@@ -1,19 +1,16 @@
 byte mmio_r2134(void) {
-ulong r;
-  r = (signed short)ppu.smul_a * (signed char)ppu.smul_b;
-  return r & 0xff;
+ulong r = ((signed short)ppu.m7a * (signed char)(ppu.m7b >> 8));
+  return (r);
 }
 
 byte mmio_r2135(void) {
-ulong r;
-  r = (signed short)ppu.smul_a * (signed char)ppu.smul_b;
-  return (r >> 8) & 0xff;
+ulong r = ((signed short)ppu.m7a * (signed char)(ppu.m7b >> 8));
+  return (r >> 8);
 }
 
 byte mmio_r2136(void) {
-ulong r;
-  r = (signed short)ppu.smul_a * (signed char)ppu.smul_b;
-  return (r >> 16) & 0xff;
+ulong r = ((signed short)ppu.m7a * (signed char)(ppu.m7b >> 8));
+  return (r >> 16);
 }
 
 void mmio_w4202(byte value) {

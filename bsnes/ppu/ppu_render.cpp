@@ -1,7 +1,13 @@
-byte ppu_addsub_adjust_buffer[96] = {
+byte ppu_addsub_adjust_buffer_full[96] = {
    0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
    0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31,
   31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31
+};
+
+byte ppu_addsub_adjust_buffer_half[96] = {
+   0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+   0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31,
+  32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63
 };
 
 #define ppu_pal_pixel(__i) \
@@ -9,28 +15,37 @@ byte ppu_addsub_adjust_buffer[96] = {
 
 word ppu_addsub_pixels(byte x, byte cdest_index, byte cdest_bg, byte csrc_index, byte csrc_bg) {
 int r, g, b;
-byte hd = 0, hs = 0;
 word cdest = ppu_pal_pixel(cdest_index);
 word csrc  = ppu_pal_pixel(csrc_index);
+word res;
 //oam palettes 0-3 are not affected by color add/sub
   if(cdest_bg == OAM) {
     if(cdest_index < 192) {
       return cdest;
     }
   }
-  if(ppu.bg_color_enabled[cdest_bg] == true) {
-    hd = hs = ppu.color_halve;
-  }
   switch(ppu.color_mode) {
   case COLORMODE_ADD:
-    r = *(ppu_addsub_adjust_buffer + 32 + (( ((cdest      ) & 31) >> hd) + ( ((csrc      ) & 31) >> hs) ));
-    g = *(ppu_addsub_adjust_buffer + 32 + (( ((cdest >>  5) & 31) >> hd) + ( ((csrc >>  5) & 31) >> hs) ));
-    b = *(ppu_addsub_adjust_buffer + 32 + (( ((cdest >> 10) & 31) >> hd) + ( ((csrc >> 10) & 31) >> hs) ));
+    if(ppu.bg_color_enabled[cdest_bg] == true && ppu.color_halve == 1) {
+      r = *(ppu_addsub_adjust_buffer_half + 32 + ( ((cdest      ) & 31) + ((csrc      ) & 31) )) >> 1;
+      g = *(ppu_addsub_adjust_buffer_half + 32 + ( ((cdest >>  5) & 31) + ((csrc >>  5) & 31) )) >> 1;
+      b = *(ppu_addsub_adjust_buffer_half + 32 + ( ((cdest >> 10) & 31) + ((csrc >> 10) & 31) )) >> 1;
+    } else {
+      r = *(ppu_addsub_adjust_buffer_full + 32 + ( ((cdest      ) & 31) + ((csrc      ) & 31) ));
+      g = *(ppu_addsub_adjust_buffer_full + 32 + ( ((cdest >>  5) & 31) + ((csrc >>  5) & 31) ));
+      b = *(ppu_addsub_adjust_buffer_full + 32 + ( ((cdest >> 10) & 31) + ((csrc >> 10) & 31) ));
+    }
     break;
   case COLORMODE_SUB:
-    r = *(ppu_addsub_adjust_buffer + 32 + (( ((cdest      ) & 31) >> hd) - ( ((csrc      ) & 31) >> hs) ));
-    g = *(ppu_addsub_adjust_buffer + 32 + (( ((cdest >>  5) & 31) >> hd) - ( ((csrc >>  5) & 31) >> hs) ));
-    b = *(ppu_addsub_adjust_buffer + 32 + (( ((cdest >> 10) & 31) >> hd) - ( ((csrc >> 10) & 31) >> hs) ));
+    if(ppu.bg_color_enabled[cdest_bg] == true && ppu.color_halve == 1) {
+      r = *(ppu_addsub_adjust_buffer_half + 32 + ( ((cdest      ) & 31) + ((csrc      ) & 31) )) >> 1;
+      g = *(ppu_addsub_adjust_buffer_half + 32 + ( ((cdest >>  5) & 31) + ((csrc >>  5) & 31) )) >> 1;
+      b = *(ppu_addsub_adjust_buffer_half + 32 + ( ((cdest >> 10) & 31) + ((csrc >> 10) & 31) )) >> 1;
+    } else {
+      r = *(ppu_addsub_adjust_buffer_full + 32 + ( ((cdest      ) & 31) - ((csrc      ) & 31) ));
+      g = *(ppu_addsub_adjust_buffer_full + 32 + ( ((cdest >>  5) & 31) - ((csrc >>  5) & 31) ));
+      b = *(ppu_addsub_adjust_buffer_full + 32 + ( ((cdest >> 10) & 31) - ((csrc >> 10) & 31) ));
+    }
     break;
   }
   return ((r) | (g << 5) | (b << 10));
@@ -38,27 +53,37 @@ word csrc  = ppu_pal_pixel(csrc_index);
 
 word ppu_addsub_pixel(byte x, byte cdest_index, byte cdest_bg) {
 int r, g, b;
-byte hd = 0;
 word cdest = ppu_pal_pixel(cdest_index);
+word csrc  = (ppu.color_r) | (ppu.color_g << 5) | (ppu.color_b << 10);
+word res;
 //only oam palettes 4-7 are affected by color add/sub
   if(cdest_bg == OAM) {
     if(cdest_index < 192) {
       return cdest;
     }
   }
-  if(ppu.bg_color_enabled[cdest_bg] == true) {
-    hd = ppu.color_halve;
-  }
   switch(ppu.color_mode) {
   case COLORMODE_ADD:
-    r = *(ppu_addsub_adjust_buffer + 32 + (( ((cdest      ) & 31) >> hd) + (ppu.color_r >> hd) ));
-    g = *(ppu_addsub_adjust_buffer + 32 + (( ((cdest >>  5) & 31) >> hd) + (ppu.color_g >> hd) ));
-    b = *(ppu_addsub_adjust_buffer + 32 + (( ((cdest >> 10) & 31) >> hd) + (ppu.color_b >> hd) ));
+    if(ppu.bg_color_enabled[cdest_bg] == true && ppu.color_halve == 1 && ppu.addsub_mode == 0) {
+      r = *(ppu_addsub_adjust_buffer_half + 32 + ( ((cdest      ) & 31) + ((csrc      ) & 31) )) >> 1;
+      g = *(ppu_addsub_adjust_buffer_half + 32 + ( ((cdest >>  5) & 31) + ((csrc >>  5) & 31) )) >> 1;
+      b = *(ppu_addsub_adjust_buffer_half + 32 + ( ((cdest >> 10) & 31) + ((csrc >> 10) & 31) )) >> 1;
+    } else {
+      r = *(ppu_addsub_adjust_buffer_full + 32 + ( ((cdest      ) & 31) + ((csrc      ) & 31) ));
+      g = *(ppu_addsub_adjust_buffer_full + 32 + ( ((cdest >>  5) & 31) + ((csrc >>  5) & 31) ));
+      b = *(ppu_addsub_adjust_buffer_full + 32 + ( ((cdest >> 10) & 31) + ((csrc >> 10) & 31) ));
+    }
     break;
   case COLORMODE_SUB:
-    r = *(ppu_addsub_adjust_buffer + 32 + (( ((cdest      ) & 31) >> hd) - (ppu.color_r >> hd) ));
-    g = *(ppu_addsub_adjust_buffer + 32 + (( ((cdest >>  5) & 31) >> hd) - (ppu.color_g >> hd) ));
-    b = *(ppu_addsub_adjust_buffer + 32 + (( ((cdest >> 10) & 31) >> hd) - (ppu.color_b >> hd) ));
+    if(ppu.bg_color_enabled[cdest_bg] == true && ppu.color_halve == 1 && ppu.addsub_mode == 0) {
+      r = *(ppu_addsub_adjust_buffer_half + 32 + ( ((cdest      ) & 31) + ((csrc      ) & 31) )) >> 1;
+      g = *(ppu_addsub_adjust_buffer_half + 32 + ( ((cdest >>  5) & 31) + ((csrc >>  5) & 31) )) >> 1;
+      b = *(ppu_addsub_adjust_buffer_half + 32 + ( ((cdest >> 10) & 31) + ((csrc >> 10) & 31) )) >> 1;
+    } else {
+      r = *(ppu_addsub_adjust_buffer_full + 32 + ( ((cdest      ) & 31) - ((csrc      ) & 31) ));
+      g = *(ppu_addsub_adjust_buffer_full + 32 + ( ((cdest >>  5) & 31) - ((csrc >>  5) & 31) ));
+      b = *(ppu_addsub_adjust_buffer_full + 32 + ( ((cdest >> 10) & 31) - ((csrc >> 10) & 31) ));
+    }
     break;
   }
   return ((r) | (g << 5) | (b << 10));
@@ -165,43 +190,42 @@ byte *dest;
 #define PPU_MAIN 0
 #define PPU_SUB  1
 
-bool windows_not_obstructing(byte layer, byte bg, byte x);
-bool color_windows_not_obstructing(byte x, byte color_mask_type);
-
-//light table is mirrored twice so that the high bit (bit 15) in the color
-//is ignored, and does not cause color to reach into next light table.
-#define ppu_write_pixel() \
-  *(ptr + x) = *(light_table + cx)
+bool windows_not_obstructing(byte layer, byte bg, word x);
+bool color_windows_not_obstructing(word x, byte color_mask_type);
 
 void ppu_render_line_to_screen(void) {
-int x;
-word *ptr, *light_table;
+int x, x1;
+word *ptr, *ptri, *light_table, *light_tablei;
 word c, cx, cy;
 word screen_width = render.snes_width;
-  ptr         = (word*)ppu.screen;
-  light_table = (word*)ppu.light_table + (ppu.display_brightness * 65536);
-  if(ppu.interlace == true) {
-    ptr += ((ppu.vline_pos * 2) + ppu.interlace_frame) * 512;
+
+  if(ppu.interlace == false) {
+    ptr  = (word*)ppu.screen + ((ppu.vline_pos << 1)    ) * 512;
+    ptri = (word*)ppu.screen + ((ppu.vline_pos << 1) + 1) * 512;
   } else {
-    ptr += ppu.vline_pos * 512;
+    ptr  = (word*)ppu.screen + ((ppu.vline_pos << 1) + ppu.interlace_frame) * 512;
   }
-  for(x=0;x<screen_width;x++) {
+  light_table = (word*)ppu.light_table + (ppu.display_brightness * 65536);
+
+  for(x=x1=0;x<screen_width;x++) {
     switch(ppu_pixel_cache[x].blend_type) {
     case BLENDTYPE_BACK:
-      if(ppu.bg_color_enabled[BACK] == true && color_windows_not_obstructing(x, PPU_SUB) == false) {
+      if(color_windows_not_obstructing(x, PPU_MAIN) == true) {
+        cx = 0x0000;
+      } else if(ppu.bg_color_enabled[BACK] == true && color_windows_not_obstructing(x, PPU_SUB) == false) {
         cx = ppu_addsub_pixel(x, 0, BACK);
       } else {
         cx = ppu_pal_pixel(0);
       }
-      ppu_write_pixel();
       break;
     case BLENDTYPE_MAIN:
-      if(ppu.bg_color_enabled[ppu_pixel_cache[x].src_main] == true && color_windows_not_obstructing(x, PPU_SUB) == false) {
+      if(ppu.bg_color_enabled[ppu_pixel_cache[x].src_main] == true && color_windows_not_obstructing(x, PPU_MAIN) == true) {
+        cx = 0x0000;
+      } else if(ppu.bg_color_enabled[ppu_pixel_cache[x].src_main] == true && color_windows_not_obstructing(x, PPU_SUB) == false) {
         cx = ppu_addsub_pixel(x, ppu_pixel_cache[x].color_main, ppu_pixel_cache[x].src_main);
       } else {
         cx = ppu_pal_pixel(ppu_pixel_cache[x].color_main);
       }
-      ppu_write_pixel();
       break;
     case BLENDTYPE_SUB:
       if(ppu.bg_color_enabled[BACK] && color_windows_not_obstructing(x, PPU_SUB) == false) {
@@ -209,7 +233,6 @@ word screen_width = render.snes_width;
       } else {
         cx = ppu_pal_pixel(ppu_pixel_cache[x].color_sub);
       }
-      ppu_write_pixel();
       break;
     case BLENDTYPE_COMBINE:
       if(color_windows_not_obstructing(x, PPU_SUB) == false) {
@@ -222,8 +245,19 @@ word screen_width = render.snes_width;
       } else {
         cx = ppu_pal_pixel(ppu_pixel_cache[x].color_main);
       }
-      ppu_write_pixel();
       break;
+    }
+
+    if(ppu.interlace == false) {
+      *(ptr  + (x1  )) = *(light_table + cx);
+      *(ptri + (x1++)) = *(light_table + cx);
+      if(screen_width != 256)continue;
+      *(ptr  + (x1  )) = *(light_table + cx);
+      *(ptri + (x1++)) = *(light_table + cx);
+    } else {
+      *(ptr  + (x1++)) = *(light_table + cx);
+      if(screen_width != 256)continue;
+      *(ptr  + (x1++)) = *(light_table + cx);
     }
   }
 }
@@ -268,6 +302,25 @@ void ppu_set_pixel(byte bg, word x, byte pal_index) {
   }
 }
 
+void ppu_set_layer_pixels(byte layer_count, byte *layer_bg_lookup) {
+int  layer, x = 0, x1;
+byte pal;
+  do {
+    layer = 0;
+    x1 = x * 12;
+    do {
+      pal = ppu_layer_cache[x1 + layer];
+      if(pal) {
+        ppu_set_pixel(layer_bg_lookup[layer], x, pal);
+      }
+      layer++;
+    } while(layer < layer_count);
+    x++;
+  } while(x < render.snes_width);
+}
+
+#define ppu_set_layer_pixel(__x, __c) ppu_layer_cache[(__x) * 12 + layer_pos] = __c
+
 struct {
   byte num;
   byte width, height;
@@ -282,21 +335,20 @@ void ppu_set_sprite_attributes(byte sprite_num) {
 ulong t;
 byte size, b;
 word x;
-  t = ppu.oam[(sprite_num << 2)    ]       |
-      ppu.oam[(sprite_num << 2) + 1] <<  8 |
-      ppu.oam[(sprite_num << 2) + 2] << 16 |
-      ppu.oam[(sprite_num << 2) + 3] << 24;
+  t = *((ulong*)ppu.oam + sprite_num);
   b = ppu.oam[512 + (sprite_num >> 2)];
 
-  if     ((sprite_num & 3) == 0) { size = (b & 0x02)?1:0; x = (b & 0x01)?0x100:0; }
-  else if((sprite_num & 3) == 1) { size = (b & 0x08)?1:0; x = (b & 0x04)?0x100:0; }
-  else if((sprite_num & 3) == 2) { size = (b & 0x20)?1:0; x = (b & 0x10)?0x100:0; }
-  else if((sprite_num & 3) == 3) { size = (b & 0x80)?1:0; x = (b & 0x40)?0x100:0; }
+  switch(sprite_num & 3) {
+  case 0: size = (b & 0x02)?1:0; x = (b & 0x01)?0x100:0; break;
+  case 1: size = (b & 0x08)?1:0; x = (b & 0x04)?0x100:0; break;
+  case 2: size = (b & 0x20)?1:0; x = (b & 0x10)?0x100:0; break;
+  case 3: size = (b & 0x80)?1:0; x = (b & 0x40)?0x100:0; break;
+  }
 
   current_sprite.num       = sprite_num;
   current_sprite.priority  = (t >> 28) & 3;
   current_sprite.x         = x | (t & 0xff);
-  current_sprite.y         = (t >> 8) & 0xff;
+  current_sprite.y         = ((t >> 8) + 1) & 0xff;
   current_sprite.v_flip    = (t & 0x80000000)?1:0;
   current_sprite.h_flip    = (t & 0x40000000)?1:0;
   current_sprite.palette   = (t >> 25) & 7;
@@ -339,44 +391,57 @@ word x;
   }
 }
 
-bool windows_not_obstructing(byte layer, byte bg, byte x) {
+bool windows_not_obstructing(byte layer, byte bg, word x) {
 byte w1_mask, w2_mask; //1 = masked, 0 = not masked
+word window1_left, window1_right, window2_left, window2_right;
   if(layer == PPU_MAIN) {
     if(ppu.bg_windowing_enabled[bg] == false)return true;
   } else if(layer == PPU_SUB) {
     if(ppu.ss_bg_windowing_enabled[bg] == false)return true;
   }
 
+  window1_left  = ppu.window1_left;
+  window1_right = ppu.window1_right;
+  window2_left  = ppu.window2_left;
+  window2_right = ppu.window2_right;
+
+  if(ppu.bg_mode == 5 || ppu.bg_mode == 6) {
+    window1_left  <<= 1;
+    window1_right <<= 1;
+    window2_left  <<= 1;
+    window2_right <<= 1;
+  }
+
   if(ppu.bg_window1_enabled[bg] == true && ppu.bg_window2_enabled[bg] == false) {
     if(ppu.bg_window1_clipmode[bg] == CLIPMODE_IN) {
-      if(x >= ppu.window1_left && x <= ppu.window1_right)return false;
+      if(x >= window1_left && x <= window1_right)return false;
       return true;
     } else {
-      if(x <= ppu.window1_left || x >= ppu.window1_right)return false;
+      if(x <  window1_left || x >  window1_right)return false;
       return true;
     }
   } else if(ppu.bg_window2_enabled[bg] == true && ppu.bg_window1_enabled[bg] == false) {
     if(ppu.bg_window2_clipmode[bg] == CLIPMODE_IN) {
-      if(x >= ppu.window2_left && x <= ppu.window2_right)return false;
+      if(x >= window2_left && x <= window2_right)return false;
       return true;
     } else {
-      if(x <= ppu.window2_left || x >= ppu.window2_right)return false;
+      if(x <  window2_left || x >  window2_right)return false;
       return true;
     }
   } else if(ppu.bg_window1_enabled[bg] == true && ppu.bg_window2_enabled[bg] == true) {
     if(ppu.bg_window1_clipmode[bg] == CLIPMODE_IN) {
-      if(x >= ppu.window1_left && x <= ppu.window1_right)w1_mask = 1;
+      if(x >= window1_left && x <= window1_right)w1_mask = 1;
       else w1_mask = 0;
     } else {
-      if(x <= ppu.window1_left || x >= ppu.window1_right)w1_mask = 1;
+      if(x <  window1_left || x >  window1_right)w1_mask = 1;
       else w1_mask = 0;
     }
 
     if(ppu.bg_window2_clipmode[bg] == CLIPMODE_IN) {
-      if(x >= ppu.window2_left && x <= ppu.window2_right)w2_mask = 1;
+      if(x >= window2_left && x <= window2_right)w2_mask = 1;
       else w2_mask = 0;
     } else {
-      if(x <= ppu.window2_left || x >= ppu.window2_right)w2_mask = 1;
+      if(x <  window2_left || x >  window2_right)w2_mask = 1;
       else w2_mask = 0;
     }
 
@@ -398,67 +463,80 @@ byte w1_mask, w2_mask; //1 = masked, 0 = not masked
   return true;
 }
 
-bool color_windows_not_obstructing(byte x, byte color_mask_type) {
+bool color_windows_not_obstructing(word x, byte color_mask_type) {
 byte w1_mask, w2_mask; //1 = masked, 0 = not masked
 byte color_mask;
 bool r;
+word window1_left, window1_right, window2_left, window2_right;
   if(color_mask_type == PPU_MAIN)color_mask = ppu.color_mask;
   else                           color_mask = ppu.ss_color_mask;
 
   if(color_mask == 0)return false;
   if(color_mask == 3)return true;
 
+  window1_left  = ppu.window1_left;
+  window1_right = ppu.window1_right;
+  window2_left  = ppu.window2_left;
+  window2_right = ppu.window2_right;
+
+  if(ppu.bg_mode == 5 || ppu.bg_mode == 6) {
+    window1_left  <<= 1;
+    window1_right <<= 1;
+    window2_left  <<= 1;
+    window2_right <<= 1;
+  }
+
   if(ppu.color_window1_enabled == false && ppu.color_window2_enabled == false) {
     r = true;
   } else if(ppu.color_window1_enabled == true && ppu.color_window2_enabled == false) {
     if(ppu.color_window1_clipmode == CLIPMODE_IN) {
-      if(x >= ppu.window1_left && x <= ppu.window1_right)r = false;
-      else                                               r = true;
+      if(x >= window1_left && x <= window1_right)r = false;
+      else r = true;
     } else {
-      if(x <= ppu.window1_left || x >= ppu.window1_right)r = false;
-      else                                               r = true;
+      if(x <  window1_left || x >  window1_right)r = false;
+      else r = true;
     }
   } else if(ppu.color_window1_enabled == false && ppu.color_window2_enabled == true) {
     if(ppu.color_window2_clipmode == CLIPMODE_IN) {
-      if(x >= ppu.window2_left && x <= ppu.window2_right)r = false;
-      else                                               r = true;
+      if(x >= window2_left && x <= window2_right)r = false;
+      else r = true;
     } else {
-      if(x <= ppu.window2_left || x >= ppu.window2_right)r = false;
-      else                                               r = true;
+      if(x <  window2_left || x >  window2_right)r = false;
+      else r = true;
     }
   } else if(ppu.color_window1_enabled == true && ppu.color_window2_enabled == true) {
     if(ppu.color_window1_clipmode == CLIPMODE_IN) {
-      if(x >= ppu.window1_left && x <= ppu.window1_right)w1_mask = 1;
+      if(x >= window1_left && x <= window1_right)w1_mask = 1;
       else w1_mask = 0;
     } else {
-      if(x <= ppu.window1_left || x >= ppu.window1_right)w1_mask = 1;
+      if(x <  window1_left || x >  window1_right)w1_mask = 1;
       else w1_mask = 0;
     }
 
     if(ppu.color_window2_clipmode == CLIPMODE_IN) {
-      if(x >= ppu.window2_left && x <= ppu.window2_right)w2_mask = 1;
+      if(x >= window2_left && x <= window2_right)w2_mask = 1;
       else w2_mask = 0;
     } else {
-      if(x <= ppu.window2_left || x >= ppu.window2_right)w2_mask = 1;
+      if(x <  window2_left || x >  window2_right)w2_mask = 1;
       else w2_mask = 0;
     }
 
     switch(ppu.color_window_mask) {
     case WINDOWMASK_OR:
       if((w1_mask | w2_mask) == 1)r = false;
-      else                        r = true;
+      else r = true;
       break;
     case WINDOWMASK_AND:
       if((w1_mask & w2_mask) == 1)r = false;
-      else                        r = true;
+      else r = true;
       break;
     case WINDOWMASK_XOR:
       if((w1_mask ^ w2_mask) == 1)r = false;
-      else                        r = true;
+      else r = true;
       break;
     case WINDOWMASK_XNOR:
       if((w1_mask ^ w2_mask) == 0)r = false;
-      else                        r = true;
+      else r = true;
       break;
     }
   }
@@ -480,21 +558,8 @@ bool r;
        correct y tile, y / 8 * 1 row (16 tiles) must be used.
 */
 
-#define ppu_render_oam_tile_line(__m) \
-  x &= 511;               \
-  if(x < 256) {           \
-    col = 0;              \
-    if(d0 & __m)col += 1; \
-    if(d1 & __m)col += 2; \
-    if(d2 & __m)col += 4; \
-    if(d3 & __m)col += 8; \
-    if(col) {                             \
-      col += pal_index;                   \
-      col += 128;                         \
-      ppu_set_pixel(OAM, x, col);         \
-    }                                     \
-  }                                       \
-  x++
+#define OAM_PRI_NONE 4
+byte ppu_oam_line_pal[512], ppu_oam_line_pri[512];
 
 void ppu_render_oam_sprite(void) {
 word pos, col, chr, tiledata_inc;
@@ -505,14 +570,27 @@ int tile_width;
 
   tile_width = current_sprite.width >> SH_8; //e.x. 16x16 sprite = 2x2 tiles
 
-  y = ppu.vline_pos;
-  x = current_sprite.x;
-  if(current_sprite.v_flip) {
-    y = (current_sprite.height - 1) - (ppu.vline_pos - current_sprite.y);
+  if(ppu.interlace == true && (ppu.bg_mode == 5 || ppu.bg_mode == 6)) {
+    y = (ppu.vline_pos << SH_2) + ppu.interlace_frame;
   } else {
-    y = ppu.vline_pos - current_sprite.y;
+    y = ppu.vline_pos;
+  }
+
+  x = current_sprite.x;
+  if(render.snes_width == 512) {
+    x <<= SH_2;
+  }
+
+  if(current_sprite.v_flip) {
+    y = ((current_sprite.height - 1) - (ppu.vline_pos - current_sprite.y));
+  } else {
+    y = (ppu.vline_pos - current_sprite.y);
   }
   y &= 255;
+  if(ppu.sprite_halve == true) {
+    y <<= 1;
+    y += ppu.interlace_frame;
+  }
 
   chr = current_sprite.character;
   tiledata_inc = (chr & 0x100)?(ppu.oam_name_sel << 13):0; //*1
@@ -526,43 +604,78 @@ int tile_width;
     d1 = ppu.vram[pos +  1];
     d2 = ppu.vram[pos + 16];
     d3 = ppu.vram[pos + 17];
-    if(current_sprite.h_flip) {
-      ppu_render_oam_tile_line(0x01);
-      ppu_render_oam_tile_line(0x02);
-      ppu_render_oam_tile_line(0x04);
-      ppu_render_oam_tile_line(0x08);
-      ppu_render_oam_tile_line(0x10);
-      ppu_render_oam_tile_line(0x20);
-      ppu_render_oam_tile_line(0x40);
-      ppu_render_oam_tile_line(0x80);
-    } else {
-      ppu_render_oam_tile_line(0x80);
-      ppu_render_oam_tile_line(0x40);
-      ppu_render_oam_tile_line(0x20);
-      ppu_render_oam_tile_line(0x10);
-      ppu_render_oam_tile_line(0x08);
-      ppu_render_oam_tile_line(0x04);
-      ppu_render_oam_tile_line(0x02);
-      ppu_render_oam_tile_line(0x01);
+    for(z=0;z<8;z++) {
+      if(current_sprite.h_flip) {
+        mask = 0x01 << z;
+      } else {
+        mask = 0x80 >> z;
+      }
+      x &= 511;
+      if(x < render.snes_width) {
+        col = 0;
+        if(d0 & mask)col += 1;
+        if(d1 & mask)col += 2;
+        if(d2 & mask)col += 4;
+        if(d3 & mask)col += 8;
+        if(col) {
+          col += pal_index;
+          col += 128;
+          if(ppu_oam_line_pri[x] == OAM_PRI_NONE) {
+            ppu_oam_line_pal[x] = col;
+            ppu_oam_line_pri[x] = current_sprite.priority;
+          }
+          if(render.snes_width == 512) {
+            if(ppu_oam_line_pri[x + 1] == OAM_PRI_NONE) {
+              ppu_oam_line_pal[x + 1] = col;
+              ppu_oam_line_pri[x + 1] = current_sprite.priority;
+            }
+          }
+        }
+      }
+      x++;
+      if(render.snes_width == 512) {
+        x++;
+      }
     }
   }
 }
 
-void ppu_render_line_oam(byte priority) {
-int s;
+/*
+
+*/
+
+void ppu_render_line_oam(byte layer_pos_pri0, byte layer_pos_pri1, byte layer_pos_pri2, byte layer_pos_pri3) {
+int i, s;
+byte layer_pos;
   if(ppu.bg_enabled[OAM] != true && ppu.ss_bg_enabled[OAM] != true)return;
 
-  s = 128;
-  while(s--) {
+  memset(ppu_oam_line_pri, OAM_PRI_NONE, 512);
+  for(s=0;s<128;s++) {
     ppu_set_sprite_attributes(s);
-    if(current_sprite.priority == priority) {
-//if the sprite is within screen boundaries... render the current line from the sprite
+    if(ppu.sprite_halve == false) {
       if(ppu.vline_pos >= current_sprite.y && ppu.vline_pos < (current_sprite.y + current_sprite.height)) {
         ppu_render_oam_sprite();
-//or if the sprite is so close to the bottom of the screen that the bottom of it actually wraps back around to the top...
       } else if((current_sprite.y + current_sprite.height) >= 256 && ppu.vline_pos < ((current_sprite.y + current_sprite.height) & 255)) {
         ppu_render_oam_sprite();
       }
+    } else {
+      if(ppu.vline_pos >= current_sprite.y && ppu.vline_pos < (current_sprite.y + (current_sprite.height >> 1))) {
+        ppu_render_oam_sprite();
+      } else if((current_sprite.y + current_sprite.height) >= 256 && ppu.vline_pos < ((current_sprite.y + (current_sprite.height >> 1)) & 255)) {
+        ppu_render_oam_sprite();
+      }
+    }
+  }
+
+  for(i=0;i<render.snes_width;i++) {
+    if(ppu_oam_line_pri[i] != OAM_PRI_NONE) {
+      switch(ppu_oam_line_pri[i]) {
+      case 0:layer_pos = layer_pos_pri0;break;
+      case 1:layer_pos = layer_pos_pri1;break;
+      case 2:layer_pos = layer_pos_pri2;break;
+      case 3:layer_pos = layer_pos_pri3;break;
+      }
+      ppu_set_layer_pixel(i, ppu_oam_line_pal[i]);
     }
   }
 }
@@ -584,7 +697,7 @@ int s;
               (((x tile #) mapped to tilemap boundary) * 2 (# of bytes per tilemap entry));
 */
 
-void ppu_render_line_bg(byte color_depth, byte bg, byte priority) {
+void ppu_render_line_bg(byte layer_pos_pri0, byte layer_pos_pri1, byte color_depth, byte bg) {
 int x, y, z, x1, y1;
 int mirror_x, mirror_y, p;
 int screen_x, screen_y;
@@ -592,13 +705,19 @@ int bg_x, bg_y;
 int xpos, ypos, mosaic_x, mosaic_y;
 word t, base_xpos, base_pos, pos, ppos = 0;
 word col;
-byte *src, *bg_tiledata, *bg_tiledata_state;
+byte *src, *bg_tiledata, *bg_tiledata_state, *tile_ptr;
 byte tiledata_size;
-byte tile_size, tile_width, tile_height;
+byte tile_size, tile_width, tile_height, tile_x;
 byte mask, pal_index, pal_size;
 word tile_num, screen_width, screen_height, screen_width_mask, screen_height_mask, map_index;
 word *mosaic_table;
+byte layer_pos;
+word opt_valid_bit, voffset, hoffset, vscroll, hscroll;
   if(ppu.bg_enabled[bg] == false && ppu.ss_bg_enabled[bg] == false)return;
+
+  if     (bg == BG1)opt_valid_bit = 0x2000;
+  else if(bg == BG2)opt_valid_bit = 0x4000;
+  else              opt_valid_bit = 0x0000;
 
   switch(color_depth) {
   case COLORDEPTH_4:
@@ -629,7 +748,7 @@ word *mosaic_table;
     screen_y = ppu.vline_pos;
   }
 
-//Not sure why, but modes 5 and 6 seem to force 16-width tiles.
+//Modes 5 and 6 seem to force 16-width tiles due to having twice the resolution.
 //The tile size attribute in $2105 has no effect on tile width.
   if(ppu.bg_mode == 5 || ppu.bg_mode == 6) {
     tile_width = SH_16;
@@ -647,37 +766,80 @@ word *mosaic_table;
   screen_height_mask = screen_height - 1;
 
   if(render.snes_width == 512) {
-    bg_x = (ppu.bg_hscroll_pos[bg] << SH_2) & screen_width_mask;
+    hscroll = (ppu.bg_hscroll_pos[bg] << SH_2) & screen_width_mask;
   } else {
-    bg_x = ppu.bg_hscroll_pos[bg] & screen_width_mask;
+    hscroll = ppu.bg_hscroll_pos[bg] & screen_width_mask;
   }
-  if(render.snes_height == 448) {
-    bg_y = (screen_y + ((ppu.bg_vscroll_pos[bg] << SH_2) & screen_height_mask)) & screen_height_mask;
-  } else {
-    bg_y = (screen_y + (ppu.bg_vscroll_pos[bg] & screen_height_mask)) & screen_height_mask;
-  }
+  bg_x = hscroll;
 
-  mosaic_table = (word*)ppu.mosaic_table[ppu.mosaic_size];
-  mosaic_y     = mosaic_table[bg_y];
+  if(render.snes_height == 448) {
+    vscroll = (ppu.bg_vscroll_pos[bg] << SH_2) & screen_height_mask;
+  } else {
+    vscroll = ppu.bg_vscroll_pos[bg] & screen_height_mask;
+  }
+  bg_y = (screen_y + vscroll) & screen_height_mask;
+
+  if(ppu.mosaic_enabled[bg] == true) {
+    mosaic_table = (word*)ppu.mosaic_table[ppu.mosaic_size];
+  } else {
+    mosaic_table = (word*)ppu.mosaic_table[0];
+  }
+  mosaic_x = mosaic_table[bg_x];
+  mosaic_y = mosaic_table[bg_y];
 
   for(screen_x=0;screen_x<render.snes_width;screen_x++) {
-    switch(ppu.bg_tilemap_size[bg]) {
-    case 0:
-      map_index  = 0;
-      break;
-    case 1:
-      map_index  = ((bg_x >> tile_size) > 31)?32*32*2:0;
-      break;
-    case 2:
-      map_index  = ((bg_y >> tile_size) > 31)?32*32*2:0;
-      break;
-    case 3:
-      map_index  = ((bg_x >> tile_size) > 31)?32*32*2:0;
-      map_index += ((bg_y >> tile_size) > 31)?32*32*2*2:0;
-      break;
+    if(ppu.bg_mode == 2 || ppu.bg_mode == 4 || ppu.bg_mode == 6) {
+      if(ppu.bg_mode == 6) {
+        tile_x = (mosaic_table[screen_x + (hscroll & 15)] >> SH_16);
+      } else {
+        tile_x = (mosaic_table[screen_x + (hscroll &  7)] >>  SH_8);
+      }
+      hoffset = hscroll;
+      voffset = vscroll;
+      if(tile_x != 0) {
+        tile_x = (tile_x - 1) & 31;
+        if(ppu.bg_mode == 4) {
+          pos = ppu.bg_tilemap_loc[BG3] + (tile_x << SH_2);
+          t   = *((word*)ppu.vram + (pos >> SH_2));
+          if(t & opt_valid_bit) {
+            if(!(t & 0x8000)) {
+              hoffset = ((t & 0x1ff8) | (hscroll & 7)) & screen_width_mask;
+            } else {
+              voffset = (t & 0x1fff) & screen_height_mask;
+            }
+          }
+        } else {
+          pos = ppu.bg_tilemap_loc[BG3] + (tile_x << SH_2);
+          t   = *((word*)ppu.vram + (pos >> SH_2));
+          if(t & opt_valid_bit) {
+            hoffset = ((t & 0x1ff8) | (hscroll & 7)) & screen_width_mask;
+          }
+          pos = ppu.bg_tilemap_loc[BG3] + 64 + (tile_x << SH_2);
+          t   = *((word*)ppu.vram + (pos >> SH_2));
+          if(t & opt_valid_bit) {
+            voffset = (t & 0x1fff) & screen_height_mask;
+          }
+        }
+      }
+      mosaic_x = mosaic_table[(screen_x + hoffset) & screen_width_mask ];
+      mosaic_y = mosaic_table[(screen_y + voffset) & screen_height_mask];
     }
 
-    mosaic_x = mosaic_table[bg_x];
+    switch(ppu.bg_tilemap_size[bg]) {
+    case 0:
+      map_index = 0;
+      break;
+    case 1:
+      map_index = ((mosaic_x >> tile_size) >> SH_32) << SH_2048;
+      break;
+    case 2:
+      map_index = ((mosaic_y >> tile_size) >> SH_32) << SH_2048;
+      break;
+    case 3:
+      map_index = ((mosaic_x >> tile_size) >> SH_32) << SH_2048 |
+                  ((mosaic_y >> tile_size) >> SH_32) << SH_4096;
+      break;
+    }
 
     base_xpos = ((mosaic_x >> SH_8) & 31);
     base_pos  = (((mosaic_y >> tile_height) & 31) << SH_32) + ((mosaic_x >> tile_width) & 31);
@@ -685,69 +847,55 @@ word *mosaic_table;
     t         = *((word*)ppu.vram + (pos >> SH_2));
     mirror_y  = (t & 0x8000)?1:0;
     mirror_x  = (t & 0x4000)?1:0;
-    if(((t >> 13) & 1) == priority) {
-      tile_num = t & 0x03ff;
-      if(tile_width == SH_16) {
-        if((mosaic_x & 15) >= 8)tile_num++;
-        if(mirror_x) {
-          if((mosaic_x & 15) >= 8)tile_num--;
-          else                    tile_num++;
-        }
-        tile_num &= 0x03ff;
-      }
-      if(tile_height == SH_16) {
-        if((mosaic_y & 15) >= 8)tile_num += 16;
-        if(mirror_y) {
-          if((mosaic_y & 15) >= 8)tile_num -= 16;
-          else                    tile_num += 16;
-        }
-        tile_num &= 0x03ff;
-      }
-      tile_num += (ppu.bg_tiledata_loc[bg] >> tiledata_size);
 
-      if(bg_tiledata_state[tile_num] == 1) {
-        ppu_render_bg_tile(color_depth, bg, tile_num);
-      }
+    if((t & 0x2000) == 0) {
+      layer_pos = layer_pos_pri0;
+    } else {
+      layer_pos = layer_pos_pri1;
+    }
 
-      pal_index = ((t >> 10) & 7) * pal_size;
+    tile_num = t & 0x03ff;
+    if(tile_width == SH_16) {
+      if(((mosaic_x & 15) >= 8 && !mirror_x) ||
+         ((mosaic_x & 15) <  8 &&  mirror_x))tile_num++;
+      tile_num &= 0x03ff;
+    }
+    if(tile_height == SH_16) {
+      if(((mosaic_y & 15) >= 8 && !mirror_y) ||
+         ((mosaic_y & 15) <  8 &&  mirror_y))tile_num += 16;
+      tile_num &= 0x03ff;
+    }
+    tile_num += (ppu.bg_tiledata_loc[bg] >> tiledata_size);
 
-      if(mirror_y) { ypos = (7 - (mosaic_y & 7)); }
-      else         { ypos = (    (mosaic_y & 7)); }
+    if(bg_tiledata_state[tile_num] == 1) {
+      ppu_render_bg_tile(color_depth, bg, tile_num);
+    }
+
+    pal_index = ((t >> 10) & 7) * pal_size;
+
+    if(mirror_y) { ypos = (7 - (mosaic_y & 7)); }
+    else         { ypos = (    (mosaic_y & 7)); }
 
 //loop while we are rendering from the same tile, as there's no need to do all of the above work
 //unless we have rendered all of the visible tile, taking mosaic into account.
-      while(1) {
-        if(mirror_x) { xpos = (7 - (mosaic_x & 7)); }
-        else         { xpos = (    (mosaic_x & 7)); }
-        col  = *(bg_tiledata + (tile_num << SH_64) + (ypos << SH_8) + (xpos));
-        if(col) {
-          ppu_set_pixel(bg, screen_x, col + pal_index);
-        }
-
-        bg_x++;
-        bg_x &= screen_width_mask;
-        mosaic_x = mosaic_table[bg_x];
-
-        if(base_xpos != ((mosaic_x >> SH_8) & 31))break;
-        screen_x++;
-        if(screen_x >= render.snes_width)break;
+    tile_ptr = (byte*)bg_tiledata + (tile_num << SH_64) + (ypos << SH_8);
+    while(1) {
+      if(mirror_x) { xpos = (7 - (mosaic_x & 7)); }
+      else         { xpos = (    (mosaic_x & 7)); }
+      col = *(tile_ptr + xpos);
+      if(col) {
+        ppu_set_layer_pixel(screen_x, col + pal_index);
       }
-    } else {
-      while(1) {
-        bg_x++;
-        bg_x &= screen_width_mask;
-        mosaic_x = mosaic_table[bg_x];
 
-        if(base_xpos != ((mosaic_x >> SH_8) & 31))break;
-        screen_x++;
-        if(screen_x >= render.snes_width)break;
-      }
+      bg_x++;
+      bg_x &= screen_width_mask;
+      mosaic_x = mosaic_table[bg_x];
+
+      if(base_xpos != ((mosaic_x >> SH_8) & 31))break;
+      screen_x++;
+      if(screen_x >= render.snes_width)break;
     }
   }
 }
 
-#ifdef PUBLIC_DOMAIN
-  #include "ppu_render_mode7f.cpp"
-#else
-  #include "ppu_render_mode7i.cpp"
-#endif
+#include "ppu_render_mode7.cpp"

@@ -11,14 +11,12 @@
 */
 void mmio_w210d(byte value) {
   ppu.bg_hscroll_pos[BG1] = (value << 8) | (ppu.bg_hscroll_pos[BG1] >> 8);
-  ppu.m7hofs = (value << 8) | m7_latch;
-  m7_latch   = value;
+  ppu.m7hofs = (value << 8) | (ppu.m7hofs >> 8);
 }
 
 void mmio_w210e(byte value) {
   ppu.bg_vscroll_pos[BG1] = (value << 8) | (ppu.bg_vscroll_pos[BG1] >> 8);
-  ppu.m7vofs = (value << 8) | m7_latch;
-  m7_latch   = value;
+  ppu.m7vofs = (value << 8) | (ppu.m7vofs >> 8);
 }
 
 void mmio_w210f(byte value) {

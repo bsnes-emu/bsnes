@@ -46,7 +46,7 @@ void CreateDDraw_Win(void) {
   ddsd.dwFlags  = DDSD_CAPS | DDSD_WIDTH | DDSD_HEIGHT;
   ddsd.ddsCaps.dwCaps = DDSCAPS_OFFSCREENPLAIN | DDSCAPS_SYSTEMMEMORY;
   ddsd.dwWidth  = 512;
-  ddsd.dwHeight = 480;
+  ddsd.dwHeight = 478;
   lpdd->CreateSurface(&ddsd, &lpddsb, 0);
 }
 
@@ -63,12 +63,16 @@ void CreateDDraw_Full(void) {
   ddsd.ddsCaps.dwCaps = DDSCAPS_PRIMARYSURFACE;
   lpdd->CreateSurface(&ddsd, &lpdds, 0);
 
+  lpdd->CreateClipper(0, &lpddc, 0);
+  lpddc->SetHWnd(0, hwndMain);
+  lpdds->SetClipper(lpddc);
+
   memset(&ddsd, 0, sizeof(DDSURFACEDESC));
   ddsd.dwSize = sizeof(DDSURFACEDESC);
   ddsd.dwFlags  = DDSD_CAPS | DDSD_WIDTH | DDSD_HEIGHT;
   ddsd.ddsCaps.dwCaps = DDSCAPS_OFFSCREENPLAIN | DDSCAPS_SYSTEMMEMORY;
   ddsd.dwWidth  = 512;
-  ddsd.dwHeight = 480;
+  ddsd.dwHeight = 478;
   lpdd->CreateSurface(&ddsd, &lpddsb, 0);
 }
 
@@ -101,15 +105,19 @@ int i, r, g, b;
 
 vfunc RenderScene;
 
+#include "render_modes.cpp"
+
 //sets up color table and sets render proc
 void CreateColorTable(void) {
   lpdds->GetSurfaceDesc(&ddsd);
   switch(ddsd.ddpfPixelFormat.dwRGBBitCount) {
   case 16:
     InitColorTable16();
+    RenderScene = RenderScene16;
     break;
   case 32:
     InitColorTable24();
+    RenderScene = RenderScene32;
     break;
   default:
     alert("Error: Bit depth [%d] unsupported (supported depths: 16, 32)", ddsd.ddpfPixelFormat.dwRGBBitCount);
@@ -118,113 +126,50 @@ void CreateColorTable(void) {
   }
 }
 
-#include "render_modes.cpp"
+void DrawScene(void) {
+RECT  rsrc, rdest;
+POINT p;
+HRESULT hr;
+  p.x = p.y = 0;
+  if(render.fullscreen == true) {
+    SetRect(&rdest, 0, 0, 512, 448);
+    OffsetRect(&rdest, (640 - 512) / 2, (480 - 448) / 2);
+  } else {
+    ClientToScreen(hwndMain, &p);
+    GetClientRect(hwndMain, &rdest);
+    OffsetRect(&rdest, p.x, p.y);
+  }
 
-void SelectRenderer(void) {
-  lpdds->GetSurfaceDesc(&ddsd);
-  switch(ddsd.ddpfPixelFormat.dwRGBBitCount) {
-  case 16:
-    if       (render.snes_width == 512 && render.snes_height == 480) {
-      RenderScene = RenderScene16_512x480;
-    } else if(render.snes_width == 512 && render.snes_height == 448) {
-      RenderScene = RenderScene16_512x448;
-    } else if(render.snes_width == 512 && render.snes_height == 240) {
-      RenderScene = RenderScene16_512x240;
-    } else if(render.snes_width == 512 && render.snes_height == 224) {
-      RenderScene = RenderScene16_512x224;
-    } else if(render.snes_width == 256 && render.snes_height == 480) {
-      RenderScene = RenderScene16_256x480;
-    } else if(render.snes_width == 256 && render.snes_height == 448) {
-      RenderScene = RenderScene16_256x448;
-    } else if(render.snes_width == 256 && render.snes_height == 240) {
-      RenderScene = RenderScene16_256x240;
-    } else if(render.snes_width == 256 && render.snes_height == 224) {
-      RenderScene = RenderScene16_256x224;
-    } else {
-      alert("Error: Unsupported SNES Resolution: %dx%d", render.snes_width, render.snes_height);
-    }
-    break;
-  case 32:
-    if       (render.snes_width == 512 && render.snes_height == 480) {
-      RenderScene = RenderScene32_512x480;
-    } else if(render.snes_width == 512 && render.snes_height == 448) {
-      RenderScene = RenderScene32_512x448;
-    } else if(render.snes_width == 512 && render.snes_height == 240) {
-      RenderScene = RenderScene32_512x240;
-    } else if(render.snes_width == 512 && render.snes_height == 224) {
-      RenderScene = RenderScene32_512x224;
-    } else if(render.snes_width == 256 && render.snes_height == 480) {
-      RenderScene = RenderScene32_256x480;
-    } else if(render.snes_width == 256 && render.snes_height == 448) {
-      RenderScene = RenderScene32_256x448;
-    } else if(render.snes_width == 256 && render.snes_height == 240) {
-      RenderScene = RenderScene32_256x240;
-    } else if(render.snes_width == 256 && render.snes_height == 224) {
-      RenderScene = RenderScene32_256x224;
-    } else {
-      alert("Error: Unsupported SNES Resolution: %dx%d", render.snes_width, render.snes_height);
-    }
-    break;
-  default:
-    alert("Error: Bit depth [%d] unsupported (supported depths: 16, 32)", ddsd.ddpfPixelFormat.dwRGBBitCount);
-    exit(0);
-    break;
+  if(ppu.overscan == false) {
+    SetRect(&rsrc, 0, 2, 512, 448);
+  } else {
+    SetRect(&rsrc, 0, 2 + 15, 512, 448 + 15);
+  }
+
+  hr = lpdds->Blt(&rdest, lpddsb, &rsrc, DDBLT_WAIT, 0);
+  if(hr == DDERR_SURFACELOST) {
+    lpdds->Restore();
+    lpddsb->Restore();
   }
 }
 
 void UpdateDisplay(void) {
-RECT  rsrc, rdest;
-POINT p;
-HRESULT hr;
   RenderScene();
-
-  p.x = p.y = 0;
-  if(render.fullscreen == true) {
-    SetRect(&rdest, 0, 0, 512, 448);
-    OffsetRect(&rdest, (640 - 512) / 2, (480 - 448) / 2);
-  } else {
-    ClientToScreen(hwndMain, &p);
-    GetClientRect(hwndMain, &rdest);
-    OffsetRect(&rdest, p.x, p.y);
-  }
-
-  SetRect(&rsrc, 0, 0, render.snes_width, render.snes_height);
-
-  hr = lpdds->Blt(&rdest, lpddsb, &rsrc, DDBLT_WAIT, 0);
-  if(hr == DDERR_SURFACELOST) {
-    lpdds->Restore();
-    lpddsb->Restore();
-  }
-}
-
-void UpdateDisplay_NoRender(void) {
-RECT  rsrc, rdest;
-POINT p;
-HRESULT hr;
-  p.x = p.y = 0;
-  if(render.fullscreen == true) {
-    SetRect(&rdest, 0, 0, 512, 448);
-    OffsetRect(&rdest, (640 - 512) / 2, (480 - 448) / 2);
-  } else {
-    ClientToScreen(hwndMain, &p);
-    GetClientRect(hwndMain, &rdest);
-    OffsetRect(&rdest, p.x, p.y);
-  }
-
-  SetRect(&rsrc, 0, 0, render.snes_width, render.snes_height);
-
-  hr = lpdds->Blt(&rdest, lpddsb, &rsrc, DDBLT_WAIT, 0);
-  if(hr == DDERR_SURFACELOST) {
-    lpdds->Restore();
-    lpddsb->Restore();
-  }
+  DrawScene();
 }
 
 void video_setmode(bool fullscreen, word width, word height) {
 bool prev_mode = render.fullscreen;
-  render.fullscreen = fullscreen;
-  render.width      = width;
-  render.height     = height;
+  if(debug_get_state() != DEBUGMODE_DISABLED)return;
+  render.fullscreen     = fullscreen;
+  render.display_width  = width;
+  render.display_height = height;
+
+//remove top scanline that is not rendered
+  if     (height == 224)height = 223;
+  else if(height == 239)height = 238;
+  else if(height == 448)height = 446;
+  else if(height == 478)height = 476;
 
   FixWindowSize(hwndMain, width, height);
   ShowWindow(hwndMain, SW_NORMAL);
@@ -242,6 +187,7 @@ bool prev_mode = render.fullscreen;
       FixWindowSize(hwndMain, width, height);
       ShowWindow(hwndMain, SW_NORMAL);
     }
+    CreateColorTable();
   }
 }
 
@@ -251,19 +197,17 @@ void video_setsnesmode(void) {
   } else {
     render.snes_width = 256;
   }
-  if(ppu.interlace == true) {
-    if(ppu.visible_scanlines == 240) {
-      render.snes_height = 480;
+  if(ppu.interlace == false) {
+    if(ppu.overscan == false) {
+      render.snes_height = 224;
     } else {
-      render.snes_height = 448;
+      render.snes_height = 239;
     }
   } else {
-    if(ppu.visible_scanlines == 240) {
-      render.snes_height = 240;
+    if(ppu.overscan == false) {
+      render.snes_height = 448;
     } else {
-      render.snes_height = 224;
+      render.snes_height = 478;
     }
   }
-
-  SelectRenderer();
 }

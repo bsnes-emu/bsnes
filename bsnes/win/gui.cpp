@@ -2,19 +2,22 @@
 #include "../timing/timing.h"
 extern snes_timer *snes_time;
 #include "../cpu/g65816.h"
-extern g65816 *gx816;
-extern emustate emu_state;
-extern debugstate debugger;
-extern videostate render;
-extern ppustate ppu;
+#include "../apu/spc700.h"
+extern g65816      *gx816;
+extern sony_spc700 *spc700;
+extern emustate     emu_state;
+extern debugstate   debugger;
+extern videostate   render;
+extern ppustate     ppu;
 #include <windows.h>
 
-#define BSNES_TITLE "bsnes v0.0.002 ir9"
+#define BSNES_TITLE "bsnes v0.0.005a"
 
 enum {
   MENU_FILE_LOAD = 100,
   MENU_FILE_RESET,
   MENU_FILE_EXIT,
+  MENU_SETTINGS_VIDEOMODE_256x224w,
   MENU_SETTINGS_VIDEOMODE_512x448w,
   MENU_SETTINGS_VIDEOMODE_640x480f,
   MENU_SETTINGS_FRAMESKIP_OFF,
@@ -54,9 +57,9 @@ extern joypad_state joypad1;
 
 void UpdateJoypad(void) {
   joypad1.up     = KeyState(KEY_UP   );
-  joypad1.down   = KeyState(KEY_DOWN );
+  joypad1.down   = (joypad1.up)?0:KeyState(KEY_DOWN);
   joypad1.left   = KeyState(KEY_LEFT );
-  joypad1.right  = KeyState(KEY_RIGHT);
+  joypad1.right  = (joypad1.left)?0:KeyState(KEY_RIGHT);
   joypad1.select = KeyState(KEY_SHIFT);
   joypad1.start  = KeyState(KEY_ENTER);
   joypad1.y      = KeyState(KEY_A    );
@@ -65,6 +68,20 @@ void UpdateJoypad(void) {
   joypad1.a      = KeyState(KEY_X    );
   joypad1.l      = KeyState(KEY_D    );
   joypad1.r      = KeyState(KEY_C    );
+
+  if(debugger_enabled() == false)return;
+  if(debugger.lock_up     == true)joypad1.up     = 1;
+  if(debugger.lock_down   == true)joypad1.down   = 1;
+  if(debugger.lock_left   == true)joypad1.left   = 1;
+  if(debugger.lock_right  == true)joypad1.right  = 1;
+  if(debugger.lock_a      == true)joypad1.a      = 1;
+  if(debugger.lock_b      == true)joypad1.b      = 1;
+  if(debugger.lock_x      == true)joypad1.x      = 1;
+  if(debugger.lock_y      == true)joypad1.y      = 1;
+  if(debugger.lock_l      == true)joypad1.l      = 1;
+  if(debugger.lock_r      == true)joypad1.r      = 1;
+  if(debugger.lock_select == true)joypad1.select = 1;
+  if(debugger.lock_start  == true)joypad1.start  = 1;
 }
 
 void alert(char *s, ...) {
@@ -126,6 +143,7 @@ HMENU hsubmenu, hbranchmenu;
   hsubmenu = CreatePopupMenu();
 
   hbranchmenu = CreatePopupMenu();
+  AppendMenu(hbranchmenu, MF_STRING, MENU_SETTINGS_VIDEOMODE_256x224w, "256x224 Windowed");
   AppendMenu(hbranchmenu, MF_STRING, MENU_SETTINGS_VIDEOMODE_512x448w, "512x448 Windowed");
   AppendMenu(hbranchmenu, MF_STRING, MENU_SETTINGS_VIDEOMODE_640x480f, "640x480 Fullscreen");
   AppendMenu(hsubmenu, MF_STRING | MF_POPUP, (unsigned int)hbranchmenu, "&Video Mode");
@@ -179,7 +197,7 @@ void SetMainWindowPos(bool update_style) {
       SetWindowLong(hwndMain, GWL_STYLE,   WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX);
       SetWindowLong(hwndMain, GWL_EXSTYLE, 0);
     }
-    FixWindowSize(hwndMain, render.width, render.height);
+    FixWindowSize(hwndMain, render.display_width, render.display_height);
   }
 }
 
@@ -253,7 +271,7 @@ bool result;
     PostQuitMessage(0);
     break;
   case WM_PAINT:
-    UpdateDisplay_NoRender();
+    DrawScene();
     break;
   case WM_KEYDOWN:
     switch(wparam) {
@@ -273,30 +291,40 @@ bool result;
       strcpy(fn, "");
       result = GUIOpenFile(fn);
       if(result == true) {
+        emu_state.rom_loaded = true;
         strcpy(emu_state.rom_name, fn);
         fn[strlen(fn) - 4] = 0;
         strcat(fn, ".srm");
         strcpy(emu_state.sram_name, fn);
         gx816->PowerOn(0);
         gx816->LoadROM();
-        if(debug_get_state() == DEBUGMODE_NOROM) {
-          debug_set_state(DEBUGMODE_DISABLED);
+        ResetSNES();
+        if(debugger_enabled() == true) {
+          debug_set_state(DEBUGMODE_WAIT);
         }
       }
       break;
     case MENU_FILE_RESET:
-      gx816->Reset();
+      ResetSNES();
       break;
     case MENU_FILE_EXIT:
       PostQuitMessage(0);
       break;
+    case MENU_SETTINGS_VIDEOMODE_256x224w:
+      video_setmode(false, 256, 224);
+      CheckMenuItem(hmenuMain, MENU_SETTINGS_VIDEOMODE_256x224w, MF_CHECKED);
+      CheckMenuItem(hmenuMain, MENU_SETTINGS_VIDEOMODE_512x448w, MF_UNCHECKED);
+      CheckMenuItem(hmenuMain, MENU_SETTINGS_VIDEOMODE_640x480f, MF_UNCHECKED);
+      break;
     case MENU_SETTINGS_VIDEOMODE_512x448w:
       video_setmode(false, 512, 448);
+      CheckMenuItem(hmenuMain, MENU_SETTINGS_VIDEOMODE_256x224w, MF_UNCHECKED);
       CheckMenuItem(hmenuMain, MENU_SETTINGS_VIDEOMODE_512x448w, MF_CHECKED);
       CheckMenuItem(hmenuMain, MENU_SETTINGS_VIDEOMODE_640x480f, MF_UNCHECKED);
       break;
     case MENU_SETTINGS_VIDEOMODE_640x480f:
       video_setmode(true, 512, 448);
+      CheckMenuItem(hmenuMain, MENU_SETTINGS_VIDEOMODE_256x224w, MF_UNCHECKED);
       CheckMenuItem(hmenuMain, MENU_SETTINGS_VIDEOMODE_512x448w, MF_UNCHECKED);
       CheckMenuItem(hmenuMain, MENU_SETTINGS_VIDEOMODE_640x480f, MF_CHECKED);
       break;
@@ -316,9 +344,7 @@ bool result;
       CheckMenuItem(hmenuMain, MENU_SETTINGS_FRAMESKIP_OFF + render.frame_skip, MF_CHECKED);
       break;
     case MENU_SETTINGS_DEBUGGER:
-      if(debug_get_state() == DEBUGMODE_NOROM)break;
-
-      if(debug_get_state() == DEBUGMODE_DISABLED) {
+      if(debugger_enabled() == false) {
         CheckMenuItem(hmenuMain, MENU_SETTINGS_DEBUGGER, MF_CHECKED);
         EnableDebugger(0);
       } else {
@@ -358,23 +384,23 @@ long height;
 void EnableDebugger(byte first_time) {
   debug_set_state(DEBUGMODE_WAIT);
 
-  hwndDCPU = NewWindow(wndprocDCPU, "bsnes_cpu", "g65816 cpu debugger", null, DCPU_WIDTH, DCPU_HEIGHT);
+  hwndDCPU = NewWindow(wndprocDCPU, "bsnes_cpu", "console", null, DCPU_WIDTH, DCPU_HEIGHT);
   CreateDCPU();
-  FixWindowSize(hwndDCPU, DCPU_WIDTH, DCPU_HEIGHT, 0, 1024 - 320);
+  FixWindowSize(hwndDCPU, DCPU_WIDTH, DCPU_HEIGHT, 0, 1024 - 410);
 
-  hwndDMEM = NewWindow(wndprocDMEM, "bsnes_mem", "g65816 memory editor -- snes memory mode", null, 495, 238);
+  hwndDMEM = NewWindow(wndprocDMEM, "bsnes_mem", "memory editor", null, DMEM_WIDTH, DMEM_HEIGHT);
   CreateDMEM();
-  FixWindowSize(hwndDMEM, 495, 238, 316, 441);
+  FixWindowSize(hwndDMEM, DMEM_WIDTH, DMEM_HEIGHT, 386, 321);
 
-  hwndDBP = NewWindow(wndprocDBP, "bsnes_bp", "g65816 breakpoint editor", null, 310, 238);
+  hwndDBP = NewWindow(wndprocDBP, "bsnes_bp", "breakpoint editor", null, DBP_WIDTH, DBP_HEIGHT);
   CreateDBP();
-  FixWindowSize(hwndDBP, 310, 238, 0, 441);
+  FixWindowSize(hwndDBP, DBP_WIDTH, DBP_HEIGHT, 0, 346);
 
   hwndDBGToggle = NewWindow(wndprocDBGToggle, "bsnes_bgtoggle", "ppu bg toggle", null, 275, 90);
   CreateDBGToggle();
-  FixWindowSize(hwndDBGToggle, 275, 90, 0, 326);
+  FixWindowSize(hwndDBGToggle, 275, 90, 0, 231);
 
-  FixWindowSize(hwndMain, 256, 224, 681, 1024 - 320);
+  FixWindowSize(hwndMain, 256, 223, 871, 1024 - 410);
 
   ShowWindow(hwndDCPU,      SW_NORMAL);
   ShowWindow(hwndDMEM,      SW_NORMAL);
@@ -385,7 +411,7 @@ void EnableDebugger(byte first_time) {
   if(first_time == 0) {
     debug_refresh_mem();
     debug_refresh_bp();
-    debug_update_cycles();
+    debug_update_status();
     dprintf("* Debugger Enabled");
     UpdateDisplay();
   }
@@ -411,11 +437,10 @@ MSG msg;
   if(debug_get_state() == DEBUGMODE_WAIT) {
     EnableDebugger(1);
   }
-  video_setmode(render.fullscreen, render.width, render.height);
+  video_setmode(render.fullscreen, render.display_width, render.display_height);
 
   InitDisplay();
   CreateColorTable();
-  SelectRenderer();
 
   InitSNES();
 

@@ -1,8 +1,10 @@
 #include "../base.h"
 #include "../cpu/g65816.h"
-extern g65816 *gx816;
-extern emustate emu_state;
-extern debugstate debugger;
+#include "../timing/timing.h"
+extern g65816     *gx816;
+extern emustate    emu_state;
+extern debugstate  debugger;
+extern snes_timer *snes_time;
 
 void g65816::InitializeROM(byte memory_map) {
   memset(rom, 0, 0x600000);
@@ -71,37 +73,35 @@ ulong g65816::convert_offset(byte read_mode, ulong addr, bool mirror) {
 byte db;
   switch(read_mode) {
   case MEMMODE_DP:
-    addr = (regs.d + (addr & 0xff)) & 0xffff;
+    addr = (regs.d + (addr & 0xffff)) & 0xffff;
     break;
   case MEMMODE_DPX:
-    addr = (regs.d + regs.x + (addr & 0xff)) & 0xffff;
+    addr = (regs.d + regs.x + (addr & 0xffff)) & 0xffff;
     break;
   case MEMMODE_DPY:
-    addr = (regs.d + regs.y + (addr & 0xff)) & 0xffff;
+    addr = (regs.d + regs.y + (addr & 0xffff)) & 0xffff;
     break;
   case MEMMODE_IDP:
-    addr = (regs.d + (addr & 0xff)) & 0xffff;
+    addr = (regs.d + (addr & 0xffff)) & 0xffff;
     addr = mem_read(MEMMODE_LONG, MEMSIZE_WORD, addr);
     addr |= (regs.db << 16);
     break;
   case MEMMODE_IDPX:
-    addr = (regs.d + regs.x + (addr & 0xff)) & 0xffff;
+    addr = (regs.d + regs.x + (addr & 0xffff)) & 0xffff;
     addr = mem_read(MEMMODE_LONG, MEMSIZE_WORD, addr);
     addr |= (regs.db << 16);
     break;
   case MEMMODE_IDPY:
-    addr = (regs.d + (addr & 0xff)) & 0xffff;
+    addr = (regs.d + (addr & 0xffff)) & 0xffff;
     addr = mem_read(MEMMODE_LONG, MEMSIZE_WORD, addr);
     addr += (regs.db << 16) + regs.y;
-    if((addr >> 16) != regs.db)index_bank_crossed = true;
-    else                       index_bank_crossed = false;
     break;
   case MEMMODE_ILDP:
-    addr = (regs.d + (addr & 0xff));
+    addr = (regs.d + (addr & 0xffff));
     addr = mem_read(MEMMODE_LONG, MEMSIZE_LONG, addr);
     break;
   case MEMMODE_ILDPY:
-    addr = (regs.d + (addr & 0xff));
+    addr = (regs.d + (addr & 0xffff));
     addr = mem_read(MEMMODE_LONG, MEMSIZE_LONG, addr);
     addr += regs.y;
     break;
@@ -116,14 +116,10 @@ byte db;
   case MEMMODE_ADDRX:
     addr = (regs.db << 16) + (addr & 0xffff);
     addr += regs.x;
-    if((addr >> 16) != regs.db)index_bank_crossed = true;
-    else                       index_bank_crossed = false;
     break;
   case MEMMODE_ADDRY:
     addr = (regs.db << 16) + (addr & 0xffff);
     addr += regs.y;
-    if((addr >> 16) != regs.db)index_bank_crossed = true;
-    else                       index_bank_crossed = false;
     break;
   case MEMMODE_IADDRX:
     addr += regs.x;
@@ -154,6 +150,25 @@ byte db;
     addr = (regs.s + (addr & 0xff)) & 0xffff;
     addr = mem_read(MEMMODE_LONG, MEMSIZE_WORD, addr);
     addr += (regs.db << 16) + regs.y;
+    break;
+
+  case OPMODE_ADDR:
+    addr &= 0xffff;
+    break;
+  case OPMODE_LONG:
+    addr &= 0xffffff;
+    break;
+  case OPMODE_DBR:
+    addr = (regs.db << 16) + addr;
+    break;
+  case OPMODE_PBR:
+    addr = (regs.pc & 0xff0000) | (addr & 0xffff);
+    break;
+  case OPMODE_DP:
+    addr = (regs.d + (addr & 0xffff)) & 0xffff;
+    break;
+  case OPMODE_SP:
+    addr = (regs.s + (addr & 0xffff)) & 0xffff;
     break;
   }
 
@@ -164,129 +179,13 @@ byte db;
   }
 }
 
-ulong g65816::adjust_base_offset(byte read_mode, ulong addr) {
-byte db;
-  switch(read_mode) {
-  case MEMMODE_DP:
-    addr = (regs.d + (addr & 0xff)) & 0xffff;
-    break;
-  case MEMMODE_DPX:
-    addr = (regs.d + regs.x + (addr & 0xff)) & 0xffff;
-    break;
-  case MEMMODE_DPY:
-    addr = (regs.d + regs.y + (addr & 0xff)) & 0xffff;
-    break;
-  case MEMMODE_IDP:
-    addr = (regs.d + (addr & 0xff)) & 0xffff;
-    break;
-  case MEMMODE_IDPX:
-    addr = (regs.d + regs.x + (addr & 0xff)) & 0xffff;
-    break;
-  case MEMMODE_IDPY:
-    addr = (regs.d + (addr & 0xff)) & 0xffff;
-    break;
-  case MEMMODE_ILDP:
-    addr = (regs.d + (addr & 0xff));
-    break;
-  case MEMMODE_ILDPY:
-    addr = (regs.d + (addr & 0xff));
-    break;
-  case MEMMODE_ADDR:
-    addr = addr & 0xffff;
-    addr |= (regs.db << 16);
-    break;
-  case MEMMODE_ADDR_PC:
-    addr = addr & 0xffff;
-    addr |= (regs.pc & 0xff0000);
-    break;
-  case MEMMODE_ADDRX:
-    addr = (regs.db << 16) | (addr & 0xffff);
-    addr += regs.x;
-    if((addr >> 16) != regs.db)index_bank_crossed = true;
-    else                       index_bank_crossed = false;
-    break;
-  case MEMMODE_ADDRY:
-    addr = (regs.db << 16) + (addr & 0xffff);
-    addr += regs.y;
-    if((addr >> 16) != regs.db)index_bank_crossed = true;
-    else                       index_bank_crossed = false;
-    break;
-  case MEMMODE_IADDRX:
-    addr += regs.x;
-    addr &= 0xffff;
-    break;
-  case MEMMODE_ILADDR:
-    addr &= 0xffff;
-    break;
-  case MEMMODE_IADDR_PC:
-    addr |= (regs.pc & 0xff0000);
-    break;
-  case MEMMODE_IADDRX_PC:
-    addr += regs.x;
-    addr |= (regs.pc & 0xff0000);
-    break;
-  case MEMMODE_ILADDR_PC:
-    break;
-  case MEMMODE_LONG:
-    break;
-  case MEMMODE_LONGX:
-    addr += regs.x;
-    break;
-  case MEMMODE_SR:
-    addr = (regs.s + (addr & 0xff)) & 0xffff;
-    break;
-  case MEMMODE_ISRY:
-    addr = (regs.s + (addr & 0xff)) & 0xffff;
-    break;
-  }
-  return addr;
-}
-
-ulong g65816::read_indirect_address(byte read_mode, ulong addr) {
-byte db;
-  switch(read_mode) {
-  case MEMMODE_IDP:
-    addr = mem_read(MEMMODE_LONG, MEMSIZE_WORD, addr);
-    addr |= (regs.db << 16);
-    break;
-  case MEMMODE_IDPX:
-    addr = mem_read(MEMMODE_LONG, MEMSIZE_WORD, addr);
-    addr |= (regs.db << 16);
-    break;
-  case MEMMODE_IDPY:
-    addr = mem_read(MEMMODE_LONG, MEMSIZE_WORD, addr);
-    addr += (regs.db << 16) + regs.y;
-    if((addr >> 16) != regs.db)index_bank_crossed = true;
-    else                       index_bank_crossed = false;
-    break;
-  case MEMMODE_ILDP:
-    addr = mem_read(MEMMODE_LONG, MEMSIZE_LONG, addr);
-    break;
-  case MEMMODE_ILDPY:
-    addr = mem_read(MEMMODE_LONG, MEMSIZE_LONG, addr);
-    addr += regs.y;
-    break;
-  case MEMMODE_IADDRX:
-    addr = mem_read(MEMMODE_LONG, MEMSIZE_WORD, (addr & 0x00ffff));
-    addr |= (regs.pc & 0xff0000);
-    break;
-  case MEMMODE_ILADDR:
-    addr = mem_read(MEMMODE_LONG, MEMSIZE_LONG, addr);
-    break;
-  case MEMMODE_ISRY:
-    addr = mem_read(MEMMODE_LONG, MEMSIZE_WORD, addr);
-    addr += (regs.db << 16) + regs.y;
-    break;
-  default:
-    dprintf("* Error: Invalid read_mode for g65816::read_indirect_address [%d]", read_mode);
-    break;
-  }
-  return addr;
-}
-
-ulong g65816::get_dc(byte read_mode, ulong addr) {
-  regs.dc = convert_offset(read_mode, addr, false);
-  return regs.dc;
+ulong g65816::read_operand(byte size) {
+ulong r;
+  r = gx816->mem_read(MEMMODE_NONE, size, gx816->regs.pc + 1);
+//add size + 1 cycles. the extra cycle is for the actual opcode
+//byte itself being read in by the main cpu emulation routine.
+  snes_time->add_cpu_pcycles(size + 1);
+  return r;
 }
 
 byte g65816::mem_getbyte_direct(ulong addr, byte access_mode) {
@@ -295,7 +194,11 @@ word a;
   db = (addr >> 16) & 0xff;
   a  = (addr & 0xffff);
   if(db == 0x00 && a >= 0x2000 && a <= 0x5fff) {
-    return mmio_read(addr);
+    if(access_mode == MEMACCESS_DEBUGGER) {
+      return 0x00;
+    } else {
+      return mmio_read(addr);
+    }
   }
 
   if(db == 0x7e || db == 0x7f) {
@@ -324,30 +227,9 @@ byte r;
   r = mem_getbyte_direct(addr, access_mode);
 
   if(debug_get_state() == DEBUGMODE_DISABLED)return r;
-
   if(access_mode == MEMACCESS_DEBUGGER)return r; //don't report breakpoint hits from debugger
 
-  for(i=0;i<16;i++) {
-    if(bp_list[i].flags & BP_READ) {
-      if(bp_list[i].offset == addr) {
-        if(bp_list[i].flags & BP_VAL) {
-          if(bp_list[i].value == r) {
-            dprintf("* breakpoint %d hit -- read match access [%0.2x]", i, r);
-            bp_list[i].hit_count++;
-            debugger.refresh_bp = true;
-            debug_set_state(DEBUGMODE_WAIT);
-            disas_g65816_op();
-          }
-        } else {
-          dprintf("* breakpoint %d hit -- read access", i);
-          bp_list[i].hit_count++;
-          debugger.refresh_bp = true;
-          debug_set_state(DEBUGMODE_WAIT);
-          disas_g65816_op();
-        }
-      }
-    }
-  }
+  debug_test_bp(BPSRC_MEM, BP_READ, addr, r);
   return r;
 }
 
@@ -392,30 +274,9 @@ int i;
   mem_putbyte_direct(addr, value, access_mode);
 
   if(debug_get_state() == DEBUGMODE_DISABLED)return;
-
   if(access_mode == MEMACCESS_DEBUGGER)return; //don't report breakpoint hits from debugger
 
-  for(i=0;i<16;i++) {
-    if(bp_list[i].flags & BP_WRITE) {
-      if(bp_list[i].offset == addr) {
-        if(bp_list[i].flags & BP_VAL) {
-          if(bp_list[i].value == value) {
-            dprintf("* breakpoint %d hit -- write match access [%0.2x]", i, value);
-            bp_list[i].hit_count++;
-            debugger.refresh_bp = true;
-            debug_set_state(DEBUGMODE_WAIT);
-            disas_g65816_op();
-          }
-        } else {
-          dprintf("* breakpoint %d hit -- write access", i);
-          bp_list[i].hit_count++;
-          debugger.refresh_bp = true;
-          debug_set_state(DEBUGMODE_WAIT);
-          disas_g65816_op();
-        }
-      }
-    }
-  }
+  debug_test_bp(BPSRC_MEM, BP_WRITE, addr, value);
 }
 
 ulong g65816::mem_read(byte read_mode, byte read_size, ulong addr, byte access_mode) {
@@ -424,16 +285,16 @@ ulong r;
 
   switch(read_size) {
   case MEMSIZE_BYTE:
-    r = mem_getbyte(addr,     access_mode);
+    r = mem_getbyte(addr,   access_mode);
     break;
   case MEMSIZE_WORD:
-    r = mem_getbyte(addr,     access_mode) |
-        mem_getbyte(addr + 1, access_mode)<<8;
+    r = mem_getbyte(addr,   access_mode) |
+        mem_getbyte(addr+1, access_mode)<<8;
     break;
   case MEMSIZE_LONG:
-    r = mem_getbyte(addr,     access_mode) |
-        mem_getbyte(addr + 1, access_mode)<<8 |
-        mem_getbyte(addr + 2, access_mode)<<16;
+    r = mem_getbyte(addr,   access_mode) |
+        mem_getbyte(addr+1, access_mode)<<8 |
+        mem_getbyte(addr+2, access_mode)<<16;
     break;
   }
 
@@ -459,6 +320,63 @@ void g65816::mem_write(byte write_mode, byte write_size, ulong addr, ulong value
   }
 
   debugger.refresh_mem = true;
+}
+
+/*
+  todo: move address mirroring into mem_getbyte
+  in case there are different memory speeds depending
+  on pre-mirrored addresses.
+*/
+byte g65816::op_read(byte mode, ulong addr) {
+byte r;
+  addr = convert_offset(mode, addr);
+  r    = mem_getbyte(addr);
+  snes_time->add_cpu_mcycles(1, addr);
+  return r;
+}
+
+void g65816::op_write(byte mode, ulong addr, byte value) {
+  mem_putbyte(convert_offset(mode, addr), value);
+  snes_time->add_cpu_mcycles(1, addr);
+}
+
+byte g65816::stack_read(void) {
+byte r;
+  gx816->regs.s++;
+  if(gx816->regs.e == true) {
+    gx816->regs.s = 0x0100 | (gx816->regs.s & 0xff);
+  }
+  r = mem_getbyte(convert_offset(OPMODE_SP, 0));
+  snes_time->add_cpu_mcycles(1, gx816->regs.s);
+  return r;
+}
+
+void g65816::stack_write(byte value) {
+  mem_putbyte(convert_offset(OPMODE_SP, 0), value);
+  gx816->regs.s--;
+  if(gx816->regs.e == true) {
+    gx816->regs.s = 0x0100 | (gx816->regs.s & 0xff);
+  }
+  snes_time->add_cpu_mcycles(1, gx816->regs.s);
+}
+
+/*
+  note: case 4 (write) condition is handled directly
+  in the opcode, since it is always true.
+*/
+void g65816::op_cond(byte c, ulong n0, ulong n1) {
+  switch(c) {
+  case 2: //dl != 0
+    if((regs.d & 0xff) != 0x00) {
+      snes_time->add_cpu_icycles(1);
+    }
+    break;
+  case 4: //read across page boundaries, write, or x=0
+    if((n0 & 0xff00) != (n1 & 0xff00) || !(gx816->regs.p & PF_X)) {
+      snes_time->add_cpu_icycles(1);
+    }
+    break;
+  }
 }
 
 ulong g65816::rom_read(ulong addr, byte read_size) {

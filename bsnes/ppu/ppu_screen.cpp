@@ -24,13 +24,17 @@ void mmio_w2100(byte value) {
   m: screen mode
 */
 void mmio_w2105(byte value) {
+static byte prev_mode = 0x00;
   ppu.bg_tile_size[BG4] = (value & 0x80)?1:0;
   ppu.bg_tile_size[BG3] = (value & 0x40)?1:0;
   ppu.bg_tile_size[BG2] = (value & 0x20)?1:0;
   ppu.bg_tile_size[BG1] = (value & 0x10)?1:0;
   ppu.bg_priority_mode  = (value & 0x08)?1:0;
   ppu.bg_mode           = (value & 0x07);
-  video_setsnesmode();
+  if(prev_mode != ppu.bg_mode) {
+    video_setsnesmode();
+    prev_mode = ppu.bg_mode;
+  }
 }
 
 /*
@@ -80,13 +84,18 @@ void mmio_w212d(byte value) {
 
 /*
   $2133 : screen mode settings
-  ?????h?i
+  ?m???ohi
 
-  h: snes height (0 = 224, 1 = 240)
-  i: interlace   (0 = off, 1 = on)
+  m: mode7 extbg  (0 = off, 1 = on)
+  o: overscan     (0 = off, 1 = on)
+  h: sprite halve (0 = off, 1 = on)
+  i: interlace    (0 = off, 1 = on)
 */
 void mmio_w2133(byte value) {
-  ppu.toggle_visible_scanlines = (value & 0x04)?240:224;
-  ppu.interlace                = (value & 0x01)?true:false;
+  ppu.mode7_extbg       = (value & 0x40)?true:false;
+  ppu.overscan          = (value & 0x04)?true:false;
+  ppu.visible_scanlines = (value & 0x04)?239:224;
+  ppu.sprite_halve      = (value & 0x02)?true:false;
+  ppu.toggle_interlace  = (value & 0x01)?true:false;
   video_setsnesmode();
 }

@@ -5,7 +5,6 @@
   multiply value by 2 to get actual offset into ppu.cgram
 */
 void mmio_w2121(byte value) {
-//if(ppu.vline_pos < 224 && ppu.display_disable == false)return;
   ppu.cgram_write_pos = value << 1;
 }
 
@@ -14,9 +13,11 @@ void mmio_w2121(byte value) {
 
   writes to cgram using cgram_write_pos * 2 as an index
 */
-void mmio_w2122(byte val) {
-//if(ppu.vline_pos < 224 && ppu.display_disable == false)return;
-  ppu.cgram[ppu.cgram_write_pos] = val;
+void mmio_w2122(byte value) {
+  ppu.cgram[ppu.cgram_write_pos] = value;
+
+  debug_test_bp(BPSRC_CGRAM, BP_WRITE, ppu.cgram_write_pos, value);
+
   ppu.cgram_write_pos++;
   ppu.cgram_write_pos &= 0x01ff;
 }
@@ -28,8 +29,10 @@ void mmio_w2122(byte val) {
 */
 byte mmio_r213b(void) {
 byte r;
-//if(ppu.vline_pos < 224 && ppu.display_disable == false)return;
   r = ppu.cgram[ppu.cgram_write_pos];
+
+  debug_test_bp(BPSRC_CGRAM, BP_READ, ppu.cgram_write_pos, r);
+
   ppu.cgram_write_pos++;
   ppu.cgram_write_pos &= 0x01ff;
   return r;

@@ -1,288 +1,443 @@
-#define g65816_sta_data_b() gx816->mem_write(MEMMODE_NONE, MEMSIZE_BYTE, dest_addr, gx816->regs.a.b)
-#define g65816_sta_data_w() gx816->mem_write(MEMMODE_NONE, MEMSIZE_WORD, dest_addr, gx816->regs.a.w)
+/**********************
+ *** 0x8d: sta addr ***
+ **********************
+cycles:
+  [1 ] pbr,pc   ; opcode
+  [2 ] pbr,pc+1 ; aal
+  [3 ] pbr,pc+2 ; aah
+  [4 ] dbr,aa   ; data low
+  [4a] dbr,aa+1 ; data high [1]
+*/
 
 void g65816_op_sta_addrb(void) {
-g65816_prefetch(2);
-g65816_getaddr(MEMMODE_ADDR);
-  g65816_sta_data_b();
+  gx816->op.aa.w = gx816->read_operand(2);                      //1-3 [op fetch]
+  gx816->op_write(OPMODE_DBR, gx816->op.aa.w, gx816->regs.a.b); //4 [write]
+
   g65816_incpc(3);
-  snes_time->add_cpu_pcycles(3);
-  snes_time->add_cpu_mcycles(1, dest_addr);
 }
 
 void g65816_op_sta_addrw(void) {
-g65816_prefetch(2);
-g65816_getaddr(MEMMODE_ADDR);
-  g65816_sta_data_w();
+  gx816->op.aa.w = gx816->read_operand(2);                            //1-3 [op fetch]
+  gx816->op_write(OPMODE_DBR, gx816->op.aa.w,     gx816->regs.a.p.l); //4 [write low]
+  gx816->op_write(OPMODE_DBR, gx816->op.aa.w + 1, gx816->regs.a.p.h); //4a [write high]
+
   g65816_incpc(3);
-  snes_time->add_cpu_pcycles(3);
-  snes_time->add_cpu_mcycles(2, dest_addr);
 }
 
+/************************
+ *** 0x9d: sta addr,x ***
+ ************************
+cycles:
+  [1 ] pbr,pc         ; operand
+  [2 ] pbr,pc+1       ; aal
+  [3 ] pbr,pc+2       ; aah
+  [3a] dbr,aah,aal+xl ; io [4]
+  [4 ] dbr,aa+x       ; data low
+  [4a] dbr,aa+x+1     ; data high [1]
+*/
+
 void g65816_op_sta_addrxb(void) {
-g65816_prefetch(2);
-g65816_getaddr(MEMMODE_ADDRX);
-  g65816_sta_data_b();
+  gx816->op.aa.w = gx816->read_operand(2);                                      //1-3 [op fetch]
+  snes_time->add_cpu_icycles(1);                                                //3a [write i/o]
+  gx816->op_write(OPMODE_DBR, gx816->op.aa.w + gx816->regs.x, gx816->regs.a.b); //4 [write]
+
   g65816_incpc(3);
-  snes_time->add_cpu_pcycles(3);
-  snes_time->add_cpu_mcycles(1, dest_addr);
-  snes_time->add_cpu_icycles(0, TIMING_CONDITION4);
 }
 
 void g65816_op_sta_addrxw(void) {
-g65816_prefetch(2);
-g65816_getaddr(MEMMODE_ADDRX);
-  g65816_sta_data_w();
+  gx816->op.aa.w = gx816->read_operand(2);                                            //1-3 [op fetch]
+  snes_time->add_cpu_icycles(1);                                                      //3a [write i/o]
+  gx816->op_write(OPMODE_DBR, gx816->op.aa.w + gx816->regs.x,     gx816->regs.a.p.l); //4 [write low]
+  gx816->op_write(OPMODE_DBR, gx816->op.aa.w + gx816->regs.x + 1, gx816->regs.a.p.h); //4a [write high]
+
   g65816_incpc(3);
-  snes_time->add_cpu_pcycles(3);
-  snes_time->add_cpu_mcycles(2, dest_addr);
-  snes_time->add_cpu_icycles(0, TIMING_CONDITION4);
 }
 
+/********************
+ *** 0x85: sta dp ***
+ ********************
+cycles:
+  [1 ] pbr,pc   ; operand
+  [2 ] pbr,pc+1 ; dp
+  [2a] pbr,pc+1 ; io [2]
+  [3 ] 0,d+dp   ; data low
+  [3a] 0,d+dp+1 ; data high [1]
+*/
+
 void g65816_op_sta_dpb(void) {
-g65816_prefetch(1);
-g65816_getaddr(MEMMODE_DP);
-  g65816_sta_data_b();
+  gx816->op.dp = gx816->read_operand(1);                     //1,2 [op fetch]
+  gx816->op_cond(2);                                         //2a [dl!=0]
+  gx816->op_write(OPMODE_DP, gx816->op.dp, gx816->regs.a.b); //3 [write]
+
   g65816_incpc(2);
-  snes_time->add_cpu_pcycles(2);
-  snes_time->add_cpu_mcycles(1, dest_addr);
-  snes_time->add_cpu_icycles(0, TIMING_CONDITION2);
 }
 
 void g65816_op_sta_dpw(void) {
-g65816_prefetch(1);
-g65816_getaddr(MEMMODE_DP);
-  g65816_sta_data_w();
+  gx816->op.dp = gx816->read_operand(1);                           //1,2 [op fetch]
+  gx816->op_cond(2);                                               //2a [dl!=0]
+  gx816->op_write(OPMODE_DP, gx816->op.dp,     gx816->regs.a.p.l); //3 [write low]
+  gx816->op_write(OPMODE_DP, gx816->op.dp + 1, gx816->regs.a.p.h); //3a [write high]
+
   g65816_incpc(2);
-  snes_time->add_cpu_pcycles(2);
-  snes_time->add_cpu_mcycles(2, dest_addr);
-  snes_time->add_cpu_icycles(0, TIMING_CONDITION2);
 }
 
+/**********************
+ *** 0x92: sta (dp) ***
+ **********************
+cycles:
+  [1 ] pbr,pc   ; opcode
+  [2 ] pbr,pc+1 ; dp
+  [2a] pbr,pc+1 ; io [2]
+  [3 ] 0,d+dp   ; aal
+  [4 ] 0,d+dp+1 ; aah
+  [5 ] dbr,aa   ; data low
+  [5a] dbr,aa+1 ; data high [1]
+*/
+
 void g65816_op_sta_idpb(void) {
-g65816_prefetch(1);
-g65816_getiaddr(MEMMODE_IDP);
-  g65816_sta_data_b();
+  gx816->op.dp = gx816->read_operand(1);                          //1,2 [op fetch]
+  gx816->op_cond(2);                                              //2a [dl!=0]
+  gx816->op.aa.p.l = gx816->op_read(OPMODE_DP, gx816->op.dp);     //3 [aal]
+  gx816->op.aa.p.h = gx816->op_read(OPMODE_DP, gx816->op.dp + 1); //4 [aah]
+  gx816->op_write(OPMODE_DBR, gx816->op.aa.w, gx816->regs.a.b);   //5 [write]
+
   g65816_incpc(2);
-  snes_time->add_cpu_pcycles(2);
-  snes_time->add_cpu_mcycles(2, base_addr);
-  snes_time->add_cpu_mcycles(1, dest_addr);
-  snes_time->add_cpu_icycles(0, TIMING_CONDITION2);
 }
 
 void g65816_op_sta_idpw(void) {
-g65816_prefetch(1);
-g65816_getiaddr(MEMMODE_IDP);
-  g65816_sta_data_w();
+  gx816->op.dp = gx816->read_operand(1);                              //1,2 [op fetch]
+  gx816->op_cond(2);                                                  //2a [dl!=0]
+  gx816->op.aa.p.l = gx816->op_read(OPMODE_DP, gx816->op.dp);         //3 [aal]
+  gx816->op.aa.p.h = gx816->op_read(OPMODE_DP, gx816->op.dp + 1);     //4 [aah]
+  gx816->op_write(OPMODE_DBR, gx816->op.aa.w,     gx816->regs.a.p.l); //5 [write low]
+  gx816->op_write(OPMODE_DBR, gx816->op.aa.w + 1, gx816->regs.a.p.h); //5a [write high]
+
   g65816_incpc(2);
-  snes_time->add_cpu_pcycles(2);
-  snes_time->add_cpu_mcycles(2, base_addr);
-  snes_time->add_cpu_mcycles(2, dest_addr);
-  snes_time->add_cpu_icycles(0, TIMING_CONDITION2);
 }
 
+/**********************
+ *** 0x87: sta [dp] ***
+ **********************
+cycles:
+  [1 ] pbr,pc   ; opcode
+  [2 ] pbr,pc+1 ; dp
+  [2a] pbr,pc+1 ; io [2]
+  [3 ] 0,d+dp   ; aal
+  [4 ] 0,d+dp+1 ; aah
+  [5 ] 0,d+dp+2 ; aab
+  [6 ] aab,aa   ; data low
+  [6a] aab,aa+1 ; data high [1]
+*/
+
 void g65816_op_sta_ildpb(void) {
-g65816_prefetch(1);
-g65816_getiaddr(MEMMODE_ILDP);
-  g65816_sta_data_b();
+  gx816->op.dp = gx816->read_operand(1);                          //1,2 [op fetch]
+  gx816->op_cond(2);                                              //2a [dl!=0]
+  gx816->op.aa.p.l = gx816->op_read(OPMODE_DP, gx816->op.dp);     //3 [aal]
+  gx816->op.aa.p.h = gx816->op_read(OPMODE_DP, gx816->op.dp + 1); //4 [aah]
+  gx816->op.aa.p.b = gx816->op_read(OPMODE_DP, gx816->op.dp + 2); //5 [aab]
+  gx816->op_write(OPMODE_LONG, gx816->op.aa.l, gx816->regs.a.b);  //6 [write]
+
   g65816_incpc(2);
-  snes_time->add_cpu_pcycles(2);
-  snes_time->add_cpu_mcycles(3, base_addr);
-  snes_time->add_cpu_mcycles(1, dest_addr);
-  snes_time->add_cpu_icycles(0, TIMING_CONDITION2);
 }
 
 void g65816_op_sta_ildpw(void) {
-g65816_prefetch(1);
-g65816_getiaddr(MEMMODE_ILDP);
-  g65816_sta_data_w();
+  gx816->op.dp = gx816->read_operand(1);                               //1,2 [op fetch]
+  gx816->op_cond(2);                                                   //2a [dl!=0]
+  gx816->op.aa.p.l  = gx816->op_read(OPMODE_DP, gx816->op.dp);         //3 [aal]
+  gx816->op.aa.p.h  = gx816->op_read(OPMODE_DP, gx816->op.dp + 1);     //4 [aah]
+  gx816->op.aa.p.b  = gx816->op_read(OPMODE_DP, gx816->op.dp + 2);     //5 [aab]
+  gx816->op_write(OPMODE_LONG, gx816->op.aa.l,     gx816->regs.a.p.l); //6 [write low]
+  gx816->op_write(OPMODE_LONG, gx816->op.aa.l + 1, gx816->regs.a.p.h); //6a [write high]
+
   g65816_incpc(2);
-  snes_time->add_cpu_pcycles(2);
-  snes_time->add_cpu_mcycles(3, base_addr);
-  snes_time->add_cpu_mcycles(2, dest_addr);
-  snes_time->add_cpu_icycles(0, TIMING_CONDITION2);
 }
 
+/**********************
+ *** 0x8f: sta long ***
+ **********************
+cycles:
+  [1 ] pbr,pc   ; opcode
+  [2 ] pbr,pc+1 ; aal
+  [3 ] pbr,pc+2 ; aah
+  [4 ] pbr,pc+3 ; aab
+  [5 ] aab,aa   ; data low
+  [5a] aab,aa+1 ; data high
+*/
+
 void g65816_op_sta_longb(void) {
-g65816_prefetch(3);
-g65816_getaddr(MEMMODE_LONG);
-  g65816_sta_data_b();
+  gx816->op.aa.l = gx816->read_operand(3);                       //1-4 [op fetch]
+  gx816->op_write(OPMODE_LONG, gx816->op.aa.l, gx816->regs.a.b); //5 [write]
+
   g65816_incpc(4);
-  snes_time->add_cpu_pcycles(4);
-  snes_time->add_cpu_mcycles(1, dest_addr);
 }
 
 void g65816_op_sta_longw(void) {
-g65816_prefetch(3);
-g65816_getaddr(MEMMODE_LONG);
-  g65816_sta_data_w();
+  gx816->op.aa.l = gx816->read_operand(3);                             //1-4 [op fetch]
+  gx816->op_write(OPMODE_LONG, gx816->op.aa.l,     gx816->regs.a.p.l); //5 [write]
+  gx816->op_write(OPMODE_LONG, gx816->op.aa.l + 1, gx816->regs.a.p.h); //5a [write]
+
   g65816_incpc(4);
-  snes_time->add_cpu_pcycles(4);
-  snes_time->add_cpu_mcycles(2, dest_addr);
 }
 
+/************************
+ *** 0x9f: sta long,x ***
+ ************************
+cycles:
+  [1 ] pbr,pc     ; opcode
+  [2 ] pbr,pc+1   ; aal
+  [3 ] pbr,pc+2   ; aah
+  [4 ] pbr,pc+3   ; aab
+  [5 ] aab,aa+x   ; data low
+  [5a] aab,aa+x+1 ; data high
+*/
+
 void g65816_op_sta_longxb(void) {
-g65816_prefetch(3);
-g65816_getaddr(MEMMODE_LONGX);
-  g65816_sta_data_b();
+  gx816->op.aa.l = gx816->read_operand(3);                                       //1-4 [op fetch]
+  gx816->op_write(OPMODE_LONG, gx816->op.aa.l + gx816->regs.x, gx816->regs.a.b); //5 [write]
+
   g65816_incpc(4);
-  snes_time->add_cpu_pcycles(4);
-  snes_time->add_cpu_mcycles(1, dest_addr);
 }
 
 void g65816_op_sta_longxw(void) {
-g65816_prefetch(3);
-g65816_getaddr(MEMMODE_LONGX);
-  g65816_sta_data_w();
+  gx816->op.aa.l = gx816->read_operand(3);                                             //1-4 [op fetch]
+  gx816->op_write(OPMODE_LONG, gx816->op.aa.l + gx816->regs.x,     gx816->regs.a.p.l); //5 [write]
+  gx816->op_write(OPMODE_LONG, gx816->op.aa.l + gx816->regs.x + 1, gx816->regs.a.p.h); //5a [write]
+
   g65816_incpc(4);
-  snes_time->add_cpu_pcycles(4);
-  snes_time->add_cpu_mcycles(2, dest_addr);
 }
 
+/************************
+ *** 0x99: sta addr,y ***
+ ************************
+cycles:
+  [1 ] pbr,pc         ; operand
+  [2 ] pbr,pc+1       ; aal
+  [3 ] pbr,pc+2       ; aah
+  [3a] dbr,aah,aal+yl ; io [4]
+  [4 ] dbr,aa+y       ; data low
+  [4a] dbr,aa+y+1     ; data high [1]
+*/
+
 void g65816_op_sta_addryb(void) {
-g65816_prefetch(2);
-g65816_getaddr(MEMMODE_ADDRY);
-  g65816_sta_data_b();
+  gx816->op.aa.w = gx816->read_operand(2);                                      //1-3 [op fetch]
+  snes_time->add_cpu_icycles(1);                                                //3a [write i/o]
+  gx816->op_write(OPMODE_DBR, gx816->op.aa.w + gx816->regs.y, gx816->regs.a.b); //4 [write]
+
   g65816_incpc(3);
-  snes_time->add_cpu_pcycles(3);
-  snes_time->add_cpu_mcycles(1, dest_addr);
-  snes_time->add_cpu_icycles(0, TIMING_CONDITION4);
 }
 
 void g65816_op_sta_addryw(void) {
-g65816_prefetch(2);
-g65816_getaddr(MEMMODE_ADDRY);
-  g65816_sta_data_w();
+  gx816->op.aa.w = gx816->read_operand(2);                                            //1-3 [op fetch]
+  snes_time->add_cpu_icycles(1);                                                      //3a [write i/o]
+  gx816->op_write(OPMODE_DBR, gx816->op.aa.w + gx816->regs.y,     gx816->regs.a.p.l); //4 [write low]
+  gx816->op_write(OPMODE_DBR, gx816->op.aa.w + gx816->regs.y + 1, gx816->regs.a.p.h); //4a [write high]
+
   g65816_incpc(3);
-  snes_time->add_cpu_pcycles(3);
-  snes_time->add_cpu_mcycles(2, dest_addr);
-  snes_time->add_cpu_icycles(0, TIMING_CONDITION4);
 }
 
+/**********************
+ *** 0x95: sta dp,x ***
+ **********************
+cycles:
+  [1 ] pbr,pc     ; opcode
+  [2 ] pbr,pc+1   ; dp
+  [2a] pbr,pc+1   ; io
+  [3 ] pbr,pc+1   ; io
+  [4 ] 0,d+dp+x   ; data low
+  [4a] 0,d+dp+x+1 ; data high
+*/
+
 void g65816_op_sta_dpxb(void) {
-g65816_prefetch(1);
-g65816_getaddr(MEMMODE_DPX);
-  g65816_sta_data_b();
+  gx816->op.dp = gx816->read_operand(1);                                     //1,2 [op fetch]
+  gx816->op_cond(2);                                                         //2a [dl!=0]
+  snes_time->add_cpu_icycles(1);                                             //3 [i/o]
+  gx816->op_write(OPMODE_DP, gx816->op.dp + gx816->regs.x, gx816->regs.a.b); //4 [write]
+
   g65816_incpc(2);
-  snes_time->add_cpu_pcycles(2);
-  snes_time->add_cpu_mcycles(1, dest_addr);
-  snes_time->add_cpu_icycles(1, TIMING_CONDITION2);
 }
 
 void g65816_op_sta_dpxw(void) {
-g65816_prefetch(1);
-g65816_getaddr(MEMMODE_DPX);
-  g65816_sta_data_w();
+  gx816->op.dp = gx816->read_operand(1);                                           //1,2 [op fetch]
+  gx816->op_cond(2);                                                               //2a [dl!=0]
+  snes_time->add_cpu_icycles(1);                                                   //3 [i/o]
+  gx816->op_write(OPMODE_DP, gx816->op.dp + gx816->regs.x,     gx816->regs.a.p.l); //4 [write low]
+  gx816->op_write(OPMODE_DP, gx816->op.dp + gx816->regs.x + 1, gx816->regs.a.p.h); //4a [write high]
+
   g65816_incpc(2);
-  snes_time->add_cpu_pcycles(2);
-  snes_time->add_cpu_mcycles(2, dest_addr);
-  snes_time->add_cpu_icycles(1, TIMING_CONDITION2);
 }
 
+/************************
+ *** 0x81: sta (dp,x) ***
+ ************************
+cycles:
+  [1 ] pbr,pc     ; opcode
+  [2 ] pbr,pc+1   ; dp
+  [2a] pbr,pc+1   ; io [2]
+  [3 ] pbr,pc+1   ; io
+  [4 ] 0,d+dp+x   ; aal
+  [5 ] 0,d+dp+x+1 ; aah
+  [6 ] dbr,aa     ; data low
+  [6a] dbr,aa+1   ; data high [1]
+*/
+
 void g65816_op_sta_idpxb(void) {
-g65816_prefetch(1);
-g65816_getiaddr(MEMMODE_IDPX);
-  g65816_sta_data_b();
+  gx816->op.dp = gx816->read_operand(1);                                          //1,2 [op fetch]
+  gx816->op_cond(2);                                                              //2a [dl!=0]
+  snes_time->add_cpu_icycles(1);                                                  //3 [i/o]
+  gx816->op.aa.p.l = gx816->op_read(OPMODE_DP, gx816->op.dp + gx816->regs.x);     //4 [aal]
+  gx816->op.aa.p.h = gx816->op_read(OPMODE_DP, gx816->op.dp + gx816->regs.x + 1); //5 [aah]
+  gx816->op_write(OPMODE_DBR, gx816->op.aa.w, gx816->regs.a.b);                   //6 [write]
+
   g65816_incpc(2);
-  snes_time->add_cpu_pcycles(2);
-  snes_time->add_cpu_mcycles(2, base_addr);
-  snes_time->add_cpu_mcycles(1, dest_addr);
-  snes_time->add_cpu_icycles(1, TIMING_CONDITION2);
 }
 
 void g65816_op_sta_idpxw(void) {
-g65816_prefetch(1);
-g65816_getiaddr(MEMMODE_IDPX);
-  g65816_sta_data_w();
+  gx816->op.dp = gx816->read_operand(1);                                          //1,2 [op fetch]
+  gx816->op_cond(2);                                                              //2a [dl!=0]
+  snes_time->add_cpu_icycles(1);                                                  //3 [i/o]
+  gx816->op.aa.p.l = gx816->op_read(OPMODE_DP, gx816->op.dp + gx816->regs.x);     //4 [aal]
+  gx816->op.aa.p.h = gx816->op_read(OPMODE_DP, gx816->op.dp + gx816->regs.x + 1); //5 [aah]
+  gx816->op_write(OPMODE_DBR, gx816->op.aa.w,     gx816->regs.a.p.l);             //6 [write low]
+  gx816->op_write(OPMODE_DBR, gx816->op.aa.w + 1, gx816->regs.a.p.h);             //6 [write high]
+
   g65816_incpc(2);
-  snes_time->add_cpu_pcycles(2);
-  snes_time->add_cpu_mcycles(2, base_addr);
-  snes_time->add_cpu_mcycles(2, dest_addr);
-  snes_time->add_cpu_icycles(1, TIMING_CONDITION2);
 }
 
+/************************
+ *** 0x91: sta (dp),y ***
+ ************************
+cycles:
+  [1 ] pbr,pc         ; opcode
+  [2 ] pbr,pc+1       ; dp
+  [2a] pbr,pc+1       ; io [2]
+  [3 ] 0,d+dp         ; aal
+  [4 ] 0,d+dp+1       ; aah
+  [4a] dbr,aah,aal+yl ; io [4]
+  [5 ] dbr,aa+y       ; data low
+  [5a] dbr,aa+y+1     ; data high [1]
+*/
+
 void g65816_op_sta_idpyb(void) {
-g65816_prefetch(1);
-g65816_getiaddr(MEMMODE_IDPY);
-  g65816_sta_data_b();
+  gx816->op.dp = gx816->read_operand(1);                                        //1,2 [op fetch]
+  gx816->op_cond(2);                                                            //2a [dl!=0]
+  gx816->op.aa.p.l = gx816->op_read(OPMODE_DP, gx816->op.dp);                   //3 [aal]
+  gx816->op.aa.p.h = gx816->op_read(OPMODE_DP, gx816->op.dp + 1);               //4 [aah]
+  snes_time->add_cpu_icycles(1);                                                //4a [write i/o]
+  gx816->op_write(OPMODE_DBR, gx816->op.aa.w + gx816->regs.y, gx816->regs.a.b); //5 [write]
+
   g65816_incpc(2);
-  snes_time->add_cpu_pcycles(2);
-  snes_time->add_cpu_mcycles(2, base_addr);
-  snes_time->add_cpu_mcycles(1, dest_addr);
-  snes_time->add_cpu_icycles(0, TIMING_CONDITION2 | TIMING_CONDITION4);
 }
 
 void g65816_op_sta_idpyw(void) {
-g65816_prefetch(1);
-g65816_getiaddr(MEMMODE_IDPY);
-  g65816_sta_data_w();
+  gx816->op.dp = gx816->read_operand(1);                                              //1,2 [op fetch]
+  gx816->op_cond(2);                                                                  //2a [dl!=0]
+  gx816->op.aa.p.l = gx816->op_read(OPMODE_DP, gx816->op.dp);                         //3 [aal]
+  gx816->op.aa.p.h = gx816->op_read(OPMODE_DP, gx816->op.dp + 1);                     //4 [aah]
+  snes_time->add_cpu_icycles(1);                                                      //4a [write i/o]
+  gx816->op_write(OPMODE_DBR, gx816->op.aa.w + gx816->regs.y,     gx816->regs.a.p.l); //5 [write low]
+  gx816->op_write(OPMODE_DBR, gx816->op.aa.w + gx816->regs.y + 1, gx816->regs.a.p.h); //5a [write high]
+
   g65816_incpc(2);
-  snes_time->add_cpu_pcycles(2);
-  snes_time->add_cpu_mcycles(2, base_addr);
-  snes_time->add_cpu_mcycles(2, dest_addr);
-  snes_time->add_cpu_icycles(0, TIMING_CONDITION2 | TIMING_CONDITION4);
 }
 
+/************************
+ *** 0x97: sta [dp],y ***
+ ************************
+cycles:
+  [1 ] pbr,pc     ; opcode
+  [2 ] pbr,pc+1   ; dp
+  [2a] pbr,pc+1   ; io [2]
+  [3 ] 0,d+dp     ; aal
+  [4 ] 0,d+dp+1   ; aah
+  [5 ] 0,d+dp+2   ; aab
+  [6 ] aab,aa+y   ; data low
+  [6a] aab,aa+y+1 ; data high [1]
+*/
+
 void g65816_op_sta_ildpyb(void) {
-g65816_prefetch(1);
-g65816_getiaddr(MEMMODE_ILDPY);
-  g65816_sta_data_b();
+  gx816->op.dp = gx816->read_operand(1);                                         //1,2 [op fetch]
+  gx816->op_cond(2);                                                             //2a [dl!=0]
+  gx816->op.aa.p.l = gx816->op_read(OPMODE_DP, gx816->op.dp);                    //3 [aal]
+  gx816->op.aa.p.h = gx816->op_read(OPMODE_DP, gx816->op.dp + 1);                //4 [aah]
+  gx816->op.aa.p.b = gx816->op_read(OPMODE_DP, gx816->op.dp + 2);                //5 [aab]
+  gx816->op_write(OPMODE_LONG, gx816->op.aa.l + gx816->regs.y, gx816->regs.a.b); //6 [write]
+
   g65816_incpc(2);
-  snes_time->add_cpu_pcycles(2);
-  snes_time->add_cpu_mcycles(3, base_addr);
-  snes_time->add_cpu_mcycles(1, dest_addr);
-  snes_time->add_cpu_icycles(0, TIMING_CONDITION2);
 }
 
 void g65816_op_sta_ildpyw(void) {
-g65816_prefetch(1);
-g65816_getiaddr(MEMMODE_ILDPY);
-  g65816_sta_data_w();
+  gx816->op.dp = gx816->read_operand(1);                                               //1,2 [op fetch]
+  gx816->op_cond(2);                                                                   //2a [dl!=0]
+  gx816->op.aa.p.l  = gx816->op_read(OPMODE_DP, gx816->op.dp);                         //3 [aal]
+  gx816->op.aa.p.h  = gx816->op_read(OPMODE_DP, gx816->op.dp + 1);                     //4 [aah]
+  gx816->op.aa.p.b  = gx816->op_read(OPMODE_DP, gx816->op.dp + 2);                     //5 [aab]
+  gx816->op_write(OPMODE_LONG, gx816->op.aa.l + gx816->regs.y,     gx816->regs.a.p.l); //6 [write low]
+  gx816->op_write(OPMODE_LONG, gx816->op.aa.l + gx816->regs.y + 1, gx816->regs.a.p.h); //6a [write high]
+
   g65816_incpc(2);
-  snes_time->add_cpu_pcycles(2);
-  snes_time->add_cpu_mcycles(3, base_addr);
-  snes_time->add_cpu_mcycles(2, dest_addr);
-  snes_time->add_cpu_icycles(0, TIMING_CONDITION2);
 }
 
+/**********************
+ *** 0x83: sta sr,s ***
+ **********************
+cycles:
+  [1 ] pbr,pc   ; opcode
+  [2 ] pbr,pc+1 ; sp
+  [3 ] pbr,pc+1 ; io
+  [4 ] 0,s+sp   ; data low
+  [4a] 0,s+sp+1 ; data high [1]
+*/
+
 void g65816_op_sta_srb(void) {
-g65816_prefetch(1);
-g65816_getaddr(MEMMODE_SR);
-  g65816_sta_data_b();
+  gx816->op.sp = gx816->read_operand(1);                     //1,2 [op fetch]
+  snes_time->add_cpu_icycles(1);                             //3 [i/o]
+  gx816->op_write(OPMODE_SP, gx816->op.sp, gx816->regs.a.b); //4 [write]
+
   g65816_incpc(2);
-  snes_time->add_cpu_pcycles(2);
-  snes_time->add_cpu_scycles(1);
-  snes_time->add_cpu_icycles(1);
 }
 
 void g65816_op_sta_srw(void) {
-g65816_prefetch(1);
-g65816_getaddr(MEMMODE_SR);
-  g65816_sta_data_w();
+  gx816->op.sp = gx816->read_operand(1);                           //1,2 [op fetch]
+  snes_time->add_cpu_icycles(1);                                   //3 [i/o]
+  gx816->op_write(OPMODE_SP, gx816->op.sp,     gx816->regs.a.p.l); //4 [write low]
+  gx816->op_write(OPMODE_SP, gx816->op.sp + 1, gx816->regs.a.p.h); //4a [write high]
+
   g65816_incpc(2);
-  snes_time->add_cpu_pcycles(2);
-  snes_time->add_cpu_scycles(2);
-  snes_time->add_cpu_icycles(1);
 }
 
+/**************************
+ *** 0x93: sta (sr,s),y ***
+ **************************
+cycles:
+  [1 ] pbr,pc     ; opcode
+  [2 ] pbr,pc+1   ; sp
+  [3 ] pbr,pc+1   ; io
+  [4 ] 0,s+sp     ; aal
+  [5 ] 0,s+sp+1   ; aah
+  [6 ] 0,s+sp+1   ; io
+  [7 ] dbr,aa+y   ; data low
+  [7a] dbr,aa+y+1 ; data high [1]
+*/
+
 void g65816_op_sta_isryb(void) {
-g65816_prefetch(1);
-g65816_getaddr(MEMMODE_ISRY);
-  g65816_sta_data_b();
+  gx816->op.sp = gx816->read_operand(1);                                        //1,2 [op fetch]
+  snes_time->add_cpu_icycles(1);                                                //3 [i/o]
+  gx816->op.aa.p.l = gx816->op_read(OPMODE_SP, gx816->op.sp);                   //4 [aal]
+  gx816->op.aa.p.h = gx816->op_read(OPMODE_SP, gx816->op.sp + 1);               //5 [aah]
+  snes_time->add_cpu_icycles(1);                                                //6 [i/o]
+  gx816->op_write(OPMODE_DBR, gx816->op.aa.w + gx816->regs.y, gx816->regs.a.b); //7 [write]
+
   g65816_incpc(2);
-  snes_time->add_cpu_pcycles(2);
-  snes_time->add_cpu_scycles(2);
-  snes_time->add_cpu_mcycles(1, dest_addr);
-  snes_time->add_cpu_icycles(2);
 }
 
 void g65816_op_sta_isryw(void) {
-g65816_prefetch(1);
-g65816_getaddr(MEMMODE_ISRY);
-  g65816_sta_data_w();
+  gx816->op.sp = gx816->read_operand(1);                                              //1,2 [op fetch]
+  snes_time->add_cpu_icycles(1);                                                      //3 [i/o]
+  gx816->op.aa.p.l = gx816->op_read(OPMODE_SP, gx816->op.sp);                         //4 [aal]
+  gx816->op.aa.p.h = gx816->op_read(OPMODE_SP, gx816->op.sp + 1);                     //5 [aah]
+  snes_time->add_cpu_icycles(1);                                                      //6 [i/o]
+  gx816->op_write(OPMODE_DBR, gx816->op.aa.w + gx816->regs.y,     gx816->regs.a.p.l); //7 [write low]
+  gx816->op_write(OPMODE_DBR, gx816->op.aa.w + gx816->regs.y + 1, gx816->regs.a.p.h); //7a [write high]
+
   g65816_incpc(2);
-  snes_time->add_cpu_pcycles(2);
-  snes_time->add_cpu_scycles(2);
-  snes_time->add_cpu_mcycles(2, dest_addr);
-  snes_time->add_cpu_icycles(2);
 }

@@ -1,14 +1,18 @@
 #include "../base.h"
 #include "../timing/timing.h"
 #include "../cpu/g65816.h"
-extern g65816 *gx816;
-extern snes_timer *snes_time;
-extern videostate render;
+#include "../bridge/bridge.h"
 
-ppustate ppu;
+extern g65816      *gx816;
+extern snes_timer  *snes_time;
+extern videostate   render;
+extern debugstate   debugger;
+extern port_bridge *cpu_apu_bridge;
+ppustate            ppu;
 
 #include "ppu_cache.cpp"
 
+#include "ppu_spc.cpp"
 #include "ppu_dma.cpp"
 #include "ppu_screen.cpp"
 #include "ppu_vram.cpp"
@@ -27,21 +31,29 @@ ppustate ppu;
 #include "ppu.cpp"
 
 byte mmio_read(word addr) {
-static word counter = 0;
+  snes_time->update_timer();
+
+  if((snes_time->hscan_pos >= 274 || snes_time->vscan_pos >= (ppu.visible_scanlines + 1)) || ppu.display_disable == true) {
+    switch(addr) {
+    case 0x2139:return mmio_r2139();
+    case 0x213a:return mmio_r213a();
+    case 0x213b:return mmio_r213b();
+    }
+  }
+
   switch(addr) {
   case 0x2134:return mmio_r2134();
   case 0x2135:return mmio_r2135();
   case 0x2136:return mmio_r2136();
   case 0x2137:return mmio_r2137();
   case 0x2138:return mmio_r2138();
-  case 0x2139:return mmio_r2139();
-  case 0x213a:return mmio_r213a();
-  case 0x213b:return mmio_r213b();
   case 0x213c:return mmio_r213c();
   case 0x213d:return mmio_r213d();
   case 0x213e:return mmio_r213e();
   case 0x213f:return mmio_r213f();
+  }
 
+  switch(addr) {
   case 0x2140:case 0x2141:case 0x2142:case 0x2143:
   case 0x2144:case 0x2145:case 0x2146:case 0x2147:
   case 0x2148:case 0x2149:case 0x214a:case 0x214b:
@@ -58,13 +70,10 @@ static word counter = 0;
   case 0x2174:case 0x2175:case 0x2176:case 0x2177:
   case 0x2178:case 0x2179:case 0x217a:case 0x217b:
   case 0x217c:case 0x217d:case 0x217e:case 0x217f:
-    byte x;
-    x = rand() & 3;
-    if(x == 0)return gx816->regs.a.b;
-    if(x == 1)return gx816->regs.x;
-    if(x == 2)return gx816->regs.y;
-    if(x == 3) { counter++; return counter >> 1; }
+    return mmio_rspc((addr & 3));
     break;
+
+  case 0x2180:return mmio_r2180();
 
   case 0x21c2:return mmio_r21c2();
   case 0x21c3:return mmio_r21c3();
@@ -87,10 +96,28 @@ static word counter = 0;
 */
     break;
   }
+
+  if(addr >= 0x4300 && addr <= 0x437f) {
+    if((addr & 0xf) == 0x8)return mmio_r43x8((addr >> 4) & 7);
+    if((addr & 0xf) == 0x9)return mmio_r43x9((addr >> 4) & 7);
+    if((addr & 0xf) == 0xa)return mmio_r43xa((addr >> 4) & 7);
+    return ppu.mmio_mem_43xx[addr & 0x7f];
+  }
+
   return 0x00;
 }
 
 void mmio_write(word addr, byte value) {
+  snes_time->update_timer();
+
+  if((snes_time->hscan_pos >= 274 || snes_time->vscan_pos >= (ppu.visible_scanlines + 1)) || ppu.display_disable == true) {
+    switch(addr) {
+    case 0x2118:mmio_w2118(value);break;
+    case 0x2119:mmio_w2119(value);break;
+    case 0x2122:mmio_w2122(value);break;
+    }
+  }
+
   switch(addr) {
   case 0x2100:mmio_w2100(value);break;
   case 0x2101:mmio_w2101(value);break;
@@ -116,8 +143,6 @@ void mmio_write(word addr, byte value) {
   case 0x2115:mmio_w2115(value);break;
   case 0x2116:mmio_w2116(value);break;
   case 0x2117:mmio_w2117(value);break;
-  case 0x2118:mmio_w2118(value);break;
-  case 0x2119:mmio_w2119(value);break;
   case 0x211a:mmio_w211a(value);break;
   case 0x211b:mmio_w211b(value);break;
   case 0x211c:mmio_w211c(value);break;
@@ -126,7 +151,6 @@ void mmio_write(word addr, byte value) {
   case 0x211f:mmio_w211f(value);break;
   case 0x2120:mmio_w2120(value);break;
   case 0x2121:mmio_w2121(value);break;
-  case 0x2122:mmio_w2122(value);break;
   case 0x2123:mmio_w2123(value);break;
   case 0x2124:mmio_w2124(value);break;
   case 0x2125:mmio_w2125(value);break;
@@ -144,12 +168,23 @@ void mmio_write(word addr, byte value) {
   case 0x2131:mmio_w2131(value);break;
   case 0x2132:mmio_w2132(value);break;
   case 0x2133:mmio_w2133(value);break;
+  }
+
+  if(addr >= 0x2140 && addr <= 0x217f) {
+    mmio_wspc(addr & 3, value);
+  }
+
+  switch(addr) {
   case 0x2180:mmio_w2180(value);break;
   case 0x2181:mmio_w2181(value);break;
   case 0x2182:mmio_w2182(value);break;
   case 0x2183:mmio_w2183(value);break;
+  }
+
+  switch(addr) {
   case 0x4016:mmio_w4016(value);break;
   case 0x4200:mmio_w4200(value);break;
+  case 0x4201:mmio_w4201(value);break;
   case 0x4202:mmio_w4202(value);break;
   case 0x4203:mmio_w4203(value);break;
   case 0x4204:mmio_w4204(value);break;
@@ -165,34 +200,61 @@ void mmio_write(word addr, byte value) {
 
   case 0x4300:case 0x4310:case 0x4320:case 0x4330:
   case 0x4340:case 0x4350:case 0x4360:case 0x4370:
-    mmio_w43x0((addr >> 4) & 7, value);break;
+    mmio_w43x0((addr >> 4) & 7, value);
+    break;
 
   case 0x4301:case 0x4311:case 0x4321:case 0x4331:
   case 0x4341:case 0x4351:case 0x4361:case 0x4371:
-    mmio_w43x1((addr >> 4) & 7, value);break;
+    mmio_w43x1((addr >> 4) & 7, value);
+    break;
 
   case 0x4302:case 0x4312:case 0x4322:case 0x4332:
   case 0x4342:case 0x4352:case 0x4362:case 0x4372:
-    mmio_w43x2((addr >> 4) & 7, value);break;
+    mmio_w43x2((addr >> 4) & 7, value);
+    break;
 
   case 0x4303:case 0x4313:case 0x4323:case 0x4333:
   case 0x4343:case 0x4353:case 0x4363:case 0x4373:
-    mmio_w43x3((addr >> 4) & 7, value);break;
+    mmio_w43x3((addr >> 4) & 7, value);
+    break;
 
   case 0x4304:case 0x4314:case 0x4324:case 0x4334:
   case 0x4344:case 0x4354:case 0x4364:case 0x4374:
-    mmio_w43x4((addr >> 4) & 7, value);break;
+    mmio_w43x4((addr >> 4) & 7, value);
+    break;
 
   case 0x4305:case 0x4315:case 0x4325:case 0x4335:
   case 0x4345:case 0x4355:case 0x4365:case 0x4375:
-    mmio_w43x5((addr >> 4) & 7, value);break;
+    mmio_w43x5((addr >> 4) & 7, value);
+    break;
 
   case 0x4306:case 0x4316:case 0x4326:case 0x4336:
   case 0x4346:case 0x4356:case 0x4366:case 0x4376:
-    mmio_w43x6((addr >> 4) & 7, value);break;
+    mmio_w43x6((addr >> 4) & 7, value);
+    break;
 
   case 0x4307:case 0x4317:case 0x4327:case 0x4337:
   case 0x4347:case 0x4357:case 0x4367:case 0x4377:
-    mmio_w43x7((addr >> 4) & 7, value);break;
+    mmio_w43x7((addr >> 4) & 7, value);
+    break;
+
+  case 0x4308:case 0x4318:case 0x4328:case 0x4338:
+  case 0x4348:case 0x4358:case 0x4368:case 0x4378:
+    mmio_w43x8((addr >> 4) & 7, value);
+    break;
+
+  case 0x4309:case 0x4319:case 0x4329:case 0x4339:
+  case 0x4349:case 0x4359:case 0x4369:case 0x4379:
+    mmio_w43x9((addr >> 4) & 7, value);
+    break;
+
+  case 0x430a:case 0x431a:case 0x432a:case 0x433a:
+  case 0x434a:case 0x435a:case 0x436a:case 0x437a:
+    mmio_w43xa((addr >> 4) & 7, value);
+    break;
+  }
+
+  if(addr >= 0x4300 && addr <= 0x437f) {
+    ppu.mmio_mem_43xx[addr & 0x7f] = value;
   }
 }

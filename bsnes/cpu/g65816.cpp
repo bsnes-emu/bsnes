@@ -2,11 +2,11 @@
 #include "../timing/timing.h"
 #include "g65816.h"
 
-extern emustate emu_state;
-extern debugstate debugger;
-extern ppustate ppu;
+extern emustate    emu_state;
+extern debugstate  debugger;
+extern ppustate    ppu;
 extern snes_timer *snes_time;
-g65816 *gx816;
+g65816            *gx816;
 
 #include "g65816_ops.cpp"
 
@@ -31,12 +31,12 @@ int   i;
   if((fsize & 0x000fff) == 0x000200)header_offset = 512;
 
   fseek(fp, 0x7fdc + header_offset, SEEK_SET);
-  cksum = fgetc(fp) | fgetc(fp) << 8;
+  cksum  = fgetc(fp) | fgetc(fp) << 8;
   icksum = fgetc(fp) | fgetc(fp) << 8;
   if(cksum + icksum == 0xffff)map = MEMMAP_LOROM;
 
   fseek(fp, 0xffdc + header_offset, SEEK_SET);
-  cksum = fgetc(fp) | fgetc(fp) << 8;
+  cksum  = fgetc(fp) | fgetc(fp) << 8;
   icksum = fgetc(fp) | fgetc(fp) << 8;
   if(cksum + icksum == 0xffff)map = MEMMAP_HIROM;
 
@@ -65,7 +65,7 @@ int   i;
 
 //pbr is loaded with 00, and 16-bit pc is loaded with reset vector at 0xfffc
 //upon power on and at first reset
-  regs.pc   = mem_read(MEMMODE_LONG, MEMSIZE_WORD, 0x00fffc);
+  regs.pc = mem_read(MEMMODE_LONG, MEMSIZE_WORD, 0x00fffc);
 
   fclose(fp);
 
@@ -114,12 +114,13 @@ void g65816::PowerOn(byte first_time) {
   regs.e   = true;
   snes_time->master_cycles = 0;
   memory_speed             = MEMSPEED_SLOWROM;
-  toggle_memory_speed      = MEMSPEED_SLOWROM;
   wai_interrupt_occurred   = false;
 
   InitializeWRAM(0x00);
   PPUInit(first_time);
   UpdateDisplay();
+  snes_time->set_speed_map(MEMSPEED_SLOWROM);
+  cpu_state = CPUSTATE_RUN;
 }
 
 void g65816::Reset(void) {
@@ -133,73 +134,67 @@ void g65816::Reset(void) {
   regs.pc = mem_read(MEMMODE_LONG, MEMSIZE_WORD, 0x00fffc);
   snes_time->master_cycles = 0;
   memory_speed             = MEMSPEED_SLOWROM;
-  toggle_memory_speed      = MEMSPEED_SLOWROM;
   wai_interrupt_occurred   = false;
 
   PPUInit(0); //0 blocks reallocating memory for vram, cgram, etc.
   UpdateDisplay();
-
-  if(debug_get_state() == DEBUGMODE_WAIT)disas_g65816_op();
+  snes_time->set_speed_map(MEMSPEED_SLOWROM);
+  cpu_state = CPUSTATE_RUN;
 }
+
+/***********
+ *** IRQ ***
+ ***********
+cycles:
+  [1] pbr,pc ; io
+  [2] pbr,pc ; io
+  [3] 0,s    ; pbr
+  [4] 0,s-1  ; pch
+  [5] 0,s-2  ; pcl
+  [6] 0,s-3  ; p
+  [7] 0,va   ; aavl
+  [8] 0,va+1 ; aavh
+*/
 
 void g65816::InvokeIRQ(word addr) {
-  wai_interrupt_occurred = true;
-  snes_time->add_cpu_pcycles(1);
-  if(gx816->regs.e == true) {
-    snes_time->add_cpu_scycles(3);
-    g65816_stackwrite(MEMSIZE_WORD, gx816->regs.pc);
-    g65816_stackwrite(MEMSIZE_BYTE, gx816->regs.p);
-  } else {
-    snes_time->add_cpu_scycles(4);
-    g65816_stackwrite(MEMSIZE_LONG, gx816->regs.pc);
-    g65816_stackwrite(MEMSIZE_BYTE, gx816->regs.p);
-  }
-  snes_time->add_cpu_mcycles(2, addr);
-  snes_time->add_cpu_icycles(1);
-  gx816->regs.pc = gx816->mem_read(MEMMODE_NONE, MEMSIZE_WORD, addr);
-  gx816->regs.p |= PF_I;
+  snes_time->add_cpu_icycles(2);                           //1,2 [i/o]
+  gx816->stack_write(gx816->regs.pc >> 16);                //3 [write pbr]
+  gx816->stack_write(gx816->regs.pc >> 8);                 //4 [write pch]
+  gx816->stack_write(gx816->regs.pc);                      //5 [write pcl]
+  gx816->stack_write(gx816->regs.p);                       //6 [write p]
+  gx816->op.r.p.l = gx816->op_read(OPMODE_ADDR, addr);     //7 [read low]
+  gx816->op.r.p.h = gx816->op_read(OPMODE_ADDR, addr + 1); //8 [read high]
 
+  gx816->regs.pc = gx816->op.r.w;
+  gx816->regs.p |= PF_I;
+  wai_interrupt_occurred = true;
   snes_time->update_timer();
 }
 
-void g65816::Run(void) {
+void g65816::exec_op(void) {
 FILE *fp;
 byte  op;
-word  h;
 int   i;
 static ulong sram_save_tick = 0;
-  op = mem_read(MEMMODE_NONE, MEMSIZE_BYTE, gx816->regs.pc);
-  if(regs.e == true)g65816_optbl_e[op]();
-  else switch((regs.p & 0x30)) {
-  case 0x30:g65816_optbl_MX[op]();break;
-  case 0x20:g65816_optbl_Mx[op]();break;
-  case 0x10:g65816_optbl_mX[op]();break;
-  case 0x00:g65816_optbl_mx[op]();break;
-  }
-
-  h = snes_time->hscan_pos;
-  snes_time->update_timer();
-  if(snes_time->hscan_pos >= WRAM_REFRESH_DOT_POS && h < WRAM_REFRESH_DOT_POS) {
-    snes_time->add_cpu_cycles(40);
+  if(cpu_state == CPUSTATE_RUN || cpu_state == CPUSTATE_STP) {
+    op = mem_read(MEMMODE_NONE, MEMSIZE_BYTE, gx816->regs.pc);
+    if(regs.e == true)g65816_optbl_e[op]();
+    else switch((regs.p & 0x30)) {
+    case 0x30:g65816_optbl_MX[op]();break;
+    case 0x20:g65816_optbl_Mx[op]();break;
+    case 0x10:g65816_optbl_mX[op]();break;
+    case 0x00:g65816_optbl_mx[op]();break;
+    }
+    debugger.cpu_op_executed = true;
+    debugger.disas_cpu_op    = true;
+    snes_time->update_timer();
+  } else if(cpu_state == CPUSTATE_DMA) {
+    ppu_update_dma();
     snes_time->update_timer();
   }
+
+  snes_time->update_timer_events();
   ppu_update_scanline();
-
-  memory_speed = toggle_memory_speed;
-
-  if(debug_get_state() == DEBUGMODE_DISABLED)return;
-
-  for(i=0;i<16;i++) {
-    if(gx816->bp_list[i].flags & BP_EXEC) {
-      if(gx816->bp_list[i].offset == gx816->regs.pc) {
-        dprintf("* breakpoint %d hit -- exec access", i);
-        gx816->bp_list[i].hit_count++;
-        debug_set_state(DEBUGMODE_WAIT);
-        disas_g65816_op();
-        debugger.refresh_bp = true;
-      }
-    }
-  }
 
 //see if we need to backup sram to a file yet...
   if(sram_size != 0) {
@@ -211,20 +206,31 @@ static ulong sram_save_tick = 0;
       fclose(fp);
     }
   }
+
+  debug_test_bp(BPSRC_MEM, BP_EXEC, gx816->regs.pc, 0);
+}
+
+void g65816::Run(void) {
+  if(snes_time->bridge.apu_cycles >= snes_time->bridge.cpu_cycles) {
+    exec_op();
+  }
+  if(snes_time->bridge.cpu_cycles >= 65536 && snes_time->bridge.apu_cycles >= 65536) {
+    snes_time->bridge.cpu_cycles &= 65535;
+    snes_time->bridge.apu_cycles &= 65535;
+  }
 }
 
 g65816::g65816() {
+int   i;
   rom  = (byte*)malloc(0x600000);
   wram = (byte*)malloc(0x020000);
   sram = (byte*)malloc(0x0e0000);
-  for(int i=0;i<16;i++) {
-    bp_list[i].offset    = 0;
-    bp_list[i].flags     = BP_OFF;
-    bp_list[i].value     = 0;
-    bp_list[i].hit_count = 0;
-  }
   nmi_enabled = false;
   nmi_pin     = 0;
+
+  op.dp = op.sp = 0x00;
+  op.r.l  = 0x000000;
+  op.aa.l = 0x000000;
 }
 
 g65816::~g65816() {

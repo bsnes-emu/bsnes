@@ -11,17 +11,27 @@
 #define HDMAMODE_CONTINUOUS 1
 
 typedef struct {
+  bool  active;
   byte  transfer_mode;
-  byte  index_mode;
+  bool  indirect;
   bool  fixed_address;
-  byte  write_dir;
+  int   write_dir;
   byte  transfer_type;
-  word  dest_addr;
+  byte  dest_addr;
   ulong src_addr;
   word  transfer_size;
-  byte  indirect_bank_address;
+  byte  indirect_bank;
   byte  hdma_mode;
   word  hdma_indirect_pointer;
+
+//hdma specific
+  bool  first_line;
+  bool  repeat;
+  bool  completed;
+  byte  line_counter;
+  ulong address, iaddress;
+
+  word  r43x8;
 }dmachannel;
 
 dmachannel dma_channel[8];
@@ -31,25 +41,19 @@ dmachannel dma_channel[8];
   da-ifttt
 
   d: (dma only)
-     0=read from cpu mem, write to $21??
-     1=read from $21??, write to cpu mem
+     0=read from cpu mem, write to $21xx
+     1=read from $21xx, write to cpu mem
   a: (hdma only)
      0=absolute addressing
      1=indirect addressing
-  f: 1=fixed address, 0=inc/dec address
   i: 0=increment address, 1=decrement address
+  f: 1=fixed address, 0=inc/dec address
   t: transfer type
-     000: 1 reg  1 write  (01->2118 23->2118 45->2118 67->2118 89->2118)
-     001: 2 regs 1 write  (01->2118 23->2119 45->2118 67->2119 89->2118)
-     010: 1 reg  2 writes (01->2118 23->2118 45->2118 67->2118 89->2118)
-     011: 2 regs 2 writes (01->2118 23->2118 45->2119 67->2119 89->2118)
-     100: 4 regs 1 write  (01->2118 23->2119 45->211a 67->211b 89->2118)
-     101-111: unknown
 */
 void mmio_w43x0(byte c, byte value) {
   dma_channel[c].transfer_mode = (value & 0x80)?DMATRANSFER_MMIOTOCPU:DMATRANSFER_CPUTOMMIO;
-  dma_channel[c].index_mode    = (value & 0x40)?DMAINDEX_INDIRECT:DMAINDEX_ABSOLUTE;
-  dma_channel[c].write_dir     = (value & 0x10)?DMAWRITE_DEC:DMAWRITE_INC;
+  dma_channel[c].indirect      = (value & 0x40)?true:false;
+  dma_channel[c].write_dir     = (value & 0x10)?-1:1;
   dma_channel[c].fixed_address = (value & 0x08)?true:false;
   dma_channel[c].transfer_type = (value & 0x07);
 }
@@ -61,7 +65,7 @@ void mmio_w43x0(byte c, byte value) {
   b: $2100 | b = destination register - limited to $21xx regs only
 */
 void mmio_w43x1(byte c, byte value) {
-  dma_channel[c].dest_addr = 0x2100 | value;
+  dma_channel[c].dest_addr = value;
 }
 
 /*
@@ -96,390 +100,293 @@ void mmio_w43x6(byte c, byte value) {
   $43x7 : HDMA indirect bank address
 */
 void mmio_w43x7(byte c, byte value) {
-  dma_channel[c].indirect_bank_address = value;
+  dma_channel[c].indirect_bank = value;
 }
 
-void dma_cputommio(byte c, byte a) {
-byte x;
-  x = gx816->mem_read(MEMMODE_LONG, MEMSIZE_BYTE, dma_channel[c].src_addr);
-  mmio_write(dma_channel[c].dest_addr + a, x);
-  if(dma_channel[c].fixed_address == false) {
-    if(dma_channel[c].write_dir == DMAWRITE_INC)dma_channel[c].src_addr++;
-    if(dma_channel[c].write_dir == DMAWRITE_DEC)dma_channel[c].src_addr--;
-  }
-  dma_channel[c].transfer_size--;
+void dma_mmio_write(byte reg, byte value) {
+  mmio_write(0x2100 | reg, value);
 }
 
-void dma_mmiotocpu(byte c, byte a) {
+byte dma_mmio_read(byte reg) {
+  return mmio_read(0x2100 | reg);
+}
+
+word dma_cputommio(byte c, byte a) {
 byte x;
-  x = mmio_read(dma_channel[c].dest_addr + a);
-  gx816->mem_write(MEMMODE_LONG, MEMSIZE_BYTE, dma_channel[c].src_addr, x);
+  x = gx816->mem_read(MEMMODE_NONE, MEMSIZE_BYTE, dma_channel[c].src_addr);
+  dma_mmio_write(dma_channel[c].dest_addr + a, x);
   if(dma_channel[c].fixed_address == false) {
-    if(dma_channel[c].write_dir == DMAWRITE_INC)dma_channel[c].src_addr++;
-    if(dma_channel[c].write_dir == DMAWRITE_DEC)dma_channel[c].src_addr--;
+    dma_channel[c].src_addr = (dma_channel[c].src_addr & 0xff0000) | ((dma_channel[c].src_addr + dma_channel[c].write_dir) & 0xffff);
   }
-  dma_channel[c].transfer_size--;
+  snes_time->add_cpu_cycles(1, 8);
+  return --dma_channel[c].transfer_size;
+}
+
+word dma_mmiotocpu(byte c, byte a) {
+byte x;
+  x = dma_mmio_read(dma_channel[c].dest_addr + a);
+  gx816->mem_write(MEMMODE_NONE, MEMSIZE_BYTE, dma_channel[c].src_addr, x);
+  if(dma_channel[c].fixed_address == false) {
+    dma_channel[c].src_addr = (dma_channel[c].src_addr & 0xff0000) | ((dma_channel[c].src_addr + dma_channel[c].write_dir) & 0xffff);
+  }
+  snes_time->add_cpu_cycles(1, 8);
+  return --dma_channel[c].transfer_size;
 }
 
 void dma_transfer_type0(byte c) {
   if(dma_channel[c].transfer_mode == DMATRANSFER_CPUTOMMIO) {
-    while(1) {
-      dma_cputommio(c, 0); if(dma_channel[c].transfer_size == 0)break;
-    }
+    if(dma_cputommio(c, 0) == 0)return;
   } else if(dma_channel[c].transfer_mode == DMATRANSFER_MMIOTOCPU) {
-    while(1) {
-      dma_mmiotocpu(c, 0); if(dma_channel[c].transfer_size == 0)break;
-    }
+    if(dma_mmiotocpu(c, 0) == 0)return;
   }
 }
 
 void dma_transfer_type1(byte c) {
   if(dma_channel[c].transfer_mode == DMATRANSFER_CPUTOMMIO) {
-    while(1) {
-      dma_cputommio(c, 0); if(dma_channel[c].transfer_size == 0)break;
-      dma_cputommio(c, 1); if(dma_channel[c].transfer_size == 0)break;
-    }
+    if(dma_cputommio(c, 0) == 0)return;
+    if(dma_cputommio(c, 1) == 0)return;
   } else if(dma_channel[c].transfer_mode == DMATRANSFER_MMIOTOCPU) {
-    while(1) {
-      dma_mmiotocpu(c, 0); if(dma_channel[c].transfer_size == 0)break;
-      dma_mmiotocpu(c, 1); if(dma_channel[c].transfer_size == 0)break;
-    }
+    if(dma_mmiotocpu(c, 0) == 0)return;
+    if(dma_mmiotocpu(c, 1) == 0)return;
   }
 }
 
 void dma_transfer_type2(byte c) {
   if(dma_channel[c].transfer_mode == DMATRANSFER_CPUTOMMIO) {
-    while(1) {
-      dma_cputommio(c, 0); if(dma_channel[c].transfer_size == 0)break;
-    }
+    if(dma_cputommio(c, 0) == 0)return;
   } else if(dma_channel[c].transfer_mode == DMATRANSFER_MMIOTOCPU) {
-    while(1) {
-      dma_mmiotocpu(c, 0); if(dma_channel[c].transfer_size == 0)break;
-    }
+    if(dma_mmiotocpu(c, 0) == 0)return;
   }
 }
 
 void dma_transfer_type3(byte c) {
   if(dma_channel[c].transfer_mode == DMATRANSFER_CPUTOMMIO) {
-    while(1) {
-      dma_cputommio(c, 0); if(dma_channel[c].transfer_size == 0)break;
-      dma_cputommio(c, 0); if(dma_channel[c].transfer_size == 0)break;
-      dma_cputommio(c, 1); if(dma_channel[c].transfer_size == 0)break;
-      dma_cputommio(c, 1); if(dma_channel[c].transfer_size == 0)break;
-    }
+    if(dma_cputommio(c, 0) == 0)return;
+    if(dma_cputommio(c, 0) == 0)return;
+    if(dma_cputommio(c, 1) == 0)return;
+    if(dma_cputommio(c, 1) == 0)return;
   } else if(dma_channel[c].transfer_mode == DMATRANSFER_MMIOTOCPU) {
-    while(1) {
-      dma_mmiotocpu(c, 0); if(dma_channel[c].transfer_size == 0)break;
-      dma_mmiotocpu(c, 0); if(dma_channel[c].transfer_size == 0)break;
-      dma_mmiotocpu(c, 1); if(dma_channel[c].transfer_size == 0)break;
-      dma_mmiotocpu(c, 1); if(dma_channel[c].transfer_size == 0)break;
-    }
+    if(dma_mmiotocpu(c, 0) == 0)return;
+    if(dma_mmiotocpu(c, 0) == 0)return;
+    if(dma_mmiotocpu(c, 1) == 0)return;
+    if(dma_mmiotocpu(c, 1) == 0)return;
   }
 }
 
 void dma_transfer_type4(byte c) {
   if(dma_channel[c].transfer_mode == DMATRANSFER_CPUTOMMIO) {
-    while(1) {
-      dma_cputommio(c, 0); if(dma_channel[c].transfer_size == 0)break;
-      dma_cputommio(c, 1); if(dma_channel[c].transfer_size == 0)break;
-      dma_cputommio(c, 2); if(dma_channel[c].transfer_size == 0)break;
-      dma_cputommio(c, 3); if(dma_channel[c].transfer_size == 0)break;
-    }
+    if(dma_cputommio(c, 0) == 0)return;
+    if(dma_cputommio(c, 1) == 0)return;
+    if(dma_cputommio(c, 2) == 0)return;
+    if(dma_cputommio(c, 3) == 0)return;
   } else if(dma_channel[c].transfer_mode == DMATRANSFER_MMIOTOCPU) {
-    while(1) {
-      dma_mmiotocpu(c, 0); if(dma_channel[c].transfer_size == 0)break;
-      dma_mmiotocpu(c, 1); if(dma_channel[c].transfer_size == 0)break;
-      dma_mmiotocpu(c, 2); if(dma_channel[c].transfer_size == 0)break;
-      dma_mmiotocpu(c, 3); if(dma_channel[c].transfer_size == 0)break;
-    }
+    if(dma_mmiotocpu(c, 0) == 0)return;
+    if(dma_mmiotocpu(c, 1) == 0)return;
+    if(dma_mmiotocpu(c, 2) == 0)return;
+    if(dma_mmiotocpu(c, 3) == 0)return;
   }
+}
+
+void dma_transfer_type5(byte c) {
+  if(dma_channel[c].transfer_mode == DMATRANSFER_CPUTOMMIO) {
+    if(dma_cputommio(c, 0) == 0)return;
+    if(dma_cputommio(c, 1) == 0)return;
+    if(dma_cputommio(c, 0) == 0)return;
+    if(dma_cputommio(c, 1) == 0)return;
+  } else if(dma_channel[c].transfer_mode == DMATRANSFER_MMIOTOCPU) {
+    if(dma_mmiotocpu(c, 0) == 0)return;
+    if(dma_mmiotocpu(c, 1) == 0)return;
+    if(dma_mmiotocpu(c, 0) == 0)return;
+    if(dma_mmiotocpu(c, 1) == 0)return;
+  }
+}
+
+/*
+  This function is called consecutively until all DMA transfers are completed.
+  Rather than transfer all of the DMA data immediately, control is returned to
+  the main loop after each DMA transfer so that the APU, PPU, renderer, etc.
+  can keep in sync. Otherwise, a transfer of 65536 bytes could prevent the renderer
+  from drawing all scanlines, for example.
+  Each DMA channel must be completed incrementally. The entire transfer from channel 0
+  must complete before any data is transferred for channel 1, etc.
+*/
+void ppu_update_dma(void) {
+int i, z;
+  z = 0;
+  for(i=0;i<8;i++) {
+    if(dma_channel[i].active == false)continue;
+    switch(dma_channel[i].transfer_type) {
+    case 0:dma_transfer_type0(i);break;
+    case 1:dma_transfer_type1(i);break;
+    case 2:dma_transfer_type2(i);break;
+    case 3:dma_transfer_type3(i);break;
+    case 4:dma_transfer_type4(i);break;
+    case 5:dma_transfer_type5(i);break;
+    case 6:dma_transfer_type2(i);break; //6 is the same as 2
+    case 7:dma_transfer_type3(i);break; //7 is the same as 3
+    }
+    if(dma_channel[i].transfer_size == 0) {
+      dma_channel[i].active = false;
+    }
+    return;
+  }
+  gx816->cpu_state = CPUSTATE_RUN;
 }
 
 /*
   $420b : DMA  enable
   $420c : HDMA enable
 
-  each bit corresponds to the respecting DMA channel (7,6,5,4,3,2,1,0)
-  setting a bit in this register will perform the DMA transfer. multiple
-  transfers can be done at once. requires one cycle per byte transferred
-  hdma bits are sticky (they are not cleared automatically after write)
+  Each bit corresponds to the respecting DMA channel (7,6,5,4,3,2,1,0)
+  Setting a bit in this register will perform the DMA transfer. Multiple
+  transfers can be done at once. Requires one cycle per byte transferred.
 */
 void mmio_w420b(byte value) {
 int i;
+  ppu.active_hdma_channels &= ~value;
   for(i=0;i<8;i++) {
     if(value & (1 << i)) {
-      snes_time->add_cpu_cycles(dma_channel[i].transfer_size * 6);
-      if     (dma_channel[i].transfer_type == 0)dma_transfer_type0(i);
-      else if(dma_channel[i].transfer_type == 1)dma_transfer_type1(i);
-      else if(dma_channel[i].transfer_type == 2)dma_transfer_type2(i);
-      else if(dma_channel[i].transfer_type == 3)dma_transfer_type3(i);
-      else if(dma_channel[i].transfer_type == 4)dma_transfer_type4(i);
-      else dprintf("* mmio_w420b(): Unknown DMA transfer type: %d", dma_channel[i].transfer_type);
+      dma_channel[i].active = true;
+      gx816->cpu_state = CPUSTATE_DMA;
     }
   }
 }
 
 void mmio_w420c(byte value) {
-//don't actually enable hdma channels until the start of the next frame
-  ppu.toggle_active_hdma_channels = value;
+  ppu.active_hdma_channels = value;
 }
 
-byte hdma_read_absolute(byte c) {
-ulong x;
-  x = gx816->mem_read(MEMMODE_NONE, MEMSIZE_BYTE, dma_channel[c].src_addr + ppu.hdma_index_pointer[c]);
-  ppu.hdma_index_pointer[c]++;
-  return x;
-}
+byte hdma_transfer_lentbl[8] = { 1, 2, 2, 4, 4, 4, 2, 4 };
 
-byte hdma_read_indirect(byte c) {
-ulong x;
-  x = gx816->mem_read(MEMMODE_NONE, MEMSIZE_WORD, dma_channel[c].src_addr + ppu.hdma_index_pointer[c]);
-  x += dma_channel[c].hdma_indirect_pointer;
-  x = (dma_channel[c].indirect_bank_address << 16) | (x & 0xffff);
-  x = gx816->mem_read(MEMMODE_NONE, MEMSIZE_BYTE, x);
-  dma_channel[c].hdma_indirect_pointer++;
-  return x;
-}
-
-void hdma_transfer_type0_absolute(byte c) {
-  mmio_write(dma_channel[c].dest_addr,     hdma_read_absolute(c));
-}
-
-void hdma_transfer_type0_indirect(byte c) {
-  mmio_write(dma_channel[c].dest_addr,     hdma_read_indirect(c));
-  if(dma_channel[c].hdma_mode == HDMAMODE_NORMAL)dma_channel[c].hdma_indirect_pointer -= 1;
-}
-
-void hdma_transfer_type1_absolute(byte c) {
-  mmio_write(dma_channel[c].dest_addr,     hdma_read_absolute(c));
-  mmio_write(dma_channel[c].dest_addr + 1, hdma_read_absolute(c));
-}
-
-void hdma_transfer_type1_indirect(byte c) {
-  mmio_write(dma_channel[c].dest_addr,     hdma_read_indirect(c));
-  mmio_write(dma_channel[c].dest_addr + 1, hdma_read_indirect(c));
-  if(dma_channel[c].hdma_mode == HDMAMODE_NORMAL)dma_channel[c].hdma_indirect_pointer -= 2;
-}
-
-void hdma_transfer_type2_absolute(byte c) {
-  mmio_write(dma_channel[c].dest_addr,     hdma_read_absolute(c));
-  mmio_write(dma_channel[c].dest_addr,     hdma_read_absolute(c));
-}
-
-void hdma_transfer_type2_indirect(byte c) {
-  mmio_write(dma_channel[c].dest_addr,     hdma_read_indirect(c));
-  mmio_write(dma_channel[c].dest_addr,     hdma_read_indirect(c));
-  if(dma_channel[c].hdma_mode == HDMAMODE_NORMAL)dma_channel[c].hdma_indirect_pointer -= 2;
-}
-
-void hdma_transfer_type3_absolute(byte c) {
-  mmio_write(dma_channel[c].dest_addr,     hdma_read_absolute(c));
-  mmio_write(dma_channel[c].dest_addr,     hdma_read_absolute(c));
-  mmio_write(dma_channel[c].dest_addr + 1, hdma_read_absolute(c));
-  mmio_write(dma_channel[c].dest_addr + 1, hdma_read_absolute(c));
-}
-
-void hdma_transfer_type3_indirect(byte c) {
-  mmio_write(dma_channel[c].dest_addr,     hdma_read_indirect(c));
-  mmio_write(dma_channel[c].dest_addr,     hdma_read_indirect(c));
-  mmio_write(dma_channel[c].dest_addr + 1, hdma_read_indirect(c));
-  mmio_write(dma_channel[c].dest_addr + 1, hdma_read_indirect(c));
-  if(dma_channel[c].hdma_mode == HDMAMODE_NORMAL)dma_channel[c].hdma_indirect_pointer -= 4;
-}
-
-void hdma_transfer_type4_absolute(byte c) {
-  mmio_write(dma_channel[c].dest_addr,     hdma_read_absolute(c));
-  mmio_write(dma_channel[c].dest_addr + 1, hdma_read_absolute(c));
-  mmio_write(dma_channel[c].dest_addr + 2, hdma_read_absolute(c));
-  mmio_write(dma_channel[c].dest_addr + 3, hdma_read_absolute(c));
-}
-
-void hdma_transfer_type4_indirect(byte c) {
-  mmio_write(dma_channel[c].dest_addr,     hdma_read_indirect(c));
-  mmio_write(dma_channel[c].dest_addr + 1, hdma_read_indirect(c));
-  mmio_write(dma_channel[c].dest_addr + 2, hdma_read_indirect(c));
-  mmio_write(dma_channel[c].dest_addr + 3, hdma_read_indirect(c));
-  if(dma_channel[c].hdma_mode == HDMAMODE_NORMAL)dma_channel[c].hdma_indirect_pointer -= 4;
-}
-
-byte hdma_transfer_type_size_table[8] = { 1, 2, 2, 4, 4, 0, 0, 0 };
-
-void HDMAFirstWrite(byte c) {
-  if(dma_channel[c].hdma_mode == HDMAMODE_NORMAL     && ppu.hdma_scanlines_remaining[c] == 0x00) {
-    return;
-  }
-  if(dma_channel[c].hdma_mode == HDMAMODE_CONTINUOUS && ppu.hdma_scanlines_remaining[c] == 0x80) {
-    return;
-  }
-
-  if(dma_channel[c].index_mode == DMAINDEX_ABSOLUTE) {
-    if     (dma_channel[c].transfer_type == 0)hdma_transfer_type0_absolute(c);
-    else if(dma_channel[c].transfer_type == 1)hdma_transfer_type1_absolute(c);
-    else if(dma_channel[c].transfer_type == 2)hdma_transfer_type2_absolute(c);
-    else if(dma_channel[c].transfer_type == 3)hdma_transfer_type3_absolute(c);
-    else if(dma_channel[c].transfer_type == 4)hdma_transfer_type4_absolute(c);
-    else dprintf("* mmio_w420c(): Unknown HDMA transfer type: %d", dma_channel[c].transfer_type);
-  } else { //indirect
-    if     (dma_channel[c].transfer_type == 0)hdma_transfer_type0_indirect(c);
-    else if(dma_channel[c].transfer_type == 1)hdma_transfer_type1_indirect(c);
-    else if(dma_channel[c].transfer_type == 2)hdma_transfer_type2_indirect(c);
-    else if(dma_channel[c].transfer_type == 3)hdma_transfer_type3_indirect(c);
-    else if(dma_channel[c].transfer_type == 4)hdma_transfer_type4_indirect(c);
-    else dprintf("* mmio_w420c(): Unknown HDMA transfer type: %d", dma_channel[c].transfer_type);
+void hdma_write_byte(byte i, byte l, byte x) {
+  switch(dma_channel[i].transfer_type) {
+  case 0:
+    dma_mmio_write(dma_channel[i].dest_addr, x);
+    break;
+  case 1:
+    dma_mmio_write(dma_channel[i].dest_addr + l, x);
+    break;
+  case 2:
+    dma_mmio_write(dma_channel[i].dest_addr, x);
+    break;
+  case 3:
+    dma_mmio_write(dma_channel[i].dest_addr + (l >> 1), x);
+    break;
+  case 4:
+    dma_mmio_write(dma_channel[i].dest_addr + l, x);
+    break;
+  case 5:
+    dma_mmio_write(dma_channel[i].dest_addr + (l & 1), x);
+    break;
+  case 6:
+    dma_mmio_write(dma_channel[i].dest_addr, x);
+    break;
+  case 7:
+    dma_mmio_write(dma_channel[i].dest_addr + (l >> 1), x);
+    break;
   }
 }
 
-void UpdateHDMAAbsoluteNormal(byte c) {
-  if(ppu.hdma_scanlines_remaining[c] == 0x00) {
-    ppu.hdma_scanlines_remaining[c] = gx816->mem_read(MEMMODE_NONE, MEMSIZE_BYTE, dma_channel[c].src_addr + ppu.hdma_index_pointer[c]);
+void hdma_update(void) {
+int  i, l;
+byte x, channels_active = 0;
+  if(snes_time->vscan_pos > ppu.visible_scanlines)return;
+  for(i=0;i<8;i++) {
+    if(dma_channel[i].completed == true)continue;
+    snes_time->add_cpu_cycles(1, 8);
+    channels_active++;
+    if(dma_channel[i].line_counter == 0) {
+      dma_channel[i].line_counter = gx816->mem_read(MEMMODE_NONE, MEMSIZE_BYTE, dma_channel[i].address++);
+      dma_channel[i].r43x8 = dma_channel[i].address;
+      if(dma_channel[i].line_counter == 0) {
+        dma_channel[i].completed = true;
+        continue;
+      }
 
-    if(ppu.hdma_scanlines_remaining[c] == 0) {
-      ppu.hdma_completed[c] = true;
-      return;
-    }
-
-    dma_channel[c].hdma_indirect_pointer = 0;
-    if(ppu.hdma_scanlines_remaining[c] > 0x80) {
-      dma_channel[c].hdma_mode = HDMAMODE_CONTINUOUS;
-    } else {
-      dma_channel[c].hdma_mode = HDMAMODE_NORMAL;
-    }
-
-    ppu.hdma_index_pointer[c]++;
-    HDMAFirstWrite(c);
-  }
-
-  ppu.hdma_scanlines_remaining[c]--;
-}
-
-void UpdateHDMAAbsoluteContinuous(byte c) {
-  if(ppu.hdma_scanlines_remaining[c] == 0x80) {
-    ppu.hdma_scanlines_remaining[c] = gx816->mem_read(MEMMODE_NONE, MEMSIZE_BYTE, dma_channel[c].src_addr + ppu.hdma_index_pointer[c]);
-
-    if(ppu.hdma_scanlines_remaining[c] == 0) {
-      ppu.hdma_completed[c] = true;
-      return;
-    }
-
-    dma_channel[c].hdma_indirect_pointer = 0;
-    if(ppu.hdma_scanlines_remaining[c] > 0x80) {
-      dma_channel[c].hdma_mode = HDMAMODE_CONTINUOUS;
-    } else {
-      dma_channel[c].hdma_mode = HDMAMODE_NORMAL;
-    }
-
-    ppu.hdma_index_pointer[c]++;
-    HDMAFirstWrite(c);
-    ppu.hdma_scanlines_remaining[c]--;
-  } else {
-    if     (dma_channel[c].transfer_type == 0)hdma_transfer_type0_absolute(c);
-    else if(dma_channel[c].transfer_type == 1)hdma_transfer_type1_absolute(c);
-    else if(dma_channel[c].transfer_type == 2)hdma_transfer_type2_absolute(c);
-    else if(dma_channel[c].transfer_type == 3)hdma_transfer_type3_absolute(c);
-    else if(dma_channel[c].transfer_type == 4)hdma_transfer_type4_absolute(c);
-    else dprintf("* mmio_w420c(): Unknown HDMA transfer type: %d", dma_channel[c].transfer_type);
-
-    ppu.hdma_scanlines_remaining[c]--;
-  }
-}
-
-void UpdateHDMAIndirectNormal(byte c) {
-  if(ppu.hdma_scanlines_remaining[c] == 0x00) {
-    ppu.hdma_index_pointer[c] += 2;
-    ppu.hdma_scanlines_remaining[c] = gx816->mem_read(MEMMODE_NONE, MEMSIZE_BYTE, dma_channel[c].src_addr + ppu.hdma_index_pointer[c]);
-
-    if(ppu.hdma_scanlines_remaining[c] == 0) {
-      ppu.hdma_completed[c] = true;
-      return;
-    }
-
-    dma_channel[c].hdma_indirect_pointer = 0;
-    if(ppu.hdma_scanlines_remaining[c] > 0x80) {
-      dma_channel[c].hdma_mode = HDMAMODE_CONTINUOUS;
-    } else {
-      dma_channel[c].hdma_mode = HDMAMODE_NORMAL;
-    }
-
-    ppu.hdma_index_pointer[c]++;
-    HDMAFirstWrite(c);
-  }
-
-  ppu.hdma_scanlines_remaining[c]--;
-}
-
-void UpdateHDMAIndirectContinuous(byte c) {
-  if(ppu.hdma_scanlines_remaining[c] == 0x80) {
-    ppu.hdma_index_pointer[c] += 2;
-    ppu.hdma_scanlines_remaining[c] = gx816->mem_read(MEMMODE_NONE, MEMSIZE_BYTE, dma_channel[c].src_addr + ppu.hdma_index_pointer[c]);
-
-    if(ppu.hdma_scanlines_remaining[c] == 0) {
-      ppu.hdma_completed[c] = true;
-      return;
-    }
-
-    dma_channel[c].hdma_indirect_pointer = 0;
-    if(ppu.hdma_scanlines_remaining[c] > 0x80) {
-      dma_channel[c].hdma_mode = HDMAMODE_CONTINUOUS;
-    } else {
-      dma_channel[c].hdma_mode = HDMAMODE_NORMAL;
-    }
-    ppu.hdma_index_pointer[c]++;
-    HDMAFirstWrite(c);
-    ppu.hdma_scanlines_remaining[c]--;
-  } else {
-    if     (dma_channel[c].transfer_type == 0)hdma_transfer_type0_indirect(c);
-    else if(dma_channel[c].transfer_type == 1)hdma_transfer_type1_indirect(c);
-    else if(dma_channel[c].transfer_type == 2)hdma_transfer_type2_indirect(c);
-    else if(dma_channel[c].transfer_type == 3)hdma_transfer_type3_indirect(c);
-    else if(dma_channel[c].transfer_type == 4)hdma_transfer_type4_indirect(c);
-    else dprintf("* mmio_w420c(): Unknown HDMA transfer type: %d", dma_channel[c].transfer_type);
-
-    ppu.hdma_scanlines_remaining[c]--;
-  }
-}
-
-void UpdateHDMA(void) {
-int c;
-  for(c=0;c<8;c++) {
-    if(ppu.active_hdma_channels & (1 << c)) {
-      if(ppu.vline_pos == 0)continue;
-      if(ppu.vline_pos == 1) {
-        ppu.hdma_completed[c]     = false;
-        ppu.hdma_index_pointer[c] = 0;
-        ppu.hdma_scanlines_remaining[c] = gx816->mem_read(MEMMODE_NONE, MEMSIZE_BYTE, dma_channel[c].src_addr);
-        ppu.hdma_index_pointer[c]++;
-
-        if(ppu.hdma_scanlines_remaining[c] == 0) {
-          ppu.hdma_completed[c] = true;
-          continue;
-        }
-
-        dma_channel[c].hdma_indirect_pointer = 0;
-        if(ppu.hdma_scanlines_remaining[c] > 0x80) {
-          dma_channel[c].hdma_mode = HDMAMODE_CONTINUOUS;
-        } else {
-          dma_channel[c].hdma_mode = HDMAMODE_NORMAL;
-        }
-
-        HDMAFirstWrite(c);
-        ppu.hdma_scanlines_remaining[c]--;
+      if(dma_channel[i].line_counter > 0x80) {
+        dma_channel[i].repeat = true;
+        dma_channel[i].line_counter -= 0x80;
       } else {
-        if(ppu.hdma_completed[c] == true)continue;
+        dma_channel[i].repeat = false;
+      }
 
-        if(dma_channel[c].index_mode == DMAINDEX_ABSOLUTE) {
-          if(dma_channel[c].hdma_mode == HDMAMODE_NORMAL) {
-            UpdateHDMAAbsoluteNormal(c);
-          } else {
-            UpdateHDMAAbsoluteContinuous(c);
-          }
-        } else { //indirect
-          if(dma_channel[c].hdma_mode == HDMAMODE_NORMAL) {
-            UpdateHDMAIndirectNormal(c);
-          } else {
-            UpdateHDMAIndirectContinuous(c);
-          }
-        }
+      dma_channel[i].first_line = true;
+      if(dma_channel[i].indirect == false) {
+        dma_channel[i].iaddress = dma_channel[i].address;
+      } else {
+        dma_channel[i].iaddress  = gx816->mem_read(MEMMODE_NONE, MEMSIZE_WORD, dma_channel[i].address);
+        dma_channel[i].iaddress |= (dma_channel[i].indirect_bank << 16);
+        dma_channel[i].address  += 2;
+        snes_time->add_cpu_cycles(1, 16);
       }
     }
+
+    dma_channel[i].line_counter--;
+    if(dma_channel[i].first_line == false && dma_channel[i].repeat == false)continue;
+    dma_channel[i].first_line = false;
+
+    if(dma_channel[i].indirect == false) {
+      dma_channel[i].iaddress = dma_channel[i].address;
+    }
+
+    for(l=0;l<hdma_transfer_lentbl[dma_channel[i].transfer_type];l++) {
+      x = gx816->mem_read(MEMMODE_NONE, MEMSIZE_BYTE, dma_channel[i].iaddress++);
+      if(dma_channel[i].indirect == false) {
+        dma_channel[i].address++;
+      }
+      hdma_write_byte(i, l, x);
+      snes_time->add_cpu_cycles(1, 8);
+    }
   }
+  if(channels_active != 0) {
+    snes_time->add_cpu_cycles(1, 18);
+  }
+}
+
+void hdma_initialize(void) {
+int i, active_channels = 0;
+  for(i=0;i<8;i++) {
+    if((ppu.active_hdma_channels & (1 << i)) == 0) {
+      dma_channel[i].completed = true;
+      continue;
+    }
+    active_channels++;
+    dma_channel[i].first_line   = true;
+    dma_channel[i].repeat       = false;
+    dma_channel[i].line_counter = 0;
+    dma_channel[i].address      = dma_channel[i].src_addr;
+    dma_channel[i].completed    = false;
+    if(dma_channel[i].indirect == false) {
+      snes_time->add_cpu_cycles(1, 8);
+    } else {
+      snes_time->add_cpu_cycles(1, 24);
+    }
+  }
+  if(active_channels != 0) {
+    snes_time->add_cpu_cycles(1, 18);
+  }
+}
+
+byte mmio_r43x8(byte c) {
+  return (dma_channel[c].r43x8);
+}
+
+byte mmio_r43x9(byte c) {
+  return (dma_channel[c].r43x8 >> 8);
+}
+
+byte mmio_r43xa(byte c) {
+  return (dma_channel[c].line_counter + 1);
+}
+
+void mmio_w43x8(byte c, byte x) {
+  dma_channel[c].address = (dma_channel[c].address & 0xff00) | x;
+}
+
+void mmio_w43x9(byte c, byte x) {
+  dma_channel[c].address = (dma_channel[c].address & 0x00ff) | (x << 8);
+}
+
+void mmio_w43xa(byte c, byte x) {
+  dma_channel[c].line_counter = x;
 }

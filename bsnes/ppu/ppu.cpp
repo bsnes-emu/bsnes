@@ -3,206 +3,129 @@
 
 #include "ppu_render.cpp"
 
-/**********************
- *** priority table ***
- *********************************
- *** p = $2105 bit 3           ***
- *** o = tile priority bit     ***
- *** s = sprite priority (0-3) ***
- *********************************
- *** p = 0      : p = 1        ***
- *** bg4(o = 0) : bg4(o = 0)   ***
- *** bg3(o = 0) : bg3(o = 0)   ***
- *** oam(s = 0) : oam(s = 0)   ***
- *** bg4(o = 1) : bg4(o = 1)   ***
- *** bg3(o = 1) : oam(s = 1)   ***
- *** oam(s = 1) : bg2(o = 0)   ***
- *** bg2(o = 0) : bg1(o = 0)   ***
- *** bg1(o = 0) : oam(s = 2)   ***
- *** oam(s = 2) : bg2(o = 1)   ***
- *** bg2(o = 1) : bg1(o = 1)   ***
- *** bg1(o = 1) : oam(s = 3)   ***
- *** oam(s = 3) : bg3(o = 1)   ***
- ********************************/
-
-#define debug_ppu_render_line_bg(bgnum, depth, bg, pri)                \
-  if(render.##bgnum##_enabled[DEBUG_BGENABLED_ALL] == true) {          \
-    if(render.##bgnum##_enabled[DEBUG_BGENABLED_PRI##pri##] == true) { \
-      ppu_render_line_bg(depth, bg, pri);                              \
-    }                                                                  \
-  }
-#define debug_ppu_render_line_oam(bgnum, pri)                          \
-  if(render.##bgnum##_enabled[DEBUG_BGENABLED_ALL] == true) {          \
-    if(render.##bgnum##_enabled[DEBUG_BGENABLED_PRI##pri##] == true) { \
-      ppu_render_line_oam(pri);                                        \
-    }                                                                  \
-  }
+byte layer_bg_lookup_mode0[12] = {
+  BG4, BG3, OAM, BG4, BG3, OAM, BG2, BG1, OAM, BG2, BG1, OAM
+};
 
 void ppu_render_line_mode0(void) {
-  if(ppu.bg_priority_mode == 0) {
-    debug_ppu_render_line_bg (bg4, COLORDEPTH_4, BG4, 0);
-    debug_ppu_render_line_bg (bg3, COLORDEPTH_4, BG3, 0);
-    debug_ppu_render_line_oam(oam,                    0);
-    debug_ppu_render_line_bg (bg4, COLORDEPTH_4, BG4, 1);
-    debug_ppu_render_line_bg (bg3, COLORDEPTH_4, BG3, 1);
-    debug_ppu_render_line_oam(oam,                    1);
-    debug_ppu_render_line_bg (bg2, COLORDEPTH_4, BG2, 0);
-    debug_ppu_render_line_bg (bg1, COLORDEPTH_4, BG1, 0);
-    debug_ppu_render_line_oam(oam,                    2);
-    debug_ppu_render_line_bg (bg2, COLORDEPTH_4, BG2, 1);
-    debug_ppu_render_line_bg (bg1, COLORDEPTH_4, BG1, 1);
-    debug_ppu_render_line_oam(oam,                    3);
-  } else {
-    debug_ppu_render_line_bg (bg4, COLORDEPTH_4, BG4, 0);
-    debug_ppu_render_line_bg (bg3, COLORDEPTH_4, BG3, 0);
-    debug_ppu_render_line_oam(oam,                    0);
-    debug_ppu_render_line_bg (bg4, COLORDEPTH_4, BG4, 1);
-    debug_ppu_render_line_oam(oam,                    1);
-    debug_ppu_render_line_bg (bg2, COLORDEPTH_4, BG2, 0);
-    debug_ppu_render_line_bg (bg1, COLORDEPTH_4, BG1, 0);
-    debug_ppu_render_line_oam(oam,                    2);
-    debug_ppu_render_line_bg (bg2, COLORDEPTH_4, BG2, 1);
-    debug_ppu_render_line_bg (bg1, COLORDEPTH_4, BG1, 1);
-    debug_ppu_render_line_oam(oam,                    3);
-    debug_ppu_render_line_bg (bg3, COLORDEPTH_4, BG3, 1);
-  }
+  ppu_render_line_bg (7, 10, COLORDEPTH_4, BG1);
+  ppu_render_line_bg (6,  9, COLORDEPTH_4, BG2);
+  ppu_render_line_bg (1,  4, COLORDEPTH_4, BG3);
+  ppu_render_line_bg (0,  3, COLORDEPTH_4, BG4);
+  ppu_render_line_oam(2,  5, 8, 11);
+  ppu_set_layer_pixels(12, layer_bg_lookup_mode0);
 }
+
+byte layer_bg_lookup_mode1_pri0[10] = {
+  BG3, OAM, BG3, OAM, BG2, BG1, OAM, BG2, BG1, OAM
+};
+
+byte layer_bg_lookup_mode1_pri1[10] = {
+  BG3, OAM, OAM, BG2, BG1, OAM, BG2, BG1, OAM, BG3
+};
 
 void ppu_render_line_mode1(void) {
-  if(ppu.bg_priority_mode == 0) {
-    debug_ppu_render_line_bg (bg3, COLORDEPTH_4,  BG3, 0);
-    debug_ppu_render_line_oam(oam,                     0);
-    debug_ppu_render_line_bg (bg3, COLORDEPTH_4,  BG3, 1);
-    debug_ppu_render_line_oam(oam,                     1);
-    debug_ppu_render_line_bg (bg2, COLORDEPTH_16, BG2, 0);
-    debug_ppu_render_line_bg (bg1, COLORDEPTH_16, BG1, 0);
-    debug_ppu_render_line_oam(oam,                     2);
-    debug_ppu_render_line_bg (bg2, COLORDEPTH_16, BG2, 1);
-    debug_ppu_render_line_bg (bg1, COLORDEPTH_16, BG1, 1);
-    debug_ppu_render_line_oam(oam,                     3);
-  } else {
-    debug_ppu_render_line_bg (bg3, COLORDEPTH_4,  BG3, 0);
-    debug_ppu_render_line_oam(oam,                     0);
-    debug_ppu_render_line_oam(oam,                     1);
-    debug_ppu_render_line_bg (bg2, COLORDEPTH_16, BG2, 0);
-    debug_ppu_render_line_bg (bg1, COLORDEPTH_16, BG1, 0)
-    debug_ppu_render_line_oam(oam,                     2);
-    debug_ppu_render_line_bg (bg2, COLORDEPTH_16, BG2, 1);
-    debug_ppu_render_line_bg (bg1, COLORDEPTH_16, BG1, 1)
-    debug_ppu_render_line_oam(oam,                     3);
-    debug_ppu_render_line_bg (bg3, COLORDEPTH_4,  BG3, 1);
+  switch(ppu.bg_priority_mode) {
+  case 0:
+    ppu_render_line_bg (5, 8, COLORDEPTH_16, BG1);
+    ppu_render_line_bg (4, 7, COLORDEPTH_16, BG2);
+    ppu_render_line_bg (0, 2, COLORDEPTH_4,  BG3);
+    ppu_render_line_oam(1, 3, 6, 9);
+    ppu_set_layer_pixels(10, layer_bg_lookup_mode1_pri0);
+    break;
+  case 1:
+    ppu_render_line_bg (4, 7, COLORDEPTH_16, BG1);
+    ppu_render_line_bg (3, 6, COLORDEPTH_16, BG2);
+    ppu_render_line_bg (0, 9, COLORDEPTH_4,  BG3);
+    ppu_render_line_oam(1, 2, 5, 8);
+    ppu_set_layer_pixels(10, layer_bg_lookup_mode1_pri1);
+    break;
   }
 }
+
+byte layer_bg_lookup_mode2[8] = {
+  OAM, OAM, BG2, BG1, OAM, BG2, BG1, OAM
+};
 
 void ppu_render_line_mode2(void) {
-  if(ppu.bg_priority_mode == 0) {
-    debug_ppu_render_line_oam(oam,                     0);
-    debug_ppu_render_line_oam(oam,                     1);
-    debug_ppu_render_line_bg (bg2, COLORDEPTH_16, BG2, 0);
-    debug_ppu_render_line_bg (bg1, COLORDEPTH_16, BG1, 0);
-    debug_ppu_render_line_oam(oam,                     2);
-    debug_ppu_render_line_bg (bg2, COLORDEPTH_16, BG2, 1);
-    debug_ppu_render_line_bg (bg1, COLORDEPTH_16, BG1, 1);
-    debug_ppu_render_line_oam(oam,                     3);
-  } else {
-    debug_ppu_render_line_oam(oam,                     0);
-    debug_ppu_render_line_oam(oam,                     1);
-    debug_ppu_render_line_bg (bg2, COLORDEPTH_16, BG2, 0);
-    debug_ppu_render_line_bg (bg1, COLORDEPTH_16, BG1, 0)
-    debug_ppu_render_line_oam(oam,                     2);
-    debug_ppu_render_line_bg (bg2, COLORDEPTH_16, BG2, 1);
-    debug_ppu_render_line_bg (bg1, COLORDEPTH_16, BG1, 1)
-    debug_ppu_render_line_oam(oam,                     3);
-  }
+  ppu_render_line_bg (3, 6, COLORDEPTH_16, BG1);
+  ppu_render_line_bg (2, 5, COLORDEPTH_16, BG2);
+  ppu_render_line_oam(0, 1, 4, 7);
+  ppu_set_layer_pixels(8, layer_bg_lookup_mode2);
 }
+
+byte layer_bg_lookup_mode3[8] = {
+  OAM, OAM, BG2, BG1, OAM, BG2, BG1, OAM
+};
 
 void ppu_render_line_mode3(void) {
-  if(ppu.bg_priority_mode == 0) {
-    debug_ppu_render_line_oam(oam,                     0);
-    debug_ppu_render_line_oam(oam,                     1);
-    debug_ppu_render_line_bg(bg2, COLORDEPTH_16,  BG2, 0);
-    debug_ppu_render_line_bg(bg1, COLORDEPTH_256, BG1, 0);
-    debug_ppu_render_line_oam(oam,                     2);
-    debug_ppu_render_line_bg(bg2, COLORDEPTH_16,  BG2, 1);
-    debug_ppu_render_line_bg(bg1, COLORDEPTH_256, BG1, 1);
-    debug_ppu_render_line_oam(oam,                     3);
-  } else {
-    debug_ppu_render_line_oam(oam,                     0);
-    debug_ppu_render_line_oam(oam,                     1);
-    debug_ppu_render_line_bg(bg2, COLORDEPTH_16,  BG2, 0);
-    debug_ppu_render_line_bg(bg1, COLORDEPTH_256, BG1, 0);
-    debug_ppu_render_line_oam(oam,                     2);
-    debug_ppu_render_line_bg(bg2, COLORDEPTH_16,  BG2, 1);
-    debug_ppu_render_line_bg(bg1, COLORDEPTH_256, BG1, 1);
-    debug_ppu_render_line_oam(oam,                     3);
-  }
+  ppu_render_line_bg (3, 6, COLORDEPTH_256, BG1);
+  ppu_render_line_bg (2, 5, COLORDEPTH_16,  BG2);
+  ppu_render_line_oam(0, 1, 4, 7);
+  ppu_set_layer_pixels(8, layer_bg_lookup_mode3);
 }
+
+byte layer_bg_lookup_mode4[8] = {
+  OAM, OAM, BG2, BG1, OAM, BG2, BG1, OAM
+};
 
 void ppu_render_line_mode4(void) {
-  if(ppu.bg_priority_mode == 0) {
-    debug_ppu_render_line_oam(oam,                     0);
-    debug_ppu_render_line_oam(oam,                     1);
-    debug_ppu_render_line_bg(bg2, COLORDEPTH_4,   BG2, 0);
-    debug_ppu_render_line_bg(bg1, COLORDEPTH_256, BG1, 0);
-    debug_ppu_render_line_oam(oam,                     2);
-    debug_ppu_render_line_bg(bg2, COLORDEPTH_4,   BG2, 1);
-    debug_ppu_render_line_bg(bg1, COLORDEPTH_256, BG1, 1);
-    debug_ppu_render_line_oam(oam,                     3);
-  } else {
-    debug_ppu_render_line_oam(oam,                     0);
-    debug_ppu_render_line_oam(oam,                     1);
-    debug_ppu_render_line_bg(bg2, COLORDEPTH_4,   BG2, 0);
-    debug_ppu_render_line_bg(bg1, COLORDEPTH_256, BG1, 0);
-    debug_ppu_render_line_oam(oam,                     2);
-    debug_ppu_render_line_bg(bg2, COLORDEPTH_4,   BG2, 1);
-    debug_ppu_render_line_bg(bg1, COLORDEPTH_256, BG1, 1);
-    debug_ppu_render_line_oam(oam,                     3);
-  }
+  ppu_render_line_bg (3, 6, COLORDEPTH_256, BG1);
+  ppu_render_line_bg (2, 5, COLORDEPTH_4,   BG2);
+  ppu_render_line_oam(0, 1, 4, 7);
+  ppu_set_layer_pixels(8, layer_bg_lookup_mode4);
 }
+
+byte layer_bg_lookup_mode5[8] = {
+  OAM, OAM, BG2, BG1, OAM, BG2, BG1, OAM
+};
 
 void ppu_render_line_mode5(void) {
-  debug_ppu_render_line_bg(bg2, COLORDEPTH_4,  BG2, 0);
-  debug_ppu_render_line_bg(bg1, COLORDEPTH_16, BG1, 0);
-  debug_ppu_render_line_bg(bg2, COLORDEPTH_4,  BG2, 0);
-  debug_ppu_render_line_bg(bg1, COLORDEPTH_16, BG1, 1);
+  ppu_render_line_bg (3, 6, COLORDEPTH_16, BG1);
+  ppu_render_line_bg (2, 5, COLORDEPTH_4,  BG2);
+  ppu_render_line_oam(0, 1, 4, 7);
+  ppu_set_layer_pixels(8, layer_bg_lookup_mode5);
 }
+
+byte layer_bg_lookup_mode6[6] = {
+  OAM, OAM, BG1, OAM, BG1, OAM
+};
 
 void ppu_render_line_mode6(void) {
-  debug_ppu_render_line_bg(bg1, COLORDEPTH_16, BG1, 0);
-  debug_ppu_render_line_bg(bg1, COLORDEPTH_16, BG1, 1);
+  ppu_render_line_bg (2, 4, COLORDEPTH_16, BG1);
+  ppu_render_line_oam(0, 1, 3, 5);
+  ppu_set_layer_pixels(8, layer_bg_lookup_mode6);
 }
 
+byte layer_bg_lookup_mode7[5] = {
+  OAM, BG1, OAM, OAM, OAM
+};
+
+byte layer_bg_lookup_mode7_extbg[6] = {
+  BG2, OAM, OAM, BG2, OAM, OAM
+};
+
 void ppu_render_line_mode7(void) {
-  if(ppu.bg_priority_mode == 0) {
-    debug_ppu_render_line_oam(oam, 0);
-    debug_ppu_render_line_oam(oam, 1);
-    ppu_render_line_m7();
-    debug_ppu_render_line_oam(oam, 2);
-    debug_ppu_render_line_oam(oam, 3);
+  if(ppu.mode7_extbg == false) {
+    ppu_render_line_m7 (1, 0, 0); //bg2 priorities are ignored
+    ppu_render_line_oam(0, 2, 3, 4);
+    ppu_set_layer_pixels(5, layer_bg_lookup_mode7);
   } else {
-    debug_ppu_render_line_oam(oam, 0);
-    debug_ppu_render_line_oam(oam, 1);
-    ppu_render_line_m7();
-    debug_ppu_render_line_oam(oam, 2);
-    debug_ppu_render_line_oam(oam, 3);
+    ppu_render_line_m7 (0, 0, 3); //bg1 priority is ignored
+    ppu_render_line_oam(1, 2, 4, 5);
+    ppu_set_layer_pixels(6, layer_bg_lookup_mode7_extbg);
   }
 }
 
 void ppu_render_scanline(void) {
 int x, y;
+  ppu.vline_pos = snes_time->vscan_pos;
   ppu.hirq_triggered = false;
-  ppu.vline_pos++;
-  if(ppu.vline_pos > 261)ppu.vline_pos = 0;
 
 //new screen initialize
   if(ppu.vline_pos == 0) {
+    hdma_initialize();
     ppu.virq_triggered = false;
-    ppu.active_hdma_channels = ppu.toggle_active_hdma_channels;
-    if(ppu.visible_scanlines != ppu.toggle_visible_scanlines) {
-      ppu.visible_scanlines = ppu.toggle_visible_scanlines;
-      video_setsnesmode();
-      video_setmode(false, 512, ppu.visible_scanlines * 2);
-    }
     gx816->nmi_pin = 1;
   }
 
@@ -215,7 +138,6 @@ int x, y;
     if(render.frame_count >= render.frame_skip) {
       render.frame_count = 0;
     }
-    ppu.interlace_frame ^= 1;
   }
 
 //automatic joypad read
@@ -223,20 +145,12 @@ int x, y;
     UpdateJoypad();
   }
 
-//nmi
-  if(ppu.vline_pos == (ppu.visible_scanlines + 8) && gx816->nmi_pin == 1) {
-    gx816->nmi_pin = 0;
-    if(gx816->nmi_enabled == true) {
-      gx816->InvokeIRQ(0xffea);
-    }
-  }
-
-  UpdateHDMA(); //found in ppu_dma.cpp
   y = ppu.vline_pos;
-  if(y < ppu.visible_scanlines && (render.frame_skip == 0 || render.frame_count == 0)) {
+  if(y > 0 && y < ppu.visible_scanlines && (render.frame_skip == 0 || render.frame_count == 0)) {
     if(ppu.display_disable == true) {
-      memset(ppu.screen + y * 512, 0, 1024);
+      memset(ppu.screen + (y << 1) * 512, 0, 2048);
     } else {
+      ppu_clear_layer_cache();
       ppu_clear_pixel_cache();
       switch(ppu.bg_mode) {
       case 0:ppu_render_line_mode0();break;
@@ -254,16 +168,25 @@ int x, y;
 }
 
 void ppu_update_scanline(void) {
+static bool hdma_triggered = false;
+word current_vscan_pos;
 //starting a new screen?
-  if(ppu.vline_pos > snes_time->vscan_pos) {
-    while(ppu.vline_pos != 0) {
-      ppu_render_scanline();
-    }
+  if(snes_time->vscan_wrapped == true) {
+    snes_time->vscan_wrapped = false;
   }
 
-  while(snes_time->vscan_pos > ppu.vline_pos) {
+  if(snes_time->hscan_wrapped == true) {
+    snes_time->hscan_wrapped = false;
+    hdma_triggered           = false;
     ppu_render_scanline();
   }
+
+  if(snes_time->hscan_pos >= 278 && hdma_triggered == false) {
+    hdma_update();
+    hdma_triggered = true;
+  }
+
+  if(gx816->cpu_state == CPUSTATE_STP)return;
 
   if(!(gx816->regs.p & PF_I)) {
     if(ppu.vcounter_enabled == true && ppu.hcounter_enabled == true) {
@@ -292,13 +215,17 @@ void ppu_update_scanline(void) {
 }
 
 byte oam_read(word addr) {
+byte r;
   addr &= 1023;
   if(addr >= 512) {
     addr &= 31;
-    return ppu.oam[addr + 512];
+    r = ppu.oam[addr + 512];
+    debug_test_bp(BPSRC_OAM, BP_READ, addr + 512, r);
   } else {
-    return ppu.oam[addr];
+    r = ppu.oam[addr];
+    debug_test_bp(BPSRC_OAM, BP_READ, addr, r);
   }
+  return r;
 }
 
 void oam_write(word addr, byte value) {
@@ -306,8 +233,10 @@ void oam_write(word addr, byte value) {
   if(addr >= 512) {
     addr &= 31;
     ppu.oam[addr + 512] = value;
+    debug_test_bp(BPSRC_OAM, BP_WRITE, addr + 512, value);
   } else {
     ppu.oam[addr] = value;
+    debug_test_bp(BPSRC_OAM, BP_WRITE, addr, value);
   }
 }
 
@@ -317,7 +246,7 @@ byte r, g, b;
 double m;
 word *ptr;
   if(first_time == 1) {
-    ppu.screen      = (word*)malloc(512 * 480 * 2);
+    ppu.screen      = (word*)malloc(512 * 478 * 2);
     ppu.vram        = (byte*)malloc(0x10000);
     ppu.cgram       = (byte*)malloc(512);
     ppu.oam         = (byte*)malloc(544);
@@ -349,32 +278,35 @@ word *ptr;
       }
     }
   }
-  ppu_clear_pixel_cache();
-  memset(ppu.screen, 0, 512 * 480 * 2);
+  ppu_clear_tiledata_cache();
+  memset(ppu.screen, 0, 512 * 478 * 2);
   memset(ppu.vram,   0, 0x10000);
   memset(ppu.cgram,  0, 512);
   memset(ppu.oam,    0, 544);
-  ppu.ppu_cycles               = 0;
-  ppu.ppu_prev_cycles          = 0;
-  ppu.display_disable          = true;
-  ppu.display_brightness       = 15;
-  ppu.visible_scanlines        = 224;
-  ppu.toggle_visible_scanlines = 224;
+  ppu.ppu_cycles         = 0;
+  ppu.ppu_prev_cycles    = 0;
+  ppu.display_disable    = true;
+  ppu.display_brightness = 15;
 
-  ppu.interlace        = false;
-  ppu.interlace_frame  = 0;
-  ppu.hline_pos        = 0;
-  ppu.vline_pos        = 261;
-  ppu.irq_triggered    = false;
-  ppu.virq_triggered   = false;
-  ppu.hirq_triggered   = false;
-  ppu.vram_write_pos   = 0;
-  ppu.cgram_write_pos  = 0;
-  ppu.wram_write_pos   = 0;
-  ppu.vram_inc_size    = 2;
-  ppu.vram_inc_reg     = 0;
-  ppu.oam_write_pos    = 0;
-  ppu.oam_tiledata_loc = 0;
+//ppu.interlace/ppu.interlace_frame initialized in timing/timing.cpp
+  ppu.overscan          = false;
+  ppu.visible_scanlines = 224;
+  ppu.sprite_halve      = false;
+  ppu.hline_pos         = 0;
+  ppu.vline_pos         = 0;
+  ppu.irq_triggered     = false;
+  ppu.virq_triggered    = false;
+  ppu.hirq_triggered    = false;
+  ppu.vram_write_pos    = 0;
+  ppu.vram_read_buffer  = 0;
+  ppu.vram_write_buffer = 0;
+  ppu.cgram_write_pos   = 0;
+  ppu.wram_write_pos    = 0;
+  ppu.vram_remap_mode   = 0;
+  ppu.vram_inc_size     = 2;
+  ppu.vram_inc_reg      = 0;
+  ppu.oam_write_pos     = 0;
+  ppu.oam_tiledata_loc  = 0;
 
   ppu.bg_enabled[OAM]              = false;
   ppu.ss_bg_enabled[OAM]           = false;
@@ -417,10 +349,7 @@ word *ptr;
   ppu.div_b               = 0;
   ppu.r_4214              = 0;
   ppu.r_4216              = 0;
-
-  ppu.smul_a              = 0;
-  ppu.smul_b              = 0;
-  ppu.smul_r              = 0;
+  ppu.r_2134              = 0;
 
   ppu.window1_left        = 0;
   ppu.window1_right       = 0;
@@ -444,14 +373,14 @@ word *ptr;
   ppu.color_g = 0;
   ppu.color_b = 0;
 
-  ppu.toggle_active_hdma_channels = 0;
-  ppu.active_hdma_channels        = 0;
+  ppu.active_hdma_channels = 0;
   for(i=0;i<8;i++) {
     memset(&dma_channel[i], 0, sizeof(dmachannel));
     ppu.hdma_completed[i]           = false;
     ppu.hdma_scanlines_remaining[i] = 0;
     ppu.hdma_index_pointer[i]       = 0;
   }
+  hdma_initialize();
 
   ppu.vcounter_enabled = false;
   ppu.hcounter_enabled = false;
@@ -471,6 +400,13 @@ word *ptr;
 
   ppu.m7hofs = ppu.m7vofs = 0x0000;
 
-  ppu.mode7_hflip = false;
-  ppu.mode7_vflip = false;
+  ppu.mode7_repeat = 0;
+  ppu.mode7_extbg  = false;
+  ppu.mode7_hflip  = false;
+  ppu.mode7_vflip  = false;
+
+  ppu.io4201 = 0xff;
+  ppu.counter_latched = false;
+
+  memset(ppu.mmio_mem_43xx, 0, 0x80);
 }

@@ -1,6 +1,7 @@
 #include "../base.h"
 #include "g65816.h"
-extern g65816 *gx816;
+extern g65816     *gx816;
+extern debugstate debugger;
 
 ulong _disas_relb(byte addr) {
   return gx816->regs.pc + (signed char)(addr + 2);
@@ -298,11 +299,14 @@ char *s = (char*)__disas_op_str;
 }
 
 void disas_g65816_op(void) {
-byte op  = gx816->mem_read(MEMMODE_NONE, MEMSIZE_BYTE, gx816->regs.pc,     MEMACCESS_DEBUGGER);
-byte op0 = gx816->mem_read(MEMMODE_NONE, MEMSIZE_BYTE, gx816->regs.pc + 1, MEMACCESS_DEBUGGER),
-     op1 = gx816->mem_read(MEMMODE_NONE, MEMSIZE_BYTE, gx816->regs.pc + 2, MEMACCESS_DEBUGGER),
-     op2 = gx816->mem_read(MEMMODE_NONE, MEMSIZE_BYTE, gx816->regs.pc + 3, MEMACCESS_DEBUGGER);
+byte op, op0, op1, op2;
 char str0[256], str1[256], str2[256];
+  if(debug_write_status() == DEBUGWRITE_NONE)return;
+
+  op  = gx816->mem_read(MEMMODE_NONE, MEMSIZE_BYTE, gx816->regs.pc,     MEMACCESS_DEBUGGER);
+  op0 = gx816->mem_read(MEMMODE_NONE, MEMSIZE_BYTE, gx816->regs.pc + 1, MEMACCESS_DEBUGGER);
+  op1 = gx816->mem_read(MEMMODE_NONE, MEMSIZE_BYTE, gx816->regs.pc + 2, MEMACCESS_DEBUGGER);
+  op2 = gx816->mem_read(MEMMODE_NONE, MEMSIZE_BYTE, gx816->regs.pc + 3, MEMACCESS_DEBUGGER);
 
   strcpy(__disas_op_str, "???                    ");
   __disas_op(op, op0, op1, op2);
@@ -329,9 +333,7 @@ char str0[256], str1[256], str2[256];
       (gx816->regs.p & 0x01)?'C':'c');
   }
 
-  dprintf("%0.6x %s A:%0.4x X:%0.4x Y:%0.4x S:%0.4x D:%0.4x DB:%0.2x %s", gx816->regs.pc, __disas_op_str,
+  dprintf(DEBUGMSG_CPU, "%0.6x %s A:%0.4x X:%0.4x Y:%0.4x S:%0.4x D:%0.4x DB:%0.2x %s", gx816->regs.pc, __disas_op_str,
     gx816->regs.a.w, gx816->regs.x, gx816->regs.y, gx816->regs.s,
     gx816->regs.d, gx816->regs.db, str1);
-
-  debug_update_cycles();
 }
