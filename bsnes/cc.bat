@@ -1,0 +1,2 @@
+@nmake /NOLOGO
+@pause
