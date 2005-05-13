@@ -1,0 +1,3 @@
+//can't use common dialogs with this defined...
+//#define WIN32_LEAN_AND_MEAN
+#include <windows.h>

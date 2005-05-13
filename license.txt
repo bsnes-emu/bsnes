@@ -1,0 +1,10 @@
+bsnes Licensing Agreement:
+
+You are free to redistribute this software, and its source code; provided
+there is no charge for the software, nor any charge for the medium used to
+distribute the software. You are also free to use and modify the source code
+as you desire for personal use only. No publically-released derivative works
+of this source code are permitted without my permission. You must also abide
+by the terms of any additional source code licenses contained within my code.
+At present, this only includes the mode7 renderer, which was derived from the
+snes9x mode7 renderer.

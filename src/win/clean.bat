@@ -1,0 +1,1 @@
+@nmake clean /NOLOGO
