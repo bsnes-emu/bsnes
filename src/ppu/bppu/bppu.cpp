@@ -7,11 +7,25 @@ void bPPU::run() {}
 void bPPU::scanline() {
 uint16 v = clock->vcounter();
   if(v > 0 && v < clock->visible_scanlines()) {
+    if(clock->interlace() || regs.oam_halve == true) {
+      output->frame_mode       |= PPUOutput::INTERLACE;
+      output->scanline_mode[v] |= PPUOutput::INTERLACE;
+    }
+    if(regs.bg_mode == 5 || regs.bg_mode == 6) {
+      output->frame_mode       |= PPUOutput::DOUBLEWIDTH;
+      output->scanline_mode[v] |= PPUOutput::DOUBLEWIDTH;
+    }
     render_line(v);
   }
 }
 
-void bPPU::frame() {}
+void bPPU::frame() {
+  snes->notify(SNES::RENDER_FRAME);
+  output->frame_mode = PPUOutput::NORMAL;
+  for(int i=0;i<239;i++) {
+    output->scanline_mode[i] = PPUOutput::NORMAL;
+  }
+}
 
 void bPPU::power() {
   memset(vram,  0, 65536);
@@ -21,7 +35,8 @@ void bPPU::power() {
 }
 
 void bPPU::reset() {
-  memset(output, 0, 512 * 478 * 2);
+  memset(output->buffer, 0, 512 * 478 * 2);
+  frame();
 
 //$2100
   regs.display_disabled   = 0;

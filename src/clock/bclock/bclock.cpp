@@ -71,9 +71,7 @@ void bClock::inc_vcounter() {
         cc1.frame_lines  = 262;
       }
     }
-    cc1.render_frame = true;
-    cpu->frame();
-    if(frameskip.notify_ppu == true)ppu->frame();
+    signal_frame = true;
   }
 
   if(status.interlace == false && status.interlace_field == 1 && status.vcounter == 240) {
@@ -83,13 +81,7 @@ void bClock::inc_vcounter() {
   }
 
   cc1.dram_refreshed = false;
-
-  cpu->scanline();
-  if(frameskip.notify_ppu == true)ppu->scanline();
-
-//if(status.vcounter == visible_scanlines()) {
-//  cc1.render_frame = true;
-//}
+  signal_scanline = true;
 }
 
 /*
@@ -121,18 +113,18 @@ uint32 new_cycles, cycles;
       inc_vcounter();
     }
   }
-  cc1.last_pos = cc1.pos;
-
-  if(cc1.pos > cc1.frequency) {
-    cc1.pos      -= cc1.frequency;
-    cc1.last_pos -= cc1.frequency;
-  }
 
   if(status.interlace == false && status.interlace_field == 1 && status.vcounter == 240) {
     status.hcounter = status.hcycles >> 2;
   } else {
   //1288 = 322 * 4, 1306 = 326 * 4 + 2
     status.hcounter = (status.hcycles - ((status.hcycles > 1288) << 1) - ((status.hcycles > 1306) << 1)) >> 2;
+  }
+
+  cc1.last_pos = cc1.pos;
+  if(cc1.pos > cc1.frequency) {
+    cc1.pos      -= cc1.frequency;
+    cc1.last_pos -= cc1.frequency;
   }
 }
 
@@ -141,21 +133,11 @@ void bClock::set_frameskip(uint8 fs) {
   frameskip.new_count = fs;
 }
 
-bool bClock::update_frame() {
-  if(cc1.render_frame == true) {
-    cc1.render_frame = false;
-    return true;
-  }
-  return false;
-}
-
 void bClock::power() {
   reset();
 }
 
 void bClock::reset() {
-  cc1.render_frame = false;
-
 //upon SNES reset, start at scanline 0 non-interlace
   cc1.frame_cycles = 262 * 1364;
   cc1.frame_lines  = 262;
@@ -178,6 +160,8 @@ void bClock::reset() {
 
   cc2.pos = 0;
 
+  signal_scanline = false;
+  signal_frame    = false;
   sync();
 }
 
@@ -185,6 +169,18 @@ void bClock::run() {
   cpu->run();
   if(frameskip.notify_ppu == true)ppu->run();
   sync();
+
+  if(signal_frame == true) {
+    signal_frame = false;
+    cpu->frame();
+    if(frameskip.notify_ppu == true)ppu->frame();
+  }
+
+  if(signal_scanline == true) {
+    signal_scanline = false;
+    cpu->scanline();
+    if(frameskip.notify_ppu == true)ppu->scanline();
+  }
 }
 
 void bClock::add_cc1_cycles(uint32 cycles) {

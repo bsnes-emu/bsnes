@@ -4,6 +4,7 @@ struct {
 bool changed, notify_ppu;
 uint8 count, new_count, pos;
 }frameskip;
+bool signal_scanline, signal_frame;
   void frameskip_update_status();
   void inc_vcounter();
   void dram_refresh_test();
@@ -16,8 +17,6 @@ public:
     uint16 line_cycles;
     bool   dram_refreshed; //whether or not dram has been refreshed on this line
     uint16 dram_refresh_pos;
-
-    bool   render_frame;
   }cc1;
   struct {
     uint32 frequency;
@@ -25,7 +24,6 @@ public:
   }cc2;
 
   void set_frameskip(uint8 fs);
-  bool update_frame();
 
   void add_cc1_cycles(uint32 cycles);
   void add_cc2_cycles(uint32 cycles);

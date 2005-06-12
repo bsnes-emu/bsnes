@@ -1,9 +1,9 @@
-void bCPU::flags_ora_b() {
+inline void bCPU::flags_ora_b() {
   regs.p.n = !!(regs.a.l & 0x80);
   regs.p.z = (regs.a.l == 0);
 }
 
-void bCPU::flags_ora_w() {
+inline void bCPU::flags_ora_w() {
   regs.p.n = !!(regs.a.w & 0x8000);
   regs.p.z = (regs.a.w == 0);
 }
@@ -26,8 +26,6 @@ void bCPU::op_ora_constw() {
   regs.a.h |= op_read(); //2a
   flags_ora_w();
 }
-
-void bCPU::op_ora_const() { (regs.p.m)?op_ora_constb():op_ora_constw(); }
 
 /**********************
  *** 0x0d: ora addr ***
@@ -53,8 +51,6 @@ void bCPU::op_ora_addrw() {
   regs.a.h |= op_read(OPMODE_DBR, aa.w + 1); //4a
   flags_ora_w();
 }
-
-void bCPU::op_ora_addr() { (regs.p.m)?op_ora_addrb():op_ora_addrw(); }
 
 /************************
  *** 0x1d: ora addr,x ***
@@ -84,8 +80,6 @@ void bCPU::op_ora_addrxw() {
   flags_ora_w();
 }
 
-void bCPU::op_ora_addrx() { (regs.p.m)?op_ora_addrxb():op_ora_addrxw(); }
-
 /********************
  *** 0x05: ora dp ***
  ********************
@@ -110,8 +104,6 @@ void bCPU::op_ora_dpw() {
   regs.a.h |= op_read(OPMODE_DP, dp + 1); //3a
   flags_ora_w();
 }
-
-void bCPU::op_ora_dp() { (regs.p.m)?op_ora_dpb():op_ora_dpw(); }
 
 /**********************
  *** 0x12: ora (dp) ***
@@ -143,8 +135,6 @@ void bCPU::op_ora_idpw() {
   regs.a.h |= op_read(OPMODE_DBR, aa.w + 1); //5
   flags_ora_w();
 }
-
-void bCPU::op_ora_idp() { (regs.p.m)?op_ora_idpb():op_ora_idpw(); }
 
 /**********************
  *** 0x07: ora [dp] ***
@@ -180,8 +170,6 @@ void bCPU::op_ora_ildpw() {
   flags_ora_w();
 }
 
-void bCPU::op_ora_ildp() { (regs.p.m)?op_ora_ildpb():op_ora_ildpw(); }
-
 /**********************
  *** 0x0f: ora long ***
  **********************
@@ -209,8 +197,6 @@ void bCPU::op_ora_longw() {
   regs.a.h |= op_read(OPMODE_LONG, aa.d + 1); //5a
   flags_ora_w();
 }
-
-void bCPU::op_ora_long() { (regs.p.m)?op_ora_longb():op_ora_longw(); }
 
 /************************
  *** 0x1f: ora long,x ***
@@ -240,8 +226,6 @@ void bCPU::op_ora_longxw() {
   flags_ora_w();
 }
 
-void bCPU::op_ora_longx() { (regs.p.m)?op_ora_longxb():op_ora_longxw(); }
-
 /************************
  *** 0x19: ora addr,y ***
  ************************
@@ -270,8 +254,6 @@ void bCPU::op_ora_addryw() {
   flags_ora_w();
 }
 
-void bCPU::op_ora_addry() { (regs.p.m)?op_ora_addryb():op_ora_addryw(); }
-
 /**********************
  *** 0x15: ora dp,x ***
  **********************
@@ -299,8 +281,6 @@ void bCPU::op_ora_dpxw() {
   regs.a.h |= op_read(OPMODE_DP, dp + regs.x.w + 1); //4a
   flags_ora_w();
 }
-
-void bCPU::op_ora_dpx() { (regs.p.m)?op_ora_dpxb():op_ora_dpxw(); }
 
 /************************
  *** 0x01: ora (dp,x) ***
@@ -336,8 +316,6 @@ void bCPU::op_ora_idpxw() {
   flags_ora_w();
 }
 
-void bCPU::op_ora_idpx() { (regs.p.m)?op_ora_idpxb():op_ora_idpxw(); }
-
 /************************
  *** 0x11: ora (dp),y ***
  ************************
@@ -371,8 +349,6 @@ void bCPU::op_ora_idpyw() {
   regs.a.h |= op_read(OPMODE_DBR, aa.w + regs.y.w + 1); //5a
   flags_ora_w();
 }
-
-void bCPU::op_ora_idpy() { (regs.p.m)?op_ora_idpyb():op_ora_idpyw(); }
 
 /************************
  *** 0x17: ora [dp],y ***
@@ -408,8 +384,6 @@ void bCPU::op_ora_ildpyw() {
   flags_ora_w();
 }
 
-void bCPU::op_ora_ildpy() { (regs.p.m)?op_ora_ildpyb():op_ora_ildpyw(); }
-
 /**********************
  *** 0x03: ora sr,s ***
  **********************
@@ -434,8 +408,6 @@ void bCPU::op_ora_srw() {
   regs.a.h |= op_read(OPMODE_SP, sp + 1); //4a
   flags_ora_w();
 }
-
-void bCPU::op_ora_sr() { (regs.p.m)?op_ora_srb():op_ora_srw(); }
 
 /**************************
  *** 0x13: ora (sr,s),y ***
@@ -470,5 +442,3 @@ void bCPU::op_ora_isryw() {
   regs.a.h |= op_read(OPMODE_DBR, aa.w + regs.y.w + 1); //7a
   flags_ora_w();
 }
-
-void bCPU::op_ora_isry() { (regs.p.m)?op_ora_isryb():op_ora_isryw(); }

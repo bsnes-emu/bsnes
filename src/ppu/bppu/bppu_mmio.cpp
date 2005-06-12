@@ -487,13 +487,6 @@ uint16 r = regs.vcounter;
 //STAT77
 uint8 bPPU::mmio_r213e() {
 uint8 r = 0x00;
-  r |= clock->interlace_field() << 7;
-  if(!(cpu->pio_status() & 0x80)) {
-    r |= 1 << 6;
-  } else if(regs.counters_latched == true) {
-    r |= 1 << 6;
-    regs.counters_latched = false;
-  }
   r |= 0x01; //PPU1 version number
   return r;
 }
@@ -503,6 +496,14 @@ uint8 bPPU::mmio_r213f() {
 uint8 r = 0x00;
   regs.latch_hcounter = 0;
   regs.latch_vcounter = 0;
+
+  r |= clock->interlace_field() << 7;
+  if(!(cpu->pio_status() & 0x80)) {
+    r |= 1 << 6;
+  } else if(regs.counters_latched == true) {
+    r |= 1 << 6;
+    regs.counters_latched = false;
+  }
   r |= (1 << 5);
   r |= 0x03; //PPU2 version number
   return r;

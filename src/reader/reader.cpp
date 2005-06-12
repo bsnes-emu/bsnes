@@ -12,7 +12,12 @@ int i;
 
 char *filetype = fn + i;
 /* make sure we support this file format before loading it */
-  if(strcmp(filetype, ".smc"))return false;
+  if(stricmp(filetype, ".smc") &&
+     stricmp(filetype, ".swc") &&
+     stricmp(filetype, ".fig") &&
+     stricmp(filetype, ".ufo") &&
+     stricmp(filetype, ".gd3") &&
+     stricmp(filetype, ".078"))return false;
 
   fp = fopen(fn, "rb");
   if(!fp)return false;
@@ -21,7 +26,12 @@ char *filetype = fn + i;
   fsize = ftell(fp);
   fseek(fp, 0, SEEK_SET);
 
-  if(!strcmp(filetype, ".smc")) {
+  if(!stricmp(filetype, ".smc") ||
+     !stricmp(filetype, ".swc") ||
+     !stricmp(filetype, ".fig") ||
+     !stricmp(filetype, ".ufo") ||
+     !stricmp(filetype, ".gd3") ||
+     !stricmp(filetype, ".078")) {
   /* remove header if it exists */
     if((fsize & 0xfff) == 0x200) {
       fsize -= 0x200;

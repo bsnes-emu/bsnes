@@ -4,14 +4,14 @@
 //mov eax,[array+eax*4] -> lea ebx,[parray] ; mov ebx,[ebx+eax*4]
 uint32 color_lookup_table[65536];
 
-render::render() {
+Render::Render() {
   lpdd    = 0;
   lpdds   = 0;
   lpddsb  = 0;
   lpddc   = 0;
 }
 
-void render::update_color_lookup_table() {
+void Render::update_color_lookup_table() {
 int i, r, g, b;
   lpdds->GetSurfaceDesc(&ddsd);
   color_depth = ddsd.ddpfPixelFormat.dwRGBBitCount;
@@ -45,9 +45,9 @@ int i, r, g, b;
   }
 }
 
-void render::set_window(HWND hwnd_handle) { hwnd = hwnd_handle; }
+void Render::set_window(HWND hwnd_handle) { hwnd = hwnd_handle; }
 
-void render::to_windowed() {
+void Render::to_windowed() {
   destroy();
   DirectDrawCreate(0, &lpdd, 0);
   lpdd->SetCooperativeLevel(hwnd, DDSCL_NORMAL);
@@ -65,7 +65,12 @@ void render::to_windowed() {
   memset(&ddsd, 0, sizeof(DDSURFACEDESC));
   ddsd.dwSize = sizeof(DDSURFACEDESC);
   ddsd.dwFlags = DDSD_CAPS | DDSD_WIDTH | DDSD_HEIGHT;
-  ddsd.ddsCaps.dwCaps = DDSCAPS_OFFSCREENPLAIN | DDSCAPS_VIDEOMEMORY;
+  ddsd.ddsCaps.dwCaps = DDSCAPS_OFFSCREENPLAIN;
+  if(cfg.video.use_vram) {
+    ddsd.ddsCaps.dwCaps |= DDSCAPS_VIDEOMEMORY;
+  } else {
+    ddsd.ddsCaps.dwCaps |= DDSCAPS_SYSTEMMEMORY;
+  }
   ddsd.dwWidth  = 512;
   ddsd.dwHeight = 478;
   lpdd->CreateSurface(&ddsd, &lpddsb, 0);
@@ -74,7 +79,7 @@ void render::to_windowed() {
   update();
 }
 
-void render::to_fullscreen() {
+void Render::to_fullscreen() {
   destroy();
   DirectDrawCreate(0, &lpdd, 0);
   lpdd->SetCooperativeLevel(hwnd, DDSCL_FULLSCREEN | DDSCL_EXCLUSIVE);
@@ -93,7 +98,12 @@ void render::to_fullscreen() {
   memset(&ddsd, 0, sizeof(DDSURFACEDESC));
   ddsd.dwSize = sizeof(DDSURFACEDESC);
   ddsd.dwFlags = DDSD_CAPS | DDSD_WIDTH | DDSD_HEIGHT;
-  ddsd.ddsCaps.dwCaps = DDSCAPS_OFFSCREENPLAIN | DDSCAPS_SYSTEMMEMORY;
+  ddsd.ddsCaps.dwCaps = DDSCAPS_OFFSCREENPLAIN;
+  if(cfg.video.use_vram) {
+    ddsd.ddsCaps.dwCaps |= DDSCAPS_VIDEOMEMORY;
+  } else {
+    ddsd.ddsCaps.dwCaps |= DDSCAPS_SYSTEMMEMORY;
+  }
   ddsd.dwWidth  = 512;
   ddsd.dwHeight = 478;
   lpdd->CreateSurface(&ddsd, &lpddsb, 0);
@@ -102,7 +112,16 @@ void render::to_fullscreen() {
   update();
 }
 
-void render::redraw() {
+void Render::set_source_window(RECT *rs) {
+  switch(ppu->output->frame_mode) {
+  case 0:SetRect(rs, 0, 0, 256, 223);break;
+  case 1:SetRect(rs, 0, 0, 256, 446);break;
+  case 2:SetRect(rs, 0, 0, 512, 223);break;
+  case 3:SetRect(rs, 0, 0, 512, 446);break;
+  }
+}
+
+void Render::redraw() {
 RECT rd, rs;
 POINT p;
 HRESULT hr;
@@ -110,87 +129,177 @@ HRESULT hr;
   ClientToScreen(hwnd, &p);
   GetClientRect(hwnd, &rd);
   OffsetRect(&rd, p.x, p.y);
-  if(clock->overscan() == false) {
-    SetRect(&rs, 0, 2, 512, 448);
-  } else {
-    SetRect(&rs, 0, 2 + 15, 512, 448 + 15);
-  }
+  set_source_window(&rs);
   hr = lpdds->Blt(&rd, lpddsb, &rs, DDBLT_WAIT, 0);
   if(hr == DDERR_SURFACELOST) {
     lpdds->Restore();
     lpddsb->Restore();
   }
+
+uint32 fps;
+char s[256], t[256];
+  fps_timer->tick();
+  if(fps_timer->second_passed() == true) {
+    sprintf(s, "bsnes v" BSNES_VERSION " ~byuu");
+    if(rom_image->loaded() == true) {
+      fps = fps_timer->get_ticks();
+      if(w_main->frameskip == 0) {
+        sprintf(t, " : %d fps", fps);
+      } else {
+        sprintf(t, " : %d fps [fs: %d]", fps * (1 + w_main->frameskip), w_main->frameskip);
+      }
+      strcat(s, t);
+    }
+    SetWindowText(w_main->hwnd, s);
+    fps_timer->reset();
+  }
 }
 
-void render::update16() {
+void Render::update16() {
 HRESULT hr;
   hr = lpddsb->Lock(0, &ddsd, DDLOCK_WAIT, 0);
   if(hr != DD_OK)return;
 
-uint16 *_src_data  = (uint16*)ppu->output;
-uint16 *_dest_data = (uint16*)ddsd.lpSurface;
-uint32  _pitch     = ddsd.lPitch;
-  __asm {
-	mov edi,_dest_data
-	mov edx,_pitch
-	add edi,edx
-	add edi,edx
-	sub edx,1024
-	mov esi,_src_data
-	add esi,2048
-	mov ebx,478-2
-	xor eax,eax
-	loop_y:
-		mov ecx,512
-		loop_x:
-			lodsw
-			mov eax,dword ptr[color_lookup_table+eax*4]
-			stosw
-			dec ecx
-			jnz loop_x
-		add edi,edx
-		dec ebx
-		jnz loop_y
+uint16 *src  = (uint16*)ppu->output->buffer;
+uint16 *dest = (uint16*)ddsd.lpSurface;
+uint32 pitch;
+int x, y;
+/* skip first scanline */
+  src  += 1024;
+
+  if(clock->overscan() == true) {
+    if(ppu->output->frame_mode & PPUOutput::INTERLACE) {
+      src += 1024 * 16;
+    } else {
+      src += 1024 *  8;
+    }
   }
 
+  if(ppu->output->frame_mode == PPUOutput::NORMAL) {
+  /* 256x223 */
+    pitch = (ddsd.lPitch >> 1) - 256;
+    y = 223;
+    while(y--) {
+      x = 256;
+      while(x--) {
+        *dest++ = color_lookup_table[*src];
+        src += 2;
+      }
+      dest += pitch;
+      src  += 512;
+    }
+  } else if(ppu->output->frame_mode == PPUOutput::INTERLACE) {
+  /* 256x446 */
+    pitch = (ddsd.lPitch >> 1) - 256;
+    y = 446;
+    while(y--) {
+      x = 256;
+      while(x--) {
+        *dest++ = color_lookup_table[*src];
+        src += 2;
+      }
+      dest += pitch;
+    }
+  } else if(ppu->output->frame_mode == PPUOutput::DOUBLEWIDTH) {
+  /* 512x223 */
+    pitch = (ddsd.lPitch >> 1) - 512;
+    y = 223;
+    while(y--) {
+      x = 512;
+      while(x--) {
+        *dest++ = color_lookup_table[*src++];
+      }
+      dest += pitch;
+      src  += 512;
+    }
+  } else {
+  /* 512x446 */
+    pitch = (ddsd.lPitch >> 1) - 512;
+    y = 446;
+    while(y--) {
+      x = 512;
+      while(x--) {
+        *dest++ = color_lookup_table[*src++];
+      }
+      dest += pitch;
+    }
+  }
   lpddsb->Unlock(0);
 }
 
-void render::update32() {
+void Render::update32() {
 HRESULT hr;
   hr = lpddsb->Lock(0, &ddsd, DDLOCK_WAIT, 0);
   if(hr != DD_OK)return;
 
-uint16 *_src_data  = (uint16*)ppu->output;
-uint32 *_dest_data = (uint32*)ddsd.lpSurface;
-uint32  _pitch     = ddsd.lPitch;
-  __asm {
-	mov edi,_dest_data
-	mov edx,_pitch
-	add edi,edx
-	add edi,edx
-	sub edx,2048
-	mov esi,_src_data
-	add esi,2048
-	mov ebx,478-2
-	loop_y:
-		mov ecx,512
-		loop_x:
-			lodsw
-			and eax,0xffff
-			mov eax,dword ptr[color_lookup_table+eax*4]
-			stosd
-			dec ecx
-			jnz loop_x
-		add edi,edx
-		dec ebx
-		jnz loop_y
+uint16 *src  = (uint16*)ppu->output->buffer;
+uint32 *dest = (uint32*)ddsd.lpSurface;
+uint32 pitch;
+int x, y;
+/* skip first scanline */
+  src  += 1024;
+
+  if(clock->overscan() == true) {
+    if(ppu->output->frame_mode & PPUOutput::INTERLACE) {
+      src += 1024 * 16;
+    } else {
+      src += 1024 *  8;
+    }
   }
 
+  if(ppu->output->frame_mode == PPUOutput::NORMAL) {
+  /* 256x223 */
+    pitch = (ddsd.lPitch >> 2) - 256;
+    y = 223;
+    while(y--) {
+      x = 256;
+      while(x--) {
+        *dest++ = color_lookup_table[*src];
+        src += 2;
+      }
+      dest += pitch;
+      src  += 512;
+    }
+  } else if(ppu->output->frame_mode == PPUOutput::INTERLACE) {
+  /* 256x446 */
+    pitch = (ddsd.lPitch >> 2) - 256;
+    y = 446;
+    while(y--) {
+      x = 256;
+      while(x--) {
+        *dest++ = color_lookup_table[*src];
+        src += 2;
+      }
+      dest += pitch;
+    }
+  } else if(ppu->output->frame_mode == PPUOutput::DOUBLEWIDTH) {
+  /* 512x223 */
+    pitch = (ddsd.lPitch >> 2) - 512;
+    y = 223;
+    while(y--) {
+      x = 512;
+      while(x--) {
+        *dest++ = color_lookup_table[*src++];
+      }
+      dest += pitch;
+      src  += 512;
+    }
+  } else {
+  /* 512x446 */
+    pitch = (ddsd.lPitch >> 2) - 512;
+    y = 446;
+    while(y--) {
+      x = 512;
+      while(x--) {
+        *dest++ = color_lookup_table[*src++];
+      }
+      dest += pitch;
+    }
+  }
   lpddsb->Unlock(0);
 }
 
-void render::update() {
+void Render::update() {
   switch(color_depth) {
   case 15:
   case 16:
@@ -203,7 +312,7 @@ void render::update() {
   redraw();
 }
 
-void render::destroy() {
+void Render::destroy() {
   if(lpddc) {
     lpddc->Release();
     lpddc = 0;

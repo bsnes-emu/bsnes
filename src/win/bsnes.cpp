@@ -33,10 +33,10 @@ void bSNES::run() {
 
   switch(run_status) {
   case RUN:
-    while(clock->update_frame() == false) {
+    while(update_frame == false) {
       clock->run();
     }
-    render_frame();
+    update_frame = false;
     return;
   case STOP:
     break;
@@ -53,8 +53,8 @@ void bSNES::run() {
     break;
   case RUNTOFRAME:
     clock->run();
-    if(clock->update_frame() == true) {
-      render_frame();
+    if(update_frame == true) {
+      update_frame = false;
       set_status(STOP);
       disassemble_cpu_op();
     } else if(w_bp->hit() == true) {
@@ -83,14 +83,10 @@ void bSNES::run() {
     }
     break;
   }
-
-  if(clock->update_frame() == true) {
-    render_frame();
-  }
 }
 
 void bSNES::render_frame() {
-  renderer.update();
+  renderer->update();
 }
 
 /***********************
@@ -229,6 +225,15 @@ void bSNES::write(uint8 type, uint32 addr, uint8 value) {
 }
 
 void bSNES::notify(uint32 message, uint32 param1, uint32 param2) {
+/* system messages */
+  switch(message) {
+  case RENDER_FRAME:
+    update_frame = true;
+    render_frame();
+    break;
+  }
+
+/* debugging messages */
   if(is_debugger_enabled == false)return;
 
   switch(message) {
@@ -262,6 +267,9 @@ void bSNES::notify(uint32 message, uint32 param1, uint32 param2) {
 
 void bSNES::disassemble_cpu_op() {
 char t[512];
+/* don't disassemble opcodes when no ROM is loaded */
+  if(is_debugger_activated == false)return;
+
 /* don't disassemble opcodes that won't be printed to console/traced to log anyway */
   if(!w_console->can_write(Console::CPU_MESSAGE) && !w_console->tracing_enabled)return;
 
@@ -311,6 +319,10 @@ void bSNES::debugger_update() {
   disassemble_cpu_op();
 }
 
+bool bSNES::debugger_activated() {
+  return is_debugger_activated;
+}
+
 void bSNES::debugger_activate() {
 HWND hwnd;
 uint32 i, style;
@@ -343,6 +355,8 @@ uint32 i, style;
     SetWindowLong(hwnd, GWL_STYLE, style);
   }
   InvalidateRect(w_memory->hwnd, 0, TRUE);
+
+  is_debugger_activated = true;
 }
 
 void bSNES::debugger_deactivate() {
@@ -378,11 +392,14 @@ uint32 i, style;
   }
   w_memory->clear();
   InvalidateRect(w_memory->hwnd, 0, TRUE);
+
+  is_debugger_activated = false;
 }
 
 bSNES::bSNES() {
-  run_status = STOP;
+  run_status    = STOP;
   debug_command = false;
+  update_frame  = false;
 
   debugger_disable();
 }

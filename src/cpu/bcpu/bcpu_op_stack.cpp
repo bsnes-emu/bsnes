@@ -18,8 +18,6 @@ void bCPU::op_phaw() {
   stack_write(regs.a.l); //3
 }
 
-void bCPU::op_pha() { (regs.p.m)?op_phab():op_phaw(); }
-
 /*****************
  *** 0x8b: phb ***
  *****************
@@ -94,8 +92,6 @@ void bCPU::op_phxw() {
   stack_write(regs.x.l); //3
 }
 
-void bCPU::op_phx() { (regs.p.x)?op_phxb():op_phxw(); }
-
 /*****************
  *** 0x5a: phy ***
  *****************
@@ -115,8 +111,6 @@ void bCPU::op_phyw() {
   stack_write(regs.y.h); //3a
   stack_write(regs.y.l); //3
 }
-
-void bCPU::op_phy() { (regs.p.x)?op_phyb():op_phyw(); }
 
 /*****************
  *** 0x68: pla ***
@@ -144,8 +138,6 @@ void bCPU::op_plaw() {
   regs.p.n = !!(regs.a.w & 0x8000);
   regs.p.z = (regs.a.w == 0);
 }
-
-void bCPU::op_pla() { (regs.p.m)?op_plab():op_plaw(); }
 
 /*****************
  *** 0xab: plb ***
@@ -196,7 +188,16 @@ void bCPU::op_plp() {
   cpu_io();              //2
   cpu_io();              //3
   regs.p = stack_read(); //4
-  if(regs.e)regs.p |= 0x30;
+  if(regs.e) {
+    regs.p |= 0x30;
+  } else {
+    switch((regs.p >> 4) & 3) {
+    case 0:optbl = optbl_mx;break;
+    case 1:optbl = optbl_mX;break;
+    case 2:optbl = optbl_Mx;break;
+    case 3:optbl = optbl_MX;break;
+    }
+  }
   if(regs.p.x) {
     regs.x.h = 0x00;
     regs.y.h = 0x00;
@@ -230,8 +231,6 @@ void bCPU::op_plxw() {
   regs.p.z = (regs.x.w == 0);
 }
 
-void bCPU::op_plx() { (regs.p.x)?op_plxb():op_plxw(); }
-
 /*****************
  *** 0x7a: ply ***
  *****************
@@ -258,8 +257,6 @@ void bCPU::op_plyw() {
   regs.p.n = !!(regs.y.w & 0x8000);
   regs.p.z = (regs.y.w == 0);
 }
-
-void bCPU::op_ply() { (regs.p.x)?op_plyb():op_plyw(); }
 
 /**********************
  *** 0xf4: pea addr ***

@@ -1,9 +1,9 @@
-void bCPU::flags_eor_b() {
+inline void bCPU::flags_eor_b() {
   regs.p.n = !!(regs.a.l & 0x80);
   regs.p.z = (regs.a.l == 0);
 }
 
-void bCPU::flags_eor_w() {
+inline void bCPU::flags_eor_w() {
   regs.p.n = !!(regs.a.w & 0x8000);
   regs.p.z = (regs.a.w == 0);
 }
@@ -26,8 +26,6 @@ void bCPU::op_eor_constw() {
   regs.a.h ^= op_read(); //2a
   flags_eor_w();
 }
-
-void bCPU::op_eor_const() { (regs.p.m)?op_eor_constb():op_eor_constw(); }
 
 /**********************
  *** 0x4d: eor addr ***
@@ -53,8 +51,6 @@ void bCPU::op_eor_addrw() {
   regs.a.h ^= op_read(OPMODE_DBR, aa.w + 1); //4a
   flags_eor_w();
 }
-
-void bCPU::op_eor_addr() { (regs.p.m)?op_eor_addrb():op_eor_addrw(); }
 
 /************************
  *** 0x5d: eor addr,x ***
@@ -84,8 +80,6 @@ void bCPU::op_eor_addrxw() {
   flags_eor_w();
 }
 
-void bCPU::op_eor_addrx() { (regs.p.m)?op_eor_addrxb():op_eor_addrxw(); }
-
 /********************
  *** 0x45: eor dp ***
  ********************
@@ -110,8 +104,6 @@ void bCPU::op_eor_dpw() {
   regs.a.h ^= op_read(OPMODE_DP, dp + 1); //3a
   flags_eor_w();
 }
-
-void bCPU::op_eor_dp() { (regs.p.m)?op_eor_dpb():op_eor_dpw(); }
 
 /**********************
  *** 0x52: eor (dp) ***
@@ -143,8 +135,6 @@ void bCPU::op_eor_idpw() {
   regs.a.h ^= op_read(OPMODE_DBR, aa.w + 1); //5
   flags_eor_w();
 }
-
-void bCPU::op_eor_idp() { (regs.p.m)?op_eor_idpb():op_eor_idpw(); }
 
 /**********************
  *** 0x47: eor [dp] ***
@@ -180,8 +170,6 @@ void bCPU::op_eor_ildpw() {
   flags_eor_w();
 }
 
-void bCPU::op_eor_ildp() { (regs.p.m)?op_eor_ildpb():op_eor_ildpw(); }
-
 /**********************
  *** 0x4f: eor long ***
  **********************
@@ -209,8 +197,6 @@ void bCPU::op_eor_longw() {
   regs.a.h ^= op_read(OPMODE_LONG, aa.d + 1); //5a
   flags_eor_w();
 }
-
-void bCPU::op_eor_long() { (regs.p.m)?op_eor_longb():op_eor_longw(); }
 
 /************************
  *** 0x5f: eor long,x ***
@@ -240,8 +226,6 @@ void bCPU::op_eor_longxw() {
   flags_eor_w();
 }
 
-void bCPU::op_eor_longx() { (regs.p.m)?op_eor_longxb():op_eor_longxw(); }
-
 /************************
  *** 0x59: eor addr,y ***
  ************************
@@ -270,8 +254,6 @@ void bCPU::op_eor_addryw() {
   flags_eor_w();
 }
 
-void bCPU::op_eor_addry() { (regs.p.m)?op_eor_addryb():op_eor_addryw(); }
-
 /**********************
  *** 0x55: eor dp,x ***
  **********************
@@ -299,8 +281,6 @@ void bCPU::op_eor_dpxw() {
   regs.a.h ^= op_read(OPMODE_DP, dp + regs.x.w + 1); //4a
   flags_eor_w();
 }
-
-void bCPU::op_eor_dpx() { (regs.p.m)?op_eor_dpxb():op_eor_dpxw(); }
 
 /************************
  *** 0x41: eor (dp,x) ***
@@ -336,8 +316,6 @@ void bCPU::op_eor_idpxw() {
   flags_eor_w();
 }
 
-void bCPU::op_eor_idpx() { (regs.p.m)?op_eor_idpxb():op_eor_idpxw(); }
-
 /************************
  *** 0x51: eor (dp),y ***
  ************************
@@ -371,8 +349,6 @@ void bCPU::op_eor_idpyw() {
   regs.a.h ^= op_read(OPMODE_DBR, aa.w + regs.y.w + 1); //5a
   flags_eor_w();
 }
-
-void bCPU::op_eor_idpy() { (regs.p.m)?op_eor_idpyb():op_eor_idpyw(); }
 
 /************************
  *** 0x57: eor [dp],y ***
@@ -408,8 +384,6 @@ void bCPU::op_eor_ildpyw() {
   flags_eor_w();
 }
 
-void bCPU::op_eor_ildpy() { (regs.p.m)?op_eor_ildpyb():op_eor_ildpyw(); }
-
 /**********************
  *** 0x43: eor sr,s ***
  **********************
@@ -434,8 +408,6 @@ void bCPU::op_eor_srw() {
   regs.a.h ^= op_read(OPMODE_SP, sp + 1); //4a
   flags_eor_w();
 }
-
-void bCPU::op_eor_sr() { (regs.p.m)?op_eor_srb():op_eor_srw(); }
 
 /**************************
  *** 0x53: eor (sr,s),y ***
@@ -470,5 +442,3 @@ void bCPU::op_eor_isryw() {
   regs.a.h ^= op_read(OPMODE_DBR, aa.w + regs.y.w + 1); //7a
   flags_eor_w();
 }
-
-void bCPU::op_eor_isry() { (regs.p.m)?op_eor_isryb():op_eor_isryw(); }

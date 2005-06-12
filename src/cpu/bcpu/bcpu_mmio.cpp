@@ -177,7 +177,7 @@ uint8 bCPU::mmio_r4218() {
 uint8 r = 0x00;
 uint16 v = clock->vcounter();
   if(status.auto_joypad_poll == false)return 0x00; //can't read joypad if auto polling not enabled
-  if(v >= 225 && v <= 227)return 0x00; //can't read joypad while SNES is polling input
+//if(v >= 225 && v <= 227)return 0x00; //can't read joypad while SNES is polling input
   r |= (uint8)snes->get_input_status(SNES::DEV_JOYPAD1, SNES::JOYPAD_A) << 7;
   r |= (uint8)snes->get_input_status(SNES::DEV_JOYPAD1, SNES::JOYPAD_X) << 6;
   r |= (uint8)snes->get_input_status(SNES::DEV_JOYPAD1, SNES::JOYPAD_L) << 5;
@@ -190,7 +190,7 @@ uint8 bCPU::mmio_r4219() {
 uint8 r = 0x00;
 uint16 v = clock->vcounter();
   if(status.auto_joypad_poll == false)return 0x00; //can't read joypad if auto polling not enabled
-  if(v >= 225 && v <= 227)return 0x00; //can't read joypad while SNES is polling input
+//if(v >= 225 && v <= 227)return 0x00; //can't read joypad while SNES is polling input
   r |= (uint8)snes->get_input_status(SNES::DEV_JOYPAD1, SNES::JOYPAD_B)      << 7;
   r |= (uint8)snes->get_input_status(SNES::DEV_JOYPAD1, SNES::JOYPAD_Y)      << 6;
   r |= (uint8)snes->get_input_status(SNES::DEV_JOYPAD1, SNES::JOYPAD_SELECT) << 5;
@@ -250,9 +250,11 @@ void bCPU::mmio_w2183(uint8 value) {
 
 //JOYSER0
 void bCPU::mmio_w4016(uint8 value) {
-  status.joypad1_strobe_value = value;
-  if(value == 1)snes->poll_input();
-  if(value == 0)status.joypad1_read_pos = 0;
+  status.joypad1_strobe_value = (value & 1);
+  if(value == 1) {
+    snes->poll_input();
+    status.joypad1_read_pos = 0;
+  }
 }
 
 //NMITIMEN
@@ -320,22 +322,24 @@ void bCPU::mmio_w420a(uint8 value) {
 
 //DMAEN
 void bCPU::mmio_w420b(uint8 value) {
+  if(value != 0x00) {
+    clock->add_cc1_cycles(18);
+  }
+
   for(int i=0;i<8;i++) {
-    dma->channel[i].active = !!(value & (1 << i));
-    if(dma->channel[i].active == true) {
+    if(value & (1 << i)) {
+      dma->channel[i].active = true;
       dma->channel[i].hdma_active = false;
+      clock->add_cc1_cycles(8);
+      cpustate = CPUSTATE_DMA;
     }
   }
-  cpustate = CPUSTATE_DMA;
 }
 
 //HDMAEN
 void bCPU::mmio_w420c(uint8 value) {
   for(int i=0;i<8;i++) {
     dma->channel[i].hdma_active = !!(value & (1 << i));
-    if(dma->channel[i].hdma_active == true) {
-      dma->channel[i].active = false;
-    }
   }
 }
 
@@ -610,9 +614,10 @@ uint8 x, active_channels = 0;
       if(channel[i].hdma_indirect == false) {
         channel[i].hdma_iaddress = channel[i].hdma_address;
       } else {
-        channel[i].hdma_iaddress  = mem_bus->read(channel[i].hdma_address++);
-        channel[i].hdma_iaddress |= mem_bus->read(channel[i].hdma_address++) << 8;
+        channel[i].hdma_iaddress  = mem_bus->read(channel[i].hdma_address);
+        channel[i].hdma_iaddress |= mem_bus->read(channel[i].hdma_address + 1) << 8;
         channel[i].hdma_iaddress |= channel[i].hdma_indirect_bank << 16;
+        channel[i].hdma_address += 2;
         clock->add_cc1_cycles(16);
       }
     }
@@ -648,7 +653,7 @@ uint8 x, active_channels = 0;
 void bDMA::hdma_initialize() {
 uint8 active_channels = 0;
   for(int i=0;i<8;i++) {
-    if(!channel[i].hdma_active) {
+    if(channel[i].hdma_active == false) {
       channel[i].hdma_completed = true;
       continue;
     }
@@ -687,9 +692,8 @@ void bDMA::reset() {
     channel[i].hdma_line_counter  = 0;
     channel[i].hdma_address       = 0;
     channel[i].hdma_iaddress      = 0;
-    channel[i].hdma_completed     = false;
+    channel[i].hdma_completed     = true;
   }
-  hdma_triggered = false;
 }
 
 bDMA::bDMA(bCPU *_cpu) {

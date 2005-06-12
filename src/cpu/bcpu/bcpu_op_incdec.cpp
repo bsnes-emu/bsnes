@@ -19,8 +19,6 @@ void bCPU::op_incw() {
   regs.p.z = (regs.a.w == 0);
 }
 
-void bCPU::op_inc() { (regs.p.m)?op_incb():op_incw(); }
-
 /**********************
  *** 0xee: inc addr ***
  **********************
@@ -57,8 +55,6 @@ void bCPU::op_inc_addrw() {
   regs.p.n = !!(rd.w & 0x8000);
   regs.p.z = (rd.w == 0);
 }
-
-void bCPU::op_inc_addr() { (regs.p.m)?op_inc_addrb():op_inc_addrw(); }
 
 /************************
  *** 0xfe: inc addr,x ***
@@ -100,8 +96,6 @@ void bCPU::op_inc_addrxw() {
   regs.p.z = (rd.w == 0);
 }
 
-void bCPU::op_inc_addrx() { (regs.p.m)?op_inc_addrxb():op_inc_addrxw(); }
-
 /********************
  *** 0xe6: inc dp ***
  ********************
@@ -138,8 +132,6 @@ void bCPU::op_inc_dpw() {
   regs.p.n = !!(rd.w & 0x8000);
   regs.p.z = (rd.w == 0);
 }
-
-void bCPU::op_inc_dp() { (regs.p.m)?op_inc_dpb():op_inc_dpw(); }
 
 /**********************
  *** 0xf6: inc dp,x ***
@@ -181,8 +173,6 @@ void bCPU::op_inc_dpxw() {
   regs.p.z = (rd.w == 0);
 }
 
-void bCPU::op_inc_dpx() { (regs.p.m)?op_inc_dpxb():op_inc_dpxw(); }
-
 /*****************
  *** 0xe8: inx ***
  *****************
@@ -203,8 +193,6 @@ void bCPU::op_inxw() {
   regs.p.n = !!(regs.x.w & 0x8000);
   regs.p.z = (regs.x.w == 0);
 }
-
-void bCPU::op_inx() { (regs.p.x)?op_inxb():op_inxw(); }
 
 /*****************
  *** 0xc8: iny ***
@@ -227,8 +215,6 @@ void bCPU::op_inyw() {
   regs.p.z = (regs.y.w == 0);
 }
 
-void bCPU::op_iny() { (regs.p.x)?op_inyb():op_inyw(); }
-
 /*****************
  *** 0x3a: dec ***
  *****************
@@ -249,8 +235,6 @@ void bCPU::op_decw() {
   regs.p.n = !!(regs.a.w & 0x8000);
   regs.p.z = (regs.a.w == 0);
 }
-
-void bCPU::op_dec() { (regs.p.m)?op_decb():op_decw(); }
 
 /**********************
  *** 0xce: dec addr ***
@@ -288,8 +272,6 @@ void bCPU::op_dec_addrw() {
   regs.p.n = !!(rd.w & 0x8000);
   regs.p.z = (rd.w == 0);
 }
-
-void bCPU::op_dec_addr() { (regs.p.m)?op_dec_addrb():op_dec_addrw(); }
 
 /************************
  *** 0xde: dec addr,x ***
@@ -331,8 +313,6 @@ void bCPU::op_dec_addrxw() {
   regs.p.z = (rd.w == 0);
 }
 
-void bCPU::op_dec_addrx() { (regs.p.m)?op_dec_addrxb():op_dec_addrxw(); }
-
 /********************
  *** 0xc6: dec dp ***
  ********************
@@ -369,8 +349,6 @@ void bCPU::op_dec_dpw() {
   regs.p.n = !!(rd.w & 0x8000);
   regs.p.z = (rd.w == 0);
 }
-
-void bCPU::op_dec_dp() { (regs.p.m)?op_dec_dpb():op_dec_dpw(); }
 
 /**********************
  *** 0xd6: dec dp,x ***
@@ -412,8 +390,6 @@ void bCPU::op_dec_dpxw() {
   regs.p.z = (rd.w == 0);
 }
 
-void bCPU::op_dec_dpx() { (regs.p.m)?op_dec_dpxb():op_dec_dpxw(); }
-
 /*****************
  *** 0xca: dex ***
  *****************
@@ -435,8 +411,6 @@ void bCPU::op_dexw() {
   regs.p.z = (regs.x.w == 0);
 }
 
-void bCPU::op_dex() { (regs.p.x)?op_dexb():op_dexw(); }
-
 /*****************
  *** 0x88: dey ***
  *****************
@@ -457,5 +431,3 @@ void bCPU::op_deyw() {
   regs.p.n = !!(regs.y.w & 0x8000);
   regs.p.z = (regs.y.w == 0);
 }
-
-void bCPU::op_dey() { (regs.p.x)?op_deyb():op_deyw(); }

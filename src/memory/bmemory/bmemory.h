@@ -26,6 +26,9 @@ byte *wram;
   uint8 read (uint32 addr);
   void  write(uint32 addr, byte value);
 
+  void power();
+  void reset();
+
   bMemBus();
   ~bMemBus();
 };

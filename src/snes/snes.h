@@ -28,6 +28,7 @@ enum {
 //debugging functions
 enum {
   NO_ACTION = 0,
+  RENDER_FRAME,
   CPU_EXEC_OPCODE,
   MEM_READ,   MEM_WRITE,
   VRAM_READ,  VRAM_WRITE,

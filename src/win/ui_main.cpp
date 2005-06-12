@@ -12,35 +12,37 @@ void MainWindow::set_frameskip(uint8 fs) {
 
   CheckMenuItem(w_main->hmenu, MENU_SETTINGS_FRAMESKIP_OFF + fs, MF_CHECKED);
   clock->set_frameskip(fs);
+  w_main->frameskip = fs;
 }
 
 void MainWindow::set_video_mode(uint8 mode) {
+  hide();
   CheckMenuItem(w_main->hmenu, MENU_SETTINGS_VIDEOMODE_256x224w, MF_UNCHECKED);
   CheckMenuItem(w_main->hmenu, MENU_SETTINGS_VIDEOMODE_512x448w, MF_UNCHECKED);
   CheckMenuItem(w_main->hmenu, MENU_SETTINGS_VIDEOMODE_960x720w, MF_UNCHECKED);
   switch(mode) {
   case VIDEOMODE_256x224w:
     CheckMenuItem(w_main->hmenu, MENU_SETTINGS_VIDEOMODE_256x224w, MF_CHECKED);
-    w_main->resize(256, 223);
+    resize(256, 223);
     break;
   case VIDEOMODE_512x448w:
     CheckMenuItem(w_main->hmenu, MENU_SETTINGS_VIDEOMODE_512x448w, MF_CHECKED);
-    w_main->resize(512, 446);
+    resize(512, 446);
     break;
   case VIDEOMODE_960x720w:
     CheckMenuItem(w_main->hmenu, MENU_SETTINGS_VIDEOMODE_960x720w, MF_CHECKED);
-    w_main->resize(960, 720);
+    resize(960, 720);
     break;
   }
   if(bsnes->debugger_enabled() == true) {
-    w_main->to_bottom();
-    w_main->to_right();
+    to_bottom();
+    to_right();
   } else {
-    w_main->to_middle();
-    w_main->to_center();
+    to_middle();
+    to_center();
   }
-  video_mode = mode;
-  w_main->show();
+  cfg.video.mode = mode;
+  show();
 }
 
 void MainWindow::menu_load() {
@@ -135,7 +137,7 @@ long __stdcall wndproc_main(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
     PostQuitMessage(0);
     break;
   case WM_PAINT:
-    renderer.redraw();
+    renderer->redraw();
     break;
   }
   return DefWindowProc(hwnd, msg, wparam, lparam);
@@ -199,11 +201,10 @@ HMENU hsubmenu, hbranchmenu;
   AppendMenu(hsubmenu, MF_STRING, MENU_SETTINGS_DEBUGGER, "&Debugger");
   AppendMenu(w_main->hmenu, MF_STRING | MF_POPUP, (unsigned int)hsubmenu, "&Settings");
 
-  w_main->set_video_mode(w_main->video_mode);
-  w_main->set_frameskip(0);
   w_main->show_menu();
+  w_main->set_video_mode(cfg.video.mode);
+  w_main->set_frameskip(0);
 }
 
 MainWindow::MainWindow() {
-  video_mode = VIDEOMODE_512x448w;
 }

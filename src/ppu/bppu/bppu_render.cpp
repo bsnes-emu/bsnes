@@ -113,7 +113,7 @@ void bPPU::render_line_mode7() {
 
 void bPPU::render_line(uint16 line) {
   if(regs.display_disabled == true) {
-    memset(output + (line << 1) * 512, 0, 2048);
+    memset(output->buffer + (line << 1) * 512, 0, 2048);
     return;
   }
 

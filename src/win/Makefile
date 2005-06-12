@@ -1,6 +1,7 @@
 CC = cl
 CFLAGS = /nologo /O2 /Ob2
 OBJS = winmain.obj \
+       libstring.obj libconfig.obj \
        clock.obj bclock.obj \
        memory.obj bmemory.obj \
        reader.obj \
@@ -20,6 +21,14 @@ clean:
 ######################
 winmain.obj: *.cpp *.h
 	$(CC) $(CFLAGS) /c winmain.cpp
+
+#################
+### libraries ###
+#################
+libstring.obj: ../lib/*.cpp ../lib/*.h
+	$(CC) $(CFLAGS) /c ../lib/libstring.cpp
+libconfig.obj: ../lib/*.cpp ../lib/*.h
+	$(CC) $(CFLAGS) /c ../lib/libconfig.cpp
 
 #############
 ### clock ###

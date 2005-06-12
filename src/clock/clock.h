@@ -22,7 +22,6 @@ public:
   virtual uint16 visible_scanlines();
 
   virtual void set_frameskip(uint8 fs);
-  virtual bool update_frame() = 0;
 
   virtual void add_cc1_cycles(uint32 cycles) = 0;
   virtual void add_cc2_cycles(uint32 cycles) = 0;

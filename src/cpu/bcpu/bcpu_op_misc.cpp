@@ -1,10 +1,10 @@
-void bCPU::flags_bit_b() {
+inline void bCPU::flags_bit_b() {
   regs.p.n = !!(rd.l & 0x80);
   regs.p.v = !!(rd.l & 0x40);
   regs.p.z = ((rd.l & regs.a.l) == 0);
 }
 
-void bCPU::flags_bit_w() {
+inline void bCPU::flags_bit_w() {
   regs.p.n = !!(rd.w & 0x8000);
   regs.p.v = !!(rd.w & 0x4000);
   regs.p.z = ((rd.w & regs.a.w) == 0);
@@ -20,16 +20,14 @@ cycles:
 */
 void bCPU::op_bit_constb() {
   rd.l = op_read(); //2
-  flags_bit_b();
+  regs.p.z = ((rd.l & regs.a.l) == 0);
 }
 
 void bCPU::op_bit_constw() {
   rd.l = op_read(); //2
   rd.h = op_read(); //2a
-  flags_bit_w();
+  regs.p.z = ((rd.w & regs.a.w) == 0);
 }
-
-void bCPU::op_bit_const() { (regs.p.m)?op_bit_constb():op_bit_constw(); }
 
 /**********************
  *** 0x2c: bit addr ***
@@ -55,8 +53,6 @@ void bCPU::op_bit_addrw() {
   rd.h = op_read(OPMODE_DBR, aa.w + 1); //4a
   flags_bit_w();
 }
-
-void bCPU::op_bit_addr() { (regs.p.m)?op_bit_addrb():op_bit_addrw(); }
 
 /************************
  *** 0x3c: bit addr,x ***
@@ -86,8 +82,6 @@ void bCPU::op_bit_addrxw() {
   flags_bit_w();
 }
 
-void bCPU::op_bit_addrx() { (regs.p.m)?op_bit_addrxb():op_bit_addrxw(); }
-
 /********************
  *** 0x24: bit dp ***
  ********************
@@ -112,8 +106,6 @@ void bCPU::op_bit_dpw() {
   rd.h = op_read(OPMODE_DP, dp + 1); //3a
   flags_bit_w();
 }
-
-void bCPU::op_bit_dp() { (regs.p.m)?op_bit_dpb():op_bit_dpw(); }
 
 /**********************
  *** 0x34: bit dp,x ***
@@ -143,16 +135,14 @@ void bCPU::op_bit_dpxw() {
   flags_bit_w();
 }
 
-void bCPU::op_bit_dpx() { (regs.p.m)?op_bit_dpxb():op_bit_dpxw(); }
-
-void bCPU::flags_cpx_b() {
+inline void bCPU::flags_cpx_b() {
 int32 r = regs.x.l - rd.l;
   regs.p.n = !!(r & 0x80);
   regs.p.z = ((uint8)r == 0);
   regs.p.c = (r >= 0);
 }
 
-void bCPU::flags_cpx_w() {
+inline void bCPU::flags_cpx_w() {
 int32 r = regs.x.w - rd.w;
   regs.p.n = !!(r & 0x8000);
   regs.p.z = ((uint16)r == 0);
@@ -177,8 +167,6 @@ void bCPU::op_cpx_constw() {
   rd.h = op_read(); //2a
   flags_cpx_w();
 }
-
-void bCPU::op_cpx_const() { (regs.p.x)?op_cpx_constb():op_cpx_constw(); }
 
 /**********************
  *** 0xec: cpx addr ***
@@ -205,8 +193,6 @@ void bCPU::op_cpx_addrw() {
   flags_cpx_w();
 }
 
-void bCPU::op_cpx_addr() { (regs.p.x)?op_cpx_addrb():op_cpx_addrw(); }
-
 /********************
  *** 0xe4: cpx dp ***
  ********************
@@ -232,16 +218,14 @@ void bCPU::op_cpx_dpw() {
   flags_cpx_w();
 }
 
-void bCPU::op_cpx_dp() { (regs.p.x)?op_cpx_dpb():op_cpx_dpw(); }
-
-void bCPU::flags_cpy_b() {
+inline void bCPU::flags_cpy_b() {
 int32 r = regs.y.l - rd.l;
   regs.p.n = !!(r & 0x80);
   regs.p.z = ((uint8)r == 0);
   regs.p.c = (r >= 0);
 }
 
-void bCPU::flags_cpy_w() {
+inline void bCPU::flags_cpy_w() {
 int32 r = regs.y.w - rd.w;
   regs.p.n = !!(r & 0x8000);
   regs.p.z = ((uint16)r == 0);
@@ -266,8 +250,6 @@ void bCPU::op_cpy_constw() {
   rd.h = op_read(); //2a
   flags_cpy_w();
 }
-
-void bCPU::op_cpy_const() { (regs.p.x)?op_cpy_constb():op_cpy_constw(); }
 
 /**********************
  *** 0xcc: cpy addr ***
@@ -294,8 +276,6 @@ void bCPU::op_cpy_addrw() {
   flags_cpy_w();
 }
 
-void bCPU::op_cpy_addr() { (regs.p.x)?op_cpy_addrb():op_cpy_addrw(); }
-
 /********************
  *** 0xc4: cpy dp ***
  ********************
@@ -321,14 +301,12 @@ void bCPU::op_cpy_dpw() {
   flags_cpy_w();
 }
 
-void bCPU::op_cpy_dp() { (regs.p.x)?op_cpy_dpb():op_cpy_dpw(); }
-
-void bCPU::flags_ldx_b() {
+inline void bCPU::flags_ldx_b() {
   regs.p.n = !!(regs.x.l & 0x80);
   regs.p.z = (regs.x.l == 0);
 }
 
-void bCPU::flags_ldx_w() {
+inline void bCPU::flags_ldx_w() {
   regs.p.n = !!(regs.x.w & 0x8000);
   regs.p.z = (regs.x.w == 0);
 }
@@ -351,8 +329,6 @@ void bCPU::op_ldx_constw() {
   regs.x.h = op_read(); //2a
   flags_ldx_w();
 }
-
-void bCPU::op_ldx_const() { (regs.p.x)?op_ldx_constb():op_ldx_constw(); }
 
 /**********************
  *** 0xae: ldx addr ***
@@ -378,8 +354,6 @@ void bCPU::op_ldx_addrw() {
   regs.x.h = op_read(OPMODE_DBR, aa.w + 1); //4a
   flags_ldx_w();
 }
-
-void bCPU::op_ldx_addr() { (regs.p.x)?op_ldx_addrb():op_ldx_addrw(); }
 
 /************************
  *** 0xbe: ldx addr,y ***
@@ -409,8 +383,6 @@ void bCPU::op_ldx_addryw() {
   flags_ldx_w();
 }
 
-void bCPU::op_ldx_addry() { (regs.p.x)?op_ldx_addryb():op_ldx_addryw(); }
-
 /********************
  *** 0xa6: ldx dp ***
  ********************
@@ -435,8 +407,6 @@ void bCPU::op_ldx_dpw() {
   regs.x.h = op_read(OPMODE_DP, dp + 1); //3a
   flags_ldx_w();
 }
-
-void bCPU::op_ldx_dp() { (regs.p.x)?op_ldx_dpb():op_ldx_dpw(); }
 
 /**********************
  *** 0xb6: ldx dp,y ***
@@ -466,14 +436,12 @@ void bCPU::op_ldx_dpyw() {
   flags_ldx_w();
 }
 
-void bCPU::op_ldx_dpy() { (regs.p.x)?op_ldx_dpyb():op_ldx_dpyw(); }
-
-void bCPU::flags_ldy_b() {
+inline void bCPU::flags_ldy_b() {
   regs.p.n = !!(regs.y.l & 0x80);
   regs.p.z = (regs.y.l == 0);
 }
 
-void bCPU::flags_ldy_w() {
+inline void bCPU::flags_ldy_w() {
   regs.p.n = !!(regs.y.w & 0x8000);
   regs.p.z = (regs.y.w == 0);
 }
@@ -496,8 +464,6 @@ void bCPU::op_ldy_constw() {
   regs.y.h = op_read(); //2a
   flags_ldy_w();
 }
-
-void bCPU::op_ldy_const() { (regs.p.x)?op_ldy_constb():op_ldy_constw(); }
 
 /**********************
  *** 0xac: ldy addr ***
@@ -523,8 +489,6 @@ void bCPU::op_ldy_addrw() {
   regs.y.h = op_read(OPMODE_DBR, aa.w + 1); //4a
   flags_ldy_w();
 }
-
-void bCPU::op_ldy_addr() { (regs.p.x)?op_ldy_addrb():op_ldy_addrw(); }
 
 /************************
  *** 0xbc: ldy addr,x ***
@@ -554,8 +518,6 @@ void bCPU::op_ldy_addrxw() {
   flags_ldy_w();
 }
 
-void bCPU::op_ldy_addrx() { (regs.p.x)?op_ldy_addrxb():op_ldy_addrxw(); }
-
 /********************
  *** 0xa4: ldy dp ***
  ********************
@@ -580,8 +542,6 @@ void bCPU::op_ldy_dpw() {
   regs.y.h = op_read(OPMODE_DP, dp + 1); //3a
   flags_ldy_w();
 }
-
-void bCPU::op_ldy_dp() { (regs.p.x)?op_ldy_dpb():op_ldy_dpw(); }
 
 /**********************
  *** 0xb4: ldy dp,x ***
@@ -611,8 +571,6 @@ void bCPU::op_ldy_dpxw() {
   flags_ldy_w();
 }
 
-void bCPU::op_ldy_dpx() { (regs.p.x)?op_ldy_dpxb():op_ldy_dpxw(); }
-
 /**********************
  *** 0x8e: stx addr ***
  **********************
@@ -636,8 +594,6 @@ void bCPU::op_stx_addrw() {
   op_write(OPMODE_DBR, aa.w + 1, regs.x.h); //4a
 }
 
-void bCPU::op_stx_addr() { (regs.p.x)?op_stx_addrb():op_stx_addrw(); }
-
 /********************
  *** 0x86: stx dp ***
  ********************
@@ -660,8 +616,6 @@ void bCPU::op_stx_dpw() {
   op_write(OPMODE_DP, dp,     regs.x.l); //3
   op_write(OPMODE_DP, dp + 1, regs.x.h); //3a
 }
-
-void bCPU::op_stx_dp() { (regs.p.x)?op_stx_dpb():op_stx_dpw(); }
 
 /**********************
  *** 0x96: stx dp,y ***
@@ -689,8 +643,6 @@ void bCPU::op_stx_dpyw() {
   op_write(OPMODE_DP, dp + regs.y.w + 1, regs.x.h); //4a
 }
 
-void bCPU::op_stx_dpy() { (regs.p.x)?op_stx_dpyb():op_stx_dpyw(); }
-
 /**********************
  *** 0x8c: sty addr ***
  **********************
@@ -714,8 +666,6 @@ void bCPU::op_sty_addrw() {
   op_write(OPMODE_DBR, aa.w + 1, regs.y.h); //4a
 }
 
-void bCPU::op_sty_addr() { (regs.p.x)?op_sty_addrb():op_sty_addrw(); }
-
 /********************
  *** 0x84: sty dp ***
  ********************
@@ -738,8 +688,6 @@ void bCPU::op_sty_dpw() {
   op_write(OPMODE_DP, dp,     regs.y.l); //3
   op_write(OPMODE_DP, dp + 1, regs.y.h); //3a
 }
-
-void bCPU::op_sty_dp() { (regs.p.x)?op_sty_dpb():op_sty_dpw(); }
 
 /**********************
  *** 0x94: sty dp,x ***
@@ -767,8 +715,6 @@ void bCPU::op_sty_dpxw() {
   op_write(OPMODE_DP, dp + regs.x.w + 1, regs.y.h); //4a
 }
 
-void bCPU::op_sty_dpx() { (regs.p.x)?op_sty_dpxb():op_sty_dpxw(); }
-
 /**********************
  *** 0x9c: stz addr ***
  **********************
@@ -791,8 +737,6 @@ void bCPU::op_stz_addrw() {
   op_write(OPMODE_DBR, aa.w,     0); //4
   op_write(OPMODE_DBR, aa.w + 1, 0); //4a
 }
-
-void bCPU::op_stz_addr() { (regs.p.m)?op_stz_addrb():op_stz_addrw(); }
 
 /************************
  *** 0x9e: stz addr,x ***
@@ -820,8 +764,6 @@ void bCPU::op_stz_addrxw() {
   op_write(OPMODE_DBR, aa.w + regs.x.w + 1, 0); //4a
 }
 
-void bCPU::op_stz_addrx() { (regs.p.m)?op_stz_addrxb():op_stz_addrxw(); }
-
 /********************
  *** 0x64: stz dp ***
  ********************
@@ -844,8 +786,6 @@ void bCPU::op_stz_dpw() {
   op_write(OPMODE_DP, dp,     0); //3
   op_write(OPMODE_DP, dp + 1, 0); //3a
 }
-
-void bCPU::op_stz_dp() { (regs.p.m)?op_stz_dpb():op_stz_dpw(); }
 
 /**********************
  *** 0x74: stz dp,x ***
@@ -872,8 +812,6 @@ void bCPU::op_stz_dpxw() {
   op_write(OPMODE_DP, dp + regs.x.w,     0); //4
   op_write(OPMODE_DP, dp + regs.x.w + 1, 0); //4a
 }
-
-void bCPU::op_stz_dpx() { (regs.p.m)?op_stz_dpxb():op_stz_dpxw(); }
 
 /*****************
  *** 0xeb: xba ***
@@ -928,8 +866,6 @@ void bCPU::op_trb_addrw() {
   op_write(OPMODE_DBR, aa.w,     rd.l);    //6
 }
 
-void bCPU::op_trb_addr() { (regs.p.m)?op_trb_addrb():op_trb_addrw(); }
-
 /********************
  *** 0x14: trb dp ***
  ********************
@@ -964,8 +900,6 @@ void bCPU::op_trb_dpw() {
   op_write(OPMODE_DP, dp + 1, rd.h);       //5a
   op_write(OPMODE_DP, dp,     rd.l);       //5
 }
-
-void bCPU::op_trb_dp() { (regs.p.m)?op_trb_dpb():op_trb_dpw(); }
 
 /**********************
  *** 0x0c: tsb addr ***
@@ -1002,8 +936,6 @@ void bCPU::op_tsb_addrw() {
   op_write(OPMODE_DBR, aa.w,     rd.l);    //6
 }
 
-void bCPU::op_tsb_addr() { (regs.p.m)?op_tsb_addrb():op_tsb_addrw(); }
-
 /********************
  *** 0x04: tsb dp ***
  ********************
@@ -1038,8 +970,6 @@ void bCPU::op_tsb_dpw() {
   op_write(OPMODE_DP, dp + 1, rd.h);       //5a
   op_write(OPMODE_DP, dp,     rd.l);       //5
 }
-
-void bCPU::op_tsb_dp() { (regs.p.m)?op_tsb_dpb():op_tsb_dpw(); }
 
 /**************************
  *** 0x54: mvn src,dest ***
@@ -1219,6 +1149,14 @@ bool c = regs.p.c;
     regs.x.h = 0x00;
     regs.y.h = 0x00;
     regs.s.h = 0x01;
+    optbl = optbl_e;
+  } else {
+    switch((regs.p >> 4) & 3) {
+    case 0:optbl = optbl_mx;break;
+    case 1:optbl = optbl_mX;break;
+    case 2:optbl = optbl_Mx;break;
+    case 3:optbl = optbl_MX;break;
+    }
   }
 }
 
@@ -1343,6 +1281,13 @@ void bCPU::op_rep() {
   regs.p &= ~rd.l;
   if(regs.e) {
     regs.p |= 0x30;
+  } else {
+    switch((regs.p >> 4) & 3) {
+    case 0:optbl = optbl_mx;break;
+    case 1:optbl = optbl_mX;break;
+    case 2:optbl = optbl_Mx;break;
+    case 3:optbl = optbl_MX;break;
+    }
   }
 }
 
@@ -1360,6 +1305,13 @@ void bCPU::op_sep() {
   regs.p |= rd.l;
   if(regs.e) {
     regs.p |= 0x30;
+  } else {
+    switch((regs.p >> 4) & 3) {
+    case 0:optbl = optbl_mx;break;
+    case 1:optbl = optbl_mX;break;
+    case 2:optbl = optbl_Mx;break;
+    case 3:optbl = optbl_MX;break;
+    }
   }
   if(regs.p.x) {
     regs.x.h = 0x00;
@@ -1388,8 +1340,6 @@ void bCPU::op_taxw() {
   regs.p.z = (regs.x.w == 0);
 }
 
-void bCPU::op_tax() { (regs.p.x)?op_taxb():op_taxw(); }
-
 /*****************
  *** 0xa8: tay ***
  *****************
@@ -1410,8 +1360,6 @@ void bCPU::op_tayw() {
   regs.p.n = !!(regs.y.w & 0x8000);
   regs.p.z = (regs.y.w == 0);
 }
-
-void bCPU::op_tay() { (regs.p.x)?op_tayb():op_tayw(); }
 
 /*****************
  *** 0x5b: tcd ***
@@ -1496,8 +1444,6 @@ void bCPU::op_tsxw() {
   regs.p.z = (regs.x.w == 0);
 }
 
-void bCPU::op_tsx() { (regs.p.x)?op_tsxb():op_tsxw(); }
-
 /*****************
  *** 0x8a: txa ***
  *****************
@@ -1518,8 +1464,6 @@ void bCPU::op_txaw() {
   regs.p.n = !!(regs.a.w & 0x8000);
   regs.p.z = (regs.a.w == 0);
 }
-
-void bCPU::op_txa() { (regs.p.m)?op_txab():op_txaw(); }
 
 /*****************
  *** 0x9a: txs ***
@@ -1542,8 +1486,6 @@ void bCPU::op_txsw() {
   regs.p.z = (regs.s.w == 0);
 }
 
-void bCPU::op_txs() { (regs.p.x)?op_txsb():op_txsw(); }
-
 /*****************
  *** 0x9b: txy ***
  *****************
@@ -1564,8 +1506,6 @@ void bCPU::op_txyw() {
   regs.p.n = !!(regs.y.w & 0x8000);
   regs.p.z = (regs.y.w == 0);
 }
-
-void bCPU::op_txy() { (regs.p.x)?op_txyb():op_txyw(); }
 
 /*****************
  *** 0x98: tya ***
@@ -1588,8 +1528,6 @@ void bCPU::op_tyaw() {
   regs.p.z = (regs.a.w == 0);
 }
 
-void bCPU::op_tya() { (regs.p.m)?op_tyab():op_tyaw(); }
-
 /*****************
  *** 0xbb: tyx ***
  *****************
@@ -1610,5 +1548,3 @@ void bCPU::op_tyxw() {
   regs.p.n = !!(regs.x.w & 0x8000);
   regs.p.z = (regs.x.w == 0);
 }
-
-void bCPU::op_tyx() { (regs.p.x)?op_tyxb():op_tyxw(); }

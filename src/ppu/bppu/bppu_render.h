@@ -56,8 +56,8 @@ struct {
 }current_sprite;
 
 void   render_line_to_output();
-uint16 addsub_pixels(uint8 x, uint8 cdest_index, uint8 cdest_bg, uint8 csrc_index, uint8 csrc_bg);
-uint16 addsub_pixel(uint8 x, uint8 cdest_index, uint8 cdest_bg);
+inline uint16 addsub_pixels(uint8 x, uint8 cdest_index, uint8 cdest_bg, uint8 csrc_index, uint8 csrc_bg);
+inline uint16 addsub_pixel(uint8 x, uint8 cdest_index, uint8 cdest_bg);
 void   render_bg_tile(uint8 color_depth, uint8 bg, uint16 tile_num);
 void   set_pixel(uint8 bg, uint16 x, uint8 pal_index);
 void   set_layer_pixels(uint8 layer_count, uint8 *layer_bg_lookup);

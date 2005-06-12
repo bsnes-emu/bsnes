@@ -307,6 +307,15 @@ uint32 b, w;
   snes->notify(SNES::MEM_WRITE, addr, value);
 }
 
+void bMemBus::power() {
+  memset(wram, 0, 0x020000);
+  reset();
+}
+
+void bMemBus::reset() {
+  fastROM = false;
+}
+
 bMemBus::bMemBus() {
   rom = new bROM();
 

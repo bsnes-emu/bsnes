@@ -193,9 +193,14 @@ void bCPU::op_rtin() {
     regs.y.h = 0x00;
   }
   regs.pc.d = rd.d;
-}
 
-void bCPU::op_rti() { (regs.e)?op_rtie():op_rtin(); }
+  switch((regs.p >> 4) & 3) {
+  case 0:optbl = optbl_mx;break;
+  case 1:optbl = optbl_mX;break;
+  case 2:optbl = optbl_Mx;break;
+  case 3:optbl = optbl_MX;break;
+  }
+}
 
 /*****************
  *** 0x60: rts ***

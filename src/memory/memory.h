@@ -33,6 +33,9 @@ bool fastROM;
   virtual bool  set_mmio_mapper(uint16 addr, MMIO *mapper);
   virtual uint8 speed(uint32 addr);
 
+  virtual void power() = 0;
+  virtual void reset() = 0;
+
   MemBus();
   ~MemBus();
 };

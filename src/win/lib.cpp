@@ -68,44 +68,6 @@ va_list args;
   }
 }
 
-uint32 strhex(char *str) {
-uint32 r = 0, m = 0;
-int i, ssl = strlen(str);
-uint8 x;
-  for(i=0;i<ssl;i++) {
-    if(str[i] >= '0' && str[i] <= '9');
-    else if(str[i] >= 'A' && str[i] <= 'F');
-    else if(str[i] >= 'a' && str[i] <= 'f');
-    else break;
-  }
-  for(--i;i>=0;i--, m+=4) {
-    x = str[i];
-    if(x >= '0' && x <= '9')x -= '0';
-    else if(x >= 'A' && x <= 'F')x -= 'A' - 0x0a;
-    else if(x >= 'a' && x <= 'f')x -= 'a' - 0x0a;
-    else return r;
-    r |= x << m;
-  }
-  return r;
-}
-
-uint32 strdec(char *str) {
-uint32 m = 1;
-int i, r = 0, ssl = strlen(str);
-uint8 x;
-  for(i=0;i<ssl;i++) {
-    if(str[i] >= '0' && str[i] <= '9');
-    else break;
-  }
-  for(--i;i>=0;i--, m*=10) {
-    x = str[i];
-    if(x >= '0' && x <= '9')x -= '0';
-    else return r;
-    r += x * m;
-  }
-  return r;
-}
-
 uint32 load_file(char *fn, uint8 **buffer) {
 FILE *fp;
 uint8 *data;

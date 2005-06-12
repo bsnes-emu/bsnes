@@ -21,8 +21,6 @@ void bCPU::op_sta_addrw() {
   op_write(OPMODE_DBR, aa.w + 1, regs.a.h); //4a
 }
 
-void bCPU::op_sta_addr() { (regs.p.m)?op_sta_addrb():op_sta_addrw(); }
-
 /************************
  *** 0x9d: sta addr,x ***
  ************************
@@ -49,8 +47,6 @@ void bCPU::op_sta_addrxw() {
   op_write(OPMODE_DBR, aa.w + regs.x.w + 1, regs.a.h); //4a
 }
 
-void bCPU::op_sta_addrx() { (regs.p.m)?op_sta_addrxb():op_sta_addrxw(); }
-
 /********************
  *** 0x85: sta dp ***
  ********************
@@ -73,8 +69,6 @@ void bCPU::op_sta_dpw() {
   op_write(OPMODE_DP, dp,     regs.a.l); //3
   op_write(OPMODE_DP, dp + 1, regs.a.h); //3a
 }
-
-void bCPU::op_sta_dp() { (regs.p.m)?op_sta_dpb():op_sta_dpw(); }
 
 /**********************
  *** 0x92: sta (dp) ***
@@ -104,8 +98,6 @@ void bCPU::op_sta_idpw() {
   op_write(OPMODE_DBR, aa.w,     regs.a.l); //5
   op_write(OPMODE_DBR, aa.w + 1, regs.a.h); //5
 }
-
-void bCPU::op_sta_idp() { (regs.p.m)?op_sta_idpb():op_sta_idpw(); }
 
 /**********************
  *** 0x87: sta [dp] ***
@@ -139,8 +131,6 @@ void bCPU::op_sta_ildpw() {
   op_write(OPMODE_LONG, aa.d + 1, regs.a.h); //6a
 }
 
-void bCPU::op_sta_ildp() { (regs.p.m)?op_sta_ildpb():op_sta_ildpw(); }
-
 /**********************
  *** 0x8f: sta long ***
  **********************
@@ -166,8 +156,6 @@ void bCPU::op_sta_longw() {
   op_write(OPMODE_LONG, aa.d,     regs.a.l); //5
   op_write(OPMODE_LONG, aa.d + 1, regs.a.h); //5a
 }
-
-void bCPU::op_sta_long() { (regs.p.m)?op_sta_longb():op_sta_longw(); }
 
 /************************
  *** 0x9f: sta long,x ***
@@ -195,8 +183,6 @@ void bCPU::op_sta_longxw() {
   op_write(OPMODE_LONG, aa.d + regs.x.w + 1, regs.a.h); //5a
 }
 
-void bCPU::op_sta_longx() { (regs.p.m)?op_sta_longxb():op_sta_longxw(); }
-
 /************************
  *** 0x99: sta addr,y ***
  ************************
@@ -223,8 +209,6 @@ void bCPU::op_sta_addryw() {
   op_write(OPMODE_DBR, aa.w + regs.y.w + 1, regs.a.h); //4a
 }
 
-void bCPU::op_sta_addry() { (regs.p.m)?op_sta_addryb():op_sta_addryw(); }
-
 /**********************
  *** 0x95: sta dp,x ***
  **********************
@@ -250,8 +234,6 @@ void bCPU::op_sta_dpxw() {
   op_write(OPMODE_DP, dp + regs.x.w,     regs.a.l); //4
   op_write(OPMODE_DP, dp + regs.x.w + 1, regs.a.h); //4a
 }
-
-void bCPU::op_sta_dpx() { (regs.p.m)?op_sta_dpxb():op_sta_dpxw(); }
 
 /************************
  *** 0x81: sta (dp,x) ***
@@ -285,8 +267,6 @@ void bCPU::op_sta_idpxw() {
   op_write(OPMODE_DBR, aa.w + 1, regs.a.h);     //6a
 }
 
-void bCPU::op_sta_idpx() { (regs.p.m)?op_sta_idpxb():op_sta_idpxw(); }
-
 /************************
  *** 0x91: sta (dp),y ***
  ************************
@@ -318,8 +298,6 @@ void bCPU::op_sta_idpyw() {
   op_write(OPMODE_DBR, aa.w + regs.y.w,     regs.a.l); //5
   op_write(OPMODE_DBR, aa.w + regs.y.w + 1, regs.a.h); //5a
 }
-
-void bCPU::op_sta_idpy() { (regs.p.m)?op_sta_idpyb():op_sta_idpyw(); }
 
 /************************
  *** 0x97: sta [dp],y ***
@@ -353,8 +331,6 @@ void bCPU::op_sta_ildpyw() {
   op_write(OPMODE_LONG, aa.d + regs.y.w + 1, regs.a.h); //6a
 }
 
-void bCPU::op_sta_ildpy() { (regs.p.m)?op_sta_ildpyb():op_sta_ildpyw(); }
-
 /**********************
  *** 0x83: sta sr,s ***
  **********************
@@ -377,8 +353,6 @@ void bCPU::op_sta_srw() {
   op_write(OPMODE_SP, sp,     regs.a.l); //4
   op_write(OPMODE_SP, sp + 1, regs.a.h); //4a
 }
-
-void bCPU::op_sta_sr() { (regs.p.m)?op_sta_srb():op_sta_srw(); }
 
 /**************************
  *** 0x93: sta (sr,s),y ***
@@ -411,5 +385,3 @@ void bCPU::op_sta_isryw() {
   op_write(OPMODE_DBR, aa.w + regs.y.w,     regs.a.l); //7
   op_write(OPMODE_DBR, aa.w + regs.y.w + 1, regs.a.h); //7a
 }
-
-void bCPU::op_sta_isry() { (regs.p.m)?op_sta_isryb():op_sta_isryw(); }

@@ -8,7 +8,7 @@ void SNES::power() {
   clock->power();
   cpu->power();
   ppu->power();
-  mem_bus->fastROM = false;
+  mem_bus->power();
 
 int i;
   mem_bus->flush_mmio_mappers();
@@ -17,6 +17,8 @@ int i;
   for(i=0x2180;i<=0x2183;i++)mem_bus->set_mmio_mapper(i, cpu->mmio);
   mem_bus->set_mmio_mapper(0x21c2, cpu->mmio);
   mem_bus->set_mmio_mapper(0x21c3, cpu->mmio);
+  mem_bus->set_mmio_mapper(0x4016, cpu->mmio);
+  mem_bus->set_mmio_mapper(0x4017, cpu->mmio);
   for(i=0x4200;i<=0x421f;i++)mem_bus->set_mmio_mapper(i, cpu->mmio);
   for(i=0x4300;i<=0x437f;i++)mem_bus->set_mmio_mapper(i, cpu->mmio);
 }
@@ -25,7 +27,7 @@ void SNES::reset() {
   clock->reset();
   cpu->reset();
   ppu->reset();
-  mem_bus->fastROM = false;
+  mem_bus->reset();
 }
 
 /***************************

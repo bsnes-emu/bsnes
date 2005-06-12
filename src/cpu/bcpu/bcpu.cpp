@@ -58,17 +58,26 @@ void bCPU::irq(uint16 addr) {
 
 void bCPU::run() {
 uint16 v, h, hc, vs;
+  v  = clock->vcounter();
+  h  = clock->hcounter();
+  hc = clock->hcycles();
+  vs = clock->visible_scanlines();
+
+//HDMA test
+  if(v < vs && h >= 278) {
+    if(status.hdma_triggered == false) {
+      status.hdma_triggered = true;
+      dma->hdma_run();
+      return;
+    }
+  }
+
   switch(cpustate) {
   case CPUSTATE_RUN:
   case CPUSTATE_WAI:
-    v = clock->vcounter();
-    h = clock->hcounter();
-    hc = clock->hcycles();
-    vs = clock->visible_scanlines();
-
   //NMI test
     if(v >= (vs + 1) && status.nmi_triggered == false) {
-      if((v == (vs + 1) && hc >= 12) || (v >= (vs + 1))) {
+      if((v == (vs + 1) && hc >= 12) || (v > (vs + 1))) {
         status.nmi_triggered = true;
         status.nmi_pin = 0;
         if(status.nmi_enabled == true) {
@@ -104,12 +113,6 @@ uint16 v, h, hc, vs;
       }
     }
 
-  //HDMA test
-    if(v < vs && h >= 278 && dma->hdma_triggered == false) {
-      dma->hdma_run();
-      dma->hdma_triggered = true;
-    }
-
     exec_opcode();
     break;
   case CPUSTATE_DMA:
@@ -123,16 +126,25 @@ uint16 v, h, hc, vs;
 
 void bCPU::scanline() {
 uint16 v = clock->vcounter();
+  status.hdma_triggered = false;
+
   if(v == 225 && status.auto_joypad_poll == true) {
     snes->poll_input();
+//When the SNES auto-polls the joypads, it writes 1, then 0 to
+//$4016, then reads from each 16 times to get the joypad state
+//information. As a result, the joypad read positions are set
+//to 16 after such a poll. Position 16 is the controller
+//connected status bit.
+    status.joypad1_read_pos = 16;
   }
   if(status.virq_enabled == false) {
     status.irq_pin = 1;
   }
-  dma->hdma_triggered = false;
 }
 
 void bCPU::frame() {
+  status.hdma_triggered = false;
+
   status.nmi_triggered = false;
   status.r4210_read = false;
 
@@ -164,6 +176,10 @@ void bCPU::reset() {
 
   dma->reset();
   mmio_reset();
+
+  optbl = optbl_e;
+
+  status.hdma_triggered = false;
 
   status.nmi_triggered = false;
   status.nmi_pin = 1;
@@ -290,6 +306,8 @@ void bCPU::stack_write(uint8 value) {
 bCPU::bCPU() {
   dma = new bDMA(this);
   mmio = new bCPUMMIO(this);
+
+  init_op_tables();
 }
 
 bCPU::~bCPU() {

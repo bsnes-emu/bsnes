@@ -1,10 +1,15 @@
 #define INTERFACE_MAIN
-#define BSNES_VERSION "0.006"
+#define BSNES_VERSION "0.007"
 #include "winmain.h"
 #include "../base.h"
 
+#include "config.cpp"
+
 #include "bsnes.h"
 #include "ui.h"
+
+#include "timer.cpp"
+fpstimer *fps_timer;
 
 #include "lib.cpp"
 #include "rom.cpp"
@@ -31,7 +36,13 @@ void term_snes() {
 
 int __stdcall WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
 MSG msg;
+string cfg_fn;
+  _getcwd(cfg_fn, 4096);
+  cfg_fn += "\\bsnes.cfg";
+  cfg.load(cfg_fn);
   meminit();
+  fps_timer = new fpstimer();
+  fps_timer->start();
   rom_image = new ROMImage();
 
   init_ui0();
@@ -56,6 +67,8 @@ MSG msg;
     bsnes->run();
   }
 
+  cfg.save(cfg_fn);
+  delete(rom_image);
   term_snes();
   memterm();
   return 0;

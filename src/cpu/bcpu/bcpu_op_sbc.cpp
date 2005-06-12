@@ -1,4 +1,4 @@
-void bCPU::flags_sbc_b() {
+inline void bCPU::flags_sbc_b() {
 int32 r = regs.a.l - rd.l - !regs.p.c;
 //bcd
   if(regs.p.d) {
@@ -12,7 +12,7 @@ int32 r = regs.a.l - rd.l - !regs.p.c;
   regs.a.l = r;
 }
 
-void bCPU::flags_sbc_w() {
+inline void bCPU::flags_sbc_w() {
 int32 r = regs.a.w - rd.w - !regs.p.c;
 //bcd
   if(regs.p.d) {
@@ -47,8 +47,6 @@ void bCPU::op_sbc_constw() {
   flags_sbc_w();
 }
 
-void bCPU::op_sbc_const() { (regs.p.m)?op_sbc_constb():op_sbc_constw(); }
-
 /**********************
  *** 0xed: sbc addr ***
  **********************
@@ -73,8 +71,6 @@ void bCPU::op_sbc_addrw() {
   rd.h = op_read(OPMODE_DBR, aa.w + 1); //4a
   flags_sbc_w();
 }
-
-void bCPU::op_sbc_addr() { (regs.p.m)?op_sbc_addrb():op_sbc_addrw(); }
 
 /************************
  *** 0xfd: sbc addr,x ***
@@ -104,8 +100,6 @@ void bCPU::op_sbc_addrxw() {
   flags_sbc_w();
 }
 
-void bCPU::op_sbc_addrx() { (regs.p.m)?op_sbc_addrxb():op_sbc_addrxw(); }
-
 /********************
  *** 0xe5: sbc dp ***
  ********************
@@ -130,8 +124,6 @@ void bCPU::op_sbc_dpw() {
   rd.h = op_read(OPMODE_DP, dp + 1); //3a
   flags_sbc_w();
 }
-
-void bCPU::op_sbc_dp() { (regs.p.m)?op_sbc_dpb():op_sbc_dpw(); }
 
 /**********************
  *** 0xf2: sbc (dp) ***
@@ -163,8 +155,6 @@ void bCPU::op_sbc_idpw() {
   rd.h = op_read(OPMODE_DBR, aa.w + 1); //5
   flags_sbc_w();
 }
-
-void bCPU::op_sbc_idp() { (regs.p.m)?op_sbc_idpb():op_sbc_idpw(); }
 
 /**********************
  *** 0xe7: sbc [dp] ***
@@ -200,8 +190,6 @@ void bCPU::op_sbc_ildpw() {
   flags_sbc_w();
 }
 
-void bCPU::op_sbc_ildp() { (regs.p.m)?op_sbc_ildpb():op_sbc_ildpw(); }
-
 /**********************
  *** 0xef: sbc long ***
  **********************
@@ -229,8 +217,6 @@ void bCPU::op_sbc_longw() {
   rd.h = op_read(OPMODE_LONG, aa.d + 1); //5a
   flags_sbc_w();
 }
-
-void bCPU::op_sbc_long() { (regs.p.m)?op_sbc_longb():op_sbc_longw(); }
 
 /************************
  *** 0xff: sbc long,x ***
@@ -260,8 +246,6 @@ void bCPU::op_sbc_longxw() {
   flags_sbc_w();
 }
 
-void bCPU::op_sbc_longx() { (regs.p.m)?op_sbc_longxb():op_sbc_longxw(); }
-
 /************************
  *** 0xf9: sbc addr,y ***
  ************************
@@ -290,8 +274,6 @@ void bCPU::op_sbc_addryw() {
   flags_sbc_w();
 }
 
-void bCPU::op_sbc_addry() { (regs.p.m)?op_sbc_addryb():op_sbc_addryw(); }
-
 /**********************
  *** 0xf5: sbc dp,x ***
  **********************
@@ -319,8 +301,6 @@ void bCPU::op_sbc_dpxw() {
   rd.h = op_read(OPMODE_DP, dp + regs.x.w + 1); //4a
   flags_sbc_w();
 }
-
-void bCPU::op_sbc_dpx() { (regs.p.m)?op_sbc_dpxb():op_sbc_dpxw(); }
 
 /************************
  *** 0xe1: sbc (dp,x) ***
@@ -356,8 +336,6 @@ void bCPU::op_sbc_idpxw() {
   flags_sbc_w();
 }
 
-void bCPU::op_sbc_idpx() { (regs.p.m)?op_sbc_idpxb():op_sbc_idpxw(); }
-
 /************************
  *** 0xf1: sbc (dp),y ***
  ************************
@@ -391,8 +369,6 @@ void bCPU::op_sbc_idpyw() {
   rd.h = op_read(OPMODE_DBR, aa.w + regs.y.w + 1); //5a
   flags_sbc_w();
 }
-
-void bCPU::op_sbc_idpy() { (regs.p.m)?op_sbc_idpyb():op_sbc_idpyw(); }
 
 /************************
  *** 0xf7: sbc [dp],y ***
@@ -428,8 +404,6 @@ void bCPU::op_sbc_ildpyw() {
   flags_sbc_w();
 }
 
-void bCPU::op_sbc_ildpy() { (regs.p.m)?op_sbc_ildpyb():op_sbc_ildpyw(); }
-
 /**********************
  *** 0xe3: sbc sr,s ***
  **********************
@@ -454,8 +428,6 @@ void bCPU::op_sbc_srw() {
   rd.h = op_read(OPMODE_SP, sp + 1); //4a
   flags_sbc_w();
 }
-
-void bCPU::op_sbc_sr() { (regs.p.m)?op_sbc_srb():op_sbc_srw(); }
 
 /**************************
  *** 0xf3: sbc (sr,s),y ***
@@ -490,5 +462,3 @@ void bCPU::op_sbc_isryw() {
   rd.h = op_read(OPMODE_DBR, aa.w + regs.y.w + 1); //7a
   flags_sbc_w();
 }
-
-void bCPU::op_sbc_isry() { (regs.p.m)?op_sbc_isryb():op_sbc_isryw(); }

@@ -141,7 +141,7 @@ bool visible, menu_visible;
 
 class MainWindow : public Window {
 public:
-uint8 video_mode, frameskip;
+uint8 frameskip;
   void set_frameskip(uint8 fs);
   void set_video_mode(uint8 mode);
   void menu_load();
@@ -227,7 +227,7 @@ uint32 edit_mode, edit_addr, edit_mask;
 MemoryEditor *w_memory;
 
 #include <ddraw.h>
-class render {
+class Render {
 public:
 LPDIRECTDRAW        lpdd;
 LPDIRECTDRAWSURFACE lpdds, lpddsb;
@@ -239,13 +239,14 @@ uint8 color_depth;
   void set_window(HWND hwnd_handle);
   void to_windowed();
   void to_fullscreen();
+  void set_source_window(RECT *rs);
   void redraw();
   void update16();
   void update32();
   void update();
   void destroy();
   void update_color_lookup_table();
-  render();
+  Render();
 };
 
-render renderer;
+Render *renderer;

@@ -1,11 +1,11 @@
-void bCPU::flags_cmp_b() {
+inline void bCPU::flags_cmp_b() {
 int32 r = regs.a.l - rd.l;
   regs.p.n = !!(r & 0x80);
   regs.p.z = ((uint8)r == 0);
   regs.p.c = (r >= 0);
 }
 
-void bCPU::flags_cmp_w() {
+inline void bCPU::flags_cmp_w() {
 int32 r = regs.a.w - rd.w;
   regs.p.n = !!(r & 0x8000);
   regs.p.z = ((uint16)r == 0);
@@ -31,8 +31,6 @@ void bCPU::op_cmp_constw() {
   flags_cmp_w();
 }
 
-void bCPU::op_cmp_const() { (regs.p.m)?op_cmp_constb():op_cmp_constw(); }
-
 /**********************
  *** 0xcd: cmp addr ***
  **********************
@@ -57,8 +55,6 @@ void bCPU::op_cmp_addrw() {
   rd.h = op_read(OPMODE_DBR, aa.w + 1); //4a
   flags_cmp_w();
 }
-
-void bCPU::op_cmp_addr() { (regs.p.m)?op_cmp_addrb():op_cmp_addrw(); }
 
 /************************
  *** 0xdd: cmp addr,x ***
@@ -88,8 +84,6 @@ void bCPU::op_cmp_addrxw() {
   flags_cmp_w();
 }
 
-void bCPU::op_cmp_addrx() { (regs.p.m)?op_cmp_addrxb():op_cmp_addrxw(); }
-
 /********************
  *** 0xc5: cmp dp ***
  ********************
@@ -114,8 +108,6 @@ void bCPU::op_cmp_dpw() {
   rd.h = op_read(OPMODE_DP, dp + 1); //3a
   flags_cmp_w();
 }
-
-void bCPU::op_cmp_dp() { (regs.p.m)?op_cmp_dpb():op_cmp_dpw(); }
 
 /**********************
  *** 0xd2: cmp (dp) ***
@@ -147,8 +139,6 @@ void bCPU::op_cmp_idpw() {
   rd.h = op_read(OPMODE_DBR, aa.w + 1); //5
   flags_cmp_w();
 }
-
-void bCPU::op_cmp_idp() { (regs.p.m)?op_cmp_idpb():op_cmp_idpw(); }
 
 /**********************
  *** 0xc7: cmp [dp] ***
@@ -184,8 +174,6 @@ void bCPU::op_cmp_ildpw() {
   flags_cmp_w();
 }
 
-void bCPU::op_cmp_ildp() { (regs.p.m)?op_cmp_ildpb():op_cmp_ildpw(); }
-
 /**********************
  *** 0xcf: cmp long ***
  **********************
@@ -213,8 +201,6 @@ void bCPU::op_cmp_longw() {
   rd.h = op_read(OPMODE_LONG, aa.d + 1); //5a
   flags_cmp_w();
 }
-
-void bCPU::op_cmp_long() { (regs.p.m)?op_cmp_longb():op_cmp_longw(); }
 
 /************************
  *** 0xdf: cmp long,x ***
@@ -244,8 +230,6 @@ void bCPU::op_cmp_longxw() {
   flags_cmp_w();
 }
 
-void bCPU::op_cmp_longx() { (regs.p.m)?op_cmp_longxb():op_cmp_longxw(); }
-
 /************************
  *** 0xd9: cmp addr,y ***
  ************************
@@ -274,8 +258,6 @@ void bCPU::op_cmp_addryw() {
   flags_cmp_w();
 }
 
-void bCPU::op_cmp_addry() { (regs.p.m)?op_cmp_addryb():op_cmp_addryw(); }
-
 /**********************
  *** 0xd5: cmp dp,x ***
  **********************
@@ -303,8 +285,6 @@ void bCPU::op_cmp_dpxw() {
   rd.h = op_read(OPMODE_DP, dp + regs.x.w + 1); //4a
   flags_cmp_w();
 }
-
-void bCPU::op_cmp_dpx() { (regs.p.m)?op_cmp_dpxb():op_cmp_dpxw(); }
 
 /************************
  *** 0xc1: cmp (dp,x) ***
@@ -340,8 +320,6 @@ void bCPU::op_cmp_idpxw() {
   flags_cmp_w();
 }
 
-void bCPU::op_cmp_idpx() { (regs.p.m)?op_cmp_idpxb():op_cmp_idpxw(); }
-
 /************************
  *** 0xd1: cmp (dp),y ***
  ************************
@@ -375,8 +353,6 @@ void bCPU::op_cmp_idpyw() {
   rd.h = op_read(OPMODE_DBR, aa.w + regs.y.w + 1); //5a
   flags_cmp_w();
 }
-
-void bCPU::op_cmp_idpy() { (regs.p.m)?op_cmp_idpyb():op_cmp_idpyw(); }
 
 /************************
  *** 0xd7: cmp [dp],y ***
@@ -412,8 +388,6 @@ void bCPU::op_cmp_ildpyw() {
   flags_cmp_w();
 }
 
-void bCPU::op_cmp_ildpy() { (regs.p.m)?op_cmp_ildpyb():op_cmp_ildpyw(); }
-
 /**********************
  *** 0xc3: cmp sr,s ***
  **********************
@@ -438,8 +412,6 @@ void bCPU::op_cmp_srw() {
   rd.h = op_read(OPMODE_SP, sp + 1); //4a
   flags_cmp_w();
 }
-
-void bCPU::op_cmp_sr() { (regs.p.m)?op_cmp_srb():op_cmp_srw(); }
 
 /**************************
  *** 0xd3: cmp (sr,s),y ***
@@ -474,5 +446,3 @@ void bCPU::op_cmp_isryw() {
   rd.h = op_read(OPMODE_DBR, aa.w + regs.y.w + 1); //7a
   flags_cmp_w();
 }
-
-void bCPU::op_cmp_isry() { (regs.p.m)?op_cmp_isryb():op_cmp_isryw(); }

@@ -29,6 +29,7 @@ void CreateWindows() {
 }
 
 void init_ui0() {
+  renderer  = new Render();
   w_main    = new MainWindow();
   w_console = new Console();
   w_bp      = new BreakpointEditor();
@@ -39,7 +40,7 @@ void init_ui1() {
   CreateFonts();
   CreateWindows();
   SetFocus(w_main->hwnd);
-  renderer.set_window(w_main->hwnd);
-  renderer.to_windowed();
+  renderer->set_window(w_main->hwnd);
+  renderer->to_windowed();
   bsnes->debugger_deactivate();
 }

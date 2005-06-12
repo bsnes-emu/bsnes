@@ -14,7 +14,7 @@ namespace bPPUAddSubTables {
   };
 };
 
-uint16 bPPU::addsub_pixels(uint8 x, uint8 cdest_index, uint8 cdest_bg, uint8 csrc_index, uint8 csrc_bg) {
+inline uint16 bPPU::addsub_pixels(uint8 x, uint8 cdest_index, uint8 cdest_bg, uint8 csrc_index, uint8 csrc_bg) {
 int r, g, b;
 uint16 cdest = pal_pixel(cdest_index);
 uint16 csrc  = pal_pixel(csrc_index);
@@ -52,7 +52,7 @@ uint16 res;
   return ((r) | (g << 5) | (b << 10));
 }
 
-uint16 bPPU::addsub_pixel(uint8 x, uint8 cdest_index, uint8 cdest_bg) {
+inline uint16 bPPU::addsub_pixel(uint8 x, uint8 cdest_index, uint8 cdest_bg) {
 int r, g, b;
 uint16 cdest = pal_pixel(cdest_index);
 uint16 csrc  = (regs.color_r) | (regs.color_g << 5) | (regs.color_b << 10);
@@ -190,16 +190,17 @@ uint8 *dest;
 
 void bPPU::render_line_to_output() {
 int x, x1;
-uint16 *ptr, *ptri, *ltable;
+uint16 *ptr, *ltable;
 uint16 c, cx, cy;
-uint16 screen_width = (regs.bg_mode == 5 || regs.bg_mode == 6)?512:256;
-uint16 vline_pos = clock->vcounter();
+uint16 screen_width;
+uint16 v, vline_pos = clock->vcounter();
+  v = vline_pos;
+  screen_width = (output->scanline_mode[v] & PPUOutput::DOUBLEWIDTH)?512:256;
 
-  if(clock->interlace() == false) {
-    ptr  = (uint16*)output + ((vline_pos << 1)    ) * 512;
-    ptri = (uint16*)output + ((vline_pos << 1) + 1) * 512;
+  if(!(output->scanline_mode[v] & PPUOutput::INTERLACE)) {
+    ptr = (uint16*)output->buffer + ((vline_pos << 1)) * 512;
   } else {
-    ptr  = (uint16*)output + ((vline_pos << 1) + clock->interlace_field()) * 512;
+    ptr = (uint16*)output->buffer + ((vline_pos << 1) + clock->interlace_field()) * 512;
   }
   ltable = (uint16*)light_table + (regs.display_brightness * 65536);
 
@@ -244,16 +245,12 @@ uint16 vline_pos = clock->vcounter();
       break;
     }
 
-    if(clock->interlace() == false) {
-      *(ptr  + (x1  )) = *(ltable + cx);
-      *(ptri + (x1++)) = *(ltable + cx);
-      if(screen_width != 256)continue;
-      *(ptr  + (x1  )) = *(ltable + cx);
-      *(ptri + (x1++)) = *(ltable + cx);
+    if(screen_width == 256) {
+      *(ptr + (x1)) = *(ltable + cx);
+      x1 += 2;
     } else {
-      *(ptr  + (x1++)) = *(ltable + cx);
-      if(screen_width != 256)continue;
-      *(ptr  + (x1++)) = *(ltable + cx);
+      *(ptr + (x1)) = *(ltable + cx);
+      x1 += 1;
     }
   }
 }

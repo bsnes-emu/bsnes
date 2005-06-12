@@ -1,9 +1,9 @@
-void bCPU::flags_lda_b() {
+inline void bCPU::flags_lda_b() {
   regs.p.n = !!(regs.a.l & 0x80);
   regs.p.z = (regs.a.l == 0);
 }
 
-void bCPU::flags_lda_w() {
+inline void bCPU::flags_lda_w() {
   regs.p.n = !!(regs.a.w & 0x8000);
   regs.p.z = (regs.a.w == 0);
 }
@@ -26,8 +26,6 @@ void bCPU::op_lda_constw() {
   regs.a.h = op_read(); //2a
   flags_lda_w();
 }
-
-void bCPU::op_lda_const() { (regs.p.m)?op_lda_constb():op_lda_constw(); }
 
 /**********************
  *** 0xad: lda addr ***
@@ -53,8 +51,6 @@ void bCPU::op_lda_addrw() {
   regs.a.h = op_read(OPMODE_DBR, aa.w + 1); //4a
   flags_lda_w();
 }
-
-void bCPU::op_lda_addr() { (regs.p.m)?op_lda_addrb():op_lda_addrw(); }
 
 /************************
  *** 0xbd: lda addr,x ***
@@ -84,8 +80,6 @@ void bCPU::op_lda_addrxw() {
   flags_lda_w();
 }
 
-void bCPU::op_lda_addrx() { (regs.p.m)?op_lda_addrxb():op_lda_addrxw(); }
-
 /********************
  *** 0xa5: lda dp ***
  ********************
@@ -110,8 +104,6 @@ void bCPU::op_lda_dpw() {
   regs.a.h = op_read(OPMODE_DP, dp + 1); //3a
   flags_lda_w();
 }
-
-void bCPU::op_lda_dp() { (regs.p.m)?op_lda_dpb():op_lda_dpw(); }
 
 /**********************
  *** 0xb2: lda (dp) ***
@@ -143,8 +135,6 @@ void bCPU::op_lda_idpw() {
   regs.a.h = op_read(OPMODE_DBR, aa.w + 1); //5
   flags_lda_w();
 }
-
-void bCPU::op_lda_idp() { (regs.p.m)?op_lda_idpb():op_lda_idpw(); }
 
 /**********************
  *** 0xa7: lda [dp] ***
@@ -180,8 +170,6 @@ void bCPU::op_lda_ildpw() {
   flags_lda_w();
 }
 
-void bCPU::op_lda_ildp() { (regs.p.m)?op_lda_ildpb():op_lda_ildpw(); }
-
 /**********************
  *** 0xaf: lda long ***
  **********************
@@ -209,8 +197,6 @@ void bCPU::op_lda_longw() {
   regs.a.h = op_read(OPMODE_LONG, aa.d + 1); //5a
   flags_lda_w();
 }
-
-void bCPU::op_lda_long() { (regs.p.m)?op_lda_longb():op_lda_longw(); }
 
 /************************
  *** 0xbf: lda long,x ***
@@ -240,8 +226,6 @@ void bCPU::op_lda_longxw() {
   flags_lda_w();
 }
 
-void bCPU::op_lda_longx() { (regs.p.m)?op_lda_longxb():op_lda_longxw(); }
-
 /************************
  *** 0xb9: lda addr,y ***
  ************************
@@ -270,8 +254,6 @@ void bCPU::op_lda_addryw() {
   flags_lda_w();
 }
 
-void bCPU::op_lda_addry() { (regs.p.m)?op_lda_addryb():op_lda_addryw(); }
-
 /**********************
  *** 0xb5: lda dp,x ***
  **********************
@@ -299,8 +281,6 @@ void bCPU::op_lda_dpxw() {
   regs.a.h = op_read(OPMODE_DP, dp + regs.x.w + 1); //4a
   flags_lda_w();
 }
-
-void bCPU::op_lda_dpx() { (regs.p.m)?op_lda_dpxb():op_lda_dpxw(); }
 
 /************************
  *** 0xa1: lda (dp,x) ***
@@ -336,8 +316,6 @@ void bCPU::op_lda_idpxw() {
   flags_lda_w();
 }
 
-void bCPU::op_lda_idpx() { (regs.p.m)?op_lda_idpxb():op_lda_idpxw(); }
-
 /************************
  *** 0xb1: lda (dp),y ***
  ************************
@@ -371,8 +349,6 @@ void bCPU::op_lda_idpyw() {
   regs.a.h = op_read(OPMODE_DBR, aa.w + regs.y.w + 1); //5a
   flags_lda_w();
 }
-
-void bCPU::op_lda_idpy() { (regs.p.m)?op_lda_idpyb():op_lda_idpyw(); }
 
 /************************
  *** 0xb7: lda [dp],y ***
@@ -408,8 +384,6 @@ void bCPU::op_lda_ildpyw() {
   flags_lda_w();
 }
 
-void bCPU::op_lda_ildpy() { (regs.p.m)?op_lda_ildpyb():op_lda_ildpyw(); }
-
 /**********************
  *** 0xa3: lda sr,s ***
  **********************
@@ -434,8 +408,6 @@ void bCPU::op_lda_srw() {
   regs.a.h = op_read(OPMODE_SP, sp + 1); //4a
   flags_lda_w();
 }
-
-void bCPU::op_lda_sr() { (regs.p.m)?op_lda_srb():op_lda_srw(); }
 
 /**************************
  *** 0xb3: lda (sr,s),y ***
@@ -470,5 +442,3 @@ void bCPU::op_lda_isryw() {
   regs.a.h = op_read(OPMODE_DBR, aa.w + regs.y.w + 1); //7a
   flags_lda_w();
 }
-
-void bCPU::op_lda_isry() { (regs.p.m)?op_lda_isryb():op_lda_isryw(); }
