@@ -1,5 +1,5 @@
 #define INTERFACE_MAIN
-#define BSNES_VERSION "0.007"
+#define BSNES_VERSION "0.007a"
 #include "winmain.h"
 #include "../base.h"
 
@@ -34,11 +34,18 @@ void term_snes() {
   if(snes)    { delete(snes);    snes    = 0; }
 }
 
+void get_config_fn(string &str) {
+char *t = (char*)malloc(4096);
+  _getcwd(t, 4095);
+  str = t;
+  free(t);
+  str += "\\bsnes.cfg";
+}
+
 int __stdcall WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
 MSG msg;
 string cfg_fn;
-  _getcwd(cfg_fn, 4096);
-  cfg_fn += "\\bsnes.cfg";
+  get_config_fn(cfg_fn);
   cfg.load(cfg_fn);
   meminit();
   fps_timer = new fpstimer();

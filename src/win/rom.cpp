@@ -22,23 +22,19 @@ bool ROMImage::load() {
 
   dprintf("* Loading [%s]...", rom_fn);
 
-Reader *rf = new FileReader();
-FileReader *f_rf = static_cast<FileReader*>(rf);
-  if(!f_rf->open(rom_fn)) {
+FileReader *rf = new FileReader();
+  if(!rf->open(FileReader::TYPE_ROM, rom_fn)) {
     alert("Error loading image file [%s]!", rom_fn);
     return false;
   }
-  mem_bus->rom->load_rom(rf);
-  f_rf->close();
-  delete rf;
+  mem_bus->rom->load_rom(static_cast<Reader*>(rf));
+  rf->close();
 
-uint8 *sram_data;
-uint32 sram_size;
-  sram_size = load_file(sram_fn, &sram_data);
-  if(sram_size) {
-    mem_bus->rom->load_sram(sram_data, sram_size);
-    memfree(sram_data);
-  }
+  rf->open(FileReader::TYPE_SRAM, sram_fn);
+  mem_bus->rom->load_sram(static_cast<Reader*>(rf));
+  rf->close();
+
+  delete(rf);
 
   file_loaded = true;
   bsnes->debugger_activate();
@@ -48,13 +44,12 @@ uint32 sram_size;
 void ROMImage::unload() {
   if(file_loaded == false)return;
 
-uint8 *sram_data;
-uint32 sram_size;
-  sram_size = mem_bus->rom->save_sram(&sram_data);
-  if(sram_size) {
-    save_file(sram_fn, sram_data, sram_size);
-    memfree(sram_data);
-  }
+FileWriter *wf = new FileWriter();
+  wf->open(sram_fn);
+  mem_bus->rom->save_sram(static_cast<Writer*>(wf));
+  wf->close();
+  delete(wf);
+
   file_loaded = false;
   bsnes->debugger_deactivate();
 

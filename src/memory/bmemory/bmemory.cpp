@@ -113,28 +113,17 @@ uint32 b, w;
   }
 }
 
-void bROM::load_sram(uint8 *buffer, uint32 size) {
+void bROM::load_sram(Reader *rf) {
   if(rom_loaded == false)return;
 
-  if(size > sram_size) {
-    memcpy(sram_data, buffer, sram_size);
-  } else {
-    memset(sram_data, 0, sram_size);
-    memcpy(sram_data, buffer, size);
-  }
+  rf->read(&sram_data, sram_size);
 }
 
-uint32 bROM::save_sram(uint8 **buffer) {
-uint8 *t;
-  if(rom_loaded == false)return 0;
-  if(!sram_size)return 0;
+void bROM::save_sram(Writer *wf) {
+  if(rom_loaded == false)return;
+  if(!sram_size)return;
 
-  if(*buffer) {
-    t = (uint8*)memalloc(sram_size, "bROM::save_sram");
-    memcpy(t, sram_data, sram_size);
-    *buffer = t;
-  }
-  return sram_size;
+  wf->write(sram_data, sram_size);
 }
 
 void bROM::load_rom(Reader *rf) {
@@ -175,12 +164,6 @@ end:
   case 5:sram_size =  32 * 1024;break;
   case 6:sram_size =  64 * 1024;break;
   case 7:sram_size = 128 * 1024;break;
-  }
-  if(sram_size) {
-    sram_data = (uint8*)memalloc(sram_size, "bROM::sram_data");
-    memset(sram_data, 0, sram_size);
-  } else {
-    sram_data = 0;
   }
 
   dprintf("Image Name : \"%s\"", cart_title);

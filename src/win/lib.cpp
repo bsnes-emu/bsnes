@@ -67,32 +67,3 @@ va_list args;
     w_console->write(str, Console::DEBUG_MESSAGE);
   }
 }
-
-uint32 load_file(char *fn, uint8 **buffer) {
-FILE *fp;
-uint8 *data;
-int fsize;
-  fp = fopen(fn, "rb");
-  if(!fp)return 0;
-  fseek(fp, 0, SEEK_END);
-  fsize = ftell(fp);
-  if(!fsize) {
-    fclose(fp);
-    return 0;
-  }
-  fseek(fp, 0, SEEK_SET);
-  data = (uint8*)memalloc(fsize);
-  fread(data, 1, fsize, fp);
-  fclose(fp);
-  *buffer = data;
-  return fsize;
-}
-
-bool save_file(char *fn, uint8 *data, uint32 size) {
-FILE *fp;
-  fp = fopen(fn, "wb");
-  if(!fp)return false;
-  fwrite(data, 1, size, fp);
-  fclose(fp);
-  return true;
-}
