@@ -1,5 +1,5 @@
 CC = cl
-CFLAGS = /nologo /O2 /Ob2
+CFLAGS = /nologo /O2 /Ogityb2 /Gr /Gs
 OBJS = winmain.obj \
        libstring.obj libconfig.obj \
        clock.obj bclock.obj \

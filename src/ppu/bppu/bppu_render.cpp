@@ -1,124 +1,134 @@
 #include "bppu_render_cache.cpp"
 #include "bppu_render_windows.cpp"
-#include "bppu_render_main.cpp"
+#include "bppu_render_bg.cpp"
+#include "bppu_render_oam.cpp"
 #include "bppu_render_mode7.cpp"
+#include "bppu_render_addsub.cpp"
+#include "bppu_render_line.cpp"
 
-namespace bPPURenderTables {
-enum { BG1 = 0, BG2 = 1, BG3 = 2, BG4 = 3, OAM = 4, BACK = 5 };
-  uint8 lookup_mode0[12] = {
-    BG4, BG3, OAM, BG4, BG3, OAM, BG2, BG1, OAM, BG2, BG1, OAM
-  };
-  uint8 lookup_mode1_pri0[10] = {
-    BG3, OAM, BG3, OAM, BG2, BG1, OAM, BG2, BG1, OAM
-  };
-  uint8 lookup_mode1_pri1[10] = {
-    BG3, OAM, OAM, BG2, BG1, OAM, BG2, BG1, OAM, BG3
-  };
-  uint8 lookup_mode2[8] = {
-    OAM, OAM, BG2, BG1, OAM, BG2, BG1, OAM
-  };
-  uint8 lookup_mode3[8] = {
-    OAM, OAM, BG2, BG1, OAM, BG2, BG1, OAM
-  };
-  uint8 lookup_mode4[8] = {
-    OAM, OAM, BG2, BG1, OAM, BG2, BG1, OAM
-  };
-  uint8 lookup_mode5[8] = {
-    OAM, OAM, BG2, BG1, OAM, BG2, BG1, OAM
-  };
-  uint8 lookup_mode6[6] = {
-    OAM, OAM, BG1, OAM, BG1, OAM
-  };
-  uint8 lookup_mode7[5] = {
-    OAM, BG1, OAM, OAM, OAM
-  };
-  uint8 lookup_mode7_extbg[6] = {
-    BG2, OAM, OAM, BG2, OAM, OAM
-  };
-};
-
-void bPPU::render_line_mode0() {
-  render_line_bg (7, 10, COLORDEPTH_4, BG1);
-  render_line_bg (6,  9, COLORDEPTH_4, BG2);
-  render_line_bg (1,  4, COLORDEPTH_4, BG3);
-  render_line_bg (0,  3, COLORDEPTH_4, BG4);
-  render_line_oam(2,  5, 8, 11);
-  set_layer_pixels(12, bPPURenderTables::lookup_mode0);
+/*
+Mode 0: ->
+     1,    2,    3,    4,    5,    6,    7,    8,    9,   10,   11,   12
+  BG4B, BG3B, OAM0, BG4A, BG3A, OAM1, BG2B, BG1B, OAM2, BG2A, BG1A, OAM3
+*/
+inline void bPPU::render_line_mode0() {
+  render_line_bg(BG1, COLORDEPTH_4, 8, 11);
+  render_line_bg(BG2, COLORDEPTH_4, 7, 10);
+  render_line_bg(BG3, COLORDEPTH_4, 2,  5);
+  render_line_bg(BG4, COLORDEPTH_4, 1,  4);
+  render_line_oam(3, 6, 9, 12);
 }
 
-void bPPU::render_line_mode1() {
+/*
+Mode 1 (pri=0): ->
+     1,    2,    3,    4,    5,    6,    7,    8,    9,   10
+  BG3B, OAM0, BG3A, OAM1, BG2B, BG1B, OAM2, BG2A, BG1A, OAM3
+
+Mode 1 (pri=1): ->
+     1,    2,    3,    4,    5,    6,    7,    8,    9,   10
+  BG3B, OAM0, OAM1, BG2B, BG1B, OAM2, BG2A, BG1A, OAM3, BG3A
+*/
+inline void bPPU::render_line_mode1() {
   switch(regs.bg3_priority) {
   case 0:
-    render_line_bg (5, 8, COLORDEPTH_16, BG1);
-    render_line_bg (4, 7, COLORDEPTH_16, BG2);
-    render_line_bg (0, 2, COLORDEPTH_4,  BG3);
-    render_line_oam(1, 3, 6, 9);
-    set_layer_pixels(10, bPPURenderTables::lookup_mode1_pri0);
+    render_line_bg(BG1, COLORDEPTH_16, 6,  9);
+    render_line_bg(BG2, COLORDEPTH_16, 5,  8);
+    render_line_bg(BG3, COLORDEPTH_4,  1,  3);
+    render_line_oam(2, 4, 7, 10);
     break;
   case 1:
-    render_line_bg (4, 7, COLORDEPTH_16, BG1);
-    render_line_bg (3, 6, COLORDEPTH_16, BG2);
-    render_line_bg (0, 9, COLORDEPTH_4,  BG3);
-    render_line_oam(1, 2, 5, 8);
-    set_layer_pixels(10, bPPURenderTables::lookup_mode1_pri1);
+    render_line_bg(BG1, COLORDEPTH_16, 5,  8);
+    render_line_bg(BG2, COLORDEPTH_16, 4,  7);
+    render_line_bg(BG3, COLORDEPTH_4,  1, 10);
+    render_line_oam(2, 3, 6, 9);
     break;
   }
 }
 
-void bPPU::render_line_mode2() {
-  render_line_bg (3, 6, COLORDEPTH_16, BG1);
-  render_line_bg (2, 5, COLORDEPTH_16, BG2);
-  render_line_oam(0, 1, 4, 7);
-  set_layer_pixels(8, bPPURenderTables::lookup_mode2);
+/*
+Mode 2: ->
+     1,    2,    3,    4,    5,    6,    7,    8
+  OAM0, OAM1, BG2B, BG1B, OAM2, BG2A, BG1A, OAM3
+*/
+inline void bPPU::render_line_mode2() {
+  render_line_bg(BG1, COLORDEPTH_16, 4, 7);
+  render_line_bg(BG2, COLORDEPTH_16, 3, 6);
+  render_line_oam(1, 2, 5, 8);
 }
 
-void bPPU::render_line_mode3() {
-  render_line_bg (3, 6, COLORDEPTH_256, BG1);
-  render_line_bg (2, 5, COLORDEPTH_16,  BG2);
-  render_line_oam(0, 1, 4, 7);
-  set_layer_pixels(8, bPPURenderTables::lookup_mode3);
+/*
+Mode 3: ->
+     1,    2,    3,    4,    5,    6,    7,    8
+  OAM0, OAM1, BG2B, BG1B, OAM2, BG2A, BG1A, OAM3
+*/
+inline void bPPU::render_line_mode3() {
+  render_line_bg(BG1, COLORDEPTH_256, 4, 7);
+  render_line_bg(BG2, COLORDEPTH_16,  3, 6);
 }
 
-void bPPU::render_line_mode4() {
-  render_line_bg (3, 6, COLORDEPTH_256, BG1);
-  render_line_bg (2, 5, COLORDEPTH_4,   BG2);
-  render_line_oam(0, 1, 4, 7);
-  set_layer_pixels(8, bPPURenderTables::lookup_mode4);
+/*
+Mode 4: ->
+     1,    2,    3,    4,    5,    6,    7,    8
+  OAM0, OAM1, BG2B, BG1B, OAM2, BG2A, BG1A, OAM3
+*/
+inline void bPPU::render_line_mode4() {
+  render_line_bg(BG1, COLORDEPTH_256, 4, 7);
+  render_line_bg(BG2, COLORDEPTH_4,   3, 6);
+  render_line_oam(1, 2, 5, 8);
 }
 
-void bPPU::render_line_mode5() {
-  render_line_bg (3, 6, COLORDEPTH_16, BG1);
-  render_line_bg (2, 5, COLORDEPTH_4,  BG2);
-  render_line_oam(0, 1, 4, 7);
-  set_layer_pixels(8, bPPURenderTables::lookup_mode5);
+/*
+Mode 5: ->
+     1,    2,    3,    4,    5,    6,    7,    8
+  OAM0, OAM1, BG2B, BG1B, OAM2, BG2A, BG1A, OAM3
+*/
+inline void bPPU::render_line_mode5() {
+  render_line_bg(BG1, COLORDEPTH_16, 4, 7);
+  render_line_bg(BG2, COLORDEPTH_4,  3, 6);
+  render_line_oam(1, 2, 5, 8);
 }
 
-void bPPU::render_line_mode6() {
-  render_line_bg (2, 4, COLORDEPTH_16, BG1);
-  render_line_oam(0, 1, 3, 5);
-  set_layer_pixels(8, bPPURenderTables::lookup_mode6);
+/*
+Mode 6: ->
+     1,    2,    3,    4,    5,    6
+  OAM0, OAM1, BG1B, OAM2, BG1A, OAM3
+*/
+inline void bPPU::render_line_mode6() {
+  render_line_bg(BG1, COLORDEPTH_16, 3, 5);
+  render_line_oam(1, 2, 4, 6);
 }
 
-void bPPU::render_line_mode7() {
+/*
+Mode7: ->
+     1,    2,    3,    4,    5
+  OAM0, BG1n, OAM1, OAM2, OAM3
+
+Mode 7 (extbg): ->
+     1,    2,    3,    4,    5,    6
+  BG2B, OAM0, OAM1, BG2A, OAM2, OAM3
+*/
+inline void bPPU::render_line_mode7() {
   if(regs.mode7_extbg == false) {
-    render_line_m7 (1, 0, 0); //bg2 priorities are ignored
+    render_line_mode7(1, 0, 0); //bg2 priorities are ignored
     render_line_oam(0, 2, 3, 4);
-    set_layer_pixels(5, bPPURenderTables::lookup_mode7);
   } else {
-    render_line_m7 (0, 0, 3); //bg1 priority is ignored
+    render_line_mode7(0, 0, 3); //bg1 priority is ignored
     render_line_oam(1, 2, 4, 5);
-    set_layer_pixels(6, bPPURenderTables::lookup_mode7_extbg);
   }
 }
 
-void bPPU::render_line(uint16 line) {
+void bPPU::render_line() {
+  _screen_width    = (regs.bg_mode == 5 || regs.bg_mode == 6)?512:256;
+  _interlace       = clock->interlace();
+  _interlace_field = clock->interlace_field();
+
   if(regs.display_disabled == true) {
-    memset(output->buffer + (line << 1) * 512, 0, 2048);
+    memset(output->buffer + (((_y << 1) + _interlace_field) << 9), 0, 1024);
     return;
   }
 
-  clear_layer_cache();
   clear_pixel_cache();
+  build_color_window_tables();
   switch(regs.bg_mode) {
   case 0:render_line_mode0();break;
   case 1:render_line_mode1();break;
@@ -129,5 +139,5 @@ void bPPU::render_line(uint16 line) {
   case 6:render_line_mode6();break;
   case 7:render_line_mode7();break;
   }
-  render_line_to_output();
+  render_line_output();
 }

@@ -1,7 +1,7 @@
 HFONT hFont, hMonofont;
 
+#include "dd_renderer.cpp"
 #include "ui_window.cpp"
-#include "ui_render.cpp"
 #include "ui_main.cpp"
 #include "ui_console.cpp"
 #include "ui_bp.cpp"
@@ -29,18 +29,18 @@ void CreateWindows() {
 }
 
 void init_ui0() {
-  renderer  = new Render();
-  w_main    = new MainWindow();
-  w_console = new Console();
-  w_bp      = new BreakpointEditor();
-  w_memory  = new MemoryEditor();
+  dd_renderer = new DDRenderer();
+  w_main      = new MainWindow();
+  w_console   = new Console();
+  w_bp        = new BreakpointEditor();
+  w_memory    = new MemoryEditor();
 }
 
 void init_ui1() {
   CreateFonts();
   CreateWindows();
   SetFocus(w_main->hwnd);
-  renderer->set_window(w_main->hwnd);
-  renderer->to_windowed();
+  dd_renderer->set_window(w_main->hwnd);
+  dd_renderer->to_windowed();
   bsnes->debugger_deactivate();
 }

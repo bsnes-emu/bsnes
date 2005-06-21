@@ -1,5 +1,5 @@
 #define INTERFACE_MAIN
-#define BSNES_VERSION "0.007a"
+#define BSNES_VERSION "0.008"
 #include "winmain.h"
 #include "../base.h"
 
@@ -7,6 +7,7 @@
 
 #include "bsnes.h"
 #include "ui.h"
+#include "dd_renderer.h"
 
 #include "timer.cpp"
 fpstimer *fps_timer;

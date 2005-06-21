@@ -225,28 +225,3 @@ uint32 edit_mode, edit_addr, edit_mask;
 };
 
 MemoryEditor *w_memory;
-
-#include <ddraw.h>
-class Render {
-public:
-LPDIRECTDRAW        lpdd;
-LPDIRECTDRAWSURFACE lpdds, lpddsb;
-LPDIRECTDRAWCLIPPER lpddc;
-DDSURFACEDESC       ddsd;
-DDSCAPS             ddscaps;
-HWND hwnd;
-uint8 color_depth;
-  void set_window(HWND hwnd_handle);
-  void to_windowed();
-  void to_fullscreen();
-  void set_source_window(RECT *rs);
-  void redraw();
-  void update16();
-  void update32();
-  void update();
-  void destroy();
-  void update_color_lookup_table();
-  Render();
-};
-
-Render *renderer;

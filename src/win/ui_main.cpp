@@ -137,7 +137,7 @@ long __stdcall wndproc_main(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
     PostQuitMessage(0);
     break;
   case WM_PAINT:
-    renderer->redraw();
+    dd_renderer->redraw();
     break;
   }
   return DefWindowProc(hwnd, msg, wparam, lparam);

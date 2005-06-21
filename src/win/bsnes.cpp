@@ -86,7 +86,7 @@ void bSNES::run() {
 }
 
 void bSNES::render_frame() {
-  renderer->update();
+  dd_renderer->update();
 }
 
 /***********************
@@ -94,18 +94,21 @@ void bSNES::render_frame() {
  ***********************/
 #define KeyState(key) ((GetAsyncKeyState(key) & 0x8000)?1:0)
 void bSNES::poll_input() {
-  joypad1.up     = KeyState(VK_UP);
-  joypad1.down   = KeyState(VK_DOWN);
-  joypad1.left   = KeyState(VK_LEFT);
-  joypad1.right  = KeyState(VK_RIGHT);
-  joypad1.select = KeyState(VK_LSHIFT) | KeyState(VK_RSHIFT);
-  joypad1.start  = KeyState(VK_RETURN);
-  joypad1.y      = KeyState('A');
-  joypad1.b      = KeyState('Z');
-  joypad1.x      = KeyState('S');
-  joypad1.a      = KeyState('X');
-  joypad1.l      = KeyState('D');
-  joypad1.r      = KeyState('C');
+/* Only capture input when main window has focus */
+  if(GetForegroundWindow() == w_main->hwnd) {
+    joypad1.up     = KeyState(VK_UP);
+    joypad1.down   = KeyState(VK_DOWN);
+    joypad1.left   = KeyState(VK_LEFT);
+    joypad1.right  = KeyState(VK_RIGHT);
+    joypad1.select = KeyState(VK_LSHIFT) | KeyState(VK_RSHIFT);
+    joypad1.start  = KeyState(VK_RETURN);
+    joypad1.y      = KeyState('A');
+    joypad1.b      = KeyState('Z');
+    joypad1.x      = KeyState('S');
+    joypad1.a      = KeyState('X');
+    joypad1.l      = KeyState('D');
+    joypad1.r      = KeyState('C');
+  }
 
 //Check for debugger-based key locks
   if(is_debugger_enabled == true) {

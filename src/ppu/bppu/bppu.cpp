@@ -1,21 +1,26 @@
 #include "../../base.h"
 #include "bppu_mmio.cpp"
+
+#ifdef _BPPU_OLDRENDER
+#include "bppu_old_render.cpp"
+#else
 #include "bppu_render.cpp"
+#endif
 
 void bPPU::run() {}
 
 void bPPU::scanline() {
-uint16 v = clock->vcounter();
-  if(v > 0 && v < clock->visible_scanlines()) {
+  _y = clock->vcounter();
+  if(_y > 0 && _y < clock->visible_scanlines()) {
     if(clock->interlace() || regs.oam_halve == true) {
-      output->frame_mode       |= PPUOutput::INTERLACE;
-      output->scanline_mode[v] |= PPUOutput::INTERLACE;
+      output->frame_mode        |= PPUOutput::INTERLACE;
+      output->scanline_mode[_y] |= PPUOutput::INTERLACE;
     }
     if(regs.bg_mode == 5 || regs.bg_mode == 6) {
-      output->frame_mode       |= PPUOutput::DOUBLEWIDTH;
-      output->scanline_mode[v] |= PPUOutput::DOUBLEWIDTH;
+      output->frame_mode        |= PPUOutput::DOUBLEWIDTH;
+      output->scanline_mode[_y] |= PPUOutput::DOUBLEWIDTH;
     }
-    render_line(v);
+    render_line();
   }
 }
 

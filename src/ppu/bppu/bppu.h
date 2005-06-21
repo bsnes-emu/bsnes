@@ -1,3 +1,5 @@
+//#define _BPPU_OLDRENDER
+
 class bPPU;
 
 class bPPUMMIO : public MMIO {
@@ -194,10 +196,16 @@ struct {
   void   latch_counters();
 
 /* PPU render functions */
+
+#ifdef _BPPU_OLDRENDER
+#include "bppu_old_render.h"
+#else
 #include "bppu_render.h"
+#endif
+
 uint16 *light_table;
 uint16 *mosaic_table[16];
-  void   render_line(uint16 line);
+  void   render_line();
 
 /* Required functions */
   void   run();

@@ -14,6 +14,7 @@ uint16 *buffer;
 
 class PPU {
 public:
+int _y;
 PPUOutput *output;
 MMIO      *mmio;
   virtual uint8 vram_read  (uint16 addr) = 0;

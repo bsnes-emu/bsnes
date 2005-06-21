@@ -1,30 +1,115 @@
-//this should be reset once every scanline
-void bPPU::clear_pixel_cache(void) {
-int i;
-  for(i=0;i<512;i++) {
-    pixel_cache[i].color_main = 0;
-    pixel_cache[i].color_sub  = 0;
-    pixel_cache[i].src_main   = BACK;
-    pixel_cache[i].src_sub    = BACK;
-    pixel_cache[i].blend_type = BLENDTYPE_BACK;
+#define render_bg_tile_line_4(__m) \
+  col = 0;              \
+  if(d0 & __m)col += 1; \
+  if(d1 & __m)col += 2; \
+  *dest++ = col
+#define render_bg_tile_line_16(__m) \
+  col = 0;              \
+  if(d0 & __m)col += 1; \
+  if(d1 & __m)col += 2; \
+  if(d2 & __m)col += 4; \
+  if(d3 & __m)col += 8; \
+  *dest++ = col
+#define render_bg_tile_line_256(__m) \
+  col = 0;                \
+  if(d0 & __m)col +=   1; \
+  if(d1 & __m)col +=   2; \
+  if(d2 & __m)col +=   4; \
+  if(d3 & __m)col +=   8; \
+  if(d4 & __m)col +=  16; \
+  if(d5 & __m)col +=  32; \
+  if(d6 & __m)col +=  64; \
+  if(d7 & __m)col += 128; \
+  *dest++ = col
+
+void bPPU::render_bg_tile(uint8 color_depth, uint16 tile_num) {
+uint8  mask, d0, d1, d2, d3, d4, d5, d6, d7, col;
+int    x, y;
+uint32 pos;
+uint8 *dest;
+  switch(color_depth) {
+  case COLORDEPTH_4:
+    dest = (uint8*)bg_tiledata[TILE_2BIT] + tile_num * 64;
+    pos  = tile_num * 16;
+    y    = 8;
+    while(y--) {
+      d0 = vram[pos    ];
+      d1 = vram[pos + 1];
+      render_bg_tile_line_4(0x80);
+      render_bg_tile_line_4(0x40);
+      render_bg_tile_line_4(0x20);
+      render_bg_tile_line_4(0x10);
+      render_bg_tile_line_4(0x08);
+      render_bg_tile_line_4(0x04);
+      render_bg_tile_line_4(0x02);
+      render_bg_tile_line_4(0x01);
+      pos += 2;
+    }
+    bg_tiledata_state[TILE_2BIT][tile_num] = 0;
+    break;
+  case COLORDEPTH_16:
+    dest = (uint8*)bg_tiledata[TILE_4BIT] + tile_num * 64;
+    pos  = tile_num * 32;
+    y    = 8;
+    while(y--) {
+      d0 = vram[pos     ];
+      d1 = vram[pos +  1];
+      d2 = vram[pos + 16];
+      d3 = vram[pos + 17];
+      render_bg_tile_line_16(0x80);
+      render_bg_tile_line_16(0x40);
+      render_bg_tile_line_16(0x20);
+      render_bg_tile_line_16(0x10);
+      render_bg_tile_line_16(0x08);
+      render_bg_tile_line_16(0x04);
+      render_bg_tile_line_16(0x02);
+      render_bg_tile_line_16(0x01);
+      pos += 2;
+    }
+    bg_tiledata_state[TILE_4BIT][tile_num] = 0;
+    break;
+  case COLORDEPTH_256:
+    dest = (uint8*)bg_tiledata[TILE_8BIT] + tile_num * 64;
+    pos  = tile_num * 64;
+    y    = 8;
+    while(y--) {
+      d0 = vram[pos     ];
+      d1 = vram[pos +  1];
+      d2 = vram[pos + 16];
+      d3 = vram[pos + 17];
+      d4 = vram[pos + 32];
+      d5 = vram[pos + 33];
+      d6 = vram[pos + 48];
+      d7 = vram[pos + 49];
+      render_bg_tile_line_256(0x80);
+      render_bg_tile_line_256(0x40);
+      render_bg_tile_line_256(0x20);
+      render_bg_tile_line_256(0x10);
+      render_bg_tile_line_256(0x08);
+      render_bg_tile_line_256(0x04);
+      render_bg_tile_line_256(0x02);
+      render_bg_tile_line_256(0x01);
+      pos += 2;
+    }
+    bg_tiledata_state[TILE_8BIT][tile_num] = 0;
+    break;
   }
 }
 
-//this should be reset once every scanline
-void bPPU::clear_layer_cache(void) {
-  memset(&layer_cache, 0, 512 * 12);
+inline void bPPU::clear_pixel_cache() {
+  memset(pixel_cache, 0, sizeof(pixel_cache));
 }
 
-void bPPU::init_tiledata_cache(void) {
-  bg_tiledata[TILE_2BIT]       = (byte*)malloc(262144);
-  bg_tiledata[TILE_4BIT]       = (byte*)malloc(131072);
-  bg_tiledata[TILE_8BIT]       = (byte*)malloc( 65536);
-  bg_tiledata_state[TILE_2BIT] = (byte*)malloc(  4096);
-  bg_tiledata_state[TILE_4BIT] = (byte*)malloc(  2048);
-  bg_tiledata_state[TILE_8BIT] = (byte*)malloc(  1024);
+void bPPU::init_tiledata_cache() {
+  bg_tiledata[TILE_2BIT]       = (uint8*)malloc(262144);
+  bg_tiledata[TILE_4BIT]       = (uint8*)malloc(131072);
+  bg_tiledata[TILE_8BIT]       = (uint8*)malloc( 65536);
+  bg_tiledata_state[TILE_2BIT] = (uint8*)malloc(  4096);
+  bg_tiledata_state[TILE_4BIT] = (uint8*)malloc(  2048);
+  bg_tiledata_state[TILE_8BIT] = (uint8*)malloc(  1024);
 }
 
-void bPPU::clear_tiledata_cache(void) {
+void bPPU::clear_tiledata_cache() {
   memset(bg_tiledata[TILE_2BIT],       0, 262144);
   memset(bg_tiledata[TILE_4BIT],       0, 131072);
   memset(bg_tiledata[TILE_4BIT],       0,  65536);

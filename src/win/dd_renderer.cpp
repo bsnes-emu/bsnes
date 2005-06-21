@@ -1,19 +1,13 @@
-//This is in the global namespace for inline assembly optimizations.
-//If it were in a class, I would have to cast a pointer to it, and
-//to read from a pointer array requires an extra opcode:
-//mov eax,[array+eax*4] -> lea ebx,[parray] ; mov ebx,[ebx+eax*4]
-uint32 color_lookup_table[65536];
-
-Render::Render() {
+DDRenderer::DDRenderer() {
   lpdd    = 0;
   lpdds   = 0;
   lpddsb  = 0;
   lpddc   = 0;
 }
 
-void Render::update_color_lookup_table() {
+void DDRenderer::update_color_lookup_table() {
 int i, r, g, b;
-  lpdds->GetSurfaceDesc(&ddsd);
+  lpddsb->GetSurfaceDesc(&ddsd);
   color_depth = ddsd.ddpfPixelFormat.dwRGBBitCount;
   if(color_depth == 15) {
     for(i=0;i<65536;i++) {
@@ -45,9 +39,66 @@ int i, r, g, b;
   }
 }
 
-void Render::set_window(HWND hwnd_handle) { hwnd = hwnd_handle; }
+void DDRenderer::set_window(HWND hwnd_handle) { hwnd = hwnd_handle; }
 
-void Render::to_windowed() {
+/*
+  This function tries to create a 16-bit backbuffer whenever possible,
+  even in 24/32-bit mode. This is possible because DDraw automatically
+  handles conversion from 16bpp->32bpp in hardware. This only works
+  when both the source and dest buffers are in VRAM, though.
+*/
+void DDRenderer::create_backbuffer() {
+int color_depth;
+  lpdds->GetSurfaceDesc(&ddsd);
+  color_depth = ddsd.ddpfPixelFormat.dwRGBBitCount;
+  if(color_depth == 15 || color_depth == 16) {
+    goto try_native_backbuffer;
+  } else {
+    if(cfg.video.use_vram == false) {
+      goto try_native_backbuffer;
+    }
+  }
+
+  memset(&ddsd, 0, sizeof(DDSURFACEDESC));
+  ddsd.dwSize = sizeof(DDSURFACEDESC);
+  ddsd.dwFlags = DDSD_CAPS | DDSD_WIDTH | DDSD_HEIGHT | DDSD_PIXELFORMAT;
+  ddsd.ddsCaps.dwCaps = DDSCAPS_OFFSCREENPLAIN;
+  if(cfg.video.use_vram) {
+    ddsd.ddsCaps.dwCaps |= DDSCAPS_VIDEOMEMORY;
+  } else {
+    ddsd.ddsCaps.dwCaps |= DDSCAPS_SYSTEMMEMORY;
+  }
+
+  ddsd.dwWidth  = 512;
+  ddsd.dwHeight = 478;
+
+  ddsd.ddpfPixelFormat.dwSize = sizeof(DDPIXELFORMAT);
+  ddsd.ddpfPixelFormat.dwFlags = DDPF_RGB;
+  ddsd.ddpfPixelFormat.dwRGBBitCount = 16;
+  ddsd.ddpfPixelFormat.dwRBitMask = 0xf800;
+  ddsd.ddpfPixelFormat.dwGBitMask = 0x07e0;
+  ddsd.ddpfPixelFormat.dwBBitMask = 0x001f;
+
+  if(lpdd->CreateSurface(&ddsd, &lpddsb, 0) == DD_OK)return;
+
+try_native_backbuffer:
+  memset(&ddsd, 0, sizeof(DDSURFACEDESC));
+  ddsd.dwSize = sizeof(DDSURFACEDESC);
+  ddsd.dwFlags = DDSD_CAPS | DDSD_WIDTH | DDSD_HEIGHT;
+  ddsd.ddsCaps.dwCaps = DDSCAPS_OFFSCREENPLAIN;
+  if(cfg.video.use_vram) {
+    ddsd.ddsCaps.dwCaps |= DDSCAPS_VIDEOMEMORY;
+  } else {
+    ddsd.ddsCaps.dwCaps |= DDSCAPS_SYSTEMMEMORY;
+  }
+
+  ddsd.dwWidth  = 512;
+  ddsd.dwHeight = 478;
+
+  lpdd->CreateSurface(&ddsd, &lpddsb, 0);
+}
+
+void DDRenderer::to_windowed() {
   destroy();
   DirectDrawCreate(0, &lpdd, 0);
   lpdd->SetCooperativeLevel(hwnd, DDSCL_NORMAL);
@@ -62,24 +113,12 @@ void Render::to_windowed() {
   lpddc->SetHWnd(0, hwnd);
   lpdds->SetClipper(lpddc);
 
-  memset(&ddsd, 0, sizeof(DDSURFACEDESC));
-  ddsd.dwSize = sizeof(DDSURFACEDESC);
-  ddsd.dwFlags = DDSD_CAPS | DDSD_WIDTH | DDSD_HEIGHT;
-  ddsd.ddsCaps.dwCaps = DDSCAPS_OFFSCREENPLAIN;
-  if(cfg.video.use_vram) {
-    ddsd.ddsCaps.dwCaps |= DDSCAPS_VIDEOMEMORY;
-  } else {
-    ddsd.ddsCaps.dwCaps |= DDSCAPS_SYSTEMMEMORY;
-  }
-  ddsd.dwWidth  = 512;
-  ddsd.dwHeight = 478;
-  lpdd->CreateSurface(&ddsd, &lpddsb, 0);
-
+  create_backbuffer();
   update_color_lookup_table();
   update();
 }
 
-void Render::to_fullscreen() {
+void DDRenderer::to_fullscreen() {
   destroy();
   DirectDrawCreate(0, &lpdd, 0);
   lpdd->SetCooperativeLevel(hwnd, DDSCL_FULLSCREEN | DDSCL_EXCLUSIVE);
@@ -95,24 +134,12 @@ void Render::to_fullscreen() {
   lpddc->SetHWnd(0, hwnd);
   lpdds->SetClipper(lpddc);
 
-  memset(&ddsd, 0, sizeof(DDSURFACEDESC));
-  ddsd.dwSize = sizeof(DDSURFACEDESC);
-  ddsd.dwFlags = DDSD_CAPS | DDSD_WIDTH | DDSD_HEIGHT;
-  ddsd.ddsCaps.dwCaps = DDSCAPS_OFFSCREENPLAIN;
-  if(cfg.video.use_vram) {
-    ddsd.ddsCaps.dwCaps |= DDSCAPS_VIDEOMEMORY;
-  } else {
-    ddsd.ddsCaps.dwCaps |= DDSCAPS_SYSTEMMEMORY;
-  }
-  ddsd.dwWidth  = 512;
-  ddsd.dwHeight = 478;
-  lpdd->CreateSurface(&ddsd, &lpddsb, 0);
-
+  create_backbuffer();
   update_color_lookup_table();
   update();
 }
 
-void Render::set_source_window(RECT *rs) {
+void DDRenderer::set_source_window(RECT *rs) {
   switch(ppu->output->frame_mode) {
   case 0:SetRect(rs, 0, 0, 256, 223);break;
   case 1:SetRect(rs, 0, 0, 256, 446);break;
@@ -121,7 +148,7 @@ void Render::set_source_window(RECT *rs) {
   }
 }
 
-void Render::redraw() {
+void DDRenderer::redraw() {
 RECT rd, rs;
 POINT p;
 HRESULT hr;
@@ -136,6 +163,7 @@ HRESULT hr;
     lpddsb->Restore();
   }
 
+  if(cfg.gui.show_fps == false)return;
 uint32 fps;
 char s[256], t[256];
   fps_timer->tick();
@@ -155,7 +183,7 @@ char s[256], t[256];
   }
 }
 
-void Render::update16() {
+void DDRenderer::update16() {
 HRESULT hr;
   hr = lpddsb->Lock(0, &ddsd, DDLOCK_WAIT, 0);
   if(hr != DD_OK)return;
@@ -227,7 +255,7 @@ int x, y;
   lpddsb->Unlock(0);
 }
 
-void Render::update32() {
+void DDRenderer::update32() {
 HRESULT hr;
   hr = lpddsb->Lock(0, &ddsd, DDLOCK_WAIT, 0);
   if(hr != DD_OK)return;
@@ -299,7 +327,7 @@ int x, y;
   lpddsb->Unlock(0);
 }
 
-void Render::update() {
+void DDRenderer::update() {
   switch(color_depth) {
   case 15:
   case 16:
@@ -312,7 +340,7 @@ void Render::update() {
   redraw();
 }
 
-void Render::destroy() {
+void DDRenderer::destroy() {
   if(lpddc) {
     lpddc->Release();
     lpddc = 0;

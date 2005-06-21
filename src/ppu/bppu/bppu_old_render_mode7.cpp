@@ -4,14 +4,14 @@
 #define CAST_WORDTOINT(x) \
   (int)(((x & 0x8000)?(x | 0xffff0000):(x & 0x00007fff)))
 
-void bPPU::render_line_mode7(uint8 bg1_pri, uint8 bg2b_pri, uint8 bg2a_pri) {
+void bPPU::render_line_m7(uint8 layer_pos_bg1, uint8 layer_pos_bg2_pri0, uint8 layer_pos_bg2_pri1) {
 int x;
 int step_m7a, step_m7c, m7a, m7b, m7c, m7d;
 int hoffset, voffset;
 int centerx, centery;
 int xx, yy;
 int px, py;
-int tx, ty, tile, palette;
+int tx, ty, tile, palette, priority;
 uint8 layer_pos;
   hoffset = (CAST_WORDTOINT(regs.bg_hofs[BG1]) << 7) >> 7;
   voffset = (CAST_WORDTOINT(regs.bg_vofs[BG1]) << 7) >> 7;
@@ -20,9 +20,9 @@ uint8 layer_pos;
   centery = (CAST_WORDTOINT(regs.m7y) << 7) >> 7;
 
   if(regs.mode7_vflip == true) {
-    yy = 223 - _y;
+    yy = 223 - clock->vcounter();
   } else {
-    yy = _y;
+    yy = clock->vcounter();
   }
   yy += CLIP_10BIT_SIGNED(voffset - centery);
 
@@ -37,23 +37,6 @@ uint8 layer_pos;
   m7a = CAST_WORDTOINT(regs.m7a) * xx;
   m7c = CAST_WORDTOINT(regs.m7c) * xx;
 
-int _pri, _x, _bg;
-bool _bg_enabled, _bgsub_enabled;
-  if(regs.mode7_extbg == false) {
-    _pri           = bg1_pri;
-    _bg            = BG1;
-    _bg_enabled    = regs.bg_enabled[BG1];
-    _bgsub_enabled = regs.bgsub_enabled[BG1];
-  } else {
-    _bg            = BG2;
-    _bg_enabled    = regs.bg_enabled[BG2];
-    _bgsub_enabled = regs.bgsub_enabled[BG2];
-  }
-
-uint8 *wt_main = main_windowtable[_bg];
-uint8 *wt_sub  = sub_windowtable[_bg];
-  build_window_tables(_bg);
-
   for(x=0;x<256;x++) {
     px = ((m7a + m7b) >> 8);
     py = ((m7c + m7d) >> 8);
@@ -63,10 +46,10 @@ uint8 *wt_sub  = sub_windowtable[_bg];
     case 1: //same as case 0
       px &= 1023;
       py &= 1023;
-      tx = ((px >> 3) & 127);
-      ty = ((py >> 3) & 127);
+      tx = ((px >> SH_8) & 127);
+      ty = ((py >> SH_8) & 127);
       tile    = vram[(ty * 128 + tx) << 1];
-      palette = vram[(((tile << 6) + ((py & 7) << 3) + (px & 7)) << 1) + 1];
+      palette = vram[(((tile << SH_64) + ((py & 7) << SH_8) + (px & 7)) << 1) + 1];
       break;
     case 2: //character 0 repetition outside of screen area
       if(px < 0 || px > 1023 || py < 0 || py > 1023) {
@@ -75,11 +58,11 @@ uint8 *wt_sub  = sub_windowtable[_bg];
       } else {
         px &= 1023;
         py &= 1023;
-        tx = ((px >> 3) & 127);
-        ty = ((py >> 3) & 127);
+        tx = ((px >> SH_8) & 127);
+        ty = ((py >> SH_8) & 127);
       }
       tile    = vram[(ty * 128 + tx) << 1];
-      palette = vram[(((tile << 6) + ((py & 7) << 3) + (px & 7)) << 1) + 1];
+      palette = vram[(((tile << SH_64) + ((py & 7) << SH_8) + (px & 7)) << 1) + 1];
       break;
     case 3: //palette color 0 outside of screen area
       if(px < 0 || px > 1023 || py < 0 || py > 1023) {
@@ -87,51 +70,40 @@ uint8 *wt_sub  = sub_windowtable[_bg];
       } else {
         px &= 1023;
         py &= 1023;
-        tx = ((px >> 3) & 127);
-        ty = ((py >> 3) & 127);
+        tx = ((px >> SH_8) & 127);
+        ty = ((py >> SH_8) & 127);
         tile    = vram[(ty * 128 + tx) << 1];
-        palette = vram[(((tile << 6) + ((py & 7) << 3) + (px & 7)) << 1) + 1];
+        palette = vram[(((tile << SH_64) + ((py & 7) << SH_8) + (px & 7)) << 1) + 1];
       }
       break;
     }
 
-    if(!palette)goto _end_setpixel;
-
     if(regs.mode7_extbg == false) {
-    //_pri set at top of function, as it is static
-      if(regs.mode7_hflip == true) {
-        _x = 255 - x;
-      } else {
-        _x = x;
+      if(palette) {
+        layer_pos = layer_pos_bg1;
+        if(regs.mode7_hflip == true) {
+          set_layer_pixel(255 - x, palette);
+        } else {
+          set_layer_pixel(x, palette);
+        }
       }
     } else {
-      _pri = (palette >> 7) ? bg2a_pri : bg2b_pri;
+      priority = (palette >> 7);
       palette &= 0x7f;
-      if(regs.mode7_hflip == true) {
-        _x = 255 - x;
-      } else {
-        _x = x;
-      }
-    }
-
-    if(main_colorwindowtable[_x]) {
-      if(_bg_enabled == true && !wt_main[_x]) {
-        if(pixel_cache[_x].pri_main < _pri) {
-          pixel_cache[_x].pri_main = _pri;
-          pixel_cache[_x].bg_main  = 0x80 | _bg;
-          pixel_cache[_x].src_main = palette;
+      if(palette) {
+        if(priority == 0) {
+          layer_pos = layer_pos_bg2_pri0;
+        } else {
+          layer_pos = layer_pos_bg2_pri1;
         }
-      }
-      if(_bgsub_enabled == true && !wt_sub[_x]) {
-        if(pixel_cache[_x].pri_sub < _pri) {
-          pixel_cache[_x].pri_sub = _pri;
-          pixel_cache[_x].bg_sub  = 0x80 | _bg;
-          pixel_cache[_x].src_sub = palette;
+        if(regs.mode7_hflip == true) {
+          set_layer_pixel(255 - x, palette);
+        } else {
+          set_layer_pixel(x, palette);
         }
       }
     }
 
-_end_setpixel:
     m7a += step_m7a;
     m7c += step_m7c;
   }
