@@ -1,8 +1,20 @@
 DDRenderer::DDRenderer() {
   lpdd    = 0;
+  lpdd7   = 0;
   lpdds   = 0;
   lpddsb  = 0;
   lpddc   = 0;
+
+int i, c;
+  for(i=0,c=0;i<16;i++) {
+    color_curve_table[i] = c;
+    c = c + i + 1;
+  }
+  for(;i<31;i++) {
+    color_curve_table[i] = c;
+    c += 8;
+  }
+  color_curve_table[i] = 0xff;
 }
 
 void DDRenderer::update_color_lookup_table() {
@@ -14,6 +26,11 @@ int i, r, g, b;
       r = (i      ) & 31;
       g = (i >>  5) & 31;
       b = (i >> 10) & 31;
+      if(cfg.video.color_curve) {
+        r = color_curve_table[r] >> 3;
+        g = color_curve_table[g] >> 3;
+        b = color_curve_table[b] >> 3;
+      }
       color_lookup_table[i] = (r << 10) | (g << 5) | (b);
     }
   } else if(color_depth == 16) {
@@ -21,7 +38,13 @@ int i, r, g, b;
       r = (i      ) & 31;
       g = (i >>  5) & 31;
       b = (i >> 10) & 31;
-      g = (g << 1) | (g >> 4);
+      if(cfg.video.color_curve) {
+        r = color_curve_table[r] >> 3;
+        g = color_curve_table[g] >> 2;
+        b = color_curve_table[b] >> 3;
+      } else {
+        g = (g << 1) | (g >> 4);
+      }
       color_lookup_table[i] = (r << 11) | (g << 5) | (b);
     }
   } else if(color_depth == 32) {
@@ -29,9 +52,15 @@ int i, r, g, b;
       r = (i      ) & 31;
       g = (i >>  5) & 31;
       b = (i >> 10) & 31;
-      r = (r << 3) | (r >> 2);
-      g = (g << 3) | (g >> 2);
-      b = (b << 3) | (b >> 2);
+      if(cfg.video.color_curve) {
+        r = color_curve_table[r];
+        g = color_curve_table[g];
+        b = color_curve_table[b];
+      } else {
+        r = (r << 3) | (r >> 2);
+        g = (g << 3) | (g >> 2);
+        b = (b << 3) | (b >> 2);
+      }
       color_lookup_table[i] = (r << 16) | (g << 8) | (b);
     }
   } else {
@@ -46,6 +75,17 @@ void DDRenderer::set_window(HWND hwnd_handle) { hwnd = hwnd_handle; }
   even in 24/32-bit mode. This is possible because DDraw automatically
   handles conversion from 16bpp->32bpp in hardware. This only works
   when both the source and dest buffers are in VRAM, though.
+
+  The SNES resolution is 256x224. The top scanline is never drawn, so
+  256x223 is used. Hires mode doubles the screen width, and hires+interlace
+  double the screen height, making the resolution 512x446.
+  There is one more problem, however. On some video cards, when blitting
+  from video memory from 256x223->512x446, a bilinear filter is applied by
+  the video card, and sometimes this filter tries to read past the source
+  video memory to get interpolation data. This results in a line of garble
+  on the right and bottom edges of the screen. Therefore, an additional
+  4 pixels in each direction is added to the backbuffer.
+  The backbuffer is thusly 512+4 * 476+4
 */
 void DDRenderer::create_backbuffer() {
 int color_depth;
@@ -69,8 +109,8 @@ int color_depth;
     ddsd.ddsCaps.dwCaps |= DDSCAPS_SYSTEMMEMORY;
   }
 
-  ddsd.dwWidth  = 512;
-  ddsd.dwHeight = 478;
+  ddsd.dwWidth  = 512 + 4;
+  ddsd.dwHeight = 476 + 4;
 
   ddsd.ddpfPixelFormat.dwSize = sizeof(DDPIXELFORMAT);
   ddsd.ddpfPixelFormat.dwFlags = DDPF_RGB;
@@ -79,7 +119,7 @@ int color_depth;
   ddsd.ddpfPixelFormat.dwGBitMask = 0x07e0;
   ddsd.ddpfPixelFormat.dwBBitMask = 0x001f;
 
-  if(lpdd->CreateSurface(&ddsd, &lpddsb, 0) == DD_OK)return;
+  if(lpdd->CreateSurface(&ddsd, &lpddsb, 0) == DD_OK)goto clear_backbuffer;
 
 try_native_backbuffer:
   memset(&ddsd, 0, sizeof(DDSURFACEDESC));
@@ -92,14 +132,26 @@ try_native_backbuffer:
     ddsd.ddsCaps.dwCaps |= DDSCAPS_SYSTEMMEMORY;
   }
 
-  ddsd.dwWidth  = 512;
-  ddsd.dwHeight = 478;
+  ddsd.dwWidth  = 512 + 4;
+  ddsd.dwHeight = 476 + 4;
 
   lpdd->CreateSurface(&ddsd, &lpddsb, 0);
+
+clear_backbuffer:
+  if(!lpddsb) {
+    alert("Error: Failed to create DirectDraw backbuffer, cannot continue");
+    exit(0);
+  }
+
+DDBLTFX fx;
+  fx.dwSize = sizeof(DDBLTFX);
+  fx.dwFillColor = 0x00000000;
+  lpddsb->Blt(0, 0, 0, DDBLT_WAIT | DDBLT_COLORFILL, &fx);
 }
 
 void DDRenderer::to_windowed() {
   destroy();
+  fullscreen = false;
   DirectDrawCreate(0, &lpdd, 0);
   lpdd->SetCooperativeLevel(hwnd, DDSCL_NORMAL);
 
@@ -115,14 +167,22 @@ void DDRenderer::to_windowed() {
 
   create_backbuffer();
   update_color_lookup_table();
-  update();
+  redraw();
 }
 
-void DDRenderer::to_fullscreen() {
+void DDRenderer::to_fullscreen(int _width, int _height) {
   destroy();
+  fullscreen = true;
+  width      = _width;
+  height     = _height;
   DirectDrawCreate(0, &lpdd, 0);
+/*
+  lpdd->QueryInterface(IID_IDirectDraw7, (void**)&lpdd7);
+  lpdd7->SetCooperativeLevel(hwnd, DDSCL_FULLSCREEN | DDSCL_EXCLUSIVE);
+  lpdd7->SetDisplayMode(width, height, 16, 60, 0);
+*/
   lpdd->SetCooperativeLevel(hwnd, DDSCL_FULLSCREEN | DDSCL_EXCLUSIVE);
-  lpdd->SetDisplayMode(640, 480, 16);
+  lpdd->SetDisplayMode(width, height, 16);
 
   memset(&ddsd, 0, sizeof(DDSURFACEDESC));
   ddsd.dwSize = sizeof(DDSURFACEDESC);
@@ -136,28 +196,40 @@ void DDRenderer::to_fullscreen() {
 
   create_backbuffer();
   update_color_lookup_table();
-  update();
+  redraw();
 }
 
-void DDRenderer::set_source_window(RECT *rs) {
-  switch(ppu->output->frame_mode) {
-  case 0:SetRect(rs, 0, 0, 256, 223);break;
-  case 1:SetRect(rs, 0, 0, 256, 446);break;
-  case 2:SetRect(rs, 0, 0, 512, 223);break;
-  case 3:SetRect(rs, 0, 0, 512, 446);break;
-  }
+void DDRenderer::set_source_window() {
+  SetRect(&lpddrc, 0, 0,
+    (ppu->output->hires     == false)?256:512,
+    (ppu->output->interlace == false)?223:446);
 }
 
 void DDRenderer::redraw() {
-RECT rd, rs;
+RECT rd;
 POINT p;
 HRESULT hr;
-  p.x = p.y = 0;
-  ClientToScreen(hwnd, &p);
-  GetClientRect(hwnd, &rd);
-  OffsetRect(&rd, p.x, p.y);
-  set_source_window(&rs);
-  hr = lpdds->Blt(&rd, lpddsb, &rs, DDBLT_WAIT, 0);
+int rx, ry;
+  if(fullscreen == false) {
+    p.x = p.y = 0;
+    ClientToScreen(hwnd, &p);
+    GetClientRect(hwnd, &rd);
+    OffsetRect(&rd, p.x, p.y);
+  } else {
+    switch(width) {
+    case 640: //x480
+      SetRect(&rd, 0, 2, 512, 448);
+      OffsetRect(&rd, (640 - 512) / 2, (480 - 446) / 2);
+      break;
+    case 1024: //x768
+      SetRect(&rd, 0, 0, 1024, 768);
+      break;
+    }
+  }
+  if(cfg.video.vblank) {
+    lpdd->WaitForVerticalBlank(DDWAITVB_BLOCKBEGIN, 0);
+  }
+  hr = lpdds->Blt(&rd, lpddsb, &lpddrc, DDBLT_WAIT, 0);
   if(hr == DDERR_SURFACELOST) {
     lpdds->Restore();
     lpddsb->Restore();
@@ -168,7 +240,7 @@ uint32 fps;
 char s[256], t[256];
   fps_timer->tick();
   if(fps_timer->second_passed() == true) {
-    sprintf(s, "bsnes v" BSNES_VERSION " ~byuu");
+    sprintf(s, BSNES_TITLE);
     if(rom_image->loaded() == true) {
       fps = fps_timer->get_ticks();
       if(w_main->frameskip == 0) {
@@ -183,147 +255,51 @@ char s[256], t[256];
   }
 }
 
+#include "dd_renderer16.cpp"
 void DDRenderer::update16() {
 HRESULT hr;
   hr = lpddsb->Lock(0, &ddsd, DDLOCK_WAIT, 0);
   if(hr != DD_OK)return;
 
-uint16 *src  = (uint16*)ppu->output->buffer;
-uint16 *dest = (uint16*)ddsd.lpSurface;
-uint32 pitch;
-int x, y;
-/* skip first scanline */
-  src  += 1024;
-
-  if(clock->overscan() == true) {
-    if(ppu->output->frame_mode & PPUOutput::INTERLACE) {
-      src += 1024 * 16;
+  set_source_window();
+  if(ppu->output->hires == false) {
+    if(ppu->output->interlace == false) {
+      update16_256x224();
     } else {
-      src += 1024 *  8;
-    }
-  }
-
-  if(ppu->output->frame_mode == PPUOutput::NORMAL) {
-  /* 256x223 */
-    pitch = (ddsd.lPitch >> 1) - 256;
-    y = 223;
-    while(y--) {
-      x = 256;
-      while(x--) {
-        *dest++ = color_lookup_table[*src];
-        src += 2;
-      }
-      dest += pitch;
-      src  += 512;
-    }
-  } else if(ppu->output->frame_mode == PPUOutput::INTERLACE) {
-  /* 256x446 */
-    pitch = (ddsd.lPitch >> 1) - 256;
-    y = 446;
-    while(y--) {
-      x = 256;
-      while(x--) {
-        *dest++ = color_lookup_table[*src];
-        src += 2;
-      }
-      dest += pitch;
-    }
-  } else if(ppu->output->frame_mode == PPUOutput::DOUBLEWIDTH) {
-  /* 512x223 */
-    pitch = (ddsd.lPitch >> 1) - 512;
-    y = 223;
-    while(y--) {
-      x = 512;
-      while(x--) {
-        *dest++ = color_lookup_table[*src++];
-      }
-      dest += pitch;
-      src  += 512;
+      update16_256x448();
     }
   } else {
-  /* 512x446 */
-    pitch = (ddsd.lPitch >> 1) - 512;
-    y = 446;
-    while(y--) {
-      x = 512;
-      while(x--) {
-        *dest++ = color_lookup_table[*src++];
-      }
-      dest += pitch;
+    if(ppu->output->interlace == false) {
+      update16_512x224();
+    } else {
+      update16_512x448();
     }
   }
+
   lpddsb->Unlock(0);
 }
 
+#include "dd_renderer32.cpp"
 void DDRenderer::update32() {
 HRESULT hr;
   hr = lpddsb->Lock(0, &ddsd, DDLOCK_WAIT, 0);
   if(hr != DD_OK)return;
 
-uint16 *src  = (uint16*)ppu->output->buffer;
-uint32 *dest = (uint32*)ddsd.lpSurface;
-uint32 pitch;
-int x, y;
-/* skip first scanline */
-  src  += 1024;
-
-  if(clock->overscan() == true) {
-    if(ppu->output->frame_mode & PPUOutput::INTERLACE) {
-      src += 1024 * 16;
+  set_source_window();
+  if(ppu->output->hires == false) {
+    if(ppu->output->interlace == false) {
+      update32_256x224();
     } else {
-      src += 1024 *  8;
-    }
-  }
-
-  if(ppu->output->frame_mode == PPUOutput::NORMAL) {
-  /* 256x223 */
-    pitch = (ddsd.lPitch >> 2) - 256;
-    y = 223;
-    while(y--) {
-      x = 256;
-      while(x--) {
-        *dest++ = color_lookup_table[*src];
-        src += 2;
-      }
-      dest += pitch;
-      src  += 512;
-    }
-  } else if(ppu->output->frame_mode == PPUOutput::INTERLACE) {
-  /* 256x446 */
-    pitch = (ddsd.lPitch >> 2) - 256;
-    y = 446;
-    while(y--) {
-      x = 256;
-      while(x--) {
-        *dest++ = color_lookup_table[*src];
-        src += 2;
-      }
-      dest += pitch;
-    }
-  } else if(ppu->output->frame_mode == PPUOutput::DOUBLEWIDTH) {
-  /* 512x223 */
-    pitch = (ddsd.lPitch >> 2) - 512;
-    y = 223;
-    while(y--) {
-      x = 512;
-      while(x--) {
-        *dest++ = color_lookup_table[*src++];
-      }
-      dest += pitch;
-      src  += 512;
+      update32_256x448();
     }
   } else {
-  /* 512x446 */
-    pitch = (ddsd.lPitch >> 2) - 512;
-    y = 446;
-    while(y--) {
-      x = 512;
-      while(x--) {
-        *dest++ = color_lookup_table[*src++];
-      }
-      dest += pitch;
+    if(ppu->output->interlace == false) {
+      update32_512x224();
+    } else {
+      update32_512x448();
     }
   }
+
   lpddsb->Unlock(0);
 }
 
@@ -352,6 +328,10 @@ void DDRenderer::destroy() {
   if(lpdds) {
     lpdds->Release();
     lpdds = 0;
+  }
+  if(lpdd7) {
+    lpdd7->Release();
+    lpdd7 = 0;
   }
   if(lpdd) {
     lpdd->Release();

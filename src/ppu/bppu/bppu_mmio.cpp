@@ -6,14 +6,14 @@ void bPPU::latch_counters() {
 
 uint16 bPPU::get_vram_address() {
 uint16 addr;
-  addr = regs.vram_addr << 1;
+  addr = regs.vram_addr;
   switch(regs.vram_mapping) {
   case 0:break;
   case 1:addr = (addr & 0xff00) | ((addr & 0x001f) << 3) | ((addr >> 5) & 7);break;
   case 2:addr = (addr & 0xfe00) | ((addr & 0x003f) << 3) | ((addr >> 6) & 7);break;
   case 3:addr = (addr & 0xfc00) | ((addr & 0x007f) << 3) | ((addr >> 7) & 7);break;
   }
-  return addr;
+  return (addr << 1);
 }
 
 //INIDISP

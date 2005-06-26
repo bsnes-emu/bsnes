@@ -1,12 +1,9 @@
 class PPUOutput {
 public:
-enum {
-  NORMAL      = 0,
-  INTERLACE   = 1,
-  DOUBLEWIDTH = 2
-};
-uint8  frame_mode;
-uint8  scanline_mode[239];
+bool hires, interlace;
+struct {
+bool hires, interlace;
+}line[239];
 uint16 *buffer;
   PPUOutput();
   ~PPUOutput();

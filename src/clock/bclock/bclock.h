@@ -5,9 +5,9 @@ bool changed, notify_ppu;
 uint8 count, new_count, pos;
 }frameskip;
 bool signal_scanline, signal_frame;
-  void frameskip_update_status();
-  void inc_vcounter();
-  void dram_refresh_test();
+  inline void frameskip_update_status();
+  inline void inc_vcounter();
+  inline void dram_refresh_test();
 
 public:
   struct {
@@ -23,14 +23,14 @@ public:
     uint32 pos, last_pos;
   }cc2;
 
-  void set_frameskip(uint8 fs);
+  inline void set_frameskip(uint8 fs);
 
-  void add_cc1_cycles(uint32 cycles);
-  void add_cc2_cycles(uint32 cycles);
-  void sync();
-  void run();
-  void power();
-  void reset();
+  inline void add_cc1_cycles(uint32 cycles);
+  inline void add_cc2_cycles(uint32 cycles);
+  inline void sync();
+  inline void run();
+  inline void power();
+  inline void reset();
 
   bClock();
   ~bClock();

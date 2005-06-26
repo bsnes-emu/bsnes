@@ -111,8 +111,6 @@ uint8 *wt_main = main_windowtable[bg];
 uint8 *wt_sub  = sub_windowtable[bg];
   build_window_tables(bg);
   for(screen_x=0;screen_x<_screen_width;screen_x++) {
-    if(wt_main[screen_x] && wt_sub[screen_x])continue;
-
     if(regs.bg_mode == 2 || regs.bg_mode == 4 || regs.bg_mode == 6) {
       if(regs.bg_mode == 6) {
         tile_x = (mtable[screen_x + (hscroll & 15)] >> 4);

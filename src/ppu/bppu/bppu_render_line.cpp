@@ -53,7 +53,10 @@ inline void bPPU::render_line_output() {
 int x;
 uint16 _r;
 uint16 *ptr;
-  ptr = (uint16*)output->buffer + (((_y << 1) + _interlace_field) << 9); //((y * 2) + interlace) * scanline_width
+  ptr = (uint16*)output->buffer + (_y << 10);
+  if(_interlace == true) {
+    ptr += _interlace_field << 9;
+  }
 
 uint16 *ltable;
   ltable = (uint16*)light_table + (regs.display_brightness << 16);

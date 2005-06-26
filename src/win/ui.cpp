@@ -42,5 +42,10 @@ void init_ui1() {
   SetFocus(w_main->hwnd);
   dd_renderer->set_window(w_main->hwnd);
   dd_renderer->to_windowed();
+
+  w_main->show_menu();
+  w_main->set_video_mode(cfg.video.mode);
+  w_main->set_frameskip(0);
+
   bsnes->debugger_deactivate();
 }

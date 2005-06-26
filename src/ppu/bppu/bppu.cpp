@@ -11,14 +11,18 @@ void bPPU::run() {}
 
 void bPPU::scanline() {
   _y = clock->vcounter();
+  _screen_width    = (regs.bg_mode == 5 || regs.bg_mode == 6)?512:256;
+  _interlace       = clock->interlace();
+  _interlace_field = clock->interlace_field();
+
   if(_y > 0 && _y < clock->visible_scanlines()) {
-    if(clock->interlace() || regs.oam_halve == true) {
-      output->frame_mode        |= PPUOutput::INTERLACE;
-      output->scanline_mode[_y] |= PPUOutput::INTERLACE;
-    }
     if(regs.bg_mode == 5 || regs.bg_mode == 6) {
-      output->frame_mode        |= PPUOutput::DOUBLEWIDTH;
-      output->scanline_mode[_y] |= PPUOutput::DOUBLEWIDTH;
+      output->hires = true;
+      output->line[_y].hires = true;
+    }
+    if(_interlace == true) {
+      output->interlace = true;
+      output->line[_y].interlace = true;
     }
     render_line();
   }
@@ -26,9 +30,11 @@ void bPPU::scanline() {
 
 void bPPU::frame() {
   snes->notify(SNES::RENDER_FRAME);
-  output->frame_mode = PPUOutput::NORMAL;
+  output->hires     = false;
+  output->interlace = false;
   for(int i=0;i<239;i++) {
-    output->scanline_mode[i] = PPUOutput::NORMAL;
+    output->line[i].hires     = false;
+    output->line[i].interlace = false;
   }
 }
 

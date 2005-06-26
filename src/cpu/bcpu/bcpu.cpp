@@ -89,7 +89,7 @@ uint16 v, h, hc, vs;
 
   //IRQ test
     if(!regs.p.i) {
-      if(status.virq_enabled == true && status.virq_enabled == true) {
+      if(status.virq_enabled == true && status.hirq_enabled == true) {
         if(v == status.virq_pos && h >= status.hirq_pos && status.irq_pin == 1) {
           status.irq_triggered = true;
           status.irq_pin = 0;
@@ -148,6 +148,7 @@ void bCPU::frame() {
   status.nmi_triggered = false;
   status.r4210_read = false;
 
+  status.irq_triggered = false;
   status.irq_pin = 1;
 
   dma->hdma_initialize();

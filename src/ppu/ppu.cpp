@@ -3,9 +3,11 @@
 PPUOutput::PPUOutput() {
   buffer = (uint16*)memalloc(512 * 478 * 2, "PPUOutput::buffer");
   memset(buffer, 0, 512 * 478 * 2);
-  frame_mode = NORMAL;
+  hires     = false;
+  interlace = false;
   for(int i=0;i<239;i++) {
-    scanline_mode[i] = NORMAL;
+    line[i].hires     = false;
+    line[i].interlace = false;
   }
 }
 

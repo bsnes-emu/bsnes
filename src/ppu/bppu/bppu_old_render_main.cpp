@@ -195,9 +195,9 @@ uint16 c, cx, cy;
 uint16 screen_width;
 uint16 v, vline_pos = clock->vcounter();
   v = vline_pos;
-  screen_width = (output->scanline_mode[v] & PPUOutput::DOUBLEWIDTH)?512:256;
+  screen_width = (output->line[v].hires)?512:256;
 
-  if(!(output->scanline_mode[v] & PPUOutput::INTERLACE)) {
+  if(output->line[v].interlace == false) {
     ptr = (uint16*)output->buffer + ((vline_pos << 1)) * 512;
   } else {
     ptr = (uint16*)output->buffer + ((vline_pos << 1) + clock->interlace_field()) * 512;

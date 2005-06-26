@@ -8,7 +8,7 @@ OBJS = winmain.obj \
        cpu.obj bcpu.obj \
        ppu.obj bppu.obj \
        snes.obj
-LIBS = kernel32.lib user32.lib gdi32.lib comdlg32.lib ddraw.lib
+LIBS = kernel32.lib user32.lib gdi32.lib comdlg32.lib ddraw.lib dxguid.lib
 
 all: $(OBJS)
 	$(CC) /Febsnes_g2.exe $(CFLAGS) $(OBJS) $(LIBS)

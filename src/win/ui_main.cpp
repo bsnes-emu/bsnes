@@ -15,32 +15,86 @@ void MainWindow::set_frameskip(uint8 fs) {
   w_main->frameskip = fs;
 }
 
-void MainWindow::set_video_mode(uint8 mode) {
-  hide();
-  CheckMenuItem(w_main->hmenu, MENU_SETTINGS_VIDEOMODE_256x224w, MF_UNCHECKED);
-  CheckMenuItem(w_main->hmenu, MENU_SETTINGS_VIDEOMODE_512x448w, MF_UNCHECKED);
-  CheckMenuItem(w_main->hmenu, MENU_SETTINGS_VIDEOMODE_960x720w, MF_UNCHECKED);
-  switch(mode) {
-  case VIDEOMODE_256x224w:
-    CheckMenuItem(w_main->hmenu, MENU_SETTINGS_VIDEOMODE_256x224w, MF_CHECKED);
-    resize(256, 223);
-    break;
-  case VIDEOMODE_512x448w:
-    CheckMenuItem(w_main->hmenu, MENU_SETTINGS_VIDEOMODE_512x448w, MF_CHECKED);
-    resize(512, 446);
-    break;
-  case VIDEOMODE_960x720w:
-    CheckMenuItem(w_main->hmenu, MENU_SETTINGS_VIDEOMODE_960x720w, MF_CHECKED);
-    resize(960, 720);
-    break;
+void MainWindow::to_fullscreen() {
+  if(bsnes->debugger_enabled() == true) {
+    bsnes->debugger_disable();
   }
+  SetWindowLong(hwnd, GWL_STYLE,   WS_POPUP);
+  SetWindowLong(hwnd, GWL_EXSTYLE, WS_EX_TOPMOST);
+  SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, width, height, 0);
+  dd_renderer->to_fullscreen(width, height);
+  hide_menu();
+}
+
+void MainWindow::to_windowed() {
+  SetWindowLong(hwnd, GWL_STYLE,   WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX);
+  SetWindowLong(hwnd, GWL_EXSTYLE, 0);
+//always call in case the video mode change is simply changing
+//the backbuffer from a VRAM surface to a DRAM surface.
+  dd_renderer->to_windowed();
+  if(dd_renderer->fullscreen == true) {
+    show_menu();
+  }
+}
+
+void MainWindow::adjust_video_mode(bool fullscreen_mode) {
+  fullscreen = fullscreen_mode;
+
+  if(fullscreen == true) {
+    to_fullscreen();
+  } else {
+    to_windowed();
+  }
+
+  resize(width, height);
+  if(fullscreen == false)center();
+
   if(bsnes->debugger_enabled() == true) {
     to_bottom();
     to_right();
-  } else {
-    to_middle();
-    to_center();
   }
+}
+
+void MainWindow::set_video_mode(uint8 mode) {
+  hide();
+  CheckMenuItem(hmenu, MENU_SETTINGS_VIDEOMODE_256x224w,  MF_UNCHECKED);
+  CheckMenuItem(hmenu, MENU_SETTINGS_VIDEOMODE_512x448w,  MF_UNCHECKED);
+  CheckMenuItem(hmenu, MENU_SETTINGS_VIDEOMODE_960x720w,  MF_UNCHECKED);
+  CheckMenuItem(hmenu, MENU_SETTINGS_VIDEOMODE_640x480f,  MF_UNCHECKED);
+  CheckMenuItem(hmenu, MENU_SETTINGS_VIDEOMODE_1024x768f, MF_UNCHECKED);
+  switch(mode) {
+  case VIDEOMODE_256x224w:
+    CheckMenuItem(hmenu, MENU_SETTINGS_VIDEOMODE_256x224w, MF_CHECKED);
+    width  =  256;
+    height =  223;
+    adjust_video_mode(false);
+    break;
+  case VIDEOMODE_512x448w:
+    CheckMenuItem(hmenu, MENU_SETTINGS_VIDEOMODE_512x448w, MF_CHECKED);
+    width  =  512;
+    height =  446;
+    adjust_video_mode(false);
+    break;
+  case VIDEOMODE_960x720w:
+    CheckMenuItem(hmenu, MENU_SETTINGS_VIDEOMODE_960x720w, MF_CHECKED);
+    width  =  960;
+    height =  720;
+    adjust_video_mode(false);
+    break;
+  case VIDEOMODE_640x480f:
+    CheckMenuItem(hmenu, MENU_SETTINGS_VIDEOMODE_640x480f, MF_CHECKED);
+    width  =  640;
+    height =  480;
+    adjust_video_mode(true);
+    break;
+  case VIDEOMODE_1024x768f:
+    CheckMenuItem(hmenu, MENU_SETTINGS_VIDEOMODE_1024x768f, MF_CHECKED);
+    width  = 1024;
+    height =  768;
+    adjust_video_mode(true);
+    break;
+  }
+
   cfg.video.mode = mode;
   show();
 }
@@ -79,6 +133,16 @@ void MainWindow::menu_unload() {
 
 long __stdcall wndproc_main(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
   switch(msg) {
+  case WM_KEYDOWN:
+    if(wparam == VK_ESCAPE) {
+      if(GetMenu(w_main->hwnd) == NULL) {
+        w_main->show_menu();
+      } else {
+        w_main->hide_menu();
+      }
+      w_main->center();
+    }
+    break;
   case WM_COMMAND:
     switch(LOWORD(wparam)) {
     case MENU_FILE_LOAD:
@@ -123,6 +187,31 @@ long __stdcall wndproc_main(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
     case MENU_SETTINGS_VIDEOMODE_960x720w:
       w_main->set_video_mode(VIDEOMODE_960x720w);
       break;
+    case MENU_SETTINGS_VIDEOMODE_640x480f:
+      w_main->set_video_mode(VIDEOMODE_640x480f);
+      break;
+    case MENU_SETTINGS_VIDEOMODE_1024x768f:
+      w_main->set_video_mode(VIDEOMODE_1024x768f);
+      break;
+    case MENU_SETTINGS_USEVRAM:
+      cfg.video.use_vram ^= 1;
+      w_main->set_video_mode(cfg.video.mode);
+      CheckMenuItem(w_main->hmenu, MENU_SETTINGS_USEVRAM, (cfg.video.use_vram)?MF_CHECKED:MF_UNCHECKED);
+      break;
+    case MENU_SETTINGS_VBLANK:
+      cfg.video.vblank ^= 1;
+      CheckMenuItem(w_main->hmenu, MENU_SETTINGS_VBLANK, (cfg.video.vblank)?MF_CHECKED:MF_UNCHECKED);
+      break;
+    case MENU_SETTINGS_COLORCURVE:
+      cfg.video.color_curve ^= 1;
+      dd_renderer->update_color_lookup_table();
+      CheckMenuItem(w_main->hmenu, MENU_SETTINGS_COLORCURVE, (cfg.video.color_curve)?MF_CHECKED:MF_UNCHECKED);
+      break;
+    case MENU_SETTINGS_SHOWFPS:
+      cfg.gui.show_fps ^= 1;
+      SetWindowText(w_main->hwnd, BSNES_TITLE);
+      CheckMenuItem(w_main->hmenu, MENU_SETTINGS_SHOWFPS, (cfg.gui.show_fps)?MF_CHECKED:MF_UNCHECKED);
+      break;
     case MENU_SETTINGS_DEBUGGER:
       if(bsnes->debugger_enabled() == true) {
         bsnes->debugger_disable();
@@ -157,7 +246,7 @@ WNDCLASS wc;
   wc.style         = CS_HREDRAW | CS_VREDRAW;
   RegisterClass(&wc);
 
-  w_main->hwnd = CreateWindow("bsnes", "bsnes v" BSNES_VERSION " ~byuu",
+  w_main->hwnd = CreateWindowEx(0, "bsnes", "bsnes v" BSNES_VERSION " ~byuu",
     WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX,
     0, 0, 512, 446,
     0, 0, GetModuleHandle(0), 0);
@@ -192,18 +281,26 @@ HMENU hsubmenu, hbranchmenu;
   AppendMenu(hsubmenu, MF_STRING | MF_POPUP, (unsigned int)hbranchmenu, "&Frameskip");
 
   hbranchmenu = CreatePopupMenu();
-  AppendMenu(hbranchmenu, MF_STRING, MENU_SETTINGS_VIDEOMODE_256x224w, "256x224 Windowed [16:15]");
-  AppendMenu(hbranchmenu, MF_STRING, MENU_SETTINGS_VIDEOMODE_512x448w, "512x448 Windowed [16:15]");
-  AppendMenu(hbranchmenu, MF_STRING, MENU_SETTINGS_VIDEOMODE_960x720w, "960x720 Windowed [4:3]");
+  AppendMenu(hbranchmenu, MF_STRING, MENU_SETTINGS_VIDEOMODE_256x224w,   "256x224 Windowed [16:15]");
+  AppendMenu(hbranchmenu, MF_STRING, MENU_SETTINGS_VIDEOMODE_512x448w,   "512x448 Windowed [16:15]");
+  AppendMenu(hbranchmenu, MF_STRING, MENU_SETTINGS_VIDEOMODE_960x720w,   "960x720 Windowed [4:3]");
+  AppendMenu(hbranchmenu, MF_STRING, MENU_SETTINGS_VIDEOMODE_640x480f,   "640x480 Fullscreen [16:15]");
+  AppendMenu(hbranchmenu, MF_STRING, MENU_SETTINGS_VIDEOMODE_1024x768f,  "1024x768 Fullscreen [4:3]");
   AppendMenu(hsubmenu, MF_STRING | MF_POPUP, (unsigned int)hbranchmenu, "&Video Mode");
+
+  AppendMenu(hsubmenu, MF_STRING, MENU_SETTINGS_USEVRAM,    "Use &Video Memory Surface");
+  AppendMenu(hsubmenu, MF_STRING, MENU_SETTINGS_VBLANK,     "&Wait for Vertical Retrace");
+  AppendMenu(hsubmenu, MF_STRING, MENU_SETTINGS_COLORCURVE, "Use &Color Curve");
+  AppendMenu(hsubmenu, MF_STRING, MENU_SETTINGS_SHOWFPS,    "&Show FPS");
 
   AppendMenu(hsubmenu, MF_SEPARATOR, 0, "");
   AppendMenu(hsubmenu, MF_STRING, MENU_SETTINGS_DEBUGGER, "&Debugger");
   AppendMenu(w_main->hmenu, MF_STRING | MF_POPUP, (unsigned int)hsubmenu, "&Settings");
 
-  w_main->show_menu();
-  w_main->set_video_mode(cfg.video.mode);
-  w_main->set_frameskip(0);
+  CheckMenuItem(w_main->hmenu, MENU_SETTINGS_USEVRAM,    (cfg.video.use_vram)?MF_CHECKED:MF_UNCHECKED);
+  CheckMenuItem(w_main->hmenu, MENU_SETTINGS_VBLANK,     (cfg.video.vblank)?MF_CHECKED:MF_UNCHECKED);
+  CheckMenuItem(w_main->hmenu, MENU_SETTINGS_COLORCURVE, (cfg.video.color_curve)?MF_CHECKED:MF_UNCHECKED);
+  CheckMenuItem(w_main->hmenu, MENU_SETTINGS_SHOWFPS,    (cfg.gui.show_fps)?MF_CHECKED:MF_UNCHECKED);
 }
 
 MainWindow::MainWindow() {

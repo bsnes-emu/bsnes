@@ -1,5 +1,6 @@
 #define INTERFACE_MAIN
-#define BSNES_VERSION "0.008"
+#define BSNES_VERSION "0.009"
+#define BSNES_TITLE "bsnes v" BSNES_VERSION " ~byuu"
 #include "winmain.h"
 #include "../base.h"
 

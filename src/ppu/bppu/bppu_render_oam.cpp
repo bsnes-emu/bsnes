@@ -81,11 +81,13 @@ int    tile_width;
   } else {
     y = (_y - current_sprite.y);
   }
-  y &= 255;
   if(regs.oam_halve == true) {
     y <<= 1;
-    y += _interlace_field;
+    if(_interlace == true && _screen_width == 512) {
+      y += _interlace_field;
+    }
   }
+  y &= 255;
 
   chr = current_sprite.character;
   tiledata_inc = (chr & 0x100)?(regs.oam_nameselect << 13):0;

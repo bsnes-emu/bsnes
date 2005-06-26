@@ -303,21 +303,25 @@ void bCPU::mmio_w4206(uint8 value) {
 //HTIMEL
 void bCPU::mmio_w4207(uint8 value) {
   status.hirq_pos = (status.hirq_pos & 0xff00) | value;
+  if(status.irq_triggered == false)status.irq_pin = 1;
 }
 
 //HTIMEH
 void bCPU::mmio_w4208(uint8 value) {
   status.hirq_pos = (status.hirq_pos & 0x00ff) | (value << 8);
+  if(status.irq_triggered == false)status.irq_pin = 1;
 }
 
 //VTIMEL
 void bCPU::mmio_w4209(uint8 value) {
   status.virq_pos = (status.virq_pos & 0xff00) | value;
+  if(status.irq_triggered == false)status.irq_pin = 1;
 }
 
 //VTIMEH
 void bCPU::mmio_w420a(uint8 value) {
   status.virq_pos = (status.virq_pos & 0x00ff) | (value << 8);
+  if(status.irq_triggered == false)status.irq_pin = 1;
 }
 
 //DMAEN

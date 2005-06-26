@@ -1,7 +1,9 @@
 enum {
   VIDEOMODE_256x224w = 0,
   VIDEOMODE_512x448w,
-  VIDEOMODE_960x720w
+  VIDEOMODE_960x720w,
+  VIDEOMODE_640x480f,
+  VIDEOMODE_1024x768f
 };
 
 enum {
@@ -23,6 +25,12 @@ enum {
   MENU_SETTINGS_VIDEOMODE_256x224w,
   MENU_SETTINGS_VIDEOMODE_512x448w,
   MENU_SETTINGS_VIDEOMODE_960x720w,
+  MENU_SETTINGS_VIDEOMODE_640x480f,
+  MENU_SETTINGS_VIDEOMODE_1024x768f,
+  MENU_SETTINGS_USEVRAM,
+  MENU_SETTINGS_VBLANK,
+  MENU_SETTINGS_COLORCURVE,
+  MENU_SETTINGS_SHOWFPS,
   MENU_SETTINGS_DEBUGGER
 };
 
@@ -122,27 +130,36 @@ enum {
 
 class Window {
 public:
-HWND hwnd;
+HWND  hwnd;
 HMENU hmenu;
-bool visible, menu_visible;
+bool fullscreen, visible, cursor_visible;
+RECT workarea, wa_offset;
+struct { int width, height; }window;
   void resize(int width, int height);
+  void center();
+  void show_menu();
+  void hide_menu();
+  void show();
+  void hide();
+
   void to_left(HWND _hwnd = 0);
   void to_center();
   void to_right();
   void to_top();
   void to_middle();
   void to_bottom(HWND _hwnd = 0);
-  void hide();
-  void show();
-  void show_menu();
-  void hide_menu();
+
   Window();
 };
 
 class MainWindow : public Window {
 public:
 uint8 frameskip;
+int width, height;
+  void to_fullscreen();
+  void to_windowed();
   void set_frameskip(uint8 fs);
+  void adjust_video_mode(bool fullscreen_mode);
   void set_video_mode(uint8 mode);
   void menu_load();
   void menu_unload();

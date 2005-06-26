@@ -165,19 +165,19 @@ struct {
   void  mmio_w43x6(uint8 value, uint8 i);
   void  mmio_w43x7(uint8 value, uint8 i);
 
-  void  exec_opcode();
+  inline void  exec_opcode();
 
-  uint8 op_read ();
-  uint8 op_read (uint8 mode, uint32 addr);
-  void  op_write(uint8 mode, uint32 addr, uint8 value);
-  uint8 stack_read ();
-  void  stack_write(uint8 value);
+  inline uint8 op_read ();
+  inline uint8 op_read (uint8 mode, uint32 addr);
+  inline void  op_write(uint8 mode, uint32 addr, uint8 value);
+  inline uint8 stack_read ();
+  inline void  stack_write(uint8 value);
 
 //cpu extra-cycle conditions
-  void cpu_c2();
-  void cpu_c4(uint16 a, uint16 b);
-  void cpu_c6(uint16 a);
-  void cpu_io();
+  inline void cpu_c2();
+  inline void cpu_c4(uint16 a, uint16 b);
+  inline void cpu_c6(uint16 a);
+  inline void cpu_io();
 
 //opcode functions
   void init_op_tables();

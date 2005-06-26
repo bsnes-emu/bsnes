@@ -25,7 +25,7 @@ enum {
 
 class Writer {
 public:
-  virtual void write(uint8 *buffer, uint32 length);
+  virtual void write(uint8 *buffer, uint32 length) = 0;
 };
 
 class FileWriter : public Writer {
