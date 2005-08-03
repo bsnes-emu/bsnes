@@ -60,10 +60,10 @@ va_list args;
 void dprintf(char *s, ...) {
 char str[4096];
 va_list args;
+  if(!w_console)return;
+  if(!w_console->can_write(Console::DEBUG_MESSAGE))return;
   va_start(args, s);
   vsprintf(str, s, args);
   va_end(args);
-  if(w_console) {
-    w_console->write(str, Console::DEBUG_MESSAGE);
-  }
+  w_console->write(str, Console::DEBUG_MESSAGE);
 }

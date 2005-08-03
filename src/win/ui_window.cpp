@@ -80,6 +80,7 @@ int width, height;
 
 void Window::show() {
 int style;
+  visible = true;
   style = GetWindowLong(hwnd, GWL_STYLE);
   if(style & WS_VISIBLE)return;
   ShowWindow(hwnd, SW_NORMAL);
@@ -87,6 +88,7 @@ int style;
 
 void Window::hide() {
 int style;
+  visible = false;
   style = GetWindowLong(hwnd, GWL_STYLE);
   if(!(style & WS_VISIBLE))return;
   ShowWindow(hwnd, SW_HIDE);

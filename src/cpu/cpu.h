@@ -2,20 +2,34 @@
 
 class CPU {
 public:
+//timing
+  virtual uint16 vcounter() = 0;
+  virtual uint16 hcounter() = 0;
+  virtual uint16 hcycles() = 0;
+  virtual bool   interlace() = 0;
+  virtual bool   interlace_field() = 0;
+  virtual bool   overscan() = 0;
+
+  virtual void   set_interlace(bool r) = 0;
+  virtual void   set_overscan (bool r) = 0;
+
 MMIO *mmio;
 CPURegs regs;
+  virtual uint8 port_read (uint8 port) = 0;
+  virtual void  port_write(uint8 port, uint8 value) = 0;
+
   enum {
     FLAG_N = 0x80, FLAG_V = 0x40,
     FLAG_M = 0x20, FLAG_X = 0x10,
     FLAG_D = 0x08, FLAG_I = 0x04,
     FLAG_Z = 0x02, FLAG_C = 0x01
   };
-  virtual uint8 pio_status() = 0;
-  virtual void  run() = 0;
-  virtual void  scanline() = 0;
-  virtual void  frame() = 0;
-  virtual void  power() = 0;
-  virtual void  reset() = 0;
+  virtual uint8  pio_status() = 0;
+  virtual void   run() = 0;
+  virtual void   scanline() = 0;
+  virtual void   frame() = 0;
+  virtual void   power() = 0;
+  virtual void   reset() = 0;
 
 //opcode disassembler
   enum {

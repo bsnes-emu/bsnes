@@ -1,21 +1,39 @@
 #include "../../base.h"
 #include "bppu_mmio.cpp"
-
-#ifdef _BPPU_OLDRENDER
-#include "bppu_old_render.cpp"
-#else
 #include "bppu_render.cpp"
-#endif
 
 void bPPU::run() {}
 
 void bPPU::scanline() {
-  _y = clock->vcounter();
+  _y               = cpu->vcounter();
   _screen_width    = (regs.bg_mode == 5 || regs.bg_mode == 6)?512:256;
-  _interlace       = clock->interlace();
-  _interlace_field = clock->interlace_field();
+  _interlace       = cpu->interlace();
+  _interlace_field = cpu->interlace_field();
 
-  if(_y > 0 && _y < clock->visible_scanlines()) {
+  if(_y == 0) {
+  //RTO flag reset
+    regs.time_over  = false;
+    regs.range_over = false;
+  }
+
+  if(_y == 1) {
+  //OAM FirstSprite priority set
+    if(regs.oam_priority == true) {
+      regs.oam_firstsprite = (regs.oam_addr & 0xfe) >> 1;
+    } else {
+      regs.oam_firstsprite = 0;
+    }
+  }
+
+  if(_y == (cpu->overscan()?239:224) && regs.display_disabled == false) {
+  //OAM address reset
+    regs.oam_addr = ((regs.oam_addrh << 8) | regs.oam_addrl) << 1;
+  }
+
+//only allow frameskip setting to ignore actual rendering; not RTO, etc.
+  if(settings.frameskip_pos != 0)return;
+
+  if(_y > 0 && _y < (cpu->overscan()?239:224)) {
     if(regs.bg_mode == 5 || regs.bg_mode == 6) {
       output->hires = true;
       output->line[_y].hires = true;
@@ -29,6 +47,16 @@ void bPPU::scanline() {
 }
 
 void bPPU::frame() {
+  if(settings.frameskip_changed == true) {
+    settings.frameskip_changed = false;
+    settings.frameskip_pos = 0;
+  } else {
+    settings.frameskip_pos++;
+    settings.frameskip_pos %= (settings.frameskip + 1);
+  }
+
+  if(settings.frameskip_pos != 0)return;
+
   snes->notify(SNES::RENDER_FRAME);
   output->hires     = false;
   output->interlace = false;
@@ -36,6 +64,11 @@ void bPPU::frame() {
     output->line[i].hires     = false;
     output->line[i].interlace = false;
   }
+}
+
+void bPPU::set_frameskip(int fs) {
+  settings.frameskip = fs;
+  settings.frameskip_changed = true;
 }
 
 void bPPU::power() {
@@ -49,6 +82,8 @@ void bPPU::reset() {
   memset(output->buffer, 0, 512 * 478 * 2);
   frame();
 
+  memset(sprite_list, 0, sizeof(sprite_list));
+
 //$2100
   regs.display_disabled   = 0;
   regs.display_brightness = 0;
@@ -59,10 +94,12 @@ void bPPU::reset() {
   regs.oam_tdaddr     = 0x0000;
 
 //$2102-$2103
-  regs.oam_addrl     = 0x00;
-  regs.oam_addrh     = 0x00;
-  regs.oam_addr      = 0x0000;
-  regs.oam_latchdata = 0x00;
+  regs.oam_addrl       = 0x00;
+  regs.oam_addrh       = 0x00;
+  regs.oam_addr        = 0x0000;
+  regs.oam_latchdata   = 0x00;
+  regs.oam_priority    = false;
+  regs.oam_firstsprite = 0x00;
 
 //$2105
   regs.bg_tilesize[BG1] = 0;
@@ -226,6 +263,11 @@ void bPPU::reset() {
 //$2139-$213a
   regs.vram_readbuffer = 0x0000;
 
+//$213e
+  regs.time_over  = false;
+  regs.range_over = false;
+
+  update_sprite_list_sizes();
   clear_tiledata_cache();
 }
 
@@ -252,6 +294,7 @@ uint8 r;
 void bPPU::oam_write(uint16 addr, uint8 value) {
   if(addr >= 0x0200)addr = 0x0200 | (addr & 31);
   oam[addr] = value;
+  update_sprite_list(addr);
   snes->notify(SNES::OAM_WRITE, addr, value);
 }
 
@@ -268,6 +311,10 @@ void bPPU::cgram_write(uint16 addr, uint8 value) {
 }
 
 bPPU::bPPU() {
+  settings.frameskip         = 0;
+  settings.frameskip_pos     = 0;
+  settings.frameskip_changed = false;
+
   mmio = new bPPUMMIO(this);
 
   vram  = (uint8*)memalloc(65536, "bPPU::vram");
@@ -301,9 +348,9 @@ uint16 *ptr;
       if(l == 0) { r = g = b = 0; }
       else if(l == 15);
       else {
-        r = (double)r * m;
-        g = (double)g * m;
-        b = (double)b * m;
+        r = (uint8)((double)r * m);
+        g = (uint8)((double)g * m);
+        b = (uint8)((double)b * m);
       }
       *ptr++ = (r) | (g << 5) | (b << 10);
     }

@@ -11,7 +11,7 @@ void MainWindow::set_frameskip(uint8 fs) {
   CheckMenuItem(w_main->hmenu, MENU_SETTINGS_FRAMESKIP_9,   MF_UNCHECKED);
 
   CheckMenuItem(w_main->hmenu, MENU_SETTINGS_FRAMESKIP_OFF + fs, MF_CHECKED);
-  clock->set_frameskip(fs);
+  ppu->set_frameskip(fs);
   w_main->frameskip = fs;
 }
 
@@ -212,6 +212,13 @@ long __stdcall wndproc_main(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
       SetWindowText(w_main->hwnd, BSNES_TITLE);
       CheckMenuItem(w_main->hmenu, MENU_SETTINGS_SHOWFPS, (cfg.gui.show_fps)?MF_CHECKED:MF_UNCHECKED);
       break;
+    case MENU_SETTINGS_APUENABLED:
+      cfg.apu.enabled ^= 1;
+      CheckMenuItem(w_main->hmenu, MENU_SETTINGS_APUENABLED, (cfg.apu.enabled)?MF_CHECKED:MF_UNCHECKED);
+      break;
+    case MENU_SETTINGS_INPUTCFG_JOYPAD1:
+      w_inputconfig->begin_config(InputConfig::JOYPAD1);
+      break;
     case MENU_SETTINGS_DEBUGGER:
       if(bsnes->debugger_enabled() == true) {
         bsnes->debugger_disable();
@@ -219,6 +226,11 @@ long __stdcall wndproc_main(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
         bsnes->debugger_enable();
         w_main->set_video_mode(VIDEOMODE_256x224w);
       }
+      break;
+    case MENU_MISC_ABOUT:
+      w_about->center();
+      w_about->show();
+      SetFocus(w_about->hwnd);
       break;
     }
     break;
@@ -232,13 +244,13 @@ long __stdcall wndproc_main(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
   return DefWindowProc(hwnd, msg, wparam, lparam);
 }
 
-void CreateWindowMain() {
+void MainWindow::create() {
 WNDCLASS wc;
   wc.cbClsExtra    = 0;
   wc.cbWndExtra    = 0;
   wc.hbrBackground = CreateSolidBrush(RGB(0, 0, 0));
   wc.hCursor       = LoadCursor(0, IDC_ARROW);
-  wc.hIcon         = LoadIcon(0, IDI_APPLICATION);
+  wc.hIcon         = LoadIcon(GetModuleHandle(0), MAKEINTRESOURCE(101));
   wc.hInstance     = GetModuleHandle(0);
   wc.lpfnWndProc   = wndproc_main;
   wc.lpszClassName = "bsnes";
@@ -246,13 +258,13 @@ WNDCLASS wc;
   wc.style         = CS_HREDRAW | CS_VREDRAW;
   RegisterClass(&wc);
 
-  w_main->hwnd = CreateWindowEx(0, "bsnes", "bsnes v" BSNES_VERSION " ~byuu",
+  hwnd = CreateWindowEx(0, "bsnes", BSNES_TITLE,
     WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX,
     0, 0, 512, 446,
     0, 0, GetModuleHandle(0), 0);
 
 HMENU hsubmenu, hbranchmenu;
-  w_main->hmenu = CreateMenu();
+  hmenu = CreateMenu();
 
   hsubmenu = CreatePopupMenu();
   AppendMenu(hsubmenu, MF_STRING, MENU_FILE_LOAD, "&Load ROM");
@@ -262,7 +274,7 @@ HMENU hsubmenu, hbranchmenu;
   AppendMenu(hsubmenu, MF_STRING, MENU_FILE_POWER, "&Power (Hard Reset)");
   AppendMenu(hsubmenu, MF_SEPARATOR, 0, "");
   AppendMenu(hsubmenu, MF_STRING, MENU_FILE_EXIT, "E&xit");
-  AppendMenu(w_main->hmenu, MF_STRING | MF_POPUP, (unsigned int)hsubmenu, "&File");
+  AppendMenu(hmenu, MF_STRING | MF_POPUP, (unsigned int)hsubmenu, "&File");
 
   hsubmenu = CreatePopupMenu();
 
@@ -292,16 +304,23 @@ HMENU hsubmenu, hbranchmenu;
   AppendMenu(hsubmenu, MF_STRING, MENU_SETTINGS_VBLANK,     "&Wait for Vertical Retrace");
   AppendMenu(hsubmenu, MF_STRING, MENU_SETTINGS_COLORCURVE, "Use &Color Curve");
   AppendMenu(hsubmenu, MF_STRING, MENU_SETTINGS_SHOWFPS,    "&Show FPS");
+  AppendMenu(hsubmenu, MF_STRING, MENU_SETTINGS_APUENABLED, "&Enable APU");
+
+  hbranchmenu = CreatePopupMenu();
+  AppendMenu(hbranchmenu, MF_STRING, MENU_SETTINGS_INPUTCFG_JOYPAD1, "Joypad 1");
+  AppendMenu(hsubmenu, MF_STRING | MF_POPUP, (unsigned int)hbranchmenu, "&Configure Input Devices");
 
   AppendMenu(hsubmenu, MF_SEPARATOR, 0, "");
   AppendMenu(hsubmenu, MF_STRING, MENU_SETTINGS_DEBUGGER, "&Debugger");
-  AppendMenu(w_main->hmenu, MF_STRING | MF_POPUP, (unsigned int)hsubmenu, "&Settings");
+  AppendMenu(hmenu, MF_STRING | MF_POPUP, (unsigned int)hsubmenu, "&Settings");
 
-  CheckMenuItem(w_main->hmenu, MENU_SETTINGS_USEVRAM,    (cfg.video.use_vram)?MF_CHECKED:MF_UNCHECKED);
-  CheckMenuItem(w_main->hmenu, MENU_SETTINGS_VBLANK,     (cfg.video.vblank)?MF_CHECKED:MF_UNCHECKED);
-  CheckMenuItem(w_main->hmenu, MENU_SETTINGS_COLORCURVE, (cfg.video.color_curve)?MF_CHECKED:MF_UNCHECKED);
-  CheckMenuItem(w_main->hmenu, MENU_SETTINGS_SHOWFPS,    (cfg.gui.show_fps)?MF_CHECKED:MF_UNCHECKED);
-}
+  hsubmenu = CreatePopupMenu();
+  AppendMenu(hsubmenu, MF_STRING, MENU_MISC_ABOUT, "&About...");
+  AppendMenu(hmenu, MF_STRING | MF_POPUP, (unsigned int)hsubmenu, "&Misc");
 
-MainWindow::MainWindow() {
+  CheckMenuItem(hmenu, MENU_SETTINGS_USEVRAM,    (cfg.video.use_vram)?MF_CHECKED:MF_UNCHECKED);
+  CheckMenuItem(hmenu, MENU_SETTINGS_VBLANK,     (cfg.video.vblank)?MF_CHECKED:MF_UNCHECKED);
+  CheckMenuItem(hmenu, MENU_SETTINGS_COLORCURVE, (cfg.video.color_curve)?MF_CHECKED:MF_UNCHECKED);
+  CheckMenuItem(hmenu, MENU_SETTINGS_SHOWFPS,    (cfg.gui.show_fps)?MF_CHECKED:MF_UNCHECKED);
+  CheckMenuItem(hmenu, MENU_SETTINGS_APUENABLED, (cfg.apu.enabled)?MF_CHECKED:MF_UNCHECKED);
 }

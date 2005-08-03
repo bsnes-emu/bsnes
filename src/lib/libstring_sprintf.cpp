@@ -17,7 +17,7 @@ uint8 pad_type, pad_len;
 uint32 num;
 char *r;
   va_start(args, s);
-  strcpy(str, "");
+  strcpy(*str, "");
   for(i=0;i<strlen(s);i++) {
     if(s[i] == '%') {
       i++;

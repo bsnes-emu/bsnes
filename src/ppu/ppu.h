@@ -28,6 +28,7 @@ MMIO      *mmio;
   virtual void  frame() = 0;
   virtual void  power() = 0;
   virtual void  reset() = 0;
+  virtual void  set_frameskip(int fs);
 
   PPU();
   ~PPU();

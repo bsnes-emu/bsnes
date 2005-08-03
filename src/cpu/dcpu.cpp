@@ -378,7 +378,7 @@ uint8 op, op0, op1, op2;
   strcat(s, " ");
 
   sprintf(t, "A:%0.4x X:%0.4x Y:%0.4x S:%0.4x D:%0.4x DB:%0.2x ",
-    regs.a.w, regs.x.w, regs.y.w, regs.s.w, regs.d, regs.db);
+    regs.a.w, regs.x.w, regs.y.w, regs.s.w, regs.d.w, regs.db);
   strcat(s, t);
   if(regs.e) {
     sprintf(t, "%c%c%c%c%c%c%c%c",

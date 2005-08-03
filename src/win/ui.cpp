@@ -1,11 +1,15 @@
 HFONT hFont, hMonofont;
+HBRUSH hbr_backbrush;
 
 #include "dd_renderer.cpp"
+#include "uictl_editex.cpp"
 #include "ui_window.cpp"
 #include "ui_main.cpp"
 #include "ui_console.cpp"
 #include "ui_bp.cpp"
 #include "ui_memory.cpp"
+#include "ui_inputconfig.cpp"
+#include "ui_about.cpp"
 
 void CreateFonts() {
 HDC hdc;
@@ -22,18 +26,24 @@ long height;
 }
 
 void CreateWindows() {
-  CreateWindowMain();
-  CreateWindowConsole();
-  CreateWindowBreakpoint();
-  CreateWindowMemory();
+  LoadLibrary("riched20.dll");
+  hbr_backbrush = CreateSolidBrush(RGB(32, 32, 32));
+  w_main->create();
+  w_console->create();
+  w_bp->create();
+  w_memory->create();
+  w_inputconfig->create();
+  w_about->create();
 }
 
 void init_ui0() {
-  dd_renderer = new DDRenderer();
-  w_main      = new MainWindow();
-  w_console   = new Console();
-  w_bp        = new BreakpointEditor();
-  w_memory    = new MemoryEditor();
+  dd_renderer   = new DDRenderer();
+  w_main        = new MainWindow();
+  w_console     = new Console();
+  w_bp          = new BreakpointEditor();
+  w_memory      = new MemoryEditor();
+  w_inputconfig = new InputConfig();
+  w_about       = new AboutWindow();
 }
 
 void init_ui1() {

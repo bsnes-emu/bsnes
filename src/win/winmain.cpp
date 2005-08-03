@@ -1,6 +1,6 @@
 #define INTERFACE_MAIN
-#define BSNES_VERSION "0.009"
-#define BSNES_TITLE "bsnes v" BSNES_VERSION " ~byuu"
+#define BSNES_VERSION "0.010"
+#define BSNES_TITLE "bsnes v" BSNES_VERSION
 #include "winmain.h"
 #include "../base.h"
 
@@ -20,18 +20,24 @@ fpstimer *fps_timer;
 #include "ui.cpp"
 
 void init_snes() {
-  clock   = new bClock();
+//clock   = new bClock();
   mem_bus = new bMemBus();
   cpu     = new bCPU();
+  if(cfg.apu.enabled) {
+    apu = new bAPU();
+  } else {
+    apu = new bAPUSkip();
+  }
   ppu     = new bPPU();
   snes    = new bSNES();
   bsnes   = static_cast<bSNES*>(snes);
 }
 
 void term_snes() {
-  if(clock)   { delete(clock);   clock   = 0; }
+//if(clock)   { delete(clock);   clock   = 0; }
   if(mem_bus) { delete(mem_bus); mem_bus = 0; }
   if(cpu)     { delete(cpu);     cpu     = 0; }
+  if(apu)     { delete(apu);     apu     = 0; }
   if(ppu)     { delete(ppu);     ppu     = 0; }
   if(snes)    { delete(snes);    snes    = 0; }
 }
@@ -39,9 +45,9 @@ void term_snes() {
 void get_config_fn(string &str) {
 char *t = (char*)malloc(4096);
   _getcwd(t, 4095);
-  str = t;
+  strcpy(str, t);
   free(t);
-  str += "\\bsnes.cfg";
+  strcat(str, "\\bsnes.cfg");
 }
 
 int __stdcall WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
@@ -58,13 +64,14 @@ string cfg_fn;
   init_snes();
   init_ui1();
 
-  if(lpCmdLine) {
-    if(*lpCmdLine) {
-      rom_image->select(lpCmdLine);
-      rom_image->load();
-      snes->power();
-      bsnes->debugger_update();
-    }
+int argc    = __argc;
+char **argv = __argv;
+
+  if(argc >= 2) {
+    rom_image->select(argv[1]);
+    rom_image->load();
+    snes->power();
+    bsnes->debugger_update();
   }
 
   while(1) {
@@ -73,7 +80,7 @@ string cfg_fn;
       TranslateMessage(&msg);
       DispatchMessage(&msg);
     }
-    bsnes->run();
+    bsnes->snes_run();
   }
 
   cfg.save(cfg_fn);

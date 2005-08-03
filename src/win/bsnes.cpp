@@ -6,6 +6,7 @@ uint8 cpu_op;
   case STOP:
     w_console->is_running(false);
     w_console->update_status();
+    w_memory->refresh();
     break;
   case RUNTOCPUSTEP:
     status.cpu_ran = false;
@@ -21,6 +22,9 @@ uint8 cpu_op;
       run_status     = RUNTOCPUSTEP;
     }
     break;
+  case RUNTOAPUSTEP:
+    status.apu_ran = false;
+    break;
   }
 }
 
@@ -28,58 +32,71 @@ uint32 bSNES::get_status() {
   return run_status;
 }
 
-void bSNES::run() {
+void bSNES::snes_run() {
   if(!rom_image->loaded())return;
 
   switch(run_status) {
   case RUN:
     while(update_frame == false) {
-      clock->run();
+      run();
     }
     update_frame = false;
     return;
   case STOP:
     break;
   case RUNONCE:
-    clock->run();
+    run();
     set_status(STOP);
     break;
   case RUNTOSIGNAL:
-    clock->run();
+    run();
     if(w_bp->hit() == true) {
       set_status(STOP);
-      disassemble_cpu_op();
+      disassemble_bp_op();
     }
     break;
   case RUNTOFRAME:
-    clock->run();
+    run();
     if(update_frame == true) {
       update_frame = false;
+      set_status(STOP);
+      disassemble_apu_op();
+      disassemble_cpu_op();
+    } else if(w_bp->hit() == true) {
+      set_status(STOP);
+      disassemble_bp_op();
+    }
+    return;
+  case RUNTOCPUSTEP:
+    run();
+    if(status.cpu_ran == true) {
+      set_status(STOP);
+    } else if(w_bp->hit() == true) {
+      set_status(STOP);
+      disassemble_bp_op();
+    }
+    break;
+  case RUNTOCPUPROCEED:
+    run();
+    if(status.cpu_stop_pos == cpu->regs.pc) {
       set_status(STOP);
       disassemble_cpu_op();
     } else if(w_bp->hit() == true) {
       set_status(STOP);
-      disassemble_cpu_op();
-    }
-    return;
-  case RUNTOCPUSTEP:
-    clock->run();
-    if(status.cpu_ran == true || w_bp->hit() == true) {
-      set_status(STOP);
-    }
-    break;
-  case RUNTOCPUPROCEED:
-    clock->run();
-    if(status.cpu_stop_pos == cpu->regs.pc || w_bp->hit() == true) {
-      set_status(STOP);
-      disassemble_cpu_op();
+      disassemble_bp_op();
     }
     break;
   case RUNTOCPUTRACE:
-    clock->run();
+    run();
     if(status.cpu_trace_pos >= status.cpu_trace_stop) {
       set_status(STOP);
       disassemble_cpu_op();
+    }
+    break;
+  case RUNTOAPUSTEP:
+    run();
+    if(status.apu_ran == true || w_bp->hit() == true) {
+      set_status(STOP);
     }
     break;
   }
@@ -92,22 +109,26 @@ void bSNES::render_frame() {
 /***********************
  *** Input functions ***
  ***********************/
-#define KeyState(key) ((GetAsyncKeyState(key) & 0x8000)?1:0)
 void bSNES::poll_input() {
 /* Only capture input when main window has focus */
   if(GetForegroundWindow() == w_main->hwnd) {
-    joypad1.up     = KeyState(VK_UP);
-    joypad1.down   = KeyState(VK_DOWN);
-    joypad1.left   = KeyState(VK_LEFT);
-    joypad1.right  = KeyState(VK_RIGHT);
-    joypad1.select = KeyState(VK_LSHIFT) | KeyState(VK_RSHIFT);
-    joypad1.start  = KeyState(VK_RETURN);
-    joypad1.y      = KeyState('A');
-    joypad1.b      = KeyState('Z');
-    joypad1.x      = KeyState('S');
-    joypad1.a      = KeyState('X');
-    joypad1.l      = KeyState('D');
-    joypad1.r      = KeyState('C');
+    joypad1.up     = KeyDown(cfg.input.joypad1.up);
+    joypad1.down   = KeyDown(cfg.input.joypad1.down);
+    joypad1.left   = KeyDown(cfg.input.joypad1.left);
+    joypad1.right  = KeyDown(cfg.input.joypad1.right);
+    joypad1.select = KeyDown(cfg.input.joypad1.select);
+    joypad1.start  = KeyDown(cfg.input.joypad1.start);
+    joypad1.y      = KeyDown(cfg.input.joypad1.y);
+    joypad1.b      = KeyDown(cfg.input.joypad1.b);
+    joypad1.x      = KeyDown(cfg.input.joypad1.x);
+    joypad1.a      = KeyDown(cfg.input.joypad1.a);
+    joypad1.l      = KeyDown(cfg.input.joypad1.l);
+    joypad1.r      = KeyDown(cfg.input.joypad1.r);
+  } else {
+    joypad1.up = joypad1.down = joypad1.left = joypad1.right =
+    joypad1.select = joypad1.start =
+    joypad1.y = joypad1.b = joypad1.x = joypad1.a =
+    joypad1.l = joypad1.r = 0;
   }
 
 //Check for debugger-based key locks
@@ -175,7 +196,7 @@ uint8  r = 0x00;
     a = addr & 0xffff;
     if((bank >= 0x00 && bank <= 0x3f) ||
        (bank >= 0x80 && bank <= 0xbf)) {
-    /* Don't let the debugger poll MMIO ports */
+    //don't let the debugger poll MMIO ports
       if(a >= 0x2000 && a <= 0x5fff) {
         r = 0x00;
       } else {
@@ -184,6 +205,10 @@ uint8  r = 0x00;
     } else {
       r = mem_bus->read(addr);
     }
+    break;
+  case SPCRAM:
+    addr &= 0xffff;
+    r = apu->spcram_read(addr);
     break;
   case VRAM:
     addr &= 0xffff;
@@ -207,9 +232,13 @@ void bSNES::write(uint8 type, uint32 addr, uint8 value) {
   switch(type) {
   case DRAM:
     addr &= 0xffffff;
-    mem_bus->rom->write_protect(false);
+    mem_bus->cart->write_protect(false);
     mem_bus->write(addr, value);
-    mem_bus->rom->write_protect(true);
+    mem_bus->cart->write_protect(true);
+    break;
+  case SPCRAM:
+    addr &= 0xffff;
+    apu->spcram_write(addr, value);
     break;
   case VRAM:
     addr &= 0xffff;
@@ -228,7 +257,7 @@ void bSNES::write(uint8 type, uint32 addr, uint8 value) {
 }
 
 void bSNES::notify(uint32 message, uint32 param1, uint32 param2) {
-/* system messages */
+//system messages
   switch(message) {
   case RENDER_FRAME:
     update_frame = true;
@@ -236,17 +265,27 @@ void bSNES::notify(uint32 message, uint32 param1, uint32 param2) {
     break;
   }
 
-/* debugging messages */
+//debugging messages
   if(is_debugger_enabled == false)return;
 
   switch(message) {
-  case CPU_EXEC_OPCODE:
+  case CPU_EXEC_OPCODE_BEGIN:
+    break;
+  case CPU_EXEC_OPCODE_END:
     status.cpu_ran = true;
     status.cpu_trace_pos++;
     w_bp->test(message, cpu->regs.pc.d, 0);
     disassemble_cpu_op();
     break;
+  case APU_EXEC_OPCODE_BEGIN:
+    break;
+  case APU_EXEC_OPCODE_END:
+    status.apu_ran = true;
+    w_bp->test(message, apu->regs.pc, 0);
+    disassemble_apu_op();
+    break;
   case MEM_READ:
+  case SPCRAM_READ:
   case VRAM_READ:
   case OAM_READ:
   case CGRAM_READ:
@@ -255,14 +294,15 @@ void bSNES::notify(uint32 message, uint32 param1, uint32 param2) {
     }
     break;
   case MEM_WRITE:
+  case SPCRAM_WRITE:
   case VRAM_WRITE:
   case OAM_WRITE:
   case CGRAM_WRITE:
     if(debug_command == false) {
       w_bp->test(message, param1, param2);
     }
-  /* this needs to be called after the breakpoint test,
-     as it will access read() and clear debug_command */
+  //this needs to be called after the breakpoint test,
+  //as it will access read() and clear debug_command
     w_memory->refresh(message, param1);
     break;
   }
@@ -270,14 +310,32 @@ void bSNES::notify(uint32 message, uint32 param1, uint32 param2) {
 
 void bSNES::disassemble_cpu_op() {
 char t[512];
-/* don't disassemble opcodes when no ROM is loaded */
+//don't disassemble opcodes when no ROM is loaded
   if(is_debugger_activated == false)return;
 
-/* don't disassemble opcodes that won't be printed to console/traced to log anyway */
+//don't disassemble opcodes that won't be printed to console/traced to log anyway
   if(!w_console->can_write(Console::CPU_MESSAGE) && !w_console->tracing_enabled)return;
 
   cpu->disassemble_opcode(t);
   w_console->write(t, Console::CPU_MESSAGE);
+}
+
+void bSNES::disassemble_apu_op() {
+char t[512];
+  if(is_debugger_activated == false)return;
+
+  if(!w_console->can_write(Console::APU_MESSAGE) && !w_console->tracing_enabled)return;
+
+  apu->disassemble_opcode(t);
+  w_console->write(t, Console::APU_MESSAGE);
+}
+
+void bSNES::disassemble_bp_op() {
+  if(w_bp->bp[w_bp->bp_hit_num].source == SPCRAM) {
+    disassemble_apu_op();
+  } else {
+    disassemble_cpu_op();
+  }
 }
 
 bool bSNES::debugger_enabled() {
@@ -319,6 +377,7 @@ void bSNES::debugger_update() {
   w_console->update_status();
   w_bp->refresh();
   w_memory->refresh();
+  disassemble_apu_op();
   disassemble_cpu_op();
 }
 

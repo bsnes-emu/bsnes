@@ -49,21 +49,20 @@ void build_color_window_tables();
 void render_line_bg(uint8 bg, uint8 color_depth, uint8 pri0_pos, uint8 pri1_pos);
 
 //bppu_render_oam.cpp
-struct {
-  byte num;
-  byte width, height;
-  word x, y;
-  word character;
-  byte v_flip, h_flip;
-  byte palette;
-  byte priority;
-}current_sprite;
+sprite_item *spr;
+
+uint8 oam_itemlist[32];
+struct oam_tileitem {
+  uint16 x, y, pri, pal, tile;
+  bool   hflip;
+}oam_tilelist[34];
 
 enum { OAM_PRI_NONE = 4 };
 uint8 oam_line_pal[512], oam_line_pri[512];
 
-void set_sprite_attributes(uint8 sprite_num);
-void render_oam_sprite();
+bool is_sprite_on_scanline();
+void load_oam_tiles();
+void render_oam_tile(int tile_num);
 void render_line_oam(uint8 pri0_pos, uint8 pri1_pos, uint8 pri2_pos, uint8 pri3_pos);
 
 //bppu_render_mode7.cpp

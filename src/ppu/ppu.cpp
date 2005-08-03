@@ -15,6 +15,8 @@ PPUOutput::~PPUOutput() {
   if(buffer)memfree(buffer, "PPUOutput::buffer");
 }
 
+void PPU::set_frameskip(int fs) {}
+
 PPU::PPU() {
   mmio = &mmio_unmapped;
   output = new PPUOutput();

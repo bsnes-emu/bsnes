@@ -8,9 +8,9 @@ int x, y;
   pitch = (ddsd.lPitch >> 2) - 256;
 
 int overscan_adjust = 0;
-  if(clock->overscan() == true) {
-    src += 8 << 10;
-    overscan_adjust = 8;
+  if(cpu->overscan() == true) {
+    src += 7 << 10;
+    overscan_adjust = 7;
   }
 
   for(y=1+overscan_adjust;y<224+overscan_adjust;y++) {
@@ -34,9 +34,9 @@ int x, y;
   pitch = (ddsd.lPitch >> 2) - 256;
 
 int overscan_adjust = 0;
-  if(clock->overscan() == true) {
-    src += 8 << 10;
-    overscan_adjust = 16;
+  if(cpu->overscan() == true) {
+    src += 7 << 10;
+    overscan_adjust = 14;
   }
 
   for(y=2+overscan_adjust;y<448+overscan_adjust;y++) {
@@ -62,9 +62,9 @@ int x, y;
   pitch = (ddsd.lPitch >> 2) - 512;
 
 int overscan_adjust = 0;
-  if(clock->overscan() == true) {
-    src += 8 << 10;
-    overscan_adjust = 8;
+  if(cpu->overscan() == true) {
+    src += 7 << 10;
+    overscan_adjust = 7;
   }
 
   for(y=1+overscan_adjust;y<224+overscan_adjust;y++) {
@@ -96,9 +96,9 @@ int x, y;
   pitch = (ddsd.lPitch >> 2) - 512;
 
 int overscan_adjust = 0;
-  if(clock->overscan() == true) {
-    src += 8 << 10;
-    overscan_adjust = 16;
+  if(cpu->overscan() == true) {
+    src += 7 << 10;
+    overscan_adjust = 14;
   }
 
   for(y=2+overscan_adjust;y<448+overscan_adjust;y++) {

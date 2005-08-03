@@ -1,3 +1,5 @@
+#define KeyDown(key) ((GetAsyncKeyState(key) & 0x8000)?1:0)
+
 enum {
   VIDEOMODE_256x224w = 0,
   VIDEOMODE_512x448w,
@@ -31,7 +33,10 @@ enum {
   MENU_SETTINGS_VBLANK,
   MENU_SETTINGS_COLORCURVE,
   MENU_SETTINGS_SHOWFPS,
-  MENU_SETTINGS_DEBUGGER
+  MENU_SETTINGS_APUENABLED,
+  MENU_SETTINGS_INPUTCFG_JOYPAD1,
+  MENU_SETTINGS_DEBUGGER,
+  MENU_MISC_ABOUT
 };
 
 enum {
@@ -118,14 +123,13 @@ enum {
   MEMORYEDITOR_FSOURCE,
   MEMORYEDITOR_FEXPORT,
 
-  MEMORYEDITOR_UP40,
-  MEMORYEDITOR_DOWN40,
-  MEMORYEDITOR_UP400,
-  MEMORYEDITOR_DOWN400,
-  MEMORYEDITOR_UP4000,
-  MEMORYEDITOR_DOWN4000,
-  MEMORYEDITOR_UP40000,
-  MEMORYEDITOR_DOWN40000
+  MEMORYEDITOR_UPDATE,
+  MEMORYEDITOR_AUTOUPDATE
+};
+
+enum {
+  ABOUT_STATIC = 100,
+  ABOUT_OK
 };
 
 class Window {
@@ -156,6 +160,7 @@ class MainWindow : public Window {
 public:
 uint8 frameskip;
 int width, height;
+  void create();
   void to_fullscreen();
   void to_windowed();
   void set_frameskip(uint8 fs);
@@ -163,23 +168,22 @@ int width, height;
   void set_video_mode(uint8 mode);
   void menu_load();
   void menu_unload();
+}*w_main = 0;
 
-  MainWindow();
-};
-
-MainWindow *w_main;
-
-#define CONSOLE_LINES 256
+#define CONSOLE_LINES 240
 class Console : public Window {
 private:
 bool _is_running; //used to swap "Run"/"Stop" text on console window
+
 public:
 bool ctl_disabled[100];
+bool outputcpu, outputapu, outputdbg;
 
 enum { DEBUG_MESSAGE = 0, CPU_MESSAGE, APU_MESSAGE };
 enum { REGTYPE_CPU = 0, REGTYPE_APU };
-char output_line[CONSOLE_LINES][512];
-char output_data[CONSOLE_LINES * 512];
+char  output_line[CONSOLE_LINES][128];
+uint8 output_linecol[CONSOLE_LINES];
+char  output_data[CONSOLE_LINES * 128];
 FILE *log_fp;
 bool tracing_enabled;
 
@@ -189,8 +193,9 @@ struct {
   bool l, r, select, start;
 }joypad_lock;
 
+  void create();
+  long wndproc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam);
   void clear();
-  void create_controls();
   void update_status();
   void set_reg_list_type(uint8 list_type);
   bool can_write(uint32 message_type);
@@ -198,15 +203,13 @@ struct {
   void is_running(bool n); //API access to _is_running
 
   Console();
-};
-
-Console *w_console;
+}*w_console = 0;
 
 class BreakpointEditor : public Window {
 public:
 bool ctl_disabled[100];
 
-enum { DRAM = 0, VRAM = 1, OAM = 2, CGRAM = 3 };
+enum { DRAM = 0, SPCRAM = 1, VRAM = 2, OAM = 3, CGRAM = 4 };
 enum { FLAG_NONE = 0, FLAG_R = 1, FLAG_W = 2, FLAG_X = 4, FLAG_V = 8 };
 struct {
   uint32 addr;
@@ -216,29 +219,54 @@ struct {
   uint32 hit_count;
   bool   set;
 }bp[16];
-bool bp_enabled, bp_hit;
+bool  bp_enabled, bp_hit;
+//indicates which breakpoint was hit, used to tell whether to disassemble
+//a cpu or apu opcode once the emulation status is set to stop.
+uint8 bp_hit_num;
   void clear();
-  void create_controls();
+  void create();
   bool hit();
   void test(uint32 message, uint32 addr, uint32 value);
   void refresh();
 
   BreakpointEditor();
-};
-
-BreakpointEditor *w_bp;
+}*w_bp = 0;
 
 class MemoryEditor : public Window {
 public:
 bool ctl_disabled[100];
 
-enum { MODE_DRAM = 0, MODE_ROM, MODE_SRAM, MODE_VRAM, MODE_OAM, MODE_CGRAM };
+enum { MODE_DRAM = 0, MODE_ROM, MODE_SRAM, MODE_SPCRAM, MODE_VRAM, MODE_OAM, MODE_CGRAM };
 uint32 edit_mode, edit_addr, edit_mask;
+bool   auto_update; //update memory window whenever visible value is written to when true
   void  clear();
-  void  create_controls();
+  void  create();
   uint8 read_byte(uint32 addr);
-  void  refresh(uint32 type = 0, uint32 addr = 0);
+  void  write_byte(uint32 addr, uint8 value);
+  void  refresh(uint32 type = null, uint32 addr = 0);
   void  export(uint32 type);
-};
+}*w_memory = 0;
 
-MemoryEditor *w_memory;
+class InputConfig : public Window {
+public:
+enum {
+  JOYPAD1 = 0
+};
+enum {
+  ID_COMMAND = 100
+};
+int config_type, config_pos;
+bool polling;
+  long wndproc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam);
+  void update_polling(int key);
+  void update_command();
+  void set_text(char *str);
+  void begin_config(int type);
+  void create();
+}*w_inputconfig = 0;
+
+class AboutWindow : public Window {
+public:
+  long wndproc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam);
+  void create();
+}*w_about = 0;

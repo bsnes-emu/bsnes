@@ -1,5 +1,5 @@
 /*
-  libconfig : version 0.01 ~byuu
+  libconfig : version 0.02 ~byuu
 */
 
 #ifndef __LIBCONFIG

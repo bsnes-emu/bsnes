@@ -1,4 +1,5 @@
 bool BreakpointEditor::hit() {
+//breakpoints are disabled when BP window is closed
   if(visible == false)return false;
 
   if(bp_hit == true) {
@@ -17,7 +18,7 @@ int i;
     if(bp[i].set == false)continue;
 
     switch(message) {
-    case SNES::CPU_EXEC_OPCODE:
+    case SNES::CPU_EXEC_OPCODE_END:
       if(!(bp[i].flags & FLAG_X))continue;
       if(bp[i].source != DRAM)continue;
       if(bp[i].addr != addr)continue;
@@ -26,13 +27,24 @@ int i;
       bp_hit = true;
       w_bp->refresh();
       break;
+    case SNES::APU_EXEC_OPCODE_END:
+      if(!(bp[i].flags & FLAG_X))continue;
+      if(bp[i].source != SPCRAM)continue;
+      if(bp[i].addr != addr)continue;
+      dprintf("* Breakpoint %d hit (exec)", i);
+      bp[i].hit_count++;
+      bp_hit = true;
+      w_bp->refresh();
+      break;
     case SNES::MEM_READ:
+    case SNES::SPCRAM_READ:
     case SNES::VRAM_READ:
     case SNES::OAM_READ:
     case SNES::CGRAM_READ:
       if(!(bp[i].flags & FLAG_R))continue;
       if(bp[i].addr != addr)continue;
       if(message == SNES::MEM_READ && bp[i].source == DRAM);
+      else if(message == SNES::SPCRAM_READ && bp[i].source == SPCRAM);
       else if(message == SNES::VRAM_READ && bp[i].source == VRAM);
       else if(message == SNES::OAM_READ && bp[i].source == OAM);
       else if(message == SNES::CGRAM_READ && bp[i].source == CGRAM);
@@ -46,12 +58,14 @@ int i;
       w_bp->refresh();
       break;
     case SNES::MEM_WRITE:
+    case SNES::SPCRAM_WRITE:
     case SNES::VRAM_WRITE:
     case SNES::OAM_WRITE:
     case SNES::CGRAM_WRITE:
       if(!(bp[i].flags & FLAG_W))continue;
       if(bp[i].addr != addr)continue;
       if(message == SNES::MEM_WRITE && bp[i].source == DRAM);
+      else if(message == SNES::SPCRAM_WRITE && bp[i].source == SPCRAM);
       else if(message == SNES::VRAM_WRITE && bp[i].source == VRAM);
       else if(message == SNES::OAM_WRITE && bp[i].source == OAM);
       else if(message == SNES::CGRAM_WRITE && bp[i].source == CGRAM);
@@ -65,13 +79,24 @@ int i;
       w_bp->refresh();
       break;
     }
+    if(bp_hit == true) {
+      bp_hit_num = i;
+    }
   }
 }
 
 long __stdcall wndproc_bp(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
 char t[256];
 uint32 n, addr;
+HDC hdc;
   switch(msg) {
+  case WM_CTLCOLORSTATIC:
+    if((HWND)lparam != GetDlgItem(hwnd, BREAKPOINT_LIST))break;
+    hdc = (HDC)wparam;
+    SetTextColor(hdc, RGB(255, 255, 255));
+    SetBkColor(hdc, RGB(0, 0, 0));
+    SetBkMode(hdc, TRANSPARENT);
+    return (long)hbr_backbrush;
   case WM_COMMAND:
     switch(LOWORD(wparam)) {
     case BREAKPOINT_SET:
@@ -136,32 +161,6 @@ uint32 n, addr;
   return DefWindowProc(hwnd, msg, wparam, lparam);
 }
 
-void CreateWindowBreakpoint() {
-WNDCLASS wc;
-  wc.cbClsExtra    = 0;
-  wc.cbWndExtra    = 0;
-  wc.hbrBackground = (HBRUSH)COLOR_WINDOW;
-  wc.hCursor       = LoadCursor(0, IDC_ARROW);
-  wc.hIcon         = LoadIcon(0, IDI_APPLICATION);
-  wc.hInstance     = GetModuleHandle(0);
-  wc.lpfnWndProc   = wndproc_bp;
-  wc.lpszClassName = "bsnes_breakpoint";
-  wc.lpszMenuName  = 0;
-  wc.style         = CS_HREDRAW | CS_VREDRAW;
-  RegisterClass(&wc);
-
-  w_bp->hwnd = CreateWindow("bsnes_breakpoint", "bsnes breakpoint editor",
-    WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX,
-    0, 0, 395, 245,
-    0, 0, GetModuleHandle(0), 0);
-
-  w_bp->resize(395, 245);
-  w_bp->to_left();
-  w_bp->to_bottom(w_console->hwnd);
-
-  w_bp->create_controls();
-}
-
 void BreakpointEditor::clear() {
   SetDlgItemText(hwnd, BREAKPOINT_LIST, "");
 }
@@ -175,11 +174,12 @@ char s[256 * 16], t[256], source[256], v[16];
   for(int i=0;i<16;i++) {
     if(bp[i].set == true) {
       switch(bp[i].source) {
-      case DRAM: strcpy(source, "DRAM  ");break;
-      case VRAM: strcpy(source, "VRAM  ");break;
-      case OAM:  strcpy(source, "OAM   ");break;
-      case CGRAM:strcpy(source, "CGRAM ");break;
-      default:   strcpy(source, "??????");break;
+      case DRAM:  strcpy(source, "DRAM  ");break;
+      case SPCRAM:strcpy(source, "SPCRAM");break;
+      case VRAM:  strcpy(source, "VRAM  ");break;
+      case OAM:   strcpy(source, "OAM   ");break;
+      case CGRAM: strcpy(source, "CGRAM ");break;
+      default:    strcpy(source, "??????");break;
       }
       if(bp[i].flags & FLAG_V)sprintf(v, "%0.2x", bp[i].value);
       else strcpy(v, "--");
@@ -197,7 +197,29 @@ char s[256 * 16], t[256], source[256], v[16];
   SetDlgItemText(hwnd, BREAKPOINT_LIST, s);
 }
 
-void BreakpointEditor::create_controls() {
+void BreakpointEditor::create() {
+WNDCLASS wc;
+  wc.cbClsExtra    = 0;
+  wc.cbWndExtra    = 0;
+  wc.hbrBackground = (HBRUSH)COLOR_WINDOW;
+  wc.hCursor       = LoadCursor(0, IDC_ARROW);
+  wc.hIcon         = LoadIcon(0, IDI_APPLICATION);
+  wc.hInstance     = GetModuleHandle(0);
+  wc.lpfnWndProc   = wndproc_bp;
+  wc.lpszClassName = "bsnes_breakpoint";
+  wc.lpszMenuName  = 0;
+  wc.style         = CS_HREDRAW | CS_VREDRAW;
+  RegisterClass(&wc);
+
+  hwnd = CreateWindow("bsnes_breakpoint", "bsnes Breakpoint Editor",
+    WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX,
+    0, 0, 395, 245,
+    0, 0, GetModuleHandle(0), 0);
+
+  resize(395, 245);
+  to_left();
+  to_bottom(w_console->hwnd);
+
   CreateWindowEx(WS_EX_CLIENTEDGE, "EDIT", "", WS_CHILD | WS_VISIBLE | ES_MULTILINE | ES_READONLY,
     5, 5, 260, 235, hwnd, (HMENU)BREAKPOINT_LIST, GetModuleHandle(0), 0);
 
@@ -243,6 +265,7 @@ void BreakpointEditor::create_controls() {
   CreateWindow("COMBOBOX", "", WS_CHILD | WS_VISIBLE | CBS_DROPDOWNLIST | CBS_HASSTRINGS,
     305, 75, 85, 200, hwnd, (HMENU)BREAKPOINT_SOURCE, GetModuleHandle(0), 0);
   SendDlgItemMessage(hwnd, BREAKPOINT_SOURCE, CB_ADDSTRING, 0, (LPARAM)"DRAM");
+  SendDlgItemMessage(hwnd, BREAKPOINT_SOURCE, CB_ADDSTRING, 0, (LPARAM)"SPCRAM");
   SendDlgItemMessage(hwnd, BREAKPOINT_SOURCE, CB_ADDSTRING, 0, (LPARAM)"VRAM");
   SendDlgItemMessage(hwnd, BREAKPOINT_SOURCE, CB_ADDSTRING, 0, (LPARAM)"OAM");
   SendDlgItemMessage(hwnd, BREAKPOINT_SOURCE, CB_ADDSTRING, 0, (LPARAM)"CGRAM");
@@ -254,7 +277,7 @@ void BreakpointEditor::create_controls() {
     330, 100, 60, 20, hwnd, (HMENU)BREAKPOINT_CLEAR, GetModuleHandle(0), 0);
 
   CreateWindow("BUTTON", "Enable Breakpoints", WS_CHILD | WS_VISIBLE | BS_CHECKBOX,
-    270, 160, 120, 15, hwnd, (HMENU)BREAKPOINT_ENABLE, GetModuleHandle(0), 0);
+    270, 163, 120, 15, hwnd, (HMENU)BREAKPOINT_ENABLE, GetModuleHandle(0), 0);
   SendDlgItemMessage(hwnd, BREAKPOINT_ENABLE, BM_SETCHECK, (WPARAM)true, 0);
   CreateWindow("BUTTON", "Clear All Breakpoints", WS_CHILD | WS_VISIBLE,
     270, 180, 120, 20, hwnd, (HMENU)BREAKPOINT_CLEARALL, GetModuleHandle(0), 0);

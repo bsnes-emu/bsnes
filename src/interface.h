@@ -1,9 +1,5 @@
 #include "reader/reader.h"
 
-#include "clock/clock.h"
-#include "clock/bclock/bclock.h"
-extern Clock *clock;
-
 #include "memory/memory.h"
 #include "memory/bmemory/bmemory.h"
 extern MMIO mmio_unmapped;
@@ -13,6 +9,11 @@ extern MemBus *mem_bus;
 #include "cpu/bcpu/bcpu.h"
 extern CPU *cpu;
 
+#include "apu/apu.h"
+#include "apu/bapu/bapu.h"
+#include "apu/bapuskip/bapuskip.h"
+extern APU *apu;
+
 #include "ppu/ppu.h"
 #include "ppu/bppu/bppu.h"
 extern PPU *ppu;
@@ -21,9 +22,9 @@ extern PPU *ppu;
 extern SNES *snes;
 
 #ifdef INTERFACE_MAIN
-  Clock       *clock;
-  MemBus      *mem_bus;
-  CPU         *cpu;
-  PPU         *ppu;
-  SNES        *snes;
+  MemBus *mem_bus;
+  CPU    *cpu;
+  APU    *apu;
+  PPU    *ppu;
+  SNES   *snes;
 #endif

@@ -1,18 +1,29 @@
 #include "libbase.h"
 #include "libconfig.h"
 
+//if this function returns true, the option is written
+//to the configuration file. by always returning true,
+//every option is always written. disable the first line
+//to only output options after they have been changed by
+//the program from their default values first.
 bool config_item::changed() {
-  return (is_string == true) ? (*strsource != strdef) : (*source != def);
+  return true;
+
+  if(is_string == true) {
+    if(!strcmp(*strsource, strdef))return false;
+    return true;
+  }
+  return (*source != def);
 }
 
 config_item::config_item() {
+  strcpy(name,   "");
+  strcpy(strdef, "");
   is_string = false;
   source    = 0;
   strsource = 0;
   def       = 0;
-  strdef    = "";
   type      = 0;
-  name      = "";
 }
 
 void config::add(uint32 *variable, char *name, uint32 def, uint32 type) {
@@ -21,13 +32,12 @@ int n;
   n = item_count;
 
   item[n] = new config_item();
-
+  strcpy(item[n]->name, name);
   item[n]->is_string = false;
-  item[n]->name      = name;
-  item[n]->source    = variable;
   item[n]->def       = def;
-  item[n]->type      = type;
+  item[n]->source    = variable;
   *item[n]->source   = item[n]->def;
+  item[n]->type      = type;
 
   item_count++;
 }
@@ -38,18 +48,19 @@ int n;
   n = item_count;
 
   item[n] = new config_item();
-  item[n]->is_string  = true;
-  item[n]->name       = name;
-  item[n]->strsource  = variable;
-  item[n]->strdef     = def;
-  *item[n]->strsource = item[n]->strdef;
+  strcpy(item[n]->name, name);
+  item[n]->is_string = true;
+  strcpy(item[n]->strdef, def);
+  item[n]->strsource = variable;
+  strcpy(*item[n]->strsource, item[n]->strdef);
+  item[n]->type = type;
 
   item_count++;
 }
 
 uint32 config::find(char *name) {
   for(int i=0;i<item_count;i++) {
-    if(item[i]->name == name) {
+    if(!strcmp(item[i]->name, name)) {
       return i;
     }
   }
@@ -66,7 +77,7 @@ string &config::strget(char *name) {
 int i = find(name);
   if(i == null) {
   static string not_found;
-    not_found = "";
+    strcmp(not_found, "");
     return not_found;
   }
   return *item[i]->strsource;
@@ -81,7 +92,7 @@ int i = find(name);
 void config::set(char *name, char *value) {
 int i = find(name);
   if(i == null)return;
-  *item[i]->strsource = value;
+  strcpy(*item[i]->strsource, value);
 }
 
 void config::load(char *fn) {
@@ -90,14 +101,14 @@ char *buffer;
 int i, fsize;
 uint32 l;
   fp = fopen(fn, "rb");
-/* file doesn't exist yet, do nothing */
+//file doesn't exist yet, do nothing
   if(!fp)return;
 
   fseek(fp, 0, SEEK_END);
   fsize = ftell(fp);
   fseek(fp, 0, SEEK_SET);
 
-/* blank file, do nothing */
+//blank file, do nothing
   if(fsize == 0) {
     fclose(fp);
     return;
@@ -108,7 +119,7 @@ uint32 l;
   fclose(fp);
   buffer[fsize] = 0;
 
-  data = buffer;
+  strcpy(data, buffer);
   free(buffer);
   replace(data, "\r\n", "\n");
   qreplace(data, "\t", " ");
@@ -118,29 +129,31 @@ uint32 l;
   for(i=0;i<count(line);i++) {
     qreplace(line[i], " ", "");
 
-  /* remove comment, if it exists */
+  //remove comment, if it exists
     if(strqpos(line[i], "#") != null) {
       strset(line[i], strqpos(line[i], "#"), 0);
     }
 
-  /* ignore blank lines */
+  //ignore blank lines
     if(strlen(line[i]) == 0)continue;
 
     qsplit(part, "=", line[i]);
 
     l = find(*part[0]);
     if(l != null) {
-    /* if the config item name is valid... update item value */
+    //if the config item name is valid... update item value
       if(item[l]->is_string == true) {
         strunquote(part[1]);
-        *item[l]->strsource = part[1];
+        strcpy(*item[l]->strsource, part[1]);
       } else {
-        if(part[1] == "true" || part[1] == "yes" || part[1] == "on" || part[1] == "enabled") {
+        if(!strcmp(part[1], "true") || !strcmp(part[1], "yes") ||
+        !strcmp(part[1], "on") || !strcmp(part[1], "enabled")) {
           *item[l]->source = 1;
-        } else if(part[1] == "false" || part[1] == "no" || part[1] == "off" || part[1] == "disabled") {
+        } else if(!strcmp(part[1], "false") || !strcmp(part[1], "no") ||
+        !strcmp(part[1], "off") || !strcmp(part[1], "disabled")) {
           *item[l]->source = 0;
         } else if(item[l]->type == HEX) {
-          *item[l]->source = strhex(part[1]);
+          *item[l]->source = strhex(*part[1] + 2); //skip 0x prefix
         } else { /* fall back on DEC */
           *item[l]->source = strdec(part[1]);
         }
@@ -149,38 +162,38 @@ uint32 l;
   }
 }
 
-/* create a text string from config item[i] to be output via config->save() */
+//create a text string from config item[i] to be output via config->save()
 void config::set_newline(int i) {
 char t[16];
   if(item[i]->is_string == true) {
-    newline  = item[i]->name;
-    newline += " = \"";
-    newline += *item[i]->strsource;
-    newline += "\"";
+    strcpy(newline, item[i]->name);
+    strcat(newline, " = \"");
+    strcat(newline, *item[i]->strsource);
+    strcat(newline, "\"");
   } else {
-    newline  = item[i]->name;
-    newline += " = ";
+    strcpy(newline, item[i]->name);
+    strcat(newline, " = ");
     switch(item[i]->type) {
     case TRUEFALSE:
-      newline += (*item[i]->source)?"true":"false";
+      strcat(newline, (*item[i]->source)?"true":"false");
       break;
     case YESNO:
-      newline += (*item[i]->source)?"yes":"no";
+      strcat(newline, (*item[i]->source)?"yes":"no");
       break;
     case ONOFF:
-      newline += (*item[i]->source)?"on":"off";
+      strcat(newline, (*item[i]->source)?"on":"off");
       break;
     case ENABLED:
-      newline += (*item[i]->source)?"enabled":"disabled";
+      strcat(newline, (*item[i]->source)?"enabled":"disabled");
       break;
     case HEX:
-      sprintf(t, "%x", *item[i]->source);
-      newline += t;
+      sprintf(t, "0x%0.2x", *item[i]->source);
+      strcat(newline, t);
       break;
     case DEC:
     default:
       sprintf(t, "%d", *item[i]->source);
-      newline += t;
+      strcat(newline, t);
       break;
     }
   }
@@ -206,21 +219,21 @@ bool blank = false;
     } else {
       buffer = (char*)malloc(fsize + 1);
       fread(buffer, 1, fsize, fp);
-      fclose(fp);
       buffer[fsize] = 0;
 
-      data = buffer;
+      strcpy(data, buffer);
       free(buffer);
     }
+    fclose(fp);
   }
 
   fp = fopen(fn, "wb");
-/* no write access? */
+//no write access?
   if(!fp)return;
 
-/* list of config items. if the item is set in the
-   existing config file, then don't test it to see
-   if it needs to be written again later on */
+//list of config items. if the item is set in the
+//existing config file, then don't test it to see
+//if it needs to be written again later on
   memset(set, 0, item_count);
 
   if(blank == false) {
@@ -237,9 +250,9 @@ bool blank = false;
         strset(line[i], strqpos(line[i], "#"), 0);
       }
 
-    /* this line is empty, restore the old line and continue */
+    //this line is empty, restore the old line and continue
       if(strlen(line[i]) == 0) {
-        line[i] = oldline[i];
+        strcpy(line[i], oldline[i]);
         continue;
       }
 
@@ -247,44 +260,44 @@ bool blank = false;
 
       l = find(*part[0]);
       if(l == null) {
-      /* invalid item name, restore the old line and continue */
-        line[i] = oldline[i];
+      //invalid item name, restore the old line and continue
+        strcpy(line[i], oldline[i]);
         continue;
       }
 
       set[l] = 1;
       set_newline(l);
 
-    /* copy the user comment from the old config file, if it exists */
+    //copy the user comment from the old config file, if it exists
       if(strqpos(oldline[i], "#") != null) {
-        newline += " ";
-        newline += *oldline[i] + strqpos(oldline[i], "#");
+        strcat(newline, " ");
+        strcat(newline, *oldline[i] + strqpos(oldline[i], "#"));
       }
 
-      line[i] = newline;
+      strcpy(line[i], newline);
     }
 
-  /* write out the old config file + changes first */
+  //write out the old config file + changes first
     for(i=0;i<count(line);) {
       fprintf(fp, "%s", *line[i]);
 
-    /* write a line feed on all lines but the last.
-       keeps the file from growing everytime it is saved */
+    //write a line feed on all lines but the last.
+    //keeps the file from growing everytime it is saved
       if(++i < count(line))fprintf(fp, "\r\n");
     }
   }
 
 int lines_written;
   for(i=lines_written=0;i<item_count;i++) {
-  /* if the item was written to the file above... */
+  //if the item was written to the file above...
     if(set[i] == 1)continue;
-  /* ...or if it is still set to the default value,
-     then don't output it to the file here */
+  //...or if it is still set to the default value,
+  //then don't output it to the file here
     if(item[i]->changed() == false)continue;
 
     set_newline(i);
-  /* prevent a newline from appearing at the top of the file
-     when the config file is created for the first time */
+  //prevent a newline from appearing at the top of the file
+  //when the config file is created for the first time
     if(lines_written == 0 && blank == false)fprintf(fp, "\r\n");
     fprintf(fp, "%s\r\n", *newline);
     lines_written++;

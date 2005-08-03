@@ -111,6 +111,8 @@ uint8 *wt_main = main_windowtable[bg];
 uint8 *wt_sub  = sub_windowtable[bg];
   build_window_tables(bg);
   for(screen_x=0;screen_x<_screen_width;screen_x++) {
+  //offset-per-tile mode. horizontal OPT is buggy, so it is disabled
+  //vertical OPT seems to be working OK...
     if(regs.bg_mode == 2 || regs.bg_mode == 4 || regs.bg_mode == 6) {
       if(regs.bg_mode == 6) {
         tile_x = (mtable[screen_x + (hscroll & 15)] >> 4);

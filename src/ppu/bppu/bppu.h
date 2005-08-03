@@ -1,5 +1,3 @@
-//#define _BPPU_OLDRENDER
-
 class bPPU;
 
 class bPPUMMIO : public MMIO {
@@ -17,6 +15,21 @@ uint8 *vram, *oam, *cgram;
 enum { BG1 = 0, BG2 = 1, BG3 = 2, BG4 = 3, OAM = 4, BACK = 5 };
 enum { SC_32x32 = 0, SC_32x64 = 1, SC_64x32 = 2, SC_64x64 = 3 };
 
+struct sprite_item {
+  uint8  width, height;
+  uint16 x, y;
+  uint8  character;
+  bool   use_nameselect;
+  bool   vflip, hflip;
+  uint8  palette;
+  uint8  priority;
+}sprite_list[128];
+
+struct {
+  int32  frameskip, frameskip_pos;
+  bool   frameskip_changed;
+}settings;
+
 struct {
 //$2100
   bool   display_disabled;
@@ -31,6 +44,8 @@ struct {
   uint8  oam_addrl, oam_addrh;
   uint16 oam_addr;
   uint8  oam_latchdata;
+  bool   oam_priority;
+  uint8  oam_firstsprite;
 
 //$2105
   bool   bg_tilesize[4];
@@ -118,6 +133,10 @@ struct {
 
 //$2139-$213a
   uint16 vram_readbuffer;
+
+//$213e
+  bool   time_over, range_over;
+  uint16 oam_itemcount, oam_tilecount;
 }regs;
   uint8  vram_read  (uint16 addr);
   void   vram_write (uint16 addr, uint8 value);
@@ -126,6 +145,9 @@ struct {
   uint8  cgram_read (uint16 addr);
   void   cgram_write(uint16 addr, uint8 value);
 
+  void   get_sprite_size(int i, bool size);
+  void   update_sprite_list(uint16 addr);
+  void   update_sprite_list_sizes();
   uint16 get_vram_address();
 
   void   mmio_w2100(uint8 value); //INIDISP
@@ -197,22 +219,20 @@ struct {
 
 /* PPU render functions */
 
-#ifdef _BPPU_OLDRENDER
-#include "bppu_old_render.h"
-#else
 #include "bppu_render.h"
-#endif
 
 uint16 *light_table;
 uint16 *mosaic_table[16];
   void   render_line();
 
+  void   update_oam_status();
 /* Required functions */
   void   run();
   void   scanline();
   void   frame();
   void   power();
   void   reset();
+  void   set_frameskip(int fs);
 
   bPPU();
   ~bPPU();

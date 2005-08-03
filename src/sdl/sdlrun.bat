@@ -1,0 +1,1 @@
+c:\root\bsnes_g2\bsnes_sdl.exe c:\root\bsnes_testrom\zelda_us.smc

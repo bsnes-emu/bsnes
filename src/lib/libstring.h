@@ -1,5 +1,5 @@
 /*
-  libstring : version 0.04 ~byuu
+  libstring : version 0.05 ~byuu
 */
 
 #ifndef __LIBSTRING
@@ -49,34 +49,29 @@ class _string {
 public:
 char *s;
 uint32 size;
-
-/* * */
   inline char* operator*() { return s; }
 
-/* = */
+#ifdef __LIBSTRING_OVERLOADS
   inline _string& operator=(char *cpy);
   inline _string& operator=(_string &cpy);
   inline _string& operator=(string &cpy);
 
-/* += */
   inline _string& operator+=(char *cat);
   inline _string& operator+=(_string &cat);
   inline _string& operator+=(string &cat);
 
-/* -= */
   inline _string& operator-=(char *cut);
   inline _string& operator-=(_string &cut);
   inline _string& operator-=(string &cut);
 
-/* == */
   inline bool operator==(char *cmp);
   inline bool operator==(_string &cmp);
   inline bool operator==(string &cmp);
 
-/* != */
   inline bool operator!=(char *cmp);
   inline bool operator!=(_string &cmp);
   inline bool operator!=(string &cmp);
+#endif
 
   inline operator char*() { return s; }
 
@@ -91,33 +86,29 @@ uint32 count, listcount;
   void addto(uint32 num);   //creates all needed strings to make list[num] valid
   _string &str(uint32 num); //gets a _string reference, creating it + new strings if needed
 
-/* * */
   inline char* operator*() { return strptr(str(0)); }
 
-/* = */
+#ifdef __LIBSTRING_OVERLOADS
   inline string& operator=(char *cpy);
   inline string& operator=(_string &cpy);
   inline string& operator=(string &cpy);
 
-/* += */
   inline string& operator+=(char *cat);
   inline string& operator+=(_string &cat);
   inline string& operator+=(string &cat);
 
-/* -= */
   inline string& operator-=(char *cut);
   inline string& operator-=(_string &cut);
   inline string& operator-=(string &cut);
 
-/* == */
   inline bool operator==(char *cmp);
   inline bool operator==(_string &cmp);
   inline bool operator==(string &cmp);
 
-/* != */
   inline bool operator!=(char *cmp);
   inline bool operator!=(_string &cmp);
   inline bool operator!=(string &cmp);
+#endif
 
   inline operator char*()              { return str(0).s; }
   inline operator _string&()           { return str(0); }
@@ -128,9 +119,7 @@ uint32 count, listcount;
   ~string();
 };
 
-//
-// =
-//
+#ifdef __LIBSTRING_OVERLOADS
 inline _string& _string::operator=(char *cpy) {
   strcpy(*this, cpy);
   return *this;
@@ -157,9 +146,6 @@ inline string& string::operator=(string &cpy) {
   return *this;
 }
 
-//
-// +=
-//
 inline _string& _string::operator+=(char *cat) {
   strcat(*this, cat);
   return *this;
@@ -186,9 +172,6 @@ inline string& string::operator+=(string &cat) {
   return *this;
 }
 
-//
-// -=
-//
 inline _string& _string::operator-=(char *cut) {
   strrtrim(*this, cut);
   return *this;
@@ -215,9 +198,6 @@ inline string& string::operator-=(string &cut) {
   return *this;
 }
 
-//
-// ==
-//
 inline bool _string::operator==(char *cmp) {
   if(!strcmp(*this, cmp))return true;
   return false;
@@ -244,9 +224,6 @@ inline bool string::operator==(string &cmp) {
   return false;
 }
 
-//
-// !=
-//
 inline bool _string::operator!=(char *cmp) {
   if(!strcmp(*this, cmp))return false;
   return true;
@@ -272,5 +249,6 @@ inline bool string::operator!=(string &cmp) {
   if(!strcmp(str(0), cmp.str(0)))return false;
   return true;
 }
+#endif //__LIBSTRING_OVERLOADS
 
-#endif
+#endif //__LIBSTRING

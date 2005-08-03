@@ -9,13 +9,15 @@ enum { WRAP_NONE = 0, WRAP_BANK = 1, WRAP_PAGE = 2 };
   virtual void   write_long(uint32 addr, uint32 value, uint8 wrap = WRAP_NONE);
 };
 
-class ROM : public Memory {
+typedef struct {
+uint8 *rom, *sram;
+uint32 rom_size, sram_size;
+}CartInfo;
+
+class Cart : public Memory {
 public:
-  virtual void load_rom(Reader *rf) = 0;
-  virtual void load_sram(Reader *rf) = 0;
-  virtual void save_sram(Writer *wf) = 0;
-  virtual void unload() = 0;
-  virtual void write_protect(bool yn) = 0;
+  virtual void write_protect(bool r) = 0;
+  virtual void set_cartinfo(CartInfo *ci) = 0;
 };
 
 class MMIO : public Memory {
@@ -26,12 +28,18 @@ public:
 
 class MemBus : public Memory {
 public:
-ROM  *rom;
+Cart *cart;
 MMIO *mmio[0x4000];
 bool fastROM;
   virtual void  flush_mmio_mappers();
   virtual bool  set_mmio_mapper(uint16 addr, MMIO *mapper);
   virtual uint8 speed(uint32 addr);
+
+  virtual bool  load_cart(Reader *rf) = 0;
+  virtual bool  load_sram(Reader *rf) = 0;
+  virtual bool  save_sram(Writer *wf) = 0;
+  virtual void  unload_cart() = 0;
+  virtual void  get_cartinfo(CartInfo *ci) = 0;
 
   virtual void power() = 0;
   virtual void reset() = 0;

@@ -61,9 +61,8 @@ int size, sizelimit;
   }
 
   inline T &operator[](int index) {
-  static T __null = (T)0;
     if(index >= size)resize(index + 1);
-    if(index > sizelimit)return __null;
+    if(index > sizelimit)return array[size - 1];
     return array[index];
   }
 };

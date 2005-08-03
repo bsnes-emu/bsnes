@@ -2,32 +2,35 @@ class CPURegFlags {
 private:
   template <uint8 B> class bit {
   public:
-  uint8 b;
-    inline operator bool() { return (b & B); }
-    inline operator = (bool i) { (i) ? b |= B : b &= ~B; return (b & B); }
-    inline operator & (bool i) { if(i)b &= ~B; return (b & B); }
-    inline operator | (bool i) { if(i)b |= B; return (b & B); }
-    inline operator ^ (bool i) { if(i)b ^= B; return (b & B); }
+  uint8 _b;
+    inline operator bool() { return (_b & B); }
+    inline bool operator =  (bool i) { (i) ? _b |= B : _b &= ~B; return (_b & B); }
+    inline bool operator &  (bool i) { if(i)_b &= ~B; return (_b & B); }
+    inline bool operator &= (bool i) { if(i)_b &= ~B; return (_b & B); }
+    inline bool operator |  (bool i) { if(i)_b |= B; return (_b & B); }
+    inline bool operator |= (bool i) { if(i)_b |= B; return (_b & B); }
+    inline bool operator ^  (bool i) { if(i)_b ^= B; return (_b & B); }
+    inline bool operator ^= (bool i) { if(i)_b ^= B; return (_b & B); }
   };
 public:
   union {
-  uint8 b;
+  uint8 _b;
   bit<0x80> n;
   bit<0x40> v;
-  bit<0x20> m;
-  bit<0x10> x;
+  bit<0x20> m, p;
+  bit<0x10> x, b;
   bit<0x08> d;
   bit<0x04> i;
   bit<0x02> z;
   bit<0x01> c;
   };
 
-  CPURegFlags() { b = 0; }
-  inline operator uint8() { return b; }
-  inline unsigned operator  = (uint8 i) { b  = i; return b; }
-  inline unsigned operator &= (uint8 i) { b &= i; return b; }
-  inline unsigned operator |= (uint8 i) { b |= i; return b; }
-  inline unsigned operator ^= (uint8 i) { b ^= i; return b; }
+  CPURegFlags() { _b = 0; }
+  inline operator uint8() { return _b; }
+  inline unsigned operator  = (uint8 i) { _b  = i; return _b; }
+  inline unsigned operator &= (uint8 i) { _b &= i; return _b; }
+  inline unsigned operator |= (uint8 i) { _b |= i; return _b; }
+  inline unsigned operator ^= (uint8 i) { _b ^= i; return _b; }
 };
 
 class CPUReg16 {

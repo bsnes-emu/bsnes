@@ -20,19 +20,23 @@ bool ROMImage::loaded() {
 bool ROMImage::load() {
   if(file_loaded == true)return false;
 
-  dprintf("* Loading [%s]...", rom_fn);
+  dprintf("* Loading \"%s\"...", rom_fn);
 
 FileReader *rf = new FileReader();
   if(!rf->open(FileReader::TYPE_ROM, rom_fn)) {
     alert("Error loading image file [%s]!", rom_fn);
     return false;
   }
-  mem_bus->rom->load_rom(static_cast<Reader*>(rf));
+  mem_bus->load_cart(static_cast<Reader*>(rf));
   rf->close();
 
-  rf->open(FileReader::TYPE_SRAM, sram_fn);
-  mem_bus->rom->load_sram(static_cast<Reader*>(rf));
-  rf->close();
+CartInfo ci;
+  mem_bus->get_cartinfo(&ci);
+  if(ci.sram_size != 0) {
+    rf->open(FileReader::TYPE_SRAM, sram_fn);
+    mem_bus->load_sram(static_cast<Reader*>(rf));
+    rf->close();
+  }
 
   delete(rf);
 
@@ -44,19 +48,25 @@ FileReader *rf = new FileReader();
 void ROMImage::unload() {
   if(file_loaded == false)return;
 
-FileWriter *wf = new FileWriter();
-  wf->open(sram_fn);
-  mem_bus->rom->save_sram(static_cast<Writer*>(wf));
-  wf->close();
-  delete(wf);
+FileWriter *wf;
+CartInfo ci;
+  mem_bus->get_cartinfo(&ci);
+  if(ci.sram_size != 0) {
+    wf = new FileWriter();
+    wf->open(sram_fn);
+    mem_bus->save_sram(static_cast<Writer*>(wf));
+    wf->close();
+    delete(wf);
+  }
 
   file_loaded = false;
   bsnes->debugger_deactivate();
 
-  mem_bus->rom->unload();
+  mem_bus->unload_cart();
 }
 
 void ROMImage::select(char *fn) {
+int i;
   if(file_loaded == true)return;
 
 /* Remove quotes */
@@ -67,7 +77,7 @@ void ROMImage::select(char *fn) {
     strcpy(rom_fn, fn);
   }
 
-  for(int i=strlen(rom_fn)-1;i>=0;i--) {
+  for(i=strlen(rom_fn)-1;i>=0;i--) {
     if(rom_fn[i] == '.')break;
   }
 

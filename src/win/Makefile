@@ -2,16 +2,17 @@ CC = cl
 CFLAGS = /nologo /O2 /Ogityb2 /Gr /Gs
 OBJS = winmain.obj \
        libstring.obj libconfig.obj \
-       clock.obj bclock.obj \
-       memory.obj bmemory.obj \
        reader.obj \
+       memory.obj bmemory.obj \
        cpu.obj bcpu.obj \
+       apu.obj bapu.obj bapuskip.obj \
        ppu.obj bppu.obj \
        snes.obj
 LIBS = kernel32.lib user32.lib gdi32.lib comdlg32.lib ddraw.lib dxguid.lib
 
 all: $(OBJS)
-	$(CC) /Febsnes_g2.exe $(CFLAGS) $(OBJS) $(LIBS)
+	rc /r /fobsnes.res bsnes.rc
+	$(CC) /Febsnes.exe $(CFLAGS) $(OBJS) bsnes.res $(LIBS)
 
 clean:
 	del *.obj
@@ -30,15 +31,6 @@ libstring.obj: ../lib/*.cpp ../lib/*.h
 libconfig.obj: ../lib/*.cpp ../lib/*.h
 	$(CC) $(CFLAGS) /c ../lib/libconfig.cpp
 
-#############
-### clock ###
-#############
-clock.obj: ../clock/*.cpp ../clock/*.h
-	$(CC) $(CFLAGS) /c ../clock/clock.cpp
-
-bclock.obj: ../clock/bclock/*
-	$(CC) $(CFLAGS) /c ../clock/bclock/bclock.cpp
-
 ##############
 ### memory ###
 ##############
@@ -56,6 +48,18 @@ cpu.obj: ../cpu/*.cpp ../cpu/*.h
 
 bcpu.obj: ../cpu/bcpu/*
 	$(CC) $(CFLAGS) /c ../cpu/bcpu/bcpu.cpp
+
+###########
+### apu ###
+###########
+apu.obj: ../apu/*
+	$(CC) $(CFLAGS) /c ../apu/apu.cpp
+
+bapu.obj: ../apu/bapu/*
+	$(CC) $(CFLAGS) /c ../apu/bapu/bapu.cpp
+
+bapuskip.obj: ../apu/bapuskip/*
+	$(CC) $(CFLAGS) /c ../apu/bapuskip/bapuskip.cpp
 
 ###########
 ### ppu ###

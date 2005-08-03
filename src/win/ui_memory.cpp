@@ -1,7 +1,101 @@
+WNDPROC wndproc_oldmemoryeditbox;
+
+long __stdcall wndproc_memoryeditbox(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
+int pos, len, xpos, ypos, t, z, read;
+  switch(msg) {
+  case WM_KEYDOWN:
+    pos = SendMessage(hwnd, EM_GETSEL, 0, 0);
+    pos = LOWORD(pos);
+    ypos = pos / 57;
+    xpos = pos % 57;
+
+    if(wparam == VK_UP) {
+      if(ypos != 0)break;
+      w_memory->edit_addr -= 16;
+      w_memory->edit_addr &= w_memory->edit_mask;
+      w_memory->refresh();
+      SendMessage(hwnd, EM_SETSEL, pos, pos);
+      break;
+    }
+
+    if(wparam == VK_DOWN) {
+      if(ypos != 15)break;
+      w_memory->edit_addr += 16;
+      w_memory->edit_addr &= w_memory->edit_mask;
+      w_memory->refresh();
+      SendMessage(hwnd, EM_SETSEL, pos, pos);
+      break;
+    }
+
+    if(wparam == VK_PRIOR) {
+      if(KeyDown(VK_CONTROL))len = 65536;
+      else if(KeyDown(VK_SHIFT))len = 4096;
+      else len = 256;
+      w_memory->edit_addr -= len;
+      w_memory->edit_addr &= w_memory->edit_mask;
+      w_memory->refresh();
+      SendMessage(hwnd, EM_SETSEL, pos, pos);
+      break;
+    }
+
+    if(wparam == VK_NEXT) {
+      if(KeyDown(VK_CONTROL))len = 65536;
+      else if(KeyDown(VK_SHIFT))len = 4096;
+      else len = 256;
+      w_memory->edit_addr += len;
+      w_memory->edit_addr &= w_memory->edit_mask;
+      w_memory->refresh();
+      SendMessage(hwnd, EM_SETSEL, pos, pos);
+      break;
+    }
+
+    if(xpos < 8)break;
+    xpos -= 8;
+    t = xpos % 3;
+    xpos /= 3;
+    if(xpos > 15)break;
+
+    if(wparam >= '0' && wparam <= '9')read = wparam - '0';
+    else if(wparam >= 'A' && wparam <= 'F')read = wparam - 'A' + 0x0a;
+    else if(wparam >= 'a' && wparam <= 'f')read = wparam - 'a' + 0x0a;
+    else break;
+
+    z = w_memory->read_byte(w_memory->edit_addr + ypos * 16 + xpos);
+    if(t == 0) {
+      z = (read << 4) | (z & 0x0f);
+      pos++;
+    } else {
+      z = (z & 0xf0) | (read);
+      if(xpos == 15) { //go to new line
+        if(ypos == 15) { //so long as we aren't on the last one
+          pos++;
+        } else {
+          pos += 11;
+        }
+      } else { //go to next byte
+        pos += 2;
+      }
+    }
+    w_memory->write_byte(w_memory->edit_addr + ypos * 16 + xpos, z);
+    w_memory->refresh();
+    SendMessage(hwnd, EM_SETSEL, pos, pos);
+    break;
+  }
+  return wndproc_oldmemoryeditbox(hwnd, msg, wparam, lparam);
+}
+
 long __stdcall wndproc_memoryeditor(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
 char t[256];
 uint32 addr, value, pos;
+HDC hdc;
   switch(msg) {
+  case WM_CTLCOLORSTATIC:
+    if((HWND)lparam != GetDlgItem(hwnd, MEMORYEDITOR_VIEW))break;
+    hdc = (HDC)wparam;
+    SetTextColor(hdc, RGB(255, 255, 255));
+    SetBkColor(hdc, RGB(0, 0, 0));
+    SetBkMode(hdc, TRANSPARENT);
+    return (long)hbr_backbrush;
   case WM_COMMAND:
     switch(LOWORD(wparam)) {
     case MEMORYEDITOR_MODE:
@@ -20,14 +114,18 @@ uint32 addr, value, pos;
           w_memory->edit_addr = 0x700000;
           w_memory->edit_mask = 0xffffff;
         } else if(pos == 3) {
-          w_memory->edit_mode = MemoryEditor::MODE_VRAM;
+          w_memory->edit_mode = MemoryEditor::MODE_SPCRAM;
           w_memory->edit_addr = 0x0000;
           w_memory->edit_mask = 0xffff;
         } else if(pos == 4) {
+          w_memory->edit_mode = MemoryEditor::MODE_VRAM;
+          w_memory->edit_addr = 0x0000;
+          w_memory->edit_mask = 0xffff;
+        } else if(pos == 5) {
           w_memory->edit_mode = MemoryEditor::MODE_OAM;
           w_memory->edit_addr = 0x0000;
           w_memory->edit_mask = 0x03ff;
-        } else if(pos == 5) {
+        } else if(pos == 6) {
           w_memory->edit_mode = MemoryEditor::MODE_CGRAM;
           w_memory->edit_addr = 0x0000;
           w_memory->edit_mask = 0x01ff;
@@ -47,54 +145,26 @@ uint32 addr, value, pos;
       GetDlgItemText(hwnd, MEMORYEDITOR_VALUE, t, 255);
       value = strhex(t) & 0xff;
       switch(w_memory->edit_mode) {
-      case MemoryEditor::MODE_DRAM: bsnes->write(bSNES::DRAM,  addr, value);break;
-      case MemoryEditor::MODE_VRAM: bsnes->write(bSNES::VRAM,  addr, value);break;
-      case MemoryEditor::MODE_OAM:  bsnes->write(bSNES::OAM,   addr, value);break;
-      case MemoryEditor::MODE_CGRAM:bsnes->write(bSNES::CGRAM, addr, value);break;
+      case MemoryEditor::MODE_DRAM:  bsnes->write(bSNES::DRAM,   addr, value);break;
+      case MemoryEditor::MODE_SPCRAM:bsnes->write(bSNES::SPCRAM, addr, value);break;
+      case MemoryEditor::MODE_VRAM:  bsnes->write(bSNES::VRAM,   addr, value);break;
+      case MemoryEditor::MODE_OAM:   bsnes->write(bSNES::OAM,    addr, value);break;
+      case MemoryEditor::MODE_CGRAM: bsnes->write(bSNES::CGRAM,  addr, value);break;
       }
       break;
     case MEMORYEDITOR_FEXPORT:
       pos = SendDlgItemMessage(hwnd, MEMORYEDITOR_FSOURCE, CB_GETCURSEL, 0, 0);
       w_memory->export(pos);
       break;
-    case MEMORYEDITOR_UP40:
-      w_memory->edit_addr -= 0x40;
-      w_memory->edit_addr &= w_memory->edit_mask;
-      w_memory->refresh();
+    case MEMORYEDITOR_AUTOUPDATE:
+      if(w_memory->auto_update == false) {
+        w_memory->auto_update = true;
+      } else {
+        w_memory->auto_update = false;
+      }
+      SendDlgItemMessage(hwnd, MEMORYEDITOR_AUTOUPDATE, BM_SETCHECK, (WPARAM)w_memory->auto_update, 0);
       break;
-    case MEMORYEDITOR_DOWN40:
-      w_memory->edit_addr += 0x40;
-      w_memory->edit_addr &= w_memory->edit_mask;
-      w_memory->refresh();
-      break;
-    case MEMORYEDITOR_UP400:
-      w_memory->edit_addr -= 0x400;
-      w_memory->edit_addr &= w_memory->edit_mask;
-      w_memory->refresh();
-      break;
-    case MEMORYEDITOR_DOWN400:
-      w_memory->edit_addr += 0x400;
-      w_memory->edit_addr &= w_memory->edit_mask;
-      w_memory->refresh();
-      break;
-    case MEMORYEDITOR_UP4000:
-      w_memory->edit_addr -= 0x4000;
-      w_memory->edit_addr &= w_memory->edit_mask;
-      w_memory->refresh();
-      break;
-    case MEMORYEDITOR_DOWN4000:
-      w_memory->edit_addr += 0x4000;
-      w_memory->edit_addr &= w_memory->edit_mask;
-      w_memory->refresh();
-      break;
-    case MEMORYEDITOR_UP40000:
-      w_memory->edit_addr -= 0x40000;
-      w_memory->edit_addr &= w_memory->edit_mask;
-      w_memory->refresh();
-      break;
-    case MEMORYEDITOR_DOWN40000:
-      w_memory->edit_addr += 0x40000;
-      w_memory->edit_addr &= w_memory->edit_mask;
+    case MEMORYEDITOR_UPDATE:
       w_memory->refresh();
       break;
     }
@@ -116,32 +186,6 @@ uint32 addr, value, pos;
   return DefWindowProc(hwnd, msg, wparam, lparam);
 }
 
-void CreateWindowMemory() {
-WNDCLASS wc;
-  wc.cbClsExtra    = 0;
-  wc.cbWndExtra    = 0;
-  wc.hbrBackground = (HBRUSH)COLOR_WINDOW;
-  wc.hCursor       = LoadCursor(0, IDC_ARROW);
-  wc.hIcon         = LoadIcon(0, IDI_APPLICATION);
-  wc.hInstance     = GetModuleHandle(0);
-  wc.lpfnWndProc   = wndproc_memoryeditor;
-  wc.lpszClassName = "bsnes_memoryeditor";
-  wc.lpszMenuName  = 0;
-  wc.style         = CS_HREDRAW | CS_VREDRAW;
-  RegisterClass(&wc);
-
-  w_memory->hwnd = CreateWindow("bsnes_memoryeditor", "bsnes memory editor",
-    WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX,
-    0, 0, 500, 245,
-    0, 0, GetModuleHandle(0), 0);
-
-  w_memory->resize(500, 245);
-  w_memory->to_left(w_bp->hwnd);
-  w_memory->to_bottom(w_console->hwnd);
-
-  w_memory->create_controls();
-}
-
 void MemoryEditor::export(uint32 type) {
 FILE *fp;
 int i, x;
@@ -160,44 +204,63 @@ int i, x;
       fputc(x, fp);
     }
     fclose(fp);
-  } else if(type == 2) { //VRAM
+  } else if(type == 2) { //SPCRAM
+    fp = fopen("spcram.bin", "wb");
+    for(i=0x0000;i<=0xffff;i++) {
+      x = bsnes->read(bSNES::SPCRAM, i);
+      fputc(x, fp);
+    }
+    fclose(fp);
+  } else if(type == 3) { //VRAM
     fp = fopen("vram.bin", "wb");
     for(i=0x0000;i<=0xffff;i++) {
       x = bsnes->read(bSNES::VRAM, i);
       fputc(x, fp);
     }
     fclose(fp);
-  } else if(type == 3) { //OAM
+  } else if(type == 4) { //OAM
     fp = fopen("oam.bin", "wb");
     for(i=0x0000;i<=0x021f;i++) {
       x = bsnes->read(bSNES::OAM, i);
       fputc(x, fp);
     }
     fclose(fp);
-  } else if(type == 4) { //CGRAM
+  } else if(type == 5) { //CGRAM
     fp = fopen("cgram.bin", "wb");
     for(i=0x0000;i<=0x01ff;i++) {
       x = bsnes->read(bSNES::CGRAM, i);
       fputc(x, fp);
     }
     fclose(fp);
-  } else if(type == 5) { //All
+  } else if(type == 6) { //All
     export(0);
     export(1);
     export(2);
     export(3);
     export(4);
+    export(5);
   }
 }
 
 uint8 MemoryEditor::read_byte(uint32 addr) {
   switch(edit_mode) {
-  case MODE_DRAM: return bsnes->read(bSNES::DRAM,  addr);
-  case MODE_VRAM: return bsnes->read(bSNES::VRAM,  addr);
-  case MODE_OAM:  return bsnes->read(bSNES::OAM,   addr);
-  case MODE_CGRAM:return bsnes->read(bSNES::CGRAM, addr);
+  case MODE_DRAM:  return bsnes->read(bSNES::DRAM,   addr);
+  case MODE_SPCRAM:return bsnes->read(bSNES::SPCRAM, addr);
+  case MODE_VRAM:  return bsnes->read(bSNES::VRAM,   addr);
+  case MODE_OAM:   return bsnes->read(bSNES::OAM,    addr);
+  case MODE_CGRAM: return bsnes->read(bSNES::CGRAM,  addr);
   }
   return 0x00;
+}
+
+void MemoryEditor::write_byte(uint32 addr, uint8 value) {
+  switch(edit_mode) {
+  case MODE_DRAM:  bsnes->write(bSNES::DRAM,   addr, value);break;
+  case MODE_SPCRAM:bsnes->write(bSNES::SPCRAM, addr, value);break;
+  case MODE_VRAM:  bsnes->write(bSNES::VRAM,   addr, value);break;
+  case MODE_OAM:   bsnes->write(bSNES::OAM,    addr, value);break;
+  case MODE_CGRAM: bsnes->write(bSNES::CGRAM,  addr, value);break;
+  }
 }
 
 void MemoryEditor::clear() {
@@ -210,18 +273,25 @@ int x, y;
   if(rom_image->loaded() == false)return;
   if(visible == false)return;
 
-  if(type == SNES::MEM_WRITE) {
-    if(edit_mode != MODE_DRAM)return;
-    if(addr < edit_addr || addr >= edit_addr + 256)return;
-  } else if(type == SNES::VRAM_WRITE) {
-    if(edit_mode != MODE_VRAM)return;
-    if(addr < edit_addr || addr >= edit_addr + 256)return;
-  } else if(type == SNES::OAM_WRITE) {
-    if(edit_mode != MODE_OAM)return;
-    if(addr < edit_addr || addr >= edit_addr + 256)return;
-  } else if(type == SNES::CGRAM_WRITE) {
-    if(edit_mode != MODE_CGRAM)return;
-    if(addr < edit_addr || addr >= edit_addr + 256)return;
+  if(type != null) {
+    if(auto_update == false && bsnes->get_status() != bSNES::STOP)return;
+
+    if(type == SNES::MEM_WRITE) {
+      if(edit_mode != MODE_DRAM)return;
+      if(addr < edit_addr || addr >= edit_addr + 256)return;
+    } else if(type == SNES::SPCRAM_WRITE) {
+      if(edit_mode != MODE_SPCRAM)return;
+      if(addr < edit_addr || addr >= edit_addr + 256)return;
+    } else if(type == SNES::VRAM_WRITE) {
+      if(edit_mode != MODE_VRAM)return;
+      if(addr < edit_addr || addr >= edit_addr + 256)return;
+    } else if(type == SNES::OAM_WRITE) {
+      if(edit_mode != MODE_OAM)return;
+      if(addr < edit_addr || addr >= edit_addr + 256)return;
+    } else if(type == SNES::CGRAM_WRITE) {
+      if(edit_mode != MODE_CGRAM)return;
+      if(addr < edit_addr || addr >= edit_addr + 256)return;
+    }
   }
 
   strcpy(s, "");
@@ -238,9 +308,33 @@ int x, y;
   SetDlgItemText(hwnd, MEMORYEDITOR_VIEW, s);
 }
 
-void MemoryEditor::create_controls() {
+void MemoryEditor::create() {
+WNDCLASS wc;
+  wc.cbClsExtra    = 0;
+  wc.cbWndExtra    = 0;
+  wc.hbrBackground = (HBRUSH)COLOR_WINDOW;
+  wc.hCursor       = LoadCursor(0, IDC_ARROW);
+  wc.hIcon         = LoadIcon(0, IDI_APPLICATION);
+  wc.hInstance     = GetModuleHandle(0);
+  wc.lpfnWndProc   = wndproc_memoryeditor;
+  wc.lpszClassName = "bsnes_memoryeditor";
+  wc.lpszMenuName  = 0;
+  wc.style         = CS_HREDRAW | CS_VREDRAW;
+  RegisterClass(&wc);
+
+  hwnd = CreateWindow("bsnes_memoryeditor", "bsnes Memory Editor",
+    WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX,
+    0, 0, 500, 245,
+    0, 0, GetModuleHandle(0), 0);
+
+  resize(500, 245);
+  to_left(w_bp->hwnd);
+  to_bottom(w_console->hwnd);
+
   CreateWindowEx(WS_EX_CLIENTEDGE, "EDIT", "", WS_CHILD | WS_VISIBLE | ES_MULTILINE | ES_READONLY,
       5,   5, 395, 235, hwnd, (HMENU)MEMORYEDITOR_VIEW, GetModuleHandle(0), 0);
+  wndproc_oldmemoryeditbox = (WNDPROC)GetWindowLong(GetDlgItem(hwnd, MEMORYEDITOR_VIEW), GWL_WNDPROC);
+  SetWindowLong(GetDlgItem(hwnd, MEMORYEDITOR_VIEW), GWL_WNDPROC, (long)wndproc_memoryeditbox);
 
   CreateWindow("COMBOBOX", "", WS_CHILD | WS_VISIBLE | CBS_DROPDOWNLIST | CBS_HASSTRINGS,
     405,   5,  90, 200, hwnd, (HMENU)MEMORYEDITOR_MODE, GetModuleHandle(0), 0);
@@ -263,45 +357,28 @@ void MemoryEditor::create_controls() {
   CreateWindow("BUTTON", "Export...", WS_CHILD | WS_VISIBLE,
     405, 131,  90,  20, hwnd, (HMENU)MEMORYEDITOR_FEXPORT, GetModuleHandle(0), 0);
 
-  CreateWindow("BUTTON", "-40", WS_CHILD | WS_VISIBLE,
-    405, 160,  45,  20, hwnd, (HMENU)MEMORYEDITOR_UP40, GetModuleHandle(0), 0);
-  CreateWindow("BUTTON", "+40", WS_CHILD | WS_VISIBLE,
-    450, 160,  45,  20, hwnd, (HMENU)MEMORYEDITOR_DOWN40, GetModuleHandle(0), 0);
-  CreateWindow("BUTTON", "-400", WS_CHILD | WS_VISIBLE,
-    405, 180,  45,  20, hwnd, (HMENU)MEMORYEDITOR_UP400, GetModuleHandle(0), 0);
-  CreateWindow("BUTTON", "+400", WS_CHILD | WS_VISIBLE,
-    450, 180,  45,  20, hwnd, (HMENU)MEMORYEDITOR_DOWN400, GetModuleHandle(0), 0);
-  CreateWindow("BUTTON", "-4000", WS_CHILD | WS_VISIBLE,
-    405, 200,  45,  20, hwnd, (HMENU)MEMORYEDITOR_UP4000, GetModuleHandle(0), 0);
-  CreateWindow("BUTTON", "+4000", WS_CHILD | WS_VISIBLE,
-    450, 200,  45,  20, hwnd, (HMENU)MEMORYEDITOR_DOWN4000, GetModuleHandle(0), 0);
-  CreateWindow("BUTTON", "-40000", WS_CHILD | WS_VISIBLE,
-    405, 220,  45,  20, hwnd, (HMENU)MEMORYEDITOR_UP40000, GetModuleHandle(0), 0);
-  CreateWindow("BUTTON", "+40000", WS_CHILD | WS_VISIBLE,
-    450, 220,  45,  20, hwnd, (HMENU)MEMORYEDITOR_DOWN40000, GetModuleHandle(0), 0);
+  CreateWindow("BUTTON", "Auto Update", WS_CHILD | WS_VISIBLE | BS_CHECKBOX,
+    405, 203,  90,  15, hwnd, (HMENU)MEMORYEDITOR_AUTOUPDATE, GetModuleHandle(0), 0);
+  CreateWindow("BUTTON", "Update", WS_CHILD | WS_VISIBLE,
+    405, 220,  90,  20, hwnd, (HMENU)MEMORYEDITOR_UPDATE, GetModuleHandle(0), 0);
 
-  SendDlgItemMessage(hwnd, MEMORYEDITOR_VIEW,      WM_SETFONT, (WPARAM)hMonofont, 0);
-  SendDlgItemMessage(hwnd, MEMORYEDITOR_MODE,      WM_SETFONT, (WPARAM)hFont,     0);
-  SendDlgItemMessage(hwnd, MEMORYEDITOR_GOTOADDR,  WM_SETFONT, (WPARAM)hMonofont, 0);
-  SendDlgItemMessage(hwnd, MEMORYEDITOR_GOTO,      WM_SETFONT, (WPARAM)hFont,     0);
-  SendDlgItemMessage(hwnd, MEMORYEDITOR_STATIC1,   WM_SETFONT, (WPARAM)hFont,     0);
-  SendDlgItemMessage(hwnd, MEMORYEDITOR_OFFSET,    WM_SETFONT, (WPARAM)hMonofont, 0);
-  SendDlgItemMessage(hwnd, MEMORYEDITOR_VALUE,     WM_SETFONT, (WPARAM)hMonofont, 0);
-  SendDlgItemMessage(hwnd, MEMORYEDITOR_EDIT,      WM_SETFONT, (WPARAM)hFont,     0);
-  SendDlgItemMessage(hwnd, MEMORYEDITOR_FSOURCE,   WM_SETFONT, (WPARAM)hFont,     0);
-  SendDlgItemMessage(hwnd, MEMORYEDITOR_FEXPORT,   WM_SETFONT, (WPARAM)hFont,     0);
-  SendDlgItemMessage(hwnd, MEMORYEDITOR_UP40,      WM_SETFONT, (WPARAM)hFont,     0);
-  SendDlgItemMessage(hwnd, MEMORYEDITOR_DOWN40,    WM_SETFONT, (WPARAM)hFont,     0);
-  SendDlgItemMessage(hwnd, MEMORYEDITOR_UP400,     WM_SETFONT, (WPARAM)hFont,     0);
-  SendDlgItemMessage(hwnd, MEMORYEDITOR_DOWN400,   WM_SETFONT, (WPARAM)hFont,     0);
-  SendDlgItemMessage(hwnd, MEMORYEDITOR_UP4000,    WM_SETFONT, (WPARAM)hFont,     0);
-  SendDlgItemMessage(hwnd, MEMORYEDITOR_DOWN4000,  WM_SETFONT, (WPARAM)hFont,     0);
-  SendDlgItemMessage(hwnd, MEMORYEDITOR_UP40000,   WM_SETFONT, (WPARAM)hFont,     0);
-  SendDlgItemMessage(hwnd, MEMORYEDITOR_DOWN40000, WM_SETFONT, (WPARAM)hFont,     0);
+  SendDlgItemMessage(hwnd, MEMORYEDITOR_VIEW,       WM_SETFONT, (WPARAM)hMonofont, 0);
+  SendDlgItemMessage(hwnd, MEMORYEDITOR_MODE,       WM_SETFONT, (WPARAM)hFont,     0);
+  SendDlgItemMessage(hwnd, MEMORYEDITOR_GOTOADDR,   WM_SETFONT, (WPARAM)hMonofont, 0);
+  SendDlgItemMessage(hwnd, MEMORYEDITOR_GOTO,       WM_SETFONT, (WPARAM)hFont,     0);
+  SendDlgItemMessage(hwnd, MEMORYEDITOR_STATIC1,    WM_SETFONT, (WPARAM)hFont,     0);
+  SendDlgItemMessage(hwnd, MEMORYEDITOR_OFFSET,     WM_SETFONT, (WPARAM)hMonofont, 0);
+  SendDlgItemMessage(hwnd, MEMORYEDITOR_VALUE,      WM_SETFONT, (WPARAM)hMonofont, 0);
+  SendDlgItemMessage(hwnd, MEMORYEDITOR_EDIT,       WM_SETFONT, (WPARAM)hFont,     0);
+  SendDlgItemMessage(hwnd, MEMORYEDITOR_FSOURCE,    WM_SETFONT, (WPARAM)hFont,     0);
+  SendDlgItemMessage(hwnd, MEMORYEDITOR_FEXPORT,    WM_SETFONT, (WPARAM)hFont,     0);
+  SendDlgItemMessage(hwnd, MEMORYEDITOR_AUTOUPDATE, WM_SETFONT, (WPARAM)hFont,     0);
+  SendDlgItemMessage(hwnd, MEMORYEDITOR_UPDATE,     WM_SETFONT, (WPARAM)hFont,     0);
 
   SendDlgItemMessage(hwnd, MEMORYEDITOR_MODE, CB_ADDSTRING, 0, (LPARAM)"DRAM");
   SendDlgItemMessage(hwnd, MEMORYEDITOR_MODE, CB_ADDSTRING, 0, (LPARAM)"ROM");
   SendDlgItemMessage(hwnd, MEMORYEDITOR_MODE, CB_ADDSTRING, 0, (LPARAM)"SRAM");
+  SendDlgItemMessage(hwnd, MEMORYEDITOR_MODE, CB_ADDSTRING, 0, (LPARAM)"SPCRAM");
   SendDlgItemMessage(hwnd, MEMORYEDITOR_MODE, CB_ADDSTRING, 0, (LPARAM)"VRAM");
   SendDlgItemMessage(hwnd, MEMORYEDITOR_MODE, CB_ADDSTRING, 0, (LPARAM)"OAM");
   SendDlgItemMessage(hwnd, MEMORYEDITOR_MODE, CB_ADDSTRING, 0, (LPARAM)"CGRAM");
@@ -309,6 +386,7 @@ void MemoryEditor::create_controls() {
 
   SendDlgItemMessage(hwnd, MEMORYEDITOR_FSOURCE, CB_ADDSTRING, 0, (LPARAM)"DRAM");
   SendDlgItemMessage(hwnd, MEMORYEDITOR_FSOURCE, CB_ADDSTRING, 0, (LPARAM)"SRAM");
+  SendDlgItemMessage(hwnd, MEMORYEDITOR_FSOURCE, CB_ADDSTRING, 0, (LPARAM)"SPCRAM");
   SendDlgItemMessage(hwnd, MEMORYEDITOR_FSOURCE, CB_ADDSTRING, 0, (LPARAM)"VRAM");
   SendDlgItemMessage(hwnd, MEMORYEDITOR_FSOURCE, CB_ADDSTRING, 0, (LPARAM)"OAM");
   SendDlgItemMessage(hwnd, MEMORYEDITOR_FSOURCE, CB_ADDSTRING, 0, (LPARAM)"CGRAM");
@@ -324,4 +402,6 @@ uint32 style;
     style = GetWindowLong(h, GWL_STYLE);
     if(style & WS_DISABLED)ctl_disabled[i] = true;
   }
+
+  auto_update = false;
 }

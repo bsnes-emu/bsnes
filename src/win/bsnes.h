@@ -31,12 +31,13 @@ enum {
   RUNTOFRAME,
   RUNTOCPUSTEP,
   RUNTOCPUPROCEED,
-  RUNTOCPUTRACE
+  RUNTOCPUTRACE,
+  RUNTOAPUSTEP
 };
-enum { DRAM = 0, VRAM = 1, OAM = 2, CGRAM = 3 };
+enum { DRAM = 0, SPCRAM = 1, VRAM = 2, OAM = 3, CGRAM = 4 };
   void   set_status(uint32 new_status);
   uint32 get_status();
-  void   run();
+  void   snes_run();
   void   render_frame();
 
 //input functions
@@ -47,12 +48,14 @@ enum { DRAM = 0, VRAM = 1, OAM = 2, CGRAM = 3 };
 struct {
   uint32 cpu_stop_pos;
   uint32 cpu_trace_pos, cpu_trace_stop;
-  bool   cpu_ran;
+  bool   cpu_ran, apu_ran;
 }status;
   uint8 read (uint8 type, uint32 addr);
   void  write(uint8 type, uint32 addr, uint8 value);
   void  notify(uint32 message, uint32 param1 = 0, uint32 param2 = 0);
   void  disassemble_cpu_op();
+  void  disassemble_apu_op();
+  void  disassemble_bp_op();
 
 //whether or not the user requests the debugger open
   bool  debugger_enabled();

@@ -1,10 +1,21 @@
-bsnes Licensing Agreement:
-
+bsnes License:
+--------------
 You are free to redistribute this software, and its source code; provided
 there is no charge for the software, nor any charge for the medium used to
 distribute the software. You are also free to use and modify the source code
 as you desire for personal use only. No publically-released derivative works
-of this source code are permitted without my permission. You must also abide
-by the terms of any additional source code licenses contained within my code.
-At present, this only includes the mode7 renderer, which was derived from the
-snes9x mode7 renderer.
+of this source code are permitted without my permission, though I will likely
+grant you permission if you ask me. You must also abide by the terms of any
+additional source code licenses contained within this program.
+
+Simple DirectMedia Layer License:
+---------------------------------
+The Simple DirectMedia Layer (SDL for short) is a cross-platform library
+designed to make it easy to write multi-media software, such as games and
+emulators.
+
+The Simple DirectMedia Layer library source code is available from:
+http://www.libsdl.org/
+
+This library is distributed under the terms of the GNU LGPL license:
+http://www.gnu.org/copyleft/lesser.html

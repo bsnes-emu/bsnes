@@ -1,6 +1,6 @@
 void bPPU::latch_counters() {
-  regs.hcounter = clock->hcounter();
-  regs.vcounter = clock->vcounter();
+  regs.hcounter = cpu->hcounter();
+  regs.vcounter = cpu->vcounter();
   regs.counters_latched = true;
 }
 
@@ -27,6 +27,7 @@ void bPPU::mmio_w2101(uint8 value) {
   regs.oam_basesize   = (value >> 5) & 7;
   regs.oam_nameselect = (value >> 3) & 3;
   regs.oam_tdaddr     = (value & 3) << 14;
+  update_sprite_list_sizes();
 }
 
 //OAMADDL
@@ -37,8 +38,9 @@ void bPPU::mmio_w2102(uint8 value) {
 
 //OAMADDH
 void bPPU::mmio_w2103(uint8 value) {
-  regs.oam_addrh = value & 1;
-  regs.oam_addr  = ((regs.oam_addrh << 8) | regs.oam_addrl) << 1;
+  regs.oam_priority = !!(value & 0x80);
+  regs.oam_addrh    = value & 1;
+  regs.oam_addr     = ((regs.oam_addrh << 8) | regs.oam_addrl) << 1;
 }
 
 //OAMDATA
@@ -168,11 +170,17 @@ void bPPU::mmio_w2115(uint8 value) {
 //VMADDL
 void bPPU::mmio_w2116(uint8 value) {
   regs.vram_addr = (regs.vram_addr & 0xff00) | value;
+uint16 addr = get_vram_address();
+  regs.vram_readbuffer  = vram_read(addr);
+  regs.vram_readbuffer |= vram_read(addr + 1) << 8;
 }
 
 //VMADDH
 void bPPU::mmio_w2117(uint8 value) {
   regs.vram_addr = (value << 8) | (regs.vram_addr & 0x00ff);
+uint16 addr = get_vram_address();
+  regs.vram_readbuffer  = vram_read(addr);
+  regs.vram_readbuffer |= vram_read(addr + 1) << 8;
 }
 
 //VMDATAL
@@ -388,8 +396,8 @@ void bPPU::mmio_w2133(uint8 value) {
   regs.oam_halve   = !!(value & 0x02);
   regs.interlace   = !!(value & 0x01);
 
-  clock->enable_overscan(regs.overscan);
-  clock->enable_interlace(regs.interlace);
+  cpu->set_overscan(regs.overscan);
+  cpu->set_interlace(regs.interlace);
 }
 
 //MPYL
@@ -487,6 +495,8 @@ uint16 r = regs.vcounter;
 //STAT77
 uint8 bPPU::mmio_r213e() {
 uint8 r = 0x00;
+  r |= (regs.time_over) ?0x80:0x00;
+  r |= (regs.range_over)?0x40:0x00;
   r |= 0x01; //PPU1 version number
   return r;
 }
@@ -497,7 +507,7 @@ uint8 r = 0x00;
   regs.latch_hcounter = 0;
   regs.latch_vcounter = 0;
 
-  r |= clock->interlace_field() << 7;
+  r |= cpu->interlace_field() << 7;
   if(!(cpu->pio_status() & 0x80)) {
     r |= 1 << 6;
   } else if(regs.counters_latched == true) {
@@ -510,7 +520,7 @@ uint8 r = 0x00;
 }
 
 uint8 bPPUMMIO::read(uint32 addr) {
-  clock->sync();
+//cpu->sync();
   switch(addr) {
   case 0x2134:return ppu->mmio_r2134(); //MPYL
   case 0x2135:return ppu->mmio_r2135(); //MPYM
@@ -524,36 +534,12 @@ uint8 bPPUMMIO::read(uint32 addr) {
   case 0x213d:return ppu->mmio_r213d(); //OPVCT
   case 0x213e:return ppu->mmio_r213e(); //STAT77
   case 0x213f:return ppu->mmio_r213f(); //STAT78
-
-  case 0x2140:case 0x2141:case 0x2142:case 0x2143:
-  static uint8 t = 0, counter = 0;
-  uint8 x, port = (addr & 3);
-    if(rand() & 1) {
-      x = rand() & 7;
-      if(x == 0) {
-        if(!(port & 1))t = cpu->regs.a;
-        else           t = cpu->regs.a >> 8;
-      }
-      else if(x == 1) {
-        if(!(port & 1))t = cpu->regs.x;
-        else           t = cpu->regs.x >> 8;
-      }
-      else if(x == 2) {
-        if(!(port & 1))t = cpu->regs.y;
-        else           t = cpu->regs.y >> 8;
-      }
-      else if(x == 3)t = 0xaa;
-      else if(x == 4)t = 0xbb;
-      else if(x == 5)t = 0xcc;
-      else { t = counter++; }
-    }
-    return t;
   }
   return 0x00;
 }
 
 void bPPUMMIO::write(uint32 addr, uint8 value) {
-  clock->sync();
+//cpu->sync();
   switch(addr) {
   case 0x2100:ppu->mmio_w2100(value);return; //INIDISP
   case 0x2101:ppu->mmio_w2101(value);return; //OBSEL

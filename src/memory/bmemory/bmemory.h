@@ -1,30 +1,23 @@
-class bROM : public ROM {
-private:
-bool write_protection;
-bool rom_loaded;
-
-public:
-enum { LOROM = 0, HIROM = 1 };
-uint8  *data, *sram_data;
-uint8  mapper;
-uint32 size, sram_size;
-  void  load_rom(Reader *rf);
-  void  load_sram(Reader *rf);
-  void  save_sram(Writer *wf);
-  void  unload();
-  uint8 read (uint32 addr);
-  void  write(uint32 addr, byte value);
-  void  write_protect(bool yn);
-
-  bROM();
-  ~bROM();
-};
+#include "bcart_lorom.h"
+#include "bcart_hirom.h"
+#include "bcart_exhirom.h"
 
 class bMemBus : public MemBus {
 public:
-byte *wram;
+uint8 *rom, *sram, *wram;
+uint32 rom_size, sram_size;
+
+bool rom_loaded;
+enum { LOROM = 0x20, HIROM = 0x21, EXHIROM = 0x25 };
+
   uint8 read (uint32 addr);
   void  write(uint32 addr, byte value);
+
+  bool  load_cart(Reader *rf);
+  bool  load_sram(Reader *rf);
+  bool  save_sram(Writer *wf);
+  void  unload_cart();
+  void  get_cartinfo(CartInfo *ci);
 
   void power();
   void reset();

@@ -1,3 +1,4 @@
+#include <time.h>
 #include "lib/libbase.h"
 
 //structs

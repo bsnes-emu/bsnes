@@ -235,7 +235,7 @@ int rx, ry;
     lpddsb->Restore();
   }
 
-  if(cfg.gui.show_fps == false)return;
+  if(cfg.gui.show_fps == false || bsnes->get_status() == bSNES::STOP)return;
 uint32 fps;
 char s[256], t[256];
   fps_timer->tick();

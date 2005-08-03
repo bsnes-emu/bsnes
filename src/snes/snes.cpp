@@ -1,22 +1,28 @@
 #include "../base.h"
 
 void SNES::run() {
-  clock->run();
+  cpu->run();
 }
 
 void SNES::power() {
-  clock->power();
   cpu->power();
+  apu->power();
   ppu->power();
+//clock->power();
   mem_bus->power();
 
 int i;
   mem_bus->flush_mmio_mappers();
   for(i=0x2100;i<=0x213f;i++)mem_bus->set_mmio_mapper(i, ppu->mmio);
-  for(i=0x2140;i<=0x2143;i++)mem_bus->set_mmio_mapper(i, ppu->mmio);
+  for(i=0x2140;i<=0x217f;i++)mem_bus->set_mmio_mapper(i, cpu->mmio);
   for(i=0x2180;i<=0x2183;i++)mem_bus->set_mmio_mapper(i, cpu->mmio);
+//unknown
   mem_bus->set_mmio_mapper(0x21c2, cpu->mmio);
   mem_bus->set_mmio_mapper(0x21c3, cpu->mmio);
+//S-RTC
+  mem_bus->set_mmio_mapper(0x2800, cpu->mmio);
+  mem_bus->set_mmio_mapper(0x2801, cpu->mmio);
+//input
   mem_bus->set_mmio_mapper(0x4016, cpu->mmio);
   mem_bus->set_mmio_mapper(0x4017, cpu->mmio);
   for(i=0x4200;i<=0x421f;i++)mem_bus->set_mmio_mapper(i, cpu->mmio);
@@ -24,9 +30,10 @@ int i;
 }
 
 void SNES::reset() {
-  clock->reset();
   cpu->reset();
+  apu->reset();
   ppu->reset();
+//clock->reset();
   mem_bus->reset();
 }
 

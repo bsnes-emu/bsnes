@@ -1,3 +1,3 @@
 @nmake /NOLOGO
-@move bsnes_g2.exe ../../bsnes_g2.exe>nul
+@move bsnes.exe ../../bsnes.exe>nul
 @pause

@@ -247,10 +247,10 @@ int ssl = strlen(str), ksl = strlen(key);
 /* does not work on type char* because function increases string length */
 void strquote(_string &str) {
 static string t;
-  t = "\"";
-  t += str;
-  t += "\"";
-  str = t;
+  strcpy(t, "\"");
+  strcat(t, str);
+  strcat(t, "\"");
+  strcpy(str, t);
 }
 
 bool strunquote(char *str) {

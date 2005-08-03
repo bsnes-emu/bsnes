@@ -4,7 +4,7 @@ bool is_debugger_enabled;
 
 public:
 //system functions
-  virtual void run();
+  void run();
   virtual void render_frame() = 0;
   virtual void power();
   virtual void reset();
@@ -29,11 +29,13 @@ enum {
 enum {
   NO_ACTION = 0,
   RENDER_FRAME,
-  CPU_EXEC_OPCODE,
-  MEM_READ,   MEM_WRITE,
-  VRAM_READ,  VRAM_WRITE,
-  OAM_READ,   OAM_WRITE,
-  CGRAM_READ, CGRAM_WRITE,
+  CPU_EXEC_OPCODE_BEGIN, CPU_EXEC_OPCODE_END,
+  APU_EXEC_OPCODE_BEGIN, APU_EXEC_OPCODE_END,
+  MEM_READ,    MEM_WRITE,
+  SPCRAM_READ, SPCRAM_WRITE,
+  VRAM_READ,   VRAM_WRITE,
+  OAM_READ,    OAM_WRITE,
+  CGRAM_READ,  CGRAM_WRITE,
 };
   virtual void notify(uint32 message, uint32 param1 = 0, uint32 param2 = 0);
   virtual void debugger_enable();
