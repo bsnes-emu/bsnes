@@ -26,33 +26,37 @@ CPURegs regs;
   };
   virtual uint8  pio_status() = 0;
   virtual void   run() = 0;
+  virtual uint32 cycles_executed() = 0;
   virtual void   scanline() = 0;
   virtual void   frame() = 0;
   virtual void   power() = 0;
   virtual void   reset() = 0;
 
 //opcode disassembler
-  enum {
-    OPTYPE_DP = 0,    //dp
-    OPTYPE_DPX,       //dp,x
-    OPTYPE_DPY,       //dp,y
-    OPTYPE_IDP,       //(dp)
-    OPTYPE_IDPX,      //(dp,x)
-    OPTYPE_IDPY,      //(dp),y
-    OPTYPE_ILDP,      //[dp]
-    OPTYPE_ILDPY,     //[dp],y
-    OPTYPE_ADDR,      //addr
-    OPTYPE_ADDRX,     //addr,x
-    OPTYPE_ADDRY,     //addr,y
-    OPTYPE_IADDRX,    //(addr,x)
-    OPTYPE_ILADDR,    //[addr]
-    OPTYPE_LONG,      //long
-    OPTYPE_LONGX,     //long, x
-    OPTYPE_SR,        //sr,s
-    OPTYPE_ISRY,      //(sr,s),y
-    OPTYPE_ADDR_PC,   //pbr:addr
-    OPTYPE_IADDR_PC   //pbr:(addr)
-  };
+enum {
+  OPTYPE_DP = 0,    //dp
+  OPTYPE_DPX,       //dp,x
+  OPTYPE_DPY,       //dp,y
+  OPTYPE_IDP,       //(dp)
+  OPTYPE_IDPX,      //(dp,x)
+  OPTYPE_IDPY,      //(dp),y
+  OPTYPE_ILDP,      //[dp]
+  OPTYPE_ILDPY,     //[dp],y
+  OPTYPE_ADDR,      //addr
+  OPTYPE_ADDRX,     //addr,x
+  OPTYPE_ADDRY,     //addr,y
+  OPTYPE_IADDRX,    //(addr,x)
+  OPTYPE_ILADDR,    //[addr]
+  OPTYPE_LONG,      //long
+  OPTYPE_LONGX,     //long, x
+  OPTYPE_SR,        //sr,s
+  OPTYPE_ISRY,      //(sr,s),y
+  OPTYPE_ADDR_PC,   //pbr:addr
+  OPTYPE_IADDR_PC   //pbr:(addr)
+};
+//see dcpu.cpp for notes on this function
+  virtual bool in_opcode();
+
   void   disassemble_opcode(char *output);
   uint32 resolve_offset(uint8 offset_type, uint32 addr);
   uint8  opcode_length();

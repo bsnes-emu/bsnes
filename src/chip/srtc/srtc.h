@@ -1,10 +1,12 @@
-void  srtc_set_time();
-void  srtc_power();
-void  srtc_reset();
-void  srtc_write(uint8 data);
-uint8 srtc_read();
+class SRTCMMIO : public MMIO {
+public:
+  inline uint8 read (uint32 addr);
+  inline void  write(uint32 addr, uint8 value);
+};
 
-#define MAX_SRTC_INDEX 0x0c
+class SRTC {
+public:
+enum { MAX_SRTC_INDEX = 0x0c };
 
 enum {
   SRTC_READ = 0,
@@ -18,9 +20,7 @@ enum {
   SRTC_COMMAND_CLEAR = 4
 };
 
-#define DAYTICKS    (60*60*24)
-#define HOURTICKS   (60*60)
-#define MINUTETICKS (60)
+SRTCMMIO *mmio;
 
 /******************************
 [srtc.data structure]
@@ -38,11 +38,18 @@ Index  Description   Range
     9  Year ones     0-9
    10  Year tens     0-9
    11  Year hundreds 9-11 (9=19xx, 10=20xx, 11=21xx)
-   12  Day of week   0-6 (0=Sunday, ...)
+   12  Day of week   0-6  (0=Sunday, ...)
 ******************************/
-
 struct {
   int8   index;
   uint8  mode;
   uint8  data[MAX_SRTC_INDEX + 1];
 }srtc;
+  void  set_time();
+  void  power();
+  void  reset();
+  void  write(uint8 data);
+  uint8 read();
+
+  SRTC();
+};

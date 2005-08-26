@@ -1,6 +1,7 @@
 class bCartHiROM : public Cart {
 private:
-bool write_protected;
+bool   write_protected;
+uint32 P0_size, P1_size, ROM_mask;
 
 public:
 uint8 *rom, *sram;

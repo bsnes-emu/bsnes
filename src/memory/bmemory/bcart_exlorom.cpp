@@ -1,6 +1,6 @@
-void bCartHiROM::write_protect(bool r) { write_protected = r; }
+void bCartExLoROM::write_protect(bool r) { write_protected = r; }
 
-uint8 bCartHiROM::read(uint32 addr) {
+uint8 bCartExLoROM::read(uint32 addr) {
 uint32 b, w;
   addr &= 0xffffff;
   b = (addr >> 16);
@@ -33,16 +33,22 @@ uint32 b, w;
     }
   }
 
-  addr &= ROM_mask;
-
-  if(addr >= P0_size) {
-    addr = P0_size + (addr & (P1_size - 1));
+  if(b <= 0x3f) {
+    addr = (b << 15) | (addr & 0x7fff);
+  } else if(b <= 0x7f) {
+    addr &= 0x3fffff;
+  } else if(b <= 0xbf) {
+    b &= 0x7f;
+    addr = (b << 15) | (addr & 0x7fff);
+  } else {
+    addr = sdd1->offset(addr);
   }
 
-  return rom[addr];
+  if(addr < rom_size)return rom[addr];
+  return 0x00;
 }
 
-void bCartHiROM::write(uint32 addr, uint8 value) {
+void bCartExLoROM::write(uint32 addr, uint8 value) {
 uint32 b, w;
   addr &= 0xffffff;
   b = (addr >> 16);
@@ -78,29 +84,23 @@ uint32 b, w;
 
   if(write_protected == true)return;
 
-  addr &= ROM_mask;
-
-  if(addr >= P0_size) {
-    addr = P0_size + (addr & (P1_size - 1));
+  if(b <= 0x3f) {
+    addr = (b << 15) | (addr & 0x7fff);
+  } else if(b <= 0x7f) {
+    addr &= 0x3fffff;
+  } else if(b <= 0xbf) {
+    b &= 0x7f;
+    addr = (b << 15) | (addr & 0x7fff);
+  } else {
+    addr = sdd1->offset(addr);
   }
 
-  rom[addr] = value;
+  if(addr < rom_size)rom[addr] = value;
 }
 
-void bCartHiROM::set_cartinfo(CartInfo *ci) {
+void bCartExLoROM::set_cartinfo(CartInfo *ci) {
   rom       = ci->rom;
   sram      = ci->sram;
   rom_size  = ci->rom_size;
   sram_size = ci->sram_size;
-
-//calculate highest power of 2, which is the size of the first ROM chip
-  P0_size = 0x800000;
-  while(!(rom_size & P0_size))P0_size >>= 1;
-  P1_size = rom_size - P0_size;
-
-  if(rom_size == P0_size) { //cart only contains one ROM chip
-    ROM_mask = (P0_size - 1);
-  } else { //cart contains two ROM chips
-    ROM_mask = (P0_size + P0_size - 1);
-  }
 }

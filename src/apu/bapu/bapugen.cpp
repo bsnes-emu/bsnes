@@ -107,16 +107,16 @@ int i, l;
     replace(t, "$5", op_list[i].arg[5]);
     replace(t, "$6", op_list[i].arg[6]);
     replace(t, "$7", op_list[i].arg[7]);
-    fprintf(fp, "%s\r\n\r\n", *t);
+    fprintf(fp, "%s\r\n\r\n", strptr(t));
 
     strcpy(t, output_header);
     replace(t, "$$", op_list[i].name);
-    fprintf(fph, "%s", *t);
+    fprintf(fph, "%s", strptr(t));
 
     strcpy(t, output_table);
     replace(t, "$$", op_list[i].name);
     replace(t, "$0", op_list[i].arg[0]);
-    fprintf(fpt, "%s", *t);
+    fprintf(fpt, "%s", strptr(t));
   }
 }
 

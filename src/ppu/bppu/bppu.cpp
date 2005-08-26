@@ -75,6 +75,9 @@ void bPPU::power() {
   memset(vram,  0, 65536);
   memset(oam,   0,   544);
   memset(cgram, 0,   512);
+
+  region = snes->region();
+
   reset();
 }
 
@@ -83,6 +86,10 @@ void bPPU::reset() {
   frame();
 
   memset(sprite_list, 0, sizeof(sprite_list));
+
+//open bus support
+  regs.ppu1_mdr = 0xff;
+  regs.ppu2_mdr = 0xff;
 
 //$2100
   regs.display_disabled   = 0;
@@ -133,6 +140,8 @@ void bPPU::reset() {
   regs.bg_tdaddr[BG4] = 0x0000;
 
 //$210d-$2114
+  regs.bg_ofslatch  = 0x00;
+  regs.m7_hofs = regs.m7_vofs = 0x0000;
   regs.bg_hofs[BG1] = regs.bg_vofs[BG1] = 0x0000;
   regs.bg_hofs[BG2] = regs.bg_vofs[BG2] = 0x0000;
   regs.bg_hofs[BG3] = regs.bg_vofs[BG3] = 0x0000;
@@ -152,6 +161,7 @@ void bPPU::reset() {
   regs.mode7_hflip  = false;
 
 //$211b-$2120
+  regs.m7_latch = 0x00;
   regs.m7a = 0x0000;
   regs.m7b = 0x0000;
   regs.m7c = 0x0000;
@@ -300,13 +310,21 @@ void bPPU::oam_write(uint16 addr, uint8 value) {
 
 uint8 bPPU::cgram_read(uint16 addr) {
 uint8 r;
-  r = cgram[addr & 511];
+  addr &= 511;
+  r = cgram[addr];
+  if(addr & 1) {
+    r &= 0x7f;
+  }
   snes->notify(SNES::CGRAM_READ, addr, r);
   return r;
 }
 
 void bPPU::cgram_write(uint16 addr, uint8 value) {
-  cgram[addr & 511] = value;
+  addr &= 511;
+  if(addr & 1) {
+    value &= 0x7f;
+  }
+  cgram[addr] = value;
   snes->notify(SNES::CGRAM_WRITE, addr, value);
 }
 
@@ -326,31 +344,31 @@ bPPU::bPPU() {
 
   init_tiledata_cache();
 
-int i, l;
-byte r, g, b;
-double m;
+int     i, l;
+uint8   r, g, b;
+float   m;
 uint16 *ptr;
   for(l=0;l<16;l++) {
-    mosaic_table[l] = (uint16*)memalloc(4096 * 2, "bPPU::mosaic_table[%2d]", l);
+    mosaic_table[l] = (uint16*)malloc(4096 * 2);
     for(i=0;i<4096;i++) {
       mosaic_table[l][i] = (i / (l + 1)) * (l + 1);
     }
   }
 
-  light_table = (uint16*)memalloc(16 * 65536 * 2, "bPPU::light_table");
-  ptr = (word*)light_table;
+  light_table = (uint16*)malloc(16 * 32768 * 2);
+  ptr = (uint16*)light_table;
   for(l=0;l<16;l++) {
-    m = (double)l / 15.0;
-    for(i=0;i<65536;i++) {
+    m = (float)l / 15.0;
+    for(i=0;i<32768;i++) {
       r = (i      ) & 31;
       g = (i >>  5) & 31;
       b = (i >> 10) & 31;
       if(l == 0) { r = g = b = 0; }
       else if(l == 15);
       else {
-        r = (uint8)((double)r * m);
-        g = (uint8)((double)g * m);
-        b = (uint8)((double)b * m);
+        r = (uint8)((float)r * m);
+        g = (uint8)((float)g * m);
+        b = (uint8)((float)b * m);
       }
       *ptr++ = (r) | (g << 5) | (b << 10);
     }
@@ -360,14 +378,30 @@ uint16 *ptr;
 bPPU::~bPPU() {
   delete(mmio);
 
-  if(vram) memfree(vram,  "bPPU::vram");
-  if(oam)  memfree(oam,   "bPPU::oam");
-  if(cgram)memfree(cgram, "bPPU::cgram");
+  if(vram) {
+    free(vram);
+    vram = 0;
+  }
+  if(oam) {
+    free(oam);
+    oam = 0;
+  }
+  if(cgram) {
+    free(cgram);
+    cgram = 0;
+  }
 
   for(int i=0;i<16;i++) {
-    if(mosaic_table[i])memfree(mosaic_table[i], "bPPU::mosaic_table[%2d]", i);
+    if(mosaic_table[i]) {
+      free(mosaic_table[i]);
+      mosaic_table[i] = 0;
+    }
   }
-  if(light_table)memfree(light_table, "bPPU::light_table");
+
+  if(light_table) {
+    memfree(light_table);
+    light_table = 0;
+  }
 }
 
 bPPUMMIO::bPPUMMIO(bPPU *_ppu) {

@@ -1,5 +1,5 @@
-void numtobin(char *s, uint32 num) {
-uint32 mask = 0x80000000, len = 0, z = 0;
+void numtobin(char *s, uint num) {
+uint mask = 0x80000000, len = 0, z = 0;
   for(;mask;mask>>=1,len++) { if(num&mask)break; }
   len = 32 - len;
   do {
@@ -9,7 +9,7 @@ uint32 mask = 0x80000000, len = 0, z = 0;
   s[z] = 0;
 }
 
-void sprintf(_string &str, char *s, ...) {
+void sprintf(substring &str, const char *s, ...) {
 va_list args;
 char t[2], n[256];
 int i, l, sl, z;
@@ -17,7 +17,7 @@ uint8 pad_type, pad_len;
 uint32 num;
 char *r;
   va_start(args, s);
-  strcpy(*str, "");
+  strcpy(str, "");
   for(i=0;i<strlen(s);i++) {
     if(s[i] == '%') {
       i++;

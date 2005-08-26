@@ -132,6 +132,7 @@ void MainWindow::menu_unload() {
 }
 
 long __stdcall wndproc_main(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
+time_t timeout;
   switch(msg) {
   case WM_KEYDOWN:
     if(wparam == VK_ESCAPE) {
@@ -144,6 +145,13 @@ long __stdcall wndproc_main(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
     }
     break;
   case WM_COMMAND:
+//below code fails becahse it is triggered after snes->poll_input()...
+//unsure how to fix this...
+//  timeout = time(NULL);
+//  while(difftime(time(NULL), timeout) < 5) {
+//    if(!KeyDown(VK_RETURN))break;
+//  }
+
     switch(LOWORD(wparam)) {
     case MENU_FILE_LOAD:
       w_main->menu_load();
@@ -226,6 +234,8 @@ long __stdcall wndproc_main(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
         bsnes->debugger_enable();
         w_main->set_video_mode(VIDEOMODE_256x224w);
       }
+      break;
+    case MENU_MISC_SCREENSHOT:
       break;
     case MENU_MISC_ABOUT:
       w_about->center();
@@ -315,6 +325,8 @@ HMENU hsubmenu, hbranchmenu;
   AppendMenu(hmenu, MF_STRING | MF_POPUP, (unsigned int)hsubmenu, "&Settings");
 
   hsubmenu = CreatePopupMenu();
+  AppendMenu(hsubmenu, MF_STRING | MF_GRAYED, MENU_MISC_SCREENSHOT, "&Capture Screenshot");
+  AppendMenu(hsubmenu, MF_SEPARATOR, 0, "");
   AppendMenu(hsubmenu, MF_STRING, MENU_MISC_ABOUT, "&About...");
   AppendMenu(hmenu, MF_STRING | MF_POPUP, (unsigned int)hsubmenu, "&Misc");
 

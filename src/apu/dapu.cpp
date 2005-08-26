@@ -1,12 +1,23 @@
+//virtual function, see src/cpu/dcpu.cpp
+//for explanation of this function
+bool APU::in_opcode() { return false; }
+
 uint16 APU::__relb(int8 offset, int op_len) {
 uint16 pc = regs.pc + op_len;
   return pc + offset;
 }
 
 void APU::disassemble_opcode(char *output) {
-char *s = output, t[512];
+char *s, t[512];
 uint8  op, op0, op1;
 uint16 opw, opdp0, opdp1;
+  s = output;
+
+  if(in_opcode() == true) {
+    strcpy(s, "..???? <APU within opcode>");
+    return;
+  }
+
   sprintf(s, "..%0.4x ", regs.pc);
 
   op  = spcram_read(regs.pc);

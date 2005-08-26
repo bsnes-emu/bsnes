@@ -1,6 +1,16 @@
 #include <time.h>
 #include "lib/libbase.h"
 
+#if defined(_WIN32)
+  #define _WIN32_
+  #undef _UNIX_
+#elif defined(__GNUC__)
+  #define _UNIX_
+  #undef _WIN32_
+#else
+  #error "unknown architecture"
+#endif
+
 //structs
 typedef struct {
 uint8 *data;

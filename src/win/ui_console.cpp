@@ -29,13 +29,21 @@ HDC hdc;
       break;
     case CONSOLE_CPUPROCEED:
       if(bsnes->get_status() == bSNES::STOP) {
-        bsnes->set_status(bSNES::RUNTOCPUPROCEED);
+        if(cpu->in_opcode() == true) {
+          dprintf("* CPU within opcode, proceed aborted");
+        } else {
+          bsnes->set_status(bSNES::RUNTOCPUPROCEED);
+        }
       }
       break;
     case CONSOLE_CPUSKIP:
       if(bsnes->get_status() == bSNES::STOP) {
-        cpu->regs.pc.w += cpu->opcode_length();
-        bsnes->disassemble_cpu_op();
+        if(cpu->in_opcode() == true) {
+          dprintf("* CPU within opcode, skip aborted");
+        } else {
+          cpu->regs.pc.w += cpu->opcode_length();
+          bsnes->disassemble_cpu_op();
+        }
       }
       break;
     case CONSOLE_CPUTRACE:
@@ -49,13 +57,17 @@ HDC hdc;
       break;
     case CONSOLE_CPUDISABLE:
       if(bsnes->get_status() == bSNES::STOP) {
-        addr = cpu->regs.pc.d;
-        len = cpu->opcode_length();
-        for(i=0;i<len;i++) {
-          bsnes->write(bSNES::DRAM, (addr & 0xff0000) | ((addr + i) & 0xffff), 0xea);
+        if(cpu->in_opcode() == true) {
+          dprintf("* CPU within opcode, disable aborted");
+        } else {
+          addr = cpu->regs.pc.d;
+          len = cpu->opcode_length();
+          for(i=0;i<len;i++) {
+            bsnes->write(bSNES::DRAM, (addr & 0xff0000) | ((addr + i) & 0xffff), 0xea);
+          }
+        //cpu->regs.pc.w += len;
+          bsnes->disassemble_cpu_op();
         }
-//      cpu->regs.pc.w += len;
-        bsnes->disassemble_cpu_op();
       }
       break;
     case CONSOLE_APUSTEP:
@@ -111,21 +123,25 @@ HDC hdc;
       value = strhex(t);
       pos = SendDlgItemMessage(hwnd, CONSOLE_CFGREGTYPE, CB_GETCURSEL, 0, 0);
       if(pos == 0) { //Set CPU register
-        pos = SendDlgItemMessage(hwnd, CONSOLE_CFGREGNUM, CB_GETCURSEL, 0, 0);
-        switch(pos) {
-        case 0:cpu->regs.a.w  = value;break;
-        case 1:cpu->regs.x.w  = value;break;
-        case 2:cpu->regs.y.w  = value;break;
-        case 3:cpu->regs.s.w  = value;break;
-        case 4:cpu->regs.d.w  = value;break;
-        case 5:cpu->regs.db   = value;break;
-        case 6:cpu->regs.p    = value;break;
-        case 7:cpu->regs.e    = value;break;
-        case 8:cpu->regs.pc.d = value;break;
+        if(cpu->in_opcode() == true) {
+          dprintf("* CPU within opcode, register set aborted");
+        } else {
+          pos = SendDlgItemMessage(hwnd, CONSOLE_CFGREGNUM, CB_GETCURSEL, 0, 0);
+          switch(pos) {
+          case 0:cpu->regs.a.w  = value;break;
+          case 1:cpu->regs.x.w  = value;break;
+          case 2:cpu->regs.y.w  = value;break;
+          case 3:cpu->regs.s.w  = value;break;
+          case 4:cpu->regs.d.w  = value;break;
+          case 5:cpu->regs.db   = value;break;
+          case 6:cpu->regs.p    = value;break;
+          case 7:cpu->regs.e    = value;break;
+          case 8:cpu->regs.pc.d = value;break;
+          }
+        //these bits can never be clear in emulation mode
+          if(cpu->regs.e)cpu->regs.p |= 0x30;
+          bsnes->disassemble_cpu_op();
         }
-      //these bits can never be clear in emulation mode
-        if(cpu->regs.e)cpu->regs.p |= 0x30;
-        bsnes->disassemble_cpu_op();
       } else { //Set APU register
       }
       break;

@@ -13,8 +13,10 @@ private:
 typedef void (bCPU::*op)();
 op optbl[256];
 
+enum { NTSC = 0, PAL = 1 };
+uint8 region;
+
 public:
-#include "srtc.h"
 #include "bcpu_timing.h"
 
 uint8 apu_port[4];
@@ -39,25 +41,33 @@ enum {
 
 enum {
   DMASTATE_STOP = 0,
-  DMASTATE_INIT,
   DMASTATE_DMASYNC,
+  DMASTATE_DMASYNC2,
   DMASTATE_RUN,
-  DMASTATE_CPUSYNC
+  DMASTATE_CPUSYNC,
+  DMASTATE_CPUSYNC2
 };
 
 struct {
-  uint8  cpu_state, cycle_count;
+  uint8  cpu_state, cycle_pos, cycle_count;
+  uint8  opcode;
+  uint32 cycles_executed;
 
   uint8  dma_state;
   uint32 dma_cycle_count;
   bool   hdma_triggered;
 
-  bool   nmi_triggered;
-  bool   nmi_pin;
-  bool   r4210_read;
+//used by $4210 read bit 7
+  bool   nmi_read;
+//used by NMI test, set when NMI executed this frame
+  bool   nmi_exec;
 
-  bool   irq_triggered;
-  bool   irq_pin;
+//IRQ is level-sensitive, so $4211 must be read to
+//prevent multiple interrupts from occurring
+  bool   irq_read;
+//this is used to return $4211 bit 7
+  bool   irq_exec;
+//$4207-$420a
   uint16 virq_trigger, hirq_trigger;
 
 //$2181-$2183
@@ -91,10 +101,12 @@ struct {
 }status;
 
 struct {
+  uint32 read_index; //set to 0 at beginning of DMA/HDMA
+
 //$420b
   bool   active;
 //$420c
-  bool   hdma_active;
+  bool   hdma_enabled;
 //$43x0
   uint8  dmap;
   bool   direction;
@@ -104,14 +116,16 @@ struct {
   uint8  xfermode;
 //$43x1
   uint8  destaddr;
-//$43x2-$43x4
-  uint32 srcaddr;
+//$43x2-$43x3
+  uint16 srcaddr;
+//$43x4
+  uint8  srcbank;
 //$43x5-$43x6
   uint16 xfersize;
 //$43x7
-  uint8  hdma_indirect_bank;
+  uint8  hdma_ibank;
 //$43x8-$43x9
-  uint32 hdma_taddr;
+  uint16 hdma_addr;
 //$43xa
   uint8  hdma_line_counter;
 //$43xb/$43xf
@@ -120,43 +134,41 @@ struct {
 //hdma-specific
   bool   hdma_first_line;
   bool   hdma_repeat;
-  uint32 hdma_itaddr;
-  bool   hdma_completed;
+  uint16 hdma_iaddr;
+  bool   hdma_active;
 }channel[8];
 
-  inline bool  hdma_test();
-  inline bool  nmi_test();
-  inline bool  irq_test();
-  inline void  irq(uint16 addr);
+  inline bool   hdma_test();
+  inline bool   nmi_test();
+  inline bool   irq_test();
+  inline void   irq(uint16 addr);
 
-  inline uint8 pio_status();
-  inline void  run();
-  inline void  scanline();
-  inline void  frame();
-  inline void  power();
-  inline void  reset();
+  inline uint8  pio_status();
+  inline void   run();
+  inline uint32 cycles_executed();
+  inline void   scanline();
+  inline void   frame();
+  inline void   power();
+  inline void   reset();
 
 //dma commands
   inline void   dma_run();
   inline void   hdma_run();
   inline void   hdma_initialize();
-  inline uint16 dma_cputommio(uint8 i, uint8 index);
-  inline uint16 dma_mmiotocpu(uint8 i, uint8 index);
-  inline void   dma_xfer_type0(uint8 i);
-  inline void   dma_xfer_type1(uint8 i);
-  inline void   dma_xfer_type2(uint8 i);
-  inline void   dma_xfer_type3(uint8 i);
-  inline void   dma_xfer_type4(uint8 i);
-  inline void   dma_xfer_type5(uint8 i);
+  inline void   dma_cputommio(uint8 i, uint8 index);
+  inline void   dma_mmiotocpu(uint8 i, uint8 index);
+  inline void   dma_write(uint8 i, uint8 index);
+  inline uint32 dma_addr(uint8 i);
+  inline uint32 hdma_addr(uint8 i);
+  inline uint32 hdma_iaddr(uint8 i);
   inline void   hdma_write(uint8 i, uint8 l, uint8 x);
   inline void   dma_reset();
 
 //mmio commands
   void  mmio_reset();
   uint8 mmio_r2180();
-  uint8 mmio_r21c2();
-  uint8 mmio_r21c3();
   uint8 mmio_r4016();
+  uint8 mmio_r4017();
   uint8 mmio_r4210();
   uint8 mmio_r4211();
   uint8 mmio_r4212();
@@ -212,8 +224,9 @@ struct {
   void  mmio_w43xb(uint8 value, uint8 i);
 
 enum { CYCLE_OPREAD = 0, CYCLE_READ, CYCLE_WRITE, CYCLE_IO };
-  inline void exec_opcode();
+  inline void exec_cycle();
   inline void cycle_edge();
+  inline bool in_opcode();
 
 //cpu extra-cycle conditions
   inline void cpu_c2();

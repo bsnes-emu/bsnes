@@ -12,11 +12,22 @@ uint8 cpu_op;
     status.cpu_ran = false;
     break;
   case RUNTOCPUPROCEED:
-    cpu_op = mem_bus->read(cpu->regs.pc);
-  /* proceed only skips subroutines (jsr <addr>). 0x20, 0x22, and 0xfc are all three jsr opcodes */
-    if(cpu_op == 0x20 || cpu_op == 0x22 || cpu_op == 0xfc) {
+    cpu_op = mem_bus->read(cpu->regs.pc.d);
+
+    if(cpu_op == 0x10 || //bpl rel
+       cpu_op == 0x30 || //bmi rel
+       cpu_op == 0x50 || //bvc rel
+       cpu_op == 0x70 || //bvs rel
+       cpu_op == 0x90 || //bcc rel
+       cpu_op == 0xb0 || //bcs rel
+       cpu_op == 0xd0 || //bne rel
+       cpu_op == 0xf0 || //beq rel
+       cpu_op == 0x20 || //jsr addr
+       cpu_op == 0x22 || //jsl long
+       cpu_op == 0xfc    //jsr (addr,x)
+    ) {
       w_console->is_running(true);
-      status.cpu_stop_pos = (cpu->regs.pc.b << 16) | ((cpu->regs.pc + cpu->opcode_length()) & 0xffff);
+      status.cpu_stop_pos = (cpu->regs.pc.b << 16) | ((cpu->regs.pc.d + cpu->opcode_length()) & 0xffff);
     } else {
       status.cpu_ran = false;
       run_status     = RUNTOCPUSTEP;
@@ -78,7 +89,7 @@ void bSNES::snes_run() {
     break;
   case RUNTOCPUPROCEED:
     run();
-    if(status.cpu_stop_pos == cpu->regs.pc) {
+    if(cpu->in_opcode() == false && status.cpu_stop_pos == cpu->regs.pc.d) {
       set_status(STOP);
       disassemble_cpu_op();
     } else if(w_bp->hit() == true) {
@@ -110,7 +121,7 @@ void bSNES::render_frame() {
  *** Input functions ***
  ***********************/
 void bSNES::poll_input() {
-/* Only capture input when main window has focus */
+//only capture input when main window has focus
   if(GetForegroundWindow() == w_main->hwnd) {
     joypad1.up     = KeyDown(cfg.input.joypad1.up);
     joypad1.down   = KeyDown(cfg.input.joypad1.down);
@@ -131,7 +142,7 @@ void bSNES::poll_input() {
     joypad1.l = joypad1.r = 0;
   }
 
-//Check for debugger-based key locks
+//check for debugger-based key locks
   if(is_debugger_enabled == true) {
     if(w_console->joypad_lock.up    )joypad1.up     = true;
     if(w_console->joypad_lock.down  )joypad1.down   = true;
@@ -147,7 +158,7 @@ void bSNES::poll_input() {
     if(w_console->joypad_lock.start )joypad1.start  = true;
   }
 
-//It's impossible to hold both up+down, or left+right down
+//it's impossible to hold both up+down, or left+right down
 //at the same time on a directional pad; and besides, allowing
 //this to happen causes glitches in many SNES games.
   if(joypad1.up)  joypad1.down  = 0;
@@ -274,6 +285,7 @@ void bSNES::notify(uint32 message, uint32 param1, uint32 param2) {
   case CPU_EXEC_OPCODE_END:
     status.cpu_ran = true;
     status.cpu_trace_pos++;
+  //test next opcode for breakpoint
     w_bp->test(message, cpu->regs.pc.d, 0);
     disassemble_cpu_op();
     break;

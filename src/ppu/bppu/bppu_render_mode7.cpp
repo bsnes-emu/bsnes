@@ -2,25 +2,25 @@
   ((x) & ((1 << 10) - 1)) + (((((x) & (1 << 13)) ^ (1 << 13)) - (1 << 13)) >> 3)
 
 #define CAST_WORDTOINT(x) \
-  (int)(((x & 0x8000)?(x | 0xffff0000):(x & 0x00007fff)))
+  (int32)(((x & 0x8000) ? (x | 0xffff0000) : (x & 0x00007fff)))
 
 void bPPU::render_line_mode7(uint8 bg1_pri, uint8 bg2b_pri, uint8 bg2a_pri) {
-int x;
-int step_m7a, step_m7c, m7a, m7b, m7c, m7d;
-int hoffset, voffset;
-int centerx, centery;
-int xx, yy;
-int px, py;
-int tx, ty, tile, palette;
+int32 x;
+int32 step_m7a, step_m7c, m7a, m7b, m7c, m7d;
+int32 hoffset, voffset;
+int32 centerx, centery;
+int32 xx, yy;
+int32 px, py;
+int32 tx, ty, tile, palette;
 uint8 layer_pos;
-  hoffset = (CAST_WORDTOINT(regs.bg_hofs[BG1]) << 7) >> 7;
-  voffset = (CAST_WORDTOINT(regs.bg_vofs[BG1]) << 7) >> 7;
+  hoffset = ((int32)regs.m7_hofs << 19) >> 19;
+  voffset = ((int32)regs.m7_vofs << 19) >> 19;
 
-  centerx = (CAST_WORDTOINT(regs.m7x) << 7) >> 7;
-  centery = (CAST_WORDTOINT(regs.m7y) << 7) >> 7;
+  centerx = ((int32)regs.m7x << 19) >> 19;
+  centery = ((int32)regs.m7y << 19) >> 19;
 
   if(regs.mode7_vflip == true) {
-    yy = 223 - _y;
+    yy = 255 - _y;
   } else {
     yy = _y;
   }

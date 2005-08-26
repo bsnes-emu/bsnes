@@ -18,6 +18,25 @@ uint16 opt_valid_bit; //offset-per-tile valid flag bit
     opt_valid_bit = 0x0000;
   }
 
+//Mode 0 uses a special palette-indexing mode.
+//Since there are 8 selectable palettes per tile,
+//and there are 4 colors per palette on all four
+//BGs for Mode 0, each BG has a unique palette
+//entry point. This allows all 256 palette colors
+//to be used, instead of just the first 32.
+//entry = bg * 32, where 32 is from 8 * 4
+uint8 bgpal_index;
+  if(regs.bg_mode == 0) {
+    switch(bg) {
+    case BG1:bgpal_index =  0;break;
+    case BG2:bgpal_index = 32;break;
+    case BG3:bgpal_index = 64;break;
+    case BG4:bgpal_index = 96;break;
+    }
+  } else {
+    bgpal_index = 0;
+  }
+
 uint8 pal_size, tiledata_size;
   switch(color_depth) {
   case COLORDEPTH_4:
@@ -193,7 +212,7 @@ int _pri;
       render_bg_tile(color_depth, tile_num);
     }
 
-    pal_index = ((t >> 10) & 7) * pal_size;
+    pal_index = ((t >> 10) & 7) * pal_size + bgpal_index;
 
     if(mirror_y) { ypos = (7 - (mosaic_y & 7)); }
     else         { ypos = (    (mosaic_y & 7)); }

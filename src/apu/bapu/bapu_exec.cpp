@@ -15,6 +15,11 @@ uint8 op;
   }
 }
 
+//only return true when we are on an opcode edge
+bool bAPU::in_opcode() {
+  return (status.cycle_pos != 0);
+}
+
 void bAPU::init_op_table() {
 #include "bapu_optable.cpp"
 }

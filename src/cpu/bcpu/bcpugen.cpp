@@ -44,7 +44,7 @@ char t[4096];
     i++;
   }
 
-  sprintf(output_op,     "void bCPU::op_$$() {\r\n");
+  sprintf(output_op,     "void bCPU::op_$$() {\r\n  switch(status.cycle_pos++) {\r\n");
   sprintf(output_header, "void op_$$();\r\n");
   sprintf(output_table,  "optbl[$0] = &bCPU::op_$$;\r\n");
 
@@ -54,8 +54,8 @@ char t[4096];
 void update_line(int i, int n) {
 char t[4096];
   sprintf(t, "goto l%d;", n + 2);
-  replace(line[i], "end;",  "return;");
-  replace(line[i], "skip;", t);
+  replace(line[i], "end;",  "status.cycle_pos = 0;");
+  replace(line[i], "skip;", "status.cycle_pos++;");
 }
 
 void gen_op() {
@@ -67,12 +67,12 @@ char t[4096];
     n = strdec(line[i]);
     sprintf(t, "%d:", n);
     strltrim(line[i], t);
-    sprintf(t, "l%d:\r\n", n);
+    sprintf(t, "  case %d:\r\n", n);
     strcat(output_op, t);
 
     update_line(i, n);
     if(strcmp(line[i], "")) {
-      strcat(output_op, "  ");
+      strcat(output_op, "    ");
       strcat(output_op, line[i]);
       strcat(output_op, "\r\n");
     }
@@ -82,13 +82,16 @@ char t[4096];
       if((strptr(line[i])[1]) == ':' || !strcmp(line[i], "}"))break;
 
       update_line(i, n);
+      strcat(output_op, "  ");
       strcat(output_op, line[i]);
       strcat(output_op, "\r\n");
 
       i++;
     }
+    if(!strcmp(line[i], "}"))strcat(output_op, "    status.cycle_pos = 0;\r\n");
+    strcat(output_op, "    break;\r\n");
   }
-  strcat(output_op, "}");
+  strcat(output_op, "  }\r\n}");
 
   line_num = i + 1;
 }
@@ -107,16 +110,16 @@ int i, l;
     replace(t, "$5", op_list[i].arg[5]);
     replace(t, "$6", op_list[i].arg[6]);
     replace(t, "$7", op_list[i].arg[7]);
-    fprintf(fp, "%s\r\n\r\n", *t);
+    fprintf(fp, "%s\r\n\r\n", strptr(t));
 
     strcpy(t, output_header);
     replace(t, "$$", op_list[i].name);
-    fprintf(fph, "%s", *t);
+    fprintf(fph, "%s", strptr(t));
 
     strcpy(t, output_table);
     replace(t, "$$", op_list[i].name);
     replace(t, "$0", op_list[i].arg[0]);
-    fprintf(fpt, "%s", *t);
+    fprintf(fpt, "%s", strptr(t));
   }
 }
 

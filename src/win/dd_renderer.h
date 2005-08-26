@@ -13,7 +13,7 @@ bool   fullscreen;
 int    width, height; //used for fullscreen mode clipping only
 uint8  color_depth;
 uint8  color_curve_table[32];
-uint32 color_lookup_table[65536];
+uint32 color_lookup_table[32768];
   void set_window(HWND hwnd_handle);
   void create_backbuffer();
   void to_windowed();

@@ -59,7 +59,7 @@ uint16 *ptr;
   }
 
 uint16 *ltable;
-  ltable = (uint16*)light_table + (regs.display_brightness << 16);
+  ltable = (uint16*)light_table + (regs.display_brightness << 15);
 
   if(_screen_width == 256) {
     for(x=0;x<256;x++) {

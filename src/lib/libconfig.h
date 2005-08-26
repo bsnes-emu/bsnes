@@ -1,5 +1,5 @@
 /*
-  libconfig : version 0.02 ~byuu
+  libconfig : version 0.03 ~byuu (08/20/05)
 */
 
 #ifndef __LIBCONFIG
@@ -13,7 +13,6 @@ uint32 *source, def, type;
 string *strsource, strdef;
 bool is_string;
 string name;
-  bool changed();
   config_item();
 };
 
@@ -35,13 +34,10 @@ enum {
   void add(uint32 *variable, char *name, uint32 def, uint32 type = DEC);
   void add(string *variable, char *name, char *def, uint32 type = STR);
   uint32 find(char *name);
-  uint32 get(char *name);
-  string &strget(char *name);
-  void set(char *name, uint32 value);
-  void set(char *name, char *value);
-
   void load(char *fn);
+  void load(substring &fn);
   void save(char *fn);
+  void save(substring &fn);
   void set_newline(int i);
 
   config();

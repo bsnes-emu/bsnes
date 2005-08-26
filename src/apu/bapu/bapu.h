@@ -53,6 +53,7 @@ enum {
   inline void  stack_write(uint8 value);
 
   inline void exec_cycle();
+  inline bool in_opcode();
   inline void init_op_table();
 
   inline uint8  op_adc (uint8  x, uint8  y);

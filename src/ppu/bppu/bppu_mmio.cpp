@@ -117,42 +117,56 @@ void bPPU::mmio_w210c(uint8 value) {
 
 //BG1HOFS
 void bPPU::mmio_w210d(uint8 value) {
-  regs.bg_hofs[BG1] = (value << 8) | (regs.bg_hofs[BG1] >> 8);
+  regs.m7_hofs  = (value << 8) | regs.m7_latch;
+  regs.m7_latch = value;
+
+  regs.bg_hofs[BG1] = (value << 8) | (regs.bg_ofslatch & 0xf8) | ((regs.bg_hofs[BG1] >> 8) & 7);
+  regs.bg_ofslatch  = value;
 }
 
 //BG1VOFS
 void bPPU::mmio_w210e(uint8 value) {
-  regs.bg_vofs[BG1] = (value << 8) | (regs.bg_vofs[BG1] >> 8);
+  regs.m7_vofs  = (value << 8) | regs.m7_latch;
+  regs.m7_latch = value;
+
+  regs.bg_vofs[BG1] = (value << 8) | (regs.bg_ofslatch & 0xf8) | ((regs.bg_vofs[BG1] >> 8) & 7);
+  regs.bg_ofslatch  = value;
 }
 
 //BG2HOFS
 void bPPU::mmio_w210f(uint8 value) {
-  regs.bg_hofs[BG2] = (value << 8) | (regs.bg_hofs[BG2] >> 8);
+  regs.bg_hofs[BG2] = (value << 8) | (regs.bg_ofslatch & 0xf8) | ((regs.bg_hofs[BG2] >> 8) & 7);
+  regs.bg_ofslatch  = value;
 }
 
 //BG2VOFS
 void bPPU::mmio_w2110(uint8 value) {
-  regs.bg_vofs[BG2] = (value << 8) | (regs.bg_vofs[BG2] >> 8);
+  regs.bg_vofs[BG2] = (value << 8) | (regs.bg_ofslatch & 0xf8) | ((regs.bg_vofs[BG2] >> 8) & 7);
+  regs.bg_ofslatch  = value;
 }
 
 //BG3HOFS
 void bPPU::mmio_w2111(uint8 value) {
-  regs.bg_hofs[BG3] = (value << 8) | (regs.bg_hofs[BG3] >> 8);
+  regs.bg_hofs[BG3] = (value << 8) | (regs.bg_ofslatch & 0xf8) | ((regs.bg_hofs[BG3] >> 8) & 7);
+  regs.bg_ofslatch  = value;
 }
 
 //BG3VOFS
 void bPPU::mmio_w2112(uint8 value) {
-  regs.bg_vofs[BG3] = (value << 8) | (regs.bg_vofs[BG3] >> 8);
+  regs.bg_vofs[BG3] = (value << 8) | (regs.bg_ofslatch & 0xf8) | ((regs.bg_vofs[BG3] >> 8) & 7);
+  regs.bg_ofslatch  = value;
 }
 
 //BG4HOFS
 void bPPU::mmio_w2113(uint8 value) {
-  regs.bg_hofs[BG4] = (value << 8) | (regs.bg_hofs[BG4] >> 8);
+  regs.bg_hofs[BG4] = (value << 8) | (regs.bg_ofslatch & 0xf8) | ((regs.bg_hofs[BG4] >> 8) & 7);
+  regs.bg_ofslatch  = value;
 }
 
 //BG4VOFS
 void bPPU::mmio_w2114(uint8 value) {
-  regs.bg_vofs[BG4] = (value << 8) | (regs.bg_vofs[BG4] >> 8);
+  regs.bg_vofs[BG4] = (value << 8) | (regs.bg_ofslatch & 0xf8) | ((regs.bg_vofs[BG4] >> 8) & 7);
+  regs.bg_ofslatch  = value;
 }
 
 //VMAIN
@@ -210,38 +224,44 @@ uint16 addr = get_vram_address() + 1;
 //M7SEL
 void bPPU::mmio_w211a(uint8 value) {
   regs.mode7_repeat = (value >> 6) & 3;
-  regs.mode7_vflip = !!(value & 0x02);
-  regs.mode7_hflip = !!(value & 0x01);
+  regs.mode7_vflip  = !!(value & 0x02);
+  regs.mode7_hflip  = !!(value & 0x01);
 }
 
 //M7A
 void bPPU::mmio_w211b(uint8 value) {
-  regs.m7a = (value << 8) | (regs.m7a >> 8);
+  regs.m7a      = (value << 8) | regs.m7_latch;
+  regs.m7_latch = value;
 }
 
 //M7B
 void bPPU::mmio_w211c(uint8 value) {
-  regs.m7b = (value << 8) | (regs.m7b >> 8);
+  regs.m7b      = (value << 8) | regs.m7_latch;
+  regs.m7_latch = value;
 }
 
 //M7C
 void bPPU::mmio_w211d(uint8 value) {
-  regs.m7c = (value << 8) | (regs.m7c >> 8);
+  regs.m7c      = (value << 8) | regs.m7_latch;
+  regs.m7_latch = value;
 }
 
 //M7D
 void bPPU::mmio_w211e(uint8 value) {
-  regs.m7d = (value << 8) | (regs.m7d >> 8);
+  regs.m7d      = (value << 8) | regs.m7_latch;
+  regs.m7_latch = value;
 }
 
 //M7X
 void bPPU::mmio_w211f(uint8 value) {
-  regs.m7x = (value << 8) | (regs.m7x >> 8);
+  regs.m7x      = (value << 8) | regs.m7_latch;
+  regs.m7_latch = value;
 }
 
 //M7Y
 void bPPU::mmio_w2120(uint8 value) {
-  regs.m7y = (value << 8) | (regs.m7y >> 8);
+  regs.m7y      = (value << 8) | regs.m7_latch;
+  regs.m7_latch = value;
 }
 
 //CGADD
@@ -250,7 +270,13 @@ void bPPU::mmio_w2121(uint8 value) {
 }
 
 //CGDATA
+//note: CGRAM palette data format is 15-bits
+//(0,bbbbb,ggggg,rrrrr). Highest bit is ignored,
+//as evidenced by $213b CGRAM data reads.
 void bPPU::mmio_w2122(uint8 value) {
+  if(regs.cgram_addr & 1) {
+    value &= 0x7f;
+  }
   cgram_write(regs.cgram_addr, value);
   regs.cgram_addr++;
   regs.cgram_addr &= 0x01ff;
@@ -404,21 +430,24 @@ void bPPU::mmio_w2133(uint8 value) {
 uint8 bPPU::mmio_r2134() {
 uint32 r;
   r = ((int16)regs.m7a * (int8)(regs.m7b >> 8));
-  return (r);
+  regs.ppu1_mdr = r;
+  return regs.ppu1_mdr;
 }
 
 //MPYM
 uint8 bPPU::mmio_r2135() {
 uint32 r;
   r = ((int16)regs.m7a * (int8)(regs.m7b >> 8));
-  return (r >> 8);
+  regs.ppu1_mdr = r >> 8;
+  return regs.ppu1_mdr;
 }
 
 //MPYH
 uint8 bPPU::mmio_r2136() {
 uint32 r;
   r = ((int16)regs.m7a * (int8)(regs.m7b >> 8));
-  return (r >> 16);
+  regs.ppu1_mdr = r >> 16;
+  return regs.ppu1_mdr;
 }
 
 //SLHV
@@ -426,70 +455,84 @@ uint8 bPPU::mmio_r2137() {
   if(cpu->pio_status() & 0x80) {
     latch_counters();
   }
-  return 0x00;
+  return cpu->regs.mdr;
 }
 
 //OAMDATAREAD
 uint8 bPPU::mmio_r2138() {
-uint8 r;
-  r = oam_read(regs.oam_addr);
+  regs.ppu1_mdr = oam_read(regs.oam_addr);
   if(!(regs.oam_addr & 1)) {
-    regs.oam_latchdata = r;
+    regs.oam_latchdata = regs.ppu1_mdr;
   }
   regs.oam_addr++;
   regs.oam_addr &= 0x03ff;
-  return r;
+  return regs.ppu1_mdr;
 }
 
 //VMDATALREAD
 uint8 bPPU::mmio_r2139() {
 uint16 addr = get_vram_address();
-uint8 r = regs.vram_readbuffer;
+  regs.ppu1_mdr = regs.vram_readbuffer;
   if(regs.vram_incmode == 0) {
     addr &= 0xfffe;
     regs.vram_readbuffer  = vram_read(addr);
     regs.vram_readbuffer |= vram_read(addr + 1) << 8;
     regs.vram_addr += regs.vram_incsize;
   }
-  return r;
+  return regs.ppu1_mdr;
 }
 
 //VMDATAHREAD
 uint8 bPPU::mmio_r213a() {
 uint16 addr = get_vram_address() + 1;
-uint8 r = regs.vram_readbuffer >> 8;
+  regs.ppu1_mdr = regs.vram_readbuffer >> 8;
   if(regs.vram_incmode == 1) {
     addr &= 0xfffe;
     regs.vram_readbuffer  = vram_read(addr);
     regs.vram_readbuffer |= vram_read(addr + 1) << 8;
     regs.vram_addr += regs.vram_incsize;
   }
-  return r;
+  return regs.ppu1_mdr;
 }
 
 //CGDATAREAD
+//note: CGRAM palette data is 15-bits (0,bbbbb,ggggg,rrrrr)
+//therefore, the high byte read from each color does not
+//update bit 7 of the PPU2 MDR.
 uint8 bPPU::mmio_r213b() {
-uint8 r;
-  r = cgram_read(regs.cgram_addr);
+  if(!(regs.cgram_addr & 1)) {
+    regs.ppu2_mdr  = cgram_read(regs.cgram_addr) & 0xff;
+  } else {
+    regs.ppu2_mdr &= 0x80;
+    regs.ppu2_mdr |= cgram_read(regs.cgram_addr) & 0x7f;
+  }
   regs.cgram_addr++;
   regs.cgram_addr &= 0x01ff;
-  return r;
+  return regs.ppu2_mdr;
 }
 
 //OPHCT
 uint8 bPPU::mmio_r213c() {
-uint16 r = regs.hcounter;
-  if(regs.latch_hcounter)r >>= 8;
+  if(!regs.latch_hcounter) {
+    regs.ppu2_mdr  = regs.hcounter & 0xff;
+  } else {
+    regs.ppu2_mdr &= 0xfe;
+    regs.ppu2_mdr |= (regs.hcounter >> 8) & 1;
+  }
   regs.latch_hcounter ^= 1;
-  return r;
+  return regs.ppu2_mdr;
 }
 
 //OPVCT
 uint8 bPPU::mmio_r213d() {
-uint16 r = regs.vcounter;
-  if(regs.latch_vcounter)r >>= 8;
+  if(!regs.latch_vcounter) {
+    regs.ppu2_mdr  = regs.vcounter & 0xff;
+  } else {
+    regs.ppu2_mdr &= 0xfe;
+    regs.ppu2_mdr |= (regs.vcounter >> 8) & 1;
+  }
   regs.latch_vcounter ^= 1;
-  return r;
+  return regs.ppu2_mdr;
 }
 
 //STAT77
@@ -498,7 +541,8 @@ uint8 r = 0x00;
   r |= (regs.time_over) ?0x80:0x00;
   r |= (regs.range_over)?0x40:0x00;
   r |= 0x01; //PPU1 version number
-  return r;
+  regs.ppu1_mdr = r;
+  return regs.ppu1_mdr;
 }
 
 //STAT78
@@ -509,19 +553,39 @@ uint8 r = 0x00;
 
   r |= cpu->interlace_field() << 7;
   if(!(cpu->pio_status() & 0x80)) {
-    r |= 1 << 6;
+    r |= 0x40;
   } else if(regs.counters_latched == true) {
-    r |= 1 << 6;
+    r |= 0x40;
     regs.counters_latched = false;
   }
-  r |= (1 << 5);
+  r |= (regs.ppu2_mdr & 0x20);
+  r |= (region << 4); //0 = NTSC, 1 = PAL
   r |= 0x03; //PPU2 version number
-  return r;
+  regs.ppu2_mdr = r;
+  return regs.ppu2_mdr;
 }
 
 uint8 bPPUMMIO::read(uint32 addr) {
-//cpu->sync();
   switch(addr) {
+  case 0x2104:
+  case 0x2105:
+  case 0x2106:
+  case 0x2108:
+  case 0x2109:
+  case 0x210a:
+  case 0x2114:
+  case 0x2115:
+  case 0x2116:
+  case 0x2118:
+  case 0x2119:
+  case 0x211a:
+  case 0x2124:
+  case 0x2125:
+  case 0x2126:
+  case 0x2128:
+  case 0x2129:
+  case 0x212a:
+    return ppu->regs.ppu1_mdr;
   case 0x2134:return ppu->mmio_r2134(); //MPYL
   case 0x2135:return ppu->mmio_r2135(); //MPYM
   case 0x2136:return ppu->mmio_r2136(); //MPYH
@@ -535,11 +599,11 @@ uint8 bPPUMMIO::read(uint32 addr) {
   case 0x213e:return ppu->mmio_r213e(); //STAT77
   case 0x213f:return ppu->mmio_r213f(); //STAT78
   }
-  return 0x00;
+
+  return cpu->regs.mdr;
 }
 
 void bPPUMMIO::write(uint32 addr, uint8 value) {
-//cpu->sync();
   switch(addr) {
   case 0x2100:ppu->mmio_w2100(value);return; //INIDISP
   case 0x2101:ppu->mmio_w2101(value);return; //OBSEL

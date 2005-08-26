@@ -1,5 +1,5 @@
 /*
-  libstring : version 0.05 ~byuu
+  libstring : version 0.06a ~byuu (08/22/05)
 */
 
 #ifndef __LIBSTRING
@@ -8,247 +8,172 @@
 #include "libvector.h"
 
 class string;
-class _string;
+class substring;
 
-uint32 count(string &str);
-void   strresize(_string &str, uint32 size);
-char*  strptr(_string &str);
-void   strcpy(_string &dest, char *src);
-void   strset(_string &dest, uint32 pos, uint8 c);
-void   strcat(_string &dest, char *src);
-void   strinsert(_string &dest, char *src, uint32 pos);
-void   strremove(_string &dest, uint32 start, uint32 length = 0);
-bool   stricmp(char *dest, char *src);
-void   strlower(char *str);
-void   strupper(char *str);
-uint32 strpos(char *str, char *key);
-uint32 strqpos(char *str, char *key);
-void   strtr(char *dest, char *before, char *after);
-uint32 strbegin(char *str, char *key);
-uint32 stribegin(char *str, char *key);
-uint32 strend(char *str, char *key);
-uint32 striend(char *str, char *key);
-void   strltrim(char *str, char *key);
-void   striltrim(char *str, char *key);
-void   strrtrim(char *str, char *key);
-void   strirtrim(char *str, char *key);
-void   strquote(_string &str);
-bool   strunquote(char *str);
-uint32 strhex(char *str);
-int    strdec(char *str);
-uint32 strbin(char *str);
-uint32 strmath(char *in_str);
-uint32 strmathentity(char *str);
-void   replace (_string &str, char *key, char *token);
-void   qreplace(_string &str, char *key, char *token);
-void   split (string &dest, char *key, char *src);
-void   qsplit(string &dest, char *key, char *src);
-void   sprintf(_string &str, char *s, ...);
+char  chrlower(char c);
+char  chrupper(char c);
 
-class _string {
+uint  count(string &str);
+
+void  strresize(substring &str, uint size);
+
+char* strptr(substring &str);
+
+uint  strlen(substring &str);
+
+int   strcmp(substring &dest, const char *src);
+int   strcmp(const char *dest, substring &src);
+int   strcmp(substring &dest, substring &src);
+
+void  strcpy(substring &dest, const char *src);
+void  strcpy(substring &dest, substring &src);
+
+void  strset(substring &dest, uint pos, uint8 c);
+
+void  strcat(substring &dest, const char *src);
+void  strcat(substring &dest, substring &src);
+
+void  strinsert(substring &dest, const char *src, uint pos);
+void  strinsert(substring &dest, substring &src, uint pos);
+
+void  strremove(substring &dest, uint start, uint length = 0);
+
+//vc6/win32 and gcc/dos only support stricmp, whereas
+//gcc/unix only supports strcasecmp. this is an attempt
+//to avoid platform-specific defines...
+#define stricmp __stricmp
+int   __stricmp(const char *dest, const char *src);
+int   stricmp(substring &dest, const char *src);
+int   stricmp(const char *dest, substring &src);
+int   stricmp(substring &dest, substring &src);
+
+void  strlower(char *str);
+void  strlower(substring &str);
+
+void  strupper(char *str);
+void  strupper(substring &str);
+
+uint  strpos(const char *str, const char *key);
+uint  strpos(substring &str, const char *key);
+uint  strpos(const char *str, substring &key);
+uint  strpos(substring &str, substring &key);
+
+uint  qstrpos(const char *str, const char *key);
+uint  qstrpos(substring &str, const char *key);
+uint  qstrpos(const char *str, substring &key);
+uint  qstrpos(substring &str, substring &key);
+
+void  strtr(char *dest, const char *before, const char *after);
+void  strtr(substring &dest, const char *before, const char *after);
+
+uint  strbegin(const char *str, const char *key);
+uint  strbegin(substring &str, const char *key);
+
+uint  stribegin(const char *str, const char *key);
+uint  stribegin(substring &str, const char *key);
+
+uint  strend(const char *str, const char *key);
+uint  strend(substring &str, const char *key);
+
+uint  striend(const char *str, const char *key);
+uint  striend(substring &str, const char *key);
+
+void  strltrim(char *str, const char *key);
+void  strltrim(substring &str, const char *key);
+
+void  striltrim(char *str, const char *key);
+void  striltrim(substring &str, const char *key);
+
+void  strrtrim(char *str, const char *key);
+void  strrtrim(substring &str, const char *key);
+
+void  strirtrim(char *str, const char *key);
+void  strirtrim(substring &str, const char *key);
+
+void  strquote(substring &str);
+
+bool  strunquote(char *str);
+bool  strunquote(substring &str);
+
+uint  strhex(const char *str);
+uint  strhex(substring &str);
+
+int   sstrhex(const char *str);
+int   sstrhex(substring &str);
+
+uint  strdec(const char *str);
+uint  strdec(substring &str);
+
+int   sstrdec(const char *str);
+int   sstrdec(substring &str);
+
+uint  strbin(const char *str);
+uint  strbin(substring &str);
+
+int   sstrbin(const char *str);
+int   sstrbin(substring &str);
+
+uint  strmath(const char *in_str);
+uint  strmath(substring &in_str);
+
+bool  strmathentity(const char *str);
+bool  strmathentity(substring &str);
+
+void  replace(substring &str, const char *key, const char *token);
+void  replace(substring &str, const char *key, substring &token);
+
+void  qreplace(substring &str, const char *key, const char *token);
+void  qreplace(substring &str, const char *key, substring &token);
+
+void  split(string &dest, const char *key, char *src);
+void  split(string &dest, const char *key, substring &src);
+
+void  qsplit(string &dest, const char *key, char *src);
+void  qsplit(string &dest, const char *key, substring &src);
+
+void  sprintf(substring &str, const char *s, ...);
+
+class substring {
 public:
 char *s;
-uint32 size;
-  inline char* operator*() { return s; }
+uint size;
+//inline char* operator*() { return s; }
+//inline operator char*()  { return s; }
 
-#ifdef __LIBSTRING_OVERLOADS
-  inline _string& operator=(char *cpy);
-  inline _string& operator=(_string &cpy);
-  inline _string& operator=(string &cpy);
-
-  inline _string& operator+=(char *cat);
-  inline _string& operator+=(_string &cat);
-  inline _string& operator+=(string &cat);
-
-  inline _string& operator-=(char *cut);
-  inline _string& operator-=(_string &cut);
-  inline _string& operator-=(string &cut);
-
-  inline bool operator==(char *cmp);
-  inline bool operator==(_string &cmp);
-  inline bool operator==(string &cmp);
-
-  inline bool operator!=(char *cmp);
-  inline bool operator!=(_string &cmp);
-  inline bool operator!=(string &cmp);
-#endif
-
-  inline operator char*() { return s; }
-
-  _string();
-  ~_string();
+  substring();
+  ~substring();
 };
 
+/* listcount is the actual size of list[], used for allocation
+ * of substrings.
+ * count is used by split() and count() to return the number of
+ * active/valid substrings. example: if string T contains 16
+ * substrings, and split is called, which sets three substrings,
+ * then count() needs to reflect that only three substrings are
+ * now used, but listcount still needs to reflect the true size
+ * of list[].
+ */
 class string {
 public:
-vector<_string*> list;
-uint32 count, listcount;
-  void addto(uint32 num);   //creates all needed strings to make list[num] valid
-  _string &str(uint32 num); //gets a _string reference, creating it + new strings if needed
+vector<substring*> list;
+uint listcount, count;
+  void addto(uint num);     //creates all needed strings to make list[num] valid
+  substring &str(uint num); //gets a substring reference, creating it + new strings if needed
 
-  inline char* operator*() { return strptr(str(0)); }
-
-#ifdef __LIBSTRING_OVERLOADS
-  inline string& operator=(char *cpy);
-  inline string& operator=(_string &cpy);
-  inline string& operator=(string &cpy);
-
-  inline string& operator+=(char *cat);
-  inline string& operator+=(_string &cat);
-  inline string& operator+=(string &cat);
-
-  inline string& operator-=(char *cut);
-  inline string& operator-=(_string &cut);
-  inline string& operator-=(string &cut);
-
-  inline bool operator==(char *cmp);
-  inline bool operator==(_string &cmp);
-  inline bool operator==(string &cmp);
-
-  inline bool operator!=(char *cmp);
-  inline bool operator!=(_string &cmp);
-  inline bool operator!=(string &cmp);
-#endif
-
-  inline operator char*()              { return str(0).s; }
-  inline operator _string&()           { return str(0); }
-  inline _string& operator[](uint32 i) { return str(i); }
-  inline _string& operator[](int i)    { return str(i); }
+//inline char* operator*()               { return strptr(str(0)); }
+//inline operator char*()                { return str(0).s; }
+  inline operator substring&()           { return str(0); }
+  inline substring& operator[](uint   i) { return str(i); }
+  inline substring& operator[](uint8  i) { return str(i); }
+  inline substring& operator[](uint16 i) { return str(i); }
+  inline substring& operator[](uint32 i) { return str(i); }
+  inline substring& operator[](int    i) { return str(i); }
+  inline substring& operator[](int8   i) { return str(i); }
+  inline substring& operator[](int16  i) { return str(i); }
+  inline substring& operator[](int32  i) { return str(i); }
 
   string();
   ~string();
 };
-
-#ifdef __LIBSTRING_OVERLOADS
-inline _string& _string::operator=(char *cpy) {
-  strcpy(*this, cpy);
-  return *this;
-}
-inline _string& _string::operator=(_string &cpy) {
-  strcpy(*this, cpy);
-  return *this;
-}
-inline _string& _string::operator=(string &cpy) {
-  strcpy(*this, cpy.str(0));
-  return *this;
-}
-
-inline string& string::operator=(char *cpy) {
-  strcpy(str(0), cpy);
-  return *this;
-}
-inline string& string::operator=(_string &cpy) {
-  strcpy(str(0), cpy);
-  return *this;
-}
-inline string& string::operator=(string &cpy) {
-  strcpy(str(0), cpy.str(0));
-  return *this;
-}
-
-inline _string& _string::operator+=(char *cat) {
-  strcat(*this, cat);
-  return *this;
-}
-inline _string& _string::operator+=(_string &cat) {
-  strcat(*this, cat);
-  return *this;
-}
-inline _string& _string::operator+=(string &cat) {
-  strcat(*this, cat.str(0));
-  return *this;
-}
-
-inline string& string::operator+=(char *cat) {
-  strcat(str(0), cat);
-  return *this;
-}
-inline string& string::operator+=(_string &cat) {
-  strcat(str(0), cat);
-  return *this;
-}
-inline string& string::operator+=(string &cat) {
-  strcat(str(0), cat.str(0));
-  return *this;
-}
-
-inline _string& _string::operator-=(char *cut) {
-  strrtrim(*this, cut);
-  return *this;
-}
-inline _string& _string::operator-=(_string &cut) {
-  strrtrim(*this, cut);
-  return *this;
-}
-inline _string& _string::operator-=(string &cut) {
-  strrtrim(*this, cut.str(0));
-  return *this;
-}
-
-inline string& string::operator-=(char *cut) {
-  strrtrim(str(0), cut);
-  return *this;
-}
-inline string& string::operator-=(_string &cut) {
-  strrtrim(str(0), cut);
-  return *this;
-}
-inline string& string::operator-=(string &cut) {
-  strrtrim(str(0), cut.str(0));
-  return *this;
-}
-
-inline bool _string::operator==(char *cmp) {
-  if(!strcmp(*this, cmp))return true;
-  return false;
-}
-inline bool _string::operator==(_string &cmp) {
-  if(!strcmp(*this, cmp))return true;
-  return false;
-}
-inline bool _string::operator==(string &cmp) {
-  if(!strcmp(*this, cmp.str(0)))return true;
-  return false;
-}
-
-inline bool string::operator==(char *cmp) {
-  if(!strcmp(str(0), cmp))return true;
-  return false;
-}
-inline bool string::operator==(_string &cmp) {
-  if(!strcmp(str(0), cmp))return true;
-  return false;
-}
-inline bool string::operator==(string &cmp) {
-  if(!strcmp(str(0), cmp.str(0)))return true;
-  return false;
-}
-
-inline bool _string::operator!=(char *cmp) {
-  if(!strcmp(*this, cmp))return false;
-  return true;
-}
-inline bool _string::operator!=(_string &cmp) {
-  if(!strcmp(*this, cmp))return false;
-  return true;
-}
-inline bool _string::operator!=(string &cmp) {
-  if(!strcmp(*this, cmp.str(0)))return false;
-  return true;
-}
-
-inline bool string::operator!=(char *cmp) {
-  if(!strcmp(str(0), cmp))return false;
-  return true;
-}
-inline bool string::operator!=(_string &cmp) {
-  if(!strcmp(str(0), cmp))return false;
-  return true;
-}
-inline bool string::operator!=(string &cmp) {
-  if(!strcmp(str(0), cmp.str(0)))return false;
-  return true;
-}
-#endif //__LIBSTRING_OVERLOADS
 
 #endif //__LIBSTRING

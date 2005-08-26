@@ -226,7 +226,8 @@ void bAPU::reset() {
   regs.sp = 0xef;
   regs.p  = 0x02;
 
-  status.cycle_pos = 0;
+  status.cycle_pos       = 0;
+  status.cycles_executed = 0;
 
 //$f1
   status.iplrom_enabled = true;

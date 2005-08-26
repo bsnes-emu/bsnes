@@ -3,8 +3,7 @@ nop(0xea) {
 }
 
 wdm(0x42) {
-1:cpu_io();
-  regs.pc.w++;
+1:op_read();
 }
 
 xba(0xeb) {

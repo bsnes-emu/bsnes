@@ -7,7 +7,8 @@ OBJS = sdlmain.obj \
        cpu.obj bcpu.obj \
        apu.obj bapu.obj bapuskip.obj \
        ppu.obj bppu.obj \
-       snes.obj
+       snes.obj \
+       srtc.obj sdd1.obj
 LIBS = kernel32.lib user32.lib gdi32.lib sdlmain.lib sdl.lib
 
 all: $(OBJS)
@@ -72,7 +73,7 @@ bppu.obj: ../ppu/bppu/*
 ##############
 ### reader ###
 ##############
-reader.obj: ../reader/reader.cpp ../reader/reader.h
+reader.obj: ../reader/*.cpp ../reader/*.h
 	$(CC) $(CFLAGS) /c ../reader/reader.cpp
 
 ############
@@ -80,3 +81,15 @@ reader.obj: ../reader/reader.cpp ../reader/reader.h
 ############
 snes.obj: ../snes/*.cpp ../snes/*.h
 	$(CC) $(CFLAGS) /c ../snes/snes.cpp
+
+############
+### srtc ###
+############
+srtc.obj: ../chip/srtc/*.cpp ../chip/srtc/*.h
+	$(CC) $(CFLAGS) /c ../chip/srtc/srtc.cpp
+
+############
+### sdd1 ###
+############
+sdd1.obj: ../chip/sdd1/*.cpp ../chip/sdd1/*.h
+	$(CC) $(CFLAGS) /c ../chip/sdd1/sdd1.cpp

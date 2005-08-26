@@ -1,20 +1,54 @@
-uint16 bCPU::vcounter()        { return time.v; }
-uint16 bCPU::hcounter()        { return get_hcounter(); }
-uint16 bCPU::hcycles()         { return time.hc; }
-bool   bCPU::interlace()       { return time.interlace; }
-bool   bCPU::interlace_field() { return time.interlace_field; }
-bool   bCPU::overscan()        { return time.overscan; }
+/* Notes about PAL timing:
+ * As I do not have PAL hardware to run timing tests on, I've
+ * had to guess on a lot of things. Below is how I've arrived
+ * at various calculations:
+ *
+ * NTSC timing crystal: ~21477272hz
+ * PAL  timing crystal: ~21281370hz
+ * NTSC ~60fps, PAL ~50fps
+ * NTSC ~262 lines/frame, PAL ~312 lines/frame
+ * NTSC 21477272 / (262 * 60) = ~1366 cycles/line
+ * PAL  21281370 / (312 * 50) = ~1364 cycles/line
+ *
+ * As the cycles/line are very close between the two systems,
+ * I have left the known NTSC anomalies intact for PAL timing.
+ * In reality, some of these may not exist, and some may be
+ * slightly different.
+ *
+ * [known]
+ * - DRAM refresh occurs at about the same time every
+ * scanline on PAL units (per Overload).
+ * [unknown]
+ * - Are dots 323/327 still 2 cycles longer than the
+ * other dots?
+ * - Is scanline 240 on non-interlace odd frames still
+ * 4 cycles short?
+ */
+
+uint16 bCPU::vcounter()         { return time.v; }
+uint16 bCPU::hcounter()         { return get_hcounter(); }
+uint16 bCPU::hcycles()          { return time.hc; }
+bool   bCPU::interlace()        { return time.interlace; }
+bool   bCPU::interlace_field()  { return time.interlace_field; }
+bool   bCPU::overscan()         { return time.overscan; }
+uint16 bCPU::region_scanlines() { return time.region_scanlines; }
 
 void   bCPU::set_interlace(bool r) { time.interlace = r; }
 void   bCPU::set_overscan(bool r)  { time.overscan  = r; }
 
-uint8  bCPU::dma_counter()       { return (time.dma_counter + time.hc) & 6; }
+uint8  bCPU::dma_counter() { return (time.dma_counter + time.hc) & 6; }
 
 //all scanlines are 1364 cycles long, except scanline 240
 //on non-interlace odd-frames, which is 1360 cycles long.
+//[NTSC]
 //interlace mode has 525 scanlines: 263 on the even frame,
 //and 262 on the odd.
 //non-interlace mode has 524 scanlines: 262 scanlines on
+//both even and odd frames.
+//[PAL] <PAL info is unverified on hardware>
+//interlace mode has 625 scanlines: 313 on the even frame,
+//and 312 on the odd.
+//non-interlace mode has 624 scanlines: 312 scanlines on
 //both even and odd frames.
 //
 //cycles per frame:
@@ -28,9 +62,9 @@ void bCPU::inc_vcounter() {
     time.interlace_field ^= 1;
 
     if(time.interlace == true && time.interlace_field == 0) {
-      time.frame_lines = 263;
+      time.frame_lines = time.region_scanlines + 1;
     } else {
-      time.frame_lines = 262;
+      time.frame_lines = time.region_scanlines;
     }
   }
 
@@ -44,31 +78,19 @@ void bCPU::inc_vcounter() {
   time.dram_refreshed = false;
 }
 
-//all dots are 4 cycles long, except dots 322 and 326. dots 322 and 326
+//all dots are 4 cycles long, except dots 323 and 327. dots 323 and 327
 //are 6 cycles long. this holds true for all scanlines except scanline
 //240 on non-interlace odd frames. the reason for this is because this
 //scanline is only 1360 cycles long, instead of 1364 like all other
 //scanlines.
 //this makes the effective range of hscan_pos 0-339 at all times.
-//dot 322 range = { 1288, 1290, 1292 }
-//dot 326 range = { 1306, 1308, 1310 }
+//dot 323 range = { 1292, 1294, 1296 }
+//dot 327 range = { 1310, 1312, 1314 }
 uint16 bCPU::get_hcounter() {
   if(time.v == 240 && time.interlace == false && time.interlace_field == 1) {
     return time.hc >> 2;
   }
-  return (time.hc - ((time.hc > 1288) << 1) - ((time.hc > 1306) << 1)) >> 2;
-}
-
-void bCPU::apu_sync() {
-int cycles;
-  while(apusync.cycles >= 0) {
-    apu->run();
-
-    cycles = apu->cycles_executed();
-    if(cycles) {
-      apusync.cycles -= apusync.cpu_multbl[cycles];
-    }
-  }
+  return (time.hc - ((time.hc > 1292) << 1) - ((time.hc > 1310) << 1)) >> 2;
 }
 
 void bCPU::dram_refresh() {
@@ -76,15 +98,22 @@ void bCPU::dram_refresh() {
   add_cycles(40);
   if(time.v != 240 || time.interlace != false || time.interlace_field != 1) {
   //alternate between 534 and 538 every scanline except 240ni1
+  //in reality, this is probably based on frame cycle length...
     time.dram_refresh_pos ^= 12;
   }
 }
 
+uint32 bCPU::cycles_executed() {
+uint32 r = status.cycles_executed;
+  status.cycles_executed = 0;
+  return r;
+}
+
 void bCPU::add_cycles(int cycles) {
+  status.cycles_executed += cycles;
+
   cycles >>= 1;
   while(cycles--) {
-    apusync.cycles += apusync.apu_freq << 1;
-    apu_sync();
     time.hc += 2;
 
     if(time.hc >= time.line_cycles) {
@@ -119,23 +148,20 @@ void bCPU::time_reset() {
   time.interlace_field = false;
   time.overscan        = false;
   time.line_cycles     = 1364;
-  time.frame_lines     = 262;
 
   time.dram_refreshed   = false;
   time.dram_refresh_pos = 538;
 
   time.dma_counter = 0;
 
-  apusync.cycles = apusync.cpu_multbl[255];
-}
-
-void bCPU::time_init() {
-  apusync.cpu_freq = 21477272 >> 3;
-  apusync.apu_freq = 24576000 >> 3;
-
-int i;
-  for(i=0;i<1024;i++) {
-    apusync.cpu_multbl[i] = i * apusync.cpu_freq;
-    apusync.apu_multbl[i] = i * apusync.apu_freq;
+  switch(region) {
+  case NTSC:
+    time.region_scanlines = 262;
+    break;
+  case PAL:
+    time.region_scanlines = 312;
+    break;
   }
+
+  time.frame_lines = time.region_scanlines;
 }

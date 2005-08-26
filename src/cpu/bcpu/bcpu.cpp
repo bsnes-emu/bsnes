@@ -1,7 +1,5 @@
 #include "../../base.h"
 
-#include "srtc.cpp"
-
 #include "bcpu_opfn.cpp"
 #include "bcpu_op_read.cpp"
 #include "bcpu_op_rmw.cpp"
@@ -58,9 +56,11 @@ void bCPU::irq(uint16 addr) {
   snes->notify(SNES::CPU_EXEC_OPCODE_END);
 }
 
+//vcounter range verified on real hardware,
+//HDMA runs on the very first scanline of vblank
 bool bCPU::hdma_test() {
   if(status.hdma_triggered == false) {
-    if(vcounter() < (overscan()?239:224) && hcounter() >= 278) {
+    if(vcounter() <= (overscan()?239:224) && hcounter() >= 278) {
       status.hdma_triggered = true;
       return true;
     }
@@ -68,41 +68,62 @@ bool bCPU::hdma_test() {
   return false;
 }
 
+//NMI range: V==225/240,H>=12 ; V>225/240
 bool bCPU::nmi_test() {
-  if(vcounter() >= ((overscan()?239:224) + 1) && status.nmi_triggered == false) {
-    if((vcounter() == ((overscan()?239:224) + 1) && hcycles() >= 12) || (vcounter() > ((overscan()?239:224) + 1))) {
-      status.nmi_triggered = true;
-      status.nmi_pin = 0;
-      if(status.nmi_enabled == true) {
-        return true;
-      }
-    }
+  if(status.nmi_exec == true)return false;
+
+//[status.cycle_count index]
+//  6->12
+//  8->14
+int hc = status.cycle_count + 6;
+  if(vcounter() == ((overscan()?239:224) + 1) && hcycles() < hc) {
+  //dprintf("* miss at %3d,%4d,%3x : %d x=%0.4x", vcounter(), hcycles(), hcounter(), status.cycle_count, regs.x.w);
   }
+
+  if(
+    (vcounter() == ((overscan()?239:224) + 1) && hcycles() >= hc) ||
+    (vcounter()  > ((overscan()?239:224) + 1))
+  ) {
+  //dprintf("* %3d,%4d,%3x : %d x=%0.4x", vcounter(), hcycles(), hcounter(), status.cycle_count, regs.x.w);
+    status.nmi_exec = true;
+    return status.nmi_enabled;
+  }
+
   return false;
 }
 
 bool bCPU::irq_test() {
 int vpos, hpos;
   if(regs.p.i)return false; //no interrupt can occur with I flag set
-  if(status.irq_pin == 0)return false; //same as above
+  if(status.irq_read == true)return false; //same as above
   if(status.virq_enabled == false && status.hirq_enabled == false)return false;
+
+//if irq_exec is true, then an IRQ occurred already.
+//IRQs will continue to fire until $4211 is read from, or
+//$4200 is written to, where irq_exec is set back to false.
+  if(status.irq_exec == true) {
+    return true;
+  }
 
 //calculate V/H positions required for IRQ to trigger
   vpos = status.virq_pos;
   hpos = (status.hirq_enabled) ? status.hirq_pos : 0;
 
 //positions that can never be latched
-  if(vpos == 261 && hpos == 339 && interlace() == false)return false;
-  if(vpos == 262 && interlace() == false)return false;
-  if(vpos == 262 && hpos == 339)return false;
-  if(vpos  > 262)return false;
+//region_scanlines() = 262/NTSC, 312/PAL
+//PAL results are unverified on hardware
+  if(vpos == 240 && hpos == 339 && interlace() == false && interlace_field() == 1)return false;
+  if(vpos == (region_scanlines() - 1) && hpos == 339 && interlace() == false)return false;
+  if(vpos == region_scanlines() && interlace() == false)return false;
+  if(vpos == region_scanlines() && hpos == 339)return false;
+  if(vpos  > region_scanlines())return false;
   if(hpos  > 339)return false;
 
   if(hpos == 0) {
-    hpos = 24;
+    hpos = status.cycle_count + 14;
   } else {
     hpos <<= 2;
-    hpos += 24; //30 - status.cycle_count;
+    hpos += status.cycle_count + 18;
   //it should be OK to use the current line cycles/frame lines,
   //as the IRQ will only trigger on the correct scanline anyway...
     if(hpos >= time.line_cycles) {
@@ -116,11 +137,8 @@ int vpos, hpos;
 
   if(status.virq_enabled == true && vcounter() != vpos)return false;
 
-  if(hcycles() >= hpos && status.irq_pin == 1) {
-  //dprintf("* vpos=%3d,hpos=%4d; v=%3d,h=%4d; lc=%d,virq=%3d,hirq=%3d",
-  //  vpos, hpos, vcounter(), hcycles(), status.cycle_count, status.virq_pos, status.hirq_pos);
-    status.irq_triggered = true;
-    status.irq_pin = 0;
+  if(hcycles() >= hpos) {
+    status.irq_exec = true;
     return true;
   }
 
@@ -134,20 +152,24 @@ void bCPU::run() {
     break;
   case CPUSTATE_RUN:
   case CPUSTATE_WAI:
-    if(nmi_test() == true) {
-      irq(0xffea);
-      break;
+    if(status.cycle_pos == 0) {
+    //interrupts only trigger on opcode edges
+      if(nmi_test() == true) {
+        irq(0xffea);
+        break;
+      }
+      if(irq_test() == true) {
+        irq(0xffee);
+        break;
+      }
     }
-    if(irq_test() == true) {
-      irq(0xffee);
-      break;
-    }
-    exec_opcode();
-    break;
+  //fallthrough
   case CPUSTATE_STP:
-    exec_opcode();
+    exec_cycle();
     break;
   }
+
+  cycle_edge();
 }
 
 void bCPU::scanline() {
@@ -164,23 +186,21 @@ void bCPU::scanline() {
   }
 
   if(status.virq_enabled == false) {
-    status.irq_pin = 1;
+    status.irq_read = false;
   }
 }
 
 void bCPU::frame() {
   hdma_initialize();
 
-  status.nmi_triggered = false;
-  status.nmi_pin = 1;
-  status.r4210_read = false;
+  status.nmi_read = false;
+  status.nmi_exec = false;
 
-  status.irq_triggered = false;
-  status.irq_pin = 1;
+  status.irq_read = false;
 }
 
 void bCPU::power() {
-  srtc_power();
+  region = snes->region();
 
   regs.a = regs.x = regs.y = 0x0000;
   regs.s = 0x01ff;
@@ -188,10 +208,6 @@ void bCPU::power() {
 }
 
 void bCPU::reset() {
-  srtc_reset();
-
-  frame();
-
 //reset vector location
   regs.pc  = mem_bus->read(0xfffc) | (mem_bus->read(0xfffd) << 8);
 
@@ -203,26 +219,33 @@ void bCPU::reset() {
   regs.db  = 0x00;
   regs.p   = 0x34;
   regs.e   = 1;
+  regs.mdr = 0x00;
 
   time_reset();
   mmio_reset();
   dma_reset();
 
   status.cpu_state = CPUSTATE_RUN;
+  status.dma_state = DMASTATE_STOP;
+
+  status.cycle_pos       = 0;
+  status.cycle_count     = 0;
+  status.cycles_executed = 0;
 
   status.hdma_triggered = false;
 
-  status.nmi_triggered = false;
-  status.nmi_pin       = 1;
-  status.r4210_read    = false;
+  status.nmi_read = false;
+  status.nmi_exec = false;
 
-  status.irq_triggered = false;
-  status.irq_pin       = 1;
+  status.irq_read = false;
+  status.irq_exec = false;
 
   apu_port[0] = 0x00;
   apu_port[1] = 0x00;
   apu_port[2] = 0x00;
   apu_port[3] = 0x00;
+
+  frame();
 }
 
 uint8 bCPU::port_read(uint8 port) {
@@ -236,7 +259,6 @@ void bCPU::port_write(uint8 port, uint8 value) {
 void bCPU::cpu_c2() {
   if(regs.d.l != 0x00) {
     status.cycle_count = 6;
-    cycle_edge();
     add_cycles(6);
   }
 }
@@ -244,7 +266,6 @@ void bCPU::cpu_c2() {
 void bCPU::cpu_c4(uint16 x, uint16 y) {
   if(!regs.p.x && (x & 0xff00) != (y & 0xff00)) {
     status.cycle_count = 6;
-    cycle_edge();
     add_cycles(6);
   }
 }
@@ -252,30 +273,25 @@ void bCPU::cpu_c4(uint16 x, uint16 y) {
 void bCPU::cpu_c6(uint16 addr) {
   if(regs.e && (regs.pc.w & 0xff00) != (addr & 0xff00)) {
     status.cycle_count = 6;
-    cycle_edge();
     add_cycles(6);
   }
 }
 
 void bCPU::cpu_io() {
   status.cycle_count = 6;
-  cycle_edge();
   add_cycles(6);
 }
 
 uint8 bCPU::mem_read(uint32 addr) {
-uint8 r;
   status.cycle_count = mem_bus->speed(addr);
-  cycle_edge();
   add_cycles(2);
-  r = mem_bus->read(addr);
+  regs.mdr = mem_bus->read(addr);
   add_cycles(status.cycle_count - 2);
-  return r;
+  return regs.mdr;
 }
 
 void bCPU::mem_write(uint32 addr, uint8 value) {
   status.cycle_count = mem_bus->speed(addr);
-  cycle_edge();
   add_cycles(6);
   mem_bus->write(addr, value);
   add_cycles(status.cycle_count - 6);
@@ -345,9 +361,7 @@ void bCPU::stack_write(uint8 value) {
 }
 
 bCPU::bCPU() {
-  time_init();
   mmio = new bCPUMMIO(this);
-
   init_op_tables();
 }
 

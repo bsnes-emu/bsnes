@@ -7,7 +7,8 @@ OBJS = sdlmain.o \
        cpu.o bcpu.o \
        apu.o bapu.o bapuskip.o \
        ppu.o bppu.o \
-       snes.o
+       snes.o \
+       srtc.o sdd1.o
 
 all: $(OBJS)
 	$(CC) $(CFLAGS) $(OBJS) `sdl11-config --cflags --libs` -o bsnes_sdl
@@ -71,7 +72,7 @@ bppu.o: ../ppu/bppu/*
 ##############
 ### reader ###
 ##############
-reader.o: ../reader/reader.cpp ../reader/reader.h
+reader.o: ../reader/*.cpp ../reader/*.h
 	$(CC) $(CFLAGS) -c ../reader/reader.cpp
 
 ############
@@ -79,3 +80,15 @@ reader.o: ../reader/reader.cpp ../reader/reader.h
 ############
 snes.o: ../snes/*.cpp ../snes/*.h
 	$(CC) $(CFLAGS) -c ../snes/snes.cpp
+
+############
+### srtc ###
+############
+srtc.o: ../chip/srtc/*.cpp ../chip/srtc/*.h
+	$(CC) $(CFLAGS) -c ../chip/srtc/srtc.cpp
+
+############
+### sdd1 ###
+############
+sdd1.o: ../chip/sdd1/*.cpp ../chip/sdd1/*.h
+	$(CC) $(CFLAGS) -c ../chip/sdd1/sdd1.cpp

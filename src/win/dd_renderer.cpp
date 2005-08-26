@@ -22,7 +22,7 @@ int i, r, g, b;
   lpddsb->GetSurfaceDesc(&ddsd);
   color_depth = ddsd.ddpfPixelFormat.dwRGBBitCount;
   if(color_depth == 15) {
-    for(i=0;i<65536;i++) {
+    for(i=0;i<32768;i++) {
       r = (i      ) & 31;
       g = (i >>  5) & 31;
       b = (i >> 10) & 31;
@@ -34,7 +34,7 @@ int i, r, g, b;
       color_lookup_table[i] = (r << 10) | (g << 5) | (b);
     }
   } else if(color_depth == 16) {
-    for(i=0;i<65536;i++) {
+    for(i=0;i<32768;i++) {
       r = (i      ) & 31;
       g = (i >>  5) & 31;
       b = (i >> 10) & 31;
@@ -48,7 +48,7 @@ int i, r, g, b;
       color_lookup_table[i] = (r << 11) | (g << 5) | (b);
     }
   } else if(color_depth == 32) {
-    for(i=0;i<65536;i++) {
+    for(i=0;i<32768;i++) {
       r = (i      ) & 31;
       g = (i >>  5) & 31;
       b = (i >> 10) & 31;

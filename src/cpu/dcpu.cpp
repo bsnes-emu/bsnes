@@ -1,3 +1,17 @@
+//this is a virtual function.
+//in opcode-based CPU emulators, the main emulation routine
+//will only be able to call the disassemble_opcode() function
+//on clean opcode edges. but with cycle-based CPU emulators,
+//the CPU may be in the middle of executing an opcode when the
+//emulator (e.g. debugger) wants to disassemble an opcode. this
+//would mean that important registers may not reflect what they
+//did at the start of the opcode (especially regs.pc), so in
+//cycle-based emulators, this function should be overridden to
+//reflect whether or not an opcode has only been partially
+//executed. if not, the debugger should abort attempts to skip,
+//disable, or disassemble the current opcode.
+bool CPU::in_opcode() { return false; }
+
 uint16 CPU::__relb(int8 offset) {
 uint32 addr;
   addr = (regs.pc.d & 0xff0000) | ((regs.pc.d + 2) & 0xffff);
@@ -81,16 +95,24 @@ uint32 r = 0;
 }
 
 void CPU::disassemble_opcode(char *output) {
-char *s = output;
+char *s;
 char t[256];
 uint8 op, op0, op1, op2;
-  sprintf(s, "%0.6x ", regs.pc.d);
+static CPUReg24 pc;
+  s = output;
 
-//TODO: This should wrap around the bank byte
-  op  = mem_bus->read(regs.pc.d);
-  op0 = mem_bus->read(regs.pc.d + 1);
-  op1 = mem_bus->read(regs.pc.d + 2);
-  op2 = mem_bus->read(regs.pc.d + 3);
+  if(in_opcode() == true) {
+    strcpy(s, "?????? <CPU within opcode>");
+    return;
+  }
+
+  pc.d = regs.pc.d;
+  sprintf(s, "%0.6x ", pc.d);
+
+  op  = mem_bus->read(pc.d); pc.w++;
+  op0 = mem_bus->read(pc.d); pc.w++;
+  op1 = mem_bus->read(pc.d); pc.w++;
+  op2 = mem_bus->read(pc.d);
 
   switch(op) {
   case 0x00:sprintf(t, "brk #$%0.2x               ", op0);break;
@@ -431,6 +453,10 @@ static uint8 op_len_tbl[256] = {
   6,2,2,2,  2,2,2,2,  1,5,1,1,  3,3,3,4, //0xen
   2,2,2,2,  3,2,2,2,  1,3,1,1,  3,3,3,4  //0xfn
 };
+  if(in_opcode() == true) {
+    return 0;
+  }
+
   op = mem_bus->read(regs.pc.d);
   len = op_len_tbl[op];
   if(len == 5)return (regs.p.m)?2:3;

@@ -1,22 +1,36 @@
 #include "../../base.h"
 #include "bcart_lorom.cpp"
 #include "bcart_hirom.cpp"
+#include "bcart_exlorom.cpp"
 #include "bcart_exhirom.cpp"
 
 bool bMemBus::load_cart(Reader *rf) {
 uint32 cksum, icksum, index;
 char   cart_title[24];
-uint8  mapper;
+uint8  mapper, region;
   if(rom_loaded == true)return false;
 
-  rf->read(&rom);
-
+  rf->read(&rom_image);
+  rom = rom_image;
   rom_size = rf->size();
 
-  if(rom_size < 32768)return false;
+  if(rom_size < 32768) {
+    free(rom_image);
+    return false;
+  }
+
+//check for ROM header (currently unused)
+  if((rom_size & 0x1fff) == 0x0200) {
+    rom_size -= 512;
+    rom += 512;
+  }
 
   if(rom_size >= 0x410000) {
-    mapper = EXHIROM;
+    if(rom[0x7fd5] == 0x32) {
+      mapper = EXLOROM;
+    } else {
+      mapper = EXHIROM;
+    }
     goto end;
   }
 
@@ -33,10 +47,17 @@ uint8  mapper;
     mapper = LOROM;
   }
 
+  if(rom[0x7fd5] == 0x32 && rom[0xffd5] == 0x32) {
+  //SFA2 detected
+    mapper = EXLOROM;
+    goto end;
+  }
+
 end:
   switch(mapper) {
   case LOROM:  index = 0x007fc0;break;
   case HIROM:  index = 0x00ffc0;break;
+  case EXLOROM:index = 0x007fc0;break;
   case EXHIROM:index = 0x40ffc0;break;
   }
   memcpy(cart_title, (char*)rom + index, 21);
@@ -53,7 +74,10 @@ end:
   case 7:sram_size = 128 * 1024;break;
   }
 
+  region = rom[index + 0x19];
+
   dprintf("* Image Name : \"%s\"", cart_title);
+  dprintf("* Region     : %s", (region <= 1)?"NTSC":"PAL");
   dprintf("* MAD        : %0.2x", mapper);
   dprintf("* SRAM Size  : %dkb", sram_size / 1024);
   dprintf("* Reset:%0.4x NMI:%0.4x IRQ:%0.4x BRK[n]:%0.4x COP[n]:%0.4x BRK[e]:%0.4x COP[e]:%0.4x",
@@ -76,12 +100,20 @@ CartInfo ci;
   switch(mapper) {
   case LOROM:  cart = new bCartLoROM();  break;
   case HIROM:  cart = new bCartHiROM();  break;
+  case EXLOROM:cart = new bCartExLoROM();break;
   case EXHIROM:cart = new bCartExHiROM();break;
   default:return false;
   }
 
   cart->set_cartinfo(&ci);
   rom_loaded = true;
+
+  if(region == 0 || region == 1) {
+    snes->set_region(SNES::NTSC);
+  } else {
+    snes->set_region(SNES::PAL);
+  }
+
   return true;
 }
 
@@ -108,7 +140,7 @@ bool bMemBus::save_sram(Writer *wf) {
 void bMemBus::unload_cart() {
   if(rom_loaded == false)return;
 
-  if(rom) free(rom);
+  if(rom_image)free(rom_image);
   if(sram)free(sram);
   delete(cart);
 

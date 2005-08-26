@@ -23,7 +23,7 @@ bool ROMImage::load() {
   dprintf("* Loading \"%s\"...", rom_fn);
 
 FileReader *rf = new FileReader();
-  if(!rf->open(FileReader::TYPE_ROM, rom_fn)) {
+  if(!rf->open(rom_fn)) {
     alert("Error loading image file [%s]!", rom_fn);
     return false;
   }
@@ -33,7 +33,7 @@ FileReader *rf = new FileReader();
 CartInfo ci;
   mem_bus->get_cartinfo(&ci);
   if(ci.sram_size != 0) {
-    rf->open(FileReader::TYPE_SRAM, sram_fn);
+    rf->open(sram_fn);
     mem_bus->load_sram(static_cast<Reader*>(rf));
     rf->close();
   }

@@ -79,7 +79,7 @@ void Memory::write_long(uint32 addr, uint32 value, uint8 wrap) {
 }
 
 MMIO  mmio_unmapped;
-uint8 MMIO::read (uint32 addr) { return 0x00; }
+uint8 MMIO::read (uint32 addr) { return cpu->regs.mdr; }
 void  MMIO::write(uint32 addr, uint8 value) {}
 
 uint8 MemBus::speed(uint32 addr) {

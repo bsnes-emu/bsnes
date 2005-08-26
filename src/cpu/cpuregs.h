@@ -82,6 +82,7 @@ CPUReg24 pc;
 CPUReg16 a, x, y, s, d;
 CPURegFlags p;
 uint8 db;
+uint8 mdr; //memory data register (openbus)
 bool  e;
-  CPURegs() { db = 0; e = false; }
+  CPURegs() { db = 0; mdr = 0x00; e = false; }
 };

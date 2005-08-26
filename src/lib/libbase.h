@@ -1,5 +1,5 @@
 /*
-  libbase : version 0.01 ~byuu
+  libbase : version 0.03 ~byuu (08/20/05)
 */
 
 #ifndef __LIBBASE
@@ -10,10 +10,21 @@
 #include <stdarg.h>
 #include <string.h>
 
+#ifndef TRUE
+#define TRUE 1
+#endif
+
+#ifndef FALSE
+#define FALSE 0
+#endif
+
+typedef unsigned int   uint;
+
 typedef unsigned char  byte;
 typedef unsigned short word;
 typedef unsigned long  ulong;
 
+typedef unsigned char  bool8;
 typedef unsigned char  uint8;
 typedef unsigned short uint16;
 typedef unsigned long  uint32;

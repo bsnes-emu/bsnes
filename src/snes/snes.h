@@ -2,12 +2,28 @@ class SNES {
 protected:
 bool is_debugger_enabled;
 
+uint8 snes_region;
+
+//APU synchronization
+struct {
+int32 cpu_freq, apu_freq;
+int32 cpu_multbl[1024], apu_multbl[1024];
+int32 cycles;
+}apusync;
+
+void update_timing();
+
 public:
+enum { NTSC = 0, PAL = 1 };
+
 //system functions
   void run();
-  virtual void render_frame() = 0;
-  virtual void power();
-  virtual void reset();
+  virtual void  render_frame() = 0;
+  virtual void  init();
+  virtual void  power();
+  virtual void  reset();
+  virtual uint8 region();
+  virtual void  set_region(uint8 new_region);
 
 //input functions
 enum {

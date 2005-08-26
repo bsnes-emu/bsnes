@@ -43,10 +43,10 @@ strmath(str)
   str, and returns numerical result
   example: strmath("5+5")=10
 ***************************************/
-uint32 p_strmath(char *str) {
-int i = 0, ssl = strlen(str);
+uint p_strmath(const char *str) {
+int   i = 0, ssl = strlen(str);
+uint  r, array[128], array_size = 0, z = 0;
 uint8 x, mode = 0;
-uint32 r, array[128], array_size = 0, z = 0;
 uint8 array_gate[128];
 char *s1;
   if(!ssl)return 0;
@@ -95,11 +95,11 @@ char *s1;
   return r;
 }
 
-uint32 strmath(char *in_str) {
-uint32 r = 0;
-uint32 pdepth = 0, cpdepth, maxpdepth = 0;
-uint32 pstart, pend, spos;
-int i, sc, sl = strlen(in_str);
+uint strmath(const char *in_str) {
+uint r = 0;
+uint pdepth = 0, cpdepth, maxpdepth = 0;
+uint pstart, pend, spos;
+int  i, sc, sl = strlen(in_str);
 char *str = (char*)malloc(sl + 1), *str0;
 char *pstr;
 char num[64];
@@ -165,13 +165,15 @@ char num[64];
   free(str);
   return r;
 }
+uint strmath(substring &in_str) { return strmath(strptr(in_str)); }
 
-uint32 strmathentity(char *str) {
+bool strmathentity(const char *str) {
 int i, ssl = strlen(str);
   for(i=0;i<ssl;i++) {
     if(str[i] == '+' || str[i] == '-' || str[i] == '*' || str[i] == '/' ||
        str[i] == '%' || str[i] == '&' || str[i] == '|' || str[i] == '^' ||
-      (str[i] == '<' && str[i+1] == '<') || (str[i] == '>' && str[i+1] == '>'))return 1;
+      (str[i] == '<' && str[i+1] == '<') || (str[i] == '>' && str[i+1] == '>'))return true;
   }
-  return 0;
+  return false;
 }
+bool strmathentity(substring &str) { return strmathentity(strptr(str)); }

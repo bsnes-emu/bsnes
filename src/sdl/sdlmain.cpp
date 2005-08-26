@@ -1,10 +1,8 @@
-#define _WIN32_
-
 #define INTERFACE_MAIN
-#define BSNES_VERSION "0.010"
+#define BSNES_VERSION "0.011"
 #define BSNES_TITLE "bsnes/SDL v" BSNES_VERSION
-#include "sdlmain.h"
 #include "../base.h"
+#include "sdlmain.h"
 
 #ifdef _WIN32_
 HWND hwnd;
@@ -57,6 +55,8 @@ void init_snes() {
   ppu     = new bPPU();
   snes    = new bSNES();
   bsnes   = static_cast<bSNES*>(snes);
+
+  snes->init();
 }
 
 void term_snes() {

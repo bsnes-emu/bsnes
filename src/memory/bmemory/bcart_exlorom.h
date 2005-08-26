@@ -1,7 +1,6 @@
-class bCartLoROM : public Cart {
+class bCartExLoROM : public Cart {
 private:
-bool   write_protected;
-uint32 P0_size, P1_size, ROM_mask;
+bool write_protected;
 
 public:
 uint8 *rom, *sram;
@@ -11,5 +10,5 @@ uint32 rom_size, sram_size;
   void  write_protect(bool r);
   void  set_cartinfo(CartInfo *ci);
 
-  bCartLoROM() : write_protected(true) {}
+  bCartExLoROM() : write_protected(true) {}
 };

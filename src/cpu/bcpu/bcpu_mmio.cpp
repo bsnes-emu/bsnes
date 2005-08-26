@@ -41,16 +41,7 @@ uint8 r;
   return r;
 }
 
-//???
-uint8 bCPU::mmio_r21c2() {
-  return 0x20;
-}
-
-//???
-uint8 bCPU::mmio_r21c3() {
-  return 0x00;
-}
-
+//JOYSER0
 /*
   The joypad contains a small bit shifter that has 16 bits.
   Reading from 4016 reads one bit from this buffer, then moves
@@ -61,9 +52,12 @@ uint8 bCPU::mmio_r21c3() {
   A zero must be written back to $4016 to unlock the buffer,
   so that reads will increment the bit shifting position.
 */
-//JOYSER0
+//7-2 = MDR
+//1-0 = Joypad serial data
 uint8 bCPU::mmio_r4016() {
-uint8 r = 0x00;
+uint8 r;
+  r = regs.mdr & 0xfc;
+
   if(status.joypad1_strobe_value == 1) {
     r |= (uint8)snes->get_input_status(SNES::DEV_JOYPAD1, SNES::JOYPAD_B);
   } else {
@@ -85,45 +79,85 @@ uint8 r = 0x00;
     }
     if(++status.joypad1_read_pos > 17)status.joypad1_read_pos = 17;
   }
+
+  return r;
+}
+
+//JOYSER1
+//7-5 = MDR
+//4-2 = Always 1
+//1-0 = Joypad serial data
+uint8 bCPU::mmio_r4017() {
+uint8 r;
+  r  = regs.mdr & 0xe0;
+  r |= 0x1c;
+
   return r;
 }
 
 //RDNMI
+/* $4210 bit 7 (NMI triggered bit) is set at:
+ *   V=225/240,HC>=2,
+ *   V>225
+ * The bit is only set once per NMI trigger, so
+ * subsequent reads return this bit as being clear.
+ * There is but one exception: if the $4210 read
+ * occurs at *exactly* V=225/240,HC==2, then $4210
+ * bit 7 will be set, and the next read will also
+ * have this bit set.
+ */
+//7   = NMI acknowledge
+//6-4 = MDR
+//3-0 = CPU (5a22) version
 uint8 bCPU::mmio_r4210() {
-uint8 r = 0x00;
+uint8  r;
 uint16 v, h, hc, vs;
+  r = regs.mdr & 0x70;
+
   v  = vcounter();
   h  = hcounter();
   hc = hcycles();
   vs = (overscan()?239:224);
 
-  if(status.r4210_read == false) {
-    if((v == (vs + 1) && hc >= 2) || v > (vs + 1)) {
+  if(status.nmi_read == false) {
+    if(
+      (v == (vs + 1) && hc >= 2) ||
+      (v  > (vs + 1))
+    ) {
       r |= 0x80;
-      status.r4210_read = true;
-      status.nmi_pin = 1;
+
+    //test for special case where NMI read not raised
+      if(v != (vs + 1) || hc != 2) {
+        status.nmi_read = true;
+      }
     }
   }
 
-  r |= 0x40;
   r |= 0x02; //cpu version number
   return r;
 }
 
 //TIMEUP
+//7   = IRQ acknowledge
+//6-0 = MDR
 uint8 bCPU::mmio_r4211() {
-uint8 r = 0x00;
-  r |= 0x40;
-  if(status.irq_triggered == true)r |= 0x80;
-  status.irq_triggered = false;
+uint8 r;
+  r = regs.mdr & 0x7f;
+  if(status.irq_exec == true)r |= 0x80;
+  status.irq_exec = false;
+  status.irq_read = true;
   return r;
 }
 
 //HVBJOY
+//7   = in vblank
+//6   = in hblank
+//5-1 = MDR
+//0   = joypad ready
 uint8 bCPU::mmio_r4212() {
 uint8  r;
 uint16 v, h, hc, vs;
-  r = 0x00;
+  r = regs.mdr & 0x3e;
 
   v  = vcounter();
   h  = hcounter();
@@ -168,7 +202,7 @@ uint8 bCPU::mmio_r4217() {
 
 //JOY1L
 uint8 bCPU::mmio_r4218() {
-uint8 r = 0x00;
+uint8  r = 0x00;
 uint16 v = vcounter();
   if(status.auto_joypad_poll == false)return 0x00; //can't read joypad if auto polling not enabled
 //if(v >= 225 && v <= 227)return 0x00; //can't read joypad while SNES is polling input
@@ -181,7 +215,7 @@ uint16 v = vcounter();
 
 //JOY1H
 uint8 bCPU::mmio_r4219() {
-uint8 r = 0x00;
+uint8  r = 0x00;
 uint16 v = vcounter();
   if(status.auto_joypad_poll == false)return 0x00; //can't read joypad if auto polling not enabled
 //if(v >= 225 && v <= 227)return 0x00; //can't read joypad while SNES is polling input
@@ -218,7 +252,7 @@ uint8 bCPU::mmio_r43x3(uint8 i) {
 
 //A1Bx
 uint8 bCPU::mmio_r43x4(uint8 i) {
-  return channel[i].srcaddr >> 16;
+  return channel[i].srcbank;
 }
 
 //DASxL
@@ -233,17 +267,17 @@ uint8 bCPU::mmio_r43x6(uint8 i) {
 
 //DASBx
 uint8 bCPU::mmio_r43x7(uint8 i) {
-  return channel[i].hdma_indirect_bank;
+  return channel[i].hdma_ibank;
 }
 
 //A2AxL
 uint8 bCPU::mmio_r43x8(uint8 i) {
-  return channel[i].hdma_taddr;
+  return channel[i].hdma_addr;
 }
 
 //A2AxH
 uint8 bCPU::mmio_r43x9(uint8 i) {
-  return channel[i].hdma_taddr >> 8;
+  return channel[i].hdma_addr >> 8;
 }
 
 //NTRLx
@@ -281,19 +315,17 @@ uint8 i;
     case 0x9:return cpu->mmio_r43x9(i);
     case 0xa:return cpu->mmio_r43xa(i);
     case 0xb:return cpu->mmio_r43xb(i);
-    case 0xc:return 0x43; //unmapped
-    case 0xd:return 0x43; //unmapped
-    case 0xe:return 0x43; //unmapped
+    case 0xc:return cpu->regs.mdr; //unmapped
+    case 0xd:return cpu->regs.mdr; //unmapped
+    case 0xe:return cpu->regs.mdr; //unmapped
     case 0xf:return cpu->mmio_r43xb(i); //mirror of 43xb
     }
   }
 
   switch(addr) {
   case 0x2180:return cpu->mmio_r2180(); //WMDATA
-  case 0x21c2:return cpu->mmio_r21c2(); //???
-  case 0x21c3:return cpu->mmio_r21c3(); //???
-  case 0x2800:return cpu->srtc_read();
   case 0x4016:return cpu->mmio_r4016(); //JOYSER0
+  case 0x4017:return cpu->mmio_r4017(); //JOYSER1
   case 0x4210:return cpu->mmio_r4210(); //RDNMI
   case 0x4211:return cpu->mmio_r4211(); //TIMEUP
   case 0x4212:return cpu->mmio_r4212(); //HVBJOY
@@ -306,7 +338,8 @@ uint8 i;
   case 0x4219:return cpu->mmio_r4219(); //JOY1H
   case 0x421a:case 0x421b:case 0x421c:case 0x421d:case 0x421e:case 0x421f:return 0x00;
   }
-  return 0x00;
+
+  return cpu->regs.mdr;
 }
 
 //WMDATA
@@ -351,11 +384,12 @@ void bCPU::mmio_w4200(uint8 value) {
   status.auto_joypad_poll = !!(value & 0x01);
 
   if(status.nmi_enabled == false) {
-    status.nmi_pin = 0;
+    status.nmi_read = false;
   }
 
-  if(status.virq_enabled == false && status.hirq_enabled == false) {
-    status.irq_pin = 0;
+  status.irq_exec = false;
+  if(status.virq_enabled == true || status.hirq_enabled == true) {
+    status.irq_read = false;
   }
 }
 
@@ -397,37 +431,40 @@ void bCPU::mmio_w4206(uint8 value) {
 //HTIMEL
 void bCPU::mmio_w4207(uint8 value) {
   status.hirq_pos = (status.hirq_pos & 0xff00) | value;
-  if(status.irq_triggered == false)status.irq_pin = 1;
+  status.irq_read = false;
 }
 
 //HTIMEH
 void bCPU::mmio_w4208(uint8 value) {
   status.hirq_pos = (status.hirq_pos & 0x00ff) | (value << 8);
-  if(status.irq_triggered == false)status.irq_pin = 1;
+  status.irq_read = false;
 }
 
 //VTIMEL
 void bCPU::mmio_w4209(uint8 value) {
   status.virq_pos = (status.virq_pos & 0xff00) | value;
-  if(status.irq_triggered == false)status.irq_pin = 1;
+  status.irq_read = false;
 }
 
 //VTIMEH
 void bCPU::mmio_w420a(uint8 value) {
   status.virq_pos = (status.virq_pos & 0x00ff) | (value << 8);
-  if(status.irq_triggered == false)status.irq_pin = 1;
+  status.irq_read = false;
 }
 
 //DMAEN
 void bCPU::mmio_w420b(uint8 value) {
+int len;
   if(value != 0x00) {
-    status.dma_state = DMASTATE_INIT;
+    status.dma_state = DMASTATE_DMASYNC;
   }
 
   for(int i=0;i<8;i++) {
     if(value & (1 << i)) {
-      channel[i].active = true;
-      channel[i].hdma_active = false;
+      channel[i].active       = true;
+      channel[i].hdma_enabled = false;
+      channel[i].hdma_active  = false;
+      channel[i].read_index   = 0;
     }
   }
 }
@@ -435,7 +472,8 @@ void bCPU::mmio_w420b(uint8 value) {
 //HDMAEN
 void bCPU::mmio_w420c(uint8 value) {
   for(int i=0;i<8;i++) {
-    channel[i].hdma_active = !!(value & (1 << i));
+    channel[i].hdma_enabled = !!(value & (1 << i));
+    channel[i].hdma_active  = !!(value & (1 << i));
   }
 }
 
@@ -461,17 +499,17 @@ void bCPU::mmio_w43x1(uint8 value, uint8 i) {
 
 //A1TxL
 void bCPU::mmio_w43x2(uint8 value, uint8 i) {
-  channel[i].srcaddr = (channel[i].srcaddr & 0xffff00) | value;
+  channel[i].srcaddr = (channel[i].srcaddr & 0xff00) | value;
 }
 
 //A1TxH
 void bCPU::mmio_w43x3(uint8 value, uint8 i) {
-  channel[i].srcaddr = (channel[i].srcaddr & 0xff00ff) | (value << 8);
+  channel[i].srcaddr = (channel[i].srcaddr & 0x00ff) | (value << 8);
 }
 
 //A1Bx
 void bCPU::mmio_w43x4(uint8 value, uint8 i) {
-  channel[i].srcaddr = (channel[i].srcaddr & 0x00ffff) | (value << 16);
+  channel[i].srcbank = value;
 }
 
 //DASxL
@@ -486,17 +524,17 @@ void bCPU::mmio_w43x6(uint8 value, uint8 i) {
 
 //DASBx
 void bCPU::mmio_w43x7(uint8 value, uint8 i) {
-  channel[i].hdma_indirect_bank = value;
+  channel[i].hdma_ibank = value;
 }
 
 //A2AxL
 void bCPU::mmio_w43x8(uint8 value, uint8 i) {
-  channel[i].hdma_taddr = (channel[i].hdma_taddr & 0xffff00) | value;
+  channel[i].hdma_addr = (channel[i].hdma_addr & 0xff00) | value;
 }
 
 //A2AxH
 void bCPU::mmio_w43x9(uint8 value, uint8 i) {
-  channel[i].hdma_taddr = (channel[i].hdma_taddr & 0xff00ff) | (value << 8);
+  channel[i].hdma_addr = (channel[i].hdma_addr & 0x00ff) | (value << 8);
 }
 
 //NTRLx
@@ -547,7 +585,6 @@ uint8 i;
   case 0x2181:cpu->mmio_w2181(value);return; //WMADDL
   case 0x2182:cpu->mmio_w2182(value);return; //WMADDM
   case 0x2183:cpu->mmio_w2183(value);return; //WMADDH
-  case 0x2801:cpu->srtc_write(value);return;
   case 0x4016:cpu->mmio_w4016(value);return; //JOYSER0
   case 0x4200:cpu->mmio_w4200(value);return; //NMITIMEN
   case 0x4201:cpu->mmio_w4201(value);return; //WRIO

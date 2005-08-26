@@ -21,10 +21,18 @@ extern PPU *ppu;
 #include "snes/snes.h"
 extern SNES *snes;
 
+#include "chip/srtc/srtc.h"
+#include "chip/sdd1/sdd1.h"
+extern SRTC *srtc;
+extern SDD1 *sdd1;
+
 #ifdef INTERFACE_MAIN
   MemBus *mem_bus;
   CPU    *cpu;
   APU    *apu;
   PPU    *ppu;
   SNES   *snes;
+
+  SRTC   *srtc;
+  SDD1   *sdd1;
 #endif

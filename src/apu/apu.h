@@ -23,6 +23,8 @@ APURegs regs;
   virtual void   power() = 0;
   virtual void   reset() = 0;
 
+//debugging functions
+  virtual bool in_opcode();
   void disassemble_opcode(char *output);
   inline uint16 __relb(int8 offset, int op_len);
 };

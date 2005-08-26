@@ -1,23 +1,26 @@
 #include "libbase.h"
 #include "libstring.h"
 
-_string::_string() {
+substring::substring() {
   size = 16;
   s = (char*)malloc(size + 1);
   *s = 0;
 }
 
-_string::~_string() {
-  free(s);
-}
-
-void string::addto(uint32 num) {
-  while(listcount < (num + 1)) {
-    list[listcount++] = new _string();
+substring::~substring() {
+  if(s) {
+    free(s);
+    s = 0;
   }
 }
 
-_string &string::str(uint32 num) {
+void string::addto(uint num) {
+  while(listcount < (num + 1)) {
+    list[listcount++] = new substring();
+  }
+}
+
+substring &string::str(uint num) {
   if(listcount < (num + 1)) { addto(num); }
   return *list[num];
 }
@@ -31,60 +34,68 @@ string::string() {
 string::~string() {
 int i;
   for(i=listcount-1;i>=0;i--) {
-    delete((_string*)list[i]);
+    delete((substring*)list[i]);
   }
 }
 
-uint32 count(string &str) {
-  return str.count;
+char chrlower(char c) {
+  if(c >= 'A' && c <= 'Z')return c + ('a' - 'A');
+  return c;
 }
 
-void strresize(_string &str, uint32 size) {
-char *t;
-int sl;
-  if(str.size == size)return;
-  sl = strlen(str.s);
-  t = (char*)malloc(size + 1);
-  strcpy(t, str.s);
-  free(str.s);
-  str.s = t;
+char chrupper(char c) {
+  if(c >= 'a' && c <= 'z')return c - ('a' - 'A');
+  return c;
+}
+
+uint count(string &str) { return str.count; }
+
+void strresize(substring &str, uint size) {
+  str.s = (char*)realloc(str.s, size + 1);
+  str.s[size] = 0;
   str.size = size;
 }
 
-char *strptr(_string &str) {
-  return str.s;
-}
+char *strptr(substring &str) { return str.s; }
 
-void strcpy(_string &dest, char *src) {
+uint strlen(substring &str) { return strlen(strptr(str)); }
+
+int strcmp(substring &dest, const char *src) { return strcmp(strptr(dest), src); }
+int strcmp(const char *dest, substring &src) { return strcmp(dest, strptr(src)); }
+int strcmp(substring &dest, substring &src) { return strcmp(strptr(dest), strptr(src)); }
+
+void strcpy(substring &dest, const char *src) {
 int srclen = strlen(src);
   if(srclen > dest.size) { strresize(dest, srclen); }
   strcpy(dest.s, src);
 }
+void strcpy(substring &dest, substring &src) { strcpy(dest, strptr(src)); }
 
-void strset(_string &dest, uint32 pos, uint8 c) {
+void strset(substring &dest, uint pos, uint8 c) {
 char *s;
   if(pos > dest.size) { strresize(dest, pos); }
   dest.s[pos] = c;
 }
 
-void strcat(_string &dest, char *src) {
+void strcat(substring &dest, const char *src) {
 int srclen, destlen;
   srclen = strlen(src);
   destlen = strlen(dest.s);
   if(srclen + destlen > dest.size) { strresize(dest, srclen + destlen); }
   strcat(dest.s, src);
 }
+void strcat(substring &dest, substring &src) { strcat(dest, strptr(src)); }
 
-void strinsert(_string &dest, char *src, uint32 pos) {
-_string *s = new _string();
-  strcpy(*s, strptr(dest) + pos);
+void strinsert(substring &dest, const char *src, uint pos) {
+static substring s;
+  strcpy(s, strptr(dest) + pos);
   strset(dest, pos, 0);
   strcat(dest, src);
-  strcat(dest, *s);
-  delete(s);
+  strcat(dest, s);
 }
+void strinsert(substring &dest, substring &src, uint pos) { strinsert(dest, strptr(src), pos); }
 
-void strremove(_string &dest, uint32 start, uint32 length) {
+void strremove(substring &dest, uint start, uint length) {
 int destlen;
 char *s;
 int i, sl = strlen(dest.s);
@@ -98,36 +109,35 @@ int i, sl = strlen(dest.s);
   s[i] = 0;
 }
 
-bool stricmp(char *dest, char *src) {
-int i, sl = strlen(dest);
-  if(sl != strlen(src))return false;
-  for(i=0;i<sl;i++) {
-    if(dest[i] >= 'A' && dest[i] <= 'Z') {
-      if(dest[i] != src[i] && dest[i] + 0x20 != src[i])return false;
-    } else if(dest[i] >='a' && dest[i] <= 'z') {
-      if(dest[i] != src[i] && dest[i] - 0x20 != src[i])return false;
-    } else {
-      if(dest[i] != src[i])return false;
-    }
+int __stricmp(const char *dest, const char *src) {
+  while(*dest && *src) {
+    if(chrlower(*dest) != chrlower(*src))break;
+    dest++;
+    src++;
   }
-  return true;
+  return (int)chrlower(*dest) - (int)chrlower(*src);
 }
+int stricmp(substring &dest, const char *src) { return __stricmp(strptr(dest), src); }
+int stricmp(const char *dest, substring &src) { return __stricmp(dest, strptr(src)); }
+int stricmp(substring &dest, substring &src) { return __stricmp(strptr(dest), strptr(src)); }
 
 void strlower(char *str) {
-int i, sl = strlen(str);
-  for(i=0;i<sl;i++) {
-    if(str[i] >= 'A' && str[i] <= 'Z')str[i] += 0x20;
+  while(*str) {
+    *str = chrlower(*str);
+    str++;
   }
 }
+void strlower(substring &str) { strlower(strptr(str)); }
 
 void strupper(char *str) {
-int i, sl = strlen(str);
-  for(i=0;i<sl;i++) {
-    if(str[i] >= 'a' && str[i] <= 'z')str[i] -= 0x20;
+  while(*str) {
+    *str = chrupper(*str);
+    str++;
   }
 }
+void strupper(substring &str) { strupper(strptr(str)); }
 
-uint32 strpos(char *str, char *key) {
+uint strpos(const char *str, const char *key) {
 int i, ssl = strlen(str), ksl = strlen(key);
   if(ksl > ssl)return null;
   for(i=0;i<=ssl-ksl;i++) {
@@ -135,8 +145,11 @@ int i, ssl = strlen(str), ksl = strlen(key);
   }
   return null;
 }
+uint strpos(substring &str, const char *key) { return strpos(strptr(str), key); }
+uint strpos(const char *str, substring &key) { return strpos(str, strptr(key)); }
+uint strpos(substring &str, substring &key) { return strpos(strptr(str), strptr(key)); }
 
-uint32 strqpos(char *str, char *key) {
+uint qstrpos(const char *str, const char *key) {
 int i, z, ssl = strlen(str), ksl = strlen(key);
 uint8 x;
   if(ksl > ssl)return null;
@@ -155,8 +168,11 @@ uint8 x;
   }
   return null;
 }
+uint qstrpos(substring &str, const char *key) { return qstrpos(strptr(str), key); }
+uint qstrpos(const char *str, substring &key) { return qstrpos(str, strptr(key)); }
+uint qstrpos(substring &str, substring &key) { return qstrpos(strptr(str), strptr(key)); }
 
-void strtr(char *dest, char *before, char *after) {
+void strtr(char *dest, const char *before, const char *after) {
 int i, l, sl = strlen(dest), bsl = strlen(before), asl = strlen(after);
   if((bsl != asl) || bsl == 0)return;
   for(i=0;i<sl;i++) {
@@ -165,15 +181,17 @@ int i, l, sl = strlen(dest), bsl = strlen(before), asl = strlen(after);
     }
   }
 }
+void strtr(substring &dest, const char *before, const char *after) { strtr(strptr(dest), before, after); }
 
-uint32 strbegin(char *str, char *key) {
+uint strbegin(const char *str, const char *key) {
 int i, ssl = strlen(str), ksl = strlen(key);
   if(ksl > ssl)return 1;
   if(!memcmp(str, key, ksl))return 0;
   return 1;
 }
+uint strbegin(substring &str, const char *key) { return strbegin(strptr(str), key); }
 
-uint32 stribegin(char *str, char *key) {
+uint stribegin(const char *str, const char *key) {
 int i, ssl = strlen(str), ksl = strlen(key);
   if(ksl > ssl)return 1;
   for(i=0;i<ksl;i++) {
@@ -187,15 +205,17 @@ int i, ssl = strlen(str), ksl = strlen(key);
   }
   return 0;
 }
+uint stribegin(substring &str, const char *key) { return stribegin(strptr(str), key); }
 
-uint32 strend(char *str, char *key) {
+uint strend(const char *str, const char *key) {
 int i, ssl = strlen(str), ksl = strlen(key);
   if(ksl > ssl)return 1;
   if(!memcmp(str + ssl - ksl, key, ksl))return 0;
   return 1;
 }
+uint strend(substring &str, const char *key) { return strend(strptr(str), key); }
 
-uint32 striend(char *str, char *key) {
+uint striend(const char *str, const char *key) {
 int i, z, ssl = strlen(str), ksl = strlen(key);
   if(ksl > ssl)return 1;
   for(i=ssl-ksl, z=0;i<ssl;i++, z++) {
@@ -209,8 +229,9 @@ int i, z, ssl = strlen(str), ksl = strlen(key);
   }
   return 0;
 }
+uint striend(substring &str, const char *key) { return striend(strptr(str), key); }
 
-void strltrim(char *str, char *key) {
+void strltrim(char *str, const char *key) {
 int i, ssl = strlen(str), ksl = strlen(key);
   if(ksl > ssl)return;
   if(!strbegin(str, key)) {
@@ -218,8 +239,9 @@ int i, ssl = strlen(str), ksl = strlen(key);
     str[i] = 0;
   }
 }
+void strltrim(substring &str, const char *key) { strltrim(strptr(str), key); }
 
-void striltrim(char *str, char *key) {
+void striltrim(char *str, const char *key) {
 int i, ssl = strlen(str), ksl = strlen(key);
   if(ksl > ssl)return;
   if(!stribegin(str, key)) {
@@ -227,25 +249,28 @@ int i, ssl = strlen(str), ksl = strlen(key);
     str[i] = 0;
   }
 }
+void striltrim(substring &str, const char *key) { striltrim(strptr(str), key); }
 
-void strrtrim(char *str, char *key) {
+void strrtrim(char *str, const char *key) {
 int ssl = strlen(str), ksl = strlen(key);
   if(ksl > ssl)return;
   if(!strend(str, key)) {
     str[ssl - ksl] = 0;
   }
 }
+void strrtrim(substring &str, const char *key) { strrtrim(strptr(str), key); }
 
-void strirtrim(char *str, char *key) {
+void strirtrim(char *str, const char *key) {
 int ssl = strlen(str), ksl = strlen(key);
   if(ksl > ssl)return;
   if(!striend(str, key)) {
     str[ssl - ksl] = 0;
   }
 }
+void strirtrim(substring &str, const char *key) { strirtrim(strptr(str), key); }
 
-/* does not work on type char* because function increases string length */
-void strquote(_string &str) {
+//does not work on type char* because function increases string length
+void strquote(substring &str) {
 static string t;
   strcpy(t, "\"");
   strcat(t, str);
@@ -255,15 +280,15 @@ static string t;
 
 bool strunquote(char *str) {
 int i, ssl = strlen(str);
-/* make sure string is long enough to have quotes */
+//make sure string is long enough to have quotes
   if(ssl < 2)return false;
 
-/* make sure string actually has quotes */
+//make sure string actually has quotes
   if(str[0] == '\"' && str[ssl - 1] == '\"');
   else if(str[0] == '\'' && str[ssl - 1] == '\'');
   else return false;
 
-/* now remove them */
+//now remove them
   for(i=0;i<ssl;i++) {
     str[i] = str[i + 1];
   }
@@ -271,9 +296,10 @@ int i, ssl = strlen(str);
 
   return true;
 }
+bool strunquote(substring &str) { return strunquote(strptr(str)); }
 
-uint32 strhex(char *str) {
-uint32 r = 0, m = 0;
+uint strhex(const char *str) {
+uint r = 0, m = 0;
 int i, ssl = strlen(str);
 uint8 x;
   for(i=0;i<ssl;i++) {
@@ -292,31 +318,44 @@ uint8 x;
   }
   return r;
 }
+uint strhex(substring &str) { return strhex(strptr(str)); }
 
-int strdec(char *str) {
-uint32 m = 1;
+int sstrhex(const char *str) {
+  if(str[0] == '-') {
+    return -strhex(str + 1);
+  }
+  return strhex(str);
+}
+int sstrhex(substring &str) { return sstrhex(strptr(str)); }
+
+uint strdec(const char *str) {
+uint m = 1;
 int i, r = 0, ssl = strlen(str);
 uint8 x;
   for(i=0;i<ssl;i++) {
     if(str[i] >= '0' && str[i] <= '9');
-    else if(str[i] == '-' && i == 0);
     else break;
   }
   for(--i;i>=0;i--, m*=10) {
     x = str[i];
     if(x >= '0' && x <= '9')x -= '0';
-    else if(i == 0 && str[i] == '-') {
-      r *= -1;
-      return r;
-    }
     else return r;
     r += x * m;
   }
   return r;
 }
+uint strdec(substring &str) { return strdec(strptr(str)); }
 
-uint32 strbin(char *str) {
-uint32 r = 0, m = 0;
+int sstrdec(const char *str) {
+  if(str[0] == '-') {
+    return -strdec(str + 1);
+  }
+  return strdec(str);
+}
+int sstrdec(substring &str) { return sstrdec(strptr(str)); }
+
+uint strbin(const char *str) {
+uint r = 0, m = 0;
 int i, ssl = strlen(str);
 uint8 x;
   for(i=0;i<ssl;i++) {
@@ -331,6 +370,15 @@ uint8 x;
   }
   return r;
 }
+uint strbin(substring &str) { return strbin(strptr(str)); }
+
+int sstrbin(const char *str) {
+  if(str[0] == '-') {
+    return -strbin(str + 1);
+  }
+  return strbin(str);
+}
+int sstrbin(substring &str) { return sstrbin(strptr(str)); }
 
 #include "libstring_math.cpp"
 #include "libstring_split.cpp"

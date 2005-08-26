@@ -1,5 +1,5 @@
 #define INTERFACE_MAIN
-#define BSNES_VERSION "0.010"
+#define BSNES_VERSION "0.011"
 #define BSNES_TITLE "bsnes v" BSNES_VERSION
 #include "winmain.h"
 #include "../base.h"
@@ -31,6 +31,8 @@ void init_snes() {
   ppu     = new bPPU();
   snes    = new bSNES();
   bsnes   = static_cast<bSNES*>(snes);
+
+  snes->init();
 }
 
 void term_snes() {

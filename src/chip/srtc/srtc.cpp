@@ -50,7 +50,9 @@
   whenever the RTC is set.
 */
 
-void bCPU::srtc_set_time() {
+#include "../../base.h"
+
+void SRTC::set_time() {
 time_t rawtime;
 tm *t;
   ::time(&rawtime);
@@ -72,12 +74,12 @@ tm *t;
   srtc.data[12] = t->tm_wday;
 }
 
-void bCPU::srtc_power() {
+void SRTC::power() {
   memset(&srtc, 0, sizeof(srtc));
   reset();
 }
 
-void bCPU::srtc_reset() {
+void SRTC::reset() {
   srtc.index = -1;
   srtc.mode = SRTC_READ;
 }
@@ -87,7 +89,7 @@ void bCPU::srtc_reset() {
 //as reads will refresh the data array with the current system
 //time. The write method is only here for the sake of faux
 //emulation of the real hardware.
-void bCPU::srtc_write(uint8 data) {
+void SRTC::write(uint8 data) {
   data &= 0x0f; //only the low four bits are used
 
   if(data >= 0x0d) {
@@ -140,10 +142,10 @@ void bCPU::srtc_write(uint8 data) {
   }
 }
 
-uint8 bCPU::srtc_read() {
+uint8 SRTC::read() {
   if(srtc.mode == SRTC_READ) {
     if(srtc.index < 0) {
-      srtc_set_time();
+      set_time();
       srtc.index++;
       return 0x0f; //send start message
     } else if(srtc.index > MAX_SRTC_INDEX) {
@@ -154,5 +156,23 @@ uint8 bCPU::srtc_read() {
     }
   } else {
     return 0x00;
+  }
+}
+
+SRTC::SRTC() {
+  mmio = new SRTCMMIO();
+}
+
+uint8 SRTCMMIO::read(uint32 addr) {
+  switch(addr) {
+  case 0x2800:return srtc->read();
+  }
+
+  return cpu->regs.mdr;
+}
+
+void SRTCMMIO::write(uint32 addr, uint8 value) {
+  switch(addr) {
+  case 0x2801:srtc->write(value);break;
   }
 }

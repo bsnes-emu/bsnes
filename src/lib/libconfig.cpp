@@ -1,21 +1,6 @@
 #include "libbase.h"
 #include "libconfig.h"
 
-//if this function returns true, the option is written
-//to the configuration file. by always returning true,
-//every option is always written. disable the first line
-//to only output options after they have been changed by
-//the program from their default values first.
-bool config_item::changed() {
-  return true;
-
-  if(is_string == true) {
-    if(!strcmp(*strsource, strdef))return false;
-    return true;
-  }
-  return (*source != def);
-}
-
 config_item::config_item() {
   strcpy(name,   "");
   strcpy(strdef, "");
@@ -67,34 +52,6 @@ uint32 config::find(char *name) {
   return null;
 }
 
-uint32 config::get(char *name) {
-int i = find(name);
-  if(i == null)return 0;
-  return *item[i]->source;
-}
-
-string &config::strget(char *name) {
-int i = find(name);
-  if(i == null) {
-  static string not_found;
-    strcmp(not_found, "");
-    return not_found;
-  }
-  return *item[i]->strsource;
-}
-
-void config::set(char *name, uint32 value) {
-int i = find(name);
-  if(i == null)return;
-  *item[i]->source = value;
-}
-
-void config::set(char *name, char *value) {
-int i = find(name);
-  if(i == null)return;
-  strcpy(*item[i]->strsource, value);
-}
-
 void config::load(char *fn) {
 FILE *fp;
 char *buffer;
@@ -130,8 +87,8 @@ uint32 l;
     qreplace(line[i], " ", "");
 
   //remove comment, if it exists
-    if(strqpos(line[i], "#") != null) {
-      strset(line[i], strqpos(line[i], "#"), 0);
+    if(qstrpos(line[i], "#") != null) {
+      strset(line[i], qstrpos(line[i], "#"), 0);
     }
 
   //ignore blank lines
@@ -139,7 +96,7 @@ uint32 l;
 
     qsplit(part, "=", line[i]);
 
-    l = find(*part[0]);
+    l = find(strptr(part[0]));
     if(l != null) {
     //if the config item name is valid... update item value
       if(item[l]->is_string == true) {
@@ -153,7 +110,7 @@ uint32 l;
         !strcmp(part[1], "off") || !strcmp(part[1], "disabled")) {
           *item[l]->source = 0;
         } else if(item[l]->type == HEX) {
-          *item[l]->source = strhex(*part[1] + 2); //skip 0x prefix
+          *item[l]->source = strhex(strptr(part[1]) + 2); //skip 0x prefix
         } else { /* fall back on DEC */
           *item[l]->source = strdec(part[1]);
         }
@@ -161,6 +118,7 @@ uint32 l;
     }
   }
 }
+void config::load(substring &fn) { load(strptr(fn)); }
 
 //create a text string from config item[i] to be output via config->save()
 void config::set_newline(int i) {
@@ -246,8 +204,8 @@ bool blank = false;
     for(i=0;i<count(line);i++) {
       qreplace(line[i], " ", "");
 
-      if(strqpos(line[i], "#") != null) {
-        strset(line[i], strqpos(line[i], "#"), 0);
+      if(qstrpos(line[i], "#") != null) {
+        strset(line[i], qstrpos(line[i], "#"), 0);
       }
 
     //this line is empty, restore the old line and continue
@@ -258,7 +216,7 @@ bool blank = false;
 
       qsplit(part, "=", line[i]);
 
-      l = find(*part[0]);
+      l = find(strptr(part[0]));
       if(l == null) {
       //invalid item name, restore the old line and continue
         strcpy(line[i], oldline[i]);
@@ -269,9 +227,9 @@ bool blank = false;
       set_newline(l);
 
     //copy the user comment from the old config file, if it exists
-      if(strqpos(oldline[i], "#") != null) {
+      if(qstrpos(oldline[i], "#") != null) {
         strcat(newline, " ");
-        strcat(newline, *oldline[i] + strqpos(oldline[i], "#"));
+        strcat(newline, strptr(oldline[i]) + qstrpos(oldline[i], "#"));
       }
 
       strcpy(line[i], newline);
@@ -279,7 +237,7 @@ bool blank = false;
 
   //write out the old config file + changes first
     for(i=0;i<count(line);) {
-      fprintf(fp, "%s", *line[i]);
+      fprintf(fp, "%s", strptr(line[i]));
 
     //write a line feed on all lines but the last.
     //keeps the file from growing everytime it is saved
@@ -291,20 +249,18 @@ int lines_written;
   for(i=lines_written=0;i<item_count;i++) {
   //if the item was written to the file above...
     if(set[i] == 1)continue;
-  //...or if it is still set to the default value,
-  //then don't output it to the file here
-    if(item[i]->changed() == false)continue;
 
     set_newline(i);
   //prevent a newline from appearing at the top of the file
   //when the config file is created for the first time
     if(lines_written == 0 && blank == false)fprintf(fp, "\r\n");
-    fprintf(fp, "%s\r\n", *newline);
+    fprintf(fp, "%s\r\n", strptr(newline));
     lines_written++;
   }
 
   fclose(fp);
 }
+void config::save(substring &fn) { save(strptr(fn)); }
 
 config::config() {
   item_count = 0;

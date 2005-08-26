@@ -11,7 +11,9 @@ bPPU *ppu;
 class bPPU : public PPU {
 public:
 uint8 *vram, *oam, *cgram;
+uint8  region;
 
+enum { NTSC = 0, PAL = 1 };
 enum { BG1 = 0, BG2 = 1, BG3 = 2, BG4 = 3, OAM = 4, BACK = 5 };
 enum { SC_32x32 = 0, SC_32x64 = 1, SC_64x32 = 2, SC_64x64 = 3 };
 
@@ -31,6 +33,9 @@ struct {
 }settings;
 
 struct {
+//open bus support
+  uint8 ppu1_mdr, ppu2_mdr;
+
 //$2100
   bool   display_disabled;
   uint8  display_brightness;
@@ -64,6 +69,8 @@ struct {
   uint16 bg_tdaddr[4];
 
 //$210d-$2114
+  uint8  bg_ofslatch;
+  uint16 m7_hofs, m7_vofs;
   uint16 bg_hofs[4];
   uint16 bg_vofs[4];
 
@@ -81,6 +88,7 @@ struct {
   bool   mode7_hflip;
 
 //$211b-$2120
+  uint8  m7_latch;
   uint16 m7a, m7b, m7c, m7d, m7x, m7y;
 
 //$2121

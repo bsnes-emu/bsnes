@@ -1,6 +1,6 @@
-void replace(_string &str, char *key, char *token) {
-int i, z, ksl = strlen(key), tsl = strlen(token), ssl = strlen(str);
-uint32 replace_count = 0, size = ssl;
+void replace(substring &str, const char *key, const char *token) {
+int  i, z, ksl = strlen(key), tsl = strlen(token), ssl = strlen(str);
+uint replace_count = 0, size = ssl;
 char *data;
   if(ksl > ssl)return;
   if(tsl > ksl) {                      //the new string may be longer than the old string...
@@ -27,11 +27,12 @@ char *data;
   strcpy(str, data);
   free(data);
 }
+void replace(substring &str, const char *key, substring &token) { replace(str, key, strptr(token)); }
 
-void qreplace(_string &str, char *key, char *token) {
-int i, l, z, ksl = strlen(key), tsl = strlen(token), ssl = strlen(str);
+void qreplace(substring &str, const char *key, const char *token) {
+int   i, l, z, ksl = strlen(key), tsl = strlen(token), ssl = strlen(str);
+uint  replace_count = 0, size = ssl;
 uint8 x;
-uint32 replace_count = 0, size = ssl;
 char *data;
   if(ksl > ssl)return;
   if(tsl > ksl) {
@@ -80,3 +81,4 @@ char *data;
   strcpy(str, data);
   free(data);
 }
+void qreplace(substring &str, const char *key, substring &token) { qreplace(str, key, strptr(token)); }
