@@ -393,6 +393,7 @@ void bPPU::mmio_w2130(uint8 value) {
   regs.color_mask    = (value >> 6) & 3;
   regs.colorsub_mask = (value >> 4) & 3;
   regs.addsub_mode   = !!(value & 0x02);
+  regs.direct_color  = !!(value & 0x01);
 }
 
 //CGADDSUB
@@ -538,9 +539,9 @@ uint8 bPPU::mmio_r213d() {
 //STAT77
 uint8 bPPU::mmio_r213e() {
 uint8 r = 0x00;
-  r |= (regs.time_over) ?0x80:0x00;
-  r |= (regs.range_over)?0x40:0x00;
-  r |= 0x01; //PPU1 version number
+  r |= (regs.time_over)  ? 0x80 : 0x00;
+  r |= (regs.range_over) ? 0x40 : 0x00;
+  r |= (ppu1_version & 0x0f);
   regs.ppu1_mdr = r;
   return regs.ppu1_mdr;
 }
@@ -560,7 +561,7 @@ uint8 r = 0x00;
   }
   r |= (regs.ppu2_mdr & 0x20);
   r |= (region << 4); //0 = NTSC, 1 = PAL
-  r |= 0x03; //PPU2 version number
+  r |= (ppu2_version & 0x0f);
   regs.ppu2_mdr = r;
   return regs.ppu2_mdr;
 }

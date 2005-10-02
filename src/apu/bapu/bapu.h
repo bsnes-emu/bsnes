@@ -29,12 +29,13 @@ struct {
 
 bAPUTimer t0, t1, t2;
 
-uint8 *spcram, iplrom[64], dsp_regs[128];
+uint8 *spcram;
   inline uint8  spcram_read (uint16 addr);
   inline void   spcram_write(uint16 addr, uint8 value);
   inline uint8  port_read (uint8 port);
   inline void   port_write(uint8 port,  uint8 value);
 
+  inline uint8 *get_spcram_handle();
   inline void   run();
   inline uint32 cycles_executed();
   inline void   power();

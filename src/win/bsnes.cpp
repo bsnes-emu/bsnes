@@ -43,31 +43,31 @@ uint32 bSNES::get_status() {
   return run_status;
 }
 
-void bSNES::snes_run() {
+void bSNES::run() {
   if(!rom_image->loaded())return;
 
   switch(run_status) {
   case RUN:
     while(update_frame == false) {
-      run();
+      SNES::run();
     }
     update_frame = false;
     return;
   case STOP:
     break;
   case RUNONCE:
-    run();
+    SNES::run();
     set_status(STOP);
     break;
   case RUNTOSIGNAL:
-    run();
+    SNES::run();
     if(w_bp->hit() == true) {
       set_status(STOP);
       disassemble_bp_op();
     }
     break;
   case RUNTOFRAME:
-    run();
+    SNES::run();
     if(update_frame == true) {
       update_frame = false;
       set_status(STOP);
@@ -79,7 +79,7 @@ void bSNES::snes_run() {
     }
     return;
   case RUNTOCPUSTEP:
-    run();
+    SNES::run();
     if(status.cpu_ran == true) {
       set_status(STOP);
     } else if(w_bp->hit() == true) {
@@ -88,7 +88,7 @@ void bSNES::snes_run() {
     }
     break;
   case RUNTOCPUPROCEED:
-    run();
+    SNES::run();
     if(cpu->in_opcode() == false && status.cpu_stop_pos == cpu->regs.pc.d) {
       set_status(STOP);
       disassemble_cpu_op();
@@ -98,14 +98,14 @@ void bSNES::snes_run() {
     }
     break;
   case RUNTOCPUTRACE:
-    run();
+    SNES::run();
     if(status.cpu_trace_pos >= status.cpu_trace_stop) {
       set_status(STOP);
       disassemble_cpu_op();
     }
     break;
   case RUNTOAPUSTEP:
-    run();
+    SNES::run();
     if(status.apu_ran == true || w_bp->hit() == true) {
       set_status(STOP);
     }
@@ -113,8 +113,12 @@ void bSNES::snes_run() {
   }
 }
 
-void bSNES::render_frame() {
+void bSNES::video_run() {
   dd_renderer->update();
+}
+
+void bSNES::sound_run() {
+  ds_sound->run();
 }
 
 /***********************
@@ -123,18 +127,18 @@ void bSNES::render_frame() {
 void bSNES::poll_input() {
 //only capture input when main window has focus
   if(GetForegroundWindow() == w_main->hwnd) {
-    joypad1.up     = KeyDown(cfg.input.joypad1.up);
-    joypad1.down   = KeyDown(cfg.input.joypad1.down);
-    joypad1.left   = KeyDown(cfg.input.joypad1.left);
-    joypad1.right  = KeyDown(cfg.input.joypad1.right);
-    joypad1.select = KeyDown(cfg.input.joypad1.select);
-    joypad1.start  = KeyDown(cfg.input.joypad1.start);
-    joypad1.y      = KeyDown(cfg.input.joypad1.y);
-    joypad1.b      = KeyDown(cfg.input.joypad1.b);
-    joypad1.x      = KeyDown(cfg.input.joypad1.x);
-    joypad1.a      = KeyDown(cfg.input.joypad1.a);
-    joypad1.l      = KeyDown(cfg.input.joypad1.l);
-    joypad1.r      = KeyDown(cfg.input.joypad1.r);
+    joypad1.up     = KeyDown(config::input.joypad1.up);
+    joypad1.down   = KeyDown(config::input.joypad1.down);
+    joypad1.left   = KeyDown(config::input.joypad1.left);
+    joypad1.right  = KeyDown(config::input.joypad1.right);
+    joypad1.select = KeyDown(config::input.joypad1.select);
+    joypad1.start  = KeyDown(config::input.joypad1.start);
+    joypad1.y      = KeyDown(config::input.joypad1.y);
+    joypad1.b      = KeyDown(config::input.joypad1.b);
+    joypad1.x      = KeyDown(config::input.joypad1.x);
+    joypad1.a      = KeyDown(config::input.joypad1.a);
+    joypad1.l      = KeyDown(config::input.joypad1.l);
+    joypad1.r      = KeyDown(config::input.joypad1.r);
   } else {
     joypad1.up = joypad1.down = joypad1.left = joypad1.right =
     joypad1.select = joypad1.start =
@@ -272,7 +276,6 @@ void bSNES::notify(uint32 message, uint32 param1, uint32 param2) {
   switch(message) {
   case RENDER_FRAME:
     update_frame = true;
-    render_frame();
     break;
   }
 

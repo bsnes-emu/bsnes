@@ -9,9 +9,11 @@ ldx_const(0xa2, ldx, regs.p.x),
 ldy_const(0xa0, ldy, regs.p.x),
 ora_const(0x09, ora, regs.p.m),
 sbc_const(0xe9, sbc, regs.p.m) {
-1:rd.l = op_read();
+1:if($2)last_cycle();
+  rd.l = op_read();
   if($2) { op_$1_b(); end; }
-2:rd.h = op_read();
+2:last_cycle();
+  rd.h = op_read();
   op_$1_w();
 }
 
@@ -29,9 +31,11 @@ ora_addr(0x0d, ora, regs.p.m),
 sbc_addr(0xed, sbc, regs.p.m) {
 1:aa.l = op_read();
 2:aa.h = op_read();
-3:rd.l = op_read(OPMODE_DBR, aa.w);
+3:if($2)last_cycle();
+  rd.l = op_read(OPMODE_DBR, aa.w);
   if($2) { op_$1_b(); end; }
-4:rd.h = op_read(OPMODE_DBR, aa.w + 1);
+4:last_cycle();
+  rd.h = op_read(OPMODE_DBR, aa.w + 1);
   op_$1_w();
 }
 
@@ -47,9 +51,11 @@ sbc_addrx(0xfd, sbc, regs.p.m) {
 1:aa.l = op_read();
 2:aa.h = op_read();
 3:cpu_c4(aa.w, aa.w + regs.x.w);
-4:rd.l = op_read(OPMODE_DBR, aa.w + regs.x.w);
+4:if($2)last_cycle();
+  rd.l = op_read(OPMODE_DBR, aa.w + regs.x.w);
   if($2) { op_$1_b(); end; }
-5:rd.h = op_read(OPMODE_DBR, aa.w + regs.x.w + 1);
+5:last_cycle();
+  rd.h = op_read(OPMODE_DBR, aa.w + regs.x.w + 1);
   op_$1_w();
 }
 
@@ -64,9 +70,11 @@ sbc_addry(0xf9, sbc, regs.p.m) {
 1:aa.l = op_read();
 2:aa.h = op_read();
 3:cpu_c4(aa.w, aa.w + regs.y.w);
-4:rd.l = op_read(OPMODE_DBR, aa.w + regs.y.w);
+4:if($2)last_cycle();
+  rd.l = op_read(OPMODE_DBR, aa.w + regs.y.w);
   if($2) { op_$1_b(); end; }
-5:rd.h = op_read(OPMODE_DBR, aa.w + regs.y.w + 1);
+5:last_cycle();
+  rd.h = op_read(OPMODE_DBR, aa.w + regs.y.w + 1);
   op_$1_w();
 }
 
@@ -80,9 +88,11 @@ sbc_long(0xef, sbc, regs.p.m) {
 1:aa.l = op_read();
 2:aa.h = op_read();
 3:aa.b = op_read();
-4:rd.l = op_read(OPMODE_LONG, aa.d);
+4:if($2)last_cycle();
+  rd.l = op_read(OPMODE_LONG, aa.d);
   if($2) { op_$1_b(); end; }
-5:rd.h = op_read(OPMODE_LONG, aa.d + 1);
+5:last_cycle();
+  rd.h = op_read(OPMODE_LONG, aa.d + 1);
   op_$1_w();
 }
 
@@ -96,9 +106,11 @@ sbc_longx(0xff, sbc, regs.p.m) {
 1:aa.l = op_read();
 2:aa.h = op_read();
 3:aa.b = op_read();
-4:rd.l = op_read(OPMODE_LONG, aa.d + regs.x.w);
+4:if($2)last_cycle();
+  rd.l = op_read(OPMODE_LONG, aa.d + regs.x.w);
   if($2) { op_$1_b(); end; }
-5:rd.h = op_read(OPMODE_LONG, aa.d + regs.x.w + 1);
+5:last_cycle();
+  rd.h = op_read(OPMODE_LONG, aa.d + regs.x.w + 1);
   op_$1_w();
 }
 
@@ -116,9 +128,11 @@ ora_dp(0x05, ora, regs.p.m),
 sbc_dp(0xe5, sbc, regs.p.m) {
 1:dp = op_read();
 2:cpu_c2();
-3:rd.l = op_read(OPMODE_DP, dp);
+3:if($2)last_cycle();
+  rd.l = op_read(OPMODE_DP, dp);
   if($2) { op_$1_b(); end; }
-4:rd.h = op_read(OPMODE_DP, dp + 1);
+4:last_cycle();
+  rd.h = op_read(OPMODE_DP, dp + 1);
   op_$1_w();
 }
 
@@ -134,9 +148,11 @@ sbc_dpx(0xf5, sbc, regs.p.m) {
 1:dp = op_read();
 2:cpu_c2();
 3:cpu_io();
-4:rd.l = op_read(OPMODE_DP, dp + regs.x.w);
+4:if($2)last_cycle();
+  rd.l = op_read(OPMODE_DP, dp + regs.x.w);
   if($2) { op_$1_b(); end; }
-5:rd.h = op_read(OPMODE_DP, dp + regs.x.w + 1);
+5:last_cycle();
+  rd.h = op_read(OPMODE_DP, dp + regs.x.w + 1);
   op_$1_w();
 }
 
@@ -144,9 +160,11 @@ ldx_dpy(0xb6, ldx, regs.p.x) {
 1:dp = op_read();
 2:cpu_c2();
 3:cpu_io();
-4:rd.l = op_read(OPMODE_DP, dp + regs.y.w);
+4:if($2)last_cycle();
+  rd.l = op_read(OPMODE_DP, dp + regs.y.w);
   if($2) { op_$1_b(); end; }
-5:rd.h = op_read(OPMODE_DP, dp + regs.y.w + 1);
+5:last_cycle();
+  rd.h = op_read(OPMODE_DP, dp + regs.y.w + 1);
   op_$1_w();
 }
 
@@ -161,9 +179,11 @@ sbc_idp(0xf2, sbc, regs.p.m) {
 2:cpu_c2();
 3:aa.l = op_read(OPMODE_DP, dp);
 4:aa.h = op_read(OPMODE_DP, dp + 1);
-5:rd.l = op_read(OPMODE_DBR, aa.w);
+5:if($2)last_cycle();
+  rd.l = op_read(OPMODE_DBR, aa.w);
   if($2) { op_$1_b(); end; }
-6:rd.h = op_read(OPMODE_DBR, aa.w + 1);
+6:last_cycle();
+  rd.h = op_read(OPMODE_DBR, aa.w + 1);
   op_$1_w();
 }
 
@@ -179,9 +199,11 @@ sbc_idpx(0xe1, sbc, regs.p.m) {
 3:cpu_io();
 4:aa.l = op_read(OPMODE_DP, dp + regs.x.w);
 5:aa.h = op_read(OPMODE_DP, dp + regs.x.w + 1);
-6:rd.l = op_read(OPMODE_DBR, aa.w);
+6:if($2)last_cycle();
+  rd.l = op_read(OPMODE_DBR, aa.w);
   if($2) { op_$1_b(); end; }
-7:rd.h = op_read(OPMODE_DBR, aa.w + 1);
+7:last_cycle();
+  rd.h = op_read(OPMODE_DBR, aa.w + 1);
   op_$1_w();
 }
 
@@ -197,9 +219,11 @@ sbc_idpy(0xf1, sbc, regs.p.m) {
 3:aa.l = op_read(OPMODE_DP, dp);
 4:aa.h = op_read(OPMODE_DP, dp + 1);
 5:cpu_c4(aa.w, aa.w + regs.y.w);
-6:rd.l = op_read(OPMODE_DBR, aa.w + regs.y.w);
+6:if($2)last_cycle();
+  rd.l = op_read(OPMODE_DBR, aa.w + regs.y.w);
   if($2) { op_$1_b(); end; }
-7:rd.h = op_read(OPMODE_DBR, aa.w + regs.y.w + 1);
+7:last_cycle();
+  rd.h = op_read(OPMODE_DBR, aa.w + regs.y.w + 1);
   op_$1_w();
 }
 
@@ -215,9 +239,11 @@ sbc_ildp(0xe7, sbc, regs.p.m) {
 3:aa.l = op_read(OPMODE_DP, dp);
 4:aa.h = op_read(OPMODE_DP, dp + 1);
 5:aa.b = op_read(OPMODE_DP, dp + 2);
-6:rd.l = op_read(OPMODE_LONG, aa.d);
+6:if($2)last_cycle();
+  rd.l = op_read(OPMODE_LONG, aa.d);
   if($2) { op_$1_b(); end; }
-7:rd.h = op_read(OPMODE_LONG, aa.d + 1);
+7:last_cycle();
+  rd.h = op_read(OPMODE_LONG, aa.d + 1);
   op_$1_w();
 }
 
@@ -233,9 +259,11 @@ sbc_ildpy(0xf7, sbc, regs.p.m) {
 3:aa.l = op_read(OPMODE_DP, dp);
 4:aa.h = op_read(OPMODE_DP, dp + 1);
 5:aa.b = op_read(OPMODE_DP, dp + 2);
-6:rd.l = op_read(OPMODE_LONG, aa.d + regs.y.w);
+6:if($2)last_cycle();
+  rd.l = op_read(OPMODE_LONG, aa.d + regs.y.w);
   if($2) { op_$1_b(); end; }
-7:rd.h = op_read(OPMODE_LONG, aa.d + regs.y.w + 1);
+7:last_cycle();
+  rd.h = op_read(OPMODE_LONG, aa.d + regs.y.w + 1);
   op_$1_w();
 }
 
@@ -248,9 +276,11 @@ ora_sr(0x03, ora, regs.p.m),
 sbc_sr(0xe3, sbc, regs.p.m) {
 1:sp = op_read();
 2:cpu_io();
-3:rd.l = op_read(OPMODE_SP, sp);
+3:if($2)last_cycle();
+  rd.l = op_read(OPMODE_SP, sp);
   if($2) { op_$1_b(); end; }
-4:rd.h = op_read(OPMODE_SP, sp + 1);
+4:last_cycle();
+  rd.h = op_read(OPMODE_SP, sp + 1);
   op_$1_w();
 }
 
@@ -266,18 +296,22 @@ sbc_isry(0xf3, sbc) {
 3:aa.l = op_read(OPMODE_SP, sp);
 4:aa.h = op_read(OPMODE_SP, sp + 1);
 5:cpu_io();
-6:rd.l = op_read(OPMODE_DBR, aa.w + regs.y.w);
+6:if(regs.p.m)last_cycle();
+  rd.l = op_read(OPMODE_DBR, aa.w + regs.y.w);
   if(regs.p.m) { op_$1_b(); end; }
-7:rd.h = op_read(OPMODE_DBR, aa.w + regs.y.w + 1);
+7:last_cycle();
+  rd.h = op_read(OPMODE_DBR, aa.w + regs.y.w + 1);
   op_$1_w();
 }
 
 bit_const(0x89) {
-1:rd.l = op_read();
+1:if(regs.p.m)last_cycle();
+  rd.l = op_read();
   if(regs.p.m) {
     regs.p.z = ((rd.l & regs.a.l) == 0);
     end;
   }
-2:rd.h = op_read();
+2:last_cycle();
+  rd.h = op_read();
   regs.p.z = ((rd.w & regs.a.w) == 0);
 }

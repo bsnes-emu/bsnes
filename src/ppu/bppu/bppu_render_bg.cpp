@@ -3,7 +3,7 @@ void bPPU::render_line_bg(uint8 bg, uint8 color_depth, uint8 pri0_pos, uint8 pri
     return;
   }
 
-int x;
+int  x;
 int  _scaddr        = regs.bg_scaddr[bg];
 int  _tdaddr        = regs.bg_tdaddr[bg];
 bool _bg_enabled    = regs.bg_enabled[bg];
@@ -25,17 +25,7 @@ uint16 opt_valid_bit; //offset-per-tile valid flag bit
 //entry point. This allows all 256 palette colors
 //to be used, instead of just the first 32.
 //entry = bg * 32, where 32 is from 8 * 4
-uint8 bgpal_index;
-  if(regs.bg_mode == 0) {
-    switch(bg) {
-    case BG1:bgpal_index =  0;break;
-    case BG2:bgpal_index = 32;break;
-    case BG3:bgpal_index = 64;break;
-    case BG4:bgpal_index = 96;break;
-    }
-  } else {
-    bgpal_index = 0;
-  }
+uint8 bgpal_index = (regs.bg_mode == 0) ? (bg << 5) : 0;
 
 uint8 pal_size, tiledata_size;
   switch(color_depth) {
@@ -114,36 +104,43 @@ int mosaic_x, mosaic_y;
   } else {
     mtable = (uint16*)mosaic_table[0];
   }
+
   mosaic_x = mtable[bg_x];
   mosaic_y = mtable[bg_y];
 
 uint8  tile_x;
 uint16 t, base_xpos, base_pos, pos;
 uint16 tile_num;
-int mirror_x, mirror_y;
-uint8  pal_index;
+int    mirror_x, mirror_y;
+uint8  pal_index, pal_num;
 uint8 *tile_ptr;
 int    xpos, ypos;
 uint16 map_index, hoffset, voffset, col;
 
+  build_window_tables(bg);
 uint8 *wt_main = main_windowtable[bg];
 uint8 *wt_sub  = sub_windowtable[bg];
-  build_window_tables(bg);
-  for(screen_x=0;screen_x<_screen_width;screen_x++) {
-  //offset-per-tile mode. horizontal OPT is buggy, so it is disabled
-  //vertical OPT seems to be working OK...
+
+  screen_x = 0;
+  do { //for(screen_x=0;screen_x<_screen_width;screen_x++) {
     if(regs.bg_mode == 2 || regs.bg_mode == 4 || regs.bg_mode == 6) {
       if(regs.bg_mode == 6) {
+      //hires adjust
         tile_x = (mtable[screen_x + (hscroll & 15)] >> 4);
       } else {
         tile_x = (mtable[screen_x + (hscroll &  7)] >> 3);
       }
+
       hoffset = hscroll;
       voffset = vscroll;
+
+    //tile 0 is unaffected by OPT mode...
       if(tile_x != 0) {
-        tile_x = (tile_x - 1) & 31;
+      //multiply by two to index into 16-bit table entries
+        tile_x = ((tile_x - 1) & 31) << 1;
+
         if(regs.bg_mode == 4) {
-          pos = regs.bg_scaddr[BG3] + (tile_x << 1);
+          pos = regs.bg_scaddr[BG3] + tile_x;
           t   = *((uint16*)vram + (pos >> 1));
           if(t & opt_valid_bit) {
             if(!(t & 0x8000)) {
@@ -153,18 +150,19 @@ uint8 *wt_sub  = sub_windowtable[bg];
             }
           }
         } else {
-          pos = regs.bg_scaddr[BG3] + (tile_x << 1);
+          pos = regs.bg_scaddr[BG3] + tile_x;
           t   = *((uint16*)vram + (pos >> 1));
           if(t & opt_valid_bit) {
             hoffset = ((t & 0x1ff8) | (hscroll & 7)) & screen_width_mask;
           }
-          pos = regs.bg_scaddr[BG3] + 64 + (tile_x << 1);
+          pos = regs.bg_scaddr[BG3] + 64 + tile_x;
           t   = *((uint16*)vram + (pos >> 1));
           if(t & opt_valid_bit) {
             voffset = (t & 0x1fff) & screen_height_mask;
           }
         }
       }
+
       mosaic_x = mtable[(screen_x + hoffset) & screen_width_mask ];
       mosaic_y = mtable[(screen_y + voffset) & screen_height_mask];
     }
@@ -189,30 +187,36 @@ uint8 *wt_sub  = sub_windowtable[bg];
     base_pos  = (((mosaic_y >> tile_height) & 31) << 5) + ((mosaic_x >> tile_width) & 31);
     pos       = _scaddr + map_index + (base_pos << 1);
     t         = *((uint16*)vram + (pos >> 1));
-    mirror_y  = (t & 0x8000)?1:0;
-    mirror_x  = (t & 0x4000)?1:0;
+    mirror_y  = !!(t & 0x8000);
+    mirror_x  = !!(t & 0x4000);
 
 int _pri;
     _pri = (t & 0x2000) ? pri1_pos : pri0_pos;
 
     tile_num = t & 0x03ff;
+
+  //16x16 horizontal tile mirroring
     if(tile_width == 4) {
       if(((mosaic_x & 15) >= 8 && !mirror_x) ||
          ((mosaic_x & 15) <  8 &&  mirror_x))tile_num++;
       tile_num &= 0x03ff;
     }
+
+  //16x16 vertical tile mirroring
     if(tile_height == 4) {
       if(((mosaic_y & 15) >= 8 && !mirror_y) ||
          ((mosaic_y & 15) <  8 &&  mirror_y))tile_num += 16;
       tile_num &= 0x03ff;
     }
+
     tile_num += (_tdaddr >> tiledata_size);
 
     if(bg_td_state[tile_num] == 1) {
       render_bg_tile(color_depth, tile_num);
     }
 
-    pal_index = ((t >> 10) & 7) * pal_size + bgpal_index;
+    pal_num   = ((t >> 10) & 7);
+    pal_index = pal_num * pal_size + bgpal_index;
 
     if(mirror_y) { ypos = (7 - (mosaic_y & 7)); }
     else         { ypos = (    (mosaic_y & 7)); }
@@ -220,23 +224,30 @@ int _pri;
 //loop while we are rendering from the same tile, as there's no need to do all of the above work
 //unless we have rendered all of the visible tile, taking mosaic into account.
     tile_ptr = (uint8*)bg_td + (tile_num << 6) + (ypos << 3);
-    while(1) {
+    do {
       if(mirror_x) { xpos = (7 - (mosaic_x & 7)); }
       else         { xpos = (    (mosaic_x & 7)); }
       col = *(tile_ptr + xpos);
       if(col && main_colorwindowtable[screen_x]) {
+        if(regs.direct_color == true && bg == BG1 && (regs.bg_mode == 3 || regs.bg_mode == 4)) {
+          col = get_direct_color(pal_num, col);
+        } else {
+          col = get_palette(col + pal_index);
+        }
+
         if(_bg_enabled == true && !wt_main[screen_x]) {
           if(pixel_cache[screen_x].pri_main < _pri) {
             pixel_cache[screen_x].pri_main = _pri;
             pixel_cache[screen_x].bg_main  = 0x80 | bg;
-            pixel_cache[screen_x].src_main = col + pal_index;
+            pixel_cache[screen_x].src_main = col;
+            pixel_cache[screen_x].color_exempt = false;
           }
         }
         if(_bgsub_enabled == true && !wt_sub[screen_x]) {
           if(pixel_cache[screen_x].pri_sub < _pri) {
             pixel_cache[screen_x].pri_sub = _pri;
             pixel_cache[screen_x].bg_sub  = 0x80 | bg;
-            pixel_cache[screen_x].src_sub = col + pal_index;
+            pixel_cache[screen_x].src_sub = col;
           }
         }
       }
@@ -246,8 +257,7 @@ int _pri;
       mosaic_x = mtable[bg_x];
 
       if(base_xpos != ((mosaic_x >> 3) & 31))break;
-      screen_x++;
-      if(screen_x >= _screen_width)break;
-    }
-  }
+      if(++screen_x >= _screen_width)break;
+    } while(1);
+  } while(++screen_x < _screen_width);
 }

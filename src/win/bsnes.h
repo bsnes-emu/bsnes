@@ -35,10 +35,12 @@ enum {
   RUNTOAPUSTEP
 };
 enum { DRAM = 0, SPCRAM = 1, VRAM = 2, OAM = 3, CGRAM = 4 };
+  void   run();
+  void   video_run();
+  void   sound_run();
+
   void   set_status(uint32 new_status);
   uint32 get_status();
-  void   snes_run();
-  void   render_frame();
 
 //input functions
   void poll_input();

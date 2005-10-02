@@ -171,33 +171,39 @@ void bMemBus::get_cartinfo(CartInfo *ci) {
  ***************************************/
 
 uint8 bMemBus::read(uint32 addr) {
-uint32 b, w, r;
-  addr &= 0xffffff;
-  b = (addr >> 16);
-  w = (addr & 0xffff);
+static uint32 r;
+  switch(addr & 0xc00000) {
+  case 0x400000:
+    if((addr & 0xfe0000) == 0x7e0000) {
+      r = wram[addr & 0x01ffff];
+      break;
+    }
+  //fallthrough
+  case 0xc00000:
+    r = cart->read(addr);
+    break;
 
-  if(b <= 0x3f) {
-    if(w <= 0x1fff) {
-      r = wram[w];
-    } else if(w <= 0x5fff) {
-      r = mmio[w - 0x2000]->read(w);
-    } else {
+//case 0x000000:
+//case 0x800000:
+  default:
+    switch(addr & 0x00e000) {
+    case 0x0000:
+      r = wram[addr & 0x1fff];
+      break;
+    case 0x2000:
+    case 0x4000:
+      r = mmio[(addr - 0x2000) & 0x3fff]->read(addr & 0x7fff);
+      break;
+//  case 0x6000:
+//  case 0x8000:
+//  case 0xa000:
+//  case 0xc000:
+//  case 0xe000:
+    default:
       r = cart->read(addr);
+      break;
     }
-  } else if(b <= 0x7d) {
-    r = cart->read(addr);
-  } else if(b <= 0x7f) {
-    r = wram[addr & 0x01ffff];
-  } else if(b <= 0xbf) {
-    if(w <= 0x1fff) {
-      r = wram[w];
-    } else if(w <= 0x5fff) {
-      r = mmio[w - 0x2000]->read(w);
-    } else {
-      r = cart->read(addr);
-    }
-  } else {
-    r = cart->read(addr);
+    break;
   }
 
   snes->notify(SNES::MEM_READ, addr, r);
@@ -205,33 +211,38 @@ uint32 b, w, r;
 }
 
 void bMemBus::write(uint32 addr, uint8 value) {
-uint32 b, w;
-  addr &= 0xffffff;
-  b = (addr >> 16);
-  w = (addr & 0xffff);
+  switch(addr & 0xc00000) {
+  case 0x400000:
+    if((addr & 0xfe0000) == 0x7e0000) {
+      wram[addr & 0x01ffff] = value;
+      break;
+    }
+  //fallthrough
+  case 0xc00000:
+    cart->write(addr, value);
+    break;
 
-  if(b <= 0x3f) {
-    if(w <= 0x1fff) {
-      wram[w] = value;
-    } else if(w <= 0x5fff) {
-      mmio[w - 0x2000]->write(w, value);
-    } else {
+//case 0x000000:
+//case 0x800000:
+  default:
+    switch(addr & 0x00e000) {
+    case 0x0000:
+      wram[addr & 0x1fff] = value;
+      break;
+    case 0x2000:
+    case 0x4000:
+      mmio[(addr - 0x2000) & 0x3fff]->write(addr & 0x7fff, value);
+      break;
+//  case 0x6000:
+//  case 0x8000:
+//  case 0xa000:
+//  case 0xc000:
+//  case 0xe000:
+    default:
       cart->write(addr, value);
+      break;
     }
-  } else if(b <= 0x7d) {
-    cart->write(addr, value);
-  } else if(b <= 0x7f) {
-    wram[addr & 0x01ffff] = value;
-  } else if(b <= 0xbf) {
-    if(w <= 0x1fff) {
-      wram[w] = value;
-    } else if(w <= 0x5fff) {
-      mmio[w - 0x2000]->write(w, value);
-    } else {
-      cart->write(addr, value);
-    }
-  } else {
-    cart->write(addr, value);
+    break;
   }
 
   snes->notify(SNES::MEM_WRITE, addr, value);
@@ -243,7 +254,7 @@ void bMemBus::power() {
 }
 
 void bMemBus::reset() {
-  fastROM = false;
+  set_speed(false);
 }
 
 bMemBus::bMemBus() {
@@ -253,5 +264,5 @@ bMemBus::bMemBus() {
 }
 
 bMemBus::~bMemBus() {
-  if(wram)free(wram);
+  zerofree(wram);
 }

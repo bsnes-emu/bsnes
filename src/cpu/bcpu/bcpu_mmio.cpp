@@ -42,18 +42,17 @@ uint8 r;
 }
 
 //JOYSER0
-/*
-  The joypad contains a small bit shifter that has 16 bits.
-  Reading from 4016 reads one bit from this buffer, then moves
-  the buffer left one, and adds a '1' to the rightmost bit.
-  Writing a one to $4016 will fill the buffer with the current
-  joypad button states, and lock the bit shifter at position
-  zero. All reads will be the first buffer state, or 'B'.
-  A zero must be written back to $4016 to unlock the buffer,
-  so that reads will increment the bit shifting position.
-*/
 //7-2 = MDR
 //1-0 = Joypad serial data
+/* The joypad contains a small bit shifter that has 16 bits.
+ * Reading from 4016 reads one bit from this buffer, then moves
+ * the buffer left one, and adds a '1' to the rightmost bit.
+ * Writing a one to $4016 will fill the buffer with the current
+ * joypad button states, and lock the bit shifter at position
+ * zero. All reads will be the first buffer state, or 'B'.
+ * A zero must be written back to $4016 to unlock the buffer,
+ * so that reads will increment the bit shifting position.
+ */
 uint8 bCPU::mmio_r4016() {
 uint8 r;
   r = regs.mdr & 0xfc;
@@ -96,44 +95,19 @@ uint8 r;
 }
 
 //RDNMI
-/* $4210 bit 7 (NMI triggered bit) is set at:
- *   V=225/240,HC>=2,
- *   V>225
- * The bit is only set once per NMI trigger, so
- * subsequent reads return this bit as being clear.
- * There is but one exception: if the $4210 read
- * occurs at *exactly* V=225/240,HC==2, then $4210
- * bit 7 will be set, and the next read will also
- * have this bit set.
- */
 //7   = NMI acknowledge
 //6-4 = MDR
 //3-0 = CPU (5a22) version
 uint8 bCPU::mmio_r4210() {
-uint8  r;
-uint16 v, h, hc, vs;
-  r = regs.mdr & 0x70;
+uint8 r;
+  r  = regs.mdr & 0x70;
+  r |= uint8(!time.nmi_read) << 7;
 
-  v  = vcounter();
-  h  = hcounter();
-  hc = hcycles();
-  vs = (overscan()?239:224);
-
-  if(status.nmi_read == false) {
-    if(
-      (v == (vs + 1) && hc >= 2) ||
-      (v  > (vs + 1))
-    ) {
-      r |= 0x80;
-
-    //test for special case where NMI read not raised
-      if(v != (vs + 1) || hc != 2) {
-        status.nmi_read = true;
-      }
-    }
+  if(!nmi_trigger_pos_match(0) && !nmi_trigger_pos_match(2)) {
+    time.nmi_read = 1;
   }
 
-  r |= 0x02; //cpu version number
+  r |= (cpu_version & 0x0f);
   return r;
 }
 
@@ -142,10 +116,15 @@ uint16 v, h, hc, vs;
 //6-0 = MDR
 uint8 bCPU::mmio_r4211() {
 uint8 r;
-  r = regs.mdr & 0x7f;
-  if(status.irq_exec == true)r |= 0x80;
-  status.irq_exec = false;
-  status.irq_read = true;
+  r  = regs.mdr & 0x7f;
+  r |= uint8(!time.irq_read) << 7;
+
+  if(!irq_trigger_pos_match(0) && !irq_trigger_pos_match(2)) {
+    time.irq_read = 1;
+    time.irq_line = 1;
+    time.irq_transition = 0;
+  }
+
   return r;
 }
 
@@ -155,23 +134,20 @@ uint8 r;
 //5-1 = MDR
 //0   = joypad ready
 uint8 bCPU::mmio_r4212() {
-uint8  r;
-uint16 v, h, hc, vs;
+uint8 r;
   r = regs.mdr & 0x3e;
 
-  v  = vcounter();
-  h  = hcounter();
-  hc = hcycles();
-  vs = (overscan()?239:224);
+uint16 vs = overscan() ? 240 : 225;
 
 //auto joypad polling
-  if(v >= (vs + 1) && v <= (vs + 3))r |= 0x01;
+  if(time.v >= vs && time.v <= (vs + 2))r |= 0x01;
 
 //hblank
-  if(hc <= 2 || hc >= 1096)r |= 0x40;
+  if(time.hc <= 2 || time.hc >= 1096)r |= 0x40;
 
 //vblank
-  if(v >= (vs + 1))r |= 0x80;
+  if(time.v >= vs)r |= 0x80;
+
   return r;
 }
 
@@ -291,9 +267,7 @@ uint8 bCPU::mmio_r43xb(uint8 i) {
 }
 
 uint8 bCPUMMIO::read(uint32 addr) {
-uint8 i;
-//cpu->sync();
-
+uint i;
 //APU
   if(addr >= 0x2140 && addr <= 0x217f) {
     return apu->port_read(addr & 3);
@@ -337,6 +311,8 @@ uint8 i;
   case 0x4218:return cpu->mmio_r4218(); //JOY1L
   case 0x4219:return cpu->mmio_r4219(); //JOY1H
   case 0x421a:case 0x421b:case 0x421c:case 0x421d:case 0x421e:case 0x421f:return 0x00;
+case 0x4000:dprintf("* 4000 read at %3d,%4d <%d>", cpu->time.v, cpu->time.hc, cpu->status.cycle_count);break;
+case 0x4200:dprintf("* 4200 read at %3d,%4d", cpu->time.v, cpu->time.hc);break;
   }
 
   return cpu->regs.mdr;
@@ -383,14 +359,20 @@ void bCPU::mmio_w4200(uint8 value) {
   status.hirq_enabled     = !!(value & 0x10);
   status.auto_joypad_poll = !!(value & 0x01);
 
-  if(status.nmi_enabled == false) {
-    status.nmi_read = false;
+  if(time.nmi_read == 0) {
+    if(time.nmi_line == 1 && !status.nmi_enabled == 0) {
+      time.nmi_transition = 1;
+    }
+    time.nmi_line = !status.nmi_enabled;
   }
 
-  status.irq_exec = false;
-  if(status.virq_enabled == true || status.hirq_enabled == true) {
-    status.irq_read = false;
+  if(status.virq_enabled == false && status.hirq_enabled == false) {
+    time.irq_line = 1;
+    time.irq_read = 1;
+    time.irq_transition = 0;
   }
+
+  update_interrupts();
 }
 
 //WRIO
@@ -424,32 +406,32 @@ void bCPU::mmio_w4205(uint8 value) {
 //WRDIVB
 void bCPU::mmio_w4206(uint8 value) {
   status.div_b = value;
-  status.r4214 = (status.div_b)?status.div_a / status.div_b : 0xffff;
-  status.r4216 = (status.div_b)?status.div_a % status.div_b : status.div_a;
+  status.r4214 = (status.div_b) ? status.div_a / status.div_b : 0xffff;
+  status.r4216 = (status.div_b) ? status.div_a % status.div_b : status.div_a;
 }
 
 //HTIMEL
 void bCPU::mmio_w4207(uint8 value) {
   status.hirq_pos = (status.hirq_pos & 0xff00) | value;
-  status.irq_read = false;
+  update_interrupts();
 }
 
 //HTIMEH
 void bCPU::mmio_w4208(uint8 value) {
   status.hirq_pos = (status.hirq_pos & 0x00ff) | (value << 8);
-  status.irq_read = false;
+  update_interrupts();
 }
 
 //VTIMEL
 void bCPU::mmio_w4209(uint8 value) {
   status.virq_pos = (status.virq_pos & 0xff00) | value;
-  status.irq_read = false;
+  update_interrupts();
 }
 
 //VTIMEH
 void bCPU::mmio_w420a(uint8 value) {
   status.virq_pos = (status.virq_pos & 0x00ff) | (value << 8);
-  status.irq_read = false;
+  update_interrupts();
 }
 
 //DMAEN
@@ -479,7 +461,7 @@ void bCPU::mmio_w420c(uint8 value) {
 
 //MEMSEL
 void bCPU::mmio_w420d(uint8 value) {
-  mem_bus->fastROM = value & 1;
+  mem_bus->set_speed(value & 1);
 }
 
 //DMAPx
@@ -549,8 +531,6 @@ void bCPU::mmio_w43xb(uint8 value, uint8 i) {
 
 void bCPUMMIO::write(uint32 addr, uint8 value) {
 uint8 i;
-//cpu->sync();
-
 //APU
   if(addr >= 0x2140 && addr <= 0x217f) {
     cpu->port_write(addr & 3, value);
@@ -600,6 +580,7 @@ uint8 i;
   case 0x420b:cpu->mmio_w420b(value);return; //DMAEN
   case 0x420c:cpu->mmio_w420c(value);return; //HDMAEN
   case 0x420d:cpu->mmio_w420d(value);return; //MEMSEL
+case 0x4000:dprintf("* 4000 write at %3d,%4d", cpu->time.v, cpu->time.hc);break;
   }
 }
 

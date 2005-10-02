@@ -1,6 +1,15 @@
 #include "../../base.h"
 #include "sdd1emu.cpp"
 
+void SDD1::init() {
+}
+
+void SDD1::enable() {
+  for(int i=0x4800;i<=0x4807;i++) {
+    mem_bus->set_mmio_mapper(i, mmio);
+  }
+}
+
 void SDD1::power() {
   reset();
 }

@@ -4,68 +4,6 @@ DDRenderer::DDRenderer() {
   lpdds   = 0;
   lpddsb  = 0;
   lpddc   = 0;
-
-int i, c;
-  for(i=0,c=0;i<16;i++) {
-    color_curve_table[i] = c;
-    c = c + i + 1;
-  }
-  for(;i<31;i++) {
-    color_curve_table[i] = c;
-    c += 8;
-  }
-  color_curve_table[i] = 0xff;
-}
-
-void DDRenderer::update_color_lookup_table() {
-int i, r, g, b;
-  lpddsb->GetSurfaceDesc(&ddsd);
-  color_depth = ddsd.ddpfPixelFormat.dwRGBBitCount;
-  if(color_depth == 15) {
-    for(i=0;i<32768;i++) {
-      r = (i      ) & 31;
-      g = (i >>  5) & 31;
-      b = (i >> 10) & 31;
-      if(cfg.video.color_curve) {
-        r = color_curve_table[r] >> 3;
-        g = color_curve_table[g] >> 3;
-        b = color_curve_table[b] >> 3;
-      }
-      color_lookup_table[i] = (r << 10) | (g << 5) | (b);
-    }
-  } else if(color_depth == 16) {
-    for(i=0;i<32768;i++) {
-      r = (i      ) & 31;
-      g = (i >>  5) & 31;
-      b = (i >> 10) & 31;
-      if(cfg.video.color_curve) {
-        r = color_curve_table[r] >> 3;
-        g = color_curve_table[g] >> 2;
-        b = color_curve_table[b] >> 3;
-      } else {
-        g = (g << 1) | (g >> 4);
-      }
-      color_lookup_table[i] = (r << 11) | (g << 5) | (b);
-    }
-  } else if(color_depth == 32) {
-    for(i=0;i<32768;i++) {
-      r = (i      ) & 31;
-      g = (i >>  5) & 31;
-      b = (i >> 10) & 31;
-      if(cfg.video.color_curve) {
-        r = color_curve_table[r];
-        g = color_curve_table[g];
-        b = color_curve_table[b];
-      } else {
-        r = (r << 3) | (r >> 2);
-        g = (g << 3) | (g >> 2);
-        b = (b << 3) | (b >> 2);
-      }
-      color_lookup_table[i] = (r << 16) | (g << 8) | (b);
-    }
-  } else {
-    alert("Error: Unsupported color depth [%d]", color_depth);
-  }
 }
 
 void DDRenderer::set_window(HWND hwnd_handle) { hwnd = hwnd_handle; }
@@ -76,25 +14,24 @@ void DDRenderer::set_window(HWND hwnd_handle) { hwnd = hwnd_handle; }
   handles conversion from 16bpp->32bpp in hardware. This only works
   when both the source and dest buffers are in VRAM, though.
 
-  The SNES resolution is 256x224. The top scanline is never drawn, so
-  256x223 is used. Hires mode doubles the screen width, and hires+interlace
-  double the screen height, making the resolution 512x446.
+  The SNES resolution is 256x224. Hires mode doubles the screen width, and
+  hires+interlace   double the screen height, making the resolution 512x448.
   There is one more problem, however. On some video cards, when blitting
-  from video memory from 256x223->512x446, a bilinear filter is applied by
+  from video memory from 256x224->512x448, a bilinear filter is applied by
   the video card, and sometimes this filter tries to read past the source
   video memory to get interpolation data. This results in a line of garble
   on the right and bottom edges of the screen. Therefore, an additional
   4 pixels in each direction is added to the backbuffer.
-  The backbuffer is thusly 512+4 * 476+4
+  The backbuffer is thusly 512+4 * 480+4
 */
 void DDRenderer::create_backbuffer() {
-int color_depth;
+int depth;
   lpdds->GetSurfaceDesc(&ddsd);
-  color_depth = ddsd.ddpfPixelFormat.dwRGBBitCount;
-  if(color_depth == 15 || color_depth == 16) {
+  depth = ddsd.ddpfPixelFormat.dwRGBBitCount;
+  if(depth == 15 || depth == 16) {
     goto try_native_backbuffer;
   } else {
-    if(cfg.video.use_vram == false) {
+    if((int)config::video.use_vram == false) {
       goto try_native_backbuffer;
     }
   }
@@ -103,14 +40,14 @@ int color_depth;
   ddsd.dwSize = sizeof(DDSURFACEDESC);
   ddsd.dwFlags = DDSD_CAPS | DDSD_WIDTH | DDSD_HEIGHT | DDSD_PIXELFORMAT;
   ddsd.ddsCaps.dwCaps = DDSCAPS_OFFSCREENPLAIN;
-  if(cfg.video.use_vram) {
+  if(config::video.use_vram) {
     ddsd.ddsCaps.dwCaps |= DDSCAPS_VIDEOMEMORY;
   } else {
     ddsd.ddsCaps.dwCaps |= DDSCAPS_SYSTEMMEMORY;
   }
 
   ddsd.dwWidth  = 512 + 4;
-  ddsd.dwHeight = 476 + 4;
+  ddsd.dwHeight = 480 + 4;
 
   ddsd.ddpfPixelFormat.dwSize = sizeof(DDPIXELFORMAT);
   ddsd.ddpfPixelFormat.dwFlags = DDPF_RGB;
@@ -126,14 +63,14 @@ try_native_backbuffer:
   ddsd.dwSize = sizeof(DDSURFACEDESC);
   ddsd.dwFlags = DDSD_CAPS | DDSD_WIDTH | DDSD_HEIGHT;
   ddsd.ddsCaps.dwCaps = DDSCAPS_OFFSCREENPLAIN;
-  if(cfg.video.use_vram) {
+  if(config::video.use_vram) {
     ddsd.ddsCaps.dwCaps |= DDSCAPS_VIDEOMEMORY;
   } else {
     ddsd.ddsCaps.dwCaps |= DDSCAPS_SYSTEMMEMORY;
   }
 
   ddsd.dwWidth  = 512 + 4;
-  ddsd.dwHeight = 476 + 4;
+  ddsd.dwHeight = 480 + 4;
 
   lpdd->CreateSurface(&ddsd, &lpddsb, 0);
 
@@ -147,6 +84,9 @@ DDBLTFX fx;
   fx.dwSize = sizeof(DDBLTFX);
   fx.dwFillColor = 0x00000000;
   lpddsb->Blt(0, 0, 0, DDBLT_WAIT | DDBLT_COLORFILL, &fx);
+
+  lpddsb->GetSurfaceDesc(&ddsd);
+  color_depth = ddsd.ddpfPixelFormat.dwRGBBitCount;
 }
 
 void DDRenderer::to_windowed() {
@@ -166,7 +106,6 @@ void DDRenderer::to_windowed() {
   lpdds->SetClipper(lpddc);
 
   create_backbuffer();
-  update_color_lookup_table();
   redraw();
 }
 
@@ -195,14 +134,13 @@ void DDRenderer::to_fullscreen(int _width, int _height) {
   lpdds->SetClipper(lpddc);
 
   create_backbuffer();
-  update_color_lookup_table();
   redraw();
 }
 
 void DDRenderer::set_source_window() {
-  SetRect(&lpddrc, 0, 0,
-    (ppu->output->hires     == false)?256:512,
-    (ppu->output->interlace == false)?223:446);
+//skip first scanline
+int i = (vi.height == 224) ? 1 : 2;
+  SetRect(&lpddrc, 0, i, vi.width, vi.height);
 }
 
 void DDRenderer::redraw() {
@@ -226,7 +164,7 @@ int rx, ry;
       break;
     }
   }
-  if(cfg.video.vblank) {
+  if(config::video.vblank) {
     lpdd->WaitForVerticalBlank(DDWAITVB_BLOCKBEGIN, 0);
   }
   hr = lpdds->Blt(&rd, lpddsb, &lpddrc, DDBLT_WAIT, 0);
@@ -235,7 +173,7 @@ int rx, ry;
     lpddsb->Restore();
   }
 
-  if(cfg.gui.show_fps == false || bsnes->get_status() == bSNES::STOP)return;
+  if((int)config::gui.show_fps == false || bsnes->get_status() == bSNES::STOP)return;
 uint32 fps;
 char s[256], t[256];
   fps_timer->tick();
@@ -262,24 +200,22 @@ HRESULT hr;
   if(hr != DD_OK)return;
 
   set_source_window();
-  if(ppu->output->hires == false) {
-    if(ppu->output->interlace == false) {
-      update16_256x224();
-    } else {
-      update16_256x448();
-    }
-  } else {
-    if(ppu->output->interlace == false) {
-      update16_512x224();
-    } else {
-      update16_512x448();
-    }
+
+  if       (vi.width == 256 && vi.height == 224) {
+    update16_256x224();
+  } else if(vi.width == 512 && vi.height == 224) {
+    update16_512x224();
+  } else if(vi.width == 256 && vi.height == 448) {
+    update16_256x448();
+  } else if(vi.width == 512 && vi.height == 448) {
+    update16_512x448();
   }
 
   lpddsb->Unlock(0);
 }
 
-#include "dd_renderer32.cpp"
+//#include "dd_renderer32.cpp"
+/*
 void DDRenderer::update32() {
 HRESULT hr;
   hr = lpddsb->Lock(0, &ddsd, DDLOCK_WAIT, 0);
@@ -302,17 +238,21 @@ HRESULT hr;
 
   lpddsb->Unlock(0);
 }
+*/
 
 void DDRenderer::update() {
+  snes->get_video_info(&vi);
+
   switch(color_depth) {
   case 15:
   case 16:
     update16();
     break;
   case 32:
-    update32();
+  //update32();
     break;
   }
+
   redraw();
 }
 

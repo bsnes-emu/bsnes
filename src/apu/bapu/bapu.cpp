@@ -24,7 +24,7 @@ uint8 r;
       break;
     case 0xf3: //DSPDATA
     //0x80-0xff is a read-only mirror of 0x00-0x7f
-      r = dsp_regs[status.dsp_addr & 0x7f];
+      r = dsp->read(status.dsp_addr & 0x7f);
       break;
     case 0xf4: //CPUIO0
     case 0xf5: //CPUIO1
@@ -111,7 +111,7 @@ void bAPU::spcram_write(uint16 addr, uint8 value) {
     case 0xf3: //DSPDATA
     //0x80-0xff is a read-only mirror of 0x00-0x7f
       if(status.dsp_addr < 0x80) {
-        dsp_regs[status.dsp_addr & 0x7f] = value;
+        dsp->write(status.dsp_addr & 0x7f, value);
       }
       break;
     case 0xf4: //CPUIO0
@@ -209,6 +209,14 @@ void bAPU::stack_write(uint8 value) {
   regs.sp--;
 }
 
+uint8 *bAPU::get_spcram_handle() {
+  if(!spcram) {
+    alert("bAPU::get_spcram_handle() -- spcram uninitialized");
+  }
+
+  return spcram;
+}
+
 void bAPU::run() {
   exec_cycle();
 }
@@ -247,15 +255,12 @@ void bAPU::reset() {
   t0.stage3_ticks = 0;
   t1.stage3_ticks = 0;
   t2.stage3_ticks = 0;
-
-  memset(dsp_regs, 0, 128);
 }
 
 bAPU::bAPU() {
   init_op_table();
 
   spcram = (uint8*)malloc(65536);
-  memcpy(iplrom, spc700_iplrom, 64);
 
   t0.cycle_frequency = 128; //1.024mhz /  8khz = 128
   t1.cycle_frequency = 128; //1.024mhz /  8khz = 128

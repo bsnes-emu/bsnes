@@ -53,7 +53,6 @@ char t[4096];
 
 void update_line(int i, int n) {
 char t[4096];
-  sprintf(t, "goto l%d;", n + 2);
   replace(line[i], "end;",  "status.cycle_pos = 0;");
   replace(line[i], "skip;", "status.cycle_pos++;");
 }
@@ -88,7 +87,11 @@ char t[4096];
 
       i++;
     }
-    if(!strcmp(line[i], "}"))strcat(output_op, "    status.cycle_pos = 0;\r\n");
+
+    if(!strcmp(line[i], "}")) {
+      strcat(output_op, "    status.cycle_pos = 0;\r\n");
+    }
+
     strcat(output_op, "    break;\r\n");
   }
   strcat(output_op, "  }\r\n}");

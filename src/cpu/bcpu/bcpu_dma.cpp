@@ -113,11 +113,11 @@ uint16 index;
 void bCPU::hdma_run() {
 int l, xferlen;
 uint8 x, active_channels = 0;
-static hdma_xferlen[8] = { 1, 2, 2, 4, 4, 4, 2, 4 };
+static uint8 hdma_xferlen[8] = { 1, 2, 2, 4, 4, 4, 2, 4 };
   for(int i=0;i<8;i++) {
     if(channel[i].hdma_active == false)continue;
 
-//  add_cycles(8);
+    add_cycles(8);
     active_channels++;
 
     if(channel[i].hdma_line_counter == 0) {
@@ -140,7 +140,7 @@ static hdma_xferlen[8] = { 1, 2, 2, 4, 4, 4, 2, 4 };
       if(channel[i].hdma_indirect == true) {
         channel[i].hdma_iaddr  = mem_bus->read(hdma_addr(i));
         channel[i].hdma_iaddr |= mem_bus->read(hdma_addr(i)) << 8;
-//      add_cycles(16);
+        add_cycles(16);
       }
     }
 
@@ -157,12 +157,12 @@ static hdma_xferlen[8] = { 1, 2, 2, 4, 4, 4, 2, 4 };
       }
 
       hdma_write(i, l, x);
-//    add_cycles(8);
+      add_cycles(8);
     }
   }
 
   if(active_channels != 0) {
-//  add_cycles(18);
+    add_cycles(18);
   }
 }
 

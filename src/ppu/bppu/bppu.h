@@ -25,12 +25,12 @@ struct sprite_item {
   bool   vflip, hflip;
   uint8  palette;
   uint8  priority;
-}sprite_list[128];
+} sprite_list[128];
 
 struct {
   int32  frameskip, frameskip_pos;
   bool   frameskip_changed;
-}settings;
+} settings;
 
 struct {
 //open bus support
@@ -119,6 +119,7 @@ struct {
 //$2130
   uint8  color_mask, colorsub_mask;
   bool   addsub_mode;
+  bool   direct_color;
 
 //$2131
   bool   color_mode, color_halve;
@@ -145,7 +146,7 @@ struct {
 //$213e
   bool   time_over, range_over;
   uint16 oam_itemcount, oam_tilecount;
-}regs;
+} regs;
   uint8  vram_read  (uint16 addr);
   void   vram_write (uint16 addr, uint8 value);
   uint8  oam_read   (uint16 addr);
@@ -225,7 +226,7 @@ struct {
 
   void   latch_counters();
 
-/* PPU render functions */
+//PPU render functions
 
 #include "bppu_render.h"
 
@@ -234,13 +235,17 @@ uint16 *mosaic_table[16];
   void   render_line();
 
   void   update_oam_status();
-/* Required functions */
+//required functions
   void   run();
   void   scanline();
+  void   render_scanline();
   void   frame();
   void   power();
   void   reset();
   void   set_frameskip(int fs);
+  bool   render_frame();
+
+  bool   scanline_is_hires() { return (regs.bg_mode == 5 || regs.bg_mode == 6); }
 
   bPPU();
   ~bPPU();

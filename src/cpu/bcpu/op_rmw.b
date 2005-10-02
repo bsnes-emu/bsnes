@@ -1,7 +1,8 @@
 inc(0x1a, regs.p.m, a),
 inx(0xe8, regs.p.x, x),
 iny(0xc8, regs.p.x, y) {
-1:cpu_io();
+1:last_cycle();
+  cpu_io();
   if($1) {
     regs.$2.l++;
     regs.p.n = !!(regs.$2.l & 0x80);
@@ -16,7 +17,8 @@ iny(0xc8, regs.p.x, y) {
 dec(0x3a, regs.p.m, a),
 dex(0xca, regs.p.x, x),
 dey(0x88, regs.p.x, y) {
-1:cpu_io();
+1:last_cycle();
+  cpu_io();
   if($1) {
     regs.$2.l--;
     regs.p.n = !!(regs.$2.l & 0x80);
@@ -29,7 +31,8 @@ dey(0x88, regs.p.x, y) {
 }
 
 asl(0x0a) {
-1:cpu_io();
+1:last_cycle();
+  cpu_io();
   if(regs.p.m) {
     regs.p.c = !!(regs.a.l & 0x80);
     regs.a.l <<= 1;
@@ -44,7 +47,8 @@ asl(0x0a) {
 }
 
 lsr(0x4a) {
-1:cpu_io();
+1:last_cycle();
+  cpu_io();
   if(regs.p.m) {
     regs.p.c = regs.a.l & 1;
     regs.a.l >>= 1;
@@ -59,7 +63,8 @@ lsr(0x4a) {
 }
 
 rol(0x2a) {
-1:cpu_io();
+1:last_cycle();
+  cpu_io();
   uint16 c = regs.p.c;
   if(regs.p.m) {
     regs.p.c = !!(regs.a.l & 0x80);
@@ -77,7 +82,8 @@ rol(0x2a) {
 }
 
 ror(0x6a) {
-1:cpu_io();
+1:last_cycle();
+  cpu_io();
   uint16 c;
   if(regs.p.m) {
     c = (regs.p.c)?0x80:0;
@@ -113,7 +119,8 @@ tsb_addr(0x0c, tsb) {
   if(regs.p.m) { op_$1_b(); skip; }
   else op_$1_w();
 6:op_write(OPMODE_DBR, aa.w + 1, rd.h);
-7:op_write(OPMODE_DBR, aa.w,     rd.l);
+7:last_cycle();
+  op_write(OPMODE_DBR, aa.w,     rd.l);
 }
 
 inc_addrx(0xfe, inc),
@@ -132,7 +139,8 @@ ror_addrx(0x7e, ror) {
   if(regs.p.m) { op_$1_b(); skip; }
   else op_$1_w();
 7:op_write(OPMODE_DBR, aa.w + regs.x.w + 1, rd.h);
-8:op_write(OPMODE_DBR, aa.w + regs.x.w,     rd.l);
+8:last_cycle();
+  op_write(OPMODE_DBR, aa.w + regs.x.w,     rd.l);
 }
 
 inc_dp(0xe6, inc),
@@ -152,7 +160,8 @@ tsb_dp(0x04, tsb) {
   if(regs.p.m) { op_$1_b(); skip; }
   else op_$1_w();
 6:op_write(OPMODE_DP, dp + 1, rd.h);
-7:op_write(OPMODE_DP, dp,     rd.l);
+7:last_cycle();
+  op_write(OPMODE_DP, dp,     rd.l);
 }
 
 inc_dpx(0xf6, inc),
@@ -171,5 +180,6 @@ ror_dpx(0x76, ror) {
   if(regs.p.m) { op_$1_b(); skip; }
   else op_$1_w();
 7:op_write(OPMODE_DP, dp + regs.x.w + 1, rd.h);
-8:op_write(OPMODE_DP, dp + regs.x.w,     rd.l);
+8:last_cycle();
+  op_write(OPMODE_DP, dp + regs.x.w,     rd.l);
 }

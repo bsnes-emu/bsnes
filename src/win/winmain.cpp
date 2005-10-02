@@ -1,14 +1,19 @@
 #define INTERFACE_MAIN
-#define BSNES_VERSION "0.011"
-#define BSNES_TITLE "bsnes v" BSNES_VERSION
+
+//requires visual c++
+#define USE_X86_ASM
+
 #include "winmain.h"
 #include "../base.h"
 
 #include "config.cpp"
 
+#define DSP_BUFFER_SIZE 8000
+
 #include "bsnes.h"
 #include "ui.h"
 #include "dd_renderer.h"
+#include "ds_sound.h"
 
 #include "timer.cpp"
 fpstimer *fps_timer;
@@ -20,28 +25,47 @@ fpstimer *fps_timer;
 #include "ui.cpp"
 
 void init_snes() {
-//clock   = new bClock();
   mem_bus = new bMemBus();
   cpu     = new bCPU();
-  if(cfg.apu.enabled) {
-    apu = new bAPU();
-  } else {
-    apu = new bAPUSkip();
-  }
+cpu->cpu_version = 1;
+  apu     = new bAPU();
+  dsp     = new bDSP();
   ppu     = new bPPU();
   snes    = new bSNES();
   bsnes   = static_cast<bSNES*>(snes);
 
   snes->init();
+  snes->set_playback_buffer_size(DSP_BUFFER_SIZE);
 }
 
 void term_snes() {
-//if(clock)   { delete(clock);   clock   = 0; }
-  if(mem_bus) { delete(mem_bus); mem_bus = 0; }
-  if(cpu)     { delete(cpu);     cpu     = 0; }
-  if(apu)     { delete(apu);     apu     = 0; }
-  if(ppu)     { delete(ppu);     ppu     = 0; }
-  if(snes)    { delete(snes);    snes    = 0; }
+  snes->term();
+
+//static casting is neccesary to call derived class deconstructor...
+  if(mem_bus) {
+    delete(static_cast<bMemBus*>(mem_bus));
+    mem_bus = 0;
+  }
+  if(cpu) {
+    delete(static_cast<bCPU*>(cpu));
+    cpu = 0;
+  }
+  if(apu) {
+    delete(static_cast<bAPU*>(apu));
+    apu = 0;
+  }
+  if(dsp) {
+    delete(static_cast<bDSP*>(dsp));
+    dsp = 0;
+  }
+  if(ppu) {
+    delete(static_cast<bPPU*>(ppu));
+    ppu = 0;
+  }
+  if(snes) {
+    delete(static_cast<bSNES*>(snes));
+    snes = 0;
+  }
 }
 
 void get_config_fn(string &str) {
@@ -56,7 +80,7 @@ int __stdcall WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdL
 MSG msg;
 string cfg_fn;
   get_config_fn(cfg_fn);
-  cfg.load(cfg_fn);
+  config_file.load(cfg_fn);
   meminit();
   fps_timer = new fpstimer();
   fps_timer->start();
@@ -77,15 +101,16 @@ char **argv = __argv;
   }
 
   while(1) {
-    if(PeekMessage(&msg, 0, 0, 0, PM_REMOVE)) {
-      if(msg.message == WM_QUIT)break;
+    while(PeekMessage(&msg, 0, 0, 0, PM_REMOVE)) {
+      if(msg.message == WM_QUIT)goto _end;
       TranslateMessage(&msg);
       DispatchMessage(&msg);
     }
-    bsnes->snes_run();
+    bsnes->run();
   }
 
-  cfg.save(cfg_fn);
+_end:
+  config_file.save(cfg_fn);
   delete(rom_image);
   term_snes();
   memterm();

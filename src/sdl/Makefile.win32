@@ -6,6 +6,7 @@ OBJS = sdlmain.obj \
        memory.obj bmemory.obj \
        cpu.obj bcpu.obj \
        apu.obj bapu.obj bapuskip.obj \
+       bdsp.obj \
        ppu.obj bppu.obj \
        snes.obj \
        srtc.obj sdd1.obj
@@ -60,6 +61,12 @@ bapu.obj: ../apu/bapu/*
 
 bapuskip.obj: ../apu/bapuskip/*
 	$(CC) $(CFLAGS) /c ../apu/bapuskip/bapuskip.cpp
+
+###########
+### dsp ###
+###########
+bdsp.obj: ../dsp/bdsp/*
+	$(CC) $(CFLAGS) /c ../dsp/bdsp/bdsp.cpp
 
 ###########
 ### ppu ###

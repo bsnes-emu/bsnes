@@ -10,8 +10,7 @@ bCPU *cpu;
 
 class bCPU : public CPU {
 private:
-typedef void (bCPU::*op)();
-op optbl[256];
+void (bCPU::*optbl[256])();
 
 enum { NTSC = 0, PAL = 1 };
 uint8 region;
@@ -53,20 +52,13 @@ struct {
   uint8  opcode;
   uint32 cycles_executed;
 
+//set by last_cycle(), cleared by last_cycle_exec()
+  bool   is_last_cycle;
+
   uint8  dma_state;
   uint32 dma_cycle_count;
   bool   hdma_triggered;
 
-//used by $4210 read bit 7
-  bool   nmi_read;
-//used by NMI test, set when NMI executed this frame
-  bool   nmi_exec;
-
-//IRQ is level-sensitive, so $4211 must be read to
-//prevent multiple interrupts from occurring
-  bool   irq_read;
-//this is used to return $4211 bit 7
-  bool   irq_exec;
 //$4207-$420a
   uint16 virq_trigger, hirq_trigger;
 
@@ -98,7 +90,7 @@ struct {
 //$4214-$4216
   uint16 r4214;
   uint16 r4216;
-}status;
+} status;
 
 struct {
   uint32 read_index; //set to 0 at beginning of DMA/HDMA
@@ -136,12 +128,13 @@ struct {
   bool   hdma_repeat;
   uint16 hdma_iaddr;
   bool   hdma_active;
-}channel[8];
+} channel[8];
 
   inline bool   hdma_test();
+
+  inline void   irq(uint16 addr);
   inline bool   nmi_test();
   inline bool   irq_test();
-  inline void   irq(uint16 addr);
 
   inline uint8  pio_status();
   inline void   run();
@@ -225,6 +218,8 @@ struct {
 
 enum { CYCLE_OPREAD = 0, CYCLE_READ, CYCLE_WRITE, CYCLE_IO };
   inline void exec_cycle();
+  inline void last_cycle();
+  inline void last_cycle_exec();
   inline void cycle_edge();
   inline bool in_opcode();
 

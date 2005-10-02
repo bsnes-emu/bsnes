@@ -1,24 +1,48 @@
 #include "../base.h"
 
+#include "snes_video.cpp"
+#include "snes_audio.cpp"
+#include "snes_input.cpp"
+
 void SNES::run() {
-uint32 cycles;
+uint32 cycles, r;
   if(apusync.cycles < 0) {
     cpu->run();
     apusync.cycles += apusync.apu_multbl[cpu->cycles_executed()];
   } else {
     apu->run();
-    apusync.cycles -= apusync.cpu_multbl[apu->cycles_executed()];
+    cycles = apu->cycles_executed();
+    apusync.dsp += cycles;
+    apusync.cycles -= apusync.cpu_multbl[cycles];
+
+  //1024000(SPC700) / 32000(DSP) = 32spc/dsp ticks
+  //24576000(Sound clock crystal) / 32000(DSP) = 768crystal/dsp ticks
+    while(apusync.dsp >= 768) {
+      apusync.dsp -= 768;
+      audio_update(dsp->run());
+    }
   }
 }
 
 void SNES::init() {
   srtc = new SRTC();
   sdd1 = new SDD1();
+
+  srtc->init();
+  sdd1->init();
+
+  video_init();
+  audio_init();
+}
+
+void SNES::term() {
+  audio_term();
 }
 
 void SNES::power() {
   cpu->power();
   apu->power();
+  dsp->power();
   ppu->power();
   mem_bus->power();
 
@@ -30,16 +54,19 @@ int i;
   for(i=0x2100;i<=0x213f;i++)mem_bus->set_mmio_mapper(i, ppu->mmio);
   for(i=0x2140;i<=0x217f;i++)mem_bus->set_mmio_mapper(i, cpu->mmio);
   for(i=0x2180;i<=0x2183;i++)mem_bus->set_mmio_mapper(i, cpu->mmio);
-//S-RTC
-  mem_bus->set_mmio_mapper(0x2800, srtc->mmio);
-  mem_bus->set_mmio_mapper(0x2801, srtc->mmio);
 //input
+mem_bus->set_mmio_mapper(0x4000, cpu->mmio); //test -- remove this
   mem_bus->set_mmio_mapper(0x4016, cpu->mmio);
   mem_bus->set_mmio_mapper(0x4017, cpu->mmio);
   for(i=0x4200;i<=0x421f;i++)mem_bus->set_mmio_mapper(i, cpu->mmio);
   for(i=0x4300;i<=0x437f;i++)mem_bus->set_mmio_mapper(i, cpu->mmio);
-//S-DD1
-  for(i=0x4800;i<=0x4807;i++)mem_bus->set_mmio_mapper(i, sdd1->mmio);
+
+  srtc->enable();
+  sdd1->enable();
+
+  memset(video.data,     0, 512 * 448 * sizeof(uint32));
+  memset(video.ppu_data, 0, 512 * 480 * sizeof(uint16));
+  video_update();
 }
 
 void SNES::reset() {
@@ -47,12 +74,29 @@ void SNES::reset() {
 
   cpu->reset();
   apu->reset();
+  dsp->reset();
   ppu->reset();
   mem_bus->reset();
 
   srtc->reset();
   sdd1->reset();
+
+  memset(video.data,     0, 512 * 448 * sizeof(uint32));
+  memset(video.ppu_data, 0, 512 * 480 * sizeof(uint16));
+  video_update();
 }
+
+void SNES::frame() {
+  video_update();
+}
+
+void SNES::scanline() {
+  video_scanline();
+}
+
+/****************
+ *** PAL/NTSC ***
+ ****************/
 
 void SNES::set_region(uint8 new_region) {
   if(new_region == NTSC) {
@@ -67,6 +111,10 @@ void SNES::set_region(uint8 new_region) {
 }
 
 uint8 SNES::region() { return snes_region; }
+
+/**************
+ *** Timing ***
+ **************/
 
 void SNES::update_timing() {
   apusync.cycles = 0;
@@ -87,6 +135,7 @@ int i;
 /***************************
  *** Debugging functions ***
  ***************************/
+
 void SNES::notify(uint32 message, uint32 param1, uint32 param2) {}
 
 void SNES::debugger_enable() {
@@ -102,8 +151,10 @@ bool SNES::debugger_enabled() {
 }
 
 SNES::SNES() {
-  is_debugger_enabled = true;
+  is_debugger_enabled = false;
 
   snes_region = NTSC;
   update_timing();
+
+  dsp_buffer.data = 0;
 }

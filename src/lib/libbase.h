@@ -18,6 +18,8 @@
 #define FALSE 0
 #endif
 
+#define zerofree(__n) if(__n) { free(__n); __n = 0; }
+
 typedef unsigned int   uint;
 
 typedef unsigned char  byte;

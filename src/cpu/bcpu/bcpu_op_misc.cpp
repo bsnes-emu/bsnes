@@ -1,6 +1,7 @@
 void bCPU::op_nop() {
   switch(status.cycle_pos++) {
   case 1:
+    last_cycle();
     cpu_io();
     status.cycle_pos = 0;
     break;
@@ -10,6 +11,7 @@ void bCPU::op_nop() {
 void bCPU::op_wdm() {
   switch(status.cycle_pos++) {
   case 1:
+    last_cycle();
     op_read();
     status.cycle_pos = 0;
     break;
@@ -22,6 +24,7 @@ void bCPU::op_xba() {
     cpu_io();
     break;
   case 2:
+    last_cycle();
     cpu_io();
     regs.a.l ^= regs.a.h;
     regs.a.h ^= regs.a.l;
@@ -54,6 +57,7 @@ void bCPU::op_mvn() {
     else         { regs.x.w++; regs.y.w++; }
     break;
   case 6:
+    last_cycle();
     cpu_io();
     if(regs.a.w--)regs.pc.w -= 3;
     status.cycle_pos = 0;
@@ -82,6 +86,7 @@ void bCPU::op_mvp() {
     else         { regs.x.w--; regs.y.w--; }
     break;
   case 6:
+    last_cycle();
     cpu_io();
     if(regs.a.w--)regs.pc.w -= 3;
     status.cycle_pos = 0;
@@ -111,6 +116,7 @@ void bCPU::op_brk() {
     rd.l = op_read(OPMODE_LONG, (regs.e)?0xfffe:0xffe6);
     break;
   case 7:
+    last_cycle();
     rd.h = op_read(OPMODE_LONG, (regs.e)?0xffff:0xffe7);
     regs.pc.b = 0x00;
     regs.pc.w = rd.w;
@@ -143,6 +149,7 @@ void bCPU::op_cop() {
     rd.l = op_read(OPMODE_LONG, (regs.e)?0xfff4:0xffe4);
     break;
   case 7:
+    last_cycle();
     rd.h = op_read(OPMODE_LONG, (regs.e)?0xfff5:0xffe5);
     regs.pc.b = 0x00;
     regs.pc.w = rd.w;
@@ -160,6 +167,7 @@ void bCPU::op_stp() {
     status.cpu_state = CPUSTATE_STP;
     break;
   case 2:
+    last_cycle();
     cpu_io();
     regs.pc.w--;
     status.cycle_pos = 0;
@@ -174,8 +182,11 @@ void bCPU::op_wai() {
     status.cpu_state = CPUSTATE_WAI;
     break;
   case 2:
+    last_cycle();
     cpu_io();
-    regs.pc.w--;
+    if(status.cpu_state == CPUSTATE_WAI) {
+      regs.pc.w--;
+    }
     status.cycle_pos = 0;
     break;
   }
@@ -184,6 +195,7 @@ void bCPU::op_wai() {
 void bCPU::op_xce() {
   switch(status.cycle_pos++) {
   case 1:
+    last_cycle();
     cpu_io();
   bool c = regs.p.c;
     regs.p.c = regs.e;
@@ -202,6 +214,7 @@ void bCPU::op_xce() {
 void bCPU::op_clc() {
   switch(status.cycle_pos++) {
   case 1:
+    last_cycle();
     cpu_io();
     regs.p.c = 0;
     status.cycle_pos = 0;
@@ -212,6 +225,7 @@ void bCPU::op_clc() {
 void bCPU::op_cld() {
   switch(status.cycle_pos++) {
   case 1:
+    last_cycle();
     cpu_io();
     regs.p.d = 0;
     status.cycle_pos = 0;
@@ -222,6 +236,7 @@ void bCPU::op_cld() {
 void bCPU::op_cli() {
   switch(status.cycle_pos++) {
   case 1:
+    last_cycle();
     cpu_io();
     regs.p.i = 0;
     status.cycle_pos = 0;
@@ -232,6 +247,7 @@ void bCPU::op_cli() {
 void bCPU::op_clv() {
   switch(status.cycle_pos++) {
   case 1:
+    last_cycle();
     cpu_io();
     regs.p.v = 0;
     status.cycle_pos = 0;
@@ -242,6 +258,7 @@ void bCPU::op_clv() {
 void bCPU::op_sec() {
   switch(status.cycle_pos++) {
   case 1:
+    last_cycle();
     cpu_io();
     regs.p.c = 1;
     status.cycle_pos = 0;
@@ -252,6 +269,7 @@ void bCPU::op_sec() {
 void bCPU::op_sed() {
   switch(status.cycle_pos++) {
   case 1:
+    last_cycle();
     cpu_io();
     regs.p.d = 1;
     status.cycle_pos = 0;
@@ -262,6 +280,7 @@ void bCPU::op_sed() {
 void bCPU::op_sei() {
   switch(status.cycle_pos++) {
   case 1:
+    last_cycle();
     cpu_io();
     regs.p.i = 1;
     status.cycle_pos = 0;
@@ -275,6 +294,7 @@ void bCPU::op_rep() {
     rd.l = op_read();
     break;
   case 2:
+    last_cycle();
     cpu_io();
     regs.p &=~ rd.l;
     if(regs.e)regs.p |= 0x30;
@@ -293,6 +313,7 @@ void bCPU::op_sep() {
     rd.l = op_read();
     break;
   case 2:
+    last_cycle();
     cpu_io();
     regs.p |= rd.l;
     if(regs.e)regs.p |= 0x30;
@@ -308,6 +329,7 @@ void bCPU::op_sep() {
 void bCPU::op_tax() {
   switch(status.cycle_pos++) {
   case 1:
+    last_cycle();
     cpu_io();
     if(regs.p.x) {
       regs.x.l = regs.a.l;
@@ -326,6 +348,7 @@ void bCPU::op_tax() {
 void bCPU::op_tay() {
   switch(status.cycle_pos++) {
   case 1:
+    last_cycle();
     cpu_io();
     if(regs.p.x) {
       regs.y.l = regs.a.l;
@@ -344,6 +367,7 @@ void bCPU::op_tay() {
 void bCPU::op_txa() {
   switch(status.cycle_pos++) {
   case 1:
+    last_cycle();
     cpu_io();
     if(regs.p.m) {
       regs.a.l = regs.x.l;
@@ -362,6 +386,7 @@ void bCPU::op_txa() {
 void bCPU::op_txy() {
   switch(status.cycle_pos++) {
   case 1:
+    last_cycle();
     cpu_io();
     if(regs.p.x) {
       regs.y.l = regs.x.l;
@@ -380,6 +405,7 @@ void bCPU::op_txy() {
 void bCPU::op_tya() {
   switch(status.cycle_pos++) {
   case 1:
+    last_cycle();
     cpu_io();
     if(regs.p.m) {
       regs.a.l = regs.y.l;
@@ -398,6 +424,7 @@ void bCPU::op_tya() {
 void bCPU::op_tyx() {
   switch(status.cycle_pos++) {
   case 1:
+    last_cycle();
     cpu_io();
     if(regs.p.x) {
       regs.x.l = regs.y.l;
@@ -416,6 +443,7 @@ void bCPU::op_tyx() {
 void bCPU::op_tcd() {
   switch(status.cycle_pos++) {
   case 1:
+    last_cycle();
     cpu_io();
     regs.d.w = regs.a.w;
     regs.p.n = !!(regs.d.w & 0x8000);
@@ -428,6 +456,7 @@ void bCPU::op_tcd() {
 void bCPU::op_tcs() {
   switch(status.cycle_pos++) {
   case 1:
+    last_cycle();
     cpu_io();
     regs.s.w = regs.a.w;
     if(regs.e)regs.s.h = 0x01;
@@ -439,6 +468,7 @@ void bCPU::op_tcs() {
 void bCPU::op_tdc() {
   switch(status.cycle_pos++) {
   case 1:
+    last_cycle();
     cpu_io();
     regs.a.w = regs.d.w;
     regs.p.n = !!(regs.a.w & 0x8000);
@@ -451,6 +481,7 @@ void bCPU::op_tdc() {
 void bCPU::op_tsc() {
   switch(status.cycle_pos++) {
   case 1:
+    last_cycle();
     cpu_io();
     regs.a.w = regs.s.w;
     if(regs.e) {
@@ -468,6 +499,7 @@ void bCPU::op_tsc() {
 void bCPU::op_tsx() {
   switch(status.cycle_pos++) {
   case 1:
+    last_cycle();
     cpu_io();
     if(regs.p.x) {
       regs.x.l = regs.s.l;
@@ -486,6 +518,7 @@ void bCPU::op_tsx() {
 void bCPU::op_txs() {
   switch(status.cycle_pos++) {
   case 1:
+    last_cycle();
     cpu_io();
     if(regs.e) {
       regs.s.l = regs.x.l;
@@ -511,6 +544,7 @@ void bCPU::op_pha() {
     stack_write(regs.a.h);
     break;
   case 3:
+    last_cycle();
     stack_write(regs.a.l);
     status.cycle_pos = 0;
     break;
@@ -527,6 +561,7 @@ void bCPU::op_phx() {
     stack_write(regs.x.h);
     break;
   case 3:
+    last_cycle();
     stack_write(regs.x.l);
     status.cycle_pos = 0;
     break;
@@ -543,6 +578,7 @@ void bCPU::op_phy() {
     stack_write(regs.y.h);
     break;
   case 3:
+    last_cycle();
     stack_write(regs.y.l);
     status.cycle_pos = 0;
     break;
@@ -559,6 +595,7 @@ void bCPU::op_phd() {
     stack_write(regs.       d.h);
     break;
   case 3:
+    last_cycle();
     stack_write(regs.       d.l);
     status.cycle_pos = 0;
     break;
@@ -571,6 +608,7 @@ void bCPU::op_phb() {
     cpu_io();
     break;
   case 2:
+    last_cycle();
     stack_write(regs.db);
     status.cycle_pos = 0;
     break;
@@ -583,6 +621,7 @@ void bCPU::op_phk() {
     cpu_io();
     break;
   case 2:
+    last_cycle();
     stack_write(regs.pc.b);
     status.cycle_pos = 0;
     break;
@@ -595,6 +634,7 @@ void bCPU::op_php() {
     cpu_io();
     break;
   case 2:
+    last_cycle();
     stack_write(regs.p);
     status.cycle_pos = 0;
     break;
@@ -610,6 +650,7 @@ void bCPU::op_pla() {
     cpu_io();
     break;
   case 3:
+    if(regs.p.m)last_cycle();
     regs.a.l = stack_read();
     if(regs.p.m) {
       regs.p.n = !!(regs.a.l & 0x80);
@@ -618,6 +659,7 @@ void bCPU::op_pla() {
     }
     break;
   case 4:
+    last_cycle();
     regs.a.h = stack_read();
     regs.p.n = !!(regs.a.w & 0x8000);
     regs.p.z = (regs.a.w == 0);
@@ -635,6 +677,7 @@ void bCPU::op_plx() {
     cpu_io();
     break;
   case 3:
+    if(regs.p.x)last_cycle();
     regs.x.l = stack_read();
     if(regs.p.x) {
       regs.p.n = !!(regs.x.l & 0x80);
@@ -643,6 +686,7 @@ void bCPU::op_plx() {
     }
     break;
   case 4:
+    last_cycle();
     regs.x.h = stack_read();
     regs.p.n = !!(regs.x.w & 0x8000);
     regs.p.z = (regs.x.w == 0);
@@ -660,6 +704,7 @@ void bCPU::op_ply() {
     cpu_io();
     break;
   case 3:
+    if(regs.p.x)last_cycle();
     regs.y.l = stack_read();
     if(regs.p.x) {
       regs.p.n = !!(regs.y.l & 0x80);
@@ -668,6 +713,7 @@ void bCPU::op_ply() {
     }
     break;
   case 4:
+    last_cycle();
     regs.y.h = stack_read();
     regs.p.n = !!(regs.y.w & 0x8000);
     regs.p.z = (regs.y.w == 0);
@@ -685,6 +731,7 @@ void bCPU::op_pld() {
     cpu_io();
     break;
   case 3:
+    if(0)last_cycle();
     regs.       d.l = stack_read();
     if(0) {
       regs.p.n = !!(regs.       d.l & 0x80);
@@ -693,6 +740,7 @@ void bCPU::op_pld() {
     }
     break;
   case 4:
+    last_cycle();
     regs.       d.h = stack_read();
     regs.p.n = !!(regs.       d.w & 0x8000);
     regs.p.z = (regs.       d.w == 0);
@@ -710,6 +758,7 @@ void bCPU::op_plb() {
     cpu_io();
     break;
   case 3:
+    last_cycle();
     regs.db = stack_read();
     regs.p.n = !!(regs.db & 0x80);
     regs.p.z = (regs.db == 0);
@@ -727,6 +776,7 @@ void bCPU::op_plp() {
     cpu_io();
     break;
   case 3:
+    last_cycle();
     regs.p = stack_read();
     if(regs.e)regs.p |= 0x30;
     if(regs.p.x) {
@@ -750,6 +800,7 @@ void bCPU::op_pea() {
     stack_write(aa.h);
     break;
   case 4:
+    last_cycle();
     stack_write(aa.l);
     status.cycle_pos = 0;
     break;
@@ -774,6 +825,7 @@ void bCPU::op_pei() {
     stack_write(aa.h);
     break;
   case 6:
+    last_cycle();
     stack_write(aa.l);
     status.cycle_pos = 0;
     break;
@@ -796,6 +848,7 @@ void bCPU::op_per() {
     stack_write(rd.h);
     break;
   case 5:
+    last_cycle();
     stack_write(rd.l);
     status.cycle_pos = 0;
     break;

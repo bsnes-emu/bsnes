@@ -1,3 +1,6 @@
+#define BSNES_VERSION "0.012"
+#define BSNES_TITLE "bsnes v" BSNES_VERSION
+
 #include "reader/reader.h"
 
 #include "memory/memory.h"
@@ -14,6 +17,10 @@ extern CPU *cpu;
 #include "apu/bapuskip/bapuskip.h"
 extern APU *apu;
 
+#include "dsp/dsp.h"
+#include "dsp/bdsp/bdsp.h"
+extern DSP *dsp;
+
 #include "ppu/ppu.h"
 #include "ppu/bppu/bppu.h"
 extern PPU *ppu;
@@ -26,10 +33,14 @@ extern SNES *snes;
 extern SRTC *srtc;
 extern SDD1 *sdd1;
 
+#include "config/config.h"
+
 #ifdef INTERFACE_MAIN
+#include "config/config.cpp"
   MemBus *mem_bus;
   CPU    *cpu;
   APU    *apu;
+  DSP    *dsp;
   PPU    *ppu;
   SNES   *snes;
 

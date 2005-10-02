@@ -1,13 +1,13 @@
 void   bSNES::set_status(uint32 new_status) { run_status = new_status; }
 uint32 bSNES::get_status()                  { return run_status; }
 
-void bSNES::snes_run() {
+void bSNES::run() {
   if(!rom_image->loaded())return;
 
   switch(run_status) {
   case RUN:
     while(update_frame == false) {
-      run();
+      SNES::run();
     }
     update_frame = false;
     render();
@@ -17,7 +17,8 @@ void bSNES::snes_run() {
   }
 }
 
-void bSNES::render_frame() {}
+void bSNES::video_run() { render(); }
+void bSNES::sound_run() {}
 
 /***********************
  *** Input functions ***
@@ -28,18 +29,18 @@ void bSNES::render_frame() {}
 //to throw error messages about a bad free call to stdout...
 void bSNES::poll_input() {
 uint8 *keystate = SDL_GetKeyState(0);
-  joypad1.up     = keystate[cfg.input.joypad1.up];
-  joypad1.down   = keystate[cfg.input.joypad1.down];
-  joypad1.left   = keystate[cfg.input.joypad1.left];
-  joypad1.right  = keystate[cfg.input.joypad1.right];
-  joypad1.select = keystate[cfg.input.joypad1.select];
-  joypad1.start  = keystate[cfg.input.joypad1.start];
-  joypad1.y      = keystate[cfg.input.joypad1.y];
-  joypad1.b      = keystate[cfg.input.joypad1.b];
-  joypad1.x      = keystate[cfg.input.joypad1.x];
-  joypad1.a      = keystate[cfg.input.joypad1.a];
-  joypad1.l      = keystate[cfg.input.joypad1.l];
-  joypad1.r      = keystate[cfg.input.joypad1.r];
+  joypad1.up     = keystate[(int)config::input.joypad1.up];
+  joypad1.down   = keystate[(int)config::input.joypad1.down];
+  joypad1.left   = keystate[(int)config::input.joypad1.left];
+  joypad1.right  = keystate[(int)config::input.joypad1.right];
+  joypad1.select = keystate[(int)config::input.joypad1.select];
+  joypad1.start  = keystate[(int)config::input.joypad1.start];
+  joypad1.y      = keystate[(int)config::input.joypad1.y];
+  joypad1.b      = keystate[(int)config::input.joypad1.b];
+  joypad1.x      = keystate[(int)config::input.joypad1.x];
+  joypad1.a      = keystate[(int)config::input.joypad1.a];
+  joypad1.l      = keystate[(int)config::input.joypad1.l];
+  joypad1.r      = keystate[(int)config::input.joypad1.r];
 
 //It's impossible to hold both up+down, or left+right down
 //at the same time on a directional pad; and besides, allowing

@@ -3,12 +3,8 @@
 //allow writing to the IPLROM, all writes are
 //instead mapped to the extended SPC700 RAM region,
 //accessible when $f1 bit 7 is clear.
-//If you use this buffer directly, make sure not
-//to write to it, as this will break other APU
-//implementations that attempt to use this buffer.
 
-#ifdef _APU_IPLROM
-const uint8 spc700_iplrom[64] = {
+const uint8 APU::iplrom[64] = {
 /*ffc0*/ 0xcd, 0xef,       //mov   x,#$ef
 /*ffc2*/ 0xbd,             //mov   sp,x
 /*ffc3*/ 0xe8, 0x00,       //mov   a,#$00
@@ -43,6 +39,3 @@ const uint8 spc700_iplrom[64] = {
 /*fffb*/ 0x1f, 0x00, 0x00, //jmp   ($0000+x)
 /*fffe*/ 0xc0, 0xff        //---reset vector location ($ffc0)
 };
-#else
-extern const uint8 spc700_iplrom[64];
-#endif

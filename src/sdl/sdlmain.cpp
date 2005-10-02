@@ -1,14 +1,13 @@
 #define INTERFACE_MAIN
-#define BSNES_VERSION "0.011"
-#define BSNES_TITLE "bsnes/SDL v" BSNES_VERSION
 #include "../base.h"
 #include "sdlmain.h"
+
+#include "config.cpp"
 
 #ifdef _WIN32_
 HWND hwnd;
 #endif
 
-#include "config.cpp"
 #include "bsnes.h"
 #include "rom.cpp"
 #include "render.cpp"
@@ -47,24 +46,31 @@ va_list args;
 void init_snes() {
   mem_bus = new bMemBus();
   cpu     = new bCPU();
-  if(cfg.apu.enabled) {
-    apu = new bAPU();
-  } else {
-    apu = new bAPUSkip();
-  }
+  apu     = new bAPU();
+  dsp     = new bDSP();
   ppu     = new bPPU();
   snes    = new bSNES();
   bsnes   = static_cast<bSNES*>(snes);
 
   snes->init();
+
+//TODO: add sound support and remove this,
+//this is used with linux/bsd and mkfifo to
+//play audio in real-time while sound output
+//isn't available.
+  snes->log_audio_enable("output.wav");
+
+  snes->set_playback_buffer_size(2000);
 }
 
 void term_snes() {
-  if(mem_bus) { delete(mem_bus); mem_bus = 0; }
-  if(cpu)     { delete(cpu);     cpu     = 0; }
-  if(apu)     { delete(apu);     apu     = 0; }
-  if(ppu)     { delete(ppu);     ppu     = 0; }
-  if(snes)    { delete(snes);    snes    = 0; }
+  snes->term();
+
+  if(mem_bus) { delete(static_cast<bMemBus*>(mem_bus)); mem_bus = 0; }
+  if(cpu)     { delete(static_cast<bCPU*>   (cpu));     cpu     = 0; }
+  if(apu)     { delete(static_cast<bAPU*>   (apu));     apu     = 0; }
+  if(ppu)     { delete(static_cast<bPPU*>   (ppu));     ppu     = 0; }
+  if(snes)    { delete(static_cast<bSNES*>  (snes));    snes    = 0; }
 }
 
 void center_window() {
@@ -82,22 +88,17 @@ void set_window_info() {
 //SDL won't draw anything if you blit an image that's larger than
 //the display mode/window, even if you use the SoftStretch blit and
 //clip the source + dest rectangles properly...
-  if(cfg.video.display_width < cfg.video.output_width) {
-    cfg.video.display_width = cfg.video.output_width;
+  if((int)config::video.display_width < (int)config::video.output_width) {
+    config::video.display_width = config::video.output_width;
   }
-  if(cfg.video.display_height < cfg.video.output_height) {
-    cfg.video.display_height = cfg.video.output_height;
+  if((int)config::video.display_height < (int)config::video.output_height) {
+    config::video.display_height = config::video.output_height;
   }
 
-  screen_info.rd.x = (cfg.video.display_width  - cfg.video.output_width ) >> 1;
-  screen_info.rd.y = (cfg.video.display_height - cfg.video.output_height) >> 1;
-  screen_info.rd.w = cfg.video.output_width;
-  screen_info.rd.h = cfg.video.output_height;
-
-  screen_info.rs.x = 0;
-  screen_info.rs.y = 0;
-  screen_info.rs.w = 256;
-  screen_info.rs.h = 223;
+  screen_info.rd.x = ((int)config::video.display_width  - (int)config::video.output_width ) >> 1;
+  screen_info.rd.y = ((int)config::video.display_height - (int)config::video.output_height) >> 1;
+  screen_info.rd.w = config::video.output_width;
+  screen_info.rd.h = config::video.output_height;
 }
 
 #ifdef _WIN32_
@@ -115,14 +116,13 @@ SDL_Event event;
     return 0;
   }
 
-  cfg.load("bsnes_sdl.cfg");
+  config_file.load("bsnes_sdl.cfg");
 
   rom_image = new ROMImage();
   init_snes();
 
   rom_image->select(argv[1]);
   rom_image->load();
-  snes->power();
 
   if(rom_image->loaded() == false) {
     alert("Failed to load image. Usage: bsnes_sdl <filename.smc>");
@@ -132,13 +132,11 @@ SDL_Event event;
   SDL_Init(SDL_INIT_VIDEO);
   atexit(SDL_Quit);
   set_window_info();
-  screen = SDL_SetVideoMode(cfg.video.display_width, cfg.video.display_height, 16,
-    SDL_SWSURFACE | ((cfg.video.fullscreen)?SDL_FULLSCREEN:0));
-  if(!screen) {
-    alert("Failed to initialize SDL");
-    goto _end;
-  }
-  backbuffer = SDL_CreateRGBSurface(SDL_SWSURFACE, 256, 223, 16, 0xf800, 0x07e0, 0x001f, 0x0000);
+  screen = SDL_SetVideoMode(config::video.display_width, config::video.display_height, 16,
+    SDL_SWSURFACE | ((config::video.fullscreen)?SDL_FULLSCREEN:0));
+  if(!screen)     { alert("Failed to initialize SDL"); goto _end; }
+  backbuffer = SDL_CreateRGBSurface(SDL_SWSURFACE, 512, 448, 16, 0xf800, 0x07e0, 0x001f, 0x0000);
+  if(!backbuffer) { alert("Failed to initialize SDL"); goto _end; }
 
   SDL_WM_SetCaption(BSNES_TITLE, 0);
 #ifdef _WIN32_
@@ -146,18 +144,21 @@ SDL_Event event;
 #endif
   center_window();
 
-  update_color_lookup_table();
+  snes->power();
   bsnes->set_status(bSNES::RUN);
 
 int cursor_status;
   while(1) {
-    bsnes->snes_run();
+    bsnes->run();
     while(SDL_PollEvent(&event)) {
       switch(event.type) {
       case SDL_KEYUP:
         switch(event.key.keysym.sym) {
         case SDLK_ESCAPE:
           goto _end;
+        case SDLK_BACKSPACE:
+          snes->capture_screenshot();
+          break;
         case SDLK_F10: //toggle cursor display
           cursor_status = (SDL_ShowCursor(SDL_QUERY) == SDL_ENABLE)?SDL_DISABLE:SDL_ENABLE;
           SDL_ShowCursor(cursor_status);
@@ -174,7 +175,7 @@ int cursor_status;
   }
 
 _end:
-  cfg.save("bsnes_sdl.cfg");
+  config_file.save("bsnes_sdl.cfg");
   term_snes();
 
   return 0;

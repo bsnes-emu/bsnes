@@ -21,6 +21,7 @@ struct {
   bool   dma_active;
 }sdd1;
   void   init();
+  void   enable();
   void   power();
   void   reset();
   uint32 offset(uint32 addr);

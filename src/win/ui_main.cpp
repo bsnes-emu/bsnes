@@ -95,7 +95,7 @@ void MainWindow::set_video_mode(uint8 mode) {
     break;
   }
 
-  cfg.video.mode = mode;
+  config::video.mode = mode;
   show();
 }
 
@@ -107,8 +107,8 @@ char t[4096];
 
   ofn.lStructSize = sizeof(ofn);
   ofn.hwndOwner   = hwnd;
-  ofn.lpstrFilter = "SNES ROM Images (*.smc;*.swc;*.fig;*.ufo;*.gd3;*.078)\0"
-                      "*.smc;*.swc;*.fig;*.ufo;*.gd3;*.078\0"
+  ofn.lpstrFilter = "SNES ROM Images (*.smc;*.sfc;*.swc;*.fig;*.ufo;*.gd3;*.078)\0"
+                      "*.smc;*.sfc;*.swc;*.fig;*.ufo;*.gd3;*.078\0"
                     "All Files (*.*)\0"
                       "*.*\0";
   ofn.lpstrFile   = t;
@@ -133,6 +133,7 @@ void MainWindow::menu_unload() {
 
 long __stdcall wndproc_main(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
 time_t timeout;
+int i;
   switch(msg) {
   case WM_KEYDOWN:
     if(wparam == VK_ESCAPE) {
@@ -145,7 +146,7 @@ time_t timeout;
     }
     break;
   case WM_COMMAND:
-//below code fails becahse it is triggered after snes->poll_input()...
+//below code fails because it is triggered after snes->poll_input()...
 //unsure how to fix this...
 //  timeout = time(NULL);
 //  while(difftime(time(NULL), timeout) < 5) {
@@ -201,28 +202,39 @@ time_t timeout;
     case MENU_SETTINGS_VIDEOMODE_1024x768f:
       w_main->set_video_mode(VIDEOMODE_1024x768f);
       break;
+    case MENU_SETTINGS_COLORADJUST_COLORCURVE:
+      config::snes.video_color_curve.toggle();
+      CheckMenuItem(w_main->hmenu, MENU_SETTINGS_COLORADJUST_COLORCURVE,
+        (config::snes.video_color_curve)?MF_CHECKED:MF_UNCHECKED);
+      break;
+    case MENU_SETTINGS_COLORADJUST_NORMAL:
+    case MENU_SETTINGS_COLORADJUST_GRAYSCALE:
+    case MENU_SETTINGS_COLORADJUST_VGA:
+    case MENU_SETTINGS_COLORADJUST_GENESIS:
+      i = LOWORD(wparam) - MENU_SETTINGS_COLORADJUST_NORMAL;
+      config::snes.video_color_adjust_mode = i;
+      CheckMenuItem(w_main->hmenu, MENU_SETTINGS_COLORADJUST_NORMAL,    (i == 0)?MF_CHECKED:MF_UNCHECKED);
+      CheckMenuItem(w_main->hmenu, MENU_SETTINGS_COLORADJUST_GRAYSCALE, (i == 1)?MF_CHECKED:MF_UNCHECKED);
+      CheckMenuItem(w_main->hmenu, MENU_SETTINGS_COLORADJUST_VGA,       (i == 2)?MF_CHECKED:MF_UNCHECKED);
+      CheckMenuItem(w_main->hmenu, MENU_SETTINGS_COLORADJUST_GENESIS,   (i == 3)?MF_CHECKED:MF_UNCHECKED);
+      break;
     case MENU_SETTINGS_USEVRAM:
-      cfg.video.use_vram ^= 1;
-      w_main->set_video_mode(cfg.video.mode);
-      CheckMenuItem(w_main->hmenu, MENU_SETTINGS_USEVRAM, (cfg.video.use_vram)?MF_CHECKED:MF_UNCHECKED);
+      config::video.use_vram.toggle();
+      w_main->set_video_mode(config::video.mode);
+      CheckMenuItem(w_main->hmenu, MENU_SETTINGS_USEVRAM, (config::video.use_vram)?MF_CHECKED:MF_UNCHECKED);
       break;
     case MENU_SETTINGS_VBLANK:
-      cfg.video.vblank ^= 1;
-      CheckMenuItem(w_main->hmenu, MENU_SETTINGS_VBLANK, (cfg.video.vblank)?MF_CHECKED:MF_UNCHECKED);
-      break;
-    case MENU_SETTINGS_COLORCURVE:
-      cfg.video.color_curve ^= 1;
-      dd_renderer->update_color_lookup_table();
-      CheckMenuItem(w_main->hmenu, MENU_SETTINGS_COLORCURVE, (cfg.video.color_curve)?MF_CHECKED:MF_UNCHECKED);
+      config::video.vblank.toggle();
+      CheckMenuItem(w_main->hmenu, MENU_SETTINGS_VBLANK, (config::video.vblank)?MF_CHECKED:MF_UNCHECKED);
       break;
     case MENU_SETTINGS_SHOWFPS:
-      cfg.gui.show_fps ^= 1;
+      config::gui.show_fps.toggle();
       SetWindowText(w_main->hwnd, BSNES_TITLE);
-      CheckMenuItem(w_main->hmenu, MENU_SETTINGS_SHOWFPS, (cfg.gui.show_fps)?MF_CHECKED:MF_UNCHECKED);
+      CheckMenuItem(w_main->hmenu, MENU_SETTINGS_SHOWFPS, (config::gui.show_fps)?MF_CHECKED:MF_UNCHECKED);
       break;
-    case MENU_SETTINGS_APUENABLED:
-      cfg.apu.enabled ^= 1;
-      CheckMenuItem(w_main->hmenu, MENU_SETTINGS_APUENABLED, (cfg.apu.enabled)?MF_CHECKED:MF_UNCHECKED);
+    case MENU_SETTINGS_MUTE:
+      config::snes.mute.toggle();
+      CheckMenuItem(w_main->hmenu, MENU_SETTINGS_MUTE, (config::snes.mute)?MF_CHECKED:MF_UNCHECKED);
       break;
     case MENU_SETTINGS_INPUTCFG_JOYPAD1:
       w_inputconfig->begin_config(InputConfig::JOYPAD1);
@@ -236,6 +248,17 @@ time_t timeout;
       }
       break;
     case MENU_MISC_SCREENSHOT:
+      snes->capture_screenshot();
+      break;
+    case MENU_MISC_LOGAUDIO:
+      i = CheckMenuItem(w_main->hmenu, MENU_MISC_LOGAUDIO, 0);
+      if(i == MF_UNCHECKED) {
+        CheckMenuItem(w_main->hmenu, MENU_MISC_LOGAUDIO, MF_CHECKED);
+        snes->log_audio_enable();
+      } else {
+        CheckMenuItem(w_main->hmenu, MENU_MISC_LOGAUDIO, MF_UNCHECKED);
+        snes->log_audio_disable();
+      }
       break;
     case MENU_MISC_ABOUT:
       w_about->center();
@@ -256,6 +279,7 @@ time_t timeout;
 
 void MainWindow::create() {
 WNDCLASS wc;
+int i;
   wc.cbClsExtra    = 0;
   wc.cbWndExtra    = 0;
   wc.hbrBackground = CreateSolidBrush(RGB(0, 0, 0));
@@ -303,18 +327,26 @@ HMENU hsubmenu, hbranchmenu;
   AppendMenu(hsubmenu, MF_STRING | MF_POPUP, (unsigned int)hbranchmenu, "&Frameskip");
 
   hbranchmenu = CreatePopupMenu();
-  AppendMenu(hbranchmenu, MF_STRING, MENU_SETTINGS_VIDEOMODE_256x224w,   "256x224 Windowed [16:15]");
-  AppendMenu(hbranchmenu, MF_STRING, MENU_SETTINGS_VIDEOMODE_512x448w,   "512x448 Windowed [16:15]");
-  AppendMenu(hbranchmenu, MF_STRING, MENU_SETTINGS_VIDEOMODE_960x720w,   "960x720 Windowed [4:3]");
-  AppendMenu(hbranchmenu, MF_STRING, MENU_SETTINGS_VIDEOMODE_640x480f,   "640x480 Fullscreen [16:15]");
-  AppendMenu(hbranchmenu, MF_STRING, MENU_SETTINGS_VIDEOMODE_1024x768f,  "1024x768 Fullscreen [4:3]");
+  AppendMenu(hbranchmenu, MF_STRING, MENU_SETTINGS_VIDEOMODE_256x224w,  "256x224 Windowed (16:15)");
+  AppendMenu(hbranchmenu, MF_STRING, MENU_SETTINGS_VIDEOMODE_512x448w,  "512x448 Windowed (16:15)");
+  AppendMenu(hbranchmenu, MF_STRING, MENU_SETTINGS_VIDEOMODE_960x720w,  "960x720 Windowed (4:3)");
+  AppendMenu(hbranchmenu, MF_STRING, MENU_SETTINGS_VIDEOMODE_640x480f,  "640x480 Fullscreen (16:15)");
+  AppendMenu(hbranchmenu, MF_STRING, MENU_SETTINGS_VIDEOMODE_1024x768f, "1024x768 Fullscreen (4:3)");
   AppendMenu(hsubmenu, MF_STRING | MF_POPUP, (unsigned int)hbranchmenu, "&Video Mode");
 
-  AppendMenu(hsubmenu, MF_STRING, MENU_SETTINGS_USEVRAM,    "Use &Video Memory Surface");
-  AppendMenu(hsubmenu, MF_STRING, MENU_SETTINGS_VBLANK,     "&Wait for Vertical Retrace");
-  AppendMenu(hsubmenu, MF_STRING, MENU_SETTINGS_COLORCURVE, "Use &Color Curve");
-  AppendMenu(hsubmenu, MF_STRING, MENU_SETTINGS_SHOWFPS,    "&Show FPS");
-  AppendMenu(hsubmenu, MF_STRING, MENU_SETTINGS_APUENABLED, "&Enable APU");
+  hbranchmenu = CreatePopupMenu();
+  AppendMenu(hbranchmenu, MF_STRING, MENU_SETTINGS_COLORADJUST_COLORCURVE, "Use &Color Curve");
+  AppendMenu(hbranchmenu, MF_SEPARATOR, 0, "");
+  AppendMenu(hbranchmenu, MF_STRING, MENU_SETTINGS_COLORADJUST_NORMAL,    "Normal (RGB555)");
+  AppendMenu(hbranchmenu, MF_STRING, MENU_SETTINGS_COLORADJUST_GRAYSCALE, "Grayscale Mode (L5)");
+  AppendMenu(hbranchmenu, MF_STRING, MENU_SETTINGS_COLORADJUST_VGA,       "VGA Mode (RGB332)");
+  AppendMenu(hbranchmenu, MF_STRING, MENU_SETTINGS_COLORADJUST_GENESIS,   "Genesis Mode (RGB333)");
+  AppendMenu(hsubmenu, MF_STRING | MF_POPUP, (unsigned int)hbranchmenu, "&Color Adjust");
+
+  AppendMenu(hsubmenu, MF_STRING, MENU_SETTINGS_USEVRAM, "Use &Video Memory Surface");
+  AppendMenu(hsubmenu, MF_STRING, MENU_SETTINGS_VBLANK,  "&Wait For Vertical Retrace");
+  AppendMenu(hsubmenu, MF_STRING, MENU_SETTINGS_SHOWFPS, "&Show FPS");
+  AppendMenu(hsubmenu, MF_STRING, MENU_SETTINGS_MUTE,    "&Mute Sound Output");
 
   hbranchmenu = CreatePopupMenu();
   AppendMenu(hbranchmenu, MF_STRING, MENU_SETTINGS_INPUTCFG_JOYPAD1, "Joypad 1");
@@ -325,14 +357,20 @@ HMENU hsubmenu, hbranchmenu;
   AppendMenu(hmenu, MF_STRING | MF_POPUP, (unsigned int)hsubmenu, "&Settings");
 
   hsubmenu = CreatePopupMenu();
-  AppendMenu(hsubmenu, MF_STRING | MF_GRAYED, MENU_MISC_SCREENSHOT, "&Capture Screenshot");
+  AppendMenu(hsubmenu, MF_STRING, MENU_MISC_SCREENSHOT, "&Capture Screenshot");
+  AppendMenu(hsubmenu, MF_STRING, MENU_MISC_LOGAUDIO,   "&Log Audio Data");
   AppendMenu(hsubmenu, MF_SEPARATOR, 0, "");
   AppendMenu(hsubmenu, MF_STRING, MENU_MISC_ABOUT, "&About...");
   AppendMenu(hmenu, MF_STRING | MF_POPUP, (unsigned int)hsubmenu, "&Misc");
 
-  CheckMenuItem(hmenu, MENU_SETTINGS_USEVRAM,    (cfg.video.use_vram)?MF_CHECKED:MF_UNCHECKED);
-  CheckMenuItem(hmenu, MENU_SETTINGS_VBLANK,     (cfg.video.vblank)?MF_CHECKED:MF_UNCHECKED);
-  CheckMenuItem(hmenu, MENU_SETTINGS_COLORCURVE, (cfg.video.color_curve)?MF_CHECKED:MF_UNCHECKED);
-  CheckMenuItem(hmenu, MENU_SETTINGS_SHOWFPS,    (cfg.gui.show_fps)?MF_CHECKED:MF_UNCHECKED);
-  CheckMenuItem(hmenu, MENU_SETTINGS_APUENABLED, (cfg.apu.enabled)?MF_CHECKED:MF_UNCHECKED);
+  CheckMenuItem(hmenu, MENU_SETTINGS_USEVRAM,    (config::video.use_vram)?MF_CHECKED:MF_UNCHECKED);
+  CheckMenuItem(hmenu, MENU_SETTINGS_VBLANK,     (config::video.vblank)?MF_CHECKED:MF_UNCHECKED);
+  CheckMenuItem(hmenu, MENU_SETTINGS_COLORADJUST_COLORCURVE, (config::snes.video_color_curve)?MF_CHECKED:MF_UNCHECKED);
+  i = config::snes.video_color_adjust_mode;
+  CheckMenuItem(hmenu, MENU_SETTINGS_COLORADJUST_NORMAL,     (i == 0)?MF_CHECKED:MF_UNCHECKED);
+  CheckMenuItem(hmenu, MENU_SETTINGS_COLORADJUST_GRAYSCALE,  (i == 1)?MF_CHECKED:MF_UNCHECKED);
+  CheckMenuItem(hmenu, MENU_SETTINGS_COLORADJUST_VGA,        (i == 2)?MF_CHECKED:MF_UNCHECKED);
+  CheckMenuItem(hmenu, MENU_SETTINGS_COLORADJUST_GENESIS,    (i == 3)?MF_CHECKED:MF_UNCHECKED);
+  CheckMenuItem(hmenu, MENU_SETTINGS_SHOWFPS, (config::gui.show_fps)?MF_CHECKED:MF_UNCHECKED);
+  CheckMenuItem(hmenu, MENU_SETTINGS_MUTE,    (config::snes.mute)   ?MF_CHECKED:MF_UNCHECKED);
 }

@@ -6,10 +6,11 @@ OBJS = winmain.obj \
        memory.obj bmemory.obj \
        cpu.obj bcpu.obj \
        apu.obj bapu.obj bapuskip.obj \
+       bdsp.obj \
        ppu.obj bppu.obj \
        snes.obj \
        srtc.obj sdd1.obj
-LIBS = kernel32.lib user32.lib gdi32.lib comdlg32.lib ddraw.lib dxguid.lib
+LIBS = kernel32.lib user32.lib gdi32.lib comdlg32.lib ddraw.lib dsound.lib dxguid.lib
 
 all: $(OBJS)
 	rc /r /fobsnes.res bsnes.rc
@@ -21,7 +22,7 @@ clean:
 ######################
 ### win32-specific ###
 ######################
-winmain.obj: *.cpp *.h
+winmain.obj: *.cpp *.h ../config/*
 	$(CC) $(CFLAGS) /c winmain.cpp
 
 #################
@@ -61,6 +62,12 @@ bapu.obj: ../apu/bapu/*
 
 bapuskip.obj: ../apu/bapuskip/*
 	$(CC) $(CFLAGS) /c ../apu/bapuskip/bapuskip.cpp
+
+###########
+### dsp ###
+###########
+bdsp.obj: ../dsp/bdsp/*
+	$(CC) $(CFLAGS) /c ../dsp/bdsp/bdsp.cpp
 
 ###########
 ### ppu ###

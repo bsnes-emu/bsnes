@@ -1,6 +1,7 @@
 void bCPU::op_inc() {
   switch(status.cycle_pos++) {
   case 1:
+    last_cycle();
     cpu_io();
     if(regs.p.m) {
       regs.a.l++;
@@ -19,6 +20,7 @@ void bCPU::op_inc() {
 void bCPU::op_inx() {
   switch(status.cycle_pos++) {
   case 1:
+    last_cycle();
     cpu_io();
     if(regs.p.x) {
       regs.x.l++;
@@ -37,6 +39,7 @@ void bCPU::op_inx() {
 void bCPU::op_iny() {
   switch(status.cycle_pos++) {
   case 1:
+    last_cycle();
     cpu_io();
     if(regs.p.x) {
       regs.y.l++;
@@ -55,6 +58,7 @@ void bCPU::op_iny() {
 void bCPU::op_dec() {
   switch(status.cycle_pos++) {
   case 1:
+    last_cycle();
     cpu_io();
     if(regs.p.m) {
       regs.a.l--;
@@ -73,6 +77,7 @@ void bCPU::op_dec() {
 void bCPU::op_dex() {
   switch(status.cycle_pos++) {
   case 1:
+    last_cycle();
     cpu_io();
     if(regs.p.x) {
       regs.x.l--;
@@ -91,6 +96,7 @@ void bCPU::op_dex() {
 void bCPU::op_dey() {
   switch(status.cycle_pos++) {
   case 1:
+    last_cycle();
     cpu_io();
     if(regs.p.x) {
       regs.y.l--;
@@ -109,6 +115,7 @@ void bCPU::op_dey() {
 void bCPU::op_asl() {
   switch(status.cycle_pos++) {
   case 1:
+    last_cycle();
     cpu_io();
     if(regs.p.m) {
       regs.p.c = !!(regs.a.l & 0x80);
@@ -129,6 +136,7 @@ void bCPU::op_asl() {
 void bCPU::op_lsr() {
   switch(status.cycle_pos++) {
   case 1:
+    last_cycle();
     cpu_io();
     if(regs.p.m) {
       regs.p.c = regs.a.l & 1;
@@ -149,6 +157,7 @@ void bCPU::op_lsr() {
 void bCPU::op_rol() {
   switch(status.cycle_pos++) {
   case 1:
+    last_cycle();
     cpu_io();
     uint16 c = regs.p.c;
     if(regs.p.m) {
@@ -172,6 +181,7 @@ void bCPU::op_rol() {
 void bCPU::op_ror() {
   switch(status.cycle_pos++) {
   case 1:
+    last_cycle();
     cpu_io();
     uint16 c;
     if(regs.p.m) {
@@ -218,6 +228,7 @@ void bCPU::op_inc_addr() {
     op_write(OPMODE_DBR, aa.w + 1, rd.h);
     break;
   case 7:
+    last_cycle();
     op_write(OPMODE_DBR, aa.w,     rd.l);
     status.cycle_pos = 0;
     break;
@@ -248,6 +259,7 @@ void bCPU::op_dec_addr() {
     op_write(OPMODE_DBR, aa.w + 1, rd.h);
     break;
   case 7:
+    last_cycle();
     op_write(OPMODE_DBR, aa.w,     rd.l);
     status.cycle_pos = 0;
     break;
@@ -278,6 +290,7 @@ void bCPU::op_asl_addr() {
     op_write(OPMODE_DBR, aa.w + 1, rd.h);
     break;
   case 7:
+    last_cycle();
     op_write(OPMODE_DBR, aa.w,     rd.l);
     status.cycle_pos = 0;
     break;
@@ -308,6 +321,7 @@ void bCPU::op_lsr_addr() {
     op_write(OPMODE_DBR, aa.w + 1, rd.h);
     break;
   case 7:
+    last_cycle();
     op_write(OPMODE_DBR, aa.w,     rd.l);
     status.cycle_pos = 0;
     break;
@@ -338,6 +352,7 @@ void bCPU::op_rol_addr() {
     op_write(OPMODE_DBR, aa.w + 1, rd.h);
     break;
   case 7:
+    last_cycle();
     op_write(OPMODE_DBR, aa.w,     rd.l);
     status.cycle_pos = 0;
     break;
@@ -368,6 +383,7 @@ void bCPU::op_ror_addr() {
     op_write(OPMODE_DBR, aa.w + 1, rd.h);
     break;
   case 7:
+    last_cycle();
     op_write(OPMODE_DBR, aa.w,     rd.l);
     status.cycle_pos = 0;
     break;
@@ -398,6 +414,7 @@ void bCPU::op_trb_addr() {
     op_write(OPMODE_DBR, aa.w + 1, rd.h);
     break;
   case 7:
+    last_cycle();
     op_write(OPMODE_DBR, aa.w,     rd.l);
     status.cycle_pos = 0;
     break;
@@ -428,6 +445,7 @@ void bCPU::op_tsb_addr() {
     op_write(OPMODE_DBR, aa.w + 1, rd.h);
     break;
   case 7:
+    last_cycle();
     op_write(OPMODE_DBR, aa.w,     rd.l);
     status.cycle_pos = 0;
     break;
@@ -461,6 +479,7 @@ void bCPU::op_inc_addrx() {
     op_write(OPMODE_DBR, aa.w + regs.x.w + 1, rd.h);
     break;
   case 8:
+    last_cycle();
     op_write(OPMODE_DBR, aa.w + regs.x.w,     rd.l);
     status.cycle_pos = 0;
     break;
@@ -494,6 +513,7 @@ void bCPU::op_dec_addrx() {
     op_write(OPMODE_DBR, aa.w + regs.x.w + 1, rd.h);
     break;
   case 8:
+    last_cycle();
     op_write(OPMODE_DBR, aa.w + regs.x.w,     rd.l);
     status.cycle_pos = 0;
     break;
@@ -527,6 +547,7 @@ void bCPU::op_asl_addrx() {
     op_write(OPMODE_DBR, aa.w + regs.x.w + 1, rd.h);
     break;
   case 8:
+    last_cycle();
     op_write(OPMODE_DBR, aa.w + regs.x.w,     rd.l);
     status.cycle_pos = 0;
     break;
@@ -560,6 +581,7 @@ void bCPU::op_lsr_addrx() {
     op_write(OPMODE_DBR, aa.w + regs.x.w + 1, rd.h);
     break;
   case 8:
+    last_cycle();
     op_write(OPMODE_DBR, aa.w + regs.x.w,     rd.l);
     status.cycle_pos = 0;
     break;
@@ -593,6 +615,7 @@ void bCPU::op_rol_addrx() {
     op_write(OPMODE_DBR, aa.w + regs.x.w + 1, rd.h);
     break;
   case 8:
+    last_cycle();
     op_write(OPMODE_DBR, aa.w + regs.x.w,     rd.l);
     status.cycle_pos = 0;
     break;
@@ -626,6 +649,7 @@ void bCPU::op_ror_addrx() {
     op_write(OPMODE_DBR, aa.w + regs.x.w + 1, rd.h);
     break;
   case 8:
+    last_cycle();
     op_write(OPMODE_DBR, aa.w + regs.x.w,     rd.l);
     status.cycle_pos = 0;
     break;
@@ -656,6 +680,7 @@ void bCPU::op_inc_dp() {
     op_write(OPMODE_DP, dp + 1, rd.h);
     break;
   case 7:
+    last_cycle();
     op_write(OPMODE_DP, dp,     rd.l);
     status.cycle_pos = 0;
     break;
@@ -686,6 +711,7 @@ void bCPU::op_dec_dp() {
     op_write(OPMODE_DP, dp + 1, rd.h);
     break;
   case 7:
+    last_cycle();
     op_write(OPMODE_DP, dp,     rd.l);
     status.cycle_pos = 0;
     break;
@@ -716,6 +742,7 @@ void bCPU::op_asl_dp() {
     op_write(OPMODE_DP, dp + 1, rd.h);
     break;
   case 7:
+    last_cycle();
     op_write(OPMODE_DP, dp,     rd.l);
     status.cycle_pos = 0;
     break;
@@ -746,6 +773,7 @@ void bCPU::op_lsr_dp() {
     op_write(OPMODE_DP, dp + 1, rd.h);
     break;
   case 7:
+    last_cycle();
     op_write(OPMODE_DP, dp,     rd.l);
     status.cycle_pos = 0;
     break;
@@ -776,6 +804,7 @@ void bCPU::op_rol_dp() {
     op_write(OPMODE_DP, dp + 1, rd.h);
     break;
   case 7:
+    last_cycle();
     op_write(OPMODE_DP, dp,     rd.l);
     status.cycle_pos = 0;
     break;
@@ -806,6 +835,7 @@ void bCPU::op_ror_dp() {
     op_write(OPMODE_DP, dp + 1, rd.h);
     break;
   case 7:
+    last_cycle();
     op_write(OPMODE_DP, dp,     rd.l);
     status.cycle_pos = 0;
     break;
@@ -836,6 +866,7 @@ void bCPU::op_trb_dp() {
     op_write(OPMODE_DP, dp + 1, rd.h);
     break;
   case 7:
+    last_cycle();
     op_write(OPMODE_DP, dp,     rd.l);
     status.cycle_pos = 0;
     break;
@@ -866,6 +897,7 @@ void bCPU::op_tsb_dp() {
     op_write(OPMODE_DP, dp + 1, rd.h);
     break;
   case 7:
+    last_cycle();
     op_write(OPMODE_DP, dp,     rd.l);
     status.cycle_pos = 0;
     break;
@@ -899,6 +931,7 @@ void bCPU::op_inc_dpx() {
     op_write(OPMODE_DP, dp + regs.x.w + 1, rd.h);
     break;
   case 8:
+    last_cycle();
     op_write(OPMODE_DP, dp + regs.x.w,     rd.l);
     status.cycle_pos = 0;
     break;
@@ -932,6 +965,7 @@ void bCPU::op_dec_dpx() {
     op_write(OPMODE_DP, dp + regs.x.w + 1, rd.h);
     break;
   case 8:
+    last_cycle();
     op_write(OPMODE_DP, dp + regs.x.w,     rd.l);
     status.cycle_pos = 0;
     break;
@@ -965,6 +999,7 @@ void bCPU::op_asl_dpx() {
     op_write(OPMODE_DP, dp + regs.x.w + 1, rd.h);
     break;
   case 8:
+    last_cycle();
     op_write(OPMODE_DP, dp + regs.x.w,     rd.l);
     status.cycle_pos = 0;
     break;
@@ -998,6 +1033,7 @@ void bCPU::op_lsr_dpx() {
     op_write(OPMODE_DP, dp + regs.x.w + 1, rd.h);
     break;
   case 8:
+    last_cycle();
     op_write(OPMODE_DP, dp + regs.x.w,     rd.l);
     status.cycle_pos = 0;
     break;
@@ -1031,6 +1067,7 @@ void bCPU::op_rol_dpx() {
     op_write(OPMODE_DP, dp + regs.x.w + 1, rd.h);
     break;
   case 8:
+    last_cycle();
     op_write(OPMODE_DP, dp + regs.x.w,     rd.l);
     status.cycle_pos = 0;
     break;
@@ -1064,6 +1101,7 @@ void bCPU::op_ror_dpx() {
     op_write(OPMODE_DP, dp + regs.x.w + 1, rd.h);
     break;
   case 8:
+    last_cycle();
     op_write(OPMODE_DP, dp + regs.x.w,     rd.l);
     status.cycle_pos = 0;
     break;

@@ -284,7 +284,7 @@ static uint8 linecol[4] = { 1, 2, 3 };
     cpu->vcounter(), cpu->hcounter(), cpu->hcycles(),
     cpu->interlace(), cpu->interlace_field(), cpu->overscan());
   strcat(s, t);
-  if(cfg.apu.enabled) {
+  if(1) { //config::apu.enabled
     sprintf(t, " -- CPU[$%0.2x,$%0.2x,$%0.2x,$%0.2x]<>APU[$%0.2x,$%0.2x,$%0.2x,$%0.2x]",
       cpu->port_read(0), cpu->port_read(1), cpu->port_read(2), cpu->port_read(3),
       apu->port_read(0), apu->port_read(1), apu->port_read(2), apu->port_read(3)

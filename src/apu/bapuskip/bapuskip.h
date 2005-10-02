@@ -1,4 +1,7 @@
 class bAPUSkip : public APU {
+private:
+uint8 spcram[65536];
+
 public:
 
 struct _apu_port {
@@ -26,6 +29,7 @@ enum {
   uint8  port_read   (uint8 port);
   void   port_write  (uint8 port, uint8 value);
 
+  uint8 *get_spcram_handle() { return spcram; }
   void   run();
   uint32 cycles_executed() { return 12 * 24; }
   void   power();

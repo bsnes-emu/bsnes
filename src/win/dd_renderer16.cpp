@@ -1,123 +1,79 @@
 inline void DDRenderer::update16_256x224() {
-uint16 *src;
-uint16 *dest;
+uint16 *src, *dest;
 uint32 pitch;
 int x, y;
-  src   = (uint16*)ppu->output->buffer + (1 << 10);
-  dest  = (uint16*)ddsd.lpSurface;
-  pitch = (ddsd.lPitch >> 1) - 256;
+  dest = (uint16*)ddsd.lpSurface;
+  src  = (uint16*)vi.data;
 
-int overscan_adjust = 0;
-  if(cpu->overscan() == true) {
-    src += 7 << 10;
-    overscan_adjust = 7;
+#ifdef USE_X86_ASM
+  pitch = (ddsd.lPitch) - 512;
+  __asm {
+    mov edi,dest
+    mov esi,src
+    mov edx,224
+  ly:
+    mov ecx,32
+  lx:
+    movsd
+    movsd
+    movsd
+    movsd
+    loopnz lx
+    add edi,pitch
+    dec edx
+    jnz ly
   }
+#else
+  pitch = (ddsd.lPitch >> 1);
+  for(y=0;y<224;y++) {
+    memcpy(dest, src, 512);
+    dest += pitch;
+    src  += 256;
+  }
+#endif
+}
 
-  for(y=1+overscan_adjust;y<224+overscan_adjust;y++) {
-    x = 256;
-    while(x--) {
-      *dest++ = color_lookup_table[*src];
-      src += 2;
-    }
+inline void DDRenderer::update16_512x224() {
+uint16 *src, *dest;
+uint32 pitch;
+int x, y;
+  pitch = (ddsd.lPitch >> 1);
+  dest  = (uint16*)ddsd.lpSurface;
+  src   = (uint16*)vi.data;
+
+  for(y=0;y<224;y++) {
+    memcpy(dest, src, 1024);
     dest += pitch;
     src  += 512;
   }
 }
 
 inline void DDRenderer::update16_256x448() {
-uint16 *src;
-uint16 *dest;
+uint16 *src, *dest;
 uint32 pitch;
 int x, y;
-  src   = (uint16*)ppu->output->buffer + (1 << 10);
+  pitch = (ddsd.lPitch >> 1);
   dest  = (uint16*)ddsd.lpSurface;
-  pitch = (ddsd.lPitch >> 1) - 256;
+  src   = (uint16*)vi.data;
 
-int overscan_adjust = 0;
-  if(cpu->overscan() == true) {
-    src += 7 << 10;
-    overscan_adjust = 14;
-  }
-
-  for(y=2+overscan_adjust;y<448+overscan_adjust;y++) {
-    x = 256;
-    while(x--) {
-      *dest++ = color_lookup_table[*src];
-      src += 2;
-    }
+  for(y=0;y<448;y++) {
+    memcpy(dest, src, 512);
     dest += pitch;
-    if(ppu->output->line[y >> 1].interlace == false) {
-      src += (y & 1)?512:-512;
-    }
-  }
-}
-
-inline void DDRenderer::update16_512x224() {
-uint16 *src;
-uint16 *dest;
-uint32 pitch;
-int x, y;
-  src   = (uint16*)ppu->output->buffer + (1 << 10);
-  dest  = (uint16*)ddsd.lpSurface;
-  pitch = (ddsd.lPitch >> 1) - 512;
-
-int overscan_adjust = 0;
-  if(cpu->overscan() == true) {
-    src += 7 << 10;
-    overscan_adjust = 7;
-  }
-
-  for(y=1+overscan_adjust;y<224+overscan_adjust;y++) {
-    if(ppu->output->line[y].hires == true) {
-      x = 512;
-      while(x--) {
-        *dest++ = color_lookup_table[*src++];
-      }
-    } else {
-      x = 256;
-      while(x--) {
-        *dest++ = color_lookup_table[*src];
-        *dest++ = color_lookup_table[*src];
-        src += 2;
-      }
-    }
-    dest += pitch;
-    src  += 512;
+    src  += 256;
   }
 }
 
 inline void DDRenderer::update16_512x448() {
-uint16 *src;
-uint16 *dest;
+uint16 *src, *dest;
 uint32 pitch;
 int x, y;
-  src   = (uint16*)ppu->output->buffer + (1 << 10);
+  pitch = (ddsd.lPitch >> 1);
   dest  = (uint16*)ddsd.lpSurface;
-  pitch = (ddsd.lPitch >> 1) - 512;
+  src   = (uint16*)vi.data;
 
-int overscan_adjust = 0;
-  if(cpu->overscan() == true) {
-    src += 7 << 10;
-    overscan_adjust = 14;
-  }
-
-  for(y=2+overscan_adjust;y<448+overscan_adjust;y++) {
-    if(ppu->output->line[y >> 1].hires == true) {
-      x = 512;
-      while(x--) {
-        *dest++ = color_lookup_table[*src++];
-      }
-    } else {
-      x = 256;
-      while(x--) {
-        *dest++ = color_lookup_table[*src];
-        *dest++ = color_lookup_table[*src];
-        src += 2;
-      }
-    }
+  for(y=0;y<448;y++) {
+    memcpy(dest, src, 1024);
     dest += pitch;
-    if(ppu->output->line[y >> 1].interlace == false) {
-      src += (y & 1)?512:-512;
-    }
+    src  += 512;
   }
 }

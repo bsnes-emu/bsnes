@@ -1,4 +1,15 @@
-inline void bCPU::cycle_edge() {
+void bCPU::last_cycle() {
+  status.is_last_cycle = true;
+}
+
+void bCPU::last_cycle_exec() {
+  status.is_last_cycle = false;
+
+  time.nmi_pending = nmi_test();
+  time.irq_pending = irq_test();
+}
+
+void bCPU::cycle_edge() {
 int c, n, z;
   if(status.dma_state != DMASTATE_STOP) {
     switch(status.dma_state) {
@@ -36,15 +47,17 @@ int c, n, z;
 }
 
 void bCPU::exec_cycle() {
+//on first cycle?
   if(status.cycle_pos == 0) {
     snes->notify(SNES::CPU_EXEC_OPCODE_BEGIN);
     status.opcode = op_read();
     status.cycle_pos = 1;
-  } else {
-    (this->*optbl[status.opcode])();
-    if(status.cycle_pos == 0) {
-      snes->notify(SNES::CPU_EXEC_OPCODE_END);
-    }
+    return;
+  }
+
+  (this->*optbl[status.opcode])();
+  if(status.cycle_pos == 0) {
+    snes->notify(SNES::CPU_EXEC_OPCODE_END);
   }
 }
 

@@ -256,14 +256,15 @@ int _pri;
         if(pixel_cache[x].pri_main < _pri) {
           pixel_cache[x].pri_main = _pri;
           pixel_cache[x].bg_main  = PC_OAM;
-          pixel_cache[x].src_main = oam_line_pal[x];
+          pixel_cache[x].src_main = get_palette(oam_line_pal[x]);
+          pixel_cache[x].color_exempt = (oam_line_pal[x] < 192);
         }
       }
       if(_bgsub_enabled == true && !wt_sub[x]) {
         if(pixel_cache[x].pri_sub < _pri) {
           pixel_cache[x].pri_sub = _pri;
           pixel_cache[x].bg_sub  = PC_OAM;
-          pixel_cache[x].src_sub = oam_line_pal[x];
+          pixel_cache[x].src_sub = get_palette(oam_line_pal[x]);
         }
       }
     }

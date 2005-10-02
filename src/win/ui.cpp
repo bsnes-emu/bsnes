@@ -2,6 +2,7 @@ HFONT hFont, hMonofont;
 HBRUSH hbr_backbrush;
 
 #include "dd_renderer.cpp"
+#include "ds_sound.cpp"
 #include "uictl_editex.cpp"
 #include "ui_window.cpp"
 #include "ui_main.cpp"
@@ -38,6 +39,7 @@ void CreateWindows() {
 
 void init_ui0() {
   dd_renderer   = new DDRenderer();
+  ds_sound      = new DSSound();
   w_main        = new MainWindow();
   w_console     = new Console();
   w_bp          = new BreakpointEditor();
@@ -52,9 +54,10 @@ void init_ui1() {
   SetFocus(w_main->hwnd);
   dd_renderer->set_window(w_main->hwnd);
   dd_renderer->to_windowed();
+  ds_sound->init();
 
   w_main->show_menu();
-  w_main->set_video_mode(cfg.video.mode);
+  w_main->set_video_mode(config::video.mode);
   w_main->set_frameskip(0);
 
   bsnes->debugger_deactivate();

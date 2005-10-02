@@ -14,10 +14,12 @@ bJoypad joypad1, joypad2;
 
 public:
 enum { STOP = 0, RUN };
+  void   run();
+  void   video_run();
+  void   sound_run();
+
   void   set_status(uint32 new_status);
   uint32 get_status();
-  void   snes_run();
-  void   render_frame();
 
 //input functions
   void poll_input();

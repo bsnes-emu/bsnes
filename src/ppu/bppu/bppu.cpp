@@ -6,7 +6,7 @@ void bPPU::run() {}
 
 void bPPU::scanline() {
   _y               = cpu->vcounter();
-  _screen_width    = (regs.bg_mode == 5 || regs.bg_mode == 6)?512:256;
+  _screen_width    = (regs.bg_mode == 5 || regs.bg_mode == 6) ? 512 : 256;
   _interlace       = cpu->interlace();
   _interlace_field = cpu->interlace_field();
 
@@ -25,26 +25,22 @@ void bPPU::scanline() {
     }
   }
 
-  if(_y == (cpu->overscan()?239:224) && regs.display_disabled == false) {
+  if(_y == (cpu->overscan() ? 239 : 224) && regs.display_disabled == false) {
   //OAM address reset
     regs.oam_addr = ((regs.oam_addrh << 8) | regs.oam_addrl) << 1;
   }
+}
 
+void bPPU::render_scanline() {
 //only allow frameskip setting to ignore actual rendering; not RTO, etc.
   if(settings.frameskip_pos != 0)return;
 
-  if(_y > 0 && _y < (cpu->overscan()?239:224)) {
-    if(regs.bg_mode == 5 || regs.bg_mode == 6) {
-      output->hires = true;
-      output->line[_y].hires = true;
-    }
-    if(_interlace == true) {
-      output->interlace = true;
-      output->line[_y].interlace = true;
-    }
+  if(_y > 0 && _y < (cpu->overscan() ? 239 : 224)) {
     render_line();
   }
 }
+
+bool bPPU::render_frame() { return (settings.frameskip_pos == 0); }
 
 void bPPU::frame() {
   if(settings.frameskip_changed == true) {
@@ -58,12 +54,6 @@ void bPPU::frame() {
   if(settings.frameskip_pos != 0)return;
 
   snes->notify(SNES::RENDER_FRAME);
-  output->hires     = false;
-  output->interlace = false;
-  for(int i=0;i<239;i++) {
-    output->line[i].hires     = false;
-    output->line[i].interlace = false;
-  }
 }
 
 void bPPU::set_frameskip(int fs) {
@@ -82,7 +72,6 @@ void bPPU::power() {
 }
 
 void bPPU::reset() {
-  memset(output->buffer, 0, 512 * 478 * 2);
   frame();
 
   memset(sprite_list, 0, sizeof(sprite_list));
@@ -335,9 +324,9 @@ bPPU::bPPU() {
 
   mmio = new bPPUMMIO(this);
 
-  vram  = (uint8*)memalloc(65536, "bPPU::vram");
-  oam   = (uint8*)memalloc(  544, "bPPU::oam");
-  cgram = (uint8*)memalloc(  512, "bPPU::cgram");
+  vram  = (uint8*)malloc(65536);
+  oam   = (uint8*)malloc(  544);
+  cgram = (uint8*)malloc(  512);
   memset(vram,  0, 65536);
   memset(oam,   0,   544);
   memset(cgram, 0,   512);
@@ -346,7 +335,7 @@ bPPU::bPPU() {
 
 int     i, l;
 uint8   r, g, b;
-float   m;
+double  m;
 uint16 *ptr;
   for(l=0;l<16;l++) {
     mosaic_table[l] = (uint16*)malloc(4096 * 2);
@@ -358,7 +347,7 @@ uint16 *ptr;
   light_table = (uint16*)malloc(16 * 32768 * 2);
   ptr = (uint16*)light_table;
   for(l=0;l<16;l++) {
-    m = (float)l / 15.0;
+    m = (double)l / 15.0;
     for(i=0;i<32768;i++) {
       r = (i      ) & 31;
       g = (i >>  5) & 31;
@@ -366,9 +355,9 @@ uint16 *ptr;
       if(l == 0) { r = g = b = 0; }
       else if(l == 15);
       else {
-        r = (uint8)((float)r * m);
-        g = (uint8)((float)g * m);
-        b = (uint8)((float)b * m);
+        r = (uint8)((double)r * m);
+        g = (uint8)((double)g * m);
+        b = (uint8)((double)b * m);
       }
       *ptr++ = (r) | (g << 5) | (b << 10);
     }
@@ -378,30 +367,15 @@ uint16 *ptr;
 bPPU::~bPPU() {
   delete(mmio);
 
-  if(vram) {
-    free(vram);
-    vram = 0;
-  }
-  if(oam) {
-    free(oam);
-    oam = 0;
-  }
-  if(cgram) {
-    free(cgram);
-    cgram = 0;
-  }
+  zerofree(vram);
+  zerofree(oam);
+  zerofree(cgram);
 
   for(int i=0;i<16;i++) {
-    if(mosaic_table[i]) {
-      free(mosaic_table[i]);
-      mosaic_table[i] = 0;
-    }
+    zerofree(mosaic_table[i]);
   }
 
-  if(light_table) {
-    memfree(light_table);
-    light_table = 0;
-  }
+  zerofree(light_table);
 }
 
 bPPUMMIO::bPPUMMIO(bPPU *_ppu) {

@@ -41,11 +41,13 @@ Index  Description   Range
    12  Day of week   0-6  (0=Sunday, ...)
 ******************************/
 struct {
-  int8   index;
-  uint8  mode;
-  uint8  data[MAX_SRTC_INDEX + 1];
-}srtc;
+  int8  index;
+  uint8 mode;
+  uint8 data[MAX_SRTC_INDEX + 1];
+} srtc;
   void  set_time();
+  void  init();
+  void  enable();
   void  power();
   void  reset();
   void  write(uint8 data);

@@ -1,10 +1,12 @@
 void bCPU::op_adc_const() {
   switch(status.cycle_pos++) {
   case 1:
+    if(regs.p.m)last_cycle();
     rd.l = op_read();
     if(regs.p.m) { op_adc_b(); status.cycle_pos = 0; }
     break;
   case 2:
+    last_cycle();
     rd.h = op_read();
     op_adc_w();
     status.cycle_pos = 0;
@@ -15,10 +17,12 @@ void bCPU::op_adc_const() {
 void bCPU::op_and_const() {
   switch(status.cycle_pos++) {
   case 1:
+    if(regs.p.m)last_cycle();
     rd.l = op_read();
     if(regs.p.m) { op_and_b(); status.cycle_pos = 0; }
     break;
   case 2:
+    last_cycle();
     rd.h = op_read();
     op_and_w();
     status.cycle_pos = 0;
@@ -29,10 +33,12 @@ void bCPU::op_and_const() {
 void bCPU::op_cmp_const() {
   switch(status.cycle_pos++) {
   case 1:
+    if(regs.p.m)last_cycle();
     rd.l = op_read();
     if(regs.p.m) { op_cmp_b(); status.cycle_pos = 0; }
     break;
   case 2:
+    last_cycle();
     rd.h = op_read();
     op_cmp_w();
     status.cycle_pos = 0;
@@ -43,10 +49,12 @@ void bCPU::op_cmp_const() {
 void bCPU::op_cpx_const() {
   switch(status.cycle_pos++) {
   case 1:
+    if(regs.p.x)last_cycle();
     rd.l = op_read();
     if(regs.p.x) { op_cpx_b(); status.cycle_pos = 0; }
     break;
   case 2:
+    last_cycle();
     rd.h = op_read();
     op_cpx_w();
     status.cycle_pos = 0;
@@ -57,10 +65,12 @@ void bCPU::op_cpx_const() {
 void bCPU::op_cpy_const() {
   switch(status.cycle_pos++) {
   case 1:
+    if(regs.p.x)last_cycle();
     rd.l = op_read();
     if(regs.p.x) { op_cpy_b(); status.cycle_pos = 0; }
     break;
   case 2:
+    last_cycle();
     rd.h = op_read();
     op_cpy_w();
     status.cycle_pos = 0;
@@ -71,10 +81,12 @@ void bCPU::op_cpy_const() {
 void bCPU::op_eor_const() {
   switch(status.cycle_pos++) {
   case 1:
+    if(regs.p.m)last_cycle();
     rd.l = op_read();
     if(regs.p.m) { op_eor_b(); status.cycle_pos = 0; }
     break;
   case 2:
+    last_cycle();
     rd.h = op_read();
     op_eor_w();
     status.cycle_pos = 0;
@@ -85,10 +97,12 @@ void bCPU::op_eor_const() {
 void bCPU::op_lda_const() {
   switch(status.cycle_pos++) {
   case 1:
+    if(regs.p.m)last_cycle();
     rd.l = op_read();
     if(regs.p.m) { op_lda_b(); status.cycle_pos = 0; }
     break;
   case 2:
+    last_cycle();
     rd.h = op_read();
     op_lda_w();
     status.cycle_pos = 0;
@@ -99,10 +113,12 @@ void bCPU::op_lda_const() {
 void bCPU::op_ldx_const() {
   switch(status.cycle_pos++) {
   case 1:
+    if(regs.p.x)last_cycle();
     rd.l = op_read();
     if(regs.p.x) { op_ldx_b(); status.cycle_pos = 0; }
     break;
   case 2:
+    last_cycle();
     rd.h = op_read();
     op_ldx_w();
     status.cycle_pos = 0;
@@ -113,10 +129,12 @@ void bCPU::op_ldx_const() {
 void bCPU::op_ldy_const() {
   switch(status.cycle_pos++) {
   case 1:
+    if(regs.p.x)last_cycle();
     rd.l = op_read();
     if(regs.p.x) { op_ldy_b(); status.cycle_pos = 0; }
     break;
   case 2:
+    last_cycle();
     rd.h = op_read();
     op_ldy_w();
     status.cycle_pos = 0;
@@ -127,10 +145,12 @@ void bCPU::op_ldy_const() {
 void bCPU::op_ora_const() {
   switch(status.cycle_pos++) {
   case 1:
+    if(regs.p.m)last_cycle();
     rd.l = op_read();
     if(regs.p.m) { op_ora_b(); status.cycle_pos = 0; }
     break;
   case 2:
+    last_cycle();
     rd.h = op_read();
     op_ora_w();
     status.cycle_pos = 0;
@@ -141,10 +161,12 @@ void bCPU::op_ora_const() {
 void bCPU::op_sbc_const() {
   switch(status.cycle_pos++) {
   case 1:
+    if(regs.p.m)last_cycle();
     rd.l = op_read();
     if(regs.p.m) { op_sbc_b(); status.cycle_pos = 0; }
     break;
   case 2:
+    last_cycle();
     rd.h = op_read();
     op_sbc_w();
     status.cycle_pos = 0;
@@ -161,10 +183,12 @@ void bCPU::op_adc_addr() {
     aa.h = op_read();
     break;
   case 3:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_DBR, aa.w);
     if(regs.p.m) { op_adc_b(); status.cycle_pos = 0; }
     break;
   case 4:
+    last_cycle();
     rd.h = op_read(OPMODE_DBR, aa.w + 1);
     op_adc_w();
     status.cycle_pos = 0;
@@ -181,10 +205,12 @@ void bCPU::op_and_addr() {
     aa.h = op_read();
     break;
   case 3:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_DBR, aa.w);
     if(regs.p.m) { op_and_b(); status.cycle_pos = 0; }
     break;
   case 4:
+    last_cycle();
     rd.h = op_read(OPMODE_DBR, aa.w + 1);
     op_and_w();
     status.cycle_pos = 0;
@@ -201,10 +227,12 @@ void bCPU::op_bit_addr() {
     aa.h = op_read();
     break;
   case 3:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_DBR, aa.w);
     if(regs.p.m) { op_bit_b(); status.cycle_pos = 0; }
     break;
   case 4:
+    last_cycle();
     rd.h = op_read(OPMODE_DBR, aa.w + 1);
     op_bit_w();
     status.cycle_pos = 0;
@@ -221,10 +249,12 @@ void bCPU::op_cmp_addr() {
     aa.h = op_read();
     break;
   case 3:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_DBR, aa.w);
     if(regs.p.m) { op_cmp_b(); status.cycle_pos = 0; }
     break;
   case 4:
+    last_cycle();
     rd.h = op_read(OPMODE_DBR, aa.w + 1);
     op_cmp_w();
     status.cycle_pos = 0;
@@ -241,10 +271,12 @@ void bCPU::op_cpx_addr() {
     aa.h = op_read();
     break;
   case 3:
+    if(regs.p.x)last_cycle();
     rd.l = op_read(OPMODE_DBR, aa.w);
     if(regs.p.x) { op_cpx_b(); status.cycle_pos = 0; }
     break;
   case 4:
+    last_cycle();
     rd.h = op_read(OPMODE_DBR, aa.w + 1);
     op_cpx_w();
     status.cycle_pos = 0;
@@ -261,10 +293,12 @@ void bCPU::op_cpy_addr() {
     aa.h = op_read();
     break;
   case 3:
+    if(regs.p.x)last_cycle();
     rd.l = op_read(OPMODE_DBR, aa.w);
     if(regs.p.x) { op_cpy_b(); status.cycle_pos = 0; }
     break;
   case 4:
+    last_cycle();
     rd.h = op_read(OPMODE_DBR, aa.w + 1);
     op_cpy_w();
     status.cycle_pos = 0;
@@ -281,10 +315,12 @@ void bCPU::op_eor_addr() {
     aa.h = op_read();
     break;
   case 3:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_DBR, aa.w);
     if(regs.p.m) { op_eor_b(); status.cycle_pos = 0; }
     break;
   case 4:
+    last_cycle();
     rd.h = op_read(OPMODE_DBR, aa.w + 1);
     op_eor_w();
     status.cycle_pos = 0;
@@ -301,10 +337,12 @@ void bCPU::op_lda_addr() {
     aa.h = op_read();
     break;
   case 3:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_DBR, aa.w);
     if(regs.p.m) { op_lda_b(); status.cycle_pos = 0; }
     break;
   case 4:
+    last_cycle();
     rd.h = op_read(OPMODE_DBR, aa.w + 1);
     op_lda_w();
     status.cycle_pos = 0;
@@ -321,10 +359,12 @@ void bCPU::op_ldx_addr() {
     aa.h = op_read();
     break;
   case 3:
+    if(regs.p.x)last_cycle();
     rd.l = op_read(OPMODE_DBR, aa.w);
     if(regs.p.x) { op_ldx_b(); status.cycle_pos = 0; }
     break;
   case 4:
+    last_cycle();
     rd.h = op_read(OPMODE_DBR, aa.w + 1);
     op_ldx_w();
     status.cycle_pos = 0;
@@ -341,10 +381,12 @@ void bCPU::op_ldy_addr() {
     aa.h = op_read();
     break;
   case 3:
+    if(regs.p.x)last_cycle();
     rd.l = op_read(OPMODE_DBR, aa.w);
     if(regs.p.x) { op_ldy_b(); status.cycle_pos = 0; }
     break;
   case 4:
+    last_cycle();
     rd.h = op_read(OPMODE_DBR, aa.w + 1);
     op_ldy_w();
     status.cycle_pos = 0;
@@ -361,10 +403,12 @@ void bCPU::op_ora_addr() {
     aa.h = op_read();
     break;
   case 3:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_DBR, aa.w);
     if(regs.p.m) { op_ora_b(); status.cycle_pos = 0; }
     break;
   case 4:
+    last_cycle();
     rd.h = op_read(OPMODE_DBR, aa.w + 1);
     op_ora_w();
     status.cycle_pos = 0;
@@ -381,10 +425,12 @@ void bCPU::op_sbc_addr() {
     aa.h = op_read();
     break;
   case 3:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_DBR, aa.w);
     if(regs.p.m) { op_sbc_b(); status.cycle_pos = 0; }
     break;
   case 4:
+    last_cycle();
     rd.h = op_read(OPMODE_DBR, aa.w + 1);
     op_sbc_w();
     status.cycle_pos = 0;
@@ -404,10 +450,12 @@ void bCPU::op_adc_addrx() {
     cpu_c4(aa.w, aa.w + regs.x.w);
     break;
   case 4:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_DBR, aa.w + regs.x.w);
     if(regs.p.m) { op_adc_b(); status.cycle_pos = 0; }
     break;
   case 5:
+    last_cycle();
     rd.h = op_read(OPMODE_DBR, aa.w + regs.x.w + 1);
     op_adc_w();
     status.cycle_pos = 0;
@@ -427,10 +475,12 @@ void bCPU::op_and_addrx() {
     cpu_c4(aa.w, aa.w + regs.x.w);
     break;
   case 4:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_DBR, aa.w + regs.x.w);
     if(regs.p.m) { op_and_b(); status.cycle_pos = 0; }
     break;
   case 5:
+    last_cycle();
     rd.h = op_read(OPMODE_DBR, aa.w + regs.x.w + 1);
     op_and_w();
     status.cycle_pos = 0;
@@ -450,10 +500,12 @@ void bCPU::op_bit_addrx() {
     cpu_c4(aa.w, aa.w + regs.x.w);
     break;
   case 4:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_DBR, aa.w + regs.x.w);
     if(regs.p.m) { op_bit_b(); status.cycle_pos = 0; }
     break;
   case 5:
+    last_cycle();
     rd.h = op_read(OPMODE_DBR, aa.w + regs.x.w + 1);
     op_bit_w();
     status.cycle_pos = 0;
@@ -473,10 +525,12 @@ void bCPU::op_cmp_addrx() {
     cpu_c4(aa.w, aa.w + regs.x.w);
     break;
   case 4:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_DBR, aa.w + regs.x.w);
     if(regs.p.m) { op_cmp_b(); status.cycle_pos = 0; }
     break;
   case 5:
+    last_cycle();
     rd.h = op_read(OPMODE_DBR, aa.w + regs.x.w + 1);
     op_cmp_w();
     status.cycle_pos = 0;
@@ -496,10 +550,12 @@ void bCPU::op_eor_addrx() {
     cpu_c4(aa.w, aa.w + regs.x.w);
     break;
   case 4:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_DBR, aa.w + regs.x.w);
     if(regs.p.m) { op_eor_b(); status.cycle_pos = 0; }
     break;
   case 5:
+    last_cycle();
     rd.h = op_read(OPMODE_DBR, aa.w + regs.x.w + 1);
     op_eor_w();
     status.cycle_pos = 0;
@@ -519,10 +575,12 @@ void bCPU::op_lda_addrx() {
     cpu_c4(aa.w, aa.w + regs.x.w);
     break;
   case 4:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_DBR, aa.w + regs.x.w);
     if(regs.p.m) { op_lda_b(); status.cycle_pos = 0; }
     break;
   case 5:
+    last_cycle();
     rd.h = op_read(OPMODE_DBR, aa.w + regs.x.w + 1);
     op_lda_w();
     status.cycle_pos = 0;
@@ -542,10 +600,12 @@ void bCPU::op_ldy_addrx() {
     cpu_c4(aa.w, aa.w + regs.x.w);
     break;
   case 4:
+    if(regs.p.x)last_cycle();
     rd.l = op_read(OPMODE_DBR, aa.w + regs.x.w);
     if(regs.p.x) { op_ldy_b(); status.cycle_pos = 0; }
     break;
   case 5:
+    last_cycle();
     rd.h = op_read(OPMODE_DBR, aa.w + regs.x.w + 1);
     op_ldy_w();
     status.cycle_pos = 0;
@@ -565,10 +625,12 @@ void bCPU::op_ora_addrx() {
     cpu_c4(aa.w, aa.w + regs.x.w);
     break;
   case 4:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_DBR, aa.w + regs.x.w);
     if(regs.p.m) { op_ora_b(); status.cycle_pos = 0; }
     break;
   case 5:
+    last_cycle();
     rd.h = op_read(OPMODE_DBR, aa.w + regs.x.w + 1);
     op_ora_w();
     status.cycle_pos = 0;
@@ -588,10 +650,12 @@ void bCPU::op_sbc_addrx() {
     cpu_c4(aa.w, aa.w + regs.x.w);
     break;
   case 4:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_DBR, aa.w + regs.x.w);
     if(regs.p.m) { op_sbc_b(); status.cycle_pos = 0; }
     break;
   case 5:
+    last_cycle();
     rd.h = op_read(OPMODE_DBR, aa.w + regs.x.w + 1);
     op_sbc_w();
     status.cycle_pos = 0;
@@ -611,10 +675,12 @@ void bCPU::op_adc_addry() {
     cpu_c4(aa.w, aa.w + regs.y.w);
     break;
   case 4:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_DBR, aa.w + regs.y.w);
     if(regs.p.m) { op_adc_b(); status.cycle_pos = 0; }
     break;
   case 5:
+    last_cycle();
     rd.h = op_read(OPMODE_DBR, aa.w + regs.y.w + 1);
     op_adc_w();
     status.cycle_pos = 0;
@@ -634,10 +700,12 @@ void bCPU::op_and_addry() {
     cpu_c4(aa.w, aa.w + regs.y.w);
     break;
   case 4:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_DBR, aa.w + regs.y.w);
     if(regs.p.m) { op_and_b(); status.cycle_pos = 0; }
     break;
   case 5:
+    last_cycle();
     rd.h = op_read(OPMODE_DBR, aa.w + regs.y.w + 1);
     op_and_w();
     status.cycle_pos = 0;
@@ -657,10 +725,12 @@ void bCPU::op_cmp_addry() {
     cpu_c4(aa.w, aa.w + regs.y.w);
     break;
   case 4:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_DBR, aa.w + regs.y.w);
     if(regs.p.m) { op_cmp_b(); status.cycle_pos = 0; }
     break;
   case 5:
+    last_cycle();
     rd.h = op_read(OPMODE_DBR, aa.w + regs.y.w + 1);
     op_cmp_w();
     status.cycle_pos = 0;
@@ -680,10 +750,12 @@ void bCPU::op_eor_addry() {
     cpu_c4(aa.w, aa.w + regs.y.w);
     break;
   case 4:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_DBR, aa.w + regs.y.w);
     if(regs.p.m) { op_eor_b(); status.cycle_pos = 0; }
     break;
   case 5:
+    last_cycle();
     rd.h = op_read(OPMODE_DBR, aa.w + regs.y.w + 1);
     op_eor_w();
     status.cycle_pos = 0;
@@ -703,10 +775,12 @@ void bCPU::op_lda_addry() {
     cpu_c4(aa.w, aa.w + regs.y.w);
     break;
   case 4:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_DBR, aa.w + regs.y.w);
     if(regs.p.m) { op_lda_b(); status.cycle_pos = 0; }
     break;
   case 5:
+    last_cycle();
     rd.h = op_read(OPMODE_DBR, aa.w + regs.y.w + 1);
     op_lda_w();
     status.cycle_pos = 0;
@@ -726,10 +800,12 @@ void bCPU::op_ldx_addry() {
     cpu_c4(aa.w, aa.w + regs.y.w);
     break;
   case 4:
+    if(regs.p.x)last_cycle();
     rd.l = op_read(OPMODE_DBR, aa.w + regs.y.w);
     if(regs.p.x) { op_ldx_b(); status.cycle_pos = 0; }
     break;
   case 5:
+    last_cycle();
     rd.h = op_read(OPMODE_DBR, aa.w + regs.y.w + 1);
     op_ldx_w();
     status.cycle_pos = 0;
@@ -749,10 +825,12 @@ void bCPU::op_ora_addry() {
     cpu_c4(aa.w, aa.w + regs.y.w);
     break;
   case 4:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_DBR, aa.w + regs.y.w);
     if(regs.p.m) { op_ora_b(); status.cycle_pos = 0; }
     break;
   case 5:
+    last_cycle();
     rd.h = op_read(OPMODE_DBR, aa.w + regs.y.w + 1);
     op_ora_w();
     status.cycle_pos = 0;
@@ -772,10 +850,12 @@ void bCPU::op_sbc_addry() {
     cpu_c4(aa.w, aa.w + regs.y.w);
     break;
   case 4:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_DBR, aa.w + regs.y.w);
     if(regs.p.m) { op_sbc_b(); status.cycle_pos = 0; }
     break;
   case 5:
+    last_cycle();
     rd.h = op_read(OPMODE_DBR, aa.w + regs.y.w + 1);
     op_sbc_w();
     status.cycle_pos = 0;
@@ -795,10 +875,12 @@ void bCPU::op_adc_long() {
     aa.b = op_read();
     break;
   case 4:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_LONG, aa.d);
     if(regs.p.m) { op_adc_b(); status.cycle_pos = 0; }
     break;
   case 5:
+    last_cycle();
     rd.h = op_read(OPMODE_LONG, aa.d + 1);
     op_adc_w();
     status.cycle_pos = 0;
@@ -818,10 +900,12 @@ void bCPU::op_and_long() {
     aa.b = op_read();
     break;
   case 4:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_LONG, aa.d);
     if(regs.p.m) { op_and_b(); status.cycle_pos = 0; }
     break;
   case 5:
+    last_cycle();
     rd.h = op_read(OPMODE_LONG, aa.d + 1);
     op_and_w();
     status.cycle_pos = 0;
@@ -841,10 +925,12 @@ void bCPU::op_cmp_long() {
     aa.b = op_read();
     break;
   case 4:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_LONG, aa.d);
     if(regs.p.m) { op_cmp_b(); status.cycle_pos = 0; }
     break;
   case 5:
+    last_cycle();
     rd.h = op_read(OPMODE_LONG, aa.d + 1);
     op_cmp_w();
     status.cycle_pos = 0;
@@ -864,10 +950,12 @@ void bCPU::op_eor_long() {
     aa.b = op_read();
     break;
   case 4:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_LONG, aa.d);
     if(regs.p.m) { op_eor_b(); status.cycle_pos = 0; }
     break;
   case 5:
+    last_cycle();
     rd.h = op_read(OPMODE_LONG, aa.d + 1);
     op_eor_w();
     status.cycle_pos = 0;
@@ -887,10 +975,12 @@ void bCPU::op_lda_long() {
     aa.b = op_read();
     break;
   case 4:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_LONG, aa.d);
     if(regs.p.m) { op_lda_b(); status.cycle_pos = 0; }
     break;
   case 5:
+    last_cycle();
     rd.h = op_read(OPMODE_LONG, aa.d + 1);
     op_lda_w();
     status.cycle_pos = 0;
@@ -910,10 +1000,12 @@ void bCPU::op_ora_long() {
     aa.b = op_read();
     break;
   case 4:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_LONG, aa.d);
     if(regs.p.m) { op_ora_b(); status.cycle_pos = 0; }
     break;
   case 5:
+    last_cycle();
     rd.h = op_read(OPMODE_LONG, aa.d + 1);
     op_ora_w();
     status.cycle_pos = 0;
@@ -933,10 +1025,12 @@ void bCPU::op_sbc_long() {
     aa.b = op_read();
     break;
   case 4:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_LONG, aa.d);
     if(regs.p.m) { op_sbc_b(); status.cycle_pos = 0; }
     break;
   case 5:
+    last_cycle();
     rd.h = op_read(OPMODE_LONG, aa.d + 1);
     op_sbc_w();
     status.cycle_pos = 0;
@@ -956,10 +1050,12 @@ void bCPU::op_adc_longx() {
     aa.b = op_read();
     break;
   case 4:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_LONG, aa.d + regs.x.w);
     if(regs.p.m) { op_adc_b(); status.cycle_pos = 0; }
     break;
   case 5:
+    last_cycle();
     rd.h = op_read(OPMODE_LONG, aa.d + regs.x.w + 1);
     op_adc_w();
     status.cycle_pos = 0;
@@ -979,10 +1075,12 @@ void bCPU::op_and_longx() {
     aa.b = op_read();
     break;
   case 4:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_LONG, aa.d + regs.x.w);
     if(regs.p.m) { op_and_b(); status.cycle_pos = 0; }
     break;
   case 5:
+    last_cycle();
     rd.h = op_read(OPMODE_LONG, aa.d + regs.x.w + 1);
     op_and_w();
     status.cycle_pos = 0;
@@ -1002,10 +1100,12 @@ void bCPU::op_cmp_longx() {
     aa.b = op_read();
     break;
   case 4:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_LONG, aa.d + regs.x.w);
     if(regs.p.m) { op_cmp_b(); status.cycle_pos = 0; }
     break;
   case 5:
+    last_cycle();
     rd.h = op_read(OPMODE_LONG, aa.d + regs.x.w + 1);
     op_cmp_w();
     status.cycle_pos = 0;
@@ -1025,10 +1125,12 @@ void bCPU::op_eor_longx() {
     aa.b = op_read();
     break;
   case 4:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_LONG, aa.d + regs.x.w);
     if(regs.p.m) { op_eor_b(); status.cycle_pos = 0; }
     break;
   case 5:
+    last_cycle();
     rd.h = op_read(OPMODE_LONG, aa.d + regs.x.w + 1);
     op_eor_w();
     status.cycle_pos = 0;
@@ -1048,10 +1150,12 @@ void bCPU::op_lda_longx() {
     aa.b = op_read();
     break;
   case 4:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_LONG, aa.d + regs.x.w);
     if(regs.p.m) { op_lda_b(); status.cycle_pos = 0; }
     break;
   case 5:
+    last_cycle();
     rd.h = op_read(OPMODE_LONG, aa.d + regs.x.w + 1);
     op_lda_w();
     status.cycle_pos = 0;
@@ -1071,10 +1175,12 @@ void bCPU::op_ora_longx() {
     aa.b = op_read();
     break;
   case 4:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_LONG, aa.d + regs.x.w);
     if(regs.p.m) { op_ora_b(); status.cycle_pos = 0; }
     break;
   case 5:
+    last_cycle();
     rd.h = op_read(OPMODE_LONG, aa.d + regs.x.w + 1);
     op_ora_w();
     status.cycle_pos = 0;
@@ -1094,10 +1200,12 @@ void bCPU::op_sbc_longx() {
     aa.b = op_read();
     break;
   case 4:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_LONG, aa.d + regs.x.w);
     if(regs.p.m) { op_sbc_b(); status.cycle_pos = 0; }
     break;
   case 5:
+    last_cycle();
     rd.h = op_read(OPMODE_LONG, aa.d + regs.x.w + 1);
     op_sbc_w();
     status.cycle_pos = 0;
@@ -1114,10 +1222,12 @@ void bCPU::op_adc_dp() {
     cpu_c2();
     break;
   case 3:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_DP, dp);
     if(regs.p.m) { op_adc_b(); status.cycle_pos = 0; }
     break;
   case 4:
+    last_cycle();
     rd.h = op_read(OPMODE_DP, dp + 1);
     op_adc_w();
     status.cycle_pos = 0;
@@ -1134,10 +1244,12 @@ void bCPU::op_and_dp() {
     cpu_c2();
     break;
   case 3:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_DP, dp);
     if(regs.p.m) { op_and_b(); status.cycle_pos = 0; }
     break;
   case 4:
+    last_cycle();
     rd.h = op_read(OPMODE_DP, dp + 1);
     op_and_w();
     status.cycle_pos = 0;
@@ -1154,10 +1266,12 @@ void bCPU::op_bit_dp() {
     cpu_c2();
     break;
   case 3:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_DP, dp);
     if(regs.p.m) { op_bit_b(); status.cycle_pos = 0; }
     break;
   case 4:
+    last_cycle();
     rd.h = op_read(OPMODE_DP, dp + 1);
     op_bit_w();
     status.cycle_pos = 0;
@@ -1174,10 +1288,12 @@ void bCPU::op_cmp_dp() {
     cpu_c2();
     break;
   case 3:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_DP, dp);
     if(regs.p.m) { op_cmp_b(); status.cycle_pos = 0; }
     break;
   case 4:
+    last_cycle();
     rd.h = op_read(OPMODE_DP, dp + 1);
     op_cmp_w();
     status.cycle_pos = 0;
@@ -1194,10 +1310,12 @@ void bCPU::op_cpx_dp() {
     cpu_c2();
     break;
   case 3:
+    if(regs.p.x)last_cycle();
     rd.l = op_read(OPMODE_DP, dp);
     if(regs.p.x) { op_cpx_b(); status.cycle_pos = 0; }
     break;
   case 4:
+    last_cycle();
     rd.h = op_read(OPMODE_DP, dp + 1);
     op_cpx_w();
     status.cycle_pos = 0;
@@ -1214,10 +1332,12 @@ void bCPU::op_cpy_dp() {
     cpu_c2();
     break;
   case 3:
+    if(regs.p.x)last_cycle();
     rd.l = op_read(OPMODE_DP, dp);
     if(regs.p.x) { op_cpy_b(); status.cycle_pos = 0; }
     break;
   case 4:
+    last_cycle();
     rd.h = op_read(OPMODE_DP, dp + 1);
     op_cpy_w();
     status.cycle_pos = 0;
@@ -1234,10 +1354,12 @@ void bCPU::op_eor_dp() {
     cpu_c2();
     break;
   case 3:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_DP, dp);
     if(regs.p.m) { op_eor_b(); status.cycle_pos = 0; }
     break;
   case 4:
+    last_cycle();
     rd.h = op_read(OPMODE_DP, dp + 1);
     op_eor_w();
     status.cycle_pos = 0;
@@ -1254,10 +1376,12 @@ void bCPU::op_lda_dp() {
     cpu_c2();
     break;
   case 3:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_DP, dp);
     if(regs.p.m) { op_lda_b(); status.cycle_pos = 0; }
     break;
   case 4:
+    last_cycle();
     rd.h = op_read(OPMODE_DP, dp + 1);
     op_lda_w();
     status.cycle_pos = 0;
@@ -1274,10 +1398,12 @@ void bCPU::op_ldx_dp() {
     cpu_c2();
     break;
   case 3:
+    if(regs.p.x)last_cycle();
     rd.l = op_read(OPMODE_DP, dp);
     if(regs.p.x) { op_ldx_b(); status.cycle_pos = 0; }
     break;
   case 4:
+    last_cycle();
     rd.h = op_read(OPMODE_DP, dp + 1);
     op_ldx_w();
     status.cycle_pos = 0;
@@ -1294,10 +1420,12 @@ void bCPU::op_ldy_dp() {
     cpu_c2();
     break;
   case 3:
+    if(regs.p.x)last_cycle();
     rd.l = op_read(OPMODE_DP, dp);
     if(regs.p.x) { op_ldy_b(); status.cycle_pos = 0; }
     break;
   case 4:
+    last_cycle();
     rd.h = op_read(OPMODE_DP, dp + 1);
     op_ldy_w();
     status.cycle_pos = 0;
@@ -1314,10 +1442,12 @@ void bCPU::op_ora_dp() {
     cpu_c2();
     break;
   case 3:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_DP, dp);
     if(regs.p.m) { op_ora_b(); status.cycle_pos = 0; }
     break;
   case 4:
+    last_cycle();
     rd.h = op_read(OPMODE_DP, dp + 1);
     op_ora_w();
     status.cycle_pos = 0;
@@ -1334,10 +1464,12 @@ void bCPU::op_sbc_dp() {
     cpu_c2();
     break;
   case 3:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_DP, dp);
     if(regs.p.m) { op_sbc_b(); status.cycle_pos = 0; }
     break;
   case 4:
+    last_cycle();
     rd.h = op_read(OPMODE_DP, dp + 1);
     op_sbc_w();
     status.cycle_pos = 0;
@@ -1357,10 +1489,12 @@ void bCPU::op_adc_dpx() {
     cpu_io();
     break;
   case 4:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_DP, dp + regs.x.w);
     if(regs.p.m) { op_adc_b(); status.cycle_pos = 0; }
     break;
   case 5:
+    last_cycle();
     rd.h = op_read(OPMODE_DP, dp + regs.x.w + 1);
     op_adc_w();
     status.cycle_pos = 0;
@@ -1380,10 +1514,12 @@ void bCPU::op_and_dpx() {
     cpu_io();
     break;
   case 4:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_DP, dp + regs.x.w);
     if(regs.p.m) { op_and_b(); status.cycle_pos = 0; }
     break;
   case 5:
+    last_cycle();
     rd.h = op_read(OPMODE_DP, dp + regs.x.w + 1);
     op_and_w();
     status.cycle_pos = 0;
@@ -1403,10 +1539,12 @@ void bCPU::op_bit_dpx() {
     cpu_io();
     break;
   case 4:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_DP, dp + regs.x.w);
     if(regs.p.m) { op_bit_b(); status.cycle_pos = 0; }
     break;
   case 5:
+    last_cycle();
     rd.h = op_read(OPMODE_DP, dp + regs.x.w + 1);
     op_bit_w();
     status.cycle_pos = 0;
@@ -1426,10 +1564,12 @@ void bCPU::op_cmp_dpx() {
     cpu_io();
     break;
   case 4:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_DP, dp + regs.x.w);
     if(regs.p.m) { op_cmp_b(); status.cycle_pos = 0; }
     break;
   case 5:
+    last_cycle();
     rd.h = op_read(OPMODE_DP, dp + regs.x.w + 1);
     op_cmp_w();
     status.cycle_pos = 0;
@@ -1449,10 +1589,12 @@ void bCPU::op_eor_dpx() {
     cpu_io();
     break;
   case 4:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_DP, dp + regs.x.w);
     if(regs.p.m) { op_eor_b(); status.cycle_pos = 0; }
     break;
   case 5:
+    last_cycle();
     rd.h = op_read(OPMODE_DP, dp + regs.x.w + 1);
     op_eor_w();
     status.cycle_pos = 0;
@@ -1472,10 +1614,12 @@ void bCPU::op_lda_dpx() {
     cpu_io();
     break;
   case 4:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_DP, dp + regs.x.w);
     if(regs.p.m) { op_lda_b(); status.cycle_pos = 0; }
     break;
   case 5:
+    last_cycle();
     rd.h = op_read(OPMODE_DP, dp + regs.x.w + 1);
     op_lda_w();
     status.cycle_pos = 0;
@@ -1495,10 +1639,12 @@ void bCPU::op_ldy_dpx() {
     cpu_io();
     break;
   case 4:
+    if(regs.p.x)last_cycle();
     rd.l = op_read(OPMODE_DP, dp + regs.x.w);
     if(regs.p.x) { op_ldy_b(); status.cycle_pos = 0; }
     break;
   case 5:
+    last_cycle();
     rd.h = op_read(OPMODE_DP, dp + regs.x.w + 1);
     op_ldy_w();
     status.cycle_pos = 0;
@@ -1518,10 +1664,12 @@ void bCPU::op_ora_dpx() {
     cpu_io();
     break;
   case 4:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_DP, dp + regs.x.w);
     if(regs.p.m) { op_ora_b(); status.cycle_pos = 0; }
     break;
   case 5:
+    last_cycle();
     rd.h = op_read(OPMODE_DP, dp + regs.x.w + 1);
     op_ora_w();
     status.cycle_pos = 0;
@@ -1541,10 +1689,12 @@ void bCPU::op_sbc_dpx() {
     cpu_io();
     break;
   case 4:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_DP, dp + regs.x.w);
     if(regs.p.m) { op_sbc_b(); status.cycle_pos = 0; }
     break;
   case 5:
+    last_cycle();
     rd.h = op_read(OPMODE_DP, dp + regs.x.w + 1);
     op_sbc_w();
     status.cycle_pos = 0;
@@ -1564,10 +1714,12 @@ void bCPU::op_ldx_dpy() {
     cpu_io();
     break;
   case 4:
+    if(regs.p.x)last_cycle();
     rd.l = op_read(OPMODE_DP, dp + regs.y.w);
     if(regs.p.x) { op_ldx_b(); status.cycle_pos = 0; }
     break;
   case 5:
+    last_cycle();
     rd.h = op_read(OPMODE_DP, dp + regs.y.w + 1);
     op_ldx_w();
     status.cycle_pos = 0;
@@ -1590,10 +1742,12 @@ void bCPU::op_adc_idp() {
     aa.h = op_read(OPMODE_DP, dp + 1);
     break;
   case 5:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_DBR, aa.w);
     if(regs.p.m) { op_adc_b(); status.cycle_pos = 0; }
     break;
   case 6:
+    last_cycle();
     rd.h = op_read(OPMODE_DBR, aa.w + 1);
     op_adc_w();
     status.cycle_pos = 0;
@@ -1616,10 +1770,12 @@ void bCPU::op_and_idp() {
     aa.h = op_read(OPMODE_DP, dp + 1);
     break;
   case 5:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_DBR, aa.w);
     if(regs.p.m) { op_and_b(); status.cycle_pos = 0; }
     break;
   case 6:
+    last_cycle();
     rd.h = op_read(OPMODE_DBR, aa.w + 1);
     op_and_w();
     status.cycle_pos = 0;
@@ -1642,10 +1798,12 @@ void bCPU::op_cmp_idp() {
     aa.h = op_read(OPMODE_DP, dp + 1);
     break;
   case 5:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_DBR, aa.w);
     if(regs.p.m) { op_cmp_b(); status.cycle_pos = 0; }
     break;
   case 6:
+    last_cycle();
     rd.h = op_read(OPMODE_DBR, aa.w + 1);
     op_cmp_w();
     status.cycle_pos = 0;
@@ -1668,10 +1826,12 @@ void bCPU::op_eor_idp() {
     aa.h = op_read(OPMODE_DP, dp + 1);
     break;
   case 5:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_DBR, aa.w);
     if(regs.p.m) { op_eor_b(); status.cycle_pos = 0; }
     break;
   case 6:
+    last_cycle();
     rd.h = op_read(OPMODE_DBR, aa.w + 1);
     op_eor_w();
     status.cycle_pos = 0;
@@ -1694,10 +1854,12 @@ void bCPU::op_lda_idp() {
     aa.h = op_read(OPMODE_DP, dp + 1);
     break;
   case 5:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_DBR, aa.w);
     if(regs.p.m) { op_lda_b(); status.cycle_pos = 0; }
     break;
   case 6:
+    last_cycle();
     rd.h = op_read(OPMODE_DBR, aa.w + 1);
     op_lda_w();
     status.cycle_pos = 0;
@@ -1720,10 +1882,12 @@ void bCPU::op_ora_idp() {
     aa.h = op_read(OPMODE_DP, dp + 1);
     break;
   case 5:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_DBR, aa.w);
     if(regs.p.m) { op_ora_b(); status.cycle_pos = 0; }
     break;
   case 6:
+    last_cycle();
     rd.h = op_read(OPMODE_DBR, aa.w + 1);
     op_ora_w();
     status.cycle_pos = 0;
@@ -1746,10 +1910,12 @@ void bCPU::op_sbc_idp() {
     aa.h = op_read(OPMODE_DP, dp + 1);
     break;
   case 5:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_DBR, aa.w);
     if(regs.p.m) { op_sbc_b(); status.cycle_pos = 0; }
     break;
   case 6:
+    last_cycle();
     rd.h = op_read(OPMODE_DBR, aa.w + 1);
     op_sbc_w();
     status.cycle_pos = 0;
@@ -1775,10 +1941,12 @@ void bCPU::op_adc_idpx() {
     aa.h = op_read(OPMODE_DP, dp + regs.x.w + 1);
     break;
   case 6:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_DBR, aa.w);
     if(regs.p.m) { op_adc_b(); status.cycle_pos = 0; }
     break;
   case 7:
+    last_cycle();
     rd.h = op_read(OPMODE_DBR, aa.w + 1);
     op_adc_w();
     status.cycle_pos = 0;
@@ -1804,10 +1972,12 @@ void bCPU::op_and_idpx() {
     aa.h = op_read(OPMODE_DP, dp + regs.x.w + 1);
     break;
   case 6:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_DBR, aa.w);
     if(regs.p.m) { op_and_b(); status.cycle_pos = 0; }
     break;
   case 7:
+    last_cycle();
     rd.h = op_read(OPMODE_DBR, aa.w + 1);
     op_and_w();
     status.cycle_pos = 0;
@@ -1833,10 +2003,12 @@ void bCPU::op_cmp_idpx() {
     aa.h = op_read(OPMODE_DP, dp + regs.x.w + 1);
     break;
   case 6:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_DBR, aa.w);
     if(regs.p.m) { op_cmp_b(); status.cycle_pos = 0; }
     break;
   case 7:
+    last_cycle();
     rd.h = op_read(OPMODE_DBR, aa.w + 1);
     op_cmp_w();
     status.cycle_pos = 0;
@@ -1862,10 +2034,12 @@ void bCPU::op_eor_idpx() {
     aa.h = op_read(OPMODE_DP, dp + regs.x.w + 1);
     break;
   case 6:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_DBR, aa.w);
     if(regs.p.m) { op_eor_b(); status.cycle_pos = 0; }
     break;
   case 7:
+    last_cycle();
     rd.h = op_read(OPMODE_DBR, aa.w + 1);
     op_eor_w();
     status.cycle_pos = 0;
@@ -1891,10 +2065,12 @@ void bCPU::op_lda_idpx() {
     aa.h = op_read(OPMODE_DP, dp + regs.x.w + 1);
     break;
   case 6:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_DBR, aa.w);
     if(regs.p.m) { op_lda_b(); status.cycle_pos = 0; }
     break;
   case 7:
+    last_cycle();
     rd.h = op_read(OPMODE_DBR, aa.w + 1);
     op_lda_w();
     status.cycle_pos = 0;
@@ -1920,10 +2096,12 @@ void bCPU::op_ora_idpx() {
     aa.h = op_read(OPMODE_DP, dp + regs.x.w + 1);
     break;
   case 6:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_DBR, aa.w);
     if(regs.p.m) { op_ora_b(); status.cycle_pos = 0; }
     break;
   case 7:
+    last_cycle();
     rd.h = op_read(OPMODE_DBR, aa.w + 1);
     op_ora_w();
     status.cycle_pos = 0;
@@ -1949,10 +2127,12 @@ void bCPU::op_sbc_idpx() {
     aa.h = op_read(OPMODE_DP, dp + regs.x.w + 1);
     break;
   case 6:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_DBR, aa.w);
     if(regs.p.m) { op_sbc_b(); status.cycle_pos = 0; }
     break;
   case 7:
+    last_cycle();
     rd.h = op_read(OPMODE_DBR, aa.w + 1);
     op_sbc_w();
     status.cycle_pos = 0;
@@ -1978,10 +2158,12 @@ void bCPU::op_adc_idpy() {
     cpu_c4(aa.w, aa.w + regs.y.w);
     break;
   case 6:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_DBR, aa.w + regs.y.w);
     if(regs.p.m) { op_adc_b(); status.cycle_pos = 0; }
     break;
   case 7:
+    last_cycle();
     rd.h = op_read(OPMODE_DBR, aa.w + regs.y.w + 1);
     op_adc_w();
     status.cycle_pos = 0;
@@ -2007,10 +2189,12 @@ void bCPU::op_and_idpy() {
     cpu_c4(aa.w, aa.w + regs.y.w);
     break;
   case 6:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_DBR, aa.w + regs.y.w);
     if(regs.p.m) { op_and_b(); status.cycle_pos = 0; }
     break;
   case 7:
+    last_cycle();
     rd.h = op_read(OPMODE_DBR, aa.w + regs.y.w + 1);
     op_and_w();
     status.cycle_pos = 0;
@@ -2036,10 +2220,12 @@ void bCPU::op_cmp_idpy() {
     cpu_c4(aa.w, aa.w + regs.y.w);
     break;
   case 6:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_DBR, aa.w + regs.y.w);
     if(regs.p.m) { op_cmp_b(); status.cycle_pos = 0; }
     break;
   case 7:
+    last_cycle();
     rd.h = op_read(OPMODE_DBR, aa.w + regs.y.w + 1);
     op_cmp_w();
     status.cycle_pos = 0;
@@ -2065,10 +2251,12 @@ void bCPU::op_eor_idpy() {
     cpu_c4(aa.w, aa.w + regs.y.w);
     break;
   case 6:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_DBR, aa.w + regs.y.w);
     if(regs.p.m) { op_eor_b(); status.cycle_pos = 0; }
     break;
   case 7:
+    last_cycle();
     rd.h = op_read(OPMODE_DBR, aa.w + regs.y.w + 1);
     op_eor_w();
     status.cycle_pos = 0;
@@ -2094,10 +2282,12 @@ void bCPU::op_lda_idpy() {
     cpu_c4(aa.w, aa.w + regs.y.w);
     break;
   case 6:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_DBR, aa.w + regs.y.w);
     if(regs.p.m) { op_lda_b(); status.cycle_pos = 0; }
     break;
   case 7:
+    last_cycle();
     rd.h = op_read(OPMODE_DBR, aa.w + regs.y.w + 1);
     op_lda_w();
     status.cycle_pos = 0;
@@ -2123,10 +2313,12 @@ void bCPU::op_ora_idpy() {
     cpu_c4(aa.w, aa.w + regs.y.w);
     break;
   case 6:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_DBR, aa.w + regs.y.w);
     if(regs.p.m) { op_ora_b(); status.cycle_pos = 0; }
     break;
   case 7:
+    last_cycle();
     rd.h = op_read(OPMODE_DBR, aa.w + regs.y.w + 1);
     op_ora_w();
     status.cycle_pos = 0;
@@ -2152,10 +2344,12 @@ void bCPU::op_sbc_idpy() {
     cpu_c4(aa.w, aa.w + regs.y.w);
     break;
   case 6:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_DBR, aa.w + regs.y.w);
     if(regs.p.m) { op_sbc_b(); status.cycle_pos = 0; }
     break;
   case 7:
+    last_cycle();
     rd.h = op_read(OPMODE_DBR, aa.w + regs.y.w + 1);
     op_sbc_w();
     status.cycle_pos = 0;
@@ -2181,10 +2375,12 @@ void bCPU::op_adc_ildp() {
     aa.b = op_read(OPMODE_DP, dp + 2);
     break;
   case 6:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_LONG, aa.d);
     if(regs.p.m) { op_adc_b(); status.cycle_pos = 0; }
     break;
   case 7:
+    last_cycle();
     rd.h = op_read(OPMODE_LONG, aa.d + 1);
     op_adc_w();
     status.cycle_pos = 0;
@@ -2210,10 +2406,12 @@ void bCPU::op_and_ildp() {
     aa.b = op_read(OPMODE_DP, dp + 2);
     break;
   case 6:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_LONG, aa.d);
     if(regs.p.m) { op_and_b(); status.cycle_pos = 0; }
     break;
   case 7:
+    last_cycle();
     rd.h = op_read(OPMODE_LONG, aa.d + 1);
     op_and_w();
     status.cycle_pos = 0;
@@ -2239,10 +2437,12 @@ void bCPU::op_cmp_ildp() {
     aa.b = op_read(OPMODE_DP, dp + 2);
     break;
   case 6:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_LONG, aa.d);
     if(regs.p.m) { op_cmp_b(); status.cycle_pos = 0; }
     break;
   case 7:
+    last_cycle();
     rd.h = op_read(OPMODE_LONG, aa.d + 1);
     op_cmp_w();
     status.cycle_pos = 0;
@@ -2268,10 +2468,12 @@ void bCPU::op_eor_ildp() {
     aa.b = op_read(OPMODE_DP, dp + 2);
     break;
   case 6:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_LONG, aa.d);
     if(regs.p.m) { op_eor_b(); status.cycle_pos = 0; }
     break;
   case 7:
+    last_cycle();
     rd.h = op_read(OPMODE_LONG, aa.d + 1);
     op_eor_w();
     status.cycle_pos = 0;
@@ -2297,10 +2499,12 @@ void bCPU::op_lda_ildp() {
     aa.b = op_read(OPMODE_DP, dp + 2);
     break;
   case 6:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_LONG, aa.d);
     if(regs.p.m) { op_lda_b(); status.cycle_pos = 0; }
     break;
   case 7:
+    last_cycle();
     rd.h = op_read(OPMODE_LONG, aa.d + 1);
     op_lda_w();
     status.cycle_pos = 0;
@@ -2326,10 +2530,12 @@ void bCPU::op_ora_ildp() {
     aa.b = op_read(OPMODE_DP, dp + 2);
     break;
   case 6:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_LONG, aa.d);
     if(regs.p.m) { op_ora_b(); status.cycle_pos = 0; }
     break;
   case 7:
+    last_cycle();
     rd.h = op_read(OPMODE_LONG, aa.d + 1);
     op_ora_w();
     status.cycle_pos = 0;
@@ -2355,10 +2561,12 @@ void bCPU::op_sbc_ildp() {
     aa.b = op_read(OPMODE_DP, dp + 2);
     break;
   case 6:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_LONG, aa.d);
     if(regs.p.m) { op_sbc_b(); status.cycle_pos = 0; }
     break;
   case 7:
+    last_cycle();
     rd.h = op_read(OPMODE_LONG, aa.d + 1);
     op_sbc_w();
     status.cycle_pos = 0;
@@ -2384,10 +2592,12 @@ void bCPU::op_adc_ildpy() {
     aa.b = op_read(OPMODE_DP, dp + 2);
     break;
   case 6:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_LONG, aa.d + regs.y.w);
     if(regs.p.m) { op_adc_b(); status.cycle_pos = 0; }
     break;
   case 7:
+    last_cycle();
     rd.h = op_read(OPMODE_LONG, aa.d + regs.y.w + 1);
     op_adc_w();
     status.cycle_pos = 0;
@@ -2413,10 +2623,12 @@ void bCPU::op_and_ildpy() {
     aa.b = op_read(OPMODE_DP, dp + 2);
     break;
   case 6:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_LONG, aa.d + regs.y.w);
     if(regs.p.m) { op_and_b(); status.cycle_pos = 0; }
     break;
   case 7:
+    last_cycle();
     rd.h = op_read(OPMODE_LONG, aa.d + regs.y.w + 1);
     op_and_w();
     status.cycle_pos = 0;
@@ -2442,10 +2654,12 @@ void bCPU::op_cmp_ildpy() {
     aa.b = op_read(OPMODE_DP, dp + 2);
     break;
   case 6:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_LONG, aa.d + regs.y.w);
     if(regs.p.m) { op_cmp_b(); status.cycle_pos = 0; }
     break;
   case 7:
+    last_cycle();
     rd.h = op_read(OPMODE_LONG, aa.d + regs.y.w + 1);
     op_cmp_w();
     status.cycle_pos = 0;
@@ -2471,10 +2685,12 @@ void bCPU::op_eor_ildpy() {
     aa.b = op_read(OPMODE_DP, dp + 2);
     break;
   case 6:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_LONG, aa.d + regs.y.w);
     if(regs.p.m) { op_eor_b(); status.cycle_pos = 0; }
     break;
   case 7:
+    last_cycle();
     rd.h = op_read(OPMODE_LONG, aa.d + regs.y.w + 1);
     op_eor_w();
     status.cycle_pos = 0;
@@ -2500,10 +2716,12 @@ void bCPU::op_lda_ildpy() {
     aa.b = op_read(OPMODE_DP, dp + 2);
     break;
   case 6:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_LONG, aa.d + regs.y.w);
     if(regs.p.m) { op_lda_b(); status.cycle_pos = 0; }
     break;
   case 7:
+    last_cycle();
     rd.h = op_read(OPMODE_LONG, aa.d + regs.y.w + 1);
     op_lda_w();
     status.cycle_pos = 0;
@@ -2529,10 +2747,12 @@ void bCPU::op_ora_ildpy() {
     aa.b = op_read(OPMODE_DP, dp + 2);
     break;
   case 6:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_LONG, aa.d + regs.y.w);
     if(regs.p.m) { op_ora_b(); status.cycle_pos = 0; }
     break;
   case 7:
+    last_cycle();
     rd.h = op_read(OPMODE_LONG, aa.d + regs.y.w + 1);
     op_ora_w();
     status.cycle_pos = 0;
@@ -2558,10 +2778,12 @@ void bCPU::op_sbc_ildpy() {
     aa.b = op_read(OPMODE_DP, dp + 2);
     break;
   case 6:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_LONG, aa.d + regs.y.w);
     if(regs.p.m) { op_sbc_b(); status.cycle_pos = 0; }
     break;
   case 7:
+    last_cycle();
     rd.h = op_read(OPMODE_LONG, aa.d + regs.y.w + 1);
     op_sbc_w();
     status.cycle_pos = 0;
@@ -2578,10 +2800,12 @@ void bCPU::op_adc_sr() {
     cpu_io();
     break;
   case 3:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_SP, sp);
     if(regs.p.m) { op_adc_b(); status.cycle_pos = 0; }
     break;
   case 4:
+    last_cycle();
     rd.h = op_read(OPMODE_SP, sp + 1);
     op_adc_w();
     status.cycle_pos = 0;
@@ -2598,10 +2822,12 @@ void bCPU::op_and_sr() {
     cpu_io();
     break;
   case 3:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_SP, sp);
     if(regs.p.m) { op_and_b(); status.cycle_pos = 0; }
     break;
   case 4:
+    last_cycle();
     rd.h = op_read(OPMODE_SP, sp + 1);
     op_and_w();
     status.cycle_pos = 0;
@@ -2618,10 +2844,12 @@ void bCPU::op_cmp_sr() {
     cpu_io();
     break;
   case 3:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_SP, sp);
     if(regs.p.m) { op_cmp_b(); status.cycle_pos = 0; }
     break;
   case 4:
+    last_cycle();
     rd.h = op_read(OPMODE_SP, sp + 1);
     op_cmp_w();
     status.cycle_pos = 0;
@@ -2638,10 +2866,12 @@ void bCPU::op_eor_sr() {
     cpu_io();
     break;
   case 3:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_SP, sp);
     if(regs.p.m) { op_eor_b(); status.cycle_pos = 0; }
     break;
   case 4:
+    last_cycle();
     rd.h = op_read(OPMODE_SP, sp + 1);
     op_eor_w();
     status.cycle_pos = 0;
@@ -2658,10 +2888,12 @@ void bCPU::op_lda_sr() {
     cpu_io();
     break;
   case 3:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_SP, sp);
     if(regs.p.m) { op_lda_b(); status.cycle_pos = 0; }
     break;
   case 4:
+    last_cycle();
     rd.h = op_read(OPMODE_SP, sp + 1);
     op_lda_w();
     status.cycle_pos = 0;
@@ -2678,10 +2910,12 @@ void bCPU::op_ora_sr() {
     cpu_io();
     break;
   case 3:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_SP, sp);
     if(regs.p.m) { op_ora_b(); status.cycle_pos = 0; }
     break;
   case 4:
+    last_cycle();
     rd.h = op_read(OPMODE_SP, sp + 1);
     op_ora_w();
     status.cycle_pos = 0;
@@ -2698,10 +2932,12 @@ void bCPU::op_sbc_sr() {
     cpu_io();
     break;
   case 3:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_SP, sp);
     if(regs.p.m) { op_sbc_b(); status.cycle_pos = 0; }
     break;
   case 4:
+    last_cycle();
     rd.h = op_read(OPMODE_SP, sp + 1);
     op_sbc_w();
     status.cycle_pos = 0;
@@ -2727,10 +2963,12 @@ void bCPU::op_adc_isry() {
     cpu_io();
     break;
   case 6:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_DBR, aa.w + regs.y.w);
     if(regs.p.m) { op_adc_b(); status.cycle_pos = 0; }
     break;
   case 7:
+    last_cycle();
     rd.h = op_read(OPMODE_DBR, aa.w + regs.y.w + 1);
     op_adc_w();
     status.cycle_pos = 0;
@@ -2756,10 +2994,12 @@ void bCPU::op_and_isry() {
     cpu_io();
     break;
   case 6:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_DBR, aa.w + regs.y.w);
     if(regs.p.m) { op_and_b(); status.cycle_pos = 0; }
     break;
   case 7:
+    last_cycle();
     rd.h = op_read(OPMODE_DBR, aa.w + regs.y.w + 1);
     op_and_w();
     status.cycle_pos = 0;
@@ -2785,10 +3025,12 @@ void bCPU::op_cmp_isry() {
     cpu_io();
     break;
   case 6:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_DBR, aa.w + regs.y.w);
     if(regs.p.m) { op_cmp_b(); status.cycle_pos = 0; }
     break;
   case 7:
+    last_cycle();
     rd.h = op_read(OPMODE_DBR, aa.w + regs.y.w + 1);
     op_cmp_w();
     status.cycle_pos = 0;
@@ -2814,10 +3056,12 @@ void bCPU::op_eor_isry() {
     cpu_io();
     break;
   case 6:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_DBR, aa.w + regs.y.w);
     if(regs.p.m) { op_eor_b(); status.cycle_pos = 0; }
     break;
   case 7:
+    last_cycle();
     rd.h = op_read(OPMODE_DBR, aa.w + regs.y.w + 1);
     op_eor_w();
     status.cycle_pos = 0;
@@ -2843,10 +3087,12 @@ void bCPU::op_lda_isry() {
     cpu_io();
     break;
   case 6:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_DBR, aa.w + regs.y.w);
     if(regs.p.m) { op_lda_b(); status.cycle_pos = 0; }
     break;
   case 7:
+    last_cycle();
     rd.h = op_read(OPMODE_DBR, aa.w + regs.y.w + 1);
     op_lda_w();
     status.cycle_pos = 0;
@@ -2872,10 +3118,12 @@ void bCPU::op_ora_isry() {
     cpu_io();
     break;
   case 6:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_DBR, aa.w + regs.y.w);
     if(regs.p.m) { op_ora_b(); status.cycle_pos = 0; }
     break;
   case 7:
+    last_cycle();
     rd.h = op_read(OPMODE_DBR, aa.w + regs.y.w + 1);
     op_ora_w();
     status.cycle_pos = 0;
@@ -2901,10 +3149,12 @@ void bCPU::op_sbc_isry() {
     cpu_io();
     break;
   case 6:
+    if(regs.p.m)last_cycle();
     rd.l = op_read(OPMODE_DBR, aa.w + regs.y.w);
     if(regs.p.m) { op_sbc_b(); status.cycle_pos = 0; }
     break;
   case 7:
+    last_cycle();
     rd.h = op_read(OPMODE_DBR, aa.w + regs.y.w + 1);
     op_sbc_w();
     status.cycle_pos = 0;
@@ -2915,6 +3165,7 @@ void bCPU::op_sbc_isry() {
 void bCPU::op_bit_const() {
   switch(status.cycle_pos++) {
   case 1:
+    if(regs.p.m)last_cycle();
     rd.l = op_read();
     if(regs.p.m) {
       regs.p.z = ((rd.l & regs.a.l) == 0);
@@ -2922,6 +3173,7 @@ void bCPU::op_bit_const() {
     }
     break;
   case 2:
+    last_cycle();
     rd.h = op_read();
     regs.p.z = ((rd.w & regs.a.w) == 0);
     status.cycle_pos = 0;

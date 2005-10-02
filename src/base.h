@@ -1,5 +1,8 @@
 #include <time.h>
 #include "lib/libbase.h"
+#include "lib/libvector.h"
+#include "lib/libstring.h"
+#include "lib/libconfig.h"
 
 #if defined(_WIN32)
   #define _WIN32_
@@ -10,12 +13,6 @@
 #else
   #error "unknown architecture"
 #endif
-
-//structs
-typedef struct {
-uint8 *data;
-uint32 size;
-}lfile;
 
 //platform-specific global functions
 void *memalloc(uint32 size, char *name = 0, ...);

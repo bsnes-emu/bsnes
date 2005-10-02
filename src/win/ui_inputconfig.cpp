@@ -38,18 +38,18 @@ bool end_config = false;
   switch(config_type) {
   case JOYPAD1:
     switch(config_pos) {
-    case  0:cfg.input.joypad1.up     = key;break;
-    case  1:cfg.input.joypad1.down   = key;break;
-    case  2:cfg.input.joypad1.left   = key;break;
-    case  3:cfg.input.joypad1.right  = key;break;
-    case  4:cfg.input.joypad1.select = key;break;
-    case  5:cfg.input.joypad1.start  = key;break;
-    case  6:cfg.input.joypad1.x      = key;break;
-    case  7:cfg.input.joypad1.y      = key;break;
-    case  8:cfg.input.joypad1.a      = key;break;
-    case  9:cfg.input.joypad1.b      = key;break;
-    case 10:cfg.input.joypad1.l      = key;break;
-    case 11:cfg.input.joypad1.r      = key;break;
+    case  0:config::input.joypad1.up     = key;break;
+    case  1:config::input.joypad1.down   = key;break;
+    case  2:config::input.joypad1.left   = key;break;
+    case  3:config::input.joypad1.right  = key;break;
+    case  4:config::input.joypad1.select = key;break;
+    case  5:config::input.joypad1.start  = key;break;
+    case  6:config::input.joypad1.x      = key;break;
+    case  7:config::input.joypad1.y      = key;break;
+    case  8:config::input.joypad1.a      = key;break;
+    case  9:config::input.joypad1.b      = key;break;
+    case 10:config::input.joypad1.l      = key;break;
+    case 11:config::input.joypad1.r      = key;break;
     case 12:end_config = true;break;
     }
     config_pos++;

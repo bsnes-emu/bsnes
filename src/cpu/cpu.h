@@ -2,6 +2,12 @@
 
 class CPU {
 public:
+//CPU version number
+//* 1 and 2 are known
+//* reported by $4210
+//* affects DRAM refresh behavior
+uint8 cpu_version;
+
 //timing
   virtual uint16 vcounter() = 0;
   virtual uint16 hcounter() = 0;
@@ -9,7 +15,6 @@ public:
   virtual bool   interlace() = 0;
   virtual bool   interlace_field() = 0;
   virtual bool   overscan() = 0;
-
   virtual void   set_interlace(bool r) = 0;
   virtual void   set_overscan (bool r) = 0;
 

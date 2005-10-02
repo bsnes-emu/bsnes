@@ -1,15 +1,6 @@
-inline uint16 bPPU::addsub_pixels(int cdest_index, int cdest_bg, int csrc_index, int csrc_bg) {
+inline uint16 bPPU::addsub_pixels(uint32 cdest, uint32 csrc) {
 int r, g, b;
-uint32 cdest = get_palette(cdest_index);
-uint32 csrc  = get_palette(csrc_index);
 uint16 res;
-//oam palettes 0-3 are not affected by color add/sub
-  if(cdest_bg == OAM) {
-    if(cdest_index < 192) {
-      return cdest;
-    }
-  }
-
   switch(regs.color_mode) {
   case 0: //COLORMODE_ADD:
     if(regs.color_halve == true) {
@@ -53,18 +44,10 @@ uint16 res;
   return 0x0000; //prevent annoying warning message
 }
 
-inline uint16 bPPU::addsub_pixel(int cdest_index, int cdest_bg) {
+inline uint16 bPPU::addsub_pixel(uint32 cdest) {
 int r, g, b;
-uint32 cdest = get_palette(cdest_index);
 uint32 csrc  = (regs.color_r) | (regs.color_g << 5) | (regs.color_b << 10);
 uint16 res;
-//only oam palettes 4-7 are affected by color add/sub
-  if(cdest_bg == OAM) {
-    if(cdest_index < 192) {
-      return cdest;
-    }
-  }
-
   switch(regs.color_mode) {
   case 0: //COLORMODE_ADD:
     if(regs.color_halve == true && regs.addsub_mode == 0) {

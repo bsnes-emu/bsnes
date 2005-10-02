@@ -13,5 +13,5 @@
 SDL_Surface *screen, *backbuffer;
 
 struct {
-SDL_Rect rs, rd;
-}screen_info;
+  SDL_Rect rs, rd;
+} screen_info;

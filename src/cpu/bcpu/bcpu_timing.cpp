@@ -25,18 +25,157 @@
  * 4 cycles short?
  */
 
-uint16 bCPU::vcounter()         { return time.v; }
-uint16 bCPU::hcounter()         { return get_hcounter(); }
-uint16 bCPU::hcycles()          { return time.hc; }
+uint16 bCPU::vcounter() { return time.v; }
+uint16 bCPU::hcounter() { return get_hcounter(); }
+uint16 bCPU::hcycles()  { return time.hc; }
+
 bool   bCPU::interlace()        { return time.interlace; }
 bool   bCPU::interlace_field()  { return time.interlace_field; }
 bool   bCPU::overscan()         { return time.overscan; }
 uint16 bCPU::region_scanlines() { return time.region_scanlines; }
 
-void   bCPU::set_interlace(bool r) { time.interlace = r; }
-void   bCPU::set_overscan(bool r)  { time.overscan  = r; }
+void   bCPU::set_interlace(bool r) { time.interlace = r; update_interrupts(); }
+void   bCPU::set_overscan (bool r) { time.overscan  = r; update_interrupts(); }
 
 uint8  bCPU::dma_counter() { return (time.dma_counter + time.hc) & 6; }
+
+bool bCPU::nmi_trigger_pos_match(uint32 offset) {
+uint16 v  = overscan() ? 240 : 225;
+uint16 hc = 2 + offset;
+  return (time.v == v && time.hc == hc);
+}
+
+bool bCPU::irq_trigger_pos_match(uint32 offset) {
+uint16 v  = status.virq_pos;
+uint16 hc = (status.hirq_enabled) ? status.hirq_pos : 0;
+
+//positions that can never be latched
+//region_scanlines() = 262/NTSC, 312/PAL
+//PAL results are unverified on hardware
+  if(v == 240 && hc == 339 && interlace() == false && interlace_field() == 1)return false;
+  if(v == (region_scanlines() - 1) && hc == 339 && interlace() == false)return false;
+  if(v == region_scanlines() && interlace() == false)return false;
+  if(v == region_scanlines() && hc == 339)return false;
+  if(v  > region_scanlines())return false;
+  if(hc > 339)return false;
+
+  hc  = (hc != 0) ? ((hc << 2) + 14) : 10;
+  hc += offset;
+  if(hc >= time.line_cycles) {
+    hc -= time.line_cycles;
+    if(++v >= time.frame_lines) {
+      v = 0;
+    }
+  }
+
+  if((status.virq_enabled == true && time.v == v) || status.virq_enabled == false) {
+    return (time.hc == hc);
+  }
+
+  return false;
+}
+
+void bCPU::update_nmi() {
+  if(time.v == (overscan() ? 240 : 225)) {
+    time.nmi_read_trigger_pos = 2;
+    time.nmi_line_trigger_pos = 6;
+  } else {
+    time.nmi_read_trigger_pos = -64;
+    time.nmi_line_trigger_pos = -64;
+  }
+}
+
+void bCPU::update_irq() {
+int vpos = status.virq_pos;
+int hpos = (status.hirq_enabled) ? status.hirq_pos : 0;
+
+//positions that can never be latched
+//region_scanlines() = 262/NTSC, 312/PAL
+//PAL results are unverified on hardware
+  if(vpos == 240 && hpos == 339 && interlace() == false && interlace_field() == 1)goto _nolatch;
+  if(vpos == (region_scanlines() - 1) && hpos == 339 && interlace() == false)goto _nolatch;
+  if(vpos == region_scanlines() && interlace() == false)goto _nolatch;
+  if(vpos == region_scanlines() && hpos == 339)goto _nolatch;
+  if(vpos  > region_scanlines())goto _nolatch;
+  if(hpos  > 339)goto _nolatch;
+
+  hpos = (hpos != 0) ? ((hpos << 2) + 14) : 10;
+  if(hpos >= time.line_cycles) {
+    hpos -= time.line_cycles;
+    if(++vpos >= time.frame_lines) {
+      vpos = 0;
+    }
+  }
+
+  if((status.virq_enabled == true && time.v == vpos) || status.virq_enabled == false) {
+    time.irq_read_trigger_pos = hpos;
+  } else {
+    time.irq_read_trigger_pos = -64;
+  }
+
+  hpos += 4;
+  if(hpos >= time.line_cycles) {
+    hpos -= time.line_cycles;
+    if(++vpos >= time.frame_lines) {
+      vpos = 0;
+    }
+  }
+
+  if((status.virq_enabled == true && time.v == vpos) || status.virq_enabled == false) {
+    time.irq_line_trigger_pos = hpos;
+  } else {
+    time.irq_line_trigger_pos = -64;
+  }
+
+  return;
+
+_nolatch:
+  time.irq_read_trigger_pos = -64;
+  time.irq_line_trigger_pos = -64;
+}
+
+void bCPU::update_interrupts() {
+  update_nmi();
+  update_irq();
+}
+
+void bCPU::poll_interrupts(int cycles) {
+int16 hc, hc_end;
+  if(time.hc == 0) {
+    hc     = -1;
+    hc_end = cycles;
+  } else {
+    hc     = time.hc;
+    hc_end = time.hc + cycles;
+  }
+
+  if(hc < time.nmi_read_trigger_pos && time.nmi_read_trigger_pos <= hc_end) {
+  //nmi_read can go low even with NMI interrupts disabled in $4200.d7
+    time.nmi_read = 0;
+  }
+
+  if(hc < time.nmi_line_trigger_pos && time.nmi_line_trigger_pos <= hc_end) {
+    if(status.nmi_enabled == true) {
+      if(time.nmi_line == 1) {
+        time.nmi_transition = 1;
+      }
+      time.nmi_line = 0;
+    }
+  }
+
+  if(hc < time.irq_read_trigger_pos && time.irq_read_trigger_pos <= hc_end) {
+    if(status.virq_enabled == true || status.hirq_enabled == true) {
+      time.irq_read = 0;
+    }
+  }
+
+  if(hc < time.irq_line_trigger_pos && time.irq_line_trigger_pos <= hc_end) {
+    if(status.virq_enabled == true || status.hirq_enabled == true) {
+      time.irq_line = 0;
+      time.irq_transition = 1;
+    }
+  }
+}
 
 //all scanlines are 1364 cycles long, except scanline 240
 //on non-interlace odd-frames, which is 1360 cycles long.
@@ -68,7 +207,6 @@ void bCPU::inc_vcounter() {
     }
   }
 
-  time.hc = 0;
   time.dma_counter = time.line_cycles & 6;
   if(time.v == 240 && time.interlace == false && time.interlace_field == 1) {
     time.line_cycles = 1360;
@@ -76,6 +214,8 @@ void bCPU::inc_vcounter() {
     time.line_cycles = 1364;
   }
   time.dram_refreshed = false;
+
+  update_interrupts();
 }
 
 //all dots are 4 cycles long, except dots 323 and 327. dots 323 and 327
@@ -93,16 +233,6 @@ uint16 bCPU::get_hcounter() {
   return (time.hc - ((time.hc > 1292) << 1) - ((time.hc > 1310) << 1)) >> 2;
 }
 
-void bCPU::dram_refresh() {
-  time.dram_refreshed = true;
-  add_cycles(40);
-  if(time.v != 240 || time.interlace != false || time.interlace_field != 1) {
-  //alternate between 534 and 538 every scanline except 240ni1
-  //in reality, this is probably based on frame cycle length...
-    time.dram_refresh_pos ^= 12;
-  }
-}
-
 uint32 bCPU::cycles_executed() {
 uint32 r = status.cycles_executed;
   status.cycles_executed = 0;
@@ -112,28 +242,73 @@ uint32 r = status.cycles_executed;
 void bCPU::add_cycles(int cycles) {
   status.cycles_executed += cycles;
 
-  cycles >>= 1;
-  while(cycles--) {
-    time.hc += 2;
+  poll_interrupts(cycles);
 
-    if(time.hc >= time.line_cycles) {
-      inc_vcounter();
-      if(time.v == 0) {
-        frame();
-        ppu->frame();
-      }
-      scanline();
-      ppu->scanline();
+  if(time.hc + cycles >= time.line_cycles) {
+    cycles  = (time.hc + cycles) - time.line_cycles;
+    time.hc = 0;
+
+    inc_vcounter();
+    poll_interrupts(cycles);
+
+    if(time.v == 0) {
+      frame();
+      ppu->frame();
+      snes->frame();
     }
 
-    if(time.dram_refreshed == false && time.hc >= time.dram_refresh_pos) {
-      dram_refresh();
-    }
+    scanline();
+    ppu->scanline();
+//  ppu->render_scanline();
+    snes->scanline();
+    time.line_rendered = false;
+  }
 
-    if(hdma_test() == true) {
-      hdma_run();
+  if(time.line_rendered == false) {
+  //rendering should start at H=22, but due to inaccurate
+  //timing, and due to using a scanline-based renderer, use
+  //a higher value to allow more games to run properly...
+  //H=48 fixes off-by-one HDMA effects with FF6's battles
+    if(time.hc + cycles >= (48 * 4)) {
+      cycles  = (time.hc + cycles) - (48 * 4);
+      time.hc = (48 * 4);
+      time.line_rendered = true;
+      ppu->render_scanline();
     }
   }
+
+  if(time.dram_refreshed == false) {
+    if(time.hc + cycles >= time.dram_refresh_pos) {
+      time.dram_refreshed = true;
+      status.cycles_executed += 40;
+      cycles  = (time.hc + cycles) - time.dram_refresh_pos;
+      time.hc = time.dram_refresh_pos + 40;
+
+      if(cpu_version == 2) {
+        if(time.v != 240 || time.interlace != false || time.interlace_field != 1) {
+          if(time.dram_refresh_pos == 534) {
+            time.dram_refresh_pos = 538;
+          } else {
+            time.dram_refresh_pos = 534;
+          }
+        }
+      }
+    }
+  }
+
+  if(status.hdma_triggered == false) {
+  //vcounter range verified on hardware
+    if(time.v <= (overscan() ? 239 : 224)) {
+      if(time.hc + cycles >= 1112) { //278 * 4 = 1112
+        cycles  = (time.hc + cycles) - 1112;
+        time.hc = 1112;
+        status.hdma_triggered = true;
+        hdma_run();
+      }
+    }
+  }
+
+  time.hc += cycles;
 }
 
 void bCPU::time_reset() {
@@ -150,9 +325,19 @@ void bCPU::time_reset() {
   time.line_cycles     = 1364;
 
   time.dram_refreshed   = false;
-  time.dram_refresh_pos = 538;
+  time.dram_refresh_pos = (cpu_version == 2) ? 538 : 530;
 
   time.dma_counter = 0;
+
+  time.nmi_pending = false;
+  time.irq_pending = false;
+  time.nmi_line = time.nmi_read = 1;
+  time.irq_line = time.irq_read = 1;
+
+  time.nmi_transition = 0;
+  time.irq_transition = 0;
+
+  update_interrupts();
 
   switch(region) {
   case NTSC:

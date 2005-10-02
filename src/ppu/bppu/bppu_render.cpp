@@ -104,32 +104,30 @@ Mode7: ->
      1,    2,    3,    4,    5
   OAM0, BG1n, OAM1, OAM2, OAM3
 
-***
-This appears to be incorrect, possibly should be...
+Mode 7 EXTBG: ->
+     1,    2,    3,    4,    5,    6,    7
   BG2B, OAM0, BG1n, OAM1, BG2A, OAM2, OAM3
-***
-Mode 7 (extbg): ->
-     1,    2,    3,    4,    5,    6
-  BG2B, OAM0, OAM1, BG2A, OAM2, OAM3
 */
 inline void bPPU::render_line_mode7() {
   if(regs.mode7_extbg == false) {
-    render_line_mode7(2, 0, 0); //bg2 priorities are ignored
+    render_line_mode7(BG1, 2, 2);
     render_line_oam(1, 3, 4, 5);
   } else {
-    render_line_mode7(0, 1, 4); //bg1 priority is ignored
-    render_line_oam(2, 3, 5, 6);
+    render_line_mode7(BG1, 3, 3);
+    render_line_mode7(BG2, 1, 5);
+    render_line_oam(2, 4, 6, 7);
   }
 }
 
 void bPPU::render_line() {
   if(regs.display_disabled == true) {
-    memset(output->buffer + (_y << 10), 0, 2048);
+    memset(snes->get_ppu_output_handle(), 0, 1024);
     return;
   }
 
   clear_pixel_cache();
   build_color_window_tables();
+
   switch(regs.bg_mode) {
   case 0:render_line_mode0();break;
   case 1:render_line_mode1();break;
@@ -140,5 +138,6 @@ void bPPU::render_line() {
   case 6:render_line_mode6();break;
   case 7:render_line_mode7();break;
   }
+
   render_line_output();
 }
