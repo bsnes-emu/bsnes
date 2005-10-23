@@ -207,9 +207,9 @@ int s, x;
 bool _bg_enabled    = regs.bg_enabled[OAM];
 bool _bgsub_enabled = regs.bgsub_enabled[OAM];
 
-uint8 *wt_main = main_windowtable[OAM];
-uint8 *wt_sub  = sub_windowtable[OAM];
   build_window_tables(OAM);
+uint8 *wt_main = window_cache[OAM].main;
+uint8 *wt_sub  = window_cache[OAM].sub;
 
   regs.oam_itemcount = 0;
   regs.oam_tilecount = 0;
@@ -240,6 +240,7 @@ uint8 *wt_sub  = sub_windowtable[OAM];
   regs.range_over |= (regs.oam_itemcount > 32);
 
   if(_bg_enabled == false && _bgsub_enabled == false)return;
+
 int _pri;
   for(x=0;x<_screen_width;x++) {
     if(oam_line_pri[x] == OAM_PRI_NONE)continue;
@@ -251,7 +252,7 @@ int _pri;
     case 3:_pri = pri3_pos;break;
     }
 
-    if(main_colorwindowtable[x]) {
+    if(window_cache[COL].main[x]) {
       if(_bg_enabled == true && !wt_main[x]) {
         if(pixel_cache[x].pri_main < _pri) {
           pixel_cache[x].pri_main = _pri;

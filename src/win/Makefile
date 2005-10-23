@@ -1,5 +1,5 @@
 CC = cl
-CFLAGS = /nologo /O2 /Ogityb2 /Gr /Gs
+CFLAGS = /nologo /O2 /Ogityb2 /Gr /Gs /DARCH_LSB
 OBJS = winmain.obj \
        libstring.obj libconfig.obj \
        reader.obj \

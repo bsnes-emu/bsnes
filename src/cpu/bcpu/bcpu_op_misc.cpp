@@ -164,7 +164,7 @@ void bCPU::op_stp() {
   switch(status.cycle_pos++) {
   case 1:
     cpu_io();
-    status.cpu_state = CPUSTATE_STP;
+    run_state.stp = true;
     break;
   case 2:
     last_cycle();
@@ -179,12 +179,13 @@ void bCPU::op_wai() {
   switch(status.cycle_pos++) {
   case 1:
     cpu_io();
-    status.cpu_state = CPUSTATE_WAI;
+    run_state.wai = true;
     break;
   case 2:
     last_cycle();
     cpu_io();
-    if(status.cpu_state == CPUSTATE_WAI) {
+    if(run_state.wai) {
+    //this can be cleared within last_cycle()
       regs.pc.w--;
     }
     status.cycle_pos = 0;

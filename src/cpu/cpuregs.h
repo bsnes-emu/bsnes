@@ -13,7 +13,7 @@ private:
     inline bool operator ^= (bool i) { if(i)_b ^= B; return (_b & B); }
   };
 public:
-  union {
+union {
   uint8 _b;
   bit<0x80> n;
   bit<0x40> v;
@@ -23,7 +23,7 @@ public:
   bit<0x04> i;
   bit<0x02> z;
   bit<0x01> c;
-  };
+};
 
   CPURegFlags() { _b = 0; }
   inline operator uint8() { return _b; }
@@ -35,10 +35,14 @@ public:
 
 class CPUReg16 {
 public:
-  union {
+union {
   uint16 w;
+#ifdef ARCH_LSB
   struct { uint8 l, h; };
-  };
+#else
+  struct { uint8 h, l; };
+#endif;
+};
 
   CPUReg16() { w = 0; }
   inline operator uint16() { return w; }
@@ -56,11 +60,16 @@ public:
 
 class CPUReg24 {
 public:
-  union {
-  uint16 w;
+union {
   uint32 d;
-  struct { uint8 l, h, b; };
-  };
+#ifdef ARCH_LSB
+  struct { uint16 w, null_w; };
+  struct { uint8  l, h, b, null_b; };
+#else
+  struct { uint16 null_w, w; };
+  struct { uint8  null_b, b, h, l; };
+#endif
+};
 
   CPUReg24() { d = 0; }
   inline operator uint32() { return (d & 0xffffff); }

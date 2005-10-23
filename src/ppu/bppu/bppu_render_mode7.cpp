@@ -31,15 +31,16 @@ int32 tx, ty, tile, palette;
   cx   = (int32(regs.m7x)         << 19) >> 19;
   cy   = (int32(regs.m7y)         << 19) >> 19;
   hofs = (int32(regs.m7_hofs)     << 19) >> 19;
-  vofs = (int32(regs.m7_vofs + 1) << 19) >> 19;
+//+1 breaks FF5 title screen mirror alignment...
+  vofs = (int32(regs.m7_vofs + 0) << 19) >> 19;
 
 int  _pri, _x;
 bool _bg_enabled    = regs.bg_enabled[bg];
 bool _bgsub_enabled = regs.bgsub_enabled[bg];
 
   build_window_tables(bg);
-uint8 *wt_main = main_windowtable[bg];
-uint8 *wt_sub  = sub_windowtable[bg];
+uint8 *wt_main = window_cache[bg].main;
+uint8 *wt_sub  = window_cache[bg].sub;
 
   if(regs.mode7_vflip == true) {
     y = 255 - _y;
@@ -119,7 +120,7 @@ int32 psy = ((c * CLIP(hofs - cx)) & ~63) + ((d * CLIP(vofs - cy)) & ~63) + ((d 
       _x = x;
     }
 
-    if(main_colorwindowtable[_x]) {
+    if(window_cache[COL].main[_x]) {
     uint32 col;
       if(regs.direct_color == true && bg == BG1) {
       //direct color mode does not apply to bg2, as it is only 128 colors...

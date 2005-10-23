@@ -32,32 +32,39 @@ CPUReg24 aa, rd;
 uint8    dp, sp;
 
 enum {
-  CPUSTATE_RUN = 0,
-  CPUSTATE_WAI,
-  CPUSTATE_STP,
-  CPUSTATE_DMA
-};
-
-enum {
-  DMASTATE_STOP = 0,
   DMASTATE_DMASYNC,
   DMASTATE_DMASYNC2,
+  DMASTATE_DMASYNC3,
   DMASTATE_RUN,
   DMASTATE_CPUSYNC,
-  DMASTATE_CPUSYNC2
+
+  HDMASTATE_IDMASYNC,
+  HDMASTATE_IDMASYNC2,
+  HDMASTATE_IDMASYNC3,
+  HDMASTATE_ICPUSYNC,
+
+  HDMASTATE_DMASYNC,
+  HDMASTATE_DMASYNC2,
+  HDMASTATE_DMASYNC3,
+  HDMASTATE_RUN,
+  HDMASTATE_CPUSYNC
 };
 
 struct {
-  uint8  cpu_state, cycle_pos, cycle_count;
+  bool hdma;
+  bool dma;
+  bool irq;
+  bool stp;
+  bool wai;
+} run_state;
+
+struct {
+  uint8  cycle_pos, cycle_count;
   uint8  opcode;
   uint32 cycles_executed;
 
-//set by last_cycle(), cleared by last_cycle_exec()
-  bool   is_last_cycle;
-
-  uint8  dma_state;
-  uint32 dma_cycle_count;
-  bool   hdma_triggered;
+  uint8  dma_state, hdma_state;
+  uint32 dma_cycle_count, hdma_cycle_count;
 
 //$4207-$420a
   uint16 virq_trigger, hirq_trigger;
@@ -65,9 +72,9 @@ struct {
 //$2181-$2183
   uint32 wram_addr;
 
-//$4016
-  uint8  joypad1_strobe_value;
-  uint8  joypad1_read_pos;
+//$4016-$4017
+  uint8  joypad1_strobe_value, joypad2_strobe_value;
+  uint8  joypad1_read_pos,     joypad2_read_pos;
 
 //$4200
   bool   nmi_enabled;
@@ -92,6 +99,12 @@ struct {
   uint16 r4216;
 } status;
 
+//$43x0.d7
+enum {
+  DMA_CPUTOMMIO = 0,
+  DMA_MMIOTOCPU = 1
+};
+
 struct {
   uint32 read_index; //set to 0 at beginning of DMA/HDMA
 
@@ -113,7 +126,10 @@ struct {
 //$43x4
   uint8  srcbank;
 //$43x5-$43x6
-  uint16 xfersize;
+  union {
+    uint16 xfersize;
+    uint16 hdma_iaddr;
+  };
 //$43x7
   uint8  hdma_ibank;
 //$43x8-$43x9
@@ -124,15 +140,11 @@ struct {
   uint8  hdma_unknown;
 
 //hdma-specific
-  bool   hdma_first_line;
-  bool   hdma_repeat;
-  uint16 hdma_iaddr;
   bool   hdma_active;
+  bool   hdma_do_transfer;
 } channel[8];
 
   inline bool   hdma_test();
-
-  inline void   irq(uint16 addr);
   inline bool   nmi_test();
   inline bool   irq_test();
 
@@ -144,17 +156,27 @@ struct {
   inline void   power();
   inline void   reset();
 
+  inline void   irq_run();
+
 //dma commands
+  inline void   dma_add_cycles(uint32 cycles);
+  inline void   hdma_add_cycles(uint32 cycles);
   inline void   dma_run();
   inline void   hdma_run();
-  inline void   hdma_initialize();
+  inline void   hdma_update(uint8 i);
+  inline uint8  hdma_enabled_channels();
+  inline uint8  hdma_active_channels();
+  inline void   hdmainit_activate();
+  inline void   hdma_activate();
   inline void   dma_cputommio(uint8 i, uint8 index);
   inline void   dma_mmiotocpu(uint8 i, uint8 index);
   inline void   dma_write(uint8 i, uint8 index);
   inline uint32 dma_addr(uint8 i);
   inline uint32 hdma_addr(uint8 i);
   inline uint32 hdma_iaddr(uint8 i);
-  inline void   hdma_write(uint8 i, uint8 l, uint8 x);
+  inline uint16 hdma_mmio(uint8 i);
+  inline uint8  hdma_read(uint8 i);
+  inline void   hdma_write(uint8 i, uint8 x);
   inline void   dma_reset();
 
 //mmio commands
@@ -172,6 +194,8 @@ struct {
   uint8 mmio_r4217();
   uint8 mmio_r4218();
   uint8 mmio_r4219();
+  uint8 mmio_r421a();
+  uint8 mmio_r421b();
   uint8 mmio_r43x0(uint8 i);
   uint8 mmio_r43x1(uint8 i);
   uint8 mmio_r43x2(uint8 i);
@@ -189,6 +213,7 @@ struct {
   void  mmio_w2182(uint8 value);
   void  mmio_w2183(uint8 value);
   void  mmio_w4016(uint8 value);
+  void  mmio_w4017(uint8 value);
   void  mmio_w4200(uint8 value);
   void  mmio_w4201(uint8 value);
   void  mmio_w4202(uint8 value);
@@ -217,10 +242,11 @@ struct {
   void  mmio_w43xb(uint8 value, uint8 i);
 
 enum { CYCLE_OPREAD = 0, CYCLE_READ, CYCLE_WRITE, CYCLE_IO };
+  inline void pre_exec_cycle();
+  inline void exec_hdma();
+  inline void exec_dma();
   inline void exec_cycle();
   inline void last_cycle();
-  inline void last_cycle_exec();
-  inline void cycle_edge();
   inline bool in_opcode();
 
 //cpu extra-cycle conditions

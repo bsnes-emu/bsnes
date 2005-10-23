@@ -15,9 +15,6 @@
 #include "dd_renderer.h"
 #include "ds_sound.h"
 
-#include "timer.cpp"
-fpstimer *fps_timer;
-
 #include "lib.cpp"
 #include "rom.cpp"
 
@@ -27,7 +24,6 @@ fpstimer *fps_timer;
 void init_snes() {
   mem_bus = new bMemBus();
   cpu     = new bCPU();
-cpu->cpu_version = 1;
   apu     = new bAPU();
   dsp     = new bDSP();
   ppu     = new bPPU();
@@ -82,8 +78,6 @@ string cfg_fn;
   get_config_fn(cfg_fn);
   config_file.load(cfg_fn);
   meminit();
-  fps_timer = new fpstimer();
-  fps_timer->start();
   rom_image = new ROMImage();
 
   init_ui0();

@@ -2,9 +2,11 @@ void bCPU::mmio_reset() {
 //$2181-$2183
   status.wram_addr = 0x000000;
 
-//$4016
+//$4016-$4017
   status.joypad1_strobe_value = 0x00;
+  status.joypad2_strobe_value = 0x00;
   status.joypad1_read_pos     = 0;
+  status.joypad2_read_pos     = 0;
 
 //$4200
   status.nmi_enabled      = false;
@@ -90,6 +92,28 @@ uint8 bCPU::mmio_r4017() {
 uint8 r;
   r  = regs.mdr & 0xe0;
   r |= 0x1c;
+
+  if(status.joypad2_strobe_value == 1) {
+    r |= (uint8)snes->get_input_status(SNES::DEV_JOYPAD2, SNES::JOYPAD_B);
+  } else {
+    switch(status.joypad2_read_pos) {
+    case  0:r |= (uint8)snes->get_input_status(SNES::DEV_JOYPAD2, SNES::JOYPAD_B);     break;
+    case  1:r |= (uint8)snes->get_input_status(SNES::DEV_JOYPAD2, SNES::JOYPAD_Y);     break;
+    case  2:r |= (uint8)snes->get_input_status(SNES::DEV_JOYPAD2, SNES::JOYPAD_SELECT);break;
+    case  3:r |= (uint8)snes->get_input_status(SNES::DEV_JOYPAD2, SNES::JOYPAD_START); break;
+    case  4:r |= (uint8)snes->get_input_status(SNES::DEV_JOYPAD2, SNES::JOYPAD_UP);    break;
+    case  5:r |= (uint8)snes->get_input_status(SNES::DEV_JOYPAD2, SNES::JOYPAD_DOWN);  break;
+    case  6:r |= (uint8)snes->get_input_status(SNES::DEV_JOYPAD2, SNES::JOYPAD_LEFT);  break;
+    case  7:r |= (uint8)snes->get_input_status(SNES::DEV_JOYPAD2, SNES::JOYPAD_RIGHT); break;
+    case  8:r |= (uint8)snes->get_input_status(SNES::DEV_JOYPAD2, SNES::JOYPAD_A);     break;
+    case  9:r |= (uint8)snes->get_input_status(SNES::DEV_JOYPAD2, SNES::JOYPAD_X);     break;
+    case 10:r |= (uint8)snes->get_input_status(SNES::DEV_JOYPAD2, SNES::JOYPAD_L);     break;
+    case 11:r |= (uint8)snes->get_input_status(SNES::DEV_JOYPAD2, SNES::JOYPAD_R);     break;
+    case 16:r |= 1;break; //joypad connected bit
+    default:r |= 1;break; //after 16th read, all subsequent reads return 1
+    }
+    if(++status.joypad2_read_pos > 17)status.joypad2_read_pos = 17;
+  }
 
   return r;
 }
@@ -206,6 +230,36 @@ uint16 v = vcounter();
   return r;
 }
 
+//JOY2L
+uint8 bCPU::mmio_r421a() {
+uint8  r = 0x00;
+uint16 v = vcounter();
+  if(status.auto_joypad_poll == false)return 0x00; //can't read joypad if auto polling not enabled
+//if(v >= 225 && v <= 227)return 0x00; //can't read joypad while SNES is polling input
+  r |= (uint8)snes->get_input_status(SNES::DEV_JOYPAD2, SNES::JOYPAD_A) << 7;
+  r |= (uint8)snes->get_input_status(SNES::DEV_JOYPAD2, SNES::JOYPAD_X) << 6;
+  r |= (uint8)snes->get_input_status(SNES::DEV_JOYPAD2, SNES::JOYPAD_L) << 5;
+  r |= (uint8)snes->get_input_status(SNES::DEV_JOYPAD2, SNES::JOYPAD_R) << 4;
+  return r;
+}
+
+//JOY2H
+uint8 bCPU::mmio_r421b() {
+uint8  r = 0x00;
+uint16 v = vcounter();
+  if(status.auto_joypad_poll == false)return 0x00; //can't read joypad if auto polling not enabled
+//if(v >= 225 && v <= 227)return 0x00; //can't read joypad while SNES is polling input
+  r |= (uint8)snes->get_input_status(SNES::DEV_JOYPAD2, SNES::JOYPAD_B)      << 7;
+  r |= (uint8)snes->get_input_status(SNES::DEV_JOYPAD2, SNES::JOYPAD_Y)      << 6;
+  r |= (uint8)snes->get_input_status(SNES::DEV_JOYPAD2, SNES::JOYPAD_SELECT) << 5;
+  r |= (uint8)snes->get_input_status(SNES::DEV_JOYPAD2, SNES::JOYPAD_START)  << 4;
+  r |= (uint8)snes->get_input_status(SNES::DEV_JOYPAD2, SNES::JOYPAD_UP)     << 3;
+  r |= (uint8)snes->get_input_status(SNES::DEV_JOYPAD2, SNES::JOYPAD_DOWN)   << 2;
+  r |= (uint8)snes->get_input_status(SNES::DEV_JOYPAD2, SNES::JOYPAD_LEFT)   << 1;
+  r |= (uint8)snes->get_input_status(SNES::DEV_JOYPAD2, SNES::JOYPAD_RIGHT);
+  return r;
+}
+
 //DMAPx
 uint8 bCPU::mmio_r43x0(uint8 i) {
   return channel[i].dmap;
@@ -310,9 +364,9 @@ uint i;
   case 0x4217:return cpu->mmio_r4217(); //RDMPYH
   case 0x4218:return cpu->mmio_r4218(); //JOY1L
   case 0x4219:return cpu->mmio_r4219(); //JOY1H
-  case 0x421a:case 0x421b:case 0x421c:case 0x421d:case 0x421e:case 0x421f:return 0x00;
-case 0x4000:dprintf("* 4000 read at %3d,%4d <%d>", cpu->time.v, cpu->time.hc, cpu->status.cycle_count);break;
-case 0x4200:dprintf("* 4200 read at %3d,%4d", cpu->time.v, cpu->time.hc);break;
+  case 0x421a:return cpu->mmio_r421a(); //JOY2L
+  case 0x421b:return cpu->mmio_r421b(); //JOY2H
+  case 0x421c:case 0x421d:case 0x421e:case 0x421f:return 0x00;
   }
 
   return cpu->regs.mdr;
@@ -345,10 +399,19 @@ void bCPU::mmio_w2183(uint8 value) {
 
 //JOYSER0
 void bCPU::mmio_w4016(uint8 value) {
-  status.joypad1_strobe_value = (value & 1);
+  status.joypad1_strobe_value = !!(value & 1);
   if(value == 1) {
-    snes->poll_input();
+    snes->poll_input(SNES::DEV_JOYPAD1);
     status.joypad1_read_pos = 0;
+  }
+}
+
+//JOYSER1
+void bCPU::mmio_w4017(uint8 value) {
+  status.joypad2_strobe_value = !!(value & 1);
+  if(value == 1) {
+    snes->poll_input(SNES::DEV_JOYPAD2);
+    status.joypad2_read_pos = 0;
   }
 }
 
@@ -438,6 +501,7 @@ void bCPU::mmio_w420a(uint8 value) {
 void bCPU::mmio_w420b(uint8 value) {
 int len;
   if(value != 0x00) {
+    run_state.dma = true;
     status.dma_state = DMASTATE_DMASYNC;
   }
 
@@ -566,6 +630,7 @@ uint8 i;
   case 0x2182:cpu->mmio_w2182(value);return; //WMADDM
   case 0x2183:cpu->mmio_w2183(value);return; //WMADDH
   case 0x4016:cpu->mmio_w4016(value);return; //JOYSER0
+  case 0x4017:cpu->mmio_w4017(value);return; //JOYSER1
   case 0x4200:cpu->mmio_w4200(value);return; //NMITIMEN
   case 0x4201:cpu->mmio_w4201(value);return; //WRIO
   case 0x4202:cpu->mmio_w4202(value);return; //WRMPYA
@@ -580,7 +645,6 @@ uint8 i;
   case 0x420b:cpu->mmio_w420b(value);return; //DMAEN
   case 0x420c:cpu->mmio_w420c(value);return; //HDMAEN
   case 0x420d:cpu->mmio_w420d(value);return; //MEMSEL
-case 0x4000:dprintf("* 4000 write at %3d,%4d", cpu->time.v, cpu->time.hc);break;
   }
 }
 

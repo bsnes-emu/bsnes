@@ -207,7 +207,7 @@ void bCPU::inc_vcounter() {
     }
   }
 
-  time.dma_counter = time.line_cycles & 6;
+  time.dma_counter += time.line_cycles;
   if(time.v == 240 && time.interlace == false && time.interlace_field == 1) {
     time.line_cycles = 1360;
   } else {
@@ -259,21 +259,14 @@ void bCPU::add_cycles(int cycles) {
 
     scanline();
     ppu->scanline();
-//  ppu->render_scanline();
     snes->scanline();
     time.line_rendered = false;
   }
 
-  if(time.line_rendered == false) {
-  //rendering should start at H=22, but due to inaccurate
-  //timing, and due to using a scanline-based renderer, use
-  //a higher value to allow more games to run properly...
-  //H=48 fixes off-by-one HDMA effects with FF6's battles
-    if(time.hc + cycles >= (48 * 4)) {
-      cycles  = (time.hc + cycles) - (48 * 4);
-      time.hc = (48 * 4);
-      time.line_rendered = true;
-      ppu->render_scanline();
+  if(time.hdmainit_triggered == false) {
+    if(time.hc + cycles >= time.hdmainit_trigger_pos || time.v) {
+      time.hdmainit_triggered = true;
+      hdmainit_activate();
     }
   }
 
@@ -296,14 +289,22 @@ void bCPU::add_cycles(int cycles) {
     }
   }
 
-  if(status.hdma_triggered == false) {
-  //vcounter range verified on hardware
+  if(time.line_rendered == false) {
+  //rendering should start at H=18 (+256=274), but since the
+  //current PPU emulation renders the entire scanline at once,
+  //PPU register changes mid-scanline do not show up.
+  //therefore, wait a few dots before rendering the scanline
+    if(time.hc + cycles >= (48 * 4)) {
+      time.line_rendered = true;
+      ppu->render_scanline();
+    }
+  }
+
+  if(time.hdma_triggered == false) {
     if(time.v <= (overscan() ? 239 : 224)) {
-      if(time.hc + cycles >= 1112) { //278 * 4 = 1112
-        cycles  = (time.hc + cycles) - 1112;
-        time.hc = 1112;
-        status.hdma_triggered = true;
-        hdma_run();
+      if(time.hc + cycles >= 1106) {
+        time.hdma_triggered = true;
+        hdma_activate();
       }
     }
   }
@@ -312,11 +313,8 @@ void bCPU::add_cycles(int cycles) {
 }
 
 void bCPU::time_reset() {
-//initial latch values for $213c/$213d
-//[x]0035 : [y]0000 (53.0 -> 212) [lda $2137]
-//[x]0038 : [y]0000 (56.5 -> 226) [nop : lda $2137]
   time.v  = 0;
-  time.hc = 186;
+  time.hc = 0;
 
 //upon SNES reset, start at scanline 0 non-interlace
   time.interlace       = false;
@@ -328,6 +326,12 @@ void bCPU::time_reset() {
   time.dram_refresh_pos = (cpu_version == 2) ? 538 : 530;
 
   time.dma_counter = 0;
+
+//set at V=0,H=0
+  time.hdmainit_trigger_pos = 0;
+  time.hdmainit_triggered   = true;
+
+  time.hdma_triggered = false;
 
   time.nmi_pending = false;
   time.irq_pending = false;

@@ -11,6 +11,11 @@ struct {
 
   uint8  dma_counter;
 
+  uint16 hdmainit_trigger_pos;
+  bool   hdmainit_triggered;
+
+  bool   hdma_triggered;
+
   uint16 region_scanlines;
 
 //nmi_pending, irq_pending are used by last_cycle()

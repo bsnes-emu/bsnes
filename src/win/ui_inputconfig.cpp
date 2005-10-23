@@ -53,18 +53,40 @@ bool end_config = false;
     case 12:end_config = true;break;
     }
     config_pos++;
+    break;
+  case JOYPAD2:
+    switch(config_pos) {
+    case  0:config::input.joypad2.up     = key;break;
+    case  1:config::input.joypad2.down   = key;break;
+    case  2:config::input.joypad2.left   = key;break;
+    case  3:config::input.joypad2.right  = key;break;
+    case  4:config::input.joypad2.select = key;break;
+    case  5:config::input.joypad2.start  = key;break;
+    case  6:config::input.joypad2.x      = key;break;
+    case  7:config::input.joypad2.y      = key;break;
+    case  8:config::input.joypad2.a      = key;break;
+    case  9:config::input.joypad2.b      = key;break;
+    case 10:config::input.joypad2.l      = key;break;
+    case 11:config::input.joypad2.r      = key;break;
+    case 12:end_config = true;break;
+    }
+    config_pos++;
+    break;
   }
+
   if(end_config == true) {
     polling = false;
     hide();
     return;
   }
+
   update_command();
 }
 
 void InputConfig::update_command() {
   switch(config_type) {
   case JOYPAD1:
+  case JOYPAD2:
     switch(config_pos) {
     case  0:set_text("Press key for Up...");    break;
     case  1:set_text("Press key for Down...");  break;
@@ -90,17 +112,23 @@ void InputConfig::begin_config(int type) {
     SetFocus(hwnd);
     return;
   }
+
   config_type = type;
   config_pos  = 0;
   switch(config_type) {
   case JOYPAD1:
-    SetWindowText(hwnd, "bsnes Input Configuration : Joypad1");
+    SetWindowText(hwnd, "bsnes Input Configuration (Joypad1)");
+    break;
+  case JOYPAD2:
+    SetWindowText(hwnd, "bsnes Input Configuration (Joypad2)");
     break;
   default:
     return;
   }
+
   polling = true;
   update_command();
+
   center();
   show();
 }

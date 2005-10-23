@@ -32,33 +32,16 @@ void bPPU::scanline() {
 }
 
 void bPPU::render_scanline() {
-//only allow frameskip setting to ignore actual rendering; not RTO, etc.
-  if(settings.frameskip_pos != 0)return;
+  if(status.render_output == false)return;
 
   if(_y > 0 && _y < (cpu->overscan() ? 239 : 224)) {
     render_line();
   }
 }
 
-bool bPPU::render_frame() { return (settings.frameskip_pos == 0); }
-
 void bPPU::frame() {
-  if(settings.frameskip_changed == true) {
-    settings.frameskip_changed = false;
-    settings.frameskip_pos = 0;
-  } else {
-    settings.frameskip_pos++;
-    settings.frameskip_pos %= (settings.frameskip + 1);
-  }
-
-  if(settings.frameskip_pos != 0)return;
-
+  PPU::frame();
   snes->notify(SNES::RENDER_FRAME);
-}
-
-void bPPU::set_frameskip(int fs) {
-  settings.frameskip = fs;
-  settings.frameskip_changed = true;
 }
 
 void bPPU::power() {
@@ -162,30 +145,33 @@ void bPPU::reset() {
   regs.cgram_addr = 0x0000;
 
 //$2123-$2125
-  regs.bg_window1_enabled[BG1] = false;
-  regs.bg_window1_enabled[BG2] = false;
-  regs.bg_window1_enabled[BG3] = false;
-  regs.bg_window1_enabled[BG4] = false;
-  regs.bg_window1_enabled[OAM] = false;
-  regs.bg_window1_invert [BG1] = false;
-  regs.bg_window1_invert [BG2] = false;
-  regs.bg_window1_invert [BG3] = false;
-  regs.bg_window1_invert [BG4] = false;
-  regs.bg_window1_invert [OAM] = false;
-  regs.bg_window2_enabled[BG1] = false;
-  regs.bg_window2_enabled[BG2] = false;
-  regs.bg_window2_enabled[BG3] = false;
-  regs.bg_window2_enabled[BG4] = false;
-  regs.bg_window2_enabled[OAM] = false;
-  regs.bg_window2_invert [BG1] = false;
-  regs.bg_window2_invert [BG2] = false;
-  regs.bg_window2_invert [BG3] = false;
-  regs.bg_window2_invert [BG4] = false;
-  regs.bg_window2_invert [OAM] = false;
-  regs.color_window1_enabled   = false;
-  regs.color_window1_invert    = false;
-  regs.color_window2_enabled   = false;
-  regs.color_window2_invert    = false;
+  regs.window1_enabled[BG1] = false;
+  regs.window1_enabled[BG2] = false;
+  regs.window1_enabled[BG3] = false;
+  regs.window1_enabled[BG4] = false;
+  regs.window1_enabled[OAM] = false;
+  regs.window1_enabled[COL] = false;
+
+  regs.window1_invert [BG1] = false;
+  regs.window1_invert [BG2] = false;
+  regs.window1_invert [BG3] = false;
+  regs.window1_invert [BG4] = false;
+  regs.window1_invert [OAM] = false;
+  regs.window1_invert [COL] = false;
+
+  regs.window2_enabled[BG1] = false;
+  regs.window2_enabled[BG2] = false;
+  regs.window2_enabled[BG3] = false;
+  regs.window2_enabled[BG4] = false;
+  regs.window2_enabled[OAM] = false;
+  regs.window2_enabled[COL] = false;
+
+  regs.window2_invert [BG1] = false;
+  regs.window2_invert [BG2] = false;
+  regs.window2_invert [BG3] = false;
+  regs.window2_invert [BG4] = false;
+  regs.window2_invert [OAM] = false;
+  regs.window2_invert [COL] = false;
 
 //$2126-$2129
   regs.window1_left  = 0;
@@ -194,12 +180,12 @@ void bPPU::reset() {
   regs.window2_right = 0;
 
 //$212a-$212b
-  regs.bg_window_mask[BG1] = 0;
-  regs.bg_window_mask[BG2] = 0;
-  regs.bg_window_mask[BG3] = 0;
-  regs.bg_window_mask[BG4] = 0;
-  regs.bg_window_mask[OAM] = 0;
-  regs.color_window_mask   = 0;
+  regs.window_mask[BG1] = 0;
+  regs.window_mask[BG2] = 0;
+  regs.window_mask[BG3] = 0;
+  regs.window_mask[BG4] = 0;
+  regs.window_mask[OAM] = 0;
+  regs.window_mask[COL] = 0;
 
 //$212c-$212d
   regs.bg_enabled[BG1]    = false;
@@ -214,16 +200,16 @@ void bPPU::reset() {
   regs.bgsub_enabled[OAM] = false;
 
 //$212e-$212f
-  regs.bg_window_enabled[BG1]    = false;
-  regs.bg_window_enabled[BG2]    = false;
-  regs.bg_window_enabled[BG3]    = false;
-  regs.bg_window_enabled[BG4]    = false;
-  regs.bg_window_enabled[OAM]    = false;
-  regs.bgsub_window_enabled[BG1] = false;
-  regs.bgsub_window_enabled[BG2] = false;
-  regs.bgsub_window_enabled[BG3] = false;
-  regs.bgsub_window_enabled[BG4] = false;
-  regs.bgsub_window_enabled[OAM] = false;
+  regs.window_enabled[BG1]     = false;
+  regs.window_enabled[BG2]     = false;
+  regs.window_enabled[BG3]     = false;
+  regs.window_enabled[BG4]     = false;
+  regs.window_enabled[OAM]     = false;
+  regs.sub_window_enabled[BG1] = false;
+  regs.sub_window_enabled[BG2] = false;
+  regs.sub_window_enabled[BG3] = false;
+  regs.sub_window_enabled[BG4] = false;
+  regs.sub_window_enabled[OAM] = false;
 
 //$2130
   regs.color_mask    = 0;
@@ -231,14 +217,14 @@ void bPPU::reset() {
   regs.addsub_mode   = 0;
 
 //$2131
-  regs.color_mode             = 0;
-  regs.color_halve            = false;
-  regs.bg_color_enabled[BACK] = false;
-  regs.bg_color_enabled[OAM]  = false;
-  regs.bg_color_enabled[BG4]  = false;
-  regs.bg_color_enabled[BG3]  = false;
-  regs.bg_color_enabled[BG2]  = false;
-  regs.bg_color_enabled[BG1]  = false;
+  regs.color_mode          = 0;
+  regs.color_halve         = false;
+  regs.color_enabled[BACK] = false;
+  regs.color_enabled[OAM]  = false;
+  regs.color_enabled[BG4]  = false;
+  regs.color_enabled[BG3]  = false;
+  regs.color_enabled[BG2]  = false;
+  regs.color_enabled[BG1]  = false;
 
 //$2132
   regs.color_r = 0x00;
@@ -266,8 +252,10 @@ void bPPU::reset() {
   regs.time_over  = false;
   regs.range_over = false;
 
+  _screen_width = 256; //needed for clear_window_cache()
   update_sprite_list_sizes();
   clear_tiledata_cache();
+  clear_window_cache();
 }
 
 uint8 bPPU::vram_read(uint16 addr) {
@@ -318,10 +306,6 @@ void bPPU::cgram_write(uint16 addr, uint8 value) {
 }
 
 bPPU::bPPU() {
-  settings.frameskip         = 0;
-  settings.frameskip_pos     = 0;
-  settings.frameskip_changed = false;
-
   mmio = new bPPUMMIO(this);
 
   vram  = (uint8*)malloc(65536);

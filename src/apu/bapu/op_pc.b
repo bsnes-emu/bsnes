@@ -37,14 +37,23 @@ bbc7(0xf3, 0x80, ==) {
 6:regs.pc += (int8)rd;
 }
 
-cbne_dp(0x2e, 0),
-cbne_dpx(0xde, regs.x) {
+cbne_dp(0x2e) {
 1:dp = op_read();
 2:rd = op_read();
-3:sp = op_read(OPMODE_DP, dp + $1);
+3:sp = op_read(OPMODE_DP, dp);
 4:if(regs.a == sp)end;
 5:
 6:regs.pc += (int8)rd;
+}
+
+cbne_dpx(0xde) {
+1:dp = op_read();
+2:rd = op_read();
+3:
+4:sp = op_read(OPMODE_DP, dp + regs.x);
+5:if(regs.a == sp)end;
+6:
+7:regs.pc += (int8)rd;
 }
 
 dbnz_dp(0x6e) {

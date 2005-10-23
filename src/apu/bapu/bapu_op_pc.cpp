@@ -510,7 +510,7 @@ void bAPU::op_cbne_dp() {
     rd = op_read();
     break;
   case 3:
-    sp = op_read(OPMODE_DP, dp + 0);
+    sp = op_read(OPMODE_DP, dp);
     break;
   case 4:
     if(regs.a == sp)status.cycle_pos = 0;
@@ -533,14 +533,16 @@ void bAPU::op_cbne_dpx() {
     rd = op_read();
     break;
   case 3:
-    sp = op_read(OPMODE_DP, dp + regs.x);
     break;
   case 4:
-    if(regs.a == sp)status.cycle_pos = 0;
+    sp = op_read(OPMODE_DP, dp + regs.x);
     break;
   case 5:
+    if(regs.a == sp)status.cycle_pos = 0;
     break;
   case 6:
+    break;
+  case 7:
     regs.pc += (int8)rd;
     status.cycle_pos = 0;
     break;

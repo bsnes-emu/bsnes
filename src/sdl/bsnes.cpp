@@ -17,17 +17,33 @@ void bSNES::run() {
   }
 }
 
-void bSNES::video_run() { render(); }
+void bSNES::video_run() {
+  if(ppu->status.frames_updated) {
+  char s[512], t[512];
+    ppu->status.frames_updated = false;
+//  if((bool)config::gui.show_fps == true) {
+      sprintf(s, "%s : %d fps", BSNES_TITLE, ppu->status.frames_executed);
+//    if(w_main->frameskip != 0) {
+//      sprintf(t, " (%d frames)", ppu->status.frames_rendered);
+//      strcat(s, t);
+//    }
+      SDL_WM_SetCaption(s, 0);
+//  }
+  }
+
+  render();
+}
+
 void bSNES::sound_run() {}
 
 /***********************
  *** Input functions ***
  ***********************/
 
-//It would appear that keystate does not need to be free'd
+//It would appear that keystate does not need to be released
 //after calling SDL_GetKeyState... doing so causes libSDL
 //to throw error messages about a bad free call to stdout...
-void bSNES::poll_input() {
+void bSNES::poll_input(uint8 type) {
 uint8 *keystate = SDL_GetKeyState(0);
   joypad1.up     = keystate[(int)config::input.joypad1.up];
   joypad1.down   = keystate[(int)config::input.joypad1.down];

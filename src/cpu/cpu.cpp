@@ -2,6 +2,6 @@
 #include "dcpu.cpp"
 
 CPU::CPU() {
-  cpu_version = 2;
+  cpu_version = 1;
   mmio = &mmio_unmapped;
 }

@@ -22,7 +22,7 @@ enum { STOP = 0, RUN };
   uint32 get_status();
 
 //input functions
-  void poll_input();
+  void poll_input(uint8 type);
   bool get_input_status(uint8 device, uint8 button);
 
   void  notify(uint32 message, uint32 param1 = 0, uint32 param2 = 0);

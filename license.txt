@@ -19,3 +19,8 @@ http://www.libsdl.org/
 
 This library is distributed under the terms of the GNU LGPL:
 http://www.gnu.org/copyleft/lesser.html
+
+Licensing Exemptions:
+---------------------
+Richard Bannister has asked for and received my permission to distribute
+a binary-only port of bsnes on the Mac OS X platform.

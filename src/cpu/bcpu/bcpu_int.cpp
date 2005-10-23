@@ -1,43 +1,43 @@
 /*
 [IRQ cycles]
-  [1] pbr,pc ; opcode
-  [2] pbr,pc ; io
-  [3] 0,s    ; pbr
-  [4] 0,s-1  ; pch
-  [5] 0,s-2  ; pcl
-  [6] 0,s-3  ; p
-  [7] 0,va   ; aavl
-  [8] 0,va+1 ; aavh
+  [0] pbr,pc ; opcode
+  [1] pbr,pc ; io
+  [2] 0,s    ; pbr
+  [3] 0,s-1  ; pch
+  [4] 0,s-2  ; pcl
+  [5] 0,s-3  ; p
+  [6] 0,va   ; aavl
+  [7] 0,va+1 ; aavh
 */
-void bCPU::irq(uint16 addr) {
+void bCPU::irq_run() {
 //WDC documentation is incorrect, first cycle
 //is a memory read fetch from PBR:PC
-  add_cycles(mem_bus->speed(regs.pc.d));
-  add_cycles(6);
-  stack_write(regs.pc.b);
-  stack_write(regs.pc.h);
-  stack_write(regs.pc.l);
-  stack_write(regs.p);
-  rd.l = op_read(OPMODE_ADDR, addr);
-  rd.h = op_read(OPMODE_ADDR, addr + 1);
-
-  regs.pc.b = 0x00;
-  regs.pc.w = rd.w;
-  regs.p.i  = 1;
-  regs.p.d  = 0;
-
-//let debugger know the new IRQ opcode address
-  snes->notify(SNES::CPU_EXEC_OPCODE_END);
+  switch(status.cycle_pos++) {
+  case 0: add_cycles(mem_bus->speed(regs.pc.d)); break;
+  case 1: add_cycles(6);                         break;
+  case 2: stack_write(regs.pc.b);                break;
+  case 3: stack_write(regs.pc.h);                break;
+  case 4: stack_write(regs.pc.l);                break;
+  case 5: stack_write(regs.p);                   break;
+  case 6: rd.l = op_read(OPMODE_ADDR, aa.w);     break;
+  case 7: rd.h = op_read(OPMODE_ADDR, aa.w + 1);
+    regs.pc.b = 0x00;
+    regs.pc.w = rd.w;
+    regs.p.i  = 1;
+    regs.p.d  = 0;
+  //let debugger know the new IRQ opcode address
+    snes->notify(SNES::CPU_EXEC_OPCODE_END);
+    status.cycle_pos = 0;
+    run_state.irq = false;
+    break;
+  }
 }
 
 bool bCPU::nmi_test() {
   if(time.nmi_transition == 0)return false;
   time.nmi_transition = 0;
 
-  if(status.cpu_state == CPUSTATE_WAI) {
-    status.cpu_state = CPUSTATE_RUN;
-  }
-
+  run_state.wai = false;
   return true;
 }
 
@@ -61,10 +61,7 @@ bool bCPU::irq_test() {
 _true:
   time.irq_transition = 0;
 
-  if(status.cpu_state == CPUSTATE_WAI) {
-    status.cpu_state = CPUSTATE_RUN;
-  }
-
+  run_state.wai = false;
   if(regs.p.i)return false;
   return true;
 }

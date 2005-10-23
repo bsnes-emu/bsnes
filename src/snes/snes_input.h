@@ -14,7 +14,7 @@ enum {
 
 //The CPU calls poll_input() when the main interface should check the
 //status of all joypad buttons and cache the results...
-  virtual void poll_input() = 0;
+  virtual void poll_input(uint8 type) = 0;
 
 //...and then the CPU calls get_input_status() whenever it needs one
 //of the cached button values to be returned for emulation purposes.

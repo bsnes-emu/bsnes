@@ -55,7 +55,6 @@ int i;
   for(i=0x2140;i<=0x217f;i++)mem_bus->set_mmio_mapper(i, cpu->mmio);
   for(i=0x2180;i<=0x2183;i++)mem_bus->set_mmio_mapper(i, cpu->mmio);
 //input
-mem_bus->set_mmio_mapper(0x4000, cpu->mmio); //test -- remove this
   mem_bus->set_mmio_mapper(0x4016, cpu->mmio);
   mem_bus->set_mmio_mapper(0x4017, cpu->mmio);
   for(i=0x4200;i<=0x421f;i++)mem_bus->set_mmio_mapper(i, cpu->mmio);

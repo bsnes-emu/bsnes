@@ -18,54 +18,72 @@
 uint8 bCPU::pio_status() { return status.pio; }
 
 void bCPU::run() {
-  switch(status.cpu_state) {
-  case CPUSTATE_DMA:
-    dma_run();
-    break;
-  case CPUSTATE_WAI:
-  case CPUSTATE_RUN:
-    if(status.cycle_pos == 0) {
-    //interrupts only trigger on opcode edges
-      if(time.nmi_pending == true) {
-        time.nmi_pending = false;
-        irq(0xffea);
-        break;
-      }
-      if(time.irq_pending == true) {
-        time.irq_pending = false;
-        irq(0xffee);
-        break;
-      }
-    }
-  //fallthrough
-  case CPUSTATE_STP:
-    exec_cycle();
-    break;
+  if(run_state.hdma) {
+    exec_hdma();
+    return;
   }
 
-  cycle_edge();
+  if(run_state.dma) {
+    exec_dma();
+    return;
+  }
+
+  if(run_state.irq) {
+    irq_run();
+    return;
+  }
+
+  if(run_state.stp) {
+    exec_cycle();
+    return;
+  }
+
+  if(status.cycle_pos == 0) {
+  //interrupts only trigger on opcode edges
+    if(time.nmi_pending == true) {
+      time.nmi_pending = false;
+      aa.w = 0xffea;
+      run_state.irq = true;
+      return;
+    }
+    if(time.irq_pending == true) {
+      time.irq_pending = false;
+      aa.w = 0xffee;
+      run_state.irq = true;
+      return;
+    }
+  }
+
+  exec_cycle();
 }
 
 void bCPU::scanline() {
-  status.hdma_triggered = false;
+  time.hdma_triggered = false;
 
   if(vcounter() == 225 && status.auto_joypad_poll == true) {
-    snes->poll_input();
+    snes->poll_input(SNES::DEV_JOYPAD1);
+    snes->poll_input(SNES::DEV_JOYPAD2);
   //When the SNES auto-polls the joypads, it writes 1, then 0 to
   //$4016, then reads from each 16 times to get the joypad state
   //information. As a result, the joypad read positions are set
   //to 16 after such a poll. Position 16 is the controller
   //connected status bit.
     status.joypad1_read_pos = 16;
+    status.joypad2_read_pos = 16;
   }
 }
 
 void bCPU::frame() {
-  hdma_initialize();
-
   time.nmi_read = 1;
   time.nmi_line = 1;
   time.nmi_transition = 0;
+
+  if(cpu_version == 2) {
+    time.hdmainit_trigger_pos = 12 + dma_counter();
+  } else {
+    time.hdmainit_trigger_pos = 12 + 8 - dma_counter();
+  }
+  time.hdmainit_triggered = false;
 }
 
 void bCPU::power() {
@@ -94,14 +112,15 @@ void bCPU::reset() {
   mmio_reset();
   dma_reset();
 
-  status.cpu_state = CPUSTATE_RUN;
-  status.dma_state = DMASTATE_STOP;
+  run_state.hdma = false;
+  run_state.dma  = false;
+  run_state.irq  = false;
+  run_state.wai  = false;
+  run_state.stp  = false;
 
   status.cycle_pos       = 0;
   status.cycle_count     = 0;
   status.cycles_executed = 0;
-
-  status.hdma_triggered = false;
 
   apu_port[0] = 0x00;
   apu_port[1] = 0x00;
@@ -109,6 +128,11 @@ void bCPU::reset() {
   apu_port[3] = 0x00;
 
   frame();
+
+//initial latch values for $213c/$213d
+//[x]0035 : [y]0000 (53.0 -> 212) [lda $2137]
+//[x]0038 : [y]0000 (56.5 -> 226) [nop : lda $2137]
+  add_cycles(186);
 }
 
 uint8 bCPU::port_read(uint8 port) {
@@ -141,20 +165,18 @@ void bCPU::cpu_c6(uint16 addr) {
  * cpu_io is an I/O cycle, and always 6 clock cycles long.
  * mem_read / mem_write indicate memory access bus cycle,
  * they are either 6, 8, or 12 bus cycles long, depending
- * both on location and the $420d.1 FastROM enable bit.
+ * both on location and the $420d.d0 FastROM enable bit.
  */
 
 void bCPU::cpu_io() {
-  if(status.is_last_cycle)last_cycle_exec();
-
   status.cycle_count = 6;
+  pre_exec_cycle();
   add_cycles(6);
 }
 
 uint8 bCPU::mem_read(uint32 addr) {
-  if(status.is_last_cycle)last_cycle_exec();
-
   status.cycle_count = mem_bus->speed(addr);
+  pre_exec_cycle();
   add_cycles(status.cycle_count - 4);
   regs.mdr = mem_bus->read(addr);
   add_cycles(4);
@@ -162,9 +184,8 @@ uint8 bCPU::mem_read(uint32 addr) {
 }
 
 void bCPU::mem_write(uint32 addr, uint8 value) {
-  if(status.is_last_cycle)last_cycle_exec();
-
   status.cycle_count = mem_bus->speed(addr);
+  pre_exec_cycle();
   add_cycles(status.cycle_count);
   mem_bus->write(addr, value);
 }

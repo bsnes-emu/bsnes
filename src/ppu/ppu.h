@@ -1,5 +1,16 @@
 class PPU {
 public:
+
+//this struct should be read-only to
+//functions outside of this class
+struct {
+  bool   render_output;
+
+  bool   frames_updated;
+  uint32 frames_rendered;
+  uint32 frames_executed;
+} status;
+
 //PPU1 version number
 //* 1 is known
 //* reported by $213e
@@ -32,11 +43,11 @@ struct scanline_info {
   virtual void  run() = 0;
   virtual void  scanline() = 0;
   virtual void  render_scanline() = 0;
-  virtual void  frame() = 0;
+  virtual void  frame();
   virtual void  power() = 0;
   virtual void  reset() = 0;
-  virtual void  set_frameskip(int fs);
-  virtual bool  render_frame();
+  virtual void  enable_renderer(bool r);
+  virtual bool  renderer_enabled();
 
   PPU();
   ~PPU();

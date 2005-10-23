@@ -126,7 +126,7 @@ void bPPU::render_line() {
   }
 
   clear_pixel_cache();
-  build_color_window_tables();
+  build_window_tables(COL);
 
   switch(regs.bg_mode) {
   case 0:render_line_mode0();break;

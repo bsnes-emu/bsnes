@@ -11,8 +11,8 @@ void MainWindow::set_frameskip(uint8 fs) {
   CheckMenuItem(w_main->hmenu, MENU_SETTINGS_FRAMESKIP_9,   MF_UNCHECKED);
 
   CheckMenuItem(w_main->hmenu, MENU_SETTINGS_FRAMESKIP_OFF + fs, MF_CHECKED);
-  ppu->set_frameskip(fs);
-  w_main->frameskip = fs;
+  w_main->frameskip     = fs;
+  w_main->frameskip_pos = 0;
 }
 
 void MainWindow::to_fullscreen() {
@@ -239,6 +239,9 @@ int i;
     case MENU_SETTINGS_INPUTCFG_JOYPAD1:
       w_inputconfig->begin_config(InputConfig::JOYPAD1);
       break;
+    case MENU_SETTINGS_INPUTCFG_JOYPAD2:
+      w_inputconfig->begin_config(InputConfig::JOYPAD2);
+      break;
     case MENU_SETTINGS_DEBUGGER:
       if(bsnes->debugger_enabled() == true) {
         bsnes->debugger_disable();
@@ -350,6 +353,7 @@ HMENU hsubmenu, hbranchmenu;
 
   hbranchmenu = CreatePopupMenu();
   AppendMenu(hbranchmenu, MF_STRING, MENU_SETTINGS_INPUTCFG_JOYPAD1, "Joypad 1");
+  AppendMenu(hbranchmenu, MF_STRING, MENU_SETTINGS_INPUTCFG_JOYPAD2, "Joypad 2");
   AppendMenu(hsubmenu, MF_STRING | MF_POPUP, (unsigned int)hbranchmenu, "&Configure Input Devices");
 
   AppendMenu(hsubmenu, MF_SEPARATOR, 0, "");

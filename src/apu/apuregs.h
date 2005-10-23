@@ -13,7 +13,7 @@ private:
     inline bool operator ^= (bool i) { if(i)_b ^= B; return (_b & B); }
   };
 public:
-  union {
+union {
   uint8 _b;
   bit<0x80> n;
   bit<0x40> v;
@@ -23,7 +23,7 @@ public:
   bit<0x04> i;
   bit<0x02> z;
   bit<0x01> c;
-  };
+};
 
   APURegFlags() { _b = 0; }
   inline operator uint8() { return _b; }
@@ -38,10 +38,11 @@ public:
 uint16 pc;
 union {
   uint16 ya;
-//not endian-safe
-  struct {
-    uint8 a, y;
-  };
+#ifdef ARCH_LSB
+  struct { uint8 a, y; };
+#else
+  struct { uint8 y, a; };
+#endif
 };
 uint8 x, sp;
 APURegFlags p;

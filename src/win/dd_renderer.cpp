@@ -164,32 +164,15 @@ int rx, ry;
       break;
     }
   }
+
   if(config::video.vblank) {
     lpdd->WaitForVerticalBlank(DDWAITVB_BLOCKBEGIN, 0);
   }
+
   hr = lpdds->Blt(&rd, lpddsb, &lpddrc, DDBLT_WAIT, 0);
   if(hr == DDERR_SURFACELOST) {
     lpdds->Restore();
     lpddsb->Restore();
-  }
-
-  if((int)config::gui.show_fps == false || bsnes->get_status() == bSNES::STOP)return;
-uint32 fps;
-char s[256], t[256];
-  fps_timer->tick();
-  if(fps_timer->second_passed() == true) {
-    sprintf(s, BSNES_TITLE);
-    if(rom_image->loaded() == true) {
-      fps = fps_timer->get_ticks();
-      if(w_main->frameskip == 0) {
-        sprintf(t, " : %d fps", fps);
-      } else {
-        sprintf(t, " : %d fps [fs: %d]", fps * (1 + w_main->frameskip), w_main->frameskip);
-      }
-      strcat(s, t);
-    }
-    SetWindowText(w_main->hwnd, s);
-    fps_timer->reset();
   }
 }
 

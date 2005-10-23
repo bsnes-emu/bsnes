@@ -16,6 +16,55 @@ uint16 addr;
   return (addr << 1);
 }
 
+bool bPPU::vram_can_read() {
+  if(regs.display_disabled == true) {
+    return true;
+  }
+
+uint16 v  = cpu->vcounter();
+uint16 hc = cpu->hcycles();
+uint16 ls;
+  if(cpu->interlace() && !cpu->interlace_field()) {
+    ls = cpu->region_scanlines();
+  } else {
+    ls = cpu->region_scanlines() - 1;
+  }
+
+  if(v == ls && hc == 1362)return false;
+
+  if(v < (cpu->overscan() ? 239 : 224))return false;
+
+  if(v == (cpu->overscan() ? 239 : 224)) {
+    if(hc == 1362)return true;
+    return false;
+  }
+
+  return true;
+}
+
+bool bPPU::vram_can_write(uint8 &value) {
+  if(regs.display_disabled == true) {
+    return true;
+  }
+
+uint16 v  = cpu->vcounter();
+uint16 hc = cpu->hcycles();
+  if(v == 0) {
+    if(hc <= 4)return true;
+    if(hc == 6) { value = cpu->regs.mdr; return true; }
+    return false;
+  }
+
+  if(v < (cpu->overscan() ? 240 : 225))return false;
+
+  if(v == (cpu->overscan() ? 240 : 225)) {
+    if(hc <= 4)return false;
+    return true;
+  }
+
+  return true;
+}
+
 //INIDISP
 void bPPU::mmio_w2100(uint8 value) {
   regs.display_disabled   = !!(value & 0x80);
@@ -68,6 +117,13 @@ void bPPU::mmio_w2105(uint8 value) {
   regs.bg_tilesize[BG1] = !!(value & 0x10);
   regs.bg3_priority     = !!(value & 0x08);
   regs.bg_mode          = (value & 7);
+
+  window_cache[BG1].main_dirty = window_cache[BG1].sub_dirty = true;
+  window_cache[BG2].main_dirty = window_cache[BG2].sub_dirty = true;
+  window_cache[BG3].main_dirty = window_cache[BG3].sub_dirty = true;
+  window_cache[BG4].main_dirty = window_cache[BG4].sub_dirty = true;
+  window_cache[OAM].main_dirty = window_cache[OAM].sub_dirty = true;
+  window_cache[COL].main_dirty = window_cache[COL].sub_dirty = true;
 }
 
 //MOSAIC
@@ -185,40 +241,54 @@ void bPPU::mmio_w2115(uint8 value) {
 void bPPU::mmio_w2116(uint8 value) {
   regs.vram_addr = (regs.vram_addr & 0xff00) | value;
 uint16 addr = get_vram_address();
-  regs.vram_readbuffer  = vram_read(addr);
-  regs.vram_readbuffer |= vram_read(addr + 1) << 8;
+  if(vram_can_read()) {
+    regs.vram_readbuffer  = vram_read(addr);
+    regs.vram_readbuffer |= vram_read(addr + 1) << 8;
+  } else {
+    regs.vram_readbuffer  = 0x0000;
+  }
 }
 
 //VMADDH
 void bPPU::mmio_w2117(uint8 value) {
   regs.vram_addr = (value << 8) | (regs.vram_addr & 0x00ff);
 uint16 addr = get_vram_address();
-  regs.vram_readbuffer  = vram_read(addr);
-  regs.vram_readbuffer |= vram_read(addr + 1) << 8;
+  if(vram_can_read()) {
+    regs.vram_readbuffer  = vram_read(addr);
+    regs.vram_readbuffer |= vram_read(addr + 1) << 8;
+  } else {
+    regs.vram_readbuffer  = 0x0000;
+  }
 }
 
 //VMDATAL
 void bPPU::mmio_w2118(uint8 value) {
 uint16 addr = get_vram_address();
-  vram_write(addr, value);
+  if(vram_can_write(value)) {
+    vram_write(addr, value);
+    bg_tiledata_state[TILE_2BIT][(addr >> 4)] = 1;
+    bg_tiledata_state[TILE_4BIT][(addr >> 5)] = 1;
+    bg_tiledata_state[TILE_8BIT][(addr >> 6)] = 1;
+  }
+
   if(regs.vram_incmode == 0) {
     regs.vram_addr += regs.vram_incsize;
   }
-  bg_tiledata_state[TILE_2BIT][(addr >> 4)] = 1;
-  bg_tiledata_state[TILE_4BIT][(addr >> 5)] = 1;
-  bg_tiledata_state[TILE_8BIT][(addr >> 6)] = 1;
 }
 
 //VMDATAH
 void bPPU::mmio_w2119(uint8 value) {
 uint16 addr = get_vram_address() + 1;
-  vram_write(addr, value);
+  if(vram_can_write(value)) {
+    vram_write(addr, value);
+    bg_tiledata_state[TILE_2BIT][(addr >> 4)] = 1;
+    bg_tiledata_state[TILE_4BIT][(addr >> 5)] = 1;
+    bg_tiledata_state[TILE_8BIT][(addr >> 6)] = 1;
+  }
+
   if(regs.vram_incmode == 1) {
     regs.vram_addr += regs.vram_incsize;
   }
-  bg_tiledata_state[TILE_2BIT][(addr >> 4)] = 1;
-  bg_tiledata_state[TILE_4BIT][(addr >> 5)] = 1;
-  bg_tiledata_state[TILE_8BIT][(addr >> 6)] = 1;
 }
 
 //M7SEL
@@ -284,72 +354,117 @@ void bPPU::mmio_w2122(uint8 value) {
 
 //W12SEL
 void bPPU::mmio_w2123(uint8 value) {
-  regs.bg_window2_enabled[BG2] = !!(value & 0x80);
-  regs.bg_window2_invert [BG2] = !!(value & 0x40);
-  regs.bg_window1_enabled[BG2] = !!(value & 0x20);
-  regs.bg_window1_invert [BG2] = !!(value & 0x10);
-  regs.bg_window2_enabled[BG1] = !!(value & 0x08);
-  regs.bg_window2_invert [BG1] = !!(value & 0x04);
-  regs.bg_window1_enabled[BG1] = !!(value & 0x02);
-  regs.bg_window1_invert [BG1] = !!(value & 0x01);
+  regs.window2_enabled[BG2] = !!(value & 0x80);
+  regs.window2_invert [BG2] = !!(value & 0x40);
+  regs.window1_enabled[BG2] = !!(value & 0x20);
+  regs.window1_invert [BG2] = !!(value & 0x10);
+  regs.window2_enabled[BG1] = !!(value & 0x08);
+  regs.window2_invert [BG1] = !!(value & 0x04);
+  regs.window1_enabled[BG1] = !!(value & 0x02);
+  regs.window1_invert [BG1] = !!(value & 0x01);
+
+  window_cache[BG1].main_dirty = window_cache[BG1].sub_dirty = true;
+  window_cache[BG2].main_dirty = window_cache[BG2].sub_dirty = true;
 }
 
 //W34SEL
 void bPPU::mmio_w2124(uint8 value) {
-  regs.bg_window2_enabled[BG4] = !!(value & 0x80);
-  regs.bg_window2_invert [BG4] = !!(value & 0x40);
-  regs.bg_window1_enabled[BG4] = !!(value & 0x20);
-  regs.bg_window1_invert [BG4] = !!(value & 0x10);
-  regs.bg_window2_enabled[BG3] = !!(value & 0x08);
-  regs.bg_window2_invert [BG3] = !!(value & 0x04);
-  regs.bg_window1_enabled[BG3] = !!(value & 0x02);
-  regs.bg_window1_invert [BG3] = !!(value & 0x01);
+  regs.window2_enabled[BG4] = !!(value & 0x80);
+  regs.window2_invert [BG4] = !!(value & 0x40);
+  regs.window1_enabled[BG4] = !!(value & 0x20);
+  regs.window1_invert [BG4] = !!(value & 0x10);
+  regs.window2_enabled[BG3] = !!(value & 0x08);
+  regs.window2_invert [BG3] = !!(value & 0x04);
+  regs.window1_enabled[BG3] = !!(value & 0x02);
+  regs.window1_invert [BG3] = !!(value & 0x01);
+
+  window_cache[BG3].main_dirty = window_cache[BG3].sub_dirty = true;
+  window_cache[BG4].main_dirty = window_cache[BG4].sub_dirty = true;
 }
 
 //WOBJSEL
 void bPPU::mmio_w2125(uint8 value) {
-  regs.color_window2_enabled   = !!(value & 0x80);
-  regs.color_window2_invert    = !!(value & 0x40);
-  regs.color_window1_enabled   = !!(value & 0x20);
-  regs.color_window1_invert    = !!(value & 0x10);
-  regs.bg_window2_enabled[OAM] = !!(value & 0x08);
-  regs.bg_window2_invert [OAM] = !!(value & 0x04);
-  regs.bg_window1_enabled[OAM] = !!(value & 0x02);
-  regs.bg_window1_invert [OAM] = !!(value & 0x01);
+  regs.window2_enabled[COL] = !!(value & 0x80);
+  regs.window2_invert [COL] = !!(value & 0x40);
+  regs.window1_enabled[COL] = !!(value & 0x20);
+  regs.window1_invert [COL] = !!(value & 0x10);
+  regs.window2_enabled[OAM] = !!(value & 0x08);
+  regs.window2_invert [OAM] = !!(value & 0x04);
+  regs.window1_enabled[OAM] = !!(value & 0x02);
+  regs.window1_invert [OAM] = !!(value & 0x01);
+
+  window_cache[OAM].main_dirty = window_cache[OAM].sub_dirty = true;
+  window_cache[COL].main_dirty = window_cache[COL].sub_dirty = true;
 }
 
 //WH0
 void bPPU::mmio_w2126(uint8 value) {
   regs.window1_left = value;
+
+  window_cache[BG1].main_dirty = window_cache[BG1].sub_dirty = true;
+  window_cache[BG2].main_dirty = window_cache[BG2].sub_dirty = true;
+  window_cache[BG3].main_dirty = window_cache[BG3].sub_dirty = true;
+  window_cache[BG4].main_dirty = window_cache[BG4].sub_dirty = true;
+  window_cache[OAM].main_dirty = window_cache[OAM].sub_dirty = true;
+  window_cache[COL].main_dirty = window_cache[COL].sub_dirty = true;
 }
 
 //WH1
 void bPPU::mmio_w2127(uint8 value) {
   regs.window1_right = value;
+
+  window_cache[BG1].main_dirty = window_cache[BG1].sub_dirty = true;
+  window_cache[BG2].main_dirty = window_cache[BG2].sub_dirty = true;
+  window_cache[BG3].main_dirty = window_cache[BG3].sub_dirty = true;
+  window_cache[BG4].main_dirty = window_cache[BG4].sub_dirty = true;
+  window_cache[OAM].main_dirty = window_cache[OAM].sub_dirty = true;
+  window_cache[COL].main_dirty = window_cache[COL].sub_dirty = true;
 }
 
 //WH2
 void bPPU::mmio_w2128(uint8 value) {
   regs.window2_left = value;
+
+  window_cache[BG1].main_dirty = window_cache[BG1].sub_dirty = true;
+  window_cache[BG2].main_dirty = window_cache[BG2].sub_dirty = true;
+  window_cache[BG3].main_dirty = window_cache[BG3].sub_dirty = true;
+  window_cache[BG4].main_dirty = window_cache[BG4].sub_dirty = true;
+  window_cache[OAM].main_dirty = window_cache[OAM].sub_dirty = true;
+  window_cache[COL].main_dirty = window_cache[COL].sub_dirty = true;
 }
 
 //WH3
 void bPPU::mmio_w2129(uint8 value) {
   regs.window2_right = value;
+
+  window_cache[BG1].main_dirty = window_cache[BG1].sub_dirty = true;
+  window_cache[BG2].main_dirty = window_cache[BG2].sub_dirty = true;
+  window_cache[BG3].main_dirty = window_cache[BG3].sub_dirty = true;
+  window_cache[BG4].main_dirty = window_cache[BG4].sub_dirty = true;
+  window_cache[OAM].main_dirty = window_cache[OAM].sub_dirty = true;
+  window_cache[COL].main_dirty = window_cache[COL].sub_dirty = true;
 }
 
 //WBGLOG
 void bPPU::mmio_w212a(uint8 value) {
-  regs.bg_window_mask[BG4] = (value >> 6) & 3;
-  regs.bg_window_mask[BG3] = (value >> 4) & 3;
-  regs.bg_window_mask[BG2] = (value >> 2) & 3;
-  regs.bg_window_mask[BG1] = (value     ) & 3;
+  regs.window_mask[BG4] = (value >> 6) & 3;
+  regs.window_mask[BG3] = (value >> 4) & 3;
+  regs.window_mask[BG2] = (value >> 2) & 3;
+  regs.window_mask[BG1] = (value     ) & 3;
+
+  window_cache[BG1].main_dirty = window_cache[BG1].sub_dirty = true;
+  window_cache[BG2].main_dirty = window_cache[BG2].sub_dirty = true;
+  window_cache[BG3].main_dirty = window_cache[BG3].sub_dirty = true;
+  window_cache[BG4].main_dirty = window_cache[BG4].sub_dirty = true;
 }
 
 //WOBJLOG
 void bPPU::mmio_w212b(uint8 value) {
-  regs.color_window_mask   = (value >> 2) & 3;
-  regs.bg_window_mask[OAM] = (value     ) & 3;
+  regs.window_mask[COL] = (value >> 2) & 3;
+  regs.window_mask[OAM] = (value     ) & 3;
+
+  window_cache[OAM].main_dirty = window_cache[OAM].sub_dirty = true;
+  window_cache[COL].main_dirty = window_cache[COL].sub_dirty = true;
 }
 
 //TM
@@ -372,20 +487,32 @@ void bPPU::mmio_w212d(uint8 value) {
 
 //TMW
 void bPPU::mmio_w212e(uint8 value) {
-  regs.bg_window_enabled[OAM] = !!(value & 0x10);
-  regs.bg_window_enabled[BG4] = !!(value & 0x08);
-  regs.bg_window_enabled[BG3] = !!(value & 0x04);
-  regs.bg_window_enabled[BG2] = !!(value & 0x02);
-  regs.bg_window_enabled[BG1] = !!(value & 0x01);
+  regs.window_enabled[OAM] = !!(value & 0x10);
+  regs.window_enabled[BG4] = !!(value & 0x08);
+  regs.window_enabled[BG3] = !!(value & 0x04);
+  regs.window_enabled[BG2] = !!(value & 0x02);
+  regs.window_enabled[BG1] = !!(value & 0x01);
+
+  window_cache[BG1].main_dirty = window_cache[BG1].sub_dirty = true;
+  window_cache[BG2].main_dirty = window_cache[BG2].sub_dirty = true;
+  window_cache[BG3].main_dirty = window_cache[BG3].sub_dirty = true;
+  window_cache[BG4].main_dirty = window_cache[BG4].sub_dirty = true;
+  window_cache[OAM].main_dirty = window_cache[OAM].sub_dirty = true;
 }
 
 //TSW
 void bPPU::mmio_w212f(uint8 value) {
-  regs.bgsub_window_enabled[OAM] = !!(value & 0x10);
-  regs.bgsub_window_enabled[BG4] = !!(value & 0x08);
-  regs.bgsub_window_enabled[BG3] = !!(value & 0x04);
-  regs.bgsub_window_enabled[BG2] = !!(value & 0x02);
-  regs.bgsub_window_enabled[BG1] = !!(value & 0x01);
+  regs.sub_window_enabled[OAM] = !!(value & 0x10);
+  regs.sub_window_enabled[BG4] = !!(value & 0x08);
+  regs.sub_window_enabled[BG3] = !!(value & 0x04);
+  regs.sub_window_enabled[BG2] = !!(value & 0x02);
+  regs.sub_window_enabled[BG1] = !!(value & 0x01);
+
+  window_cache[BG1].main_dirty = window_cache[BG1].sub_dirty = true;
+  window_cache[BG2].main_dirty = window_cache[BG2].sub_dirty = true;
+  window_cache[BG3].main_dirty = window_cache[BG3].sub_dirty = true;
+  window_cache[BG4].main_dirty = window_cache[BG4].sub_dirty = true;
+  window_cache[OAM].main_dirty = window_cache[OAM].sub_dirty = true;
 }
 
 //CGWSEL
@@ -394,18 +521,20 @@ void bPPU::mmio_w2130(uint8 value) {
   regs.colorsub_mask = (value >> 4) & 3;
   regs.addsub_mode   = !!(value & 0x02);
   regs.direct_color  = !!(value & 0x01);
+
+  window_cache[COL].main_dirty = window_cache[COL].sub_dirty = true;
 }
 
 //CGADDSUB
 void bPPU::mmio_w2131(uint8 value) {
-  regs.color_mode             = !!(value & 0x80);
-  regs.color_halve            = !!(value & 0x40);
-  regs.bg_color_enabled[BACK] = !!(value & 0x20);
-  regs.bg_color_enabled[OAM]  = !!(value & 0x10);
-  regs.bg_color_enabled[BG4]  = !!(value & 0x08);
-  regs.bg_color_enabled[BG3]  = !!(value & 0x04);
-  regs.bg_color_enabled[BG2]  = !!(value & 0x02);
-  regs.bg_color_enabled[BG1]  = !!(value & 0x01);
+  regs.color_mode          = !!(value & 0x80);
+  regs.color_halve         = !!(value & 0x40);
+  regs.color_enabled[BACK] = !!(value & 0x20);
+  regs.color_enabled[OAM]  = !!(value & 0x10);
+  regs.color_enabled[BG4]  = !!(value & 0x08);
+  regs.color_enabled[BG3]  = !!(value & 0x04);
+  regs.color_enabled[BG2]  = !!(value & 0x02);
+  regs.color_enabled[BG1]  = !!(value & 0x01);
 }
 
 //COLDATA
@@ -476,8 +605,12 @@ uint16 addr = get_vram_address();
   regs.ppu1_mdr = regs.vram_readbuffer;
   if(regs.vram_incmode == 0) {
     addr &= 0xfffe;
-    regs.vram_readbuffer  = vram_read(addr);
-    regs.vram_readbuffer |= vram_read(addr + 1) << 8;
+    if(vram_can_read()) {
+      regs.vram_readbuffer  = vram_read(addr);
+      regs.vram_readbuffer |= vram_read(addr + 1) << 8;
+    } else {
+      regs.vram_readbuffer  = 0x0000;
+    }
     regs.vram_addr += regs.vram_incsize;
   }
   return regs.ppu1_mdr;
@@ -489,8 +622,12 @@ uint16 addr = get_vram_address() + 1;
   regs.ppu1_mdr = regs.vram_readbuffer >> 8;
   if(regs.vram_incmode == 1) {
     addr &= 0xfffe;
-    regs.vram_readbuffer  = vram_read(addr);
-    regs.vram_readbuffer |= vram_read(addr + 1) << 8;
+    if(vram_can_read()) {
+      regs.vram_readbuffer  = vram_read(addr);
+      regs.vram_readbuffer |= vram_read(addr + 1) << 8;
+    } else {
+      regs.vram_readbuffer  = 0x0000;
+    }
     regs.vram_addr += regs.vram_incsize;
   }
   return regs.ppu1_mdr;

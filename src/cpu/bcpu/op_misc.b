@@ -53,7 +53,7 @@ cop(0x02, 0xfff4, 0xfff5, 0xffe4, 0xffe5) {
 
 stp(0xdb) {
 1:cpu_io();
-  status.cpu_state = CPUSTATE_STP;
+  run_state.stp = true;
 2:last_cycle();
   cpu_io();
   regs.pc.w--;
@@ -61,10 +61,11 @@ stp(0xdb) {
 
 wai(0xcb) {
 1:cpu_io();
-  status.cpu_state = CPUSTATE_WAI;
+  run_state.wai = true;
 2:last_cycle();
   cpu_io();
-  if(status.cpu_state == CPUSTATE_WAI) {
+  if(run_state.wai) {
+  //this can be cleared within last_cycle()
     regs.pc.w--;
   }
 }

@@ -14,7 +14,7 @@ uint8 *vram, *oam, *cgram;
 uint8  region;
 
 enum { NTSC = 0, PAL = 1 };
-enum { BG1 = 0, BG2 = 1, BG3 = 2, BG4 = 3, OAM = 4, BACK = 5 };
+enum { BG1 = 0, BG2 = 1, BG3 = 2, BG4 = 3, OAM = 4, BACK = 5, COL = 5 };
 enum { SC_32x32 = 0, SC_32x64 = 1, SC_64x32 = 2, SC_64x64 = 3 };
 
 struct sprite_item {
@@ -26,11 +26,6 @@ struct sprite_item {
   uint8  palette;
   uint8  priority;
 } sprite_list[128];
-
-struct {
-  int32  frameskip, frameskip_pos;
-  bool   frameskip_changed;
-} settings;
 
 struct {
 //open bus support
@@ -95,26 +90,23 @@ struct {
   uint16 cgram_addr;
 
 //$2123-$2125
-  bool   bg_window1_enabled[5];
-  bool   bg_window1_invert [5];
-  bool   bg_window2_enabled[5];
-  bool   bg_window2_invert [5];
-  bool   color_window1_enabled, color_window1_invert;
-  bool   color_window2_enabled, color_window2_invert;
+  bool   window1_enabled[6];
+  bool   window1_invert [6];
+  bool   window2_enabled[6];
+  bool   window2_invert [6];
 
 //$2126-$2129
   uint8  window1_left, window1_right;
   uint8  window2_left, window2_right;
 
 //$212a-$212b
-  uint8  bg_window_mask[5];
-  uint8  color_window_mask;
+  uint8  window_mask[6];
 
 //$212c-$212d
   bool   bg_enabled[5], bgsub_enabled[5];
 
 //$212e-$212f
-  bool   bg_window_enabled[5], bgsub_window_enabled[5];
+  bool   window_enabled[5], sub_window_enabled[5];
 
 //$2130
   uint8  color_mask, colorsub_mask;
@@ -123,7 +115,7 @@ struct {
 
 //$2131
   bool   color_mode, color_halve;
-  bool   bg_color_enabled[6];
+  bool   color_enabled[6];
 
 //$2132
   uint8  color_r, color_g, color_b;
@@ -158,6 +150,8 @@ struct {
   void   update_sprite_list(uint16 addr);
   void   update_sprite_list_sizes();
   uint16 get_vram_address();
+  bool   vram_can_read();
+  bool   vram_can_write(uint8 &value);
 
   void   mmio_w2100(uint8 value); //INIDISP
   void   mmio_w2101(uint8 value); //OBSEL
@@ -242,8 +236,6 @@ uint16 *mosaic_table[16];
   void   frame();
   void   power();
   void   reset();
-  void   set_frameskip(int fs);
-  bool   render_frame();
 
   bool   scanline_is_hires() { return (regs.bg_mode == 5 || regs.bg_mode == 6); }
 

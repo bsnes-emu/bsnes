@@ -145,7 +145,7 @@ int i, v, n;
 
   case 0x4c:
     status.KON = data;
-    status.kon = data;
+//  status.kon = data;
     status.key_flag = true;
     break;
 
@@ -221,7 +221,7 @@ int v;
   status.KOFF  = 0x00;
   status.FLG  |= 0xe0;
 
-  status.kon      = 0x00;
+//status.kon      = 0x00;
   status.key_flag = false;
 
   status.noise_ctr    = 0;
@@ -290,17 +290,20 @@ int32 fir_samplel, fir_sampler;
 
   if(!(dsp_counter++ & 1) && status.key_flag) {
     for(v=0;v<8;v++) {
+    uint8 mask = 1 << v;
       if(status.soft_reset()) {
         if(voice[v].env_state != SILENCE) {
           voice[v].env_state = SILENCE;
           voice[v].AdjustEnvelope();
         }
-      } else if(status.KOFF & (1 << v)) {
+      } else if(status.KOFF & mask) {
         if(voice[v].env_state != SILENCE && voice[v].env_state != RELEASE) {
           voice[v].env_state = RELEASE;
           voice[v].AdjustEnvelope();
         }
-      } else if(status.kon & (1 << v)) {
+      } else if(status.KON & mask) { //status.kon
+        status.KON  &= ~mask; //new code
+        status.ENDX &= ~mask; //new code
         voice[v].brr_ptr     = read_16((status.DIR << 8) + (voice[v].SRCN << 2));
         voice[v].brr_index   = -9;
         voice[v].brr_looped  = false;
@@ -313,8 +316,8 @@ int32 fir_samplel, fir_sampler;
         voice[v].AdjustEnvelope();
       }
     }
-    status.ENDX &= ~status.kon;
-    status.kon      = 0;
+//  status.ENDX &= ~status.kon;
+//  status.kon      = 0;
     status.key_flag = false;
   }
 

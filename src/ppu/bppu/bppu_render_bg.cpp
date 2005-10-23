@@ -118,8 +118,8 @@ int    xpos, ypos;
 uint16 map_index, hoffset, voffset, col;
 
   build_window_tables(bg);
-uint8 *wt_main = main_windowtable[bg];
-uint8 *wt_sub  = sub_windowtable[bg];
+uint8 *wt_main = window_cache[bg].main;
+uint8 *wt_sub  = window_cache[bg].sub;
 
   screen_x = 0;
   do { //for(screen_x=0;screen_x<_screen_width;screen_x++) {
@@ -141,7 +141,7 @@ uint8 *wt_sub  = sub_windowtable[bg];
 
         if(regs.bg_mode == 4) {
           pos = regs.bg_scaddr[BG3] + tile_x;
-          t   = *((uint16*)vram + (pos >> 1));
+          t   = read16(vram, pos);
           if(t & opt_valid_bit) {
             if(!(t & 0x8000)) {
               hoffset = ((t & 0x1ff8) | (hscroll & 7)) & screen_width_mask;
@@ -151,12 +151,12 @@ uint8 *wt_sub  = sub_windowtable[bg];
           }
         } else {
           pos = regs.bg_scaddr[BG3] + tile_x;
-          t   = *((uint16*)vram + (pos >> 1));
+          t   = read16(vram, pos);
           if(t & opt_valid_bit) {
             hoffset = ((t & 0x1ff8) | (hscroll & 7)) & screen_width_mask;
           }
           pos = regs.bg_scaddr[BG3] + 64 + tile_x;
-          t   = *((uint16*)vram + (pos >> 1));
+          t   = read16(vram, pos);
           if(t & opt_valid_bit) {
             voffset = (t & 0x1fff) & screen_height_mask;
           }
@@ -186,7 +186,7 @@ uint8 *wt_sub  = sub_windowtable[bg];
     base_xpos = ((mosaic_x >> 3) & 31);
     base_pos  = (((mosaic_y >> tile_height) & 31) << 5) + ((mosaic_x >> tile_width) & 31);
     pos       = _scaddr + map_index + (base_pos << 1);
-    t         = *((uint16*)vram + (pos >> 1));
+    t         = read16(vram, pos);
     mirror_y  = !!(t & 0x8000);
     mirror_x  = !!(t & 0x4000);
 
@@ -228,7 +228,7 @@ int _pri;
       if(mirror_x) { xpos = (7 - (mosaic_x & 7)); }
       else         { xpos = (    (mosaic_x & 7)); }
       col = *(tile_ptr + xpos);
-      if(col && main_colorwindowtable[screen_x]) {
+      if(col && window_cache[COL].main[screen_x]) {
         if(regs.direct_color == true && bg == BG1 && (regs.bg_mode == 3 || regs.bg_mode == 4)) {
           col = get_direct_color(pal_num, col);
         } else {

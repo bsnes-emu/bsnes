@@ -39,6 +39,7 @@ enum {
   MENU_SETTINGS_SHOWFPS,
   MENU_SETTINGS_MUTE,
   MENU_SETTINGS_INPUTCFG_JOYPAD1,
+  MENU_SETTINGS_INPUTCFG_JOYPAD2,
   MENU_SETTINGS_DEBUGGER,
   MENU_MISC_SCREENSHOT,
   MENU_MISC_LOGAUDIO,
@@ -164,7 +165,7 @@ struct { int width, height; }window;
 
 class MainWindow : public Window {
 public:
-uint8 frameskip;
+uint8 frameskip, frameskip_pos;
 int width, height;
   void create();
   void to_fullscreen();
@@ -256,7 +257,8 @@ bool   auto_update; //update memory window whenever visible value is written to 
 class InputConfig : public Window {
 public:
 enum {
-  JOYPAD1 = 0
+  JOYPAD1 = 0,
+  JOYPAD2
 };
 enum {
   ID_COMMAND = 100

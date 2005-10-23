@@ -15,6 +15,7 @@ uint8 cpu_version;
   virtual bool   interlace() = 0;
   virtual bool   interlace_field() = 0;
   virtual bool   overscan() = 0;
+  virtual uint16 region_scanlines() = 0;
   virtual void   set_interlace(bool r) = 0;
   virtual void   set_overscan (bool r) = 0;
 

@@ -1,7 +1,22 @@
+void bCPU::dma_add_cycles(uint32 cycles) {
+  status.dma_cycle_count += cycles;
+}
+
+void bCPU::hdma_add_cycles(uint32 cycles) {
+  if(run_state.dma) {
+    status.dma_cycle_count += cycles;
+  }
+  status.hdma_cycle_count += cycles;
+}
+
 uint32 bCPU::dma_addr(uint8 i) {
 uint32 r;
-  r  = channel[i].srcaddr;
-  r |= (channel[i].srcbank << 16);
+  r = (channel[i].srcbank << 16) | (channel[i].srcaddr);
+
+  if(channel[i].fixedxfer == false) {
+    channel[i].srcaddr += channel[i].incmode;
+  }
+
   return r;
 }
 
@@ -15,10 +30,6 @@ uint8 x;
 
   mem_bus->write(0x2100 | ((channel[i].destaddr + index) & 0xff), x);
 
-  if(channel[i].fixedxfer == false) {
-    channel[i].srcaddr += channel[i].incmode;
-  }
-
   add_cycles(8);
   channel[i].xfersize--;
 }
@@ -27,10 +38,6 @@ void bCPU::dma_mmiotocpu(uint8 i, uint8 index) {
 uint8 x;
   x = mem_bus->read(0x2100 | ((channel[i].destaddr + index) & 0xff));
   mem_bus->write(dma_addr(i), x);
-
-  if(channel[i].fixedxfer == false) {
-    channel[i].srcaddr += channel[i].incmode;
-  }
 
   add_cycles(8);
   channel[i].xfersize--;
@@ -51,7 +58,8 @@ int i;
 
   //first byte transferred?
     if(channel[i].read_index == 0) {
-      sdd1->dma_begin(i, dma_addr(i), channel[i].xfersize);
+      sdd1->dma_begin(i, (channel[i].srcbank << 16) | (channel[i].srcaddr),
+        channel[i].xfersize);
     }
 
     switch(channel[i].xfermode) {
@@ -66,6 +74,7 @@ int i;
     }
 
     channel[i].read_index++;
+    dma_add_cycles(8);
 
     if(channel[i].xfersize == 0) {
       channel[i].active = false;
@@ -78,22 +87,15 @@ int i;
 }
 
 uint32 bCPU::hdma_addr(uint8 i) {
-uint32 r;
-  r  = channel[i].hdma_addr;
-  r |= (channel[i].srcbank << 16);
-  channel[i].hdma_addr++;
-  return r;
+  return (channel[i].srcbank << 16) | (channel[i].hdma_addr++);
 }
 
 uint32 bCPU::hdma_iaddr(uint8 i) {
-uint32 r;
-  r  = channel[i].hdma_iaddr;
-  r |= (channel[i].hdma_ibank << 16);
-  channel[i].hdma_iaddr++;
-  return r;
+  return (channel[i].hdma_ibank << 16) | (channel[i].hdma_iaddr++);
 }
 
-void bCPU::hdma_write(uint8 i, uint8 l, uint8 x) {
+uint16 bCPU::hdma_mmio(uint8 i) {
+uint8  l = channel[i].read_index;
 uint16 index;
   switch(channel[i].xfermode) {
   case 0:index = 0;           break; //0
@@ -106,90 +108,118 @@ uint16 index;
   case 7:index = (l >> 1) & 1;break; //0,0,1,1 [3]
   }
 
-  index = 0x2100 | ((channel[i].destaddr + index) & 0xff);
-  mem_bus->write(index, x);
+  return (0x2100 | ((channel[i].destaddr + index) & 0xff));
+}
+
+uint8 bCPU::hdma_read(uint8 i) {
+  if(channel[i].direction == DMA_MMIOTOCPU) {
+    return mem_bus->read(hdma_mmio(i));
+  } else if(!channel[i].hdma_indirect) {
+    return mem_bus->read(hdma_addr(i));
+  } else {
+    return mem_bus->read(hdma_iaddr(i));
+  }
+}
+
+void bCPU::hdma_write(uint8 i, uint8 x) {
+  if(channel[i].direction == DMA_CPUTOMMIO) {
+    mem_bus->write(hdma_mmio(i), x);
+  } else if(!channel[i].hdma_indirect) {
+    mem_bus->write(hdma_addr(i), x);
+  } else {
+    mem_bus->write(hdma_iaddr(i), x);
+  }
+
+  add_cycles(8);
+  hdma_add_cycles(8);
+}
+
+void bCPU::hdma_update(uint8 i) {
+  channel[i].hdma_line_counter = mem_bus->read(hdma_addr(i));
+  add_cycles(8);
+  hdma_add_cycles(8);
+
+  if(channel[i].hdma_indirect) {
+    channel[i].hdma_iaddr = mem_bus->read(hdma_addr(i)) << 8;
+    add_cycles(8);
+    hdma_add_cycles(8);
+  }
+
+  if(channel[i].hdma_line_counter == 0) {
+    channel[i].hdma_active      = false;
+    channel[i].hdma_do_transfer = false;
+    return;
+  }
+
+  channel[i].hdma_do_transfer = true;
+
+  if(channel[i].hdma_indirect) {
+    channel[i].hdma_iaddr >>= 8;
+    channel[i].hdma_iaddr  |= mem_bus->read(hdma_addr(i)) << 8;
+    add_cycles(8);
+    hdma_add_cycles(8);
+  }
 }
 
 void bCPU::hdma_run() {
-int l, xferlen;
-uint8 x, active_channels = 0;
 static uint8 hdma_xferlen[8] = { 1, 2, 2, 4, 4, 4, 2, 4 };
   for(int i=0;i<8;i++) {
-    if(channel[i].hdma_active == false)continue;
+    if(!channel[i].hdma_enabled || !channel[i].hdma_active)continue;
 
-    add_cycles(8);
-    active_channels++;
-
-    if(channel[i].hdma_line_counter == 0) {
-      channel[i].hdma_line_counter = mem_bus->read(hdma_addr(i));
-
-      if(channel[i].hdma_line_counter == 0) {
-        channel[i].hdma_active = false;
-        continue;
-      }
-
-      if(channel[i].hdma_line_counter > 0x80) {
-        channel[i].hdma_repeat = true;
-        channel[i].hdma_line_counter -= 0x80;
-      } else {
-        channel[i].hdma_repeat = false;
-      }
-
-      channel[i].hdma_first_line = true;
-
-      if(channel[i].hdma_indirect == true) {
-        channel[i].hdma_iaddr  = mem_bus->read(hdma_addr(i));
-        channel[i].hdma_iaddr |= mem_bus->read(hdma_addr(i)) << 8;
-        add_cycles(16);
+    if(channel[i].hdma_do_transfer) {
+    int xferlen = hdma_xferlen[channel[i].xfermode];
+      for(channel[i].read_index=0;channel[i].read_index<xferlen;channel[i].read_index++) {
+        hdma_write(i, hdma_read(i));
       }
     }
 
     channel[i].hdma_line_counter--;
-    if(channel[i].hdma_first_line == false && channel[i].hdma_repeat == false)continue;
-    channel[i].hdma_first_line = false;
-
-    xferlen = hdma_xferlen[channel[i].xfermode];
-    for(l=0;l<xferlen;l++) {
-      if(channel[i].hdma_indirect == false) {
-        x = mem_bus->read(hdma_addr(i));
-      } else {
-        x = mem_bus->read(hdma_iaddr(i));
-      }
-
-      hdma_write(i, l, x);
-      add_cycles(8);
+    channel[i].hdma_do_transfer = !!(channel[i].hdma_line_counter & 0x80);
+    if((channel[i].hdma_line_counter & 0x7f) == 0) {
+      hdma_update(i);
     }
-  }
-
-  if(active_channels != 0) {
-    add_cycles(18);
   }
 }
 
-void bCPU::hdma_initialize() {
-uint8 active_channels = 0;
+uint8 bCPU::hdma_enabled_channels() {
+int r = 0;
   for(int i=0;i<8;i++) {
-  //does this happen when $420c channel bit is clear?
-    channel[i].hdma_addr         = channel[i].srcaddr;
-    channel[i].hdma_line_counter = 0x00;
+    if(channel[i].hdma_enabled)r++;
+  }
+  return r;
+}
 
-    if(channel[i].hdma_enabled == false) {
-      channel[i].hdma_active = false;
-      continue;
-    }
+uint8 bCPU::hdma_active_channels() {
+int r = 0;
+  for(int i=0;i<8;i++) {
+    if(channel[i].hdma_enabled && channel[i].hdma_active)r++;
+  }
+  return r;
+}
 
-    channel[i].hdma_active = true;
-    active_channels++;
+/* hdmainit_activate()
+ * hdma_activate()
+ *
+ * Functions are called by CPU timing routine
+ * when an HDMA event (init or run) occurs.
+ */
 
-    if(channel[i].hdma_indirect == false) {
-      add_cycles(8);
-    } else {
-      add_cycles(24);
-    }
+void bCPU::hdmainit_activate() {
+  for(int i=0;i<8;i++) {
+    channel[i].hdma_active      = false;
+    channel[i].hdma_do_transfer = false;
   }
 
-  if(active_channels != 0) {
-    add_cycles(18);
+  if(hdma_enabled_channels() != 0) {
+    status.hdma_state = HDMASTATE_IDMASYNC;
+    run_state.hdma = true;
+  }
+}
+
+void bCPU::hdma_activate() {
+  if(hdma_active_channels() != 0) {
+    status.hdma_state = HDMASTATE_DMASYNC;
+    run_state.hdma = true;
   }
 }
 
@@ -206,15 +236,15 @@ void bCPU::dma_reset() {
     channel[i].xfermode          = 0;
     channel[i].destaddr          = 0;
     channel[i].srcaddr           = 0;
-    channel[i].xfersize          = 0;
+    channel[i].xfersize          = 0x0000;
+  //xfersize and hdma_iaddr are of union { uint16 };
+  //channel[i].hdma_iaddr        = 0x0000;
     channel[i].hdma_ibank        = 0;
     channel[i].hdma_addr         = 0x0000;
     channel[i].hdma_line_counter = 0x00;
     channel[i].hdma_unknown      = 0x00;
 
     channel[i].hdma_active       = false;
-    channel[i].hdma_first_line   = false;
-    channel[i].hdma_repeat       = false;
-    channel[i].hdma_iaddr        = 0x0000;
+    channel[i].hdma_do_transfer  = false;
   }
 }

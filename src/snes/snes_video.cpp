@@ -10,108 +10,66 @@ const uint8 SNES::color_curve_table[32] = {
 void SNES::update_color_lookup_table() {
 int i, l, r, g, b;
 double lr = 0.2126, lg = 0.7152, lb = 0.0722; //luminance
-  switch(video.depth) {
-  case 15: //rgb565
-    for(i=0;i<32768;i++) {
-      r = (i      ) & 31;
-      g = (i >>  5) & 31;
-      b = (i >> 10) & 31;
+uint32 col;
 
-      if((bool)config::snes.video_color_curve == true) {
-        r = color_curve_table[r] >> 3;
-        g = color_curve_table[g] >> 3;
-        b = color_curve_table[b] >> 3;
-      }
+  for(i=0;i<32768;i++) {
+  //bgr555->rgb888
+    col = ((i & 0x001f) << 19) | ((i & 0x001c) << 14) |
+          ((i & 0x03e0) <<  6) | ((i & 0x0380) <<  1) |
+          ((i & 0x7c00) >>  7) | ((i & 0x7000) >> 12);
 
-      if((int)config::snes.video_color_adjust_mode == VCA_GRAYSCALE) {
-        r = (r << 3) | (r >> 2);
-        g = (g << 3) | (g >> 2);
-        b = (b << 3) | (b >> 2);
+    r = (col >> 16) & 0xff;
+    g = (col >>  8) & 0xff;
+    b = (col      ) & 0xff;
 
-        l = int((double)r * lr) + ((double)g * lg) + ((double)b * lb);
-        if(l <   0)l =   0;
-        if(l > 255)l = 255;
-        r = g = b = l;
+    if((bool)config::snes.video_color_curve == true) {
+      r = color_curve_table[r >> 3];
+      g = color_curve_table[g >> 3];
+      b = color_curve_table[b >> 3];
+    }
 
-        r >>= 3;
-        g >>= 3;
-        b >>= 3;
-      } else if((int)config::snes.video_color_adjust_mode == VCA_VGA) {
-      //rgb555->rgb332
-        r >>= 2;
-        g >>= 2;
-        b >>= 3;
+    if((int)config::snes.video_color_adjust_mode == VCA_GRAYSCALE) {
+      l = int((double)r * lr) + ((double)g * lg) + ((double)b * lb);
+      if(l <   0)l =   0;
+      if(l > 255)l = 255;
+      r = g = b = l;
+    } else if((int)config::snes.video_color_adjust_mode == VCA_VGA) {
+      r &= 0xe0;
+      g &= 0xe0;
+      b &= 0xc0;
+      r |= (r >> 3) | (r >> 6);
+      g |= (g >> 3) | (g >> 6);
+      b |= (b >> 2) | (b >> 4) | (b >> 6);
+    } else if((int)config::snes.video_color_adjust_mode == VCA_GENESIS) {
+      r &= 0xe0;
+      g &= 0xe0;
+      b &= 0xe0;
+      r |= (r >> 3) | (r >> 6);
+      g |= (g >> 3) | (g >> 6);
+      b |= (b >> 3) | (b >> 6);
+    }
 
-        r = (r << 2) | (r >> 1);
-        g = (g << 2) | (g >> 1);
-        b = (b << 3) | (b << 1) | (b >> 1);
-      } else if((int)config::snes.video_color_adjust_mode == VCA_GENESIS) {
-      //rgb555->rgb333
-        r >>= 2;
-        g >>= 2;
-        b >>= 2;
-
-        r = (r << 2) | (r >> 1);
-        g = (g << 2) | (g >> 1);
-        b = (b << 2) | (b >> 1);
-      }
-
+    switch(video.depth) {
+    case 15:
+      r >>= 3;
+      g >>= 3;
+      b >>= 3;
       color_lookup_table[i] = (r << 10) | (g << 5) | (b);
-    }
-    break;
-  case 16: //rgb565
-    for(i=0;i<32768;i++) {
-      r = (i      ) & 31;
-      g = (i >>  5) & 31;
-      b = (i >> 10) & 31;
-
-      if((bool)config::snes.video_color_curve == true) {
-        r = color_curve_table[r] >> 3;
-        g = color_curve_table[g] >> 2;
-        b = color_curve_table[b] >> 3;
-      } else {
-        g = (g << 1) | (g >> 4);
-      }
-
-      if((int)config::snes.video_color_adjust_mode == VCA_GRAYSCALE) {
-        r = (r << 3) | (r >> 2);
-        g = (g << 2) | (g >> 4);
-        b = (b << 3) | (b >> 2);
-
-        l = int((double)r * lr) + ((double)g * lg) + ((double)b * lb);
-        if(l <   0)l =   0;
-        if(l > 255)l = 255;
-        r = g = b = l;
-
-        r >>= 3;
-        g >>= 2;
-        b >>= 3;
-      } else if((int)config::snes.video_color_adjust_mode == VCA_VGA) {
-      //rgb565->rgb332
-        r >>= 2;
-        g >>= 3;
-        b >>= 3;
-
-        r = (r << 2) | (r >> 1);
-        g = (g << 3) | (g);
-        b = (b << 3) | (b << 1) | (b >> 1);
-      } else if((int)config::snes.video_color_adjust_mode == VCA_GENESIS) {
-      //rgb565->rgb333
-        r >>= 2;
-        g >>= 3;
-        b >>= 2;
-
-        r = (r << 2) | (r >> 1);
-        g = (g << 3) | (g);
-        b = (b << 2) | (b >> 1);
-      }
-
+      break;
+    case 16:
+      r >>= 3;
+      g >>= 2;
+      b >>= 3;
       color_lookup_table[i] = (r << 11) | (g << 5) | (b);
+      break;
+    case 24:
+    case 32:
+      color_lookup_table[i] = (r << 16) | (g << 8) | (b);
+      break;
+    default:
+      alert("Error: SNES::update_color_lookup_table() -- color depth %d not supported", video.depth);
+      break;
     }
-    break;
-  default:
-    alert("Error: SNES::update_color_lookup_table() -- color depth %d not supported", video.depth);
-    break;
   }
 }
 
@@ -305,32 +263,32 @@ bool field = !cpu->interlace_field();
 }
 
 void SNES::video_update() {
-  if(!ppu->render_frame())return;
-
-  if(video.format_changed == true) {
-    update_video_format();
-  }
-
-uint16 *src = (uint16*)video.ppu_data + ((int(cpu->overscan()) << 3) * 1024);
-  switch(video.mode) {
-  case VM_256x224:video_update_256x224(src);break;
-  case VM_512x224:video_update_512x224(src);break;
-  case VM_256x448:video_update_256x448(src);break;
-  case VM_512x448:video_update_512x448(src);break;
-  case VM_VARIABLE:
-    switch(int(video.frame_hires) | (int(video.frame_interlace) << 1)) {
-    case 0:video_update_256x224(src);break;
-    case 1:video_update_512x224(src);break;
-    case 2:video_update_256x448(src);break;
-    case 3:video_update_512x448(src);break;
+  if(ppu->renderer_enabled()) {
+    if(video.format_changed == true) {
+      update_video_format();
     }
-    break;
-  }
 
-//SNES::capture_screenshot() was called by emulation interface
-  if(flag_output_screenshot == true) {
-    output_screenshot();
-    flag_output_screenshot = false;
+  uint16 *src = (uint16*)video.ppu_data + ((int(cpu->overscan()) << 3) * 1024);
+    switch(video.mode) {
+    case VM_256x224:video_update_256x224(src);break;
+    case VM_512x224:video_update_512x224(src);break;
+    case VM_256x448:video_update_256x448(src);break;
+    case VM_512x448:video_update_512x448(src);break;
+    case VM_VARIABLE:
+      switch(int(video.frame_hires) | (int(video.frame_interlace) << 1)) {
+      case 0:video_update_256x224(src);break;
+      case 1:video_update_512x224(src);break;
+      case 2:video_update_256x448(src);break;
+      case 3:video_update_512x448(src);break;
+      }
+      break;
+    }
+
+  //SNES::capture_screenshot() was called by emulation interface
+    if(flag_output_screenshot == true) {
+      output_screenshot();
+      flag_output_screenshot = false;
+    }
   }
 
   video_run();

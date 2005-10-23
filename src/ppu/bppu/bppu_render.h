@@ -35,17 +35,18 @@ uint8 *bg_tiledata_state[3];
 
 void render_bg_tile(uint8 color_depth, uint16 tile_num);
 inline void clear_pixel_cache();
-void init_tiledata_cache();
-void clear_tiledata_cache();
+inline void init_tiledata_cache();
+inline void clear_tiledata_cache();
 
 //bppu_render_windows.cpp
-uint8 main_windowtable[5][512],   sub_windowtable[5][512],
-      main_colorwindowtable[512], sub_colorwindowtable[512];
+struct _window {
+  bool  main_dirty, sub_dirty;
+  uint8 main[512],  sub[512];
+} window_cache[6];
 
-void build_window_table(uint8 bg, uint8 *wtbl, bool mainscreen);
+void build_window_table(uint8 bg, bool mainscreen);
 void build_window_tables(uint8 bg);
-void build_color_window_table(uint8 *wtbl, uint8 mask);
-void build_color_window_tables();
+inline void clear_window_cache();
 
 //bppu_render_bg.cpp
 void render_line_bg(uint8 bg, uint8 color_depth, uint8 pri0_pos, uint8 pri1_pos);

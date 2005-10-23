@@ -114,7 +114,23 @@ void bSNES::run() {
 }
 
 void bSNES::video_run() {
-  dd_renderer->update();
+  if(ppu->status.frames_updated) {
+  char s[512], t[512];
+    ppu->status.frames_updated = false;
+    if((bool)config::gui.show_fps == true) {
+      sprintf(s, "%s : %d fps", BSNES_TITLE, ppu->status.frames_executed);
+      if(w_main->frameskip != 0) {
+        sprintf(t, " (%d frames)", ppu->status.frames_rendered);
+        strcat(s, t);
+      }
+      SetWindowText(w_main->hwnd, s);
+    }
+  }
+
+  w_main->frameskip_pos++;
+  w_main->frameskip_pos %= (w_main->frameskip + 1);
+  if(ppu->renderer_enabled())dd_renderer->update();
+  ppu->enable_renderer(w_main->frameskip_pos == 0);
 }
 
 void bSNES::sound_run() {
@@ -124,30 +140,58 @@ void bSNES::sound_run() {
 /***********************
  *** Input functions ***
  ***********************/
-void bSNES::poll_input() {
+void bSNES::poll_input(uint8 type) {
 //only capture input when main window has focus
   if(GetForegroundWindow() == w_main->hwnd) {
-    joypad1.up     = KeyDown(config::input.joypad1.up);
-    joypad1.down   = KeyDown(config::input.joypad1.down);
-    joypad1.left   = KeyDown(config::input.joypad1.left);
-    joypad1.right  = KeyDown(config::input.joypad1.right);
-    joypad1.select = KeyDown(config::input.joypad1.select);
-    joypad1.start  = KeyDown(config::input.joypad1.start);
-    joypad1.y      = KeyDown(config::input.joypad1.y);
-    joypad1.b      = KeyDown(config::input.joypad1.b);
-    joypad1.x      = KeyDown(config::input.joypad1.x);
-    joypad1.a      = KeyDown(config::input.joypad1.a);
-    joypad1.l      = KeyDown(config::input.joypad1.l);
-    joypad1.r      = KeyDown(config::input.joypad1.r);
+    switch(type) {
+    case SNES::DEV_JOYPAD1:
+      joypad1.up     = KeyDown(config::input.joypad1.up);
+      joypad1.down   = KeyDown(config::input.joypad1.down);
+      joypad1.left   = KeyDown(config::input.joypad1.left);
+      joypad1.right  = KeyDown(config::input.joypad1.right);
+      joypad1.select = KeyDown(config::input.joypad1.select);
+      joypad1.start  = KeyDown(config::input.joypad1.start);
+      joypad1.y      = KeyDown(config::input.joypad1.y);
+      joypad1.b      = KeyDown(config::input.joypad1.b);
+      joypad1.x      = KeyDown(config::input.joypad1.x);
+      joypad1.a      = KeyDown(config::input.joypad1.a);
+      joypad1.l      = KeyDown(config::input.joypad1.l);
+      joypad1.r      = KeyDown(config::input.joypad1.r);
+      break;
+    case SNES::DEV_JOYPAD2:
+      joypad2.up     = KeyDown(config::input.joypad2.up);
+      joypad2.down   = KeyDown(config::input.joypad2.down);
+      joypad2.left   = KeyDown(config::input.joypad2.left);
+      joypad2.right  = KeyDown(config::input.joypad2.right);
+      joypad2.select = KeyDown(config::input.joypad2.select);
+      joypad2.start  = KeyDown(config::input.joypad2.start);
+      joypad2.y      = KeyDown(config::input.joypad2.y);
+      joypad2.b      = KeyDown(config::input.joypad2.b);
+      joypad2.x      = KeyDown(config::input.joypad2.x);
+      joypad2.a      = KeyDown(config::input.joypad2.a);
+      joypad2.l      = KeyDown(config::input.joypad2.l);
+      joypad2.r      = KeyDown(config::input.joypad2.r);
+      break;
+    }
   } else {
-    joypad1.up = joypad1.down = joypad1.left = joypad1.right =
-    joypad1.select = joypad1.start =
-    joypad1.y = joypad1.b = joypad1.x = joypad1.a =
-    joypad1.l = joypad1.r = 0;
+    switch(type) {
+    case SNES::DEV_JOYPAD1:
+      joypad1.up = joypad1.down = joypad1.left = joypad1.right =
+      joypad1.select = joypad1.start =
+      joypad1.y = joypad1.b = joypad1.x = joypad1.a =
+      joypad1.l = joypad1.r = 0;
+      break;
+    case SNES::DEV_JOYPAD2:
+      joypad2.up = joypad2.down = joypad2.left = joypad2.right =
+      joypad2.select = joypad2.start =
+      joypad2.y = joypad2.b = joypad2.x = joypad2.a =
+      joypad1.l = joypad2.r = 0;
+      break;
+    }
   }
 
 //check for debugger-based key locks
-  if(is_debugger_enabled == true) {
+  if(is_debugger_enabled == true && type == SNES::DEV_JOYPAD1) {
     if(w_console->joypad_lock.up    )joypad1.up     = true;
     if(w_console->joypad_lock.down  )joypad1.down   = true;
     if(w_console->joypad_lock.left  )joypad1.left   = true;
@@ -167,6 +211,9 @@ void bSNES::poll_input() {
 //this to happen causes glitches in many SNES games.
   if(joypad1.up)  joypad1.down  = 0;
   if(joypad1.left)joypad1.right = 0;
+
+  if(joypad2.up)  joypad2.down  = 0;
+  if(joypad2.left)joypad2.right = 0;
 }
 
 bool bSNES::get_input_status(uint8 device, uint8 button) {
@@ -187,7 +234,24 @@ bool bSNES::get_input_status(uint8 device, uint8 button) {
     case JOYPAD_START: return joypad1.start;
     }
     break;
+  case DEV_JOYPAD2:
+    switch(button) {
+    case JOYPAD_UP:    return joypad2.up;
+    case JOYPAD_DOWN:  return joypad2.down;
+    case JOYPAD_LEFT:  return joypad2.left;
+    case JOYPAD_RIGHT: return joypad2.right;
+    case JOYPAD_A:     return joypad2.a;
+    case JOYPAD_B:     return joypad2.b;
+    case JOYPAD_X:     return joypad2.x;
+    case JOYPAD_Y:     return joypad2.y;
+    case JOYPAD_L:     return joypad2.l;
+    case JOYPAD_R:     return joypad2.r;
+    case JOYPAD_SELECT:return joypad2.select;
+    case JOYPAD_START: return joypad2.start;
+    }
+    break;
   }
+
   return 0;
 }
 

@@ -63,7 +63,7 @@ struct Status {
   int8   FIR[8];
 
 //internal variables
-  uint8  kon;
+//uint8  kon;
   bool   key_flag;
 
   int16  noise_ctr, noise_rate;

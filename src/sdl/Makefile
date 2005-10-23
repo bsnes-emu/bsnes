@@ -1,5 +1,5 @@
 CC = c++
-CFLAGS = -O2
+CFLAGS = -O3 -fomit-frame-pointer -ffast-math
 OBJS = sdlmain.o \
        libstring.o libconfig.o \
        reader.o \

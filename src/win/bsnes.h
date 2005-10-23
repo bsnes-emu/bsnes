@@ -43,7 +43,7 @@ enum { DRAM = 0, SPCRAM = 1, VRAM = 2, OAM = 3, CGRAM = 4 };
   uint32 get_status();
 
 //input functions
-  void poll_input();
+  void poll_input(uint8 type);
   bool get_input_status(uint8 device, uint8 button);
 
 //debugging functions
