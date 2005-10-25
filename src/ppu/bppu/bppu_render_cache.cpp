@@ -3,6 +3,7 @@
   if(d0 & __m)col += 1; \
   if(d1 & __m)col += 2; \
   *dest++ = col
+
 #define render_bg_tile_line_16(__m) \
   col = 0;              \
   if(d0 & __m)col += 1; \
@@ -10,6 +11,7 @@
   if(d2 & __m)col += 4; \
   if(d3 & __m)col += 8; \
   *dest++ = col
+
 #define render_bg_tile_line_256(__m) \
   col = 0;                \
   if(d0 & __m)col +=   1; \
@@ -95,6 +97,10 @@ uint8 *dest;
     break;
   }
 }
+
+#undef render_bg_tile_line_4
+#undef render_bg_tile_line_16
+#undef render_bg_tile_line_256
 
 inline void bPPU::clear_pixel_cache() {
   memset(pixel_cache, 0, sizeof(pixel_cache));

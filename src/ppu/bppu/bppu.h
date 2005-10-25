@@ -15,7 +15,15 @@ uint8  region;
 
 enum { NTSC = 0, PAL = 1 };
 enum { BG1 = 0, BG2 = 1, BG3 = 2, BG4 = 3, OAM = 4, BACK = 5, COL = 5 };
-enum { SC_32x32 = 0, SC_32x64 = 1, SC_64x32 = 2, SC_64x64 = 3 };
+enum { SC_32x32 = 0, SC_64x32 = 1, SC_32x64 = 2, SC_64x64 = 3 };
+
+struct {
+  uint32 y;
+  uint32 width;
+  bool   hires;
+  bool   interlace;
+  bool   interlace_field;
+} line;
 
 struct sprite_item {
   uint8  width, height;

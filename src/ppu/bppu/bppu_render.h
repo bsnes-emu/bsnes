@@ -1,8 +1,4 @@
 //bppu_render.cpp
-int  _screen_width;
-bool _interlace;
-int  _interlace_field;
-
 inline void render_line_mode0();
 inline void render_line_mode1();
 inline void render_line_mode2();
@@ -49,6 +45,13 @@ void build_window_tables(uint8 bg);
 inline void clear_window_cache();
 
 //bppu_render_bg.cpp
+struct {
+  uint16 tw, th; //tile width, height
+  uint16 mx, my; //screen mask x, y
+} bg_info[4];
+
+inline void   update_bg_info();
+inline uint16 bg_get_tile(uint8 bg, uint16 x, uint16 y);
 void render_line_bg(uint8 bg, uint8 color_depth, uint8 pri0_pos, uint8 pri1_pos);
 
 //bppu_render_oam.cpp

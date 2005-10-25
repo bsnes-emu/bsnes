@@ -28,29 +28,18 @@ void bCPU::run() {
     return;
   }
 
-  if(run_state.irq) {
-    irq_run();
-    return;
-  }
-
-  if(run_state.stp) {
-    exec_cycle();
-    return;
-  }
-
   if(status.cycle_pos == 0) {
   //interrupts only trigger on opcode edges
-    if(time.nmi_pending == true) {
-      time.nmi_pending = false;
-      aa.w = 0xffea;
-      run_state.irq = true;
-      return;
-    }
-    if(time.irq_pending == true) {
-      time.irq_pending = false;
-      aa.w = 0xffee;
-      run_state.irq = true;
-      return;
+    if(!run_state.irq && !run_state.stp) {
+      if(time.nmi_pending == true) {
+        time.nmi_pending = false;
+        aa.w = 0xffea;
+        run_state.irq = true;
+      } else if(time.irq_pending == true) {
+        time.irq_pending = false;
+        aa.w = 0xffee;
+        run_state.irq = true;
+      }
     }
   }
 

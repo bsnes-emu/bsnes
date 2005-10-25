@@ -21,7 +21,6 @@ uint8 ppu1_version;
 //* reported by $213f
 uint8 ppu2_version;
 
-int   _y;
 MMIO *mmio;
 
 struct scanline_info {

@@ -5,18 +5,19 @@
 void bPPU::run() {}
 
 void bPPU::scanline() {
-  _y               = cpu->vcounter();
-  _screen_width    = (regs.bg_mode == 5 || regs.bg_mode == 6) ? 512 : 256;
-  _interlace       = cpu->interlace();
-  _interlace_field = cpu->interlace_field();
+  line.y               = cpu->vcounter();
+  line.width           = (regs.bg_mode == 5 || regs.bg_mode == 6) ? 512 : 256;
+  line.hires           = (regs.bg_mode == 5 || regs.bg_mode == 6);
+  line.interlace       = cpu->interlace();
+  line.interlace_field = cpu->interlace_field();
 
-  if(_y == 0) {
+  if(line.y == 0) {
   //RTO flag reset
     regs.time_over  = false;
     regs.range_over = false;
   }
 
-  if(_y == 1) {
+  if(line.y == 1) {
   //OAM FirstSprite priority set
     if(regs.oam_priority == true) {
       regs.oam_firstsprite = (regs.oam_addr & 0xfe) >> 1;
@@ -25,7 +26,7 @@ void bPPU::scanline() {
     }
   }
 
-  if(_y == (cpu->overscan() ? 239 : 224) && regs.display_disabled == false) {
+  if(line.y == (cpu->overscan() ? 239 : 224) && regs.display_disabled == false) {
   //OAM address reset
     regs.oam_addr = ((regs.oam_addrh << 8) | regs.oam_addrl) << 1;
   }
@@ -34,7 +35,7 @@ void bPPU::scanline() {
 void bPPU::render_scanline() {
   if(status.render_output == false)return;
 
-  if(_y > 0 && _y < (cpu->overscan() ? 239 : 224)) {
+  if(line.y > 0 && line.y < (cpu->overscan() ? 239 : 224)) {
     render_line();
   }
 }
@@ -252,7 +253,7 @@ void bPPU::reset() {
   regs.time_over  = false;
   regs.range_over = false;
 
-  _screen_width = 256; //needed for clear_window_cache()
+  line.width = 256; //needed for clear_window_cache()
   update_sprite_list_sizes();
   clear_tiledata_cache();
   clear_window_cache();

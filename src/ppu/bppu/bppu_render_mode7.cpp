@@ -43,9 +43,9 @@ uint8 *wt_main = window_cache[bg].main;
 uint8 *wt_sub  = window_cache[bg].sub;
 
   if(regs.mode7_vflip == true) {
-    y = 255 - _y;
+    y = 255 - line.y;
   } else {
-    y = _y;
+    y = line.y;
   }
 
 uint16 *mtable_x, *mtable_y;

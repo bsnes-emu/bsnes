@@ -141,6 +141,12 @@ static int z;
 }
 
 void bCPU::exec_cycle() {
+//irq active? run one bus cycle of the irq event and return
+  if(run_state.irq) {
+    irq_run();
+    return;
+  }
+
 //on first cycle?
   if(status.cycle_pos == 0) {
     snes->notify(SNES::CPU_EXEC_OPCODE_BEGIN);

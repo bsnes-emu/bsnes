@@ -90,18 +90,18 @@ uint16 addr = 0x0200;
 bool bPPU::is_sprite_on_scanline() {
 //if sprite is entirely offscreen and doesn't wrap around to the left side of the screen,
 //then it is not counted. 256 is correct, and not 255 -- as one might first expect
-  if(spr->x > 256 && (spr->x + spr->width) < 512 && _screen_width != 512)return false;
+  if(spr->x > 256 && (spr->x + spr->width) < 512 && line.width != 512)return false;
 
   if(regs.oam_halve == false) {
-    if(_y >= spr->y && _y < (spr->y + spr->height)) {
+    if(line.y >= spr->y && line.y < (spr->y + spr->height)) {
       return true;
-    } else if((spr->y + spr->height) >= 256 && _y < ((spr->y + spr->height) & 255)) {
+    } else if((spr->y + spr->height) >= 256 && line.y < ((spr->y + spr->height) & 255)) {
       return true;
     }
   } else {
-    if(_y >= spr->y && _y < (spr->y + (spr->height >> 1))) {
+    if(line.y >= spr->y && line.y < (spr->y + (spr->height >> 1))) {
       return true;
-    } else if((spr->y + (spr->height >> 1)) >= 256 && _y < ((spr->y + (spr->height >> 1)) & 255)) {
+    } else if((spr->y + (spr->height >> 1)) >= 256 && line.y < ((spr->y + (spr->height >> 1)) & 255)) {
       return true;
     }
   }
@@ -115,21 +115,21 @@ uint16 tile_width;
 
 int x, y, chr, nameselect_index;
   x = spr->x;
-  if(_screen_width == 512)x <<= 1;
+  if(line.width == 512)x <<= 1;
   x &= 511;
 
   if(spr->vflip) {
-    y = ((spr->height - 1) - (_y - spr->y));
+    y = ((spr->height - 1) - (line.y - spr->y));
   } else {
-    y = (_y - spr->y);
+    y = (line.y - spr->y);
   }
 //todo: double-check code below. seems that interlace_field
 //should be added to hires 512x448 sprites as well, and not
 //just when oam_halve is enabled...
   if(regs.oam_halve == true) {
     y <<= 1;
-    if(_interlace == true && _screen_width == 512) {
-      y += _interlace_field;
+    if(line.interlace && line.width == 512) {
+      y += line.interlace_field;
     }
   }
   y &= 255;
@@ -146,11 +146,11 @@ int x, y, chr, nameselect_index;
 int i, n, mx, pos, z;
   for(i=0;i<tile_width;i++) {
     z  = x;
-    z += (i << ((_screen_width == 512)?4:3));
+    z += (i << ((line.width == 512) ? 4 : 3));
     z &= 511;
   //ignore sprites that are offscreen
   //sprites at 256 are still counted, even though they aren't visible onscreen
-    if(z >= 257 && (z + 7) < 512 && _screen_width != 512)continue;
+    if(z >= 257 && (z + 7) < 512 && line.width != 512)continue;
 
     if(regs.oam_tilecount++ > 34)break;
     n = regs.oam_tilecount - 1;
@@ -186,19 +186,19 @@ int x, sx, col;
   tile_ptr = (uint8*)oam_td + (t->tile << 6) + ((t->y & 7) << 3);
   for(x=0;x<8;x++) {
     sx &= 511;
-    if(sx < _screen_width) {
+    if(sx < line.width) {
       col = *(tile_ptr + ((t->hflip)?7-x:x));
       if(col) {
         col += t->pal;
         oam_line_pal[sx] = col;
         oam_line_pri[sx] = t->pri;
-        if(_screen_width == 512) {
+        if(line.width == 512) {
           oam_line_pal[sx + 1] = col;
           oam_line_pri[sx + 1] = t->pri;
         }
       }
     }
-    sx += (_screen_width == 512)?2:1;
+    sx += (line.width == 512) ? 2 : 1;
   }
 }
 
@@ -242,7 +242,7 @@ uint8 *wt_sub  = window_cache[OAM].sub;
   if(_bg_enabled == false && _bgsub_enabled == false)return;
 
 int _pri;
-  for(x=0;x<_screen_width;x++) {
+  for(x=0;x<line.width;x++) {
     if(oam_line_pri[x] == OAM_PRI_NONE)continue;
 
     switch(oam_line_pri[x]) {

@@ -1,4 +1,4 @@
-#define BSNES_VERSION "0.013"
+#define BSNES_VERSION "0.013 wip2"
 #define BSNES_TITLE "bsnes v" BSNES_VERSION
 
 #include "reader/reader.h"

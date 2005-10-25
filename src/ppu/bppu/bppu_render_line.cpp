@@ -67,7 +67,7 @@ uint16 *ptr;
 uint16 *ltable;
   ltable = (uint16*)light_table + (regs.display_brightness << 15);
 
-  if(_screen_width == 256) {
+  if(line.width == 256) {
     for(x=0;x<256;x++) {
       _r = get_pixel(x);
       *ptr++ = *(ltable + _r);

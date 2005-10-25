@@ -9,11 +9,11 @@ uint8 *wtbl;
 
   if(bg != COL) {
     if(mainscreen == true && regs.window_enabled[bg] == false) {
-      memset(wtbl, 0, _screen_width);
+      memset(wtbl, 0, line.width);
       return;
     }
     if(mainscreen == false && regs.sub_window_enabled[bg] == false) {
-      memset(wtbl, 0, _screen_width);
+      memset(wtbl, 0, line.width);
       return;
     }
   } else {
@@ -26,13 +26,13 @@ uint8 *wtbl;
 
     if(mask == 0) {
     //always
-      memset(wtbl, 1, _screen_width);
+      memset(wtbl, 1, line.width);
       return;
     }
 
     if(mask == 3) {
     //never
-      memset(wtbl, 0, _screen_width);
+      memset(wtbl, 0, line.width);
       return;
     }
 
@@ -56,7 +56,7 @@ bool   r;
   window2_left  = regs.window2_left;
   window2_right = regs.window2_right;
 
-  if(_screen_width == 512) {
+  if(line.width == 512) {
     window1_left  <<= 1;
     window1_right <<= 1;
     window2_left  <<= 1;
@@ -64,29 +64,29 @@ bool   r;
   }
 
   if(regs.window1_enabled[bg] == false && regs.window2_enabled[bg] == false) {
-    memset(wtbl, clr, _screen_width);
+    memset(wtbl, clr, line.width);
   } else if(regs.window1_enabled[bg] == true && regs.window2_enabled[bg] == false) {
     if(regs.window1_invert[bg] == false) {
-      for(x=0;x<_screen_width;x++) {
+      for(x=0;x<line.width;x++) {
         wtbl[x] = (x >= window1_left && x <= window1_right) ? set : clr;
       }
     } else {
-      for(x=0;x<_screen_width;x++) {
+      for(x=0;x<line.width;x++) {
         wtbl[x] = (x <  window1_left || x >  window1_right) ? set : clr;
       }
     }
   } else if(regs.window1_enabled[bg] == false && regs.window2_enabled[bg] == true) {
     if(regs.window2_invert[bg] == false) {
-      for(x=0;x<_screen_width;x++) {
+      for(x=0;x<line.width;x++) {
         wtbl[x] = (x >= window2_left && x <= window2_right) ? set : clr;
       }
     } else {
-      for(x=0;x<_screen_width;x++) {
+      for(x=0;x<line.width;x++) {
         wtbl[x] = (x <  window2_left || x >  window2_right) ? set : clr;
       }
     }
   } else { //if(regs.window1_enabled[bg] == true && regs.window2_enabled[bg] == true) {
-    for(x=0;x<_screen_width;x++) {
+    for(x=0;x<line.width;x++) {
       if(regs.window1_invert[bg] == false) {
         w1_mask = (x >= window1_left && x <= window1_right);
       } else {
