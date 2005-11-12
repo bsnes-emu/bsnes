@@ -6,11 +6,7 @@ void bSNES::run() {
 
   switch(run_status) {
   case RUN:
-    while(update_frame == false) {
-      SNES::run();
-    }
-    update_frame = false;
-    render();
+    SNES::runtoframe();
     return;
   case STOP:
     break;
@@ -18,13 +14,13 @@ void bSNES::run() {
 }
 
 void bSNES::video_run() {
-  if(ppu->status.frames_updated) {
+  if(r_ppu->status.frames_updated) {
   char s[512], t[512];
-    ppu->status.frames_updated = false;
+    r_ppu->status.frames_updated = false;
 //  if((bool)config::gui.show_fps == true) {
-      sprintf(s, "%s : %d fps", BSNES_TITLE, ppu->status.frames_executed);
+      sprintf(s, "%s : %d fps", BSNES_TITLE, r_ppu->status.frames_executed);
 //    if(w_main->frameskip != 0) {
-//      sprintf(t, " (%d frames)", ppu->status.frames_rendered);
+//      sprintf(t, " (%d frames)", r_ppu->status.frames_rendered);
 //      strcat(s, t);
 //    }
       SDL_WM_SetCaption(s, 0);
@@ -34,7 +30,28 @@ void bSNES::video_run() {
   render();
 }
 
-void bSNES::sound_run() {}
+void bSNES::sound_run(uint32 data) {}
+
+uint16 *bSNES::video_lock(uint32 &pitch) {
+  if(SDL_MUSTLOCK(screen)) {
+    SDL_LockSurface(screen);
+  }
+  if(SDL_MUSTLOCK(backbuffer)) {
+    SDL_LockSurface(backbuffer);
+  }
+
+  pitch = backbuffer->pitch;
+  return (uint16*)backbuffer->pixels;
+}
+
+void bSNES::video_unlock() {
+  if(SDL_MUSTLOCK(backbuffer)) {
+    SDL_UnlockSurface(backbuffer);
+  }
+  if(SDL_MUSTLOCK(screen)) {
+    SDL_UnlockSurface(screen);
+  }
+}
 
 /***********************
  *** Input functions ***
@@ -93,15 +110,8 @@ bJoypad::bJoypad() {
   l = r = select = start = false;
 }
 
-void bSNES::notify(uint32 message, uint32 param1, uint32 param2) {
-  switch(message) {
-  case RENDER_FRAME:
-    update_frame = true;
-    break;
-  }
-}
+void bSNES::notify(uint32 message, uint32 param1, uint32 param2) {}
 
 bSNES::bSNES() {
-  run_status   = STOP;
-  update_frame = false;
+  run_status = STOP;
 }

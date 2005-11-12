@@ -69,5 +69,6 @@ inline uint8  dma_counter();
 
 inline void   inc_vcounter();
 inline uint16 get_hcounter();
+inline void   cycle_edge();
 inline void   add_cycles(int cycles);
 inline void   time_reset();

@@ -127,6 +127,7 @@ struct {
 
 //$2132
   uint8  color_r, color_g, color_b;
+  uint16 color_rgb;
 
 //$2133
   bool   mode7_extbg;

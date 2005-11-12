@@ -154,7 +154,7 @@ HDC hdc;
       break;
     case MEMORYEDITOR_FEXPORT:
       pos = SendDlgItemMessage(hwnd, MEMORYEDITOR_FSOURCE, CB_GETCURSEL, 0, 0);
-      w_memory->export(pos);
+      w_memory->export_data(pos);
       break;
     case MEMORYEDITOR_AUTOUPDATE:
       if(w_memory->auto_update == false) {
@@ -186,7 +186,7 @@ HDC hdc;
   return DefWindowProc(hwnd, msg, wparam, lparam);
 }
 
-void MemoryEditor::export(uint32 type) {
+void MemoryEditor::export_data(uint32 type) {
 FILE *fp;
 int i, x;
   if(type == 0) { //DRAM
@@ -233,12 +233,12 @@ int i, x;
     }
     fclose(fp);
   } else if(type == 6) { //All
-    export(0);
-    export(1);
-    export(2);
-    export(3);
-    export(4);
-    export(5);
+    export_data(0);
+    export_data(1);
+    export_data(2);
+    export_data(3);
+    export_data(4);
+    export_data(5);
   }
 }
 

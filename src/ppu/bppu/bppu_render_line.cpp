@@ -11,71 +11,59 @@ inline uint16 bPPU::get_direct_color(uint8 p, uint8 t) {
     ((t >> 6) << 13) | ((p >> 2) << 12);
 }
 
-inline uint16 bPPU::get_pixel(int x) {
+inline uint16 bPPU::get_pixel(uint32 x) {
 _pixel *p = &pixel_cache[x];
-uint16 _r, src_back = get_palette(0);
-  if(p->bg_main && p->bg_sub) {
-    if(p->color_exempt == false && regs.color_enabled[p->bg_main & 0x7f] && window_cache[COL].sub[x]) {
-      if(regs.addsub_mode) {
-        _r = addsub_pixels(p->src_main, p->src_sub);
-      } else {
-        _r = addsub_pixel(p->src_main);
-      }
-    } else {
-      _r = p->src_main;
-    }
-  } else if(p->bg_main) {
-    if(p->color_exempt == false && regs.color_enabled[p->bg_main & 0x7f] && window_cache[COL].sub[x]) {
-      _r = addsub_pixel(p->src_main);
-    } else {
-      _r = p->src_main;
-    }
-  } else if(p->bg_sub) {
-    if(regs.color_enabled[BACK]) {
-      if(window_cache[COL].sub[x]) {
-        if(regs.addsub_mode) {
-          _r = addsub_pixels(src_back, p->src_sub);
-        } else {
-          _r = addsub_pixel(src_back);
-        }
-      } else {
-        _r = src_back;
-      }
-    } else {
-      _r = src_back; //was 0x0000 -- possibly another condition here?
-    }
+  if(!p->bg_main) {
+    p->bg_main      = BACK;
+    p->src_main     = get_palette(0);
+    p->color_exempt = false;
   } else {
-    if(window_cache[COL].main[x]) {
-      if(regs.color_enabled[BACK] && window_cache[COL].sub[x]) {
-        _r = addsub_pixel(src_back);
-      } else {
-        _r = src_back;
-      }
-    } else {
-      _r = 0x0000;
-    }
+    p->bg_main &= 0x7f;
   }
-  return _r;
+
+  if(!p->bg_sub) {
+    p->bg_sub  = BACK;
+    p->src_sub = regs.color_rgb;
+  } else {
+    p->bg_sub &= 0x7f;
+  }
+
+  if(!regs.addsub_mode) {
+    p->bg_sub  = BACK;
+    p->src_sub = regs.color_rgb;
+  }
+
+  if(!window_cache[COL].main[x]) {
+    if(!window_cache[COL].sub[x]) {
+      return 0x0000;
+    }
+  //p->bg_main remains the same, even when the main color window
+  //masks out the color. this is needed for regs.color_enabled[p->bg_main]
+  //test below. illusion of gaia relies on this behavior for its load menu.
+    p->src_main = 0x0000;
+  }
+
+  if(!p->color_exempt && regs.color_enabled[p->bg_main] && window_cache[COL].sub[x]) {
+    return addsub_pixels(x);
+  }
+  return p->src_main;
 }
 
 inline void bPPU::render_line_output() {
-int x;
-uint16 _r;
-uint16 *ptr;
-  ptr = (uint16*)snes->get_ppu_output_handle();
-
-uint16 *ltable;
-  ltable = (uint16*)light_table + (regs.display_brightness << 15);
+uint16 r, x;
+uint16 *ptr    = (uint16*)output + (line.y * 1024) +
+                 ((line.interlace && line.interlace_field) ? 512 : 0);
+uint16 *ltable = (uint16*)light_table + (regs.display_brightness << 15);
 
   if(line.width == 256) {
     for(x=0;x<256;x++) {
-      _r = get_pixel(x);
-      *ptr++ = *(ltable + _r);
+      r = get_pixel(x);
+      *ptr++ = *(ltable + r);
     }
   } else {
     for(x=0;x<512;x++) {
-      _r = get_pixel(x);
-      *ptr++ = *(ltable + _r);
+      r = get_pixel(x);
+      *ptr++ = *(ltable + r);
     }
   }
 }

@@ -1,18 +1,22 @@
 void bAPU::exec_cycle() {
-uint8 op;
-  if(status.cycle_pos == 0) {
-    op = spcram_read(regs.pc);
-    snes->notify(SNES::APU_EXEC_OPCODE_BEGIN);
-    status.opcode = op_read();
-    status.cycle_pos = 1;
-    add_cycles(1);
-  } else {
+  if(status.cycle_pos) {
     (this->*optbl[status.opcode])();
     add_cycles(1);
     if(status.cycle_pos == 0) {
+    #ifdef DEBUGGER
       snes->notify(SNES::APU_EXEC_OPCODE_END);
+    #endif
     }
+    return;
   }
+
+//on first cycle?
+#ifdef DEBUGGER
+  snes->notify(SNES::APU_EXEC_OPCODE_BEGIN);
+#endif
+  status.opcode = op_read();
+  status.cycle_pos = 1;
+  add_cycles(1);
 }
 
 //only return true when we are on an opcode edge

@@ -11,7 +11,6 @@ uint Setting::get() {
 }
 
 void Setting::set(uint _data) {
-printf("%s %d\n", name, _data);
   data = _data;
 
   if(type != DEC && type != HEX) {

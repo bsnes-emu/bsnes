@@ -1,5 +1,10 @@
 namespace config {
 
+struct System {
+  static Setting regulate_speed;
+} system;
+Setting System::regulate_speed(&config_file, "system.regulate_speed", "Regulate speed to 60hz (NTSC) / 50hz (PAL)", true, Setting::TRUE_FALSE);
+
 struct Video {
   static Setting mode, use_vram, vblank;
 } video;

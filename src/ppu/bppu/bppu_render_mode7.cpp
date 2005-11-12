@@ -120,29 +120,27 @@ int32 psy = ((c * CLIP(hofs - cx)) & ~63) + ((d * CLIP(vofs - cy)) & ~63) + ((d 
       _x = x;
     }
 
-    if(window_cache[COL].main[_x]) {
-    uint32 col;
-      if(regs.direct_color == true && bg == BG1) {
-      //direct color mode does not apply to bg2, as it is only 128 colors...
-        col = get_direct_color(0, palette);
-      } else {
-        col = get_palette(palette);
-      }
+  uint32 col;
+    if(regs.direct_color == true && bg == BG1) {
+    //direct color mode does not apply to bg2, as it is only 128 colors...
+      col = get_direct_color(0, palette);
+    } else {
+      col = get_palette(palette);
+    }
 
-      if(regs.bg_enabled[bg] == true && !wt_main[_x]) {
-        if(pixel_cache[_x].pri_main < _pri) {
-          pixel_cache[_x].pri_main = _pri;
-          pixel_cache[_x].bg_main  = 0x80 | bg;
-          pixel_cache[_x].src_main = col;
-          pixel_cache[_x].color_exempt = false;
-        }
+    if(regs.bg_enabled[bg] == true && !wt_main[_x]) {
+      if(pixel_cache[_x].pri_main < _pri) {
+        pixel_cache[_x].pri_main = _pri;
+        pixel_cache[_x].bg_main  = 0x80 | bg;
+        pixel_cache[_x].src_main = col;
+        pixel_cache[_x].color_exempt = false;
       }
-      if(regs.bgsub_enabled[bg] == true && !wt_sub[_x]) {
-        if(pixel_cache[_x].pri_sub < _pri) {
-          pixel_cache[_x].pri_sub = _pri;
-          pixel_cache[_x].bg_sub  = 0x80 | bg;
-          pixel_cache[_x].src_sub = col;
-        }
+    }
+    if(regs.bgsub_enabled[bg] == true && !wt_sub[_x]) {
+      if(pixel_cache[_x].pri_sub < _pri) {
+        pixel_cache[_x].pri_sub = _pri;
+        pixel_cache[_x].bg_sub  = 0x80 | bg;
+        pixel_cache[_x].src_sub = col;
       }
     }
   }

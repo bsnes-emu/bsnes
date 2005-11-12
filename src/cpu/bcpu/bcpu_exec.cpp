@@ -133,6 +133,7 @@ static int z;
     break;
   case DMASTATE_RUN:
     dma_run(); //updates status.dma_cycle_count
+    cycle_edge();
     break;
   case DMASTATE_CPUSYNC:
     exec_cycle();
@@ -147,18 +148,22 @@ void bCPU::exec_cycle() {
     return;
   }
 
-//on first cycle?
-  if(status.cycle_pos == 0) {
-    snes->notify(SNES::CPU_EXEC_OPCODE_BEGIN);
-    status.opcode = op_read();
-    status.cycle_pos = 1;
+  if(status.cycle_pos) {
+    (this->*optbl[status.opcode])();
+  #ifdef DEBUGGER
+    if(status.cycle_pos == 0) {
+      snes->notify(SNES::CPU_EXEC_OPCODE_END);
+    }
+  #endif
     return;
   }
 
-  (this->*optbl[status.opcode])();
-  if(status.cycle_pos == 0) {
-    snes->notify(SNES::CPU_EXEC_OPCODE_END);
-  }
+//on first cycle?
+#ifdef DEBUGGER
+  snes->notify(SNES::CPU_EXEC_OPCODE_BEGIN);
+#endif
+  status.opcode = op_read();
+  status.cycle_pos = 1;
 }
 
 //only return true when we are on an opcode edge

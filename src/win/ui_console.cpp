@@ -29,7 +29,7 @@ HDC hdc;
       break;
     case CONSOLE_CPUPROCEED:
       if(bsnes->get_status() == bSNES::STOP) {
-        if(cpu->in_opcode() == true) {
+        if(r_cpu->in_opcode() == true) {
           dprintf("* CPU within opcode, proceed aborted");
         } else {
           bsnes->set_status(bSNES::RUNTOCPUPROCEED);
@@ -38,10 +38,10 @@ HDC hdc;
       break;
     case CONSOLE_CPUSKIP:
       if(bsnes->get_status() == bSNES::STOP) {
-        if(cpu->in_opcode() == true) {
+        if(r_cpu->in_opcode() == true) {
           dprintf("* CPU within opcode, skip aborted");
         } else {
-          cpu->regs.pc.w += cpu->opcode_length();
+          r_cpu->regs.pc.w += r_cpu->opcode_length();
           bsnes->disassemble_cpu_op();
         }
       }
@@ -57,15 +57,15 @@ HDC hdc;
       break;
     case CONSOLE_CPUDISABLE:
       if(bsnes->get_status() == bSNES::STOP) {
-        if(cpu->in_opcode() == true) {
+        if(r_cpu->in_opcode() == true) {
           dprintf("* CPU within opcode, disable aborted");
         } else {
-          addr = cpu->regs.pc.d;
-          len = cpu->opcode_length();
+          addr = r_cpu->regs.pc.d;
+          len = r_cpu->opcode_length();
           for(i=0;i<len;i++) {
             bsnes->write(bSNES::DRAM, (addr & 0xff0000) | ((addr + i) & 0xffff), 0xea);
           }
-        //cpu->regs.pc.w += len;
+        //r_cpu->regs.pc.w += len;
           bsnes->disassemble_cpu_op();
         }
       }
@@ -123,23 +123,23 @@ HDC hdc;
       value = strhex(t);
       pos = SendDlgItemMessage(hwnd, CONSOLE_CFGREGTYPE, CB_GETCURSEL, 0, 0);
       if(pos == 0) { //Set CPU register
-        if(cpu->in_opcode() == true) {
+        if(r_cpu->in_opcode() == true) {
           dprintf("* CPU within opcode, register set aborted");
         } else {
           pos = SendDlgItemMessage(hwnd, CONSOLE_CFGREGNUM, CB_GETCURSEL, 0, 0);
           switch(pos) {
-          case 0:cpu->regs.a.w  = value;break;
-          case 1:cpu->regs.x.w  = value;break;
-          case 2:cpu->regs.y.w  = value;break;
-          case 3:cpu->regs.s.w  = value;break;
-          case 4:cpu->regs.d.w  = value;break;
-          case 5:cpu->regs.db   = value;break;
-          case 6:cpu->regs.p    = value;break;
-          case 7:cpu->regs.e    = value;break;
-          case 8:cpu->regs.pc.d = value;break;
+          case 0:r_cpu->regs.a.w  = value;break;
+          case 1:r_cpu->regs.x.w  = value;break;
+          case 2:r_cpu->regs.y.w  = value;break;
+          case 3:r_cpu->regs.s.w  = value;break;
+          case 4:r_cpu->regs.d.w  = value;break;
+          case 5:r_cpu->regs.db   = value;break;
+          case 6:r_cpu->regs.p    = value;break;
+          case 7:r_cpu->regs.e    = value;break;
+          case 8:r_cpu->regs.pc.d = value;break;
           }
         //these bits can never be clear in emulation mode
-          if(cpu->regs.e)cpu->regs.p |= 0x30;
+          if(r_cpu->regs.e)r_cpu->regs.p |= 0x30;
           bsnes->disassemble_cpu_op();
         }
       } else { //Set APU register
@@ -229,10 +229,12 @@ int sl = strlen(s);
     memset(t + sl, 0x20, 80 - sl);
   }
   t[80] = 0;
+
 //only allow ascii characters. other characters will force the
 //font to change to one that supports non-ascii characters,
 //which will break the line highlighting and alignment of text
-  for(int i=0;i<80;i++) {
+int i;
+  for(i=0;i<80;i++) {
     if(t[i] & 0x80)t[i] = '?';
   }
 
@@ -281,13 +283,13 @@ static uint8 linecol[4] = { 1, 2, 3 };
 
   strcpy(s, "");
   sprintf(t, "V:%3d H:%3d HC:%4d I:%d IF:%d O:%d",
-    cpu->vcounter(), cpu->hcounter(), cpu->hcycles(),
-    cpu->interlace(), cpu->interlace_field(), cpu->overscan());
+    r_cpu->vcounter(), r_cpu->hcounter(), r_cpu->hcycles(),
+    r_cpu->interlace(), r_cpu->interlace_field(), r_cpu->overscan());
   strcat(s, t);
   if(1) { //config::apu.enabled
     sprintf(t, " -- CPU[$%0.2x,$%0.2x,$%0.2x,$%0.2x]<>APU[$%0.2x,$%0.2x,$%0.2x,$%0.2x]",
-      cpu->port_read(0), cpu->port_read(1), cpu->port_read(2), cpu->port_read(3),
-      apu->port_read(0), apu->port_read(1), apu->port_read(2), apu->port_read(3)
+      r_cpu->port_read(0), r_cpu->port_read(1), r_cpu->port_read(2), r_cpu->port_read(3),
+      r_apu->port_read(0), r_apu->port_read(1), r_apu->port_read(2), r_apu->port_read(3)
     );
     strcat(s, t);
   }

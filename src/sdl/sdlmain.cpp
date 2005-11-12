@@ -44,13 +44,15 @@ va_list args;
 }
 
 void init_snes() {
-  mem_bus = new bMemBus();
-  cpu     = new bCPU();
-  apu     = new bAPU();
-  dsp     = new bDSP();
-  ppu     = new bPPU();
-  snes    = new bSNES();
-  bsnes   = static_cast<bSNES*>(snes);
+#ifdef POLYMORPHISM
+  deref(mem) = new bMemBus();
+  deref(cpu) = new bCPU();
+  deref(apu) = new bAPU();
+  deref(dsp) = new bDSP();
+  deref(ppu) = new bPPU();
+#endif
+  snes  = new bSNES();
+  bsnes = static_cast<bSNES*>(snes);
 
   snes->init();
 
@@ -59,18 +61,18 @@ void init_snes() {
 //play audio in real-time while sound output
 //isn't available.
   snes->log_audio_enable("output.wav");
-
-  snes->set_playback_buffer_size(2000);
 }
 
 void term_snes() {
   snes->term();
-
-  if(mem_bus) { delete(static_cast<bMemBus*>(mem_bus)); mem_bus = 0; }
-  if(cpu)     { delete(static_cast<bCPU*>   (cpu));     cpu     = 0; }
-  if(apu)     { delete(static_cast<bAPU*>   (apu));     apu     = 0; }
-  if(ppu)     { delete(static_cast<bPPU*>   (ppu));     ppu     = 0; }
-  if(snes)    { delete(static_cast<bSNES*>  (snes));    snes    = 0; }
+#ifdef POLYMORPHISM
+  if(deref(mem)) { delete static_cast<bMemBus*>(deref(mem)); deref(mem) = 0; }
+  if(deref(cpu)) { delete static_cast<bCPU*>   (deref(cpu)); deref(cpu) = 0; }
+  if(deref(apu)) { delete static_cast<bAPU*>   (deref(apu)); deref(apu) = 0; }
+  if(deref(dsp)) { delete static_cast<bDSP*>   (deref(dsp)); deref(dsp) = 0; }
+  if(deref(ppu)) { delete static_cast<bPPU*>   (deref(ppu)); deref(ppu) = 0; }
+#endif
+  if(snes) { delete(static_cast<bSNES*>(snes)); snes = 0; }
 }
 
 void center_window() {
@@ -133,7 +135,7 @@ SDL_Event event;
   atexit(SDL_Quit);
   set_window_info();
   screen = SDL_SetVideoMode(config::video.display_width, config::video.display_height, 16,
-    SDL_SWSURFACE | ((config::video.fullscreen)?SDL_FULLSCREEN:0));
+    SDL_SWSURFACE | ((config::video.fullscreen) ? SDL_FULLSCREEN : 0));
   if(!screen)     { alert("Failed to initialize SDL"); goto _end; }
   backbuffer = SDL_CreateRGBSurface(SDL_SWSURFACE, 512, 448, 16, 0xf800, 0x07e0, 0x001f, 0x0000);
   if(!backbuffer) { alert("Failed to initialize SDL"); goto _end; }
@@ -160,7 +162,7 @@ int cursor_status;
           snes->capture_screenshot();
           break;
         case SDLK_F10: //toggle cursor display
-          cursor_status = (SDL_ShowCursor(SDL_QUERY) == SDL_ENABLE)?SDL_DISABLE:SDL_ENABLE;
+          cursor_status = (SDL_ShowCursor(SDL_QUERY) == SDL_ENABLE) ? SDL_DISABLE : SDL_ENABLE;
           SDL_ShowCursor(cursor_status);
           break;
         case SDLK_F11: //only supported on X11

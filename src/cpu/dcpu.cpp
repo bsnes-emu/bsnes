@@ -38,23 +38,23 @@ uint32 r = 0;
     break;
   case OPTYPE_IDP:
     addr = (regs.d + (addr & 0xffff)) & 0xffff;
-    r = (regs.db << 16) + mem_bus->read_word(addr);
+    r = (regs.db << 16) + r_mem->read_word(addr);
     break;
   case OPTYPE_IDPX:
     addr = (regs.d + regs.x + (addr & 0xffff)) & 0xffff;
-    r = (regs.db << 16) + mem_bus->read_word(addr);
+    r = (regs.db << 16) + r_mem->read_word(addr);
     break;
   case OPTYPE_IDPY:
     addr = (regs.d + (addr & 0xffff)) & 0xffff;
-    r = (regs.db << 16) + mem_bus->read_word(addr) + regs.y;
+    r = (regs.db << 16) + r_mem->read_word(addr) + regs.y;
     break;
   case OPTYPE_ILDP:
     addr = (regs.d + (addr & 0xffff)) & 0xffff;
-    r = mem_bus->read_long(addr);
+    r = r_mem->read_long(addr);
     break;
   case OPTYPE_ILDPY:
     addr = (regs.d + (addr & 0xffff)) & 0xffff;
-    r = mem_bus->read_long(addr) + regs.y;
+    r = r_mem->read_long(addr) + regs.y;
     break;
   case OPTYPE_ADDR:
     r = (regs.db << 16) + (addr & 0xffff);
@@ -88,7 +88,7 @@ uint32 r = 0;
     break;
   case OPTYPE_ISRY:
     addr = (regs.s + (addr & 0xff)) & 0xffff;
-    r = (regs.db << 16) + mem_bus->read_word(addr) + regs.y;
+    r = (regs.db << 16) + r_mem->read_word(addr) + regs.y;
     break;
   }
   return r;
@@ -109,10 +109,10 @@ static CPUReg24 pc;
   pc.d = regs.pc.d;
   sprintf(s, "%0.6x ", pc.d);
 
-  op  = mem_bus->read(pc.d); pc.w++;
-  op0 = mem_bus->read(pc.d); pc.w++;
-  op1 = mem_bus->read(pc.d); pc.w++;
-  op2 = mem_bus->read(pc.d);
+  op  = r_mem->read(pc.d); pc.w++;
+  op0 = r_mem->read(pc.d); pc.w++;
+  op1 = r_mem->read(pc.d); pc.w++;
+  op2 = r_mem->read(pc.d);
 
   switch(op) {
   case 0x00:sprintf(t, "brk #$%0.2x               ", op0);break;
@@ -457,7 +457,7 @@ static uint8 op_len_tbl[256] = {
     return 0;
   }
 
-  op = mem_bus->read(regs.pc.d);
+  op = r_mem->read(regs.pc.d);
   len = op_len_tbl[op];
   if(len == 5)return (regs.p.m)?2:3;
   if(len == 6)return (regs.p.x)?2:3;

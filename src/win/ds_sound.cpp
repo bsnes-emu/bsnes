@@ -1,77 +1,116 @@
-DSSound::DSSound() {
-  data.buffer = 0;
-  data.lpos = data.lsample = data.lbuffer = 0;
-}
+void DSSound::run(uint32 sample) {
+  data.buffer[data.buffer_pos++] = sample;
 
-void DSSound::run() {
-  if(snes->get_playback_buffer_pos() != 0)return;
+  if(data.buffer_pos >= data.samples_per_frame) {
+  uint32 pos, size;
+  void  *buffer;
+    if((bool)config::system.regulate_speed == true) {
+      do {
+        dsb_b->GetCurrentPosition(&pos, 0);
+        data.read_buffer = pos / data.buffer_size;
+      } while(data.read_buffer == data.prev_buffer);
+    }
 
-uint32 pos, status;
+    data.prev_buffer = data.read_buffer;
+    data.read_buffer++;
+    data.read_buffer &= 7;
 
-//dsb_b[0]->SetFrequency(22050);
+    pos = (data.read_buffer + 1) & 7;
 
-//do {
-//  dsb_b[0]->GetStatus(&status);
-//} while(status & DSBSTATUS_PLAYING);
+    if(dsb_b->Lock(pos * data.buffer_size,
+    data.buffer_size, &buffer, &size, 0, 0, 0) == DS_OK) {
+      memcpy(buffer, data.buffer, data.buffer_size);
+      dsb_b->Unlock(buffer, size, 0, 0);
+    }
 
-  dsb_b[0]->Lock(0, DSP_BUFFER_SIZE * 4, &dslb, &dslbs, 0, 0, 0);
-  memcpy(dslb, snes->get_playback_buffer(), DSP_BUFFER_SIZE * 4);
-  dsb_b[0]->Unlock(dslb, dslbs, 0, 0);
-
-  dsb_b[0]->SetCurrentPosition(0);
-
-//has the buffer stopped (possibly due to running too fast)?
-  dsb_b[0]->GetStatus(&status);
-  if(!(status & DSBSTATUS_PLAYING)) {
-    dsb_b[0]->Play(0, 0, 0);
+    data.buffer_pos = 0;
   }
 }
 
+void DSSound::clear() {
+  data.read_buffer = 0;
+  data.prev_buffer = 0;
+  data.buffer_pos  = 0;
+  memset(data.buffer, 0, 2048 * 4);
+
+  if(!dsb_b)return;
+
+  dsb_b->Stop();
+  dsb_b->SetCurrentPosition(0);
+
+uint32 size;
+void  *buffer;
+  dsb_b->Lock(0, data.buffer_size * 8, &buffer, &size, 0, 0, 0);
+  memset(buffer, 0, data.buffer_size * 8);
+  dsb_b->Unlock(buffer, size, 0, 0);
+
+  dsb_b->Play(0, 0, DSBPLAY_LOOPING);
+}
+
 void DSSound::init() {
+  clear();
+  term();
+
+  data.read_buffer       = 0;
+  data.prev_buffer       = 0;
+  data.buffer_pos        = 0;
+  data.samples_per_frame = DSP_FREQ / ((snes->region() == SNES::NTSC) ? 60 : 50);
+  data.buffer_size       = data.samples_per_frame * 4;
+
   DirectSoundCreate(0, &ds, 0);
   ds->SetCooperativeLevel(w_main->hwnd, DSSCL_PRIORITY);
 
   memset(&dsbd, 0, sizeof(dsbd));
-  dsbd.dwSize = sizeof(dsbd);
-  dsbd.dwFlags = DSBCAPS_PRIMARYBUFFER;
+  dsbd.dwSize        = sizeof(dsbd);
+  dsbd.dwFlags       = DSBCAPS_PRIMARYBUFFER;
   dsbd.dwBufferBytes = 0;
-  dsbd.lpwfxFormat = 0;
+  dsbd.lpwfxFormat   = 0;
   ds->CreateSoundBuffer(&dsbd, &dsb_p, 0);
 
   memset(&wfx, 0, sizeof(wfx));
-  wfx.wFormatTag = WAVE_FORMAT_PCM;
-  wfx.nChannels = 2;
-  wfx.nSamplesPerSec = 32000;
-  wfx.wBitsPerSample = 16;
-  wfx.nBlockAlign = wfx.wBitsPerSample / 8 * wfx.nChannels;
+  wfx.wFormatTag      = WAVE_FORMAT_PCM;
+  wfx.nChannels       = 2;
+  wfx.nSamplesPerSec  = DSP_FREQ;
+  wfx.wBitsPerSample  = 16;
+  wfx.nBlockAlign     = wfx.wBitsPerSample / 8 * wfx.nChannels;
   wfx.nAvgBytesPerSec = wfx.nSamplesPerSec * wfx.nBlockAlign;
   dsb_p->SetFormat(&wfx);
 
-  sample_size = (16 / 8) * 2;
-  buffer_size = DSP_BUFFER_SIZE * sample_size;
-  buffer_pos  = 0;
-
-  dsb_b = new LPDIRECTSOUNDBUFFER[1];
   memset(&dsbd, 0, sizeof(dsbd));
-  dsbd.dwSize = sizeof(dsbd);
-  dsbd.dwFlags = DSBCAPS_CTRLFREQUENCY | DSBCAPS_GLOBALFOCUS;
-  dsbd.dwBufferBytes = buffer_size;
+  dsbd.dwSize          = sizeof(dsbd);
+  dsbd.dwFlags         = DSBCAPS_GETCURRENTPOSITION2 | DSBCAPS_CTRLFREQUENCY |
+                         DSBCAPS_GLOBALFOCUS | DSBCAPS_LOCSOFTWARE;
+  dsbd.dwBufferBytes   = data.buffer_size * 8;
   dsbd.guid3DAlgorithm = GUID_NULL;
-  dsbd.lpwfxFormat = &wfx;
-  ds->CreateSoundBuffer(&dsbd, &dsb_b[0], 0);
-  ds->CreateSoundBuffer(&dsbd, &dsb_b[1], 0);
-  dsb_b[0]->SetFrequency(32000);
-  dsb_b[1]->SetFrequency(32000);
+  dsbd.lpwfxFormat     = &wfx;
+  ds->CreateSoundBuffer(&dsbd, &dsb_b, 0);
+  dsb_b->SetFrequency(DSP_FREQ);
+  dsb_b->SetCurrentPosition(0);
 
-  dsb_b[0]->Lock(0, buffer_size, &dslb, &dslbs, 0, 0, 0);
-  memset(dslb, 0, buffer_size);
-  dsb_b[0]->Unlock(dslb, dslbs, 0, 0);
+uint32 size;
+void  *buffer;
+  dsb_b->Lock(0, data.buffer_size * 8, &buffer, &size, 0, 0, 0);
+  memset(buffer, 0, data.buffer_size * 8);
+  dsb_b->Unlock(buffer, size, 0, 0);
 
-  dsb_b[1]->Lock(0, buffer_size, &dslb, &dslbs, 0, 0, 0);
-  memset(dslb, 0, buffer_size);
-  dsb_b[1]->Unlock(dslb, dslbs, 0, 0);
+  data.read_buffer = 0;
+  dsb_b->Play(0, 0, DSBPLAY_LOOPING);
+}
 
-  dsb_b[0]->Play(0, 0, 0);
+void DSSound::term() {
+  if(dsb_b) {
+    dsb_b->Stop();
+    dsb_b->Release();
+    dsb_b = 0;
+  }
 
-  buffer_pos = 0;
+  if(dsb_p) {
+    dsb_p->Release();
+    dsb_p = 0;
+  }
+
+  if(ds) {
+    ds->Release();
+    ds = 0;
+  }
 }

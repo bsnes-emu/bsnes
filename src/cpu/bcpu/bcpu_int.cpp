@@ -13,7 +13,7 @@ void bCPU::irq_run() {
 //WDC documentation is incorrect, first cycle
 //is a memory read fetch from PBR:PC
   switch(status.cycle_pos++) {
-  case 0: add_cycles(mem_bus->speed(regs.pc.d)); break;
+  case 0: add_cycles(r_mem->speed(regs.pc.d));   break;
   case 1: add_cycles(6);                         break;
   case 2: stack_write(regs.pc.b);                break;
   case 3: stack_write(regs.pc.h);                break;
@@ -25,8 +25,10 @@ void bCPU::irq_run() {
     regs.pc.w = rd.w;
     regs.p.i  = 1;
     regs.p.d  = 0;
+  #ifdef DEBUGGER
   //let debugger know the new IRQ opcode address
     snes->notify(SNES::CPU_EXEC_OPCODE_END);
+  #endif
     status.cycle_pos = 0;
     run_state.irq = false;
     break;

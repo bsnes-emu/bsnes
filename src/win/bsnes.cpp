@@ -1,3 +1,12 @@
+void bSNES::power() {
+  ds_sound->init();
+  SNES::power();
+}
+
+void bSNES::reset() {
+  SNES::reset();
+}
+
 void bSNES::set_status(uint32 new_status) {
 uint8 cpu_op;
   run_status = new_status;
@@ -12,7 +21,7 @@ uint8 cpu_op;
     status.cpu_ran = false;
     break;
   case RUNTOCPUPROCEED:
-    cpu_op = mem_bus->read(cpu->regs.pc.d);
+    cpu_op = r_mem->read(r_cpu->regs.pc.d);
 
     if(cpu_op == 0x10 || //bpl rel
        cpu_op == 0x30 || //bmi rel
@@ -27,7 +36,7 @@ uint8 cpu_op;
        cpu_op == 0xfc    //jsr (addr,x)
     ) {
       w_console->is_running(true);
-      status.cpu_stop_pos = (cpu->regs.pc.b << 16) | ((cpu->regs.pc.d + cpu->opcode_length()) & 0xffff);
+      status.cpu_stop_pos = (r_cpu->regs.pc.b << 16) | ((r_cpu->regs.pc.d + r_cpu->opcode_length()) & 0xffff);
     } else {
       status.cpu_ran = false;
       run_status     = RUNTOCPUSTEP;
@@ -48,10 +57,7 @@ void bSNES::run() {
 
   switch(run_status) {
   case RUN:
-    while(update_frame == false) {
-      SNES::run();
-    }
-    update_frame = false;
+    SNES::runtoframe();
     return;
   case STOP:
     break;
@@ -68,8 +74,8 @@ void bSNES::run() {
     break;
   case RUNTOFRAME:
     SNES::run();
-    if(update_frame == true) {
-      update_frame = false;
+    if(r_ppu->status.frame_executed == true) {
+      r_ppu->status.frame_executed = false;
       set_status(STOP);
       disassemble_apu_op();
       disassemble_cpu_op();
@@ -89,7 +95,7 @@ void bSNES::run() {
     break;
   case RUNTOCPUPROCEED:
     SNES::run();
-    if(cpu->in_opcode() == false && status.cpu_stop_pos == cpu->regs.pc.d) {
+    if(r_cpu->in_opcode() == false && status.cpu_stop_pos == r_cpu->regs.pc.d) {
       set_status(STOP);
       disassemble_cpu_op();
     } else if(w_bp->hit() == true) {
@@ -114,13 +120,13 @@ void bSNES::run() {
 }
 
 void bSNES::video_run() {
-  if(ppu->status.frames_updated) {
+  if(r_ppu->status.frames_updated) {
   char s[512], t[512];
-    ppu->status.frames_updated = false;
+    r_ppu->status.frames_updated = false;
     if((bool)config::gui.show_fps == true) {
-      sprintf(s, "%s : %d fps", BSNES_TITLE, ppu->status.frames_executed);
+      sprintf(s, "%s : %d fps", BSNES_TITLE, r_ppu->status.frames_executed);
       if(w_main->frameskip != 0) {
-        sprintf(t, " (%d frames)", ppu->status.frames_rendered);
+        sprintf(t, " (%d frames)", r_ppu->status.frames_rendered);
         strcat(s, t);
       }
       SetWindowText(w_main->hwnd, s);
@@ -129,17 +135,43 @@ void bSNES::video_run() {
 
   w_main->frameskip_pos++;
   w_main->frameskip_pos %= (w_main->frameskip + 1);
-  if(ppu->renderer_enabled())dd_renderer->update();
-  ppu->enable_renderer(w_main->frameskip_pos == 0);
+  if(r_ppu->renderer_enabled())dd_renderer->update();
+  r_ppu->enable_renderer(w_main->frameskip_pos == 0);
 }
 
-void bSNES::sound_run() {
-  ds_sound->run();
+void bSNES::sound_run(uint32 data) {
+  ds_sound->run(data);
+}
+
+/***********************
+ *** Video functions ***
+ ***********************/
+uint16 *bSNES::video_lock(uint32 &pitch) {
+  return dd_renderer->lock(pitch);
+}
+
+void bSNES::video_unlock() {
+  dd_renderer->unlock();
 }
 
 /***********************
  *** Input functions ***
  ***********************/
+void bSNES::clear_input() {
+  joypad1.up     = joypad2.up =
+  joypad1.down   = joypad2.down =
+  joypad1.left   = joypad2.left =
+  joypad1.right  = joypad2.right =
+  joypad1.a      = joypad2.a =
+  joypad1.b      = joypad2.b =
+  joypad1.x      = joypad2.x =
+  joypad1.y      = joypad2.y =
+  joypad1.l      = joypad2.l =
+  joypad1.r      = joypad2.r =
+  joypad1.select = joypad2.select =
+  joypad1.start  = joypad2.start = 0;
+}
+
 void bSNES::poll_input(uint8 type) {
 //only capture input when main window has focus
   if(GetForegroundWindow() == w_main->hwnd) {
@@ -279,27 +311,27 @@ uint8  r = 0x00;
       if(a >= 0x2000 && a <= 0x5fff) {
         r = 0x00;
       } else {
-        r = mem_bus->read(addr);
+        r = r_mem->read(addr);
       }
     } else {
-      r = mem_bus->read(addr);
+      r = r_mem->read(addr);
     }
     break;
   case SPCRAM:
     addr &= 0xffff;
-    r = apu->spcram_read(addr);
+    r = r_apu->spcram_read(addr);
     break;
   case VRAM:
     addr &= 0xffff;
-    r = ppu->vram_read(addr);
+    r = r_ppu->vram_read(addr);
     break;
   case OAM:
     addr &= 0x03ff;
-    r = ppu->oam_read(addr);
+    r = r_ppu->oam_read(addr);
     break;
   case CGRAM:
     addr &= 0x01ff;
-    r = ppu->cgram_read(addr);
+    r = r_ppu->cgram_read(addr);
     break;
   }
   debug_command = false;
@@ -311,38 +343,31 @@ void bSNES::write(uint8 type, uint32 addr, uint8 value) {
   switch(type) {
   case DRAM:
     addr &= 0xffffff;
-    mem_bus->cart->write_protect(false);
-    mem_bus->write(addr, value);
-    mem_bus->cart->write_protect(true);
+    r_mem->cart->write_protect(false);
+    r_mem->write(addr, value);
+    r_mem->cart->write_protect(true);
     break;
   case SPCRAM:
     addr &= 0xffff;
-    apu->spcram_write(addr, value);
+    r_apu->spcram_write(addr, value);
     break;
   case VRAM:
     addr &= 0xffff;
-    ppu->vram_write(addr, value);
+    r_ppu->vram_write(addr, value);
     break;
   case OAM:
     addr &= 0x03ff;
-    ppu->oam_write(addr, value);
+    r_ppu->oam_write(addr, value);
     break;
   case CGRAM:
     addr &= 0x01ff;
-    ppu->cgram_write(addr, value);
+    r_ppu->cgram_write(addr, value);
     break;
   }
   debug_command = false;
 }
 
 void bSNES::notify(uint32 message, uint32 param1, uint32 param2) {
-//system messages
-  switch(message) {
-  case RENDER_FRAME:
-    update_frame = true;
-    break;
-  }
-
 //debugging messages
   if(is_debugger_enabled == false)return;
 
@@ -353,14 +378,14 @@ void bSNES::notify(uint32 message, uint32 param1, uint32 param2) {
     status.cpu_ran = true;
     status.cpu_trace_pos++;
   //test next opcode for breakpoint
-    w_bp->test(message, cpu->regs.pc.d, 0);
+    w_bp->test(message, r_cpu->regs.pc.d, 0);
     disassemble_cpu_op();
     break;
   case APU_EXEC_OPCODE_BEGIN:
     break;
   case APU_EXEC_OPCODE_END:
     status.apu_ran = true;
-    w_bp->test(message, apu->regs.pc, 0);
+    w_bp->test(message, r_apu->regs.pc, 0);
     disassemble_apu_op();
     break;
   case MEM_READ:
@@ -395,7 +420,7 @@ char t[512];
 //don't disassemble opcodes that won't be printed to console/traced to log anyway
   if(!w_console->can_write(Console::CPU_MESSAGE) && !w_console->tracing_enabled)return;
 
-  cpu->disassemble_opcode(t);
+  r_cpu->disassemble_opcode(t);
   w_console->write(t, Console::CPU_MESSAGE);
 }
 
@@ -405,7 +430,7 @@ char t[512];
 
   if(!w_console->can_write(Console::APU_MESSAGE) && !w_console->tracing_enabled)return;
 
-  apu->disassemble_opcode(t);
+  r_apu->disassemble_opcode(t);
   w_console->write(t, Console::APU_MESSAGE);
 }
 
@@ -540,7 +565,6 @@ uint32 i, style;
 bSNES::bSNES() {
   run_status    = STOP;
   debug_command = false;
-  update_frame  = false;
 
   debugger_disable();
 }

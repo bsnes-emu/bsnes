@@ -14,6 +14,7 @@ enum {
   MENU_FILE_RESET,
   MENU_FILE_POWER,
   MENU_FILE_EXIT,
+  MENU_SETTINGS_REGULATE_SPEED,
   MENU_SETTINGS_FRAMESKIP_OFF,
   MENU_SETTINGS_FRAMESKIP_1,
   MENU_SETTINGS_FRAMESKIP_2,
@@ -251,7 +252,7 @@ bool   auto_update; //update memory window whenever visible value is written to 
   uint8 read_byte(uint32 addr);
   void  write_byte(uint32 addr, uint8 value);
   void  refresh(uint32 type = null, uint32 addr = 0);
-  void  export(uint32 type);
+  void  export_data(uint32 type);
 }*w_memory = 0;
 
 class InputConfig : public Window {

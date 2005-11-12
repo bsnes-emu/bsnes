@@ -78,8 +78,8 @@ void SRTC::init() {
 }
 
 void SRTC::enable() {
-  mem_bus->set_mmio_mapper(0x2800, mmio);
-  mem_bus->set_mmio_mapper(0x2801, mmio);
+  r_mem->set_mmio_mapper(0x2800, mmio);
+  r_mem->set_mmio_mapper(0x2801, mmio);
 }
 
 void SRTC::power() {
@@ -176,7 +176,7 @@ uint8 SRTCMMIO::read(uint32 addr) {
   case 0x2800:return srtc->read();
   }
 
-  return cpu->regs.mdr;
+  return r_cpu->regs.mdr;
 }
 
 void SRTCMMIO::write(uint32 addr, uint8 value) {

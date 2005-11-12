@@ -176,66 +176,19 @@ int rx, ry;
   }
 }
 
-#include "dd_renderer16.cpp"
-void DDRenderer::update16() {
-HRESULT hr;
-  hr = lpddsb->Lock(0, &ddsd, DDLOCK_WAIT, 0);
-  if(hr != DD_OK)return;
-
-  set_source_window();
-
-  if       (vi.width == 256 && vi.height == 224) {
-    update16_256x224();
-  } else if(vi.width == 512 && vi.height == 224) {
-    update16_512x224();
-  } else if(vi.width == 256 && vi.height == 448) {
-    update16_256x448();
-  } else if(vi.width == 512 && vi.height == 448) {
-    update16_512x448();
-  }
-
-  lpddsb->Unlock(0);
+uint16 *DDRenderer::lock(uint32 &pitch) {
+  if(lpddsb->Lock(0, &ddsd, DDLOCK_WAIT, 0) != DD_OK)return 0;
+  pitch = ddsd.lPitch;
+  return (uint16*)ddsd.lpSurface;
 }
 
-//#include "dd_renderer32.cpp"
-/*
-void DDRenderer::update32() {
-HRESULT hr;
-  hr = lpddsb->Lock(0, &ddsd, DDLOCK_WAIT, 0);
-  if(hr != DD_OK)return;
-
-  set_source_window();
-  if(ppu->output->hires == false) {
-    if(ppu->output->interlace == false) {
-      update32_256x224();
-    } else {
-      update32_256x448();
-    }
-  } else {
-    if(ppu->output->interlace == false) {
-      update32_512x224();
-    } else {
-      update32_512x448();
-    }
-  }
-
+void DDRenderer::unlock() {
   lpddsb->Unlock(0);
 }
-*/
 
 void DDRenderer::update() {
   snes->get_video_info(&vi);
-
-  switch(color_depth) {
-  case 15:
-  case 16:
-    update16();
-    break;
-  case 32:
-  //update32();
-    break;
-  }
-
+  set_source_window();
   redraw();
 }
 

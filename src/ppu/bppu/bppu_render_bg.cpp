@@ -43,6 +43,7 @@ uint16 opt_valid_bit  = (bg == BG1) ? 0x2000 : ((bg == BG2) ? 0x4000 : 0x0000);
 uint8  bgpal_index    = (regs.bg_mode == 0) ? (bg << 5) : 0;
 
 uint8  pal_size       = (color_depth == 2) ? 256 : ((color_depth == 1) ? 16 : 4);
+uint16 tile_mask      = (color_depth == 2) ? 0x03ff : ((color_depth == 1) ? 0x07ff : 0x0fff);
 //4 + color_depth = >>(4-6) -- / {16, 32, 64 } bytes/tile
 //index is a tile number count to add to base tile number
 uint   tiledata_index = regs.bg_tdaddr[bg] >> (4 + color_depth);
@@ -145,6 +146,7 @@ int32 prev_x = -1, prev_y = -1;
 
       tile_num &= 0x03ff;
       tile_num += tiledata_index;
+      tile_num &= tile_mask;
 
       if(bg_td_state[tile_num] == 1) {
         render_bg_tile(color_depth, tile_num);
@@ -162,7 +164,7 @@ int32 prev_x = -1, prev_y = -1;
     xpos = mosaic_x & 7;
     if(mirror_x)xpos ^= 7; //invert x tile pos
     col = *(tile_ptr + xpos);
-    if(col && window_cache[COL].main[x]) {
+    if(col) {
       if(regs.direct_color == true && bg == BG1 && (regs.bg_mode == 3 || regs.bg_mode == 4)) {
         col = get_direct_color(pal_num, col);
       } else {

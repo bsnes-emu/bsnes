@@ -19,7 +19,8 @@ public:
 enum { NTSC = 0, PAL = 1 };
 
 //system functions
-  virtual void run();
+  virtual inline void run();
+  virtual inline void runtoframe();
   virtual void init();
   virtual void term();
   virtual void power();
@@ -39,7 +40,6 @@ enum { NTSC = 0, PAL = 1 };
 //debugging functions
 enum {
   NO_ACTION = 0,
-  RENDER_FRAME,
   CPU_EXEC_OPCODE_BEGIN, CPU_EXEC_OPCODE_END,
   APU_EXEC_OPCODE_BEGIN, APU_EXEC_OPCODE_END,
   MEM_READ,    MEM_WRITE,

@@ -63,10 +63,10 @@ uint16 width, height;
     addr &= 0x001f;
     z = oam[0x0200 + addr];
     i = addr << 2;
-    sprite_list[i    ].x = ((z & 0x01)?0x0100:0x0000) + (sprite_list[i    ].x & 0xff);
-    sprite_list[i + 1].x = ((z & 0x04)?0x0100:0x0000) + (sprite_list[i + 1].x & 0xff);
-    sprite_list[i + 2].x = ((z & 0x10)?0x0100:0x0000) + (sprite_list[i + 2].x & 0xff);
-    sprite_list[i + 3].x = ((z & 0x40)?0x0100:0x0000) + (sprite_list[i + 3].x & 0xff);
+    sprite_list[i    ].x = ((z & 0x01) ? 256 : 0) + (sprite_list[i    ].x & 255);
+    sprite_list[i + 1].x = ((z & 0x04) ? 256 : 0) + (sprite_list[i + 1].x & 255);
+    sprite_list[i + 2].x = ((z & 0x10) ? 256 : 0) + (sprite_list[i + 2].x & 255);
+    sprite_list[i + 3].x = ((z & 0x40) ? 256 : 0) + (sprite_list[i + 3].x & 255);
     get_sprite_size(i,     !!(z & 0x02));
     get_sprite_size(i + 1, !!(z & 0x08));
     get_sprite_size(i + 2, !!(z & 0x20));
@@ -90,7 +90,7 @@ uint16 addr = 0x0200;
 bool bPPU::is_sprite_on_scanline() {
 //if sprite is entirely offscreen and doesn't wrap around to the left side of the screen,
 //then it is not counted. 256 is correct, and not 255 -- as one might first expect
-  if(spr->x > 256 && (spr->x + spr->width) < 512 && line.width != 512)return false;
+  if(spr->x > 256 && (spr->x + spr->width) < 512)return false;
 
   if(regs.oam_halve == false) {
     if(line.y >= spr->y && line.y < (spr->y + spr->height)) {
@@ -110,19 +110,10 @@ bool bPPU::is_sprite_on_scanline() {
 }
 
 void bPPU::load_oam_tiles() {
-uint16 tile_width;
-  tile_width = spr->width >> 3;
+uint16 tile_width = spr->width >> 3;
+int x = spr->x;
+int y = (spr->vflip) ? ((spr->height - 1) - (line.y - spr->y)) : (line.y - spr->y);
 
-int x, y, chr, nameselect_index;
-  x = spr->x;
-  if(line.width == 512)x <<= 1;
-  x &= 511;
-
-  if(spr->vflip) {
-    y = ((spr->height - 1) - (line.y - spr->y));
-  } else {
-    y = (line.y - spr->y);
-  }
 //todo: double-check code below. seems that interlace_field
 //should be added to hires 512x448 sprites as well, and not
 //just when oam_halve is enabled...
@@ -132,40 +123,40 @@ int x, y, chr, nameselect_index;
       y += line.interlace_field;
     }
   }
+
+  x &= 511;
   y &= 255;
 
-  chr = spr->character;
+uint16 tdaddr = regs.oam_tdaddr;
+uint16 chrx   = (spr->character     ) & 15;
+uint16 chry   = (spr->character >> 4) & 15;
   if(spr->use_nameselect == true) {
-    chr += 256;
-    nameselect_index = regs.oam_nameselect << 13;
-  } else {
-    nameselect_index = 0x0000;
+    tdaddr += (256 * 32) + (regs.oam_nameselect << 13);
   }
-  chr += (y >> 3) << 4;
+  chry  += (y >> 3);
+  chry  &= 15;
+  chry <<= 4;
 
-int i, n, mx, pos, z;
+int i, n, sx, mx, pos;
   for(i=0;i<tile_width;i++) {
-    z  = x;
-    z += (i << ((line.width == 512) ? 4 : 3));
-    z &= 511;
+    sx  = x;
+    sx += i << 3;
+    sx &= 511;
+
   //ignore sprites that are offscreen
   //sprites at 256 are still counted, even though they aren't visible onscreen
-    if(z >= 257 && (z + 7) < 512 && line.width != 512)continue;
+    if(sx >= 257 && (sx + 7) < 512)continue;
 
     if(regs.oam_tilecount++ > 34)break;
     n = regs.oam_tilecount - 1;
-    oam_tilelist[n].x     = z;
+    oam_tilelist[n].x     = sx;
     oam_tilelist[n].y     = y;
     oam_tilelist[n].pri   = spr->priority;
     oam_tilelist[n].pal   = (spr->palette << 4) + 128;
     oam_tilelist[n].hflip = spr->hflip;
 
-    if(oam_tilelist[n].hflip) {
-      mx = (tile_width - 1) - i;
-    } else {
-      mx = i;
-    }
-    pos = regs.oam_tdaddr + ((chr + mx) << 5) + ((y & 7) << 1) + nameselect_index;
+    mx  = (oam_tilelist[n].hflip) ? ((tile_width - 1) - i) : i;
+    pos = tdaddr + ((chry + ((chrx + mx) & 15)) << 5);
     oam_tilelist[n].tile = (pos >> 5) & 0x07ff;
   }
 }
@@ -182,38 +173,26 @@ oam_tileitem *t = &oam_tilelist[tile_num];
 
 int x, sx, col;
   sx = t->x;
-//tile_ptr = tiledata + (tile * (8_width * 8_height)) + ((y & 7_height_mask) * 8_width);
   tile_ptr = (uint8*)oam_td + (t->tile << 6) + ((t->y & 7) << 3);
   for(x=0;x<8;x++) {
     sx &= 511;
-    if(sx < line.width) {
-      col = *(tile_ptr + ((t->hflip)?7-x:x));
+    if(sx < 256) {
+      col = *(tile_ptr + ((t->hflip) ? (7 - x) : x));
       if(col) {
         col += t->pal;
         oam_line_pal[sx] = col;
         oam_line_pri[sx] = t->pri;
-        if(line.width == 512) {
-          oam_line_pal[sx + 1] = col;
-          oam_line_pri[sx + 1] = t->pri;
-        }
       }
     }
-    sx += (line.width == 512) ? 2 : 1;
+    sx++;
   }
 }
 
 void bPPU::render_line_oam(uint8 pri0_pos, uint8 pri1_pos, uint8 pri2_pos, uint8 pri3_pos) {
-int s, x;
-bool _bg_enabled    = regs.bg_enabled[OAM];
-bool _bgsub_enabled = regs.bgsub_enabled[OAM];
-
-  build_window_tables(OAM);
-uint8 *wt_main = window_cache[OAM].main;
-uint8 *wt_sub  = window_cache[OAM].sub;
-
+int s;
   regs.oam_itemcount = 0;
   regs.oam_tilecount = 0;
-  memset(oam_line_pri, OAM_PRI_NONE, 512);
+  memset(oam_line_pri, OAM_PRI_NONE, 256);
 
   memset(oam_itemlist, 0xff, 32);
   for(s=0;s<128;s++) {
@@ -239,34 +218,105 @@ uint8 *wt_sub  = window_cache[OAM].sub;
   regs.time_over  |= (regs.oam_tilecount > 34);
   regs.range_over |= (regs.oam_itemcount > 32);
 
-  if(_bg_enabled == false && _bgsub_enabled == false)return;
+  if(regs.bg_enabled[OAM] == false && regs.bgsub_enabled[OAM] == false)return;
 
-int _pri;
-  for(x=0;x<line.width;x++) {
+  if(line.width == 256) {
+    render_line_oam_lores(pri0_pos, pri1_pos, pri2_pos, pri3_pos);
+  } else {
+    render_line_oam_hires(pri0_pos, pri1_pos, pri2_pos, pri3_pos);
+  }
+}
+
+void bPPU::render_line_oam_lores(uint8 pri0_pos, uint8 pri1_pos, uint8 pri2_pos, uint8 pri3_pos) {
+bool bg_enabled    = regs.bg_enabled[OAM];
+bool bgsub_enabled = regs.bgsub_enabled[OAM];
+
+  build_window_tables(OAM);
+uint8 *wt_main = window_cache[OAM].main;
+uint8 *wt_sub  = window_cache[OAM].sub;
+
+int pri;
+  for(int x=0;x<256;x++) {
     if(oam_line_pri[x] == OAM_PRI_NONE)continue;
 
     switch(oam_line_pri[x]) {
-    case 0:_pri = pri0_pos;break;
-    case 1:_pri = pri1_pos;break;
-    case 2:_pri = pri2_pos;break;
-    case 3:_pri = pri3_pos;break;
+    case 0:pri = pri0_pos;break;
+    case 1:pri = pri1_pos;break;
+    case 2:pri = pri2_pos;break;
+    case 3:pri = pri3_pos;break;
     }
 
-    if(window_cache[COL].main[x]) {
-      if(_bg_enabled == true && !wt_main[x]) {
-        if(pixel_cache[x].pri_main < _pri) {
-          pixel_cache[x].pri_main = _pri;
-          pixel_cache[x].bg_main  = PC_OAM;
-          pixel_cache[x].src_main = get_palette(oam_line_pal[x]);
-          pixel_cache[x].color_exempt = (oam_line_pal[x] < 192);
-        }
+    if(bg_enabled == true && !wt_main[x]) {
+      if(pixel_cache[x].pri_main < pri) {
+        pixel_cache[x].pri_main = pri;
+        pixel_cache[x].bg_main  = PC_OAM;
+        pixel_cache[x].src_main = get_palette(oam_line_pal[x]);
+        pixel_cache[x].color_exempt = (oam_line_pal[x] < 192);
       }
-      if(_bgsub_enabled == true && !wt_sub[x]) {
-        if(pixel_cache[x].pri_sub < _pri) {
-          pixel_cache[x].pri_sub = _pri;
-          pixel_cache[x].bg_sub  = PC_OAM;
-          pixel_cache[x].src_sub = get_palette(oam_line_pal[x]);
-        }
+    }
+
+    if(bgsub_enabled == true && !wt_sub[x]) {
+      if(pixel_cache[x].pri_sub < pri) {
+        pixel_cache[x].pri_sub = pri;
+        pixel_cache[x].bg_sub  = PC_OAM;
+        pixel_cache[x].src_sub = get_palette(oam_line_pal[x]);
+      }
+    }
+  }
+}
+
+void bPPU::render_line_oam_hires(uint8 pri0_pos, uint8 pri1_pos, uint8 pri2_pos, uint8 pri3_pos) {
+bool bg_enabled    = regs.bg_enabled[OAM];
+bool bgsub_enabled = regs.bgsub_enabled[OAM];
+
+  build_window_tables(OAM);
+uint8 *wt_main = window_cache[OAM].main;
+uint8 *wt_sub  = window_cache[OAM].sub;
+
+int pri, sx;
+  for(int x=0;x<256;x++) {
+    if(oam_line_pri[x] == OAM_PRI_NONE)continue;
+
+    switch(oam_line_pri[x]) {
+    case 0:pri = pri0_pos;break;
+    case 1:pri = pri1_pos;break;
+    case 2:pri = pri2_pos;break;
+    case 3:pri = pri3_pos;break;
+    }
+
+    sx = x << 1;
+    if(bg_enabled == true && !wt_main[sx]) {
+      if(pixel_cache[sx].pri_main < pri) {
+        pixel_cache[sx].pri_main = pri;
+        pixel_cache[sx].bg_main  = PC_OAM;
+        pixel_cache[sx].src_main = get_palette(oam_line_pal[x]);
+        pixel_cache[sx].color_exempt = (oam_line_pal[x] < 192);
+      }
+    }
+
+    if(bgsub_enabled == true && !wt_sub[sx]) {
+      if(pixel_cache[sx].pri_sub < pri) {
+        pixel_cache[sx].pri_sub = pri;
+        pixel_cache[sx].bg_sub  = PC_OAM;
+        pixel_cache[sx].src_sub = get_palette(oam_line_pal[x]);
+      }
+    }
+
+    sx++;
+    if(bg_enabled == true && !wt_main[sx]) {
+      if(pixel_cache[sx].pri_main < pri) {
+        pixel_cache[sx].pri_main = pri;
+        pixel_cache[sx].bg_main  = PC_OAM;
+        pixel_cache[sx].src_main = get_palette(oam_line_pal[x]);
+        pixel_cache[sx].color_exempt = (oam_line_pal[x] < 192);
+      }
+    }
+
+    if(bgsub_enabled == true && !wt_sub[sx]) {
+      if(pixel_cache[sx].pri_sub < pri) {
+        pixel_cache[sx].pri_sub = pri;
+        pixel_cache[sx].bg_sub  = PC_OAM;
+        pixel_cache[sx].src_sub = get_palette(oam_line_pal[x]);
       }
     }
   }

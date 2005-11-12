@@ -9,17 +9,19 @@ bool l, r, select, start;
 class bSNES : public SNES {
 private:
 uint32 run_status;
-bool update_frame;
 bJoypad joypad1, joypad2;
 
 public:
 enum { STOP = 0, RUN };
-  void   run();
-  void   video_run();
-  void   sound_run();
+  void    run();
+  void    video_run();
+  void    sound_run(uint32 data);
 
-  void   set_status(uint32 new_status);
-  uint32 get_status();
+  uint16 *video_lock(uint32 &data);
+  void    video_unlock();
+
+  void    set_status(uint32 new_status);
+  uint32  get_status();
 
 //input functions
   void poll_input(uint8 type);

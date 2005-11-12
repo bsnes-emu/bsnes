@@ -79,7 +79,7 @@ void Memory::write_long(uint32 addr, uint32 data, uint wrap) {
 }
 
 MMIO  mmio_unmapped;
-uint8 MMIO::read (uint32 addr) { return cpu->regs.mdr; }
+uint8 MMIO::read (uint32 addr) { return r_cpu->regs.mdr; }
 void  MMIO::write(uint32 addr, uint8 value) {}
 
 uint8 MemBus::calc_speed(uint32 addr, bool fast) {
@@ -90,10 +90,6 @@ uint8 MemBus::calc_speed(uint32 addr, bool fast) {
   if((addr & 0xfe00) == 0x4000)return 12;
   if((addr & 0xe000) == 0x4000)return 6;
   return 8;
-}
-
-uint8 MemBus::speed(uint32 addr) {
-  return speed_table[addr >> 9];
 }
 
 void MemBus::set_speed(bool fast) {

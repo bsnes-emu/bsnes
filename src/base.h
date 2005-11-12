@@ -1,3 +1,6 @@
+//#define DEBUGGER
+//#define POLYMORPHISM
+
 //this should be declared in the port-specific makefiles
 //#define ARCH_LSB
 //#define ARCH_MSB

@@ -6,7 +6,7 @@ void SDD1::init() {
 
 void SDD1::enable() {
   for(int i=0x4800;i<=0x4807;i++) {
-    mem_bus->set_mmio_mapper(i, mmio);
+    r_mem->set_mmio_mapper(i, mmio);
   }
 }
 
@@ -47,7 +47,7 @@ uint8 SDD1::mmio_read(uint16 addr) {
   case 0x4807:return (sdd1.index[3] >> 20) & 7;
   }
 
-  return cpu->regs.mdr;
+  return r_cpu->regs.mdr;
 }
 
 void SDD1::mmio_write(uint16 addr, uint8 data) {

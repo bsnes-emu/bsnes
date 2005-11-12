@@ -1,14 +1,9 @@
 #define INTERFACE_MAIN
 
-//requires visual c++
-#define USE_X86_ASM
-
 #include "winmain.h"
 #include "../base.h"
 
 #include "config.cpp"
-
-#define DSP_BUFFER_SIZE 8000
 
 #include "bsnes.h"
 #include "ui.h"
@@ -22,44 +17,47 @@
 #include "ui.cpp"
 
 void init_snes() {
-  mem_bus = new bMemBus();
-  cpu     = new bCPU();
-  apu     = new bAPU();
-  dsp     = new bDSP();
-  ppu     = new bPPU();
-  snes    = new bSNES();
-  bsnes   = static_cast<bSNES*>(snes);
+#ifdef POLYMORPHISM
+  deref(mem) = new bMemBus();
+  deref(cpu) = new bCPU();
+  deref(apu) = new bAPU();
+  deref(dsp) = new bDSP();
+  deref(ppu) = new bPPU();
+#endif
+  snes  = new bSNES();
+  bsnes = static_cast<bSNES*>(snes);
 
   snes->init();
-  snes->set_playback_buffer_size(DSP_BUFFER_SIZE);
 }
 
 void term_snes() {
   snes->term();
 
+#ifdef POLYMORPHISM
 //static casting is neccesary to call derived class deconstructor...
-  if(mem_bus) {
-    delete(static_cast<bMemBus*>(mem_bus));
-    mem_bus = 0;
+  if(deref(mem)) {
+    delete static_cast<bMemBus*>(deref(mem));
+    deref(mem) = 0;
   }
-  if(cpu) {
-    delete(static_cast<bCPU*>(cpu));
-    cpu = 0;
+  if(deref(cpu)) {
+    delete static_cast<bCPU*>(deref(cpu));
+    deref(cpu) = 0;
   }
-  if(apu) {
-    delete(static_cast<bAPU*>(apu));
-    apu = 0;
+  if(deref(apu)) {
+    delete static_cast<bAPU*>(deref(apu));
+    deref(apu) = 0;
   }
-  if(dsp) {
-    delete(static_cast<bDSP*>(dsp));
-    dsp = 0;
+  if(deref(dsp)) {
+    delete static_cast<bDSP*>(deref(dsp));
+    deref(dsp) = 0;
   }
-  if(ppu) {
-    delete(static_cast<bPPU*>(ppu));
-    ppu = 0;
+  if(deref(ppu)) {
+    delete static_cast<bPPU*>(deref(ppu));
+    deref(ppu) = 0;
   }
+#endif
   if(snes) {
-    delete(static_cast<bSNES*>(snes));
+    delete static_cast<bSNES*>(snes);
     snes = 0;
   }
 }

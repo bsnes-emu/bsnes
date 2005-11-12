@@ -15,7 +15,7 @@ uint8  mapper, region;
   rom_size = rf->size();
 
   if(rom_size < 32768) {
-    free(rom_image);
+    zerofree(rom_image);
     return false;
   }
 
@@ -77,7 +77,7 @@ end:
   region = rom[index + 0x19];
 
   dprintf("* Image Name : \"%s\"", cart_title);
-  dprintf("* Region     : %s", (region <= 1)?"NTSC":"PAL");
+  dprintf("* Region     : %s", (region <= 1) ? "NTSC" : "PAL");
   dprintf("* MAD        : %0.2x", mapper);
   dprintf("* SRAM Size  : %dkb", sram_size / 1024);
   dprintf("* Reset:%0.4x NMI:%0.4x IRQ:%0.4x BRK[n]:%0.4x COP[n]:%0.4x BRK[e]:%0.4x COP[e]:%0.4x",
@@ -206,7 +206,9 @@ static uint32 r;
     break;
   }
 
+#ifdef DEBUGGER
   snes->notify(SNES::MEM_READ, addr, r);
+#endif
   return r;
 }
 
@@ -245,7 +247,9 @@ void bMemBus::write(uint32 addr, uint8 value) {
     break;
   }
 
+#ifdef DEBUGGER
   snes->notify(SNES::MEM_WRITE, addr, value);
+#endif
 }
 
 void bMemBus::power() {

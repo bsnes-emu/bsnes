@@ -1,30 +1,28 @@
 #include <dsound.h>
 
+#define DSP_FREQ 32000
+
 class DSSound {
 public:
 LPDIRECTSOUND ds;
-LPDIRECTSOUNDBUFFER dsb_p, *dsb_b;
+LPDIRECTSOUNDBUFFER dsb_p, dsb_b;
 DSBUFFERDESC dsbd;
 WAVEFORMATEX wfx;
-uint32 sample_size;
 uint32 buffer_size;
-uint32 buffer_pos;
-
-void  *dslb;
-uint32 dslbs;
 
 public:
-  void run();
+  void run(uint32 sample);
+  void clear();
   void init();
-
-  DSSound();
+  void term();
 };
 
 struct {
-  uint32 *buffer;
-  uint32 lpos;
-  uint32 lsample;
-  bool   lbuffer;
+  uint32 buffer[2048];
+  uint8  read_buffer, prev_buffer;
+  uint32 buffer_pos, buffer_size;
+
+  uint32 samples_per_frame;
 } data;
 
 DSSound *ds_sound;

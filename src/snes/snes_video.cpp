@@ -8,7 +8,7 @@ const uint8 SNES::color_curve_table[32] = {
 };
 
 void SNES::update_color_lookup_table() {
-int i, l, r, g, b;
+int32 i, l, r, g, b;
 double lr = 0.2126, lg = 0.7152, lb = 0.0722; //luminance
 uint32 col;
 
@@ -29,7 +29,7 @@ uint32 col;
     }
 
     if((int)config::snes.video_color_adjust_mode == VCA_GRAYSCALE) {
-      l = int((double)r * lr) + ((double)g * lg) + ((double)b * lb);
+      l = int32(((double)r * lr) + ((double)g * lg) + ((double)b * lb));
       if(l <   0)l =   0;
       if(l > 255)l = 255;
       r = g = b = l;
@@ -92,7 +92,6 @@ void SNES::update_video_format() {
 }
 
 void SNES::get_video_info(video_info *info) {
-  info->data = video.data;
   info->mode = video.mode;
 
   switch(video.mode) {
@@ -129,10 +128,10 @@ void SNES::get_video_info(video_info *info) {
   }
 }
 
-void SNES::video_update_256x224(uint16 *src) {
+void SNES::video_update_256x224() {
 int x, y;
-uint16 *dest;
-  dest = video.data;
+uint16 *src  = video.ppu_data;
+uint16 *dest = video.data;
 
   for(y=0;y<224;y++) {
     if(video_frame[y].hires == false) {
@@ -147,13 +146,14 @@ uint16 *dest;
       }
       src += 512;
     }
+    dest += video.pitch - 256;
   }
 }
 
-void SNES::video_update_512x224(uint16 *src) {
+void SNES::video_update_512x224() {
 int x, y;
-uint16 *dest;
-  dest = video.data;
+uint16 *src  = video.ppu_data;
+uint16 *dest = video.data;
 
   for(y=0;y<224;y++) {
     if(video_frame[y].hires == false) {
@@ -168,31 +168,41 @@ uint16 *dest;
       }
       src += 512;
     }
+    dest += video.pitch - 512;
   }
 }
 
-void SNES::video_update_256x448(uint16 *src) {
+void SNES::video_update_256x448() {
 int x, y;
-uint16 *dest;
-bool field = !cpu->interlace_field();
-  dest = video.data;
+uint16 *src   = video.ppu_data;
+uint16 *dest  = video.data;
+bool    field = !r_cpu->interlace_field();
 
   for(y=0;y<224;y++) {
     if(video_frame[y].interlace == false) {
       if(video_frame[y].hires == false) {
-        for(x=0;x<512;x++) {
-          *dest++ = color_lookup_table[*(src + (uint8)x)];
+        for(x=0;x<256;x++) {
+          *dest++ = color_lookup_table[*(src + x)];
         }
-        src += 1024;
+        dest += video.pitch - 256;
+        for(x=0;x<256;x++) {
+          *dest++ = color_lookup_table[*(src + x)];
+        }
+        dest += video.pitch - 256;
       } else {
-        for(x=0;x<512;x++) {
-          *dest++ = color_lookup_table[*(src + ((x & 255) << 1))];
+        for(x=0;x<256;x++) {
+          *dest++ = color_lookup_table[*(src + (x << 1))];
         }
-        src += 1024;
+        dest += video.pitch - 256;
+        for(x=0;x<256;x++) {
+          *dest++ = color_lookup_table[*(src + (x << 1))];
+        }
+        dest += video.pitch - 256;
       }
+      src += 1024;
     } else {
       if(field) {
-        dest += 256;
+        dest += video.pitch;
         src  += 512;
       }
 
@@ -207,38 +217,49 @@ bool field = !cpu->interlace_field();
           src += 2;
         }
       }
+      dest += video.pitch - 256;
 
       if(!field) {
-        dest += 256;
+        dest += video.pitch;
         src  += 512;
       }
     }
   }
 }
 
-void SNES::video_update_512x448(uint16 *src) {
+void SNES::video_update_512x448() {
 int x, y;
-uint16 *dest;
-bool field = !cpu->interlace_field();
-  dest = video.data;
+uint16 *src   = video.ppu_data;
+uint16 *dest  = video.data;
+bool    field = !r_cpu->interlace_field();
 
   for(y=0;y<224;y++) {
     if(video_frame[y].interlace == false) {
       if(video_frame[y].hires == false) {
-        for(x=0;x<512;x++) {
-          *dest++ = color_lookup_table[*(src + (uint8)x)];
-          *dest++ = color_lookup_table[*(src + (uint8)x)];
+        for(x=0;x<256;x++) {
+          *dest++ = color_lookup_table[*(src + x)];
+          *dest++ = color_lookup_table[*(src + x)];
         }
-        src += 1024;
+        dest += video.pitch - 512;
+        for(x=0;x<256;x++) {
+          *dest++ = color_lookup_table[*(src + x)];
+          *dest++ = color_lookup_table[*(src + x)];
+        }
+        dest += video.pitch - 512;
       } else {
-        for(x=0;x<1024;x++) {
-          *dest++ = color_lookup_table[*(src + (x & 511))];
+        for(x=0;x<512;x++) {
+          *dest++ = color_lookup_table[*(src + x)];
         }
-        src += 1024;
+        dest += video.pitch - 512;
+        for(x=0;x<512;x++) {
+          *dest++ = color_lookup_table[*(src + x)];
+        }
+        dest += video.pitch - 512;
       }
+      src += 1024;
     } else {
       if(field) {
-        dest += 512;
+        dest += video.pitch;
         src  += 512;
       }
 
@@ -253,9 +274,10 @@ bool field = !cpu->interlace_field();
           *dest++ = color_lookup_table[*src++];
         }
       }
+      dest += video.pitch - 512;
 
       if(!field) {
-        dest += 512;
+        dest += video.pitch;
         src  += 512;
       }
     }
@@ -263,25 +285,30 @@ bool field = !cpu->interlace_field();
 }
 
 void SNES::video_update() {
-  if(ppu->renderer_enabled()) {
+  if(r_ppu->renderer_enabled()) {
     if(video.format_changed == true) {
       update_video_format();
     }
 
-  uint16 *src = (uint16*)video.ppu_data + ((int(cpu->overscan()) << 3) * 1024);
-    switch(video.mode) {
-    case VM_256x224:video_update_256x224(src);break;
-    case VM_512x224:video_update_512x224(src);break;
-    case VM_256x448:video_update_256x448(src);break;
-    case VM_512x448:video_update_512x448(src);break;
-    case VM_VARIABLE:
-      switch(int(video.frame_hires) | (int(video.frame_interlace) << 1)) {
-      case 0:video_update_256x224(src);break;
-      case 1:video_update_512x224(src);break;
-      case 2:video_update_256x448(src);break;
-      case 3:video_update_512x448(src);break;
+    video.data     = (uint16*)video_lock(video.pitch);
+    video.ppu_data = (uint16*)r_ppu->output + (int(r_cpu->overscan()) << 13);
+    video.pitch  >>= 1;
+    if(video.data) {
+      switch(video.mode) {
+      case VM_256x224:video_update_256x224();break;
+      case VM_512x224:video_update_512x224();break;
+      case VM_256x448:video_update_256x448();break;
+      case VM_512x448:video_update_512x448();break;
+      case VM_VARIABLE:
+        switch(int(video.frame_hires) | (int(video.frame_interlace) << 1)) {
+        case 0:video_update_256x224();break;
+        case 1:video_update_512x224();break;
+        case 2:video_update_256x448();break;
+        case 3:video_update_512x448();break;
+        }
+        break;
       }
-      break;
+      video_unlock();
     }
 
   //SNES::capture_screenshot() was called by emulation interface
@@ -298,13 +325,13 @@ void SNES::video_update() {
 }
 
 void SNES::video_scanline() {
-int y = cpu->vcounter();
-int o = int(cpu->overscan()) << 3;
+int y = r_cpu->vcounter();
+int o = int(r_cpu->overscan()) << 3;
   if(y <= (0 + o) || y >= (224 + o))return;
   y -= o;
 
 PPU::scanline_info si;
-  ppu->get_scanline_info(&si);
+  r_ppu->get_scanline_info(&si);
 
   video_frame[y].hires     = si.hires;
   video_frame[y].interlace = si.interlace;
@@ -313,20 +340,9 @@ PPU::scanline_info si;
   video.frame_interlace   |= si.interlace;
 }
 
-uint16 *SNES::get_ppu_output_handle() {
-  return (uint16*)(video.ppu_data +
-    (cpu->vcounter() * 1024) +
-    ((cpu->interlace() && cpu->interlace_field())?512:0));
-}
-
 void SNES::video_init() {
 int i, c;
   video.format_changed = false;
-
-  video.data     = (uint16*)malloc(512 * 448 * sizeof(uint32));
-  video.ppu_data = (uint16*)malloc(512 * 480 * sizeof(uint16));
-  memset(video.data,     0, 512 * 448 * sizeof(uint32));
-  memset(video.ppu_data, 0, 512 * 480 * sizeof(uint16));
 
   for(i=0;i<224;i++) {
     video_frame[i].hires     = false;

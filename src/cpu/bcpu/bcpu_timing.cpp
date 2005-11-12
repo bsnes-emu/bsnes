@@ -239,6 +239,24 @@ uint32 r = status.cycles_executed;
   return r;
 }
 
+void bCPU::cycle_edge() {
+  if(time.hdmainit_triggered == false) {
+    if(time.hc >= time.hdmainit_trigger_pos || time.v) {
+      time.hdmainit_triggered = true;
+      hdmainit_activate();
+    }
+  }
+
+  if(time.hdma_triggered == false) {
+    if(time.v <= (overscan() ? 239 : 224)) {
+      if(time.hc >= 1106) {
+        time.hdma_triggered = true;
+        hdma_activate();
+      }
+    }
+  }
+}
+
 void bCPU::add_cycles(int cycles) {
   status.cycles_executed += cycles;
 
@@ -253,21 +271,14 @@ void bCPU::add_cycles(int cycles) {
 
     if(time.v == 0) {
       frame();
-      ppu->frame();
+      r_ppu->frame();
       snes->frame();
     }
 
     scanline();
-    ppu->scanline();
+    r_ppu->scanline();
     snes->scanline();
     time.line_rendered = false;
-  }
-
-  if(time.hdmainit_triggered == false) {
-    if(time.hc + cycles >= time.hdmainit_trigger_pos || time.v) {
-      time.hdmainit_triggered = true;
-      hdmainit_activate();
-    }
   }
 
   if(time.dram_refreshed == false) {
@@ -296,16 +307,7 @@ void bCPU::add_cycles(int cycles) {
   //therefore, wait a few dots before rendering the scanline
     if(time.hc + cycles >= (48 * 4)) {
       time.line_rendered = true;
-      ppu->render_scanline();
-    }
-  }
-
-  if(time.hdma_triggered == false) {
-    if(time.v <= (overscan() ? 239 : 224)) {
-      if(time.hc + cycles >= 1106) {
-        time.hdma_triggered = true;
-        hdma_activate();
-      }
+      r_ppu->render_scanline();
     }
   }
 

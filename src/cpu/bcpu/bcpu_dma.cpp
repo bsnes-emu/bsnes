@@ -25,10 +25,10 @@ uint8 x;
   if(sdd1->dma_active() == true) {
     x = sdd1->dma_read();
   } else {
-    x = mem_bus->read(dma_addr(i));
+    x = r_mem->read(dma_addr(i));
   }
 
-  mem_bus->write(0x2100 | ((channel[i].destaddr + index) & 0xff), x);
+  r_mem->write(0x2100 | ((channel[i].destaddr + index) & 0xff), x);
 
   add_cycles(8);
   channel[i].xfersize--;
@@ -36,8 +36,8 @@ uint8 x;
 
 void bCPU::dma_mmiotocpu(uint8 i, uint8 index) {
 uint8 x;
-  x = mem_bus->read(0x2100 | ((channel[i].destaddr + index) & 0xff));
-  mem_bus->write(dma_addr(i), x);
+  x = r_mem->read(0x2100 | ((channel[i].destaddr + index) & 0xff));
+  r_mem->write(dma_addr(i), x);
 
   add_cycles(8);
   channel[i].xfersize--;
@@ -113,21 +113,21 @@ uint16 index;
 
 uint8 bCPU::hdma_read(uint8 i) {
   if(channel[i].direction == DMA_MMIOTOCPU) {
-    return mem_bus->read(hdma_mmio(i));
+    return r_mem->read(hdma_mmio(i));
   } else if(!channel[i].hdma_indirect) {
-    return mem_bus->read(hdma_addr(i));
+    return r_mem->read(hdma_addr(i));
   } else {
-    return mem_bus->read(hdma_iaddr(i));
+    return r_mem->read(hdma_iaddr(i));
   }
 }
 
 void bCPU::hdma_write(uint8 i, uint8 x) {
   if(channel[i].direction == DMA_CPUTOMMIO) {
-    mem_bus->write(hdma_mmio(i), x);
+    r_mem->write(hdma_mmio(i), x);
   } else if(!channel[i].hdma_indirect) {
-    mem_bus->write(hdma_addr(i), x);
+    r_mem->write(hdma_addr(i), x);
   } else {
-    mem_bus->write(hdma_iaddr(i), x);
+    r_mem->write(hdma_iaddr(i), x);
   }
 
   add_cycles(8);
@@ -135,12 +135,12 @@ void bCPU::hdma_write(uint8 i, uint8 x) {
 }
 
 void bCPU::hdma_update(uint8 i) {
-  channel[i].hdma_line_counter = mem_bus->read(hdma_addr(i));
+  channel[i].hdma_line_counter = r_mem->read(hdma_addr(i));
   add_cycles(8);
   hdma_add_cycles(8);
 
   if(channel[i].hdma_indirect) {
-    channel[i].hdma_iaddr = mem_bus->read(hdma_addr(i)) << 8;
+    channel[i].hdma_iaddr = r_mem->read(hdma_addr(i)) << 8;
     add_cycles(8);
     hdma_add_cycles(8);
   }
@@ -155,7 +155,7 @@ void bCPU::hdma_update(uint8 i) {
 
   if(channel[i].hdma_indirect) {
     channel[i].hdma_iaddr >>= 8;
-    channel[i].hdma_iaddr  |= mem_bus->read(hdma_addr(i)) << 8;
+    channel[i].hdma_iaddr  |= r_mem->read(hdma_addr(i)) << 8;
     add_cycles(8);
     hdma_add_cycles(8);
   }

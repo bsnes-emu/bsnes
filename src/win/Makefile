@@ -1,11 +1,11 @@
 CC = cl
-CFLAGS = /nologo /O2 /Ogityb2 /Gr /Gs /DARCH_LSB
+CFLAGS = /nologo /O2 /wd4996
 OBJS = winmain.obj \
        libstring.obj libconfig.obj \
        reader.obj \
        memory.obj bmemory.obj \
        cpu.obj bcpu.obj \
-       apu.obj bapu.obj bapuskip.obj \
+       apu.obj bapu.obj \
        bdsp.obj \
        ppu.obj bppu.obj \
        snes.obj \
@@ -15,9 +15,12 @@ LIBS = kernel32.lib user32.lib gdi32.lib comdlg32.lib ddraw.lib dsound.lib dxgui
 all: $(OBJS)
 	rc /r /fobsnes.res bsnes.rc
 	$(CC) /Febsnes.exe $(CFLAGS) $(OBJS) bsnes.res $(LIBS)
+#/link /PGD:bsnes.pgd /LTCG:PGOPTIMIZE
 
 clean:
 	del *.obj
+	del *.pgd
+	del *.pgc
 
 ######################
 ### win32-specific ###
@@ -59,9 +62,6 @@ apu.obj: ../apu/*
 
 bapu.obj: ../apu/bapu/*
 	$(CC) $(CFLAGS) /c ../apu/bapu/bapu.cpp
-
-bapuskip.obj: ../apu/bapuskip/*
-	$(CC) $(CFLAGS) /c ../apu/bapuskip/bapuskip.cpp
 
 ###########
 ### dsp ###

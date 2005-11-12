@@ -37,7 +37,7 @@ void bCPU::mmio_reset() {
 //WMDATA
 uint8 bCPU::mmio_r2180() {
 uint8 r;
-  r = mem_bus->read(0x7e0000 | status.wram_addr);
+  r = r_mem->read(0x7e0000 | status.wram_addr);
   status.wram_addr++;
   status.wram_addr &= 0x01ffff;
   return r;
@@ -324,7 +324,7 @@ uint8 bCPUMMIO::read(uint32 addr) {
 uint i;
 //APU
   if(addr >= 0x2140 && addr <= 0x217f) {
-    return apu->port_read(addr & 3);
+    return r_apu->port_read(addr & 3);
   }
 
 //HDMA
@@ -374,7 +374,7 @@ uint i;
 
 //WMDATA
 void bCPU::mmio_w2180(uint8 value) {
-  mem_bus->write(0x7e0000 | status.wram_addr, value);
+  r_mem->write(0x7e0000 | status.wram_addr, value);
   status.wram_addr++;
   status.wram_addr &= 0x01ffff;
 }
@@ -441,7 +441,7 @@ void bCPU::mmio_w4200(uint8 value) {
 //WRIO
 void bCPU::mmio_w4201(uint8 value) {
   if((status.pio & 0x80) && !(value & 0x80)) {
-    ppu->latch_counters();
+    r_ppu->latch_counters();
   }
   status.pio = value;
 }
@@ -525,7 +525,7 @@ void bCPU::mmio_w420c(uint8 value) {
 
 //MEMSEL
 void bCPU::mmio_w420d(uint8 value) {
-  mem_bus->set_speed(value & 1);
+  r_mem->set_speed(value & 1);
 }
 
 //DMAPx

@@ -1,25 +1,3 @@
-void SNES::set_playback_buffer_size(uint32 buffer_size) {
-  if(dsp_buffer.data) {
-    free(dsp_buffer.data);
-    dsp_buffer.data = 0;
-  }
-
-//* 2 is for left/right channel data
-  dsp_buffer.data = (uint16*)malloc(buffer_size * sizeof(uint16) * 2);
-  memset(dsp_buffer.data, 0, buffer_size * sizeof(uint16) * 2);
-
-  dsp_buffer.size = buffer_size;
-  dsp_buffer.pos  = 0;
-}
-
-uint32 SNES::get_playback_buffer_pos() {
-  return dsp_buffer.pos;
-}
-
-uint16 *SNES::get_playback_buffer() {
-  return dsp_buffer.data;
-}
-
 void SNES::audio_update(uint32 data) {
   if(pcmfp) {
     fputc(data,       pcmfp);
@@ -30,11 +8,7 @@ void SNES::audio_update(uint32 data) {
 
   if((bool)config::snes.mute == true)data = 0x0000;
 
-  dsp_buffer.data[dsp_buffer.pos++] = (data)       & 0xffff;
-  dsp_buffer.data[dsp_buffer.pos++] = (data >> 16) & 0xffff;
-  dsp_buffer.pos %= dsp_buffer.size;
-
-  sound_run();
+  sound_run(data);
 }
 
 void SNES::log_audio_enable(const char *fn) {

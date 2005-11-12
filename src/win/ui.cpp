@@ -54,7 +54,6 @@ void init_ui1() {
   SetFocus(w_main->hwnd);
   dd_renderer->set_window(w_main->hwnd);
   dd_renderer->to_windowed();
-  ds_sound->init();
 
   w_main->show_menu();
   w_main->set_video_mode(config::video.mode);

@@ -1,6 +1,6 @@
 void bPPU::latch_counters() {
-  regs.hcounter = cpu->hcounter();
-  regs.vcounter = cpu->vcounter();
+  regs.hcounter = r_cpu->hcounter();
+  regs.vcounter = r_cpu->vcounter();
   regs.counters_latched = true;
 }
 
@@ -21,20 +21,20 @@ bool bPPU::vram_can_read() {
     return true;
   }
 
-uint16 v  = cpu->vcounter();
-uint16 hc = cpu->hcycles();
+uint16 v  = r_cpu->vcounter();
+uint16 hc = r_cpu->hcycles();
 uint16 ls;
-  if(cpu->interlace() && !cpu->interlace_field()) {
-    ls = cpu->region_scanlines();
+  if(r_cpu->interlace() && !r_cpu->interlace_field()) {
+    ls = r_cpu->region_scanlines();
   } else {
-    ls = cpu->region_scanlines() - 1;
+    ls = r_cpu->region_scanlines() - 1;
   }
 
   if(v == ls && hc == 1362)return false;
 
-  if(v < (cpu->overscan() ? 239 : 224))return false;
+  if(v < (r_cpu->overscan() ? 239 : 224))return false;
 
-  if(v == (cpu->overscan() ? 239 : 224)) {
+  if(v == (r_cpu->overscan() ? 239 : 224)) {
     if(hc == 1362)return true;
     return false;
   }
@@ -47,17 +47,17 @@ bool bPPU::vram_can_write(uint8 &value) {
     return true;
   }
 
-uint16 v  = cpu->vcounter();
-uint16 hc = cpu->hcycles();
+uint16 v  = r_cpu->vcounter();
+uint16 hc = r_cpu->hcycles();
   if(v == 0) {
     if(hc <= 4)return true;
-    if(hc == 6) { value = cpu->regs.mdr; return true; }
+    if(hc == 6) { value = r_cpu->regs.mdr; return true; }
     return false;
   }
 
-  if(v < (cpu->overscan() ? 240 : 225))return false;
+  if(v < (r_cpu->overscan() ? 240 : 225))return false;
 
-  if(v == (cpu->overscan() ? 240 : 225)) {
+  if(v == (r_cpu->overscan() ? 240 : 225)) {
     if(hc <= 4)return false;
     return true;
   }
@@ -542,6 +542,8 @@ void bPPU::mmio_w2132(uint8 value) {
   if(value & 0x80)regs.color_b = value & 0x1f;
   if(value & 0x40)regs.color_g = value & 0x1f;
   if(value & 0x20)regs.color_r = value & 0x1f;
+
+  regs.color_rgb = (regs.color_r) | (regs.color_g << 5) | (regs.color_b << 10);
 }
 
 //SETINI
@@ -552,8 +554,8 @@ void bPPU::mmio_w2133(uint8 value) {
   regs.oam_halve   = !!(value & 0x02);
   regs.interlace   = !!(value & 0x01);
 
-  cpu->set_overscan(regs.overscan);
-  cpu->set_interlace(regs.interlace);
+  r_cpu->set_overscan(regs.overscan);
+  r_cpu->set_interlace(regs.interlace);
 }
 
 //MPYL
@@ -582,10 +584,10 @@ uint32 r;
 
 //SLHV
 uint8 bPPU::mmio_r2137() {
-  if(cpu->pio_status() & 0x80) {
+  if(r_cpu->pio_status() & 0x80) {
     latch_counters();
   }
-  return cpu->regs.mdr;
+  return r_cpu->regs.mdr;
 }
 
 //OAMDATAREAD
@@ -689,8 +691,8 @@ uint8 r = 0x00;
   regs.latch_hcounter = 0;
   regs.latch_vcounter = 0;
 
-  r |= cpu->interlace_field() << 7;
-  if(!(cpu->pio_status() & 0x80)) {
+  r |= r_cpu->interlace_field() << 7;
+  if(!(r_cpu->pio_status() & 0x80)) {
     r |= 0x40;
   } else if(regs.counters_latched == true) {
     r |= 0x40;
@@ -738,7 +740,7 @@ uint8 bPPUMMIO::read(uint32 addr) {
   case 0x213f:return ppu->mmio_r213f(); //STAT78
   }
 
-  return cpu->regs.mdr;
+  return r_cpu->regs.mdr;
 }
 
 void bPPUMMIO::write(uint32 addr, uint8 value) {

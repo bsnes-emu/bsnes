@@ -27,14 +27,14 @@ FileReader *rf = new FileReader();
     alert("Error loading image file [%s]!", rom_fn);
     return false;
   }
-  mem_bus->load_cart(static_cast<Reader*>(rf));
+  r_mem->load_cart(static_cast<Reader*>(rf));
   rf->close();
 
 CartInfo ci;
-  mem_bus->get_cartinfo(&ci);
+  r_mem->get_cartinfo(&ci);
   if(ci.sram_size != 0) {
     rf->open(sram_fn);
-    mem_bus->load_sram(static_cast<Reader*>(rf));
+    r_mem->load_sram(static_cast<Reader*>(rf));
     rf->close();
   }
 
@@ -50,11 +50,11 @@ void ROMImage::unload() {
 
 FileWriter *wf;
 CartInfo ci;
-  mem_bus->get_cartinfo(&ci);
+  r_mem->get_cartinfo(&ci);
   if(ci.sram_size != 0) {
     wf = new FileWriter();
     wf->open(sram_fn);
-    mem_bus->save_sram(static_cast<Writer*>(wf));
+    r_mem->save_sram(static_cast<Writer*>(wf));
     wf->close();
     delete(wf);
   }
@@ -62,7 +62,7 @@ CartInfo ci;
   file_loaded = false;
   bsnes->debugger_deactivate();
 
-  mem_bus->unload_cart();
+  r_mem->unload_cart();
 }
 
 void ROMImage::select(char *fn) {

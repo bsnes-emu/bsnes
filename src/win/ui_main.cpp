@@ -135,6 +135,16 @@ long __stdcall wndproc_main(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
 time_t timeout;
 int i;
   switch(msg) {
+  case WM_ENTERMENULOOP:
+    ds_sound->clear();
+    break;
+  case WM_EXITMENULOOP:
+    timeout = time(0);
+    while(difftime(time(0), timeout) < 3) {
+      if(!KeyDown(VK_RETURN))break;
+    }
+    bsnes->clear_input();
+    break;
   case WM_KEYDOWN:
     if(wparam == VK_ESCAPE) {
       if(GetMenu(w_main->hwnd) == NULL) {
@@ -146,13 +156,6 @@ int i;
     }
     break;
   case WM_COMMAND:
-//below code fails because it is triggered after snes->poll_input()...
-//unsure how to fix this...
-//  timeout = time(NULL);
-//  while(difftime(time(NULL), timeout) < 5) {
-//    if(!KeyDown(VK_RETURN))break;
-//  }
-
     switch(LOWORD(wparam)) {
     case MENU_FILE_LOAD:
       w_main->menu_load();
@@ -174,6 +177,11 @@ int i;
       break;
     case MENU_FILE_EXIT:
       PostQuitMessage(0);
+      break;
+    case MENU_SETTINGS_REGULATE_SPEED:
+      config::system.regulate_speed.toggle();
+      CheckMenuItem(w_main->hmenu, MENU_SETTINGS_REGULATE_SPEED,
+        (config::system.regulate_speed)?MF_CHECKED:MF_UNCHECKED);
       break;
     case MENU_SETTINGS_FRAMESKIP_OFF:
     case MENU_SETTINGS_FRAMESKIP_1:
@@ -314,6 +322,7 @@ HMENU hsubmenu, hbranchmenu;
   AppendMenu(hmenu, MF_STRING | MF_POPUP, (unsigned int)hsubmenu, "&File");
 
   hsubmenu = CreatePopupMenu();
+  AppendMenu(hsubmenu, MF_STRING, MENU_SETTINGS_REGULATE_SPEED, "&Regulate Speed");
 
   hbranchmenu = CreatePopupMenu();
   AppendMenu(hbranchmenu, MF_STRING, MENU_SETTINGS_FRAMESKIP_OFF, "Off");
@@ -356,8 +365,11 @@ HMENU hsubmenu, hbranchmenu;
   AppendMenu(hbranchmenu, MF_STRING, MENU_SETTINGS_INPUTCFG_JOYPAD2, "Joypad 2");
   AppendMenu(hsubmenu, MF_STRING | MF_POPUP, (unsigned int)hbranchmenu, "&Configure Input Devices");
 
+#ifdef DEBUGGER
   AppendMenu(hsubmenu, MF_SEPARATOR, 0, "");
   AppendMenu(hsubmenu, MF_STRING, MENU_SETTINGS_DEBUGGER, "&Debugger");
+#endif
+
   AppendMenu(hmenu, MF_STRING | MF_POPUP, (unsigned int)hsubmenu, "&Settings");
 
   hsubmenu = CreatePopupMenu();
@@ -367,6 +379,7 @@ HMENU hsubmenu, hbranchmenu;
   AppendMenu(hsubmenu, MF_STRING, MENU_MISC_ABOUT, "&About...");
   AppendMenu(hmenu, MF_STRING | MF_POPUP, (unsigned int)hsubmenu, "&Misc");
 
+  CheckMenuItem(hmenu, MENU_SETTINGS_REGULATE_SPEED, (config::system.regulate_speed)?MF_CHECKED:MF_UNCHECKED);
   CheckMenuItem(hmenu, MENU_SETTINGS_USEVRAM,    (config::video.use_vram)?MF_CHECKED:MF_UNCHECKED);
   CheckMenuItem(hmenu, MENU_SETTINGS_VBLANK,     (config::video.vblank)?MF_CHECKED:MF_UNCHECKED);
   CheckMenuItem(hmenu, MENU_SETTINGS_COLORADJUST_COLORCURVE, (config::snes.video_color_curve)?MF_CHECKED:MF_UNCHECKED);

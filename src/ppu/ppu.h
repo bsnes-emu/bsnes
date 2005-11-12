@@ -1,11 +1,13 @@
 class PPU {
 public:
+uint16 *output;
 
 //this struct should be read-only to
 //functions outside of this class
 struct {
   bool   render_output;
 
+  bool   frame_executed;
   bool   frames_updated;
   uint32 frames_rendered;
   uint32 frames_executed;
@@ -43,8 +45,8 @@ struct scanline_info {
   virtual void  scanline() = 0;
   virtual void  render_scanline() = 0;
   virtual void  frame();
-  virtual void  power() = 0;
-  virtual void  reset() = 0;
+  virtual void  power();
+  virtual void  reset();
   virtual void  enable_renderer(bool r);
   virtual bool  renderer_enabled();
 

@@ -43,8 +43,10 @@ uint8 *speed_table,
        speed_table_fastrom[32768];
   inline uint8 calc_speed(uint32 addr, bool fast);
 public:
-  uint8 speed(uint32 addr);
-  void  set_speed(bool fast);
+  inline uint8 speed(uint32 addr) {
+    return speed_table[addr >> 9];
+  }
+  void set_speed(bool fast);
 
   virtual bool load_cart(Reader *rf) = 0;
   virtual bool load_sram(Reader *rf) = 0;

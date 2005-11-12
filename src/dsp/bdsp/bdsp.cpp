@@ -183,7 +183,7 @@ int i, v, n;
 
 void bDSP::power() {
 int v;
-  spcram = apu->get_spcram_handle();
+  spcram = r_apu->get_spcram_handle();
   memset(dspram, 0x00, 128);
 
   for(v=0;v<8;v++) {

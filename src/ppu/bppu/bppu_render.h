@@ -64,24 +64,25 @@ struct oam_tileitem {
 } oam_tilelist[34];
 
 enum { OAM_PRI_NONE = 4 };
-uint8 oam_line_pal[512], oam_line_pri[512];
+uint8 oam_line_pal[256], oam_line_pri[256];
 
 bool is_sprite_on_scanline();
 void load_oam_tiles();
 void render_oam_tile(int tile_num);
 void render_line_oam(uint8 pri0_pos, uint8 pri1_pos, uint8 pri2_pos, uint8 pri3_pos);
+void render_line_oam_lores(uint8 pri0_pos, uint8 pri1_pos, uint8 pri2_pos, uint8 pri3_pos);
+void render_line_oam_hires(uint8 pri0_pos, uint8 pri1_pos, uint8 pri2_pos, uint8 pri3_pos);
 
 //bppu_render_mode7.cpp
 void render_line_mode7(uint8 bg, uint8 pri0_pos, uint8 pri1_pos);
 
 //bppu_render_addsub.cpp
-inline uint16 addsub_pixels(uint32 cdest, uint32 csrc);
-inline uint16 addsub_pixel (uint32 cdest);
+inline uint16 addsub_pixels(uint32 x);
 
 //bppu_render_line.cpp
 enum { BLENDTYPE_BACK = 0, BLENDTYPE_MAIN = 1, BLENDTYPE_SUB = 2, BLENDTYPE_COMBINE = 3 };
 
 inline uint16 get_palette(uint8 index);
 inline uint16 get_direct_color(uint8 p, uint8 t);
-inline uint16 get_pixel(int x);
+inline uint16 get_pixel(uint32 x);
 inline void render_line_output();

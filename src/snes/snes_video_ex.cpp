@@ -5,25 +5,13 @@ void SNES::capture_screenshot() {
 //used to convert pixel data to write to rgb555 format
 //bitmap image via SNES::output_screenshot() function
 uint16 SNES::to_rgb555(uint32 color) {
-  if(video.depth == 15) {
-  //rgb555
-    return color & 0x7fff;
-  }
-
-  if(video.depth == 16) {
-  //rgb565->rgb555
-    return ((color >> 1) & 0x7fe0) | (color & 0x001f);
-  }
-
-  if(video.depth == 24 || video.depth == 32) {
-  //rgb888->rgb555
-    return ((color >> 9) & 0x7c00) | ((color >> 6) & 0x03e0) | ((color >> 3) & 0x001f);
-  }
-
-//unsupported color depth
-  return color;
+//bgr555->rgb555
+  return ((color & 0x7c00) >> 10) | (color & 0x03e0) | ((color & 0x001f) << 10);
 }
 
+//this routine isn't perfect... it will fail if the video frame
+//mixes resolutions (e.g. the top half is 256x224, and the bottom
+//half is 512x224, etc.)
 void SNES::output_screenshot() {
 FILE *fp;
 char fn[256];
@@ -95,7 +83,7 @@ int x, y;
 uint16 c;
   for(y=height;y>=1;y--) {
     for(x=0;x<width;x++) {
-      c = to_rgb555(video.data[y * width + x]);
+      c = to_rgb555(video.ppu_data[y * 1024 + x]);
       fputc(c,      fp);
       fputc(c >> 8, fp);
     }

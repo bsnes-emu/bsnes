@@ -118,7 +118,7 @@ void bPPU::init_tiledata_cache() {
 void bPPU::clear_tiledata_cache() {
   memset(bg_tiledata[TILE_2BIT],       0, 262144);
   memset(bg_tiledata[TILE_4BIT],       0, 131072);
-  memset(bg_tiledata[TILE_4BIT],       0,  65536);
+  memset(bg_tiledata[TILE_8BIT],       0,  65536);
   memset(bg_tiledata_state[TILE_2BIT], 0,   4096);
   memset(bg_tiledata_state[TILE_4BIT], 0,   2048);
   memset(bg_tiledata_state[TILE_8BIT], 0,   1024);

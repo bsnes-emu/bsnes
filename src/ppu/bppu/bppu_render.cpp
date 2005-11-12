@@ -20,28 +20,25 @@ inline void bPPU::render_line_mode0() {
 }
 
 /*
-Mode 1 (pri=0): ->
-     1,    2,    3,    4,    5,    6,    7,    8,    9,   10
-  BG3B, OAM0, BG3A, OAM1, BG2B, BG1B, OAM2, BG2A, BG1A, OAM3
-
 Mode 1 (pri=1): ->
      1,    2,    3,    4,    5,    6,    7,    8,    9,   10
   BG3B, OAM0, OAM1, BG2B, BG1B, OAM2, BG2A, BG1A, OAM3, BG3A
+
+Mode 1 (pri=0): ->
+     1,    2,    3,    4,    5,    6,    7,    8,    9,   10
+  BG3B, OAM0, BG3A, OAM1, BG2B, BG1B, OAM2, BG2A, BG1A, OAM3
 */
 inline void bPPU::render_line_mode1() {
-  switch(regs.bg3_priority) {
-  case 0:
-    render_line_bg(BG1, COLORDEPTH_16, 6,  9);
-    render_line_bg(BG2, COLORDEPTH_16, 5,  8);
-    render_line_bg(BG3, COLORDEPTH_4,  1,  3);
-    render_line_oam(2, 4, 7, 10);
-    break;
-  case 1:
+  if(regs.bg3_priority) {
     render_line_bg(BG1, COLORDEPTH_16, 5,  8);
     render_line_bg(BG2, COLORDEPTH_16, 4,  7);
     render_line_bg(BG3, COLORDEPTH_4,  1, 10);
     render_line_oam(2, 3, 6, 9);
-    break;
+  } else {
+    render_line_bg(BG1, COLORDEPTH_16, 6,  9);
+    render_line_bg(BG2, COLORDEPTH_16, 5,  8);
+    render_line_bg(BG3, COLORDEPTH_4,  1,  3);
+    render_line_oam(2, 4, 7, 10);
   }
 }
 
@@ -121,7 +118,7 @@ inline void bPPU::render_line_mode7() {
 
 void bPPU::render_line() {
   if(regs.display_disabled == true) {
-    memset(snes->get_ppu_output_handle(), 0, 1024);
+    memset(output + (line.y * 1024), 0, 1024);
     return;
   }
 

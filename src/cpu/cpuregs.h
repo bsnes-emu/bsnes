@@ -41,7 +41,7 @@ union {
   struct { uint8 l, h; };
 #else
   struct { uint8 h, l; };
-#endif;
+#endif
 };
 
   CPUReg16() { w = 0; }

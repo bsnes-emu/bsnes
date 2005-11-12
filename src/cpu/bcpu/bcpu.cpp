@@ -85,7 +85,7 @@ void bCPU::power() {
 
 void bCPU::reset() {
 //reset vector location
-  regs.pc  = mem_bus->read(0xfffc) | (mem_bus->read(0xfffd) << 8);
+  regs.pc  = r_mem->read(0xfffc) | (r_mem->read(0xfffd) << 8);
 
 //registers are not fully reset by SNES
   regs.x.h = 0x00;
@@ -161,22 +161,25 @@ void bCPU::cpu_io() {
   status.cycle_count = 6;
   pre_exec_cycle();
   add_cycles(6);
+  cycle_edge();
 }
 
 uint8 bCPU::mem_read(uint32 addr) {
-  status.cycle_count = mem_bus->speed(addr);
+  status.cycle_count = r_mem->speed(addr);
   pre_exec_cycle();
   add_cycles(status.cycle_count - 4);
-  regs.mdr = mem_bus->read(addr);
+  regs.mdr = r_mem->read(addr);
   add_cycles(4);
+  cycle_edge();
   return regs.mdr;
 }
 
 void bCPU::mem_write(uint32 addr, uint8 value) {
-  status.cycle_count = mem_bus->speed(addr);
+  status.cycle_count = r_mem->speed(addr);
   pre_exec_cycle();
   add_cycles(status.cycle_count);
-  mem_bus->write(addr, value);
+  r_mem->write(addr, value);
+  cycle_edge();
 }
 
 uint32 bCPU::op_addr(uint8 mode, uint32 addr) {

@@ -5,11 +5,11 @@
 void bPPU::run() {}
 
 void bPPU::scanline() {
-  line.y               = cpu->vcounter();
+  line.y               = r_cpu->vcounter();
   line.width           = (regs.bg_mode == 5 || regs.bg_mode == 6) ? 512 : 256;
   line.hires           = (regs.bg_mode == 5 || regs.bg_mode == 6);
-  line.interlace       = cpu->interlace();
-  line.interlace_field = cpu->interlace_field();
+  line.interlace       = r_cpu->interlace();
+  line.interlace_field = r_cpu->interlace_field();
 
   if(line.y == 0) {
   //RTO flag reset
@@ -26,7 +26,7 @@ void bPPU::scanline() {
     }
   }
 
-  if(line.y == (cpu->overscan() ? 239 : 224) && regs.display_disabled == false) {
+  if(line.y == (r_cpu->overscan() ? 239 : 224) && regs.display_disabled == false) {
   //OAM address reset
     regs.oam_addr = ((regs.oam_addrh << 8) | regs.oam_addrl) << 1;
   }
@@ -35,17 +35,18 @@ void bPPU::scanline() {
 void bPPU::render_scanline() {
   if(status.render_output == false)return;
 
-  if(line.y > 0 && line.y < (cpu->overscan() ? 239 : 224)) {
+  if(line.y > 0 && line.y < (r_cpu->overscan() ? 239 : 224)) {
     render_line();
   }
 }
 
 void bPPU::frame() {
   PPU::frame();
-  snes->notify(SNES::RENDER_FRAME);
 }
 
 void bPPU::power() {
+  PPU::power();
+
   memset(vram,  0, 65536);
   memset(oam,   0,   544);
   memset(cgram, 0,   512);
@@ -56,6 +57,7 @@ void bPPU::power() {
 }
 
 void bPPU::reset() {
+  PPU::reset();
   frame();
 
   memset(sprite_list, 0, sizeof(sprite_list));
@@ -228,9 +230,10 @@ void bPPU::reset() {
   regs.color_enabled[BG1]  = false;
 
 //$2132
-  regs.color_r = 0x00;
-  regs.color_g = 0x00;
-  regs.color_b = 0x00;
+  regs.color_r   = 0x00;
+  regs.color_g   = 0x00;
+  regs.color_b   = 0x00;
+  regs.color_rgb = 0x0000;
 
 //$2133
   regs.mode7_extbg = false;
@@ -262,20 +265,26 @@ void bPPU::reset() {
 uint8 bPPU::vram_read(uint16 addr) {
 uint8 r;
   r = vram[addr];
+#ifdef DEBUGGER
   snes->notify(SNES::VRAM_READ, addr, r);
+#endif
   return r;
 }
 
 void bPPU::vram_write(uint16 addr, uint8 value) {
   vram[addr] = value;
+#ifdef DEBUGGER
   snes->notify(SNES::VRAM_WRITE, addr, value);
+#endif
 }
 
 uint8 bPPU::oam_read(uint16 addr) {
 uint8 r;
   if(addr >= 0x0200)addr = 0x0200 | (addr & 31);
   r = oam[addr];
+#ifdef DEBUGGER
   snes->notify(SNES::OAM_READ, addr, r);
+#endif
   return r;
 }
 
@@ -283,7 +292,9 @@ void bPPU::oam_write(uint16 addr, uint8 value) {
   if(addr >= 0x0200)addr = 0x0200 | (addr & 31);
   oam[addr] = value;
   update_sprite_list(addr);
+#ifdef DEBUGGER
   snes->notify(SNES::OAM_WRITE, addr, value);
+#endif
 }
 
 uint8 bPPU::cgram_read(uint16 addr) {
@@ -293,7 +304,9 @@ uint8 r;
   if(addr & 1) {
     r &= 0x7f;
   }
+#ifdef DEBUGGER
   snes->notify(SNES::CGRAM_READ, addr, r);
+#endif
   return r;
 }
 
@@ -303,7 +316,9 @@ void bPPU::cgram_write(uint16 addr, uint8 value) {
     value &= 0x7f;
   }
   cgram[addr] = value;
+#ifdef DEBUGGER
   snes->notify(SNES::CGRAM_WRITE, addr, value);
+#endif
 }
 
 bPPU::bPPU() {
