@@ -10,10 +10,10 @@ enum {
   BRR_LOOP = 2
 };
 
-uint8  read_8  (uint16 addr);
-uint16 read_16 (uint16 addr);
-void   write_8 (uint16 addr, uint8 data);
-void   write_16(uint16 addr, uint16 data);
+uint8  readb (uint16 addr);
+uint16 readw (uint16 addr);
+void   writeb(uint16 addr, uint8  data);
+void   writew(uint16 addr, uint16 data);
 
 public:
 static const uint16 RateTable[32];
@@ -63,7 +63,7 @@ struct Status {
   int8   FIR[8];
 
 //internal variables
-//uint8  kon;
+  uint8  kon;
   bool   key_flag;
 
   int16  noise_ctr, noise_rate;

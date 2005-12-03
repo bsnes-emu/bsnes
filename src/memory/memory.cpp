@@ -127,5 +127,3 @@ int i;
   }
   speed_table = (uint8*)speed_table_slowrom;
 }
-
-MemBus::~MemBus() {}

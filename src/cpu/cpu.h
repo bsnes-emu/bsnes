@@ -70,4 +70,5 @@ enum {
   uint16 __relw(int16 offset);
 
   CPU();
+  virtual ~CPU() {}
 };

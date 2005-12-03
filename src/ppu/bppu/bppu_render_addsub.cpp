@@ -1,14 +1,4 @@
-inline uint16 bPPU::addsub_pixels(uint32 x) {
-uint32 cdest = pixel_cache[x].src_main,
-       csrc  = pixel_cache[x].src_sub;
-bool   halve = false;
-  if(regs.color_halve && window_cache[COL].main[x]) {
-    if(regs.addsub_mode && pixel_cache[x].bg_sub == BACK);
-    else {
-      halve = true;
-    }
-  }
-
+inline uint16 bPPU::addsub_pixels(uint32 x, uint32 cdest, uint32 csrc, bool halve) {
   if(!regs.color_mode) {
   //add
     cdest = ((cdest << 16) | cdest) & 0x03e07c1f;

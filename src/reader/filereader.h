@@ -5,7 +5,7 @@ uint32 fsize;
 
 public:
   uint32 size();
-  void   read(uint8 **buffer, uint32 length = 0);
+  uint8 *read(uint32 length = 0);
   bool   open(char *fn);
   void   close();
 

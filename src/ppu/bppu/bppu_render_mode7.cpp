@@ -17,6 +17,12 @@
 void bPPU::render_line_mode7(uint8 bg, uint8 pri0_pos, uint8 pri1_pos) {
   if(regs.bg_enabled[bg] == false && regs.bgsub_enabled[bg] == false)return;
 
+//are layers disabled by user?
+  if(render_enabled(bg, 0) == false)pri0_pos = 0;
+  if(render_enabled(bg, 1) == false)pri1_pos = 0;
+//nothing to render?
+  if(!pri0_pos && !pri1_pos);
+
 int32 x, y;
 int32 a, b, c, d, cx, cy;
 int32 hofs, vofs;
@@ -131,16 +137,17 @@ int32 psy = ((c * CLIP(hofs - cx)) & ~63) + ((d * CLIP(vofs - cy)) & ~63) + ((d 
     if(regs.bg_enabled[bg] == true && !wt_main[_x]) {
       if(pixel_cache[_x].pri_main < _pri) {
         pixel_cache[_x].pri_main = _pri;
-        pixel_cache[_x].bg_main  = 0x80 | bg;
+        pixel_cache[_x].bg_main  = bg;
         pixel_cache[_x].src_main = col;
-        pixel_cache[_x].color_exempt = false;
+        pixel_cache[_x].ce_main  = false;
       }
     }
     if(regs.bgsub_enabled[bg] == true && !wt_sub[_x]) {
       if(pixel_cache[_x].pri_sub < _pri) {
         pixel_cache[_x].pri_sub = _pri;
-        pixel_cache[_x].bg_sub  = 0x80 | bg;
+        pixel_cache[_x].bg_sub  = bg;
         pixel_cache[_x].src_sub = col;
+        pixel_cache[_x].ce_sub  = false;
       }
     }
   }

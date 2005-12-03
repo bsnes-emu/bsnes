@@ -9,12 +9,11 @@ int16 r = x + y + regs.p.c;
 }
 
 uint16 bAPU::op_addw(uint16 x, uint16 y) {
-int32 r = x + y;
-  regs.p.n = !!(r & 0x8000);
-  regs.p.v = !!(~(x ^ y) & (y ^ (uint16)r) & 0x8000);
-  regs.p.h = !!((x ^ y ^ (uint16)r) & 0x10);
+int16 r;
+  regs.p.c = 0;
+  r  = op_adc(x, y);
+  r |= op_adc(x >> 8, y >> 8) << 8;
   regs.p.z = ((uint16)r == 0);
-  regs.p.c = (r > 0xffff);
   return r;
 }
 
@@ -66,12 +65,11 @@ int16 r = x - y - !regs.p.c;
 }
 
 uint16 bAPU::op_subw(uint16 x, uint16 y) {
-int32 r = x - y;
-  regs.p.n = !!(r & 0x8000);
-  regs.p.v = !!((x ^ y) & (x ^ (uint16)r) & 0x8000);
-  regs.p.h = !((x ^ y ^ (uint16)r) & 0x10);
+int16 r;
+  regs.p.c = 1;
+  r  = op_sbc(x, y);
+  r |= op_sbc(x >> 8, y >> 8) << 8;
   regs.p.z = ((uint16)r == 0);
-  regs.p.c = (r >= 0);
   return r;
 }
 

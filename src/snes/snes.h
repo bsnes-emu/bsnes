@@ -56,4 +56,5 @@ enum {
   virtual void notify(uint32 message, uint32 param1 = 0, uint32 param2 = 0);
 
   SNES();
+  virtual ~SNES() {}
 };

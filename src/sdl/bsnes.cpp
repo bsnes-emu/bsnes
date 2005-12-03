@@ -2,8 +2,6 @@ void   bSNES::set_status(uint32 new_status) { run_status = new_status; }
 uint32 bSNES::get_status()                  { return run_status; }
 
 void bSNES::run() {
-  if(!rom_image->loaded())return;
-
   switch(run_status) {
   case RUN:
     SNES::runtoframe();

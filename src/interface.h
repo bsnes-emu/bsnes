@@ -1,4 +1,4 @@
-#define BSNES_VERSION "0.014"
+#define BSNES_VERSION "0.015"
 #define BSNES_TITLE "bsnes v" BSNES_VERSION
 
 #ifdef POLYMORPHISM
@@ -15,6 +15,7 @@
 #define r_ppu ref(deref(ppu))
 
 #include "reader/reader.h"
+#include "cart/cart.h"
 
 #include "memory/memory.h"
 #include "memory/bmemory/bmemory.h"
@@ -35,6 +36,7 @@
 
 #include "chip/srtc/srtc.h"
 #include "chip/sdd1/sdd1.h"
+#include "chip/c4/c4.h"
 
 extern MMIO mmio_unmapped;
 #ifdef POLYMORPHISM
@@ -54,10 +56,12 @@ extern SNES *snes;
 
 extern SRTC *srtc;
 extern SDD1 *sdd1;
+extern C4   *c4;
 
 #include "config/config.h"
 
 #ifdef INTERFACE_MAIN
+Cartridge cartridge;
 
 #include "config/config.cpp"
 #ifdef POLYMORPHISM
@@ -77,5 +81,6 @@ SNES *snes;
 
 SRTC *srtc;
 SDD1 *sdd1;
+C4   *c4;
 
 #endif

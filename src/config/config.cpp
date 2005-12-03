@@ -21,8 +21,24 @@ void SNES::VideoColorAdjust::set(uint32 _data) {
   ::snes->update_color_lookup_table();
 }
 
-Setting SNES::mute(&config_file, "snes.mute",
-  "Mutes SNES audio output when enabled",
-  true, Setting::TRUE_FALSE);
+Setting SNES::mute(&config_file, "snes.mute", "Mutes SNES audio output when enabled",
+  false, Setting::TRUE_FALSE);
+
+//do not save these settings to config_file
+Setting CPU::hdma_enable(0, "cpu.hdma_enable", "Enable HDMA effects", true, Setting::TRUE_FALSE);
+Setting PPU::opt_enable(0, "ppu.opt_enable", "Enable offset-per-tile effects", true, Setting::TRUE_FALSE);
+
+Setting PPU::bg1_pri0_enable(0, "ppu.bg1_pri0_enable", "Enable BG1 Priority 0", true, Setting::TRUE_FALSE);
+Setting PPU::bg1_pri1_enable(0, "ppu.bg1_pri1_enable", "Enable BG1 Priority 1", true, Setting::TRUE_FALSE);
+Setting PPU::bg2_pri0_enable(0, "ppu.bg2_pri0_enable", "Enable BG2 Priority 0", true, Setting::TRUE_FALSE);
+Setting PPU::bg2_pri1_enable(0, "ppu.bg2_pri1_enable", "Enable BG2 Priority 1", true, Setting::TRUE_FALSE);
+Setting PPU::bg3_pri0_enable(0, "ppu.bg3_pri0_enable", "Enable BG3 Priority 0", true, Setting::TRUE_FALSE);
+Setting PPU::bg3_pri1_enable(0, "ppu.bg3_pri1_enable", "Enable BG3 Priority 1", true, Setting::TRUE_FALSE);
+Setting PPU::bg4_pri0_enable(0, "ppu.bg4_pri0_enable", "Enable BG4 Priority 0", true, Setting::TRUE_FALSE);
+Setting PPU::bg4_pri1_enable(0, "ppu.bg4_pri1_enable", "Enable BG4 Priority 1", true, Setting::TRUE_FALSE);
+Setting PPU::oam_pri0_enable(0, "ppu.oam_pri0_enable", "Enable OAM Priority 0", true, Setting::TRUE_FALSE);
+Setting PPU::oam_pri1_enable(0, "ppu.oam_pri1_enable", "Enable OAM Priority 1", true, Setting::TRUE_FALSE);
+Setting PPU::oam_pri2_enable(0, "ppu.oam_pri2_enable", "Enable OAM Priority 2", true, Setting::TRUE_FALSE);
+Setting PPU::oam_pri3_enable(0, "ppu.oam_pri3_enable", "Enable OAM Priority 3", true, Setting::TRUE_FALSE);
 
 };

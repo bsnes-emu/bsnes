@@ -1,8 +1,8 @@
 //called once at the start of every rendered scanline
 void bPPU::update_bg_info() {
-  for(int bg=0;bg<4;bg++) {
+  for(int bg = 0; bg < 4; bg++) {
     bg_info[bg].th = (regs.bg_tilesize[bg]) ? 4 : 3;
-    bg_info[bg].tw = (line.hires) ? 4 : bg_info[bg].th;
+    bg_info[bg].tw = (regs.hires) ? 4 : bg_info[bg].th;
     bg_info[bg].mx = (bg_info[bg].th == 4) ? (line.width << 1) : line.width;
     bg_info[bg].my = bg_info[bg].mx;
     if(regs.bg_scsize[bg] & 0x01)bg_info[bg].mx <<= 1;
@@ -13,28 +13,29 @@ void bPPU::update_bg_info() {
 }
 
 uint16 bPPU::bg_get_tile(uint8 bg, uint16 x, uint16 y) {
-uint16 map_index, pos;
+uint16 pos;
   x &= bg_info[bg].mx;
   y &= bg_info[bg].my;
 
-//32 = SC width, height; tilemap data is stored as uint16
-//width(32) * height(32) * sizeof(uint16) = 2048
-  switch(regs.bg_scsize[bg]) {
-  case SC_32x32:map_index = 0; break;
-  case SC_64x32:map_index = ((x >> bg_info[bg].th) / 32) * 2048; break;
-  case SC_32x64:map_index = ((y >> bg_info[bg].th) / 32) * 2048; break;
-  case SC_64x64:map_index = ((x >> bg_info[bg].th) / 32) * 2048 +
-                            ((y >> bg_info[bg].th) / 32) * 4096; break;
-  }
+  x >>= bg_info[bg].tw;
+  y >>= bg_info[bg].th;
 
-  pos = ((((y >> bg_info[bg].th) & 31) * 32) + ((x >> bg_info[bg].tw) & 31)) << 1;
-  return read16(vram, regs.bg_scaddr[bg] + map_index + pos);
+  pos  = (regs.bg_scsize[bg] & 2) ? ((y & 0x20) << ((regs.bg_scsize[bg] & 1) ? 6 : 5)) : 0;
+  pos += (regs.bg_scsize[bg] & 1) ? ((x & 0x20) << 5) : 0;
+  pos += ((y & 31) << 5) + (x & 31);
+  return read16(vram, regs.bg_scaddr[bg] + (pos << 1));
 }
 
 void bPPU::render_line_bg(uint8 bg, uint8 color_depth, uint8 pri0_pos, uint8 pri1_pos) {
   if(regs.bg_enabled[bg] == false && regs.bgsub_enabled[bg] == false) {
     return;
   }
+
+//are layers disabled by user?
+  if(render_enabled(bg, 0) == false)pri0_pos = 0;
+  if(render_enabled(bg, 1) == false)pri1_pos = 0;
+//nothing to render?
+  if(!pri0_pos && !pri1_pos)return;
 
 bool   bg_enabled     = regs.bg_enabled[bg];
 bool   bgsub_enabled  = regs.bgsub_enabled[bg];
@@ -57,13 +58,13 @@ uint16 mask_x         = bg_info[bg].mx; //screen width  mask
 uint16 mask_y         = bg_info[bg].my; //screen height mask
 
 uint x = 0;
-uint y = line.y;
-  if(line.interlace && line.hires) {
+uint y = regs.bg_y[bg];
+  if(line.interlace && regs.hires) {
     y = (y << 1) + line.interlace_field;
   }
 
-uint16 hscroll = (line.hires) ? (regs.bg_hofs[bg] << 1) : regs.bg_hofs[bg];
-uint16 vscroll = (line.interlace && line.hires) ? (regs.bg_vofs[bg] << 1) : regs.bg_vofs[bg];
+uint16 hscroll = (regs.hires) ? (regs.bg_hofs[bg] << 1) : regs.bg_hofs[bg];
+uint16 vscroll = (line.interlace && regs.hires) ? (regs.bg_vofs[bg] << 1) : regs.bg_vofs[bg];
   hscroll &= mask_x;
   vscroll &= mask_y;
 
@@ -78,14 +79,14 @@ uint8 *tile_ptr;
 uint   xpos, ypos;
 uint16 hoffset, voffset, opt_x, col;
 bool   mirror_x, mirror_y;
-bool   is_opt_mode = (regs.bg_mode == 2 || regs.bg_mode == 4 || regs.bg_mode == 6);
+bool   is_opt_mode = (config::ppu.opt_enable) && (regs.bg_mode == 2 || regs.bg_mode == 4 || regs.bg_mode == 6);
 
   build_window_tables(bg);
 uint8 *wt_main = window_cache[bg].main;
 uint8 *wt_sub  = window_cache[bg].sub;
 
 int32 prev_x = -1, prev_y = -1;
-  for(x=0;x<line.width;x++) {
+  for(x = 0; x < line.width; x++) {
     hoffset = x + hscroll;
     voffset = y + vscroll;
 
@@ -122,7 +123,7 @@ int32 prev_x = -1, prev_y = -1;
     }
 
     mosaic_x = mtable[hoffset & mask_x];
-    mosaic_y = mtable[voffset & mask_y];
+    mosaic_y = voffset & mask_y;
 
     if((mosaic_x >> 3) != prev_x || (mosaic_y >> 3) != prev_y) {
       prev_x = (mosaic_x >> 3);
@@ -171,21 +172,35 @@ int32 prev_x = -1, prev_y = -1;
         col = get_palette(col + pal_index);
       }
 
-      if(bg_enabled == true && !wt_main[x]) {
-        if(pixel_cache[x].pri_main < tile_pri) {
-          pixel_cache[x].pri_main = tile_pri;
-          pixel_cache[x].bg_main  = 0x80 | bg;
-          pixel_cache[x].src_main = col;
-          pixel_cache[x].color_exempt = false;
+    #define setpixel_main(x) \
+      if(pixel_cache[x].pri_main < tile_pri) { \
+        pixel_cache[x].pri_main = tile_pri; \
+        pixel_cache[x].bg_main  = bg; \
+        pixel_cache[x].src_main = col; \
+        pixel_cache[x].ce_main  = false; \
+      }
+    #define setpixel_sub(x) \
+      if(pixel_cache[x].pri_sub < tile_pri) { \
+        pixel_cache[x].pri_sub = tile_pri; \
+        pixel_cache[x].bg_sub  = bg; \
+        pixel_cache[x].src_sub = col; \
+        pixel_cache[x].ce_sub  = false; \
+      }
+
+      if(!regs.hires) {
+        if(bg_enabled    == true && !wt_main[x]) { setpixel_main(x); }
+        if(bgsub_enabled == true && !wt_sub[x])  { setpixel_sub(x);  }
+      } else {
+      int hx = x >> 1;
+        if(x & 1) {
+          if(bg_enabled    == true && !wt_main[hx]) { setpixel_main(hx); }
+        } else {
+          if(bgsub_enabled == true && !wt_sub[hx])  { setpixel_sub(hx);  }
         }
       }
-      if(bgsub_enabled == true && !wt_sub[x]) {
-        if(pixel_cache[x].pri_sub < tile_pri) {
-          pixel_cache[x].pri_sub = tile_pri;
-          pixel_cache[x].bg_sub  = 0x80 | bg;
-          pixel_cache[x].src_sub = col;
-        }
-      }
+
+    #undef setpixel_main
+    #undef setpixel_sub
     }
   }
 }

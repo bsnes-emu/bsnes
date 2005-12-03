@@ -6,8 +6,7 @@ void bPPU::run() {}
 
 void bPPU::scanline() {
   line.y               = r_cpu->vcounter();
-  line.width           = (regs.bg_mode == 5 || regs.bg_mode == 6) ? 512 : 256;
-  line.hires           = (regs.bg_mode == 5 || regs.bg_mode == 6);
+  line.width           = (regs.hires) ? 512 : 256;
   line.interlace       = r_cpu->interlace();
   line.interlace_field = r_cpu->interlace_field();
 
@@ -15,6 +14,28 @@ void bPPU::scanline() {
   //RTO flag reset
     regs.time_over  = false;
     regs.range_over = false;
+  }
+
+int32 bg;
+  if(line.y == 1) {
+  //mosaic reset
+    for(bg=BG1;bg<=BG4;bg++) {
+      regs.bg_y[bg] = 1;
+    }
+
+    regs.mosaic_countdown = regs.mosaic_size + 1;
+    regs.mosaic_countdown--;
+  } else {
+    for(bg=BG1;bg<=BG4;bg++) {
+      if(!regs.mosaic_enabled[bg] || !regs.mosaic_countdown) {
+        regs.bg_y[bg] = line.y;
+      }
+    }
+
+    if(!regs.mosaic_countdown) {
+      regs.mosaic_countdown = regs.mosaic_size + 1;
+    }
+    regs.mosaic_countdown--;
   }
 
   if(line.y == 1) {
@@ -66,6 +87,12 @@ void bPPU::reset() {
   regs.ppu1_mdr = 0xff;
   regs.ppu2_mdr = 0xff;
 
+//bg line counters
+  regs.bg_y[0] = 0;
+  regs.bg_y[1] = 0;
+  regs.bg_y[2] = 0;
+  regs.bg_y[3] = 0;
+
 //$2100
   regs.display_disabled   = 0;
   regs.display_brightness = 0;
@@ -90,13 +117,15 @@ void bPPU::reset() {
   regs.bg_tilesize[BG4] = 0;
   regs.bg3_priority     = 0;
   regs.bg_mode          = 0;
+  regs.hires            = false;
 
 //$2106
-  regs.mosaic_size         = 0;
-  regs.mosaic_enabled[BG1] = false;
-  regs.mosaic_enabled[BG2] = false;
-  regs.mosaic_enabled[BG3] = false;
-  regs.mosaic_enabled[BG4] = false;
+  regs.mosaic_size          = 0;
+  regs.mosaic_enabled[BG1]  = false;
+  regs.mosaic_enabled[BG2]  = false;
+  regs.mosaic_enabled[BG3]  = false;
+  regs.mosaic_enabled[BG4]  = false;
+  regs.mosaic_countdown     = 0;
 
 //$2107-$210a
   regs.bg_scaddr[BG1] = 0x0000;
@@ -236,11 +265,12 @@ void bPPU::reset() {
   regs.color_rgb = 0x0000;
 
 //$2133
-  regs.mode7_extbg = false;
-  regs.overscan    = false;
-  regs.scanlines   = 224;
-  regs.oam_halve   = false;
-  regs.interlace   = false;
+  regs.mode7_extbg  = false;
+  regs.pseudo_hires = false;
+  regs.overscan     = false;
+  regs.scanlines    = 224;
+  regs.oam_halve    = false;
+  regs.interlace    = false;
 
 //$2137
   regs.hcounter         = 0;

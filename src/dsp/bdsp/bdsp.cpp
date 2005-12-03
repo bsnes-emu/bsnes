@@ -1,10 +1,22 @@
 #include "../../base.h"
 #include "bdsp_tables.cpp"
 
-uint8  bDSP::read_8  (uint16 addr) { return (spcram[addr]); }
-uint16 bDSP::read_16 (uint16 addr) { return (spcram[(addr + 1) & 0xffff] << 8) + (spcram[addr]); }
-void   bDSP::write_8 (uint16 addr, uint8 data)  { spcram[addr] = data; }
-void   bDSP::write_16(uint16 addr, uint16 data) { spcram[addr++] = data; spcram[addr] = data >> 8; }
+uint8  bDSP::readb(uint16 addr) {
+  return spcram[addr];
+}
+
+void bDSP::writeb(uint16 addr, uint8 data) {
+  spcram[addr] = data;
+}
+
+uint16 bDSP::readw(uint16 addr) {
+  return (readb(addr)) | (readb(addr + 1) << 8);
+}
+
+void bDSP::writew(uint16 addr, uint16 data) {
+  writeb(addr,     data);
+  writeb(addr + 1, data >> 8);
+}
 
 uint8 bDSP::read(uint8 addr) {
 int i, v, n;
@@ -98,12 +110,14 @@ int i, v, n;
     break;
   case 0x04:case 0x14:case 0x24:case 0x34:
   case 0x44:case 0x54:case 0x64:case 0x74:
-  //voice[v].SRCN = data;
+    voice[v].SRCN = data;
+    break;
   //below is anomie's code, but TRAC says writing SRCN doesn't affect anything until a
   //BRR-with-end block is encountered, where it loads the loop address from the new SRCN
+  //anomie's code breaks MK2 sound completely...
     if(voice[v].SRCN != data) {
-      voice[v].SRCN = data;
-      voice[v].brr_ptr   = read_16((status.DIR << 8) + (voice[v].SRCN << 2) + ((voice[v].brr_looped)?2:0));
+      voice[v].SRCN      = data;
+      voice[v].brr_ptr   = readw((status.DIR << 8) + (voice[v].SRCN << 2) + ((voice[v].brr_looped) ? 2 : 0));
       voice[v].brr_index = 0;
     }
     break;
@@ -144,18 +158,18 @@ int i, v, n;
   case 0x3c:status.EVOLR = data;break;
 
   case 0x4c:
-    status.KON = data;
-//  status.kon = data;
+    status.KON      = data;
+    status.kon      = data;
     status.key_flag = true;
     break;
 
   case 0x5c:
-    status.KOFF = data;
+    status.KOFF     = data;
     status.key_flag = true;
     break;
 
   case 0x6c:
-    status.FLG = data;
+    status.FLG        = data;
     status.key_flag   = true;
     status.noise_rate = RateTable[data & 0x1f];
     break;
@@ -165,15 +179,15 @@ int i, v, n;
     status.ENDX = 0;
     break;
 
-  case 0x0d:status.EFB   = data;break;
-  case 0x2d:status.PMON  = data;break;
-  case 0x3d:status.NON   = data;break;
-  case 0x4d:status.EON   = data;break;
-  case 0x5d:status.DIR   = data;break;
-  case 0x6d:status.ESA   = data;break;
+  case 0x0d:status.EFB  = data;break;
+  case 0x2d:status.PMON = data;break;
+  case 0x3d:status.NON  = data;break;
+  case 0x4d:status.EON  = data;break;
+  case 0x5d:status.DIR  = data;break;
+  case 0x6d:status.ESA  = data;break;
 
   case 0x7d:
-    status.EDL = data;
+    status.EDL       = data;
     status.echo_size = (data & 0x0f) << 11;
     break;
   }
@@ -221,7 +235,7 @@ int v;
   status.KOFF  = 0x00;
   status.FLG  |= 0xe0;
 
-//status.kon      = 0x00;
+  status.kon      = 0x00;
   status.key_flag = false;
 
   status.noise_ctr    = 0;
@@ -238,7 +252,7 @@ int v;
     voice[v].pitch_ctr = 0;
 
     voice[v].brr_index      = 0;
-    voice[v].brr_ptr        = read_16((status.DIR << 8) + (voice[v].SRCN << 2));
+    voice[v].brr_ptr        = readw((status.DIR << 8) + (voice[v].SRCN << 2));
     voice[v].brr_looped     = false;
     voice[v].brr_data[0]    = 0;
     voice[v].brr_data[1]    = 0;
@@ -288,7 +302,9 @@ int32 esamplel, esampler;
 int32 fir_samplel, fir_sampler;
   pmon = status.PMON & ~status.NON & ~1;
 
-  if(!(dsp_counter++ & 1) && status.key_flag) {
+//if(!(dsp_counter++ & 1) && status.key_flag) {
+//TRAC believes KON/KOFF is polled every sample. further testing is needed
+  if(status.key_flag) {
     for(v=0;v<8;v++) {
     uint8 mask = 1 << v;
       if(status.soft_reset()) {
@@ -301,10 +317,12 @@ int32 fir_samplel, fir_sampler;
           voice[v].env_state = RELEASE;
           voice[v].AdjustEnvelope();
         }
-      } else if(status.KON & mask) { //status.kon
-        status.KON  &= ~mask; //new code
-        status.ENDX &= ~mask; //new code
-        voice[v].brr_ptr     = read_16((status.DIR << 8) + (voice[v].SRCN << 2));
+      } else if(status.kon & mask) {
+      //new KON code
+        status.ENDX &= ~mask;
+        status.kon  &= ~mask;
+
+        voice[v].brr_ptr     = readw((status.DIR << 8) + (voice[v].SRCN << 2));
         voice[v].brr_index   = -9;
         voice[v].brr_looped  = false;
         voice[v].brr_data[0] = 0;
@@ -316,7 +334,8 @@ int32 fir_samplel, fir_sampler;
         voice[v].AdjustEnvelope();
       }
     }
-//  status.ENDX &= ~status.kon;
+//old KON code, breaks sound effects in DL / SFA2
+//  status.ENDX    &= ~status.kon;
 //  status.kon      = 0;
     status.key_flag = false;
   }
@@ -359,7 +378,7 @@ int32 fir_samplel, fir_sampler;
       voice[v].brr_data_index &= 3;
 
       if(voice[v].brr_index == 0) {
-        voice[v].brr_header = read_8(voice[v].brr_ptr);
+        voice[v].brr_header = readb(voice[v].brr_ptr);
 
         if(voice[v].brr_header_flags() & BRR_END) {
           status.ENDX |= (1 << v);
@@ -373,7 +392,7 @@ int32 fir_samplel, fir_sampler;
 
 #define S(x) voice[v].brr_data[(voice[v].brr_data_index + (x)) & 3]
       if(voice[v].env_state != SILENCE) {
-        sample = read_8(voice[v].brr_ptr + 1 + (voice[v].brr_index >> 1));
+        sample = readb(voice[v].brr_ptr + 1 + (voice[v].brr_index >> 1));
         if(voice[v].brr_index & 1) {
           sample = clip(4, sample);
         } else {
@@ -410,7 +429,7 @@ int32 fir_samplel, fir_sampler;
       if(++voice[v].brr_index > 15) {
         voice[v].brr_index = 0;
         if(voice[v].brr_header_flags() & BRR_END) {
-          voice[v].brr_ptr    = read_16((status.DIR << 8) + (voice[v].SRCN << 2) + 2);
+          voice[v].brr_ptr    = readw((status.DIR << 8) + (voice[v].SRCN << 2) + 2);
           voice[v].brr_looped = true;
         } else {
           voice[v].brr_ptr   += 9;
@@ -496,7 +515,7 @@ int32 fir_samplel, fir_sampler;
 
   //gaussian interpolation / noise
     if(status.NON & (1 << v)) {
-      sample = status.noise_sample;
+      sample  = clip(15, status.noise_sample);
     } else {
       d = voice[v].pitch_ctr >> 4; //-256 <= sample <= -1
       sample  = ((GaussTable[ -1-d] * S(-3)) >> 11);
@@ -527,8 +546,8 @@ int32 fir_samplel, fir_sampler;
 //echo (FIR) adjust
 #define F(c,x) status.fir_buffer[c][(status.fir_buffer_index+(x)) & 7]
   status.fir_buffer_index++;
-  F(0,0) = read_16((status.ESA << 8) + status.echo_index);
-  F(1,0) = read_16((status.ESA << 8) + status.echo_index + 2);
+  F(0,0) = readw((status.ESA << 8) + status.echo_index);
+  F(1,0) = readw((status.ESA << 8) + status.echo_index + 2);
 
   fir_samplel = (F(0,-0) * status.FIR[7] +
                  F(0,-1) * status.FIR[6] +
@@ -557,8 +576,8 @@ int32 fir_samplel, fir_sampler;
     esamplel = clamp(16, esamplel);
     esampler = clamp(16, esampler);
 
-    write_16((status.ESA << 8) + status.echo_index,     esamplel);
-    write_16((status.ESA << 8) + status.echo_index + 2, esampler);
+    writew((status.ESA << 8) + status.echo_index,     esamplel);
+    writew((status.ESA << 8) + status.echo_index + 2, esampler);
   }
 
   status.echo_index += 4;

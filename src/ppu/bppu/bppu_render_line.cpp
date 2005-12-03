@@ -11,59 +11,109 @@ inline uint16 bPPU::get_direct_color(uint8 p, uint8 t) {
     ((t >> 6) << 13) | ((p >> 2) << 12);
 }
 
-inline uint16 bPPU::get_pixel(uint32 x) {
+inline uint16 bPPU::get_pixel_normal(uint32 x) {
 _pixel *p = &pixel_cache[x];
-  if(!p->bg_main) {
-    p->bg_main      = BACK;
-    p->src_main     = get_palette(0);
-    p->color_exempt = false;
-  } else {
-    p->bg_main &= 0x7f;
-  }
-
-  if(!p->bg_sub) {
-    p->bg_sub  = BACK;
-    p->src_sub = regs.color_rgb;
-  } else {
-    p->bg_sub &= 0x7f;
-  }
+uint16 src_main, src_sub;
+uint8  bg_sub;
+  src_main = p->src_main;
 
   if(!regs.addsub_mode) {
-    p->bg_sub  = BACK;
-    p->src_sub = regs.color_rgb;
+    bg_sub  = BACK;
+    src_sub = regs.color_rgb;
+  } else {
+    bg_sub  = p->bg_sub;
+    src_sub = p->src_sub;
   }
 
   if(!window_cache[COL].main[x]) {
     if(!window_cache[COL].sub[x]) {
       return 0x0000;
     }
-  //p->bg_main remains the same, even when the main color window
-  //masks out the color. this is needed for regs.color_enabled[p->bg_main]
-  //test below. illusion of gaia relies on this behavior for its load menu.
-    p->src_main = 0x0000;
+    src_main = 0x0000;
   }
 
-  if(!p->color_exempt && regs.color_enabled[p->bg_main] && window_cache[COL].sub[x]) {
-    return addsub_pixels(x);
+  if(!p->ce_main && regs.color_enabled[p->bg_main] && window_cache[COL].sub[x]) {
+  bool halve = false;
+    if(regs.color_halve && window_cache[COL].main[x]) {
+      if(regs.addsub_mode && bg_sub == BACK);
+      else {
+        halve = true;
+      }
+    }
+    return addsub_pixels(x, src_main, src_sub, halve);
   }
-  return p->src_main;
+
+  return src_main;
+}
+
+inline uint16 bPPU::get_pixel_swap(uint32 x) {
+_pixel *p = &pixel_cache[x];
+uint16 src_main, src_sub;
+uint8  bg_sub;
+  src_main = p->src_sub;
+
+  if(!regs.addsub_mode) {
+    bg_sub  = BACK;
+    src_sub = regs.color_rgb;
+  } else {
+    bg_sub  = p->bg_main;
+    src_sub = p->src_main;
+  }
+
+  if(!window_cache[COL].main[x]) {
+    if(!window_cache[COL].sub[x]) {
+      return 0x0000;
+    }
+    src_main = 0x0000;
+  }
+
+  if(!p->ce_sub && regs.color_enabled[p->bg_sub] && window_cache[COL].sub[x]) {
+  bool halve = false;
+    if(regs.color_halve && window_cache[COL].main[x]) {
+      if(regs.addsub_mode && bg_sub == BACK);
+      else {
+        halve = true;
+      }
+    }
+    return addsub_pixels(x, src_main, src_sub, halve);
+  }
+
+  return src_main;
+}
+
+inline uint16 bPPU::get_pixel_lores(uint32 x) {
+  return get_pixel_normal(x);
+}
+
+inline uint16 bPPU::get_pixel_hires(uint32 x) {
+  if(x & 1) {
+    return get_pixel_normal(x >> 1);
+  } else {
+    return get_pixel_swap(x >> 1);
+  }
 }
 
 inline void bPPU::render_line_output() {
-uint16 r, x;
+uint32 r, x;
 uint16 *ptr    = (uint16*)output + (line.y * 1024) +
                  ((line.interlace && line.interlace_field) ? 512 : 0);
 uint16 *ltable = (uint16*)light_table + (regs.display_brightness << 15);
 
-  if(line.width == 256) {
+  if(!regs.pseudo_hires && !regs.hires) {
     for(x=0;x<256;x++) {
-      r = get_pixel(x);
+      r = get_pixel_lores(x);
       *ptr++ = *(ltable + r);
     }
   } else {
     for(x=0;x<512;x++) {
-      r = get_pixel(x);
+      r = get_pixel_hires(x);
       *ptr++ = *(ltable + r);
+    }
+    if(regs.pseudo_hires && !regs.hires) {
+      ptr -= 512;
+      for(x=0;x<256;x++) {
+        *(ptr + x) = ((ptr[x << 1] & 0x7bde) >> 1) + ((ptr[(x << 1) + 1] & 0x7bde) >> 1);
+      }
     }
   }
 }

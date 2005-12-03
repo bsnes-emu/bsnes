@@ -1,31 +1,75 @@
 //op_read
 inline void bCPU::op_adc_b() {
 int32 r = regs.a.l + rd.l + regs.p.c;
-//bcd
   if(regs.p.d) {
-    if(((r     ) & 15) > 9)r += 6;
-    if(((r >> 4) & 15) > 9)r += 6 << 4;
+  uint8 n0 = (regs.a.l     ) & 15;
+  uint8 n1 = (regs.a.l >> 4) & 15;
+    n0 += ((rd.l) & 15) + regs.p.c;
+    if(n0 > 9) {
+      n0 -= 10;
+      n0 &= 15;
+      n1++;
+    }
+    n1 += ((rd.l >> 4) & 15);
+    if(n1 > 9) {
+      n1 -= 10;
+      n1 &= 15;
+      regs.p.c = 1;
+    } else {
+      regs.p.c = 0;
+    }
+    r = (n1 << 4) | (n0);
+  } else {
+    r = regs.a.l + rd.l + regs.p.c;
+    regs.p.c = (r > 0xff);
   }
   regs.p.n = !!(r & 0x80);
   regs.p.v = !!(~(regs.a.l ^ rd.l) & (regs.a.l ^ r) & 0x80);
   regs.p.z = ((uint8)r == 0);
-  regs.p.c = (r > 0xff);
   regs.a.l = r;
 }
 
 inline void bCPU::op_adc_w() {
-int32 r = regs.a.w + rd.w + regs.p.c;
-//bcd
+int32 r;
   if(regs.p.d) {
-    if(((r      ) & 15) > 9)r += 6;
-    if(((r >>  4) & 15) > 9)r += 6 <<  4;
-    if(((r >>  8) & 15) > 9)r += 6 <<  8;
-    if(((r >> 12) & 15) > 9)r += 6 << 12;
+  uint8 n0 = (regs.a.w      ) & 15;
+  uint8 n1 = (regs.a.w >>  4) & 15;
+  uint8 n2 = (regs.a.w >>  8) & 15;
+  uint8 n3 = (regs.a.w >> 12) & 15;
+    n0 += ((rd.w) & 15) + regs.p.c;
+    if(n0 > 9) {
+      n0 -= 10;
+      n0 &= 15;
+      n1++;
+    }
+    n1 += ((rd.w >> 4) & 15);
+    if(n1 > 9) {
+      n1 -= 10;
+      n1 &= 15;
+      n2++;
+    }
+    n2 += ((rd.w >> 8) & 15);
+    if(n2 > 9) {
+      n2 -= 10;
+      n2 &= 15;
+      n3++;
+    }
+    n3 += ((rd.w >> 12) & 15);
+    if(n3 > 9) {
+      n3 -= 10;
+      n3 &= 15;
+      regs.p.c = 1;
+    } else {
+      regs.p.c = 0;
+    }
+    r = (n3 << 12) | (n2 << 8) | (n1 << 4) | (n0);
+  } else {
+    r = regs.a.w + rd.w + regs.p.c;
+    regs.p.c = (r > 0xffff);
   }
   regs.p.n = !!(r & 0x8000);
   regs.p.v = !!(~(regs.a.w ^ rd.w) & (regs.a.w ^ r) & 0x8000);
   regs.p.z = ((uint16)r == 0);
-  regs.p.c = (r > 0xffff);
   regs.a.w = r;
 }
 
@@ -156,32 +200,70 @@ inline void bCPU::op_ora_w() {
 }
 
 inline void bCPU::op_sbc_b() {
-int32 r = regs.a.l - rd.l - !regs.p.c;
-//bcd
+int32 r;
   if(regs.p.d) {
-    if(((r     ) & 15) > 9)r -= 6;
-    if(((r >> 4) & 15) > 9)r -= 6 << 4;
+  uint8 n0 = (regs.a.l     ) & 15;
+  uint8 n1 = (regs.a.l >> 4) & 15;
+    n0 -= ((rd.l     ) & 15) + !regs.p.c;
+    n1 -= ((rd.l >> 4) & 15);
+    if(n0 > 9) {
+      n0 += 10;
+      n1--;
+    }
+    if(n1 > 9) {
+      n1 += 10;
+      regs.p.c = 0;
+    } else {
+      regs.p.c = 1;
+    }
+    r = (n1 << 4) | (n0);
+  } else {
+    r = regs.a.l - rd.l - !regs.p.c;
+    regs.p.c = (r >= 0);
   }
   regs.p.n = !!(r & 0x80);
   regs.p.v = !!((regs.a.l ^ rd.l) & (regs.a.l ^ r) & 0x80);
-  regs.p.z = ((byte)r == 0);
-  regs.p.c = (r >= 0);
+  regs.p.z = ((uint8)r == 0);
   regs.a.l = r;
 }
 
 inline void bCPU::op_sbc_w() {
-int32 r = regs.a.w - rd.w - !regs.p.c;
-//bcd
+int32 r;
   if(regs.p.d) {
-    if(((r      ) & 15) > 9)r -= 6;
-    if(((r >>  4) & 15) > 9)r -= 6 <<  4;
-    if(((r >>  8) & 15) > 9)r -= 6 <<  8;
-    if(((r >> 12) & 15) > 9)r -= 6 << 12;
+  uint8 n0 = (regs.a.w      ) & 15;
+  uint8 n1 = (regs.a.w >>  4) & 15;
+  uint8 n2 = (regs.a.w >>  8) & 15;
+  uint8 n3 = (regs.a.w >> 12) & 15;
+    n0 -= ((rd.w      ) & 15) + !regs.p.c;
+    n1 -= ((rd.w >>  4) & 15);
+    n2 -= ((rd.w >>  8) & 15);
+    n3 -= ((rd.w >> 12) & 15);
+    if(n0 > 9) {
+      n0 += 10;
+      n1--;
+    }
+    if(n1 > 9) {
+      n1 += 10;
+      n2--;
+    }
+    if(n2 > 9) {
+      n2 += 10;
+      n3--;
+    }
+    if(n3 > 9) {
+      n3 += 10;
+      regs.p.c = 0;
+    } else {
+      regs.p.c = 1;
+    }
+    r = (n3 << 12) | (n2 << 8) | (n1 << 4) | (n0);
+  } else {
+    r = regs.a.w - rd.w - !regs.p.c;
+    regs.p.c = (r >= 0);
   }
   regs.p.n = !!(r & 0x8000);
   regs.p.v = !!((regs.a.w ^ rd.w) & (regs.a.w ^ r) & 0x8000);
-  regs.p.z = ((word)r == 0);
-  regs.p.c = (r >= 0);
+  regs.p.z = ((uint16)r == 0);
   regs.a.w = r;
 }
 

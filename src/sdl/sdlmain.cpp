@@ -9,7 +9,6 @@ HWND hwnd;
 #endif
 
 #include "bsnes.h"
-#include "rom.cpp"
 #include "render.cpp"
 #include "bsnes.cpp"
 
@@ -66,13 +65,13 @@ void init_snes() {
 void term_snes() {
   snes->term();
 #ifdef POLYMORPHISM
-  if(deref(mem)) { delete static_cast<bMemBus*>(deref(mem)); deref(mem) = 0; }
-  if(deref(cpu)) { delete static_cast<bCPU*>   (deref(cpu)); deref(cpu) = 0; }
-  if(deref(apu)) { delete static_cast<bAPU*>   (deref(apu)); deref(apu) = 0; }
-  if(deref(dsp)) { delete static_cast<bDSP*>   (deref(dsp)); deref(dsp) = 0; }
-  if(deref(ppu)) { delete static_cast<bPPU*>   (deref(ppu)); deref(ppu) = 0; }
+  if(deref(mem)) { delete deref(mem); deref(mem) = 0; }
+  if(deref(cpu)) { delete deref(cpu); deref(cpu) = 0; }
+  if(deref(apu)) { delete deref(apu); deref(apu) = 0; }
+  if(deref(dsp)) { delete deref(dsp); deref(dsp) = 0; }
+  if(deref(ppu)) { delete deref(ppu); deref(ppu) = 0; }
 #endif
-  if(snes) { delete(static_cast<bSNES*>(snes)); snes = 0; }
+  if(snes) { delete(snes); snes = 0; }
 }
 
 void center_window() {
@@ -120,13 +119,9 @@ SDL_Event event;
 
   config_file.load("bsnes_sdl.cfg");
 
-  rom_image = new ROMImage();
   init_snes();
 
-  rom_image->select(argv[1]);
-  rom_image->load();
-
-  if(rom_image->loaded() == false) {
+  if(cartridge.load(argv[1]) == false) {
     alert("Failed to load image. Usage: bsnes_sdl <filename.smc>");
     goto _end;
   }
@@ -178,6 +173,7 @@ int cursor_status;
 
 _end:
   config_file.save("bsnes_sdl.cfg");
+  cartridge.unload();
   term_snes();
 
   return 0;

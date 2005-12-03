@@ -20,20 +20,23 @@
 
 #define zerofree(__n) if(__n) { free(__n); __n = 0; }
 
-typedef unsigned int   uint;
+typedef unsigned int       uint;
 
-typedef unsigned char  byte;
-typedef unsigned short word;
-typedef unsigned long  ulong;
+typedef unsigned char      byte;
+typedef unsigned short     word;
+typedef unsigned long      ulong;
+typedef unsigned long long uquad;
 
-typedef unsigned char  bool8;
-typedef unsigned char  uint8;
-typedef unsigned short uint16;
-typedef unsigned long  uint32;
+typedef unsigned char      bool8;
+typedef unsigned char      uint8;
+typedef unsigned short     uint16;
+typedef unsigned long      uint32;
+typedef unsigned long long uint64;
 
-typedef signed char    int8;
-typedef signed short   int16;
-typedef signed long    int32;
+typedef signed char        int8;
+typedef signed short       int16;
+typedef signed long        int32;
+typedef signed long long   int64;
 
 #ifdef null
 #undef null

@@ -6,6 +6,12 @@ uint32 b, w;
   b = (addr >> 16);
   w = (addr & 0xffff);
 
+  if(cartridge.cart.c4) {
+    if(!(b & 0x40) && w >= 0x6000 && w <= 0x7fff) {
+      return c4->read(w);
+    }
+  }
+
 //SRAM Region A
   if((b & 0x7f) >= 0x30 && (b & 0x7f) <= 0x3f && (w & 0xe000) == 0x6000) {
     b &= 0x7f;
@@ -56,6 +62,13 @@ uint32 b, w;
   addr &= 0xffffff;
   b = (addr >> 16);
   w = (addr & 0xffff);
+
+  if(cartridge.cart.c4) {
+    if(!(b & 0x40) && w >= 0x6000 && w <= 0x7fff) {
+      c4->write(w, value);
+      return;
+    }
+  }
 
 //SRAM Region A
   if((b & 0x7f) >= 0x30 && (b & 0x7f) <= 0x3f && (w & 0xe000) == 0x6000) {

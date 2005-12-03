@@ -6,7 +6,7 @@ uint32 FileReader::size() {
 //This is needed so that when SRAM files do not exist, the
 //memory for the SRAM data will be allocated still.
 //The memory is flushed to 0x00 when no file is opened.
-void FileReader::read(uint8 **buffer, uint32 length) {
+uint8 *FileReader::read(uint32 length) {
 uint8 *data;
   if(length == 0) {
   //read the entire file into RAM
@@ -24,7 +24,7 @@ uint8 *data;
     memset(data, 0, length);
     if(fp)fread(data, 1, length, fp);
   }
-  *buffer = data;
+  return data;
 }
 
 bool FileReader::open(char *fn) {

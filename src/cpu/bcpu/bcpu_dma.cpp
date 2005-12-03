@@ -122,12 +122,17 @@ uint8 bCPU::hdma_read(uint8 i) {
 }
 
 void bCPU::hdma_write(uint8 i, uint8 x) {
+uint32 addr;
   if(channel[i].direction == DMA_CPUTOMMIO) {
-    r_mem->write(hdma_mmio(i), x);
+    addr = hdma_mmio(i);
   } else if(!channel[i].hdma_indirect) {
-    r_mem->write(hdma_addr(i), x);
+    addr = hdma_addr(i);
   } else {
-    r_mem->write(hdma_iaddr(i), x);
+    addr = hdma_iaddr(i);
+  }
+
+  if((bool)config::cpu.hdma_enable == true) {
+    r_mem->write(addr, x);
   }
 
   add_cycles(8);

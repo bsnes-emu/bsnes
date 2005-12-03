@@ -19,6 +19,15 @@ void Setting::set(uint _data) {
   }
 }
 
+char *Setting::sget() {
+  return strptr(char_data);
+}
+
+void Setting::sset(const char *_data) {
+  strcpy(char_data, _data);
+  strunquote(char_data);
+}
+
 Setting::Setting(Config *_parent, char *_name, char *_desc, uint _data, uint _type) {
 int s;
   if(_parent) {
@@ -43,28 +52,53 @@ int s;
   type = _type;
 }
 
+Setting::Setting(Config *_parent, char *_name, char *_desc, char *_data) {
+int s;
+  if(_parent) {
+    _parent->add(this);
+  }
+
+  s = strlen(_name);
+  name = (char*)malloc(s + 1);
+  strcpy(name, _name);
+
+  if(_desc) {
+    s = strlen(_desc);
+    desc = (char*)malloc(s + 1);
+    strcpy(desc, _desc);
+  } else {
+    desc = (char*)malloc(1);
+    *desc = 0;
+  }
+
+  strcpy(char_data, _data);
+  strcpy(char_def,  _data);
+
+  type = STR;
+}
+
 void Config::add(Setting *setting) {
   list[list_count++] = setting;
 }
 
 uint Config::string_to_uint(uint type, char *input) {
-  if(!strcmp(input, "true") ||
-     !strcmp(input, "enabled") ||
-     !strcmp(input, "on") ||
-     !strcmp(input, "yes")
+  if(strmatch(input, "true") ||
+     strmatch(input, "enabled") ||
+     strmatch(input, "on") ||
+     strmatch(input, "yes")
   ) {
     return (uint)true;
   }
 
-  if(!strcmp(input, "false") ||
-     !strcmp(input, "disabled") ||
-     !strcmp(input, "off") ||
-     !strcmp(input, "no")
+  if(strmatch(input, "false") ||
+     strmatch(input, "disabled") ||
+     strmatch(input, "off") ||
+     strmatch(input, "no")
   ) {
     return (uint)false;
   }
 
-  if(!strbegin(input, "0x")) {
+  if(strbegin(input, "0x")) {
     return strhex(input + 2);
   }
 
@@ -75,16 +109,16 @@ char *Config::uint_to_string(uint type, uint input) {
 static char output[512];
   switch(type) {
   case Setting::TRUE_FALSE:
-    sprintf(output, "%s", (input & 1)?"true":"false");
+    sprintf(output, "%s", (input & 1) ? "true" : "false");
     break;
   case Setting::ENABLED_DISABLED:
-    sprintf(output, "%s", (input & 1)?"enabled":"disabled");
+    sprintf(output, "%s", (input & 1) ? "enabled" : "disabled");
     break;
   case Setting::ON_OFF:
-    sprintf(output, "%s", (input & 1)?"on":"off");
+    sprintf(output, "%s", (input & 1) ? "on" : "off");
     break;
   case Setting::YES_NO:
-    sprintf(output, "%s", (input & 1)?"yes":"no");
+    sprintf(output, "%s", (input & 1) ? "yes" : "no");
     break;
   case Setting::DEC:
     sprintf(output, "%d", input);
@@ -119,14 +153,18 @@ char *buffer = (char*)malloc(fsize + 1);
   qreplace(data, " ", "");
   split(line, "\n", data);
 
-  for(int i=0;i<count(line);i++) {
+  for(int i = 0; i < count(line); i++) {
     if(strlen(line[i]) == 0)continue;
     if(*strptr(line[i]) == '#')continue;
 
-    split(part, "=", line[i]);
-    for(int l=0;l<list_count;l++) {
-      if(!strcmp(list[l]->name, part[0])) {
-        list[l]->set(string_to_uint(list[l]->type, strptr(part[1])));
+    qsplit(part, "=", line[i]);
+    for(int l = 0; l < list_count; l++) {
+      if(strmatch(list[l]->name, part[0])) {
+        if(list[l]->type != Setting::STR) {
+          list[l]->set(string_to_uint(list[l]->type, strptr(part[1])));
+        } else {
+          list[l]->sset(strptr(part[1]));
+        }
       }
     }
   }
@@ -140,15 +178,20 @@ FILE *fp;
   fp = fopen(fn, "wb");
   if(!fp)return false;
 
-  for(int i=0;i<list_count;i++) {
+  for(int i = 0; i < list_count; i++) {
     strcpy(data, list[i]->desc);
     replace(data, "\r\n", "\n");
     split(line, "\n", data);
-    for(int l=0;l<count(line);l++) {
+    for(int l = 0; l < count(line); l++) {
       fprintf(fp, "# %s\r\n", strptr(line[l]));
     }
-    fprintf(fp, "# (default = %s)\r\n", uint_to_string(list[i]->type, list[i]->def));
-    fprintf(fp, "%s = %s\r\n\r\n", list[i]->name, uint_to_string(list[i]->type, list[i]->data));
+    if(list[i]->type != Setting::STR) {
+      fprintf(fp, "# (default = %s)\r\n", uint_to_string(list[i]->type, list[i]->def));
+      fprintf(fp, "%s = %s\r\n\r\n", list[i]->name, uint_to_string(list[i]->type, list[i]->data));
+    } else {
+      fprintf(fp, "# (default = \"%s\")\r\n", strptr(list[i]->char_def));
+      fprintf(fp, "%s = \"%s\"\r\n\r\n", list[i]->name, strptr(list[i]->char_data));
+    }
   }
 
   return true;

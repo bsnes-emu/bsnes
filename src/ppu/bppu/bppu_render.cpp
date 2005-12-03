@@ -6,6 +6,40 @@
 #include "bppu_render_addsub.cpp"
 #include "bppu_render_line.cpp"
 
+bool bPPU::render_enabled(uint8 bg, uint8 pri) {
+  switch(bg) {
+  case BG1:
+    switch(pri) {
+    case 0: return config::ppu.bg1_pri0_enable;
+    case 1: return config::ppu.bg1_pri1_enable;
+    } break;
+  case BG2:
+    switch(pri) {
+    case 0: return config::ppu.bg2_pri0_enable;
+    case 1: return config::ppu.bg2_pri1_enable;
+    } break;
+  case BG3:
+    switch(pri) {
+    case 0: return config::ppu.bg3_pri0_enable;
+    case 1: return config::ppu.bg3_pri1_enable;
+    } break;
+  case BG4:
+    switch(pri) {
+    case 0: return config::ppu.bg4_pri0_enable;
+    case 1: return config::ppu.bg4_pri1_enable;
+    } break;
+  case OAM:
+    switch(pri) {
+    case 0: return config::ppu.oam_pri0_enable;
+    case 1: return config::ppu.oam_pri1_enable;
+    case 2: return config::ppu.oam_pri2_enable;
+    case 3: return config::ppu.oam_pri3_enable;
+    } break;
+  }
+
+  return true;
+}
+
 /*
 Mode 0: ->
      1,    2,    3,    4,    5,    6,    7,    8,    9,   10,   11,   12

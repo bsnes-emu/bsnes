@@ -103,7 +103,19 @@ uint8 *dest;
 #undef render_bg_tile_line_256
 
 inline void bPPU::clear_pixel_cache() {
-  memset(pixel_cache, 0, sizeof(pixel_cache));
+uint16 main = get_palette(0);
+uint16 sub  = (regs.pseudo_hires || regs.hires) ? main : regs.color_rgb;
+uint32 i    = 255;
+  do {
+    pixel_cache[i].src_main = main;
+    pixel_cache[i].src_sub  = sub;
+    pixel_cache[i].bg_main  = BACK;
+    pixel_cache[i].bg_sub   = BACK;
+    pixel_cache[i].ce_main  = false;
+    pixel_cache[i].ce_sub   = false;
+    pixel_cache[i].pri_main = 0;
+    pixel_cache[i].pri_sub  = 0;
+  } while(i--);
 }
 
 void bPPU::init_tiledata_cache() {

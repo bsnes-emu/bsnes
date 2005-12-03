@@ -33,9 +33,11 @@ void SNES::runtoframe() {
 void SNES::init() {
   srtc = new SRTC();
   sdd1 = new SDD1();
+  c4   = new C4();
 
   srtc->init();
   sdd1->init();
+  c4->init();
 
   video_init();
   audio_init();
@@ -52,8 +54,9 @@ void SNES::power() {
   r_ppu->power();
   r_mem->power();
 
-  srtc->power();
-  sdd1->power();
+  if(cartridge.cart.srtc)srtc->power();
+  if(cartridge.cart.sdd1)sdd1->power();
+  if(cartridge.cart.c4)  c4->power();
 
 int i;
   r_mem->flush_mmio_mappers();
@@ -66,8 +69,9 @@ int i;
   for(i=0x4200;i<=0x421f;i++)r_mem->set_mmio_mapper(i, r_cpu->mmio);
   for(i=0x4300;i<=0x437f;i++)r_mem->set_mmio_mapper(i, r_cpu->mmio);
 
-  srtc->enable();
-  sdd1->enable();
+  if(cartridge.cart.srtc)srtc->enable();
+  if(cartridge.cart.sdd1)sdd1->enable();
+  if(cartridge.cart.c4)  c4->enable();
 
   video_update();
 }
@@ -81,8 +85,9 @@ void SNES::reset() {
   r_ppu->reset();
   r_mem->reset();
 
-  srtc->reset();
-  sdd1->reset();
+  if(cartridge.cart.srtc)srtc->reset();
+  if(cartridge.cart.sdd1)sdd1->reset();
+  if(cartridge.cart.c4)  c4->reset();
 
   video_update();
 }

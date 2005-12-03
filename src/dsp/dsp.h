@@ -6,4 +6,7 @@ public:
   virtual void   power() = 0;
   virtual void   reset() = 0;
   virtual uint32 run()   = 0;
+
+  DSP() {}
+  virtual ~DSP() {}
 };

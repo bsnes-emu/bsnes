@@ -20,7 +20,6 @@ enum { SC_32x32 = 0, SC_64x32 = 1, SC_32x64 = 2, SC_64x64 = 3 };
 struct {
   uint32 y;
   uint32 width;
-  bool   hires;
   bool   interlace;
   bool   interlace_field;
 } line;
@@ -38,6 +37,9 @@ struct sprite_item {
 struct {
 //open bus support
   uint8 ppu1_mdr, ppu2_mdr;
+
+//bg line counters
+  uint16 bg_y[4];
 
 //$2100
   bool   display_disabled;
@@ -59,10 +61,12 @@ struct {
   bool   bg_tilesize[4];
   bool   bg3_priority;
   uint8  bg_mode;
+  bool   hires;
 
 //$2106
   uint8  mosaic_size;
   bool   mosaic_enabled[4];
+  uint16 mosaic_countdown;
 
 //$2107-$210a
   uint16 bg_scaddr[4];
@@ -131,6 +135,7 @@ struct {
 
 //$2133
   bool   mode7_extbg;
+  bool   pseudo_hires;
   bool   overscan;
   uint16 scanlines;
   bool   oam_halve;
@@ -246,7 +251,7 @@ uint16 *mosaic_table[16];
   void   power();
   void   reset();
 
-  bool   scanline_is_hires() { return (regs.bg_mode == 5 || regs.bg_mode == 6); }
+  bool   scanline_is_hires() { return (regs.hires); }
 
   bPPU();
   ~bPPU();

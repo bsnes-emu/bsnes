@@ -1,15 +1,18 @@
 CC = cl
-CFLAGS = /nologo /O2 /wd4996
+CFLAGS = /nologo /O2 /EHsc /wd4996
 OBJS = sdlmain.obj \
        libstring.obj libconfig.obj \
-       reader.obj \
+       reader.obj cart.obj \
        memory.obj bmemory.obj \
        cpu.obj bcpu.obj \
        apu.obj bapu.obj \
        bdsp.obj \
        ppu.obj bppu.obj \
        snes.obj \
-       srtc.obj sdd1.obj
+       srtc.obj sdd1.obj c4.obj
+#      adler32.obj compress.obj crc32.obj deflate.obj gzio.obj inffast.obj \
+#      inflate.obj inftrees.obj ioapi.obj trees.obj unzip.obj zip.obj zutil.obj \
+#      jma.obj jcrc32.obj lzmadec.obj 7zlzma.obj iiostrm.obj inbyte.obj lzma.obj winout.obj
 LIBS = kernel32.lib user32.lib gdi32.lib sdlmain.lib sdl.lib
 
 all: $(OBJS)
@@ -74,11 +77,14 @@ ppu.obj: ../ppu/*.cpp ../ppu/*.h
 bppu.obj: ../ppu/bppu/*
 	$(CC) $(CFLAGS) /c ../ppu/bppu/bppu.cpp
 
-##############
-### reader ###
-##############
+#################
+### utilities ###
+#################
 reader.obj: ../reader/*.cpp ../reader/*.h
 	$(CC) $(CFLAGS) /c ../reader/reader.cpp
+
+cart.obj: ../cart/*.cpp ../cart/*.h
+	$(CC) $(CFLAGS) /c ../cart/cart.cpp
 
 ############
 ### snes ###
@@ -86,14 +92,26 @@ reader.obj: ../reader/*.cpp ../reader/*.h
 snes.obj: ../snes/*.cpp ../snes/*.h
 	$(CC) $(CFLAGS) /c ../snes/snes.cpp
 
-############
-### srtc ###
-############
+#####################
+### special chips ###
+#####################
 srtc.obj: ../chip/srtc/*.cpp ../chip/srtc/*.h
 	$(CC) $(CFLAGS) /c ../chip/srtc/srtc.cpp
 
-############
-### sdd1 ###
-############
 sdd1.obj: ../chip/sdd1/*.cpp ../chip/sdd1/*.h
 	$(CC) $(CFLAGS) /c ../chip/sdd1/sdd1.cpp
+
+c4.obj: ../chip/c4/*.cpp ../chip/c4/*.h
+	$(CC) $(CFLAGS) /c ../chip/c4/c4.cpp
+
+############
+### zlib ###
+############
+adler32.obj: ../reader/zlib/*.c ../reader/zlib/*.h
+	$(CC) $(CFLAGS) /c ../reader/zlib/*.c
+
+###########
+### jma ###
+###########
+jma.obj: ../reader/jma/*.cpp ../reader/jma/*.h
+	$(CC) $(CFLAGS) /c ../reader/jma/*.cpp

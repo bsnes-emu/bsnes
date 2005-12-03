@@ -1,4 +1,5 @@
 //bppu_render.cpp
+inline bool render_enabled(uint8 bg, uint8 pri);
 inline void render_line_mode0();
 inline void render_line_mode1();
 inline void render_line_mode2();
@@ -12,19 +13,18 @@ inline void render_line_mode7();
 enum { COLORDEPTH_4 = 0, COLORDEPTH_16 = 1, COLORDEPTH_256 = 2 };
 enum { TILE_2BIT = 0, TILE_4BIT = 1, TILE_8BIT = 2 };
 
-enum { PC_BG1 = 0x80, PC_BG2 = 0x81, PC_BG3 = 0x82, PC_BG4 = 0x83, PC_OAM = 0x84, PC_BACK = 0x00 };
 struct _pixel {
 //bgr555 color data for main/subscreen pixels: 0x0000 = transparent / use palette color # 0
 //needs to be bgr555 instead of palette index for direct color mode ($2130 bit 0) to work
 uint16 src_main, src_sub;
 //indicates source of palette # for main/subscreen (BG1-4, OAM, or back)
 uint8  bg_main,  bg_sub;
-//true when bg_main == OAM && palette index >= 192, disables color add/sub effects
-uint8  color_exempt;
+//color_exemption -- true when bg == OAM && palette index >= 192, disables color add/sub effects
+uint8  ce_main,  ce_sub;
 //priority level of src_n. to set src_n,
 //the priority of the pixel must be >pri_n
 uint8  pri_main, pri_sub;
-} pixel_cache[512];
+} pixel_cache[256];
 
 uint8 *bg_tiledata[3];
 uint8 *bg_tiledata_state[3];
@@ -37,7 +37,7 @@ inline void clear_tiledata_cache();
 //bppu_render_windows.cpp
 struct _window {
   bool  main_dirty, sub_dirty;
-  uint8 main[512],  sub[512];
+  uint8 main[256],  sub[256];
 } window_cache[6];
 
 void build_window_table(uint8 bg, bool mainscreen);
@@ -71,18 +71,20 @@ void load_oam_tiles();
 void render_oam_tile(int tile_num);
 void render_line_oam(uint8 pri0_pos, uint8 pri1_pos, uint8 pri2_pos, uint8 pri3_pos);
 void render_line_oam_lores(uint8 pri0_pos, uint8 pri1_pos, uint8 pri2_pos, uint8 pri3_pos);
-void render_line_oam_hires(uint8 pri0_pos, uint8 pri1_pos, uint8 pri2_pos, uint8 pri3_pos);
 
 //bppu_render_mode7.cpp
 void render_line_mode7(uint8 bg, uint8 pri0_pos, uint8 pri1_pos);
 
 //bppu_render_addsub.cpp
-inline uint16 addsub_pixels(uint32 x);
+inline uint16 addsub_pixels(uint32 x, uint32 cdest, uint32 csrc, bool halve);
 
 //bppu_render_line.cpp
 enum { BLENDTYPE_BACK = 0, BLENDTYPE_MAIN = 1, BLENDTYPE_SUB = 2, BLENDTYPE_COMBINE = 3 };
 
 inline uint16 get_palette(uint8 index);
 inline uint16 get_direct_color(uint8 p, uint8 t);
-inline uint16 get_pixel(uint32 x);
+inline uint16 get_pixel_normal(uint32 x);
+inline uint16 get_pixel_swap(uint32 x);
+inline uint16 get_pixel_lores(uint32 x);
+inline uint16 get_pixel_hires(uint32 x);
 inline void render_line_output();

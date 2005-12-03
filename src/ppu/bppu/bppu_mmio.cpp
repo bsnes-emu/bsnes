@@ -117,6 +117,7 @@ void bPPU::mmio_w2105(uint8 value) {
   regs.bg_tilesize[BG1] = !!(value & 0x10);
   regs.bg3_priority     = !!(value & 0x08);
   regs.bg_mode          = (value & 7);
+  regs.hires            = (regs.bg_mode == 5 || regs.bg_mode == 6);
 
   window_cache[BG1].main_dirty = window_cache[BG1].sub_dirty = true;
   window_cache[BG2].main_dirty = window_cache[BG2].sub_dirty = true;
@@ -548,11 +549,12 @@ void bPPU::mmio_w2132(uint8 value) {
 
 //SETINI
 void bPPU::mmio_w2133(uint8 value) {
-  regs.mode7_extbg = !!(value & 0x40);
-  regs.overscan    = !!(value & 0x04);
-  regs.scanlines   = (value & 0x04)?239:224;
-  regs.oam_halve   = !!(value & 0x02);
-  regs.interlace   = !!(value & 0x01);
+  regs.mode7_extbg  = !!(value & 0x40);
+  regs.pseudo_hires = !!(value & 0x08);
+  regs.overscan     = !!(value & 0x04);
+  regs.scanlines    = (value & 0x04)?239:224;
+  regs.oam_halve    = !!(value & 0x02);
+  regs.interlace    = !!(value & 0x01);
 
   r_cpu->set_overscan(regs.overscan);
   r_cpu->set_interlace(regs.interlace);

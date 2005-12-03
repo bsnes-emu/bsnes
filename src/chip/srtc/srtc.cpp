@@ -74,8 +74,7 @@ tm *t;
   srtc.data[12] = t->tm_wday;
 }
 
-void SRTC::init() {
-}
+void SRTC::init() {}
 
 void SRTC::enable() {
   r_mem->set_mmio_mapper(0x2800, mmio);

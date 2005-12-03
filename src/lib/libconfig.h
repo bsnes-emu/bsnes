@@ -1,5 +1,5 @@
 /*
-  libconfig : version 0.05 ~byuu (09/13/05)
+  libconfig : version 0.05 ~byuu (10/30/05)
 */
 
 #ifndef __LIBCONFIG
@@ -28,6 +28,8 @@ class Config;
   inline __name &operator=(const int8   _data) { set(_data); return *this; } \
   inline __name &operator=(const int16  _data) { set(_data); return *this; } \
   inline __name &operator=(const int32  _data) { set(_data); return *this; } \
+  inline __name &operator=(const float  _data) { set((uint)_data); return *this; } \
+  inline __name &operator=(const double _data) { set((uint)_data); return *this; } \
   void toggle() { data ^= 1; set(data); } \
   __name(Config *_parent, char *_name, char *_desc = 0, uint _data = 0, uint _type = Setting::DEC) : \
   Setting(_parent, _name, _desc, _data, _type) {}
@@ -46,14 +48,20 @@ enum {
   YES_NO,
   BOOL,
   DEC,
-  HEX
+  HEX,
+  STR
 };
 char *name, *desc;
-  virtual void toggle();
-  virtual uint get();
-  virtual void set(uint _data);
+substring char_data, char_def;
+  virtual void  toggle();
+  virtual uint  get();
+  virtual void  set(uint _data);
 
-  Setting(Config *_parent, char *_name, char *_desc = 0, uint _data = 0, uint _type = DEC);
+  virtual char *sget();
+  virtual void  sset(const char *_data);
+
+  Setting(Config *_parent, char *_name, char *_desc, uint  _data, uint _type);
+  Setting(Config *_parent, char *_name, char *_desc, char *_data);
 
   inline operator bool()   { return (bool)get(); }
   inline operator uint()   { return get(); }
@@ -64,6 +72,8 @@ char *name, *desc;
   inline operator int8()   { return get(); }
   inline operator int16()  { return get(); }
   inline operator int32()  { return get(); }
+  inline operator float()  { return (float) get(); }
+  inline operator double() { return (double)get(); }
 
   inline Setting &operator=(const bool   _data) { set((uint)_data); return *this; }
   inline Setting &operator=(const uint   _data) { set(_data); return *this; }
@@ -74,6 +84,8 @@ char *name, *desc;
   inline Setting &operator=(const int8   _data) { set(_data); return *this; }
   inline Setting &operator=(const int16  _data) { set(_data); return *this; }
   inline Setting &operator=(const int32  _data) { set(_data); return *this; }
+  inline Setting &operator=(const float  _data) { set((uint)_data); return *this; }
+  inline Setting &operator=(const double _data) { set((uint)_data); return *this; }
 };
 
 class Config {

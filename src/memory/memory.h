@@ -48,15 +48,14 @@ public:
   }
   void set_speed(bool fast);
 
-  virtual bool load_cart(Reader *rf) = 0;
-  virtual bool load_sram(Reader *rf) = 0;
-  virtual bool save_sram(Writer *wf) = 0;
+  virtual void load_cart() = 0;
   virtual void unload_cart() = 0;
+  virtual bool cart_loaded() = 0;
   virtual void get_cartinfo(CartInfo *ci) = 0;
 
   virtual void power() = 0;
   virtual void reset() = 0;
 
   MemBus();
-  ~MemBus();
+  virtual ~MemBus() {}
 };

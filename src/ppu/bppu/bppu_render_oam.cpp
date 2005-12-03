@@ -220,12 +220,31 @@ int s;
 
   if(regs.bg_enabled[OAM] == false && regs.bgsub_enabled[OAM] == false)return;
 
-  if(line.width == 256) {
-    render_line_oam_lores(pri0_pos, pri1_pos, pri2_pos, pri3_pos);
-  } else {
-    render_line_oam_hires(pri0_pos, pri1_pos, pri2_pos, pri3_pos);
-  }
+//are layers disabled by user?
+  if(render_enabled(OAM, 0) == false)pri0_pos = 0;
+  if(render_enabled(OAM, 1) == false)pri1_pos = 0;
+  if(render_enabled(OAM, 2) == false)pri2_pos = 0;
+  if(render_enabled(OAM, 3) == false)pri3_pos = 0;
+//nothing to render?
+  if(!pri0_pos && !pri1_pos && !pri2_pos && !pri3_pos)return;
+
+  render_line_oam_lores(pri0_pos, pri1_pos, pri2_pos, pri3_pos);
 }
+
+#define setpixel_main(x) \
+  if(pixel_cache[x].pri_main < pri) { \
+    pixel_cache[x].pri_main = pri; \
+    pixel_cache[x].bg_main  = OAM; \
+    pixel_cache[x].src_main = get_palette(oam_line_pal[x]); \
+    pixel_cache[x].ce_main  = (oam_line_pal[x] < 192); \
+  }
+#define setpixel_sub(x) \
+  if(pixel_cache[x].pri_sub < pri) { \
+    pixel_cache[x].pri_sub = pri; \
+    pixel_cache[x].bg_sub  = OAM; \
+    pixel_cache[x].src_sub = get_palette(oam_line_pal[x]); \
+    pixel_cache[x].ce_sub  = (oam_line_pal[x] < 192); \
+  }
 
 void bPPU::render_line_oam_lores(uint8 pri0_pos, uint8 pri1_pos, uint8 pri2_pos, uint8 pri3_pos) {
 bool bg_enabled    = regs.bg_enabled[OAM];
@@ -246,78 +265,10 @@ int pri;
     case 3:pri = pri3_pos;break;
     }
 
-    if(bg_enabled == true && !wt_main[x]) {
-      if(pixel_cache[x].pri_main < pri) {
-        pixel_cache[x].pri_main = pri;
-        pixel_cache[x].bg_main  = PC_OAM;
-        pixel_cache[x].src_main = get_palette(oam_line_pal[x]);
-        pixel_cache[x].color_exempt = (oam_line_pal[x] < 192);
-      }
-    }
-
-    if(bgsub_enabled == true && !wt_sub[x]) {
-      if(pixel_cache[x].pri_sub < pri) {
-        pixel_cache[x].pri_sub = pri;
-        pixel_cache[x].bg_sub  = PC_OAM;
-        pixel_cache[x].src_sub = get_palette(oam_line_pal[x]);
-      }
-    }
+    if(bg_enabled    == true && !wt_main[x]) { setpixel_main(x); }
+    if(bgsub_enabled == true && !wt_sub[x])  { setpixel_sub(x); }
   }
 }
 
-void bPPU::render_line_oam_hires(uint8 pri0_pos, uint8 pri1_pos, uint8 pri2_pos, uint8 pri3_pos) {
-bool bg_enabled    = regs.bg_enabled[OAM];
-bool bgsub_enabled = regs.bgsub_enabled[OAM];
-
-  build_window_tables(OAM);
-uint8 *wt_main = window_cache[OAM].main;
-uint8 *wt_sub  = window_cache[OAM].sub;
-
-int pri, sx;
-  for(int x=0;x<256;x++) {
-    if(oam_line_pri[x] == OAM_PRI_NONE)continue;
-
-    switch(oam_line_pri[x]) {
-    case 0:pri = pri0_pos;break;
-    case 1:pri = pri1_pos;break;
-    case 2:pri = pri2_pos;break;
-    case 3:pri = pri3_pos;break;
-    }
-
-    sx = x << 1;
-    if(bg_enabled == true && !wt_main[sx]) {
-      if(pixel_cache[sx].pri_main < pri) {
-        pixel_cache[sx].pri_main = pri;
-        pixel_cache[sx].bg_main  = PC_OAM;
-        pixel_cache[sx].src_main = get_palette(oam_line_pal[x]);
-        pixel_cache[sx].color_exempt = (oam_line_pal[x] < 192);
-      }
-    }
-
-    if(bgsub_enabled == true && !wt_sub[sx]) {
-      if(pixel_cache[sx].pri_sub < pri) {
-        pixel_cache[sx].pri_sub = pri;
-        pixel_cache[sx].bg_sub  = PC_OAM;
-        pixel_cache[sx].src_sub = get_palette(oam_line_pal[x]);
-      }
-    }
-
-    sx++;
-    if(bg_enabled == true && !wt_main[sx]) {
-      if(pixel_cache[sx].pri_main < pri) {
-        pixel_cache[sx].pri_main = pri;
-        pixel_cache[sx].bg_main  = PC_OAM;
-        pixel_cache[sx].src_main = get_palette(oam_line_pal[x]);
-        pixel_cache[sx].color_exempt = (oam_line_pal[x] < 192);
-      }
-    }
-
-    if(bgsub_enabled == true && !wt_sub[sx]) {
-      if(pixel_cache[sx].pri_sub < pri) {
-        pixel_cache[sx].pri_sub = pri;
-        pixel_cache[sx].bg_sub  = PC_OAM;
-        pixel_cache[sx].src_sub = get_palette(oam_line_pal[x]);
-      }
-    }
-  }
-}
+#undef setpixel_main
+#undef setpixel_sub

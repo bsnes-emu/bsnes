@@ -1,5 +1,5 @@
 /*
-  libstring : version 0.06a ~byuu (08/22/05)
+  libstring : version 0.07 ~byuu (11/30/05)
 */
 
 #ifndef __LIBSTRING
@@ -25,6 +25,25 @@ int   strcmp(substring &dest, const char *src);
 int   strcmp(const char *dest, substring &src);
 int   strcmp(substring &dest, substring &src);
 
+//vc6/win32 and gcc/dos only support stricmp, whereas
+//gcc/unix only supports strcasecmp. this is an attempt
+//to avoid platform-specific defines...
+#define stricmp __stricmp
+int   __stricmp(const char *dest, const char *src);
+int   stricmp(substring &dest, const char *src);
+int   stricmp(const char *dest, substring &src);
+int   stricmp(substring &dest, substring &src);
+
+bool  strmatch(const char *dest, const char *src);
+bool  strmatch(substring &dest, const char *src);
+bool  strmatch(const char *dest, substring &src);
+bool  strmatch(substring &dest, substring &src);
+
+bool  strimatch(const char *dest, const char *src);
+bool  strimatch(substring &dest, const char *src);
+bool  strimatch(const char *dest, substring &src);
+bool  strimatch(substring &dest, substring &src);
+
 void  strcpy(substring &dest, const char *src);
 void  strcpy(substring &dest, substring &src);
 
@@ -38,45 +57,36 @@ void  strinsert(substring &dest, substring &src, uint pos);
 
 void  strremove(substring &dest, uint start, uint length = 0);
 
-//vc6/win32 and gcc/dos only support stricmp, whereas
-//gcc/unix only supports strcasecmp. this is an attempt
-//to avoid platform-specific defines...
-#define stricmp __stricmp
-int   __stricmp(const char *dest, const char *src);
-int   stricmp(substring &dest, const char *src);
-int   stricmp(const char *dest, substring &src);
-int   stricmp(substring &dest, substring &src);
-
 void  strlower(char *str);
 void  strlower(substring &str);
 
 void  strupper(char *str);
 void  strupper(substring &str);
 
-uint  strpos(const char *str, const char *key);
-uint  strpos(substring &str, const char *key);
-uint  strpos(const char *str, substring &key);
-uint  strpos(substring &str, substring &key);
+bool  strpos(const char *str, const char *key, uint &pos);
+bool  strpos(substring &str, const char *key, uint &pos);
+bool  strpos(const char *str, substring &key, uint &pos);
+bool  strpos(substring &str, substring &key, uint &pos);
 
-uint  qstrpos(const char *str, const char *key);
-uint  qstrpos(substring &str, const char *key);
-uint  qstrpos(const char *str, substring &key);
-uint  qstrpos(substring &str, substring &key);
+bool  qstrpos(const char *str, const char *key, uint &pos);
+bool  qstrpos(substring &str, const char *key, uint &pos);
+bool  qstrpos(const char *str, substring &key, uint &pos);
+bool  qstrpos(substring &str, substring &key, uint &pos);
 
 void  strtr(char *dest, const char *before, const char *after);
 void  strtr(substring &dest, const char *before, const char *after);
 
-uint  strbegin(const char *str, const char *key);
-uint  strbegin(substring &str, const char *key);
+bool  strbegin(const char *str, const char *key);
+bool  strbegin(substring &str, const char *key);
 
-uint  stribegin(const char *str, const char *key);
-uint  stribegin(substring &str, const char *key);
+bool  stribegin(const char *str, const char *key);
+bool  stribegin(substring &str, const char *key);
 
-uint  strend(const char *str, const char *key);
-uint  strend(substring &str, const char *key);
+bool  strend(const char *str, const char *key);
+bool  strend(substring &str, const char *key);
 
-uint  striend(const char *str, const char *key);
-uint  striend(substring &str, const char *key);
+bool  striend(const char *str, const char *key);
+bool  striend(substring &str, const char *key);
 
 void  strltrim(char *str, const char *key);
 void  strltrim(substring &str, const char *key);

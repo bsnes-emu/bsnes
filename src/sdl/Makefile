@@ -1,18 +1,23 @@
-CC = c++
+CC = cc
+CXX = c++
 CFLAGS = -O3 -fomit-frame-pointer -ffast-math
+CXXFLAGS = $(CFLAGS) -fno-rtti
 OBJS = sdlmain.o \
        libstring.o libconfig.o \
-       reader.o \
+       reader.o cart.o \
        memory.o bmemory.o \
        cpu.o bcpu.o \
        apu.o bapu.o \
        bdsp.o \
        ppu.o bppu.o \
        snes.o \
-       srtc.o sdd1.o
+       srtc.o sdd1.o c4.o \
+       adler32.o compress.o crc32.o deflate.o gzio.o inffast.o \
+       inflate.o inftrees.o ioapi.o trees.o unzip.o zip.o zutil.o \
+       jma.o jcrc32.o lzmadec.o 7zlzma.o iiostrm.o inbyte.o lzma.o winout.o
 
 all: $(OBJS)
-	$(CC) $(CFLAGS) $(OBJS) `sdl11-config --cflags --libs` -o bsnes_sdl
+	$(CXX) $(CXXFLAGS) $(OBJS) `sdl11-config --cflags --libs` -o bsnes_sdl
 
 clean:
 	rm *.o
@@ -21,78 +26,93 @@ clean:
 ### sdl-specific ###
 ####################
 sdlmain.o: *.cpp *.h
-	$(CC) $(CFLAGS) -c sdlmain.cpp `sdl11-config --cflags`
+	$(CXX) $(CXXFLAGS) -c sdlmain.cpp `sdl11-config --cflags`
 
 #################
 ### libraries ###
 #################
 libstring.o: ../lib/*.cpp ../lib/*.h
-	$(CC) $(CFLAGS) -c ../lib/libstring.cpp
+	$(CXX) $(CXXFLAGS) -c ../lib/libstring.cpp
 libconfig.o: ../lib/*.cpp ../lib/*.h
-	$(CC) $(CFLAGS) -c ../lib/libconfig.cpp
+	$(CXX) $(CXXFLAGS) -c ../lib/libconfig.cpp
 
 ##############
 ### memory ###
 ##############
 memory.o: ../memory/memory.cpp ../memory/memory.h
-	$(CC) $(CFLAGS) -c ../memory/memory.cpp
+	$(CXX) $(CXXFLAGS) -c ../memory/memory.cpp
 
 bmemory.o: ../memory/bmemory/*
-	$(CC) $(CFLAGS) -c ../memory/bmemory/bmemory.cpp
+	$(CXX) $(CXXFLAGS) -c ../memory/bmemory/bmemory.cpp
 
 ###########
 ### cpu ###
 ###########
 cpu.o: ../cpu/*.cpp ../cpu/*.h
-	$(CC) $(CFLAGS) -c ../cpu/cpu.cpp
+	$(CXX) $(CXXFLAGS) -c ../cpu/cpu.cpp
 
 bcpu.o: ../cpu/bcpu/*
-	$(CC) $(CFLAGS) -c ../cpu/bcpu/bcpu.cpp
+	$(CXX) $(CXXFLAGS) -c ../cpu/bcpu/bcpu.cpp
 
 ###########
 ### apu ###
 ###########
 apu.o: ../apu/*
-	$(CC) $(CFLAGS) -c ../apu/apu.cpp
+	$(CXX) $(CXXFLAGS) -c ../apu/apu.cpp
 
 bapu.o: ../apu/bapu/*
-	$(CC) $(CFLAGS) -c ../apu/bapu/bapu.cpp
+	$(CXX) $(CXXFLAGS) -c ../apu/bapu/bapu.cpp
 
 ###########
 ### dsp ###
 ###########
 bdsp.o: ../dsp/bdsp/*
-	$(CC) $(CFLAGS) -c ../dsp/bdsp/bdsp.cpp
+	$(CXX) $(CXXFLAGS) -c ../dsp/bdsp/bdsp.cpp
 
 ###########
 ### ppu ###
 ###########
 ppu.o: ../ppu/*.cpp ../ppu/*.h
-	$(CC) $(CFLAGS) -c ../ppu/ppu.cpp
+	$(CXX) $(CXXFLAGS) -c ../ppu/ppu.cpp
 
 bppu.o: ../ppu/bppu/*
-	$(CC) $(CFLAGS) -c ../ppu/bppu/bppu.cpp
+	$(CXX) $(CXXFLAGS) -c ../ppu/bppu/bppu.cpp
 
-##############
-### reader ###
-##############
+#################
+### utilities ###
+#################
 reader.o: ../reader/*.cpp ../reader/*.h
-	$(CC) $(CFLAGS) -c ../reader/reader.cpp
+	$(CXX) $(CXXFLAGS) -c ../reader/reader.cpp
+
+cart.o: ../cart/*.cpp ../cart/*.h
+	$(CXX) $(CXXFLAGS) -c ../cart/cart.cpp
 
 ############
 ### snes ###
 ############
 snes.o: ../snes/*.cpp ../snes/*.h
-	$(CC) $(CFLAGS) -c ../snes/snes.cpp
+	$(CXX) $(CXXFLAGS) -c ../snes/snes.cpp
 
-############
-### srtc ###
-############
+#####################
+### special chips ###
+#####################
 srtc.o: ../chip/srtc/*.cpp ../chip/srtc/*.h
-	$(CC) $(CFLAGS) -c ../chip/srtc/srtc.cpp
+	$(CXX) $(CXXFLAGS) -c ../chip/srtc/srtc.cpp
+
+sdd1.o: ../chip/sdd1/*.cpp ../chip/sdd1/*.h
+	$(CXX) $(CXXFLAGS) -c ../chip/sdd1/sdd1.cpp
+
+c4.o: ../chip/c4/*.cpp ../chip/c4/*.h
+	$(CXX) $(CXXFLAGS) -c ../chip/c4/c4.cpp
 
 ############
-### sdd1 ###
+### zlib ###
 ############
-sdd1.o: ../chip/sdd1/*.cpp ../chip/sdd1/*.h
-	$(CC) $(CFLAGS) -c ../chip/sdd1/sdd1.cpp
+adler32.o: ../reader/zlib/*.c ../reader/zlib/*.h
+	$(CC) $(CFLAGS) -c ../reader/zlib/*.c
+
+###########
+### jma ###
+###########
+jma.o: ../reader/jma/*.cpp ../reader/jma/*.h
+	$(CXX) $(CXXFLAGS) -c ../reader/jma/*.cpp

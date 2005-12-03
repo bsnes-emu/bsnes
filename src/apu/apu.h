@@ -27,4 +27,7 @@ static const uint8 iplrom[64];
   virtual bool in_opcode();
   void disassemble_opcode(char *output);
   inline uint16 __relb(int8 offset, int op_len);
+
+  APU() {}
+  virtual ~APU() {}
 };

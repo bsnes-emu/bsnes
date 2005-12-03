@@ -51,5 +51,5 @@ struct scanline_info {
   virtual bool  renderer_enabled();
 
   PPU();
-  ~PPU();
+  virtual ~PPU();
 };

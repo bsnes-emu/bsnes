@@ -1,5 +1,15 @@
+//debugging extensions (~10% speed hit)
 //#define DEBUGGER
+
+//snes core polymorphism (allow mem/cpu/apu/ppu overriding,
+//~10% speed hit)
 //#define POLYMORPHISM
+
+//enable GZ, ZIP format support
+#define GZIP_SUPPORT
+
+//enable JMA support
+#define JMA_SUPPORT
 
 //this should be declared in the port-specific makefiles
 //#define ARCH_LSB
