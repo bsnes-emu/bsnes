@@ -2,13 +2,23 @@ extern Config config_file;
 
 namespace config {
 
+extern struct FS {
+  static class Path : public Setting {
+  public:
+    void sset(const char *_data);
+    SettingOperators(Path);
+  } base_path, rom_path, save_path;
+  static Setting save_ext;
+} fs;
+
 extern struct SNES {
   static class VideoColorAdjust : public Setting {
   public:
     void set(uint32 _data);
     SettingOperators(VideoColorAdjust);
-  } video_color_curve, video_color_adjust_mode;
+  } gamma_ramp, sepia, grayscale, invert, contrast, brightness, gamma;
 
+  static Setting ntsc_merge_fields;
   static Setting mute;
 } snes;
 

@@ -1,18 +1,12 @@
 #include "../../base.h"
 
-#include "bcpu_opfn.cpp"
-#include "bcpu_op_read.cpp"
-#include "bcpu_op_rmw.cpp"
-#include "bcpu_op_write.cpp"
-#include "bcpu_op_pc.cpp"
-#include "bcpu_op_misc.cpp"
+#include "core/core.cpp"
+#include "memory/memory.cpp"
+#include "dma/dma.cpp"
+#include "timing/timing.cpp"
 
 #include "bcpu_exec.cpp"
 #include "bcpu_mmio.cpp"
-#include "bcpu_dma.cpp"
-
-#include "bcpu_timing.cpp"
-
 #include "bcpu_int.cpp"
 
 uint8 bCPU::pio_status() { return status.pio; }
@@ -49,7 +43,7 @@ void bCPU::run() {
 void bCPU::scanline() {
   time.hdma_triggered = false;
 
-  if(vcounter() == 225 && status.auto_joypad_poll == true) {
+  if(vcounter() == (overscan() == false ? 227 : 242) && status.auto_joypad_poll == true) {
     snes->poll_input(SNES::DEV_JOYPAD1);
     snes->poll_input(SNES::DEV_JOYPAD2);
   //When the SNES auto-polls the joypads, it writes 1, then 0 to
@@ -124,131 +118,8 @@ void bCPU::reset() {
   add_cycles(186);
 }
 
-uint8 bCPU::port_read(uint8 port) {
-  return apu_port[port & 3];
-}
-
-void bCPU::port_write(uint8 port, uint8 value) {
-  apu_port[port & 3] = value;
-}
-
-void bCPU::cpu_c2() {
-  if(regs.d.l != 0x00) {
-    cpu_io();
-  }
-}
-
-void bCPU::cpu_c4(uint16 x, uint16 y) {
-  if(!regs.p.x && (x & 0xff00) != (y & 0xff00)) {
-    cpu_io();
-  }
-}
-
-void bCPU::cpu_c6(uint16 addr) {
-  if(regs.e && (regs.pc.w & 0xff00) != (addr & 0xff00)) {
-    cpu_io();
-  }
-}
-
-/* The next 3 functions control bus timing for the CPU.
- * cpu_io is an I/O cycle, and always 6 clock cycles long.
- * mem_read / mem_write indicate memory access bus cycle,
- * they are either 6, 8, or 12 bus cycles long, depending
- * both on location and the $420d.d0 FastROM enable bit.
- */
-
-void bCPU::cpu_io() {
-  status.cycle_count = 6;
-  pre_exec_cycle();
-  add_cycles(6);
-  cycle_edge();
-}
-
-uint8 bCPU::mem_read(uint32 addr) {
-  status.cycle_count = r_mem->speed(addr);
-  pre_exec_cycle();
-  add_cycles(status.cycle_count - 4);
-  regs.mdr = r_mem->read(addr);
-  add_cycles(4);
-  cycle_edge();
-  return regs.mdr;
-}
-
-void bCPU::mem_write(uint32 addr, uint8 value) {
-  status.cycle_count = r_mem->speed(addr);
-  pre_exec_cycle();
-  add_cycles(status.cycle_count);
-  r_mem->write(addr, value);
-  cycle_edge();
-}
-
-uint32 bCPU::op_addr(uint8 mode, uint32 addr) {
-  switch(mode) {
-  case OPMODE_ADDR:
-    addr &= 0xffff;
-    break;
-  case OPMODE_LONG:
-    addr &= 0xffffff;
-    break;
-  case OPMODE_DBR:
-    addr = ((regs.db << 16) + addr) & 0xffffff;
-    break;
-  case OPMODE_PBR:
-    addr &= 0xffff;
-    addr = (regs.pc.b << 16) + addr;
-    break;
-  case OPMODE_DP:
-    addr &= 0xffff;
-    addr = (regs.d + addr) & 0xffff;
-    break;
-  case OPMODE_SP:
-    addr &= 0xffff;
-    addr = (regs.s + addr) & 0xffff;
-    break;
-  }
-  return addr;
-}
-
-uint8 bCPU::op_read() {
-uint8 r;
-  r = mem_read(regs.pc.d);
-  regs.pc.w++;
-  return r;
-}
-
-uint8 bCPU::op_read(uint8 mode, uint32 addr) {
-  addr = op_addr(mode, addr);
-  return mem_read(addr);
-}
-
-void bCPU::op_write(uint8 mode, uint32 addr, uint8 value) {
-  addr = op_addr(mode, addr);
-  mem_write(addr, value);
-}
-
-uint8 bCPU::stack_read() {
-  if(regs.e) {
-    regs.s.l++;
-  } else {
-    regs.s.w++;
-  }
-  return mem_read(regs.s);
-}
-
-void bCPU::stack_write(uint8 value) {
-  mem_write(regs.s, value);
-  if(regs.e) {
-    regs.s.l--;
-  } else {
-    regs.s.w--;
-  }
-}
-
 bCPU::bCPU() {
-  mmio = new bCPUMMIO(this);
   init_op_tables();
 }
 
-bCPU::~bCPU() {
-  delete(mmio);
-}
+bCPU::~bCPU() {}

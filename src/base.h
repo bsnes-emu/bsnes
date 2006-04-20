@@ -1,15 +1,27 @@
+#define BSNES_VERSION "0.015 rc2" //wip45
+#define BSNES_TITLE "bsnes v" BSNES_VERSION
+
+#define MEMCORE bMemBus
+#define CPUCORE bCPU
+#define APUCORE bAPU
+#define DSPCORE bDSP
+#define PPUCORE bPPU
+
 //debugging extensions (~10% speed hit)
-//#define DEBUGGER
+#define DEBUGGER
+
+//game genie + pro action replay code support (~1-3% speed hit)
+#define CHEAT_SYSTEM
+
+//enable GZ, ZIP format support
+//#define GZIP_SUPPORT
+
+//enable JMA support
+//#define JMA_SUPPORT
 
 //snes core polymorphism (allow mem/cpu/apu/ppu overriding,
 //~10% speed hit)
 //#define POLYMORPHISM
-
-//enable GZ, ZIP format support
-#define GZIP_SUPPORT
-
-//enable JMA support
-#define JMA_SUPPORT
 
 //this should be declared in the port-specific makefiles
 //#define ARCH_LSB
@@ -21,20 +33,6 @@
   #endif
 #endif
 
-#include <time.h>
-#include "lib/libbase.h"
-#include "lib/libvector.h"
-#include "lib/libstring.h"
-#include "lib/libconfig.h"
-
-inline uint16 read16(uint8 *addr, uint pos) {
-#ifdef ARCH_LSB
-  return *((uint16*)(addr + pos));
-#else
-  return (addr[pos]) | (addr[pos + 1] << 8);
-#endif
-}
-
 #if defined(_WIN32)
   #define _WIN32_
   #undef _UNIX_
@@ -45,9 +43,21 @@ inline uint16 read16(uint8 *addr, uint pos) {
   #error "unknown architecture"
 #endif
 
+#include "lib/libbase.h"
+#include "lib/libvector.h"
+#include "lib/libstring.h"
+#include "lib/libconfig.h"
+#include "lib/libbpf.h"
+
+inline uint16 read16(uint8 *addr, uint pos) {
+#ifdef ARCH_LSB
+  return *((uint16*)(addr + pos));
+#else
+  return (addr[pos]) | (addr[pos + 1] << 8);
+#endif
+}
+
 //platform-specific global functions
-void *memalloc(uint32 size, char *name = 0, ...);
-void memfree(void *mem, char *name = 0, ...);
 void alert(char *s, ...);
 void dprintf(char *s, ...);
 

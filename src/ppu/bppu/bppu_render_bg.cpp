@@ -26,6 +26,22 @@ uint16 pos;
   return read16(vram, regs.bg_scaddr[bg] + (pos << 1));
 }
 
+#define setpixel_main(x) \
+  if(pixel_cache[x].pri_main < tile_pri) { \
+    pixel_cache[x].pri_main = tile_pri; \
+    pixel_cache[x].bg_main  = bg; \
+    pixel_cache[x].src_main = col; \
+    pixel_cache[x].ce_main  = false; \
+  }
+
+#define setpixel_sub(x) \
+  if(pixel_cache[x].pri_sub < tile_pri) { \
+    pixel_cache[x].pri_sub = tile_pri; \
+    pixel_cache[x].bg_sub  = bg; \
+    pixel_cache[x].src_sub = col; \
+    pixel_cache[x].ce_sub  = false; \
+  }
+
 void bPPU::render_line_bg(uint8 bg, uint8 color_depth, uint8 pri0_pos, uint8 pri1_pos) {
   if(regs.bg_enabled[bg] == false && regs.bgsub_enabled[bg] == false) {
     return;
@@ -59,12 +75,12 @@ uint16 mask_y         = bg_info[bg].my; //screen height mask
 
 uint x = 0;
 uint y = regs.bg_y[bg];
-  if(line.interlace && regs.hires) {
+  if(regs.interlace && regs.hires) {
     y = (y << 1) + line.interlace_field;
   }
 
-uint16 hscroll = (regs.hires) ? (regs.bg_hofs[bg] << 1) : regs.bg_hofs[bg];
-uint16 vscroll = (line.interlace && regs.hires) ? (regs.bg_vofs[bg] << 1) : regs.bg_vofs[bg];
+uint16 hscroll = (regs.hires)                   ? (regs.bg_hofs[bg] << 1) : regs.bg_hofs[bg];
+uint16 vscroll = (regs.interlace && regs.hires) ? (regs.bg_vofs[bg] << 1) : regs.bg_vofs[bg];
   hscroll &= mask_x;
   vscroll &= mask_y;
 
@@ -82,8 +98,8 @@ bool   mirror_x, mirror_y;
 bool   is_opt_mode = (config::ppu.opt_enable) && (regs.bg_mode == 2 || regs.bg_mode == 4 || regs.bg_mode == 6);
 
   build_window_tables(bg);
-uint8 *wt_main = window_cache[bg].main;
-uint8 *wt_sub  = window_cache[bg].sub;
+uint8 *wt_main = window[bg].main;
+uint8 *wt_sub  = window[bg].sub;
 
 int32 prev_x = -1, prev_y = -1;
   for(x = 0; x < line.width; x++) {
@@ -172,21 +188,6 @@ int32 prev_x = -1, prev_y = -1;
         col = get_palette(col + pal_index);
       }
 
-    #define setpixel_main(x) \
-      if(pixel_cache[x].pri_main < tile_pri) { \
-        pixel_cache[x].pri_main = tile_pri; \
-        pixel_cache[x].bg_main  = bg; \
-        pixel_cache[x].src_main = col; \
-        pixel_cache[x].ce_main  = false; \
-      }
-    #define setpixel_sub(x) \
-      if(pixel_cache[x].pri_sub < tile_pri) { \
-        pixel_cache[x].pri_sub = tile_pri; \
-        pixel_cache[x].bg_sub  = bg; \
-        pixel_cache[x].src_sub = col; \
-        pixel_cache[x].ce_sub  = false; \
-      }
-
       if(!regs.hires) {
         if(bg_enabled    == true && !wt_main[x]) { setpixel_main(x); }
         if(bgsub_enabled == true && !wt_sub[x])  { setpixel_sub(x);  }
@@ -198,9 +199,9 @@ int32 prev_x = -1, prev_y = -1;
           if(bgsub_enabled == true && !wt_sub[hx])  { setpixel_sub(hx);  }
         }
       }
-
-    #undef setpixel_main
-    #undef setpixel_sub
     }
   }
 }
+
+#undef setpixel_main
+#undef setpixel_sub

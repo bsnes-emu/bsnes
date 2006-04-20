@@ -10,23 +10,37 @@ void bPPU::scanline() {
   line.interlace       = r_cpu->interlace();
   line.interlace_field = r_cpu->interlace_field();
 
+//this should probably only be done once per frame (at the
+//start of vblank), however it is currently done every scanline
+//as an attempt to emulate FirstSprite+Y priority mode
+  if(regs.oam_priority == true) {
+    if((regs.oam_addr & 3) == 3) {
+    //FirstSprite+Y priority (untested)
+      regs.oam_firstsprite = (regs.oam_addr >> 2) + (line.y - 1);
+    } else {
+      regs.oam_firstsprite = (regs.oam_addr >> 2);
+    }
+    regs.oam_firstsprite &= 127;
+  } else {
+    regs.oam_firstsprite = 0;
+  }
+
   if(line.y == 0) {
   //RTO flag reset
     regs.time_over  = false;
     regs.range_over = false;
   }
 
-int32 bg;
   if(line.y == 1) {
   //mosaic reset
-    for(bg=BG1;bg<=BG4;bg++) {
+    for(int32 bg = BG1; bg <= BG4; bg++) {
       regs.bg_y[bg] = 1;
     }
 
     regs.mosaic_countdown = regs.mosaic_size + 1;
     regs.mosaic_countdown--;
   } else {
-    for(bg=BG1;bg<=BG4;bg++) {
+    for(int32 bg = BG1; bg <= BG4; bg++) {
       if(!regs.mosaic_enabled[bg] || !regs.mosaic_countdown) {
         regs.bg_y[bg] = line.y;
       }
@@ -38,25 +52,29 @@ int32 bg;
     regs.mosaic_countdown--;
   }
 
-  if(line.y == 1) {
-  //OAM FirstSprite priority set
-    if(regs.oam_priority == true) {
-      regs.oam_firstsprite = (regs.oam_addr & 0xfe) >> 1;
-    } else {
-      regs.oam_firstsprite = 0;
-    }
+//TODO: line.y position needs to be verified
+  if(line.y == (r_cpu->overscan() ? 240 : 225) && regs.display_disabled == false) {
+  //OAM address reset
+    regs.oam_addr = regs.oam_baseaddr << 1;
   }
 
-  if(line.y == (r_cpu->overscan() ? 239 : 224) && regs.display_disabled == false) {
-  //OAM address reset
-    regs.oam_addr = ((regs.oam_addrh << 8) | regs.oam_addrl) << 1;
+  if(line.y == 241 && line.interlace_field == 1) {
+    if(regs.interlace != r_cpu->interlace()) {
+    //clear entire frame so that odd scanlines are empty
+    //this should be handled better, but one blank frame looks
+    //better than one improperly interlaced frame...
+      memset(output, 0, 512 * 480 * sizeof(uint16));
+    }
+  //r_cpu->set_overscan(regs.overscan);
+    r_cpu->set_interlace(regs.interlace);
+    regs.scanlines = (regs.overscan == false) ? 224 : 239;
   }
 }
 
 void bPPU::render_scanline() {
   if(status.render_output == false)return;
 
-  if(line.y > 0 && line.y < (r_cpu->overscan() ? 239 : 224)) {
+  if(line.y > 0 && line.y < (r_cpu->overscan() ? 240 : 225)) {
     render_line();
   }
 }
@@ -103,8 +121,7 @@ void bPPU::reset() {
   regs.oam_tdaddr     = 0x0000;
 
 //$2102-$2103
-  regs.oam_addrl       = 0x00;
-  regs.oam_addrh       = 0x00;
+  regs.oam_baseaddr    = 0x0000;
   regs.oam_addr        = 0x0000;
   regs.oam_latchdata   = 0x00;
   regs.oam_priority    = false;
@@ -265,12 +282,12 @@ void bPPU::reset() {
   regs.color_rgb = 0x0000;
 
 //$2133
-  regs.mode7_extbg  = false;
-  regs.pseudo_hires = false;
-  regs.overscan     = false;
-  regs.scanlines    = 224;
-  regs.oam_halve    = false;
-  regs.interlace    = false;
+  regs.mode7_extbg   = false;
+  regs.pseudo_hires  = false;
+  regs.overscan      = false;
+  regs.scanlines     = 224;
+  regs.oam_interlace = false;
+  regs.interlace     = false;
 
 //$2137
   regs.hcounter         = 0;
@@ -287,9 +304,7 @@ void bPPU::reset() {
   regs.range_over = false;
 
   line.width = 256; //needed for clear_window_cache()
-  update_sprite_list_sizes();
   clear_tiledata_cache();
-  clear_window_cache();
 }
 
 uint8 bPPU::vram_read(uint16 addr) {
@@ -321,7 +336,6 @@ uint8 r;
 void bPPU::oam_write(uint16 addr, uint8 value) {
   if(addr >= 0x0200)addr = 0x0200 | (addr & 31);
   oam[addr] = value;
-  update_sprite_list(addr);
 #ifdef DEBUGGER
   snes->notify(SNES::OAM_WRITE, addr, value);
 #endif
@@ -352,8 +366,6 @@ void bPPU::cgram_write(uint16 addr, uint8 value) {
 }
 
 bPPU::bPPU() {
-  mmio = new bPPUMMIO(this);
-
   vram  = (uint8*)malloc(65536);
   oam   = (uint8*)malloc(  544);
   cgram = (uint8*)malloc(  512);
@@ -363,51 +375,74 @@ bPPU::bPPU() {
 
   init_tiledata_cache();
 
-int     i, l;
-uint8   r, g, b;
-double  m;
-uint16 *ptr;
-  for(l=0;l<16;l++) {
+  for(int32 l = 0; l < 16; l++) {
     mosaic_table[l] = (uint16*)malloc(4096 * 2);
-    for(i=0;i<4096;i++) {
+    for(int32 i = 0; i < 4096; i++) {
       mosaic_table[l][i] = (i / (l + 1)) * (l + 1);
     }
   }
 
   light_table = (uint16*)malloc(16 * 32768 * 2);
-  ptr = (uint16*)light_table;
-  for(l=0;l<16;l++) {
-    m = (double)l / 15.0;
-    for(i=0;i<32768;i++) {
+uint16 *ptr = (uint16*)light_table;
+  for(int32 l = 0; l < 16; l++) {
+  int32  r, g, b;
+  #if 0
+  double y, cb, cr;
+  double kr = 0.2126, kb = 0.0722, kg = (1.0 - kr - kb);
+    for(int32 i = 0; i < 32768; i++) {
+      if(l ==  0) { *ptr++ = 0; continue; }
+      if(l == 15) { *ptr++ = i; continue; }
+
       r = (i      ) & 31;
       g = (i >>  5) & 31;
       b = (i >> 10) & 31;
-      if(l == 0) { r = g = b = 0; }
-      else if(l == 15);
-      else {
-        r = (uint8)((double)r * m);
-        g = (uint8)((double)g * m);
-        b = (uint8)((double)b * m);
-      }
+
+      y  = double(r) * kr + double(g) * kg + double(b) * kb;
+      cb = (double(b) - y) / (2.0 - 2.0 * kb);
+      cr = (double(r) - y) / (2.0 - 2.0 * kr);
+
+      y  *= double(l) / 15.0;
+      cb *= double(l) / 15.0;
+      cr *= double(l) / 15.0;
+
+      r = y + cr * (2.0 - 2.0 * kr);
+      b = y + cb * (2.0 - 2.0 * kb);
+      g = (y - b * kb - r * kr) / kg;
+
+      r = (r > 31) ? 31 : ((r < 0) ? 0 : r);
+      g = (g > 31) ? 31 : ((g < 0) ? 0 : g);
+      b = (b > 31) ? 31 : ((b < 0) ? 0 : b);
+
       *ptr++ = (r) | (g << 5) | (b << 10);
     }
+  #else
+  double m = double(l) / 15.0;
+    for(int32 i = 0; i < 32768; i++) {
+      if(l ==  0) { *ptr++ = 0; continue; }
+      if(l == 15) { *ptr++ = i; continue; }
+
+      r = (i      ) & 31;
+      g = (i >>  5) & 31;
+      b = (i >> 10) & 31;
+
+      r = (int32)(double(r) * m);
+      g = (int32)(double(g) * m);
+      b = (int32)(double(b) * m);
+
+      *ptr++ = (r) | (g << 5) | (b << 10);
+    }
+  #endif
   }
 }
 
 bPPU::~bPPU() {
-  delete(mmio);
+  SafeFree(vram);
+  SafeFree(oam);
+  SafeFree(cgram);
 
-  zerofree(vram);
-  zerofree(oam);
-  zerofree(cgram);
-
-  for(int i=0;i<16;i++) {
-    zerofree(mosaic_table[i]);
+  for(int i = 0; i < 16; i++) {
+    SafeFree(mosaic_table[i]);
   }
 
-  zerofree(light_table);
-}
-
-bPPUMMIO::bPPUMMIO(bPPU *_ppu) {
-  ppu = _ppu;
+  SafeFree(light_table);
 }

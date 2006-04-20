@@ -1,5 +1,5 @@
 /*
-  libconfig : version 0.05 ~byuu (10/30/05)
+  libconfig : version 0.07 ~byuu (02/10/06)
 */
 
 #ifndef __LIBCONFIG
@@ -31,8 +31,10 @@ class Config;
   inline __name &operator=(const float  _data) { set((uint)_data); return *this; } \
   inline __name &operator=(const double _data) { set((uint)_data); return *this; } \
   void toggle() { data ^= 1; set(data); } \
-  __name(Config *_parent, char *_name, char *_desc = 0, uint _data = 0, uint _type = Setting::DEC) : \
-  Setting(_parent, _name, _desc, _data, _type) {}
+  __name(Config *_parent, char *_name, char *_desc, uint  _data, uint _type) : \
+  Setting(_parent, _name, _desc, _data, _type) {} \
+  __name(Config *_parent, char *_name, char *_desc, char *_data) : \
+  Setting(_parent, _name, _desc, _data) {}
 
 class Setting {
   friend class Config;
@@ -46,9 +48,12 @@ enum {
   ENABLED_DISABLED,
   ON_OFF,
   YES_NO,
-  BOOL,
   DEC,
   HEX,
+  HEX8,
+  HEX16,
+  HEX24,
+  HEX32,
   STR
 };
 char *name, *desc;

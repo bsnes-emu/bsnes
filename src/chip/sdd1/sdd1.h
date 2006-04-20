@@ -1,15 +1,8 @@
 #include "sdd1emu.h"
 
-class SDD1MMIO : public MMIO {
-public:
-  inline uint8 read (uint32 addr);
-  inline void  write(uint32 addr, uint8 value);
-};
-
-class SDD1 {
+class SDD1 : public MMIO {
 public:
 SDD1emu sdd1emu;
-SDD1MMIO *mmio;
 
 struct {
   uint32 index[4];      //memory mapping registers
@@ -19,7 +12,7 @@ struct {
   uint16 buffer_size;
   bool   active[8];     //true when DMA channel should pass through S-DD1
   bool   dma_active;
-}sdd1;
+} sdd1;
   void   init();
   void   enable();
   void   power();
@@ -30,7 +23,7 @@ struct {
   bool   dma_active();
   uint8  dma_read();
 
-  uint8  mmio_read(uint16 addr);
+  uint8  mmio_read (uint16 addr);
   void   mmio_write(uint16 addr, uint8 data);
 
   SDD1();

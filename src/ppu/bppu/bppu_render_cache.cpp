@@ -135,17 +135,3 @@ void bPPU::clear_tiledata_cache() {
   memset(bg_tiledata_state[TILE_4BIT], 0,   2048);
   memset(bg_tiledata_state[TILE_8BIT], 0,   1024);
 }
-
-void bPPU::clear_window_cache() {
-  for(int i=0;i<6;i++) {
-    window_cache[i].main_dirty = true;
-    window_cache[i].sub_dirty  = true;
-  }
-
-  build_window_tables(BG1);
-  build_window_tables(BG2);
-  build_window_tables(BG3);
-  build_window_tables(BG4);
-  build_window_tables(OAM);
-  build_window_tables(COL);
-}

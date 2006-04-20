@@ -10,8 +10,8 @@ SNES::video_info vi;
 //documentation says not to use this, but it's rather ridiculous that a graphics
 //library wouldn't support simple image scaling... so let's use it anyway and see
 //what happens...
-  SDL_SoftStretch(backbuffer, &screen_info.rs, screen, &screen_info.rd);
-//SDL_BlitSurface(backbuffer, &screen_info.rs, screen, &screen_info.rd);
+//SDL_SoftStretch(backbuffer, &screen_info.rs, screen, &screen_info.rd);
+  SDL_BlitSurface(backbuffer, &screen_info.rs, screen, &screen_info.rd);
 
   SDL_UpdateRect(screen, screen_info.rd.x, screen_info.rd.y, screen_info.rd.w, screen_info.rd.h);
 }

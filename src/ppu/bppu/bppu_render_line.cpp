@@ -25,22 +25,22 @@ uint8  bg_sub;
     src_sub = p->src_sub;
   }
 
-  if(!window_cache[COL].main[x]) {
-    if(!window_cache[COL].sub[x]) {
+  if(!window[COL].main[x]) {
+    if(!window[COL].sub[x]) {
       return 0x0000;
     }
     src_main = 0x0000;
   }
 
-  if(!p->ce_main && regs.color_enabled[p->bg_main] && window_cache[COL].sub[x]) {
+  if(!p->ce_main && regs.color_enabled[p->bg_main] && window[COL].sub[x]) {
   bool halve = false;
-    if(regs.color_halve && window_cache[COL].main[x]) {
+    if(regs.color_halve && window[COL].main[x]) {
       if(regs.addsub_mode && bg_sub == BACK);
       else {
         halve = true;
       }
     }
-    return addsub_pixels(x, src_main, src_sub, halve);
+    return addsub(src_main, src_sub, halve);
   }
 
   return src_main;
@@ -60,22 +60,22 @@ uint8  bg_sub;
     src_sub = p->src_main;
   }
 
-  if(!window_cache[COL].main[x]) {
-    if(!window_cache[COL].sub[x]) {
+  if(!window[COL].main[x]) {
+    if(!window[COL].sub[x]) {
       return 0x0000;
     }
     src_main = 0x0000;
   }
 
-  if(!p->ce_sub && regs.color_enabled[p->bg_sub] && window_cache[COL].sub[x]) {
+  if(!p->ce_sub && regs.color_enabled[p->bg_sub] && window[COL].sub[x]) {
   bool halve = false;
-    if(regs.color_halve && window_cache[COL].main[x]) {
+    if(regs.color_halve && window[COL].main[x]) {
       if(regs.addsub_mode && bg_sub == BACK);
       else {
         halve = true;
       }
     }
-    return addsub_pixels(x, src_main, src_sub, halve);
+    return addsub(src_main, src_sub, halve);
   }
 
   return src_main;
@@ -94,26 +94,20 @@ inline uint16 bPPU::get_pixel_hires(uint32 x) {
 }
 
 inline void bPPU::render_line_output() {
-uint32 r, x;
 uint16 *ptr    = (uint16*)output + (line.y * 1024) +
                  ((line.interlace && line.interlace_field) ? 512 : 0);
 uint16 *ltable = (uint16*)light_table + (regs.display_brightness << 15);
-
   if(!regs.pseudo_hires && !regs.hires) {
-    for(x=0;x<256;x++) {
-      r = get_pixel_lores(x);
-      *ptr++ = *(ltable + r);
+    for(int x = 0; x < 256; x++) {
+      *ptr++ = *(ltable + get_pixel_lores(x));
     }
   } else {
-    for(x=0;x<512;x++) {
-      r = get_pixel_hires(x);
-      *ptr++ = *(ltable + r);
-    }
-    if(regs.pseudo_hires && !regs.hires) {
-      ptr -= 512;
-      for(x=0;x<256;x++) {
-        *(ptr + x) = ((ptr[x << 1] & 0x7bde) >> 1) + ((ptr[(x << 1) + 1] & 0x7bde) >> 1);
-      }
+  uint32 curr, prev = 0;
+    for(int x = 0; x < 512; x++) {
+      curr = *(ltable + get_pixel_hires(x));
+      *ptr++ = (prev + curr - ((prev ^ curr) & 0x0421)) >> 1;
+      prev = curr;
+    //*ptr++ = *(ltable + get_pixel_hires(x));
     }
   }
 }

@@ -1,19 +1,20 @@
 CC = cl
-CFLAGS = /nologo /O2 /EHsc /wd4996
+CFLAGS = /nologo /O2 /arch:SSE2 /wd4996
 OBJS = main.obj \
-       libstring.obj libconfig.obj \
-       reader.obj cart.obj \
+       libstring.obj libconfig.obj libbpf.obj \
+       reader.obj cart.obj cheat.obj \
        memory.obj bmemory.obj \
        cpu.obj bcpu.obj \
        apu.obj bapu.obj \
        bdsp.obj \
        ppu.obj bppu.obj \
        snes.obj \
-       srtc.obj sdd1.obj c4.obj \
-       adler32.obj compress.obj crc32.obj deflate.obj gzio.obj inffast.obj \
-       inflate.obj inftrees.obj ioapi.obj trees.obj unzip.obj zip.obj zutil.obj \
-       jma.obj jcrc32.obj lzmadec.obj 7zlzma.obj iiostrm.obj inbyte.obj lzma.obj winout.obj
-LIBS = kernel32.lib user32.lib gdi32.lib comdlg32.lib ddraw.lib dsound.lib dinput8.lib dxguid.lib
+       srtc.obj sdd1.obj c4.obj dsp2.obj obc1.obj
+#      adler32.obj compress.obj crc32.obj deflate.obj gzio.obj inffast.obj \
+#      inflate.obj inftrees.obj ioapi.obj trees.obj unzip.obj zip.obj zutil.obj \
+#      jma.obj jcrc32.obj lzmadec.obj 7zlzma.obj iiostrm.obj inbyte.obj lzma.obj winout.obj
+LIBS = kernel32.lib user32.lib gdi32.lib comdlg32.lib comctl32.lib \
+       d3d9.lib d3dx9.lib ddraw.lib dsound.lib dinput8.lib dxguid.lib
 
 all: $(OBJS)
 	rc /r /fobsnes.res bsnes.rc
@@ -22,6 +23,7 @@ all: $(OBJS)
 
 clean:
 	del *.obj
+	del *.res
 	del *.pgd
 	del *.pgc
 	del *.ilk
@@ -30,7 +32,7 @@ clean:
 ######################
 ### win32-specific ###
 ######################
-main.obj: *.cpp *.h video/* audio/* input/* ../config/*
+main.obj: *.cpp *.h video/* audio/* input/* settings/* debugger/* ../config/*
 	$(CC) $(CFLAGS) /c main.cpp
 
 #################
@@ -40,6 +42,8 @@ libstring.obj: ../lib/*.cpp ../lib/*.h
 	$(CC) $(CFLAGS) /c ../lib/libstring.cpp
 libconfig.obj: ../lib/*.cpp ../lib/*.h
 	$(CC) $(CFLAGS) /c ../lib/libconfig.cpp
+libbpf.obj: ../lib/*.cpp ../lib/*.h
+	$(CC) $(CFLAGS) /c ../lib/libbpf.cpp
 
 ##############
 ### memory ###
@@ -92,10 +96,13 @@ reader.obj: ../reader/*.cpp ../reader/*.h
 cart.obj: ../cart/*.cpp ../cart/*.h
 	$(CC) $(CFLAGS) /c ../cart/cart.cpp
 
+cheat.obj: ../cheat/*.cpp ../cheat/*.h
+	$(CC) $(CFLAGS) /c ../cheat/cheat.cpp
+
 ############
 ### snes ###
 ############
-snes.obj: ../snes/*.cpp ../snes/*.h
+snes.obj: ../snes/* ../snes/video/* ../snes/audio/* ../snes/input/*
 	$(CC) $(CFLAGS) /c ../snes/snes.cpp
 
 #####################
@@ -109,6 +116,12 @@ sdd1.obj: ../chip/sdd1/*.cpp ../chip/sdd1/*.h
 
 c4.obj: ../chip/c4/*.cpp ../chip/c4/*.h
 	$(CC) $(CFLAGS) /c ../chip/c4/c4.cpp
+
+dsp2.obj: ../chip/dsp2/*.cpp ../chip/dsp2/*.h
+	$(CC) $(CFLAGS) /c ../chip/dsp2/dsp2.cpp
+
+obc1.obj: ../chip/obc1/*.cpp ../chip/obc1/*.h
+	$(CC) $(CFLAGS) /c ../chip/obc1/obc1.cpp
 
 ############
 ### zlib ###

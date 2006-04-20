@@ -1,3 +1,5 @@
+class VideoFilter;
+
 class SNES {
 protected:
 bool is_debugger_enabled;
@@ -33,9 +35,9 @@ enum { NTSC = 0, PAL = 1 };
   uint8 region();
   void  set_region(uint8 new_region);
 
-#include "snes_video.h"
-#include "snes_audio.h"
-#include "snes_input.h"
+#include "video/video.h"
+#include "audio/audio.h"
+#include "input/input.h"
 
 //debugging functions
 enum {
@@ -58,3 +60,5 @@ enum {
   SNES();
   virtual ~SNES() {}
 };
+
+#include "video/filter.h"

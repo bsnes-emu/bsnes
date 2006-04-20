@@ -76,20 +76,19 @@ void bPPU::mmio_w2101(uint8 value) {
   regs.oam_basesize   = (value >> 5) & 7;
   regs.oam_nameselect = (value >> 3) & 3;
   regs.oam_tdaddr     = (value & 3) << 14;
-  update_sprite_list_sizes();
 }
 
 //OAMADDL
 void bPPU::mmio_w2102(uint8 value) {
-  regs.oam_addrl = value;
-  regs.oam_addr  = ((regs.oam_addrh << 8) | regs.oam_addrl) << 1;
+  regs.oam_baseaddr = (regs.oam_baseaddr & 0x100) | value;
+  regs.oam_addr     = regs.oam_baseaddr << 1;
 }
 
 //OAMADDH
 void bPPU::mmio_w2103(uint8 value) {
   regs.oam_priority = !!(value & 0x80);
-  regs.oam_addrh    = value & 1;
-  regs.oam_addr     = ((regs.oam_addrh << 8) | regs.oam_addrl) << 1;
+  regs.oam_baseaddr = ((value & 1) << 8) | (regs.oam_baseaddr & 0xff);
+  regs.oam_addr     = regs.oam_baseaddr << 1;
 }
 
 //OAMDATA
@@ -118,13 +117,6 @@ void bPPU::mmio_w2105(uint8 value) {
   regs.bg3_priority     = !!(value & 0x08);
   regs.bg_mode          = (value & 7);
   regs.hires            = (regs.bg_mode == 5 || regs.bg_mode == 6);
-
-  window_cache[BG1].main_dirty = window_cache[BG1].sub_dirty = true;
-  window_cache[BG2].main_dirty = window_cache[BG2].sub_dirty = true;
-  window_cache[BG3].main_dirty = window_cache[BG3].sub_dirty = true;
-  window_cache[BG4].main_dirty = window_cache[BG4].sub_dirty = true;
-  window_cache[OAM].main_dirty = window_cache[OAM].sub_dirty = true;
-  window_cache[COL].main_dirty = window_cache[COL].sub_dirty = true;
 }
 
 //MOSAIC
@@ -363,9 +355,6 @@ void bPPU::mmio_w2123(uint8 value) {
   regs.window2_invert [BG1] = !!(value & 0x04);
   regs.window1_enabled[BG1] = !!(value & 0x02);
   regs.window1_invert [BG1] = !!(value & 0x01);
-
-  window_cache[BG1].main_dirty = window_cache[BG1].sub_dirty = true;
-  window_cache[BG2].main_dirty = window_cache[BG2].sub_dirty = true;
 }
 
 //W34SEL
@@ -378,9 +367,6 @@ void bPPU::mmio_w2124(uint8 value) {
   regs.window2_invert [BG3] = !!(value & 0x04);
   regs.window1_enabled[BG3] = !!(value & 0x02);
   regs.window1_invert [BG3] = !!(value & 0x01);
-
-  window_cache[BG3].main_dirty = window_cache[BG3].sub_dirty = true;
-  window_cache[BG4].main_dirty = window_cache[BG4].sub_dirty = true;
 }
 
 //WOBJSEL
@@ -393,57 +379,26 @@ void bPPU::mmio_w2125(uint8 value) {
   regs.window2_invert [OAM] = !!(value & 0x04);
   regs.window1_enabled[OAM] = !!(value & 0x02);
   regs.window1_invert [OAM] = !!(value & 0x01);
-
-  window_cache[OAM].main_dirty = window_cache[OAM].sub_dirty = true;
-  window_cache[COL].main_dirty = window_cache[COL].sub_dirty = true;
 }
 
 //WH0
 void bPPU::mmio_w2126(uint8 value) {
   regs.window1_left = value;
-
-  window_cache[BG1].main_dirty = window_cache[BG1].sub_dirty = true;
-  window_cache[BG2].main_dirty = window_cache[BG2].sub_dirty = true;
-  window_cache[BG3].main_dirty = window_cache[BG3].sub_dirty = true;
-  window_cache[BG4].main_dirty = window_cache[BG4].sub_dirty = true;
-  window_cache[OAM].main_dirty = window_cache[OAM].sub_dirty = true;
-  window_cache[COL].main_dirty = window_cache[COL].sub_dirty = true;
 }
 
 //WH1
 void bPPU::mmio_w2127(uint8 value) {
   regs.window1_right = value;
-
-  window_cache[BG1].main_dirty = window_cache[BG1].sub_dirty = true;
-  window_cache[BG2].main_dirty = window_cache[BG2].sub_dirty = true;
-  window_cache[BG3].main_dirty = window_cache[BG3].sub_dirty = true;
-  window_cache[BG4].main_dirty = window_cache[BG4].sub_dirty = true;
-  window_cache[OAM].main_dirty = window_cache[OAM].sub_dirty = true;
-  window_cache[COL].main_dirty = window_cache[COL].sub_dirty = true;
 }
 
 //WH2
 void bPPU::mmio_w2128(uint8 value) {
   regs.window2_left = value;
-
-  window_cache[BG1].main_dirty = window_cache[BG1].sub_dirty = true;
-  window_cache[BG2].main_dirty = window_cache[BG2].sub_dirty = true;
-  window_cache[BG3].main_dirty = window_cache[BG3].sub_dirty = true;
-  window_cache[BG4].main_dirty = window_cache[BG4].sub_dirty = true;
-  window_cache[OAM].main_dirty = window_cache[OAM].sub_dirty = true;
-  window_cache[COL].main_dirty = window_cache[COL].sub_dirty = true;
 }
 
 //WH3
 void bPPU::mmio_w2129(uint8 value) {
   regs.window2_right = value;
-
-  window_cache[BG1].main_dirty = window_cache[BG1].sub_dirty = true;
-  window_cache[BG2].main_dirty = window_cache[BG2].sub_dirty = true;
-  window_cache[BG3].main_dirty = window_cache[BG3].sub_dirty = true;
-  window_cache[BG4].main_dirty = window_cache[BG4].sub_dirty = true;
-  window_cache[OAM].main_dirty = window_cache[OAM].sub_dirty = true;
-  window_cache[COL].main_dirty = window_cache[COL].sub_dirty = true;
 }
 
 //WBGLOG
@@ -452,20 +407,12 @@ void bPPU::mmio_w212a(uint8 value) {
   regs.window_mask[BG3] = (value >> 4) & 3;
   regs.window_mask[BG2] = (value >> 2) & 3;
   regs.window_mask[BG1] = (value     ) & 3;
-
-  window_cache[BG1].main_dirty = window_cache[BG1].sub_dirty = true;
-  window_cache[BG2].main_dirty = window_cache[BG2].sub_dirty = true;
-  window_cache[BG3].main_dirty = window_cache[BG3].sub_dirty = true;
-  window_cache[BG4].main_dirty = window_cache[BG4].sub_dirty = true;
 }
 
 //WOBJLOG
 void bPPU::mmio_w212b(uint8 value) {
   regs.window_mask[COL] = (value >> 2) & 3;
   regs.window_mask[OAM] = (value     ) & 3;
-
-  window_cache[OAM].main_dirty = window_cache[OAM].sub_dirty = true;
-  window_cache[COL].main_dirty = window_cache[COL].sub_dirty = true;
 }
 
 //TM
@@ -493,12 +440,6 @@ void bPPU::mmio_w212e(uint8 value) {
   regs.window_enabled[BG3] = !!(value & 0x04);
   regs.window_enabled[BG2] = !!(value & 0x02);
   regs.window_enabled[BG1] = !!(value & 0x01);
-
-  window_cache[BG1].main_dirty = window_cache[BG1].sub_dirty = true;
-  window_cache[BG2].main_dirty = window_cache[BG2].sub_dirty = true;
-  window_cache[BG3].main_dirty = window_cache[BG3].sub_dirty = true;
-  window_cache[BG4].main_dirty = window_cache[BG4].sub_dirty = true;
-  window_cache[OAM].main_dirty = window_cache[OAM].sub_dirty = true;
 }
 
 //TSW
@@ -508,12 +449,6 @@ void bPPU::mmio_w212f(uint8 value) {
   regs.sub_window_enabled[BG3] = !!(value & 0x04);
   regs.sub_window_enabled[BG2] = !!(value & 0x02);
   regs.sub_window_enabled[BG1] = !!(value & 0x01);
-
-  window_cache[BG1].main_dirty = window_cache[BG1].sub_dirty = true;
-  window_cache[BG2].main_dirty = window_cache[BG2].sub_dirty = true;
-  window_cache[BG3].main_dirty = window_cache[BG3].sub_dirty = true;
-  window_cache[BG4].main_dirty = window_cache[BG4].sub_dirty = true;
-  window_cache[OAM].main_dirty = window_cache[OAM].sub_dirty = true;
 }
 
 //CGWSEL
@@ -522,8 +457,6 @@ void bPPU::mmio_w2130(uint8 value) {
   regs.colorsub_mask = (value >> 4) & 3;
   regs.addsub_mode   = !!(value & 0x02);
   regs.direct_color  = !!(value & 0x01);
-
-  window_cache[COL].main_dirty = window_cache[COL].sub_dirty = true;
 }
 
 //CGADDSUB
@@ -549,15 +482,13 @@ void bPPU::mmio_w2132(uint8 value) {
 
 //SETINI
 void bPPU::mmio_w2133(uint8 value) {
-  regs.mode7_extbg  = !!(value & 0x40);
-  regs.pseudo_hires = !!(value & 0x08);
-  regs.overscan     = !!(value & 0x04);
-  regs.scanlines    = (value & 0x04)?239:224;
-  regs.oam_halve    = !!(value & 0x02);
-  regs.interlace    = !!(value & 0x01);
+  regs.mode7_extbg   = !!(value & 0x40);
+  regs.pseudo_hires  = !!(value & 0x08);
+  regs.overscan      = !!(value & 0x04);
+  regs.oam_interlace = !!(value & 0x02);
+  regs.interlace     = !!(value & 0x01);
 
   r_cpu->set_overscan(regs.overscan);
-  r_cpu->set_interlace(regs.interlace);
 }
 
 //MPYL
@@ -707,7 +638,7 @@ uint8 r = 0x00;
   return regs.ppu2_mdr;
 }
 
-uint8 bPPUMMIO::read(uint32 addr) {
+uint8 bPPU::mmio_read(uint16 addr) {
   switch(addr) {
   case 0x2104:
   case 0x2105:
@@ -727,77 +658,78 @@ uint8 bPPUMMIO::read(uint32 addr) {
   case 0x2128:
   case 0x2129:
   case 0x212a:
-    return ppu->regs.ppu1_mdr;
-  case 0x2134:return ppu->mmio_r2134(); //MPYL
-  case 0x2135:return ppu->mmio_r2135(); //MPYM
-  case 0x2136:return ppu->mmio_r2136(); //MPYH
-  case 0x2137:return ppu->mmio_r2137(); //SLHV
-  case 0x2138:return ppu->mmio_r2138(); //OAMDATAREAD
-  case 0x2139:return ppu->mmio_r2139(); //VMDATALREAD
-  case 0x213a:return ppu->mmio_r213a(); //VMDATAHREAD
-  case 0x213b:return ppu->mmio_r213b(); //CGDATAREAD
-  case 0x213c:return ppu->mmio_r213c(); //OPHCT
-  case 0x213d:return ppu->mmio_r213d(); //OPVCT
-  case 0x213e:return ppu->mmio_r213e(); //STAT77
-  case 0x213f:return ppu->mmio_r213f(); //STAT78
+    return regs.ppu1_mdr;
+  case 0x2134:return mmio_r2134(); //MPYL
+  case 0x2135:return mmio_r2135(); //MPYM
+  case 0x2136:return mmio_r2136(); //MPYH
+  case 0x2137:return mmio_r2137(); //SLHV
+  case 0x2138:return mmio_r2138(); //OAMDATAREAD
+  case 0x2139:return mmio_r2139(); //VMDATALREAD
+  case 0x213a:return mmio_r213a(); //VMDATAHREAD
+  case 0x213b:return mmio_r213b(); //CGDATAREAD
+  case 0x213c:return mmio_r213c(); //OPHCT
+  case 0x213d:return mmio_r213d(); //OPVCT
+  case 0x213e:return mmio_r213e(); //STAT77
+  case 0x213f:return mmio_r213f(); //STAT78
   }
 
+//return 0x00;
   return r_cpu->regs.mdr;
 }
 
-void bPPUMMIO::write(uint32 addr, uint8 value) {
+void bPPU::mmio_write(uint16 addr, uint8 data) {
   switch(addr) {
-  case 0x2100:ppu->mmio_w2100(value);return; //INIDISP
-  case 0x2101:ppu->mmio_w2101(value);return; //OBSEL
-  case 0x2102:ppu->mmio_w2102(value);return; //OAMADDL
-  case 0x2103:ppu->mmio_w2103(value);return; //OAMADDH
-  case 0x2104:ppu->mmio_w2104(value);return; //OAMDATA
-  case 0x2105:ppu->mmio_w2105(value);return; //BGMODE
-  case 0x2106:ppu->mmio_w2106(value);return; //MOSAIC
-  case 0x2107:ppu->mmio_w2107(value);return; //BG1SC
-  case 0x2108:ppu->mmio_w2108(value);return; //BG2SC
-  case 0x2109:ppu->mmio_w2109(value);return; //BG3SC
-  case 0x210a:ppu->mmio_w210a(value);return; //BG4SC
-  case 0x210b:ppu->mmio_w210b(value);return; //BG12NBA
-  case 0x210c:ppu->mmio_w210c(value);return; //BG34NBA
-  case 0x210d:ppu->mmio_w210d(value);return; //BG1HOFS
-  case 0x210e:ppu->mmio_w210e(value);return; //BG1VOFS
-  case 0x210f:ppu->mmio_w210f(value);return; //BG2HOFS
-  case 0x2110:ppu->mmio_w2110(value);return; //BG2VOFS
-  case 0x2111:ppu->mmio_w2111(value);return; //BG3HOFS
-  case 0x2112:ppu->mmio_w2112(value);return; //BG3VOFS
-  case 0x2113:ppu->mmio_w2113(value);return; //BG4HOFS
-  case 0x2114:ppu->mmio_w2114(value);return; //BG4VOFS
-  case 0x2115:ppu->mmio_w2115(value);return; //VMAIN
-  case 0x2116:ppu->mmio_w2116(value);return; //VMADDL
-  case 0x2117:ppu->mmio_w2117(value);return; //VMADDH
-  case 0x2118:ppu->mmio_w2118(value);return; //VMDATAL
-  case 0x2119:ppu->mmio_w2119(value);return; //VMDATAH
-  case 0x211a:ppu->mmio_w211a(value);return; //M7SEL
-  case 0x211b:ppu->mmio_w211b(value);return; //M7A
-  case 0x211c:ppu->mmio_w211c(value);return; //M7B
-  case 0x211d:ppu->mmio_w211d(value);return; //M7C
-  case 0x211e:ppu->mmio_w211e(value);return; //M7D
-  case 0x211f:ppu->mmio_w211f(value);return; //M7X
-  case 0x2120:ppu->mmio_w2120(value);return; //M7Y
-  case 0x2121:ppu->mmio_w2121(value);return; //CGADD
-  case 0x2122:ppu->mmio_w2122(value);return; //CGDATA
-  case 0x2123:ppu->mmio_w2123(value);return; //W12SEL
-  case 0x2124:ppu->mmio_w2124(value);return; //W34SEL
-  case 0x2125:ppu->mmio_w2125(value);return; //WOBJSEL
-  case 0x2126:ppu->mmio_w2126(value);return; //WH0
-  case 0x2127:ppu->mmio_w2127(value);return; //WH1
-  case 0x2128:ppu->mmio_w2128(value);return; //WH2
-  case 0x2129:ppu->mmio_w2129(value);return; //WH3
-  case 0x212a:ppu->mmio_w212a(value);return; //WBGLOG
-  case 0x212b:ppu->mmio_w212b(value);return; //WOBJLOG
-  case 0x212c:ppu->mmio_w212c(value);return; //TM
-  case 0x212d:ppu->mmio_w212d(value);return; //TS
-  case 0x212e:ppu->mmio_w212e(value);return; //TMW
-  case 0x212f:ppu->mmio_w212f(value);return; //TSW
-  case 0x2130:ppu->mmio_w2130(value);return; //CGWSEL
-  case 0x2131:ppu->mmio_w2131(value);return; //CGADDSUB
-  case 0x2132:ppu->mmio_w2132(value);return; //COLDATA
-  case 0x2133:ppu->mmio_w2133(value);return; //SETINI
+  case 0x2100:mmio_w2100(data);return; //INIDISP
+  case 0x2101:mmio_w2101(data);return; //OBSEL
+  case 0x2102:mmio_w2102(data);return; //OAMADDL
+  case 0x2103:mmio_w2103(data);return; //OAMADDH
+  case 0x2104:mmio_w2104(data);return; //OAMDATA
+  case 0x2105:mmio_w2105(data);return; //BGMODE
+  case 0x2106:mmio_w2106(data);return; //MOSAIC
+  case 0x2107:mmio_w2107(data);return; //BG1SC
+  case 0x2108:mmio_w2108(data);return; //BG2SC
+  case 0x2109:mmio_w2109(data);return; //BG3SC
+  case 0x210a:mmio_w210a(data);return; //BG4SC
+  case 0x210b:mmio_w210b(data);return; //BG12NBA
+  case 0x210c:mmio_w210c(data);return; //BG34NBA
+  case 0x210d:mmio_w210d(data);return; //BG1HOFS
+  case 0x210e:mmio_w210e(data);return; //BG1VOFS
+  case 0x210f:mmio_w210f(data);return; //BG2HOFS
+  case 0x2110:mmio_w2110(data);return; //BG2VOFS
+  case 0x2111:mmio_w2111(data);return; //BG3HOFS
+  case 0x2112:mmio_w2112(data);return; //BG3VOFS
+  case 0x2113:mmio_w2113(data);return; //BG4HOFS
+  case 0x2114:mmio_w2114(data);return; //BG4VOFS
+  case 0x2115:mmio_w2115(data);return; //VMAIN
+  case 0x2116:mmio_w2116(data);return; //VMADDL
+  case 0x2117:mmio_w2117(data);return; //VMADDH
+  case 0x2118:mmio_w2118(data);return; //VMDATAL
+  case 0x2119:mmio_w2119(data);return; //VMDATAH
+  case 0x211a:mmio_w211a(data);return; //M7SEL
+  case 0x211b:mmio_w211b(data);return; //M7A
+  case 0x211c:mmio_w211c(data);return; //M7B
+  case 0x211d:mmio_w211d(data);return; //M7C
+  case 0x211e:mmio_w211e(data);return; //M7D
+  case 0x211f:mmio_w211f(data);return; //M7X
+  case 0x2120:mmio_w2120(data);return; //M7Y
+  case 0x2121:mmio_w2121(data);return; //CGADD
+  case 0x2122:mmio_w2122(data);return; //CGDATA
+  case 0x2123:mmio_w2123(data);return; //W12SEL
+  case 0x2124:mmio_w2124(data);return; //W34SEL
+  case 0x2125:mmio_w2125(data);return; //WOBJSEL
+  case 0x2126:mmio_w2126(data);return; //WH0
+  case 0x2127:mmio_w2127(data);return; //WH1
+  case 0x2128:mmio_w2128(data);return; //WH2
+  case 0x2129:mmio_w2129(data);return; //WH3
+  case 0x212a:mmio_w212a(data);return; //WBGLOG
+  case 0x212b:mmio_w212b(data);return; //WOBJLOG
+  case 0x212c:mmio_w212c(data);return; //TM
+  case 0x212d:mmio_w212d(data);return; //TS
+  case 0x212e:mmio_w212e(data);return; //TMW
+  case 0x212f:mmio_w212f(data);return; //TSW
+  case 0x2130:mmio_w2130(data);return; //CGWSEL
+  case 0x2131:mmio_w2131(data);return; //CGADDSUB
+  case 0x2132:mmio_w2132(data);return; //COLDATA
+  case 0x2133:mmio_w2133(data);return; //SETINI
   }
 }

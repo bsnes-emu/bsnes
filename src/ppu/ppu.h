@@ -1,4 +1,4 @@
-class PPU {
+class PPU : public MMIO {
 public:
 uint16 *output;
 
@@ -23,8 +23,6 @@ uint8 ppu1_version;
 //* reported by $213f
 uint8 ppu2_version;
 
-MMIO *mmio;
-
 struct scanline_info {
   bool hires;
   bool interlace;
@@ -42,8 +40,8 @@ struct scanline_info {
   virtual void  latch_counters() = 0;
 
   virtual void  run() = 0;
-  virtual void  scanline() = 0;
   virtual void  render_scanline() = 0;
+  virtual void  scanline() = 0;
   virtual void  frame();
   virtual void  power();
   virtual void  reset();

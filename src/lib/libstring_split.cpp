@@ -1,13 +1,9 @@
-void split(string &dest, const char *key, char *src) {
-int   i, ssl = strlen(src), ksl = strlen(key);
-uint  lp = 0, split_count = 0;
-uint8 x;
-  for(i=0;i<=ssl-ksl;) {
+void split(string &dest, const char *key, const char *src) {
+int  ssl = strlen(src), ksl = strlen(key);
+uint lp = 0, split_count = 0;
+  for(int32 i = 0; i <= ssl - ksl;) {
     if(!memcmp(src + i, key, ksl)) {
-      x = src[i];
-      src[i] = 0;
-      strcpy(dest[split_count++], src + lp);
-      src[i] = x;
+      strncpy(dest[split_count++], src + lp, i - lp);
       i += ksl;
       lp = i;
     } else i++;
@@ -17,22 +13,18 @@ uint8 x;
 }
 void split(string &dest, const char *key, substring &src) { split(dest, key, strptr(src)); }
 
-void qsplit(string &dest, const char *key, char *src) {
-int   i, z, ssl = strlen(src), ksl = strlen(key);
-uint  lp = 0, split_count = 0;
-uint8 x;
-  for(i=0;i<=ssl-ksl;) {
-    x = src[i];
-    if(x=='\"' || x=='\'') {
+void qsplit(string &dest, const char *key, const char *src) {
+int  z, ssl = strlen(src), ksl = strlen(key);
+uint lp = 0, split_count = 0;
+  for(int32 i = 0; i <= ssl - ksl;) {
+  uint8 x = src[i];
+    if(x == '\"' || x == '\'') {
       z = i++;
       while(src[i] != x && i < ssl)i++;
       if(i >= ssl)i = z;
     }
     if(!memcmp(src + i, key, ksl)) {
-      x = src[i];
-      src[i] = 0;
-      strcpy(dest[split_count++], src + lp);
-      src[i] = x;
+      strncpy(dest[split_count++], src + lp, i - lp);
       i += ksl;
       lp = i;
     } else i++;

@@ -4,8 +4,8 @@
 class InputDI : public Input {
 public:
 LPDIRECTINPUT8       di;
-LPDIRECTINPUTDEVICE8 di_key, di_joy;
-uint8 keystate[256], joystate[256];
+LPDIRECTINPUTDEVICE8 di_key, di_joy[INPUT_JOYMAX];
+uint32               di_joy_count;
 
 struct joypad {
   bool up, down, left, right;
@@ -13,8 +13,8 @@ struct joypad {
   bool select, start;
 } joypad1, joypad2;
 
-  void   poll_devices();
-  uint32 poll();
+  void   poll();
+  bool   button_down(uint32 r);
 
   void   poll(uint8 type);
   bool   get_status(uint8 device, uint8 button);
@@ -27,7 +27,7 @@ struct joypad {
   InputDI() {
     di     = 0;
     di_key = 0;
-    di_joy = 0;
+    for(int i = 0; i < INPUT_JOYMAX; i++)di_joy[i] = 0;
   }
 
   ~InputDI() { term(); }

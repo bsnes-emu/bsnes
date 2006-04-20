@@ -380,11 +380,13 @@ int32 fir_samplel, fir_sampler;
       if(voice[v].brr_index == 0) {
         voice[v].brr_header = readb(voice[v].brr_ptr);
 
-        if(voice[v].brr_header_flags() & BRR_END) {
-          status.ENDX |= (1 << v);
-        }
+//moving status.ENDX bit set into == BRR_END condition per DMV27
+      //if(voice[v].brr_header_flags() & BRR_END) {
+      //  status.ENDX |= (1 << v);
+      //}
 
         if(voice[v].brr_header_flags() == BRR_END) {
+          status.ENDX |= (1 << v);
           voice[v].env_state = SILENCE;
           voice[v].AdjustEnvelope();
         }
@@ -429,6 +431,10 @@ int32 fir_samplel, fir_sampler;
       if(++voice[v].brr_index > 15) {
         voice[v].brr_index = 0;
         if(voice[v].brr_header_flags() & BRR_END) {
+        //below condition added by DMV27
+          if(voice[v].brr_header_flags() & BRR_LOOP) {
+            status.ENDX |= (1 << v);
+          }
           voice[v].brr_ptr    = readw((status.DIR << 8) + (voice[v].SRCN << 2) + 2);
           voice[v].brr_looped = true;
         } else {

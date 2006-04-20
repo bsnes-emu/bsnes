@@ -43,9 +43,8 @@ PPU::PPU() {
 
   ppu1_version = 1;
   ppu2_version = 1;
-  mmio = &mmio_unmapped;
 }
 
 PPU::~PPU() {
-  zerofree(output);
+  SafeFree(output);
 }

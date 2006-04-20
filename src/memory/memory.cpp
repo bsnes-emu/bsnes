@@ -79,13 +79,13 @@ void Memory::write_long(uint32 addr, uint32 data, uint wrap) {
 }
 
 MMIO  mmio_unmapped;
-uint8 MMIO::read (uint32 addr) { return r_cpu->regs.mdr; }
-void  MMIO::write(uint32 addr, uint8 value) {}
+uint8 MMIO::mmio_read (uint16 addr) { return r_cpu->regs.mdr; }
+void  MMIO::mmio_write(uint16 addr, uint8 data) {}
 
 uint8 MemBus::calc_speed(uint32 addr, bool fast) {
   if((addr & 0xc00000) == 0x400000)return 8;
-  if((addr & 0x808000) == 0x808000)return fast?6:8;
-  if((addr & 0xc00000) == 0xc00000)return fast?6:8;
+  if((addr & 0x808000) == 0x808000)return fast ? 6 : 8;
+  if((addr & 0xc00000) == 0xc00000)return fast ? 6 : 8;
   if((addr & 0xe000) == 0x2000)return 6;
   if((addr & 0xfe00) == 0x4000)return 12;
   if((addr & 0xe000) == 0x4000)return 6;
@@ -103,7 +103,7 @@ void MemBus::set_speed(bool fast) {
 }
 
 void MemBus::flush_mmio_mappers() {
-  for(int i=0;i<0x4000;i++) {
+  for(int i = 0; i < 0x4000; i++) {
     mmio[i] = &mmio_unmapped;
   }
 }
@@ -117,11 +117,10 @@ bool MemBus::set_mmio_mapper(uint16 addr, MMIO *mapper) {
 }
 
 MemBus::MemBus() {
-int i;
   fastROM = false;
   flush_mmio_mappers();
 
-  for(i=0;i<32768;i++) {
+  for(int i = 0; i < 32768; i++) {
     speed_table_slowrom[i] = calc_speed(i << 9, false);
     speed_table_fastrom[i] = calc_speed(i << 9, true);
   }

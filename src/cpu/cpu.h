@@ -1,6 +1,6 @@
 #include "cpuregs.h"
 
-class CPU {
+class CPU : public MMIO {
 public:
 //CPU version number
 //* 1 and 2 are known
@@ -12,14 +12,13 @@ uint8 cpu_version;
   virtual uint16 vcounter() = 0;
   virtual uint16 hcounter() = 0;
   virtual uint16 hcycles() = 0;
+  virtual bool   overscan() = 0;
   virtual bool   interlace() = 0;
   virtual bool   interlace_field() = 0;
-  virtual bool   overscan() = 0;
   virtual uint16 region_scanlines() = 0;
   virtual void   set_interlace(bool r) = 0;
   virtual void   set_overscan (bool r) = 0;
 
-MMIO *mmio;
 CPURegs regs;
   virtual uint8 port_read (uint8 port) = 0;
   virtual void  port_write(uint8 port, uint8 value) = 0;

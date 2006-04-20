@@ -4,8 +4,8 @@
 void SDD1::init() {}
 
 void SDD1::enable() {
-  for(int i=0x4800;i<=0x4807;i++) {
-    r_mem->set_mmio_mapper(i, mmio);
+  for(int i = 0x4800; i <= 0x4807; i++) {
+    r_mem->set_mmio_mapper(i, this);
   }
 }
 
@@ -50,10 +50,9 @@ uint8 SDD1::mmio_read(uint16 addr) {
 }
 
 void SDD1::mmio_write(uint16 addr, uint8 data) {
-int i;
   switch(addr) {
   case 0x4801:
-    for(i=0;i<8;i++) {
+    for(int i = 0; i < 8; i++) {
       sdd1.active[i] = !!(data & (1 << i));
     }
     break;
@@ -89,14 +88,4 @@ uint8 SDD1::dma_read() {
   return sdd1.buffer[sdd1.buffer_index++];
 }
 
-SDD1::SDD1() {
-  mmio = new SDD1MMIO();
-}
-
-uint8 SDD1MMIO::read(uint32 addr) {
-  return sdd1->mmio_read(addr);
-}
-
-void SDD1MMIO::write(uint32 addr, uint8 value) {
-  sdd1->mmio_write(addr, value);
-}
+SDD1::SDD1() {}

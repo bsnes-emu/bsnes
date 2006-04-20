@@ -1,7 +1,7 @@
 CC = cl
 CFLAGS = /nologo /O2 /EHsc /wd4996
 OBJS = sdlmain.obj \
-       libstring.obj libconfig.obj \
+       libstring.obj libconfig.obj libbpf.obj \
        reader.obj cart.obj \
        memory.obj bmemory.obj \
        cpu.obj bcpu.obj \
@@ -34,6 +34,8 @@ libstring.obj: ../lib/*.cpp ../lib/*.h
 	$(CC) $(CFLAGS) /c ../lib/libstring.cpp
 libconfig.obj: ../lib/*.cpp ../lib/*.h
 	$(CC) $(CFLAGS) /c ../lib/libconfig.cpp
+libbpf.obj: ../lib/*.cpp ../lib/*.h
+	$(CC) $(CFLAGS) /c ../lib/libbpf.cpp
 
 ##############
 ### memory ###

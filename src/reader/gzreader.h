@@ -8,9 +8,8 @@ uint32 fsize;
 public:
   uint32 size();
   uint8 *read(uint32 length = 0);
-  bool   open(char *fn);
-  void   close();
+  bool   ready();
 
-  GZReader() { gp = 0; fsize = 0; }
-  ~GZReader() { if(gp)gzclose(gp); }
+  GZReader(const char *fn);
+  ~GZReader();
 };

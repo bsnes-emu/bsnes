@@ -6,8 +6,6 @@ void AudioDS::run(uint32 sample) {
   void  *buffer;
     if((bool)config::system.regulate_speed == true) {
       do {
-      //see if video refresh is needed
-        uiVideo->scanline();
         dsb_b->GetCurrentPosition(&pos, 0);
         data.read_buffer = pos / data.buffer_size;
       } while(data.read_buffer == data.prev_buffer);

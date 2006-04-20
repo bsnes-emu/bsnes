@@ -170,7 +170,3 @@ void bCPU::exec_cycle() {
 bool bCPU::in_opcode() {
   return (status.cycle_pos != 0);
 }
-
-void bCPU::init_op_tables() {
-#include "bcpu_optable.cpp"
-}

@@ -9,28 +9,16 @@ enum { WRAP_NONE = 0, WRAP_BANK = 1, WRAP_PAGE = 2 };
   virtual void   write_long(uint32 addr, uint32 data, uint wrap = WRAP_NONE);
 };
 
-typedef struct {
-  uint8 *rom, *sram;
-  uint32 rom_size, sram_size;
-} CartInfo;
-
-class Cart : public Memory {
+class MMIO {
 public:
-  virtual void write_protect(bool r) = 0;
-  virtual void set_cartinfo(CartInfo *ci) = 0;
-};
-
-class MMIO : public Memory {
-public:
-  virtual uint8 read (uint32 addr);
-  virtual void  write(uint32 addr, uint8 value);
+  virtual uint8 mmio_read (uint16 addr);
+  virtual void  mmio_write(uint16 addr, uint8 data);
 };
 
 class MemBus : public Memory {
 public:
-Cart *cart;
-MMIO *mmio[0x4000];
-bool fastROM;
+MMIO *mmio[0x4000]; //mapped to $[00-3f|80-bf]:[2000-5fff]
+bool  fastROM;
   void flush_mmio_mappers();
   bool set_mmio_mapper(uint16 addr, MMIO *mapper);
 
@@ -43,15 +31,22 @@ uint8 *speed_table,
        speed_table_fastrom[32768];
   inline uint8 calc_speed(uint32 addr, bool fast);
 public:
-  inline uint8 speed(uint32 addr) {
-    return speed_table[addr >> 9];
-  }
+  inline uint8 speed(uint32 addr) { return speed_table[addr >> 9]; }
   void set_speed(bool fast);
 
   virtual void load_cart() = 0;
   virtual void unload_cart() = 0;
   virtual bool cart_loaded() = 0;
-  virtual void get_cartinfo(CartInfo *ci) = 0;
+
+//set to true to block writes to cartridge ROM data,
+//set to false to allow writes. ROM cannot be written
+//on true SNES, however the debugger should be able to
+//set this to false, write to the cartridge, and then
+//set this back to true.
+//
+//needs to be set to true on power.
+bool cart_write_protect_enabled;
+  virtual void cart_write_protect(bool status) { cart_write_protect_enabled = status; }
 
   virtual void power() = 0;
   virtual void reset() = 0;

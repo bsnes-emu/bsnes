@@ -5,11 +5,6 @@
 #include "SDL.h"
 #endif
 
-#include "../lib/libbase.h"
-#include "../lib/libvector.h"
-#include "../lib/libstring.h"
-#include "../lib/libconfig.h"
-
 SDL_Surface *screen, *backbuffer;
 
 struct {

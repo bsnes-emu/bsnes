@@ -1,31 +1,54 @@
-#include "bcart_lorom.h"
-#include "bcart_hirom.h"
-#include "bcart_exlorom.h"
-#include "bcart_exhirom.h"
-
 class bMemBus : public MemBus {
 public:
-
-//rom_image is the actual image, including header.
-//rom is the image sans header, which is actually
-//just a pointer to rom_image (with no header), or
-//rom_image + 512 (if a header is present).
-//rom should never be allocated or released directly.
 uint8 *wram;
+bool   rom_loaded;
 
-bool rom_loaded;
+uint8 *page_handle[65536];
+uint8 (bMemBus::*page_read [65536])(uint32 addr);
+void  (bMemBus::*page_write[65536])(uint32 addr, uint8 data);
+
 enum { LOROM = 0x20, HIROM = 0x21, EXLOROM = 0x22, EXHIROM = 0x25 };
 
-  uint8 read (uint32 addr);
-  void  write(uint32 addr, uint8 value);
+enum { TYPE_WRAM, TYPE_MMIO, TYPE_CART };
+  uint8  memory_type(uint32 addr);
 
-  void load_cart();
-  void unload_cart();
-  bool cart_loaded() { return rom_loaded; }
-  void get_cartinfo(CartInfo *ci);
+  uint8  read (uint32 addr);
+  void   write(uint32 addr, uint8 data);
 
-  void power();
-  void reset();
+  void   load_cart();
+  void   unload_cart();
+  bool   cart_loaded() { return rom_loaded; }
+
+//bmemory_rw.cpp
+  uint8  read_unmapped (uint32 addr);
+  void   write_unmapped(uint32 addr, uint8 data);
+  uint8  read_mmio     (uint32 addr);
+  void   write_mmio    (uint32 addr, uint8 data);
+  uint8  read_rom      (uint32 addr);
+  void   write_rom     (uint32 addr, uint8 data);
+  uint8  read_ram      (uint32 addr);
+  void   write_ram     (uint32 addr, uint8 data);
+
+  uint8  read_sdd1     (uint32 addr);
+  void   write_sdd1    (uint32 addr, uint8 data);
+  uint8  read_c4       (uint32 addr);
+  void   write_c4      (uint32 addr, uint8 data);
+  uint8  read_dsp2     (uint32 addr);
+  void   write_dsp2    (uint32 addr, uint8 data);
+  uint8  read_obc1     (uint32 addr);
+  void   write_obc1    (uint32 addr, uint8 data);
+
+  void   cart_map_reset();
+  void   cart_map_system();
+  void   cart_map_generic(uint type);
+
+  void   cart_map_sdd1();
+  void   cart_map_c4();
+  void   cart_map_dsp2();
+  void   cart_map_obc1();
+
+  void   power();
+  void   reset();
 
   bMemBus();
   ~bMemBus();

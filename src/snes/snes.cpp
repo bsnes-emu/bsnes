@@ -1,8 +1,9 @@
 #include "../base.h"
 
-#include "snes_video.cpp"
-#include "snes_audio.cpp"
-#include "snes_input.cpp"
+#include "video/filter.cpp"
+#include "video/video.cpp"
+#include "audio/audio.cpp"
+#include "input/input.cpp"
 
 void SNES::run() {
   if(apusync.cycles < 0) {
@@ -34,10 +35,14 @@ void SNES::init() {
   srtc = new SRTC();
   sdd1 = new SDD1();
   c4   = new C4();
+  dsp2 = new DSP2();
+  obc1 = new OBC1();
 
   srtc->init();
   sdd1->init();
   c4->init();
+  dsp2->init();
+  obc1->init();
 
   video_init();
   audio_init();
@@ -57,21 +62,24 @@ void SNES::power() {
   if(cartridge.cart.srtc)srtc->power();
   if(cartridge.cart.sdd1)sdd1->power();
   if(cartridge.cart.c4)  c4->power();
+  if(cartridge.cart.dsp2)dsp2->power();
+  if(cartridge.cart.obc1)obc1->power();
 
-int i;
   r_mem->flush_mmio_mappers();
-  for(i=0x2100;i<=0x213f;i++)r_mem->set_mmio_mapper(i, r_ppu->mmio);
-  for(i=0x2140;i<=0x217f;i++)r_mem->set_mmio_mapper(i, r_cpu->mmio);
-  for(i=0x2180;i<=0x2183;i++)r_mem->set_mmio_mapper(i, r_cpu->mmio);
+  for(int i = 0x2100; i <= 0x213f; i++)r_mem->set_mmio_mapper(i, r_ppu);
+  for(int i = 0x2140; i <= 0x217f; i++)r_mem->set_mmio_mapper(i, r_cpu);
+  for(int i = 0x2180; i <= 0x2183; i++)r_mem->set_mmio_mapper(i, r_cpu);
 //input
-  r_mem->set_mmio_mapper(0x4016, r_cpu->mmio);
-  r_mem->set_mmio_mapper(0x4017, r_cpu->mmio);
-  for(i=0x4200;i<=0x421f;i++)r_mem->set_mmio_mapper(i, r_cpu->mmio);
-  for(i=0x4300;i<=0x437f;i++)r_mem->set_mmio_mapper(i, r_cpu->mmio);
+  r_mem->set_mmio_mapper(0x4016, r_cpu);
+  r_mem->set_mmio_mapper(0x4017, r_cpu);
+  for(int i = 0x4200; i <= 0x421f; i++)r_mem->set_mmio_mapper(i, r_cpu);
+  for(int i = 0x4300; i <= 0x437f; i++)r_mem->set_mmio_mapper(i, r_cpu);
 
   if(cartridge.cart.srtc)srtc->enable();
   if(cartridge.cart.sdd1)sdd1->enable();
   if(cartridge.cart.c4)  c4->enable();
+  if(cartridge.cart.dsp2)dsp2->enable();
+  if(cartridge.cart.obc1)obc1->enable();
 
   video_update();
 }
@@ -88,17 +96,23 @@ void SNES::reset() {
   if(cartridge.cart.srtc)srtc->reset();
   if(cartridge.cart.sdd1)sdd1->reset();
   if(cartridge.cart.c4)  c4->reset();
+  if(cartridge.cart.dsp2)dsp2->reset();
+  if(cartridge.cart.obc1)obc1->reset();
 
-  video_update();
-}
-
-void SNES::frame() {
   video_update();
 }
 
 void SNES::scanline() {
   video_scanline();
+
+//draw before the start of the next frame, to make the
+//video output seem more responsive to controller input
+  if(r_cpu->vcounter() == 241) {
+    video_update();
+  }
 }
+
+void SNES::frame() {}
 
 /****************
  *** PAL/NTSC ***
@@ -131,8 +145,7 @@ void SNES::update_timing() {
   }
   apusync.apu_freq = 24576000 >> 3;
 
-int i;
-  for(i=0;i<1024;i++) {
+  for(int i = 0; i < 1024; i++) {
     apusync.cpu_multbl[i] = i * apusync.cpu_freq;
     apusync.apu_multbl[i] = i * apusync.apu_freq;
   }

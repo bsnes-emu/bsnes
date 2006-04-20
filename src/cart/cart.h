@@ -1,7 +1,7 @@
 class Cartridge {
 public:
 bool cart_loaded;
-char rom_fn[4096], sram_fn[4096];
+char rom_fn[4096], sram_fn[4096], cheat_fn[4096], patch_fn[4096];
 
 uint8 *base_rom, *rom, *sram;
 uint32 rom_size;
@@ -31,6 +31,7 @@ enum {
 };
 
 struct {
+  uint32 crc32;
   uint32 header_index;
 
   char   name[32];
@@ -39,12 +40,19 @@ struct {
   bool   region;
 
   uint32 mapper;
+
+//set to true for games that need cart MMIO mapping (c4, dsp-n, ...),
+//for games that map outside the standard MMIO range of $2000-$5fff
+  bool   cart_mmio;
   bool   srtc;
   bool   sdd1;
   bool   c4;
+  bool   dsp2;
+  bool   obc1;
 } cart;
 
   void load_rom(Reader *rf);
+  void patch_rom(Reader *rf);
   void load_sram();
   void save_sram();
   void find_header();

@@ -1,10 +1,4 @@
-class SRTCMMIO : public MMIO {
-public:
-  inline uint8 read (uint32 addr);
-  inline void  write(uint32 addr, uint8 value);
-};
-
-class SRTC {
+class SRTC : public MMIO {
 public:
 enum { MAX_SRTC_INDEX = 0x0c };
 
@@ -19,8 +13,6 @@ enum {
   SRTC_COMMAND_WRITE = 0,
   SRTC_COMMAND_CLEAR = 4
 };
-
-SRTCMMIO *mmio;
 
 /******************************
 [srtc.data structure]
@@ -50,8 +42,9 @@ struct {
   void  enable();
   void  power();
   void  reset();
-  void  write(uint8 data);
-  uint8 read();
+
+  uint8 mmio_read (uint16 addr);
+  void  mmio_write(uint16 addr, uint8 data);
 
   SRTC();
 };

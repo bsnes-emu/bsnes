@@ -1,4 +1,4 @@
-void InputDI::poll_devices() {
+void InputDI::poll() {
 HRESULT hr;
 DIJOYSTATE2 js;
   memset(keystate, 0, 256);
@@ -10,53 +10,67 @@ DIJOYSTATE2 js;
     }
   }
 
-  memset(joystate, 0, 256);
-  memset(js.rgbButtons, 0, 128);
-  if(di_joy) {
-    hr = di_joy->Poll();
-    if(FAILED(hr)) {
-      di_joy->Acquire();
-      di_joy->Poll();
-    }
-    di_joy->GetDeviceState(sizeof(DIJOYSTATE2), &js);
-    memcpy(joystate, js.rgbButtons, 128);
+  memset(joystate, 0, INPUT_JOYMAX * 256);
+  for(int i = 0; i < di_joy_count; i++) {
+    if(!di_joy[i])continue;
 
-  //map d-pad axes to joystate[128 - 131]
-    joystate[128] = (js.lY == 0x0000) ? 0x80 : 0x00;
-    joystate[129] = (js.lY == 0xffff) ? 0x80 : 0x00;
-    joystate[130] = (js.lX == 0x0000) ? 0x80 : 0x00;
-    joystate[131] = (js.lX == 0xffff) ? 0x80 : 0x00;
+    memset(js.rgbButtons, 0, 128);
+
+    hr = di_joy[i]->Poll();
+    if(FAILED(hr)) {
+      di_joy[i]->Acquire();
+      di_joy[i]->Poll();
+    }
+    di_joy[i]->GetDeviceState(sizeof(DIJOYSTATE2), &js);
+
+  uint32 index = i * 256; //joypad index
+    memcpy(joystate + index, js.rgbButtons, 128);
+  //map d-pad axes to joystate[index + {128 - 131}]
+  int32 resistance = config::input.axis_resistance;
+    if(resistance <  1)resistance =  1;
+    if(resistance > 99)resistance = 99;
+    resistance = int32(double(resistance) * 32768.0 / 100.0);
+  int32 resistance_lo = 0x7fff - resistance;
+  int32 resistance_hi = 0x8000 + resistance;
+    joystate[index + 128]  = (js.lY <= resistance_lo) ? 0x80 : 0x00;
+    joystate[index + 129]  = (js.lY >= resistance_hi) ? 0x80 : 0x00;
+    joystate[index + 130]  = (js.lX <= resistance_lo) ? 0x80 : 0x00;
+    joystate[index + 131]  = (js.lX >= resistance_hi) ? 0x80 : 0x00;
+
+  //map analog POV (analog directional pad) as well
+  uint32 pov = js.rgdwPOV[0];
+    joystate[index + 128] |= (pov ==     0 || pov == 31500 || pov ==  4500) ? 0x80 : 0x00;
+    joystate[index + 129] |= (pov == 18000 || pov == 13500 || pov == 22500) ? 0x80 : 0x00;
+    joystate[index + 130] |= (pov == 27000 || pov == 22500 || pov == 31500) ? 0x80 : 0x00;
+    joystate[index + 131] |= (pov ==  9000 || pov ==  4500 || pov == 13500) ? 0x80 : 0x00;
   }
 }
 
-uint32 InputDI::poll() {
-  if(GetForegroundWindow() != wInputCfg.hwnd)return 0xffff;
-
-  poll_devices();
-  for(int i = 0; i < 256; i++) {
-    if(joystate[i] & 0x80)return (i << 8) | 0xff;
-  }
-  for(int i = 0; i < 256; i++) {
-    if(keystate[i] & 0x80)return 0xff00 | (i);
+bool InputDI::button_down(uint32 r) {
+  if((r & JOYMASK) != JOY_NONE) {
+  uint8 joynum = (r >> 16) & 0xff;
+    joynum %= INPUT_JOYMAX;
+    if(joystate[(joynum * 256) + ((r >> 8) & 0xff)] & 0x80) {
+      return true;
+    }
   }
 
-  return 0xffff;
+  if((r & KEYMASK) != KEY_NONE) {
+  //keypad value defined
+    if(keystate[r & 0xff] & 0x80) {
+      return true;
+    }
+  }
+
+  return false;
 }
 
 void InputDI::poll(uint8 type) {
-HWND fw = GetForegroundWindow();
-  poll_devices();
+  poll();
 
+HWND fw = GetForegroundWindow();
 #define poll_key(__key) \
-  __key = 0; \
-  if(fw == wMain.hwnd) { \
-    if(di_joy && ((uint16)config::input.##__key## & 0xff00) != 0xff00) { \
-      __key |= !!(joystate[(((uint16)config::input.##__key##) >> 8) & 0xff] & 0x80); \
-    } \
-    if(di_key && ((uint16)config::input.##__key## & 0x00ff) != 0x00ff) { \
-      __key |= !!(keystate[((uint16)config::input.##__key##) & 0xff] & 0x80); \
-    } \
-  }
+  __key = (fw == wMain.hwnd) ? button_down(uint32(config::input.__key)) : 0
 
   switch(type) {
   case SNES::DEV_JOYPAD1:
@@ -88,6 +102,7 @@ HWND fw = GetForegroundWindow();
     poll_key(joypad2.start);
     break;
   }
+
 #undef poll_key
 }
 
@@ -187,15 +202,28 @@ BOOL CALLBACK DI_EnumJoypadsCallback(const DIDEVICEINSTANCE *instance, void *con
 }
 
 bool InputDI::enum_joypads(const DIDEVICEINSTANCE *instance) {
-HRESULT hr;
-  hr = di->CreateDevice(instance->guidInstance, &di_joy, 0);
-  if(FAILED(hr))return DIENUM_CONTINUE;
-  return DIENUM_STOP;
+HRESULT hr = di->CreateDevice(instance->guidInstance, &di_joy[di_joy_count], 0);
+  if(FAILED(hr)) {
+    return DIENUM_CONTINUE;
+  }
+
+  di_joy[di_joy_count]->SetDataFormat(&c_dfDIJoystick2);
+  di_joy[di_joy_count]->SetCooperativeLevel(wMain.hwnd, DISCL_NONEXCLUSIVE | DISCL_BACKGROUND);
+
+  if(++di_joy_count >= INPUT_JOYMAX) {
+  //too many joypads?
+    return DIENUM_STOP;
+  }
+
+  return DIENUM_CONTINUE;
 }
 
 void InputDI::init() {
-HRESULT hr;
-  term();
+  di_key = 0;
+  for(int i = 0; i < INPUT_JOYMAX; i++)di_joy[i] = 0;
+  di = 0;
+  di_joy_count = 0;
+
   clear_input();
 
   DirectInput8Create(GetModuleHandle(0), DIRECTINPUT_VERSION,
@@ -206,17 +234,20 @@ HRESULT hr;
   di_key->SetCooperativeLevel(wMain.hwnd, DISCL_NONEXCLUSIVE | DISCL_BACKGROUND);
   di_key->Acquire();
 
-  hr = di->EnumDevices(DI8DEVCLASS_GAMECTRL, DI_EnumJoypadsCallback,
-    0, DIEDFL_ATTACHEDONLY);
+  di->EnumDevices(DI8DEVCLASS_GAMECTRL, DI_EnumJoypadsCallback, 0, DIEDFL_ATTACHEDONLY);
 
-  if(!di_joy)return;
+  #include "dinput_keymap.cpp"
 
-  di_joy->SetDataFormat(&c_dfDIJoystick2);
-  di_joy->SetCooperativeLevel(wMain.hwnd, DISCL_NONEXCLUSIVE | DISCL_BACKGROUND);
+  Input::init();
 }
 
 void InputDI::term() {
   if(di_key) { di_key->Unacquire(); di_key->Release(); di_key = 0; }
-  if(di_joy) { di_joy->Unacquire(); di_joy->Release(); di_joy = 0; }
+  for(int i = 0; i < INPUT_JOYMAX; i++) {
+    if(di_joy[i]) { di_joy[i]->Unacquire(); di_joy[i]->Release(); di_joy[i] = 0; }
+  }
   if(di) { di->Release(); di = 0; }
+  di_joy_count = 0;
+
+  Input::term();
 }

@@ -112,7 +112,7 @@ char num[64];
     } else if(str[i]==')') {
       if(pdepth == 0) {
         free(str);
-        return null; //error! too many )'s
+        return 0; //error! too many )'s
       }
       pdepth --;
     }
@@ -120,7 +120,7 @@ char num[64];
 
   if(pdepth != 0) {
     free(str);
-    return null; //error! unequal ('s to )'s
+    return 0; //error! unequal ('s to )'s
   }
 
   pdepth = maxpdepth;

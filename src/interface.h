@@ -1,6 +1,3 @@
-#define BSNES_VERSION "0.015"
-#define BSNES_TITLE "bsnes v" BSNES_VERSION
-
 #ifdef POLYMORPHISM
   #define ref(x) x
 #else
@@ -16,6 +13,7 @@
 
 #include "reader/reader.h"
 #include "cart/cart.h"
+#include "cheat/cheat.h"
 
 #include "memory/memory.h"
 #include "memory/bmemory/bmemory.h"
@@ -37,6 +35,8 @@
 #include "chip/srtc/srtc.h"
 #include "chip/sdd1/sdd1.h"
 #include "chip/c4/c4.h"
+#include "chip/dsp2/dsp2.h"
+#include "chip/obc1/obc1.h"
 
 extern MMIO mmio_unmapped;
 #ifdef POLYMORPHISM
@@ -46,22 +46,25 @@ extern MMIO mmio_unmapped;
   extern DSP    *deref(dsp);
   extern PPU    *deref(ppu);
 #else
-  extern bMemBus deref(mem);
-  extern bCPU    deref(cpu);
-  extern bAPU    deref(apu);
-  extern bDSP    deref(dsp);
-  extern bPPU    deref(ppu);
+  extern MEMCORE deref(mem);
+  extern CPUCORE deref(cpu);
+  extern APUCORE deref(apu);
+  extern DSPCORE deref(dsp);
+  extern PPUCORE deref(ppu);
   #endif
 extern SNES *snes;
 
 extern SRTC *srtc;
 extern SDD1 *sdd1;
 extern C4   *c4;
+extern DSP2 *dsp2;
+extern OBC1 *obc1;
 
 #include "config/config.h"
 
 #ifdef INTERFACE_MAIN
 Cartridge cartridge;
+Cheat     cheat;
 
 #include "config/config.cpp"
 #ifdef POLYMORPHISM
@@ -71,16 +74,18 @@ Cartridge cartridge;
   DSP    *deref(dsp);
   PPU    *deref(ppu);
 #else
-  bMemBus deref(mem);
-  bCPU    deref(cpu);
-  bAPU    deref(apu);
-  bDSP    deref(dsp);
-  bPPU    deref(ppu);
+  MEMCORE deref(mem);
+  CPUCORE deref(cpu);
+  APUCORE deref(apu);
+  DSPCORE deref(dsp);
+  PPUCORE deref(ppu);
 #endif
 SNES *snes;
 
 SRTC *srtc;
 SDD1 *sdd1;
 C4   *c4;
+DSP2 *dsp2;
+OBC1 *obc1;
 
 #endif

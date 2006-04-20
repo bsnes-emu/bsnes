@@ -1,9 +1,7 @@
 class bSNES : public SNES {
 public:
+enum { RUN, STOP };
 uint32 state;
-enum {
-  RUN, PAUSE
-};
   uint32  get_state();
   void    set_state(uint32 new_state);
 
@@ -23,6 +21,9 @@ enum {
 //input functions
   void    poll_input(uint8 type);
   bool    get_input_status(uint8 device, uint8 button);
+
+//debugging functions
+  void    notify(uint32 message, uint32 param1 = 0, uint32 param2 = 0);
 
   bSNES() { state = RUN; }
 };

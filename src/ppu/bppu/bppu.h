@@ -1,13 +1,3 @@
-class bPPU;
-
-class bPPUMMIO : public MMIO {
-public:
-bPPU *ppu;
-  uint8 read (uint32 addr);
-  void  write(uint32 addr, uint8 value);
-  bPPUMMIO(bPPU *_ppu);
-};
-
 class bPPU : public PPU {
 public:
 uint8 *vram, *oam, *cgram;
@@ -23,16 +13,6 @@ struct {
   bool   interlace;
   bool   interlace_field;
 } line;
-
-struct sprite_item {
-  uint8  width, height;
-  uint16 x, y;
-  uint8  character;
-  bool   use_nameselect;
-  bool   vflip, hflip;
-  uint8  palette;
-  uint8  priority;
-} sprite_list[128];
 
 struct {
 //open bus support
@@ -51,7 +31,7 @@ struct {
   uint16 oam_tdaddr;
 
 //$2102-$2103
-  uint8  oam_addrl, oam_addrh;
+  uint16 oam_baseaddr;
   uint16 oam_addr;
   uint8  oam_latchdata;
   bool   oam_priority;
@@ -134,11 +114,15 @@ struct {
   uint16 color_rgb;
 
 //$2133
+//overscan and interlace are checked once per frame to
+//determine if entire frame should be interlaced/non-interlace
+//and overscan adjusted. therefore, the variables act sort of
+//like a buffer, but they do still affect internal rendering
   bool   mode7_extbg;
   bool   pseudo_hires;
   bool   overscan;
   uint16 scanlines;
-  bool   oam_halve;
+  bool   oam_interlace;
   bool   interlace;
 
 //$2137
@@ -160,9 +144,6 @@ struct {
   uint8  cgram_read (uint16 addr);
   void   cgram_write(uint16 addr, uint8 value);
 
-  void   get_sprite_size(int i, bool size);
-  void   update_sprite_list(uint16 addr);
-  void   update_sprite_list_sizes();
   uint16 get_vram_address();
   bool   vram_can_read();
   bool   vram_can_write(uint8 &value);
@@ -232,6 +213,9 @@ struct {
   uint8  mmio_r213e();            //STAT77
   uint8  mmio_r213f();            //STAT78
 
+  uint8  mmio_read (uint16 addr);
+  void   mmio_write(uint16 addr, uint8 data);
+
   void   latch_counters();
 
 //PPU render functions
@@ -251,7 +235,7 @@ uint16 *mosaic_table[16];
   void   power();
   void   reset();
 
-  bool   scanline_is_hires() { return (regs.hires); }
+  bool   scanline_is_hires() { return (regs.pseudo_hires || regs.hires); }
 
   bPPU();
   ~bPPU();

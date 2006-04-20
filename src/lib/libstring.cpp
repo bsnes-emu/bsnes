@@ -93,6 +93,18 @@ int srclen = strlen(src);
 }
 void strcpy(substring &dest, substring &src) { strcpy(dest, strptr(src)); }
 
+//this differs from libc's strncpy in that it always
+//appends a null terminator to the end of a copied string
+void strncpy(substring &dest, const char *src, uint32 length) {
+int srclen = strlen(src);
+//never copy more text than is in the string
+  if(srclen > length)srclen = length;
+  if(srclen > dest.size) { strresize(dest, srclen); }
+  strncpy(dest.s, src, srclen);
+  dest.s[srclen] = 0;
+}
+void strncpy(substring &dest, substring &src, uint32 length) { strncpy(dest, strptr(src), length); }
+
 void strset(substring &dest, uint pos, uint8 c) {
 char *s;
   if(pos > dest.size) { strresize(dest, pos); }
@@ -187,11 +199,14 @@ bool qstrpos(const char *str, substring &key, uint &pos) { return qstrpos(str, s
 bool qstrpos(substring &str, substring &key, uint &pos) { return qstrpos(strptr(str), strptr(key), pos); }
 
 void strtr(char *dest, const char *before, const char *after) {
-int i, l, sl = strlen(dest), bsl = strlen(before), asl = strlen(after);
-  if((bsl != asl) || bsl == 0)return;
-  for(i=0;i<sl;i++) {
-    for(l=0;l<bsl;l++) {
-      if(dest[i] == before[l])dest[i] = after[l];
+int sl = strlen(dest), bsl = strlen(before), asl = strlen(after);
+  if(bsl != asl || bsl == 0)return;
+  for(int i = 0; i < sl; i++) {
+    for(int l = 0; l < bsl; l++) {
+      if(dest[i] == before[l]) {
+        dest[i] = after[l];
+        break;
+      }
     }
   }
 }
@@ -246,8 +261,8 @@ bool striend(substring &str, const char *key) { return striend(strptr(str), key)
 void strltrim(char *str, const char *key) {
 int i, ssl = strlen(str), ksl = strlen(key);
   if(ksl > ssl)return;
-  if(!strbegin(str, key)) {
-    for(i=0;i<ssl-ksl;i++)str[i] = str[i + ksl];
+  if(strbegin(str, key)) {
+    for(i = 0; i < (ssl - ksl); i++)str[i] = str[i + ksl];
     str[i] = 0;
   }
 }
@@ -256,8 +271,8 @@ void strltrim(substring &str, const char *key) { strltrim(strptr(str), key); }
 void striltrim(char *str, const char *key) {
 int i, ssl = strlen(str), ksl = strlen(key);
   if(ksl > ssl)return;
-  if(!stribegin(str, key)) {
-    for(i=0;i<ssl-ksl;i++)str[i] = str[i + ksl];
+  if(stribegin(str, key)) {
+    for(i = 0; i < (ssl-ksl); i++)str[i] = str[i + ksl];
     str[i] = 0;
   }
 }
@@ -266,7 +281,7 @@ void striltrim(substring &str, const char *key) { striltrim(strptr(str), key); }
 void strrtrim(char *str, const char *key) {
 int ssl = strlen(str), ksl = strlen(key);
   if(ksl > ssl)return;
-  if(!strend(str, key)) {
+  if(strend(str, key)) {
     str[ssl - ksl] = 0;
   }
 }
@@ -275,7 +290,7 @@ void strrtrim(substring &str, const char *key) { strrtrim(strptr(str), key); }
 void strirtrim(char *str, const char *key) {
 int ssl = strlen(str), ksl = strlen(key);
   if(ksl > ssl)return;
-  if(!striend(str, key)) {
+  if(striend(str, key)) {
     str[ssl - ksl] = 0;
   }
 }
@@ -314,13 +329,13 @@ uint strhex(const char *str) {
 uint r = 0, m = 0;
 int i, ssl = strlen(str);
 uint8 x;
-  for(i=0;i<ssl;i++) {
+  for(i = 0; i < ssl; i++) {
     if(str[i] >= '0' && str[i] <= '9');
     else if(str[i] >= 'A' && str[i] <= 'F');
     else if(str[i] >= 'a' && str[i] <= 'f');
     else break;
   }
-  for(--i;i>=0;i--, m+=4) {
+  for(--i; i >= 0; i--, m += 4) {
     x = str[i];
     if(x >= '0' && x <= '9')x -= '0';
     else if(x >= 'A' && x <= 'F')x -= 'A' - 0x0a;
@@ -344,11 +359,11 @@ uint strdec(const char *str) {
 uint m = 1;
 int i, r = 0, ssl = strlen(str);
 uint8 x;
-  for(i=0;i<ssl;i++) {
+  for(i = 0; i < ssl; i++) {
     if(str[i] >= '0' && str[i] <= '9');
     else break;
   }
-  for(--i;i>=0;i--, m*=10) {
+  for(--i; i >= 0; i--, m *= 10) {
     x = str[i];
     if(x >= '0' && x <= '9')x -= '0';
     else return r;
@@ -370,11 +385,11 @@ uint strbin(const char *str) {
 uint r = 0, m = 0;
 int i, ssl = strlen(str);
 uint8 x;
-  for(i=0;i<ssl;i++) {
+  for(i = 0; i < ssl; i++) {
     if(str[i] == '0' || str[i] == '1');
     else break;
   }
-  for(--i;i>=0;i--, m++) {
+  for(--i; i >= 0; i--, m++) {
     x = str[i];
     if(str[i] == '0' || str[i] == '1')x -= '0';
     else return r;

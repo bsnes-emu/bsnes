@@ -36,13 +36,11 @@ inline void clear_tiledata_cache();
 
 //bppu_render_windows.cpp
 struct _window {
-  bool  main_dirty, sub_dirty;
-  uint8 main[256],  sub[256];
-} window_cache[6];
+  uint8 main[256], sub[256];
+} window[6];
 
 void build_window_table(uint8 bg, bool mainscreen);
 void build_window_tables(uint8 bg);
-inline void clear_window_cache();
 
 //bppu_render_bg.cpp
 struct {
@@ -55,7 +53,15 @@ inline uint16 bg_get_tile(uint8 bg, uint16 x, uint16 y);
 void render_line_bg(uint8 bg, uint8 color_depth, uint8 pri0_pos, uint8 pri1_pos);
 
 //bppu_render_oam.cpp
-sprite_item *spr;
+struct sprite_item {
+  uint8  width, height;
+  uint16 x, y;
+  uint8  character;
+  bool   use_nameselect;
+  bool   vflip, hflip;
+  uint8  palette;
+  uint8  priority;
+} sprite_list[128], *spr;
 
 uint8 oam_itemlist[32];
 struct oam_tileitem {
@@ -66,6 +72,7 @@ struct oam_tileitem {
 enum { OAM_PRI_NONE = 4 };
 uint8 oam_line_pal[256], oam_line_pri[256];
 
+void build_sprite_list();
 bool is_sprite_on_scanline();
 void load_oam_tiles();
 void render_oam_tile(int tile_num);
@@ -76,7 +83,7 @@ void render_line_oam_lores(uint8 pri0_pos, uint8 pri1_pos, uint8 pri2_pos, uint8
 void render_line_mode7(uint8 bg, uint8 pri0_pos, uint8 pri1_pos);
 
 //bppu_render_addsub.cpp
-inline uint16 addsub_pixels(uint32 x, uint32 cdest, uint32 csrc, bool halve);
+inline uint16 addsub(uint32 x, uint32 y, bool halve);
 
 //bppu_render_line.cpp
 enum { BLENDTYPE_BACK = 0, BLENDTYPE_MAIN = 1, BLENDTYPE_SUB = 2, BLENDTYPE_COMBINE = 3 };

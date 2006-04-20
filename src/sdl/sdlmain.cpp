@@ -12,14 +12,6 @@ HWND hwnd;
 #include "render.cpp"
 #include "bsnes.cpp"
 
-void *memalloc(uint32 size, char *name, ...) {
-  return (void*)malloc(size);
-}
-
-void memfree(void *mem, char *name, ...) {
-  free(mem);
-}
-
 void alert(char *s, ...) {
 char str[4096];
 va_list args;
@@ -65,13 +57,13 @@ void init_snes() {
 void term_snes() {
   snes->term();
 #ifdef POLYMORPHISM
-  if(deref(mem)) { delete deref(mem); deref(mem) = 0; }
-  if(deref(cpu)) { delete deref(cpu); deref(cpu) = 0; }
-  if(deref(apu)) { delete deref(apu); deref(apu) = 0; }
-  if(deref(dsp)) { delete deref(dsp); deref(dsp) = 0; }
-  if(deref(ppu)) { delete deref(ppu); deref(ppu) = 0; }
+  SafeDelete(deref(mem));
+  SafeDelete(deref(cpu));
+  SafeDelete(deref(apu));
+  SafeDelete(deref(dsp));
+  SafeDelete(deref(ppu));
 #endif
-  if(snes) { delete(snes); snes = 0; }
+  SafeDelete(snes);
 }
 
 void center_window() {
@@ -154,7 +146,7 @@ int cursor_status;
         case SDLK_ESCAPE:
           goto _end;
         case SDLK_BACKSPACE:
-          snes->capture_screenshot();
+        //snes->capture_screenshot();
           break;
         case SDLK_F10: //toggle cursor display
           cursor_status = (SDL_ShowCursor(SDL_QUERY) == SDL_ENABLE) ? SDL_DISABLE : SDL_ENABLE;

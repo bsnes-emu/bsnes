@@ -1,5 +1,5 @@
 /*
-  libstring : version 0.07 ~byuu (11/30/05)
+  libstring : version 0.10 ~byuu (03/05/06)
 */
 
 #ifndef __LIBSTRING
@@ -46,6 +46,8 @@ bool  strimatch(substring &dest, substring &src);
 
 void  strcpy(substring &dest, const char *src);
 void  strcpy(substring &dest, substring &src);
+void  strncpy(substring &dest, const char *src, uint32 length);
+void  strncpy(substring &dest, substring &src, uint32 length);
 
 void  strset(substring &dest, uint pos, uint8 c);
 
@@ -135,10 +137,10 @@ void  replace(substring &str, const char *key, substring &token);
 void  qreplace(substring &str, const char *key, const char *token);
 void  qreplace(substring &str, const char *key, substring &token);
 
-void  split(string &dest, const char *key, char *src);
+void  split(string &dest, const char *key, const char *src);
 void  split(string &dest, const char *key, substring &src);
 
-void  qsplit(string &dest, const char *key, char *src);
+void  qsplit(string &dest, const char *key, const char *src);
 void  qsplit(string &dest, const char *key, substring &src);
 
 void  sprintf(substring &str, const char *s, ...);

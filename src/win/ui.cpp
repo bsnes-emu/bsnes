@@ -1,39 +1,68 @@
+#include "video/video.cpp"
+#include "video/d3d.cpp"
 #include "video/ddraw.cpp"
 #include "audio/dsound.cpp"
+#include "input/input.cpp"
 #include "input/dinput.cpp"
 
-#include "ui_window.cpp"
 #include "ui_main.cpp"
-#include "ui_inputcfg.cpp"
-#include "ui_ppucfg.cpp"
+#include "ui_about.cpp"
+#include "settings/settings.cpp"
+#include "debugger/debugger.cpp"
 
 void init_ui() {
-HDC  hdc    = GetDC(0);
-long height = -MulDiv(8, GetDeviceCaps(hdc, LOGPIXELSY), 72);
-  ReleaseDC(0, hdc);
+HDC  hdc = GetDC(0);
+long height;
+  height = -MulDiv(8, GetDeviceCaps(hdc, LOGPIXELSY), 72);
   global::vwf = CreateFont(height, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tahoma");
+  height = -MulDiv(8, GetDeviceCaps(hdc, LOGPIXELSY), 72);
   global::fwf = CreateFont(height, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Courier New");
+  height = -MulDiv(9, GetDeviceCaps(hdc, LOGPIXELSY), 72);
+  global::font_about = CreateFont(height, 0, 0, 0, FW_BOLD, 0, 0, 0, 0, 0, 0, 0, 0, "Verdana");
+  height = -MulDiv(14, GetDeviceCaps(hdc, LOGPIXELSY), 72);
+  global::font_header = CreateFont(height, 0, 0, 0, FW_BOLD, 0, 0, 0, 0, 0, 0, 0, 0, "Verdana");
+  height = -MulDiv(10, GetDeviceCaps(hdc, LOGPIXELSY), 72);
+  global::font_list = CreateFont(height, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Verdana");
+  ReleaseDC(0, hdc);
 
-  global::black_brush  = (HBRUSH)CreateSolidBrush(RGB(0, 0, 0));
-  global::window_brush = (HBRUSH)COLOR_WINDOW;
+  wMain.SetBackgroundColor(0, 0, 0);
+  wMain.SetIcon(100);
+  wMain.Create(0, "bsnes", config::misc.window_style.sget(), 0, 0, 256, 224, BSNES_TITLE);
+  wMain.Center();
 
-  wMain.init("bsnes", BSNES_TITLE,
-    256, 223, global::black_brush,  Window::WF_CENTER);
-  wInputCfg.init("bsnes_inputcfg", "bsnes Input Configuration",
-    355, 145, global::window_brush, Window::WF_CENTER | Window::WF_TOPMOST);
-  wPPUCfg.init("bsnes_ppucfg", "bsnes PPU Configuration",
-    250, 165, global::window_brush, Window::WF_CENTER | Window::WF_TOPMOST);
+  wAbout.SetIcon(100);
+  wAbout.Create(0, "bsnes_about", "topmost|popup|frame|dragmove", 0, 0, 400, 240, "About bsnes...");
+  wAbout.Center();
 
-  uiVideo = new VideoDD();
+  init_settings();
+  init_debugger();
+
+  if(strmatch(config::video.renderer.sget(), "dd")) {
+    uiVideo = new VideoDD();
+  } else {
+    uiVideo = new VideoD3D();
+  }
   uiAudio = new AudioDS();
   uiInput = new InputDI();
   uiVideo->init();
   uiAudio->init();
   uiInput->init();
 
-  wMain.setup();
-  wInputCfg.setup();
-  wPPUCfg.setup();
+  wMain.Setup();
+  wAbout.Setup();
+  setup_settings();
+  setup_debugger();
 
-  wMain.show();
+  wMain.Show();
+}
+
+void term_ui() {
+  wMain.Hide();
+
+  uiVideo->term();
+  uiAudio->term();
+  uiInput->term();
+  SafeDelete(uiVideo);
+  SafeDelete(uiAudio);
+  SafeDelete(uiInput);
 }

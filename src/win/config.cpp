@@ -5,76 +5,176 @@ struct System {
   static Setting speed_slowest, speed_slow, speed_normal, speed_fast, speed_fastest;
 } system;
 Setting System::regulate_speed(&config_file, "system.regulate_speed", "Regulate speed to 60hz (NTSC) / 50hz (PAL)", true, Setting::TRUE_FALSE);
-Setting System::speed_slowest(&config_file, "system.speed_slowest", "Slowest speed setting (in hz)", 16000, Setting::DEC);
-Setting System::speed_slow   (&config_file, "system.speed_slow",    "Slow speed setting",            24000, Setting::DEC);
-Setting System::speed_normal (&config_file, "system.speed_normal",  "Normal speed setting",          32000, Setting::DEC);
-Setting System::speed_fast   (&config_file, "system.speed_fast",    "Fast speed setting",            48000, Setting::DEC);
-Setting System::speed_fastest(&config_file, "system.speed_fastest", "Fastest speed setting",         64000, Setting::DEC);
+Setting System::speed_slowest (&config_file, "system.speed_slowest",  "Slowest speed setting (in hz)", 16000, Setting::DEC);
+Setting System::speed_slow    (&config_file, "system.speed_slow",     "Slow speed setting",            24000, Setting::DEC);
+Setting System::speed_normal  (&config_file, "system.speed_normal",   "Normal speed setting",          32000, Setting::DEC);
+Setting System::speed_fast    (&config_file, "system.speed_fast",     "Fast speed setting",            48000, Setting::DEC);
+Setting System::speed_fastest (&config_file, "system.speed_fastest",  "Fastest speed setting",         64000, Setting::DEC);
 
 struct Video {
-  static Setting mode;
-  static Setting mode0, mode1, mode2, mode3, mode4;
-  static Setting mode5, mode6, mode7, mode8, mode9;
+  static Setting renderer;
+  static Setting profile;
+  static Setting profile_windowed_default, profile_fullscreen_default;
+  static Setting profile_0, profile_1, profile_2, profile_3, profile_4;
+  static Setting profile_5, profile_6, profile_7, profile_8, profile_9;
+
   static Setting use_vram, triple_buffering;
+  static Setting pscanline_intensity, iscanline_intensity;
+
+  struct Filter {
+    static Setting software, hardware;
+  } filter;
 } video;
-Setting Video::mode(&config_file, "video.mode", "Video mode at startup", 2, Setting::DEC);
-Setting Video::mode0(&config_file, "video.mode_0", "Video mode 0 (windowed)",   "256x223");
-Setting Video::mode1(&config_file, "video.mode_1", "Video mode 1 (windowed)",   "512x446");
-Setting Video::mode2(&config_file, "video.mode_2", "Video mode 2 (windowed)",   "640x480");
-Setting Video::mode3(&config_file, "video.mode_3", "Video mode 3 (windowed)",   "960x720");
-Setting Video::mode4(&config_file, "video.mode_4", "Video mode 4 (windowed)",   "1152x864");
-Setting Video::mode5(&config_file, "video.mode_5", "Video mode 5 (fullscreen)", "640x480@60:640x480");
-Setting Video::mode6(&config_file, "video.mode_6", "Video mode 6 (fullscreen)", "800x600@60:800x600");
-Setting Video::mode7(&config_file, "video.mode_7", "Video mode 7 (fullscreen)", "1024x768@60:1024x768");
-Setting Video::mode8(&config_file, "video.mode_8", "Video mode 8 (fullscreen)", "1280x960@60:1280x960");
-Setting Video::mode9(&config_file, "video.mode_9", "Video mode 9 (fullscreen)", "1600x1200@60:1600x1200");
+Setting Video::renderer(&config_file, "video.renderer", "Video renderer\n"
+  "\"dd\" (DirectDraw7 -- faster, less features)\n"
+  "\"d3d\" (Direct3D9 -- slower, more features)", "d3d");
+Setting Video::profile(&config_file, "video.profile", "Video profile to load at startup", 2, Setting::DEC);
+Setting Video::profile_windowed_default(&config_file, "video.profile_windowed_default",
+  "Windowed profile to select for Alt+Enter", 0, Setting::DEC);
+Setting Video::profile_fullscreen_default(&config_file, "video.profile_fullscreen_default",
+  "Fullscreen profile to select for Alt+Enter", 5, Setting::DEC);
+
+/* software_filter
+ * hardware_filter
+ * video_standard
+ * multiplier
+ * correct_aspect_ratio
+ * enable_scanlines
+ * manual_render_size
+ * render_width
+ * render_height
+ * fullscreen
+ * resolution_width
+ * resolution_height
+ * refresh_rate
+ * triple_buffering
+ */
+Setting Video::profile_0(&config_file, "video.profile_0", "Video profile 0 configuration\n"
+  "Please use bsnes GUI configuration editor to modify video profile settings\n"
+  "Format: software_filter;hardware_filter;video_standard;multiplier;correct_aspect_ratio;\n"
+  "        enable_scanlines;manual_render_size;render_width;render_height;fullscreen;\n"
+  "        resolution_width;resolution_height;refresh_rate;triple_buffering"
+  "",                                                   "0;0;0;0;false;false;false;256;224;false;640;480;60;false");
+Setting Video::profile_1(&config_file, "video.profile_1", "", "0;0;0;0;false;false;false;256;224;false;640;480;60;false");
+Setting Video::profile_2(&config_file, "video.profile_2", "", "0;0;0;0;false;false;false;256;224;false;640;480;60;false");
+Setting Video::profile_3(&config_file, "video.profile_3", "", "0;0;0;0;false;false;false;256;224;false;640;480;60;false");
+Setting Video::profile_4(&config_file, "video.profile_4", "", "0;0;0;0;false;false;false;256;224;false;640;480;60;false");
+Setting Video::profile_5(&config_file, "video.profile_5", "", "0;0;0;0;false;false;false;256;224;false;640;480;60;false");
+Setting Video::profile_6(&config_file, "video.profile_6", "", "0;0;0;0;false;false;false;256;224;false;640;480;60;false");
+Setting Video::profile_7(&config_file, "video.profile_7", "", "0;0;0;0;false;false;false;256;224;false;640;480;60;false");
+Setting Video::profile_8(&config_file, "video.profile_8", "", "0;0;0;0;false;false;false;256;224;false;640;480;60;false");
+Setting Video::profile_9(&config_file, "video.profile_9", "", "0;0;0;0;false;false;false;256;224;false;640;480;60;false");
+
 Setting Video::use_vram(&config_file, "video.use_vram", "Use Video RAM instead of System RAM", true, Setting::TRUE_FALSE);
 Setting Video::triple_buffering(&config_file, "video.triple_buffering", "Use triple buffering", false, Setting::TRUE_FALSE);
+Setting Video::pscanline_intensity(&config_file, "video.pscanline_intensity",
+  "Progressive scanline intensity\n"
+  "Value is percentage of intensity from 0 to 100", 30, Setting::DEC);
+Setting Video::iscanline_intensity(&config_file, "video.iscanline_intensity",
+  "Interlace scanline intensity", 50, Setting::DEC);
 
-struct GUI {
-  static Setting show_fps;
-} gui;
-Setting GUI::show_fps(&config_file, "gui.show_fps", "Show framerate in window title", true, Setting::TRUE_FALSE);
+Setting Video::Filter::software(&config_file, "video.filter.software", "Software video filter\n"
+  "0 = Direct\n"
+  "1 = Scale2x\n", 0, Setting::DEC);
+
+Setting Video::Filter::hardware(&config_file, "video.filter.hardware", "Hardware video filter\n"
+  "0 = Pixel\n"
+  "1 = Bilinear", 1, Setting::DEC);
 
 struct Input {
+  static Setting axis_resistance;
   struct Joypad1 {
     static Setting allow_invalid_input;
     static Setting up, down, left, right, a, b, x, y, l, r, select, start;
+    static Setting map;
   } joypad1;
   struct Joypad2 {
     static Setting allow_invalid_input;
     static Setting up, down, left, right, a, b, x, y, l, r, select, start;
+    static Setting map;
   } joypad2;
 } input;
 
+Setting Input::axis_resistance(&config_file, "input.axis_resistance",
+  "Axis resistance for all analog joypads\n"
+  "Affects responsiveness of analog stick movement by specifying what percentage\n"
+  "in any given direction the axis must be pressed to trigger a button press.\n"
+  "In other words, this determines how hard you have to press the analog stick to\n"
+  "simulate pressing e.g. left or right on a digital joypad.\n"
+  "Value is a percentage, from 0 (axis will trigger with virtually any axis movement)\n"
+  "up to 100 (axis must be pressed fully to given corner).\n"
+  "Value affects all four directions of the axis equally.\n"
+  "Note: Values below 10 or above 90 are not recommended and may not work at all.",
+  75, Setting::DEC);
+
 Setting Input::Joypad1::allow_invalid_input(&config_file, "input.joypad1.allow_invalid_input",
-  "Allow \"impossible\" key combinations for joypad 1 (not recommended)", false, Setting::TRUE_FALSE);
-Setting Input::Joypad1::up    (&config_file, "input.joypad1.up",     "Joypad1 up",     0x80c8, Setting::HEX);
-Setting Input::Joypad1::down  (&config_file, "input.joypad1.down",   "Joypad1 down",   0x81d0, Setting::HEX);
-Setting Input::Joypad1::left  (&config_file, "input.joypad1.left",   "Joypad1 left",   0x82cb, Setting::HEX);
-Setting Input::Joypad1::right (&config_file, "input.joypad1.right",  "Joypad1 right",  0x83cd, Setting::HEX);
-Setting Input::Joypad1::a     (&config_file, "input.joypad1.a",      "Joypad1 A",      0x042d, Setting::HEX);
-Setting Input::Joypad1::b     (&config_file, "input.joypad1.b",      "Joypad1 B",      0x032c, Setting::HEX);
-Setting Input::Joypad1::x     (&config_file, "input.joypad1.x",      "Joypad1 X",      0x011f, Setting::HEX);
-Setting Input::Joypad1::y     (&config_file, "input.joypad1.y",      "Joypad1 Y",      0x001e, Setting::HEX);
-Setting Input::Joypad1::l     (&config_file, "input.joypad1.l",      "Joypad1 L",      0x0620, Setting::HEX);
-Setting Input::Joypad1::r     (&config_file, "input.joypad1.r",      "Joypad1 R",      0x072e, Setting::HEX);
-Setting Input::Joypad1::select(&config_file, "input.joypad1.select", "Joypad1 select", 0x0836, Setting::HEX);
-Setting Input::Joypad1::start (&config_file, "input.joypad1.start",  "Joypad1 start",  0x091c, Setting::HEX);
+  "Allow up+down and left+right key combinations for joypad 1 (not recommended)", false, Setting::TRUE_FALSE);
+
+Setting Input::Joypad1::up    (0, "input.joypad1.up",     "", 0, Setting::HEX);
+Setting Input::Joypad1::down  (0, "input.joypad1.down",   "", 0, Setting::HEX);
+Setting Input::Joypad1::left  (0, "input.joypad1.left",   "", 0, Setting::HEX);
+Setting Input::Joypad1::right (0, "input.joypad1.right",  "", 0, Setting::HEX);
+Setting Input::Joypad1::a     (0, "input.joypad1.a",      "", 0, Setting::HEX);
+Setting Input::Joypad1::b     (0, "input.joypad1.b",      "", 0, Setting::HEX);
+Setting Input::Joypad1::x     (0, "input.joypad1.x",      "", 0, Setting::HEX);
+Setting Input::Joypad1::y     (0, "input.joypad1.y",      "", 0, Setting::HEX);
+Setting Input::Joypad1::l     (0, "input.joypad1.l",      "", 0, Setting::HEX);
+Setting Input::Joypad1::r     (0, "input.joypad1.r",      "", 0, Setting::HEX);
+Setting Input::Joypad1::select(0, "input.joypad1.select", "", 0, Setting::HEX);
+Setting Input::Joypad1::start (0, "input.joypad1.start",  "", 0, Setting::HEX);
+
+Setting Input::Joypad1::map(&config_file, "input.joypad1.map", "Joypad 1 button map\n"
+  "Format: Up; Down; Left; Right; A; B; X; Y; L; R; Select; Start",
+  "up | joy0.up; down | joy0.down; left | joy0.left; right | joy0.right; "
+  "x | joy0.button4; z | joy0.button3; s | joy0.button1; a | joy0.button0; "
+  "d | joy0.button6; c | joy0.button7; rshift | joy0.button2; enter | joy0.button5");
+
+//
 
 Setting Input::Joypad2::allow_invalid_input(&config_file, "input.joypad2.allow_invalid_input",
-  "Allow \"impossible\" key combinations for joypad 2 (not recommended)", false, Setting::TRUE_FALSE);
-Setting Input::Joypad2::up    (&config_file, "input.joypad2.up",     "Joypad2 up",     0xff14, Setting::HEX);
-Setting Input::Joypad2::down  (&config_file, "input.joypad2.down",   "Joypad2 down",   0xff22, Setting::HEX);
-Setting Input::Joypad2::left  (&config_file, "input.joypad2.left",   "Joypad2 left",   0xff21, Setting::HEX);
-Setting Input::Joypad2::right (&config_file, "input.joypad2.right",  "Joypad2 right",  0xff23, Setting::HEX);
-Setting Input::Joypad2::a     (&config_file, "input.joypad2.a",      "Joypad2 A",      0xff25, Setting::HEX);
-Setting Input::Joypad2::b     (&config_file, "input.joypad2.b",      "Joypad2 B",      0xff24, Setting::HEX);
-Setting Input::Joypad2::x     (&config_file, "input.joypad2.x",      "Joypad2 X",      0xff17, Setting::HEX);
-Setting Input::Joypad2::y     (&config_file, "input.joypad2.y",      "Joypad2 Y",      0xff16, Setting::HEX);
-Setting Input::Joypad2::l     (&config_file, "input.joypad2.l",      "Joypad2 L",      0xff18, Setting::HEX);
-Setting Input::Joypad2::r     (&config_file, "input.joypad2.r",      "Joypad2 R",      0xff26, Setting::HEX);
-Setting Input::Joypad2::select(&config_file, "input.joypad2.select", "Joypad2 select", 0xff1a, Setting::HEX);
-Setting Input::Joypad2::start (&config_file, "input.joypad2.start",  "Joypad2 start",  0xff1b, Setting::HEX);
+  "Allow up+down and left+right key combinations for joypad 2 (not recommended)", false, Setting::TRUE_FALSE);
+
+Setting Input::Joypad2::up    (0, "input.joypad2.up",     "", 0, Setting::HEX);
+Setting Input::Joypad2::down  (0, "input.joypad2.down",   "", 0, Setting::HEX);
+Setting Input::Joypad2::left  (0, "input.joypad2.left",   "", 0, Setting::HEX);
+Setting Input::Joypad2::right (0, "input.joypad2.right",  "", 0, Setting::HEX);
+Setting Input::Joypad2::a     (0, "input.joypad2.a",      "", 0, Setting::HEX);
+Setting Input::Joypad2::b     (0, "input.joypad2.b",      "", 0, Setting::HEX);
+Setting Input::Joypad2::x     (0, "input.joypad2.x",      "", 0, Setting::HEX);
+Setting Input::Joypad2::y     (0, "input.joypad2.y",      "", 0, Setting::HEX);
+Setting Input::Joypad2::l     (0, "input.joypad2.l",      "", 0, Setting::HEX);
+Setting Input::Joypad2::r     (0, "input.joypad2.r",      "", 0, Setting::HEX);
+Setting Input::Joypad2::select(0, "input.joypad2.select", "", 0, Setting::HEX);
+Setting Input::Joypad2::start (0, "input.joypad2.start",  "", 0, Setting::HEX);
+
+Setting Input::Joypad2::map(&config_file, "input.joypad2.map", "Joypad 2 button map\n"
+  "Format: Up; Down; Left; Right; A; B; X; Y; L; R; Select; Start",
+  "t | joy1.up; g | joy1.down; f | joy1.left; h | joy1.right; "
+  "k | joy1.button4; j | joy1.button3; i | joy1.button1; u | joy1.button0; "
+  "o | joy1.button6; l | joy1.button7; lbracket | joy1.button2; rbracket | joy1.button5");
+
+//
+
+struct Debugger {
+  static Setting console_lines;
+} debugger;
+Setting Debugger::console_lines(&config_file, "debugger.console_lines", "Number of lines buffered for debugger console",
+  100, Setting::DEC);
+
+struct Misc {
+  static Setting image_format;
+  static Setting window_style;
+  static Setting show_fps;
+  static Setting config_window_alpha_level;
+} misc;
+Setting Misc::image_format(&config_file, "misc.image_format", "Image format for screenshots\n"
+  "Valid formats: \"bmp\", \"png\", \"jpg\"", "png");
+Setting Misc::window_style(&config_file, "misc.window_style", "Window style for main emulation window",
+  "titlebar|frame|minimize|dragmove");
+Setting Misc::show_fps(&config_file, "misc.show_fps", "Show framerate", true, Setting::TRUE_FALSE);
+Setting Misc::config_window_alpha_level(&config_file, "misc.config_window_alpha_level",
+  "Alpha level (opacity) of configuration window\n"
+  "Value must be between 64 (25% opaque, 75% transparent) and 255 (100% opaque)",
+  192, Setting::DEC);
 
 };

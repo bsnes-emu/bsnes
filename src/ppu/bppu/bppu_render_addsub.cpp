@@ -1,29 +1,30 @@
-inline uint16 bPPU::addsub_pixels(uint32 x, uint32 cdest, uint32 csrc, bool halve) {
+/*****
+ * Color Addition / Subtraction
+ * Thanks to blargg for the optimized algorithms
+ *
+ * clock() counts for 32768x32768 iterations of addsub(),
+ * taken on an Athlon 3500+/DDR266 system:
+ *        add = 10594
+ *   half_add =  6516
+ *        sub = 10579
+ *   half_sub = 11860
+ *****/
+inline uint16 bPPU::addsub(uint32 x, uint32 y, bool halve) {
   if(!regs.color_mode) {
-  //add
-    cdest = ((cdest << 16) | cdest) & 0x03e07c1f;
-    csrc  = ((csrc  << 16) | csrc)  & 0x03e07c1f;
-    cdest += csrc;
-
     if(!halve) {
-      if(cdest & 0x04000000)cdest |= 0x03e00000;
-      if(cdest & 0x00008000)cdest |= 0x00007c00;
-      if(cdest & 0x00000020)cdest |= 0x0000001f;
+    uint sum   = x + y;
+    uint carry = (sum - ((x ^ y) & 0x0421)) & 0x8420;
+      return (sum - carry) | (carry - (carry >> 5));
     } else {
-      cdest >>= 1;
+      return (x + y - ((x ^ y) & 0x0421)) >> 1;
     }
-
-    cdest &= 0x03e07c1f;
-    return (cdest >> 16) | cdest;
   } else {
-  //subtract
-    if((cdest & 0x7c00) < (csrc & 0x7c00))cdest &= ~0x7c00;
-    else cdest -= (csrc & 0x7c00);
-    if((cdest & 0x03e0) < (csrc & 0x03e0))cdest &= ~0x03e0;
-    else cdest -= (csrc & 0x03e0);
-    if((cdest & 0x001f) < (csrc & 0x001f))cdest &= ~0x001f;
-    else cdest -= (csrc & 0x001f);
-
-    return (!halve) ? cdest : ((cdest & 0x7bde) >> 1);
+  uint diff   = x - y + 0x8420;
+  uint borrow = (diff - ((x ^ y) & 0x8420)) & 0x8420;
+    if(!halve) {
+      return   (diff - borrow) & (borrow - (borrow >> 5));
+    } else {
+      return (((diff - borrow) & (borrow - (borrow >> 5))) & 0x7bde) >> 1;
+    }
   }
 }

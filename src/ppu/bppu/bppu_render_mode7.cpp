@@ -4,15 +4,14 @@
   base algorithm written by anomie
   bsnes implementation written by byuu
 
-  supports mode 7 + extbg + rotate + zoom + direct color + scrolling + m7sel + windowing + mosaic
-  does not support pseudo-hires
-  interlace support is automatic via main rendering routine
+  supports mode 7 + extbg + rotate + zoom +
+    direct color + scrolling + m7sel + windowing + mosaic
+  interlace and pseudo-hires support are automatic via main rendering routine
 */
 
 //13-bit sign extend
 //--s---vvvvvvvvvv -> ssssssvvvvvvvvvv
 #define CLIP(x) ( ((x) & 0x2000) ? ( (x) | ~0x03ff) : ((x) & 0x03ff) )
-//#define CLIP(x) ( ((x) & 0x03ff) | (((x) & 0x2000) ? -0x0400 : 0) )
 
 void bPPU::render_line_mode7(uint8 bg, uint8 pri0_pos, uint8 pri1_pos) {
   if(regs.bg_enabled[bg] == false && regs.bgsub_enabled[bg] == false)return;
@@ -21,38 +20,31 @@ void bPPU::render_line_mode7(uint8 bg, uint8 pri0_pos, uint8 pri1_pos) {
   if(render_enabled(bg, 0) == false)pri0_pos = 0;
   if(render_enabled(bg, 1) == false)pri1_pos = 0;
 //nothing to render?
-  if(!pri0_pos && !pri1_pos);
-
-int32 x, y;
-int32 a, b, c, d, cx, cy;
-int32 hofs, vofs;
+  if(!pri0_pos && !pri1_pos)return;
 
 int32 px, py;
 int32 tx, ty, tile, palette;
-  a = int32(int16(regs.m7a));
-  b = int32(int16(regs.m7b));
-  c = int32(int16(regs.m7c));
-  d = int32(int16(regs.m7d));
 
-  cx   = (int32(regs.m7x)         << 19) >> 19;
-  cy   = (int32(regs.m7y)         << 19) >> 19;
-  hofs = (int32(regs.m7_hofs)     << 19) >> 19;
+int32 a = int32(int16(regs.m7a));
+int32 b = int32(int16(regs.m7b));
+int32 c = int32(int16(regs.m7c));
+int32 d = int32(int16(regs.m7d));
+
+int32 cx   = (int32(regs.m7x)         << 19) >> 19;
+int32 cy   = (int32(regs.m7y)         << 19) >> 19;
+int32 hofs = (int32(regs.m7_hofs)     << 19) >> 19;
 //+1 breaks FF5 title screen mirror alignment...
-  vofs = (int32(regs.m7_vofs + 0) << 19) >> 19;
+int32 vofs = (int32(regs.m7_vofs + 0) << 19) >> 19;
 
 int  _pri, _x;
 bool _bg_enabled    = regs.bg_enabled[bg];
 bool _bgsub_enabled = regs.bgsub_enabled[bg];
 
   build_window_tables(bg);
-uint8 *wt_main = window_cache[bg].main;
-uint8 *wt_sub  = window_cache[bg].sub;
+uint8 *wt_main = window[bg].main;
+uint8 *wt_sub  = window[bg].sub;
 
-  if(regs.mode7_vflip == true) {
-    y = 255 - line.y;
-  } else {
-    y = line.y;
-  }
+int32 y = (regs.mode7_vflip == false) ? (line.y) : (255 - line.y);
 
 uint16 *mtable_x, *mtable_y;
   if(bg == BG1) {
@@ -67,7 +59,7 @@ uint16 *mtable_x, *mtable_y;
 
 int32 psx = ((a * CLIP(hofs - cx)) & ~63) + ((b * CLIP(vofs - cy)) & ~63) + ((b * mtable_y[y]) & ~63) + (cx << 8);
 int32 psy = ((c * CLIP(hofs - cx)) & ~63) + ((d * CLIP(vofs - cy)) & ~63) + ((d * mtable_y[y]) & ~63) + (cy << 8);
-  for(x=0;x<256;x++) {
+  for(int32 x = 0; x < 256; x++) {
     px = psx + (a * mtable_x[x]);
     py = psy + (c * mtable_x[x]);
 
@@ -120,11 +112,7 @@ int32 psy = ((c * CLIP(hofs - cx)) & ~63) + ((d * CLIP(vofs - cy)) & ~63) + ((d 
 
     if(!palette)continue;
 
-    if(regs.mode7_hflip == true) {
-      _x = 255 - x;
-    } else {
-      _x = x;
-    }
+    _x = (regs.mode7_hflip == false) ? (x) : (255 - x);
 
   uint32 col;
     if(regs.direct_color == true && bg == BG1) {

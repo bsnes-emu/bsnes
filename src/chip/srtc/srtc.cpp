@@ -77,8 +77,8 @@ tm *t;
 void SRTC::init() {}
 
 void SRTC::enable() {
-  r_mem->set_mmio_mapper(0x2800, mmio);
-  r_mem->set_mmio_mapper(0x2801, mmio);
+  r_mem->set_mmio_mapper(0x2800, this);
+  r_mem->set_mmio_mapper(0x2801, this);
 }
 
 void SRTC::power() {
@@ -88,7 +88,35 @@ void SRTC::power() {
 
 void SRTC::reset() {
   srtc.index = -1;
-  srtc.mode = SRTC_READ;
+  srtc.mode  = SRTC_READ;
+}
+
+uint8 SRTC::mmio_read(uint16 addr) {
+  switch(addr) {
+
+  case 0x2800: {
+    if(srtc.mode == SRTC_READ) {
+      if(srtc.index < 0) {
+        set_time();
+        srtc.index++;
+        return 0x0f; //send start message
+      } else if(srtc.index > MAX_SRTC_INDEX) {
+        srtc.index = -1;
+        return 0x0f; //send finished message
+      } else {
+        return srtc.data[srtc.index++];
+      }
+    } else {
+      return 0x00;
+    }
+  } break;
+
+  case 0x2801: {
+  } break;
+
+  }
+
+  return r_cpu->regs.mdr;
 }
 
 //Please see notes above about the implementation of the S-RTC
@@ -96,90 +124,66 @@ void SRTC::reset() {
 //as reads will refresh the data array with the current system
 //time. The write method is only here for the sake of faux
 //emulation of the real hardware.
-void SRTC::write(uint8 data) {
-  data &= 0x0f; //only the low four bits are used
+void SRTC::mmio_write(uint16 addr, uint8 data) {
+  switch(addr) {
 
-  if(data >= 0x0d) {
-    switch(data) {
-    case 0x0d:
-      srtc.mode = SRTC_READ;
-      srtc.index = -1;
-      break;
-    case 0x0e:
-      srtc.mode = SRTC_COMMAND;
-      break;
-    case 0x0f:
-    //unknown behaviour
-      break;
+  case 0x2800: {
+  } break;
+
+  case 0x2801: {
+    data &= 0x0f; //only the low four bits are used
+
+    if(data >= 0x0d) {
+      switch(data) {
+      case 0x0d:
+        srtc.mode  = SRTC_READ;
+        srtc.index = -1;
+        break;
+      case 0x0e:
+        srtc.mode = SRTC_COMMAND;
+        break;
+      case 0x0f:
+      //unknown behaviour
+        break;
+      }
+      return;
     }
-    return;
-  }
 
-  if(srtc.mode == SRTC_WRITE) {
-    if(srtc.index >= 0 && srtc.index < MAX_SRTC_INDEX) {
-      srtc.data[srtc.index++] = data;
+    if(srtc.mode == SRTC_WRITE) {
+      if(srtc.index >= 0 && srtc.index < MAX_SRTC_INDEX) {
+        srtc.data[srtc.index++] = data;
 
-      if(srtc.index == MAX_SRTC_INDEX) {
-      //all S-RTC data has been loaded by program
-        srtc.data[srtc.index++] = 0x00; //day_of_week
+        if(srtc.index == MAX_SRTC_INDEX) {
+        //all S-RTC data has been loaded by program
+          srtc.data[srtc.index++] = 0x00; //day_of_week
+        }
+      }
+    } else if(srtc.mode == SRTC_COMMAND) {
+      switch(data) {
+      case SRTC_COMMAND_CLEAR:
+        memset(srtc.data, 0, MAX_SRTC_INDEX + 1);
+        srtc.index = -1;
+        srtc.mode  = SRTC_READY;
+        break;
+      case SRTC_COMMAND_WRITE:
+        srtc.index = 0;
+        srtc.mode  = SRTC_WRITE;
+        break;
+      default:
+      //unknown behaviour
+        srtc.mode  = SRTC_READY;
+        break;
+      }
+    } else {
+      if(srtc.mode == SRTC_READ) {
+      //ignore writes while in read mode
+      } else if(srtc.mode == SRTC_READY) {
+      //unknown behaviour
       }
     }
-  } else if(srtc.mode == SRTC_COMMAND) {
-    switch(data) {
-    case SRTC_COMMAND_CLEAR:
-      memset(srtc.data, 0, MAX_SRTC_INDEX + 1);
-      srtc.index = -1;
-      srtc.mode = SRTC_READY;
-      break;
-    case SRTC_COMMAND_WRITE:
-      srtc.index = 0;
-      srtc.mode = SRTC_WRITE;
-      break;
-    default:
-    //unknown behaviour
-      srtc.mode = SRTC_READY;
-      break;
-    }
-  } else {
-    if(srtc.mode == SRTC_READ) {
-    //ignore writes while in read mode
-    } else if(srtc.mode == SRTC_READY) {
-    //unknown behaviour
-    }
+  } break;
+
   }
 }
 
-uint8 SRTC::read() {
-  if(srtc.mode == SRTC_READ) {
-    if(srtc.index < 0) {
-      set_time();
-      srtc.index++;
-      return 0x0f; //send start message
-    } else if(srtc.index > MAX_SRTC_INDEX) {
-      srtc.index = -1;
-      return 0x0f; //send finished message
-    } else {
-      return srtc.data[srtc.index++];
-    }
-  } else {
-    return 0x00;
-  }
-}
-
-SRTC::SRTC() {
-  mmio = new SRTCMMIO();
-}
-
-uint8 SRTCMMIO::read(uint32 addr) {
-  switch(addr) {
-  case 0x2800:return srtc->read();
-  }
-
-  return r_cpu->regs.mdr;
-}
-
-void SRTCMMIO::write(uint32 addr, uint8 value) {
-  switch(addr) {
-  case 0x2801:srtc->write(value);break;
-  }
-}
+SRTC::SRTC() {}

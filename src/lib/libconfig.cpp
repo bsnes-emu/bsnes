@@ -13,9 +13,22 @@ uint Setting::get() {
 void Setting::set(uint _data) {
   data = _data;
 
-  if(type != DEC && type != HEX) {
-  //data is a boolean type
+  switch(type) {
+  case TRUE_FALSE:
+  case ENABLED_DISABLED:
+  case ON_OFF:
+  case YES_NO:
     data &= 1;
+    break;
+  case HEX8:
+    data &= 0xff;
+    break;
+  case HEX16:
+    data &= 0xffff;
+    break;
+  case HEX24:
+    data &= 0xffffff;
+    break;
   }
 }
 
@@ -98,11 +111,11 @@ uint Config::string_to_uint(uint type, char *input) {
     return (uint)false;
   }
 
-  if(strbegin(input, "0x")) {
-    return strhex(input + 2);
+  if(strbegin(input, "0x") || strbegin(input, "-0x")) {
+    return sstrhex(input + 2);
   }
 
-  return strdec(input);
+  return sstrdec(input);
 }
 
 char *Config::uint_to_string(uint type, uint input) {
@@ -120,12 +133,12 @@ static char output[512];
   case Setting::YES_NO:
     sprintf(output, "%s", (input & 1) ? "yes" : "no");
     break;
-  case Setting::DEC:
-    sprintf(output, "%d", input);
-    break;
-  case Setting::HEX:
-    sprintf(output, "0x%x", input);
-    break;
+  case Setting::DEC:   sprintf(output, "%d",      input);            break;
+  case Setting::HEX:   sprintf(output, "0x%x",    input);            break;
+  case Setting::HEX8:  sprintf(output, "0x%0.2x", input & 0xff);     break;
+  case Setting::HEX16: sprintf(output, "0x%0.4x", input & 0xffff);   break;
+  case Setting::HEX24: sprintf(output, "0x%0.6x", input & 0xffffff); break;
+  case Setting::HEX32: sprintf(output, "0x%0.8x", input);            break;
   }
 
   return output;

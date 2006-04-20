@@ -10,27 +10,32 @@ uint8 *GZReader::read(uint32 length) {
 uint8 *data;
   if(length == 0) {
   //read the entire file into RAM
-    data = (uint8*)memalloc(fsize);
+    data = (uint8*)malloc(fsize);
     memset(data, 0, fsize);
     if(gp)gzread(gp, data, fsize);
   } else if(length > fsize) {
   //read the entire file into RAM, pad the rest with 0x00s
-    data = (uint8*)memalloc(length);
+    data = (uint8*)malloc(length);
     memset(data, 0, length);
     if(gp)gzread(gp, data, fsize);
   } else { //fsize >= length
   //read only what was requested
-    data = (uint8*)memalloc(length);
+    data = (uint8*)malloc(length);
     memset(data, 0, length);
     if(gp)gzread(gp, data, length);
   }
   return data;
 }
 
-bool GZReader::open(char *fn) {
-FILE *fp;
-  fp = fopen(fn, "rb");
-  if(!fp)return false;
+bool GZReader::ready() {
+  return (gp != 0);
+}
+
+GZReader::GZReader(const char *fn) {
+  gp = 0;
+
+FILE *fp = fopen(fn, "rb");
+  if(!fp)return;
 
   fseek(fp, 0, SEEK_END);
   fsize = ftell(fp);
@@ -38,7 +43,7 @@ FILE *fp;
   if(fsize < 4) {
     fclose(fp);
     fp = 0;
-    return false;
+    return;
   }
 
 uint32 gzsize;
@@ -52,7 +57,7 @@ uint32 gzsize;
   fp = 0;
 
   gp = gzopen(fn, "rb");
-  if(!gp)return false;
+  if(!gp)return;
 
   if(!gzdirect(gp)) {
     fsize = gzsize;
@@ -62,13 +67,11 @@ uint32 gzsize;
   if(fsize == 0) {
     gzclose(gp);
     gp = 0;
-    return false;
+    return;
   }
-
-  return true;
 }
 
-void GZReader::close() {
+GZReader::~GZReader() {
   if(gp) {
     gzclose(gp);
     gp = 0;

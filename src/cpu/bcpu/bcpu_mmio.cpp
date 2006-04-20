@@ -3,10 +3,9 @@ void bCPU::mmio_reset() {
   status.wram_addr = 0x000000;
 
 //$4016-$4017
-  status.joypad1_strobe_value = 0x00;
-  status.joypad2_strobe_value = 0x00;
-  status.joypad1_read_pos     = 0;
-  status.joypad2_read_pos     = 0;
+  status.joypad_strobe_latch = 0;
+  status.joypad1_read_pos    = 0;
+  status.joypad2_read_pos    = 0;
 
 //$4200
   status.nmi_enabled      = false;
@@ -59,26 +58,30 @@ uint8 bCPU::mmio_r4016() {
 uint8 r;
   r = regs.mdr & 0xfc;
 
-  if(status.joypad1_strobe_value == 1) {
+  if(status.joypad_strobe_latch == 1) {
     r |= (uint8)snes->get_input_status(SNES::DEV_JOYPAD1, SNES::JOYPAD_B);
   } else {
     switch(status.joypad1_read_pos) {
-    case  0:r |= (uint8)snes->get_input_status(SNES::DEV_JOYPAD1, SNES::JOYPAD_B);     break;
-    case  1:r |= (uint8)snes->get_input_status(SNES::DEV_JOYPAD1, SNES::JOYPAD_Y);     break;
-    case  2:r |= (uint8)snes->get_input_status(SNES::DEV_JOYPAD1, SNES::JOYPAD_SELECT);break;
-    case  3:r |= (uint8)snes->get_input_status(SNES::DEV_JOYPAD1, SNES::JOYPAD_START); break;
-    case  4:r |= (uint8)snes->get_input_status(SNES::DEV_JOYPAD1, SNES::JOYPAD_UP);    break;
-    case  5:r |= (uint8)snes->get_input_status(SNES::DEV_JOYPAD1, SNES::JOYPAD_DOWN);  break;
-    case  6:r |= (uint8)snes->get_input_status(SNES::DEV_JOYPAD1, SNES::JOYPAD_LEFT);  break;
-    case  7:r |= (uint8)snes->get_input_status(SNES::DEV_JOYPAD1, SNES::JOYPAD_RIGHT); break;
-    case  8:r |= (uint8)snes->get_input_status(SNES::DEV_JOYPAD1, SNES::JOYPAD_A);     break;
-    case  9:r |= (uint8)snes->get_input_status(SNES::DEV_JOYPAD1, SNES::JOYPAD_X);     break;
-    case 10:r |= (uint8)snes->get_input_status(SNES::DEV_JOYPAD1, SNES::JOYPAD_L);     break;
-    case 11:r |= (uint8)snes->get_input_status(SNES::DEV_JOYPAD1, SNES::JOYPAD_R);     break;
-    case 16:r |= 1;break; //joypad connected bit
-    default:r |= 1;break; //after 16th read, all subsequent reads return 1
+    case  0: r |= (uint8)snes->get_input_status(SNES::DEV_JOYPAD1, SNES::JOYPAD_B);      break;
+    case  1: r |= (uint8)snes->get_input_status(SNES::DEV_JOYPAD1, SNES::JOYPAD_Y);      break;
+    case  2: r |= (uint8)snes->get_input_status(SNES::DEV_JOYPAD1, SNES::JOYPAD_SELECT); break;
+    case  3: r |= (uint8)snes->get_input_status(SNES::DEV_JOYPAD1, SNES::JOYPAD_START);  break;
+    case  4: r |= (uint8)snes->get_input_status(SNES::DEV_JOYPAD1, SNES::JOYPAD_UP);     break;
+    case  5: r |= (uint8)snes->get_input_status(SNES::DEV_JOYPAD1, SNES::JOYPAD_DOWN);   break;
+    case  6: r |= (uint8)snes->get_input_status(SNES::DEV_JOYPAD1, SNES::JOYPAD_LEFT);   break;
+    case  7: r |= (uint8)snes->get_input_status(SNES::DEV_JOYPAD1, SNES::JOYPAD_RIGHT);  break;
+    case  8: r |= (uint8)snes->get_input_status(SNES::DEV_JOYPAD1, SNES::JOYPAD_A);      break;
+    case  9: r |= (uint8)snes->get_input_status(SNES::DEV_JOYPAD1, SNES::JOYPAD_X);      break;
+    case 10: r |= (uint8)snes->get_input_status(SNES::DEV_JOYPAD1, SNES::JOYPAD_L);      break;
+    case 11: r |= (uint8)snes->get_input_status(SNES::DEV_JOYPAD1, SNES::JOYPAD_R);      break;
+    case 12: break;
+    case 13: break;
+    case 14: break;
+    case 15: break; //bits 12-15 always return 0
+  //all subsequent reads return joypad connection status
+    case 16: r |= 1; break; //joypad connected bit
     }
-    if(++status.joypad1_read_pos > 17)status.joypad1_read_pos = 17;
+    if(++status.joypad1_read_pos > 16)status.joypad1_read_pos = 16;
   }
 
   return r;
@@ -86,33 +89,37 @@ uint8 r;
 
 //JOYSER1
 //7-5 = MDR
-//4-2 = Always 1
+//4-2 = Always 1 (pins are connected to GND)
 //1-0 = Joypad serial data
 uint8 bCPU::mmio_r4017() {
 uint8 r;
   r  = regs.mdr & 0xe0;
   r |= 0x1c;
 
-  if(status.joypad2_strobe_value == 1) {
+  if(status.joypad_strobe_latch == 1) {
     r |= (uint8)snes->get_input_status(SNES::DEV_JOYPAD2, SNES::JOYPAD_B);
   } else {
     switch(status.joypad2_read_pos) {
-    case  0:r |= (uint8)snes->get_input_status(SNES::DEV_JOYPAD2, SNES::JOYPAD_B);     break;
-    case  1:r |= (uint8)snes->get_input_status(SNES::DEV_JOYPAD2, SNES::JOYPAD_Y);     break;
-    case  2:r |= (uint8)snes->get_input_status(SNES::DEV_JOYPAD2, SNES::JOYPAD_SELECT);break;
-    case  3:r |= (uint8)snes->get_input_status(SNES::DEV_JOYPAD2, SNES::JOYPAD_START); break;
-    case  4:r |= (uint8)snes->get_input_status(SNES::DEV_JOYPAD2, SNES::JOYPAD_UP);    break;
-    case  5:r |= (uint8)snes->get_input_status(SNES::DEV_JOYPAD2, SNES::JOYPAD_DOWN);  break;
-    case  6:r |= (uint8)snes->get_input_status(SNES::DEV_JOYPAD2, SNES::JOYPAD_LEFT);  break;
-    case  7:r |= (uint8)snes->get_input_status(SNES::DEV_JOYPAD2, SNES::JOYPAD_RIGHT); break;
-    case  8:r |= (uint8)snes->get_input_status(SNES::DEV_JOYPAD2, SNES::JOYPAD_A);     break;
-    case  9:r |= (uint8)snes->get_input_status(SNES::DEV_JOYPAD2, SNES::JOYPAD_X);     break;
-    case 10:r |= (uint8)snes->get_input_status(SNES::DEV_JOYPAD2, SNES::JOYPAD_L);     break;
-    case 11:r |= (uint8)snes->get_input_status(SNES::DEV_JOYPAD2, SNES::JOYPAD_R);     break;
-    case 16:r |= 1;break; //joypad connected bit
-    default:r |= 1;break; //after 16th read, all subsequent reads return 1
+    case  0: r |= (uint8)snes->get_input_status(SNES::DEV_JOYPAD2, SNES::JOYPAD_B);      break;
+    case  1: r |= (uint8)snes->get_input_status(SNES::DEV_JOYPAD2, SNES::JOYPAD_Y);      break;
+    case  2: r |= (uint8)snes->get_input_status(SNES::DEV_JOYPAD2, SNES::JOYPAD_SELECT); break;
+    case  3: r |= (uint8)snes->get_input_status(SNES::DEV_JOYPAD2, SNES::JOYPAD_START);  break;
+    case  4: r |= (uint8)snes->get_input_status(SNES::DEV_JOYPAD2, SNES::JOYPAD_UP);     break;
+    case  5: r |= (uint8)snes->get_input_status(SNES::DEV_JOYPAD2, SNES::JOYPAD_DOWN);   break;
+    case  6: r |= (uint8)snes->get_input_status(SNES::DEV_JOYPAD2, SNES::JOYPAD_LEFT);   break;
+    case  7: r |= (uint8)snes->get_input_status(SNES::DEV_JOYPAD2, SNES::JOYPAD_RIGHT);  break;
+    case  8: r |= (uint8)snes->get_input_status(SNES::DEV_JOYPAD2, SNES::JOYPAD_A);      break;
+    case  9: r |= (uint8)snes->get_input_status(SNES::DEV_JOYPAD2, SNES::JOYPAD_X);      break;
+    case 10: r |= (uint8)snes->get_input_status(SNES::DEV_JOYPAD2, SNES::JOYPAD_L);      break;
+    case 11: r |= (uint8)snes->get_input_status(SNES::DEV_JOYPAD2, SNES::JOYPAD_R);      break;
+    case 12: break;
+    case 13: break;
+    case 14: break;
+    case 15: break; //bits 12-15 always return 0
+  //all subsequent reads return joypad connection status
+    case 16: r |= 1; break; //joypad connected bit
     }
-    if(++status.joypad2_read_pos > 17)status.joypad2_read_pos = 17;
+    if(++status.joypad2_read_pos > 16)status.joypad2_read_pos = 16;
   }
 
   return r;
@@ -320,8 +327,7 @@ uint8 bCPU::mmio_r43xb(uint8 i) {
   return channel[i].hdma_unknown;
 }
 
-uint8 bCPUMMIO::read(uint32 addr) {
-uint i;
+uint8 bCPU::mmio_read(uint16 addr) {
 //APU
   if(addr >= 0x2140 && addr <= 0x217f) {
     return r_apu->port_read(addr & 3);
@@ -329,47 +335,50 @@ uint i;
 
 //HDMA
   if(addr >= 0x4300 && addr <= 0x437f) {
-    i = (addr >> 4) & 7;
+  uint i = (addr >> 4) & 7;
     switch(addr & 0xf) {
-    case 0x0:return cpu->mmio_r43x0(i);
-    case 0x1:return cpu->mmio_r43x1(i);
-    case 0x2:return cpu->mmio_r43x2(i);
-    case 0x3:return cpu->mmio_r43x3(i);
-    case 0x4:return cpu->mmio_r43x4(i);
-    case 0x5:return cpu->mmio_r43x5(i);
-    case 0x6:return cpu->mmio_r43x6(i);
-    case 0x7:return cpu->mmio_r43x7(i);
-    case 0x8:return cpu->mmio_r43x8(i);
-    case 0x9:return cpu->mmio_r43x9(i);
-    case 0xa:return cpu->mmio_r43xa(i);
-    case 0xb:return cpu->mmio_r43xb(i);
-    case 0xc:return cpu->regs.mdr; //unmapped
-    case 0xd:return cpu->regs.mdr; //unmapped
-    case 0xe:return cpu->regs.mdr; //unmapped
-    case 0xf:return cpu->mmio_r43xb(i); //mirror of 43xb
+    case 0x0: return mmio_r43x0(i);
+    case 0x1: return mmio_r43x1(i);
+    case 0x2: return mmio_r43x2(i);
+    case 0x3: return mmio_r43x3(i);
+    case 0x4: return mmio_r43x4(i);
+    case 0x5: return mmio_r43x5(i);
+    case 0x6: return mmio_r43x6(i);
+    case 0x7: return mmio_r43x7(i);
+    case 0x8: return mmio_r43x8(i);
+    case 0x9: return mmio_r43x9(i);
+    case 0xa: return mmio_r43xa(i);
+    case 0xb: return mmio_r43xb(i);
+    case 0xc: return regs.mdr; //unmapped
+    case 0xd: return regs.mdr; //unmapped
+    case 0xe: return regs.mdr; //unmapped
+    case 0xf: return mmio_r43xb(i); //mirror of 43xb
     }
   }
 
   switch(addr) {
-  case 0x2180:return cpu->mmio_r2180(); //WMDATA
-  case 0x4016:return cpu->mmio_r4016(); //JOYSER0
-  case 0x4017:return cpu->mmio_r4017(); //JOYSER1
-  case 0x4210:return cpu->mmio_r4210(); //RDNMI
-  case 0x4211:return cpu->mmio_r4211(); //TIMEUP
-  case 0x4212:return cpu->mmio_r4212(); //HVBJOY
-  case 0x4213:return cpu->mmio_r4213(); //RDIO
-  case 0x4214:return cpu->mmio_r4214(); //RDDIVL
-  case 0x4215:return cpu->mmio_r4215(); //RDDIVH
-  case 0x4216:return cpu->mmio_r4216(); //RDMPYL
-  case 0x4217:return cpu->mmio_r4217(); //RDMPYH
-  case 0x4218:return cpu->mmio_r4218(); //JOY1L
-  case 0x4219:return cpu->mmio_r4219(); //JOY1H
-  case 0x421a:return cpu->mmio_r421a(); //JOY2L
-  case 0x421b:return cpu->mmio_r421b(); //JOY2H
-  case 0x421c:case 0x421d:case 0x421e:case 0x421f:return 0x00;
+  case 0x2180: return mmio_r2180(); //WMDATA
+  case 0x4016: return mmio_r4016(); //JOYSER0
+  case 0x4017: return mmio_r4017(); //JOYSER1
+  case 0x4210: return mmio_r4210(); //RDNMI
+  case 0x4211: return mmio_r4211(); //TIMEUP
+  case 0x4212: return mmio_r4212(); //HVBJOY
+  case 0x4213: return mmio_r4213(); //RDIO
+  case 0x4214: return mmio_r4214(); //RDDIVL
+  case 0x4215: return mmio_r4215(); //RDDIVH
+  case 0x4216: return mmio_r4216(); //RDMPYL
+  case 0x4217: return mmio_r4217(); //RDMPYH
+  case 0x4218: return mmio_r4218(); //JOY1L
+  case 0x4219: return mmio_r4219(); //JOY1H
+  case 0x421a: return mmio_r421a(); //JOY2L
+  case 0x421b: return mmio_r421b(); //JOY2H
+  case 0x421c: return 0x00;
+  case 0x421d: return 0x00;
+  case 0x421e: return 0x00;
+  case 0x421f: return 0x00;
   }
 
-  return cpu->regs.mdr;
+  return regs.mdr;
 }
 
 //WMDATA
@@ -398,19 +407,16 @@ void bCPU::mmio_w2183(uint8 value) {
 }
 
 //JOYSER0
+//bit 0 is shared between JOYSER0 and JOYSER1, therefore
+//strobing $4016.d0 affects both controller port latches.
+//$4017 bit 0 writes are ignored.
 void bCPU::mmio_w4016(uint8 value) {
-  status.joypad1_strobe_value = !!(value & 1);
-  if(value == 1) {
-    snes->poll_input(SNES::DEV_JOYPAD1);
-    status.joypad1_read_pos = 0;
-  }
-}
+  status.joypad_strobe_latch = !!(value & 1);
 
-//JOYSER1
-void bCPU::mmio_w4017(uint8 value) {
-  status.joypad2_strobe_value = !!(value & 1);
-  if(value == 1) {
+  if(status.joypad_strobe_latch == 1) {
+    snes->poll_input(SNES::DEV_JOYPAD1);
     snes->poll_input(SNES::DEV_JOYPAD2);
+    status.joypad1_read_pos = 0;
     status.joypad2_read_pos = 0;
   }
 }
@@ -505,12 +511,11 @@ int len;
     status.dma_state = DMASTATE_DMASYNC;
   }
 
-  for(int i=0;i<8;i++) {
+  for(int i = 0; i < 8; i++) {
     if(value & (1 << i)) {
-      channel[i].active       = true;
-      channel[i].hdma_enabled = false;
-      channel[i].hdma_active  = false;
-      channel[i].read_index   = 0;
+    //DMA enable does not disable active HDMA channels
+      channel[i].active     = true;
+      channel[i].read_index = 0;
     }
   }
 }
@@ -593,61 +598,56 @@ void bCPU::mmio_w43xb(uint8 value, uint8 i) {
   channel[i].hdma_unknown = value;
 }
 
-void bCPUMMIO::write(uint32 addr, uint8 value) {
-uint8 i;
+void bCPU::mmio_write(uint16 addr, uint8 data) {
 //APU
   if(addr >= 0x2140 && addr <= 0x217f) {
-    cpu->port_write(addr & 3, value);
+    port_write(addr & 3, data);
     return;
   }
 
 //HDMA
   if(addr >= 0x4300 && addr <= 0x437f) {
-    i = (addr >> 4) & 7;
+  uint i = (addr >> 4) & 7;
     switch(addr & 0xf) {
-    case 0x0:cpu->mmio_w43x0(value, i);return;
-    case 0x1:cpu->mmio_w43x1(value, i);return;
-    case 0x2:cpu->mmio_w43x2(value, i);return;
-    case 0x3:cpu->mmio_w43x3(value, i);return;
-    case 0x4:cpu->mmio_w43x4(value, i);return;
-    case 0x5:cpu->mmio_w43x5(value, i);return;
-    case 0x6:cpu->mmio_w43x6(value, i);return;
-    case 0x7:cpu->mmio_w43x7(value, i);return;
-    case 0x8:cpu->mmio_w43x8(value, i);return;
-    case 0x9:cpu->mmio_w43x9(value, i);return;
-    case 0xa:cpu->mmio_w43xa(value, i);return;
-    case 0xb:cpu->mmio_w43xb(value, i);return;
-    case 0xc:return; //unmapped
-    case 0xd:return; //unmapped
-    case 0xe:return; //unmapped
-    case 0xf:cpu->mmio_w43xb(value, i);return; //mirror of 43xb
+    case 0x0: mmio_w43x0(data, i); return;
+    case 0x1: mmio_w43x1(data, i); return;
+    case 0x2: mmio_w43x2(data, i); return;
+    case 0x3: mmio_w43x3(data, i); return;
+    case 0x4: mmio_w43x4(data, i); return;
+    case 0x5: mmio_w43x5(data, i); return;
+    case 0x6: mmio_w43x6(data, i); return;
+    case 0x7: mmio_w43x7(data, i); return;
+    case 0x8: mmio_w43x8(data, i); return;
+    case 0x9: mmio_w43x9(data, i); return;
+    case 0xa: mmio_w43xa(data, i); return;
+    case 0xb: mmio_w43xb(data, i); return;
+    case 0xc: return; //unmapped
+    case 0xd: return; //unmapped
+    case 0xe: return; //unmapped
+    case 0xf: mmio_w43xb(data, i); return; //mirror of 43xb
     }
   }
 
   switch(addr) {
-  case 0x2180:cpu->mmio_w2180(value);return; //WMDATA
-  case 0x2181:cpu->mmio_w2181(value);return; //WMADDL
-  case 0x2182:cpu->mmio_w2182(value);return; //WMADDM
-  case 0x2183:cpu->mmio_w2183(value);return; //WMADDH
-  case 0x4016:cpu->mmio_w4016(value);return; //JOYSER0
-  case 0x4017:cpu->mmio_w4017(value);return; //JOYSER1
-  case 0x4200:cpu->mmio_w4200(value);return; //NMITIMEN
-  case 0x4201:cpu->mmio_w4201(value);return; //WRIO
-  case 0x4202:cpu->mmio_w4202(value);return; //WRMPYA
-  case 0x4203:cpu->mmio_w4203(value);return; //WRMPYB
-  case 0x4204:cpu->mmio_w4204(value);return; //WRDIVL
-  case 0x4205:cpu->mmio_w4205(value);return; //WRDIVH
-  case 0x4206:cpu->mmio_w4206(value);return; //WRDIVB
-  case 0x4207:cpu->mmio_w4207(value);return; //HTIMEL
-  case 0x4208:cpu->mmio_w4208(value);return; //HTIMEH
-  case 0x4209:cpu->mmio_w4209(value);return; //VTIMEL
-  case 0x420a:cpu->mmio_w420a(value);return; //VTIMEH
-  case 0x420b:cpu->mmio_w420b(value);return; //DMAEN
-  case 0x420c:cpu->mmio_w420c(value);return; //HDMAEN
-  case 0x420d:cpu->mmio_w420d(value);return; //MEMSEL
+  case 0x2180: mmio_w2180(data); return; //WMDATA
+  case 0x2181: mmio_w2181(data); return; //WMADDL
+  case 0x2182: mmio_w2182(data); return; //WMADDM
+  case 0x2183: mmio_w2183(data); return; //WMADDH
+  case 0x4016: mmio_w4016(data); return; //JOYSER0
+  case 0x4017: return; //unmapped
+  case 0x4200: mmio_w4200(data); return; //NMITIMEN
+  case 0x4201: mmio_w4201(data); return; //WRIO
+  case 0x4202: mmio_w4202(data); return; //WRMPYA
+  case 0x4203: mmio_w4203(data); return; //WRMPYB
+  case 0x4204: mmio_w4204(data); return; //WRDIVL
+  case 0x4205: mmio_w4205(data); return; //WRDIVH
+  case 0x4206: mmio_w4206(data); return; //WRDIVB
+  case 0x4207: mmio_w4207(data); return; //HTIMEL
+  case 0x4208: mmio_w4208(data); return; //HTIMEH
+  case 0x4209: mmio_w4209(data); return; //VTIMEL
+  case 0x420a: mmio_w420a(data); return; //VTIMEH
+  case 0x420b: mmio_w420b(data); return; //DMAEN
+  case 0x420c: mmio_w420c(data); return; //HDMAEN
+  case 0x420d: mmio_w420d(data); return; //MEMSEL
   }
-}
-
-bCPUMMIO::bCPUMMIO(bCPU *_cpu) {
-  cpu = _cpu;
 }

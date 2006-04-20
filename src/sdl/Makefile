@@ -3,7 +3,7 @@ CXX = c++
 CFLAGS = -O3 -fomit-frame-pointer -ffast-math
 CXXFLAGS = $(CFLAGS) -fno-rtti
 OBJS = sdlmain.o \
-       libstring.o libconfig.o \
+       libstring.o libconfig.o libbpf.o \
        reader.o cart.o \
        memory.o bmemory.o \
        cpu.o bcpu.o \
@@ -35,6 +35,8 @@ libstring.o: ../lib/*.cpp ../lib/*.h
 	$(CXX) $(CXXFLAGS) -c ../lib/libstring.cpp
 libconfig.o: ../lib/*.cpp ../lib/*.h
 	$(CXX) $(CXXFLAGS) -c ../lib/libconfig.cpp
+libbpf.o: ../lib/*.cpp ../lib/*.h
+	$(CXX) $(CXXFLAGS) -c ../lib/libbpf.cpp
 
 ##############
 ### memory ###
