@@ -17,15 +17,20 @@ uint8  mask[0x200000];
 
   inline bool enabled() { return cheat_enabled; }
   inline uint count() { return cheat_count; }
-  inline bool exists(uint32 addr) { return !!(mask[addr >> 3] & 1 << (addr & 7)); }
-  inline void set(uint32 addr) { mask[addr >> 3] |= 1 << (addr & 7); }
-  inline void clear(uint32 addr) { mask[addr >> 3] &= ~(1 << (addr & 7)); }
+  inline bool exists(uint32 addr) { return bool(mask[addr >> 3] & 1 << (addr & 7)); }
 
   bool  decode(char *str, uint32 &addr, uint8 &data, uint8 &type);
   bool  encode(char *str, uint32  addr, uint8  data, uint8  type);
 
+private:
+  uint  mirror_address(uint addr);
+  void  set(uint32 addr);
+  void  clear(uint32 addr);
+public:
+
+  bool  read(uint32 addr, uint8 &data);
+
   void  update_cheat_status();
-  uint8 read(uint32 addr);
   bool  add(bool enable, char *code, char *desc);
   bool  edit(uint32 n, bool enable, char *code, char *desc);
   bool  get(uint32 n, bool &enable, uint32 &addr, uint8 &data, char *code, char *desc);

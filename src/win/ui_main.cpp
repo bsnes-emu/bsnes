@@ -171,21 +171,10 @@ bool MainWindow::Event(EventInfo &info) {
       SetFrameskip(info.control_id - MENU_SETTINGS_FRAMESKIP_0);
     } break;
 
-    case MENU_SETTINGS_VIDEO_OPTIONS_USEVRAM: {
-      config::video.use_vram.toggle();
-      event::set_video_profile(config::video.profile);
-      CheckMenuItem(MENU_SETTINGS_VIDEO_OPTIONS_USEVRAM, config::video.use_vram);
-    } break;
-
-    case MENU_SETTINGS_VIDEO_OPTIONS_TRIPLEBUF: {
-      config::video.triple_buffering.toggle();
-      CheckMenuItem(MENU_SETTINGS_VIDEO_OPTIONS_TRIPLEBUF, config::video.triple_buffering);
-    } break;
-
-    case MENU_SETTINGS_VIDEO_OPTIONS_SHOWFPS: {
+    case MENU_SETTINGS_SHOWFPS: {
       config::misc.show_fps.toggle();
       SetWindowText(hwnd, BSNES_TITLE);
-      CheckMenuItem(MENU_SETTINGS_VIDEO_OPTIONS_SHOWFPS, config::misc.show_fps);
+      CheckMenuItem(MENU_SETTINGS_SHOWFPS, config::misc.show_fps);
     } break;
 
     case MENU_SETTINGS_MUTE: {
@@ -286,11 +275,7 @@ char t[128];
       AddMenuItem(MENU_SETTINGS_FRAMESKIP_9, "&9");
     EndMenuGroup();
 
-    AddMenuGroup("&Video Options");
-      AddMenuItem(MENU_SETTINGS_VIDEO_OPTIONS_USEVRAM,   "Use &Video Memory Surface");
-      AddMenuItem(MENU_SETTINGS_VIDEO_OPTIONS_TRIPLEBUF, "Use &Triple Buffering");
-      AddMenuItem(MENU_SETTINGS_VIDEO_OPTIONS_SHOWFPS,   "&Show FPS");
-    EndMenuGroup();
+    AddMenuItem(MENU_SETTINGS_SHOWFPS, "&Show FPS");
 
     AddMenuSeparator();
     AddMenuItem(MENU_SETTINGS_MUTE, "&Mute Sound Output");
@@ -299,20 +284,15 @@ char t[128];
     AddMenuGroup("&Speed Regulation");
       AddMenuItem(MENU_SETTINGS_SPEED_REGULATION_ENABLE, "&Enable");
       AddMenuSeparator();
-      sprintf(t, "&Slowest (%d%%, %dhz)", uint(100.0 * (double(config::system.speed_slowest) / 32000.0)),
-        uint(config::system.speed_slowest));
+      sprintf(t, "&Slowest (%d%%)", uint(100.0 * (double(config::system.speed_slowest) / 32000.0)));
       AddMenuItem(MENU_SETTINGS_SPEED_REGULATION_SLOWEST, t);
-      sprintf(t, "&Slow (%d%%, %dhz)", uint(100.0 * (double(config::system.speed_slow) / 32000.0)),
-        uint(config::system.speed_slow));
+      sprintf(t, "&Slow (%d%%)", uint(100.0 * (double(config::system.speed_slow) / 32000.0)));
       AddMenuItem(MENU_SETTINGS_SPEED_REGULATION_SLOW, t);
-      sprintf(t, "&Normal (%d%%, %dhz)", uint(100.0 * (double(config::system.speed_normal) / 32000.0)),
-        uint(config::system.speed_normal));
+      sprintf(t, "&Normal (%d%%)", uint(100.0 * (double(config::system.speed_normal) / 32000.0)));
       AddMenuItem(MENU_SETTINGS_SPEED_REGULATION_NORMAL, t);
-      sprintf(t, "&Fast (%d%%, %dhz)", uint(100.0 * (double(config::system.speed_fast) / 32000.0)),
-        uint(config::system.speed_fast));
+      sprintf(t, "&Fast (%d%%)", uint(100.0 * (double(config::system.speed_fast) / 32000.0)));
       AddMenuItem(MENU_SETTINGS_SPEED_REGULATION_FAST, t);
-      sprintf(t, "&Fastest (%d%%, %dhz)", uint(100.0 * (double(config::system.speed_fastest) / 32000.0)),
-        uint(config::system.speed_fastest));
+      sprintf(t, "&Fastest (%d%%)", uint(100.0 * (double(config::system.speed_fastest) / 32000.0)));
       AddMenuItem(MENU_SETTINGS_SPEED_REGULATION_FASTEST, t);
     EndMenuGroup();
 
@@ -331,9 +311,7 @@ char t[128];
 
   ShowMenu();
 
-  CheckMenuItem(MENU_SETTINGS_VIDEO_OPTIONS_USEVRAM,   config::video.use_vram);
-  CheckMenuItem(MENU_SETTINGS_VIDEO_OPTIONS_TRIPLEBUF, config::video.triple_buffering);
-  CheckMenuItem(MENU_SETTINGS_VIDEO_OPTIONS_SHOWFPS,   config::misc.show_fps);
+  CheckMenuItem(MENU_SETTINGS_SHOWFPS,                 config::misc.show_fps);
   CheckMenuItem(MENU_SETTINGS_MUTE,                    config::snes.mute);
   CheckMenuItem(MENU_SETTINGS_SPEED_REGULATION_ENABLE, config::system.regulate_speed);
 

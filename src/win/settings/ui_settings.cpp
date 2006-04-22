@@ -27,8 +27,8 @@ bool SettingsWindow::Event(EventInfo &info) {
 
 void SettingsWindow::Show() {
   settings.show_active_panel();
-  SetFocus(Panel.hwnd);
   Window::Show();
+  Panel.Focus();
 }
 
 void SettingsWindow::Hide() {
@@ -39,7 +39,7 @@ void SettingsWindow::Hide() {
 void SettingsWindow::Setup() {
   Panel.Create(this, "visible|edge", 5, 5, 150, 360,
     "Video Settings|"
-    "Color Adjust|"
+    "Color Adjustment|"
     "Raster Settings|"
     "|"
     "Input Configuration|"

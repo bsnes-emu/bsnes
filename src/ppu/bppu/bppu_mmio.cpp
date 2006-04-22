@@ -67,7 +67,7 @@ uint16 hc = r_cpu->hcycles();
 
 //INIDISP
 void bPPU::mmio_w2100(uint8 value) {
-  regs.display_disabled   = !!(value & 0x80);
+  regs.display_disabled   = bool(value & 0x80);
   regs.display_brightness = value & 15;
 }
 
@@ -86,7 +86,7 @@ void bPPU::mmio_w2102(uint8 value) {
 
 //OAMADDH
 void bPPU::mmio_w2103(uint8 value) {
-  regs.oam_priority = !!(value & 0x80);
+  regs.oam_priority = bool(value & 0x80);
   regs.oam_baseaddr = ((value & 1) << 8) | (regs.oam_baseaddr & 0xff);
   regs.oam_addr     = regs.oam_baseaddr << 1;
 }
@@ -110,11 +110,11 @@ void bPPU::mmio_w2104(uint8 value) {
 
 //BGMODE
 void bPPU::mmio_w2105(uint8 value) {
-  regs.bg_tilesize[BG4] = !!(value & 0x80);
-  regs.bg_tilesize[BG3] = !!(value & 0x40);
-  regs.bg_tilesize[BG2] = !!(value & 0x20);
-  regs.bg_tilesize[BG1] = !!(value & 0x10);
-  regs.bg3_priority     = !!(value & 0x08);
+  regs.bg_tilesize[BG4] = bool(value & 0x80);
+  regs.bg_tilesize[BG3] = bool(value & 0x40);
+  regs.bg_tilesize[BG2] = bool(value & 0x20);
+  regs.bg_tilesize[BG1] = bool(value & 0x10);
+  regs.bg3_priority     = bool(value & 0x08);
   regs.bg_mode          = (value & 7);
   regs.hires            = (regs.bg_mode == 5 || regs.bg_mode == 6);
 }
@@ -122,10 +122,10 @@ void bPPU::mmio_w2105(uint8 value) {
 //MOSAIC
 void bPPU::mmio_w2106(uint8 value) {
   regs.mosaic_size         = (value >> 4) & 15;
-  regs.mosaic_enabled[BG4] = !!(value & 0x08);
-  regs.mosaic_enabled[BG3] = !!(value & 0x04);
-  regs.mosaic_enabled[BG2] = !!(value & 0x02);
-  regs.mosaic_enabled[BG1] = !!(value & 0x01);
+  regs.mosaic_enabled[BG4] = bool(value & 0x08);
+  regs.mosaic_enabled[BG3] = bool(value & 0x04);
+  regs.mosaic_enabled[BG2] = bool(value & 0x02);
+  regs.mosaic_enabled[BG1] = bool(value & 0x01);
 }
 
 //BG1SC
@@ -220,7 +220,7 @@ void bPPU::mmio_w2114(uint8 value) {
 
 //VMAIN
 void bPPU::mmio_w2115(uint8 value) {
-  regs.vram_incmode = !!(value & 0x80);
+  regs.vram_incmode = bool(value & 0x80);
   regs.vram_mapping = (value >> 2) & 3;
   switch(value & 3) {
   case 0:regs.vram_incsize =   1;break;
@@ -287,8 +287,8 @@ uint16 addr = get_vram_address() + 1;
 //M7SEL
 void bPPU::mmio_w211a(uint8 value) {
   regs.mode7_repeat = (value >> 6) & 3;
-  regs.mode7_vflip  = !!(value & 0x02);
-  regs.mode7_hflip  = !!(value & 0x01);
+  regs.mode7_vflip  = bool(value & 0x02);
+  regs.mode7_hflip  = bool(value & 0x01);
 }
 
 //M7A
@@ -347,38 +347,38 @@ void bPPU::mmio_w2122(uint8 value) {
 
 //W12SEL
 void bPPU::mmio_w2123(uint8 value) {
-  regs.window2_enabled[BG2] = !!(value & 0x80);
-  regs.window2_invert [BG2] = !!(value & 0x40);
-  regs.window1_enabled[BG2] = !!(value & 0x20);
-  regs.window1_invert [BG2] = !!(value & 0x10);
-  regs.window2_enabled[BG1] = !!(value & 0x08);
-  regs.window2_invert [BG1] = !!(value & 0x04);
-  regs.window1_enabled[BG1] = !!(value & 0x02);
-  regs.window1_invert [BG1] = !!(value & 0x01);
+  regs.window2_enabled[BG2] = bool(value & 0x80);
+  regs.window2_invert [BG2] = bool(value & 0x40);
+  regs.window1_enabled[BG2] = bool(value & 0x20);
+  regs.window1_invert [BG2] = bool(value & 0x10);
+  regs.window2_enabled[BG1] = bool(value & 0x08);
+  regs.window2_invert [BG1] = bool(value & 0x04);
+  regs.window1_enabled[BG1] = bool(value & 0x02);
+  regs.window1_invert [BG1] = bool(value & 0x01);
 }
 
 //W34SEL
 void bPPU::mmio_w2124(uint8 value) {
-  regs.window2_enabled[BG4] = !!(value & 0x80);
-  regs.window2_invert [BG4] = !!(value & 0x40);
-  regs.window1_enabled[BG4] = !!(value & 0x20);
-  regs.window1_invert [BG4] = !!(value & 0x10);
-  regs.window2_enabled[BG3] = !!(value & 0x08);
-  regs.window2_invert [BG3] = !!(value & 0x04);
-  regs.window1_enabled[BG3] = !!(value & 0x02);
-  regs.window1_invert [BG3] = !!(value & 0x01);
+  regs.window2_enabled[BG4] = bool(value & 0x80);
+  regs.window2_invert [BG4] = bool(value & 0x40);
+  regs.window1_enabled[BG4] = bool(value & 0x20);
+  regs.window1_invert [BG4] = bool(value & 0x10);
+  regs.window2_enabled[BG3] = bool(value & 0x08);
+  regs.window2_invert [BG3] = bool(value & 0x04);
+  regs.window1_enabled[BG3] = bool(value & 0x02);
+  regs.window1_invert [BG3] = bool(value & 0x01);
 }
 
 //WOBJSEL
 void bPPU::mmio_w2125(uint8 value) {
-  regs.window2_enabled[COL] = !!(value & 0x80);
-  regs.window2_invert [COL] = !!(value & 0x40);
-  regs.window1_enabled[COL] = !!(value & 0x20);
-  regs.window1_invert [COL] = !!(value & 0x10);
-  regs.window2_enabled[OAM] = !!(value & 0x08);
-  regs.window2_invert [OAM] = !!(value & 0x04);
-  regs.window1_enabled[OAM] = !!(value & 0x02);
-  regs.window1_invert [OAM] = !!(value & 0x01);
+  regs.window2_enabled[COL] = bool(value & 0x80);
+  regs.window2_invert [COL] = bool(value & 0x40);
+  regs.window1_enabled[COL] = bool(value & 0x20);
+  regs.window1_invert [COL] = bool(value & 0x10);
+  regs.window2_enabled[OAM] = bool(value & 0x08);
+  regs.window2_invert [OAM] = bool(value & 0x04);
+  regs.window1_enabled[OAM] = bool(value & 0x02);
+  regs.window1_invert [OAM] = bool(value & 0x01);
 }
 
 //WH0
@@ -417,58 +417,58 @@ void bPPU::mmio_w212b(uint8 value) {
 
 //TM
 void bPPU::mmio_w212c(uint8 value) {
-  regs.bg_enabled[OAM] = !!(value & 0x10);
-  regs.bg_enabled[BG4] = !!(value & 0x08);
-  regs.bg_enabled[BG3] = !!(value & 0x04);
-  regs.bg_enabled[BG2] = !!(value & 0x02);
-  regs.bg_enabled[BG1] = !!(value & 0x01);
+  regs.bg_enabled[OAM] = bool(value & 0x10);
+  regs.bg_enabled[BG4] = bool(value & 0x08);
+  regs.bg_enabled[BG3] = bool(value & 0x04);
+  regs.bg_enabled[BG2] = bool(value & 0x02);
+  regs.bg_enabled[BG1] = bool(value & 0x01);
 }
 
 //TS
 void bPPU::mmio_w212d(uint8 value) {
-  regs.bgsub_enabled[OAM] = !!(value & 0x10);
-  regs.bgsub_enabled[BG4] = !!(value & 0x08);
-  regs.bgsub_enabled[BG3] = !!(value & 0x04);
-  regs.bgsub_enabled[BG2] = !!(value & 0x02);
-  regs.bgsub_enabled[BG1] = !!(value & 0x01);
+  regs.bgsub_enabled[OAM] = bool(value & 0x10);
+  regs.bgsub_enabled[BG4] = bool(value & 0x08);
+  regs.bgsub_enabled[BG3] = bool(value & 0x04);
+  regs.bgsub_enabled[BG2] = bool(value & 0x02);
+  regs.bgsub_enabled[BG1] = bool(value & 0x01);
 }
 
 //TMW
 void bPPU::mmio_w212e(uint8 value) {
-  regs.window_enabled[OAM] = !!(value & 0x10);
-  regs.window_enabled[BG4] = !!(value & 0x08);
-  regs.window_enabled[BG3] = !!(value & 0x04);
-  regs.window_enabled[BG2] = !!(value & 0x02);
-  regs.window_enabled[BG1] = !!(value & 0x01);
+  regs.window_enabled[OAM] = bool(value & 0x10);
+  regs.window_enabled[BG4] = bool(value & 0x08);
+  regs.window_enabled[BG3] = bool(value & 0x04);
+  regs.window_enabled[BG2] = bool(value & 0x02);
+  regs.window_enabled[BG1] = bool(value & 0x01);
 }
 
 //TSW
 void bPPU::mmio_w212f(uint8 value) {
-  regs.sub_window_enabled[OAM] = !!(value & 0x10);
-  regs.sub_window_enabled[BG4] = !!(value & 0x08);
-  regs.sub_window_enabled[BG3] = !!(value & 0x04);
-  regs.sub_window_enabled[BG2] = !!(value & 0x02);
-  regs.sub_window_enabled[BG1] = !!(value & 0x01);
+  regs.sub_window_enabled[OAM] = bool(value & 0x10);
+  regs.sub_window_enabled[BG4] = bool(value & 0x08);
+  regs.sub_window_enabled[BG3] = bool(value & 0x04);
+  regs.sub_window_enabled[BG2] = bool(value & 0x02);
+  regs.sub_window_enabled[BG1] = bool(value & 0x01);
 }
 
 //CGWSEL
 void bPPU::mmio_w2130(uint8 value) {
   regs.color_mask    = (value >> 6) & 3;
   regs.colorsub_mask = (value >> 4) & 3;
-  regs.addsub_mode   = !!(value & 0x02);
-  regs.direct_color  = !!(value & 0x01);
+  regs.addsub_mode   = bool(value & 0x02);
+  regs.direct_color  = bool(value & 0x01);
 }
 
 //CGADDSUB
 void bPPU::mmio_w2131(uint8 value) {
-  regs.color_mode          = !!(value & 0x80);
-  regs.color_halve         = !!(value & 0x40);
-  regs.color_enabled[BACK] = !!(value & 0x20);
-  regs.color_enabled[OAM]  = !!(value & 0x10);
-  regs.color_enabled[BG4]  = !!(value & 0x08);
-  regs.color_enabled[BG3]  = !!(value & 0x04);
-  regs.color_enabled[BG2]  = !!(value & 0x02);
-  regs.color_enabled[BG1]  = !!(value & 0x01);
+  regs.color_mode          = bool(value & 0x80);
+  regs.color_halve         = bool(value & 0x40);
+  regs.color_enabled[BACK] = bool(value & 0x20);
+  regs.color_enabled[OAM]  = bool(value & 0x10);
+  regs.color_enabled[BG4]  = bool(value & 0x08);
+  regs.color_enabled[BG3]  = bool(value & 0x04);
+  regs.color_enabled[BG2]  = bool(value & 0x02);
+  regs.color_enabled[BG1]  = bool(value & 0x01);
 }
 
 //COLDATA
@@ -482,11 +482,11 @@ void bPPU::mmio_w2132(uint8 value) {
 
 //SETINI
 void bPPU::mmio_w2133(uint8 value) {
-  regs.mode7_extbg   = !!(value & 0x40);
-  regs.pseudo_hires  = !!(value & 0x08);
-  regs.overscan      = !!(value & 0x04);
-  regs.oam_interlace = !!(value & 0x02);
-  regs.interlace     = !!(value & 0x01);
+  regs.mode7_extbg   = bool(value & 0x40);
+  regs.pseudo_hires  = bool(value & 0x08);
+  regs.overscan      = bool(value & 0x04);
+  regs.oam_interlace = bool(value & 0x02);
+  regs.interlace     = bool(value & 0x01);
 
   r_cpu->set_overscan(regs.overscan);
 }

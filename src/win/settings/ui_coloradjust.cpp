@@ -54,7 +54,7 @@ bool ColorAdjustWindow::Event(EventInfo &info) {
 }
 
 void ColorAdjustWindow::Setup() {
-  Header.Create(this, "visible", 0, 0, 475, 30, "Color Adjust");
+  Header.Create(this, "visible", 0, 0, 475, 30, "Color Adjustment");
   Header.SetFont(global::font_header);
 
 int x = 15, y = 30;

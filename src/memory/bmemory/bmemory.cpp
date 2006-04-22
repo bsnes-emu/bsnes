@@ -106,7 +106,7 @@ uint8 r;
 #ifdef CHEAT_SYSTEM
   if(cheat.enabled()) {
     if(cheat.exists(addr)) {
-      return cheat.read(addr);
+      if(cheat.read(addr, r) == true)return r;
     }
   }
 #endif

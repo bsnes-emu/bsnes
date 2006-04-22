@@ -1,5 +1,5 @@
 /*
-  libbase : version 0.06 ~byuu (02/18/06)
+  libbase : version 0.07 ~byuu (04/21/06)
 */
 
 #ifndef __LIBBASE
@@ -12,12 +12,12 @@
 #include <time.h>
 #include <math.h>
 
-#ifndef TRUE
-#define TRUE 1
-#endif
-
 #ifndef FALSE
 #define FALSE 0
+#endif
+
+#ifndef TRUE
+#define TRUE 1
 #endif
 
 #define SafeFree(__n)    if(__n) { free(__n);      __n = 0; }
@@ -41,6 +41,16 @@ typedef signed char        int8;
 typedef signed short       int16;
 typedef signed long        int32;
 typedef signed long long   int64;
+
+template<typename T> void swap(T &x, T &y) {
+T z = x;
+  x = y;
+  y = z;
+}
+
+template<typename T, typename Targ> T bound_range(T &x, Targ min, Targ max) {
+  return (x < T(min)) ? T(min) : (x > T(max)) ? T(max) : x;
+}
 
 inline bool fexists(const char *fn) {
 FILE *fp = fopen(fn, "rb");

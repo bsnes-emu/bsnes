@@ -1,11 +1,18 @@
 #include "../base.h"
 
+/*****
+ * string <> binary code translation routines
+ * decode() "7e1234:56" ->  0x7e123456
+ * encode()  0x7e123456 -> "7e1234:56"
+ *****/
+
 bool Cheat::decode(char *str, uint32 &addr, uint8 &data, uint8 &type) {
 string t, part;
   strcpy(t, str);
   strlower(t);
-  if(strlen(t) == 8) {
+  if(strlen(t) == 8 || (strlen(t) == 9 && strptr(t)[6] == ':')) {
     type = CT_PRO_ACTION_REPLAY;
+    replace(t, ":", "");
   uint32 r = strhex(t);
     addr = r >> 8;
     data = r & 0xff;
@@ -38,7 +45,7 @@ string t, part;
 
 bool Cheat::encode(char *str, uint32 addr, uint8 data, uint8 type) {
   if(type == CT_PRO_ACTION_REPLAY) {
-    sprintf(str, "%0.6x%0.2x", addr, data);
+    sprintf(str, "%0.6x:%0.2x", addr, data);
     return true;
   } else if(type == CT_GAME_GENIE) {
   uint32 r = addr;
@@ -61,8 +68,83 @@ bool Cheat::encode(char *str, uint32 addr, uint8 data, uint8 type) {
   return false;
 }
 
-//enable cheat system when at least one cheat is enabled,
-//disable otherwise to speed up emulation
+/*****
+ * address lookup table manipulation and mirroring
+ * mirror_address() 0x000000 -> 0x7e0000
+ * set() enable specified address, mirror accordingly
+ * clear() disable specified address, mirror accordingly
+ *****/
+
+uint Cheat::mirror_address(uint addr) {
+  if((addr & 0x40e000) != 0x0000)return addr;
+//8k WRAM mirror
+//$[00-3f|80-bf]:[0000-1fff] -> $7e:[0000-1fff]
+  return (0x7e0000 + (addr & 0x1fff));
+}
+
+void Cheat::set(uint32 addr) {
+  addr = mirror_address(addr);
+
+  mask[addr >> 3] |= 1 << (addr & 7);
+  if((addr & 0xffe000) == 0x7e0000) {
+  //mirror $7e:[0000-1fff] to $[00-3f|80-bf]:[0000-1fff]
+  uint mirror;
+    for(int x = 0; x <= 0x3f; x++) {
+      mirror = ((0x00 + x) << 16) + (addr & 0x1fff);
+      mask[mirror >> 3] |= 1 << (mirror & 7);
+      mirror = ((0x80 + x) << 16) + (addr & 0x1fff);
+      mask[mirror >> 3] |= 1 << (mirror & 7);
+    }
+  }
+}
+
+void Cheat::clear(uint32 addr) {
+  addr = mirror_address(addr);
+
+//is there more than one cheat code using the same address
+//(and likely a different override value) that is enabled?
+//if so, do not clear code lookup table entry for this address.
+uint8 r;
+  if(read(addr, r) == true)return;
+
+  mask[addr >> 3] &= ~(1 << (addr & 7));
+  if((addr & 0xffe000) == 0x7e0000) {
+  //mirror $7e:[0000-1fff] to $[00-3f|80-bf]:[0000-1fff]
+  uint mirror;
+    for(int x = 0; x <= 0x3f; x++) {
+      mirror = ((0x00 + x) << 16) + (addr & 0x1fff);
+      mask[mirror >> 3] &= ~(1 << (mirror & 7));
+      mirror = ((0x80 + x) << 16) + (addr & 0x1fff);
+      mask[mirror >> 3] &= ~(1 << (mirror & 7));
+    }
+  }
+}
+
+/*****
+ * read() is used by MemBus::read() if Cheat::enabled(addr)
+ * returns true to look up cheat code.
+ * returns true if cheat code was found, false if it was not.
+ * when true, cheat code substitution value is stored in data.
+ *****/
+
+bool Cheat::read(uint32 addr, uint8 &data) {
+  addr = mirror_address(addr);
+  for(int i = 0; i < cheat_count; i++) {
+    if(enabled(i) == false)continue;
+    if(addr == mirror_address(index[i].addr)) {
+      data = index[i].data;
+      return true;
+    }
+  }
+//code not found, or code is disabled
+  return false;
+}
+
+/*****
+ * update_cheat_status() will scan to see if any codes are
+ * enabled. if any are, make sure the cheat system is on.
+ * otherwise, turn cheat system off to speed up emulation.
+ *****/
 void Cheat::update_cheat_status() {
   for(int i = 0; i < cheat_count; i++) {
     if(index[i].enabled) {
@@ -73,18 +155,9 @@ void Cheat::update_cheat_status() {
   cheat_enabled = false;
 }
 
-uint8 Cheat::read(uint32 addr) {
-  addr &= 0xffffff;
-  for(int i = 0; i < cheat_count; i++) {
-    if(index[i].addr == addr) {
-      return index[i].data;
-    }
-  }
-
-//cheat not found? disable and return 0
-  clear(addr);
-  return 0x00;
-}
+/*****
+ * cheat list manipulation routines
+ *****/
 
 bool Cheat::add(bool enable, char *code, char *desc) {
   if(cheat_count >= CHEAT_LIMIT)return false;
@@ -93,7 +166,6 @@ uint32 addr, len;
 uint8  data, type;
   if(decode(code, addr, data, type) == false)return false;
 
-  (enable) ? set(addr) : clear(addr);
   index[cheat_count].enabled = enable;
   index[cheat_count].addr = addr;
   index[cheat_count].data = data;
@@ -106,6 +178,7 @@ uint8  data, type;
   memcpy(index[cheat_count].desc, desc, len);
   index[cheat_count].desc[len] = 0;
   cheat_count++;
+  (enable) ? set(addr) : clear(addr);
 
   update_cheat_status();
   return true;
@@ -118,8 +191,11 @@ uint32 addr, len;
 uint8  data, type;
   if(decode(code, addr, data, type) == false)return false;
 
+//disable current code and clear from code lookup table
+  index[n].enabled = false;
   clear(index[n].addr);
-  set(addr);
+
+//update code and enable in code lookup table
   index[n].enabled = enable;
   index[n].addr = addr;
   index[n].data = data;
@@ -131,6 +207,7 @@ uint8  data, type;
   len = len > 128 ? 128 : len;
   memcpy(index[n].desc, desc, len);
   index[n].desc[len] = 0;
+  set(addr);
 
   update_cheat_status();
   return true;
@@ -162,6 +239,10 @@ bool Cheat::get(uint32 n, bool &enable, uint32 &addr, uint8 &data, char *code, c
   return true;
 }
 
+/*****
+ * code status modifier routines
+ *****/
+
 bool Cheat::enabled(uint32 n) {
   if(n >= cheat_count)return false;
   return index[n].enabled;
@@ -169,17 +250,21 @@ bool Cheat::enabled(uint32 n) {
 
 void Cheat::enable(uint32 n) {
   if(n >= cheat_count)return;
-  set(index[n].addr);
   index[n].enabled = true;
+  set(index[n].addr);
   update_cheat_status();
 }
 
 void Cheat::disable(uint32 n) {
   if(n >= cheat_count)return;
-  clear(index[n].addr);
   index[n].enabled = false;
+  clear(index[n].addr);
   update_cheat_status();
 }
+
+/*****
+ * cheat file manipulation routines
+ *****/
 
 bool Cheat::load(Reader *rf) {
   if(!rf->ready())return false;
@@ -226,6 +311,10 @@ char   t[4096];
   wf->write((uint8*)strptr(data), strlen(data));
   return true;
 }
+
+/*****
+ * initialization routines
+ *****/
 
 void Cheat::clear() {
   cheat_enabled = false;

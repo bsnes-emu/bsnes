@@ -147,18 +147,18 @@ int32 prev_x = -1, prev_y = -1;
 
       t = bg_get_tile(bg, mosaic_x, mosaic_y);
 
-      mirror_y  = !!(t & 0x8000);
-      mirror_x  = !!(t & 0x4000);
+      mirror_y  = bool(t & 0x8000);
+      mirror_x  = bool(t & 0x4000);
 
       tile_pri = (t & 0x2000) ? pri1_pos : pri0_pos;
       tile_num = t;
 
       if(tile_width  == 4) { //16x16 horizontal tile mirroring
-        if(!!(mosaic_x & 8) != mirror_x)tile_num++;
+        if(bool(mosaic_x & 8) != mirror_x)tile_num++;
       }
 
       if(tile_height == 4) { //16x16 vertical tile mirroring
-        if(!!(mosaic_y & 8) != mirror_y)tile_num += 16;
+        if(bool(mosaic_y & 8) != mirror_y)tile_num += 16;
       }
 
       tile_num &= 0x03ff;

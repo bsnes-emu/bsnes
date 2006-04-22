@@ -2,8 +2,8 @@ void bPPU::build_sprite_list() {
 uint8 *tableA = oam, *tableB = oam + 512;
 
   for(int i = 0; i < 128; i++) {
-  uint x    = !!(*tableB & (1 << ((i & 3) << 1))); //0x01, 0x04, 0x10, 0x40
-  bool size = !!(*tableB & (2 << ((i & 3) << 1))); //0x02, 0x08, 0x20, 0x80
+  uint x    = bool(*tableB & (1 << ((i & 3) << 1))); //0x01, 0x04, 0x10, 0x40
+  bool size = bool(*tableB & (2 << ((i & 3) << 1))); //0x02, 0x08, 0x20, 0x80
 
     switch(regs.oam_basesize) {
     case 0: sprite_list[i].width  = (!size) ?  8 : 16;
@@ -35,8 +35,8 @@ uint8 *tableA = oam, *tableB = oam + 512;
     sprite_list[i].x              = (x << 8) + tableA[0];
     sprite_list[i].y              = tableA[1] + 1;
     sprite_list[i].character      = tableA[2];
-    sprite_list[i].vflip          = !!(tableA[3] & 0x80);
-    sprite_list[i].hflip          = !!(tableA[3] & 0x40);
+    sprite_list[i].vflip          = bool(tableA[3] & 0x80);
+    sprite_list[i].hflip          = bool(tableA[3] & 0x40);
     sprite_list[i].priority       = (tableA[3] >> 4) & 3;
     sprite_list[i].palette        = (tableA[3] >> 1) & 7;
     sprite_list[i].use_nameselect = tableA[3] & 1;

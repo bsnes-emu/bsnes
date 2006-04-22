@@ -3,12 +3,12 @@ bool VideoSettingsWindow::Event(EventInfo &info) {
 
   case EVENT_CHANGED:
   case EVENT_CLICKED: {
-    if(info.control == &VideoProfile) {
-      LoadSettings(VideoProfile.GetSelection());
-    } else if(info.control == &WinProfile) {
+    if(info.control == &WinProfile) {
       config::video.profile_windowed_default = WinProfile.GetSelection();
     } else if(info.control == &FullProfile) {
       config::video.profile_fullscreen_default = FullProfile.GetSelection();
+    } else if(info.control == &VideoProfile) {
+      LoadSettings(VideoProfile.GetSelection());
     } else if(info.control == &ApplySettings) {
       SaveSettings(VideoProfile.GetSelection());
     } else if(info.control == &SelectProfile) {
@@ -74,9 +74,9 @@ char t[64 + 1];
 }
 
 void VideoSettingsWindow::Show() {
-  VideoProfile.SetSelection(config::video.profile);
   WinProfile.SetSelection(config::video.profile_windowed_default);
   FullProfile.SetSelection(config::video.profile_fullscreen_default);
+  VideoProfile.SetSelection(config::video.profile);
   LoadSettings(config::video.profile);
   Window::Show();
 }
@@ -86,12 +86,6 @@ void VideoSettingsWindow::Setup() {
   Header.SetFont(global::font_header);
 
 int x = 15, y = 30;
-  VideoProfileLabel.Create(this, "visible", x, y + 3, 135, 15, "Video profile to configure:");
-  VideoProfile.Create(this, "visible", x + 135, y, 90, 200,
-    "Profile 0|Profile 1|Profile 2|Profile 3|Profile 4|"
-    "Profile 5|Profile 6|Profile 7|Profile 8|Profile 9");
-  y += 25;
-
   WinProfileLabel.Create(this, "visible", x, y + 3, 135, 15, "Default windowed profile:");
   WinProfile.Create(this, "visible", x + 135, y, 90, 200,
     "Profile 0|Profile 1|Profile 2|Profile 3|Profile 4|"
@@ -103,16 +97,22 @@ int x = 15, y = 30;
     "Profile 5|Profile 6|Profile 7|Profile 8|Profile 9");
   y += 25;
 
+  VideoProfileLabel.Create(this, "visible", x, y + 3, 135, 15, "Video profile to configure:");
+  VideoProfile.Create(this, "visible", x + 135, y, 90, 200,
+    "Profile 0|Profile 1|Profile 2|Profile 3|Profile 4|"
+    "Profile 5|Profile 6|Profile 7|Profile 8|Profile 9");
+  y += 25;
+
   Separator1.Create(this, "visible|sunken", x, y + 5, 460, 3);
   y += 15;
 
   SoftwareFilterLabel.Create(this, "visible", x, y + 3, 85, 15, "Software filter:");
   SoftwareFilter.Create(this, "visible", x + 85, y, 140, 200,
-    "Direct|NTSC|HQ2x|Scale2x");
+    "None|NTSC|HQ2x|Scale2x");
 
   HardwareFilterLabel.Create(this, "visible", x + 235, y + 3, 85, 15, "Hardware filter:");
   HardwareFilter.Create(this, "visible", x + 320, y, 140, 200,
-    "Pixel|Bilinear");
+    "None|Bilinear");
   y += 25;
 
   VideoStandardLabel.Create(this, "visible", x, y + 3, 85, 15, "Video standard:");

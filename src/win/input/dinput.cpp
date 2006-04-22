@@ -161,8 +161,7 @@ void InputDI::set_status(uint8 device, uint8 button, bool status) {
     case SNES::JOYPAD_R:      joypad1.r      = status; break;
     case SNES::JOYPAD_SELECT: joypad1.select = status; break;
     case SNES::JOYPAD_START:  joypad1.start  = status; break;
-    }
-    break;
+    } break;
   case SNES::DEV_JOYPAD2:
     switch(button) {
     case SNES::JOYPAD_UP:     joypad2.up     = status; break;
@@ -177,8 +176,7 @@ void InputDI::set_status(uint8 device, uint8 button, bool status) {
     case SNES::JOYPAD_R:      joypad2.r      = status; break;
     case SNES::JOYPAD_SELECT: joypad2.select = status; break;
     case SNES::JOYPAD_START:  joypad2.start  = status; break;
-    }
-    break;
+    } break;
   }
 }
 

@@ -411,7 +411,7 @@ void bCPU::mmio_w2183(uint8 value) {
 //strobing $4016.d0 affects both controller port latches.
 //$4017 bit 0 writes are ignored.
 void bCPU::mmio_w4016(uint8 value) {
-  status.joypad_strobe_latch = !!(value & 1);
+  status.joypad_strobe_latch = bool(value & 1);
 
   if(status.joypad_strobe_latch == 1) {
     snes->poll_input(SNES::DEV_JOYPAD1);
@@ -423,10 +423,10 @@ void bCPU::mmio_w4016(uint8 value) {
 
 //NMITIMEN
 void bCPU::mmio_w4200(uint8 value) {
-  status.nmi_enabled      = !!(value & 0x80);
-  status.virq_enabled     = !!(value & 0x20);
-  status.hirq_enabled     = !!(value & 0x10);
-  status.auto_joypad_poll = !!(value & 0x01);
+  status.nmi_enabled      = bool(value & 0x80);
+  status.virq_enabled     = bool(value & 0x20);
+  status.hirq_enabled     = bool(value & 0x10);
+  status.auto_joypad_poll = bool(value & 0x01);
 
   if(time.nmi_read == 0) {
     if(time.nmi_line == 1 && !status.nmi_enabled == 0) {
@@ -522,9 +522,9 @@ int len;
 
 //HDMAEN
 void bCPU::mmio_w420c(uint8 value) {
-  for(int i=0;i<8;i++) {
-    channel[i].hdma_enabled = !!(value & (1 << i));
-    channel[i].hdma_active  = !!(value & (1 << i));
+  for(int i = 0; i < 8; i++) {
+    channel[i].hdma_enabled = bool(value & (1 << i));
+    channel[i].hdma_active  = bool(value & (1 << i));
   }
 }
 
@@ -536,10 +536,10 @@ void bCPU::mmio_w420d(uint8 value) {
 //DMAPx
 void bCPU::mmio_w43x0(uint8 value, uint8 i) {
   channel[i].dmap          = value;
-  channel[i].direction     = !!(value & 0x80);
-  channel[i].hdma_indirect = !!(value & 0x40);
-  channel[i].incmode       = (value & 0x10)?-1:1;
-  channel[i].fixedxfer     = !!(value & 0x08);
+  channel[i].direction     = bool(value & 0x80);
+  channel[i].hdma_indirect = bool(value & 0x40);
+  channel[i].incmode       = (value & 0x10) ? -1 : 1;
+  channel[i].fixedxfer     = bool(value & 0x08);
   channel[i].xfermode      = value & 7;
 }
 

@@ -1,7 +1,7 @@
 class RasterSettingsWindow : public Window {
 public:
 Label   Header;
-Editbox ScanlineDesc;
+Label   ScanlineLabel;
 Label   PScanlineLabel;
 Slider  PScanlineSlider;
 Label   IScanlineLabel;

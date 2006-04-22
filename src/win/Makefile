@@ -1,5 +1,6 @@
 CC = cl
 CFLAGS = /nologo /O2 /arch:SSE2 /wd4996
+#CFLAGS = /nologo /O2 /GL /EHsc /wd4996
 OBJS = main.obj \
        libstring.obj libconfig.obj libbpf.obj \
        reader.obj cart.obj cheat.obj \
@@ -19,7 +20,8 @@ LIBS = kernel32.lib user32.lib gdi32.lib comdlg32.lib comctl32.lib \
 all: $(OBJS)
 	rc /r /fobsnes.res bsnes.rc
 	$(CC) /Febsnes.exe $(CFLAGS) $(OBJS) bsnes.res $(LIBS)
-#/link /PGD:bsnes.pgd /LTCG:PGINSTRUMENT
+#	$(CC) /Febsnes.exe $(CFLAGS) $(OBJS) bsnes.res $(LIBS) /link /PGD:bsnes.pgd /LTCG:PGINSTRUMENT
+#	$(CC) /Febsnes.exe $(CFLAGS) $(OBJS) bsnes.res $(LIBS) /link /PGD:bsnes.pgd /LTCG:PGOPTIMIZE
 
 clean:
 	del *.obj

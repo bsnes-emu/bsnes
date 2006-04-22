@@ -76,6 +76,8 @@ enum {
   bool keydown(uint id);
   uint stringtokeymap(const char *str);
   const char *keymaptostring(uint key);
+  uint get_keymap(uint device, uint button);
+  void set_keymap(uint device, uint button, uint keymap);
 
   Input();
 };

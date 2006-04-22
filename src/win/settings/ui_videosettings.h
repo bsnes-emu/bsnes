@@ -1,12 +1,12 @@
 class VideoSettingsWindow : public Window {
 public:
 Label    Header;
-Label    VideoProfileLabel;
-Combobox VideoProfile;
 Label    WinProfileLabel;
 Combobox WinProfile;
 Label    FullProfileLabel;
 Combobox FullProfile;
+Label    VideoProfileLabel;
+Combobox VideoProfile;
 Label    Separator1;
 Label    SoftwareFilterLabel;
 Combobox SoftwareFilter;

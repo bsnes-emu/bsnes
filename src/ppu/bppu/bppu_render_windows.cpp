@@ -39,9 +39,7 @@ uint16 window2_right = regs.window2_right;
   }
 
   if(regs.window1_enabled[bg] == true && regs.window2_enabled[bg] == false) {
-    if(regs.window1_invert[bg] == true) {
-      set ^= clr; clr ^= set; set ^= clr;
-    }
+    if(regs.window1_invert[bg] == true)swap(set, clr);
     for(int x = 0; x < 256; x++) {
       wtbl[x] = (x >= window1_left && x <= window1_right) ? set : clr;
     }
@@ -49,9 +47,7 @@ uint16 window2_right = regs.window2_right;
   }
 
   if(regs.window1_enabled[bg] == false && regs.window2_enabled[bg] == true) {
-    if(regs.window2_invert[bg] == true) {
-      set ^= clr; clr ^= set; set ^= clr;
-    }
+    if(regs.window2_invert[bg] == true)swap(set, clr);
     for(int x = 0; x < 256; x++) {
       wtbl[x] = (x >= window2_left && x <= window2_right) ? set : clr;
     }

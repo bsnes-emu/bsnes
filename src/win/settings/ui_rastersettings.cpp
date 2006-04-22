@@ -23,12 +23,9 @@ void RasterSettingsWindow::Setup() {
   Header.SetFont(global::font_header);
 
 int x = 15, y = 30;
-  ScanlineDesc.Create(this, "visible|sunken|multiline|readonly", x, y, 460, 45,
-    "Scanline Intensity Adjust: (0% = no scanlines, 100% = full scanlines)\r\n"
-    "This setting will affect all video modes. However, scanlines are only applied "
-    "if current video profile has hardware scanlines enabled, and render height >= 448."
-  );
-  y += 50;
+  ScanlineLabel.Create(this, "visible", x, y, 460, 15,
+    "Scanline intensity adjust: (0% = no scanlines, 100% = full scanlines)");
+  y += 20;
 
   PScanlineLabel.Create(this, "visible", x, y, 100, 15);
   PScanlineLabel.SetText("Progressive: %d%%", uint(config::video.pscanline_intensity));

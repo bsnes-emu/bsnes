@@ -183,7 +183,7 @@ static uint8 hdma_xferlen[8] = { 1, 2, 2, 4, 4, 4, 2, 4 };
     }
 
     channel[i].hdma_line_counter--;
-    channel[i].hdma_do_transfer = !!(channel[i].hdma_line_counter & 0x80);
+    channel[i].hdma_do_transfer = bool(channel[i].hdma_line_counter & 0x80);
     if((channel[i].hdma_line_counter & 0x7f) == 0) {
       hdma_update(i);
     }

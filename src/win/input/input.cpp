@@ -202,6 +202,77 @@ uint r = key & KEYMASK;
   return result;
 }
 
+uint Input::get_keymap(uint device, uint button) {
+  switch(device) {
+  case SNES::DEV_JOYPAD1:
+    switch(button) {
+    case SNES::JOYPAD_UP:     return config::input.joypad1.up;
+    case SNES::JOYPAD_DOWN:   return config::input.joypad1.down;
+    case SNES::JOYPAD_LEFT:   return config::input.joypad1.left;
+    case SNES::JOYPAD_RIGHT:  return config::input.joypad1.right;
+    case SNES::JOYPAD_A:      return config::input.joypad1.a;
+    case SNES::JOYPAD_B:      return config::input.joypad1.b;
+    case SNES::JOYPAD_X:      return config::input.joypad1.x;
+    case SNES::JOYPAD_Y:      return config::input.joypad1.y;
+    case SNES::JOYPAD_L:      return config::input.joypad1.l;
+    case SNES::JOYPAD_R:      return config::input.joypad1.r;
+    case SNES::JOYPAD_SELECT: return config::input.joypad1.select;
+    case SNES::JOYPAD_START:  return config::input.joypad1.start;
+    } break;
+  case SNES::DEV_JOYPAD2:
+    switch(button) {
+    case SNES::JOYPAD_UP:     return config::input.joypad2.up;
+    case SNES::JOYPAD_DOWN:   return config::input.joypad2.down;
+    case SNES::JOYPAD_LEFT:   return config::input.joypad2.left;
+    case SNES::JOYPAD_RIGHT:  return config::input.joypad2.right;
+    case SNES::JOYPAD_A:      return config::input.joypad2.a;
+    case SNES::JOYPAD_B:      return config::input.joypad2.b;
+    case SNES::JOYPAD_X:      return config::input.joypad2.x;
+    case SNES::JOYPAD_Y:      return config::input.joypad2.y;
+    case SNES::JOYPAD_L:      return config::input.joypad2.l;
+    case SNES::JOYPAD_R:      return config::input.joypad2.r;
+    case SNES::JOYPAD_SELECT: return config::input.joypad2.select;
+    case SNES::JOYPAD_START:  return config::input.joypad2.start;
+    } break;
+  }
+  return JOYKEY_NONE;
+}
+
+void Input::set_keymap(uint device, uint button, uint keymap) {
+  switch(device) {
+  case SNES::DEV_JOYPAD1:
+    switch(button) {
+    case SNES::JOYPAD_UP:     config::input.joypad1.up     = keymap; break;
+    case SNES::JOYPAD_DOWN:   config::input.joypad1.down   = keymap; break;
+    case SNES::JOYPAD_LEFT:   config::input.joypad1.left   = keymap; break;
+    case SNES::JOYPAD_RIGHT:  config::input.joypad1.right  = keymap; break;
+    case SNES::JOYPAD_A:      config::input.joypad1.a      = keymap; break;
+    case SNES::JOYPAD_B:      config::input.joypad1.b      = keymap; break;
+    case SNES::JOYPAD_X:      config::input.joypad1.x      = keymap; break;
+    case SNES::JOYPAD_Y:      config::input.joypad1.y      = keymap; break;
+    case SNES::JOYPAD_L:      config::input.joypad1.l      = keymap; break;
+    case SNES::JOYPAD_R:      config::input.joypad1.r      = keymap; break;
+    case SNES::JOYPAD_SELECT: config::input.joypad1.select = keymap; break;
+    case SNES::JOYPAD_START:  config::input.joypad1.start  = keymap; break;
+    } break;
+  case SNES::DEV_JOYPAD2:
+    switch(button) {
+    case SNES::JOYPAD_UP:     config::input.joypad2.up     = keymap; break;
+    case SNES::JOYPAD_DOWN:   config::input.joypad2.down   = keymap; break;
+    case SNES::JOYPAD_LEFT:   config::input.joypad2.left   = keymap; break;
+    case SNES::JOYPAD_RIGHT:  config::input.joypad2.right  = keymap; break;
+    case SNES::JOYPAD_A:      config::input.joypad2.a      = keymap; break;
+    case SNES::JOYPAD_B:      config::input.joypad2.b      = keymap; break;
+    case SNES::JOYPAD_X:      config::input.joypad2.x      = keymap; break;
+    case SNES::JOYPAD_Y:      config::input.joypad2.y      = keymap; break;
+    case SNES::JOYPAD_L:      config::input.joypad2.l      = keymap; break;
+    case SNES::JOYPAD_R:      config::input.joypad2.r      = keymap; break;
+    case SNES::JOYPAD_SELECT: config::input.joypad2.select = keymap; break;
+    case SNES::JOYPAD_START:  config::input.joypad2.start  = keymap; break;
+    } break;
+  }
+}
+
 void Input::init() {
 string t, part;
   strcpy(t, config::input.joypad1.map.sget());

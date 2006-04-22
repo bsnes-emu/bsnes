@@ -313,6 +313,7 @@ void Window::SetIcon(uint resource_id) {
 
 void Window::Show(bool do_show) {
   if(do_show == true) {
+    if(Visible() == false)Resize();
     ShowWindow(hwnd, SW_NORMAL);
     state.ws |=  WS_VISIBLE;
   } else {

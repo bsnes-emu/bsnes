@@ -1,4 +1,4 @@
-#define BSNES_VERSION "0.015 rc2" //wip45
+#define BSNES_VERSION "0.015 rc3" //wip47
 #define BSNES_TITLE "bsnes v" BSNES_VERSION
 
 #define MEMCORE bMemBus
@@ -19,8 +19,8 @@
 //enable JMA support
 //#define JMA_SUPPORT
 
-//snes core polymorphism (allow mem/cpu/apu/ppu overriding,
-//~10% speed hit)
+//snes core polymorphism
+//(allow mem/cpu/apu/ppu overriding, ~10% speed hit)
 //#define POLYMORPHISM
 
 //this should be declared in the port-specific makefiles
