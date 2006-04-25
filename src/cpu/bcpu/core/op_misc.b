@@ -42,13 +42,13 @@ cop(0x02, 0xfff4, 0xfff5, 0xffe4, 0xffe5) {
 3:stack_write(regs.pc.h);
 4:stack_write(regs.pc.l);
 5:stack_write(regs.p);
-6:rd.l = op_read(OPMODE_LONG, (regs.e)?$1:$3);
-7:last_cycle();
-  rd.h = op_read(OPMODE_LONG, (regs.e)?$2:$4);
+6:rd.l = op_read(OPMODE_LONG, (regs.e) ? $1 : $3);
   regs.pc.b = 0x00;
-  regs.pc.w = rd.w;
   regs.p.i  = 1;
   regs.p.d  = 0;
+7:last_cycle();
+  rd.h = op_read(OPMODE_LONG, (regs.e) ? $2 : $4);
+  regs.pc.w = rd.w;
 }
 
 stp(0xdb) {
@@ -64,10 +64,16 @@ wai(0xcb) {
   run_state.wai = true;
 2:last_cycle();
   cpu_io();
-  if(run_state.wai) {
-  //this can be cleared within last_cycle()
-    regs.pc.w--;
-  }
+//no wakeup delay if last_cycle() cancelled wai
+  if(run_state.wai == false)end;
+3:last_cycle();
+  cpu_io();
+//sleep another i/o cycle
+//note: this should alert the debugger that wai is continuing...
+  if(run_state.wai == true)status.cycle_pos--;
+//wai wakeup delay (one i/o cycle)
+4:last_cycle();
+  cpu_io();
 }
 
 xce(0xfb) {
@@ -183,12 +189,8 @@ txs(0x9a) {
   cpu_io();
   if(regs.e) {
     regs.s.l = regs.x.l;
-    regs.p.n = !!(regs.s.l & 0x80);
-    regs.p.z = (regs.s.l == 0);
   } else {
     regs.s.w = regs.x.w;
-    regs.p.n = !!(regs.s.w & 0x8000);
-    regs.p.z = (regs.s.w == 0);
   }
 }
 

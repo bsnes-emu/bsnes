@@ -33,9 +33,11 @@ struct {
 //$2102-$2103
   uint16 oam_baseaddr;
   uint16 oam_addr;
-  uint8  oam_latchdata;
   bool   oam_priority;
   uint8  oam_firstsprite;
+
+//$2104
+  uint8  oam_latchdata;
 
 //$2105
   bool   bg_tilesize[4];
@@ -80,6 +82,9 @@ struct {
 
 //$2121
   uint16 cgram_addr;
+
+//$2122
+  uint8  cgram_latchdata;
 
 //$2123-$2125
   bool   window1_enabled[6];

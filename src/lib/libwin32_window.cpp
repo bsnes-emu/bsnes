@@ -291,15 +291,11 @@ string part;
 void Window::SetAlphaLevel(uint level) {
   level &= 255;
   if(level == 255) {
-  //no reason to use layered attribute for completely opaque window
     state.es &= ~WS_EX_LAYERED;
-    SetWindowLong(hwnd, GWL_EXSTYLE, state.es);
-    SetLayeredWindowAttributes(hwnd, 0, 0, 0);
   } else {
     state.es |=  WS_EX_LAYERED;
-    SetWindowLong(hwnd, GWL_EXSTYLE, state.es);
-    SetLayeredWindowAttributes(hwnd, 0, level, LWA_ALPHA);
   }
+  SetWindowAlphaLevel(hwnd, level);
 }
 
 void Window::SetBackgroundColor(uint r, uint g, uint b) {

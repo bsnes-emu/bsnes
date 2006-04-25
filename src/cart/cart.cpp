@@ -93,10 +93,15 @@ int32 score_lo = 0,
 uint16 cksum, icksum;
   cksum  = rom[0x7fc0 +  CKSUM] | (rom[0x7fc0 +  CKSUM + 1] << 8);
   icksum = rom[0x7fc0 + ICKSUM] | (rom[0x7fc0 + ICKSUM + 1] << 8);
-  if((cksum + icksum) == 0xffff)score_lo += 8;
+  if((cksum + icksum) == 0xffff && (cksum != 0) && (icksum != 0)) {
+    score_lo += 8;
+  }
+
   cksum  = rom[0xffc0 +  CKSUM] | (rom[0xffc0 +  CKSUM + 1] << 8);
   icksum = rom[0xffc0 + ICKSUM] | (rom[0xffc0 + ICKSUM + 1] << 8);
-  if((cksum + icksum) == 0xffff)score_hi += 8;
+  if((cksum + icksum) == 0xffff && (cksum != 0) && (icksum != 0)) {
+    score_hi += 8;
+  }
 
   if(rom_size < 0x401000) {
     score_ex = 0;

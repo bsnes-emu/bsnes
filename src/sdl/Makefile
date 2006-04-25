@@ -4,14 +4,14 @@ CFLAGS = -O3 -fomit-frame-pointer -ffast-math
 CXXFLAGS = $(CFLAGS) -fno-rtti
 OBJS = sdlmain.o \
        libstring.o libconfig.o libbpf.o \
-       reader.o cart.o \
+       reader.o cart.o cheat.o \
        memory.o bmemory.o \
        cpu.o bcpu.o \
        apu.o bapu.o \
        bdsp.o \
        ppu.o bppu.o \
        snes.o \
-       srtc.o sdd1.o c4.o \
+       srtc.o sdd1.o c4.o dsp2.o obc1.o \
        adler32.o compress.o crc32.o deflate.o gzio.o inffast.o \
        inflate.o inftrees.o ioapi.o trees.o unzip.o zip.o zutil.o \
        jma.o jcrc32.o lzmadec.o 7zlzma.o iiostrm.o inbyte.o lzma.o winout.o
@@ -89,6 +89,9 @@ reader.o: ../reader/*.cpp ../reader/*.h
 cart.o: ../cart/*.cpp ../cart/*.h
 	$(CXX) $(CXXFLAGS) -c ../cart/cart.cpp
 
+cheat.o: ../cheat/*.cpp ../cheat/*.h
+	$(CXX) $(CXXFLAGS) -c ../cheat/cheat.cpp
+
 ############
 ### snes ###
 ############
@@ -106,6 +109,12 @@ sdd1.o: ../chip/sdd1/*.cpp ../chip/sdd1/*.h
 
 c4.o: ../chip/c4/*.cpp ../chip/c4/*.h
 	$(CXX) $(CXXFLAGS) -c ../chip/c4/c4.cpp
+
+dsp2.o: ../chip/dsp2/*.cpp ../chip/dsp2/*.h
+	$(CXX) $(CXXFLAGS) -c ../chip/dsp2/dsp2.cpp
+
+obc1.o: ../chip/obc1/*.cpp ../chip/obc1/*.h
+	$(CXX) $(CXXFLAGS) -c ../chip/obc1/obc1.cpp
 
 ############
 ### zlib ###

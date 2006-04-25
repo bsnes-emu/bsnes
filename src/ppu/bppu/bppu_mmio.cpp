@@ -94,15 +94,16 @@ void bPPU::mmio_w2103(uint8 value) {
 //OAMDATA
 void bPPU::mmio_w2104(uint8 value) {
   if(regs.oam_addr >= 0x0200) {
-    if(!(regs.oam_addr & 1)) {
-      regs.oam_latchdata = value;
-    }
+  //does this happen?
+  //if(!(regs.oam_addr & 1)) {
+  //  regs.oam_latchdata = value;
+  //}
     oam_write(regs.oam_addr, value);
   } else if(!(regs.oam_addr & 1)) {
     regs.oam_latchdata = value;
   } else {
-    oam_write((regs.oam_addr & 0x03fe),     regs.oam_latchdata);
-    oam_write((regs.oam_addr & 0x03fe) + 1, value);
+    oam_write((regs.oam_addr & 0x01fe),     regs.oam_latchdata);
+    oam_write((regs.oam_addr & 0x01fe) + 1, value);
   }
   regs.oam_addr++;
   regs.oam_addr &= 0x03ff;
@@ -336,11 +337,17 @@ void bPPU::mmio_w2121(uint8 value) {
 //note: CGRAM palette data format is 15-bits
 //(0,bbbbb,ggggg,rrrrr). Highest bit is ignored,
 //as evidenced by $213b CGRAM data reads.
+//
+//anomie indicates writes to CGDATA work the same
+//as writes to OAMDATA's low table. need to verify
+//this on hardware.
 void bPPU::mmio_w2122(uint8 value) {
-  if(regs.cgram_addr & 1) {
-    value &= 0x7f;
+  if(!(regs.cgram_addr & 1)) {
+    regs.cgram_latchdata = value;
+  } else {
+    cgram_write((regs.cgram_addr & 0x01fe),     regs.cgram_latchdata);
+    cgram_write((regs.cgram_addr & 0x01fe) + 1, value & 0x7f);
   }
-  cgram_write(regs.cgram_addr, value);
   regs.cgram_addr++;
   regs.cgram_addr &= 0x01ff;
 }
@@ -526,9 +533,12 @@ uint8 bPPU::mmio_r2137() {
 //OAMDATAREAD
 uint8 bPPU::mmio_r2138() {
   regs.ppu1_mdr = oam_read(regs.oam_addr);
-  if(!(regs.oam_addr & 1)) {
-    regs.oam_latchdata = regs.ppu1_mdr;
-  }
+//DMV27: OAM writes do not affect latch data
+//byuu: Even if they do, this should only affect the low table
+//byuu: Disable for now, see what happens... test on hardware
+//if(!(regs.oam_addr & 1)) {
+//  regs.oam_latchdata = regs.ppu1_mdr;
+//}
   regs.oam_addr++;
   regs.oam_addr &= 0x03ff;
   return regs.ppu1_mdr;

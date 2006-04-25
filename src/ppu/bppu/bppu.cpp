@@ -123,9 +123,11 @@ void bPPU::reset() {
 //$2102-$2103
   regs.oam_baseaddr    = 0x0000;
   regs.oam_addr        = 0x0000;
-  regs.oam_latchdata   = 0x00;
   regs.oam_priority    = false;
   regs.oam_firstsprite = 0x00;
+
+//$2104
+  regs.oam_latchdata   = 0x00;
 
 //$2105
   regs.bg_tilesize[BG1] = 0;
@@ -192,6 +194,9 @@ void bPPU::reset() {
 
 //$2121
   regs.cgram_addr = 0x0000;
+
+//$2122
+  regs.cgram_latchdata = 0x00;
 
 //$2123-$2125
   regs.window1_enabled[BG1] = false;

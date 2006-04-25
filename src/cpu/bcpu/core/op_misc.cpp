@@ -113,15 +113,15 @@ void bCPU::op_brk() {
     stack_write(regs.p);
     } break;
   case 6: {
-    rd.l = op_read(OPMODE_LONG, (regs.e)?0xfffe:0xffe6);
+    rd.l = op_read(OPMODE_LONG, (regs.e) ? 0xfffe : 0xffe6);
+    regs.pc.b = 0x00;
+    regs.p.i  = 1;
+    regs.p.d  = 0;
     } break;
   case 7: {
     last_cycle();
-    rd.h = op_read(OPMODE_LONG, (regs.e)?0xffff:0xffe7);
-    regs.pc.b = 0x00;
+    rd.h = op_read(OPMODE_LONG, (regs.e) ? 0xffff : 0xffe7);
     regs.pc.w = rd.w;
-    regs.p.i  = 1;
-    regs.p.d  = 0;
     status.cycle_pos = 0;
     } break;
   }
@@ -146,15 +146,15 @@ void bCPU::op_cop() {
     stack_write(regs.p);
     } break;
   case 6: {
-    rd.l = op_read(OPMODE_LONG, (regs.e)?0xfff4:0xffe4);
+    rd.l = op_read(OPMODE_LONG, (regs.e) ? 0xfff4 : 0xffe4);
+    regs.pc.b = 0x00;
+    regs.p.i  = 1;
+    regs.p.d  = 0;
     } break;
   case 7: {
     last_cycle();
-    rd.h = op_read(OPMODE_LONG, (regs.e)?0xfff5:0xffe5);
-    regs.pc.b = 0x00;
+    rd.h = op_read(OPMODE_LONG, (regs.e) ? 0xfff5 : 0xffe5);
     regs.pc.w = rd.w;
-    regs.p.i  = 1;
-    regs.p.d  = 0;
     status.cycle_pos = 0;
     } break;
   }
@@ -184,10 +184,20 @@ void bCPU::op_wai() {
   case 2: {
     last_cycle();
     cpu_io();
-    if(run_state.wai) {
-    //this can be cleared within last_cycle()
-      regs.pc.w--;
-    }
+  //no wakeup delay if last_cycle() cancelled wai
+    if(run_state.wai == false)status.cycle_pos = 0;
+    } break;
+  case 3: {
+    last_cycle();
+    cpu_io();
+  //sleep another i/o cycle
+  //note: this should alert the debugger that wai is continuing...
+    if(run_state.wai == true)status.cycle_pos--;
+  //wai wakeup delay (one i/o cycle)
+    } break;
+  case 4: {
+    last_cycle();
+    cpu_io();
     status.cycle_pos = 0;
     } break;
   }
@@ -523,12 +533,8 @@ void bCPU::op_txs() {
     cpu_io();
     if(regs.e) {
       regs.s.l = regs.x.l;
-      regs.p.n = !!(regs.s.l & 0x80);
-      regs.p.z = (regs.s.l == 0);
     } else {
       regs.s.w = regs.x.w;
-      regs.p.n = !!(regs.s.w & 0x8000);
-      regs.p.z = (regs.s.w == 0);
     }
     status.cycle_pos = 0;
     } break;

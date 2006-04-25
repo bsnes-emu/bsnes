@@ -132,13 +132,17 @@ bool MainWindow::Event(EventInfo &info) {
     } break;
 
     case MENU_FILE_RESET: {
-      bsnes->reset();
-      dprintf("* Reset");
+      if(cartridge.loaded() == true) {
+        bsnes->reset();
+        dprintf("* Reset");
+      }
     } break;
 
     case MENU_FILE_POWER: {
-      bsnes->power();
-      dprintf("* Power");
+      if(cartridge.loaded() == true) {
+        bsnes->power();
+        dprintf("* Power");
+      }
     } break;
 
     case MENU_FILE_EXIT: {
@@ -215,6 +219,11 @@ bool MainWindow::Event(EventInfo &info) {
         UncheckMenuItem(MENU_MISC_LOGAUDIO);
         snes->log_audio_disable();
       }
+    } break;
+
+    case MENU_MISC_CHEATEDITOR: {
+      settings.set_active_panel(&wCheatEditor);
+      wSettings.Show();
     } break;
 
     case MENU_MISC_ABOUT: {
@@ -303,8 +312,9 @@ char t[128];
   EndMenuGroup();
 
   AddMenuGroup("&Misc");
-    AddMenuItem(MENU_MISC_SCREENSHOT, "&Capture Screenshot");
-    AddMenuItem(MENU_MISC_LOGAUDIO,   "&Log Audio Data");
+    AddMenuItem(MENU_MISC_SCREENSHOT,  "Capture &Screenshot");
+    AddMenuItem(MENU_MISC_LOGAUDIO,    "&Log Audio Data");
+    AddMenuItem(MENU_MISC_CHEATEDITOR, "&Cheat Code Editor");
     AddMenuSeparator();
     AddMenuItem(MENU_MISC_ABOUT,      "&About");
   EndMenuGroup();

@@ -97,7 +97,7 @@ string dir;
 
   if(!GetOpenFileName(&ofn))return;
 
-  cartridge.unload();
+  if(cartridge.loaded() == true)cartridge.unload();
   wDebug.Clear();
 
   cartridge.load(t);
@@ -107,6 +107,8 @@ string dir;
 }
 
 void unload_rom() {
+  if(cartridge.loaded() == false)return;
+
   cartridge.unload();
   uiVideo->clear_video();
   uiAudio->clear_audio();

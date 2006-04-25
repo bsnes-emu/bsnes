@@ -1,4 +1,4 @@
-#define BSNES_VERSION "0.015 rc3" //wip47
+#define BSNES_VERSION "0.016"
 #define BSNES_TITLE "bsnes v" BSNES_VERSION
 
 #define MEMCORE bMemBus
@@ -6,9 +6,6 @@
 #define APUCORE bAPU
 #define DSPCORE bDSP
 #define PPUCORE bPPU
-
-//debugging extensions (~10% speed hit)
-#define DEBUGGER
 
 //game genie + pro action replay code support (~1-3% speed hit)
 #define CHEAT_SYSTEM
@@ -18,6 +15,9 @@
 
 //enable JMA support
 //#define JMA_SUPPORT
+
+//debugging extensions (~10% speed hit)
+#define DEBUGGER
 
 //snes core polymorphism
 //(allow mem/cpu/apu/ppu overriding, ~10% speed hit)

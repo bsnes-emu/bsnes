@@ -103,7 +103,7 @@ MSG msg;
   }
 
 _end:
-  cartridge.unload();
+  if(cartridge.loaded() == true)cartridge.unload();
 
   term_ui();
   term_snes();

@@ -34,6 +34,7 @@ void bCPU::mem_write(uint32 addr, uint8 value) {
   status.cycle_count = r_mem->speed(addr);
   pre_exec_cycle();
   add_cycles(status.cycle_count);
+  regs.mdr = value;
   r_mem->write(addr, value);
   cycle_edge();
 }

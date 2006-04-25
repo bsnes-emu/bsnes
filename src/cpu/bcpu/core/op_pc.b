@@ -126,7 +126,8 @@ rti(0x40) {
     regs.y.h = 0x00;
   }
 4:rd.l = stack_read();
-5:rd.h = stack_read();
+5:if(regs.e)last_cycle();
+  rd.h = stack_read();
   if(regs.e) {
     regs.pc.w = rd.w;
     end;

@@ -79,7 +79,9 @@ void bCPU::power() {
 
 void bCPU::reset() {
 //reset vector location
-  regs.pc  = r_mem->read(0xfffc) | (r_mem->read(0xfffd) << 8);
+  regs.pc.d = 0;
+  regs.pc.l = r_mem->read(0xfffc);
+  regs.pc.h = r_mem->read(0xfffd);
 
 //registers are not fully reset by SNES
   regs.x.h = 0x00;
@@ -90,6 +92,9 @@ void bCPU::reset() {
   regs.p   = 0x34;
   regs.e   = 1;
   regs.mdr = 0x00;
+
+//simulate pbr:pc push during reset irq vector
+  regs.s.l -= 3;
 
   time_reset();
   mmio_reset();

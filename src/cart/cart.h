@@ -57,6 +57,7 @@ struct {
   void save_sram();
   void find_header();
   void read_header();
+  bool loaded() { return cart_loaded; }
   bool load(const char *fn);
   bool unload();
 

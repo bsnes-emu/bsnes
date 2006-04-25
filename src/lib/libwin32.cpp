@@ -1,6 +1,7 @@
 #include "libbase.h"
 #include "libwin32.h"
 
+#include "libwin32_misc.cpp"
 #include "libwin32_file.cpp"
 #include "libwin32_window.cpp"
 #include "libwin32_control.cpp"

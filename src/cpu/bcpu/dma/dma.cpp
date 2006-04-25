@@ -233,25 +233,31 @@ void bCPU::hdma_activate() {
 }
 
 void bCPU::dma_reset() {
+  status.dma_state        = DMASTATE_CPUSYNC;
+  status.hdma_state       = HDMASTATE_CPUSYNC;
+  status.dma_cycle_count  = 0;
+  status.hdma_cycle_count = 0;
+
   for(int i = 0; i < 8; i++) {
     channel[i].read_index        = 0;
     channel[i].active            = false;
     channel[i].hdma_enabled      = false;
-    channel[i].dmap              = 0x00;
-    channel[i].direction         = 0;
-    channel[i].hdma_indirect     = false;
-    channel[i].incmode           = 1;
-    channel[i].fixedxfer         = false;
-    channel[i].xfermode          = 0;
-    channel[i].destaddr          = 0;
-    channel[i].srcaddr           = 0;
-    channel[i].xfersize          = 0x0000;
+    channel[i].dmap              = 0xff;
+    channel[i].direction         = 1;
+    channel[i].hdma_indirect     = 1;
+    channel[i].incmode           = -1;
+    channel[i].fixedxfer         = 1;
+    channel[i].xfermode          = 7;
+    channel[i].destaddr          = 0xff;
+    channel[i].srcaddr           = 0xffff;
+    channel[i].srcbank           = 0xff;
+    channel[i].xfersize          = 0xffff;
   //xfersize and hdma_iaddr are of union { uint16 };
-  //channel[i].hdma_iaddr        = 0x0000;
-    channel[i].hdma_ibank        = 0;
-    channel[i].hdma_addr         = 0x0000;
-    channel[i].hdma_line_counter = 0x00;
-    channel[i].hdma_unknown      = 0x00;
+  //channel[i].hdma_iaddr        = 0xffff;
+    channel[i].hdma_ibank        = 0xff;
+    channel[i].hdma_addr         = 0xffff;
+    channel[i].hdma_line_counter = 0xff;
+    channel[i].hdma_unknown      = 0xff;
 
     channel[i].hdma_active       = false;
     channel[i].hdma_do_transfer  = false;

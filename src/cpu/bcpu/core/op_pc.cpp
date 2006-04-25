@@ -417,6 +417,7 @@ void bCPU::op_rti() {
     rd.l = stack_read();
     } break;
   case 5: {
+    if(regs.e)last_cycle();
     rd.h = stack_read();
     if(regs.e) {
       regs.pc.w = rd.w;

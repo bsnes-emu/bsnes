@@ -17,16 +17,16 @@ void bCPU::mmio_reset() {
   status.pio = 0xff;
 
 //$4202-$4203
-  status.mul_a = 0x00;
-  status.mul_b = 0x00;
+  status.mul_a = 0xff;
+  status.mul_b = 0xff;
 
 //$4204-$4206
-  status.div_a = 0x0000;
-  status.div_b = 0x00;
+  status.div_a = 0xffff;
+  status.div_b = 0xff;
 
 //$4207-$420a
-  status.hirq_pos = 0;
-  status.virq_pos = 0;
+  status.hirq_pos = 0x01ff;
+  status.virq_pos = 0x01ff;
 
 //$4214-$4217
   status.r4214 = 0x0000;
@@ -505,7 +505,6 @@ void bCPU::mmio_w420a(uint8 value) {
 
 //DMAEN
 void bCPU::mmio_w420b(uint8 value) {
-int len;
   if(value != 0x00) {
     run_state.dma = true;
     status.dma_state = DMASTATE_DMASYNC;

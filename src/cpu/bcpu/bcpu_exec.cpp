@@ -1,5 +1,7 @@
 void bCPU::last_cycle() {
-  time.nmi_pending = nmi_test();
+//DMV27: keep previous nmi value,
+//to allow wai and irq to work properly
+  time.nmi_pending = nmi_test() || time.nmi_pending;
   time.irq_pending = irq_test();
 }
 
