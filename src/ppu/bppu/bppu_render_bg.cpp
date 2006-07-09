@@ -3,26 +3,27 @@ void bPPU::update_bg_info() {
   for(int bg = 0; bg < 4; bg++) {
     bg_info[bg].th = (regs.bg_tilesize[bg]) ? 4 : 3;
     bg_info[bg].tw = (regs.hires) ? 4 : bg_info[bg].th;
+
     bg_info[bg].mx = (bg_info[bg].th == 4) ? (line.width << 1) : line.width;
     bg_info[bg].my = bg_info[bg].mx;
     if(regs.bg_scsize[bg] & 0x01)bg_info[bg].mx <<= 1;
     if(regs.bg_scsize[bg] & 0x02)bg_info[bg].my <<= 1;
     bg_info[bg].mx--;
     bg_info[bg].my--;
+
+    bg_info[bg].scy = (regs.bg_scsize[bg] & 0x02) ? (32 << 5) : 0;
+    bg_info[bg].scx = (regs.bg_scsize[bg] & 0x01) ? (32 << 5) : 0;
+    if(regs.bg_scsize[bg] == 3)bg_info[bg].scy <<= 1;
   }
 }
 
 uint16 bPPU::bg_get_tile(uint8 bg, uint16 x, uint16 y) {
-uint16 pos;
-  x &= bg_info[bg].mx;
-  y &= bg_info[bg].my;
+  x = (x & bg_info[bg].mx) >> bg_info[bg].tw;
+  y = (y & bg_info[bg].my) >> bg_info[bg].th;
 
-  x >>= bg_info[bg].tw;
-  y >>= bg_info[bg].th;
-
-  pos  = (regs.bg_scsize[bg] & 2) ? ((y & 0x20) << ((regs.bg_scsize[bg] & 1) ? 6 : 5)) : 0;
-  pos += (regs.bg_scsize[bg] & 1) ? ((x & 0x20) << 5) : 0;
-  pos += ((y & 31) << 5) + (x & 31);
+uint16 pos = ((y & 0x1f) << 5) + (x & 0x1f);
+  if(y & 0x20)pos += bg_info[bg].scy;
+  if(x & 0x20)pos += bg_info[bg].scx;
   return read16(vram, regs.bg_scaddr[bg] + (pos << 1));
 }
 
@@ -56,11 +57,11 @@ void bPPU::render_line_bg(uint8 bg, uint8 color_depth, uint8 pri0_pos, uint8 pri
 bool   bg_enabled     = regs.bg_enabled[bg];
 bool   bgsub_enabled  = regs.bgsub_enabled[bg];
 
-uint16 opt_valid_bit  = (bg == BG1) ? 0x2000 : ((bg == BG2) ? 0x4000 : 0x0000);
+uint16 opt_valid_bit  = (bg == BG1) ? 0x2000 : (bg == BG2) ? 0x4000 : 0x0000;
 uint8  bgpal_index    = (regs.bg_mode == 0) ? (bg << 5) : 0;
 
-uint8  pal_size       = (color_depth == 2) ? 256 : ((color_depth == 1) ? 16 : 4);
-uint16 tile_mask      = (color_depth == 2) ? 0x03ff : ((color_depth == 1) ? 0x07ff : 0x0fff);
+uint8  pal_size       = 2 << color_depth;      //<<2 (*4), <<4 (*16), <<8 (*256)
+uint16 tile_mask      = 0x0fff >> color_depth; //0x0fff, 0x07ff, 0x03ff
 //4 + color_depth = >>(4-6) -- / {16, 32, 64 } bytes/tile
 //index is a tile number count to add to base tile number
 uint   tiledata_index = regs.bg_tdaddr[bg] >> (4 + color_depth);
@@ -95,7 +96,7 @@ uint8 *tile_ptr;
 uint   xpos, ypos;
 uint16 hoffset, voffset, opt_x, col;
 bool   mirror_x, mirror_y;
-bool   is_opt_mode = (config::ppu.opt_enable) && (regs.bg_mode == 2 || regs.bg_mode == 4 || regs.bg_mode == 6);
+bool   is_opt_mode = (config::ppu.opt_enable == true) && (regs.bg_mode == 2 || regs.bg_mode == 4 || regs.bg_mode == 6);
 
   build_window_tables(bg);
 uint8 *wt_main = window[bg].main;
@@ -170,7 +171,7 @@ int32 prev_x = -1, prev_y = -1;
       }
 
       pal_num   = ((t >> 10) & 7);
-      pal_index = (pal_num * pal_size) + bgpal_index;
+      pal_index = bgpal_index + (pal_num << pal_size);
 
       ypos = mosaic_y & 7;
       if(mirror_y)ypos ^= 7; //invert y tile pos

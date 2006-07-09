@@ -4,8 +4,11 @@ void Cartridge::read_header() {
   cart.srtc = false;
   cart.sdd1 = false;
   cart.c4   = false;
+  cart.dsp1 = false;
   cart.dsp2 = false;
   cart.obc1 = false;
+
+  cart.dsp1_mapper = 0;
 
   if(cart.header_index == 0x7fc0 && cart.rom_size >= 0x401000) {
     cart.mapper = EXLOROM;
@@ -33,6 +36,28 @@ uint8 rom_type = rom[cart.header_index + ROM_TYPE];
     cart.c4 = true;
   }
 
+  if((mapper == 0x20 || mapper == 0x21) && rom_type == 0x03) {
+    cart.dsp1 = true;
+  }
+
+  if(mapper == 0x30 && rom_type == 0x05) {
+    cart.dsp1 = true;
+  }
+
+  if(mapper == 0x31 && (rom_type == 0x03 || rom_type == 0x05)) {
+    cart.dsp1 = true;
+  }
+
+  if(cart.dsp1 == true) {
+    if((mapper & 0x2f) == 0x20 && rom_size <= 0x100000) {
+      cart.dsp1_mapper = DSP1_LOROM_1MB;
+    } else if((mapper & 0x2f) == 0x20) {
+      cart.dsp1_mapper = DSP1_LOROM_2MB;
+    } else if((mapper & 0x2f) == 0x21) {
+      cart.dsp1_mapper = DSP1_HIROM;
+    }
+  }
+
   if(mapper == 0x20 && rom_type == 0x05) {
     cart.dsp2 = true;
   }
@@ -41,7 +66,7 @@ uint8 rom_type = rom[cart.header_index + ROM_TYPE];
     cart.obc1 = true;
   }
 
-  cart.cart_mmio = cart.c4 | cart.dsp2 | cart.obc1;
+  cart.cart_mmio = cart.c4 | cart.dsp1 | cart.dsp2 | cart.obc1;
 
   if(rom[cart.header_index + SRAM_SIZE] & 7) {
     cart.sram_size = 1024 << (rom[cart.header_index + SRAM_SIZE] & 7);
@@ -67,7 +92,7 @@ int32 score_lo = 0,
       score_ex = 0;
 
   if(rom_size < 0x010000) {
-  //cart too small to be anything else
+  //cart too small to be anything but lorom
     cart.header_index = 0x007fc0;
     return;
   }

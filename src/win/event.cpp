@@ -24,7 +24,7 @@ void capture_screenshot() {
 }
 
 void set_video_profile(uint profile) {
-  if(profile > 9)profile = 0;
+  if(profile > 7)profile = 0;
 
   config::video.profile = profile;
   uiVideo->update_video_profile();
@@ -37,16 +37,16 @@ void set_video_profile(uint profile) {
   wMain.CheckMenuItem(MENU_SETTINGS_VIDEOPROFILE_5, profile == 5);
   wMain.CheckMenuItem(MENU_SETTINGS_VIDEOPROFILE_6, profile == 6);
   wMain.CheckMenuItem(MENU_SETTINGS_VIDEOPROFILE_7, profile == 7);
-  wMain.CheckMenuItem(MENU_SETTINGS_VIDEOPROFILE_8, profile == 8);
-  wMain.CheckMenuItem(MENU_SETTINGS_VIDEOPROFILE_9, profile == 9);
 }
 
 void toggle_fullscreen() {
-  if(uiVideo->active_profile_is_fullscreen() == false) {
-    set_video_profile(config::video.profile_fullscreen_default);
-  } else {
-    set_video_profile(config::video.profile_windowed_default);
+  config::video.fullscreen.toggle();
+  if(bool(config::video.fullscreen) == true) {
+    wSettings.Hide();
+    wAbout.Hide();
+    debugger.deactivate();
   }
+  event::set_video_profile(config::video.profile);
 }
 
 void load_rom() {

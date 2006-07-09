@@ -22,7 +22,7 @@ void bAPU::reset() {
   regs.p  = 0x02;
 
   status.cycle_pos       = 0;
-  status.cycles_executed = 0;
+  status.clocks_executed = 0;
 
 //$f1
   status.iplrom_enabled = true;
@@ -47,8 +47,6 @@ void bAPU::reset() {
 bAPU::bAPU() {
   init_op_table();
 
-  spcram = (uint8*)malloc(65536);
-
   t0.cycle_frequency = 128; //1.024mhz /  8khz = 128
   t1.cycle_frequency = 128; //1.024mhz /  8khz = 128
   t2.cycle_frequency =  16; //1.024mhz / 64khz =  16
@@ -59,6 +57,4 @@ bAPU::bAPU() {
   t2.target = 0;
 }
 
-bAPU::~bAPU() {
-  if(spcram)free(spcram);
-}
+bAPU::~bAPU() {}

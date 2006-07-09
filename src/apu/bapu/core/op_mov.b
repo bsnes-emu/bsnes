@@ -2,11 +2,14 @@ mov_a_x(0x7d, a, x),
 mov_a_y(0xdd, a, y),
 mov_x_a(0x5d, x, a),
 mov_y_a(0xfd, y, a),
-mov_x_sp(0x9d, x, sp),
-mov_sp_x(0xbd, sp, x) {
+mov_x_sp(0x9d, x, sp) {
 1:regs.$1 = regs.$2;
   regs.p.n = !!(regs.$1 & 0x80);
   regs.p.z = (regs.$1 == 0);
+}
+
+mov_sp_x(0xbd, sp, x) {
+1:regs.$1 = regs.$2;
 }
 
 mov_a_const(0xe8, a),

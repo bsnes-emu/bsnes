@@ -2,7 +2,7 @@ struct {
   uint32 read_index; //set to 0 at beginning of DMA/HDMA
 
 //$420b
-  bool   active;
+  bool   dma_enabled;
 //$420c
   bool   hdma_enabled;
 //$43x0
@@ -33,7 +33,7 @@ struct {
   uint8  hdma_unknown;
 
 //hdma-specific
-  bool   hdma_active;
+  bool   hdma_completed; //for this frame
   bool   hdma_do_transfer;
 
   uint8  hdma_current_channel;
@@ -41,10 +41,12 @@ struct {
 } channel[8];
 
   inline void   dma_transfer_byte(bool direction, uint8 bbus, uint32 abus);
+  inline uint8  dma_bbus(uint8 i, uint8 index);
   inline void   dma_add_cycles(uint32 cycles);
   inline void   hdma_add_cycles(uint32 cycles);
   inline void   dma_run();
   inline void   hdma_run();
+  inline void   hdma_init();
   inline void   hdma_update(uint8 i);
   inline uint8  hdma_enabled_channels();
   inline uint8  hdma_active_channels();
@@ -56,5 +58,4 @@ struct {
   inline uint32 dma_addr(uint8 i);
   inline uint32 hdma_addr(uint8 i);
   inline uint32 hdma_iaddr(uint8 i);
-  inline uint16 hdma_mmio(uint8 i);
   inline void   dma_reset();

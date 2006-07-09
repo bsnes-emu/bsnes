@@ -27,11 +27,11 @@ void bCPU::run() {
     if(!run_state.irq && !run_state.stp) {
       if(time.nmi_pending == true) {
         time.nmi_pending = false;
-        aa.w = 0xffea;
+        aa.w = (regs.e == false) ? 0xffea : 0xfffa;
         run_state.irq = true;
       } else if(time.irq_pending == true) {
         time.irq_pending = false;
-        aa.w = 0xffee;
+        aa.w = (regs.e == false) ? 0xffee : 0xfffe;
         run_state.irq = true;
       }
     }
@@ -41,9 +41,9 @@ void bCPU::run() {
 }
 
 void bCPU::scanline() {
-  time.hdma_triggered = false;
+  time.hdma_triggered = (vcounter() <= (!overscan() ? 224 : 239)) ? false : true;
 
-  if(vcounter() == (overscan() == false ? 227 : 242) && status.auto_joypad_poll == true) {
+  if(vcounter() == (!overscan() ? 227 : 242) && status.auto_joypad_poll == true) {
     snes->poll_input(SNES::DEV_JOYPAD1);
     snes->poll_input(SNES::DEV_JOYPAD2);
   //When the SNES auto-polls the joypads, it writes 1, then 0 to
@@ -92,9 +92,6 @@ void bCPU::reset() {
   regs.p   = 0x34;
   regs.e   = 1;
   regs.mdr = 0x00;
-
-//simulate pbr:pc push during reset irq vector
-  regs.s.l -= 3;
 
   time_reset();
   mmio_reset();

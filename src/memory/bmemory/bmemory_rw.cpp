@@ -54,6 +54,9 @@ void bMemBus::write_sdd1(uint32 addr, uint8 data) {
 uint8 bMemBus::read_c4 (uint32 addr) { return c4->read(addr); }
 void  bMemBus::write_c4(uint32 addr, uint8 data) { c4->write(addr, data); }
 
+uint8 bMemBus::read_dsp1 (uint32 addr) { return dsp1->read(addr); }
+void  bMemBus::write_dsp1(uint32 addr, uint8 data) { dsp1->write(addr, data); }
+
 uint8 bMemBus::read_dsp2 (uint32 addr) { return dsp2->read(addr); }
 void  bMemBus::write_dsp2(uint32 addr, uint8 data) { dsp2->write(addr, data); }
 

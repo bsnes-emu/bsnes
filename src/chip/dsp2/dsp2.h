@@ -1,13 +1,13 @@
 class DSP2 {
 public:
 struct {
-  bool waiting_for_command;
-  uint command;
-  uint in_count,  in_index;
-  uint out_count, out_index;
+  bool   waiting_for_command;
+  uint   command;
+  uint   in_count,  in_index;
+  uint   out_count, out_index;
 
-  uint8 parameters[512];
-  uint8 output[512];
+  uint8  parameters[512];
+  uint8  output[512];
 
   uint8  op05transparent;
   bool   op05haslen;
@@ -20,6 +20,7 @@ struct {
   int    op0doutlen;
   int    op0dinlen;
 } status;
+
   void   init();
   void   enable();
   void   power();

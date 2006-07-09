@@ -19,9 +19,11 @@
 #include "memory/bmemory/bmemory.h"
 
 #include "cpu/cpu.h"
+#include "cpu/scpu/scpu.h"
 #include "cpu/bcpu/bcpu.h"
 
 #include "apu/apu.h"
+#include "apu/sapu/sapu.h"
 #include "apu/bapu/bapu.h"
 
 #include "dsp/dsp.h"
@@ -35,6 +37,7 @@
 #include "chip/srtc/srtc.h"
 #include "chip/sdd1/sdd1.h"
 #include "chip/c4/c4.h"
+#include "chip/dsp1/dsp1.h"
 #include "chip/dsp2/dsp2.h"
 #include "chip/obc1/obc1.h"
 
@@ -51,12 +54,13 @@ extern MMIO mmio_unmapped;
   extern APUCORE deref(apu);
   extern DSPCORE deref(dsp);
   extern PPUCORE deref(ppu);
-  #endif
+#endif
 extern SNES *snes;
 
 extern SRTC *srtc;
 extern SDD1 *sdd1;
 extern C4   *c4;
+extern DSP1 *dsp1;
 extern DSP2 *dsp2;
 extern OBC1 *obc1;
 
@@ -85,6 +89,7 @@ SNES *snes;
 SRTC *srtc;
 SDD1 *sdd1;
 C4   *c4;
+DSP1 *dsp1;
 DSP2 *dsp2;
 OBC1 *obc1;
 

@@ -1,14 +1,14 @@
 void bAPU::add_cycles(int cycles) {
-  status.cycles_executed += cycles;
+  status.clocks_executed += cycles;
 
   t0.add_cycles(cycles);
   t1.add_cycles(cycles);
   t2.add_cycles(cycles);
 }
 
-uint32 bAPU::cycles_executed() {
-uint32 r = status.cycles_executed;
-  status.cycles_executed = 0;
+uint32 bAPU::clocks_executed() {
+uint32 r = status.clocks_executed;
+  status.clocks_executed = 0;
   return (r << 4) + (r << 3);
 }
 

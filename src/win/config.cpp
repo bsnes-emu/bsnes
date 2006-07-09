@@ -13,26 +13,18 @@ Setting System::speed_fastest (&config_file, "system.speed_fastest",  "Fastest s
 
 struct Video {
   static Setting renderer;
-  static Setting profile;
-  static Setting profile_windowed_default, profile_fullscreen_default;
-  static Setting profile_0, profile_1, profile_2, profile_3, profile_4;
-  static Setting profile_5, profile_6, profile_7, profile_8, profile_9;
+  static Setting profile, fullscreen;
+  static Setting profile_0, profile_1, profile_2, profile_3;
+  static Setting profile_4, profile_5, profile_6, profile_7;
 
   static Setting use_vram, triple_buffering;
   static Setting pscanline_intensity, iscanline_intensity;
-
-  struct Filter {
-    static Setting software, hardware;
-  } filter;
 } video;
 Setting Video::renderer(&config_file, "video.renderer", "Video renderer\n"
   "\"dd\" (DirectDraw7 -- faster, less features)\n"
   "\"d3d\" (Direct3D9 -- slower, more features)", "d3d");
-Setting Video::profile(0, "video.profile", "", 2, Setting::DEC);
-Setting Video::profile_windowed_default(&config_file, "video.profile_windowed_default",
-  "Windowed profile to select for Alt+Enter", 2, Setting::DEC);
-Setting Video::profile_fullscreen_default(&config_file, "video.profile_fullscreen_default",
-  "Fullscreen profile to select for Alt+Enter", 9, Setting::DEC);
+Setting Video::profile(&config_file, "video.profile", "", 2, Setting::DEC);
+Setting Video::fullscreen(0, "video.fullscreen", "", false, Setting::TRUE_FALSE);
 
 /* software_filter
  * hardware_filter
@@ -49,22 +41,19 @@ Setting Video::profile_fullscreen_default(&config_file, "video.profile_fullscree
  * refresh_rate
  * triple_buffering
  */
-Setting Video::profile_0(&config_file, "video.profile_0", "Video profile 0 configuration\n"
+Setting Video::profile_0(&config_file, "video.profile_0", "Video profile 0-7 configuration\n"
   "Please use bsnes GUI configuration editor to modify video profile settings\n"
   "Format: software_filter;hardware_filter;video_standard;multiplier-1;correct_aspect_ratio;\n"
-  "        enable_scanlines;manual_render_size;render_width;render_height;fullscreen;\n"
+  "        enable_scanlines;manual_render_size;render_width;render_height;\n"
   "        resolution_width;resolution_height;refresh_rate;triple_buffering"
-  "",                                                         "0;0;0;0;false;false;false;256;224;false;320;240;0;false");
-Setting Video::profile_1(&config_file, "video.profile_1", "", "0;0;0;1;false;false;false;512;448;false;640;480;0;false");
-Setting Video::profile_2(&config_file, "video.profile_2", "", "0;1;0;1;true;false;false;597;448;false;640;480;0;false");
-Setting Video::profile_3(&config_file, "video.profile_3", "", "0;1;0;2;true;false;false;896;672;false;1024;768;0;false");
-Setting Video::profile_4(&config_file, "video.profile_4", "", "0;1;0;3;true;false;false;1195;896;false;1280;960;0;false");
-
-Setting Video::profile_5(&config_file, "video.profile_5", "", "0;0;0;0;false;false;false;256;224;true;320;240;0;false");
-Setting Video::profile_6(&config_file, "video.profile_6", "", "0;0;0;1;false;false;false;512;448;true;640;480;0;false");
-Setting Video::profile_7(&config_file, "video.profile_7", "", "0;1;0;1;true;false;false;597;448;true;640;480;0;false");
-Setting Video::profile_8(&config_file, "video.profile_8", "", "0;1;0;2;true;false;false;896;672;true;1024;768;0;false");
-Setting Video::profile_9(&config_file, "video.profile_9", "", "0;1;0;3;true;false;false;1195;896;true;1280;960;0;false");
+  "",                                                         "0;0;0;0;false;false;false;256;224;0;0;0;false");
+Setting Video::profile_1(&config_file, "video.profile_1", "", "0;0;0;1;false;false;false;512;448;0;0;0;false");
+Setting Video::profile_2(&config_file, "video.profile_2", "", "0;1;0;1;true;false;false;597;448;0;0;0;false");
+Setting Video::profile_3(&config_file, "video.profile_3", "", "0;1;0;2;true;false;false;896;672;0;0;0;false");
+Setting Video::profile_4(&config_file, "video.profile_4", "", "0;1;0;3;true;false;false;1195;896;0;0;0;false");
+Setting Video::profile_5(&config_file, "video.profile_5", "", "0;0;0;0;false;false;false;256;224;0;0;0;false");
+Setting Video::profile_6(&config_file, "video.profile_6", "", "0;0;0;0;false;false;false;256;224;0;0;0;false");
+Setting Video::profile_7(&config_file, "video.profile_7", "", "0;0;0;0;false;false;false;256;224;0;0;0;false");
 
 Setting Video::use_vram(&config_file, "video.use_vram", "Use Video RAM instead of System RAM", true, Setting::TRUE_FALSE);
 Setting Video::triple_buffering(&config_file, "video.triple_buffering", "Use triple buffering", false, Setting::TRUE_FALSE);
@@ -73,14 +62,6 @@ Setting Video::pscanline_intensity(&config_file, "video.pscanline_intensity",
   "Value is percentage of intensity from 0 to 100", 30, Setting::DEC);
 Setting Video::iscanline_intensity(&config_file, "video.iscanline_intensity",
   "Interlace scanline intensity", 50, Setting::DEC);
-
-Setting Video::Filter::software(&config_file, "video.filter.software", "Software video filter\n"
-  "0 = Direct\n"
-  "1 = Scale2x\n", 0, Setting::DEC);
-
-Setting Video::Filter::hardware(&config_file, "video.filter.hardware", "Hardware video filter\n"
-  "0 = Pixel\n"
-  "1 = Bilinear", 1, Setting::DEC);
 
 struct Input {
   static Setting axis_resistance;

@@ -1,3 +1,19 @@
+/*****
+ * Generic LoROM / HiROM / ExHiROM / ExLoROM mapping
+ *
+ * Must map the following regions :
+ * $[00-3f]:[6000-ffff]
+ * $[40-7d]:[0000-ffff]
+ * $[80-bf]:[6000-ffff]
+ * $[c0-ff]:[0000-ffff]
+ *
+ * The following regions will be ignored / overwritten :
+ * $[00-3f]:[0000-1fff] WRAM
+ * $[00-3f]:[2000-5fff] MMIO
+ * $[7e-7f]:[0000-ffff] WRAM
+ * $[80-bf]:[0000-1fff] WRAM
+ * $[80-bf]:[2000-5fff] MMIO
+ *****/
 void bMemBus::cart_map_generic(uint type) {
 uint32 P0_size, P1_size, ROM_mask, ROM_size, SRAM_size;
   ROM_size  = cartridge.cart.rom_size;
@@ -26,6 +42,12 @@ uint32 P0_size, P1_size, ROM_mask, ROM_size, SRAM_size;
   //layout I can create using only ROM header information. Additional accuracy
   //requires PCB identification.
 
+  //Unmapped region
+  //$[00-1f|80-9f]:[6000-7fff]
+    if((bank & 0x7f) >= 0x00 && (bank & 0x7f) <= 0x1f && (addr & 0xe000) == 0x6000) {
+      continue;
+    }
+
   //HiROM SRAM region
   //$[20-3f|a0-bf]:[6000-7fff]
     if((bank & 0x7f) >= 0x20 && (bank & 0x7f) <= 0x3f && (addr & 0xe000) == 0x6000) {
@@ -41,7 +63,7 @@ uint32 P0_size, P1_size, ROM_mask, ROM_size, SRAM_size;
 
   //LoROM SRAM region
   //$[70-7f|f0-ff]:[0000-7fff]
-  //Note: RAM is remapped over $[7e-7f]:[0000-ffff]
+  //Note: WRAM is remapped over $[7e-7f]:[0000-ffff]
     if((bank & 0x7f) >= 0x70 && (bank & 0x7f) <= 0x7f && (addr & 0x8000) == 0x0000) {
       if(SRAM_size == 0)continue;
 
@@ -114,6 +136,34 @@ void bMemBus::cart_map_c4() {
       page_read [0x8000 + (bank << 8) + page] = &bMemBus::read_c4;
       page_write[0x0000 + (bank << 8) + page] = &bMemBus::write_c4;
       page_write[0x8000 + (bank << 8) + page] = &bMemBus::write_c4;
+    }
+  }
+}
+
+void bMemBus::cart_map_dsp1() {
+  if(cartridge.cart.dsp1_mapper == Cartridge::DSP1_LOROM_1MB) {
+  //$[20-3f]:[8000-ffff]
+    for(uint bank = 0x20; bank <= 0x3f; bank++) {
+      for(uint page = 0x80; page <= 0xff; page++) {
+        page_read [(bank << 8) + page] = &bMemBus::read_dsp1;
+        page_write[(bank << 8) + page] = &bMemBus::write_dsp1;
+      }
+    }
+  } else if(cartridge.cart.dsp1_mapper == Cartridge::DSP1_LOROM_2MB) {
+  //$[60-6f]:[0000-7fff]
+    for(uint bank = 0x60; bank <= 0x6f; bank++) {
+      for(uint page = 0x00; page <= 0x7f; page++) {
+        page_read [(bank << 8) + page] = &bMemBus::read_dsp1;
+        page_write[(bank << 8) + page] = &bMemBus::write_dsp1;
+      }
+    }
+  } else if(cartridge.cart.dsp1_mapper == Cartridge::DSP1_HIROM) {
+  //$[00-1f]:[6000-7fff]
+    for(uint bank = 0x00; bank <= 0x1f; bank++) {
+      for(uint page = 0x60; page <= 0x7f; page++) {
+        page_read [(bank << 8) + page] = &bMemBus::read_dsp1;
+        page_write[(bank << 8) + page] = &bMemBus::write_dsp1;
+      }
     }
   }
 }

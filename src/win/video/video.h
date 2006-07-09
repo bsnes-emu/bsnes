@@ -13,12 +13,11 @@ struct VideoSettings {
   bool manual_render_size;
   uint render_width;
   uint render_height;
-  bool fullscreen;
   uint resolution_width;
   uint resolution_height;
   uint refresh_rate;
   bool triple_buffering;
-} video_settings[10];
+} video_settings[8];
 
 void load_video_settings(uint profile);
 void save_video_settings(uint profile);
@@ -32,7 +31,6 @@ struct {
   uint render_height;
 
   uint hardware_filter;
-  bool fullscreen;
   bool triple_buffering;
   bool enable_scanlines;
 
@@ -47,7 +45,6 @@ struct {
 } settings;
   void update_video_settings();
   void update_window();
-  bool active_profile_is_fullscreen() { return settings.fullscreen; }
 
   virtual uint16 *lock(uint32 &pitch) = 0;
   virtual void    unlock() = 0;

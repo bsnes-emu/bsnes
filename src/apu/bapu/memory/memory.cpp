@@ -189,11 +189,3 @@ void bAPU::stack_write(uint8 value) {
   spcram_write(0x0100 | regs.sp, value);
   regs.sp--;
 }
-
-uint8 *bAPU::get_spcram_handle() {
-  if(!spcram) {
-    alert("bAPU::get_spcram_handle() -- spcram uninitialized");
-  }
-
-  return spcram;
-}

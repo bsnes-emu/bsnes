@@ -44,8 +44,9 @@ void build_window_tables(uint8 bg);
 
 //bppu_render_bg.cpp
 struct {
-  uint16 tw, th; //tile width, height
-  uint16 mx, my; //screen mask x, y
+  uint16 tw,  th;  //tile width, height
+  uint16 mx,  my;  //screen mask x, y
+  uint16 scx, scy; //sc index offsets
 } bg_info[4];
 
 inline void   update_bg_info();

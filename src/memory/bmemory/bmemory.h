@@ -33,6 +33,8 @@ enum { TYPE_WRAM, TYPE_MMIO, TYPE_CART };
   void   write_sdd1    (uint32 addr, uint8 data);
   uint8  read_c4       (uint32 addr);
   void   write_c4      (uint32 addr, uint8 data);
+  uint8  read_dsp1     (uint32 addr);
+  void   write_dsp1    (uint32 addr, uint8 data);
   uint8  read_dsp2     (uint32 addr);
   void   write_dsp2    (uint32 addr, uint8 data);
   uint8  read_obc1     (uint32 addr);
@@ -44,6 +46,7 @@ enum { TYPE_WRAM, TYPE_MMIO, TYPE_CART };
 
   void   cart_map_sdd1();
   void   cart_map_c4();
+  void   cart_map_dsp1();
   void   cart_map_dsp2();
   void   cart_map_obc1();
 

@@ -122,9 +122,9 @@ SDL_Event event;
   atexit(SDL_Quit);
   set_window_info();
   screen = SDL_SetVideoMode(config::video.display_width, config::video.display_height, 16,
-    SDL_SWSURFACE | ((config::video.fullscreen) ? SDL_FULLSCREEN : 0));
+    SDL_HWSURFACE | ((config::video.fullscreen) ? SDL_FULLSCREEN : 0));
   if(!screen)     { alert("Failed to initialize SDL"); goto _end; }
-  backbuffer = SDL_CreateRGBSurface(SDL_SWSURFACE, 512, 448, 16, 0xf800, 0x07e0, 0x001f, 0x0000);
+  backbuffer = SDL_CreateRGBSurface(SDL_HWSURFACE, 512, 448, 16, 0xf800, 0x07e0, 0x001f, 0x0000);
   if(!backbuffer) { alert("Failed to initialize SDL"); goto _end; }
 
   SDL_WM_SetCaption(BSNES_TITLE, 0);

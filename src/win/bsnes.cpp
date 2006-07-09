@@ -49,6 +49,14 @@ void bSNES::run() {
 }
 
 void bSNES::video_run() {
+//temporary code to try and fix input buffer stalls
+static int sync_counter = 0;
+  if(++sync_counter >= 30) {
+    Sleep(1);
+    sync_counter = 0;
+  }
+//remove above code after testing
+
   if(r_ppu->status.frames_updated) {
   char s[512], t[512];
     r_ppu->status.frames_updated = false;

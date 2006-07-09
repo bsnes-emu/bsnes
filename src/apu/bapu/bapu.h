@@ -6,7 +6,7 @@ public:
 
 struct {
   uint8  cycle_pos, opcode;
-  uint32 cycles_executed;
+  uint32 clocks_executed;
 
 //$f1
   bool   iplrom_enabled;

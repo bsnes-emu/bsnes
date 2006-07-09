@@ -6,19 +6,19 @@
 #include "input/input.cpp"
 
 void SNES::run() {
-  if(apusync.cycles < 0) {
+  if(sync.counter <= 0) {
     r_cpu->run();
-    apusync.cycles += apusync.apu_multbl[r_cpu->cycles_executed()];
+  uint32 clocks = r_cpu->clocks_executed();
+    sync.counter += sync.apu_multbl[clocks];
   } else {
     r_apu->run();
-  uint32 cycles = r_apu->cycles_executed();
-    apusync.dsp += cycles;
-    apusync.cycles -= apusync.cpu_multbl[cycles];
-
+  uint32 clocks = r_apu->clocks_executed();
+    sync.counter -= sync.cpu_multbl[clocks];
   //1024000(SPC700) / 32000(DSP) = 32spc/dsp ticks
   //24576000(Sound clock crystal) / 32000(DSP) = 768crystal/dsp ticks
-    while(apusync.dsp >= 768) {
-      apusync.dsp -= 768;
+    sync.dsp_counter += clocks;
+    while(sync.dsp_counter >= 768) {
+      sync.dsp_counter -= 768;
       audio_update(r_dsp->run());
     }
   }
@@ -35,12 +35,14 @@ void SNES::init() {
   srtc = new SRTC();
   sdd1 = new SDD1();
   c4   = new C4();
+  dsp1 = new DSP1();
   dsp2 = new DSP2();
   obc1 = new OBC1();
 
   srtc->init();
   sdd1->init();
   c4->init();
+  dsp1->init();
   dsp2->init();
   obc1->init();
 
@@ -62,6 +64,7 @@ void SNES::power() {
   if(cartridge.cart.srtc)srtc->power();
   if(cartridge.cart.sdd1)sdd1->power();
   if(cartridge.cart.c4)  c4->power();
+  if(cartridge.cart.dsp1)dsp1->power();
   if(cartridge.cart.dsp2)dsp2->power();
   if(cartridge.cart.obc1)obc1->power();
 
@@ -69,15 +72,14 @@ void SNES::power() {
   for(int i = 0x2100; i <= 0x213f; i++)r_mem->set_mmio_mapper(i, r_ppu);
   for(int i = 0x2140; i <= 0x217f; i++)r_mem->set_mmio_mapper(i, r_cpu);
   for(int i = 0x2180; i <= 0x2183; i++)r_mem->set_mmio_mapper(i, r_cpu);
-//input
-  r_mem->set_mmio_mapper(0x4016, r_cpu);
-  r_mem->set_mmio_mapper(0x4017, r_cpu);
+  for(int i = 0x4016; i <= 0x4017; i++)r_mem->set_mmio_mapper(i, r_cpu);
   for(int i = 0x4200; i <= 0x421f; i++)r_mem->set_mmio_mapper(i, r_cpu);
   for(int i = 0x4300; i <= 0x437f; i++)r_mem->set_mmio_mapper(i, r_cpu);
 
   if(cartridge.cart.srtc)srtc->enable();
   if(cartridge.cart.sdd1)sdd1->enable();
   if(cartridge.cart.c4)  c4->enable();
+  if(cartridge.cart.dsp1)dsp1->enable();
   if(cartridge.cart.dsp2)dsp2->enable();
   if(cartridge.cart.obc1)obc1->enable();
 
@@ -85,7 +87,8 @@ void SNES::power() {
 }
 
 void SNES::reset() {
-  apusync.cycles = -apusync.cpu_multbl[32];
+  sync.counter     = -sync.cpu_multbl[32];
+  sync.dsp_counter = 0;
 
   r_cpu->reset();
   r_apu->reset();
@@ -96,6 +99,7 @@ void SNES::reset() {
   if(cartridge.cart.srtc)srtc->reset();
   if(cartridge.cart.sdd1)sdd1->reset();
   if(cartridge.cart.c4)  c4->reset();
+  if(cartridge.cart.dsp1)dsp1->reset();
   if(cartridge.cart.dsp2)dsp2->reset();
   if(cartridge.cart.obc1)obc1->reset();
 
@@ -137,17 +141,13 @@ uint8 SNES::region() { return snes_region; }
  **************/
 
 void SNES::update_timing() {
-  apusync.cycles = 0;
-  if(snes_region == NTSC) {
-    apusync.cpu_freq = 21477272 >> 3;
-  } else if(snes_region == PAL) {
-    apusync.cpu_freq = 21281370 >> 3;
-  }
-  apusync.apu_freq = 24576000 >> 3;
+  sync.counter  = 0;
+  sync.cpu_freq = (snes_region == NTSC) ? 21477272 : 21281370;
+  sync.apu_freq = 24576000;
 
-  for(int i = 0; i < 1024; i++) {
-    apusync.cpu_multbl[i] = i * apusync.cpu_freq;
-    apusync.apu_multbl[i] = i * apusync.apu_freq;
+  for(int64 i = 0; i < 1024; i++) {
+    sync.cpu_multbl[i] = i * sync.cpu_freq;
+    sync.apu_multbl[i] = i * sync.apu_freq;
   }
 }
 

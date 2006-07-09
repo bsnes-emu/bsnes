@@ -32,7 +32,7 @@ void bCPU::irq_run() {
     break;
   case 5:
   //emulation-mode irqs clear brk bit 0x10
-    stack_write((regs.e) ? (regs.p & ~0x10) : regs.p);
+    stack_write(regs.e ? (regs.p & ~0x10) : regs.p);
     break;
   case 6:
   //todo: test if NMI can override IRQ here...
@@ -83,6 +83,5 @@ _true:
   time.irq_transition = 0;
 
   run_state.wai = false;
-  if(regs.p.i)return false;
-  return true;
+  return (regs.p.i) ? false : true;
 }

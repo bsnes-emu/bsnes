@@ -1,20 +1,18 @@
 class APURegFlags {
 private:
-  template <uint8 B> class bit {
+  template<uint mask> class bit {
   public:
-  uint8 _b;
-    inline operator bool() { return (_b & B); }
-    inline bool operator =  (bool i) { (i) ? _b |= B : _b &= ~B; return (_b & B); }
-    inline bool operator &  (bool i) { if(i)_b &= ~B; return (_b & B); }
-    inline bool operator &= (bool i) { if(i)_b &= ~B; return (_b & B); }
-    inline bool operator |  (bool i) { if(i)_b |= B; return (_b & B); }
-    inline bool operator |= (bool i) { if(i)_b |= B; return (_b & B); }
-    inline bool operator ^  (bool i) { if(i)_b ^= B; return (_b & B); }
-    inline bool operator ^= (bool i) { if(i)_b ^= B; return (_b & B); }
+  uint data;
+    inline operator bool() { return bool(data & mask); }
+    inline bool operator  = (const bool i) { (i) ? data |= mask : data &= ~mask; return bool(data & mask); }
+    inline bool operator |= (const bool i) { if(i)data |= mask; return bool(data & mask); }
+    inline bool operator ^= (const bool i) { if(i)data ^= mask; return bool(data & mask); }
+    inline bool operator &= (const bool i) { if(i)data &= mask; return bool(data & mask); }
   };
+
 public:
 union {
-  uint8 _b;
+  uint8 data;
   bit<0x80> n;
   bit<0x40> v;
   bit<0x20> p;
@@ -25,12 +23,12 @@ union {
   bit<0x01> c;
 };
 
-  APURegFlags() { _b = 0; }
-  inline operator uint8() { return _b; }
-  inline unsigned operator  = (uint8 i) { _b  = i; return _b; }
-  inline unsigned operator &= (uint8 i) { _b &= i; return _b; }
-  inline unsigned operator |= (uint8 i) { _b |= i; return _b; }
-  inline unsigned operator ^= (uint8 i) { _b ^= i; return _b; }
+  APURegFlags() { data = 0; }
+  inline operator unsigned() { return data; }
+  inline unsigned operator  = (const uint8 i) { data  = i; return data; }
+  inline unsigned operator |= (const uint8 i) { data |= i; return data; }
+  inline unsigned operator ^= (const uint8 i) { data ^= i; return data; }
+  inline unsigned operator &= (const uint8 i) { data &= i; return data; }
 };
 
 class APURegs {
@@ -38,11 +36,7 @@ public:
 uint16 pc;
 union {
   uint16 ya;
-#ifdef ARCH_LSB
-  struct { uint8 a, y; };
-#else
-  struct { uint8 y, a; };
-#endif
+  struct { uint8 order_lsb2(a, y); };
 };
 uint8 x, sp;
 APURegFlags p;

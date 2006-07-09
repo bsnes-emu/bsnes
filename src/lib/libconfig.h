@@ -1,5 +1,5 @@
 /*
-  libconfig : version 0.07 ~byuu (02/10/06)
+  libconfig : version 0.08 ~byuu (07/02/06)
 */
 
 #ifndef __LIBCONFIG
@@ -19,17 +19,7 @@ class Config;
 //  class T : public Setting { public: SettingOperators(T); } t;
 //  t = 0; // -> t.set(0);
 #define SettingOperators(__name) \
-  inline __name &operator=(const bool   _data) { set((uint)_data); return *this; } \
-  inline __name &operator=(const uint   _data) { set(_data); return *this; } \
-  inline __name &operator=(const uint8  _data) { set(_data); return *this; } \
-  inline __name &operator=(const uint16 _data) { set(_data); return *this; } \
-  inline __name &operator=(const uint32 _data) { set(_data); return *this; } \
-  inline __name &operator=(const int    _data) { set(_data); return *this; } \
-  inline __name &operator=(const int8   _data) { set(_data); return *this; } \
-  inline __name &operator=(const int16  _data) { set(_data); return *this; } \
-  inline __name &operator=(const int32  _data) { set(_data); return *this; } \
-  inline __name &operator=(const float  _data) { set((uint)_data); return *this; } \
-  inline __name &operator=(const double _data) { set((uint)_data); return *this; } \
+  template<typename T> inline __name &operator=(const T x) { set(T(x)); return *this; } \
   void toggle() { data ^= 1; set(data); } \
   __name(Config *_parent, char *_name, char *_desc, uint  _data, uint _type) : \
   Setting(_parent, _name, _desc, _data, _type) {} \
@@ -44,17 +34,19 @@ uint data, type, def;
 
 public:
 enum {
-  TRUE_FALSE,
-  ENABLED_DISABLED,
-  ON_OFF,
-  YES_NO,
-  DEC,
-  HEX,
-  HEX8,
-  HEX16,
-  HEX24,
-  HEX32,
-  STR
+  BOOL             =  0,
+  BOOLEAN          =  0,
+  TRUE_FALSE       =  0,
+  ENABLED_DISABLED =  1,
+  ON_OFF           =  2,
+  YES_NO           =  3,
+  DEC              =  4,
+  HEX              =  5,
+  HEX8             =  6,
+  HEX16            =  7,
+  HEX24            =  8,
+  HEX32            =  9,
+  STR              = 10,
 };
 char *name, *desc;
 substring char_data, char_def;
@@ -68,29 +60,14 @@ substring char_data, char_def;
   Setting(Config *_parent, char *_name, char *_desc, uint  _data, uint _type);
   Setting(Config *_parent, char *_name, char *_desc, char *_data);
 
-  inline operator bool()   { return (bool)get(); }
-  inline operator uint()   { return get(); }
-  inline operator uint8()  { return get(); }
-  inline operator uint16() { return get(); }
-  inline operator uint32() { return get(); }
-  inline operator int()    { return get(); }
-  inline operator int8()   { return get(); }
-  inline operator int16()  { return get(); }
-  inline operator int32()  { return get(); }
-  inline operator float()  { return (float) get(); }
-  inline operator double() { return (double)get(); }
-
-  inline Setting &operator=(const bool   _data) { set((uint)_data); return *this; }
-  inline Setting &operator=(const uint   _data) { set(_data); return *this; }
-  inline Setting &operator=(const uint8  _data) { set(_data); return *this; }
-  inline Setting &operator=(const uint16 _data) { set(_data); return *this; }
-  inline Setting &operator=(const uint32 _data) { set(_data); return *this; }
-  inline Setting &operator=(const int    _data) { set(_data); return *this; }
-  inline Setting &operator=(const int8   _data) { set(_data); return *this; }
-  inline Setting &operator=(const int16  _data) { set(_data); return *this; }
-  inline Setting &operator=(const int32  _data) { set(_data); return *this; }
-  inline Setting &operator=(const float  _data) { set((uint)_data); return *this; }
-  inline Setting &operator=(const double _data) { set((uint)_data); return *this; }
+  template<typename T> inline operator T() { return T(get()); }
+  template<typename T> inline Setting &operator=(const T x) { set(T(x)); return *this; }
+  template<typename T> inline bool operator==(const T x) { return T(get()) == x; }
+  template<typename T> inline bool operator!=(const T x) { return T(get()) != x; }
+  template<typename T> inline bool operator>=(const T x) { return T(get()) >= x; }
+  template<typename T> inline bool operator> (const T x) { return T(get()) >  x; }
+  template<typename T> inline bool operator<=(const T x) { return T(get()) <= x; }
+  template<typename T> inline bool operator< (const T x) { return T(get()) <  x; }
 };
 
 class Config {

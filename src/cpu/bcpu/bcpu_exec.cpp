@@ -1,8 +1,8 @@
 void bCPU::last_cycle() {
 //DMV27: keep previous nmi value,
 //to allow wai and irq to work properly
-  time.nmi_pending = nmi_test() || time.nmi_pending;
-  time.irq_pending = irq_test();
+  time.nmi_pending |= nmi_test();
+  time.irq_pending |= irq_test();
 }
 
 void bCPU::pre_exec_cycle() {
@@ -56,12 +56,7 @@ static int z;
     status.hdma_state = HDMASTATE_IDMASYNC3;
     break;
   case HDMASTATE_IDMASYNC3:
-    channel[z].hdma_active = channel[z].hdma_enabled;
-    if(channel[z].hdma_enabled) {
-      channel[z].hdma_addr = channel[z].srcaddr;
-      hdma_update(z); //updates status.hdma_cycle_count
-    }
-    if(++z < 8)break;
+    hdma_init();
     if(!run_state.dma) {
       status.hdma_state = HDMASTATE_ICPUSYNC;
     } else {
@@ -89,7 +84,7 @@ static int z;
     status.hdma_state = HDMASTATE_DMASYNC3;
     break;
   case HDMASTATE_DMASYNC3:
-    if(channel[z].hdma_active) {
+    if(channel[z].hdma_line_counter) {
       add_cycles(8);
       status.hdma_cycle_count += 8;
     }
@@ -126,7 +121,7 @@ static int z;
     status.dma_state = DMASTATE_DMASYNC3;
     break;
   case DMASTATE_DMASYNC3:
-    if(channel[z].active == true) {
+    if(channel[z].dma_enabled == true) {
       add_cycles(8);
       status.dma_cycle_count += 8;
     }

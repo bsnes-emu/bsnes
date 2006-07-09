@@ -1,8 +1,8 @@
-void replace(substring &str, const char *key, const char *token) {
+substring &replace(substring &str, const char *key, const char *token) {
 int  i, z, ksl = strlen(key), tsl = strlen(token), ssl = strlen(str);
 uint replace_count = 0, size = ssl;
 char *data;
-  if(ksl > ssl)return;
+  if(ksl > ssl)return str;
   if(tsl > ksl) {                      //the new string may be longer than the old string...
     for(i=0;i<=ssl-ksl;) {             //so let's find out how big of a string we'll need...
       if(!memcmp(str.s + i, key, ksl)) {
@@ -26,15 +26,16 @@ char *data;
   data[z] = 0;
   strcpy(str, data);
   free(data);
+  return str;
 }
-void replace(substring &str, const char *key, substring &token) { replace(str, key, strptr(token)); }
+substring &replace(substring &str, const char *key, substring &token) { return replace(str, key, strptr(token)); }
 
-void qreplace(substring &str, const char *key, const char *token) {
+substring &qreplace(substring &str, const char *key, const char *token) {
 int   i, l, z, ksl = strlen(key), tsl = strlen(token), ssl = strlen(str);
 uint  replace_count = 0, size = ssl;
 uint8 x;
 char *data;
-  if(ksl > ssl)return;
+  if(ksl > ssl)return str;
   if(tsl > ksl) {
     for(i=0;i<=ssl-ksl;) {
       x = str.s[i];
@@ -80,5 +81,6 @@ char *data;
   data[z] = 0;
   strcpy(str, data);
   free(data);
+  return str;
 }
-void qreplace(substring &str, const char *key, substring &token) { qreplace(str, key, strptr(token)); }
+substring &qreplace(substring &str, const char *key, substring &token) { return qreplace(str, key, strptr(token)); }

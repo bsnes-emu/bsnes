@@ -1,20 +1,18 @@
 class CPURegFlags {
 private:
-  template <uint8 B> class bit {
+  template<uint mask> class bit {
   public:
-  uint8 _b;
-    inline operator bool() { return (_b & B); }
-    inline bool operator =  (bool i) { (i) ? _b |= B : _b &= ~B; return (_b & B); }
-    inline bool operator &  (bool i) { if(i)_b &= ~B; return (_b & B); }
-    inline bool operator &= (bool i) { if(i)_b &= ~B; return (_b & B); }
-    inline bool operator |  (bool i) { if(i)_b |= B; return (_b & B); }
-    inline bool operator |= (bool i) { if(i)_b |= B; return (_b & B); }
-    inline bool operator ^  (bool i) { if(i)_b ^= B; return (_b & B); }
-    inline bool operator ^= (bool i) { if(i)_b ^= B; return (_b & B); }
+  uint data;
+    inline operator bool() { return bool(data & mask); }
+    inline bool operator  = (const bool i) { (i) ? data |= mask : data &= ~mask; return bool(data & mask); }
+    inline bool operator |= (const bool i) { if(i)data |= mask; return bool(data & mask); }
+    inline bool operator ^= (const bool i) { if(i)data ^= mask; return bool(data & mask); }
+    inline bool operator &= (const bool i) { if(i)data &= mask; return bool(data & mask); }
   };
+
 public:
 union {
-  uint8 _b;
+  uint8 data;
   bit<0x80> n;
   bit<0x40> v;
   bit<0x20> m, p;
@@ -25,64 +23,57 @@ union {
   bit<0x01> c;
 };
 
-  CPURegFlags() { _b = 0; }
-  inline operator uint8() { return _b; }
-  inline unsigned operator  = (uint8 i) { _b  = i; return _b; }
-  inline unsigned operator &= (uint8 i) { _b &= i; return _b; }
-  inline unsigned operator |= (uint8 i) { _b |= i; return _b; }
-  inline unsigned operator ^= (uint8 i) { _b ^= i; return _b; }
+  CPURegFlags() { data = 0; }
+  inline operator unsigned() { return data; }
+  inline unsigned operator  = (const uint8 i) { data  = i; return data; }
+  inline unsigned operator |= (const uint8 i) { data |= i; return data; }
+  inline unsigned operator ^= (const uint8 i) { data ^= i; return data; }
+  inline unsigned operator &= (const uint8 i) { data &= i; return data; }
 };
 
 class CPUReg16 {
 public:
 union {
   uint16 w;
-#ifdef ARCH_LSB
-  struct { uint8 l, h; };
-#else
-  struct { uint8 h, l; };
-#endif
+  struct { uint8 order_lsb2(l, h); };
 };
 
   CPUReg16() { w = 0; }
-  inline operator uint16() { return w; }
-  inline unsigned operator   = (uint16 i) { w   = i; return w; }
-  inline unsigned operator  += (uint16 i) { w  += i; return w; }
-  inline unsigned operator  -= (uint16 i) { w  -= i; return w; }
-  inline unsigned operator  *= (uint16 i) { w  *= i; return w; }
-  inline unsigned operator  /= (uint16 i) { w  /= i; return w; }
-  inline unsigned operator  &= (uint16 i) { w  &= i; return w; }
-  inline unsigned operator  |= (uint16 i) { w  |= i; return w; }
-  inline unsigned operator  ^= (uint16 i) { w  ^= i; return w; }
-  inline unsigned operator <<= (uint16 i) { w <<= i; return w; }
-  inline unsigned operator >>= (uint16 i) { w >>= i; return w; }
+  inline operator unsigned() { return w; }
+  template<typename T> inline unsigned operator   = (const T i) { w   = i; return w; }
+  template<typename T> inline unsigned operator  |= (const T i) { w  |= i; return w; }
+  template<typename T> inline unsigned operator  ^= (const T i) { w  ^= i; return w; }
+  template<typename T> inline unsigned operator  &= (const T i) { w  &= i; return w; }
+  template<typename T> inline unsigned operator <<= (const T i) { w <<= i; return w; }
+  template<typename T> inline unsigned operator >>= (const T i) { w >>= i; return w; }
+  template<typename T> inline unsigned operator  += (const T i) { w  += i; return w; }
+  template<typename T> inline unsigned operator  -= (const T i) { w  -= i; return w; }
+  template<typename T> inline unsigned operator  *= (const T i) { w  *= i; return w; }
+  template<typename T> inline unsigned operator  /= (const T i) { w  /= i; return w; }
+  template<typename T> inline unsigned operator  %= (const T i) { w  %= i; return w; }
 };
 
 class CPUReg24 {
 public:
 union {
   uint32 d;
-#ifdef ARCH_LSB
-  struct { uint16 w, null_w; };
-  struct { uint8  l, h, b, null_b; };
-#else
-  struct { uint16 null_w, w; };
-  struct { uint8  null_b, b, h, l; };
-#endif
+  struct { uint16 order_lsb2(w, wh); };
+  struct { uint8  order_lsb4(l, h, b, bh); };
 };
 
   CPUReg24() { d = 0; }
-  inline operator uint32() { return (d & 0xffffff); }
-  inline unsigned operator   = (uint16 i) { d   = i; return d; }
-  inline unsigned operator  += (uint16 i) { d  += i; return d; }
-  inline unsigned operator  -= (uint16 i) { d  -= i; return d; }
-  inline unsigned operator  *= (uint16 i) { d  *= i; return d; }
-  inline unsigned operator  /= (uint16 i) { d  /= i; return d; }
-  inline unsigned operator  &= (uint16 i) { d  &= i; return d; }
-  inline unsigned operator  |= (uint16 i) { d  |= i; return d; }
-  inline unsigned operator  ^= (uint16 i) { d  ^= i; return d; }
-  inline unsigned operator <<= (uint16 i) { d <<= i; return d; }
-  inline unsigned operator >>= (uint16 i) { d >>= i; return d; }
+  inline operator unsigned() { return d; }
+  template<typename T> inline unsigned operator   = (const T i) { d = uclip<24>(i);      return d; }
+  template<typename T> inline unsigned operator  |= (const T i) { d = uclip<24>(d  | i); return d; }
+  template<typename T> inline unsigned operator  ^= (const T i) { d = uclip<24>(d  ^ i); return d; }
+  template<typename T> inline unsigned operator  &= (const T i) { d = uclip<24>(d  & i); return d; }
+  template<typename T> inline unsigned operator <<= (const T i) { d = uclip<24>(d << i); return d; }
+  template<typename T> inline unsigned operator >>= (const T i) { d = uclip<24>(d >> i); return d; }
+  template<typename T> inline unsigned operator  += (const T i) { d = uclip<24>(d  + i); return d; }
+  template<typename T> inline unsigned operator  -= (const T i) { d = uclip<24>(d  - i); return d; }
+  template<typename T> inline unsigned operator  *= (const T i) { d = uclip<24>(d  * i); return d; }
+  template<typename T> inline unsigned operator  /= (const T i) { d = uclip<24>(d  / i); return d; }
+  template<typename T> inline unsigned operator  %= (const T i) { d = uclip<24>(d  % i); return d; }
 };
 
 class CPURegs {
@@ -90,8 +81,8 @@ public:
 CPUReg24 pc;
 CPUReg16 a, x, y, s, d;
 CPURegFlags p;
-uint8 db;
-uint8 mdr; //memory data register (openbus)
-bool  e;
+uint8  db;
+uint8  mdr;
+bool   e;
   CPURegs() { db = 0; mdr = 0x00; e = false; }
 };

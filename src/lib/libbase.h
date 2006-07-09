@@ -1,9 +1,28 @@
 /*
-  libbase : version 0.07 ~byuu (04/21/06)
+  libbase : version 0.08 ~byuu (07/08/06)
 */
 
 #ifndef __LIBBASE
 #define __LIBBASE
+
+#ifdef _MSC_VER
+//disable libc deprecation warnings in MSVC 2k5+
+#pragma warning(disable:4996)
+#endif
+
+/*****
+ * inline expansion
+ *****/
+
+#ifdef _MSC_VER
+  #define noinline     __declspec(noinline)
+  #define inline       inline
+  #define forceinline  __forceinline
+#else
+  #define noinline
+  #define inline       inline
+  #define forceinline  inline
+#endif
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -17,14 +36,19 @@
 #endif
 
 #ifndef TRUE
-#define TRUE 1
+#define TRUE !FALSE
 #endif
 
 #define SafeFree(__n)    if(__n) { free(__n);      __n = 0; }
 #define SafeDelete(__n)  if(__n) { delete(__n);    __n = 0; }
 #define SafeRelease(__n) if(__n) { __n->Release(); __n = 0; }
 
+/*****
+ * typedefs
+ *****/
+
 typedef unsigned int       uint;
+typedef signed int         sint;
 
 typedef unsigned char      byte;
 typedef unsigned short     word;
@@ -42,15 +66,150 @@ typedef signed short       int16;
 typedef signed long        int32;
 typedef signed long long   int64;
 
-template<typename T> void swap(T &x, T &y) {
+
+/*****
+ * templates
+ *****/
+
+template<typename T> inline void swap(T &x, T &y) {
 T z = x;
   x = y;
   y = z;
 }
 
-template<typename T, typename Targ> T bound_range(T &x, Targ min, Targ max) {
+template<int min, int max, typename T> inline T minmax(const T x) {
   return (x < T(min)) ? T(min) : (x > T(max)) ? T(max) : x;
 }
+
+template<int bits> inline unsigned uclamp(const unsigned x) {
+enum { m = (1 << bits) - 1 };
+  return (x > m) ? m : x;
+}
+
+template<int bits> inline unsigned uclip(const unsigned x) {
+enum { m = (1 << bits) - 1 };
+  return (x & m);
+}
+
+template<int bits> inline signed sclamp(const signed x) {
+enum { b = 1 << (bits - 1), m = (1 << (bits - 1)) - 1 };
+  return (x > m) ? m : (x < -b) ? -b : x;
+}
+
+//requires compiler SAR (shift arithmetic right) support
+template<int bits> inline signed sclip(const signed x) {
+enum { s = sizeof(x) * 8 - bits };
+  return (x << s) >> s;
+}
+
+//use this if compiler uses SLR (shift logical right)
+//template<int bits> inline signed sclip(const signed x) {
+//enum { b = 1 << (bits - 1), m = (1 << (bits - 1)) - 1 };
+//  return (x & b) ? (x | ~m) : (x & m);
+//}
+
+template<unsigned bits, typename base = uint> class uint_t {
+private:
+base data;
+
+public:
+  inline operator unsigned() const { return data; }
+                       inline unsigned operator ++(int)       { base r = data; data = uclip<bits>(data + 1); return r; }
+                       inline unsigned operator --(int)       { base r = data; data = uclip<bits>(data - 1); return r; }
+                       inline unsigned operator ++()          { data = uclip<bits>(data  + 1); return data; }
+                       inline unsigned operator --()          { data = uclip<bits>(data  - 1); return data; }
+  template<typename T> inline unsigned operator  =(const T i) { data = uclip<bits>(i);         return data; }
+  template<typename T> inline unsigned operator |=(const T i) { data = uclip<bits>(data  | i); return data; }
+  template<typename T> inline unsigned operator ^=(const T i) { data = uclip<bits>(data  ^ i); return data; }
+  template<typename T> inline unsigned operator &=(const T i) { data = uclip<bits>(data  & i); return data; }
+  template<typename T> inline unsigned operator<<=(const T i) { data = uclip<bits>(data << i); return data; }
+  template<typename T> inline unsigned operator>>=(const T i) { data = uclip<bits>(data >> i); return data; }
+  template<typename T> inline unsigned operator +=(const T i) { data = uclip<bits>(data  + i); return data; }
+  template<typename T> inline unsigned operator -=(const T i) { data = uclip<bits>(data  - i); return data; }
+  template<typename T> inline unsigned operator *=(const T i) { data = uclip<bits>(data  * i); return data; }
+  template<typename T> inline unsigned operator /=(const T i) { data = uclip<bits>(data  / i); return data; }
+  template<typename T> inline unsigned operator %=(const T i) { data = uclip<bits>(data  % i); return data; }
+
+  inline uint_t() : data(0) {}
+  inline uint_t(const base i) : data(uclip<bits>(i)) {}
+};
+
+template<unsigned bits, typename base = int> class int_t {
+private:
+base data;
+
+public:
+  inline operator signed() const { return data; }
+                       inline signed operator ++(int)       { base r = data; data = sclip<bits>(data + 1); return r; }
+                       inline signed operator --(int)       { base r = data; data = sclip<bits>(data - 1); return r; }
+                       inline signed operator ++()          { data = sclip<bits>(data  + 1); return data; }
+                       inline signed operator --()          { data = sclip<bits>(data  - 1); return data; }
+  template<typename T> inline signed operator  =(const T i) { data = sclip<bits>(i);         return data; }
+  template<typename T> inline signed operator |=(const T i) { data = sclip<bits>(data  | i); return data; }
+  template<typename T> inline signed operator ^=(const T i) { data = sclip<bits>(data  ^ i); return data; }
+  template<typename T> inline signed operator &=(const T i) { data = sclip<bits>(data  & i); return data; }
+  template<typename T> inline signed operator<<=(const T i) { data = sclip<bits>(data << i); return data; }
+  template<typename T> inline signed operator>>=(const T i) { data = sclip<bits>(data >> i); return data; }
+  template<typename T> inline signed operator +=(const T i) { data = sclip<bits>(data  + i); return data; }
+  template<typename T> inline signed operator -=(const T i) { data = sclip<bits>(data  - i); return data; }
+  template<typename T> inline signed operator *=(const T i) { data = sclip<bits>(data  * i); return data; }
+  template<typename T> inline signed operator /=(const T i) { data = sclip<bits>(data  / i); return data; }
+  template<typename T> inline signed operator %=(const T i) { data = sclip<bits>(data  % i); return data; }
+
+  inline int_t() : data(0) {}
+  inline int_t(const base i) : data(sclip<bits>(i)) {}
+};
+
+typedef uint_t<24>         uint24;
+typedef  int_t<24>          int24;
+typedef uint_t<48, uint64> uint48;
+typedef  int_t<48,  int64>  int48;
+
+/*****
+ * endian wrappers
+ *****/
+
+#ifndef ARCH_MSB
+//little-endian: uint8[] { 0x01, 0x02, 0x03, 0x04 } = 0x04030201
+#define order_lsb2(a,b)             a,b
+#define order_lsb3(a,b,c)           a,b,c
+#define order_lsb4(a,b,c,d)         a,b,c,d
+#define order_lsb5(a,b,c,d,e)       a,b,c,d,e
+#define order_lsb6(a,b,c,d,e,f)     a,b,c,d,e,f
+#define order_lsb7(a,b,c,d,e,f,g)   a,b,c,d,e,f,g
+#define order_lsb8(a,b,c,d,e,f,g,h) a,b,c,d,e,f,g,h
+#define order_msb2(a,b)             b,a
+#define order_msb3(a,b,c)           c,b,a
+#define order_msb4(a,b,c,d)         d,c,b,a
+#define order_msb5(a,b,c,d,e)       e,d,c,b,a
+#define order_msb6(a,b,c,d,e,f)     f,e,d,c,b,a
+#define order_msb7(a,b,c,d,e,f,g)   g,f,e,d,c,b,a
+#define order_msb8(a,b,c,d,e,f,g,h) h,g,f,e,d,c,b,a
+#define order_lsbit8(b0,b1,b2,b3,b4,b5,b6,b7) b7:1,b6:1,b5:1,b4:1,b3:1,b2:1,b1:1,b0:1
+#define order_msbit8(b7,b6,b5,b4,b3,b2,b1,b0) b0:1,b1:1,b2:1,b3:1,b4:1,b5:1,b6:1,b7:1
+#else
+//big-endian:    uint8[] { 0x01, 0x02, 0x03, 0x04 } = 0x01020304
+#define order_lsb2(a,b)             b,a
+#define order_lsb3(a,b,c)           c,b,a
+#define order_lsb4(a,b,c,d)         d,c,b,a
+#define order_lsb5(a,b,c,d,e)       e,d,c,b,a
+#define order_lsb6(a,b,c,d,e,f)     f,e,d,c,b,a
+#define order_lsb7(a,b,c,d,e,f,g)   g,f,e,d,c,b,a
+#define order_lsb8(a,b,c,d,e,f,g,h) h,g,f,e,d,c,b,a
+#define order_msb2(a,b)             a,b
+#define order_msb3(a,b,c)           a,b,c
+#define order_msb4(a,b,c,d)         a,b,c,d
+#define order_msb5(a,b,c,d,e)       a,b,c,d,e
+#define order_msb6(a,b,c,d,e,f)     a,b,c,d,e,f
+#define order_msb7(a,b,c,d,e,f,g)   a,b,c,d,e,f,g
+#define order_msb8(a,b,c,d,e,f,g,h) a,b,c,d,e,f,g,h
+#define order_lsbit8(b7,b6,b5,b4,b3,b2,b1,b0) b0:1,b1:1,b2:1,b3:1,b4:1,b5:1,b6:1,b7:1
+#define order_msbit8(b0,b1,b2,b3,b4,b5,b6,b7) b7:1,b6:1,b5:1,b4:1,b3:1,b2:1,b1:1,b0:1
+#endif
+
+/*****
+ * libc extensions
+ *****/
 
 inline bool fexists(const char *fn) {
 FILE *fp = fopen(fn, "rb");
@@ -78,6 +237,11 @@ uint32 size = ftell(fp);
   fp = 0;
   return size;
 }
+
+/*****
+ * crc32 calculation
+ * TODO: create libhash and move this code there
+ *****/
 
 const uint32 crc32_table[256] = {
   0x00000000, 0x77073096, 0xee0e612c, 0x990951ba, 0x076dc419, 0x706af48f,

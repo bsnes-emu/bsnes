@@ -47,44 +47,37 @@ bool MainWindow::Event(EventInfo &info) {
   uint key  = info.control_id;
   bool ctrl = uiInput->keydown(keymap->lctrl) || uiInput->keydown(keymap->rctrl);
     if(key == keymap->esc) {
-      if(uiVideo->settings.fullscreen == false) {
+      if(bool(config::video.fullscreen) == false) {
         ShowMenu(!MenuVisible());
         Center();
       } else {
-        event::set_video_profile(config::video.profile_windowed_default);
+        config::video.fullscreen = false;
+        event::set_video_profile(config::video.profile);
       }
     } else if(key == keymap->f11) {
-      if(uiVideo->settings.fullscreen == false) {
-        event::set_video_profile(config::video.profile_fullscreen_default);
-      } else {
-        event::set_video_profile(config::video.profile_windowed_default);
-      }
+      event::toggle_fullscreen();
     } else if(key == keymap->f12) {
       if(bsnes->get_state() == bSNES::RUN) {
         bsnes->set_state(bSNES::STOP);
       } else if(bsnes->get_state() == bSNES::STOP) {
         bsnes->set_state(bSNES::RUN);
       }
-    } else if(key == keymap->numpad_0 && ctrl) {
+    } else if(key == keymap->num_1 && ctrl) {
       event::set_video_profile(0);
-    } else if(key == keymap->numpad_1 && ctrl) {
+    } else if(key == keymap->num_2 && ctrl) {
       event::set_video_profile(1);
-    } else if(key == keymap->numpad_2 && ctrl) {
+    } else if(key == keymap->num_3 && ctrl) {
       event::set_video_profile(2);
-    } else if(key == keymap->numpad_3 && ctrl) {
+    } else if(key == keymap->num_4 && ctrl) {
       event::set_video_profile(3);
-    } else if(key == keymap->numpad_4 && ctrl) {
+    } else if(key == keymap->num_5 && ctrl) {
       event::set_video_profile(4);
-    } else if(key == keymap->numpad_5 && ctrl) {
+    } else if(key == keymap->num_6 && ctrl) {
       event::set_video_profile(5);
-    } else if(key == keymap->numpad_6 && ctrl) {
+    } else if(key == keymap->num_7 && ctrl) {
       event::set_video_profile(6);
-    } else if(key == keymap->numpad_7 && ctrl) {
+    } else if(key == keymap->num_8 && ctrl) {
       event::set_video_profile(7);
-    } else if(key == keymap->numpad_8 && ctrl) {
-      event::set_video_profile(8);
-    } else if(key == keymap->numpad_9 && ctrl) {
-      event::set_video_profile(9);
     } else if((key == keymap->minus && !ctrl) || key == keymap->numpad_minus) {
       if(frameskip > 0)SetFrameskip(frameskip - 1);
     } else if((key == keymap->plus && !ctrl) || key == keymap->numpad_plus) {
@@ -156,9 +149,7 @@ bool MainWindow::Event(EventInfo &info) {
     case MENU_SETTINGS_VIDEOPROFILE_4:
     case MENU_SETTINGS_VIDEOPROFILE_5:
     case MENU_SETTINGS_VIDEOPROFILE_6:
-    case MENU_SETTINGS_VIDEOPROFILE_7:
-    case MENU_SETTINGS_VIDEOPROFILE_8:
-    case MENU_SETTINGS_VIDEOPROFILE_9: {
+    case MENU_SETTINGS_VIDEOPROFILE_7: {
       event::set_video_profile(info.control_id - MENU_SETTINGS_VIDEOPROFILE_0);
     } break;
 
@@ -258,16 +249,14 @@ char t[128];
 
   AddMenuGroup("&Settings");
     AddMenuGroup("&Video Profile");
-      AddMenuItem(MENU_SETTINGS_VIDEOPROFILE_0, "Profile &0");
-      AddMenuItem(MENU_SETTINGS_VIDEOPROFILE_1, "Profile &1");
-      AddMenuItem(MENU_SETTINGS_VIDEOPROFILE_2, "Profile &2");
-      AddMenuItem(MENU_SETTINGS_VIDEOPROFILE_3, "Profile &3");
-      AddMenuItem(MENU_SETTINGS_VIDEOPROFILE_4, "Profile &4");
-      AddMenuItem(MENU_SETTINGS_VIDEOPROFILE_5, "Profile &5");
-      AddMenuItem(MENU_SETTINGS_VIDEOPROFILE_6, "Profile &6");
-      AddMenuItem(MENU_SETTINGS_VIDEOPROFILE_7, "Profile &7");
-      AddMenuItem(MENU_SETTINGS_VIDEOPROFILE_8, "Profile &8");
-      AddMenuItem(MENU_SETTINGS_VIDEOPROFILE_9, "Profile &9");
+      AddMenuItem(MENU_SETTINGS_VIDEOPROFILE_0, "Profile &1");
+      AddMenuItem(MENU_SETTINGS_VIDEOPROFILE_1, "Profile &2");
+      AddMenuItem(MENU_SETTINGS_VIDEOPROFILE_2, "Profile &3");
+      AddMenuItem(MENU_SETTINGS_VIDEOPROFILE_3, "Profile &4");
+      AddMenuItem(MENU_SETTINGS_VIDEOPROFILE_4, "Profile &5");
+      AddMenuItem(MENU_SETTINGS_VIDEOPROFILE_5, "Profile &6");
+      AddMenuItem(MENU_SETTINGS_VIDEOPROFILE_6, "Profile &7");
+      AddMenuItem(MENU_SETTINGS_VIDEOPROFILE_7, "Profile &8");
     EndMenuGroup();
 
     AddMenuGroup("&Frameskip");
@@ -325,7 +314,7 @@ char t[128];
   CheckMenuItem(MENU_SETTINGS_MUTE,                    config::snes.mute);
   CheckMenuItem(MENU_SETTINGS_SPEED_REGULATION_ENABLE, config::system.regulate_speed);
 
-  event::set_video_profile(config::video.profile_windowed_default);
+  event::set_video_profile(config::video.profile);
   SetFrameskip(0);
   SetRegulationSpeed(2);
 

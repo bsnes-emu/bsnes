@@ -48,15 +48,16 @@ uint16 hc = 2 + offset;
 bool bCPU::irq_trigger_pos_match(uint32 offset) {
 uint16 v  = status.virq_pos;
 uint16 hc = (status.hirq_enabled) ? status.hirq_pos : 0;
+uint16 vlimit = region_scanlines() >> 1;
 
 //positions that can never be latched
-//region_scanlines() = 262/NTSC, 312/PAL
+//region_scanlines() = 525/NTSC, 625/PAL
 //PAL results are unverified on hardware
   if(v == 240 && hc == 339 && interlace() == false && interlace_field() == 1)return false;
-  if(v == (region_scanlines() - 1) && hc == 339 && interlace() == false)return false;
-  if(v == region_scanlines() && interlace() == false)return false;
-  if(v == region_scanlines() && hc == 339)return false;
-  if(v  > region_scanlines())return false;
+  if(v == (vlimit - 1) && hc == 339 && interlace() == false)return false;
+  if(v == vlimit && interlace() == false)return false;
+  if(v == vlimit && hc == 339)return false;
+  if(v  > vlimit)return false;
   if(hc > 339)return false;
 
   hc  = (hc != 0) ? ((hc << 2) + 14) : 10;
@@ -88,15 +89,16 @@ void bCPU::update_nmi() {
 void bCPU::update_irq() {
 int vpos = status.virq_pos;
 int hpos = (status.hirq_enabled) ? status.hirq_pos : 0;
+int vlimit = region_scanlines() >> 1;
 
 //positions that can never be latched
 //region_scanlines() = 262/NTSC, 312/PAL
 //PAL results are unverified on hardware
   if(vpos == 240 && hpos == 339 && interlace() == false && interlace_field() == 1)goto _nolatch;
-  if(vpos == (region_scanlines() - 1) && hpos == 339 && interlace() == false)goto _nolatch;
-  if(vpos == region_scanlines() && interlace() == false)goto _nolatch;
-  if(vpos == region_scanlines() && hpos == 339)goto _nolatch;
-  if(vpos  > region_scanlines())goto _nolatch;
+  if(vpos == (vlimit - 1) && hpos == 339 && interlace() == false)goto _nolatch;
+  if(vpos == vlimit && interlace() == false)goto _nolatch;
+  if(vpos == vlimit && hpos == 339)goto _nolatch;
+  if(vpos  > vlimit)goto _nolatch;
   if(hpos  > 339)goto _nolatch;
 
   hpos = (hpos != 0) ? ((hpos << 2) + 14) : 10;
@@ -201,9 +203,9 @@ void bCPU::inc_vcounter() {
     time.interlace_field ^= 1;
 
     if(interlace() == true && interlace_field() == 0) {
-      time.frame_lines = time.region_scanlines + 1;
+      time.frame_lines = (time.region_scanlines >> 1) + 1;
     } else {
-      time.frame_lines = time.region_scanlines;
+      time.frame_lines = (time.region_scanlines >> 1);
     }
   }
 
@@ -233,7 +235,7 @@ uint16 bCPU::get_hcounter() {
   return (time.hc - ((time.hc > 1292) << 1) - ((time.hc > 1310) << 1)) >> 2;
 }
 
-uint32 bCPU::cycles_executed() {
+uint32 bCPU::clocks_executed() {
 uint32 r = status.cycles_executed;
   status.cycles_executed = 0;
   return r;
@@ -248,18 +250,16 @@ void bCPU::cycle_edge() {
   }
 
   if(time.hdma_triggered == false) {
-    if(time.v <= (overscan() ? 239 : 224)) {
-      if(time.hc >= 1106) {
-        time.hdma_triggered = true;
-        hdma_activate();
-      }
+  //hdma_triggered only set to false for v <= (overscan ? 239 : 224)
+    if(time.hc >= 1106) {
+      time.hdma_triggered = true;
+      hdma_activate();
     }
   }
 }
 
 void bCPU::add_cycles(int cycles) {
   status.cycles_executed += cycles;
-
   poll_interrupts(cycles);
 
   if(time.hc + cycles >= time.line_cycles) {
@@ -267,7 +267,6 @@ void bCPU::add_cycles(int cycles) {
     time.hc = 0;
 
     inc_vcounter();
-    poll_interrupts(cycles);
 
     if(time.v == 0) {
       frame();
@@ -279,8 +278,20 @@ void bCPU::add_cycles(int cycles) {
     r_ppu->scanline();
     snes->scanline();
     time.line_rendered = false;
+
+    poll_interrupts(cycles);
   }
 
+  time.hc += cycles;
+
+  if(time.dram_refreshed == false) {
+    if(time.hc >= time.dram_refresh_pos) {
+      time.dram_refreshed = true;
+      add_cycles(40);
+      return;
+    }
+  }
+/*
   if(time.dram_refreshed == false) {
     if(time.hc + cycles >= time.dram_refresh_pos) {
       time.dram_refreshed = true;
@@ -299,19 +310,19 @@ void bCPU::add_cycles(int cycles) {
       }
     }
   }
-
+*/
   if(time.line_rendered == false) {
   //rendering should start at H=18 (+256=274), but since the
   //current PPU emulation renders the entire scanline at once,
   //PPU register changes mid-scanline do not show up.
   //therefore, wait a few dots before rendering the scanline
-    if(time.hc + cycles >= (48 * 4)) {
+    if(time.hc >= (48 * 4)) {
       time.line_rendered = true;
       r_ppu->render_scanline();
     }
   }
 
-  time.hc += cycles;
+//time.hc += cycles;
 }
 
 void bCPU::time_reset() {
@@ -347,12 +358,12 @@ void bCPU::time_reset() {
 
   switch(region) {
   case NTSC:
-    time.region_scanlines = 262;
+    time.region_scanlines = 525;
     break;
   case PAL:
-    time.region_scanlines = 312;
+    time.region_scanlines = 625;
     break;
   }
 
-  time.frame_lines = time.region_scanlines;
+  time.frame_lines = time.region_scanlines >> 1;
 }

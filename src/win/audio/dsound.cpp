@@ -4,7 +4,7 @@ void AudioDS::run(uint32 sample) {
   if(data.buffer_pos >= data.samples_per_frame) {
   uint32 pos, size;
   void  *buffer;
-    if((bool)config::system.regulate_speed == true) {
+    if(bool(config::system.regulate_speed) == true) {
       do {
         dsb_b->GetCurrentPosition(&pos, 0);
         data.read_buffer = pos / data.buffer_size;

@@ -21,20 +21,39 @@ Button   APUSkip;
 Editbox  APUTraceNum;
 Button   APUTrace;
 Button   APUDisable;
+Groupbox ConsoleGroup;
+Checkbox ConsoleMsgDebug;
+Checkbox ConsoleMsgCPU;
+Checkbox ConsoleMsgAPU;
+Checkbox ConsoleTrace;
+Checkbox ConsoleTraceMask;
 
 struct {
   uint count;
   char line[250][128];
 } buffer;
 
+struct {
+  bool debug;
+  bool cpu;
+  bool apu;
+
+  FILE *fp;
+  bool trace;
+  bool trace_mask;
+} output;
+
   bool Event(EventInfo &info);
 
   void Update();
-  void Print(const char *str);
+  void Print(uint source, const char *str);
   void Clear();
 
   void SetState(uint state);
 
   void Show();
   void Setup();
+
+  DebugWindow();
+  ~DebugWindow();
 } wDebug;

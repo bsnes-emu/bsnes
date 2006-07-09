@@ -329,12 +329,12 @@ uint8 bCPU::mmio_r43xb(uint8 i) {
 
 uint8 bCPU::mmio_read(uint16 addr) {
 //APU
-  if(addr >= 0x2140 && addr <= 0x217f) {
+  if((addr & 0xffc0) == 0x2140) { //$2140-$217f
     return r_apu->port_read(addr & 3);
   }
 
 //HDMA
-  if(addr >= 0x4300 && addr <= 0x437f) {
+  if((addr & 0xff80) == 0x4300) { //$4300-$437f
   uint i = (addr >> 4) & 7;
     switch(addr & 0xf) {
     case 0x0: return mmio_r43x0(i);
@@ -457,6 +457,7 @@ void bCPU::mmio_w4202(uint8 value) {
   status.mul_a = value;
 }
 
+//WRMPYB
 void bCPU::mmio_w4203(uint8 value) {
   status.mul_b = value;
   status.r4216 = status.mul_a * status.mul_b;
@@ -464,7 +465,7 @@ void bCPU::mmio_w4203(uint8 value) {
 
 //WRDIVL
 void bCPU::mmio_w4204(uint8 value) {
-  status.div_a = (status.div_a & 0xff00) | value;
+  status.div_a = (status.div_a & 0xff00) | (value);
 }
 
 //WRDIVH
@@ -504,6 +505,7 @@ void bCPU::mmio_w420a(uint8 value) {
 }
 
 //DMAEN
+//DMA enable does not disable active HDMA channels
 void bCPU::mmio_w420b(uint8 value) {
   if(value != 0x00) {
     run_state.dma = true;
@@ -511,11 +513,9 @@ void bCPU::mmio_w420b(uint8 value) {
   }
 
   for(int i = 0; i < 8; i++) {
-    if(value & (1 << i)) {
-    //DMA enable does not disable active HDMA channels
-      channel[i].active     = true;
-      channel[i].read_index = 0;
-    }
+    channel[i].dma_enabled = bool(value & (1 << i));
+  //TODO: clearing read_index may interfere with DMA+HDMA occurring simultaneously
+    if(channel[i].dma_enabled)channel[i].read_index = 0;
   }
 }
 
@@ -523,7 +523,6 @@ void bCPU::mmio_w420b(uint8 value) {
 void bCPU::mmio_w420c(uint8 value) {
   for(int i = 0; i < 8; i++) {
     channel[i].hdma_enabled = bool(value & (1 << i));
-    channel[i].hdma_active  = bool(value & (1 << i));
   }
 }
 
@@ -599,13 +598,13 @@ void bCPU::mmio_w43xb(uint8 value, uint8 i) {
 
 void bCPU::mmio_write(uint16 addr, uint8 data) {
 //APU
-  if(addr >= 0x2140 && addr <= 0x217f) {
+  if((addr & 0xffc0) == 0x2140) { //$2140-$217f
     port_write(addr & 3, data);
     return;
   }
 
 //HDMA
-  if(addr >= 0x4300 && addr <= 0x437f) {
+  if((addr & 0xff80) == 0x4300) { //$4300-$437f
   uint i = (addr >> 4) & 7;
     switch(addr & 0xf) {
     case 0x0: mmio_w43x0(data, i); return;

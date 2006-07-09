@@ -14,37 +14,39 @@ HRESULT hr;
   }
 
   memset(&presentation, 0, sizeof(presentation));
-  presentation.Flags = 0;
-  if(settings.triple_buffering == false) {
-    presentation.Flags |= D3DPRESENTFLAG_LOCKABLE_BACKBUFFER;
+  presentation.Flags                  = D3DPRESENTFLAG_VIDEO;
+  presentation.SwapEffect             = (settings.triple_buffering == true) ?
+                                        D3DSWAPEFFECT_FLIP : D3DSWAPEFFECT_DISCARD;
+  presentation.hDeviceWindow          = wMain.hwnd;
+  presentation.BackBufferCount        = (settings.triple_buffering == true) ? 2 : 1;
+  presentation.MultiSampleType        = D3DMULTISAMPLE_NONE;
+  presentation.MultiSampleQuality     = 0;
+  presentation.EnableAutoDepthStencil = false;
+  presentation.AutoDepthStencilFormat = D3DFMT_UNKNOWN;
+  presentation.PresentationInterval   = (settings.triple_buffering == true) ?
+                                        D3DPRESENT_INTERVAL_ONE : D3DPRESENT_INTERVAL_IMMEDIATE;
+  presentation.FullScreen_RefreshRateInHz = settings.refresh_rate;
+
+  if(bool(config::video.fullscreen) == false) {
+    presentation.Windowed         = true;
+    presentation.BackBufferFormat = D3DFMT_UNKNOWN;
+    presentation.BackBufferWidth  = 0;
+    presentation.BackBufferHeight = 0;
+  } else {
+    presentation.Windowed         = false;
+    presentation.BackBufferFormat = D3DFMT_R5G6B5;
+    presentation.BackBufferWidth  = settings.resolution_width;
+    presentation.BackBufferHeight = settings.resolution_height;
   }
-  presentation.Flags |= D3DPRESENTFLAG_VIDEO;
-  presentation.Windowed                   = (settings.fullscreen == false);
-  presentation.SwapEffect                 = (settings.triple_buffering == true) ?
-                                            D3DSWAPEFFECT_FLIP : D3DSWAPEFFECT_DISCARD;
-  presentation.hDeviceWindow              = wMain.hwnd;
-  presentation.BackBufferFormat           = (settings.fullscreen) ? D3DFMT_X8R8G8B8 : D3DFMT_UNKNOWN;
-  presentation.BackBufferWidth            = (settings.fullscreen) ? settings.resolution_width  : 0;
-  presentation.BackBufferHeight           = (settings.fullscreen) ? settings.resolution_height : 0;
-  presentation.BackBufferCount            = (settings.triple_buffering == true) ? 2 : 1;
-  presentation.MultiSampleType            = D3DMULTISAMPLE_NONE;
-  presentation.MultiSampleQuality         = 0;
-  presentation.EnableAutoDepthStencil     = false;
-  presentation.AutoDepthStencilFormat     = D3DFMT_UNKNOWN;
-  presentation.PresentationInterval       = (settings.triple_buffering == true) ?
-                                            D3DPRESENT_INTERVAL_ONE : D3DPRESENT_INTERVAL_IMMEDIATE;
-  presentation.FullScreen_RefreshRateInHz = (settings.fullscreen == true) ? settings.refresh_rate : D3DPRESENT_RATE_DEFAULT;
 
   hr = lpd3d->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, wMain.hwnd,
-    D3DCREATE_HARDWARE_VERTEXPROCESSING, &presentation, &device);
+    D3DCREATE_SOFTWARE_VERTEXPROCESSING, &presentation, &device);
   if(hr != D3D_OK) {
     alert("Failed to create Direct3D9 device");
     return false;
   }
 
-/*****
- * detect device capabilities
- *****/
+//detect device capabilities
   device->GetDeviceCaps(&d3dcaps);
   if(d3dcaps.MaxTextureWidth < 1024 || d3dcaps.MaxTextureWidth < 1024) {
     alert("Error: Direct3D renderer requires that the video card supports textures up to 1024x1024.\n"
@@ -52,8 +54,8 @@ HRESULT hr;
       "", d3dcaps.MaxTextureWidth, d3dcaps.MaxTextureHeight);
     return false;
   }
-  caps.dynamic     = !!(d3dcaps.Caps2 & D3DCAPS2_DYNAMICTEXTURES);
-  caps.addresswrap = !!(d3dcaps.TextureAddressCaps & D3DPTADDRESSCAPS_WRAP);
+  caps.dynamic     = bool(d3dcaps.Caps2 & D3DCAPS2_DYNAMICTEXTURES);
+  caps.addresswrap = bool(d3dcaps.TextureAddressCaps & D3DPTADDRESSCAPS_WRAP);
   caps.stretchrect = (d3dcaps.DevCaps2 & D3DDEVCAPS2_CAN_STRETCHRECT_FROM_TEXTURES) &&
     (d3dcaps.StretchRectFilterCaps & D3DPTFILTERCAPS_MINFPOINT)  &&
     (d3dcaps.StretchRectFilterCaps & D3DPTFILTERCAPS_MAGFPOINT)  &&
@@ -74,8 +76,7 @@ HRESULT hr;
     flags.lock    = D3DLOCK_NOSYSLOCK | D3DLOCK_DISCARD;
   }
 
-//this is required to allow window menu to be visible in fullscreen mode
-  device->SetDialogBoxMode(settings.triple_buffering == false);
+  device->SetDialogBoxMode(false);
 
   device->SetTextureStageState(0, D3DTSS_COLOROP,   D3DTOP_SELECTARG1);
   device->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);

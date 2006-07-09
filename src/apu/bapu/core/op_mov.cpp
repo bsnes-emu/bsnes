@@ -57,8 +57,6 @@ void bAPU::op_mov_sp_x() {
   switch(status.cycle_pos++) {
   case 1: {
     regs.sp = regs.x;
-    regs.p.n = !!(regs.sp & 0x80);
-    regs.p.z = (regs.sp == 0);
     status.cycle_pos = 0;
     } break;
   }

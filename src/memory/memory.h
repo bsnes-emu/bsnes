@@ -29,9 +29,9 @@ private:
 uint8 *speed_table,
        speed_table_slowrom[32768],
        speed_table_fastrom[32768];
-  inline uint8 calc_speed(uint32 addr, bool fast);
+  uint8 calc_speed(uint32 addr, bool fast);
 public:
-  inline uint8 speed(uint32 addr) { return speed_table[addr >> 9]; }
+  uint8 speed(uint32 addr) { return speed_table[addr >> 9]; }
   void set_speed(bool fast);
 
   virtual void load_cart() = 0;

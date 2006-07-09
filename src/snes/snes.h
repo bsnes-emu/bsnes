@@ -2,20 +2,17 @@ class VideoFilter;
 
 class SNES {
 protected:
-bool is_debugger_enabled;
+bool   is_debugger_enabled;
+uint8  snes_region;
 
-uint8 snes_region;
-
-//APU synchronization
+//CPU<>APU synchronization
 struct {
-  int32 cpu_freq, apu_freq;
-  int32 cpu_multbl[1024], apu_multbl[1024];
-  int32 cycles;
+  int64  counter, dsp_counter;
+  int64  cpu_freq, apu_freq;
+  int64  cpu_multbl[1024], apu_multbl[1024];
+} sync;
 
-  int32 dsp;
-} apusync;
-
-void update_timing();
+  void   update_timing();
 
 public:
 enum { NTSC = 0, PAL = 1 };
@@ -23,6 +20,7 @@ enum { NTSC = 0, PAL = 1 };
 //system functions
   virtual inline void run();
   virtual inline void runtoframe();
+
   virtual void init();
   virtual void term();
   virtual void power();
@@ -32,8 +30,8 @@ enum { NTSC = 0, PAL = 1 };
   virtual void scanline();
 
 //PAL/NTSC
-  uint8 region();
-  void  set_region(uint8 new_region);
+  uint8  region();
+  void   set_region(uint8 new_region);
 
 #include "video/video.h"
 #include "audio/audio.h"

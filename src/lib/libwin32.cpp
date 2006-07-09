@@ -25,6 +25,9 @@ va_list args;
   MessageBox(0, str, "bsnes", MB_OK);
 }
 
+uint GetScreenWidth()  { return GetSystemMetrics(SM_CXSCREEN); }
+uint GetScreenHeight() { return GetSystemMetrics(SM_CYSCREEN); }
+
 void ShowCursor() {
   if(global::cursor_visible == false) {
     global::cursor_visible = true;

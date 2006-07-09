@@ -10,19 +10,19 @@ double lmin, lmax;
   lmin =   0.0 - double(int32(config::snes.contrast));
   lmax = 255.0 + double(int32(config::snes.contrast));
 int32 result = int32(lmin + double(input) * ((lmax - lmin) / 256.0));
-  input = bound_range(result, 0, 255);
+  input = minmax<0, 255>(result);
 }
 
 void SNES::brightness_adjust(int32 &input) {
 int32 result;
   result = input + int32(config::snes.brightness);
-  input  = bound_range(result, 0, 255);
+  input  = minmax<0, 255>(result);
 }
 
 void SNES::gamma_adjust(int32 &input) {
 int32 result;
   result = int32(pow((double(input + 1) / 256.0), double(config::snes.gamma) / 100.0) * 256.0);
-  input  = bound_range(result, 0, 255);
+  input  = minmax<0, 255>(result);
 }
 
 void SNES::update_color_lookup_table() {
@@ -55,14 +55,14 @@ uint32 col;
       r = int32(double(l) * (1.0 + 0.300));
       g = int32(double(l) * (1.0 - 0.055));
       b = int32(double(l) * (1.0 - 0.225));
-      r = bound_range(r, 0, 255);
-      g = bound_range(g, 0, 255);
-      b = bound_range(b, 0, 255);
+      r = minmax<0, 255>(r);
+      g = minmax<0, 255>(g);
+      b = minmax<0, 255>(b);
     }
 
     if(bool(config::snes.grayscale) == true) {
       l = int32(double(r) * kr + double(g) * kg + double(b) * kb);
-      l = bound_range(l, 0, 255);
+      l = minmax<0, 255>(l);
       r = g = b = l;
     }
 

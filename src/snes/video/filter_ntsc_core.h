@@ -1,4 +1,3 @@
-
 /* SNES NTSC composite video to RGB emulator/blitter */
 
 /* snes_ntsc 0.2.1 */

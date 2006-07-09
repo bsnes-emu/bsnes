@@ -15,6 +15,24 @@ bool DebugWindow::Event(EventInfo &info) {
       } else if(bsnes->get_state() == bSNES::STOP) {
         bsnes->set_state(bSNES::RUN);
       }
+    } else if(info.control == &ConsoleMsgDebug) {
+      output.debug ^= 1;
+      ConsoleMsgDebug.Check(output.debug);
+    } else if(info.control == &ConsoleMsgCPU) {
+      output.cpu ^= 1;
+      ConsoleMsgCPU.Check(output.cpu);
+    } else if(info.control == &ConsoleMsgAPU) {
+      output.apu ^= 1;
+      ConsoleMsgAPU.Check(output.apu);
+    } else if(info.control == &ConsoleTrace) {
+      output.trace ^= 1;
+      ConsoleTrace.Check(output.trace);
+      if(output.trace == true) {
+        output.fp = fopen("trace.log", "wb");
+      } else {
+        fclose(output.fp);
+        output.fp = 0;
+      }
     }
   } break;
 
@@ -36,8 +54,29 @@ char t[250 * 132];
   Console.SetSelection(0, -1); //scroll cursor to bottom of window
 }
 
-void DebugWindow::Print(const char *str) {
+void DebugWindow::Print(uint source, const char *str) {
   if(!hwnd)return;
+
+  switch(source) {
+  case source::none:
+    break;
+  case source::debug:
+    if(output.debug == false)return;
+    break;
+  case source::cpu:
+    if(output.cpu == false)return;
+    break;
+  case source::apu:
+    if(output.apu == false)return;
+    break;
+  }
+
+  if(output.trace == true) {
+    fprintf(output.fp, "%s\r\n", str);
+
+  //only debug messages are printed to console while tracing is enabled
+    if(source != source::none && source != source::debug)return;
+  }
 
   for(uint i = 0; i < buffer.count - 1; i++) {
     strcpy(buffer.line[i], buffer.line[i + 1]);
@@ -125,7 +164,33 @@ int x = 5, y = 5;
   APUDisable.Create(this, "visible|left", x + 165, y + 35, 80, 20, " Disable");
   y += 66;
 
+  ConsoleGroup.Create(this, "visible", x, y, 250, 70, "Console output");
+  ConsoleMsgDebug.Create(this, "visible", x + 5, y + 15, 80, 15, "Debug");
+  ConsoleMsgCPU.Create(this, "visible", x + 85, y + 15, 80, 15, "CPU");
+  ConsoleMsgAPU.Create(this, "visible", x + 165, y + 15, 80, 15, "APU");
+  ConsoleTrace.Create(this, "visible", x + 5, y + 35, 240, 15, "Enable trace logging");
+  ConsoleTraceMask.Create(this, "visible|disabled", x + 5, y + 50, 240, 15, "Mask duplicate instructions");
+  ConsoleMsgDebug.Check(output.debug);
+  ConsoleMsgCPU.Check(output.cpu);
+  ConsoleMsgAPU.Check(output.apu);
+  ConsoleTrace.Check(output.trace);
+  ConsoleTraceMask.Check(output.trace_mask);
+
   buffer.count = uint(config::debugger.console_lines);
   buffer.count = (buffer.count < 20) ? 20 : (buffer.count > 250) ? 250 : buffer.count;
   Clear();
+}
+
+DebugWindow::DebugWindow() {
+  output.debug = true;
+  output.cpu   = true;
+  output.apu   = true;
+
+  output.fp         = 0;
+  output.trace      = false;
+  output.trace_mask = false;
+}
+
+DebugWindow::~DebugWindow() {
+  if(output.fp)fclose(output.fp);
 }

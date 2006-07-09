@@ -5,10 +5,7 @@ uint8 *spcram;
 
 uint32 dsp_counter;
 
-enum {
-  BRR_END  = 1,
-  BRR_LOOP = 2
-};
+enum { BRR_END = 1, BRR_LOOP = 2 };
 
 uint8  readb (uint16 addr);
 uint16 readw (uint16 addr);
@@ -74,9 +71,9 @@ struct Status {
   uint8  fir_buffer_index;
 
 //functions
-  bool soft_reset() { return !!(FLG & 0x80); }
-  bool mute()       { return !!(FLG & 0x40); }
-  bool echo_write() { return  !(FLG & 0x20); }
+  bool soft_reset() { return bool(FLG & 0x80); }
+  bool mute()       { return bool(FLG & 0x40); }
+  bool echo_write() { return    !(FLG & 0x20); }
 } status;
 
 struct Voice {
@@ -116,7 +113,7 @@ struct Voice {
   uint8 brr_header_filter() { return (brr_header >> 2) & 3; }
   uint8 brr_header_flags()  { return brr_header & 3; }
 
-  bool  ADSR_enabled()      { return !!(ADSR1 & 0x80); }
+  bool  ADSR_enabled()      { return bool(ADSR1 & 0x80); }
   uint8 ADSR_decay()        { return (ADSR1 >> 4) & 7; }
   uint8 ADSR_attack()       { return ADSR1 & 15; }
   uint8 ADSR_sus_level()    { return ADSR2 >> 5; }
@@ -147,10 +144,10 @@ struct Voice {
       }
     } else if(GAIN & 0x80) {
       switch(GAIN & 0x60) {
-      case 0x00:env_mode = LINEAR_DEC; break;
-      case 0x20:env_mode = EXP_DEC;    break;
-      case 0x40:env_mode = LINEAR_INC; break;
-      case 0x60:env_mode = BENT_INC;   break;
+      case 0x00: env_mode = LINEAR_DEC; break;
+      case 0x20: env_mode = EXP_DEC;    break;
+      case 0x40: env_mode = LINEAR_INC; break;
+      case 0x60: env_mode = BENT_INC;   break;
       }
       env_rate = RateTable[GAIN & 0x1f];
     } else {
@@ -161,8 +158,6 @@ struct Voice {
   }
 } voice[8];
 
-  int32  clamp(int32 bits, int32 x);
-  int32  clip (int32 bits, int32 x);
 public:
   uint8  read (uint8 addr);
   void   write(uint8 addr, uint8 data);

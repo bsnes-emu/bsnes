@@ -1,10 +1,6 @@
 class VideoSettingsWindow : public Window {
 public:
 Label    Header;
-Label    WinProfileLabel;
-Combobox WinProfile;
-Label    FullProfileLabel;
-Combobox FullProfile;
 Label    VideoProfileLabel;
 Combobox VideoProfile;
 Label    Separator1;
@@ -24,7 +20,6 @@ Editbox  RenderWidth;
 Label    RenderHeightLabel;
 Editbox  RenderHeight;
 Label    Separator2;
-Checkbox Fullscreen;
 Label    FullResWidthLabel;
 Editbox  FullResWidth;
 Label    FullResHeightLabel;

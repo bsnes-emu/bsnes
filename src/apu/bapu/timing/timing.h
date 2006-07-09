@@ -6,4 +6,4 @@ bool  enabled;
   inline void add_cycles(int cycles);
 } t0, t1, t2;
   inline void   add_cycles(int cycles);
-  inline uint32 cycles_executed();
+  inline uint32 clocks_executed();

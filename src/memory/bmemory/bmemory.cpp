@@ -16,19 +16,27 @@ char t[256];
   if(cartridge.cart.srtc)strcat(t, "S-RTC, ");
   if(cartridge.cart.sdd1)strcat(t, "S-DD1, ");
   if(cartridge.cart.c4)  strcat(t, "Cx4, ");
+  if(cartridge.cart.dsp1)strcat(t, "DSP-1, ");
   if(cartridge.cart.dsp2)strcat(t, "DSP-2, ");
   if(cartridge.cart.obc1)strcat(t, "OBC-1, ");
   strrtrim(t, ", ");
   dprintf("* Coprocessor(s)  : %s", (strlen(t) == 0) ? "None" : t);
-  dprintf("* Reset:%0.4x NMI:%0.4x IRQ:%0.4x BRK[n]:%0.4x COP[n]:%0.4x BRK[e]:%0.4x COP[e]:%0.4x",
-    rom[index + 0x3c] | (rom[index + 0x3d] << 8), //Reset
-    rom[index + 0x2a] | (rom[index + 0x2b] << 8), //NMI
-    rom[index + 0x2e] | (rom[index + 0x2f] << 8), //IRQ
-    rom[index + 0x26] | (rom[index + 0x27] << 8), //BRK[n]
-    rom[index + 0x24] | (rom[index + 0x25] << 8), //COP[n]
-    rom[index + 0x3e] | (rom[index + 0x3f] << 8), //BRK[e]
-    rom[index + 0x34] | (rom[index + 0x35] << 8)  //COP[e]
+  dprintf("* Reset:%0.4x NMI[n]:%0.4x IRQ[n]:%0.4x BRK[n]:%0.4x COP[n]:%0.4x",
+    read16(rom, index + 0x3c), //Reset
+    read16(rom, index + 0x2a), //NMI
+    read16(rom, index + 0x2e), //IRQ
+    read16(rom, index + 0x26), //BRK
+    read16(rom, index + 0x24)  //COP
   );
+//BRK[e] should be $fff6, however emulation mode brk is technically not supported.
+//this needs verification, but I believe brk jumps to IRQ[e] vector.
+  dprintf("*            NMI[e]:%0.4x IRQ[e]:%0.4x BRK[e]:%0.4x COP[e]:%0.4x",
+    read16(rom, index + 0x3a), //NMI
+    read16(rom, index + 0x3e), //IRQ
+    read16(rom, index + 0x3e), //BRK
+    read16(rom, index + 0x34)  //COP
+  );
+  dprintf("* CRC32           : %0.8x", cartridge.cart.crc32);
   dprintf("");
 
   cart_map_reset();
@@ -46,6 +54,7 @@ char t[256];
 
   if(cartridge.cart.sdd1)cart_map_sdd1();
   if(cartridge.cart.c4)  cart_map_c4();
+  if(cartridge.cart.dsp1)cart_map_dsp1();
   if(cartridge.cart.dsp2)cart_map_dsp2();
   if(cartridge.cart.obc1)cart_map_obc1();
 

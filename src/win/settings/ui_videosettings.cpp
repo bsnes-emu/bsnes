@@ -3,11 +3,7 @@ bool VideoSettingsWindow::Event(EventInfo &info) {
 
   case EVENT_CHANGED:
   case EVENT_CLICKED: {
-    if(info.control == &WinProfile) {
-      config::video.profile_windowed_default = WinProfile.GetSelection();
-    } else if(info.control == &FullProfile) {
-      config::video.profile_fullscreen_default = FullProfile.GetSelection();
-    } else if(info.control == &VideoProfile) {
+    if(info.control == &VideoProfile) {
       LoadSettings(VideoProfile.GetSelection());
     } else if(info.control == &ApplySettings) {
       SaveSettings(VideoProfile.GetSelection());
@@ -34,7 +30,6 @@ VideoSettings *v = &video_settings[profile];
   ManualRenderSize.Check(v->manual_render_size);
   RenderWidth.SetText("%d", v->render_width);
   RenderHeight.SetText("%d", v->render_height);
-  Fullscreen.Check(v->fullscreen);
   FullResWidth.SetText("%d", v->resolution_width);
   FullResHeight.SetText("%d", v->resolution_height);
   FullResHz.SetText("%d", v->refresh_rate);
@@ -55,7 +50,6 @@ char t[64 + 1];
   v->render_width         = strdec(t);
   RenderHeight.GetText(t, 64);
   v->render_height        = strdec(t);
-  v->fullscreen           = Fullscreen.Checked();
   FullResWidth.GetText(t, 64);
   v->resolution_width     = strdec(t);
   FullResHeight.GetText(t, 64);
@@ -74,8 +68,6 @@ char t[64 + 1];
 }
 
 void VideoSettingsWindow::Show() {
-  WinProfile.SetSelection(config::video.profile_windowed_default);
-  FullProfile.SetSelection(config::video.profile_fullscreen_default);
   VideoProfile.SetSelection(config::video.profile);
   LoadSettings(config::video.profile);
   Window::Show();
@@ -86,25 +78,14 @@ void VideoSettingsWindow::Setup() {
   Header.SetFont(global::font_header);
 
 int x = 15, y = 30;
-  WinProfileLabel.Create(this, "visible", x, y + 3, 135, 15, "Default windowed profile:");
-  WinProfile.Create(this, "visible", x + 135, y, 90, 200,
-    "Profile 0|Profile 1|Profile 2|Profile 3|Profile 4|"
-    "Profile 5|Profile 6|Profile 7|Profile 8|Profile 9");
-
-  FullProfileLabel.Create(this, "visible", x + 235, y + 3, 135, 15, "Default fullscreen profile:");
-  FullProfile.Create(this, "visible", x + 370, y, 90, 200,
-    "Profile 0|Profile 1|Profile 2|Profile 3|Profile 4|"
-    "Profile 5|Profile 6|Profile 7|Profile 8|Profile 9");
-  y += 25;
-
   VideoProfileLabel.Create(this, "visible", x, y + 3, 135, 15, "Video profile to configure:");
   VideoProfile.Create(this, "visible", x + 135, y, 90, 200,
-    "Profile 0|Profile 1|Profile 2|Profile 3|Profile 4|"
-    "Profile 5|Profile 6|Profile 7|Profile 8|Profile 9");
+    "Profile 1|Profile 2|Profile 3|Profile 4|"
+    "Profile 5|Profile 6|Profile 7|Profile 8");
   y += 25;
 
-  Separator1.Create(this, "visible|sunken", x, y + 5, 460, 3);
-  y += 15;
+  Separator1.Create(this, "visible|sunken", x, y + 1, 460, 3);
+  y += 9;
 
   SoftwareFilterLabel.Create(this, "visible", x, y + 3, 85, 15, "Software filter:");
   SoftwareFilter.Create(this, "visible", x + 85, y, 140, 200,
@@ -134,13 +115,10 @@ int x = 15, y = 30;
   RenderWidth.Create(this, "visible|edge", x + 90, y, 50, 20);
   RenderHeightLabel.Create(this, "visible", x + 150, y + 3, 90, 15, "Render height:");
   RenderHeight.Create(this, "visible|edge", x + 240, y, 50, 20);
-  y += 22;
+  y += 25;
 
-  Separator2.Create(this, "visible|sunken", x, y + 5, 460, 3);
-  y += 15;
-
-  Fullscreen.Create(this, "visible|auto", x, y, 460, 15, "Fullscreen (hit Esc or F11 to exit)");
-  y += 15;
+  Separator1.Create(this, "visible|sunken", x, y, 460, 3);
+  y += 8;
 
   FullResWidthLabel.Create(this, "visible", x, y + 3, 90, 15, "Resolution width:");
   FullResWidth.Create(this, "visible|edge", x + 90, y, 50, 20);
@@ -157,7 +135,7 @@ int x = 15, y = 30;
   SelectProfile.Create(this, "visible", x + 125, y, 120, 25, "Set as active profile");
   y += 25;
 
-  for(int i = 0; i < 10; i++) {
+  for(int i = 0; i < 8; i++) {
     load_video_settings(i);
   }
 }

@@ -1,5 +1,5 @@
 CC = cl
-CFLAGS = /nologo /O2 /EHsc /wd4996
+CFLAGS = /nologo /O2 /EHsc
 OBJS = sdlmain.obj \
        libstring.obj libconfig.obj libbpf.obj \
        reader.obj cart.obj \

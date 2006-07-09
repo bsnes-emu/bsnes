@@ -1,4 +1,3 @@
-
 /* snes_ntsc 0.2.1. http://www.slack.net/~ant/ */
 
 /* compilable in C or C++; just change the file extension */

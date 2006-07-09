@@ -1,69 +1,202 @@
-void numtobin(char *s, uint num) {
-uint mask = 0x80000000, len = 0, z = 0;
-  for(;mask;mask>>=1,len++) { if(num&mask)break; }
-  len = 32 - len;
-  do {
-    if(num&(1<<(len-1)))s[z++] = '1';
-    else                s[z++] = '0';
-  }while(--len);
-  s[z] = 0;
+uint sprintf(substring &str, const char *s, ...) {
+va_list args;
+  va_start(args, s);
+uint length = vsprintf(str, s, args);
+  va_end(args);
+  return length;
 }
 
-void sprintf(substring &str, const char *s, ...) {
-va_list args;
-char t[2], n[256];
-int i, l, sl, z;
-uint8 pad_type, pad_len;
-uint32 num;
-char *r;
-  va_start(args, s);
+uint vsprintf(substring &str, const char *s, va_list args) {
+bool   leftalign;
+bool   showbase;
+char   positivesign;
+char   pad;
+uint   width;
+bool   useprecision;
+uint   precision;
+char   modifier;
+char   type;
+
+uint32 vararg32;
+uint64 vararg64;
+char  *varptr;
+char   varstr[256];
+uint   varstrlen;
+
   strcpy(str, "");
-  for(i=0;i<strlen(s);i++) {
-    if(s[i] == '%') {
+uint i = 0;
+  while(s[i]) {
+    if(s[i] != '%') {
+      strcat(str, s[i++]);
+    } else if(s[i + 1] == '%' || !s[i + 1]) {
+      strcat(str, '%');
+    } else { //s[i] == '%'
+    //format: %[flags][width][.precision][modifiers]type
       i++;
-      if(s[i] == '0' && s[i+1] == '.' && (s[i+2] >= '0' && s[i+2] <= '9')) {
-        pad_type = 1;
-        if(s[i+3] >= '0' && s[i+3] <= '9') { pad_len = (s[i+2]-'0')*10 + (s[i+3]-'0'); i+=4; }
-        else                               { pad_len = (s[i+2]-'0');                   i+=3; }
-      }
-      else if(s[i] >= '0' && s[i] <= '9') {
-        pad_type = 2;
-        if(s[i+1] >= '0' && s[i+1] <= '9') { pad_len = (s[i]-'0')*10 + (s[i+1]-'0'); i+=2; }
-        else                               { pad_len = (s[i]-'0');                   i+=1; }
-      }
-      else { pad_type = 0; }
 
-      if(s[i] == 'd') {
-        num = va_arg(args, uint32);
-        sprintf(n, "%d", num);
-      } else if(s[i] == 'x') {
-        num = va_arg(args, uint32);
-        sprintf(n, "%x", num);
-      } else if(s[i] == 'b') {
-        num = va_arg(args, uint32);
-        numtobin(n, num);
-      } else if(s[i] == 's') {
-        r = va_arg(args, char*);
-      }
+    //flags
+      leftalign    = false;
+      positivesign = 0;
+      showbase     = false;
 
-      if(pad_type != 0) {
-        if(s[i] == 's')sl = strlen(r);
-        else           sl = strlen(n);
-        if(sl < pad_len) {
-          while(sl < pad_len) {
-            strcat(str, (pad_type == 1)?"0":" ");
-            sl++;
-          }
+      while(s[i]) {
+        if(s[i] == '-') {
+          leftalign = true;
+          i++;
+        } else if(s[i] == '+') {
+          positivesign = '+';
+          i++;
+        } else if(s[i] == ' ') {
+          positivesign = ' ';
+          i++;
+        } else if(s[i] == '#') {
+          showbase = true;
+          i++;
+        } else {
+          break;
         }
       }
 
-      if(s[i] == 's')strcat(str, r);
-      else           strcat(str, n);
-    } else {
-      t[0] = s[i];
-      t[1] = 0;
-      strcat(str, t);
+    //zero padding
+      if(s[i] == '0') {
+        pad = '0';
+        i++;
+      } else {
+        pad = ' ';
+      }
+
+    //width
+      width = 0;
+      if(s[i] == '*') {
+        width = va_arg(args, uint32);
+        i++;
+      } else {
+        while(s[i]) {
+          if(s[i] < '0' || s[i] > '9')break;
+          width *= 10;
+          width += s[i++] - '0';
+        }
+      }
+      if(width == 0)width = 1;
+
+    //precision
+      useprecision = false;
+      precision    = 0;
+      if(s[i] == '.') {
+        useprecision = true;
+        i++;
+
+        if(s[i] == '*') {
+          precision = va_arg(args, uint32);
+          i++;
+        } else {
+          while(s[i]) {
+            if(s[i] < '0' || s[i] > '9')break;
+            precision *= 10;
+            precision += s[i++] - '0';
+          }
+        }
+      }
+      if(precision == 0)precision = 1;
+
+    //modifier
+      if(s[i] == 'h') {
+        modifier = 'h';
+        i++;
+      } else if(s[i] == 'l') {
+        modifier = 'l';
+        i++;
+      } else if(s[i] == 'L') {
+        modifier = 'L';
+        i++;
+      }
+
+    //type
+      type = s[i++];
+      switch(type) {
+
+      case 'c': {
+      //character
+        vararg32 = va_arg(args, uint32);
+
+        if(leftalign == false) { while(width-- > 1)strcat(str, pad); }
+        strcat(str, char(vararg32));
+        if(leftalign ==  true) { while(width-- > 1)strcat(str, pad); }
+      } break;
+
+      case 's': {
+      //string
+        varptr = va_arg(args, char*);
+
+        varstrlen = strlen(varptr);
+        if(useprecision && precision < varstrlen)varstrlen = precision;
+        if(leftalign == false) { while(width-- > varstrlen)strcat(str, pad); }
+      uint index = 0;
+      //todo: optimize to a fixed-width strcat
+        while(index < varstrlen)strcat(str, varptr[index++]);
+        if(leftalign ==  true) { while(width-- > varstrlen)strcat(str, pad); }
+      } break;
+
+      case 'd':
+      case 'i':
+      case 'u':
+      case 'x':
+      case 'X': {
+      //signed integer
+        vararg32 = va_arg(args, uint32);
+
+        if(type == 'd' || type == 'i') {
+          itoa(varstr, vararg32);
+        } else if(type == 'u') {
+          utoa(varstr, vararg32);
+        } else if(type == 'x') {
+          htoa(varstr, vararg32);
+        } else if(type == 'X') {
+          uhtoa(varstr, vararg32);
+        }
+
+      uint basestrlen = strlen(varstr);
+        varstrlen = (useprecision && precision > basestrlen) ? precision : basestrlen;
+
+        if(type == 'd' || type == 'i') {
+          if(int32(vararg32) >= 0 && positivesign) { varstrlen++; }
+        }
+
+        if(type == 'x' || type == 'X') {
+          if(showbase) { varstrlen += 2; }
+        }
+
+        if(leftalign == false) { while(width-- > varstrlen)strcat(str, pad); }
+        if(type == 'd' || type == 'i') {
+          if(int32(vararg32) >= 0 && positivesign) { strcat(str, positivesign); }
+        }
+        if(type == 'x' || type == 'X') {
+          if(showbase)strcat(str, (type == 'x') ? "0x" : "0X");
+        }
+        if(useprecision) {
+          while(basestrlen < precision) { strcat(str, "0"); basestrlen++; }
+        }
+        strcat(str, varstr);
+        if(leftalign ==  true) { while(width-- > varstrlen)strcat(str, pad); }
+      } break;
+
+      case 'p': {
+      //todo: add 64-bit pointer support
+        vararg32 = va_arg(args, uint32);
+
+        strcpy(varstr, "00000000");
+      uint index = 8;
+        htoa(varstr + index, vararg32);
+        varstrlen = strlen(varstr + index);
+        index -= 8 - varstrlen;
+
+        if(leftalign == false) { while(width-- > 8)strcat(str, pad); }
+        strcat(str, varstr + index);
+        if(leftalign ==  true) { while(width-- > 8)strcat(str, pad); }
+      } break;
+
+      }
     }
   }
-  va_end(args);
+  return strlen(str);
 }

@@ -1,6 +1,6 @@
 void load_video_settings(uint profile) {
 string line, part;
-  if(profile > 9)profile = 0;
+  if(profile > 7)profile = 0;
 
   switch(profile) {
   case 0: strcpy(line, config::video.profile_0.sget()); break;
@@ -11,8 +11,6 @@ string line, part;
   case 5: strcpy(line, config::video.profile_5.sget()); break;
   case 6: strcpy(line, config::video.profile_6.sget()); break;
   case 7: strcpy(line, config::video.profile_7.sget()); break;
-  case 8: strcpy(line, config::video.profile_8.sget()); break;
-  case 9: strcpy(line, config::video.profile_9.sget()); break;
   }
 
   split(part, ";", line);
@@ -27,17 +25,19 @@ int i = 0;
   v->manual_render_size   = strmatch(part[i++], "true");
   v->render_width         = strdec(part[i++]);
   v->render_height        = strdec(part[i++]);
-  v->fullscreen           = strmatch(part[i++], "true");
   v->resolution_width     = strdec(part[i++]);
   v->resolution_height    = strdec(part[i++]);
   v->refresh_rate         = strdec(part[i++]);
   v->triple_buffering     = strmatch(part[i++], "true");
+
+  if(v->render_width  < 256)v->render_width  = 256;
+  if(v->render_height < 224)v->render_height = 224;
 }
 
 void save_video_settings(uint profile) {
 string line;
 char   part[64];
-  if(profile > 9)profile = 0;
+  if(profile > 7)profile = 0;
 
 VideoSettings *v = &video_settings[profile];
   strcpy(line, "");
@@ -50,7 +50,6 @@ VideoSettings *v = &video_settings[profile];
   sprintf(part, "%s", v->manual_render_size   ? "true" : "false"); strcat(line, part); strcat(line, ";");
   sprintf(part, "%d", v->render_width);                            strcat(line, part); strcat(line, ";");
   sprintf(part, "%d", v->render_height);                           strcat(line, part); strcat(line, ";");
-  sprintf(part, "%s", v->fullscreen           ? "true" : "false"); strcat(line, part); strcat(line, ";");
   sprintf(part, "%d", v->resolution_width);                        strcat(line, part); strcat(line, ";");
   sprintf(part, "%d", v->resolution_height);                       strcat(line, part); strcat(line, ";");
   sprintf(part, "%d", v->refresh_rate);                            strcat(line, part); strcat(line, ";");
@@ -65,14 +64,12 @@ VideoSettings *v = &video_settings[profile];
   case 5: config::video.profile_5.sset(strptr(line)); break;
   case 6: config::video.profile_6.sset(strptr(line)); break;
   case 7: config::video.profile_7.sset(strptr(line)); break;
-  case 8: config::video.profile_8.sset(strptr(line)); break;
-  case 9: config::video.profile_9.sset(strptr(line)); break;
   }
 }
 
 void Video::update_video_settings() {
 uint profile = uint(config::video.profile);
-  if(profile > 9)profile = 0;
+  if(profile > 7)profile = 0;
 
   load_video_settings(profile);
 VideoSettings *v = &video_settings[profile];
@@ -94,13 +91,12 @@ VideoSettings *v = &video_settings[profile];
   }
 
   settings.hardware_filter   = v->hardware_filter;
-  settings.fullscreen        = v->fullscreen;
   settings.triple_buffering  = v->triple_buffering;
   settings.enable_scanlines  = v->enable_scanlines;
 
-  if(settings.fullscreen == true) {
-    settings.resolution_width  = v->resolution_width;
-    settings.resolution_height = v->resolution_height;
+  if(bool(config::video.fullscreen) == true) {
+    settings.resolution_width  = (v->resolution_width)  ? v->resolution_width  : GetScreenWidth();
+    settings.resolution_height = (v->resolution_height) ? v->resolution_height : GetScreenHeight();
     settings.refresh_rate      = v->refresh_rate;
   } else {
     settings.resolution_width  = settings.render_width;
@@ -119,7 +115,7 @@ VideoSettings *v = &video_settings[profile];
 
 void Video::update_window() {
 string t;
-  if(settings.fullscreen == true) {
+  if(bool(config::video.fullscreen) == true) {
     strcpy(t, "topmost|popup");
     if(wMain.Visible())strcat(t, "|visible");
     wMain.HideMenu();

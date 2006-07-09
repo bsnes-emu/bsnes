@@ -21,9 +21,22 @@ va_list args;
   vsprintf(str, s, args);
   va_end(args);
 #ifdef DEBUGGER
-  wDebug.Print(str);
+  wDebug.Print(source::none, str);
 #else
-  fprintf(stdout, "%s\r\n", str);
+  fprintf(stdout, "[%3d] %s\r\n", source::none, str);
+#endif
+}
+
+void dprintf(uint source, char *s, ...) {
+char str[4096];
+va_list args;
+  va_start(args, s);
+  vsprintf(str, s, args);
+  va_end(args);
+#ifdef DEBUGGER
+  wDebug.Print(source, str);
+#else
+  fprintf(stdout, "[%3d] %s\r\n", source, str);
 #endif
 }
 

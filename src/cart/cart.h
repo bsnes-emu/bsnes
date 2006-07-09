@@ -28,6 +28,11 @@ enum {
   HIROM   = 0x21,
   EXLOROM = 0x22,
   EXHIROM = 0x25,
+
+//special chip memory mappers
+  DSP1_LOROM_1MB = 1,
+  DSP1_LOROM_2MB = 2,
+  DSP1_HIROM     = 3,
 };
 
 struct {
@@ -47,8 +52,11 @@ struct {
   bool   srtc;
   bool   sdd1;
   bool   c4;
+  bool   dsp1;
   bool   dsp2;
   bool   obc1;
+
+  uint   dsp1_mapper;
 } cart;
 
   void load_rom(Reader *rf);

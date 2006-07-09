@@ -55,7 +55,7 @@ void SNES::VideoColorAdjust::set(uint32 _data) {
 Setting SNES::ntsc_merge_fields(&config_file, "snes.ntsc_merge_fields",
 "Merge fields in NTSC video filter\n"
 "Set to true if using filter at any refresh rate other than 60hz\n"
-"", false, Setting::TRUE_FALSE);
+"", true, Setting::TRUE_FALSE);
 
 Setting SNES::mute(&config_file, "snes.mute", "Mutes SNES audio output when enabled",
   false, Setting::TRUE_FALSE);

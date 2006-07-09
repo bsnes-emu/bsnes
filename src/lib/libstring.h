@@ -1,5 +1,5 @@
 /*
-  libstring : version 0.10 ~byuu (03/05/06)
+  libstring : version 0.11 ~byuu (07/02/06)
 */
 
 #ifndef __LIBSTRING
@@ -51,6 +51,7 @@ void  strncpy(substring &dest, substring &src, uint32 length);
 
 void  strset(substring &dest, uint pos, uint8 c);
 
+void  strcat(substring &dest, const char src);
 void  strcat(substring &dest, const char *src);
 void  strcat(substring &dest, substring &src);
 
@@ -59,11 +60,11 @@ void  strinsert(substring &dest, substring &src, uint pos);
 
 void  strremove(substring &dest, uint start, uint length = 0);
 
-void  strlower(char *str);
-void  strlower(substring &str);
+char *strlower(char *str);
+substring &strlower(substring &str);
 
-void  strupper(char *str);
-void  strupper(substring &str);
+char *strupper(char *str);
+substring &strupper(substring &str);
 
 bool  strpos(const char *str, const char *key, uint &pos);
 bool  strpos(substring &str, const char *key, uint &pos);
@@ -125,17 +126,32 @@ uint  strbin(substring &str);
 int   sstrbin(const char *str);
 int   sstrbin(substring &str);
 
+char *utoa(char *str, uint num);
+substring &utoa(substring &str, uint num);
+
+char *itoa(char *str, uint num);
+substring &itoa(substring &str, uint num);
+
+char *htoa(char *str, uint num);
+substring &htoa(substring &str, uint num);
+
+char *uhtoa(char *str, uint num);
+substring &uhtoa(substring &str, uint num);
+
+char *btoa(char *str, uint num);
+substring &btoa(substring &str, uint num);
+
 uint  strmath(const char *in_str);
 uint  strmath(substring &in_str);
 
 bool  strmathentity(const char *str);
 bool  strmathentity(substring &str);
 
-void  replace(substring &str, const char *key, const char *token);
-void  replace(substring &str, const char *key, substring &token);
+substring &replace(substring &str, const char *key, const char *token);
+substring &replace(substring &str, const char *key, substring &token);
 
-void  qreplace(substring &str, const char *key, const char *token);
-void  qreplace(substring &str, const char *key, substring &token);
+substring &qreplace(substring &str, const char *key, const char *token);
+substring &qreplace(substring &str, const char *key, substring &token);
 
 void  split(string &dest, const char *key, const char *src);
 void  split(string &dest, const char *key, substring &src);
@@ -143,7 +159,8 @@ void  split(string &dest, const char *key, substring &src);
 void  qsplit(string &dest, const char *key, const char *src);
 void  qsplit(string &dest, const char *key, substring &src);
 
-void  sprintf(substring &str, const char *s, ...);
+uint  vsprintf(substring &str, const char *s, va_list args);
+uint  sprintf(substring &str, const char *s, ...);
 
 class substring {
 public:
@@ -175,14 +192,7 @@ uint listcount, count;
 //inline char* operator*()               { return strptr(str(0)); }
 //inline operator char*()                { return str(0).s; }
   inline operator substring&()           { return str(0); }
-  inline substring& operator[](uint   i) { return str(i); }
-  inline substring& operator[](uint8  i) { return str(i); }
-  inline substring& operator[](uint16 i) { return str(i); }
-  inline substring& operator[](uint32 i) { return str(i); }
-  inline substring& operator[](int    i) { return str(i); }
-  inline substring& operator[](int8   i) { return str(i); }
-  inline substring& operator[](int16  i) { return str(i); }
-  inline substring& operator[](int32  i) { return str(i); }
+  template<typename T> inline substring& operator[](T i) { return str(i); }
 
   string();
   ~string();

@@ -23,18 +23,14 @@ bool bPPU::vram_can_read() {
 
 uint16 v  = r_cpu->vcounter();
 uint16 hc = r_cpu->hcycles();
-uint16 ls;
-  if(r_cpu->interlace() && !r_cpu->interlace_field()) {
-    ls = r_cpu->region_scanlines();
-  } else {
-    ls = r_cpu->region_scanlines() - 1;
-  }
+uint16 ls = (r_cpu->region_scanlines() >> 1) - 1;
+  if(r_cpu->interlace() && !r_cpu->interlace_field())ls++;
 
   if(v == ls && hc == 1362)return false;
 
-  if(v < (r_cpu->overscan() ? 239 : 224))return false;
+  if(v < (!r_cpu->overscan() ? 224 : 239))return false;
 
-  if(v == (r_cpu->overscan() ? 239 : 224)) {
+  if(v == (!r_cpu->overscan() ? 224 : 239)) {
     if(hc == 1362)return true;
     return false;
   }

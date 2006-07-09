@@ -12,9 +12,9 @@ uint8 cpu_version;
   virtual uint16 vcounter() = 0;
   virtual uint16 hcounter() = 0;
   virtual uint16 hcycles() = 0;
-  virtual bool   overscan() = 0;
   virtual bool   interlace() = 0;
   virtual bool   interlace_field() = 0;
+  virtual bool   overscan() = 0;
   virtual uint16 region_scanlines() = 0;
   virtual void   set_interlace(bool r) = 0;
   virtual void   set_overscan (bool r) = 0;
@@ -30,14 +30,32 @@ CPURegs regs;
     FLAG_Z = 0x02, FLAG_C = 0x01
   };
   virtual uint8  pio_status() = 0;
+  virtual void   main() {}
   virtual void   run() = 0;
-  virtual uint32 cycles_executed() = 0;
+  virtual uint32 clocks_executed() = 0;
   virtual void   scanline() = 0;
   virtual void   frame() = 0;
   virtual void   power() = 0;
   virtual void   reset() = 0;
 
-//opcode disassembler
+/*****
+ * in opcode-based CPU emulators, the main emulation routine
+ * will only be able to call the disassemble_opcode() function
+ * on clean opcode edges. but with cycle-based CPU emulators,
+ * the CPU may be in the middle of executing an opcode when the
+ * emulator (e.g. debugger) wants to disassemble an opcode. this
+ * would mean that important registers may not reflect what they
+ * did at the start of the opcode (especially regs.pc), so in
+ * cycle-based emulators, this function should be overridden to
+ * reflect whether or not an opcode has only been partially
+ * executed. if not, the debugger should abort attempts to skip,
+ * disable, or disassemble the current opcode.
+ *****/
+  virtual bool in_opcode() { return false; }
+
+/*****
+ * opcode disassembler
+ *****/
 enum {
   OPTYPE_DP = 0,    //dp
   OPTYPE_DPX,       //dp,x
@@ -57,16 +75,17 @@ enum {
   OPTYPE_SR,        //sr,s
   OPTYPE_ISRY,      //(sr,s),y
   OPTYPE_ADDR_PC,   //pbr:addr
-  OPTYPE_IADDR_PC   //pbr:(addr)
+  OPTYPE_IADDR_PC,  //pbr:(addr)
+  OPTYPE_RELB,      //relb
+  OPTYPE_RELW,      //relw
 };
-//see dcpu.cpp for notes on this function
-  virtual bool in_opcode();
 
   void   disassemble_opcode(char *output);
-  uint32 resolve_offset(uint8 offset_type, uint32 addr);
+  uint8  dreadb(uint32 addr);
+  uint16 dreadw(uint32 addr);
+  uint32 dreadl(uint32 addr);
+  uint32 decode(uint8 offset_type, uint32 addr);
   uint8  opcode_length();
-  uint16 __relb(int8 offset);
-  uint16 __relw(int16 offset);
 
   CPU();
   virtual ~CPU() {}

@@ -26,9 +26,12 @@ uint8 *tableA = oam, *tableB = oam + 512;
             break;
     case 6: sprite_list[i].width  = (!size) ? 16 : 32;
             sprite_list[i].height = (!size) ? 32 : 64;
+            if(regs.oam_interlace && !size)sprite_list[i].height = 16;
+          //32x64 height is not affected by oam_interlace setting
             break;
     case 7: sprite_list[i].width  = (!size) ? 16 : 32;
             sprite_list[i].height = (!size) ? 32 : 32;
+            if(regs.oam_interlace && !size)sprite_list[i].height = 16;
             break;
     }
 
@@ -48,38 +51,33 @@ uint8 *tableA = oam, *tableB = oam + 512;
 
 bool bPPU::is_sprite_on_scanline() {
 //if sprite is entirely offscreen and doesn't wrap around to the left side of the screen,
-//then it is not counted. 256 is correct, and not 255 -- as one might first expect
-  if(spr->x > 256 && (spr->x + spr->width) < 512)return false;
+//then it is not counted. this *should* be 256, and not 255, even though dot 256 is offscreen.
+  if(spr->x > 256 && (spr->x + spr->width - 1) < 512)return false;
 
-  if(regs.oam_interlace == false) {
-    if(line.y >= spr->y && line.y < (spr->y + spr->height)) {
-      return true;
-    } else if((spr->y + spr->height) >= 256 && line.y < ((spr->y + spr->height) & 255)) {
-      return true;
-    }
-  } else {
-    if(line.y >= spr->y && line.y < (spr->y + (spr->height >> 1))) {
-      return true;
-    } else if((spr->y + (spr->height >> 1)) >= 256 && line.y < ((spr->y + (spr->height >> 1)) & 255)) {
-      return true;
-    }
-  }
-
+int spr_height = (regs.oam_interlace == false) ? (spr->height) : (spr->height >> 1);
+  if(line.y >= spr->y && line.y < (spr->y + spr_height))return true;
+  if((spr->y + spr_height) >= 256 && line.y < ((spr->y + spr_height) & 255))return true;
   return false;
 }
 
 void bPPU::load_oam_tiles() {
 uint16 tile_width = spr->width >> 3;
 int x = spr->x;
-int y = (spr->vflip) ? ((spr->height - 1) - (line.y - spr->y)) : (line.y - spr->y);
-
-//todo: verify below code is hardware-accurate
-//specifically, is interlace_field added for oam_interlace mode?
+int y = line.y - spr->y;
   if(regs.oam_interlace == true) {
     y <<= 1;
-    if(line.interlace && line.width == 512) {
-      y += line.interlace_field;
+  }
+
+  if(spr->vflip == true) {
+    if(spr->width == spr->height) {
+      y = (spr->height - 1) - y;
+    } else {
+      y = (y < spr->width) ? ((spr->width - 1) - y) : (spr->width + ((spr->width - 1) - (y - spr->width)));
     }
+  }
+
+  if(regs.oam_interlace == true) {
+    y = (spr->vflip == false) ? (y + line.interlace_field) : (y - line.interlace_field);
   }
 
   x &= 511;
@@ -95,47 +93,39 @@ uint16 chry   = (spr->character >> 4) & 15;
   chry  &= 15;
   chry <<= 4;
 
-int i, n, sx, mx, pos;
-  for(i=0;i<tile_width;i++) {
-    sx  = x;
-    sx += i << 3;
-    sx &= 511;
-
-  //ignore sprites that are offscreen
-  //sprites at 256 are still counted, even though they aren't visible onscreen
-    if(sx >= 257 && (sx + 7) < 512)continue;
+  for(uint tx = 0; tx < tile_width; tx++) {
+  uint sx = (x + (tx << 3)) & 511;
+    if(sx > 256 && (sx + 7) < 512)continue; //ignore sprites that are offscreen
 
     if(regs.oam_tilecount++ > 34)break;
-    n = regs.oam_tilecount - 1;
+  uint n = regs.oam_tilecount - 1;
     oam_tilelist[n].x     = sx;
     oam_tilelist[n].y     = y;
     oam_tilelist[n].pri   = spr->priority;
-    oam_tilelist[n].pal   = (spr->palette << 4) + 128;
+    oam_tilelist[n].pal   = 128 + (spr->palette << 4);
     oam_tilelist[n].hflip = spr->hflip;
 
-    mx  = (oam_tilelist[n].hflip) ? ((tile_width - 1) - i) : i;
-    pos = tdaddr + ((chry + ((chrx + mx) & 15)) << 5);
+  uint mx  = (spr->hflip == false) ? tx : ((tile_width - 1) - tx);
+  uint pos = tdaddr + ((chry + ((chrx + mx) & 15)) << 5);
     oam_tilelist[n].tile = (pos >> 5) & 0x07ff;
   }
 }
 
 void bPPU::render_oam_tile(int tile_num) {
-uint8 *oam_td, *oam_td_state, *tile_ptr;
-oam_tileitem *t = &oam_tilelist[tile_num];
-  oam_td       = (uint8*)bg_tiledata[COLORDEPTH_16];
-  oam_td_state = (uint8*)bg_tiledata_state[COLORDEPTH_16];
+oam_tileitem *t     = &oam_tilelist[tile_num];
+uint8 *oam_td       = (uint8*)bg_tiledata[COLORDEPTH_16];
+uint8 *oam_td_state = (uint8*)bg_tiledata_state[COLORDEPTH_16];
 
   if(oam_td_state[t->tile] == 1) {
     render_bg_tile(COLORDEPTH_16, t->tile);
   }
 
-int x, sx, col;
-  sx = t->x;
-  tile_ptr = (uint8*)oam_td + (t->tile << 6) + ((t->y & 7) << 3);
-  for(x=0;x<8;x++) {
+uint   sx = t->x;
+uint8 *tile_ptr = (uint8*)oam_td + (t->tile << 6) + ((t->y & 7) << 3);
+  for(uint x = 0; x < 8; x++) {
     sx &= 511;
     if(sx < 256) {
-      col = *(tile_ptr + ((t->hflip) ? (7 - x) : x));
+    uint col = *(tile_ptr + ((t->hflip == false) ? x : (7 - x)));
       if(col) {
         col += t->pal;
         oam_line_pal[sx] = col;
@@ -152,16 +142,15 @@ void bPPU::render_line_oam(uint8 pri0_pos, uint8 pri1_pos, uint8 pri2_pos, uint8
   regs.oam_itemcount = 0;
   regs.oam_tilecount = 0;
   memset(oam_line_pri, OAM_PRI_NONE, 256);
-
   memset(oam_itemlist, 0xff, 32);
+  for(int s = 0; s < 34; s++)oam_tilelist[s].tile = 0xffff;
+
   for(int s = 0; s < 128; s++) {
     spr = &sprite_list[(s + regs.oam_firstsprite) & 127];
     if(is_sprite_on_scanline() == false)continue;
     if(regs.oam_itemcount++ > 32)break;
     oam_itemlist[regs.oam_itemcount - 1] = (s + regs.oam_firstsprite) & 127;
   }
-
-  for(int s = 0; s < 34; s++)oam_tilelist[s].tile = 0xffff;
 
   for(int s = 31; s >= 0; s--) {
     if(oam_itemlist[s] == 0xff)continue;
@@ -213,17 +202,11 @@ bool bgsub_enabled = regs.bgsub_enabled[OAM];
 uint8 *wt_main = window[OAM].main;
 uint8 *wt_sub  = window[OAM].sub;
 
-int pri;
+int pri_tbl[4] = { pri0_pos, pri1_pos, pri2_pos, pri3_pos };
   for(int x = 0; x < 256; x++) {
     if(oam_line_pri[x] == OAM_PRI_NONE)continue;
 
-    switch(oam_line_pri[x]) {
-    case 0: pri = pri0_pos; break;
-    case 1: pri = pri1_pos; break;
-    case 2: pri = pri2_pos; break;
-    case 3: pri = pri3_pos; break;
-    }
-
+  int pri = pri_tbl[oam_line_pri[x]];
     if(bg_enabled    == true && !wt_main[x]) { setpixel_main(x); }
     if(bgsub_enabled == true && !wt_sub[x])  { setpixel_sub(x); }
   }

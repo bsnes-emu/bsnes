@@ -25,16 +25,15 @@ void bPPU::render_line_mode7(uint8 bg, uint8 pri0_pos, uint8 pri1_pos) {
 int32 px, py;
 int32 tx, ty, tile, palette;
 
-int32 a = int32(int16(regs.m7a));
-int32 b = int32(int16(regs.m7b));
-int32 c = int32(int16(regs.m7c));
-int32 d = int32(int16(regs.m7d));
+int32 a = sclip<15>(regs.m7a); //int32(int16(regs.m7a));
+int32 b = sclip<15>(regs.m7b); //int32(int16(regs.m7b));
+int32 c = sclip<15>(regs.m7c); //int32(int16(regs.m7c));
+int32 d = sclip<15>(regs.m7d); //int32(int16(regs.m7d));
 
-int32 cx   = (int32(regs.m7x)         << 19) >> 19;
-int32 cy   = (int32(regs.m7y)         << 19) >> 19;
-int32 hofs = (int32(regs.m7_hofs)     << 19) >> 19;
-//+1 breaks FF5 title screen mirror alignment...
-int32 vofs = (int32(regs.m7_vofs + 0) << 19) >> 19;
+int32 cx   = sclip<13>(regs.m7x);     //(int32(regs.m7x)         << 19) >> 19;
+int32 cy   = sclip<13>(regs.m7y);     //(int32(regs.m7y)         << 19) >> 19;
+int32 hofs = sclip<13>(regs.m7_hofs); //(int32(regs.m7_hofs)     << 19) >> 19;
+int32 vofs = sclip<13>(regs.m7_vofs); //(int32(regs.m7_vofs + 0) << 19) >> 19;
 
 int  _pri, _x;
 bool _bg_enabled    = regs.bg_enabled[bg];
@@ -59,6 +58,10 @@ uint16 *mtable_x, *mtable_y;
 
 int32 psx = ((a * CLIP(hofs - cx)) & ~63) + ((b * CLIP(vofs - cy)) & ~63) + ((b * mtable_y[y]) & ~63) + (cx << 8);
 int32 psy = ((c * CLIP(hofs - cx)) & ~63) + ((d * CLIP(vofs - cy)) & ~63) + ((d * mtable_y[y]) & ~63) + (cy << 8);
+//suggestion by TRAC, difference can be no greater than 1 bit (due to rounding) from above,
+//but verification would be good...
+//int32 psx = ((a * CLIP(hofs - cx)) & ~63) + ((b * (CLIP(vofs - cy) + mtable_y[y])) & ~63) + (cx << 8);
+//int32 psy = ((c * CLIP(hofs - cx)) & ~63) + ((d * (CLIP(vofs - cy) + mtable_y[y])) & ~63) + (cy << 8);
   for(int32 x = 0; x < 256; x++) {
     px = psx + (a * mtable_x[x]);
     py = psy + (c * mtable_x[x]);
