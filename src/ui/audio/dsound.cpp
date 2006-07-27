@@ -5,10 +5,12 @@ void AudioDS::run(uint32 sample) {
   uint32 pos, size;
   void  *buffer;
     if(bool(config::system.regulate_speed) == true) {
-      do {
+      for(;;) {
         dsb_b->GetCurrentPosition(&pos, 0);
         data.read_buffer = pos / data.buffer_size;
-      } while(data.read_buffer == data.prev_buffer);
+        if(data.read_buffer != data.prev_buffer)break;
+        Sleep(1);
+      }
     }
 
     data.prev_buffer = data.read_buffer;
@@ -27,7 +29,7 @@ void AudioDS::run(uint32 sample) {
   }
 }
 
-void AudioDS::set_frequency(uint32 new_freq) {
+void AudioDS::set_frequency(uint new_freq) {
   frequency = new_freq;
   init();
 }

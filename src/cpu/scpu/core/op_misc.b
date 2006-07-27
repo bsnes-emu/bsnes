@@ -15,7 +15,7 @@ xba(0xeb) {
   regs.a.l ^= regs.a.h;
   regs.a.h ^= regs.a.l;
   regs.a.l ^= regs.a.h;
-  regs.p.n = !!(regs.a.l & 0x80);
+  regs.p.n = bool(regs.a.l & 0x80);
   regs.p.z = (regs.a.l == 0);
 }
 
@@ -27,8 +27,11 @@ mvp(0x44, --) {
   rd.l = op_readlong((sp << 16) | regs.x.w);
 4:op_writelong((dp << 16) | regs.y.w, rd.l);
 5:op_io();
-  if(regs.p.x) { regs.x.l$1; regs.y.l$1; }
-  else         { regs.x.w$1; regs.y.w$1; }
+  if(regs.idx_8b) {
+    regs.x.l $1; regs.y.l $1;
+  } else {
+    regs.x.w $1; regs.y.w $1;
+  }
 6:last_cycle();
   op_io();
   if(regs.a.w--)regs.pc.w -= 3;
@@ -77,11 +80,12 @@ xce(0xfb) {
 bool c = regs.p.c;
   regs.p.c = regs.e;
   regs.e = c;
-  if(regs.e) {
-    regs.p  |= 0x30;
+  if(regs.e)regs.s.h = 0x01;
+  regs.acc_8b = (regs.e || regs.p.m);
+  regs.idx_8b = (regs.e || regs.p.x);
+  if(regs.idx_8b) {
     regs.x.h = 0x00;
     regs.y.h = 0x00;
-    regs.s.h = 0x01;
   }
 }
 
@@ -103,28 +107,29 @@ sep(0xe2, |=) {
 2:last_cycle();
   op_io();
   regs.p $1 rd.l;
-  if(regs.e)regs.p |= 0x30;
-  if(regs.p.x) {
+  regs.acc_8b = (regs.e || regs.p.m);
+  regs.idx_8b = (regs.e || regs.p.x);
+  if(regs.idx_8b) {
     regs.x.h = 0x00;
     regs.y.h = 0x00;
   }
 }
 
-tax(0xaa, regs.p.x, x, a),
-tay(0xa8, regs.p.x, y, a),
-txa(0x8a, regs.p.m, a, x),
-txy(0x9b, regs.p.x, y, x),
-tya(0x98, regs.p.m, a, y),
-tyx(0xbb, regs.p.x, x, y) {
+tax(0xaa, regs.idx_8b, x, a),
+tay(0xa8, regs.idx_8b, y, a),
+txa(0x8a, regs.acc_8b, a, x),
+txy(0x9b, regs.idx_8b, y, x),
+tya(0x98, regs.acc_8b, a, y),
+tyx(0xbb, regs.idx_8b, x, y) {
 1:last_cycle();
   op_io();
   if($1) {
     regs.$2.l = regs.$3.l;
-    regs.p.n = !!(regs.$2.l & 0x80);
+    regs.p.n = bool(regs.$2.l & 0x80);
     regs.p.z = (regs.$2.l == 0);
   } else {
     regs.$2.w = regs.$3.w;
-    regs.p.n = !!(regs.$2.w & 0x8000);
+    regs.p.n = bool(regs.$2.w & 0x8000);
     regs.p.z = (regs.$2.w == 0);
   }
 }
@@ -133,7 +138,7 @@ tcd(0x5b) {
 1:last_cycle();
   op_io();
   regs.d.w = regs.a.w;
-  regs.p.n = !!(regs.d.w & 0x8000);
+  regs.p.n = bool(regs.d.w & 0x8000);
   regs.p.z = (regs.d.w == 0);
 }
 
@@ -148,7 +153,7 @@ tdc(0x7b) {
 1:last_cycle();
   op_io();
   regs.a.w = regs.d.w;
-  regs.p.n = !!(regs.a.w & 0x8000);
+  regs.p.n = bool(regs.a.w & 0x8000);
   regs.p.z = (regs.a.w == 0);
 }
 
@@ -157,10 +162,10 @@ tsc(0x3b) {
   op_io();
   regs.a.w = regs.s.w;
   if(regs.e) {
-    regs.p.n = !!(regs.a.l & 0x80);
+    regs.p.n = bool(regs.a.l & 0x80);
     regs.p.z = (regs.a.l == 0);
   } else {
-    regs.p.n = !!(regs.a.w & 0x8000);
+    regs.p.n = bool(regs.a.w & 0x8000);
     regs.p.z = (regs.a.w == 0);
   }
 }
@@ -168,13 +173,13 @@ tsc(0x3b) {
 tsx(0xba) {
 1:last_cycle();
   op_io();
-  if(regs.p.x) {
+  if(regs.idx_8b) {
     regs.x.l = regs.s.l;
-    regs.p.n = !!(regs.x.l & 0x80);
+    regs.p.n = bool(regs.x.l & 0x80);
     regs.p.z = (regs.x.l == 0);
   } else {
     regs.x.w = regs.s.w;
-    regs.p.n = !!(regs.x.w & 0x8000);
+    regs.p.n = bool(regs.x.w & 0x8000);
     regs.p.z = (regs.x.w == 0);
   }
 }
@@ -189,10 +194,10 @@ txs(0x9a) {
   }
 }
 
-pha(0x48, regs.p.m, a),
-phx(0xda, regs.p.x, x),
-phy(0x5a, regs.p.x, y),
-phd(0x0b, 0,        d) {
+pha(0x48, regs.acc_8b, a),
+phx(0xda, regs.idx_8b, x),
+phy(0x5a, regs.idx_8b, y),
+phd(0x0b, 0,           d) {
 1:op_io();
 2:if(!$1)op_writestack(regs.$2.h);
 3:last_cycle();
@@ -207,22 +212,22 @@ php(0x08, regs.p) {
   op_writestack($1);
 }
 
-pla(0x68, regs.p.m, a),
-plx(0xfa, regs.p.x, x),
-ply(0x7a, regs.p.x, y),
-pld(0x2b, 0,        d) {
+pla(0x68, regs.acc_8b, a),
+plx(0xfa, regs.idx_8b, x),
+ply(0x7a, regs.idx_8b, y),
+pld(0x2b, 0,           d) {
 1:op_io();
 2:op_io();
 3:if($1)last_cycle();
   regs.$2.l = op_readstack();
   if($1) {
-    regs.p.n = !!(regs.$2.l & 0x80);
+    regs.p.n = bool(regs.$2.l & 0x80);
     regs.p.z = (regs.$2.l == 0);
     end;
   }
 4:last_cycle();
   regs.$2.h = op_readstack();
-  regs.p.n = !!(regs.$2.w & 0x8000);
+  regs.p.n = bool(regs.$2.w & 0x8000);
   regs.p.z = (regs.$2.w == 0);
 }
 
@@ -231,7 +236,7 @@ plb(0xab) {
 2:op_io();
 3:last_cycle();
   regs.db = op_readstack();
-  regs.p.n = !!(regs.db & 0x80);
+  regs.p.n = bool(regs.db & 0x80);
   regs.p.z = (regs.db == 0);
 }
 
@@ -240,8 +245,9 @@ plp(0x28) {
 2:op_io();
 3:last_cycle();
   regs.p = op_readstack();
-  if(regs.e)regs.p |= 0x30;
-  if(regs.p.x) {
+  regs.acc_8b = (regs.e || regs.p.m);
+  regs.idx_8b = (regs.e || regs.p.x);
+  if(regs.idx_8b) {
     regs.x.h = 0x00;
     regs.y.h = 0x00;
   }

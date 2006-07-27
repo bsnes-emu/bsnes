@@ -1,5 +1,5 @@
 /*
-  libstring : version 0.11 ~byuu (07/02/06)
+  libstring : version 0.11b ~byuu (07/16/06)
 */
 
 #ifndef __LIBSTRING
@@ -141,11 +141,10 @@ substring &uhtoa(substring &str, uint num);
 char *btoa(char *str, uint num);
 substring &btoa(substring &str, uint num);
 
-uint  strmath(const char *in_str);
-uint  strmath(substring &in_str);
+bool  strfread(substring &str, const char *filename);
 
-bool  strmathentity(const char *str);
-bool  strmathentity(substring &str);
+int   strmath(const char *in_str);
+int   strmath(substring &in_str);
 
 substring &replace(substring &str, const char *key, const char *token);
 substring &replace(substring &str, const char *key, substring &token);
@@ -166,9 +165,6 @@ class substring {
 public:
 char *s;
 uint size;
-//inline char* operator*() { return s; }
-//inline operator char*()  { return s; }
-
   substring();
   ~substring();
 };
@@ -189,10 +185,8 @@ uint listcount, count;
   void addto(uint num);     //creates all needed strings to make list[num] valid
   substring &str(uint num); //gets a substring reference, creating it + new strings if needed
 
-//inline char* operator*()               { return strptr(str(0)); }
-//inline operator char*()                { return str(0).s; }
-  inline operator substring&()           { return str(0); }
-  template<typename T> inline substring& operator[](T i) { return str(i); }
+  inline operator substring&() { return str(0); }
+  template<typename T> inline substring& operator[](const T i) { return str(i); }
 
   string();
   ~string();

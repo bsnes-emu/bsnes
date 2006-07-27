@@ -48,7 +48,7 @@ jmp_long(0x5c) {
 2:rd.h = op_readpc();
 3:last_cycle();
   rd.b = op_readpc();
-  regs.pc.d = rd.d & 0xffffff;
+  regs.pc.d = uclip<24>(rd.d);
 }
 
 jmp_iaddr(0x6c) {
@@ -77,7 +77,7 @@ jmp_iladdr(0xdc) {
 4:rd.h = op_readaddr(aa.w + 1);
 5:last_cycle();
   rd.b = op_readaddr(aa.w + 2);
-  regs.pc.d = rd.d & 0xffffff;
+  regs.pc.d = uclip<24>(rd.d);
 }
 
 jsr_addr(0x20) {
@@ -101,7 +101,7 @@ jsr_long(0x22) {
   op_writestack(regs.pc.h);
 7:last_cycle();
   op_writestack(regs.pc.l);
-  regs.pc.d = aa.d & 0xffffff;
+  regs.pc.d = uclip<24>(aa.d);
 }
 
 jsr_iaddrx(0xfc) {
@@ -120,8 +120,9 @@ rti(0x40) {
 1:op_io();
 2:op_io();
 3:regs.p = op_readstack();
-  if(regs.e)regs.p |= 0x30;
-  if(regs.p.x) {
+  regs.acc_8b = (regs.e || regs.p.m);
+  regs.idx_8b = (regs.e || regs.p.x);
+  if(regs.idx_8b) {
     regs.x.h = 0x00;
     regs.y.h = 0x00;
   }
@@ -134,7 +135,7 @@ rti(0x40) {
   }
 6:last_cycle();
   rd.b = op_readstack();
-  regs.pc.d = rd.d & 0xffffff;
+  regs.pc.d = uclip<24>(rd.d);
 }
 
 rts(0x60) {
@@ -155,6 +156,6 @@ rtl(0x6b) {
 4:rd.h = op_readstack();
 5:last_cycle();
   rd.b = op_readstack();
-  regs.pc.d = rd.d & 0xffffff;
+  regs.pc.d = uclip<24>(rd.d);
   regs.pc.w++;
 }

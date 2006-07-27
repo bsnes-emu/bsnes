@@ -1,10 +1,3 @@
-#include "video/video.cpp"
-#include "video/d3d.cpp"
-#include "video/ddraw.cpp"
-#include "audio/dsound.cpp"
-#include "input/input.cpp"
-#include "input/dinput.cpp"
-
 #include "ui_main.cpp"
 #include "ui_about.cpp"
 #include "settings/settings.cpp"

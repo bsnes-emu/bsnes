@@ -151,7 +151,7 @@ case 0x5c: {
   rd.h = op_readpc();
   last_cycle();
   rd.b = op_readpc();
-  regs.pc.d = rd.d & 0xffffff;
+  regs.pc.d = uclip<24>(rd.d);
 } break;
 
 //jmp_iaddr
@@ -183,7 +183,7 @@ case 0xdc: {
   rd.h = op_readaddr(aa.w + 1);
   last_cycle();
   rd.b = op_readaddr(aa.w + 2);
-  regs.pc.d = rd.d & 0xffffff;
+  regs.pc.d = uclip<24>(rd.d);
 } break;
 
 //jsr_addr
@@ -209,7 +209,7 @@ case 0x22: {
   op_writestack(regs.pc.h);
   last_cycle();
   op_writestack(regs.pc.l);
-  regs.pc.d = aa.d & 0xffffff;
+  regs.pc.d = uclip<24>(aa.d);
 } break;
 
 //jsr_iaddrx
@@ -230,8 +230,9 @@ case 0x40: {
   op_io();
   op_io();
   regs.p = op_readstack();
-  if(regs.e)regs.p |= 0x30;
-  if(regs.p.x) {
+  regs.acc_8b = (regs.e || regs.p.m);
+  regs.idx_8b = (regs.e || regs.p.x);
+  if(regs.idx_8b) {
     regs.x.h = 0x00;
     regs.y.h = 0x00;
   }
@@ -244,7 +245,7 @@ case 0x40: {
   }
   last_cycle();
   rd.b = op_readstack();
-  regs.pc.d = rd.d & 0xffffff;
+  regs.pc.d = uclip<24>(rd.d);
 } break;
 
 //rts
@@ -267,7 +268,7 @@ case 0x6b: {
   rd.h = op_readstack();
   last_cycle();
   rd.b = op_readstack();
-  regs.pc.d = rd.d & 0xffffff;
+  regs.pc.d = uclip<24>(rd.d);
   regs.pc.w++;
 } break;
 

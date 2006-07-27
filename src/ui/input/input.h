@@ -80,6 +80,4 @@ enum {
   void set_keymap(uint device, uint button, uint keymap);
 
   Input();
-};
-
-#include "dinput.h"
+} *uiInput;

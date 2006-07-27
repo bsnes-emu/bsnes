@@ -14,13 +14,16 @@
   void   scanline();
   void   frame();
 
-  void   opcode_edge();
+  void   precycle_edge();
   void   cycle_edge();
   void   last_cycle();
   uint32 clocks_executed();
+
+  void   timing_power();
   void   timing_reset();
 
 //irq.cpp
+  void   set_irq_delay(uint clocks);
   void   update_interrupts();
   void   poll_interrupts(int clocks);
   bool   nmi_read_pos_match(uint offset);
@@ -28,3 +31,7 @@
   bool   irq_pos_valid();
   bool   nmi_test();
   bool   irq_test();
+
+//joypad.cpp
+  void   run_manual_joypad_poll();
+  void   run_auto_joypad_poll();

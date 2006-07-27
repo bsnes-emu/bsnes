@@ -2,7 +2,7 @@ void bCPU::op_bcc() {
   switch(status.cycle_pos++) {
   case 1: {
     if(!!regs.p.c)last_cycle();
-    rd.l = op_read();
+    rd.l = op_readpc();
     if(!regs.p.c) {
       aa.w = regs.pc.d + (int8)rd.l;
       regs.pc.w = aa.w;
@@ -25,7 +25,7 @@ void bCPU::op_bcs() {
   switch(status.cycle_pos++) {
   case 1: {
     if(!regs.p.c)last_cycle();
-    rd.l = op_read();
+    rd.l = op_readpc();
     if(regs.p.c) {
       aa.w = regs.pc.d + (int8)rd.l;
       regs.pc.w = aa.w;
@@ -48,7 +48,7 @@ void bCPU::op_bne() {
   switch(status.cycle_pos++) {
   case 1: {
     if(!!regs.p.z)last_cycle();
-    rd.l = op_read();
+    rd.l = op_readpc();
     if(!regs.p.z) {
       aa.w = regs.pc.d + (int8)rd.l;
       regs.pc.w = aa.w;
@@ -71,7 +71,7 @@ void bCPU::op_beq() {
   switch(status.cycle_pos++) {
   case 1: {
     if(!regs.p.z)last_cycle();
-    rd.l = op_read();
+    rd.l = op_readpc();
     if(regs.p.z) {
       aa.w = regs.pc.d + (int8)rd.l;
       regs.pc.w = aa.w;
@@ -94,7 +94,7 @@ void bCPU::op_bpl() {
   switch(status.cycle_pos++) {
   case 1: {
     if(!!regs.p.n)last_cycle();
-    rd.l = op_read();
+    rd.l = op_readpc();
     if(!regs.p.n) {
       aa.w = regs.pc.d + (int8)rd.l;
       regs.pc.w = aa.w;
@@ -117,7 +117,7 @@ void bCPU::op_bmi() {
   switch(status.cycle_pos++) {
   case 1: {
     if(!regs.p.n)last_cycle();
-    rd.l = op_read();
+    rd.l = op_readpc();
     if(regs.p.n) {
       aa.w = regs.pc.d + (int8)rd.l;
       regs.pc.w = aa.w;
@@ -140,7 +140,7 @@ void bCPU::op_bvc() {
   switch(status.cycle_pos++) {
   case 1: {
     if(!!regs.p.v)last_cycle();
-    rd.l = op_read();
+    rd.l = op_readpc();
     if(!regs.p.v) {
       aa.w = regs.pc.d + (int8)rd.l;
       regs.pc.w = aa.w;
@@ -163,7 +163,7 @@ void bCPU::op_bvs() {
   switch(status.cycle_pos++) {
   case 1: {
     if(!regs.p.v)last_cycle();
-    rd.l = op_read();
+    rd.l = op_readpc();
     if(regs.p.v) {
       aa.w = regs.pc.d + (int8)rd.l;
       regs.pc.w = aa.w;
@@ -185,7 +185,7 @@ void bCPU::op_bvs() {
 void bCPU::op_bra() {
   switch(status.cycle_pos++) {
   case 1: {
-    rd.l = op_read();
+    rd.l = op_readpc();
     aa.w = regs.pc.d + (int8)rd.l;
     regs.pc.w = aa.w;
     } break;
@@ -203,10 +203,10 @@ void bCPU::op_bra() {
 void bCPU::op_brl() {
   switch(status.cycle_pos++) {
   case 1: {
-    rd.l = op_read();
+    rd.l = op_readpc();
     } break;
   case 2: {
-    rd.h = op_read();
+    rd.h = op_readpc();
     } break;
   case 3: {
     last_cycle();
@@ -220,11 +220,11 @@ void bCPU::op_brl() {
 void bCPU::op_jmp_addr() {
   switch(status.cycle_pos++) {
   case 1: {
-    rd.l = op_read();
+    rd.l = op_readpc();
     } break;
   case 2: {
     last_cycle();
-    rd.h = op_read();
+    rd.h = op_readpc();
     regs.pc.w = rd.w;
     status.cycle_pos = 0;
     } break;
@@ -234,14 +234,14 @@ void bCPU::op_jmp_addr() {
 void bCPU::op_jmp_long() {
   switch(status.cycle_pos++) {
   case 1: {
-    rd.l = op_read();
+    rd.l = op_readpc();
     } break;
   case 2: {
-    rd.h = op_read();
+    rd.h = op_readpc();
     } break;
   case 3: {
     last_cycle();
-    rd.b = op_read();
+    rd.b = op_readpc();
     regs.pc.d = rd.d & 0xffffff;
     status.cycle_pos = 0;
     } break;
@@ -251,17 +251,17 @@ void bCPU::op_jmp_long() {
 void bCPU::op_jmp_iaddr() {
   switch(status.cycle_pos++) {
   case 1: {
-    aa.l = op_read();
+    aa.l = op_readpc();
     } break;
   case 2: {
-    aa.h = op_read();
+    aa.h = op_readpc();
     } break;
   case 3: {
-    rd.l = op_read(OPMODE_ADDR, aa.w);
+    rd.l = op_readaddr(aa.w);
     } break;
   case 4: {
     last_cycle();
-    rd.h = op_read(OPMODE_ADDR, aa.w + 1);
+    rd.h = op_readaddr(aa.w + 1);
     regs.pc.w = rd.w;
     status.cycle_pos = 0;
     } break;
@@ -271,20 +271,20 @@ void bCPU::op_jmp_iaddr() {
 void bCPU::op_jmp_iaddrx() {
   switch(status.cycle_pos++) {
   case 1: {
-    aa.l = op_read();
+    aa.l = op_readpc();
     } break;
   case 2: {
-    aa.h = op_read();
+    aa.h = op_readpc();
     } break;
   case 3: {
     cpu_io();
     } break;
   case 4: {
-    rd.l = op_read(OPMODE_PBR, aa.w + regs.x.w);
+    rd.l = op_readpbr(aa.w + regs.x.w);
     } break;
   case 5: {
     last_cycle();
-    rd.h = op_read(OPMODE_PBR, aa.w + regs.x.w + 1);
+    rd.h = op_readpbr(aa.w + regs.x.w + 1);
     regs.pc.w = rd.w;
     status.cycle_pos = 0;
     } break;
@@ -294,20 +294,20 @@ void bCPU::op_jmp_iaddrx() {
 void bCPU::op_jmp_iladdr() {
   switch(status.cycle_pos++) {
   case 1: {
-    aa.l = op_read();
+    aa.l = op_readpc();
     } break;
   case 2: {
-    aa.h = op_read();
+    aa.h = op_readpc();
     } break;
   case 3: {
-    rd.l = op_read(OPMODE_ADDR, aa.w);
+    rd.l = op_readaddr(aa.w);
     } break;
   case 4: {
-    rd.h = op_read(OPMODE_ADDR, aa.w + 1);
+    rd.h = op_readaddr(aa.w + 1);
     } break;
   case 5: {
     last_cycle();
-    rd.b = op_read(OPMODE_ADDR, aa.w + 2);
+    rd.b = op_readaddr(aa.w + 2);
     regs.pc.d = rd.d & 0xffffff;
     status.cycle_pos = 0;
     } break;
@@ -317,21 +317,21 @@ void bCPU::op_jmp_iladdr() {
 void bCPU::op_jsr_addr() {
   switch(status.cycle_pos++) {
   case 1: {
-    aa.l = op_read();
+    aa.l = op_readpc();
     } break;
   case 2: {
-    aa.h = op_read();
+    aa.h = op_readpc();
     } break;
   case 3: {
     cpu_io();
     } break;
   case 4: {
     regs.pc.w--;
-    stack_write(regs.pc.h);
+    op_writestack(regs.pc.h);
     } break;
   case 5: {
     last_cycle();
-    stack_write(regs.pc.l);
+    op_writestack(regs.pc.l);
     regs.pc.w = aa.w;
     status.cycle_pos = 0;
     } break;
@@ -341,27 +341,27 @@ void bCPU::op_jsr_addr() {
 void bCPU::op_jsr_long() {
   switch(status.cycle_pos++) {
   case 1: {
-    aa.l = op_read();
+    aa.l = op_readpc();
     } break;
   case 2: {
-    aa.h = op_read();
+    aa.h = op_readpc();
     } break;
   case 3: {
-    stack_write(regs.pc.b);
+    op_writestack(regs.pc.b);
     } break;
   case 4: {
     cpu_io();
     } break;
   case 5: {
-    aa.b = op_read();
+    aa.b = op_readpc();
     } break;
   case 6: {
     regs.pc.w--;
-    stack_write(regs.pc.h);
+    op_writestack(regs.pc.h);
     } break;
   case 7: {
     last_cycle();
-    stack_write(regs.pc.l);
+    op_writestack(regs.pc.l);
     regs.pc.d = aa.d & 0xffffff;
     status.cycle_pos = 0;
     } break;
@@ -371,26 +371,26 @@ void bCPU::op_jsr_long() {
 void bCPU::op_jsr_iaddrx() {
   switch(status.cycle_pos++) {
   case 1: {
-    aa.l = op_read();
+    aa.l = op_readpc();
     } break;
   case 2: {
-    stack_write(regs.pc.h);
+    op_writestack(regs.pc.h);
     } break;
   case 3: {
-    stack_write(regs.pc.l);
+    op_writestack(regs.pc.l);
     } break;
   case 4: {
-    aa.h = op_read();
+    aa.h = op_readpc();
     } break;
   case 5: {
     cpu_io();
     } break;
   case 6: {
-    rd.l = op_read(OPMODE_PBR, aa.w + regs.x.w);
+    rd.l = op_readpbr(aa.w + regs.x.w);
     } break;
   case 7: {
     last_cycle();
-    rd.h = op_read(OPMODE_PBR, aa.w + regs.x.w + 1);
+    rd.h = op_readpbr(aa.w + regs.x.w + 1);
     regs.pc.w = rd.w;
     status.cycle_pos = 0;
     } break;
@@ -406,7 +406,7 @@ void bCPU::op_rti() {
     cpu_io();
     } break;
   case 3: {
-    regs.p = stack_read();
+    regs.p = op_readstack();
     if(regs.e)regs.p |= 0x30;
     if(regs.p.x) {
       regs.x.h = 0x00;
@@ -414,11 +414,11 @@ void bCPU::op_rti() {
     }
     } break;
   case 4: {
-    rd.l = stack_read();
+    rd.l = op_readstack();
     } break;
   case 5: {
     if(regs.e)last_cycle();
-    rd.h = stack_read();
+    rd.h = op_readstack();
     if(regs.e) {
       regs.pc.w = rd.w;
       status.cycle_pos = 0;
@@ -426,7 +426,7 @@ void bCPU::op_rti() {
     } break;
   case 6: {
     last_cycle();
-    rd.b = stack_read();
+    rd.b = op_readstack();
     regs.pc.d = rd.d & 0xffffff;
     status.cycle_pos = 0;
     } break;
@@ -442,10 +442,10 @@ void bCPU::op_rts() {
     cpu_io();
     } break;
   case 3: {
-    rd.l = stack_read();
+    rd.l = op_readstack();
     } break;
   case 4: {
-    rd.h = stack_read();
+    rd.h = op_readstack();
     } break;
   case 5: {
     last_cycle();
@@ -466,14 +466,14 @@ void bCPU::op_rtl() {
     cpu_io();
     } break;
   case 3: {
-    rd.l = stack_read();
+    rd.l = op_readstack();
     } break;
   case 4: {
-    rd.h = stack_read();
+    rd.h = op_readstack();
     } break;
   case 5: {
     last_cycle();
-    rd.b = stack_read();
+    rd.b = op_readstack();
     regs.pc.d = rd.d & 0xffffff;
     regs.pc.w++;
     status.cycle_pos = 0;

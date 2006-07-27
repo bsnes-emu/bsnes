@@ -22,51 +22,21 @@ void bCPU::run() {
     return;
   }
 
-  if(status.cycle_pos == 0) {
-  //interrupts only trigger on opcode edges
-    if(!run_state.irq && !run_state.stp) {
+  if(status.cycle_pos == 0) { //interrupts only trigger on opcode edges
+    if(run_state.irq && !run_state.stp) {
+      run_state.irq = false;
       if(time.nmi_pending == true) {
         time.nmi_pending = false;
         aa.w = (regs.e == false) ? 0xffea : 0xfffa;
-        run_state.irq = true;
       } else if(time.irq_pending == true) {
         time.irq_pending = false;
         aa.w = (regs.e == false) ? 0xffee : 0xfffe;
-        run_state.irq = true;
       }
+      irq_run();
     }
   }
 
   exec_cycle();
-}
-
-void bCPU::scanline() {
-  time.hdma_triggered = (vcounter() <= (!overscan() ? 224 : 239)) ? false : true;
-
-  if(vcounter() == (!overscan() ? 227 : 242) && status.auto_joypad_poll == true) {
-    snes->poll_input(SNES::DEV_JOYPAD1);
-    snes->poll_input(SNES::DEV_JOYPAD2);
-  //When the SNES auto-polls the joypads, it writes 1, then 0 to
-  //$4016, then reads from each 16 times to get the joypad state
-  //information. As a result, the joypad read positions are set
-  //to 16 after such a poll. Position 16 is the controller
-  //connected status bit.
-    status.joypad1_read_pos = 16;
-    status.joypad2_read_pos = 16;
-  }
-}
-
-void bCPU::frame() {
-  time.nmi_read = 1;
-  time.nmi_line = 1;
-  time.nmi_transition = 0;
-
-  if(cpu_version == 2) {
-    time.hdmainit_trigger_pos = 12 + dma_counter();
-  } else {
-    time.hdmainit_trigger_pos = 12 + 8 - dma_counter();
-  }
-  time.hdmainit_triggered = false;
 }
 
 void bCPU::power() {

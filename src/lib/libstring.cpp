@@ -523,6 +523,23 @@ substring &btoa(substring &str, uint num) {
   return str;
 }
 
+bool strfread(substring &str, const char *filename) {
+  strcpy(str, "");
+
+FILE *fp = fopen(filename, "rb");
+  if(!fp)return false;
+
+uint size = fsize(fp);
+char *fdata = (char*)malloc(size + 1);
+  fread(fdata, 1, size, fp);
+  fclose(fp);
+  fdata[size] = 0;
+  strcpy(str, fdata);
+  free(fdata);
+
+  return true;
+}
+
 #include "libstring_math.cpp"
 #include "libstring_split.cpp"
 #include "libstring_replace.cpp"

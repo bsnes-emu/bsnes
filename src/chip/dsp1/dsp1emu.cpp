@@ -1,4 +1,4 @@
-﻿// DSP-1's emulation code
+// DSP-1's emulation code
 //
 // Based on research by Overload, The Dumper, Neviksti and Andreas Naive
 // Date: June 2006
@@ -859,8 +859,8 @@ const int16 Dsp1::MaxAZS_Exp[16] = {
 // (Fx, Fy, Fz)-> coordinates of base point (global coordinates)
 // Lfe-> distance between the base point and the viewpoint (center of projection)
 // Les-> distance between the base point and the screen
-// Aas-> azimuth angle (0º is east; 90ª is north)
-// Azs-> zenith angle (0º is zenith)
+// Aas-> azimuth angle (0 degrees is east; 90 degrees is north)
+// Azs-> zenith angle (0 degrees is zenith)
 // Output:
 // Vof-> raster line of imaginary center (whatever it means ;) )
 // Vva-> raster line representing the horizon line
@@ -1025,7 +1025,7 @@ void Dsp1::parameter(int16 *input, int16 *output)
 // you consider the "reference case" (center of projection at an unit of height),
 // the projection of a thin strip containing the raster line will have the same
 // width (as the raster line would be on the ground in this case, but will suffer a
-// change of scale in height (as the ground and the vertical axis would form an angle of 180º-Azs).
+// change of scale in height (as the ground and the vertical axis would form an angle of 180-Azs degrees).
 // This scale factor, when the angle 'center of screen-center of projection-raster line' is small,
 // can be aproximated by the one of the center of the screen, 1/cos(Azs).(**) (Here is when it's used
 // SecAZS). By last, you have to consider the effect of the azimuth angle Aas, and you are done.

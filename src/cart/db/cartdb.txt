@@ -1,0 +1,41 @@
+[0x7aedd703]
+name = "Der Langrisser (Japan) [!]"
+pcb  = "SHVC-1A3M-30"
+rom  = 16mbit
+ram  = 64kbit
+
+[0x35f9eecc]
+name = "Der Langrisser (Japan) (V1.1)"
+pcb  = "SHVC-1A3M-30" ;unverified (guess)
+rom  = 16mbit
+ram  = 64kbit
+
+[0x19bdcb19]
+name = "Derby Stallion '96 (Japan) [!]"
+pcb  = "BSC-1A5M-01"
+rom  =  24mbit
+ram  = 256kbit
+
+[0x9684526d]
+name = "Romancing SaGa (Japan) (V1.1) [!]"
+pcb  = "SHVC-1A3B-12"
+rom  =  8mbit
+ram  = 64kbit
+
+[0x675b6382]
+name = "RPG Tsukuru 2 (Japan)"
+pcb  = "BSC-1A7M-01" ;unverified
+rom  =  16mbit
+ram  = 512kbit
+
+[0x5ebf7246]
+name = "Sound Novel Tsukuru (Japan) [!]"
+pcb  = "BSC-1A7M-10"
+rom  =  24mbit
+ram  = 512kbit
+
+[0x64a91e64]
+name = "Wanderers from Ys (USA) [!]"
+pcb  = "SHVC-1A3B-12"
+rom  =  8mbit
+ram  = 64kbit

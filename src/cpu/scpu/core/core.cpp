@@ -1,12 +1,11 @@
 #include "opfn.cpp"
-//#include "op_read.cpp"
-//#include "op_write.cpp"
-//#include "op_rmw.cpp"
-//#include "op_pc.cpp"
-//#include "op_misc.cpp"
 
 void sCPU::main() {
   for(;;) {
+  #ifdef DEBUGGER
+    snes->notify(SNES::CPU_EXEC_OPCODE_BEGIN);
+  #endif
+
     status.in_opcode = true;
 
     if(event.irq) {
@@ -21,7 +20,6 @@ void sCPU::main() {
       op_irq();
     }
 
-//  (this->*optbl[op_readpc()])();
     switch(op_readpc()) {
       #include "op_read.cpp"
       #include "op_write.cpp"
@@ -31,7 +29,14 @@ void sCPU::main() {
     }
 
     status.in_opcode = false;
-    opcode_edge();
+
+  #ifdef DEBUGGER
+    snes->notify(SNES::CPU_EXEC_OPCODE_END);
+  #endif
+
+  #ifdef FAVOR_SPEED
+    co_return();
+  #endif
   }
 }
 

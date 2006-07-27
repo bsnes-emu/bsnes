@@ -83,8 +83,6 @@ struct {
   inline uint8  pio_status();
   inline void   run();
   inline uint32 clocks_executed();
-  inline void   scanline();
-  inline void   frame();
   inline void   power();
   inline void   reset();
 

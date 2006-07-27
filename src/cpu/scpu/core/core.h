@@ -6,7 +6,7 @@ uint8    dp, sp;
   inline void   main();
   inline void   op_irq();
 
-  bool   in_opcode() { return status.in_opcode; }
+  inline bool   in_opcode() { return status.in_opcode; }
 
 //op_read
   void   op_adc_b();

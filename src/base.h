@@ -1,4 +1,4 @@
-#define BSNES_VERSION "0.016.27a"
+#define BSNES_VERSION "0.016.38"
 #define BSNES_TITLE   "bsnes v" BSNES_VERSION
 
 #define MEMCORE bMemBus
@@ -14,44 +14,33 @@
 #define CHEAT_SYSTEM
 
 //enable GZ, ZIP format support
-#define GZIP_SUPPORT
+//#define GZIP_SUPPORT
 
 //enable JMA support
-#define JMA_SUPPORT
+//#define JMA_SUPPORT
 
 //debugging extensions (~10% speed hit)
-//#define DEBUGGER
+#define DEBUGGER
 
 //snes core polymorphism
 //(allow mem/cpu/apu/ppu overriding, ~10% speed hit)
 //#define POLYMORPHISM
 
-//this should be declared in the port-specific makefile
-//#define ARCH_LSB
-//#define ARCH_MSB
-
-#ifndef ARCH_LSB
-  #ifndef ARCH_MSB
-    #define ARCH_LSB
-  #endif
-#endif
-
-#if defined(_WIN32)
-  #define _WIN32_
-  #undef _UNIX_
-#elif defined(__GNUC__)
-  #define _UNIX_
-  #undef _WIN32_
+#if defined(PROCESSOR_X86)
+  #define ARCH_LSB
+#elif defined(PROCESSOR_X86)
+  #define ARCH_LSB
+#elif defined(PROCESSOR_G5)
+  #define ARCH_MSB
 #else
-  #error "unknown architecture"
+  #error "unsupported processor"
 #endif
 
-#include "lib/libco_x86.h"
 #include "lib/libbase.h"
+#include "lib/libco_x86.h"
 #include "lib/libvector.h"
 #include "lib/libstring.h"
 #include "lib/libconfig.h"
-#include "lib/libbpf.h"
 
 inline uint16 read16(uint8 *addr, uint pos) {
 #ifdef ARCH_LSB

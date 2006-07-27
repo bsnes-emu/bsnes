@@ -1,57 +1,20 @@
-/*
-[IRQ cycles]
-  [0] pbr,pc ; opcode
-  [1] pbr,pc ; io
-  [2] 0,s    ; pbr
-  [3] 0,s-1  ; pch
-  [4] 0,s-2  ; pcl
-  [5] 0,s-3  ; p
-  [6] 0,va   ; aavl
-  [7] 0,va+1 ; aavh
-*/
 void bCPU::irq_run() {
-//WDC documentation is incorrect, first cycle
-//is a memory read fetch from PBR:PC
-  switch(status.cycle_pos++) {
-  case 0:
-  //read from PBR:PC, but do not increment PC counter
-    mem_read(regs.pc.d);
-    break;
-  case 1:
-    cpu_io();
-    if(regs.e)status.cycle_pos++;
-    break;
-  case 2:
-    stack_write(regs.pc.b);
-    break;
-  case 3:
-    stack_write(regs.pc.h);
-    break;
-  case 4:
-    stack_write(regs.pc.l);
-    break;
-  case 5:
-  //emulation-mode irqs clear brk bit 0x10
-    stack_write(regs.e ? (regs.p & ~0x10) : regs.p);
-    break;
-  case 6:
-  //todo: test if NMI can override IRQ here...
-    rd.l = op_read(OPMODE_ADDR, aa.w);
-    regs.pc.b = 0x00;
-    regs.p.i  = 1;
-    regs.p.d  = 0;
-    break;
-  case 7:
-    rd.h = op_read(OPMODE_ADDR, aa.w + 1);
-    regs.pc.w = rd.w;
-  #ifdef DEBUGGER
-  //let debugger know the new IRQ opcode address
-    snes->notify(SNES::CPU_EXEC_OPCODE_END);
-  #endif
-    status.cycle_pos = 0;
-    run_state.irq = false;
-    break;
-  }
+  mem_read(regs.pc.d);
+  cpu_io();
+  if(!regs.e)op_writestack(regs.pc.b);
+  op_writestack(regs.pc.h);
+  op_writestack(regs.pc.l);
+  op_writestack(regs.e ? (regs.p & ~0x10) : regs.p);
+  rd.l = op_readaddr(aa.w + 0);
+  regs.pc.b = 0x00;
+  regs.p.i  = 1;
+  regs.p.d  = 0;
+  rd.h = op_readaddr(aa.w + 1);
+  regs.pc.w = rd.w;
+#ifdef DEBUGGER
+//let debugger know the new IRQ opcode address
+  snes->notify(SNES::CPU_EXEC_OPCODE_END);
+#endif
 }
 
 bool bCPU::nmi_test() {

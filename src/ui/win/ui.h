@@ -1,12 +1,5 @@
 #define KeyDown(__key) ((GetAsyncKeyState(__key) & 0x8000) ? 1 : 0)
 
-#include "video/video.h"
-#include "audio/audio.h"
-#include "input/input.h"
-Video *uiVideo;
-Audio *uiAudio;
-Input *uiInput;
-
 namespace global {
 Font vwf, fwf, font_about, font_header, font_list;
 };

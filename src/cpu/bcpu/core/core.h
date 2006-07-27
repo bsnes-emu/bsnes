@@ -57,18 +57,6 @@ uint8    dp, sp;
   inline void   cpu_c4(uint16 x, uint16 y);
   inline void   cpu_c6(uint16 addr);
 
-enum {
-  OPMODE_ADDR, OPMODE_LONG,
-  OPMODE_DBR,  OPMODE_PBR,
-  OPMODE_DP,   OPMODE_SP
-};
-  inline uint32 op_addr(uint8 mode, uint32 addr);
-  inline uint8  op_read();
-  inline uint8  op_read(uint8 mode, uint32 addr);
-  inline void   op_write(uint8 mode, uint32 addr, uint8 value);
-  inline uint8  stack_read();
-  inline void   stack_write(uint8 value);
-
   inline void   init_op_tables();
 
 #include "op.h"

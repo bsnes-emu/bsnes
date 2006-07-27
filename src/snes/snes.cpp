@@ -61,12 +61,12 @@ void SNES::power() {
   r_ppu->power();
   r_mem->power();
 
-  if(cartridge.cart.srtc)srtc->power();
-  if(cartridge.cart.sdd1)sdd1->power();
-  if(cartridge.cart.c4)  c4->power();
-  if(cartridge.cart.dsp1)dsp1->power();
-  if(cartridge.cart.dsp2)dsp2->power();
-  if(cartridge.cart.obc1)obc1->power();
+  if(cartridge.info.srtc)srtc->power();
+  if(cartridge.info.sdd1)sdd1->power();
+  if(cartridge.info.c4)  c4->power();
+  if(cartridge.info.dsp1)dsp1->power();
+  if(cartridge.info.dsp2)dsp2->power();
+  if(cartridge.info.obc1)obc1->power();
 
   r_mem->flush_mmio_mappers();
   for(int i = 0x2100; i <= 0x213f; i++)r_mem->set_mmio_mapper(i, r_ppu);
@@ -76,12 +76,12 @@ void SNES::power() {
   for(int i = 0x4200; i <= 0x421f; i++)r_mem->set_mmio_mapper(i, r_cpu);
   for(int i = 0x4300; i <= 0x437f; i++)r_mem->set_mmio_mapper(i, r_cpu);
 
-  if(cartridge.cart.srtc)srtc->enable();
-  if(cartridge.cart.sdd1)sdd1->enable();
-  if(cartridge.cart.c4)  c4->enable();
-  if(cartridge.cart.dsp1)dsp1->enable();
-  if(cartridge.cart.dsp2)dsp2->enable();
-  if(cartridge.cart.obc1)obc1->enable();
+  if(cartridge.info.srtc)srtc->enable();
+  if(cartridge.info.sdd1)sdd1->enable();
+  if(cartridge.info.c4)  c4->enable();
+  if(cartridge.info.dsp1)dsp1->enable();
+  if(cartridge.info.dsp2)dsp2->enable();
+  if(cartridge.info.obc1)obc1->enable();
 
   video_update();
 }
@@ -96,12 +96,12 @@ void SNES::reset() {
   r_ppu->reset();
   r_mem->reset();
 
-  if(cartridge.cart.srtc)srtc->reset();
-  if(cartridge.cart.sdd1)sdd1->reset();
-  if(cartridge.cart.c4)  c4->reset();
-  if(cartridge.cart.dsp1)dsp1->reset();
-  if(cartridge.cart.dsp2)dsp2->reset();
-  if(cartridge.cart.obc1)obc1->reset();
+  if(cartridge.info.srtc)srtc->reset();
+  if(cartridge.info.sdd1)sdd1->reset();
+  if(cartridge.info.c4)  c4->reset();
+  if(cartridge.info.dsp1)dsp1->reset();
+  if(cartridge.info.dsp2)dsp2->reset();
+  if(cartridge.info.obc1)obc1->reset();
 
   video_update();
 }
@@ -118,9 +118,9 @@ void SNES::scanline() {
 
 void SNES::frame() {}
 
-/****************
- *** PAL/NTSC ***
- ****************/
+/*****
+ * PAL/NTSC
+ *****/
 
 void SNES::set_region(uint8 new_region) {
   if(new_region == NTSC) {
@@ -136,13 +136,21 @@ void SNES::set_region(uint8 new_region) {
 
 uint8 SNES::region() { return snes_region; }
 
-/**************
- *** Timing ***
- **************/
+/*****
+ * Timing
+ *
+ * Note: Stock PAL CPU speed is currently unknown.
+ * It is thought to be 21281370hz, but this causes
+ * sound errors in certain games. Therefore, the PAL
+ * CPU is currently clocked 40000hz slower, at
+ * 21241370hz.
+ *****/
 
 void SNES::update_timing() {
-  sync.counter  = 0;
-  sync.cpu_freq = (snes_region == NTSC) ? 21477272 : 21281370;
+  sync.counter     = 0;
+  sync.dsp_counter = 0;
+
+  sync.cpu_freq = (snes_region == NTSC) ? 21477272 : 21241370;
   sync.apu_freq = 24576000;
 
   for(int64 i = 0; i < 1024; i++) {
@@ -151,9 +159,9 @@ void SNES::update_timing() {
   }
 }
 
-/***************************
- *** Debugging functions ***
- ***************************/
+/*****
+ * Debugging functions
+ *****/
 
 void SNES::notify(uint32 message, uint32 param1, uint32 param2) {}
 

@@ -26,7 +26,6 @@
  */
 
 uint16 bCPU::vcounter() { return time.v; }
-uint16 bCPU::hcounter() { return get_hcounter(); }
 uint16 bCPU::hcycles()  { return time.hc; }
 
 bool   bCPU::interlace()        { return time.interlace; }
@@ -38,6 +37,13 @@ void   bCPU::set_interlace(bool r) { time.interlace = r; update_interrupts(); }
 void   bCPU::set_overscan (bool r) { time.overscan  = r; update_interrupts(); }
 
 uint8  bCPU::dma_counter() { return (time.dma_counter + time.hc) & 6; }
+
+uint16 bCPU::hcounter() {
+  if(time.v == 240 && time.interlace == false && time.interlace_field == 1) {
+    return time.hc >> 2;
+  }
+  return (time.hc - ((time.hc > 1292) << 1) - ((time.hc > 1310) << 1)) >> 2;
+}
 
 bool bCPU::nmi_trigger_pos_match(uint32 offset) {
 uint16 v  = overscan() ? 240 : 225;
@@ -179,62 +185,6 @@ int16 hc, hc_end;
   }
 }
 
-//all scanlines are 1364 cycles long, except scanline 240
-//on non-interlace odd-frames, which is 1360 cycles long.
-//[NTSC]
-//interlace mode has 525 scanlines: 263 on the even frame,
-//and 262 on the odd.
-//non-interlace mode has 524 scanlines: 262 scanlines on
-//both even and odd frames.
-//[PAL] <PAL info is unverified on hardware>
-//interlace mode has 625 scanlines: 313 on the even frame,
-//and 312 on the odd.
-//non-interlace mode has 624 scanlines: 312 scanlines on
-//both even and odd frames.
-//
-//cycles per frame:
-//  263 * 1364     = 358732
-//  262 * 1364     = 357368
-//  262 * 1364 - 4 = 357364
-void bCPU::inc_vcounter() {
-  time.v++;
-  if(time.v >= time.frame_lines) {
-    time.v = 0;
-    time.interlace_field ^= 1;
-
-    if(interlace() == true && interlace_field() == 0) {
-      time.frame_lines = (time.region_scanlines >> 1) + 1;
-    } else {
-      time.frame_lines = (time.region_scanlines >> 1);
-    }
-  }
-
-  time.dma_counter += time.line_cycles;
-  if(time.v == 240 && time.interlace == false && time.interlace_field == 1) {
-    time.line_cycles = 1360;
-  } else {
-    time.line_cycles = 1364;
-  }
-  time.dram_refreshed = false;
-
-  update_interrupts();
-}
-
-//all dots are 4 cycles long, except dots 323 and 327. dots 323 and 327
-//are 6 cycles long. this holds true for all scanlines except scanline
-//240 on non-interlace odd frames. the reason for this is because this
-//scanline is only 1360 cycles long, instead of 1364 like all other
-//scanlines.
-//this makes the effective range of hscan_pos 0-339 at all times.
-//dot 323 range = { 1292, 1294, 1296 }
-//dot 327 range = { 1310, 1312, 1314 }
-uint16 bCPU::get_hcounter() {
-  if(time.v == 240 && time.interlace == false && time.interlace_field == 1) {
-    return time.hc >> 2;
-  }
-  return (time.hc - ((time.hc > 1292) << 1) - ((time.hc > 1310) << 1)) >> 2;
-}
-
 uint32 bCPU::clocks_executed() {
 uint32 r = status.cycles_executed;
   status.cycles_executed = 0;
@@ -242,6 +192,13 @@ uint32 r = status.cycles_executed;
 }
 
 void bCPU::cycle_edge() {
+  if(time.line_rendered == false) {
+    if(time.hc >= 128) {
+      time.line_rendered = true;
+      r_ppu->render_scanline();
+    }
+  }
+
   if(time.hdmainit_triggered == false) {
     if(time.hc >= time.hdmainit_trigger_pos || time.v) {
       time.hdmainit_triggered = true;
@@ -265,20 +222,7 @@ void bCPU::add_cycles(int cycles) {
   if(time.hc + cycles >= time.line_cycles) {
     cycles  = (time.hc + cycles) - time.line_cycles;
     time.hc = 0;
-
-    inc_vcounter();
-
-    if(time.v == 0) {
-      frame();
-      r_ppu->frame();
-      snes->frame();
-    }
-
     scanline();
-    r_ppu->scanline();
-    snes->scanline();
-    time.line_rendered = false;
-
     poll_interrupts(cycles);
   }
 
@@ -291,38 +235,64 @@ void bCPU::add_cycles(int cycles) {
       return;
     }
   }
-/*
-  if(time.dram_refreshed == false) {
-    if(time.hc + cycles >= time.dram_refresh_pos) {
-      time.dram_refreshed = true;
-      status.cycles_executed += 40;
-      cycles  = (time.hc + cycles) - time.dram_refresh_pos;
-      time.hc = time.dram_refresh_pos + 40;
+}
 
-      if(cpu_version == 2) {
-        if(time.v != 240 || time.interlace != false || time.interlace_field != 1) {
-          if(time.dram_refresh_pos == 534) {
-            time.dram_refresh_pos = 538;
-          } else {
-            time.dram_refresh_pos = 534;
-          }
-        }
-      }
-    }
-  }
-*/
-  if(time.line_rendered == false) {
-  //rendering should start at H=18 (+256=274), but since the
-  //current PPU emulation renders the entire scanline at once,
-  //PPU register changes mid-scanline do not show up.
-  //therefore, wait a few dots before rendering the scanline
-    if(time.hc >= (48 * 4)) {
-      time.line_rendered = true;
-      r_ppu->render_scanline();
-    }
+void bCPU::scanline() {
+  if(++time.v >= time.frame_lines) {
+    frame();
   }
 
-//time.hc += cycles;
+  time.dma_counter += time.line_cycles;
+  if(time.v == 240 && time.interlace == false && time.interlace_field == 1) {
+    time.line_cycles = 1360;
+  } else {
+    time.line_cycles = 1364;
+  }
+  time.dram_refreshed = false;
+
+  time.line_rendered  =
+  time.hdma_triggered = (time.v <= (!overscan() ? 224 : 239)) ? false : true;
+
+  r_ppu->scanline();
+  snes->scanline();
+
+  update_interrupts();
+
+  if(vcounter() == (!overscan() ? 227 : 242) && status.auto_joypad_poll == true) {
+    snes->poll_input(SNES::DEV_JOYPAD1);
+    snes->poll_input(SNES::DEV_JOYPAD2);
+  //When the SNES auto-polls the joypads, it writes 1, then 0 to
+  //$4016, then reads from each 16 times to get the joypad state
+  //information. As a result, the joypad read positions are set
+  //to 16 after such a poll. Position 16 is the controller
+  //connected status bit.
+    status.joypad1_read_pos = 16;
+    status.joypad2_read_pos = 16;
+  }
+}
+
+void bCPU::frame() {
+  time.nmi_read = 1;
+  time.nmi_line = 1;
+  time.nmi_transition = 0;
+
+  time.v = 0;
+  time.interlace_field ^= 1;
+  if(interlace() == true && interlace_field() == 0) {
+    time.frame_lines = (time.region_scanlines >> 1) + 1;
+  } else {
+    time.frame_lines = (time.region_scanlines >> 1);
+  }
+
+  if(cpu_version == 2) {
+    time.hdmainit_trigger_pos = 12 + dma_counter();
+  } else {
+    time.hdmainit_trigger_pos = 12 + 8 - dma_counter();
+  }
+  time.hdmainit_triggered = false;
+
+  r_ppu->frame();
+  snes->frame();
 }
 
 void bCPU::time_reset() {

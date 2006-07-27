@@ -1,3 +1,9 @@
+void sCPU::set_irq_delay(uint clocks) {
+  if(status.irq_delay < clocks) {
+    status.irq_delay = clocks;
+  }
+}
+
 void sCPU::update_interrupts() {
   if(status.vcounter == (!overscan() ? 225 : 240)) {
     status.nmi_read_pos = 2;

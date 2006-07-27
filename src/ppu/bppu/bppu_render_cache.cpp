@@ -1,27 +1,24 @@
-#define render_bg_tile_line_4(__m) \
-  col = 0;              \
-  if(d0 & __m)col += 1; \
-  if(d1 & __m)col += 2; \
+#define render_bg_tile_line_2bpp(mask) \
+  col  = bool(d0 & mask) << 0; \
+  col += bool(d1 & mask) << 1; \
   *dest++ = col
 
-#define render_bg_tile_line_16(__m) \
-  col = 0;              \
-  if(d0 & __m)col += 1; \
-  if(d1 & __m)col += 2; \
-  if(d2 & __m)col += 4; \
-  if(d3 & __m)col += 8; \
+#define render_bg_tile_line_4bpp(mask) \
+  col  = bool(d0 & mask) << 0; \
+  col += bool(d1 & mask) << 1; \
+  col += bool(d2 & mask) << 2; \
+  col += bool(d3 & mask) << 3; \
   *dest++ = col
 
-#define render_bg_tile_line_256(__m) \
-  col = 0;                \
-  if(d0 & __m)col +=   1; \
-  if(d1 & __m)col +=   2; \
-  if(d2 & __m)col +=   4; \
-  if(d3 & __m)col +=   8; \
-  if(d4 & __m)col +=  16; \
-  if(d5 & __m)col +=  32; \
-  if(d6 & __m)col +=  64; \
-  if(d7 & __m)col += 128; \
+#define render_bg_tile_line_8bpp(mask) \
+  col  = bool(d0 & mask) << 0; \
+  col += bool(d1 & mask) << 1; \
+  col += bool(d2 & mask) << 2; \
+  col += bool(d3 & mask) << 3; \
+  col += bool(d4 & mask) << 4; \
+  col += bool(d5 & mask) << 5; \
+  col += bool(d6 & mask) << 6; \
+  col += bool(d7 & mask) << 7; \
   *dest++ = col
 
 void bPPU::render_bg_tile(uint8 color_depth, uint16 tile_num) {
@@ -37,14 +34,14 @@ uint8 *dest;
     while(y--) {
       d0 = vram[pos    ];
       d1 = vram[pos + 1];
-      render_bg_tile_line_4(0x80);
-      render_bg_tile_line_4(0x40);
-      render_bg_tile_line_4(0x20);
-      render_bg_tile_line_4(0x10);
-      render_bg_tile_line_4(0x08);
-      render_bg_tile_line_4(0x04);
-      render_bg_tile_line_4(0x02);
-      render_bg_tile_line_4(0x01);
+      render_bg_tile_line_2bpp(0x80);
+      render_bg_tile_line_2bpp(0x40);
+      render_bg_tile_line_2bpp(0x20);
+      render_bg_tile_line_2bpp(0x10);
+      render_bg_tile_line_2bpp(0x08);
+      render_bg_tile_line_2bpp(0x04);
+      render_bg_tile_line_2bpp(0x02);
+      render_bg_tile_line_2bpp(0x01);
       pos += 2;
     }
     bg_tiledata_state[TILE_2BIT][tile_num] = 0;
@@ -58,14 +55,14 @@ uint8 *dest;
       d1 = vram[pos +  1];
       d2 = vram[pos + 16];
       d3 = vram[pos + 17];
-      render_bg_tile_line_16(0x80);
-      render_bg_tile_line_16(0x40);
-      render_bg_tile_line_16(0x20);
-      render_bg_tile_line_16(0x10);
-      render_bg_tile_line_16(0x08);
-      render_bg_tile_line_16(0x04);
-      render_bg_tile_line_16(0x02);
-      render_bg_tile_line_16(0x01);
+      render_bg_tile_line_4bpp(0x80);
+      render_bg_tile_line_4bpp(0x40);
+      render_bg_tile_line_4bpp(0x20);
+      render_bg_tile_line_4bpp(0x10);
+      render_bg_tile_line_4bpp(0x08);
+      render_bg_tile_line_4bpp(0x04);
+      render_bg_tile_line_4bpp(0x02);
+      render_bg_tile_line_4bpp(0x01);
       pos += 2;
     }
     bg_tiledata_state[TILE_4BIT][tile_num] = 0;
@@ -83,14 +80,14 @@ uint8 *dest;
       d5 = vram[pos + 33];
       d6 = vram[pos + 48];
       d7 = vram[pos + 49];
-      render_bg_tile_line_256(0x80);
-      render_bg_tile_line_256(0x40);
-      render_bg_tile_line_256(0x20);
-      render_bg_tile_line_256(0x10);
-      render_bg_tile_line_256(0x08);
-      render_bg_tile_line_256(0x04);
-      render_bg_tile_line_256(0x02);
-      render_bg_tile_line_256(0x01);
+      render_bg_tile_line_8bpp(0x80);
+      render_bg_tile_line_8bpp(0x40);
+      render_bg_tile_line_8bpp(0x20);
+      render_bg_tile_line_8bpp(0x10);
+      render_bg_tile_line_8bpp(0x08);
+      render_bg_tile_line_8bpp(0x04);
+      render_bg_tile_line_8bpp(0x02);
+      render_bg_tile_line_8bpp(0x01);
       pos += 2;
     }
     bg_tiledata_state[TILE_8BIT][tile_num] = 0;
@@ -98,9 +95,9 @@ uint8 *dest;
   }
 }
 
-#undef render_bg_tile_line_4
-#undef render_bg_tile_line_16
-#undef render_bg_tile_line_256
+#undef render_bg_tile_line_2bpp
+#undef render_bg_tile_line_4bpp
+#undef render_bg_tile_line_8bpp
 
 inline void bPPU::clear_pixel_cache() {
 uint16 main = get_palette(0);

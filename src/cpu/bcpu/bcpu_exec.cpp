@@ -1,8 +1,8 @@
 void bCPU::last_cycle() {
-//DMV27: keep previous nmi value,
-//to allow wai and irq to work properly
   time.nmi_pending |= nmi_test();
   time.irq_pending |= irq_test();
+
+  run_state.irq = (time.nmi_pending || time.irq_pending);
 }
 
 void bCPU::pre_exec_cycle() {
@@ -139,12 +139,6 @@ static int z;
 }
 
 void bCPU::exec_cycle() {
-//irq active? run one bus cycle of the irq event and return
-  if(run_state.irq) {
-    irq_run();
-    return;
-  }
-
   if(status.cycle_pos) {
     (this->*optbl[status.opcode])();
   #ifdef DEBUGGER
@@ -159,7 +153,7 @@ void bCPU::exec_cycle() {
 #ifdef DEBUGGER
   snes->notify(SNES::CPU_EXEC_OPCODE_BEGIN);
 #endif
-  status.opcode = op_read();
+  status.opcode = op_readpc();
   status.cycle_pos = 1;
 }
 

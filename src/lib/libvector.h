@@ -1,5 +1,5 @@
 /*
-  libvector : version 0.04 ~byuu (12/24/05)
+  libvector : version 0.04a ~byuu (06/15/05)
 */
 
 #ifndef __LIBVECTOR
@@ -41,40 +41,48 @@ public:
 
 //used to free up memory used by vector, but without
 //actually destroying the vector itself
-  void release() {
-    resize(16);
+  void release() { resize(16); }
+
+  T *handle(uint req_size = 0) {
+    if(req_size > size)resize(req_size);
+    return (T*)array;
   }
 
-  T *handle() { return (T*)array; }
-
-  void copy(T *source, uint32 copy_size) {
-    if(copy_size > size) {
-      resize(copy_size);
-      copy_size = size;
-    }
-    memcpy(array, source, copy_size * sizeof(T));
+  void read(uint start, T *source, uint length) {
+    if(start + length > size)resize(start + length);
+    memcpy(array + start, source, length);
   }
 
-  void clear() {
-    memset(array, 0, size * sizeof(T));
+  void read(T *source, uint length) { read(0, source, length); }
+
+  void write(uint start, T *dest, uint length) {
+    if(start + length > size)resize(start + length);
+    memcpy(dest, array + start, length);
   }
+
+  void write(T *dest, uint length) { write(0, dest, length); }
+
+  void clear() { memset(array, 0, size * sizeof(T)); }
 
   vector(int newsize, int newsizelimit) {
     size = newsize;
     sizelimit = newsizelimit;
-    array = (T*)calloc(size, sizeof(T));
+    array = (T*)malloc(size * sizeof(T));
+    clear();
   }
 
   vector(int newsize) {
     size = newsize;
     sizelimit = 1 << 24;
-    array = (T*)calloc(size, sizeof(T));
+    array = (T*)malloc(size * sizeof(T));
+    clear();
   }
 
   vector() {
     size = 16;
     sizelimit = 1 << 24;
-    array = (T*)calloc(size, sizeof(T));
+    array = (T*)malloc(size * sizeof(T));
+    clear();
   }
 
   ~vector() {

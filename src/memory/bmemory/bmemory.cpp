@@ -1,72 +1,93 @@
 #include "../../base.h"
+#include "mapper/mapper.cpp"
 #include "bmemory_rw.cpp"
 #include "bmemory_mapper_generic.cpp"
 
 void bMemBus::load_cart() {
   if(rom_loaded == true)return;
 
-uint8 *rom   = cartridge.rom;
-uint16 index = cartridge.cart.header_index;
-  dprintf("* Image Name      : \"%s\"", cartridge.cart.name);
-  dprintf("* Region          : %s", (cartridge.cart.region == Cartridge::NTSC) ? "NTSC" : "PAL");
-  dprintf("* Address Decoder : %0.2x", cartridge.cart.mapper);
-  dprintf("* SRAM Size       : %dkb", cartridge.cart.sram_size / 1024);
-char t[256];
-  strcpy(t, "");
-  if(cartridge.cart.srtc)strcat(t, "S-RTC, ");
-  if(cartridge.cart.sdd1)strcat(t, "S-DD1, ");
-  if(cartridge.cart.c4)  strcat(t, "Cx4, ");
-  if(cartridge.cart.dsp1)strcat(t, "DSP-1, ");
-  if(cartridge.cart.dsp2)strcat(t, "DSP-2, ");
-  if(cartridge.cart.obc1)strcat(t, "OBC-1, ");
-  strrtrim(t, ", ");
-  dprintf("* Coprocessor(s)  : %s", (strlen(t) == 0) ? "None" : t);
-  dprintf("* Reset:%0.4x NMI[n]:%0.4x IRQ[n]:%0.4x BRK[n]:%0.4x COP[n]:%0.4x",
-    read16(rom, index + 0x3c), //Reset
-    read16(rom, index + 0x2a), //NMI
-    read16(rom, index + 0x2e), //IRQ
-    read16(rom, index + 0x26), //BRK
-    read16(rom, index + 0x24)  //COP
-  );
-//BRK[e] should be $fff6, however emulation mode brk is technically not supported.
-//this needs verification, but I believe brk jumps to IRQ[e] vector.
-  dprintf("*            NMI[e]:%0.4x IRQ[e]:%0.4x BRK[e]:%0.4x COP[e]:%0.4x",
-    read16(rom, index + 0x3a), //NMI
-    read16(rom, index + 0x3e), //IRQ
-    read16(rom, index + 0x3e), //BRK
-    read16(rom, index + 0x34)  //COP
-  );
-  dprintf("* CRC32           : %0.8x", cartridge.cart.crc32);
-  dprintf("");
-
   cart_map_reset();
 
-  switch(cartridge.cart.mapper) {
+  switch(cartridge.info.mapper) {
+  case Cartridge::PCB:
+    if(!strcmp(cartridge.info.pcb, "SHVC-1A3B-01")) { cart_map_shvc_1a3b_13(); break; }
+    if(!strcmp(cartridge.info.pcb, "SHVC-1A3B-11")) { cart_map_shvc_1a3b_13(); break; }
+    if(!strcmp(cartridge.info.pcb, "SHVC-1A3B-12")) { cart_map_shvc_1a3b_13(); break; }
+    if(!strcmp(cartridge.info.pcb, "SHVC-1A3B-13")) { cart_map_shvc_1a3b_13(); break; }
+    if(!strcmp(cartridge.info.pcb, "SHVC-1A3B-20")) { cart_map_shvc_1a3b_20(); break; }
+    if(!strcmp(cartridge.info.pcb, "SHVC-1A3M-10")) { cart_map_shvc_1a3m_30(); break; }
+    if(!strcmp(cartridge.info.pcb, "SHVC-1A3M-20")) { cart_map_shvc_1a3m_30(); break; }
+    if(!strcmp(cartridge.info.pcb, "SHVC-1A3M-21")) { cart_map_shvc_1a3m_30(); break; }
+    if(!strcmp(cartridge.info.pcb, "SHVC-1A3M-30")) { cart_map_shvc_1a3m_30(); break; }
+    if(!strcmp(cartridge.info.pcb, "BSC-1A5M-01"))  { cart_map_bsc_1a5m_01();  break; }
+    if(!strcmp(cartridge.info.pcb, "BSC-1A7M-01"))  { cart_map_bsc_1a7m_01();  break; }
+    if(!strcmp(cartridge.info.pcb, "BSC-1A7M-10"))  { cart_map_bsc_1a7m_10();  break; }
+    dprintf("* PCB mapper not found");
+    return;
+
   case Cartridge::LOROM:
   case Cartridge::HIROM:
   case Cartridge::EXLOROM:
   case Cartridge::EXHIROM:
-    cart_map_generic(cartridge.cart.mapper);
+    cart_map_generic(cartridge.info.mapper);
     break;
   default:
+    dprintf("* generic mapper not found");
     return;
   }
 
-  if(cartridge.cart.sdd1)cart_map_sdd1();
-  if(cartridge.cart.c4)  cart_map_c4();
-  if(cartridge.cart.dsp1)cart_map_dsp1();
-  if(cartridge.cart.dsp2)cart_map_dsp2();
-  if(cartridge.cart.obc1)cart_map_obc1();
+  if(cartridge.info.sdd1)cart_map_sdd1();
+  if(cartridge.info.c4)  cart_map_c4();
+  if(cartridge.info.dsp1)cart_map_dsp1();
+  if(cartridge.info.dsp2)cart_map_dsp2();
+  if(cartridge.info.obc1)cart_map_obc1();
 
   cart_map_system();
 
-  if(cartridge.cart.region == Cartridge::NTSC) {
+uint region = read(0xffd9) & 0x7f;
+  cartridge.info.region = (region == 0 || region == 1 || region == 13) ? Cartridge::NTSC : Cartridge::PAL;
+  if(cartridge.info.region == Cartridge::NTSC) {
     snes->set_region(SNES::NTSC);
   } else {
     snes->set_region(SNES::PAL);
   }
 
   rom_loaded = true;
+
+//print cartridge info to debug console
+
+  dprintf("* CRC32    : %0.8x", cartridge.info.crc32);
+  dprintf("* Name     : \"%s\"", cartridge.info.name);
+  dprintf("* PCB      : %s", cartridge.info.pcb);
+  dprintf("* ROM Size : %dmbit", cartridge.info.rom_size / 1024 / 1024 * 8);
+  dprintf("* RAM Size : %dkbit", cartridge.info.ram_size / 1024 * 8);
+  dprintf("* Region   : %s", (cartridge.info.region == Cartridge::NTSC) ? "NTSC" : "PAL");
+char t[256];
+  strcpy(t, "");
+  if(cartridge.info.srtc)strcat(t, "S-RTC, ");
+  if(cartridge.info.sdd1)strcat(t, "S-DD1, ");
+  if(cartridge.info.c4)  strcat(t, "Cx4, ");
+  if(cartridge.info.dsp1)strcat(t, "DSP-1, ");
+  if(cartridge.info.dsp2)strcat(t, "DSP-2, ");
+  if(cartridge.info.obc1)strcat(t, "OBC-1, ");
+  strrtrim(t, ", ");
+  dprintf("* Coprocessor(s) : %s", (strlen(t) == 0) ? "None" : t);
+  dprintf("* Reset:%0.4x NMI[n]:%0.4x IRQ[n]:%0.4x BRK[n]:%0.4x COP[n]:%0.4x",
+    (read(0xfffc) << 0) | (read(0xfffd) << 8), //Reset
+    (read(0xffea) << 0) | (read(0xffeb) << 8), //NMI
+    (read(0xffee) << 0) | (read(0xffef) << 8), //IRQ
+    (read(0xffe6) << 0) | (read(0xffe7) << 8), //BRK
+    (read(0xffe4) << 0) | (read(0xffe5) << 8)  //COP
+  );
+//BRK[e] should be $fff6, however emulation mode brk is technically not supported.
+//this needs verification, but I believe brk jumps to IRQ[e] vector.
+  dprintf("*            NMI[e]:%0.4x IRQ[e]:%0.4x BRK[e]:%0.4x COP[e]:%0.4x",
+    (read(0xfffa) << 0) | (read(0xfffb) << 8), //NMI
+    (read(0xfffe) << 0) | (read(0xffff) << 8), //IRQ
+    (read(0xfffe) << 0) | (read(0xffff) << 8), //BRK
+    (read(0xfff4) << 0) | (read(0xfff5) << 8)  //COP
+  );
+  dprintf("");
 }
 
 void bMemBus::unload_cart() {
@@ -177,12 +198,12 @@ void bMemBus::cart_map_system() {
 
 void bMemBus::power() {
   cart_write_protect(true);
-  memset(wram, 0, 0x020000);
+  memset(wram, 0xff, 0x020000);
   reset();
 }
 
 void bMemBus::reset() {
-  set_speed(false);
+  set_speed(0);
 }
 
 bMemBus::bMemBus() {

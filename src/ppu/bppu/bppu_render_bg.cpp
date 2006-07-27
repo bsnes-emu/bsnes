@@ -54,40 +54,40 @@ void bPPU::render_line_bg(uint8 bg, uint8 color_depth, uint8 pri0_pos, uint8 pri
 //nothing to render?
   if(!pri0_pos && !pri1_pos)return;
 
-bool   bg_enabled     = regs.bg_enabled[bg];
-bool   bgsub_enabled  = regs.bgsub_enabled[bg];
+bool   bg_enabled    = regs.bg_enabled[bg];
+bool   bgsub_enabled = regs.bgsub_enabled[bg];
 
-uint16 opt_valid_bit  = (bg == BG1) ? 0x2000 : (bg == BG2) ? 0x4000 : 0x0000;
-uint8  bgpal_index    = (regs.bg_mode == 0) ? (bg << 5) : 0;
+uint16 opt_valid_bit = (bg == BG1) ? 0x2000 : (bg == BG2) ? 0x4000 : 0x0000;
+uint8  bgpal_index   = (regs.bg_mode == 0) ? (bg << 5) : 0;
 
-uint8  pal_size       = 2 << color_depth;      //<<2 (*4), <<4 (*16), <<8 (*256)
-uint16 tile_mask      = 0x0fff >> color_depth; //0x0fff, 0x07ff, 0x03ff
+uint8  pal_size  = 2 << color_depth;      //<<2 (*4), <<4 (*16), <<8 (*256)
+uint16 tile_mask = 0x0fff >> color_depth; //0x0fff, 0x07ff, 0x03ff
 //4 + color_depth = >>(4-6) -- / {16, 32, 64 } bytes/tile
 //index is a tile number count to add to base tile number
 uint   tiledata_index = regs.bg_tdaddr[bg] >> (4 + color_depth);
 
-uint8 *bg_td          = (uint8*)bg_tiledata[color_depth];
-uint8 *bg_td_state    = (uint8*)bg_tiledata_state[color_depth];
+uint8 *bg_td       = (uint8*)bg_tiledata[color_depth];
+uint8 *bg_td_state = (uint8*)bg_tiledata_state[color_depth];
 
-uint8  tile_width     = bg_info[bg].tw;
-uint8  tile_height    = bg_info[bg].th;
-uint16 mask_x         = bg_info[bg].mx; //screen width  mask
-uint16 mask_y         = bg_info[bg].my; //screen height mask
+uint8  tile_width  = bg_info[bg].tw;
+uint8  tile_height = bg_info[bg].th;
+uint16 mask_x      = bg_info[bg].mx; //screen width  mask
+uint16 mask_y      = bg_info[bg].my; //screen height mask
 
-uint x = 0;
-uint y = regs.bg_y[bg];
-  if(regs.interlace && regs.hires) {
-    y = (y << 1) + line.interlace_field;
+uint16 x       = 0;
+uint16 y       = regs.bg_y[bg];
+uint16 hscroll = regs.bg_hofs[bg];
+uint16 vscroll = regs.bg_vofs[bg];
+
+  if(regs.hires) {
+    hscroll <<= 1;
+    if(regs.interlace) {
+      vscroll <<= 1;
+      y = (y << 1) + line.interlace_field;
+    }
   }
 
-uint16 hscroll = (regs.hires)                   ? (regs.bg_hofs[bg] << 1) : regs.bg_hofs[bg];
-uint16 vscroll = (regs.interlace && regs.hires) ? (regs.bg_vofs[bg] << 1) : regs.bg_vofs[bg];
-  hscroll &= mask_x;
-  vscroll &= mask_y;
-
 uint16 *mtable = (uint16*)mosaic_table[(regs.mosaic_enabled[bg]) ? regs.mosaic_size : 0];
-uint16  mosaic_x;
-uint16  mosaic_y;
 
 uint16 hval, vval;
 uint16 t, tile_pri, tile_num;
@@ -104,7 +104,7 @@ uint8 *wt_sub  = window[bg].sub;
 
 int32 prev_x = -1, prev_y = -1;
   for(x = 0; x < line.width; x++) {
-    hoffset = x + hscroll;
+    hoffset = mtable[x] + hscroll;
     voffset = y + vscroll;
 
     if(is_opt_mode) {
@@ -139,27 +139,27 @@ int32 prev_x = -1, prev_y = -1;
       }
     }
 
-    mosaic_x = mtable[hoffset & mask_x];
-    mosaic_y = voffset & mask_y;
+    hoffset &= mask_x;
+    voffset &= mask_y;
 
-    if((mosaic_x >> 3) != prev_x || (mosaic_y >> 3) != prev_y) {
-      prev_x = (mosaic_x >> 3);
-      prev_y = (mosaic_y >> 3);
+    if((hoffset >> 3) != prev_x || (voffset >> 3) != prev_y) {
+      prev_x = (hoffset >> 3);
+      prev_y = (voffset >> 3);
 
-      t = bg_get_tile(bg, mosaic_x, mosaic_y);
+      t = bg_get_tile(bg, hoffset, voffset);
 
-      mirror_y  = bool(t & 0x8000);
-      mirror_x  = bool(t & 0x4000);
+      mirror_y = bool(t & 0x8000);
+      mirror_x = bool(t & 0x4000);
 
       tile_pri = (t & 0x2000) ? pri1_pos : pri0_pos;
       tile_num = t;
 
       if(tile_width  == 4) { //16x16 horizontal tile mirroring
-        if(bool(mosaic_x & 8) != mirror_x)tile_num++;
+        if(bool(hoffset & 8) != mirror_x)tile_num++;
       }
 
       if(tile_height == 4) { //16x16 vertical tile mirroring
-        if(bool(mosaic_y & 8) != mirror_y)tile_num += 16;
+        if(bool(voffset & 8) != mirror_y)tile_num += 16;
       }
 
       tile_num &= 0x03ff;
@@ -173,13 +173,13 @@ int32 prev_x = -1, prev_y = -1;
       pal_num   = ((t >> 10) & 7);
       pal_index = bgpal_index + (pal_num << pal_size);
 
-      ypos = mosaic_y & 7;
+      ypos = voffset & 7;
       if(mirror_y)ypos ^= 7; //invert y tile pos
 
       tile_ptr = (uint8*)bg_td + (tile_num * 64) + (ypos * 8);
     }
 
-    xpos = mosaic_x & 7;
+    xpos = hoffset & 7;
     if(mirror_x)xpos ^= 7; //invert x tile pos
     col = *(tile_ptr + xpos);
     if(col) {

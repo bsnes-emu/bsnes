@@ -1,5 +1,5 @@
 /*
-  libconfig : version 0.08 ~byuu (07/02/06)
+  libconfig : version 0.08a ~byuu (07/16/06)
 */
 
 #ifndef __LIBCONFIG
@@ -19,7 +19,7 @@ class Config;
 //  class T : public Setting { public: SettingOperators(T); } t;
 //  t = 0; // -> t.set(0);
 #define SettingOperators(__name) \
-  template<typename T> inline __name &operator=(const T x) { set(T(x)); return *this; } \
+  template<typename T> inline __name &operator=(const T &x) { set(x); return *this; } \
   void toggle() { data ^= 1; set(data); } \
   __name(Config *_parent, char *_name, char *_desc, uint  _data, uint _type) : \
   Setting(_parent, _name, _desc, _data, _type) {} \
@@ -60,14 +60,14 @@ substring char_data, char_def;
   Setting(Config *_parent, char *_name, char *_desc, uint  _data, uint _type);
   Setting(Config *_parent, char *_name, char *_desc, char *_data);
 
-  template<typename T> inline operator T() { return T(get()); }
-  template<typename T> inline Setting &operator=(const T x) { set(T(x)); return *this; }
-  template<typename T> inline bool operator==(const T x) { return T(get()) == x; }
-  template<typename T> inline bool operator!=(const T x) { return T(get()) != x; }
-  template<typename T> inline bool operator>=(const T x) { return T(get()) >= x; }
-  template<typename T> inline bool operator> (const T x) { return T(get()) >  x; }
-  template<typename T> inline bool operator<=(const T x) { return T(get()) <= x; }
-  template<typename T> inline bool operator< (const T x) { return T(get()) <  x; }
+  template<typename T> inline operator T() { return (T)get(); }
+  template<typename T> inline Setting &operator=(const T &x) { set(x); return *this; }
+  template<typename T> inline bool operator==(const T &x) { return (T)get() == x; }
+  template<typename T> inline bool operator!=(const T &x) { return (T)get() != x; }
+  template<typename T> inline bool operator>=(const T &x) { return (T)get() >= x; }
+  template<typename T> inline bool operator> (const T &x) { return (T)get() >  x; }
+  template<typename T> inline bool operator<=(const T &x) { return (T)get() <= x; }
+  template<typename T> inline bool operator< (const T &x) { return (T)get() <  x; }
 };
 
 class Config {

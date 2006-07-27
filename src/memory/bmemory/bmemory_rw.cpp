@@ -39,13 +39,13 @@ void bMemBus::write_ram(uint32 addr, uint8 data) {
 //
 
 uint8 bMemBus::read_sdd1(uint32 addr) {
-  addr = sdd1->offset(addr) % cartridge.cart.rom_size;
+  addr = sdd1->offset(addr) % cartridge.info.rom_size;
   return cartridge.rom[addr];
 }
 
 void bMemBus::write_sdd1(uint32 addr, uint8 data) {
   if(cart_write_protect_enabled == true)return;
-  addr = sdd1->offset(addr) % cartridge.cart.rom_size;
+  addr = sdd1->offset(addr) % cartridge.info.rom_size;
   cartridge.rom[addr] = data;
 }
 

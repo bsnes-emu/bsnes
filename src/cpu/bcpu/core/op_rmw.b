@@ -110,17 +110,17 @@ rol_addr(0x2e, rol),
 ror_addr(0x6e, ror),
 trb_addr(0x1c, trb),
 tsb_addr(0x0c, tsb) {
-1:aa.l = op_read();
-2:aa.h = op_read();
-3:rd.l = op_read(OPMODE_DBR, aa.w);
+1:aa.l = op_readpc();
+2:aa.h = op_readpc();
+3:rd.l = op_readdbr(aa.w);
   if(regs.p.m)skip;
-4:rd.h = op_read(OPMODE_DBR, aa.w + 1);
+4:rd.h = op_readdbr(aa.w + 1);
 5:cpu_io();
   if(regs.p.m) { op_$1_b(); skip; }
   else op_$1_w();
-6:op_write(OPMODE_DBR, aa.w + 1, rd.h);
+6:op_writedbr(aa.w + 1, rd.h);
 7:last_cycle();
-  op_write(OPMODE_DBR, aa.w,     rd.l);
+  op_writedbr(aa.w,     rd.l);
 }
 
 inc_addrx(0xfe, inc),
@@ -129,18 +129,18 @@ asl_addrx(0x1e, asl),
 lsr_addrx(0x5e, lsr),
 rol_addrx(0x3e, rol),
 ror_addrx(0x7e, ror) {
-1:aa.l = op_read();
-2:aa.h = op_read();
+1:aa.l = op_readpc();
+2:aa.h = op_readpc();
 3:cpu_io();
-4:rd.l = op_read(OPMODE_DBR, aa.w + regs.x.w);
+4:rd.l = op_readdbr(aa.w + regs.x.w);
   if(regs.p.m)skip;
-5:rd.h = op_read(OPMODE_DBR, aa.w + regs.x.w + 1);
+5:rd.h = op_readdbr(aa.w + regs.x.w + 1);
 6:cpu_io();
   if(regs.p.m) { op_$1_b(); skip; }
   else op_$1_w();
-7:op_write(OPMODE_DBR, aa.w + regs.x.w + 1, rd.h);
+7:op_writedbr(aa.w + regs.x.w + 1, rd.h);
 8:last_cycle();
-  op_write(OPMODE_DBR, aa.w + regs.x.w,     rd.l);
+  op_writedbr(aa.w + regs.x.w,     rd.l);
 }
 
 inc_dp(0xe6, inc),
@@ -151,17 +151,17 @@ rol_dp(0x26, rol),
 ror_dp(0x66, ror),
 trb_dp(0x14, trb),
 tsb_dp(0x04, tsb) {
-1:dp = op_read();
+1:dp = op_readpc();
 2:cpu_c2();
-3:rd.l = op_read(OPMODE_DP, dp);
+3:rd.l = op_readdp(dp);
   if(regs.p.m)skip;
-4:rd.h = op_read(OPMODE_DP, dp + 1);
+4:rd.h = op_readdp(dp + 1);
 5:cpu_io();
   if(regs.p.m) { op_$1_b(); skip; }
   else op_$1_w();
-6:op_write(OPMODE_DP, dp + 1, rd.h);
+6:op_writedp(dp + 1, rd.h);
 7:last_cycle();
-  op_write(OPMODE_DP, dp,     rd.l);
+  op_writedp(dp,     rd.l);
 }
 
 inc_dpx(0xf6, inc),
@@ -170,16 +170,16 @@ asl_dpx(0x16, asl),
 lsr_dpx(0x56, lsr),
 rol_dpx(0x36, rol),
 ror_dpx(0x76, ror) {
-1:dp = op_read();
+1:dp = op_readpc();
 2:cpu_c2();
 3:cpu_io();
-4:rd.l = op_read(OPMODE_DP, dp + regs.x.w);
+4:rd.l = op_readdp(dp + regs.x.w);
   if(regs.p.m)skip;
-5:rd.h = op_read(OPMODE_DP, dp + regs.x.w + 1);
+5:rd.h = op_readdp(dp + regs.x.w + 1);
 6:cpu_io();
   if(regs.p.m) { op_$1_b(); skip; }
   else op_$1_w();
-7:op_write(OPMODE_DP, dp + regs.x.w + 1, rd.h);
+7:op_writedp(dp + regs.x.w + 1, rd.h);
 8:last_cycle();
-  op_write(OPMODE_DP, dp + regs.x.w,     rd.l);
+  op_writedp(dp + regs.x.w,     rd.l);
 }

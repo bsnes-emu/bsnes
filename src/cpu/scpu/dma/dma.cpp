@@ -77,7 +77,7 @@ uint32 sCPU::hdma_iaddr(uint8 i) {
  *****/
 
 void sCPU::dma_transfertobusb(uint8 i, uint8 bbus) {
-  if(cartridge.cart.sdd1 == true && sdd1->dma_active() == true) {
+  if(cartridge.info.sdd1 == true && sdd1->dma_active() == true) {
     r_mem->write(0x2100 | bbus, sdd1->dma_read());
   } else {
     dma_transfer(0, bbus, dma_addr(i));
@@ -105,8 +105,9 @@ void sCPU::dma_run() {
 
   for(int i = 0; i < 8; i++) {
     if(channel[i].dma_enabled == false)continue;
+    add_clocks(8);
 
-    if(cartridge.cart.sdd1 == true) {
+    if(cartridge.info.sdd1 == true) {
       sdd1->dma_begin(i, (channel[i].srcbank << 16) | (channel[i].srcaddr),
         channel[i].xfersize);
     }
@@ -114,10 +115,12 @@ void sCPU::dma_run() {
   uint index = 0;
     do {
       dma_write(i, dma_bbus(i, index++));
-    } while(channel[i].xfersize);
+    } while(channel[i].dma_enabled && channel[i].xfersize);
 
     channel[i].dma_enabled = false;
   }
+
+  set_irq_delay(24);
 }
 
 /*****
@@ -176,6 +179,8 @@ void sCPU::hdma_run() {
 static uint8 hdma_xferlen[8] = { 1, 2, 2, 4, 4, 4, 2, 4 };
   for(int i = 0; i < 8; i++) {
     if(hdma_active(i) == false)continue;
+    channel[i].dma_enabled = false; //HDMA run during DMA will stop DMA mid-transfer
+    add_clocks(8);
 
     if(channel[i].hdma_do_transfer) {
     int xferlen = hdma_xferlen[channel[i].xfermode];
@@ -197,6 +202,8 @@ static uint8 hdma_xferlen[8] = { 1, 2, 2, 4, 4, 4, 2, 4 };
       hdma_update(i);
     }
   }
+
+  set_irq_delay(24);
 }
 
 void sCPU::hdma_init() {
@@ -211,17 +218,20 @@ void sCPU::hdma_init() {
 
   for(int i = 0; i < 8; i++) {
     if(!channel[i].hdma_enabled)continue;
+    channel[i].dma_enabled = false; //HDMA init during DMA will stop DMA mid-transfer
 
     channel[i].hdma_addr = channel[i].srcaddr;
     hdma_update(i);
   }
+
+  set_irq_delay(24);
 }
 
 /*****
  * power / reset functions
  *****/
 
-void sCPU::dma_reset() {
+void sCPU::dma_power() {
   for(int i = 0; i < 8; i++) {
     channel[i].dma_enabled       = false;
     channel[i].hdma_enabled      = false;
@@ -245,7 +255,11 @@ void sCPU::dma_reset() {
     channel[i].hdma_addr         = 0xffff;
     channel[i].hdma_line_counter = 0xff;
     channel[i].unknown           = 0xff;
+  }
+}
 
+void sCPU::dma_reset() {
+  for(int i = 0; i < 8; i++) {
     channel[i].hdma_completed    = false;
     channel[i].hdma_do_transfer  = false;
   }

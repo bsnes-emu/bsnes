@@ -1,87 +1,112 @@
 #include "../base.h"
+#include "database.cpp"
+
+void Cartridge::read_dbi() {
+  info.srtc = false;
+  info.sdd1 = false;
+  info.c4   = false;
+  info.dsp1 = false;
+  info.dsp2 = false;
+  info.obc1 = false;
+
+  info.dsp1_mapper = 0;
+
+  info.header_index = 0x7fc0;
+  info.mapper = PCB;
+  strcpy(info.name, dbi.name);
+  strcpy(info.pcb,  dbi.pcb);
+  info.region = NTSC;
+  info.cart_mmio = false;
+
+  info.rom_size = dbi.rom;
+  info.ram_size = dbi.ram;
+}
 
 void Cartridge::read_header() {
-  cart.srtc = false;
-  cart.sdd1 = false;
-  cart.c4   = false;
-  cart.dsp1 = false;
-  cart.dsp2 = false;
-  cart.obc1 = false;
+  info.srtc = false;
+  info.sdd1 = false;
+  info.c4   = false;
+  info.dsp1 = false;
+  info.dsp2 = false;
+  info.obc1 = false;
 
-  cart.dsp1_mapper = 0;
+  info.dsp1_mapper = 0;
 
-  if(cart.header_index == 0x7fc0 && cart.rom_size >= 0x401000) {
-    cart.mapper = EXLOROM;
-  } else if(cart.header_index == 0x7fc0 && rom[cart.header_index + MAPPER] == 0x32) {
-    cart.mapper = EXLOROM;
-  } else if(cart.header_index == 0x7fc0) {
-    cart.mapper = LOROM;
-  } else if(cart.header_index == 0xffc0) {
-    cart.mapper = HIROM;
-  } else { //cart.header_index == 0x40ffc0
-    cart.mapper = EXHIROM;
+  if(info.header_index == 0x7fc0 && info.rom_size >= 0x401000) {
+    info.mapper = EXLOROM;
+    strcpy(info.pcb, "UNL-EXLOROM");
+  } else if(info.header_index == 0x7fc0 && rom[info.header_index + MAPPER] == 0x32) {
+    info.mapper = EXLOROM;
+    strcpy(info.pcb, "UNL-EXLOROM");
+  } else if(info.header_index == 0x7fc0) {
+    info.mapper = LOROM;
+    strcpy(info.pcb, "UNL-LOROM");
+  } else if(info.header_index == 0xffc0) {
+    info.mapper = HIROM;
+    strcpy(info.pcb, "UNL-HIROM");
+  } else { //info.header_index == 0x40ffc0
+    info.mapper = EXHIROM;
+    strcpy(info.pcb, "UNL-EXHIROM");
   }
 
-uint8 mapper   = rom[cart.header_index + MAPPER];
-uint8 rom_type = rom[cart.header_index + ROM_TYPE];
+uint8 mapper   = rom[info.header_index + MAPPER];
+uint8 rom_type = rom[info.header_index + ROM_TYPE];
   if(mapper == 0x35 && rom_type == 0x55) {
-    cart.srtc = true;
+    info.srtc = true;
   }
 
   if(mapper == 0x32 && (rom_type == 0x43 || rom_type == 0x45)) {
-    cart.sdd1 = true;
+    info.sdd1 = true;
   }
 
   if(mapper == 0x20 && rom_type == 0xf3) {
-    cart.c4 = true;
+    info.c4 = true;
   }
 
   if((mapper == 0x20 || mapper == 0x21) && rom_type == 0x03) {
-    cart.dsp1 = true;
+    info.dsp1 = true;
   }
 
   if(mapper == 0x30 && rom_type == 0x05) {
-    cart.dsp1 = true;
+    info.dsp1 = true;
   }
 
   if(mapper == 0x31 && (rom_type == 0x03 || rom_type == 0x05)) {
-    cart.dsp1 = true;
+    info.dsp1 = true;
   }
 
-  if(cart.dsp1 == true) {
-    if((mapper & 0x2f) == 0x20 && rom_size <= 0x100000) {
-      cart.dsp1_mapper = DSP1_LOROM_1MB;
+  if(info.dsp1 == true) {
+    if((mapper & 0x2f) == 0x20 && info.rom_size <= 0x100000) {
+      info.dsp1_mapper = DSP1_LOROM_1MB;
     } else if((mapper & 0x2f) == 0x20) {
-      cart.dsp1_mapper = DSP1_LOROM_2MB;
+      info.dsp1_mapper = DSP1_LOROM_2MB;
     } else if((mapper & 0x2f) == 0x21) {
-      cart.dsp1_mapper = DSP1_HIROM;
+      info.dsp1_mapper = DSP1_HIROM;
     }
   }
 
   if(mapper == 0x20 && rom_type == 0x05) {
-    cart.dsp2 = true;
+    info.dsp2 = true;
   }
 
   if(mapper == 0x30 && rom_type == 0x25) {
-    cart.obc1 = true;
+    info.obc1 = true;
   }
 
-  cart.cart_mmio = cart.c4 | cart.dsp1 | cart.dsp2 | cart.obc1;
+  info.cart_mmio = info.c4 | info.dsp1 | info.dsp2 | info.obc1;
 
-  if(rom[cart.header_index + SRAM_SIZE] & 7) {
-    cart.sram_size = 1024 << (rom[cart.header_index + SRAM_SIZE] & 7);
+  if(rom[info.header_index + SRAM_SIZE] & 7) {
+    info.ram_size = 1024 << (rom[info.header_index + SRAM_SIZE] & 7);
   } else {
-    cart.sram_size = 0;
+    info.ram_size = 0;
   }
 
-  cart.region = ((rom[cart.header_index + REGION] & 0x7f) < 2) ? NTSC : PAL;
-
-  memcpy(&cart.name, &rom[cart.header_index + CART_NAME], 21);
-  cart.name[21] = 0;
+  memcpy(&info.name, &rom[info.header_index + CART_NAME], 21);
+  info.name[21] = 0;
 
   for(int i = 0; i < 22; i++) {
-    if(cart.name[i] & 0x80) {
-      cart.name[i] = '?';
+    if(info.name[i] & 0x80) {
+      info.name[i] = '?';
     }
   }
 }
@@ -91,9 +116,9 @@ int32 score_lo = 0,
       score_hi = 0,
       score_ex = 0;
 
-  if(rom_size < 0x010000) {
+  if(info.rom_size < 0x010000) {
   //cart too small to be anything but lorom
-    cart.header_index = 0x007fc0;
+    info.header_index = 0x007fc0;
     return;
   }
 
@@ -115,6 +140,9 @@ int32 score_lo = 0,
   if(rom[0x7fc0 + LICENSE] < 3)score_lo++;
   if(rom[0xffc0 + LICENSE] < 3)score_hi++;
 
+  if(rom[0x7fc0 + RESH] & 0x80)score_lo += 2;
+  if(rom[0xffc0 + RESH] & 0x80)score_hi += 2;
+
 uint16 cksum, icksum;
   cksum  = rom[0x7fc0 +  CKSUM] | (rom[0x7fc0 +  CKSUM + 1] << 8);
   icksum = rom[0x7fc0 + ICKSUM] | (rom[0x7fc0 + ICKSUM + 1] << 8);
@@ -128,7 +156,7 @@ uint16 cksum, icksum;
     score_hi += 8;
   }
 
-  if(rom_size < 0x401000) {
+  if(info.rom_size < 0x401000) {
     score_ex = 0;
   } else {
     if(rom[0x7fc0 + MAPPER] == 0x32)score_lo++;
@@ -136,100 +164,78 @@ uint16 cksum, icksum;
   }
 
   if(score_lo >= score_hi && score_lo >= score_ex) {
-    cart.header_index = 0x007fc0;
+    info.header_index = 0x007fc0;
   } else if(score_hi >= score_ex) {
-    cart.header_index = 0x00ffc0;
+    info.header_index = 0x00ffc0;
   } else {
-    cart.header_index = 0x40ffc0;
+    info.header_index = 0x40ffc0;
   }
 }
 
 void Cartridge::load_sram() {
-  if(cart.sram_size == 0) {
+  if(info.ram_size == 0) {
     sram = 0;
     return;
   }
 
 FileReader ff(sram_fn);
   if(!ff.ready()) {
-    sram = (uint8*)malloc(cart.sram_size);
-    memset(sram, 0, cart.sram_size);
+    sram = (uint8*)malloc(info.ram_size);
+    memset(sram, 0, info.ram_size);
     return;
   }
 
-  sram = ff.read(cart.sram_size);
+  sram = ff.read(info.ram_size);
 }
 
 void Cartridge::save_sram() {
-  if(cart.sram_size == 0)return;
+  if(info.ram_size == 0)return;
 
 FileWriter ff(sram_fn);
   if(!ff.ready())return;
 
-  ff.write(sram, cart.sram_size);
+  ff.write(sram, info.ram_size);
 }
 
-void Cartridge::load_rom(Reader *rf) {
-  base_rom = rf->read();
-  rom_size = rf->size();
-
-  if((rom_size & 0x7fff) == 0x0200) {
-    rom = base_rom + 512;
-    rom_size -= 512;
-  } else {
-    rom = base_rom;
+uint Cartridge::mirror_rom(uint size) {
+uint i;
+//find largest power of two <= size
+  for(i = 31; i >= 0; i--) {
+    if(size & (1 << i))break;
   }
 
-  cart.rom_size = rom_size;
+uint P0_size = 1 << i;
+  size -= P0_size;
+  if(size == 0)return P0_size;
 
-  cart.crc32 = 0xffffffff;
-  for(int32 i = 0; i < cart.rom_size; i++) {
-    cart.crc32 = crc32_adjust(cart.crc32, rom[i]);
+//find smallest power of two >= size
+  for(i = 0; i <= 31; i++) {
+    if((1 << i) >= size)break;
   }
-  cart.crc32 = ~cart.crc32;
+
+uint P1_size = 1 << i;
+  return P0_size + P1_size;
 }
 
-void Cartridge::patch_rom(Reader *rf) {
-uint8 *patch_data = rf->read();
-uint32 patch_size = rf->size();
-BPF bpf;
-  if(patch_size < 34)return;
-
-uint32 target;
-  target  = patch_data[BPF::INDEX_FORMAT + 0] <<  0;
-  target |= patch_data[BPF::INDEX_FORMAT + 1] <<  8;
-  target |= patch_data[BPF::INDEX_FORMAT + 2] << 16;
-  target |= patch_data[BPF::INDEX_FORMAT + 3] << 24;
-  if(target != BPF::FORMAT_SNES) {
-    alert("Warning: BPF patch file is not in SNES format!\n\n"
-      "The patch will still be applied, but it will not be "
-      "possible to determine whether the patch was created "
-      "against an image with a header or without a header.\n\n"
-      "bsnes is now forced to assume the patch was created "
-      "against a headerless source image. If this is not the "
-      "case, then patching will fail!\n\n"
-      "If you are the author of this patch, please recreate "
-      "the patch in SNES format.\n\n"
-      "If you are not the patch author, please contact the "
-      "author and ask them to create an SNES format BPF patch.");
+void Cartridge::load_rom(Reader &rf) {
+  info.rom_size = rf.size();
+bool header = false;
+  if((info.rom_size & 0x7fff) == 0x0200) {
+    info.rom_size -= 512;
+    header = true;
   }
 
-  if(bpf.apply_patch(patch_size, patch_data, rom_size, rom) == true) {
-    SafeFree(base_rom);
-  uint8 *temp = bpf.get_output_handle(rom_size);
-    base_rom = (uint8*)malloc(rom_size);
-    memcpy(base_rom, temp, rom_size);
-    rom = base_rom;
-    cart.rom_size = rom_size;
-  } else {
-    alert("Failed to apply patch.\n\nThis could be because the patch itself "
-      "does not match its internal checksum, because the ROM loaded does not "
-      "match the patch information for either the original or modified file, "
-      "or because the patched file does not match the checksum of either the "
-      "original or modified file that is stored inside the patch.\n\n"
-      "The original ROM image will be used instead.");
+  info.rom_size = mirror_rom(info.rom_size);
+
+  base_rom = rf.read(info.rom_size + ((header) ? 512 : 0));
+  rom = base_rom;
+  if(header)rom += 512;
+
+  info.crc32 = 0xffffffff;
+  for(int32 i = 0; i < info.rom_size; i++) {
+    info.crc32 = crc32_adjust(info.crc32, rom[i]);
   }
-  SafeFree(patch_data);
+  info.crc32 = ~info.crc32;
 }
 
 bool Cartridge::load(const char *fn) {
@@ -247,7 +253,7 @@ bool Cartridge::load(const char *fn) {
       alert("Error loading image file (%s)!", rom_fn);
       return false;
     }
-    load_rom(static_cast<Reader*>(&ff));
+    load_rom(ff);
     break;
   }
 #ifdef GZIP_SUPPORT
@@ -257,12 +263,12 @@ bool Cartridge::load(const char *fn) {
       alert("Error loading image file (%s)!", rom_fn);
       return false;
     }
-    load_rom(static_cast<Reader*>(&gf));
+    load_rom(gf);
     break;
   }
   case Reader::RF_ZIP: {
   ZipReader zf(rom_fn);
-    load_rom(static_cast<Reader*>(&zf));
+    load_rom(zf);
     break;
   }
 #endif
@@ -270,7 +276,7 @@ bool Cartridge::load(const char *fn) {
   case Reader::RF_JMA: {
     try {
     JMAReader jf(rom_fn);
-      load_rom(static_cast<Reader*>(&jf));
+      load_rom(jf);
     } catch(JMA::jma_errors jma_error) {
       alert("Error loading image file (%s)!", rom_fn);
       return false;
@@ -288,25 +294,6 @@ bool Cartridge::load(const char *fn) {
       break;
     }
   }
-
-//check for bpf patch
-#ifdef GZIP_SUPPORT
-  strcpy(patch_fn, sram_fn);
-  strcat(patch_fn, ".bpz");
-  if(fexists(patch_fn)) {
-  ZipReader zf(patch_fn);
-    patch_rom(static_cast<Reader*>(&zf));
-  } else {
-#endif
-    strcpy(patch_fn, sram_fn);
-    strcat(patch_fn, ".bpf");
-    if(fexists(patch_fn)) {
-    FileReader ff(patch_fn);
-      patch_rom(static_cast<Reader*>(&ff));
-    }
-#ifdef GZIP_SUPPORT
-  }
-#endif
 
 //add SRAM extension
   strcat(sram_fn, ".");
@@ -343,13 +330,19 @@ bool Cartridge::load(const char *fn) {
   strcat(cheat_fn, ".cht");
   if(fexists(cheat_fn) == true) {
   FileReader ff(cheat_fn);
-    cheat.load(static_cast<Reader*>(&ff));
+    cheat.load(ff);
   }
 
-  find_header();
-  read_header();
+  if(read_database() == true) {
+    read_dbi();
+  } else {
+    find_header();
+    read_header();
+  }
+
   load_sram();
   cart_loaded = true;
+
   r_mem->load_cart();
   return true;
 }
@@ -370,7 +363,7 @@ bool Cartridge::unload() {
 
   if(cheat.count() > 0 || fexists(cheat_fn)) {
   FileWriter ff(cheat_fn);
-    cheat.save(static_cast<Writer*>(&ff));
+    cheat.save(ff);
     cheat.clear();
   }
 
@@ -379,12 +372,13 @@ bool Cartridge::unload() {
 }
 
 Cartridge::Cartridge() {
+  load_database();
+
   cart_loaded = false;
 
   base_rom = 0;
   rom      = 0;
   sram     = 0;
-  rom_size = 0;
 }
 
 Cartridge::~Cartridge() {

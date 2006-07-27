@@ -266,12 +266,12 @@ void Cheat::disable(uint32 n) {
  * cheat file manipulation routines
  *****/
 
-bool Cheat::load(Reader *rf) {
-  if(!rf->ready())return false;
+bool Cheat::load(Reader &rf) {
+  if(!rf.ready())return false;
 
-uint8 *raw_data = rf->read();
+uint8 *raw_data = rf.read();
 string data;
-  raw_data[rf->size()] = 0;
+  raw_data[rf.size()] = 0;
   strcpy(data, (char*)raw_data);
   SafeFree(raw_data);
   replace(data, "\r\n", "\n");
@@ -297,8 +297,8 @@ string line;
   return true;
 }
 
-bool Cheat::save(Writer *wf) {
-  if(!wf->ready())return false;
+bool Cheat::save(Writer &wf) {
+  if(!wf.ready())return false;
 
 string data;
 char   t[4096];
@@ -308,7 +308,7 @@ char   t[4096];
     strcat(data, t);
   }
 
-  wf->write((uint8*)strptr(data), strlen(data));
+  wf.write((uint8*)strptr(data), strlen(data));
   return true;
 }
 

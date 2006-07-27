@@ -24,7 +24,7 @@ void DSP1::reset() {
  * of expected ranges
  *****/
 bool DSP1::addr_decode(uint16 addr) {
-  switch(cartridge.cart.dsp1_mapper) {
+  switch(cartridge.info.dsp1_mapper) {
 
   case Cartridge::DSP1_LOROM_1MB:
   //$[20-3f]:[8000-bfff] = DR, $[20-3f]:[c000-ffff] = SR

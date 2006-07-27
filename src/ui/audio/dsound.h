@@ -6,7 +6,7 @@ LPDIRECTSOUND ds;
 LPDIRECTSOUNDBUFFER dsb_p, dsb_b;
 DSBUFFERDESC dsbd;
 WAVEFORMATEX wfx;
-uint32 buffer_size;
+uint buffer_size;
 
 struct {
   uint32 buffer[16384];
@@ -16,7 +16,7 @@ struct {
   uint32 samples_per_frame;
 } data;
   void run(uint32 sample);
-  void set_frequency(uint32 new_freq);
+  void set_frequency(uint new_freq);
   void clear_audio();
   void init();
   void term();

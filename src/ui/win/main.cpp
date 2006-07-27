@@ -1,16 +1,28 @@
-#define INTERFACE_MAIN
-
-#include "../base.h"
-#include "../lib/libwin32.h"
-#include "../lib/libwin32.cpp"
+#include "../../lib/libwin32.h"
+#include "../../lib/libwin32.cpp"
 
 #include "config.cpp"
 
-#include "bsnes.h"
 #include "event.h"
 #include "ui.h"
 
-#include "bsnes.cpp"
+#include "../video/video.h"
+#include "../audio/audio.h"
+#include "../input/input.h"
+
+#include "../video/video.cpp"
+#include "../input/input.cpp"
+
+#include "../video/d3d.h"
+#include "../video/ddraw.h"
+#include "../audio/dsound.h"
+#include "../input/dinput.h"
+
+#include "../video/d3d.cpp"
+#include "../video/ddraw.cpp"
+#include "../audio/dsound.cpp"
+#include "../input/dinput.cpp"
+
 #include "event.cpp"
 #include "ui.cpp"
 
@@ -40,32 +52,6 @@ va_list args;
 #endif
 }
 
-void init_snes() {
-#ifdef POLYMORPHISM
-  deref(mem) = new MEMCORE();
-  deref(cpu) = new CPUCORE();
-  deref(apu) = new APUCORE();
-  deref(dsp) = new DSPCORE();
-  deref(ppu) = new PPUCORE();
-#endif
-  snes  = new bSNES();
-  bsnes = static_cast<bSNES*>(snes);
-
-  snes->init();
-}
-
-void term_snes() {
-  snes->term();
-#ifdef POLYMORPHISM
-  SafeDelete(deref(mem));
-  SafeDelete(deref(cpu));
-  SafeDelete(deref(apu));
-  SafeDelete(deref(dsp));
-  SafeDelete(deref(ppu));
-#endif
-  SafeDelete(snes);
-}
-
 void get_base_path() {
 char full_name[4095];
   GetFullPathName(__argv[0], 4095, full_name, 0);
@@ -88,6 +74,7 @@ string t;
 }
 
 int __stdcall WinMain(HINSTANCE hinstance, HINSTANCE hprevinstance, LPSTR lpcmdline, int ncmdshow) {
+  timeBeginPeriod(1);
   InitCommonControls();
   get_base_path();
 
@@ -121,5 +108,6 @@ _end:
   term_ui();
   term_snes();
   config_file.save(cfg_fn);
+  timeEndPeriod(1);
   return 0;
 }

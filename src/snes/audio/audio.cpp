@@ -112,6 +112,7 @@ void SNES::log_audio_disable() {
 }
 
 void SNES::audio_init() {
+  pcmfp = 0;
 }
 
 void SNES::audio_term() {

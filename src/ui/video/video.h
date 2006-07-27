@@ -62,7 +62,4 @@ struct {
   virtual void    update() = 0;
   virtual void    init() = 0;
   virtual void    term() = 0;
-};
-
-#include "d3d.h"
-#include "ddraw.h"
+} *uiVideo;

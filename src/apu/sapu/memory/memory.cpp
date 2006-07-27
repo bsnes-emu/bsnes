@@ -2,6 +2,11 @@ uint8 sAPU::spcram_read(uint16 addr) {
 uint8 r;
   if((addr & 0xfff0) == 0x00f0) {
   //addr >= 0x00f0 && addr <= 0x00ff
+
+  #ifdef FAVOR_SPEED
+    co_return();
+  #endif
+
     switch(addr) {
     case 0xf0: //TEST -- operation unknown, supposedly returns 0x00
       r = 0x00;
@@ -20,9 +25,6 @@ uint8 r;
     case 0xf5: //CPUIO1
     case 0xf6: //CPUIO2
     case 0xf7: //CPUIO3
-    #ifdef FAVOR_SPEED
-      co_return();
-    #endif
       r = r_cpu->port_read(addr & 3);
       break;
     case 0xf8: //???
@@ -66,6 +68,11 @@ uint8 r;
 void sAPU::spcram_write(uint16 addr, uint8 data) {
   if((addr & 0xfff0) == 0x00f0) {
   //addr >= 0x00f0 && addr >= 0x00ff
+
+  #ifdef FAVOR_SPEED
+    co_return();
+  #endif
+
     switch(addr) {
     case 0xf0: //TEST -- operation unknown
       break;
@@ -115,9 +122,6 @@ void sAPU::spcram_write(uint16 addr, uint8 data) {
     case 0xf5: //CPUIO1
     case 0xf6: //CPUIO2
     case 0xf7: //CPUIO3
-    #ifdef FAVOR_SPEED
-      co_return();
-    #endif
       port_write(addr & 3, data);
       break;
     case 0xf8: //???

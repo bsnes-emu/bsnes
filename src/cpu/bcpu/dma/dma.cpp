@@ -68,7 +68,7 @@ uint32 r;
 }
 
 void bCPU::dma_cputommio(uint8 i, uint8 bbus) {
-  if(cartridge.cart.sdd1 == true && sdd1->dma_active() == true) {
+  if(cartridge.info.sdd1 == true && sdd1->dma_active() == true) {
     r_mem->write(0x2100 | bbus, sdd1->dma_read());
   } else {
     dma_transfer_byte(0, bbus, dma_addr(i));
@@ -98,7 +98,7 @@ void bCPU::dma_run() {
     if(channel[i].dma_enabled == false)continue;
 
   //first byte transferred?
-    if(cartridge.cart.sdd1 == true && channel[i].read_index == 0) {
+    if(cartridge.info.sdd1 == true && channel[i].read_index == 0) {
       sdd1->dma_begin(i, (channel[i].srcbank << 16) | (channel[i].srcaddr),
         channel[i].xfersize);
     }

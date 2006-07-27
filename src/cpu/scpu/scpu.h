@@ -35,6 +35,8 @@ struct {
   bool   hdmainit_triggered;
   bool   hdma_triggered;
 
+  uint16 irq_delay;
+
   int16  nmi_read_pos, nmi_line_pos;
   bool   nmi_read, nmi_line, nmi_transition;
   bool   nmi_pending;
@@ -50,7 +52,8 @@ struct {
 
 //$4016-$4017
   bool   joypad_strobe_latch;
-  uint8  joypad1_read_pos, joypad2_read_pos;
+  uint32 joypad1_bits;
+  uint32 joypad2_bits;
 
 //$4200
   bool   nmi_enabled;
@@ -73,6 +76,12 @@ struct {
 //$4214-$4217
   uint16 r4214;
   uint16 r4216;
+
+//$4218-$421f
+  uint8  joy1l, joy1h;
+  uint8  joy2l, joy2h;
+  uint8  joy3l, joy3h;
+  uint8  joy4l, joy4h;
 } status;
 
   void   run();

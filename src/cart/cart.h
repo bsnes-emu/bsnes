@@ -1,10 +1,24 @@
 class Cartridge {
 public:
+
+/*****
+ * cart database
+ *****/
+
+#include "db/db.h"
+db_item dbi;
+  uint8 *database;
+  uint   database_size;
+  uint   database_blocksize;
+  void   load_database();
+  bool   read_database();
+
+//
+
 bool cart_loaded;
 char rom_fn[4096], sram_fn[4096], cheat_fn[4096], patch_fn[4096];
 
 uint8 *base_rom, *rom, *sram;
-uint32 rom_size;
 
 enum {
 //header fields
@@ -18,12 +32,15 @@ enum {
   VERSION   = 0x1b,
   ICKSUM    = 0x1c,
   CKSUM     = 0x1e,
+  RESL      = 0x3c,
+  RESH      = 0x3d,
 
 //regions
   NTSC = 0,
   PAL  = 1,
 
 //memory mappers
+  PCB     = 0x00,
   LOROM   = 0x20,
   HIROM   = 0x21,
   EXLOROM = 0x22,
@@ -37,14 +54,13 @@ enum {
 
 struct {
   uint32 crc32;
-  uint32 header_index;
+  char   name[128];
+  char   pcb[32];
 
-  char   name[32];
-  uint32 rom_size;
-  uint32 sram_size;
-  bool   region;
-
-  uint32 mapper;
+  uint   region;
+  uint   mapper;
+  uint   rom_size;
+  uint   ram_size;
 
 //set to true for games that need cart MMIO mapping (c4, dsp-n, ...),
 //for games that map outside the standard MMIO range of $2000-$5fff
@@ -57,12 +73,16 @@ struct {
   bool   obc1;
 
   uint   dsp1_mapper;
-} cart;
 
-  void load_rom(Reader *rf);
-  void patch_rom(Reader *rf);
+//HiROM / LoROM specific code
+  uint   header_index;
+} info;
+
+  uint mirror_rom(uint size);
+  void load_rom(Reader &rf);
   void load_sram();
   void save_sram();
+  void read_dbi();
   void find_header();
   void read_header();
   bool loaded() { return cart_loaded; }

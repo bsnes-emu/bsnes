@@ -31,8 +31,7 @@ void sCPU::op_write(uint32 addr, uint8 data) {
 #ifdef FAVOR_ACCURACY
   co_return();
 #endif
-//below needs to be verified on hardware
-//regs.mdr = data;
-  r_mem->write(addr, data);
+  regs.mdr = data;
+  r_mem->write(addr, regs.mdr);
   cycle_edge();
 }

@@ -19,6 +19,11 @@ void sCPU::power() {
 
   regs.a = regs.x = regs.y = 0x0000;
   regs.s = 0x01ff;
+
+  mmio_power();
+  dma_power();
+  timing_power();
+
   reset();
 }
 
@@ -30,7 +35,10 @@ void sCPU::reset() {
   regs.pc.l = r_mem->read(0xfffc);
   regs.pc.h = r_mem->read(0xfffd);
 
-//some registers are not fully reset by SNES
+  regs.acc_8b = true;
+  regs.idx_8b = true;
+
+//note: some registers are not fully reset by SNES
   regs.x.h  = 0x00;
   regs.y.h  = 0x00;
   regs.s.h  = 0x01;

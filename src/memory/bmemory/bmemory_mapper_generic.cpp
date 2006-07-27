@@ -16,8 +16,8 @@
  *****/
 void bMemBus::cart_map_generic(uint type) {
 uint32 P0_size, P1_size, ROM_mask, ROM_size, SRAM_size;
-  ROM_size  = cartridge.cart.rom_size;
-  SRAM_size = cartridge.cart.sram_size;
+  ROM_size  = cartridge.info.rom_size;
+  SRAM_size = cartridge.info.ram_size;
 
 //calculate highest power of 2, which is the size of the first ROM chip
   P0_size = 0x800000;
@@ -64,7 +64,7 @@ uint32 P0_size, P1_size, ROM_mask, ROM_size, SRAM_size;
   //LoROM SRAM region
   //$[70-7f|f0-ff]:[0000-7fff]
   //Note: WRAM is remapped over $[7e-7f]:[0000-ffff]
-    if((bank & 0x7f) >= 0x70 && (bank & 0x7f) <= 0x7f && (addr & 0x8000) == 0x0000) {
+    if(bank >= 0x70 && bank <= 0x7f && (addr & 0x8000) == 0x0000) {
       if(SRAM_size == 0)continue;
 
       if(type == Cartridge::LOROM || !(bank & 0x80)) {
@@ -141,40 +141,48 @@ void bMemBus::cart_map_c4() {
 }
 
 void bMemBus::cart_map_dsp1() {
-  if(cartridge.cart.dsp1_mapper == Cartridge::DSP1_LOROM_1MB) {
-  //$[20-3f]:[8000-ffff]
+  if(cartridge.info.dsp1_mapper == Cartridge::DSP1_LOROM_1MB) {
+  //$[20-3f|a0-bf]:[8000-ffff]
     for(uint bank = 0x20; bank <= 0x3f; bank++) {
       for(uint page = 0x80; page <= 0xff; page++) {
-        page_read [(bank << 8) + page] = &bMemBus::read_dsp1;
-        page_write[(bank << 8) + page] = &bMemBus::write_dsp1;
+        page_read [0x0000 + (bank << 8) + page] = &bMemBus::read_dsp1;
+        page_read [0x8000 + (bank << 8) + page] = &bMemBus::read_dsp1;
+        page_write[0x0000 + (bank << 8) + page] = &bMemBus::write_dsp1;
+        page_write[0x8000 + (bank << 8) + page] = &bMemBus::write_dsp1;
       }
     }
-  } else if(cartridge.cart.dsp1_mapper == Cartridge::DSP1_LOROM_2MB) {
-  //$[60-6f]:[0000-7fff]
+  } else if(cartridge.info.dsp1_mapper == Cartridge::DSP1_LOROM_2MB) {
+  //$[60-6f|e0-ef]:[0000-7fff]
     for(uint bank = 0x60; bank <= 0x6f; bank++) {
       for(uint page = 0x00; page <= 0x7f; page++) {
-        page_read [(bank << 8) + page] = &bMemBus::read_dsp1;
-        page_write[(bank << 8) + page] = &bMemBus::write_dsp1;
+        page_read [0x0000 + (bank << 8) + page] = &bMemBus::read_dsp1;
+        page_read [0x8000 + (bank << 8) + page] = &bMemBus::read_dsp1;
+        page_write[0x0000 + (bank << 8) + page] = &bMemBus::write_dsp1;
+        page_write[0x8000 + (bank << 8) + page] = &bMemBus::write_dsp1;
       }
     }
-  } else if(cartridge.cart.dsp1_mapper == Cartridge::DSP1_HIROM) {
-  //$[00-1f]:[6000-7fff]
+  } else if(cartridge.info.dsp1_mapper == Cartridge::DSP1_HIROM) {
+  //$[00-1f|80-9f]:[6000-7fff]
     for(uint bank = 0x00; bank <= 0x1f; bank++) {
       for(uint page = 0x60; page <= 0x7f; page++) {
-        page_read [(bank << 8) + page] = &bMemBus::read_dsp1;
-        page_write[(bank << 8) + page] = &bMemBus::write_dsp1;
+        page_read [0x0000 + (bank << 8) + page] = &bMemBus::read_dsp1;
+        page_read [0x8000 + (bank << 8) + page] = &bMemBus::read_dsp1;
+        page_write[0x0000 + (bank << 8) + page] = &bMemBus::write_dsp1;
+        page_write[0x8000 + (bank << 8) + page] = &bMemBus::write_dsp1;
       }
     }
   }
 }
 
 void bMemBus::cart_map_dsp2() {
-//$[20-3f]:[6000-6fff|8000-bfff]
+//$[20-3f|a0-bf]:[6000-6fff|8000-bfff]
   for(uint bank = 0x20; bank <= 0x3f; bank++) {
     for(uint page = 0x60; page <= 0xbf; page++) {
       if(page >= 0x70 && page <= 0x7f)continue;
-      page_read [(bank << 8) + page] = &bMemBus::read_dsp2;
-      page_write[(bank << 8) + page] = &bMemBus::write_dsp2;
+      page_read [0x0000 + (bank << 8) + page] = &bMemBus::read_dsp2;
+      page_read [0x8000 + (bank << 8) + page] = &bMemBus::read_dsp2;
+      page_write[0x0000 + (bank << 8) + page] = &bMemBus::write_dsp2;
+      page_write[0x8000 + (bank << 8) + page] = &bMemBus::write_dsp2;
     }
   }
 }

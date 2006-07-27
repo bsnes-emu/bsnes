@@ -23,12 +23,13 @@ union {
   bit<0x01> c;
 };
 
-  APURegFlags() { data = 0; }
-  inline operator unsigned() { return data; }
+  inline operator unsigned() const { return data; }
   inline unsigned operator  = (const uint8 i) { data  = i; return data; }
   inline unsigned operator |= (const uint8 i) { data |= i; return data; }
   inline unsigned operator ^= (const uint8 i) { data ^= i; return data; }
   inline unsigned operator &= (const uint8 i) { data &= i; return data; }
+
+  APURegFlags() : data(0) {}
 };
 
 class APURegs {

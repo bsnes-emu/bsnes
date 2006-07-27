@@ -10,21 +10,6 @@ void bPPU::scanline() {
   line.interlace       = r_cpu->interlace();
   line.interlace_field = r_cpu->interlace_field();
 
-//this should probably only be done once per frame (at the
-//start of vblank), however it is currently done every scanline
-//as an attempt to emulate FirstSprite+Y priority mode
-  if(regs.oam_priority == true) {
-    if((regs.oam_addr & 3) == 3) {
-    //FirstSprite+Y priority (untested)
-      regs.oam_firstsprite = (regs.oam_addr >> 2) + (line.y - 1);
-    } else {
-      regs.oam_firstsprite = (regs.oam_addr >> 2);
-    }
-    regs.oam_firstsprite &= 127;
-  } else {
-    regs.oam_firstsprite = 0;
-  }
-
   if(line.y == 0) {
   //RTO flag reset
     regs.time_over  = false;
@@ -39,6 +24,13 @@ void bPPU::scanline() {
 
     regs.mosaic_countdown = regs.mosaic_size + 1;
     regs.mosaic_countdown--;
+
+  //OAM sprite priority rotation
+    if(regs.oam_priority == false) {
+      regs.oam_firstsprite = 0;
+    } else {
+      regs.oam_firstsprite = (regs.oam_addr >> 2) & 127;
+    }
   } else {
     for(int32 bg = BG1; bg <= BG4; bg++) {
       if(!regs.mosaic_enabled[bg] || !regs.mosaic_countdown) {
@@ -52,8 +44,7 @@ void bPPU::scanline() {
     regs.mosaic_countdown--;
   }
 
-//TODO: line.y position needs to be verified
-  if(line.y == (r_cpu->overscan() ? 240 : 225) && regs.display_disabled == false) {
+  if(line.y == (!r_cpu->overscan() ? 225 : 240) && regs.display_disabled == false) {
   //OAM address reset
     regs.oam_addr = regs.oam_baseaddr << 1;
   }
@@ -72,9 +63,14 @@ void bPPU::scanline() {
 }
 
 void bPPU::render_scanline() {
+#ifdef FAVOR_SPEED
+//bypass RTO status flag calculations
   if(status.render_output == false)return;
+#endif
 
   if(line.y > 0 && line.y < (r_cpu->overscan() ? 240 : 225)) {
+    render_line_oam_rto();
+    if(status.render_output == false)return;
     render_line();
   }
 }

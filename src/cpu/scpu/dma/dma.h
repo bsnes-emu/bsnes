@@ -64,4 +64,5 @@ struct {
   void   hdma_run();
   void   hdma_init();
 
+  void   dma_power();
   void   dma_reset();

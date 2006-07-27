@@ -8,17 +8,17 @@ uint16 bPPU::get_vram_address() {
 uint16 addr;
   addr = regs.vram_addr;
   switch(regs.vram_mapping) {
-  case 0:break;
-  case 1:addr = (addr & 0xff00) | ((addr & 0x001f) << 3) | ((addr >> 5) & 7);break;
-  case 2:addr = (addr & 0xfe00) | ((addr & 0x003f) << 3) | ((addr >> 6) & 7);break;
-  case 3:addr = (addr & 0xfc00) | ((addr & 0x007f) << 3) | ((addr >> 7) & 7);break;
+  case 0: break;
+  case 1: addr = (addr & 0xff00) | ((addr & 0x001f) << 3) | ((addr >> 5) & 7); break;
+  case 2: addr = (addr & 0xfe00) | ((addr & 0x003f) << 3) | ((addr >> 6) & 7); break;
+  case 3: addr = (addr & 0xfc00) | ((addr & 0x007f) << 3) | ((addr >> 7) & 7); break;
   }
   return (addr << 1);
 }
 
-bool bPPU::vram_can_read() {
+uint8 bPPU::vram_mmio_read(uint16 addr) {
   if(regs.display_disabled == true) {
-    return true;
+    return vram_read(addr);
   }
 
 uint16 v  = r_cpu->vcounter();
@@ -26,39 +26,57 @@ uint16 hc = r_cpu->hcycles();
 uint16 ls = (r_cpu->region_scanlines() >> 1) - 1;
   if(r_cpu->interlace() && !r_cpu->interlace_field())ls++;
 
-  if(v == ls && hc == 1362)return false;
-
-  if(v < (!r_cpu->overscan() ? 224 : 239))return false;
-
-  if(v == (!r_cpu->overscan() ? 224 : 239)) {
-    if(hc == 1362)return true;
-    return false;
+  if(v == ls && hc == 1362) {
+    return 0x00;
   }
 
-  return true;
+  if(v < (!r_cpu->overscan() ? 224 : 239)) {
+    return 0x00;
+  }
+
+  if(v == (!r_cpu->overscan() ? 224 : 239)) {
+    if(hc == 1362) {
+      return vram_read(addr);
+    }
+    return 0x00;
+  }
+
+  return vram_read(addr);
 }
 
-bool bPPU::vram_can_write(uint8 &value) {
+void bPPU::vram_mmio_write(uint16 addr, uint8 data) {
   if(regs.display_disabled == true) {
-    return true;
+    vram_write(addr, data);
+    return;
   }
 
 uint16 v  = r_cpu->vcounter();
 uint16 hc = r_cpu->hcycles();
   if(v == 0) {
-    if(hc <= 4)return true;
-    if(hc == 6) { value = r_cpu->regs.mdr; return true; }
-    return false;
+    if(hc <= 4) {
+      vram_write(addr, data);
+      return;
+    }
+    if(hc == 6) {
+      vram_write(addr, r_cpu->regs.mdr);
+      return;
+    }
+    return;
   }
 
-  if(v < (r_cpu->overscan() ? 240 : 225))return false;
-
-  if(v == (r_cpu->overscan() ? 240 : 225)) {
-    if(hc <= 4)return false;
-    return true;
+  if(v < (!r_cpu->overscan() ? 225 : 240)) {
+    return;
   }
 
-  return true;
+  if(v == (!r_cpu->overscan() ? 225 : 240)) {
+    if(hc <= 4) {
+      return;
+    }
+    vram_write(addr, data);
+    return;
+  }
+
+  vram_write(addr, data);
 }
 
 //INIDISP
@@ -78,6 +96,12 @@ void bPPU::mmio_w2101(uint8 value) {
 void bPPU::mmio_w2102(uint8 value) {
   regs.oam_baseaddr = (regs.oam_baseaddr & 0x100) | value;
   regs.oam_addr     = regs.oam_baseaddr << 1;
+
+  if(regs.oam_priority == false) {
+    regs.oam_firstsprite = 0;
+  } else {
+    regs.oam_firstsprite = (regs.oam_addr >> 2) & 127;
+  }
 }
 
 //OAMADDH
@@ -85,24 +109,34 @@ void bPPU::mmio_w2103(uint8 value) {
   regs.oam_priority = bool(value & 0x80);
   regs.oam_baseaddr = ((value & 1) << 8) | (regs.oam_baseaddr & 0xff);
   regs.oam_addr     = regs.oam_baseaddr << 1;
+
+  if(regs.oam_priority == false) {
+    regs.oam_firstsprite = 0;
+  } else {
+    regs.oam_firstsprite = (regs.oam_addr >> 2) & 127;
+  }
 }
 
 //OAMDATA
 void bPPU::mmio_w2104(uint8 value) {
   if(regs.oam_addr >= 0x0200) {
-  //does this happen?
-  //if(!(regs.oam_addr & 1)) {
-  //  regs.oam_latchdata = value;
-  //}
     oam_write(regs.oam_addr, value);
   } else if(!(regs.oam_addr & 1)) {
     regs.oam_latchdata = value;
   } else {
-    oam_write((regs.oam_addr & 0x01fe),     regs.oam_latchdata);
+    oam_write((regs.oam_addr & 0x01fe) + 0, regs.oam_latchdata);
     oam_write((regs.oam_addr & 0x01fe) + 1, value);
   }
   regs.oam_addr++;
   regs.oam_addr &= 0x03ff;
+
+  if(!(regs.oam_addr & 1)) {
+    if(regs.oam_priority == false) {
+      regs.oam_firstsprite = 0;
+    } else {
+      regs.oam_firstsprite = (regs.oam_addr >> 2) & 127;
+    }
+  }
 }
 
 //BGMODE
@@ -220,10 +254,10 @@ void bPPU::mmio_w2115(uint8 value) {
   regs.vram_incmode = bool(value & 0x80);
   regs.vram_mapping = (value >> 2) & 3;
   switch(value & 3) {
-  case 0:regs.vram_incsize =   1;break;
-  case 1:regs.vram_incsize =  32;break;
-  case 2:regs.vram_incsize = 128;break;
-  case 3:regs.vram_incsize = 128;break;
+  case 0: regs.vram_incsize =   1; break;
+  case 1: regs.vram_incsize =  32; break;
+  case 2: regs.vram_incsize = 128; break;
+  case 3: regs.vram_incsize = 128; break;
   }
 }
 
@@ -231,35 +265,25 @@ void bPPU::mmio_w2115(uint8 value) {
 void bPPU::mmio_w2116(uint8 value) {
   regs.vram_addr = (regs.vram_addr & 0xff00) | value;
 uint16 addr = get_vram_address();
-  if(vram_can_read()) {
-    regs.vram_readbuffer  = vram_read(addr);
-    regs.vram_readbuffer |= vram_read(addr + 1) << 8;
-  } else {
-    regs.vram_readbuffer  = 0x0000;
-  }
+  regs.vram_readbuffer  = vram_mmio_read(addr + 0);
+  regs.vram_readbuffer |= vram_mmio_read(addr + 1) << 8;
 }
 
 //VMADDH
 void bPPU::mmio_w2117(uint8 value) {
   regs.vram_addr = (value << 8) | (regs.vram_addr & 0x00ff);
 uint16 addr = get_vram_address();
-  if(vram_can_read()) {
-    regs.vram_readbuffer  = vram_read(addr);
-    regs.vram_readbuffer |= vram_read(addr + 1) << 8;
-  } else {
-    regs.vram_readbuffer  = 0x0000;
-  }
+  regs.vram_readbuffer  = vram_mmio_read(addr + 0);
+  regs.vram_readbuffer |= vram_mmio_read(addr + 1) << 8;
 }
 
 //VMDATAL
 void bPPU::mmio_w2118(uint8 value) {
 uint16 addr = get_vram_address();
-  if(vram_can_write(value)) {
-    vram_write(addr, value);
-    bg_tiledata_state[TILE_2BIT][(addr >> 4)] = 1;
-    bg_tiledata_state[TILE_4BIT][(addr >> 5)] = 1;
-    bg_tiledata_state[TILE_8BIT][(addr >> 6)] = 1;
-  }
+  vram_mmio_write(addr, value);
+  bg_tiledata_state[TILE_2BIT][(addr >> 4)] = 1;
+  bg_tiledata_state[TILE_4BIT][(addr >> 5)] = 1;
+  bg_tiledata_state[TILE_8BIT][(addr >> 6)] = 1;
 
   if(regs.vram_incmode == 0) {
     regs.vram_addr += regs.vram_incsize;
@@ -269,12 +293,10 @@ uint16 addr = get_vram_address();
 //VMDATAH
 void bPPU::mmio_w2119(uint8 value) {
 uint16 addr = get_vram_address() + 1;
-  if(vram_can_write(value)) {
-    vram_write(addr, value);
-    bg_tiledata_state[TILE_2BIT][(addr >> 4)] = 1;
-    bg_tiledata_state[TILE_4BIT][(addr >> 5)] = 1;
-    bg_tiledata_state[TILE_8BIT][(addr >> 6)] = 1;
-  }
+  vram_mmio_write(addr, value);
+  bg_tiledata_state[TILE_2BIT][(addr >> 4)] = 1;
+  bg_tiledata_state[TILE_4BIT][(addr >> 5)] = 1;
+  bg_tiledata_state[TILE_8BIT][(addr >> 6)] = 1;
 
   if(regs.vram_incmode == 1) {
     regs.vram_addr += regs.vram_incsize;
@@ -529,14 +551,17 @@ uint8 bPPU::mmio_r2137() {
 //OAMDATAREAD
 uint8 bPPU::mmio_r2138() {
   regs.ppu1_mdr = oam_read(regs.oam_addr);
-//DMV27: OAM writes do not affect latch data
-//byuu: Even if they do, this should only affect the low table
-//byuu: Disable for now, see what happens... test on hardware
-//if(!(regs.oam_addr & 1)) {
-//  regs.oam_latchdata = regs.ppu1_mdr;
-//}
   regs.oam_addr++;
   regs.oam_addr &= 0x03ff;
+
+  if(!(regs.oam_addr & 1)) {
+    if(regs.oam_priority == false) {
+      regs.oam_firstsprite = 0;
+    } else {
+      regs.oam_firstsprite = (regs.oam_addr >> 2) & 127;
+    }
+  }
+
   return regs.ppu1_mdr;
 }
 
@@ -546,12 +571,8 @@ uint16 addr = get_vram_address();
   regs.ppu1_mdr = regs.vram_readbuffer;
   if(regs.vram_incmode == 0) {
     addr &= 0xfffe;
-    if(vram_can_read()) {
-      regs.vram_readbuffer  = vram_read(addr);
-      regs.vram_readbuffer |= vram_read(addr + 1) << 8;
-    } else {
-      regs.vram_readbuffer  = 0x0000;
-    }
+    regs.vram_readbuffer  = vram_mmio_read(addr + 0);
+    regs.vram_readbuffer |= vram_mmio_read(addr + 1) << 8;
     regs.vram_addr += regs.vram_incsize;
   }
   return regs.ppu1_mdr;
@@ -563,12 +584,8 @@ uint16 addr = get_vram_address() + 1;
   regs.ppu1_mdr = regs.vram_readbuffer >> 8;
   if(regs.vram_incmode == 1) {
     addr &= 0xfffe;
-    if(vram_can_read()) {
-      regs.vram_readbuffer  = vram_read(addr);
-      regs.vram_readbuffer |= vram_read(addr + 1) << 8;
-    } else {
-      regs.vram_readbuffer  = 0x0000;
-    }
+    regs.vram_readbuffer  = vram_mmio_read(addr + 0);
+    regs.vram_readbuffer |= vram_mmio_read(addr + 1) << 8;
     regs.vram_addr += regs.vram_incsize;
   }
   return regs.ppu1_mdr;

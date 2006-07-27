@@ -3,6 +3,7 @@
    status.interlace == false && status.interlace_field == 1)
 
 #include "irq.cpp"
+#include "joypad.cpp"
 
 uint16 sCPU::vcounter() { return status.vcounter; }
 uint16 sCPU::hcycles()  { return status.hclock;   }
@@ -33,6 +34,14 @@ uint16 sCPU::hcounter() {
 }
 
 void sCPU::add_clocks(uint clocks) {
+  if(status.irq_delay) {
+    if(status.irq_delay >= clocks) {
+      status.irq_delay -= clocks;
+    } else {
+      status.irq_delay  = 0;
+    }
+  }
+
   status.clocks_executed += clocks;
   poll_interrupts(clocks);
 
@@ -73,16 +82,8 @@ void sCPU::scanline() {
 
   update_interrupts();
 
-  if(status.vcounter == (!overscan() ? 227 : 242) && status.auto_joypad_poll == true) {
-    snes->poll_input(SNES::DEV_JOYPAD1);
-    snes->poll_input(SNES::DEV_JOYPAD2);
-  //When the SNES auto-polls the joypads, it writes 1, then 0 to
-  //$4016, then reads from each 16 times to get the joypad state
-  //information. As a result, the joypad read positions are set
-  //to 16 after such a poll. Position 16 is the controller
-  //connected status bit.
-    status.joypad1_read_pos = 16;
-    status.joypad2_read_pos = 16;
+  if(status.auto_joypad_poll == true && status.vcounter == (!overscan() ? 227 : 242)) {
+    run_auto_joypad_poll();
   }
 }
 
@@ -104,18 +105,11 @@ void sCPU::frame() {
 }
 
 /*****
- * opcode_edge()
+ * precycle_edge()
+ *
+ * Used for DMA/HDMA bus synchronization
  *****/
-void sCPU::opcode_edge() {
-#ifdef FAVOR_SPEED
-  co_return();
-#endif
-  if(status.line_rendered == false) {
-    if(status.hclock >= 128) {
-      status.line_rendered = true;
-      r_ppu->render_scanline();
-    }
-  }
+void sCPU::precycle_edge() {
 }
 
 /*****
@@ -124,6 +118,13 @@ void sCPU::opcode_edge() {
  * Used to test for HDMA, which can trigger on the edge of every opcode cycle.
  *****/
 void sCPU::cycle_edge() {
+  if(status.line_rendered == false) {
+    if(status.hclock >= 128) {
+      status.line_rendered = true;
+      r_ppu->render_scanline();
+    }
+  }
+
   if(status.hdmainit_triggered == false) {
     if(status.hclock >= 12 || status.vcounter) {
       status.hdmainit_triggered = true;
@@ -144,8 +145,13 @@ void sCPU::cycle_edge() {
  *
  * Used to test for NMI/IRQ, which can trigger on the edge of every opcode.
  * Test one cycle early to simulate two-stage pipeline of x816 CPU.
+ *
+ * status.irq_delay is used to simulate hardware delay before interrupts can
+ * trigger during certain events (immediately after DMA, writes to $4200, etc)
  *****/
 void sCPU::last_cycle() {
+  if(status.irq_delay)return;
+
   status.nmi_pending |= nmi_test();
   status.irq_pending |= irq_test();
 
@@ -162,6 +168,9 @@ uint32 sCPU::clocks_executed() {
 uint32 r = status.clocks_executed;
   status.clocks_executed = 0;
   return r;
+}
+
+void sCPU::timing_power() {
 }
 
 void sCPU::timing_reset() {
@@ -184,6 +193,8 @@ void sCPU::timing_reset() {
   status.dram_refreshed     = false;
   status.hdmainit_triggered = false;
   status.hdma_triggered     = false;
+
+  status.irq_delay = 0;
 
   status.nmi_read       = 1;
   status.nmi_line       = 1;

@@ -7,6 +7,8 @@ uint8 *page_handle[65536];
 uint8 (bMemBus::*page_read [65536])(uint32 addr);
 void  (bMemBus::*page_write[65536])(uint32 addr, uint8 data);
 
+#include "mapper/mapper.h"
+
 enum { LOROM = 0x20, HIROM = 0x21, EXLOROM = 0x22, EXHIROM = 0x25 };
 
 enum { TYPE_WRAM, TYPE_MMIO, TYPE_CART };

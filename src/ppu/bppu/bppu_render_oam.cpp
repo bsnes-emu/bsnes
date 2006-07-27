@@ -95,7 +95,8 @@ uint16 chry   = (spr->character >> 4) & 15;
 
   for(uint tx = 0; tx < tile_width; tx++) {
   uint sx = (x + (tx << 3)) & 511;
-    if(sx > 256 && (sx + 7) < 512)continue; //ignore sprites that are offscreen
+  //ignore sprites that are offscreen, x==256 is a special case that loads all tiles in OBJ
+    if(x != 256 && sx >= 256 && (sx + 7) < 512)continue;
 
     if(regs.oam_tilecount++ > 34)break;
   uint n = regs.oam_tilecount - 1;
@@ -136,7 +137,7 @@ uint8 *tile_ptr = (uint8*)oam_td + (t->tile << 6) + ((t->y & 7) << 3);
   }
 }
 
-void bPPU::render_line_oam(uint8 pri0_pos, uint8 pri1_pos, uint8 pri2_pos, uint8 pri3_pos) {
+void bPPU::render_line_oam_rto() {
   build_sprite_list();
 
   regs.oam_itemcount = 0;
@@ -158,14 +159,11 @@ void bPPU::render_line_oam(uint8 pri0_pos, uint8 pri1_pos, uint8 pri2_pos, uint8
     load_oam_tiles();
   }
 
-  for(int s = 0; s < 34; s++) {
-    if(oam_tilelist[s].tile == 0xffff)continue;
-    render_oam_tile(s);
-  }
-
   regs.time_over  |= (regs.oam_tilecount > 34);
   regs.range_over |= (regs.oam_itemcount > 32);
+}
 
+void bPPU::render_line_oam(uint8 pri0_pos, uint8 pri1_pos, uint8 pri2_pos, uint8 pri3_pos) {
   if(regs.bg_enabled[OAM] == false && regs.bgsub_enabled[OAM] == false)return;
 
 //are layers disabled by user?
@@ -175,6 +173,11 @@ void bPPU::render_line_oam(uint8 pri0_pos, uint8 pri1_pos, uint8 pri2_pos, uint8
   if(render_enabled(OAM, 3) == false)pri3_pos = 0;
 //nothing to render?
   if(!pri0_pos && !pri1_pos && !pri2_pos && !pri3_pos)return;
+
+  for(int s = 0; s < 34; s++) {
+    if(oam_tilelist[s].tile == 0xffff)continue;
+    render_oam_tile(s);
+  }
 
   render_line_oam_lores(pri0_pos, pri1_pos, pri2_pos, pri3_pos);
 }

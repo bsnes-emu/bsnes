@@ -1,3 +1,4 @@
+  void   mmio_power();
   void   mmio_reset();
   uint8  mmio_read (uint16 addr);
   void   mmio_write(uint16 addr, uint8 data);
@@ -19,6 +20,10 @@
   uint8  mmio_r4219();
   uint8  mmio_r421a();
   uint8  mmio_r421b();
+  uint8  mmio_r421c();
+  uint8  mmio_r421d();
+  uint8  mmio_r421e();
+  uint8  mmio_r421f();
   uint8  mmio_r43x0(uint8 i);
   uint8  mmio_r43x1(uint8 i);
   uint8  mmio_r43x2(uint8 i);

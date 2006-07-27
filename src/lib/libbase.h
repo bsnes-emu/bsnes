@@ -1,27 +1,31 @@
 /*
-  libbase : version 0.08 ~byuu (07/08/06)
+  libbase : version 0.08a ~byuu (07/14/06)
 */
 
 #ifndef __LIBBASE
 #define __LIBBASE
 
-#ifdef _MSC_VER
+#if defined(_MSC_VER)
 //disable libc deprecation warnings in MSVC 2k5+
-#pragma warning(disable:4996)
+  #pragma warning(disable:4996)
 #endif
 
 /*****
  * inline expansion
  *****/
 
-#ifdef _MSC_VER
+#if defined(_MSC_VER)
   #define noinline     __declspec(noinline)
   #define inline       inline
   #define forceinline  __forceinline
-#else
+  #define fastcall     __fastcall
+#elif defined(__GNUC__)
   #define noinline
   #define inline       inline
   #define forceinline  inline
+  #define fastcall     __attribute__((fastcall))
+#else
+  #error "unsupported compiler"
 #endif
 
 #include <stdio.h>
@@ -32,11 +36,11 @@
 #include <math.h>
 
 #ifndef FALSE
-#define FALSE 0
+  #define FALSE 0
 #endif
 
 #ifndef TRUE
-#define TRUE !FALSE
+  #define TRUE !FALSE
 #endif
 
 #define SafeFree(__n)    if(__n) { free(__n);      __n = 0; }
@@ -289,7 +293,7 @@ const uint32 crc32_table[256] = {
   0xb40bbe37, 0xc30c8ea1, 0x5a05df1b, 0x2d02ef8d
 };
 
-inline uint32 crc32_adjust(uint32 crc32, uint32 input) {
+inline uint32 crc32_adjust(uint32 crc32, uint8 input) {
   return ((crc32 >> 8) & 0x00ffffff) ^ crc32_table[(crc32 ^ input) & 0xff];
 }
 

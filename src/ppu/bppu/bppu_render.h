@@ -77,6 +77,7 @@ void build_sprite_list();
 bool is_sprite_on_scanline();
 void load_oam_tiles();
 void render_oam_tile(int tile_num);
+void render_line_oam_rto();
 void render_line_oam(uint8 pri0_pos, uint8 pri1_pos, uint8 pri2_pos, uint8 pri3_pos);
 void render_line_oam_lores(uint8 pri0_pos, uint8 pri1_pos, uint8 pri2_pos, uint8 pri3_pos);
 

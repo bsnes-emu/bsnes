@@ -18,7 +18,7 @@ case 0xeb: {
   regs.a.l ^= regs.a.h;
   regs.a.h ^= regs.a.l;
   regs.a.l ^= regs.a.h;
-  regs.p.n = !!(regs.a.l & 0x80);
+  regs.p.n = bool(regs.a.l & 0x80);
   regs.p.z = (regs.a.l == 0);
 } break;
 
@@ -30,8 +30,11 @@ case 0x54: {
   rd.l = op_readlong((sp << 16) | regs.x.w);
   op_writelong((dp << 16) | regs.y.w, rd.l);
   op_io();
-  if(regs.p.x) { regs.x.l++; regs.y.l++; }
-  else         { regs.x.w++; regs.y.w++; }
+  if(regs.idx_8b) {
+    regs.x.l ++; regs.y.l ++;
+  } else {
+    regs.x.w ++; regs.y.w ++;
+  }
   last_cycle();
   op_io();
   if(regs.a.w--)regs.pc.w -= 3;
@@ -45,8 +48,11 @@ case 0x44: {
   rd.l = op_readlong((sp << 16) | regs.x.w);
   op_writelong((dp << 16) | regs.y.w, rd.l);
   op_io();
-  if(regs.p.x) { regs.x.l--; regs.y.l--; }
-  else         { regs.x.w--; regs.y.w--; }
+  if(regs.idx_8b) {
+    regs.x.l --; regs.y.l --;
+  } else {
+    regs.x.w --; regs.y.w --;
+  }
   last_cycle();
   op_io();
   if(regs.a.w--)regs.pc.w -= 3;
@@ -114,11 +120,12 @@ case 0xfb: {
 bool c = regs.p.c;
   regs.p.c = regs.e;
   regs.e = c;
-  if(regs.e) {
-    regs.p  |= 0x30;
+  if(regs.e)regs.s.h = 0x01;
+  regs.acc_8b = (regs.e || regs.p.m);
+  regs.idx_8b = (regs.e || regs.p.x);
+  if(regs.idx_8b) {
     regs.x.h = 0x00;
     regs.y.h = 0x00;
-    regs.s.h = 0x01;
   }
 } break;
 
@@ -177,8 +184,9 @@ case 0xc2: {
   last_cycle();
   op_io();
   regs.p &=~ rd.l;
-  if(regs.e)regs.p |= 0x30;
-  if(regs.p.x) {
+  regs.acc_8b = (regs.e || regs.p.m);
+  regs.idx_8b = (regs.e || regs.p.x);
+  if(regs.idx_8b) {
     regs.x.h = 0x00;
     regs.y.h = 0x00;
   }
@@ -190,8 +198,9 @@ case 0xe2: {
   last_cycle();
   op_io();
   regs.p |= rd.l;
-  if(regs.e)regs.p |= 0x30;
-  if(regs.p.x) {
+  regs.acc_8b = (regs.e || regs.p.m);
+  regs.idx_8b = (regs.e || regs.p.x);
+  if(regs.idx_8b) {
     regs.x.h = 0x00;
     regs.y.h = 0x00;
   }
@@ -201,13 +210,13 @@ case 0xe2: {
 case 0xaa: {
   last_cycle();
   op_io();
-  if(regs.p.x) {
+  if(regs.idx_8b) {
     regs.x.l = regs.a.l;
-    regs.p.n = !!(regs.x.l & 0x80);
+    regs.p.n = bool(regs.x.l & 0x80);
     regs.p.z = (regs.x.l == 0);
   } else {
     regs.x.w = regs.a.w;
-    regs.p.n = !!(regs.x.w & 0x8000);
+    regs.p.n = bool(regs.x.w & 0x8000);
     regs.p.z = (regs.x.w == 0);
   }
 } break;
@@ -216,13 +225,13 @@ case 0xaa: {
 case 0xa8: {
   last_cycle();
   op_io();
-  if(regs.p.x) {
+  if(regs.idx_8b) {
     regs.y.l = regs.a.l;
-    regs.p.n = !!(regs.y.l & 0x80);
+    regs.p.n = bool(regs.y.l & 0x80);
     regs.p.z = (regs.y.l == 0);
   } else {
     regs.y.w = regs.a.w;
-    regs.p.n = !!(regs.y.w & 0x8000);
+    regs.p.n = bool(regs.y.w & 0x8000);
     regs.p.z = (regs.y.w == 0);
   }
 } break;
@@ -231,13 +240,13 @@ case 0xa8: {
 case 0x8a: {
   last_cycle();
   op_io();
-  if(regs.p.m) {
+  if(regs.acc_8b) {
     regs.a.l = regs.x.l;
-    regs.p.n = !!(regs.a.l & 0x80);
+    regs.p.n = bool(regs.a.l & 0x80);
     regs.p.z = (regs.a.l == 0);
   } else {
     regs.a.w = regs.x.w;
-    regs.p.n = !!(regs.a.w & 0x8000);
+    regs.p.n = bool(regs.a.w & 0x8000);
     regs.p.z = (regs.a.w == 0);
   }
 } break;
@@ -246,13 +255,13 @@ case 0x8a: {
 case 0x9b: {
   last_cycle();
   op_io();
-  if(regs.p.x) {
+  if(regs.idx_8b) {
     regs.y.l = regs.x.l;
-    regs.p.n = !!(regs.y.l & 0x80);
+    regs.p.n = bool(regs.y.l & 0x80);
     regs.p.z = (regs.y.l == 0);
   } else {
     regs.y.w = regs.x.w;
-    regs.p.n = !!(regs.y.w & 0x8000);
+    regs.p.n = bool(regs.y.w & 0x8000);
     regs.p.z = (regs.y.w == 0);
   }
 } break;
@@ -261,13 +270,13 @@ case 0x9b: {
 case 0x98: {
   last_cycle();
   op_io();
-  if(regs.p.m) {
+  if(regs.acc_8b) {
     regs.a.l = regs.y.l;
-    regs.p.n = !!(regs.a.l & 0x80);
+    regs.p.n = bool(regs.a.l & 0x80);
     regs.p.z = (regs.a.l == 0);
   } else {
     regs.a.w = regs.y.w;
-    regs.p.n = !!(regs.a.w & 0x8000);
+    regs.p.n = bool(regs.a.w & 0x8000);
     regs.p.z = (regs.a.w == 0);
   }
 } break;
@@ -276,13 +285,13 @@ case 0x98: {
 case 0xbb: {
   last_cycle();
   op_io();
-  if(regs.p.x) {
+  if(regs.idx_8b) {
     regs.x.l = regs.y.l;
-    regs.p.n = !!(regs.x.l & 0x80);
+    regs.p.n = bool(regs.x.l & 0x80);
     regs.p.z = (regs.x.l == 0);
   } else {
     regs.x.w = regs.y.w;
-    regs.p.n = !!(regs.x.w & 0x8000);
+    regs.p.n = bool(regs.x.w & 0x8000);
     regs.p.z = (regs.x.w == 0);
   }
 } break;
@@ -292,7 +301,7 @@ case 0x5b: {
   last_cycle();
   op_io();
   regs.d.w = regs.a.w;
-  regs.p.n = !!(regs.d.w & 0x8000);
+  regs.p.n = bool(regs.d.w & 0x8000);
   regs.p.z = (regs.d.w == 0);
 } break;
 
@@ -309,7 +318,7 @@ case 0x7b: {
   last_cycle();
   op_io();
   regs.a.w = regs.d.w;
-  regs.p.n = !!(regs.a.w & 0x8000);
+  regs.p.n = bool(regs.a.w & 0x8000);
   regs.p.z = (regs.a.w == 0);
 } break;
 
@@ -319,10 +328,10 @@ case 0x3b: {
   op_io();
   regs.a.w = regs.s.w;
   if(regs.e) {
-    regs.p.n = !!(regs.a.l & 0x80);
+    regs.p.n = bool(regs.a.l & 0x80);
     regs.p.z = (regs.a.l == 0);
   } else {
-    regs.p.n = !!(regs.a.w & 0x8000);
+    regs.p.n = bool(regs.a.w & 0x8000);
     regs.p.z = (regs.a.w == 0);
   }
 } break;
@@ -331,13 +340,13 @@ case 0x3b: {
 case 0xba: {
   last_cycle();
   op_io();
-  if(regs.p.x) {
+  if(regs.idx_8b) {
     regs.x.l = regs.s.l;
-    regs.p.n = !!(regs.x.l & 0x80);
+    regs.p.n = bool(regs.x.l & 0x80);
     regs.p.z = (regs.x.l == 0);
   } else {
     regs.x.w = regs.s.w;
-    regs.p.n = !!(regs.x.w & 0x8000);
+    regs.p.n = bool(regs.x.w & 0x8000);
     regs.p.z = (regs.x.w == 0);
   }
 } break;
@@ -356,7 +365,7 @@ case 0x9a: {
 //pha
 case 0x48: {
   op_io();
-  if(!regs.p.m)op_writestack(regs.a.h);
+  if(!regs.acc_8b)op_writestack(regs.a.h);
   last_cycle();
   op_writestack(regs.a.l);
 } break;
@@ -364,7 +373,7 @@ case 0x48: {
 //phx
 case 0xda: {
   op_io();
-  if(!regs.p.x)op_writestack(regs.x.h);
+  if(!regs.idx_8b)op_writestack(regs.x.h);
   last_cycle();
   op_writestack(regs.x.l);
 } break;
@@ -372,7 +381,7 @@ case 0xda: {
 //phy
 case 0x5a: {
   op_io();
-  if(!regs.p.x)op_writestack(regs.y.h);
+  if(!regs.idx_8b)op_writestack(regs.y.h);
   last_cycle();
   op_writestack(regs.y.l);
 } break;
@@ -380,9 +389,9 @@ case 0x5a: {
 //phd
 case 0x0b: {
   op_io();
-  if(!0)op_writestack(regs.       d.h);
+  if(!0)op_writestack(regs.          d.h);
   last_cycle();
-  op_writestack(regs.       d.l);
+  op_writestack(regs.          d.l);
 } break;
 
 //phb
@@ -410,16 +419,16 @@ case 0x08: {
 case 0x68: {
   op_io();
   op_io();
-  if(regs.p.m)last_cycle();
+  if(regs.acc_8b)last_cycle();
   regs.a.l = op_readstack();
-  if(regs.p.m) {
-    regs.p.n = !!(regs.a.l & 0x80);
+  if(regs.acc_8b) {
+    regs.p.n = bool(regs.a.l & 0x80);
     regs.p.z = (regs.a.l == 0);
     break;
   }
   last_cycle();
   regs.a.h = op_readstack();
-  regs.p.n = !!(regs.a.w & 0x8000);
+  regs.p.n = bool(regs.a.w & 0x8000);
   regs.p.z = (regs.a.w == 0);
 } break;
 
@@ -427,16 +436,16 @@ case 0x68: {
 case 0xfa: {
   op_io();
   op_io();
-  if(regs.p.x)last_cycle();
+  if(regs.idx_8b)last_cycle();
   regs.x.l = op_readstack();
-  if(regs.p.x) {
-    regs.p.n = !!(regs.x.l & 0x80);
+  if(regs.idx_8b) {
+    regs.p.n = bool(regs.x.l & 0x80);
     regs.p.z = (regs.x.l == 0);
     break;
   }
   last_cycle();
   regs.x.h = op_readstack();
-  regs.p.n = !!(regs.x.w & 0x8000);
+  regs.p.n = bool(regs.x.w & 0x8000);
   regs.p.z = (regs.x.w == 0);
 } break;
 
@@ -444,16 +453,16 @@ case 0xfa: {
 case 0x7a: {
   op_io();
   op_io();
-  if(regs.p.x)last_cycle();
+  if(regs.idx_8b)last_cycle();
   regs.y.l = op_readstack();
-  if(regs.p.x) {
-    regs.p.n = !!(regs.y.l & 0x80);
+  if(regs.idx_8b) {
+    regs.p.n = bool(regs.y.l & 0x80);
     regs.p.z = (regs.y.l == 0);
     break;
   }
   last_cycle();
   regs.y.h = op_readstack();
-  regs.p.n = !!(regs.y.w & 0x8000);
+  regs.p.n = bool(regs.y.w & 0x8000);
   regs.p.z = (regs.y.w == 0);
 } break;
 
@@ -462,16 +471,16 @@ case 0x2b: {
   op_io();
   op_io();
   if(0)last_cycle();
-  regs.       d.l = op_readstack();
+  regs.          d.l = op_readstack();
   if(0) {
-    regs.p.n = !!(regs.       d.l & 0x80);
-    regs.p.z = (regs.       d.l == 0);
+    regs.p.n = bool(regs.          d.l & 0x80);
+    regs.p.z = (regs.          d.l == 0);
     break;
   }
   last_cycle();
-  regs.       d.h = op_readstack();
-  regs.p.n = !!(regs.       d.w & 0x8000);
-  regs.p.z = (regs.       d.w == 0);
+  regs.          d.h = op_readstack();
+  regs.p.n = bool(regs.          d.w & 0x8000);
+  regs.p.z = (regs.          d.w == 0);
 } break;
 
 //plb
@@ -480,7 +489,7 @@ case 0xab: {
   op_io();
   last_cycle();
   regs.db = op_readstack();
-  regs.p.n = !!(regs.db & 0x80);
+  regs.p.n = bool(regs.db & 0x80);
   regs.p.z = (regs.db == 0);
 } break;
 
@@ -490,8 +499,9 @@ case 0x28: {
   op_io();
   last_cycle();
   regs.p = op_readstack();
-  if(regs.e)regs.p |= 0x30;
-  if(regs.p.x) {
+  regs.acc_8b = (regs.e || regs.p.m);
+  regs.idx_8b = (regs.e || regs.p.x);
+  if(regs.idx_8b) {
     regs.x.h = 0x00;
     regs.y.h = 0x00;
   }

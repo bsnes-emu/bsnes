@@ -150,8 +150,8 @@ struct {
   void   cgram_write(uint16 addr, uint8 value);
 
   uint16 get_vram_address();
-  bool   vram_can_read();
-  bool   vram_can_write(uint8 &value);
+  uint8  vram_mmio_read (uint16 addr);
+  void   vram_mmio_write(uint16 addr, uint8 data);
 
   void   mmio_w2100(uint8 value); //INIDISP
   void   mmio_w2101(uint8 value); //OBSEL

@@ -135,28 +135,4 @@ Setting Input::Joypad2::map(&config_file, "input.joypad2.map", "Joypad 2 button 
   "k | joy1.button4; j | joy1.button3; i | joy1.button1; u | joy1.button0; "
   "o | joy1.button6; l | joy1.button7; lbracket | joy1.button2; rbracket | joy1.button5");
 
-//
-
-struct Debugger {
-  static Setting console_lines;
-} debugger;
-Setting Debugger::console_lines(&config_file, "debugger.console_lines", "Number of lines buffered for debugger console",
-  100, Setting::DEC);
-
-struct Misc {
-  static Setting image_format;
-  static Setting window_style;
-  static Setting show_fps;
-  static Setting config_window_alpha_level;
-} misc;
-Setting Misc::image_format(&config_file, "misc.image_format", "Image format for screenshots\n"
-  "Valid formats: \"bmp\", \"png\", \"jpg\"", "png");
-Setting Misc::window_style(&config_file, "misc.window_style", "Window style for main emulation window",
-  "titlebar|frame|minimize|dragmove");
-Setting Misc::show_fps(&config_file, "misc.show_fps", "Show framerate", true, Setting::TRUE_FALSE);
-Setting Misc::config_window_alpha_level(&config_file, "misc.config_window_alpha_level",
-  "Alpha level (opacity) of configuration window\n"
-  "Value must be between 64 (25% opaque, 75% transparent) and 255 (100% opaque)",
-  255, Setting::DEC);
-
 };
