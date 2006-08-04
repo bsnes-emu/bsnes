@@ -45,7 +45,7 @@ SNES::VideoColorAdjust SNES::contrast(&config_file, "snes.colorfilter.contrast",
 SNES::VideoColorAdjust SNES::brightness(&config_file, "snes.colorfilter.brightness",
   "", 0, Setting::DEC);
 SNES::VideoColorAdjust SNES::gamma(&config_file, "snes.colorfilter.gamma",
-  "", 100, Setting::DEC);
+  "", 80, Setting::DEC);
 
 void SNES::VideoColorAdjust::set(uint32 _data) {
   Setting::set(_data);

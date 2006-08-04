@@ -36,8 +36,11 @@ struct {
   void    set_vertex(uint32 px, uint32 py, uint32 pw, uint32 ph,
             uint32 tw, uint32 th, uint32 x, uint32 y, uint32 w, uint32 h);
 
-  uint16 *lock(uint32 &pitch);
+  uint16 *lock(uint &pitch);
   void    unlock();
+
+  uint    screen_width()  { return GetScreenWidth();  }
+  uint    screen_height() { return GetScreenHeight(); }
 
   void    pause_enable();
   void    pause_disable();

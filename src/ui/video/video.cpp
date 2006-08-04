@@ -73,20 +73,20 @@ uint profile = uint(config::video.profile);
 
   load_video_settings(profile);
 VideoSettings *v = &video_settings[profile];
-  snes->set_video_format(v->software_filter, SNES::PIXELFORMAT_RGB565);
+  snes->set_video_format(v->software_filter, v->video_standard, SNES::PIXELFORMAT_RGB565);
 
   if(v->manual_render_size == true) {
     settings.render_width  = v->render_width;
     settings.render_height = v->render_height;
   } else {
     settings.render_width  = 256;
-    settings.render_height = (v->video_standard == 0) ? 224 : 239;
+    settings.render_height = (v->video_standard == SNES::VIDEOSTANDARD_NTSC) ? 224 : 239;
 
     settings.render_width  *= (v->multiplier + 1);
     settings.render_height *= (v->multiplier + 1);
 
     if(v->correct_aspect_ratio == true) {
-      settings.render_width = uint( double(settings.render_height) / 3.0 * 4.0 );
+      settings.render_width = (uint)( (double)settings.render_height / 3.0 * 4.0 );
     }
   }
 
@@ -94,9 +94,9 @@ VideoSettings *v = &video_settings[profile];
   settings.triple_buffering  = v->triple_buffering;
   settings.enable_scanlines  = v->enable_scanlines;
 
-  if(bool(config::video.fullscreen) == true) {
-    settings.resolution_width  = (v->resolution_width)  ? v->resolution_width  : GetScreenWidth();
-    settings.resolution_height = (v->resolution_height) ? v->resolution_height : GetScreenHeight();
+  if((bool)config::video.fullscreen == true) {
+    settings.resolution_width  = (v->resolution_width)  ? v->resolution_width  : screen_width();
+    settings.resolution_height = (v->resolution_height) ? v->resolution_height : screen_height();
     settings.refresh_rate      = v->refresh_rate;
   } else {
     settings.resolution_width  = settings.render_width;
@@ -104,28 +104,19 @@ VideoSettings *v = &video_settings[profile];
     settings.refresh_rate      = 0;
   }
 
-  settings.internal_height_normal   = 224;
-  settings.internal_height_overscan = (v->video_standard == 0) ? 224 : 239;
-
-  settings.rx = (settings.resolution_width  - settings.render_width)  >> 1;
-  settings.ry = (settings.resolution_height - settings.render_height) >> 1;
-  settings.rw = (settings.render_width);
-  settings.rh = (settings.render_height);
-}
-
-void Video::update_window() {
-string t;
-  if(bool(config::video.fullscreen) == true) {
-    strcpy(t, "topmost|popup");
-    if(wMain.Visible())strcat(t, "|visible");
-    wMain.HideMenu();
-    HideCursor();
+  if(settings.render_width  <= settings.resolution_width) {
+    settings.rx = (settings.resolution_width  - settings.render_width)  >> 1;
+    settings.rw = settings.render_width;
   } else {
-    strcpy(t, config::misc.window_style.sget());
-    if(wMain.Visible())strcat(t, "|visible");
-    wMain.ShowMenu();
-    ShowCursor();
+    settings.rx = 0;
+    settings.rw = settings.resolution_width;
   }
-  wMain.SetStyle(strptr(t));
-  wMain.Resize(settings.resolution_width, settings.resolution_height, true);
+
+  if(settings.render_height <= settings.resolution_height) {
+    settings.ry = (settings.resolution_height - settings.render_height) >> 1;
+    settings.rh = settings.render_height;
+  } else {
+    settings.ry = 0;
+    settings.rh = settings.resolution_height;
+  }
 }

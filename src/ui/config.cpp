@@ -107,9 +107,9 @@ Setting Input::Joypad1::start (0, "input.joypad1.start",  "", 0, Setting::HEX);
 
 Setting Input::Joypad1::map(&config_file, "input.joypad1.map", "Joypad 1 button map\n"
   "Format: Up; Down; Left; Right; A; B; X; Y; L; R; Select; Start",
-  "up | joy0.up; down | joy0.down; left | joy0.left; right | joy0.right; "
-  "x | joy0.button4; z | joy0.button3; s | joy0.button1; a | joy0.button0; "
-  "d | joy0.button6; c | joy0.button7; rshift | joy0.button2; enter | joy0.button5");
+  "up | joypad0.up; "       "down | joypad0.down; "       "left | joypad0.left; "     "right | joypad0.right; "
+   "x | joypad0.button3; "     "z | joypad0.button2; "       "s | joypad0.button1; "      "a | joypad0.button0; "
+   "d | joypad0.button6; "     "c | joypad0.button7; "  "rshift | joypad0.button4; "  "enter | joypad0.button5");
 
 //
 
@@ -131,8 +131,8 @@ Setting Input::Joypad2::start (0, "input.joypad2.start",  "", 0, Setting::HEX);
 
 Setting Input::Joypad2::map(&config_file, "input.joypad2.map", "Joypad 2 button map\n"
   "Format: Up; Down; Left; Right; A; B; X; Y; L; R; Select; Start",
-  "t | joy1.up; g | joy1.down; f | joy1.left; h | joy1.right; "
-  "k | joy1.button4; j | joy1.button3; i | joy1.button1; u | joy1.button0; "
-  "o | joy1.button6; l | joy1.button7; lbracket | joy1.button2; rbracket | joy1.button5");
+  "t | joypad1.up; "       "g | joypad1.down; "            "f | joypad1.left; "            "h | joypad1.right; "
+  "k | joypad1.button3; "  "j | joypad1.button2; "         "i | joypad1.button1; "         "u | joypad1.button0; "
+  "o | joypad1.button6; "  "l | joypad1.button7; "  "lbracket | joypad1.button4; "  "rbracket | joypad1.button5");
 
 };

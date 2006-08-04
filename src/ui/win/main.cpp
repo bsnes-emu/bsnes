@@ -3,15 +3,12 @@
 
 #include "config.cpp"
 
+#include "bsnes.h"
+
 #include "event.h"
 #include "ui.h"
 
-#include "../video/video.h"
-#include "../audio/audio.h"
-#include "../input/input.h"
-
-#include "../video/video.cpp"
-#include "../input/input.cpp"
+#include "bsnes.cpp"
 
 #include "../video/d3d.h"
 #include "../video/ddraw.h"

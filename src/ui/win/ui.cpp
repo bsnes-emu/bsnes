@@ -1,3 +1,4 @@
+#include "ui_input.cpp"
 #include "ui_main.cpp"
 #include "ui_about.cpp"
 #include "settings/settings.cpp"

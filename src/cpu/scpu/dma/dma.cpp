@@ -233,9 +233,6 @@ void sCPU::hdma_init() {
 
 void sCPU::dma_power() {
   for(int i = 0; i < 8; i++) {
-    channel[i].dma_enabled       = false;
-    channel[i].hdma_enabled      = false;
-
     channel[i].dmap              = 0xff;
     channel[i].direction         = 1;
     channel[i].hdma_indirect     = true;
@@ -260,6 +257,9 @@ void sCPU::dma_power() {
 
 void sCPU::dma_reset() {
   for(int i = 0; i < 8; i++) {
+    channel[i].dma_enabled       = false;
+    channel[i].hdma_enabled      = false;
+
     channel[i].hdma_completed    = false;
     channel[i].hdma_do_transfer  = false;
   }

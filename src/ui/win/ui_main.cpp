@@ -1,7 +1,5 @@
 void CALLBACK wMainInputTimerProc(HWND hwnd, UINT msg, UINT event, DWORD time) {
-  if(!uiInput)return;
-
-  uiInput->ui_poll_input(&wMain);
+  if(uiInput) { ui_poll_input(&wMain); }
 }
 
 void MainWindow::SetFrameskip(uint fs) {
@@ -42,11 +40,11 @@ void MainWindow::SetRegulationSpeed(uint speed) {
 bool MainWindow::Event(EventInfo &info) {
   switch(info.event_id) {
 
-  case Input::EVENT_INPUTKEYDOWN: {
-  Input::Keymap *keymap = &uiInput->keymap;
-  uint key  = info.control_id;
-  bool ctrl = uiInput->keydown(keymap->lctrl) || uiInput->keydown(keymap->rctrl);
-    if(key == keymap->esc) {
+  case EVENT_INPUTKEYDOWN: {
+  keymap *key = &uiInput->key;
+  uint id   = info.control_id;
+  bool ctrl = uiInput->keydown(key->lctrl) || uiInput->keydown(key->rctrl);
+    if(id == key->esc) {
       if(bool(config::video.fullscreen) == false) {
         ShowMenu(!MenuVisible());
         Center();
@@ -54,37 +52,37 @@ bool MainWindow::Event(EventInfo &info) {
         config::video.fullscreen = false;
         event::set_video_profile(config::video.profile);
       }
-    } else if(key == keymap->f11) {
+    } else if(id == key->f11) {
       event::toggle_fullscreen();
-    } else if(key == keymap->f12) {
+    } else if(id == key->f12) {
       if(bsnes->get_state() == bSNES::RUN) {
         bsnes->set_state(bSNES::STOP);
       } else if(bsnes->get_state() == bSNES::STOP) {
         bsnes->set_state(bSNES::RUN);
       }
-    } else if(key == keymap->num_1 && ctrl) {
+    } else if(id == key->num_1 && ctrl) {
       event::set_video_profile(0);
-    } else if(key == keymap->num_2 && ctrl) {
+    } else if(id == key->num_2 && ctrl) {
       event::set_video_profile(1);
-    } else if(key == keymap->num_3 && ctrl) {
+    } else if(id == key->num_3 && ctrl) {
       event::set_video_profile(2);
-    } else if(key == keymap->num_4 && ctrl) {
+    } else if(id == key->num_4 && ctrl) {
       event::set_video_profile(3);
-    } else if(key == keymap->num_5 && ctrl) {
+    } else if(id == key->num_5 && ctrl) {
       event::set_video_profile(4);
-    } else if(key == keymap->num_6 && ctrl) {
+    } else if(id == key->num_6 && ctrl) {
       event::set_video_profile(5);
-    } else if(key == keymap->num_7 && ctrl) {
+    } else if(id == key->num_7 && ctrl) {
       event::set_video_profile(6);
-    } else if(key == keymap->num_8 && ctrl) {
+    } else if(id == key->num_8 && ctrl) {
       event::set_video_profile(7);
-    } else if((key == keymap->minus && !ctrl) || key == keymap->numpad_minus) {
+    } else if((id == key->minus && !ctrl) || id == key->numpad_minus) {
       if(frameskip > 0)SetFrameskip(frameskip - 1);
-    } else if((key == keymap->plus && !ctrl) || key == keymap->numpad_plus) {
+    } else if((id == key->plus && !ctrl) || id == key->numpad_plus) {
       if(frameskip < 9)SetFrameskip(frameskip + 1);
-    } else if(key == keymap->minus && ctrl) {
+    } else if(id == key->minus && ctrl) {
       if(regulation_speed > 0)SetRegulationSpeed(regulation_speed - 1);
-    } else if(key == keymap->plus && ctrl) {
+    } else if(id == key->plus && ctrl) {
       if(regulation_speed < 4)SetRegulationSpeed(regulation_speed + 1);
     }
   } break;

@@ -15,7 +15,7 @@ uint32 state;
   void    sound_run(uint32 data);
 
 //video functions
-  uint16 *video_lock(uint32 &pitch);
+  uint16 *video_lock(uint &pitch);
   void    video_unlock();
 
 //input functions
@@ -26,6 +26,4 @@ uint32 state;
   void    notify(uint32 message, uint32 param1 = 0, uint32 param2 = 0);
 
   bSNES() { state = RUN; }
-};
-
-bSNES *bsnes;
+} *bsnes;

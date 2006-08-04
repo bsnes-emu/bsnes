@@ -51,8 +51,7 @@ uint8 sCPU::mmio_r4016() {
 uint8 r = regs.mdr & 0xfc;
   r |= status.joypad1_bits & 1;
   if(status.joypad_strobe_latch == 0) {
-    status.joypad1_bits >>= 1;
-    status.joypad1_bits  |= ~0xffff;
+    status.joypad1_bits = asr<1>(status.joypad1_bits);
   }
 
   return r;
@@ -66,8 +65,7 @@ uint8 sCPU::mmio_r4017() {
 uint8 r = (regs.mdr & 0xe0) | 0x1c;
   r |= status.joypad2_bits & 1;
   if(status.joypad_strobe_latch == 0) {
-    status.joypad2_bits >>= 1;
-    status.joypad2_bits  |= ~0xffff;
+    status.joypad2_bits = asr<1>(status.joypad2_bits);
   }
 
   return r;

@@ -4,7 +4,7 @@ CXX = cl
 AS = nasm
 RM = del
 OBJ = obj
-CFLAGS = /nologo /O2 /arch:SSE2 /DPLATFORM_WIN /DCOMPILER_VISUALC /DPROCESSOR_X86
+CFLAGS = /nologo /O2 /MD /arch:SSE2 /DPLATFORM_WIN /DCOMPILER_VISUALC /DPROCESSOR_X86
 COMPILE = $(CC) $(CFLAGS) /c
 ASSEMBLE = $(AS) -f win32
 LINK =
@@ -18,7 +18,7 @@ CXX = cl
 AS = nasm
 RM = del
 OBJ = obj
-CFLAGS = /nologo /O2 /GL /DPLATFORM_WIN /DCOMPILER_VISUALC /DPROCESSOR_X86
+CFLAGS = /nologo /O2 /MD /GL /DPLATFORM_WIN /DCOMPILER_VISUALC /DPROCESSOR_X86
 COMPILE = $(CC) $(CFLAGS) /c
 ASSEMBLE = $(AS) -f win32
 LINK = /link /LTCG
@@ -32,7 +32,7 @@ CXX = cl
 AS = nasm
 RM = del
 OBJ = obj
-CFLAGS = /nologo /O2 /GL /DPLATFORM_WIN /DCOMPILER_VISUALC /DPROCESSOR_X86
+CFLAGS = /nologo /O2 /MD /GL /DPLATFORM_WIN /DCOMPILER_VISUALC /DPROCESSOR_X86
 COMPILE = $(CC) $(CFLAGS) /c
 ASSEMBLE = $(AS) -f win32
 LINK = /link /PGD:bsnes.pgd /LTCG:PGINSTRUMENT
@@ -46,12 +46,26 @@ CXX = cl
 AS = nasm
 RM = del
 OBJ = obj
-CFLAGS = /nologo /O2 /arch:SSE2 /DPLATFORM_WIN /DCOMPILER_VISUALC /DPROCESSOR_X86
+CFLAGS = /nologo /O2 /MD /arch:SSE2 /DPLATFORM_WIN /DCOMPILER_VISUALC /DPROCESSOR_X86
 COMPILE = $(CC) $(CFLAGS) /c
 ASSEMBLE = $(AS) -f win32
 LINK = /link /PGD:bsnes.pgd /LTCG:PGOPTIMIZE
 LIBS =  kernel32.lib user32.lib gdi32.lib winmm.lib comdlg32.lib comctl32.lib \
 	d3d9.lib d3dx9.lib ddraw.lib dsound.lib dinput8.lib dxguid.lib
+endif
+
+ifeq ($(PLATFORM),win-visualc-sdl)
+CC = cl
+CXX = cl
+AS = nasm
+RM = del
+OBJ = obj
+CFLAGS = /nologo /O2 /MD /DPLATFORM_SDL /DCOMPILER_VISUALC /DPROCESSOR_X86
+COMPILE = $(CC) $(CFLAGS) /c
+ASSEMBLE = $(AS) -f win32
+LINK =
+LIBS =	kernel32.lib user32.lib gdi32.lib winmm.lib comdlg32.lib comctl32.lib \
+	sdlmain.lib sdl.lib
 endif
 
 OBJS =  main.$(OBJ) \
@@ -71,6 +85,7 @@ OBJS =  main.$(OBJ) \
 all: $(OBJS)
 	rc /r /fobsnes.res bsnes.rc
 	$(CC) /Febsnes.exe $(CFLAGS) $(OBJS) bsnes.res $(LIBS) $(LINK)
+	mt -nologo -manifest bsnes.exe.manifest -outputresource:bsnes.exe;1
 
 clean:
 	$(RM) *.$(OBJ)
@@ -79,6 +94,7 @@ clean:
 	$(RM) *.pgc
 	$(RM) *.ilk
 	$(RM) *.pdb
+	$(RM) *.manifest
 
 #########################
 ### platform-specific ###
@@ -91,6 +107,7 @@ main.$(OBJ): *.cpp *.h video/* audio/* input/* ../config/* win/* win/settings/* 
 #################
 libco.$(OBJ): ../lib/*
 	$(ASSEMBLE) -o libco.$(OBJ) ../lib/libco_x86.asm
+#	$(COMPILE) /Folibco.obj ../lib/libco_win32.cpp
 
 libstring.$(OBJ): ../lib/*.cpp ../lib/*.h
 	$(COMPILE) ../lib/libstring.cpp

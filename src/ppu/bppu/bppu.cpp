@@ -18,7 +18,7 @@ void bPPU::scanline() {
 
   if(line.y == 1) {
   //mosaic reset
-    for(int32 bg = BG1; bg <= BG4; bg++) {
+    for(int bg = BG1; bg <= BG4; bg++) {
       regs.bg_y[bg] = 1;
     }
 
@@ -32,7 +32,7 @@ void bPPU::scanline() {
       regs.oam_firstsprite = (regs.oam_addr >> 2) & 127;
     }
   } else {
-    for(int32 bg = BG1; bg <= BG4; bg++) {
+    for(int bg = BG1; bg <= BG4; bg++) {
       if(!regs.mosaic_enabled[bg] || !regs.mosaic_countdown) {
         regs.bg_y[bg] = line.y;
       }
@@ -88,25 +88,6 @@ void bPPU::power() {
 
   region = snes->region();
 
-  reset();
-}
-
-void bPPU::reset() {
-  PPU::reset();
-  frame();
-
-  memset(sprite_list, 0, sizeof(sprite_list));
-
-//open bus support
-  regs.ppu1_mdr = 0xff;
-  regs.ppu2_mdr = 0xff;
-
-//bg line counters
-  regs.bg_y[0] = 0;
-  regs.bg_y[1] = 0;
-  regs.bg_y[2] = 0;
-  regs.bg_y[3] = 0;
-
 //$2100
   regs.display_disabled   = 0;
   regs.display_brightness = 0;
@@ -135,12 +116,12 @@ void bPPU::reset() {
   regs.hires            = false;
 
 //$2106
-  regs.mosaic_size          = 0;
-  regs.mosaic_enabled[BG1]  = false;
-  regs.mosaic_enabled[BG2]  = false;
-  regs.mosaic_enabled[BG3]  = false;
-  regs.mosaic_enabled[BG4]  = false;
-  regs.mosaic_countdown     = 0;
+  regs.mosaic_size         = 0;
+  regs.mosaic_enabled[BG1] = false;
+  regs.mosaic_enabled[BG2] = false;
+  regs.mosaic_enabled[BG3] = false;
+  regs.mosaic_enabled[BG4] = false;
+  regs.mosaic_countdown    = 0;
 
 //$2107-$210a
   regs.bg_scaddr[BG1] = 0x0000;
@@ -159,7 +140,7 @@ void bPPU::reset() {
   regs.bg_tdaddr[BG4] = 0x0000;
 
 //$210d-$2114
-  regs.bg_ofslatch  = 0x00;
+  regs.bg_ofslatch = 0x00;
   regs.m7_hofs = regs.m7_vofs = 0x0000;
   regs.bg_hofs[BG1] = regs.bg_vofs[BG1] = 0x0000;
   regs.bg_hofs[BG2] = regs.bg_vofs[BG2] = 0x0000;
@@ -304,7 +285,26 @@ void bPPU::reset() {
   regs.time_over  = false;
   regs.range_over = false;
 
-  line.width = 256; //needed for clear_window_cache()
+  reset();
+}
+
+void bPPU::reset() {
+  PPU::reset();
+  frame();
+
+  memset(sprite_list, 0, sizeof(sprite_list));
+
+//open bus support
+  regs.ppu1_mdr = 0xff;
+  regs.ppu2_mdr = 0xff;
+
+//bg line counters
+  regs.bg_y[0] = 0;
+  regs.bg_y[1] = 0;
+  regs.bg_y[2] = 0;
+  regs.bg_y[3] = 0;
+
+  line.width = 256;
   clear_tiledata_cache();
 }
 
@@ -376,21 +376,21 @@ bPPU::bPPU() {
 
   init_tiledata_cache();
 
-  for(int32 l = 0; l < 16; l++) {
+  for(int l = 0; l < 16; l++) {
     mosaic_table[l] = (uint16*)malloc(4096 * 2);
-    for(int32 i = 0; i < 4096; i++) {
+    for(int i = 0; i < 4096; i++) {
       mosaic_table[l][i] = (i / (l + 1)) * (l + 1);
     }
   }
 
   light_table = (uint16*)malloc(16 * 32768 * 2);
 uint16 *ptr = (uint16*)light_table;
-  for(int32 l = 0; l < 16; l++) {
-  int32  r, g, b;
+  for(int l = 0; l < 16; l++) {
+  int r, g, b;
   #if 0
   double y, cb, cr;
   double kr = 0.2126, kb = 0.0722, kg = (1.0 - kr - kb);
-    for(int32 i = 0; i < 32768; i++) {
+    for(int i = 0; i < 32768; i++) {
       if(l ==  0) { *ptr++ = 0; continue; }
       if(l == 15) { *ptr++ = i; continue; }
 
@@ -398,27 +398,27 @@ uint16 *ptr = (uint16*)light_table;
       g = (i >>  5) & 31;
       b = (i >> 10) & 31;
 
-      y  = double(r) * kr + double(g) * kg + double(b) * kb;
-      cb = (double(b) - y) / (2.0 - 2.0 * kb);
-      cr = (double(r) - y) / (2.0 - 2.0 * kr);
+      y  = (double)r * kr + (double)g * kg + (double)b * kb;
+      cb = ((double)b - y) / (2.0 - 2.0 * kb);
+      cr = ((double)r - y) / (2.0 - 2.0 * kr);
 
-      y  *= double(l) / 15.0;
-      cb *= double(l) / 15.0;
-      cr *= double(l) / 15.0;
+      y  *= (double)l / 15.0;
+      cb *= (double)l / 15.0;
+      cr *= (double)l / 15.0;
 
       r = y + cr * (2.0 - 2.0 * kr);
       b = y + cb * (2.0 - 2.0 * kb);
       g = (y - b * kb - r * kr) / kg;
 
-      r = (r > 31) ? 31 : ((r < 0) ? 0 : r);
-      g = (g > 31) ? 31 : ((g < 0) ? 0 : g);
-      b = (b > 31) ? 31 : ((b < 0) ? 0 : b);
+      r = minmax<0, 31>(r);
+      g = minmax<0, 31>(g);
+      b = minmax<0, 31>(b);
 
       *ptr++ = (r) | (g << 5) | (b << 10);
     }
   #else
-  double m = double(l) / 15.0;
-    for(int32 i = 0; i < 32768; i++) {
+  double m = (double)l / 15.0;
+    for(int i = 0; i < 32768; i++) {
       if(l ==  0) { *ptr++ = 0; continue; }
       if(l == 15) { *ptr++ = i; continue; }
 
@@ -426,9 +426,9 @@ uint16 *ptr = (uint16*)light_table;
       g = (i >>  5) & 31;
       b = (i >> 10) & 31;
 
-      r = (int32)(double(r) * m);
-      g = (int32)(double(g) * m);
-      b = (int32)(double(b) * m);
+      r = minmax<0, 31>((int)((double)r * m));
+      g = minmax<0, 31>((int)((double)g * m));
+      b = minmax<0, 31>((int)((double)b * m));
 
       *ptr++ = (r) | (g << 5) | (b << 10);
     }

@@ -1,5 +1,10 @@
 #define KeyDown(__key) ((GetAsyncKeyState(__key) & 0x8000) ? 1 : 0)
 
+enum {
+  EVENT_INPUTKEYDOWN = EVENT_USER + 0,
+  EVENT_INPUTKEYUP   = EVENT_USER + 1,
+};
+
 namespace global {
 Font vwf, fwf, font_about, font_header, font_list;
 };

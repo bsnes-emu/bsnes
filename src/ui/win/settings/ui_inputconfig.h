@@ -8,11 +8,13 @@ Combobox Selected;
 Label    Separator;
 Label    Message;
 Listview ButtonList;
-Button   ButtonUpdate;
+Button   ButtonUpdatePrimary;
+Button   ButtonUpdateSecondary;
 Button   ButtonClear;
 Checkbox AllowBadInput;
 
 struct {
+  bool primary;
   bool active;
   uint controller;
   uint button;

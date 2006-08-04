@@ -45,7 +45,7 @@ void bMemBus::load_cart() {
   cart_map_system();
 
 uint region = read(0xffd9) & 0x7f;
-  cartridge.info.region = (region == 0 || region == 1 || region == 13) ? Cartridge::NTSC : Cartridge::PAL;
+  cartridge.info.region = (region <= 1 || region >= 13) ? Cartridge::NTSC : Cartridge::PAL;
   if(cartridge.info.region == Cartridge::NTSC) {
     snes->set_region(SNES::NTSC);
   } else {

@@ -5,7 +5,6 @@ HRESULT hr;
   term();
 
   update_video_settings();
-  update_window();
 
   lpd3d = Direct3DCreate9(D3D_SDK_VERSION);
   if(!lpd3d) {
@@ -117,7 +116,6 @@ HRESULT hr;
     static_cast<D3DPOOL>(flags.v_pool), &vertex_buffer, NULL);
 
   clear_video();
-  update_window();
   return true;
 }
 
@@ -170,7 +168,7 @@ D3DLOCKED_RECT     d3dlr;
   }
 }
 
-uint16 *VideoD3D::lock(uint32 &pitch) {
+uint16 *VideoD3D::lock(uint &pitch) {
   if(caps.stretchrect == false) {
     texture->GetLevelDesc(0, &d3dsd);
     texture->GetSurfaceLevel(0, &surface);

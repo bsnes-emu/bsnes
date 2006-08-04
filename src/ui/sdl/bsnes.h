@@ -17,7 +17,7 @@ enum { STOP = 0, RUN };
   void    video_run();
   void    sound_run(uint32 data);
 
-  uint16 *video_lock(uint32 &data);
+  uint16 *video_lock(uint &data);
   void    video_unlock();
 
   void    set_status(uint32 new_status);
@@ -29,6 +29,4 @@ enum { STOP = 0, RUN };
 
   void    notify(uint32 message, uint32 param1 = 0, uint32 param2 = 0);
   bSNES();
-};
-
-bSNES *bsnes;
+} *bsnes;

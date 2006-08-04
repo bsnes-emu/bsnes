@@ -1,13 +1,17 @@
 /*
-  libkeymap : version 0.01 ~byuu (07/14/06)
+  libkeymap : version 0.02 ~byuu (07/30/06)
 */
 
 #ifndef __LIBKEYMAP
 #define __LIBKEYMAP
 
 class keymap {
+private:
+char tmp[32];
+
 public:
 
+uint null;
 uint esc;
 uint f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12;
 uint print_screen, scroll_lock, pause;
@@ -30,8 +34,14 @@ uint tab, enter, space;
 uint lctrl, rctrl, lalt, ralt, lshift, rshift;
 uint lwin, rwin, menu;
 
+struct {
+  uint up, down, left, right;
+  uint button[128];
+} joypad[16];
+
   uint find(const char *key) {
   #define match(n) if(!strcmp(#n, key))return n;
+    match(null)
     match(esc)
     match(f1) match(f2) match(f3) match(f4) match(f5) match(f6)
     match(f7) match(f8) match(f9) match(f10) match(f11) match(f12)
@@ -62,10 +72,32 @@ uint lwin, rwin, menu;
     match(ralt) match(lshift) match(rshift)
     match(lwin) match(rwin) match(menu)
   #undef match
+
+    if(!memcmp(key, "joypad", 6)) {
+    const char *p = key + 6;
+    int joy, bn, n;
+      sscanf(p, "%d%n", &joy, &n);
+      p += n;
+      if(*p == '.') {
+        p++;
+        if(!strcmp(p, "up"))    { return joypad[joy].up;    }
+        if(!strcmp(p, "down"))  { return joypad[joy].down;  }
+        if(!strcmp(p, "left"))  { return joypad[joy].left;  }
+        if(!strcmp(p, "right")) { return joypad[joy].right; }
+        if(!memcmp(p, "button", 6)) {
+          p += 6;
+          sscanf(p, "%d", &bn);
+          return joypad[joy].button[bn];
+        }
+      }
+    }
+
+    return 0;
   }
 
   const char *find(uint key) {
   #define match(n) if(n == key)return #n;
+    match(null)
     match(esc)
     match(f1) match(f2) match(f3) match(f4) match(f5) match(f6)
     match(f7) match(f8) match(f9) match(f10) match(f11) match(f12)
@@ -96,9 +128,22 @@ uint lwin, rwin, menu;
     match(ralt) match(lshift) match(rshift)
     match(lwin) match(rwin) match(menu)
   #undef match
+
+    for(int joy = 0; joy < 16; joy++) {
+      if(joypad[joy].up    == key) { sprintf(tmp, "joypad%d.up",    joy); return tmp; }
+      if(joypad[joy].down  == key) { sprintf(tmp, "joypad%d.down",  joy); return tmp; }
+      if(joypad[joy].left  == key) { sprintf(tmp, "joypad%d.left",  joy); return tmp; }
+      if(joypad[joy].right == key) { sprintf(tmp, "joypad%d.right", joy); return tmp; }
+      for(int bn = 0; bn < 128; bn++) {
+        if(joypad[joy].button[bn] == key) { sprintf(tmp, "joypad%d.button%d", joy, bn); return tmp; }
+      }
+    }
+
+    return "null";
   }
 
   keymap() {
+    null = 0;
     esc = 0;
     f1 = f2 = f3 = f4 = f5 = f6 = 0;
     f7 = f8 = f9 = f10 = f11 = f12 = 0;
@@ -122,6 +167,14 @@ uint lwin, rwin, menu;
     tab = enter = space = 0;
     lctrl = rctrl = lalt = ralt = lshift = rshift = 0;
     lwin = rwin = menu = 0;
+
+    for(int joy = 0; joy < 16; joy++) {
+      joypad[joy].up    = 0;
+      joypad[joy].down  = 0;
+      joypad[joy].left  = 0;
+      joypad[joy].right = 0;
+      memset(joypad[joy].button, 0, sizeof(joypad[joy].button));
+    }
   }
 
 };

@@ -84,7 +84,7 @@ void bSNES::sound_run(uint32 data) {
  *** video functions ***
  ***********************/
 
-uint16 *bSNES::video_lock(uint32 &pitch) {
+uint16 *bSNES::video_lock(uint &pitch) {
   return uiVideo->lock(pitch);
 }
 

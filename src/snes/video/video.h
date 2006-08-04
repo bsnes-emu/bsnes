@@ -1,4 +1,9 @@
 enum {
+  VIDEOSTANDARD_NTSC,
+  VIDEOSTANDARD_PAL,
+};
+
+enum {
   PIXELFORMAT_RGB444,
   PIXELFORMAT_RGB555,
   PIXELFORMAT_RGB565,
@@ -17,23 +22,23 @@ uint32 color_lookup_table[32768];
 
 struct {
   uint16 *data, *raster_data, *ppu_data;
-  uint32  raster_width, raster_height;
-  uint32  width, height;
-  uint32  filter, pixel_format;
-  uint32  pitch;
+  uint    raster_width, raster_height;
+  uint    width, height;
+  uint    filter, video_standard, pixel_format;
+  uint    pitch;
 
   bool    frame_hires, frame_interlace;
 } video;
 
 struct {
-  bool    modified;
-  uint32  filter, pixel_format;
+  bool modified;
+  uint filter, video_standard, pixel_format;
 } video_format;
 
 uint16 pline_width[240], iline_width[480];
 
 struct video_info {
-  uint32  filter, pixel_format, width, height;
+  uint filter, video_standard, pixel_format, width, height;
 };
 
   void contrast_adjust(int32 &input);
@@ -42,10 +47,10 @@ struct video_info {
 //public functions
   void update_color_lookup_table();
 
-  virtual void    set_video_format(uint32 filter, uint32 pixel_format);
+  virtual void    set_video_format(uint filter, uint video_standard, uint pixel_format);
   virtual void    get_video_info(video_info *info);
   virtual void    video_run() = 0;
-  virtual uint16 *video_lock(uint32 &pitch) = 0;
+  virtual uint16 *video_lock(uint &pitch) = 0;
   virtual void    video_unlock() = 0;
 
 //private functions

@@ -1,4 +1,4 @@
-#define BSNES_VERSION "0.016.38"
+#define BSNES_VERSION "0.016.42"
 #define BSNES_TITLE   "bsnes v" BSNES_VERSION
 
 #define MEMCORE bMemBus
@@ -20,7 +20,7 @@
 //#define JMA_SUPPORT
 
 //debugging extensions (~10% speed hit)
-#define DEBUGGER
+//#define DEBUGGER
 
 //snes core polymorphism
 //(allow mem/cpu/apu/ppu overriding, ~10% speed hit)

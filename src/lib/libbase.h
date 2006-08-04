@@ -1,5 +1,5 @@
 /*
-  libbase : version 0.08a ~byuu (07/14/06)
+  libbase : version 0.08b ~byuu (07/30/06)
 */
 
 #ifndef __LIBBASE
@@ -100,17 +100,46 @@ enum { b = 1 << (bits - 1), m = (1 << (bits - 1)) - 1 };
   return (x > m) ? m : (x < -b) ? -b : x;
 }
 
-//requires compiler SAR (shift arithmetic right) support
 template<int bits> inline signed sclip(const signed x) {
-enum { s = sizeof(x) * 8 - bits };
-  return (x << s) >> s;
+enum { b = 1 << (bits - 1), m = (1 << (bits - 1)) - 1 };
+  return (x & b) ? (x | ~m) : (x & m);
 }
 
-//use this if compiler uses SLR (shift logical right)
+//requires compiler arithmetic shift right support
+//c++ standard does not define whether >> is arithmetic or logical
 //template<int bits> inline signed sclip(const signed x) {
-//enum { b = 1 << (bits - 1), m = (1 << (bits - 1)) - 1 };
-//  return (x & b) ? (x | ~m) : (x & m);
+//enum { s = sizeof(x) * 8 - bits };
+//  return (x << s) >> s;
 //}
+
+template<int bits, typename T> inline T rol(const T x) {
+enum { s = (sizeof(T) << 3) - bits };
+  return (x << bits) | (x >> s);
+}
+
+template<int bits, typename T> inline T ror(const T x) {
+enum { s = (sizeof(T) << 3) - bits };
+  return (x >> bits) | (x << s);
+}
+
+template<int bits, typename T> inline T asl(const T x) {
+  return (x << bits);
+}
+
+template<int bits, typename T> inline T asr(const T x) {
+enum { h = 1 << ((sizeof(T) << 3) - 1) };
+enum { m = ~((1 << ((sizeof(T) << 3) - bits)) - 1) };
+  return (x >> bits) | ((0 - !!(x & h)) & m);
+}
+
+template<int bits, typename T> inline T lsl(const T x) {
+  return (x << bits);
+}
+
+template<int bits, typename T> inline T lsr(const T x) {
+enum { m = ((1 << ((sizeof(T) << 3) - bits)) - 1) };
+  return (x >> bits) & m;
+}
 
 template<unsigned bits, typename base = uint> class uint_t {
 private:

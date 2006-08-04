@@ -38,21 +38,21 @@ struct {
   uint resolution_height;
   uint refresh_rate;
 
-  uint internal_height_normal;
-  uint internal_height_overscan;
-
   uint rx, ry, rw, rh;
 } settings;
   void update_video_settings();
-  void update_window();
 
-  virtual uint16 *lock(uint32 &pitch) = 0;
+  virtual uint16 *lock(uint &pitch) = 0;
   virtual void    unlock() = 0;
+
+  virtual uint    screen_width()  = 0;
+  virtual uint    screen_height() = 0;
+
+  virtual bool    update_video_profile() = 0;
+  virtual void    clear_video() = 0;
 
   virtual void    pause_enable() {}
   virtual void    pause_disable() {}
-  virtual void    clear_video() = 0;
-  virtual bool    update_video_profile() = 0;
   virtual void    update_hardware_filter() {}
   virtual void    update_scanlines() {}
 

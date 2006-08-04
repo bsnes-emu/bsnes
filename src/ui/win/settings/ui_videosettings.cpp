@@ -62,8 +62,8 @@ char t[64 + 1];
   save_video_settings(profile);
 
 //update current video mode if necessary
-  if(profile == uint(config::video.profile)) {
-    uiVideo->update_video_profile();
+  if(profile == (uint)config::video.profile) {
+    event::set_video_profile(config::video.profile);
   }
 }
 
@@ -97,8 +97,8 @@ int x = 15, y = 30;
   y += 25;
 
   VideoStandardLabel.Create(this, "visible", x, y + 3, 85, 15, "Video standard:");
-  VideoStandard.Create(this, "visible|disabled", x + 85, y, 140, 200,
-    "NTSC|PAL|PAL (centered)");
+  VideoStandard.Create(this, "visible", x + 85, y, 140, 200,
+    "NTSC|PAL");
 
   MultiplierLabel.Create(this, "visible", x + 235, y + 3, 85, 15, "Multiplier:");
   Multiplier.Create(this, "visible", x + 320, y, 140, 200,

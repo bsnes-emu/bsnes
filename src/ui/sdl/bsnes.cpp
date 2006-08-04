@@ -15,14 +15,8 @@ void bSNES::video_run() {
   if(r_ppu->status.frames_updated) {
   char s[512], t[512];
     r_ppu->status.frames_updated = false;
-//  if((bool)config::gui.show_fps == true) {
-      sprintf(s, "%s : %d fps", BSNES_TITLE, r_ppu->status.frames_executed);
-//    if(w_main->frameskip != 0) {
-//      sprintf(t, " (%d frames)", r_ppu->status.frames_rendered);
-//      strcat(s, t);
-//    }
-      SDL_WM_SetCaption(s, 0);
-//  }
+    sprintf(s, "%s : %d fps", BSNES_TITLE, r_ppu->status.frames_executed);
+    SDL_WM_SetCaption(s, 0);
   }
 
   render();
@@ -30,7 +24,7 @@ void bSNES::video_run() {
 
 void bSNES::sound_run(uint32 data) {}
 
-uint16 *bSNES::video_lock(uint32 &pitch) {
+uint16 *bSNES::video_lock(uint &pitch) {
   if(SDL_MUSTLOCK(screen)) {
     SDL_LockSurface(screen);
   }

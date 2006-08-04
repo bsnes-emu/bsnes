@@ -1,5 +1,5 @@
 /*
-  libco_win32 : version 0.04 ~byuu (05/11/06)
+  libco_win32 : version 0.06 ~byuu (05/21/06)
   win32-x86 implementation of libco
 */
 
@@ -7,7 +7,7 @@
 #define _WIN32_WINNT 0x0400
 #include <windows.h>
 
-#include "libco.h"
+#include "libco_win32.h"
 
 namespace libco_win32 {
   bool     co_enabled  = false;
@@ -20,16 +20,16 @@ namespace libco_win32 {
   }
 };
 
-extern "C" void co_init() {
+void co_init() {
   if(libco_win32::co_enabled == true)return;
   libco_win32::co_enabled = true;
 
   ConvertThreadToFiber(0);
 }
 
-extern "C" void co_term() {
+void co_term() {
 /*****
-//ConverFiberToThread() only exists in WinXP+
+//ConverFiberToThread() only exists on WinXP+
 
   if(libco_win32::co_enabled == false)return;
   libco_win32::co_enabled = false;
@@ -38,31 +38,31 @@ extern "C" void co_term() {
 *****/
 }
 
-extern "C" thread_t co_active() {
+thread_t co_active() {
   if(libco_win32::co_enabled == false)co_init();
 
   return GetCurrentFiber();
 }
 
-extern "C" thread_t co_create(thread_p coentry, unsigned int heapsize) {
+thread_t co_create(thread_p coentry, unsigned int heapsize) {
   if(libco_win32::co_enabled == false)co_init();
 
   return CreateFiber(heapsize, libco_win32::coentry_proc, (void*)coentry);
 }
 
-extern "C" void co_delete(thread_t cothread) {
+void co_delete(thread_t cothread) {
   DeleteFiber(cothread);
 }
 
-extern "C" void co_jump(thread_t cothread) {
+void co_jump(thread_t cothread) {
   SwitchToFiber(cothread);
 }
 
-extern "C" void co_call(thread_t cothread) {
+void co_call(thread_t cothread) {
   libco_win32::co_stack[libco_win32::co_stackptr++] = co_active();
   co_jump(cothread);
 }
 
-extern "C" void co_return() {
+void co_return() {
   co_jump(libco_win32::co_stack[--libco_win32::co_stackptr]);
 }

@@ -7,5 +7,5 @@ uint frequency;
   virtual void init() = 0;
   virtual void term() = 0;
 
-  Audio() { frequency = 32000; }
+  Audio() : frequency(32000) {}
 } *uiAudio;

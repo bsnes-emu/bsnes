@@ -7,22 +7,12 @@ LPDIRECTINPUT8       di;
 LPDIRECTINPUTDEVICE8 di_key, di_joy[INPUT_JOYMAX];
 uint32               di_joy_count;
 
-struct joypad {
-  bool up, down, left, right;
-  bool a, b, x, y, l, r;
-  bool select, start;
-} joypad1, joypad2;
-
   void   poll();
-  bool   button_down(uint32 r);
-
-  void   poll(uint8 type);
-  bool   get_status(uint8 device, uint8 button);
-  void   set_status(uint8 device, uint8 button, bool status);
-  void   clear_input();
-  bool   enum_joypads(const DIDEVICEINSTANCE *instance);
+  void   poll(uint8 device);
   void   init();
   void   term();
+
+  bool   enum_joypads(const DIDEVICEINSTANCE *instance);
 
   InputDI() {
     di     = 0;

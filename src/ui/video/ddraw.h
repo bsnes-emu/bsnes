@@ -11,8 +11,11 @@ DDSURFACEDESC2       ddsd;
 DDSCAPS2             ddscaps;
 
 public:
-  uint16 *lock(uint32 &pitch);
+  uint16 *lock(uint &pitch);
   void    unlock();
+
+  uint    screen_width()  { return GetScreenWidth();  }
+  uint    screen_height() { return GetScreenHeight(); }
 
   bool    update_video_profile();
   void    init();

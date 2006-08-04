@@ -1,208 +1,140 @@
-void Input::ui_poll_input(Window *focus, bool require_window_focus) {
-  if(require_window_focus == true) {
-    if(GetFocus() != focus->hwnd)return;
-  }
-
+void Input::poll(uint8 device) {
   poll();
 
-EventInfo info;
-  info.window    = focus;
-  info.window_id = focus->id;
-  info.control   = 0;
+#define poll_key(__key) \
+  __key = bool(keystate[(uint(config::input.__key) >>  0) & 4095]) | \
+          bool(keystate[(uint(config::input.__key) >> 16) & 4095])
 
-  for(int i = 0; i < 256; i++) {
-    if(!old_keystate[i] && keystate[i]) {
-      info.event_id   = EVENT_INPUTKEYDOWN;
-      info.control_id = KEYFLAG | i;
-      focus->Event(info);
-    } else if(old_keystate[i] && !keystate[i]) {
-      info.event_id   = EVENT_INPUTKEYUP;
-      info.control_id = KEYFLAG | i;
-      focus->Event(info);
-    }
+  switch(device) {
+  case SNES::DEV_JOYPAD1:
+    poll_key(joypad1.up);
+    poll_key(joypad1.down);
+    poll_key(joypad1.left);
+    poll_key(joypad1.right);
+    poll_key(joypad1.a);
+    poll_key(joypad1.b);
+    poll_key(joypad1.x);
+    poll_key(joypad1.y);
+    poll_key(joypad1.l);
+    poll_key(joypad1.r);
+    poll_key(joypad1.select);
+    poll_key(joypad1.start);
+    break;
+  case SNES::DEV_JOYPAD2:
+    poll_key(joypad2.up);
+    poll_key(joypad2.down);
+    poll_key(joypad2.left);
+    poll_key(joypad2.right);
+    poll_key(joypad2.a);
+    poll_key(joypad2.b);
+    poll_key(joypad2.x);
+    poll_key(joypad2.y);
+    poll_key(joypad2.l);
+    poll_key(joypad2.r);
+    poll_key(joypad2.select);
+    poll_key(joypad2.start);
+    break;
   }
 
-  for(int j = 0; j < INPUT_JOYMAX; j++) {
-    for(int i = 0; i < 256; i++) {
-      if(!old_joystate[j * 256 + i] && joystate[j * 256 + i]) {
-        info.event_id   = EVENT_INPUTKEYDOWN;
-        info.control_id = JOYFLAG | (j << 8) | i;
-        focus->Event(info);
-      } else if(old_joystate[j * 256 + i] && !joystate[j * 256 + i]) {
-        info.event_id   = EVENT_INPUTKEYUP;
-        info.control_id = JOYFLAG | (j << 8) | i;
-        focus->Event(info);
-      }
+#undef poll_key
+}
+
+bool Input::get_status(uint8 device, uint8 button) {
+  switch(device) {
+  case SNES::DEV_JOYPAD1:
+    switch(button) {
+    case SNES::JOYPAD_UP:     return joypad1.up;
+    case SNES::JOYPAD_DOWN:   return joypad1.down;
+    case SNES::JOYPAD_LEFT:   return joypad1.left;
+    case SNES::JOYPAD_RIGHT:  return joypad1.right;
+    case SNES::JOYPAD_A:      return joypad1.a;
+    case SNES::JOYPAD_B:      return joypad1.b;
+    case SNES::JOYPAD_X:      return joypad1.x;
+    case SNES::JOYPAD_Y:      return joypad1.y;
+    case SNES::JOYPAD_L:      return joypad1.l;
+    case SNES::JOYPAD_R:      return joypad1.r;
+    case SNES::JOYPAD_SELECT: return joypad1.select;
+    case SNES::JOYPAD_START:  return joypad1.start;
     }
-  }
-
-  memcpy(old_keystate, keystate, 256);
-  memcpy(old_joystate, joystate, INPUT_JOYMAX * 256);
-}
-
-void Input::ui_clear_input() {
-  memset(keystate, 0, 256);
-  memset(joystate, 0, INPUT_JOYMAX * 256);
-  memset(old_keystate, 0, 256);
-  memset(old_joystate, 0, INPUT_JOYMAX * 256);
-}
-
-//this does not poll actual key state, it relies on
-//current keystate buffer to be up-to-date.
-//it is intended to be used inside
-//Input::EVENT_INPUTKEY* messages only.
-//calling Input::ui_poll_input() first will allow
-//this function to be used anywhere.
-bool Input::keydown(uint id) {
-  if(id < 256) {
-    return (keystate[id] != 0);
+    break;
+  case SNES::DEV_JOYPAD2:
+    switch(button) {
+    case SNES::JOYPAD_UP:     return joypad2.up;
+    case SNES::JOYPAD_DOWN:   return joypad2.down;
+    case SNES::JOYPAD_LEFT:   return joypad2.left;
+    case SNES::JOYPAD_RIGHT:  return joypad2.right;
+    case SNES::JOYPAD_A:      return joypad2.a;
+    case SNES::JOYPAD_B:      return joypad2.b;
+    case SNES::JOYPAD_X:      return joypad2.x;
+    case SNES::JOYPAD_Y:      return joypad2.y;
+    case SNES::JOYPAD_L:      return joypad2.l;
+    case SNES::JOYPAD_R:      return joypad2.r;
+    case SNES::JOYPAD_SELECT: return joypad2.select;
+    case SNES::JOYPAD_START:  return joypad2.start;
+    }
+    break;
   }
 
   return false;
 }
 
-//turn string into keymap value, eg
-//"esc" returns keymap.esc
-uint Input::stringtokeymap(const char *str) {
-uint r = JOYKEY_NONE;
-string t, part;
-  strcpy(t, str);
-  replace(t, ".", "|");
-  split(part, "|", t);
-
-#define cmp(__n) if(strmatch(#__n, part[0]) == true)r = (r & ~KEYMASK) | keymap.__n;
-  cmp(esc)
-  cmp(f1) cmp(f2) cmp(f3) cmp(f4) cmp(f5) cmp(f6)
-  cmp(f7) cmp(f8) cmp(f9) cmp(f10) cmp(f11) cmp(f12)
-  cmp(print_screen) cmp(scroll_lock) cmp(pause)
-
-  cmp(tilde)
-  cmp(num_0) cmp(num_1) cmp(num_2) cmp(num_3) cmp(num_4)
-  cmp(num_5) cmp(num_6) cmp(num_7) cmp(num_8) cmp(num_9)
-  cmp(minus) cmp(plus) cmp(backspace)
-  cmp(ins) cmp(del) cmp(home) cmp(end) cmp(page_up) cmp(page_down)
-
-  cmp(a) cmp(b) cmp(c) cmp(d) cmp(e) cmp(f) cmp(g) cmp(h) cmp(i)
-  cmp(j) cmp(k) cmp(l) cmp(m) cmp(n) cmp(o) cmp(p) cmp(q) cmp(r)
-  cmp(s) cmp(t) cmp(u) cmp(v) cmp(w) cmp(x) cmp(y) cmp(z)
-
-  cmp(lbracket) cmp(rbracket) cmp(pipe)
-  cmp(colon) cmp(quote)
-  cmp(comma) cmp(period) cmp(question)
-
-  cmp(numpad_0) cmp(numpad_1) cmp(numpad_2) cmp(numpad_3) cmp(numpad_4)
-  cmp(numpad_5) cmp(numpad_6) cmp(numpad_7) cmp(numpad_8) cmp(numpad_9)
-  cmp(numpad_plus) cmp(numpad_minus) cmp(numpad_mul) cmp(numpad_div)
-  cmp(numpad_enter) cmp(numpad_point)
-
-  cmp(numlock) cmp(capslock)
-
-  cmp(up) cmp(down) cmp(left) cmp(right)
-
-  cmp(tab) cmp(enter) cmp(space)
-  cmp(lctrl) cmp(rctrl)
-  cmp(lalt) cmp(ralt)
-  cmp(lshift) cmp(rshift)
-
-  cmp(lwin) cmp(rwin) cmp(menu)
-#undef cmp
-
-  if(count(part) < 3)return r;
-
-  strcpy(t, part[1]);
-  replace(t, "joy", "");
-uint controller = strdec(t), button;
-
-  strcpy(t, part[2]);
-  if(strmatch(t, "up")) {
-    button = 0x80;
-  } else if(strmatch(t, "down")) {
-    button = 0x81;
-  } else if(strmatch(t, "left")) {
-    button = 0x82;
-  } else if(strmatch(t, "right")) {
-    button = 0x83;
-  } else {
-    replace(t, "button", "");
-    button = strdec(t);
+void Input::set_status(uint8 device, uint8 button, bool status) {
+  switch(device) {
+  case SNES::DEV_JOYPAD1:
+    switch(button) {
+    case SNES::JOYPAD_UP:     joypad1.up     = status; break;
+    case SNES::JOYPAD_DOWN:   joypad1.down   = status; break;
+    case SNES::JOYPAD_LEFT:   joypad1.left   = status; break;
+    case SNES::JOYPAD_RIGHT:  joypad1.right  = status; break;
+    case SNES::JOYPAD_A:      joypad1.a      = status; break;
+    case SNES::JOYPAD_B:      joypad1.b      = status; break;
+    case SNES::JOYPAD_X:      joypad1.x      = status; break;
+    case SNES::JOYPAD_Y:      joypad1.y      = status; break;
+    case SNES::JOYPAD_L:      joypad1.l      = status; break;
+    case SNES::JOYPAD_R:      joypad1.r      = status; break;
+    case SNES::JOYPAD_SELECT: joypad1.select = status; break;
+    case SNES::JOYPAD_START:  joypad1.start  = status; break;
+    } break;
+  case SNES::DEV_JOYPAD2:
+    switch(button) {
+    case SNES::JOYPAD_UP:     joypad2.up     = status; break;
+    case SNES::JOYPAD_DOWN:   joypad2.down   = status; break;
+    case SNES::JOYPAD_LEFT:   joypad2.left   = status; break;
+    case SNES::JOYPAD_RIGHT:  joypad2.right  = status; break;
+    case SNES::JOYPAD_A:      joypad2.a      = status; break;
+    case SNES::JOYPAD_B:      joypad2.b      = status; break;
+    case SNES::JOYPAD_X:      joypad2.x      = status; break;
+    case SNES::JOYPAD_Y:      joypad2.y      = status; break;
+    case SNES::JOYPAD_L:      joypad2.l      = status; break;
+    case SNES::JOYPAD_R:      joypad2.r      = status; break;
+    case SNES::JOYPAD_SELECT: joypad2.select = status; break;
+    case SNES::JOYPAD_START:  joypad2.start  = status; break;
+    } break;
   }
-
-  r = (r & ~JOYMASK) | (controller << 16) | (button << 8);
-
-  return r;
 }
 
-//turn keymap value into string,
-//eg 0x01 returns "esc"
-const char *Input::keymaptostring(uint key) {
-static char result[128];
-  strcpy(result, "keynone");
-
-uint r = key & KEYMASK;
-
-#define cmp(__n) if(r == keymap.__n)strcpy(result, #__n);
-  cmp(esc)
-  cmp(f1) cmp(f2) cmp(f3) cmp(f4) cmp(f5) cmp(f6)
-  cmp(f7) cmp(f8) cmp(f9) cmp(f10) cmp(f11) cmp(f12)
-  cmp(print_screen) cmp(scroll_lock) cmp(pause)
-
-  cmp(tilde)
-  cmp(num_0) cmp(num_1) cmp(num_2) cmp(num_3) cmp(num_4)
-  cmp(num_5) cmp(num_6) cmp(num_7) cmp(num_8) cmp(num_9)
-  cmp(minus) cmp(plus) cmp(backspace)
-  cmp(ins) cmp(del) cmp(home) cmp(end) cmp(page_up) cmp(page_down)
-
-  cmp(a) cmp(b) cmp(c) cmp(d) cmp(e) cmp(f) cmp(g) cmp(h) cmp(i)
-  cmp(j) cmp(k) cmp(l) cmp(m) cmp(n) cmp(o) cmp(p) cmp(q) cmp(r)
-  cmp(s) cmp(t) cmp(u) cmp(v) cmp(w) cmp(x) cmp(y) cmp(z)
-
-  cmp(lbracket) cmp(rbracket) cmp(pipe)
-  cmp(colon) cmp(quote)
-  cmp(comma) cmp(period) cmp(question)
-
-  cmp(numpad_0) cmp(numpad_1) cmp(numpad_2) cmp(numpad_3) cmp(numpad_4)
-  cmp(numpad_5) cmp(numpad_6) cmp(numpad_7) cmp(numpad_8) cmp(numpad_9)
-  cmp(numpad_plus) cmp(numpad_minus) cmp(numpad_mul) cmp(numpad_div)
-  cmp(numpad_enter) cmp(numpad_point)
-
-  cmp(numlock) cmp(capslock)
-
-  cmp(up) cmp(down) cmp(left) cmp(right)
-
-  cmp(tab) cmp(enter) cmp(space)
-  cmp(lctrl) cmp(rctrl)
-  cmp(lalt) cmp(ralt)
-  cmp(lshift) cmp(rshift)
-
-  cmp(lwin) cmp(rwin) cmp(menu)
-#undef cmp
-
-  if((key & JOYMASK) != JOY_NONE) {
-    strcat(result, " | joy");
-    r = (key >> 16) & 0xff;
-  char tmp[16];
-    sprintf(tmp, "%d", r);
-    strcat(result, tmp);
-    strcat(result, ".");
-    r = (key >> 8) & 0xff;
-    if(r == 0x80) {
-      strcat(result, "up");
-    } else if(r == 0x81) {
-      strcat(result, "down");
-    } else if(r == 0x82) {
-      strcat(result, "left");
-    } else if(r == 0x83) {
-      strcat(result, "right");
-    } else {
-      sprintf(tmp, "button%d", r);
-      strcat(result, tmp);
-    }
-  }
-
-  return result;
+void Input::clear_input() {
+  joypad1.up     = joypad2.up     =
+  joypad1.down   = joypad2.down   =
+  joypad1.left   = joypad2.left   =
+  joypad1.right  = joypad2.right  =
+  joypad1.a      = joypad2.a      =
+  joypad1.b      = joypad2.b      =
+  joypad1.x      = joypad2.x      =
+  joypad1.y      = joypad2.y      =
+  joypad1.l      = joypad2.l      =
+  joypad1.r      = joypad2.r      =
+  joypad1.select = joypad2.select =
+  joypad1.start  = joypad2.start  = false;
 }
 
-uint Input::get_keymap(uint device, uint button) {
+//this does not poll actual key state, it relies on
+//current keystate buffer to be up-to-date.
+bool Input::keydown(uint16 key) {
+  return (keystate[key] != 0);
+}
+
+uint Input::get_key(uint device, uint button) {
   switch(device) {
   case SNES::DEV_JOYPAD1:
     switch(button) {
@@ -235,42 +167,51 @@ uint Input::get_keymap(uint device, uint button) {
     case SNES::JOYPAD_START:  return config::input.joypad2.start;
     } break;
   }
-  return JOYKEY_NONE;
+
+  return 0;
 }
 
-void Input::set_keymap(uint device, uint button, uint keymap) {
+void Input::set_key(uint device, uint button, uint key) {
   switch(device) {
   case SNES::DEV_JOYPAD1:
     switch(button) {
-    case SNES::JOYPAD_UP:     config::input.joypad1.up     = keymap; break;
-    case SNES::JOYPAD_DOWN:   config::input.joypad1.down   = keymap; break;
-    case SNES::JOYPAD_LEFT:   config::input.joypad1.left   = keymap; break;
-    case SNES::JOYPAD_RIGHT:  config::input.joypad1.right  = keymap; break;
-    case SNES::JOYPAD_A:      config::input.joypad1.a      = keymap; break;
-    case SNES::JOYPAD_B:      config::input.joypad1.b      = keymap; break;
-    case SNES::JOYPAD_X:      config::input.joypad1.x      = keymap; break;
-    case SNES::JOYPAD_Y:      config::input.joypad1.y      = keymap; break;
-    case SNES::JOYPAD_L:      config::input.joypad1.l      = keymap; break;
-    case SNES::JOYPAD_R:      config::input.joypad1.r      = keymap; break;
-    case SNES::JOYPAD_SELECT: config::input.joypad1.select = keymap; break;
-    case SNES::JOYPAD_START:  config::input.joypad1.start  = keymap; break;
+    case SNES::JOYPAD_UP:     config::input.joypad1.up     = key; break;
+    case SNES::JOYPAD_DOWN:   config::input.joypad1.down   = key; break;
+    case SNES::JOYPAD_LEFT:   config::input.joypad1.left   = key; break;
+    case SNES::JOYPAD_RIGHT:  config::input.joypad1.right  = key; break;
+    case SNES::JOYPAD_A:      config::input.joypad1.a      = key; break;
+    case SNES::JOYPAD_B:      config::input.joypad1.b      = key; break;
+    case SNES::JOYPAD_X:      config::input.joypad1.x      = key; break;
+    case SNES::JOYPAD_Y:      config::input.joypad1.y      = key; break;
+    case SNES::JOYPAD_L:      config::input.joypad1.l      = key; break;
+    case SNES::JOYPAD_R:      config::input.joypad1.r      = key; break;
+    case SNES::JOYPAD_SELECT: config::input.joypad1.select = key; break;
+    case SNES::JOYPAD_START:  config::input.joypad1.start  = key; break;
     } break;
   case SNES::DEV_JOYPAD2:
     switch(button) {
-    case SNES::JOYPAD_UP:     config::input.joypad2.up     = keymap; break;
-    case SNES::JOYPAD_DOWN:   config::input.joypad2.down   = keymap; break;
-    case SNES::JOYPAD_LEFT:   config::input.joypad2.left   = keymap; break;
-    case SNES::JOYPAD_RIGHT:  config::input.joypad2.right  = keymap; break;
-    case SNES::JOYPAD_A:      config::input.joypad2.a      = keymap; break;
-    case SNES::JOYPAD_B:      config::input.joypad2.b      = keymap; break;
-    case SNES::JOYPAD_X:      config::input.joypad2.x      = keymap; break;
-    case SNES::JOYPAD_Y:      config::input.joypad2.y      = keymap; break;
-    case SNES::JOYPAD_L:      config::input.joypad2.l      = keymap; break;
-    case SNES::JOYPAD_R:      config::input.joypad2.r      = keymap; break;
-    case SNES::JOYPAD_SELECT: config::input.joypad2.select = keymap; break;
-    case SNES::JOYPAD_START:  config::input.joypad2.start  = keymap; break;
+    case SNES::JOYPAD_UP:     config::input.joypad2.up     = key; break;
+    case SNES::JOYPAD_DOWN:   config::input.joypad2.down   = key; break;
+    case SNES::JOYPAD_LEFT:   config::input.joypad2.left   = key; break;
+    case SNES::JOYPAD_RIGHT:  config::input.joypad2.right  = key; break;
+    case SNES::JOYPAD_A:      config::input.joypad2.a      = key; break;
+    case SNES::JOYPAD_B:      config::input.joypad2.b      = key; break;
+    case SNES::JOYPAD_X:      config::input.joypad2.x      = key; break;
+    case SNES::JOYPAD_Y:      config::input.joypad2.y      = key; break;
+    case SNES::JOYPAD_L:      config::input.joypad2.l      = key; break;
+    case SNES::JOYPAD_R:      config::input.joypad2.r      = key; break;
+    case SNES::JOYPAD_SELECT: config::input.joypad2.select = key; break;
+    case SNES::JOYPAD_START:  config::input.joypad2.start  = key; break;
     } break;
   }
+}
+
+uint Input::decode(substring &str) {
+string p;
+  split(p, "|", str);
+uint r = key.find(strptr(p[0])) & 4095;
+  if(count(p) >= 2) { r |= (key.find(strptr(p[1])) & 4095) << 16; }
+  return r;
 }
 
 void Input::init() {
@@ -280,72 +221,82 @@ string t, part;
   replace(t, "\t", "");
   strlower(t);
   split(part, ";", t);
-  config::input.joypad1.up     = stringtokeymap(strptr(part[ 0]));
-  config::input.joypad1.down   = stringtokeymap(strptr(part[ 1]));
-  config::input.joypad1.left   = stringtokeymap(strptr(part[ 2]));
-  config::input.joypad1.right  = stringtokeymap(strptr(part[ 3]));
-  config::input.joypad1.a      = stringtokeymap(strptr(part[ 4]));
-  config::input.joypad1.b      = stringtokeymap(strptr(part[ 5]));
-  config::input.joypad1.x      = stringtokeymap(strptr(part[ 6]));
-  config::input.joypad1.y      = stringtokeymap(strptr(part[ 7]));
-  config::input.joypad1.l      = stringtokeymap(strptr(part[ 8]));
-  config::input.joypad1.r      = stringtokeymap(strptr(part[ 9]));
-  config::input.joypad1.select = stringtokeymap(strptr(part[10]));
-  config::input.joypad1.start  = stringtokeymap(strptr(part[11]));
+  config::input.joypad1.up     = decode(part[ 0]);
+  config::input.joypad1.down   = decode(part[ 1]);
+  config::input.joypad1.left   = decode(part[ 2]);
+  config::input.joypad1.right  = decode(part[ 3]);
+  config::input.joypad1.a      = decode(part[ 4]);
+  config::input.joypad1.b      = decode(part[ 5]);
+  config::input.joypad1.x      = decode(part[ 6]);
+  config::input.joypad1.y      = decode(part[ 7]);
+  config::input.joypad1.l      = decode(part[ 8]);
+  config::input.joypad1.r      = decode(part[ 9]);
+  config::input.joypad1.select = decode(part[10]);
+  config::input.joypad1.start  = decode(part[11]);
 
   strcpy(t, config::input.joypad2.map.sget());
   replace(t, " ", "");
   replace(t, "\t", "");
   strlower(t);
   split(part, ";", t);
-  config::input.joypad2.up     = stringtokeymap(strptr(part[ 0]));
-  config::input.joypad2.down   = stringtokeymap(strptr(part[ 1]));
-  config::input.joypad2.left   = stringtokeymap(strptr(part[ 2]));
-  config::input.joypad2.right  = stringtokeymap(strptr(part[ 3]));
-  config::input.joypad2.a      = stringtokeymap(strptr(part[ 4]));
-  config::input.joypad2.b      = stringtokeymap(strptr(part[ 5]));
-  config::input.joypad2.x      = stringtokeymap(strptr(part[ 6]));
-  config::input.joypad2.y      = stringtokeymap(strptr(part[ 7]));
-  config::input.joypad2.l      = stringtokeymap(strptr(part[ 8]));
-  config::input.joypad2.r      = stringtokeymap(strptr(part[ 9]));
-  config::input.joypad2.select = stringtokeymap(strptr(part[10]));
-  config::input.joypad2.start  = stringtokeymap(strptr(part[11]));
+  config::input.joypad2.up     = decode(part[ 0]);
+  config::input.joypad2.down   = decode(part[ 1]);
+  config::input.joypad2.left   = decode(part[ 2]);
+  config::input.joypad2.right  = decode(part[ 3]);
+  config::input.joypad2.a      = decode(part[ 4]);
+  config::input.joypad2.b      = decode(part[ 5]);
+  config::input.joypad2.x      = decode(part[ 6]);
+  config::input.joypad2.y      = decode(part[ 7]);
+  config::input.joypad2.l      = decode(part[ 8]);
+  config::input.joypad2.r      = decode(part[ 9]);
+  config::input.joypad2.select = decode(part[10]);
+  config::input.joypad2.start  = decode(part[11]);
+}
+
+const char *Input::encode(uint k) {
+  strcpy(tmp, key.find(k & 4095));
+  if(k >> 16) {
+    strcat(tmp, " | ");
+    strcat(tmp, key.find((k >> 16) & 4095));
+  }
+  return tmp;
 }
 
 void Input::term() {
 string result;
 char   t[256];
   strcpy(result, "");
-  strcat(result, keymaptostring(config::input.joypad1.up));     strcat(result, "; ");
-  strcat(result, keymaptostring(config::input.joypad1.down));   strcat(result, "; ");
-  strcat(result, keymaptostring(config::input.joypad1.left));   strcat(result, "; ");
-  strcat(result, keymaptostring(config::input.joypad1.right));  strcat(result, "; ");
-  strcat(result, keymaptostring(config::input.joypad1.a));      strcat(result, "; ");
-  strcat(result, keymaptostring(config::input.joypad1.b));      strcat(result, "; ");
-  strcat(result, keymaptostring(config::input.joypad1.x));      strcat(result, "; ");
-  strcat(result, keymaptostring(config::input.joypad1.y));      strcat(result, "; ");
-  strcat(result, keymaptostring(config::input.joypad1.l));      strcat(result, "; ");
-  strcat(result, keymaptostring(config::input.joypad1.r));      strcat(result, "; ");
-  strcat(result, keymaptostring(config::input.joypad1.select)); strcat(result, "; ");
-  strcat(result, keymaptostring(config::input.joypad1.start));
+  strcat(result, encode((uint)config::input.joypad1.up));     strcat(result, "; ");
+  strcat(result, encode((uint)config::input.joypad1.down));   strcat(result, "; ");
+  strcat(result, encode((uint)config::input.joypad1.left));   strcat(result, "; ");
+  strcat(result, encode((uint)config::input.joypad1.right));  strcat(result, "; ");
+  strcat(result, encode((uint)config::input.joypad1.a));      strcat(result, "; ");
+  strcat(result, encode((uint)config::input.joypad1.b));      strcat(result, "; ");
+  strcat(result, encode((uint)config::input.joypad1.x));      strcat(result, "; ");
+  strcat(result, encode((uint)config::input.joypad1.y));      strcat(result, "; ");
+  strcat(result, encode((uint)config::input.joypad1.l));      strcat(result, "; ");
+  strcat(result, encode((uint)config::input.joypad1.r));      strcat(result, "; ");
+  strcat(result, encode((uint)config::input.joypad1.select)); strcat(result, "; ");
+  strcat(result, encode((uint)config::input.joypad1.start));
   config::input.joypad1.map.sset(strptr(result));
 
   strcpy(result, "");
-  strcat(result, keymaptostring(config::input.joypad2.up));     strcat(result, "; ");
-  strcat(result, keymaptostring(config::input.joypad2.down));   strcat(result, "; ");
-  strcat(result, keymaptostring(config::input.joypad2.left));   strcat(result, "; ");
-  strcat(result, keymaptostring(config::input.joypad2.right));  strcat(result, "; ");
-  strcat(result, keymaptostring(config::input.joypad2.a));      strcat(result, "; ");
-  strcat(result, keymaptostring(config::input.joypad2.b));      strcat(result, "; ");
-  strcat(result, keymaptostring(config::input.joypad2.x));      strcat(result, "; ");
-  strcat(result, keymaptostring(config::input.joypad2.y));      strcat(result, "; ");
-  strcat(result, keymaptostring(config::input.joypad2.l));      strcat(result, "; ");
-  strcat(result, keymaptostring(config::input.joypad2.r));      strcat(result, "; ");
-  strcat(result, keymaptostring(config::input.joypad2.select)); strcat(result, "; ");
-  strcat(result, keymaptostring(config::input.joypad2.start));
+  strcat(result, encode((uint)config::input.joypad2.up));     strcat(result, "; ");
+  strcat(result, encode((uint)config::input.joypad2.down));   strcat(result, "; ");
+  strcat(result, encode((uint)config::input.joypad2.left));   strcat(result, "; ");
+  strcat(result, encode((uint)config::input.joypad2.right));  strcat(result, "; ");
+  strcat(result, encode((uint)config::input.joypad2.a));      strcat(result, "; ");
+  strcat(result, encode((uint)config::input.joypad2.b));      strcat(result, "; ");
+  strcat(result, encode((uint)config::input.joypad2.x));      strcat(result, "; ");
+  strcat(result, encode((uint)config::input.joypad2.y));      strcat(result, "; ");
+  strcat(result, encode((uint)config::input.joypad2.l));      strcat(result, "; ");
+  strcat(result, encode((uint)config::input.joypad2.r));      strcat(result, "; ");
+  strcat(result, encode((uint)config::input.joypad2.select)); strcat(result, "; ");
+  strcat(result, encode((uint)config::input.joypad2.start));
   config::input.joypad2.map.sset(strptr(result));
 }
 
 Input::Input() {
-  ui_clear_input();
+  memset(keystate, 0, sizeof(keystate));
+  clear_input();
 }

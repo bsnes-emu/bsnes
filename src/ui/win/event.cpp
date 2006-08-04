@@ -27,6 +27,23 @@ void set_video_profile(uint profile) {
   if(profile > 7)profile = 0;
 
   config::video.profile = profile;
+  uiVideo->update_video_settings();
+
+string t;
+  if(bool(config::video.fullscreen) == true) {
+    strcpy(t, "topmost|popup");
+    if(wMain.Visible())strcat(t, "|visible");
+    wMain.HideMenu();
+    HideCursor();
+  } else {
+    strcpy(t, config::misc.window_style.sget());
+    if(wMain.Visible())strcat(t, "|visible");
+    wMain.ShowMenu();
+    ShowCursor();
+  }
+  wMain.SetStyle(strptr(t));
+  wMain.Resize(uiVideo->settings.resolution_width, uiVideo->settings.resolution_height, true);
+
   uiVideo->update_video_profile();
 
   wMain.CheckMenuItem(MENU_SETTINGS_VIDEOPROFILE_0, profile == 0);

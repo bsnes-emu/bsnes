@@ -2,7 +2,6 @@ bool VideoDD::update_video_profile() {
   term();
 
   update_video_settings();
-  update_window();
 
   DirectDrawCreate(0, &lpdd, 0);
   lpdd->QueryInterface(IID_IDirectDraw7, (void**)&lpdd7);
@@ -23,7 +22,6 @@ bool VideoDD::update_video_profile() {
 
   create_render_target();
   clear_video();
-  update_window();
   return true;
 }
 
@@ -85,7 +83,7 @@ DDBLTFX fx;
   surface->Blt(0, 0, 0, DDBLT_WAIT | DDBLT_COLORFILL, &fx);
 }
 
-uint16 *VideoDD::lock(uint32 &pitch) {
+uint16 *VideoDD::lock(uint &pitch) {
   if(surface->Lock(0, &ddsd, DDLOCK_WAIT, 0) != DD_OK)return 0;
   pitch = ddsd.lPitch;
   return (uint16*)ddsd.lpSurface;

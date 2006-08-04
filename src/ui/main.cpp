@@ -1,6 +1,7 @@
 #define INTERFACE_MAIN
 
 #include "../base.h"
+#include "main.h"
 #include "config.cpp"
 
 void init_snes();
@@ -10,30 +11,24 @@ void term_snes();
  * OS abstraction layer
  *****/
 
-//#include "video/video.h"
-//#include "audio/audio.h"
-//#include "input/input.h"
+#include "video/video.h"
+#include "audio/audio.h"
+#include "input/input.h"
 
-//#include "video/video.cpp"
-//#include "input/input.cpp"
-
-/*****
- * emulation abstraction layer
- *****/
-
-#include "bsnes.h"
+#include "video/video.cpp"
+#include "input/input.cpp"
 
 /*****
  * platform abstraction layer
  *****/
 
-#ifdef PLATFORM_WIN
+#if defined(PLATFORM_WIN)
   #include "win/main.cpp"
+#elif defined(PLATFORM_SDL)
+  #include "sdl/main.cpp"
 #else
   #error "unsupported platform"
 #endif
-
-#include "bsnes.cpp"
 
 /*****
  * platform independent code

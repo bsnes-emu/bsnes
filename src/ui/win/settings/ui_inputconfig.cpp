@@ -1,7 +1,6 @@
 void CALLBACK wInputConfigInputTimerProc(HWND hwnd, UINT msg, UINT event, DWORD time) {
   if(!uiInput)return;
-
-  uiInput->ui_poll_input(&wInputConfig, false);
+  ui_poll_input(&wInputConfig, false);
 }
 
 bool InputConfigWindow::Event(EventInfo &info) {
@@ -13,13 +12,13 @@ bool InputConfigWindow::Event(EventInfo &info) {
   HDC hdcsrc = CreateCompatibleDC(hdc);
   HBITMAP hbm = LoadBitmap(GetModuleHandle(0), MAKEINTRESOURCE(102));
     SelectObject(hdcsrc, hbm);
-    BitBlt(hdc, 285, 139, 190, 100, hdcsrc, 0, 0, SRCCOPY);
+    BitBlt(hdc, 285, 169, 190, 100, hdcsrc, 0, 0, SRCCOPY);
     DeleteDC(hdcsrc);
     DeleteObject(hbm);
     EndPaint(hwnd, &ps);
   } break;
 
-  case Input::EVENT_INPUTKEYDOWN: {
+  case EVENT_INPUTKEYDOWN: {
     if(button_update.active == true) {
       button_update.id = info.control_id;
       ButtonUpdateEnd();
@@ -42,19 +41,32 @@ bool InputConfigWindow::Event(EventInfo &info) {
   case EVENT_DOUBLECLICKED: {
     if(info.control == &ButtonList) {
     int sel = ButtonList.GetSelection();
-      if(sel != -1)ButtonUpdateBegin(sel);
+      if(sel != -1) {
+        button_update.primary = true;
+        ButtonUpdateBegin(sel);
+      }
     }
   } break;
 
   case EVENT_CLICKED: {
-    if(info.control == &ButtonUpdate) {
+    if(info.control == &ButtonUpdatePrimary ||
+       info.control == &ButtonUpdateSecondary) {
     int sel = ButtonList.GetSelection();
-      if(sel != -1)ButtonUpdateBegin(sel);
+      if(sel != -1) {
+        button_update.primary = (info.control == &ButtonUpdatePrimary);
+        ButtonUpdateBegin(sel);
+      }
     } else if(info.control == &ButtonClear) {
     int sel = ButtonList.GetSelection();
       if(sel != -1) {
+        button_update.primary = true;
         ButtonUpdateBegin(sel);
-        button_update.id = uiInput->keymap.esc;
+        button_update.id = uiInput->key.esc;
+        ButtonUpdateEnd();
+
+        button_update.primary = false;
+        ButtonUpdateBegin(sel);
+        button_update.id = uiInput->key.esc;
         ButtonUpdateEnd();
       }
     } else if(info.control == &AllowBadInput) {
@@ -100,9 +112,12 @@ uint device = Selected.GetSelection();
 char t[512], tmp[512];
 string str, part;
 #define add(__label, __bn) \
-  strcpy(tmp, uiInput->keymaptostring(uiInput->get_keymap(device, SNES::JOYPAD_##__bn))); \
+  strcpy(tmp, uiInput->key.find((uiInput->get_key(device, SNES::JOYPAD_##__bn) >>  0) & 4095)); \
+  strcat(tmp, " | "); \
+  strcat(tmp, uiInput->key.find((uiInput->get_key(device, SNES::JOYPAD_##__bn) >> 16) & 4095)); \
   split(part, " | ", tmp); \
-  replace(part[0], "keynone", "<none>"); \
+  replace(part[0], "null", "<none>"); \
+  replace(part[1], "null", "<none>"); \
   if(count(part) < 2)strcpy(part[1], "<none>"); \
   sprintf(t, #__label "|%s|%s", strptr(part[0]), strptr(part[1])); \
   ButtonList.AddItem(t);
@@ -137,35 +152,19 @@ void InputConfigWindow::ButtonUpdateEnd() {
   button_update.active = false;
   KillTimer(hwnd, 0);
 
-uint old_id, id = button_update.id;
-  if(id == uiInput->keymap.esc) {
-  //escape key was pressed, clear key + joy mapping
-    id = Input::JOYKEY_NONE;
+uint id = button_update.id;
+  if(id == uiInput->key.esc) { id = 0; }
+
+uint old_id = uiInput->get_key(button_update.controller, button_update.button);
+  if(button_update.primary == true) {
+    id  &= 0xffff;
+    id  |= old_id & ~0xffff;
   } else {
-    old_id = uiInput->get_keymap(button_update.controller, button_update.button);
-
-    if(id & Input::JOYFLAG) {
-    //joypad key was pressed
-
-    //format for EVENT_INPUTKEY(DOWN|UP) is (joypad<<8)|button,
-    //format for config file is (joypad<<16)|(button<<8)|key.
-    //the idea is to allow config file to have both key and joypad
-    //mapping for a single SNES button, so id must be converted to
-    //config file format.
-      id <<= 8;
-
-      id  &= Input::JOYMASK;
-      id  |= old_id & Input::KEYMASK;
-    } else {
-    //keyboard key was pressed
-      id  &= Input::KEYMASK;
-      id  |= old_id & Input::JOYMASK;
-    }
-
-    id &= Input::JOYKEYMASK;
+    id <<= 16;
+    id  |= old_id &  0xffff;
   }
 
-  uiInput->set_keymap(button_update.controller, button_update.button, id);
+  uiInput->set_key(button_update.controller, button_update.button, id);
 
   Message.SetText("Button updated. Select another button to update.");
 int sel = ButtonList.GetSelection();
@@ -215,10 +214,11 @@ int x = 15, y = 30;
 
   ButtonList.Create(this, "visible|edge", x, y, 265, 195);
   ButtonList.AddColumn(Listview::LEFT,  61, "Button");
-  ButtonList.AddColumn(Listview::LEFT, 100, "Key Mapping");
-  ButtonList.AddColumn(Listview::LEFT, 100, "Joypad Mapping");
-  ButtonUpdate.Create(this, "visible", x + 270, y, 92, 25, "Update");
-  ButtonClear.Create(this, "visible", x + 270 + 98, y, 92, 25, "Clear");
+  ButtonList.AddColumn(Listview::LEFT, 100, "Primary");
+  ButtonList.AddColumn(Listview::LEFT, 100, "Secondary");
+  ButtonUpdatePrimary.Create(this, "visible", x + 270, y, 92, 25, "Set Primary");
+  ButtonUpdateSecondary.Create(this, "visible", x + 270 + 98, y, 92, 25, "Set Secondary");
+  ButtonClear.Create(this, "visible", x + 270, y + 30, 190, 25, "Clear Primary + Secondary");
   y += 200;
 
   AllowBadInput.Create(this, "visible", x, y, 460, 15,

@@ -1,12 +1,4 @@
-#define INTERFACE_MAIN
-#include "../base.h"
-#include "sdlmain.h"
-
-#include "config.cpp"
-
-#ifdef _WIN32_
-HWND hwnd;
-#endif
+#include "main.h"
 
 #include "bsnes.h"
 #include "render.cpp"
@@ -18,7 +10,7 @@ va_list args;
   va_start(args, s);
   vsprintf(str, s, args);
   va_end(args);
-#ifdef _WIN32_
+#ifdef _WIN32
   MessageBox(0, str, "bsnes", MB_OK);
 #else
   fprintf(stdout, "%s\r\n", str);
@@ -34,42 +26,12 @@ va_list args;
   fprintf(stdout, "%s\r\n", str);
 }
 
-void init_snes() {
-#ifdef POLYMORPHISM
-  deref(mem) = new bMemBus();
-  deref(cpu) = new bCPU();
-  deref(apu) = new bAPU();
-  deref(dsp) = new bDSP();
-  deref(ppu) = new bPPU();
-#endif
-  snes  = new bSNES();
-  bsnes = static_cast<bSNES*>(snes);
-
-  snes->init();
-
-//TODO: add sound support and remove this,
-//this is used with linux/bsd and mkfifo to
-//play audio in real-time while sound output
-//isn't available.
-  snes->log_audio_enable("output.wav");
-}
-
-void term_snes() {
-  snes->term();
-#ifdef POLYMORPHISM
-  SafeDelete(deref(mem));
-  SafeDelete(deref(cpu));
-  SafeDelete(deref(apu));
-  SafeDelete(deref(dsp));
-  SafeDelete(deref(ppu));
-#endif
-  SafeDelete(snes);
-}
-
 void center_window() {
-#ifdef _WIN32_
+#ifdef _WIN32
+HWND hwnd;
 RECT rc;
 int x, y;
+  hwnd = FindWindow(0, BSNES_TITLE);
   GetWindowRect(hwnd, &rc);
   x = (GetSystemMetrics(SM_CXSCREEN) - (rc.right - rc.left)) >> 1;
   y = (GetSystemMetrics(SM_CYSCREEN) - (rc.bottom - rc.top)) >> 1;
@@ -77,29 +39,13 @@ int x, y;
 #endif
 }
 
-void set_window_info() {
-//SDL won't draw anything if you blit an image that's larger than
-//the display mode/window, even if you use the SoftStretch blit and
-//clip the source + dest rectangles properly...
-  if((int)config::video.display_width < (int)config::video.output_width) {
-    config::video.display_width = config::video.output_width;
-  }
-  if((int)config::video.display_height < (int)config::video.output_height) {
-    config::video.display_height = config::video.output_height;
-  }
-
-  screen_info.rd.x = ((int)config::video.display_width  - (int)config::video.output_width ) >> 1;
-  screen_info.rd.y = ((int)config::video.display_height - (int)config::video.output_height) >> 1;
-  screen_info.rd.w = config::video.output_width;
-  screen_info.rd.h = config::video.output_height;
-}
-
-#ifdef _WIN32_
+#ifdef _WIN32
 int __stdcall WinMain(HINSTANCE hinstance, HINSTANCE hprevinstance, LPSTR lpcmdline, int ncmdshow) {
 int argc    = __argc;
 char **argv = __argv;
+  SDL_SetModuleHandle(GetModuleHandle(0));
 #else
-int main(int argc, char *argv[]) {
+int SDL_main(int argc, char *argv[]) {
 #endif
 
 SDL_Event event;
@@ -120,17 +66,20 @@ SDL_Event event;
 
   SDL_Init(SDL_INIT_VIDEO);
   atexit(SDL_Quit);
-  set_window_info();
-  screen = SDL_SetVideoMode(config::video.display_width, config::video.display_height, 16,
+
+  screen_rect.x = 0;
+  screen_rect.y = 0;
+  screen_rect.w = 256;
+  screen_rect.h = 224;
+
+  screen = SDL_SetVideoMode(screen_rect.w, screen_rect.h, 16,
     SDL_HWSURFACE | ((config::video.fullscreen) ? SDL_FULLSCREEN : 0));
   if(!screen)     { alert("Failed to initialize SDL"); goto _end; }
+
   backbuffer = SDL_CreateRGBSurface(SDL_HWSURFACE, 512, 448, 16, 0xf800, 0x07e0, 0x001f, 0x0000);
   if(!backbuffer) { alert("Failed to initialize SDL"); goto _end; }
 
   SDL_WM_SetCaption(BSNES_TITLE, 0);
-#ifdef _WIN32_
-  hwnd = FindWindow(0, BSNES_TITLE);
-#endif
   center_window();
 
   snes->power();

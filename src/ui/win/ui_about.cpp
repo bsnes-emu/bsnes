@@ -5,7 +5,7 @@ const char AboutWindow::about_text[4096] = ""
   "\r\n\r\n\r\n\r\n\r\n"
   "Contributors:\r\n"
   "   anomie, blargg, DMV27, GIGO, kode54, Nach,\r\n"
-  "   Overload, Richard Bannister, TRAC\r\n";
+  "   Overload, Richard Bannister, TRAC, zones\r\n";
 
 bool AboutWindow::Event(EventInfo &info) {
   switch(info.event_id) {
