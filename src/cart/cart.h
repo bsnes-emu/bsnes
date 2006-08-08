@@ -78,7 +78,9 @@ struct {
   uint   header_index;
 } info;
 
-  uint mirror_rom(uint size);
+  uint mirror_realloc(uint8 *&data, uint size);
+  uint mirror(uint8 *&data, uint size);
+
   void load_rom(Reader &rf);
   void load_sram();
   void save_sram();

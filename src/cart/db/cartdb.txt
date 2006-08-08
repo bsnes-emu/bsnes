@@ -28,6 +28,12 @@ pcb  = "BSC-1A7M-01" ;unverified
 rom  =  16mbit
 ram  = 512kbit
 
+[0xa5c0045e]
+name = "Secret of Evermore (USA) [!]"
+pcb  = "SHVC-1J3M-20"
+rom  = 32mbit
+ram  = 64kbit
+
 [0x5ebf7246]
 name = "Sound Novel Tsukuru (Japan) [!]"
 pcb  = "BSC-1A7M-10"

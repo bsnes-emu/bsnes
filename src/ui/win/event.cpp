@@ -117,7 +117,7 @@ string dir;
   if(cartridge.loaded() == true)cartridge.unload();
   wDebug.Clear();
 
-  cartridge.load(t);
+  if(cartridge.load(t) == false)return;
   wCheatEditor.Refresh();
 
   bsnes->power();

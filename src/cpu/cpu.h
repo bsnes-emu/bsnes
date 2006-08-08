@@ -88,5 +88,5 @@ enum {
   uint8  opcode_length();
 
   CPU();
-  virtual ~CPU() {}
+  virtual ~CPU();
 };

@@ -24,7 +24,7 @@ uint8 r;
   //read from address bus b, write to address bus a
 
   //block invalid writes, see comments above
-    r = (bbus == 0x80) ? r_cpu->regs.mdr : r_mem->read(0x2100 | bbus);
+    r = r_mem->read(0x2100 | bbus);
     if((abus & 0x40ff00) == 0x2100 || (abus & 0x40ff80) == 0x4300 ||
        (abus & 0x40ffff) == 0x420b || (abus & 0x40ffff) == 0x420c)return;
     r_mem->write(abus, r);

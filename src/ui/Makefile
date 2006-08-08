@@ -4,7 +4,7 @@ CXX = cl
 AS = nasm
 RM = del
 OBJ = obj
-CFLAGS = /nologo /O2 /MD /arch:SSE2 /DPLATFORM_WIN /DCOMPILER_VISUALC /DPROCESSOR_X86
+CFLAGS = /nologo /O2 /arch:SSE2 /DPLATFORM_WIN /DCOMPILER_VISUALC /DPROCESSOR_X86
 COMPILE = $(CC) $(CFLAGS) /c
 ASSEMBLE = $(AS) -f win32
 LINK =
@@ -18,7 +18,7 @@ CXX = cl
 AS = nasm
 RM = del
 OBJ = obj
-CFLAGS = /nologo /O2 /MD /GL /DPLATFORM_WIN /DCOMPILER_VISUALC /DPROCESSOR_X86
+CFLAGS = /nologo /O2 /GL /DPLATFORM_WIN /DCOMPILER_VISUALC /DPROCESSOR_X86
 COMPILE = $(CC) $(CFLAGS) /c
 ASSEMBLE = $(AS) -f win32
 LINK = /link /LTCG
@@ -32,7 +32,7 @@ CXX = cl
 AS = nasm
 RM = del
 OBJ = obj
-CFLAGS = /nologo /O2 /MD /GL /DPLATFORM_WIN /DCOMPILER_VISUALC /DPROCESSOR_X86
+CFLAGS = /nologo /O2 /GL /DPLATFORM_WIN /DCOMPILER_VISUALC /DPROCESSOR_X86
 COMPILE = $(CC) $(CFLAGS) /c
 ASSEMBLE = $(AS) -f win32
 LINK = /link /PGD:bsnes.pgd /LTCG:PGINSTRUMENT
@@ -46,7 +46,7 @@ CXX = cl
 AS = nasm
 RM = del
 OBJ = obj
-CFLAGS = /nologo /O2 /MD /arch:SSE2 /DPLATFORM_WIN /DCOMPILER_VISUALC /DPROCESSOR_X86
+CFLAGS = /nologo /O2 /arch:SSE2 /DPLATFORM_WIN /DCOMPILER_VISUALC /DPROCESSOR_X86
 COMPILE = $(CC) $(CFLAGS) /c
 ASSEMBLE = $(AS) -f win32
 LINK = /link /PGD:bsnes.pgd /LTCG:PGOPTIMIZE
@@ -60,7 +60,7 @@ CXX = cl
 AS = nasm
 RM = del
 OBJ = obj
-CFLAGS = /nologo /O2 /MD /DPLATFORM_SDL /DCOMPILER_VISUALC /DPROCESSOR_X86
+CFLAGS = /nologo /O2 /DPLATFORM_SDL /DCOMPILER_VISUALC /DPROCESSOR_X86
 COMPILE = $(CC) $(CFLAGS) /c
 ASSEMBLE = $(AS) -f win32
 LINK =
@@ -85,7 +85,7 @@ OBJS =  main.$(OBJ) \
 all: $(OBJS)
 	rc /r /fobsnes.res bsnes.rc
 	$(CC) /Febsnes.exe $(CFLAGS) $(OBJS) bsnes.res $(LIBS) $(LINK)
-	mt -nologo -manifest bsnes.exe.manifest -outputresource:bsnes.exe;1
+#	mt -nologo -manifest bsnes.exe.manifest -outputresource:bsnes.exe;1
 
 clean:
 	$(RM) *.$(OBJ)

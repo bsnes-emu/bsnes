@@ -2,22 +2,15 @@ Config config_file;
 
 namespace config {
 
-FS::Path FS::base_path(0, "fs.base_path", "Directory that bsnes resides in", "");
-
-FS::Path FS::rom_path(&config_file, "fs.rom_path",
-  "Default path to look for ROM files in (\"\" = use default directory)", "");
-FS::Path FS::save_path(&config_file, "fs.save_path",
-  "Default path for all save RAM and cheat files (\"\" = use current directory)", "");
-
-void FS::Path::sset(const char *_data) {
+void fs_set_path(Setting &s, const char *data) {
 string path;
-  strcpy(path, _data);
+  strcpy(path, data);
   strunquote(path);
   replace(path, "\\", "/");
 
 //blank path?
   if(strlen(path) == 0) {
-    Setting::sset(strptr(path));
+    s.sset(strptr(path));
     return;
   }
 
@@ -26,31 +19,33 @@ string path;
     strcat(path, "/");
   }
 
-  Setting::sset(strptr(path));
+  s.sset(strptr(path));
 }
+
+Setting FS::base_path(0, "fs.base_path",
+  "Directory that bsnes resides in", "");
+Setting FS::rom_path(&config_file, "fs.rom_path",
+  "Default path to look for ROM files in (\"\" = use default directory)", "");
+Setting FS::save_path(&config_file, "fs.save_path",
+  "Default path for all save RAM and cheat files (\"\" = use current directory)", "");
 
 Setting FS::save_ext(&config_file, "fs.save_ext",
   "Extension to be used for all save RAM files", "srm");
 
-SNES::VideoColorAdjust SNES::gamma_ramp(&config_file, "snes.colorfilter.gamma_ramp",
+Setting SNES::gamma_ramp(&config_file, "snes.colorfilter.gamma_ramp",
   "Use precalculated TV-style gamma ramp", true, Setting::TRUE_FALSE);
-SNES::VideoColorAdjust SNES::sepia(&config_file, "snes.colorfilter.sepia",
+Setting SNES::sepia(&config_file, "snes.colorfilter.sepia",
   "Convert color to sepia tone", false, Setting::TRUE_FALSE);
-SNES::VideoColorAdjust SNES::grayscale(&config_file, "snes.colorfilter.grayscale",
+Setting SNES::grayscale(&config_file, "snes.colorfilter.grayscale",
   "Convert color to grayscale tone", false, Setting::TRUE_FALSE);
-SNES::VideoColorAdjust SNES::invert(&config_file, "snes.colorfilter.invert",
+Setting SNES::invert(&config_file, "snes.colorfilter.invert",
   "Invert output image colors", false, Setting::TRUE_FALSE);
-SNES::VideoColorAdjust SNES::contrast(&config_file, "snes.colorfilter.contrast",
-  "", 0,  Setting::DEC);
-SNES::VideoColorAdjust SNES::brightness(&config_file, "snes.colorfilter.brightness",
-  "", 0, Setting::DEC);
-SNES::VideoColorAdjust SNES::gamma(&config_file, "snes.colorfilter.gamma",
-  "", 80, Setting::DEC);
-
-void SNES::VideoColorAdjust::set(uint32 _data) {
-  Setting::set(_data);
-  ::snes->update_color_lookup_table();
-}
+Setting SNES::contrast(&config_file, "snes.colorfilter.contrast",
+  "Contrast", 0,  Setting::DEC);
+Setting SNES::brightness(&config_file, "snes.colorfilter.brightness",
+  "Brightness", 0, Setting::DEC);
+Setting SNES::gamma(&config_file, "snes.colorfilter.gamma",
+  "Gamma", 80, Setting::DEC);
 
 Setting SNES::ntsc_merge_fields(&config_file, "snes.ntsc_merge_fields",
 "Merge fields in NTSC video filter\n"

@@ -1,11 +1,15 @@
 void bMemBus::cart_map_range(
-  uint8 bank_lo, uint8 bank_hi,
-  uint8 page_lo, uint8 page_hi,
+  uint mode,
+  uint8  bank_lo, uint8  bank_hi,
+  uint16 addr_lo, uint16 addr_hi,
   uint type, uint offset
 ) {
 uint8 *data  = 0;
 uint   size  = 0;
 uint   index = 0;
+
+uint8 page_lo = (addr_lo >> 8) & 255;
+uint8 page_hi = (addr_hi >> 8) & 255;
 
   switch(type) {
 
@@ -24,6 +28,8 @@ uint   index = 0;
   if(size) { index = (index + offset) % size; }
 
   for(uint bank = bank_lo; bank <= bank_hi; bank++) {
+    if(mode == SHADOW && size) { index = (index + page_lo * 256) % size; }
+
     for(uint page = page_lo; page <= page_hi; page++) {
     uint16 n = (bank << 8) + page;
 
@@ -44,6 +50,8 @@ uint   index = 0;
 
       }
     }
+
+    if(mode == SHADOW && size) { index = (index + (255 - page_hi) * 256) % size; }
   }
 }
 
@@ -52,5 +60,5 @@ uint   index = 0;
 
 #include "mapper_pcb.cpp"
 
-#undef cart_map_range
+#undef map
 #undef mapper

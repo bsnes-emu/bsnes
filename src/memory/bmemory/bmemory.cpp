@@ -14,14 +14,25 @@ void bMemBus::load_cart() {
     if(!strcmp(cartridge.info.pcb, "SHVC-1A3B-11")) { cart_map_shvc_1a3b_13(); break; }
     if(!strcmp(cartridge.info.pcb, "SHVC-1A3B-12")) { cart_map_shvc_1a3b_13(); break; }
     if(!strcmp(cartridge.info.pcb, "SHVC-1A3B-13")) { cart_map_shvc_1a3b_13(); break; }
+
     if(!strcmp(cartridge.info.pcb, "SHVC-1A3B-20")) { cart_map_shvc_1a3b_20(); break; }
+
     if(!strcmp(cartridge.info.pcb, "SHVC-1A3M-10")) { cart_map_shvc_1a3m_30(); break; }
     if(!strcmp(cartridge.info.pcb, "SHVC-1A3M-20")) { cart_map_shvc_1a3m_30(); break; }
     if(!strcmp(cartridge.info.pcb, "SHVC-1A3M-21")) { cart_map_shvc_1a3m_30(); break; }
     if(!strcmp(cartridge.info.pcb, "SHVC-1A3M-30")) { cart_map_shvc_1a3m_30(); break; }
+
+    if(!strcmp(cartridge.info.pcb, "SHVC-1J3M-01")) { cart_map_shvc_1j3m_20(); break; }
+    if(!strcmp(cartridge.info.pcb, "SHVC-1J3M-10")) { cart_map_shvc_1j3m_20(); break; }
+    if(!strcmp(cartridge.info.pcb, "SHVC-1J3M-11")) { cart_map_shvc_1j3m_20(); break; }
+    if(!strcmp(cartridge.info.pcb, "SHVC-1J3M-20")) { cart_map_shvc_1j3m_20(); break; }
+
     if(!strcmp(cartridge.info.pcb, "BSC-1A5M-01"))  { cart_map_bsc_1a5m_01();  break; }
+
     if(!strcmp(cartridge.info.pcb, "BSC-1A7M-01"))  { cart_map_bsc_1a7m_01();  break; }
+
     if(!strcmp(cartridge.info.pcb, "BSC-1A7M-10"))  { cart_map_bsc_1a7m_10();  break; }
+
     dprintf("* PCB mapper not found");
     return;
 

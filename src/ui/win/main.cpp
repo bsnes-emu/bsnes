@@ -67,7 +67,7 @@ string t;
     }
   }
 
-  config::fs.base_path.sset(strptr(t));
+  config::fs_set_path(config::fs.base_path, strptr(t));
 }
 
 int __stdcall WinMain(HINSTANCE hinstance, HINSTANCE hprevinstance, LPSTR lpcmdline, int ncmdshow) {

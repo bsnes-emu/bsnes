@@ -1,27 +1,29 @@
 /*****
  * used by both DMA and HDMA
- * prevents transfer across same bus (a->a or b->b)
  *
- * DMA address bus a cannot read from or write to the following addresses :
- * $[00-3f|80-bf]:21[00-ff] <address bus b>
+ * DMA address bus A cannot read from or write to the following addresses :
  * $[00-3f|80-bf]:43[00-7f] <DMA control registers>
  * $[00-3f|80-bf]:420b      <DMA enable register>
  * $[00-3f|80-bf]:420c      <HDMA enable register>
- *
- * DMA address bus b cannot read from $2180
+ * WRAM<>WRAM transfers via $2180
  *****/
 void sCPU::dma_transfer(bool direction, uint8 bbus, uint32 abus) {
 uint8 r;
   if(direction == 0) { //a->b
     if((abus & 0x40ff00) == 0x2100 || (abus & 0x40ff80) == 0x4300 ||
        (abus & 0x40ffff) == 0x420b || (abus & 0x40ffff) == 0x420c) {
-      r = r_cpu->regs.mdr; //invalid reads return open bus
+      r = regs.mdr;
     } else {
       r = r_mem->read(abus);
     }
     r_mem->write(0x2100 | bbus, r);
   } else { //b->a
-  uint8 r = (bbus == 0x80) ? r_cpu->regs.mdr : r_mem->read(0x2100 | bbus);
+    if(bbus == 0x80 && ((abus & 0x7e0000) == 0x7e0000 || (abus & 0x40e000) == 0x0000)) {
+    //prevent WRAM->WRAM transfers
+      r = regs.mdr;
+    } else {
+      r = r_mem->read(0x2100 | bbus);
+    }
     if((abus & 0x40ff00) == 0x2100 || (abus & 0x40ff80) == 0x4300 ||
        (abus & 0x40ffff) == 0x420b || (abus & 0x40ffff) == 0x420c)return;
     r_mem->write(abus, r);
