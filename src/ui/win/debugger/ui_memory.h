@@ -12,8 +12,8 @@ class MemoryEditor : public Window {
 public:
 Editbox  View;
 Combobox Mode;
+Label    GotoLabel;
 Editbox  GotoAddr;
-Button   Goto;
 Label    OffsetLabel;
 Editbox  Offset;
 Editbox  Data;

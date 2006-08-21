@@ -20,11 +20,11 @@
 
 #include "cpu/cpu.h"
 #include "cpu/scpu/scpu.h"
-#include "cpu/bcpu/bcpu.h"
+//#include "cpu/bcpu/bcpu.h"
 
 #include "apu/apu.h"
 #include "apu/sapu/sapu.h"
-#include "apu/bapu/bapu.h"
+//#include "apu/bapu/bapu.h"
 
 #include "dsp/dsp.h"
 #include "dsp/bdsp/bdsp.h"

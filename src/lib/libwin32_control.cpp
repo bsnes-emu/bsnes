@@ -34,10 +34,10 @@ void Control::Focus() { SetFocus(hwnd); }
 
 void Control::Enable(bool do_enable) {
   if(do_enable == true) {
-    SetWindowLong(hwnd, GWL_STYLE, GetWindowLong(hwnd, GWL_STYLE) & ~WS_DISABLED);
+    EnableWindow(hwnd, TRUE);
     state.ws &= ~WS_DISABLED;
   } else {
-    SetWindowLong(hwnd, GWL_STYLE, GetWindowLong(hwnd, GWL_STYLE) |  WS_DISABLED);
+    EnableWindow(hwnd, FALSE);
     state.ws |=  WS_DISABLED;
   }
 }

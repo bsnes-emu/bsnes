@@ -8,4 +8,4 @@ bool  enabled;
 
   inline void   add_clocks(int clocks);
   inline void   tick_timers();
-  inline uint32 clocks_executed();
+  uint32 clocks_executed();

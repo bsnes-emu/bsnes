@@ -81,33 +81,24 @@ uint8  bg_sub;
   return src_main;
 }
 
-inline uint16 bPPU::get_pixel_lores(uint32 x) {
-  return get_pixel_normal(x);
-}
-
-inline uint16 bPPU::get_pixel_hires(uint32 x) {
-  if(x & 1) {
-    return get_pixel_normal(x >> 1);
-  } else {
-    return get_pixel_swap(x >> 1);
-  }
-}
-
 inline void bPPU::render_line_output() {
-uint16 *ptr    = (uint16*)output + (line.y * 1024) +
-                 ((line.interlace && line.interlace_field) ? 512 : 0);
-uint16 *ltable = (uint16*)light_table + (regs.display_brightness << 15);
-  if(!regs.pseudo_hires && !regs.hires) {
+uint16 *ptr  = (uint16*)output + (line.y * 1024) +
+               ((line.interlace && line.interlace_field) ? 512 : 0);
+uint16 *luma = light_table[regs.display_brightness];
+  if(!regs.pseudo_hires && regs.bg_mode != 5 && regs.bg_mode != 6) {
     for(int x = 0; x < 256; x++) {
-      *ptr++ = *(ltable + get_pixel_lores(x));
+      *ptr++ = luma[get_pixel_normal(x)];
     }
   } else {
   uint32 curr, prev = 0;
-    for(int x = 0; x < 512; x++) {
-      curr = *(ltable + get_pixel_hires(x));
+    for(int x = 0; x < 256; x++) {
+      curr = luma[get_pixel_swap(x)];
       *ptr++ = (prev + curr - ((prev ^ curr) & 0x0421)) >> 1;
       prev = curr;
-    //*ptr++ = *(ltable + get_pixel_hires(x));
+
+      curr = luma[get_pixel_normal(x)];
+      *ptr++ = (prev + curr - ((prev ^ curr) & 0x0421)) >> 1;
+      prev = curr;
     }
   }
 }

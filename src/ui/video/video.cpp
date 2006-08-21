@@ -25,10 +25,11 @@ int i = 0;
   v->manual_render_size   = strmatch(part[i++], "true");
   v->render_width         = strdec(part[i++]);
   v->render_height        = strdec(part[i++]);
+  v->fullscreen           = strmatch(part[i++], "true");
+  v->triple_buffering     = strmatch(part[i++], "true");
   v->resolution_width     = strdec(part[i++]);
   v->resolution_height    = strdec(part[i++]);
   v->refresh_rate         = strdec(part[i++]);
-  v->triple_buffering     = strmatch(part[i++], "true");
 
   if(v->render_width  < 256)v->render_width  = 256;
   if(v->render_height < 224)v->render_height = 224;
@@ -50,10 +51,11 @@ VideoSettings *v = &video_settings[profile];
   sprintf(part, "%s", v->manual_render_size   ? "true" : "false"); strcat(line, part); strcat(line, ";");
   sprintf(part, "%d", v->render_width);                            strcat(line, part); strcat(line, ";");
   sprintf(part, "%d", v->render_height);                           strcat(line, part); strcat(line, ";");
+  sprintf(part, "%s", v->fullscreen           ? "true" : "false"); strcat(line, part); strcat(line, ";");
+  sprintf(part, "%s", v->triple_buffering     ? "true" : "false"); strcat(line, part); strcat(line, ";");
   sprintf(part, "%d", v->resolution_width);                        strcat(line, part); strcat(line, ";");
   sprintf(part, "%d", v->resolution_height);                       strcat(line, part); strcat(line, ";");
-  sprintf(part, "%d", v->refresh_rate);                            strcat(line, part); strcat(line, ";");
-  sprintf(part, "%s", v->triple_buffering     ? "true" : "false"); strcat(line, part);
+  sprintf(part, "%d", v->refresh_rate);                            strcat(line, part);
 
   switch(profile) {
   case 0: config::video.profile_0.sset(strptr(line)); break;
@@ -90,11 +92,13 @@ VideoSettings *v = &video_settings[profile];
     }
   }
 
-  settings.hardware_filter   = v->hardware_filter;
+  settings.fullscreen        = v->fullscreen;
   settings.triple_buffering  = v->triple_buffering;
+
+  settings.hardware_filter   = v->hardware_filter;
   settings.enable_scanlines  = v->enable_scanlines;
 
-  if((bool)config::video.fullscreen == true) {
+  if(v->fullscreen == true) {
     settings.resolution_width  = (v->resolution_width)  ? v->resolution_width  : screen_width();
     settings.resolution_height = (v->resolution_height) ? v->resolution_height : screen_height();
     settings.refresh_rate      = v->refresh_rate;

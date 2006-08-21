@@ -2,6 +2,7 @@
 
 class VideoDD : public Video {
 private:
+HWND hwnd;
 LPDIRECTDRAW         lpdd;
 LPDIRECTDRAW7        lpdd7;
 LPDIRECTDRAWSURFACE7 screen, backbuffer;
@@ -29,5 +30,5 @@ public:
   void    redraw();
   void    update();
 
-  VideoDD();
+  VideoDD(HWND handle);
 };

@@ -7,17 +7,17 @@ bool VideoDD::update_video_profile() {
   lpdd->QueryInterface(IID_IDirectDraw7, (void**)&lpdd7);
   SafeRelease(lpdd);
 
-  if(bool(config::video.fullscreen) == true) {
-    lpdd7->SetCooperativeLevel(wMain.hwnd, DDSCL_FULLSCREEN | DDSCL_EXCLUSIVE);
+  if(settings.fullscreen == true) {
+    lpdd7->SetCooperativeLevel(hwnd, DDSCL_FULLSCREEN | DDSCL_EXCLUSIVE);
     lpdd7->SetDisplayMode(settings.resolution_width, settings.resolution_height, 16, settings.refresh_rate, 0);
   } else {
-    lpdd7->SetCooperativeLevel(wMain.hwnd, DDSCL_NORMAL);
+    lpdd7->SetCooperativeLevel(hwnd, DDSCL_NORMAL);
   }
 
   create_presentation();
 
   lpdd7->CreateClipper(0, &clipper, 0);
-  clipper->SetHWnd(0, wMain.hwnd);
+  clipper->SetHWnd(0, hwnd);
   screen->SetClipper(clipper);
 
   create_render_target();
@@ -101,7 +101,7 @@ DDBLTFX fx;
   backbuffer->Blt(0, 0, 0, DDBLT_WAIT | DDBLT_COLORFILL, &fx);
   surface->Blt   (0, 0, 0, DDBLT_WAIT | DDBLT_COLORFILL, &fx);
 
-  if(bool(config::video.fullscreen) == true) {
+  if(settings.fullscreen == true) {
     screen->Flip(0, DDFLIP_WAIT);
     backbuffer->Blt(0, 0, 0, DDBLT_WAIT | DDBLT_COLORFILL, &fx);
     screen->Flip(0, DDFLIP_WAIT);
@@ -113,7 +113,7 @@ void VideoDD::create_presentation() {
   memset(&ddsd, 0, sizeof(DDSURFACEDESC2));
   ddsd.dwSize = sizeof(DDSURFACEDESC2);
 
-  if(bool(config::video.fullscreen) == true) {
+  if(settings.fullscreen == true) {
     ddsd.dwFlags           = DDSD_CAPS | DDSD_BACKBUFFERCOUNT;
     ddsd.dwBackBufferCount = (settings.triple_buffering == true) ? 2 : 1;
     ddsd.ddsCaps.dwCaps    = DDSCAPS_PRIMARYSURFACE | DDSCAPS_FLIP | DDSCAPS_COMPLEX;
@@ -149,14 +149,14 @@ RECT rd, rs;
   snes->get_video_info(&vi);
   SetRect(&rs, 0, 0, vi.width, vi.height);
 
-  if(bool(config::video.fullscreen) == true) {
+  if(settings.fullscreen == true) {
     SetRect(&rd, settings.rx, settings.ry, settings.rx + settings.rw, settings.ry + settings.rh);
     backbuffer->Blt(&rd, surface, &rs, DDBLT_WAIT, 0);
     hr = screen->Flip(0, DDFLIP_WAIT);
   } else {
   POINT p = { 0, 0 };
-    ClientToScreen(wMain.hwnd, &p);
-    GetClientRect(wMain.hwnd, &rd);
+    ClientToScreen(hwnd, &p);
+    GetClientRect(hwnd, &rd);
     OffsetRect(&rd, p.x, p.y);
 
     hr = screen->Blt(&rd, surface, &rs, DDBLT_WAIT, 0);
@@ -184,7 +184,9 @@ void VideoDD::term() {
   SafeRelease(lpdd);
 }
 
-VideoDD::VideoDD() {
+VideoDD::VideoDD(HWND handle) {
+  hwnd = handle;
+
   lpdd       = 0;
   lpdd7      = 0;
   screen     = 0;

@@ -1,3 +1,16 @@
+uint bMemBus::mirror(uint size, uint pos) {
+  if(size == 0)return 0;
+  if(pos < size)return pos;
+
+uint mask = 1 << 31;
+  while(!(pos & mask))mask >>= 1;
+  if(size <= (pos & mask)) {
+    return mirror(size, pos - mask);
+  } else {
+    return mask + mirror(size - mask, pos - mask);
+  }
+}
+
 void bMemBus::cart_map_range(
   uint mode,
   uint8  bank_lo, uint8  bank_hi,
@@ -33,7 +46,7 @@ uint8 page_hi = (addr_hi >> 8) & 255;
     for(uint page = page_lo; page <= page_hi; page++) {
     uint16 n = (bank << 8) + page;
 
-      page_handle[n] = data + index;
+      page_handle[n] = data + mirror(size, index);
       if(size) { index = (index + 256) % size; }
 
       switch(type) {

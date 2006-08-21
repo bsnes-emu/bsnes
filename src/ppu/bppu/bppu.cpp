@@ -6,7 +6,6 @@ void bPPU::run() {}
 
 void bPPU::scanline() {
   line.y               = r_cpu->vcounter();
-  line.width           = (regs.hires) ? 512 : 256;
   line.interlace       = r_cpu->interlace();
   line.interlace_field = r_cpu->interlace_field();
 
@@ -89,8 +88,8 @@ void bPPU::power() {
   region = snes->region();
 
 //$2100
-  regs.display_disabled   = 0;
-  regs.display_brightness = 0;
+  regs.display_disabled   = 1;
+  regs.display_brightness = 15;
 
 //$2101
   regs.oam_basesize   = 0;
@@ -99,12 +98,12 @@ void bPPU::power() {
 
 //$2102-$2103
   regs.oam_baseaddr    = 0x0000;
-  regs.oam_addr        = 0x0000;
+  regs.oam_addr        = regs.oam_baseaddr << 1;
   regs.oam_priority    = false;
-  regs.oam_firstsprite = 0x00;
+  regs.oam_firstsprite = 0;
 
 //$2104
-  regs.oam_latchdata   = 0x00;
+  regs.oam_latchdata = 0x00;
 
 //$2105
   regs.bg_tilesize[BG1] = 0;
@@ -113,7 +112,6 @@ void bPPU::power() {
   regs.bg_tilesize[BG4] = 0;
   regs.bg3_priority     = 0;
   regs.bg_mode          = 0;
-  regs.hires            = false;
 
 //$2106
   regs.mosaic_size         = 0;
@@ -205,10 +203,10 @@ void bPPU::power() {
   regs.window2_invert [COL] = false;
 
 //$2126-$2129
-  regs.window1_left  = 0;
-  regs.window1_right = 0;
-  regs.window2_left  = 0;
-  regs.window2_right = 0;
+  regs.window1_left  = 0x00;
+  regs.window1_right = 0x00;
+  regs.window2_left  = 0x00;
+  regs.window2_right = 0x00;
 
 //$212a-$212b
   regs.window_mask[BG1] = 0;
@@ -245,7 +243,8 @@ void bPPU::power() {
 //$2130
   regs.color_mask    = 0;
   regs.colorsub_mask = 0;
-  regs.addsub_mode   = 0;
+  regs.addsub_mode   = false;
+  regs.direct_color  = false;
 
 //$2131
   regs.color_mode          = 0;
@@ -304,7 +303,6 @@ void bPPU::reset() {
   regs.bg_y[2] = 0;
   regs.bg_y[3] = 0;
 
-  line.width = 256;
   clear_tiledata_cache();
 }
 
@@ -377,62 +375,25 @@ bPPU::bPPU() {
   init_tiledata_cache();
 
   for(int l = 0; l < 16; l++) {
-    mosaic_table[l] = (uint16*)malloc(4096 * 2);
     for(int i = 0; i < 4096; i++) {
       mosaic_table[l][i] = (i / (l + 1)) * (l + 1);
     }
   }
 
-  light_table = (uint16*)malloc(16 * 32768 * 2);
-uint16 *ptr = (uint16*)light_table;
   for(int l = 0; l < 16; l++) {
   int r, g, b;
-  #if 0
-  double y, cb, cr;
-  double kr = 0.2126, kb = 0.0722, kg = (1.0 - kr - kb);
-    for(int i = 0; i < 32768; i++) {
-      if(l ==  0) { *ptr++ = 0; continue; }
-      if(l == 15) { *ptr++ = i; continue; }
-
-      r = (i      ) & 31;
-      g = (i >>  5) & 31;
-      b = (i >> 10) & 31;
-
-      y  = (double)r * kr + (double)g * kg + (double)b * kb;
-      cb = ((double)b - y) / (2.0 - 2.0 * kb);
-      cr = ((double)r - y) / (2.0 - 2.0 * kr);
-
-      y  *= (double)l / 15.0;
-      cb *= (double)l / 15.0;
-      cr *= (double)l / 15.0;
-
-      r = y + cr * (2.0 - 2.0 * kr);
-      b = y + cb * (2.0 - 2.0 * kb);
-      g = (y - b * kb - r * kr) / kg;
-
-      r = minmax<0, 31>(r);
-      g = minmax<0, 31>(g);
-      b = minmax<0, 31>(b);
-
-      *ptr++ = (r) | (g << 5) | (b << 10);
-    }
-  #else
   double m = (double)l / 15.0;
     for(int i = 0; i < 32768; i++) {
-      if(l ==  0) { *ptr++ = 0; continue; }
-      if(l == 15) { *ptr++ = i; continue; }
-
       r = (i      ) & 31;
       g = (i >>  5) & 31;
       b = (i >> 10) & 31;
 
-      r = minmax<0, 31>((int)((double)r * m));
-      g = minmax<0, 31>((int)((double)g * m));
-      b = minmax<0, 31>((int)((double)b * m));
+      r = minmax<0, 31>( (int)((double)r * m + 0.5) );
+      g = minmax<0, 31>( (int)((double)g * m + 0.5) );
+      b = minmax<0, 31>( (int)((double)b * m + 0.5) );
 
-      *ptr++ = (r) | (g << 5) | (b << 10);
+      light_table[l][i] = (b << 10) | (g << 5) | (r);
     }
-  #endif
   }
 }
 
@@ -440,10 +401,4 @@ bPPU::~bPPU() {
   SafeFree(vram);
   SafeFree(oam);
   SafeFree(cgram);
-
-  for(int i = 0; i < 16; i++) {
-    SafeFree(mosaic_table[i]);
-  }
-
-  SafeFree(light_table);
 }

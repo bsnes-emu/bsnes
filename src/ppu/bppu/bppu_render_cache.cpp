@@ -99,9 +99,9 @@ uint8 *dest;
 #undef render_bg_tile_line_4bpp
 #undef render_bg_tile_line_8bpp
 
-inline void bPPU::clear_pixel_cache() {
+void bPPU::clear_pixel_cache() {
 uint16 main = get_palette(0);
-uint16 sub  = (regs.pseudo_hires || regs.hires) ? main : regs.color_rgb;
+uint16 sub  = (regs.pseudo_hires || regs.bg_mode == 5 || regs.bg_mode == 6) ? main : regs.color_rgb;
 uint32 i    = 255;
   do {
     pixel_cache[i].src_main = main;

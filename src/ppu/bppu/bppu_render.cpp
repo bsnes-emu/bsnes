@@ -45,7 +45,7 @@ Mode 0: ->
      1,    2,    3,    4,    5,    6,    7,    8,    9,   10,   11,   12
   BG4B, BG3B, OAM0, BG4A, BG3A, OAM1, BG2B, BG1B, OAM2, BG2A, BG1A, OAM3
 */
-inline void bPPU::render_line_mode0() {
+void bPPU::render_line_mode0() {
   render_line_bg(BG1, COLORDEPTH_4, 8, 11);
   render_line_bg(BG2, COLORDEPTH_4, 7, 10);
   render_line_bg(BG3, COLORDEPTH_4, 2,  5);
@@ -62,7 +62,7 @@ Mode 1 (pri=0): ->
      1,    2,    3,    4,    5,    6,    7,    8,    9,   10
   BG3B, OAM0, BG3A, OAM1, BG2B, BG1B, OAM2, BG2A, BG1A, OAM3
 */
-inline void bPPU::render_line_mode1() {
+void bPPU::render_line_mode1() {
   if(regs.bg3_priority) {
     render_line_bg(BG1, COLORDEPTH_16, 5,  8);
     render_line_bg(BG2, COLORDEPTH_16, 4,  7);
@@ -81,7 +81,7 @@ Mode 2: ->
      1,    2,    3,    4,    5,    6,    7,    8
   BG2B, OAM0, BG1B, OAM1, BG2A, OAM2, BG1A, OAM3
 */
-inline void bPPU::render_line_mode2() {
+void bPPU::render_line_mode2() {
   render_line_bg(BG1, COLORDEPTH_16, 3, 7);
   render_line_bg(BG2, COLORDEPTH_16, 1, 5);
   render_line_oam(2, 4, 6, 8);
@@ -92,7 +92,7 @@ Mode 3: ->
      1,    2,    3,    4,    5,    6,    7,    8
   BG2B, OAM0, BG1B, OAM1, BG2A, OAM2, BG1A, OAM3
 */
-inline void bPPU::render_line_mode3() {
+void bPPU::render_line_mode3() {
   render_line_bg(BG1, COLORDEPTH_256, 3, 7);
   render_line_bg(BG2, COLORDEPTH_16,  1, 5);
   render_line_oam(2, 4, 6, 8);
@@ -103,7 +103,7 @@ Mode 4: ->
      1,    2,    3,    4,    5,    6,    7,    8
   BG2B, OAM0, BG1B, OAM1, BG2A, OAM2, BG1A, OAM3
 */
-inline void bPPU::render_line_mode4() {
+void bPPU::render_line_mode4() {
   render_line_bg(BG1, COLORDEPTH_256, 3, 7);
   render_line_bg(BG2, COLORDEPTH_4,   1, 5);
   render_line_oam(2, 4, 6, 8);
@@ -114,7 +114,7 @@ Mode 5: ->
      1,    2,    3,    4,    5,    6,    7,    8
   BG2B, OAM0, BG1B, OAM1, BG2A, OAM2, BG1A, OAM3
 */
-inline void bPPU::render_line_mode5() {
+void bPPU::render_line_mode5() {
   render_line_bg(BG1, COLORDEPTH_16, 3, 7);
   render_line_bg(BG2, COLORDEPTH_4,  1, 5);
   render_line_oam(2, 4, 6, 8);
@@ -125,7 +125,7 @@ Mode 6: ->
      1,    2,    3,    4,    5,    6
   OAM0, BG1B, OAM1, OAM2, BG1A, OAM3
 */
-inline void bPPU::render_line_mode6() {
+void bPPU::render_line_mode6() {
   render_line_bg(BG1, COLORDEPTH_16, 2, 5);
   render_line_oam(1, 3, 4, 6);
 }
@@ -139,7 +139,7 @@ Mode 7 EXTBG: ->
      1,    2,    3,    4,    5,    6,    7
   BG2B, OAM0, BG1n, OAM1, BG2A, OAM2, OAM3
 */
-inline void bPPU::render_line_mode7() {
+void bPPU::render_line_mode7() {
   if(regs.mode7_extbg == false) {
     render_line_mode7(BG1, 2, 2);
     render_line_oam(1, 3, 4, 5);
@@ -151,7 +151,7 @@ inline void bPPU::render_line_mode7() {
 }
 
 void bPPU::render_line() {
-  if(regs.display_disabled == true || regs.display_brightness == 0) {
+  if(regs.display_disabled == true) {
     memset(output + (line.y * 1024), 0, 1024);
     return;
   }

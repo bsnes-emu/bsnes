@@ -13,10 +13,11 @@ struct VideoSettings {
   bool manual_render_size;
   uint render_width;
   uint render_height;
+  bool fullscreen;
+  bool triple_buffering;
   uint resolution_width;
   uint resolution_height;
   uint refresh_rate;
-  bool triple_buffering;
 } video_settings[8];
 
 void load_video_settings(uint profile);
@@ -30,8 +31,10 @@ struct {
   uint render_width;
   uint render_height;
 
-  uint hardware_filter;
+  bool fullscreen;
   bool triple_buffering;
+
+  uint hardware_filter;
   bool enable_scanlines;
 
   uint resolution_width;
@@ -48,8 +51,8 @@ struct {
   virtual uint    screen_width()  = 0;
   virtual uint    screen_height() = 0;
 
-  virtual bool    update_video_profile() = 0;
-  virtual void    clear_video() = 0;
+  virtual bool    update_video_profile() { return true; }
+  virtual void    clear_video() {}
 
   virtual void    pause_enable() {}
   virtual void    pause_disable() {}

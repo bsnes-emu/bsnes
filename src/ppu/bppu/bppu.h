@@ -8,10 +8,9 @@ enum { BG1 = 0, BG2 = 1, BG3 = 2, BG4 = 3, OAM = 4, BACK = 5, COL = 5 };
 enum { SC_32x32 = 0, SC_64x32 = 1, SC_32x64 = 2, SC_64x64 = 3 };
 
 struct {
-  uint32 y;
-  uint32 width;
-  bool   interlace;
-  bool   interlace_field;
+  uint y;
+  bool interlace;
+  bool interlace_field;
 } line;
 
 struct {
@@ -43,7 +42,6 @@ struct {
   bool   bg_tilesize[4];
   bool   bg3_priority;
   uint8  bg_mode;
-  bool   hires;
 
 //$2106
   uint8  mosaic_size;
@@ -227,8 +225,8 @@ struct {
 
 #include "bppu_render.h"
 
-uint16 *light_table;
-uint16 *mosaic_table[16];
+uint16 light_table[16][32768];
+uint16 mosaic_table[16][4096];
   void   render_line();
 
   void   update_oam_status();
@@ -240,7 +238,7 @@ uint16 *mosaic_table[16];
   void   power();
   void   reset();
 
-  bool   scanline_is_hires() { return (regs.pseudo_hires || regs.hires); }
+  bool   scanline_is_hires() { return (regs.pseudo_hires || regs.bg_mode == 5 || regs.bg_mode == 6); }
 
   bPPU();
   ~bPPU();

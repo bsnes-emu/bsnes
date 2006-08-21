@@ -1,8 +1,8 @@
   uint8  spcram_read (uint16 addr);
   void   spcram_write(uint16 addr, uint8 data);
 
-  inline uint8  port_read (uint8 port);
-  inline void   port_write(uint8 port, uint8 data);
+  uint8  port_read (uint8 port);
+  void   port_write(uint8 port, uint8 data);
 
 /*****
  * core APU bus functions

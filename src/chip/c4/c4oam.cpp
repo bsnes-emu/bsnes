@@ -1,7 +1,7 @@
 //Build OAM
 void C4::op00_00() {
 uint32 oamptr = ram[0x626] << 2;
-  for(int32 i=0x1fd;i>oamptr && i>=0;i-=4) {
+  for(int32 i = 0x1fd; i > oamptr && i >= 0; i -= 4) {
   //clear oam-to-be
     if(i >= 0)ram[i] = 0xe0;
   }
@@ -19,58 +19,55 @@ uint8  sprcount;
 
   sprcount = 128 - ram[0x626];
 uint8 offset = (ram[0x626] & 3) * 2;
-  for(int pri=0x30;pri>=0;pri-=0x10) {
-  uint32 srcptr = 0x220;
-    for(int i=ram[0x620];i>0 && sprcount>0;i--, srcptr+=16) {
-      if((ram[srcptr + 4] & 0x30) != pri)continue;
-      sprx = readw(srcptr)     - globalx;
-      spry = readw(srcptr + 2) - globaly;
-      sprname = ram[srcptr + 5];
-      sprattr = ram[srcptr + 4] | ram[srcptr + 6];
+uint32 srcptr = 0x220;
+  for(int i = ram[0x620]; i > 0 && sprcount > 0; i--, srcptr += 16) {
+    sprx = readw(srcptr)     - globalx;
+    spry = readw(srcptr + 2) - globaly;
+    sprname = ram[srcptr + 5];
+    sprattr = ram[srcptr + 4] | ram[srcptr + 6];
 
-    uint32 spraddr = readl(srcptr + 7);
-      if(r_mem->read(spraddr)) {
-      int16 x, y;
-        for(int sprcnt=r_mem->read(spraddr++);sprcnt>0 && sprcount>0;sprcnt--, spraddr+=4) {
-          x = (int8)r_mem->read(spraddr + 1);
-          if(sprattr & 0x40) {
-            x = -x - ((r_mem->read(spraddr) & 0x20) ? 16 : 8);
+  uint32 spraddr = readl(srcptr + 7);
+    if(r_mem->read(spraddr)) {
+    int16 x, y;
+      for(int sprcnt = r_mem->read(spraddr++); sprcnt > 0 && sprcount > 0; sprcnt--, spraddr += 4) {
+        x = (int8)r_mem->read(spraddr + 1);
+        if(sprattr & 0x40) {
+          x = -x - ((r_mem->read(spraddr) & 0x20) ? 16 : 8);
+        }
+        x += sprx;
+        if(x >= -16 && x <= 272) {
+          y = (int8)r_mem->read(spraddr + 2);
+          if(sprattr & 0x80) {
+            y = -y - ((r_mem->read(spraddr) & 0x20) ? 16 : 8);
           }
-          x += sprx;
-          if(x >= -16 && x <= 272) {
-            y = (int8)r_mem->read(spraddr + 2);
-            if(sprattr & 0x80) {
-              y = -y - ((r_mem->read(spraddr) & 0x20) ? 16 : 8);
-            }
-            y += spry;
-            if(y >= -16 && y <= 224) {
-              ram[oamptr    ] = (uint8)x;
-              ram[oamptr + 1] = (uint8)y;
-              ram[oamptr + 2] = sprname + r_mem->read(spraddr + 3);
-              ram[oamptr + 3] = sprattr ^ (r_mem->read(spraddr) & 0xc0);
-              ram[oamptr2] &= ~(3 << offset);
-              if(x & 0x100)ram[oamptr2] |= 1 << offset;
-              if(r_mem->read(spraddr) & 0x20)ram[oamptr2] |= 2 << offset;
-              oamptr += 4;
-              sprcount--;
-              offset = (offset + 2) & 6;
-              if(!offset)oamptr2++;
-            }
+          y += spry;
+          if(y >= -16 && y <= 224) {
+            ram[oamptr    ] = (uint8)x;
+            ram[oamptr + 1] = (uint8)y;
+            ram[oamptr + 2] = sprname + r_mem->read(spraddr + 3);
+            ram[oamptr + 3] = sprattr ^ (r_mem->read(spraddr) & 0xc0);
+            ram[oamptr2] &= ~(3 << offset);
+            if(x & 0x100)ram[oamptr2] |= 1 << offset;
+            if(r_mem->read(spraddr) & 0x20)ram[oamptr2] |= 2 << offset;
+            oamptr += 4;
+            sprcount--;
+            offset = (offset + 2) & 6;
+            if(!offset)oamptr2++;
           }
         }
-      } else if(sprcount > 0) {
-        ram[oamptr    ] = (uint8)sprx;
-        ram[oamptr + 1] = (uint8)spry;
-        ram[oamptr + 2] = sprname;
-        ram[oamptr + 3] = sprattr;
-        ram[oamptr2] &= ~(3 << offset);
-        if(sprx & 0x100)ram[oamptr2] |= 3 << offset;
-        else ram[oamptr2] |= 2 << offset;
-        oamptr += 4;
-        sprcount--;
-        offset = (offset + 2) & 6;
-        if(!offset)oamptr2++;
       }
+    } else if(sprcount > 0) {
+      ram[oamptr    ] = (uint8)sprx;
+      ram[oamptr + 1] = (uint8)spry;
+      ram[oamptr + 2] = sprname;
+      ram[oamptr + 3] = sprattr;
+      ram[oamptr2] &= ~(3 << offset);
+      if(sprx & 0x100)ram[oamptr2] |= 3 << offset;
+      else ram[oamptr2] |= 2 << offset;
+      oamptr += 4;
+      sprcount--;
+      offset = (offset + 2) & 6;
+      if(!offset)oamptr2++;
     }
   }
 }
@@ -178,13 +175,11 @@ uint32 waveptr = read(0x1f83);
 uint16 mask1   = 0xc0c0;
 uint16 mask2   = 0x3f3f;
 
-int32 i, j;
-int16 height, temp;
-  for(j = 0; j < 0x10; j++) {
+  for(int j = 0; j < 0x10; j++) {
     do {
-      height = -((int8)ram[waveptr + 0xb00]) - 16;
-      for(i = 0; i < 40; i++) {
-        temp = readw(destptr + wave_data[i]) & mask2;
+    int16 height = -((int8)read(waveptr + 0xb00)) - 16;
+      for(int i = 0; i < 40; i++) {
+      uint16 temp = readw(destptr + wave_data[i]) & mask2;
         if(height >= 0) {
           if(height < 8) {
             temp |= mask1 & readw(0xa00 + height * 2);
@@ -202,22 +197,22 @@ int16 height, temp;
     destptr += 16;
 
     do {
-      height = -((int8)ram[waveptr + 0xb00]) - 16;
-      for(i = 0; i < 40; i++) {
-        temp = readw(destptr + wave_data[i]) & mask2;
+    int16 height = -((int8)read(waveptr + 0xb00)) - 16;
+      for(int i = 0; i < 40; i++) {
+      uint16 temp = readw(destptr + wave_data[i]) & mask2;
         if(height >= 0) {
           if(height < 8) {
             temp |= mask1 & readw(0xa10 + height * 2);
           } else {
             temp |= mask1 & 0xff00;
           }
-          writew(destptr + wave_data[i], temp);
-          height++;
         }
-        waveptr = (waveptr + 1) & 0x7f;
-        mask1   = (mask1 >> 2) | (mask1 << 6);
-        mask2   = (mask2 >> 2) | (mask2 << 6);
+        writew(destptr + wave_data[i], temp);
+        height++;
       }
+      waveptr = (waveptr + 1) & 0x7f;
+      mask1   = (mask1 >> 2) | (mask1 << 6);
+      mask2   = (mask2 >> 2) | (mask2 << 6);
     } while(mask1 != 0xc0c0);
     destptr += 16;
   }

@@ -19,7 +19,7 @@ enum { NTSC = 0, PAL = 1 };
 
 //system functions
   virtual inline void run();
-  virtual inline void runtoframe();
+  virtual void runtoframe();
 
   virtual void init();
   virtual void term();

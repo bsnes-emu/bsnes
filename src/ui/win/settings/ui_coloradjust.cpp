@@ -85,7 +85,7 @@ int x = 15, y = 30;
   GammaSlider.SetPos(int32(config::snes.gamma));
   y += 75;
 
-  GammaRamp.Create(this, "visible", x, y, 475, 15, "Half Gamma Adjust (darkens image, helps prevent washed out colors)");
+  GammaRamp.Create(this, "visible", x, y, 475, 15, "Half gamma adjust (darkens image, helps prevent washed out colors)");
   GammaRamp.Check(config::snes.gamma_ramp);
   y += 15;
   Sepia.Create(this, "visible", x, y, 475, 15, "Sepia");
@@ -94,7 +94,7 @@ int x = 15, y = 30;
   Grayscale.Create(this, "visible", x, y, 475, 15, "Grayscale");
   Grayscale.Check(config::snes.grayscale);
   y += 15;
-  Invert.Create(this, "visible", x, y, 475, 15, "Invert Colors");
+  Invert.Create(this, "visible", x, y, 475, 15, "Invert colors");
   Invert.Check(config::snes.invert);
   y += 20;
 

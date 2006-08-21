@@ -30,7 +30,7 @@ void set_video_profile(uint profile) {
   uiVideo->update_video_settings();
 
 string t;
-  if(bool(config::video.fullscreen) == true) {
+  if(uiVideo->settings.fullscreen == true) {
     strcpy(t, "topmost|popup");
     if(wMain.Visible())strcat(t, "|visible");
     wMain.HideMenu();
@@ -57,12 +57,21 @@ string t;
 }
 
 void toggle_fullscreen() {
-  config::video.fullscreen.toggle();
-  if(bool(config::video.fullscreen) == true) {
-    wSettings.Hide();
-    wAbout.Hide();
-    debugger.deactivate();
+bool fullscreen = !uiVideo->settings.fullscreen;
+uint i;
+  for(i = 0; i < 8; i++) {
+    if(video_settings[i].fullscreen == fullscreen)break;
   }
+
+  if(i <= 7) {
+    if(fullscreen == true) {
+      wSettings.Hide();
+      wAbout.Hide();
+      debugger.deactivate();
+    }
+    config::video.profile = i;
+  }
+
   event::set_video_profile(config::video.profile);
 }
 

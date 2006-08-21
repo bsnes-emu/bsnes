@@ -55,7 +55,7 @@ uint8 r = 0x00;
     r = r_mem->read(addr);
   } break;
   case SPCRAM:
-    r = r_apu->spcram_read(addr & 0xffff);
+    r = r_apu->spcram[addr & 0xffff];
     break;
   case VRAM:
     r = r_ppu->vram_read(addr & 0xffff);
@@ -80,7 +80,7 @@ void Debugger::write(uint8 mode, uint32 addr, uint8 data) {
     r_mem->cart_write_protect(true);
     break;
   case SPCRAM:
-    r_apu->spcram_write(addr & 0xffff, data);
+    r_apu->spcram[addr & 0xffff] = data;
     break;
   case VRAM:
     r_ppu->vram_write(addr & 0xffff, data);

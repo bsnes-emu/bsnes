@@ -9,12 +9,27 @@ bool VideoSettingsWindow::Event(EventInfo &info) {
       SaveSettings(VideoProfile.GetSelection());
     } else if(info.control == &SelectProfile) {
       event::set_video_profile(VideoProfile.GetSelection());
+    } else if(info.control == &ManualRenderSize || info.control == &Fullscreen) {
+      UpdateControls();
     }
   } break;
 
   }
 
   return false;
+}
+
+void VideoSettingsWindow::UpdateControls() {
+bool r = ManualRenderSize.Checked();
+  Multiplier.Enable(!r);
+  FixAspectRatio.Enable(!r);
+  RenderWidth.Enable(r);
+  RenderHeight.Enable(r);
+
+  r = Fullscreen.Checked();
+  FullResWidth.Enable(r);
+  FullResHeight.Enable(r);
+  FullResHz.Enable(r);
 }
 
 void VideoSettingsWindow::LoadSettings(uint profile) {
@@ -30,10 +45,13 @@ VideoSettings *v = &video_settings[profile];
   ManualRenderSize.Check(v->manual_render_size);
   RenderWidth.SetText("%d", v->render_width);
   RenderHeight.SetText("%d", v->render_height);
+  Fullscreen.Check(v->fullscreen);
+  TripleBuffering.Check(v->triple_buffering);
   FullResWidth.SetText("%d", v->resolution_width);
   FullResHeight.SetText("%d", v->resolution_height);
   FullResHz.SetText("%d", v->refresh_rate);
-  TripleBuffering.Check(v->triple_buffering);
+
+  UpdateControls();
 }
 
 void VideoSettingsWindow::SaveSettings(uint profile) {
@@ -50,13 +68,14 @@ char t[64 + 1];
   v->render_width         = strdec(t);
   RenderHeight.GetText(t, 64);
   v->render_height        = strdec(t);
+  v->fullscreen           = Fullscreen.Checked();
+  v->triple_buffering     = TripleBuffering.Checked();
   FullResWidth.GetText(t, 64);
   v->resolution_width     = strdec(t);
   FullResHeight.GetText(t, 64);
   v->resolution_height    = strdec(t);
   FullResHz.GetText(t, 64);
   v->refresh_rate         = strdec(t);
-  v->triple_buffering     = TripleBuffering.Checked();
 
 //update config file line entry
   save_video_settings(profile);
@@ -107,9 +126,8 @@ int x = 15, y = 30;
 
   FixAspectRatio.Create(this, "visible|auto", x, y, 460, 16, "Correct aspect ratio");
   Scanlines.Create(this, "visible|auto", x, y + 15, 460, 15, "Enable hardware scanlines");
-  ManualRenderSize.Create(this, "visible|auto", x, y + 30, 460, 15,
-    "Manual render screen size (ignores correct aspect ratio and multiplier settings)");
-  y += 45;
+  ManualRenderSize.Create(this, "visible|auto", x, y + 30, 460, 15, "Manual render screen size");
+  y += 47;
 
   RenderWidthLabel.Create(this, "visible", x, y + 3, 90, 15, "Render width:");
   RenderWidth.Create(this, "visible|edge", x + 90, y, 50, 20);
@@ -117,8 +135,12 @@ int x = 15, y = 30;
   RenderHeight.Create(this, "visible|edge", x + 240, y, 50, 20);
   y += 25;
 
-  Separator1.Create(this, "visible|sunken", x, y, 460, 3);
+  Separator2.Create(this, "visible|sunken", x, y, 460, 3);
   y += 8;
+
+  Fullscreen.Create(this, "visible|auto", x, y, 460, 16, "Fullscreen");
+  TripleBuffering.Create(this, "visible|auto", x, y + 15, 460, 15, "Triple buffering (buggy, causes sound desync)");
+  y += 35;
 
   FullResWidthLabel.Create(this, "visible", x, y + 3, 90, 15, "Resolution width:");
   FullResWidth.Create(this, "visible|edge", x + 90, y, 50, 20);
@@ -126,10 +148,7 @@ int x = 15, y = 30;
   FullResHeight.Create(this, "visible|edge", x + 240, y, 50, 20);
   FullResHzLabel.Create(this, "visible", x + 300, y + 3, 70, 15, "Refresh rate:");
   FullResHz.Create(this, "visible|edge", x + 370, y, 50, 20);
-  y += 22;
-
-  TripleBuffering.Create(this, "visible|auto", x, y, 460, 15, "Triple buffering (buggy, causes sound desync)");
-  y += 20;
+  y += 27;
 
   ApplySettings.Create(this, "visible", x, y, 120, 25, "Apply settings");
   SelectProfile.Create(this, "visible", x + 125, y, 120, 25, "Set as active profile");

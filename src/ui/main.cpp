@@ -22,9 +22,11 @@ void term_snes();
  * platform abstraction layer
  *****/
 
-#if defined(PLATFORM_WIN)
+#if defined(UI_WIN)
   #include "win/main.cpp"
-#elif defined(PLATFORM_SDL)
+#elif defined(UI_GTK)
+  #include "gtk/main.cpp"
+#elif defined(UI_SDL)
   #include "sdl/main.cpp"
 #else
   #error "unsupported platform"

@@ -88,12 +88,8 @@ void render_line_mode7(uint8 bg, uint8 pri0_pos, uint8 pri1_pos);
 inline uint16 addsub(uint32 x, uint32 y, bool halve);
 
 //bppu_render_line.cpp
-enum { BLENDTYPE_BACK = 0, BLENDTYPE_MAIN = 1, BLENDTYPE_SUB = 2, BLENDTYPE_COMBINE = 3 };
-
 inline uint16 get_palette(uint8 index);
 inline uint16 get_direct_color(uint8 p, uint8 t);
 inline uint16 get_pixel_normal(uint32 x);
 inline uint16 get_pixel_swap(uint32 x);
-inline uint16 get_pixel_lores(uint32 x);
-inline uint16 get_pixel_hires(uint32 x);
-inline void render_line_output();
+inline void   render_line_output();

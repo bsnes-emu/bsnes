@@ -20,17 +20,19 @@ Editbox  RenderWidth;
 Label    RenderHeightLabel;
 Editbox  RenderHeight;
 Label    Separator2;
+Checkbox Fullscreen;
+Checkbox TripleBuffering;
 Label    FullResWidthLabel;
 Editbox  FullResWidth;
 Label    FullResHeightLabel;
 Editbox  FullResHeight;
 Label    FullResHzLabel;
 Editbox  FullResHz;
-Checkbox TripleBuffering;
 Button   ApplySettings;
 Button   SelectProfile;
 
   bool Event(EventInfo &info);
+  void UpdateControls();
 
   void LoadSettings(uint profile);
   void SaveSettings(uint profile);

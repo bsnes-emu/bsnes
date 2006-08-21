@@ -197,57 +197,21 @@ FileWriter ff(sram_fn);
   ff.write(sram, info.ram_size);
 }
 
-uint Cartridge::mirror_realloc(uint8 *&data, uint size) {
-  for(int i = 31; i >= 0; i--) {
-    if(size & (1 << i)) {
-      if(!(size & ~(1 << i))) { return 1 << i; }
-      data = (uint8*)realloc(data, 2 << i);
-      return 2 << i;
-    }
-  }
-  return 0;
-}
-
-uint Cartridge::mirror(uint8 *&data, uint size) {
-uint r = mirror_realloc(data, size);
-
-  while(size < r) {
-  uint i = 0;
-    for(; i < 32; i++) { if(size & (1 << i))break; }
-  uint masklo = 1 << i++;
-    for(; i < 32; i++) { if(size & (1 << i))break; }
-  uint maskhi = 1 << i;
-    if(i > 31)break; //no mirroring necessary
-
-    while(masklo < maskhi) {
-    uint start = size - masklo;
-      memcpy(data + size, data + start, masklo);
-      size += masklo;
-      masklo <<= 1;
-    }
-  }
-
-  return r;
-}
-
 void Cartridge::load_rom(Reader &rf) {
-uint8 *data   = rf.read();
-uint   size   = rf.size();
-bool   header = ((size & 0x7fff) == 0x0200);
+uint size   = rf.size();
+bool header = ((size & 0x7fff) == 512);
   info.rom_size = size - (header ? 512 : 0);
-
-  base_rom = (uint8*)malloc(info.rom_size);
-  memcpy(base_rom, data + (header ? 512 : 0), info.rom_size);
-  SafeFree(data);
+  if(info.rom_size & 0x7fff) {
+    info.rom_size += 0x8000 - (info.rom_size & 0x7fff);
+  }
+  base_rom = rf.read(info.rom_size + (header ? 512 : 0));
+  rom = base_rom + (header ? 512 : 0);
 
   info.crc32 = 0xffffffff;
   for(int32 i = 0; i < info.rom_size; i++) {
-    info.crc32 = crc32_adjust(info.crc32, base_rom[i]);
+    info.crc32 = crc32_adjust(info.crc32, rom[i]);
   }
   info.crc32 = ~info.crc32;
-
-  info.rom_size = mirror(base_rom, info.rom_size);
-  rom = base_rom;
 }
 
 bool Cartridge::load(const char *fn) {

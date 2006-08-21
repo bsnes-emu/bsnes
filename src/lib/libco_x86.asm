@@ -1,9 +1,9 @@
 ;*****
-;libco_x86 : version 0.06 ~byuu (05/21/06)
+;libco_x86 : version 0.07 ~byuu (08/15/06)
 ;cross-platform x86 implementation of libco
 ;
 ;context save/restore adheres to c/c++ ABI
-;for x86 win32, linux and freebsd
+;for x86 windows, linux and freebsd
 ;
 ;context saves esp+ebp+esi+edi+ebx
 ;context ignores eax+ecx+edx
@@ -22,6 +22,7 @@ section .code
 ;*****
 ;linker-specific name decorations
 ;*****
+%ifdef WIN32
 %define malloc     _malloc
 %define free       _free
 
@@ -33,6 +34,7 @@ section .code
 %define co_jump    @co_jump@4
 %define co_call    @co_call@4
 %define co_return  @co_return@0
+%endif
 
 extern malloc
 extern free
@@ -47,7 +49,7 @@ global co_call
 global co_return
 
 ;*****
-;extern "C" void __fastcall co_init();
+;extern "C" void fastcall co_init();
 ;*****
 
 align 16
@@ -65,7 +67,7 @@ co_init:
     ret
 
 ;*****
-;extern "C" void __fastcall co_term();
+;extern "C" void fastcall co_term();
 ;*****
 
 align 16
@@ -73,7 +75,7 @@ co_term:
     ret
 
 ;*****
-;extern "C" thread_t __fastcall co_active();
+;extern "C" thread_t fastcall co_active();
 ;return = eax
 ;*****
 
@@ -87,7 +89,7 @@ co_active:
     ret
 
 ;*****
-;extern "C" thread_t __fastcall co_create(thread_p coentry, unsigned int heapsize);
+;extern "C" thread_t fastcall co_create(thread_p coentry, unsigned int heapsize);
 ;ecx = coentry
 ;edx = heapsize
 ;return = eax
@@ -108,7 +110,11 @@ co_create:
     add    edx,28                           ;+8(esp+prev_call_context)+4(coentry)+16(stack_align)
     push   ecx
     push   edx
+
+    push   edx
     call   malloc
+    add    esp,4
+
     pop    edx
     pop    ecx
 
@@ -130,7 +136,7 @@ co_create:
     ret                                     ;return allocated memory block as thread handle
 
 ;*****
-;extern "C" void __fastcall co_delete(thread_t cothread);
+;extern "C" void fastcall co_delete(thread_t cothread);
 ;ecx = cothread
 ;*****
 
@@ -142,7 +148,7 @@ co_delete:
     ret
 
 ;*****
-;extern "C" void __fastcall co_jump(thread_t cothread);
+;extern "C" void fastcall co_jump(thread_t cothread);
 ;ecx = cothread
 ;*****
 
@@ -166,7 +172,7 @@ co_jump:
     ret
 
 ;*****
-;extern "C" void __fastcall co_call(thread_t cothread);
+;extern "C" void fastcall co_call(thread_t cothread);
 ;ecx = cothread
 ;*****
 
@@ -191,7 +197,7 @@ co_call:
     ret
 
 ;*****
-;extern "C" void __fastcall co_return();
+;extern "C" void fastcall co_return();
 ;*****
 
 align 16

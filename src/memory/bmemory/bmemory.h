@@ -55,6 +55,15 @@ enum { TYPE_WRAM, TYPE_MMIO, TYPE_CART };
   void   power();
   void   reset();
 
+//load_cart() helper
+  void calc_size(char *t, uint size) {
+    if(size < 1024) { sprintf(t, "%dbit",  size); return; }
+    size /= 1024;
+    if(size < 1024) { sprintf(t, "%dkbit", size); return; }
+    size /= 1024;
+    sprintf(t, "%dmbit", size);
+  }
+
   bMemBus();
   ~bMemBus();
 };

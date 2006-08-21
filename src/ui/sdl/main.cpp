@@ -4,13 +4,21 @@
 #include "render.cpp"
 #include "bsnes.cpp"
 
+#ifdef PLATFORM_WIN
+#include "../audio/dsound.h"
+#include "../audio/dsound.cpp"
+#endif
+
+#include "../input/sdl.h"
+#include "../input/sdl.cpp"
+
 void alert(char *s, ...) {
 char str[4096];
 va_list args;
   va_start(args, s);
   vsprintf(str, s, args);
   va_end(args);
-#ifdef _WIN32
+#ifdef PLATFORM_WIN
   MessageBox(0, str, "bsnes", MB_OK);
 #else
   fprintf(stdout, "%s\r\n", str);
@@ -27,7 +35,7 @@ va_list args;
 }
 
 void center_window() {
-#ifdef _WIN32
+#ifdef PLATFORM_WIN
 HWND hwnd;
 RECT rc;
 int x, y;
@@ -39,13 +47,13 @@ int x, y;
 #endif
 }
 
-#ifdef _WIN32
+#ifdef PLATFORM_WIN
 int __stdcall WinMain(HINSTANCE hinstance, HINSTANCE hprevinstance, LPSTR lpcmdline, int ncmdshow) {
 int argc    = __argc;
 char **argv = __argv;
   SDL_SetModuleHandle(GetModuleHandle(0));
 #else
-int SDL_main(int argc, char *argv[]) {
+int main(int argc, char *argv[]) {
 #endif
 
 SDL_Event event;
@@ -58,6 +66,15 @@ SDL_Event event;
   config_file.load("bsnes_sdl.cfg");
 
   init_snes();
+
+#ifdef PLATFORM_WIN
+  uiAudio = new AudioDS();
+#else
+  uiAudio = new Audio();
+#endif
+  uiInput = new InputSDL();
+  uiAudio->init();
+  uiInput->init();
 
   if(cartridge.load(argv[1]) == false) {
     alert("Failed to load image. Usage: bsnes_sdl <filename.smc>");
@@ -73,7 +90,7 @@ SDL_Event event;
   screen_rect.h = 224;
 
   screen = SDL_SetVideoMode(screen_rect.w, screen_rect.h, 16,
-    SDL_HWSURFACE | ((config::video.fullscreen) ? SDL_FULLSCREEN : 0));
+    SDL_HWSURFACE | (0 ? SDL_FULLSCREEN : 0));
   if(!screen)     { alert("Failed to initialize SDL"); goto _end; }
 
   backbuffer = SDL_CreateRGBSurface(SDL_HWSURFACE, 512, 448, 16, 0xf800, 0x07e0, 0x001f, 0x0000);
@@ -115,6 +132,10 @@ int cursor_status;
 _end:
   config_file.save("bsnes_sdl.cfg");
   cartridge.unload();
+  uiAudio->term();
+  uiInput->term();
+  SafeDelete(uiAudio);
+  SafeDelete(uiInput);
   term_snes();
 
   return 0;

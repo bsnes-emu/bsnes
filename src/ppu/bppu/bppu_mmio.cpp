@@ -147,7 +147,6 @@ void bPPU::mmio_w2105(uint8 value) {
   regs.bg_tilesize[BG1] = bool(value & 0x10);
   regs.bg3_priority     = bool(value & 0x08);
   regs.bg_mode          = (value & 7);
-  regs.hires            = (regs.bg_mode == 5 || regs.bg_mode == 6);
 }
 
 //MOSAIC

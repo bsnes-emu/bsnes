@@ -45,12 +45,11 @@ bool MainWindow::Event(EventInfo &info) {
   uint id   = info.control_id;
   bool ctrl = uiInput->keydown(key->lctrl) || uiInput->keydown(key->rctrl);
     if(id == key->esc) {
-      if(bool(config::video.fullscreen) == false) {
+      if(uiVideo->settings.fullscreen == false) {
         ShowMenu(!MenuVisible());
         Center();
       } else {
-        config::video.fullscreen = false;
-        event::set_video_profile(config::video.profile);
+        event::toggle_fullscreen();
       }
     } else if(id == key->f11) {
       event::toggle_fullscreen();

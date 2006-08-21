@@ -1,4 +1,4 @@
-#ifdef _WIN32
+#ifdef PLATFORM_WIN
   #include <windows.h>
 #endif
 

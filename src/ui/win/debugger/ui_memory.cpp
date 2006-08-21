@@ -107,7 +107,7 @@ bool MemoryEditor::Event(EventInfo &info) {
 
   case EVENT_CHANGED:
   case EVENT_CLICKED: {
-    if(info.control == &Mode) {
+    if(info.control == &Mode && info.event_id == EVENT_CHANGED) {
       switch(Mode.GetSelection()) {
       case 0:
         status.mode = Debugger::DRAM;
@@ -147,7 +147,7 @@ bool MemoryEditor::Event(EventInfo &info) {
       }
 
       Refresh();
-    } else if(info.control == &Goto) {
+    } else if(info.control == &GotoAddr) {
     char t[16 + 1];
       GotoAddr.GetText(t, 16);
       status.addr = strhex(t) & status.mask;
@@ -247,9 +247,9 @@ void MemoryEditor::Setup() {
   SetWindowLong(View.hwnd, GWL_WNDPROC, (long)NSMemoryEditor::wndproc_new_memory_view);
 
   Mode.Create(this, "visible", 405, 5, 90, 200, "DRAM|ROM|SRAM|SPCRAM|VRAM|OAM|CGRAM");
-  GotoAddr.Create(this, "visible|edge", 405, 26, 55, 20, "000000");
+  GotoLabel.Create(this, "visible", 405, 26 + 4, 35, 15, "Goto:");
+  GotoAddr.Create(this, "visible|edge", 440, 26, 55, 20, "000000");
   GotoAddr.SetFont(global::fwf);
-  Goto.Create(this, "visible", 460, 26, 35, 20, "Go");
 
   OffsetLabel.Create(this, "visible", 405, 50, 90, 15, "Offset:       Data:");
   Offset.Create(this, "visible|edge", 405, 65, 55, 20, "000000");

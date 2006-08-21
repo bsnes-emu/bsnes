@@ -16,7 +16,7 @@ HRESULT hr;
   presentation.Flags                  = D3DPRESENTFLAG_VIDEO;
   presentation.SwapEffect             = (settings.triple_buffering == true) ?
                                         D3DSWAPEFFECT_FLIP : D3DSWAPEFFECT_DISCARD;
-  presentation.hDeviceWindow          = wMain.hwnd;
+  presentation.hDeviceWindow          = hwnd;
   presentation.BackBufferCount        = (settings.triple_buffering == true) ? 2 : 1;
   presentation.MultiSampleType        = D3DMULTISAMPLE_NONE;
   presentation.MultiSampleQuality     = 0;
@@ -26,7 +26,7 @@ HRESULT hr;
                                         D3DPRESENT_INTERVAL_ONE : D3DPRESENT_INTERVAL_IMMEDIATE;
   presentation.FullScreen_RefreshRateInHz = settings.refresh_rate;
 
-  if(bool(config::video.fullscreen) == false) {
+  if(settings.fullscreen == false) {
     presentation.Windowed         = true;
     presentation.BackBufferFormat = D3DFMT_UNKNOWN;
     presentation.BackBufferWidth  = 0;
@@ -38,7 +38,7 @@ HRESULT hr;
     presentation.BackBufferHeight = settings.resolution_height;
   }
 
-  hr = lpd3d->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, wMain.hwnd,
+  hr = lpd3d->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, hwnd,
     D3DCREATE_SOFTWARE_VERTEXPROCESSING, &presentation, &device);
   if(hr != D3D_OK) {
     alert("Failed to create Direct3D9 device");
@@ -328,6 +328,8 @@ void VideoD3D::update() {
 }
 
 bool VideoD3D::capture_screenshot() {
+  if(!d3dx || !pD3DXSaveSurfaceToFileA) { return false; }
+
 //fill both backbuffers with currently rendered image
   redraw();
   redraw();
@@ -358,8 +360,7 @@ uint32 format;
     format = D3DXIFF_PNG;
   }
 
-  D3DXSaveSurfaceToFile(fn, static_cast<D3DXIMAGE_FILEFORMAT>(format),
-    temp_surface, NULL, NULL);
+  pD3DXSaveSurfaceToFileA(fn, format, temp_surface, NULL, NULL);
   temp_surface->Release();
   return true;
 }
@@ -379,7 +380,9 @@ void VideoD3D::term() {
   SafeRelease(lpd3d);
 }
 
-VideoD3D::VideoD3D() {
+VideoD3D::VideoD3D(HWND handle) {
+  hwnd = handle;
+
   vertex_buffer = 0;
   surface       = 0;
   texture       = 0;
@@ -388,6 +391,56 @@ VideoD3D::VideoD3D() {
   scanline[2]   = 0;
   device        = 0;
   lpd3d         = 0;
+
+//Below code dynamically loads d3dx9 DLL at runtime
+//to map D3DXSaveSurfaceToFileA function, used to
+//capture screenshots.
+//
+//We are forced to link against this DLL dynamically
+//because Microsoft decided that releasing 10+ versions
+//of this DLL, all with different filenames, rather than
+//making one DLL that was backwards-compatible.
+//
+//As a result of this blatant stupidity, if the application
+//statically links against d3dx9.lib, then the application
+//will then *require* the version of the d3dx9 DLL included
+//with the DX9 SDK used to build said application.
+//
+//And since most end users generally have not downloaded
+//every single bimonthly DX9 update, the application will
+//completely fail to load when it cannot find said dx9 DLL.
+//
+//Hillariously enough, most (if not all) of the d3dx9
+//functionality appears to be backwards-compatible anyway,
+//including this function.
+//
+//Therefore, as a workaround, we search through all possible
+//DLL filenames. If a d3dx9 DLL is found, we dynamically map
+//the D3DXSaveSurfaceToFileA function. Otherwise, screenshot
+//support will fail silently.
+//
+//The benefit to this approach is that it allows all users
+//to run this application, without explicitly requiring said
+//d3dx9 DLL to run the application at all.
+
+  d3dx = 0;
+  pD3DXSaveSurfaceToFileA = 0;
+
+  for(int i = 0; i < 256; i++) {
+  char t[256];
+    sprintf(t, "d3dx9_%d.dll", i);
+    d3dx = LoadLibrary(t);
+    if(d3dx) { break; }
+  }
+  if(!d3dx) { d3dx = LoadLibrary("d3dx9.dll"); }
+  if(!d3dx) { return; }
+
+  pD3DXSaveSurfaceToFileA = (HRESULT(WINAPI*)(LPCSTR, DWORD, LPDIRECT3DSURFACE9, CONST PALETTEENTRY*, CONST RECT*))
+    GetProcAddress(d3dx, "D3DXSaveSurfaceToFileA");
+}
+
+VideoD3D::~VideoD3D() {
+  if(d3dx)FreeLibrary(d3dx);
 }
 
 #undef D3DVERTEX

@@ -2,6 +2,7 @@
 
 class AudioDS : public Audio {
 public:
+HWND hwnd;
 LPDIRECTSOUND ds;
 LPDIRECTSOUNDBUFFER dsb_p, dsb_b;
 DSBUFFERDESC dsbd;
@@ -21,7 +22,8 @@ struct {
   void init();
   void term();
 
-  AudioDS() {
+  AudioDS(HWND handle = 0) {
+    hwnd        = (handle) ? handle : GetDesktopWindow();
     ds          = 0;
     dsb_p       = 0;
     dsb_b       = 0;

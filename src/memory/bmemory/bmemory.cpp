@@ -66,14 +66,16 @@ uint region = read(0xffd9) & 0x7f;
   rom_loaded = true;
 
 //print cartridge info to debug console
-
+char t[256];
   dprintf("* CRC32    : %0.8x", cartridge.info.crc32);
   dprintf("* Name     : \"%s\"", cartridge.info.name);
   dprintf("* PCB      : %s", cartridge.info.pcb);
-  dprintf("* ROM Size : %dmbit", cartridge.info.rom_size / 1024 / 1024 * 8);
-  dprintf("* RAM Size : %dkbit", cartridge.info.ram_size / 1024 * 8);
+  calc_size(t, cartridge.info.rom_size);
+  dprintf("* ROM Size : %s", t);
+  calc_size(t, cartridge.info.ram_size);
+  dprintf("* RAM Size : %s", t);
   dprintf("* Region   : %s", (cartridge.info.region == Cartridge::NTSC) ? "NTSC" : "PAL");
-char t[256];
+
   strcpy(t, "");
   if(cartridge.info.srtc)strcat(t, "S-RTC, ");
   if(cartridge.info.sdd1)strcat(t, "S-DD1, ");
@@ -124,22 +126,23 @@ void bMemBus::unload_cart() {
  *****************************************/
 
 uint8 bMemBus::memory_type(uint32 addr) {
-uint8 bank;
-  bank  = addr >> 16;
+uint8 bank = addr >> 16;
   addr &= 0xffff;
 
-  if((bank >= 0x00 && bank <= 0x3f) || (bank >= 0x80 && bank <= 0xbf)) {
+  if((bank & 0x40) == 0x00) {
+  //$[00-3f|80-bf]:[0000-ffff]
     if(addr >= 0x0000 && addr <= 0x1fff)return TYPE_WRAM;
     if(addr >= 0x2000 && addr <= 0x5fff)return TYPE_MMIO;
     return TYPE_CART;
   }
 
-  if((bank >= 0x40 && bank <= 0x7d) || (bank >= 0xc0 && bank <= 0xff)) {
-    return TYPE_CART;
+  if((bank & 0xfe) == 0x7e) {
+  //$[7e-7f]:[0000-ffff]
+    return TYPE_WRAM;
   }
 
-//(bank >= 0x7e && bank <= 0x7f)
-  return TYPE_WRAM;
+//$[40-7d|c0-ff]:[0000-ffff]
+  return TYPE_CART;
 }
 
 uint8 bMemBus::read(uint32 addr) {
@@ -209,7 +212,7 @@ void bMemBus::cart_map_system() {
 
 void bMemBus::power() {
   cart_write_protect(true);
-  memset(wram, 0xff, 0x020000);
+  memset(wram, 0x55, 0x020000);
   reset();
 }
 

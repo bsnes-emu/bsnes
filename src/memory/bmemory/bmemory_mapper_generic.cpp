@@ -15,22 +15,8 @@
  * $[80-bf]:[2000-5fff] MMIO
  *****/
 void bMemBus::cart_map_generic(uint type) {
-uint32 P0_size, P1_size, ROM_mask, ROM_size, SRAM_size;
-  ROM_size  = cartridge.info.rom_size;
-  SRAM_size = cartridge.info.ram_size;
-
-//calculate highest power of 2, which is the size of the first ROM chip
-  P0_size = 0x800000;
-  while(!(ROM_size & P0_size))P0_size >>= 1;
-  P1_size = ROM_size - P0_size;
-
-  if(ROM_size == P0_size) {
-  //cart only contains one ROM chip
-    ROM_mask = (P0_size - 1);
-  } else {
-  //cart contains two ROM chips
-    ROM_mask = (P0_size + P0_size - 1);
-  }
+uint rom_size = cartridge.info.rom_size;
+uint ram_size = cartridge.info.ram_size;
 
   for(uint page = 0x0000; page <= 0xffff; page++) {
     if(memory_type(page << 8) != TYPE_CART)continue;
@@ -51,10 +37,10 @@ uint32 P0_size, P1_size, ROM_mask, ROM_size, SRAM_size;
   //HiROM SRAM region
   //$[20-3f|a0-bf]:[6000-7fff]
     if((bank & 0x7f) >= 0x20 && (bank & 0x7f) <= 0x3f && (addr & 0xe000) == 0x6000) {
-      if(SRAM_size == 0)continue;
+      if(ram_size == 0)continue;
 
       addr  = ((bank & 0x7f) - 0x20) * 0x2000 + ((addr & 0xffff) - 0x6000);
-      addr %= SRAM_size;
+      addr %= ram_size;
       page_handle[page] = cartridge.sram + addr;
       page_read  [page] = &bMemBus::read_ram;
       page_write [page] = &bMemBus::write_ram;
@@ -65,12 +51,12 @@ uint32 P0_size, P1_size, ROM_mask, ROM_size, SRAM_size;
   //$[70-7f|f0-ff]:[0000-7fff]
   //Note: WRAM is remapped over $[7e-7f]:[0000-ffff]
     if(bank >= 0x70 && bank <= 0x7f && (addr & 0x8000) == 0x0000) {
-      if(SRAM_size == 0)continue;
+      if(ram_size == 0)continue;
 
       if(type == Cartridge::LOROM || !(bank & 0x80)) {
       //HiROM maps $[f0-ff]:[0000-7fff] to ROM
         addr  = ((bank & 0x7f) - 0x70) * 0x8000 + (addr & 0x7fff);
-        addr %= SRAM_size;
+        addr %= ram_size;
         page_handle[page] = cartridge.sram + addr;
         page_read  [page] = &bMemBus::read_ram;
         page_write [page] = &bMemBus::write_ram;
@@ -82,18 +68,12 @@ uint32 P0_size, P1_size, ROM_mask, ROM_size, SRAM_size;
     switch(type) {
 
     case Cartridge::LOROM: {
-      addr  = (bank & 0x7f) * 0x8000 + (addr & 0x7fff);
-      addr &= ROM_mask;
-      if(addr >= P0_size) {
-        addr = P0_size + (addr & (P1_size - 1));
-      }
+      addr = (bank & 0x7f) * 0x8000 + (addr & 0x7fff);
+      addr = mirror(rom_size, addr);
     } break;
 
     case Cartridge::HIROM: {
-      addr &= ROM_mask;
-      if(addr >= P0_size) {
-        addr = P0_size + (addr & (P1_size - 1));
-      }
+      addr = mirror(rom_size, addr);
     } break;
 
     case Cartridge::EXLOROM: {
@@ -103,13 +83,13 @@ uint32 P0_size, P1_size, ROM_mask, ROM_size, SRAM_size;
       } else {
         addr &= 0x3fffff;
       }
-      addr %= ROM_size;
+      addr = mirror(rom_size, addr);
     } break;
 
     case Cartridge::EXHIROM: {
       addr &= 0x3fffff;
       addr += (bank < 0x80) ? 0x400000 : 0x000000;
-      addr %= ROM_size;
+      addr  = mirror(rom_size, addr);
     } break;
 
     }

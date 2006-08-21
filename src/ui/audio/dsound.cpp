@@ -4,7 +4,7 @@ void AudioDS::run(uint32 sample) {
   if(data.buffer_pos >= data.samples_per_frame) {
   uint32 pos, size;
   void  *buffer;
-    if(bool(config::system.regulate_speed) == true) {
+    if(config::system.regulate_speed == true) {
       for(;;) {
         dsb_b->GetCurrentPosition(&pos, 0);
         data.read_buffer = pos / data.buffer_size;
@@ -62,7 +62,7 @@ void AudioDS::init() {
   data.buffer_size       = data.samples_per_frame * 4;
 
   DirectSoundCreate(0, &ds, 0);
-  ds->SetCooperativeLevel(wMain.hwnd, DSSCL_PRIORITY);
+  ds->SetCooperativeLevel(hwnd, DSSCL_PRIORITY);
 
   memset(&dsbd, 0, sizeof(dsbd));
   dsbd.dwSize        = sizeof(dsbd);

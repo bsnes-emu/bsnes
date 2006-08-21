@@ -70,7 +70,6 @@ typedef signed short       int16;
 typedef signed long        int32;
 typedef signed long long   int64;
 
-
 /*****
  * templates
  *****/

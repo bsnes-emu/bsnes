@@ -31,13 +31,28 @@ long height;
   init_settings();
   init_debugger();
 
-  if(strmatch(config::video.renderer.sget(), "dd")) {
-    uiVideo = new VideoDD();
+  if(!stricmp(config::system.video.sget(), "dd")) {
+    uiVideo = new VideoDD(wMain.hwnd);
+//} else if(!stricmp(config::system.video.sget(), "sdl")) {
+//  uiVideo = new VideoSDL((void*)wMain.hwnd);
   } else {
-    uiVideo = new VideoD3D();
+    uiVideo = new VideoD3D(wMain.hwnd);
   }
-  uiAudio = new AudioDS();
-  uiInput = new InputDI();
+
+  if(!stricmp(config::system.audio.sget(), "none")) {
+    uiAudio = new Audio();
+  } else {
+    uiAudio = new AudioDS(wMain.hwnd);
+  }
+
+  if(!stricmp(config::system.input.sget(), "none")) {
+    uiInput = new Input();
+//} else if(!stricmp(config::system.input.sget(), "sdl")) {
+//  uiInput = new InputSDL((void*)wMain.hwnd);
+  } else {
+    uiInput = new InputDI();
+  }
+
   uiVideo->init();
   uiAudio->init();
   uiInput->init();
@@ -56,6 +71,7 @@ void term_ui() {
   uiVideo->term();
   uiAudio->term();
   uiInput->term();
+
   SafeDelete(uiVideo);
   SafeDelete(uiAudio);
   SafeDelete(uiInput);

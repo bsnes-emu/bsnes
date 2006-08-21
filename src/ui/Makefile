@@ -1,90 +1,127 @@
-ifeq ($(PLATFORM),win-visualc)
-CC = cl
-CXX = cl
+# bsnes makefile
+
+##################################
+### platform-specific settings ###
+##################################
+
+ifeq ($(PLATFORM),x-gcc-gtk)
+OS = unix
+CC = gcc
+CFLAGS = -O3 -fomit-frame-pointer -ffast-math -DPLATFORM_X -DCOMPILER_GCC -DPROCESSOR_X86 -DUI_GTK `pkg-config --cflags gtk+-2.0` `sdl-config --cflags`
 AS = nasm
-RM = del
-OBJ = obj
-CFLAGS = /nologo /O2 /arch:SSE2 /DPLATFORM_WIN /DCOMPILER_VISUALC /DPROCESSOR_X86
-COMPILE = $(CC) $(CFLAGS) /c
-ASSEMBLE = $(AS) -f win32
-LINK =
-LIBS =  kernel32.lib user32.lib gdi32.lib winmm.lib comdlg32.lib comctl32.lib \
-	d3d9.lib d3dx9.lib ddraw.lib dsound.lib dinput8.lib dxguid.lib
+ASFLAGS = -f elf
+LIBS = `pkg-config --libs gtk+-2.0` `sdl-config --libs`
+endif
+
+ifeq ($(PLATFORM),win-visualc)
+OS = win
+CC = cl
+CFLAGS = /nologo /O2 /arch:SSE2 /DPLATFORM_WIN /DCOMPILER_VISUALC /DPROCESSOR_X86 /DUI_WIN
+AS = nasm
+ASFLAGS = -f win32 -DWIN32
+LIBS = d3d9.lib ddraw.lib dsound.lib dinput8.lib dxguid.lib
 endif
 
 ifeq ($(PLATFORM),win-visualc-wip)
+OS = win
 CC = cl
-CXX = cl
+CFLAGS = /nologo /O2 /GL /DPLATFORM_WIN /DCOMPILER_VISUALC /DPROCESSOR_X86 /DUI_WIN
 AS = nasm
-RM = del
-OBJ = obj
-CFLAGS = /nologo /O2 /GL /DPLATFORM_WIN /DCOMPILER_VISUALC /DPROCESSOR_X86
-COMPILE = $(CC) $(CFLAGS) /c
-ASSEMBLE = $(AS) -f win32
+ASFLAGS = -f win32 -DWIN32
+LIBS = d3d9.lib ddraw.lib dsound.lib dinput8.lib dxguid.lib
 LINK = /link /LTCG
-LIBS =  kernel32.lib user32.lib gdi32.lib winmm.lib comdlg32.lib comctl32.lib \
-	d3d9.lib d3dx9.lib ddraw.lib dsound.lib dinput8.lib dxguid.lib
 endif
 
 ifeq ($(PLATFORM),win-visualc-pgi)
+OS = win
 CC = cl
-CXX = cl
+CFLAGS = /nologo /O2 /GL /DPLATFORM_WIN /DCOMPILER_VISUALC /DPROCESSOR_X86 /DUI_WIN
 AS = nasm
-RM = del
-OBJ = obj
-CFLAGS = /nologo /O2 /GL /DPLATFORM_WIN /DCOMPILER_VISUALC /DPROCESSOR_X86
-COMPILE = $(CC) $(CFLAGS) /c
-ASSEMBLE = $(AS) -f win32
+ASFLAGS = -f win32 -DWIN32
+LIBS = d3d9.lib ddraw.lib dsound.lib dinput8.lib dxguid.lib
 LINK = /link /PGD:bsnes.pgd /LTCG:PGINSTRUMENT
-LIBS =  kernel32.lib user32.lib gdi32.lib winmm.lib comdlg32.lib comctl32.lib \
-	d3d9.lib d3dx9.lib ddraw.lib dsound.lib dinput8.lib dxguid.lib
 endif
 
 ifeq ($(PLATFORM),win-visualc-pgo)
+OS = win
 CC = cl
-CXX = cl
+CFLAGS = /nologo /O2 /GL /DPLATFORM_WIN /DCOMPILER_VISUALC /DPROCESSOR_X86 /DUI_WIN
 AS = nasm
-RM = del
-OBJ = obj
-CFLAGS = /nologo /O2 /arch:SSE2 /DPLATFORM_WIN /DCOMPILER_VISUALC /DPROCESSOR_X86
-COMPILE = $(CC) $(CFLAGS) /c
-ASSEMBLE = $(AS) -f win32
+ASFLAGS = -f win32 -DWIN32
+LIBS = d3d9.lib ddraw.lib dsound.lib dinput8.lib dxguid.lib
 LINK = /link /PGD:bsnes.pgd /LTCG:PGOPTIMIZE
-LIBS =  kernel32.lib user32.lib gdi32.lib winmm.lib comdlg32.lib comctl32.lib \
-	d3d9.lib d3dx9.lib ddraw.lib dsound.lib dinput8.lib dxguid.lib
 endif
 
 ifeq ($(PLATFORM),win-visualc-sdl)
+OS = win
 CC = cl
-CXX = cl
+CFLAGS = /nologo /O2 /DPLATFORM_WIN /DCOMPILER_VISUALC /DPROCESSOR_X86 /DUI_SDL
 AS = nasm
-RM = del
-OBJ = obj
-CFLAGS = /nologo /O2 /DPLATFORM_SDL /DCOMPILER_VISUALC /DPROCESSOR_X86
-COMPILE = $(CC) $(CFLAGS) /c
-ASSEMBLE = $(AS) -f win32
-LINK =
-LIBS =	kernel32.lib user32.lib gdi32.lib winmm.lib comdlg32.lib comctl32.lib \
-	sdlmain.lib sdl.lib
+ASFLAGS = -f win32 -DWIN32
+LIBS = sdlmain.lib sdl.lib dsound.lib
 endif
 
-OBJS =  main.$(OBJ) \
-	libco.$(OBJ) libstring.$(OBJ) libconfig.$(OBJ) \
-	reader.$(OBJ) cart.$(OBJ) cheat.$(OBJ) \
-	memory.$(OBJ) bmemory.$(OBJ) \
-	cpu.$(OBJ) scpu.$(OBJ) bcpu.$(OBJ) \
-	apu.$(OBJ) sapu.$(OBJ) bapu.$(OBJ) \
-	bdsp.$(OBJ) \
-	ppu.$(OBJ) bppu.$(OBJ) \
-	snes.$(OBJ) \
-	srtc.$(OBJ) sdd1.$(OBJ) c4.$(OBJ) dsp1.$(OBJ) dsp2.$(OBJ) obc1.$(OBJ)
-#	adler32.$(OBJ) compress.$(OBJ) crc32.$(OBJ) deflate.$(OBJ) gzio.$(OBJ) inffast.$(OBJ) \
-#	inflate.$(OBJ) inftrees.$(OBJ) ioapi.$(OBJ) trees.$(OBJ) unzip.$(OBJ) zip.$(OBJ) zutil.$(OBJ) \
-#	jma.$(OBJ) jcrc32.$(OBJ) lzmadec.$(OBJ) 7zlzma.$(OBJ) iiostrm.$(OBJ) inbyte.$(OBJ) lzma.$(OBJ) winout.$(OBJ)
+#####################################
+### compiler / assembler switches ###
+#####################################
+
+ifeq ($(CC),gcc)
+OUT = -obsnes
+CXX = g++
+OBJ = o
+COBJFLAG = -c
+endif
+
+ifeq ($(CC),cl)
+OUT = /Febsnes.exe
+CXX = cl
+OBJ = obj
+COBJFLAG = /c
+endif
+
+ifeq ($(AS),nasm)
+ASOBJFLAG = -o
+endif
+
+###################
+### OS switches ###
+###################
+
+ifeq ($(OS),unix)
+RM = rm -f
+endif
+
+ifeq ($(OS),win)
+RM = del
+LIBS += kernel32.lib user32.lib gdi32.lib winmm.lib comdlg32.lib comctl32.lib
+endif
+
+#########################
+### begin compilation ###
+#########################
+
+OBJS = main.$(OBJ) \
+       libco.$(OBJ) libstring.$(OBJ) libconfig.$(OBJ) \
+       reader.$(OBJ) cart.$(OBJ) cheat.$(OBJ) \
+       memory.$(OBJ) bmemory.$(OBJ) \
+       cpu.$(OBJ) scpu.$(OBJ) \
+       apu.$(OBJ) sapu.$(OBJ) \
+       bdsp.$(OBJ) \
+       ppu.$(OBJ) bppu.$(OBJ) \
+       snes.$(OBJ) \
+       srtc.$(OBJ) sdd1.$(OBJ) c4.$(OBJ) dsp1.$(OBJ) dsp2.$(OBJ) obc1.$(OBJ)
+      #adler32.$(OBJ) compress.$(OBJ) crc32.$(OBJ) deflate.$(OBJ) gzio.$(OBJ) inffast.$(OBJ) \
+      #inflate.$(OBJ) inftrees.$(OBJ) ioapi.$(OBJ) trees.$(OBJ) unzip.$(OBJ) zip.$(OBJ) zutil.$(OBJ) \
+      #jma.$(OBJ) jcrc32.$(OBJ) lzmadec.$(OBJ) 7zlzma.$(OBJ) iiostrm.$(OBJ) inbyte.$(OBJ) lzma.$(OBJ) winout.$(OBJ)
+
+ifeq ($(OS),win)
+  ifeq ($(CC),cl)
+    OBJS += bsnes.res
+  endif
+endif
 
 all: $(OBJS)
-	rc /r /fobsnes.res bsnes.rc
-	$(CC) /Febsnes.exe $(CFLAGS) $(OBJS) bsnes.res $(LIBS) $(LINK)
+	$(CXX) $(OUT) $(CFLAGS) $(OBJS) $(LIBS) $(LINK)
 #	mt -nologo -manifest bsnes.exe.manifest -outputresource:bsnes.exe;1
 
 clean:
@@ -99,117 +136,120 @@ clean:
 #########################
 ### platform-specific ###
 #########################
-main.$(OBJ): *.cpp *.h video/* audio/* input/* ../config/* win/* win/settings/* win/debugger/*
-	$(COMPILE) main.cpp
+main.$(OBJ): *.cpp *.h video/* audio/* input/* ../config/* win/* win/settings/* win/debugger/* sdl/*
+	$(CXX) $(CFLAGS) $(COBJFLAG) main.cpp
+
+bsnes.res: bsnes.rc
+	rc /r /fobsnes.res bsnes.rc
 
 #################
 ### libraries ###
 #################
 libco.$(OBJ): ../lib/*
-	$(ASSEMBLE) -o libco.$(OBJ) ../lib/libco_x86.asm
-#	$(COMPILE) /Folibco.obj ../lib/libco_win32.cpp
+	$(AS) $(ASFLAGS) $(ASOBJFLAG) libco.$(OBJ) ../lib/libco_x86.asm
+#	$(CXX) $(CFLAGS) $(COBJFLAG) /Folibco.$(OBJ) ../lib/libco_win32.cpp
 
 libstring.$(OBJ): ../lib/*.cpp ../lib/*.h
-	$(COMPILE) ../lib/libstring.cpp
+	$(CXX) $(CFLAGS) $(COBJFLAG) ../lib/libstring.cpp
 
 libconfig.$(OBJ): ../lib/*.cpp ../lib/*.h
-	$(COMPILE) ../lib/libconfig.cpp
+	$(CXX) $(CFLAGS) $(COBJFLAG) ../lib/libconfig.cpp
 
 ##############
 ### memory ###
 ##############
 memory.$(OBJ): ../memory/memory.cpp ../memory/memory.h
-	$(COMPILE) ../memory/memory.cpp
+	$(CXX) $(CFLAGS) $(COBJFLAG) ../memory/memory.cpp
 
 bmemory.$(OBJ): ../memory/bmemory/* ../memory/bmemory/mapper/*
-	$(COMPILE) ../memory/bmemory/bmemory.cpp
+	$(CXX) $(CFLAGS) $(COBJFLAG) ../memory/bmemory/bmemory.cpp
 
 ###########
 ### cpu ###
 ###########
 cpu.$(OBJ): ../cpu/*
-	$(COMPILE) ../cpu/cpu.cpp
+	$(CXX) $(CFLAGS) $(COBJFLAG) ../cpu/cpu.cpp
 
 scpu.$(OBJ): ../cpu/scpu/* ../cpu/scpu/core/* ../cpu/scpu/dma/* ../cpu/scpu/memory/* ../cpu/scpu/mmio/* ../cpu/scpu/timing/*
-	$(COMPILE) ../cpu/scpu/scpu.cpp
+	$(CXX) $(CFLAGS) $(COBJFLAG) ../cpu/scpu/scpu.cpp
 
 bcpu.$(OBJ): ../cpu/bcpu/*
-	$(COMPILE) ../cpu/bcpu/bcpu.cpp
+	$(CXX) $(CFLAGS) $(COBJFLAG) ../cpu/bcpu/bcpu.cpp
 
 ###########
 ### apu ###
 ###########
 apu.$(OBJ): ../apu/*
-	$(COMPILE) ../apu/apu.cpp
+	$(CXX) $(CFLAGS) $(COBJFLAG) ../apu/apu.cpp
 
 sapu.$(OBJ): ../apu/sapu/* ../apu/sapu/core/* ../apu/sapu/memory/* ../apu/sapu/timing/*
-	$(COMPILE) ../apu/sapu/sapu.cpp
+	$(CXX) $(CFLAGS) $(COBJFLAG) ../apu/sapu/sapu.cpp
 
 bapu.$(OBJ): ../apu/bapu/*
-	$(COMPILE) ../apu/bapu/bapu.cpp
+	$(CXX) $(CFLAGS) $(COBJFLAG) ../apu/bapu/bapu.cpp
 
 ###########
 ### dsp ###
 ###########
 bdsp.$(OBJ): ../dsp/bdsp/*
-	$(COMPILE) ../dsp/bdsp/bdsp.cpp
+	$(CXX) $(CFLAGS) $(COBJFLAG) ../dsp/bdsp/bdsp.cpp
 
 ###########
 ### ppu ###
 ###########
 ppu.$(OBJ): ../ppu/*.cpp ../ppu/*.h
-	$(COMPILE) ../ppu/ppu.cpp
+	$(CXX) $(CFLAGS) $(COBJFLAG) ../ppu/ppu.cpp
 
 bppu.$(OBJ): ../ppu/bppu/*
-	$(COMPILE) ../ppu/bppu/bppu.cpp
+	$(CXX) $(CFLAGS) $(COBJFLAG) ../ppu/bppu/bppu.cpp
 
 #################
 ### utilities ###
 #################
 reader.$(OBJ): ../reader/*.cpp ../reader/*.h
-	$(COMPILE) ../reader/reader.cpp
+	$(CXX) $(CFLAGS) $(COBJFLAG) ../reader/reader.cpp
 
 cart.$(OBJ): ../cart/*.cpp ../cart/*.h
-	$(COMPILE) ../cart/cart.cpp
+	$(CXX) $(CFLAGS) $(COBJFLAG) ../cart/cart.cpp
 
 cheat.$(OBJ): ../cheat/*.cpp ../cheat/*.h
-	$(COMPILE) ../cheat/cheat.cpp
+	$(CXX) $(CFLAGS) $(COBJFLAG) ../cheat/cheat.cpp
 
 ############
 ### snes ###
 ############
 snes.$(OBJ): ../snes/* ../snes/video/* ../snes/audio/* ../snes/input/*
-	$(COMPILE) ../snes/snes.cpp
+	$(CXX) $(CFLAGS) $(COBJFLAG) ../snes/snes.cpp
 
 #####################
 ### special chips ###
 #####################
 srtc.$(OBJ): ../chip/srtc/*
-	$(COMPILE) ../chip/srtc/srtc.cpp
+	$(CXX) $(CFLAGS) $(COBJFLAG) ../chip/srtc/srtc.cpp
 
 sdd1.$(OBJ): ../chip/sdd1/*
-	$(COMPILE) ../chip/sdd1/sdd1.cpp
+	$(CXX) $(CFLAGS) $(COBJFLAG) ../chip/sdd1/sdd1.cpp
 
 c4.$(OBJ): ../chip/c4/*
-	$(COMPILE) ../chip/c4/c4.cpp
+	$(CXX) $(CFLAGS) $(COBJFLAG) ../chip/c4/c4.cpp
 
 dsp1.$(OBJ): ../chip/dsp1/*
-	$(COMPILE) ../chip/dsp1/dsp1.cpp
+	$(CXX) $(CFLAGS) $(COBJFLAG) ../chip/dsp1/dsp1.cpp
 
 dsp2.$(OBJ): ../chip/dsp2/*
-	$(COMPILE) ../chip/dsp2/dsp2.cpp
+	$(CXX) $(CFLAGS) $(COBJFLAG) ../chip/dsp2/dsp2.cpp
 
 obc1.$(OBJ): ../chip/obc1/*
-	$(COMPILE) ../chip/obc1/obc1.cpp
+	$(CXX) $(CFLAGS) $(COBJFLAG) ../chip/obc1/obc1.cpp
 
 ############
 ### zlib ###
 ############
 adler32.$(OBJ): ../reader/zlib/*.c ../reader/zlib/*.h
-	$(COMPILE) ../reader/zlib/*.c
+	$(CC) $(CFLAGS) $(COBJFLAG) ../reader/zlib/*.c
 
 ###########
 ### jma ###
 ###########
 jma.$(OBJ): ../reader/jma/*.cpp ../reader/jma/*.h
-	$(COMPILE) ../reader/jma/*.cpp
+	$(CXX) $(CFLAGS) $(COBJFLAG) ../reader/jma/*.cpp

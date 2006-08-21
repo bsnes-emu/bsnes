@@ -1,4 +1,4 @@
-#define BSNES_VERSION "0.016.44"
+#define BSNES_VERSION "0.016.52"
 #define BSNES_TITLE   "bsnes v" BSNES_VERSION
 
 #define MEMCORE bMemBus
@@ -28,7 +28,7 @@
 
 #if defined(PROCESSOR_X86)
   #define ARCH_LSB
-#elif defined(PROCESSOR_X86)
+#elif defined(PROCESSOR_X86_64)
   #define ARCH_LSB
 #elif defined(PROCESSOR_G5)
   #define ARCH_MSB
