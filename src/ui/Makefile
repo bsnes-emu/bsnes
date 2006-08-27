@@ -13,10 +13,19 @@ ASFLAGS = -f elf
 LIBS = `pkg-config --libs gtk+-2.0` `sdl-config --libs`
 endif
 
+ifeq ($(PLATFORM),x-gcc-sdl)
+OS = unix
+CC = gcc
+CFLAGS = -O3 -fomit-frame-pointer -ffast-math -DPLATFORM_X -DCOMPILER_GCC -DPROCESSOR_X86 -DUI_SDL `sdl-config --cflags`
+AS = nasm
+ASFLAGS = -f elf
+LIBS = `sdl-config --libs`
+endif
+
 ifeq ($(PLATFORM),win-visualc)
 OS = win
 CC = cl
-CFLAGS = /nologo /O2 /arch:SSE2 /DPLATFORM_WIN /DCOMPILER_VISUALC /DPROCESSOR_X86 /DUI_WIN
+CFLAGS = /nologo /O2 /EHsc /arch:SSE2 /DPLATFORM_WIN /DCOMPILER_VISUALC /DPROCESSOR_X86 /DUI_WIN
 AS = nasm
 ASFLAGS = -f win32 -DWIN32
 LIBS = d3d9.lib ddraw.lib dsound.lib dinput8.lib dxguid.lib
@@ -25,7 +34,7 @@ endif
 ifeq ($(PLATFORM),win-visualc-wip)
 OS = win
 CC = cl
-CFLAGS = /nologo /O2 /GL /DPLATFORM_WIN /DCOMPILER_VISUALC /DPROCESSOR_X86 /DUI_WIN
+CFLAGS = /nologo /O2 /GL /EHsc /DPLATFORM_WIN /DCOMPILER_VISUALC /DPROCESSOR_X86 /DUI_WIN
 AS = nasm
 ASFLAGS = -f win32 -DWIN32
 LIBS = d3d9.lib ddraw.lib dsound.lib dinput8.lib dxguid.lib
@@ -35,7 +44,7 @@ endif
 ifeq ($(PLATFORM),win-visualc-pgi)
 OS = win
 CC = cl
-CFLAGS = /nologo /O2 /GL /DPLATFORM_WIN /DCOMPILER_VISUALC /DPROCESSOR_X86 /DUI_WIN
+CFLAGS = /nologo /O2 /GL /EHsc /DPLATFORM_WIN /DCOMPILER_VISUALC /DPROCESSOR_X86 /DUI_WIN
 AS = nasm
 ASFLAGS = -f win32 -DWIN32
 LIBS = d3d9.lib ddraw.lib dsound.lib dinput8.lib dxguid.lib
@@ -45,7 +54,7 @@ endif
 ifeq ($(PLATFORM),win-visualc-pgo)
 OS = win
 CC = cl
-CFLAGS = /nologo /O2 /GL /DPLATFORM_WIN /DCOMPILER_VISUALC /DPROCESSOR_X86 /DUI_WIN
+CFLAGS = /nologo /O2 /GL /EHsc /DPLATFORM_WIN /DCOMPILER_VISUALC /DPROCESSOR_X86 /DUI_WIN
 AS = nasm
 ASFLAGS = -f win32 -DWIN32
 LIBS = d3d9.lib ddraw.lib dsound.lib dinput8.lib dxguid.lib
@@ -55,7 +64,7 @@ endif
 ifeq ($(PLATFORM),win-visualc-sdl)
 OS = win
 CC = cl
-CFLAGS = /nologo /O2 /DPLATFORM_WIN /DCOMPILER_VISUALC /DPROCESSOR_X86 /DUI_SDL
+CFLAGS = /nologo /O2 /EHsc /DPLATFORM_WIN /DCOMPILER_VISUALC /DPROCESSOR_X86 /DUI_SDL
 AS = nasm
 ASFLAGS = -f win32 -DWIN32
 LIBS = sdlmain.lib sdl.lib dsound.lib
@@ -109,10 +118,10 @@ OBJS = main.$(OBJ) \
        bdsp.$(OBJ) \
        ppu.$(OBJ) bppu.$(OBJ) \
        snes.$(OBJ) \
-       srtc.$(OBJ) sdd1.$(OBJ) c4.$(OBJ) dsp1.$(OBJ) dsp2.$(OBJ) obc1.$(OBJ)
-      #adler32.$(OBJ) compress.$(OBJ) crc32.$(OBJ) deflate.$(OBJ) gzio.$(OBJ) inffast.$(OBJ) \
-      #inflate.$(OBJ) inftrees.$(OBJ) ioapi.$(OBJ) trees.$(OBJ) unzip.$(OBJ) zip.$(OBJ) zutil.$(OBJ) \
-      #jma.$(OBJ) jcrc32.$(OBJ) lzmadec.$(OBJ) 7zlzma.$(OBJ) iiostrm.$(OBJ) inbyte.$(OBJ) lzma.$(OBJ) winout.$(OBJ)
+       srtc.$(OBJ) sdd1.$(OBJ) c4.$(OBJ) dsp1.$(OBJ) dsp2.$(OBJ) obc1.$(OBJ) \
+       adler32.$(OBJ) compress.$(OBJ) crc32.$(OBJ) deflate.$(OBJ) gzio.$(OBJ) inffast.$(OBJ) \
+       inflate.$(OBJ) inftrees.$(OBJ) ioapi.$(OBJ) trees.$(OBJ) unzip.$(OBJ) zip.$(OBJ) zutil.$(OBJ) \
+       jma.$(OBJ) jcrc32.$(OBJ) lzmadec.$(OBJ) 7zlzma.$(OBJ) iiostrm.$(OBJ) inbyte.$(OBJ) lzma.$(OBJ) winout.$(OBJ)
 
 ifeq ($(OS),win)
   ifeq ($(CC),cl)

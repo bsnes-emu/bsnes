@@ -87,7 +87,6 @@ uint width = (!hires) ? 256 : 512;
   if(hires) {
     hscroll <<= 1;
     if(regs.interlace) {
-      vscroll <<= 1;
       y = (y << 1) + line.interlace_field;
     }
   }

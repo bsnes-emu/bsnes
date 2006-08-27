@@ -84,7 +84,8 @@ struct {
 
 class AboutWindow : public Window {
 public:
-Button Ok;
+Editbox AboutText;
+Button  Ok;
 
 static const char about_text[4096];
   bool Event(EventInfo &info);

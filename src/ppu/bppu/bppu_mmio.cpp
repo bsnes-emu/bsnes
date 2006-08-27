@@ -81,7 +81,7 @@ uint16 hc = r_cpu->hcycles();
 
 //INIDISP
 void bPPU::mmio_w2100(uint8 value) {
-  regs.display_disabled   = bool(value & 0x80);
+  regs.display_disabled   = !!(value & 0x80);
   regs.display_brightness = value & 15;
 }
 
@@ -93,69 +93,55 @@ void bPPU::mmio_w2101(uint8 value) {
 }
 
 //OAMADDL
-void bPPU::mmio_w2102(uint8 value) {
-  regs.oam_baseaddr = (regs.oam_baseaddr & 0x100) | value;
-  regs.oam_addr     = regs.oam_baseaddr << 1;
-
-  if(regs.oam_priority == false) {
-    regs.oam_firstsprite = 0;
-  } else {
-    regs.oam_firstsprite = (regs.oam_addr >> 2) & 127;
-  }
+void bPPU::mmio_w2102(uint8 data) {
+  regs.oam_baseaddr    = (regs.oam_baseaddr & ~0xff) | (data << 0);
+  regs.oam_baseaddr   &= 0x01ff;
+  regs.oam_addr        = regs.oam_baseaddr << 1;
+  regs.oam_firstsprite = (regs.oam_priority == false) ? 0 : (regs.oam_addr >> 2) & 127;
 }
 
 //OAMADDH
-void bPPU::mmio_w2103(uint8 value) {
-  regs.oam_priority = bool(value & 0x80);
-  regs.oam_baseaddr = ((value & 1) << 8) | (regs.oam_baseaddr & 0xff);
-  regs.oam_addr     = regs.oam_baseaddr << 1;
-
-  if(regs.oam_priority == false) {
-    regs.oam_firstsprite = 0;
-  } else {
-    regs.oam_firstsprite = (regs.oam_addr >> 2) & 127;
-  }
+void bPPU::mmio_w2103(uint8 data) {
+  regs.oam_priority    = !!(data & 0x80);
+  regs.oam_baseaddr    = (regs.oam_baseaddr &  0xff) | (data << 8);
+  regs.oam_baseaddr   &= 0x01ff;
+  regs.oam_addr        = regs.oam_baseaddr << 1;
+  regs.oam_firstsprite = (regs.oam_priority == false) ? 0 : (regs.oam_addr >> 2) & 127;
 }
 
 //OAMDATA
-void bPPU::mmio_w2104(uint8 value) {
-  if(regs.oam_addr >= 0x0200) {
-    oam_write(regs.oam_addr, value);
-  } else if(!(regs.oam_addr & 1)) {
-    regs.oam_latchdata = value;
+void bPPU::mmio_w2104(uint8 data) {
+  if(regs.oam_addr & 0x0200) {
+    oam_write(regs.oam_addr, data);
+  } else if((regs.oam_addr & 1) == 0) {
+    regs.oam_latchdata = data;
   } else {
-    oam_write((regs.oam_addr & 0x01fe) + 0, regs.oam_latchdata);
-    oam_write((regs.oam_addr & 0x01fe) + 1, value);
+    oam_write((regs.oam_addr & ~1) + 0, regs.oam_latchdata);
+    oam_write((regs.oam_addr & ~1) + 1, data);
   }
+
   regs.oam_addr++;
   regs.oam_addr &= 0x03ff;
-
-  if(!(regs.oam_addr & 1)) {
-    if(regs.oam_priority == false) {
-      regs.oam_firstsprite = 0;
-    } else {
-      regs.oam_firstsprite = (regs.oam_addr >> 2) & 127;
-    }
-  }
+  regs.oam_firstsprite = (regs.oam_priority == false) ? 0 : (regs.oam_addr >> 2) & 127;
 }
 
 //BGMODE
 void bPPU::mmio_w2105(uint8 value) {
-  regs.bg_tilesize[BG4] = bool(value & 0x80);
-  regs.bg_tilesize[BG3] = bool(value & 0x40);
-  regs.bg_tilesize[BG2] = bool(value & 0x20);
-  regs.bg_tilesize[BG1] = bool(value & 0x10);
-  regs.bg3_priority     = bool(value & 0x08);
+  regs.bg_tilesize[BG4] = !!(value & 0x80);
+  regs.bg_tilesize[BG3] = !!(value & 0x40);
+  regs.bg_tilesize[BG2] = !!(value & 0x20);
+  regs.bg_tilesize[BG1] = !!(value & 0x10);
+  regs.bg3_priority     = !!(value & 0x08);
   regs.bg_mode          = (value & 7);
 }
 
 //MOSAIC
 void bPPU::mmio_w2106(uint8 value) {
   regs.mosaic_size         = (value >> 4) & 15;
-  regs.mosaic_enabled[BG4] = bool(value & 0x08);
-  regs.mosaic_enabled[BG3] = bool(value & 0x04);
-  regs.mosaic_enabled[BG2] = bool(value & 0x02);
-  regs.mosaic_enabled[BG1] = bool(value & 0x01);
+  regs.mosaic_enabled[BG4] = !!(value & 0x08);
+  regs.mosaic_enabled[BG3] = !!(value & 0x04);
+  regs.mosaic_enabled[BG2] = !!(value & 0x02);
+  regs.mosaic_enabled[BG1] = !!(value & 0x01);
 }
 
 //BG1SC
@@ -250,7 +236,7 @@ void bPPU::mmio_w2114(uint8 value) {
 
 //VMAIN
 void bPPU::mmio_w2115(uint8 value) {
-  regs.vram_incmode = bool(value & 0x80);
+  regs.vram_incmode = !!(value & 0x80);
   regs.vram_mapping = (value >> 2) & 3;
   switch(value & 3) {
   case 0: regs.vram_incsize =   1; break;
@@ -305,8 +291,8 @@ uint16 addr = get_vram_address() + 1;
 //M7SEL
 void bPPU::mmio_w211a(uint8 value) {
   regs.mode7_repeat = (value >> 6) & 3;
-  regs.mode7_vflip  = bool(value & 0x02);
-  regs.mode7_hflip  = bool(value & 0x01);
+  regs.mode7_vflip  = !!(value & 0x02);
+  regs.mode7_hflip  = !!(value & 0x01);
 }
 
 //M7A
@@ -371,38 +357,38 @@ void bPPU::mmio_w2122(uint8 value) {
 
 //W12SEL
 void bPPU::mmio_w2123(uint8 value) {
-  regs.window2_enabled[BG2] = bool(value & 0x80);
-  regs.window2_invert [BG2] = bool(value & 0x40);
-  regs.window1_enabled[BG2] = bool(value & 0x20);
-  regs.window1_invert [BG2] = bool(value & 0x10);
-  regs.window2_enabled[BG1] = bool(value & 0x08);
-  regs.window2_invert [BG1] = bool(value & 0x04);
-  regs.window1_enabled[BG1] = bool(value & 0x02);
-  regs.window1_invert [BG1] = bool(value & 0x01);
+  regs.window2_enabled[BG2] = !!(value & 0x80);
+  regs.window2_invert [BG2] = !!(value & 0x40);
+  regs.window1_enabled[BG2] = !!(value & 0x20);
+  regs.window1_invert [BG2] = !!(value & 0x10);
+  regs.window2_enabled[BG1] = !!(value & 0x08);
+  regs.window2_invert [BG1] = !!(value & 0x04);
+  regs.window1_enabled[BG1] = !!(value & 0x02);
+  regs.window1_invert [BG1] = !!(value & 0x01);
 }
 
 //W34SEL
 void bPPU::mmio_w2124(uint8 value) {
-  regs.window2_enabled[BG4] = bool(value & 0x80);
-  regs.window2_invert [BG4] = bool(value & 0x40);
-  regs.window1_enabled[BG4] = bool(value & 0x20);
-  regs.window1_invert [BG4] = bool(value & 0x10);
-  regs.window2_enabled[BG3] = bool(value & 0x08);
-  regs.window2_invert [BG3] = bool(value & 0x04);
-  regs.window1_enabled[BG3] = bool(value & 0x02);
-  regs.window1_invert [BG3] = bool(value & 0x01);
+  regs.window2_enabled[BG4] = !!(value & 0x80);
+  regs.window2_invert [BG4] = !!(value & 0x40);
+  regs.window1_enabled[BG4] = !!(value & 0x20);
+  regs.window1_invert [BG4] = !!(value & 0x10);
+  regs.window2_enabled[BG3] = !!(value & 0x08);
+  regs.window2_invert [BG3] = !!(value & 0x04);
+  regs.window1_enabled[BG3] = !!(value & 0x02);
+  regs.window1_invert [BG3] = !!(value & 0x01);
 }
 
 //WOBJSEL
 void bPPU::mmio_w2125(uint8 value) {
-  regs.window2_enabled[COL] = bool(value & 0x80);
-  regs.window2_invert [COL] = bool(value & 0x40);
-  regs.window1_enabled[COL] = bool(value & 0x20);
-  regs.window1_invert [COL] = bool(value & 0x10);
-  regs.window2_enabled[OAM] = bool(value & 0x08);
-  regs.window2_invert [OAM] = bool(value & 0x04);
-  regs.window1_enabled[OAM] = bool(value & 0x02);
-  regs.window1_invert [OAM] = bool(value & 0x01);
+  regs.window2_enabled[COL] = !!(value & 0x80);
+  regs.window2_invert [COL] = !!(value & 0x40);
+  regs.window1_enabled[COL] = !!(value & 0x20);
+  regs.window1_invert [COL] = !!(value & 0x10);
+  regs.window2_enabled[OAM] = !!(value & 0x08);
+  regs.window2_invert [OAM] = !!(value & 0x04);
+  regs.window1_enabled[OAM] = !!(value & 0x02);
+  regs.window1_invert [OAM] = !!(value & 0x01);
 }
 
 //WH0
@@ -441,58 +427,58 @@ void bPPU::mmio_w212b(uint8 value) {
 
 //TM
 void bPPU::mmio_w212c(uint8 value) {
-  regs.bg_enabled[OAM] = bool(value & 0x10);
-  regs.bg_enabled[BG4] = bool(value & 0x08);
-  regs.bg_enabled[BG3] = bool(value & 0x04);
-  regs.bg_enabled[BG2] = bool(value & 0x02);
-  regs.bg_enabled[BG1] = bool(value & 0x01);
+  regs.bg_enabled[OAM] = !!(value & 0x10);
+  regs.bg_enabled[BG4] = !!(value & 0x08);
+  regs.bg_enabled[BG3] = !!(value & 0x04);
+  regs.bg_enabled[BG2] = !!(value & 0x02);
+  regs.bg_enabled[BG1] = !!(value & 0x01);
 }
 
 //TS
 void bPPU::mmio_w212d(uint8 value) {
-  regs.bgsub_enabled[OAM] = bool(value & 0x10);
-  regs.bgsub_enabled[BG4] = bool(value & 0x08);
-  regs.bgsub_enabled[BG3] = bool(value & 0x04);
-  regs.bgsub_enabled[BG2] = bool(value & 0x02);
-  regs.bgsub_enabled[BG1] = bool(value & 0x01);
+  regs.bgsub_enabled[OAM] = !!(value & 0x10);
+  regs.bgsub_enabled[BG4] = !!(value & 0x08);
+  regs.bgsub_enabled[BG3] = !!(value & 0x04);
+  regs.bgsub_enabled[BG2] = !!(value & 0x02);
+  regs.bgsub_enabled[BG1] = !!(value & 0x01);
 }
 
 //TMW
 void bPPU::mmio_w212e(uint8 value) {
-  regs.window_enabled[OAM] = bool(value & 0x10);
-  regs.window_enabled[BG4] = bool(value & 0x08);
-  regs.window_enabled[BG3] = bool(value & 0x04);
-  regs.window_enabled[BG2] = bool(value & 0x02);
-  regs.window_enabled[BG1] = bool(value & 0x01);
+  regs.window_enabled[OAM] = !!(value & 0x10);
+  regs.window_enabled[BG4] = !!(value & 0x08);
+  regs.window_enabled[BG3] = !!(value & 0x04);
+  regs.window_enabled[BG2] = !!(value & 0x02);
+  regs.window_enabled[BG1] = !!(value & 0x01);
 }
 
 //TSW
 void bPPU::mmio_w212f(uint8 value) {
-  regs.sub_window_enabled[OAM] = bool(value & 0x10);
-  regs.sub_window_enabled[BG4] = bool(value & 0x08);
-  regs.sub_window_enabled[BG3] = bool(value & 0x04);
-  regs.sub_window_enabled[BG2] = bool(value & 0x02);
-  regs.sub_window_enabled[BG1] = bool(value & 0x01);
+  regs.sub_window_enabled[OAM] = !!(value & 0x10);
+  regs.sub_window_enabled[BG4] = !!(value & 0x08);
+  regs.sub_window_enabled[BG3] = !!(value & 0x04);
+  regs.sub_window_enabled[BG2] = !!(value & 0x02);
+  regs.sub_window_enabled[BG1] = !!(value & 0x01);
 }
 
 //CGWSEL
 void bPPU::mmio_w2130(uint8 value) {
   regs.color_mask    = (value >> 6) & 3;
   regs.colorsub_mask = (value >> 4) & 3;
-  regs.addsub_mode   = bool(value & 0x02);
-  regs.direct_color  = bool(value & 0x01);
+  regs.addsub_mode   = !!(value & 0x02);
+  regs.direct_color  = !!(value & 0x01);
 }
 
 //CGADDSUB
 void bPPU::mmio_w2131(uint8 value) {
-  regs.color_mode          = bool(value & 0x80);
-  regs.color_halve         = bool(value & 0x40);
-  regs.color_enabled[BACK] = bool(value & 0x20);
-  regs.color_enabled[OAM]  = bool(value & 0x10);
-  regs.color_enabled[BG4]  = bool(value & 0x08);
-  regs.color_enabled[BG3]  = bool(value & 0x04);
-  regs.color_enabled[BG2]  = bool(value & 0x02);
-  regs.color_enabled[BG1]  = bool(value & 0x01);
+  regs.color_mode          = !!(value & 0x80);
+  regs.color_halve         = !!(value & 0x40);
+  regs.color_enabled[BACK] = !!(value & 0x20);
+  regs.color_enabled[OAM]  = !!(value & 0x10);
+  regs.color_enabled[BG4]  = !!(value & 0x08);
+  regs.color_enabled[BG3]  = !!(value & 0x04);
+  regs.color_enabled[BG2]  = !!(value & 0x02);
+  regs.color_enabled[BG1]  = !!(value & 0x01);
 }
 
 //COLDATA
@@ -506,11 +492,11 @@ void bPPU::mmio_w2132(uint8 value) {
 
 //SETINI
 void bPPU::mmio_w2133(uint8 value) {
-  regs.mode7_extbg   = bool(value & 0x40);
-  regs.pseudo_hires  = bool(value & 0x08);
-  regs.overscan      = bool(value & 0x04);
-  regs.oam_interlace = bool(value & 0x02);
-  regs.interlace     = bool(value & 0x01);
+  regs.mode7_extbg   = !!(value & 0x40);
+  regs.pseudo_hires  = !!(value & 0x08);
+  regs.overscan      = !!(value & 0x04);
+  regs.oam_interlace = !!(value & 0x02);
+  regs.interlace     = !!(value & 0x01);
 
   r_cpu->set_overscan(regs.overscan);
 }
@@ -550,16 +536,10 @@ uint8 bPPU::mmio_r2137() {
 //OAMDATAREAD
 uint8 bPPU::mmio_r2138() {
   regs.ppu1_mdr = oam_read(regs.oam_addr);
+
   regs.oam_addr++;
   regs.oam_addr &= 0x03ff;
-
-  if(!(regs.oam_addr & 1)) {
-    if(regs.oam_priority == false) {
-      regs.oam_firstsprite = 0;
-    } else {
-      regs.oam_firstsprite = (regs.oam_addr >> 2) & 127;
-    }
-  }
+  regs.oam_firstsprite = (regs.oam_priority == false) ? 0 : (regs.oam_addr >> 2) & 127;
 
   return regs.ppu1_mdr;
 }
@@ -681,18 +661,18 @@ uint8 bPPU::mmio_read(uint16 addr) {
   case 0x2129:
   case 0x212a:
     return regs.ppu1_mdr;
-  case 0x2134:return mmio_r2134(); //MPYL
-  case 0x2135:return mmio_r2135(); //MPYM
-  case 0x2136:return mmio_r2136(); //MPYH
-  case 0x2137:return mmio_r2137(); //SLHV
-  case 0x2138:return mmio_r2138(); //OAMDATAREAD
-  case 0x2139:return mmio_r2139(); //VMDATALREAD
-  case 0x213a:return mmio_r213a(); //VMDATAHREAD
-  case 0x213b:return mmio_r213b(); //CGDATAREAD
-  case 0x213c:return mmio_r213c(); //OPHCT
-  case 0x213d:return mmio_r213d(); //OPVCT
-  case 0x213e:return mmio_r213e(); //STAT77
-  case 0x213f:return mmio_r213f(); //STAT78
+  case 0x2134: return mmio_r2134(); //MPYL
+  case 0x2135: return mmio_r2135(); //MPYM
+  case 0x2136: return mmio_r2136(); //MPYH
+  case 0x2137: return mmio_r2137(); //SLHV
+  case 0x2138: return mmio_r2138(); //OAMDATAREAD
+  case 0x2139: return mmio_r2139(); //VMDATALREAD
+  case 0x213a: return mmio_r213a(); //VMDATAHREAD
+  case 0x213b: return mmio_r213b(); //CGDATAREAD
+  case 0x213c: return mmio_r213c(); //OPHCT
+  case 0x213d: return mmio_r213d(); //OPVCT
+  case 0x213e: return mmio_r213e(); //STAT77
+  case 0x213f: return mmio_r213f(); //STAT78
   }
 
 //return 0x00;
@@ -701,57 +681,57 @@ uint8 bPPU::mmio_read(uint16 addr) {
 
 void bPPU::mmio_write(uint16 addr, uint8 data) {
   switch(addr) {
-  case 0x2100:mmio_w2100(data);return; //INIDISP
-  case 0x2101:mmio_w2101(data);return; //OBSEL
-  case 0x2102:mmio_w2102(data);return; //OAMADDL
-  case 0x2103:mmio_w2103(data);return; //OAMADDH
-  case 0x2104:mmio_w2104(data);return; //OAMDATA
-  case 0x2105:mmio_w2105(data);return; //BGMODE
-  case 0x2106:mmio_w2106(data);return; //MOSAIC
-  case 0x2107:mmio_w2107(data);return; //BG1SC
-  case 0x2108:mmio_w2108(data);return; //BG2SC
-  case 0x2109:mmio_w2109(data);return; //BG3SC
-  case 0x210a:mmio_w210a(data);return; //BG4SC
-  case 0x210b:mmio_w210b(data);return; //BG12NBA
-  case 0x210c:mmio_w210c(data);return; //BG34NBA
-  case 0x210d:mmio_w210d(data);return; //BG1HOFS
-  case 0x210e:mmio_w210e(data);return; //BG1VOFS
-  case 0x210f:mmio_w210f(data);return; //BG2HOFS
-  case 0x2110:mmio_w2110(data);return; //BG2VOFS
-  case 0x2111:mmio_w2111(data);return; //BG3HOFS
-  case 0x2112:mmio_w2112(data);return; //BG3VOFS
-  case 0x2113:mmio_w2113(data);return; //BG4HOFS
-  case 0x2114:mmio_w2114(data);return; //BG4VOFS
-  case 0x2115:mmio_w2115(data);return; //VMAIN
-  case 0x2116:mmio_w2116(data);return; //VMADDL
-  case 0x2117:mmio_w2117(data);return; //VMADDH
-  case 0x2118:mmio_w2118(data);return; //VMDATAL
-  case 0x2119:mmio_w2119(data);return; //VMDATAH
-  case 0x211a:mmio_w211a(data);return; //M7SEL
-  case 0x211b:mmio_w211b(data);return; //M7A
-  case 0x211c:mmio_w211c(data);return; //M7B
-  case 0x211d:mmio_w211d(data);return; //M7C
-  case 0x211e:mmio_w211e(data);return; //M7D
-  case 0x211f:mmio_w211f(data);return; //M7X
-  case 0x2120:mmio_w2120(data);return; //M7Y
-  case 0x2121:mmio_w2121(data);return; //CGADD
-  case 0x2122:mmio_w2122(data);return; //CGDATA
-  case 0x2123:mmio_w2123(data);return; //W12SEL
-  case 0x2124:mmio_w2124(data);return; //W34SEL
-  case 0x2125:mmio_w2125(data);return; //WOBJSEL
-  case 0x2126:mmio_w2126(data);return; //WH0
-  case 0x2127:mmio_w2127(data);return; //WH1
-  case 0x2128:mmio_w2128(data);return; //WH2
-  case 0x2129:mmio_w2129(data);return; //WH3
-  case 0x212a:mmio_w212a(data);return; //WBGLOG
-  case 0x212b:mmio_w212b(data);return; //WOBJLOG
-  case 0x212c:mmio_w212c(data);return; //TM
-  case 0x212d:mmio_w212d(data);return; //TS
-  case 0x212e:mmio_w212e(data);return; //TMW
-  case 0x212f:mmio_w212f(data);return; //TSW
-  case 0x2130:mmio_w2130(data);return; //CGWSEL
-  case 0x2131:mmio_w2131(data);return; //CGADDSUB
-  case 0x2132:mmio_w2132(data);return; //COLDATA
-  case 0x2133:mmio_w2133(data);return; //SETINI
+  case 0x2100: mmio_w2100(data); return; //INIDISP
+  case 0x2101: mmio_w2101(data); return; //OBSEL
+  case 0x2102: mmio_w2102(data); return; //OAMADDL
+  case 0x2103: mmio_w2103(data); return; //OAMADDH
+  case 0x2104: mmio_w2104(data); return; //OAMDATA
+  case 0x2105: mmio_w2105(data); return; //BGMODE
+  case 0x2106: mmio_w2106(data); return; //MOSAIC
+  case 0x2107: mmio_w2107(data); return; //BG1SC
+  case 0x2108: mmio_w2108(data); return; //BG2SC
+  case 0x2109: mmio_w2109(data); return; //BG3SC
+  case 0x210a: mmio_w210a(data); return; //BG4SC
+  case 0x210b: mmio_w210b(data); return; //BG12NBA
+  case 0x210c: mmio_w210c(data); return; //BG34NBA
+  case 0x210d: mmio_w210d(data); return; //BG1HOFS
+  case 0x210e: mmio_w210e(data); return; //BG1VOFS
+  case 0x210f: mmio_w210f(data); return; //BG2HOFS
+  case 0x2110: mmio_w2110(data); return; //BG2VOFS
+  case 0x2111: mmio_w2111(data); return; //BG3HOFS
+  case 0x2112: mmio_w2112(data); return; //BG3VOFS
+  case 0x2113: mmio_w2113(data); return; //BG4HOFS
+  case 0x2114: mmio_w2114(data); return; //BG4VOFS
+  case 0x2115: mmio_w2115(data); return; //VMAIN
+  case 0x2116: mmio_w2116(data); return; //VMADDL
+  case 0x2117: mmio_w2117(data); return; //VMADDH
+  case 0x2118: mmio_w2118(data); return; //VMDATAL
+  case 0x2119: mmio_w2119(data); return; //VMDATAH
+  case 0x211a: mmio_w211a(data); return; //M7SEL
+  case 0x211b: mmio_w211b(data); return; //M7A
+  case 0x211c: mmio_w211c(data); return; //M7B
+  case 0x211d: mmio_w211d(data); return; //M7C
+  case 0x211e: mmio_w211e(data); return; //M7D
+  case 0x211f: mmio_w211f(data); return; //M7X
+  case 0x2120: mmio_w2120(data); return; //M7Y
+  case 0x2121: mmio_w2121(data); return; //CGADD
+  case 0x2122: mmio_w2122(data); return; //CGDATA
+  case 0x2123: mmio_w2123(data); return; //W12SEL
+  case 0x2124: mmio_w2124(data); return; //W34SEL
+  case 0x2125: mmio_w2125(data); return; //WOBJSEL
+  case 0x2126: mmio_w2126(data); return; //WH0
+  case 0x2127: mmio_w2127(data); return; //WH1
+  case 0x2128: mmio_w2128(data); return; //WH2
+  case 0x2129: mmio_w2129(data); return; //WH3
+  case 0x212a: mmio_w212a(data); return; //WBGLOG
+  case 0x212b: mmio_w212b(data); return; //WOBJLOG
+  case 0x212c: mmio_w212c(data); return; //TM
+  case 0x212d: mmio_w212d(data); return; //TS
+  case 0x212e: mmio_w212e(data); return; //TMW
+  case 0x212f: mmio_w212f(data); return; //TSW
+  case 0x2130: mmio_w2130(data); return; //CGWSEL
+  case 0x2131: mmio_w2131(data); return; //CGADDSUB
+  case 0x2132: mmio_w2132(data); return; //COLDATA
+  case 0x2133: mmio_w2133(data); return; //SETINI
   }
 }

@@ -12,7 +12,7 @@ long height;
   height = -MulDiv(8, GetDeviceCaps(hdc, LOGPIXELSY), 72);
   global::fwf = CreateFont(height, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Courier New");
   height = -MulDiv(9, GetDeviceCaps(hdc, LOGPIXELSY), 72);
-  global::font_about = CreateFont(height, 0, 0, 0, FW_BOLD, 0, 0, 0, 0, 0, 0, 0, 0, "Verdana");
+  global::font_about = CreateFont(height, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Verdana");
   height = -MulDiv(14, GetDeviceCaps(hdc, LOGPIXELSY), 72);
   global::font_header = CreateFont(height, 0, 0, 0, FW_BOLD, 0, 0, 0, 0, 0, 0, 0, 0, "Verdana");
   height = -MulDiv(10, GetDeviceCaps(hdc, LOGPIXELSY), 72);
@@ -25,7 +25,7 @@ long height;
   wMain.Center();
 
   wAbout.SetIcon(100);
-  wAbout.Create(0, "bsnes_about", "topmost|popup|frame|dragmove", 0, 0, 400, 240, "About bsnes...");
+  wAbout.Create(0, "bsnes_about", "topmost|popup|frame|dragmove", 0, 0, 325, 165, "About bsnes...");
   wAbout.Center();
 
   init_settings();

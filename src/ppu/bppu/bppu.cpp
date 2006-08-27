@@ -23,13 +23,6 @@ void bPPU::scanline() {
 
     regs.mosaic_countdown = regs.mosaic_size + 1;
     regs.mosaic_countdown--;
-
-  //OAM sprite priority rotation
-    if(regs.oam_priority == false) {
-      regs.oam_firstsprite = 0;
-    } else {
-      regs.oam_firstsprite = (regs.oam_addr >> 2) & 127;
-    }
   } else {
     for(int bg = BG1; bg <= BG4; bg++) {
       if(!regs.mosaic_enabled[bg] || !regs.mosaic_countdown) {
@@ -43,9 +36,11 @@ void bPPU::scanline() {
     regs.mosaic_countdown--;
   }
 
-  if(line.y == (!r_cpu->overscan() ? 225 : 240) && regs.display_disabled == false) {
-  //OAM address reset
-    regs.oam_addr = regs.oam_baseaddr << 1;
+  if(line.y == (!r_cpu->overscan() ? 225 : 240)) {
+    if(regs.display_disabled == false) {
+    //OAM address reset
+      regs.oam_addr = regs.oam_baseaddr << 1;
+    }
   }
 
   if(line.y == 241 && line.interlace_field == 1) {
@@ -98,7 +93,7 @@ void bPPU::power() {
 
 //$2102-$2103
   regs.oam_baseaddr    = 0x0000;
-  regs.oam_addr        = regs.oam_baseaddr << 1;
+  regs.oam_addr        = 0x0000;
   regs.oam_priority    = false;
   regs.oam_firstsprite = 0;
 

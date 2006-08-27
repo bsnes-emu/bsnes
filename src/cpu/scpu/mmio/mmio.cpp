@@ -21,19 +21,19 @@ void sCPU::mmio_w2180(uint8 data) {
 
 //WMADDL
 void sCPU::mmio_w2181(uint8 data) {
-  status.wram_addr = (status.wram_addr & 0xffff00) | (data);
+  status.wram_addr  = (status.wram_addr & 0xffff00) | (data);
   status.wram_addr &= 0x01ffff;
 }
 
 //WMADDM
 void sCPU::mmio_w2182(uint8 data) {
-  status.wram_addr = (status.wram_addr & 0xff00ff) | (data << 8);
+  status.wram_addr  = (status.wram_addr & 0xff00ff) | (data << 8);
   status.wram_addr &= 0x01ffff;
 }
 
 //WMADDH
 void sCPU::mmio_w2183(uint8 data) {
-  status.wram_addr = (status.wram_addr & 0x00ffff) | (data << 16);
+  status.wram_addr  = (status.wram_addr & 0x00ffff) | (data << 16);
   status.wram_addr &= 0x01ffff;
 }
 
@@ -51,7 +51,8 @@ uint8 sCPU::mmio_r4016() {
 uint8 r = regs.mdr & 0xfc;
   r |= status.joypad1_bits & 1;
   if(status.joypad_strobe_latch == 0) {
-    status.joypad1_bits = asr<1>(status.joypad1_bits);
+    status.joypad1_bits >>= 1;
+    status.joypad1_bits  |= 0x8000;
   }
 
   return r;
@@ -65,7 +66,8 @@ uint8 sCPU::mmio_r4017() {
 uint8 r = (regs.mdr & 0xe0) | 0x1c;
   r |= status.joypad2_bits & 1;
   if(status.joypad_strobe_latch == 0) {
-    status.joypad2_bits = asr<1>(status.joypad2_bits);
+    status.joypad2_bits >>= 1;
+    status.joypad2_bits  |= 0x8000;
   }
 
   return r;
@@ -179,25 +181,29 @@ void sCPU::mmio_w4200(uint8 data) {
 
 //HTIMEL
 void sCPU::mmio_w4207(uint8 data) {
-  status.hirq_pos = (status.hirq_pos & 0xff00) | (data);
+  status.hirq_pos  = (status.hirq_pos & ~0xff) | (data);
+  status.hirq_pos &= 0x01ff;
   update_interrupts();
 }
 
 //HTIMEH
 void sCPU::mmio_w4208(uint8 data) {
-  status.hirq_pos = (status.hirq_pos & 0x00ff) | (data << 8);
+  status.hirq_pos  = (status.hirq_pos &  0xff) | (data << 8);
+  status.hirq_pos &= 0x01ff;
   update_interrupts();
 }
 
 //VTIMEL
 void sCPU::mmio_w4209(uint8 data) {
-  status.virq_pos = (status.virq_pos & 0xff00) | (data);
+  status.virq_pos  = (status.virq_pos & ~0xff) | (data);
+  status.virq_pos &= 0x01ff;
   update_interrupts();
 }
 
 //VTIMEH
 void sCPU::mmio_w420a(uint8 data) {
-  status.virq_pos = (status.virq_pos & 0x00ff) | (data << 8);
+  status.virq_pos  = (status.virq_pos &  0xff) | (data << 8);
+  status.virq_pos &= 0x01ff;
   update_interrupts();
 }
 

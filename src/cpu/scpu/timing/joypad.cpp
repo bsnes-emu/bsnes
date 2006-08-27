@@ -14,7 +14,6 @@ void sCPU::run_manual_joypad_poll() {
   status.joypad1_bits |= uint8(snes->get_input_status(SNES::DEV_JOYPAD1, SNES::JOYPAD_X))      <<  9;
   status.joypad1_bits |= uint8(snes->get_input_status(SNES::DEV_JOYPAD1, SNES::JOYPAD_L))      << 10;
   status.joypad1_bits |= uint8(snes->get_input_status(SNES::DEV_JOYPAD1, SNES::JOYPAD_R))      << 11;
-  status.joypad1_bits |= ~0xffff;
 
   status.joypad2_bits  = uint8(snes->get_input_status(SNES::DEV_JOYPAD2, SNES::JOYPAD_B))      <<  0;
   status.joypad2_bits |= uint8(snes->get_input_status(SNES::DEV_JOYPAD2, SNES::JOYPAD_Y))      <<  1;
@@ -28,7 +27,6 @@ void sCPU::run_manual_joypad_poll() {
   status.joypad2_bits |= uint8(snes->get_input_status(SNES::DEV_JOYPAD2, SNES::JOYPAD_X))      <<  9;
   status.joypad2_bits |= uint8(snes->get_input_status(SNES::DEV_JOYPAD2, SNES::JOYPAD_L))      << 10;
   status.joypad2_bits |= uint8(snes->get_input_status(SNES::DEV_JOYPAD2, SNES::JOYPAD_R))      << 11;
-  status.joypad2_bits |= ~0xffff;
 }
 
 /*****
@@ -66,6 +64,6 @@ uint16 joy1 = 0x0000, joy2 = 0x0000;
   status.joypad1_bits >>= 16;
   status.joypad2_bits >>= 16;
 
-  status.joypad1_bits |= ~0xffff;
-  status.joypad2_bits |= ~0xffff;
+  status.joypad1_bits  |= 0xffff;
+  status.joypad2_bits  |= 0xffff;
 }

@@ -6,17 +6,17 @@ void CALLBACK wInputConfigInputTimerProc(HWND hwnd, UINT msg, UINT event, DWORD 
 bool InputConfigWindow::Event(EventInfo &info) {
   switch(info.event_id) {
 
-  case EVENT_DRAW: {
-  PAINTSTRUCT ps;
-  HDC hdc = BeginPaint(hwnd, &ps);
-  HDC hdcsrc = CreateCompatibleDC(hdc);
-  HBITMAP hbm = LoadBitmap(GetModuleHandle(0), MAKEINTRESOURCE(102));
-    SelectObject(hdcsrc, hbm);
-    BitBlt(hdc, 285, 169, 190, 100, hdcsrc, 0, 0, SRCCOPY);
-    DeleteDC(hdcsrc);
-    DeleteObject(hbm);
-    EndPaint(hwnd, &ps);
-  } break;
+//case EVENT_DRAW: {
+//PAINTSTRUCT ps;
+//HDC hdc = BeginPaint(hwnd, &ps);
+//HDC hdcsrc = CreateCompatibleDC(hdc);
+//HBITMAP hbm = LoadBitmap(GetModuleHandle(0), MAKEINTRESOURCE(102));
+//  SelectObject(hdcsrc, hbm);
+//  BitBlt(hdc, 285, 169, 190, 100, hdcsrc, 0, 0, SRCCOPY);
+//  DeleteDC(hdcsrc);
+//  DeleteObject(hbm);
+//  EndPaint(hwnd, &ps);
+//} break;
 
   case EVENT_INPUTKEYDOWN: {
     if(button_update.active == true) {

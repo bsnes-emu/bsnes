@@ -1,3 +1,4 @@
+#warning "WARNING: GTK+ port input is currently broken! Controls will not work! Please use SDL port instead."
 #include "main.h"
 
 #include "bsnes.h"
