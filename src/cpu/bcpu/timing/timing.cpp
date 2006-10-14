@@ -26,7 +26,7 @@
  */
 
 uint16 bCPU::vcounter() { return time.v; }
-uint16 bCPU::hcycles()  { return time.hc; }
+uint16 bCPU::hclock()  { return time.hc; }
 
 bool   bCPU::interlace()        { return time.interlace; }
 bool   bCPU::interlace_field()  { return time.interlace_field; }
@@ -193,7 +193,7 @@ uint32 r = status.cycles_executed;
 
 void bCPU::cycle_edge() {
   if(time.line_rendered == false) {
-    if(time.hc >= 128) {
+    if(time.hc >= 192) {
       time.line_rendered = true;
       r_ppu->render_scanline();
     }
@@ -259,8 +259,7 @@ void bCPU::scanline() {
   update_interrupts();
 
   if(vcounter() == (!overscan() ? 227 : 242) && status.auto_joypad_poll == true) {
-    snes->poll_input(SNES::DEV_JOYPAD1);
-    snes->poll_input(SNES::DEV_JOYPAD2);
+    snes->poll_input();
   //When the SNES auto-polls the joypads, it writes 1, then 0 to
   //$4016, then reads from each 16 times to get the joypad state
   //information. As a result, the joypad read positions are set

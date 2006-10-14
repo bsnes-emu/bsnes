@@ -15,6 +15,7 @@ enum {
 };
 
   uint mirror(uint size, uint pos);
+  bool cart_map_pcb(const char *pcb);
   void cart_map_range(uint mode, uint8 bank_lo, uint8 bank_hi, uint16 addr_lo, uint16 addr_hi, uint type, uint offset = 0);
 
 #define mapper(name) void cart_map_##name()

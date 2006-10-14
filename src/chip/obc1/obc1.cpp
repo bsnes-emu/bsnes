@@ -1,5 +1,7 @@
 #include "../../base.h"
 
+OBC1 *obc1;
+
 void OBC1::init() {}
 void OBC1::enable() {}
 

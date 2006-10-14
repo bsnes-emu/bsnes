@@ -92,4 +92,5 @@ inline uint16 get_palette(uint8 index);
 inline uint16 get_direct_color(uint8 p, uint8 t);
 inline uint16 get_pixel_normal(uint32 x);
 inline uint16 get_pixel_swap(uint32 x);
-inline void   render_line_output();
+void   render_line_output();
+void   render_line_clear();

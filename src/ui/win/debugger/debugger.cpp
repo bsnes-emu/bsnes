@@ -1,11 +1,16 @@
 #include "ui_debugger.cpp"
+#include "ui_tracer.cpp"
 #include "ui_memory.cpp"
 
 void init_debugger() {
   wDebug.SetIcon(100);
-  wDebug.Create(0, "bsnes_debug", "title|minimize", 0, 0, 850, 385, "bsnes Debugger");
+  wDebug.Create(0, "bsnes_debug", "title|minimize", 0, 0, 735, 350, "bsnes Debugger");
   wDebug.MoveToBottom();
   wDebug.MoveToLeft();
+
+  wTracer.SetIcon(100);
+  wTracer.Create(0, "bsnes_tracer", "title|minimize", 0, 0, 335, 160, "bsnes Tracer");
+  wTracer.Center();
 
   wMemory.SetIcon(100);
   wMemory.Create(0, "bsnes_memory", "title|minimize", 0, 0, 500, 245, "bsnes Memory Editor");
@@ -14,6 +19,7 @@ void init_debugger() {
 
 void setup_debugger() {
   wDebug.Setup();
+  wTracer.Setup();
   wMemory.Setup();
 }
 
@@ -33,6 +39,7 @@ void Debugger::deactivate() {
   status.active = false;
 
   wDebug.Hide();
+  wTracer.Hide();
   wMemory.Hide();
   wMain.CheckMenuItem(MENU_SETTINGS_DEBUGGER, false);
   bsnes->set_state(bSNES::RUN);
@@ -40,9 +47,6 @@ void Debugger::deactivate() {
 
 void Debugger::refresh() {
   wMemory.Refresh();
-}
-
-void Debugger::notify(uint32 message, uint32 param1, uint32 param2) {
 }
 
 uint8 Debugger::read(uint8 mode, uint32 addr) {
@@ -55,7 +59,7 @@ uint8 r = 0x00;
     r = r_mem->read(addr);
   } break;
   case SPCRAM:
-    r = r_apu->spcram[addr & 0xffff];
+    r = r_smp->spcram[addr & 0xffff];
     break;
   case VRAM:
     r = r_ppu->vram_read(addr & 0xffff);
@@ -80,7 +84,7 @@ void Debugger::write(uint8 mode, uint32 addr, uint8 data) {
     r_mem->cart_write_protect(true);
     break;
   case SPCRAM:
-    r_apu->spcram[addr & 0xffff] = data;
+    r_smp->spcram[addr & 0xffff] = data;
     break;
   case VRAM:
     r_ppu->vram_write(addr & 0xffff, data);

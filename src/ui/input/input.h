@@ -16,8 +16,8 @@ struct joypad {
 keymap key; //this must be initialized by init()
 bool8 keystate[4096];
 
-  virtual void poll() {}
-  virtual void poll(uint8 device);
+  virtual void poll_hw() {}
+  virtual void poll();
   virtual void init();
   virtual void term();
 
@@ -30,7 +30,7 @@ bool8 keystate[4096];
   uint get_key(uint device, uint button);
   void set_key(uint device, uint button, uint key);
 
-  uint decode(substring&);
+  uint decode(string&);
   const char *encode(uint);
 
   Input();

@@ -1,5 +1,9 @@
 #include "../base.h"
 
+SNES *snes;
+
+#include "tracer/tracer.cpp"
+
 #include "video/filter.cpp"
 #include "video/video.cpp"
 #include "audio/audio.cpp"
@@ -11,8 +15,8 @@ void SNES::run() {
   uint32 clocks = r_cpu->clocks_executed();
     sync.counter += sync.apu_multbl[clocks];
   } else {
-    r_apu->run();
-  uint32 clocks = r_apu->clocks_executed();
+    r_smp->run();
+  uint32 clocks = r_smp->clocks_executed();
     sync.counter -= sync.cpu_multbl[clocks];
   //1024000(SPC700) / 32000(DSP) = 32spc/dsp ticks
   //24576000(Sound clock crystal) / 32000(DSP) = 768crystal/dsp ticks
@@ -48,6 +52,7 @@ void SNES::init() {
 
   video_init();
   audio_init();
+  input_init();
 }
 
 void SNES::term() {
@@ -56,7 +61,7 @@ void SNES::term() {
 
 void SNES::power() {
   r_cpu->power();
-  r_apu->power();
+  r_smp->power();
   r_dsp->power();
   r_ppu->power();
   r_mem->power();
@@ -91,7 +96,7 @@ void SNES::reset() {
   sync.dsp_counter = 0;
 
   r_cpu->reset();
-  r_apu->reset();
+  r_smp->reset();
   r_dsp->reset();
   r_ppu->reset();
   r_mem->reset();
@@ -150,8 +155,8 @@ void SNES::update_timing() {
   sync.counter     = 0;
   sync.dsp_counter = 0;
 
-  sync.cpu_freq = (snes_region == NTSC) ? 21477272 : 21241370;
-  sync.apu_freq = 24576000;
+  sync.cpu_freq = (snes_region == NTSC) ? config::cpu.ntsc_clock_rate : config::cpu.pal_clock_rate;
+  sync.apu_freq = (snes_region == NTSC) ? config::smp.ntsc_clock_rate : config::smp.pal_clock_rate;
 
   for(int64 i = 0; i < 1024; i++) {
     sync.cpu_multbl[i] = i * sync.cpu_freq;
@@ -159,27 +164,7 @@ void SNES::update_timing() {
   }
 }
 
-/*****
- * Debugging functions
- *****/
-
-void SNES::notify(uint32 message, uint32 param1, uint32 param2) {}
-
-void SNES::debugger_enable() {
-  is_debugger_enabled = true;
-}
-
-void SNES::debugger_disable() {
-  is_debugger_enabled = false;
-}
-
-bool SNES::debugger_enabled() {
-  return is_debugger_enabled;
-}
-
 SNES::SNES() {
-  is_debugger_enabled = false;
-
   snes_region = NTSC;
   update_timing();
 }

@@ -1,4 +1,4 @@
-uint sprintf(substring &str, const char *s, ...) {
+uint sprintf(string &str, const char *s, ...) {
 va_list args;
   va_start(args, s);
 uint length = vsprintf(str, s, args);
@@ -6,7 +6,14 @@ uint length = vsprintf(str, s, args);
   return length;
 }
 
-uint vsprintf(substring &str, const char *s, va_list args) {
+uint vsprintf(string &str, const char *s, va_list args) {
+uint length = vsnprintf(0, 0, s, args);
+  strresize(str, length + 1);
+  return vsprintf(strptr(str), s, args);
+}
+
+/*
+uint vsprintf(string &str, const char *s, va_list args) {
 bool   leftalign;
 bool   showbase;
 char   positivesign;
@@ -200,3 +207,4 @@ uint i = 0;
   }
   return strlen(str);
 }
+*/

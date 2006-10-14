@@ -19,13 +19,12 @@ Setting System::speed_fastest (&config_file, "system.speed_fastest",  "Fastest s
 
 struct Video {
   static Setting profile;
-  static Setting profile_0, profile_1, profile_2, profile_3;
-  static Setting profile_4, profile_5, profile_6, profile_7;
+  static Setting profile_win, profile_full;
 
   static Setting use_vram;
   static Setting pscanline_intensity, iscanline_intensity;
 } video;
-Setting Video::profile(&config_file, "video.profile", "", 2, Setting::DEC);
+Setting Video::profile(0, "video.profile", "", 0, Setting::DEC);
 
 /* software_filter
  * hardware_filter
@@ -42,19 +41,14 @@ Setting Video::profile(&config_file, "video.profile", "", 2, Setting::DEC);
  * refresh_rate
  * triple_buffering
  */
-Setting Video::profile_0(&config_file, "video.profile_0", "Video profile 0-7 configuration\n"
-  "Please use bsnes GUI configuration editor to modify video profile settings\n"
-  "Format: software_filter;hardware_filter;video_standard;multiplier-1;correct_aspect_ratio;\n"
+Setting Video::profile_win(&config_file, "video.profile_win", "Windowed video profile configuration\n"
+  "If available, please use bsnes GUI configuration editor to modify video profile settings\n"
+  "Format: software_filter;hardware_filter;video_standard;multiplier;correct_aspect_ratio;\n"
   "        enable_scanlines;manual_render_size;render_width;render_height;\n"
-  "        fullscreen;triple_buffering;resolution_width;resolution_height;refresh_rate"
-  "",                                                         "0;0;0;0;false;false;false;256;224;false;false;0;0;0");
-Setting Video::profile_1(&config_file, "video.profile_1", "", "0;0;0;1;false;false;false;512;448;false;false;0;0;0");
-Setting Video::profile_2(&config_file, "video.profile_2", "", "0;1;0;1;true;false;false;597;448;false;false;0;0;0");
-Setting Video::profile_3(&config_file, "video.profile_3", "", "0;1;0;2;true;false;false;896;672;false;false;0;0;0");
-Setting Video::profile_4(&config_file, "video.profile_4", "", "0;1;0;3;true;false;false;1195;896;false;false;0;0;0");
-Setting Video::profile_5(&config_file, "video.profile_5", "", "0;1;0;1;true;false;false;597;448;true;false;0;0;0");
-Setting Video::profile_6(&config_file, "video.profile_6", "", "0;1;0;2;true;false;false;896;672;true;false;0;0;0");
-Setting Video::profile_7(&config_file, "video.profile_7", "", "0;1;0;3;true;false;false;1195;896;true;false;0;0;0");
+  "        triple_buffering;resolution_width;resolution_height;refresh_rate",
+  "0;1;0;2;true;false;false;595;448;false;0;0;0");
+Setting Video::profile_full(&config_file, "video.profile_full", "Fullscreen video profile configuration",
+  "0;1;0;2;true;false;false;595;448;false;0;0;0");
 
 Setting Video::use_vram(&config_file, "video.use_vram", "Use Video RAM instead of System RAM", true, Setting::TRUE_FALSE);
 Setting Video::pscanline_intensity(&config_file, "video.pscanline_intensity",

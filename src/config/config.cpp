@@ -2,26 +2,6 @@ Config config_file;
 
 namespace config {
 
-void fs_set_path(Setting &s, const char *data) {
-string path;
-  strcpy(path, data);
-  strunquote(path);
-  replace(path, "\\", "/");
-
-//blank path?
-  if(strlen(path) == 0) {
-    s.sset(strptr(path));
-    return;
-  }
-
-//missing final directory marker?
-  if(strptr(path)[strlen(path) - 1] != '/') {
-    strcat(path, "/");
-  }
-
-  s.sset(strptr(path));
-}
-
 Setting FS::base_path(0, "fs.base_path",
   "Directory that bsnes resides in", "");
 Setting FS::rom_path(&config_file, "fs.rom_path",
@@ -48,15 +28,33 @@ Setting SNES::gamma(&config_file, "snes.colorfilter.gamma",
   "Gamma", 80, Setting::DEC);
 
 Setting SNES::ntsc_merge_fields(&config_file, "snes.ntsc_merge_fields",
-"Merge fields in NTSC video filter\n"
-"Set to true if using filter at any refresh rate other than 60hz\n"
-"", true, Setting::TRUE_FALSE);
+  "Merge fields in NTSC video filter\n"
+  "Set to true if using filter at any refresh rate other than 60hz\n"
+  "", true, Setting::TRUE_FALSE);
 
 Setting SNES::mute(&config_file, "snes.mute", "Mutes SNES audio output when enabled",
   false, Setting::TRUE_FALSE);
 
-//do not save these settings to config_file
-Setting CPU::hdma_enable(0, "cpu.hdma_enable", "Enable HDMA effects", true, Setting::TRUE_FALSE);
+Setting SNES::controller_port0(&config_file, "snes.controller_port_1",
+  "Controller attached to SNES port 1", ::SNES::DEVICEID_JOYPAD1, Setting::DEC);
+Setting SNES::controller_port1(&config_file, "snes.controller_port_2",
+  "Controller attached to SNES port 2", ::SNES::DEVICEID_JOYPAD2, Setting::DEC);
+
+Setting CPU::ntsc_clock_rate(&config_file, "cpu.ntsc_clock_rate",
+  "NTSC S-CPU clock rate (in hz)", 21477272, Setting::DEC);
+Setting CPU::pal_clock_rate(&config_file, "cpu.pal_clock_rate",
+  "PAL S-CPU clock rate (in hz)", 21241370, Setting::DEC);
+Setting CPU::hdma_enable(0, "cpu.hdma_enable",
+  "Enable HDMA effects", true, Setting::TRUE_FALSE);
+
+Setting SMP::ntsc_clock_rate(&config_file, "smp.ntsc_clock_rate",
+  "NTSC S-SMP clock rate (in hz)", 24576000, Setting::DEC);
+Setting SMP::pal_clock_rate(&config_file, "smp.pal_clock_rate",
+  "PAL S-SMP clock rate (in hz)", 24576000, Setting::DEC);
+
+Setting PPU::render_scanline_position(&config_file, "ppu.render_scanline_position",
+  "Approximate HCLOCK position to render at for scanline-based renderers",
+  256, Setting::DEC);
 Setting PPU::opt_enable(0, "ppu.opt_enable", "Enable offset-per-tile effects", true, Setting::TRUE_FALSE);
 
 Setting PPU::bg1_pri0_enable(0, "ppu.bg1_pri0_enable", "Enable BG1 Priority 0", true, Setting::TRUE_FALSE);

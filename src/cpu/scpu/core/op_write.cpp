@@ -46,7 +46,7 @@ case 0x9c: {
 case 0x9d: {
   aa.l = op_readpc();
   aa.h = op_readpc();
-  op_io_cond4(aa.w, aa.w + regs.x.w);
+  op_io();
   if(regs.acc_8b)last_cycle();
   op_writedbr(aa.w + regs.x.w,     regs.a.w);
   if(regs.acc_8b)break;
@@ -58,7 +58,7 @@ case 0x9d: {
 case 0x9e: {
   aa.l = op_readpc();
   aa.h = op_readpc();
-  op_io_cond4(aa.w, aa.w + regs.x.w);
+  op_io();
   if(regs.acc_8b)last_cycle();
   op_writedbr(aa.w + regs.x.w,     0x0000);
   if(regs.acc_8b)break;
@@ -70,7 +70,7 @@ case 0x9e: {
 case 0x99: {
   aa.l = op_readpc();
   aa.h = op_readpc();
-  op_io_cond4(aa.w, aa.w + regs.y.w);
+  op_io();
   if(regs.acc_8b)last_cycle();
   op_writedbr(aa.w + regs.y.w,     regs.a.l);
   if(regs.acc_8b)break;
@@ -241,7 +241,7 @@ case 0x91: {
   op_io_cond2();
   aa.l = op_readdp(dp);
   aa.h = op_readdp(dp + 1);
-  op_io_cond4(aa.w, aa.w + regs.y.w);
+  op_io();
   if(regs.acc_8b)last_cycle();
   op_writedbr(aa.w + regs.y.w,     regs.a.l);
   if(regs.acc_8b)break;

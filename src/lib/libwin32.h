@@ -32,7 +32,7 @@ uint GetScreenWidth();
 uint GetScreenHeight();
 void ShowCursor();
 void HideCursor();
-void ParseStyleParam(const char *style, string &output);
+void ParseStyleParam(const char *style, stringarray &output);
 
 class Window;
 class Control;

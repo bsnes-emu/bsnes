@@ -10,31 +10,11 @@ void bMemBus::load_cart() {
 
   switch(cartridge.info.mapper) {
   case Cartridge::PCB:
-    if(!strcmp(cartridge.info.pcb, "SHVC-1A3B-01")) { cart_map_shvc_1a3b_13(); break; }
-    if(!strcmp(cartridge.info.pcb, "SHVC-1A3B-11")) { cart_map_shvc_1a3b_13(); break; }
-    if(!strcmp(cartridge.info.pcb, "SHVC-1A3B-12")) { cart_map_shvc_1a3b_13(); break; }
-    if(!strcmp(cartridge.info.pcb, "SHVC-1A3B-13")) { cart_map_shvc_1a3b_13(); break; }
-
-    if(!strcmp(cartridge.info.pcb, "SHVC-1A3B-20")) { cart_map_shvc_1a3b_20(); break; }
-
-    if(!strcmp(cartridge.info.pcb, "SHVC-1A3M-10")) { cart_map_shvc_1a3m_30(); break; }
-    if(!strcmp(cartridge.info.pcb, "SHVC-1A3M-20")) { cart_map_shvc_1a3m_30(); break; }
-    if(!strcmp(cartridge.info.pcb, "SHVC-1A3M-21")) { cart_map_shvc_1a3m_30(); break; }
-    if(!strcmp(cartridge.info.pcb, "SHVC-1A3M-30")) { cart_map_shvc_1a3m_30(); break; }
-
-    if(!strcmp(cartridge.info.pcb, "SHVC-1J3M-01")) { cart_map_shvc_1j3m_20(); break; }
-    if(!strcmp(cartridge.info.pcb, "SHVC-1J3M-10")) { cart_map_shvc_1j3m_20(); break; }
-    if(!strcmp(cartridge.info.pcb, "SHVC-1J3M-11")) { cart_map_shvc_1j3m_20(); break; }
-    if(!strcmp(cartridge.info.pcb, "SHVC-1J3M-20")) { cart_map_shvc_1j3m_20(); break; }
-
-    if(!strcmp(cartridge.info.pcb, "BSC-1A5M-01"))  { cart_map_bsc_1a5m_01();  break; }
-
-    if(!strcmp(cartridge.info.pcb, "BSC-1A7M-01"))  { cart_map_bsc_1a7m_01();  break; }
-
-    if(!strcmp(cartridge.info.pcb, "BSC-1A7M-10"))  { cart_map_bsc_1a7m_10();  break; }
-
-    dprintf("* PCB mapper not found");
-    return;
+    if(cart_map_pcb(cartridge.info.pcb) == false) {
+      dprintf("* PCB mapper not found, cartridge load failed");
+      return;
+    }
+    break;
 
   case Cartridge::LOROM:
   case Cartridge::HIROM:
@@ -43,7 +23,7 @@ void bMemBus::load_cart() {
     cart_map_generic(cartridge.info.mapper);
     break;
   default:
-    dprintf("* generic mapper not found");
+    dprintf("* Generic mapper not found, cartridge load failed");
     return;
   }
 
@@ -156,17 +136,11 @@ uint8 r;
 #endif
 
   r = (this->*page_read[addr >> 8])(addr);
-#ifdef DEBUGGER
-  snes->notify(SNES::MEM_READ, addr, r);
-#endif
   return r;
 }
 
 void bMemBus::write(uint32 addr, uint8 data) {
   (this->*page_write[addr >> 8])(addr, data);
-#ifdef DEBUGGER
-  snes->notify(SNES::MEM_WRITE, addr, data);
-#endif
 }
 
 void bMemBus::cart_map_reset() {

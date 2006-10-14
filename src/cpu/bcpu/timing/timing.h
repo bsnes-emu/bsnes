@@ -48,7 +48,7 @@ struct {
 
   inline uint16 vcounter();
   inline uint16 hcounter();
-  inline uint16 hcycles();
+  inline uint16 hclock();
   inline bool   interlace();
   inline bool   interlace_field();
   inline bool   overscan();

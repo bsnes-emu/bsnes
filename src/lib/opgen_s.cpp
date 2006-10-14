@@ -1,14 +1,13 @@
 #include "libbase.h"
-#include "libstring.h"
 #include "libstring.cpp"
 
 FILE *fp;
 
-string data, line, part, subpart;
-string output_op;
+string data;
+stringarray line, part, subpart, output_op;
 
-struct _op_list {
-  string name, arg;
+struct OpList {
+  stringarray name, arg;
 } op_list[64];
 
 int32 op_count, line_num;
@@ -38,7 +37,7 @@ char t[4096];
     for(int l = 0; l < count(part); l++) {
       strcpy(op_list[z].arg[l], part[l]);
     }
-    if(strend(line[i], " {"))break;
+    if(strend(line[i], " {") == true)break;
     i++;
   }
 
@@ -54,7 +53,7 @@ void gen_op() {
 int i = line_num, n, c;
 char t[4096];
   while(1) {
-    if(strmatch(line[i], "}"))break;
+    if(!strcmp(line[i], "}"))break;
 
   //remove cycle number
     n = strdec(line[i]);
@@ -64,7 +63,7 @@ char t[4096];
   //strcat(output_op, t);
 
     update_line(i);
-    if(!strmatch(line[i], "")) {
+    if(strcmp(line[i], "")) {
       strcat(output_op, "  ");
       strcat(output_op, line[i]);
       strcat(output_op, "\r\n");
@@ -123,7 +122,7 @@ char *buf = (char*)malloc(fsize + 1);
 
   line_num = 0;
   while(line_num < count(line)) {
-    while(strmatch(line[line_num], "") && line_num < count(line))line_num++;
+    while(line_num < count(line) && !strcmp(line[line_num], ""))line_num++;
     if(line_num >= count(line))break;
 
     gen_begin();

@@ -152,7 +152,7 @@ void bPPU::render_line_mode7() {
 
 void bPPU::render_line() {
   if(regs.display_disabled == true) {
-    memset(output + (line.y * 1024), 0, 1024);
+    render_line_clear();
     return;
   }
 

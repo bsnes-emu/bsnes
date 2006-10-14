@@ -8,11 +8,11 @@
  *   false - File was not selected
  */
 bool FileOpen(Window *owner, const char *filter, const char *default_dir, char *output) {
-string dir;
+string dir, f;
   strcpy(dir, default_dir ? default_dir : "");
   replace(dir, "/", "\\");
 
-string f, type, part;
+stringarray type, part;
   strcpy(f, "");
   split(type, "|", filter);
   for(int i = 0; i < count(type); i++) {

@@ -15,7 +15,7 @@ sta_addrx(0x9d, regs.acc_8b, regs.a.w),
 stz_addrx(0x9e, regs.acc_8b, 0x0000) {
 1:aa.l = op_readpc();
 2:aa.h = op_readpc();
-3:op_io_cond4(aa.w, aa.w + regs.x.w);
+3:op_io();
 4:if($1)last_cycle();
   op_writedbr(aa.w + regs.x.w,     $2);
   if($1)end;
@@ -26,7 +26,7 @@ stz_addrx(0x9e, regs.acc_8b, 0x0000) {
 sta_addry(0x99) {
 1:aa.l = op_readpc();
 2:aa.h = op_readpc();
-3:op_io_cond4(aa.w, aa.w + regs.y.w);
+3:op_io();
 4:if(regs.acc_8b)last_cycle();
   op_writedbr(aa.w + regs.y.w,     regs.a.l);
   if(regs.acc_8b)end;
@@ -136,7 +136,7 @@ sta_idpy(0x91) {
 2:op_io_cond2();
 3:aa.l = op_readdp(dp);
 4:aa.h = op_readdp(dp + 1);
-5:op_io_cond4(aa.w, aa.w + regs.y.w);
+5:op_io();
 6:if(regs.acc_8b)last_cycle();
   op_writedbr(aa.w + regs.y.w,     regs.a.l);
   if(regs.acc_8b)end;

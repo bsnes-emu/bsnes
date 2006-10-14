@@ -15,9 +15,9 @@ void AudioDS::run(uint32 sample) {
 
     data.prev_buffer = data.read_buffer;
     data.read_buffer++;
-    data.read_buffer &= 7;
+    data.read_buffer %= data.buffer_count;
 
-    pos = (data.read_buffer + 1) & 7;
+    pos = (data.read_buffer + 1) % data.buffer_count;
 
     if(dsb_b->Lock(pos * data.buffer_size,
     data.buffer_size, &buffer, &size, 0, 0, 0) == DS_OK) {
@@ -38,7 +38,9 @@ void AudioDS::clear_audio() {
   data.read_buffer = 0;
   data.prev_buffer = 0;
   data.buffer_pos  = 0;
-  memset(data.buffer, 0, 2048 * 4);
+  if(data.buffer) {
+    memset(data.buffer, 0, data.buffer_size * data.buffer_count);
+  }
 
   if(!dsb_b)return;
 
@@ -47,8 +49,8 @@ void AudioDS::clear_audio() {
 
 uint32 size;
 void  *buffer;
-  dsb_b->Lock(0, data.buffer_size * 8, &buffer, &size, 0, 0, 0);
-  memset(buffer, 0, data.buffer_size * 8);
+  dsb_b->Lock(0, data.buffer_size * data.buffer_count, &buffer, &size, 0, 0, 0);
+  memset(buffer, 0, data.buffer_size * data.buffer_count);
   dsb_b->Unlock(buffer, size, 0, 0);
 
   dsb_b->Play(0, 0, DSBPLAY_LOOPING);
@@ -58,8 +60,10 @@ void AudioDS::init() {
   clear_audio();
   term();
 
-  data.samples_per_frame = frequency / ((snes->region() == SNES::NTSC) ? 60 : 50);
-  data.buffer_size       = data.samples_per_frame * 4;
+  data.samples_per_frame = (uint)( (double)frequency / ((snes->region() == SNES::NTSC) ? 60.0 : 50.0) + 0.5 );
+  data.buffer_size  = data.samples_per_frame * sizeof(uint32);
+  data.buffer_count = 4;
+  data.buffer       = (uint32*)malloc(data.buffer_size * data.buffer_count);
 
   DirectSoundCreate(0, &ds, 0);
   ds->SetCooperativeLevel(hwnd, DSSCL_PRIORITY);
@@ -84,7 +88,7 @@ void AudioDS::init() {
   dsbd.dwSize          = sizeof(dsbd);
   dsbd.dwFlags         = DSBCAPS_GETCURRENTPOSITION2 | DSBCAPS_CTRLFREQUENCY |
                          DSBCAPS_GLOBALFOCUS | DSBCAPS_LOCSOFTWARE;
-  dsbd.dwBufferBytes   = data.buffer_size * 8;
+  dsbd.dwBufferBytes   = data.buffer_size * data.buffer_count;
   dsbd.guid3DAlgorithm = GUID_NULL;
   dsbd.lpwfxFormat     = &wfx;
   ds->CreateSoundBuffer(&dsbd, &dsb_b, 0);
@@ -93,8 +97,8 @@ void AudioDS::init() {
 
 uint32 size;
 void  *buffer;
-  dsb_b->Lock(0, data.buffer_size * 8, &buffer, &size, 0, 0, 0);
-  memset(buffer, 0, data.buffer_size * 8);
+  dsb_b->Lock(0, data.buffer_size * data.buffer_count, &buffer, &size, 0, 0, 0);
+  memset(buffer, 0, data.buffer_size * data.buffer_count);
   dsb_b->Unlock(buffer, size, 0, 0);
 
   data.read_buffer = 0;
@@ -102,6 +106,8 @@ void  *buffer;
 }
 
 void AudioDS::term() {
+  SafeFree(data.buffer);
+
   if(dsb_b) { dsb_b->Stop(); dsb_b->Release(); dsb_b = 0; }
   if(dsb_p) { dsb_p->Stop(); dsb_p->Release(); dsb_p = 0; }
   if(ds) { ds->Release(); ds = 0; }

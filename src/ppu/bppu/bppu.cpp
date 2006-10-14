@@ -36,6 +36,8 @@ void bPPU::scanline() {
     regs.mosaic_countdown--;
   }
 
+//note: this should actually occur at V=225,HC=10.
+//this is a limitation of the scanline-based renderer.
   if(line.y == (!r_cpu->overscan() ? 225 : 240)) {
     if(regs.display_disabled == false) {
     //OAM address reset
@@ -62,10 +64,9 @@ void bPPU::render_scanline() {
   if(status.render_output == false)return;
 #endif
 
-  if(line.y > 0 && line.y < (r_cpu->overscan() ? 240 : 225)) {
+  if(line.y >= 0 && line.y < (r_cpu->overscan() ? 240 : 225)) {
+    if(status.render_output == true && line.y != 0) { render_line(); }
     render_line_oam_rto();
-    if(status.render_output == false)return;
-    render_line();
   }
 }
 
@@ -304,59 +305,37 @@ void bPPU::reset() {
 uint8 bPPU::vram_read(uint16 addr) {
 uint8 r;
   r = vram[addr];
-#ifdef DEBUGGER
-  snes->notify(SNES::VRAM_READ, addr, r);
-#endif
   return r;
 }
 
 void bPPU::vram_write(uint16 addr, uint8 value) {
   vram[addr] = value;
-#ifdef DEBUGGER
-  snes->notify(SNES::VRAM_WRITE, addr, value);
-#endif
 }
 
 uint8 bPPU::oam_read(uint16 addr) {
 uint8 r;
-  if(addr >= 0x0200)addr = 0x0200 | (addr & 31);
+  if(addr >= 0x0200) { addr = 0x0200 | (addr & 31); }
   r = oam[addr];
-#ifdef DEBUGGER
-  snes->notify(SNES::OAM_READ, addr, r);
-#endif
   return r;
 }
 
 void bPPU::oam_write(uint16 addr, uint8 value) {
-  if(addr >= 0x0200)addr = 0x0200 | (addr & 31);
+  if(addr >= 0x0200) { addr = 0x0200 | (addr & 31); }
   oam[addr] = value;
-#ifdef DEBUGGER
-  snes->notify(SNES::OAM_WRITE, addr, value);
-#endif
 }
 
 uint8 bPPU::cgram_read(uint16 addr) {
 uint8 r;
   addr &= 511;
   r = cgram[addr];
-  if(addr & 1) {
-    r &= 0x7f;
-  }
-#ifdef DEBUGGER
-  snes->notify(SNES::CGRAM_READ, addr, r);
-#endif
+  if(addr & 1) { r &= 0x7f; }
   return r;
 }
 
 void bPPU::cgram_write(uint16 addr, uint8 value) {
   addr &= 511;
-  if(addr & 1) {
-    value &= 0x7f;
-  }
+  if(addr & 1) { value &= 0x7f; }
   cgram[addr] = value;
-#ifdef DEBUGGER
-  snes->notify(SNES::CGRAM_WRITE, addr, value);
-#endif
 }
 
 bPPU::bPPU() {
@@ -376,18 +355,12 @@ bPPU::bPPU() {
   }
 
   for(int l = 0; l < 16; l++) {
-  int r, g, b;
   double m = (double)l / 15.0;
-    for(int i = 0; i < 32768; i++) {
-      r = (i      ) & 31;
-      g = (i >>  5) & 31;
-      b = (i >> 10) & 31;
-
-      r = minmax<0, 31>( (int)((double)r * m + 0.5) );
-      g = minmax<0, 31>( (int)((double)g * m + 0.5) );
-      b = minmax<0, 31>( (int)((double)b * m + 0.5) );
-
-      light_table[l][i] = (b << 10) | (g << 5) | (r);
+    for(int i = 0; i < 32 * 32; i++) {
+    int r = minmax<0, 31>((int)((double)((i)      & 31) * m + 0.5));
+    int g = minmax<0, 31>((int)((double)((i >> 5) & 31) * m + 0.5));
+      if(i < 32)light_table_b[l][i]  = (r << 10);
+      light_table_gr[l][i] = (g << 5) | (r);
     }
   }
 }

@@ -8,6 +8,7 @@
 
 void sCPU::op_io() {
   status.clock_count = 6;
+  precycle_edge();
   add_clocks(6);
 //co_return();
   cycle_edge();
@@ -15,6 +16,7 @@ void sCPU::op_io() {
 
 uint8 sCPU::op_read(uint32 addr) {
   status.clock_count = r_mem->speed(addr);
+  precycle_edge();
   add_clocks(status.clock_count - 4);
 #ifdef FAVOR_ACCURACY
   co_return();
@@ -27,6 +29,7 @@ uint8 sCPU::op_read(uint32 addr) {
 
 void sCPU::op_write(uint32 addr, uint8 data) {
   status.clock_count = r_mem->speed(addr);
+  precycle_edge();
   add_clocks(status.clock_count);
 #ifdef FAVOR_ACCURACY
   co_return();

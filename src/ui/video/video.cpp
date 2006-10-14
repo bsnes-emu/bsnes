@@ -1,16 +1,10 @@
 void load_video_settings(uint profile) {
-string line, part;
-  if(profile > 7)profile = 0;
+stringarray line, part;
+  if(profile >= VIDEO_PROFILE_COUNT)profile = 0;
 
   switch(profile) {
-  case 0: strcpy(line, config::video.profile_0.sget()); break;
-  case 1: strcpy(line, config::video.profile_1.sget()); break;
-  case 2: strcpy(line, config::video.profile_2.sget()); break;
-  case 3: strcpy(line, config::video.profile_3.sget()); break;
-  case 4: strcpy(line, config::video.profile_4.sget()); break;
-  case 5: strcpy(line, config::video.profile_5.sget()); break;
-  case 6: strcpy(line, config::video.profile_6.sget()); break;
-  case 7: strcpy(line, config::video.profile_7.sget()); break;
+  case 0: strcpy(line, config::video.profile_win.sget());  break;
+  case 1: strcpy(line, config::video.profile_full.sget()); break;
   }
 
   split(part, ";", line);
@@ -25,20 +19,22 @@ int i = 0;
   v->manual_render_size   = strmatch(part[i++], "true");
   v->render_width         = strdec(part[i++]);
   v->render_height        = strdec(part[i++]);
-  v->fullscreen           = strmatch(part[i++], "true");
+  v->fullscreen           = (profile == 1);
   v->triple_buffering     = strmatch(part[i++], "true");
   v->resolution_width     = strdec(part[i++]);
   v->resolution_height    = strdec(part[i++]);
   v->refresh_rate         = strdec(part[i++]);
 
-  if(v->render_width  < 256)v->render_width  = 256;
-  if(v->render_height < 224)v->render_height = 224;
+//0,1 = 1x; 2 = 2x, 3 = 3x, ..., 8+ = 8x
+  v->multiplier = minmax<1, 8>(v->multiplier);
+  if(v->render_width  < 256) { v->render_width  = 256; }
+  if(v->render_height < 224) { v->render_height = 224; }
 }
 
 void save_video_settings(uint profile) {
-string line;
+stringarray line;
 char   part[64];
-  if(profile > 7)profile = 0;
+  if(profile >= VIDEO_PROFILE_COUNT)profile = 0;
 
 VideoSettings *v = &video_settings[profile];
   strcpy(line, "");
@@ -51,27 +47,20 @@ VideoSettings *v = &video_settings[profile];
   sprintf(part, "%s", v->manual_render_size   ? "true" : "false"); strcat(line, part); strcat(line, ";");
   sprintf(part, "%d", v->render_width);                            strcat(line, part); strcat(line, ";");
   sprintf(part, "%d", v->render_height);                           strcat(line, part); strcat(line, ";");
-  sprintf(part, "%s", v->fullscreen           ? "true" : "false"); strcat(line, part); strcat(line, ";");
   sprintf(part, "%s", v->triple_buffering     ? "true" : "false"); strcat(line, part); strcat(line, ";");
   sprintf(part, "%d", v->resolution_width);                        strcat(line, part); strcat(line, ";");
   sprintf(part, "%d", v->resolution_height);                       strcat(line, part); strcat(line, ";");
   sprintf(part, "%d", v->refresh_rate);                            strcat(line, part);
 
   switch(profile) {
-  case 0: config::video.profile_0.sset(strptr(line)); break;
-  case 1: config::video.profile_1.sset(strptr(line)); break;
-  case 2: config::video.profile_2.sset(strptr(line)); break;
-  case 3: config::video.profile_3.sset(strptr(line)); break;
-  case 4: config::video.profile_4.sset(strptr(line)); break;
-  case 5: config::video.profile_5.sset(strptr(line)); break;
-  case 6: config::video.profile_6.sset(strptr(line)); break;
-  case 7: config::video.profile_7.sset(strptr(line)); break;
+  case 0: config::video.profile_win.sset(strptr(line));  break;
+  case 1: config::video.profile_full.sset(strptr(line)); break;
   }
 }
 
 void Video::update_video_settings() {
 uint profile = uint(config::video.profile);
-  if(profile > 7)profile = 0;
+  if(profile >= VIDEO_PROFILE_COUNT)profile = 0;
 
   load_video_settings(profile);
 VideoSettings *v = &video_settings[profile];
@@ -84,19 +73,20 @@ VideoSettings *v = &video_settings[profile];
     settings.render_width  = 256;
     settings.render_height = (v->video_standard == SNES::VIDEOSTANDARD_NTSC) ? 224 : 239;
 
-    settings.render_width  *= (v->multiplier + 1);
-    settings.render_height *= (v->multiplier + 1);
+    settings.render_width  *= v->multiplier;
+    settings.render_height *= v->multiplier;
 
     if(v->correct_aspect_ratio == true) {
+    //TODO: support non-4:3 resolutions (eg 1280x1024 -- 5:4)
       settings.render_width = (uint)( (double)settings.render_height / 3.0 * 4.0 );
     }
   }
 
-  settings.fullscreen        = v->fullscreen;
-  settings.triple_buffering  = v->triple_buffering;
+  settings.fullscreen       = v->fullscreen;
+  settings.triple_buffering = v->triple_buffering;
 
-  settings.hardware_filter   = v->hardware_filter;
-  settings.enable_scanlines  = v->enable_scanlines;
+  settings.hardware_filter  = v->hardware_filter;
+  settings.enable_scanlines = v->enable_scanlines;
 
   if(v->fullscreen == true) {
     settings.resolution_width  = (v->resolution_width)  ? v->resolution_width  : screen_width();
@@ -122,5 +112,17 @@ VideoSettings *v = &video_settings[profile];
   } else {
     settings.ry = 0;
     settings.rh = settings.resolution_height;
+  }
+}
+
+Video::Video() {
+  for(int i = 0; i < VIDEO_PROFILE_COUNT; i++) {
+    load_video_settings(i);
+  }
+}
+
+Video::~Video() {
+  for(int i = 0; i < VIDEO_PROFILE_COUNT; i++) {
+    save_video_settings(i);
   }
 }

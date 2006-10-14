@@ -5,4 +5,5 @@ CPU::CPU() {
   cpu_version = 1;
 }
 
-CPU::~CPU() {}
+CPU::~CPU() {
+}

@@ -114,7 +114,7 @@ OBJS = main.$(OBJ) \
        reader.$(OBJ) cart.$(OBJ) cheat.$(OBJ) \
        memory.$(OBJ) bmemory.$(OBJ) \
        cpu.$(OBJ) scpu.$(OBJ) \
-       apu.$(OBJ) sapu.$(OBJ) \
+       smp.$(OBJ) ssmp.$(OBJ) \
        bdsp.$(OBJ) \
        ppu.$(OBJ) bppu.$(OBJ) \
        snes.$(OBJ) \
@@ -186,16 +186,16 @@ bcpu.$(OBJ): ../cpu/bcpu/*
 	$(CXX) $(CFLAGS) $(COBJFLAG) ../cpu/bcpu/bcpu.cpp
 
 ###########
-### apu ###
+### smp ###
 ###########
-apu.$(OBJ): ../apu/*
-	$(CXX) $(CFLAGS) $(COBJFLAG) ../apu/apu.cpp
+smp.$(OBJ): ../smp/*
+	$(CXX) $(CFLAGS) $(COBJFLAG) ../smp/smp.cpp
 
-sapu.$(OBJ): ../apu/sapu/* ../apu/sapu/core/* ../apu/sapu/memory/* ../apu/sapu/timing/*
-	$(CXX) $(CFLAGS) $(COBJFLAG) ../apu/sapu/sapu.cpp
+ssmp.$(OBJ): ../smp/ssmp/* ../smp/ssmp/core/* ../smp/ssmp/memory/* ../smp/ssmp/timing/*
+	$(CXX) $(CFLAGS) $(COBJFLAG) ../smp/ssmp/ssmp.cpp
 
-bapu.$(OBJ): ../apu/bapu/*
-	$(CXX) $(CFLAGS) $(COBJFLAG) ../apu/bapu/bapu.cpp
+bsmp.$(OBJ): ../smp/bsmp/*
+	$(CXX) $(CFLAGS) $(COBJFLAG) ../smp/bsmp/bsmp.cpp
 
 ###########
 ### dsp ###

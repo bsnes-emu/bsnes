@@ -2,6 +2,7 @@
 #include "ui_videosettings.cpp"
 #include "ui_coloradjust.cpp"
 #include "ui_rastersettings.cpp"
+#include "ui_emusettings.cpp"
 #include "ui_inputconfig.cpp"
 #include "ui_cheateditor.cpp"
 
@@ -16,6 +17,7 @@ void init_settings() {
   wVideoSettings.Create(&wSettings, "bsnes_videosettings", "", 160, 5, 475, 355);
   wColorAdjust.Create(&wSettings, "bsnes_coloradjust", "", 160, 5, 475, 355);
   wRasterSettings.Create(&wSettings, "bsnes_rastersettings", "", 160, 5, 475, 355);
+  wEmuSettings.Create(&wSettings, "bsnes_emusettings", "", 160, 5, 475, 355);
   wInputConfig.Create(&wSettings, "bsnes_inputconfig", "", 160, 5, 475, 355);
   wCheatEditor.Create(&wSettings, "bsnes_cheateditor", "", 160, 5, 475, 355);
 }
@@ -26,6 +28,7 @@ void setup_settings() {
   wVideoSettings.Setup();
   wColorAdjust.Setup();
   wRasterSettings.Setup();
+  wEmuSettings.Setup();
   wInputConfig.Setup();
   wCheatEditor.Setup();
 }

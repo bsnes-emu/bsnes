@@ -12,7 +12,7 @@ void bCPU::cpu_c2() {
 }
 
 void bCPU::cpu_c4(uint16 x, uint16 y) {
-  if(!regs.p.x && (x & 0xff00) != (y & 0xff00)) {
+  if(!regs.p.x || (x & 0xff00) != (y & 0xff00)) {
     cpu_io();
   }
 }

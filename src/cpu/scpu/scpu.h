@@ -15,6 +15,21 @@ struct {
 } event;
 
 struct {
+  bool   enabled;
+  uint   irq_delay;
+  uint   irq_fire;
+  uint   nmi_fire;
+  uint   hw_math;
+} counter;
+
+enum {
+  DMASTATE_INACTIVE,
+  DMASTATE_DMASYNC,
+  DMASTATE_RUN,
+  DMASTATE_CPUSYNC,
+};
+
+struct {
 //core
   uint8  opcode;
   bool   in_opcode;
@@ -29,21 +44,36 @@ struct {
   bool   interlace, interlace_field;
   bool   overscan;
   uint16 field_lines, line_clocks;
+  uint16 vblstart;
 
   bool   line_rendered;
+  uint16 line_render_position;
+
   bool   dram_refreshed;
+  uint16 dram_refresh_position;
+
   bool   hdmainit_triggered;
+  uint16 hdmainit_trigger_position;
+
   bool   hdma_triggered;
 
   uint16 irq_delay;
 
-  int16  nmi_read_pos, nmi_line_pos;
+  uint16 nmi_trigger_pos;
   bool   nmi_read, nmi_line, nmi_transition;
   bool   nmi_pending;
 
-  int16  irq_read_pos, irq_line_pos;
+  uint16 virq_trigger_pos, hirq_trigger_pos;
   bool   irq_read, irq_line, irq_transition;
-  bool   irq_pending;
+  bool   irq_lock, irq_pending;
+
+//dma
+  uint   dma_counter;
+  uint   dma_clocks;
+  uint   dma_state;
+  bool   dma_pending;
+  bool   hdma_pending;
+  bool   hdmainit_pending;
 
 //mmio
 

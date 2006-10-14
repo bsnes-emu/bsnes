@@ -115,7 +115,7 @@ int strmath(const char *s) {
 }
 
 #ifdef __LIBSTRING
-int strmath(substring &s) {
+int strmath(string &s) {
   return strmath(strptr(s));
 }
 #endif

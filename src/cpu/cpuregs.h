@@ -1,33 +1,17 @@
 class CPURegFlags {
-private:
-  template<uint mask> class bit {
-  public:
-  uint data;
-    inline operator bool() { return bool(data & mask); }
-    inline bool operator  = (const bool i) { (i) ? data |= mask : data &= ~mask; return bool(data & mask); }
-    inline bool operator |= (const bool i) { if(i)data |= mask; return bool(data & mask); }
-    inline bool operator ^= (const bool i) { if(i)data ^= mask; return bool(data & mask); }
-    inline bool operator &= (const bool i) { if(i)data &= mask; return bool(data & mask); }
-  };
-
 public:
 union {
   uint8 data;
-  bit<0x80> n;
-  bit<0x40> v;
-  bit<0x20> m, p;
-  bit<0x10> x, b;
-  bit<0x08> d;
-  bit<0x04> i;
-  bit<0x02> z;
-  bit<0x01> c;
+  struct {
+    uint8 order_msb8(n:1, v:1, m:1, x:1, d:1, i:1, z:1, c:1);
+  };
 };
 
   inline operator unsigned() const { return data; }
-  inline unsigned operator  = (const uint8 i) { data  = i; return data; }
-  inline unsigned operator |= (const uint8 i) { data |= i; return data; }
-  inline unsigned operator ^= (const uint8 i) { data ^= i; return data; }
-  inline unsigned operator &= (const uint8 i) { data &= i; return data; }
+  template<typename T> inline unsigned operator  = (const T i) { data  = i; return data; }
+  template<typename T> inline unsigned operator |= (const T i) { data |= i; return data; }
+  template<typename T> inline unsigned operator ^= (const T i) { data ^= i; return data; }
+  template<typename T> inline unsigned operator &= (const T i) { data &= i; return data; }
 
   CPURegFlags() : data(0) {}
 };

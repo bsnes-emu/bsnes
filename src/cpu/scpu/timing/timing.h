@@ -1,6 +1,6 @@
   uint16 vcounter();
   uint16 hcounter();
-  uint16 hcycles();
+  uint16 hclock();
 
   bool   interlace();
   bool   interlace_field();
@@ -10,7 +10,10 @@
   void   set_interlace(bool r);
   void   set_overscan(bool r);
 
+  uint   dma_counter();
+
   void   add_clocks(uint clocks);
+  void   tick();
   void   scanline();
   void   frame();
 
@@ -22,16 +25,23 @@
   void   timing_power();
   void   timing_reset();
 
+  void counter_set(uint &ctr, uint clocks) {
+    if(clocks >= ctr) { ctr = clocks; }
+  }
+
+//timeshift.cpp
+  void   timeshift_forward (uint clocks, uint &v, uint &h);
+  void   timeshift_backward(uint clocks, uint &v, uint &h);
+
 //irq.cpp
-  void   set_irq_delay(uint clocks);
+enum { IRQ_TRIGGER_NEVER = 0x3fff };
   void   update_interrupts();
-  void   poll_interrupts(int clocks);
-  bool   nmi_read_pos_match(uint offset);
-  bool   irq_read_pos_match(uint offset);
+  void   nmi_tick();
+  void   irq_tick();
+  void   poll_interrupts();
   bool   irq_pos_valid();
   bool   nmi_test();
   bool   irq_test();
 
 //joypad.cpp
-  void   run_manual_joypad_poll();
   void   run_auto_joypad_poll();

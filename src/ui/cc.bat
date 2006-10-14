@@ -1,3 +1,3 @@
-@make PLATFORM=win-visualc-wip
+@make PLATFORM=win-visualc
 @move bsnes.exe ../../bsnes.exe>nul
 @pause

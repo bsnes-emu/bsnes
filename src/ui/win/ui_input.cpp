@@ -5,7 +5,7 @@ void ui_poll_input(Window *focus, bool require_window_focus = true) {
     if(GetFocus() != focus->hwnd)return;
   }
 
-  uiInput->poll();
+  uiInput->poll_hw();
 
 bool8 *keystate = uiInput->keystate;
 EventInfo info;

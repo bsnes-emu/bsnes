@@ -20,7 +20,6 @@ Editbox  RenderWidth;
 Label    RenderHeightLabel;
 Editbox  RenderHeight;
 Label    Separator2;
-Checkbox Fullscreen;
 Checkbox TripleBuffering;
 Label    FullResWidthLabel;
 Editbox  FullResWidth;

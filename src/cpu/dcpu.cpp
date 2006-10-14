@@ -421,6 +421,10 @@ uint8 op2 = dreadb(pc.d);
   }
 
   strcat(s, t);
+  strcat(s, " ");
+
+  sprintf(t, "V:%3d H:%4d", vcounter(), hclock());
+  strcat(s, t);
 }
 
 /*****

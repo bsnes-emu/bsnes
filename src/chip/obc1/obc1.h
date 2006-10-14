@@ -16,3 +16,5 @@ struct {
   OBC1();
   ~OBC1();
 };
+
+extern OBC1 *obc1;

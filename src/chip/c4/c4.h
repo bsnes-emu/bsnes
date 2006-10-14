@@ -92,3 +92,5 @@ public:
 
   C4();
 };
+
+extern C4 *c4;

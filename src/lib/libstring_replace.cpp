@@ -1,4 +1,4 @@
-substring &replace(substring &str, const char *key, const char *token) {
+string &replace(string &str, const char *key, const char *token) {
 int  i, z, ksl = strlen(key), tsl = strlen(token), ssl = strlen(str);
 uint replace_count = 0, size = ssl;
 char *data;
@@ -28,9 +28,9 @@ char *data;
   free(data);
   return str;
 }
-substring &replace(substring &str, const char *key, substring &token) { return replace(str, key, strptr(token)); }
+string &replace(string &str, const char *key, string &token) { return replace(str, key, strptr(token)); }
 
-substring &qreplace(substring &str, const char *key, const char *token) {
+string &qreplace(string &str, const char *key, const char *token) {
 int   i, l, z, ksl = strlen(key), tsl = strlen(token), ssl = strlen(str);
 uint  replace_count = 0, size = ssl;
 uint8 x;
@@ -83,4 +83,4 @@ char *data;
   free(data);
   return str;
 }
-substring &qreplace(substring &str, const char *key, substring &token) { return qreplace(str, key, strptr(token)); }
+string &qreplace(string &str, const char *key, string &token) { return qreplace(str, key, strptr(token)); }

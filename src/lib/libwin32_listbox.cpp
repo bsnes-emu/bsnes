@@ -35,7 +35,7 @@ bool Listbox::Create(Window *parent_window, const char *style, int x, int y, int
   state.width  = width;
   state.height = height;
 
-string part;
+stringarray part;
   ParseStyleParam(style, part);
   for(int i = 0; i < count(part); i++) {
     if(strmatch(part[i], "visible"))state.ws |= WS_VISIBLE;
@@ -53,7 +53,7 @@ string part;
   if(!hwnd)return false;
 
   if(strmatch(text, "") == false) {
-  string t;
+  stringarray t;
     split(t, "|", text);
     for(int i = 0; i < ::count(t); i++) {
       AddItem(strptr(t[i]));

@@ -1,4 +1,7 @@
 #include "../../base.h"
+
+SDD1 *sdd1;
+
 #include "sdd1emu.cpp"
 
 void SDD1::init() {}

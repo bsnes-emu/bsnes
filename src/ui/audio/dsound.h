@@ -7,15 +7,14 @@ LPDIRECTSOUND ds;
 LPDIRECTSOUNDBUFFER dsb_p, dsb_b;
 DSBUFFERDESC dsbd;
 WAVEFORMATEX wfx;
-uint buffer_size;
 
 struct {
-  uint32 buffer[16384];
-  uint8  read_buffer, prev_buffer;
-  uint32 buffer_pos, buffer_size;
-
-  uint32 samples_per_frame;
+  uint32 *buffer;
+  uint read_buffer, prev_buffer;
+  uint samples_per_frame;
+  uint buffer_pos, buffer_size, buffer_count;
 } data;
+
   void run(uint32 sample);
   void set_frequency(uint new_freq);
   void clear_audio();
@@ -23,11 +22,18 @@ struct {
   void term();
 
   AudioDS(HWND handle = 0) {
-    hwnd        = (handle) ? handle : GetDesktopWindow();
-    ds          = 0;
-    dsb_p       = 0;
-    dsb_b       = 0;
-    buffer_size = 0;
+    hwnd  = (handle) ? handle : GetDesktopWindow();
+    ds    = 0;
+    dsb_p = 0;
+    dsb_b = 0;
+
+    data.buffer            = 0;
+    data.read_buffer       = 0;
+    data.prev_buffer       = 0;
+    data.samples_per_frame = 0;
+    data.buffer_pos        = 0;
+    data.buffer_size       = 0;
+    data.buffer_count      = 0;
   }
 
   ~AudioDS() { term(); }

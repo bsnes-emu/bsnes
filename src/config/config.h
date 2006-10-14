@@ -2,8 +2,6 @@ extern Config config_file;
 
 namespace config {
 
-void fs_set_path(Setting &s, const char *data);
-
 extern struct FS {
   static Setting base_path, rom_path, save_path;
   static Setting save_ext;
@@ -13,13 +11,21 @@ extern struct SNES {
   static Setting gamma_ramp, sepia, grayscale, invert, contrast, brightness, gamma;
   static Setting ntsc_merge_fields;
   static Setting mute;
+  static Setting controller_port0;
+  static Setting controller_port1;
 } snes;
 
 extern struct CPU {
+  static Setting ntsc_clock_rate, pal_clock_rate;
   static Setting hdma_enable;
 } cpu;
 
+extern struct SMP {
+  static Setting ntsc_clock_rate, pal_clock_rate;
+} smp;
+
 extern struct PPU {
+  static Setting render_scanline_position;
   static Setting opt_enable;
 
   static Setting bg1_pri0_enable, bg1_pri1_enable;

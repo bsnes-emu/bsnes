@@ -9,7 +9,7 @@ bool VideoSettingsWindow::Event(EventInfo &info) {
       SaveSettings(VideoProfile.GetSelection());
     } else if(info.control == &SelectProfile) {
       event::set_video_profile(VideoProfile.GetSelection());
-    } else if(info.control == &ManualRenderSize || info.control == &Fullscreen) {
+    } else if(info.control == &ManualRenderSize) {
       UpdateControls();
     }
   } break;
@@ -26,7 +26,7 @@ bool r = ManualRenderSize.Checked();
   RenderWidth.Enable(r);
   RenderHeight.Enable(r);
 
-  r = Fullscreen.Checked();
+  r = (VideoProfile.GetSelection() == 1);
   FullResWidth.Enable(r);
   FullResHeight.Enable(r);
   FullResHz.Enable(r);
@@ -39,13 +39,12 @@ VideoSettings *v = &video_settings[profile];
   SoftwareFilter.SetSelection(v->software_filter);
   HardwareFilter.SetSelection(v->hardware_filter);
   VideoStandard.SetSelection(v->video_standard);
-  Multiplier.SetSelection(v->multiplier);
+  Multiplier.SetSelection(v->multiplier - 1);
   FixAspectRatio.Check(v->correct_aspect_ratio);
   Scanlines.Check(v->enable_scanlines);
   ManualRenderSize.Check(v->manual_render_size);
   RenderWidth.SetText("%d", v->render_width);
   RenderHeight.SetText("%d", v->render_height);
-  Fullscreen.Check(v->fullscreen);
   TripleBuffering.Check(v->triple_buffering);
   FullResWidth.SetText("%d", v->resolution_width);
   FullResHeight.SetText("%d", v->resolution_height);
@@ -60,7 +59,7 @@ char t[64 + 1];
   v->software_filter      = SoftwareFilter.GetSelection();
   v->hardware_filter      = HardwareFilter.GetSelection();
   v->video_standard       = VideoStandard.GetSelection();
-  v->multiplier           = Multiplier.GetSelection();
+  v->multiplier           = Multiplier.GetSelection() + 1;
   v->correct_aspect_ratio = FixAspectRatio.Checked();
   v->enable_scanlines     = Scanlines.Checked();
   v->manual_render_size   = ManualRenderSize.Checked();
@@ -68,7 +67,6 @@ char t[64 + 1];
   v->render_width         = strdec(t);
   RenderHeight.GetText(t, 64);
   v->render_height        = strdec(t);
-  v->fullscreen           = Fullscreen.Checked();
   v->triple_buffering     = TripleBuffering.Checked();
   FullResWidth.GetText(t, 64);
   v->resolution_width     = strdec(t);
@@ -98,13 +96,11 @@ void VideoSettingsWindow::Setup() {
 
 int x = 15, y = 30;
   VideoProfileLabel.Create(this, "visible", x, y + 3, 135, 15, "Video profile to configure:");
-  VideoProfile.Create(this, "visible", x + 135, y, 90, 200,
-    "Profile 1|Profile 2|Profile 3|Profile 4|"
-    "Profile 5|Profile 6|Profile 7|Profile 8");
-  y += 25;
+  VideoProfile.Create(this, "visible", x + 135, y, 90, 200, "Windowed|Fullscreen");
+  y += 26;
 
-  Separator1.Create(this, "visible|sunken", x, y + 1, 460, 3);
-  y += 9;
+  Separator1.Create(this, "visible|sunken", x, y, 460, 3);
+  y += 8;
 
   SoftwareFilterLabel.Create(this, "visible", x, y + 3, 85, 15, "Software filter:");
   SoftwareFilter.Create(this, "visible", x + 85, y, 140, 200,
@@ -121,7 +117,7 @@ int x = 15, y = 30;
 
   MultiplierLabel.Create(this, "visible", x + 235, y + 3, 85, 15, "Multiplier:");
   Multiplier.Create(this, "visible", x + 320, y, 140, 200,
-    "1x|2x|3x|4x|5x|6x|7x|8x");
+    "1x|2x|3x|4x|5x");
   y += 25;
 
   FixAspectRatio.Create(this, "visible|auto", x, y, 460, 16, "Correct aspect ratio");
@@ -138,9 +134,8 @@ int x = 15, y = 30;
   Separator2.Create(this, "visible|sunken", x, y, 460, 3);
   y += 8;
 
-  Fullscreen.Create(this, "visible|auto", x, y, 460, 16, "Fullscreen");
-  TripleBuffering.Create(this, "visible|auto", x, y + 15, 460, 15, "Triple buffering (buggy, causes sound desync)");
-  y += 35;
+  TripleBuffering.Create(this, "visible|auto", x, y, 460, 15, "Triple buffering (buggy, causes sound desync)");
+  y += 20;
 
   FullResWidthLabel.Create(this, "visible", x, y + 3, 90, 15, "Resolution width:");
   FullResWidth.Create(this, "visible|edge", x + 90, y, 50, 20);
@@ -153,8 +148,4 @@ int x = 15, y = 30;
   ApplySettings.Create(this, "visible", x, y, 120, 25, "Apply settings");
   SelectProfile.Create(this, "visible", x + 125, y, 120, 25, "Set as active profile");
   y += 25;
-
-  for(int i = 0; i < 8; i++) {
-    load_video_settings(i);
-  }
 }

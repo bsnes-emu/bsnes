@@ -16,7 +16,7 @@ long height;
   height = -MulDiv(14, GetDeviceCaps(hdc, LOGPIXELSY), 72);
   global::font_header = CreateFont(height, 0, 0, 0, FW_BOLD, 0, 0, 0, 0, 0, 0, 0, 0, "Verdana");
   height = -MulDiv(10, GetDeviceCaps(hdc, LOGPIXELSY), 72);
-  global::font_list = CreateFont(height, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Verdana");
+  global::font_list = CreateFont(height, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Comic Sans MS");
   ReleaseDC(0, hdc);
 
   wMain.SetBackgroundColor(0, 0, 0);
@@ -25,7 +25,7 @@ long height;
   wMain.Center();
 
   wAbout.SetIcon(100);
-  wAbout.Create(0, "bsnes_about", "topmost|popup|frame|dragmove", 0, 0, 325, 165, "About bsnes...");
+  wAbout.Create(0, "bsnes_about", "topmost|title", 0, 0, 325, 155, "About bsnes...");
   wAbout.Center();
 
   init_settings();

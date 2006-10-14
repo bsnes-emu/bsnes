@@ -1,103 +1,208 @@
 /*
-  libvector : version 0.04a ~byuu (06/15/05)
+  libvector : version 0.04 ~byuu (10/14/06)
 */
+
+/*****
+ * Dynamic vector allocation template class library
+ *
+ * Implements auto-allocating, auto-resizing vectors that allow for
+ * theoretically infinitely-sized arrays of objects.
+ * Array indexes are not bounds checked, and reallocate to requested size when
+ * accessing out of bounds.
+ * These class are intended only for use with objects that require
+ * construction. Significant overhead will result if used for raw memory
+ * management. See libarray for a far more suitable raw memory vector array
+ * class.
+ *
+ * Vectors also reserve an internal pool of memory that can be larger to
+ * minimize memory allocation requests, but by default the pools only grow to
+ * the requested vector index, as some objects may have substantial memory
+ * requirements per object. The reserve() function may be used to allocate
+ * memory in advance when possible.
+ *
+ * Two types of vectors are implemented. Their public interfaces are identical,
+ * however they operate very differently internally.
+ *
+ * [linear_vector]
+ * Works by allocating one giant heap of memory to contain all objects.
+ * Constructors and destructors are called during resize() as needed.
+ *
+ * Pros:
+ * - memory is allocated and objects are prebuilt in advance, so accessing
+ *   array objects will be very fast.
+ * - all objects are in contigious memory, which helps for processor caching.
+ * Cons:
+ * - accessing object 15 will require objects 0-14 to be constructed first.
+ * - resizing array may invalidate pointers to member objects inside classes
+ *   (eg object "this" pointer may change).
+ *
+ * Use when:
+ * You need an array of objects that do not rely on pointers to member
+ * variables, you have an idea of how many objects you will need, and
+ * speed is critical.
+ *
+ * [ptr_vector]
+ * Works by allocating a smaller heap of memory used as an array of pointers to
+ * individual objects.
+ *
+ * Pros:
+ * - accessing object 15 does not require objects 0-14 to be constructed first.
+ * - resizing array will not invalidate pointers to member objects inside
+ *   classes.
+ * Cons:
+ * - memory for individual objects cannot be allocated in advance. Each "first"
+ *   access to an array object will require memory allocation and object
+ *   construction.
+ * - objects are not guaranteed to be aligned in contigious memory, and
+ *   individual array indexes require two indirect memory lookups. Will affect
+ *   speed adversely when indexing very large arrays of objects.
+ *
+ * Use when:
+ * Objects rely on pointers to member variables, you do not know how many
+ * objects you will need in advance, you need to access vector elements out of
+ * order and prefer not to have all previous objects constructed in advance,
+ * and speed is less critical.
+ *****/
 
 #ifndef __LIBVECTOR
 #define __LIBVECTOR
 
-template<typename T> class vector {
-private:
-T *array;
-int size, sizelimit;
+#include <new>
 
-//find next array size that is a power of two
-  int findsize(int newsize) {
-  int r = 1;
-    while(r >= 1) {
-      r <<= 1;
-      if(r > sizelimit)return sizelimit;
-      if(r >= newsize)return r;
-    }
-    return size;
-  }
+template<typename T> class linear_vector {
+protected:
+T *pool;
+uint poolsize, objectsize;
 
 public:
-  void resize(int newsize) {
-    newsize = findsize(newsize);
+  uint size() { return objectsize; }
+  uint capacity() { return poolsize; }
 
-    if(newsize > sizelimit)newsize = sizelimit;
-    if(newsize == size)return;
+  void reset() {
+    for(uint i = 0; i < objectsize; i++) { pool[i].~T(); }
 
-    array = (T*)realloc(array, sizeof(T) * newsize);
-
-    if(newsize > size) {
-      for(int i = size; i < newsize; i += sizeof(T)) {
-        array[i] = (T)0;
-      }
+    if(pool) {
+      free(pool);
+      pool = 0;
     }
 
-    size = newsize;
+    poolsize = 0;
+    objectsize = 0;
   }
 
-//used to free up memory used by vector, but without
-//actually destroying the vector itself
-  void release() { resize(16); }
+  void reserve(uint size) {
+    if(size == poolsize)return;
 
-  T *handle(uint req_size = 0) {
-    if(req_size > size)resize(req_size);
-    return (T*)array;
-  }
-
-  void read(uint start, T *source, uint length) {
-    if(start + length > size)resize(start + length);
-    memcpy(array + start, source, length);
-  }
-
-  void read(T *source, uint length) { read(0, source, length); }
-
-  void write(uint start, T *dest, uint length) {
-    if(start + length > size)resize(start + length);
-    memcpy(dest, array + start, length);
-  }
-
-  void write(T *dest, uint length) { write(0, dest, length); }
-
-  void clear() { memset(array, 0, size * sizeof(T)); }
-
-  vector(int newsize, int newsizelimit) {
-    size = newsize;
-    sizelimit = newsizelimit;
-    array = (T*)malloc(size * sizeof(T));
-    clear();
-  }
-
-  vector(int newsize) {
-    size = newsize;
-    sizelimit = 1 << 24;
-    array = (T*)malloc(size * sizeof(T));
-    clear();
-  }
-
-  vector() {
-    size = 16;
-    sizelimit = 1 << 24;
-    array = (T*)malloc(size * sizeof(T));
-    clear();
-  }
-
-  ~vector() {
-    if(array) {
-      free(array);
-      array = 0;
+    if(size < poolsize) {
+      for(uint i = size; i < objectsize; i++) { pool[i].~T(); }
+      objectsize = size;
     }
+
+    pool = static_cast<T*>(realloc(pool, sizeof(T) * size));
+    poolsize = size;
   }
 
-//operator T() { return array[0]; }
+  void resize(int size) {
+    if(size == objectsize)return;
+    if(size > poolsize)reserve(size);
+
+    if(size < objectsize) {
+      for(uint i = size; i < objectsize; i++) { pool[i].~T(); }
+    } else {
+      for(uint i = objectsize; i < size; i++) { new(pool + i) T; }
+    }
+
+    objectsize = size;
+  }
+
+  linear_vector() {
+    pool = 0;
+    poolsize = 0;
+    objectsize = 0;
+  }
+
+  ~linear_vector() { reset(); }
+
+  inline operator T&() {
+    if(objectsize == 0)resize(1);
+    if(objectsize == 0)throw "vector[] out of bounds";
+    return pool[0];
+  }
 
   inline T &operator[](int index) {
-    if(index >= size)resize(index + 1);
-    if(index > sizelimit)return array[size - 1];
-    return array[index];
+    if(index >= objectsize)resize(index + 1);
+    if(index >= objectsize)throw "vector[] out of bounds";
+    return pool[index];
+  }
+};
+
+template<typename T> class ptr_vector {
+protected:
+T **pool;
+uint poolsize, objectsize;
+
+public:
+  uint size() { return objectsize; }
+  uint capacity() { return poolsize; }
+
+  void reset() {
+    for(uint i = 0; i < objectsize; i++) { if(pool[i])delete pool[i]; }
+
+    if(pool) {
+      free(pool);
+      pool = 0;
+    }
+
+    poolsize = 0;
+    objectsize = 0;
+  }
+
+  void reserve(uint size) {
+    if(size == poolsize)return;
+
+    if(size < poolsize) {
+      for(uint i = size; i < objectsize; i++) { if(pool[i])delete pool[i]; }
+      objectsize = size;
+    }
+
+    pool = static_cast<T**>(realloc(pool, sizeof(T*) * size));
+    if(size > poolsize) {
+      memset(pool + poolsize, 0, sizeof(T*) * (size - poolsize));
+    }
+    poolsize = size;
+  }
+
+  void resize(int size) {
+    if(size == objectsize)return;
+    if(size > poolsize)reserve(size);
+
+    if(size < objectsize) {
+      for(uint i = size; i < objectsize; i++) { if(pool[i])delete pool[i]; }
+    }
+
+    objectsize = size;
+  }
+
+  ptr_vector() {
+    pool = 0;
+    poolsize = 0;
+    objectsize = 0;
+  }
+
+  ~ptr_vector() { reset(); }
+
+  inline operator T&() {
+    if(objectsize == 0)resize(1);
+    if(objectsize == 0)throw "vector[] out of bounds";
+    if(!pool[0])pool[0] = new T;
+    return *pool[0];
+  }
+
+  inline T &operator[](int index) {
+    if(index >= objectsize)resize(index + 1);
+    if(index >= objectsize)throw "vector[] out of bounds";
+    if(!pool[index])pool[index] = new T;
+    return *pool[index];
   }
 };
 

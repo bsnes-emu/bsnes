@@ -1,3 +1,3 @@
-cl /O2 scpugen.cpp
+cl /nologo /O2 scpugen.cpp
 @pause
 @del *.obj

@@ -1,3 +1,5 @@
+enum { VIDEO_PROFILE_COUNT = 2 };
+
 enum {
   HARDWARE_FILTER_PIXEL,
   HARDWARE_FILTER_BILINEAR,
@@ -65,4 +67,7 @@ struct {
   virtual void    update() = 0;
   virtual void    init() = 0;
   virtual void    term() = 0;
+
+  Video();
+  virtual ~Video();
 } *uiVideo;

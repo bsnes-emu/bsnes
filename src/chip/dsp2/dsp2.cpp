@@ -1,4 +1,7 @@
 #include "../../base.h"
+
+DSP2 *dsp2;
+
 #include "dsp2_op.cpp"
 
 void DSP2::init() {}

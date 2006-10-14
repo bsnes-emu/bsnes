@@ -58,10 +58,12 @@ struct {
   void   dma_run();
 
   bool   hdma_active(uint8 i);
+  bool   hdma_active_after(uint8 i);
   uint8  hdma_enabled_channels();
   uint8  hdma_active_channels();
   void   hdma_update(uint8 i);
   void   hdma_run();
+  void   hdma_init_reset();
   void   hdma_init();
 
   void   dma_power();

@@ -1,4 +1,7 @@
 #include "../../base.h"
+
+DSP1 *dsp1;
+
 #include "dsp1emu.cpp"
 
 void DSP1::init() {}

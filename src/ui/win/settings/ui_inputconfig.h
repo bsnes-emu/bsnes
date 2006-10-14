@@ -21,6 +21,9 @@ struct {
   uint id;
 } button_update;
 
+  uint SelectionToDevice(uint selection);
+  uint DeviceToSelection(uint device);
+
   bool Event(EventInfo &info);
   void Show();
   void Hide();

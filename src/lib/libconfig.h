@@ -1,30 +1,14 @@
 /*
-  libconfig : version 0.08a ~byuu (07/16/06)
+  libconfig : version 0.10 ~byuu (10/10/06)
 */
 
 #ifndef __LIBCONFIG
 #define __LIBCONFIG
 
+#include "libarray.h"
 #include "libstring.h"
 
 class Config;
-
-//operator= is the /only/ overloaded operator that isn't inherited by derived classes.
-//similarly, base constructor/destructors with arguments are not inherited.
-//the inclusion of the overloaded virtual function 'toggle' is to allow toggle to call
-//the overloaded set() function, if it exists. for some reason, Setting::toggle() calls
-//Setting::set() no matter what, even if the derived class defines set()...
-//the below macro is a quick way to take care of all of these issues.
-//usage example:
-//  class T : public Setting { public: SettingOperators(T); } t;
-//  t = 0; // -> t.set(0);
-#define SettingOperators(__name) \
-  template<typename T> inline __name &operator=(const T &x) { set(x); return *this; } \
-  void toggle() { data ^= 1; set(data); } \
-  __name(Config *_parent, char *_name, char *_desc, uint  _data, uint _type) : \
-  Setting(_parent, _name, _desc, _data, _type) {} \
-  __name(Config *_parent, char *_name, char *_desc, char *_data) : \
-  Setting(_parent, _name, _desc, _data) {}
 
 class Setting {
   friend class Config;
@@ -49,7 +33,7 @@ enum {
   STR              = 10,
 };
 char *name, *desc;
-substring char_data, char_def;
+string char_data, char_def;
   virtual void  toggle();
   virtual uint  get();
   virtual void  set(uint _data);
@@ -72,10 +56,11 @@ substring char_data, char_def;
 
 class Config {
 protected:
-vector<Setting*> list;
+array<Setting*> list;
 uint list_count;
 
-string data, line, part, subpart;
+string data;
+stringarray line, part, subpart;
 
 uint  string_to_uint(uint type, char *input);
 char *uint_to_string(uint type, uint  input);
@@ -83,9 +68,9 @@ char *uint_to_string(uint type, uint  input);
 public:
   void add(Setting *setting);
   bool load(char *fn);
-  bool load(substring &fn);
+  bool load(string &fn);
   bool save(char *fn);
-  bool save(substring &fn);
+  bool save(string &fn);
   Config();
 };
 

@@ -7,6 +7,8 @@
 
 #include "../../base.h"
 
+C4 *c4;
+
 #include "c4data.cpp"
 #include "c4fn.cpp"
 #include "c4oam.cpp"

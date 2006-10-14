@@ -1,122 +1,60 @@
-void sCPU::set_irq_delay(uint clocks) {
-  if(status.irq_delay < clocks) {
-    status.irq_delay = clocks;
-  }
-}
-
 void sCPU::update_interrupts() {
-  if(status.vcounter == (!overscan() ? 225 : 240)) {
-    status.nmi_read_pos = 2;
-    status.nmi_line_pos = 6;
+  status.nmi_trigger_pos = (status.vcounter == status.vblstart) ? 2 : IRQ_TRIGGER_NEVER;
+
+  if(irq_pos_valid() == true) {
+    status.virq_trigger_pos = status.virq_pos;
+    status.hirq_trigger_pos = (status.hirq_enabled) ? ((status.hirq_pos + 1) * 4) : 0;
   } else {
-    status.nmi_read_pos = -64;
-    status.nmi_line_pos = -64;
-  }
-
-  if(irq_pos_valid() == false) {
-    status.irq_read_pos = -64;
-    status.irq_line_pos = -64;
-    return;
-  }
-
-uint vpos = status.virq_pos;
-uint hpos = (status.hirq_enabled) ? status.hirq_pos : 0;
-  hpos = (hpos != 0) ? ((hpos << 2) + 14) : 10;
-  if(hpos >= status.line_clocks) {
-    hpos -= status.line_clocks;
-    if(++vpos >= status.field_lines) {
-      vpos = 0;
-    }
-  }
-
-  if((status.virq_enabled == true && status.vcounter == vpos) || status.virq_enabled == false) {
-    status.irq_read_pos = hpos;
-  } else {
-    status.irq_read_pos = -64;
-  }
-
-  hpos += 4;
-  if(hpos >= status.line_clocks) {
-    hpos -= status.line_clocks;
-    if(++vpos >= status.field_lines) {
-      vpos = 0;
-    }
-  }
-
-  if((status.virq_enabled == true && status.vcounter == vpos) || status.virq_enabled == false) {
-    status.irq_line_pos = hpos;
-  } else {
-    status.irq_line_pos = -64;
+    status.virq_trigger_pos = IRQ_TRIGGER_NEVER;
+    status.hirq_trigger_pos = IRQ_TRIGGER_NEVER;
   }
 }
 
-void sCPU::poll_interrupts(int clocks) {
-int16 start, end;
-  if(status.hclock == 0) {
-    start = -1;
-    end   = clocks;
-  } else {
-    start = status.hclock;
-    end   = status.hclock + clocks;
-  }
+alwaysinline void sCPU::nmi_tick() {
+  counter.nmi_fire -= 2;
+  if(counter.nmi_fire != 0) { return; }
 
-//NMI read test
-  if(start < status.nmi_read_pos && status.nmi_read_pos <= end) {
-  //nmi_read lowers even when NMI interrupts are disabled via $4200.d7
-    status.nmi_read = 0;
-  }
-
-//NMI line test
-  if(start < status.nmi_line_pos && status.nmi_line_pos <= end) {
-    if(status.nmi_enabled == true) {
-      if(status.nmi_line == 1) {
-        status.nmi_transition = 1;
-      }
-      status.nmi_line = 0;
-    }
-  }
-
-//IRQ read test
-  if(start < status.irq_read_pos && status.irq_read_pos <= end) {
-    if(status.virq_enabled == true || status.hirq_enabled == true) {
-      status.irq_read = 0;
-    }
-  }
-
-//IRQ line test
-  if(start < status.irq_line_pos && status.irq_line_pos <= end) {
-    if(status.virq_enabled == true || status.hirq_enabled == true) {
-      status.irq_line = 0;
-      status.irq_transition = 1;
-    }
+  if(status.nmi_enabled == true && status.nmi_line == 1) {
+    status.nmi_line = 0;
+    status.nmi_transition = 1;
   }
 }
 
-bool sCPU::nmi_read_pos_match(uint offset) {
-uint16 v = !overscan() ? 225 : 240;
-uint16 h = 2 + offset;
-  return (status.vcounter == v && status.hclock == h);
+alwaysinline void sCPU::irq_tick() {
+  counter.irq_fire -= 2;
+  if(counter.irq_fire != 0) { return; }
+
+  if(status.virq_enabled == true || status.hirq_enabled == true) {
+    status.irq_line = 0;
+    status.irq_transition = 1;
+  }
 }
 
-bool sCPU::irq_read_pos_match(uint offset) {
-  if(irq_pos_valid() == false)return false;
-
-uint vpos = status.virq_pos;
-uint hpos = (status.hirq_enabled) ? status.hirq_pos : 0;
-  hpos  = (hpos != 0) ? ((hpos << 2) + 14) : 10;
-  hpos += offset;
-  if(hpos >= status.line_clocks) {
-    hpos -= status.line_clocks;
-    if(++vpos >= status.field_lines) {
-      vpos = 0;
-    }
+alwaysinline void sCPU::poll_interrupts() {
+  if(status.hclock == status.nmi_trigger_pos) {
+    status.nmi_read  = 0;
+    counter.nmi_fire = 4;
   }
 
-  if((status.virq_enabled == true && status.vcounter == vpos) || status.virq_enabled == false) {
-    return (status.hclock == hpos);
-  }
+  if(status.hclock == 10) { status.irq_lock = false; }
 
-  return false;
+  if(status.hirq_trigger_pos == IRQ_TRIGGER_NEVER)return;
+  if(status.virq_enabled == false && status.hirq_enabled == false)return;
+  if(status.irq_lock == true)return;
+
+uint vpos = status.vcounter;
+uint hpos = status.hclock;
+  timeshift_backward(10, vpos, hpos);
+
+bool trigger_irq = true;
+  if(status.virq_enabled == true && vpos != status.virq_trigger_pos)trigger_irq = false;
+  if(status.hirq_enabled == true && hpos != status.hirq_trigger_pos)trigger_irq = false;
+
+  if(trigger_irq == true) {
+    status.irq_lock  = true;
+    status.irq_read  = 0;
+    counter.irq_fire = 4;
+  }
 }
 
 bool sCPU::irq_pos_valid() {
@@ -136,7 +74,7 @@ uint vlimit = region_scanlines() >> 1;
   return true;
 }
 
-bool sCPU::nmi_test() {
+alwaysinline bool sCPU::nmi_test() {
   if(status.nmi_transition == 0)return false;
 
   status.nmi_transition = 0;
@@ -144,11 +82,11 @@ bool sCPU::nmi_test() {
   return true;
 }
 
-bool sCPU::irq_test() {
+alwaysinline bool sCPU::irq_test() {
   if(status.irq_transition == 1)goto irq_trigger;
 
   if(status.irq_read == 0) {
-    if(status.irq_line == 1 && (irq_read_pos_match(0) || irq_read_pos_match(2))) {
+    if(status.irq_line == 1 && counter.irq_fire) {
       return false;
     }
     goto irq_trigger;

@@ -1,46 +1,21 @@
 class DebugWindow : public Window {
 public:
-Button   Breakpoints;
-Button   Memory;
-Button   RunToFrame;
-Button   Run;
-Label    Separator;
-Editbox  Console;
-Editbox  Status;
-Groupbox CPUGroup;
-Button   CPUStep;
-Button   CPUProceed;
-Button   CPUSkip;
-Editbox  CPUTraceNum;
-Button   CPUTrace;
-Button   CPUDisable;
-Groupbox APUGroup;
-Button   APUStep;
-Button   APUProceed;
-Button   APUSkip;
-Editbox  APUTraceNum;
-Button   APUTrace;
-Button   APUDisable;
-Groupbox ConsoleGroup;
-Checkbox ConsoleMsgDebug;
-Checkbox ConsoleMsgCPU;
-Checkbox ConsoleMsgAPU;
-Checkbox ConsoleTrace;
-Checkbox ConsoleTraceMask;
+Button  Run;
+Button  Tracer;
+Button  Memory;
+
+Editbox Console;
+Editbox Command;
 
 struct {
   uint count;
-  char line[250][128];
+  char line[250][512];
 } buffer;
 
 struct {
   bool debug;
   bool cpu;
-  bool apu;
-
-  FILE *fp;
-  bool trace;
-  bool trace_mask;
+  bool smp;
 } output;
 
   bool Event(EventInfo &info);

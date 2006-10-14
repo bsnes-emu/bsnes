@@ -59,22 +59,9 @@ bool MainWindow::Event(EventInfo &info) {
       } else if(bsnes->get_state() == bSNES::STOP) {
         bsnes->set_state(bSNES::RUN);
       }
-    } else if(id == key->num_1 && ctrl) {
-      event::set_video_profile(0);
-    } else if(id == key->num_2 && ctrl) {
-      event::set_video_profile(1);
-    } else if(id == key->num_3 && ctrl) {
-      event::set_video_profile(2);
-    } else if(id == key->num_4 && ctrl) {
-      event::set_video_profile(3);
-    } else if(id == key->num_5 && ctrl) {
-      event::set_video_profile(4);
-    } else if(id == key->num_6 && ctrl) {
-      event::set_video_profile(5);
-    } else if(id == key->num_7 && ctrl) {
-      event::set_video_profile(6);
-    } else if(id == key->num_8 && ctrl) {
-      event::set_video_profile(7);
+    //no idea why this is needed, keydown event should only occur once;
+    //however it is being called repeatedly when F11 is held down ...
+      Sleep(200);
     } else if((id == key->minus && !ctrl) || id == key->numpad_minus) {
       if(frameskip > 0)SetFrameskip(frameskip - 1);
     } else if((id == key->plus && !ctrl) || id == key->numpad_plus) {
@@ -139,17 +126,6 @@ bool MainWindow::Event(EventInfo &info) {
       PostQuitMessage(0);
     } break;
 
-    case MENU_SETTINGS_VIDEOPROFILE_0:
-    case MENU_SETTINGS_VIDEOPROFILE_1:
-    case MENU_SETTINGS_VIDEOPROFILE_2:
-    case MENU_SETTINGS_VIDEOPROFILE_3:
-    case MENU_SETTINGS_VIDEOPROFILE_4:
-    case MENU_SETTINGS_VIDEOPROFILE_5:
-    case MENU_SETTINGS_VIDEOPROFILE_6:
-    case MENU_SETTINGS_VIDEOPROFILE_7: {
-      event::set_video_profile(info.control_id - MENU_SETTINGS_VIDEOPROFILE_0);
-    } break;
-
     case MENU_SETTINGS_FRAMESKIP_0:
     case MENU_SETTINGS_FRAMESKIP_1:
     case MENU_SETTINGS_FRAMESKIP_2:
@@ -211,6 +187,7 @@ bool MainWindow::Event(EventInfo &info) {
 
     case MENU_MISC_CHEATEDITOR: {
       settings.set_active_panel(&wCheatEditor);
+      wSettings.Panel.SetSelection(PANEL_CHEATEDITOR);
       wSettings.Show();
     } break;
 
@@ -235,8 +212,8 @@ char t[128];
   CreateMenu();
 
   AddMenuGroup("&File");
-    AddMenuItem(MENU_FILE_LOAD,   "&Load ROM");
-    AddMenuItem(MENU_FILE_UNLOAD, "&Unload ROM");
+    AddMenuItem(MENU_FILE_LOAD,   "&Load Cartridge");
+    AddMenuItem(MENU_FILE_UNLOAD, "&Unload Cartridge");
     AddMenuSeparator();
     AddMenuItem(MENU_FILE_RESET,  "&Reset");
     AddMenuItem(MENU_FILE_POWER,  "&Power (Hard Reset)");
@@ -245,17 +222,6 @@ char t[128];
   EndMenuGroup();
 
   AddMenuGroup("&Settings");
-    AddMenuGroup("&Video Profile");
-      AddMenuItem(MENU_SETTINGS_VIDEOPROFILE_0, "Profile &1");
-      AddMenuItem(MENU_SETTINGS_VIDEOPROFILE_1, "Profile &2");
-      AddMenuItem(MENU_SETTINGS_VIDEOPROFILE_2, "Profile &3");
-      AddMenuItem(MENU_SETTINGS_VIDEOPROFILE_3, "Profile &4");
-      AddMenuItem(MENU_SETTINGS_VIDEOPROFILE_4, "Profile &5");
-      AddMenuItem(MENU_SETTINGS_VIDEOPROFILE_5, "Profile &6");
-      AddMenuItem(MENU_SETTINGS_VIDEOPROFILE_6, "Profile &7");
-      AddMenuItem(MENU_SETTINGS_VIDEOPROFILE_7, "Profile &8");
-    EndMenuGroup();
-
     AddMenuGroup("&Frameskip");
       AddMenuItem(MENU_SETTINGS_FRAMESKIP_0, "&0 (Off)");
       AddMenuSeparator();
@@ -276,10 +242,10 @@ char t[128];
     AddMenuItem(MENU_SETTINGS_MUTE, "&Mute Sound Output");
     AddMenuSeparator();
 
-    AddMenuGroup("&Speed Regulation");
+    AddMenuGroup("Speed &Regulation");
       AddMenuItem(MENU_SETTINGS_SPEED_REGULATION_ENABLE, "&Enable");
       AddMenuSeparator();
-      sprintf(t, "&Slowest (%d%%)", uint(100.0 * (double(config::system.speed_slowest) / 32000.0)));
+      sprintf(t, "Slowest (%d%%)", uint(100.0 * (double(config::system.speed_slowest) / 32000.0)));
       AddMenuItem(MENU_SETTINGS_SPEED_REGULATION_SLOWEST, t);
       sprintf(t, "&Slow (%d%%)", uint(100.0 * (double(config::system.speed_slow) / 32000.0)));
       AddMenuItem(MENU_SETTINGS_SPEED_REGULATION_SLOW, t);
@@ -287,14 +253,12 @@ char t[128];
       AddMenuItem(MENU_SETTINGS_SPEED_REGULATION_NORMAL, t);
       sprintf(t, "&Fast (%d%%)", uint(100.0 * (double(config::system.speed_fast) / 32000.0)));
       AddMenuItem(MENU_SETTINGS_SPEED_REGULATION_FAST, t);
-      sprintf(t, "&Fastest (%d%%)", uint(100.0 * (double(config::system.speed_fastest) / 32000.0)));
+      sprintf(t, "Fastest (%d%%)", uint(100.0 * (double(config::system.speed_fastest) / 32000.0)));
       AddMenuItem(MENU_SETTINGS_SPEED_REGULATION_FASTEST, t);
     EndMenuGroup();
 
     AddMenuItem(MENU_SETTINGS_CONFIGURATION, "&Configuration");
-  #ifdef DEBUGGER
     AddMenuItem(MENU_SETTINGS_DEBUGGER, "&Debugger");
-  #endif
   EndMenuGroup();
 
   AddMenuGroup("&Misc");

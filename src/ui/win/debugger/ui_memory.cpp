@@ -147,7 +147,7 @@ bool MemoryEditor::Event(EventInfo &info) {
       }
 
       Refresh();
-    } else if(info.control == &GotoAddr) {
+    } else if(info.control == &GotoAddr && info.event_id == EVENT_CHANGED) {
     char t[16 + 1];
       GotoAddr.GetText(t, 16);
       status.addr = strhex(t) & status.mask;

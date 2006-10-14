@@ -2,12 +2,6 @@
 
 void sCPU::main() {
   for(;;) {
-  #ifdef DEBUGGER
-    snes->notify(SNES::CPU_EXEC_OPCODE_BEGIN);
-  #endif
-
-    status.in_opcode = true;
-
     if(event.irq) {
       event.irq = false;
       if(status.nmi_pending == true) {
@@ -20,6 +14,10 @@ void sCPU::main() {
       op_irq();
     }
 
+    tracer.trace_cpuop(); //traces CPU opcode (only if tracer is enabled)
+
+    status.in_opcode = true;
+
     switch(op_readpc()) {
       #include "op_read.cpp"
       #include "op_write.cpp"
@@ -29,10 +27,6 @@ void sCPU::main() {
     }
 
     status.in_opcode = false;
-
-  #ifdef DEBUGGER
-    snes->notify(SNES::CPU_EXEC_OPCODE_END);
-  #endif
 
   #ifdef FAVOR_SPEED
     co_return();
@@ -53,24 +47,24 @@ void sCPU::op_irq() {
   regs.p.d  = 0;
   rd.h = op_read(event.irq_vector + 1);
   regs.pc.w = rd.w;
-
-#ifdef DEBUGGER
-  status.in_opcode = false;
-  snes->notify(SNES::CPU_EXEC_OPCODE_END);
-  status.in_opcode = true;
-#endif
 }
 
 //
 
-void sCPU::op_io_cond2() {
-  if(regs.d.l != 0x00)op_io();
+alwaysinline void sCPU::op_io_cond2() {
+  if(regs.d.l != 0x00) {
+    op_io();
+  }
 }
 
-void sCPU::op_io_cond4(uint16 x, uint16 y) {
-  if(!regs.p.x && (x & 0xff00) != (y & 0xff00))op_io();
+alwaysinline void sCPU::op_io_cond4(uint16 x, uint16 y) {
+  if(!regs.p.x || (x & 0xff00) != (y & 0xff00)) {
+    op_io();
+  }
 }
 
-void sCPU::op_io_cond6(uint16 addr) {
-  if(regs.e && (regs.pc.w & 0xff00) != (addr & 0xff00))op_io();
+alwaysinline void sCPU::op_io_cond6(uint16 addr) {
+  if(regs.e && (regs.pc.w & 0xff00) != (addr & 0xff00)) {
+    op_io();
+  }
 }

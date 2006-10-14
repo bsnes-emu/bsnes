@@ -18,7 +18,7 @@ db_item dbi;
 bool cart_loaded;
 char rom_fn[4096], sram_fn[4096], cheat_fn[4096], patch_fn[4096];
 
-uint8 *base_rom, *rom, *sram;
+uint8 rom_header[512], *rom, *sram;
 
 enum {
 //header fields
@@ -79,6 +79,7 @@ struct {
 } info;
 
   void load_rom(Reader &rf);
+  void patch_rom(Reader &rf);
   void load_sram();
   void save_sram();
   void read_dbi();

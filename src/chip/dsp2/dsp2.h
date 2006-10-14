@@ -39,3 +39,5 @@ struct {
   DSP2();
   ~DSP2();
 };
+
+extern DSP2 *dsp2;

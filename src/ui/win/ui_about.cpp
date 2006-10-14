@@ -1,7 +1,7 @@
 const char AboutWindow::about_text[4096] = ""
-  "bsnes -- version " BSNES_VERSION "\r\n"
-  "Author: byuu\r\n"
-  "Project began: October 14th, 2004\r\n"
+  "          bsnes -- version " BSNES_VERSION "\r\n"
+  "          Author: byuu\r\n"
+  "          Project began: October 14th, 2004\r\n"
   "\r\n\r\n"
   "Contributors:\r\n"
   "   anomie, blargg, DMV27, GIGO, kode54, Nach,\r\n"
@@ -16,31 +16,19 @@ bool AboutWindow::Event(EventInfo &info) {
   } break;
 
   case EVENT_DRAW: {
-break;
   PAINTSTRUCT ps;
   HDC hdc = BeginPaint(hwnd, &ps);
 
-//HDC hdcsrc = CreateCompatibleDC(hdc);
-//HBITMAP hbm = LoadBitmap(GetModuleHandle(0), MAKEINTRESOURCE(101));
-//  SelectObject(hdcsrc, hbm);
-//  BitBlt(hdc, 0, 0, 400, 240, hdcsrc, 0, 0, SRCCOPY);
-//  DeleteDC(hdcsrc);
-//  DeleteObject(hbm);
+  HDC hdcsrc = CreateCompatibleDC(hdc);
+  HICON hicon = LoadIcon(GetModuleHandle(0), MAKEINTRESOURCE(100));
+    DrawIcon(hdc, 5, 10, hicon);
+    DeleteObject(hicon);
 
     SelectObject(hdc, (HGDIOBJ)global::font_about);
     SetBkMode(hdc, TRANSPARENT);
   RECT rc;
     SetTextColor(hdc, RGB(0, 0, 0));
-    SetRect(&rc, 27, 28, 375, 215);
-    DrawText(hdc, about_text, strlen(about_text), &rc, DT_TOP | DT_LEFT);
-    SetRect(&rc, 29, 28, 375, 215);
-    DrawText(hdc, about_text, strlen(about_text), &rc, DT_TOP | DT_LEFT);
-    SetRect(&rc, 28, 27, 375, 215);
-    DrawText(hdc, about_text, strlen(about_text), &rc, DT_TOP | DT_LEFT);
-    SetRect(&rc, 28, 29, 375, 215);
-    DrawText(hdc, about_text, strlen(about_text), &rc, DT_TOP | DT_LEFT);
-    SetTextColor(hdc, RGB(255, 255, 255));
-    SetRect(&rc, 28, 28, 375, 215);
+    SetRect(&rc, 5, 5, 315, 145);
     DrawText(hdc, about_text, strlen(about_text), &rc, DT_TOP | DT_LEFT);
 
     EndPaint(hwnd, &ps);
@@ -58,9 +46,5 @@ break;
 }
 
 void AboutWindow::Setup() {
-  AboutText.Create(this, "visible|edge|multiline|readonly", 5, 5, 315, 125, about_text);
-  AboutText.SetBackgroundColor(32, 32, 32);
-  AboutText.SetTextColor(255, 255, 255);
-  AboutText.SetFont(global::font_about);
-  Ok.Create(this, "visible", 240, 135, 80, 25, "Ok");
+  Ok.Create(this, "visible", 220, 125, 100, 25, "Ok");
 }

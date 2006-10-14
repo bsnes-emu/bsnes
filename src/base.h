@@ -1,9 +1,9 @@
-#define BSNES_VERSION "0.017"
+#define BSNES_VERSION "0.018"
 #define BSNES_TITLE   "bsnes v" BSNES_VERSION
 
 #define MEMCORE bMemBus
 #define CPUCORE sCPU
-#define APUCORE sAPU
+#define SMPCORE sSMP
 #define DSPCORE bDSP
 #define PPUCORE bPPU
 
@@ -19,11 +19,8 @@
 //enable JMA support
 #define JMA_SUPPORT
 
-//debugging extensions (~10% speed hit)
-//#define DEBUGGER
-
 //snes core polymorphism
-//(allow mem/cpu/apu/ppu overriding, ~10% speed hit)
+//(allow runtime cpu/smp/dsp/ppu/bus selection, ~10% speed hit)
 //#define POLYMORPHISM
 
 #if defined(PROCESSOR_X86)
@@ -38,7 +35,10 @@
 
 #include "lib/libbase.h"
 #include "lib/libco_x86.h"
+#include "lib/libarray.h"
 #include "lib/libvector.h"
+#include "lib/libfile.h"
+#include "lib/libups.h"
 #include "lib/libstring.h"
 #include "lib/libconfig.h"
 
@@ -60,7 +60,10 @@ namespace source {
     none = 0,
     debug,
     cpu,
-    apu,
+    ppu,
+    smp,
+    dsp,
+    bus,
   };
 };
 

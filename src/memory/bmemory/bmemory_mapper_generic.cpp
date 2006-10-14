@@ -50,11 +50,11 @@ uint ram_size = cartridge.info.ram_size;
   //LoROM SRAM region
   //$[70-7f|f0-ff]:[0000-7fff]
   //Note: WRAM is remapped over $[7e-7f]:[0000-ffff]
-    if(bank >= 0x70 && bank <= 0x7f && (addr & 0x8000) == 0x0000) {
-      if(ram_size == 0)continue;
-
-      if(type == Cartridge::LOROM || !(bank & 0x80)) {
+    if((bank & 0x7f) >= 0x70 && (bank & 0x7f) <= 0x7f && (addr & 0x8000) == 0x0000) {
+      if(!(bank & 0x80) || type == Cartridge::LOROM) {
       //HiROM maps $[f0-ff]:[0000-7fff] to ROM
+        if(ram_size == 0)continue;
+
         addr  = ((bank & 0x7f) - 0x70) * 0x8000 + (addr & 0x7fff);
         addr %= ram_size;
         page_handle[page] = cartridge.sram + addr;

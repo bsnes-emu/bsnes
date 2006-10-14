@@ -19,19 +19,21 @@ class MemBus : public Memory {
 public:
 MMIO *mmio[0x4000]; //mapped to $[00-3f|80-bf]:[2000-5fff]
 bool  fastROM;
+uint  fastSpeed;
   void flush_mmio_mappers();
   bool set_mmio_mapper(uint16 addr, MMIO *mapper);
 
-private:
-//0x1000000 / 512 = 32768
-//512 = 0x200, smallest block of a different-speed memory range
-//ex. $4000-$41ff = 512
-uint8 *speed_table,
-       speed_table_slowrom[32768],
-       speed_table_fastrom[32768];
-  uint8 calc_speed(uint32 addr, bool fast);
 public:
-  uint8 speed(uint32 addr) { return speed_table[addr >> 9]; }
+  inline uint8 speed(uint32 addr) {
+    if(addr & 0x408000) {
+      if(addr & 0x800000) { return fastSpeed; }
+      return 8;
+    }
+    if((addr + 0x6000) & 0x4000) { return 8; }
+    if((addr - 0x4000) & 0x7e00) { return 6; }
+    return 12;
+  }
+
   void set_speed(bool fast);
 
   virtual void load_cart() = 0;

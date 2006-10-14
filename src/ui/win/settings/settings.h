@@ -12,5 +12,6 @@ Window *active_panel;
 #include "ui_videosettings.h"
 #include "ui_coloradjust.h"
 #include "ui_rastersettings.h"
+#include "ui_emusettings.h"
 #include "ui_inputconfig.h"
 #include "ui_cheateditor.h"

@@ -42,7 +42,7 @@ void HideCursor() {
   }
 }
 
-void ParseStyleParam(const char *style, string &output) {
+void ParseStyleParam(const char *style, stringarray &output) {
 string temp;
   strcpy(temp, style);
   strlower(temp);
@@ -95,7 +95,7 @@ libwin32_init::libwin32_init() {
 WNDCLASS wc;
   wc.cbClsExtra    = 0;
   wc.cbWndExtra    = 0;
-  wc.hbrBackground = (HBRUSH)COLOR_WINDOW;
+  wc.hbrBackground = (HBRUSH)(COLOR_3DFACE + 1);
   wc.hCursor       = LoadCursor(0, IDC_ARROW);
   wc.hIcon         = LoadIcon(0, IDI_APPLICATION);
   wc.hInstance     = GetModuleHandle(0);

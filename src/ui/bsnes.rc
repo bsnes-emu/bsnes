@@ -1,3 +1,5 @@
-#define IDI_APP_ICON 100
+#define IDI_APP_ICON   100
+#define IDI_CONTROLLER 101
 
-IDI_APP_ICON ICON DISCARDABLE "../data/bsnes.ico"
+IDI_APP_ICON   ICON   DISCARDABLE "../data/bsnes.ico"
+IDI_CONTROLLER BITMAP DISCARDABLE "../data/snes_controller.bmp"

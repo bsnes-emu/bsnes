@@ -19,11 +19,8 @@ uint32 state;
   void    video_unlock();
 
 //input functions
-  void    poll_input(uint8 type);
-  bool    get_input_status(uint8 device, uint8 button);
-
-//debugging functions
-  void    notify(uint32 message, uint32 param1 = 0, uint32 param2 = 0);
+  void    poll_input();
+  bool    get_input_status(uint8 deviceid, uint8 button);
 
   bSNES() { state = RUN; }
 } *bsnes;

@@ -3,20 +3,36 @@ void CALLBACK wInputConfigInputTimerProc(HWND hwnd, UINT msg, UINT event, DWORD 
   ui_poll_input(&wInputConfig, false);
 }
 
+uint InputConfigWindow::SelectionToDevice(uint selection) {
+  switch(selection) {
+  case 0:  return SNES::DEVICEID_JOYPAD1;
+  case 1:  return SNES::DEVICEID_JOYPAD2;
+  default: return SNES::DEVICEID_NONE;
+  }
+}
+
+uint InputConfigWindow::DeviceToSelection(uint device) {
+  switch(device) {
+  case SNES::DEVICEID_JOYPAD1: return 0;
+  case SNES::DEVICEID_JOYPAD2: return 1;
+  default: return 0;
+  }
+}
+
 bool InputConfigWindow::Event(EventInfo &info) {
   switch(info.event_id) {
 
-//case EVENT_DRAW: {
-//PAINTSTRUCT ps;
-//HDC hdc = BeginPaint(hwnd, &ps);
-//HDC hdcsrc = CreateCompatibleDC(hdc);
-//HBITMAP hbm = LoadBitmap(GetModuleHandle(0), MAKEINTRESOURCE(102));
-//  SelectObject(hdcsrc, hbm);
-//  BitBlt(hdc, 285, 169, 190, 100, hdcsrc, 0, 0, SRCCOPY);
-//  DeleteDC(hdcsrc);
-//  DeleteObject(hbm);
-//  EndPaint(hwnd, &ps);
-//} break;
+  case EVENT_DRAW: {
+  PAINTSTRUCT ps;
+  HDC hdc = BeginPaint(hwnd, &ps);
+  HDC hdcsrc = CreateCompatibleDC(hdc);
+  HBITMAP hbm = LoadBitmap(GetModuleHandle(0), MAKEINTRESOURCE(101));
+    SelectObject(hdcsrc, hbm);
+    BitBlt(hdc, 285, 169, 190, 100, hdcsrc, 0, 0, SRCCOPY);
+    DeleteDC(hdcsrc);
+    DeleteObject(hbm);
+    EndPaint(hwnd, &ps);
+  } break;
 
   case EVENT_INPUTKEYDOWN: {
     if(button_update.active == true) {
@@ -28,11 +44,11 @@ bool InputConfigWindow::Event(EventInfo &info) {
   case EVENT_CHANGED: {
     if(info.control == &Resistance) {
       config::input.axis_resistance = Resistance.GetPos();
-      ResistanceLabel.SetText("Joypad axis resistance: %d%%", uint(config::input.axis_resistance));
+      ResistanceLabel.SetText("Joypad axis resistance: %d%%", (uint)config::input.axis_resistance);
     } else if(info.control == &Selected) {
-      switch(Selected.GetSelection()) {
-      case 0: AllowBadInput.Check(config::input.joypad1.allow_invalid_input); break;
-      case 1: AllowBadInput.Check(config::input.joypad2.allow_invalid_input); break;
+      switch(SelectionToDevice(Selected.GetSelection())) {
+      case SNES::DEVICEID_JOYPAD1: AllowBadInput.Check(config::input.joypad1.allow_invalid_input); break;
+      case SNES::DEVICEID_JOYPAD2: AllowBadInput.Check(config::input.joypad2.allow_invalid_input); break;
       }
       UpdateButtonList();
     }
@@ -70,12 +86,12 @@ bool InputConfigWindow::Event(EventInfo &info) {
         ButtonUpdateEnd();
       }
     } else if(info.control == &AllowBadInput) {
-      switch(Selected.GetSelection()) {
-      case 0:
+      switch(SelectionToDevice(Selected.GetSelection())) {
+      case SNES::DEVICEID_JOYPAD1:
         config::input.joypad1.allow_invalid_input.toggle();
         AllowBadInput.Check(config::input.joypad1.allow_invalid_input);
         break;
-      case 1:
+      case SNES::DEVICEID_JOYPAD2:
         config::input.joypad2.allow_invalid_input.toggle();
         AllowBadInput.Check(config::input.joypad2.allow_invalid_input);
         break;
@@ -108,9 +124,10 @@ const char *InputConfigWindow::GetCaption(uint button) {
 
 void InputConfigWindow::UpdateButtonList() {
   ButtonList.DeleteAllItems();
-uint device = Selected.GetSelection();
 char t[512], tmp[512];
-string str, part;
+stringarray str, part;
+uint device = SelectionToDevice(Selected.GetSelection());
+
 #define add(__label, __bn) \
   strcpy(tmp, uiInput->key.find((uiInput->get_key(device, SNES::JOYPAD_##__bn) >>  0) & 4095)); \
   strcat(tmp, " | "); \
@@ -120,11 +137,12 @@ string str, part;
   replace(part[1], "null", "<none>"); \
   if(count(part) < 2)strcpy(part[1], "<none>"); \
   sprintf(t, #__label "|%s|%s", strptr(part[0]), strptr(part[1])); \
-  ButtonList.AddItem(t);
+  ButtonList.AddItem(t)
 
   add(Up, UP); add(Down, DOWN); add(Left, LEFT); add(Right, RIGHT);
   add(Y, Y); add(X, X); add(B, B); add(A, A);
   add(L, L); add(R, R); add(Select, SELECT); add(Start, START);
+
 #undef add
 }
 
@@ -136,12 +154,12 @@ void InputConfigWindow::ButtonUpdateBegin(uint button) {
 //to      B,  Y,    Select, Start, Up, Down, Left, Right, A, X, L,      R
 uint translate_table[12] = { 4, 5, 6, 7, 1, 9, 0, 8, 10, 11, 2, 3 };
   button_update.active     = true;
-  button_update.controller = Selected.GetSelection();
+  button_update.controller = SelectionToDevice(Selected.GetSelection());
   button_update.button     = translate_table[button];
 
-  Message.SetText("Press key or button for 'Controller %d::%s', "
+  Message.SetText("Press key or button for '%s', "
     "or press escape to clear button assignment.",
-    button_update.controller + 1, GetCaption(button_update.button));
+    GetCaption(button_update.button));
   SetFocus(Message.hwnd);
   SetTimer(hwnd, 0, 50, wInputConfigInputTimerProc);
 }

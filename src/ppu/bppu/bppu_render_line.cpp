@@ -84,21 +84,51 @@ uint8  bg_sub;
 inline void bPPU::render_line_output() {
 uint16 *ptr  = (uint16*)output + (line.y * 1024) +
                ((line.interlace && line.interlace_field) ? 512 : 0);
-uint16 *luma = light_table[regs.display_brightness];
+uint16 *luma_b  = light_table_b[regs.display_brightness];
+uint16 *luma_gr = light_table_gr[regs.display_brightness];
+uint16 curr, prev;
   if(!regs.pseudo_hires && regs.bg_mode != 5 && regs.bg_mode != 6) {
-    for(int x = 0; x < 256; x++) {
-      *ptr++ = luma[get_pixel_normal(x)];
+    if(regs.display_brightness == 15) {
+      for(int x = 0; x < 256; x++) {
+        *ptr++ = get_pixel_normal(x);
+      }
+    } else {
+      for(int x = 0; x < 256; x++) {
+        curr = get_pixel_normal(x);
+        *ptr++ = luma_b[curr >> 10] + luma_gr[curr & 0x3ff];
+      }
     }
   } else {
-  uint32 curr, prev = 0;
-    for(int x = 0; x < 256; x++) {
-      curr = luma[get_pixel_swap(x)];
-      *ptr++ = (prev + curr - ((prev ^ curr) & 0x0421)) >> 1;
-      prev = curr;
+    if(regs.display_brightness == 15) {
+      for(int x = 0, prev = 0; x < 256; x++) {
+        curr = get_pixel_swap(x);
+        *ptr++ = (prev + curr - ((prev ^ curr) & 0x0421)) >> 1;
+        prev = curr;
 
-      curr = luma[get_pixel_normal(x)];
-      *ptr++ = (prev + curr - ((prev ^ curr) & 0x0421)) >> 1;
-      prev = curr;
+        curr = get_pixel_normal(x);
+        *ptr++ = (prev + curr - ((prev ^ curr) & 0x0421)) >> 1;
+        prev = curr;
+
+      }
+    } else {
+      for(int x = 0, prev = 0; x < 256; x++) {
+        curr = get_pixel_swap(x);
+        curr = luma_b[curr >> 10] + luma_gr[curr & 0x3ff];
+        *ptr++ = (prev + curr - ((prev ^ curr) & 0x0421)) >> 1;
+        prev = curr;
+
+        curr = get_pixel_normal(x);
+        curr = luma_b[curr >> 10] + luma_gr[curr & 0x3ff];
+        *ptr++ = (prev + curr - ((prev ^ curr) & 0x0421)) >> 1;
+        prev = curr;
+      }
     }
   }
+}
+
+inline void bPPU::render_line_clear() {
+uint16 *ptr = (uint16*)output + (line.y * 1024) +
+              ((line.interlace && line.interlace_field) ? 512 : 0);
+uint16 width = (!regs.pseudo_hires && regs.bg_mode != 5 && regs.bg_mode != 6) ? 256 : 512;
+  memset(ptr, 0, width * 2 * sizeof(uint16));
 }

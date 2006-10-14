@@ -1,5 +1,5 @@
 /*
-  libbase : version 0.08b ~byuu (07/30/06)
+  libbase : version 0.08c ~byuu (09/28/06)
 */
 
 #ifndef __LIBBASE
@@ -8,6 +8,9 @@
 #if defined(_MSC_VER)
 //disable libc deprecation warnings in MSVC 2k5+
   #pragma warning(disable:4996)
+
+  #define ftruncate _chsize
+  #define vsnprintf _vsnprintf
 #endif
 
 /*****
@@ -15,15 +18,15 @@
  *****/
 
 #if defined(_MSC_VER)
-  #define noinline     __declspec(noinline)
-  #define inline       inline
-  #define forceinline  __forceinline
-  #define fastcall     __fastcall
+  #define noinline      __declspec(noinline)
+  #define inline        inline
+  #define alwaysinline  __forceinline
+  #define fastcall      __fastcall
 #elif defined(__GNUC__)
   #define noinline
-  #define inline       inline
-  #define forceinline  inline
-  #define fastcall     __attribute__((fastcall))
+  #define inline        inline
+  #define alwaysinline  inline
+  #define fastcall      __attribute__((fastcall))
 #else
   #error "unsupported compiler"
 #endif
@@ -34,6 +37,7 @@
 #include <string.h>
 #include <time.h>
 #include <math.h>
+#include <io.h>
 
 #ifndef FALSE
   #define FALSE 0
@@ -217,8 +221,6 @@ typedef  int_t<48,  int64>  int48;
 #define order_msb6(a,b,c,d,e,f)     f,e,d,c,b,a
 #define order_msb7(a,b,c,d,e,f,g)   g,f,e,d,c,b,a
 #define order_msb8(a,b,c,d,e,f,g,h) h,g,f,e,d,c,b,a
-#define order_lsbit8(b0,b1,b2,b3,b4,b5,b6,b7) b7:1,b6:1,b5:1,b4:1,b3:1,b2:1,b1:1,b0:1
-#define order_msbit8(b7,b6,b5,b4,b3,b2,b1,b0) b0:1,b1:1,b2:1,b3:1,b4:1,b5:1,b6:1,b7:1
 #else
 //big-endian:    uint8[] { 0x01, 0x02, 0x03, 0x04 } = 0x01020304
 #define order_lsb2(a,b)             b,a
@@ -235,15 +237,13 @@ typedef  int_t<48,  int64>  int48;
 #define order_msb6(a,b,c,d,e,f)     a,b,c,d,e,f
 #define order_msb7(a,b,c,d,e,f,g)   a,b,c,d,e,f,g
 #define order_msb8(a,b,c,d,e,f,g,h) a,b,c,d,e,f,g,h
-#define order_lsbit8(b7,b6,b5,b4,b3,b2,b1,b0) b0:1,b1:1,b2:1,b3:1,b4:1,b5:1,b6:1,b7:1
-#define order_msbit8(b0,b1,b2,b3,b4,b5,b6,b7) b7:1,b6:1,b5:1,b4:1,b3:1,b2:1,b1:1,b0:1
 #endif
 
 /*****
  * libc extensions
  *****/
 
-inline bool fexists(const char *fn) {
+static bool fexists(const char *fn) {
 FILE *fp = fopen(fn, "rb");
   if(!fp)return false;
   fclose(fp);
@@ -251,7 +251,7 @@ FILE *fp = fopen(fn, "rb");
   return true;
 }
 
-inline uint32 fsize(FILE *fp) {
+static uint32 fsize(FILE *fp) {
   if(!fp)return 0;
 uint32 pos = ftell(fp);
   fseek(fp, 0, SEEK_END);
@@ -260,7 +260,7 @@ uint32 size = ftell(fp);
   return size;
 }
 
-inline uint32 fsize(const char *fn) {
+static uint32 fsize(const char *fn) {
 FILE *fp = fopen(fn, "rb");
   if(!fp)return 0;
   fseek(fp, 0, SEEK_END);
@@ -269,6 +269,8 @@ uint32 size = ftell(fp);
   fp = 0;
   return size;
 }
+
+inline int ftruncate(FILE *fp, long size) { return ftruncate(fileno(fp), size); }
 
 /*****
  * crc32 calculation

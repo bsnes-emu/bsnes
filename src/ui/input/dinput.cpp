@@ -1,12 +1,12 @@
-void InputDI::poll(uint8 device) {
+void InputDI::poll() {
   if(wMain.hwnd != GetForegroundWindow()) {
     clear_input();
     return;
   }
-  Input::poll(device);
+  Input::poll();
 }
 
-void InputDI::poll() {
+void InputDI::poll_hw() {
 HRESULT hr;
 DIJOYSTATE2 js;
   memset(keystate, 0, sizeof(keystate));

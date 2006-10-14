@@ -33,11 +33,7 @@ va_list args;
   va_start(args, s);
   vsprintf(str, s, args);
   va_end(args);
-#ifdef DEBUGGER
   wDebug.Print(source::none, str);
-#else
-  fprintf(stdout, "[%3d] %s\r\n", source::none, str);
-#endif
 }
 
 void dprintf(uint source, char *s, ...) {
@@ -46,11 +42,7 @@ va_list args;
   va_start(args, s);
   vsprintf(str, s, args);
   va_end(args);
-#ifdef DEBUGGER
   wDebug.Print(source, str);
-#else
-  fprintf(stdout, "[%3d] %s\r\n", source, str);
-#endif
 }
 
 void get_base_path() {
@@ -71,7 +63,8 @@ string t;
     }
   }
 
-  config::fs_set_path(config::fs.base_path, strptr(t));
+  if(strend(t, "/") == false) { strcat(t, "/"); }
+  config::fs.base_path.sset(strptr(t));
 }
 
 int __stdcall WinMain(HINSTANCE hinstance, HINSTANCE hprevinstance, LPSTR lpcmdline, int ncmdshow) {
@@ -96,14 +89,14 @@ string cfg_fn;
 MSG msg;
   while(1) {
     while(PeekMessage(&msg, 0, 0, 0, PM_REMOVE)) {
-      if(msg.message == WM_QUIT)goto _end;
+      if(msg.message == WM_QUIT)goto end;
       TranslateMessage(&msg);
       DispatchMessage(&msg);
     }
     bsnes->run();
   }
 
-_end:
+end:
   if(cartridge.loaded() == true)cartridge.unload();
 
   term_ui();

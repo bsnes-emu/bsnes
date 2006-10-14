@@ -24,7 +24,7 @@ void capture_screenshot() {
 }
 
 void set_video_profile(uint profile) {
-  if(profile > 7)profile = 0;
+  if(profile >= VIDEO_PROFILE_COUNT)profile = 0;
 
   config::video.profile = profile;
   uiVideo->update_video_settings();
@@ -45,31 +45,13 @@ string t;
   wMain.Resize(uiVideo->settings.resolution_width, uiVideo->settings.resolution_height, true);
 
   uiVideo->update_video_profile();
-
-  wMain.CheckMenuItem(MENU_SETTINGS_VIDEOPROFILE_0, profile == 0);
-  wMain.CheckMenuItem(MENU_SETTINGS_VIDEOPROFILE_1, profile == 1);
-  wMain.CheckMenuItem(MENU_SETTINGS_VIDEOPROFILE_2, profile == 2);
-  wMain.CheckMenuItem(MENU_SETTINGS_VIDEOPROFILE_3, profile == 3);
-  wMain.CheckMenuItem(MENU_SETTINGS_VIDEOPROFILE_4, profile == 4);
-  wMain.CheckMenuItem(MENU_SETTINGS_VIDEOPROFILE_5, profile == 5);
-  wMain.CheckMenuItem(MENU_SETTINGS_VIDEOPROFILE_6, profile == 6);
-  wMain.CheckMenuItem(MENU_SETTINGS_VIDEOPROFILE_7, profile == 7);
 }
 
 void toggle_fullscreen() {
-bool fullscreen = !uiVideo->settings.fullscreen;
-uint i;
-  for(i = 0; i < 8; i++) {
-    if(video_settings[i].fullscreen == fullscreen)break;
-  }
-
-  if(i <= 7) {
-    if(fullscreen == true) {
-      wSettings.Hide();
-      wAbout.Hide();
-      debugger.deactivate();
-    }
-    config::video.profile = i;
+  if(config::video.profile == 0) {
+    config::video.profile = 1;
+  } else {
+    config::video.profile = 0;
   }
 
   event::set_video_profile(config::video.profile);
@@ -78,11 +60,13 @@ uint i;
 void load_rom() {
 OPENFILENAME ofn;
 char t[MAX_PATH];
-string dir;
+stringarray dir;
   strcpy(t, "");
   strcpy(dir, config::fs.rom_path.sget());
+  replace(dir, "\\", "/");
+  if(strlen(dir) && !strend(dir, "/")) { strcat(dir, "/"); }
 
-//append base path if rom path is relative
+//append base_path if rom_path is relative
   if(strbegin(dir, "./")) {
     strltrim(dir, "./");
     strcpy(dir[1], dir[0]);

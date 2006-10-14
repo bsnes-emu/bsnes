@@ -1,5 +1,7 @@
 #include "../base.h"
 
+Cheat cheat;
+
 /*****
  * string <> binary code translation routines
  * decode() "7e1234:56" ->  0x7e123456
@@ -7,7 +9,7 @@
  *****/
 
 bool Cheat::decode(char *str, uint32 &addr, uint8 &data, uint8 &type) {
-string t, part;
+stringarray t, part;
   strcpy(t, str);
   strlower(t);
   if(strlen(t) == 8 || (strlen(t) == 9 && strptr(t)[6] == ':')) {
@@ -270,15 +272,15 @@ bool Cheat::load(Reader &rf) {
   if(!rf.ready())return false;
 
 uint8 *raw_data = rf.read();
-string data;
+stringarray data, line;
   raw_data[rf.size()] = 0;
   strcpy(data, (char*)raw_data);
   SafeFree(raw_data);
   replace(data, "\r\n", "\n");
-string line;
+
   split(line, "\n", data);
   for(int i = 0; i < ::count(line); i++) {
-  string part;
+  stringarray part;
   uint8  en = *(strptr(line[i]));
     if(en == '+') {
       strltrim(line[i], "+");

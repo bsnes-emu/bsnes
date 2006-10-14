@@ -12,6 +12,7 @@ bool SettingsWindow::Event(EventInfo &info) {
       case PANEL_VIDEOSETTINGS:  settings.set_active_panel(&wVideoSettings);  break;
       case PANEL_COLORADJUST:    settings.set_active_panel(&wColorAdjust);    break;
       case PANEL_RASTERSETTINGS: settings.set_active_panel(&wRasterSettings); break;
+      case PANEL_EMUSETTINGS:    settings.set_active_panel(&wEmuSettings);    break;
       case PANEL_INPUTCONFIG:    settings.set_active_panel(&wInputConfig);    break;
       case PANEL_CHEATEDITOR:    settings.set_active_panel(&wCheatEditor);    break;
       default:                   settings.set_active_panel(0);                break;
@@ -41,11 +42,11 @@ void SettingsWindow::Setup() {
     "Video Settings|"
     "Color Adjustment|"
     "Raster Settings|"
-    "|"
+    "Emulation Settings|"
     "Input Configuration|"
-    "|"
     "Cheat Code Editor"
   );
+//Panel.SetFont(global::font_list);
 
   settings.set_active_panel(&wVideoSettings);
 }

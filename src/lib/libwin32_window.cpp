@@ -72,7 +72,8 @@ bool result = false;
 
     for(int i = 0; i < control_count; i++) {
       if(LOWORD(wparam) == list[i]->id) {
-        if((list[i]->type == Control::COMBOBOX && HIWORD(wparam) == CBN_SELCHANGE) ||
+        if((list[i]->type == Control::EDITBOX  && HIWORD(wparam) == EN_CHANGE) ||
+           (list[i]->type == Control::COMBOBOX && HIWORD(wparam) == CBN_SELCHANGE) ||
            (list[i]->type == Control::LISTBOX  && HIWORD(wparam) == LBN_SELCHANGE)) {
           info.event_id   = EVENT_CHANGED;
           info.control    = list[i];
@@ -253,7 +254,7 @@ void Window::SetStyle(const char *style) {
 
   if(parent)state.ws |= WS_CHILD;
 
-string part;
+stringarray part;
   ParseStyleParam(style, part);
   for(int i = 0; i < count(part); i++) {
     if(strmatch(part[i], "visible")) state.ws |= WS_VISIBLE;
@@ -437,7 +438,7 @@ bool Window::Event(EventInfo &info) {
 Window::Window() {
   hwnd           = 0;
   hwnd_resize    = 0;
-  backbrush      = (HBRUSH)COLOR_WINDOW;
+  backbrush      = (HBRUSH)(COLOR_3DFACE + 1);
   control_count  = 0;
   event_callback = 0;
 

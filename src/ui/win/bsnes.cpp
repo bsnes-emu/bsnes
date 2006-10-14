@@ -93,44 +93,14 @@ void bSNES::video_unlock() {
 }
 
 /***********************
- *** audio functions ***
+ *** input functions ***
  ***********************/
 
-void bSNES::poll_input(uint8 type) {
-  uiInput->poll(type);
-
-  if((bool)config::input.joypad1.allow_invalid_input == false) {
-    if(uiInput->get_status(DEV_JOYPAD1, JOYPAD_UP) &&
-       uiInput->get_status(DEV_JOYPAD1, JOYPAD_DOWN)) {
-      uiInput->set_status(DEV_JOYPAD1, JOYPAD_DOWN, false);
-    }
-
-    if(uiInput->get_status(DEV_JOYPAD1, JOYPAD_LEFT) &&
-       uiInput->get_status(DEV_JOYPAD1, JOYPAD_RIGHT)) {
-      uiInput->set_status(DEV_JOYPAD1, JOYPAD_RIGHT, false);
-    }
-  }
-
-  if((bool)config::input.joypad2.allow_invalid_input == false) {
-    if(uiInput->get_status(DEV_JOYPAD2, JOYPAD_UP) &&
-       uiInput->get_status(DEV_JOYPAD2, JOYPAD_DOWN)) {
-      uiInput->set_status(DEV_JOYPAD2, JOYPAD_DOWN, false);
-    }
-
-    if(uiInput->get_status(DEV_JOYPAD2, JOYPAD_LEFT) &&
-       uiInput->get_status(DEV_JOYPAD2, JOYPAD_RIGHT)) {
-      uiInput->set_status(DEV_JOYPAD2, JOYPAD_RIGHT, false);
-    }
-  }
+void bSNES::poll_input() {
+  uiInput->poll();
+  SNES::poll_input();
 }
 
-bool bSNES::get_input_status(uint8 device, uint8 button) {
-  return uiInput->get_status(device, button);
-}
-
-/***************************
- *** debugging functions ***
- ***************************/
-void bSNES::notify(uint32 message, uint32 param1, uint32 param2) {
-  debugger.notify(message, param1, param2);
+bool bSNES::get_input_status(uint8 deviceid, uint8 button) {
+  return uiInput->get_status(deviceid, button);
 }

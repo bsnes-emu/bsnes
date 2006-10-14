@@ -22,7 +22,7 @@ uint8 bPPU::vram_mmio_read(uint16 addr) {
   }
 
 uint16 v  = r_cpu->vcounter();
-uint16 hc = r_cpu->hcycles();
+uint16 hc = r_cpu->hclock();
 uint16 ls = (r_cpu->region_scanlines() >> 1) - 1;
   if(r_cpu->interlace() && !r_cpu->interlace_field())ls++;
 
@@ -51,7 +51,7 @@ void bPPU::vram_mmio_write(uint16 addr, uint8 data) {
   }
 
 uint16 v  = r_cpu->vcounter();
-uint16 hc = r_cpu->hcycles();
+uint16 hc = r_cpu->hclock();
   if(v == 0) {
     if(hc <= 4) {
       vram_write(addr, data);
@@ -81,6 +81,10 @@ uint16 hc = r_cpu->hcycles();
 
 //INIDISP
 void bPPU::mmio_w2100(uint8 value) {
+  if(regs.display_disabled == true && !!(value & 0x80) == false) {
+    regs.oam_addr = regs.oam_baseaddr << 1;
+  }
+
   regs.display_disabled   = !!(value & 0x80);
   regs.display_brightness = value & 15;
 }

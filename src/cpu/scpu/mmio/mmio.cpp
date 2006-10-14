@@ -2,21 +2,17 @@ uint8 sCPU::pio_status() {
   return status.pio;
 }
 
-/*****
- * WRAM data registers
- *****/
-
 //WMDATA
 uint8 sCPU::mmio_r2180() {
-uint8 r = r_mem->read(0x7e0000 | status.wram_addr++);
-  status.wram_addr &= 0x01ffff;
+uint8 r = r_mem->read(0x7e0000 | status.wram_addr);
+  status.wram_addr = (status.wram_addr + 1) & 0x01ffff;
   return r;
 }
 
 //WMDATA
 void sCPU::mmio_w2180(uint8 data) {
-  r_mem->write(0x7e0000 | status.wram_addr++, data);
-  status.wram_addr &= 0x01ffff;
+  r_mem->write(0x7e0000 | status.wram_addr, data);
+  status.wram_addr = (status.wram_addr + 1) & 0x01ffff;
 }
 
 //WMADDL
@@ -37,24 +33,27 @@ void sCPU::mmio_w2183(uint8 data) {
   status.wram_addr &= 0x01ffff;
 }
 
-/*****
- * Joypad registers
- *****/
+//JOYSER0
+//bit 0 is shared between JOYSER0 and JOYSER1, therefore
+//strobing $4016.d0 affects both controller port latches.
+//$4017 bit 0 writes are ignored.
+void sCPU::mmio_w4016(uint8 data) {
+  status.joypad_strobe_latch = !!(data & 1);
 
-//TODO: test whether strobe latch of zero returns
-//realtime or buffered status of joypadN.b
+  if(status.joypad_strobe_latch == 1) {
+    snes->poll_input();
+  }
+}
 
 //JOYSER0
 //7-2 = MDR
 //1-0 = Joypad serial data
+//
+//TODO: test whether strobe latch of zero returns
+//realtime or buffered status of joypadN.b
 uint8 sCPU::mmio_r4016() {
 uint8 r = regs.mdr & 0xfc;
-  r |= status.joypad1_bits & 1;
-  if(status.joypad_strobe_latch == 0) {
-    status.joypad1_bits >>= 1;
-    status.joypad1_bits  |= 0x8000;
-  }
-
+  r |= (uint8)snes->port_read(0);
   return r;
 }
 
@@ -64,41 +63,149 @@ uint8 r = regs.mdr & 0xfc;
 //1-0 = Joypad serial data
 uint8 sCPU::mmio_r4017() {
 uint8 r = (regs.mdr & 0xe0) | 0x1c;
-  r |= status.joypad2_bits & 1;
-  if(status.joypad_strobe_latch == 0) {
-    status.joypad2_bits >>= 1;
-    status.joypad2_bits  |= 0x8000;
-  }
-
+  r |= (uint8)snes->port_read(1);
   return r;
 }
 
-//TODO: handle reads during joypad polling (v=225-227)
+//NMITIMEN
+void sCPU::mmio_w4200(uint8 data) {
+  status.nmi_enabled      = !!(data & 0x80);
+  status.virq_enabled     = !!(data & 0x20);
+  status.hirq_enabled     = !!(data & 0x10);
+  status.auto_joypad_poll = !!(data & 0x01);
 
-uint8 sCPU::mmio_r4218() { return status.joy1l; } //JOY1L
-uint8 sCPU::mmio_r4219() { return status.joy1h; } //JOY1H
-uint8 sCPU::mmio_r421a() { return status.joy2l; } //JOY2L
-uint8 sCPU::mmio_r421b() { return status.joy2h; } //JOY2H
-uint8 sCPU::mmio_r421c() { return status.joy3l; } //JOY3L
-uint8 sCPU::mmio_r421d() { return status.joy3h; } //JOY3H
-uint8 sCPU::mmio_r421e() { return status.joy4l; } //JOY4L
-uint8 sCPU::mmio_r421f() { return status.joy4h; } //JOY4H
+  if(status.nmi_read == 0) {
+    if(status.nmi_line == 1 && status.nmi_enabled == 1) {
+      status.nmi_transition = 1;
+    }
+    status.nmi_line = !status.nmi_enabled;
+  }
 
-//JOYSER0
-//bit 0 is shared between JOYSER0 and JOYSER1, therefore
-//strobing $4016.d0 affects both controller port latches.
-//$4017 bit 0 writes are ignored.
-void sCPU::mmio_w4016(uint8 data) {
-  status.joypad_strobe_latch = bool(data & 1);
+  if(status.irq_read == 0) {
+    if(status.irq_line == 1 && (status.virq_enabled || status.hirq_enabled)) {
+      status.irq_transition = 1;
+    }
+    status.irq_line = !(status.virq_enabled || status.hirq_enabled);
+  }
 
-  if(status.joypad_strobe_latch == 1) {
-    run_manual_joypad_poll();
+  if(status.virq_enabled == true && status.hirq_enabled == false) {
+    status.irq_lock = false;
+  }
+
+  if(status.virq_enabled == false && status.hirq_enabled == false) {
+    status.irq_line = 1;
+    status.irq_read = 1;
+    status.irq_transition = 0;
+  }
+
+  update_interrupts();
+  counter_set(counter.irq_delay, 2);
+}
+
+//WRIO
+void sCPU::mmio_w4201(uint8 data) {
+  if((status.pio & 0x80) && !(data & 0x80)) {
+    r_ppu->latch_counters();
+  }
+  status.pio = data;
+}
+
+//WRMPYA
+void sCPU::mmio_w4202(uint8 data) {
+  status.mul_a = data;
+}
+
+//WRMPYB
+void sCPU::mmio_w4203(uint8 data) {
+  status.mul_b = data;
+  status.r4216 = status.mul_a * status.mul_b;
+//counter_set(counter.hw_math, 48);
+}
+
+//WRDIVL
+void sCPU::mmio_w4204(uint8 data) {
+  status.div_a = (status.div_a & 0xff00) | (data);
+}
+
+//WRDIVH
+void sCPU::mmio_w4205(uint8 data) {
+  status.div_a = (status.div_a & 0x00ff) | (data << 8);
+}
+
+//WRDIVB
+void sCPU::mmio_w4206(uint8 data) {
+  status.div_b = data;
+  status.r4214 = (status.div_b) ? status.div_a / status.div_b : 0xffff;
+  status.r4216 = (status.div_b) ? status.div_a % status.div_b : status.div_a;
+//counter_set(counter.hw_math, 96);
+}
+
+//HTIMEL
+void sCPU::mmio_w4207(uint8 data) {
+  status.hirq_pos  = (status.hirq_pos & ~0xff) | (data);
+  status.hirq_pos &= 0x01ff;
+  update_interrupts();
+
+uint vpos = status.vcounter, hpos = status.hclock;
+  timeshift_backward(10, vpos, hpos);
+  if(hpos < status.hirq_trigger_pos) { status.irq_lock = false; }
+}
+
+//HTIMEH
+void sCPU::mmio_w4208(uint8 data) {
+  status.hirq_pos  = (status.hirq_pos &  0xff) | (data << 8);
+  status.hirq_pos &= 0x01ff;
+  update_interrupts();
+
+uint vpos = status.vcounter, hpos = status.hclock;
+  timeshift_backward(10, vpos, hpos);
+  if(hpos < status.hirq_trigger_pos) { status.irq_lock = false; }
+}
+
+//VTIMEL
+void sCPU::mmio_w4209(uint8 data) {
+  status.virq_pos  = (status.virq_pos & ~0xff) | (data);
+  status.virq_pos &= 0x01ff;
+  update_interrupts();
+
+uint vpos = status.vcounter, hpos = status.hclock;
+  timeshift_backward(10, vpos, hpos);
+  if(hpos < status.hirq_trigger_pos) { status.irq_lock = false; }
+}
+
+//VTIMEH
+void sCPU::mmio_w420a(uint8 data) {
+  status.virq_pos  = (status.virq_pos &  0xff) | (data << 8);
+  status.virq_pos &= 0x01ff;
+  update_interrupts();
+
+uint vpos = status.vcounter, hpos = status.hclock;
+  timeshift_backward(10, vpos, hpos);
+  if(hpos < status.hirq_trigger_pos) { status.irq_lock = false; }
+}
+
+//DMAEN
+void sCPU::mmio_w420b(uint8 data) {
+  for(int i = 0; i < 8; i++) {
+    channel[i].dma_enabled  = !!(data & (1 << i));
+  }
+  if(data) {
+    status.dma_state = DMASTATE_DMASYNC;
+    status.dma_pending = true;
   }
 }
 
-/*****
- * NMI / IRQ registers
- *****/
+//HDMAEN
+void sCPU::mmio_w420c(uint8 data) {
+  for(int i = 0; i < 8; i++) {
+    channel[i].hdma_enabled = !!(data & (1 << i));
+  }
+}
+
+//MEMSEL
+void sCPU::mmio_w420d(uint8 data) {
+  r_mem->set_speed(data & 1);
+}
 
 //RDNMI
 //7   = NMI acknowledge
@@ -106,9 +213,9 @@ void sCPU::mmio_w4016(uint8 data) {
 //3-0 = CPU (5a22) version
 uint8 sCPU::mmio_r4210() {
 uint8 r = (regs.mdr & 0x70);
-  r |= uint8(!status.nmi_read) << 7;
+  r |= (uint8)(!status.nmi_read) << 7;
 
-  if(!nmi_read_pos_match(0) && !nmi_read_pos_match(2)) {
+  if(!counter.nmi_fire) {
     status.nmi_read = 1;
   }
 
@@ -121,9 +228,9 @@ uint8 r = (regs.mdr & 0x70);
 //6-0 = MDR
 uint8 sCPU::mmio_r4211() {
 uint8 r = (regs.mdr & 0x7f);
-  r |= uint8(!status.irq_read) << 7;
+  r |= (uint8)(!status.irq_read) << 7;
 
-  if(!irq_read_pos_match(0) && !irq_read_pos_match(2)) {
+  if(!counter.irq_fire) {
     status.irq_read = 1;
     status.irq_line = 1;
     status.irq_transition = 0;
@@ -153,132 +260,44 @@ uint16 vs = !overscan() ? 225 : 240;
   return r;
 }
 
-//NMITIMEN
-void sCPU::mmio_w4200(uint8 data) {
-  status.nmi_enabled      = bool(data & 0x80);
-  status.virq_enabled     = bool(data & 0x20);
-  status.hirq_enabled     = bool(data & 0x10);
-  status.auto_joypad_poll = bool(data & 0x01);
-
-//if(!status.nmi_enabled)status.nmi_read=1;
-
-  if(status.nmi_read == 0) {
-    if(status.nmi_line == 1 && !status.nmi_enabled == 0) {
-      status.nmi_transition = 1;
-    }
-    status.nmi_line = !status.nmi_enabled;
-  }
-
-  if(status.virq_enabled == false && status.hirq_enabled == false) {
-    status.irq_line = 1;
-    status.irq_read = 1;
-    status.irq_transition = 0;
-  }
-
-  update_interrupts();
-  set_irq_delay(2);
-}
-
-//HTIMEL
-void sCPU::mmio_w4207(uint8 data) {
-  status.hirq_pos  = (status.hirq_pos & ~0xff) | (data);
-  status.hirq_pos &= 0x01ff;
-  update_interrupts();
-}
-
-//HTIMEH
-void sCPU::mmio_w4208(uint8 data) {
-  status.hirq_pos  = (status.hirq_pos &  0xff) | (data << 8);
-  status.hirq_pos &= 0x01ff;
-  update_interrupts();
-}
-
-//VTIMEL
-void sCPU::mmio_w4209(uint8 data) {
-  status.virq_pos  = (status.virq_pos & ~0xff) | (data);
-  status.virq_pos &= 0x01ff;
-  update_interrupts();
-}
-
-//VTIMEH
-void sCPU::mmio_w420a(uint8 data) {
-  status.virq_pos  = (status.virq_pos &  0xff) | (data << 8);
-  status.virq_pos &= 0x01ff;
-  update_interrupts();
-}
-
-/*****
- * I/O registers
- ****/
-
 //RDIO
 uint8 sCPU::mmio_r4213() {
   return status.pio;
 }
 
-//WRIO
-void sCPU::mmio_w4201(uint8 data) {
-  if((status.pio & 0x80) && !(data & 0x80)) {
-    r_ppu->latch_counters();
-  }
-  status.pio = data;
-}
-
-/*****
- * Math registers (multiplication and division)
- *****/
-
 //RDDIVL
 uint8 sCPU::mmio_r4214() {
+  if(counter.hw_math) { return 0x00; }
   return status.r4214;
 }
 
 //RDDIVH
 uint8 sCPU::mmio_r4215() {
+  if(counter.hw_math) { return 0x00; }
   return status.r4214 >> 8;
 }
 
 //RDMPYL
 uint8 sCPU::mmio_r4216() {
+  if(counter.hw_math) { return 0x00; }
   return status.r4216;
 }
 
 //RDMPYH
 uint8 sCPU::mmio_r4217() {
+  if(counter.hw_math) { return 0x00; }
   return status.r4216 >> 8;
 }
 
-//WRMPYA
-void sCPU::mmio_w4202(uint8 data) {
-  status.mul_a = data;
-}
-
-//WRMPYB
-void sCPU::mmio_w4203(uint8 data) {
-  status.mul_b = data;
-  status.r4216 = status.mul_a * status.mul_b;
-}
-
-//WRDIVL
-void sCPU::mmio_w4204(uint8 data) {
-  status.div_a = (status.div_a & 0xff00) | (data);
-}
-
-//WRDIVH
-void sCPU::mmio_w4205(uint8 data) {
-  status.div_a = (status.div_a & 0x00ff) | (data << 8);
-}
-
-//WRDIVB
-void sCPU::mmio_w4206(uint8 data) {
-  status.div_b = data;
-  status.r4214 = (status.div_b) ? status.div_a / status.div_b : 0xffff;
-  status.r4216 = (status.div_b) ? status.div_a % status.div_b : status.div_a;
-}
-
-/*****
- * DMA / HDMA registers
- *****/
+//TODO: handle reads during joypad polling (v=225-227)
+uint8 sCPU::mmio_r4218() { return status.joy1l; } //JOY1L
+uint8 sCPU::mmio_r4219() { return status.joy1h; } //JOY1H
+uint8 sCPU::mmio_r421a() { return status.joy2l; } //JOY2L
+uint8 sCPU::mmio_r421b() { return status.joy2h; } //JOY2H
+uint8 sCPU::mmio_r421c() { return status.joy3l; } //JOY3L
+uint8 sCPU::mmio_r421d() { return status.joy3h; } //JOY3H
+uint8 sCPU::mmio_r421e() { return status.joy4l; } //JOY4L
+uint8 sCPU::mmio_r421f() { return status.joy4h; } //JOY4H
 
 //DMAPx
 uint8 sCPU::mmio_r43x0(uint8 i) {
@@ -342,34 +361,13 @@ uint8 sCPU::mmio_r43xb(uint8 i) {
   return channel[i].unknown;
 }
 
-//DMAEN
-//Note: DMA enable does not disable active HDMA channels
-void sCPU::mmio_w420b(uint8 data) {
-  for(int i = 0; i < 8; i++) {
-    channel[i].dma_enabled  = bool(data & (1 << i));
-  }
-  if(data)dma_run(); //temporary
-}
-
-//HDMAEN
-void sCPU::mmio_w420c(uint8 data) {
-  for(int i = 0; i < 8; i++) {
-    channel[i].hdma_enabled = bool(data & (1 << i));
-  }
-}
-
-//MEMSEL
-void sCPU::mmio_w420d(uint8 data) {
-  r_mem->set_speed(data & 1);
-}
-
 //DMAPx
 void sCPU::mmio_w43x0(uint8 i, uint8 data) {
   channel[i].dmap          = data;
-  channel[i].direction     = bool(data & 0x80);
-  channel[i].hdma_indirect = bool(data & 0x40);
-  channel[i].reversexfer   = bool(data & 0x10);
-  channel[i].fixedxfer     = bool(data & 0x08);
+  channel[i].direction     = !!(data & 0x80);
+  channel[i].hdma_indirect = !!(data & 0x40);
+  channel[i].reversexfer   = !!(data & 0x10);
+  channel[i].fixedxfer     = !!(data & 0x08);
   channel[i].xfermode      = data & 7;
 }
 
@@ -430,10 +428,6 @@ void sCPU::mmio_w43xb(uint8 i, uint8 data) {
   channel[i].unknown = data;
 }
 
-/*****
- * reset / read / write
- *****/
-
 void sCPU::mmio_power() {
 }
 
@@ -488,7 +482,7 @@ uint8 sCPU::mmio_read(uint16 addr) {
   #ifdef FAVOR_SPEED
     co_return();
   #endif
-    return r_apu->port_read(addr & 3);
+    return r_smp->port_read(addr & 3);
   }
 
 //DMA

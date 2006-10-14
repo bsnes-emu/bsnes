@@ -36,7 +36,7 @@ uint8 *tableA = oam, *tableB = oam + 512;
     }
 
     sprite_list[i].x              = (x << 8) + tableA[0];
-    sprite_list[i].y              = tableA[1] + 1;
+    sprite_list[i].y              = tableA[1];
     sprite_list[i].character      = tableA[2];
     sprite_list[i].vflip          = bool(tableA[3] & 0x80);
     sprite_list[i].hflip          = bool(tableA[3] & 0x40);

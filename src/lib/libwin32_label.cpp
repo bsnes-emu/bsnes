@@ -11,7 +11,7 @@ bool Label::Create(Window *parent_window, const char *style, int x, int y, int w
   state.width  = width;
   state.height = height;
 
-string part;
+stringarray part;
   ParseStyleParam(style, part);
   for(int i = 0; i < count(part); i++) {
     if(strmatch(part[i], "visible"))state.ws |= WS_VISIBLE;

@@ -185,7 +185,7 @@ int n = addr & 15;
 }
 
 void bDSP::power() {
-  spcram = r_apu->get_spcram_handle();
+  spcram = r_smp->get_spcram_handle();
   memset(dspram, 0x00, 128);
 
   for(int v = 0; v < 8; v++) {

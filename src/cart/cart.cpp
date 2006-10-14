@@ -1,6 +1,8 @@
 #include "../base.h"
 #include "database.cpp"
 
+Cartridge cartridge;
+
 void Cartridge::read_dbi() {
   info.srtc = false;
   info.sdd1 = false;
@@ -204,14 +206,44 @@ bool header = ((size & 0x7fff) == 512);
   if(info.rom_size & 0x7fff) {
     info.rom_size += 0x8000 - (info.rom_size & 0x7fff);
   }
-  base_rom = rf.read(info.rom_size + (header ? 512 : 0));
-  rom = base_rom + (header ? 512 : 0);
+
+uint8 *base_rom = rf.read(info.rom_size + (header ? 512 : 0));
+  if(header) {
+    memcpy(rom_header, base_rom, 512);
+  } else {
+    memset(rom_header, 0x00, 512);
+  }
+
+  rom = (uint8*)malloc(info.rom_size);
+  memcpy(rom, base_rom + (header ? 512 : 0), info.rom_size);
+  SafeFree(base_rom);
 
   info.crc32 = 0xffffffff;
   for(int32 i = 0; i < info.rom_size; i++) {
     info.crc32 = crc32_adjust(info.crc32, rom[i]);
   }
   info.crc32 = ~info.crc32;
+}
+
+void Cartridge::patch_rom(Reader &rf) {
+UPS<ramfile, ramfile, ramfile> ups;
+uint   patchsize = rf.size();
+uint8 *patchdata = rf.read();
+
+  fopen(ups.original, 0, file::mode_writeread);
+  fopen(ups.modified, 0, file::mode_writeread);
+  fopen(ups.patch.fp, 0, file::mode_writeread);
+
+  fwrite(ups.original, rom, info.rom_size);
+  fwrite(ups.patch.fp, patchdata, patchsize);
+
+  if(ups.apply() == true) {
+    info.crc32    = ups.modified_crc32;
+    info.rom_size = ups.modified_filesize;
+    rom = (uint8*)realloc(rom, info.rom_size);
+    fseek(ups.modified, 0, file::seek_start);
+    fread(ups.modified, rom, info.rom_size);
+  }
 }
 
 bool Cartridge::load(const char *fn) {
@@ -223,6 +255,7 @@ bool Cartridge::load(const char *fn) {
   strcpy(rom_fn, fn);
 
   switch(Reader::detect(rom_fn)) {
+
   case Reader::RF_NORMAL: {
   FileReader ff(rom_fn);
     if(!ff.ready()) {
@@ -230,8 +263,8 @@ bool Cartridge::load(const char *fn) {
       return false;
     }
     load_rom(ff);
-    break;
-  }
+  } break;
+
 #ifdef GZIP_SUPPORT
   case Reader::RF_GZ: {
   GZReader gf(rom_fn);
@@ -240,14 +273,14 @@ bool Cartridge::load(const char *fn) {
       return false;
     }
     load_rom(gf);
-    break;
-  }
+  } break;
+
   case Reader::RF_ZIP: {
   ZipReader zf(rom_fn);
     load_rom(zf);
-    break;
-  }
+  } break;
 #endif
+
 #ifdef JMA_SUPPORT
   case Reader::RF_JMA: {
     try {
@@ -257,9 +290,9 @@ bool Cartridge::load(const char *fn) {
       alert("Error loading image file (%s)!", rom_fn);
       return false;
     }
-    break;
-  }
+  } break;
 #endif
+
   }
 
 //remove ROM extension
@@ -275,16 +308,20 @@ bool Cartridge::load(const char *fn) {
   strcat(sram_fn, ".");
   strcat(sram_fn, config::fs.save_ext.sget());
 
-//override default path (current directory)?
-  if(strmatch(config::fs.save_path.sget(), "") == false) {
-  //remove path if fs.sram_path was specified
-  string new_fn, parts;
+stringarray save_path;
+  strcpy(save_path, config::fs.save_path.sget());
+  replace(save_path, "\\", "/");
+  if(strlen(save_path) && !strend(save_path, "/")) { strcat(save_path, "/"); }
+
+  if(strlen(save_path) != 0) {
+  //override default path (current directory)
+  stringarray new_fn, parts;
     strcpy(new_fn, sram_fn);
     replace(new_fn, "\\", "/");
     split(parts, "/", new_fn);
 
   //add new SRAM path
-    strcpy(new_fn, config::fs.save_path.sget());
+    strcpy(new_fn, save_path);
 
   //append fs.base_path if fs.sram_path is not fully-qualified path
     if(strbegin(new_fn, "./") == true) {
@@ -304,10 +341,33 @@ bool Cartridge::load(const char *fn) {
   strrtrim(cheat_fn, config::fs.save_ext.sget());
   strrtrim(cheat_fn, ".");
   strcat(cheat_fn, ".cht");
+
   if(fexists(cheat_fn) == true) {
   FileReader ff(cheat_fn);
     cheat.load(ff);
   }
+
+//load patch file if it exists
+  strcpy(patch_fn, sram_fn);
+  strrtrim(patch_fn, config::fs.save_ext.sget());
+  strrtrim(patch_fn, ".");
+  strcat(patch_fn, ".ups");
+
+  if(fexists(patch_fn) == true) {
+  FileReader ff(patch_fn);
+    patch_rom(ff);
+  }
+
+#ifdef GZIP_SUPPORT
+  else {
+    strrtrim(patch_fn, ".ups");
+    strcat(patch_fn, ".upz");
+    if(fexists(patch_fn) == true) {
+    ZipReader zf(patch_fn);
+      patch_rom(zf);
+    }
+  }
+#endif
 
   if(read_database() == true) {
     read_dbi();
@@ -328,14 +388,9 @@ bool Cartridge::unload() {
 
   r_mem->unload_cart();
 
-  if(base_rom) {
-    SafeFree(base_rom);
-  }
-
-  if(sram) {
-    save_sram();
-    SafeFree(sram);
-  }
+  if(sram) { save_sram(); }
+  SafeFree(rom);
+  SafeFree(sram);
 
   if(cheat.count() > 0 || fexists(cheat_fn)) {
   FileWriter ff(cheat_fn);
@@ -352,9 +407,8 @@ Cartridge::Cartridge() {
 
   cart_loaded = false;
 
-  base_rom = 0;
-  rom      = 0;
-  sram     = 0;
+  rom  = 0;
+  sram = 0;
 }
 
 Cartridge::~Cartridge() {

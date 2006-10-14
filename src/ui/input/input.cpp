@@ -1,47 +1,42 @@
-void Input::poll(uint8 device) {
-  poll();
+void Input::poll() {
+  poll_hw();
 
 #define poll_key(__key) \
-  __key = bool(keystate[(uint(config::input.__key) >>  0) & 4095]) | \
-          bool(keystate[(uint(config::input.__key) >> 16) & 4095])
+  __key = !!(keystate[(uint(config::input.__key) >>  0) & 4095]) | \
+          !!(keystate[(uint(config::input.__key) >> 16) & 4095])
 
-  switch(device) {
-  case SNES::DEV_JOYPAD1:
-    poll_key(joypad1.up);
-    poll_key(joypad1.down);
-    poll_key(joypad1.left);
-    poll_key(joypad1.right);
-    poll_key(joypad1.a);
-    poll_key(joypad1.b);
-    poll_key(joypad1.x);
-    poll_key(joypad1.y);
-    poll_key(joypad1.l);
-    poll_key(joypad1.r);
-    poll_key(joypad1.select);
-    poll_key(joypad1.start);
-    break;
-  case SNES::DEV_JOYPAD2:
-    poll_key(joypad2.up);
-    poll_key(joypad2.down);
-    poll_key(joypad2.left);
-    poll_key(joypad2.right);
-    poll_key(joypad2.a);
-    poll_key(joypad2.b);
-    poll_key(joypad2.x);
-    poll_key(joypad2.y);
-    poll_key(joypad2.l);
-    poll_key(joypad2.r);
-    poll_key(joypad2.select);
-    poll_key(joypad2.start);
-    break;
-  }
+  poll_key(joypad1.up);
+  poll_key(joypad1.down);
+  poll_key(joypad1.left);
+  poll_key(joypad1.right);
+  poll_key(joypad1.a);
+  poll_key(joypad1.b);
+  poll_key(joypad1.x);
+  poll_key(joypad1.y);
+  poll_key(joypad1.l);
+  poll_key(joypad1.r);
+  poll_key(joypad1.select);
+  poll_key(joypad1.start);
+
+  poll_key(joypad2.up);
+  poll_key(joypad2.down);
+  poll_key(joypad2.left);
+  poll_key(joypad2.right);
+  poll_key(joypad2.a);
+  poll_key(joypad2.b);
+  poll_key(joypad2.x);
+  poll_key(joypad2.y);
+  poll_key(joypad2.l);
+  poll_key(joypad2.r);
+  poll_key(joypad2.select);
+  poll_key(joypad2.start);
 
 #undef poll_key
 }
 
 bool Input::get_status(uint8 device, uint8 button) {
   switch(device) {
-  case SNES::DEV_JOYPAD1:
+  case SNES::DEVICEID_JOYPAD1:
     switch(button) {
     case SNES::JOYPAD_UP:     return joypad1.up;
     case SNES::JOYPAD_DOWN:   return joypad1.down;
@@ -57,7 +52,7 @@ bool Input::get_status(uint8 device, uint8 button) {
     case SNES::JOYPAD_START:  return joypad1.start;
     }
     break;
-  case SNES::DEV_JOYPAD2:
+  case SNES::DEVICEID_JOYPAD2:
     switch(button) {
     case SNES::JOYPAD_UP:     return joypad2.up;
     case SNES::JOYPAD_DOWN:   return joypad2.down;
@@ -80,7 +75,7 @@ bool Input::get_status(uint8 device, uint8 button) {
 
 void Input::set_status(uint8 device, uint8 button, bool status) {
   switch(device) {
-  case SNES::DEV_JOYPAD1:
+  case SNES::DEVICEID_JOYPAD1:
     switch(button) {
     case SNES::JOYPAD_UP:     joypad1.up     = status; break;
     case SNES::JOYPAD_DOWN:   joypad1.down   = status; break;
@@ -95,7 +90,7 @@ void Input::set_status(uint8 device, uint8 button, bool status) {
     case SNES::JOYPAD_SELECT: joypad1.select = status; break;
     case SNES::JOYPAD_START:  joypad1.start  = status; break;
     } break;
-  case SNES::DEV_JOYPAD2:
+  case SNES::DEVICEID_JOYPAD2:
     switch(button) {
     case SNES::JOYPAD_UP:     joypad2.up     = status; break;
     case SNES::JOYPAD_DOWN:   joypad2.down   = status; break;
@@ -136,7 +131,7 @@ bool Input::keydown(uint16 key) {
 
 uint Input::get_key(uint device, uint button) {
   switch(device) {
-  case SNES::DEV_JOYPAD1:
+  case SNES::DEVICEID_JOYPAD1:
     switch(button) {
     case SNES::JOYPAD_UP:     return config::input.joypad1.up;
     case SNES::JOYPAD_DOWN:   return config::input.joypad1.down;
@@ -151,7 +146,7 @@ uint Input::get_key(uint device, uint button) {
     case SNES::JOYPAD_SELECT: return config::input.joypad1.select;
     case SNES::JOYPAD_START:  return config::input.joypad1.start;
     } break;
-  case SNES::DEV_JOYPAD2:
+  case SNES::DEVICEID_JOYPAD2:
     switch(button) {
     case SNES::JOYPAD_UP:     return config::input.joypad2.up;
     case SNES::JOYPAD_DOWN:   return config::input.joypad2.down;
@@ -173,7 +168,7 @@ uint Input::get_key(uint device, uint button) {
 
 void Input::set_key(uint device, uint button, uint key) {
   switch(device) {
-  case SNES::DEV_JOYPAD1:
+  case SNES::DEVICEID_JOYPAD1:
     switch(button) {
     case SNES::JOYPAD_UP:     config::input.joypad1.up     = key; break;
     case SNES::JOYPAD_DOWN:   config::input.joypad1.down   = key; break;
@@ -188,7 +183,7 @@ void Input::set_key(uint device, uint button, uint key) {
     case SNES::JOYPAD_SELECT: config::input.joypad1.select = key; break;
     case SNES::JOYPAD_START:  config::input.joypad1.start  = key; break;
     } break;
-  case SNES::DEV_JOYPAD2:
+  case SNES::DEVICEID_JOYPAD2:
     switch(button) {
     case SNES::JOYPAD_UP:     config::input.joypad2.up     = key; break;
     case SNES::JOYPAD_DOWN:   config::input.joypad2.down   = key; break;
@@ -206,8 +201,8 @@ void Input::set_key(uint device, uint button, uint key) {
   }
 }
 
-uint Input::decode(substring &str) {
-string p;
+uint Input::decode(string &str) {
+stringarray p;
   split(p, "|", str);
 uint r = key.find(strptr(p[0])) & 4095;
   if(count(p) >= 2) { r |= (key.find(strptr(p[1])) & 4095) << 16; }
@@ -215,7 +210,7 @@ uint r = key.find(strptr(p[0])) & 4095;
 }
 
 void Input::init() {
-string t, part;
+stringarray t, part;
   strcpy(t, config::input.joypad1.map.sget());
   replace(t, " ", "");
   replace(t, "\t", "");

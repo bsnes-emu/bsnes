@@ -184,7 +184,7 @@ char *buffer = (char*)malloc(fsize + 1);
 
   return true;
 }
-bool Config::load(substring &fn) { return load(strptr(fn)); }
+bool Config::load(string &fn) { return load(strptr(fn)); }
 
 bool Config::save(char *fn) {
 FILE *fp;
@@ -209,7 +209,7 @@ FILE *fp;
 
   return true;
 }
-bool Config::save(substring &fn) { return save(strptr(fn)); }
+bool Config::save(string &fn) { return save(strptr(fn)); }
 
 Config::Config() {
   list_count = 0;
