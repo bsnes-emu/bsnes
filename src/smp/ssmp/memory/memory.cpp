@@ -25,10 +25,7 @@ alwaysinline uint8 sSMP::op_busread(uint16 addr) {
 uint8 r;
   if((addr & 0xfff0) == 0x00f0) {
   //addr >= 0x00f0 && addr <= 0x00ff
-
-  #ifdef FAVOR_SPEED
-    co_return();
-  #endif
+    scheduler.sync_smpcpu();
 
     switch(addr) {
 
@@ -99,10 +96,7 @@ uint8 r;
 alwaysinline void sSMP::op_buswrite(uint16 addr, uint8 data) {
   if((addr & 0xfff0) == 0x00f0) {
   //addr >= 0x00f0 && addr >= 0x00ff
-
-  #ifdef FAVOR_SPEED
-    co_return();
-  #endif
+    scheduler.sync_smpcpu();
 
     if(status.mmio_disabled == true)return;
 
@@ -208,25 +202,48 @@ alwaysinline void sSMP::op_buswrite(uint16 addr, uint8 data) {
 
 //
 
-alwaysinline void sSMP::op_io() {
+void sSMP::op_io() {
   add_clocks(status.clock_speed);
-//co_return();
 }
 
-alwaysinline uint8 sSMP::op_read(uint16 addr) {
+uint8 sSMP::op_read(uint16 addr) {
   add_clocks(status.clock_speed >> 1);
-#ifdef FAVOR_ACCURACY
-  co_return();
-#endif
 uint8 r = op_busread(addr);
   add_clocks(status.clock_speed >> 1);
   return r;
 }
 
-alwaysinline void sSMP::op_write(uint16 addr, uint8 data) {
+void sSMP::op_write(uint16 addr, uint8 data) {
   add_clocks(status.clock_speed);
-#ifdef FAVOR_ACCURACY
-  co_return();
-#endif
   op_buswrite(addr, data);
+}
+
+//
+
+alwaysinline uint8 sSMP::op_readpc() {
+  return op_read(regs.pc++);
+}
+
+alwaysinline uint8 sSMP::op_readstack() {
+  return op_read(0x0100 | ++regs.sp);
+}
+
+alwaysinline void sSMP::op_writestack(uint8 data) {
+  op_write(0x0100 | regs.sp--, data);
+}
+
+alwaysinline uint8 sSMP::op_readaddr(uint16 addr) {
+  return op_read(addr);
+}
+
+alwaysinline void sSMP::op_writeaddr(uint16 addr, uint8 data) {
+  op_write(addr, data);
+}
+
+alwaysinline uint8 sSMP::op_readdp(uint8 addr) {
+  return op_read(((uint)regs.p.p << 8) + addr);
+}
+
+alwaysinline void sSMP::op_writedp(uint8 addr, uint8 data) {
+  op_write(((uint)regs.p.p << 8) + addr, data);
 }

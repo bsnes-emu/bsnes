@@ -45,35 +45,21 @@ uint16 sCPU::hcounter() {
 }
 
 void sCPU::add_clocks(uint clocks) {
-  status.clocks_executed += clocks;
-
-  if(counter.irq_delay) {
-    counter.irq_delay = (counter.irq_delay > clocks) ? (counter.irq_delay - clocks) : 0;
+  if(status.dram_refreshed == false) {
+    if(status.hclock + clocks >= status.dram_refresh_position) {
+      status.dram_refreshed = true;
+      clocks += 40;
+    }
   }
 
-  if(status.hclock + clocks >= status.line_clocks) {
-    clocks = (status.hclock + clocks) - status.line_clocks;
-    while(status.hclock < status.line_clocks - 2) { tick(); }
-    scanline();
-  }
+  counter.sub(counter.irq_delay, clocks);
+  scheduler.addclocks_cpu(clocks);
 
-  clocks >>= 1;
-  while(clocks--) { tick(); }
-}
-
-alwaysinline void sCPU::tick() {
-  status.hclock += 2;
-
-  if(counter.nmi_fire) { nmi_tick(); }
-  if(counter.irq_fire) { irq_tick(); }
-
-  if(status.dram_refreshed == false && status.hclock >= status.dram_refresh_position) {
-    status.dram_refreshed = true;
-    add_clocks(40);
-    return;
-  }
-
-  poll_interrupts();
+//TODO: rename function to more descriptive term
+//below function is responsible for incrementing status.hclock
+//by clocks, calling scanline() when a new line is reached, and
+//testing for and triggering NMIs and IRQs
+  poll_interrupts(clocks);
 }
 
 void sCPU::scanline() {
@@ -231,30 +217,16 @@ void sCPU::last_cycle() {
   event.irq = (status.nmi_pending || status.irq_pending);
 }
 
-/*****
- * clocks_executed()
- *
- * Return number of clocks executed since last call to this function.
- * Used by class SNES to control CPU<>APU synchronization.
- *****/
-uint32 sCPU::clocks_executed() {
-uint32 r = status.clocks_executed;
-  status.clocks_executed = 0;
-  return r;
-}
-
 void sCPU::timing_power() {
 }
 
 void sCPU::timing_reset() {
-  counter.enabled   = false;
+  counter.nmi_fire  = 0;
+  counter.irq_fire  = 0;
   counter.irq_delay = 0;
   counter.hw_math   = 0;
-  counter.irq_fire  = 0;
-  counter.nmi_fire  = 0;
 
-  status.clock_count     = 0;
-  status.clocks_executed = 0;
+  status.clock_count = 0;
 
   status.vcounter = 0;
   status.hcounter = 0;
@@ -285,6 +257,7 @@ void sCPU::timing_reset() {
   status.nmi_read       = 1;
   status.nmi_line       = 1;
   status.nmi_transition = 0;
+  status.nmi_lock       = false;
   status.nmi_pending    = false;
 
   status.irq_read       = 1;

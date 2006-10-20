@@ -1,6 +1,6 @@
 #include "opfn.cpp"
 
-void sCPU::main() {
+void sCPU::enter() {
   for(;;) {
     if(event.irq) {
       event.irq = false;
@@ -27,10 +27,6 @@ void sCPU::main() {
     }
 
     status.in_opcode = false;
-
-  #ifdef FAVOR_SPEED
-    co_return();
-  #endif
   }
 }
 

@@ -1,4 +1,4 @@
-#define BSNES_VERSION "0.018"
+#define BSNES_VERSION "0.018.04"
 #define BSNES_TITLE   "bsnes v" BSNES_VERSION
 
 #define MEMCORE bMemBus
@@ -14,10 +14,10 @@
 #define CHEAT_SYSTEM
 
 //enable GZ, ZIP format support
-#define GZIP_SUPPORT
+//#define GZIP_SUPPORT
 
 //enable JMA support
-#define JMA_SUPPORT
+//#define JMA_SUPPORT
 
 //snes core polymorphism
 //(allow runtime cpu/smp/dsp/ppu/bus selection, ~10% speed hit)

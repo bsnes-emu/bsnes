@@ -99,7 +99,7 @@ void sCPU::mmio_w4200(uint8 data) {
   }
 
   update_interrupts();
-  counter_set(counter.irq_delay, 2);
+  counter.set(counter.irq_delay, 2);
 }
 
 //WRIO
@@ -119,7 +119,7 @@ void sCPU::mmio_w4202(uint8 data) {
 void sCPU::mmio_w4203(uint8 data) {
   status.mul_b = data;
   status.r4216 = status.mul_a * status.mul_b;
-//counter_set(counter.hw_math, 48);
+//counter.set(counter.hw_math, 48);
 }
 
 //WRDIVL
@@ -137,7 +137,7 @@ void sCPU::mmio_w4206(uint8 data) {
   status.div_b = data;
   status.r4214 = (status.div_b) ? status.div_a / status.div_b : 0xffff;
   status.r4216 = (status.div_b) ? status.div_a % status.div_b : status.div_a;
-//counter_set(counter.hw_math, 96);
+//counter.set(counter.hw_math, 96);
 }
 
 //HTIMEL
@@ -145,10 +145,7 @@ void sCPU::mmio_w4207(uint8 data) {
   status.hirq_pos  = (status.hirq_pos & ~0xff) | (data);
   status.hirq_pos &= 0x01ff;
   update_interrupts();
-
-uint vpos = status.vcounter, hpos = status.hclock;
-  timeshift_backward(10, vpos, hpos);
-  if(hpos < status.hirq_trigger_pos) { status.irq_lock = false; }
+  irqpos_update(0x4207);
 }
 
 //HTIMEH
@@ -156,10 +153,7 @@ void sCPU::mmio_w4208(uint8 data) {
   status.hirq_pos  = (status.hirq_pos &  0xff) | (data << 8);
   status.hirq_pos &= 0x01ff;
   update_interrupts();
-
-uint vpos = status.vcounter, hpos = status.hclock;
-  timeshift_backward(10, vpos, hpos);
-  if(hpos < status.hirq_trigger_pos) { status.irq_lock = false; }
+  irqpos_update(0x4208);
 }
 
 //VTIMEL
@@ -167,10 +161,7 @@ void sCPU::mmio_w4209(uint8 data) {
   status.virq_pos  = (status.virq_pos & ~0xff) | (data);
   status.virq_pos &= 0x01ff;
   update_interrupts();
-
-uint vpos = status.vcounter, hpos = status.hclock;
-  timeshift_backward(10, vpos, hpos);
-  if(hpos < status.hirq_trigger_pos) { status.irq_lock = false; }
+  irqpos_update(0x4209);
 }
 
 //VTIMEH
@@ -178,10 +169,7 @@ void sCPU::mmio_w420a(uint8 data) {
   status.virq_pos  = (status.virq_pos &  0xff) | (data << 8);
   status.virq_pos &= 0x01ff;
   update_interrupts();
-
-uint vpos = status.vcounter, hpos = status.hclock;
-  timeshift_backward(10, vpos, hpos);
-  if(hpos < status.hirq_trigger_pos) { status.irq_lock = false; }
+  irqpos_update(0x420a);
 }
 
 //DMAEN
@@ -215,7 +203,7 @@ uint8 sCPU::mmio_r4210() {
 uint8 r = (regs.mdr & 0x70);
   r |= (uint8)(!status.nmi_read) << 7;
 
-  if(!counter.nmi_fire) {
+  if(!nmi_edge()) {
     status.nmi_read = 1;
   }
 
@@ -230,7 +218,7 @@ uint8 sCPU::mmio_r4211() {
 uint8 r = (regs.mdr & 0x7f);
   r |= (uint8)(!status.irq_read) << 7;
 
-  if(!counter.irq_fire) {
+  if(!irq_edge()) {
     status.irq_read = 1;
     status.irq_line = 1;
     status.irq_transition = 0;
@@ -479,9 +467,7 @@ void sCPU::mmio_reset() {
 uint8 sCPU::mmio_read(uint16 addr) {
 //APU
   if((addr & 0xffc0) == 0x2140) { //$2140-$217f
-  #ifdef FAVOR_SPEED
-    co_return();
-  #endif
+    scheduler.sync_cpusmp();
     return r_smp->port_read(addr & 3);
   }
 
@@ -536,9 +522,7 @@ uint8 sCPU::mmio_read(uint16 addr) {
 void sCPU::mmio_write(uint16 addr, uint8 data) {
 //APU
   if((addr & 0xffc0) == 0x2140) { //$2140-$217f
-  #ifdef FAVOR_SPEED
-    co_return();
-  #endif
+    scheduler.sync_cpusmp();
     port_write(addr & 3, data);
     return;
   }

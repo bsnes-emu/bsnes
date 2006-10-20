@@ -1,8 +1,8 @@
 //adc_const
 case 0x69: {
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readpc();
-  if(regs.acc_8b) { op_adc_b(); break; }
+  if(regs.p.m) { op_adc_b(); break; }
   last_cycle();
   rd.h = op_readpc();
   op_adc_w();
@@ -10,9 +10,9 @@ case 0x69: {
 
 //and_const
 case 0x29: {
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readpc();
-  if(regs.acc_8b) { op_and_b(); break; }
+  if(regs.p.m) { op_and_b(); break; }
   last_cycle();
   rd.h = op_readpc();
   op_and_w();
@@ -20,9 +20,9 @@ case 0x29: {
 
 //cmp_const
 case 0xc9: {
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readpc();
-  if(regs.acc_8b) { op_cmp_b(); break; }
+  if(regs.p.m) { op_cmp_b(); break; }
   last_cycle();
   rd.h = op_readpc();
   op_cmp_w();
@@ -30,9 +30,9 @@ case 0xc9: {
 
 //cpx_const
 case 0xe0: {
-  if(regs.idx_8b)last_cycle();
+  if(regs.p.x)last_cycle();
   rd.l = op_readpc();
-  if(regs.idx_8b) { op_cpx_b(); break; }
+  if(regs.p.x) { op_cpx_b(); break; }
   last_cycle();
   rd.h = op_readpc();
   op_cpx_w();
@@ -40,9 +40,9 @@ case 0xe0: {
 
 //cpy_const
 case 0xc0: {
-  if(regs.idx_8b)last_cycle();
+  if(regs.p.x)last_cycle();
   rd.l = op_readpc();
-  if(regs.idx_8b) { op_cpy_b(); break; }
+  if(regs.p.x) { op_cpy_b(); break; }
   last_cycle();
   rd.h = op_readpc();
   op_cpy_w();
@@ -50,9 +50,9 @@ case 0xc0: {
 
 //eor_const
 case 0x49: {
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readpc();
-  if(regs.acc_8b) { op_eor_b(); break; }
+  if(regs.p.m) { op_eor_b(); break; }
   last_cycle();
   rd.h = op_readpc();
   op_eor_w();
@@ -60,9 +60,9 @@ case 0x49: {
 
 //lda_const
 case 0xa9: {
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readpc();
-  if(regs.acc_8b) { op_lda_b(); break; }
+  if(regs.p.m) { op_lda_b(); break; }
   last_cycle();
   rd.h = op_readpc();
   op_lda_w();
@@ -70,9 +70,9 @@ case 0xa9: {
 
 //ldx_const
 case 0xa2: {
-  if(regs.idx_8b)last_cycle();
+  if(regs.p.x)last_cycle();
   rd.l = op_readpc();
-  if(regs.idx_8b) { op_ldx_b(); break; }
+  if(regs.p.x) { op_ldx_b(); break; }
   last_cycle();
   rd.h = op_readpc();
   op_ldx_w();
@@ -80,9 +80,9 @@ case 0xa2: {
 
 //ldy_const
 case 0xa0: {
-  if(regs.idx_8b)last_cycle();
+  if(regs.p.x)last_cycle();
   rd.l = op_readpc();
-  if(regs.idx_8b) { op_ldy_b(); break; }
+  if(regs.p.x) { op_ldy_b(); break; }
   last_cycle();
   rd.h = op_readpc();
   op_ldy_w();
@@ -90,9 +90,9 @@ case 0xa0: {
 
 //ora_const
 case 0x09: {
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readpc();
-  if(regs.acc_8b) { op_ora_b(); break; }
+  if(regs.p.m) { op_ora_b(); break; }
   last_cycle();
   rd.h = op_readpc();
   op_ora_w();
@@ -100,9 +100,9 @@ case 0x09: {
 
 //sbc_const
 case 0xe9: {
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readpc();
-  if(regs.acc_8b) { op_sbc_b(); break; }
+  if(regs.p.m) { op_sbc_b(); break; }
   last_cycle();
   rd.h = op_readpc();
   op_sbc_w();
@@ -112,9 +112,9 @@ case 0xe9: {
 case 0x6d: {
   aa.l = op_readpc();
   aa.h = op_readpc();
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readdbr(aa.w);
-  if(regs.acc_8b) { op_adc_b(); break; }
+  if(regs.p.m) { op_adc_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + 1);
   op_adc_w();
@@ -124,9 +124,9 @@ case 0x6d: {
 case 0x2d: {
   aa.l = op_readpc();
   aa.h = op_readpc();
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readdbr(aa.w);
-  if(regs.acc_8b) { op_and_b(); break; }
+  if(regs.p.m) { op_and_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + 1);
   op_and_w();
@@ -136,9 +136,9 @@ case 0x2d: {
 case 0x2c: {
   aa.l = op_readpc();
   aa.h = op_readpc();
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readdbr(aa.w);
-  if(regs.acc_8b) { op_bit_b(); break; }
+  if(regs.p.m) { op_bit_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + 1);
   op_bit_w();
@@ -148,9 +148,9 @@ case 0x2c: {
 case 0xcd: {
   aa.l = op_readpc();
   aa.h = op_readpc();
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readdbr(aa.w);
-  if(regs.acc_8b) { op_cmp_b(); break; }
+  if(regs.p.m) { op_cmp_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + 1);
   op_cmp_w();
@@ -160,9 +160,9 @@ case 0xcd: {
 case 0xec: {
   aa.l = op_readpc();
   aa.h = op_readpc();
-  if(regs.idx_8b)last_cycle();
+  if(regs.p.x)last_cycle();
   rd.l = op_readdbr(aa.w);
-  if(regs.idx_8b) { op_cpx_b(); break; }
+  if(regs.p.x) { op_cpx_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + 1);
   op_cpx_w();
@@ -172,9 +172,9 @@ case 0xec: {
 case 0xcc: {
   aa.l = op_readpc();
   aa.h = op_readpc();
-  if(regs.idx_8b)last_cycle();
+  if(regs.p.x)last_cycle();
   rd.l = op_readdbr(aa.w);
-  if(regs.idx_8b) { op_cpy_b(); break; }
+  if(regs.p.x) { op_cpy_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + 1);
   op_cpy_w();
@@ -184,9 +184,9 @@ case 0xcc: {
 case 0x4d: {
   aa.l = op_readpc();
   aa.h = op_readpc();
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readdbr(aa.w);
-  if(regs.acc_8b) { op_eor_b(); break; }
+  if(regs.p.m) { op_eor_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + 1);
   op_eor_w();
@@ -196,9 +196,9 @@ case 0x4d: {
 case 0xad: {
   aa.l = op_readpc();
   aa.h = op_readpc();
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readdbr(aa.w);
-  if(regs.acc_8b) { op_lda_b(); break; }
+  if(regs.p.m) { op_lda_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + 1);
   op_lda_w();
@@ -208,9 +208,9 @@ case 0xad: {
 case 0xae: {
   aa.l = op_readpc();
   aa.h = op_readpc();
-  if(regs.idx_8b)last_cycle();
+  if(regs.p.x)last_cycle();
   rd.l = op_readdbr(aa.w);
-  if(regs.idx_8b) { op_ldx_b(); break; }
+  if(regs.p.x) { op_ldx_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + 1);
   op_ldx_w();
@@ -220,9 +220,9 @@ case 0xae: {
 case 0xac: {
   aa.l = op_readpc();
   aa.h = op_readpc();
-  if(regs.idx_8b)last_cycle();
+  if(regs.p.x)last_cycle();
   rd.l = op_readdbr(aa.w);
-  if(regs.idx_8b) { op_ldy_b(); break; }
+  if(regs.p.x) { op_ldy_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + 1);
   op_ldy_w();
@@ -232,9 +232,9 @@ case 0xac: {
 case 0x0d: {
   aa.l = op_readpc();
   aa.h = op_readpc();
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readdbr(aa.w);
-  if(regs.acc_8b) { op_ora_b(); break; }
+  if(regs.p.m) { op_ora_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + 1);
   op_ora_w();
@@ -244,9 +244,9 @@ case 0x0d: {
 case 0xed: {
   aa.l = op_readpc();
   aa.h = op_readpc();
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readdbr(aa.w);
-  if(regs.acc_8b) { op_sbc_b(); break; }
+  if(regs.p.m) { op_sbc_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + 1);
   op_sbc_w();
@@ -257,9 +257,9 @@ case 0x7d: {
   aa.l = op_readpc();
   aa.h = op_readpc();
   op_io_cond4(aa.w, aa.w + regs.x.w);
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readdbr(aa.w + regs.x.w);
-  if(regs.acc_8b) { op_adc_b(); break; }
+  if(regs.p.m) { op_adc_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + regs.x.w + 1);
   op_adc_w();
@@ -270,9 +270,9 @@ case 0x3d: {
   aa.l = op_readpc();
   aa.h = op_readpc();
   op_io_cond4(aa.w, aa.w + regs.x.w);
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readdbr(aa.w + regs.x.w);
-  if(regs.acc_8b) { op_and_b(); break; }
+  if(regs.p.m) { op_and_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + regs.x.w + 1);
   op_and_w();
@@ -283,9 +283,9 @@ case 0x3c: {
   aa.l = op_readpc();
   aa.h = op_readpc();
   op_io_cond4(aa.w, aa.w + regs.x.w);
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readdbr(aa.w + regs.x.w);
-  if(regs.acc_8b) { op_bit_b(); break; }
+  if(regs.p.m) { op_bit_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + regs.x.w + 1);
   op_bit_w();
@@ -296,9 +296,9 @@ case 0xdd: {
   aa.l = op_readpc();
   aa.h = op_readpc();
   op_io_cond4(aa.w, aa.w + regs.x.w);
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readdbr(aa.w + regs.x.w);
-  if(regs.acc_8b) { op_cmp_b(); break; }
+  if(regs.p.m) { op_cmp_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + regs.x.w + 1);
   op_cmp_w();
@@ -309,9 +309,9 @@ case 0x5d: {
   aa.l = op_readpc();
   aa.h = op_readpc();
   op_io_cond4(aa.w, aa.w + regs.x.w);
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readdbr(aa.w + regs.x.w);
-  if(regs.acc_8b) { op_eor_b(); break; }
+  if(regs.p.m) { op_eor_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + regs.x.w + 1);
   op_eor_w();
@@ -322,9 +322,9 @@ case 0xbd: {
   aa.l = op_readpc();
   aa.h = op_readpc();
   op_io_cond4(aa.w, aa.w + regs.x.w);
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readdbr(aa.w + regs.x.w);
-  if(regs.acc_8b) { op_lda_b(); break; }
+  if(regs.p.m) { op_lda_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + regs.x.w + 1);
   op_lda_w();
@@ -335,9 +335,9 @@ case 0xbc: {
   aa.l = op_readpc();
   aa.h = op_readpc();
   op_io_cond4(aa.w, aa.w + regs.x.w);
-  if(regs.idx_8b)last_cycle();
+  if(regs.p.x)last_cycle();
   rd.l = op_readdbr(aa.w + regs.x.w);
-  if(regs.idx_8b) { op_ldy_b(); break; }
+  if(regs.p.x) { op_ldy_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + regs.x.w + 1);
   op_ldy_w();
@@ -348,9 +348,9 @@ case 0x1d: {
   aa.l = op_readpc();
   aa.h = op_readpc();
   op_io_cond4(aa.w, aa.w + regs.x.w);
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readdbr(aa.w + regs.x.w);
-  if(regs.acc_8b) { op_ora_b(); break; }
+  if(regs.p.m) { op_ora_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + regs.x.w + 1);
   op_ora_w();
@@ -361,9 +361,9 @@ case 0xfd: {
   aa.l = op_readpc();
   aa.h = op_readpc();
   op_io_cond4(aa.w, aa.w + regs.x.w);
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readdbr(aa.w + regs.x.w);
-  if(regs.acc_8b) { op_sbc_b(); break; }
+  if(regs.p.m) { op_sbc_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + regs.x.w + 1);
   op_sbc_w();
@@ -374,9 +374,9 @@ case 0x79: {
   aa.l = op_readpc();
   aa.h = op_readpc();
   op_io_cond4(aa.w, aa.w + regs.y.w);
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readdbr(aa.w + regs.y.w);
-  if(regs.acc_8b) { op_adc_b(); break; }
+  if(regs.p.m) { op_adc_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + regs.y.w + 1);
   op_adc_w();
@@ -387,9 +387,9 @@ case 0x39: {
   aa.l = op_readpc();
   aa.h = op_readpc();
   op_io_cond4(aa.w, aa.w + regs.y.w);
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readdbr(aa.w + regs.y.w);
-  if(regs.acc_8b) { op_and_b(); break; }
+  if(regs.p.m) { op_and_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + regs.y.w + 1);
   op_and_w();
@@ -400,9 +400,9 @@ case 0xd9: {
   aa.l = op_readpc();
   aa.h = op_readpc();
   op_io_cond4(aa.w, aa.w + regs.y.w);
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readdbr(aa.w + regs.y.w);
-  if(regs.acc_8b) { op_cmp_b(); break; }
+  if(regs.p.m) { op_cmp_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + regs.y.w + 1);
   op_cmp_w();
@@ -413,9 +413,9 @@ case 0x59: {
   aa.l = op_readpc();
   aa.h = op_readpc();
   op_io_cond4(aa.w, aa.w + regs.y.w);
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readdbr(aa.w + regs.y.w);
-  if(regs.acc_8b) { op_eor_b(); break; }
+  if(regs.p.m) { op_eor_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + regs.y.w + 1);
   op_eor_w();
@@ -426,9 +426,9 @@ case 0xb9: {
   aa.l = op_readpc();
   aa.h = op_readpc();
   op_io_cond4(aa.w, aa.w + regs.y.w);
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readdbr(aa.w + regs.y.w);
-  if(regs.acc_8b) { op_lda_b(); break; }
+  if(regs.p.m) { op_lda_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + regs.y.w + 1);
   op_lda_w();
@@ -439,9 +439,9 @@ case 0xbe: {
   aa.l = op_readpc();
   aa.h = op_readpc();
   op_io_cond4(aa.w, aa.w + regs.y.w);
-  if(regs.idx_8b)last_cycle();
+  if(regs.p.x)last_cycle();
   rd.l = op_readdbr(aa.w + regs.y.w);
-  if(regs.idx_8b) { op_ldx_b(); break; }
+  if(regs.p.x) { op_ldx_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + regs.y.w + 1);
   op_ldx_w();
@@ -452,9 +452,9 @@ case 0x19: {
   aa.l = op_readpc();
   aa.h = op_readpc();
   op_io_cond4(aa.w, aa.w + regs.y.w);
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readdbr(aa.w + regs.y.w);
-  if(regs.acc_8b) { op_ora_b(); break; }
+  if(regs.p.m) { op_ora_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + regs.y.w + 1);
   op_ora_w();
@@ -465,9 +465,9 @@ case 0xf9: {
   aa.l = op_readpc();
   aa.h = op_readpc();
   op_io_cond4(aa.w, aa.w + regs.y.w);
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readdbr(aa.w + regs.y.w);
-  if(regs.acc_8b) { op_sbc_b(); break; }
+  if(regs.p.m) { op_sbc_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + regs.y.w + 1);
   op_sbc_w();
@@ -478,9 +478,9 @@ case 0x6f: {
   aa.l = op_readpc();
   aa.h = op_readpc();
   aa.b = op_readpc();
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readlong(aa.d);
-  if(regs.acc_8b) { op_adc_b(); break; }
+  if(regs.p.m) { op_adc_b(); break; }
   last_cycle();
   rd.h = op_readlong(aa.d + 1);
   op_adc_w();
@@ -491,9 +491,9 @@ case 0x2f: {
   aa.l = op_readpc();
   aa.h = op_readpc();
   aa.b = op_readpc();
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readlong(aa.d);
-  if(regs.acc_8b) { op_and_b(); break; }
+  if(regs.p.m) { op_and_b(); break; }
   last_cycle();
   rd.h = op_readlong(aa.d + 1);
   op_and_w();
@@ -504,9 +504,9 @@ case 0xcf: {
   aa.l = op_readpc();
   aa.h = op_readpc();
   aa.b = op_readpc();
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readlong(aa.d);
-  if(regs.acc_8b) { op_cmp_b(); break; }
+  if(regs.p.m) { op_cmp_b(); break; }
   last_cycle();
   rd.h = op_readlong(aa.d + 1);
   op_cmp_w();
@@ -517,9 +517,9 @@ case 0x4f: {
   aa.l = op_readpc();
   aa.h = op_readpc();
   aa.b = op_readpc();
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readlong(aa.d);
-  if(regs.acc_8b) { op_eor_b(); break; }
+  if(regs.p.m) { op_eor_b(); break; }
   last_cycle();
   rd.h = op_readlong(aa.d + 1);
   op_eor_w();
@@ -530,9 +530,9 @@ case 0xaf: {
   aa.l = op_readpc();
   aa.h = op_readpc();
   aa.b = op_readpc();
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readlong(aa.d);
-  if(regs.acc_8b) { op_lda_b(); break; }
+  if(regs.p.m) { op_lda_b(); break; }
   last_cycle();
   rd.h = op_readlong(aa.d + 1);
   op_lda_w();
@@ -543,9 +543,9 @@ case 0x0f: {
   aa.l = op_readpc();
   aa.h = op_readpc();
   aa.b = op_readpc();
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readlong(aa.d);
-  if(regs.acc_8b) { op_ora_b(); break; }
+  if(regs.p.m) { op_ora_b(); break; }
   last_cycle();
   rd.h = op_readlong(aa.d + 1);
   op_ora_w();
@@ -556,9 +556,9 @@ case 0xef: {
   aa.l = op_readpc();
   aa.h = op_readpc();
   aa.b = op_readpc();
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readlong(aa.d);
-  if(regs.acc_8b) { op_sbc_b(); break; }
+  if(regs.p.m) { op_sbc_b(); break; }
   last_cycle();
   rd.h = op_readlong(aa.d + 1);
   op_sbc_w();
@@ -569,9 +569,9 @@ case 0x7f: {
   aa.l = op_readpc();
   aa.h = op_readpc();
   aa.b = op_readpc();
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readlong(aa.d + regs.x.w);
-  if(regs.acc_8b) { op_adc_b(); break; }
+  if(regs.p.m) { op_adc_b(); break; }
   last_cycle();
   rd.h = op_readlong(aa.d + regs.x.w + 1);
   op_adc_w();
@@ -582,9 +582,9 @@ case 0x3f: {
   aa.l = op_readpc();
   aa.h = op_readpc();
   aa.b = op_readpc();
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readlong(aa.d + regs.x.w);
-  if(regs.acc_8b) { op_and_b(); break; }
+  if(regs.p.m) { op_and_b(); break; }
   last_cycle();
   rd.h = op_readlong(aa.d + regs.x.w + 1);
   op_and_w();
@@ -595,9 +595,9 @@ case 0xdf: {
   aa.l = op_readpc();
   aa.h = op_readpc();
   aa.b = op_readpc();
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readlong(aa.d + regs.x.w);
-  if(regs.acc_8b) { op_cmp_b(); break; }
+  if(regs.p.m) { op_cmp_b(); break; }
   last_cycle();
   rd.h = op_readlong(aa.d + regs.x.w + 1);
   op_cmp_w();
@@ -608,9 +608,9 @@ case 0x5f: {
   aa.l = op_readpc();
   aa.h = op_readpc();
   aa.b = op_readpc();
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readlong(aa.d + regs.x.w);
-  if(regs.acc_8b) { op_eor_b(); break; }
+  if(regs.p.m) { op_eor_b(); break; }
   last_cycle();
   rd.h = op_readlong(aa.d + regs.x.w + 1);
   op_eor_w();
@@ -621,9 +621,9 @@ case 0xbf: {
   aa.l = op_readpc();
   aa.h = op_readpc();
   aa.b = op_readpc();
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readlong(aa.d + regs.x.w);
-  if(regs.acc_8b) { op_lda_b(); break; }
+  if(regs.p.m) { op_lda_b(); break; }
   last_cycle();
   rd.h = op_readlong(aa.d + regs.x.w + 1);
   op_lda_w();
@@ -634,9 +634,9 @@ case 0x1f: {
   aa.l = op_readpc();
   aa.h = op_readpc();
   aa.b = op_readpc();
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readlong(aa.d + regs.x.w);
-  if(regs.acc_8b) { op_ora_b(); break; }
+  if(regs.p.m) { op_ora_b(); break; }
   last_cycle();
   rd.h = op_readlong(aa.d + regs.x.w + 1);
   op_ora_w();
@@ -647,9 +647,9 @@ case 0xff: {
   aa.l = op_readpc();
   aa.h = op_readpc();
   aa.b = op_readpc();
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readlong(aa.d + regs.x.w);
-  if(regs.acc_8b) { op_sbc_b(); break; }
+  if(regs.p.m) { op_sbc_b(); break; }
   last_cycle();
   rd.h = op_readlong(aa.d + regs.x.w + 1);
   op_sbc_w();
@@ -659,9 +659,9 @@ case 0xff: {
 case 0x65: {
   dp = op_readpc();
   op_io_cond2();
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readdp(dp);
-  if(regs.acc_8b) { op_adc_b(); break; }
+  if(regs.p.m) { op_adc_b(); break; }
   last_cycle();
   rd.h = op_readdp(dp + 1);
   op_adc_w();
@@ -671,9 +671,9 @@ case 0x65: {
 case 0x25: {
   dp = op_readpc();
   op_io_cond2();
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readdp(dp);
-  if(regs.acc_8b) { op_and_b(); break; }
+  if(regs.p.m) { op_and_b(); break; }
   last_cycle();
   rd.h = op_readdp(dp + 1);
   op_and_w();
@@ -683,9 +683,9 @@ case 0x25: {
 case 0x24: {
   dp = op_readpc();
   op_io_cond2();
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readdp(dp);
-  if(regs.acc_8b) { op_bit_b(); break; }
+  if(regs.p.m) { op_bit_b(); break; }
   last_cycle();
   rd.h = op_readdp(dp + 1);
   op_bit_w();
@@ -695,9 +695,9 @@ case 0x24: {
 case 0xc5: {
   dp = op_readpc();
   op_io_cond2();
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readdp(dp);
-  if(regs.acc_8b) { op_cmp_b(); break; }
+  if(regs.p.m) { op_cmp_b(); break; }
   last_cycle();
   rd.h = op_readdp(dp + 1);
   op_cmp_w();
@@ -707,9 +707,9 @@ case 0xc5: {
 case 0xe4: {
   dp = op_readpc();
   op_io_cond2();
-  if(regs.idx_8b)last_cycle();
+  if(regs.p.x)last_cycle();
   rd.l = op_readdp(dp);
-  if(regs.idx_8b) { op_cpx_b(); break; }
+  if(regs.p.x) { op_cpx_b(); break; }
   last_cycle();
   rd.h = op_readdp(dp + 1);
   op_cpx_w();
@@ -719,9 +719,9 @@ case 0xe4: {
 case 0xc4: {
   dp = op_readpc();
   op_io_cond2();
-  if(regs.idx_8b)last_cycle();
+  if(regs.p.x)last_cycle();
   rd.l = op_readdp(dp);
-  if(regs.idx_8b) { op_cpy_b(); break; }
+  if(regs.p.x) { op_cpy_b(); break; }
   last_cycle();
   rd.h = op_readdp(dp + 1);
   op_cpy_w();
@@ -731,9 +731,9 @@ case 0xc4: {
 case 0x45: {
   dp = op_readpc();
   op_io_cond2();
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readdp(dp);
-  if(regs.acc_8b) { op_eor_b(); break; }
+  if(regs.p.m) { op_eor_b(); break; }
   last_cycle();
   rd.h = op_readdp(dp + 1);
   op_eor_w();
@@ -743,9 +743,9 @@ case 0x45: {
 case 0xa5: {
   dp = op_readpc();
   op_io_cond2();
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readdp(dp);
-  if(regs.acc_8b) { op_lda_b(); break; }
+  if(regs.p.m) { op_lda_b(); break; }
   last_cycle();
   rd.h = op_readdp(dp + 1);
   op_lda_w();
@@ -755,9 +755,9 @@ case 0xa5: {
 case 0xa6: {
   dp = op_readpc();
   op_io_cond2();
-  if(regs.idx_8b)last_cycle();
+  if(regs.p.x)last_cycle();
   rd.l = op_readdp(dp);
-  if(regs.idx_8b) { op_ldx_b(); break; }
+  if(regs.p.x) { op_ldx_b(); break; }
   last_cycle();
   rd.h = op_readdp(dp + 1);
   op_ldx_w();
@@ -767,9 +767,9 @@ case 0xa6: {
 case 0xa4: {
   dp = op_readpc();
   op_io_cond2();
-  if(regs.idx_8b)last_cycle();
+  if(regs.p.x)last_cycle();
   rd.l = op_readdp(dp);
-  if(regs.idx_8b) { op_ldy_b(); break; }
+  if(regs.p.x) { op_ldy_b(); break; }
   last_cycle();
   rd.h = op_readdp(dp + 1);
   op_ldy_w();
@@ -779,9 +779,9 @@ case 0xa4: {
 case 0x05: {
   dp = op_readpc();
   op_io_cond2();
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readdp(dp);
-  if(regs.acc_8b) { op_ora_b(); break; }
+  if(regs.p.m) { op_ora_b(); break; }
   last_cycle();
   rd.h = op_readdp(dp + 1);
   op_ora_w();
@@ -791,9 +791,9 @@ case 0x05: {
 case 0xe5: {
   dp = op_readpc();
   op_io_cond2();
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readdp(dp);
-  if(regs.acc_8b) { op_sbc_b(); break; }
+  if(regs.p.m) { op_sbc_b(); break; }
   last_cycle();
   rd.h = op_readdp(dp + 1);
   op_sbc_w();
@@ -804,9 +804,9 @@ case 0x75: {
   dp = op_readpc();
   op_io_cond2();
   op_io();
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readdp(dp + regs.x.w);
-  if(regs.acc_8b) { op_adc_b(); break; }
+  if(regs.p.m) { op_adc_b(); break; }
   last_cycle();
   rd.h = op_readdp(dp + regs.x.w + 1);
   op_adc_w();
@@ -817,9 +817,9 @@ case 0x35: {
   dp = op_readpc();
   op_io_cond2();
   op_io();
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readdp(dp + regs.x.w);
-  if(regs.acc_8b) { op_and_b(); break; }
+  if(regs.p.m) { op_and_b(); break; }
   last_cycle();
   rd.h = op_readdp(dp + regs.x.w + 1);
   op_and_w();
@@ -830,9 +830,9 @@ case 0x34: {
   dp = op_readpc();
   op_io_cond2();
   op_io();
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readdp(dp + regs.x.w);
-  if(regs.acc_8b) { op_bit_b(); break; }
+  if(regs.p.m) { op_bit_b(); break; }
   last_cycle();
   rd.h = op_readdp(dp + regs.x.w + 1);
   op_bit_w();
@@ -843,9 +843,9 @@ case 0xd5: {
   dp = op_readpc();
   op_io_cond2();
   op_io();
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readdp(dp + regs.x.w);
-  if(regs.acc_8b) { op_cmp_b(); break; }
+  if(regs.p.m) { op_cmp_b(); break; }
   last_cycle();
   rd.h = op_readdp(dp + regs.x.w + 1);
   op_cmp_w();
@@ -856,9 +856,9 @@ case 0x55: {
   dp = op_readpc();
   op_io_cond2();
   op_io();
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readdp(dp + regs.x.w);
-  if(regs.acc_8b) { op_eor_b(); break; }
+  if(regs.p.m) { op_eor_b(); break; }
   last_cycle();
   rd.h = op_readdp(dp + regs.x.w + 1);
   op_eor_w();
@@ -869,9 +869,9 @@ case 0xb5: {
   dp = op_readpc();
   op_io_cond2();
   op_io();
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readdp(dp + regs.x.w);
-  if(regs.acc_8b) { op_lda_b(); break; }
+  if(regs.p.m) { op_lda_b(); break; }
   last_cycle();
   rd.h = op_readdp(dp + regs.x.w + 1);
   op_lda_w();
@@ -882,9 +882,9 @@ case 0xb4: {
   dp = op_readpc();
   op_io_cond2();
   op_io();
-  if(regs.idx_8b)last_cycle();
+  if(regs.p.x)last_cycle();
   rd.l = op_readdp(dp + regs.x.w);
-  if(regs.idx_8b) { op_ldy_b(); break; }
+  if(regs.p.x) { op_ldy_b(); break; }
   last_cycle();
   rd.h = op_readdp(dp + regs.x.w + 1);
   op_ldy_w();
@@ -895,9 +895,9 @@ case 0x15: {
   dp = op_readpc();
   op_io_cond2();
   op_io();
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readdp(dp + regs.x.w);
-  if(regs.acc_8b) { op_ora_b(); break; }
+  if(regs.p.m) { op_ora_b(); break; }
   last_cycle();
   rd.h = op_readdp(dp + regs.x.w + 1);
   op_ora_w();
@@ -908,9 +908,9 @@ case 0xf5: {
   dp = op_readpc();
   op_io_cond2();
   op_io();
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readdp(dp + regs.x.w);
-  if(regs.acc_8b) { op_sbc_b(); break; }
+  if(regs.p.m) { op_sbc_b(); break; }
   last_cycle();
   rd.h = op_readdp(dp + regs.x.w + 1);
   op_sbc_w();
@@ -921,9 +921,9 @@ case 0xb6: {
   dp = op_readpc();
   op_io_cond2();
   op_io();
-  if(regs.idx_8b)last_cycle();
+  if(regs.p.x)last_cycle();
   rd.l = op_readdp(dp + regs.y.w);
-  if(regs.idx_8b) { op_ldx_b(); break; }
+  if(regs.p.x) { op_ldx_b(); break; }
   last_cycle();
   rd.h = op_readdp(dp + regs.y.w + 1);
   op_ldx_w();
@@ -935,9 +935,9 @@ case 0x72: {
   op_io_cond2();
   aa.l = op_readdp(dp);
   aa.h = op_readdp(dp + 1);
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readdbr(aa.w);
-  if(regs.acc_8b) { op_adc_b(); break; }
+  if(regs.p.m) { op_adc_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + 1);
   op_adc_w();
@@ -949,9 +949,9 @@ case 0x32: {
   op_io_cond2();
   aa.l = op_readdp(dp);
   aa.h = op_readdp(dp + 1);
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readdbr(aa.w);
-  if(regs.acc_8b) { op_and_b(); break; }
+  if(regs.p.m) { op_and_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + 1);
   op_and_w();
@@ -963,9 +963,9 @@ case 0xd2: {
   op_io_cond2();
   aa.l = op_readdp(dp);
   aa.h = op_readdp(dp + 1);
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readdbr(aa.w);
-  if(regs.acc_8b) { op_cmp_b(); break; }
+  if(regs.p.m) { op_cmp_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + 1);
   op_cmp_w();
@@ -977,9 +977,9 @@ case 0x52: {
   op_io_cond2();
   aa.l = op_readdp(dp);
   aa.h = op_readdp(dp + 1);
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readdbr(aa.w);
-  if(regs.acc_8b) { op_eor_b(); break; }
+  if(regs.p.m) { op_eor_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + 1);
   op_eor_w();
@@ -991,9 +991,9 @@ case 0xb2: {
   op_io_cond2();
   aa.l = op_readdp(dp);
   aa.h = op_readdp(dp + 1);
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readdbr(aa.w);
-  if(regs.acc_8b) { op_lda_b(); break; }
+  if(regs.p.m) { op_lda_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + 1);
   op_lda_w();
@@ -1005,9 +1005,9 @@ case 0x12: {
   op_io_cond2();
   aa.l = op_readdp(dp);
   aa.h = op_readdp(dp + 1);
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readdbr(aa.w);
-  if(regs.acc_8b) { op_ora_b(); break; }
+  if(regs.p.m) { op_ora_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + 1);
   op_ora_w();
@@ -1019,9 +1019,9 @@ case 0xf2: {
   op_io_cond2();
   aa.l = op_readdp(dp);
   aa.h = op_readdp(dp + 1);
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readdbr(aa.w);
-  if(regs.acc_8b) { op_sbc_b(); break; }
+  if(regs.p.m) { op_sbc_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + 1);
   op_sbc_w();
@@ -1034,9 +1034,9 @@ case 0x61: {
   op_io();
   aa.l = op_readdp(dp + regs.x.w);
   aa.h = op_readdp(dp + regs.x.w + 1);
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readdbr(aa.w);
-  if(regs.acc_8b) { op_adc_b(); break; }
+  if(regs.p.m) { op_adc_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + 1);
   op_adc_w();
@@ -1049,9 +1049,9 @@ case 0x21: {
   op_io();
   aa.l = op_readdp(dp + regs.x.w);
   aa.h = op_readdp(dp + regs.x.w + 1);
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readdbr(aa.w);
-  if(regs.acc_8b) { op_and_b(); break; }
+  if(regs.p.m) { op_and_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + 1);
   op_and_w();
@@ -1064,9 +1064,9 @@ case 0xc1: {
   op_io();
   aa.l = op_readdp(dp + regs.x.w);
   aa.h = op_readdp(dp + regs.x.w + 1);
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readdbr(aa.w);
-  if(regs.acc_8b) { op_cmp_b(); break; }
+  if(regs.p.m) { op_cmp_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + 1);
   op_cmp_w();
@@ -1079,9 +1079,9 @@ case 0x41: {
   op_io();
   aa.l = op_readdp(dp + regs.x.w);
   aa.h = op_readdp(dp + regs.x.w + 1);
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readdbr(aa.w);
-  if(regs.acc_8b) { op_eor_b(); break; }
+  if(regs.p.m) { op_eor_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + 1);
   op_eor_w();
@@ -1094,9 +1094,9 @@ case 0xa1: {
   op_io();
   aa.l = op_readdp(dp + regs.x.w);
   aa.h = op_readdp(dp + regs.x.w + 1);
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readdbr(aa.w);
-  if(regs.acc_8b) { op_lda_b(); break; }
+  if(regs.p.m) { op_lda_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + 1);
   op_lda_w();
@@ -1109,9 +1109,9 @@ case 0x01: {
   op_io();
   aa.l = op_readdp(dp + regs.x.w);
   aa.h = op_readdp(dp + regs.x.w + 1);
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readdbr(aa.w);
-  if(regs.acc_8b) { op_ora_b(); break; }
+  if(regs.p.m) { op_ora_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + 1);
   op_ora_w();
@@ -1124,9 +1124,9 @@ case 0xe1: {
   op_io();
   aa.l = op_readdp(dp + regs.x.w);
   aa.h = op_readdp(dp + regs.x.w + 1);
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readdbr(aa.w);
-  if(regs.acc_8b) { op_sbc_b(); break; }
+  if(regs.p.m) { op_sbc_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + 1);
   op_sbc_w();
@@ -1139,9 +1139,9 @@ case 0x71: {
   aa.l = op_readdp(dp);
   aa.h = op_readdp(dp + 1);
   op_io_cond4(aa.w, aa.w + regs.y.w);
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readdbr(aa.w + regs.y.w);
-  if(regs.acc_8b) { op_adc_b(); break; }
+  if(regs.p.m) { op_adc_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + regs.y.w + 1);
   op_adc_w();
@@ -1154,9 +1154,9 @@ case 0x31: {
   aa.l = op_readdp(dp);
   aa.h = op_readdp(dp + 1);
   op_io_cond4(aa.w, aa.w + regs.y.w);
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readdbr(aa.w + regs.y.w);
-  if(regs.acc_8b) { op_and_b(); break; }
+  if(regs.p.m) { op_and_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + regs.y.w + 1);
   op_and_w();
@@ -1169,9 +1169,9 @@ case 0xd1: {
   aa.l = op_readdp(dp);
   aa.h = op_readdp(dp + 1);
   op_io_cond4(aa.w, aa.w + regs.y.w);
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readdbr(aa.w + regs.y.w);
-  if(regs.acc_8b) { op_cmp_b(); break; }
+  if(regs.p.m) { op_cmp_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + regs.y.w + 1);
   op_cmp_w();
@@ -1184,9 +1184,9 @@ case 0x51: {
   aa.l = op_readdp(dp);
   aa.h = op_readdp(dp + 1);
   op_io_cond4(aa.w, aa.w + regs.y.w);
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readdbr(aa.w + regs.y.w);
-  if(regs.acc_8b) { op_eor_b(); break; }
+  if(regs.p.m) { op_eor_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + regs.y.w + 1);
   op_eor_w();
@@ -1199,9 +1199,9 @@ case 0xb1: {
   aa.l = op_readdp(dp);
   aa.h = op_readdp(dp + 1);
   op_io_cond4(aa.w, aa.w + regs.y.w);
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readdbr(aa.w + regs.y.w);
-  if(regs.acc_8b) { op_lda_b(); break; }
+  if(regs.p.m) { op_lda_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + regs.y.w + 1);
   op_lda_w();
@@ -1214,9 +1214,9 @@ case 0x11: {
   aa.l = op_readdp(dp);
   aa.h = op_readdp(dp + 1);
   op_io_cond4(aa.w, aa.w + regs.y.w);
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readdbr(aa.w + regs.y.w);
-  if(regs.acc_8b) { op_ora_b(); break; }
+  if(regs.p.m) { op_ora_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + regs.y.w + 1);
   op_ora_w();
@@ -1229,9 +1229,9 @@ case 0xf1: {
   aa.l = op_readdp(dp);
   aa.h = op_readdp(dp + 1);
   op_io_cond4(aa.w, aa.w + regs.y.w);
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readdbr(aa.w + regs.y.w);
-  if(regs.acc_8b) { op_sbc_b(); break; }
+  if(regs.p.m) { op_sbc_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + regs.y.w + 1);
   op_sbc_w();
@@ -1244,9 +1244,9 @@ case 0x67: {
   aa.l = op_readdp(dp);
   aa.h = op_readdp(dp + 1);
   aa.b = op_readdp(dp + 2);
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readlong(aa.d);
-  if(regs.acc_8b) { op_adc_b(); break; }
+  if(regs.p.m) { op_adc_b(); break; }
   last_cycle();
   rd.h = op_readlong(aa.d + 1);
   op_adc_w();
@@ -1259,9 +1259,9 @@ case 0x27: {
   aa.l = op_readdp(dp);
   aa.h = op_readdp(dp + 1);
   aa.b = op_readdp(dp + 2);
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readlong(aa.d);
-  if(regs.acc_8b) { op_and_b(); break; }
+  if(regs.p.m) { op_and_b(); break; }
   last_cycle();
   rd.h = op_readlong(aa.d + 1);
   op_and_w();
@@ -1274,9 +1274,9 @@ case 0xc7: {
   aa.l = op_readdp(dp);
   aa.h = op_readdp(dp + 1);
   aa.b = op_readdp(dp + 2);
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readlong(aa.d);
-  if(regs.acc_8b) { op_cmp_b(); break; }
+  if(regs.p.m) { op_cmp_b(); break; }
   last_cycle();
   rd.h = op_readlong(aa.d + 1);
   op_cmp_w();
@@ -1289,9 +1289,9 @@ case 0x47: {
   aa.l = op_readdp(dp);
   aa.h = op_readdp(dp + 1);
   aa.b = op_readdp(dp + 2);
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readlong(aa.d);
-  if(regs.acc_8b) { op_eor_b(); break; }
+  if(regs.p.m) { op_eor_b(); break; }
   last_cycle();
   rd.h = op_readlong(aa.d + 1);
   op_eor_w();
@@ -1304,9 +1304,9 @@ case 0xa7: {
   aa.l = op_readdp(dp);
   aa.h = op_readdp(dp + 1);
   aa.b = op_readdp(dp + 2);
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readlong(aa.d);
-  if(regs.acc_8b) { op_lda_b(); break; }
+  if(regs.p.m) { op_lda_b(); break; }
   last_cycle();
   rd.h = op_readlong(aa.d + 1);
   op_lda_w();
@@ -1319,9 +1319,9 @@ case 0x07: {
   aa.l = op_readdp(dp);
   aa.h = op_readdp(dp + 1);
   aa.b = op_readdp(dp + 2);
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readlong(aa.d);
-  if(regs.acc_8b) { op_ora_b(); break; }
+  if(regs.p.m) { op_ora_b(); break; }
   last_cycle();
   rd.h = op_readlong(aa.d + 1);
   op_ora_w();
@@ -1334,9 +1334,9 @@ case 0xe7: {
   aa.l = op_readdp(dp);
   aa.h = op_readdp(dp + 1);
   aa.b = op_readdp(dp + 2);
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readlong(aa.d);
-  if(regs.acc_8b) { op_sbc_b(); break; }
+  if(regs.p.m) { op_sbc_b(); break; }
   last_cycle();
   rd.h = op_readlong(aa.d + 1);
   op_sbc_w();
@@ -1349,9 +1349,9 @@ case 0x77: {
   aa.l = op_readdp(dp);
   aa.h = op_readdp(dp + 1);
   aa.b = op_readdp(dp + 2);
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readlong(aa.d + regs.y.w);
-  if(regs.acc_8b) { op_adc_b(); break; }
+  if(regs.p.m) { op_adc_b(); break; }
   last_cycle();
   rd.h = op_readlong(aa.d + regs.y.w + 1);
   op_adc_w();
@@ -1364,9 +1364,9 @@ case 0x37: {
   aa.l = op_readdp(dp);
   aa.h = op_readdp(dp + 1);
   aa.b = op_readdp(dp + 2);
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readlong(aa.d + regs.y.w);
-  if(regs.acc_8b) { op_and_b(); break; }
+  if(regs.p.m) { op_and_b(); break; }
   last_cycle();
   rd.h = op_readlong(aa.d + regs.y.w + 1);
   op_and_w();
@@ -1379,9 +1379,9 @@ case 0xd7: {
   aa.l = op_readdp(dp);
   aa.h = op_readdp(dp + 1);
   aa.b = op_readdp(dp + 2);
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readlong(aa.d + regs.y.w);
-  if(regs.acc_8b) { op_cmp_b(); break; }
+  if(regs.p.m) { op_cmp_b(); break; }
   last_cycle();
   rd.h = op_readlong(aa.d + regs.y.w + 1);
   op_cmp_w();
@@ -1394,9 +1394,9 @@ case 0x57: {
   aa.l = op_readdp(dp);
   aa.h = op_readdp(dp + 1);
   aa.b = op_readdp(dp + 2);
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readlong(aa.d + regs.y.w);
-  if(regs.acc_8b) { op_eor_b(); break; }
+  if(regs.p.m) { op_eor_b(); break; }
   last_cycle();
   rd.h = op_readlong(aa.d + regs.y.w + 1);
   op_eor_w();
@@ -1409,9 +1409,9 @@ case 0xb7: {
   aa.l = op_readdp(dp);
   aa.h = op_readdp(dp + 1);
   aa.b = op_readdp(dp + 2);
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readlong(aa.d + regs.y.w);
-  if(regs.acc_8b) { op_lda_b(); break; }
+  if(regs.p.m) { op_lda_b(); break; }
   last_cycle();
   rd.h = op_readlong(aa.d + regs.y.w + 1);
   op_lda_w();
@@ -1424,9 +1424,9 @@ case 0x17: {
   aa.l = op_readdp(dp);
   aa.h = op_readdp(dp + 1);
   aa.b = op_readdp(dp + 2);
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readlong(aa.d + regs.y.w);
-  if(regs.acc_8b) { op_ora_b(); break; }
+  if(regs.p.m) { op_ora_b(); break; }
   last_cycle();
   rd.h = op_readlong(aa.d + regs.y.w + 1);
   op_ora_w();
@@ -1439,9 +1439,9 @@ case 0xf7: {
   aa.l = op_readdp(dp);
   aa.h = op_readdp(dp + 1);
   aa.b = op_readdp(dp + 2);
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readlong(aa.d + regs.y.w);
-  if(regs.acc_8b) { op_sbc_b(); break; }
+  if(regs.p.m) { op_sbc_b(); break; }
   last_cycle();
   rd.h = op_readlong(aa.d + regs.y.w + 1);
   op_sbc_w();
@@ -1451,9 +1451,9 @@ case 0xf7: {
 case 0x63: {
   sp = op_readpc();
   op_io();
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readsp(sp);
-  if(regs.acc_8b) { op_adc_b(); break; }
+  if(regs.p.m) { op_adc_b(); break; }
   last_cycle();
   rd.h = op_readsp(sp + 1);
   op_adc_w();
@@ -1463,9 +1463,9 @@ case 0x63: {
 case 0x23: {
   sp = op_readpc();
   op_io();
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readsp(sp);
-  if(regs.acc_8b) { op_and_b(); break; }
+  if(regs.p.m) { op_and_b(); break; }
   last_cycle();
   rd.h = op_readsp(sp + 1);
   op_and_w();
@@ -1475,9 +1475,9 @@ case 0x23: {
 case 0xc3: {
   sp = op_readpc();
   op_io();
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readsp(sp);
-  if(regs.acc_8b) { op_cmp_b(); break; }
+  if(regs.p.m) { op_cmp_b(); break; }
   last_cycle();
   rd.h = op_readsp(sp + 1);
   op_cmp_w();
@@ -1487,9 +1487,9 @@ case 0xc3: {
 case 0x43: {
   sp = op_readpc();
   op_io();
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readsp(sp);
-  if(regs.acc_8b) { op_eor_b(); break; }
+  if(regs.p.m) { op_eor_b(); break; }
   last_cycle();
   rd.h = op_readsp(sp + 1);
   op_eor_w();
@@ -1499,9 +1499,9 @@ case 0x43: {
 case 0xa3: {
   sp = op_readpc();
   op_io();
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readsp(sp);
-  if(regs.acc_8b) { op_lda_b(); break; }
+  if(regs.p.m) { op_lda_b(); break; }
   last_cycle();
   rd.h = op_readsp(sp + 1);
   op_lda_w();
@@ -1511,9 +1511,9 @@ case 0xa3: {
 case 0x03: {
   sp = op_readpc();
   op_io();
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readsp(sp);
-  if(regs.acc_8b) { op_ora_b(); break; }
+  if(regs.p.m) { op_ora_b(); break; }
   last_cycle();
   rd.h = op_readsp(sp + 1);
   op_ora_w();
@@ -1523,9 +1523,9 @@ case 0x03: {
 case 0xe3: {
   sp = op_readpc();
   op_io();
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readsp(sp);
-  if(regs.acc_8b) { op_sbc_b(); break; }
+  if(regs.p.m) { op_sbc_b(); break; }
   last_cycle();
   rd.h = op_readsp(sp + 1);
   op_sbc_w();
@@ -1538,9 +1538,9 @@ case 0x73: {
   aa.l = op_readsp(sp);
   aa.h = op_readsp(sp + 1);
   op_io();
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readdbr(aa.w + regs.y.w);
-  if(regs.acc_8b) { op_adc_b(); break; }
+  if(regs.p.m) { op_adc_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + regs.y.w + 1);
   op_adc_w();
@@ -1553,9 +1553,9 @@ case 0x33: {
   aa.l = op_readsp(sp);
   aa.h = op_readsp(sp + 1);
   op_io();
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readdbr(aa.w + regs.y.w);
-  if(regs.acc_8b) { op_and_b(); break; }
+  if(regs.p.m) { op_and_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + regs.y.w + 1);
   op_and_w();
@@ -1568,9 +1568,9 @@ case 0xd3: {
   aa.l = op_readsp(sp);
   aa.h = op_readsp(sp + 1);
   op_io();
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readdbr(aa.w + regs.y.w);
-  if(regs.acc_8b) { op_cmp_b(); break; }
+  if(regs.p.m) { op_cmp_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + regs.y.w + 1);
   op_cmp_w();
@@ -1583,9 +1583,9 @@ case 0x53: {
   aa.l = op_readsp(sp);
   aa.h = op_readsp(sp + 1);
   op_io();
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readdbr(aa.w + regs.y.w);
-  if(regs.acc_8b) { op_eor_b(); break; }
+  if(regs.p.m) { op_eor_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + regs.y.w + 1);
   op_eor_w();
@@ -1598,9 +1598,9 @@ case 0xb3: {
   aa.l = op_readsp(sp);
   aa.h = op_readsp(sp + 1);
   op_io();
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readdbr(aa.w + regs.y.w);
-  if(regs.acc_8b) { op_lda_b(); break; }
+  if(regs.p.m) { op_lda_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + regs.y.w + 1);
   op_lda_w();
@@ -1613,9 +1613,9 @@ case 0x13: {
   aa.l = op_readsp(sp);
   aa.h = op_readsp(sp + 1);
   op_io();
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readdbr(aa.w + regs.y.w);
-  if(regs.acc_8b) { op_ora_b(); break; }
+  if(regs.p.m) { op_ora_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + regs.y.w + 1);
   op_ora_w();
@@ -1628,9 +1628,9 @@ case 0xf3: {
   aa.l = op_readsp(sp);
   aa.h = op_readsp(sp + 1);
   op_io();
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readdbr(aa.w + regs.y.w);
-  if(regs.acc_8b) { op_sbc_b(); break; }
+  if(regs.p.m) { op_sbc_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + regs.y.w + 1);
   op_sbc_w();
@@ -1638,9 +1638,9 @@ case 0xf3: {
 
 //bit_const
 case 0x89: {
-  if(regs.acc_8b)last_cycle();
+  if(regs.p.m)last_cycle();
   rd.l = op_readpc();
-  if(regs.acc_8b) {
+  if(regs.p.m) {
     regs.p.z = ((rd.l & regs.a.l) == 0);
     break;
   }

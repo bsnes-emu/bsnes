@@ -1,0 +1,35 @@
+bsnes License:
+--------------
+You are free to redistribute this software, and its source code; provided
+there is no charge for the software, nor any charge for the medium used to
+distribute the software. You are also free to use and modify the source code
+as you desire for personal use only. No publically-released derivative works
+of this program nor its source code are permitted without my permission,
+though I will likely grant you permission if you ask me. You must also abide
+by the terms of any additional source code licenses contained within this
+program.
+
+Simple DirectMedia Layer License:
+---------------------------------
+The Simple DirectMedia Layer (SDL for short) is a cross-platform library
+designed to make it easy to write multi-media software, such as games and
+emulators.
+
+The Simple DirectMedia Layer library source code is available from:
+http://www.libsdl.org/
+
+This library is distributed under the terms of the GNU LGPL:
+http://www.gnu.org/copyleft/lesser.html
+
+JMA License:
+------------
+JMA is licensed under the GNU GPL. I have received special exemption from
+Nach to use this library in bsnes.
+
+Licensing Exemptions:
+---------------------
+libco, the cooperative multithreading library used by bsnes, is public domain.
+You may obtain the latest version at: http://byuu.org/
+
+Richard Bannister has asked for and received my permission to distribute
+a binary-only port of bsnes on the Mac OS X platform.

@@ -2,37 +2,17 @@
 
 SNES *snes;
 
+#include "scheduler/scheduler.cpp"
 #include "tracer/tracer.cpp"
 
-#include "video/filter.cpp"
 #include "video/video.cpp"
 #include "audio/audio.cpp"
 #include "input/input.cpp"
 
-void SNES::run() {
-  if(sync.counter <= 0) {
-    r_cpu->run();
-  uint32 clocks = r_cpu->clocks_executed();
-    sync.counter += sync.apu_multbl[clocks];
-  } else {
-    r_smp->run();
-  uint32 clocks = r_smp->clocks_executed();
-    sync.counter -= sync.cpu_multbl[clocks];
-  //1024000(SPC700) / 32000(DSP) = 32spc/dsp ticks
-  //24576000(Sound clock crystal) / 32000(DSP) = 768crystal/dsp ticks
-    sync.dsp_counter += clocks;
-    while(sync.dsp_counter >= 768) {
-      sync.dsp_counter -= 768;
-      audio_update(r_dsp->run());
-    }
-  }
-}
+void SNES::run() {}
 
 void SNES::runtoframe() {
-  while(r_ppu->status.frame_executed == false) {
-    SNES::run();
-  }
-  r_ppu->status.frame_executed = false;
+  scheduler.enter();
 }
 
 void SNES::init() {
@@ -60,6 +40,8 @@ void SNES::term() {
 }
 
 void SNES::power() {
+  scheduler.init();
+
   r_cpu->power();
   r_smp->power();
   r_dsp->power();
@@ -92,8 +74,7 @@ void SNES::power() {
 }
 
 void SNES::reset() {
-  sync.counter     = -sync.cpu_multbl[32];
-  sync.dsp_counter = 0;
+  scheduler.init();
 
   r_cpu->reset();
   r_smp->reset();
@@ -118,6 +99,7 @@ void SNES::scanline() {
 //video output seem more responsive to controller input
   if(r_cpu->vcounter() == 241) {
     video_update();
+    scheduler.exit();
   }
 }
 
@@ -135,36 +117,8 @@ void SNES::set_region(uint8 new_region) {
   } else {
     alert("Unsupported region : %0.2x", new_region);
   }
-
-  update_timing();
 }
 
 uint8 SNES::region() { return snes_region; }
 
-/*****
- * Timing
- *
- * Note: Stock PAL CPU speed is currently unknown.
- * It is thought to be 21281370hz, but this causes
- * sound errors in certain games. Therefore, the PAL
- * CPU is currently clocked 40000hz slower, at
- * 21241370hz.
- *****/
-
-void SNES::update_timing() {
-  sync.counter     = 0;
-  sync.dsp_counter = 0;
-
-  sync.cpu_freq = (snes_region == NTSC) ? config::cpu.ntsc_clock_rate : config::cpu.pal_clock_rate;
-  sync.apu_freq = (snes_region == NTSC) ? config::smp.ntsc_clock_rate : config::smp.pal_clock_rate;
-
-  for(int64 i = 0; i < 1024; i++) {
-    sync.cpu_multbl[i] = i * sync.cpu_freq;
-    sync.apu_multbl[i] = i * sync.apu_freq;
-  }
-}
-
-SNES::SNES() {
-  snes_region = NTSC;
-  update_timing();
-}
+SNES::SNES() {}

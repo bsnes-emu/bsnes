@@ -1,6 +1,6 @@
 #include "opfn.cpp"
 
-void sSMP::main() {
+void sSMP::enter() {
   for(;;) {
     tracer.trace_smpop(); //traces SMP opcode (only if tracer is enabled)
 
@@ -15,9 +15,5 @@ void sSMP::main() {
     }
 
     status.in_opcode = false;
-
-  #ifdef FAVOR_SPEED
-    co_return();
-  #endif
   }
 }

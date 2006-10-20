@@ -2,6 +2,10 @@
 
 class SMP {
 public:
+thread_t thread;
+  virtual void enter() = 0;
+
+public:
 SMPRegs regs;
 uint8 spcram[65536];
 static const uint8 iplrom[64];
@@ -17,9 +21,6 @@ static const uint8 iplrom[64];
   virtual void   port_write(uint8 port, uint8 value) = 0;
 
   virtual uint8 *get_spcram_handle() { return spcram; }
-  virtual void   main() {}
-  virtual void   run() = 0;
-  virtual uint32 clocks_executed() = 0;
   virtual void   power() = 0;
   virtual void   reset() = 0;
 

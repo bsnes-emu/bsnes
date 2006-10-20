@@ -1,3 +1,5 @@
+#include "filter.cpp"
+
 void SNES::set_video_format(uint filter, uint video_standard, uint pixel_format) {
 //only make changes at the start of a new frame
   video_format.filter         = filter;

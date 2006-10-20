@@ -13,7 +13,6 @@
   uint   dma_counter();
 
   void   add_clocks(uint clocks);
-  void   tick();
   void   scanline();
   void   frame();
 
@@ -25,10 +24,6 @@
   void   timing_power();
   void   timing_reset();
 
-  void counter_set(uint &ctr, uint clocks) {
-    if(clocks >= ctr) { ctr = clocks; }
-  }
-
 //timeshift.cpp
   void   timeshift_forward (uint clocks, uint &v, uint &h);
   void   timeshift_backward(uint clocks, uint &v, uint &h);
@@ -36,9 +31,13 @@
 //irq.cpp
 enum { IRQ_TRIGGER_NEVER = 0x3fff };
   void   update_interrupts();
-  void   nmi_tick();
-  void   irq_tick();
-  void   poll_interrupts();
+  void   poll_interrupts(uint clocks);
+#ifdef FAVOR_SPEED
+  void   poll_interrupts_range(uint clocks);
+#endif
+  bool   nmi_edge();
+  bool   irq_edge();
+  void   irqpos_update(uint16 addr);
   bool   irq_pos_valid();
   bool   nmi_test();
   bool   irq_test();

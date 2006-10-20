@@ -71,6 +71,5 @@ CPURegFlags p;
 uint8 db;
 uint8 mdr;
 bool  e;
-bool  acc_8b, idx_8b;
-  CPURegs() : db(0), mdr(0x00), e(false), acc_8b(true), idx_8b(true) {}
+  CPURegs() : db(0), mdr(0x00), e(false) {}
 };

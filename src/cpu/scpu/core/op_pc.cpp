@@ -151,7 +151,7 @@ case 0x5c: {
   rd.h = op_readpc();
   last_cycle();
   rd.b = op_readpc();
-  regs.pc.d = uclip<24>(rd.d);
+  regs.pc.d = rd.d & 0xffffff;
 } break;
 
 //jmp_iaddr
@@ -183,7 +183,7 @@ case 0xdc: {
   rd.h = op_readaddr(aa.w + 1);
   last_cycle();
   rd.b = op_readaddr(aa.w + 2);
-  regs.pc.d = uclip<24>(rd.d);
+  regs.pc.d = rd.d & 0xffffff;
 } break;
 
 //jsr_addr
@@ -202,27 +202,29 @@ case 0x20: {
 case 0x22: {
   aa.l = op_readpc();
   aa.h = op_readpc();
-  op_writestack(regs.pc.b);
+  op_writestackn(regs.pc.b);
   op_io();
   aa.b = op_readpc();
   regs.pc.w--;
-  op_writestack(regs.pc.h);
+  op_writestackn(regs.pc.h);
   last_cycle();
-  op_writestack(regs.pc.l);
-  regs.pc.d = uclip<24>(aa.d);
+  op_writestackn(regs.pc.l);
+  regs.pc.d = aa.d & 0xffffff;
+  if(regs.e)regs.s.h = 0x01;
 } break;
 
 //jsr_iaddrx
 case 0xfc: {
   aa.l = op_readpc();
-  op_writestack(regs.pc.h);
-  op_writestack(regs.pc.l);
+  op_writestackn(regs.pc.h);
+  op_writestackn(regs.pc.l);
   aa.h = op_readpc();
   op_io();
   rd.l = op_readpbr(aa.w + regs.x.w);
   last_cycle();
   rd.h = op_readpbr(aa.w + regs.x.w + 1);
   regs.pc.w = rd.w;
+  if(regs.e)regs.s.h = 0x01;
 } break;
 
 //rti
@@ -230,9 +232,8 @@ case 0x40: {
   op_io();
   op_io();
   regs.p = op_readstack();
-  regs.acc_8b = (regs.e || regs.p.m);
-  regs.idx_8b = (regs.e || regs.p.x);
-  if(regs.idx_8b) {
+  if(regs.e)regs.p |= 0x30;
+  if(regs.p.x) {
     regs.x.h = 0x00;
     regs.y.h = 0x00;
   }
@@ -245,7 +246,7 @@ case 0x40: {
   }
   last_cycle();
   rd.b = op_readstack();
-  regs.pc.d = uclip<24>(rd.d);
+  regs.pc.d = rd.d & 0xffffff;
 } break;
 
 //rts
@@ -264,11 +265,12 @@ case 0x60: {
 case 0x6b: {
   op_io();
   op_io();
-  rd.l = op_readstack();
-  rd.h = op_readstack();
+  rd.l = op_readstackn();
+  rd.h = op_readstackn();
   last_cycle();
-  rd.b = op_readstack();
-  regs.pc.d = uclip<24>(rd.d);
+  rd.b = op_readstackn();
+  regs.pc.d = rd.d & 0xffffff;
   regs.pc.w++;
+  if(regs.e)regs.s.h = 0x01;
 } break;
 

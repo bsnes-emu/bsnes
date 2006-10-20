@@ -1,12 +1,13 @@
 class sCPU : public CPU {
 public:
+  void enter();
+
+public:
 #include "core/core.h"
 #include "dma/dma.h"
 #include "memory/memory.h"
 #include "mmio/mmio.h"
 #include "timing/timing.h"
-
-thread_t thread;
 
 struct {
   bool   wai;
@@ -15,11 +16,22 @@ struct {
 } event;
 
 struct {
-  bool   enabled;
-  uint   irq_delay;
-  uint   irq_fire;
   uint   nmi_fire;
+  uint   irq_fire;
+  uint   irq_delay;
   uint   hw_math;
+
+  alwaysinline void set(uint &ctr, uint clocks) {
+    if(clocks >= ctr) { ctr = clocks; }
+  }
+
+  alwaysinline void sub(uint &ctr, uint clocks) {
+    if(ctr >= clocks) {
+      ctr -= clocks;
+    } else {
+      ctr  = 0;
+    }
+  }
 } counter;
 
 enum {
@@ -35,7 +47,6 @@ struct {
   bool   in_opcode;
 
   uint   clock_count;
-  uint   clocks_executed;
 
 //timing
   bool   region;
@@ -60,10 +71,12 @@ struct {
   uint16 irq_delay;
 
   uint16 nmi_trigger_pos;
+  uint16 nmi_read_pos, nmi_line_pos;
   bool   nmi_read, nmi_line, nmi_transition;
-  bool   nmi_pending;
+  bool   nmi_lock, nmi_pending;
 
   uint16 virq_trigger_pos, hirq_trigger_pos;
+  uint16 irq_read_pos, irq_line_pos;
   bool   irq_read, irq_line, irq_transition;
   bool   irq_lock, irq_pending;
 
@@ -114,7 +127,6 @@ struct {
   uint8  joy4l, joy4h;
 } status;
 
-  void   run();
   void   power();
   void   reset();
 

@@ -118,10 +118,10 @@ OBJS = main.$(OBJ) \
        bdsp.$(OBJ) \
        ppu.$(OBJ) bppu.$(OBJ) \
        snes.$(OBJ) \
-       srtc.$(OBJ) sdd1.$(OBJ) c4.$(OBJ) dsp1.$(OBJ) dsp2.$(OBJ) obc1.$(OBJ) \
-       adler32.$(OBJ) compress.$(OBJ) crc32.$(OBJ) deflate.$(OBJ) gzio.$(OBJ) inffast.$(OBJ) \
-       inflate.$(OBJ) inftrees.$(OBJ) ioapi.$(OBJ) trees.$(OBJ) unzip.$(OBJ) zip.$(OBJ) zutil.$(OBJ) \
-       jma.$(OBJ) jcrc32.$(OBJ) lzmadec.$(OBJ) 7zlzma.$(OBJ) iiostrm.$(OBJ) inbyte.$(OBJ) lzma.$(OBJ) winout.$(OBJ)
+       srtc.$(OBJ) sdd1.$(OBJ) c4.$(OBJ) dsp1.$(OBJ) dsp2.$(OBJ) obc1.$(OBJ)
+#      adler32.$(OBJ) compress.$(OBJ) crc32.$(OBJ) deflate.$(OBJ) gzio.$(OBJ) inffast.$(OBJ) \
+#      inflate.$(OBJ) inftrees.$(OBJ) ioapi.$(OBJ) trees.$(OBJ) unzip.$(OBJ) zip.$(OBJ) zutil.$(OBJ) \
+#      jma.$(OBJ) jcrc32.$(OBJ) lzmadec.$(OBJ) 7zlzma.$(OBJ) iiostrm.$(OBJ) inbyte.$(OBJ) lzma.$(OBJ) winout.$(OBJ)
 
 ifeq ($(OS),win)
   ifeq ($(CC),cl)
@@ -182,9 +182,6 @@ cpu.$(OBJ): ../cpu/*
 scpu.$(OBJ): ../cpu/scpu/* ../cpu/scpu/core/* ../cpu/scpu/dma/* ../cpu/scpu/memory/* ../cpu/scpu/mmio/* ../cpu/scpu/timing/*
 	$(CXX) $(CFLAGS) $(COBJFLAG) ../cpu/scpu/scpu.cpp
 
-bcpu.$(OBJ): ../cpu/bcpu/*
-	$(CXX) $(CFLAGS) $(COBJFLAG) ../cpu/bcpu/bcpu.cpp
-
 ###########
 ### smp ###
 ###########
@@ -193,9 +190,6 @@ smp.$(OBJ): ../smp/*
 
 ssmp.$(OBJ): ../smp/ssmp/* ../smp/ssmp/core/* ../smp/ssmp/memory/* ../smp/ssmp/timing/*
 	$(CXX) $(CFLAGS) $(COBJFLAG) ../smp/ssmp/ssmp.cpp
-
-bsmp.$(OBJ): ../smp/bsmp/*
-	$(CXX) $(CFLAGS) $(COBJFLAG) ../smp/bsmp/bsmp.cpp
 
 ###########
 ### dsp ###

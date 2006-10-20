@@ -20,11 +20,9 @@
 
 #include "cpu/cpu.h"
 #include "cpu/scpu/scpu.h"
-//#include "cpu/bcpu/bcpu.h"
 
 #include "smp/smp.h"
 #include "smp/ssmp/ssmp.h"
-//#include "smp/bsmp/bsmp.h"
 
 #include "dsp/dsp.h"
 #include "dsp/bdsp/bdsp.h"

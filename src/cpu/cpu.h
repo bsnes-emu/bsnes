@@ -2,6 +2,10 @@
 
 class CPU : public MMIO {
 public:
+thread_t thread;
+  virtual void enter() = 0;
+
+public:
 //CPU version number
 //* 1 and 2 are known
 //* reported by $4210
@@ -30,9 +34,6 @@ CPURegs regs;
     FLAG_Z = 0x02, FLAG_C = 0x01
   };
   virtual uint8  pio_status() = 0;
-  virtual void   main() {}
-  virtual void   run() = 0;
-  virtual uint32 clocks_executed() = 0;
   virtual void   scanline() = 0;
   virtual void   frame() = 0;
   virtual void   power() = 0;

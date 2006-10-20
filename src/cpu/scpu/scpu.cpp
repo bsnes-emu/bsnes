@@ -6,16 +6,8 @@
 #include "mmio/mmio.cpp"
 #include "timing/timing.cpp"
 
-void scpu_entry_point() {
-  r_cpu->main();
-}
-
-void sCPU::run() {
-  co_call(thread);
-}
-
 void sCPU::power() {
-  status.region = bool(snes->region());
+  status.region = (bool)snes->region();
 
   regs.a = regs.x = regs.y = 0x0000;
   regs.s = 0x01ff;
@@ -28,15 +20,9 @@ void sCPU::power() {
 }
 
 void sCPU::reset() {
-  if(thread)co_delete(thread);
-  thread = co_create(scpu_entry_point, 65536);
-
   regs.pc.d = 0x000000;
   regs.pc.l = r_mem->read(0xfffc);
   regs.pc.h = r_mem->read(0xfffd);
-
-  regs.acc_8b = true;
-  regs.idx_8b = true;
 
 //note: some registers are not fully reset by SNES
   regs.x.h  = 0x00;
@@ -62,11 +48,5 @@ void sCPU::reset() {
   apu_port[3] = 0x00;
 }
 
-sCPU::sCPU() {
-//#include "core/optable.cpp"
-  thread = 0;
-}
-
-sCPU::~sCPU() {
-  if(thread)co_delete(thread);
-}
+sCPU::sCPU() {}
+sCPU::~sCPU() {}

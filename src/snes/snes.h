@@ -1,3 +1,4 @@
+#include "scheduler/scheduler.h"
 #include "tracer/tracer.h"
 
 class VideoFilter;
@@ -5,15 +6,6 @@ class VideoFilter;
 class SNES {
 protected:
 uint8  snes_region;
-
-//CPU<>APU synchronization
-struct {
-  int64  counter, dsp_counter;
-  int64  cpu_freq, apu_freq;
-  int64  cpu_multbl[1024], apu_multbl[1024];
-} sync;
-
-  void   update_timing();
 
 public:
 enum { NTSC = 0, PAL = 1 };
