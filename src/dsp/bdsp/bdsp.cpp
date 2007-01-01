@@ -558,7 +558,7 @@ int32 fir_samplel, fir_sampler;
     msampler  = sclamp<16>(msampler);
   }
 
-  return uint32( uint16(msamplel) | (uint16(msampler) << 16) );
+  return (uint32)( (uint16)msamplel | ((uint16)msampler << 16) );
 }
 
 bDSP::bDSP()  {}

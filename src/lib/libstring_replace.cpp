@@ -4,17 +4,17 @@ uint replace_count = 0, size = ssl;
 char *data;
   if(ksl > ssl)return str;
   if(tsl > ksl) {                      //the new string may be longer than the old string...
-    for(i=0;i<=ssl-ksl;) {             //so let's find out how big of a string we'll need...
+    for(i = 0; i <= ssl - ksl;) {      //so let's find out how big of a string we'll need...
       if(!memcmp(str.s + i, key, ksl)) {
         replace_count++;
         i += ksl;
       } else i++;
     }
     size = ssl + ((tsl - ksl) * replace_count);
-    if(size > str.size)strresize(str, size);
+    str.reserve(size);
   }
   data = (char*)malloc(size + 1);
-  for(i=z=0;i<ssl;) {
+  for(i = z = 0; i < ssl;) {
     if(i <= ssl - ksl) {
       if(!memcmp(str.s + i, key, ksl)) {
         memcpy(data + z, token, tsl);
@@ -37,7 +37,7 @@ uint8 x;
 char *data;
   if(ksl > ssl)return str;
   if(tsl > ksl) {
-    for(i=0;i<=ssl-ksl;) {
+    for(i = 0; i <= ssl - ksl;) {
       x = str.s[i];
       if(x == '\"' || x == '\'') {
         l = i;
@@ -55,10 +55,10 @@ char *data;
       } else i++;
     }
     size = ssl + ((tsl - ksl) * replace_count);
-    if(size > str.size)strresize(str, size);
+    str.reserve(size);
   }
   data = (char*)malloc(size + 1);
-  for(i=z=0;i<ssl;) {
+  for(i = z = 0; i < ssl;) {
     x = str.s[i];
     if(x == '\"' || x == '\'') {
       l = i++;

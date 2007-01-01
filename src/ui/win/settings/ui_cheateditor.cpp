@@ -35,7 +35,7 @@ void CheatEditorWindow::CheatAdd() {
 char code[16 + 1], desc[128 + 1];
   Code.GetText(code,  16);
   Desc.GetText(desc, 128);
-  if(strmatch(code, "") == true)return;
+  if(!strcmp(code, ""))return;
 
   cheat.add(Enabled.Checked(), code, desc);
   Refresh();

@@ -5,15 +5,15 @@ bool ColorAdjustWindow::Event(EventInfo &info) {
     if(info.control == &ContrastSlider) {
       config::snes.contrast = ContrastSlider.GetPos();
       ContrastLabel.SetText("Contrast: %d", int32(config::snes.contrast));
-      snes->update_color_lookup_table();
+      snes.update_color_lookup_table();
     } else if(info.control == &BrightnessSlider) {
       config::snes.brightness = BrightnessSlider.GetPos();
       BrightnessLabel.SetText("Brightness: %d", int32(config::snes.brightness));
-      snes->update_color_lookup_table();
+      snes.update_color_lookup_table();
     } else if(info.control == &GammaSlider) {
       config::snes.gamma = GammaSlider.GetPos();
       GammaLabel.SetText("Gamma: %0.2f", double(config::snes.gamma) / 100.0);
-      snes->update_color_lookup_table();
+      snes.update_color_lookup_table();
     }
   } break;
 
@@ -21,19 +21,19 @@ bool ColorAdjustWindow::Event(EventInfo &info) {
     if(info.control == &GammaRamp) {
       config::snes.gamma_ramp.toggle();
       GammaRamp.Check(config::snes.gamma_ramp);
-      snes->update_color_lookup_table();
+      snes.update_color_lookup_table();
     } else if(info.control == &Sepia) {
       config::snes.sepia.toggle();
       Sepia.Check(config::snes.sepia);
-      snes->update_color_lookup_table();
+      snes.update_color_lookup_table();
     } else if(info.control == &Grayscale) {
       config::snes.grayscale.toggle();
       Grayscale.Check(config::snes.grayscale);
-      snes->update_color_lookup_table();
+      snes.update_color_lookup_table();
     } else if(info.control == &Invert) {
       config::snes.invert.toggle();
       Invert.Check(config::snes.invert);
-      snes->update_color_lookup_table();
+      snes.update_color_lookup_table();
     } else if(info.control == &Restore) {
       config::snes.contrast   =   0;
       config::snes.brightness =   0;
@@ -52,7 +52,7 @@ bool ColorAdjustWindow::Event(EventInfo &info) {
       Sepia.Check(config::snes.sepia);
       Grayscale.Check(config::snes.grayscale);
       Invert.Check(config::snes.invert);
-      snes->update_color_lookup_table();
+      snes.update_color_lookup_table();
     }
   } break;
 

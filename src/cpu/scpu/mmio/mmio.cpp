@@ -41,7 +41,7 @@ void sCPU::mmio_w4016(uint8 data) {
   status.joypad_strobe_latch = !!(data & 1);
 
   if(status.joypad_strobe_latch == 1) {
-    snes->poll_input();
+    snes.poll_input();
   }
 }
 
@@ -53,7 +53,7 @@ void sCPU::mmio_w4016(uint8 data) {
 //realtime or buffered status of joypadN.b
 uint8 sCPU::mmio_r4016() {
 uint8 r = regs.mdr & 0xfc;
-  r |= (uint8)snes->port_read(0);
+  r |= (uint8)snes.port_read(0);
   return r;
 }
 
@@ -63,43 +63,14 @@ uint8 r = regs.mdr & 0xfc;
 //1-0 = Joypad serial data
 uint8 sCPU::mmio_r4017() {
 uint8 r = (regs.mdr & 0xe0) | 0x1c;
-  r |= (uint8)snes->port_read(1);
+  r |= (uint8)snes.port_read(1);
   return r;
 }
 
 //NMITIMEN
 void sCPU::mmio_w4200(uint8 data) {
-  status.nmi_enabled      = !!(data & 0x80);
-  status.virq_enabled     = !!(data & 0x20);
-  status.hirq_enabled     = !!(data & 0x10);
   status.auto_joypad_poll = !!(data & 0x01);
-
-  if(status.nmi_read == 0) {
-    if(status.nmi_line == 1 && status.nmi_enabled == 1) {
-      status.nmi_transition = 1;
-    }
-    status.nmi_line = !status.nmi_enabled;
-  }
-
-  if(status.irq_read == 0) {
-    if(status.irq_line == 1 && (status.virq_enabled || status.hirq_enabled)) {
-      status.irq_transition = 1;
-    }
-    status.irq_line = !(status.virq_enabled || status.hirq_enabled);
-  }
-
-  if(status.virq_enabled == true && status.hirq_enabled == false) {
-    status.irq_lock = false;
-  }
-
-  if(status.virq_enabled == false && status.hirq_enabled == false) {
-    status.irq_line = 1;
-    status.irq_read = 1;
-    status.irq_transition = 0;
-  }
-
-  update_interrupts();
-  counter.set(counter.irq_delay, 2);
+  nmitimen_update(data);
 }
 
 //WRIO
@@ -144,32 +115,28 @@ void sCPU::mmio_w4206(uint8 data) {
 void sCPU::mmio_w4207(uint8 data) {
   status.hirq_pos  = (status.hirq_pos & ~0xff) | (data);
   status.hirq_pos &= 0x01ff;
-  update_interrupts();
-  irqpos_update(0x4207);
+  hvtime_update(0x4207);
 }
 
 //HTIMEH
 void sCPU::mmio_w4208(uint8 data) {
   status.hirq_pos  = (status.hirq_pos &  0xff) | (data << 8);
   status.hirq_pos &= 0x01ff;
-  update_interrupts();
-  irqpos_update(0x4208);
+  hvtime_update(0x4208);
 }
 
 //VTIMEL
 void sCPU::mmio_w4209(uint8 data) {
   status.virq_pos  = (status.virq_pos & ~0xff) | (data);
   status.virq_pos &= 0x01ff;
-  update_interrupts();
-  irqpos_update(0x4209);
+  hvtime_update(0x4209);
 }
 
 //VTIMEH
 void sCPU::mmio_w420a(uint8 data) {
   status.virq_pos  = (status.virq_pos &  0xff) | (data << 8);
   status.virq_pos &= 0x01ff;
-  update_interrupts();
-  irqpos_update(0x420a);
+  hvtime_update(0x420a);
 }
 
 //DMAEN
@@ -201,12 +168,7 @@ void sCPU::mmio_w420d(uint8 data) {
 //3-0 = CPU (5a22) version
 uint8 sCPU::mmio_r4210() {
 uint8 r = (regs.mdr & 0x70);
-  r |= (uint8)(!status.nmi_read) << 7;
-
-  if(!nmi_edge()) {
-    status.nmi_read = 1;
-  }
-
+  r |= (uint8)(rdnmi()) << 7;
   r |= (cpu_version & 0x0f);
   return r;
 }
@@ -216,14 +178,7 @@ uint8 r = (regs.mdr & 0x70);
 //6-0 = MDR
 uint8 sCPU::mmio_r4211() {
 uint8 r = (regs.mdr & 0x7f);
-  r |= (uint8)(!status.irq_read) << 7;
-
-  if(!irq_edge()) {
-    status.irq_read = 1;
-    status.irq_line = 1;
-    status.irq_transition = 0;
-  }
-
+  r |= (uint8)(timeup()) << 7;
   return r;
 }
 

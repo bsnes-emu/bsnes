@@ -1,15 +1,20 @@
 /*
-  libco_win32 : version 0.06 ~byuu (05/21/2006)
+  libco_win32 : version 0.08 ~byuu (10/21/2006)
 */
 
-typedef void (*thread_t);
-typedef void (*thread_p)();
+#define COTHREAD_STACKSIZE_TINY      0x1000
+#define COTHREAD_STACKSIZE_SMALL     0x4000
+#define COTHREAD_STACKSIZE_NORMAL   0x10000
+#define COTHREAD_STACKSIZE_LARGE    0x40000
+#define COTHREAD_STACKSIZE_HUGE    0x100000
 
-void     co_init();
-void     co_term();
-thread_t co_active();
-thread_t co_create(thread_p coentry, unsigned int heapsize);
-void     co_delete(thread_t cothread);
-void     co_jump(thread_t cothread);
-void     co_call(thread_t cothread);
-void     co_return();
+typedef void (*cothread_t);
+typedef void (*cothread_p)(void);
+
+cothread_t co_init();
+void       co_term();
+cothread_t co_active();
+cothread_t co_create(cothread_p coentry, unsigned int heapsize);
+void       co_delete(cothread_t cothread);
+void       co_switch(cothread_t cothread);
+void       co_exit(cothread_t cothread);

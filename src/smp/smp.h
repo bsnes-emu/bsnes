@@ -2,7 +2,6 @@
 
 class SMP {
 public:
-thread_t thread;
   virtual void enter() = 0;
 
 public:

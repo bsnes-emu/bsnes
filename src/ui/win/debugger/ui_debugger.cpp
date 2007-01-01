@@ -8,10 +8,10 @@ bool DebugWindow::Event(EventInfo &info) {
 
   case EVENT_CLICKED: {
     if(info.control == &Run) {
-      if(bsnes->get_state() == bSNES::RUN) {
-        bsnes->set_state(bSNES::STOP);
-      } else if(bsnes->get_state() == bSNES::STOP) {
-        bsnes->set_state(bSNES::RUN);
+      if(bsnes.get_state() == bSNES::RUN) {
+        bsnes.set_state(bSNES::STOP);
+      } else if(bsnes.get_state() == bSNES::STOP) {
+        bsnes.set_state(bSNES::RUN);
       }
     } else if(info.control == &Tracer) {
       wTracer.Show();
@@ -88,7 +88,7 @@ void DebugWindow::SetState(uint state) {
 }
 
 void DebugWindow::Show() {
-  Run.SetText((bsnes->get_state() == bSNES::RUN) ? " Stop" : " Run");
+  Run.SetText((bsnes.get_state() == bSNES::RUN) ? " Stop" : " Run");
   Window::Show();
   Update();
 }

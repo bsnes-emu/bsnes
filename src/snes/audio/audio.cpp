@@ -1,28 +1,26 @@
-void SNES::audio_update(uint32 data) {
+void SNES::audio_update(uint16 l_sample, uint16 r_sample) {
   if(pcmfp) {
-    fputc(data,       pcmfp);
-    fputc(data >>  8, pcmfp);
-    fputc(data >> 16, pcmfp);
-    fputc(data >> 24, pcmfp);
+    fputlw(pcmfp, l_sample);
+    fputlw(pcmfp, r_sample);
   }
+  if(config::snes.mute == true) { l_sample = r_sample = 0x0000; }
 
-  if((bool)config::snes.mute == true)data = 0x0000;
-
-  sound_run(data);
+  snesinterface.audio_sample(l_sample, r_sample);
 }
 
 void SNES::log_audio_enable(const char *fn) {
-char tfn[256];
-int i;
-  if(pcmfp)log_audio_disable();
+  if(pcmfp) { log_audio_disable(); }
 
+char tfn[256];
   if(!fn) {
-    for(i=0;i<=999;i++) {
+  int i = 0;
+    while(i < 1000) {
       sprintf(tfn, "audio%0.3d.wav", i);
       pcmfp = fopen(tfn, "rb");
       if(!pcmfp)break;
       fclose(pcmfp);
       pcmfp = 0;
+      i++;
     }
     if(i >= 1000)return;
   } else {

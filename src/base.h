@@ -1,4 +1,4 @@
-#define BSNES_VERSION "0.018.04"
+#define BSNES_VERSION "0.019"
 #define BSNES_TITLE   "bsnes v" BSNES_VERSION
 
 #define MEMCORE bMemBus
@@ -34,6 +34,7 @@
 #endif
 
 #include "lib/libbase.h"
+#include "lib/libsort.h"
 #include "lib/libco_x86.h"
 #include "lib/libarray.h"
 #include "lib/libvector.h"

@@ -98,9 +98,7 @@ case 0x02: {
 case 0xdb: {
   op_io();
   last_cycle();
-  while(1) {
-    op_io();
-  }
+  while(1) { op_io(); }
 } break;
 
 //wai
@@ -119,9 +117,9 @@ case 0xcb: {
 case 0xfb: {
   last_cycle();
   op_io();
-bool c = regs.p.c;
+bool carry = regs.p.c;
   regs.p.c = regs.e;
-  regs.e = c;
+  regs.e = carry;
   if(regs.e) {
     regs.p |= 0x30;
     regs.s.h = 0x01;

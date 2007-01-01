@@ -19,18 +19,18 @@ bool Editbox::Create(Window *parent_window, const char *style, int x, int y, int
 stringarray part;
   ParseStyleParam(style, part);
   for(int i = 0; i < count(part); i++) {
-    if(strmatch(part[i], "visible"))state.ws |= WS_VISIBLE;
-    if(strmatch(part[i], "disabled"))state.ws |= WS_DISABLED;
-    if(strmatch(part[i], "border"))state.ws |= WS_BORDER;
-    if(strmatch(part[i], "raised"))state.ws |= WS_DLGFRAME;
-    if(strmatch(part[i], "vscroll"))state.ws |= WS_VSCROLL;
-    if(strmatch(part[i], "hscroll"))state.ws |= WS_HSCROLL;
+    if(!strcmp(part[i], "visible"))state.ws |= WS_VISIBLE;
+    if(!strcmp(part[i], "disabled"))state.ws |= WS_DISABLED;
+    if(!strcmp(part[i], "border"))state.ws |= WS_BORDER;
+    if(!strcmp(part[i], "raised"))state.ws |= WS_DLGFRAME;
+    if(!strcmp(part[i], "vscroll"))state.ws |= WS_VSCROLL;
+    if(!strcmp(part[i], "hscroll"))state.ws |= WS_HSCROLL;
 
-    if(strmatch(part[i], "multiline"))state.ws |= ES_MULTILINE;
-    if(strmatch(part[i], "readonly"))state.ws |= ES_READONLY;
+    if(!strcmp(part[i], "multiline"))state.ws |= ES_MULTILINE;
+    if(!strcmp(part[i], "readonly"))state.ws |= ES_READONLY;
 
-    if(strmatch(part[i], "sunken"))state.es |= WS_EX_STATICEDGE;
-    if(strmatch(part[i], "edge"))state.es |= WS_EX_CLIENTEDGE;
+    if(!strcmp(part[i], "sunken"))state.es |= WS_EX_STATICEDGE;
+    if(!strcmp(part[i], "edge"))state.es |= WS_EX_CLIENTEDGE;
   }
 
   hwnd = CreateWindowEx(state.es, "EDIT", text, state.ws,

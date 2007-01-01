@@ -268,7 +268,8 @@ void Cheat::disable(uint32 n) {
  * cheat file manipulation routines
  *****/
 
-bool Cheat::load(Reader &rf) {
+bool Cheat::load(const char *fn) {
+FileReader rf(fn);
   if(!rf.ready())return false;
 
 uint8 *raw_data = rf.read();
@@ -299,7 +300,8 @@ stringarray data, line;
   return true;
 }
 
-bool Cheat::save(Writer &wf) {
+bool Cheat::save(const char *fn) {
+FileWriter wf(fn);
   if(!wf.ready())return false;
 
 string data;

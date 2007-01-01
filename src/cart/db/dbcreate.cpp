@@ -8,7 +8,7 @@
 
 FILE *fp;
 
-uint decode_size(substring &str) {
+uint decode_size(string &str) {
 //hex encoding
   if(strbegin(str, "0x")) {
     strltrim(str, "0x");
@@ -31,8 +31,8 @@ uint decode_size(substring &str) {
   return strdec(str);
 }
 
-void build_block(substring &block) {
-string line, hashpart, part;
+void build_block(string &block) {
+stringarray line, hashpart, part;
   split(line, "\n", block);
 
   if(strbegin(line[0], "[") == false) {
@@ -58,26 +58,26 @@ db_item dbi;
       strset(line[i], pos, 0);
     }
 
-    if(strmatch(line[i], ""))continue;
+    if(line[i] == "")continue;
 
     split(part, "=", line[i]);
     strunquote(part[1]);
 
-    if(strmatch(part[0], "name")) {
+    if(part[0] == "name") {
       strncpy(dbi.name, strptr(part[1]), 128);
       dbi.name[128] = 0;
     }
 
-    if(strmatch(part[0], "pcb")) {
+    if(part[0] == "pcb") {
       strncpy(dbi.pcb, strptr(part[1]), 32);
       dbi.pcb[31] = 0;
     }
 
-    if(strmatch(part[0], "rom")) {
+    if(part[0] == "rom") {
       dbi.rom = decode_size(part[1]);
     }
 
-    if(strmatch(part[0], "ram")) {
+    if(part[0] == "ram") {
       dbi.ram = decode_size(part[1]);
     }
   }
@@ -89,7 +89,7 @@ db_item dbi;
 }
 
 void build_database() {
-string data, block;
+stringarray data, block;
   if(strfread(data, "cartdb.txt") == false)return;
 
   fp = fopen("cart.db", "wb");

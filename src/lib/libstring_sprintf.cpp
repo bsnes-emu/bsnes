@@ -8,7 +8,7 @@ uint length = vsprintf(str, s, args);
 
 uint vsprintf(string &str, const char *s, va_list args) {
 uint length = vsnprintf(0, 0, s, args);
-  strresize(str, length + 1);
+  str.reserve(length + 1);
   return vsprintf(strptr(str), s, args);
 }
 

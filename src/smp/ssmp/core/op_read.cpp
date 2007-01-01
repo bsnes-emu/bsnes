@@ -661,15 +661,6 @@ case 0x7a: {
   regs.ya = op_addw(regs.ya, rd);
 } break;
 
-//cmpw_ya_dp
-case 0x5a: {
-  dp  = op_readpc();
-  rd  = op_readdp(dp);
-  rd |= op_readdp(dp + 1) << 8;
-  op_io();
-  regs.ya = op_cmpw(regs.ya, rd);
-} break;
-
 //subw_ya_dp
 case 0x9a: {
   dp  = op_readpc();
@@ -677,6 +668,14 @@ case 0x9a: {
   rd |= op_readdp(dp + 1) << 8;
   op_io();
   regs.ya = op_subw(regs.ya, rd);
+} break;
+
+//cmpw_ya_dp
+case 0x5a: {
+  dp  = op_readpc();
+  rd  = op_readdp(dp);
+  rd |= op_readdp(dp + 1) << 8;
+  op_cmpw(regs.ya, rd);
 } break;
 
 //and1_bit

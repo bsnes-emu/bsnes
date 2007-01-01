@@ -31,13 +31,12 @@
 //irq.cpp
 enum { IRQ_TRIGGER_NEVER = 0x3fff };
   void   update_interrupts();
-  void   poll_interrupts(uint clocks);
-#ifdef FAVOR_SPEED
-  void   poll_interrupts_range(uint clocks);
-#endif
-  bool   nmi_edge();
-  bool   irq_edge();
-  void   irqpos_update(uint16 addr);
+  void   poll_interrupts();
+  void   nmitimen_update(uint8 data);
+  void   hvtime_update(uint16 addr);
+  bool   rdnmi();
+  bool   timeup();
+
   bool   irq_pos_valid();
   bool   nmi_test();
   bool   irq_test();

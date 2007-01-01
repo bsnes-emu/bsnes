@@ -14,7 +14,7 @@ void Setting::set(uint _data) {
   data = _data;
 
   switch(type) {
-  case TRUE_FALSE:
+  case BOOL:
   case ENABLED_DISABLED:
   case ON_OFF:
   case YES_NO:
@@ -32,22 +32,20 @@ void Setting::set(uint _data) {
   }
 }
 
-char *Setting::sget() {
+char *Setting::strget() {
   return strptr(char_data);
 }
 
-void Setting::sset(const char *_data) {
+void Setting::strset(const char *_data) {
   strcpy(char_data, _data);
-  strunquote(char_data);
 }
 
 Setting::Setting(Config *_parent, char *_name, char *_desc, uint _data, uint _type) {
-int s;
   if(_parent) {
     _parent->add(this);
   }
 
-  s = strlen(_name);
+uint s = strlen(_name);
   name = (char*)malloc(s + 1);
   strcpy(name, _name);
 
@@ -66,12 +64,11 @@ int s;
 }
 
 Setting::Setting(Config *_parent, char *_name, char *_desc, char *_data) {
-int s;
   if(_parent) {
     _parent->add(this);
   }
 
-  s = strlen(_name);
+uint s = strlen(_name);
   name = (char*)malloc(s + 1);
   strcpy(name, _name);
 
@@ -87,7 +84,7 @@ int s;
   strcpy(char_data, _data);
   strcpy(char_def,  _data);
 
-  type = STR;
+  type = STRING;
 }
 
 void Config::add(Setting *setting) {
@@ -95,18 +92,18 @@ void Config::add(Setting *setting) {
 }
 
 uint Config::string_to_uint(uint type, char *input) {
-  if(strmatch(input, "true") ||
-     strmatch(input, "enabled") ||
-     strmatch(input, "on") ||
-     strmatch(input, "yes")
+  if(!strcmp(input, "true") ||
+     !strcmp(input, "enabled") ||
+     !strcmp(input, "on") ||
+     !strcmp(input, "yes")
   ) {
     return (uint)true;
   }
 
-  if(strmatch(input, "false") ||
-     strmatch(input, "disabled") ||
-     strmatch(input, "off") ||
-     strmatch(input, "no")
+  if(!strcmp(input, "false") ||
+     !strcmp(input, "disabled") ||
+     !strcmp(input, "off") ||
+     !strcmp(input, "no")
   ) {
     return (uint)false;
   }
@@ -121,7 +118,7 @@ uint Config::string_to_uint(uint type, char *input) {
 char *Config::uint_to_string(uint type, uint input) {
 static char output[512];
   switch(type) {
-  case Setting::TRUE_FALSE:
+  case Setting::BOOL:
     sprintf(output, "%s", (input & 1) ? "true" : "false");
     break;
   case Setting::ENABLED_DISABLED:
@@ -144,7 +141,7 @@ static char output[512];
   return output;
 }
 
-bool Config::load(char *fn) {
+bool Config::load(const char *fn) {
 FILE *fp;
   fp = fopen(fn, "rb");
   if(!fp)return false;
@@ -172,11 +169,12 @@ char *buffer = (char*)malloc(fsize + 1);
 
     qsplit(part, "=", line[i]);
     for(int l = 0; l < list_count; l++) {
-      if(strmatch(list[l]->name, part[0])) {
+      if(!strcmp(list[l]->name, part[0])) {
         if(list[l]->type != Setting::STR) {
           list[l]->set(string_to_uint(list[l]->type, strptr(part[1])));
         } else {
-          list[l]->sset(strptr(part[1]));
+          list[l]->strset(strptr(part[1]));
+          strunquote(list[l]->char_data);
         }
       }
     }
@@ -186,7 +184,7 @@ char *buffer = (char*)malloc(fsize + 1);
 }
 bool Config::load(string &fn) { return load(strptr(fn)); }
 
-bool Config::save(char *fn) {
+bool Config::save(const char *fn) {
 FILE *fp;
   fp = fopen(fn, "wb");
   if(!fp)return false;
@@ -198,7 +196,7 @@ FILE *fp;
     for(int l = 0; l < count(line); l++) {
       fprintf(fp, "# %s\r\n", strptr(line[l]));
     }
-    if(list[i]->type != Setting::STR) {
+    if(list[i]->type != Setting::STRING) {
       fprintf(fp, "# (default = %s)\r\n", uint_to_string(list[i]->type, list[i]->def));
       fprintf(fp, "%s = %s\r\n\r\n", list[i]->name, uint_to_string(list[i]->type, list[i]->data));
     } else {
@@ -207,6 +205,7 @@ FILE *fp;
     }
   }
 
+  fclose(fp);
   return true;
 }
 bool Config::save(string &fn) { return save(strptr(fn)); }

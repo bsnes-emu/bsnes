@@ -1,26 +1,11 @@
-class bSNES : public SNES {
+class bSNES {
 public:
 enum { RUN, STOP };
-uint32 state;
-  uint32  get_state();
-  void    set_state(uint32 new_state);
-
-  void    power();
-  void    reset();
-
-  void    scanline();
-
-  void    run();
-  void    video_run();
-  void    sound_run(uint32 data);
-
-//video functions
-  uint16 *video_lock(uint &pitch);
-  void    video_unlock();
-
-//input functions
-  void    poll_input();
-  bool    get_input_status(uint8 deviceid, uint8 button);
+uint state;
+  uint get_state();
+  void set_state(uint new_state);
+  void run();
+  void video_run();
 
   bSNES() { state = RUN; }
-} *bsnes;
+} bsnes;

@@ -28,7 +28,7 @@ uint8 *JMAReader::read(uint32 length)
   return data;
 }
 
-JMAReader::JMAReader(char *fn) : JMAFile(fn), fsize(0)
+JMAReader::JMAReader(const char *fn) : JMAFile(fn), fsize(0)
 {
   std::vector<JMA::jma_public_file_info> file_info = JMAFile.get_files_info();
   for (std::vector<JMA::jma_public_file_info>::iterator i = file_info.begin(); i != file_info.end(); i++)

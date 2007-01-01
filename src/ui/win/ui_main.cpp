@@ -54,10 +54,10 @@ bool MainWindow::Event(EventInfo &info) {
     } else if(id == key->f11) {
       event::toggle_fullscreen();
     } else if(id == key->f12) {
-      if(bsnes->get_state() == bSNES::RUN) {
-        bsnes->set_state(bSNES::STOP);
-      } else if(bsnes->get_state() == bSNES::STOP) {
-        bsnes->set_state(bSNES::RUN);
+      if(bsnes.get_state() == bSNES::RUN) {
+        bsnes.set_state(bSNES::STOP);
+      } else if(bsnes.get_state() == bSNES::STOP) {
+        bsnes.set_state(bSNES::RUN);
       }
     //no idea why this is needed, keydown event should only occur once;
     //however it is being called repeatedly when F11 is held down ...
@@ -101,7 +101,15 @@ bool MainWindow::Event(EventInfo &info) {
     switch(info.control_id) {
 
     case MENU_FILE_LOAD: {
-      event::load_rom();
+      event::load_rom_normal();
+    } break;
+
+    case MENU_FILE_LOAD_ST: {
+      event::load_rom_st();
+    } break;
+
+    case MENU_FILE_LOAD_STDUAL: {
+      event::load_rom_stdual();
     } break;
 
     case MENU_FILE_UNLOAD: {
@@ -110,14 +118,14 @@ bool MainWindow::Event(EventInfo &info) {
 
     case MENU_FILE_RESET: {
       if(cartridge.loaded() == true) {
-        bsnes->reset();
+        snes.reset();
         dprintf("* Reset");
       }
     } break;
 
     case MENU_FILE_POWER: {
       if(cartridge.loaded() == true) {
-        bsnes->power();
+        snes.power();
         dprintf("* Power");
       }
     } break;
@@ -178,10 +186,10 @@ bool MainWindow::Event(EventInfo &info) {
     case MENU_MISC_LOGAUDIO: {
       if(MenuItemChecked(MENU_MISC_LOGAUDIO) == false) {
         CheckMenuItem(MENU_MISC_LOGAUDIO);
-        snes->log_audio_enable();
+        snes.log_audio_enable();
       } else {
         UncheckMenuItem(MENU_MISC_LOGAUDIO);
-        snes->log_audio_disable();
+        snes.log_audio_disable();
       }
     } break;
 
@@ -213,10 +221,14 @@ char t[128];
 
   AddMenuGroup("&File");
     AddMenuItem(MENU_FILE_LOAD,   "&Load Cartridge");
+    AddMenuGroup("&Load Special");
+      AddMenuItem(MENU_FILE_LOAD_ST, "&Load ST Cartridge");
+      AddMenuItem(MENU_FILE_LOAD_STDUAL, "&Load ST Dual Cartridges");
+    EndMenuGroup();
     AddMenuItem(MENU_FILE_UNLOAD, "&Unload Cartridge");
     AddMenuSeparator();
-    AddMenuItem(MENU_FILE_RESET,  "&Reset");
-    AddMenuItem(MENU_FILE_POWER,  "&Power (Hard Reset)");
+    AddMenuItem(MENU_FILE_RESET,  "&Reset System");
+    AddMenuItem(MENU_FILE_POWER,  "&Power Cycle System");
     AddMenuSeparator();
     AddMenuItem(MENU_FILE_EXIT,   "E&xit");
   EndMenuGroup();

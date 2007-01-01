@@ -214,14 +214,14 @@ case 0xfa: {
 case 0x8f: {
   rd = op_readpc();
   dp = op_readpc();
-  op_io();
+  op_readdp(dp);
   op_writedp(dp, rd);
 } break;
 
 //mov_ix_a
 case 0xc6: {
   op_io();
-  op_io();
+  op_readdp(regs.x);
   op_writedp(regs.x, regs.a);
 } break;
 
@@ -235,53 +235,56 @@ case 0xaf: {
 //mov_dp_a
 case 0xc4: {
   dp = op_readpc();
-  op_io();
+  op_readdp(dp);
   op_writedp(dp, regs.a);
 } break;
 
 //mov_dp_x
 case 0xd8: {
   dp = op_readpc();
-  op_io();
+  op_readdp(dp);
   op_writedp(dp, regs.x);
 } break;
 
 //mov_dp_y
 case 0xcb: {
   dp = op_readpc();
-  op_io();
+  op_readdp(dp);
   op_writedp(dp, regs.y);
 } break;
 
 //mov_dpx_a
 case 0xd4: {
-  dp = op_readpc();
+  dp  = op_readpc();
   op_io();
-  op_io();
-  op_writedp(dp + regs.x, regs.a);
+  dp += regs.x;
+  op_readdp(dp);
+  op_writedp(dp, regs.a);
 } break;
 
 //mov_dpy_x
 case 0xd9: {
-  dp = op_readpc();
+  dp  = op_readpc();
   op_io();
-  op_io();
-  op_writedp(dp + regs.y, regs.x);
+  dp += regs.y;
+  op_readdp(dp);
+  op_writedp(dp, regs.x);
 } break;
 
 //mov_dpx_y
 case 0xdb: {
-  dp = op_readpc();
+  dp  = op_readpc();
   op_io();
-  op_io();
-  op_writedp(dp + regs.x, regs.y);
+  dp += regs.x;
+  op_readdp(dp);
+  op_writedp(dp, regs.y);
 } break;
 
 //mov_addr_a
 case 0xc5: {
   dp  = op_readpc();
   dp |= op_readpc() << 8;
-  op_io();
+  op_readaddr(dp);
   op_writeaddr(dp, regs.a);
 } break;
 
@@ -289,7 +292,7 @@ case 0xc5: {
 case 0xc9: {
   dp  = op_readpc();
   dp |= op_readpc() << 8;
-  op_io();
+  op_readaddr(dp);
   op_writeaddr(dp, regs.x);
 } break;
 
@@ -297,7 +300,7 @@ case 0xc9: {
 case 0xcc: {
   dp  = op_readpc();
   dp |= op_readpc() << 8;
-  op_io();
+  op_readaddr(dp);
   op_writeaddr(dp, regs.y);
 } break;
 
@@ -306,8 +309,9 @@ case 0xd5: {
   dp  = op_readpc();
   dp |= op_readpc() << 8;
   op_io();
-  op_io();
-  op_writeaddr(dp + regs.x, regs.a);
+  dp += regs.x;
+  op_readaddr(dp);
+  op_writeaddr(dp, regs.a);
 } break;
 
 //mov_addry_a
@@ -315,28 +319,31 @@ case 0xd6: {
   dp  = op_readpc();
   dp |= op_readpc() << 8;
   op_io();
-  op_io();
-  op_writeaddr(dp + regs.y, regs.a);
+  dp += regs.y;
+  op_readaddr(dp);
+  op_writeaddr(dp, regs.a);
 } break;
 
 //mov_idpx_a
 case 0xc7: {
-  sp = op_readpc() + regs.x;
+  sp  = op_readpc();
   op_io();
+  sp += regs.x;
   dp  = op_readdp(sp);
   dp |= op_readdp(sp + 1) << 8;
-  op_io();
+  op_readaddr(dp);
   op_writeaddr(dp, regs.a);
 } break;
 
 //mov_idpy_a
 case 0xd7: {
-  sp = op_readpc();
-  op_io();
+  sp  = op_readpc();
   dp  = op_readdp(sp);
   dp |= op_readdp(sp + 1) << 8;
   op_io();
-  op_writeaddr(dp + regs.y, regs.a);
+  dp += regs.y;
+  op_readaddr(dp);
+  op_writeaddr(dp, regs.a);
 } break;
 
 //movw_ya_dp
@@ -352,7 +359,7 @@ case 0xba: {
 //movw_dp_ya
 case 0xda: {
   dp = op_readpc();
-  op_io();
+  op_readdp(dp);
   op_writedp(dp,     regs.a);
   op_writedp(dp + 1, regs.y);
 } break;

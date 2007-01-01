@@ -1,9 +1,9 @@
 class Scheduler {
 public:
 
-thread_t thread_snes;
-thread_t thread_cpu;
-thread_t thread_smp;
+cothread_t thread_snes;
+cothread_t thread_cpu;
+cothread_t thread_smp;
 
 enum ActiveThread {
   THREAD_CPU,
@@ -21,25 +21,25 @@ struct {
   alwaysinline void sync_cpusmp() {
     if(clock.cpusmp < 0) {
       clock.active = THREAD_SMP;
-      co_jump(thread_smp);
+      co_switch(thread_smp);
     }
   }
 
   alwaysinline void sync_smpcpu() {
     if(clock.cpusmp >= 0) {
       clock.active = THREAD_CPU;
-      co_jump(thread_cpu);
+      co_switch(thread_cpu);
     }
   }
 
   alwaysinline void addclocks_cpu(uint clocks) {
     clock.cpusmp -= clocks * (uint64)clock.smp_freq;
-    if(clock.cpusmp < -(275000 * (int64)24000000))sync_cpusmp();
+    if(clock.cpusmp < -(250000 * (int64)20000000))sync_cpusmp();
   }
 
   alwaysinline void addclocks_smp(uint clocks) {
     clock.cpusmp += clocks * (uint64)clock.cpu_freq;
-    if(clock.cpusmp > +(275000 * (int64)24000000))sync_smpcpu();
+    if(clock.cpusmp > +(250000 * (int64)20000000))sync_smpcpu();
   }
 
   void enter();

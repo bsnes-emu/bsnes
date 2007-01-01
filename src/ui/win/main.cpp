@@ -64,7 +64,7 @@ string t;
   }
 
   if(strend(t, "/") == false) { strcat(t, "/"); }
-  config::fs.base_path.sset(strptr(t));
+  config::path.base = strptr(t);
 }
 
 int __stdcall WinMain(HINSTANCE hinstance, HINSTANCE hprevinstance, LPSTR lpcmdline, int ncmdshow) {
@@ -73,7 +73,7 @@ int __stdcall WinMain(HINSTANCE hinstance, HINSTANCE hprevinstance, LPSTR lpcmdl
   get_base_path();
 
 string cfg_fn;
-  strcpy(cfg_fn, config::fs.base_path.sget());
+  strcpy(cfg_fn, config::path.base);
   strcat(cfg_fn, "bsnes.cfg");
   config_file.load(cfg_fn);
 
@@ -81,9 +81,10 @@ string cfg_fn;
   init_ui();
 
   if(__argc >= 2) {
-    if(cartridge.load(__argv[1]) == true) {
-      snes->power();
-    }
+    cartridge.load_begin(Cartridge::CART_NORMAL);
+    cartridge.load(__argv[1]);
+    cartridge.load_end();
+    snes.power();
   }
 
 MSG msg;
@@ -93,7 +94,7 @@ MSG msg;
       TranslateMessage(&msg);
       DispatchMessage(&msg);
     }
-    bsnes->run();
+    bsnes.run();
   }
 
 end:

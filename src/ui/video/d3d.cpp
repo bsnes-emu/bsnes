@@ -168,14 +168,15 @@ D3DLOCKED_RECT     d3dlr;
   }
 }
 
-uint16 *VideoD3D::lock(uint &pitch) {
+bool VideoD3D::lock(uint16 *&data, uint &pitch) {
   if(caps.stretchrect == false) {
     texture->GetLevelDesc(0, &d3dsd);
     texture->GetSurfaceLevel(0, &surface);
   }
   surface->LockRect(&d3dlr, 0, flags.lock);
   pitch = d3dlr.Pitch;
-  return (uint16*)d3dlr.pBits;
+  data = (uint16*)d3dlr.pBits;
+  return data;
 }
 
 void VideoD3D::unlock() {
@@ -291,7 +292,7 @@ void VideoD3D::redraw() {
   if(!device)return;
 
   device->BeginScene();
-  snes->get_video_info(&vi);
+  snes.get_video_info(&vi);
 
   if(caps.stretchrect == true) {
   RECT rs, rd;
@@ -343,7 +344,7 @@ char fn[4096];
 int i;
   for(i = 0; i <= 999; i++) {
   //should probably check the length of config::misc.image_format here...
-    sprintf(fn, "image%0.3d.%s", i, config::misc.image_format.sget());
+    sprintf(fn, "image%0.3d.%s", i, config::misc.image_format.strget());
     fp = fopen(fn, "rb");
     if(!fp)break;
     fclose(fp);
@@ -352,9 +353,9 @@ int i;
   if(i >= 1000)return false;
 
 uint32 format;
-  if(strmatch(config::misc.image_format.sget(), "bmp")) {
+  if(!strcmp(config::misc.image_format.strget(), "bmp")) {
     format = D3DXIFF_BMP;
-  } else if(strmatch(config::misc.image_format.sget(), "jpg")) {
+  } else if(!strcmp(config::misc.image_format.strget(), "jpg")) {
     format = D3DXIFF_JPG;
   } else {
     format = D3DXIFF_PNG;

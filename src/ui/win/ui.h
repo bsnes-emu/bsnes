@@ -12,6 +12,10 @@ Font vwf, fwf, font_about, font_header, font_list;
 enum {
 MENU_FILE = 100,
   MENU_FILE_LOAD,
+  MENU_FILE_LOAD_SPECIAL,
+  //---
+    MENU_FILE_LOAD_ST,
+    MENU_FILE_LOAD_STDUAL,
   MENU_FILE_UNLOAD,
   MENU_FILE_RESET,
   MENU_FILE_POWER,

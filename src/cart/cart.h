@@ -15,10 +15,15 @@ db_item dbi;
 
 //
 
-bool cart_loaded;
-char rom_fn[4096], sram_fn[4096], cheat_fn[4096], patch_fn[4096];
+enum {
+  CART_NORMAL,
+  CART_ST,
+  CART_STDUAL,
+};
 
-uint8 rom_header[512], *rom, *sram;
+bool cart_loaded;
+
+uint8 rom_header[512], *rom, *ram;
 
 enum {
 //header fields
@@ -26,7 +31,7 @@ enum {
   MAPPER    = 0x15,
   ROM_TYPE  = 0x16,
   ROM_SIZE  = 0x17,
-  SRAM_SIZE = 0x18,
+  RAM_SIZE  = 0x18,
   REGION    = 0x19,
   LICENSE   = 0x1a,
   VERSION   = 0x1b,
@@ -53,6 +58,17 @@ enum {
 };
 
 struct {
+  uint   count;
+  char   cheat_name[4096], patch_name[4096];
+  char   rom_name[8][4096], ram_name[8][4096];
+  uint   rom_size[8],  ram_size[8];
+  uint8 *rom_data[8], *ram_data[8];
+} file;
+
+struct {
+  uint   type;
+
+//cart information
   uint32 crc32;
   char   name[128];
   char   pcb[32];
@@ -78,15 +94,28 @@ struct {
   uint   header_index;
 } info;
 
-  void load_rom(Reader &rf);
-  void patch_rom(Reader &rf);
-  void load_sram();
-  void save_sram();
-  void read_dbi();
+  bool load_file(const char *fn, uint8 *&data, uint &size);
+  bool save_file(const char *fn, uint8 *data, uint size);
+
+  void load_rom_normal();
+  void load_ram_normal();
+  void save_ram_normal();
+
+  void load_rom_st();
+  void load_ram_st();
+  void save_ram_st();
+
+  void load_rom_stdual();
+  void load_ram_stdual();
+  void save_ram_stdual();
+
   void find_header();
   void read_header();
+
   bool loaded() { return cart_loaded; }
-  bool load(const char *fn);
+  void load_begin(uint cart_type);
+  void load(const char *rom_fn);
+  bool load_end();
   bool unload();
 
   Cartridge();

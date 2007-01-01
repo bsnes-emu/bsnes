@@ -26,4 +26,6 @@ enum {
   mapper(bsc_1a5m_01);
   mapper(bsc_1a7m_01);
   mapper(bsc_1a7m_10);
+  mapper(stc_solo);
+  mapper(stc_dual);
 #undef mapper

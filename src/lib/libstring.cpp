@@ -1,5 +1,6 @@
 #include "libbase.h"
 #include "libstring.h"
+#include "libstring_oo.cpp"
 
 uint count(stringarray &str) { return str.size(); }
 
@@ -11,12 +12,6 @@ char chrlower(char c) {
 char chrupper(char c) {
   if(c >= 'a' && c <= 'z')return c - ('a' - 'A');
   return c;
-}
-
-void strresize(string &str, uint size) {
-  str.s = (char*)realloc(str.s, size + 1);
-  str.s[size] = 0;
-  str.size = size;
 }
 
 char *strptr(string &str) { return str.s; }
@@ -39,49 +34,41 @@ int stricmp(string &dest, const char *src) { return __stricmp(strptr(dest), src)
 int stricmp(const char *dest, string &src) { return __stricmp(dest, strptr(src)); }
 int stricmp(string &dest, string &src) { return __stricmp(strptr(dest), strptr(src)); }
 
-bool strmatch(const char *dest, const char *src) { return !strcmp(dest, src); }
-bool strmatch(string &dest, const char *src) { return strmatch(strptr(dest), src); }
-bool strmatch(const char *dest, string &src) { return strmatch(dest, strptr(src)); }
-bool strmatch(string &dest, string &src) { return strmatch(strptr(dest), strptr(src)); }
-
-bool strimatch(const char *dest, const char *src) { return !stricmp(dest, src); }
-bool strimatch(string &dest, const char *src) { return strimatch(strptr(dest), src); }
-bool strimatch(const char *dest, string &src) { return strimatch(dest, strptr(src)); }
-bool strimatch(string &dest, string &src) { return strimatch(strptr(dest), strptr(src)); }
-
 void strcpy(string &dest, const char src) {
-  if(1 > dest.size) { strresize(dest, 1); }
+  dest.reserve(2);
   dest.s[0] = src;
   dest.s[1] = 0;
 }
 
 void strcpy(string &dest, const char *src) {
 int srclen = strlen(src);
-  if(srclen > dest.size) { strresize(dest, srclen); }
+  dest.reserve(srclen);
   strcpy(dest.s, src);
 }
 void strcpy(string &dest, string &src) { strcpy(dest, strptr(src)); }
 
-//this differs from libc's strncpy in that it always
-//appends a null terminator to the end of a copied string
-void strncpy(string &dest, const char *src, uint32 length) {
-int srclen = strlen(src);
-//never copy more text than is in the string
-  if(srclen > length)srclen = length;
-  if(srclen > dest.size) { strresize(dest, srclen); }
-  strncpy(dest.s, src, srclen);
-  dest.s[srclen] = 0;
+uint strlcpy(char *dest, const char *src, uint length) {
+uint srclen = strlen(src);
+  length--;
+  if(length > srclen)length = srclen;
+  memcpy(dest, src, length);
+  dest[length] = 0;
+  return srclen;
 }
-void strncpy(string &dest, string &src, uint32 length) { strncpy(dest, strptr(src), length); }
 
-void strset(string &dest, uint pos, uint8 c) {
-  if(pos > dest.size) { strresize(dest, pos); }
-  dest.s[pos] = c;
+uint strlcpy(string &dest, const char *src, uint length) {
+  dest.reserve(length);
+  return strlcpy(strptr(dest), src, length);
+}
+
+uint strlcpy(string &dest, string &src, uint length) {
+  dest.reserve(length);
+  return strlcpy(strptr(dest), strptr(src), length);
 }
 
 void strcat(string &dest, const char src) {
 int length = strlen(dest);
-  if(length + 1 > dest.size) { strresize(dest, length + 1); }
+  dest.reserve(length + 1);
   dest.s[length]     = src;
   dest.s[length + 1] = 0;
 }
@@ -89,32 +76,62 @@ int length = strlen(dest);
 void strcat(string &dest, const char *src) {
 int srclen  = strlen(src);
 int destlen = strlen(dest);
-  if(srclen + destlen > dest.size) { strresize(dest, srclen + destlen); }
+  dest.reserve(srclen + destlen);
   strcat(dest.s, src);
 }
 void strcat(string &dest, string &src) { strcat(dest, strptr(src)); }
 
+uint strlcat(char *dest, const char *src, uint length) {
+uint destlen = strlen(dest), srclen = strlen(src);
+  length--;
+  if(length > destlen + srclen)length = destlen + srclen;
+  memcpy(dest + destlen, src, length - destlen);
+  dest[length] = 0;
+  return destlen + srclen;
+}
+
+uint strlcat(string &dest, const char *src, uint length) {
+  dest.reserve(length);
+  return strlcat(strptr(dest), src, length);
+}
+
+uint strlcat(string &dest, string &src, uint length) {
+  dest.reserve(length);
+  return strlcat(strptr(dest), strptr(src), length);
+}
+
+string substr(string &dest, const char *src, uint start, uint length) {
+string temp;
+  if(length == 0) {
+  //copy entire string
+    strcpy(temp, src + start);
+  } else {
+  //copy partial string
+    strlcpy(temp, src + start, length + 1);
+  }
+  return temp;
+}
+
+string substr(string &dest, string &src, uint start, uint length) { return substr(dest, strptr(src), start, length); }
+
 void strinsert(string &dest, const char *src, uint pos) {
-static string s;
-  strcpy(s, strptr(dest) + pos);
-  strset(dest, pos, 0);
+string temp;
+  strcpy(temp, strptr(dest) + pos);
+  dest[pos] = 0;
   strcat(dest, src);
-  strcat(dest, s);
+  strcat(dest, temp);
 }
 void strinsert(string &dest, string &src, uint pos) { strinsert(dest, strptr(src), pos); }
 
 void strremove(string &dest, uint start, uint length) {
-int destlen;
-char *s;
-int i, sl = strlen(dest.s);
-  if(start > dest.size) { strresize(dest, start); }
+int i, destlen = strlen(dest);
+  dest.reserve(start);
   if(!length) {
-    strset(dest, start, 0);
+    dest[start] = 0;
     return;
   }
-  s = dest.s;
-  for(i=start;i<sl;i++) { s[i] = s[i+length]; }
-  s[i] = 0;
+  for(i = start; i < destlen; i++) { dest.s[i] = dest.s[i + length]; }
+  dest.s[i] = 0;
 }
 
 char *strlower(char *str) {
@@ -401,7 +418,7 @@ uint mask = 1000000000;
 }
 
 string &utoa(string &str, uint num) {
-  if(str.size < 16) { strresize(str, 16); }
+  str.reserve(16);
   utoa(strptr(str), num);
   return str;
 }
@@ -418,7 +435,7 @@ char *pstr = str;
 }
 
 string &itoa(string &str, uint num) {
-  if(str.size < 16) { strresize(str, 16); }
+  str.reserve(16);
   itoa(strptr(str), num);
   return str;
 }
@@ -441,7 +458,7 @@ uint mask = 28, r;
 }
 
 string &htoa(string &str, uint num) {
-  if(str.size < 16) { strresize(str, 16); }
+  str.reserve(16);
   htoa(strptr(str), num);
   return str;
 }
@@ -464,7 +481,7 @@ uint mask = 28, r;
 }
 
 string &uhtoa(string &str, uint num) {
-  if(str.size < 16) { strresize(str, 16); }
+  str.reserve(16);
   uhtoa(strptr(str), num);
   return str;
 }
@@ -485,7 +502,7 @@ uint mask = 0x80000000;
 }
 
 string &btoa(string &str, uint num) {
-  if(str.size < 48) { strresize(str, 48); }
+  str.reserve(48);
   btoa(strptr(str), num);
   return str;
 }
@@ -507,6 +524,7 @@ char *fdata = (char*)malloc(size + 1);
   return true;
 }
 
+#include "libstring_int.cpp"
 #include "libstring_math.cpp"
 #include "libstring_split.cpp"
 #include "libstring_replace.cpp"

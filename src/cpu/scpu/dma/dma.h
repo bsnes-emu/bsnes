@@ -45,6 +45,7 @@ struct {
   bool   hdma_do_transfer;
 } channel[8];
 
+  void   dma_add_clocks(uint clocks);
   void   dma_transfer(bool direction, uint8 bbus, uint32 abus);
 
   uint8  dma_bbus(uint8 i, uint8 index);

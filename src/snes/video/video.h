@@ -47,17 +47,14 @@ struct video_info {
 //public functions
   void update_color_lookup_table();
 
-  virtual void    set_video_format(uint filter, uint video_standard, uint pixel_format);
-  virtual void    get_video_info(video_info *info);
-  virtual void    video_run() = 0;
-  virtual uint16 *video_lock(uint &pitch) = 0;
-  virtual void    video_unlock() = 0;
+  void set_video_format(uint filter, uint video_standard, uint pixel_format);
+  void get_video_info(video_info *info);
 
 //private functions
 private:
-  void   update_video_format();
-  void   video_normalize();
-  void   video_update();
-  void   video_scanline();
-  void   video_init();
+  void update_video_format();
+  void video_normalize();
+  void video_update();
+  void video_scanline();
+  void video_init();
 public:

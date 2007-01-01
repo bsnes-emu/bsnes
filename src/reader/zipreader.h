@@ -15,7 +15,7 @@ public:
   uint32 size();
   uint8 *read(uint32 length = 0);
 
-  ZipReader(char *fn);
+  ZipReader(const char *fn);
   ~ZipReader()
   {
     if (zipfile)

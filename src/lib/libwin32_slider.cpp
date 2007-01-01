@@ -28,13 +28,13 @@ bool Slider::Create(Window *parent_window, const char *style, int x, int y, int 
 stringarray part;
   ParseStyleParam(style, part);
   for(int i = 0; i < count(part); i++) {
-    if(strmatch(part[i], "visible"))state.ws |= WS_VISIBLE;
-    if(strmatch(part[i], "disabled"))state.ws |= WS_DISABLED;
-    if(strmatch(part[i], "border"))state.ws |= WS_BORDER;
-    if(strmatch(part[i], "raised"))state.ws |= WS_DLGFRAME;
+    if(!strcmp(part[i], "visible"))state.ws |= WS_VISIBLE;
+    if(!strcmp(part[i], "disabled"))state.ws |= WS_DISABLED;
+    if(!strcmp(part[i], "border"))state.ws |= WS_BORDER;
+    if(!strcmp(part[i], "raised"))state.ws |= WS_DLGFRAME;
 
-    if(strmatch(part[i], "sunken"))state.es |= WS_EX_STATICEDGE;
-    if(strmatch(part[i], "edge"))state.es |= WS_EX_CLIENTEDGE;
+    if(!strcmp(part[i], "sunken"))state.es |= WS_EX_STATICEDGE;
+    if(!strcmp(part[i], "edge"))state.es |= WS_EX_CLIENTEDGE;
   }
 
   hwnd = CreateWindowEx(state.es, TRACKBAR_CLASS, text, state.ws,

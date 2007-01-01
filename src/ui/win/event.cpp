@@ -36,7 +36,7 @@ string t;
     wMain.HideMenu();
     HideCursor();
   } else {
-    strcpy(t, config::misc.window_style.sget());
+    strcpy(t, config::misc.window_style);
     if(wMain.Visible())strcat(t, "|visible");
     wMain.ShowMenu();
     ShowCursor();
@@ -57,12 +57,11 @@ void toggle_fullscreen() {
   event::set_video_profile(config::video.profile);
 }
 
-void load_rom() {
+bool load_rom(char *fn) {
 OPENFILENAME ofn;
-char t[MAX_PATH];
 stringarray dir;
-  strcpy(t, "");
-  strcpy(dir, config::fs.rom_path.sget());
+  strcpy(fn, "");
+  strcpy(dir, config::path.rom);
   replace(dir, "\\", "/");
   if(strlen(dir) && !strend(dir, "/")) { strcat(dir, "/"); }
 
@@ -70,7 +69,7 @@ stringarray dir;
   if(strbegin(dir, "./")) {
     strltrim(dir, "./");
     strcpy(dir[1], dir[0]);
-    strcpy(dir[0], config::fs.base_path.sget());
+    strcpy(dir[0], config::path.base);
     strcat(dir[0], dir[1]);
   }
 
@@ -81,7 +80,7 @@ stringarray dir;
 
   ofn.lStructSize = sizeof(ofn);
   ofn.hwndOwner   = wMain.hwnd;
-  ofn.lpstrFilter = "SNES ROM Images (*.smc;*.sfc;*.swc;*.fig;*.ufo;*.gd3;*.078"
+  ofn.lpstrFilter = "SNES ROM Images (*.smc;*.sfc;*.swc;*.fig;*.ufo;*.gd3;*.078;*.st"
 #ifdef GZIP_SUPPORT
                       ";.gz;.z;.zip"
 #endif
@@ -89,7 +88,7 @@ stringarray dir;
                       ";.jma"
 #endif
                       ")\0"
-                      "*.smc;*.sfc;*.swc;*.fig;*.ufo;*.gd3;*.078"
+                      "*.smc;*.sfc;*.swc;*.fig;*.ufo;*.gd3;*.078;*.st"
 #ifdef GZIP_SUPPORT
                       ";*.gz;*.z;*.zip"
 #endif
@@ -99,21 +98,61 @@ stringarray dir;
                       "\0"
                     "All Files (*.*)\0"
                       "*.*\0";
-  ofn.lpstrFile       = t;
+  ofn.lpstrFile       = fn;
   ofn.lpstrInitialDir = strptr(dir);
   ofn.nMaxFile        = MAX_PATH;
   ofn.Flags           = OFN_EXPLORER | OFN_FILEMUSTEXIST;
   ofn.lpstrDefExt     = "smc";
 
-  if(!GetOpenFileName(&ofn))return;
+  if(!GetOpenFileName(&ofn))return false;
+  return true;
+}
+
+void load_rom_normal() {
+char fn[MAX_PATH];
+  if(load_rom(fn) == false)return;
 
   if(cartridge.loaded() == true)cartridge.unload();
   wDebug.Clear();
 
-  if(cartridge.load(t) == false)return;
-  wCheatEditor.Refresh();
+  cartridge.load_begin(Cartridge::CART_NORMAL);
+  cartridge.load(fn);
+  cartridge.load_end();
+  snes.power();
 
-  bsnes->power();
+  wCheatEditor.Refresh();
+}
+
+void load_rom_st() {
+char fn[MAX_PATH];
+  if(load_rom(fn) == false)return;
+
+  if(cartridge.loaded() == true)cartridge.unload();
+  wDebug.Clear();
+
+  cartridge.load_begin(Cartridge::CART_ST);
+  cartridge.load(fn);
+  cartridge.load_end();
+  snes.power();
+
+  wCheatEditor.Refresh();
+}
+
+void load_rom_stdual() {
+char fn_a[MAX_PATH], fn_b[MAX_PATH];
+  if(load_rom(fn_a) == false)return;
+  if(load_rom(fn_b) == false)return;
+
+  if(cartridge.loaded() == true)cartridge.unload();
+  wDebug.Clear();
+
+  cartridge.load_begin(Cartridge::CART_STDUAL);
+  cartridge.load(fn_a);
+  cartridge.load(fn_b);
+  cartridge.load_end();
+  snes.power();
+
+  wCheatEditor.Refresh();
 }
 
 void unload_rom() {

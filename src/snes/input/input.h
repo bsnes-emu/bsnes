@@ -28,13 +28,5 @@ struct {
 
   bool port_read(bool port);
   void port_set_deviceid(bool port, uint deviceid);
-
-//The CPU calls poll_input() when the main interface should check the
-//status of all joypad buttons and cache the results...
-  virtual void poll_input();
-
-//...and then the CPU calls get_input_status() whenever it needs one
-//of the cached button values to be returned for emulation purposes.
-  virtual bool get_input_status(uint8 device, uint8 button) { return false; }
-
-  virtual void input_init();
+  void input_init();
+  void poll_input();

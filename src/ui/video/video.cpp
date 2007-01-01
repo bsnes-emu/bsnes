@@ -3,8 +3,8 @@ stringarray line, part;
   if(profile >= VIDEO_PROFILE_COUNT)profile = 0;
 
   switch(profile) {
-  case 0: strcpy(line, config::video.profile_win.sget());  break;
-  case 1: strcpy(line, config::video.profile_full.sget()); break;
+  case 0: strcpy(line, config::video.profile_win.strget());  break;
+  case 1: strcpy(line, config::video.profile_full.strget()); break;
   }
 
   split(part, ";", line);
@@ -14,13 +14,13 @@ int i = 0;
   v->hardware_filter      = strdec(part[i++]);
   v->video_standard       = strdec(part[i++]);
   v->multiplier           = strdec(part[i++]);
-  v->correct_aspect_ratio = strmatch(part[i++], "true");
-  v->enable_scanlines     = strmatch(part[i++], "true");
-  v->manual_render_size   = strmatch(part[i++], "true");
+  v->correct_aspect_ratio = !strcmp(part[i++], "true");
+  v->enable_scanlines     = !strcmp(part[i++], "true");
+  v->manual_render_size   = !strcmp(part[i++], "true");
   v->render_width         = strdec(part[i++]);
   v->render_height        = strdec(part[i++]);
   v->fullscreen           = (profile == 1);
-  v->triple_buffering     = strmatch(part[i++], "true");
+  v->triple_buffering     = !strcmp(part[i++], "true");
   v->resolution_width     = strdec(part[i++]);
   v->resolution_height    = strdec(part[i++]);
   v->refresh_rate         = strdec(part[i++]);
@@ -53,8 +53,8 @@ VideoSettings *v = &video_settings[profile];
   sprintf(part, "%d", v->refresh_rate);                            strcat(line, part);
 
   switch(profile) {
-  case 0: config::video.profile_win.sset(strptr(line));  break;
-  case 1: config::video.profile_full.sset(strptr(line)); break;
+  case 0: config::video.profile_win.strset(strptr(line));  break;
+  case 1: config::video.profile_full.strset(strptr(line)); break;
   }
 }
 
@@ -64,7 +64,7 @@ uint profile = uint(config::video.profile);
 
   load_video_settings(profile);
 VideoSettings *v = &video_settings[profile];
-  snes->set_video_format(v->software_filter, v->video_standard, SNES::PIXELFORMAT_RGB565);
+  snes.set_video_format(v->software_filter, v->video_standard, SNES::PIXELFORMAT_RGB565);
 
   if(v->manual_render_size == true) {
     settings.render_width  = v->render_width;

@@ -9,7 +9,7 @@ enum {
 
 //attemps to determine filetype by extension,
 //RF_NORMAL is returned on failure as a failsafe
-  static uint32 detect(char *fn);
+  static uint detect(const char *fn);
   virtual uint32 size() = 0;
 
 //return is 0 on failure, caller must deallocate memory manually

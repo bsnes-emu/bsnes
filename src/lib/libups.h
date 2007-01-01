@@ -226,33 +226,33 @@ uint ptr = 0;
 template<typename FTO, typename FTM, typename FTP>
 void UPS<FTO, FTM, FTP>::ptr_write(uint ptr) {
   if(ptr <= 0xf7) {
-    fputc(patch.fp, ptr);
+    fputb(patch.fp, ptr);
     return;
   }
 
   ptr -= 0xf8;
   if(ptr <= 0xffff) {
-    fputc(patch.fp, 0xf8);
-    fputc(patch.fp, ptr);
-    fputc(patch.fp, ptr >> 8);
+    fputb(patch.fp, 0xf8);
+    fputb(patch.fp, ptr);
+    fputb(patch.fp, ptr >> 8);
     return;
   }
 
   ptr -= 0x10000;
   if(ptr <= 0xffffff) {
-    fputc(patch.fp, 0xf9);
-    fputc(patch.fp, ptr);
-    fputc(patch.fp, ptr >> 8);
-    fputc(patch.fp, ptr >> 16);
+    fputb(patch.fp, 0xf9);
+    fputb(patch.fp, ptr);
+    fputb(patch.fp, ptr >> 8);
+    fputb(patch.fp, ptr >> 16);
     return;
   }
 
   ptr -= 0x1000000;
-  fputc(patch.fp, 0xfa);
-  fputc(patch.fp, ptr);
-  fputc(patch.fp, ptr >> 8);
-  fputc(patch.fp, ptr >> 16);
-  fputc(patch.fp, ptr >> 24);
+  fputb(patch.fp, 0xfa);
+  fputb(patch.fp, ptr);
+  fputb(patch.fp, ptr >> 8);
+  fputb(patch.fp, ptr >> 16);
+  fputb(patch.fp, ptr >> 24);
 }
 
 template<typename FTO, typename FTM, typename FTP>
@@ -298,14 +298,14 @@ uint last_ptr = 0, rle_count, last_out, rep_count;
     ptr_write((i - 1) - last_ptr);
 
   //data
-    fputc(patch.fp, r);
+    fputb(patch.fp, r);
     last_out  = r;
     rep_count = 0;
 
     do {
       r = fgetc(original) ^ fgetc(modified);
       i++;
-      fputc(patch.fp, r);
+      fputb(patch.fp, r);
 
       if(last_out != r) {
         rep_count = 0;
@@ -319,7 +319,7 @@ uint last_ptr = 0, rle_count, last_out, rep_count;
           } while(i < largest_filesize);
 
           ptr_write(rle_count);
-          if(i < largest_filesize) { fputc(patch.fp, r); }
+          if(i < largest_filesize) { fputb(patch.fp, r); }
           rep_count = 0;
         }
       }
@@ -331,7 +331,7 @@ uint last_ptr = 0, rle_count, last_out, rep_count;
     last_ptr = i;
   }
 
-  fputc(patch.fp, 0xff);
+  fputb(patch.fp, 0xff);
 }
 
 template<typename FTO, typename FTM, typename FTP>
@@ -385,7 +385,7 @@ void UPS<FTO, FTM, FTP>::apply_linear() {
   fseek(original, 0, file::seek_start);
   fseek(modified, 0, file::seek_start);
   for(uint i = 0; i < modified_filesize; i++) {
-    fputc(modified, fgetc(original));
+    fputb(modified, fgetc(original));
   }
 
   fseek(original, 0, file::seek_start);
@@ -408,14 +408,14 @@ uint rle_count, last_in, rep_count;
       if(ftell(modified) >= modified_filesize) { break; }
 
     uint8 r = fgetc(patch.fp);
-      fputc(modified, r ^ fgetc(original));
+      fputb(modified, r ^ fgetc(original));
       if(r != last_in) {
         rep_count = 0;
       } else {
         if(++rep_count == (3 - 1)) {
           rle_count = ptr_read();
           while(rle_count-- && ftell(modified) < modified_filesize) {
-            fputc(modified, r ^ fgetc(original));
+            fputb(modified, r ^ fgetc(original));
           }
           rep_count = 0;
         }

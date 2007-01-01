@@ -25,26 +25,16 @@ endif
 ifeq ($(PLATFORM),win-visualc)
 OS = win
 CC = cl
-CFLAGS = /nologo /O2 /EHsc /arch:SSE2 /DPLATFORM_WIN /DCOMPILER_VISUALC /DPROCESSOR_X86 /DUI_WIN
+CFLAGS = /nologo /wd4996 /O2 /EHsc /DPLATFORM_WIN /DCOMPILER_VISUALC /DPROCESSOR_X86 /DUI_WIN
 AS = nasm
 ASFLAGS = -f win32 -DWIN32
 LIBS = d3d9.lib ddraw.lib dsound.lib dinput8.lib dxguid.lib
-endif
-
-ifeq ($(PLATFORM),win-visualc-wip)
-OS = win
-CC = cl
-CFLAGS = /nologo /O2 /GL /EHsc /DPLATFORM_WIN /DCOMPILER_VISUALC /DPROCESSOR_X86 /DUI_WIN
-AS = nasm
-ASFLAGS = -f win32 -DWIN32
-LIBS = d3d9.lib ddraw.lib dsound.lib dinput8.lib dxguid.lib
-LINK = /link /LTCG
 endif
 
 ifeq ($(PLATFORM),win-visualc-pgi)
 OS = win
 CC = cl
-CFLAGS = /nologo /O2 /GL /EHsc /DPLATFORM_WIN /DCOMPILER_VISUALC /DPROCESSOR_X86 /DUI_WIN
+CFLAGS = /nologo /wd4996 /O2 /GL /EHsc /DPLATFORM_WIN /DCOMPILER_VISUALC /DPROCESSOR_X86 /DUI_WIN
 AS = nasm
 ASFLAGS = -f win32 -DWIN32
 LIBS = d3d9.lib ddraw.lib dsound.lib dinput8.lib dxguid.lib
@@ -54,7 +44,7 @@ endif
 ifeq ($(PLATFORM),win-visualc-pgo)
 OS = win
 CC = cl
-CFLAGS = /nologo /O2 /GL /EHsc /DPLATFORM_WIN /DCOMPILER_VISUALC /DPROCESSOR_X86 /DUI_WIN
+CFLAGS = /nologo /wd4996 /O2 /GL /EHsc /DPLATFORM_WIN /DCOMPILER_VISUALC /DPROCESSOR_X86 /DUI_WIN
 AS = nasm
 ASFLAGS = -f win32 -DWIN32
 LIBS = d3d9.lib ddraw.lib dsound.lib dinput8.lib dxguid.lib
@@ -64,7 +54,7 @@ endif
 ifeq ($(PLATFORM),win-visualc-sdl)
 OS = win
 CC = cl
-CFLAGS = /nologo /O2 /EHsc /DPLATFORM_WIN /DCOMPILER_VISUALC /DPROCESSOR_X86 /DUI_SDL
+CFLAGS = /nologo /wd4996 /O2 /EHsc /DPLATFORM_WIN /DCOMPILER_VISUALC /DPROCESSOR_X86 /DUI_SDL
 AS = nasm
 ASFLAGS = -f win32 -DWIN32
 LIBS = sdlmain.lib sdl.lib dsound.lib

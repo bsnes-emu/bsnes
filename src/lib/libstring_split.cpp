@@ -5,7 +5,7 @@ int ssl = strlen(src), ksl = strlen(key);
 int lp = 0, split_count = 0;
   for(int i = 0; i <= ssl - ksl;) {
     if(!memcmp(src + i, key, ksl)) {
-      strncpy(dest[split_count++], src + lp, i - lp);
+      strlcpy(dest[split_count++], src + lp, i - lp + 1);
       i += ksl;
       lp = i;
     } else i++;
@@ -27,7 +27,7 @@ int lp = 0, split_count = 0;
       if(i >= ssl)i = z;
     }
     if(!memcmp(src + i, key, ksl)) {
-      strncpy(dest[split_count++], src + lp, i - lp);
+      strlcpy(dest[split_count++], src + lp, i - lp + 1);
       i += ksl;
       lp = i;
     } else i++;

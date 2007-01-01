@@ -14,7 +14,8 @@ alwaysinline void sSMP::add_clocks(uint clocks) {
   //1024000 / 768 = 32000 DSP ticks/second
     if(++status.dsp_counter == 32) {
       status.dsp_counter = 0;
-      snes->audio_update(r_dsp->run());
+    uint32 sample = r_dsp->run();
+      snes.audio_update( (sample & 0xffff), (sample >> 16) );
     }
   }
 }

@@ -2,10 +2,12 @@ extern Config config_file;
 
 namespace config {
 
-extern struct FS {
-  static Setting base_path, rom_path, save_path;
+string file_updatepath(const char *, const char *);
+
+extern struct Path {
+  static Setting base, rom, save, bios;
   static Setting save_ext;
-} fs;
+} path;
 
 extern struct SNES {
   static Setting gamma_ramp, sepia, grayscale, invert, contrast, brightness, gamma;
@@ -25,9 +27,12 @@ extern struct SMP {
 } smp;
 
 extern struct PPU {
-  static Setting render_scanline_position;
-  static Setting opt_enable;
+  struct Hack {
+    static Setting render_scanline_position;
+    static Setting obj_cache;
+  } hack;
 
+  static Setting opt_enable;
   static Setting bg1_pri0_enable, bg1_pri1_enable;
   static Setting bg2_pri0_enable, bg2_pri1_enable;
   static Setting bg3_pri0_enable, bg3_pri1_enable;

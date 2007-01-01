@@ -83,10 +83,11 @@ DDBLTFX fx;
   surface->Blt(0, 0, 0, DDBLT_WAIT | DDBLT_COLORFILL, &fx);
 }
 
-uint16 *VideoDD::lock(uint &pitch) {
+bool VideoDD::lock(uint16 *&data, uint &pitch) {
   if(surface->Lock(0, &ddsd, DDLOCK_WAIT, 0) != DD_OK)return 0;
   pitch = ddsd.lPitch;
-  return (uint16*)ddsd.lpSurface;
+  data = (uint16*)ddsd.lpSurface;
+  return data;
 }
 
 void VideoDD::unlock() {
@@ -146,7 +147,7 @@ void VideoDD::create_presentation() {
 void VideoDD::redraw() {
 HRESULT hr;
 RECT rd, rs;
-  snes->get_video_info(&vi);
+  snes.get_video_info(&vi);
   SetRect(&rs, 0, 0, vi.width, vi.height);
 
   if(settings.fullscreen == true) {

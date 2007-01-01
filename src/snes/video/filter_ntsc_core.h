@@ -174,15 +174,15 @@ enum { snes_ntsc_clamp_add  = ntsc_rgb_builder * 0x101 };
 	if ( bits == 16 ) {\
 		rgb_out = (raw>>(13-x)& 0xF800)|(raw>>(8-x)&0x07E0)|(raw>>(4-x)&0x001F);\
 		rgb_out = ((rgb_out&0xf800)>>11)|((rgb_out&0x07c0)>>1)|((rgb_out&0x001f)<<10);\
-		rgb_out = snes->color_lookup_table[rgb_out];\
+		rgb_out = snes.color_lookup_table[rgb_out];\
 	} else if ( bits == 24 || bits == 32 ) {\
 		rgb_out = (raw>>(5-x)&0xFF0000)|(raw>>(3-x)&0xFF00)|(raw>>(1-x)&0xFF);\
 		rgb_out = ((rgb_out&0xf80000)>>19)|((rgb_out&0x00f800)>>6)|((rgb_out&0x0000f8)<<7);\
-		rgb_out = snes->color_lookup_table[rgb_out];\
+		rgb_out = snes.color_lookup_table[rgb_out];\
 	} else if ( bits == 15 ) {\
 		rgb_out = (raw>>(14-x)& 0x7C00)|(raw>>(9-x)&0x03E0)|(raw>>(4-x)&0x001F);\
 		rgb_out = ((rgb_out&0x7c00)>>10)|((rgb_out&0x03e0))|((rgb_out&0x001f)<<10);\
-		rgb_out = snes->color_lookup_table[rgb_out];\
+		rgb_out = snes.color_lookup_table[rgb_out];\
 	} else {\
 		rgb_out = raw;\
 	}\

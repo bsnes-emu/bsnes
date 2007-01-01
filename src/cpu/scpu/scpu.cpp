@@ -7,7 +7,7 @@
 #include "timing/timing.cpp"
 
 void sCPU::power() {
-  status.region = (bool)snes->region();
+  status.region = (bool)snes.region();
 
   regs.a = regs.x = regs.y = 0x0000;
   regs.s = 0x01ff;

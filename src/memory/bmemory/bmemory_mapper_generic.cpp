@@ -24,7 +24,7 @@ uint ram_size = cartridge.info.ram_size;
   uint addr = page << 8;
   uint bank = page >> 8;
 
-  //SRAM mapping is incorrect in several games, this is the most compatible
+  //RAM mapping is incorrect in several games, this is the most compatible
   //layout I can create using only ROM header information. Additional accuracy
   //requires PCB identification.
 
@@ -34,20 +34,20 @@ uint ram_size = cartridge.info.ram_size;
       continue;
     }
 
-  //HiROM SRAM region
+  //HiROM RAM region
   //$[20-3f|a0-bf]:[6000-7fff]
     if((bank & 0x7f) >= 0x20 && (bank & 0x7f) <= 0x3f && (addr & 0xe000) == 0x6000) {
       if(ram_size == 0)continue;
 
       addr  = ((bank & 0x7f) - 0x20) * 0x2000 + ((addr & 0xffff) - 0x6000);
       addr %= ram_size;
-      page_handle[page] = cartridge.sram + addr;
+      page_handle[page] = cartridge.ram + addr;
       page_read  [page] = &bMemBus::read_ram;
       page_write [page] = &bMemBus::write_ram;
       continue;
     }
 
-  //LoROM SRAM region
+  //LoROM RAM region
   //$[70-7f|f0-ff]:[0000-7fff]
   //Note: WRAM is remapped over $[7e-7f]:[0000-ffff]
     if((bank & 0x7f) >= 0x70 && (bank & 0x7f) <= 0x7f && (addr & 0x8000) == 0x0000) {
@@ -57,7 +57,7 @@ uint ram_size = cartridge.info.ram_size;
 
         addr  = ((bank & 0x7f) - 0x70) * 0x8000 + (addr & 0x7fff);
         addr %= ram_size;
-        page_handle[page] = cartridge.sram + addr;
+        page_handle[page] = cartridge.ram + addr;
         page_read  [page] = &bMemBus::read_ram;
         page_write [page] = &bMemBus::write_ram;
         continue;

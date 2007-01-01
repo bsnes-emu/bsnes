@@ -12,6 +12,6 @@ public:
   uint32 size();
   uint8 *read(uint32 length = 0);
 
-  JMAReader(char *fn);
+  JMAReader(const char *fn);
   ~JMAReader() { }
 };

@@ -71,7 +71,7 @@ char t[4096];
 
     i++;
     while(1) {
-      if(strptr(line[i])[1] == ':' || strptr(line[i])[2] == ':' || strmatch(line[i], "}"))break;
+      if(strptr(line[i])[1] == ':' || strptr(line[i])[2] == ':' || line[i] == "}")break;
 
       update_line(i);
       strcat(output_op, line[i]);

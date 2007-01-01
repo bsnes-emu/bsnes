@@ -4,10 +4,10 @@ bool EmuSettingsWindow::Event(EventInfo &info) {
   case EVENT_CHANGED: {
     if(info.control == &Port1) {
       config::snes.controller_port0 = Port1.GetSelection();
-      snes->port_set_deviceid(0, config::snes.controller_port0);
+      snes.port_set_deviceid(0, config::snes.controller_port0);
     } else if(info.control == &Port2) {
       config::snes.controller_port1 = Port2.GetSelection();
-      snes->port_set_deviceid(1, config::snes.controller_port1);
+      snes.port_set_deviceid(1, config::snes.controller_port1);
     }
   } break;
 

@@ -16,6 +16,9 @@ struct {
 } event;
 
 struct {
+  uint   nmi_hold;
+  uint   irq_hold;
+
   uint   nmi_fire;
   uint   irq_fire;
   uint   irq_delay;
@@ -55,6 +58,7 @@ struct {
   bool   interlace, interlace_field;
   bool   overscan;
   uint16 field_lines, line_clocks;
+  uint16 prev_field_lines, prev_line_clocks;
   uint16 vblstart;
 
   bool   line_rendered;
@@ -70,15 +74,17 @@ struct {
 
   uint16 irq_delay;
 
-  uint16 nmi_trigger_pos;
-  uint16 nmi_read_pos, nmi_line_pos;
-  bool   nmi_read, nmi_line, nmi_transition;
-  bool   nmi_lock, nmi_pending;
+  uint16 vnmi_trigger_pos;
+  bool   nmi_valid;
+  bool   nmi_line;
+  bool   nmi_transition;
+  bool   nmi_pending;
 
   uint16 virq_trigger_pos, hirq_trigger_pos;
-  uint16 irq_read_pos, irq_line_pos;
-  bool   irq_read, irq_line, irq_transition;
-  bool   irq_lock, irq_pending;
+  bool   irq_valid;
+  bool   irq_line;
+  bool   irq_transition;
+  bool   irq_pending;
 
 //dma
   uint   dma_counter;

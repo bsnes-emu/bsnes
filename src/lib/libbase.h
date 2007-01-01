@@ -1,5 +1,5 @@
 /*
-  libbase : version 0.08c ~byuu (09/28/06)
+  libbase : version 0.08f ~byuu (2006-11-07)
 */
 
 #ifndef __LIBBASE
@@ -9,6 +9,7 @@
 //disable libc deprecation warnings in MSVC 2k5+
   #pragma warning(disable:4996)
 
+  #define NOMINMAX
   #define ftruncate _chsize
   #define vsnprintf _vsnprintf
 #endif
@@ -28,7 +29,10 @@
   #define alwaysinline  inline
   #define fastcall      __attribute__((fastcall))
 #else
-  #error "unsupported compiler"
+  #define noinline
+  #define inline        inline
+  #define alwaysinline  inline
+  #define fastcall
 #endif
 
 #include <stdio.h>
@@ -47,6 +51,7 @@
   #define TRUE !FALSE
 #endif
 
+//deprecated
 #define SafeFree(__n)    if(__n) { free(__n);      __n = 0; }
 #define SafeDelete(__n)  if(__n) { delete(__n);    __n = 0; }
 #define SafeRelease(__n) if(__n) { __n->Release(); __n = 0; }
@@ -78,14 +83,45 @@ typedef signed long long   int64;
  * templates
  *****/
 
+template<typename T> inline void safe_free(T &handle) {
+  if(handle) {
+    free(handle);
+    handle = 0;
+  }
+}
+
+template<typename T> inline void safe_delete(T &handle) {
+  if(handle) {
+    delete handle;
+    handle = 0;
+  }
+}
+
+template<typename T> inline void safe_release(T &handle) {
+  if(handle) {
+    handle->Release();
+    handle = 0;
+  }
+}
+
 template<typename T> inline void swap(T &x, T &y) {
 T z = x;
   x = y;
   y = z;
 }
 
+#ifdef min
+#undef min
+#endif
+#define min(x, y) ((x < y) ? x : y)
+
+#ifdef max
+#undef max
+#endif
+#define max(x, y) ((x > y) ? x : y)
+
 template<int min, int max, typename T> inline T minmax(const T x) {
-  return (x < T(min)) ? T(min) : (x > T(max)) ? T(max) : x;
+  return (x < (T)min) ? (T)min : (x > (T)max) ? (T)max : x;
 }
 
 template<int bits> inline unsigned uclamp(const unsigned x) {
@@ -243,6 +279,90 @@ typedef  int_t<48,  int64>  int48;
  * libc extensions
  *****/
 
+static uint8 fgetb(FILE *fp) { return fgetc(fp); }
+static uint8 fgetlb(FILE *fp) { return fgetc(fp); }
+static uint8 fgetmb(FILE *fp) { return fgetc(fp); }
+
+static uint16 fgetlw(FILE *fp) {
+  return (fgetc(fp)) | (fgetc(fp) << 8);
+}
+
+static uint16 fgetmw(FILE *fp) {
+  return (fgetc(fp) << 8) | (fgetc(fp) << 8);
+}
+
+static uint32 fgetld(FILE *fp) {
+  return (fgetc(fp)) | (fgetc(fp) << 8) | (fgetc(fp) << 16) | (fgetc(fp) << 24);
+}
+
+static uint32 fgetmd(FILE *fp) {
+  return (fgetc(fp) << 24) | (fgetc(fp) << 16) | (fgetc(fp) << 8) | (fgetc(fp));
+}
+
+static uint64 fgetlq(FILE *fp) {
+  return ((uint64)fgetc(fp) <<  0) | ((uint64)fgetc(fp) <<  8) |
+         ((uint64)fgetc(fp) << 16) | ((uint64)fgetc(fp) << 24) |
+         ((uint64)fgetc(fp) << 32) | ((uint64)fgetc(fp) << 40) |
+         ((uint64)fgetc(fp) << 48) | ((uint64)fgetc(fp) << 56);
+}
+
+static uint64 fgetmq(FILE *fp) {
+  return ((uint64)fgetc(fp) << 56) | ((uint64)fgetc(fp) << 48) |
+         ((uint64)fgetc(fp) << 40) | ((uint64)fgetc(fp) << 32) |
+         ((uint64)fgetc(fp) << 24) | ((uint64)fgetc(fp) << 16) |
+         ((uint64)fgetc(fp) <<  8) | ((uint64)fgetc(fp) <<  0);
+}
+
+static void fputb(FILE *fp, uint8 data) { fputc(data, fp); }
+static void fputlb(FILE *fp, uint8 data) { fputc(data, fp); }
+static void fputmb(FILE *fp, uint8 data) { fputc(data, fp); }
+
+static void fputlw(FILE *fp, uint16 data) {
+  fputc(data >> 0, fp);
+  fputc(data >> 8, fp);
+}
+
+static void fputmw(FILE *fp, uint16 data) {
+  fputc(data >> 8, fp);
+  fputc(data >> 0, fp);
+}
+
+static void fputld(FILE *fp, uint32 data) {
+  fputc(data >>  0, fp);
+  fputc(data >>  8, fp);
+  fputc(data >> 16, fp);
+  fputc(data >> 24, fp);
+}
+
+static void fputmd(FILE *fp, uint32 data) {
+  fputc(data >> 24, fp);
+  fputc(data >> 16, fp);
+  fputc(data >>  8, fp);
+  fputc(data >>  0, fp);
+}
+
+static void fputlq(FILE *fp, uint64 data) {
+  fputc(data >>  0, fp);
+  fputc(data >>  8, fp);
+  fputc(data >> 16, fp);
+  fputc(data >> 24, fp);
+  fputc(data >> 32, fp);
+  fputc(data >> 40, fp);
+  fputc(data >> 48, fp);
+  fputc(data >> 56, fp);
+}
+
+static void fputmq(FILE *fp, uint64 data) {
+  fputc(data >> 56, fp);
+  fputc(data >> 48, fp);
+  fputc(data >> 40, fp);
+  fputc(data >> 32, fp);
+  fputc(data >> 24, fp);
+  fputc(data >> 16, fp);
+  fputc(data >>  8, fp);
+  fputc(data >>  0, fp);
+}
+
 static bool fexists(const char *fn) {
 FILE *fp = fopen(fn, "rb");
   if(!fp)return false;
@@ -270,7 +390,7 @@ uint32 size = ftell(fp);
   return size;
 }
 
-inline int ftruncate(FILE *fp, long size) { return ftruncate(fileno(fp), size); }
+static int ftruncate(FILE *fp, long size) { return ftruncate(fileno(fp), size); }
 
 /*****
  * crc32 calculation
@@ -325,6 +445,14 @@ const uint32 crc32_table[256] = {
 
 inline uint32 crc32_adjust(uint32 crc32, uint8 input) {
   return ((crc32 >> 8) & 0x00ffffff) ^ crc32_table[(crc32 ^ input) & 0xff];
+}
+
+inline uint32 crc32_calculate(uint8 *data, uint length) {
+uint32 crc32 = ~0;
+  for(uint i = 0; i < length; i++) {
+    crc32 = crc32_adjust(crc32, data[i]);
+  }
+  return ~crc32;
 }
 
 #endif

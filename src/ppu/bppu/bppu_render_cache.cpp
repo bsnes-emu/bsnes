@@ -1,24 +1,24 @@
 #define render_bg_tile_line_2bpp(mask) \
-  col  = bool(d0 & mask) << 0; \
-  col += bool(d1 & mask) << 1; \
+  col  = !!(d0 & mask) << 0; \
+  col += !!(d1 & mask) << 1; \
   *dest++ = col
 
 #define render_bg_tile_line_4bpp(mask) \
-  col  = bool(d0 & mask) << 0; \
-  col += bool(d1 & mask) << 1; \
-  col += bool(d2 & mask) << 2; \
-  col += bool(d3 & mask) << 3; \
+  col  = !!(d0 & mask) << 0; \
+  col += !!(d1 & mask) << 1; \
+  col += !!(d2 & mask) << 2; \
+  col += !!(d3 & mask) << 3; \
   *dest++ = col
 
 #define render_bg_tile_line_8bpp(mask) \
-  col  = bool(d0 & mask) << 0; \
-  col += bool(d1 & mask) << 1; \
-  col += bool(d2 & mask) << 2; \
-  col += bool(d3 & mask) << 3; \
-  col += bool(d4 & mask) << 4; \
-  col += bool(d5 & mask) << 5; \
-  col += bool(d6 & mask) << 6; \
-  col += bool(d7 & mask) << 7; \
+  col  = !!(d0 & mask) << 0; \
+  col += !!(d1 & mask) << 1; \
+  col += !!(d2 & mask) << 2; \
+  col += !!(d3 & mask) << 3; \
+  col += !!(d4 & mask) << 4; \
+  col += !!(d5 & mask) << 5; \
+  col += !!(d6 & mask) << 6; \
+  col += !!(d7 & mask) << 7; \
   *dest++ = col
 
 void bPPU::render_bg_tile(uint8 color_depth, uint16 tile_num) {

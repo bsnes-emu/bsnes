@@ -257,20 +257,20 @@ void Window::SetStyle(const char *style) {
 stringarray part;
   ParseStyleParam(style, part);
   for(int i = 0; i < count(part); i++) {
-    if(strmatch(part[i], "visible")) state.ws |= WS_VISIBLE;
-    if(strmatch(part[i], "popup"))   state.ws |= WS_POPUP;
-    if(strmatch(part[i], "border"))  state.ws |= WS_BORDER;
-    if(strmatch(part[i], "frame"))   state.ws |= WS_DLGFRAME;
-    if(strmatch(part[i], "titlebar"))state.ws |= WS_CAPTION;
-    if(strmatch(part[i], "minimize"))state.ws |= WS_MINIMIZEBOX;
-    if(strmatch(part[i], "maximize"))state.ws |= WS_MAXIMIZEBOX;
+    if(!strcmp(part[i], "visible")) state.ws |= WS_VISIBLE;
+    if(!strcmp(part[i], "popup"))   state.ws |= WS_POPUP;
+    if(!strcmp(part[i], "border"))  state.ws |= WS_BORDER;
+    if(!strcmp(part[i], "frame"))   state.ws |= WS_DLGFRAME;
+    if(!strcmp(part[i], "titlebar"))state.ws |= WS_CAPTION;
+    if(!strcmp(part[i], "minimize"))state.ws |= WS_MINIMIZEBOX;
+    if(!strcmp(part[i], "maximize"))state.ws |= WS_MAXIMIZEBOX;
 
-    if(strmatch(part[i], "topmost")) state.es |= WS_EX_TOPMOST;
-    if(strmatch(part[i], "layered")) state.es |= WS_EX_LAYERED;
-    if(strmatch(part[i], "sunken"))  state.es |= WS_EX_STATICEDGE;
-    if(strmatch(part[i], "edge"))    state.es |= WS_EX_CLIENTEDGE;
+    if(!strcmp(part[i], "topmost")) state.es |= WS_EX_TOPMOST;
+    if(!strcmp(part[i], "layered")) state.es |= WS_EX_LAYERED;
+    if(!strcmp(part[i], "sunken"))  state.es |= WS_EX_STATICEDGE;
+    if(!strcmp(part[i], "edge"))    state.es |= WS_EX_CLIENTEDGE;
 
-    if(strmatch(part[i], "dragmove"))state.dragmove = true;
+    if(!strcmp(part[i], "dragmove"))state.dragmove = true;
   }
 
   if(!hwnd)return;

@@ -5,11 +5,11 @@ iny(0xc8, regs.p.x, y) {
   op_io();
   if($1) {
     regs.$2.l++;
-    regs.p.n = bool(regs.$2.l & 0x80);
+    regs.p.n = !!(regs.$2.l & 0x80);
     regs.p.z = (regs.$2.l == 0);
   } else {
     regs.$2.w++;
-    regs.p.n = bool(regs.$2.w & 0x8000);
+    regs.p.n = !!(regs.$2.w & 0x8000);
     regs.p.z = (regs.$2.w == 0);
   }
 }
@@ -21,11 +21,11 @@ dey(0x88, regs.p.x, y) {
   op_io();
   if($1) {
     regs.$2.l--;
-    regs.p.n = bool(regs.$2.l & 0x80);
+    regs.p.n = !!(regs.$2.l & 0x80);
     regs.p.z = (regs.$2.l == 0);
   } else {
     regs.$2.w--;
-    regs.p.n = bool(regs.$2.w & 0x8000);
+    regs.p.n = !!(regs.$2.w & 0x8000);
     regs.p.z = (regs.$2.w == 0);
   }
 }
@@ -34,14 +34,14 @@ asl(0x0a) {
 1:last_cycle();
   op_io();
   if(regs.p.m) {
-    regs.p.c = bool(regs.a.l & 0x80);
+    regs.p.c = !!(regs.a.l & 0x80);
     regs.a.l <<= 1;
-    regs.p.n = bool(regs.a.l & 0x80);
+    regs.p.n = !!(regs.a.l & 0x80);
     regs.p.z = (regs.a.l == 0);
   } else {
-    regs.p.c = bool(regs.a.w & 0x8000);
+    regs.p.c = !!(regs.a.w & 0x8000);
     regs.a.w <<= 1;
-    regs.p.n = bool(regs.a.w & 0x8000);
+    regs.p.n = !!(regs.a.w & 0x8000);
     regs.p.z = (regs.a.w == 0);
   }
 }
@@ -52,12 +52,12 @@ lsr(0x4a) {
   if(regs.p.m) {
     regs.p.c = regs.a.l & 1;
     regs.a.l >>= 1;
-    regs.p.n = bool(regs.a.l & 0x80);
+    regs.p.n = !!(regs.a.l & 0x80);
     regs.p.z = (regs.a.l == 0);
   } else {
     regs.p.c = regs.a.w & 1;
     regs.a.w >>= 1;
-    regs.p.n = bool(regs.a.w & 0x8000);
+    regs.p.n = !!(regs.a.w & 0x8000);
     regs.p.z = (regs.a.w == 0);
   }
 }
@@ -67,16 +67,16 @@ rol(0x2a) {
   op_io();
   uint16 c = regs.p.c;
   if(regs.p.m) {
-    regs.p.c = bool(regs.a.l & 0x80);
+    regs.p.c = !!(regs.a.l & 0x80);
     regs.a.l <<= 1;
     regs.a.l |= c;
-    regs.p.n = bool(regs.a.l & 0x80);
+    regs.p.n = !!(regs.a.l & 0x80);
     regs.p.z = (regs.a.l == 0);
   } else {
-    regs.p.c = bool(regs.a.w & 0x8000);
+    regs.p.c = !!(regs.a.w & 0x8000);
     regs.a.w <<= 1;
     regs.a.w |= c;
-    regs.p.n = bool(regs.a.w & 0x8000);
+    regs.p.n = !!(regs.a.w & 0x8000);
     regs.p.z = (regs.a.w == 0);
   }
 }
@@ -90,14 +90,14 @@ ror(0x6a) {
     regs.p.c = regs.a.l & 1;
     regs.a.l >>= 1;
     regs.a.l |= c;
-    regs.p.n = bool(regs.a.l & 0x80);
+    regs.p.n = !!(regs.a.l & 0x80);
     regs.p.z = (regs.a.l == 0);
   } else {
     c = (regs.p.c)?0x8000:0;
     regs.p.c = regs.a.w & 1;
     regs.a.w >>= 1;
     regs.a.w |= c;
-    regs.p.n = bool(regs.a.w & 0x8000);
+    regs.p.n = !!(regs.a.w & 0x8000);
     regs.p.z = (regs.a.w == 0);
   }
 }

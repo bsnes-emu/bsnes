@@ -61,6 +61,8 @@ void SNES::port_set_deviceid(bool port, uint deviceid) {
 }
 
 void SNES::poll_input() {
+  snesinterface.input_poll();
+
 bool *p0 = input.port0_bits;
 bool *p1 = input.port1_bits;
   switch(input.port0_device) {
@@ -68,7 +70,7 @@ bool *p1 = input.port1_bits;
     break;
 
   default:
-    for(int i = 0; i < input.port0_devicebits; i++) { *p0++ = get_input_status(input.port0_deviceid, i); }
+    for(int i = 0; i < input.port0_devicebits; i++) { *p0++ = snesinterface.input_poll(input.port0_deviceid, i); }
     break;
   }
 
@@ -77,7 +79,7 @@ bool *p1 = input.port1_bits;
     break;
 
   default:
-    for(int i = 0; i < input.port1_devicebits; i++) { *p1++ = get_input_status(input.port1_deviceid, i); }
+    for(int i = 0; i < input.port1_devicebits; i++) { *p1++ = snesinterface.input_poll(input.port1_deviceid, i); }
     break;
   }
 

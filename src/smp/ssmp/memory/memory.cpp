@@ -1,32 +1,35 @@
-alwaysinline uint8 sSMP::ram_read(uint16 addr) {
+alwaysinline
+uint8 sSMP::ram_read(uint16 addr) {
   if(addr < 0xffc0)return spcram[addr];
   if(status.iplrom_enabled == false)return spcram[addr];
   return iplrom[addr & 0x3f];
 }
 
-alwaysinline void sSMP::ram_write(uint16 addr, uint8 data) {
+alwaysinline
+void sSMP::ram_write(uint16 addr, uint8 data) {
 //writes to $ffc0-$ffff always go to spcram, even if the iplrom is enabled
   spcram[addr] = data;
 }
 
 //
 
-alwaysinline uint8 sSMP::port_read(uint8 port) {
+alwaysinline
+uint8 sSMP::port_read(uint8 port) {
   return spcram[0xf4 + (port & 3)];
 }
 
-alwaysinline void sSMP::port_write(uint8 port, uint8 data) {
+alwaysinline
+void sSMP::port_write(uint8 port, uint8 data) {
   spcram[0xf4 + (port & 3)] = data;
 }
 
 //
 
-alwaysinline uint8 sSMP::op_busread(uint16 addr) {
+alwaysinline
+uint8 sSMP::op_busread(uint16 addr) {
 uint8 r;
   if((addr & 0xfff0) == 0x00f0) {
   //addr >= 0x00f0 && addr <= 0x00ff
-    scheduler.sync_smpcpu();
-
     switch(addr) {
 
     case 0xf0: { //TEST -- write-only register
@@ -50,12 +53,13 @@ uint8 r;
     case 0xf5:   //CPUIO1
     case 0xf6:   //CPUIO2
     case 0xf7: { //CPUIO3
+      scheduler.sync_smpcpu();
       r = r_cpu->port_read(addr & 3);
     } break;
 
     case 0xf8:   //???
     case 0xf9: { //??? -- Mapped to SPCRAM
-      r = spcram[addr];
+      r = ram_read(addr);
     } break;
 
     case 0xfa:   //T0TARGET
@@ -93,11 +97,10 @@ uint8 r;
   return r;
 }
 
-alwaysinline void sSMP::op_buswrite(uint16 addr, uint8 data) {
+alwaysinline
+void sSMP::op_buswrite(uint16 addr, uint8 data) {
   if((addr & 0xfff0) == 0x00f0) {
   //addr >= 0x00f0 && addr >= 0x00ff
-    scheduler.sync_smpcpu();
-
     if(status.mmio_disabled == true)return;
 
     switch(addr) {
@@ -123,15 +126,18 @@ alwaysinline void sSMP::op_buswrite(uint16 addr, uint8 data) {
     case 0xf1: { //CONTROL
       status.iplrom_enabled = !!(data & 0x80);
 
-    //one-time clearing of APU port read registers,
-    //emulated by simulating CPU writes of 0x00
-      if(data & 0x20) {
-        r_cpu->port_write(2, 0x00);
-        r_cpu->port_write(3, 0x00);
-      }
-      if(data & 0x10) {
-        r_cpu->port_write(0, 0x00);
-        r_cpu->port_write(1, 0x00);
+      if(data & 0x30) {
+      //one-time clearing of APU port read registers,
+      //emulated by simulating CPU writes of 0x00
+        scheduler.sync_smpcpu();
+        if(data & 0x20) {
+          r_cpu->port_write(2, 0x00);
+          r_cpu->port_write(3, 0x00);
+        }
+        if(data & 0x10) {
+          r_cpu->port_write(0, 0x00);
+          r_cpu->port_write(1, 0x00);
+        }
       }
 
     //0->1 transistion resets timers
@@ -169,12 +175,14 @@ alwaysinline void sSMP::op_buswrite(uint16 addr, uint8 data) {
     case 0xf5:   //CPUIO1
     case 0xf6:   //CPUIO2
     case 0xf7: { //CPUIO3
+      scheduler.sync_smpcpu();
       port_write(addr & 3, data);
     } break;
 
     case 0xf8:   //???
     case 0xf9: { //??? - Mapped to SPCRAM
-      spcram[addr] = data;
+    //$00f1.d1 (ram_writable) has no effect on these two addresses
+      ram_write(addr, data);
     } break;
 
     case 0xfa: { //T0TARGET
@@ -220,30 +228,37 @@ void sSMP::op_write(uint16 addr, uint8 data) {
 
 //
 
-alwaysinline uint8 sSMP::op_readpc() {
+alwaysinline
+uint8 sSMP::op_readpc() {
   return op_read(regs.pc++);
 }
 
-alwaysinline uint8 sSMP::op_readstack() {
+alwaysinline
+uint8 sSMP::op_readstack() {
   return op_read(0x0100 | ++regs.sp);
 }
 
-alwaysinline void sSMP::op_writestack(uint8 data) {
+alwaysinline
+void sSMP::op_writestack(uint8 data) {
   op_write(0x0100 | regs.sp--, data);
 }
 
-alwaysinline uint8 sSMP::op_readaddr(uint16 addr) {
+alwaysinline
+uint8 sSMP::op_readaddr(uint16 addr) {
   return op_read(addr);
 }
 
-alwaysinline void sSMP::op_writeaddr(uint16 addr, uint8 data) {
+alwaysinline
+void sSMP::op_writeaddr(uint16 addr, uint8 data) {
   op_write(addr, data);
 }
 
-alwaysinline uint8 sSMP::op_readdp(uint8 addr) {
+alwaysinline
+uint8 sSMP::op_readdp(uint8 addr) {
   return op_read(((uint)regs.p.p << 8) + addr);
 }
 
-alwaysinline void sSMP::op_writedp(uint8 addr, uint8 data) {
+alwaysinline
+void sSMP::op_writedp(uint8 addr, uint8 data) {
   op_write(((uint)regs.p.p << 8) + addr, data);
 }

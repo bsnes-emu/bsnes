@@ -1,8 +1,4 @@
-#if defined(FAVOR_ACCURACY)
-  #include "irqtiming_accurate.cpp"
-#elif defined(FAVOR_SPEED)
-  #include "irqtiming_fast.cpp"
-#endif
+#include "irqtiming.cpp"
 
 bool sCPU::irq_pos_valid() {
 uint vpos   = status.virq_pos;
@@ -21,15 +17,25 @@ uint vlimit = region_scanlines() >> 1;
   return true;
 }
 
-alwaysinline bool sCPU::nmi_test() {
-  if(status.nmi_transition == 0)return false;
+alwaysinline
+bool sCPU::nmi_test() {
+  if(status.nmi_transition == false) { return false; }
+  status.nmi_transition = false;
 
-  status.nmi_transition = 0;
   event.wai = false;
   return true;
 }
 
-alwaysinline bool sCPU::irq_test() {
+alwaysinline
+bool sCPU::irq_test() {
+  if(status.irq_transition == false) { return false; }
+  status.irq_transition = false;
+
+  event.wai = false;
+  return (regs.p.i) ? false : true;
+}
+
+/*
   if(status.irq_transition == 1)goto irq_trigger;
 
   if(status.irq_read == 0) {
@@ -51,3 +57,4 @@ irq_trigger:
   event.wai = false;
   return (regs.p.i) ? false : true;
 }
+*/

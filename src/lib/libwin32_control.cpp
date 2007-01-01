@@ -74,12 +74,12 @@ void Control::GetText(char *text, uint length) {
 }
 
 void Control::SetText(const char *text, ...) {
-char str[4096];
+string str;
 va_list args;
   va_start(args, text);
   vsprintf(str, text, args);
   va_end(args);
-  SetWindowText(hwnd, str);
+  SetWindowText(hwnd, strptr(str));
 }
 
 Control::Control() {

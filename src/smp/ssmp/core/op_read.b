@@ -148,13 +148,19 @@ sbc_dp_const(0xb8, sbc, 1) {
 }
 
 addw_ya_dp(0x7a, addw),
-cmpw_ya_dp(0x5a, cmpw),
 subw_ya_dp(0x9a, subw) {
 1:dp  = op_readpc();
 2:rd  = op_readdp(dp);
 3:rd |= op_readdp(dp + 1) << 8;
 4:op_io();
   regs.ya = op_$1(regs.ya, rd);
+}
+
+cmpw_ya_dp(0x5a) {
+1:dp  = op_readpc();
+2:rd  = op_readdp(dp);
+3:rd |= op_readdp(dp + 1) << 8;
+  op_cmpw(regs.ya, rd);
 }
 
 and1_bit(0x4a, !!),

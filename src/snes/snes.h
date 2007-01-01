@@ -1,3 +1,4 @@
+#include "interface/interface.h"
 #include "scheduler/scheduler.h"
 #include "tracer/tracer.h"
 
@@ -34,6 +35,6 @@ enum { NTSC = 0, PAL = 1 };
   virtual ~SNES() {}
 };
 
-extern SNES *snes;
+extern SNES snes;
 
 #include "video/filter.h"

@@ -55,11 +55,12 @@ void sCPU::add_clocks(uint clocks) {
   counter.sub(counter.irq_delay, clocks);
   scheduler.addclocks_cpu(clocks);
 
-//TODO: rename function to more descriptive term
-//below function is responsible for incrementing status.hclock
-//by clocks, calling scanline() when a new line is reached, and
-//testing for and triggering NMIs and IRQs
-  poll_interrupts(clocks);
+  clocks >>= 1;
+  while(clocks--) {
+    status.hclock += 2;
+    if(status.hclock >= status.line_clocks) { scanline(); }
+    poll_interrupts();
+  }
 }
 
 void sCPU::scanline() {
@@ -70,6 +71,7 @@ void sCPU::scanline() {
     frame();
   }
 
+  status.prev_line_clocks = status.line_clocks;
   status.line_clocks = (ntsc_color_burst_phase_shift_scanline() == false) ? 1364 : 1360;
 
 //dram refresh occurs once every scanline
@@ -89,23 +91,20 @@ void sCPU::scanline() {
   status.hdma_triggered = (status.vcounter <= (!overscan() ? 224 : 239)) ? false : true;
 
   r_ppu->scanline();
-  snes->scanline();
+  snes.scanline();
 
   update_interrupts();
 
   if(status.auto_joypad_poll == true && status.vcounter == (!overscan() ? 227 : 242)) {
-    snes->poll_input();
+    snes.poll_input();
     run_auto_joypad_poll();
   }
 }
 
 void sCPU::frame() {
-  status.nmi_read = 1;
-  status.nmi_line = 1;
-  status.nmi_transition = 0;
-
   status.vcounter = 0;
   status.interlace_field ^= 1;
+  status.prev_field_lines = status.field_lines;
   status.field_lines = (status.region_scanlines >> 1);
 //interlaced even fields have one extra scanline
 //(263+262=525 NTSC, 313+312=625 PAL)
@@ -119,7 +118,7 @@ void sCPU::frame() {
   }
 
   r_ppu->frame();
-  snes->frame();
+  snes.frame();
 }
 
 /*****
@@ -171,15 +170,16 @@ void sCPU::cycle_edge() {
   if(status.hdmainit_triggered == false) {
     if(status.hclock >= status.hdmainit_trigger_position || status.vcounter) {
       status.hdmainit_triggered = true;
-
       hdma_init_reset();
       if(hdma_enabled_channels()) {
-        if(status.dma_state == DMASTATE_INACTIVE) {
-          status.dma_state = DMASTATE_DMASYNC;
-          status.hdmainit_pending = true;
-        } else {
-          hdma_init();
-        }
+        add_clocks(12);
+        hdma_init();
+      //if(status.dma_state == DMASTATE_INACTIVE) {
+      //  status.dma_state = DMASTATE_DMASYNC;
+      //  status.hdmainit_pending = true;
+      //} else {
+      //  hdma_init();
+      //}
       }
     }
   }
@@ -188,12 +188,14 @@ void sCPU::cycle_edge() {
     if(status.hclock >= 1106) {
       status.hdma_triggered = true;
       if(hdma_active_channels()) {
-        if(status.dma_state == DMASTATE_INACTIVE) {
-          status.dma_state = DMASTATE_DMASYNC;
-          status.hdma_pending = true;
-        } else {
-          hdma_run();
-        }
+        add_clocks(12);
+        hdma_run();
+      //if(status.dma_state == DMASTATE_INACTIVE) {
+      //  status.dma_state = DMASTATE_DMASYNC;
+      //  status.hdma_pending = true;
+      //} else {
+      //  hdma_run();
+      //}
       }
     }
   }
@@ -221,6 +223,9 @@ void sCPU::timing_power() {
 }
 
 void sCPU::timing_reset() {
+  counter.nmi_hold  = 0;
+  counter.irq_hold  = 0;
+
   counter.nmi_fire  = 0;
   counter.irq_fire  = 0;
   counter.irq_delay = 0;
@@ -241,8 +246,11 @@ void sCPU::timing_reset() {
   status.field_lines = status.region_scanlines >> 1;
   status.line_clocks = 1364;
 
+  status.prev_field_lines = status.region_scanlines >> 1;
+  status.prev_line_clocks = 1364;
+
   status.line_rendered        = false;
-  status.line_render_position = minmax<0, 1112>((uint16)config::ppu.render_scanline_position);
+  status.line_render_position = minmax<0, 1112>((uint16)config::ppu.hack.render_scanline_position);
 
   status.dram_refreshed        = false;
   status.dram_refresh_position = (cpu_version == 1) ? 530 : 538;
@@ -254,16 +262,14 @@ void sCPU::timing_reset() {
 
   status.irq_delay = 0;
 
-  status.nmi_read       = 1;
-  status.nmi_line       = 1;
-  status.nmi_transition = 0;
-  status.nmi_lock       = false;
+  status.nmi_valid      = false;
+  status.nmi_line       = false;
+  status.nmi_transition = false;
   status.nmi_pending    = false;
 
-  status.irq_read       = 1;
-  status.irq_line       = 1;
-  status.irq_transition = 0;
-  status.irq_lock       = false;
+  status.irq_valid      = false;
+  status.irq_line       = false;
+  status.irq_transition = false;
   status.irq_pending    = false;
 
   update_interrupts();

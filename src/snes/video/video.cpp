@@ -63,19 +63,18 @@ void SNES::video_update() {
     if(video.frame_hires)     { video.raster_width  <<= 1; }
     if(video.frame_interlace) { video.raster_height <<= 1; }
 
-    video.data = (uint16*)video_lock(video.pitch);
-    if(video.data) {
+    if(snesinterface.video_lock(video.data, video.pitch) == true) {
       video_filter->run(color_lookup_table, video.ppu_data,
                         video.raster_width, video.raster_height,
                         video.raster_height <= 240 ? 2048 : 1024,
                         video.data, 512, 480, video.pitch,
                         512, 480, video.width, video.height,
                         video.raster_height <= 240 ? (pline_width + 1) : (iline_width + 2));
-      video_unlock();
+      snesinterface.video_unlock();
     }
   }
 
-  video_run();
+  snesinterface.video_refresh();
 
   video.frame_hires     = false;
   video.frame_interlace = false;

@@ -1,16 +1,3 @@
-uint bMemBus::mirror(uint size, uint pos) {
-  if(size == 0)return 0;
-  if(pos < size)return pos;
-
-uint mask = 1 << 31;
-  while(!(pos & mask))mask >>= 1;
-  if(size <= (pos & mask)) {
-    return mirror(size, pos - mask);
-  } else {
-    return mask + mirror(size - mask, pos - mask);
-  }
-}
-
 bool bMemBus::cart_map_pcb(const char *pcb) {
   if(!strcmp(pcb, "SHVC-1A3B-01")) { cart_map_shvc_1a3b_13(); return true; }
   if(!strcmp(pcb, "SHVC-1A3B-11")) { cart_map_shvc_1a3b_13(); return true; }
@@ -35,7 +22,24 @@ bool bMemBus::cart_map_pcb(const char *pcb) {
 
   if(!strcmp(pcb, "BSC-1A7M-10"))  { cart_map_bsc_1a7m_10();  return true; }
 
+  if(!strcmp(pcb, "STC-SOLO"))     { cart_map_stc_solo();     return true; }
+
+  if(!strcmp(pcb, "STC-DUAL"))     { cart_map_stc_dual();     return true; }
+
   return false;
+}
+
+uint bMemBus::mirror(uint size, uint pos) {
+  if(size == 0)return 0;
+  if(pos < size)return pos;
+
+uint mask = 1 << 31;
+  while(!(pos & mask))mask >>= 1;
+  if(size <= (pos & mask)) {
+    return mirror(size, pos - mask);
+  } else {
+    return mask + mirror(size - mask, pos - mask);
+  }
 }
 
 void bMemBus::cart_map_range(
@@ -59,7 +63,7 @@ uint8 page_hi = (addr_hi >> 8) & 255;
   } break;
 
   case MAP_RAM: {
-    data = cartridge.sram;
+    data = cartridge.ram;
     size = cartridge.info.ram_size;
   } break;
 

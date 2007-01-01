@@ -1,5 +1,5 @@
 /*
-  libco_win32 : version 0.06 ~byuu (05/21/06)
+  libco_win32 : version 0.08 ~byuu (10/21/06)
   win32-x86 implementation of libco
 */
 
@@ -9,60 +9,62 @@
 
 #include "libco_win32.h"
 
-namespace libco_win32 {
-  bool     co_enabled  = false;
-  int      co_stackptr = 0;
-  thread_t co_stack[4096];
-
-  void __stdcall coentry_proc(void *coentry) {
-  thread_p main = (thread_p)coentry;
-    main();
-  }
+struct cothread_struct {
+  void *cohandle;
+  cothread_p coentry;
+  cothread_t colink;
 };
 
-void co_init() {
-  if(libco_win32::co_enabled == true)return;
-  libco_win32::co_enabled = true;
+cothread_t __co_active = 0, __co_primary = 0;
 
+void __stdcall co_entryproc(void *coentry) {
+cothread_struct *s = static_cast<cothread_struct*>(coentry);
+  s->coentry();
+  co_exit(0);
+}
+
+cothread_t co_init() {
   ConvertThreadToFiber(0);
+cothread_struct *s = static_cast<cothread_struct*>(malloc(sizeof(cothread_struct)));
+  s->colink   = 0;
+  s->coentry  = 0;
+  s->cohandle = GetCurrentFiber();
+  __co_active = __co_primary = static_cast<cothread_t>(s);
+  return __co_active;
 }
 
 void co_term() {
-/*****
-//ConverFiberToThread() only exists on WinXP+
-
-  if(libco_win32::co_enabled == false)return;
-  libco_win32::co_enabled = false;
-
-  ConvertFiberToThread();
-*****/
+//primary fiber cannot be deleted; free memory used by handle to fiber only
+  free(__co_primary);
+//ConvertFiberToThread(); //only exists on WinXP+
 }
 
-thread_t co_active() {
-  if(libco_win32::co_enabled == false)co_init();
-
-  return GetCurrentFiber();
+cothread_t co_active() {
+  return __co_active;
 }
 
-thread_t co_create(thread_p coentry, unsigned int heapsize) {
-  if(libco_win32::co_enabled == false)co_init();
-
-  return CreateFiber(heapsize, libco_win32::coentry_proc, (void*)coentry);
+cothread_t co_create(cothread_p coentry, unsigned int heapsize) {
+cothread_struct *s = static_cast<cothread_struct*>(malloc(sizeof(cothread_struct)));
+  s->colink   = co_active();
+  s->coentry  = coentry;
+  s->cohandle = CreateFiber(heapsize + 512, co_entryproc, static_cast<void*>(s));
+  return static_cast<cothread_t>(s);
 }
 
-void co_delete(thread_t cothread) {
-  DeleteFiber(cothread);
+void co_delete(cothread_t cothread) {
+cothread_struct *s = static_cast<cothread_struct*>(cothread);
+  DeleteFiber(s->cohandle);
+  free(cothread);
 }
 
-void co_jump(thread_t cothread) {
-  SwitchToFiber(cothread);
+void co_switch(cothread_t cothread) {
+  __co_active = cothread;
+cothread_struct *s = static_cast<cothread_struct*>(cothread);
+  SwitchToFiber(s->cohandle);
 }
 
-void co_call(thread_t cothread) {
-  libco_win32::co_stack[libco_win32::co_stackptr++] = co_active();
-  co_jump(cothread);
-}
-
-void co_return() {
-  co_jump(libco_win32::co_stack[--libco_win32::co_stackptr]);
+void co_exit(cothread_t cothread) {
+  if(cothread != 0) { co_switch(cothread); }
+cothread_struct *s = static_cast<cothread_struct*>(__co_active);
+  co_switch(s->colink);
 }

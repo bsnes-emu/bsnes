@@ -60,7 +60,7 @@ void AudioDS::init() {
   clear_audio();
   term();
 
-  data.samples_per_frame = (uint)( (double)frequency / ((snes->region() == SNES::NTSC) ? 60.0 : 50.0) + 0.5 );
+  data.samples_per_frame = (uint)( (double)frequency / ((snes.region() == SNES::NTSC) ? 60.0 : 50.0) + 0.5 );
   data.buffer_size  = data.samples_per_frame * sizeof(uint32);
   data.buffer_count = 4;
   data.buffer       = (uint32*)malloc(data.buffer_size * data.buffer_count);

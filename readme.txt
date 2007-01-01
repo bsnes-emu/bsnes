@@ -1,5 +1,5 @@
 bsnes
-Version 0.018
+Version 0.019
 Author: byuu
 
 
@@ -12,29 +12,6 @@ The latest version can be downloaded from:
 http://byuu.org/
 
 Please see license.txt for important licensing information.
-
-
-Known Bugs
-----------
-Koushien 2 (J):
-- Severity: critical
-- Issue: game periodically crashes
-- Cause: unknown, possibly S-SMP related
-
-Mega lo Mania (J):
-- Severity: minor
-- Issue: horizontal line flickering during intro
-- Cause: caching of OAM occurs too early. Not fixable without dot-based PPU core
-
-Street Racer (J):
-- Severity: minor
-- Issue: track sometimes flickers every several frames
-- Cause: unknown, possibly timing related
-
-Unirally (J), Uniracers (U, E):
-- Severity: critical
-- Issue: 2-player mode sprites do not display at the correct positions
-- Cause: mid-frame OAM writes. Not fixable without dot-based PPU core
 
 
 Known Limitations
@@ -107,9 +84,6 @@ were downloaded via satellite
 BS-X Flashcart
 Flash cartridge used by BS-X, as well as some standalone games by
 Asciisoft
-
-Bandai Sufami Turbo
-Special cartloader to play some Bandai games
 
 Super Gameboy
 Cartridge passthrough used for playing Gameboy games

@@ -211,7 +211,7 @@ uint r = key.find(strptr(p[0])) & 4095;
 
 void Input::init() {
 stringarray t, part;
-  strcpy(t, config::input.joypad1.map.sget());
+  strcpy(t, config::input.joypad1.map.strget());
   replace(t, " ", "");
   replace(t, "\t", "");
   strlower(t);
@@ -229,7 +229,7 @@ stringarray t, part;
   config::input.joypad1.select = decode(part[10]);
   config::input.joypad1.start  = decode(part[11]);
 
-  strcpy(t, config::input.joypad2.map.sget());
+  strcpy(t, config::input.joypad2.map.strget());
   replace(t, " ", "");
   replace(t, "\t", "");
   strlower(t);
@@ -273,7 +273,7 @@ char   t[256];
   strcat(result, encode((uint)config::input.joypad1.r));      strcat(result, "; ");
   strcat(result, encode((uint)config::input.joypad1.select)); strcat(result, "; ");
   strcat(result, encode((uint)config::input.joypad1.start));
-  config::input.joypad1.map.sset(strptr(result));
+  config::input.joypad1.map.strset(strptr(result));
 
   strcpy(result, "");
   strcat(result, encode((uint)config::input.joypad2.up));     strcat(result, "; ");
@@ -288,7 +288,7 @@ char   t[256];
   strcat(result, encode((uint)config::input.joypad2.r));      strcat(result, "; ");
   strcat(result, encode((uint)config::input.joypad2.select)); strcat(result, "; ");
   strcat(result, encode((uint)config::input.joypad2.start));
-  config::input.joypad2.map.sset(strptr(result));
+  config::input.joypad2.map.strset(strptr(result));
 }
 
 Input::Input() {

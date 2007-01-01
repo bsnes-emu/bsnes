@@ -65,8 +65,17 @@ void bPPU::render_scanline() {
 #endif
 
   if(line.y >= 0 && line.y < (r_cpu->overscan() ? 240 : 225)) {
-    if(status.render_output == true && line.y != 0) { render_line(); }
-    render_line_oam_rto();
+    if(config::ppu.hack.obj_cache == false) {
+      if(line.y != 0) {
+        render_line_oam_rto();
+        render_line();
+      }
+    } else {
+      if(line.y != 0) {
+        render_line();
+      }
+      render_line_oam_rto();
+    }
   }
 }
 
@@ -81,7 +90,7 @@ void bPPU::power() {
   memset(oam,   0,   544);
   memset(cgram, 0,   512);
 
-  region = snes->region();
+  region = snes.region();
 
 //$2100
   regs.display_disabled   = 1;

@@ -1,5 +1,5 @@
 /*
-  libfile : version 0.05 ~byuu (10/12/06)
+  libfile : version 0.05a ~byuu (10/26/06)
 */
 
 #ifndef __LIBFILE
@@ -51,10 +51,12 @@ uint32 crc32 = 0xffffffff;
 inline void   fread(file &s, uint8 *data, uint length) { s.read(data, length); }
 inline uint8  fread(file &s) { return s.read(); }
 inline uint8  fgetc(file &s) { return s.read(); }
+inline uint   fgetb(file &s) { return s.read(); }
 
 inline void   fwrite(file &s, uint8 *data, uint length) { s.write(data, length); }
 inline void   fwrite(file &s, uint8 data) { s.write(data); }
-inline void   fputc(file &s, uint8 data) { s.write(data); }
+inline void   fputc(uint8 data, file &s) { s.write(data); }
+inline void   fputb(file &s, uint8 data) { s.write(data); }
 
 inline uint32 fcrc32(file &s) { return s.crc32(); }
 
@@ -107,53 +109,53 @@ inline uint64 fgetmq(file &s) {
          ((uint64)fgetc(s) <<  8) | ((uint64)fgetc(s) <<  0);
 }
 
-inline void fputlb(file &s, uint8 data) { fputc(s, data); }
-inline void fputmb(file &s, uint8 data) { fputc(s, data); }
+inline void fputlb(file &s, uint8 data) { fputc(data, s); }
+inline void fputmb(file &s, uint8 data) { fputc(data, s); }
 
 inline void fputlw(file &s, uint16 data) {
-  fputc(s, data >> 0);
-  fputc(s, data >> 8);
+  fputc(data >> 0, s);
+  fputc(data >> 8, s);
 }
 
 inline void fputmw(file &s, uint16 data) {
-  fputc(s, data >> 8);
-  fputc(s, data >> 0);
+  fputc(data >> 8, s);
+  fputc(data >> 0, s);
 }
 
 inline void fputld(file &s, uint32 data) {
-  fputc(s, data >>  0);
-  fputc(s, data >>  8);
-  fputc(s, data >> 16);
-  fputc(s, data >> 24);
+  fputc(data >>  0, s);
+  fputc(data >>  8, s);
+  fputc(data >> 16, s);
+  fputc(data >> 24, s);
 }
 
 inline void fputmd(file &s, uint32 data) {
-  fputc(s, data >> 24);
-  fputc(s, data >> 16);
-  fputc(s, data >>  8);
-  fputc(s, data >>  0);
+  fputc(data >> 24, s);
+  fputc(data >> 16, s);
+  fputc(data >>  8, s);
+  fputc(data >>  0, s);
 }
 
 inline void fputlq(file &s, uint64 data) {
-  fputc(s, data >>  0);
-  fputc(s, data >>  8);
-  fputc(s, data >> 16);
-  fputc(s, data >> 24);
-  fputc(s, data >> 32);
-  fputc(s, data >> 40);
-  fputc(s, data >> 48);
-  fputc(s, data >> 56);
+  fputc(data >>  0, s);
+  fputc(data >>  8, s);
+  fputc(data >> 16, s);
+  fputc(data >> 24, s);
+  fputc(data >> 32, s);
+  fputc(data >> 40, s);
+  fputc(data >> 48, s);
+  fputc(data >> 56, s);
 }
 
 inline void fputmq(file &s, uint64 data) {
-  fputc(s, data >> 56);
-  fputc(s, data >> 48);
-  fputc(s, data >> 40);
-  fputc(s, data >> 32);
-  fputc(s, data >> 24);
-  fputc(s, data >> 16);
-  fputc(s, data >>  8);
-  fputc(s, data >>  0);
+  fputc(data >> 56, s);
+  fputc(data >> 48, s);
+  fputc(data >> 40, s);
+  fputc(data >> 32, s);
+  fputc(data >> 24, s);
+  fputc(data >> 16, s);
+  fputc(data >>  8, s);
+  fputc(data >>  0, s);
 }
 
 /*****

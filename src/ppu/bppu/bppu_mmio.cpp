@@ -189,7 +189,7 @@ void bPPU::mmio_w210d(uint8 value) {
   regs.m7_hofs  = (value << 8) | regs.m7_latch;
   regs.m7_latch = value;
 
-  regs.bg_hofs[BG1] = (value << 8) | (regs.bg_ofslatch & 0xf8) | ((regs.bg_hofs[BG1] >> 8) & 7);
+  regs.bg_hofs[BG1] = (value << 8) | (regs.bg_ofslatch & ~7) | ((regs.bg_hofs[BG1] >> 8) & 7);
   regs.bg_ofslatch  = value;
 }
 
@@ -198,43 +198,43 @@ void bPPU::mmio_w210e(uint8 value) {
   regs.m7_vofs  = (value << 8) | regs.m7_latch;
   regs.m7_latch = value;
 
-  regs.bg_vofs[BG1] = (value << 8) | (regs.bg_ofslatch & 0xf8) | ((regs.bg_vofs[BG1] >> 8) & 7);
+  regs.bg_vofs[BG1] = (value << 8) | (regs.bg_ofslatch);
   regs.bg_ofslatch  = value;
 }
 
 //BG2HOFS
 void bPPU::mmio_w210f(uint8 value) {
-  regs.bg_hofs[BG2] = (value << 8) | (regs.bg_ofslatch & 0xf8) | ((regs.bg_hofs[BG2] >> 8) & 7);
+  regs.bg_hofs[BG2] = (value << 8) | (regs.bg_ofslatch & ~7) | ((regs.bg_hofs[BG2] >> 8) & 7);
   regs.bg_ofslatch  = value;
 }
 
 //BG2VOFS
 void bPPU::mmio_w2110(uint8 value) {
-  regs.bg_vofs[BG2] = (value << 8) | (regs.bg_ofslatch & 0xf8) | ((regs.bg_vofs[BG2] >> 8) & 7);
+  regs.bg_vofs[BG2] = (value << 8) | (regs.bg_ofslatch);
   regs.bg_ofslatch  = value;
 }
 
 //BG3HOFS
 void bPPU::mmio_w2111(uint8 value) {
-  regs.bg_hofs[BG3] = (value << 8) | (regs.bg_ofslatch & 0xf8) | ((regs.bg_hofs[BG3] >> 8) & 7);
+  regs.bg_hofs[BG3] = (value << 8) | (regs.bg_ofslatch & ~7) | ((regs.bg_hofs[BG3] >> 8) & 7);
   regs.bg_ofslatch  = value;
 }
 
 //BG3VOFS
 void bPPU::mmio_w2112(uint8 value) {
-  regs.bg_vofs[BG3] = (value << 8) | (regs.bg_ofslatch & 0xf8) | ((regs.bg_vofs[BG3] >> 8) & 7);
+  regs.bg_vofs[BG3] = (value << 8) | (regs.bg_ofslatch);
   regs.bg_ofslatch  = value;
 }
 
 //BG4HOFS
 void bPPU::mmio_w2113(uint8 value) {
-  regs.bg_hofs[BG4] = (value << 8) | (regs.bg_ofslatch & 0xf8) | ((regs.bg_hofs[BG4] >> 8) & 7);
+  regs.bg_hofs[BG4] = (value << 8) | (regs.bg_ofslatch & ~7) | ((regs.bg_hofs[BG4] >> 8) & 7);
   regs.bg_ofslatch  = value;
 }
 
 //BG4VOFS
 void bPPU::mmio_w2114(uint8 value) {
-  regs.bg_vofs[BG4] = (value << 8) | (regs.bg_ofslatch & 0xf8) | ((regs.bg_vofs[BG4] >> 8) & 7);
+  regs.bg_vofs[BG4] = (value << 8) | (regs.bg_ofslatch);
   regs.bg_ofslatch  = value;
 }
 

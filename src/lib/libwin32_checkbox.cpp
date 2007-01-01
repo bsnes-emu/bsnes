@@ -20,13 +20,13 @@ bool Checkbox::Create(Window *parent_window, const char *style, int x, int y, in
 stringarray part;
   ParseStyleParam(style, part);
   for(int i = 0; i < count(part); i++) {
-    if(strmatch(part[i], "visible"))state.ws |= WS_VISIBLE;
-    if(strmatch(part[i], "disabled"))state.ws |= WS_DISABLED;
+    if(!strcmp(part[i], "visible"))state.ws |= WS_VISIBLE;
+    if(!strcmp(part[i], "disabled"))state.ws |= WS_DISABLED;
 
-    if(strmatch(part[i], "left"))state.ws |= BS_LEFT;
-    if(strmatch(part[i], "center"))state.ws |= BS_CENTER;
-    if(strmatch(part[i], "right"))state.ws |= BS_RIGHT;
-    if(strmatch(part[i], "auto"))state.ws |= BS_AUTOCHECKBOX;
+    if(!strcmp(part[i], "left"))state.ws |= BS_LEFT;
+    if(!strcmp(part[i], "center"))state.ws |= BS_CENTER;
+    if(!strcmp(part[i], "right"))state.ws |= BS_RIGHT;
+    if(!strcmp(part[i], "auto"))state.ws |= BS_AUTOCHECKBOX;
   }
   if(!(state.ws & BS_AUTOCHECKBOX))state.ws |= BS_CHECKBOX;
 

@@ -8,7 +8,7 @@ void init_snes();
 void term_snes();
 
 /*****
- * OS abstraction layer
+ * hardware abstraction layer
  *****/
 
 #include "video/video.h"
@@ -17,6 +17,8 @@ void term_snes();
 
 #include "video/video.cpp"
 #include "input/input.cpp"
+
+#include "interface.cpp"
 
 /*****
  * platform abstraction layer
@@ -37,6 +39,8 @@ void term_snes();
  *****/
 
 void init_snes() {
+  co_init();
+
 #ifdef POLYMORPHISM
   deref(mem) = new MEMCORE();
   deref(cpu) = new CPUCORE();
@@ -44,20 +48,20 @@ void init_snes() {
   deref(dsp) = new DSPCORE();
   deref(ppu) = new PPUCORE();
 #endif
-  snes  = new bSNES();
-  bsnes = static_cast<bSNES*>(snes);
 
-  snes->init();
+  snes.init();
 }
 
 void term_snes() {
-  snes->term();
+  snes.term();
+
 #ifdef POLYMORPHISM
-  SafeDelete(deref(mem));
-  SafeDelete(deref(cpu));
-  SafeDelete(deref(apu));
-  SafeDelete(deref(dsp));
-  SafeDelete(deref(ppu));
+  safe_delete(deref(mem));
+  safe_delete(deref(cpu));
+  safe_delete(deref(apu));
+  safe_delete(deref(dsp));
+  safe_delete(deref(ppu));
 #endif
-  SafeDelete(snes);
+
+  co_term();
 }

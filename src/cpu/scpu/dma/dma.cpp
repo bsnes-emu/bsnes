@@ -1,3 +1,8 @@
+void sCPU::dma_add_clocks(uint clocks) {
+  status.dma_clocks += clocks;
+  add_clocks(clocks);
+}
+
 /*****
  * used by both DMA and HDMA
  *
@@ -29,8 +34,7 @@ uint8 r;
     r_mem->write(abus, r);
   }
 
-  status.dma_clocks += 8;
-  add_clocks(8);
+  dma_add_clocks(8);
   cycle_edge();
 }
 
@@ -104,8 +108,7 @@ inline void sCPU::dma_write(uint8 i, uint8 index) {
 void sCPU::dma_run() {
   for(int i = 0; i < 8; i++) {
     if(channel[i].dma_enabled == false)continue;
-    status.dma_clocks += 8;
-    add_clocks(8);
+    dma_add_clocks(8);
 
     if(cartridge.info.sdd1 == true) {
       sdd1->dma_begin(i, (channel[i].srcbank << 16) | (channel[i].srcaddr),
@@ -129,7 +132,7 @@ void sCPU::dma_run() {
     channel[i].dma_enabled = false;
   }
 
-  counter.set(counter.irq_delay, 24);
+  counter.set(counter.irq_delay, 2);
 }
 
 /*****
@@ -166,19 +169,19 @@ uint8 r = 0;
 
 void sCPU::hdma_update(uint8 i) {
   channel[i].hdma_line_counter = r_mem->read(hdma_addr(i));
-  add_clocks(8);
+  dma_add_clocks(8);
 
   channel[i].hdma_completed   = (channel[i].hdma_line_counter == 0);
   channel[i].hdma_do_transfer = !channel[i].hdma_completed;
 
   if(channel[i].hdma_indirect) {
     channel[i].hdma_iaddr = r_mem->read(hdma_addr(i)) << 8;
-    add_clocks(8);
+    dma_add_clocks(8);
 
     if(!channel[i].hdma_completed || hdma_active_after(i)) {
       channel[i].hdma_iaddr >>= 8;
       channel[i].hdma_iaddr  |= r_mem->read(hdma_addr(i)) << 8;
-      add_clocks(8);
+      dma_add_clocks(8);
     }
   }
 }
@@ -188,7 +191,7 @@ static uint8 hdma_xferlen[8] = { 1, 2, 2, 4, 4, 4, 2, 4 };
   for(int i = 0; i < 8; i++) {
     if(hdma_active(i) == false)continue;
     channel[i].dma_enabled = false; //HDMA run during DMA will stop DMA mid-transfer
-    add_clocks(8);
+    dma_add_clocks(8);
 
     if(channel[i].hdma_do_transfer) {
     int xferlen = hdma_xferlen[channel[i].xfermode];
@@ -197,7 +200,7 @@ static uint8 hdma_xferlen[8] = { 1, 2, 2, 4, 4, 4, 2, 4 };
           dma_transfer(channel[i].direction, dma_bbus(i, index),
             !channel[i].hdma_indirect ? hdma_addr(i) : hdma_iaddr(i));
         } else {
-          add_clocks(8);
+          dma_add_clocks(8);
           cycle_edge();
         }
       }
@@ -210,7 +213,7 @@ static uint8 hdma_xferlen[8] = { 1, 2, 2, 4, 4, 4, 2, 4 };
     }
   }
 
-  counter.set(counter.irq_delay, 24);
+  counter.set(counter.irq_delay, 2);
 }
 
 void sCPU::hdma_init_reset() {
@@ -229,7 +232,7 @@ void sCPU::hdma_init() {
     hdma_update(i);
   }
 
-  counter.set(counter.irq_delay, 24);
+  counter.set(counter.irq_delay, 2);
 }
 
 /*****

@@ -1,9 +1,9 @@
 ;*****
-;libco_x86 : version 0.07 ~byuu (08/15/06)
+;libco_x86 : version 0.08 ~byuu (10/21/06)
 ;cross-platform x86 implementation of libco
 ;
 ;context save/restore adheres to c/c++ ABI
-;for x86 windows, linux and freebsd
+;for x86 windows, osx, linux and freebsd
 ;
 ;context saves esp+ebp+esi+edi+ebx
 ;context ignores eax+ecx+edx
@@ -14,8 +14,8 @@
 section .data
 
 align 4
-co_initialized     dd 0
 co_active_context  dd 0
+co_primary_context dd 0
 
 section .code
 
@@ -31,9 +31,21 @@ section .code
 %define co_active  @co_active@0
 %define co_create  @co_create@8
 %define co_delete  @co_delete@4
-%define co_jump    @co_jump@4
-%define co_call    @co_call@4
-%define co_return  @co_return@0
+%define co_switch  @co_switch@4
+%define co_exit    @co_exit@4
+%endif
+
+%ifdef OSX86
+%define malloc     _malloc
+%define free       _free
+
+%define co_init    _co_init
+%define co_term    _co_term
+%define co_active  _co_active
+%define co_create  _co_create
+%define co_delete  _co_delete
+%define co_switch  _co_switch
+%define co_exit    _co_exit
 %endif
 
 extern malloc
@@ -44,26 +56,22 @@ global co_term
 global co_active
 global co_create
 global co_delete
-global co_jump
-global co_call
-global co_return
+global co_switch
+global co_exit
 
 ;*****
-;extern "C" void fastcall co_init();
+;extern "C" cothread_t fastcall co_init();
+;return = eax
 ;*****
 
 align 16
 co_init:
-    cmp    dword[co_initialized],0          ;only run co_init once
-    jne    .end
-    inc    dword[co_initialized]
-
-;create context for main thread
+;create context for main cothread
     mov    ecx,0                            ;entry point for main thread is not needed
-    mov    edx,256                          ;main thread uses default program stack
+    mov    edx,512                          ;main cothread uses default program stack
     call   co_create
     mov    dword[co_active_context],eax
-.end
+    mov    dword[co_primary_context],eax
     ret
 
 ;*****
@@ -72,24 +80,22 @@ co_init:
 
 align 16
 co_term:
+    mov    ecx,dword[co_primary_context]
+    call   co_delete
     ret
 
 ;*****
-;extern "C" thread_t fastcall co_active();
+;extern "C" cothread_t fastcall co_active();
 ;return = eax
 ;*****
 
 align 16
 co_active:
-    cmp    dword[co_initialized],0          ;make sure co_init has been called
-    jne    .next
-    call   co_init
-.next:
     mov    eax,dword[co_active_context]
     ret
 
 ;*****
-;extern "C" thread_t fastcall co_create(thread_p coentry, unsigned int heapsize);
+;extern "C" cothread_t fastcall co_create(cothread_p coentry, unsigned int heapsize);
 ;ecx = coentry
 ;edx = heapsize
 ;return = eax
@@ -97,17 +103,8 @@ co_active:
 
 align 16
 co_create:
-    cmp    dword[co_initialized],0          ;make sure co_init has been called
-    jne    .next
-    push   ecx
-    push   edx
-    call   co_init
-    pop    edx
-    pop    ecx
-.next:
-
 ;create heap space (stack + register storage)
-    add    edx,28                           ;+8(esp+prev_call_context)+4(coentry)+16(stack_align)
+    add    edx,512                          ;+4(esp)+4(coentry)+4(colink)+256(stack_align)
     push   ecx
     push   edx
 
@@ -119,10 +116,10 @@ co_create:
     pop    ecx
 
     add    edx,eax                          ;set edx to point to top of stack heap
-    and    edx,0xfffffff0                   ;force 16-byte alignment of stack heap
+    and    edx,0xffffff00                   ;force 256-byte alignment of stack heap
 
-;store thread entry point + registers so that first call to co_jump will go to coentry
-    mov    dword[edx-4],ecx                 ;edx=*stack,ecx=coentry
+;store thread entry point + registers so that first call to co_switch will execute coentry
+    mov    dword[edx-4],co_entrypoint       ;edx=*stack
     mov    dword[edx-8],0
     mov    dword[edx-12],0
     mov    dword[edx-16],0
@@ -130,13 +127,15 @@ co_create:
     sub    edx,20
 
 ;initialize context memory heap
-    mov    dword[eax],edx                   ;thread_t[0-3] = stack heap pointer (esp)
-    mov    dword[eax+4],0                   ;thread_t[4-7] = (null) pointer to prev_call_context
+    mov    dword[eax],edx                   ;cothread_t[ 0- 3] = stack heap pointer (esp)
+    mov    dword[eax+4],ecx                 ;cothread_t[ 4- 7] = entry point
+    mov    ecx,dword[co_active_context]
+    mov    dword[eax+8],ecx                 ;cothread_t[ 8-11] = return context
 
     ret                                     ;return allocated memory block as thread handle
 
 ;*****
-;extern "C" void fastcall co_delete(thread_t cothread);
+;extern "C" void fastcall co_delete(cothread_t cothread);
 ;ecx = cothread
 ;*****
 
@@ -148,12 +147,12 @@ co_delete:
     ret
 
 ;*****
-;extern "C" void fastcall co_jump(thread_t cothread);
+;extern "C" void fastcall co_switch(cothread_t cothread);
 ;ecx = cothread
 ;*****
 
 align 16
-co_jump:
+co_switch:
     mov    eax,dword[co_active_context]     ;backup current context
     mov    dword[co_active_context],ecx     ;set new active context
 
@@ -172,50 +171,27 @@ co_jump:
     ret
 
 ;*****
-;extern "C" void fastcall co_call(thread_t cothread);
+;extern "C" void fastcall co_exit(cothread_t cothread);
 ;ecx = cothread
 ;*****
 
 align 16
-co_call:
-    mov    eax,dword[co_active_context]     ;backup current context
-    mov    dword[co_active_context],ecx     ;set new active context
-    mov    dword[ecx+4],eax
+co_exit:
+    cmp    ecx,0
+    jne    co_switch
 
-    push   ebp
-    push   esi
-    push   edi
-    push   ebx
-    mov    dword[eax],esp
-
-    mov    esp,dword[ecx]
-    pop    ebx
-    pop    edi
-    pop    esi
-    pop    ebp
-
-    ret
+;if cothread is null, switch to context that created current context
+    mov    eax,dword[co_active_context]
+    mov    ecx,dword[eax+8]
+    jmp    co_switch
 
 ;*****
-;extern "C" void fastcall co_return();
+;void fastcall co_entrypoint();
 ;*****
 
 align 16
-co_return:
-    mov    eax,dword[co_active_context]     ;backup current context
-    mov    ecx,dword[eax+4]                 ;restore pre-call context
-    mov    dword[co_active_context],ecx     ;set new active context
-
-    push   ebp
-    push   esi
-    push   edi
-    push   ebx
-    mov    dword[eax],esp
-
-    mov    esp,dword[ecx]
-    pop    ebx
-    pop    edi
-    pop    esi
-    pop    ebp
-
-    ret
+co_entrypoint:
+    mov    eax,dword[co_active_context]
+    call   dword[eax+4]
+    xor    ecx,ecx
+    jmp    co_exit

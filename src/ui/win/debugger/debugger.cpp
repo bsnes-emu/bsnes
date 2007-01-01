@@ -29,7 +29,7 @@ void Debugger::activate() {
   if(status.active == true)return;
   status.active = true;
 
-  bsnes->set_state(bSNES::STOP);
+  bsnes.set_state(bSNES::STOP);
   wDebug.Show();
   wMain.CheckMenuItem(MENU_SETTINGS_DEBUGGER, true);
 }
@@ -42,7 +42,7 @@ void Debugger::deactivate() {
   wTracer.Hide();
   wMemory.Hide();
   wMain.CheckMenuItem(MENU_SETTINGS_DEBUGGER, false);
-  bsnes->set_state(bSNES::RUN);
+  bsnes.set_state(bSNES::RUN);
 }
 
 void Debugger::refresh() {

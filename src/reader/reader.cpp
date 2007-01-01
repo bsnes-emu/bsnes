@@ -8,7 +8,7 @@
   #include "jmareader.cpp"
 #endif
 
-uint32 Reader::detect(char *fn) {
+uint Reader::detect(const char *fn) {
 int len = strlen(fn);
   if(len >= 4 && !stricmp(fn + len - 3, ".gz")) {
     return RF_GZ;

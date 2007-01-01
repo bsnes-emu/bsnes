@@ -1,6 +1,6 @@
 #include "../base.h"
 
-SNES *snes;
+SNES snes;
 
 #include "scheduler/scheduler.cpp"
 #include "tracer/tracer.cpp"

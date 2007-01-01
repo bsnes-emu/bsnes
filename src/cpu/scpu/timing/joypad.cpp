@@ -1,8 +1,8 @@
 void sCPU::run_auto_joypad_poll() {
 uint16 joy1 = 0, joy2 = 0;
   for(int i = 0; i < 16; i++) {
-    joy1 |= (uint16)snes->port_read(0) ? (0x8000 >> i) : 0;
-    joy2 |= (uint16)snes->port_read(1) ? (0x8000 >> i) : 0;
+    joy1 |= (uint16)snes.port_read(0) ? (0x8000 >> i) : 0;
+    joy2 |= (uint16)snes.port_read(1) ? (0x8000 >> i) : 0;
   }
 
   status.joy1l = joy1;

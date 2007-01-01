@@ -58,9 +58,7 @@ cop(0x02, 0xfff4, 0xfff5, 0xffe4, 0xffe5) {
 stp(0xdb) {
 1:op_io();
 2:last_cycle();
-  while(1) {
-    op_io();
-  }
+  while(1) { op_io(); }
 }
 
 wai(0xcb) {
@@ -77,9 +75,9 @@ wai(0xcb) {
 xce(0xfb) {
 1:last_cycle();
   op_io();
-bool c = regs.p.c;
+bool carry = regs.p.c;
   regs.p.c = regs.e;
-  regs.e = c;
+  regs.e = carry;
   if(regs.e) {
     regs.p |= 0x30;
     regs.s.h = 0x01;

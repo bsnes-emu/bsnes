@@ -106,13 +106,13 @@ mov_dp_dp(0xfa) {
 mov_dp_const(0x8f) {
 1:rd = op_readpc();
 2:dp = op_readpc();
-3:op_io();
+3:op_readdp(dp);
 4:op_writedp(dp, rd);
 }
 
 mov_ix_a(0xc6) {
 1:op_io();
-2:op_io();
+2:op_readdp(regs.x);
 3:op_writedp(regs.x, regs.a);
 }
 
@@ -126,17 +126,18 @@ mov_dp_a(0xc4, a),
 mov_dp_x(0xd8, x),
 mov_dp_y(0xcb, y) {
 1:dp = op_readpc();
-2:op_io();
+2:op_readdp(dp);
 3:op_writedp(dp, regs.$1);
 }
 
 mov_dpx_a(0xd4, x, a),
 mov_dpy_x(0xd9, y, x),
 mov_dpx_y(0xdb, x, y) {
-1:dp = op_readpc();
+1:dp  = op_readpc();
 2:op_io();
-3:op_io();
-4:op_writedp(dp + regs.$1, regs.$2);
+  dp += regs.$1;
+3:op_readdp(dp);
+4:op_writedp(dp, regs.$2);
 }
 
 mov_addr_a(0xc5, a),
@@ -144,7 +145,7 @@ mov_addr_x(0xc9, x),
 mov_addr_y(0xcc, y) {
 1:dp  = op_readpc();
 2:dp |= op_readpc() << 8;
-3:op_io();
+3:op_readaddr(dp);
 4:op_writeaddr(dp, regs.$1);
 }
 
@@ -153,26 +154,29 @@ mov_addry_a(0xd6, y) {
 1:dp  = op_readpc();
 2:dp |= op_readpc() << 8;
 3:op_io();
-4:op_io();
-5:op_writeaddr(dp + regs.$1, regs.a);
+  dp += regs.$1;
+4:op_readaddr(dp);
+5:op_writeaddr(dp, regs.a);
 }
 
 mov_idpx_a(0xc7) {
-1:sp = op_readpc() + regs.x;
+1:sp  = op_readpc();
 2:op_io();
+  sp += regs.x;
 3:dp  = op_readdp(sp);
 4:dp |= op_readdp(sp + 1) << 8;
-5:op_io();
+5:op_readaddr(dp);
 6:op_writeaddr(dp, regs.a);
 }
 
 mov_idpy_a(0xd7) {
-1:sp = op_readpc();
-2:op_io();
-3:dp  = op_readdp(sp);
-4:dp |= op_readdp(sp + 1) << 8;
-5:op_io();
-6:op_writeaddr(dp + regs.y, regs.a);
+1:sp  = op_readpc();
+2:dp  = op_readdp(sp);
+3:dp |= op_readdp(sp + 1) << 8;
+4:op_io();
+  dp += regs.y;
+5:op_readaddr(dp);
+6:op_writeaddr(dp, regs.a);
 }
 
 movw_ya_dp(0xba) {
@@ -186,7 +190,7 @@ movw_ya_dp(0xba) {
 
 movw_dp_ya(0xda) {
 1:dp = op_readpc();
-2:op_io();
+2:op_readdp(dp);
 3:op_writedp(dp,     regs.a);
 4:op_writedp(dp + 1, regs.y);
 }

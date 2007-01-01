@@ -26,7 +26,7 @@ uint8 *ZipReader::read(uint32 length)
   return data;
 }
 
-ZipReader::ZipReader(char *fn) : fsize(0)
+ZipReader::ZipReader(const char *fn) : fsize(0)
 {
   unz_file_info cFileInfo; //Create variable to hold info for a compressed file
   char cFileName[sizeof(cname)];

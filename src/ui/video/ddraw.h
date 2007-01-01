@@ -12,23 +12,22 @@ DDSURFACEDESC2       ddsd;
 DDSCAPS2             ddscaps;
 
 public:
-  uint16 *lock(uint &pitch);
-  void    unlock();
+  bool lock(uint16 *&data, uint &pitch);
+  void unlock();
 
-  uint    screen_width()  { return GetScreenWidth();  }
-  uint    screen_height() { return GetScreenHeight(); }
+  uint screen_width()  { return GetScreenWidth();  }
+  uint screen_height() { return GetScreenHeight(); }
 
-  bool    update_video_profile();
-  void    init();
-  void    term();
+  bool update_video_profile();
+  void init();
+  void term();
 
-  void    create_render_target();
-  void    clear_video();
+  void create_render_target();
+  void clear_video();
 
-//ddraw_present.cpp
-  void    create_presentation();
-  void    redraw();
-  void    update();
+  void create_presentation();
+  void redraw();
+  void update();
 
   VideoDD(HWND handle);
 };

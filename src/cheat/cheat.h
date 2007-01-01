@@ -38,8 +38,8 @@ public:
   bool  enabled(uint32 n);
   void  enable (uint32 n);
   void  disable(uint32 n);
-  bool  load(Reader &rf);
-  bool  save(Writer &wf);
+  bool  load(const char *fn);
+  bool  save(const char *fn);
   void  clear();
 
   Cheat();

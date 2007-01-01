@@ -1,5 +1,5 @@
 /*
-  libstring : version 0.12 ~byuu (10/05/06)
+  libstring : version 0.14b ~byuu (2006/11/17)
 */
 
 #ifndef __LIBSTRING
@@ -15,10 +15,7 @@ char  chrupper(char c);
 
 uint  count(stringarray &str);
 
-void  strresize(string &str, uint size);
-
-char* strptr(string &str);
-
+char *strptr(string &str);
 uint  strlen(string &str);
 
 int   strcmp(string &dest, const char *src);
@@ -34,26 +31,21 @@ int   stricmp(string &dest, const char *src);
 int   stricmp(const char *dest, string &src);
 int   stricmp(string &dest, string &src);
 
-bool  strmatch(const char *dest, const char *src);
-bool  strmatch(string &dest, const char *src);
-bool  strmatch(const char *dest, string &src);
-bool  strmatch(string &dest, string &src);
-
-bool  strimatch(const char *dest, const char *src);
-bool  strimatch(string &dest, const char *src);
-bool  strimatch(const char *dest, string &src);
-bool  strimatch(string &dest, string &src);
-
 void  strcpy(string &dest, const char *src);
 void  strcpy(string &dest, string &src);
-void  strncpy(string &dest, const char *src, uint32 length);
-void  strncpy(string &dest, string &src, uint32 length);
-
-void  strset(string &dest, uint pos, uint8 c);
+uint  strlcpy(char *dest, const char *src, uint length);
+uint  strlcpy(string &dest, const char *src, uint length);
+uint  strlcpy(string &dest, string &src, uint length);
 
 void  strcat(string &dest, const char src);
 void  strcat(string &dest, const char *src);
 void  strcat(string &dest, string &src);
+uint  strlcat(char *dest, const char *src, uint length);
+uint  strlcat(string &dest, const char *src, uint length);
+uint  strlcat(string &dest, string &src, uint length);
+
+string substr(string &dest, const char *src, uint start = 0, uint length = 0);
+string substr(string &dest, string &src, uint start = 0, uint length = 0);
 
 void  strinsert(string &dest, const char *src, uint pos);
 void  strinsert(string &dest, string &src, uint pos);
@@ -143,6 +135,8 @@ string &btoa(string &str, uint num);
 
 bool  strfread(string &str, const char *filename);
 
+string strfmt(const char *fmt, int num);
+
 int   strmath(const char *in_str);
 int   strmath(string &in_str);
 
@@ -165,20 +159,68 @@ class string {
 public:
 char *s;
 uint size;
+  void reserve(uint reqsize) {
+    if(reqsize > size) {
+      size = reqsize;
+      s = (char*)realloc(s, size + 1);
+      s[size] = 0;
+    }
+  }
+
+  void swap(string &str) {
+    ::swap(s, str.s);
+    ::swap(size, str.size);
+  }
+
   string() {
     size = 16;
     s = (char*)malloc(size + 1);
-    *s = 0;
+    s[0] = 0;
   }
 
-  ~string() { SafeFree(s); }
-
-  void operator=(const string &p) {
-    SafeFree(s);
-    size = p.size;
+  string(const char *str) {
+    size = strlen(str);
     s = (char*)malloc(size + 1);
-    strcpy(s, p.s);
+    strcpy(s, str);
   }
+
+  string(string &str) {
+    size = strlen(str);
+    s = (char*)malloc(size + 1);
+    strcpy(s, strptr(str));
+  }
+
+  ~string() { safe_free(s); }
+
+  const char *operator()();
+  char &operator[](uint);
+  string &operator=(int);
+  string &operator=(const char *);
+  string &operator=(string &);
+  string &operator+=(int);
+  string &operator+=(const char *);
+  string &operator+=(string &);
+  bool operator==(const char *);
+  bool operator==(string &);
+  bool operator!=(const char *);
+  bool operator!=(string &);
+  bool operator<(const char *);
+  bool operator<(string &);
+  bool operator<=(const char *);
+  bool operator<=(string &);
+  bool operator>(const char *);
+  bool operator>(string &);
+  bool operator>=(const char *);
+  bool operator>=(string &);
+
+  string operator+(int);
+  string operator+(const char *);
+  string operator+(string &);
 };
+
+string operator+(int, string &);
+string operator+(const char *, string &);
+
+inline void swap(string &x, string &y) { x.swap(y); }
 
 #endif //__LIBSTRING

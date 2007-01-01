@@ -21,7 +21,7 @@ long height;
 
   wMain.SetBackgroundColor(0, 0, 0);
   wMain.SetIcon(100);
-  wMain.Create(0, "bsnes", config::misc.window_style.sget(), 0, 0, 256, 224, BSNES_TITLE);
+  wMain.Create(0, "bsnes", config::misc.window_style, 0, 0, 256, 224, BSNES_TITLE);
   wMain.Center();
 
   wAbout.SetIcon(100);
@@ -31,23 +31,23 @@ long height;
   init_settings();
   init_debugger();
 
-  if(!stricmp(config::system.video.sget(), "dd")) {
+  if(!stricmp(config::system.video, "dd")) {
     uiVideo = new VideoDD(wMain.hwnd);
-//} else if(!stricmp(config::system.video.sget(), "sdl")) {
+//} else if(!stricmp(config::system.video, "sdl")) {
 //  uiVideo = new VideoSDL((void*)wMain.hwnd);
   } else {
     uiVideo = new VideoD3D(wMain.hwnd);
   }
 
-  if(!stricmp(config::system.audio.sget(), "none")) {
+  if(!stricmp(config::system.audio, "none")) {
     uiAudio = new Audio();
   } else {
     uiAudio = new AudioDS(wMain.hwnd);
   }
 
-  if(!stricmp(config::system.input.sget(), "none")) {
+  if(!stricmp(config::system.input, "none")) {
     uiInput = new Input();
-//} else if(!stricmp(config::system.input.sget(), "sdl")) {
+//} else if(!stricmp(config::system.input, "sdl")) {
 //  uiInput = new InputSDL((void*)wMain.hwnd);
   } else {
     uiInput = new InputDI();
