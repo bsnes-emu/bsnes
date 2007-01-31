@@ -1,5 +1,5 @@
 /*
-  libarray : version 0.07 ~byuu (10/14/06)
+  libarray : version 0.08 ~byuu (2006-12-16)
 */
 
 #ifndef __LIBARRAY
@@ -25,14 +25,10 @@ protected:
 
 public:
   uint size() { return buffersize; }
-  uint capacity() { return buffersize; }
+  uint capacity() { return poolsize; }
 
   void reset() {
-    if(pool) {
-      free(pool);
-      pool = 0;
-    }
-
+    safe_free(pool);
     poolsize = 0;
     buffersize = 0;
   }
@@ -44,7 +40,7 @@ public:
       buffersize = size;
     }
 
-    pool = static_cast<T*>(realloc(pool, sizeof(T) * size));
+    pool = (T*)realloc(pool, sizeof(T) * size);
     poolsize = size;
   }
 
@@ -68,6 +64,17 @@ public:
   }
 
   ~array() { reset(); }
+
+  array &operator=(array &source) {
+    safe_free(pool);
+    buffersize = source.buffersize;
+    poolsize = source.poolsize;
+  //allocate entire pool size ...
+    pool = (T*)realloc(pool, sizeof(T) * poolsize);
+  //... but only copy used pool objects
+    memcpy(pool, source.pool, sizeof(T) * buffersize);
+    return *this;
+  }
 
   inline T &operator[](int index) {
     if(index >= buffersize)resize(index + 1);

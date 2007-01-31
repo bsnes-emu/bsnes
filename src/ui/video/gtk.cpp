@@ -1,9 +1,7 @@
-//WARNING: GTK video renderer is currently broken
-//Renderer is displaying incorrect colors
-
-uint16 *VideoGTK::lock(uint &pitch) {
+bool VideoGTK::lock(uint16 *&data, uint &pitch) {
   pitch = 512;
-  return (uint16*)buffer;
+  data  = buffer;
+  return data;
 }
 
 void VideoGTK::unlock() {}
@@ -14,10 +12,12 @@ uint16 *src  = buffer;
 uint    z    = 256 * 224;
   while(z--) {
   uint32 p = *src++;
-    *(uint32*)dest = ((p & 0xf800) << 8) | ((p & 0x07e0) << 5) | ((p & 0x001f) << 3);
-    dest += 3;
+  uint32 pix = ((p & 0xf800) << 8) | ((p & 0x07e0) << 5) | ((p & 0x001f) << 3);
+    *dest++ = pix >> 16;
+    *dest++ = pix >> 8;
+    *dest++ = pix;
   }
-  gdk_draw_rgb_image(GDK_DRAWABLE(widget->window), gc, 0, 0, 256, 224, GDK_RGB_DITHER_NONE, gdkbuffer, 768);
+  gdk_draw_rgb_image(GDK_DRAWABLE(window), gc, 0, 0, 256, 224, GDK_RGB_DITHER_NONE, gdkbuffer, 768);
 }
 
 void VideoGTK::update() { redraw(); }
@@ -28,11 +28,11 @@ void VideoGTK::init() {
 }
 
 void VideoGTK::term() {
-  SafeFree(buffer);
-  SafeFree(gdkbuffer);
+  safe_free(buffer);
+  safe_free(gdkbuffer);
 }
 
-VideoGTK::VideoGTK(GtkWidget *output_widget) {
-  widget = output_widget;
-  gc = gdk_gc_new(GDK_DRAWABLE(output_widget->window));
+VideoGTK::VideoGTK(unsigned long output_window) {
+  window = output_window;
+  gc = gdk_gc_new(GDK_DRAWABLE(window));
 }

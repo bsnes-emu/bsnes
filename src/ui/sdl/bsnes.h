@@ -20,4 +20,4 @@ enum { STOP = 0, RUN };
 
   void    notify(uint32 message, uint32 param1 = 0, uint32 param2 = 0);
   bSNES();
-} *bsnes;
+} bsnes;

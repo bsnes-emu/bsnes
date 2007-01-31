@@ -43,8 +43,8 @@ struct {
   bool lock(uint16 *&data, uint &pitch);
   void unlock();
 
-  uint screen_width()  { return GetScreenWidth();  }
-  uint screen_height() { return GetScreenHeight(); }
+  uint screen_width()  { return GetSystemMetrics(SM_CXSCREEN); }
+  uint screen_height() { return GetSystemMetrics(SM_CYSCREEN); }
 
   void pause_enable();
   void pause_disable();

@@ -1,3 +1,5 @@
+#include "gzreader.h"
+
 uint32 GZReader::size() {
   return fsize;
 }

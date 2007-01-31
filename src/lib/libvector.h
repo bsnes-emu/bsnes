@@ -1,5 +1,5 @@
 /*
-  libvector : version 0.04 ~byuu (10/14/06)
+  libvector : version 0.05 ~byuu (2006-12-16)
 */
 
 /*****
@@ -98,7 +98,7 @@ public:
       objectsize = size;
     }
 
-    pool = static_cast<T*>(realloc(pool, sizeof(T) * size));
+    pool = (T*)realloc(pool, sizeof(T) * size);
     poolsize = size;
   }
 
@@ -165,7 +165,7 @@ public:
       objectsize = size;
     }
 
-    pool = static_cast<T**>(realloc(pool, sizeof(T*) * size));
+    pool = (T**)realloc(pool, sizeof(T*) * size);
     if(size > poolsize) {
       memset(pool + poolsize, 0, sizeof(T*) * (size - poolsize));
     }

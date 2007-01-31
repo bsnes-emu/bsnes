@@ -31,4 +31,4 @@ void sort(T list[], uint length, Tcmp comparator) {
   }
 }
 
-#endif __LIBSORT
+#endif

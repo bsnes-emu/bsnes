@@ -1,5 +1,7 @@
 //created by Nach
 
+#include "zipreader.h"
+
 uint32 ZipReader::size() {
   return fsize;
 }

@@ -1,4 +1,4 @@
-#define BSNES_VERSION "0.019"
+#define BSNES_VERSION "0.019.09"
 #define BSNES_TITLE   "bsnes v" BSNES_VERSION
 
 #define MEMCORE bMemBus
@@ -12,12 +12,6 @@
 
 //game genie + pro action replay code support (~1-3% speed hit)
 #define CHEAT_SYSTEM
-
-//enable GZ, ZIP format support
-//#define GZIP_SUPPORT
-
-//enable JMA support
-//#define JMA_SUPPORT
 
 //snes core polymorphism
 //(allow runtime cpu/smp/dsp/ppu/bus selection, ~10% speed hit)
@@ -38,8 +32,6 @@
 #include "lib/libco_x86.h"
 #include "lib/libarray.h"
 #include "lib/libvector.h"
-#include "lib/libfile.h"
-#include "lib/libups.h"
 #include "lib/libstring.h"
 #include "lib/libconfig.h"
 

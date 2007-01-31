@@ -1,3 +1,14 @@
+#include "../reader/filereader.h"
+
+#if defined(GZIP_SUPPORT)
+  #include "../reader/gzreader.h"
+  #include "../reader/zipreader.h"
+#endif
+
+#if defined(JMA_SUPPORT)
+  #include "../reader/jmareader.h"
+#endif
+
 bool Cartridge::load_file(const char *fn, uint8 *&data, uint &size) {
   dprintf("* Loading \"%s\"...", fn);
 

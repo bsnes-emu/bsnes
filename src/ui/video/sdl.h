@@ -2,20 +2,20 @@
 
 class VideoSDL : public Video {
 private:
-void *window;
+unsigned long window;
 SDL_Surface *screen, *backbuffer;
 
 public:
-  uint16 *lock(uint &pitch);
-  void    unlock();
+  bool lock(uint16 *&data, uint &pitch);
+  void unlock();
 
-  uint    screen_width()  { return 1152; }
-  uint    screen_height() { return  864; }
+  uint screen_width()  { return 1152; }
+  uint screen_height() { return  864; }
 
-  void    redraw();
-  void    update();
-  void    init();
-  void    term();
+  void redraw();
+  void update();
+  void init();
+  void term();
 
-  VideoSDL(void *handle = 0);
+  VideoSDL(unsigned long handle);
 };

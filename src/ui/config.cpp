@@ -57,6 +57,18 @@ Setting Video::pscanline_intensity(&config_file, "video.pscanline_intensity",
 Setting Video::iscanline_intensity(&config_file, "video.iscanline_intensity",
   "Interlace scanline intensity", 50, Setting::DEC);
 
+struct Audio {
+  static Setting frequency;
+  static Setting latency;
+} audio;
+Setting Audio::frequency(&config_file, "audio.frequency", "Default audio playback frequency.", 32000, Setting::DEC);
+Setting Audio::latency(&config_file, "audio.latency", "Audio playback latency in milliseconds.\n"
+  "Specifies how long audio playback is delayed compared to a real SNES.\n"
+  "A delay is necessary to allow smooth audio playback via buffering.\n"
+  "Raising this value may help with audio playback problems, but will decrease\n"
+  "audio responsiveness.",
+  75, Setting::DEC);
+
 struct Input {
   static Setting axis_resistance;
   struct Joypad1 {

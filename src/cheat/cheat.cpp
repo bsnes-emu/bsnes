@@ -1,4 +1,5 @@
 #include "../base.h"
+#include "../reader/filereader.h"
 
 Cheat cheat;
 

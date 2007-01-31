@@ -1,5 +1,5 @@
 /*
-  libco_x86 : version 0.08 ~byuu (10/21/2006)
+  libco_x86 : version 0.09 ~byuu (2007-01-13)
 */
 
 #define COTHREAD_STACKSIZE_TINY      0x1000
@@ -11,8 +11,6 @@
 typedef void (*cothread_t);
 typedef void (*cothread_p)(void);
 
-extern "C" cothread_t fastcall co_init();
-extern "C" void       fastcall co_term();
 extern "C" cothread_t fastcall co_active();
 extern "C" cothread_t fastcall co_create(cothread_p coentry, unsigned int heapsize);
 extern "C" void       fastcall co_delete(cothread_t cothread);

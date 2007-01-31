@@ -12,7 +12,7 @@ int lp = 0, split_count = 0;
   }
   strcpy(dest[split_count++], src + lp);
 }
-void split(stringarray &dest, const char *key, string &src) { split(dest, key, strptr(src)); }
+void split(stringarray &dest, const char *key, const string &src) { split(dest, key, strptr(src)); }
 
 void qsplit(stringarray &dest, const char *key, const char *src) {
   dest.reset();
@@ -34,4 +34,4 @@ int lp = 0, split_count = 0;
   }
   strcpy(dest[split_count++], src + lp);
 }
-void qsplit(stringarray &dest, const char *key, string &src) { qsplit(dest, key, strptr(src)); }
+void qsplit(stringarray &dest, const char *key, const string &src) { qsplit(dest, key, strptr(src)); }

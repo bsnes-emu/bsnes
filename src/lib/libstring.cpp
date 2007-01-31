@@ -14,13 +14,12 @@ char chrupper(char c) {
   return c;
 }
 
-char *strptr(string &str) { return str.s; }
+char *strptr(const string &str) { return str.s; }
+uint  strlen(const string &str) { return strlen(strptr(str)); }
 
-uint strlen(string &str) { return strlen(strptr(str)); }
-
-int strcmp(string &dest, const char *src) { return strcmp(strptr(dest), src); }
-int strcmp(const char *dest, string &src) { return strcmp(dest, strptr(src)); }
-int strcmp(string &dest, string &src) { return strcmp(strptr(dest), strptr(src)); }
+int strcmp(const string &dest, const char *src) { return strcmp(strptr(dest), src); }
+int strcmp(const char *dest, const string &src) { return strcmp(dest, strptr(src)); }
+int strcmp(const string &dest, const string &src) { return strcmp(strptr(dest), strptr(src)); }
 
 int __stricmp(const char *dest, const char *src) {
   while(*dest) {
@@ -30,22 +29,16 @@ int __stricmp(const char *dest, const char *src) {
   }
   return (int)chrlower(*dest) - (int)chrlower(*src);
 }
-int stricmp(string &dest, const char *src) { return __stricmp(strptr(dest), src); }
-int stricmp(const char *dest, string &src) { return __stricmp(dest, strptr(src)); }
-int stricmp(string &dest, string &src) { return __stricmp(strptr(dest), strptr(src)); }
-
-void strcpy(string &dest, const char src) {
-  dest.reserve(2);
-  dest.s[0] = src;
-  dest.s[1] = 0;
-}
+int stricmp(const string &dest, const char *src) { return __stricmp(strptr(dest), src); }
+int stricmp(const char *dest, const string &src) { return __stricmp(dest, strptr(src)); }
+int stricmp(const string &dest, const string &src) { return __stricmp(strptr(dest), strptr(src)); }
 
 void strcpy(string &dest, const char *src) {
 int srclen = strlen(src);
   dest.reserve(srclen);
   strcpy(dest.s, src);
 }
-void strcpy(string &dest, string &src) { strcpy(dest, strptr(src)); }
+void strcpy(string &dest, const string &src) { strcpy(dest, strptr(src)); }
 
 uint strlcpy(char *dest, const char *src, uint length) {
 uint srclen = strlen(src);
@@ -61,16 +54,9 @@ uint strlcpy(string &dest, const char *src, uint length) {
   return strlcpy(strptr(dest), src, length);
 }
 
-uint strlcpy(string &dest, string &src, uint length) {
+uint strlcpy(string &dest, const string &src, uint length) {
   dest.reserve(length);
   return strlcpy(strptr(dest), strptr(src), length);
-}
-
-void strcat(string &dest, const char src) {
-int length = strlen(dest);
-  dest.reserve(length + 1);
-  dest.s[length]     = src;
-  dest.s[length + 1] = 0;
 }
 
 void strcat(string &dest, const char *src) {
@@ -79,7 +65,7 @@ int destlen = strlen(dest);
   dest.reserve(srclen + destlen);
   strcat(dest.s, src);
 }
-void strcat(string &dest, string &src) { strcat(dest, strptr(src)); }
+void strcat(string &dest, const string &src) { strcat(dest, strptr(src)); }
 
 uint strlcat(char *dest, const char *src, uint length) {
 uint destlen = strlen(dest), srclen = strlen(src);
@@ -95,7 +81,7 @@ uint strlcat(string &dest, const char *src, uint length) {
   return strlcat(strptr(dest), src, length);
 }
 
-uint strlcat(string &dest, string &src, uint length) {
+uint strlcat(string &dest, const string &src, uint length) {
   dest.reserve(length);
   return strlcat(strptr(dest), strptr(src), length);
 }
@@ -111,8 +97,7 @@ string temp;
   }
   return temp;
 }
-
-string substr(string &dest, string &src, uint start, uint length) { return substr(dest, strptr(src), start, length); }
+string substr(string &dest, const string &src, uint start, uint length) { return substr(dest, strptr(src), start, length); }
 
 void strinsert(string &dest, const char *src, uint pos) {
 string temp;
@@ -121,7 +106,7 @@ string temp;
   strcat(dest, src);
   strcat(dest, temp);
 }
-void strinsert(string &dest, string &src, uint pos) { strinsert(dest, strptr(src), pos); }
+void strinsert(string &dest, const string &src, uint pos) { strinsert(dest, strptr(src), pos); }
 
 void strremove(string &dest, uint start, uint length) {
 int i, destlen = strlen(dest);
@@ -154,24 +139,23 @@ uint i = 0;
 }
 string &strupper(string &str) { strupper(strptr(str)); return str; }
 
-bool strpos(const char *str, const char *key, uint &pos) {
+index_t strpos(const char *str, const char *key) {
 int ssl = strlen(str), ksl = strlen(key);
-  if(ksl > ssl)return false;
+  if(ksl > ssl)return index_t(false);
   for(int i = 0; i <= ssl - ksl; i++) {
     if(!memcmp(str + i, key, ksl)) {
-      pos = i;
-      return true;
+      return index_t(true, i);
     }
   }
-  return false;
+  return index_t(false);
 }
-bool strpos(string &str, const char *key, uint &pos) { return strpos(strptr(str), key, pos); }
-bool strpos(const char *str, string &key, uint &pos) { return strpos(str, strptr(key), pos); }
-bool strpos(string &str, string &key, uint &pos) { return strpos(strptr(str), strptr(key), pos); }
+index_t strpos(const string &str, const char   *key) { return strpos(strptr(str), key); }
+index_t strpos(const char   *str, const string &key) { return strpos(str, strptr(key)); }
+index_t strpos(const string &str, const string &key) { return strpos(strptr(str), strptr(key)); }
 
-bool qstrpos(const char *str, const char *key, uint &pos) {
+index_t qstrpos(const char *str, const char *key) {
 int ssl = strlen(str), ksl = strlen(key);
-  if(ksl > ssl)return false;
+  if(ksl > ssl)return index_t(false);
   for(int i = 0; i <= ssl - ksl;) {
   uint8 x = str[i];
     if(x == '\"' || x == '\'') {
@@ -180,17 +164,16 @@ int ssl = strlen(str), ksl = strlen(key);
       if(i >= ssl)i = z;
     }
     if(!memcmp(str + i, key, ksl)) {
-      pos = i;
-      return true;
+      return index_t(true, i);
     } else {
       i++;
     }
   }
-  return false;
+  return index_t(false);
 }
-bool qstrpos(string &str, const char *key, uint &pos) { return qstrpos(strptr(str), key, pos); }
-bool qstrpos(const char *str, string &key, uint &pos) { return qstrpos(str, strptr(key), pos); }
-bool qstrpos(string &str, string &key, uint &pos) { return qstrpos(strptr(str), strptr(key), pos); }
+index_t qstrpos(const string &str, const char   *key) { return qstrpos(strptr(str), key); }
+index_t qstrpos(const char   *str, const string &key) { return qstrpos(str, strptr(key)); }
+index_t qstrpos(const string &str, const string &key) { return qstrpos(strptr(str), strptr(key)); }
 
 void strtr(char *dest, const char *before, const char *after) {
 int sl = strlen(dest), bsl = strlen(before), asl = strlen(after);
@@ -211,7 +194,7 @@ int i, ssl = strlen(str), ksl = strlen(key);
   if(ksl > ssl)return false;
   return (!memcmp(str, key, ksl));
 }
-bool strbegin(string &str, const char *key) { return strbegin(strptr(str), key); }
+bool strbegin(const string &str, const char *key) { return strbegin(strptr(str), key); }
 
 bool stribegin(const char *str, const char *key) {
 int ssl = strlen(str), ksl = strlen(key);
@@ -227,14 +210,14 @@ int ssl = strlen(str), ksl = strlen(key);
   }
   return true;
 }
-bool stribegin(string &str, const char *key) { return stribegin(strptr(str), key); }
+bool stribegin(const string &str, const char *key) { return stribegin(strptr(str), key); }
 
 bool strend(const char *str, const char *key) {
 int ssl = strlen(str), ksl = strlen(key);
   if(ksl > ssl)return false;
   return (!memcmp(str + ssl - ksl, key, ksl));
 }
-bool strend(string &str, const char *key) { return strend(strptr(str), key); }
+bool strend(const string &str, const char *key) { return strend(strptr(str), key); }
 
 bool striend(const char *str, const char *key) {
 int ssl = strlen(str), ksl = strlen(key);
@@ -250,7 +233,7 @@ int ssl = strlen(str), ksl = strlen(key);
   }
   return true;
 }
-bool striend(string &str, const char *key) { return striend(strptr(str), key); }
+bool striend(const string &str, const char *key) { return striend(strptr(str), key); }
 
 void strltrim(char *str, const char *key) {
 int i, ssl = strlen(str), ksl = strlen(key);
@@ -290,9 +273,21 @@ int ssl = strlen(str), ksl = strlen(key);
 }
 void strirtrim(string &str, const char *key) { strirtrim(strptr(str), key); }
 
-//does not work on type char* because function increases string length
+void strtrim(char *str, const char *key) {
+  strltrim(str, key);
+  strrtrim(str, key);
+}
+void strtrim(string &str, const char *key) { strtrim(strptr(str), key); }
+
+void stritrim(char *str, const char *key) {
+  striltrim(str, key);
+  strirtrim(str, key);
+}
+void stritrim(string &str, const char *key) { stritrim(strptr(str), key); }
+
+//does not support char* type because function increases string length
 void strquote(string &str) {
-static string t;
+string t;
   strcpy(t, "\"");
   strcat(t, str);
   strcat(t, "\"");
@@ -321,9 +316,11 @@ bool strunquote(string &str) { return strunquote(strptr(str)); }
 
 uint strhex(const char *str) {
 uint r = 0, m = 0;
-int i, ssl = strlen(str);
+int i = 0, ssl = strlen(str);
 uint8 x;
-  for(i = 0; i < ssl; i++) {
+bool negate = (str[0] == '-');
+  if(negate)i++;
+  for(; i < ssl; i++) {
     if(str[i] >= '0' && str[i] <= '9');
     else if(str[i] >= 'A' && str[i] <= 'F');
     else if(str[i] >= 'a' && str[i] <= 'f');
@@ -334,87 +331,56 @@ uint8 x;
     if(x >= '0' && x <= '9')x -= '0';
     else if(x >= 'A' && x <= 'F')x -= 'A' - 0x0a;
     else if(x >= 'a' && x <= 'f')x -= 'a' - 0x0a;
-    else return r;
+    else break;
     r |= x << m;
   }
-  return r;
+  return !negate ? r : (uint)-r;
 }
-uint strhex(string &str) { return strhex(strptr(str)); }
-
-int sstrhex(const char *str) {
-  if(str[0] == '-') {
-    return -strhex(str + 1);
-  }
-  return strhex(str);
-}
-int sstrhex(string &str) { return sstrhex(strptr(str)); }
+uint strhex(const string &str) { return strhex(strptr(str)); }
 
 uint strdec(const char *str) {
 uint m = 1;
-int i, r = 0, ssl = strlen(str);
+int i = 0, r = 0, ssl = strlen(str);
 uint8 x;
-  for(i = 0; i < ssl; i++) {
+bool negate = (str[0] == '-');
+  if(negate)i++;
+  for(; i < ssl; i++) {
     if(str[i] >= '0' && str[i] <= '9');
     else break;
   }
   for(--i; i >= 0; i--, m *= 10) {
     x = str[i];
     if(x >= '0' && x <= '9')x -= '0';
-    else return r;
+    else break;
     r += x * m;
   }
-  return r;
+  return !negate ? r : (uint)-r;
 }
-uint strdec(string &str) { return strdec(strptr(str)); }
-
-int sstrdec(const char *str) {
-  if(str[0] == '-') {
-    return -strdec(str + 1);
-  }
-  return strdec(str);
-}
-int sstrdec(string &str) { return sstrdec(strptr(str)); }
+uint strdec(const string &str) { return strdec(strptr(str)); }
 
 uint strbin(const char *str) {
 uint r = 0, m = 0;
-int i, ssl = strlen(str);
+int i = 0, ssl = strlen(str);
 uint8 x;
-  for(i = 0; i < ssl; i++) {
+bool negate = (str[0] == '-');
+  if(negate)i++;
+  for(; i < ssl; i++) {
     if(str[i] == '0' || str[i] == '1');
     else break;
   }
   for(--i; i >= 0; i--, m++) {
     x = str[i];
     if(str[i] == '0' || str[i] == '1')x -= '0';
-    else return r;
+    else break;
     r |= x << m;
   }
-  return r;
+  return !negate ? r : (uint)-r;
 }
-uint strbin(string &str) { return strbin(strptr(str)); }
-
-int sstrbin(const char *str) {
-  if(str[0] == '-') {
-    return -strbin(str + 1);
-  }
-  return strbin(str);
-}
-int sstrbin(string &str) { return sstrbin(strptr(str)); }
+uint strbin(const string &str) { return strbin(strptr(str)); }
 
 char *utoa(char *str, uint num) {
-char *pstr = str;
-uint mask = 1000000000;
-  while(mask > num)mask /= 10;
-  while(mask > 1) {
-    str[0] = '0';
-    while(num >= mask) { str[0]++; num -= mask; }
-    str++;
-    mask /= 10;
-  }
-  str[0] = '0' + num;
-  str++;
-  str[0] = 0;
-  return pstr;
+  sprintf(str, "%u", num);
+  return str;
 }
 
 string &utoa(string &str, uint num) {
@@ -424,14 +390,8 @@ string &utoa(string &str, uint num) {
 }
 
 char *itoa(char *str, uint num) {
-char *pstr = str;
-  if(num < 0) {
-    str[0] = '-';
-    str++;
-    num = abs(int(num));
-  }
-  utoa(str, num);
-  return pstr;
+  sprintf(str, "%d", num);
+  return str;
 }
 
 string &itoa(string &str, uint num) {
@@ -441,48 +401,13 @@ string &itoa(string &str, uint num) {
 }
 
 char *htoa(char *str, uint num) {
-char *pstr = str;
-uint mask = 28, r;
-  while(mask && ((num >> mask) & 15) == 0)mask -= 4;
-  while(mask) {
-    r = (num >> mask) & 15;
-    str[0] = (r < 10) ? ('0' + r) : ('a' + r - 10);
-    str++;
-    mask -= 4;
-  }
-  r = num & 15;
-  str[0] = (r < 10) ? ('0' + r) : ('a' + r - 10);
-  str++;
-  str[0] = 0;
-  return pstr;
+  sprintf(str, "%x", num);
+  return str;
 }
 
 string &htoa(string &str, uint num) {
   str.reserve(16);
   htoa(strptr(str), num);
-  return str;
-}
-
-char *uhtoa(char *str, uint num) {
-char *pstr = str;
-uint mask = 28, r;
-  while(mask && ((num >> mask) & 15) == 0)mask -= 4;
-  while(mask) {
-    r = (num >> mask) & 15;
-    str[0] = (r < 10) ? ('0' + r) : ('A' + r - 10);
-    str++;
-    mask -= 4;
-  }
-  r = num & 15;
-  str[0] = (r < 10) ? ('0' + r) : ('A' + r - 10);
-  str++;
-  str[0] = 0;
-  return pstr;
-}
-
-string &uhtoa(string &str, uint num) {
-  str.reserve(16);
-  uhtoa(strptr(str), num);
   return str;
 }
 
@@ -502,7 +427,7 @@ uint mask = 0x80000000;
 }
 
 string &btoa(string &str, uint num) {
-  str.reserve(48);
+  str.reserve(64);
   btoa(strptr(str), num);
   return str;
 }

@@ -28,7 +28,7 @@ char *data;
   free(data);
   return str;
 }
-string &replace(string &str, const char *key, string &token) { return replace(str, key, strptr(token)); }
+string &replace(string &str, const char *key, const string &token) { return replace(str, key, strptr(token)); }
 
 string &qreplace(string &str, const char *key, const char *token) {
 int   i, l, z, ksl = strlen(key), tsl = strlen(token), ssl = strlen(str);
@@ -83,4 +83,4 @@ char *data;
   free(data);
   return str;
 }
-string &qreplace(string &str, const char *key, string &token) { return qreplace(str, key, strptr(token)); }
+string &qreplace(string &str, const char *key, const string &token) { return qreplace(str, key, strptr(token)); }

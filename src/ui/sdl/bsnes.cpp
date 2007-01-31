@@ -52,7 +52,7 @@ void bSNES::video_unlock() {
  ***********************/
 
 void bSNES::poll_input(uint8 type) {
-  uiInput->poll(type);
+  uiInput->poll();
 }
 
 bool bSNES::get_input_status(uint8 device, uint8 button) {
@@ -62,5 +62,5 @@ bool bSNES::get_input_status(uint8 device, uint8 button) {
 void bSNES::notify(uint32 message, uint32 param1, uint32 param2) {}
 
 bSNES::bSNES() {
-  run_status = STOP;
+  run_status = RUN;
 }

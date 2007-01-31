@@ -1,45 +1,62 @@
-void AudioDS::run(uint32 sample) {
-  data.buffer[data.buffer_pos++] = sample;
-
-  if(data.buffer_pos >= data.samples_per_frame) {
-  uint32 pos, size;
-  void  *buffer;
-    if(config::system.regulate_speed == true) {
-      for(;;) {
-        dsb_b->GetCurrentPosition(&pos, 0);
-        data.read_buffer = pos / data.buffer_size;
-        if(data.read_buffer != data.prev_buffer)break;
-        Sleep(1);
-      }
-    }
-
-    data.prev_buffer = data.read_buffer;
-    data.read_buffer++;
-    data.read_buffer %= data.buffer_count;
-
-    pos = (data.read_buffer + 1) % data.buffer_count;
-
-    if(dsb_b->Lock(pos * data.buffer_size,
-    data.buffer_size, &buffer, &size, 0, 0, 0) == DS_OK) {
-      memcpy(buffer, data.buffer, data.buffer_size);
-      dsb_b->Unlock(buffer, size, 0, 0);
-    }
-
-    data.buffer_pos = 0;
-  }
+void AudioDS::tick() {
 }
 
-void AudioDS::set_frequency(uint new_freq) {
-  frequency = new_freq;
+void AudioDS::run(uint32 sample) {
+  data.buffer[data.buffer_pos++] = sample;
+  run_audiosync();
+}
+
+void AudioDS::run_videosync() {
+  if(data.buffer_pos & 255)return;
+
+uint32 ring_pos, pos, size;
+  dsb_b->GetCurrentPosition(&pos, 0);
+  ring_pos = pos / data.ring_size;
+  if(ring_pos == data.ring_pos)return;
+
+  data.ring_pos = ring_pos;
+void *output;
+  if(dsb_b->Lock(((data.ring_pos + 2) % 3) * data.ring_size,
+  data.ring_size, &output, &size, 0, 0, 0) == DS_OK) {
+    Audio::resample_point((uint32*)output, data.buffer, latency, data.buffer_pos);
+    dsb_b->Unlock(output, size, 0, 0);
+  }
+
+  dprintf("AudioDS: resample_point() %d -> %d samples\n", data.buffer_pos, latency);
+  data.buffer_pos = 0;
+}
+
+void AudioDS::run_audiosync() {
+  if(data.buffer_pos < latency)return;
+
+uint32 ring_pos, pos, size;
+  do {
+    Sleep(1);
+    dsb_b->GetCurrentPosition(&pos, 0);
+    ring_pos = pos / data.ring_size;
+  } while(config::system.regulate_speed == true && ring_pos == data.ring_pos);
+
+  data.ring_pos = ring_pos;
+void *output;
+  if(dsb_b->Lock(((data.ring_pos + 2) % 3) * data.ring_size,
+  data.ring_size, &output, &size, 0, 0, 0) == DS_OK) {
+    memcpy(output, data.buffer, data.ring_size);
+    dsb_b->Unlock(output, size, 0, 0);
+  }
+
+  data.buffer_pos = 0;
+}
+
+void AudioDS::set_frequency(uint freq) {
+  Audio::set_frequency(freq);
   init();
 }
 
 void AudioDS::clear_audio() {
-  data.read_buffer = 0;
-  data.prev_buffer = 0;
-  data.buffer_pos  = 0;
+  data.buffer_pos = 0;
+  data.ring_pos   = 0;
   if(data.buffer) {
-    memset(data.buffer, 0, data.buffer_size * data.buffer_count);
+    memset(data.buffer, 0, data.buffer_size);
   }
 
   if(!dsb_b)return;
@@ -48,10 +65,10 @@ void AudioDS::clear_audio() {
   dsb_b->SetCurrentPosition(0);
 
 uint32 size;
-void  *buffer;
-  dsb_b->Lock(0, data.buffer_size * data.buffer_count, &buffer, &size, 0, 0, 0);
-  memset(buffer, 0, data.buffer_size * data.buffer_count);
-  dsb_b->Unlock(buffer, size, 0, 0);
+void  *output;
+  dsb_b->Lock(0, data.ring_size * 3, &output, &size, 0, 0, 0);
+  memset(output, 0, size);
+  dsb_b->Unlock(output, size, 0, 0);
 
   dsb_b->Play(0, 0, DSBPLAY_LOOPING);
 }
@@ -60,10 +77,10 @@ void AudioDS::init() {
   clear_audio();
   term();
 
-  data.samples_per_frame = (uint)( (double)frequency / ((snes.region() == SNES::NTSC) ? 60.0 : 50.0) + 0.5 );
-  data.buffer_size  = data.samples_per_frame * sizeof(uint32);
-  data.buffer_count = 4;
-  data.buffer       = (uint32*)malloc(data.buffer_size * data.buffer_count);
+  data.ring_size   = latency * sizeof(uint32);
+  data.buffer_size = data.ring_size * 16;
+  data.buffer      = (uint32*)malloc(data.buffer_size);
+  data.buffer_pos  = 0;
 
   DirectSoundCreate(0, &ds, 0);
   ds->SetCooperativeLevel(hwnd, DSSCL_PRIORITY);
@@ -88,27 +105,37 @@ void AudioDS::init() {
   dsbd.dwSize          = sizeof(dsbd);
   dsbd.dwFlags         = DSBCAPS_GETCURRENTPOSITION2 | DSBCAPS_CTRLFREQUENCY |
                          DSBCAPS_GLOBALFOCUS | DSBCAPS_LOCSOFTWARE;
-  dsbd.dwBufferBytes   = data.buffer_size * data.buffer_count;
+  dsbd.dwBufferBytes   = data.ring_size * 3;
   dsbd.guid3DAlgorithm = GUID_NULL;
   dsbd.lpwfxFormat     = &wfx;
   ds->CreateSoundBuffer(&dsbd, &dsb_b, 0);
   dsb_b->SetFrequency(frequency);
   dsb_b->SetCurrentPosition(0);
 
-uint32 size;
-void  *buffer;
-  dsb_b->Lock(0, data.buffer_size * data.buffer_count, &buffer, &size, 0, 0, 0);
-  memset(buffer, 0, data.buffer_size * data.buffer_count);
-  dsb_b->Unlock(buffer, size, 0, 0);
-
-  data.read_buffer = 0;
-  dsb_b->Play(0, 0, DSBPLAY_LOOPING);
+  clear_audio();
 }
 
 void AudioDS::term() {
-  SafeFree(data.buffer);
+  safe_free(data.buffer);
 
   if(dsb_b) { dsb_b->Stop(); dsb_b->Release(); dsb_b = 0; }
   if(dsb_p) { dsb_p->Stop(); dsb_p->Release(); dsb_p = 0; }
-  if(ds) { ds->Release(); ds = 0; }
+  if(ds)    { ds->Release(); ds = 0; }
+}
+
+AudioDS::AudioDS(HWND handle) {
+  hwnd  = handle ? handle : GetDesktopWindow();
+  ds    = 0;
+  dsb_p = 0;
+  dsb_b = 0;
+
+  data.buffer      = 0;
+  data.buffer_pos  = 0;
+  data.ring_pos    = 0;
+  data.buffer_size = 0;
+  data.ring_size   = 0;
+}
+
+AudioDS::~AudioDS() {
+  term();
 }

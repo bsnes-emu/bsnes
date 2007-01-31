@@ -110,12 +110,12 @@ int lhs = strmath_rdp(s, level + 1);
 }
 #undef maxlevel
 
-int strmath(const char *s) {
-  return strmath_rdp(s);
+int strmath(const char *str) {
+  return strmath_rdp(str);
 }
 
 #ifdef __LIBSTRING
-int strmath(string &s) {
-  return strmath(strptr(s));
+int strmath(const string &str) {
+  return strmath(strptr(str));
 }
 #endif

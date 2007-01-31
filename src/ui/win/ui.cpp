@@ -50,7 +50,7 @@ long height;
 //} else if(!stricmp(config::system.input, "sdl")) {
 //  uiInput = new InputSDL((void*)wMain.hwnd);
   } else {
-    uiInput = new InputDI();
+    uiInput = new InputDI(wMain.hwnd);
   }
 
   uiVideo->init();

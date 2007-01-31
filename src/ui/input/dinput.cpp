@@ -1,5 +1,5 @@
 void InputDI::poll() {
-  if(wMain.hwnd != GetForegroundWindow()) {
+  if(owner != GetForegroundWindow()) {
     clear_input();
     return;
   }
@@ -66,7 +66,7 @@ HRESULT hr = di->CreateDevice(instance->guidInstance, &di_joy[di_joy_count], 0);
   }
 
   di_joy[di_joy_count]->SetDataFormat(&c_dfDIJoystick2);
-  di_joy[di_joy_count]->SetCooperativeLevel(wMain.hwnd, DISCL_NONEXCLUSIVE | DISCL_BACKGROUND);
+  di_joy[di_joy_count]->SetCooperativeLevel(owner, DISCL_NONEXCLUSIVE | DISCL_BACKGROUND);
 
   if(++di_joy_count >= INPUT_JOYMAX) {
   //too many joypads?
@@ -89,7 +89,7 @@ void InputDI::init() {
   di->CreateDevice(GUID_SysKeyboard, &di_key, 0);
 
   di_key->SetDataFormat(&c_dfDIKeyboard);
-  di_key->SetCooperativeLevel(wMain.hwnd, DISCL_NONEXCLUSIVE | DISCL_BACKGROUND);
+  di_key->SetCooperativeLevel(owner, DISCL_NONEXCLUSIVE | DISCL_BACKGROUND);
   di_key->Acquire();
 
   di->EnumDevices(DI8DEVCLASS_GAMECTRL, DI_EnumJoypadsCallback, 0, DIEDFL_ATTACHEDONLY);

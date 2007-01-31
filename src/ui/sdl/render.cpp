@@ -1,6 +1,6 @@
 void render() {
 SNES::video_info vi;
-  snes->get_video_info(&vi);
+  snes.get_video_info(&vi);
 
 SDL_Rect rect;
   rect.x = 0;

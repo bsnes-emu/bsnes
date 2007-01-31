@@ -1,7 +1,8 @@
-uint16 *VideoSDL::lock(uint &pitch) {
+bool VideoSDL::lock(uint16 *&data, uint &pitch) {
   if(SDL_MUSTLOCK(backbuffer)) { SDL_LockSurface(backbuffer); }
+  data = (uint16*)backbuffer->pixels;
   pitch = backbuffer->pitch;
-  return (uint16*)backbuffer->pixels;
+  return data;
 }
 
 void VideoSDL::unlock() {
@@ -25,7 +26,7 @@ void VideoSDL::init() {
 
 void VideoSDL::term() {}
 
-VideoSDL::VideoSDL(void *handle) {
+VideoSDL::VideoSDL(unsigned long handle) {
   window = handle;
 
 //
@@ -36,10 +37,6 @@ VideoSDL::VideoSDL(void *handle) {
   if(window) {
   char t[64];
     sprintf(t, "SDL_WINDOWID=%ld", window);
-  #if defined(COMPILER_GCC)
     putenv(t);
-  #elif defined(COMPILER_VISUALC)
-    _putenv(t);
-  #endif
   }
 }

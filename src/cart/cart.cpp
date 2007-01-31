@@ -1,14 +1,14 @@
 #include "../base.h"
 #include "database.cpp"
 
+#include "cart_normal.cpp"
+#include "cart_st.cpp"
+#include "cart_stdual.cpp"
+
 #include "cart_file.cpp"
 #include "cart_header.cpp"
 
 Cartridge cartridge;
-
-#include "cart_normal.cpp"
-#include "cart_st.cpp"
-#include "cart_stdual.cpp"
 
 void Cartridge::load_begin(uint cart_type) {
   if(loaded() == true)return;

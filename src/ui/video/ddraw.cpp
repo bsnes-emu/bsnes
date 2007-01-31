@@ -174,7 +174,10 @@ void VideoDD::update() {
   redraw();
 }
 
-void VideoDD::init() {}
+void VideoDD::init() {
+  term();
+  update_video_profile();
+}
 
 void VideoDD::term() {
   SafeRelease(clipper);

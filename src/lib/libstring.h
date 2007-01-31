@@ -1,159 +1,155 @@
 /*
-  libstring : version 0.14b ~byuu (2006/11/17)
+  libstring : version 0.15 ~byuu (2007-01-13)
 */
 
 #ifndef __LIBSTRING
 #define __LIBSTRING
 
+#include "libbase.h"
 #include "libvector.h"
+#include "libtuple.h"
 
 class string;
 typedef linear_vector<string> stringarray;
 
-char  chrlower(char c);
-char  chrupper(char c);
+char chrlower(char c);
+char chrupper(char c);
 
-uint  count(stringarray &str);
+uint count(stringarray &str);
 
-char *strptr(string &str);
-uint  strlen(string &str);
+char *strptr(const string &str);
+uint  strlen(const string &str);
 
-int   strcmp(string &dest, const char *src);
-int   strcmp(const char *dest, string &src);
-int   strcmp(string &dest, string &src);
+int strcmp(const string &dest, const char *src);
+int strcmp(const char *dest, const string &src);
+int strcmp(const string &dest, const string &src);
 
 //vc6/win32 and gcc/dos only support stricmp, whereas
 //gcc/unix only supports strcasecmp. this is an attempt
 //to avoid platform-specific defines...
 #define stricmp __stricmp
-int   __stricmp(const char *dest, const char *src);
-int   stricmp(string &dest, const char *src);
-int   stricmp(const char *dest, string &src);
-int   stricmp(string &dest, string &src);
+int __stricmp(const char *dest, const char *src);
+int stricmp(const string &dest, const char *src);
+int stricmp(const char *dest, const string &src);
+int stricmp(const string &dest, const string &src);
 
-void  strcpy(string &dest, const char *src);
-void  strcpy(string &dest, string &src);
-uint  strlcpy(char *dest, const char *src, uint length);
-uint  strlcpy(string &dest, const char *src, uint length);
-uint  strlcpy(string &dest, string &src, uint length);
+void strcpy(string &dest, const char *src);
+void strcpy(string &dest, const string &src);
+uint strlcpy(char *dest, const char *src, uint length);
+uint strlcpy(string &dest, const char *src, uint length);
+uint strlcpy(string &dest, const string &src, uint length);
 
-void  strcat(string &dest, const char src);
-void  strcat(string &dest, const char *src);
-void  strcat(string &dest, string &src);
-uint  strlcat(char *dest, const char *src, uint length);
-uint  strlcat(string &dest, const char *src, uint length);
-uint  strlcat(string &dest, string &src, uint length);
+void strcat(string &dest, const char *src);
+void strcat(string &dest, const string &src);
+uint strlcat(char *dest, const char *src, uint length);
+uint strlcat(string &dest, const char *src, uint length);
+uint strlcat(string &dest, const string &src, uint length);
 
 string substr(string &dest, const char *src, uint start = 0, uint length = 0);
-string substr(string &dest, string &src, uint start = 0, uint length = 0);
+string substr(string &dest, const string &src, uint start = 0, uint length = 0);
 
-void  strinsert(string &dest, const char *src, uint pos);
-void  strinsert(string &dest, string &src, uint pos);
+void strinsert(string &dest, const char *src, uint pos);
+void strinsert(string &dest, const string &src, uint pos);
 
-void  strremove(string &dest, uint start, uint length = 0);
+void strremove(string &dest, uint start, uint length = 0);
 
-char *strlower(char *str);
+char   *strlower(char *str);
 string &strlower(string &str);
 
-char *strupper(char *str);
+char   *strupper(char *str);
 string &strupper(string &str);
 
-bool  strpos(const char *str, const char *key, uint &pos);
-bool  strpos(string &str, const char *key, uint &pos);
-bool  strpos(const char *str, string &key, uint &pos);
-bool  strpos(string &str, string &key, uint &pos);
+typedef tuple<bool, uint> index_t;
+index_t strpos(const char   *str, const char   *key);
+index_t strpos(const string &str, const char   *key);
+index_t strpos(const char   *str, const string &key);
+index_t strpos(const string &str, const string &key);
 
-bool  qstrpos(const char *str, const char *key, uint &pos);
-bool  qstrpos(string &str, const char *key, uint &pos);
-bool  qstrpos(const char *str, string &key, uint &pos);
-bool  qstrpos(string &str, string &key, uint &pos);
+index_t qstrpos(const char   *str, const char   *key);
+index_t qstrpos(const string &str, const char   *key);
+index_t qstrpos(const char   *str, const string &key);
+index_t qstrpos(const string &str, const string &key);
 
-void  strtr(char *dest, const char *before, const char *after);
-void  strtr(string &dest, const char *before, const char *after);
+void strtr(char *dest, const char *before, const char *after);
+void strtr(string &dest, const char *before, const char *after);
 
-bool  strbegin(const char *str, const char *key);
-bool  strbegin(string &str, const char *key);
+bool strbegin(const char   *str, const char *key);
+bool strbegin(const string &str, const char *key);
 
-bool  stribegin(const char *str, const char *key);
-bool  stribegin(string &str, const char *key);
+bool stribegin(const char   *str, const char *key);
+bool stribegin(const string &str, const char *key);
 
-bool  strend(const char *str, const char *key);
-bool  strend(string &str, const char *key);
+bool strend(const char   *str, const char *key);
+bool strend(const string &str, const char *key);
 
-bool  striend(const char *str, const char *key);
-bool  striend(string &str, const char *key);
+bool striend(const char   *str, const char *key);
+bool striend(const string &str, const char *key);
 
-void  strltrim(char *str, const char *key);
-void  strltrim(string &str, const char *key);
+void strltrim(char *str, const char *key);
+void strltrim(string &str, const char *key);
 
-void  striltrim(char *str, const char *key);
-void  striltrim(string &str, const char *key);
+void striltrim(char *str, const char *key);
+void striltrim(string &str, const char *key);
 
-void  strrtrim(char *str, const char *key);
-void  strrtrim(string &str, const char *key);
+void strrtrim(char *str, const char *key);
+void strrtrim(string &str, const char *key);
 
-void  strirtrim(char *str, const char *key);
-void  strirtrim(string &str, const char *key);
+void strirtrim(char *str, const char *key);
+void strirtrim(string &str, const char *key);
 
-void  strquote(string &str);
+void strtrim(char *str, const char *key);
+void strtrim(string &str, const char *key);
 
-bool  strunquote(char *str);
-bool  strunquote(string &str);
+void stritrim(char *str, const char *key);
+void stritrim(string &str, const char *key);
 
-uint  strhex(const char *str);
-uint  strhex(string &str);
+void strquote(string &str);
 
-int   sstrhex(const char *str);
-int   sstrhex(string &str);
+bool strunquote(char *str);
+bool strunquote(string &str);
 
-uint  strdec(const char *str);
-uint  strdec(string &str);
+uint strhex(const char   *str);
+uint strhex(const string &str);
 
-int   sstrdec(const char *str);
-int   sstrdec(string &str);
+uint strdec(const char   *str);
+uint strdec(const string &str);
 
-uint  strbin(const char *str);
-uint  strbin(string &str);
+uint strbin(const char   *str);
+uint strbin(const string &str);
 
-int   sstrbin(const char *str);
-int   sstrbin(string &str);
-
-char *utoa(char *str, uint num);
+char   *utoa(char *str, uint num);
 string &utoa(string &str, uint num);
 
-char *itoa(char *str, uint num);
+char   *itoa(char *str, uint num);
 string &itoa(string &str, uint num);
 
-char *htoa(char *str, uint num);
+char   *htoa(char *str, uint num);
 string &htoa(string &str, uint num);
 
-char *uhtoa(char *str, uint num);
-string &uhtoa(string &str, uint num);
-
-char *btoa(char *str, uint num);
+char   *btoa(char *str, uint num);
 string &btoa(string &str, uint num);
 
-bool  strfread(string &str, const char *filename);
+bool strfread(string &str, const char *filename);
 
 string strfmt(const char *fmt, int num);
 
-int   strmath(const char *in_str);
-int   strmath(string &in_str);
+int strmath(const char   *str);
+int strmath(const string &str);
 
-string &replace(string &str, const char *key, const char *token);
-string &replace(string &str, const char *key, string &token);
+string &replace(string &str, const char *key, const char   *token);
+string &replace(string &str, const char *key, const string &token);
 
-string &qreplace(string &str, const char *key, const char *token);
-string &qreplace(string &str, const char *key, string &token);
+string &qreplace(string &str, const char *key, const char   *token);
+string &qreplace(string &str, const char *key, const string &token);
 
-void  split(stringarray &dest, const char *key, const char *src);
-void  split(stringarray &dest, const char *key, string &src);
+void split(stringarray &dest, const char *key, const char   *src);
+void split(stringarray &dest, const char *key, const string &src);
 
-void  qsplit(stringarray &dest, const char *key, const char *src);
-void  qsplit(stringarray &dest, const char *key, string &src);
+void qsplit(stringarray &dest, const char *key, const char   *src);
+void qsplit(stringarray &dest, const char *key, const string &src);
 
-uint  vsprintf(string &str, const char *s, va_list args);
-uint  sprintf(string &str, const char *s, ...);
+uint vsprintf(string &str, const char *s, va_list args);
+uint sprintf(string &str, const char *s, ...);
 
 class string {
 public:
@@ -184,7 +180,7 @@ uint size;
     strcpy(s, str);
   }
 
-  string(string &str) {
+  string(const string &str) {
     size = strlen(str);
     s = (char*)malloc(size + 1);
     strcpy(s, strptr(str));
@@ -193,33 +189,33 @@ uint size;
   ~string() { safe_free(s); }
 
   const char *operator()();
-  char &operator[](uint);
-  string &operator=(int);
-  string &operator=(const char *);
-  string &operator=(string &);
-  string &operator+=(int);
+  char &operator[](const uint);
+  string &operator= (const int);
+  string &operator= (const char *);
+  string &operator= (const string &);
+  string &operator+=(const int);
   string &operator+=(const char *);
-  string &operator+=(string &);
+  string &operator+=(const string &);
   bool operator==(const char *);
-  bool operator==(string &);
+  bool operator==(const string &);
   bool operator!=(const char *);
-  bool operator!=(string &);
-  bool operator<(const char *);
-  bool operator<(string &);
+  bool operator!=(const string &);
+  bool operator< (const char *);
+  bool operator< (const string &);
   bool operator<=(const char *);
-  bool operator<=(string &);
-  bool operator>(const char *);
-  bool operator>(string &);
+  bool operator<=(const string &);
+  bool operator> (const char *);
+  bool operator> (const string &);
   bool operator>=(const char *);
-  bool operator>=(string &);
+  bool operator>=(const string &);
 
-  string operator+(int);
+  string operator+(const int);
   string operator+(const char *);
-  string operator+(string &);
+  string operator+(const string &);
 };
 
-string operator+(int, string &);
-string operator+(const char *, string &);
+string operator+(const int,    const string &);
+string operator+(const char *, const string &);
 
 inline void swap(string &x, string &y) { x.swap(y); }
 

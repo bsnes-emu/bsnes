@@ -172,7 +172,7 @@ void sCPU::cycle_edge() {
       status.hdmainit_triggered = true;
       hdma_init_reset();
       if(hdma_enabled_channels()) {
-        add_clocks(12);
+        add_clocks(18);
         hdma_init();
       //if(status.dma_state == DMASTATE_INACTIVE) {
       //  status.dma_state = DMASTATE_DMASYNC;
@@ -188,7 +188,7 @@ void sCPU::cycle_edge() {
     if(status.hclock >= 1106) {
       status.hdma_triggered = true;
       if(hdma_active_channels()) {
-        add_clocks(12);
+        add_clocks(18);
         hdma_run();
       //if(status.dma_state == DMASTATE_INACTIVE) {
       //  status.dma_state = DMASTATE_DMASYNC;
@@ -250,7 +250,7 @@ void sCPU::timing_reset() {
   status.prev_line_clocks = 1364;
 
   status.line_rendered        = false;
-  status.line_render_position = minmax<0, 1112>((uint16)config::ppu.hack.render_scanline_position);
+  status.line_render_position = min(1112, (uint16)config::ppu.hack.render_scanline_position);
 
   status.dram_refreshed        = false;
   status.dram_refresh_position = (cpu_version == 1) ? 530 : 538;

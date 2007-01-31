@@ -25,12 +25,3 @@ public:
   virtual void write(uint8 *buffer, uint32 length) = 0;
   virtual bool ready() { return true; }
 };
-
-#include "filereader.h"
-#ifdef GZIP_SUPPORT
-  #include "gzreader.h"
-  #include "zipreader.h"
-#endif
-#ifdef JMA_SUPPORT
-  #include "jmareader.h"
-#endif

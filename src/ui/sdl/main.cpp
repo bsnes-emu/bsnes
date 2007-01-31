@@ -4,9 +4,15 @@
 #include "render.cpp"
 #include "bsnes.cpp"
 
-#ifdef PLATFORM_WIN
-#include "../audio/dsound.h"
-#include "../audio/dsound.cpp"
+#include "../video/sdl.h"
+#include "../video/sdl.cpp"
+
+#if defined(PLATFORM_WIN)
+  #include "../audio/dsound.h"
+  #include "../audio/dsound.cpp"
+#elif defined(PLATFORM_X)
+  #include "../audio/ao.h"
+  #include "../audio/ao.cpp"
 #endif
 
 #include "../input/sdl.h"
@@ -32,6 +38,15 @@ va_list args;
   vsprintf(str, s, args);
   va_end(args);
   fprintf(stdout, "%s\r\n", str);
+}
+
+void dprintf(uint source, char *s, ...) {
+char str[4096];
+va_list args;
+  va_start(args, s);
+  vsprintf(str, s, args);
+  va_end(args);
+  fprintf(stdout, "[%d]: %s\r\n", source, str);
 }
 
 void center_window() {
@@ -67,19 +82,22 @@ SDL_Event event;
 
   init_snes();
 
-#ifdef PLATFORM_WIN
+  uiVideo = new VideoSDL();
+#if defined(PLATFORM_WIN)
   uiAudio = new AudioDS();
-#else
-  uiAudio = new Audio();
+#elif defined(PLATFORM_X)
+  uiAudio = new AudioAO();
+  ((AudioAO*)uiAudio)->set_driver("oss");
 #endif
   uiInput = new InputSDL();
+
+  uiVideo->init();
   uiAudio->init();
   uiInput->init();
 
-  if(cartridge.load(argv[1]) == false) {
-    alert("Failed to load image. Usage: bsnes_sdl <filename.smc>");
-    goto _end;
-  }
+  cartridge.load_begin(Cartridge::CART_NORMAL);
+  cartridge.load(argv[1]);
+  cartridge.load_end();
 
   SDL_Init(SDL_INIT_VIDEO);
   atexit(SDL_Quit);
@@ -99,12 +117,12 @@ SDL_Event event;
   SDL_WM_SetCaption(BSNES_TITLE, 0);
   center_window();
 
-  snes->power();
-  bsnes->set_status(bSNES::RUN);
+  snes.power();
+  bsnes.set_status(bSNES::RUN);
 
 int cursor_status;
   while(1) {
-    bsnes->run();
+    bsnes.run();
     while(SDL_PollEvent(&event)) {
       switch(event.type) {
       case SDL_KEYUP:
@@ -132,10 +150,12 @@ int cursor_status;
 _end:
   config_file.save("bsnes_sdl.cfg");
   cartridge.unload();
+  uiVideo->term();
   uiAudio->term();
   uiInput->term();
-  SafeDelete(uiAudio);
-  SafeDelete(uiInput);
+  safe_delete(uiVideo);
+  safe_delete(uiAudio);
+  safe_delete(uiInput);
   term_snes();
 
   return 0;

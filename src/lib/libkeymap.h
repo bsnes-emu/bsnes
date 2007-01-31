@@ -1,5 +1,5 @@
 /*
-  libkeymap : version 0.02 ~byuu (07/30/06)
+  libkeymap : version 0.02 ~byuu (2006-07-30)
 */
 
 #ifndef __LIBKEYMAP

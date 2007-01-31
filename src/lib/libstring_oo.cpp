@@ -7,7 +7,7 @@ char &string::operator[](const uint index) {
   return s[index];
 }
 
-string &string::operator=(int num) {
+string &string::operator=(const int num) {
   strcpy(*this, strfmt("%d", num));
   return *this;
 }
@@ -17,12 +17,12 @@ string &string::operator=(const char *str) {
   return *this;
 }
 
-string &string::operator=(string &str) {
+string &string::operator=(const string &str) {
   strcpy(*this, str);
   return *this;
 }
 
-string &string::operator+=(int num) {
+string &string::operator+=(const int num) {
   strcat(*this, strfmt("%d", num));
   return *this;
 }
@@ -32,25 +32,25 @@ string &string::operator+=(const char *str) {
   return *this;
 }
 
-string &string::operator+=(string &str) {
+string &string::operator+=(const string &str) {
   strcat(*this, str);
   return *this;
 }
 
-bool string::operator==(const char *str) { return strcmp(strptr(*this), str)         == 0; }
-bool string::operator==(string &str)     { return strcmp(strptr(*this), strptr(str)) == 0; }
-bool string::operator!=(const char *str) { return strcmp(strptr(*this), str)         != 0; }
-bool string::operator!=(string &str)     { return strcmp(strptr(*this), strptr(str)) != 0; }
-bool string::operator<(const char *str)  { return strcmp(strptr(*this), str)          < 0; }
-bool string::operator<(string &str)      { return strcmp(strptr(*this), strptr(str))  < 0; }
-bool string::operator<=(const char *str) { return strcmp(strptr(*this), str)         <= 0; }
-bool string::operator<=(string &str)     { return strcmp(strptr(*this), strptr(str)) <= 0; }
-bool string::operator>(const char *str)  { return strcmp(strptr(*this), str)          > 0; }
-bool string::operator>(string &str)      { return strcmp(strptr(*this), strptr(str))  > 0; }
-bool string::operator>=(const char *str) { return strcmp(strptr(*this), str)         >= 0; }
-bool string::operator>=(string &str)     { return strcmp(strptr(*this), strptr(str)) >= 0; }
+bool string::operator==(const char   *str) { return strcmp(strptr(*this), str)         == 0; }
+bool string::operator==(const string &str) { return strcmp(strptr(*this), strptr(str)) == 0; }
+bool string::operator!=(const char   *str) { return strcmp(strptr(*this), str)         != 0; }
+bool string::operator!=(const string &str) { return strcmp(strptr(*this), strptr(str)) != 0; }
+bool string::operator< (const char   *str) { return strcmp(strptr(*this), str)          < 0; }
+bool string::operator< (const string &str) { return strcmp(strptr(*this), strptr(str))  < 0; }
+bool string::operator<=(const char   *str) { return strcmp(strptr(*this), str)         <= 0; }
+bool string::operator<=(const string &str) { return strcmp(strptr(*this), strptr(str)) <= 0; }
+bool string::operator> (const char   *str) { return strcmp(strptr(*this), str)          > 0; }
+bool string::operator> (const string &str) { return strcmp(strptr(*this), strptr(str))  > 0; }
+bool string::operator>=(const char   *str) { return strcmp(strptr(*this), str)         >= 0; }
+bool string::operator>=(const string &str) { return strcmp(strptr(*this), strptr(str)) >= 0; }
 
-string string::operator+(int num) {
+string string::operator+(const int num) {
 string temp(*this);
   strcat(temp, strfmt("%d", num));
   return temp;
@@ -62,7 +62,7 @@ string temp(*this);
   return temp;
 }
 
-string string::operator+(string &str) {
+string string::operator+(const string &str) {
 string temp(*this);
   strcat(temp, str);
   return temp;
@@ -70,13 +70,13 @@ string temp(*this);
 
 //
 
-string operator+(int x, string &y) {
+string operator+(const int x, const string &y) {
 string temp(strfmt("%d", x));
   strcat(temp, y);
   return temp;
 }
 
-string operator+(const char *x, string &y) {
+string operator+(const char *x, const string &y) {
 string temp(x);
   strcat(temp, y);
   return temp;

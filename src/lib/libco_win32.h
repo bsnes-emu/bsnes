@@ -1,5 +1,5 @@
 /*
-  libco_win32 : version 0.08 ~byuu (10/21/2006)
+  libco_win32 : version 0.09 ~byuu (2007-01-19)
 */
 
 #define COTHREAD_STACKSIZE_TINY      0x1000
@@ -11,8 +11,6 @@
 typedef void (*cothread_t);
 typedef void (*cothread_p)(void);
 
-cothread_t co_init();
-void       co_term();
 cothread_t co_active();
 cothread_t co_create(cothread_p coentry, unsigned int heapsize);
 void       co_delete(cothread_t cothread);

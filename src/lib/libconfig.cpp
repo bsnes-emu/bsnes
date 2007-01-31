@@ -108,11 +108,11 @@ uint Config::string_to_uint(uint type, char *input) {
     return (uint)false;
   }
 
-  if(strbegin(input, "0x") || strbegin(input, "-0x")) {
-    return sstrhex(input + 2);
+  if(stribegin(input, "0x")) {
+    return strhex(input + 2);
   }
 
-  return sstrdec(input);
+  return strdec(input);
 }
 
 char *Config::uint_to_string(uint type, uint input) {

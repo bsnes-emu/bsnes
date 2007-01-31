@@ -1,10 +1,11 @@
 #include "../base.h"
+
 #include "filereader.cpp"
-#ifdef GZIP_SUPPORT
+#if defined(GZIP_SUPPORT)
   #include "gzreader.cpp"
   #include "zipreader.cpp"
 #endif
-#ifdef JMA_SUPPORT
+#if defined(JMA_SUPPORT)
   #include "jmareader.cpp"
 #endif
 

@@ -1,5 +1,5 @@
 /*
-  libbase : version 0.08f ~byuu (2006-11-07)
+  libbase : version 0.09 ~byuu (2007-01-12)
 */
 
 #ifndef __LIBBASE
@@ -11,6 +11,7 @@
 
   #define NOMINMAX
   #define ftruncate _chsize
+  #define putenv    _putenv
   #define vsnprintf _vsnprintf
 #endif
 
@@ -41,14 +42,19 @@
 #include <string.h>
 #include <time.h>
 #include <math.h>
-#include <io.h>
+
+#if defined(_MSC_VER)
+  #include <io.h>
+#else
+  #include <unistd.h>
+#endif
 
 #ifndef FALSE
   #define FALSE 0
 #endif
 
 #ifndef TRUE
-  #define TRUE !FALSE
+  #define TRUE (!FALSE)
 #endif
 
 //deprecated
@@ -57,11 +63,42 @@
 #define SafeRelease(__n) if(__n) { __n->Release(); __n = 0; }
 
 /*****
+ * template traits
+ *****/
+
+template<typename T> struct is_reference       { enum { value = false }; };
+template<typename T> struct is_reference<T&>   { enum { value = true  }; };
+
+template<typename T> struct is_pointer         { enum { value = false }; };
+template<typename T> struct is_pointer<T*>     { enum { value = true  }; };
+
+template<typename T> struct is_const           { enum { value = false }; };
+template<typename T> struct is_const<const T>  { enum { value = true  }; };
+template<typename T> struct is_const<const T&> { enum { value = true  }; };
+
+/*****
+ * null_t
+ *****/
+
+struct null_t {
+  alwaysinline bool operator==(const null_t&)   { return true;  }
+  alwaysinline bool operator>=(const null_t&)   { return true;  }
+  alwaysinline bool operator<=(const null_t&)   { return true;  }
+  alwaysinline bool operator!=(const null_t&)   { return false; }
+  alwaysinline bool operator> (const null_t&)   { return false; }
+  alwaysinline bool operator< (const null_t&)   { return false; }
+  alwaysinline null_t &operator=(const null_t&) { return *this; }
+};
+
+template<typename T> struct is_null_t         { enum { value = false }; };
+template<>           struct is_null_t<null_t> { enum { value = true  }; };
+
+/*****
  * typedefs
  *****/
 
 typedef unsigned int       uint;
-typedef signed int         sint;
+typedef signed   int       sint;
 
 typedef unsigned char      byte;
 typedef unsigned short     word;
@@ -74,10 +111,10 @@ typedef unsigned short     uint16;
 typedef unsigned long      uint32;
 typedef unsigned long long uint64;
 
-typedef signed char        int8;
-typedef signed short       int16;
-typedef signed long        int32;
-typedef signed long long   int64;
+typedef signed   char      int8;
+typedef signed   short     int16;
+typedef signed   long      int32;
+typedef signed   long long int64;
 
 /*****
  * templates
@@ -113,12 +150,12 @@ T z = x;
 #ifdef min
 #undef min
 #endif
-#define min(x, y) ((x < y) ? x : y)
+#define min(x, y) (((x) < (y)) ? (x) : (y))
 
 #ifdef max
 #undef max
 #endif
-#define max(x, y) ((x > y) ? x : y)
+#define max(x, y) (((x) > (y)) ? (x) : (y))
 
 template<int min, int max, typename T> inline T minmax(const T x) {
   return (x < (T)min) ? (T)min : (x > (T)max) ? (T)max : x;
@@ -390,7 +427,7 @@ uint32 size = ftell(fp);
   return size;
 }
 
-static int ftruncate(FILE *fp, long size) { return ftruncate(fileno(fp), size); }
+static int fresize(FILE *fp, long size) { return ftruncate(fileno(fp), size); }
 
 /*****
  * crc32 calculation

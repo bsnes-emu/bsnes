@@ -1,6 +1,7 @@
 //created by Nach
 
-//#include "jma/jma.h"
+#include "jmareader.h"
+#include "jma/jma.h"
 
 uint32 JMAReader::size() {
   return fsize;

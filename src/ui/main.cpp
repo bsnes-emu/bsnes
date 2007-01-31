@@ -16,6 +16,7 @@ void term_snes();
 #include "input/input.h"
 
 #include "video/video.cpp"
+#include "audio/audio.cpp"
 #include "input/input.cpp"
 
 #include "interface.cpp"
@@ -24,10 +25,10 @@ void term_snes();
  * platform abstraction layer
  *****/
 
-#if defined(UI_WIN)
+#if defined(UI_LUI)
+  #include "lui/main.cpp"
+#elif defined(UI_WIN)
   #include "win/main.cpp"
-#elif defined(UI_GTK)
-  #include "gtk/main.cpp"
 #elif defined(UI_SDL)
   #include "sdl/main.cpp"
 #else
@@ -39,9 +40,7 @@ void term_snes();
  *****/
 
 void init_snes() {
-  co_init();
-
-#ifdef POLYMORPHISM
+#if defined(POLYMORPHISM)
   deref(mem) = new MEMCORE();
   deref(cpu) = new CPUCORE();
   deref(apu) = new APUCORE();
@@ -55,13 +54,11 @@ void init_snes() {
 void term_snes() {
   snes.term();
 
-#ifdef POLYMORPHISM
+#if defined(POLYMORPHISM)
   safe_delete(deref(mem));
   safe_delete(deref(cpu));
   safe_delete(deref(apu));
   safe_delete(deref(dsp));
   safe_delete(deref(ppu));
 #endif
-
-  co_term();
 }

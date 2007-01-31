@@ -1,3 +1,5 @@
+#include "filereader.h"
+
 uint32 FileReader::size() {
   return fsize;
 }

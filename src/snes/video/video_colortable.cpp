@@ -1,3 +1,4 @@
+//Overload's gamma curve adjustment table
 const uint8 SNES::gamma_ramp_table[32] = {
   0x00, 0x01, 0x03, 0x06, 0x0a, 0x0f, 0x15, 0x1c,
   0x24, 0x2d, 0x37, 0x42, 0x4e, 0x5b, 0x69, 0x78,
@@ -7,21 +8,21 @@ const uint8 SNES::gamma_ramp_table[32] = {
 
 void SNES::contrast_adjust(int32 &input) {
 double lmin, lmax;
-  lmin =   0.0 - double(int32(config::snes.contrast));
-  lmax = 255.0 + double(int32(config::snes.contrast));
-int32 result = int32(lmin + double(input) * ((lmax - lmin) / 256.0));
+  lmin =   0.0 - (double)((int32)config::snes.contrast);
+  lmax = 255.0 + (double)((int32)config::snes.contrast);
+int32 result = (int32)(lmin + (double)input * ((lmax - lmin) / 256.0));
   input = minmax<0, 255>(result);
 }
 
 void SNES::brightness_adjust(int32 &input) {
 int32 result;
-  result = input + int32(config::snes.brightness);
+  result = input + (int32)config::snes.brightness;
   input  = minmax<0, 255>(result);
 }
 
 void SNES::gamma_adjust(int32 &input) {
 int32 result;
-  result = int32(pow((double(input + 1) / 256.0), double(config::snes.gamma) / 100.0) * 256.0);
+  result = (int32)(pow(((double)(input + 1) / 256.0), (double)config::snes.gamma / 100.0) * 256.0);
   input  = minmax<0, 255>(result);
 }
 
@@ -39,7 +40,7 @@ uint32 col;
     g = (col >>  8) & 0xff;
     b = (col      ) & 0xff;
 
-    if(bool(config::snes.gamma_ramp) == true) {
+    if((bool)config::snes.gamma_ramp == true) {
       r = gamma_ramp_table[r >> 3];
       g = gamma_ramp_table[g >> 3];
       b = gamma_ramp_table[b >> 3];
@@ -49,24 +50,24 @@ uint32 col;
     contrast_adjust(g); brightness_adjust(g); gamma_adjust(g);
     contrast_adjust(b); brightness_adjust(b); gamma_adjust(b);
 
-    if(bool(config::snes.sepia) == true) {
-      l = int32(double(r) * kr + double(g) * kg + double(b) * kb);
+    if((bool)config::snes.sepia == true) {
+      l = (int32)((double)r * kr + (double)g * kg + (double)b * kb);
       l = (l > 255) ? 255 : (l < 0) ? 0 : l;
-      r = int32(double(l) * (1.0 + 0.300));
-      g = int32(double(l) * (1.0 - 0.055));
-      b = int32(double(l) * (1.0 - 0.225));
+      r = (int32)((double)l * (1.0 + 0.300));
+      g = (int32)((double)l * (1.0 - 0.055));
+      b = (int32)((double)l * (1.0 - 0.225));
       r = minmax<0, 255>(r);
       g = minmax<0, 255>(g);
       b = minmax<0, 255>(b);
     }
 
-    if(bool(config::snes.grayscale) == true) {
-      l = int32(double(r) * kr + double(g) * kg + double(b) * kb);
+    if((bool)config::snes.grayscale == true) {
+      l = (int32)((double)r * kr + (double)g * kg + (double)b * kb);
       l = minmax<0, 255>(l);
       r = g = b = l;
     }
 
-    if(bool(config::snes.invert) == true) {
+    if((bool)config::snes.invert == true) {
       r ^= 0xff;
       g ^= 0xff;
       b ^= 0xff;
@@ -95,7 +96,7 @@ uint32 col;
       color_lookup_table[i] = (r << 16) | (g << 8) | (b);
       break;
     default:
-      color_lookup_table[i] = uint(-1);
+      color_lookup_table[i] = (uint)-1;
       break;
     }
   }

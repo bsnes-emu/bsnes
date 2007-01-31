@@ -1,5 +1,5 @@
 /*
-  libconfig : version 0.11 ~byuu (2006/11/12)
+  libconfig : version 0.12 ~byuu (2007-01-13)
 */
 
 #ifndef __LIBCONFIG
@@ -46,20 +46,30 @@ string char_data, char_def;
   Setting(Config *_parent, char *_name, char *_desc, uint  _data, uint _type);
   Setting(Config *_parent, char *_name, char *_desc, char *_data);
 
-  template<typename T> inline operator T() { return (T)get(); }
-  template<typename T> inline Setting &operator=(const T &x) { set(x); return *this; }
-  template<typename T> inline bool operator==(const T &x) { return (T)get() == x; }
-  template<typename T> inline bool operator!=(const T &x) { return (T)get() != x; }
+  inline operator uint()  { return get(); }
+  inline operator char*() { return strget(); }
+
+  template<typename T>
+  inline Setting &operator=(T x) {
+    (type != STR) ? set((uint)x) : strset((const char*)x);
+    return *this;
+  }
+
+  template<typename T>
+  inline bool operator==(T x) {
+    return (type != STR) ? get() == (uint)x : !strcmp(strget(), (const char*)x);
+  }
+
+  template<typename T>
+  inline bool operator!=(T x) {
+    return (type != STR) ? get() != (uint)x :  strcmp(strget(), (const char*)x);
+  }
+
+//numerical operations only
   template<typename T> inline bool operator>=(const T &x) { return (T)get() >= x; }
   template<typename T> inline bool operator> (const T &x) { return (T)get() >  x; }
   template<typename T> inline bool operator<=(const T &x) { return (T)get() <= x; }
   template<typename T> inline bool operator< (const T &x) { return (T)get() <  x; }
-
-  inline operator char*() { return strget(); }
-  inline Setting &operator=(char *x) { strset(x); return *this; }
-  inline Setting &operator=(const char *x) { strset(x); return *this; }
-  inline bool operator==(const char *x) { return !strcmp(strget(), x); }
-  inline bool operator!=(const char *x) { return  strcmp(strget(), x); }
 };
 
 class Config {

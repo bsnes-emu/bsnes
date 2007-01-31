@@ -1,5 +1,5 @@
 void InputSDL::poll(uint8 device) {
-  Input::poll(device);
+  Input::poll();
 }
 
 void InputSDL::poll() {

@@ -343,8 +343,7 @@ FILE *fp;
 char fn[4096];
 int i;
   for(i = 0; i <= 999; i++) {
-  //should probably check the length of config::misc.image_format here...
-    sprintf(fn, "image%0.3d.%s", i, config::misc.image_format.strget());
+    sprintf(fn, "image%0.3d.png", i);
     fp = fopen(fn, "rb");
     if(!fp)break;
     fclose(fp);
@@ -352,22 +351,14 @@ int i;
   }
   if(i >= 1000)return false;
 
-uint32 format;
-  if(!strcmp(config::misc.image_format.strget(), "bmp")) {
-    format = D3DXIFF_BMP;
-  } else if(!strcmp(config::misc.image_format.strget(), "jpg")) {
-    format = D3DXIFF_JPG;
-  } else {
-    format = D3DXIFF_PNG;
-  }
-
-  pD3DXSaveSurfaceToFileA(fn, format, temp_surface, NULL, NULL);
+  pD3DXSaveSurfaceToFileA(fn, D3DXIFF_PNG, temp_surface, NULL, NULL);
   temp_surface->Release();
   return true;
 }
 
 void VideoD3D::init() {
   term();
+  update_video_profile();
 }
 
 void VideoD3D::term() {
@@ -436,7 +427,7 @@ VideoD3D::VideoD3D(HWND handle) {
   if(!d3dx) { d3dx = LoadLibrary("d3dx9.dll"); }
   if(!d3dx) { return; }
 
-  pD3DXSaveSurfaceToFileA = (HRESULT(WINAPI*)(LPCSTR, DWORD, LPDIRECT3DSURFACE9, CONST PALETTEENTRY*, CONST RECT*))
+  pD3DXSaveSurfaceToFileA = (HRESULT (WINAPI*)(LPCSTR, DWORD, LPDIRECT3DSURFACE9, CONST PALETTEENTRY*, CONST RECT*))
     GetProcAddress(d3dx, "D3DXSaveSurfaceToFileA");
 }
 
