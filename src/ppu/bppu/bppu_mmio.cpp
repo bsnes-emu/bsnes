@@ -81,8 +81,9 @@ uint16 hc = r_cpu->hclock();
 
 //INIDISP
 void bPPU::mmio_w2100(uint8 value) {
-  if(regs.display_disabled == true && !!(value & 0x80) == false) {
+  if(regs.display_disabled == true && r_cpu->vcounter() == (!r_cpu->overscan() ? 225 : 240)) {
     regs.oam_addr = regs.oam_baseaddr << 1;
+    regs.oam_firstsprite = (regs.oam_priority == false) ? 0 : (regs.oam_addr >> 2) & 127;
   }
 
   regs.display_disabled   = !!(value & 0x80);

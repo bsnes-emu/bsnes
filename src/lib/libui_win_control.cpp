@@ -1,101 +1,15 @@
 namespace libui {
 
 /*****
- * FileLoad
- *****/
-
-bool Window::file_load(char *filename, const char *filter, const char *path) {
-string dir, f;
-  strcpy(dir, path ? path : "");
-  replace(dir, "/", "\\");
-
-stringarray type, part;
-  strcpy(f, "");
-  split(type, "|", filter);
-  for(int i = 0; i < count(type); i++) {
-    split(part, ";", type[i]);
-    if(count(part) != 2)continue;
-
-    strcat(f, part[0]);
-    strcat(f, " (");
-    strcat(f, part[1]);
-    strcat(f, ")|");
-    replace(part[1], ",", ";");
-    strcat(f, part[1]);
-    strcat(f, "|");
-  }
-
-char *pf = strptr(f);
-  for(int i = strlen(pf) - 1; i >= 0; i--) {
-    if(pf[i] == '|')pf[i] = '\0';
-  }
-
-OPENFILENAME ofn;
-  strcpy(filename, "");
-  memset(&ofn, 0, sizeof(ofn));
-  ofn.lStructSize     = sizeof(ofn);
-  ofn.hwndOwner       = info.hwnd;
-  ofn.lpstrFilter     = pf;
-  ofn.lpstrInitialDir = strptr(dir);
-  ofn.lpstrFile       = filename;
-  ofn.nMaxFile        = MAX_PATH;
-  ofn.Flags           = OFN_EXPLORER | OFN_FILEMUSTEXIST;
-  ofn.lpstrDefExt     = "";
-
-  return GetOpenFileName(&ofn);
-}
-
-/*****
- * FileSave
- *****/
-
-bool Window::file_save(char *filename, const char *filter, const char *path) {
-string dir, f;
-  strcpy(dir, path ? path : "");
-  replace(dir, "/", "\\");
-
-stringarray type, part;
-  strcpy(f, "");
-  split(type, "|", filter);
-  for(int i = 0; i < count(type); i++) {
-    split(part, ";", type[i]);
-    if(count(part) != 2)continue;
-
-    strcat(f, part[0]);
-    strcat(f, " (");
-    strcat(f, part[1]);
-    strcat(f, ")|");
-    replace(part[1], ",", ";");
-    strcat(f, part[1]);
-    strcat(f, "|");
-  }
-
-char *pf = strptr(f);
-  for(int i = strlen(pf) - 1; i >= 0; i--) {
-    if(pf[i] == '|')pf[i] = '\0';
-  }
-
-OPENFILENAME ofn;
-  strcpy(filename, "");
-  memset(&ofn, 0, sizeof(ofn));
-  ofn.lStructSize     = sizeof(ofn);
-  ofn.hwndOwner       = info.hwnd;
-  ofn.lpstrFilter     = pf;
-  ofn.lpstrInitialDir = strptr(dir);
-  ofn.lpstrFile       = filename;
-  ofn.nMaxFile        = MAX_PATH;
-  ofn.Flags           = OFN_EXPLORER | OFN_FILEMUSTEXIST;
-  ofn.lpstrDefExt     = "";
-
-  return GetSaveFileName(&ofn);
-}
-
-/*****
  * Control
  *****/
 
 void Control::resize(uint width, uint height) {
   SetWindowPos(hwnd, 0, 0, 0, width, height, SWP_NOZORDER | SWP_NOMOVE);
+}
+
+void Control::focus() {
+  if(hwnd) { SetFocus(hwnd); }
 }
 
 void Control::show() {
@@ -131,104 +45,105 @@ bool Control::enabled() {
 }
 
 /*****
- * Menu
+ * MenuBar
  *****/
 
-void Window::menu_begin() {
-  info.menu_check_list.reset();
+void MenuBar::create(Window &r_owner) {
+  type  = ControlType::MenuBar;
+  group = CreateMenu();
+  r_owner.attach(*this);
+  owner->info.menu_check_list.reset();
 }
 
-void Window::menu_end() {
-  SetMenu(info.hwnd_resize, info.menu_owner.group);
-  SetMenu(info.hwnd, info.menu_owner.group);
-  resize(info.width, info.height);
+void MenuBar::finish() {
+  show();
+
 //check all menu radio items that need to be ...
-  for(uint i = 0; i < info.menu_check_list.size(); i++) {
-    info.menu_check_list[i]->check();
+  for(uint i = 0; i < owner->info.menu_check_list.size(); i++) {
+    CheckMenuItem(owner->info.menu_check_list[i]->parent, owner->info.menu_check_list[i]->id, MF_CHECKED);
   }
-  info.menu_check_list.reset();
+  owner->info.menu_check_list.reset();
 }
 
-void Window::menu_group_begin(MenuGroup &group) {
-  info.control[info.control_index] = &group;
-  group.id    = info.control_index++;
-  group.owner = this;
-  info.menu_group[++info.menu_group_index] = &group;
+void MenuBar::show() {
+  SetMenu(owner->info.hwnd_resize, group);
+  SetMenu(owner->info.hwnd,        group);
+  owner->resize(owner->info.width, owner->info.height);
 }
 
-void Window::menu_group_end() {
-MenuGroup *group = info.menu_group[info.menu_group_index--];
-MenuGroup *owner = info.menu_group[info.menu_group_index];
-  AppendMenu(owner->group, MF_STRING | MF_POPUP, (uint)group->group, group->caption);
+void MenuBar::hide() {
+  SetMenu(owner->info.hwnd_resize, 0);
+  SetMenu(owner->info.hwnd,        0);
+  owner->resize(owner->info.width, owner->info.height);
 }
 
-void Window::menu_add_item(Control &item) {
-  info.control[info.control_index] = &item;
-MenuGroup *group = info.menu_group[info.menu_group_index];
-  item.id    = info.control_index++;
-  item.owner = this;
-
-  switch(item.type) {
-
-  case Control::MenuItem: {
-    AppendMenu(group->group, MF_STRING, (uint)item.id, static_cast<MenuItem&>(item).caption);
-  } break;
-
-  case Control::MenuCheckItem: {
-    AppendMenu(group->group, MF_STRING, (uint)item.id, static_cast<MenuCheckItem&>(item).caption);
-  } break;
-
-  case Control::MenuRadioItem: {
-    AppendMenu(group->group, MF_STRING, (uint)item.id, static_cast<MenuRadioItem&>(item).caption);
-  MenuRadioItem &radio = static_cast<MenuRadioItem&>(item);
-    if(&radio == &radio.group[0]) { info.menu_check_list[info.menu_check_list.size()] = &radio; }
-  } break;
-
-  };
+void MenuBar::show(bool state) {
+  (state == true) ? show() : hide();
 }
 
-void Window::menu_add_separator() {
-MenuGroup *group = info.menu_group[info.menu_group_index];
-  AppendMenu(group->group, MF_SEPARATOR, 0, "");
+bool MenuBar::visible() {
+  return GetMenu(owner->info.hwnd);
 }
 
 /*****
  * MenuGroup
  *****/
 
-MenuGroup& MenuGroup::create(const char *_caption) {
-  type    = Control::MenuGroup;
+void MenuGroup::create(MenuBar &r_owner, const char *_caption) {
+  type    = ControlType::MenuGroup;
+  owner   = r_owner.owner;
+  parent  = r_owner.group;
   group   = CreatePopupMenu();
   caption = strdup(_caption);
-  return *this;
+  owner->attach(*this);
+}
+
+void MenuGroup::create(MenuGroup &r_owner, const char *_caption) {
+  type    = ControlType::MenuGroup;
+  owner   = r_owner.owner;
+  parent  = r_owner.group;
+  group   = CreatePopupMenu();
+  caption = strdup(_caption);
+  owner->attach(*this);
+}
+
+void MenuGroup::finish() {
+  AppendMenu(parent, MF_STRING | MF_POPUP, (uint)group, caption);
 }
 
 /*****
  * MenuItem
  *****/
 
-MenuItem& MenuItem::create(const char *_caption) {
-  type = Control::MenuItem;
-  caption = strdup(_caption);
-  return *this;
+void MenuItem::create(MenuGroup &r_owner, const char *caption) {
+  type  = ControlType::MenuItem;
+  owner = r_owner.owner;
+  owner->attach(*this);
+  AppendMenu(r_owner.group, MF_STRING, (uint)id, caption);
 }
 
 /*****
  * MenuCheckItem
  *****/
 
-MenuCheckItem& MenuCheckItem::create(const char *_caption) {
-  type = Control::MenuCheckItem;
-  caption = strdup(_caption);
-  return *this;
+void MenuCheckItem::create(MenuGroup &r_owner, const char *caption) {
+  type   = ControlType::MenuCheckItem;
+  owner  = r_owner.owner;
+  parent = r_owner.group;
+  owner->attach(*this);
+  AppendMenu(r_owner.group, MF_STRING, (uint)id, caption);
 }
 
 void MenuCheckItem::check() {
-  CheckMenuItem(owner->info.menu_owner.group, id, MF_CHECKED);
+  if(checked() == true)return;
+  CheckMenuItem(parent, id, MF_CHECKED);
+  owner->message(Message::Clicked, this);
 }
 
 void MenuCheckItem::uncheck() {
-  CheckMenuItem(owner->info.menu_owner.group, id, MF_UNCHECKED);
+  if(checked() == false)return;
+  CheckMenuItem(parent, id, MF_UNCHECKED);
+  owner->message(Message::Clicked, this);
 }
 
 void MenuCheckItem::check(bool state) {
@@ -240,7 +155,7 @@ MENUITEMINFO info;
   memset(&info, 0, sizeof(info));
   info.cbSize = sizeof(info);
   info.fMask = MIIM_STATE;
-  GetMenuItemInfo(owner->info.menu_owner.group, id, false, &info);
+  GetMenuItemInfo(parent, id, false, &info);
   return (info.fState & MFS_CHECKED);
 }
 
@@ -248,19 +163,24 @@ MENUITEMINFO info;
  * MenuRadioItem
  *****/
 
-MenuRadioItem& MenuRadioItem::create(ControlGroup &list, const char *_caption) {
+void MenuRadioItem::create(MenuGroup &r_owner, ControlGroup &list, const char *caption) {
   if(list.count() == 0)throw;
-  type = Control::MenuRadioItem;
-  caption = strdup(_caption);
+  type   = ControlType::MenuRadioItem;
+  owner  = r_owner.owner;
+  parent = r_owner.group;
+  owner->attach(*this);
+  AppendMenu(r_owner.group, MF_STRING, (uint)id, caption);
   group = list;
-  return *this;
+  if(&group[0] == this) { owner->info.menu_check_list[owner->info.menu_check_list.size()] = this; }
 }
 
 void MenuRadioItem::check() {
+  if(checked() == true)return;
+//uncheck all items in group except for current item ...
   for(uint i = 0; i < group.count(); i++) {
-    CheckMenuItem(group[i].owner->info.menu_owner.group, group[i].id, MF_UNCHECKED);
+    CheckMenuItem(parent, group[i].id, (id == group[i].id) ? MF_CHECKED : MF_UNCHECKED);
   }
-  CheckMenuItem(owner->info.menu_owner.group, id, MF_CHECKED);
+  owner->message(Message::Clicked, this);
 }
 
 bool MenuRadioItem::checked() {
@@ -268,36 +188,52 @@ MENUITEMINFO info;
   memset(&info, 0, sizeof(info));
   info.cbSize = sizeof(info);
   info.fMask = MIIM_STATE;
-  GetMenuItemInfo(owner->info.menu_owner.group, id, false, &info);
+  GetMenuItemInfo(parent, id, false, &info);
   return (info.fState & MFS_CHECKED);
+}
+
+/*****
+ * MenuSeparator
+ *****/
+
+void MenuSeparator::create(MenuGroup &r_owner) {
+  AppendMenu(r_owner.group, MF_SEPARATOR, 0, "");
+}
+
+/*****
+ * Panel
+ *****/
+
+void Panel::create(Window &r_owner, uint style, uint x, uint y, uint width, uint height) {
+  type = ControlType::Panel;
+  hwnd = CreateWindow("libui_class", "", WS_CHILD | WS_VISIBLE,
+    x, y, width, height, r_owner.info.hwnd, (HMENU)0, GetModuleHandle(0), 0);
+  r_owner.attach(*this);
+}
+
+void Panel::attach(Window &window) {
+  if(attached) { detach(); }
+  attached = &window;
+  SetParent(attached->info.hwnd, hwnd);
+  SetWindowLong(attached->info.hwnd, GWL_STYLE, WS_CHILD);
+  SetWindowPos(attached->info.hwnd, 0, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOZORDER | SWP_NOSIZE);
+  ShowWindow(attached->info.hwnd, SW_NORMAL);
+}
+
+void Panel::detach() {
+  if(!attached) { return; }
+  ShowWindow(attached->info.hwnd, SW_HIDE);
+  SetWindowLong(attached->info.hwnd, GWL_STYLE, WS_POPUP | WS_SYSMENU | WS_CAPTION | WS_MINIMIZEBOX);
+  SetParent(attached->info.hwnd, NULL);
+  attached = 0;
 }
 
 /*****
  * Container
  *****/
 
-Container& Container::create(const char *style, uint width, uint height) {
-  type = Control::Container;
-  hwnd = CreateWindow("libui_class", "", WS_CHILD | WS_VISIBLE,
-    0, 0, width, height, libui::message_window, (HMENU)100, GetModuleHandle(0), 0);
-  return *this;
-}
-
-void Container::attach(Control &control, uint x, uint y) {
-  owner->attach(control, x, y);
-  SetParent(control.hwnd, hwnd);
-}
-
-void Container::move(Control &control, uint x, uint y) {
-  SetWindowPos(control.hwnd, 0, x, y, 0, 0, SWP_NOZORDER | SWP_NOSIZE);
-}
-
-/*****
- * Canvas
- *****/
-
-Canvas &Canvas::create(const char *style, uint width, uint height) {
-  type = Control::Canvas;
+void Container::create(Window &r_owner, uint style, uint x, uint y, uint width, uint height) {
+  type = ControlType::Container;
 
 char classname[4096];
   sprintf(classname, "libui_class_%d", window_count++);
@@ -315,15 +251,10 @@ WNDCLASS wc;
   RegisterClass(&wc);
 
   hwnd = CreateWindow(classname, "", WS_CHILD | WS_VISIBLE,
-    0, 0, width, height, libui::message_window, (HMENU)100, GetModuleHandle(0), 0);
-  return *this;
+    0, 0, width, height, r_owner.info.hwnd, (HMENU)0, GetModuleHandle(0), 0);
 }
 
-WindowHandle Canvas::handle() {
-  return (WindowHandle)hwnd;
-}
-
-void Canvas::set_background_color(uint8 r, uint8 g, uint8 b) {
+void Container::set_background_color(uint8 r, uint8 g, uint8 b) {
 HBRUSH old_brush = background;
   background = (HBRUSH)CreateSolidBrush(RGB(r, g, b));
   SetClassLong(hwnd, GCL_HBRBACKGROUND, (LONG)background);
@@ -331,60 +262,170 @@ HBRUSH old_brush = background;
   if(old_brush) { DeleteObject((HGDIOBJ)old_brush); }
 }
 
+HWND Container::handle() {
+  return hwnd;
+}
+
+Container::Container() {
+  background = 0;
+}
+
+/*****
+ * Canvas
+ *****/
+
+long __stdcall canvas_wndproc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
+  switch(msg) {
+
+  case WM_PAINT: {
+  Canvas *canvas = (Canvas*)GetWindowLongPtr(hwnd, GWLP_USERDATA);
+    if(canvas) { canvas->blit(); }
+  } break;
+
+  }
+
+  return DefWindowProc(hwnd, msg, wparam, lparam);
+}
+
+void Canvas::create(Window &r_owner, uint style, uint x, uint y, uint width, uint height) {
+  _w = width;
+  _h = height;
+
+  type = ControlType::Canvas;
+  hwnd = CreateWindow("canvas_class", "", WS_CHILD | WS_VISIBLE,
+    x, y, width, height, r_owner.info.hwnd, (HMENU)0, GetModuleHandle(0), 0);
+  SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)this);
+
+  pitch = width * sizeof(uint32);
+  buffer = (uint32*)malloc(pitch * height);
+  memset(buffer, 0, pitch * height);
+
+  memset(&bmi, 0, sizeof(BITMAPINFO));
+  bmi.bmiHeader.biSize        = sizeof(BITMAPINFOHEADER);
+  bmi.bmiHeader.biWidth       = width;
+  bmi.bmiHeader.biHeight      = -height; //use negative height to tell GDI not to flip bitmap vertically
+  bmi.bmiHeader.biPlanes      = 1;
+  bmi.bmiHeader.biBitCount    = 32;
+  bmi.bmiHeader.biCompression = BI_RGB;
+  bmi.bmiHeader.biSizeImage   = pitch * height;
+
+  r_owner.attach(*this);
+}
+
+void Canvas::blit() {
+PAINTSTRUCT ps;
+  BeginPaint(hwnd, &ps);
+  SetDIBitsToDevice(ps.hdc, 0, 0, _w, _h, 0, 0, 0, _h, (void*)buffer, &bmi, DIB_RGB_COLORS);
+  EndPaint(hwnd, &ps);
+}
+
+void Canvas::redraw() {
+  InvalidateRect(hwnd, 0, FALSE);
+}
+
+Canvas::Canvas() {
+  buffer = 0;
+}
+
+Canvas::~Canvas() {
+  safe_free(buffer);
+}
+
 /*****
  * Frame
  *****/
 
-Frame& Frame::create(const char *style, uint width, uint height, const char *caption) {
-  type = Control::Frame;
+void Frame::create(Window &r_owner, uint style, uint x, uint y, uint width, uint height, const char *caption) {
+  type = ControlType::Frame;
   hwnd = CreateWindow("BUTTON", caption ? caption : "", WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
-    0, 0, width, height, libui::message_window, (HMENU)100, GetModuleHandle(0), 0);
+    x, y, width, height, r_owner.info.hwnd, (HMENU)0, GetModuleHandle(0), 0);
   SendMessage(hwnd, WM_SETFONT, (WPARAM)libui::font.variable, 0);
-  return *this;
+  r_owner.attach(*this);
 }
 
 /*****
  * Label
  *****/
 
-Label& Label::create(const char *style, uint width, uint height, const char *caption) {
-  type = Control::Label;
-  hwnd = CreateWindow("STATIC", caption ? caption : "", WS_CHILD | WS_VISIBLE | SS_NOPREFIX | SS_ENDELLIPSIS,
-    0, 0, width, height, libui::message_window, (HMENU)100, GetModuleHandle(0), 0);
+long __stdcall label_wndproc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
+  switch(msg) {
+
+  case WM_PAINT: {
+  PAINTSTRUCT ps;
+    BeginPaint(hwnd, &ps);
+  RECT rc;
+  char t[4096];
+    GetWindowText(hwnd, t, 4095);
+    GetClientRect(hwnd, &rc);
+    SetTextColor(ps.hdc, RGB(0, 0, 0));
+    SetBkMode(ps.hdc, TRANSPARENT);
+    SelectObject(ps.hdc, (HGDIOBJ)libui::font.variable);
+    DrawText(ps.hdc, t, strlen(t), &rc, DT_END_ELLIPSIS | DT_NOPREFIX);
+    EndPaint(hwnd, &ps);
+  } break;
+
+  }
+
+  return DefWindowProc(hwnd, msg, wparam, lparam);
+}
+
+void Label::create(Window &r_owner, uint style, uint x, uint y, uint width, uint height, const char *caption) {
+string t;
+  strcpy(t, caption ? caption : "");
+  replace(t, "\r", "");
+  replace(t, "\n", "\r\n");
+
+  type = ControlType::Label;
+  hwnd = CreateWindow("label_class", strptr(t), WS_CHILD | WS_VISIBLE,
+    x, y, width, height, r_owner.info.hwnd, (HMENU)0, GetModuleHandle(0), 0);
   SendMessage(hwnd, WM_SETFONT, (WPARAM)libui::font.variable, 0);
-  return *this;
+  r_owner.attach(*this);
+}
+
+void Label::set_text(const char *str, ...) {
+va_list args;
+  va_start(args, str);
+string temp;
+  vsprintf(temp, str, args);
+  va_end(args);
+  SetWindowText(hwnd, strptr(temp));
+  InvalidateRect(hwnd, 0, TRUE);
 }
 
 /*****
  * Button
  *****/
 
-Button& Button::create(const char *style, uint width, uint height, const char *caption) {
-  type = Control::Button;
+void Button::create(Window &r_owner, uint style, uint x, uint y, uint width, uint height, const char *caption) {
+  type = ControlType::Button;
   hwnd = CreateWindow("BUTTON", caption ? caption : "", WS_CHILD | WS_VISIBLE,
-    0, 0, width, height, libui::message_window, (HMENU)100, GetModuleHandle(0), 0);
+    x, y, width, height, r_owner.info.hwnd, (HMENU)0, GetModuleHandle(0), 0);
   SendMessage(hwnd, WM_SETFONT, (WPARAM)libui::font.variable, 0);
-  return *this;
+  r_owner.attach(*this);
 }
 
 /*****
  * Checkbox
  *****/
 
-Checkbox& Checkbox::create(const char *style, uint width, uint height, const char *caption) {
-  type = Control::Checkbox;
-  hwnd = CreateWindow("BUTTON", caption ? caption : "", WS_CHILD | WS_VISIBLE | BS_AUTOCHECKBOX,
-    0, 0, width, height, libui::message_window, (HMENU)100, GetModuleHandle(0), 0);
+void Checkbox::create(Window &r_owner, uint style, uint x, uint y, uint width, uint height, const char *caption) {
+  type = ControlType::Checkbox;
+  hwnd = CreateWindow("BUTTON", caption ? caption : "", WS_CHILD | WS_VISIBLE | BS_CHECKBOX,
+    x, y, width, height, r_owner.info.hwnd, (HMENU)0, GetModuleHandle(0), 0);
   SendMessage(hwnd, WM_SETFONT, (WPARAM)libui::font.variable, 0);
-  return *this;
+  r_owner.attach(*this);
 }
 
 void Checkbox::check() {
+  if(checked() == true)return;
   SendMessage(hwnd, BM_SETCHECK, (WPARAM)TRUE, 0);
+  owner->message(Message::Clicked, this);
 }
 
 void Checkbox::uncheck() {
+  if(checked() == false)return;
   SendMessage(hwnd, BM_SETCHECK, (WPARAM)FALSE, 0);
+  owner->message(Message::Clicked, this);
 }
 
 void Checkbox::check(bool state) {
@@ -399,22 +440,23 @@ bool Checkbox::checked() {
  * Radiobox
  *****/
 
-Radiobox& Radiobox::create(ControlGroup &list, const char *style, uint width, uint height, const char *caption) {
+void Radiobox::create(Window &r_owner, ControlGroup &list, uint style, uint x, uint y, uint width, uint height, const char *caption) {
   if(list.count() == 0)throw;
-  type = Control::Radiobox;
+  type = ControlType::Radiobox;
   group = list;
   hwnd = CreateWindow("BUTTON", caption ? caption : "", WS_CHILD | WS_VISIBLE | BS_RADIOBUTTON,
-    0, 0, width, height, libui::message_window, (HMENU)100, GetModuleHandle(0), 0);
+    x, y, width, height, r_owner.info.hwnd, (HMENU)0, GetModuleHandle(0), 0);
   SendMessage(hwnd, WM_SETFONT, (WPARAM)libui::font.variable, 0);
+  r_owner.attach(*this);
   if(this == &group[0])check();
-  return *this;
 }
 
 void Radiobox::check() {
+  if(checked() == true)return;
   for(uint i = 0; i < group.count(); i++) {
-    SendMessage(group[i].hwnd, BM_SETCHECK, (WPARAM)FALSE, 0);
+    SendMessage(group[i].hwnd, BM_SETCHECK, (group[i].hwnd == hwnd) ? (WPARAM)TRUE : (WPARAM)FALSE, 0);
   }
-  SendMessage(hwnd, BM_SETCHECK, (WPARAM)TRUE, 0);
+  owner->message(Message::Clicked, this);
 }
 
 bool Radiobox::checked() {
@@ -425,48 +467,69 @@ bool Radiobox::checked() {
  * Editbox
  *****/
 
-Editbox& Editbox::create(const char *style, uint width, uint height, const char *caption) {
-  type = Control::Editbox;
-  multiline = readonly = vscroll = hscroll = false;
-stringarray part;
-  split(part, "|", style);
-  for(uint i = 0; i < count(part); i++) {
-    if(part[i] == "multiline")multiline = true;
-    if(part[i] == "readonly")readonly = true;
-    if(part[i] == "vscroll")vscroll = true;
-    if(part[i] == "hscroll")hscroll = true;
-  }
+void Editbox::create(Window &r_owner, uint style, uint x, uint y, uint width, uint height, const char *caption) {
+  type = ControlType::Editbox;
+  multiline = (style & Multiline);
+  readonly  = (style & Readonly);
+  vscroll   = false;
+  hscroll   = false;
+
+uint hscroll = (style & HorizontalScrollAlways) ? WS_HSCROLL :
+               (style & HorizontalScrollNever)  ? 0          :
+               ES_AUTOHSCROLL;
+uint vscroll = (style & VerticalScrollAlways) ? WS_VSCROLL :
+               (style & VerticalScrollNever)  ? 0          :
+               ES_AUTOVSCROLL;
+
 string data = caption;
   replace(data, "\r", "");
   replace(data, "\n", "\r\n");
   hwnd = CreateWindowEx(WS_EX_CLIENTEDGE, "EDIT", strptr(data),
-    WS_CHILD | WS_VISIBLE |
+    WS_CHILD | WS_VISIBLE | vscroll | hscroll |
     (multiline == true ? ES_MULTILINE : 0) |
-    (readonly == true ? ES_READONLY : 0) |
-    (vscroll == true ? WS_VSCROLL : ES_AUTOVSCROLL) |
-    (hscroll == true ? WS_HSCROLL : ES_AUTOHSCROLL),
-    0, 0, width, height, libui::message_window, (HMENU)100, GetModuleHandle(0), 0);
+    (readonly == true ? ES_READONLY : 0),
+    x, y, width, height, r_owner.info.hwnd, (HMENU)0, GetModuleHandle(0), 0);
   SendMessage(hwnd, WM_SETFONT, (WPARAM)libui::font.variable, 0);
-  return *this;
+  r_owner.attach(*this);
+}
+
+void Editbox::set_text(const char *str, ...) {
+va_list args;
+  va_start(args, str);
+string data;
+  vsprintf(data, str, args);
+  va_end(args);
+
+  replace(data, "\r", "");
+  replace(data, "\n", "\r\n");
+  SetWindowText(hwnd, strptr(data));
+}
+
+uint Editbox::get_text(char *str, uint length) {
+  GetWindowText(hwnd, str, length);
+  return strlen(str);
 }
 
 /*****
  * Listbox
  *****/
 
-Listbox& Listbox::create(const char *style, uint width, uint height, const char *columns, const char *data) {
+void Listbox::create(Window &r_owner, uint style, uint x, uint y, uint width, uint height, const char *columns) {
 stringarray part;
-  header = false;
-  split(part, "|", style);
-  for(uint i = 0; i < count(part); i++) {
-    if(part[i] == "header")header = true;
-  }
+  header = (style & Header);
 
-  type = Control::Listbox;
+uint hscroll = (style & HorizontalScrollAlways) ? WS_HSCROLL :
+               (style & HorizontalScrollNever)  ? 0          :
+               0;
+uint vscroll = (style & VerticalScrollAlways) ? WS_VSCROLL :
+               (style & VerticalScrollNever)  ? 0          :
+               0;
+
+  type = ControlType::Listbox;
   hwnd = CreateWindowEx(WS_EX_CLIENTEDGE, WC_LISTVIEW, "",
-    WS_CHILD | WS_VISIBLE | LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS |
+    WS_CHILD | WS_VISIBLE | LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_NOSORTHEADER | vscroll | hscroll |
     (header == true ? 0 : LVS_NOCOLUMNHEADER),
-    0, 0, width, height, libui::message_window, (HMENU)100, GetModuleHandle(0), 0);
+    x, y, width, height, r_owner.info.hwnd, (HMENU)0, GetModuleHandle(0), 0);
   SendMessage(hwnd, WM_SETFONT, (WPARAM)libui::font.variable, 0);
   ListView_SetExtendedListViewStyle(hwnd, LVS_EX_FULLROWSELECT);
 
@@ -481,15 +544,8 @@ stringarray part;
     ListView_InsertColumn(hwnd, i, &column);
   }
 
-  if(strcmp(data, "")) {
-    split(part, "||", data);
-    for(uint i = 0; i < count(part); i++) {
-      add_item(strptr(part[i]));
-    }
-  }
-
   autosize_columns();
-  return *this;
+  r_owner.attach(*this);
 }
 
 void Listbox::autosize_columns() {
@@ -502,9 +558,15 @@ void Listbox::set_column_width(uint column, uint width) {
   ListView_SetColumnWidth(hwnd, column, width);
 }
 
-void Listbox::add_item(const char *data) {
+void Listbox::add_item(const char *data, ...) {
+va_list args;
+  va_start(args, data);
+string temp;
+  vsprintf(temp, data, args);
+  va_end(args);
+
 stringarray part;
-  split(part, "|", data);
+  split(part, "|", temp);
 
 LVITEM item;
 uint pos = ListView_GetItemCount(hwnd);
@@ -519,6 +581,21 @@ uint pos = ListView_GetItemCount(hwnd);
   }
 }
 
+void Listbox::set_item(uint index, const char *data, ...) {
+va_list args;
+  va_start(args, data);
+string temp;
+  vsprintf(temp, data, args);
+  va_end(args);
+
+stringarray part;
+  split(part, "|", temp);
+
+  for(uint i = 0; i < count(part); i++) {
+    ListView_SetItemText(hwnd, index, i, strptr(part[i]));
+  }
+}
+
 int Listbox::get_selection() {
 uint count = ListView_GetItemCount(hwnd);
   for(uint i = 0; i < count; i++) {
@@ -530,7 +607,6 @@ uint count = ListView_GetItemCount(hwnd);
 void Listbox::set_selection(int index) {
 uint count = ListView_GetItemCount(hwnd);
   for(uint i = 0; i < count; i++) {
-  uint state = ListView_GetItemState(hwnd, i, LVIS_FOCUSED);
     ListView_SetItemState(hwnd, i, LVIS_FOCUSED,  (i == index) ? LVIS_FOCUSED  : 0);
     ListView_SetItemState(hwnd, i, LVIS_SELECTED, (i == index) ? LVIS_SELECTED : 0);
   }
@@ -544,23 +620,18 @@ void Listbox::reset() {
  * Combobox
  *****/
 
-Combobox& Combobox::create(const char *style, uint width, uint height, const char *caption) {
-  type = Control::Combobox;
-  hwnd = CreateWindowEx(WS_EX_CLIENTEDGE, "COMBOBOX", caption ? caption : "",
+void Combobox::create(Window &r_owner, uint style, uint x, uint y, uint width, uint height) {
+  type = ControlType::Combobox;
+  hwnd = CreateWindowEx(WS_EX_CLIENTEDGE, "COMBOBOX", "",
     WS_CHILD | WS_VISIBLE | CBS_DROPDOWNLIST | CBS_HASSTRINGS,
-    0, 0, width, 200, libui::message_window, (HMENU)100, GetModuleHandle(0), 0);
+    x, y, width, 200, r_owner.info.hwnd, (HMENU)0, GetModuleHandle(0), 0);
   SendMessage(hwnd, WM_SETFONT, (WPARAM)libui::font.variable, 0);
-  if(strcmp(caption, "")) {
-  stringarray temp;
-    split(temp, "|", caption);
-    for(uint i = 0; i < count(temp); i++) { add_item(strptr(temp[i])); }
-    set_selection(0);
-  }
-  return *this;
+  r_owner.attach(*this);
 }
 
 void Combobox::add_item(const char *data) {
   SendMessage(hwnd, CB_ADDSTRING, 0, (LPARAM)data);
+  if(SendMessage(hwnd, CB_GETCOUNT, 0, 0) == 1) { set_selection(0); }
 }
 
 void Combobox::set_selection(int index) {
@@ -579,13 +650,13 @@ void Combobox::reset() {
  * Progressbar
  *****/
 
-Progressbar& Progressbar::create(const char *style, uint width, uint height) {
-  type = Control::Progressbar;
+void Progressbar::create(Window &r_owner, uint style, uint x, uint y, uint width, uint height) {
+  type = ControlType::Progressbar;
   hwnd = CreateWindow(PROGRESS_CLASS, "", WS_CHILD | WS_VISIBLE | PBS_SMOOTH,
-    0, 0, width, height, libui::message_window, (HMENU)100, GetModuleHandle(0), 0);
+    x, y, width, height, r_owner.info.hwnd, (HMENU)0, GetModuleHandle(0), 0);
   SendMessage(hwnd, PBM_SETRANGE, 0, MAKELPARAM(0, 100));
   SendMessage(hwnd, PBM_SETSTEP, MAKEWPARAM(1, 0), 0);
-  return *this;
+  r_owner.attach(*this);
 }
 
 void Progressbar::set_progress(uint progress) {
@@ -601,22 +672,18 @@ uint Progressbar::get_progress() {
  * Slider
  *****/
 
-Slider& Slider::create(const char *style, uint width, uint height, uint min, uint max) {
-  type = Control::Slider;
-  orientation = 0;
-stringarray part;
-  split(part, "|", style);
-  for(uint i = 0; i < count(part); i++) {
-    if(part[i] == "horizontal")orientation = 0;
-    if(part[i] == "vertical")orientation = 1;
-  }
+void Slider::create(Window &r_owner, uint style, uint x, uint y, uint width, uint height, uint range) {
+  type = ControlType::Slider;
+  orientation = (style & Vertical) ? 1 : 0;
+  if(range < 1)range = 1;
+
   hwnd = CreateWindow(TRACKBAR_CLASS, "",
     WS_CHILD | WS_VISIBLE | TBS_NOTICKS | TBS_BOTH | (orientation == 0 ? TBS_HORZ : TBS_VERT),
-    0, 0, width, height, libui::message_window, (HMENU)100, GetModuleHandle(0), 0);
-  SendMessage(hwnd, TBM_SETRANGE, (WPARAM)true, (LPARAM)MAKELONG(min, max));
-  SendMessage(hwnd, TBM_SETPAGESIZE, 0, (LPARAM)((max - min) >> 3));
-  SendMessage(hwnd, TBM_SETPOS, (WPARAM)true, (LPARAM)min);
-  return *this;
+    x, y, width, height, r_owner.info.hwnd, (HMENU)0, GetModuleHandle(0), 0);
+  SendMessage(hwnd, TBM_SETRANGE, (WPARAM)true, (LPARAM)MAKELONG(0, range - 1));
+  SendMessage(hwnd, TBM_SETPAGESIZE, 0, (LPARAM)(range >> 3));
+  SendMessage(hwnd, TBM_SETPOS, (WPARAM)true, (LPARAM)0);
+  r_owner.attach(*this);
 }
 
 void Slider::set_position(uint position) {

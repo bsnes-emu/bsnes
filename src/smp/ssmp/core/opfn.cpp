@@ -80,23 +80,9 @@ uint8 sSMP::op_inc(uint8 x) {
   return x;
 }
 
-uint16 sSMP::op_incw(uint16 x) {
-  x++;
-  regs.p.n = !!(x & 0x8000);
-  regs.p.z = (x == 0);
-  return x;
-}
-
 uint8 sSMP::op_dec(uint8 x) {
   x--;
   regs.p.n = !!(x & 0x80);
-  regs.p.z = (x == 0);
-  return x;
-}
-
-uint16 sSMP::op_decw(uint16 x) {
-  x--;
-  regs.p.n = !!(x & 0x8000);
   regs.p.z = (x == 0);
   return x;
 }

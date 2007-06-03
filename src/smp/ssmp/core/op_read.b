@@ -16,8 +16,8 @@ cmp_a_ix(0x66, cmp),
 eor_a_ix(0x46, eor),
 or_a_ix(0x06, or),
 sbc_a_ix(0xa6, sbc) {
-1:rd = op_readdp(regs.x);
-2:op_io();
+1:op_io();
+2:rd = op_readdp(regs.x);
   regs.a = op_$1(regs.a, rd);
 }
 
@@ -113,9 +113,9 @@ cmp_ix_iy(0x79, cmp, 0),
 eor_ix_iy(0x59, eor, 1),
 or_ix_iy(0x19, or, 1),
 sbc_ix_iy(0xb9, sbc, 1) {
-1:wr = op_readdp(regs.x);
+1:op_io();
 2:rd = op_readdp(regs.y);
-3:op_io();
+3:wr = op_readdp(regs.x);
   wr = op_$1(wr, rd);
 4:($2) ? op_writedp(regs.x, wr) : op_io();
 }
@@ -127,9 +127,9 @@ eor_dp_dp(0x49, eor, 1),
 or_dp_dp(0x09, or, 1),
 sbc_dp_dp(0xa9, sbc, 1) {
 1:sp = op_readpc();
-2:dp = op_readpc();
-3:wr = op_readdp(dp);
-4:rd = op_readdp(sp);
+2:rd = op_readdp(sp);
+3:dp = op_readpc();
+4:wr = op_readdp(dp);
 5:wr = op_$1(wr, rd);
   ($2) ? op_writedp(dp, wr) : op_io();
 }
@@ -151,8 +151,8 @@ addw_ya_dp(0x7a, addw),
 subw_ya_dp(0x9a, subw) {
 1:dp  = op_readpc();
 2:rd  = op_readdp(dp);
-3:rd |= op_readdp(dp + 1) << 8;
-4:op_io();
+3:op_io();
+4:rd |= op_readdp(dp + 1) << 8;
   regs.ya = op_$1(regs.ya, rd);
 }
 

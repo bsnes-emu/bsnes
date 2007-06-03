@@ -1,5 +1,4 @@
-//inc
-case 0x1a: {
+void sCPU::op_inc() {
   last_cycle();
   op_io();
   if(regs.p.m) {
@@ -11,10 +10,9 @@ case 0x1a: {
     regs.p.n = !!(regs.a.w & 0x8000);
     regs.p.z = (regs.a.w == 0);
   }
-} break;
+}
 
-//inx
-case 0xe8: {
+void sCPU::op_inx() {
   last_cycle();
   op_io();
   if(regs.p.x) {
@@ -26,10 +24,9 @@ case 0xe8: {
     regs.p.n = !!(regs.x.w & 0x8000);
     regs.p.z = (regs.x.w == 0);
   }
-} break;
+}
 
-//iny
-case 0xc8: {
+void sCPU::op_iny() {
   last_cycle();
   op_io();
   if(regs.p.x) {
@@ -41,10 +38,9 @@ case 0xc8: {
     regs.p.n = !!(regs.y.w & 0x8000);
     regs.p.z = (regs.y.w == 0);
   }
-} break;
+}
 
-//dec
-case 0x3a: {
+void sCPU::op_dec() {
   last_cycle();
   op_io();
   if(regs.p.m) {
@@ -56,10 +52,9 @@ case 0x3a: {
     regs.p.n = !!(regs.a.w & 0x8000);
     regs.p.z = (regs.a.w == 0);
   }
-} break;
+}
 
-//dex
-case 0xca: {
+void sCPU::op_dex() {
   last_cycle();
   op_io();
   if(regs.p.x) {
@@ -71,10 +66,9 @@ case 0xca: {
     regs.p.n = !!(regs.x.w & 0x8000);
     regs.p.z = (regs.x.w == 0);
   }
-} break;
+}
 
-//dey
-case 0x88: {
+void sCPU::op_dey() {
   last_cycle();
   op_io();
   if(regs.p.x) {
@@ -86,10 +80,9 @@ case 0x88: {
     regs.p.n = !!(regs.y.w & 0x8000);
     regs.p.z = (regs.y.w == 0);
   }
-} break;
+}
 
-//asl
-case 0x0a: {
+void sCPU::op_asl() {
   last_cycle();
   op_io();
   if(regs.p.m) {
@@ -103,10 +96,9 @@ case 0x0a: {
     regs.p.n = !!(regs.a.w & 0x8000);
     regs.p.z = (regs.a.w == 0);
   }
-} break;
+}
 
-//lsr
-case 0x4a: {
+void sCPU::op_lsr() {
   last_cycle();
   op_io();
   if(regs.p.m) {
@@ -120,10 +112,9 @@ case 0x4a: {
     regs.p.n = !!(regs.a.w & 0x8000);
     regs.p.z = (regs.a.w == 0);
   }
-} break;
+}
 
-//rol
-case 0x2a: {
+void sCPU::op_rol() {
   last_cycle();
   op_io();
   uint16 c = regs.p.c;
@@ -140,10 +131,9 @@ case 0x2a: {
     regs.p.n = !!(regs.a.w & 0x8000);
     regs.p.z = (regs.a.w == 0);
   }
-} break;
+}
 
-//ror
-case 0x6a: {
+void sCPU::op_ror() {
   last_cycle();
   op_io();
   uint16 c;
@@ -162,10 +152,9 @@ case 0x6a: {
     regs.p.n = !!(regs.a.w & 0x8000);
     regs.p.z = (regs.a.w == 0);
   }
-} break;
+}
 
-//inc_addr
-case 0xee: {
+void sCPU::op_inc_addr() {
   aa.l = op_readpc();
   aa.h = op_readpc();
   rd.l = op_readdbr(aa.w);
@@ -176,10 +165,9 @@ case 0xee: {
   op_writedbr(aa.w + 1, rd.h); }
   last_cycle();
   op_writedbr(aa.w,     rd.l);
-} break;
+}
 
-//dec_addr
-case 0xce: {
+void sCPU::op_dec_addr() {
   aa.l = op_readpc();
   aa.h = op_readpc();
   rd.l = op_readdbr(aa.w);
@@ -190,10 +178,9 @@ case 0xce: {
   op_writedbr(aa.w + 1, rd.h); }
   last_cycle();
   op_writedbr(aa.w,     rd.l);
-} break;
+}
 
-//asl_addr
-case 0x0e: {
+void sCPU::op_asl_addr() {
   aa.l = op_readpc();
   aa.h = op_readpc();
   rd.l = op_readdbr(aa.w);
@@ -204,10 +191,9 @@ case 0x0e: {
   op_writedbr(aa.w + 1, rd.h); }
   last_cycle();
   op_writedbr(aa.w,     rd.l);
-} break;
+}
 
-//lsr_addr
-case 0x4e: {
+void sCPU::op_lsr_addr() {
   aa.l = op_readpc();
   aa.h = op_readpc();
   rd.l = op_readdbr(aa.w);
@@ -218,10 +204,9 @@ case 0x4e: {
   op_writedbr(aa.w + 1, rd.h); }
   last_cycle();
   op_writedbr(aa.w,     rd.l);
-} break;
+}
 
-//rol_addr
-case 0x2e: {
+void sCPU::op_rol_addr() {
   aa.l = op_readpc();
   aa.h = op_readpc();
   rd.l = op_readdbr(aa.w);
@@ -232,10 +217,9 @@ case 0x2e: {
   op_writedbr(aa.w + 1, rd.h); }
   last_cycle();
   op_writedbr(aa.w,     rd.l);
-} break;
+}
 
-//ror_addr
-case 0x6e: {
+void sCPU::op_ror_addr() {
   aa.l = op_readpc();
   aa.h = op_readpc();
   rd.l = op_readdbr(aa.w);
@@ -246,10 +230,9 @@ case 0x6e: {
   op_writedbr(aa.w + 1, rd.h); }
   last_cycle();
   op_writedbr(aa.w,     rd.l);
-} break;
+}
 
-//trb_addr
-case 0x1c: {
+void sCPU::op_trb_addr() {
   aa.l = op_readpc();
   aa.h = op_readpc();
   rd.l = op_readdbr(aa.w);
@@ -260,10 +243,9 @@ case 0x1c: {
   op_writedbr(aa.w + 1, rd.h); }
   last_cycle();
   op_writedbr(aa.w,     rd.l);
-} break;
+}
 
-//tsb_addr
-case 0x0c: {
+void sCPU::op_tsb_addr() {
   aa.l = op_readpc();
   aa.h = op_readpc();
   rd.l = op_readdbr(aa.w);
@@ -274,10 +256,9 @@ case 0x0c: {
   op_writedbr(aa.w + 1, rd.h); }
   last_cycle();
   op_writedbr(aa.w,     rd.l);
-} break;
+}
 
-//inc_addrx
-case 0xfe: {
+void sCPU::op_inc_addrx() {
   aa.l = op_readpc();
   aa.h = op_readpc();
   op_io();
@@ -289,10 +270,9 @@ case 0xfe: {
   op_writedbr(aa.w + regs.x.w + 1, rd.h); }
   last_cycle();
   op_writedbr(aa.w + regs.x.w,     rd.l);
-} break;
+}
 
-//dec_addrx
-case 0xde: {
+void sCPU::op_dec_addrx() {
   aa.l = op_readpc();
   aa.h = op_readpc();
   op_io();
@@ -304,10 +284,9 @@ case 0xde: {
   op_writedbr(aa.w + regs.x.w + 1, rd.h); }
   last_cycle();
   op_writedbr(aa.w + regs.x.w,     rd.l);
-} break;
+}
 
-//asl_addrx
-case 0x1e: {
+void sCPU::op_asl_addrx() {
   aa.l = op_readpc();
   aa.h = op_readpc();
   op_io();
@@ -319,10 +298,9 @@ case 0x1e: {
   op_writedbr(aa.w + regs.x.w + 1, rd.h); }
   last_cycle();
   op_writedbr(aa.w + regs.x.w,     rd.l);
-} break;
+}
 
-//lsr_addrx
-case 0x5e: {
+void sCPU::op_lsr_addrx() {
   aa.l = op_readpc();
   aa.h = op_readpc();
   op_io();
@@ -334,10 +312,9 @@ case 0x5e: {
   op_writedbr(aa.w + regs.x.w + 1, rd.h); }
   last_cycle();
   op_writedbr(aa.w + regs.x.w,     rd.l);
-} break;
+}
 
-//rol_addrx
-case 0x3e: {
+void sCPU::op_rol_addrx() {
   aa.l = op_readpc();
   aa.h = op_readpc();
   op_io();
@@ -349,10 +326,9 @@ case 0x3e: {
   op_writedbr(aa.w + regs.x.w + 1, rd.h); }
   last_cycle();
   op_writedbr(aa.w + regs.x.w,     rd.l);
-} break;
+}
 
-//ror_addrx
-case 0x7e: {
+void sCPU::op_ror_addrx() {
   aa.l = op_readpc();
   aa.h = op_readpc();
   op_io();
@@ -364,10 +340,9 @@ case 0x7e: {
   op_writedbr(aa.w + regs.x.w + 1, rd.h); }
   last_cycle();
   op_writedbr(aa.w + regs.x.w,     rd.l);
-} break;
+}
 
-//inc_dp
-case 0xe6: {
+void sCPU::op_inc_dp() {
   dp = op_readpc();
   op_io_cond2();
   rd.l = op_readdp(dp);
@@ -378,10 +353,9 @@ case 0xe6: {
   op_writedp(dp + 1, rd.h); }
   last_cycle();
   op_writedp(dp,     rd.l);
-} break;
+}
 
-//dec_dp
-case 0xc6: {
+void sCPU::op_dec_dp() {
   dp = op_readpc();
   op_io_cond2();
   rd.l = op_readdp(dp);
@@ -392,10 +366,9 @@ case 0xc6: {
   op_writedp(dp + 1, rd.h); }
   last_cycle();
   op_writedp(dp,     rd.l);
-} break;
+}
 
-//asl_dp
-case 0x06: {
+void sCPU::op_asl_dp() {
   dp = op_readpc();
   op_io_cond2();
   rd.l = op_readdp(dp);
@@ -406,10 +379,9 @@ case 0x06: {
   op_writedp(dp + 1, rd.h); }
   last_cycle();
   op_writedp(dp,     rd.l);
-} break;
+}
 
-//lsr_dp
-case 0x46: {
+void sCPU::op_lsr_dp() {
   dp = op_readpc();
   op_io_cond2();
   rd.l = op_readdp(dp);
@@ -420,10 +392,9 @@ case 0x46: {
   op_writedp(dp + 1, rd.h); }
   last_cycle();
   op_writedp(dp,     rd.l);
-} break;
+}
 
-//rol_dp
-case 0x26: {
+void sCPU::op_rol_dp() {
   dp = op_readpc();
   op_io_cond2();
   rd.l = op_readdp(dp);
@@ -434,10 +405,9 @@ case 0x26: {
   op_writedp(dp + 1, rd.h); }
   last_cycle();
   op_writedp(dp,     rd.l);
-} break;
+}
 
-//ror_dp
-case 0x66: {
+void sCPU::op_ror_dp() {
   dp = op_readpc();
   op_io_cond2();
   rd.l = op_readdp(dp);
@@ -448,10 +418,9 @@ case 0x66: {
   op_writedp(dp + 1, rd.h); }
   last_cycle();
   op_writedp(dp,     rd.l);
-} break;
+}
 
-//trb_dp
-case 0x14: {
+void sCPU::op_trb_dp() {
   dp = op_readpc();
   op_io_cond2();
   rd.l = op_readdp(dp);
@@ -462,10 +431,9 @@ case 0x14: {
   op_writedp(dp + 1, rd.h); }
   last_cycle();
   op_writedp(dp,     rd.l);
-} break;
+}
 
-//tsb_dp
-case 0x04: {
+void sCPU::op_tsb_dp() {
   dp = op_readpc();
   op_io_cond2();
   rd.l = op_readdp(dp);
@@ -476,10 +444,9 @@ case 0x04: {
   op_writedp(dp + 1, rd.h); }
   last_cycle();
   op_writedp(dp,     rd.l);
-} break;
+}
 
-//inc_dpx
-case 0xf6: {
+void sCPU::op_inc_dpx() {
   dp = op_readpc();
   op_io_cond2();
   op_io();
@@ -491,10 +458,9 @@ case 0xf6: {
   op_writedp(dp + regs.x.w + 1, rd.h); }
   last_cycle();
   op_writedp(dp + regs.x.w,     rd.l);
-} break;
+}
 
-//dec_dpx
-case 0xd6: {
+void sCPU::op_dec_dpx() {
   dp = op_readpc();
   op_io_cond2();
   op_io();
@@ -506,10 +472,9 @@ case 0xd6: {
   op_writedp(dp + regs.x.w + 1, rd.h); }
   last_cycle();
   op_writedp(dp + regs.x.w,     rd.l);
-} break;
+}
 
-//asl_dpx
-case 0x16: {
+void sCPU::op_asl_dpx() {
   dp = op_readpc();
   op_io_cond2();
   op_io();
@@ -521,10 +486,9 @@ case 0x16: {
   op_writedp(dp + regs.x.w + 1, rd.h); }
   last_cycle();
   op_writedp(dp + regs.x.w,     rd.l);
-} break;
+}
 
-//lsr_dpx
-case 0x56: {
+void sCPU::op_lsr_dpx() {
   dp = op_readpc();
   op_io_cond2();
   op_io();
@@ -536,10 +500,9 @@ case 0x56: {
   op_writedp(dp + regs.x.w + 1, rd.h); }
   last_cycle();
   op_writedp(dp + regs.x.w,     rd.l);
-} break;
+}
 
-//rol_dpx
-case 0x36: {
+void sCPU::op_rol_dpx() {
   dp = op_readpc();
   op_io_cond2();
   op_io();
@@ -551,10 +514,9 @@ case 0x36: {
   op_writedp(dp + regs.x.w + 1, rd.h); }
   last_cycle();
   op_writedp(dp + regs.x.w,     rd.l);
-} break;
+}
 
-//ror_dpx
-case 0x76: {
+void sCPU::op_ror_dpx() {
   dp = op_readpc();
   op_io_cond2();
   op_io();
@@ -566,5 +528,5 @@ case 0x76: {
   op_writedp(dp + regs.x.w + 1, rd.h); }
   last_cycle();
   op_writedp(dp + regs.x.w,     rd.l);
-} break;
+}
 

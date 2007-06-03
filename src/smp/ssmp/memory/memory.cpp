@@ -57,9 +57,12 @@ uint8 r;
       r = r_cpu->port_read(addr & 3);
     } break;
 
-    case 0xf8:   //???
-    case 0xf9: { //??? -- Mapped to SPCRAM
-      r = ram_read(addr);
+    case 0xf8: { //???
+      r = status.smp_f8;
+    } break;
+
+    case 0xf9: { //???
+      r = status.smp_f9;
     } break;
 
     case 0xfa:   //T0TARGET
@@ -108,8 +111,9 @@ void sSMP::op_buswrite(uint16 addr, uint8 data) {
     case 0xf0: { //TEST
       if(regs.p.p)break; //writes only valid when P flag clear
 
+    //multiplier table may not be 100% accurate, some settings crash
+    //the processor due to S-SMP <> S-DSP bus access misalignment
     static uint8 clock_speed_tbl[16] =
-    //multiplier table may not be 100% accurate, some settings crash the processor
       { 3, 5, 9, 17, 4, 6, 10, 18, 6, 8, 12, 20, 10, 12, 16, 24 };
 
       status.clock_speed   = 24 * clock_speed_tbl[data >> 4] / 3;
@@ -166,7 +170,7 @@ void sSMP::op_buswrite(uint16 addr, uint8 data) {
 
     case 0xf3: { //DSPDATA
     //0x80-0xff is a read-only mirror of 0x00-0x7f
-      if(status.dsp_addr < 0x80) {
+      if(!(status.dsp_addr & 0x80)) {
         r_dsp->write(status.dsp_addr & 0x7f, data);
       }
     } break;
@@ -179,10 +183,12 @@ void sSMP::op_buswrite(uint16 addr, uint8 data) {
       port_write(addr & 3, data);
     } break;
 
-    case 0xf8:   //???
-    case 0xf9: { //??? - Mapped to SPCRAM
-    //$00f1.d1 (ram_writable) has no effect on these two addresses
-      ram_write(addr, data);
+    case 0xf8: { //???
+      status.smp_f8 = data;
+    } break;
+
+    case 0xf9: { //???
+      status.smp_f9 = data;
     } break;
 
     case 0xfa: { //T0TARGET
@@ -203,7 +209,10 @@ void sSMP::op_buswrite(uint16 addr, uint8 data) {
     } break;
 
     }
-  } else if(status.ram_writable == true) {
+  }
+
+//all writes, even to MMIO registers, appear on bus
+  if(status.ram_writable == true) {
     ram_write(addr, data);
   }
 }
@@ -211,19 +220,22 @@ void sSMP::op_buswrite(uint16 addr, uint8 data) {
 //
 
 void sSMP::op_io() {
-  add_clocks(status.clock_speed);
+  add_clocks(24);
+  tick_timers();
 }
 
 uint8 sSMP::op_read(uint16 addr) {
-  add_clocks(status.clock_speed >> 1);
+  add_clocks(12);
 uint8 r = op_busread(addr);
-  add_clocks(status.clock_speed >> 1);
+  add_clocks(12);
+  tick_timers();
   return r;
 }
 
 void sSMP::op_write(uint16 addr, uint8 data) {
-  add_clocks(status.clock_speed);
+  add_clocks(24);
   op_buswrite(addr, data);
+  tick_timers();
 }
 
 //
@@ -255,10 +267,10 @@ void sSMP::op_writeaddr(uint16 addr, uint8 data) {
 
 alwaysinline
 uint8 sSMP::op_readdp(uint8 addr) {
-  return op_read(((uint)regs.p.p << 8) + addr);
+  return op_read((uint(regs.p.p) << 8) + addr);
 }
 
 alwaysinline
 void sSMP::op_writedp(uint8 addr, uint8 data) {
-  op_write(((uint)regs.p.p << 8) + addr, data);
+  op_write((uint(regs.p.p) << 8) + addr, data);
 }

@@ -1,19 +1,23 @@
 const char AboutWindow::about_text[4096] = ""
-  "bsnes -- version " BSNES_VERSION "\r\n"
-  "Author: byuu\r\n"
-  "Project began: October 14th, 2004\r\n"
-  "\r\n\r\n"
-  "Contributors:\r\n"
-  "   anomie, blargg, DMV27, GIGO, kode54, Nach,\r\n"
+  "bsnes -- version " BSNES_VERSION "\n"
+  "Author: byuu\n"
+  "Project began: October 14th, 2004\n"
+  "\n\n"
+  "Contributors:\n"
+  "   anomie, blargg, DMV27, GIGO, kode54, Nach,\n"
   "   Overload, Richard Bannister, TRAC, zones";
 
-bool AboutWindow::close() {
-  hide();
-  return false;
+void AboutWindow::setup() {
+  create(ui::Window::Center, 300, 130, "About bsnes ...");
+
+  about.create(*this, 0, 5, 5, 290, 120, about_text);
 }
 
-void AboutWindow::setup() {
-  create("center", 300, 150, "About bsnes ...");
+int AboutWindow::message(uint id, void *param) {
+  if(id == ui::Message::Close) {
+    hide();
+    return false;
+  }
 
-  attach(about.create("multiline|readonly", 290, 140, about_text), 5, 5);
+  return 0;
 }

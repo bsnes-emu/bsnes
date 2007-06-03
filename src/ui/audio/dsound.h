@@ -14,15 +14,11 @@ struct {
   uint buffer_size, ring_size;
 } data;
 
-  void tick();
-  void run(uint32 sample);
-  void set_frequency(uint freq);
+  void sample(uint16 l_sample, uint16 r_sample);
+  void update_frequency();
   void clear_audio();
   void init();
   void term();
-
-  void run_videosync();
-  void run_audiosync();
 
   AudioDS(HWND handle = 0);
   ~AudioDS();

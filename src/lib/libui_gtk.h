@@ -1,14 +1,24 @@
 /*
-  libui_gtk ~byuu (2007-01-29)
+  libui_gtk ~byuu (2007-05-27)
+  license: public domain
 */
 
-#ifndef __LIBUI
-#define __LIBUI
+#ifndef LIBUI_H
+#define LIBUI_H
 
+#include "libbase.h"
+#include "libarray.h"
+#include "libvector.h"
+#include "libstring.h"
+#include "libkeymap.h"
+
+//TODO: hide this if possible
 #include <gtk/gtk.h>
-#include <gdk/gdkx.h>
 
 namespace libui {
+
+class Window;
+#include "libui_gtk_control.h"
 
 void init();
 void term();
@@ -18,52 +28,55 @@ bool events_pending();
 uint get_screen_width();
 uint get_screen_height();
 
-class Window;
-typedef unsigned long WindowHandle;
-#include "libui_gtk_control.h"
+bool file_load(Window &owner, char *filename, const char *filter, const char *path = "");
+bool file_save(Window &owner, char *filename, const char *filter, const char *path = "");
+
+uint16 translate_key(uint key);
+
+namespace Message {
+  enum {
+    Invalid = 0,
+    Close,
+    Block,
+    KeyUp,
+    KeyDown,
+    Clicked,
+    DoubleClicked,
+    Changed,
+  };
+};
 
 class Window { public:
-struct {
-  GtkWidget *window;
-  GtkWidget *vcontainer, *container;
-  array<Control*> control;
-  uint control_index;
+enum Style {
+  Center = 1,
+};
 
-  bool has_menu;
-  array<MenuGroup*> menu_group;
-  uint menu_group_index;
-} info;
-
-  WindowHandle handle();
-  void create(const char *style, uint width, uint height, const char *caption = "");
+MenuBar menu;
+  void create(uint style, uint width, uint height, const char *caption = "");
+  void set_text(const char *str, ...);
+  void set_background_color(uint8 r, uint8 g, uint8 b);
   void focus();
   void move(uint x, uint y);
   void resize(uint width, uint height);
   virtual void show();
   virtual void hide();
   virtual bool close() { return true; }
-  virtual void keydown(uint key) {}
-  virtual void keyup(uint key) {}
+  virtual void keydown(uint16 key) {}
+  virtual void keyup(uint16 key) {}
 
-  void set_background_color(uint8 r, uint8 g, uint8 b);
+  virtual int message(uint id, void *param = 0) {}
+  virtual void clicked(Control&) {}
+  virtual void changed(Control&) {}
 
-  bool file_load(char *filename, const char *filter, const char *path = "");
-  bool file_save(char *filename, const char *filter, const char *path = "");
+//private:
+struct {
+  GtkWidget *window, *menubar;
+  GtkWidget *vcontainer, *container;
+} info;
 
-  void menu_begin();
-  void menu_end();
-  void menu_group_begin(MenuGroup &group);
-  void menu_group_end();
-  void menu_add_item(Control &item);
-  void menu_add_separator();
-
-  void attach(Control &control, uint x, uint y, bool attach_to_window = true);
-  virtual void clicked(Control*) {}
-
+public:
   Window() {
-    info.control_index    = 1;
-    info.has_menu         = false;
-    info.menu_group_index = 1;
+    info.menubar = 0;
   }
 };
 

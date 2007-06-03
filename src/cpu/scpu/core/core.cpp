@@ -1,33 +1,31 @@
 #include "opfn.cpp"
 
-void sCPU::enter() {
-  for(;;) {
-    if(event.irq) {
-      event.irq = false;
-      if(status.nmi_pending == true) {
-        status.nmi_pending = false;
-        event.irq_vector = (regs.e == false) ? 0xffea : 0xfffa;
-      } else if(status.irq_pending == true) {
-        status.irq_pending = false;
-        event.irq_vector = (regs.e == false) ? 0xffee : 0xfffe;
-      }
-      op_irq();
+#include "op_read.cpp"
+#include "op_write.cpp"
+#include "op_rmw.cpp"
+#include "op_pc.cpp"
+#include "op_misc.cpp"
+
+void sCPU::enter() { loop:
+  if(event.irq) {
+    event.irq = false;
+    if(status.nmi_pending == true) {
+      status.nmi_pending = false;
+      event.irq_vector = (regs.e == false) ? 0xffea : 0xfffa;
+    } else if(status.irq_pending == true) {
+      status.irq_pending = false;
+      event.irq_vector = (regs.e == false) ? 0xffee : 0xfffe;
     }
-
-    tracer.trace_cpuop(); //traces CPU opcode (only if tracer is enabled)
-
-    status.in_opcode = true;
-
-    switch(op_readpc()) {
-      #include "op_read.cpp"
-      #include "op_write.cpp"
-      #include "op_rmw.cpp"
-      #include "op_pc.cpp"
-      #include "op_misc.cpp"
-    }
-
-    status.in_opcode = false;
+    op_irq();
   }
+
+  tracer.trace_cpuop(); //traces CPU opcode (only if tracer is enabled)
+
+  status.in_opcode = true;
+  (this->*optbl[op_readpc()])();
+  status.in_opcode = false;
+
+  goto loop;
 }
 
 void sCPU::op_irq() {

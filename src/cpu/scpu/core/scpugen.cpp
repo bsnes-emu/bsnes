@@ -1,9 +1,9 @@
 #define CLASS_NAME "sCPU"
-#include "../../../lib/opgen_s.cpp"
+#include "../../../lib/opgen_so.cpp"
 
 int main() {
-//fph = fopen("op.h", "wb");
-//fpt = fopen("optable.cpp", "wb");
+  fph = fopen("op.h", "wb");
+  fpt = fopen("optable.cpp", "wb");
 
   generate("op_read.cpp",  "op_read.b");
   generate("op_write.cpp", "op_write.b");
@@ -11,8 +11,8 @@ int main() {
   generate("op_pc.cpp",    "op_pc.b");
   generate("op_misc.cpp",  "op_misc.b");
 
-//fclose(fph);
-//fclose(fpt);
+  fclose(fph);
+  fclose(fpt);
 
   return 0;
 }

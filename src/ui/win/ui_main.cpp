@@ -45,14 +45,8 @@ bool MainWindow::Event(EventInfo &info) {
   uint id   = info.control_id;
   bool ctrl = uiInput->keydown(key->lctrl) || uiInput->keydown(key->rctrl);
     if(id == key->esc) {
-      if(uiVideo->settings.fullscreen == false) {
-        ShowMenu(!MenuVisible());
-        Center();
-      } else {
-        event::toggle_fullscreen();
-      }
-    } else if(id == key->f11) {
-      event::toggle_fullscreen();
+      ShowMenu(!MenuVisible());
+      Center();
     } else if(id == key->f12) {
       if(bsnes.get_state() == bSNES::RUN) {
         bsnes.set_state(bSNES::STOP);
@@ -75,7 +69,7 @@ bool MainWindow::Event(EventInfo &info) {
 
   case EVENT_DRAW: {
     if(r_mem->cart_loaded() == true) {
-      uiVideo->redraw();
+      uiVideo->refresh();
     }
   } break;
 
@@ -179,10 +173,6 @@ bool MainWindow::Event(EventInfo &info) {
       (debugger.active() == false) ? debugger.activate() : debugger.deactivate();
     } break;
 
-    case MENU_MISC_SCREENSHOT: {
-      event::capture_screenshot();
-    } break;
-
     case MENU_MISC_LOGAUDIO: {
       if(MenuItemChecked(MENU_MISC_LOGAUDIO) == false) {
         CheckMenuItem(MENU_MISC_LOGAUDIO);
@@ -274,7 +264,6 @@ char t[128];
   EndMenuGroup();
 
   AddMenuGroup("&Misc");
-    AddMenuItem(MENU_MISC_SCREENSHOT,  "Capture &Screenshot");
     AddMenuItem(MENU_MISC_LOGAUDIO,    "&Log Audio Data");
     AddMenuItem(MENU_MISC_CHEATEDITOR, "&Cheat Code Editor");
     AddMenuSeparator();
@@ -287,7 +276,7 @@ char t[128];
   CheckMenuItem(MENU_SETTINGS_MUTE,                    config::snes.mute);
   CheckMenuItem(MENU_SETTINGS_SPEED_REGULATION_ENABLE, config::system.regulate_speed);
 
-  event::set_video_profile(config::video.profile);
+  event::update_video_settings();
   SetFrameskip(0);
   SetRegulationSpeed(2);
 

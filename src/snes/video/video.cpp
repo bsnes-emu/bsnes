@@ -1,11 +1,18 @@
 #include "filter.cpp"
 
-void SNES::set_video_format(uint filter, uint video_standard, uint pixel_format) {
-//only make changes at the start of a new frame
-  video_format.filter         = filter;
+void SNES::set_video_filter(uint video_filter) {
+  video_format.filter = video_filter;
+  video_format.modified = true;
+}
+
+void SNES::set_video_standard(uint video_standard) {
   video_format.video_standard = video_standard;
-  video_format.pixel_format   = pixel_format;
-  video_format.modified       = true;
+  video_format.modified = true;
+}
+
+void SNES::set_video_pixel_format(uint pixel_format) {
+  video_format.pixel_format = pixel_format;
+  video_format.modified = true;
 }
 
 /*****
@@ -17,7 +24,7 @@ void SNES::update_video_format() {
   video_format.modified = false;
 
   video.filter = video_format.filter;
-  SafeDelete(video_filter);
+  safe_delete(video_filter);
   switch(video.filter) {
   default:
   case VIDEOFILTER_DIRECT:  video_filter = new DirectVideoFilter();  break;
@@ -104,6 +111,8 @@ void SNES::video_init() {
   video.raster_data = (uint16*)malloc(512 * 480 * sizeof(uint16));
   memset(video.raster_data, 0, 512 * 480 * sizeof(uint16));
   video_filter = 0;
-  set_video_format(VIDEOFILTER_DIRECT, VIDEOSTANDARD_NTSC, PIXELFORMAT_RGB565);
+  set_video_filter(VIDEOFILTER_DIRECT);
+  set_video_standard(VIDEOSTANDARD_NTSC);
+  set_video_pixel_format(PIXELFORMAT_RGB565);
   update_video_format();
 }

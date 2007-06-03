@@ -1,7 +1,7 @@
 void SNES::audio_update(uint16 l_sample, uint16 r_sample) {
   if(pcmfp) {
-    fputlw(pcmfp, l_sample);
-    fputlw(pcmfp, r_sample);
+    fput(pcmfp, l_sample, 2);
+    fput(pcmfp, r_sample, 2);
   }
   if(config::snes.mute == true) { l_sample = r_sample = 0x0000; }
 

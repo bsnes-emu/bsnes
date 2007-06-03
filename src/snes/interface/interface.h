@@ -5,8 +5,7 @@
  * (video, audio, input, ...)
  *****/
 
-class SNESInterface {
-public:
+class SNESInterface { public:
   bool video_lock(uint16 *&data, uint &pitch);
   void video_unlock();
   void video_refresh();
@@ -15,6 +14,9 @@ public:
 
   void input_poll();
   bool input_poll(uint deviceid, uint button);
+
+  void init();
+  void term();
 };
 
 extern SNESInterface snesinterface;

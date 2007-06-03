@@ -1,57 +1,6 @@
 namespace libui {
 
 /*****
- * FileLoad
- *****/
-
-bool Window::file_load(char *filename, const char *filter, const char *path) {
-  strcpy(filename, "");
-
-GtkWidget *dialog = gtk_file_chooser_dialog_new("Load File",
-  GTK_WINDOW(info.window), GTK_FILE_CHOOSER_ACTION_OPEN,
-  GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-  GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, 0);
-  if(path && strcmp(path, "")) {
-    gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dialog), path);
-  }
-
-  if(gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT) {
-  char *fn = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
-    strcpy(filename, fn);
-    g_free(fn);
-  }
-
-  gtk_widget_destroy(dialog);
-  return strcmp(filename, ""); //return true if filename != ""
-}
-
-/*****
- * FileSave
- *****/
-
-bool Window::file_save(char *filename, const char *filter, const char *path) {
-  strcpy(filename, "");
-
-GtkWidget *dialog = gtk_file_chooser_dialog_new("Save File",
-  GTK_WINDOW(info.window), GTK_FILE_CHOOSER_ACTION_SAVE,
-  GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-  GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT, 0);
-  if(path && strcmp(path, "")) {
-    gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dialog), path);
-  }
-  gtk_file_chooser_set_do_overwrite_confirmation(GTK_FILE_CHOOSER(dialog), TRUE);
-
-  if(gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT) {
-  char *fn = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
-    strcpy(filename, fn);
-    g_free(fn);
-  }
-
-  gtk_widget_destroy(dialog);
-  return strcmp(filename, ""); //return true if filename != ""
-}
-
-/*****
  * Control
  *****/
 
@@ -61,6 +10,10 @@ void Control::move(uint x, uint y) {
 
 void Control::resize(uint width, uint height) {
   gtk_widget_set_size_request(widget, width, height);
+}
+
+void Control::focus() {
+  gtk_widget_grab_focus(widget);
 }
 
 void Control::show() {
@@ -96,84 +49,73 @@ bool Control::enabled() {
 }
 
 /*****
- * Menu
+ * MenuBar
  *****/
 
-void Window::menu_begin() {}
-void Window::menu_end() {}
-
-/*****
- * Menu
- *****/
-
-void Window::menu_group_begin(MenuGroup &group) {
-  info.control[info.control_index] = &group;
-  group.id     = info.control_index++;
-  group.owner  = this;
-  info.menu_group[++info.menu_group_index] = &group;
+void MenuBar::create(Window &r_owner) {
+  type   = ControlType::MenuBar;
+  widget = r_owner.info.menubar;
+  owner  = &r_owner;
+  show();
 }
 
-void Window::menu_group_end() {
-MenuGroup *group = info.menu_group[info.menu_group_index--];
-MenuGroup *owner = info.menu_group[info.menu_group_index];
-  gtk_menu_item_set_submenu(GTK_MENU_ITEM(group->item), group->widget);
-  gtk_menu_bar_append(owner->widget, group->item);
-  gtk_widget_show(group->item);
-}
-
-void Window::menu_add_item(Control &item) {
-  info.control[info.control_index] = &item;
-MenuGroup &group = *info.menu_group[info.menu_group_index];
-  item.id     = info.control_index++;
-  item.owner  = this;
-  gtk_menu_shell_append(GTK_MENU_SHELL(group.widget), item.widget);
-  g_signal_connect_swapped(G_OBJECT(item.widget), "activate",
-    G_CALLBACK(libui_control_clicked), (gpointer)&item);
-}
-
-void Window::menu_add_separator() {
-MenuItem *item = new MenuItem();
-  info.control[info.control_index] = item;
-MenuGroup *group = info.menu_group[info.menu_group_index];
-  item->id     = info.control_index++;
-  item->owner  = this;
-  item->type   = Control::MenuItem;
-  item->widget = gtk_separator_menu_item_new();
-  gtk_menu_shell_append(GTK_MENU_SHELL(group->widget), item->widget);
-  gtk_widget_show(item->widget);
+void MenuBar::finish() {
 }
 
 /*****
  * MenuGroup
  *****/
 
-MenuGroup& MenuGroup::create(const char *caption) {
-  type   = Control::MenuGroup;
+void MenuGroup::create(MenuBar &r_owner, const char *caption) {
+  type   = ControlType::MenuGroup;
   widget = gtk_menu_new();
   item   = gtk_menu_item_new_with_label(caption ? caption : "?");
-  return *this;
+  owner  = r_owner.owner;
+  parent = r_owner.widget;
+}
+
+void MenuGroup::create(MenuGroup &r_owner, const char *caption) {
+  type   = ControlType::MenuGroup;
+  widget = gtk_menu_new();
+  item   = gtk_menu_item_new_with_label(caption ? caption : "?");
+  owner  = r_owner.owner;
+  parent = r_owner.widget;
+}
+
+void MenuGroup::finish() {
+  gtk_menu_item_set_submenu(GTK_MENU_ITEM(item), widget);
+  gtk_menu_bar_append(parent, item);
+  gtk_widget_show(item);
 }
 
 /*****
  * MenuItem
  *****/
 
-MenuItem& MenuItem::create(const char *caption) {
-  type   = Control::MenuItem;
+void MenuItem::create(MenuGroup &r_owner, const char *caption) {
+  type   = ControlType::MenuItem;
   widget = gtk_menu_item_new_with_label(caption ? caption : "?");
+  owner  = r_owner.owner;
+  parent = r_owner.widget;
+  gtk_menu_shell_append(GTK_MENU_SHELL(parent), widget);
+  g_signal_connect_swapped(G_OBJECT(widget), "activate",
+    G_CALLBACK(libui_control_clicked), (gpointer)this);
   gtk_widget_show(widget);
-  return *this;
 }
 
 /*****
  * MenuCheckItem
  *****/
 
-MenuCheckItem& MenuCheckItem::create(const char *caption) {
-  type   = Control::MenuCheckItem;
+void MenuCheckItem::create(MenuGroup &r_owner, const char *caption) {
+  type   = ControlType::MenuCheckItem;
   widget = gtk_check_menu_item_new_with_label(caption ? caption : "?");
+  owner  = r_owner.owner;
+  parent = r_owner.widget;
+  gtk_menu_shell_append(GTK_MENU_SHELL(parent), widget);
+  g_signal_connect_swapped(G_OBJECT(widget), "activate",
+    G_CALLBACK(libui_control_clicked), (gpointer)this);
   gtk_widget_show(widget);
-  return *this;
 }
 
 void MenuCheckItem::check() {
@@ -196,14 +138,18 @@ bool MenuCheckItem::checked() {
  * MenuRadioItem
  *****/
 
-MenuRadioItem& MenuRadioItem::create(ControlGroup &list, const char *caption) {
+void MenuRadioItem::create(MenuGroup &r_owner, ControlGroup &list, const char *caption) {
   if(list.count() == 0)throw;
-  type   = Control::MenuRadioItem;
+  type   = ControlType::MenuRadioItem;
   widget = (&list[0] == this) ?
     gtk_radio_menu_item_new_with_label(0, caption ? caption : "?") :
     gtk_radio_menu_item_new_with_label_from_widget(GTK_RADIO_MENU_ITEM(list[0].widget), caption ? caption : "");
+  owner  = r_owner.owner;
+  parent = r_owner.widget;
+  gtk_menu_shell_append(GTK_MENU_SHELL(parent), widget);
+  g_signal_connect_swapped(G_OBJECT(widget), "activate",
+    G_CALLBACK(libui_control_clicked), (gpointer)this);
   gtk_widget_show(widget);
-  return *this;
 }
 
 void MenuRadioItem::check() {
@@ -215,39 +161,61 @@ bool MenuRadioItem::checked() {
 }
 
 /*****
- * Container
+ * MenuSeparator
  *****/
 
-Container &Container::create(const char *style, uint width, uint height) {
-  type   = Control::Container;
-  widget = gtk_fixed_new();
-  gtk_widget_set_size_request(widget, width, height);
+void MenuSeparator::create(MenuGroup &r_owner) {
+  type   = ControlType::MenuSeparator;
+  widget = gtk_separator_menu_item_new();
+  owner  = r_owner.owner;
+  parent = r_owner.widget;
+  gtk_menu_shell_append(GTK_MENU_SHELL(parent), widget);
   gtk_widget_show(widget);
-  return *this;
-}
-
-void Container::attach(Control &control, uint x, uint y) {
-  owner->attach(control, x, y, false);
-  gtk_fixed_put(GTK_FIXED(widget), control.widget, x, y);
 }
 
 /*****
- * Canvas
+ * Panel
  *****/
 
-Canvas &Canvas::create(const char *style, uint width, uint height) {
-  type   = Control::Canvas;
-  widget = gtk_drawing_area_new();
+void Panel::create(Window &r_owner, uint style, uint x, uint y, uint width, uint height) {
+  type   = ControlType::Panel;
+  widget = gtk_fixed_new();
+  owner  = &r_owner;
   gtk_widget_set_size_request(widget, width, height);
+  gtk_fixed_put(GTK_FIXED(owner->info.container), widget, x, y);
   gtk_widget_show(widget);
-  return *this;
 }
 
-WindowHandle Canvas::handle() {
-  return (WindowHandle)(GDK_WINDOW_XWINDOW(widget->window));
+void Panel::attach(Window &window) {
+  if(attached) { //detach existing child window, return to toplevel window
+    gtk_widget_reparent(attached->info.vcontainer, attached->info.window);
+  }
+  attached = &window;
+  window.hide();
+  gtk_widget_reparent(window.info.vcontainer, widget);
 }
 
-void Canvas::set_background_color(uint8 r, uint8 g, uint8 b) {
+void Panel::detach() {
+  if(attached) {
+    gtk_widget_reparent(attached->info.vcontainer, attached->info.window);
+  }
+  attached = 0;
+}
+
+/*****
+ * Container
+ *****/
+
+void Container::create(Window &r_owner, uint style, uint x, uint y, uint width, uint height) {
+  type   = ControlType::Container;
+  widget = gtk_drawing_area_new();
+  owner  = &r_owner;
+  gtk_widget_set_size_request(widget, width, height);
+  gtk_fixed_put(GTK_FIXED(owner->info.container), widget, x, y);
+  gtk_widget_show(widget);
+}
+
+void Container::set_background_color(uint8 r, uint8 g, uint8 b) {
 GdkColor color;
   color.pixel = (r << 16) | (g << 8) | (b);
   color.red   = (r << 8) | (r);
@@ -256,29 +224,101 @@ GdkColor color;
   gtk_widget_modify_bg(widget, GTK_STATE_NORMAL, &color);
 }
 
+unsigned long Container::x_handle() {
+  return GDK_WINDOW_XWINDOW(widget->window);
+}
+
+GtkWidget *Container::handle() {
+  return widget;
+}
+
+/*****
+ * Canvas
+ *
+ * Note: for reasons that defy any notion of logic, the GTK+ developers decided to
+ * store color in semi-reversed format (XBGR) rather than conventional format (XRGB).
+ * This is not an endian issue.
+ * As a result, we are forced to perform manual conversion to XBGR format, at the
+ * cost of significant overhead.
+ *****/
+
+void libui_canvas_expose(GtkWidget *widget, GdkEventAny *any, Canvas *canvas) {
+uint32 *d = canvas->rbuffer;
+uint32 *s = canvas->buffer;
+  for(uint y = widget->allocation.height; y; y--) {
+    for(uint x = widget->allocation.width; x; x--) {
+    uint32 p = *s++;
+      *d++ = ((p << 16) & 0xff0000) + (p & 0x00ff00) + ((p >> 16) & 0x0000ff);
+    }
+  }
+
+  gdk_draw_rgb_32_image(widget->window,
+    widget->style->fg_gc[GTK_WIDGET_STATE(widget)],
+    0, 0, widget->allocation.width, widget->allocation.height,
+    GDK_RGB_DITHER_NONE, (guchar*)canvas->rbuffer, canvas->pitch);
+}
+
+void Canvas::create(Window &r_owner, uint style, uint x, uint y, uint width, uint height) {
+  type   = ControlType::Canvas;
+  widget = gtk_drawing_area_new();
+  owner  = &r_owner;
+  gtk_widget_set_size_request(widget, width, height);
+  gtk_fixed_put(GTK_FIXED(owner->info.container), widget, x, y);
+  gtk_widget_show(widget);
+
+  pitch = width * sizeof(uint32);
+  rbuffer = (uint32*)malloc(pitch * height);
+  buffer  = (uint32*)malloc(pitch * height);
+  memset(buffer,  0, pitch * height);
+  memset(rbuffer, 0, pitch * height);
+  g_signal_connect(G_OBJECT(widget), "expose_event", G_CALLBACK(libui_canvas_expose), this);
+}
+
+void Canvas::redraw() {
+  if(!widget->window)return;
+
+GdkRectangle rect;
+  rect.x      = 0;
+  rect.y      = 0;
+  rect.width  = widget->allocation.width;
+  rect.height = widget->allocation.height;
+  gdk_window_invalidate_rect(widget->window, &rect, true);
+}
+
+Canvas::Canvas() {
+  buffer = 0;
+}
+
+Canvas::~Canvas() {
+  safe_free(rbuffer);
+  safe_free(buffer);
+}
+
 /*****
  * Frame
  *****/
 
-Frame& Frame::create(const char *style, uint width, uint height, const char *caption) {
-  type   = Control::Frame;
+void Frame::create(Window &r_owner, uint style, uint x, uint y, uint width, uint height, const char *caption) {
+  type   = ControlType::Frame;
   widget = gtk_frame_new(caption ? caption : "");
+  owner  = &r_owner;
   gtk_widget_set_size_request(widget, width, height);
+  gtk_fixed_put(GTK_FIXED(owner->info.container), widget, x, y);
   gtk_widget_show(widget);
-  return *this;
 }
 
 /*****
  * Label
  *****/
 
-Label& Label::create(const char *style, uint width, uint height, const char *caption) {
-  type   = Control::Label;
+void Label::create(Window &r_owner, uint style, uint x, uint y, uint width, uint height, const char *caption) {
+  type   = ControlType::Label;
   widget = gtk_label_new(caption ? caption : "");
+  owner  = &r_owner;
   gtk_misc_set_alignment(GTK_MISC(widget), 0.0, 0.0);
   gtk_widget_set_size_request(widget, width, height);
+  gtk_fixed_put(GTK_FIXED(owner->info.container), widget, x, y);
   gtk_widget_show(widget);
-  return *this;
 }
 
 void Label::set_text(const char *str, ...) {
@@ -290,21 +330,19 @@ string temp;
   gtk_label_set_label(GTK_LABEL(widget), strptr(temp));
 }
 
-uint Label::get_text(char *str, uint length) {
-const char *temp = gtk_label_get_text(GTK_LABEL(widget));
-  return strlcpy(str, temp ? temp : "", length);
-}
-
 /*****
  * Button
  *****/
 
-Button& Button::create(const char *style, uint width, uint height, const char *caption) {
-  type   = Control::Button;
+void Button::create(Window &r_owner, uint style, uint x, uint y, uint width, uint height, const char *caption) {
+  type   = ControlType::Button;
   widget = gtk_button_new_with_label(caption ? caption : "");
+  owner  = &r_owner;
   gtk_widget_set_size_request(widget, width, height);
+  gtk_fixed_put(GTK_FIXED(owner->info.container), widget, x, y);
   gtk_widget_show(widget);
-  return *this;
+
+  g_signal_connect_swapped(G_OBJECT(widget), "clicked", G_CALLBACK(libui_control_clicked), (gpointer)this);
 }
 
 void Button::set_text(const char *str, ...) {
@@ -316,21 +354,19 @@ string temp;
   gtk_button_set_label(GTK_BUTTON(widget), strptr(temp));
 }
 
-uint Button::get_text(char *str, uint length) {
-const char *temp = gtk_button_get_label(GTK_BUTTON(widget));
-  return strlcpy(str, temp ? temp : "", length);
-}
-
 /*****
  * Checkbox
  *****/
 
-Checkbox& Checkbox::create(const char *style, uint width, uint height, const char *caption) {
-  type   = Control::Checkbox;
+void Checkbox::create(Window &r_owner, uint style, uint x, uint y, uint width, uint height, const char *caption) {
+  type   = ControlType::Checkbox;
   widget = gtk_check_button_new_with_label(caption ? caption : "");
+  owner  = &r_owner;
   gtk_widget_set_size_request(widget, width, height);
+  gtk_fixed_put(GTK_FIXED(owner->info.container), widget, x, y);
   gtk_widget_show(widget);
-  return *this;
+
+  g_signal_connect_swapped(G_OBJECT(widget), "clicked", G_CALLBACK(libui_control_clicked), (gpointer)this);
 }
 
 void Checkbox::check() {
@@ -353,15 +389,18 @@ bool Checkbox::checked() {
  * Radiobox
  *****/
 
-Radiobox& Radiobox::create(ControlGroup &group, const char *style, uint width, uint height, const char *caption) {
+void Radiobox::create(Window &r_owner, ControlGroup &group, uint style, uint x, uint y, uint width, uint height, const char *caption) {
   if(group.count() == 0)throw;
-  type   = Control::Radiobox;
+  type   = ControlType::Radiobox;
   widget = (&group[0] == this) ?
     gtk_radio_button_new_with_label(0, caption ? caption : "") :
     gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(group[0].widget), caption ? caption : "");
+  owner  = &r_owner;
   gtk_widget_set_size_request(widget, width, height);
+  gtk_fixed_put(GTK_FIXED(owner->info.container), widget, x, y);
   gtk_widget_show(widget);
-  return *this;
+
+  g_signal_connect_swapped(G_OBJECT(widget), "clicked", G_CALLBACK(libui_control_clicked), (gpointer)this);
 }
 
 void Radiobox::check() {
@@ -376,27 +415,36 @@ bool Radiobox::checked() {
  * Editbox
  *****/
 
-Editbox& Editbox::create(const char *style, uint width, uint height, const char *caption) {
-  type = Control::Editbox;
-  multiline = false;
-stringarray part;
-  split(part, "|", style);
-  for(uint i = 0; i < count(part); i++) {
-    if(part[i] == "multiline")multiline = true;
-  }
+void Editbox::create(Window &r_owner, uint style, uint x, uint y, uint width, uint height, const char *caption) {
+  owner = &r_owner;
+  type = ControlType::Editbox;
+  multiline = bool(style & Multiline);
 
   if(multiline == false) {
     widget = gtk_entry_new();
+    if(style & Editbox::Readonly) { gtk_entry_set_editable(GTK_ENTRY(widget), false); }
     gtk_entry_set_text(GTK_ENTRY(widget), caption ? caption : "");
   } else {
-    widget = gtk_text_view_new();
-    buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(widget));
+  GtkPolicyType hscroll = (style & Editbox::HorizontalScrollAlways) ? GTK_POLICY_ALWAYS :
+                 (style & Editbox::HorizontalScrollNever)  ? GTK_POLICY_NEVER  :
+                 GTK_POLICY_AUTOMATIC;
+  GtkPolicyType vscroll = (style & Editbox::VerticalScrollAlways) ? GTK_POLICY_ALWAYS :
+                 (style & Editbox::VerticalScrollNever)  ? GTK_POLICY_NEVER  :
+                 GTK_POLICY_AUTOMATIC;
+    widget = gtk_scrolled_window_new(0, 0);
+    gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(widget), hscroll, vscroll);
+    gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(widget), GTK_SHADOW_ETCHED_IN);
+    subwidget = gtk_text_view_new();
+    gtk_container_add(GTK_CONTAINER(widget), subwidget);
+    buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(subwidget));
+    if(style & Editbox::Readonly) { gtk_text_view_set_editable(GTK_TEXT_VIEW(subwidget), false); }
     gtk_text_buffer_set_text(buffer, caption ? caption : "", -1);
+    gtk_widget_show(subwidget);
   }
 
   gtk_widget_set_size_request(widget, width, height);
+  gtk_fixed_put(GTK_FIXED(owner->info.container), widget, x, y);
   gtk_widget_show(widget);
-  return *this;
 }
 
 void Editbox::set_text(const char *str, ...) {
@@ -418,9 +466,10 @@ uint Editbox::get_text(char *str, uint length) {
   const char *temp = gtk_entry_get_text(GTK_ENTRY(widget));
     return strlcpy(str, temp ? temp : "", length);
   } else {
-  //not sure how to use GtkTextIter* to retrieve editbox text buffer ...
-    strcpy(str, "");
-    return 0;
+  GtkTextIter start, end;
+    gtk_text_buffer_get_start_iter(buffer, &start);
+    gtk_text_buffer_get_end_iter(buffer, &end);
+    return strlcpy(str, gtk_text_buffer_get_text(buffer, &start, &end, true), length);
   }
 }
 
@@ -433,15 +482,13 @@ uint Editbox::get_text(char *str, uint length) {
  * Attempt to understand the below code at the risk of your own sanity.
  *****/
 
-Listbox& Listbox::create(const char *style, uint width, uint height, const char *columns, const char *data) {
-  type = Control::Listbox;
-stringarray list, part;
-  split(part, "|", style);
-bool header = false;
-  for(uint i = 0; i < count(part); i++) {
-    if(part[i] == "header")header = true;
-  }
+void Listbox::create(Window &r_owner, uint style, uint x, uint y, uint width, uint height, const char *columns) {
+  owner = &r_owner;
+  type = ControlType::Listbox;
 
+bool header = bool(style & Header);
+
+stringarray list, part;
   split(part, "|", columns);
 
 GType *v = (GType*)malloc(count(part) * sizeof(GType));
@@ -449,37 +496,42 @@ GType *v = (GType*)malloc(count(part) * sizeof(GType));
   store = gtk_list_store_newv(count(part), v);
   safe_free(v);
 
-  if(data && strcmp(data, "")) {
-    split(list, "||", data);
-    for(uint l = 0; l < count(list); l++) {
-      gtk_list_store_append(store, &iter);
-      split(part, "|", list[l]);
-      for(uint i = 0; i < count(part); i++) {
-        gtk_list_store_set(store, &iter, i, strptr(part[i]), -1);
-      }
-    }
-  }
-
-  widget = gtk_tree_view_new_with_model(GTK_TREE_MODEL(store));
+  widget = gtk_scrolled_window_new(0, 0);
+GtkPolicyType hscroll = (style & Listbox::HorizontalScrollAlways) ? GTK_POLICY_ALWAYS :
+                        (style & Listbox::HorizontalScrollNever)  ? GTK_POLICY_NEVER  :
+                        GTK_POLICY_AUTOMATIC;
+GtkPolicyType vscroll = (style & Listbox::VerticalScrollAlways) ? GTK_POLICY_ALWAYS :
+                        (style & Listbox::VerticalScrollNever)  ? GTK_POLICY_NEVER  :
+                        GTK_POLICY_AUTOMATIC;
+  gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(widget), hscroll, vscroll);
+  gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(widget), GTK_SHADOW_ETCHED_IN);
+  subwidget = gtk_tree_view_new_with_model(GTK_TREE_MODEL(store));
+  gtk_container_add(GTK_CONTAINER(widget), subwidget);
   g_object_unref(G_OBJECT(store));
   gtk_widget_set_size_request(widget, width, height);
+  gtk_fixed_put(GTK_FIXED(owner->info.container), widget, x, y);
+  gtk_widget_show(subwidget);
   gtk_widget_show(widget);
 
   split(list, "|", columns);
+//alternate colors for each listbox entry if there are multiple columns ...
+  gtk_tree_view_set_rules_hint(GTK_TREE_VIEW(subwidget), (count(list) >= 2) ? true : false);
   for(uint i = 0; i < count(list); i++) {
     renderer = gtk_cell_renderer_text_new();
     column   = gtk_tree_view_column_new_with_attributes(strptr(list[i]), renderer, "text", i, 0);
     column_list[column_list.size()] = column;
-    gtk_tree_view_append_column(GTK_TREE_VIEW(widget), column);
+    gtk_tree_view_append_column(GTK_TREE_VIEW(subwidget), column);
   }
 
-  gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(widget), header);
+  gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(subwidget), header);
   autosize_columns();
-  return *this;
+
+  g_signal_connect_swapped(G_OBJECT(subwidget), "cursor-changed", G_CALLBACK(libui_control_changed), (gpointer)this);
+  g_signal_connect_swapped(G_OBJECT(subwidget), "row-activated", G_CALLBACK(libui_control_double_clicked), (gpointer)this);
 }
 
 void Listbox::autosize_columns() {
-  gtk_tree_view_columns_autosize(GTK_TREE_VIEW(widget));
+  gtk_tree_view_columns_autosize(GTK_TREE_VIEW(subwidget));
 }
 
 void Listbox::set_column_width(uint column, uint width) {
@@ -487,19 +539,46 @@ void Listbox::set_column_width(uint column, uint width) {
   gtk_tree_view_column_set_max_width(column_list[column], width);
 }
 
-void Listbox::add_item(const char *data) {
+void Listbox::add_item(const char *data, ...) {
+va_list args;
+  va_start(args, data);
+string temp;
+  vsprintf(temp, data, args);
+  va_end(args);
+
 stringarray part;
-  split(part, "|", data);
+  split(part, "|", temp);
   gtk_list_store_append(store, &iter);
   for(uint i = 0; i < count(part); i++) {
     gtk_list_store_set(store, &iter, i, strptr(part[i]), -1);
   }
 }
 
+void Listbox::set_item(uint index, const char *data, ...) {
+va_list args;
+  va_start(args, data);
+string temp;
+  vsprintf(temp, data, args);
+  va_end(args);
+
+GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(subwidget));
+  for(uint i = 0; i <= index; i++) {
+    (i == 0) ?
+      gtk_tree_model_get_iter_first(model, &iter) :
+      gtk_tree_model_iter_next(model, &iter);
+  }
+
+stringarray part;
+  split(part, "|", temp);
+  for(uint i = 0; i < count(part); i++) {
+    gtk_list_store_set(store, &iter, i, strptr(part[i]), -1);
+  }
+}
+
 int Listbox::get_selection() {
-//... because gtk_tree_view_get_selected_row(GTK_TREE_VIEW(widget)) would be too easy ...
-GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(widget));
-GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(widget));
+//... because gtk_tree_view_get_selected_row(GTK_TREE_VIEW(subwidget)) would be too easy ...
+GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(subwidget));
+GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(subwidget));
   if(gtk_tree_model_get_iter_first(model, &iter) == false) { return -1; }
   if(gtk_tree_selection_iter_is_selected(selection, &iter) == true) { return 0; }
   for(uint i = 1; i < 100000; i++) {
@@ -510,9 +589,9 @@ GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(widget));
 }
 
 void Listbox::set_selection(int index) {
-//... because gtk_tree_view_set_selected_row(GTK_TREE_VIEW(widget), index) would be too easy ...
-GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(widget));
-GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(widget));
+//... because gtk_tree_view_set_selected_row(GTK_TREE_VIEW(subwidget), index) would be too easy ...
+GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(subwidget));
+GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(subwidget));
   gtk_tree_selection_unselect_all(selection);
   if(index < 0) { return; }
   if(gtk_tree_model_get_iter_first(model, &iter) == false) { return; }
@@ -525,31 +604,21 @@ GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(widget));
 
 void Listbox::reset() {
   gtk_list_store_clear(GTK_LIST_STORE(store));
-  gtk_tree_view_set_model(GTK_TREE_VIEW(widget), GTK_TREE_MODEL(store));
+  gtk_tree_view_set_model(GTK_TREE_VIEW(subwidget), GTK_TREE_MODEL(store));
 }
 
 /*****
  * Combobox
  *****/
 
-Combobox& Combobox::create(const char *style, uint width, uint height, const char *data) {
-  type    = Control::Combobox;
-  widget  = gtk_combo_box_new_text(); //gtk_combo_box_entry_new_text();
+void Combobox::create(Window &r_owner, uint style, uint x, uint y, uint width, uint height) {
+  type    = ControlType::Combobox;
+  widget  = gtk_combo_box_new_text(); //gtk_combo_box_entry_new_text(); /* alternate style */
+  owner   = &r_owner;
   counter = 0;
   gtk_widget_set_size_request(widget, width, height);
+  gtk_fixed_put(GTK_FIXED(owner->info.container), widget, x, y);
   gtk_widget_show(widget);
-
-  if(data && strcmp(data, "")) {
-  stringarray temp;
-    split(temp, "|", data);
-    for(int i = 0; i < count(temp); i++) {
-      gtk_combo_box_append_text(GTK_COMBO_BOX(widget), strptr(temp[i]));
-      counter++;
-    }
-    set_selection(0);
-  }
-
-  return *this;
 }
 
 void Combobox::add_item(const char *data) {
@@ -577,12 +646,13 @@ void Combobox::reset() {
  * Progressbar
  *****/
 
-Progressbar& Progressbar::create(const char *style, uint width, uint height) {
-  type   = Control::Progressbar;
+void Progressbar::create(Window &r_owner, uint style, uint x, uint y, uint width, uint height) {
+  type   = ControlType::Progressbar;
   widget = gtk_progress_bar_new();
+  owner  = &r_owner;
   gtk_widget_set_size_request(widget, width, height);
+  gtk_fixed_put(GTK_FIXED(owner->info.container), widget, x, y);
   gtk_widget_show(widget);
-  return *this;
 }
 
 void Progressbar::set_progress(uint progress) {
@@ -600,27 +670,24 @@ uint p = (uint)(gtk_progress_bar_get_fraction(GTK_PROGRESS_BAR(widget)) * 100.0)
  * Slider
  *****/
 
-Slider& Slider::create(const char *style, uint width, uint height, uint min, uint max) {
-  type = Control::Slider;
-  orientation = 0;
+void Slider::create(Window &r_owner, uint style, uint x, uint y, uint width, uint height, uint range) {
+  type = ControlType::Slider;
+  orientation = (style & Vertical) ? 1 : 0;
 
-stringarray part;
-  split(part, "|", style);
-  for(uint i = 0; i < count(part); i++) {
-    if(part[i] == "horizontal")orientation = 0;
-    if(part[i] == "vertical")orientation = 1;
-  }
-
+  if(range < 1)range = 1;
   if(orientation == 0) {
-    widget = gtk_hscale_new_with_range(min, max, 1);
+    widget = gtk_hscale_new_with_range(0, range - 1, 1);
   } else {
-    widget = gtk_vscale_new_with_range(min, max, 1);
+    widget = gtk_vscale_new_with_range(0, range - 1, 1);
   }
 
+  owner = &r_owner;
   gtk_scale_set_draw_value(GTK_SCALE(widget), FALSE);
   gtk_widget_set_size_request(widget, width, height);
+  gtk_fixed_put(GTK_FIXED(owner->info.container), widget, x, y);
   gtk_widget_show(widget);
-  return *this;
+
+  g_signal_connect_swapped(G_OBJECT(widget), "value-changed", G_CALLBACK(libui_control_changed), (gpointer)this);
 }
 
 void Slider::set_position(uint position) {

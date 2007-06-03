@@ -9,7 +9,7 @@ NtscVideoFilter::NtscVideoFilter() {
 }
 
 NtscVideoFilter::~NtscVideoFilter() {
-  SafeFree(ntsc);
+  safe_free(ntsc);
 }
 
 void NtscVideoFilter::adjust(float hue, float saturation, float contrast,
@@ -23,7 +23,7 @@ snes_ntsc_setup_t setup = defaults;
   setup.sharpness      = sharpness;
   setup.resolution     = sharpness;
   setup.merge_fields   = merge_fields;
-  setup.bsnes_colortbl = colortbl;
+  setup.bsnes_colortbl = (unsigned long*)colortbl;
 
   if(!ntsc) {
     ntsc = (snes_ntsc_t*)malloc(sizeof *ntsc);

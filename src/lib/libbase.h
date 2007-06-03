@@ -1,18 +1,50 @@
 /*
-  libbase : version 0.09 ~byuu (2007-01-12)
+  libbase : version 0.10 ~byuu (2007-05-27)
+  license: public domain
 */
 
-#ifndef __LIBBASE
-#define __LIBBASE
+#ifndef LIBBASE_H
+#define LIBBASE_H
+
+#include <assert.h>
+#include <limits.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdarg.h>
+#include <string.h>
+#include <time.h>
+#include <math.h>
+
+#if defined(_MSC_VER)
+  #include <io.h>
+  #include <direct.h>
+  #include <shlobj.h>
+#else
+  #include <unistd.h>
+  #include <pwd.h>
+  #include <sys/stat.h>
+#endif
 
 #if defined(_MSC_VER)
 //disable libc deprecation warnings in MSVC 2k5+
   #pragma warning(disable:4996)
 
   #define NOMINMAX
+  #define PATH_MAX  _MAX_PATH
+  #define getcwd    _getcwd
   #define ftruncate _chsize
+  #define mkdir     _mkdir
   #define putenv    _putenv
+  #define rmdir     _rmdir
   #define vsnprintf _vsnprintf
+
+  #define va_copy(dst, src) ((dst) = (src))
+  static char *realpath(const char *file_name, char *resolved_name) {
+    return _fullpath(resolved_name, file_name, PATH_MAX);
+  }
+#elif defined(__GNUC__)
+  #define mkdir(path) (mkdir)(path, 0755);
 #endif
 
 /*****
@@ -25,9 +57,9 @@
   #define alwaysinline  __forceinline
   #define fastcall      __fastcall
 #elif defined(__GNUC__)
-  #define noinline
+  #define noinline      __attribute__((noinline))
   #define inline        inline
-  #define alwaysinline  inline
+  #define alwaysinline  __attribute__((always_inline))
   #define fastcall      __attribute__((fastcall))
 #else
   #define noinline
@@ -36,85 +68,43 @@
   #define fastcall
 #endif
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdarg.h>
-#include <string.h>
-#include <time.h>
-#include <math.h>
-
-#if defined(_MSC_VER)
-  #include <io.h>
-#else
-  #include <unistd.h>
-#endif
-
-#ifndef FALSE
-  #define FALSE 0
-#endif
-
-#ifndef TRUE
-  #define TRUE (!FALSE)
-#endif
-
-//deprecated
-#define SafeFree(__n)    if(__n) { free(__n);      __n = 0; }
-#define SafeDelete(__n)  if(__n) { delete(__n);    __n = 0; }
-#define SafeRelease(__n) if(__n) { __n->Release(); __n = 0; }
-
-/*****
- * template traits
- *****/
-
-template<typename T> struct is_reference       { enum { value = false }; };
-template<typename T> struct is_reference<T&>   { enum { value = true  }; };
-
-template<typename T> struct is_pointer         { enum { value = false }; };
-template<typename T> struct is_pointer<T*>     { enum { value = true  }; };
-
-template<typename T> struct is_const           { enum { value = false }; };
-template<typename T> struct is_const<const T>  { enum { value = true  }; };
-template<typename T> struct is_const<const T&> { enum { value = true  }; };
-
-/*****
- * null_t
- *****/
-
-struct null_t {
-  alwaysinline bool operator==(const null_t&)   { return true;  }
-  alwaysinline bool operator>=(const null_t&)   { return true;  }
-  alwaysinline bool operator<=(const null_t&)   { return true;  }
-  alwaysinline bool operator!=(const null_t&)   { return false; }
-  alwaysinline bool operator> (const null_t&)   { return false; }
-  alwaysinline bool operator< (const null_t&)   { return false; }
-  alwaysinline null_t &operator=(const null_t&) { return *this; }
-};
-
-template<typename T> struct is_null_t         { enum { value = false }; };
-template<>           struct is_null_t<null_t> { enum { value = true  }; };
-
 /*****
  * typedefs
  *****/
 
-typedef unsigned int       uint;
-typedef signed   int       sint;
+typedef unsigned int uint;
 
-typedef unsigned char      byte;
-typedef unsigned short     word;
-typedef unsigned long      ulong;
-typedef unsigned long long uquad;
+typedef uint8_t  uint8;
+typedef uint16_t uint16;
+typedef uint32_t uint32;
+typedef uint64_t uint64;
 
-typedef unsigned char      bool8;
-typedef unsigned char      uint8;
-typedef unsigned short     uint16;
-typedef unsigned long      uint32;
-typedef unsigned long long uint64;
+typedef int8_t   int8;
+typedef int16_t  int16;
+typedef int32_t  int32;
+typedef int64_t  int64;
 
-typedef signed   char      int8;
-typedef signed   short     int16;
-typedef signed   long      int32;
-typedef signed   long long int64;
+/*****
+ * OS localization
+ *****/
+
+//userpath(output) retrieves path to user's home folder
+//output must be at least as large as PATH_MAX
+
+#if defined(_MSC_VER)
+static char *userpath(char *output) {
+  strcpy(output, "."); //failsafe
+  SHGetFolderPath(0, CSIDL_APPDATA | CSIDL_FLAG_CREATE, 0, 0, output);
+  return output;
+}
+#elif defined(__GNUC__)
+static char *userpath(char *output) {
+  strcpy(output, "."); //failsafe
+struct passwd *userinfo = getpwuid(getuid());
+  if(userinfo) { strcpy(output, userinfo->pw_dir); }
+  return output;
+}
+#endif
 
 /*****
  * templates
@@ -162,117 +152,52 @@ template<int min, int max, typename T> inline T minmax(const T x) {
 }
 
 template<int bits> inline unsigned uclamp(const unsigned x) {
-enum { m = (1 << bits) - 1 };
-  return (x > m) ? m : x;
+enum { y = (1U << bits) - 1 };
+  return y + ((x - y) & -(x < y)); //min(x, y);
 }
 
 template<int bits> inline unsigned uclip(const unsigned x) {
-enum { m = (1 << bits) - 1 };
+enum { m = (1U << bits) - 1 };
   return (x & m);
 }
 
 template<int bits> inline signed sclamp(const signed x) {
-enum { b = 1 << (bits - 1), m = (1 << (bits - 1)) - 1 };
+enum { b = 1U << (bits - 1), m = (1U << (bits - 1)) - 1 };
   return (x > m) ? m : (x < -b) ? -b : x;
 }
 
 template<int bits> inline signed sclip(const signed x) {
-enum { b = 1 << (bits - 1), m = (1 << (bits - 1)) - 1 };
-  return (x & b) ? (x | ~m) : (x & m);
+enum { b = 1U << (bits - 1), m = (1U << bits) - 1 };
+  return ((x & m) ^ b) - b;
 }
 
-//requires compiler arithmetic shift right support
-//c++ standard does not define whether >> is arithmetic or logical
-//template<int bits> inline signed sclip(const signed x) {
-//enum { s = sizeof(x) * 8 - bits };
-//  return (x << s) >> s;
-//}
-
-template<int bits, typename T> inline T rol(const T x) {
-enum { s = (sizeof(T) << 3) - bits };
-  return (x << bits) | (x >> s);
+template<int n, typename T> inline T rol(const T x) {
+enum { s = (sizeof(T) << 3) - n };
+  return (x << n) | (x >> s);
 }
 
-template<int bits, typename T> inline T ror(const T x) {
-enum { s = (sizeof(T) << 3) - bits };
-  return (x >> bits) | (x << s);
+template<int n, typename T> inline T ror(const T x) {
+enum { s = (sizeof(T) << 3) - n };
+  return (x >> n) | (x << s);
 }
 
-template<int bits, typename T> inline T asl(const T x) {
-  return (x << bits);
+template<int n, typename T> inline T asl(const T x) {
+  return (x << n);
 }
 
-template<int bits, typename T> inline T asr(const T x) {
-enum { h = 1 << ((sizeof(T) << 3) - 1) };
-enum { m = ~((1 << ((sizeof(T) << 3) - bits)) - 1) };
-  return (x >> bits) | ((0 - !!(x & h)) & m);
+template<int n, typename T> inline T asr(const T x) {
+enum { bits = (sizeof(T) << 3) - n };
+  return sclip<bits>(x >> n);
 }
 
-template<int bits, typename T> inline T lsl(const T x) {
-  return (x << bits);
+template<int n, typename T> inline T lsl(const T x) {
+  return (x << n);
 }
 
-template<int bits, typename T> inline T lsr(const T x) {
-enum { m = ((1 << ((sizeof(T) << 3) - bits)) - 1) };
-  return (x >> bits) & m;
+template<int n, typename T> inline T lsr(const T x) {
+enum { bits = (sizeof(T) << 3) - n };
+  return uclip<bits>(x >> n);
 }
-
-template<unsigned bits, typename base = uint> class uint_t {
-private:
-base data;
-
-public:
-  inline operator unsigned() const { return data; }
-                       inline unsigned operator ++(int)       { base r = data; data = uclip<bits>(data + 1); return r; }
-                       inline unsigned operator --(int)       { base r = data; data = uclip<bits>(data - 1); return r; }
-                       inline unsigned operator ++()          { data = uclip<bits>(data  + 1); return data; }
-                       inline unsigned operator --()          { data = uclip<bits>(data  - 1); return data; }
-  template<typename T> inline unsigned operator  =(const T i) { data = uclip<bits>(i);         return data; }
-  template<typename T> inline unsigned operator |=(const T i) { data = uclip<bits>(data  | i); return data; }
-  template<typename T> inline unsigned operator ^=(const T i) { data = uclip<bits>(data  ^ i); return data; }
-  template<typename T> inline unsigned operator &=(const T i) { data = uclip<bits>(data  & i); return data; }
-  template<typename T> inline unsigned operator<<=(const T i) { data = uclip<bits>(data << i); return data; }
-  template<typename T> inline unsigned operator>>=(const T i) { data = uclip<bits>(data >> i); return data; }
-  template<typename T> inline unsigned operator +=(const T i) { data = uclip<bits>(data  + i); return data; }
-  template<typename T> inline unsigned operator -=(const T i) { data = uclip<bits>(data  - i); return data; }
-  template<typename T> inline unsigned operator *=(const T i) { data = uclip<bits>(data  * i); return data; }
-  template<typename T> inline unsigned operator /=(const T i) { data = uclip<bits>(data  / i); return data; }
-  template<typename T> inline unsigned operator %=(const T i) { data = uclip<bits>(data  % i); return data; }
-
-  inline uint_t() : data(0) {}
-  inline uint_t(const base i) : data(uclip<bits>(i)) {}
-};
-
-template<unsigned bits, typename base = int> class int_t {
-private:
-base data;
-
-public:
-  inline operator signed() const { return data; }
-                       inline signed operator ++(int)       { base r = data; data = sclip<bits>(data + 1); return r; }
-                       inline signed operator --(int)       { base r = data; data = sclip<bits>(data - 1); return r; }
-                       inline signed operator ++()          { data = sclip<bits>(data  + 1); return data; }
-                       inline signed operator --()          { data = sclip<bits>(data  - 1); return data; }
-  template<typename T> inline signed operator  =(const T i) { data = sclip<bits>(i);         return data; }
-  template<typename T> inline signed operator |=(const T i) { data = sclip<bits>(data  | i); return data; }
-  template<typename T> inline signed operator ^=(const T i) { data = sclip<bits>(data  ^ i); return data; }
-  template<typename T> inline signed operator &=(const T i) { data = sclip<bits>(data  & i); return data; }
-  template<typename T> inline signed operator<<=(const T i) { data = sclip<bits>(data << i); return data; }
-  template<typename T> inline signed operator>>=(const T i) { data = sclip<bits>(data >> i); return data; }
-  template<typename T> inline signed operator +=(const T i) { data = sclip<bits>(data  + i); return data; }
-  template<typename T> inline signed operator -=(const T i) { data = sclip<bits>(data  - i); return data; }
-  template<typename T> inline signed operator *=(const T i) { data = sclip<bits>(data  * i); return data; }
-  template<typename T> inline signed operator /=(const T i) { data = sclip<bits>(data  / i); return data; }
-  template<typename T> inline signed operator %=(const T i) { data = sclip<bits>(data  % i); return data; }
-
-  inline int_t() : data(0) {}
-  inline int_t(const base i) : data(sclip<bits>(i)) {}
-};
-
-typedef uint_t<24>         uint24;
-typedef  int_t<24>          int24;
-typedef uint_t<48, uint64> uint48;
-typedef  int_t<48,  int64>  int48;
 
 /*****
  * endian wrappers
@@ -316,88 +241,18 @@ typedef  int_t<48,  int64>  int48;
  * libc extensions
  *****/
 
-static uint8 fgetb(FILE *fp) { return fgetc(fp); }
-static uint8 fgetlb(FILE *fp) { return fgetc(fp); }
-static uint8 fgetmb(FILE *fp) { return fgetc(fp); }
-
-static uint16 fgetlw(FILE *fp) {
-  return (fgetc(fp)) | (fgetc(fp) << 8);
+static uint64 fget(FILE *fp, uint length = 1) {
+uint64 data = 0;
+  for(uint i = 0; i < length; i++) {
+    data |= fgetc(fp) << (i << 3);
+  }
+  return data;
 }
 
-static uint16 fgetmw(FILE *fp) {
-  return (fgetc(fp) << 8) | (fgetc(fp) << 8);
-}
-
-static uint32 fgetld(FILE *fp) {
-  return (fgetc(fp)) | (fgetc(fp) << 8) | (fgetc(fp) << 16) | (fgetc(fp) << 24);
-}
-
-static uint32 fgetmd(FILE *fp) {
-  return (fgetc(fp) << 24) | (fgetc(fp) << 16) | (fgetc(fp) << 8) | (fgetc(fp));
-}
-
-static uint64 fgetlq(FILE *fp) {
-  return ((uint64)fgetc(fp) <<  0) | ((uint64)fgetc(fp) <<  8) |
-         ((uint64)fgetc(fp) << 16) | ((uint64)fgetc(fp) << 24) |
-         ((uint64)fgetc(fp) << 32) | ((uint64)fgetc(fp) << 40) |
-         ((uint64)fgetc(fp) << 48) | ((uint64)fgetc(fp) << 56);
-}
-
-static uint64 fgetmq(FILE *fp) {
-  return ((uint64)fgetc(fp) << 56) | ((uint64)fgetc(fp) << 48) |
-         ((uint64)fgetc(fp) << 40) | ((uint64)fgetc(fp) << 32) |
-         ((uint64)fgetc(fp) << 24) | ((uint64)fgetc(fp) << 16) |
-         ((uint64)fgetc(fp) <<  8) | ((uint64)fgetc(fp) <<  0);
-}
-
-static void fputb(FILE *fp, uint8 data) { fputc(data, fp); }
-static void fputlb(FILE *fp, uint8 data) { fputc(data, fp); }
-static void fputmb(FILE *fp, uint8 data) { fputc(data, fp); }
-
-static void fputlw(FILE *fp, uint16 data) {
-  fputc(data >> 0, fp);
-  fputc(data >> 8, fp);
-}
-
-static void fputmw(FILE *fp, uint16 data) {
-  fputc(data >> 8, fp);
-  fputc(data >> 0, fp);
-}
-
-static void fputld(FILE *fp, uint32 data) {
-  fputc(data >>  0, fp);
-  fputc(data >>  8, fp);
-  fputc(data >> 16, fp);
-  fputc(data >> 24, fp);
-}
-
-static void fputmd(FILE *fp, uint32 data) {
-  fputc(data >> 24, fp);
-  fputc(data >> 16, fp);
-  fputc(data >>  8, fp);
-  fputc(data >>  0, fp);
-}
-
-static void fputlq(FILE *fp, uint64 data) {
-  fputc(data >>  0, fp);
-  fputc(data >>  8, fp);
-  fputc(data >> 16, fp);
-  fputc(data >> 24, fp);
-  fputc(data >> 32, fp);
-  fputc(data >> 40, fp);
-  fputc(data >> 48, fp);
-  fputc(data >> 56, fp);
-}
-
-static void fputmq(FILE *fp, uint64 data) {
-  fputc(data >> 56, fp);
-  fputc(data >> 48, fp);
-  fputc(data >> 40, fp);
-  fputc(data >> 32, fp);
-  fputc(data >> 24, fp);
-  fputc(data >> 16, fp);
-  fputc(data >>  8, fp);
-  fputc(data >>  0, fp);
+static void fput(FILE *fp, uint64 data, uint length = 1) {
+  for(uint i = 0; i < length; i++) {
+    fputc(data >> (i << 3), fp);
+  }
 }
 
 static bool fexists(const char *fn) {
@@ -427,7 +282,9 @@ uint32 size = ftell(fp);
   return size;
 }
 
-static int fresize(FILE *fp, long size) { return ftruncate(fileno(fp), size); }
+static int fresize(FILE *fp, long size) {
+  return ftruncate(fileno(fp), size);
+}
 
 /*****
  * crc32 calculation

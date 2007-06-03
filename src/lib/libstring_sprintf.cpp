@@ -1,15 +1,24 @@
+uint vsprintf(string &str, const char *s, va_list args) {
+va_list temp;
+  va_copy(temp, args);
+uint length = vsnprintf(0, 0, s, temp);
+  va_end(temp);
+
+  str.reserve(length);
+
+  va_copy(temp, args);
+  length = vsprintf(strptr(str), s, temp);
+  va_end(temp);
+
+  return length;
+}
+
 uint sprintf(string &str, const char *s, ...) {
 va_list args;
   va_start(args, s);
 uint length = vsprintf(str, s, args);
   va_end(args);
   return length;
-}
-
-uint vsprintf(string &str, const char *s, va_list args) {
-uint length = vsnprintf(0, 0, s, args);
-  str.reserve(length + 1);
-  return vsprintf(strptr(str), s, args);
 }
 
 /*

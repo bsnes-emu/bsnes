@@ -1,2 +1,2 @@
 #!/bin/sh
-gmake PLATFORM=x-gcc-lui clean
+make PLATFORM=x-gcc-lui clean

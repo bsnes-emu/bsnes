@@ -1,2 +1,2 @@
 #!/bin/sh
-gmake PLATFORM=x-gcc-lui
+make PLATFORM=x-gcc-lui

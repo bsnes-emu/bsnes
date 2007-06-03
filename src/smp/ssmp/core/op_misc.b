@@ -96,18 +96,6 @@ clr7_dp(0xf2, rd &= ~0x80) {
   op_writedp(dp, rd);
 }
 
-tset_addr_a(0x0e, |=),
-tclr_addr_a(0x4e, &=~) {
-1:dp  = op_readpc();
-2:dp |= op_readpc() << 8;
-3:rd = op_readaddr(dp);
-4:op_io();
-  regs.p.n = !!((rd & regs.a) & 0x80);
-  regs.p.z = ((rd & regs.a) == 0);
-  rd $1 regs.a;
-5:op_writeaddr(dp, rd);
-}
-
 push_a(0x2d, a),
 push_x(0x4d, x),
 push_y(0x6d, y),

@@ -46,5 +46,5 @@ PPU::PPU() {
 }
 
 PPU::~PPU() {
-  SafeFree(output);
+  safe_free(output);
 }

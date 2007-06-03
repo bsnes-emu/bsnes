@@ -11,12 +11,8 @@ D3DSURFACE_DESC         d3dsd;
 D3DLOCKED_RECT          d3dlr;
 D3DRASTER_STATUS        d3drs;
 D3DCAPS9                d3dcaps;
-LPDIRECT3DTEXTURE9      texture, scanline[3];
-LPDIRECT3DSURFACE9      surface, temp_surface;
-
-HINSTANCE d3dx;
-HRESULT (WINAPI *pD3DXSaveSurfaceToFileA)(LPCSTR, DWORD, LPDIRECT3DSURFACE9, CONST PALETTEENTRY*, CONST RECT*);
-enum { D3DXIFF_BMP = 0, D3DXIFF_JPG = 1, D3DXIFF_PNG = 3 };
+LPDIRECT3DTEXTURE9      texture;
+LPDIRECT3DSURFACE9      surface;
 
 struct d3dvertex {
   float  x, y, z, rhw; //screen coords
@@ -46,12 +42,8 @@ struct {
   uint screen_width()  { return GetSystemMetrics(SM_CXSCREEN); }
   uint screen_height() { return GetSystemMetrics(SM_CYSCREEN); }
 
-  void pause_enable();
-  void pause_disable();
-
-  bool update_video_profile();
+  bool update_video_mode();
   void update_hardware_filter();
-  void update_scanlines();
 
   bool capture_screenshot();
 
@@ -59,9 +51,8 @@ struct {
   void term();
 
   void clear_video();
-  void redraw();
-  void update();
+  void refresh(uint width, uint height);
 
-  VideoD3D(HWND handle = 0);
+  VideoD3D(HWND handle);
   ~VideoD3D();
 };

@@ -48,5 +48,9 @@ void sCPU::reset() {
   apu_port[3] = 0x00;
 }
 
-sCPU::sCPU() {}
-sCPU::~sCPU() {}
+sCPU::sCPU() {
+  #include "core/optable.cpp"
+}
+
+sCPU::~sCPU() {
+}

@@ -241,6 +241,14 @@ uint16 mosaic_table[16][4096];
 
   bool   scanline_is_hires() { return (regs.pseudo_hires || regs.bg_mode == 5 || regs.bg_mode == 6); }
 
+  inline uint16 read16(uint8 *addr, uint pos) {
+  #if defined(ARCH_LSB)
+    return *((uint16*)(addr + pos));
+  #else
+    return (addr[pos]) | (addr[pos + 1] << 8);
+  #endif
+  }
+
   bPPU();
   ~bPPU();
 };

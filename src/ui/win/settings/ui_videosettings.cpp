@@ -4,11 +4,11 @@ bool VideoSettingsWindow::Event(EventInfo &info) {
   case EVENT_CHANGED:
   case EVENT_CLICKED: {
     if(info.control == &VideoProfile) {
-      LoadSettings(VideoProfile.GetSelection());
+    //LoadSettings(VideoProfile.GetSelection());
     } else if(info.control == &ApplySettings) {
-      SaveSettings(VideoProfile.GetSelection());
+    //SaveSettings(VideoProfile.GetSelection());
     } else if(info.control == &SelectProfile) {
-      event::set_video_profile(VideoProfile.GetSelection());
+    //event::set_video_profile(VideoProfile.GetSelection());
     } else if(info.control == &ManualRenderSize) {
       UpdateControls();
     }
@@ -32,61 +32,9 @@ bool r = ManualRenderSize.Checked();
   FullResHz.Enable(r);
 }
 
-void VideoSettingsWindow::LoadSettings(uint profile) {
-  load_video_settings(profile);
-
-VideoSettings *v = &video_settings[profile];
-  SoftwareFilter.SetSelection(v->software_filter);
-  HardwareFilter.SetSelection(v->hardware_filter);
-  VideoStandard.SetSelection(v->video_standard);
-  Multiplier.SetSelection(v->multiplier - 1);
-  FixAspectRatio.Check(v->correct_aspect_ratio);
-  Scanlines.Check(v->enable_scanlines);
-  ManualRenderSize.Check(v->manual_render_size);
-  RenderWidth.SetText("%d", v->render_width);
-  RenderHeight.SetText("%d", v->render_height);
-  TripleBuffering.Check(v->triple_buffering);
-  FullResWidth.SetText("%d", v->resolution_width);
-  FullResHeight.SetText("%d", v->resolution_height);
-  FullResHz.SetText("%d", v->refresh_rate);
-
-  UpdateControls();
-}
-
-void VideoSettingsWindow::SaveSettings(uint profile) {
-VideoSettings *v = &video_settings[profile];
-char t[64 + 1];
-  v->software_filter      = SoftwareFilter.GetSelection();
-  v->hardware_filter      = HardwareFilter.GetSelection();
-  v->video_standard       = VideoStandard.GetSelection();
-  v->multiplier           = Multiplier.GetSelection() + 1;
-  v->correct_aspect_ratio = FixAspectRatio.Checked();
-  v->enable_scanlines     = Scanlines.Checked();
-  v->manual_render_size   = ManualRenderSize.Checked();
-  RenderWidth.GetText(t, 64);
-  v->render_width         = strdec(t);
-  RenderHeight.GetText(t, 64);
-  v->render_height        = strdec(t);
-  v->triple_buffering     = TripleBuffering.Checked();
-  FullResWidth.GetText(t, 64);
-  v->resolution_width     = strdec(t);
-  FullResHeight.GetText(t, 64);
-  v->resolution_height    = strdec(t);
-  FullResHz.GetText(t, 64);
-  v->refresh_rate         = strdec(t);
-
-//update config file line entry
-  save_video_settings(profile);
-
-//update current video mode if necessary
-  if(profile == (uint)config::video.profile) {
-    event::set_video_profile(config::video.profile);
-  }
-}
-
 void VideoSettingsWindow::Show() {
-  VideoProfile.SetSelection(config::video.profile);
-  LoadSettings(config::video.profile);
+//VideoProfile.SetSelection(config::video.profile);
+//LoadSettings(config::video.profile);
   Window::Show();
 }
 

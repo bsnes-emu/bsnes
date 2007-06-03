@@ -5,29 +5,20 @@ private:
 HWND hwnd;
 LPDIRECTDRAW         lpdd;
 LPDIRECTDRAW7        lpdd7;
-LPDIRECTDRAWSURFACE7 screen, backbuffer;
-LPDIRECTDRAWSURFACE7 surface;
+LPDIRECTDRAWSURFACE7 screen, raster;
 LPDIRECTDRAWCLIPPER  clipper;
 DDSURFACEDESC2       ddsd;
 DDSCAPS2             ddscaps;
+  void create_raster();
+  void clear_video();
 
 public:
   bool lock(uint16 *&data, uint &pitch);
   void unlock();
 
-  uint screen_width()  { return GetSystemMetrics(SM_CXSCREEN); }
-  uint screen_height() { return GetSystemMetrics(SM_CYSCREEN); }
-
-  bool update_video_profile();
+  void refresh(uint width, uint height);
   void init();
   void term();
-
-  void create_render_target();
-  void clear_video();
-
-  void create_presentation();
-  void redraw();
-  void update();
 
   VideoDD(HWND handle);
 };

@@ -277,7 +277,7 @@ uint8 *raw_data = rf.read();
 stringarray data, line;
   raw_data[rf.size()] = 0;
   strcpy(data, (char*)raw_data);
-  SafeFree(raw_data);
+  safe_free(raw_data);
   replace(data, "\r\n", "\n");
 
   split(line, "\n", data);

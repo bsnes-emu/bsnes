@@ -2,7 +2,7 @@
 #include "libstring.h"
 #include "libstring_oo.cpp"
 
-uint count(stringarray &str) { return str.size(); }
+#include "libstring_array.cpp"
 
 char chrlower(char c) {
   if(c >= 'A' && c <= 'Z')return c + ('a' - 'A');
@@ -139,23 +139,23 @@ uint i = 0;
 }
 string &strupper(string &str) { strupper(strptr(str)); return str; }
 
-index_t strpos(const char *str, const char *key) {
+int strpos(const char *str, const char *key) {
 int ssl = strlen(str), ksl = strlen(key);
-  if(ksl > ssl)return index_t(false);
+  if(ksl > ssl)return -1;
   for(int i = 0; i <= ssl - ksl; i++) {
     if(!memcmp(str + i, key, ksl)) {
-      return index_t(true, i);
+      return i;
     }
   }
-  return index_t(false);
+  return -1;
 }
-index_t strpos(const string &str, const char   *key) { return strpos(strptr(str), key); }
-index_t strpos(const char   *str, const string &key) { return strpos(str, strptr(key)); }
-index_t strpos(const string &str, const string &key) { return strpos(strptr(str), strptr(key)); }
+int strpos(const string &str, const char   *key) { return strpos(strptr(str), key); }
+int strpos(const char   *str, const string &key) { return strpos(str, strptr(key)); }
+int strpos(const string &str, const string &key) { return strpos(strptr(str), strptr(key)); }
 
-index_t qstrpos(const char *str, const char *key) {
+int qstrpos(const char *str, const char *key) {
 int ssl = strlen(str), ksl = strlen(key);
-  if(ksl > ssl)return index_t(false);
+  if(ksl > ssl)return -1;
   for(int i = 0; i <= ssl - ksl;) {
   uint8 x = str[i];
     if(x == '\"' || x == '\'') {
@@ -164,16 +164,16 @@ int ssl = strlen(str), ksl = strlen(key);
       if(i >= ssl)i = z;
     }
     if(!memcmp(str + i, key, ksl)) {
-      return index_t(true, i);
+      return i;
     } else {
       i++;
     }
   }
-  return index_t(false);
+  return -1;
 }
-index_t qstrpos(const string &str, const char   *key) { return qstrpos(strptr(str), key); }
-index_t qstrpos(const char   *str, const string &key) { return qstrpos(str, strptr(key)); }
-index_t qstrpos(const string &str, const string &key) { return qstrpos(strptr(str), strptr(key)); }
+int qstrpos(const string &str, const char   *key) { return qstrpos(strptr(str), key); }
+int qstrpos(const char   *str, const string &key) { return qstrpos(str, strptr(key)); }
+int qstrpos(const string &str, const string &key) { return qstrpos(strptr(str), strptr(key)); }
 
 void strtr(char *dest, const char *before, const char *after) {
 int sl = strlen(dest), bsl = strlen(before), asl = strlen(after);

@@ -4,11 +4,11 @@
 
 FILE *fp, *fph, *fpt;
 
-string data, line, part, subpart;
-string output_table, output_header, output_op;
+stringarray data, line, part, subpart;
+stringarray output_table, output_header, output_op;
 
 struct _op_list {
-  string name, arg;
+  stringarray name, arg;
 } op_list[64];
 
 int32 op_count, line_num;
@@ -58,7 +58,7 @@ void gen_op() {
 int i = line_num, n, c;
 char t[4096];
   while(1) {
-    if(strmatch(line[i], "}"))break;
+    if(!strcmp(line[i], "}"))break;
 
     n = strdec(line[i]);
     sprintf(t, "%d:", n);
@@ -67,7 +67,7 @@ char t[4096];
   //strcat(output_op, t);
 
     update_line(i);
-    if(!strmatch(line[i], "")) {
+    if(strcmp(line[i], "")) {
       strcat(output_op, "  ");
       strcat(output_op, line[i]);
       strcat(output_op, "\r\n");
@@ -75,7 +75,7 @@ char t[4096];
 
     i++;
     while(1) {
-      if(strptr(line[i])[1] == ':' || strptr(line[i])[2] == ':' || strmatch(line[i], "}"))break;
+      if(strptr(line[i])[1] == ':' || strptr(line[i])[2] == ':' || !strcmp(line[i], "}"))break;
 
       update_line(i);
       strcat(output_op, line[i]);
@@ -135,7 +135,7 @@ char *buf = (char*)malloc(fsize + 1);
 
   line_num = 0;
   while(line_num < count(line)) {
-    while(strmatch(line[line_num], "") && line_num < count(line))line_num++;
+    while(line_num < count(line) && !strcmp(line[line_num], ""))line_num++;
     if(line_num >= count(line))break;
 
     gen_header();

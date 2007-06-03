@@ -50,12 +50,25 @@ ror_addr(0x6c, ror) {
   op_writeaddr(dp, rd);
 }
 
-incw_dp(0x3a, incw),
-decw_dp(0x1a, decw) {
+tset_addr_a(0x0e, |),
+tclr_addr_a(0x4e, &~) {
+1:dp  = op_readpc();
+2:dp |= op_readpc() << 8;
+3:rd = op_readaddr(dp);
+  regs.p.n = !!((regs.a - rd) & 0x80);
+  regs.p.z = ((regs.a - rd) == 0);
+4:op_readaddr(dp);
+5:op_writeaddr(dp, rd $1 regs.a);
+}
+
+incw_dp(0x3a, rd++),
+decw_dp(0x1a, rd--) {
 1:dp = op_readpc();
-2:rd  = op_readdp(dp);
-3:rd |= op_readdp(dp + 1) << 8;
-4:rd = op_$1(rd);
-  op_writedp(dp + 1, rd >> 8);
-5:op_writedp(dp,     rd);
+2:rd = op_readdp(dp);
+  $1;
+3:op_writedp(dp++, rd);
+4:rd += op_readdp(dp) << 8;
+5:op_write(dp, rd >> 8);
+  regs.p.n = !!(rd & 0x8000);
+  regs.p.z = (rd == 0);
 }

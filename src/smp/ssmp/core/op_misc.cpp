@@ -1,24 +1,20 @@
-//nop
-case 0x00: {
+void sSMP::op_nop() {
   op_io();
-} break;
+}
 
-//sleep
-case 0xef: {
+void sSMP::op_sleep() {
   op_io();
   op_io();
   regs.pc--;
-} break;
+}
 
-//stop
-case 0xff: {
+void sSMP::op_stop() {
   op_io();
   op_io();
   regs.pc--;
-} break;
+}
 
-//xcn
-case 0x9f: {
+void sSMP::op_xcn() {
   op_io();
   op_io();
   op_io();
@@ -26,10 +22,9 @@ case 0x9f: {
   regs.a = (regs.a >> 4) | (regs.a << 4);
   regs.p.n = !!(regs.a & 0x80);
   regs.p.z = (regs.a == 0);
-} break;
+}
 
-//daa
-case 0xdf: {
+void sSMP::op_daa() {
   op_io();
   op_io();
   if(regs.p.c || (regs.a) > 0x99) {
@@ -41,10 +36,9 @@ case 0xdf: {
   }
   regs.p.n = !!(regs.a & 0x80);
   regs.p.z = (regs.a == 0);
-} break;
+}
 
-//das
-case 0xbe: {
+void sSMP::op_das() {
   op_io();
   op_io();
   if(!regs.p.c || (regs.a) > 0x99) {
@@ -56,270 +50,213 @@ case 0xbe: {
   }
   regs.p.n = !!(regs.a & 0x80);
   regs.p.z = (regs.a == 0);
-} break;
+}
 
-//clrc
-case 0x60: {
+void sSMP::op_clrc() {
   op_io();
   regs.p.c = 0;
-} break;
+}
 
-//clrp
-case 0x20: {
+void sSMP::op_clrp() {
   op_io();
   regs.p.p = 0;
-} break;
+}
 
-//setc
-case 0x80: {
+void sSMP::op_setc() {
   op_io();
   regs.p.c = 1;
-} break;
+}
 
-//setp
-case 0x40: {
+void sSMP::op_setp() {
   op_io();
   regs.p.p = 1;
-} break;
+}
 
-//clrv
-case 0xe0: {
+void sSMP::op_clrv() {
   op_io();
   regs.p.v = 0;
   regs.p.h = 0;
-} break;
+}
 
-//notc
-case 0xed: {
+void sSMP::op_notc() {
   op_io();
   op_io();
   regs.p.c ^= 1;
-} break;
+}
 
-//ei
-case 0xa0: {
+void sSMP::op_ei() {
   op_io();
   op_io();
   regs.p.i = 1;
-} break;
+}
 
-//di
-case 0xc0: {
+void sSMP::op_di() {
   op_io();
   op_io();
   regs.p.i = 0;
-} break;
+}
 
-//set0_dp
-case 0x02: {
+void sSMP::op_set0_dp() {
   dp = op_readpc();
   rd = op_readdp(dp);
   rd |=  0x01;
   op_writedp(dp, rd);
-} break;
+}
 
-//clr0_dp
-case 0x12: {
+void sSMP::op_clr0_dp() {
   dp = op_readpc();
   rd = op_readdp(dp);
   rd &= ~0x01;
   op_writedp(dp, rd);
-} break;
+}
 
-//set1_dp
-case 0x22: {
+void sSMP::op_set1_dp() {
   dp = op_readpc();
   rd = op_readdp(dp);
   rd |=  0x02;
   op_writedp(dp, rd);
-} break;
+}
 
-//clr1_dp
-case 0x32: {
+void sSMP::op_clr1_dp() {
   dp = op_readpc();
   rd = op_readdp(dp);
   rd &= ~0x02;
   op_writedp(dp, rd);
-} break;
+}
 
-//set2_dp
-case 0x42: {
+void sSMP::op_set2_dp() {
   dp = op_readpc();
   rd = op_readdp(dp);
   rd |=  0x04;
   op_writedp(dp, rd);
-} break;
+}
 
-//clr2_dp
-case 0x52: {
+void sSMP::op_clr2_dp() {
   dp = op_readpc();
   rd = op_readdp(dp);
   rd &= ~0x04;
   op_writedp(dp, rd);
-} break;
+}
 
-//set3_dp
-case 0x62: {
+void sSMP::op_set3_dp() {
   dp = op_readpc();
   rd = op_readdp(dp);
   rd |=  0x08;
   op_writedp(dp, rd);
-} break;
+}
 
-//clr3_dp
-case 0x72: {
+void sSMP::op_clr3_dp() {
   dp = op_readpc();
   rd = op_readdp(dp);
   rd &= ~0x08;
   op_writedp(dp, rd);
-} break;
+}
 
-//set4_dp
-case 0x82: {
+void sSMP::op_set4_dp() {
   dp = op_readpc();
   rd = op_readdp(dp);
   rd |=  0x10;
   op_writedp(dp, rd);
-} break;
+}
 
-//clr4_dp
-case 0x92: {
+void sSMP::op_clr4_dp() {
   dp = op_readpc();
   rd = op_readdp(dp);
   rd &= ~0x10;
   op_writedp(dp, rd);
-} break;
+}
 
-//set5_dp
-case 0xa2: {
+void sSMP::op_set5_dp() {
   dp = op_readpc();
   rd = op_readdp(dp);
   rd |=  0x20;
   op_writedp(dp, rd);
-} break;
+}
 
-//clr5_dp
-case 0xb2: {
+void sSMP::op_clr5_dp() {
   dp = op_readpc();
   rd = op_readdp(dp);
   rd &= ~0x20;
   op_writedp(dp, rd);
-} break;
+}
 
-//set6_dp
-case 0xc2: {
+void sSMP::op_set6_dp() {
   dp = op_readpc();
   rd = op_readdp(dp);
   rd |=  0x40;
   op_writedp(dp, rd);
-} break;
+}
 
-//clr6_dp
-case 0xd2: {
+void sSMP::op_clr6_dp() {
   dp = op_readpc();
   rd = op_readdp(dp);
   rd &= ~0x40;
   op_writedp(dp, rd);
-} break;
+}
 
-//set7_dp
-case 0xe2: {
+void sSMP::op_set7_dp() {
   dp = op_readpc();
   rd = op_readdp(dp);
   rd |=  0x80;
   op_writedp(dp, rd);
-} break;
+}
 
-//clr7_dp
-case 0xf2: {
+void sSMP::op_clr7_dp() {
   dp = op_readpc();
   rd = op_readdp(dp);
   rd &= ~0x80;
   op_writedp(dp, rd);
-} break;
+}
 
-//tset_addr_a
-case 0x0e: {
-  dp  = op_readpc();
-  dp |= op_readpc() << 8;
-  rd = op_readaddr(dp);
-  op_io();
-  regs.p.n = !!((rd & regs.a) & 0x80);
-  regs.p.z = ((rd & regs.a) == 0);
-  rd |= regs.a;
-  op_writeaddr(dp, rd);
-} break;
-
-//tclr_addr_a
-case 0x4e: {
-  dp  = op_readpc();
-  dp |= op_readpc() << 8;
-  rd = op_readaddr(dp);
-  op_io();
-  regs.p.n = !!((rd & regs.a) & 0x80);
-  regs.p.z = ((rd & regs.a) == 0);
-  rd &=~ regs.a;
-  op_writeaddr(dp, rd);
-} break;
-
-//push_a
-case 0x2d: {
+void sSMP::op_push_a() {
   op_io();
   op_io();
   op_writestack(regs.a);
-} break;
+}
 
-//push_x
-case 0x4d: {
+void sSMP::op_push_x() {
   op_io();
   op_io();
   op_writestack(regs.x);
-} break;
+}
 
-//push_y
-case 0x6d: {
+void sSMP::op_push_y() {
   op_io();
   op_io();
   op_writestack(regs.y);
-} break;
+}
 
-//push_p
-case 0x0d: {
+void sSMP::op_push_p() {
   op_io();
   op_io();
   op_writestack(regs.p);
-} break;
+}
 
-//pop_a
-case 0xae: {
+void sSMP::op_pop_a() {
   op_io();
   op_io();
   regs.a = op_readstack();
-} break;
+}
 
-//pop_x
-case 0xce: {
+void sSMP::op_pop_x() {
   op_io();
   op_io();
   regs.x = op_readstack();
-} break;
+}
 
-//pop_y
-case 0xee: {
+void sSMP::op_pop_y() {
   op_io();
   op_io();
   regs.y = op_readstack();
-} break;
+}
 
-//pop_p
-case 0x8e: {
+void sSMP::op_pop_p() {
   op_io();
   op_io();
   regs.p = op_readstack();
-} break;
+}
 
-//mul_ya
-case 0xcf: {
+void sSMP::op_mul_ya() {
   op_io();
   op_io();
   op_io();
@@ -334,10 +271,9 @@ case 0xcf: {
 //result is set based on y (high-byte) only
   regs.p.n = !!(regs.y & 0x80);
   regs.p.z = (regs.y == 0);
-} break;
+}
 
-//div_ya_x
-case 0x9e: {
+void sSMP::op_div_ya_x() {
   op_io();
   op_io();
   op_io();
@@ -366,5 +302,5 @@ case 0x9e: {
 //result is set based on a (quotient) only
   regs.p.n = !!(regs.a & 0x80);
   regs.p.z = (regs.a == 0);
-} break;
+}
 

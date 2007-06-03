@@ -7,11 +7,9 @@ void bSNES::set_state(uint new_state) {
 
   switch(state) {
   case RUN:
-    uiVideo->pause_disable();
     SetWindowText(wMain.hwnd, BSNES_TITLE);
     break;
   case STOP:
-    uiVideo->pause_enable();
     uiAudio->clear_audio();
     SetWindowText(wMain.hwnd, BSNES_TITLE " (Paused)");
     break;

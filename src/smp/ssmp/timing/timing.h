@@ -29,4 +29,5 @@ sSMPTimer<128> t1;
 sSMPTimer< 16> t2;
 
   void   add_clocks(uint clocks);
+  void   tick_timers();
   uint32 clocks_executed();

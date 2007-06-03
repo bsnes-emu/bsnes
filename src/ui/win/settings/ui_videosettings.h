@@ -33,8 +33,6 @@ Button   SelectProfile;
   bool Event(EventInfo &info);
   void UpdateControls();
 
-  void LoadSettings(uint profile);
-  void SaveSettings(uint profile);
   void Show();
   void Setup();
 } wVideoSettings;

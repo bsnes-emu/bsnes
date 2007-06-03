@@ -3,7 +3,7 @@ public:
 union {
   uint8 data;
   struct {
-    uint8 order_msb8(n:1, v:1, m:1, x:1, d:1, i:1, z:1, c:1);
+    bool order_msb8(n:1, v:1, m:1, x:1, d:1, i:1, z:1, c:1);
   };
 };
 

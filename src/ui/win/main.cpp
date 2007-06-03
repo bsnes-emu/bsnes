@@ -12,17 +12,13 @@
 
 #include "../video/d3d.h"
 #include "../video/ddraw.h"
-//#include "../video/sdl.h"
 #include "../audio/dsound.h"
 #include "../input/dinput.h"
-//#include "../input/sdl.h"
 
 #include "../video/d3d.cpp"
 #include "../video/ddraw.cpp"
-//#include "../video/sdl.cpp"
 #include "../audio/dsound.cpp"
 #include "../input/dinput.cpp"
-//#include "../input/sdl.cpp"
 
 #include "event.cpp"
 #include "ui.cpp"

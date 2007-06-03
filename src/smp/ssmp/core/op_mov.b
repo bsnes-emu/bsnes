@@ -31,8 +31,8 @@ mov_a_ix(0xe6) {
 
 mov_a_ixinc(0xbf) {
 1:op_io();
-2:op_io();
-3:regs.a = op_readdp(regs.x++);
+2:regs.a = op_readdp(regs.x++);
+3:op_io();
   regs.p.n = !!(regs.a & 0x80);
   regs.p.z = (regs.a == 0);
 }
@@ -98,8 +98,8 @@ mov_a_idpy(0xf7) {
 
 mov_dp_dp(0xfa) {
 1:sp = op_readpc();
-2:dp = op_readpc();
-3:rd = op_readdp(sp);
+2:rd = op_readdp(sp);
+3:dp = op_readpc();
 4:op_writedp(dp, rd);
 }
 
@@ -181,8 +181,8 @@ mov_idpy_a(0xd7) {
 
 movw_ya_dp(0xba) {
 1:sp = op_readpc();
-2:op_io();
-3:regs.a = op_readdp(sp);
+2:regs.a = op_readdp(sp);
+3:op_io();
 4:regs.y = op_readdp(sp + 1);
   regs.p.n = !!(regs.ya & 0x8000);
   regs.p.z = (regs.ya == 0);
@@ -212,5 +212,6 @@ mov1_bit_c(0xca) {
   rd = op_readaddr(dp);
   if(regs.p.c)rd |=  (1 << bit);
   else        rd &= ~(1 << bit);
-4:op_writeaddr(dp, rd);
+4:op_io();
+5:op_writeaddr(dp, rd);
 }

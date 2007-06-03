@@ -1,5 +1,5 @@
 /*
-  libstring : version 0.15 ~byuu (2007-01-13)
+  libstring : version 0.17 ~byuu (2007-05-20)
 */
 
 #ifndef __LIBSTRING
@@ -7,7 +7,6 @@
 
 #include "libbase.h"
 #include "libvector.h"
-#include "libtuple.h"
 
 class string;
 typedef linear_vector<string> stringarray;
@@ -16,6 +15,9 @@ char chrlower(char c);
 char chrupper(char c);
 
 uint count(stringarray &str);
+
+int find(stringarray &str, const char *key);
+int find(stringarray &str, const string &key);
 
 char *strptr(const string &str);
 uint  strlen(const string &str);
@@ -59,16 +61,15 @@ string &strlower(string &str);
 char   *strupper(char *str);
 string &strupper(string &str);
 
-typedef tuple<bool, uint> index_t;
-index_t strpos(const char   *str, const char   *key);
-index_t strpos(const string &str, const char   *key);
-index_t strpos(const char   *str, const string &key);
-index_t strpos(const string &str, const string &key);
+int strpos(const char   *str, const char   *key);
+int strpos(const string &str, const char   *key);
+int strpos(const char   *str, const string &key);
+int strpos(const string &str, const string &key);
 
-index_t qstrpos(const char   *str, const char   *key);
-index_t qstrpos(const string &str, const char   *key);
-index_t qstrpos(const char   *str, const string &key);
-index_t qstrpos(const string &str, const string &key);
+int qstrpos(const char   *str, const char   *key);
+int qstrpos(const string &str, const char   *key);
+int qstrpos(const char   *str, const string &key);
+int qstrpos(const string &str, const string &key);
 
 void strtr(char *dest, const char *before, const char *after);
 void strtr(string &dest, const char *before, const char *after);

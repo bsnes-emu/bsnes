@@ -1,19 +1,17 @@
 #include "opfn.cpp"
 
-void sSMP::enter() {
-  for(;;) {
-    tracer.trace_smpop(); //traces SMP opcode (only if tracer is enabled)
+#include "op_mov.cpp"
+#include "op_pc.cpp"
+#include "op_read.cpp"
+#include "op_rmw.cpp"
+#include "op_misc.cpp"
 
-    status.in_opcode = true;
+void sSMP::enter() { loop:
+  tracer.trace_smpop(); //traces SMP opcode (only if tracer is enabled)
 
-    switch(op_readpc()) {
-      #include "op_mov.cpp"
-      #include "op_pc.cpp"
-      #include "op_read.cpp"
-      #include "op_rmw.cpp"
-      #include "op_misc.cpp"
-    }
+  status.in_opcode = true;
+  (this->*optbl[op_readpc()])();
+  status.in_opcode = false;
 
-    status.in_opcode = false;
-  }
+  goto loop;
 }

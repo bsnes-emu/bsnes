@@ -13,19 +13,23 @@ endif
 ifeq ($(PLATFORM),x-gcc-lui)
 OS = unix
 CC = gcc
-CFLAGS = -O3 -fomit-frame-pointer -ffast-math -DPLATFORM_X -DCOMPILER_GCC -DPROCESSOR_X86 -DUI_LUI `pkg-config --cflags gtk+-2.0` `sdl-config --cflags`
+CFLAGS = -O3 -fomit-frame-pointer -ffast-math -DPLATFORM_X -DCOMPILER_GCC -DPROCESSOR_X86 -DUI_LUI `pkg-config --cflags gtk+-2.0`
 AS = nasm
 ASFLAGS = -f elf
-LIBS = `pkg-config --libs gtk+-2.0` `sdl-config --libs` -lXv -lao
+LIBS = `pkg-config --libs gtk+-2.0` -lXv -lao
+LIBCO = libco_x86
+LIBUI = libui_gtk
 endif
 
-ifeq ($(PLATFORM),x-gcc-sdl)
+ifeq ($(PLATFORM),x-gcc-lui-x64)
 OS = unix
 CC = gcc
-CFLAGS = -O3 -fomit-frame-pointer -ffast-math -DPLATFORM_X -DCOMPILER_GCC -DPROCESSOR_X86 -DUI_SDL `sdl-config --cflags`
-AS = nasm
-ASFLAGS = -f elf
-LIBS = `sdl-config --libs` -lao
+CFLAGS = -O3 -fomit-frame-pointer -ffast-math -DPLATFORM_X -DCOMPILER_GCC -DPROCESSOR_X86_64 -DUI_LUI `pkg-config --cflags gtk+-2.0`
+AS = yasm
+ASFLAGS = -f elf64
+LIBS = `pkg-config --libs gtk+-2.0` -lXv -lao
+LIBCO = libco_x86_64
+LIBUI = libui_gtk
 endif
 
 ifeq ($(PLATFORM),win-visualc-lui)
@@ -35,44 +39,32 @@ CFLAGS = /nologo /wd4996 /O2 /EHsc /DPLATFORM_WIN /DCOMPILER_VISUALC /DPROCESSOR
 AS = nasm
 ASFLAGS = -f win32 -DWIN32
 LIBS = d3d9.lib ddraw.lib dsound.lib dinput8.lib dxguid.lib
+LIBCO = libco_x86
+LIBUI = libui_win
 endif
 
-ifeq ($(PLATFORM),win-visualc)
+ifeq ($(PLATFORM),win-visualc-lui-pgi)
 OS = win
 CC = cl
-CFLAGS = /nologo /wd4996 /O2 /EHsc /DPLATFORM_WIN /DCOMPILER_VISUALC /DPROCESSOR_X86 /DUI_WIN
-AS = nasm
-ASFLAGS = -f win32 -DWIN32
-LIBS = d3d9.lib ddraw.lib dsound.lib dinput8.lib dxguid.lib
-endif
-
-ifeq ($(PLATFORM),win-visualc-pgi)
-OS = win
-CC = cl
-CFLAGS = /nologo /wd4996 /O2 /GL /EHsc /DPLATFORM_WIN /DCOMPILER_VISUALC /DPROCESSOR_X86 /DUI_WIN
+CFLAGS = /nologo /wd4996 /O2 /GL /EHsc /DPLATFORM_WIN /DCOMPILER_VISUALC /DPROCESSOR_X86 /DUI_LUI
 AS = nasm
 ASFLAGS = -f win32 -DWIN32
 LIBS = d3d9.lib ddraw.lib dsound.lib dinput8.lib dxguid.lib
 LINK = /link /PGD:bsnes.pgd /LTCG:PGINSTRUMENT
+LIBCO = libco_x86
+LIBUI = libui_win
 endif
 
-ifeq ($(PLATFORM),win-visualc-pgo)
+ifeq ($(PLATFORM),win-visualc-lui-pgo)
 OS = win
 CC = cl
-CFLAGS = /nologo /wd4996 /O2 /GL /EHsc /DPLATFORM_WIN /DCOMPILER_VISUALC /DPROCESSOR_X86 /DUI_WIN
+CFLAGS = /nologo /wd4996 /O2 /GL /EHsc /DPLATFORM_WIN /DCOMPILER_VISUALC /DPROCESSOR_X86 /DUI_LUI
 AS = nasm
 ASFLAGS = -f win32 -DWIN32
 LIBS = d3d9.lib ddraw.lib dsound.lib dinput8.lib dxguid.lib
 LINK = /link /PGD:bsnes.pgd /LTCG:PGOPTIMIZE
-endif
-
-ifeq ($(PLATFORM),win-visualc-sdl)
-OS = win
-CC = cl
-CFLAGS = /nologo /wd4996 /O2 /EHsc /DPLATFORM_WIN /DCOMPILER_VISUALC /DPROCESSOR_X86 /DUI_SDL
-AS = nasm
-ASFLAGS = -f win32 -DWIN32
-LIBS = sdlmain.lib sdl.lib dsound.lib
+LIBCO = libco_x86
+LIBUI = libui_win
 endif
 
 #####################################
@@ -99,6 +91,10 @@ ifeq ($(AS),nasm)
 ASARGS = $< -o $@
 endif
 
+ifeq ($(AS),yasm)
+ASARGS = $< -o $@
+endif
+
 ###################
 ### OS switches ###
 ###################
@@ -110,14 +106,15 @@ endif
 ifeq ($(OS),win)
 OUT := $(OUT).exe
 RM = del
-LIBS += kernel32.lib user32.lib gdi32.lib winmm.lib comdlg32.lib comctl32.lib
+LIBS += kernel32.lib user32.lib gdi32.lib shell32.lib winmm.lib comdlg32.lib comctl32.lib
 endif
 
 ####################################
 ### main target and dependencies ###
 ####################################
 
-OBJECTS = main.$(OBJ) libco_x86.$(OBJ) libstring.$(OBJ) libconfig.$(OBJ) \
+OBJECTS = main.$(OBJ) $(LIBCO).$(OBJ) $(LIBUI).$(OBJ) \
+  libstring.$(OBJ) \
   reader.$(OBJ) cart.$(OBJ) cheat.$(OBJ) memory.$(OBJ) bmemory.$(OBJ) \
   cpu.$(OBJ) scpu.$(OBJ) smp.$(OBJ) ssmp.$(OBJ) bdsp.$(OBJ) ppu.$(OBJ) \
   bppu.$(OBJ) snes.$(OBJ) srtc.$(OBJ) sdd1.$(OBJ) c4.$(OBJ) dsp1.$(OBJ) \
@@ -160,16 +157,25 @@ all: $(OBJECTS)
 #########################
 main.$(OBJ): ui/main.cpp config/* ui/* ui/video/* ui/audio/* ui/input/* \
 ui/lui/* ui/lui/settings/* \
-ui/win/* ui/win/settings/* ui/win/debugger/* \
-ui/sdl/*
+ui/win/* ui/win/settings/* ui/win/debugger/*
 bsnes.res  : ui/bsnes.rc ; rc /r /fobsnes.res ui/bsnes.rc
+
+#############
+### libco ###
+#############
+libco_x86.$(OBJ)   : lib/libco_x86.asm lib/*
+libco_x86_64.$(OBJ): lib/libco_x86_64.asm lib/*
+
+#############
+### libui ###
+#############
+libui_gtk.$(OBJ): lib/libui_gtk.cpp lib/*
+libui_win.$(OBJ): lib/libui_win.cpp lib/*
 
 #################
 ### libraries ###
 #################
-libco_x86.$(OBJ): lib/libco_x86.asm lib/*
 libstring.$(OBJ): lib/libstring.cpp lib/*
-libconfig.$(OBJ): lib/libconfig.cpp lib/*
 
 #################
 ### utilities ###
@@ -199,6 +205,7 @@ ssmp.$(OBJ): smp/ssmp/ssmp.cpp smp/ssmp/* smp/ssmp/core/* smp/ssmp/memory/* smp/
 ###########
 ### dsp ###
 ###########
+adsp.$(OBJ): dsp/adsp/adsp.cpp dsp/adsp/*
 bdsp.$(OBJ): dsp/bdsp/bdsp.cpp dsp/bdsp/*
 
 ###########
@@ -210,7 +217,7 @@ bppu.$(OBJ): ppu/bppu/bppu.cpp ppu/bppu/*
 ############
 ### snes ###
 ############
-snes.$(OBJ): snes/snes.cpp snes/* snes/video/* snes/audio/* snes/input/*
+snes.$(OBJ): snes/snes.cpp snes/* snes/scheduler/* snes/video/* snes/audio/* snes/input/*
 
 #####################
 ### special chips ###

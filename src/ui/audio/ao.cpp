@@ -1,11 +1,14 @@
+#include "ao.h"
+
 uint AudioAO::object_count = 0;
 
-void AudioAO::run(uint32 sample) {
-  ao_play(audio_device, (char *)&sample, 4); //This may need to be byte swapped for Big Endian
+void AudioAO::sample(uint16 l_sample, uint16 r_sample) {
+uint32 samp = (l_sample << 0) + (r_sample << 16);
+  ao_play(audio_device, (char*)&samp, 4); //This may need to be byte swapped for Big Endian
 }
 
-void AudioAO::set_frequency(uint freq) {
-  Audio::set_frequency(freq);
+void AudioAO::update_frequency() {
+  Audio::update_frequency();
   driver_format.rate = frequency;
   if(audio_device) {
     term();
@@ -29,24 +32,13 @@ void AudioAO::term() {
   }
 }
 
-void AudioAO::set_driver(const char *name) {
-  driver_id = ao_driver_id(name);
-  if(driver_id < 0) { //If a driver by that name doesn't exist, we use the default driver for that OS
-    dprintf("libao: %s is not a valid audio driver ... using default driver.\n", name);
-    driver_id = ao_default_driver_id();
-  }
-  if(audio_device) {
-    term();
-    init();
-  }
-}
-
-AudioAO::AudioAO() {
+AudioAO::AudioAO(const char *driver) {
   if(!object_count++) {
     ao_initialize();
   }
 
-  driver_id = ao_default_driver_id();
+  driver_id = (driver && *driver) ? ao_driver_id(driver) : ao_default_driver_id();
+  if(driver_id < 0) { driver_id = ao_default_driver_id(); } //fallback on default if driver doesn't exist
   driver_format.bits = 16;
   driver_format.channels = 2;
   driver_format.rate = frequency;

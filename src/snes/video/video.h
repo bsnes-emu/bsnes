@@ -47,7 +47,9 @@ struct video_info {
 //public functions
   void update_color_lookup_table();
 
-  void set_video_format(uint filter, uint video_standard, uint pixel_format);
+  void set_video_filter(uint video_filter);
+  void set_video_standard(uint video_standard);
+  void set_video_pixel_format(uint pixel_format);
   void get_video_info(video_info *info);
 
 //private functions

@@ -1,45 +1,24 @@
-void AudioDS::tick() {
-}
-
-void AudioDS::run(uint32 sample) {
-  data.buffer[data.buffer_pos++] = sample;
-  run_audiosync();
-}
-
-void AudioDS::run_videosync() {
-  if(data.buffer_pos & 255)return;
-
-uint32 ring_pos, pos, size;
-  dsb_b->GetCurrentPosition(&pos, 0);
-  ring_pos = pos / data.ring_size;
-  if(ring_pos == data.ring_pos)return;
-
-  data.ring_pos = ring_pos;
-void *output;
-  if(dsb_b->Lock(((data.ring_pos + 2) % 3) * data.ring_size,
-  data.ring_size, &output, &size, 0, 0, 0) == DS_OK) {
-    Audio::resample_point((uint32*)output, data.buffer, latency, data.buffer_pos);
-    dsb_b->Unlock(output, size, 0, 0);
-  }
-
-  dprintf("AudioDS: resample_point() %d -> %d samples\n", data.buffer_pos, latency);
-  data.buffer_pos = 0;
-}
-
-void AudioDS::run_audiosync() {
+void AudioDS::sample(uint16 l_sample, uint16 r_sample) {
+  data.buffer[data.buffer_pos++] = (l_sample << 0) + (r_sample << 16);
   if(data.buffer_pos < latency)return;
 
 uint32 ring_pos, pos, size;
-  do {
-    Sleep(1);
+  for(;;) {
     dsb_b->GetCurrentPosition(&pos, 0);
     ring_pos = pos / data.ring_size;
-  } while(config::system.regulate_speed == true && ring_pos == data.ring_pos);
+    if(
+      config::system.regulate_speed == false ||
+      config::audio.synchronize == false ||
+      ring_pos != data.ring_pos
+    ) break;
+    Sleep(1);
+  }
 
   data.ring_pos = ring_pos;
 void *output;
   if(dsb_b->Lock(((data.ring_pos + 2) % 3) * data.ring_size,
   data.ring_size, &output, &size, 0, 0, 0) == DS_OK) {
+  //Audio::resample_hermite((uint32*)output, data.buffer, latency, data.buffer_pos);
     memcpy(output, data.buffer, data.ring_size);
     dsb_b->Unlock(output, size, 0, 0);
   }
@@ -47,8 +26,31 @@ void *output;
   data.buffer_pos = 0;
 }
 
-void AudioDS::set_frequency(uint freq) {
-  Audio::set_frequency(freq);
+/*void AudioDS::sample(uint16 l_sample, uint16 r_sample) {
+  data.buffer[data.buffer_pos++] = (l_sample << 0) + (r_sample << 16);
+//if(data.buffer_pos & 15)return;
+
+uint32 ring_pos, pos, size;
+  dsb_b->GetCurrentPosition(&pos, 0);
+  ring_pos = pos / data.ring_size;
+  if(ring_pos == data.ring_pos)return;
+  data.ring_pos = ring_pos;
+
+void *output;
+  if(dsb_b->Lock(((data.ring_pos + 2) % 3) * data.ring_size,
+  data.ring_size, &output, &size, 0, 0, 0) == DS_OK) {
+    Audio::resample_hermite((uint32*)output, data.buffer, latency, data.buffer_pos);
+  //memcpy(output, data.buffer, data.ring_size);
+    dsb_b->Unlock(output, size, 0, 0);
+  }
+
+  dprintf("* %10d -> %10d / %10I64d", data.buffer_pos, latency, scheduler.clock.cpusmp);
+
+  data.buffer_pos = 0;
+}*/
+
+void AudioDS::update_frequency() {
+  Audio::update_frequency();
   init();
 }
 

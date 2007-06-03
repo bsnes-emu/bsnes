@@ -42,6 +42,7 @@ void bPPU::scanline() {
     if(regs.display_disabled == false) {
     //OAM address reset
       regs.oam_addr = regs.oam_baseaddr << 1;
+      regs.oam_firstsprite = (regs.oam_priority == false) ? 0 : (regs.oam_addr >> 2) & 127;
     }
   }
 
@@ -375,7 +376,7 @@ bPPU::bPPU() {
 }
 
 bPPU::~bPPU() {
-  SafeFree(vram);
-  SafeFree(oam);
-  SafeFree(cgram);
+  safe_free(vram);
+  safe_free(oam);
+  safe_free(cgram);
 }

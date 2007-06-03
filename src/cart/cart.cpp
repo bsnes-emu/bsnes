@@ -128,8 +128,8 @@ bool Cartridge::unload() {
   } break;
   }
 
-  SafeFree(rom);
-  SafeFree(ram);
+  safe_free(rom);
+  safe_free(ram);
 
   if(cheat.count() > 0 || fexists(file.cheat_name) == true) {
     cheat.save(file.cheat_name);

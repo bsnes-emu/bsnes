@@ -1,1 +1,1 @@
-@make PLATFORM=win-visualc clean
+@make PLATFORM=win-visualc-lui clean

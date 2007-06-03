@@ -62,14 +62,14 @@ stp(0xdb) {
 }
 
 wai(0xcb) {
-1:op_io();
-  event.wai = true;
-2:last_cycle();
-  op_io();
-3:while(event.wai) {
+//last_cycle() will set event.wai to false
+//once an NMI / IRQ edge is reached
+1:event.wai = true;
+  while(event.wai) {
     last_cycle();
     op_io();
   }
+2:op_io();
 }
 
 xce(0xfb) {

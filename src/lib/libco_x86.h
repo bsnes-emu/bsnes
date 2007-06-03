@@ -1,18 +1,16 @@
 /*
-  libco_x86 : version 0.09 ~byuu (2007-01-13)
+  libco_x86 : version 0.10 ~byuu (2007-04-18)
 */
 
-#define COTHREAD_STACKSIZE_TINY      0x1000
-#define COTHREAD_STACKSIZE_SMALL     0x4000
-#define COTHREAD_STACKSIZE_NORMAL   0x10000
-#define COTHREAD_STACKSIZE_LARGE    0x40000
-#define COTHREAD_STACKSIZE_HUGE    0x100000
+#ifndef LIBCO_H
+#define LIBCO_H
 
+#define cocall fastcall
 typedef void (*cothread_t);
-typedef void (*cothread_p)(void);
 
-extern "C" cothread_t fastcall co_active();
-extern "C" cothread_t fastcall co_create(cothread_p coentry, unsigned int heapsize);
-extern "C" void       fastcall co_delete(cothread_t cothread);
-extern "C" void       fastcall co_switch(cothread_t cothread);
-extern "C" void       fastcall co_exit(cothread_t cothread);
+extern "C" cothread_t cocall co_active();
+extern "C" cothread_t cocall co_create(unsigned int heapsize, void (cocall *coentry)(void *data), void *data);
+extern "C" void       cocall co_delete(cothread_t cothread);
+extern "C" void       cocall co_switch(cothread_t cothread);
+
+#endif

@@ -19,6 +19,8 @@ Display *display;
 int screen, xv_port;
 XShmSegmentInfo shminfo;
 
+uint8 *ytable, *utable, *vtable;
+
 public:
   bool lock(uint16 *&data, uint &pitch);
   void unlock();
@@ -26,11 +28,13 @@ public:
   uint screen_width()  { return gdk_screen_width();  }
   uint screen_height() { return gdk_screen_height(); }
 
-  void redraw();
-  void update();
+  void refresh(uint width, uint height);
   void init();
   void term();
 
   VideoXv(unsigned long handle);
   ~VideoXv();
+
+protected:
+  void init_yuv_tables();
 };

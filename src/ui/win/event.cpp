@@ -19,42 +19,16 @@
 
 namespace event {
 
-void capture_screenshot() {
-  uiVideo->capture_screenshot();
-}
-
-void set_video_profile(uint profile) {
-  if(profile >= VIDEO_PROFILE_COUNT)profile = 0;
-
-  config::video.profile = profile;
-  uiVideo->update_video_settings();
-
-string t;
-  if(uiVideo->settings.fullscreen == true) {
-    strcpy(t, "topmost|popup");
-    if(wMain.Visible())strcat(t, "|visible");
-    wMain.HideMenu();
-    HideCursor();
-  } else {
-    strcpy(t, config::misc.window_style);
-    if(wMain.Visible())strcat(t, "|visible");
-    wMain.ShowMenu();
-    ShowCursor();
+void update_video_settings() {
+uint width  = 256;
+uint height = config::video.region == 0 ? 224 : 239;
+uint multiplier = minmax<1, 5>(uint(config::video.multiplier));
+  width  *= multiplier;
+  height *= multiplier;
+  if(config::video.aspect_correction == true) {
+    width = uint( double(width) * 8.0 / 7.0 );
   }
-  wMain.SetStyle(strptr(t));
-  wMain.Resize(uiVideo->settings.resolution_width, uiVideo->settings.resolution_height, true);
-
-  uiVideo->update_video_profile();
-}
-
-void toggle_fullscreen() {
-  if(config::video.profile == 0) {
-    config::video.profile = 1;
-  } else {
-    config::video.profile = 0;
-  }
-
-  event::set_video_profile(config::video.profile);
+  wMain.Resize(width, height, true);
 }
 
 bool load_rom(char *fn) {

@@ -2,10 +2,9 @@
 
 class VideoGTK : public Video {
 private:
-GdkGC  *gc;
+GtkWidget *widget;
 uint16 *buffer;
 uint8  *gdkbuffer;
-unsigned long window;
 
 public:
   bool lock(uint16 *&data, uint &pitch);
@@ -14,10 +13,9 @@ public:
   uint screen_width()  { return gdk_screen_width();  }
   uint screen_height() { return gdk_screen_height(); }
 
-  void redraw();
-  void update();
+  void refresh(uint width, uint height);
   void init();
   void term();
 
-  VideoGTK(unsigned long output_window);
+  VideoGTK(GtkWidget *output_widget);
 };

@@ -1,49 +1,33 @@
 namespace libui {
 
 gint libui_window_close(GtkWidget *w, GdkEventAny *any, Window *window) {
-  if(window) { return !window->close(); }
+  if(window) { return !window->message(Message::Close); }
   return FALSE; //destroy window by default
 }
 
 gint libui_window_keydown(GtkWidget *w, GdkEventKey *key, Window *window) {
-  if(window) { window->keydown(key->keyval); }
+  if(window) { window->message(Message::KeyDown, (void*)libui::translate_key(key->keyval)); }
   return FALSE;
 }
 
 gint libui_window_keyup(GtkWidget *w, GdkEventKey *key, Window *window) {
-  if(window) { window->keyup(key->keyval); }
+  if(window) { window->message(Message::KeyUp, (void*)libui::translate_key(key->keyval)); }
   return FALSE;
 }
 
 void libui_control_clicked(Control *control) {
-  if(control && control->owner) { control->owner->clicked(control); }
+  if(control && control->owner) { control->owner->message(Message::Clicked, control); }
 }
 
-WindowHandle Window::handle() {
-  return (WindowHandle)(GDK_WINDOW_XWINDOW(info.window->window));
+void libui_control_changed(Control *control) {
+  if(control && control->owner) { control->owner->message(Message::Changed, control); }
 }
 
-void Window::attach(Control &control, uint x, uint y, bool attach_to_window) {
-  info.control[info.control_index] = &control;
-  control.id    = info.control_index++;
-  control.owner = this;
-  if(attach_to_window == true) {
-    gtk_fixed_put(GTK_FIXED(info.container), control.widget, x, y);
-  }
-
-  switch(control.type) {
-
-  case Control::Button:
-  case Control::Checkbox:
-  case Control::Radiobox: {
-    g_signal_connect_swapped(G_OBJECT(control.widget), "clicked",
-      G_CALLBACK(libui_control_clicked), (gpointer)&control);
-  } break;
-
-  }
+void libui_control_double_clicked(Control *control) {
+  if(control && control->owner) { control->owner->message(Message::DoubleClicked, control); }
 }
 
-void Window::create(const char *style, uint width, uint height, const char *caption) {
+void Window::create(uint style, uint width, uint height, const char *caption) {
   info.window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
   gtk_window_set_title(GTK_WINDOW(info.window), caption ? caption : "");
   gtk_window_set_resizable(GTK_WINDOW(info.window), false);
@@ -51,31 +35,16 @@ void Window::create(const char *style, uint width, uint height, const char *capt
   g_signal_connect(G_OBJECT(info.window), "key_press_event",   G_CALLBACK(libui_window_keydown), (gpointer)this);
   g_signal_connect(G_OBJECT(info.window), "key_release_event", G_CALLBACK(libui_window_keyup),   (gpointer)this);
 
-stringarray part;
-  split(part, "|", style);
-  for(int i = 0; i < count(part); i++) {
-    if(part[i] == "menu") { info.has_menu = true; }
-    if(part[i] == "center") { gtk_window_set_position(GTK_WINDOW(info.window), GTK_WIN_POS_CENTER_ALWAYS); }
-  }
+  if(style & Center) { gtk_window_set_position(GTK_WINDOW(info.window), GTK_WIN_POS_CENTER_ALWAYS); }
 
   info.vcontainer = gtk_vbox_new(false, 0);
   gtk_container_add(GTK_CONTAINER(info.window), info.vcontainer);
   gtk_widget_show(info.vcontainer);
 
-  if(info.has_menu == true) {
-  MenuGroup *group = new MenuGroup();
-    info.control[info.control_index] = group;
-
-    group->id     = info.control_index++;
-    group->owner  = this;
-    group->type   = Control::MenuGroup;
-    group->master = true;
-    group->widget = gtk_menu_bar_new();
-    gtk_box_pack_start(GTK_BOX(info.vcontainer), group->widget, false, false, 0);
-    gtk_widget_show(group->widget);
-
-    info.menu_group[++info.menu_group_index] = group;
-  }
+//always create menubar, only display it when MenuBar type is created
+//this is needed to setup box packing before menubar is defined
+  info.menubar = gtk_menu_bar_new();
+  gtk_box_pack_start(GTK_BOX(info.vcontainer), info.menubar, false, false, 0);
 
   info.container = gtk_fixed_new();
   gtk_widget_set_size_request(info.container, width, height);
@@ -104,6 +73,15 @@ void Window::show() {
 
 void Window::hide() {
   gtk_widget_hide(info.window);
+}
+
+void Window::set_text(const char *str, ...) {
+va_list args;
+  va_start(args, str);
+string temp;
+  vsprintf(temp, str, args);
+  va_end(args);
+  gtk_window_set_title(GTK_WINDOW(info.window), strptr(temp));
 }
 
 void Window::set_background_color(uint8 r, uint8 g, uint8 b) {

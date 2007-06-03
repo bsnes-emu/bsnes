@@ -42,6 +42,10 @@ void sSMP::reset() {
 //$00f2
   status.dsp_addr = 0x00;
 
+//$00f8,$00f9
+  status.smp_f8 = 0x00;
+  status.smp_f9 = 0x00;
+
   t0.enabled = false;
   t1.enabled = false;
   t2.enabled = false;
@@ -59,5 +63,9 @@ void sSMP::reset() {
   t2.stage3_ticks = 0;
 }
 
-sSMP::sSMP() {}
-sSMP::~sSMP() {}
+sSMP::sSMP() {
+  #include "core/optable.cpp"
+}
+
+sSMP::~sSMP() {
+}

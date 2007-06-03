@@ -200,5 +200,5 @@ bMemBus::bMemBus() {
 }
 
 bMemBus::~bMemBus() {
-  SafeFree(wram);
+  safe_free(wram);
 }

@@ -33,10 +33,12 @@ void SNES::init() {
   video_init();
   audio_init();
   input_init();
+  snesinterface.init();
 }
 
 void SNES::term() {
   audio_term();
+  snesinterface.term();
 }
 
 void SNES::power() {

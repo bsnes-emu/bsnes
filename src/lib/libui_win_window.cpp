@@ -10,41 +10,110 @@ long Window::wndproc(HWND hwnd, uint msg, WPARAM wparam, LPARAM lparam) {
   switch(msg) {
 
   case WM_CLOSE: {
-    if(close() == false) { return TRUE; }
+    if(message(Message::Close) == false) { return TRUE; }
   } break;
 
-  case WM_KEYDOWN: {
-    keydown((int)wparam);
-  } break;
+  case WM_ENTERMENULOOP: {
+    message(Message::Block);
+  }
 
-  case WM_KEYUP: {
-    keyup((int)wparam);
-  } break;
-
-  case WM_COMMAND: {
-  uint i = LOWORD(wparam);
-    if(!info.control[i])break;
+  case WM_PAINT: {
+  uint16 i = LOWORD(wparam);
+    if(!i || !info.control[i])break;
   Control &control = *info.control[i];
     if(control.id != i)break; //this should never happen
 
     switch(control.type) {
 
-    case Control::MenuCheckItem: { //need to simulate auto check event
-    MenuCheckItem &item = static_cast<MenuCheckItem&>(control);
-      item.check(!item.checked()); //toggle checked status
-    } break;
-
-    case Control::MenuRadioItem: { //need to simulate auto radio check event
-      static_cast<MenuRadioItem&>(control).check();
-    } break;
-
-    case Control::Radiobox: {
-      static_cast<Radiobox&>(control).check();
+    case ControlType::Canvas: {
+      ((Canvas&)control).redraw();
     } break;
 
     }
+  } break;
 
-    clicked(&control);
+  case WM_KEYDOWN: {
+    message(Message::KeyDown, (void*)libui::translate_key(wparam));
+  } break;
+
+  case WM_KEYUP: {
+    message(Message::KeyUp,   (void*)libui::translate_key(wparam));
+  } break;
+
+  case WM_COMMAND: {
+  uint16 i = LOWORD(wparam);
+    if(!i || !info.control[i])break;
+  Control &control = *info.control[i];
+    if(control.id != i)break; //this should never happen
+
+    switch(control.type) {
+
+  //emit Message::Clicked message indirectly, through control.check()
+    case ControlType::MenuCheckItem: {
+      ((MenuCheckItem&)control).check(!((MenuCheckItem&)control).checked()); //toggle checked status
+    } break;
+
+    case ControlType::MenuRadioItem: {
+      ((MenuRadioItem&)control).check();
+    } break;
+
+    case ControlType::Checkbox: {
+      ((Checkbox&)control).check(!((Checkbox&)control).checked()); //toggle checked status
+    } break;
+
+    case ControlType::Radiobox: {
+      ((Radiobox&)control).check();
+    } break;
+
+  //emit Message::Clicked message directly
+    case ControlType::MenuItem:
+    case ControlType::Button: {
+      message(Message::Clicked, &control);
+    } break;
+
+    }
+  } break;
+
+  case WM_HSCROLL:
+  case WM_VSCROLL: {
+  uint16 i = GetDlgCtrlID((HWND)lparam);
+    if(!i || !info.control[i])break;
+  Control &control = *info.control[i];
+    if(control.id != i)break;
+
+    switch(control.type) {
+
+    case ControlType::Slider: {
+      message(Message::Changed, &control);
+    } break;
+
+    }
+  } break;
+
+  case WM_NOTIFY: {
+  uint16 i = (uint16)wparam;
+    if(!i || !info.control[i])break;
+  Control &control = *info.control[i];
+    if(control.id != i)break;
+
+    switch(control.type) {
+
+    case ControlType::Listbox: {
+    Listbox &listbox = ((Listbox&)control);
+      if(((LPNMHDR)lparam)->code == LVN_ITEMCHANGED) {
+        if(((LPNMLISTVIEW)lparam)->uChanged & LVIF_STATE) {
+          if(ListView_GetItemState(listbox.hwnd, ((LPNMLISTVIEW)lparam)->iItem, LVIS_FOCUSED)) {
+            if(ListView_GetItemState(listbox.hwnd, ((LPNMLISTVIEW)lparam)->iItem, LVIS_SELECTED)) {
+              message(Message::Changed, &control);
+            }
+          }
+        }
+      } else if(((LPNMHDR)lparam)->code == LVN_ITEMACTIVATE) {
+        message(Message::DoubleClicked, &control);
+      }
+    } break;
+
+    }
   } break;
 
   }
@@ -52,21 +121,13 @@ long Window::wndproc(HWND hwnd, uint msg, WPARAM wparam, LPARAM lparam) {
   return DefWindowProc(hwnd, msg, wparam, lparam);
 }
 
-WindowHandle Window::handle() {
-  return (WindowHandle)info.hwnd;
-}
-
-void Window::attach(Control &control, uint x, uint y, bool attach_to_window) {
+void Window::attach(Control &control) {
   info.control[info.control_index] = &control;
   control.id    = info.control_index++;
   control.owner = this;
-  SetWindowLong(control.hwnd, GWL_ID, control.id);
-  SetWindowPos(control.hwnd, 0, x, y, 0, 0, SWP_NOZORDER | SWP_NOSIZE);
-  if(attach_to_window == true) { SetParent(control.hwnd, info.hwnd); }
 
-  if(control.type == Control::Container) {
-    SetWindowLongPtr(control.hwnd, GWLP_USERDATA, (LONG_PTR)GetWindowLongPtr(info.hwnd, GWLP_USERDATA));
-  }
+//menu items will not have HWND, and do not require GWL_ID to be set
+  if(control.hwnd) { SetWindowLong(control.hwnd, GWL_ID, control.id); }
 }
 
 void Window::focus() {
@@ -78,13 +139,8 @@ void Window::move(Control &control, uint x, uint y) {
   SetWindowPos(control.hwnd, 0, x, y, 0, 0, SWP_NOZORDER | SWP_NOSIZE);
 }
 
-void Window::create(const char *style, uint width, uint height, const char *caption) {
-stringarray part;
-  split(part, "|", style);
-  for(int i = 0; i < count(part); i++) {
-    if(part[i] == "center") { info.center = true; }
-    if(part[i] == "menu") { info.has_menu = true; }
-  }
+void Window::create(uint style, uint width, uint height, const char *caption) {
+  info.center = bool(style & Center);
 
 char classname[4096];
   sprintf(classname, "libui_class_%d", window_count++);
@@ -108,20 +164,9 @@ RECT rc;
     WS_POPUP | WS_SYSMENU | WS_CAPTION | WS_MINIMIZEBOX,
     rc.left, rc.top, width, height, 0, 0, GetModuleHandle(0), 0);
   info.hwnd_resize = CreateWindowEx(0, "libui_class", "",
-    WS_POPUP | WS_SYSMENU | WS_CAPTION | WS_MINIMIZEBOX, rc.left, rc.top, width, height, 0, 0, GetModuleHandle(0), 0);
+    WS_POPUP | WS_SYSMENU | WS_CAPTION | WS_MINIMIZEBOX,
+    rc.left, rc.top, width, height, 0, 0, GetModuleHandle(0), 0);
   SetWindowLongPtr(info.hwnd, GWLP_USERDATA, (LONG_PTR)this);
-
-  if(info.has_menu == true) {
-    info.control[info.control_index] = &info.menu_owner;
-
-    info.menu_owner.id     = info.control_index++;
-    info.menu_owner.owner  = this;
-    info.menu_owner.type   = Control::MenuGroup;
-    info.menu_owner.master = true;
-    info.menu_owner.group  = CreateMenu();
-
-    info.menu_group[++info.menu_group_index] = &info.menu_owner;
-  }
 
   resize(width, height);
 }
@@ -129,8 +174,8 @@ RECT rc;
 void Window::move(uint x, uint y) {
 RECT rc;
   SystemParametersInfo(SPI_GETWORKAREA, 0, &rc, 0);
-  if(x < rc.left)x = rc.left;
-  if(y < rc.top )y = rc.top;
+  if(x < rc.left) { x = rc.left; }
+  if(y < rc.top ) { y = rc.top;  }
   SetWindowPos(info.hwnd, 0, x, y, 0, 0, SWP_NOZORDER | SWP_NOSIZE);
 }
 
@@ -138,18 +183,29 @@ void Window::resize(uint width, uint height) {
   info.width  = width;
   info.height = height;
 
+//set requested window size to hidden window, calculate the difference between requested and actual client
+//size area, and then adjust width so that new width, height values will set requested client area size.
+//AdjustWindowRect() does not properly calculate the height of multi-line menus, and thusly is not used.
   SetWindowPos(info.hwnd_resize, 0, 0, 0, width, height, SWP_NOZORDER | SWP_NOMOVE);
 RECT rc;
   GetClientRect(info.hwnd_resize, &rc);
   width  += width  - (rc.right  - rc.left);
   height += height - (rc.bottom - rc.top);
-uint x = (GetSystemMetrics(SM_CXSCREEN) - width)  >> 1;
-uint y = (GetSystemMetrics(SM_CYSCREEN) - height) >> 1;
+
+int x = (GetSystemMetrics(SM_CXSCREEN) - int(width))  / 2;
+int y = (GetSystemMetrics(SM_CYSCREEN) - int(height)) / 2;
+
+//do not allow window to be placed offscreen, force to top-left if window is larger than screen size
+  SystemParametersInfo(SPI_GETWORKAREA, 0, &rc, 0);
+  if(x < rc.left) { x = rc.left; }
+  if(y < rc.top)  { y = rc.top;  }
+
   SetWindowPos(info.hwnd, 0, x, y, width, height, SWP_NOZORDER | (info.center == true ? 0 : SWP_NOMOVE));
 }
 
 void Window::show() {
   ShowWindow(info.hwnd, SW_NORMAL);
+  SetFocus(info.hwnd);
 }
 
 void Window::hide() {
@@ -157,6 +213,15 @@ void Window::hide() {
 }
 
 //
+
+void Window::set_text(const char *str, ...) {
+va_list args;
+  va_start(args, str);
+string temp;
+  vsprintf(temp, str, args);
+  va_end(args);
+  SetWindowText(info.hwnd, strptr(temp));
+}
 
 void Window::set_background_color(uint8 r, uint8 g, uint8 b) {
 HBRUSH old_brush = info.background;
@@ -169,11 +234,15 @@ HBRUSH old_brush = info.background;
 //
 
 Window::Window() {
-  info.background       = 0;
-  info.center           = false;
-  info.control_index    = 1;
-  info.has_menu         = false;
-  info.menu_group_index = 1;
+  info.background    = 0;
+  info.center        = false;
+  info.control_index = 1;
+}
+
+//platform-dependent:
+
+HWND Window::handle() {
+  return info.hwnd;
 }
 
 };

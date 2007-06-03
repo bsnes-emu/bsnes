@@ -28,6 +28,7 @@ understood.
 
 ************************************************************************/
 
+typedef uint8_t bool8;
 
 class SDD1_IM {  //Input Manager
 

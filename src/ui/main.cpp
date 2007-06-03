@@ -19,6 +19,7 @@ void term_snes();
 #include "audio/audio.cpp"
 #include "input/input.cpp"
 
+#include "inputmgr.cpp"
 #include "interface.cpp"
 
 /*****

@@ -1,171 +1,167 @@
 class bDSP : public DSP {
-private:
-uint8 dspram[128];
-uint8 *spcram;
-
-uint32 dsp_counter;
-
-enum { BRR_END = 1, BRR_LOOP = 2 };
-
-uint8  readb (uint16 addr);
-uint16 readw (uint16 addr);
-void   writeb(uint16 addr, uint8  data);
-void   writew(uint16 addr, uint16 data);
-
 public:
-static const uint16 RateTable[32];
-static const int16  GaussTable[512];
+	void enter();
+	
+	uint8 read( uint8 addr );
+	void write( uint8 addr, uint8 data );
 
-enum EnvelopeStates {
-  ATTACK,
-  DECAY,
-  SUSTAIN,
-  RELEASE,
-  SILENCE
-};
-
-enum EnvelopeModes {
-  DIRECT,
-  LINEAR_DEC,
-  EXP_DEC,
-  LINEAR_INC,
-  BENT_INC,
-
-  FAST_ATTACK,
-  RELEASE_DEC
-};
-
-private:
-struct Status {
-//$0c,$1c
-  int8   MVOLL, MVOLR;
-//$2c,$3c
-  int8   EVOLL, EVOLR;
-//$4c,$5c
-  uint8  KON, KOFF;
-//$6c
-  uint8  FLG;
-//$7c
-  uint8  ENDX;
-//$0d
-  int8   EFB;
-//$2d,$3d,$4d
-  uint8  PMON, NON, EON;
-//$5d
-  uint8  DIR;
-//$6d,$7d
-  uint8  ESA, EDL;
-
-//$xf
-  int8   FIR[8];
-
-//internal variables
-  uint8  kon;
-  bool   key_flag;
-
-  int16  noise_ctr, noise_rate;
-  uint16 noise_sample;
-
-  uint16 echo_index, echo_size, echo_target;
-  int16  fir_buffer[2][8];
-  uint8  fir_buffer_index;
-
-//functions
-  bool soft_reset() { return bool(FLG & 0x80); }
-  bool mute()       { return bool(FLG & 0x40); }
-  bool echo_write() { return    !(FLG & 0x20); }
-} status;
-
-struct Voice {
-//$x0-$x1
-  int8   VOLL, VOLR;
-//$x2-$x3
-  int16  PITCH;
-//$x4
-  uint8  SRCN;
-//$x5-$x7
-  uint8  ADSR1, ADSR2, GAIN;
-//$x8-$x9
-  uint8  ENVX, OUTX;
-
-//internal variables
-  int16  pitch_ctr;
-
-  int8   brr_index;
-  uint16 brr_ptr;
-  uint8  brr_header;
-  bool   brr_looped;
-
-  int16  brr_data[4];
-  uint8  brr_data_index;
-
-  int16  envx;
-  uint16 env_ctr, env_rate, env_sustain;
-  enum   EnvelopeStates env_state;
-  enum   EnvelopeModes  env_mode;
-
-  int16  outx;
-
-//functions
-  int16 pitch_rate()        { return PITCH & 0x3fff; }
-
-  uint8 brr_header_shift()  { return brr_header >> 4; }
-  uint8 brr_header_filter() { return (brr_header >> 2) & 3; }
-  uint8 brr_header_flags()  { return brr_header & 3; }
-
-  bool  ADSR_enabled()      { return bool(ADSR1 & 0x80); }
-  uint8 ADSR_decay()        { return (ADSR1 >> 4) & 7; }
-  uint8 ADSR_attack()       { return ADSR1 & 15; }
-  uint8 ADSR_sus_level()    { return ADSR2 >> 5; }
-  uint8 ADSR_sus_rate()     { return ADSR2 & 31; }
-
-  void  AdjustEnvelope() {
-    if(env_state == SILENCE) {
-      env_mode = DIRECT;
-      env_rate = 0;
-      envx     = 0;
-    } else if(env_state == RELEASE) {
-      env_mode = RELEASE_DEC;
-      env_rate = 0x7800;
-    } else if(ADSR_enabled()) {
-      switch(env_state) {
-      case ATTACK:
-        env_rate = RateTable[(ADSR_attack() << 1) + 1];
-        env_mode = (env_rate == 0x7800) ? FAST_ATTACK : LINEAR_INC;
-        break;
-      case DECAY:
-        env_rate = RateTable[(ADSR_decay() << 1) + 0x10];
-        env_mode = EXP_DEC;
-        break;
-      case SUSTAIN:
-        env_rate = RateTable[ADSR_sus_rate()];
-        env_mode = (env_rate == 0) ? DIRECT : EXP_DEC;
-        break;
-      }
-    } else if(GAIN & 0x80) {
-      switch(GAIN & 0x60) {
-      case 0x00: env_mode = LINEAR_DEC; break;
-      case 0x20: env_mode = EXP_DEC;    break;
-      case 0x40: env_mode = LINEAR_INC; break;
-      case 0x60: env_mode = BENT_INC;   break;
-      }
-      env_rate = RateTable[GAIN & 0x1f];
-    } else {
-      env_mode = DIRECT;
-      env_rate = 0;
-      envx     = (GAIN & 0x7f) << 4;
-    }
-  }
-} voice[8];
-
+	void power();
+	void reset();
+	
+	bDSP();
+	~bDSP();
+	
 public:
-  uint8  read (uint8 addr);
-  void   write(uint8 addr, uint8 data);
 
-  void   power();
-  void   reset();
-  uint32 run();
+	enum { echo_hist_size = 8 };
+	enum { register_count = 128 };
+	enum { voice_count = 8 };
+	
+	enum env_mode_t { env_release, env_attack, env_decay, env_sustain };
+	enum { brr_buf_size = 12 };
+	struct voice_t
+	{
+		int buf [brr_buf_size*2];// decoded samples (twice the size to simplify wrap handling)
+		int buf_pos;            // place in buffer where next samples will be decoded
+		int interp_pos;         // relative fractional position in sample (0x1000 = 1.0)
+		int brr_addr;           // address of current BRR block
+		int brr_offset;         // current decoding offset in BRR block
+		uint8* regs;            // pointer to voice's DSP registers
+		int vbit;               // bitmask for voice: 0x01 for voice 0, 0x02 for voice 1, etc.
+		int kon_delay;          // KON delay/current setup phase
+		env_mode_t env_mode;
+		int env;                // current envelope level
+		int hidden_env;         // used by GAIN mode 7, very obscure quirk
+		uint8 t_envx_out;
+	};
+private:
+	
+	struct state_t
+	{
+		uint8 regs [register_count];
+		
+		// Echo history keeps most recent 8 samples
+		int echo_hist [echo_hist_size] [2];
+		int echo_hist_pos;
+		
+		int every_other_sample; // toggles every sample
+		int kon;                // KON value when last checked
+		int noise;
+		int counter;
+		int echo_offset;        // offset from ESA in echo buffer
+		int echo_length;        // number of bytes that echo_offset will stop at
+		
+		// Hidden registers also written to when main register is written to
+		int new_kon;
+		uint8 endx_buf;
+		uint8 envx_buf;
+		uint8 outx_buf;
+		
+		// Temporary state between clocks
+		
+		// read once per sample
+		int t_pmon;
+		int t_non;
+		int t_eon;
+		int t_dir;
+		int t_koff;
+		
+		// read a few clocks ahead then used
+		int t_brr_next_addr;
+		int t_adsr0;
+		int t_brr_header;
+		int t_brr_byte;
+		int t_srcn;
+		
+		// internal state that is recalculated every sample
+		int t_dir_addr;
+		int t_pitch;
+		int t_output;
+		int t_looped;
+		
+		// left/right sums
+		int t_main_out [2];
+		int t_echo_out [2];
+		
+		voice_t voices [voice_count];
+	};
+	state_t m;
+	uint8* ram;
+	
+	unsigned read_counter( int rate );
+	
+	void run_envelope( voice_t* const v );
+	void decode_brr( voice_t* v );
 
-  bDSP();
-  ~bDSP();
+	void voice_output( voice_t const* v, int ch );
+	void voice_V1( voice_t* const );
+	void voice_V2( voice_t* const );
+	void voice_V3( voice_t* const );
+	void voice_V3a( voice_t* const );
+	void voice_V3b( voice_t* const );
+	void voice_V3c( voice_t* const );
+	void voice_V4( voice_t* const );
+	void voice_V5( voice_t* const );
+	void voice_V6( voice_t* const );
+	void voice_V7( voice_t* const );
+	void voice_V8( voice_t* const );
+	void voice_V9( voice_t* const );
+	void voice_V7_V4_V1( voice_t* const );
+	void voice_V8_V5_V2( voice_t* const );
+	void voice_V9_V6_V3( voice_t* const );
+
+	int  calc_echo_output( int ch, int sample );
+	
+	// Global registers
+	enum {
+	    r_mvoll = 0x0C, r_mvolr = 0x1C,
+	    r_evoll = 0x2C, r_evolr = 0x3C,
+	    r_kon   = 0x4C, r_koff  = 0x5C,
+	    r_flg   = 0x6C, r_endx  = 0x7C,
+	    r_efb   = 0x0D, r_pmon  = 0x2D,
+	    r_non   = 0x3D, r_eon   = 0x4D,
+	    r_dir   = 0x5D, r_esa   = 0x6D,
+	    r_edl   = 0x7D,
+	    r_fir   = 0x0F // 8 coefficients at 0x0F, 0x1F ... 0x7F
+	};
+
+	// Voice registers
+	enum {
+		v_voll   = 0x00, v_volr   = 0x01,
+		v_pitchl = 0x02, v_pitchh = 0x03,
+		v_srcn   = 0x04, v_adsr0  = 0x05,
+		v_adsr1  = 0x06, v_gain   = 0x07,
+		v_envx   = 0x08, v_outx   = 0x09
+	};
 };
+
+inline uint8 bDSP::read( uint8 addr )
+{
+	return m.regs [addr];
+}
+
+inline void bDSP::write( uint8 addr, uint8 data )
+{
+	m.regs [addr] = data;
+	switch ( addr & 0x0F )
+	{
+	case v_envx:
+		m.envx_buf = data;
+		break;
+		
+	case v_outx:
+		m.outx_buf = data;
+		break;
+	
+	case 0x0C:
+		if ( addr == r_kon )
+			m.new_kon = data;
+		
+		if ( addr == r_endx ) // always cleared, regardless of data written
+		{
+			m.endx_buf = 0;
+			m.regs [r_endx] = 0;
+		}
+		break;
+	}
+}

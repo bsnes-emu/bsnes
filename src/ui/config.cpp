@@ -1,89 +1,88 @@
 namespace config {
 
+char filename[PATH_MAX + 16] = "bsnes.cfg";
+
 struct System {
-  static Setting video, audio, input;
+  static StringSetting video, audio, input;
+  static StringSetting video_flags, audio_flags, input_flags;
 
-  static Setting regulate_speed;
-  static Setting speed_slowest, speed_slow, speed_normal, speed_fast, speed_fastest;
+  static IntegerSetting regulate_speed, speed;
+  static IntegerSetting speed_slowest, speed_slow, speed_normal, speed_fast, speed_fastest;
 } system;
-Setting System::video(&config_file, "system.video", "Video hardware interface", "");
-Setting System::audio(&config_file, "system.audio", "Audio hardware interface", "");
-Setting System::input(&config_file, "system.input", "Input hardware interface", "");
+StringSetting System::video(&config_file, "system.video", "Video hardware interface", "");
+StringSetting System::audio(&config_file, "system.audio", "Audio hardware interface", "");
+StringSetting System::input(&config_file, "system.input", "Input hardware interface", "");
 
-Setting System::regulate_speed(&config_file, "system.regulate_speed", "Regulate speed to 60hz (NTSC) / 50hz (PAL)", true, Setting::TRUE_FALSE);
-Setting System::speed_slowest (&config_file, "system.speed_slowest",  "Slowest speed setting (in hz)", 16000, Setting::DEC);
-Setting System::speed_slow    (&config_file, "system.speed_slow",     "Slow speed setting",            24000, Setting::DEC);
-Setting System::speed_normal  (&config_file, "system.speed_normal",   "Normal speed setting",          32000, Setting::DEC);
-Setting System::speed_fast    (&config_file, "system.speed_fast",     "Fast speed setting",            48000, Setting::DEC);
-Setting System::speed_fastest (&config_file, "system.speed_fastest",  "Fastest speed setting",         64000, Setting::DEC);
+StringSetting System::video_flags(&config_file, "system.video_flags", "Video hardware interface flags", "");
+StringSetting System::audio_flags(&config_file, "system.audio_flags", "Audio hardware interface flags", "");
+StringSetting System::input_flags(&config_file, "system.input_flags", "Input hardware interface flags", "");
+
+IntegerSetting System::regulate_speed(&config_file, "system.regulate_speed", "Regulate speed to 60hz (NTSC) / 50hz (PAL)", IntegerSetting::Boolean, true);
+IntegerSetting System::speed         (0,            "system.speed",          "Current speed regulation setting (1-5)", IntegerSetting::Decimal, 3);
+IntegerSetting System::speed_slowest (&config_file, "system.speed_slowest",  "Slowest speed setting", IntegerSetting::Decimal,  50);
+IntegerSetting System::speed_slow    (&config_file, "system.speed_slow",     "Slow speed setting",    IntegerSetting::Decimal,  75);
+IntegerSetting System::speed_normal  (&config_file, "system.speed_normal",   "Normal speed setting",  IntegerSetting::Decimal, 100);
+IntegerSetting System::speed_fast    (&config_file, "system.speed_fast",     "Fast speed setting",    IntegerSetting::Decimal, 150);
+IntegerSetting System::speed_fastest (&config_file, "system.speed_fastest",  "Fastest speed setting", IntegerSetting::Decimal, 200);
 
 struct Video {
-  static Setting profile;
-  static Setting profile_win, profile_full;
-
-  static Setting use_vram;
-  static Setting pscanline_intensity, iscanline_intensity;
+  static IntegerSetting synchronize;
+  static IntegerSetting multiplier, aspect_correction, region;
+  static IntegerSetting hardware_filter, software_filter;
+  static IntegerSetting frameskip;
+  static IntegerSetting use_vram;
 } video;
-Setting Video::profile(0, "video.profile", "", 0, Setting::DEC);
-
-/* software_filter
- * hardware_filter
- * video_standard
- * multiplier
- * correct_aspect_ratio
- * enable_scanlines
- * manual_render_size
- * render_width
- * render_height
- * fullscreen
- * resolution_width
- * resolution_height
- * refresh_rate
- * triple_buffering
- */
-Setting Video::profile_win(&config_file, "video.profile_win", "Windowed video profile configuration\n"
-  "If available, please use bsnes GUI configuration editor to modify video profile settings\n"
-  "Format: software_filter;hardware_filter;video_standard;multiplier;correct_aspect_ratio;\n"
-  "        enable_scanlines;manual_render_size;render_width;render_height;\n"
-  "        triple_buffering;resolution_width;resolution_height;refresh_rate",
-  "0;1;0;2;true;false;false;595;448;false;0;0;0");
-Setting Video::profile_full(&config_file, "video.profile_full", "Fullscreen video profile configuration",
-  "0;1;0;2;true;false;false;595;448;false;0;0;0");
-
-Setting Video::use_vram(&config_file, "video.use_vram", "Use Video RAM instead of System RAM", true, Setting::TRUE_FALSE);
-Setting Video::pscanline_intensity(&config_file, "video.pscanline_intensity",
-  "Progressive scanline intensity\n"
-  "Value is percentage of intensity from 0 to 100", 30, Setting::DEC);
-Setting Video::iscanline_intensity(&config_file, "video.iscanline_intensity",
-  "Interlace scanline intensity", 50, Setting::DEC);
+IntegerSetting Video::synchronize(&config_file, "video.synchronize", "Synchronize to video refresh rate.", IntegerSetting::Boolean, false);
+IntegerSetting Video::multiplier(&config_file, "video.multiplier", "Video output size multiplier (1-5x)\n"
+  "1 = 1x (~256x224)\n"
+  "2 = 2x (~512x448)\n"
+  "etc.",
+  IntegerSetting::Decimal, 2);
+IntegerSetting Video::aspect_correction(&config_file, "video.aspect_correction", "Correct video aspect ratio", IntegerSetting::Boolean, true);
+IntegerSetting Video::region(&config_file, "video.region", "Video output region\n"
+  "0 = NTSC, 1 = PAL",
+  IntegerSetting::Decimal, 0);
+IntegerSetting Video::hardware_filter(&config_file, "video.hardware_filter", "Video hardware filter\n"
+  "0 = Point\n"
+  "1 = Linear\n",
+  IntegerSetting::Decimal, 1);
+IntegerSetting Video::software_filter(&config_file, "video.software_filter", "Video software filter\n"
+  "0 = None\n"
+  "1 = NTSC\n"
+  "2 = HQ2x\n"
+  "3 = Scale2x\n",
+  IntegerSetting::Decimal, 0);
+IntegerSetting Video::frameskip(0, "video.frameskip", "Video frameskip", IntegerSetting::Decimal, 0);
+IntegerSetting Video::use_vram(&config_file, "video.use_vram", "Use Video RAM instead of System RAM", IntegerSetting::Boolean, true);
 
 struct Audio {
-  static Setting frequency;
-  static Setting latency;
+  static IntegerSetting synchronize;
+  static IntegerSetting frequency;
+  static IntegerSetting latency;
 } audio;
-Setting Audio::frequency(&config_file, "audio.frequency", "Default audio playback frequency.", 32000, Setting::DEC);
-Setting Audio::latency(&config_file, "audio.latency", "Audio playback latency in milliseconds.\n"
+IntegerSetting Audio::synchronize(&config_file, "audio.synchronize", "Synchronize to audio sample rate.", IntegerSetting::Boolean, true);
+IntegerSetting Audio::frequency(&config_file, "audio.frequency", "Default audio playback frequency.", IntegerSetting::Decimal, 32000);
+IntegerSetting Audio::latency(&config_file, "audio.latency", "Audio playback latency in milliseconds.\n"
   "Specifies how long audio playback is delayed compared to a real SNES.\n"
   "A delay is necessary to allow smooth audio playback via buffering.\n"
   "Raising this value may help with audio playback problems, but will decrease\n"
   "audio responsiveness.",
-  75, Setting::DEC);
+  IntegerSetting::Decimal, 75);
 
 struct Input {
-  static Setting axis_resistance;
+  static IntegerSetting axis_resistance;
+  static IntegerSetting allow_invalid_input;
+
   struct Joypad1 {
-    static Setting allow_invalid_input;
-    static Setting up, down, left, right, a, b, x, y, l, r, select, start;
-    static Setting map;
+    static StringSetting up, down, left, right, a, b, x, y, l, r, select, start;
   } joypad1;
+
   struct Joypad2 {
-    static Setting allow_invalid_input;
-    static Setting up, down, left, right, a, b, x, y, l, r, select, start;
-    static Setting map;
+    static StringSetting up, down, left, right, a, b, x, y, l, r, select, start;
   } joypad2;
 } input;
 
-Setting Input::axis_resistance(&config_file, "input.axis_resistance",
+IntegerSetting Input::axis_resistance(&config_file, "input.axis_resistance",
   "Axis resistance for all analog joypads\n"
   "Affects responsiveness of analog stick movement by specifying what percentage\n"
   "in any given direction the axis must be pressed to trigger a button press.\n"
@@ -93,52 +92,36 @@ Setting Input::axis_resistance(&config_file, "input.axis_resistance",
   "up to 100 (axis must be pressed fully to given corner).\n"
   "Value affects all four directions of the axis equally.\n"
   "Note: Values below 10 or above 90 are not recommended and may not work at all.",
-  75, Setting::DEC);
+  IntegerSetting::Decimal, 75);
 
-Setting Input::Joypad1::allow_invalid_input(&config_file, "input.joypad1.allow_invalid_input",
-  "Allow up+down and left+right key combinations for joypad 1 (not recommended)", false, Setting::TRUE_FALSE);
+IntegerSetting Input::allow_invalid_input(&config_file, "input.allow_invalid_input",
+  "Allow up+down and left+right combinations (not recommended)",
+  IntegerSetting::Boolean, false);
 
-Setting Input::Joypad1::up    (0, "input.joypad1.up",     "", 0, Setting::HEX);
-Setting Input::Joypad1::down  (0, "input.joypad1.down",   "", 0, Setting::HEX);
-Setting Input::Joypad1::left  (0, "input.joypad1.left",   "", 0, Setting::HEX);
-Setting Input::Joypad1::right (0, "input.joypad1.right",  "", 0, Setting::HEX);
-Setting Input::Joypad1::a     (0, "input.joypad1.a",      "", 0, Setting::HEX);
-Setting Input::Joypad1::b     (0, "input.joypad1.b",      "", 0, Setting::HEX);
-Setting Input::Joypad1::x     (0, "input.joypad1.x",      "", 0, Setting::HEX);
-Setting Input::Joypad1::y     (0, "input.joypad1.y",      "", 0, Setting::HEX);
-Setting Input::Joypad1::l     (0, "input.joypad1.l",      "", 0, Setting::HEX);
-Setting Input::Joypad1::r     (0, "input.joypad1.r",      "", 0, Setting::HEX);
-Setting Input::Joypad1::select(0, "input.joypad1.select", "", 0, Setting::HEX);
-Setting Input::Joypad1::start (0, "input.joypad1.start",  "", 0, Setting::HEX);
+StringSetting Input::Joypad1::up    (&config_file, "input.joypad1.up",     "", "up");
+StringSetting Input::Joypad1::down  (&config_file, "input.joypad1.down",   "", "down");
+StringSetting Input::Joypad1::left  (&config_file, "input.joypad1.left",   "", "left");
+StringSetting Input::Joypad1::right (&config_file, "input.joypad1.right",  "", "right");
+StringSetting Input::Joypad1::a     (&config_file, "input.joypad1.a",      "", "x");
+StringSetting Input::Joypad1::b     (&config_file, "input.joypad1.b",      "", "z");
+StringSetting Input::Joypad1::x     (&config_file, "input.joypad1.x",      "", "s");
+StringSetting Input::Joypad1::y     (&config_file, "input.joypad1.y",      "", "a");
+StringSetting Input::Joypad1::l     (&config_file, "input.joypad1.l",      "", "d");
+StringSetting Input::Joypad1::r     (&config_file, "input.joypad1.r",      "", "c");
+StringSetting Input::Joypad1::select(&config_file, "input.joypad1.select", "", "rshift");
+StringSetting Input::Joypad1::start (&config_file, "input.joypad1.start",  "", "enter");
 
-Setting Input::Joypad1::map(&config_file, "input.joypad1.map", "Joypad 1 button map\n"
-  "Format: Up; Down; Left; Right; A; B; X; Y; L; R; Select; Start",
-  "up | joypad0.up; "       "down | joypad0.down; "       "left | joypad0.left; "     "right | joypad0.right; "
-   "x | joypad0.button3; "     "z | joypad0.button2; "       "s | joypad0.button1; "      "a | joypad0.button0; "
-   "d | joypad0.button6; "     "c | joypad0.button7; "  "rshift | joypad0.button4; "  "enter | joypad0.button5");
-
-//
-
-Setting Input::Joypad2::allow_invalid_input(&config_file, "input.joypad2.allow_invalid_input",
-  "Allow up+down and left+right key combinations for joypad 2 (not recommended)", false, Setting::TRUE_FALSE);
-
-Setting Input::Joypad2::up    (0, "input.joypad2.up",     "", 0, Setting::HEX);
-Setting Input::Joypad2::down  (0, "input.joypad2.down",   "", 0, Setting::HEX);
-Setting Input::Joypad2::left  (0, "input.joypad2.left",   "", 0, Setting::HEX);
-Setting Input::Joypad2::right (0, "input.joypad2.right",  "", 0, Setting::HEX);
-Setting Input::Joypad2::a     (0, "input.joypad2.a",      "", 0, Setting::HEX);
-Setting Input::Joypad2::b     (0, "input.joypad2.b",      "", 0, Setting::HEX);
-Setting Input::Joypad2::x     (0, "input.joypad2.x",      "", 0, Setting::HEX);
-Setting Input::Joypad2::y     (0, "input.joypad2.y",      "", 0, Setting::HEX);
-Setting Input::Joypad2::l     (0, "input.joypad2.l",      "", 0, Setting::HEX);
-Setting Input::Joypad2::r     (0, "input.joypad2.r",      "", 0, Setting::HEX);
-Setting Input::Joypad2::select(0, "input.joypad2.select", "", 0, Setting::HEX);
-Setting Input::Joypad2::start (0, "input.joypad2.start",  "", 0, Setting::HEX);
-
-Setting Input::Joypad2::map(&config_file, "input.joypad2.map", "Joypad 2 button map\n"
-  "Format: Up; Down; Left; Right; A; B; X; Y; L; R; Select; Start",
-  "t | joypad1.up; "       "g | joypad1.down; "            "f | joypad1.left; "            "h | joypad1.right; "
-  "k | joypad1.button3; "  "j | joypad1.button2; "         "i | joypad1.button1; "         "u | joypad1.button0; "
-  "o | joypad1.button6; "  "l | joypad1.button7; "  "lbracket | joypad1.button4; "  "rbracket | joypad1.button5");
+StringSetting Input::Joypad2::up    (&config_file, "input.joypad2.up",     "", "t");
+StringSetting Input::Joypad2::down  (&config_file, "input.joypad2.down",   "", "g");
+StringSetting Input::Joypad2::left  (&config_file, "input.joypad2.left",   "", "f");
+StringSetting Input::Joypad2::right (&config_file, "input.joypad2.right",  "", "h");
+StringSetting Input::Joypad2::a     (&config_file, "input.joypad2.a",      "", "k");
+StringSetting Input::Joypad2::b     (&config_file, "input.joypad2.b",      "", "j");
+StringSetting Input::Joypad2::x     (&config_file, "input.joypad2.x",      "", "i");
+StringSetting Input::Joypad2::y     (&config_file, "input.joypad2.y",      "", "u");
+StringSetting Input::Joypad2::l     (&config_file, "input.joypad2.l",      "", "o");
+StringSetting Input::Joypad2::r     (&config_file, "input.joypad2.r",      "", "l");
+StringSetting Input::Joypad2::select(&config_file, "input.joypad2.select", "", "lbracket");
+StringSetting Input::Joypad2::start (&config_file, "input.joypad2.start",  "", "rbracket");
 
 };

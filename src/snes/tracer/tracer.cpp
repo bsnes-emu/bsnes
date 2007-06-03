@@ -59,7 +59,7 @@ void Tracer::cpuopmask_enable(bool en) {
     settings.cpuopmasktbl = (uint8*)malloc(0x200000);
     memset(settings.cpuopmasktbl, 0x00, 0x200000);
   } else if(en == false && cpuopmask_enabled() == true) {
-    SafeFree(settings.cpuopmasktbl);
+    safe_free(settings.cpuopmasktbl);
   }
 
   settings.cpuopmask = en;
@@ -70,7 +70,7 @@ void Tracer::smpopmask_enable(bool en) {
     settings.smpopmasktbl = (uint8*)malloc(0x2000);
     memset(settings.smpopmasktbl, 0x00, 0x2000);
   } else if(en == false && smpopmask_enabled() == true) {
-    SafeFree(settings.smpopmasktbl);
+    safe_free(settings.smpopmasktbl);
   }
 
   settings.smpopmask = en;

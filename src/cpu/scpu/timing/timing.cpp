@@ -283,7 +283,7 @@ void sCPU::timing_reset() {
 //initial latch values for $213c/$213d
 //[x]0035 : [y]0000 (53.0 -> 212) [lda $2137]
 //[x]0038 : [y]0000 (56.5 -> 226) [nop : lda $2137]
-  add_clocks(186);
+//add_clocks(186);
 }
 
 #undef ntsc_color_burst_phase_shift_scanline

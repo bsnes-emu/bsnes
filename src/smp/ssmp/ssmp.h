@@ -25,6 +25,9 @@ struct {
 
 //$00f2
   uint8  dsp_addr;
+
+//$00f8,$00f9
+  uint8  smp_f8, smp_f9;
 } status;
 
 //ssmp.cpp

@@ -31,38 +31,26 @@ long height;
   init_settings();
   init_debugger();
 
-  if(!stricmp(config::system.video, "dd")) {
-    uiVideo = new VideoDD(wMain.hwnd);
-//} else if(!stricmp(config::system.video, "sdl")) {
-//  uiVideo = new VideoSDL((void*)wMain.hwnd);
-  } else {
-    uiVideo = new VideoD3D(wMain.hwnd);
-  }
-
-  if(!stricmp(config::system.audio, "none")) {
-    uiAudio = new Audio();
-  } else {
-    uiAudio = new AudioDS(wMain.hwnd);
-  }
-
-  if(!stricmp(config::system.input, "none")) {
-    uiInput = new Input();
-//} else if(!stricmp(config::system.input, "sdl")) {
-//  uiInput = new InputSDL((void*)wMain.hwnd);
-  } else {
-    uiInput = new InputDI(wMain.hwnd);
-  }
+  uiVideo =
+    config::system.video == "none" ? (Video*)new Video() :
+    config::system.video == "dd"   ? (Video*)new VideoDD(wMain.hwnd) :
+                                     (Video*)new VideoD3D(wMain.hwnd);
+  uiAudio =
+    config::system.audio == "none" ? (Audio*)new Audio() :
+                                     (Audio*)new AudioDS(wMain.hwnd);
+  uiInput =
+    config::system.input == "none" ? (Input*)new Input() :
+                                     (Input*)new InputDI(wMain.hwnd);
 
   uiVideo->init();
   uiAudio->init();
   uiInput->init();
 
   wMain.Setup();
+  wMain.Show();
   wAbout.Setup();
   setup_settings();
   setup_debugger();
-
-  wMain.Show();
 }
 
 void term_ui() {

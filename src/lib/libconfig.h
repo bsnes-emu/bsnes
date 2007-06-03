@@ -1,95 +1,185 @@
 /*
-  libconfig : version 0.12 ~byuu (2007-01-13)
+  libconfig : version 0.14 ~byuu (2007-05-27)
+  license: public domain
 */
 
-#ifndef __LIBCONFIG
-#define __LIBCONFIG
+#ifndef LIBCONFIG_H
+#define LIBCONFIG_H
 
+#include "libbase.h"
 #include "libarray.h"
 #include "libstring.h"
 
-class Config;
+class Setting;
 
-class Setting {
-  friend class Config;
-
-protected:
-uint data, type, def;
-
-public:
-enum {
-  BOOL             =  0,
-  BOOLEAN          =  0,
-  TRUE_FALSE       =  0,
-  ENABLED_DISABLED =  1,
-  ON_OFF           =  2,
-  YES_NO           =  3,
-  DEC              =  4,
-  HEX              =  5,
-  HEX8             =  6,
-  HEX16            =  7,
-  HEX24            =  8,
-  HEX32            =  9,
-  STRING           = 10,
-  STR              = 10,
-};
-
-char *name, *desc;
-string char_data, char_def;
-  virtual void  toggle();
-  virtual uint  get();
-  virtual void  set(uint _data);
-
-  virtual char *strget();
-  virtual void  strset(const char *_data);
-
-  Setting(Config *_parent, char *_name, char *_desc, uint  _data, uint _type);
-  Setting(Config *_parent, char *_name, char *_desc, char *_data);
-
-  inline operator uint()  { return get(); }
-  inline operator char*() { return strget(); }
-
-  template<typename T>
-  inline Setting &operator=(T x) {
-    (type != STR) ? set((uint)x) : strset((const char*)x);
-    return *this;
-  }
-
-  template<typename T>
-  inline bool operator==(T x) {
-    return (type != STR) ? get() == (uint)x : !strcmp(strget(), (const char*)x);
-  }
-
-  template<typename T>
-  inline bool operator!=(T x) {
-    return (type != STR) ? get() != (uint)x :  strcmp(strget(), (const char*)x);
-  }
-
-//numerical operations only
-  template<typename T> inline bool operator>=(const T &x) { return (T)get() >= x; }
-  template<typename T> inline bool operator> (const T &x) { return (T)get() >  x; }
-  template<typename T> inline bool operator<=(const T &x) { return (T)get() <= x; }
-  template<typename T> inline bool operator< (const T &x) { return (T)get() <  x; }
-};
-
-class Config {
-protected:
+class Config { public:
 array<Setting*> list;
 uint list_count;
 
 string data;
 stringarray line, part, subpart;
 
-uint  string_to_uint(uint type, char *input);
-char *uint_to_string(uint type, uint  input);
-
-public:
-  void add(Setting *setting);
   bool load(const char *fn);
-  bool load(string &fn);
   bool save(const char *fn);
-  bool save(string &fn);
-  Config();
+  bool load(const string &fn) { return load(strptr(fn)); }
+  bool save(const string &fn) { return save(strptr(fn)); }
+  void add(Setting *setting) { list[list_count++] = setting; }
+
+  Config() : list_count(0) {}
 };
+
+class Setting { public:
+uint type;
+char *name, *desc, *def;
+
+enum Type {
+  Integer,
+  String,
+};
+
+  virtual void set(const char *input) = 0;
+  virtual void get(string &output)    = 0;
+};
+
+class IntegerSetting : public Setting { public:
+uint ifmt, data, idef;
+
+enum Format {
+  Boolean,
+  Decimal,
+  Hex,
+};
+
+  void set(const char *input) {
+    if(ifmt == Boolean) { data = !strcmp(input, "true"); }
+    if(ifmt == Decimal) { data = strdec(input); }
+    if(ifmt == Hex)     { data = strhex(input + (stribegin(input, "0x") ? 2 : 0)); }
+  }
+
+  void get(string &output) {
+    if(ifmt == Boolean) { sprintf(output, "%s", data ? "true" : "false"); }
+    if(ifmt == Decimal) { sprintf(output, "%d", data); }
+    if(ifmt == Hex)     { sprintf(output, "%x", data); }
+  }
+
+  uint operator()() { return data; }
+  operator uint() { return data; }
+  template<typename T> IntegerSetting &operator=(T x) { data = uint(x); return *this; }
+  template<typename T> bool operator==(T x) { return (T(data) == x); }
+  template<typename T> bool operator!=(T x) { return (T(data) != x); }
+  template<typename T> bool operator>=(T x) { return (T(data) >= x); }
+  template<typename T> bool operator> (T x) { return (T(data) >  x); }
+  template<typename T> bool operator<=(T x) { return (T(data) <= x); }
+  template<typename T> bool operator< (T x) { return (T(data) <  x); }
+
+  IntegerSetting(Config *parent, char *r_name, char *r_desc, uint r_format, uint r_data) {
+    type = Setting::Integer;
+    name = strdup(r_name);
+    desc = strdup(r_desc);
+    ifmt = r_format;
+    data = idef = r_data;
+  string t;
+    get(t);
+    def = strdup(strptr(t));
+
+    if(parent) { parent->add(this); }
+  }
+
+  ~IntegerSetting() {
+    free(name);
+    free(desc);
+    free(def);
+  }
+};
+
+class StringSetting : public Setting { public:
+string data;
+  void set(const char *input) { data = input; strunquote(data); }
+  void get(string &output) { output = data; strquote(output); }
+
+  const char* operator()() { return strptr(data); }
+  operator const char*() { return strptr(data); }
+  StringSetting &operator=(const char *x) { data = x; return *this; }
+  bool operator==(const char *x) { return !strcmp(data, x); }
+  bool operator!=(const char *x) { return  strcmp(data, x); }
+
+  StringSetting(Config *parent, char *r_name, char *r_desc, char *r_data) {
+    type = Setting::String;
+    name = strdup(r_name);
+    desc = strdup(r_desc);
+    data = r_data;
+  string t;
+    get(t);
+    def = strdup(strptr(t));
+
+    if(parent) { parent->add(this); }
+  }
+
+  ~StringSetting() {
+    free(name);
+    free(desc);
+    free(def);
+  }
+};
+
+inline bool Config::load(const char *fn) {
+FILE *fp = fopen(fn, "rb");
+  if(!fp)return false;
+
+//load the config file into memory
+  fseek(fp, 0, SEEK_END);
+int fsize = ftell(fp);
+  fseek(fp, 0, SEEK_SET);
+char *buffer = (char*)malloc(fsize + 1);
+  fread(buffer, 1, fsize, fp);
+  fclose(fp);
+  *(buffer + fsize) = 0;
+  strcpy(data, buffer);
+  free(buffer);
+
+//split the file into lines
+  replace(data, "\r\n", "\n");
+  qreplace(data, "\t", "");
+  qreplace(data, " ", "");
+  split(line, "\n", data);
+
+  for(int i = 0; i < count(line); i++) {
+    if(strlen(line[i]) == 0)continue;
+    if(*strptr(line[i]) == '#')continue;
+
+    qsplit(part, "=", line[i]);
+    for(int l = 0; l < list_count; l++) {
+      if(!strcmp(list[l]->name, part[0])) {
+        list[l]->set(strptr(part[1]));
+        break;
+      }
+    }
+  }
+
+  return true;
+}
+
+inline bool Config::save(const char *fn) {
+FILE *fp;
+string t;
+  fp = fopen(fn, "wb");
+  if(!fp)return false;
+
+  for(int i = 0; i < list_count; i++) {
+    strcpy(data, list[i]->desc);
+    replace(data, "\r\n", "\n");
+    split(line, "\n", data);
+    for(int l = 0; l < count(line); l++) {
+      if(line[l] != "") { fprintf(fp, "# %s\r\n", strptr(line[l])); }
+    }
+
+    fprintf(fp, "# (default = %s)\r\n", list[i]->def);
+    list[i]->get(t);
+    fprintf(fp, "%s = %s\r\n\r\n", list[i]->name, strptr(t));
+  }
+
+  fclose(fp);
+  return true;
+}
 
 #endif

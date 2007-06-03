@@ -1,4 +1,4 @@
-//void (sCPU::*optbl[256])();
+void (sCPU::*optbl[256])();
 
 CPUReg24 aa, rd;
 uint8    dp, sp;
@@ -54,4 +54,4 @@ uint8    dp, sp;
   void   op_io_cond4(uint16 x, uint16 y);
   void   op_io_cond6(uint16 addr);
 
-//#include "op.h"
+#include "op.h"

@@ -31,8 +31,8 @@ bbc6(0xd3, 0x40, ==),
 bbs7(0xe3, 0x80, !=),
 bbc7(0xf3, 0x80, ==) {
 1:dp = op_readpc();
-2:rd = op_readpc();
-3:sp = op_readdp(dp);
+2:sp = op_readdp(dp);
+3:rd = op_readpc();
 4:op_io();
   if((sp & $1) $2 $1)end;
 5:op_io();
@@ -42,8 +42,8 @@ bbc7(0xf3, 0x80, ==) {
 
 cbne_dp(0x2e) {
 1:dp = op_readpc();
-2:rd = op_readpc();
-3:sp = op_readdp(dp);
+2:sp = op_readdp(dp);
+3:rd = op_readpc();
 4:op_io();
   if(regs.a == sp)end;
 5:op_io();
@@ -53,9 +53,9 @@ cbne_dp(0x2e) {
 
 cbne_dpx(0xde) {
 1:dp = op_readpc();
-2:rd = op_readpc();
-3:op_io();
-4:sp = op_readdp(dp + regs.x);
+2:op_io();
+3:sp = op_readdp(dp + regs.x);
+4:rd = op_readpc();
 5:op_io();
   if(regs.a == sp)end;
 6:op_io();
@@ -65,10 +65,9 @@ cbne_dpx(0xde) {
 
 dbnz_dp(0x6e) {
 1:dp = op_readpc();
-2:rd = op_readpc();
-3:wr = op_readdp(dp);
-  wr--;
-4:op_writedp(dp, wr);
+2:wr = op_readdp(dp);
+3:op_writedp(dp, --wr);
+4:rd = op_readpc();
   if(wr == 0x00)end;
 5:op_io();
 6:op_io();

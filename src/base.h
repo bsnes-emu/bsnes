@@ -1,4 +1,4 @@
-#define BSNES_VERSION "0.019.09"
+#define BSNES_VERSION "0.020"
 #define BSNES_TITLE   "bsnes v" BSNES_VERSION
 
 #define MEMCORE bMemBus
@@ -17,36 +17,32 @@
 //(allow runtime cpu/smp/dsp/ppu/bus selection, ~10% speed hit)
 //#define POLYMORPHISM
 
+#include "lib/libbase.h"
+
 #if defined(PROCESSOR_X86)
   #define ARCH_LSB
+  #include "lib/libco_x86.h"
 #elif defined(PROCESSOR_X86_64)
   #define ARCH_LSB
+  #include "lib/libco_x86_64.h"
 #elif defined(PROCESSOR_G5)
   #define ARCH_MSB
 #else
   #error "unsupported processor"
 #endif
 
-#include "lib/libbase.h"
+#include "lib/libinterp.h"
 #include "lib/libsort.h"
-#include "lib/libco_x86.h"
 #include "lib/libarray.h"
 #include "lib/libvector.h"
+#include "lib/libfile.h"
 #include "lib/libstring.h"
 #include "lib/libconfig.h"
 
-inline uint16 read16(uint8 *addr, uint pos) {
-#ifdef ARCH_LSB
-  return *((uint16*)(addr + pos));
-#else
-  return (addr[pos]) | (addr[pos + 1] << 8);
-#endif
-}
-
 //platform-specific global functions
-void alert(char *, ...);
-void dprintf(char *, ...);
-void dprintf(uint, char *, ...);
+void alert(char*, ...);
+void dprintf(char*, ...);
+void dprintf(uint, char*, ...);
 
 namespace source {
   enum {

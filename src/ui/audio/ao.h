@@ -9,13 +9,11 @@ ao_sample_format driver_format;
 ao_device *audio_device;
 
 public:
-  void run(uint32 sample);
-  void set_frequency(uint freq);
+  void sample(uint16 l_sample, uint16 r_sample);
+  void update_frequency();
   void init();
   void term();
 
-  void set_driver(const char *name);
-
-  AudioAO();
+  AudioAO(const char *driver = 0);
   ~AudioAO();
 };

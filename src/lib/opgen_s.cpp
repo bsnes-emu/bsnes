@@ -1,4 +1,5 @@
 #include "libbase.h"
+#include "libstring.h"
 #include "libstring.cpp"
 
 FILE *fp;
