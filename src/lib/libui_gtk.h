@@ -1,5 +1,5 @@
 /*
-  libui_gtk ~byuu (2007-05-27)
+  libui_gtk ~byuu (2007-06-05)
   license: public domain
 */
 
@@ -28,8 +28,8 @@ bool events_pending();
 uint get_screen_width();
 uint get_screen_height();
 
-bool file_load(Window &owner, char *filename, const char *filter, const char *path = "");
-bool file_save(Window &owner, char *filename, const char *filter, const char *path = "");
+bool file_load(Window *owner, char *filename, const char *filter, const char *path = "");
+bool file_save(Window *owner, char *filename, const char *filter, const char *path = "");
 
 uint16 translate_key(uint key);
 
@@ -60,13 +60,8 @@ MenuBar menu;
   void resize(uint width, uint height);
   virtual void show();
   virtual void hide();
-  virtual bool close() { return true; }
-  virtual void keydown(uint16 key) {}
-  virtual void keyup(uint16 key) {}
 
-  virtual int message(uint id, void *param = 0) {}
-  virtual void clicked(Control&) {}
-  virtual void changed(Control&) {}
+  virtual bool message(uint id, uintptr_t param = 0) { return true; }
 
 //private:
 struct {

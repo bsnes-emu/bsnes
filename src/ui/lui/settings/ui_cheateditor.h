@@ -5,6 +5,6 @@ ui::Button  toggle_code;
 ui::Button  delete_code;
 ui::Editbox code;
 ui::Editbox desc;
-  int  message(uint id, void *param);
+  bool message(uint id, uintptr_t param);
   void setup();
 } window_cheat_editor;

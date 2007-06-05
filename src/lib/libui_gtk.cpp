@@ -40,13 +40,14 @@ uint get_screen_height() { return gdk_screen_height(); }
 
 //
 
-noinline bool gtk_file_load(Window &owner, char *filename, const char *filter, const char *path) {
+bool file_load(Window *owner, char *filename, const char *filter, const char *path) {
   strcpy(filename, "");
 
 GtkWidget *dialog = gtk_file_chooser_dialog_new("Load File",
-  GTK_WINDOW(owner.info.window), GTK_FILE_CHOOSER_ACTION_OPEN,
+  owner ? GTK_WINDOW(owner->info.window) : (GtkWindow*)0,
+  GTK_FILE_CHOOSER_ACTION_OPEN,
   GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-  GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, 0);
+  GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, (const gchar*)0);
 
   if(path && strcmp(path, "")) {
     gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dialog), path);
@@ -62,13 +63,14 @@ GtkWidget *dialog = gtk_file_chooser_dialog_new("Load File",
   return strcmp(filename, ""); //return true if filename != ""
 }
 
-noinline bool gtk_file_save(Window &owner, char *filename, const char *filter, const char *path) {
+bool file_save(Window *owner, char *filename, const char *filter, const char *path) {
   strcpy(filename, "");
 
 GtkWidget *dialog = gtk_file_chooser_dialog_new("Save File",
-  GTK_WINDOW(owner.info.window), GTK_FILE_CHOOSER_ACTION_SAVE,
+  owner ? GTK_WINDOW(owner->info.window) : (GtkWindow*)0,
+  GTK_FILE_CHOOSER_ACTION_SAVE,
   GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-  GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT, 0);
+  GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT, (const gchar*)0);
 
   if(path && strcmp(path, "")) {
     gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dialog), path);
@@ -83,19 +85,6 @@ GtkWidget *dialog = gtk_file_chooser_dialog_new("Save File",
 
   gtk_widget_destroy(dialog);
   return strcmp(filename, ""); //return true if filename != ""
-}
-
-//FreeBSD 6.2-amd64 bug workaround for file_load() + file_save()
-//gdb reveals stack corruption when calling gtk_file_chooset_dialog_new() from inside
-//a member function. however, calling function with nesting sidesteps the bug ...
-//gdb shows that the corruption occurs inside a GTK+ internal library function ...
-
-bool file_load(Window &owner, char *filename, const char *filter, const char *path) {
-  return gtk_file_load(owner, filename, filter, path);
-}
-
-bool file_save(Window &owner, char *filename, const char *filter, const char *path) {
-  return gtk_file_save(owner, filename, filter, path);
 }
 
 //

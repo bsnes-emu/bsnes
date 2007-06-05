@@ -14,7 +14,7 @@ ui::Checkbox invert;
 ui::Button   preset_optimal;
 ui::Button   preset_standard;
 
-  int  message(uint id, void *param);
+  bool message(uint id, uintptr_t param);
   void setup();
   void sync_ui();
 } window_raster_settings;

@@ -1,49 +1,50 @@
-int RasterSettingsWindow::message(uint id, void *param) {
+bool RasterSettingsWindow::message(uint id, uintptr_t param) {
+ui::Control *control = (ui::Control*)param;
   if(id == ui::Message::Changed) {
-    if(param == &contrast) {
+    if(control == &contrast) {
       if(config::snes.contrast != contrast.get_position() - 96) {
         config::snes.contrast = contrast.get_position() - 96;
         lcontrast.set_text("Contrast: %d", int(config::snes.contrast));
         snes.update_color_lookup_table();
       }
-    } else if(param == &brightness) {
+    } else if(control == &brightness) {
       if(config::snes.brightness != brightness.get_position() - 96) {
         config::snes.brightness = brightness.get_position() - 96;
         lbrightness.set_text("Brightness: %d", int(config::snes.brightness));
         snes.update_color_lookup_table();
       }
-    } else if(param == &gamma) {
+    } else if(control == &gamma) {
       if(config::snes.gamma != gamma.get_position() + 10) {
         config::snes.gamma = gamma.get_position() + 10;
         lgamma.set_text("Gamma: %0.2f", double(config::snes.gamma) / 100.0);
         snes.update_color_lookup_table();
       }
     }
-    return 0;
+    return true;
   }
 
   if(id == ui::Message::Clicked) {
-    if(param == &gamma_ramp) {
+    if(control == &gamma_ramp) {
       if(config::snes.gamma_ramp != gamma_ramp.checked()) {
         config::snes.gamma_ramp = gamma_ramp.checked();
         snes.update_color_lookup_table();
       }
-    } else if(param == &sepia) {
+    } else if(control == &sepia) {
       if(config::snes.sepia != sepia.checked()) {
         config::snes.sepia = sepia.checked();
         snes.update_color_lookup_table();
       }
-    } else if(param == &grayscale) {
+    } else if(control == &grayscale) {
       if(config::snes.grayscale != grayscale.checked()) {
         config::snes.grayscale = grayscale.checked();
         snes.update_color_lookup_table();
       }
-    } else if(param == &invert) {
+    } else if(control == &invert) {
       if(config::snes.invert != invert.checked()) {
         config::snes.invert = invert.checked();
         snes.update_color_lookup_table();
       }
-    } else if(param == &preset_optimal) {
+    } else if(control == &preset_optimal) {
       config::snes.contrast   = 0;
       config::snes.brightness = 0;
       config::snes.gamma      = 80;
@@ -52,7 +53,7 @@ int RasterSettingsWindow::message(uint id, void *param) {
       config::snes.grayscale  = false;
       config::snes.invert     = false;
       sync_ui();
-    } else if(param == &preset_standard) {
+    } else if(control == &preset_standard) {
       config::snes.contrast   = 0;
       config::snes.brightness = 0;
       config::snes.gamma      = 100;
@@ -62,10 +63,10 @@ int RasterSettingsWindow::message(uint id, void *param) {
       config::snes.invert     = false;
       sync_ui();
     }
-    return 0;
+    return true;
   }
 
-  return 0;
+  return true;
 }
 
 //update all UI controls to match config file values ...

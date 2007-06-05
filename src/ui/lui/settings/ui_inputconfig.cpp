@@ -58,7 +58,7 @@ uint InputConfigWindow::get_value(uint index) {
   return keymap::none;
 }
 
-void InputConfigWindow::set_value(uint index, uint value) {
+void InputConfigWindow::set_value(uint index, uint16 value) {
   switch(index) {
   case  0: config::input.joypad1.up     = keymap::find(value); break;
   case  1: config::input.joypad1.down   = keymap::find(value); break;
@@ -97,26 +97,27 @@ void InputConfigWindow::refresh_list() {
   list.autosize_columns();
 }
 
-int InputConfigWindow::message(uint id, void *param) {
-  if(id == ui::Message::Changed && param == &list) {
+bool InputConfigWindow::message(uint id, uintptr_t param) {
+ui::Control *control = (ui::Control*)param;
+  if(id == ui::Message::Changed && control == &list) {
   int pos = list.get_selection();
     setkey.enable(pos >= 0);
     clrkey.enable(pos >= 0);
-  } else if((id == ui::Message::DoubleClicked && param == &list) ||
-     (id == ui::Message::Clicked       && param == &setkey)) {
+  } else if((id == ui::Message::DoubleClicked && control == &list) ||
+            (id == ui::Message::Clicked       && control == &setkey)) {
   int pos = list.get_selection();
-    if(pos < 0) { return 0; }
+    if(pos < 0) { return true; }
     window_input_capture.index = pos;
     window_input_capture.label.set_text("Please press a key to assign to '%s' ...", list_index[pos]);
     window_input_capture.show();
     window_input_capture.focus();
-  } else if(id == ui::Message::Clicked && param == &clrkey) {
+  } else if(id == ui::Message::Clicked && control == &clrkey) {
   int pos = list.get_selection();
-    if(pos < 0) { return 0; }
+    if(pos < 0) { return true; }
     set_value(pos, keymap::none);
     refresh_list();
   }
-  return 0;
+  return true;
 }
 
 void InputConfigWindow::setup() {
@@ -156,16 +157,20 @@ int x = 0, y = 0;
 
 //
 
-int InputCaptureWindow::message(uint id, void *param) {
+bool InputCaptureWindow::message(uint id, uintptr_t param) {
   if(id == ui::Message::Close) {
     hide();
     return false;
-  } else if(id == ui::Message::KeyUp) {
-    hide();
-    window_input_config.set_value(index, uint(param));
-    window_input_config.refresh_list();
   }
-  return 0;
+
+  if(id == ui::Message::KeyUp) {
+    hide();
+    window_input_config.set_value(index, param);
+    window_input_config.refresh_list();
+    return true;
+  }
+
+  return true;
 }
 
 void InputCaptureWindow::setup() {

@@ -33,11 +33,11 @@ long Window::wndproc(HWND hwnd, uint msg, WPARAM wparam, LPARAM lparam) {
   } break;
 
   case WM_KEYDOWN: {
-    message(Message::KeyDown, (void*)libui::translate_key(wparam));
+    message(Message::KeyDown, libui::translate_key(wparam));
   } break;
 
   case WM_KEYUP: {
-    message(Message::KeyUp,   (void*)libui::translate_key(wparam));
+    message(Message::KeyUp,   libui::translate_key(wparam));
   } break;
 
   case WM_COMMAND: {
@@ -68,7 +68,7 @@ long Window::wndproc(HWND hwnd, uint msg, WPARAM wparam, LPARAM lparam) {
   //emit Message::Clicked message directly
     case ControlType::MenuItem:
     case ControlType::Button: {
-      message(Message::Clicked, &control);
+      message(Message::Clicked, (uintptr_t)&control);
     } break;
 
     }
@@ -84,7 +84,7 @@ long Window::wndproc(HWND hwnd, uint msg, WPARAM wparam, LPARAM lparam) {
     switch(control.type) {
 
     case ControlType::Slider: {
-      message(Message::Changed, &control);
+      message(Message::Changed, (uintptr_t)&control);
     } break;
 
     }
@@ -104,12 +104,12 @@ long Window::wndproc(HWND hwnd, uint msg, WPARAM wparam, LPARAM lparam) {
         if(((LPNMLISTVIEW)lparam)->uChanged & LVIF_STATE) {
           if(ListView_GetItemState(listbox.hwnd, ((LPNMLISTVIEW)lparam)->iItem, LVIS_FOCUSED)) {
             if(ListView_GetItemState(listbox.hwnd, ((LPNMLISTVIEW)lparam)->iItem, LVIS_SELECTED)) {
-              message(Message::Changed, &control);
+              message(Message::Changed, (uintptr_t)&control);
             }
           }
         }
       } else if(((LPNMHDR)lparam)->code == LVN_ITEMACTIVATE) {
-        message(Message::DoubleClicked, &control);
+        message(Message::DoubleClicked, (uintptr_t)&control);
       }
     } break;
 

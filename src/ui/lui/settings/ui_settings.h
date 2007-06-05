@@ -1,7 +1,7 @@
 class SettingsWindow : public ui::Window { public:
 ui::Listbox panel_list;
 ui::Panel panel;
-  int  message(uint id, void *param);
+  bool message(uint id, uintptr_t param = 0);
   void show();
   void setup();
 } window_settings;

@@ -1,4 +1,5 @@
-int MainWindow::message(uint id, void *param) {
+bool MainWindow::message(uint id, uintptr_t param) {
+ui::Control *control = (ui::Control*)param;
   if(id == ui::Message::Close) {
     _term_ = true;
     hide();
@@ -7,100 +8,101 @@ int MainWindow::message(uint id, void *param) {
 
   if(id == ui::Message::Block) {
     if(uiAudio) { uiAudio->clear_audio(); }
+    return true;
   }
 
   if(id == ui::Message::KeyDown) {
-    if(uiInput) { uiInput->signal_key_down((int)param); }
-    return 0;
+    if(uiInput) { uiInput->signal_key_down(param); }
+    return true;
   }
 
   if(id == ui::Message::KeyUp) {
-    if(uiInput) { uiInput->signal_key_up((int)param); }
-    return 0;
+    if(uiInput) { uiInput->signal_key_up(param); }
+    return true;
   }
 
   if(id == ui::Message::Clicked) {
-    if(param == &menu_file_load) {
+    if(control == &menu_file_load) {
       event::load_rom();
     }
 
-    if(param == &menu_file_unload) {
+    if(control == &menu_file_unload) {
       event::unload_rom();
     }
 
-    if(param == &menu_file_reset) {
+    if(control == &menu_file_reset) {
       event::reset();
     }
 
-    if(param == &menu_file_power) {
+    if(control == &menu_file_power) {
       event::power();
     }
 
-    if(param == &menu_file_exit) {
+    if(control == &menu_file_exit) {
       message(ui::Message::Close);
     }
 
-    if(param == &menu_settings_videomode_1x) { config::video.multiplier = 1; event::update_video_settings(); }
-    if(param == &menu_settings_videomode_2x) { config::video.multiplier = 2; event::update_video_settings(); }
-    if(param == &menu_settings_videomode_3x) { config::video.multiplier = 3; event::update_video_settings(); }
-    if(param == &menu_settings_videomode_4x) { config::video.multiplier = 4; event::update_video_settings(); }
-    if(param == &menu_settings_videomode_5x) { config::video.multiplier = 5; event::update_video_settings(); }
+    if(control == &menu_settings_videomode_1x) { config::video.multiplier = 1; event::update_video_settings(); }
+    if(control == &menu_settings_videomode_2x) { config::video.multiplier = 2; event::update_video_settings(); }
+    if(control == &menu_settings_videomode_3x) { config::video.multiplier = 3; event::update_video_settings(); }
+    if(control == &menu_settings_videomode_4x) { config::video.multiplier = 4; event::update_video_settings(); }
+    if(control == &menu_settings_videomode_5x) { config::video.multiplier = 5; event::update_video_settings(); }
 
-    if(param == &menu_settings_videomode_aspect_correction) {
+    if(control == &menu_settings_videomode_aspect_correction) {
       config::video.aspect_correction = menu_settings_videomode_aspect_correction.checked();
       event::update_video_settings();
     }
 
-    if(param == &menu_settings_videomode_ntsc) { config::video.region = 0; event::update_raster_settings(); event::update_video_settings(); }
-    if(param == &menu_settings_videomode_pal)  { config::video.region = 1; event::update_raster_settings(); event::update_video_settings(); }
+    if(control == &menu_settings_videomode_ntsc) { config::video.region = 0; event::update_raster_settings(); event::update_video_settings(); }
+    if(control == &menu_settings_videomode_pal)  { config::video.region = 1; event::update_raster_settings(); event::update_video_settings(); }
 
-    if(param == &menu_settings_videofilter_hwpoint)  { config::video.hardware_filter = 0; uiVideo->update_hardware_filter(); }
-    if(param == &menu_settings_videofilter_hwlinear) { config::video.hardware_filter = 1; uiVideo->update_hardware_filter(); }
+    if(control == &menu_settings_videofilter_hwpoint)  { config::video.hardware_filter = 0; uiVideo->update_hardware_filter(); }
+    if(control == &menu_settings_videofilter_hwlinear) { config::video.hardware_filter = 1; uiVideo->update_hardware_filter(); }
 
-    if(param == &menu_settings_videofilter_swnone)    { config::video.software_filter = 0; event::update_raster_settings(); }
-    if(param == &menu_settings_videofilter_swntsc)    { config::video.software_filter = 1; event::update_raster_settings(); }
-    if(param == &menu_settings_videofilter_swhq2x)    { config::video.software_filter = 2; event::update_raster_settings(); }
-    if(param == &menu_settings_videofilter_swscale2x) { config::video.software_filter = 3; event::update_raster_settings(); }
+    if(control == &menu_settings_videofilter_swnone)    { config::video.software_filter = 0; event::update_raster_settings(); }
+    if(control == &menu_settings_videofilter_swntsc)    { config::video.software_filter = 1; event::update_raster_settings(); }
+    if(control == &menu_settings_videofilter_swhq2x)    { config::video.software_filter = 2; event::update_raster_settings(); }
+    if(control == &menu_settings_videofilter_swscale2x) { config::video.software_filter = 3; event::update_raster_settings(); }
 
-    if(param == &menu_settings_videoframeskip_0) { config::video.frameskip = 0; }
-    if(param == &menu_settings_videoframeskip_1) { config::video.frameskip = 1; }
-    if(param == &menu_settings_videoframeskip_2) { config::video.frameskip = 2; }
-    if(param == &menu_settings_videoframeskip_3) { config::video.frameskip = 3; }
-    if(param == &menu_settings_videoframeskip_4) { config::video.frameskip = 4; }
-    if(param == &menu_settings_videoframeskip_5) { config::video.frameskip = 5; }
-    if(param == &menu_settings_videoframeskip_6) { config::video.frameskip = 6; }
-    if(param == &menu_settings_videoframeskip_7) { config::video.frameskip = 7; }
-    if(param == &menu_settings_videoframeskip_8) { config::video.frameskip = 8; }
-    if(param == &menu_settings_videoframeskip_9) { config::video.frameskip = 9; }
+    if(control == &menu_settings_videoframeskip_0) { config::video.frameskip = 0; }
+    if(control == &menu_settings_videoframeskip_1) { config::video.frameskip = 1; }
+    if(control == &menu_settings_videoframeskip_2) { config::video.frameskip = 2; }
+    if(control == &menu_settings_videoframeskip_3) { config::video.frameskip = 3; }
+    if(control == &menu_settings_videoframeskip_4) { config::video.frameskip = 4; }
+    if(control == &menu_settings_videoframeskip_5) { config::video.frameskip = 5; }
+    if(control == &menu_settings_videoframeskip_6) { config::video.frameskip = 6; }
+    if(control == &menu_settings_videoframeskip_7) { config::video.frameskip = 7; }
+    if(control == &menu_settings_videoframeskip_8) { config::video.frameskip = 8; }
+    if(control == &menu_settings_videoframeskip_9) { config::video.frameskip = 9; }
 
-    if(param == &menu_settings_mute) {
+    if(control == &menu_settings_mute) {
       config::snes.mute = menu_settings_mute.checked();
     }
 
-    if(param == &menu_settings_speedreg_enable) {
+    if(control == &menu_settings_speedreg_enable) {
       config::system.regulate_speed = menu_settings_speedreg_enable.checked();
     }
 
-    if(param == &menu_settings_speedreg_slowest) { config::system.speed = 1; uiAudio->update_frequency(); }
-    if(param == &menu_settings_speedreg_slow)    { config::system.speed = 2; uiAudio->update_frequency(); }
-    if(param == &menu_settings_speedreg_normal)  { config::system.speed = 3; uiAudio->update_frequency(); }
-    if(param == &menu_settings_speedreg_fast)    { config::system.speed = 4; uiAudio->update_frequency(); }
-    if(param == &menu_settings_speedreg_fastest) { config::system.speed = 5; uiAudio->update_frequency(); }
+    if(control == &menu_settings_speedreg_slowest) { config::system.speed = 1; uiAudio->update_frequency(); }
+    if(control == &menu_settings_speedreg_slow)    { config::system.speed = 2; uiAudio->update_frequency(); }
+    if(control == &menu_settings_speedreg_normal)  { config::system.speed = 3; uiAudio->update_frequency(); }
+    if(control == &menu_settings_speedreg_fast)    { config::system.speed = 4; uiAudio->update_frequency(); }
+    if(control == &menu_settings_speedreg_fastest) { config::system.speed = 5; uiAudio->update_frequency(); }
 
-    if(param == &menu_settings_config) { window_settings.show(); }
+    if(control == &menu_settings_config) { window_settings.show(); }
 
-    if(param == &menu_misc_logaudio) {
+    if(control == &menu_misc_logaudio) {
       (menu_misc_logaudio.checked() == true) ? snes.log_audio_enable() : snes.log_audio_disable();
     }
 
-    if(param == &menu_misc_about) {
+    if(control == &menu_misc_about) {
       window_about.focus();
     }
 
-    return 0;
+    return true;
   }
 
-  return 0;
+  return true;
 }
 
 void MainWindow::setup() {

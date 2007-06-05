@@ -1,5 +1,6 @@
-int AdvancedWindow::message(uint id, void *param) {
-  if(id == ui::Message::Changed && param == &list) {
+bool AdvancedWindow::message(uint id, uintptr_t param) {
+ui::Control *control = (ui::Control*)param;
+  if(id == ui::Message::Changed && control == &list) {
   int pos = list.get_selection();
     set_val.enable(pos >= 0);
     set_def.enable(pos >= 0);
@@ -9,15 +10,15 @@ int AdvancedWindow::message(uint id, void *param) {
       config_file.list[pos]->get(val);
       edit_val.set_text("%s", strptr(val));
     }
-  } else if(id == ui::Message::Clicked && param == &set_val) {
+  } else if(id == ui::Message::Clicked && control == &set_val) {
   char t[4096];
     edit_val.get_text(t, sizeof(t));
     update(list.get_selection(), t);
-  } else if(id == ui::Message::Clicked && param == &set_def) {
+  } else if(id == ui::Message::Clicked && control == &set_def) {
     update(list.get_selection(), 0);
   }
 
-  return 0;
+  return true;
 }
 
 void AdvancedWindow::read_config(uint pos, string &data) {

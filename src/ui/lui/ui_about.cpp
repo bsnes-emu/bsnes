@@ -13,11 +13,11 @@ void AboutWindow::setup() {
   about.create(*this, 0, 5, 5, 290, 120, about_text);
 }
 
-int AboutWindow::message(uint id, void *param) {
+bool AboutWindow::message(uint id, uintptr_t param) {
   if(id == ui::Message::Close) {
     hide();
     return false;
   }
 
-  return 0;
+  return true;
 }

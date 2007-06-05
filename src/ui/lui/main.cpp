@@ -92,6 +92,13 @@ int main(int argc, char *argv[]) {
   init_snes();
   ui_init();
 
+  if(argc >= 2) {
+    cartridge.load_begin(Cartridge::CART_NORMAL);
+    cartridge.load(argv[1]);
+    cartridge.load_end();
+    snes.power();
+  }
+
   while(_term_ == false) {
     while(ui::events_pending() == true) { ui::run(); }
     if(cartridge.loaded() == true) {
@@ -100,7 +107,7 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  if(cartridge.loaded() == true) { cartridge.unload(); }
+  event::unload_rom();
 
   config_file.save(config::filename);
   term_snes();

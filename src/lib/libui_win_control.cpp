@@ -137,13 +137,13 @@ void MenuCheckItem::create(MenuGroup &r_owner, const char *caption) {
 void MenuCheckItem::check() {
   if(checked() == true)return;
   CheckMenuItem(parent, id, MF_CHECKED);
-  owner->message(Message::Clicked, this);
+  owner->message(Message::Clicked, (uintptr_t)this);
 }
 
 void MenuCheckItem::uncheck() {
   if(checked() == false)return;
   CheckMenuItem(parent, id, MF_UNCHECKED);
-  owner->message(Message::Clicked, this);
+  owner->message(Message::Clicked, (uintptr_t)this);
 }
 
 void MenuCheckItem::check(bool state) {
@@ -180,7 +180,7 @@ void MenuRadioItem::check() {
   for(uint i = 0; i < group.count(); i++) {
     CheckMenuItem(parent, group[i].id, (id == group[i].id) ? MF_CHECKED : MF_UNCHECKED);
   }
-  owner->message(Message::Clicked, this);
+  owner->message(Message::Clicked, (uintptr_t)this);
 }
 
 bool MenuRadioItem::checked() {
@@ -419,13 +419,13 @@ void Checkbox::create(Window &r_owner, uint style, uint x, uint y, uint width, u
 void Checkbox::check() {
   if(checked() == true)return;
   SendMessage(hwnd, BM_SETCHECK, (WPARAM)TRUE, 0);
-  owner->message(Message::Clicked, this);
+  owner->message(Message::Clicked, (uintptr_t)this);
 }
 
 void Checkbox::uncheck() {
   if(checked() == false)return;
   SendMessage(hwnd, BM_SETCHECK, (WPARAM)FALSE, 0);
-  owner->message(Message::Clicked, this);
+  owner->message(Message::Clicked, (uintptr_t)this);
 }
 
 void Checkbox::check(bool state) {
@@ -456,7 +456,7 @@ void Radiobox::check() {
   for(uint i = 0; i < group.count(); i++) {
     SendMessage(group[i].hwnd, BM_SETCHECK, (group[i].hwnd == hwnd) ? (WPARAM)TRUE : (WPARAM)FALSE, 0);
   }
-  owner->message(Message::Clicked, this);
+  owner->message(Message::Clicked, (uintptr_t)this);
 }
 
 bool Radiobox::checked() {

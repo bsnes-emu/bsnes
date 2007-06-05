@@ -57,7 +57,7 @@ stringarray dir;
     strcat(dir[0], dir[1]);
   }
 
-  return ui::file_load(window_main, fn,
+  return ui::file_load(&window_main, fn,
     "SNES images;*.smc,*.sfc,*.swc,*.fig,*.ufo,*.gd3,*.078,*.st"
   #if defined(GZIP_SUPPORT)
     ",*.gz,*.z,*.zip"
@@ -70,7 +70,7 @@ stringarray dir;
 }
 
 void load_rom() {
-char fn[4096];
+char fn[PATH_MAX];
   if(load_rom(fn) == false)return;
 
   if(cartridge.loaded() == true)cartridge.unload();
@@ -81,8 +81,12 @@ char fn[4096];
 }
 
 void unload_rom() {
-  cartridge.unload();
-  uiAudio->clear_audio();
+  if(cartridge.loaded() == true) {
+    cartridge.unload();
+    uiVideo->clear_video();
+    uiAudio->clear_audio();
+  }
+  window_main.set_text(BSNES_TITLE);
 }
 
 void reset() {

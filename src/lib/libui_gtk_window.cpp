@@ -6,25 +6,25 @@ gint libui_window_close(GtkWidget *w, GdkEventAny *any, Window *window) {
 }
 
 gint libui_window_keydown(GtkWidget *w, GdkEventKey *key, Window *window) {
-  if(window) { window->message(Message::KeyDown, (void*)libui::translate_key(key->keyval)); }
+  if(window) { window->message(Message::KeyDown, libui::translate_key(key->keyval)); }
   return FALSE;
 }
 
 gint libui_window_keyup(GtkWidget *w, GdkEventKey *key, Window *window) {
-  if(window) { window->message(Message::KeyUp, (void*)libui::translate_key(key->keyval)); }
+  if(window) { window->message(Message::KeyUp, libui::translate_key(key->keyval)); }
   return FALSE;
 }
 
 void libui_control_clicked(Control *control) {
-  if(control && control->owner) { control->owner->message(Message::Clicked, control); }
+  if(control && control->owner) { control->owner->message(Message::Clicked, (uintptr_t)control); }
 }
 
 void libui_control_changed(Control *control) {
-  if(control && control->owner) { control->owner->message(Message::Changed, control); }
+  if(control && control->owner) { control->owner->message(Message::Changed, (uintptr_t)control); }
 }
 
 void libui_control_double_clicked(Control *control) {
-  if(control && control->owner) { control->owner->message(Message::DoubleClicked, control); }
+  if(control && control->owner) { control->owner->message(Message::DoubleClicked, (uintptr_t)control); }
 }
 
 void Window::create(uint style, uint width, uint height, const char *caption) {

@@ -1,0 +1,63 @@
+bsnes (TM) Open Source Reference License
+Copyright (C) 2004 - 2007 byuu
+All rights reserved
+
+1. Definitions
+
+The terms "reproduce", "reproduction", "distribute" and "distribution" have the
+same meaning here as under U.S. copyright law.
+
+"The software" means this software package as a whole, including, but not
+limited to, this license, binaries, source code, documentation, and data.
+
+"You" means the licensee of the software.
+
+"The licensor" means the copyright holder of the software, byuu.
+
+2. Grant of Rights
+
+Subject to the terms of this license, the licensor grants you a
+non-transferable, non-exclusive, worldwide, royalty-free copyright license to
+reproduce the software for non-commercial use only, provided the software
+remains unmodified, and there is no charge for the software itself, its' use,
+nor for the medium upon which the software is distributed. The reproduction of
+modified or derivative works of the software is strictly prohibited, except when
+transmitted solely to the licensor.
+
+3. Limitations
+
+This license does not grant you any rights to use the licensor's name, logo or
+trademarks.
+
+The software is provided "as is", and any express or implied warranties,
+including, but not limited to, the implied warranties of merchantability and
+fitness for a particular purpose are disclaimed. In no event shall the licensor
+be liable for any direct, indirect, incidental, special, exemplary, or
+consequential damages (including, but not limited to, procurement of substitute
+goods or services; loss of use, data, or profits; or business interruption)
+however caused and on any theory of liability, whether in contract, strict
+liability, or tort (including negligence or otherwise) arising in any way out of
+the use of the software, even if advised of the possibility of such damage.
+
+In the event that this license is determined to be invalid or unenforceable, the
+Grant of Rights will become null and void, and no rights shall be granted to the
+licensee, within the scope of U.S. copyright law.
+
+4. Exemptions
+
+The software includes the work of other copyright holders, which is licensed
+under different agreements, and exempt from this license. Below is a complete
+list of all such software, and their respective copyright holders and licenses.
+Further, respective source code files are labeled with their correct licensing
+information in the header. The lack of such a header indicates said file falls
+under the bsnes license.
+
+HQ2x Filter, author: MaxST, license: LGPL
+JMA, author: NSRT Team, license: GPL *
+libco, author: byuu, license: public domain
+libui, author: byuu, license: public domain
+NTSC Filter, author: blargg, license: LGPL
+S-DD1, author: Andreas Naive, license: public domain
+zlib, license: zlib license
+
+* bsnes has received an exemption from the copyright holder to use this work.

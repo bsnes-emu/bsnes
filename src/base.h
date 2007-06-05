@@ -1,4 +1,4 @@
-#define BSNES_VERSION "0.020"
+#define BSNES_VERSION "0.020.01"
 #define BSNES_TITLE   "bsnes v" BSNES_VERSION
 
 #define MEMCORE bMemBus

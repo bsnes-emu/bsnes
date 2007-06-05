@@ -1,5 +1,5 @@
 /*
-  libui_win ~byuu (2007-05-28)
+  libui_win ~byuu (2007-06-05)
   license: public domain
 */
 
@@ -32,8 +32,8 @@ bool events_pending();
 uint get_screen_width();
 uint get_screen_height();
 
-bool file_load(Window &owner, char *filename, const char *filter, const char *path = "");
-bool file_save(Window &owner, char *filename, const char *filter, const char *path = "");
+bool file_load(Window *owner, char *filename, const char *filter, const char *path = "");
+bool file_save(Window *owner, char *filename, const char *filter, const char *path = "");
 
 uint16 translate_key(uint key);
 
@@ -65,7 +65,7 @@ MenuBar menu;
   virtual void show();
   virtual void hide();
 
-  virtual int message(uint id, void *param = 0) { return 0; }
+  virtual bool message(uint id, uintptr_t param = 0) { return true; }
 
   void move(Control &control, uint x, uint y);
   void attach(Control &control);

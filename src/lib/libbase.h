@@ -1,5 +1,5 @@
 /*
-  libbase : version 0.10 ~byuu (2007-05-27)
+  libbase : version 0.10 ~byuu (2007-06-04)
   license: public domain
 */
 
@@ -55,17 +55,14 @@
   #define noinline      __declspec(noinline)
   #define inline        inline
   #define alwaysinline  __forceinline
-  #define fastcall      __fastcall
 #elif defined(__GNUC__)
   #define noinline      __attribute__((noinline))
   #define inline        inline
   #define alwaysinline  __attribute__((always_inline))
-  #define fastcall      __attribute__((fastcall))
 #else
   #define noinline
   #define inline        inline
   #define alwaysinline  inline
-  #define fastcall
 #endif
 
 /*****

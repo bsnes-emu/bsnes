@@ -60,7 +60,7 @@ ui::MenuGroup menu_misc;
 ui::Container view;
 //
 
-  int  message(uint id, void *param = 0);
+  bool message(uint id, uintptr_t param = 0);
   void setup();
   void setup_menu();
 } window_main;

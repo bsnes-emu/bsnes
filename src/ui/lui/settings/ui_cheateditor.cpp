@@ -1,5 +1,5 @@
-int CheatEditorWindow::message(uint id, void *param) {
-  return 0;
+bool CheatEditorWindow::message(uint id, uintptr_t param) {
+  return true;
 }
 
 void CheatEditorWindow::setup() {

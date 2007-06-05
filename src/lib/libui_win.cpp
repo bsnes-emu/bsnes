@@ -81,7 +81,7 @@ uint get_screen_height() { return GetSystemMetrics(SM_CYSCREEN); }
 
 //
 
-bool file_load(Window &owner, char *filename, const char *filter, const char *path) {
+bool file_load(Window *owner, char *filename, const char *filter, const char *path) {
 string dir, f;
   strcpy(dir, path ? path : "");
   replace(dir, "/", "\\");
@@ -111,7 +111,7 @@ OPENFILENAME ofn;
   strcpy(filename, "");
   memset(&ofn, 0, sizeof(ofn));
   ofn.lStructSize     = sizeof(ofn);
-  ofn.hwndOwner       = owner.info.hwnd;
+  ofn.hwndOwner       = owner ? owner->info.hwnd : 0;
   ofn.lpstrFilter     = pf;
   ofn.lpstrInitialDir = strptr(dir);
   ofn.lpstrFile       = filename;
@@ -122,7 +122,7 @@ OPENFILENAME ofn;
   return GetOpenFileName(&ofn);
 }
 
-bool file_save(Window &owner, char *filename, const char *filter, const char *path) {
+bool file_save(Window *owner, char *filename, const char *filter, const char *path) {
 string dir, f;
   strcpy(dir, path ? path : "");
   replace(dir, "/", "\\");
@@ -152,7 +152,7 @@ OPENFILENAME ofn;
   strcpy(filename, "");
   memset(&ofn, 0, sizeof(ofn));
   ofn.lStructSize     = sizeof(ofn);
-  ofn.hwndOwner       = owner.info.hwnd;
+  ofn.hwndOwner       = owner ? owner->info.hwnd : 0;
   ofn.lpstrFilter     = pf;
   ofn.lpstrInitialDir = strptr(dir);
   ofn.lpstrFile       = filename;
