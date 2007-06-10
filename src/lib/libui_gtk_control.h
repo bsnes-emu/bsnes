@@ -148,12 +148,12 @@ class Frame : public Control { public:
 
 class Label : public Control { public:
   void create(Window &owner, uint style, uint x, uint y, uint width, uint height, const char *caption = "");
-  void set_text(const char *str, ...);
+  void set_text(const char *str);
 };
 
 class Button : public Control { public:
   void create(Window &owner, uint style, uint x, uint y, uint width, uint height, const char *caption = "");
-  void set_text(const char *str, ...);
+  void set_text(const char *str);
 };
 
 class Checkbox : public Control { public:
@@ -185,7 +185,7 @@ enum {
 };
 
   void create(Window &owner, uint style, uint x, uint y, uint width, uint height, const char *caption = "");
-  void set_text(const char *str, ...);
+  void set_text(const char *str);
   uint get_text(char *str, uint length);
 
 private:
@@ -210,8 +210,8 @@ enum {
   void create(Window &owner, uint style, uint x, uint y, uint width, uint height, const char *columns = "");
   void autosize_columns();
   void set_column_width(uint column, uint width);
-  void add_item(const char *data, ...);
-  void set_item(uint index, const char *data, ...);
+  void add_item(const char *data);
+  void set_item(uint index, const char *data);
   int  get_selection();
   void set_selection(int index);
   void reset();

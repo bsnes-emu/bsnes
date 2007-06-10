@@ -92,31 +92,48 @@ void InputConfigWindow::set_value(uint index, uint16 value) {
 
 void InputConfigWindow::refresh_list() {
   for(uint i = 0; i < 24; i++) {
-    list.set_item(i, "%s|%s", list_index[i], keymap::find(get_value(i)));
+    list.set_item(i, string() << list_index[i] << "|" << keymap::find(get_value(i)));
   }
   list.autosize_columns();
 }
 
 bool InputConfigWindow::message(uint id, uintptr_t param) {
 ui::Control *control = (ui::Control*)param;
+  if(id == ui::Message::KeyDown) {
+    if(uiInput) { uiInput->signal_key_down(param); }
+    return true;
+  }
+
+  if(id == ui::Message::KeyUp) {
+    if(uiInput) { uiInput->signal_key_up(param); }
+    return true;
+  }
+
   if(id == ui::Message::Changed && control == &list) {
   int pos = list.get_selection();
     setkey.enable(pos >= 0);
     clrkey.enable(pos >= 0);
-  } else if((id == ui::Message::DoubleClicked && control == &list) ||
-            (id == ui::Message::Clicked       && control == &setkey)) {
+    return true;
+  }
+
+  if((id == ui::Message::DoubleClicked && control == &list) ||
+     (id == ui::Message::Clicked       && control == &setkey)) {
   int pos = list.get_selection();
     if(pos < 0) { return true; }
     window_input_capture.index = pos;
-    window_input_capture.label.set_text("Please press a key to assign to '%s' ...", list_index[pos]);
+    window_input_capture.label.set_text(string() << "Please press a key to assign to " << list_index[pos] << " ...");
     window_input_capture.show();
-    window_input_capture.focus();
-  } else if(id == ui::Message::Clicked && control == &clrkey) {
+    return true;
+  }
+
+  if(id == ui::Message::Clicked && control == &clrkey) {
   int pos = list.get_selection();
     if(pos < 0) { return true; }
     set_value(pos, keymap::none);
     refresh_list();
+    return true;
   }
+
   return true;
 }
 
@@ -124,16 +141,16 @@ void InputConfigWindow::setup() {
   create(0, 475, 355);
 
 int x = 0, y = 0;
-  lportA.create(*this, 0, x, y + 7, 105, 15, "Controller Port A:");
-  portA.create(*this, 0, x + 110, y, 125, 30);
+  lportA.create(*this, 0, x,       y, 105, 30, "Controller Port A:");
+  portA.create (*this, 0, x + 110, y, 125, 30);
   portA.add_item("None");
   portA.add_item("Joypad 1");
   portA.add_item("Joypad 2");
   portA.set_selection(1);
   portA.disable();
 
-  lportB.create(*this, 0, x + 240, y + 7, 105, 15, "Controller Port B:");
-  portB.create(*this, 0, x + 350, y, 125, 30);
+  lportB.create(*this, 0, x + 240, y, 105, 30, "Controller Port B:");
+  portB.create (*this, 0, x + 350, y, 125, 30);
   portB.add_item("None");
   portB.add_item("Joypad 1");
   portB.add_item("Joypad 2");
@@ -163,14 +180,42 @@ bool InputCaptureWindow::message(uint id, uintptr_t param) {
     return false;
   }
 
+  if(id == ui::Message::KeyDown) {
+    if(uiInput) { uiInput->signal_key_down(param); }
+    return true;
+  }
+
   if(id == ui::Message::KeyUp) {
-    hide();
-    window_input_config.set_value(index, param);
-    window_input_config.refresh_list();
+    if(uiInput) { uiInput->signal_key_up(param); }
     return true;
   }
 
   return true;
+}
+
+void InputCaptureWindow::show() {
+  uiInput->clear_input();
+
+//enter and spacebar can be used to activate key capture,
+//set lock on these keys if they are held down to prevent
+//them from being instantly assigned to selected entry ...
+  uiInput->poll();
+  key_lock = (uiInput->key_down(keymap::enter) || uiInput->key_down(keymap::space));
+  Window::show();
+  Window::focus();
+
+  while(_term_ == false && visible() == true) {
+    run();
+  uint16 key = input_manager.scan();
+    if(key == keymap::none) { key_lock = false; continue; }
+    if(key_lock && (key == keymap::enter || key == keymap::space)) { continue; }
+    hide();
+    window_input_config.set_value(index, key);
+    window_input_config.refresh_list();
+    break;
+  }
+
+  uiInput->clear_input();
 }
 
 void InputCaptureWindow::setup() {

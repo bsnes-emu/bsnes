@@ -131,8 +131,12 @@ void Window::attach(Control &control) {
 }
 
 void Window::focus() {
-  show();
+  if(!visible()) { show(); }
   SetFocus(info.hwnd);
+}
+
+bool Window::focused() {
+  return (GetForegroundWindow() == info.hwnd);
 }
 
 void Window::move(Control &control, uint x, uint y) {
@@ -180,6 +184,13 @@ RECT rc;
 }
 
 void Window::resize(uint width, uint height) {
+  if(info.fullscreen == true) {
+    info.width  = GetSystemMetrics(SM_CXSCREEN);
+    info.height = GetSystemMetrics(SM_CYSCREEN);
+    SetWindowPos(info.hwnd, 0, 0, 0, info.width, info.height, SWP_NOZORDER);
+    return;
+  }
+
   info.width  = width;
   info.height = height;
 
@@ -212,6 +223,36 @@ void Window::hide() {
   ShowWindow(info.hwnd, SW_HIDE);
 }
 
+void Window::show(bool state) {
+  (state == true) ? show() : hide();
+}
+
+bool Window::visible() {
+  return GetWindowLong(info.hwnd, GWL_STYLE) & WS_VISIBLE;
+}
+
+void Window::fullscreen() {
+  if(info.fullscreen)return;
+  info.fullscreen = true;
+  SetWindowLong(info.hwnd, GWL_STYLE, WS_VISIBLE | WS_POPUP);
+  resize(get_screen_width(), get_screen_height());
+}
+
+void Window::unfullscreen() {
+  if(!info.fullscreen)return;
+  info.fullscreen = false;
+  SetWindowLong(info.hwnd, GWL_STYLE, WS_POPUP | WS_SYSMENU | WS_CAPTION | WS_MINIMIZEBOX | WS_VISIBLE);
+  resize(info.width, info.height);
+}
+
+void Window::fullscreen(bool state) {
+  (state == true) ? fullscreen() : unfullscreen();
+}
+
+bool Window::is_fullscreen() {
+  return info.fullscreen;
+}
+
 //
 
 void Window::set_text(const char *str, ...) {
@@ -234,6 +275,7 @@ HBRUSH old_brush = info.background;
 //
 
 Window::Window() {
+  info.fullscreen    = false;
   info.background    = 0;
   info.center        = false;
   info.control_index = 1;

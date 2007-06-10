@@ -5,10 +5,10 @@ ui::Control *control = (ui::Control*)param;
     set_val.enable(pos >= 0);
     set_def.enable(pos >= 0);
     if(pos >= 0 && pos < config_file.list_count) {
-      desc.set_text("(default = %s)\n%s", config_file.list[pos]->def, config_file.list[pos]->desc);
+      desc.set_text(string() << "(default = " << config_file.list[pos]->def << ")\n" << config_file.list[pos]->desc);
     string val;
       config_file.list[pos]->get(val);
-      edit_val.set_text("%s", strptr(val));
+      edit_val.set_text(strptr(val));
     }
   } else if(id == ui::Message::Clicked && control == &set_val) {
   char t[4096];
@@ -40,7 +40,7 @@ void AdvancedWindow::update(uint pos, const char *data) {
   config_file.list[pos]->set(data ? data : config_file.list[pos]->def);
 string val;
   config_file.list[pos]->get(val);
-  edit_val.set_text("%s", strptr(val));
+  edit_val.set_text(strptr(val));
   read_config(pos, val);
   list.set_item(pos, strptr(val));
   list.autosize_columns();

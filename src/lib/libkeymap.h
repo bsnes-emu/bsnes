@@ -7,6 +7,28 @@
 
 namespace keymap {
 
+//TODO: use lookup table for find() functions
+static char keytable[][64] = {
+  "none",
+  "esc",
+  "f1", "f2", "f3", "f4", "f5", "f6", "f7", "f8", "f9", "f10", "f11", "f12",
+  "print_screen", "sys_req", "scroll_lock", "pause", "brk",
+  "grave", "tilde",
+  "num_1", "exclamation",
+  "num_2", "at",
+  "num_3", "pound",
+  "num_4", "dollar",
+  "num_5", "percent",
+  "num_6", "power",
+  "num_7", "ampersand",
+  "num_8", "asterisk",
+  "num_9", "lparenthesis",
+  "num_0", "rparenthesis",
+  "minus", "underscore",
+  "equal", "plus",
+  "backspace",
+};
+
 enum {
   none = 0x0000,
 
@@ -107,6 +129,8 @@ enum {
   lsuper,
   rsuper,
   menu,
+
+  limit, //not an actual key -- marks the end of linear key entries
 
   joypad_flag    = 0x8000,
   joypad_nummask = 0x7f00,

@@ -56,6 +56,10 @@ void Window::focus() {
   gtk_window_present(GTK_WINDOW(info.window));
 }
 
+bool Window::focused() {
+  return GTK_WIDGET_HAS_FOCUS(info.window);
+}
+
 void Window::move(uint x, uint y) {
 //if window was centered before, GTK+ will ignore move requests,
 //therfore we must turn off auto-centering.
@@ -75,13 +79,32 @@ void Window::hide() {
   gtk_widget_hide(info.window);
 }
 
-void Window::set_text(const char *str, ...) {
-va_list args;
-  va_start(args, str);
-string temp;
-  vsprintf(temp, str, args);
-  va_end(args);
-  gtk_window_set_title(GTK_WINDOW(info.window), strptr(temp));
+void Window::show(bool state) {
+  (state == true) ? show() : hide();
+}
+
+bool Window::visible() {
+  return GTK_WIDGET_VISIBLE(info.window);
+}
+
+void Window::fullscreen() {
+  gtk_window_fullscreen(GTK_WINDOW(info.window));
+}
+
+void Window::unfullscreen() {
+  gtk_window_unfullscreen(GTK_WINDOW(info.window));
+}
+
+void Window::fullscreen(bool state) {
+  (state == true) ? fullscreen() : unfullscreen();
+}
+
+bool Window::is_fullscreen() {
+  return false;
+};
+
+void Window::set_text(const char *str) {
+  gtk_window_set_title(GTK_WINDOW(info.window), str);
 }
 
 void Window::set_background_color(uint8 r, uint8 g, uint8 b) {

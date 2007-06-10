@@ -3,8 +3,8 @@ namespace event {
 void update_frame_counter() {
   if(r_ppu->status.frames_updated) {
     r_ppu->status.frames_updated = false;
-    if(bool(true) == true) { //TODO: add config file variable to toggle fps counter
-      window_main.set_text("%s [%d]", BSNES_TITLE, r_ppu->status.frames_executed);
+    if(config::misc.show_frame_counter == true) {
+      window_main.set_text(string() << BSNES_TITLE << " [" << r_ppu->status.frames_executed << "]");
     }
   }
 }
@@ -16,10 +16,25 @@ uint multiplier = minmax<1, 5>(uint(config::video.multiplier));
   width  *= multiplier;
   height *= multiplier;
   if(config::video.aspect_correction == true) {
-    width = uint( double(width) * 8.0 / 7.0 );
+    if(config::video.region == 0) {
+      width = uint( double(width) *  8.0 /  7.0 ); //NTSC
+    } else {
+      width = uint( double(width) * 48.0 / 35.0 ); //PAL
+    }
   }
-  window_main.resize(width, height);
-  window_main.view.resize(width, height);
+
+  if(config::video.fullscreen) {
+  //window_main.menu.hide();
+    window_main.fullscreen();
+    window_main.view.move((ui::get_screen_width() - width) / 2, (ui::get_screen_height() - height) / 2);
+    window_main.view.resize(width, height);
+  } else {
+  //window_main.menu.show();
+    window_main.unfullscreen();
+    window_main.resize(width, height);
+    window_main.view.move(0, 0);
+    window_main.view.resize(width, height);
+  }
 }
 
 void update_raster_settings() {
@@ -38,6 +53,16 @@ uint filter, standard;
 
   snes.set_video_filter(filter);
   snes.set_video_standard(standard);
+}
+
+void toggle_menu() {
+  window_main.menu.show(!window_main.menu.visible());
+  update_video_settings();
+}
+
+void toggle_fullscreen() {
+  config::video.fullscreen = !config::video.fullscreen;
+  update_video_settings();
 }
 
 //

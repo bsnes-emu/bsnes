@@ -21,6 +21,8 @@ public:
   bool key_down(uint16 key) { return keystate[key]; }
   void signal_key_down(uint16 key) { keystate[key] = true;  }
   void signal_key_up  (uint16 key) { keystate[key] = false; }
+
+  void clear_input() { memset(keystate, 0, sizeof(keystate)); }
 };
 
 #endif

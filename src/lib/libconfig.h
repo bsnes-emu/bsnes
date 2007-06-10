@@ -1,5 +1,5 @@
 /*
-  libconfig : version 0.14 ~byuu (2007-05-27)
+  libconfig : version 0.14 ~byuu (2007-06-10)
   license: public domain
 */
 
@@ -72,7 +72,7 @@ enum Format {
   template<typename T> bool operator<=(T x) { return (T(data) <= x); }
   template<typename T> bool operator< (T x) { return (T(data) <  x); }
 
-  IntegerSetting(Config *parent, char *r_name, char *r_desc, uint r_format, uint r_data) {
+  IntegerSetting(Config *parent, const char *r_name, const char *r_desc, uint r_format, uint r_data) {
     type = Setting::Integer;
     name = strdup(r_name);
     desc = strdup(r_desc);
@@ -103,7 +103,7 @@ string data;
   bool operator==(const char *x) { return !strcmp(data, x); }
   bool operator!=(const char *x) { return  strcmp(data, x); }
 
-  StringSetting(Config *parent, char *r_name, char *r_desc, char *r_data) {
+  StringSetting(Config *parent, const char *r_name, const char *r_desc, char *r_data) {
     type = Setting::String;
     name = strdup(r_name);
     desc = strdup(r_desc);

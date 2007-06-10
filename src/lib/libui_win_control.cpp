@@ -4,6 +4,10 @@ namespace libui {
  * Control
  *****/
 
+void Control::move(uint x, uint y) {
+  SetWindowPos(hwnd, 0, x, y, 0, 0, SWP_NOZORDER | SWP_NOSIZE);
+}
+
 void Control::resize(uint width, uint height) {
   SetWindowPos(hwnd, 0, 0, 0, width, height, SWP_NOZORDER | SWP_NOMOVE);
 }
@@ -355,11 +359,20 @@ long __stdcall label_wndproc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) 
     BeginPaint(hwnd, &ps);
   RECT rc;
   char t[4096];
-    GetWindowText(hwnd, t, 4095);
+    GetWindowText(hwnd, t, 4095); //TODO: use internal buffer, so length is not limited ...
     GetClientRect(hwnd, &rc);
     SetTextColor(ps.hdc, RGB(0, 0, 0));
     SetBkMode(ps.hdc, TRANSPARENT);
     SelectObject(ps.hdc, (HGDIOBJ)libui::font.variable);
+  //center text if text height < control height, otherwise draw from top left corner
+  RECT trc;
+    GetClientRect(hwnd, &trc);
+    DrawText(ps.hdc, t, strlen(t), &trc, DT_CALCRECT);
+    if(trc.bottom < rc.bottom) {
+      rc.top = (rc.bottom - trc.bottom) / 2;
+      rc.bottom = rc.top + trc.bottom;
+    }
+  //
     DrawText(ps.hdc, t, strlen(t), &rc, DT_END_ELLIPSIS | DT_NOPREFIX);
     EndPaint(hwnd, &ps);
   } break;

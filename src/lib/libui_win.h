@@ -1,5 +1,5 @@
 /*
-  libui_win ~byuu (2007-06-05)
+  libui_win ~byuu (2007-06-10)
   license: public domain
 */
 
@@ -60,10 +60,17 @@ MenuBar menu;
   void set_text(const char *str, ...);
   void set_background_color(uint8 r, uint8 g, uint8 b);
   void focus();
+  bool focused();
   void move(uint x, uint y);
   void resize(uint width, uint height);
   virtual void show();
   virtual void hide();
+  void show(bool state);
+  bool visible();
+  void fullscreen();
+  void unfullscreen();
+  void fullscreen(bool state);
+  bool is_fullscreen();
 
   virtual bool message(uint id, uintptr_t param = 0) { return true; }
 
@@ -78,6 +85,7 @@ MenuBar menu;
 //private:
 struct {
   uint width, height;
+  bool fullscreen;
 
   HWND hwnd;
   HWND hwnd_resize;

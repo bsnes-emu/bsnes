@@ -1,9 +1,9 @@
 /*
-  libarray : version 0.08 ~byuu (2006-12-16)
+  libarray : version 0.09 ~byuu (2007-03-06)
 */
 
-#ifndef __LIBARRAY
-#define __LIBARRAY
+#ifndef LIBARRAY_H
+#define LIBARRAY_H
 
 template<typename T> class array {
 protected:

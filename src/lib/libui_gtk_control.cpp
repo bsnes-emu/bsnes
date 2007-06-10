@@ -321,13 +321,8 @@ void Label::create(Window &r_owner, uint style, uint x, uint y, uint width, uint
   gtk_widget_show(widget);
 }
 
-void Label::set_text(const char *str, ...) {
-va_list args;
-  va_start(args, str);
-string temp;
-  vsprintf(temp, str, args);
-  va_end(args);
-  gtk_label_set_label(GTK_LABEL(widget), strptr(temp));
+void Label::set_text(const char *str) {
+  gtk_label_set_label(GTK_LABEL(widget), str);
 }
 
 /*****
@@ -345,13 +340,8 @@ void Button::create(Window &r_owner, uint style, uint x, uint y, uint width, uin
   g_signal_connect_swapped(G_OBJECT(widget), "clicked", G_CALLBACK(libui_control_clicked), (gpointer)this);
 }
 
-void Button::set_text(const char *str, ...) {
-va_list args;
-  va_start(args, str);
-string temp;
-  vsprintf(temp, str, args);
-  va_end(args);
-  gtk_button_set_label(GTK_BUTTON(widget), strptr(temp));
+void Button::set_text(const char *str) {
+  gtk_button_set_label(GTK_BUTTON(widget), str);
 }
 
 /*****
@@ -447,17 +437,11 @@ void Editbox::create(Window &r_owner, uint style, uint x, uint y, uint width, ui
   gtk_widget_show(widget);
 }
 
-void Editbox::set_text(const char *str, ...) {
-va_list args;
-  va_start(args, str);
-string temp;
-  vsprintf(temp, str, args);
-  va_end(args);
-
+void Editbox::set_text(const char *str) {
   if(multiline == false) {
-    gtk_entry_set_text(GTK_ENTRY(widget), strptr(temp));
+    gtk_entry_set_text(GTK_ENTRY(widget), str);
   } else {
-    gtk_text_buffer_set_text(buffer, strptr(temp), -1);
+    gtk_text_buffer_set_text(buffer, str, -1);
   }
 }
 
@@ -539,28 +523,16 @@ void Listbox::set_column_width(uint column, uint width) {
   gtk_tree_view_column_set_max_width(column_list[column], width);
 }
 
-void Listbox::add_item(const char *data, ...) {
-va_list args;
-  va_start(args, data);
-string temp;
-  vsprintf(temp, data, args);
-  va_end(args);
-
+void Listbox::add_item(const char *data) {
 stringarray part;
-  split(part, "|", temp);
+  split(part, "|", data);
   gtk_list_store_append(store, &iter);
   for(uint i = 0; i < count(part); i++) {
     gtk_list_store_set(store, &iter, i, strptr(part[i]), -1);
   }
 }
 
-void Listbox::set_item(uint index, const char *data, ...) {
-va_list args;
-  va_start(args, data);
-string temp;
-  vsprintf(temp, data, args);
-  va_end(args);
-
+void Listbox::set_item(uint index, const char *data) {
 GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(subwidget));
   for(uint i = 0; i <= index; i++) {
     (i == 0) ?
@@ -569,14 +541,14 @@ GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(subwidget));
   }
 
 stringarray part;
-  split(part, "|", temp);
+  split(part, "|", data);
   for(uint i = 0; i < count(part); i++) {
     gtk_list_store_set(store, &iter, i, strptr(part[i]), -1);
   }
 }
 
-int Listbox::get_selection() {
 //... because gtk_tree_view_get_selected_row(GTK_TREE_VIEW(subwidget)) would be too easy ...
+int Listbox::get_selection() {
 GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(subwidget));
 GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(subwidget));
   if(gtk_tree_model_get_iter_first(model, &iter) == false) { return -1; }
@@ -588,18 +560,21 @@ GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(subwidget));
   return -1;
 }
 
-void Listbox::set_selection(int index) {
 //... because gtk_tree_view_set_selected_row(GTK_TREE_VIEW(subwidget), index) would be too easy ...
+void Listbox::set_selection(int index) {
+int current = get_selection();
 GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(subwidget));
 GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(subwidget));
   gtk_tree_selection_unselect_all(selection);
-  if(index < 0) { return; }
-  if(gtk_tree_model_get_iter_first(model, &iter) == false) { return; }
-  if(index == 0) { gtk_tree_selection_select_iter(selection, &iter); return; }
+  if(index < 0) { goto end; }
+  if(gtk_tree_model_get_iter_first(model, &iter) == false) { goto end; }
+  if(index == 0) { gtk_tree_selection_select_iter(selection, &iter); goto end; }
   for(uint i = 1; i < 100000; i++) {
-    if(gtk_tree_model_iter_next(model, &iter) == false) { return; }
-    if(index == i) { gtk_tree_selection_select_iter(selection, &iter); return; }
+    if(gtk_tree_model_iter_next(model, &iter) == false) { goto end; }
+    if(index == i) { gtk_tree_selection_select_iter(selection, &iter); goto end; }
   }
+end:
+  if(current != index) { owner->message(Message::Changed, (uintptr_t)this); }
 }
 
 void Listbox::reset() {

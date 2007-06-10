@@ -662,7 +662,9 @@ void bDSP::power()
 {
 	ram = (uint8*) r_smp->get_spcram_handle();
 	memset( &m, 0, sizeof m );
-	memcpy( m.regs, initial_regs, sizeof m.regs );
+	//memcpy( m.regs, initial_regs, sizeof m.regs );
+	memset(m.regs, 0, sizeof m.regs);
+	REG(flg) = 0xe0;
 	
 	// Internal state
 	for ( int i = voice_count; --i >= 0; )

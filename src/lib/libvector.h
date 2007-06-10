@@ -64,10 +64,8 @@
  * and speed is less critical.
  *****/
 
-#ifndef __LIBVECTOR
-#define __LIBVECTOR
-
-#include <new>
+#ifndef LIBVECTOR_H
+#define LIBVECTOR_H
 
 template<typename T> class linear_vector {
 protected:

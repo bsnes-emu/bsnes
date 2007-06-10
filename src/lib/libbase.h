@@ -16,6 +16,8 @@
 #include <time.h>
 #include <math.h>
 
+#include <new>
+
 #if defined(_MSC_VER)
   #include <io.h>
   #include <direct.h>

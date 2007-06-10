@@ -1,7 +1,9 @@
 class InputCaptureWindow : public ui::Window { public:
 ui::Label label;
 uint index;
+bool key_lock;
   bool message(uint id, uintptr_t param = 0);
+  void show();
   void setup();
   InputCaptureWindow() : index(0) {}
 } window_input_capture;

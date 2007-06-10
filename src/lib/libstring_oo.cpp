@@ -1,7 +1,3 @@
-const char *string::operator()() {
-  return s;
-}
-
 char &string::operator[](const uint index) {
   reserve(index);
   return s[index];
@@ -22,17 +18,17 @@ string &string::operator=(const string &str) {
   return *this;
 }
 
-string &string::operator+=(const int num) {
+string& string::operator<<(const int num) {
   strcat(*this, strfmt("%d", num));
   return *this;
 }
 
-string &string::operator+=(const char *str) {
+string& string::operator<<(const char* str) {
   strcat(*this, str);
   return *this;
 }
 
-string &string::operator+=(const string &str) {
+string& string::operator<<(const string& str) {
   strcat(*this, str);
   return *this;
 }
@@ -49,35 +45,3 @@ bool string::operator> (const char   *str) { return strcmp(strptr(*this), str)  
 bool string::operator> (const string &str) { return strcmp(strptr(*this), strptr(str))  > 0; }
 bool string::operator>=(const char   *str) { return strcmp(strptr(*this), str)         >= 0; }
 bool string::operator>=(const string &str) { return strcmp(strptr(*this), strptr(str)) >= 0; }
-
-string string::operator+(const int num) {
-string temp(*this);
-  strcat(temp, strfmt("%d", num));
-  return temp;
-}
-
-string string::operator+(const char *str) {
-string temp(*this);
-  strcat(temp, str);
-  return temp;
-}
-
-string string::operator+(const string &str) {
-string temp(*this);
-  strcat(temp, str);
-  return temp;
-}
-
-//
-
-string operator+(const int x, const string &y) {
-string temp(strfmt("%d", x));
-  strcat(temp, y);
-  return temp;
-}
-
-string operator+(const char *x, const string &y) {
-string temp(x);
-  strcat(temp, y);
-  return temp;
-}

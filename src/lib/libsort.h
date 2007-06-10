@@ -2,8 +2,8 @@
   libsort : version 0.01 ~byuu (2006-11-15)
 */
 
-#ifndef __LIBSORT
-#define __LIBSORT
+#ifndef LIBSORT_H
+#define LIBSORT_H
 
 template<typename T>
 void sort(T list[], uint length) {

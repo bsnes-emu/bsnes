@@ -6,10 +6,39 @@ class InputManager { public:
     bool   up, down, left, right, a, b, x, y, l, r, select, start;
   } joystat1, joystat2;
 
+  uint16 scan();
   void bind();
   void poll();
   bool get_status(uint device, uint button);
 } input_manager;
+
+//search all key bindings, return keymap::none if no keys are active
+uint16 InputManager::scan() {
+  uiInput->poll();
+  for(uint i = 0; i < keymap::limit; i++) {
+    if(uiInput->key_down(i)) { return i; }
+  }
+  for(uint j = 0; j < 16; j++) {
+    if(uiInput->key_down(keymap::joypad_flag | (j << 16) | keymap::joypad_up)) {
+      return (keymap::joypad_flag | (j << 16) | keymap::joypad_up);
+    }
+    if(uiInput->key_down(keymap::joypad_flag | (j << 16) | keymap::joypad_down)) {
+      return (keymap::joypad_flag | (j << 16) | keymap::joypad_down);
+    }
+    if(uiInput->key_down(keymap::joypad_flag | (j << 16) | keymap::joypad_left)) {
+      return (keymap::joypad_flag | (j << 16) | keymap::joypad_left);
+    }
+    if(uiInput->key_down(keymap::joypad_flag | (j << 16) | keymap::joypad_right)) {
+      return (keymap::joypad_flag | (j << 16) | keymap::joypad_right);
+    }
+    for(uint i = 0; i < 128; i++) {
+      if(uiInput->key_down(keymap::joypad_flag | (j << 16) | i)) {
+        return (keymap::joypad_flag | (j << 16) | i);
+      }
+    }
+  }
+  return keymap::none;
+}
 
 void InputManager::bind() {
   joypad1.up     = keymap::find(config::input.joypad1.up);

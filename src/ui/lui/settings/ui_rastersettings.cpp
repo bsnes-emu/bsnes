@@ -4,19 +4,19 @@ ui::Control *control = (ui::Control*)param;
     if(control == &contrast) {
       if(config::snes.contrast != contrast.get_position() - 96) {
         config::snes.contrast = contrast.get_position() - 96;
-        lcontrast.set_text("Contrast: %d", int(config::snes.contrast));
+        lcontrast.set_text(string() << "Contrast: " << config::snes.contrast);
         snes.update_color_lookup_table();
       }
     } else if(control == &brightness) {
       if(config::snes.brightness != brightness.get_position() - 96) {
         config::snes.brightness = brightness.get_position() - 96;
-        lbrightness.set_text("Brightness: %d", int(config::snes.brightness));
+        lbrightness.set_text(string() << "Brightness: " << config::snes.brightness);
         snes.update_color_lookup_table();
       }
     } else if(control == &gamma) {
       if(config::snes.gamma != gamma.get_position() + 10) {
         config::snes.gamma = gamma.get_position() + 10;
-        lgamma.set_text("Gamma: %0.2f", double(config::snes.gamma) / 100.0);
+        lgamma.set_text(string() << "Gamma: " << config::snes.gamma); //TODO: print gamma as "%0.2f" / 100.0
         snes.update_color_lookup_table();
       }
     }
@@ -72,11 +72,11 @@ ui::Control *control = (ui::Control*)param;
 //update all UI controls to match config file values ...
 void RasterSettingsWindow::sync_ui() {
   contrast.set_position(config::snes.contrast + 96);
-  lcontrast.set_text("Contrast: %d", int(config::snes.contrast));
+  lcontrast.set_text(string() << "Contrast: " << config::snes.contrast);
   brightness.set_position(config::snes.brightness + 96);
-  lbrightness.set_text("Brightness: %d", int(config::snes.brightness));
+  lbrightness.set_text(string() << "Brightness: " << config::snes.brightness);
   gamma.set_position(config::snes.gamma - 10);
-  lgamma.set_text("Gamma: %0.2f", double(config::snes.gamma) / 100.0);
+  lgamma.set_text(string() << "Gamma: " << config::snes.gamma); //TODO: print gamma as "%0.2f" / 100.0
   gamma_ramp.check(config::snes.gamma_ramp);
   sepia.check(config::snes.sepia);
   grayscale.check(config::snes.grayscale);
@@ -88,16 +88,16 @@ void RasterSettingsWindow::setup() {
   create(0, 475, 355);
 
 int x = 0, y = 0;
-  lcontrast.create(*this, 0, x, y + 5, 100, 15);
-  contrast.create(*this, 0, x + 100, y, 375, 25, 192);
+  lcontrast.create(*this, 0, x,       y, 100, 25);
+  contrast.create (*this, 0, x + 100, y, 375, 25, 192);
   y += 25;
 
-  lbrightness.create(*this, 0, x, y + 5, 100, 15);
-  brightness.create(*this, 0, x + 100, y, 375, 25, 192);
+  lbrightness.create(*this, 0, x,       y, 100, 25);
+  brightness.create (*this, 0, x + 100, y, 375, 25, 192);
   y += 25;
 
-  lgamma.create(*this, 0, x, y + 5, 100, 15);
-  gamma.create(*this, 0, x + 100, y, 375, 25, 191);
+  lgamma.create(*this, 0, x,       y, 100, 25);
+  gamma.create (*this, 0, x + 100, y, 375, 25, 191);
   y += 25;
 
   gamma_ramp.create(*this, 0, x, y, 235, 20, "Gamma ramp");

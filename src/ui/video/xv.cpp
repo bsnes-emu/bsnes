@@ -9,6 +9,13 @@ bool VideoXv::lock(uint16 *&data, uint &pitch) {
 void VideoXv::unlock() {
 }
 
+void VideoXv::clear_video() {
+  memset(buffer, 0, 1024 * 1024 * sizeof(uint16));
+//clear twice in case video is double buffered ...
+  refresh(1024, 1024);
+  refresh(1024, 1024);
+}
+
 void VideoXv::refresh(uint r_width, uint r_height) {
 Window dw;
 int d0, d1;
@@ -109,6 +116,10 @@ unsigned int adaptor_count;
   XvFreeAdaptorInfo(adaptor_info);
   if(xv_port == -1) { printf("VideoXv: failed to find valid XvPort.\n"); }
 
+//set colorkey to auto paint, so that Xv video output is always visible
+const Atom atom = XInternAtom(display, "XV_AUTOPAINT_COLORKEY", true);
+  if(atom != None) { XvSetPortAttribute(display, xv_port, atom, 1); }
+
 //0x00000003 = 32-bit X8R8G8B8  [xRGB] (few drivers support this mode)
 //0x32595559 = 16-bit Y8U8,Y8V8 [YUY2] (most drivers support this mode)
   xvimage = XvShmCreateImage(display, xv_port, 0x32595559, 0, 1024, 1024, &shminfo);
@@ -119,6 +130,7 @@ unsigned int adaptor_count;
   if(!XShmAttach(display, &shminfo)) { printf("VideoXv: XShmAttach failed.\n"); }
 
   init_yuv_tables();
+  clear_video();
 }
 
 VideoXv::~VideoXv() {

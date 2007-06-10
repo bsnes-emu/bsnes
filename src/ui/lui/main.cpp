@@ -1,3 +1,5 @@
+void run();
+
 #if defined(PLATFORM_WIN)
   #include "../../lib/libui_win.h"
 #elif defined(PLATFORM_X)
@@ -43,36 +45,19 @@ va_list args;
   fprintf(stdout, "[%d]: %s\r\n", source, str);
 }
 
-#if 0
-void set_config_filename(const char *filename) {
-  realpath(filename, config::filename);
-
-//if argv[0] does not contain path information, obtain from getcwd()
-//otherwise, it was retrieved from argv[0] + realpath()
-  if(strchr(config::filename, '/') == 0 && strchr(config::filename, '\\') == 0) {
-    getcwd(config::filename, PATH_MAX);
-    strcat(config::filename, "/");
-  }
-
-//convert all path delimiters to '/'
-  for(int i = 0; i < strlen(config::filename); i++) {
-    if(config::filename[i] == '\\') { config::filename[i] = '/'; }
-  }
-
-//remove program name from filename
-char *p = strrchr(config::filename, '/');
-  if(p) { *p = 0; }
-
-//finally, append config file name
-  strcat(config::filename, "/bsnes.cfg");
-}
-#endif
-
 void set_config_filename() {
   userpath(config::filename);
   strcat(config::filename, "/.bsnes");
   mkdir(config::filename); //always make directory in case it does not exist, fail silently if it does
   strcat(config::filename, "/bsnes.cfg");
+}
+
+void run() {
+  while(ui::events_pending() == true) { ui::run(); }
+  if(cartridge.loaded() == true) {
+    snes.runtoframe();
+    event::update_frame_counter();
+  }
 }
 
 #if defined(PLATFORM_WIN)
@@ -100,11 +85,7 @@ int main(int argc, char *argv[]) {
   }
 
   while(_term_ == false) {
-    while(ui::events_pending() == true) { ui::run(); }
-    if(cartridge.loaded() == true) {
-      snes.runtoframe();
-      event::update_frame_counter();
-    }
+    run();
   }
 
   event::unload_rom();

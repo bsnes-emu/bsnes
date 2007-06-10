@@ -28,6 +28,7 @@ public:
   uint screen_width()  { return gdk_screen_width();  }
   uint screen_height() { return gdk_screen_height(); }
 
+  void clear_video();
   void refresh(uint width, uint height);
   void init();
   void term();

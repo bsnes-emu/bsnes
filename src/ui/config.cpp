@@ -27,12 +27,14 @@ IntegerSetting System::speed_fastest (&config_file, "system.speed_fastest",  "Fa
 
 struct Video {
   static IntegerSetting synchronize;
+  static IntegerSetting fullscreen;
   static IntegerSetting multiplier, aspect_correction, region;
   static IntegerSetting hardware_filter, software_filter;
   static IntegerSetting frameskip;
   static IntegerSetting use_vram;
 } video;
 IntegerSetting Video::synchronize(&config_file, "video.synchronize", "Synchronize to video refresh rate.", IntegerSetting::Boolean, false);
+IntegerSetting Video::fullscreen(0, "video.fullscreen", "", IntegerSetting::Boolean, false);
 IntegerSetting Video::multiplier(&config_file, "video.multiplier", "Video output size multiplier (1-5x)\n"
   "1 = 1x (~256x224)\n"
   "2 = 2x (~512x448)\n"
@@ -123,5 +125,11 @@ StringSetting Input::Joypad2::l     (&config_file, "input.joypad2.l",      "", "
 StringSetting Input::Joypad2::r     (&config_file, "input.joypad2.r",      "", "l");
 StringSetting Input::Joypad2::select(&config_file, "input.joypad2.select", "", "lbracket");
 StringSetting Input::Joypad2::start (&config_file, "input.joypad2.start",  "", "rbracket");
+
+struct Misc {
+  static IntegerSetting show_frame_counter;
+} misc;
+
+IntegerSetting Misc::show_frame_counter(&config_file, "misc.show_frame_counter", "Display frame counter", IntegerSetting::Boolean, true);
 
 };

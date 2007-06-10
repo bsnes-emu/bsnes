@@ -1,4 +1,4 @@
-#define BSNES_VERSION "0.020.01"
+#define BSNES_VERSION "0.021"
 #define BSNES_TITLE   "bsnes v" BSNES_VERSION
 
 #define MEMCORE bMemBus
@@ -31,11 +31,9 @@
   #error "unsupported processor"
 #endif
 
-#include "lib/libinterp.h"
 #include "lib/libsort.h"
 #include "lib/libarray.h"
 #include "lib/libvector.h"
-#include "lib/libfile.h"
 #include "lib/libstring.h"
 #include "lib/libconfig.h"
 

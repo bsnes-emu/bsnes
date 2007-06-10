@@ -25,6 +25,7 @@ namespace ControlType {
 
 class Control { public:
 uint type;
+  void move(uint x, uint y);
   void resize(uint width, uint height);
 
   void focus();

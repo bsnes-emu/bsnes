@@ -1,9 +1,9 @@
 /*
-  libstring : version 0.17 ~byuu (2007-05-20)
+  libstring : version 0.18 ~byuu (2007-06-06)
 */
 
-#ifndef __LIBSTRING
-#define __LIBSTRING
+#ifndef LIBSTRING_H
+#define LIBSTRING_H
 
 #include "libbase.h"
 #include "libvector.h"
@@ -189,35 +189,32 @@ uint size;
 
   ~string() { safe_free(s); }
 
-  const char *operator()();
-  char &operator[](const uint);
-  string &operator= (const int);
-  string &operator= (const char *);
-  string &operator= (const string &);
-  string &operator+=(const int);
-  string &operator+=(const char *);
-  string &operator+=(const string &);
-  bool operator==(const char *);
-  bool operator==(const string &);
-  bool operator!=(const char *);
-  bool operator!=(const string &);
-  bool operator< (const char *);
-  bool operator< (const string &);
-  bool operator<=(const char *);
-  bool operator<=(const string &);
-  bool operator> (const char *);
-  bool operator> (const string &);
-  bool operator>=(const char *);
-  bool operator>=(const string &);
+  operator const char*()   const { return s; }
+  const char* operator()() const { return s; }
+  char& operator[](const uint);
 
-  string operator+(const int);
-  string operator+(const char *);
-  string operator+(const string &);
+  string& operator=(const int);
+  string& operator=(const char*);
+  string& operator=(const string&);
+
+  string& operator<<(const int);
+  string& operator<<(const char*);
+  string& operator<<(const string&);
+
+  bool operator==(const char*);
+  bool operator==(const string&);
+  bool operator!=(const char*);
+  bool operator!=(const string&);
+  bool operator< (const char*);
+  bool operator< (const string&);
+  bool operator<=(const char*);
+  bool operator<=(const string&);
+  bool operator> (const char*);
+  bool operator> (const string&);
+  bool operator>=(const char*);
+  bool operator>=(const string&);
 };
-
-string operator+(const int,    const string &);
-string operator+(const char *, const string &);
 
 inline void swap(string &x, string &y) { x.swap(y); }
 
-#endif //__LIBSTRING
+#endif //LIBSTRING_H

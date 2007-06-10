@@ -1,5 +1,5 @@
 /*
-  libui_gtk ~byuu (2007-06-05)
+  libui_gtk ~byuu (2007-06-06)
   license: public domain
 */
 
@@ -53,13 +53,20 @@ enum Style {
 
 MenuBar menu;
   void create(uint style, uint width, uint height, const char *caption = "");
-  void set_text(const char *str, ...);
+  void set_text(const char *str);
   void set_background_color(uint8 r, uint8 g, uint8 b);
   void focus();
+  bool focused();
   void move(uint x, uint y);
   void resize(uint width, uint height);
   virtual void show();
   virtual void hide();
+  void show(bool state);
+  bool visible();
+  void fullscreen();
+  void unfullscreen();
+  void fullscreen(bool state);
+  bool is_fullscreen();
 
   virtual bool message(uint id, uintptr_t param = 0) { return true; }
 
