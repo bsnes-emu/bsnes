@@ -11,10 +11,6 @@ void term_snes();
  * hardware abstraction layer
  *****/
 
-#include "video/video.h"
-#include "audio/audio.h"
-#include "input/input.h"
-
 #include "video/video.cpp"
 #include "audio/audio.cpp"
 #include "input/input.cpp"

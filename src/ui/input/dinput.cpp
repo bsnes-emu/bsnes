@@ -1,10 +1,14 @@
 #include "dinput.h"
 
+void InputDI::clear_input() {
+  memset(keystate, 0, sizeof keystate);
+}
+
 void InputDI::poll() {
+  clear_input();
+
 HRESULT hr;
 DIJOYSTATE2 js;
-  memset(keystate, 0, sizeof(keystate));
-
   if(di_key) {
     hr = di_key->GetDeviceState(256, keystate);
     if(FAILED(hr)) {

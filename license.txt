@@ -53,11 +53,11 @@ information in the header. The lack of such a header indicates said file falls
 under the bsnes license.
 
 HQ2x Filter, author: MaxST, license: LGPL
-JMA, author: NSRT Team, license: GPL *
+JMA, author: NSRT Team, license: GPL (*)
 libco, author: byuu, license: public domain
 libui, author: byuu, license: public domain
 NTSC Filter, author: blargg, license: LGPL
 S-DD1, author: Andreas Naive, license: public domain
 zlib, license: zlib license
 
-* bsnes has received an exemption from the copyright holder to use this work.
+(*) bsnes has received an exemption from the copyright holder to use this work.

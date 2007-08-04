@@ -18,6 +18,15 @@ bool _term_ = false;
 #include "ui.cpp"
 #include "event.cpp"
 
+bool allow_input() {
+#if defined(PLATFORM_X)
+//TODO: window_main.focused() does not work at all on X
+  return true;
+#endif
+//only allow input capture when main window is active
+  return window_main.focused() == true;
+}
+
 void alert(char *s, ...) {
 char str[4096];
 va_list args;
@@ -58,6 +67,10 @@ void run() {
     snes.runtoframe();
     event::update_frame_counter();
   }
+#if defined(_MSC_VER)
+//prevent bsnes from consuming 100% CPU resources when idle
+  else { Sleep(1); }
+#endif
 }
 
 #if defined(PLATFORM_WIN)

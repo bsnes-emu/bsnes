@@ -7,4 +7,6 @@ ui::Editbox code;
 ui::Editbox desc;
   bool message(uint id, uintptr_t param);
   void setup();
+
+  void refresh();
 } window_cheat_editor;

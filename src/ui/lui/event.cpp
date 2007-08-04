@@ -17,9 +17,9 @@ uint multiplier = minmax<1, 5>(uint(config::video.multiplier));
   height *= multiplier;
   if(config::video.aspect_correction == true) {
     if(config::video.region == 0) {
-      width = uint( double(width) *  8.0 /  7.0 ); //NTSC
+      width = uint( double(width) * 54.0 / 47.0 ); //NTSC
     } else {
-      width = uint( double(width) * 48.0 / 35.0 ); //PAL
+      width = uint( double(width) * 32.0 / 23.0 ); //PAL
     }
   }
 
@@ -103,6 +103,7 @@ char fn[PATH_MAX];
   cartridge.load(fn);
   cartridge.load_end();
   snes.power();
+  window_cheat_editor.refresh();
 }
 
 void unload_rom() {
@@ -112,6 +113,7 @@ void unload_rom() {
     uiAudio->clear_audio();
   }
   window_main.set_text(BSNES_TITLE);
+  window_cheat_editor.refresh();
 }
 
 void reset() {

@@ -30,6 +30,8 @@ extern struct PPU {
   struct Hack {
     static IntegerSetting render_scanline_position;
     static IntegerSetting obj_cache;
+    static IntegerSetting oam_address_invalidation;
+    static IntegerSetting cgram_address_invalidation;
   } hack;
 
   static IntegerSetting opt_enable;

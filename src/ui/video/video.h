@@ -1,3 +1,6 @@
+#ifndef VIDEO_H
+#define VIDEO_H
+
 class Video { public:
 
 enum Filter {
@@ -18,3 +21,5 @@ enum Filter {
   Video() {}
   virtual ~Video() {}
 } *uiVideo;
+
+#endif

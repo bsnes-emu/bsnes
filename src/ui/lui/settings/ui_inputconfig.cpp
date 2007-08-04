@@ -99,16 +99,6 @@ void InputConfigWindow::refresh_list() {
 
 bool InputConfigWindow::message(uint id, uintptr_t param) {
 ui::Control *control = (ui::Control*)param;
-  if(id == ui::Message::KeyDown) {
-    if(uiInput) { uiInput->signal_key_down(param); }
-    return true;
-  }
-
-  if(id == ui::Message::KeyUp) {
-    if(uiInput) { uiInput->signal_key_up(param); }
-    return true;
-  }
-
   if(id == ui::Message::Changed && control == &list) {
   int pos = list.get_selection();
     setkey.enable(pos >= 0);
@@ -178,16 +168,6 @@ bool InputCaptureWindow::message(uint id, uintptr_t param) {
   if(id == ui::Message::Close) {
     hide();
     return false;
-  }
-
-  if(id == ui::Message::KeyDown) {
-    if(uiInput) { uiInput->signal_key_down(param); }
-    return true;
-  }
-
-  if(id == ui::Message::KeyUp) {
-    if(uiInput) { uiInput->signal_key_up(param); }
-    return true;
   }
 
   return true;

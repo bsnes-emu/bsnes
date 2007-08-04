@@ -15,6 +15,7 @@ LPDIRECTINPUT8 di;
 LPDIRECTINPUTDEVICE8 di_key, di_joy[DIRECTINPUT_JOYMAX];
 uint32 di_joy_count;
 
+  void clear_input();
   void poll();
   void init();
   void term();

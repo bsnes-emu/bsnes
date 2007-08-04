@@ -16,6 +16,11 @@ uint16 addr;
   return (addr << 1);
 }
 
+//NOTE: all VRAM writes during active display are invalid. Unlike OAM and CGRAM, they will
+//not be written anywhere at all. The below address ranges for where writes are invalid have
+//been validated on hardware, as has the edge case where the S-CPU MDR can be written if the
+//write occurs during the very last clock cycle of vblank.
+
 uint8 bPPU::vram_mmio_read(uint16 addr) {
   if(regs.display_disabled == true) {
     return vram_read(addr);
@@ -46,20 +51,17 @@ uint16 ls = (r_cpu->region_scanlines() >> 1) - 1;
 
 void bPPU::vram_mmio_write(uint16 addr, uint8 data) {
   if(regs.display_disabled == true) {
-    vram_write(addr, data);
-    return;
+    return vram_write(addr, data);
   }
 
 uint16 v  = r_cpu->vcounter();
 uint16 hc = r_cpu->hclock();
   if(v == 0) {
     if(hc <= 4) {
-      vram_write(addr, data);
-      return;
+      return vram_write(addr, data);
     }
     if(hc == 6) {
-      vram_write(addr, r_cpu->regs.mdr);
-      return;
+      return vram_write(addr, r_cpu->regs.mdr);
     }
     return;
   }
@@ -72,11 +74,85 @@ uint16 hc = r_cpu->hclock();
     if(hc <= 4) {
       return;
     }
-    vram_write(addr, data);
-    return;
+    return vram_write(addr, data);
   }
 
   vram_write(addr, data);
+}
+
+//NOTE: OAM accesses during active display are rerouted to 0x0218 ... this can be considered
+//a hack. The actual address varies during rendering, as the S-PPU reads in data itself for
+//processing. Unfortunately, we have yet to determine how this works. The algorithm cannot be
+//reverse engineered using a scanline renderer such as this, and at this time, there does not
+//exist a more accurate SNES PPU emulator to work from. The only known game to actually access
+//OAM during active display is Uniracers. It expects accesses to map to offset 0x0218.
+//It was decided by public consensus to map writes to this address to match Uniracers, primarily
+//because it is the only game observed to do this, but also because mapping to this address does
+//not contradict any of our findings, because we have no findings whatsoever on this behavior.
+//Think of this what you will, I openly admit that this is a hack. But it is more accurate than
+//writing to the 'expected' address set by $2102,$2103, and will catch problems in software that
+//accidentally accesses OAM during active display by virtue of not returning the expected data.
+//You may disable this behavior by setting config::ppu.hack.oam_address_invalidation to false,
+//or by changing the address from 0x0218 to 0x0000 below if it bothers you that greatly.
+
+uint8 bPPU::oam_mmio_read(uint16 addr) {
+  if(config::ppu.hack.oam_address_invalidation == false || regs.display_disabled == true) {
+    return oam_read(addr);
+  }
+
+uint16 v = r_cpu->vcounter();
+  if(v < (!r_cpu->overscan() ? 225 : 240)) {
+    return oam_read(0x0218);
+  }
+
+  return oam_read(addr);
+}
+
+void bPPU::oam_mmio_write(uint16 addr, uint8 data) {
+  if(config::ppu.hack.oam_address_invalidation == false || regs.display_disabled == true) {
+    return oam_write(addr, data);
+  }
+
+uint16 v = r_cpu->vcounter();
+  if(v < (!r_cpu->overscan() ? 225 : 240)) {
+    return oam_write(0x0218, data);
+  }
+
+  oam_write(addr, data);
+}
+
+//NOTE: CGRAM writes during hblank are valid. During active display, the actual address the
+//data is written to varies, as the S-PPU itself changes the address. Like OAM, we do not know
+//the exact algorithm used, but we have zero known examples of any commercial software that
+//attempts to do this. Therefore, the addresses are mapped to 0x0000. There is nothing special
+//about this address, it is simply more accurate to invalidate the 'expected' address than not.
+
+uint8 bPPU::cgram_mmio_read(uint16 addr) {
+  if(config::ppu.hack.cgram_address_invalidation == false || regs.display_disabled == true) {
+    return cgram_read(addr);
+  }
+
+uint16 v  = r_cpu->vcounter();
+uint16 hc = r_cpu->hclock();
+  if(v < (!r_cpu->overscan() ? 225 : 240) && hc > 0 && hc < 1096) {
+    return cgram_read(0x0000);
+  }
+
+  return cgram_read(addr);
+}
+
+void bPPU::cgram_mmio_write(uint16 addr, uint8 data) {
+  if(config::ppu.hack.cgram_address_invalidation == false || regs.display_disabled == true) {
+    return cgram_write(addr, data);
+  }
+
+uint16 v  = r_cpu->vcounter();
+uint16 hc = r_cpu->hclock();
+  if(v < (!r_cpu->overscan() ? 225 : 240) && hc > 0 && hc < 1096) {
+    return cgram_write(0x0000, data);
+  }
+
+  cgram_write(addr, data);
 }
 
 //INIDISP
@@ -117,12 +193,12 @@ void bPPU::mmio_w2103(uint8 data) {
 //OAMDATA
 void bPPU::mmio_w2104(uint8 data) {
   if(regs.oam_addr & 0x0200) {
-    oam_write(regs.oam_addr, data);
+    oam_mmio_write(regs.oam_addr, data);
   } else if((regs.oam_addr & 1) == 0) {
     regs.oam_latchdata = data;
   } else {
-    oam_write((regs.oam_addr & ~1) + 0, regs.oam_latchdata);
-    oam_write((regs.oam_addr & ~1) + 1, data);
+    oam_mmio_write((regs.oam_addr & ~1) + 0, regs.oam_latchdata);
+    oam_mmio_write((regs.oam_addr & ~1) + 1, data);
   }
 
   regs.oam_addr++;
@@ -353,8 +429,8 @@ void bPPU::mmio_w2122(uint8 value) {
   if(!(regs.cgram_addr & 1)) {
     regs.cgram_latchdata = value;
   } else {
-    cgram_write((regs.cgram_addr & 0x01fe),     regs.cgram_latchdata);
-    cgram_write((regs.cgram_addr & 0x01fe) + 1, value & 0x7f);
+    cgram_mmio_write((regs.cgram_addr & 0x01fe),     regs.cgram_latchdata);
+    cgram_mmio_write((regs.cgram_addr & 0x01fe) + 1, value & 0x7f);
   }
   regs.cgram_addr++;
   regs.cgram_addr &= 0x01ff;
@@ -540,7 +616,7 @@ uint8 bPPU::mmio_r2137() {
 
 //OAMDATAREAD
 uint8 bPPU::mmio_r2138() {
-  regs.ppu1_mdr = oam_read(regs.oam_addr);
+  regs.ppu1_mdr = oam_mmio_read(regs.oam_addr);
 
   regs.oam_addr++;
   regs.oam_addr &= 0x03ff;
@@ -581,10 +657,10 @@ uint16 addr = get_vram_address() + 1;
 //update bit 7 of the PPU2 MDR.
 uint8 bPPU::mmio_r213b() {
   if(!(regs.cgram_addr & 1)) {
-    regs.ppu2_mdr  = cgram_read(regs.cgram_addr) & 0xff;
+    regs.ppu2_mdr  = cgram_mmio_read(regs.cgram_addr) & 0xff;
   } else {
     regs.ppu2_mdr &= 0x80;
-    regs.ppu2_mdr |= cgram_read(regs.cgram_addr) & 0x7f;
+    regs.ppu2_mdr |= cgram_mmio_read(regs.cgram_addr) & 0x7f;
   }
   regs.cgram_addr++;
   regs.cgram_addr &= 0x01ff;

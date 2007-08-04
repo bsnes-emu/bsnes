@@ -39,8 +39,12 @@ void SNESInterface::audio_sample(uint16 l_sample, uint16 r_sample) {
 
 //input
 
+//allow_input() returns true only when main emulator window has focus
+//TODO: draft a more elegant way to poll lui, etc platforms from here
+bool allow_input(); //defined in lui/main.cpp
+
 void SNESInterface::input_poll() {
-  uiInput->poll();
+  allow_input() ? uiInput->poll() : uiInput->clear_input();
   input_manager.poll();
 }
 

@@ -1,5 +1,5 @@
 /*
-  libconfig : version 0.14 ~byuu (2007-06-10)
+  libconfig : version 0.14 ~byuu (2007-06-12)
   license: public domain
 */
 
@@ -103,7 +103,7 @@ string data;
   bool operator==(const char *x) { return !strcmp(data, x); }
   bool operator!=(const char *x) { return  strcmp(data, x); }
 
-  StringSetting(Config *parent, const char *r_name, const char *r_desc, char *r_data) {
+  StringSetting(Config *parent, const char *r_name, const char *r_desc, const char *r_data) {
     type = Setting::String;
     name = strdup(r_name);
     desc = strdup(r_desc);

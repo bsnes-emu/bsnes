@@ -12,14 +12,8 @@ ui::Control *control = (ui::Control*)param;
   }
 
   if(id == ui::Message::KeyDown) {
-    if(uiInput) { uiInput->signal_key_down(param); }
     if(param == keymap::esc) { event::toggle_menu(); }
     if(param == keymap::f11) { event::toggle_fullscreen(); }
-    return true;
-  }
-
-  if(id == ui::Message::KeyUp) {
-    if(uiInput) { uiInput->signal_key_up(param); }
     return true;
   }
 

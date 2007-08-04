@@ -89,6 +89,21 @@ IntegerSetting PPU::Hack::obj_cache(&config_file, "ppu.hack.obj_cache",
   "This is technically closer to the actual operation of the SNES,\n"
   "but can cause problems in some games if enabled",
   IntegerSetting::Boolean, false);
+IntegerSetting PPU::Hack::oam_address_invalidation(&config_file, "ppu.hack.oam_address_invalidation",
+  "OAM access address changes during active display, as the S-PPU reads\n"
+  "data to render the display. Thusly, the address retrieved when accessing\n"
+  "OAM during active display is unpredictable. Unfortunately, the exact\n"
+  "algorithm for this is completely unknown at this time. It is more hardware\n"
+  "accurate to enable this setting, but one must *not* rely on the actual\n"
+  "address to match hardware under emulation.",
+  IntegerSetting::Boolean, true);
+IntegerSetting PPU::Hack::cgram_address_invalidation(&config_file, "ppu.hack.cgram_address_invalidation",
+  "CGRAM access address changes during active display (excluding hblank), as\n"
+  "the S-PPU reads data to render the display. Thusly, as with OAM, the access\n"
+  "address is unpredictable. Again, enabling this setting is more hardware\n"
+  "accurate, but one must *not* rely on the actual address to match hardware\n"
+  "under emulation.",
+  IntegerSetting::Boolean, true);
 
 IntegerSetting PPU::opt_enable(0, "ppu.opt_enable", "Enable offset-per-tile effects", IntegerSetting::Boolean, true);
 IntegerSetting PPU::bg1_pri0_enable(0, "ppu.bg1_pri0_enable", "Enable BG1 Priority 0", IntegerSetting::Boolean, true);

@@ -20,9 +20,8 @@
   #include "../video/xv.cpp"
   #include "../video/gtk.cpp"
   #include "../audio/ao.cpp"
+  #include "../input/xinput.cpp"
 #endif
-
-#include "../input/inputui.cpp"
 
 void ui_init() {
   window_main.setup();
@@ -49,7 +48,6 @@ void ui_init() {
                                      (Audio*)new AudioDS(window_main.handle());
   uiInput =
     config::system.input == "none" ? (Input*)new Input() :
-    config::system.input == "ui"   ? (Input*)new InputUI() :
                                      (Input*)new InputDI(window_main.handle());
 #elif defined(PLATFORM_X)
   uiVideo =
@@ -61,7 +59,7 @@ void ui_init() {
                                      (Audio*)new AudioAO(config::system.audio_flags);
   uiInput =
     config::system.input == "none" ? (Input*)new Input() :
-                                     (Input*)new InputUI();
+                                     (Input*)new InputX();
 #endif
 
   uiVideo->init();
