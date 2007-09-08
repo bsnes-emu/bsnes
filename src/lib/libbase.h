@@ -1,5 +1,5 @@
 /*
-  libbase : version 0.10 ~byuu (2007-06-04)
+  libbase : version 0.11 ~byuu (2007-09-08)
   license: public domain
 */
 
@@ -18,7 +18,7 @@
 
 #include <new>
 
-#if defined(_MSC_VER)
+#if defined(PLATFORM_WIN)
   #include <io.h>
   #include <direct.h>
   #include <shlobj.h>
@@ -34,6 +34,10 @@
 
   #define NOMINMAX
   #define PATH_MAX  _MAX_PATH
+  #define va_copy(dst, src) ((dst) = (src))
+#endif
+
+#if defined(PLATFORM_WIN)
   #define getcwd    _getcwd
   #define ftruncate _chsize
   #define mkdir     _mkdir
@@ -41,11 +45,10 @@
   #define rmdir     _rmdir
   #define vsnprintf _vsnprintf
 
-  #define va_copy(dst, src) ((dst) = (src))
   static char *realpath(const char *file_name, char *resolved_name) {
     return _fullpath(resolved_name, file_name, PATH_MAX);
   }
-#elif defined(__GNUC__)
+#elif defined(PLATFORM_X)
   #define mkdir(path) (mkdir)(path, 0755);
 #endif
 
@@ -90,13 +93,13 @@ typedef int64_t  int64;
 //userpath(output) retrieves path to user's home folder
 //output must be at least as large as PATH_MAX
 
-#if defined(_MSC_VER)
+#if defined(PLATFORM_WIN)
 static char *userpath(char *output) {
   strcpy(output, "."); //failsafe
   SHGetFolderPath(0, CSIDL_APPDATA | CSIDL_FLAG_CREATE, 0, 0, output);
   return output;
 }
-#elif defined(__GNUC__)
+#elif defined(PLATFORM_X)
 static char *userpath(char *output) {
   strcpy(output, "."); //failsafe
 struct passwd *userinfo = getpwuid(getuid());

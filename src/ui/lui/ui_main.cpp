@@ -1,3 +1,13 @@
+bool MainWindow::input_ready() {
+#if defined(PLATFORM_X)
+//FIXME: focused() is broken in X port
+  return true;
+#endif
+
+//only allow input when main window is focused
+  return focused() == true;
+}
+
 bool MainWindow::message(uint id, uintptr_t param) {
 ui::Control *control = (ui::Control*)param;
   if(id == ui::Message::Close) {
@@ -102,6 +112,8 @@ ui::Control *control = (ui::Control*)param;
 }
 
 void MainWindow::setup() {
+  snesinterface.input_ready = bind(&MainWindow::input_ready, this);
+
 ui::ControlGroup group;
   create(ui::Window::Center, 256, 224, BSNES_TITLE);
   set_background_color(0, 0, 0);
@@ -169,7 +181,7 @@ ui::ControlGroup group;
         group.add(menu_settings_videoframeskip_7);
         group.add(menu_settings_videoframeskip_8);
         group.add(menu_settings_videoframeskip_9);
-        menu_settings_videoframeskip_0.create(menu_settings_videoframeskip, group, "0 (off)");
+        menu_settings_videoframeskip_0.create(menu_settings_videoframeskip, group, "0");
         menu_settings_videoframeskip_sep1.create(menu_settings_videoframeskip);
         menu_settings_videoframeskip_1.create(menu_settings_videoframeskip, group, "1");
         menu_settings_videoframeskip_2.create(menu_settings_videoframeskip, group, "2");

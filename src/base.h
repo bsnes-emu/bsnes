@@ -1,4 +1,4 @@
-#define BSNES_VERSION "0.022"
+#define BSNES_VERSION "0.022.03"
 #define BSNES_TITLE   "bsnes v" BSNES_VERSION
 
 #define MEMCORE bMemBus
@@ -31,6 +31,7 @@
   #error "unsupported processor"
 #endif
 
+#include "lib/libfunctor.h"
 #include "lib/libsort.h"
 #include "lib/libarray.h"
 #include "lib/libvector.h"
@@ -38,9 +39,9 @@
 #include "lib/libconfig.h"
 
 //platform-specific global functions
-void alert(char*, ...);
-void dprintf(char*, ...);
-void dprintf(uint, char*, ...);
+void alert(const char*, ...);
+void dprintf(const char*, ...);
+void dprintf(uint, const char*, ...);
 
 namespace source {
   enum {

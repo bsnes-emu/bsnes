@@ -38,7 +38,7 @@ CC = cl
 CFLAGS = /nologo /wd4996 /O2 /EHsc /DPLATFORM_WIN /DCOMPILER_VISUALC /DPROCESSOR_X86 /DUI_LUI
 AS = nasm
 ASFLAGS = -f win32 -DWIN32
-LIBS = d3d9.lib ddraw.lib dsound.lib dinput8.lib dxguid.lib
+LIBS = d3d9.lib ddraw.lib dsound.lib dinput8.lib dxguid.lib kernel32.lib user32.lib gdi32.lib shell32.lib winmm.lib comdlg32.lib comctl32.lib
 LIBCO = libco_x86
 LIBUI = libui_win
 endif
@@ -49,7 +49,7 @@ CC = cl
 CFLAGS = /nologo /wd4996 /O2 /GL /EHsc /DPLATFORM_WIN /DCOMPILER_VISUALC /DPROCESSOR_X86 /DUI_LUI
 AS = nasm
 ASFLAGS = -f win32 -DWIN32
-LIBS = d3d9.lib ddraw.lib dsound.lib dinput8.lib dxguid.lib
+LIBS = d3d9.lib ddraw.lib dsound.lib dinput8.lib dxguid.lib kernel32.lib user32.lib gdi32.lib shell32.lib winmm.lib comdlg32.lib comctl32.lib
 LINK = /link /PGD:bsnes.pgd /LTCG:PGINSTRUMENT
 LIBCO = libco_x86
 LIBUI = libui_win
@@ -61,8 +61,19 @@ CC = cl
 CFLAGS = /nologo /wd4996 /O2 /GL /EHsc /DPLATFORM_WIN /DCOMPILER_VISUALC /DPROCESSOR_X86 /DUI_LUI
 AS = nasm
 ASFLAGS = -f win32 -DWIN32
-LIBS = d3d9.lib ddraw.lib dsound.lib dinput8.lib dxguid.lib
+LIBS = d3d9.lib ddraw.lib dsound.lib dinput8.lib dxguid.lib kernel32.lib user32.lib gdi32.lib shell32.lib winmm.lib comdlg32.lib comctl32.lib
 LINK = /link /PGD:bsnes.pgd /LTCG:PGOPTIMIZE
+LIBCO = libco_x86
+LIBUI = libui_win
+endif
+
+ifeq ($(PLATFORM),win-mingw-lui)
+OS = win
+CC = mingw32-gcc
+CFLAGS = -O3 -fomit-frame-pointer -ffast-math -DPLATFORM_WIN -DCOMPILER_GCC -DPROCESSOR_X86 -DUI_LUI
+AS = nasm
+ASFLAGS = -f win32 -DWIN32
+LIBS = -ld3d9 -lddraw -ldsound -ldinput8 -ldxguid -luuid -lkernel32 -luser32 -lgdi32 -lshell32 -lwinmm -lcomdlg32 -lcomctl32
 LIBCO = libco_x86
 LIBUI = libui_win
 endif
@@ -74,6 +85,14 @@ endif
 ifeq ($(CC),gcc)
 OUT = -obsnes
 CPP = g++
+OBJ = o
+CARGS = -c $< -o $@
+DEFINE = -D
+endif
+
+ifeq ($(CC),mingw32-gcc)
+OUT = -obsnes
+CPP = mingw32-g++
 OBJ = o
 CARGS = -c $< -o $@
 DEFINE = -D
@@ -106,7 +125,6 @@ endif
 ifeq ($(OS),win)
 OUT := $(OUT).exe
 RM = del
-LIBS += kernel32.lib user32.lib gdi32.lib shell32.lib winmm.lib comdlg32.lib comctl32.lib
 endif
 
 ####################################

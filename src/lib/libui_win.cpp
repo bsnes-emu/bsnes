@@ -1,3 +1,5 @@
+#define _WIN32_IE 0x0600
+
 #include "libui_win.h"
 #include "libui_win_window.cpp"
 #include "libui_win_control.cpp"

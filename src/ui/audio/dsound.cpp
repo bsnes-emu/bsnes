@@ -2,7 +2,7 @@ void AudioDS::sample(uint16 l_sample, uint16 r_sample) {
   data.buffer[data.buffer_pos++] = (l_sample << 0) + (r_sample << 16);
   if(data.buffer_pos < latency)return;
 
-uint32 ring_pos, pos, size;
+DWORD ring_pos, pos, size;
   for(;;) {
     dsb_b->GetCurrentPosition(&pos, 0);
     ring_pos = pos / data.ring_size;
@@ -30,7 +30,7 @@ void *output;
   data.buffer[data.buffer_pos++] = (l_sample << 0) + (r_sample << 16);
 //if(data.buffer_pos & 15)return;
 
-uint32 ring_pos, pos, size;
+DWORD ring_pos, pos, size;
   dsb_b->GetCurrentPosition(&pos, 0);
   ring_pos = pos / data.ring_size;
   if(ring_pos == data.ring_pos)return;
@@ -66,7 +66,7 @@ void AudioDS::clear_audio() {
   dsb_b->Stop();
   dsb_b->SetCurrentPosition(0);
 
-uint32 size;
+DWORD size;
 void  *output;
   dsb_b->Lock(0, data.ring_size * 3, &output, &size, 0, 0, 0);
   memset(output, 0, size);

@@ -2,10 +2,10 @@ Scheduler scheduler;
 
 //
 
-void cocall threadentry_cpu(void*) { r_cpu->enter(); }
-void cocall threadentry_smp(void*) { r_smp->enter(); }
-void cocall threadentry_ppu(void*) {} //currently unused
-void cocall threadentry_dsp(void*) { r_dsp->enter(); }
+void threadentry_cpu() { r_cpu->enter(); }
+void threadentry_smp() { r_smp->enter(); }
+void threadentry_ppu() {                 } //currently unused
+void threadentry_dsp() { r_dsp->enter(); }
 
 //
 
@@ -41,10 +41,10 @@ void Scheduler::init() {
   if(thread_dsp)co_delete(thread_dsp);
 
   thread_snes = co_active();
-  thread_cpu  = co_create(sizeof(void*) * 64 * 1024, threadentry_cpu, 0);
-  thread_smp  = co_create(sizeof(void*) * 64 * 1024, threadentry_smp, 0);
-  thread_ppu  = co_create(sizeof(void*) * 64 * 1024, threadentry_ppu, 0);
-  thread_dsp  = co_create(sizeof(void*) * 64 * 1024, threadentry_dsp, 0);
+  thread_cpu  = co_create(sizeof(void*) * 64 * 1024, threadentry_cpu);
+  thread_smp  = co_create(sizeof(void*) * 64 * 1024, threadentry_smp);
+  thread_ppu  = co_create(sizeof(void*) * 64 * 1024, threadentry_ppu);
+  thread_dsp  = co_create(sizeof(void*) * 64 * 1024, threadentry_dsp);
 }
 
 //

@@ -1,6 +1,6 @@
 Tracer tracer;
 
-void tprintf(char *s, ...) {
+void tprintf(const char *s, ...) {
   if(tracer.enabled() == false) { return; }
 
 char str[4096];

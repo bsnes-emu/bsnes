@@ -1,4 +1,4 @@
-void tprintf(char *s, ...);
+void tprintf(const char *s, ...);
 
 class Tracer {
 private:
@@ -43,7 +43,7 @@ public:
   Tracer();
   ~Tracer();
 
-  friend void tprintf(char *s, ...);
+  friend void tprintf(const char *s, ...);
 };
 
 extern Tracer tracer;

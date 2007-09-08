@@ -60,6 +60,8 @@ ui::MenuGroup menu_misc;
 ui::Container view;
 //
 
+  bool input_ready();
+
   bool message(uint id, uintptr_t param = 0);
   void setup();
   void setup_menu();

@@ -18,16 +18,7 @@ bool _term_ = false;
 #include "ui.cpp"
 #include "event.cpp"
 
-bool allow_input() {
-#if defined(PLATFORM_X)
-//TODO: window_main.focused() does not work at all on X
-  return true;
-#endif
-//only allow input capture when main window is active
-  return window_main.focused() == true;
-}
-
-void alert(char *s, ...) {
+void alert(const char *s, ...) {
 char str[4096];
 va_list args;
   va_start(args, s);
@@ -36,7 +27,7 @@ va_list args;
   fprintf(stdout, "%s\r\n", str);
 }
 
-void dprintf(char *s, ...) {
+void dprintf(const char *s, ...) {
 char str[4096];
 va_list args;
   va_start(args, s);
@@ -45,7 +36,7 @@ va_list args;
   fprintf(stdout, "%s\r\n", str);
 }
 
-void dprintf(uint source, char *s, ...) {
+void dprintf(uint source, const char *s, ...) {
 char str[4096];
 va_list args;
   va_start(args, s);
@@ -67,7 +58,8 @@ void run() {
     snes.runtoframe();
     event::update_frame_counter();
   }
-#if defined(_MSC_VER)
+
+#if defined(PLATFORM_WIN)
 //prevent bsnes from consuming 100% CPU resources when idle
   else { Sleep(1); }
 #endif
