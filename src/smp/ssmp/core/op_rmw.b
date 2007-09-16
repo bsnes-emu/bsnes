@@ -61,14 +61,14 @@ tclr_addr_a(0x4e, &~) {
 5:op_writeaddr(dp, rd $1 regs.a);
 }
 
-incw_dp(0x3a, rd++),
-decw_dp(0x1a, rd--) {
+incw_dp(0x3a, ++),
+decw_dp(0x1a, --) {
 1:dp = op_readpc();
 2:rd = op_readdp(dp);
-  $1;
+  rd$1;
 3:op_writedp(dp++, rd);
 4:rd += op_readdp(dp) << 8;
-5:op_write(dp, rd >> 8);
+5:op_writedp(dp, rd >> 8);
   regs.p.n = !!(rd & 0x8000);
   regs.p.z = (rd == 0);
 }

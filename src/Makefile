@@ -70,7 +70,18 @@ endif
 ifeq ($(PLATFORM),win-mingw-lui)
 OS = win
 CC = mingw32-gcc
-CFLAGS = -O3 -fomit-frame-pointer -ffast-math -DPLATFORM_WIN -DCOMPILER_GCC -DPROCESSOR_X86 -DUI_LUI
+CFLAGS = -mwindows -O3 -fomit-frame-pointer -DPLATFORM_WIN -DCOMPILER_GCC -DPROCESSOR_X86 -DUI_LUI
+AS = nasm
+ASFLAGS = -f win32 -DWIN32
+LIBS = -ld3d9 -lddraw -ldsound -ldinput8 -ldxguid -luuid -lkernel32 -luser32 -lgdi32 -lshell32 -lwinmm -lcomdlg32 -lcomctl32
+LIBCO = libco_x86
+LIBUI = libui_win
+endif
+
+ifeq ($(PLATFORM),win-mingw4-lui)
+OS = win
+CC = mingw32-gcc-sjlj
+CFLAGS = -mwindows -O3 -fomit-frame-pointer -DPLATFORM_WIN -DCOMPILER_GCC -DPROCESSOR_X86 -DUI_LUI
 AS = nasm
 ASFLAGS = -f win32 -DWIN32
 LIBS = -ld3d9 -lddraw -ldsound -ldinput8 -ldxguid -luuid -lkernel32 -luser32 -lgdi32 -lshell32 -lwinmm -lcomdlg32 -lcomctl32
@@ -93,6 +104,14 @@ endif
 ifeq ($(CC),mingw32-gcc)
 OUT = -obsnes
 CPP = mingw32-g++
+OBJ = o
+CARGS = -c $< -o $@
+DEFINE = -D
+endif
+
+ifeq ($(CC),mingw32-gcc-sjlj)
+OUT = -obsnes
+CPP = mingw32-g++-sjlj
 OBJ = o
 CARGS = -c $< -o $@
 DEFINE = -D

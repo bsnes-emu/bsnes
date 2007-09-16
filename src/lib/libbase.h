@@ -18,7 +18,7 @@
 
 #include <new>
 
-#if defined(PLATFORM_WIN)
+#if defined(_MSC_VER) || defined(__MINGW32__)
   #include <io.h>
   #include <direct.h>
   #include <shlobj.h>
@@ -37,7 +37,7 @@
   #define va_copy(dst, src) ((dst) = (src))
 #endif
 
-#if defined(PLATFORM_WIN)
+#if defined(_MSC_VER) || defined(__MINGW32__)
   #define getcwd    _getcwd
   #define ftruncate _chsize
   #define mkdir     _mkdir
@@ -48,7 +48,7 @@
   static char *realpath(const char *file_name, char *resolved_name) {
     return _fullpath(resolved_name, file_name, PATH_MAX);
   }
-#elif defined(PLATFORM_X)
+#else
   #define mkdir(path) (mkdir)(path, 0755);
 #endif
 
@@ -93,13 +93,13 @@ typedef int64_t  int64;
 //userpath(output) retrieves path to user's home folder
 //output must be at least as large as PATH_MAX
 
-#if defined(PLATFORM_WIN)
+#if defined(_MSC_VER) || defined(__MINGW32__)
 static char *userpath(char *output) {
   strcpy(output, "."); //failsafe
   SHGetFolderPath(0, CSIDL_APPDATA | CSIDL_FLAG_CREATE, 0, 0, output);
   return output;
 }
-#elif defined(PLATFORM_X)
+#else
 static char *userpath(char *output) {
   strcpy(output, "."); //failsafe
 struct passwd *userinfo = getpwuid(getuid());
@@ -139,14 +139,10 @@ T z = x;
   y = z;
 }
 
-#ifdef min
 #undef min
-#endif
 #define min(x, y) (((x) < (y)) ? (x) : (y))
 
-#ifdef max
 #undef max
-#endif
 #define max(x, y) (((x) > (y)) ? (x) : (y))
 
 template<int min, int max, typename T> inline T minmax(const T x) {
@@ -172,6 +168,8 @@ template<int bits> inline signed sclip(const signed x) {
 enum { b = 1U << (bits - 1), m = (1U << bits) - 1 };
   return ((x & m) ^ b) - b;
 }
+
+//bit shifting functions are deprecated
 
 template<int n, typename T> inline T rol(const T x) {
 enum { s = (sizeof(T) << 3) - n };

@@ -212,7 +212,7 @@ void sSMP::op_incw_dp() {
   rd++;
   op_writedp(dp++, rd);
   rd += op_readdp(dp) << 8;
-  op_write(dp, rd >> 8);
+  op_writedp(dp, rd >> 8);
   regs.p.n = !!(rd & 0x8000);
   regs.p.z = (rd == 0);
 }
@@ -223,7 +223,7 @@ void sSMP::op_decw_dp() {
   rd--;
   op_writedp(dp++, rd);
   rd += op_readdp(dp) << 8;
-  op_write(dp, rd >> 8);
+  op_writedp(dp, rd >> 8);
   regs.p.n = !!(rd & 0x8000);
   regs.p.z = (rd == 0);
 }

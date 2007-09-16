@@ -16,10 +16,10 @@ uint multiplier = minmax<1, 5>(uint(config::video.multiplier));
   width  *= multiplier;
   height *= multiplier;
   if(config::video.aspect_correction == true) {
-    if(config::video.region == 0) {
-      width = uint( double(width) * 54.0 / 47.0 ); //NTSC
-    } else {
-      width = uint( double(width) * 32.0 / 23.0 ); //PAL
+    if(config::video.region == 0) { //NTSC
+      width = uint( double(width) * double(config::video.aspect_ntsc_x) / double(config::video.aspect_ntsc_y) );
+    } else { //PAL
+      width = uint( double(width) * double(config::video.aspect_pal_x)  / double(config::video.aspect_pal_y)  );
     }
   }
 

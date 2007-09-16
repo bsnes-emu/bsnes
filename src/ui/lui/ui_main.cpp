@@ -120,7 +120,7 @@ ui::ControlGroup group;
 
   menu.create(*this);
     menu_file.create(menu, "File");
-      menu_file_load.create(menu_file, "Load Cartridge");
+      menu_file_load.create(menu_file, "Load Cartridge ...");
       menu_file_unload.create(menu_file, "Unload");
       menu_file_sep1.create(menu_file);
       menu_file_reset.create(menu_file, "Reset");
@@ -216,7 +216,7 @@ ui::ControlGroup group;
       menu_settings_speedreg.finish();
 
       menu_settings_sep3.create(menu_settings);
-      menu_settings_config.create(menu_settings, "Configuration");
+      menu_settings_config.create(menu_settings, "Configuration ...");
     menu_settings.finish();
 
     menu_misc.create(menu, "Misc");

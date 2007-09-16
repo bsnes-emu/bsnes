@@ -1,8 +1,8 @@
 bsnes
-Version 0.022
+Version 0.023
 Author: byuu
 
-
+--------
 General:
 --------
 bsnes is a Super Nintendo / Super Famicom emulator that began on
@@ -13,16 +13,22 @@ http://byuu.org/
 
 Please see license.txt for important licensing information.
 
+--------------
+Shortcut Keys:
+--------------
+Esc - Toggle menubar visibility
+F11 - Toggle fullscreen
 
+------------------
 Known Limitations:
 ------------------
 S-CPU
-- Invalid DMA / HDMA transfers (eg WRAM<>WRAM) not fully emulated
+- Invalid DMA / HDMA transfers not fully emulated
 - Multiply / Divide register delays not implemented
 
 S-PPU
-- Uses scanline-based renderer. This is very inaccurate, but very few games
-  rely on mid-scanline writes to function correctly
+- Uses scanline-based renderer. This is very inaccurate, but few (if any)
+  games rely on mid-scanline writes to function correctly
 - Does not support FirstSprite+Y priority
 - OAM / CGRAM accesses during active display not supported correctly
 - RTO flags are not calculated on frames that are skipped when frameskipping
@@ -31,10 +37,10 @@ S-PPU
   Turning frameskipping off will allow RTO flag calculation on every frame
 
 Hardware Bugs
-- CPUr1 HDMA crashing bug not emulated
-- CPU<>APU communication bus conflicts not emulated
+- S-CPU.r1 HDMA crashing bug not emulated
+- S-CPU<>S-SMP communication bus conflicts not emulated
 
-
+---------------------
 Unsupported Hardware:
 ---------------------
 SA-1
@@ -79,7 +85,7 @@ Flash cartridge used by BS-X, as well as some standalone games by Asciisoft
 Super Gameboy
 Cartridge passthrough used for playing Gameboy games
 
-
+------------------------
 Unsupported Controllers:
 ------------------------
 Mouse
