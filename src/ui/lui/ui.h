@@ -2,6 +2,7 @@
 #include "ui_about.h"
 
 #include "settings/ui_settings.h"
+#include "settings/ui_videosettings.h"
 #include "settings/ui_rastersettings.h"
 #include "settings/ui_inputconfig.h"
 #include "settings/ui_cheateditor.h"

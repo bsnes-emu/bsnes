@@ -131,29 +131,35 @@ void InputConfigWindow::setup() {
   create(0, 475, 355);
 
 int x = 0, y = 0;
-  lportA.create(*this, 0, x,       y, 105, 30, "Controller Port A:");
-  portA.create (*this, 0, x + 110, y, 125, 30);
+int lh = ui::Label::ideal_height;
+int ch = ui::Combobox::ideal_height;
+int bh = ui::Button::ideal_height;
+int lbh = 355 - lh - ch - bh - 10;
+  lportA.create(*this, 0, x, y, 235, lh, "Controller Port A:");
+  lportB.create(*this, 0, x + 240, y, 235, lh, "Controller Port B:");
+  y += lh;
+
+  portA.create (*this, 0, x, y, 235, ch);
   portA.add_item("None");
   portA.add_item("Joypad 1");
   portA.add_item("Joypad 2");
   portA.set_selection(1);
   portA.disable();
 
-  lportB.create(*this, 0, x + 240, y, 105, 30, "Controller Port B:");
-  portB.create (*this, 0, x + 350, y, 125, 30);
+  portB.create (*this, 0, x + 240, y, 235, ch);
   portB.add_item("None");
   portB.add_item("Joypad 1");
   portB.add_item("Joypad 2");
   portB.set_selection(2);
   portB.disable();
-  y += 35;
+  y += ch + 5;
 
-  list.create(*this, ui::Listbox::Header | ui::Listbox::VerticalScrollAlways, x, y, 475, 285, "Name|Value");
+  list.create(*this, ui::Listbox::Header | ui::Listbox::VerticalScrollAlways, x, y, 475, lbh, "Name|Value");
   for(uint i = 0; i < 24; i++) { list.add_item("???|???"); }
-  y += 290;
+  y += lbh + 5;
 
-  setkey.create(*this, 0, x,       y, 235, 30, "Assign Key");
-  clrkey.create(*this, 0, x + 240, y, 235, 30, "Unassign Key");
+  setkey.create(*this, 0, x,       y, 235, bh, "Assign Key");
+  clrkey.create(*this, 0, x + 240, y, 235, bh, "Unassign Key");
 
   refresh_list();
   window_input_capture.setup();
@@ -199,6 +205,7 @@ void InputCaptureWindow::show() {
 }
 
 void InputCaptureWindow::setup() {
-  create(ui::Window::Center, 350, 100, "bsnes Key Capture");
-  label.create(*this, 0, 5, 5, 340, 90);
+int lh = ui::Label::ideal_height;
+  create(ui::Window::Center, 350, lh * 3, "bsnes Key Capture");
+  label.create(*this, 0, 5, lh, 340, lh);
 }

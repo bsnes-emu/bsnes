@@ -16,12 +16,13 @@ void SNES::runtoframe() {
 }
 
 void SNES::init() {
-  srtc = new SRTC();
-  sdd1 = new SDD1();
-  c4   = new C4();
-  dsp1 = new DSP1();
-  dsp2 = new DSP2();
-  obc1 = new OBC1();
+  srtc  = new SRTC();
+  sdd1  = new SDD1();
+  c4    = new C4();
+  dsp1  = new DSP1();
+  dsp2  = new DSP2();
+  obc1  = new OBC1();
+  st010 = new ST010();
 
   srtc->init();
   sdd1->init();
@@ -29,6 +30,7 @@ void SNES::init() {
   dsp1->init();
   dsp2->init();
   obc1->init();
+  st010->init();
 
   video_init();
   audio_init();
@@ -50,12 +52,13 @@ void SNES::power() {
   r_ppu->power();
   r_mem->power();
 
-  if(cartridge.info.srtc)srtc->power();
-  if(cartridge.info.sdd1)sdd1->power();
-  if(cartridge.info.c4)  c4->power();
-  if(cartridge.info.dsp1)dsp1->power();
-  if(cartridge.info.dsp2)dsp2->power();
-  if(cartridge.info.obc1)obc1->power();
+  if(cartridge.info.srtc) srtc->power();
+  if(cartridge.info.sdd1) sdd1->power();
+  if(cartridge.info.c4)   c4->power();
+  if(cartridge.info.dsp1) dsp1->power();
+  if(cartridge.info.dsp2) dsp2->power();
+  if(cartridge.info.obc1) obc1->power();
+  if(cartridge.info.st010)st010->power();
 
   r_mem->flush_mmio_mappers();
   for(int i = 0x2100; i <= 0x213f; i++)r_mem->set_mmio_mapper(i, r_ppu);
@@ -65,12 +68,13 @@ void SNES::power() {
   for(int i = 0x4200; i <= 0x421f; i++)r_mem->set_mmio_mapper(i, r_cpu);
   for(int i = 0x4300; i <= 0x437f; i++)r_mem->set_mmio_mapper(i, r_cpu);
 
-  if(cartridge.info.srtc)srtc->enable();
-  if(cartridge.info.sdd1)sdd1->enable();
-  if(cartridge.info.c4)  c4->enable();
-  if(cartridge.info.dsp1)dsp1->enable();
-  if(cartridge.info.dsp2)dsp2->enable();
-  if(cartridge.info.obc1)obc1->enable();
+  if(cartridge.info.srtc) srtc->enable();
+  if(cartridge.info.sdd1) sdd1->enable();
+  if(cartridge.info.c4)   c4->enable();
+  if(cartridge.info.dsp1) dsp1->enable();
+  if(cartridge.info.dsp2) dsp2->enable();
+  if(cartridge.info.obc1) obc1->enable();
+  if(cartridge.info.st010)st010->enable();
 
   video_update();
 }
@@ -84,12 +88,13 @@ void SNES::reset() {
   r_ppu->reset();
   r_mem->reset();
 
-  if(cartridge.info.srtc)srtc->reset();
-  if(cartridge.info.sdd1)sdd1->reset();
-  if(cartridge.info.c4)  c4->reset();
-  if(cartridge.info.dsp1)dsp1->reset();
-  if(cartridge.info.dsp2)dsp2->reset();
-  if(cartridge.info.obc1)obc1->reset();
+  if(cartridge.info.srtc) srtc->reset();
+  if(cartridge.info.sdd1) sdd1->reset();
+  if(cartridge.info.c4)   c4->reset();
+  if(cartridge.info.dsp1) dsp1->reset();
+  if(cartridge.info.dsp2) dsp2->reset();
+  if(cartridge.info.obc1) obc1->reset();
+  if(cartridge.info.st010)st010->reset();
 
   video_update();
 }

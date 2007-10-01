@@ -15,12 +15,13 @@ void Cartridge::load_begin(uint cart_type) {
 
   info.type = cart_type;
 
-  info.srtc = false;
-  info.sdd1 = false;
-  info.c4   = false;
-  info.dsp1 = false;
-  info.dsp2 = false;
-  info.obc1 = false;
+  info.srtc  = false;
+  info.sdd1  = false;
+  info.c4    = false;
+  info.dsp1  = false;
+  info.dsp2  = false;
+  info.obc1  = false;
+  info.st010 = false;
 
   info.dsp1_mapper = 0;
 

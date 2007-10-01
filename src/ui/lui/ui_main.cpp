@@ -32,6 +32,14 @@ ui::Control *control = (ui::Control*)param;
       event::load_rom();
     }
 
+    if(control == &menu_file_load_st) {
+      event::load_rom_st();
+    }
+
+    if(control == &menu_file_load_stdual) {
+      event::load_rom_stdual();
+    }
+
     if(control == &menu_file_unload) {
       event::unload_rom();
     }
@@ -121,10 +129,14 @@ ui::ControlGroup group;
   menu.create(*this);
     menu_file.create(menu, "File");
       menu_file_load.create(menu_file, "Load Cartridge ...");
-      menu_file_unload.create(menu_file, "Unload");
+      menu_file_load_special.create(menu_file, "Load Special");
+        menu_file_load_st.create(menu_file_load_special, "Load ST Cartridge ...");
+        menu_file_load_stdual.create(menu_file_load_special, "Load ST Dual Cartridge ...");
+      menu_file_load_special.finish();
+      menu_file_unload.create(menu_file, "Unload Cartridge");
       menu_file_sep1.create(menu_file);
-      menu_file_reset.create(menu_file, "Reset");
-      menu_file_power.create(menu_file, "Power");
+      menu_file_reset.create(menu_file, "Reset System");
+      menu_file_power.create(menu_file, "Power Cycle System");
       menu_file_sep2.create(menu_file);
       menu_file_exit.create(menu_file, "Exit");
     menu_file.finish();

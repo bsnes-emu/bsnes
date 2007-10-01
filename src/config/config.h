@@ -1,6 +1,6 @@
-extern Config config_file;
-
 namespace config {
+
+extern Config& config();
 
 string file_updatepath(const char *, const char *);
 

@@ -178,3 +178,15 @@ void bMemBus::cart_map_obc1() {
     }
   }
 }
+
+void bMemBus::cart_map_st010() {
+//$[68-6f|e8-ef]:[0000-0fff]
+  for(uint bank = 0x68; bank <= 0x6f; bank++) {
+    for(uint page = 0x00; page <= 0x0f; page++) {
+      page_read [0x0000 + (bank << 8) + page] = &bMemBus::read_st010;
+      page_read [0x8000 + (bank << 8) + page] = &bMemBus::read_st010;
+      page_write[0x0000 + (bank << 8) + page] = &bMemBus::write_st010;
+      page_write[0x8000 + (bank << 8) + page] = &bMemBus::write_st010;
+    }
+  }
+}

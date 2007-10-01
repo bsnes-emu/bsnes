@@ -1,4 +1,4 @@
-#include "filter_ntsc_core.h"
+#include "ntsc/snes_ntsc.h"
 
 class NtscVideoFilter : public VideoFilter {
 private:

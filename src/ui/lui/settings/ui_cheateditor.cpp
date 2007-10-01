@@ -64,16 +64,19 @@ void CheatEditorWindow::setup() {
   create(0, 475, 355);
 
 int x = 0, y = 0;
-  list.create(*this, ui::Listbox::Header | ui::Listbox::VerticalScrollAlways, x, y, 475, 285, "Status|Code|Description");
-  y += 290;
+int bh = ui::Button::ideal_height;
+int eh = ui::Editbox::ideal_height;
+int lh = 355 - bh - eh - 10;
+  list.create(*this, ui::Listbox::Header | ui::Listbox::VerticalScrollAlways, x, y, 475, lh, "Status|Code|Description");
+  y += lh + 5;
 
-  add_code.create   (*this, 0, x,       y, 155, 30, "Add Code");
-  toggle_code.create(*this, 0, x + 160, y, 155, 30, "Toggle Status");
-  delete_code.create(*this, 0, x + 320, y, 155, 30, "Delete Code");
-  y += 35;
+  add_code.create   (*this, 0, x,       y, 155, bh, "Add Code");
+  toggle_code.create(*this, 0, x + 160, y, 155, bh, "Toggle Status");
+  delete_code.create(*this, 0, x + 320, y, 155, bh, "Delete Code");
+  y += bh + 5;
 
-  code.create(*this, 0, x,       y, 155, 30, "<code>");
-  desc.create(*this, 0, x + 160, y, 315, 30, "<description>");
+  code.create(*this, 0, x,       y, 155, eh, "<code>");
+  desc.create(*this, 0, x + 160, y, 315, eh, "<description>");
 
   refresh();
 }

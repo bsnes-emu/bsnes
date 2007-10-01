@@ -13,7 +13,7 @@ endif
 ifeq ($(PLATFORM),x-gcc-lui)
 OS = unix
 CC = gcc
-CFLAGS = -O3 -fomit-frame-pointer -ffast-math -DPLATFORM_X -DCOMPILER_GCC -DPROCESSOR_X86 -DUI_LUI `pkg-config --cflags gtk+-2.0`
+CFLAGS = -O3 -fomit-frame-pointer -DPLATFORM_X -DCOMPILER_GCC -DPROCESSOR_X86 -DUI_LUI `pkg-config --cflags gtk+-2.0`
 AS = nasm
 ASFLAGS = -f elf
 LIBS = `pkg-config --libs gtk+-2.0` -lXv -lao
@@ -24,7 +24,7 @@ endif
 ifeq ($(PLATFORM),x-gcc-lui-x64)
 OS = unix
 CC = gcc
-CFLAGS = -O3 -fomit-frame-pointer -ffast-math -DPLATFORM_X -DCOMPILER_GCC -DPROCESSOR_X86_64 -DUI_LUI `pkg-config --cflags gtk+-2.0`
+CFLAGS = -O3 -fomit-frame-pointer -DPLATFORM_X -DCOMPILER_GCC -DPROCESSOR_X86_64 -DUI_LUI `pkg-config --cflags gtk+-2.0`
 AS = yasm
 ASFLAGS = -f elf64
 LIBS = `pkg-config --libs gtk+-2.0` -lXv -lao
@@ -155,7 +155,7 @@ OBJECTS = main.$(OBJ) $(LIBCO).$(OBJ) $(LIBUI).$(OBJ) \
   reader.$(OBJ) cart.$(OBJ) cheat.$(OBJ) memory.$(OBJ) bmemory.$(OBJ) \
   cpu.$(OBJ) scpu.$(OBJ) smp.$(OBJ) ssmp.$(OBJ) bdsp.$(OBJ) ppu.$(OBJ) \
   bppu.$(OBJ) snes.$(OBJ) srtc.$(OBJ) sdd1.$(OBJ) c4.$(OBJ) dsp1.$(OBJ) \
-  dsp2.$(OBJ) obc1.$(OBJ)
+  dsp2.$(OBJ) obc1.$(OBJ) st010.$(OBJ)
 
 ifeq ($(GZIP_SUPPORT),true)
   OBJECTS += adler32.$(OBJ) compress.$(OBJ) crc32.$(OBJ) deflate.$(OBJ) \
@@ -259,12 +259,13 @@ snes.$(OBJ): snes/snes.cpp snes/* snes/scheduler/* snes/video/* snes/audio/* sne
 #####################
 ### special chips ###
 #####################
-srtc.$(OBJ): chip/srtc/srtc.cpp chip/srtc/*
-sdd1.$(OBJ): chip/sdd1/sdd1.cpp chip/sdd1/*
-c4.$(OBJ)  : chip/c4/c4.cpp chip/c4/*
-dsp1.$(OBJ): chip/dsp1/dsp1.cpp chip/dsp1/*
-dsp2.$(OBJ): chip/dsp2/dsp2.cpp chip/dsp2/*
-obc1.$(OBJ): chip/obc1/obc1.cpp chip/obc1/*
+srtc.$(OBJ) : chip/srtc/srtc.cpp chip/srtc/*
+sdd1.$(OBJ) : chip/sdd1/sdd1.cpp chip/sdd1/*
+c4.$(OBJ)   : chip/c4/c4.cpp chip/c4/*
+dsp1.$(OBJ) : chip/dsp1/dsp1.cpp chip/dsp1/*
+dsp2.$(OBJ) : chip/dsp2/dsp2.cpp chip/dsp2/*
+obc1.$(OBJ) : chip/obc1/obc1.cpp chip/obc1/*
+st010.$(OBJ): chip/st010/st010.cpp chip/st010/*
 
 ############
 ### zlib ###

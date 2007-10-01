@@ -157,15 +157,18 @@ class Frame : public Control { public:
 };
 
 class Label : public Control { public:
+enum { ideal_height = 16 };
   void create(Window &owner, uint style, uint x, uint y, uint width, uint height, const char *caption = "");
   void set_text(const char *str, ...);
 };
 
 class Button : public Control { public:
+enum { ideal_height = 21 };
   void create(Window &owner, uint style, uint x, uint y, uint width, uint height, const char *caption = "");
 };
 
 class Checkbox : public Control { public:
+enum { ideal_height = 15 };
   void create(Window &owner, uint style, uint x, uint y, uint width, uint height, const char *caption = "");
   void check();
   void uncheck();
@@ -174,6 +177,7 @@ class Checkbox : public Control { public:
 };
 
 class Radiobox : public Control { public:
+enum { ideal_height = 15 };
   void create(Window &owner, ControlGroup &list, uint style, uint x, uint y, uint width, uint height, const char *caption = "");
   void check();
   bool checked();
@@ -183,6 +187,7 @@ ControlGroup group;
 };
 
 class Editbox : public Control { public:
+enum { ideal_height = 21 };
 enum {
   Multiline = (1 << 1),
   Readonly  = (1 << 2),
@@ -235,6 +240,7 @@ uint column_count;
 };
 
 class Combobox : public Control { public:
+enum { ideal_height = 21 };
   void create(Window &owner, uint style, uint x, uint y, uint width, uint height);
   void add_item(const char *data);
   void set_selection(int index);
@@ -243,12 +249,14 @@ class Combobox : public Control { public:
 };
 
 class Progressbar : public Control { public:
+enum { ideal_height = 30 };
   void create(Window &owner, uint style, uint x, uint y, uint width, uint height);
   void set_progress(uint progress);
   uint get_progress();
 };
 
 class Slider : public Control { public:
+enum { ideal_height = 25 };
 enum Style {
   Horizontal = 0,
   Vertical   = 1,

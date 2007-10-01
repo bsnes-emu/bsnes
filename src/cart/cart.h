@@ -87,6 +87,7 @@ struct {
   bool   dsp1;
   bool   dsp2;
   bool   obc1;
+  bool   st010;
 
   uint   dsp1_mapper;
 

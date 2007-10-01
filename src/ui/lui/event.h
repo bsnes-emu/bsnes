@@ -8,6 +8,8 @@ void toggle_fullscreen();
 
 bool load_rom(char *fn);
 void load_rom();
+void load_rom_st();
+void load_rom_stdual();
 void unload_rom();
 void reset();
 void power();

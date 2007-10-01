@@ -106,6 +106,32 @@ char fn[PATH_MAX];
   window_cheat_editor.refresh();
 }
 
+void load_rom_st() {
+char fn[PATH_MAX];
+  if(load_rom(fn) == false)return;
+
+  if(cartridge.loaded() == true)cartridge.unload();
+  cartridge.load_begin(Cartridge::CART_ST);
+  cartridge.load(fn);
+  cartridge.load_end();
+  snes.power();
+  window_cheat_editor.refresh();
+}
+
+void load_rom_stdual() {
+char fn_a[PATH_MAX], fn_b[PATH_MAX];
+  if(load_rom(fn_a) == false)return;
+  if(load_rom(fn_b) == false)return;
+
+  if(cartridge.loaded() == true)cartridge.unload();
+  cartridge.load_begin(Cartridge::CART_STDUAL);
+  cartridge.load(fn_a);
+  cartridge.load(fn_b);
+  cartridge.load_end();
+  snes.power();
+  window_cheat_editor.refresh();
+}
+
 void unload_rom() {
   if(cartridge.loaded() == true) {
     cartridge.unload();

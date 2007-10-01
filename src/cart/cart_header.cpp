@@ -69,6 +69,10 @@ uint8 rom_type = rom[info.header_index + ROM_TYPE];
     info.obc1 = true;
   }
 
+  if(mapper == 0x30 && rom_type == 0xf6) {
+    info.st010 = true;
+  }
+
   info.cart_mmio = info.c4 | info.dsp1 | info.dsp2 | info.obc1;
 
   if(rom[info.header_index + RAM_SIZE] & 7) {

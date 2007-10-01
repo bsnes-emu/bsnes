@@ -1,5 +1,5 @@
 bsnes
-Version 0.023
+Version 0.024
 Author: byuu
 
 --------
@@ -72,8 +72,11 @@ Coprocessor used only by SD Gundam GX
 DSP-4
 Coprocessor used only by Top Gear 3000
 
-ST010 / ST011 / ST018
-SETA coprocessors used by very few games
+ST011
+SETA DSP used only by Quick-move Shogi Match with Nidan Rank-holder Morita
+
+ST018
+SETA RISC CPU used only by Quick-move Shogi Match with Nidan Rank-holder Morita 2
 
 BS-X (Broadcast Satellite)
 Add-on unit sold only in Japan that played specially-made games that were

@@ -41,6 +41,8 @@ enum { TYPE_WRAM, TYPE_MMIO, TYPE_CART };
   void   write_dsp2    (uint32 addr, uint8 data);
   uint8  read_obc1     (uint32 addr);
   void   write_obc1    (uint32 addr, uint8 data);
+  uint8  read_st010    (uint32 addr);
+  void   write_st010   (uint32 addr, uint8 data);
 
   void   cart_map_reset();
   void   cart_map_system();
@@ -51,6 +53,7 @@ enum { TYPE_WRAM, TYPE_MMIO, TYPE_CART };
   void   cart_map_dsp1();
   void   cart_map_dsp2();
   void   cart_map_obc1();
+  void   cart_map_st010();
 
   void   power();
   void   reset();

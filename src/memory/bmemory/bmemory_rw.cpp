@@ -62,3 +62,6 @@ void  bMemBus::write_dsp2(uint32 addr, uint8 data) { dsp2->write(addr, data); }
 
 uint8 bMemBus::read_obc1 (uint32 addr) { return obc1->read(addr); }
 void  bMemBus::write_obc1(uint32 addr, uint8 data) { obc1->write(addr, data); }
+
+uint8 bMemBus::read_st010 (uint32 addr) { return st010->read(addr); }
+void  bMemBus::write_st010(uint32 addr, uint8 data) { st010->write(addr, data); }

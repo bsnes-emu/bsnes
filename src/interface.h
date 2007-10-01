@@ -39,6 +39,7 @@
 #include "chip/dsp1/dsp1.h"
 #include "chip/dsp2/dsp2.h"
 #include "chip/obc1/obc1.h"
+#include "chip/st010/st010.h"
 
 extern MMIO mmio_unmapped;
 #ifdef POLYMORPHISM

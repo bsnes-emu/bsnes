@@ -1,5 +1,4 @@
-#define SNES_NTSC_IN_FORMAT SNES_NTSC_BGR15
-#include "filter_ntsc_core.cpp"
+#include "ntsc/snes_ntsc.c"
 
 NtscVideoFilter::NtscVideoFilter() {
   ntsc = 0;

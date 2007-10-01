@@ -4,10 +4,10 @@ ui::Control *control = (ui::Control*)param;
   int pos = list.get_selection();
     set_val.enable(pos >= 0);
     set_def.enable(pos >= 0);
-    if(pos >= 0 && pos < config_file.list_count) {
-      desc.set_text(string() << "(default = " << config_file.list[pos]->def << ")\n" << config_file.list[pos]->desc);
+    if(pos >= 0 && pos < config::config().list_count) {
+      desc.set_text(string() << "(default = " << config::config().list[pos]->def << ")\n" << config::config().list[pos]->desc);
     string val;
-      config_file.list[pos]->get(val);
+      config::config().list[pos]->get(val);
       edit_val.set_text(strptr(val));
     }
   } else if(id == ui::Message::Clicked && control == &set_val) {
@@ -23,23 +23,23 @@ ui::Control *control = (ui::Control*)param;
 
 void AdvancedWindow::read_config(uint pos, string &data) {
   strcpy(data, "?|?|?");
-  if(pos >= config_file.list_count)return;
+  if(pos >= config::config().list_count)return;
 string name, val;
-  name = config_file.list[pos]->name;
-  config_file.list[pos]->get(val);
-  if(val != config_file.list[pos]->def) { strcat(name, " (*)"); }
+  name = config::config().list[pos]->name;
+  config::config().list[pos]->get(val);
+  if(val != config::config().list[pos]->def) { strcat(name, " (*)"); }
   sprintf(data, "%s|%s|%s",
     strptr(name),
-    config_file.list[pos]->type == Setting::String ? "String" : "Integer",
+    config::config().list[pos]->type == Setting::String ? "String" : "Integer",
     strptr(val)
   );
 }
 
 void AdvancedWindow::update(uint pos, const char *data) {
-  if(pos >= config_file.list_count)return;
-  config_file.list[pos]->set(data ? data : config_file.list[pos]->def);
+  if(pos >= config::config().list_count)return;
+  config::config().list[pos]->set(data ? data : config::config().list[pos]->def);
 string val;
-  config_file.list[pos]->get(val);
+  config::config().list[pos]->get(val);
   edit_val.set_text(strptr(val));
   read_config(pos, val);
   list.set_item(pos, strptr(val));
@@ -50,20 +50,27 @@ void AdvancedWindow::setup() {
   create(0, 475, 355);
 
 int x = 0, y = 0;
-  list.create(*this, ui::Listbox::Header | ui::Listbox::VerticalScrollAlways, x, y, 475, 235, "Name|Type|Value");
-  y += 240;
-  desc.create(*this, ui::Editbox::Multiline | ui::Editbox::Readonly, x, y, 475, 80,
+int bh = ui::Button::ideal_height;
+int eh = ui::Editbox::ideal_height;
+  bh = max(bh, eh); //set both editbox and button to same size, as they are on the same line
+int th = 80;
+int lh = 355 - th - bh - 10;
+  list.create(*this, ui::Listbox::Header | ui::Listbox::VerticalScrollAlways, x, y, 475, lh, "Name|Type|Value");
+  y += lh + 5;
+
+  desc.create(*this, ui::Editbox::Multiline | ui::Editbox::Readonly, x, y, 475, th,
     "<description>\n"
     "Warning: modifification of certain variables will not take effect until\n"
     "bsnes is restarted, and corresponding UI elements will not be updated\n"
     "to reflect changes here. (*) = modified"
   );
-  y += 85;
-  edit_val.create(*this, 0, x, y, 265, 30, "<current value>");
-  set_val.create(*this, 0, x + 270, y, 100, 30, "Set");
-  set_def.create(*this, 0, x + 375, y, 100, 30, "Default");
+  y += th + 5;
 
-  for(int i = 0; i < config_file.list_count; i++) {
+  edit_val.create(*this, 0, x, y, 265, bh, "<current value>");
+  set_val.create(*this, 0, x + 270, y, 100, bh, "Set");
+  set_def.create(*this, 0, x + 375, y, 100, bh, "Default");
+
+  for(int i = 0; i < config::config().list_count; i++) {
   string val;
     read_config(i, val);
     list.add_item(strptr(val));

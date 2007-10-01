@@ -88,29 +88,32 @@ void RasterSettingsWindow::setup() {
   create(0, 475, 355);
 
 int x = 0, y = 0;
-  lcontrast.create(*this, 0, x,       y, 100, 25);
-  contrast.create (*this, 0, x + 100, y, 375, 25, 192);
-  y += 25;
+int sh = ui::Slider::ideal_height;
+int kh = ui::Checkbox::ideal_height;
+int bh = ui::Button::ideal_height;
+  lcontrast.create(*this, 0, x,       y, 100, sh);
+  contrast.create (*this, 0, x + 100, y, 375, sh, 192);
+  y += sh;
 
-  lbrightness.create(*this, 0, x,       y, 100, 25);
-  brightness.create (*this, 0, x + 100, y, 375, 25, 192);
-  y += 25;
+  lbrightness.create(*this, 0, x,       y, 100, sh);
+  brightness.create (*this, 0, x + 100, y, 375, sh, 192);
+  y += sh;
 
-  lgamma.create(*this, 0, x,       y, 100, 25);
-  gamma.create (*this, 0, x + 100, y, 375, 25, 191);
-  y += 25;
+  lgamma.create(*this, 0, x,       y, 100, sh);
+  gamma.create (*this, 0, x + 100, y, 375, sh, 191);
+  y += sh;
 
-  gamma_ramp.create(*this, 0, x, y, 235, 20, "Gamma ramp");
-  sepia.create(*this, 0, x + 240, y, 235, 20, "Sepia");
-  y += 20;
+  gamma_ramp.create(*this, 0, x, y, 235, kh, "Gamma ramp");
+  sepia.create(*this, 0, x + 240, y, 235, kh, "Sepia");
+  y += kh;
 
-  grayscale.create(*this, 0, x, y, 235, 20, "Grayscale");
-  invert.create(*this, 0, x + 240, y, 235, 20, "Invert colors");
-  y += 20;
+  grayscale.create(*this, 0, x, y, 235, kh, "Grayscale");
+  invert.create(*this, 0, x + 240, y, 235, kh, "Invert colors");
+  y += kh + 5;
 
-  y += 5;
-  preset_optimal.create (*this, 0, x,       y, 235, 30, "Optimal Preset");
-  preset_standard.create(*this, 0, x + 240, y, 235, 30, "Standard Preset");
+  preset_optimal.create (*this, 0, x,       y, 235, bh, "Optimal Preset");
+  preset_standard.create(*this, 0, x + 240, y, 235, bh, "Standard Preset");
+  y += bh;
 
   sync_ui();
 }

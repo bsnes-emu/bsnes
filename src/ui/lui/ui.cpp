@@ -2,6 +2,7 @@
 #include "ui_about.cpp"
 
 #include "settings/ui_settings.cpp"
+#include "settings/ui_videosettings.cpp"
 #include "settings/ui_rastersettings.cpp"
 #include "settings/ui_inputconfig.cpp"
 #include "settings/ui_cheateditor.cpp"
@@ -27,6 +28,7 @@ void ui_init() {
   window_main.setup();
   window_about.setup();
 
+  window_video_settings.setup();
   window_raster_settings.setup();
   window_input_config.setup();
   window_cheat_editor.setup();

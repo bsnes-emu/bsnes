@@ -43,10 +43,10 @@ uint8 b = (addr >> 16) & 0xff;
 uint8 SDD1::mmio_read(uint16 addr) {
   switch(addr) {
   //>>20 == 0x100000 == 1mb
-  case 0x4804:return (sdd1.index[0] >> 20) & 7;
-  case 0x4805:return (sdd1.index[1] >> 20) & 7;
-  case 0x4806:return (sdd1.index[2] >> 20) & 7;
-  case 0x4807:return (sdd1.index[3] >> 20) & 7;
+  case 0x4804: return (sdd1.index[0] >> 20) & 7;
+  case 0x4805: return (sdd1.index[1] >> 20) & 7;
+  case 0x4806: return (sdd1.index[2] >> 20) & 7;
+  case 0x4807: return (sdd1.index[3] >> 20) & 7;
   }
 
   return r_cpu->regs.mdr;
@@ -60,10 +60,10 @@ void SDD1::mmio_write(uint16 addr, uint8 data) {
     }
     break;
   //<<20 == 0x100000 == 1mb
-  case 0x4804:sdd1.index[0] = (data & 7) << 20;break;
-  case 0x4805:sdd1.index[1] = (data & 7) << 20;break;
-  case 0x4806:sdd1.index[2] = (data & 7) << 20;break;
-  case 0x4807:sdd1.index[3] = (data & 7) << 20;break;
+  case 0x4804: sdd1.index[0] = (data & 7) << 20; break;
+  case 0x4805: sdd1.index[1] = (data & 7) << 20; break;
+  case 0x4806: sdd1.index[2] = (data & 7) << 20; break;
+  case 0x4807: sdd1.index[3] = (data & 7) << 20; break;
   }
 }
 

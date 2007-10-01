@@ -8,7 +8,7 @@ uint16 bPPU::get_vram_address() {
 uint16 addr;
   addr = regs.vram_addr;
   switch(regs.vram_mapping) {
-  case 0: break;
+  case 0: break; //direct
   case 1: addr = (addr & 0xff00) | ((addr & 0x001f) << 3) | ((addr >> 5) & 7); break;
   case 2: addr = (addr & 0xfe00) | ((addr & 0x003f) << 3) | ((addr >> 6) & 7); break;
   case 3: addr = (addr & 0xfc00) | ((addr & 0x007f) << 3) | ((addr >> 7) & 7); break;
@@ -124,7 +124,7 @@ uint16 v = r_cpu->vcounter();
 //NOTE: CGRAM writes during hblank are valid. During active display, the actual address the
 //data is written to varies, as the S-PPU itself changes the address. Like OAM, we do not know
 //the exact algorithm used, but we have zero known examples of any commercial software that
-//attempts to do this. Therefore, the addresses are mapped to 0x0000. There is nothing special
+//attempts to do this. Therefore, the addresses are mapped to 0x01ff. There is nothing special
 //about this address, it is simply more accurate to invalidate the 'expected' address than not.
 
 uint8 bPPU::cgram_mmio_read(uint16 addr) {
@@ -134,8 +134,8 @@ uint8 bPPU::cgram_mmio_read(uint16 addr) {
 
 uint16 v  = r_cpu->vcounter();
 uint16 hc = r_cpu->hclock();
-  if(v < (!r_cpu->overscan() ? 225 : 240) && hc > 0 && hc < 1096) {
-    return cgram_read(0x0000);
+  if(v < (!r_cpu->overscan() ? 225 : 240) && hc >= 72 && hc < 1096) {
+    return cgram_read(0x01ff);
   }
 
   return cgram_read(addr);
@@ -148,8 +148,8 @@ void bPPU::cgram_mmio_write(uint16 addr, uint8 data) {
 
 uint16 v  = r_cpu->vcounter();
 uint16 hc = r_cpu->hclock();
-  if(v < (!r_cpu->overscan() ? 225 : 240) && hc > 0 && hc < 1096) {
-    return cgram_write(0x0000, data);
+  if(v < (!r_cpu->overscan() ? 225 : 240) && hc >= 72 && hc < 1096) {
+    return cgram_write(0x01ff, data);
   }
 
   cgram_write(addr, data);
