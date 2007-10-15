@@ -35,7 +35,7 @@ void ui_init() {
   window_advanced.setup();
   window_settings.setup();
 
-  event::update_video_settings();
+  event::update_video_settings(); //call first time to resize main window and update menubar
   window_main.show();
   while(ui::events_pending()) { ui::run(); }
 
@@ -68,7 +68,7 @@ void ui_init() {
   uiAudio->init();
   uiInput->init();
 
-  window_main.setup_menu();
+  event::update_video_settings(); //call second time to update uiVideo->settings
 }
 
 void ui_term() {

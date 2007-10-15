@@ -20,21 +20,11 @@ uint offset = 0;
   info.crc32 = crc32_calculate(rom, info.rom_size);
 
   if(read_database() == true) {
-    info.srtc = false;
-    info.sdd1 = false;
-    info.c4   = false;
-    info.dsp1 = false;
-    info.dsp2 = false;
-    info.obc1 = false;
-
-    info.dsp1_mapper = 0;
-
     info.header_index = 0xffc0;
     info.mapper = PCB;
     strcpy(info.name, dbi.name);
     strcpy(info.pcb,  dbi.pcb);
     info.region = NTSC;
-    info.cart_mmio = false;
 
     info.rom_size = dbi.rom;
     info.ram_size = dbi.ram;

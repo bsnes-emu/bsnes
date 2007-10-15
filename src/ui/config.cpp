@@ -26,46 +26,62 @@ IntegerSetting System::speed_fast    (&config(), "system.speed_fast",     "Fast 
 IntegerSetting System::speed_fastest (&config(), "system.speed_fastest",  "Fastest speed setting", IntegerSetting::Decimal, 200);
 
 struct Video {
-  static IntegerSetting synchronize;
-  static IntegerSetting fullscreen;
-  static IntegerSetting multiplier, aspect_correction, region;
+  static IntegerSetting mode;
+  struct Windowed {
+    static IntegerSetting synchronize, aspect_correction;
+    static IntegerSetting region, multiplier, hardware_filter, software_filter;
+  } windowed;
+  struct Fullscreen {
+    static IntegerSetting synchronize, aspect_correction;
+    static IntegerSetting region, multiplier, hardware_filter, software_filter;
+  } fullscreen;
   static IntegerSetting aspect_ntsc_x, aspect_ntsc_y, aspect_pal_x, aspect_pal_y;
-  static IntegerSetting hardware_filter, software_filter;
   static IntegerSetting frameskip;
   static IntegerSetting use_vram;
 } video;
-IntegerSetting Video::synchronize(&config(), "video.synchronize", "Synchronize to video refresh rate.", IntegerSetting::Boolean, false);
-IntegerSetting Video::fullscreen(0, "video.fullscreen", "", IntegerSetting::Boolean, false);
-IntegerSetting Video::multiplier(&config(), "video.multiplier", "Video output size multiplier (1-5x)\n"
-  "1 = 1x (~256x224)\n"
-  "2 = 2x (~512x448)\n"
-  "etc.",
-  IntegerSetting::Decimal, 2);
-IntegerSetting Video::aspect_correction(&config(), "video.aspect_correction",
+
+//0 = windowed, 1 = fullscreen, 2 = exclusive
+IntegerSetting Video::mode(0, "video.mode", "Active video mode", IntegerSetting::Decimal, 0);
+
+IntegerSetting Video::Windowed::synchronize(&config(), "video.windowed.synchronize", "Synchronize to video refresh rate", IntegerSetting::Boolean, false);
+IntegerSetting Video::Windowed::aspect_correction(&config(), "video.windowed.aspect_correction",
   "Correct video aspect ratio\n"
-  "Formula: width = width * video.aspect_<region>_x / video.aspect_<region>_y",
+  "Defaults assume display pixels are perfectly square\n"
+  "Formula: width = width * video.aspect_<region>_x / video.aspect_<region>_y\n",
   IntegerSetting::Boolean, true);
-IntegerSetting Video::region(&config(), "video.region", "Video output region\n"
+IntegerSetting Video::Windowed::region(&config(), "video.windowed.region", "Video output region\n"
   "0 = NTSC, 1 = PAL",
   IntegerSetting::Decimal, 0);
+IntegerSetting Video::Windowed::multiplier(&config(), "video.windowed.multiplier", "Video output size multiplier (1-5x)\n"
+  "1 = 1x (<= 320x240)\n"
+  "2 = 2x (<= 640x480)\n"
+  "etc.",
+  IntegerSetting::Decimal, 2);
+IntegerSetting Video::Windowed::hardware_filter(&config(), "video.windowed.hardware_filter", "Video hardware filter\n"
+  "0 = Point\n"
+  "1 = Linear\n",
+  IntegerSetting::Decimal, 1);
+IntegerSetting Video::Windowed::software_filter(&config(), "video.windowed.software_filter", "Video software filter\n"
+  "0 = None\n"
+  "1 = NTSC\n"
+  "2 = HQ2x\n"
+  "3 = Scale2x\n",
+  IntegerSetting::Decimal, 0);
+
+IntegerSetting Video::Fullscreen::synchronize      (&config(), "video.fullscreen.synchronize",       "", IntegerSetting::Boolean, false);
+IntegerSetting Video::Fullscreen::aspect_correction(&config(), "video.fullscreen.aspect_correction", "", IntegerSetting::Boolean, true);
+IntegerSetting Video::Fullscreen::region           (&config(), "video.fullscreen.region",            "", IntegerSetting::Decimal, 0);
+IntegerSetting Video::Fullscreen::multiplier       (&config(), "video.fullscreen.multiplier",        "", IntegerSetting::Decimal, 2);
+IntegerSetting Video::Fullscreen::hardware_filter  (&config(), "video.fullscreen.hardware_filter",   "", IntegerSetting::Decimal, 1);
+IntegerSetting Video::Fullscreen::software_filter  (&config(), "video.fullscreen.software_filter",   "", IntegerSetting::Decimal, 0);
 
 IntegerSetting Video::aspect_ntsc_x(&config(), "video.aspect_ntsc_x", "", IntegerSetting::Decimal, 54);
 IntegerSetting Video::aspect_ntsc_y(&config(), "video.aspect_ntsc_y", "", IntegerSetting::Decimal, 47);
 IntegerSetting Video::aspect_pal_x (&config(), "video.aspect_pal_x",  "", IntegerSetting::Decimal, 32);
 IntegerSetting Video::aspect_pal_y (&config(), "video.aspect_pal_y",  "", IntegerSetting::Decimal, 23);
 
-IntegerSetting Video::hardware_filter(&config(), "video.hardware_filter", "Video hardware filter\n"
-  "0 = Point\n"
-  "1 = Linear\n",
-  IntegerSetting::Decimal, 1);
-IntegerSetting Video::software_filter(&config(), "video.software_filter", "Video software filter\n"
-  "0 = None\n"
-  "1 = NTSC\n"
-  "2 = HQ2x\n"
-  "3 = Scale2x\n",
-  IntegerSetting::Decimal, 0);
 IntegerSetting Video::frameskip(0, "video.frameskip", "Video frameskip", IntegerSetting::Decimal, 0);
-IntegerSetting Video::use_vram(&config(), "video.use_vram", "Use Video RAM instead of System RAM", IntegerSetting::Boolean, true);
+IntegerSetting Video::use_vram(&config(), "video.use_vram", "Use Video RAM instead of System RAM when possible", IntegerSetting::Boolean, true);
 
 struct Audio {
   static IntegerSetting synchronize;

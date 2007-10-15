@@ -18,7 +18,7 @@ void VideoDD::unlock() {
 }
 
 void VideoDD::refresh(uint r_width, uint r_height) {
-  if(config::video.synchronize == true) {
+  if(settings.synchronize) {
     for(;;) {
     BOOL in_vblank;
       lpdd7->GetVerticalBlankStatus(&in_vblank);

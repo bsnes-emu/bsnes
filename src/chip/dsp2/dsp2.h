@@ -1,5 +1,4 @@
-class DSP2 {
-public:
+class DSP2 { public:
 struct {
   bool   waiting_for_command;
   uint   command;
@@ -40,4 +39,4 @@ struct {
   ~DSP2();
 };
 
-extern DSP2 *dsp2;
+extern DSP2 dsp2;

@@ -33,11 +33,14 @@
 
 #include "snes/snes.h"
 
+#include "chip/superfx/superfx.h"
 #include "chip/srtc/srtc.h"
 #include "chip/sdd1/sdd1.h"
 #include "chip/c4/c4.h"
 #include "chip/dsp1/dsp1.h"
 #include "chip/dsp2/dsp2.h"
+#include "chip/dsp3/dsp3.h"
+#include "chip/dsp4/dsp4.h"
 #include "chip/obc1/obc1.h"
 #include "chip/st010/st010.h"
 

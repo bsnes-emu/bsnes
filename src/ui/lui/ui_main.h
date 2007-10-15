@@ -57,6 +57,7 @@ ui::MenuGroup menu_settings;
   ui::MenuItem menu_settings_config;
 ui::MenuGroup menu_misc;
   ui::MenuCheckItem menu_misc_logaudio;
+  ui::MenuCheckItem menu_misc_showfps;
   ui::MenuSeparator menu_misc_sep1;
   ui::MenuItem menu_misc_about;
 
@@ -65,7 +66,8 @@ ui::Container view;
 
   bool input_ready();
 
+bool locked;
   bool message(uint id, uintptr_t param = 0);
   void setup();
-  void setup_menu();
+  void update_menu_settings();
 } window_main;

@@ -31,6 +31,8 @@ void bMemBus::load_cart() {
   if(cartridge.info.c4)   cart_map_c4();
   if(cartridge.info.dsp1) cart_map_dsp1();
   if(cartridge.info.dsp2) cart_map_dsp2();
+  if(cartridge.info.dsp3) cart_map_dsp3();
+  if(cartridge.info.dsp4) cart_map_dsp4();
   if(cartridge.info.obc1) cart_map_obc1();
   if(cartridge.info.st010)cart_map_st010();
 
@@ -58,13 +60,19 @@ char t[256];
   dprintf("* Region   : %s", (cartridge.info.region == Cartridge::NTSC) ? "NTSC" : "PAL");
 
   strcpy(t, "");
-  if(cartridge.info.srtc) strcat(t, "S-RTC, ");
-  if(cartridge.info.sdd1) strcat(t, "S-DD1, ");
-  if(cartridge.info.c4)   strcat(t, "Cx4, ");
-  if(cartridge.info.dsp1) strcat(t, "DSP-1, ");
-  if(cartridge.info.dsp2) strcat(t, "DSP-2, ");
-  if(cartridge.info.obc1) strcat(t, "OBC-1, ");
-  if(cartridge.info.st010)strcat(t, "ST010, ");
+  if(cartridge.info.superfx)strcat(t, "SuperFX, ");
+  if(cartridge.info.sa1)    strcat(t, "SA-1, ");
+  if(cartridge.info.srtc)   strcat(t, "S-RTC, ");
+  if(cartridge.info.sdd1)   strcat(t, "S-DD1, ");
+  if(cartridge.info.c4)     strcat(t, "Cx4, ");
+  if(cartridge.info.dsp1)   strcat(t, "DSP-1, ");
+  if(cartridge.info.dsp2)   strcat(t, "DSP-2, ");
+  if(cartridge.info.dsp3)   strcat(t, "DSP-3, ");
+  if(cartridge.info.dsp4)   strcat(t, "DSP-4, ");
+  if(cartridge.info.obc1)   strcat(t, "OBC-1, ");
+  if(cartridge.info.st010)  strcat(t, "ST010, ");
+  if(cartridge.info.st011)  strcat(t, "ST011, ");
+  if(cartridge.info.st018)  strcat(t, "ST018, ");
   strrtrim(t, ", ");
   dprintf("* Coprocessor(s) : %s", (strlen(t) == 0) ? "None" : t);
   dprintf("* Reset:%0.4x NMI[n]:%0.4x IRQ[n]:%0.4x BRK[n]:%0.4x COP[n]:%0.4x",

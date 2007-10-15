@@ -49,4 +49,4 @@ struct {
   SRTC();
 };
 
-extern SRTC *srtc;
+extern SRTC srtc;

@@ -13,6 +13,7 @@ bool Cartridge::load_file(const char *fn, uint8 *&data, uint &size) {
   dprintf("* Loading \"%s\"...", fn);
 
   if(fexists(fn) == false) {
+    alert("Error: file '%s' not found!", fn);
     return false;
   }
 

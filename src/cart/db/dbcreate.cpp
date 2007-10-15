@@ -53,9 +53,9 @@ db_item dbi;
   dbi.ram   = 0;
 
   for(int i = 1; i < count(line); i++) {
-  uint pos;
-    if(strpos(line[i], ";", pos) == true) {
-      strset(line[i], pos, 0);
+  int pos = strpos(line[i], ";");
+    if(pos >= 0) {
+      strptr(line[i])[pos] = 0;
     }
 
     if(line[i] == "")continue;

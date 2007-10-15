@@ -81,7 +81,7 @@ endif
 ifeq ($(PLATFORM),win-mingw4-lui)
 OS = win
 CC = mingw32-gcc-sjlj
-CFLAGS = -mwindows -O3 -fomit-frame-pointer -DPLATFORM_WIN -DCOMPILER_GCC -DPROCESSOR_X86 -DUI_LUI
+CFLAGS = -mconsole -O3 -fomit-frame-pointer -DPLATFORM_WIN -DCOMPILER_GCC -DPROCESSOR_X86 -DUI_LUI
 AS = nasm
 ASFLAGS = -f win32 -DWIN32
 LIBS = -ld3d9 -lddraw -ldsound -ldinput8 -ldxguid -luuid -lkernel32 -luser32 -lgdi32 -lshell32 -lwinmm -lcomdlg32 -lcomctl32
@@ -154,8 +154,8 @@ OBJECTS = main.$(OBJ) $(LIBCO).$(OBJ) $(LIBUI).$(OBJ) \
   libstring.$(OBJ) \
   reader.$(OBJ) cart.$(OBJ) cheat.$(OBJ) memory.$(OBJ) bmemory.$(OBJ) \
   cpu.$(OBJ) scpu.$(OBJ) smp.$(OBJ) ssmp.$(OBJ) bdsp.$(OBJ) ppu.$(OBJ) \
-  bppu.$(OBJ) snes.$(OBJ) srtc.$(OBJ) sdd1.$(OBJ) c4.$(OBJ) dsp1.$(OBJ) \
-  dsp2.$(OBJ) obc1.$(OBJ) st010.$(OBJ)
+  bppu.$(OBJ) snes.$(OBJ) superfx.$(OBJ) srtc.$(OBJ) sdd1.$(OBJ) c4.$(OBJ) \
+  dsp1.$(OBJ) dsp2.$(OBJ) dsp3.$(OBJ) dsp4.$(OBJ) obc1.$(OBJ) st010.$(OBJ)
 
 ifeq ($(GZIP_SUPPORT),true)
   OBJECTS += adler32.$(OBJ) compress.$(OBJ) crc32.$(OBJ) deflate.$(OBJ) \
@@ -259,13 +259,16 @@ snes.$(OBJ): snes/snes.cpp snes/* snes/scheduler/* snes/video/* snes/audio/* sne
 #####################
 ### special chips ###
 #####################
-srtc.$(OBJ) : chip/srtc/srtc.cpp chip/srtc/*
-sdd1.$(OBJ) : chip/sdd1/sdd1.cpp chip/sdd1/*
-c4.$(OBJ)   : chip/c4/c4.cpp chip/c4/*
-dsp1.$(OBJ) : chip/dsp1/dsp1.cpp chip/dsp1/*
-dsp2.$(OBJ) : chip/dsp2/dsp2.cpp chip/dsp2/*
-obc1.$(OBJ) : chip/obc1/obc1.cpp chip/obc1/*
-st010.$(OBJ): chip/st010/st010.cpp chip/st010/*
+superfx.$(OBJ): chip/superfx/superfx.cpp chip/superfx/* chip/superfx/core/* chip/superfx/memory/*
+srtc.$(OBJ)   : chip/srtc/srtc.cpp chip/srtc/*
+sdd1.$(OBJ)   : chip/sdd1/sdd1.cpp chip/sdd1/*
+c4.$(OBJ)     : chip/c4/c4.cpp chip/c4/*
+dsp1.$(OBJ)   : chip/dsp1/dsp1.cpp chip/dsp1/*
+dsp2.$(OBJ)   : chip/dsp2/dsp2.cpp chip/dsp2/*
+dsp3.$(OBJ)   : chip/dsp3/dsp3.cpp chip/dsp3/*
+dsp4.$(OBJ)   : chip/dsp4/dsp4.cpp chip/dsp4/*
+obc1.$(OBJ)   : chip/obc1/obc1.cpp chip/obc1/*
+st010.$(OBJ)  : chip/st010/st010.cpp chip/st010/*
 
 ############
 ### zlib ###

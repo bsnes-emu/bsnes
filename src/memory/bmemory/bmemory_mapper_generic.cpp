@@ -167,6 +167,30 @@ void bMemBus::cart_map_dsp2() {
   }
 }
 
+void bMemBus::cart_map_dsp3() {
+//$[20-3f|a0-bf]:[8000-ffff]
+  for(uint bank = 0x20; bank <= 0x3f; bank++) {
+    for(uint page = 0x80; page <= 0xff; page++) {
+      page_read [0x0000 + (bank << 8) + page] = &bMemBus::read_dsp3;
+      page_read [0x8000 + (bank << 8) + page] = &bMemBus::read_dsp3;
+      page_write[0x0000 + (bank << 8) + page] = &bMemBus::write_dsp3;
+      page_write[0x8000 + (bank << 8) + page] = &bMemBus::write_dsp3;
+    }
+  }
+}
+
+void bMemBus::cart_map_dsp4() {
+//$[30-3f|b0-bf]:[8000-ffff]
+  for(uint bank = 0x30; bank <= 0x3f; bank++) {
+    for(uint page = 0x80; page <= 0xff; page++) {
+      page_read [0x0000 + (bank << 8) + page] = &bMemBus::read_dsp4;
+      page_read [0x8000 + (bank << 8) + page] = &bMemBus::read_dsp4;
+      page_write[0x0000 + (bank << 8) + page] = &bMemBus::write_dsp4;
+      page_write[0x8000 + (bank << 8) + page] = &bMemBus::write_dsp4;
+    }
+  }
+}
+
 void bMemBus::cart_map_obc1() {
 //$[00-3f|80-bf]:[6000-7fff]
   for(uint bank = 0x00; bank <= 0x3f; bank++) {

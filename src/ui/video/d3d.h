@@ -43,7 +43,7 @@ struct {
   uint screen_height() { return GetSystemMetrics(SM_CYSCREEN); }
 
   bool update_video_mode();
-  void update_hardware_filter();
+  void update_settings();
 
   bool capture_screenshot();
 

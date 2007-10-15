@@ -15,4 +15,4 @@ public:
   void   write(uint16 addr, uint8 data);
 };
 
-extern DSP1 *dsp1;
+extern DSP1 dsp1;

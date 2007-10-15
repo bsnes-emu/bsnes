@@ -37,4 +37,4 @@ static const uint8 arctan[32][32];
   void  write(uint16 addr, uint8 data);
 };
 
-extern ST010 *st010;
+extern ST010 st010;

@@ -39,29 +39,35 @@ void bMemBus::write_ram(uint32 addr, uint8 data) {
 //
 
 uint8 bMemBus::read_sdd1(uint32 addr) {
-  addr = sdd1->offset(addr) % cartridge.info.rom_size;
+  addr = sdd1.offset(addr) % cartridge.info.rom_size;
   return cartridge.rom[addr];
 }
 
 void bMemBus::write_sdd1(uint32 addr, uint8 data) {
   if(cart_write_protect_enabled == true)return;
-  addr = sdd1->offset(addr) % cartridge.info.rom_size;
+  addr = sdd1.offset(addr) % cartridge.info.rom_size;
   cartridge.rom[addr] = data;
 }
 
 //
 
-uint8 bMemBus::read_c4 (uint32 addr) { return c4->read(addr); }
-void  bMemBus::write_c4(uint32 addr, uint8 data) { c4->write(addr, data); }
+uint8 bMemBus::read_c4 (uint32 addr) { return c4.read(addr); }
+void  bMemBus::write_c4(uint32 addr, uint8 data) { c4.write(addr, data); }
 
-uint8 bMemBus::read_dsp1 (uint32 addr) { return dsp1->read(addr); }
-void  bMemBus::write_dsp1(uint32 addr, uint8 data) { dsp1->write(addr, data); }
+uint8 bMemBus::read_dsp1 (uint32 addr) { return dsp1.read(addr); }
+void  bMemBus::write_dsp1(uint32 addr, uint8 data) { dsp1.write(addr, data); }
 
-uint8 bMemBus::read_dsp2 (uint32 addr) { return dsp2->read(addr); }
-void  bMemBus::write_dsp2(uint32 addr, uint8 data) { dsp2->write(addr, data); }
+uint8 bMemBus::read_dsp2 (uint32 addr) { return dsp2.read(addr); }
+void  bMemBus::write_dsp2(uint32 addr, uint8 data) { dsp2.write(addr, data); }
 
-uint8 bMemBus::read_obc1 (uint32 addr) { return obc1->read(addr); }
-void  bMemBus::write_obc1(uint32 addr, uint8 data) { obc1->write(addr, data); }
+uint8 bMemBus::read_dsp3 (uint32 addr) { return dsp3.read(addr); }
+void  bMemBus::write_dsp3(uint32 addr, uint8 data) { dsp3.write(addr, data); }
 
-uint8 bMemBus::read_st010 (uint32 addr) { return st010->read(addr); }
-void  bMemBus::write_st010(uint32 addr, uint8 data) { st010->write(addr, data); }
+uint8 bMemBus::read_dsp4 (uint32 addr) { return dsp4.read(addr); }
+void  bMemBus::write_dsp4(uint32 addr, uint8 data) { dsp4.write(addr, data); }
+
+uint8 bMemBus::read_obc1 (uint32 addr) { return obc1.read(addr); }
+void  bMemBus::write_obc1(uint32 addr, uint8 data) { obc1.write(addr, data); }
+
+uint8 bMemBus::read_st010 (uint32 addr) { return st010.read(addr); }
+void  bMemBus::write_st010(uint32 addr, uint8 data) { st010.write(addr, data); }

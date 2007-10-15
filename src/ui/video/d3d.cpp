@@ -87,7 +87,7 @@ HRESULT hr;
   device->SetVertexShader(NULL);
   device->SetFVF(D3DVERTEX);
 
-  update_hardware_filter();
+  update_settings();
 
   if(caps.stretchrect == true) {
     device->CreateOffscreenPlainSurface(1024, 1024, D3DFMT_R5G6B5,
@@ -104,10 +104,10 @@ HRESULT hr;
   return true;
 }
 
-void VideoD3D::update_hardware_filter() {
+void VideoD3D::update_settings() {
   if(!device)return;
 
-  switch(uint(config::video.hardware_filter)) {
+  switch(settings.filter) {
   case Video::FilterPoint:
     flags.filter = D3DTEXF_POINT;
     break;
@@ -230,7 +230,7 @@ void VideoD3D::refresh(uint r_width, uint r_height) {
 
   device->EndScene();
 
-  if(config::video.synchronize == true) {
+  if(settings.synchronize == true) {
   D3DRASTER_STATUS status;
     for(;;) {
       device->GetRasterStatus(0, &status);

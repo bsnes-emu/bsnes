@@ -1,30 +1,33 @@
 bool bMemBus::cart_map_pcb(const char *pcb) {
-  if(!strcmp(pcb, "SHVC-1A3B-01")) { cart_map_shvc_1a3b_13(); return true; }
-  if(!strcmp(pcb, "SHVC-1A3B-11")) { cart_map_shvc_1a3b_13(); return true; }
-  if(!strcmp(pcb, "SHVC-1A3B-12")) { cart_map_shvc_1a3b_13(); return true; }
-  if(!strcmp(pcb, "SHVC-1A3B-13")) { cart_map_shvc_1a3b_13(); return true; }
+  if(!strcmp(pcb, "SHVC-1CB5B-01")) { cart_map_shvc_1cb5b_20(); return true; }
+  if(!strcmp(pcb, "SHVC-1CB5B-20")) { cart_map_shvc_1cb5b_20(); return true; }
 
-  if(!strcmp(pcb, "SHVC-1A3B-20")) { cart_map_shvc_1a3b_20(); return true; }
+  if(!strcmp(pcb, "SHVC-1A3B-01"))  { cart_map_shvc_1a3b_13();  return true; }
+  if(!strcmp(pcb, "SHVC-1A3B-11"))  { cart_map_shvc_1a3b_13();  return true; }
+  if(!strcmp(pcb, "SHVC-1A3B-12"))  { cart_map_shvc_1a3b_13();  return true; }
+  if(!strcmp(pcb, "SHVC-1A3B-13"))  { cart_map_shvc_1a3b_13();  return true; }
 
-  if(!strcmp(pcb, "SHVC-1A3M-10")) { cart_map_shvc_1a3m_30(); return true; }
-  if(!strcmp(pcb, "SHVC-1A3M-20")) { cart_map_shvc_1a3m_30(); return true; }
-  if(!strcmp(pcb, "SHVC-1A3M-21")) { cart_map_shvc_1a3m_30(); return true; }
-  if(!strcmp(pcb, "SHVC-1A3M-30")) { cart_map_shvc_1a3m_30(); return true; }
+  if(!strcmp(pcb, "SHVC-1A3B-20"))  { cart_map_shvc_1a3b_20();  return true; }
 
-  if(!strcmp(pcb, "SHVC-1J3M-01")) { cart_map_shvc_1j3m_20(); return true; }
-  if(!strcmp(pcb, "SHVC-1J3M-10")) { cart_map_shvc_1j3m_20(); return true; }
-  if(!strcmp(pcb, "SHVC-1J3M-11")) { cart_map_shvc_1j3m_20(); return true; }
-  if(!strcmp(pcb, "SHVC-1J3M-20")) { cart_map_shvc_1j3m_20(); return true; }
+  if(!strcmp(pcb, "SHVC-1A3M-10"))  { cart_map_shvc_1a3m_30();  return true; }
+  if(!strcmp(pcb, "SHVC-1A3M-20"))  { cart_map_shvc_1a3m_30();  return true; }
+  if(!strcmp(pcb, "SHVC-1A3M-21"))  { cart_map_shvc_1a3m_30();  return true; }
+  if(!strcmp(pcb, "SHVC-1A3M-30"))  { cart_map_shvc_1a3m_30();  return true; }
 
-  if(!strcmp(pcb, "BSC-1A5M-01"))  { cart_map_bsc_1a5m_01();  return true; }
+  if(!strcmp(pcb, "SHVC-1J3M-01"))  { cart_map_shvc_1j3m_20();  return true; }
+  if(!strcmp(pcb, "SHVC-1J3M-10"))  { cart_map_shvc_1j3m_20();  return true; }
+  if(!strcmp(pcb, "SHVC-1J3M-11"))  { cart_map_shvc_1j3m_20();  return true; }
+  if(!strcmp(pcb, "SHVC-1J3M-20"))  { cart_map_shvc_1j3m_20();  return true; }
 
-  if(!strcmp(pcb, "BSC-1A7M-01"))  { cart_map_bsc_1a7m_01();  return true; }
+  if(!strcmp(pcb, "BSC-1A5M-01"))   { cart_map_bsc_1a5m_01();   return true; }
 
-  if(!strcmp(pcb, "BSC-1A7M-10"))  { cart_map_bsc_1a7m_10();  return true; }
+  if(!strcmp(pcb, "BSC-1A7M-01"))   { cart_map_bsc_1a7m_01();   return true; }
 
-  if(!strcmp(pcb, "STC-SOLO"))     { cart_map_stc_solo();     return true; }
+  if(!strcmp(pcb, "BSC-1A7M-10"))   { cart_map_bsc_1a7m_10();   return true; }
 
-  if(!strcmp(pcb, "STC-DUAL"))     { cart_map_stc_dual();     return true; }
+  if(!strcmp(pcb, "STC-SOLO"))      { cart_map_stc_solo();      return true; }
+
+  if(!strcmp(pcb, "STC-DUAL"))      { cart_map_stc_dual();      return true; }
 
   return false;
 }

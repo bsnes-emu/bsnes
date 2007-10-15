@@ -83,8 +83,8 @@ inline uint32 sCPU::hdma_iaddr(uint8 i) {
  *****/
 
 void sCPU::dma_transfertobusb(uint8 i, uint8 bbus) {
-  if(cartridge.info.sdd1 == true && sdd1->dma_active() == true) {
-    r_mem->write(0x2100 | bbus, sdd1->dma_read());
+  if(cartridge.info.sdd1 == true && sdd1.dma_active() == true) {
+    r_mem->write(0x2100 | bbus, sdd1.dma_read());
   } else {
     dma_transfer(0, bbus, dma_addr(i));
   }
@@ -111,8 +111,7 @@ void sCPU::dma_run() {
     dma_add_clocks(8);
 
     if(cartridge.info.sdd1 == true) {
-      sdd1->dma_begin(i, (channel[i].srcbank << 16) | (channel[i].srcaddr),
-        channel[i].xfersize);
+      sdd1.dma_begin(i, (channel[i].srcbank << 16) | (channel[i].srcaddr), channel[i].xfersize);
     }
 
     if(tracer.enabled() == true && tracer.cpudma_enabled() == true) {

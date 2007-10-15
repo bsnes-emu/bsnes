@@ -29,4 +29,4 @@ struct {
   SDD1();
 };
 
-extern SDD1 *sdd1;
+extern SDD1 sdd1;

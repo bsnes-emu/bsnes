@@ -1,3 +1,15 @@
+//SHVC-1CB5B-01
+//SHVC-1CB5B-20
+mapper(shvc_1cb5b_20) {
+  cartridge.info.superfx = true; //TODO: make this more elegant
+
+  map(LINEAR, 0x00, 0x3f, 0x6000, 0x7fff, MAP_RAM);
+  map(LINEAR, 0x00, 0x3f, 0x8000, 0xffff, MAP_ROM);
+  map(LINEAR, 0x40, 0x5f, 0x0000, 0xffff, MAP_ROM);
+  map(LINEAR, 0x70, 0x71, 0x0000, 0xffff, MAP_RAM);
+  map(LINEAR, 0x80, 0xbf, 0x6000, 0x7fff, MAP_RAM);
+}
+
 //SHVC-1A3B-01
 //SHVC-1A3B-11
 //SHVC-1A3B-12

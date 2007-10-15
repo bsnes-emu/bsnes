@@ -10,18 +10,24 @@
 
 Cartridge cartridge;
 
-void Cartridge::load_begin(uint cart_type) {
+void Cartridge::load_begin(CartridgeType cart_type) {
   if(loaded() == true)return;
 
   info.type = cart_type;
 
-  info.srtc  = false;
-  info.sdd1  = false;
-  info.c4    = false;
-  info.dsp1  = false;
-  info.dsp2  = false;
-  info.obc1  = false;
-  info.st010 = false;
+  info.superfx = false;
+  info.sa1     = false;
+  info.srtc    = false;
+  info.sdd1    = false;
+  info.c4      = false;
+  info.dsp1    = false;
+  info.dsp2    = false;
+  info.dsp3    = false;
+  info.dsp4    = false;
+  info.obc1    = false;
+  info.st010   = false;
+  info.st011   = false;
+  info.st018   = false;
 
   info.dsp1_mapper = 0;
 
@@ -30,7 +36,6 @@ void Cartridge::load_begin(uint cart_type) {
   strcpy(info.name, "");
   strcpy(info.pcb,  "");
   info.region = NTSC;
-  info.cart_mmio = false;
 
   info.rom_size = 0;
   info.ram_size = 0;
@@ -93,15 +98,15 @@ bool Cartridge::load_end() {
   }
 
   switch(info.type) {
-  case CART_NORMAL: {
+  case CartridgeNormal: {
     load_rom_normal();
     load_ram_normal();
   } break;
-  case CART_ST: {
+  case CartridgeSufamiTurbo: {
     load_rom_st();
     load_ram_st();
   } break;
-  case CART_STDUAL: {
+  case CartridgeSufamiTurboDual: {
     load_rom_stdual();
     load_ram_stdual();
   } break;
@@ -118,13 +123,13 @@ bool Cartridge::unload() {
   r_mem->unload_cart();
 
   switch(info.type) {
-  case CART_NORMAL: {
+  case CartridgeNormal: {
     save_ram_normal();
   } break;
-  case CART_ST: {
+  case CartridgeSufamiTurbo: {
     save_ram_st();
   } break;
-  case CART_STDUAL: {
+  case CartridgeSufamiTurboDual: {
     save_ram_stdual();
   } break;
   }

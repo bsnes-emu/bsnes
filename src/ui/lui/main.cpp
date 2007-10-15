@@ -24,7 +24,11 @@ va_list args;
   va_start(args, s);
   vsprintf(str, s, args);
   va_end(args);
+#if defined(PLATFORM_WIN)
+  MessageBox(0, str, "bsnes", MB_OK);
+#else
   fprintf(stdout, "%s\r\n", str);
+#endif
 }
 
 void dprintf(const char *s, ...) {
@@ -104,12 +108,16 @@ int main(int argc, char *argv[]) {
 
   ui::init();
   config::config().load(config::filename);
-  config::config().save(config::filename); //in case program crashes on first run, config file settings can be modified
+  if(fexists(config::filename) == false) {
+  //in case program crashes on first run, save config file
+  //settings, so that they can be modified by hand ...
+    config::config().save(config::filename);
+  }
   init_snes();
   ui_init();
 
   if(argc >= 2) {
-    cartridge.load_begin(Cartridge::CART_NORMAL);
+    cartridge.load_begin(Cartridge::CartridgeNormal);
     cartridge.load(argv[1]);
     cartridge.load_end();
     snes.power();

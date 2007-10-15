@@ -1,13 +1,4 @@
 void Cartridge::read_header() {
-  info.srtc = false;
-  info.sdd1 = false;
-  info.c4   = false;
-  info.dsp1 = false;
-  info.dsp2 = false;
-  info.obc1 = false;
-
-  info.dsp1_mapper = 0;
-
   if(info.header_index == 0x7fc0 && info.rom_size >= 0x401000) {
     info.mapper = EXLOROM;
     strcpy(info.pcb, "UNL-EXLOROM");
@@ -27,6 +18,16 @@ void Cartridge::read_header() {
 
 uint8 mapper   = rom[info.header_index + MAPPER];
 uint8 rom_type = rom[info.header_index + ROM_TYPE];
+uint8 company  = rom[info.header_index + COMPANY];
+
+  if(mapper == 0x20 && (rom_type == 0x13 || rom_type == 0x14 || rom_type == 0x15 || rom_type == 0x1a)) {
+    info.superfx = true;
+  }
+
+  if(mapper == 0x23 && (rom_type == 0x34 || rom_type == 0x35)) {
+    info.sa1 = true;
+  }
+
   if(mapper == 0x35 && rom_type == 0x55) {
     info.srtc = true;
   }
@@ -43,7 +44,7 @@ uint8 rom_type = rom[info.header_index + ROM_TYPE];
     info.dsp1 = true;
   }
 
-  if(mapper == 0x30 && rom_type == 0x05) {
+  if(mapper == 0x30 && rom_type == 0x05 && company != 0xb2) {
     info.dsp1 = true;
   }
 
@@ -65,15 +66,28 @@ uint8 rom_type = rom[info.header_index + ROM_TYPE];
     info.dsp2 = true;
   }
 
+  if(mapper == 0x30 && rom_type == 0x05 && company == 0xb2) {
+    info.dsp3 = true;
+  }
+
+  if(mapper == 0x30 && rom_type == 0x03) {
+    info.dsp4 = true;
+  }
+
   if(mapper == 0x30 && rom_type == 0x25) {
     info.obc1 = true;
   }
 
   if(mapper == 0x30 && rom_type == 0xf6) {
+  //TODO: both ST010 and ST011 share the same mapper + rom_type
+  //need way to determine which is which
+  //for now, default to supported ST010
     info.st010 = true;
   }
 
-  info.cart_mmio = info.c4 | info.dsp1 | info.dsp2 | info.obc1;
+  if(mapper == 0x30 && rom_type == 0xf5) {
+    info.st018 = true;
+  }
 
   if(rom[info.header_index + RAM_SIZE] & 7) {
     info.ram_size = 1024 << (rom[info.header_index + RAM_SIZE] & 7);
@@ -117,8 +131,8 @@ int32 score_lo = 0,
   if(rom[0x7fc0 + REGION] < 14)score_lo++;
   if(rom[0xffc0 + REGION] < 14)score_hi++;
 
-  if(rom[0x7fc0 + LICENSE] < 3)score_lo++;
-  if(rom[0xffc0 + LICENSE] < 3)score_hi++;
+  if(rom[0x7fc0 + COMPANY] < 3)score_lo++;
+  if(rom[0xffc0 + COMPANY] < 3)score_hi++;
 
   if(rom[0x7fc0 + RESH] & 0x80)score_lo += 2;
   if(rom[0xffc0 + RESH] & 0x80)score_hi += 2;

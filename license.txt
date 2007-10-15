@@ -52,12 +52,35 @@ Further, respective source code files are labeled with their correct licensing
 information in the header. The lack of such a header indicates said file falls
 under the bsnes license.
 
-HQ2x Filter, author: MaxST, license: LGPL
-JMA, author: NSRT Team, license: GPL (*)
-libco, author: byuu, license: public domain
-libui, author: byuu, license: public domain
-NTSC Filter, author: blargg, license: LGPL
-S-DD1, author: Andreas Naive, license: public domain
-zlib, license: zlib license
+HQ2x filter, author: MaxST, license: LGPL
+JMA decompressor, author: NSRT Team, license: GPL (*)
+NTSC filter, author: blargg, license: LGPL
+zlib decompressor, license: zlib license
 
 (*) bsnes has received an exemption from the copyright holder to use this work.
+
+The software also includes works which have been released to the public domain,
+which are not bound to any licensing agreements. Below is a complete list of all
+such software.
+
+libco, author: byuu
+libui, author: byuu
+OBC-1 emu, author: byuu
+S-DD1 emu, author: Andreas Naive
+S-RTC emu, author: byuu
+
+Any software listed above as exemptions may be relicensed individually from
+bsnes under their respective terms. However, no bsnes licensed portions can be
+combined with such a derivative work.
+
+The software also includes the work of other copyright holders, which is
+licensed under the terms of the bsnes license, with permission to do so from the
+respective authors. Below is a complete list of all such software.
+
+Cx4 emu, authors: anomie, Overload, zsKnight, Nach
+DSP-1 emu, authors: Overload, John Weidman, Neviksti, Andreas Naive
+DSP-2 emu, author: Overload
+DSP-3 emu, authors: John Weidman, Kris Bleakley, Lancer, z80 gaiden
+DSP-4 emu, authors: Dreamer Nom, John Weidman, Kris Bleakley, Nach, z80 gaiden
+S-DSP emu, author: blargg
+ST-010 emu, authors: John Weidman, Matthew Kendora, Overload, Feather

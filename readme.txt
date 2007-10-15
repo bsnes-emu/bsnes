@@ -1,5 +1,5 @@
 bsnes
-Version 0.024
+Version 0.025
 Author: byuu
 
 --------
@@ -17,7 +17,7 @@ Please see license.txt for important licensing information.
 Shortcut Keys:
 --------------
 Esc - Toggle menubar visibility
-F11 - Toggle fullscreen
+F11 - Toggle fullscreen mode
 
 ------------------
 Known Limitations:
@@ -66,16 +66,10 @@ Coprocessor used only by the following games:
 - Momotarou Densetsu Happy
 - Super Power League 4
 
-DSP-3
-Coprocessor used only by SD Gundam GX
-
-DSP-4
-Coprocessor used only by Top Gear 3000
-
-ST011
+ST-011
 SETA DSP used only by Quick-move Shogi Match with Nidan Rank-holder Morita
 
-ST018
+ST-018
 SETA RISC CPU used only by Quick-move Shogi Match with Nidan Rank-holder Morita 2
 
 BS-X (Broadcast Satellite)

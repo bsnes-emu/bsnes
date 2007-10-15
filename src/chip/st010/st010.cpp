@@ -2,8 +2,6 @@
 #include "st010_data.h"
 #include "st010_op.cpp"
 
-ST010 *st010;
-
 int16 ST010::sin(int16 theta) {
   return sin_table[(theta >> 8) & 0xff];
 }

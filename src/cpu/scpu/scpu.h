@@ -1,8 +1,6 @@
-class sCPU : public CPU {
-public:
+class sCPU : public CPU { public:
   void enter();
 
-public:
 #include "core/core.h"
 #include "dma/dma.h"
 #include "memory/memory.h"

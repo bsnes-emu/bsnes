@@ -15,10 +15,10 @@ db_item dbi;
 
 //
 
-enum {
-  CART_NORMAL,
-  CART_ST,
-  CART_STDUAL,
+enum CartridgeType {
+  CartridgeNormal,
+  CartridgeSufamiTurbo,
+  CartridgeSufamiTurboDual,
 };
 
 bool cart_loaded;
@@ -33,7 +33,7 @@ enum {
   ROM_SIZE  = 0x17,
   RAM_SIZE  = 0x18,
   REGION    = 0x19,
-  LICENSE   = 0x1a,
+  COMPANY   = 0x1a,
   VERSION   = 0x1b,
   ICKSUM    = 0x1c,
   CKSUM     = 0x1e,
@@ -78,16 +78,19 @@ struct {
   uint   rom_size;
   uint   ram_size;
 
-//set to true for games that need cart MMIO mapping (c4, dsp-n, ...),
-//for games that map outside the standard MMIO range of $2000-$5fff
-  bool   cart_mmio;
+  bool   superfx;
+  bool   sa1;
   bool   srtc;
   bool   sdd1;
   bool   c4;
   bool   dsp1;
   bool   dsp2;
+  bool   dsp3;
+  bool   dsp4;
   bool   obc1;
   bool   st010;
+  bool   st011;
+  bool   st018;
 
   uint   dsp1_mapper;
 
@@ -114,7 +117,7 @@ struct {
   void read_header();
 
   bool loaded() { return cart_loaded; }
-  void load_begin(uint cart_type);
+  void load_begin(CartridgeType cart_type);
   void load(const char *rom_fn);
   bool load_end();
   bool unload();

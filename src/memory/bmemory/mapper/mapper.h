@@ -19,6 +19,7 @@ enum {
   void cart_map_range(uint mode, uint8 bank_lo, uint8 bank_hi, uint16 addr_lo, uint16 addr_hi, uint type, uint offset = 0);
 
 #define mapper(name) void cart_map_##name()
+  mapper(shvc_1cb5b_20);
   mapper(shvc_1a3b_13);
   mapper(shvc_1a3b_20);
   mapper(shvc_1a3m_30);

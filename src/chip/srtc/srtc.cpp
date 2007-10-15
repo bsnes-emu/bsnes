@@ -52,8 +52,6 @@
 
 #include "../../base.h"
 
-SRTC *srtc;
-
 void SRTC::set_time() {
 time_t rawtime;
 tm *t;

@@ -3,6 +3,12 @@
 
 class Video { public:
 
+struct Settings {
+  bool synchronize;
+  uint filter;
+  Settings() : synchronize(false), filter(0) {}
+} settings;
+
 enum Filter {
   FilterPoint,
   FilterLinear,
@@ -16,7 +22,7 @@ enum Filter {
   virtual void init() {}
   virtual void term() {}
 
-  virtual void update_hardware_filter() {}
+  virtual void update_settings() {}
 
   Video() {}
   virtual ~Video() {}
