@@ -21,8 +21,8 @@ void sCPU::power() {
 
 void sCPU::reset() {
   regs.pc.d = 0x000000;
-  regs.pc.l = r_mem->read(0xfffc);
-  regs.pc.h = r_mem->read(0xfffd);
+  regs.pc.l = bus.read(0xfffc);
+  regs.pc.h = bus.read(0xfffd);
 
 //note: some registers are not fully reset by SNES
   regs.x.h  = 0x00;

@@ -1,5 +1,5 @@
 bsnes
-Version 0.025
+Version 0.026
 Author: byuu
 
 --------
@@ -71,13 +71,6 @@ SETA DSP used only by Quick-move Shogi Match with Nidan Rank-holder Morita
 
 ST-018
 SETA RISC CPU used only by Quick-move Shogi Match with Nidan Rank-holder Morita 2
-
-BS-X (Broadcast Satellite)
-Add-on unit sold only in Japan that played specially-made games that were
-downloaded via satellite
-
-BS-X Flashcart
-Flash cartridge used by BS-X, as well as some standalone games by Asciisoft
 
 Super Gameboy
 Cartridge passthrough used for playing Gameboy games

@@ -14,7 +14,7 @@ namespace DSP4i {
     addr[1] = data >> 8;
   }
 
-  #define bool8 bool
+  #define bool8 uint8
   #include "dsp4emu.c"
   #undef bool8
 };
@@ -33,7 +33,8 @@ void DSP4::reset() {
   DSP4i::InitDSP4();
 }
 
-uint8 DSP4::read(uint16 addr) {
+uint8 DSP4::read(uint addr) {
+  addr &= 0xffff;
   if(addr < 0xc000) {
     DSP4i::dsp4_address = addr;
     DSP4i::DSP4GetByte();
@@ -42,7 +43,8 @@ uint8 DSP4::read(uint16 addr) {
   return 0x80;
 }
 
-void DSP4::write(uint16 addr, uint8 data) {
+void DSP4::write(uint addr, uint8 data) {
+  addr &= 0xffff;
   if(addr < 0xc000) {
     DSP4i::dsp4_address = addr;
     DSP4i::dsp4_byte = data;

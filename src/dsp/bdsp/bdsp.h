@@ -10,7 +10,12 @@ public:
 	
 	bDSP();
 	~bDSP();
-	
+
+	template<int n, typename T> inline T asr(const T x) {
+	enum { bits = (sizeof(T) << 3) - n };
+		return sclip<bits>(x >> n);
+	}
+
 public:
 
 	enum { echo_hist_size = 8 };

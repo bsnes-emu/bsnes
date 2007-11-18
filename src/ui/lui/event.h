@@ -25,8 +25,10 @@ void toggle_fullscreen();
 
 bool load_rom(char*);
 void load_rom();
-void load_rom_st();
-void load_rom_stdual();
+void load_cart_normal(const char*);
+void load_cart_bsx(const char*, const char*);
+void load_cart_bsc(const char*, const char*);
+void load_cart_st(const char*, const char*, const char*);
 void unload_rom();
 void reset();
 void power();

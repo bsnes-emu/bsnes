@@ -14,21 +14,21 @@ void sCPU::op_io() {
 }
 
 uint8 sCPU::op_read(uint32 addr) {
-  status.clock_count = r_mem->speed(addr);
+  status.clock_count = bus.speed(addr);
   precycle_edge();
   add_clocks(status.clock_count - 4);
-  regs.mdr = r_mem->read(addr);
+  regs.mdr = bus.read(addr);
   add_clocks(4);
   cycle_edge();
   return regs.mdr;
 }
 
 void sCPU::op_write(uint32 addr, uint8 data) {
-  status.clock_count = r_mem->speed(addr);
+  status.clock_count = bus.speed(addr);
   precycle_edge();
   add_clocks(status.clock_count);
   regs.mdr = data;
-  r_mem->write(addr, regs.mdr);
+  bus.write(addr, regs.mdr);
   cycle_edge();
 }
 

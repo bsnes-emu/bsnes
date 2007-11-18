@@ -63,10 +63,10 @@ void update_software_filter(uint software_filter) {
 }
 
 void update_frame_counter() {
-  if(r_ppu->status.frames_updated) {
-    r_ppu->status.frames_updated = false;
+  if(ppu.status.frames_updated) {
+    ppu.status.frames_updated = false;
     if(config::misc.show_frame_counter == true) {
-      window_main.set_text(string() << BSNES_TITLE << " [" << r_ppu->status.frames_executed << "]");
+      window_main.set_text(string() << BSNES_TITLE << " [" << ppu.status.frames_executed << "]");
     }
   }
 }
@@ -150,7 +150,7 @@ stringarray dir;
   replace(dir, "\\", "/");
   if(strlen(dir) && !strend(dir, "/")) { strcat(dir, "/"); }
 
-//append base_path if rom_path is relative
+//append base path if rom path is relative
   if(strbegin(dir, "./")) {
     strltrim(dir, "./");
     strcpy(dir[1], dir[0]);
@@ -158,8 +158,8 @@ stringarray dir;
     strcat(dir[0], dir[1]);
   }
 
-  return ui::file_load(&window_main, fn,
-    "SNES images;*.smc,*.sfc,*.swc,*.fig,*.ufo,*.gd3,*.078,*.st"
+  return ui::file_load(0, fn,
+    "SNES images;*.smc,*.sfc,*.swc,*.fig,*.bs,*.st"
   #if defined(GZIP_SUPPORT)
     ",*.gz,*.z,*.zip"
   #endif
@@ -172,45 +172,52 @@ stringarray dir;
 
 void load_rom() {
 char fn[PATH_MAX];
-  if(load_rom(fn) == false)return;
+  if(load_rom(fn) == false) return;
+  load_cart_normal(fn);
+}
 
-  if(cartridge.loaded() == true)cartridge.unload();
-  cartridge.load_begin(Cartridge::CartridgeNormal);
-  cartridge.load(fn);
-  cartridge.load_end();
+void load_cart_normal(const char *filename) {
+  if(!filename || !*filename) return;
+
+  if(cartridge.loaded() == true) cartridge.unload();
+  cartridge.load_cart_normal(filename);
 
 //warn if unsupported hardware detected
-  if(cartridge.info.superfx)alert("Warning: unsupported SuperFX chip detected.");
-  if(cartridge.info.sa1)    alert("Warning: unsupported SA-1 chip detected.");
-  if(cartridge.info.st011)  alert("Warning: unsupported ST011 chip detected.");
-  if(cartridge.info.st018)  alert("Warning: unsupported ST018 chip detected.");
+  if(cartridge.info.superfx) alert("Warning: unsupported SuperFX chip detected.");
+  if(cartridge.info.sa1)     alert("Warning: unsupported SA-1 chip detected.");
+  if(cartridge.info.st011)   alert("Warning: unsupported ST011 chip detected.");
+  if(cartridge.info.st018)   alert("Warning: unsupported ST018 chip detected.");
 
   snes.power();
   window_cheat_editor.refresh();
 }
 
-void load_rom_st() {
-char fn[PATH_MAX];
-  if(load_rom(fn) == false)return;
+void load_cart_bsx(const char *base, const char *slot) {
+  if(!base || !*base) return;
 
-  if(cartridge.loaded() == true)cartridge.unload();
-  cartridge.load_begin(Cartridge::CartridgeSufamiTurbo);
-  cartridge.load(fn);
-  cartridge.load_end();
+  if(cartridge.loaded() == true) cartridge.unload();
+  cartridge.load_cart_bsx(base, slot);
+
   snes.power();
   window_cheat_editor.refresh();
 }
 
-void load_rom_stdual() {
-char fn_a[PATH_MAX], fn_b[PATH_MAX];
-  if(load_rom(fn_a) == false)return;
-  if(load_rom(fn_b) == false)return;
+void load_cart_bsc(const char *base, const char *slot) {
+  if(!base || !*base) return;
 
-  if(cartridge.loaded() == true)cartridge.unload();
-  cartridge.load_begin(Cartridge::CartridgeSufamiTurboDual);
-  cartridge.load(fn_a);
-  cartridge.load(fn_b);
-  cartridge.load_end();
+  if(cartridge.loaded() == true) cartridge.unload();
+  cartridge.load_cart_bsc(base, slot);
+
+  snes.power();
+  window_cheat_editor.refresh();
+}
+
+void load_cart_st(const char *base, const char *slotA, const char *slotB) {
+  if(!base || !*base) return;
+
+  if(cartridge.loaded() == true) cartridge.unload();
+  cartridge.load_cart_st(base, slotA, slotB);
+
   snes.power();
   window_cheat_editor.refresh();
 }

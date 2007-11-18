@@ -46,7 +46,7 @@ uint8 r;
 
     case 0xf3: { //DSPDATA
     //0x80-0xff are read-only mirrors of 0x00-0x7f
-      r = r_dsp->read(status.dsp_addr & 0x7f);
+      r = dsp.read(status.dsp_addr & 0x7f);
     } break;
 
     case 0xf4:   //CPUIO0
@@ -54,7 +54,7 @@ uint8 r;
     case 0xf6:   //CPUIO2
     case 0xf7: { //CPUIO3
       scheduler.sync_smpcpu();
-      r = r_cpu->port_read(addr & 3);
+      r = cpu.port_read(addr & 3);
     } break;
 
     case 0xf8: { //???
@@ -135,12 +135,12 @@ void sSMP::op_buswrite(uint16 addr, uint8 data) {
       //emulated by simulating CPU writes of 0x00
         scheduler.sync_smpcpu();
         if(data & 0x20) {
-          r_cpu->port_write(2, 0x00);
-          r_cpu->port_write(3, 0x00);
+          cpu.port_write(2, 0x00);
+          cpu.port_write(3, 0x00);
         }
         if(data & 0x10) {
-          r_cpu->port_write(0, 0x00);
-          r_cpu->port_write(1, 0x00);
+          cpu.port_write(0, 0x00);
+          cpu.port_write(1, 0x00);
         }
       }
 
@@ -171,7 +171,7 @@ void sSMP::op_buswrite(uint16 addr, uint8 data) {
     case 0xf3: { //DSPDATA
     //0x80-0xff is a read-only mirror of 0x00-0x7f
       if(!(status.dsp_addr & 0x80)) {
-        r_dsp->write(status.dsp_addr & 0x7f, data);
+        dsp.write(status.dsp_addr & 0x7f, data);
       }
     } break;
 

@@ -1,5 +1,5 @@
 /*
-  libconfig : version 0.14 ~byuu (2007-06-12)
+  libconfig : version 0.15 ~byuu (2007-11-01)
   license: public domain
 */
 
@@ -59,7 +59,7 @@ enum Format {
   void get(string &output) {
     if(ifmt == Boolean) { sprintf(output, "%s", data ? "true" : "false"); }
     if(ifmt == Decimal) { sprintf(output, "%d", data); }
-    if(ifmt == Hex)     { sprintf(output, "%x", data); }
+    if(ifmt == Hex)     { sprintf(output, "0x%x", data); }
   }
 
   uint operator()() { return data; }

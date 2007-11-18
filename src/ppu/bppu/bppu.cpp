@@ -5,9 +5,9 @@
 void bPPU::run() {}
 
 void bPPU::scanline() {
-  line.y               = r_cpu->vcounter();
-  line.interlace       = r_cpu->interlace();
-  line.interlace_field = r_cpu->interlace_field();
+  line.y               = cpu.vcounter();
+  line.interlace       = cpu.interlace();
+  line.interlace_field = cpu.interlace_field();
 
   if(line.y == 0) {
   //RTO flag reset
@@ -38,7 +38,7 @@ void bPPU::scanline() {
 
 //note: this should actually occur at V=225,HC=10.
 //this is a limitation of the scanline-based renderer.
-  if(line.y == (!r_cpu->overscan() ? 225 : 240)) {
+  if(line.y == (!cpu.overscan() ? 225 : 240)) {
     if(regs.display_disabled == false) {
     //OAM address reset
       regs.oam_addr = regs.oam_baseaddr << 1;
@@ -47,14 +47,14 @@ void bPPU::scanline() {
   }
 
   if(line.y == 241 && line.interlace_field == 1) {
-    if(regs.interlace != r_cpu->interlace()) {
+    if(regs.interlace != cpu.interlace()) {
     //clear entire frame so that odd scanlines are empty
     //this should be handled better, but one blank frame looks
     //better than one improperly interlaced frame...
       memset(output, 0, 512 * 480 * sizeof(uint16));
     }
-  //r_cpu->set_overscan(regs.overscan);
-    r_cpu->set_interlace(regs.interlace);
+  //cpu.set_overscan(regs.overscan);
+    cpu.set_interlace(regs.interlace);
     regs.scanlines = (regs.overscan == false) ? 224 : 239;
   }
 }
@@ -65,7 +65,7 @@ void bPPU::render_scanline() {
   if(status.render_output == false)return;
 #endif
 
-  if(line.y >= 0 && line.y < (r_cpu->overscan() ? 240 : 225)) {
+  if(line.y >= 0 && line.y < (cpu.overscan() ? 240 : 225)) {
     if(config::ppu.hack.obj_cache == false) {
       if(line.y != 0) {
         render_line_oam_rto();

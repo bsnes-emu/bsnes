@@ -1,6 +1,9 @@
 #include "ui_main.cpp"
 #include "ui_about.cpp"
 
+#include "loader/ui_bsxloader.cpp"
+#include "loader/ui_stloader.cpp"
+
 #include "settings/ui_settings.cpp"
 #include "settings/ui_videosettings.cpp"
 #include "settings/ui_rastersettings.cpp"
@@ -27,6 +30,9 @@
 void ui_init() {
   window_main.setup();
   window_about.setup();
+
+  window_bsxloader.setup();
+  window_stloader.setup();
 
   window_video_settings.setup();
   window_raster_settings.setup();

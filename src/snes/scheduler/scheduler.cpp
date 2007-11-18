@@ -2,10 +2,10 @@ Scheduler scheduler;
 
 //
 
-void threadentry_cpu() { r_cpu->enter(); }
-void threadentry_smp() { r_smp->enter(); }
-void threadentry_ppu() {                 } //currently unused
-void threadentry_dsp() { r_dsp->enter(); }
+void threadentry_cpu() { cpu.enter(); }
+void threadentry_smp() { smp.enter(); }
+void threadentry_ppu() {              } //currently unused
+void threadentry_dsp() { dsp.enter(); }
 
 //
 

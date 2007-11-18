@@ -4,7 +4,7 @@ uint8  CPU::dreadb(uint32 addr) {
   //do not read MMIO registers within debugger
     return 0x00;
   }
-  return r_mem->read(addr);
+  return bus.read(addr);
 }
 
 uint16 CPU::dreadw(uint32 addr) {

@@ -660,7 +660,7 @@ static uint8 const initial_regs [bDSP::register_count] =
 
 void bDSP::power()
 {
-	ram = (uint8*) r_smp->get_spcram_handle();
+	ram = (uint8*) smp.get_spcram_handle();
 	memset( &m, 0, sizeof m );
 	//memcpy( m.regs, initial_regs, sizeof m.regs );
 	memset(m.regs, 0, sizeof m.regs);

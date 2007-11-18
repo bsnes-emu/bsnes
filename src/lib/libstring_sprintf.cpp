@@ -1,7 +1,8 @@
 uint vsprintf(string &str, const char *s, va_list args) {
 va_list temp;
   va_copy(temp, args);
-uint length = vsnprintf(0, 0, s, temp);
+int length = vsnprintf(0, 0, s, temp);
+  if(length < 0) length = 16 * 1024; //temp fix for non-C99-complaint vsnprintf
   va_end(temp);
 
   str.reserve(length);

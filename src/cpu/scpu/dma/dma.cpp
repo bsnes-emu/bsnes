@@ -19,19 +19,19 @@ uint8 r;
        (abus & 0x40ffff) == 0x420b || (abus & 0x40ffff) == 0x420c) {
       r = regs.mdr;
     } else {
-      r = r_mem->read(abus);
+      r = bus.read(abus);
     }
-    r_mem->write(0x2100 | bbus, r);
+    bus.write(0x2100 | bbus, r);
   } else { //b->a
     if(bbus == 0x80 && ((abus & 0x7e0000) == 0x7e0000 || (abus & 0x40e000) == 0x0000)) {
     //prevent WRAM->WRAM transfers
       r = regs.mdr;
     } else {
-      r = r_mem->read(0x2100 | bbus);
+      r = bus.read(0x2100 | bbus);
     }
     if((abus & 0x40ff00) == 0x2100 || (abus & 0x40ff80) == 0x4300 ||
        (abus & 0x40ffff) == 0x420b || (abus & 0x40ffff) == 0x420c)return;
-    r_mem->write(abus, r);
+    bus.write(abus, r);
   }
 
   dma_add_clocks(8);
@@ -84,7 +84,7 @@ inline uint32 sCPU::hdma_iaddr(uint8 i) {
 
 void sCPU::dma_transfertobusb(uint8 i, uint8 bbus) {
   if(cartridge.info.sdd1 == true && sdd1.dma_active() == true) {
-    r_mem->write(0x2100 | bbus, sdd1.dma_read());
+    bus.write(0x2100 | bbus, sdd1.dma_read());
   } else {
     dma_transfer(0, bbus, dma_addr(i));
   }
@@ -167,19 +167,19 @@ uint8 r = 0;
 }
 
 void sCPU::hdma_update(uint8 i) {
-  channel[i].hdma_line_counter = r_mem->read(hdma_addr(i));
+  channel[i].hdma_line_counter = bus.read(hdma_addr(i));
   dma_add_clocks(8);
 
   channel[i].hdma_completed   = (channel[i].hdma_line_counter == 0);
   channel[i].hdma_do_transfer = !channel[i].hdma_completed;
 
   if(channel[i].hdma_indirect) {
-    channel[i].hdma_iaddr = r_mem->read(hdma_addr(i)) << 8;
+    channel[i].hdma_iaddr = bus.read(hdma_addr(i)) << 8;
     dma_add_clocks(8);
 
     if(!channel[i].hdma_completed || hdma_active_after(i)) {
       channel[i].hdma_iaddr >>= 8;
-      channel[i].hdma_iaddr  |= r_mem->read(hdma_addr(i)) << 8;
+      channel[i].hdma_iaddr  |= bus.read(hdma_addr(i)) << 8;
       dma_add_clocks(8);
     }
   }

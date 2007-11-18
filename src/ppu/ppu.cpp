@@ -2,7 +2,7 @@
 
 void PPU::get_scanline_info(scanline_info *info) {
   info->hires     = scanline_is_hires();
-  info->interlace = r_cpu->interlace();
+  info->interlace = cpu.interlace();
 }
 
 void PPU::enable_renderer(bool r) { status.render_output = r; }

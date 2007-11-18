@@ -1,4 +1,6 @@
-uint8 SuperFX::mmio_read(uint16 addr) {
+uint8 SuperFX::mmio_read(uint addr) {
+  addr &= 0xffff;
+
   switch(addr) {
   case 0x3000: return regs.r0.l;
   case 0x3001: return regs.r0.h;

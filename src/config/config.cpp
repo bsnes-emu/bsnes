@@ -28,20 +28,14 @@ stringarray part;
   return path;
 }
 
-StringSetting Path::base(0, "fs.base_path",
+StringSetting Path::base(0, "path.base",
   "Path that bsnes resides in", "");
 StringSetting Path::rom(&config(), "path.rom",
   "Default path to look for ROM files in (\"\" = use default directory)", "");
 StringSetting Path::save(&config(), "path.save",
   "Default path for all save RAM and cheat files (\"\" = use current directory)", "");
-StringSetting Path::bios(&config(), "path.bios",
-  "Path where BIOS file(s) are located\n"
-  "Supported BIOS files:\n"
-  "stbios.bin - Bandai Sufami Turbo"
-  "", "./bios");
-
-StringSetting Path::save_ext(&config(), "path.save_ext",
-  "Extension to be used for all save RAM files", "srm");
+StringSetting Path::bsx(&config(), "path.bsx", "", "");
+StringSetting Path::st(&config(), "path.st", "", "");
 
 IntegerSetting SNES::gamma_ramp(&config(), "snes.colorfilter.gamma_ramp",
   "Use precalculated TV-style gamma ramp", IntegerSetting::Boolean, true);
@@ -75,6 +69,19 @@ IntegerSetting CPU::ntsc_clock_rate(&config(), "cpu.ntsc_clock_rate",
   "NTSC S-CPU clock rate (in hz)", IntegerSetting::Decimal, 21477272);
 IntegerSetting CPU::pal_clock_rate(&config(), "cpu.pal_clock_rate",
   "PAL S-CPU clock rate (in hz)", IntegerSetting::Decimal, 21281370);
+IntegerSetting CPU::wram_init_value(&config(), "cpu.wram_init_value",
+  "Value to initialize 128k WRAM to upon power cycle.\n"
+  "Note that on real hardware, this value is undefined; meaning it can vary\n"
+  "per power-on, and per SNES unit. Such randomness is undesirable for an\n"
+  "emulator, so a static value is needed. There is also some form of pattern\n"
+  "to the randomness that has yet to be determined, which some games rely upon.\n"
+  "A value of 0x55 is safe for all known commercial software, and should be used.\n"
+  "However, some software written for SNES copiers, or backup units, relies on\n"
+  "WRAM being initialized to 0x00; which was a side-effect of the BIOS program\n"
+  "which executed on these copiers. Using 0x00 will therefore fix many homebrew\n"
+  "programs, but *will* break some poorly programmed commercial software titles,\n"
+  "which do not properly initialize WRAM upon power cycle.\n",
+  IntegerSetting::Hex, 0x55);
 
 IntegerSetting CPU::hdma_enable(0, "cpu.hdma_enable",
   "Enable HDMA effects", IntegerSetting::Boolean, true);

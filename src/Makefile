@@ -78,17 +78,6 @@ LIBCO = libco_x86
 LIBUI = libui_win
 endif
 
-ifeq ($(PLATFORM),win-mingw4-lui)
-OS = win
-CC = mingw32-gcc-sjlj
-CFLAGS = -mconsole -O3 -fomit-frame-pointer -DPLATFORM_WIN -DCOMPILER_GCC -DPROCESSOR_X86 -DUI_LUI
-AS = nasm
-ASFLAGS = -f win32 -DWIN32
-LIBS = -ld3d9 -lddraw -ldsound -ldinput8 -ldxguid -luuid -lkernel32 -luser32 -lgdi32 -lshell32 -lwinmm -lcomdlg32 -lcomctl32
-LIBCO = libco_x86
-LIBUI = libui_win
-endif
-
 #####################################
 ### compiler / assembler switches ###
 #####################################
@@ -104,14 +93,6 @@ endif
 ifeq ($(CC),mingw32-gcc)
 OUT = -obsnes
 CPP = mingw32-g++
-OBJ = o
-CARGS = -c $< -o $@
-DEFINE = -D
-endif
-
-ifeq ($(CC),mingw32-gcc-sjlj)
-OUT = -obsnes
-CPP = mingw32-g++-sjlj
 OBJ = o
 CARGS = -c $< -o $@
 DEFINE = -D
@@ -152,10 +133,11 @@ endif
 
 OBJECTS = main.$(OBJ) $(LIBCO).$(OBJ) $(LIBUI).$(OBJ) \
   libstring.$(OBJ) \
-  reader.$(OBJ) cart.$(OBJ) cheat.$(OBJ) memory.$(OBJ) bmemory.$(OBJ) \
+  reader.$(OBJ) cart.$(OBJ) cheat.$(OBJ) memory.$(OBJ) smemory.$(OBJ) \
   cpu.$(OBJ) scpu.$(OBJ) smp.$(OBJ) ssmp.$(OBJ) bdsp.$(OBJ) ppu.$(OBJ) \
-  bppu.$(OBJ) snes.$(OBJ) superfx.$(OBJ) srtc.$(OBJ) sdd1.$(OBJ) c4.$(OBJ) \
-  dsp1.$(OBJ) dsp2.$(OBJ) dsp3.$(OBJ) dsp4.$(OBJ) obc1.$(OBJ) st010.$(OBJ)
+  bppu.$(OBJ) snes.$(OBJ) bsx.$(OBJ) superfx.$(OBJ) srtc.$(OBJ) \
+  sdd1.$(OBJ) cx4.$(OBJ) dsp1.$(OBJ) dsp2.$(OBJ) dsp3.$(OBJ) dsp4.$(OBJ) \
+  obc1.$(OBJ) st010.$(OBJ)
 
 ifeq ($(GZIP_SUPPORT),true)
   OBJECTS += adler32.$(OBJ) compress.$(OBJ) crc32.$(OBJ) deflate.$(OBJ) \
@@ -174,11 +156,18 @@ ifeq ($(OS),win)
   ifeq ($(CC),cl)
     OBJECTS += bsnes.res
   endif
+  ifeq ($(CC),mingw32-gcc)
+    OBJECTS += bsnesrc.o
+  endif
 endif
 
 all: $(OBJECTS)
 	$(CPP) $(OUT) $(CFLAGS) $(OBJECTS) $(LIBS) $(LINK)
-#	mt -nologo -manifest bsnes.exe.manifest -outputresource:bsnes.exe;1
+
+install:
+	cp bsnes /usr/local/bin/bsnes
+	cp data/bsnes.png /usr/local/share/icons/bsnes.png
+	chmod 775 /usr/local/bin/bsnes /usr/local/share/icons/bsnes.png
 
 ######################
 ### implicit rules ###
@@ -193,9 +182,11 @@ all: $(OBJECTS)
 ### platform-specific ###
 #########################
 main.$(OBJ): ui/main.cpp config/* ui/* ui/video/* ui/audio/* ui/input/* \
-ui/lui/* ui/lui/settings/* \
+ui/lui/* ui/lui/loader/* ui/lui/settings/* \
 ui/win/* ui/win/settings/* ui/win/debugger/*
-bsnes.res  : ui/bsnes.rc ; rc /r /fobsnes.res ui/bsnes.rc
+
+bsnes.res: ui/bsnes.rc ; rc /r /fobsnes.res ui/bsnes.rc
+bsnesrc.o: ui/bsnes.rc ; windres -I data ui/bsnes.rc bsnesrc.o
 
 #############
 ### libco ###
@@ -226,6 +217,7 @@ cheat.$(OBJ) : cheat/cheat.cpp cheat/*
 ##############
 memory.$(OBJ) : memory/memory.cpp memory/*
 bmemory.$(OBJ): memory/bmemory/bmemory.cpp memory/bmemory/* memory/bmemory/mapper/*
+smemory.$(OBJ): memory/smemory/smemory.cpp memory/smemory/* memory/smemory/mapper/*
 
 ###########
 ### cpu ###
@@ -259,10 +251,11 @@ snes.$(OBJ): snes/snes.cpp snes/* snes/scheduler/* snes/video/* snes/audio/* sne
 #####################
 ### special chips ###
 #####################
+bsx.$(OBJ)    : chip/bsx/bsx.cpp chip/bsx/*
 superfx.$(OBJ): chip/superfx/superfx.cpp chip/superfx/* chip/superfx/core/* chip/superfx/memory/*
 srtc.$(OBJ)   : chip/srtc/srtc.cpp chip/srtc/*
 sdd1.$(OBJ)   : chip/sdd1/sdd1.cpp chip/sdd1/*
-c4.$(OBJ)     : chip/c4/c4.cpp chip/c4/*
+cx4.$(OBJ)    : chip/cx4/cx4.cpp chip/cx4/*
 dsp1.$(OBJ)   : chip/dsp1/dsp1.cpp chip/dsp1/*
 dsp2.$(OBJ)   : chip/dsp2/dsp2.cpp chip/dsp2/*
 dsp3.$(OBJ)   : chip/dsp3/dsp3.cpp chip/dsp3/*
@@ -312,4 +305,17 @@ clean:
 	-@$(RM) *.manifest
 
 help:
-	@echo Please specify which platform to compile for with PLATFORM=platform_name
+	@echo "Usage: $(MAKE) PLATFORM=platform [options]"
+	@echo ""
+	@echo "Available platform targets:"
+	@echo "  x-gcc-lui       - Linux / BSD (i386) (requires nasm)"
+	@echo "  x-gcc-lui-x64   - Linux / BSD (amd64) (requires yasm)"
+	@echo "  win-mingw-lui   - Windows (i386) (requires nasm)"
+	@echo "  win-visualc-lui - Windows (i386) (requires nasm)"
+	@echo ""
+	@echo "Available options:"
+	@echo "  GZIP_SUPPORT=[true|false] - Enable ZIP / GZ support (default=false)"
+	@echo "  JMA_SUPPORT=[true|false]  - Enable JMA support (default=false)"
+	@echo ""
+	@echo "Example: $(MAKE) PLATFORM=x-gcc-lui GZIP_SUPPORT=true"
+	@echo ""

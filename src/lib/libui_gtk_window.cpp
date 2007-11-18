@@ -57,7 +57,7 @@ void Window::focus() {
 }
 
 bool Window::focused() {
-  return GTK_WIDGET_HAS_FOCUS(info.window);
+  return gtk_window_is_active(GTK_WINDOW(info.window));
 }
 
 void Window::move(uint x, uint y) {

@@ -31,31 +31,3 @@ void term_snes();
 #else
   #error "unsupported platform"
 #endif
-
-/*****
- * platform independent code
- *****/
-
-void init_snes() {
-#if defined(POLYMORPHISM)
-  deref(mem) = new MEMCORE();
-  deref(cpu) = new CPUCORE();
-  deref(apu) = new APUCORE();
-  deref(dsp) = new DSPCORE();
-  deref(ppu) = new PPUCORE();
-#endif
-
-  snes.init();
-}
-
-void term_snes() {
-  snes.term();
-
-#if defined(POLYMORPHISM)
-  safe_delete(deref(mem));
-  safe_delete(deref(cpu));
-  safe_delete(deref(apu));
-  safe_delete(deref(dsp));
-  safe_delete(deref(ppu));
-#endif
-}

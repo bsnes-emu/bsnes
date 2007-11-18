@@ -20,7 +20,7 @@ void SNESInterface::video_unlock() {
 static uint frameskip_counter = 0;
 
 void SNESInterface::video_refresh() {
-  if(r_ppu->renderer_enabled() == true) {
+  if(ppu.renderer_enabled() == true) {
   SNES::video_info vi;
     snes.get_video_info(&vi);
     uiVideo->refresh(vi.width, vi.height);
@@ -28,7 +28,7 @@ void SNESInterface::video_refresh() {
 
   frameskip_counter++;
   frameskip_counter %= (uint(config::video.frameskip) + 1);
-  r_ppu->enable_renderer(frameskip_counter == 0);
+  ppu.enable_renderer(frameskip_counter == 0);
 }
 
 //audio

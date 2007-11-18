@@ -1,6 +1,6 @@
 void bPPU::latch_counters() {
-  regs.hcounter = r_cpu->hcounter();
-  regs.vcounter = r_cpu->vcounter();
+  regs.hcounter = cpu.hcounter();
+  regs.vcounter = cpu.vcounter();
   regs.counters_latched = true;
 }
 
@@ -26,20 +26,20 @@ uint8 bPPU::vram_mmio_read(uint16 addr) {
     return vram_read(addr);
   }
 
-uint16 v  = r_cpu->vcounter();
-uint16 hc = r_cpu->hclock();
-uint16 ls = (r_cpu->region_scanlines() >> 1) - 1;
-  if(r_cpu->interlace() && !r_cpu->interlace_field())ls++;
+uint16 v  = cpu.vcounter();
+uint16 hc = cpu.hclock();
+uint16 ls = (cpu.region_scanlines() >> 1) - 1;
+  if(cpu.interlace() && !cpu.interlace_field())ls++;
 
   if(v == ls && hc == 1362) {
     return 0x00;
   }
 
-  if(v < (!r_cpu->overscan() ? 224 : 239)) {
+  if(v < (!cpu.overscan() ? 224 : 239)) {
     return 0x00;
   }
 
-  if(v == (!r_cpu->overscan() ? 224 : 239)) {
+  if(v == (!cpu.overscan() ? 224 : 239)) {
     if(hc == 1362) {
       return vram_read(addr);
     }
@@ -54,23 +54,23 @@ void bPPU::vram_mmio_write(uint16 addr, uint8 data) {
     return vram_write(addr, data);
   }
 
-uint16 v  = r_cpu->vcounter();
-uint16 hc = r_cpu->hclock();
+uint16 v  = cpu.vcounter();
+uint16 hc = cpu.hclock();
   if(v == 0) {
     if(hc <= 4) {
       return vram_write(addr, data);
     }
     if(hc == 6) {
-      return vram_write(addr, r_cpu->regs.mdr);
+      return vram_write(addr, cpu.regs.mdr);
     }
     return;
   }
 
-  if(v < (!r_cpu->overscan() ? 225 : 240)) {
+  if(v < (!cpu.overscan() ? 225 : 240)) {
     return;
   }
 
-  if(v == (!r_cpu->overscan() ? 225 : 240)) {
+  if(v == (!cpu.overscan() ? 225 : 240)) {
     if(hc <= 4) {
       return;
     }
@@ -100,8 +100,8 @@ uint8 bPPU::oam_mmio_read(uint16 addr) {
     return oam_read(addr);
   }
 
-uint16 v = r_cpu->vcounter();
-  if(v < (!r_cpu->overscan() ? 225 : 240)) {
+uint16 v = cpu.vcounter();
+  if(v < (!cpu.overscan() ? 225 : 240)) {
     return oam_read(0x0218);
   }
 
@@ -113,8 +113,8 @@ void bPPU::oam_mmio_write(uint16 addr, uint8 data) {
     return oam_write(addr, data);
   }
 
-uint16 v = r_cpu->vcounter();
-  if(v < (!r_cpu->overscan() ? 225 : 240)) {
+uint16 v = cpu.vcounter();
+  if(v < (!cpu.overscan() ? 225 : 240)) {
     return oam_write(0x0218, data);
   }
 
@@ -132,9 +132,9 @@ uint8 bPPU::cgram_mmio_read(uint16 addr) {
     return cgram_read(addr);
   }
 
-uint16 v  = r_cpu->vcounter();
-uint16 hc = r_cpu->hclock();
-  if(v < (!r_cpu->overscan() ? 225 : 240) && hc >= 72 && hc < 1096) {
+uint16 v  = cpu.vcounter();
+uint16 hc = cpu.hclock();
+  if(v < (!cpu.overscan() ? 225 : 240) && hc >= 72 && hc < 1096) {
     return cgram_read(0x01ff);
   }
 
@@ -146,9 +146,9 @@ void bPPU::cgram_mmio_write(uint16 addr, uint8 data) {
     return cgram_write(addr, data);
   }
 
-uint16 v  = r_cpu->vcounter();
-uint16 hc = r_cpu->hclock();
-  if(v < (!r_cpu->overscan() ? 225 : 240) && hc >= 72 && hc < 1096) {
+uint16 v  = cpu.vcounter();
+uint16 hc = cpu.hclock();
+  if(v < (!cpu.overscan() ? 225 : 240) && hc >= 72 && hc < 1096) {
     return cgram_write(0x01ff, data);
   }
 
@@ -157,7 +157,7 @@ uint16 hc = r_cpu->hclock();
 
 //INIDISP
 void bPPU::mmio_w2100(uint8 value) {
-  if(regs.display_disabled == true && r_cpu->vcounter() == (!r_cpu->overscan() ? 225 : 240)) {
+  if(regs.display_disabled == true && cpu.vcounter() == (!cpu.overscan() ? 225 : 240)) {
     regs.oam_addr = regs.oam_baseaddr << 1;
     regs.oam_firstsprite = (regs.oam_priority == false) ? 0 : (regs.oam_addr >> 2) & 127;
   }
@@ -579,7 +579,7 @@ void bPPU::mmio_w2133(uint8 value) {
   regs.oam_interlace = !!(value & 0x02);
   regs.interlace     = !!(value & 0x01);
 
-  r_cpu->set_overscan(regs.overscan);
+  cpu.set_overscan(regs.overscan);
 }
 
 //MPYL
@@ -608,10 +608,10 @@ uint32 r;
 
 //SLHV
 uint8 bPPU::mmio_r2137() {
-  if(r_cpu->pio_status() & 0x80) {
+  if(cpu.pio_status() & 0x80) {
     latch_counters();
   }
-  return r_cpu->regs.mdr;
+  return cpu.regs.mdr;
 }
 
 //OAMDATAREAD
@@ -707,8 +707,8 @@ uint8 r = 0x00;
   regs.latch_hcounter = 0;
   regs.latch_vcounter = 0;
 
-  r |= r_cpu->interlace_field() << 7;
-  if(!(r_cpu->pio_status() & 0x80)) {
+  r |= cpu.interlace_field() << 7;
+  if(!(cpu.pio_status() & 0x80)) {
     r |= 0x40;
   } else if(regs.counters_latched == true) {
     r |= 0x40;
@@ -721,8 +721,8 @@ uint8 r = 0x00;
   return regs.ppu2_mdr;
 }
 
-uint8 bPPU::mmio_read(uint16 addr) {
-  switch(addr) {
+uint8 bPPU::mmio_read(uint addr) {
+  switch(addr & 0xffff) {
   case 0x2104:
   case 0x2105:
   case 0x2106:
@@ -757,11 +757,11 @@ uint8 bPPU::mmio_read(uint16 addr) {
   }
 
 //return 0x00;
-  return r_cpu->regs.mdr;
+  return cpu.regs.mdr;
 }
 
-void bPPU::mmio_write(uint16 addr, uint8 data) {
-  switch(addr) {
+void bPPU::mmio_write(uint addr, uint8 data) {
+  switch(addr & 0xffff) {
   case 0x2100: mmio_w2100(data); return; //INIDISP
   case 0x2101: mmio_w2101(data); return; //OBSEL
   case 0x2102: mmio_w2102(data); return; //OAMADDL

@@ -5,8 +5,8 @@ extern Config& config();
 string file_updatepath(const char *, const char *);
 
 extern struct Path {
-  static StringSetting base, rom, save, bios;
-  static StringSetting save_ext;
+  static StringSetting base, rom, save;
+  static StringSetting bsx, st;
 } path;
 
 extern struct SNES {
@@ -19,6 +19,7 @@ extern struct SNES {
 
 extern struct CPU {
   static IntegerSetting ntsc_clock_rate, pal_clock_rate;
+  static IntegerSetting wram_init_value;
   static IntegerSetting hdma_enable;
 } cpu;
 

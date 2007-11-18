@@ -26,29 +26,30 @@ void DSP1::reset() {
  *****/
 bool DSP1::addr_decode(uint16 addr) {
   switch(cartridge.info.dsp1_mapper) {
+    case Cartridge::DSP1LoROM1MB: {
+    //$[20-3f]:[8000-bfff] = DR, $[20-3f]:[c000-ffff] = SR
+      return (addr >= 0xc000);
+    }
 
-  case Cartridge::DSP1_LOROM_1MB:
-  //$[20-3f]:[8000-bfff] = DR, $[20-3f]:[c000-ffff] = SR
-    return (addr >= 0xc000);
+    case Cartridge::DSP1LoROM2MB: {
+    //$[60-6f]:[0000-3fff] = DR, $[60-6f]:[4000-7fff] = SR
+      return (addr >= 0x4000);
+    }
 
-  case Cartridge::DSP1_LOROM_2MB:
-  //$[60-6f]:[0000-3fff] = DR, $[60-6f]:[4000-7fff] = SR
-    return (addr >= 0x4000);
-
-  case Cartridge::DSP1_HIROM:
-  //$[00-1f]:[6000-6fff] = DR, $[00-1f]:[7000-7fff] = SR
-    return (addr >= 0x7000);
-
+    case Cartridge::DSP1HiROM: {
+    //$[00-1f]:[6000-6fff] = DR, $[00-1f]:[7000-7fff] = SR
+      return (addr >= 0x7000);
+    }
   }
 
   return 0;
 }
 
-uint8 DSP1::read(uint16 addr) {
+uint8 DSP1::read(uint addr) {
   return (addr_decode(addr) == 0) ? dsp1.getDr() : dsp1.getSr();
 }
 
-void DSP1::write(uint16 addr, uint8 data) {
+void DSP1::write(uint addr, uint8 data) {
   if(addr_decode(addr) == 0) {
     dsp1.setDr(data);
   }

@@ -1,5 +1,5 @@
 /*
-  libbase : version 0.11 ~byuu (2007-09-08)
+  libbase : version 0.11a ~byuu (2007-10-14)
   license: public domain
 */
 
@@ -169,36 +169,6 @@ enum { b = 1U << (bits - 1), m = (1U << bits) - 1 };
   return ((x & m) ^ b) - b;
 }
 
-//bit shifting functions are deprecated
-
-template<int n, typename T> inline T rol(const T x) {
-enum { s = (sizeof(T) << 3) - n };
-  return (x << n) | (x >> s);
-}
-
-template<int n, typename T> inline T ror(const T x) {
-enum { s = (sizeof(T) << 3) - n };
-  return (x >> n) | (x << s);
-}
-
-template<int n, typename T> inline T asl(const T x) {
-  return (x << n);
-}
-
-template<int n, typename T> inline T asr(const T x) {
-enum { bits = (sizeof(T) << 3) - n };
-  return sclip<bits>(x >> n);
-}
-
-template<int n, typename T> inline T lsl(const T x) {
-  return (x << n);
-}
-
-template<int n, typename T> inline T lsr(const T x) {
-enum { bits = (sizeof(T) << 3) - n };
-  return uclip<bits>(x >> n);
-}
-
 /*****
  * endian wrappers
  *****/
@@ -240,6 +210,11 @@ enum { bits = (sizeof(T) << 3) - n };
 /*****
  * libc extensions
  *****/
+
+//static uint random() {
+//static uint n = 0;
+//  return n = (n >> 1) ^ (((n & 1) - 1) & 0xedb88320);
+//}
 
 static uint64 fget(FILE *fp, uint length = 1) {
 uint64 data = 0;

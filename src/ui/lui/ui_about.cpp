@@ -8,9 +8,9 @@ const char AboutWindow::about_text[4096] = ""
   "   Overload, Richard Bannister, TRAC, zones";
 
 void AboutWindow::setup() {
-  create(ui::Window::Center, 300, 130, "About bsnes ...");
+  create(ui::Window::Center, 400, 200, "About bsnes ...");
 
-  about.create(*this, 0, 5, 5, 290, 120, about_text);
+  about.create(*this, 0, 5, 5, 390, 190, about_text);
 }
 
 bool AboutWindow::message(uint id, uintptr_t param) {

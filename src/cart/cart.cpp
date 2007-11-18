@@ -1,25 +1,50 @@
 #include "../base.h"
-#include "database.cpp"
 
 #include "cart_normal.cpp"
+#include "cart_bsx.cpp"
+#include "cart_bsc.cpp"
 #include "cart_st.cpp"
-#include "cart_stdual.cpp"
 
 #include "cart_file.cpp"
 #include "cart_header.cpp"
 
+namespace memory {
+  MappedRAM cartrom, cartram;
+  MappedRAM bscram;
+  MappedRAM stArom, stAram;
+  MappedRAM stBrom, stBram;
+};
+
 Cartridge cartridge;
 
+Cartridge::MemoryMapper Cartridge::mapper() { return info.mapper; }
+Cartridge::Region Cartridge::region() { return info.region; }
+
+bool Cartridge::loaded() { return cart.loaded; }
+
 void Cartridge::load_begin(CartridgeType cart_type) {
-  if(loaded() == true)return;
+  cart.rom = cart.ram = 0;
+  bs.ram   = 0;
+  stA.rom  = stA.ram  = 0;
+  stB.rom  = stB.ram  = 0;
+
+  cart.rom_size = cart.ram_size = 0;
+  bs.ram_size   = 0;
+  stA.rom_size  = stA.ram_size  = 0;
+  stB.rom_size  = stB.ram_size  = 0;
 
   info.type = cart_type;
+
+  info.bsxbase  = false;
+  info.bsxcart  = false;
+  info.bsxflash = false;
+  info.st       = false;
 
   info.superfx = false;
   info.sa1     = false;
   info.srtc    = false;
   info.sdd1    = false;
-  info.c4      = false;
+  info.cx4     = false;
   info.dsp1    = false;
   info.dsp2    = false;
   info.dsp3    = false;
@@ -29,134 +54,66 @@ void Cartridge::load_begin(CartridgeType cart_type) {
   info.st011   = false;
   info.st018   = false;
 
-  info.dsp1_mapper = 0;
+  info.dsp1_mapper = DSP1Unmapped;
 
   info.header_index = 0xffc0;
-  info.mapper = PCB;
-  strcpy(info.name, "");
-  strcpy(info.pcb,  "");
+  info.mapper = LoROM;
+  info.name[0] = 0;
   info.region = NTSC;
 
   info.rom_size = 0;
   info.ram_size = 0;
-
-  file.count = 0;
-  for(int i = 0; i < 8; i++) {
-    strcpy(file.rom_name[i], "");
-    strcpy(file.ram_name[i], "");
-    file.rom_size[i] = 0;
-    file.ram_size[i] = 0;
-    file.rom_data[i] = 0;
-    file.ram_data[i] = 0;
-  }
 }
 
-void Cartridge::load(const char *rom_fn) {
-  if(!rom_fn || !*rom_fn)return;
+void Cartridge::load_end() {
+  memory::cartrom.map(cart.rom, cart.rom_size);
+  memory::cartram.map(cart.ram, cart.ram_size);
+  memory::bscram.map(bs.ram, bs.ram_size);
+  memory::stArom.map(stA.rom, stA.rom_size);
+  memory::stAram.map(stA.ram, stA.ram_size);
+  memory::stBrom.map(stB.rom, stB.rom_size);
+  memory::stBram.map(stB.ram, stB.ram_size);
 
-char fn[4096], ram_fn[4096];
-  strcpy(fn, rom_fn);
-//correct folder slashes
-  for(int i = strlen(fn) - 1; i >= 0; i--) {
-    if(fn[i] == '\\')fn[i] = '/';
-  }
+  memory::cartrom.write_protect(true);
+  memory::cartram.write_protect(false);
+  memory::bscram.write_protect(true);
+  memory::stArom.write_protect(true);
+  memory::stAram.write_protect(false);
+  memory::stBrom.write_protect(true);
+  memory::stBram.write_protect(false);
 
-uint i = file.count++;
-  strcpy(file.rom_name[i], fn);
-
-  strcpy(fn, rom_fn);
-//remove ROM extension
-  for(int i = strlen(fn) - 1; i >= 0; i--) {
-    if(fn[i] == '.') {
-      fn[i] = 0;
-      break;
-    }
-  }
-
-  if(i == 0) {
-    strcpy(file.patch_name, fn);
-    strcat(file.patch_name, ".ups");
-  }
-  strcpy(fn, strptr(config::file_updatepath(fn, config::path.save)));
-  if(i == 0) {
-    strcpy(file.cheat_name, fn);
-    strcat(file.cheat_name, ".cht");
-  }
-  strcpy(file.ram_name[i], fn);
-  strcat(file.ram_name[i], ".");
-  strcat(file.ram_name[i], config::path.save_ext);
-}
-
-bool Cartridge::load_end() {
-  for(int i = 0; i < file.count; i++) {
-    load_file(file.rom_name[i], file.rom_data[i], file.rom_size[i]);
-  }
-
-  if(fexists(file.cheat_name) == true) {
-    cheat.clear();
-    cheat.load(file.cheat_name);
-  }
-
-  switch(info.type) {
-  case CartridgeNormal: {
-    load_rom_normal();
-    load_ram_normal();
-  } break;
-  case CartridgeSufamiTurbo: {
-    load_rom_st();
-    load_ram_st();
-  } break;
-  case CartridgeSufamiTurboDual: {
-    load_rom_stdual();
-    load_ram_stdual();
-  } break;
-  }
-
-  cart_loaded = true;
-  r_mem->load_cart();
-  return true;
+  cart.loaded = true;
+  bus.load_cart();
 }
 
 bool Cartridge::unload() {
-  if(cart_loaded == false)return false;
+  if(cart.loaded == false) return false;
 
-  r_mem->unload_cart();
+  bus.unload_cart();
 
   switch(info.type) {
-  case CartridgeNormal: {
-    save_ram_normal();
-  } break;
-  case CartridgeSufamiTurbo: {
-    save_ram_st();
-  } break;
-  case CartridgeSufamiTurboDual: {
-    save_ram_stdual();
-  } break;
+    case CartridgeNormal: unload_cart_normal(); break;
+    case CartridgeBSX: unload_cart_bsx(); break;
+    case CartridgeBSC: unload_cart_bsc(); break;
+    case CartridgeSufamiTurbo: unload_cart_st(); break;
   }
 
-  safe_free(rom);
-  safe_free(ram);
+  safe_free(cart.rom);
+  safe_free(cart.ram);
+  safe_free(bs.ram);
+  safe_free(stA.rom);
+  safe_free(stA.ram);
+  safe_free(stB.rom);
+  safe_free(stB.ram);
 
-  if(cheat.count() > 0 || fexists(file.cheat_name) == true) {
-    cheat.save(file.cheat_name);
-    cheat.clear();
-  }
-
-  cart_loaded = false;
+  cart.loaded = false;
   return true;
 }
 
 Cartridge::Cartridge() {
-  load_database();
-
-  cart_loaded = false;
-
-  rom = 0;
-  ram = 0;
+  cart.loaded = false;
 }
 
 Cartridge::~Cartridge() {
-  if(cart_loaded == true) {
-    unload();
-  }
+  if(cart.loaded == true) unload();
 }

@@ -1,129 +1,142 @@
 class Cartridge {
 public:
+  enum CartridgeType {
+    CartridgeNormal,
+    CartridgeBSX,
+    CartridgeBSC,
+    CartridgeSufamiTurbo,
+  };
 
-/*****
- * cart database
- *****/
+  enum HeaderField {
+    CART_NAME = 0x00,
+    MAPPER    = 0x15,
+    ROM_TYPE  = 0x16,
+    ROM_SIZE  = 0x17,
+    RAM_SIZE  = 0x18,
+    REGION    = 0x19,
+    COMPANY   = 0x1a,
+    VERSION   = 0x1b,
+    ICKSUM    = 0x1c,
+    CKSUM     = 0x1e,
+    RESL      = 0x3c,
+    RESH      = 0x3d,
+  };
 
-#include "db/db.h"
-db_item dbi;
-  uint8 *database;
-  uint   database_size;
-  uint   database_blocksize;
-  void   load_database();
-  bool   read_database();
+  enum Region {
+    NTSC,
+    PAL,
+  };
 
-//
+  enum MemoryMapper {
+    LoROM,
+    HiROM,
+    ExLoROM,
+    ExHiROM,
+    BSXROM,
+    BSCLoROM,
+    BSCHiROM,
+    STROM,
+  };
 
-enum CartridgeType {
-  CartridgeNormal,
-  CartridgeSufamiTurbo,
-  CartridgeSufamiTurboDual,
-};
+  enum DSP1MemoryMapper {
+    DSP1Unmapped,
+    DSP1LoROM1MB,
+    DSP1LoROM2MB,
+    DSP1HiROM,
+  };
 
-bool cart_loaded;
+  struct {
+    bool loaded;
+    char fn[PATH_MAX];
+    uint8 *rom, *ram;
+    uint rom_size, ram_size;
+  } cart;
 
-uint8 rom_header[512], *rom, *ram;
+  struct {
+    char fn[PATH_MAX];
+    uint8 *ram;
+    uint ram_size;
+  } bs;
 
-enum {
-//header fields
-  CART_NAME = 0x00,
-  MAPPER    = 0x15,
-  ROM_TYPE  = 0x16,
-  ROM_SIZE  = 0x17,
-  RAM_SIZE  = 0x18,
-  REGION    = 0x19,
-  COMPANY   = 0x1a,
-  VERSION   = 0x1b,
-  ICKSUM    = 0x1c,
-  CKSUM     = 0x1e,
-  RESL      = 0x3c,
-  RESH      = 0x3d,
+  struct {
+    char fn[PATH_MAX];
+    uint8 *rom, *ram;
+    uint rom_size, ram_size;
+  } stA, stB;
 
-//regions
-  NTSC = 0,
-  PAL  = 1,
+  struct {
+    CartridgeType type;
 
-//memory mappers
-  PCB     = 0x00,
-  LOROM   = 0x20,
-  HIROM   = 0x21,
-  EXLOROM = 0x22,
-  EXHIROM = 0x25,
+    uint32 crc32;
+    char name[128];
 
-//special chip memory mappers
-  DSP1_LOROM_1MB = 1,
-  DSP1_LOROM_2MB = 2,
-  DSP1_HIROM     = 3,
-};
+    Region region;
+    MemoryMapper mapper;
+    uint rom_size;
+    uint ram_size;
 
-struct {
-  uint   count;
-  char   cheat_name[4096], patch_name[4096];
-  char   rom_name[8][4096], ram_name[8][4096];
-  uint   rom_size[8],  ram_size[8];
-  uint8 *rom_data[8], *ram_data[8];
-} file;
+    bool bsxbase;
+    bool bsxcart;
+    bool bsxflash;
+    bool st;
+    bool superfx;
+    bool sa1;
+    bool srtc;
+    bool sdd1;
+    bool cx4;
+    bool dsp1;
+    bool dsp2;
+    bool dsp3;
+    bool dsp4;
+    bool obc1;
+    bool st010;
+    bool st011;
+    bool st018;
 
-struct {
-  uint   type;
+    DSP1MemoryMapper dsp1_mapper;
 
-//cart information
-  uint32 crc32;
-  char   name[128];
-  char   pcb[32];
+    uint header_index;
+  } info;
 
-  uint   region;
-  uint   mapper;
-  uint   rom_size;
-  uint   ram_size;
+  MemoryMapper mapper();
+  Region region();
 
-  bool   superfx;
-  bool   sa1;
-  bool   srtc;
-  bool   sdd1;
-  bool   c4;
-  bool   dsp1;
-  bool   dsp2;
-  bool   dsp3;
-  bool   dsp4;
-  bool   obc1;
-  bool   st010;
-  bool   st011;
-  bool   st018;
+  void load_cart_normal(const char*);
+  void load_cart_bsx(const char*, const char*);
+  void load_cart_bsc(const char*, const char*);
+  void load_cart_st(const char*, const char*, const char*);
 
-  uint   dsp1_mapper;
+  void unload_cart_normal();
+  void unload_cart_bsx();
+  void unload_cart_bsc();
+  void unload_cart_st();
 
-//HiROM / LoROM specific code
-  uint   header_index;
-} info;
-
-  bool load_file(const char *fn, uint8 *&data, uint &size);
-  bool save_file(const char *fn, uint8 *data, uint size);
-
-  void load_rom_normal();
-  void load_ram_normal();
-  void save_ram_normal();
-
-  void load_rom_st();
-  void load_ram_st();
-  void save_ram_st();
-
-  void load_rom_stdual();
-  void load_ram_stdual();
-  void save_ram_stdual();
+  bool loaded();
+  void load_begin(CartridgeType);
+  void load_end();
+  bool unload();
 
   void find_header();
   void read_header();
+  void read_extended_header();
 
-  bool loaded() { return cart_loaded; }
-  void load_begin(CartridgeType cart_type);
-  void load(const char *rom_fn);
-  bool load_end();
-  bool unload();
+  bool load_file(const char *fn, uint8 *&data, uint &size);
+  bool save_file(const char *fn, uint8 *data, uint size);
+  char* modify_extension(char *filename, const char *extension);
+  char* get_save_filename(const char *source, const char *extension);
 
   Cartridge();
   ~Cartridge();
+
+private:
+  char savefn[PATH_MAX];
+};
+
+namespace memory {
+  extern MappedRAM cartrom, cartram;
+  extern MappedRAM bscram;
+  extern MappedRAM stArom, stAram;
+  extern MappedRAM stBrom, stBram;
 };
 
 extern Cartridge cartridge;

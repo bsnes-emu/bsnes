@@ -47,10 +47,10 @@ void SNES::get_video_info(video_info *info) {
 }
 
 void SNES::video_update() {
-  if(r_ppu->renderer_enabled()) {
+  if(ppu.renderer_enabled()) {
     update_video_format();
 
-    video.ppu_data = (uint16*)r_ppu->output;
+    video.ppu_data = (uint16*)ppu.output;
 //  video_normalize();
 
     switch(video.video_standard) {
@@ -58,7 +58,7 @@ void SNES::video_update() {
     case VIDEOSTANDARD_NTSC:
       video.raster_width  = 256;
       video.raster_height = 224;
-      video.ppu_data += (int(r_cpu->overscan()) << 13) + 1024;
+      video.ppu_data += (int(cpu.overscan()) << 13) + 1024;
       break;
     case VIDEOSTANDARD_PAL:
       video.raster_width  = 256;
@@ -88,15 +88,15 @@ void SNES::video_update() {
 }
 
 void SNES::video_scanline() {
-int y = r_cpu->vcounter();
-int o = (video.video_standard == VIDEOSTANDARD_NTSC) ? (int(r_cpu->overscan()) << 3) : 0;
+int y = cpu.vcounter();
+int o = (video.video_standard == VIDEOSTANDARD_NTSC) ? (int(cpu.overscan()) << 3) : 0;
   if(y <= (0 + o) || y >= (225 + o))return;
   y -= o;
 
 PPU::scanline_info si;
-  r_ppu->get_scanline_info(&si);
+  ppu.get_scanline_info(&si);
 
-  pline_width[y] = iline_width[y * 2 + int(r_cpu->interlace_field())] =
+  pline_width[y] = iline_width[y * 2 + int(cpu.interlace_field())] =
     (si.hires == false) ? 256 : 512;
   video.frame_hires      |= si.hires;
   video.frame_interlace  |= si.interlace;

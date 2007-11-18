@@ -1,24 +1,37 @@
 void Cartridge::read_header() {
-  if(info.header_index == 0x7fc0 && info.rom_size >= 0x401000) {
-    info.mapper = EXLOROM;
-    strcpy(info.pcb, "UNL-EXLOROM");
-  } else if(info.header_index == 0x7fc0 && rom[info.header_index + MAPPER] == 0x32) {
-    info.mapper = EXLOROM;
-    strcpy(info.pcb, "UNL-EXLOROM");
-  } else if(info.header_index == 0x7fc0) {
-    info.mapper = LOROM;
-    strcpy(info.pcb, "UNL-LOROM");
-  } else if(info.header_index == 0xffc0) {
-    info.mapper = HIROM;
-    strcpy(info.pcb, "UNL-HIROM");
-  } else { //info.header_index == 0x40ffc0
-    info.mapper = EXHIROM;
-    strcpy(info.pcb, "UNL-EXHIROM");
+uint8 *rom = cart.rom;
+uint index = info.header_index;
+uint8 mapper   = rom[index + MAPPER];
+uint8 rom_type = rom[index + ROM_TYPE];
+uint8 company  = rom[index + COMPANY];
+uint8 region   = rom[index + REGION] & 0x7f;
+
+//detect presence of BS-X flash cartridge connector (reads extended header information)
+bool has_bsxflash = false;
+  if(rom[index - 14] == 'Z') {
+    if(rom[index - 11] == 'J') {
+    uint8 n13 = rom[index - 13];
+      if((n13 >= 'A' && n13 <= 'Z') || (n13 >= '0' && n13 <= '9')) {
+        if(company == 0x33 || (rom[index - 10] == 0x00 && rom[index - 4] == 0x00)) {
+          has_bsxflash = true;
+        }
+      }
+    }
   }
 
-uint8 mapper   = rom[info.header_index + MAPPER];
-uint8 rom_type = rom[info.header_index + ROM_TYPE];
-uint8 company  = rom[info.header_index + COMPANY];
+  if(has_bsxflash == true) {
+    info.mapper = index == 0x7fc0 ? BSCLoROM : BSCHiROM;
+  } else if(index == 0x7fc0 && cart.rom_size >= 0x401000) {
+    info.mapper = ExLoROM;
+  } else if(index == 0x7fc0 && mapper == 0x32) {
+    info.mapper = ExLoROM;
+  } else if(index == 0x7fc0) {
+    info.mapper = LoROM;
+  } else if(index == 0xffc0) {
+    info.mapper = HiROM;
+  } else { //index == 0x40ffc0
+    info.mapper = ExHiROM;
+  }
 
   if(mapper == 0x20 && (rom_type == 0x13 || rom_type == 0x14 || rom_type == 0x15 || rom_type == 0x1a)) {
     info.superfx = true;
@@ -37,7 +50,7 @@ uint8 company  = rom[info.header_index + COMPANY];
   }
 
   if(mapper == 0x20 && rom_type == 0xf3) {
-    info.c4 = true;
+    info.cx4 = true;
   }
 
   if((mapper == 0x20 || mapper == 0x21) && rom_type == 0x03) {
@@ -53,12 +66,12 @@ uint8 company  = rom[info.header_index + COMPANY];
   }
 
   if(info.dsp1 == true) {
-    if((mapper & 0x2f) == 0x20 && info.rom_size <= 0x100000) {
-      info.dsp1_mapper = DSP1_LOROM_1MB;
+    if((mapper & 0x2f) == 0x20 && cart.rom_size <= 0x100000) {
+      info.dsp1_mapper = DSP1LoROM1MB;
     } else if((mapper & 0x2f) == 0x20) {
-      info.dsp1_mapper = DSP1_LOROM_2MB;
+      info.dsp1_mapper = DSP1LoROM2MB;
     } else if((mapper & 0x2f) == 0x21) {
-      info.dsp1_mapper = DSP1_HIROM;
+      info.dsp1_mapper = DSP1HiROM;
     }
   }
 
@@ -95,6 +108,9 @@ uint8 company  = rom[info.header_index + COMPANY];
     info.ram_size = 0;
   }
 
+//0, 1, 13 = NTSC; 2 - 12 = PAL
+  info.region = (region <= 1 || region >= 13) ? NTSC : PAL;
+
   memcpy(&info.name, &rom[info.header_index + CART_NAME], 21);
   info.name[21] = 0;
 
@@ -109,8 +125,9 @@ void Cartridge::find_header() {
 int32 score_lo = 0,
       score_hi = 0,
       score_ex = 0;
+uint8 *rom = cart.rom;
 
-  if(info.rom_size < 0x010000) {
+  if(cart.rom_size < 0x010000) {
   //cart too small to be anything but lorom
     info.header_index = 0x007fc0;
     return;
@@ -150,7 +167,7 @@ uint16 cksum, icksum;
     score_hi += 8;
   }
 
-  if(info.rom_size < 0x401000) {
+  if(cart.rom_size < 0x401000) {
     score_ex = 0;
   } else {
     if(rom[0x7fc0 + MAPPER] == 0x32)score_lo++;

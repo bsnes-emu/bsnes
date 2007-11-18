@@ -12,7 +12,7 @@ class SNESInterface { public:
 
   void audio_sample(uint16 l_sample, uint16 r_sample);
 
-functor<bool ()> input_ready;
+function<bool ()> input_ready;
   void input_poll();
   bool input_poll(uint deviceid, uint button);
 

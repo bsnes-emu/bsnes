@@ -10,7 +10,7 @@ void SuperFX::init() {
 
 void SuperFX::enable() {
   for(uint i = 0x3000; i <= 0x32ff; i++) {
-    r_mem->set_mmio_mapper(i, this);
+    memory::mmio.map(i, *this);
   }
 }
 

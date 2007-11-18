@@ -4,14 +4,14 @@ uint8 sCPU::pio_status() {
 
 //WMDATA
 uint8 sCPU::mmio_r2180() {
-uint8 r = r_mem->read(0x7e0000 | status.wram_addr);
+uint8 r = bus.read(0x7e0000 | status.wram_addr);
   status.wram_addr = (status.wram_addr + 1) & 0x01ffff;
   return r;
 }
 
 //WMDATA
 void sCPU::mmio_w2180(uint8 data) {
-  r_mem->write(0x7e0000 | status.wram_addr, data);
+  bus.write(0x7e0000 | status.wram_addr, data);
   status.wram_addr = (status.wram_addr + 1) & 0x01ffff;
 }
 
@@ -76,7 +76,7 @@ void sCPU::mmio_w4200(uint8 data) {
 //WRIO
 void sCPU::mmio_w4201(uint8 data) {
   if((status.pio & 0x80) && !(data & 0x80)) {
-    r_ppu->latch_counters();
+    ppu.latch_counters();
   }
   status.pio = data;
 }
@@ -159,7 +159,7 @@ void sCPU::mmio_w420c(uint8 data) {
 
 //MEMSEL
 void sCPU::mmio_w420d(uint8 data) {
-  r_mem->set_speed(data & 1);
+  bus.set_speed(data & 1);
 }
 
 //RDNMI
@@ -419,11 +419,13 @@ void sCPU::mmio_reset() {
   status.joy4h = 0x00;
 }
 
-uint8 sCPU::mmio_read(uint16 addr) {
+uint8 sCPU::mmio_read(uint addr) {
+  addr &= 0xffff;
+
 //APU
   if((addr & 0xffc0) == 0x2140) { //$2140-$217f
     scheduler.sync_cpusmp();
-    return r_smp->port_read(addr & 3);
+    return smp.port_read(addr & 3);
   }
 
 //DMA
@@ -474,7 +476,9 @@ uint8 sCPU::mmio_read(uint16 addr) {
   return regs.mdr;
 }
 
-void sCPU::mmio_write(uint16 addr, uint8 data) {
+void sCPU::mmio_write(uint addr, uint8 data) {
+  addr &= 0xffff;
+
 //APU
   if((addr & 0xffc0) == 0x2140) { //$2140-$217f
     scheduler.sync_cpusmp();

@@ -1,7 +1,7 @@
-#define BSNES_VERSION "0.025"
+#define BSNES_VERSION "0.026"
 #define BSNES_TITLE   "bsnes v" BSNES_VERSION
 
-#define MEMCORE bMemBus
+#define BUSCORE sBus
 #define CPUCORE sCPU
 #define SMPCORE sSMP
 #define DSPCORE bDSP
@@ -12,12 +12,6 @@
 
 //game genie + pro action replay code support (~1-3% speed hit)
 #define CHEAT_SYSTEM
-
-//snes core polymorphism
-//(allow runtime cpu/smp/dsp/ppu/bus selection, ~10% speed hit)
-//#define POLYMORPHISM
-
-#include "lib/libbase.h"
 
 #if defined(PROCESSOR_X86)
   #define ARCH_LSB
@@ -31,8 +25,8 @@
   #error "unsupported processor"
 #endif
 
-#include "lib/libfunctor.h"
-#include "lib/libsort.h"
+#include "lib/libbase.h"
+#include "lib/libfunction.h"
 #include "lib/libarray.h"
 #include "lib/libvector.h"
 #include "lib/libstring.h"

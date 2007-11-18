@@ -1,8 +1,19 @@
-class ST010 { public:
-uint8 ram[0x1000];
-static const int16 sin_table[256];
-static const int16 mode7_scale[176];
-static const uint8 arctan[32][32];
+class ST010 : public Memory {
+public:
+  void init();
+  void enable();
+  void power();
+  void reset();
+
+  uint8 read (uint addr);
+  void  write(uint addr, uint8 data);
+
+private:
+  uint8 ram[0x1000];
+  static const int16 sin_table[256];
+  static const int16 mode7_scale[176];
+  static const uint8 arctan[32][32];
+
 //interfaces to sin table
   int16 sin(int16 theta);
   int16 cos(int16 theta);
@@ -26,15 +37,6 @@ static const uint8 arctan[32][32];
   void op_08();
 
   void op_01(int16 x0, int16 y0, int16 &x1, int16 &y1, int16 &quadrant, int16 &theta);
-
-//base
-  void init();
-  void enable();
-  void power();
-  void reset();
-
-  uint8 read (uint16 addr);
-  void  write(uint16 addr, uint8 data);
 };
 
 extern ST010 st010;

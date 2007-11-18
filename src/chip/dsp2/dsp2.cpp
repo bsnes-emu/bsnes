@@ -28,7 +28,7 @@ void DSP2::reset() {
   status.op0dinlen       = 0;
 }
 
-uint8 DSP2::read(uint16 addr) {
+uint8 DSP2::read(uint addr) {
 uint8 r = 0xff;
   if(status.out_count) {
     r = status.output[status.out_index++];
@@ -40,7 +40,7 @@ uint8 r = 0xff;
   return r;
 }
 
-void DSP2::write(uint16 addr, uint8 data) {
+void DSP2::write(uint addr, uint8 data) {
   if(status.waiting_for_command) {
     status.command  = data;
     status.in_index = 0;

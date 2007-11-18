@@ -2,8 +2,9 @@ class MainWindow : public ui::Window { public:
 ui::MenuGroup menu_file;
   ui::MenuItem menu_file_load;
   ui::MenuGroup menu_file_load_special;
+    ui::MenuItem menu_file_load_bsx;
+    ui::MenuItem menu_file_load_bsc;
     ui::MenuItem menu_file_load_st;
-    ui::MenuItem menu_file_load_stdual;
   ui::MenuItem menu_file_unload;
   ui::MenuSeparator menu_file_sep1;
   ui::MenuItem menu_file_reset;

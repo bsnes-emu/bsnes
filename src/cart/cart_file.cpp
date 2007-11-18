@@ -9,11 +9,48 @@
   #include "../reader/jmareader.h"
 #endif
 
+char* Cartridge::modify_extension(char *filename, const char *extension) {
+int i;
+  for(i = strlen(filename); i >= 0; i--) {
+    if(filename[i] == '.') break;
+    if(filename[i] == '/') break;
+    if(filename[i] == '\\') break;
+  }
+  if(i > 0 && filename[i] == '.') filename[i] = 0;
+  strcat(filename, ".");
+  strcat(filename, extension);
+  return filename;
+}
+
+char* Cartridge::get_save_filename(const char *source, const char *extension) {
+  strcpy(savefn, source);
+  for(char *p = savefn; *p; p++) { if(*p == '\\') *p = '/'; }
+  modify_extension(savefn, extension);
+
+//override path with user-specified folder, if one was defined
+  if(config::path.save != "") {
+  stringarray part;
+    split(part, "/", savefn);
+  string fn = config::path.save();
+    if(strend(fn, "/") == false) strcat(fn, "/");
+    strcat(fn, part[count(part) - 1]);
+    strcpy(savefn, fn);
+
+  //resolve relative path, if found
+    if(strbegin(fn, "./") == true) {
+      strltrim(fn, "./");
+      strcpy(savefn, config::path.base);
+      strcat(savefn, fn);
+    }
+  }
+
+  return savefn;
+}
+
 bool Cartridge::load_file(const char *fn, uint8 *&data, uint &size) {
   dprintf("* Loading \"%s\"...", fn);
 
   if(fexists(fn) == false) {
-    alert("Error: file '%s' not found!", fn);
     return false;
   }
 

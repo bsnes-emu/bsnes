@@ -77,8 +77,8 @@ tm *t;
 void SRTC::init() {}
 
 void SRTC::enable() {
-  r_mem->set_mmio_mapper(0x2800, this);
-  r_mem->set_mmio_mapper(0x2801, this);
+  memory::mmio.map(0x2800, *this);
+  memory::mmio.map(0x2801, *this);
 }
 
 void SRTC::power() {
@@ -91,8 +91,8 @@ void SRTC::reset() {
   srtc.mode  = SRTC_READ;
 }
 
-uint8 SRTC::mmio_read(uint16 addr) {
-  switch(addr) {
+uint8 SRTC::mmio_read(uint addr) {
+  switch(addr & 0xffff) {
 
   case 0x2800: {
     if(srtc.mode == SRTC_READ) {
@@ -116,7 +116,7 @@ uint8 SRTC::mmio_read(uint16 addr) {
 
   }
 
-  return r_cpu->regs.mdr;
+  return cpu.regs.mdr;
 }
 
 //Please see notes above about the implementation of the S-RTC
@@ -124,8 +124,8 @@ uint8 SRTC::mmio_read(uint16 addr) {
 //as reads will refresh the data array with the current system
 //time. The write method is only here for the sake of faux
 //emulation of the real hardware.
-void SRTC::mmio_write(uint16 addr, uint8 data) {
-  switch(addr) {
+void SRTC::mmio_write(uint addr, uint8 data) {
+  switch(addr & 0xffff) {
 
   case 0x2800: {
   } break;

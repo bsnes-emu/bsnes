@@ -14,32 +14,32 @@ va_list args;
 void Tracer::trace_cpuop() {
   if(enabled() == false) { return; }
   if(cpuop_enabled() == false) { return; }
-  if(r_cpu->in_opcode() == true) { return; }
+  if(cpu.in_opcode() == true) { return; }
 
   if(cpuopmask_enabled() == true) {
-  uint addr = r_cpu->regs.pc.d;
+  uint addr = cpu.regs.pc.d;
     if(settings.cpuopmasktbl[addr >> 3] & 0x80 >> (addr & 7)) { return; }
     settings.cpuopmasktbl[addr >> 3] |= 0x80 >> (addr & 7);
   }
 
 char t[1024];
-  r_cpu->disassemble_opcode(t);
+  cpu.disassemble_opcode(t);
   fprintf(fp, "%s\r\n", t);
 }
 
 void Tracer::trace_smpop() {
   if(enabled() == false) { return; }
   if(smpop_enabled() == false) { return; }
-  if(r_smp->in_opcode() == true) { return; }
+  if(smp.in_opcode() == true) { return; }
 
   if(smpopmask_enabled() == true) {
-  uint addr = r_smp->regs.pc;
+  uint addr = smp.regs.pc;
     if(settings.smpopmasktbl[addr >> 3] & 0x80 >> (addr & 7)) { return; }
     settings.smpopmasktbl[addr >> 3] |= 0x80 >> (addr & 7);
   }
 
 char t[1024];
-  r_smp->disassemble_opcode(t);
+  smp.disassemble_opcode(t);
   fprintf(fp, "%s\r\n", t);
 }
 

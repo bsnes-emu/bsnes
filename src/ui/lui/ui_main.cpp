@@ -1,9 +1,4 @@
 bool MainWindow::input_ready() {
-#if defined(PLATFORM_X)
-//FIXME: focused() is broken in X port
-  return true;
-#endif
-
 //only allow input when main window is focused
   return focused() == true;
 }
@@ -32,12 +27,23 @@ ui::Control *control = (ui::Control*)param;
       event::load_rom();
     }
 
-    if(control == &menu_file_load_st) {
-      event::load_rom_st();
+    if(control == &menu_file_load_bsx) {
+      window_bsxloader.mode = BSXLoaderWindow::ModeBSX;
+      window_bsxloader.set_text("Load BS-X Cartridge");
+      window_bsxloader.tbase.set_text(config::path.bsx);
+      window_bsxloader.show();
     }
 
-    if(control == &menu_file_load_stdual) {
-      event::load_rom_stdual();
+    if(control == &menu_file_load_bsc) {
+      window_bsxloader.mode = BSXLoaderWindow::ModeBSC;
+      window_bsxloader.set_text("Load BS-X Slotted Cartridge");
+      window_bsxloader.tbase.set_text("");
+      window_bsxloader.show();
+    }
+
+    if(control == &menu_file_load_st) {
+      window_stloader.tbase.set_text(config::path.st);
+      window_stloader.show();
     }
 
     if(control == &menu_file_unload) {
@@ -114,7 +120,7 @@ ui::Control *control = (ui::Control*)param;
     if(control == &menu_misc_showfps) {
       config::misc.show_frame_counter = menu_misc_showfps.checked();
       if(config::misc.show_frame_counter == false) {
-        set_text(string() << BSNES_TITLE);
+        set_text(BSNES_TITLE);
       }
     }
 
@@ -141,8 +147,9 @@ ui::ControlGroup group;
     menu_file.create(menu, "File");
       menu_file_load.create(menu_file, "Load Cartridge ...");
       menu_file_load_special.create(menu_file, "Load Special");
+        menu_file_load_bsx.create(menu_file_load_special, "Load BS-X Cartridge ...");
+        menu_file_load_bsc.create(menu_file_load_special, "Load BS-X Slotted Cartridge ...");
         menu_file_load_st.create(menu_file_load_special, "Load ST Cartridge ...");
-        menu_file_load_stdual.create(menu_file_load_special, "Load ST Dual Cartridge ...");
       menu_file_load_special.finish();
       menu_file_unload.create(menu_file, "Unload Cartridge");
       menu_file_sep1.create(menu_file);
@@ -260,30 +267,30 @@ void MainWindow::update_menu_settings() {
   event::load_video_settings();
 
   switch(event::video_settings.multiplier) { default:
-  case 1: menu_settings_videomode_1x.check(); break;
-  case 2: menu_settings_videomode_2x.check(); break;
-  case 3: menu_settings_videomode_3x.check(); break;
-  case 4: menu_settings_videomode_4x.check(); break;
-  case 5: menu_settings_videomode_5x.check(); break;
+    case 1: menu_settings_videomode_1x.check(); break;
+    case 2: menu_settings_videomode_2x.check(); break;
+    case 3: menu_settings_videomode_3x.check(); break;
+    case 4: menu_settings_videomode_4x.check(); break;
+    case 5: menu_settings_videomode_5x.check(); break;
   }
 
   menu_settings_videomode_aspect_correction.check(event::video_settings.aspect_correction);
 
   switch(event::video_settings.region) { default:
-  case 0: menu_settings_videomode_ntsc.check(); break;
-  case 1: menu_settings_videomode_pal.check();  break;
+    case 0: menu_settings_videomode_ntsc.check(); break;
+    case 1: menu_settings_videomode_pal.check();  break;
   }
 
   switch(event::video_settings.hardware_filter) { default:
-  case 0: menu_settings_videofilter_hwpoint.check();  break;
-  case 1: menu_settings_videofilter_hwlinear.check(); break;
+    case 0: menu_settings_videofilter_hwpoint.check();  break;
+    case 1: menu_settings_videofilter_hwlinear.check(); break;
   }
 
   switch(event::video_settings.software_filter) { default:
-  case 0: menu_settings_videofilter_swnone.check();    break;
-  case 1: menu_settings_videofilter_swntsc.check();    break;
-  case 2: menu_settings_videofilter_swhq2x.check();    break;
-  case 3: menu_settings_videofilter_swscale2x.check(); break;
+    case 0: menu_settings_videofilter_swnone.check();    break;
+    case 1: menu_settings_videofilter_swntsc.check();    break;
+    case 2: menu_settings_videofilter_swhq2x.check();    break;
+    case 3: menu_settings_videofilter_swscale2x.check(); break;
   }
 
   menu_settings_mute.check(config::snes.mute);

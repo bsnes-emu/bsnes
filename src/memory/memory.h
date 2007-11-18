@@ -1,30 +1,91 @@
-class Memory {
-public:
+struct Memory {
+  virtual uint size() { return 0; }
+  virtual uint8 read(uint addr) = 0;
+  virtual void write(uint addr, uint8 data) = 0;
+
 enum { WRAP_NONE = 0, WRAP_BANK = 1, WRAP_PAGE = 2 };
-  virtual uint8  read      (uint32 addr)              = 0;
-  virtual void   write     (uint32 addr, uint8  data) = 0;
-  virtual uint16 read_word (uint32 addr,              uint wrap = WRAP_NONE);
-  virtual void   write_word(uint32 addr, uint16 data, uint wrap = WRAP_NONE);
-  virtual uint32 read_long (uint32 addr,              uint wrap = WRAP_NONE);
-  virtual void   write_long(uint32 addr, uint32 data, uint wrap = WRAP_NONE);
+  virtual uint16 read_word(uint addr, uint wrap = WRAP_NONE);
+  virtual void write_word(uint addr, uint16 data, uint wrap = WRAP_NONE);
+  virtual uint32 read_long(uint addr, uint wrap = WRAP_NONE);
+  virtual void write_long(uint addr, uint32 data, uint wrap = WRAP_NONE);
 };
 
-class MMIO {
-public:
-  virtual uint8 mmio_read (uint16 addr);
-  virtual void  mmio_write(uint16 addr, uint8 data);
+struct MMIO {
+  virtual uint8 mmio_read(uint addr) = 0;
+  virtual void mmio_write(uint addr, uint8 data) = 0;
 };
 
-class MemBus : public Memory {
-public:
-MMIO *mmio[0x4000]; //mapped to $[00-3f|80-bf]:[2000-5fff]
-bool  fastROM;
-uint  fastSpeed;
-  void flush_mmio_mappers();
-  bool set_mmio_mapper(uint16 addr, MMIO *mapper);
+struct UnmappedMemory : Memory {
+  uint8 read(uint);
+  void write(uint, uint8);
+};
 
-public:
-  inline uint8 speed(uint32 addr) {
+struct UnmappedMMIO : MMIO {
+  uint8 mmio_read(uint);
+  void mmio_write(uint, uint8);
+};
+
+struct StaticRAM : Memory {
+  uint8 *data;
+  uint data_size;
+
+  uint size() { return data_size; }
+  uint8 read(uint addr) { return data[addr]; }
+  void write(uint addr, uint8 n) { data[addr] = n; }
+
+  StaticRAM(uint n) : data_size(n) { data = (uint8*)malloc(data_size); }
+  ~StaticRAM() { free(data); }
+};
+
+struct MappedRAM : Memory {
+  uint8 *data;
+  uint data_size;
+  bool write_protection;
+
+  void map(uint8 *source, uint length) { data = source; data_size = length > 0 ? length : -1U; }
+  void write_protect(bool status) { write_protection = status; }
+  uint8* handle() { return data; }
+  uint size() { return data_size; }
+  uint8 read(uint addr) { return data[addr]; }
+  void write(uint addr, uint8 n) { if(!write_protection) data[addr] = n; }
+
+  MappedRAM() : data(0), data_size(0), write_protection(false) {}
+};
+
+struct MMIOAccess : Memory {
+  MMIO *mmio[0x4000];
+
+  void map(uint addr, MMIO &access);
+  uint8 read(uint addr);
+  void write(uint addr, uint8 data);
+};
+
+class Bus { public:
+  struct Page {
+    Memory *access;
+    uint offset;
+  } page[65536];
+  uint fastSpeed;
+
+  uint mirror(uint addr, uint size);
+  void map(uint addr, Memory &access, uint offset);
+enum MapMode { MapDirect, MapLinear, MapShadow };
+  void map(MapMode mode,
+    uint8  bank_lo, uint8  bank_hi,
+    uint16 addr_lo, uint16 addr_hi,
+    Memory &access, uint offset = 0, uint size = 0);
+
+  alwaysinline uint8 read(uint addr) {
+  Page &p = page[addr >> 8];
+    return p.access->read(p.offset + addr);
+  }
+  alwaysinline void write(uint addr, uint8 data) {
+  Page &p = page[addr >> 8];
+    return p.access->write(p.offset + addr, data);
+  }
+
+  void set_speed(bool fast) { fastSpeed = fast ? 6 : 8; }
+  alwaysinline uint speed(uint addr) {
     if(addr & 0x408000) {
       if(addr & 0x800000) { return fastSpeed; }
       return 8;
@@ -34,25 +95,21 @@ public:
     return 12;
   }
 
-  void set_speed(bool fast);
-
   virtual void load_cart() = 0;
   virtual void unload_cart() = 0;
   virtual bool cart_loaded() = 0;
 
-//set to true to block writes to cartridge ROM data,
-//set to false to allow writes. ROM cannot be written
-//on true SNES, however the debugger should be able to
-//set this to false, write to the cartridge, and then
-//set this back to true.
-//
-//needs to be set to true on power.
-bool cart_write_protect_enabled;
-  virtual void cart_write_protect(bool status) { cart_write_protect_enabled = status; }
-
   virtual void power() = 0;
   virtual void reset() = 0;
 
-  MemBus();
-  virtual ~MemBus() {}
+  Bus() {}
+  virtual ~Bus() {}
+};
+
+namespace memory {
+  extern MMIOAccess mmio;
+  extern StaticRAM  wram;
+
+  extern UnmappedMemory memory_unmapped;
+  extern UnmappedMMIO   mmio_unmapped;
 };

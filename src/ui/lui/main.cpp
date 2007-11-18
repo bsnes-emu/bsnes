@@ -56,14 +56,16 @@ void set_config_filename() {
   strcat(config::filename, "/bsnes.cfg");
 }
 
-void get_base_path() {
+void get_base_path(const char *image) {
+char full_name[PATH_MAX] = "";
+
 #if defined(PLATFORM_WIN)
-char full_name[PATH_MAX];
-  GetFullPathName(__argv[0], PATH_MAX, full_name, 0);
+  GetFullPathName(image, PATH_MAX, full_name, 0);
+#elif defined(PLATFORM_X)
+  realpath(image, full_name);
+#endif
 
-string t;
-  strcpy(t, full_name);
-
+string t = full_name;
   if(strlen(t) != 0) {
   //remove program name
     replace(t, "\\", "/");
@@ -77,7 +79,6 @@ string t;
 
   if(strend(t, "/") == false) { strcat(t, "/"); }
   config::path.base = strptr(t);
-#endif
 }
 
 void run() {
@@ -89,7 +90,7 @@ void run() {
   #if defined(PLATFORM_WIN)
     Sleep(1);
   #elif defined(PLATFORM_X)
-    usleep(1);
+    usleep(20);
   #endif
   }
 }
@@ -104,7 +105,7 @@ int main(int argc, char *argv[]) {
 
 //int main(int argc, char *argv[]) {
   set_config_filename();
-  get_base_path();
+  get_base_path(argv[0]);
 
   ui::init();
   config::config().load(config::filename);
@@ -113,13 +114,11 @@ int main(int argc, char *argv[]) {
   //settings, so that they can be modified by hand ...
     config::config().save(config::filename);
   }
-  init_snes();
+  snes.init();
   ui_init();
 
   if(argc >= 2) {
-    cartridge.load_begin(Cartridge::CartridgeNormal);
-    cartridge.load(argv[1]);
-    cartridge.load_end();
+    cartridge.load_cart_normal(argv[1]);
     snes.power();
   }
 
@@ -130,7 +129,7 @@ int main(int argc, char *argv[]) {
   event::unload_rom();
 
   config::config().save(config::filename);
-  term_snes();
+  snes.term();
   ui_term();
   ui::term();
   return 0;

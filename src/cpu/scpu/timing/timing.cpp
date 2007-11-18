@@ -90,7 +90,7 @@ void sCPU::scanline() {
   status.line_rendered  = false;
   status.hdma_triggered = (status.vcounter <= (!overscan() ? 224 : 239)) ? false : true;
 
-  r_ppu->scanline();
+  ppu.scanline();
   snes.scanline();
 
   update_interrupts();
@@ -117,7 +117,7 @@ void sCPU::frame() {
     status.hdmainit_trigger_position = 12 + dma_counter();
   }
 
-  r_ppu->frame();
+  ppu.frame();
   snes.frame();
 }
 
@@ -143,7 +143,7 @@ void sCPU::cycle_edge() {
   if(status.line_rendered == false) {
     if(status.hclock >= status.line_render_position) {
       status.line_rendered = true;
-      r_ppu->render_scanline();
+      ppu.render_scanline();
     }
   }
 

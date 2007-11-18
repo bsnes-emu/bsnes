@@ -1,4 +1,6 @@
-void SuperFX::mmio_write(uint16 addr, uint8 data) {
+void SuperFX::mmio_write(uint addr, uint8 data) {
+  addr &= 0xffff;
+
   switch(addr) {
   case 0x3000: regs.r0.l  = data; return;
   case 0x3001: regs.r0.h  = data; return;
