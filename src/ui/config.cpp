@@ -4,26 +4,15 @@ char filename[PATH_MAX + 16] = "bsnes.cfg";
 
 struct System {
   static StringSetting video, audio, input;
-  static StringSetting video_flags, audio_flags, input_flags;
-
   static IntegerSetting regulate_speed, speed;
-  static IntegerSetting speed_slowest, speed_slow, speed_normal, speed_fast, speed_fastest;
 } system;
+
 StringSetting System::video(&config(), "system.video", "Video hardware interface", "");
 StringSetting System::audio(&config(), "system.audio", "Audio hardware interface", "");
 StringSetting System::input(&config(), "system.input", "Input hardware interface", "");
 
-StringSetting System::video_flags(&config(), "system.video_flags", "Video hardware interface flags", "");
-StringSetting System::audio_flags(&config(), "system.audio_flags", "Audio hardware interface flags", "");
-StringSetting System::input_flags(&config(), "system.input_flags", "Input hardware interface flags", "");
-
 IntegerSetting System::regulate_speed(&config(), "system.regulate_speed", "Regulate speed to 60hz (NTSC) / 50hz (PAL)", IntegerSetting::Boolean, true);
-IntegerSetting System::speed         (0,            "system.speed",          "Current speed regulation setting (1-5)", IntegerSetting::Decimal, 3);
-IntegerSetting System::speed_slowest (&config(), "system.speed_slowest",  "Slowest speed setting", IntegerSetting::Decimal,  50);
-IntegerSetting System::speed_slow    (&config(), "system.speed_slow",     "Slow speed setting",    IntegerSetting::Decimal,  75);
-IntegerSetting System::speed_normal  (&config(), "system.speed_normal",   "Normal speed setting",  IntegerSetting::Decimal, 100);
-IntegerSetting System::speed_fast    (&config(), "system.speed_fast",     "Fast speed setting",    IntegerSetting::Decimal, 150);
-IntegerSetting System::speed_fastest (&config(), "system.speed_fastest",  "Fastest speed setting", IntegerSetting::Decimal, 200);
+IntegerSetting System::speed(0, "system.speed", "Current speed regulation setting (1-5)", IntegerSetting::Decimal, 3);
 
 struct Video {
   static IntegerSetting mode;
@@ -86,16 +75,9 @@ IntegerSetting Video::use_vram(&config(), "video.use_vram", "Use Video RAM inste
 struct Audio {
   static IntegerSetting synchronize;
   static IntegerSetting frequency;
-  static IntegerSetting latency;
 } audio;
 IntegerSetting Audio::synchronize(&config(), "audio.synchronize", "Synchronize to audio sample rate.", IntegerSetting::Boolean, true);
 IntegerSetting Audio::frequency(&config(), "audio.frequency", "Default audio playback frequency.", IntegerSetting::Decimal, 32000);
-IntegerSetting Audio::latency(&config(), "audio.latency", "Audio playback latency in milliseconds.\n"
-  "Specifies how long audio playback is delayed compared to a real SNES.\n"
-  "A delay is necessary to allow smooth audio playback via buffering.\n"
-  "Raising this value may help with audio playback problems, but will decrease\n"
-  "audio responsiveness.",
-  IntegerSetting::Decimal, 75);
 
 struct Input {
   static IntegerSetting axis_resistance;

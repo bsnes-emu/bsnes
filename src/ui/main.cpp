@@ -1,7 +1,6 @@
 #define INTERFACE_MAIN
 
 #include "../base.h"
-#include "main.h"
 #include "config.cpp"
 
 void init_snes();
@@ -11,9 +10,13 @@ void term_snes();
  * hardware abstraction layer
  *****/
 
-#include "video/video.cpp"
-#include "audio/audio.cpp"
-#include "input/input.cpp"
+#include "vai/video.h"
+#include "vai/audio.h"
+#include "vai/input.h"
+
+Video *uiVideo;
+Audio *uiAudio;
+Input *uiInput;
 
 #include "inputmgr.cpp"
 #include "interface.cpp"
@@ -22,12 +25,10 @@ void term_snes();
  * platform abstraction layer
  *****/
 
-#if defined(UI_LUI)
-  #include "lui/main.cpp"
-#elif defined(UI_WIN)
-  #include "win/main.cpp"
-#elif defined(UI_SDL)
-  #include "sdl/main.cpp"
+#if defined(UI_MIU)
+  #include "../lib/miu.h"
+  using namespace ns_miu;
+  #include "miu/main.cpp"
 #else
   #error "unsupported platform"
 #endif

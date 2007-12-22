@@ -1,5 +1,11 @@
+#include "reader/reader.h"
+#include "cheat/cheat.h"
+#include "config/config.h"
+
 #include "memory/memory.h"
 #include "memory/smemory/smemory.h"
+
+#include "cart/cart.h"
 
 #include "cpu/cpu.h"
 #include "cpu/scpu/scpu.h"
@@ -16,11 +22,6 @@
 
 #include "snes/snes.h"
 #include "chip/chip.h"
-
-#include "reader/reader.h"
-#include "cart/cart.h"
-#include "cheat/cheat.h"
-#include "config/config.h"
 
 #ifdef INTERFACE_MAIN
   #include "config/config.cpp"

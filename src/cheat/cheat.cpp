@@ -10,17 +10,17 @@ Cheat cheat;
  *****/
 
 bool Cheat::decode(char *str, uint32 &addr, uint8 &data, uint8 &type) {
-stringarray t, part;
+string t, part;
   strcpy(t, str);
-  strlower(t);
-  if(strlen(t) == 8 || (strlen(t) == 9 && strptr(t)[6] == ':')) {
+  strlower(t());
+  if(strlen(t) == 8 || (strlen(t) == 9 && t()[6] == ':')) {
     type = CT_PRO_ACTION_REPLAY;
     replace(t, ":", "");
   uint32 r = strhex(t);
     addr = r >> 8;
     data = r & 0xff;
     return true;
-  } else if(strlen(t) == 9 && strptr(t)[4] == '-') {
+  } else if(strlen(t) == 9 && t()[4] == '-') {
     type = CT_GAME_GENIE;
     replace(t, "-", "");
     strtr(t, "df4709156bc8a23e", "0123456789abcdef");
@@ -269,51 +269,40 @@ void Cheat::disable(uint32 n) {
  * cheat file manipulation routines
  *****/
 
+/* file format: */
+/* nnnn-nnnn = status, "description" \r\n */
+/* ... */
+
 bool Cheat::load(const char *fn) {
-FileReader rf(fn);
-  if(!rf.ready())return false;
-
-uint8 *raw_data = rf.read();
-stringarray data, line;
-  raw_data[rf.size()] = 0;
-  strcpy(data, (char*)raw_data);
-  safe_free(raw_data);
+string data;
+  if(!fread(data, fn)) return false;
   replace(data, "\r\n", "\n");
+  qreplace(data, "=", ",");
+  qreplace(data, " ", "");
 
+lstring line;
   split(line, "\n", data);
   for(int i = 0; i < ::count(line); i++) {
-  stringarray part;
-  uint8  en = *(strptr(line[i]));
-    if(en == '+') {
-      strltrim(line[i], "+");
-    } else if(en == '-') {
-      strltrim(line[i], "-");
-    } else {
-      continue;
-    }
-    qreplace(line[i], " ", "");
-    qsplit(part, ",", line[i]);
-    if(::count(part) != 2)continue;
-    strunquote(part[1]);
-    add(en == '+', strptr(part[0]), strptr(part[1]));
+  lstring part;
+    split(part, ",", line[i]);
+    if(::count(part) != 3) continue;
+    trim(part[2], "\"");
+    add(part[1] == "enabled", part[0](), part[2]());
   }
 
   return true;
 }
 
 bool Cheat::save(const char *fn) {
-FileWriter wf(fn);
-  if(!wf.ready())return false;
-
-string data;
-char   t[4096];
-  strcpy(data, "");
+FILE *fp = fopen(fn, "wb");
+  if(!fp) return false;
   for(int i = 0; i < cheat_count; i++) {
-    sprintf(t, "%c%s, \"%s\"\r\n", index[i].enabled ? '+' : '-', index[i].code, index[i].desc);
-    strcat(data, t);
+    fprintf(fp, "%9s = %8s, \"%s\"\r\n",
+      index[i].code,
+      index[i].enabled ? "enabled" : "disabled",
+      index[i].desc);
   }
-
-  wf.write((uint8*)strptr(data), strlen(data));
+  fclose(fp);
   return true;
 }
 
@@ -323,12 +312,12 @@ char   t[4096];
 
 void Cheat::clear() {
   cheat_enabled = false;
-  cheat_count   = 0;
+  cheat_count = 0;
   memset(mask, 0, 0x200000);
-  for(int i = 0; i < CHEAT_LIMIT + 1; i++) {
+  for(int i = 0; i <= CHEAT_LIMIT; i++) {
     index[i].enabled = false;
-    index[i].addr    = 0x000000;
-    index[i].data    = 0x00;
+    index[i].addr = 0x000000;
+    index[i].data = 0x00;
     strcpy(index[i].code, "");
     strcpy(index[i].desc, "");
   }

@@ -1,5 +1,0 @@
-#!/bin/sh
-echo "Warning: bsnes does not use a configure script"
-echo "To compile bsnes, use make ..."
-echo ""
-make #prints make usage instructions

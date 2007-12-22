@@ -15,14 +15,14 @@ string path(req_path);
   if(!strend(path, "/")) { strcat(path, "/"); }
 
   if(strbegin(path, "./")) {
-    strltrim(path, "./");
+    ltrim(path(), "./");
   string temp;
     strcpy(temp, config::path.base);
     strcat(temp, path);
     strcpy(path, temp);
   }
 
-stringarray part;
+lstring part;
   split(part, "/", file);
   strcat(path, part[count(part) - 1]);
   return path;

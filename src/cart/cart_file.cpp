@@ -29,7 +29,7 @@ char* Cartridge::get_save_filename(const char *source, const char *extension) {
 
 //override path with user-specified folder, if one was defined
   if(config::path.save != "") {
-  stringarray part;
+  lstring part;
     split(part, "/", savefn);
   string fn = config::path.save();
     if(strend(fn, "/") == false) strcat(fn, "/");
@@ -38,7 +38,7 @@ char* Cartridge::get_save_filename(const char *source, const char *extension) {
 
   //resolve relative path, if found
     if(strbegin(fn, "./") == true) {
-      strltrim(fn, "./");
+      ltrim(fn, "./");
       strcpy(savefn, config::path.base);
       strcat(savefn, fn);
     }
@@ -50,53 +50,50 @@ char* Cartridge::get_save_filename(const char *source, const char *extension) {
 bool Cartridge::load_file(const char *fn, uint8 *&data, uint &size) {
   dprintf("* Loading \"%s\"...", fn);
 
-  if(fexists(fn) == false) {
-    return false;
-  }
+  if(fexists(fn) == false) return false;
 
   switch(Reader::detect(fn)) {
+    default:
+    case Reader::RF_NORMAL: {
+    FileReader ff(fn);
+      if(!ff.ready()) {
+        alert("Error loading image file (%s)!", fn);
+        return false;
+      }
+      size = ff.size();
+      data = ff.read();
+    } break;
 
-  case Reader::RF_NORMAL: {
-  FileReader ff(fn);
-    if(!ff.ready()) {
-      alert("Error loading image file (%s)!", fn);
-      return false;
-    }
-    size = ff.size();
-    data = ff.read();
-  } break;
+  #ifdef GZIP_SUPPORT
+    case Reader::RF_GZ: {
+    GZReader gf(fn);
+      if(!gf.ready()) {
+        alert("Error loading image file (%s)!", fn);
+        return false;
+      }
+      size = gf.size();
+      data = gf.read();
+    } break;
 
-#ifdef GZIP_SUPPORT
-  case Reader::RF_GZ: {
-  GZReader gf(fn);
-    if(!gf.ready()) {
-      alert("Error loading image file (%s)!", fn);
-      return false;
-    }
-    size = gf.size();
-    data = gf.read();
-  } break;
+    case Reader::RF_ZIP: {
+    ZipReader zf(fn);
+      size = zf.size();
+      data = zf.read();
+    } break;
+  #endif
 
-  case Reader::RF_ZIP: {
-  ZipReader zf(fn);
-    size = zf.size();
-    data = zf.read();
-  } break;
-#endif
-
-#ifdef JMA_SUPPORT
-  case Reader::RF_JMA: {
-    try {
-    JMAReader jf(fn);
-      size = jf.size();
-      data = jf.read();
-    } catch(JMA::jma_errors jma_error) {
-      alert("Error loading image file (%s)!", fn);
-      return false;
-    }
-  } break;
-#endif
-
+  #ifdef JMA_SUPPORT
+    case Reader::RF_JMA: {
+      try {
+      JMAReader jf(fn);
+        size = jf.size();
+        data = jf.read();
+      } catch(JMA::jma_errors jma_error) {
+        alert("Error loading image file (%s)!", fn);
+        return false;
+      }
+    } break;
+  #endif
   }
 
   return true;

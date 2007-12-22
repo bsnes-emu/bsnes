@@ -76,9 +76,17 @@ enum MapMode { MapDirect, MapLinear, MapShadow };
     Memory &access, uint offset = 0, uint size = 0);
 
   alwaysinline uint8 read(uint addr) {
+  #if defined(CHEAT_SYSTEM)
+    if(cheat.enabled() && cheat.exists(addr)) {
+    uint8 r;
+      if(cheat.read(addr, r)) return r;
+    }
+  #endif
+
   Page &p = page[addr >> 8];
     return p.access->read(p.offset + addr);
   }
+
   alwaysinline void write(uint addr, uint8 data) {
   Page &p = page[addr >> 8];
     return p.access->write(p.offset + addr, data);

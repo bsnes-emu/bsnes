@@ -82,6 +82,14 @@ void Cartridge::load_end() {
   memory::stBrom.write_protect(true);
   memory::stBram.write_protect(false);
 
+char fn[PATH_MAX];
+  strcpy(fn, cart.fn);
+  modify_extension(fn, "cht");
+  if(fexists(fn)) {
+    cheat.clear();
+    cheat.load(fn);
+  }
+
   cart.loaded = true;
   bus.load_cart();
 }
@@ -105,6 +113,14 @@ bool Cartridge::unload() {
   safe_free(stA.ram);
   safe_free(stB.rom);
   safe_free(stB.ram);
+
+char fn[PATH_MAX];
+  strcpy(fn, cart.fn);
+  modify_extension(fn, "cht");
+  if(cheat.count() > 0 || fexists(fn)) {
+    cheat.save(fn);
+    cheat.clear();
+  }
 
   cart.loaded = false;
   return true;

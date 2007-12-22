@@ -1,4 +1,4 @@
-bsnes (TM) Open Source Reference License
+bsnes (TM) Reference License
 Copyright (C) 2004 - 2007 byuu
 All rights reserved
 
