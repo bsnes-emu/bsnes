@@ -1,10 +1,11 @@
 #include "../base.h"
 
+cothread_t co_active_ = 0;
+
 SNES     snes;
 BSXBase  bsxbase;
 BSXCart  bsxcart;
 BSXFlash bsxflash;
-SuperFX  superfx;
 SRTC     srtc;
 SDD1     sdd1;
 Cx4      cx4;
@@ -32,7 +33,6 @@ void SNES::init() {
   bsxbase.init();
   bsxcart.init();
   bsxflash.init();
-  superfx.init();
   srtc.init();
   sdd1.init();
   cx4.init();
@@ -66,7 +66,6 @@ void SNES::power() {
   if(cartridge.info.bsxbase)  bsxbase.power();
   if(cartridge.info.bsxcart)  bsxcart.power();
   if(cartridge.info.bsxflash) bsxflash.power();
-  if(cartridge.info.superfx)  superfx.power();
   if(cartridge.info.srtc)     srtc.power();
   if(cartridge.info.sdd1)     sdd1.power();
   if(cartridge.info.cx4)      cx4.power();
@@ -87,7 +86,6 @@ void SNES::power() {
   if(cartridge.info.bsxbase)  bsxbase.enable();
   if(cartridge.info.bsxcart)  bsxcart.enable();
   if(cartridge.info.bsxflash) bsxflash.enable();
-  if(cartridge.info.superfx)  superfx.enable();
   if(cartridge.info.srtc)     srtc.enable();
   if(cartridge.info.sdd1)     sdd1.enable();
   if(cartridge.info.cx4)      cx4.enable();
@@ -113,7 +111,6 @@ void SNES::reset() {
   if(cartridge.info.bsxbase)  bsxbase.reset();
   if(cartridge.info.bsxcart)  bsxcart.reset();
   if(cartridge.info.bsxflash) bsxflash.reset();
-  if(cartridge.info.superfx)  superfx.reset();
   if(cartridge.info.srtc)     srtc.reset();
   if(cartridge.info.sdd1)     sdd1.reset();
   if(cartridge.info.cx4)      cx4.reset();

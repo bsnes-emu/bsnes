@@ -6,17 +6,29 @@
 #ifndef BBASE_H
 #define BBASE_H
 
+#include <nall/stdint.hpp>
+typedef int8_t   int8;
+typedef int16_t  int16;
+typedef int32_t  int32;
+typedef int64_t  int64;
+typedef uint8_t  uint8;
+typedef uint16_t uint16;
+typedef uint32_t uint32;
+typedef uint64_t uint64;
+typedef unsigned int uint;
+
+#include <algorithm>
+using std::min;
+using std::max;
+
 #include <assert.h>
 #include <limits.h>
-#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
 #include <time.h>
 #include <math.h>
-
-#include <new>
 
 #if defined(_MSC_VER) || defined(__MINGW32__)
   #include <io.h>
@@ -71,22 +83,6 @@
 #endif
 
 /*****
- * typedefs
- *****/
-
-typedef unsigned int uint;
-
-typedef uint8_t  uint8;
-typedef uint16_t uint16;
-typedef uint32_t uint32;
-typedef uint64_t uint64;
-
-typedef int8_t   int8;
-typedef int16_t  int16;
-typedef int32_t  int32;
-typedef int64_t  int64;
-
-/*****
  * OS localization
  *****/
 
@@ -107,26 +103,6 @@ struct passwd *userinfo = getpwuid(getuid());
   return output;
 }
 #endif
-
-/*****
- * template classes
- *****/
-
-class noncopyable {
-protected:
-  noncopyable() {}
-  ~noncopyable() {}
-
-private:
-  noncopyable(const noncopyable&);
-  const noncopyable& operator=(const noncopyable&);
-};
-
-template<typename T>
-struct base_from_member {
-  T value;
-  base_from_member(T value_) : value(value_) {}
-};
 
 /*****
  * template functions
@@ -153,40 +129,8 @@ template<typename T> inline void safe_release(T &handle) {
   }
 }
 
-template<typename T> inline void swap(T &x, T &y) {
-T z = x;
-  x = y;
-  y = z;
-}
-
-#undef min
-#define min(x, y) (((x) < (y)) ? (x) : (y))
-
-#undef max
-#define max(x, y) (((x) > (y)) ? (x) : (y))
-
 template<int min, int max, typename T> inline T minmax(const T x) {
   return (x < (T)min) ? (T)min : (x > (T)max) ? (T)max : x;
-}
-
-template<int bits> inline unsigned uclamp(const unsigned x) {
-enum { y = (1U << bits) - 1 };
-  return y + ((x - y) & -(x < y)); //min(x, y);
-}
-
-template<int bits> inline unsigned uclip(const unsigned x) {
-enum { m = (1U << bits) - 1 };
-  return (x & m);
-}
-
-template<int bits> inline signed sclamp(const signed x) {
-enum { b = 1U << (bits - 1), m = (1U << (bits - 1)) - 1 };
-  return (x > m) ? m : (x < -b) ? -b : x;
-}
-
-template<int bits> inline signed sclip(const signed x) {
-enum { b = 1U << (bits - 1), m = (1U << bits) - 1 };
-  return ((x & m) ^ b) - b;
 }
 
 /*****
@@ -194,47 +138,48 @@ enum { b = 1U << (bits - 1), m = (1U << bits) - 1 };
  *****/
 
 #ifndef ARCH_MSB
-//little-endian: uint8[] { 0x01, 0x02, 0x03, 0x04 } = 0x04030201
-#define order_lsb2(a,b)             a,b
-#define order_lsb3(a,b,c)           a,b,c
-#define order_lsb4(a,b,c,d)         a,b,c,d
-#define order_lsb5(a,b,c,d,e)       a,b,c,d,e
-#define order_lsb6(a,b,c,d,e,f)     a,b,c,d,e,f
-#define order_lsb7(a,b,c,d,e,f,g)   a,b,c,d,e,f,g
-#define order_lsb8(a,b,c,d,e,f,g,h) a,b,c,d,e,f,g,h
-#define order_msb2(a,b)             b,a
-#define order_msb3(a,b,c)           c,b,a
-#define order_msb4(a,b,c,d)         d,c,b,a
-#define order_msb5(a,b,c,d,e)       e,d,c,b,a
-#define order_msb6(a,b,c,d,e,f)     f,e,d,c,b,a
-#define order_msb7(a,b,c,d,e,f,g)   g,f,e,d,c,b,a
-#define order_msb8(a,b,c,d,e,f,g,h) h,g,f,e,d,c,b,a
+//little-endian: uint8[] { 0x01, 0x02, 0x03, 0x04 } == 0x04030201
+  #define order_lsb2(a,b)             a,b
+  #define order_lsb3(a,b,c)           a,b,c
+  #define order_lsb4(a,b,c,d)         a,b,c,d
+  #define order_lsb5(a,b,c,d,e)       a,b,c,d,e
+  #define order_lsb6(a,b,c,d,e,f)     a,b,c,d,e,f
+  #define order_lsb7(a,b,c,d,e,f,g)   a,b,c,d,e,f,g
+  #define order_lsb8(a,b,c,d,e,f,g,h) a,b,c,d,e,f,g,h
+  #define order_msb2(a,b)             b,a
+  #define order_msb3(a,b,c)           c,b,a
+  #define order_msb4(a,b,c,d)         d,c,b,a
+  #define order_msb5(a,b,c,d,e)       e,d,c,b,a
+  #define order_msb6(a,b,c,d,e,f)     f,e,d,c,b,a
+  #define order_msb7(a,b,c,d,e,f,g)   g,f,e,d,c,b,a
+  #define order_msb8(a,b,c,d,e,f,g,h) h,g,f,e,d,c,b,a
 #else
-//big-endian:    uint8[] { 0x01, 0x02, 0x03, 0x04 } = 0x01020304
-#define order_lsb2(a,b)             b,a
-#define order_lsb3(a,b,c)           c,b,a
-#define order_lsb4(a,b,c,d)         d,c,b,a
-#define order_lsb5(a,b,c,d,e)       e,d,c,b,a
-#define order_lsb6(a,b,c,d,e,f)     f,e,d,c,b,a
-#define order_lsb7(a,b,c,d,e,f,g)   g,f,e,d,c,b,a
-#define order_lsb8(a,b,c,d,e,f,g,h) h,g,f,e,d,c,b,a
-#define order_msb2(a,b)             a,b
-#define order_msb3(a,b,c)           a,b,c
-#define order_msb4(a,b,c,d)         a,b,c,d
-#define order_msb5(a,b,c,d,e)       a,b,c,d,e
-#define order_msb6(a,b,c,d,e,f)     a,b,c,d,e,f
-#define order_msb7(a,b,c,d,e,f,g)   a,b,c,d,e,f,g
-#define order_msb8(a,b,c,d,e,f,g,h) a,b,c,d,e,f,g,h
+//big-endian:    uint8[] { 0x01, 0x02, 0x03, 0x04 } == 0x01020304
+  #define order_lsb2(a,b)             b,a
+  #define order_lsb3(a,b,c)           c,b,a
+  #define order_lsb4(a,b,c,d)         d,c,b,a
+  #define order_lsb5(a,b,c,d,e)       e,d,c,b,a
+  #define order_lsb6(a,b,c,d,e,f)     f,e,d,c,b,a
+  #define order_lsb7(a,b,c,d,e,f,g)   g,f,e,d,c,b,a
+  #define order_lsb8(a,b,c,d,e,f,g,h) h,g,f,e,d,c,b,a
+  #define order_msb2(a,b)             a,b
+  #define order_msb3(a,b,c)           a,b,c
+  #define order_msb4(a,b,c,d)         a,b,c,d
+  #define order_msb5(a,b,c,d,e)       a,b,c,d,e
+  #define order_msb6(a,b,c,d,e,f)     a,b,c,d,e,f
+  #define order_msb7(a,b,c,d,e,f,g)   a,b,c,d,e,f,g
+  #define order_msb8(a,b,c,d,e,f,g,h) a,b,c,d,e,f,g,h
 #endif
 
 /*****
  * libc extensions
  *****/
 
-//static uint random() {
-//static uint n = 0;
-//  return n = (n >> 1) ^ (((n & 1) - 1) & 0xedb88320);
-//}
+//pseudo-random number generator
+static uint prng() {
+static uint n = 0;
+  return n = (n >> 1) ^ (((n & 1) - 1) & 0xedb88320);
+}
 
 static uint64 fget(FILE *fp, uint length = 1) {
 uint64 data = 0;
@@ -283,7 +228,6 @@ static int fresize(FILE *fp, long size) {
 
 /*****
  * crc32 calculation
- * TODO: create libhash and move this code there
  *****/
 
 const uint32 crc32_table[256] = {

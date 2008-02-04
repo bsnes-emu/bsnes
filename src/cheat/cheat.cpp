@@ -16,7 +16,7 @@ string t, part;
   if(strlen(t) == 8 || (strlen(t) == 9 && t()[6] == ':')) {
     type = CT_PRO_ACTION_REPLAY;
     replace(t, ":", "");
-  uint32 r = strhex(t);
+  uint32 r = strhex((const char*)t);
     addr = r >> 8;
     data = r & 0xff;
     return true;
@@ -24,7 +24,7 @@ string t, part;
     type = CT_GAME_GENIE;
     replace(t, "-", "");
     strtr(t, "df4709156bc8a23e", "0123456789abcdef");
-  uint32 r = strhex(t);
+  uint32 r = strhex((const char*)t);
   //8421 8421 8421 8421 8421 8421
   //abcd efgh ijkl mnop qrst uvwx
   //ijkl qrst opab cduv wxef ghmn

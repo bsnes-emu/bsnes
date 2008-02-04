@@ -31,7 +31,7 @@ char* Cartridge::get_save_filename(const char *source, const char *extension) {
   if(config::path.save != "") {
   lstring part;
     split(part, "/", savefn);
-  string fn = config::path.save();
+  string fn = (const char*)config::path.save;
     if(strend(fn, "/") == false) strcat(fn, "/");
     strcat(fn, part[count(part) - 1]);
     strcpy(savefn, fn);

@@ -1,47 +1,46 @@
 namespace config {
 
-extern Config& config();
+extern configuration& config();
 
 string file_updatepath(const char *, const char *);
 
 extern struct Path {
-  static StringSetting base, rom, save;
-  static StringSetting bsx, st;
+  static string_setting base, rom, save;
+  static string_setting bsx, st;
 } path;
 
 extern struct SNES {
-  static IntegerSetting gamma_ramp, sepia, grayscale, invert, contrast, brightness, gamma;
-  static IntegerSetting ntsc_merge_fields;
-  static IntegerSetting mute;
-  static IntegerSetting controller_port0;
-  static IntegerSetting controller_port1;
+  static integral_setting gamma_ramp, sepia, grayscale, invert, contrast, brightness, gamma;
+  static integral_setting ntsc_merge_fields;
+  static integral_setting controller_port0;
+  static integral_setting controller_port1;
 } snes;
 
 extern struct CPU {
-  static IntegerSetting ntsc_clock_rate, pal_clock_rate;
-  static IntegerSetting wram_init_value;
-  static IntegerSetting hdma_enable;
+  static integral_setting ntsc_clock_rate, pal_clock_rate;
+  static integral_setting wram_init_value;
+  static integral_setting hdma_enable;
 } cpu;
 
 extern struct SMP {
-  static IntegerSetting ntsc_clock_rate, pal_clock_rate;
+  static integral_setting ntsc_clock_rate, pal_clock_rate;
 } smp;
 
 extern struct PPU {
   struct Hack {
-    static IntegerSetting render_scanline_position;
-    static IntegerSetting obj_cache;
-    static IntegerSetting oam_address_invalidation;
-    static IntegerSetting cgram_address_invalidation;
+    static integral_setting render_scanline_position;
+    static integral_setting obj_cache;
+    static integral_setting oam_address_invalidation;
+    static integral_setting cgram_address_invalidation;
   } hack;
 
-  static IntegerSetting opt_enable;
-  static IntegerSetting bg1_pri0_enable, bg1_pri1_enable;
-  static IntegerSetting bg2_pri0_enable, bg2_pri1_enable;
-  static IntegerSetting bg3_pri0_enable, bg3_pri1_enable;
-  static IntegerSetting bg4_pri0_enable, bg4_pri1_enable;
-  static IntegerSetting oam_pri0_enable, oam_pri1_enable;
-  static IntegerSetting oam_pri2_enable, oam_pri3_enable;
+  static integral_setting opt_enable;
+  static integral_setting bg1_pri0_enable, bg1_pri1_enable;
+  static integral_setting bg2_pri0_enable, bg2_pri1_enable;
+  static integral_setting bg3_pri0_enable, bg3_pri1_enable;
+  static integral_setting bg4_pri0_enable, bg4_pri1_enable;
+  static integral_setting oam_pri0_enable, oam_pri1_enable;
+  static integral_setting oam_pri2_enable, oam_pri3_enable;
 } ppu;
 
 };

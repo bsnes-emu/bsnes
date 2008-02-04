@@ -1,5 +1,5 @@
 bsnes
-Version 0.027
+Version: 0.028
 Author: byuu
 
 --------
@@ -12,12 +12,6 @@ The latest version can be downloaded from:
 http://byuu.org/
 
 Please see license.txt for important licensing information.
-
---------------
-Shortcut Keys:
---------------
-Esc - Toggle menubar visibility
-F11 - Toggle fullscreen mode
 
 ------------------
 Known Limitations:

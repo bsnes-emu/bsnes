@@ -10,11 +10,11 @@ SNESInterface snesinterface;
 //video
 
 bool SNESInterface::video_lock(uint16 *&data, uint &pitch) {
-  return uiVideo->lock(data, pitch);
+  return video.lock(data, pitch);
 }
 
 void SNESInterface::video_unlock() {
-  uiVideo->unlock();
+  video.unlock();
 }
 
 static uint frameskip_counter = 0;
@@ -23,7 +23,7 @@ void SNESInterface::video_refresh() {
   if(ppu.renderer_enabled() == true) {
   SNES::video_info vi;
     snes.get_video_info(&vi);
-    uiVideo->refresh(vi.width, vi.height);
+    video.refresh(vi.width, vi.height);
   }
 
   frameskip_counter++;
@@ -34,16 +34,20 @@ void SNESInterface::video_refresh() {
 //audio
 
 void SNESInterface::audio_sample(uint16 l_sample, uint16 r_sample) {
-  uiAudio->sample(l_sample, r_sample);
+  if(config::audio.mute == true) {
+    l_sample = 0;
+    r_sample = 0;
+  }
+  audio.sample(l_sample, r_sample);
 }
 
 //input
 
 void SNESInterface::input_poll() {
   if(input_ready && input_ready() == false) {
-    uiInput->clear_input();
+    input.clear();
   } else {
-    uiInput->poll();
+    input.poll();
   }
   input_manager.poll();
 }

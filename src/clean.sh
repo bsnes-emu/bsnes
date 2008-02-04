@@ -1,1 +1,1 @@
-make PLATFORM=x-gcc-x86 clean
+make platform=x compiler=gcc clean

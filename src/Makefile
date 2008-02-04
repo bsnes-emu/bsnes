@@ -1,333 +1,303 @@
-######################
-### bsnes makefile ###
-######################
+include lib/nall/Makefile.string
 
-ifeq ($(PLATFORM),)
-null_: help
+prefix = /usr/local
+arch = ARCH_LSB
+
+################
+### compiler ###
+################
+
+ifneq ($(findstring gcc,$(compiler)),) # GCC family
+  flags = -O3 -fomit-frame-pointer -Ilib
+  c = $(compiler) $(flags)
+  cpp = $(subst cc,++,$(compiler)) $(flags)
+  obj = o
+  rule = -c $< -o $@
+  link =
+  mkbin = -o$1
+  mkdef = -D$1
+  mklib = -l$1
+else ifeq ($(compiler),cl) # Visual C++
+  flags = /nologo /wd4355 /wd4996 /O2 /EHsc /Ilib
+  c = cl $(flags)
+  cpp = cl $(flags)
+  obj = obj
+  rule = /c $< /Fo$@
+  link = /link
+  mkbin = /Fe$1
+  mkdef = /D$1
+  mklib = $1.lib
+else
+  unknown_compiler: help;
 endif
 
-##################################
-### platform-specific settings ###
-##################################
+##########
+### os ###
+##########
 
-PREFIX = /usr/local
-
-ifeq ($(PLATFORM),x-gcc-x86)
-OS = unix
-CC = gcc
-CFLAGS = -O3 -fomit-frame-pointer -DPLATFORM_X -DCOMPILER_GCC -DPROCESSOR_X86 -DUI_MIU `pkg-config --cflags gtk+-2.0`
-AS = yasm
-ASFLAGS = -f elf
-LIBS = `pkg-config --libs gtk+-2.0` -lXv -lao
-LIBCO = libco.x86
-MIU = miu.gtk
-VAI = video.xv.$(OBJ) video.gtk.$(OBJ) audio.ao.$(OBJ) input.x.$(OBJ)
+ifeq ($(platform),x) # X11
+  ruby = video.glx video.xv video.sdl audio.openal audio.oss audio.ao input.sdl input.x
+  arch += PLATFORM_X
+  link += `pkg-config --libs gtk+-2.0`
+  delete = rm -f $1
+else ifeq ($(platform),win) # Windows
+  ruby = video.direct3d video.directdraw video.gdi audio.directsound input.directinput
+  arch += PLATFORM_WIN
+  link += $(if $(findstring mingw,$(compiler)),-mwindows)
+  link += $(call mklib,uuid)
+  link += $(call mklib,kernel32)
+  link += $(call mklib,user32)
+  link += $(call mklib,gdi32)
+  link += $(call mklib,shell32)
+  link += $(call mklib,winmm)
+  link += $(call mklib,comdlg32)
+  link += $(call mklib,comctl32)
+  delete = $(if $(findstring i586-mingw-gcc,$(compiler)),rm -f $1,del $(subst /,\,$1))
+else
+  unknown_platform: help;
 endif
 
-ifeq ($(PLATFORM),x-gcc-x86-64)
-OS = unix
-CC = gcc
-CFLAGS = -O3 -fomit-frame-pointer -DPLATFORM_X -DCOMPILER_GCC -DPROCESSOR_X86_64 -DUI_MIU `pkg-config --cflags gtk+-2.0`
-AS = yasm
-ASFLAGS = -f elf64
-LIBS = `pkg-config --libs gtk+-2.0` -lXv -lao
-LIBCO = libco.x86-64
-MIU = miu.gtk
-VAI = video.xv.$(OBJ) video.gtk.$(OBJ) audio.ao.$(OBJ) input.x.$(OBJ)
-endif
+############
+### ruby ###
+############
 
-ifeq ($(PLATFORM),win-mingw-x86)
-OS = win
-CC = mingw32-gcc
-CFLAGS = -mwindows -O3 -fomit-frame-pointer -DPLATFORM_WIN -DCOMPILER_GCC -DPROCESSOR_X86 -DUI_MIU
-AS = nasm
-ASFLAGS = -f win32 -DWIN
-LIBS = -ld3d9 -lddraw -ldsound -ldinput8 -ldxguid -luuid -lkernel32 -luser32 -lgdi32 -lshell32 -lwinmm -lcomdlg32 -lcomctl32
-LIBCO = libco.x86
-MIU = miu.win
-VAI = video.direct3d.$(OBJ) video.directdraw.$(OBJ) video.gdi.$(OBJ) audio.directsound.$(OBJ) input.directinput.$(OBJ)
-endif
-
-ifeq ($(PLATFORM),win-visualc-x86)
-OS = win
-CC = cl
-CFLAGS = /nologo /wd4996 /O2 /EHsc /DPLATFORM_WIN /DCOMPILER_VISUALC /DPROCESSOR_X86 /DUI_MIU
-AS = nasm
-ASFLAGS = -f win32 -DWIN
-LIBS = d3d9.lib ddraw.lib dsound.lib dinput8.lib dxguid.lib kernel32.lib user32.lib gdi32.lib shell32.lib winmm.lib comdlg32.lib comctl32.lib
-LIBCO = libco.x86
-MIU = miu.win
-VAI = video.direct3d.$(OBJ) video.directdraw.$(OBJ) video.gdi.$(OBJ) audio.directsound.$(OBJ) input.directinput.$(OBJ)
-endif
-
-#####################################
-### compiler / assembler switches ###
-#####################################
-
-ifeq ($(CC),gcc)
-OUT = -obsnes
-CPP = g++
-OBJ = o
-CARGS = -c $< -o $@
-DEFINE = -D
-endif
-
-ifeq ($(CC),mingw32-gcc)
-OUT = -obsnes
-CPP = mingw32-g++
-OBJ = o
-CARGS = -c $< -o $@
-DEFINE = -D
-endif
-
-ifeq ($(CC),cl)
-OUT = /Febsnes
-CPP = cl
-OBJ = obj
-CARGS = /c $< /Fo$@
-DEFINE = /D
-endif
-
-ifeq ($(AS),nasm)
-ASARGS = $< -o $@
-endif
-
-ifeq ($(AS),yasm)
-ASARGS = $< -o $@
-endif
-
-###################
-### OS switches ###
-###################
-
-ifeq ($(OS),unix)
-RM = rm -f
-endif
-
-ifeq ($(OS),win)
-OUT := $(OUT).exe
-RM = del
-endif
+link += $(if $(findstring video.direct3d,$(ruby)),$(call mklib,d3d9))
+link += $(if $(findstring video.directdraw,$(ruby)),$(call mklib,ddraw))
+link += $(if $(findstring video.glx,$(ruby)),$(call mklib,GL))
+link += $(if $(findstring video.xv,$(ruby)),$(call mklib,Xv))
+link += $(if $(findstring audio.ao,$(ruby)),$(call mklib,ao))
+link += $(if $(findstring audio.directsound,$(ruby)),$(call mklib,dsound))
+link += $(if $(findstring audio.openal,$(ruby)),$(call mklib,openal) $(call mklib,alut))
+link += $(if $(findstring input.directinput,$(ruby)),$(call mklib,dinput8) $(call mklib,dxguid))
+link += $(if $(findstring input.sdl,$(ruby)),`sdl-config --libs`)
 
 ####################################
 ### main target and dependencies ###
 ####################################
 
-OBJECTS = main.$(OBJ) $(LIBCO).$(OBJ) $(MIU).$(OBJ) $(VAI) bstring.$(OBJ) \
-  reader.$(OBJ) cart.$(OBJ) cheat.$(OBJ) memory.$(OBJ) smemory.$(OBJ) \
-  cpu.$(OBJ) scpu.$(OBJ) smp.$(OBJ) ssmp.$(OBJ) bdsp.$(OBJ) ppu.$(OBJ) \
-  bppu.$(OBJ) snes.$(OBJ) bsx.$(OBJ) superfx.$(OBJ) srtc.$(OBJ) \
-  sdd1.$(OBJ) cx4.$(OBJ) dsp1.$(OBJ) dsp2.$(OBJ) dsp3.$(OBJ) dsp4.$(OBJ) \
-  obc1.$(OBJ) st010.$(OBJ)
+objects = main libco hiro ruby $(ruby) string reader cart cheat \
+  memory smemory cpu scpu smp ssmp bdsp ppu bppu snes \
+  bsx srtc sdd1 cx4 dsp1 dsp2 dsp3 dsp4 obc1 st010
 
-ifeq ($(GZIP_SUPPORT),true)
-  OBJECTS += adler32.$(OBJ) compress.$(OBJ) crc32.$(OBJ) deflate.$(OBJ) \
-    gzio.$(OBJ) inffast.$(OBJ) inflate.$(OBJ) inftrees.$(OBJ) ioapi.$(OBJ) \
-    trees.$(OBJ) unzip.$(OBJ) zip.$(OBJ) zutil.$(OBJ)
-  CFLAGS += $(DEFINE)GZIP_SUPPORT
+ifeq ($(enable_gzip),true)
+  objects += adler32 compress crc32 deflate gzio inffast inflate inftrees ioapi trees unzip zip zutil
+  flags += $(call mkdef,GZIP_SUPPORT)
 endif
 
-ifeq ($(JMA_SUPPORT),true)
-  OBJECTS += jma.$(OBJ) jcrc32.$(OBJ) lzmadec.$(OBJ) 7zlzma.$(OBJ) \
-    iiostrm.$(OBJ) inbyte.$(OBJ) lzma.$(OBJ) winout.$(OBJ)
-  CFLAGS += $(DEFINE)JMA_SUPPORT
+ifeq ($(enable_jma),true)
+  objects += jma jcrc32 lzmadec 7zlzma iiostrm inbyte lzma winout
+  flags += $(call mkdef,JMA_SUPPORT)
 endif
 
-ifeq ($(OS),win)
-  ifeq ($(CC),cl)
-    OBJECTS += bsnes.res
-  endif
-  ifeq ($(CC),mingw32-gcc)
-    OBJECTS += bsnesrc.o
+arch := $(patsubst %,$(call mkdef,%),$(arch))
+objects := $(patsubst %,obj/%.$(obj),$(objects))
+rubydef := $(foreach c,$(subst .,_,$(call strupper,$(ruby))),$(call mkdef,$c))
+
+# Windows resource file
+ifeq ($(platform),win)
+  ifeq ($(compiler),cl)
+    objects += obj/bsnes.res
+  else ifneq ($(findstring gcc,$(compiler)),)
+    objects += obj/bsnesrc.$(obj)
   endif
 endif
 
-all: $(OBJECTS)
-	$(CPP) $(OUT) $(CFLAGS) $(OBJECTS) $(LIBS) $(LINK)
+################
+### implicit ###
+################
 
-######################
-### implicit rules ###
-######################
+compile = \
+  $(strip \
+    $(if $(filter %.c,$<), \
+      $(c) $1 $(rule), \
+      $(if $(filter %.cpp,$<), \
+        $(cpp) $1 $(rule) \
+      ) \
+    ) \
+  )
 
-%.$(OBJ): $<
-	$(if $(filter %.asm,$<),$(AS) $(ASFLAGS) $(ASARGS))
-	$(if $(filter %.s,$<),$(AS) $(ASFLAGS) $(ASARGS))
-	$(if $(filter %.c,$<),$(CC) $(CFLAGS) $(CARGS))
-	$(if $(filter %.cpp,$<),$(CPP) $(CFLAGS) $(CARGS))
+%.$(obj): $<; $(call compile)
+
+all: build;
 
 ############
 ### main ###
 ############
 
-main.$(OBJ): ui/main.cpp config/* \
-ui/* ui/vai/* \
-ui/miu/* ui/miu/loader/* ui/miu/settings/*
+obj/main.$(obj): ui/main.cpp config/* lib/nall/* lib/ruby/* ui/* ui/loader/* ui/settings/*
+	$(call compile,$(arch))
 
-bsnes.res: ui/bsnes.rc ; rc /r /fobsnes.res ui/bsnes.rc
-bsnesrc.o: ui/bsnes.rc ; windres -I data ui/bsnes.rc bsnesrc.o
+obj/bsnes.res     : ui/bsnes.rc; rc /r /foobj/bsnes.res ui/bsnes.rc
+obj/bsnesrc.$(obj): ui/bsnes.rc; windres -I data ui/bsnes.rc obj/bsnesrc.$(obj)
 
-##########
-### ui ###
-##########
+############
+### ruby ###
+############
 
-video.direct3d.$(OBJ)   : ui/vai/video/video.direct3d.cpp ui/vai/video/*
-video.directdraw.$(OBJ) : ui/vai/video/video.directdraw.cpp ui/vai/video/*
-video.gdi.$(OBJ)        : ui/vai/video/video.gdi.cpp ui/vai/video/*
-video.gtk.$(OBJ)        : ui/vai/video/video.gtk.cpp ui/vai/video/*
-video.xv.$(OBJ)         : ui/vai/video/video.xv.cpp ui/vai/video/*
-audio.ao.$(OBJ)         : ui/vai/audio/audio.ao.cpp ui/vai/audio/*
-audio.directsound.$(OBJ): ui/vai/audio/audio.directsound.cpp ui/vai/audio/*
-input.directinput.$(OBJ): ui/vai/input/input.directinput.cpp ui/vai/input/*
-input.x.$(OBJ)          : ui/vai/input/input.x.cpp ui/vai/input/*
+obj/ruby.$(obj)             : lib/ruby/ruby.cpp lib/ruby/*
+	$(call compile,$(rubydef))
+obj/video.direct3d.$(obj)   : lib/ruby/video/direct3d.cpp lib/ruby/video/direct3d.*
+obj/video.directdraw.$(obj) : lib/ruby/video/directdraw.cpp lib/ruby/video/directdraw.*
+obj/video.gdi.$(obj)        : lib/ruby/video/gdi.cpp lib/ruby/video/gdi.*
+obj/video.glx.$(obj)        : lib/ruby/video/glx.cpp lib/ruby/video/glx.*
+obj/video.sdl.$(obj)        : lib/ruby/video/sdl.cpp lib/ruby/video/sdl.*
+	$(call compile,`sdl-config --cflags`)
+obj/video.xv.$(obj)         : lib/ruby/video/xv.cpp lib/ruby/video/xv.*
+obj/audio.ao.$(obj)         : lib/ruby/audio/ao.cpp lib/ruby/audio/ao.*
+obj/audio.directsound.$(obj): lib/ruby/audio/directsound.cpp lib/ruby/audio/directsound.*
+obj/audio.openal.$(obj)     : lib/ruby/audio/openal.cpp lib/ruby/audio/openal.*
+obj/audio.oss.$(obj)        : lib/ruby/audio/oss.cpp lib/ruby/audio/oss.*
+obj/input.directinput.$(obj): lib/ruby/input/directinput.cpp lib/ruby/input/directinput.*
+obj/input.sdl.$(obj)        : lib/ruby/input/sdl.cpp lib/ruby/input/sdl.*
+	$(call compile,`sdl-config --cflags`)
+obj/input.x.$(obj)          : lib/ruby/input/x.cpp lib/ruby/input/x.*
 
-#############
-### libco ###
-#############
+############
+### hiro ###
+############
 
-libco.x86.$(OBJ)   : lib/libco/libco.x86.asm lib/libco/*
-libco.x86-64.$(OBJ): lib/libco/libco.x86-64.asm lib/libco/*
-libco.pcc.$(OBJ)   : lib/libco/libco.ppc.s lib/libco/*
-libco.ppc64.$(OBJ) : lib/libco/libco.ppc64.s lib/libco/*
-
-###########
-### miu ###
-###########
-
-miu.gtk.$(OBJ): lib/miu.gtk/miu.gtk.cpp lib/miu.gtk/*
-miu.win.$(OBJ): lib/miu.win/miu.win.cpp lib/miu.win/*
+obj/hiro.$(obj): lib/hiro.cpp lib/hiro.* lib/hiro_gtk/* lib/hiro_win/*
+	$(call compile,$(if $(call streq,$(platform),x),`pkg-config --cflags gtk+-2.0`))
 
 #################
 ### libraries ###
 #################
 
-bstring.$(OBJ): lib/bstring.cpp lib/*
+obj/libco.$(obj): lib/libco.c lib/libco.* lib/libco/*
+obj/string.$(obj): lib/nall/string.cpp lib/nall/*
 
 #################
 ### utilities ###
 #################
 
-reader.$(OBJ): reader/reader.cpp reader/*
-cart.$(OBJ)  : cart/cart.cpp cart/*
-cheat.$(OBJ) : cheat/cheat.cpp cheat/*
+obj/reader.$(obj): reader/reader.cpp reader/*
+obj/cart.$(obj)  : cart/cart.cpp cart/*
+obj/cheat.$(obj) : cheat/cheat.cpp cheat/*
 
 ##############
 ### memory ###
 ##############
 
-memory.$(OBJ) : memory/memory.cpp memory/*
-bmemory.$(OBJ): memory/bmemory/bmemory.cpp memory/bmemory/* memory/bmemory/mapper/*
-smemory.$(OBJ): memory/smemory/smemory.cpp memory/smemory/* memory/smemory/mapper/*
+obj/memory.$(obj) : memory/memory.cpp memory/*
+obj/bmemory.$(obj): memory/bmemory/bmemory.cpp memory/bmemory/* memory/bmemory/mapper/*
+obj/smemory.$(obj): memory/smemory/smemory.cpp memory/smemory/* memory/smemory/mapper/*
 
 ###########
 ### cpu ###
 ###########
 
-cpu.$(OBJ) : cpu/cpu.cpp cpu/*
-scpu.$(OBJ): cpu/scpu/scpu.cpp cpu/scpu/* cpu/scpu/core/* cpu/scpu/dma/* cpu/scpu/memory/* cpu/scpu/mmio/* cpu/scpu/timing/*
+obj/cpu.$(obj) : cpu/cpu.cpp cpu/*
+obj/scpu.$(obj): cpu/scpu/scpu.cpp cpu/scpu/* cpu/scpu/core/* cpu/scpu/dma/* cpu/scpu/memory/* cpu/scpu/mmio/* cpu/scpu/timing/*
 
 ###########
 ### smp ###
 ###########
 
-smp.$(OBJ) : smp/smp.cpp smp/*
-ssmp.$(OBJ): smp/ssmp/ssmp.cpp smp/ssmp/* smp/ssmp/core/* smp/ssmp/memory/* smp/ssmp/timing/*
+obj/smp.$(obj) : smp/smp.cpp smp/*
+obj/ssmp.$(obj): smp/ssmp/ssmp.cpp smp/ssmp/* smp/ssmp/core/* smp/ssmp/memory/* smp/ssmp/timing/*
 
 ###########
 ### dsp ###
 ###########
 
-adsp.$(OBJ): dsp/adsp/adsp.cpp dsp/adsp/*
-bdsp.$(OBJ): dsp/bdsp/bdsp.cpp dsp/bdsp/*
+obj/adsp.$(obj): dsp/adsp/adsp.cpp dsp/adsp/*
+obj/bdsp.$(obj): dsp/bdsp/bdsp.cpp dsp/bdsp/*
 
 ###########
 ### ppu ###
 ###########
 
-ppu.$(OBJ) : ppu/ppu.cpp ppu/*
-bppu.$(OBJ): ppu/bppu/bppu.cpp ppu/bppu/*
+obj/ppu.$(obj) : ppu/ppu.cpp ppu/*
+obj/bppu.$(obj): ppu/bppu/bppu.cpp ppu/bppu/*
 
 ############
 ### snes ###
 ############
 
-snes.$(OBJ): snes/snes.cpp snes/* snes/scheduler/* snes/video/* snes/audio/* snes/input/*
+obj/snes.$(obj): snes/snes.cpp snes/* snes/scheduler/* snes/video/* snes/audio/* snes/input/*
 
 #####################
 ### special chips ###
 #####################
 
-bsx.$(OBJ)    : chip/bsx/bsx.cpp chip/bsx/*
-superfx.$(OBJ): chip/superfx/superfx.cpp chip/superfx/* chip/superfx/core/* chip/superfx/memory/*
-srtc.$(OBJ)   : chip/srtc/srtc.cpp chip/srtc/*
-sdd1.$(OBJ)   : chip/sdd1/sdd1.cpp chip/sdd1/*
-cx4.$(OBJ)    : chip/cx4/cx4.cpp chip/cx4/*
-dsp1.$(OBJ)   : chip/dsp1/dsp1.cpp chip/dsp1/*
-dsp2.$(OBJ)   : chip/dsp2/dsp2.cpp chip/dsp2/*
-dsp3.$(OBJ)   : chip/dsp3/dsp3.cpp chip/dsp3/*
-dsp4.$(OBJ)   : chip/dsp4/dsp4.cpp chip/dsp4/*
-obc1.$(OBJ)   : chip/obc1/obc1.cpp chip/obc1/*
-st010.$(OBJ)  : chip/st010/st010.cpp chip/st010/*
+obj/bsx.$(obj)  : chip/bsx/bsx.cpp chip/bsx/*
+obj/srtc.$(obj) : chip/srtc/srtc.cpp chip/srtc/*
+obj/sdd1.$(obj) : chip/sdd1/sdd1.cpp chip/sdd1/*
+obj/cx4.$(obj)  : chip/cx4/cx4.cpp chip/cx4/*
+obj/dsp1.$(obj) : chip/dsp1/dsp1.cpp chip/dsp1/*
+obj/dsp2.$(obj) : chip/dsp2/dsp2.cpp chip/dsp2/*
+obj/dsp3.$(obj) : chip/dsp3/dsp3.cpp chip/dsp3/*
+obj/dsp4.$(obj) : chip/dsp4/dsp4.cpp chip/dsp4/*
+obj/obc1.$(obj) : chip/obc1/obc1.cpp chip/obc1/*
+obj/st010.$(obj): chip/st010/st010.cpp chip/st010/*
 
 ############
 ### zlib ###
 ############
 
-adler32.$(OBJ) : reader/zlib/adler32.c reader/zlib/*
-compress.$(OBJ): reader/zlib/compress.c reader/zlib/*
-crc32.$(OBJ)   : reader/zlib/crc32.c reader/zlib/*
-deflate.$(OBJ) : reader/zlib/deflate.c reader/zlib/*
-gzio.$(OBJ)    : reader/zlib/gzio.c reader/zlib/*
-inffast.$(OBJ) : reader/zlib/inffast.c reader/zlib/*
-inflate.$(OBJ) : reader/zlib/inflate.c reader/zlib/*
-inftrees.$(OBJ): reader/zlib/inftrees.c reader/zlib/*
-ioapi.$(OBJ)   : reader/zlib/ioapi.c reader/zlib/*
-trees.$(OBJ)   : reader/zlib/trees.c reader/zlib/*
-unzip.$(OBJ)   : reader/zlib/unzip.c reader/zlib/*
-zip.$(OBJ)     : reader/zlib/zip.c reader/zlib/*
-zutil.$(OBJ)   : reader/zlib/zutil.c reader/zlib/*
+obj/adler32.$(obj) : reader/zlib/adler32.c reader/zlib/*
+obj/compress.$(obj): reader/zlib/compress.c reader/zlib/*
+obj/crc32.$(obj)   : reader/zlib/crc32.c reader/zlib/*
+obj/deflate.$(obj) : reader/zlib/deflate.c reader/zlib/*
+obj/gzio.$(obj)    : reader/zlib/gzio.c reader/zlib/*
+obj/inffast.$(obj) : reader/zlib/inffast.c reader/zlib/*
+obj/inflate.$(obj) : reader/zlib/inflate.c reader/zlib/*
+obj/inftrees.$(obj): reader/zlib/inftrees.c reader/zlib/*
+obj/ioapi.$(obj)   : reader/zlib/ioapi.c reader/zlib/*
+obj/trees.$(obj)   : reader/zlib/trees.c reader/zlib/*
+obj/unzip.$(obj)   : reader/zlib/unzip.c reader/zlib/*
+obj/zip.$(obj)     : reader/zlib/zip.c reader/zlib/*
+obj/zutil.$(obj)   : reader/zlib/zutil.c reader/zlib/*
 
 ###########
 ### jma ###
 ###########
 
-jma.$(OBJ)    : reader/jma/jma.cpp reader/jma/*
-jcrc32.$(OBJ) : reader/jma/jcrc32.cpp reader/jma/*
-lzmadec.$(OBJ): reader/jma/lzmadec.cpp reader/jma/*
-7zlzma.$(OBJ) : reader/jma/7zlzma.cpp reader/jma/*
-iiostrm.$(OBJ): reader/jma/iiostrm.cpp reader/jma/*
-inbyte.$(OBJ) : reader/jma/inbyte.cpp reader/jma/*
-lzma.$(OBJ)   : reader/jma/lzma.cpp reader/jma/*
-winout.$(OBJ) : reader/jma/winout.cpp reader/jma/*
+obj/jma.$(obj)    : reader/jma/jma.cpp reader/jma/*
+obj/jcrc32.$(obj) : reader/jma/jcrc32.cpp reader/jma/*
+obj/lzmadec.$(obj): reader/jma/lzmadec.cpp reader/jma/*
+obj/7zlzma.$(obj) : reader/jma/7zlzma.cpp reader/jma/*
+obj/iiostrm.$(obj): reader/jma/iiostrm.cpp reader/jma/*
+obj/inbyte.$(obj) : reader/jma/inbyte.cpp reader/jma/*
+obj/lzma.$(obj)   : reader/jma/lzma.cpp reader/jma/*
+obj/winout.$(obj) : reader/jma/winout.cpp reader/jma/*
 
-####################
-### misc targets ###
-####################
+###############
+### targets ###
+###############
+
+build: $(objects)
+	$(strip $(cpp) $(call mkbin,../bsnes) $(objects) $(link))
 
 install:
-	install -m 775 bsnes $(PREFIX)/bin/bsnes
-	install -m 775 data/bsnes.png $(PREFIX)/share/icons/bsnes.png
+	install -m 755 ../bsnes $(prefix)/bin/bsnes
+	install -m 644 data/bsnes.png $(prefix)/share/icons/bsnes.png
 
 clean:
-	-@$(RM) *.$(OBJ)
-	-@$(RM) *.res
-	-@$(RM) *.pgd
-	-@$(RM) *.pgc
-	-@$(RM) *.ilk
-	-@$(RM) *.pdb
-	-@$(RM) *.manifest
+	-@$(call delete,obj/*.$(obj))
+	-@$(call delete,*.res)
+	-@$(call delete,*.pgd)
+	-@$(call delete,*.pgc)
+	-@$(call delete,*.ilk)
+	-@$(call delete,*.pdb)
+	-@$(call delete,*.manifest)
 
 help:
-	@echo "Usage: $(MAKE) PLATFORM=platform [options]"
+	@echo "Usage: $(MAKE) platform=(os) compiler=(cc) [options]"
 	@echo ""
-	@echo "Available platform targets:"
-	@echo "  x-gcc-x86       - Linux / BSD (x86) (requires yasm)"
-	@echo "  x-gcc-x86-64    - Linux / BSD (x86-64) (requires yasm)"
-	@echo "  win-mingw-x86   - Windows (x86) (requires nasm)"
-	@echo "  win-visualc-x86 - Windows (x86) (requires nasm)"
+	@echo "Supported platforms:"
+	@echo "  x   - Linux / BSD (x86, x86-64)"
+	@echo "  win - Windows (x86, x86-64)"
+	@echo ""
+	@echo "Supported compilers:"
+	@echo "  gcc              - GCC compiler"
+	@echo "  mingw32-gcc      - MinGW compiler"
+	@echo "  i586-mingw32-gcc - MinGW cross compiler"
+	@echo "  cl               - Visual C++"
 	@echo ""
 	@echo "Available options:"
-	@echo "  GZIP_SUPPORT=[true|false] - Enable ZIP / GZ support (default=false)"
-	@echo "  JMA_SUPPORT=[true|false]  - Enable JMA support (default=false)"
+	@echo "  enable_gzip=[true|false] - Enable ZIP / GZ support (default=false)"
+	@echo "  enable_jma=[true|false]  - Enable JMA support (default=false)"
 	@echo ""
-	@echo "Example: $(MAKE) PLATFORM=x-gcc-lui GZIP_SUPPORT=true"
+	@echo "Example: $(MAKE) platform=x compiler=gcc enable_gzip=true"
 	@echo ""

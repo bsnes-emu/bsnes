@@ -1,9 +1,10 @@
+//TODO: move audio logging code to SNESInterface class
+
 void SNES::audio_update(uint16 l_sample, uint16 r_sample) {
   if(pcmfp) {
     fput(pcmfp, l_sample, 2);
     fput(pcmfp, r_sample, 2);
   }
-  if(config::snes.mute == true) { l_sample = r_sample = 0x0000; }
 
   snesinterface.audio_sample(l_sample, r_sample);
 }

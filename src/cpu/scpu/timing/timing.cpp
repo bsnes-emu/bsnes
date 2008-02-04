@@ -250,7 +250,7 @@ void sCPU::timing_reset() {
   status.prev_line_clocks = 1364;
 
   status.line_rendered        = false;
-  status.line_render_position = min(1112, (uint16)config::ppu.hack.render_scanline_position);
+  status.line_render_position = min(1112U, (uint)config::ppu.hack.render_scanline_position);
 
   status.dram_refreshed        = false;
   status.dram_refresh_position = (cpu_version == 1) ? 530 : 538;

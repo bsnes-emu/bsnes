@@ -1,5 +1,5 @@
 bsnes (TM) Reference License
-Copyright (C) 2004 - 2007 byuu
+Copyright (C) 2004 - 2008 byuu
 All rights reserved
 
 1. Definitions

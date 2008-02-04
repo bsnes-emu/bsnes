@@ -28,7 +28,7 @@ uint size;
       memset(stA.ram, 0xff, stA.ram_size);
 
       if(load_file(get_save_filename(stA.fn, "srm"), data, size) == true) {
-        memcpy(stA.ram, data, min(size, 0x020000));
+        memcpy(stA.ram, data, min(size, 0x020000U));
         safe_free(data);
       }
     }
@@ -44,7 +44,7 @@ uint size;
       memset(stB.ram, 0xff, stB.ram_size);
 
       if(load_file(get_save_filename(stB.fn, "srm"), data, size) == true) {
-        memcpy(stB.ram, data, min(size, 0x020000));
+        memcpy(stB.ram, data, min(size, 0x020000U));
         safe_free(data);
       }
     }

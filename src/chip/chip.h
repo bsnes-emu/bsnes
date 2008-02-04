@@ -1,5 +1,4 @@
 #include "bsx/bsx.h"
-#include "superfx/superfx.h"
 #include "srtc/srtc.h"
 #include "sdd1/sdd1.h"
 #include "cx4/cx4.h"

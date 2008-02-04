@@ -1,4 +1,4 @@
-#define BSNES_VERSION "0.027"
+#define BSNES_VERSION "0.028"
 #define BSNES_TITLE   "bsnes v" BSNES_VERSION
 
 #define BUSCORE sBus
@@ -17,22 +17,23 @@
 //game genie + pro action replay code support (~1-3% speed hit)
 #define CHEAT_SYSTEM
 
-#if defined(PROCESSOR_X86) || defined(PROCESSOR_X86_64)
-  #define ARCH_LSB
-#elif defined(PROCESSOR_PPC) || defined(PROCESSOR_PPC64)
-  #define ARCH_MSB
-#else //guess
-  #define ARCH_LSB
+#if !defined(ARCH_LSB) && !defined(ARCH_MSB)
+  #define ARCH_LSB //guess
 #endif
 
-#include "lib/libco.h"
-#include "lib/bbase.h"
-#include "lib/bfunction.h"
-#include "lib/barray.h"
-#include "lib/bvector.h"
-#include "lib/bkeymap.h"
-#include "lib/bstring.h"
-#include "lib/bconfig.h"
+#include <nall/algorithm.hpp>
+#include <nall/array.hpp>
+#include <nall/bit.hpp>
+#include <nall/config.hpp>
+#include <nall/function.hpp>
+#include <nall/new.hpp>
+#include <nall/sort.hpp>
+#include <nall/string.hpp>
+#include <nall/vector.hpp>
+using namespace nall;
+
+#include <libco.h>
+#include <bbase.h>
 
 //platform-specific global functions
 void alert(const char*, ...);

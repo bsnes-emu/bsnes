@@ -11,10 +11,10 @@ void threadentry_dsp() { dsp.enter(); }
 
 void Scheduler::enter() {
   switch(clock.active) {
-  case THREAD_CPU: co_switch(thread_cpu); break;
-  case THREAD_SMP: co_switch(thread_smp); break;
-  case THREAD_PPU: co_switch(thread_ppu); break;
-  case THREAD_DSP: co_switch(thread_dsp); break;
+    case THREAD_CPU: co_switch(thread_cpu); break;
+    case THREAD_SMP: co_switch(thread_smp); break;
+    case THREAD_PPU: co_switch(thread_ppu); break;
+    case THREAD_DSP: co_switch(thread_dsp); break;
   }
 }
 
@@ -29,16 +29,17 @@ void Scheduler::init() {
   clock.smp_freq = snes.region() == SNES::NTSC ?
                    config::smp.ntsc_clock_rate :
                    config::smp.pal_clock_rate;
+  clock.smp_freq &= ~7; //smp_freq must be divisible by eight for dsp_freq
   clock.dsp_freq = clock.smp_freq >> 3;
 
   clock.active = THREAD_CPU;
   clock.cpusmp = 0;
   clock.smpdsp = 0;
 
-  if(thread_cpu)co_delete(thread_cpu);
-  if(thread_smp)co_delete(thread_smp);
-  if(thread_ppu)co_delete(thread_ppu);
-  if(thread_dsp)co_delete(thread_dsp);
+  if(thread_cpu) co_delete(thread_cpu);
+  if(thread_smp) co_delete(thread_smp);
+  if(thread_ppu) co_delete(thread_ppu);
+  if(thread_dsp) co_delete(thread_dsp);
 
   thread_snes = co_active();
   thread_cpu  = co_create(sizeof(void*) * 64 * 1024, threadentry_cpu);

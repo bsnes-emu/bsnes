@@ -37,5 +37,5 @@ const uint8 SMP::iplrom[64] = {
 /*fff8*/ 0x5d,             //mov   x,a
 /*fff9*/ 0xd0, 0xdb,       //bne   $ffd6
 /*fffb*/ 0x1f, 0x00, 0x00, //jmp   ($0000+x)
-/*fffe*/ 0xc0, 0xff        //---reset vector location ($ffc0)
+/*fffe*/ 0xc0, 0xff        //reset vector location ($ffc0)
 };

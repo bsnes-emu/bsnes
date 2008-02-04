@@ -5,13 +5,12 @@ void bPPU::latch_counters() {
 }
 
 uint16 bPPU::get_vram_address() {
-uint16 addr;
-  addr = regs.vram_addr;
+  uint16 addr = regs.vram_addr;
   switch(regs.vram_mapping) {
-  case 0: break; //direct
-  case 1: addr = (addr & 0xff00) | ((addr & 0x001f) << 3) | ((addr >> 5) & 7); break;
-  case 2: addr = (addr & 0xfe00) | ((addr & 0x003f) << 3) | ((addr >> 6) & 7); break;
-  case 3: addr = (addr & 0xfc00) | ((addr & 0x007f) << 3) | ((addr >> 7) & 7); break;
+    case 0: break; //direct mapping
+    case 1: addr = (addr & 0xff00) | ((addr & 0x001f) << 3) | ((addr >> 5) & 7); break;
+    case 2: addr = (addr & 0xfe00) | ((addr & 0x003f) << 3) | ((addr >> 6) & 7); break;
+    case 3: addr = (addr & 0xfc00) | ((addr & 0x007f) << 3) | ((addr >> 7) & 7); break;
   }
   return (addr << 1);
 }
@@ -696,6 +695,7 @@ uint8 bPPU::mmio_r213e() {
 uint8 r = 0x00;
   r |= (regs.time_over)  ? 0x80 : 0x00;
   r |= (regs.range_over) ? 0x40 : 0x00;
+  r |= (regs.ppu1_mdr & 0x10);
   r |= (ppu1_version & 0x0f);
   regs.ppu1_mdr = r;
   return regs.ppu1_mdr;

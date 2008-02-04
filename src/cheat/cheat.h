@@ -2,18 +2,22 @@
 
 class Cheat {
 public:
-enum { CT_PRO_ACTION_REPLAY, CT_GAME_GENIE };
+  enum {
+    CT_PRO_ACTION_REPLAY,
+    CT_GAME_GENIE
+  };
 
-struct CheatIndex {
-  bool   enabled;
-  uint32 addr;
-  uint8  data;
-  char   code[ 16 + 1];
-  char   desc[128 + 1];
-} index[CHEAT_LIMIT + 1];
-bool   cheat_enabled;
-uint32 cheat_count;
-uint8  mask[0x200000];
+  struct CheatIndex {
+    bool   enabled;
+    uint32 addr;
+    uint8  data;
+    char   code[ 16 + 1];
+    char   desc[128 + 1];
+  } index[CHEAT_LIMIT + 1];
+
+  bool   cheat_enabled;
+  uint32 cheat_count;
+  uint8  mask[0x200000];
 
   inline bool enabled() { return cheat_enabled; }
   inline uint count() { return cheat_count; }
@@ -21,12 +25,6 @@ uint8  mask[0x200000];
 
   bool  decode(char *str, uint32 &addr, uint8 &data, uint8 &type);
   bool  encode(char *str, uint32  addr, uint8  data, uint8  type);
-
-private:
-  uint  mirror_address(uint addr);
-  void  set(uint32 addr);
-  void  clear(uint32 addr);
-public:
 
   bool  read(uint32 addr, uint8 &data);
 
@@ -43,6 +41,11 @@ public:
   void  clear();
 
   Cheat();
+
+private:
+  uint  mirror_address(uint addr);
+  void  set(uint32 addr);
+  void  clear(uint32 addr);
 };
 
 extern Cheat cheat;

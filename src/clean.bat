@@ -1,2 +1,1 @@
-@make PLATFORM=win-mingw-x86 clean
-::@make PLATFORM=win-visualc-x86 clean
+@make platform=win compiler=mingw32-gcc clean
