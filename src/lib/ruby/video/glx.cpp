@@ -1,3 +1,28 @@
+/*
+  video.glx
+  author: byuu
+  license: public domain
+  date: 2008-02-06
+
+  Design notes:
+  SGI's GLX is the X11/Xlib interface to OpenGL.
+  At the time of this writing, there are three relevant versions of the API: versions 1.2, 1.3 and 1.4.
+
+  Version 1.2 was released on March 4th, 1997.
+  Version 1.3 was released on October 19th, 1998.
+  Version 1.4 was released on December 16th, 2005.
+
+  Despite version 1.3 being roughly ten years old at this time, there are still many modern X11 GLX drivers
+  that lack full support for the specification. Most notable would be the official video drivers from ATI.
+  Given this, 1.4 support is pretty much hopeless to target.
+
+  Luckily, each version has been designed to be backwards compatible with the previous version. As well,
+  version 1.2 is wholly sufficient, albeit less convenient, to implement this video module.
+
+  Therefore, for the purpose of compatibility, this driver only uses GLX 1.2 or earlier API commands.
+  As well, it only uses raw Xlib API commands, so that it is compatible with any toolkit.
+*/
+
 #include <GL/gl.h>
 #include <GL/glx.h>
 
@@ -7,6 +32,11 @@ namespace ruby {
 
 #include "glx.h"
 
+//returns true once window is mapped (created and displayed onscreen)
+static Bool x_wait_for_map_notify(Display *d, XEvent *e, char *arg) {
+  return (e->type == MapNotify) && (e->xmap.window == (Window)arg);
+}
+
 class pVideoGLX {
 public:
   VideoGLX &self;
@@ -14,19 +44,15 @@ public:
 
   Display *display;
   int screen;
-  XWindowAttributes attributes;
-  GLXFBConfig fbconfig, *fbconfiglist;
+  Window xwindow;
   GLXContext glxcontext;
   GLXWindow glxwindow;
   GLuint gltexture;
 
   struct {
+    int version_major, version_minor;
     bool double_buffer;
-    unsigned buffer_size;
-    unsigned red_size;
-    unsigned green_size;
-    unsigned blue_size;
-    unsigned alpha_size;
+    bool is_direct;
   } glx;
 
   struct {
@@ -74,11 +100,17 @@ public:
     if(glx.double_buffer) glXSwapBuffers(display, glxwindow);
   }
 
-  void refresh(unsigned width_, unsigned height_) {
-    XGetWindowAttributes(display, settings.handle, &attributes);
-
-    glClearColor(0.0, 0.0, 0.0, 1.0);
-    glClear(GL_COLOR_BUFFER_BIT);
+  void refresh(unsigned width, unsigned height) {
+    //we must ensure that the child window is the same size as the parent window.
+    //unfortunately, we cannot hook the parent window resize event notification,
+    //as we did not create the parent window, nor have any knowledge of the toolkit used.
+    //therefore, inelegant as it may be, we query each window size and resize as needed.
+    XWindowAttributes parent, child;
+    XGetWindowAttributes(display, settings.handle, &parent);
+    XGetWindowAttributes(display, xwindow, &child);
+    if(child.width != parent.width || child.height != parent.height) {
+      XResizeWindow(display, xwindow, parent.width, parent.height);
+    }
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -89,24 +121,24 @@ public:
 
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    glOrtho(0, attributes.width, 0, attributes.height, -1.0, 1.0);
-    glViewport(0, 0, attributes.width, attributes.height);
+    glOrtho(0, parent.width, 0, parent.height, -1.0, 1.0);
+    glViewport(0, 0, parent.width, parent.height);
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     glPixelStorei(GL_UNPACK_ROW_LENGTH, 1024); //length of buffer in pixels
     glTexSubImage2D(GL_TEXTURE_2D,
       /* mip-map level = */ 0, /* x = */ 0, /* y = */ 0,
-      width_, height_, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, buffer);
+      width, height, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, buffer);
 
-    //OpenGL projection sets 0,0 as *bottom-left* of screen
-    //Therefore, below vertices flip image to support top-left source
-    //Texture range = x1:0.0, y1:0.0, x2:1.0, y2:1.0
-    //Vertex range = x1:0, y1:0, x2:width, y2:height
-    double w = double(width_)  / 1024.0;
-    double h = double(height_) / 1024.0;
-    int u = attributes.width;
-    int v = attributes.height;
+    //OpenGL projection sets 0,0 as *bottom-left* of screen.
+    //therefore, below vertices flip image to support top-left source.
+    //texture range = x1:0.0, y1:0.0, x2:1.0, y2:1.0
+    //vertex range = x1:0, y1:0, x2:width, y2:height
+    double w = double(width)  / 1024.0;
+    double h = double(height) / 1024.0;
+    int u = parent.width;
+    int v = parent.height;
     glBegin(GL_TRIANGLE_STRIP);
     glTexCoord2f(0, 0); glVertex3i(0, v, 0);
     glTexCoord2f(w, 0); glVertex3i(u, v, 0);
@@ -119,75 +151,60 @@ public:
   }
 
   bool init() {
-    buffer = new(zeromemory) uint16_t[1024 * 1024 * 4];
-
-    //GLX requires a compatible X11 visualid to render to.
-    //glXChooseFBConfig often chooses visualid that is not
-    //compatible with target X11 window's visualid.
-    //Therefore, iterate all available framebuffer configurations
-    //to locate matching visualid.
-
     display = XOpenDisplay(0);
     screen = DefaultScreen(display);
-    XGetWindowAttributes(display, settings.handle, &attributes);
+    glXQueryVersion(display, &glx.version_major, &glx.version_minor);
+    //require GLX 1.2+ API
+    if(glx.version_major < 1 || (glx.version_major == 1 && glx.version_minor < 2)) return false;
 
+    buffer = new(zeromemory) uint16_t[1024 * 1024 * sizeof(uint16_t)];
+
+    XWindowAttributes wa;
+    XGetWindowAttributes(display, settings.handle, &wa);
+
+    //let GLX determine the best Visual to use for GL output; provide a few hints
     int elements = 0;
-    fbconfig = 0;
-    fbconfiglist = glXGetFBConfigs(display, screen, &elements);
-    for(int i = 0; i < elements; i++) {
-      int visualid = 0;
-      glXGetFBConfigAttrib(display, fbconfiglist[i], GLX_VISUAL_ID, &visualid);
-      if(visualid == attributes.visual->visualid) {
-        fbconfig = fbconfiglist[i];
-        break;
-      }
-    }
+    int attributelist[] = {
+      GLX_RGBA,
+      GLX_DOUBLEBUFFER, True,
+      None
+    };
+    XVisualInfo *vi = glXChooseVisual(display, screen, attributelist);
 
-    if(!fbconfig) {
-      fprintf(stderr, "VideoGLX: failed to find compatible Visual ID\n");
-      term();
-      return false;
-    }
+    //Window settings.handle has already been realized, most likely with DefaultVisual.
+    //GLX requires that the GL output window has the same Visual as the GLX context.
+    //it is not possible to change the Visual of an already realized (created) window.
+    //therefore a new child window, using the same GLX Visual, must be created and binded to settings.handle.
+    Colormap colormap = XCreateColormap(display, RootWindow(display, vi->screen), vi->visual, AllocNone);
+    XSetWindowAttributes swa;
+    swa.colormap = colormap;
+    swa.border_pixel = 0;
+    swa.event_mask = StructureNotifyMask;
+    xwindow = XCreateWindow(display, /* parent = */ settings.handle,
+      /* x = */ 0, /* y = */ 0, wa.width, wa.height,
+      /* border_width = */ 0, vi->depth, InputOutput, vi->visual,
+      CWColormap | CWBorderPixel | CWEventMask, &swa);
+    XMapWindow(display, xwindow);
+    XEvent event;
+    XIfEvent(display, &event, x_wait_for_map_notify, (char*)xwindow); //wait for window to appear onscreen
 
-    glxcontext = glXCreateNewContext(display, fbconfig, GLX_RGBA_TYPE, 0, false);
-    if(!glxcontext) {
-      fprintf(stderr, "VideoGLX: failed to create context\n");
-      term();
-      return false;
-    }
+    glxcontext = glXCreateContext(display, vi, /* sharelist = */ 0, /* direct = */ GL_TRUE);
+    glXMakeCurrent(display, glxwindow = xwindow, glxcontext);
 
-    glxwindow = glXCreateWindow(display, fbconfig, settings.handle, 0);
-    if(!glxwindow) {
-      fprintf(stderr, "VideoGLX: failed to create window\n");
-      term();
-      return false;
-    }
-
-    if(glXMakeContextCurrent(display, glxwindow, glxwindow, glxcontext) == false) {
-      fprintf(stderr, "VideoGLX: failed to set context\n");
-      term();
-      return false;
-    }
-
-    //read attributes of frame buffer for later use
+    //read attributes of frame buffer for later use, as requested attributes from above are not always granted
     int value = 0;
-    glXGetFBConfigAttrib(display, fbconfig, GLX_DOUBLEBUFFER, &value);
+    glXGetConfig(display, vi, GLX_DOUBLEBUFFER, &value);
     glx.double_buffer = value;
-    glXGetFBConfigAttrib(display, fbconfig, GLX_BUFFER_SIZE, &value);
-    glx.buffer_size = value;
-    glXGetFBConfigAttrib(display, fbconfig, GLX_RED_SIZE, &value);
-    glx.red_size = value;
-    glXGetFBConfigAttrib(display, fbconfig, GLX_GREEN_SIZE, &value);
-    glx.green_size = value;
-    glXGetFBConfigAttrib(display, fbconfig, GLX_BLUE_SIZE, &value);
-    glx.blue_size = value;
-    glXGetFBConfigAttrib(display, fbconfig, GLX_ALPHA_SIZE, &value);
-    glx.alpha_size = value;
+    glx.is_direct = glXIsDirect(display, glxcontext);
 
-    //disable unused features, enable required features
+    //disable unused features
+    glDisable(GL_ALPHA_TEST);
     glDisable(GL_BLEND);
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_POLYGON_SMOOTH);
+    glDisable(GL_STENCIL_TEST);
+
+    //enable useful and required features
     glEnable(GL_DITHER);
     glEnable(GL_TEXTURE_2D);
 
@@ -215,15 +232,21 @@ public:
       glxcontext = 0;
     }
 
-    delete[] buffer;
+    if(buffer) {
+      delete[] buffer;
+      buffer = 0;
+    }
   }
 
   pVideoGLX(VideoGLX &self_) : self(self_) {
     settings.handle = 0;
+    xwindow = 0;
     glxcontext = 0;
     glxwindow = 0;
     gltexture = 0;
   }
+
+  ~pVideoGLX() { term(); }
 };
 
 bool VideoGLX::cap(Setting setting) { return p.cap(setting); }

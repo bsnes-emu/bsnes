@@ -270,8 +270,8 @@ build: $(objects)
 	$(strip $(cpp) $(call mkbin,../bsnes) $(objects) $(link))
 
 install:
-	install -m 755 ../bsnes $(prefix)/bin/bsnes
-	install -m 644 data/bsnes.png $(prefix)/share/icons/bsnes.png
+	install -D -m 755 ../bsnes $(prefix)/bin/bsnes
+	install -D -m 644 data/bsnes.png $(prefix)/share/icons/bsnes.png
 
 clean:
 	-@$(call delete,obj/*.$(obj))
