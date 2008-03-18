@@ -6,6 +6,7 @@
 */
 
 #include "../../base.h"
+#define CX4_CPP
 
 #include "cx4data.cpp"
 #include "cx4fn.cpp"

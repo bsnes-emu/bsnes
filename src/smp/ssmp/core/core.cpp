@@ -1,3 +1,5 @@
+#ifdef SSMP_CPP
+
 #include "opfn.cpp"
 
 #include "op_mov.cpp"
@@ -15,3 +17,5 @@ void sSMP::enter() { loop:
 
   goto loop;
 }
+
+#endif //ifdef SSMP_CPP

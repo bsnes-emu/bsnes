@@ -1,6 +1,8 @@
+#ifdef SNES_CPP
+
 //TODO: move audio logging code to SNESInterface class
 
-void SNES::audio_update(uint16 l_sample, uint16 r_sample) {
+void SNES::Audio::update(uint16 l_sample, uint16 r_sample) {
   if(pcmfp) {
     fput(pcmfp, l_sample, 2);
     fput(pcmfp, r_sample, 2);
@@ -9,21 +11,21 @@ void SNES::audio_update(uint16 l_sample, uint16 r_sample) {
   snesinterface.audio_sample(l_sample, r_sample);
 }
 
-void SNES::log_audio_enable(const char *fn) {
-  if(pcmfp) { log_audio_disable(); }
+void SNES::Audio::log_enable(const char *fn) {
+  if(pcmfp) log_disable();
 
-char tfn[256];
+  char tfn[256];
   if(!fn) {
   int i = 0;
     while(i < 1000) {
       sprintf(tfn, "audio%0.3d.wav", i);
       pcmfp = fopen(tfn, "rb");
-      if(!pcmfp)break;
+      if(!pcmfp) break;
       fclose(pcmfp);
       pcmfp = 0;
       i++;
     }
-    if(i >= 1000)return;
+    if(i >= 1000) return;
   } else {
     strcpy(tfn, fn);
   }
@@ -31,41 +33,50 @@ char tfn[256];
   pcmfp = fopen(tfn, "wb");
   if(!pcmfp)return;
 
-//header
+  //header
   fwrite("RIFF", 1, 4, pcmfp);
-//file size
+
+  //file size
   fputc(0, pcmfp);
   fputc(0, pcmfp);
   fputc(0, pcmfp);
   fputc(0, pcmfp);
-//format
+
+  //format
   fwrite("WAVE", 1, 4, pcmfp);
   fwrite("fmt ", 1, 4, pcmfp);
-//fmt size
+
+  //fmt size
   fputc(0x12, pcmfp);
   fputc(0x00, pcmfp);
   fputc(0x00, pcmfp);
   fputc(0x00, pcmfp);
-//fmt type (PCM)
+
+  //fmt type (PCM)
   fputc(1, pcmfp);
   fputc(0, pcmfp);
-//channels
+
+  //channels
   fputc(2, pcmfp);
   fputc(0, pcmfp);
-//sample rate (32000hz)
+
+  //sample rate (32000hz)
   fputc(0x00, pcmfp);
   fputc(0x7d, pcmfp);
   fputc(0x00, pcmfp);
   fputc(0x00, pcmfp);
-//byte rate (32000 * 2 * (16 / 8)
+
+  //byte rate (32000 * 2 * (16 / 8)
   fputc(0x00, pcmfp);
   fputc(0xf4, pcmfp);
   fputc(0x01, pcmfp);
   fputc(0x00, pcmfp);
-//block align (bytes per sample) (4)
+
+  //block align (bytes per sample) (4)
   fputc(4, pcmfp);
   fputc(0, pcmfp);
-//???
+
+  //???
   fputc(0x10, pcmfp);
   fputc(0x00, pcmfp);
   fputc(0x00, pcmfp);
@@ -79,18 +90,20 @@ char tfn[256];
   fputc(0xf4, pcmfp);
   fputc(0x01, pcmfp);
   fputc(0x00, pcmfp);
-//data
+
+  //data
   fwrite("data", 1, 4, pcmfp);
-//data size
+
+  //data size
   fputc(0, pcmfp);
   fputc(0, pcmfp);
   fputc(0, pcmfp);
   fputc(0, pcmfp);
 }
 
-void SNES::log_audio_disable() {
+void SNES::Audio::log_disable() {
   if(pcmfp) {
-  int fsize, t;
+    int fsize, t;
     fseek(pcmfp, 0, SEEK_END);
     fsize = ftell(pcmfp);
     fseek(pcmfp, 4, SEEK_SET);
@@ -110,10 +123,12 @@ void SNES::log_audio_disable() {
   }
 }
 
-void SNES::audio_init() {
+void SNES::Audio::init() {
   pcmfp = 0;
 }
 
-void SNES::audio_term() {
-  log_audio_disable();
+void SNES::Audio::term() {
+  log_disable();
 }
+
+#endif //ifdef SNES_CPP

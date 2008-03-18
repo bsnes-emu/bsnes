@@ -2,13 +2,13 @@
 
 class GZReader : public Reader {
 private:
-gzFile gp;
-uint32 fsize;
+  gzFile gp;
+  uint32 filesize;
 
 public:
-  uint32 size();
-  uint8 *read(uint32 length = 0);
-  bool   ready();
+  unsigned size();
+  uint8_t* read(unsigned length = 0);
+  bool ready();
 
   GZReader(const char *fn);
   ~GZReader();

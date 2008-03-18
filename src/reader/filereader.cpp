@@ -1,27 +1,30 @@
+#ifdef READER_CPP
+
 #include "filereader.h"
 
-uint32 FileReader::size() {
-  return fsize;
+unsigned FileReader::size() {
+  return filesize;
 }
 
 //This function will allocate memory even if open() fails.
 //This is needed so that when SRAM files do not exist, the
 //memory for the SRAM data will be allocated still.
 //The memory is flushed to 0x00 when no file is opened.
-uint8 *FileReader::read(uint32 length) {
-uint8 *data;
+uint8_t* FileReader::read(unsigned length) {
+  uint8_t *data = 0;
+
   if(length == 0) {
-  //read the entire file into RAM
-    data = (uint8*)malloc(fsize);
-    memset(data, 0, fsize);
-    if(fp)fread(data, 1, fsize, fp);
-  } else if(length > fsize) {
-  //read the entire file into RAM, pad the rest with 0x00s
+    //read the entire file into RAM
+    data = (uint8*)malloc(filesize);
+    memset(data, 0, filesize);
+    if(fp) fread(data, 1, filesize, fp);
+  } else if(length > filesize) {
+    //read the entire file into RAM, pad the rest with 0x00s
     data = (uint8*)malloc(length);
     memset(data, 0, length);
-    if(fp)fread(data, 1, fsize, fp);
-  } else { //fsize >= length
-  //read only what was requested
+    if(fp)fread(data, 1, filesize, fp);
+  } else { //filesize >= length
+    //read only what was requested
     data = (uint8*)malloc(length);
     memset(data, 0, length);
     if(fp)fread(data, 1, length, fp);
@@ -35,14 +38,14 @@ bool FileReader::ready() {
 
 FileReader::FileReader(const char *fn) {
   fp = fopen(fn, "rb");
-  if(!fp)return;
+  if(!fp) return;
 
   fseek(fp, 0, SEEK_END);
-  fsize = ftell(fp);
-  fseek(fp, 0, SEEK_SET);
+  filesize = ftell(fp);
+  rewind(fp);
 
-//empty file?
-  if(fsize == 0) {
+  //empty file?
+  if(filesize == 0) {
     fclose(fp);
     fp = 0;
   }
@@ -55,9 +58,8 @@ FileReader::~FileReader() {
   }
 }
 
-void FileWriter::write(uint8 *buffer, uint32 length) {
-  if(!fp)return;
-
+void FileWriter::write(uint8_t *buffer, unsigned length) {
+  if(!fp) return;
   fwrite(buffer, 1, length, fp);
 }
 
@@ -75,3 +77,5 @@ FileWriter::~FileWriter() {
     fp = 0;
   }
 }
+
+#endif //ifdef READER_CPP

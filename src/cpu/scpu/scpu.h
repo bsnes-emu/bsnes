@@ -1,138 +1,132 @@
-class sCPU : public CPU { public:
+class sCPU : public CPU {
+public:
   void enter();
 
-#include "core/core.h"
-#include "dma/dma.h"
-#include "memory/memory.h"
-#include "mmio/mmio.h"
-#include "timing/timing.h"
+  #include "core/core.h"
+  #include "dma/dma.h"
+  #include "memory/memory.h"
+  #include "mmio/mmio.h"
+  #include "timing/timing.h"
 
-struct {
-  bool   wai;
-  bool   irq;
-  uint16 irq_vector;
-} event;
+  struct {
+    bool wai;
+    bool irq;
+    uint16 irq_vector;
+  } event;
 
-struct {
-  uint   nmi_hold;
-  uint   irq_hold;
+  struct {
+    uint   nmi_hold;
+    uint   irq_hold;
 
-  uint   nmi_fire;
-  uint   irq_fire;
-  uint   irq_delay;
-  uint   hw_math;
+    uint   nmi_fire;
+    uint   irq_fire;
+    uint   irq_delay;
+    uint   hw_math;
 
-  alwaysinline void set(uint &ctr, uint clocks) {
-    if(clocks >= ctr) { ctr = clocks; }
-  }
-
-  alwaysinline void sub(uint &ctr, uint clocks) {
-    if(ctr >= clocks) {
-      ctr -= clocks;
-    } else {
-      ctr  = 0;
+    alwaysinline void set(uint &ctr, uint clocks) {
+      if(clocks >= ctr) { ctr = clocks; }
     }
-  }
-} counter;
 
-enum {
-  DMASTATE_INACTIVE,
-  DMASTATE_DMASYNC,
-  DMASTATE_RUN,
-  DMASTATE_CPUSYNC,
-};
+    alwaysinline void sub(uint &ctr, uint clocks) {
+      if(ctr >= clocks) {
+        ctr -= clocks;
+      } else {
+        ctr  = 0;
+      }
+    }
+  } counter;
 
-struct {
-//core
-  uint8  opcode;
-  bool   in_opcode;
+  enum {
+    DMASTATE_INACTIVE,
+    DMASTATE_DMASYNC,
+    DMASTATE_RUN,
+    DMASTATE_CPUSYNC,
+  };
 
-  uint   clock_count;
+  struct {
+    //core
+    uint8  opcode;
+    bool   in_opcode;
 
-//timing
-  bool   region;
-  uint16 region_scanlines;
-  uint16 vcounter, hcounter, hclock;
-  bool   interlace, interlace_field;
-  bool   overscan;
-  uint16 field_lines, line_clocks;
-  uint16 prev_field_lines, prev_line_clocks;
-  uint16 vblstart;
+    uint   clock_count;
 
-  bool   line_rendered;
-  uint16 line_render_position;
+    //timing
+    uint16 vcounter, hcounter;
+    uint16 field_lines, line_clocks;
 
-  bool   dram_refreshed;
-  uint16 dram_refresh_position;
+    bool   line_rendered;
+    uint16 line_render_position;
 
-  bool   hdmainit_triggered;
-  uint16 hdmainit_trigger_position;
+    bool   dram_refreshed;
+    uint16 dram_refresh_position;
 
-  bool   hdma_triggered;
+    bool   hdmainit_triggered;
+    uint16 hdmainit_trigger_position;
 
-  uint16 irq_delay;
+    bool   hdma_triggered;
 
-  uint16 vnmi_trigger_pos;
-  bool   nmi_valid;
-  bool   nmi_line;
-  bool   nmi_transition;
-  bool   nmi_pending;
+    uint16 irq_delay;
 
-  uint16 virq_trigger_pos, hirq_trigger_pos;
-  bool   irq_valid;
-  bool   irq_line;
-  bool   irq_transition;
-  bool   irq_pending;
+    bool   nmi_valid;
+    bool   nmi_line;
+    bool   nmi_transition;
+    bool   nmi_pending;
 
-//dma
-  uint   dma_counter;
-  uint   dma_clocks;
-  uint   dma_state;
-  bool   dma_pending;
-  bool   hdma_pending;
-  bool   hdmainit_pending;
+    uint16 virq_trigger_pos, hirq_trigger_pos;
+    bool   irq_valid;
+    bool   irq_line;
+    bool   irq_transition;
+    bool   irq_pending;
 
-//mmio
+    //dma
+    uint   dma_counter;
+    uint   dma_clocks;
+    uint   dma_state;
+    bool   dma_pending;
+    bool   hdma_pending;
+    bool   hdmainit_pending;
 
-//$2181-$2183
-  uint32 wram_addr;
+    //mmio
 
-//$4016-$4017
-  bool   joypad_strobe_latch;
-  uint32 joypad1_bits;
-  uint32 joypad2_bits;
+    //$2181-$2183
+    uint32 wram_addr;
 
-//$4200
-  bool   nmi_enabled;
-  bool   hirq_enabled, virq_enabled;
-  bool   auto_joypad_poll;
+    //$4016-$4017
+    bool   joypad_strobe_latch;
+    uint32 joypad1_bits;
+    uint32 joypad2_bits;
 
-//$4201
-  uint8  pio;
+    //$4200
+    bool   nmi_enabled;
+    bool   hirq_enabled, virq_enabled;
+    bool   auto_joypad_poll;
 
-//$4202-$4203
-  uint8  mul_a, mul_b;
+    //$4201
+    uint8  pio;
 
-//$4204-$4206
-  uint16 div_a;
-  uint8  div_b;
+    //$4202-$4203
+    uint8  mul_a, mul_b;
 
-//$4207-$420a
-  uint16 hirq_pos, virq_pos;
+    //$4204-$4206
+    uint16 div_a;
+    uint8  div_b;
 
-//$4214-$4217
-  uint16 r4214;
-  uint16 r4216;
+    //$4207-$420a
+    uint16 hirq_pos, virq_pos;
 
-//$4218-$421f
-  uint8  joy1l, joy1h;
-  uint8  joy2l, joy2h;
-  uint8  joy3l, joy3h;
-  uint8  joy4l, joy4h;
-} status;
+    //$4214-$4217
+    uint16 r4214;
+    uint16 r4216;
 
-  void   power();
-  void   reset();
+    //$4218-$421f
+    uint8  joy1l, joy1h;
+    uint8  joy2l, joy2h;
+    uint8  joy3l, joy3h;
+    uint8  joy4l, joy4h;
+  } status;
+
+  void power();
+  void reset();
 
   sCPU();
   ~sCPU();

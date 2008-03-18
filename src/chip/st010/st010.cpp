@@ -1,4 +1,6 @@
 #include "../../base.h"
+#define ST010_CPP
+
 #include "st010_data.h"
 #include "st010_op.cpp"
 

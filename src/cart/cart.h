@@ -68,6 +68,7 @@ public:
     CartridgeType type;
 
     uint32 crc32;
+    char filename[PATH_MAX * 4];
     char name[128];
 
     Region region;
@@ -123,13 +124,17 @@ public:
   bool load_file(const char *fn, uint8 *&data, uint &size);
   bool save_file(const char *fn, uint8 *data, uint size);
   char* modify_extension(char *filename, const char *extension);
+  char* get_base_filename(char *filename);
+  char* get_path_filename(char *filename, const char *path, const char *source, const char *extension);
   char* get_save_filename(const char *source, const char *extension);
+  char* get_cheat_filename(const char *source, const char *extension);
 
   Cartridge();
   ~Cartridge();
 
 private:
   char savefn[PATH_MAX];
+  char cheatfn[PATH_MAX];
 };
 
 namespace memory {

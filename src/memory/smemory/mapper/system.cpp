@@ -1,8 +1,10 @@
+#ifdef SMEMORY_CPP
+
 void sBus::map_reset() {
-  for(uint i = 0x0000; i <= 0xffff; i++)
+  for(uint32_t i = 0x0000; i <= 0xffff; i++)
     map(i << 8, memory::memory_unmapped, 0);
 
-  for(uint i = 0x2000; i <= 0x5fff; i++)
+  for(uint16_t i = 0x2000; i <= 0x5fff; i++)
     memory::mmio.map(i, memory::mmio_unmapped);
 }
 
@@ -15,3 +17,5 @@ void sBus::map_system() {
 
   map(MapLinear, 0x7e, 0x7f, 0x0000, 0xffff, memory::wram);
 }
+
+#endif //ifdef SMEMORY_CPP

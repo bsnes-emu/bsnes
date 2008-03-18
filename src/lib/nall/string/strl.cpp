@@ -1,5 +1,4 @@
-#ifndef NALL_STRING_STRL_CPP
-#define NALL_STRING_STRL_CPP
+#ifdef NALL_STRING_CPP
 
 //strlcpy, strlcat based on OpenBSD implementation by Todd C. Miller
 
@@ -45,4 +44,4 @@ size_t strlcat(char *dest, const char *src, size_t length) {
   return dlength + (s - src); //return length of resulting string, sans null terminator
 }
 
-#endif //ifndef NALL_STRING_STRL_CPP
+#endif //ifdef NALL_STRING_CPP

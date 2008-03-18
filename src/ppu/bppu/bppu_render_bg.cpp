@@ -1,3 +1,5 @@
+#ifdef BPPU_CPP
+
 //called once at the start of every rendered scanline
 void bPPU::update_bg_info() {
 uint hires = (regs.bg_mode == 5 || regs.bg_mode == 6);
@@ -88,9 +90,7 @@ uint width = (!hires) ? 256 : 512;
 
   if(hires) {
     hscroll <<= 1;
-    if(regs.interlace) {
-      y = (y << 1) + line.interlace_field;
-    }
+    if(regs.interlace) y = (y << 1) + field();
   }
 
 uint16 *mtable = mosaic_table[(regs.mosaic_enabled[bg]) ? regs.mosaic_size : 0];
@@ -212,3 +212,5 @@ uint16 prev_x = 0xffff, prev_y = 0xffff;
 
 #undef setpixel_main
 #undef setpixel_sub
+
+#endif //ifdef BPPU_CPP

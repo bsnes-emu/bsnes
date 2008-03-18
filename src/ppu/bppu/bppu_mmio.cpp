@@ -1,5 +1,7 @@
+#ifdef BPPU_CPP
+
 void bPPU::latch_counters() {
-  regs.hcounter = cpu.hcounter();
+  regs.hcounter = cpu.hdot();
   regs.vcounter = cpu.vcounter();
   regs.counters_latched = true;
 }
@@ -21,61 +23,36 @@ uint16 bPPU::get_vram_address() {
 //write occurs during the very last clock cycle of vblank.
 
 uint8 bPPU::vram_mmio_read(uint16 addr) {
-  if(regs.display_disabled == true) {
-    return vram_read(addr);
-  }
+  if(regs.display_disabled == true) return vram_read(addr);
 
-uint16 v  = cpu.vcounter();
-uint16 hc = cpu.hclock();
-uint16 ls = (cpu.region_scanlines() >> 1) - 1;
-  if(cpu.interlace() && !cpu.interlace_field())ls++;
-
-  if(v == ls && hc == 1362) {
+  uint16 v = cpu.vcounter();
+  uint16 h = cpu.hcounter();
+  uint16 ls = ((snes.region() == SNES::NTSC ? 525 : 625) >> 1) - 1;
+  if(interlace() && !field()) ls++;
+  if(v == ls && h == 1362) return 0x00;
+  if(v < (!overscan() ? 224 : 239)) return 0x00;
+  if(v == (!overscan() ? 224 : 239)) {
+    if(h == 1362) return vram_read(addr);
     return 0x00;
   }
-
-  if(v < (!cpu.overscan() ? 224 : 239)) {
-    return 0x00;
-  }
-
-  if(v == (!cpu.overscan() ? 224 : 239)) {
-    if(hc == 1362) {
-      return vram_read(addr);
-    }
-    return 0x00;
-  }
-
   return vram_read(addr);
 }
 
 void bPPU::vram_mmio_write(uint16 addr, uint8 data) {
-  if(regs.display_disabled == true) {
-    return vram_write(addr, data);
-  }
+  if(regs.display_disabled == true) return vram_write(addr, data);
 
-uint16 v  = cpu.vcounter();
-uint16 hc = cpu.hclock();
+  uint16 v = cpu.vcounter();
+  uint16 h = cpu.hcounter();
   if(v == 0) {
-    if(hc <= 4) {
-      return vram_write(addr, data);
-    }
-    if(hc == 6) {
-      return vram_write(addr, cpu.regs.mdr);
-    }
+    if(h <= 4) return vram_write(addr, data);
+    if(h == 6) return vram_write(addr, cpu.regs.mdr);
     return;
   }
-
-  if(v < (!cpu.overscan() ? 225 : 240)) {
-    return;
-  }
-
-  if(v == (!cpu.overscan() ? 225 : 240)) {
-    if(hc <= 4) {
-      return;
-    }
+  if(v < (!overscan() ? 225 : 240)) return;
+  if(v == (!overscan() ? 225 : 240)) {
+    if(h <= 4) return;
     return vram_write(addr, data);
   }
-
   vram_write(addr, data);
 }
 
@@ -99,11 +76,8 @@ uint8 bPPU::oam_mmio_read(uint16 addr) {
     return oam_read(addr);
   }
 
-uint16 v = cpu.vcounter();
-  if(v < (!cpu.overscan() ? 225 : 240)) {
-    return oam_read(0x0218);
-  }
-
+  uint16 v = cpu.vcounter();
+  if(v < (!overscan() ? 225 : 240)) return oam_read(0x0218);
   return oam_read(addr);
 }
 
@@ -112,11 +86,8 @@ void bPPU::oam_mmio_write(uint16 addr, uint8 data) {
     return oam_write(addr, data);
   }
 
-uint16 v = cpu.vcounter();
-  if(v < (!cpu.overscan() ? 225 : 240)) {
-    return oam_write(0x0218, data);
-  }
-
+  uint16 v = cpu.vcounter();
+  if(v < (!overscan() ? 225 : 240)) return oam_write(0x0218, data);
   oam_write(addr, data);
 }
 
@@ -131,12 +102,11 @@ uint8 bPPU::cgram_mmio_read(uint16 addr) {
     return cgram_read(addr);
   }
 
-uint16 v  = cpu.vcounter();
-uint16 hc = cpu.hclock();
-  if(v < (!cpu.overscan() ? 225 : 240) && hc >= 72 && hc < 1096) {
+  uint16 v = cpu.vcounter();
+  uint16 h = cpu.hcounter();
+  if(v < (!overscan() ? 225 : 240) && h >= 72 && h < 1096) {
     return cgram_read(0x01ff);
   }
-
   return cgram_read(addr);
 }
 
@@ -145,18 +115,17 @@ void bPPU::cgram_mmio_write(uint16 addr, uint8 data) {
     return cgram_write(addr, data);
   }
 
-uint16 v  = cpu.vcounter();
-uint16 hc = cpu.hclock();
-  if(v < (!cpu.overscan() ? 225 : 240) && hc >= 72 && hc < 1096) {
+  uint16 v = cpu.vcounter();
+  uint16 h = cpu.hcounter();
+  if(v < (!overscan() ? 225 : 240) && h >= 72 && h < 1096) {
     return cgram_write(0x01ff, data);
   }
-
   cgram_write(addr, data);
 }
 
 //INIDISP
 void bPPU::mmio_w2100(uint8 value) {
-  if(regs.display_disabled == true && cpu.vcounter() == (!cpu.overscan() ? 225 : 240)) {
+  if(regs.display_disabled == true && cpu.vcounter() == (!overscan() ? 225 : 240)) {
     regs.oam_addr = regs.oam_baseaddr << 1;
     regs.oam_firstsprite = (regs.oam_priority == false) ? 0 : (regs.oam_addr >> 2) & 127;
   }
@@ -563,11 +532,13 @@ void bPPU::mmio_w2131(uint8 value) {
 
 //COLDATA
 void bPPU::mmio_w2132(uint8 value) {
-  if(value & 0x80)regs.color_b = value & 0x1f;
-  if(value & 0x40)regs.color_g = value & 0x1f;
-  if(value & 0x20)regs.color_r = value & 0x1f;
+  if(value & 0x80) regs.color_b = value & 0x1f;
+  if(value & 0x40) regs.color_g = value & 0x1f;
+  if(value & 0x20) regs.color_r = value & 0x1f;
 
-  regs.color_rgb = (regs.color_r) | (regs.color_g << 5) | (regs.color_b << 10);
+  regs.color_rgb = (regs.color_r)
+                 | (regs.color_g << 5)
+                 | (regs.color_b << 10);
 }
 
 //SETINI
@@ -578,7 +549,7 @@ void bPPU::mmio_w2133(uint8 value) {
   regs.oam_interlace = !!(value & 0x02);
   regs.interlace     = !!(value & 0x01);
 
-  cpu.set_overscan(regs.overscan);
+  display.overscan = regs.overscan;
 }
 
 //MPYL
@@ -707,7 +678,7 @@ uint8 r = 0x00;
   regs.latch_hcounter = 0;
   regs.latch_vcounter = 0;
 
-  r |= cpu.interlace_field() << 7;
+  r |= field() << 7;
   if(!(cpu.pio_status() & 0x80)) {
     r |= 0x40;
   } else if(regs.counters_latched == true) {
@@ -816,3 +787,5 @@ void bPPU::mmio_write(uint addr, uint8 data) {
   case 0x2133: mmio_w2133(data); return; //SETINI
   }
 }
+
+#endif //ifdef BPPU_CPP

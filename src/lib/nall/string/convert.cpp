@@ -1,9 +1,4 @@
-#ifndef NALL_STRING_CONVERT_CPP
-#define NALL_STRING_CONVERT_CPP
-
-#include <math.h>
-#include <nall/algorithm.hpp>
-#include <nall/static.hpp>
+#ifdef NALL_STRING_CPP
 
 char* strlower(char *str) {
   if(!str) return 0;
@@ -290,4 +285,4 @@ size_t strdouble(char *str, double value, size_t length /* = 0 */) {
   return nall::min(initial_length, digits + 1);
 }
 
-#endif //ifndef NALL_STRING_CONVERT_CPP
+#endif //ifdef NALL_STRING_CPP

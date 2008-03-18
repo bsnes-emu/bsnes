@@ -1,13 +1,11 @@
-Scheduler scheduler;
+#ifdef SNES_CPP
 
-//
+Scheduler scheduler;
 
 void threadentry_cpu() { cpu.enter(); }
 void threadentry_smp() { smp.enter(); }
-void threadentry_ppu() {              } //currently unused
+void threadentry_ppu() {              }
 void threadentry_dsp() { dsp.enter(); }
-
-//
 
 void Scheduler::enter() {
   switch(clock.active) {
@@ -23,14 +21,12 @@ void Scheduler::exit() {
 }
 
 void Scheduler::init() {
-  clock.cpu_freq = snes.region() == SNES::NTSC ?
-                   config::cpu.ntsc_clock_rate :
-                   config::cpu.pal_clock_rate;
-  clock.smp_freq = snes.region() == SNES::NTSC ?
-                   config::smp.ntsc_clock_rate :
-                   config::smp.pal_clock_rate;
-  clock.smp_freq &= ~7; //smp_freq must be divisible by eight for dsp_freq
-  clock.dsp_freq = clock.smp_freq >> 3;
+  clock.cpu_freq = snes.region() == SNES::NTSC
+                 ? config::cpu.ntsc_clock_rate
+                 : config::cpu.pal_clock_rate;
+  clock.smp_freq = snes.region() == SNES::NTSC
+                 ? config::smp.ntsc_clock_rate
+                 : config::smp.pal_clock_rate;
 
   clock.active = THREAD_CPU;
   clock.cpusmp = 0;
@@ -48,8 +44,6 @@ void Scheduler::init() {
   thread_dsp  = co_create(sizeof(void*) * 64 * 1024, threadentry_dsp);
 }
 
-//
-
 Scheduler::Scheduler() {
   thread_snes = 0;
   thread_cpu  = 0;
@@ -57,3 +51,5 @@ Scheduler::Scheduler() {
   thread_ppu  = 0;
   thread_dsp  = 0;
 }
+
+#endif //ifdef SNES_CPP

@@ -5,13 +5,10 @@
 class VideoFilter;
 
 class SNES {
-protected:
-uint8  snes_region;
-
 public:
-enum { NTSC = 0, PAL = 1 };
+  enum Region { NTSC = 0, PAL = 1 };
 
-//system functions
+  //system functions
   virtual void run();
   virtual void runtoframe();
 
@@ -23,18 +20,19 @@ enum { NTSC = 0, PAL = 1 };
   virtual void frame();
   virtual void scanline();
 
-//PAL/NTSC
-  uint8  region();
-  void   set_region(uint8 new_region);
+  //PAL/NTSC
+  Region region();
+  void set_region(Region);
 
-#include "video/video.h"
-#include "audio/audio.h"
-#include "input/input.h"
+  #include "video/video.h"
+  #include "audio/audio.h"
+  #include "input/input.h"
 
   SNES();
   virtual ~SNES() {}
+
+private:
+  Region snes_region;
 };
 
 extern SNES snes;
-
-#include "video/filter.h"

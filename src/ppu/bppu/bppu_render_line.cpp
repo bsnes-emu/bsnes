@@ -1,3 +1,5 @@
+#ifdef BPPU_CPP
+
 inline uint16 bPPU::get_palette(uint8 index) {
   return read16(cgram, index << 1);
 }
@@ -83,7 +85,7 @@ uint8  bg_sub;
 
 inline void bPPU::render_line_output() {
 uint16 *ptr  = (uint16*)output + (line.y * 1024) +
-               ((line.interlace && line.interlace_field) ? 512 : 0);
+               ((interlace() && field()) ? 512 : 0);
 uint16 *luma_b  = light_table_b[regs.display_brightness];
 uint16 *luma_gr = light_table_gr[regs.display_brightness];
 uint16 curr, prev;
@@ -128,7 +130,9 @@ uint16 curr, prev;
 
 inline void bPPU::render_line_clear() {
 uint16 *ptr = (uint16*)output + (line.y * 1024) +
-              ((line.interlace && line.interlace_field) ? 512 : 0);
+              ((interlace() && field()) ? 512 : 0);
 uint16 width = (!regs.pseudo_hires && regs.bg_mode != 5 && regs.bg_mode != 6) ? 256 : 512;
   memset(ptr, 0, width * 2 * sizeof(uint16));
 }
+
+#endif //ifdef BPPU_CPP

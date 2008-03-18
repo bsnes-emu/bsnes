@@ -1,3 +1,5 @@
+#ifdef SCPU_CPP
+
 /*****
  * These 3 functions control bus timing for the CPU.
  * cpu_io is an I/O cycle, and always 6 clock cycles long.
@@ -119,3 +121,5 @@ alwaysinline void sCPU::op_writedp(uint32 addr, uint8 data) {
 alwaysinline void sCPU::op_writesp(uint32 addr, uint8 data) {
   op_write((regs.s + (addr & 0xffff)) & 0xffff, data);
 }
+
+#endif //ifdef SCPU_CPP

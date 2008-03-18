@@ -1,5 +1,5 @@
 #include <AL/al.h>
-#include <AL/alut.h>
+#include <AL/alc.h>
 
 #include <ruby/ruby.h>
 
@@ -172,13 +172,10 @@ public:
 
     settings.synchronize = true;
     settings.frequency = 22050;
-
-    alutInit(0, NULL);
   }
 
   ~pAudioOpenAL() {
     term();
-    alutExit();
   }
 };
 

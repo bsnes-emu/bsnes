@@ -1,8 +1,10 @@
+#ifdef SCPU_CPP
+
 void sCPU::run_auto_joypad_poll() {
-uint16 joy1 = 0, joy2 = 0;
-  for(int i = 0; i < 16; i++) {
-    joy1 |= (uint16)snes.port_read(0) ? (0x8000 >> i) : 0;
-    joy2 |= (uint16)snes.port_read(1) ? (0x8000 >> i) : 0;
+  uint16_t joy1 = 0, joy2 = 0;
+  for(unsigned i = 0; i < 16; i++) {
+    joy1 |= (uint16_t)snes.input.port_read(0) ? (0x8000 >> i) : 0;
+    joy2 |= (uint16_t)snes.input.port_read(1) ? (0x8000 >> i) : 0;
   }
 
   status.joy1l = joy1;
@@ -17,3 +19,5 @@ uint16 joy1 = 0, joy2 = 0;
   status.joy4l = 0x00;
   status.joy4h = 0x00;
 }
+
+#endif //ifdef SCPU_CPP

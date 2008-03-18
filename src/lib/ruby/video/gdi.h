@@ -6,7 +6,7 @@ public:
   uintptr_t get(Setting);
   bool set(Setting, uintptr_t);
 
-  bool lock(uint16_t *&data, unsigned &pitch);
+  bool lock(uint32_t *&data, unsigned &pitch);
   void unlock();
 
   void refresh(unsigned width, unsigned height);

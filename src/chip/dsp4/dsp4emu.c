@@ -1,3 +1,5 @@
+#ifdef DSP4_CPP
+
 //DSP-4 emulator code
 //Copyright (c) 2004-2006 Dreamer Nom, John Weidman, Kris Bleakley, Nach, z80 gaiden
 
@@ -2144,3 +2146,5 @@ void DSP4GetByte()
     dsp4_byte = 0xff;
   }
 }
+
+#endif //ifdef DSP4_CPP

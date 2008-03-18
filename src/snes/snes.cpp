@@ -1,6 +1,5 @@
 #include "../base.h"
-
-cothread_t co_active_ = 0;
+#define SNES_CPP
 
 SNES     snes;
 BSXBase  bsxbase;
@@ -43,14 +42,14 @@ void SNES::init() {
   obc1.init();
   st010.init();
 
-  video_init();
-  audio_init();
-  input_init();
+  video.init();
+  audio.init();
+  input.init();
   snesinterface.init();
 }
 
 void SNES::term() {
-  audio_term();
+  audio.term();
   snesinterface.term();
 }
 
@@ -76,12 +75,12 @@ void SNES::power() {
   if(cartridge.info.obc1)     obc1.power();
   if(cartridge.info.st010)    st010.power();
 
-  for(int i = 0x2100; i <= 0x213f; i++) memory::mmio.map(i, ppu);
-  for(int i = 0x2140; i <= 0x217f; i++) memory::mmio.map(i, cpu);
-  for(int i = 0x2180; i <= 0x2183; i++) memory::mmio.map(i, cpu);
-  for(int i = 0x4016; i <= 0x4017; i++) memory::mmio.map(i, cpu);
-  for(int i = 0x4200; i <= 0x421f; i++) memory::mmio.map(i, cpu);
-  for(int i = 0x4300; i <= 0x437f; i++) memory::mmio.map(i, cpu);
+  for(uint16_t i = 0x2100; i <= 0x213f; i++) memory::mmio.map(i, ppu);
+  for(uint16_t i = 0x2140; i <= 0x217f; i++) memory::mmio.map(i, cpu);
+  for(uint16_t i = 0x2180; i <= 0x2183; i++) memory::mmio.map(i, cpu);
+  for(uint16_t i = 0x4016; i <= 0x4017; i++) memory::mmio.map(i, cpu);
+  for(uint16_t i = 0x4200; i <= 0x421f; i++) memory::mmio.map(i, cpu);
+  for(uint16_t i = 0x4300; i <= 0x437f; i++) memory::mmio.map(i, cpu);
 
   if(cartridge.info.bsxbase)  bsxbase.enable();
   if(cartridge.info.bsxcart)  bsxcart.enable();
@@ -96,7 +95,7 @@ void SNES::power() {
   if(cartridge.info.obc1)     obc1.enable();
   if(cartridge.info.st010)    st010.enable();
 
-  video_update();
+  video.update();
 }
 
 void SNES::reset() {
@@ -121,36 +120,19 @@ void SNES::reset() {
   if(cartridge.info.obc1)     obc1.reset();
   if(cartridge.info.st010)    st010.reset();
 
-  video_update();
+  video.update();
 }
 
 void SNES::scanline() {
-  video_scanline();
+  video.scanline();
 
-//draw before the start of the next frame, to make the
-//video output seem more responsive to controller input
   if(cpu.vcounter() == 241) {
-    video_update();
+    video.update();
     scheduler.exit();
   }
 }
 
 void SNES::frame() {}
-
-/*****
- * PAL/NTSC
- *****/
-
-void SNES::set_region(uint8 new_region) {
-  if(new_region == NTSC) {
-    snes_region = NTSC;
-  } else if(new_region == PAL) {
-    snes_region = PAL;
-  } else {
-    alert("Unsupported region : %0.2x", new_region);
-  }
-}
-
-uint8 SNES::region() { return snes_region; }
-
+void SNES::set_region(Region region) { snes_region = region; }
+SNES::Region SNES::region() { return snes_region; }
 SNES::SNES() {}

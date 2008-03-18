@@ -1,4 +1,6 @@
 #include "../base.h"
+#define CPU_CPP
+
 #include "dcpu.cpp"
 
 CPU::CPU() {

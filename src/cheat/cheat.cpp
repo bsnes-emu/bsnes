@@ -10,24 +10,24 @@ Cheat cheat;
  *****/
 
 bool Cheat::decode(char *str, uint32 &addr, uint8 &data, uint8 &type) {
-string t, part;
+  string t, part;
   strcpy(t, str);
   strlower(t());
   if(strlen(t) == 8 || (strlen(t) == 9 && t()[6] == ':')) {
-    type = CT_PRO_ACTION_REPLAY;
+    type = ProActionReplay;
     replace(t, ":", "");
-  uint32 r = strhex((const char*)t);
+    uint32 r = strhex((const char*)t);
     addr = r >> 8;
     data = r & 0xff;
     return true;
   } else if(strlen(t) == 9 && t()[4] == '-') {
-    type = CT_GAME_GENIE;
+    type = GameGenie;
     replace(t, "-", "");
     strtr(t, "df4709156bc8a23e", "0123456789abcdef");
-  uint32 r = strhex((const char*)t);
-  //8421 8421 8421 8421 8421 8421
-  //abcd efgh ijkl mnop qrst uvwx
-  //ijkl qrst opab cduv wxef ghmn
+    uint32 r = strhex((const char*)t);
+    //8421 8421 8421 8421 8421 8421
+    //abcd efgh ijkl mnop qrst uvwx
+    //ijkl qrst opab cduv wxef ghmn
     addr = (!!(r & 0x002000) << 23) | (!!(r & 0x001000) << 22) |
            (!!(r & 0x000800) << 21) | (!!(r & 0x000400) << 20) |
            (!!(r & 0x000020) << 19) | (!!(r & 0x000010) << 18) |
@@ -47,10 +47,10 @@ string t, part;
 }
 
 bool Cheat::encode(char *str, uint32 addr, uint8 data, uint8 type) {
-  if(type == CT_PRO_ACTION_REPLAY) {
+  if(type == ProActionReplay) {
     sprintf(str, "%0.6x:%0.2x", addr, data);
     return true;
-  } else if(type == CT_GAME_GENIE) {
+  } else if(type == GameGenie) {
   uint32 r = addr;
     addr = (!!(r & 0x008000) << 23) | (!!(r & 0x004000) << 22) |
            (!!(r & 0x002000) << 21) | (!!(r & 0x001000) << 20) |
@@ -79,9 +79,9 @@ bool Cheat::encode(char *str, uint32 addr, uint8 data, uint8 type) {
  *****/
 
 uint Cheat::mirror_address(uint addr) {
-  if((addr & 0x40e000) != 0x0000)return addr;
-//8k WRAM mirror
-//$[00-3f|80-bf]:[0000-1fff] -> $7e:[0000-1fff]
+  if((addr & 0x40e000) != 0x0000) return addr;
+  //8k WRAM mirror
+  //$[00-3f|80-bf]:[0000-1fff] -> $7e:[0000-1fff]
   return (0x7e0000 + (addr & 0x1fff));
 }
 
@@ -90,8 +90,8 @@ void Cheat::set(uint32 addr) {
 
   mask[addr >> 3] |= 1 << (addr & 7);
   if((addr & 0xffe000) == 0x7e0000) {
-  //mirror $7e:[0000-1fff] to $[00-3f|80-bf]:[0000-1fff]
-  uint mirror;
+    //mirror $7e:[0000-1fff] to $[00-3f|80-bf]:[0000-1fff]
+    uint mirror;
     for(int x = 0; x <= 0x3f; x++) {
       mirror = ((0x00 + x) << 16) + (addr & 0x1fff);
       mask[mirror >> 3] |= 1 << (mirror & 7);
@@ -104,16 +104,16 @@ void Cheat::set(uint32 addr) {
 void Cheat::clear(uint32 addr) {
   addr = mirror_address(addr);
 
-//is there more than one cheat code using the same address
-//(and likely a different override value) that is enabled?
-//if so, do not clear code lookup table entry for this address.
-uint8 r;
+  //is there more than one cheat code using the same address
+  //(and likely a different override value) that is enabled?
+  //if so, do not clear code lookup table entry for this address.
+  uint8 r;
   if(read(addr, r) == true)return;
 
   mask[addr >> 3] &= ~(1 << (addr & 7));
   if((addr & 0xffe000) == 0x7e0000) {
-  //mirror $7e:[0000-1fff] to $[00-3f|80-bf]:[0000-1fff]
-  uint mirror;
+    //mirror $7e:[0000-1fff] to $[00-3f|80-bf]:[0000-1fff]
+    uint mirror;
     for(int x = 0; x <= 0x3f; x++) {
       mirror = ((0x00 + x) << 16) + (addr & 0x1fff);
       mask[mirror >> 3] &= ~(1 << (mirror & 7));
@@ -133,13 +133,13 @@ uint8 r;
 bool Cheat::read(uint32 addr, uint8 &data) {
   addr = mirror_address(addr);
   for(int i = 0; i < cheat_count; i++) {
-    if(enabled(i) == false)continue;
+    if(enabled(i) == false) continue;
     if(addr == mirror_address(index[i].addr)) {
       data = index[i].data;
       return true;
     }
   }
-//code not found, or code is disabled
+  //code not found, or code is disabled
   return false;
 }
 
@@ -148,8 +148,9 @@ bool Cheat::read(uint32 addr, uint8 &data) {
  * enabled. if any are, make sure the cheat system is on.
  * otherwise, turn cheat system off to speed up emulation.
  *****/
+
 void Cheat::update_cheat_status() {
-  for(int i = 0; i < cheat_count; i++) {
+  for(unsigned i = 0; i < cheat_count; i++) {
     if(index[i].enabled) {
       cheat_enabled = true;
       return;
@@ -163,11 +164,11 @@ void Cheat::update_cheat_status() {
  *****/
 
 bool Cheat::add(bool enable, char *code, char *desc) {
-  if(cheat_count >= CHEAT_LIMIT)return false;
+  if(cheat_count >= CheatLimit) return false;
 
-uint32 addr, len;
-uint8  data, type;
-  if(decode(code, addr, data, type) == false)return false;
+  uint32 addr, len;
+  uint8  data, type;
+  if(decode(code, addr, data, type) == false) return false;
 
   index[cheat_count].enabled = enable;
   index[cheat_count].addr = addr;
@@ -188,17 +189,17 @@ uint8  data, type;
 }
 
 bool Cheat::edit(uint32 n, bool enable, char *code, char *desc) {
-  if(n >= cheat_count)return false;
+  if(n >= cheat_count) return false;
 
-uint32 addr, len;
-uint8  data, type;
-  if(decode(code, addr, data, type) == false)return false;
+  uint32 addr, len;
+  uint8  data, type;
+  if(decode(code, addr, data, type) == false) return false;
 
-//disable current code and clear from code lookup table
+  //disable current code and clear from code lookup table
   index[n].enabled = false;
   clear(index[n].addr);
 
-//update code and enable in code lookup table
+  //update code and enable in code lookup table
   index[n].enabled = enable;
   index[n].addr = addr;
   index[n].data = data;
@@ -217,9 +218,9 @@ uint8  data, type;
 }
 
 bool Cheat::remove(uint32 n) {
-  if(n >= cheat_count)return false;
+  if(n >= cheat_count) return false;
 
-  for(int i = n; i < cheat_count; i++) {
+  for(unsigned i = n; i < cheat_count; i++) {
     index[i].enabled = index[i + 1].enabled;
     index[i].addr    = index[i + 1].addr;
     index[i].data    = index[i + 1].data;
@@ -233,7 +234,7 @@ bool Cheat::remove(uint32 n) {
 }
 
 bool Cheat::get(uint32 n, bool &enable, uint32 &addr, uint8 &data, char *code, char *desc) {
-  if(n >= cheat_count)return false;
+  if(n >= cheat_count) return false;
   enable = index[n].enabled;
   addr   = index[n].addr;
   data   = index[n].data;
@@ -247,19 +248,19 @@ bool Cheat::get(uint32 n, bool &enable, uint32 &addr, uint8 &data, char *code, c
  *****/
 
 bool Cheat::enabled(uint32 n) {
-  if(n >= cheat_count)return false;
+  if(n >= cheat_count) return false;
   return index[n].enabled;
 }
 
 void Cheat::enable(uint32 n) {
-  if(n >= cheat_count)return;
+  if(n >= cheat_count) return;
   index[n].enabled = true;
   set(index[n].addr);
   update_cheat_status();
 }
 
 void Cheat::disable(uint32 n) {
-  if(n >= cheat_count)return;
+  if(n >= cheat_count) return;
   index[n].enabled = false;
   clear(index[n].addr);
   update_cheat_status();
@@ -274,16 +275,16 @@ void Cheat::disable(uint32 n) {
 /* ... */
 
 bool Cheat::load(const char *fn) {
-string data;
+  string data;
   if(!fread(data, fn)) return false;
   replace(data, "\r\n", "\n");
   qreplace(data, "=", ",");
   qreplace(data, " ", "");
 
-lstring line;
+  lstring line;
   split(line, "\n", data);
-  for(int i = 0; i < ::count(line); i++) {
-  lstring part;
+  for(unsigned i = 0; i < ::count(line); i++) {
+    lstring part;
     split(part, ",", line[i]);
     if(::count(part) != 3) continue;
     trim(part[2], "\"");
@@ -294,9 +295,9 @@ lstring line;
 }
 
 bool Cheat::save(const char *fn) {
-FILE *fp = fopen(fn, "wb");
+  FILE *fp = fopen(fn, "wb");
   if(!fp) return false;
-  for(int i = 0; i < cheat_count; i++) {
+  for(unsigned i = 0; i < cheat_count; i++) {
     fprintf(fp, "%9s = %8s, \"%s\"\r\n",
       index[i].code,
       index[i].enabled ? "enabled" : "disabled",
@@ -314,7 +315,7 @@ void Cheat::clear() {
   cheat_enabled = false;
   cheat_count = 0;
   memset(mask, 0, 0x200000);
-  for(int i = 0; i <= CHEAT_LIMIT; i++) {
+  for(unsigned i = 0; i <= CheatLimit; i++) {
     index[i].enabled = false;
     index[i].addr = 0x000000;
     index[i].data = 0x00;

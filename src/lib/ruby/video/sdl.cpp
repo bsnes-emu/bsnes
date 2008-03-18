@@ -42,10 +42,10 @@ public:
     return false;
   }
 
-  bool lock(uint16_t *&data, unsigned &pitch) {
+  bool lock(uint32_t *&data, unsigned &pitch) {
     if(SDL_MUSTLOCK(buffer)) SDL_LockSurface(buffer);
     pitch = buffer->pitch;
-    return data = (uint16_t*)buffer->pixels;
+    return data = (uint32_t*)buffer->pixels;
   }
 
   void unlock() {
@@ -81,10 +81,10 @@ public:
     sprintf(env, "SDL_WINDOWID=%ld", settings.handle);
     putenv(env);
     SDL_InitSubSystem(SDL_INIT_VIDEO);
-    screen = SDL_SetVideoMode(2560, 1600, 16, SDL_HWSURFACE);
+    screen = SDL_SetVideoMode(2560, 1600, 32, SDL_HWSURFACE);
     buffer = SDL_CreateRGBSurface(SDL_HWSURFACE,
       1024, 1024,
-      16, 0xf800, 0x07e0, 0x001f, 0x0000
+      32, 0x00ff0000, 0x0000ff00, 0x000000ff, 0x00000000
     );
     return true;
   }
@@ -101,7 +101,7 @@ public:
 bool VideoSDL::cap(Setting setting) { return p.cap(setting); }
 uintptr_t VideoSDL::get(Setting setting) { return p.get(setting); }
 bool VideoSDL::set(Setting setting, uintptr_t param) { return p.set(setting, param); }
-bool VideoSDL::lock(uint16_t *&data, unsigned &pitch) { return p.lock(data, pitch); }
+bool VideoSDL::lock(uint32_t *&data, unsigned &pitch) { return p.lock(data, pitch); }
 void VideoSDL::unlock() { p.unlock(); }
 void VideoSDL::clear() { p.clear(); }
 void VideoSDL::refresh(unsigned width, unsigned height) { p.refresh(width, height); }

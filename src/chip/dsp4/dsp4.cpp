@@ -1,4 +1,5 @@
 #include "../../base.h"
+#define DSP4_CPP
 
 namespace DSP4i {
   inline uint16 READ_WORD(uint8 *addr) {

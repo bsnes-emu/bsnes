@@ -4,10 +4,10 @@ void keydown(uint16_t key) {
   if(window_main.focused()) {
     if(key == input_manager.gui.load) load_rom();
     if(key == input_manager.gui.pause) {
-      _pause_ = !_pause_; //toggle pause state
-      if(_pause_) {
+      app.pause = !app.pause; //toggle pause state
+      if(app.pause) {
         audio.clear();
-        if(cartridge.loaded()) window_main.status.set_text("(Paused)");
+        if(cartridge.loaded()) update_status();
       }
     }
     if(key == input_manager.gui.reset) reset();
@@ -100,41 +100,59 @@ void update_software_filter(uint software_filter) {
 }
 
 void update_speed_regulation(uint speed) {
-  config::system.speed = max(1U, min(speed, 5U));
+  config::system.speed_regulation = speed <= 5 ? speed : 0;
+
+  //adjust audio frequency to match selected speed setting
   if(audio.cap(Audio::Frequency)) {
-    switch(config::system.speed) {
-      case 1: audio.set(Audio::Frequency, 16000); break;
-      case 2: audio.set(Audio::Frequency, 24000); break;
-      case 3: audio.set(Audio::Frequency, 32000); break;
-      case 4: audio.set(Audio::Frequency, 48000); break;
-      case 5: audio.set(Audio::Frequency, 64000); break;
+    switch(config::system.speed_regulation) {
+      case 0: audio.set(Audio::Frequency, 32000); break; //disabled
+      case 1: audio.set(Audio::Frequency, 16000); break; //slowest (50%)
+      case 2: audio.set(Audio::Frequency, 24000); break; //slow (75%)
+      case 3: audio.set(Audio::Frequency, 32000); break; //normal (100%)
+      case 4: audio.set(Audio::Frequency, 48000); break; //fast (150%)
+      case 5: audio.set(Audio::Frequency, 64000); break; //fastest (200%)
     }
+  }
+
+  //do not regulate speed when speed regulation is disabled
+  if(audio.cap(Audio::Synchronize)) {
+    audio.set(Audio::Synchronize, config::system.speed_regulation != 0);
   }
 }
 
-void update_frame_counter() {
+void update_status() {
   if(!cartridge.loaded()) {
     window_main.status.set_text("");
-    return;
-  }
-
-  if(_pause_ || _autopause_) return;
-
-  if(ppu.status.frames_updated) {
+  } else if(app.pause || app.autopause) {
+    window_main.status.set_text("(paused)");
+  } else if(ppu.status.frames_updated) {
     ppu.status.frames_updated = false;
-    window_main.status.set_text(string()
-      << (int)ppu.status.frames_executed
-      << (snes.region() == SNES::NTSC ? " / 60 fps" : " / 50 fps")
-    );
+
+    unsigned max_framerate = snes.region() == SNES::NTSC ? 60 : 50;
+    switch(config::system.speed_regulation) {
+      case 0: max_framerate = 0; break;
+      case 1: max_framerate = unsigned(0.50 * max_framerate); break;
+      case 2: max_framerate = unsigned(0.75 * max_framerate); break;
+      case 3: break;
+      case 4: max_framerate = unsigned(1.50 * max_framerate); break;
+      case 5: max_framerate = unsigned(2.00 * max_framerate); break;
+    }
+
+    string output = (const char*)config::misc.status_text;
+    replace(output, "%f", string() << (int)ppu.status.frames_executed);
+    replace(output, "%m", string() << (int)max_framerate);
+    replace(output, "%n", cartridge.info.filename);
+    replace(output, "%t", cartridge.info.name);
+    window_main.status.set_text(output);
   }
 }
 
 void update_video_settings() {
   load_video_settings();
 
-uint width  = 256;
-uint height = video_settings.region == 0 ? 224 : 239;
-uint multiplier = minmax<1, 5>(video_settings.multiplier);
+  uint width  = 256;
+  uint height = video_settings.region == 0 ? 224 : 239;
+  uint multiplier = minmax<1, 5>(video_settings.multiplier);
   width  *= multiplier;
   height *= multiplier;
   if(video_settings.aspect_correction == true) {
@@ -171,27 +189,43 @@ uint multiplier = minmax<1, 5>(video_settings.multiplier);
     } break;
   }
 
-uint filter, standard;
+  libfilter::FilterInterface::FilterType filter;
   switch(video_settings.software_filter) { default:
-    case 0: filter = VIDEOFILTER_DIRECT;  break;
-    case 1: filter = VIDEOFILTER_NTSC;    break;
-    case 2: filter = VIDEOFILTER_HQ2X;    break;
-    case 3: filter = VIDEOFILTER_SCALE2X; break;
+    case 0: filter = libfilter::FilterInterface::Direct;   break;
+    case 1: filter = libfilter::FilterInterface::Scanline; break;
+    case 2: filter = libfilter::FilterInterface::Scale2x;  break;
+    case 3: filter = libfilter::FilterInterface::HQ2x;     break;
+    case 4: filter = libfilter::FilterInterface::NTSC;     break;
   }
 
+  libfilter::filter.set(filter);
+
+  SNES::Video::Mode mode;
   switch(video_settings.region) { default:
-    case 0: standard = SNES::VIDEOSTANDARD_NTSC; break;
-    case 1: standard = SNES::VIDEOSTANDARD_PAL;  break;
+    case 0: mode = SNES::Video::ModeNTSC; break;
+    case 1: mode = SNES::Video::ModePAL;  break;
   }
 
-  snes.set_video_filter(filter);
-  snes.set_video_standard(standard);
+  snes.video.set_mode(mode);
 
   video.set(Video::Synchronize, video_settings.synchronize);
   video.set(Video::Filter, video_settings.hardware_filter);
 
-//update main window video mode checkbox settings
+  //update main window video mode checkbox settings
   window_main.update_menu_settings();
+}
+
+void update_opacity() {
+  //convert opacity from 50-100 (percentage) to 128-255 (8-bit alpha)
+  unsigned opacity = max(50, min(100, config::misc.opacity));
+  opacity = unsigned(256.0 / 100.0 * opacity);
+  opacity = max(128, min(255, opacity));
+
+  window_settings.set_opacity(opacity);
+  window_input_capture.set_opacity(opacity);
+  window_bsxloader.set_opacity(opacity);
+  window_stloader.set_opacity(opacity);
+  window_about.set_opacity(opacity);
 }
 
 void toggle_fullscreen() {
@@ -224,7 +258,7 @@ bool load_rom(char *fn) {
   replace(dir[0], "\\", "/");
   if(strlen(dir[0]) && !strend(dir[0], "/")) strcat(dir[0], "/");
 
-//append base path if rom path is relative
+  //append base path if rom path is relative
   if(strbegin(dir[0], "./")) {
     ltrim(dir[0], "./");
     strcpy(dir[1], dir[0]);
@@ -232,20 +266,21 @@ bool load_rom(char *fn) {
     strcat(dir[0], dir[1]);
   }
 
-  return hiro().file_load(0, fn,
+  return hiro().file_open(0, fn,
+    dir[0],
     "SNES images;*.smc,*.sfc,*.swc,*.fig,*.bs,*.st"
-  #if defined(GZIP_SUPPORT)
+    #if defined(GZIP_SUPPORT)
     ",*.gz,*.z,*.zip"
-  #endif
-  #if defined(JMA_SUPPORT)
+    #endif
+    #if defined(JMA_SUPPORT)
     ",*.jma"
-  #endif
-    "|All files;*.*",
-    dir[0]);
+    #endif
+    "|All files;*.*"
+  );
 }
 
 void load_rom() {
-char fn[PATH_MAX];
+  char fn[PATH_MAX];
   if(load_rom(fn) == false) return;
   load_cart_normal(fn);
 }
@@ -262,7 +297,7 @@ void load_cart_normal(const char *filename) {
   if(cartridge.info.st011)   alert("Warning: unsupported ST011 chip detected.");
   if(cartridge.info.st018)   alert("Warning: unsupported ST018 chip detected.");
 
-  _pause_ = false;
+  app.pause = false;
   snes.power();
   window_cheat_editor.refresh();
 }
@@ -273,7 +308,7 @@ void load_cart_bsx(const char *base, const char *slot) {
   if(cartridge.loaded() == true) cartridge.unload();
   cartridge.load_cart_bsx(base, slot);
 
-  _pause_ = false;
+  app.pause = false;
   snes.power();
   window_cheat_editor.refresh();
 }
@@ -284,7 +319,7 @@ void load_cart_bsc(const char *base, const char *slot) {
   if(cartridge.loaded() == true) cartridge.unload();
   cartridge.load_cart_bsc(base, slot);
 
-  _pause_ = false;
+  app.pause = false;
   snes.power();
   window_cheat_editor.refresh();
 }
@@ -295,7 +330,7 @@ void load_cart_st(const char *base, const char *slotA, const char *slotB) {
   if(cartridge.loaded() == true) cartridge.unload();
   cartridge.load_cart_st(base, slotA, slotB);
 
-  _pause_ = false;
+  app.pause = false;
   snes.power();
   window_cheat_editor.refresh();
 }
@@ -306,7 +341,7 @@ void unload_rom() {
     video.clear();
     audio.clear();
   }
-  window_main.status.set_text("");
+  event::update_status();
   window_cheat_editor.refresh();
 }
 

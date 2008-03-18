@@ -1,4 +1,5 @@
 #include "../../base.h"
+#define DSP3_CPP
 
 namespace DSP3i {
   #define bool8 uint8

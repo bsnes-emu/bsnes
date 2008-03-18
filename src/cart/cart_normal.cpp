@@ -1,14 +1,16 @@
+#ifdef CART_CPP
+
 void Cartridge::load_cart_normal(const char *filename) {
   if(!filename || !*filename) return;
 
-uint8 *data;
-uint size;
+  uint8_t *data = 0;
+  unsigned size;
   if(load_file(filename, data, size) == false) return;
   strcpy(cart.fn, filename);
 
   load_begin(CartridgeNormal);
 
-//load ROM data, ignore 512-byte header if detected
+  //load ROM data, ignore 512-byte header if detected
   if((size & 0x7fff) != 512) {
     cart.rom = (uint8*)malloc(cart.rom_size = size);
     memcpy(cart.rom, data, size);
@@ -34,8 +36,14 @@ uint size;
   }
 
   load_end();
+
+  //set base filename
+  strcpy(info.filename, cart.fn);
+  get_base_filename(info.filename);
 }
 
 void Cartridge::unload_cart_normal() {
   if(cart.ram) save_file(get_save_filename(cart.fn, "srm"), cart.ram, cart.ram_size);
 }
+
+#endif //ifdef CART_CPP

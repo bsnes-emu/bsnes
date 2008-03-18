@@ -1,28 +1,36 @@
 namespace config {
 
 configuration& config() {
-static configuration config;
+  static configuration config;
   return config;
 }
 
+integral_setting File::autodetect_type(config(), "file.autodetect_type",
+  "Auto-detect file type by inspecting file header, rather than by file extension.\n"
+  "In other words, if a .zip file is renamed to .smc, it will still be correctly\n"
+  "identified as a .zip file. However, there is an infinitesimal (1:~500,000,000)\n"
+  "chance of a false detection when loading an uncompressed image file, if this\n"
+  "option is enabled.",
+  integral_setting::boolean, false);
+
 string file_updatepath(const char *req_file, const char *req_path) {
-string file(req_file);
+  string file(req_file);
   replace(file, "\\", "/");
   if(!req_path || strlen(req_path) == 0) { return file; }
 
-string path(req_path);
+  string path(req_path);
   replace(path, "\\", "/");
   if(!strend(path, "/")) { strcat(path, "/"); }
 
   if(strbegin(path, "./")) {
     ltrim(path(), "./");
-  string temp;
+    string temp;
     strcpy(temp, config::path.base);
     strcat(temp, path);
     strcpy(path, temp);
   }
 
-lstring part;
+  lstring part;
   split(part, "/", file);
   strcat(path, part[count(part) - 1]);
   return path;
@@ -33,34 +41,16 @@ string_setting Path::base("path.base",
 string_setting Path::rom(config(), "path.rom",
   "Default path to look for ROM files in (\"\" = use default directory)", "");
 string_setting Path::save(config(), "path.save",
-  "Default path for all save RAM and cheat files (\"\" = use current directory)", "");
+  "Default path for all save RAM files (\"\" = use current directory)", "");
+string_setting Path::cheat(config(), "path.cheat",
+  "Default path for all cheat files (\"\" = use current directory)", "");
 string_setting Path::bsx(config(), "path.bsx", "", "");
 string_setting Path::st(config(), "path.st", "", "");
 
-integral_setting SNES::gamma_ramp(config(), "snes.colorfilter.gamma_ramp",
-  "Use precalculated TV-style gamma ramp", integral_setting::boolean, true);
-integral_setting SNES::sepia(config(), "snes.colorfilter.sepia",
-  "Convert color to sepia tone", integral_setting::boolean, false);
-integral_setting SNES::grayscale(config(), "snes.colorfilter.grayscale",
-  "Convert color to grayscale tone", integral_setting::boolean, false);
-integral_setting SNES::invert(config(), "snes.colorfilter.invert",
-  "Invert output image colors", integral_setting::boolean, false);
-integral_setting SNES::contrast(config(), "snes.colorfilter.contrast",
-  "Contrast", integral_setting::decimal, 0);
-integral_setting SNES::brightness(config(), "snes.colorfilter.brightness",
-  "Brightness", integral_setting::decimal, 0);
-integral_setting SNES::gamma(config(), "snes.colorfilter.gamma",
-  "Gamma", integral_setting::decimal, 80);
-
-integral_setting SNES::ntsc_merge_fields(config(), "snes.ntsc_merge_fields",
-  "Merge fields in NTSC video filter\n"
-  "Set to true if using filter at any refresh rate other than 60hz\n"
-  "", integral_setting::boolean, true);
-
 integral_setting SNES::controller_port0(config(), "snes.controller_port_1",
-  "Controller attached to SNES port 1", integral_setting::decimal, ::SNES::DEVICEID_JOYPAD1);
+  "Controller attached to SNES port 1", integral_setting::decimal, ::SNES::Input::DeviceIDJoypad1);
 integral_setting SNES::controller_port1(config(), "snes.controller_port_2",
-  "Controller attached to SNES port 2", integral_setting::decimal, ::SNES::DEVICEID_JOYPAD2);
+  "Controller attached to SNES port 2", integral_setting::decimal, ::SNES::Input::DeviceIDJoypad2);
 
 integral_setting CPU::ntsc_clock_rate(config(), "cpu.ntsc_clock_rate",
   "NTSC S-CPU clock rate (in hz)", integral_setting::decimal, 21477272);
@@ -126,4 +116,4 @@ integral_setting PPU::oam_pri1_enable("ppu.oam_pri1_enable", "Enable OAM Priorit
 integral_setting PPU::oam_pri2_enable("ppu.oam_pri2_enable", "Enable OAM Priority 2", integral_setting::boolean, true);
 integral_setting PPU::oam_pri3_enable("ppu.oam_pri3_enable", "Enable OAM Priority 3", integral_setting::boolean, true);
 
-};
+} //namespace config

@@ -1,3 +1,5 @@
+#ifdef CART_CPP
+
 void Cartridge::load_cart_bsc(const char *base, const char *slot) {
   if(!base || !*base) return;
 
@@ -5,8 +7,8 @@ void Cartridge::load_cart_bsc(const char *base, const char *slot) {
   strcpy(bs.fn, slot ? slot : "");
   load_begin(CartridgeBSC);
 
-uint8 *data;
-uint size;
+  uint8_t *data = 0;
+  unsigned size;
   load_file(cart.fn, data, size);
   cart.rom = data, cart.rom_size = size;
 
@@ -34,8 +36,21 @@ uint size;
   }
 
   load_end();
+
+  //set base filename
+  strcpy(info.filename, cart.fn);
+  get_base_filename(info.filename);
+  if(*bs.fn) {
+    char filenameBS[PATH_MAX];
+    strcpy(filenameBS, bs.fn);
+    get_base_filename(filenameBS);
+    strcat(info.filename, " + ");
+    strcat(info.filename, filenameBS);
+  }
 }
 
 void Cartridge::unload_cart_bsc() {
   if(cart.ram) save_file(get_save_filename(cart.fn, "srm"), cart.ram, cart.ram_size);
 }
+
+#endif //ifdef CART_CPP

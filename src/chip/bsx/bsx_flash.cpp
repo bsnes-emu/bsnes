@@ -1,3 +1,5 @@
+#ifdef BSX_CPP
+
 void BSXFlash::init() {}
 void BSXFlash::enable() {}
 
@@ -107,3 +109,5 @@ void BSXFlash::write(uint addr, uint8 data) {
     }
   }
 }
+
+#endif //ifdef BSX_CPP

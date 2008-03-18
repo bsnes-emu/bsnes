@@ -1,5 +1,4 @@
-#ifndef NALL_MATH_CPP
-#define NALL_MATH_CPP
+#ifdef NALL_STRING_CPP
 
 static int eval_integer(const char *&s) {
   if(!*s) throw "nall::bad_eval_integer";
@@ -147,4 +146,4 @@ bool strmath(const char *s, int &result) {
   }
 }
 
-#endif //ifndef NALL_MATH_CPP
+#endif //ifdef NALL_STRING_CPP

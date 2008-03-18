@@ -1,3 +1,5 @@
+#ifdef CPU_CPP
+
 uint8  CPU::dreadb(uint32 addr) {
   if((addr & 0x40ffff) >= 0x2000 && (addr & 0x40ffff) <= 0x5fff) {
   //$[00-3f|80-bf]:[2000-5fff]
@@ -423,7 +425,7 @@ uint8 op2 = dreadb(pc.d);
   strcat(s, t);
   strcat(s, " ");
 
-  sprintf(t, "V:%3d H:%4d", vcounter(), hclock());
+  sprintf(t, "V:%3d H:%4d", vcounter(), hcounter());
   strcat(s, t);
 }
 
@@ -473,3 +475,5 @@ static uint8 op_len_tbl[256] = {
   if(len == 6)return (regs.e || regs.p.x) ? 2 : 3;
   return len;
 }
+
+#endif //ifdef CPU_CPP

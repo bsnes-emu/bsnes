@@ -1,17 +1,23 @@
-#include "ui_main.cpp"
-#include "ui_about.cpp"
-#include "ui_message.cpp"
+#include "resource.cpp"
 
-#include "loader/ui_bsxloader.cpp"
-#include "loader/ui_stloader.cpp"
+#include "base/main.cpp"
+#include "base/about.cpp"
+#include "base/message.cpp"
 
-#include "settings/ui_settings.cpp"
-#include "settings/ui_rastersettings.cpp"
-#include "settings/ui_inputconfig.cpp"
-#include "settings/ui_cheateditor.cpp"
-#include "settings/ui_advanced.cpp"
+#include "loader/bsxloader.cpp"
+#include "loader/stloader.cpp"
+
+#include "settings/settings.cpp"
+#include "settings/rastersettings.cpp"
+#include "settings/inputconfig.cpp"
+#include "settings/pathsettings.cpp"
+#include "settings/cheateditor.cpp"
+#include "settings/advanced.cpp"
 
 void ui_init() {
+  hiro().disable_screensaver();
+  resource::init();
+
   window_main.setup();
   window_about.setup();
   window_message.setup();
@@ -21,16 +27,15 @@ void ui_init() {
 
   window_raster_settings.setup();
   window_input_config.setup();
+  window_path_settings.setup();
   window_cheat_editor.setup();
   window_advanced.setup();
   window_settings.setup();
 
+  event::update_opacity();
   event::update_video_settings(); //call first time to resize main window and update menubar
   window_main.show();
   while(hiro().pending()) hiro().run();
-
-  //needed only by VideoGDI (default is RGB565)
-  if(config::system.video == "gdi") snes.set_video_pixel_format(SNES::PIXELFORMAT_RGB555);
 
   video.driver(config::system.video);
   audio.driver(config::system.audio);
@@ -39,7 +44,7 @@ void ui_init() {
   video.set(Video::Handle, window_main.view.handle());
   video.set(Video::Synchronize, false);
   audio.set(Audio::Handle, window_main.handle());
-  audio.set(Audio::Synchronize, (bool)config::system.regulate_speed);
+  audio.set(Audio::Synchronize, config::system.speed_regulation != 0);
   audio.set(Audio::Frequency, 32000);
   input.set(Input::Handle, window_main.handle());
 

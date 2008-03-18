@@ -1,10 +1,14 @@
-FILE *pcmfp;
+class Audio {
+public:
+  //if a filename is not specified, one will be generated
+  //automatically ("audio%0.3d.wav")
+  void log_enable(const char *fn = 0);
+  void log_disable();
 
-//if a filename is not specified, one will be generated
-//automatically ("audio%0.3d.wav")
-  void log_audio_enable(const char *fn = 0);
-  void log_audio_disable();
+  void update(uint16 l_sample, uint16 r_sample);
+  void init();
+  void term();
 
-  void audio_update(uint16 l_sample, uint16 r_sample);
-  void audio_init();
-  void audio_term();
+private:
+  FILE *pcmfp;
+} audio;

@@ -1,3 +1,5 @@
+#ifdef CART_CPP
+
 void Cartridge::load_cart_bsx(const char *base, const char *slot) {
   if(!base || !*base) return;
 
@@ -10,8 +12,8 @@ void Cartridge::load_cart_bsx(const char *base, const char *slot) {
   info.mapper = BSXROM;
   info.region = NTSC;
 
-uint8 *data;
-uint size;
+  uint8_t *data = 0;
+  unsigned size;
   load_file(cart.fn, data, size);
   cart.rom = data, cart.rom_size = size;
   cart.ram = 0, cart.ram_size = 0;
@@ -37,9 +39,14 @@ uint size;
   }
 
   load_end();
+
+  strcpy(info.filename, !*bs.fn ? cart.fn : bs.fn);
+  get_base_filename(info.filename);
 }
 
 void Cartridge::unload_cart_bsx() {
   save_file(get_save_filename(cart.fn, "srm"), bsxcart.sram.handle (), bsxcart.sram.size ());
   save_file(get_save_filename(cart.fn, "psr"), bsxcart.psram.handle(), bsxcart.psram.size());
 }
+
+#endif //ifdef CART_CPP

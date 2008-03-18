@@ -1,3 +1,5 @@
+#ifdef BPPU_CPP
+
 /*****
  * bsnes mode7 renderer
  *
@@ -142,3 +144,5 @@ void bPPU::render_line_mode7(uint8 bg, uint8 pri0_pos, uint8 pri1_pos) {
 }
 
 #undef CLIP
+
+#endif //ifdef BPPU_CPP

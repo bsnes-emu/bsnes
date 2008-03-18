@@ -30,7 +30,7 @@ public:
   bool cap(Video::Setting setting);
   uintptr_t get(Video::Setting setting);
   bool set(Video::Setting setting, uintptr_t param);
-  bool lock(uint16_t *&data, unsigned &pitch);
+  bool lock(uint32_t *&data, unsigned &pitch);
   void unlock();
   void clear();
   void refresh(unsigned width, unsigned height);

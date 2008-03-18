@@ -1,4 +1,5 @@
 #include "../base.h"
+#define CART_CPP
 
 #include "cart_normal.cpp"
 #include "cart_bsx.cpp"
@@ -82,12 +83,9 @@ void Cartridge::load_end() {
   memory::stBrom.write_protect(true);
   memory::stBram.write_protect(false);
 
-char fn[PATH_MAX];
-  strcpy(fn, cart.fn);
-  modify_extension(fn, "cht");
-  if(fexists(fn)) {
+  if(fexists(get_cheat_filename(cart.fn, "cht"))) {
     cheat.clear();
-    cheat.load(fn);
+    cheat.load(cheatfn);
   }
 
   cart.loaded = true;
@@ -114,11 +112,11 @@ bool Cartridge::unload() {
   safe_free(stB.rom);
   safe_free(stB.ram);
 
-char fn[PATH_MAX];
+  char fn[PATH_MAX];
   strcpy(fn, cart.fn);
   modify_extension(fn, "cht");
-  if(cheat.count() > 0 || fexists(fn)) {
-    cheat.save(fn);
+  if(cheat.count() > 0 || fexists(get_cheat_filename(cart.fn, "cht"))) {
+    cheat.save(cheatfn);
     cheat.clear();
   }
 

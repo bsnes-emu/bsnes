@@ -1,3 +1,5 @@
+#ifdef SMEMORY_CPP
+
 void sBus::map_generic() {
   switch(cartridge.mapper()) {
     case Cartridge::LoROM: {
@@ -81,10 +83,12 @@ void sBus::map_generic_sram() {
   map(MapLinear, 0x20, 0x3f, 0x6000, 0x7fff, memory::cartram);
   map(MapLinear, 0xa0, 0xbf, 0x6000, 0x7fff, memory::cartram);
 
-//research shows only games with very large ROM/RAM sizes require MAD-1 memory mapping of SRAM
-//otherwise, default to safer, larger SRAM address window
-uint16 addr_hi = (memory::cartrom.size() > 0x200000 || memory::cartram.size() > 32 * 1024) ? 0x7fff : 0xffff;
+  //research shows only games with very large ROM/RAM sizes require MAD-1 memory mapping of SRAM
+  //otherwise, default to safer, larger SRAM address window
+  uint16 addr_hi = (memory::cartrom.size() > 0x200000 || memory::cartram.size() > 32 * 1024) ? 0x7fff : 0xffff;
   map(MapLinear, 0x70, 0x7f, 0x0000, addr_hi, memory::cartram);
   if(cartridge.info.mapper != Cartridge::LoROM) return;
   map(MapLinear, 0xf0, 0xff, 0x0000, addr_hi, memory::cartram);
 }
+
+#endif //ifdef SMEMORY_CPP

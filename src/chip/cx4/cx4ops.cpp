@@ -1,3 +1,5 @@
+#ifdef CX4_CPP
+
 //Sprite Functions
 void Cx4::op00() {
   switch(reg[0x4d]) {
@@ -220,3 +222,5 @@ void Cx4::op89() {
   str(0, 0x054336);
   str(1, 0xffffff);
 }
+
+#endif //ifdef CX4_CPP

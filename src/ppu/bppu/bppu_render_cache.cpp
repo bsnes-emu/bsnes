@@ -1,3 +1,5 @@
+#ifdef BPPU_CPP
+
 #define render_bg_tile_line_2bpp(mask) \
   col  = !!(d0 & mask) << 0; \
   col += !!(d1 & mask) << 1; \
@@ -132,3 +134,5 @@ void bPPU::clear_tiledata_cache() {
   memset(bg_tiledata_state[TILE_4BIT], 0,   2048);
   memset(bg_tiledata_state[TILE_8BIT], 0,   1024);
 }
+
+#endif //ifdef BPPU_CPP

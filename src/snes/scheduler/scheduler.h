@@ -1,31 +1,28 @@
 class Scheduler {
 public:
+  cothread_t thread_snes;
+  cothread_t thread_cpu;
+  cothread_t thread_smp;
+  cothread_t thread_ppu; //currently unused
+  cothread_t thread_dsp;
 
-cothread_t thread_snes;
-cothread_t thread_cpu;
-cothread_t thread_smp;
-cothread_t thread_ppu; //currently unused
-cothread_t thread_dsp;
+  enum ActiveThread {
+    THREAD_CPU,
+    THREAD_SMP,
+    THREAD_PPU,
+    THREAD_DSP,
+  };
 
-enum ActiveThread {
-  THREAD_CPU,
-  THREAD_SMP,
-  THREAD_PPU,
-  THREAD_DSP,
-};
+  struct {
+    uint cpu_freq;
+    uint smp_freq;
 
-struct {
-  uint cpu_freq;
-  uint smp_freq;
-  uint ppu_freq;
-  uint dsp_freq;
+    ActiveThread active;
+    int64 cpusmp;
+    int64 smpdsp;
+  } clock;
 
-  ActiveThread active;
-  int64 cpusmp;
-  int64 smpdsp;
-} clock;
-
-//
+  // CPU <> SMP
 
   alwaysinline void sync_cpusmp() {
     if(clock.cpusmp < 0) {
@@ -41,7 +38,7 @@ struct {
     }
   }
 
-//
+  // SMP <> DSP
 
   alwaysinline void sync_smpdsp() {
     if(clock.smpdsp < 0) {
@@ -57,26 +54,24 @@ struct {
     }
   }
 
-//
+  // Timing
 
   alwaysinline void addclocks_cpu(uint clocks) {
     clock.cpusmp -= clocks * (uint64)clock.smp_freq;
-    if(clock.cpusmp < -(250000 * (int64)20000000)) { sync_cpusmp(); }
+    if(clock.cpusmp < -(250000 * (int64)20000000)) sync_cpusmp();
   }
 
   alwaysinline void addclocks_smp(uint clocks) {
     clock.cpusmp += clocks * (uint64)clock.cpu_freq;
-    if(clock.cpusmp > +(250000 * (int64)20000000)) { sync_smpcpu(); }
-    clock.smpdsp -= clocks * (uint64)clock.dsp_freq;
+    if(clock.cpusmp > +(250000 * (int64)20000000)) sync_smpcpu();
+    clock.smpdsp -= clocks;
     sync_smpdsp();
   }
 
   alwaysinline void addclocks_dsp(uint clocks) {
-    clock.smpdsp += clocks * (uint64)clock.smp_freq;
+    clock.smpdsp += clocks;
     sync_dspsmp();
   }
-
-//
 
   void enter();
   void exit();

@@ -1,10 +1,12 @@
+#ifdef SCPU_CPP
+
 uint8 sCPU::pio_status() {
   return status.pio;
 }
 
 //WMDATA
 uint8 sCPU::mmio_r2180() {
-uint8 r = bus.read(0x7e0000 | status.wram_addr);
+  uint8 r = bus.read(0x7e0000 | status.wram_addr);
   status.wram_addr = (status.wram_addr + 1) & 0x01ffff;
   return r;
 }
@@ -41,7 +43,7 @@ void sCPU::mmio_w4016(uint8 data) {
   status.joypad_strobe_latch = !!(data & 1);
 
   if(status.joypad_strobe_latch == 1) {
-    snes.poll_input();
+    snes.input.poll();
   }
 }
 
@@ -52,8 +54,8 @@ void sCPU::mmio_w4016(uint8 data) {
 //TODO: test whether strobe latch of zero returns
 //realtime or buffered status of joypadN.b
 uint8 sCPU::mmio_r4016() {
-uint8 r = regs.mdr & 0xfc;
-  r |= (uint8)snes.port_read(0);
+  uint8 r = regs.mdr & 0xfc;
+  r |= (uint8)snes.input.port_read(0);
   return r;
 }
 
@@ -62,8 +64,8 @@ uint8 r = regs.mdr & 0xfc;
 //4-2 = Always 1 (pins are connected to GND)
 //1-0 = Joypad serial data
 uint8 sCPU::mmio_r4017() {
-uint8 r = (regs.mdr & 0xe0) | 0x1c;
-  r |= (uint8)snes.port_read(1);
+  uint8 r = (regs.mdr & 0xe0) | 0x1c;
+  r |= (uint8)snes.input.port_read(1);
   return r;
 }
 
@@ -167,7 +169,7 @@ void sCPU::mmio_w420d(uint8 data) {
 //6-4 = MDR
 //3-0 = CPU (5a22) version
 uint8 sCPU::mmio_r4210() {
-uint8 r = (regs.mdr & 0x70);
+  uint8 r = (regs.mdr & 0x70);
   r |= (uint8)(rdnmi()) << 7;
   r |= (cpu_version & 0x0f);
   return r;
@@ -177,7 +179,7 @@ uint8 r = (regs.mdr & 0x70);
 //7   = IRQ acknowledge
 //6-0 = MDR
 uint8 sCPU::mmio_r4211() {
-uint8 r = (regs.mdr & 0x7f);
+  uint8 r = (regs.mdr & 0x7f);
   r |= (uint8)(timeup()) << 7;
   return r;
 }
@@ -188,16 +190,16 @@ uint8 r = (regs.mdr & 0x7f);
 //5-1 = MDR
 //0   = JOYPAD acknowledge
 uint8 sCPU::mmio_r4212() {
-uint8 r = (regs.mdr & 0x3e);
-uint16 vs = !overscan() ? 225 : 240;
+  uint8 r = (regs.mdr & 0x3e);
+  uint16 vs = ppu.overscan() == false ? 225 : 240;
 
-//auto joypad polling
+  //auto joypad polling
   if(status.vcounter >= vs && status.vcounter <= (vs + 2))r |= 0x01;
 
-//hblank
-  if(status.hclock <= 2 || status.hclock >= 1096)r |= 0x40;
+  //hblank
+  if(status.hcounter <= 2 || status.hcounter >= 1096)r |= 0x40;
 
-//vblank
+  //vblank
   if(status.vcounter >= vs)r |= 0x80;
 
   return r;
@@ -375,40 +377,40 @@ void sCPU::mmio_power() {
 }
 
 void sCPU::mmio_reset() {
-//$2181-$2183
+  //$2181-$2183
   status.wram_addr = 0x000000;
 
-//$4016-$4017
+  //$4016-$4017
   status.joypad_strobe_latch = 0;
   status.joypad1_bits = ~0;
   status.joypad2_bits = ~0;
 
-//$4200
+  //$4200
   status.nmi_enabled      = false;
   status.hirq_enabled     = false;
   status.virq_enabled     = false;
   status.auto_joypad_poll = false;
 
-//$4201
+  //$4201
   status.pio = 0xff;
 
-//$4202-$4203
+  //$4202-$4203
   status.mul_a = 0xff;
   status.mul_b = 0xff;
 
-//$4204-$4206
+  //$4204-$4206
   status.div_a = 0xffff;
   status.div_b = 0xff;
 
-//$4207-$420a
+  //$4207-$420a
   status.hirq_pos = 0x01ff;
   status.virq_pos = 0x01ff;
 
-//$4214-$4217
+  //$4214-$4217
   status.r4214 = 0x0000;
   status.r4216 = 0x0000;
 
-//$4218-$421f
+  //$4218-$421f
   status.joy1l = 0x00;
   status.joy1h = 0x00;
   status.joy2l = 0x00;
@@ -422,55 +424,55 @@ void sCPU::mmio_reset() {
 uint8 sCPU::mmio_read(uint addr) {
   addr &= 0xffff;
 
-//APU
+  //APU
   if((addr & 0xffc0) == 0x2140) { //$2140-$217f
     scheduler.sync_cpusmp();
     return smp.port_read(addr & 3);
   }
 
-//DMA
+  //DMA
   if((addr & 0xff80) == 0x4300) { //$4300-$437f
-  uint i = (addr >> 4) & 7;
+    uint i = (addr >> 4) & 7;
     switch(addr & 0xf) {
-    case 0x0: return mmio_r43x0(i);
-    case 0x1: return mmio_r43x1(i);
-    case 0x2: return mmio_r43x2(i);
-    case 0x3: return mmio_r43x3(i);
-    case 0x4: return mmio_r43x4(i);
-    case 0x5: return mmio_r43x5(i);
-    case 0x6: return mmio_r43x6(i);
-    case 0x7: return mmio_r43x7(i);
-    case 0x8: return mmio_r43x8(i);
-    case 0x9: return mmio_r43x9(i);
-    case 0xa: return mmio_r43xa(i);
-    case 0xb: return mmio_r43xb(i);
-    case 0xc: return regs.mdr; //unmapped
-    case 0xd: return regs.mdr; //unmapped
-    case 0xe: return regs.mdr; //unmapped
-    case 0xf: return mmio_r43xb(i); //mirror of $43xb
+      case 0x0: return mmio_r43x0(i);
+      case 0x1: return mmio_r43x1(i);
+      case 0x2: return mmio_r43x2(i);
+      case 0x3: return mmio_r43x3(i);
+      case 0x4: return mmio_r43x4(i);
+      case 0x5: return mmio_r43x5(i);
+      case 0x6: return mmio_r43x6(i);
+      case 0x7: return mmio_r43x7(i);
+      case 0x8: return mmio_r43x8(i);
+      case 0x9: return mmio_r43x9(i);
+      case 0xa: return mmio_r43xa(i);
+      case 0xb: return mmio_r43xb(i);
+      case 0xc: return regs.mdr; //unmapped
+      case 0xd: return regs.mdr; //unmapped
+      case 0xe: return regs.mdr; //unmapped
+      case 0xf: return mmio_r43xb(i); //mirror of $43xb
     }
   }
 
   switch(addr) {
-  case 0x2180: return mmio_r2180();
-  case 0x4016: return mmio_r4016();
-  case 0x4017: return mmio_r4017();
-  case 0x4210: return mmio_r4210();
-  case 0x4211: return mmio_r4211();
-  case 0x4212: return mmio_r4212();
-  case 0x4213: return mmio_r4213();
-  case 0x4214: return mmio_r4214();
-  case 0x4215: return mmio_r4215();
-  case 0x4216: return mmio_r4216();
-  case 0x4217: return mmio_r4217();
-  case 0x4218: return mmio_r4218();
-  case 0x4219: return mmio_r4219();
-  case 0x421a: return mmio_r421a();
-  case 0x421b: return mmio_r421b();
-  case 0x421c: return mmio_r421c();
-  case 0x421d: return mmio_r421d();
-  case 0x421e: return mmio_r421e();
-  case 0x421f: return mmio_r421f();
+    case 0x2180: return mmio_r2180();
+    case 0x4016: return mmio_r4016();
+    case 0x4017: return mmio_r4017();
+    case 0x4210: return mmio_r4210();
+    case 0x4211: return mmio_r4211();
+    case 0x4212: return mmio_r4212();
+    case 0x4213: return mmio_r4213();
+    case 0x4214: return mmio_r4214();
+    case 0x4215: return mmio_r4215();
+    case 0x4216: return mmio_r4216();
+    case 0x4217: return mmio_r4217();
+    case 0x4218: return mmio_r4218();
+    case 0x4219: return mmio_r4219();
+    case 0x421a: return mmio_r421a();
+    case 0x421b: return mmio_r421b();
+    case 0x421c: return mmio_r421c();
+    case 0x421d: return mmio_r421d();
+    case 0x421e: return mmio_r421e();
+    case 0x421f: return mmio_r421f();
   }
 
   return regs.mdr;
@@ -479,56 +481,58 @@ uint8 sCPU::mmio_read(uint addr) {
 void sCPU::mmio_write(uint addr, uint8 data) {
   addr &= 0xffff;
 
-//APU
+  //APU
   if((addr & 0xffc0) == 0x2140) { //$2140-$217f
     scheduler.sync_cpusmp();
     port_write(addr & 3, data);
     return;
   }
 
-//DMA
+  //DMA
   if((addr & 0xff80) == 0x4300) { //$4300-$437f
   uint i = (addr >> 4) & 7;
     switch(addr & 0xf) {
-    case 0x0: mmio_w43x0(i, data); return;
-    case 0x1: mmio_w43x1(i, data); return;
-    case 0x2: mmio_w43x2(i, data); return;
-    case 0x3: mmio_w43x3(i, data); return;
-    case 0x4: mmio_w43x4(i, data); return;
-    case 0x5: mmio_w43x5(i, data); return;
-    case 0x6: mmio_w43x6(i, data); return;
-    case 0x7: mmio_w43x7(i, data); return;
-    case 0x8: mmio_w43x8(i, data); return;
-    case 0x9: mmio_w43x9(i, data); return;
-    case 0xa: mmio_w43xa(i, data); return;
-    case 0xb: mmio_w43xb(i, data); return;
-    case 0xc: return; //unmapped
-    case 0xd: return; //unmapped
-    case 0xe: return; //unmapped
-    case 0xf: mmio_w43xb(i, data); return; //mirror of $43xb
+      case 0x0: mmio_w43x0(i, data); return;
+      case 0x1: mmio_w43x1(i, data); return;
+      case 0x2: mmio_w43x2(i, data); return;
+      case 0x3: mmio_w43x3(i, data); return;
+      case 0x4: mmio_w43x4(i, data); return;
+      case 0x5: mmio_w43x5(i, data); return;
+      case 0x6: mmio_w43x6(i, data); return;
+      case 0x7: mmio_w43x7(i, data); return;
+      case 0x8: mmio_w43x8(i, data); return;
+      case 0x9: mmio_w43x9(i, data); return;
+      case 0xa: mmio_w43xa(i, data); return;
+      case 0xb: mmio_w43xb(i, data); return;
+      case 0xc: return; //unmapped
+      case 0xd: return; //unmapped
+      case 0xe: return; //unmapped
+      case 0xf: mmio_w43xb(i, data); return; //mirror of $43xb
     }
   }
 
   switch(addr) {
-  case 0x2180: mmio_w2180(data); return;
-  case 0x2181: mmio_w2181(data); return;
-  case 0x2182: mmio_w2182(data); return;
-  case 0x2183: mmio_w2183(data); return;
-  case 0x4016: mmio_w4016(data); return;
-  case 0x4017: return; //unmapped
-  case 0x4200: mmio_w4200(data); return;
-  case 0x4201: mmio_w4201(data); return;
-  case 0x4202: mmio_w4202(data); return;
-  case 0x4203: mmio_w4203(data); return;
-  case 0x4204: mmio_w4204(data); return;
-  case 0x4205: mmio_w4205(data); return;
-  case 0x4206: mmio_w4206(data); return;
-  case 0x4207: mmio_w4207(data); return;
-  case 0x4208: mmio_w4208(data); return;
-  case 0x4209: mmio_w4209(data); return;
-  case 0x420a: mmio_w420a(data); return;
-  case 0x420b: mmio_w420b(data); return;
-  case 0x420c: mmio_w420c(data); return;
-  case 0x420d: mmio_w420d(data); return;
+    case 0x2180: mmio_w2180(data); return;
+    case 0x2181: mmio_w2181(data); return;
+    case 0x2182: mmio_w2182(data); return;
+    case 0x2183: mmio_w2183(data); return;
+    case 0x4016: mmio_w4016(data); return;
+    case 0x4017: return; //unmapped
+    case 0x4200: mmio_w4200(data); return;
+    case 0x4201: mmio_w4201(data); return;
+    case 0x4202: mmio_w4202(data); return;
+    case 0x4203: mmio_w4203(data); return;
+    case 0x4204: mmio_w4204(data); return;
+    case 0x4205: mmio_w4205(data); return;
+    case 0x4206: mmio_w4206(data); return;
+    case 0x4207: mmio_w4207(data); return;
+    case 0x4208: mmio_w4208(data); return;
+    case 0x4209: mmio_w4209(data); return;
+    case 0x420a: mmio_w420a(data); return;
+    case 0x420b: mmio_w420b(data); return;
+    case 0x420c: mmio_w420c(data); return;
+    case 0x420d: mmio_w420d(data); return;
   }
 }
+
+#endif //ifdef SCPU_CPP

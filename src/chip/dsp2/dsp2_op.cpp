@@ -1,3 +1,5 @@
+#ifdef DSP2_CPP
+
 //convert bitmap to bitplane tile
 void DSP2::op01() {
 //op01 size is always 32 bytes input and output
@@ -171,3 +173,5 @@ uint8  pixelarray[512];
     status.output[i] = (pixelarray[i << 1] << 4) | pixelarray[(i << 1) + 1];
   }
 }
+
+#endif //ifdef DSP2_CPP

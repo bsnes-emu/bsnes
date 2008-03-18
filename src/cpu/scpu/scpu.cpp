@@ -1,4 +1,5 @@
 #include "../../base.h"
+#define SCPU_CPP
 
 #include "core/core.cpp"
 #include "dma/dma.cpp"
@@ -7,8 +8,6 @@
 #include "timing/timing.cpp"
 
 void sCPU::power() {
-  status.region = (bool)snes.region();
-
   regs.a = regs.x = regs.y = 0x0000;
   regs.s = 0x01ff;
 
@@ -24,7 +23,7 @@ void sCPU::reset() {
   regs.pc.l = bus.read(0xfffc);
   regs.pc.h = bus.read(0xfffd);
 
-//note: some registers are not fully reset by SNES
+  //note: some registers are not fully reset by SNES
   regs.x.h  = 0x00;
   regs.y.h  = 0x00;
   regs.s.h  = 0x01;

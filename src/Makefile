@@ -1,7 +1,5 @@
 include lib/nall/Makefile.string
-
 prefix = /usr/local
-arch = ARCH_LSB
 
 ################
 ### compiler ###
@@ -37,12 +35,11 @@ endif
 
 ifeq ($(platform),x) # X11
   ruby = video.glx video.xv video.sdl audio.openal audio.oss audio.ao input.sdl input.x
-  arch += PLATFORM_X
   link += `pkg-config --libs gtk+-2.0`
+  link += $(call mklib,Xtst)
   delete = rm -f $1
 else ifeq ($(platform),win) # Windows
   ruby = video.direct3d video.directdraw video.gdi audio.directsound input.directinput
-  arch += PLATFORM_WIN
   link += $(if $(findstring mingw,$(compiler)),-mwindows)
   link += $(call mklib,uuid)
   link += $(call mklib,kernel32)
@@ -61,13 +58,16 @@ endif
 ### ruby ###
 ############
 
+rubyflags =
+rubyflags += $(if $(findstring .sdl,$(ruby)),`sdl-config --cflags`)
+
 link += $(if $(findstring video.direct3d,$(ruby)),$(call mklib,d3d9))
 link += $(if $(findstring video.directdraw,$(ruby)),$(call mklib,ddraw))
 link += $(if $(findstring video.glx,$(ruby)),$(call mklib,GL))
 link += $(if $(findstring video.xv,$(ruby)),$(call mklib,Xv))
 link += $(if $(findstring audio.ao,$(ruby)),$(call mklib,ao))
 link += $(if $(findstring audio.directsound,$(ruby)),$(call mklib,dsound))
-link += $(if $(findstring audio.openal,$(ruby)),$(call mklib,openal) $(call mklib,alut))
+link += $(if $(findstring audio.openal,$(ruby)),$(if $(call streq,$(platform),x),$(call mklib,openal),$(call mklib,openal32)))
 link += $(if $(findstring input.directinput,$(ruby)),$(call mklib,dinput8) $(call mklib,dxguid))
 link += $(if $(findstring input.sdl,$(ruby)),`sdl-config --libs`)
 
@@ -75,7 +75,7 @@ link += $(if $(findstring input.sdl,$(ruby)),`sdl-config --libs`)
 ### main target and dependencies ###
 ####################################
 
-objects = main libco hiro ruby $(ruby) string reader cart cheat \
+objects = main libco hiro ruby libfilter string reader cart cheat \
   memory smemory cpu scpu smp ssmp bdsp ppu bppu snes \
   bsx srtc sdd1 cx4 dsp1 dsp2 dsp3 dsp4 obc1 st010
 
@@ -89,7 +89,6 @@ ifeq ($(enable_jma),true)
   flags += $(call mkdef,JMA_SUPPORT)
 endif
 
-arch := $(patsubst %,$(call mkdef,%),$(arch))
 objects := $(patsubst %,obj/%.$(obj),$(objects))
 rubydef := $(foreach c,$(subst .,_,$(call strupper,$(ruby))),$(call mkdef,$c))
 
@@ -124,47 +123,22 @@ all: build;
 ### main ###
 ############
 
-obj/main.$(obj): ui/main.cpp config/* lib/nall/* lib/ruby/* ui/* ui/loader/* ui/settings/*
-	$(call compile,$(arch))
-
-obj/bsnes.res     : ui/bsnes.rc; rc /r /foobj/bsnes.res ui/bsnes.rc
-obj/bsnesrc.$(obj): ui/bsnes.rc; windres -I data ui/bsnes.rc obj/bsnesrc.$(obj)
-
-############
-### ruby ###
-############
-
-obj/ruby.$(obj)             : lib/ruby/ruby.cpp lib/ruby/*
-	$(call compile,$(rubydef))
-obj/video.direct3d.$(obj)   : lib/ruby/video/direct3d.cpp lib/ruby/video/direct3d.*
-obj/video.directdraw.$(obj) : lib/ruby/video/directdraw.cpp lib/ruby/video/directdraw.*
-obj/video.gdi.$(obj)        : lib/ruby/video/gdi.cpp lib/ruby/video/gdi.*
-obj/video.glx.$(obj)        : lib/ruby/video/glx.cpp lib/ruby/video/glx.*
-obj/video.sdl.$(obj)        : lib/ruby/video/sdl.cpp lib/ruby/video/sdl.*
-	$(call compile,`sdl-config --cflags`)
-obj/video.xv.$(obj)         : lib/ruby/video/xv.cpp lib/ruby/video/xv.*
-obj/audio.ao.$(obj)         : lib/ruby/audio/ao.cpp lib/ruby/audio/ao.*
-obj/audio.directsound.$(obj): lib/ruby/audio/directsound.cpp lib/ruby/audio/directsound.*
-obj/audio.openal.$(obj)     : lib/ruby/audio/openal.cpp lib/ruby/audio/openal.*
-obj/audio.oss.$(obj)        : lib/ruby/audio/oss.cpp lib/ruby/audio/oss.*
-obj/input.directinput.$(obj): lib/ruby/input/directinput.cpp lib/ruby/input/directinput.*
-obj/input.sdl.$(obj)        : lib/ruby/input/sdl.cpp lib/ruby/input/sdl.*
-	$(call compile,`sdl-config --cflags`)
-obj/input.x.$(obj)          : lib/ruby/input/x.cpp lib/ruby/input/x.*
-
-############
-### hiro ###
-############
-
-obj/hiro.$(obj): lib/hiro.cpp lib/hiro.* lib/hiro_gtk/* lib/hiro_win/*
-	$(call compile,$(if $(call streq,$(platform),x),`pkg-config --cflags gtk+-2.0`))
+obj/main.$(obj): ui/main.cpp ui/* ui/base/* ui/loader/* ui/settings/*
+obj/bsnes.res: ui/bsnes.rc; rc /r /foobj/bsnes.res ui/bsnes.rc
+obj/bsnesrc.$(obj): ui/bsnes.rc; windres ui/bsnes.rc obj/bsnesrc.$(obj)
 
 #################
 ### libraries ###
 #################
 
-obj/libco.$(obj): lib/libco.c lib/libco.* lib/libco/*
-obj/string.$(obj): lib/nall/string.cpp lib/nall/*
+obj/ruby.$(obj): lib/ruby/ruby.cpp lib/ruby/*
+	$(call compile,$(rubydef) $(rubyflags))
+obj/hiro.$(obj): lib/hiro/hiro.cpp lib/hiro/* lib/hiro/gtk/* lib/hiro/win/*
+	$(call compile,$(if $(call streq,$(platform),x),`pkg-config --cflags gtk+-2.0`))
+obj/libco.$(obj):     lib/libco/libco.c lib/libco/*
+	$(call compile,-static)
+obj/libfilter.$(obj): lib/libfilter/libfilter.cpp lib/libfilter/*
+obj/string.$(obj):    lib/nall/string.cpp lib/nall/*
 
 #################
 ### utilities ###
@@ -179,7 +153,6 @@ obj/cheat.$(obj) : cheat/cheat.cpp cheat/*
 ##############
 
 obj/memory.$(obj) : memory/memory.cpp memory/*
-obj/bmemory.$(obj): memory/bmemory/bmemory.cpp memory/bmemory/* memory/bmemory/mapper/*
 obj/smemory.$(obj): memory/smemory/smemory.cpp memory/smemory/* memory/smemory/mapper/*
 
 ###########
@@ -270,8 +243,8 @@ build: $(objects)
 	$(strip $(cpp) $(call mkbin,../bsnes) $(objects) $(link))
 
 install:
-	install -D -m 755 ../bsnes $(prefix)/bin/bsnes
-	install -D -m 644 data/bsnes.png $(prefix)/share/icons/bsnes.png
+	install -D -m 755 ../bsnes $(DESTDIR)$(prefix)/bin/bsnes
+	install -D -m 644 data/bsnes.png $(DESTDIR)$(prefix)/share/icons/bsnes.png
 
 clean:
 	-@$(call delete,obj/*.$(obj))

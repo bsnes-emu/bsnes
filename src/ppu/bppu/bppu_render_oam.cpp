@@ -1,3 +1,5 @@
+#ifdef BPPU_CPP
+
 void bPPU::build_sprite_list() {
 uint8 *tableA = oam, *tableB = oam + 512;
 uint8 y_offset = (config::ppu.hack.obj_cache == true) ? 0 : 1;
@@ -78,7 +80,7 @@ int y = line.y - spr->y;
   }
 
   if(regs.oam_interlace == true) {
-    y = (spr->vflip == false) ? (y + line.interlace_field) : (y - line.interlace_field);
+    y = (spr->vflip == false) ? (y + field()) : (y - field());
   }
 
   x &= 511;
@@ -218,3 +220,5 @@ int pri_tbl[4] = { pri0_pos, pri1_pos, pri2_pos, pri3_pos };
 
 #undef setpixel_main
 #undef setpixel_sub
+
+#endif //ifdef BPPU_CPP

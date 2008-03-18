@@ -1,5 +1,4 @@
-#ifndef NALL_MATCH_CPP
-#define NALL_MATCH_CPP
+#ifdef NALL_STRING_CPP
 
 bool match(const char *p, const char *s) {
   const char *p_ = 0, *s_ = 0;
@@ -69,4 +68,4 @@ bool match(const char *p, const char *s) {
   }
 }
 
-#endif //ifndef NALL_MATCH_CPP
+#endif //ifdef NALL_STRING_CPP

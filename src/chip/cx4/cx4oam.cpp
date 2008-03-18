@@ -1,3 +1,5 @@
+#ifdef CX4_CPP
+
 //Build OAM
 void Cx4::op00_00() {
 uint32 oamptr = ram[0x626] << 2;
@@ -217,3 +219,5 @@ uint16 mask2   = 0x3f3f;
     destptr += 16;
   }
 }
+
+#endif //ifdef CX4_CPP

@@ -1,145 +1,155 @@
 class bPPU : public PPU {
 public:
-uint8 *vram, *oam, *cgram;
-uint8  region;
+  uint8 *vram, *oam, *cgram;
+  uint8 region;
 
-enum { NTSC = 0, PAL = 1 };
-enum { BG1 = 0, BG2 = 1, BG3 = 2, BG4 = 3, OAM = 4, BACK = 5, COL = 5 };
-enum { SC_32x32 = 0, SC_64x32 = 1, SC_32x64 = 2, SC_64x64 = 3 };
+  enum { NTSC = 0, PAL = 1 };
+  enum { BG1 = 0, BG2 = 1, BG3 = 2, BG4 = 3, OAM = 4, BACK = 5, COL = 5 };
+  enum { SC_32x32 = 0, SC_64x32 = 1, SC_32x64 = 2, SC_64x64 = 3 };
 
-struct {
-  uint y;
-  bool interlace;
-  bool interlace_field;
-} line;
+  struct {
+    uint y;
+  } line;
 
-struct {
-//open bus support
-  uint8 ppu1_mdr, ppu2_mdr;
+  struct {
+    bool field;
+    bool interlace;
+    bool overscan;
+  } display;
 
-//bg line counters
-  uint16 bg_y[4];
+  struct {
+    //open bus support
+    uint8 ppu1_mdr, ppu2_mdr;
 
-//$2100
-  bool   display_disabled;
-  uint8  display_brightness;
+    //bg line counters
+    uint16 bg_y[4];
 
-//$2101
-  uint8  oam_basesize;
-  uint8  oam_nameselect;
-  uint16 oam_tdaddr;
+    //$2100
+    bool   display_disabled;
+    uint8  display_brightness;
 
-//$2102-$2103
-  uint16 oam_baseaddr;
-  uint16 oam_addr;
-  bool   oam_priority;
-  uint8  oam_firstsprite;
+    //$2101
+    uint8  oam_basesize;
+    uint8  oam_nameselect;
+    uint16 oam_tdaddr;
 
-//$2104
-  uint8  oam_latchdata;
+    //$2102-$2103
+    uint16 oam_baseaddr;
+    uint16 oam_addr;
+    bool   oam_priority;
+    uint8  oam_firstsprite;
 
-//$2105
-  bool   bg_tilesize[4];
-  bool   bg3_priority;
-  uint8  bg_mode;
+    //$2104
+    uint8  oam_latchdata;
 
-//$2106
-  uint8  mosaic_size;
-  bool   mosaic_enabled[4];
-  uint16 mosaic_countdown;
+    //$2105
+    bool   bg_tilesize[4];
+    bool   bg3_priority;
+    uint8  bg_mode;
 
-//$2107-$210a
-  uint16 bg_scaddr[4];
-  uint8  bg_scsize[4];
+    //$2106
+    uint8  mosaic_size;
+    bool   mosaic_enabled[4];
+    uint16 mosaic_countdown;
 
-//$210b-$210c
-  uint16 bg_tdaddr[4];
+    //$2107-$210a
+    uint16 bg_scaddr[4];
+    uint8  bg_scsize[4];
 
-//$210d-$2114
-  uint8  bg_ofslatch;
-  uint16 m7_hofs, m7_vofs;
-  uint16 bg_hofs[4];
-  uint16 bg_vofs[4];
+    //$210b-$210c
+    uint16 bg_tdaddr[4];
 
-//$2115
-  bool   vram_incmode;
-  uint8  vram_mapping;
-  uint8  vram_incsize;
+    //$210d-$2114
+    uint8  bg_ofslatch;
+    uint16 m7_hofs, m7_vofs;
+    uint16 bg_hofs[4];
+    uint16 bg_vofs[4];
 
-//$2116-$2117
-  uint16 vram_addr;
+    //$2115
+    bool   vram_incmode;
+    uint8  vram_mapping;
+    uint8  vram_incsize;
 
-//$211a
-  uint8  mode7_repeat;
-  bool   mode7_vflip;
-  bool   mode7_hflip;
+    //$2116-$2117
+    uint16 vram_addr;
 
-//$211b-$2120
-  uint8  m7_latch;
-  uint16 m7a, m7b, m7c, m7d, m7x, m7y;
+    //$211a
+    uint8  mode7_repeat;
+    bool   mode7_vflip;
+    bool   mode7_hflip;
 
-//$2121
-  uint16 cgram_addr;
+    //$211b-$2120
+    uint8  m7_latch;
+    uint16 m7a, m7b, m7c, m7d, m7x, m7y;
 
-//$2122
-  uint8  cgram_latchdata;
+    //$2121
+    uint16 cgram_addr;
 
-//$2123-$2125
-  bool   window1_enabled[6];
-  bool   window1_invert [6];
-  bool   window2_enabled[6];
-  bool   window2_invert [6];
+    //$2122
+    uint8  cgram_latchdata;
 
-//$2126-$2129
-  uint8  window1_left, window1_right;
-  uint8  window2_left, window2_right;
+    //$2123-$2125
+    bool   window1_enabled[6];
+    bool   window1_invert [6];
+    bool   window2_enabled[6];
+    bool   window2_invert [6];
 
-//$212a-$212b
-  uint8  window_mask[6];
+    //$2126-$2129
+    uint8  window1_left, window1_right;
+    uint8  window2_left, window2_right;
 
-//$212c-$212d
-  bool   bg_enabled[5], bgsub_enabled[5];
+    //$212a-$212b
+    uint8  window_mask[6];
 
-//$212e-$212f
-  bool   window_enabled[5], sub_window_enabled[5];
+    //$212c-$212d
+    bool   bg_enabled[5], bgsub_enabled[5];
 
-//$2130
-  uint8  color_mask, colorsub_mask;
-  bool   addsub_mode;
-  bool   direct_color;
+    //$212e-$212f
+    bool   window_enabled[5], sub_window_enabled[5];
 
-//$2131
-  bool   color_mode, color_halve;
-  bool   color_enabled[6];
+    //$2130
+    uint8  color_mask, colorsub_mask;
+    bool   addsub_mode;
+    bool   direct_color;
 
-//$2132
-  uint8  color_r, color_g, color_b;
-  uint16 color_rgb;
+    //$2131
+    bool   color_mode, color_halve;
+    bool   color_enabled[6];
 
-//$2133
-//overscan and interlace are checked once per frame to
-//determine if entire frame should be interlaced/non-interlace
-//and overscan adjusted. therefore, the variables act sort of
-//like a buffer, but they do still affect internal rendering
-  bool   mode7_extbg;
-  bool   pseudo_hires;
-  bool   overscan;
-  uint16 scanlines;
-  bool   oam_interlace;
-  bool   interlace;
+    //$2132
+    uint8  color_r, color_g, color_b;
+    uint16 color_rgb;
 
-//$2137
-  uint16 hcounter, vcounter;
-  bool   latch_hcounter, latch_vcounter;
-  bool   counters_latched;
+    //$2133
+    //overscan and interlace are checked once per frame to
+    //determine if entire frame should be interlaced/non-interlace
+    //and overscan adjusted. therefore, the variables act sort of
+    //like a buffer, but they do still affect internal rendering
+    bool   mode7_extbg;
+    bool   pseudo_hires;
+    bool   overscan;
+    uint16 scanlines;
+    bool   oam_interlace;
+    bool   interlace;
 
-//$2139-$213a
-  uint16 vram_readbuffer;
+    //$2137
+    uint16 hcounter, vcounter;
+    bool   latch_hcounter, latch_vcounter;
+    bool   counters_latched;
 
-//$213e
-  bool   time_over, range_over;
-  uint16 oam_itemcount, oam_tilecount;
-} regs;
+    //$2139-$213a
+    uint16 vram_readbuffer;
+
+    //$213e
+    bool   time_over, range_over;
+    uint16 oam_itemcount, oam_tilecount;
+  } regs;
+
+  alwaysinline bool field()     { return display.field;     }
+  alwaysinline bool interlace() { return display.interlace; }
+  alwaysinline bool overscan()  { return display.overscan;  }
+  alwaysinline bool hires()     { return (regs.pseudo_hires || regs.bg_mode == 5 || regs.bg_mode == 6); }
+
   uint8  vram_read  (uint16 addr);
   void   vram_write (uint16 addr, uint8 value);
   uint8  oam_read   (uint16 addr);
@@ -220,37 +230,34 @@ struct {
   uint8  mmio_r213e();            //STAT77
   uint8  mmio_r213f();            //STAT78
 
-  uint8  mmio_read (uint addr);
-  void   mmio_write(uint addr, uint8 data);
+  uint8 mmio_read(uint addr);
+  void mmio_write(uint addr, uint8 data);
 
-  void   latch_counters();
+  void latch_counters();
 
-//PPU render functions
+  //PPU render functions
+  #include "bppu_render.h"
 
-#include "bppu_render.h"
+  uint16 light_table_b[16][32];
+  uint16 light_table_gr[16][32 * 32];
+  uint16 mosaic_table[16][4096];
+  void render_line();
 
-uint16 light_table_b[16][32];
-uint16 light_table_gr[16][32 * 32];
-uint16 mosaic_table[16][4096];
-  void   render_line();
-
-  void   update_oam_status();
-//required functions
-  void   run();
-  void   scanline();
-  void   render_scanline();
-  void   frame();
-  void   power();
-  void   reset();
-
-  bool   scanline_is_hires() { return (regs.pseudo_hires || regs.bg_mode == 5 || regs.bg_mode == 6); }
+  void update_oam_status();
+  //required functions
+  void run();
+  void scanline();
+  void render_scanline();
+  void frame();
+  void power();
+  void reset();
 
   inline uint16 read16(uint8 *addr, uint pos) {
-  #if defined(ARCH_LSB)
+    #if defined(ARCH_LSB)
     return *((uint16*)(addr + pos));
-  #else
+    #else
     return (addr[pos]) | (addr[pos + 1] << 8);
-  #endif
+    #endif
   }
 
   bPPU();

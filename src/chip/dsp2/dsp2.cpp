@@ -1,4 +1,5 @@
 #include "../../base.h"
+#define DSP2_CPP
 
 #include "dsp2_op.cpp"
 

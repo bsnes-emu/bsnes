@@ -1,5 +1,5 @@
 bsnes
-Version: 0.028
+Version: 0.029
 Author: byuu
 
 --------
@@ -17,7 +17,6 @@ Please see license.txt for important licensing information.
 Known Limitations:
 ------------------
 S-CPU
-- Invalid DMA / HDMA transfers not fully emulated
 - Multiply / Divide register delays not implemented
 
 S-PPU

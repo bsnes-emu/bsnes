@@ -1,3 +1,5 @@
+#ifdef BSX_CPP
+
 void BSXCart::init() {
 }
 
@@ -93,3 +95,5 @@ BSXCart::~BSXCart() {
   safe_free(sram_data);
   safe_free(psram_data);
 }
+
+#endif //ifdef BSX_CPP

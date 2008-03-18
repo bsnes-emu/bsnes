@@ -4,15 +4,38 @@ char filename[PATH_MAX + 16] = "bsnes.cfg";
 
 struct System {
   static string_setting video, audio, input;
-  static integral_setting regulate_speed, speed;
+  static integral_setting speed_regulation;
+  static integral_setting gamma_ramp, sepia, grayscale, invert, contrast, brightness, gamma;
 } system;
 
 string_setting System::video(config(), "system.video", "Video hardware interface", "");
 string_setting System::audio(config(), "system.audio", "Audio hardware interface", "");
 string_setting System::input(config(), "system.input", "Input hardware interface", "");
 
-integral_setting System::regulate_speed(config(), "system.regulate_speed", "Regulate speed to 60hz (NTSC) / 50hz (PAL)", integral_setting::boolean, true);
-integral_setting System::speed("system.speed", "Current speed regulation setting (1-5)", integral_setting::decimal, 3);
+integral_setting System::speed_regulation(config(), "system.speed_regulation",
+  "Speed regulation setting\n"
+  "0 = Disabled\n"
+  "1 = Slowest\n"
+  "2 = Slow\n"
+  "3 = Normal\n"
+  "4 = Fast\n"
+  "5 = Fastest",
+  integral_setting::decimal, 3);
+
+integral_setting System::gamma_ramp(config(), "system.colorfilter.gamma_ramp",
+  "Use precalculated TV-style gamma ramp", integral_setting::boolean, true);
+integral_setting System::sepia(config(), "system.colorfilter.sepia",
+  "Convert color to sepia tone", integral_setting::boolean, false);
+integral_setting System::grayscale(config(), "system.colorfilter.grayscale",
+  "Convert color to grayscale tone", integral_setting::boolean, false);
+integral_setting System::invert(config(), "system.colorfilter.invert",
+  "Invert output image colors", integral_setting::boolean, false);
+integral_setting System::contrast(config(), "system.colorfilter.contrast",
+  "Contrast", integral_setting::decimal, 0);
+integral_setting System::brightness(config(), "system.colorfilter.brightness",
+  "Brightness", integral_setting::decimal, 0);
+integral_setting System::gamma(config(), "system.colorfilter.gamma",
+  "Gamma", integral_setting::decimal, 80);
 
 struct Video {
   static integral_setting mode;
@@ -26,7 +49,6 @@ struct Video {
   } fullscreen;
   static integral_setting aspect_ntsc_x, aspect_ntsc_y, aspect_pal_x, aspect_pal_y;
   static integral_setting frameskip;
-  static integral_setting use_vram;
 } video;
 
 //0 = windowed, 1 = fullscreen, 2 = exclusive
@@ -52,9 +74,10 @@ integral_setting Video::Windowed::hardware_filter(config(), "video.windowed.hard
   integral_setting::decimal, 1);
 integral_setting Video::Windowed::software_filter(config(), "video.windowed.software_filter", "Video software filter\n"
   "0 = None\n"
-  "1 = NTSC\n"
-  "2 = HQ2x\n"
-  "3 = Scale2x\n",
+  "1 = Scanline\n"
+  "2 = Scale2x\n"
+  "3 = HQ2x\n"
+  "4 = NTSC\n",
   integral_setting::decimal, 0);
 
 integral_setting Video::Fullscreen::synchronize      (config(), "video.fullscreen.synchronize",       "", integral_setting::boolean, false);
@@ -70,20 +93,16 @@ integral_setting Video::aspect_pal_x (config(), "video.aspect_pal_x",  "", integ
 integral_setting Video::aspect_pal_y (config(), "video.aspect_pal_y",  "", integral_setting::decimal, 23);
 
 integral_setting Video::frameskip("video.frameskip", "Video frameskip", integral_setting::decimal, 0);
-integral_setting Video::use_vram(config(), "video.use_vram", "Use Video RAM instead of System RAM when possible", integral_setting::boolean, true);
 
 struct Audio {
   static integral_setting synchronize;
-  static integral_setting frequency;
   static integral_setting mute;
 } audio;
 integral_setting Audio::synchronize(config(), "audio.synchronize", "Synchronize to audio sample rate", integral_setting::boolean, true);
-integral_setting Audio::frequency(config(), "audio.frequency", "Default audio playback frequency", integral_setting::decimal, 32000);
 integral_setting Audio::mute(config(), "audio.mute", "Mute audio playback", integral_setting::boolean, false);
 
 struct Input {
   static integral_setting capture_mode;
-  static integral_setting axis_resistance;
   static integral_setting allow_invalid_input;
 
   struct Joypad1 {
@@ -113,20 +132,10 @@ integral_setting Input::capture_mode(config(), "input.capture_mode",
   "2 = Pause emulator",
   integral_setting::decimal, 2);
 
-integral_setting Input::axis_resistance(config(), "input.axis_resistance",
-  "Axis resistance for all analog joypads\n"
-  "Affects responsiveness of analog stick movement by specifying what percentage\n"
-  "in any given direction the axis must be pressed to trigger a button press.\n"
-  "In other words, this determines how hard you have to press the analog stick to\n"
-  "simulate pressing e.g. left or right on a digital joypad.\n"
-  "Value is a percentage, from 0 (axis will trigger with virtually any axis movement)\n"
-  "up to 100 (axis must be pressed fully to given corner).\n"
-  "Value affects all four directions of the axis equally.\n"
-  "Note: Values below 10 or above 90 are not recommended and may not work at all.",
-  integral_setting::decimal, 75);
-
 integral_setting Input::allow_invalid_input(config(), "input.allow_invalid_input",
-  "Allow up+down and left+right combinations (not recommended)",
+  "Allow up+down and left+right combinations (not recommended.)\n"
+  "This is not possible on an actual SNES controller, due to its design.\n"
+  "Enabling this option can trigger bugs in certain games.\n",
   integral_setting::boolean, false);
 
 string_setting Input::Joypad1::up    (config(), "input.joypad1.up",     "", "up");
@@ -164,9 +173,18 @@ string_setting Input::GUI::toggle_menubar   (config(), "input.gui.toggle_menubar
 string_setting Input::GUI::toggle_statusbar (config(), "input.gui.toggle_statusbar",  "", "escape");
 
 struct Misc {
-  static integral_setting show_status;
+  static integral_setting opacity;
+  static integral_setting status_enable;
+  static string_setting status_text;
 } misc;
 
-integral_setting Misc::show_status(config(), "misc.show_status", "Display information statusbar", integral_setting::boolean, true);
-
+integral_setting Misc::opacity(config(), "misc.opacity", "Opacity of user interface windows", integral_setting::decimal, 100);
+integral_setting Misc::status_enable(config(), "misc.status_enable", "Display information statusbar", integral_setting::boolean, true);
+string_setting Misc::status_text(config(), "misc.status_text",
+  "Text to print inside statusbar\n"
+  "%n = cartridge file name\n"
+  "%t = internal cartridge header name\n"
+  "%f = executed frames per second\n"
+  "%m = maximum frames per second"
+  "", "%n : %f / %m");
 };

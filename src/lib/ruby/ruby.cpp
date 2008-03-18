@@ -1,8 +1,7 @@
 #include <ruby/ruby.h>
+#include <ruby/ruby_impl.cpp>
 
 namespace ruby {
-
-#include <ruby/ruby.impl.h>
 
 VideoInterface video;
 AudioInterface audio;
@@ -73,7 +72,7 @@ void VideoInterface::term() {
 bool VideoInterface::cap(Video::Setting setting) { return p ? p->cap(setting) : false; }
 uintptr_t VideoInterface::get(Video::Setting setting) { return p ? p->get(setting) : false; }
 bool VideoInterface::set(Video::Setting setting, uintptr_t param) { return p ? p->set(setting, param) : false; }
-bool VideoInterface::lock(uint16_t *&data, unsigned &pitch) { return p ? p->lock(data, pitch) : false; }
+bool VideoInterface::lock(uint32_t *&data, unsigned &pitch) { return p ? p->lock(data, pitch) : false; }
 void VideoInterface::unlock() { if(p) p->unlock(); }
 void VideoInterface::clear() { if(p) p->clear(); }
 void VideoInterface::refresh(unsigned width, unsigned height) { if(p) p->refresh(width, height); }

@@ -1,3 +1,5 @@
+#ifdef SSMP_CPP
+
 uint8 sSMP::op_adc(uint8 x, uint8 y) {
 int16 r = x + y + regs.p.c;
   regs.p.n = !!(r & 0x80);
@@ -120,3 +122,5 @@ uint8 carry = (uint8)regs.p.c << 7;
   regs.p.z = (x == 0);
   return x;
 }
+
+#endif //ifdef SSMP_CPP

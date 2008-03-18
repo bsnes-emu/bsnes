@@ -1,5 +1,4 @@
-#ifndef NALL_STRING_CLASS_CPP
-#define NALL_STRING_CLASS_CPP
+#ifdef NALL_STRING_CPP
 
 size_t count(nall::lstring &str) {
   return str.size();
@@ -220,4 +219,4 @@ char *fdata = (char*)malloc(size + 1);
   return true;
 }
 
-#endif //ifndef NALL_STRING_CLASS_CPP
+#endif //ifdef NALL_STRING_CPP

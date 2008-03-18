@@ -1,4 +1,6 @@
 #include "../../base.h"
+#define SMEMORY_CPP
+
 #include "mapper/system.cpp"
 #include "mapper/generic.cpp"
 #include "mapper/chip.cpp"
@@ -28,7 +30,7 @@ void sBus::load_cart() {
   if(cartridge.info.obc1)  map_obc1();
   if(cartridge.info.st010) map_st010();
 
-  snes.set_region(cartridge.region());
+  snes.set_region(cartridge.region() == Cartridge::NTSC ? SNES::NTSC : SNES::PAL);
 
   is_cart_loaded = true;
 }

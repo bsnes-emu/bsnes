@@ -1,4 +1,3 @@
-#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <d3d9.h>
 
@@ -109,7 +108,7 @@ public:
     uint32_t px, uint32_t py, uint32_t pw, uint32_t ph,
     uint32_t tw, uint32_t th,
     uint32_t x, uint32_t y, uint32_t w, uint32_t h
-  ){
+  ) {
     d3dvertex vertex[4];
     vertex[0].x = vertex[2].x = (double)(x    ) - 0.5;
     vertex[1].x = vertex[3].x = (double)(x + w) - 0.5;
@@ -157,14 +156,14 @@ public:
     }
   }
 
-  bool lock(uint16_t *&data, unsigned &pitch) {
+  bool lock(uint32_t *&data, unsigned &pitch) {
     if(caps.stretchrect == false) {
       texture->GetLevelDesc(0, &d3dsd);
       texture->GetSurfaceLevel(0, &surface);
     }
     surface->LockRect(&d3dlr, 0, flags.lock);
     pitch = d3dlr.Pitch;
-    return data = (uint16_t*)d3dlr.pBits;
+    return data = (uint32_t*)d3dlr.pBits;
   }
 
   void unlock() {
@@ -279,10 +278,10 @@ public:
     device->SetFVF(D3DVERTEX);
 
     if(caps.stretchrect == true) {
-      device->CreateOffscreenPlainSurface(1024, 1024, D3DFMT_R5G6B5,
+      device->CreateOffscreenPlainSurface(1024, 1024, D3DFMT_X8R8G8B8,
         D3DPOOL_DEFAULT, &surface, NULL);
     } else {
-      device->CreateTexture(1024, 1024, 1, flags.t_usage, D3DFMT_R5G6B5,
+      device->CreateTexture(1024, 1024, 1, flags.t_usage, D3DFMT_X8R8G8B8,
         static_cast<D3DPOOL>(flags.t_pool), &texture, NULL);
     }
 
@@ -318,7 +317,7 @@ public:
 bool VideoD3D::cap(Setting setting) { return p.cap(setting); }
 uintptr_t VideoD3D::get(Setting setting) { return p.get(setting); }
 bool VideoD3D::set(Setting setting, uintptr_t param) { return p.set(setting, param); }
-bool VideoD3D::lock(uint16_t *&data, unsigned &pitch) { return p.lock(data, pitch); }
+bool VideoD3D::lock(uint32_t *&data, unsigned &pitch) { return p.lock(data, pitch); }
 void VideoD3D::unlock() { p.unlock(); }
 void VideoD3D::clear() { p.clear(); }
 void VideoD3D::refresh(unsigned width, unsigned height) { p.refresh(width, height); }

@@ -3,7 +3,7 @@ struct Memory {
   virtual uint8 read(uint addr) = 0;
   virtual void write(uint addr, uint8 data) = 0;
 
-enum { WRAP_NONE = 0, WRAP_BANK = 1, WRAP_PAGE = 2 };
+  enum { WRAP_NONE = 0, WRAP_BANK = 1, WRAP_PAGE = 2 };
   virtual uint16 read_word(uint addr, uint wrap = WRAP_NONE);
   virtual void write_word(uint addr, uint16 data, uint wrap = WRAP_NONE);
   virtual uint32 read_long(uint addr, uint wrap = WRAP_NONE);
@@ -69,26 +69,26 @@ class Bus { public:
 
   uint mirror(uint addr, uint size);
   void map(uint addr, Memory &access, uint offset);
-enum MapMode { MapDirect, MapLinear, MapShadow };
+  enum MapMode { MapDirect, MapLinear, MapShadow };
   void map(MapMode mode,
     uint8  bank_lo, uint8  bank_hi,
     uint16 addr_lo, uint16 addr_hi,
     Memory &access, uint offset = 0, uint size = 0);
 
   alwaysinline uint8 read(uint addr) {
-  #if defined(CHEAT_SYSTEM)
+    #if defined(CHEAT_SYSTEM)
     if(cheat.enabled() && cheat.exists(addr)) {
-    uint8 r;
+      uint8 r;
       if(cheat.read(addr, r)) return r;
     }
-  #endif
+    #endif
 
-  Page &p = page[addr >> 8];
+    Page &p = page[addr >> 8];
     return p.access->read(p.offset + addr);
   }
 
   alwaysinline void write(uint addr, uint8 data) {
-  Page &p = page[addr >> 8];
+    Page &p = page[addr >> 8];
     return p.access->write(p.offset + addr, data);
   }
 

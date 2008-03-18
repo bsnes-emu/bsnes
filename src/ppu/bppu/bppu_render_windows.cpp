@@ -1,3 +1,5 @@
+#ifdef BPPU_CPP
+
 void bPPU::build_window_table(uint8 bg, bool mainscreen) {
 uint8  set = 1, clr = 0;
 uint8 *wtbl = (mainscreen == true) ? window[bg].main : window[bg].sub;
@@ -84,3 +86,5 @@ void bPPU::build_window_tables(uint8 bg) {
   build_window_table(bg, true);
   build_window_table(bg, false);
 }
+
+#endif //ifdef BPPU_CPP

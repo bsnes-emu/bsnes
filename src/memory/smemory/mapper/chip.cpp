@@ -1,3 +1,5 @@
+#ifdef SMEMORY_CPP
+
 void sBus::map_cx4() {
   map(MapDirect, 0x00, 0x3f, 0x6000, 0x7fff, cx4);
   map(MapDirect, 0x80, 0xbf, 0x6000, 0x7fff, cx4);
@@ -48,3 +50,5 @@ void sBus::map_st010() {
   map(MapDirect, 0x68, 0x6f, 0x0000, 0x0fff, st010);
   map(MapDirect, 0xe8, 0xef, 0x0000, 0x0fff, st010);
 }
+
+#endif //ifdef SMEMORY_CPP

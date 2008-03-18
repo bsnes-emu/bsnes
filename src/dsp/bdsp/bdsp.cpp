@@ -469,7 +469,7 @@ void bDSP::enter()
 	{
 		// n is currently ignored
 		#define NEXT_CLOCK( n ) \
-			scheduler.addclocks_dsp( 3 );
+			scheduler.addclocks_dsp( 3 * 8 );
 		
 		// Execute clock for a particular voice
 		#define V( clock, voice )   voice_##clock( &m.voices [voice] );
@@ -563,7 +563,7 @@ void bDSP::enter()
 			}
 			
 			// Output sample to DAC
-			snes.audio_update( main_out_l, main_out_r );
+			snes.audio.update( main_out_l, main_out_r );
 			
 			m.t_main_out [0] = 0;
 			m.t_main_out [1] = 0;

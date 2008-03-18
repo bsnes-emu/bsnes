@@ -1,4 +1,3 @@
-#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <ddraw.h>
 
@@ -49,17 +48,17 @@ public:
   }
 
   void clear() {
-  DDBLTFX fx;
+    DDBLTFX fx;
     fx.dwSize = sizeof(DDBLTFX);
     fx.dwFillColor = 0x00000000;
     screen->Blt(0, 0, 0, DDBLT_WAIT | DDBLT_COLORFILL, &fx);
     raster->Blt(0, 0, 0, DDBLT_WAIT | DDBLT_COLORFILL, &fx);
   }
 
-  bool lock(uint16_t *&data, unsigned &pitch) {
+  bool lock(uint32_t *&data, unsigned &pitch) {
     if(raster->Lock(0, &ddsd, DDLOCK_WAIT, 0) != DD_OK) return false;
     pitch = ddsd.lPitch;
-    return data = (uint16_t*)ddsd.lpSurface;
+    return data = (uint32_t*)ddsd.lpSurface;
   }
 
   void unlock() {
@@ -69,18 +68,18 @@ public:
   void refresh(unsigned r_width, unsigned r_height) {
     if(settings.synchronize) {
       for(;;) {
-      BOOL in_vblank;
+        BOOL in_vblank;
         lpdd7->GetVerticalBlankStatus(&in_vblank);
         if(bool(in_vblank) == true) break;
       //Sleep(1);
       }
     }
 
-  HRESULT hr;
-  RECT rd, rs;
+    HRESULT hr;
+    RECT rd, rs;
     SetRect(&rs, 0, 0, r_width, r_height);
 
-  POINT p = { 0, 0 };
+    POINT p = { 0, 0 };
     ClientToScreen(settings.handle, &p);
     GetClientRect(settings.handle, &rd);
     OffsetRect(&rd, p.x, p.y);
@@ -117,10 +116,9 @@ public:
   }
 
   void create_raster() {
-  int depth;
     screen->GetSurfaceDesc(&ddsd);
-    depth = ddsd.ddpfPixelFormat.dwRGBBitCount;
-    if(depth == 15 || depth == 16) goto try_native_surface;
+    int depth = ddsd.ddpfPixelFormat.dwRGBBitCount;
+    if(depth == 32) goto try_native_surface;
 
     memset(&ddsd, 0, sizeof(DDSURFACEDESC2));
     ddsd.dwSize = sizeof(DDSURFACEDESC2);
@@ -131,14 +129,14 @@ public:
 
     ddsd.ddpfPixelFormat.dwSize = sizeof(DDPIXELFORMAT);
     ddsd.ddpfPixelFormat.dwFlags = DDPF_RGB;
-    ddsd.ddpfPixelFormat.dwRGBBitCount = 16;
-    ddsd.ddpfPixelFormat.dwRBitMask = 0xf800;
-    ddsd.ddpfPixelFormat.dwGBitMask = 0x07e0;
-    ddsd.ddpfPixelFormat.dwBBitMask = 0x001f;
+    ddsd.ddpfPixelFormat.dwRGBBitCount = 32;
+    ddsd.ddpfPixelFormat.dwRBitMask = 0xff0000;
+    ddsd.ddpfPixelFormat.dwGBitMask = 0x00ff00;
+    ddsd.ddpfPixelFormat.dwBBitMask = 0x0000ff;
 
     if(lpdd7->CreateSurface(&ddsd, &raster, 0) == DD_OK) return;
 
-  try_native_surface:
+    try_native_surface:
     memset(&ddsd, 0, sizeof(DDSURFACEDESC2));
     ddsd.dwSize = sizeof(DDSURFACEDESC2);
     ddsd.dwFlags = DDSD_CAPS | DDSD_WIDTH | DDSD_HEIGHT;
@@ -146,7 +144,7 @@ public:
     ddsd.dwWidth  = 1024;
     ddsd.dwHeight = 1024;
 
-    lpdd7->CreateSurface(&ddsd, &raster, 0);
+    if(lpdd7->CreateSurface(&ddsd, &raster, 0) == DD_OK) return;
   }
 
   void term() {
@@ -171,7 +169,7 @@ public:
 bool VideoDD::cap(Setting setting) { return p.cap(setting); }
 uintptr_t VideoDD::get(Setting setting) { return p.get(setting); }
 bool VideoDD::set(Setting setting, uintptr_t param) { return p.set(setting, param); }
-bool VideoDD::lock(uint16_t *&data, unsigned &pitch) { return p.lock(data, pitch); }
+bool VideoDD::lock(uint32_t *&data, unsigned &pitch) { return p.lock(data, pitch); }
 void VideoDD::unlock() { p.unlock(); }
 void VideoDD::clear() { p.clear(); }
 void VideoDD::refresh(unsigned width, unsigned height) { p.refresh(width, height); }

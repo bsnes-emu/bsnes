@@ -18,7 +18,7 @@ namespace ruby {
 class pVideoXv {
 public:
   VideoXv &self;
-  uint16_t *buffer;
+  uint32_t *buffer;
   XvImage *xvimage;
   GC gc;
   Display *display;
@@ -48,8 +48,8 @@ public:
     return false;
   }
 
-  bool lock(uint16_t *&data, unsigned &pitch) {
-    pitch = 1024 * 2;
+  bool lock(uint32_t *&data, unsigned &pitch) {
+    pitch = 1024 * 4;
     return data = buffer;
   }
 
@@ -57,25 +57,24 @@ public:
   }
 
   void clear() {
-    memset(buffer, 0, 1024 * 1024 * sizeof(uint16_t));
+    memset(buffer, 0, 1024 * 1024 * sizeof(uint32_t));
     //clear twice in case video is double buffered ...
     refresh(1024, 1024);
     refresh(1024, 1024);
   }
 
-  void refresh(unsigned r_width, unsigned r_height) {
-  Window dw;
-  int d0, d1;
-  unsigned d2, d3;
-  unsigned width, height;
-    XGetGeometry(display, settings.handle, &dw, &d0, &d1, &width, &height, &d2, &d3);
+  void refresh(unsigned width, unsigned height) {
+    XWindowAttributes attributes;
+    XGetWindowAttributes(display, settings.handle, &attributes);
 
-  uint16_t *input  = (uint16_t*)buffer;
-  uint16_t *output = (uint16_t*)xvimage->data;
-    for(int y = 0; y < r_height; y++) {
-      for(int x = 0; x < r_width >> 1; x++) {
-      uint16_t p0 = *input++;
-      uint16_t p1 = *input++;
+    uint32_t *input  = (uint32_t*)buffer;
+    uint16_t *output = (uint16_t*)xvimage->data;
+    for(int y = 0; y < height; y++) {
+      for(int x = 0; x < width >> 1; x++) {
+        uint32_t p0 = *input++;
+        uint32_t p1 = *input++;
+        p0 = ((p0 >> 8) & 0xf800) + ((p0 >> 5) & 0x07e0) + ((p0 >> 3) & 0x001f);
+        p1 = ((p1 >> 8) & 0xf800) + ((p1 >> 5) & 0x07e0) + ((p1 >> 3) & 0x001f);
 
       uint8_t u = (utable[p0] + utable[p1]) >> 1;
       uint8_t v = (vtable[p0] + vtable[p1]) >> 1;
@@ -83,34 +82,21 @@ public:
         *output++ = (u << 8) | ytable[p0];
         *output++ = (v << 8) | ytable[p1];
       }
-      input  += 1024 - r_width;
-      output += 1024 - r_width;
+      input  += 1024 - width;
+      output += 1024 - width;
     }
 
     XvShmPutImage(display, xv_port, settings.handle, gc, xvimage,
-      0, 0, r_width, r_height,
       0, 0, width, height,
+      0, 0, attributes.width, attributes.height,
       true);
   }
 
   bool init() {
-    buffer  = (uint16_t*)malloc(1024 * 1024 * sizeof(uint16_t));
+    buffer  = (uint32_t*)malloc(1024 * 1024 * sizeof(uint32_t));
     display = XOpenDisplay(0);
     screen  = DefaultScreen(display);
     gc      = XCreateGC(display, settings.handle, 0, 0);
-
-    XVisualInfo visual_info;
-           if(XMatchVisualInfo(display, screen, 24, TrueColor,   &visual_info)) {
-    } else if(XMatchVisualInfo(display, screen, 16, TrueColor,   &visual_info)) {
-    } else if(XMatchVisualInfo(display, screen, 15, TrueColor,   &visual_info)) {
-    } else if(XMatchVisualInfo(display, screen,  8, PseudoColor, &visual_info)) {
-    } else if(XMatchVisualInfo(display, screen,  8, GrayScale,   &visual_info)) {
-    } else if(XMatchVisualInfo(display, screen,  8, StaticGray,  &visual_info)) {
-    } else if(XMatchVisualInfo(display, screen,  1, StaticGray,  &visual_info)) {
-    } else {
-      fprintf(stderr, "VideoXv: unable to find suitable video display.\n");
-      return false;
-    }
 
     if(!XShmQueryExtension(display)) {
       fprintf(stderr, "VideoXv: XShm extension not found.\n");
@@ -138,8 +124,7 @@ public:
     const Atom atom = XInternAtom(display, "XV_AUTOPAINT_COLORKEY", true);
     if(atom != None) XvSetPortAttribute(display, xv_port, atom, 1);
 
-    //0x00000003 = 32-bit X8R8G8B8  [xRGB] (few drivers support this mode)
-    //0x32595559 = 16-bit Y8U8,Y8V8 [YUY2] (most drivers support this mode)
+    //0x32595559 = 16-bit Y8U8,Y8V8 (YUY2)
     xvimage = XvShmCreateImage(display, xv_port, 0x32595559, 0, 1024, 1024, &shminfo);
     if(!xvimage) {
       fprintf(stderr, "VideoXv: XShmCreateImage failed.\n");
@@ -202,7 +187,7 @@ public:
 bool VideoXv::cap(Setting setting) { return p.cap(setting); }
 uintptr_t VideoXv::get(Setting setting) { return p.get(setting); }
 bool VideoXv::set(Setting setting, uintptr_t param) { return p.set(setting, param); }
-bool VideoXv::lock(uint16_t *&data, unsigned &pitch) { return p.lock(data, pitch); }
+bool VideoXv::lock(uint32_t *&data, unsigned &pitch) { return p.lock(data, pitch); }
 void VideoXv::unlock() { p.unlock(); }
 void VideoXv::clear() { p.clear(); }
 void VideoXv::refresh(unsigned width, unsigned height) { p.refresh(width, height); }

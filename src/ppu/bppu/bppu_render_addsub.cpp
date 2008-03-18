@@ -1,13 +1,8 @@
+#ifdef BPPU_CPP
+
 /*****
  * Color Addition / Subtraction
  * Thanks to blargg for the optimized algorithms
- *
- * clock() counts for 32768x32768 iterations of addsub(),
- * taken on an Athlon 3500+/DDR266 system:
- *        add = 10594
- *   half_add =  6516
- *        sub = 10579
- *   half_sub = 11860
  *****/
 inline uint16 bPPU::addsub(uint32 x, uint32 y, bool halve) {
   if(!regs.color_mode) {
@@ -28,3 +23,5 @@ inline uint16 bPPU::addsub(uint32 x, uint32 y, bool halve) {
     }
   }
 }
+
+#endif //ifdef BPPU_CPP

@@ -1,3 +1,5 @@
+#ifdef SSMP_CPP
+
 alwaysinline
 void sSMP::add_clocks(uint clocks) {
   scheduler.addclocks_smp(clocks);
@@ -9,3 +11,5 @@ void sSMP::tick_timers() {
   t1.tick();
   t2.tick();
 }
+
+#endif //ifdef SSMP_CPP

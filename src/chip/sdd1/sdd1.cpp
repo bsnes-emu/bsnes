@@ -1,4 +1,5 @@
 #include "../../base.h"
+#define SDD1_CPP
 
 #include "sdd1emu.cpp"
 

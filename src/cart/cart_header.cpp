@@ -1,16 +1,18 @@
-void Cartridge::read_header() {
-uint8 *rom = cart.rom;
-uint index = info.header_index;
-uint8 mapper   = rom[index + MAPPER];
-uint8 rom_type = rom[index + ROM_TYPE];
-uint8 company  = rom[index + COMPANY];
-uint8 region   = rom[index + REGION] & 0x7f;
+#ifdef CART_CPP
 
-//detect presence of BS-X flash cartridge connector (reads extended header information)
-bool has_bsxflash = false;
+void Cartridge::read_header() {
+  uint8 *rom = cart.rom;
+  uint index = info.header_index;
+  uint8 mapper   = rom[index + MAPPER];
+  uint8 rom_type = rom[index + ROM_TYPE];
+  uint8 company  = rom[index + COMPANY];
+  uint8 region   = rom[index + REGION] & 0x7f;
+
+  //detect presence of BS-X flash cartridge connector (reads extended header information)
+  bool has_bsxflash = false;
   if(rom[index - 14] == 'Z') {
     if(rom[index - 11] == 'J') {
-    uint8 n13 = rom[index - 13];
+      uint8 n13 = rom[index - 13];
       if((n13 >= 'A' && n13 <= 'Z') || (n13 >= '0' && n13 <= '9')) {
         if(company == 0x33 || (rom[index - 10] == 0x00 && rom[index - 4] == 0x00)) {
           has_bsxflash = true;
@@ -92,9 +94,9 @@ bool has_bsxflash = false;
   }
 
   if(mapper == 0x30 && rom_type == 0xf6) {
-  //TODO: both ST010 and ST011 share the same mapper + rom_type
-  //need way to determine which is which
-  //for now, default to supported ST010
+    //TODO: both ST010 and ST011 share the same mapper + rom_type.
+    //need way to determine which is which.
+    //for now, default to supported ST010.
     info.st010 = true;
   }
 
@@ -108,53 +110,54 @@ bool has_bsxflash = false;
     info.ram_size = 0;
   }
 
-//0, 1, 13 = NTSC; 2 - 12 = PAL
+  //0, 1, 13 = NTSC; 2 - 12 = PAL
   info.region = (region <= 1 || region >= 13) ? NTSC : PAL;
 
   memcpy(&info.name, &rom[info.header_index + CART_NAME], 21);
   info.name[21] = 0;
+  trim(info.name);
 
-  for(int i = 0; i < 22; i++) {
-    if(info.name[i] & 0x80) {
-      info.name[i] = '?';
-    }
+  //convert undisplayable characters (half-width katakana, etc) to '?' characters
+  for(int i = 0; i < 21; i++) {
+    if(info.name[i] & 0x80) info.name[i] = '?';
   }
+
+  //always display something
+  if(!info.name[0]) strcpy(info.name, "(untitled)");
 }
 
 void Cartridge::find_header() {
-int32 score_lo = 0,
-      score_hi = 0,
-      score_ex = 0;
-uint8 *rom = cart.rom;
+  int32 score_lo = 0, score_hi = 0, score_ex = 0;
+  uint8_t *rom = cart.rom;
 
   if(cart.rom_size < 0x010000) {
-  //cart too small to be anything but lorom
+    //cart too small to be anything but lorom
     info.header_index = 0x007fc0;
     return;
   }
 
-  if((rom[0x7fc0 + MAPPER] & ~0x10) == 0x20)score_lo++;
-  if((rom[0xffc0 + MAPPER] & ~0x10) == 0x21)score_hi++;
+  if((rom[0x7fc0 + MAPPER] & ~0x10) == 0x20) score_lo++;
+  if((rom[0xffc0 + MAPPER] & ~0x10) == 0x21) score_hi++;
 
-  if(rom[0x7fc0 + ROM_TYPE] < 0x08)score_lo++;
-  if(rom[0xffc0 + ROM_TYPE] < 0x08)score_hi++;
+  if(rom[0x7fc0 + ROM_TYPE] < 0x08) score_lo++;
+  if(rom[0xffc0 + ROM_TYPE] < 0x08) score_hi++;
 
-  if(rom[0x7fc0 + ROM_SIZE] < 0x10)score_lo++;
-  if(rom[0xffc0 + ROM_SIZE] < 0x10)score_hi++;
+  if(rom[0x7fc0 + ROM_SIZE] < 0x10) score_lo++;
+  if(rom[0xffc0 + ROM_SIZE] < 0x10) score_hi++;
 
-  if(rom[0x7fc0 + RAM_SIZE] < 0x08)score_lo++;
-  if(rom[0xffc0 + RAM_SIZE] < 0x08)score_hi++;
+  if(rom[0x7fc0 + RAM_SIZE] < 0x08) score_lo++;
+  if(rom[0xffc0 + RAM_SIZE] < 0x08) score_hi++;
 
-  if(rom[0x7fc0 + REGION] < 14)score_lo++;
-  if(rom[0xffc0 + REGION] < 14)score_hi++;
+  if(rom[0x7fc0 + REGION] < 14) score_lo++;
+  if(rom[0xffc0 + REGION] < 14) score_hi++;
 
-  if(rom[0x7fc0 + COMPANY] < 3)score_lo++;
-  if(rom[0xffc0 + COMPANY] < 3)score_hi++;
+  if(rom[0x7fc0 + COMPANY] < 3) score_lo++;
+  if(rom[0xffc0 + COMPANY] < 3) score_hi++;
 
-  if(rom[0x7fc0 + RESH] & 0x80)score_lo += 2;
-  if(rom[0xffc0 + RESH] & 0x80)score_hi += 2;
+  if(rom[0x7fc0 + RESH] & 0x80) score_lo += 2;
+  if(rom[0xffc0 + RESH] & 0x80) score_hi += 2;
 
-uint16 cksum, icksum;
+  uint16 cksum, icksum;
   cksum  = rom[0x7fc0 +  CKSUM] | (rom[0x7fc0 +  CKSUM + 1] << 8);
   icksum = rom[0x7fc0 + ICKSUM] | (rom[0x7fc0 + ICKSUM + 1] << 8);
   if((cksum + icksum) == 0xffff && (cksum != 0) && (icksum != 0)) {
@@ -170,7 +173,7 @@ uint16 cksum, icksum;
   if(cart.rom_size < 0x401000) {
     score_ex = 0;
   } else {
-    if(rom[0x7fc0 + MAPPER] == 0x32)score_lo++;
+    if(rom[0x7fc0 + MAPPER] == 0x32) score_lo++;
     else score_ex += 16;
   }
 
@@ -182,3 +185,5 @@ uint16 cksum, icksum;
     info.header_index = 0x40ffc0;
   }
 }
+
+#endif //ifdef CART_CPP

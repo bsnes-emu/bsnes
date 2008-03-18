@@ -6,15 +6,13 @@
  *****/
 
 class SNESInterface { public:
-  bool video_lock(uint16 *&data, uint &pitch);
-  void video_unlock();
-  void video_refresh();
+  void video_refresh(uint16_t *data, unsigned pitch, unsigned *line, unsigned width, unsigned height);
 
-  void audio_sample(uint16 l_sample, uint16 r_sample);
+  void audio_sample(uint16_t l_sample, uint16_t r_sample);
 
-function<bool ()> input_ready;
+  function<bool ()> input_ready;
   void input_poll();
-  bool input_poll(uint deviceid, uint button);
+  bool input_poll(unsigned deviceid, unsigned button);
 
   void init();
   void term();

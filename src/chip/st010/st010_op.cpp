@@ -1,3 +1,5 @@
+#ifdef ST010_CPP
+
 //ST-010 emulation code - Copyright (C) 2003 The Dumper, Matthew Kendora, Overload, Feather
 //bsnes port - Copyright (C) 2007 byuu
 
@@ -255,3 +257,5 @@ int16 x1, y1;
   writew(0x0010, x1);
   writew(0x0012, y1);
 }
+
+#endif //ifdef ST010_CPP

@@ -1,34 +1,32 @@
 class PPU : public MMIO {
 public:
-uint16 *output;
+  uint16 *output;
 
-//this struct should be read-only to
-//functions outside of this class
-struct {
-  bool   render_output;
+  //this struct should be read-only to
+  //functions outside of this class
+  struct {
+    bool   render_output;
 
-  bool   frame_executed;
-  bool   frames_updated;
-  uint32 frames_rendered;
-  uint32 frames_executed;
-} status;
+    bool   frame_executed;
+    bool   frames_updated;
+    uint32 frames_rendered;
+    uint32 frames_executed;
+  } status;
 
-//PPU1 version number
-//* 1 is known
-//* reported by $213e
-uint8 ppu1_version;
+  //PPU1 version number
+  //* 1 is known
+  //* reported by $213e
+  uint8 ppu1_version;
 
-//PPU2 version number
-//* 1 and 3 are known
-//* reported by $213f
-uint8 ppu2_version;
+  //PPU2 version number
+  //* 1 and 3 are known
+  //* reported by $213f
+  uint8 ppu2_version;
 
-struct scanline_info {
-  bool hires;
-  bool interlace;
-};
-  virtual bool  scanline_is_hires() = 0;
-  virtual void  get_scanline_info(scanline_info *info);
+  virtual bool field() = 0;
+  virtual bool interlace() = 0;
+  virtual bool overscan() = 0;
+  virtual bool hires() = 0;
 
   virtual uint8 vram_read  (uint16 addr) = 0;
   virtual void  vram_write (uint16 addr, uint8 value) = 0;
@@ -39,7 +37,6 @@ struct scanline_info {
 
   virtual void  latch_counters() = 0;
 
-  virtual void  run() = 0;
   virtual void  render_scanline() = 0;
   virtual void  scanline() = 0;
   virtual void  frame();

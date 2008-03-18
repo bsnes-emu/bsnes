@@ -1,4 +1,6 @@
 #include "../../base.h"
+#define ADSP_CPP
+
 #include "adsp_tables.cpp"
 
 void aDSP::enter() { loop:
@@ -579,7 +581,7 @@ int32 fir_samplel, fir_sampler;
   }
 
   snes.audio_update(msamplel, msampler);
-  scheduler.addclocks_dsp(32 * 3);
+  scheduler.addclocks_dsp(32 * 3 * 8);
 }
 
 aDSP::aDSP()  {}

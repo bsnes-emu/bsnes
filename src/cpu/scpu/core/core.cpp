@@ -1,3 +1,5 @@
+#ifdef SCPU_CPP
+
 #include "opfn.cpp"
 
 #include "op_read.cpp"
@@ -43,8 +45,6 @@ void sCPU::op_irq() {
   regs.pc.w = rd.w;
 }
 
-//
-
 alwaysinline void sCPU::op_io_cond2() {
   if(regs.d.l != 0x00) {
     op_io();
@@ -62,3 +62,5 @@ alwaysinline void sCPU::op_io_cond6(uint16 addr) {
     op_io();
   }
 }
+
+#endif //ifdef SCPU_CPP

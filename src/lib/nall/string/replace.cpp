@@ -1,5 +1,4 @@
-#ifndef NALL_STRING_REPLACE_CPP
-#define NALL_STRING_REPLACE_CPP
+#ifdef NALL_STRING_CPP
 
 nall::string &replace(nall::string &str, const char *key, const char *token) {
   int i, z, ksl = strlen(key), tsl = strlen(token), ssl = strlen(str);
@@ -88,4 +87,4 @@ nall::string &qreplace(nall::string &str, const char *key, const char *token) {
   return str;
 }
 
-#endif //ifndef NALL_STRING_REPLACE_CPP
+#endif //ifdef NALL_STRING_CPP

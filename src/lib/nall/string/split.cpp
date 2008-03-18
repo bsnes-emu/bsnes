@@ -1,5 +1,4 @@
-#ifndef NALL_STRING_SPLIT_CPP
-#define NALL_STRING_SPLIT_CPP
+#ifdef NALL_STRING_CPP
 
 void split(nall::lstring &dest, const char *key, const char *src, size_t limit) {
   dest.reset();
@@ -49,4 +48,4 @@ void qsplit(nall::lstring &dest, const char *key, const char *src, size_t limit)
   strcpy(dest[split_count++], src + lp);
 }
 
-#endif //ifndef NALL_STRING_SPLIT_CPP
+#endif //ifdef NALL_STRING_CPP

@@ -2,16 +2,18 @@ namespace config {
 
 extern configuration& config();
 
-string file_updatepath(const char *, const char *);
+string file_updatepath(const char*, const char*);
+
+extern struct File {
+  static integral_setting autodetect_type;
+} file;
 
 extern struct Path {
-  static string_setting base, rom, save;
+  static string_setting base, rom, save, cheat;
   static string_setting bsx, st;
 } path;
 
 extern struct SNES {
-  static integral_setting gamma_ramp, sepia, grayscale, invert, contrast, brightness, gamma;
-  static integral_setting ntsc_merge_fields;
   static integral_setting controller_port0;
   static integral_setting controller_port1;
 } snes;

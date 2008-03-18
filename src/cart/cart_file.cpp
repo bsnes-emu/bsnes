@@ -1,3 +1,5 @@
+#ifdef CART_CPP
+
 #include "../reader/filereader.h"
 
 #if defined(GZIP_SUPPORT)
@@ -10,7 +12,7 @@
 #endif
 
 char* Cartridge::modify_extension(char *filename, const char *extension) {
-int i;
+  int i;
   for(i = strlen(filename); i >= 0; i--) {
     if(filename[i] == '.') break;
     if(filename[i] == '/') break;
@@ -22,29 +24,62 @@ int i;
   return filename;
 }
 
-char* Cartridge::get_save_filename(const char *source, const char *extension) {
-  strcpy(savefn, source);
-  for(char *p = savefn; *p; p++) { if(*p == '\\') *p = '/'; }
-  modify_extension(savefn, extension);
-
-//override path with user-specified folder, if one was defined
-  if(config::path.save != "") {
-  lstring part;
-    split(part, "/", savefn);
-  string fn = (const char*)config::path.save;
-    if(strend(fn, "/") == false) strcat(fn, "/");
-    strcat(fn, part[count(part) - 1]);
-    strcpy(savefn, fn);
-
-  //resolve relative path, if found
-    if(strbegin(fn, "./") == true) {
-      ltrim(fn, "./");
-      strcpy(savefn, config::path.base);
-      strcat(savefn, fn);
+//remove directory information and file extension ("/foo/bar.ext" -> "bar")
+char* Cartridge::get_base_filename(char *filename) {
+  //remove extension
+  for(int i = strlen(filename) - 1; i >= 0; i--) {
+    if(filename[i] == '.') {
+      filename[i] = 0;
+      break;
     }
   }
 
-  return savefn;
+  //remove directory information
+  for(int i = strlen(filename) - 1; i >= 0; i--) {
+    if(filename[i] == '/' || filename[i] == '\\') {
+      i++;
+      char *output = filename;
+      while(true) {
+        *output++ = filename[i];
+        if(!filename[i]) break;
+        i++;
+      }
+      break;
+    }
+  }
+}
+
+char* Cartridge::get_path_filename(char *filename, const char *path, const char *source, const char *extension) {
+  strcpy(filename, source);
+  for(char *p = filename; *p; p++) { if(*p == '\\') *p = '/'; }
+  modify_extension(filename, extension);
+
+  //override path with user-specified folder, if one was defined
+  if(path != "") {
+    lstring part;
+    split(part, "/", filename);
+    string fn = path;
+    if(strend(fn, "/") == false) strcat(fn, "/");
+    strcat(fn, part[count(part) - 1]);
+    strcpy(filename, fn);
+
+    //resolve relative path, if found
+    if(strbegin(fn, "./") == true) {
+      ltrim(fn, "./");
+      strcpy(filename, config::path.base);
+      strcat(filename, fn);
+    }
+  }
+
+  return filename;
+}
+
+char* Cartridge::get_save_filename(const char *source, const char *extension) {
+  return get_path_filename(savefn, config::path.save, source, extension);
+}
+
+char* Cartridge::get_cheat_filename(const char *source, const char *extension) {
+  return get_path_filename(cheatfn, config::path.cheat, source, extension);
 }
 
 bool Cartridge::load_file(const char *fn, uint8 *&data, uint &size) {
@@ -54,8 +89,8 @@ bool Cartridge::load_file(const char *fn, uint8 *&data, uint &size) {
 
   switch(Reader::detect(fn)) {
     default:
-    case Reader::RF_NORMAL: {
-    FileReader ff(fn);
+    case Reader::Normal: {
+      FileReader ff(fn);
       if(!ff.ready()) {
         alert("Error loading image file (%s)!", fn);
         return false;
@@ -64,9 +99,9 @@ bool Cartridge::load_file(const char *fn, uint8 *&data, uint &size) {
       data = ff.read();
     } break;
 
-  #ifdef GZIP_SUPPORT
-    case Reader::RF_GZ: {
-    GZReader gf(fn);
+    #ifdef GZIP_SUPPORT
+    case Reader::GZIP: {
+      GZReader gf(fn);
       if(!gf.ready()) {
         alert("Error loading image file (%s)!", fn);
         return false;
@@ -75,17 +110,17 @@ bool Cartridge::load_file(const char *fn, uint8 *&data, uint &size) {
       data = gf.read();
     } break;
 
-    case Reader::RF_ZIP: {
-    ZipReader zf(fn);
+    case Reader::ZIP: {
+      ZipReader zf(fn);
       size = zf.size();
       data = zf.read();
     } break;
-  #endif
+    #endif
 
-  #ifdef JMA_SUPPORT
-    case Reader::RF_JMA: {
+    #ifdef JMA_SUPPORT
+    case Reader::JMA: {
       try {
-      JMAReader jf(fn);
+        JMAReader jf(fn);
         size = jf.size();
         data = jf.read();
       } catch(JMA::jma_errors jma_error) {
@@ -93,15 +128,17 @@ bool Cartridge::load_file(const char *fn, uint8 *&data, uint &size) {
         return false;
       }
     } break;
-  #endif
+    #endif
   }
 
   return true;
 }
 
 bool Cartridge::save_file(const char *fn, uint8 *data, uint size) {
-FileWriter ff(fn);
+  FileWriter ff(fn);
   if(!ff.ready())return false;
   ff.write(data, size);
   return true;
 }
+
+#endif //ifdef CART_CPP

@@ -1,12 +1,12 @@
 class FileReader : public Reader {
 private:
-FILE  *fp;
-uint32 fsize;
+  FILE *fp;
+  unsigned filesize;
 
 public:
-  uint32 size();
-  uint8 *read(uint32 length = 0);
-  bool   ready();
+  unsigned size();
+  uint8_t* read(unsigned length = 0);
+  bool ready();
 
   FileReader(const char *fn);
   ~FileReader();
@@ -14,10 +14,10 @@ public:
 
 class FileWriter : public Writer {
 private:
-FILE *fp;
+  FILE *fp;
 
 public:
-  void write(uint8 *buffer, uint32 length);
+  void write(uint8_t *buffer, unsigned length);
   bool ready();
 
   FileWriter(const char *fn);

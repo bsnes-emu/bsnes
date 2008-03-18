@@ -1,5 +1,4 @@
-#ifndef NALL_STRING_COMPARE_CPP
-#define NALL_STRING_COMPARE_CPP
+#ifdef NALL_STRING_CPP
 
 char chrlower(char c) {
   return (c >= 'A' && c <= 'Z') ? c + ('a' - 'A') : c;
@@ -97,4 +96,4 @@ bool striend(const char *str, const char *key) {
   return true;
 }
 
-#endif //ifndef NALL_STRING_COMPARE_CPP
+#endif //ifdef NALL_STRING_CPP

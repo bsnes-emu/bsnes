@@ -1,3 +1,5 @@
+#ifdef SCPU_CPP
+
 void sCPU::dma_add_clocks(uint clocks) {
   status.dma_clocks += clocks;
   add_clocks(clocks);
@@ -10,30 +12,44 @@ void sCPU::dma_add_clocks(uint clocks) {
  * $[00-3f|80-bf]:43[00-7f] <DMA control registers>
  * $[00-3f|80-bf]:420b      <DMA enable register>
  * $[00-3f|80-bf]:420c      <HDMA enable register>
- * WRAM<>WRAM transfers via $2180
+ *
+ * WRAM<>WRAM transfers via $2180 are also illegal
  *****/
+
 void sCPU::dma_transfer(bool direction, uint8 bbus, uint32 abus) {
-uint8 r;
-  if(direction == 0) { //a->b
-    if((abus & 0x40ff00) == 0x2100 || (abus & 0x40ff80) == 0x4300 ||
-       (abus & 0x40ffff) == 0x420b || (abus & 0x40ffff) == 0x420c) {
-      r = regs.mdr;
+  if(direction == 0) {
+    //a->b transfer (to $21xx)
+    if(bbus == 0x80 && ((abus & 0xfe0000) == 0x7e0000 || (abus & 0x40e000) == 0x0000)) {
+      //illegal WRAM->WRAM transfer
+      //read most likely occurs; no write occurs
+      //read is irrelevant, as it has no observable effect on emulation
+    } else if((abus & 0x40ff00) == 0x2100 || (abus & 0x40ff80) == 0x4300
+           || (abus & 0x40ffff) == 0x420b || (abus & 0x40ffff) == 0x420c) {
+      //illegal register access
+      bus.write(0x2100 | bbus, regs.mdr); //TODO: verify if MDR is written here
     } else {
-      r = bus.read(abus);
+      //valid transfer
+      bus.write(0x2100 | bbus, bus.read(abus));
     }
-    bus.write(0x2100 | bbus, r);
-  } else { //b->a
-    if(bbus == 0x80 && ((abus & 0x7e0000) == 0x7e0000 || (abus & 0x40e000) == 0x0000)) {
-    //prevent WRAM->WRAM transfers
-      r = regs.mdr;
+  } else {
+    //b->a transfer (from $21xx)
+    if(bbus == 0x80 && ((abus & 0xfe0000) == 0x7e0000 || (abus & 0x40e000) == 0x0000)) {
+      //illegal WRAM->WRAM transfer
+      //no read occurs; write does occur
+      //does not write MDR as expected
+      //TODO: 0x00 was observed on hardware; verify if other values are possible
+      bus.write(abus, 0x00);
+    } else if((abus & 0x40ff00) == 0x2100 || (abus & 0x40ff80) == 0x4300
+           || (abus & 0x40ffff) == 0x420b || (abus & 0x40ffff) == 0x420c) {
+      //illegal register access
+      bus.write(abus, regs.mdr); //TODO: verify if MDR is written here
     } else {
-      r = bus.read(0x2100 | bbus);
+      //valid transfer
+      bus.write(abus, bus.read(0x2100 | bbus));
     }
-    if((abus & 0x40ff00) == 0x2100 || (abus & 0x40ff80) == 0x4300 ||
-       (abus & 0x40ffff) == 0x420b || (abus & 0x40ffff) == 0x420c)return;
-    bus.write(abus, r);
   }
 
+  //each byte *always* consumes 8 clocks, even if transfer is invalid and no read and/or write occurs
   dma_add_clocks(8);
   cycle_edge();
 }
@@ -43,21 +59,20 @@ uint8 r;
  *****/
 
 uint8 sCPU::dma_bbus(uint8 i, uint8 index) {
-  switch(channel[i].xfermode) {
-  default:
-  case 0: return (channel[i].destaddr);                      break; //0
-  case 1: return (channel[i].destaddr + (index & 1));        break; //0,1
-  case 2: return (channel[i].destaddr);                      break; //0,0
-  case 3: return (channel[i].destaddr + ((index >> 1) & 1)); break; //0,0,1,1
-  case 4: return (channel[i].destaddr + (index & 3));        break; //0,1,2,3
-  case 5: return (channel[i].destaddr + (index & 1));        break; //0,1,0,1
-  case 6: return (channel[i].destaddr);                      break; //0,0     [2]
-  case 7: return (channel[i].destaddr + ((index >> 1) & 1)); break; //0,0,1,1 [3]
+  switch(channel[i].xfermode) { default:
+    case 0: return (channel[i].destaddr);                      //0
+    case 1: return (channel[i].destaddr + (index & 1));        //0,1
+    case 2: return (channel[i].destaddr);                      //0,0
+    case 3: return (channel[i].destaddr + ((index >> 1) & 1)); //0,0,1,1
+    case 4: return (channel[i].destaddr + (index & 3));        //0,1,2,3
+    case 5: return (channel[i].destaddr + (index & 1));        //0,1,0,1
+    case 6: return (channel[i].destaddr);                      //0,0     [2]
+    case 7: return (channel[i].destaddr + ((index >> 1) & 1)); //0,0,1,1 [3]
   }
 }
 
 inline uint32 sCPU::dma_addr(uint8 i) {
-uint32 r = (channel[i].srcbank << 16) | (channel[i].srcaddr);
+  uint32 r = (channel[i].srcbank << 16) | (channel[i].srcaddr);
 
   if(channel[i].fixedxfer == false) {
     if(channel[i].reversexfer == false) {
@@ -97,7 +112,7 @@ void sCPU::dma_transfertobusa(uint8 i, uint8 bbus) {
 }
 
 inline void sCPU::dma_write(uint8 i, uint8 index) {
-//cannot use dma_transfer() directly, due to current S-DD1 implementation
+  //cannot use dma_transfer() directly, due to current S-DD1 implementation
   if(channel[i].direction == 0) {
     dma_transfertobusb(i, index);
   } else {
@@ -107,7 +122,7 @@ inline void sCPU::dma_write(uint8 i, uint8 index) {
 
 void sCPU::dma_run() {
   for(int i = 0; i < 8; i++) {
-    if(channel[i].dma_enabled == false)continue;
+    if(channel[i].dma_enabled == false) continue;
     dma_add_clocks(8);
 
     if(cartridge.info.sdd1 == true) {
@@ -123,7 +138,7 @@ void sCPU::dma_run() {
         channel[i].xfersize, channel[i].xfersize ? channel[i].xfersize : 65536);
     }
 
-  uint index = 0;
+    uint index = 0;
     do {
       dma_write(i, dma_bbus(i, index++));
     } while(channel[i].dma_enabled && channel[i].xfersize);
@@ -144,24 +159,23 @@ inline bool sCPU::hdma_active(uint8 i) {
 
 inline bool sCPU::hdma_active_after(uint8 i) {
   for(int n = i + 1; n < 8; n++) {
-    if(hdma_active(n) == true) { return true; }
+    if(hdma_active(n) == true) return true;
   }
-
   return false;
 }
 
 inline uint8 sCPU::hdma_enabled_channels() {
-uint8 r = 0;
+  uint8 r = 0;
   for(int i = 0; i < 8; i++) {
-    if(channel[i].hdma_enabled)r++;
+    if(channel[i].hdma_enabled) r++;
   }
   return r;
 }
 
 inline uint8 sCPU::hdma_active_channels() {
-uint8 r = 0;
+  uint8 r = 0;
   for(int i = 0; i < 8; i++) {
-    if(hdma_active(i) == true)r++;
+    if(hdma_active(i) == true) r++;
   }
   return r;
 }
@@ -186,14 +200,14 @@ void sCPU::hdma_update(uint8 i) {
 }
 
 void sCPU::hdma_run() {
-static uint8 hdma_xferlen[8] = { 1, 2, 2, 4, 4, 4, 2, 4 };
+  static uint8 hdma_xferlen[8] = { 1, 2, 2, 4, 4, 4, 2, 4 };
   for(int i = 0; i < 8; i++) {
-    if(hdma_active(i) == false)continue;
+    if(hdma_active(i) == false) continue;
     channel[i].dma_enabled = false; //HDMA run during DMA will stop DMA mid-transfer
     dma_add_clocks(8);
 
     if(channel[i].hdma_do_transfer) {
-    int xferlen = hdma_xferlen[channel[i].xfermode];
+      int xferlen = hdma_xferlen[channel[i].xfermode];
       for(int index = 0; index < xferlen; index++) {
         if(bool(config::cpu.hdma_enable) == true) {
           dma_transfer(channel[i].direction, dma_bbus(i, index),
@@ -271,3 +285,5 @@ void sCPU::dma_reset() {
     channel[i].hdma_do_transfer  = false;
   }
 }
+
+#endif //ifdef SCPU_CPP

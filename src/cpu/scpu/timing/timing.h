@@ -1,45 +1,57 @@
   uint16 vcounter();
   uint16 hcounter();
-  uint16 hclock();
+  uint16 hdot();
+  uint dma_counter();
 
-  bool   interlace();
-  bool   interlace_field();
-  bool   overscan();
-  uint16 region_scanlines();
+  void add_clocks(uint clocks);
+  void scanline();
+  void frame();
 
-  void   set_interlace(bool r);
-  void   set_overscan(bool r);
-
-  uint   dma_counter();
-
-  void   add_clocks(uint clocks);
-  void   scanline();
-  void   frame();
-
-  void   precycle_edge();
-  void   cycle_edge();
-  void   last_cycle();
+  void precycle_edge();
+  void cycle_edge();
+  void last_cycle();
   uint32 clocks_executed();
 
-  void   timing_power();
-  void   timing_reset();
+  void timing_power();
+  void timing_reset();
 
-//timeshift.cpp
-  void   timeshift_forward (uint clocks, uint &v, uint &h);
-  void   timeshift_backward(uint clocks, uint &v, uint &h);
+  //timeshifting -- needed by NMI and IRQ timing
+  struct History {
+    struct Time {
+      uint16 vcounter;
+      uint16 hcounter;
+    } time[32];
+    unsigned index;
+    alwaysinline void enqueue(uint16 vcounter, uint16 hcounter) {
+      Time &t = time[index++];
+      index &= 31;
+      t.vcounter = vcounter;
+      t.hcounter = hcounter;
+    }
+    alwaysinline void query(unsigned offset, uint16 &vcounter, uint16 &hcounter) {
+      Time &t = time[(index - (offset >> 1)) & 31];
+      vcounter = t.vcounter;
+      hcounter = t.hcounter;
+    }
+    void reset() {
+      index = 0;
+      for(unsigned i = 0; i < 32; i++) time[i].vcounter = time[i].hcounter = 0;
+    }
+    History() { reset(); }
+  } history;
 
-//irq.cpp
-enum { IRQ_TRIGGER_NEVER = 0x3fff };
-  void   update_interrupts();
-  void   poll_interrupts();
-  void   nmitimen_update(uint8 data);
-  void   hvtime_update(uint16 addr);
-  bool   rdnmi();
-  bool   timeup();
+  //irq.cpp
+  enum { IRQ_TRIGGER_NEVER = 0x3fff };
+  void update_interrupts();
+  void poll_interrupts();
+  void nmitimen_update(uint8 data);
+  void hvtime_update(uint16 addr);
+  bool rdnmi();
+  bool timeup();
 
-  bool   irq_pos_valid();
-  bool   nmi_test();
-  bool   irq_test();
+  bool irq_pos_valid();
+  bool nmi_test();
+  bool irq_test();
 
-//joypad.cpp
-  void   run_auto_joypad_poll();
+  //joypad.cpp
+  void run_auto_joypad_poll();

@@ -1,3 +1,5 @@
+#ifdef DSP3_CPP
+
 //DSP-3 emulator code
 //Copyright (c) 2003-2006 John Weidman, Kris Bleakley, Lancer, z80 gaiden
 
@@ -1140,3 +1142,5 @@ void InitDSP3()
 {
   DSP3_Reset();
 }
+
+#endif //ifdef DSP3_CPP

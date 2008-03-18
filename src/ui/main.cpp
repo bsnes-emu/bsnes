@@ -1,6 +1,8 @@
 #define INTERFACE_MAIN
 
 #include "../base.h"
+
+#include "main.h"
 #include "config.cpp"
 
 void init_snes();
@@ -13,23 +15,21 @@ void term_snes();
 #include <ruby/ruby.h>
 using namespace ruby;
 
-#include "inputmgr.cpp"
+#include <libfilter/libfilter.h>
+
+#include "inputmanager.cpp"
 #include "interface.cpp"
 
 /*****
  * platform abstraction layer
  *****/
 
-#include <hiro.h>
+#include <hiro/hiro.h>
 using namespace libhiro;
 
 /*****
  * core
  *****/
-
-bool _term_      = false;
-bool _pause_     = false;
-bool _autopause_ = false;
 
 #include "ui.h"
 #include "event.h"
@@ -94,37 +94,37 @@ void get_base_path(const char *image) {
     }
   }
 
-  if(strend(t, "/") == false) { strcat(t, "/"); }
+  if(strend(t, "/") == false) strcat(t, "/");
   config::path.base = t;
 }
 
 void run() {
   while(hiro().pending()) hiro().run();
   input_manager.refresh();
-  event::update_frame_counter();
 
   if(config::input.capture_mode == 2) {
     bool inactive = window_main.focused() == false;
-    if(_autopause_ == false && inactive == true) {
+    if(app.autopause == false && inactive == true) {
+      app.autopause = true;
       audio.clear();
-      if(cartridge.loaded()) window_main.status.set_text("(Paused)");
-      _autopause_ = true;
-    } else if(_autopause_ == true && inactive == false) {
-      _autopause_ = false;
+      if(cartridge.loaded()) event::update_status();
+    } else if(app.autopause == true && inactive == false) {
+      app.autopause = false;
     }
   } else {
-    _autopause_ = false;
+    app.autopause = false;
   }
 
-  if(cartridge.loaded() == false || _pause_ == true || _autopause_ == true) {
+  if(cartridge.loaded() == false || app.pause == true || app.autopause == true) {
     //prevent bsnes from consuming 100% CPU resources when idle
     #if defined(PLATFORM_WIN)
     Sleep(20);
     #elif defined(PLATFORM_X)
-    usleep(20);
+    usleep(20 * 1000);
     #endif
   } else {
     snes.runtoframe();
+    event::update_status();
   }
 }
 
@@ -140,24 +140,22 @@ int main(int argc, char *argv[]) { */
   set_config_filename();
   get_base_path(argv[0]);
 
-  hiro().init();
   config::config().load(config::filename);
   if(fexists(config::filename) == false) {
-  //in case program crashes on first run, save config file
-  //settings, so that they can be modified by hand ...
+    //in case program crashes on first run, save config file
+    //settings, so that they can be modified by hand ...
     config::config().save(config::filename);
   }
-  snes.init();
+  hiro().init();
   ui_init();
+  snes.init();
 
   if(argc >= 2) {
     cartridge.load_cart_normal(argv[1]);
     snes.power();
   }
 
-  while(_term_ == false) {
-    run();
-  }
+  while(app.term == false) run();
 
   event::unload_rom();
 

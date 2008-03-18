@@ -9,21 +9,18 @@ SNESInterface snesinterface;
 
 //video
 
-bool SNESInterface::video_lock(uint16 *&data, uint &pitch) {
-  return video.lock(data, pitch);
-}
-
-void SNESInterface::video_unlock() {
-  video.unlock();
-}
-
 static uint frameskip_counter = 0;
 
-void SNESInterface::video_refresh() {
+void SNESInterface::video_refresh(uint16_t *data, unsigned pitch, unsigned *line, unsigned width, unsigned height) {
   if(ppu.renderer_enabled() == true) {
-  SNES::video_info vi;
-    snes.get_video_info(&vi);
-    video.refresh(vi.width, vi.height);
+    uint32_t *output;
+    unsigned opitch;
+    if(video.lock(output, opitch) == true) {
+      unsigned owidth, oheight;
+      libfilter::filter.render(output, opitch, owidth, oheight, data, pitch, line, width, height);
+      video.unlock();
+      video.refresh(owidth, oheight);
+    }
   }
 
   frameskip_counter++;
@@ -60,6 +57,15 @@ bool SNESInterface::input_poll(uint deviceid, uint button) {
 
 void SNESInterface::init() {
   input_manager.bind();
+  libfilter::colortable.set_format(libfilter::Colortable::RGB888);
+  libfilter::colortable.set_contrast(config::system.contrast);
+  libfilter::colortable.set_brightness(config::system.brightness);
+  libfilter::colortable.set_gamma(config::system.gamma);
+  libfilter::colortable.enable_gamma_ramp(config::system.gamma_ramp);
+  libfilter::colortable.enable_sepia(config::system.sepia);
+  libfilter::colortable.enable_grayscale(config::system.grayscale);
+  libfilter::colortable.enable_invert(config::system.invert);
+  libfilter::colortable.update();
 }
 
 void SNESInterface::term() {

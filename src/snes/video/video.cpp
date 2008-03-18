@@ -1,118 +1,58 @@
-#include "filter.cpp"
+#ifdef SNES_CPP
 
-void SNES::set_video_filter(uint video_filter) {
-  video_format.filter = video_filter;
-  video_format.modified = true;
+void SNES::Video::set_mode(Mode mode_) {
+  mode = mode_;
 }
 
-void SNES::set_video_standard(uint video_standard) {
-  video_format.video_standard = video_standard;
-  video_format.modified = true;
-}
+void SNES::Video::update() {
+  uint16_t *data = (uint16_t*)ppu.output;
+  unsigned width, height;
 
-void SNES::set_video_pixel_format(uint pixel_format) {
-  video_format.pixel_format = pixel_format;
-  video_format.modified = true;
-}
-
-/*****
- * Internal function called at the start of each frame.
- * Use SNES::set_video_format to modify these options.
- *****/
-void SNES::update_video_format() {
-  if(video_format.modified == false)return;
-  video_format.modified = false;
-
-  video.filter = video_format.filter;
-  safe_delete(video_filter);
-  switch(video.filter) {
-  default:
-  case VIDEOFILTER_DIRECT:  video_filter = new DirectVideoFilter();  break;
-  case VIDEOFILTER_NTSC:    video_filter = new NtscVideoFilter();    break;
-  case VIDEOFILTER_HQ2X:    video_filter = new HQ2xVideoFilter();    break;
-  case VIDEOFILTER_SCALE2X: video_filter = new Scale2xVideoFilter(); break;
-  }
-
-  video.video_standard = video_format.video_standard;
-  video.pixel_format   = video_format.pixel_format;
-  update_color_lookup_table();
-}
-
-void SNES::get_video_info(video_info *info) {
-  info->filter         = video.filter;
-  info->video_standard = video.video_standard;
-  info->pixel_format   = video.pixel_format;
-  info->width          = video.width;
-  info->height         = video.height;
-}
-
-void SNES::video_update() {
-  if(ppu.renderer_enabled()) {
-    update_video_format();
-
-    video.ppu_data = (uint16*)ppu.output;
-//  video_normalize();
-
-    switch(video.video_standard) {
-    default:
-    case VIDEOSTANDARD_NTSC:
-      video.raster_width  = 256;
-      video.raster_height = 224;
-      video.ppu_data += (int(cpu.overscan()) << 13) + 1024;
+  switch(mode) { default:
+    case ModeNTSC: {
+      width  = 256;
+      height = 224;
+      data  += ((int)ppu.overscan() << 13) + 1024;
+    } break;
+    case ModePAL: {
+      width  = 256;
+      height = 239;
+      data  += 1024;
       break;
-    case VIDEOSTANDARD_PAL:
-      video.raster_width  = 256;
-      video.raster_height = 239;
-      video.ppu_data += 1024;
-      break;
-    }
-
-    if(video.frame_hires)     { video.raster_width  <<= 1; }
-    if(video.frame_interlace) { video.raster_height <<= 1; }
-
-    if(snesinterface.video_lock(video.data, video.pitch) == true) {
-      video_filter->run(color_lookup_table, video.ppu_data,
-                        video.raster_width, video.raster_height,
-                        video.raster_height <= 240 ? 2048 : 1024,
-                        video.data, 512, 480, video.pitch,
-                        512, 480, video.width, video.height,
-                        video.raster_height <= 240 ? (pline_width + 1) : (iline_width + 2));
-      snesinterface.video_unlock();
     }
   }
 
-  snesinterface.video_refresh();
+  if(frame_hires) width <<= 1;
+  if(frame_interlace) height <<= 1;
 
-  video.frame_hires     = false;
-  video.frame_interlace = false;
+  snesinterface.video_refresh(
+    data,
+    /* pitch = */ height <= 240 ? 2048 : 1024,
+    /* *line = */ height <= 240 ? (pline_width + 1) : (iline_width + 2),
+    width, height
+  );
+
+  frame_hires = false;
+  frame_interlace = false;
 }
 
-void SNES::video_scanline() {
-int y = cpu.vcounter();
-int o = (video.video_standard == VIDEOSTANDARD_NTSC) ? (int(cpu.overscan()) << 3) : 0;
-  if(y <= (0 + o) || y >= (225 + o))return;
+void SNES::Video::scanline() {
+  int y = cpu.vcounter();
+  int o = (mode == ModeNTSC) ? ((int)ppu.overscan() << 3) : 0;
+  if(y <= (0 + o) || y >= (225 + o)) return;
   y -= o;
 
-PPU::scanline_info si;
-  ppu.get_scanline_info(&si);
-
-  pline_width[y] = iline_width[y * 2 + int(cpu.interlace_field())] =
-    (si.hires == false) ? 256 : 512;
-  video.frame_hires      |= si.hires;
-  video.frame_interlace  |= si.interlace;
+  pline_width[y] = iline_width[y * 2 + (int)ppu.field()] = (ppu.hires() == false) ? 256 : 512;
+  frame_hires |= ppu.hires();
+  frame_interlace |= ppu.interlace();
 }
 
-void SNES::video_init() {
-  for(int i = 0; i < 240; i++)pline_width[i] = 256;
-  for(int i = 0; i < 480; i++)iline_width[i] = 256;
-  video.frame_hires     = false;
-  video.frame_interlace = false;
-
-  video.raster_data = (uint16*)malloc(512 * 480 * sizeof(uint16));
-  memset(video.raster_data, 0, 512 * 480 * sizeof(uint16));
-  video_filter = 0;
-  set_video_filter(VIDEOFILTER_DIRECT);
-  set_video_standard(VIDEOSTANDARD_NTSC);
-  set_video_pixel_format(PIXELFORMAT_RGB565);
-  update_video_format();
+void SNES::Video::init() {
+  for(unsigned i = 0; i < 240; i++) pline_width[i] = 256;
+  for(unsigned i = 0; i < 480; i++) iline_width[i] = 256;
+  frame_hires = false;
+  frame_interlace = false;
+  set_mode(ModeNTSC);
 }
+
+#endif //ifdef SNES_CPP

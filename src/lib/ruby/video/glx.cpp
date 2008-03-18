@@ -40,7 +40,7 @@ static Bool x_wait_for_map_notify(Display *d, XEvent *e, char *arg) {
 class pVideoGLX {
 public:
   VideoGLX &self;
-  uint16_t *buffer;
+  uint32_t *buffer;
 
   Display *display;
   int screen;
@@ -84,8 +84,8 @@ public:
     return false;
   }
 
-  bool lock(uint16_t *&data, unsigned &pitch) {
-    pitch = 1024 * 2;
+  bool lock(uint32_t *&data, unsigned &pitch) {
+    pitch = 1024 * 4;
     return data = buffer;
   }
 
@@ -93,7 +93,7 @@ public:
   }
 
   void clear() {
-    memset(buffer, 0, 1024 * 1024 * sizeof(uint16_t));
+    memset(buffer, 0, 1024 * 1024 * sizeof(uint32_t));
     glClearColor(0.0, 0.0, 0.0, 1.0);
     glClear(GL_COLOR_BUFFER_BIT);
     glFlush();
@@ -129,7 +129,7 @@ public:
     glPixelStorei(GL_UNPACK_ROW_LENGTH, 1024); //length of buffer in pixels
     glTexSubImage2D(GL_TEXTURE_2D,
       /* mip-map level = */ 0, /* x = */ 0, /* y = */ 0,
-      width, height, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, buffer);
+      width, height, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, buffer);
 
     //OpenGL projection sets 0,0 as *bottom-left* of screen.
     //therefore, below vertices flip image to support top-left source.
@@ -157,7 +157,7 @@ public:
     //require GLX 1.2+ API
     if(glx.version_major < 1 || (glx.version_major == 1 && glx.version_minor < 2)) return false;
 
-    buffer = new(zeromemory) uint16_t[1024 * 1024 * sizeof(uint16_t)];
+    buffer = new(zeromemory) uint32_t[1024 * 1024 * sizeof(uint32_t)];
 
     XWindowAttributes wa;
     XGetWindowAttributes(display, settings.handle, &wa);
@@ -166,7 +166,7 @@ public:
     int elements = 0;
     int attributelist[] = {
       GLX_RGBA,
-      GLX_DOUBLEBUFFER, True,
+      GLX_DOUBLEBUFFER,
       None
     };
     XVisualInfo *vi = glXChooseVisual(display, screen, attributelist);
@@ -216,7 +216,7 @@ public:
     glTexImage2D(GL_TEXTURE_2D,
       /* mip-map level = */ 0, /* internal format = */ GL_RGB,
       /* width = */ 1024, /* height = */ 1024, /* border = */ 0,
-      /* format = */ GL_RGB, GL_UNSIGNED_SHORT_5_6_5, buffer);
+      /* format = */ GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, buffer);
 
     return true;
   }
@@ -252,7 +252,7 @@ public:
 bool VideoGLX::cap(Setting setting) { return p.cap(setting); }
 uintptr_t VideoGLX::get(Setting setting) { return p.get(setting); }
 bool VideoGLX::set(Setting setting, uintptr_t param) { return p.set(setting, param); }
-bool VideoGLX::lock(uint16_t *&data, unsigned &pitch) { return p.lock(data, pitch); }
+bool VideoGLX::lock(uint32_t *&data, unsigned &pitch) { return p.lock(data, pitch); }
 void VideoGLX::unlock() { p.unlock(); }
 void VideoGLX::clear() { p.clear(); }
 void VideoGLX::refresh(unsigned width, unsigned height) { p.refresh(width, height); }

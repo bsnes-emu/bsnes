@@ -1,3 +1,5 @@
+#ifdef SCPU_CPP
+
 //op_read
 inline void sCPU::op_adc_b() {
 int32 r = regs.a.l + rd.l + regs.p.c;
@@ -371,3 +373,5 @@ inline void sCPU::op_tsb_w() {
   regs.p.z = ((rd.w & regs.a.w) == 0);
   rd.w |= regs.a.w;
 }
+
+#endif //ifdef SCPU_CPP

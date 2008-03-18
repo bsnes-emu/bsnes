@@ -1,3 +1,5 @@
+#ifdef CART_CPP
+
 void Cartridge::load_cart_st(const char *base, const char *slotA, const char *slotB) {
   if(!base || !*base) return;
 
@@ -10,8 +12,8 @@ void Cartridge::load_cart_st(const char *base, const char *slotA, const char *sl
   info.mapper = STROM;
   info.region = NTSC;
 
-uint8 *data;
-uint size;
+  uint8_t *data = 0;
+  unsigned size;
   if(load_file(cart.fn, data, size) == true) {
     cart.rom = (uint8*)malloc(cart.rom_size = 0x040000);
     memcpy(cart.rom, data, min(size, cart.rom_size));
@@ -51,9 +53,32 @@ uint size;
   }
 
   load_end();
+
+  //set base filename
+  if(!*stA.fn && !*stB.fn) {
+    strcpy(info.filename, cart.fn);
+    get_base_filename(info.filename);
+  } else if(*stA.fn && !*stB.fn) {
+    strcpy(info.filename, stA.fn);
+    get_base_filename(info.filename);
+  } else if(!*stA.fn && *stB.fn) {
+    strcpy(info.filename, stB.fn);
+    get_base_filename(info.filename);
+  } else {
+    char filenameA[PATH_MAX], filenameB[PATH_MAX];
+    strcpy(filenameA, stA.fn);
+    get_base_filename(filenameA);
+    strcpy(filenameB, stB.fn);
+    get_base_filename(filenameB);
+    strcpy(info.filename, filenameA);
+    strcat(info.filename, " + ");
+    strcat(info.filename, filenameB);
+  }
 }
 
 void Cartridge::unload_cart_st() {
   if(stA.ram) save_file(get_save_filename(stA.fn, "srm"), stA.ram, stA.ram_size);
   if(stB.ram) save_file(get_save_filename(stB.fn, "srm"), stB.ram, stB.ram_size);
 }
+
+#endif //ifdef CART_CPP

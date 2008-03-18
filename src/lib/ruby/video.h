@@ -15,7 +15,7 @@ public:
   virtual uintptr_t get(Setting) { return false; }
   virtual bool set(Setting, uintptr_t) { return false; }
 
-  virtual bool lock(uint16_t *&data, unsigned &pitch) { return false; }
+  virtual bool lock(uint32_t *&data, unsigned &pitch) { return false; }
   virtual void unlock() {}
 
   virtual void clear() {}

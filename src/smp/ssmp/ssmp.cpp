@@ -1,18 +1,20 @@
 #include "../../base.h"
+#define SSMP_CPP
 
 #include "core/core.cpp"
 #include "memory/memory.cpp"
 #include "timing/timing.cpp"
 
 void sSMP::power() {
-//for(int i = 0; i < 65536; i += 64) {
+//SNES hardware SPCRAM contains pseudo-random data upon power up
+//for(unsigned i = 0; i < 65536; i += 64) {
 //  memset(spcram + i,      0x00, 32);
 //  memset(spcram + i + 32, 0xff, 32);
 //}
 
   memset(spcram, 0x00, 65536);
 
-//targets not initialized/changed upon reset
+  //targets not initialized/changed upon reset
   t0.target = 0;
   t1.target = 0;
   t2.target = 0;
@@ -31,18 +33,18 @@ void sSMP::reset() {
   status.clock_counter = 0;
   status.dsp_counter   = 0;
 
-//$00f0
+  //$00f0
   status.clock_speed   = 24 * 3 / 3;
   status.mmio_disabled = false;
   status.ram_writable  = true;
 
-//$00f1
+  //$00f1
   status.iplrom_enabled = true;
 
-//$00f2
+  //$00f2
   status.dsp_addr = 0x00;
 
-//$00f8,$00f9
+  //$00f8,$00f9
   status.smp_f8 = 0x00;
   status.smp_f9 = 0x00;
 

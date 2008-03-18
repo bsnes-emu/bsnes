@@ -1,18 +1,13 @@
 #include "../base.h"
 
-void PPU::get_scanline_info(scanline_info *info) {
-  info->hires     = scanline_is_hires();
-  info->interlace = cpu.interlace();
-}
-
 void PPU::enable_renderer(bool r) { status.render_output = r; }
 bool PPU::renderer_enabled() { return status.render_output; }
 
 void PPU::frame() {
   status.frame_executed = true;
 
-static int32 fr = 0, fe = 0;
-static time_t prev, curr;
+  static int32 fr = 0, fe = 0;
+  static time_t prev, curr;
   fe++;
   if(status.render_output)fr++;
 
@@ -46,5 +41,5 @@ PPU::PPU() {
 }
 
 PPU::~PPU() {
-  safe_free(output);
+  free(output);
 }

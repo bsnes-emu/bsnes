@@ -1,3 +1,5 @@
+#ifdef DSP1_CPP
+
 // DSP-1's emulation code
 //
 // Based on research by Overload, The Dumper, Neviksti and Andreas Naive
@@ -1620,3 +1622,4 @@ const int16 Dsp1::SinTable[256] = {
 
 //////////////////////////////////////////////////////////////////
 
+#endif //ifdef DSP1_CPP

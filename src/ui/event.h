@@ -22,8 +22,9 @@ void update_software_filter(uint);
 
 void update_speed_regulation(uint);
 
-void update_frame_counter();
+void update_status();
 void update_video_settings();
+void update_opacity();
 void toggle_fullscreen();
 void toggle_menubar();
 void toggle_statusbar();

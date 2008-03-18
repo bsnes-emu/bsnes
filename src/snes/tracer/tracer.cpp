@@ -1,3 +1,5 @@
+#ifdef SNES_CPP
+
 Tracer tracer;
 
 void tprintf(const char *s, ...) {
@@ -91,3 +93,5 @@ Tracer::Tracer() {
 
 Tracer::~Tracer() {
 }
+
+#endif //ifdef SNES_CPP

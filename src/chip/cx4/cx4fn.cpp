@@ -1,3 +1,5 @@
+#ifdef CX4_CPP
+
 #include <math.h>
 #define Tan(a) (CosTable[a] ? ((((int32)SinTable[a]) << 16) / CosTable[a]) : 0x80000000)
 #define sar(b, n) ((b) >> (n))
@@ -240,3 +242,5 @@ uint8 bit    = 0x80;
     LineY += D;
   }
 }
+
+#endif //ifdef CX4_CPP

@@ -1,3 +1,5 @@
+#ifdef BPPU_CPP
+
 #include "bppu_render_cache.cpp"
 #include "bppu_render_windows.cpp"
 #include "bppu_render_bg.cpp"
@@ -173,3 +175,5 @@ void bPPU::render_line() {
 
   render_line_output();
 }
+
+#endif //ifdef BPPU_CPP

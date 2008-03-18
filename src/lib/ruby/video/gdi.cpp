@@ -1,5 +1,4 @@
 #include <assert.h>
-#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
 #include <ruby/ruby.h>
@@ -12,7 +11,7 @@ class pVideoGDI {
 public:
   VideoGDI &self;
 
-  uint16_t *buffer;
+  uint32_t *buffer;
   HBITMAP bitmap;
   HDC bitmapdc;
   BITMAPINFO bmi;
@@ -39,8 +38,8 @@ public:
     return false;
   }
 
-  bool lock(uint16_t *&data, unsigned &pitch) {
-    pitch = 2048;
+  bool lock(uint32_t *&data, unsigned &pitch) {
+    pitch = 1024 * 4;
     return data = buffer;
   }
 
@@ -70,9 +69,9 @@ public:
     bmi.bmiHeader.biWidth       = 1024;
     bmi.bmiHeader.biHeight      = -1024;
     bmi.bmiHeader.biPlanes      = 1;
-    bmi.bmiHeader.biBitCount    = 16; //biBitCount of 15 is invalid, biBitCount of 16 is really RGB555
+    bmi.bmiHeader.biBitCount    = 32; //biBitCount of 15 is invalid, biBitCount of 16 is really RGB555
     bmi.bmiHeader.biCompression = BI_RGB;
-    bmi.bmiHeader.biSizeImage   = 1024 * 1024 * sizeof(uint16_t);
+    bmi.bmiHeader.biSizeImage   = 1024 * 1024 * sizeof(uint32_t);
 
     return true;
   }
@@ -83,7 +82,7 @@ public:
   }
 
   pVideoGDI(VideoGDI &self_) : self(self_) {
-    buffer = (uint16_t*)malloc(1024 * 1024 * sizeof(uint16_t));
+    buffer = (uint32_t*)malloc(1024 * 1024 * sizeof(uint32_t));
     settings.handle = 0;
   }
 
@@ -95,7 +94,7 @@ public:
 bool VideoGDI::cap(Setting setting) { return p.cap(setting); }
 uintptr_t VideoGDI::get(Setting setting) { return p.get(setting); }
 bool VideoGDI::set(Setting setting, uintptr_t param) { return p.set(setting, param); }
-bool VideoGDI::lock(uint16_t *&data, unsigned &pitch) { return p.lock(data, pitch); }
+bool VideoGDI::lock(uint32_t *&data, unsigned &pitch) { return p.lock(data, pitch); }
 void VideoGDI::unlock() { p.unlock(); }
 void VideoGDI::refresh(unsigned width, unsigned height) { p.refresh(width, height); }
 bool VideoGDI::init() { return p.init(); }

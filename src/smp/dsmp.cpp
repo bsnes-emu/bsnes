@@ -1,3 +1,5 @@
+#ifdef SMP_CPP
+
 //virtual function, see src/cpu/dcpu.cpp
 //for explanation of this function
 bool SMP::in_opcode() { return false; }
@@ -304,3 +306,5 @@ uint16 opw, opdp0, opdp1;
     (regs.p.c) ? 'C' : 'c');
   strcat(s, t);
 }
+
+#endif //ifdef SMP_CPP

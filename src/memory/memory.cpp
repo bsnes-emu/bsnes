@@ -1,4 +1,6 @@
 #include "../base.h"
+#define MEMORY_CPP
+
 #include "memory_rw.cpp"
 
 namespace memory {
@@ -16,7 +18,7 @@ uint8 UnmappedMMIO::mmio_read(uint) { return cpu.regs.mdr; }
 void UnmappedMMIO::mmio_write(uint, uint8) {}
 
 void MMIOAccess::map(uint addr, MMIO &access) {
-//MMIO: $[00-3f]:[2000-5fff]
+  //MMIO: $[00-3f]:[2000-5fff]
   mmio[(addr - 0x2000) & 0x3fff] = &access;
 }
 
@@ -29,9 +31,9 @@ void MMIOAccess::write(uint addr, uint8 data) {
 }
 
 uint Bus::mirror(uint addr, uint size) {
-uint base = 0;
+  uint base = 0;
   if(size) {
-  uint mask = 1 << 23;
+    uint mask = 1 << 23;
     while(addr >= size) {
       while(!(addr & mask)) mask >>= 1;
       addr -= mask;
@@ -62,9 +64,9 @@ void Bus::map(
 
   if(access.size() == -1U) return;
 
-uint8 page_lo = addr_lo >> 8;
-uint8 page_hi = addr_hi >> 8;
-uint index = 0;
+  uint8 page_lo = addr_lo >> 8;
+  uint8 page_hi = addr_hi >> 8;
+  uint index = 0;
 
   switch(mode) {
     case MapDirect: {

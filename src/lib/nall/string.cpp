@@ -1,8 +1,11 @@
 #ifndef NALL_STRING_CPP
 #define NALL_STRING_CPP
 
-#include <nall/string.hpp>
+#include <math.h>
+#include <nall/algorithm.hpp>
+#include <nall/static.hpp>
 
+#include <nall/string.hpp>
 #include <nall/string/class.cpp>
 #include <nall/string/compare.cpp>
 #include <nall/string/convert.cpp>
