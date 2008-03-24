@@ -14,7 +14,7 @@
 #include "smp/ssmp/ssmp.h"
 
 #include "dsp/dsp.h"
-#include "dsp/bdsp/bdsp.h"
+#include "dsp/sdsp/sdsp.h"
 
 #include "ppu/ppu.h"
 #include "ppu/bppu/bppu.h"

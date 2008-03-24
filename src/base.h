@@ -1,10 +1,10 @@
-#define BSNES_VERSION "0.029"
+#define BSNES_VERSION "0.030"
 #define BSNES_TITLE   "bsnes v" BSNES_VERSION
 
 #define BUSCORE sBus
 #define CPUCORE sCPU
 #define SMPCORE sSMP
-#define DSPCORE bDSP
+#define DSPCORE sDSP
 #define PPUCORE bPPU
 
 //FAST_FRAMESKIP disables calculation of RTO during frameskip

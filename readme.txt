@@ -1,5 +1,5 @@
 bsnes
-Version: 0.029
+Version: 0.030
 Author: byuu
 
 --------

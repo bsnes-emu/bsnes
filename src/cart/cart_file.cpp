@@ -55,7 +55,7 @@ char* Cartridge::get_path_filename(char *filename, const char *path, const char 
   modify_extension(filename, extension);
 
   //override path with user-specified folder, if one was defined
-  if(path != "") {
+  if(*path) {
     lstring part;
     split(part, "/", filename);
     string fn = path;

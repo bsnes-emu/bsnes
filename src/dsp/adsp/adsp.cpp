@@ -580,7 +580,7 @@ int32 fir_samplel, fir_sampler;
     msampler  = sclamp<16>(msampler);
   }
 
-  snes.audio_update(msamplel, msampler);
+  snes.audio.update(msamplel, msampler);
   scheduler.addclocks_dsp(32 * 3 * 8);
 }
 

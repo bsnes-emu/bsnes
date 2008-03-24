@@ -76,7 +76,7 @@ link += $(if $(findstring input.sdl,$(ruby)),`sdl-config --libs`)
 ####################################
 
 objects = main libco hiro ruby libfilter string reader cart cheat \
-  memory smemory cpu scpu smp ssmp bdsp ppu bppu snes \
+  memory smemory cpu scpu smp ssmp sdsp ppu bppu snes \
   bsx srtc sdd1 cx4 dsp1 dsp2 dsp3 dsp4 obc1 st010
 
 ifeq ($(enable_gzip),true)
@@ -175,6 +175,7 @@ obj/ssmp.$(obj): smp/ssmp/ssmp.cpp smp/ssmp/* smp/ssmp/core/* smp/ssmp/memory/* 
 
 obj/adsp.$(obj): dsp/adsp/adsp.cpp dsp/adsp/*
 obj/bdsp.$(obj): dsp/bdsp/bdsp.cpp dsp/bdsp/*
+obj/sdsp.$(obj): dsp/sdsp/sdsp.cpp dsp/sdsp/*
 
 ###########
 ### ppu ###
