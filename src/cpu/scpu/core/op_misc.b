@@ -1,6 +1,6 @@
 nop(0xea) {
 1:last_cycle();
-  op_io();
+  op_io_irq();
 }
 
 wdm(0x42) {
@@ -36,34 +36,33 @@ mvp(0x44, --) {
   }
 6:last_cycle();
   op_io();
-  if(regs.a.w--)regs.pc.w -= 3;
+  if(regs.a.w--) regs.pc.w -= 3;
 }
 
 brk(0x00, 0xfffe, 0xffff, 0xffe6, 0xffe7),
 cop(0x02, 0xfff4, 0xfff5, 0xffe4, 0xffe5) {
 1:op_readpc();
-2:if(!regs.e)op_writestack(regs.pc.b);
+2:if(!regs.e) op_writestack(regs.pc.b);
 3:op_writestack(regs.pc.h);
 4:op_writestack(regs.pc.l);
 5:op_writestack(regs.p);
-6:rd.l = op_readlong((regs.e) ? $1 : $3);
+6:rd.l = op_readlong(regs.e ? $1 : $3);
   regs.pc.b = 0x00;
   regs.p.i  = 1;
   regs.p.d  = 0;
 7:last_cycle();
-  rd.h = op_readlong((regs.e) ? $2 : $4);
+  rd.h = op_readlong(regs.e ? $2 : $4);
   regs.pc.w = rd.w;
 }
 
 stp(0xdb) {
 1:op_io();
 2:last_cycle();
-  while(1) { op_io(); }
+  while(true) op_io();
 }
 
 wai(0xcb) {
-//last_cycle() will set event.wai to false
-//once an NMI / IRQ edge is reached
+//last_cycle() will clear event.wai once an NMI / IRQ edge is reached
 1:event.wai = true;
   while(event.wai) {
     last_cycle();
@@ -74,8 +73,8 @@ wai(0xcb) {
 
 xce(0xfb) {
 1:last_cycle();
-  op_io();
-bool carry = regs.p.c;
+  op_io_irq();
+  bool carry = regs.p.c;
   regs.p.c = regs.e;
   regs.e = carry;
   if(regs.e) {
@@ -96,7 +95,7 @@ sec(0x38, regs.p.c = 1),
 sed(0xf8, regs.p.d = 1),
 sei(0x78, regs.p.i = 1) {
 1:last_cycle();
-  op_io();
+  op_io_irq();
   $1;
 }
 
@@ -106,7 +105,7 @@ sep(0xe2, |=) {
 2:last_cycle();
   op_io();
   regs.p $1 rd.l;
-  if(regs.e)regs.p |= 0x30;
+  if(regs.e) regs.p |= 0x30;
   if(regs.p.x) {
     regs.x.h = 0x00;
     regs.y.h = 0x00;
@@ -120,7 +119,7 @@ txy(0x9b, regs.p.x, y, x),
 tya(0x98, regs.p.m, a, y),
 tyx(0xbb, regs.p.x, x, y) {
 1:last_cycle();
-  op_io();
+  op_io_irq();
   if($1) {
     regs.$2.l = regs.$3.l;
     regs.p.n = !!(regs.$2.l & 0x80);
@@ -134,7 +133,7 @@ tyx(0xbb, regs.p.x, x, y) {
 
 tcd(0x5b) {
 1:last_cycle();
-  op_io();
+  op_io_irq();
   regs.d.w = regs.a.w;
   regs.p.n = !!(regs.d.w & 0x8000);
   regs.p.z = (regs.d.w == 0);
@@ -142,14 +141,14 @@ tcd(0x5b) {
 
 tcs(0x1b) {
 1:last_cycle();
-  op_io();
+  op_io_irq();
   regs.s.w = regs.a.w;
-  if(regs.e)regs.s.h = 0x01;
+  if(regs.e) regs.s.h = 0x01;
 }
 
 tdc(0x7b) {
 1:last_cycle();
-  op_io();
+  op_io_irq();
   regs.a.w = regs.d.w;
   regs.p.n = !!(regs.a.w & 0x8000);
   regs.p.z = (regs.a.w == 0);
@@ -157,7 +156,7 @@ tdc(0x7b) {
 
 tsc(0x3b) {
 1:last_cycle();
-  op_io();
+  op_io_irq();
   regs.a.w = regs.s.w;
   if(regs.e) {
     regs.p.n = !!(regs.a.l & 0x80);
@@ -170,7 +169,7 @@ tsc(0x3b) {
 
 tsx(0xba) {
 1:last_cycle();
-  op_io();
+  op_io_irq();
   if(regs.p.x) {
     regs.x.l = regs.s.l;
     regs.p.n = !!(regs.x.l & 0x80);
@@ -184,7 +183,7 @@ tsx(0xba) {
 
 txs(0x9a) {
 1:last_cycle();
-  op_io();
+  op_io_irq();
   if(regs.e) {
     regs.s.l = regs.x.l;
   } else {
@@ -206,7 +205,7 @@ phd(0x0b) {
 2:op_writestackn(regs.d.h);
 3:last_cycle();
   op_writestackn(regs.d.l);
-  if(regs.e)regs.s.h = 0x01;
+  if(regs.e) regs.s.h = 0x01;
 }
 
 phb(0x8b, regs.db),
@@ -243,7 +242,7 @@ pld(0x2b) {
   regs.d.h = op_readstackn();
   regs.p.n = !!(regs.d.w & 0x8000);
   regs.p.z = (regs.d.w == 0);
-  if(regs.e)regs.s.h = 0x01;
+  if(regs.e) regs.s.h = 0x01;
 }
 
 plb(0xab) {
@@ -260,7 +259,7 @@ plp(0x28) {
 2:op_io();
 3:last_cycle();
   regs.p = op_readstack();
-  if(regs.e)regs.p |= 0x30;
+  if(regs.e) regs.p |= 0x30;
   if(regs.p.x) {
     regs.x.h = 0x00;
     regs.y.h = 0x00;
@@ -273,7 +272,7 @@ pea(0xf4) {
 3:op_writestackn(aa.h);
 4:last_cycle();
   op_writestackn(aa.l);
-  if(regs.e)regs.s.h = 0x01;
+  if(regs.e) regs.s.h = 0x01;
 }
 
 pei(0xd4) {
@@ -284,7 +283,7 @@ pei(0xd4) {
 5:op_writestackn(aa.h);
 6:last_cycle();
   op_writestackn(aa.l);
-  if(regs.e)regs.s.h = 0x01;
+  if(regs.e) regs.s.h = 0x01;
 }
 
 per(0x62) {
@@ -295,5 +294,5 @@ per(0x62) {
 4:op_writestackn(rd.h);
 5:last_cycle();
   op_writestackn(rd.l);
-  if(regs.e)regs.s.h = 0x01;
+  if(regs.e) regs.s.h = 0x01;
 }

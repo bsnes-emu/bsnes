@@ -53,7 +53,7 @@ void AdvancedWindow::load() {
     string name = config::config().list[i]->name;
 
     //blacklist (omit/hide options that can be configured through the standard UI)
-    if(name == "file.autodetect_type") continue;
+    if(strbegin(name, "file.")) continue;
     if(strbegin(name, "path.")) continue;
     if(strbegin(name, "snes.controller_port_")) continue;
     if(strpos(name, "colorfilter.") >= 0) continue;

@@ -61,10 +61,11 @@ void pHiro::term() {
 bool pHiro::run() {
   MSG msg;
   if(PeekMessage(&msg, 0, 0, 0, PM_REMOVE)) {
-    if(!IsDialogMessage(GetParent(msg.hwnd) ? GetParent(msg.hwnd) : msg.hwnd, &msg)) {
+    //TODO: IsDialogMessage() does not clear keyboard buffer, but is required for tab key to work ...
+    //if(!IsDialogMessage(GetParent(msg.hwnd) ? GetParent(msg.hwnd) : msg.hwnd, &msg)) {
       TranslateMessage(&msg);
       DispatchMessage(&msg);
-    }
+    //}
   }
   return pending();
 }

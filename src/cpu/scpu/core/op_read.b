@@ -9,7 +9,7 @@ ldx_const(0xa2, ldx, regs.p.x),
 ldy_const(0xa0, ldy, regs.p.x),
 ora_const(0x09, ora, regs.p.m),
 sbc_const(0xe9, sbc, regs.p.m) {
-1:if($2)last_cycle();
+1:if($2) last_cycle();
   rd.l = op_readpc();
   if($2) { op_$1_b(); end; }
 2:last_cycle();
@@ -31,7 +31,7 @@ ora_addr(0x0d, ora, regs.p.m),
 sbc_addr(0xed, sbc, regs.p.m) {
 1:aa.l = op_readpc();
 2:aa.h = op_readpc();
-3:if($2)last_cycle();
+3:if($2) last_cycle();
   rd.l = op_readdbr(aa.w);
   if($2) { op_$1_b(); end; }
 4:last_cycle();
@@ -51,7 +51,7 @@ sbc_addrx(0xfd, sbc, regs.p.m) {
 1:aa.l = op_readpc();
 2:aa.h = op_readpc();
 3:op_io_cond4(aa.w, aa.w + regs.x.w);
-4:if($2)last_cycle();
+4:if($2) last_cycle();
   rd.l = op_readdbr(aa.w + regs.x.w);
   if($2) { op_$1_b(); end; }
 5:last_cycle();
@@ -70,7 +70,7 @@ sbc_addry(0xf9, sbc, regs.p.m) {
 1:aa.l = op_readpc();
 2:aa.h = op_readpc();
 3:op_io_cond4(aa.w, aa.w + regs.y.w);
-4:if($2)last_cycle();
+4:if($2) last_cycle();
   rd.l = op_readdbr(aa.w + regs.y.w);
   if($2) { op_$1_b(); end; }
 5:last_cycle();
@@ -88,7 +88,7 @@ sbc_long(0xef, sbc, regs.p.m) {
 1:aa.l = op_readpc();
 2:aa.h = op_readpc();
 3:aa.b = op_readpc();
-4:if($2)last_cycle();
+4:if($2) last_cycle();
   rd.l = op_readlong(aa.d);
   if($2) { op_$1_b(); end; }
 5:last_cycle();
@@ -106,7 +106,7 @@ sbc_longx(0xff, sbc, regs.p.m) {
 1:aa.l = op_readpc();
 2:aa.h = op_readpc();
 3:aa.b = op_readpc();
-4:if($2)last_cycle();
+4:if($2) last_cycle();
   rd.l = op_readlong(aa.d + regs.x.w);
   if($2) { op_$1_b(); end; }
 5:last_cycle();
@@ -128,7 +128,7 @@ ora_dp(0x05, ora, regs.p.m),
 sbc_dp(0xe5, sbc, regs.p.m) {
 1:dp = op_readpc();
 2:op_io_cond2();
-3:if($2)last_cycle();
+3:if($2) last_cycle();
   rd.l = op_readdp(dp);
   if($2) { op_$1_b(); end; }
 4:last_cycle();
@@ -148,7 +148,7 @@ sbc_dpx(0xf5, sbc, regs.p.m) {
 1:dp = op_readpc();
 2:op_io_cond2();
 3:op_io();
-4:if($2)last_cycle();
+4:if($2) last_cycle();
   rd.l = op_readdp(dp + regs.x.w);
   if($2) { op_$1_b(); end; }
 5:last_cycle();
@@ -160,7 +160,7 @@ ldx_dpy(0xb6, ldx, regs.p.x) {
 1:dp = op_readpc();
 2:op_io_cond2();
 3:op_io();
-4:if($2)last_cycle();
+4:if($2) last_cycle();
   rd.l = op_readdp(dp + regs.y.w);
   if($2) { op_$1_b(); end; }
 5:last_cycle();
@@ -179,7 +179,7 @@ sbc_idp(0xf2, sbc, regs.p.m) {
 2:op_io_cond2();
 3:aa.l = op_readdp(dp);
 4:aa.h = op_readdp(dp + 1);
-5:if($2)last_cycle();
+5:if($2) last_cycle();
   rd.l = op_readdbr(aa.w);
   if($2) { op_$1_b(); end; }
 6:last_cycle();
@@ -199,7 +199,7 @@ sbc_idpx(0xe1, sbc, regs.p.m) {
 3:op_io();
 4:aa.l = op_readdp(dp + regs.x.w);
 5:aa.h = op_readdp(dp + regs.x.w + 1);
-6:if($2)last_cycle();
+6:if($2) last_cycle();
   rd.l = op_readdbr(aa.w);
   if($2) { op_$1_b(); end; }
 7:last_cycle();
@@ -219,7 +219,7 @@ sbc_idpy(0xf1, sbc, regs.p.m) {
 3:aa.l = op_readdp(dp);
 4:aa.h = op_readdp(dp + 1);
 5:op_io_cond4(aa.w, aa.w + regs.y.w);
-6:if($2)last_cycle();
+6:if($2) last_cycle();
   rd.l = op_readdbr(aa.w + regs.y.w);
   if($2) { op_$1_b(); end; }
 7:last_cycle();
@@ -239,7 +239,7 @@ sbc_ildp(0xe7, sbc, regs.p.m) {
 3:aa.l = op_readdp(dp);
 4:aa.h = op_readdp(dp + 1);
 5:aa.b = op_readdp(dp + 2);
-6:if($2)last_cycle();
+6:if($2) last_cycle();
   rd.l = op_readlong(aa.d);
   if($2) { op_$1_b(); end; }
 7:last_cycle();
@@ -259,7 +259,7 @@ sbc_ildpy(0xf7, sbc, regs.p.m) {
 3:aa.l = op_readdp(dp);
 4:aa.h = op_readdp(dp + 1);
 5:aa.b = op_readdp(dp + 2);
-6:if($2)last_cycle();
+6:if($2) last_cycle();
   rd.l = op_readlong(aa.d + regs.y.w);
   if($2) { op_$1_b(); end; }
 7:last_cycle();
@@ -276,7 +276,7 @@ ora_sr(0x03, ora, regs.p.m),
 sbc_sr(0xe3, sbc, regs.p.m) {
 1:sp = op_readpc();
 2:op_io();
-3:if($2)last_cycle();
+3:if($2) last_cycle();
   rd.l = op_readsp(sp);
   if($2) { op_$1_b(); end; }
 4:last_cycle();
@@ -296,7 +296,7 @@ sbc_isry(0xf3, sbc) {
 3:aa.l = op_readsp(sp);
 4:aa.h = op_readsp(sp + 1);
 5:op_io();
-6:if(regs.p.m)last_cycle();
+6:if(regs.p.m) last_cycle();
   rd.l = op_readdbr(aa.w + regs.y.w);
   if(regs.p.m) { op_$1_b(); end; }
 7:last_cycle();
@@ -305,7 +305,7 @@ sbc_isry(0xf3, sbc) {
 }
 
 bit_const(0x89) {
-1:if(regs.p.m)last_cycle();
+1:if(regs.p.m) last_cycle();
   rd.l = op_readpc();
   if(regs.p.m) {
     regs.p.z = ((rd.l & regs.a.l) == 0);

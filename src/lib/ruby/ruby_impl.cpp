@@ -20,6 +20,10 @@
   #include <ruby/video/sdl.cpp>
 #endif
 
+#ifdef VIDEO_WGL
+  #include <ruby/video/wgl.cpp>
+#endif
+
 #ifdef VIDEO_XV
   #include <ruby/video/xv.cpp>
 #endif

@@ -1,7 +1,7 @@
 #include <windows.h>
 #include <d3d9.h>
 
-#define D3DVERTEX (D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_TEX1)
+#define D3DVERTEX (D3DFVF_XYZRHW | D3DFVF_TEX1)
 
 #include <ruby/ruby.h>
 
@@ -26,7 +26,6 @@ public:
 
   struct d3dvertex {
     float x, y, z, rhw; //screen coords
-    uint32_t color;     //diffuse color
     float u, v;         //texture coords
   };
 
@@ -47,6 +46,11 @@ public:
     bool synchronize;
     unsigned filter;
   } settings;
+
+  struct {
+    unsigned width;
+    unsigned height;
+  } state;
 
   bool cap(Video::Setting setting) {
     if(setting == Video::Handle) return true;
@@ -101,7 +105,7 @@ public:
      | /        |
      2----------3
 
-    (x,y) screen coords, in pixels (-0.5 for texel / pixel correction)
+    (x,y) screen coords, in pixels
     (u,v) texture coords, betweeen 0.0 (top, left) to 1.0 (bottom, right)
   */
   void set_vertex(
@@ -110,12 +114,12 @@ public:
     uint32_t x, uint32_t y, uint32_t w, uint32_t h
   ) {
     d3dvertex vertex[4];
-    vertex[0].x = vertex[2].x = (double)(x    ) - 0.5;
-    vertex[1].x = vertex[3].x = (double)(x + w) - 0.5;
-    vertex[0].y = vertex[1].y = (double)(y    ) - 0.5;
-    vertex[2].y = vertex[3].y = (double)(y + h) - 0.5;
+    vertex[0].x = vertex[2].x = (double)(x    );
+    vertex[1].x = vertex[3].x = (double)(x + w);
+    vertex[0].y = vertex[1].y = (double)(y    );
+    vertex[2].y = vertex[3].y = (double)(y + h);
 
-  //Z-buffer and RHW are unused for 2D blit, set to normal values
+    //Z-buffer and RHW are unused for 2D blit, set to normal values
     vertex[0].z = vertex[1].z = vertex[2].z = vertex[3].z = 0.0;
     vertex[0].rhw = vertex[1].rhw = vertex[2].rhw = vertex[3].rhw = 1.0;
 
@@ -149,7 +153,7 @@ public:
       }
     }
 
-  //clear primary display and all backbuffers
+    //clear primary display and all backbuffers
     for(int i = 0; i < 3; i++) {
       device->Clear(0, 0, D3DCLEAR_TARGET, D3DCOLOR_XRGB(0x00, 0x00, 0x00), 1.0f, 0);
       device->Present(0, 0, 0, 0);
@@ -171,22 +175,28 @@ public:
     if(caps.stretchrect == false)surface->Release();
   }
 
-  void refresh(unsigned r_width, unsigned r_height) {
+  void refresh(unsigned width, unsigned height) {
     if(!device) return;
+
+    RECT rd, rs; //dest, source rectangles
+    GetClientRect(settings.handle, &rd);
+    SetRect(&rs, 0, 0, width, height);
+
+    if(state.width != rd.right || state.height != rd.bottom) {
+      //if window size changed, D3DPRESENT_PARAMETERS must be updated
+      //failure to do so causes scaling issues on some ATI drivers
+      init();
+    }
 
     device->BeginScene();
 
     if(caps.stretchrect == true) {
-      RECT rs;
-      SetRect(&rs, 0, 0, r_width, r_height);
       LPDIRECT3DSURFACE9 temp;
       device->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &temp);
       device->StretchRect(surface, &rs, temp, 0, static_cast<D3DTEXTUREFILTERTYPE>(flags.filter));
       temp->Release();
     } else {
-      RECT rd;
-      GetClientRect(settings.handle, &rd);
-      set_vertex(0, 0, r_width, r_height, 1024, 1024, 0, 0, rd.right, rd.bottom);
+      set_vertex(0, 0, width, height, 1024, 1024, 0, 0, rd.right, rd.bottom);
       device->SetTexture(0, texture);
       device->DrawPrimitive(D3DPT_TRIANGLESTRIP, 0, 2);
     }
@@ -194,7 +204,7 @@ public:
     device->EndScene();
 
     if(settings.synchronize) {
-    D3DRASTER_STATUS status;
+      D3DRASTER_STATUS status;
       for(;;) {
         device->GetRasterStatus(0, &status);
         if(bool(status.InVBlank) == true) break;
@@ -207,6 +217,11 @@ public:
 
   bool init() {
     term();
+
+    RECT rd;
+    GetClientRect(settings.handle, &rd);
+    state.width  = rd.right;
+    state.height = rd.bottom;
 
     lpd3d = Direct3DCreate9(D3D_SDK_VERSION);
     if(!lpd3d) return false;
@@ -231,7 +246,7 @@ public:
       return false;
     }
 
-  //detect device capabilities
+    //detect device capabilities
     device->GetDeviceCaps(&d3dcaps);
     if(d3dcaps.MaxTextureWidth < 1024 || d3dcaps.MaxTextureWidth < 1024) return false;
 

@@ -294,6 +294,7 @@ void load_cart_normal(const char *filename) {
 //warn if unsupported hardware detected
   if(cartridge.info.superfx) alert("Warning: unsupported SuperFX chip detected.");
   if(cartridge.info.sa1)     alert("Warning: unsupported SA-1 chip detected.");
+  if(cartridge.info.spc7110) alert("Warning: unsupported SPC7110 chip detected.");
   if(cartridge.info.st011)   alert("Warning: unsupported ST011 chip detected.");
   if(cartridge.info.st018)   alert("Warning: unsupported ST018 chip detected.");
 

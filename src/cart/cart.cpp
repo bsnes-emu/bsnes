@@ -1,6 +1,9 @@
 #include "../base.h"
 #define CART_CPP
 
+#include <nall/crc32.hpp>
+#include <nall/ups.hpp>
+
 #include "cart_normal.cpp"
 #include "cart_bsx.cpp"
 #include "cart_bsc.cpp"
@@ -43,6 +46,7 @@ void Cartridge::load_begin(CartridgeType cart_type) {
 
   info.superfx = false;
   info.sa1     = false;
+  info.spc7110 = false;
   info.srtc    = false;
   info.sdd1    = false;
   info.cx4     = false;

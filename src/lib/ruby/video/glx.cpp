@@ -184,6 +184,7 @@ public:
       /* x = */ 0, /* y = */ 0, wa.width, wa.height,
       /* border_width = */ 0, vi->depth, InputOutput, vi->visual,
       CWColormap | CWBorderPixel | CWEventMask, &swa);
+    XSetWindowBackground(display, xwindow, /* color = */ 0);
     XMapWindow(display, xwindow);
     XEvent event;
     XIfEvent(display, &event, x_wait_for_map_notify, (char*)xwindow); //wait for window to appear onscreen

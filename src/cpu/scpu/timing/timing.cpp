@@ -124,6 +124,35 @@ void sCPU::cycle_edge() {
     }
   }
 
+  if(status.hdmainit_triggered == false) {
+    if(status.hcounter >= status.hdmainit_trigger_position || status.vcounter) {
+      status.hdmainit_triggered = true;
+      hdma_init_reset();
+      if(hdma_enabled_channels()) {
+        if(status.dma_state == DMASTATE_INACTIVE) {
+          status.dma_state = DMASTATE_DMASYNC;
+          status.hdmainit_pending = true;
+        } else {
+          hdma_init();
+        }
+      }
+    }
+  }
+
+  if(status.hdma_triggered == false) {
+    if(status.hcounter >= 1106) {
+      status.hdma_triggered = true;
+      if(hdma_active_channels()) {
+        if(status.dma_state == DMASTATE_INACTIVE) {
+          status.dma_state = DMASTATE_DMASYNC;
+          status.hdma_pending = true;
+        } else {
+          hdma_run();
+        }
+      }
+    }
+  }
+
   switch(status.dma_state) {
     case DMASTATE_INACTIVE: break;
 
@@ -141,39 +170,6 @@ void sCPU::cycle_edge() {
       if(status.dma_pending)      { dma_run();   status.dma_pending      = false; }
 
     } break;
-  }
-
-  if(status.hdmainit_triggered == false) {
-    if(status.hcounter >= status.hdmainit_trigger_position || status.vcounter) {
-      status.hdmainit_triggered = true;
-      hdma_init_reset();
-      if(hdma_enabled_channels()) {
-        add_clocks(18);
-        hdma_init();
-      //if(status.dma_state == DMASTATE_INACTIVE) {
-      //  status.dma_state = DMASTATE_DMASYNC;
-      //  status.hdmainit_pending = true;
-      //} else {
-      //  hdma_init();
-      //}
-      }
-    }
-  }
-
-  if(status.hdma_triggered == false) {
-    if(status.hcounter >= 1106) {
-      status.hdma_triggered = true;
-      if(hdma_active_channels()) {
-        add_clocks(18);
-        hdma_run();
-      //if(status.dma_state == DMASTATE_INACTIVE) {
-      //  status.dma_state = DMASTATE_DMASYNC;
-      //  status.hdma_pending = true;
-      //} else {
-      //  hdma_run();
-      //}
-      }
-    }
   }
 }
 

@@ -7,15 +7,13 @@ void sDSP::brr_decode(voice_t &v) {
   const int filter = (state.t_brr_header >> 2) & 3;
   const int scale  = (state.t_brr_header >> 4);
 
-  //write to next four samples in circular buffer
-  int *pos = &v.buf[v.buf_pos];
-  v.buf_pos += 4;
-  if(v.buf_pos >= brr_buf_size) v.buf_pos = 0;
-
   //decode four samples
-  for(int *end = pos + 4; pos < end; pos++) {
-    int s = sclip<4>(nybbles >> 12); //extract upper nybble and sign extend
-    nybbles <<= 4;                   //advance nybble position
+  for(unsigned i = 0; i < 4; i++) {
+    //bits 12-15 = current nybble; sign extend, then shift right to 4-bit precision
+    //result: s = 4-bit sign-extended sample value
+    int s = (int16)nybbles >> 12;
+    nybbles <<= 4; //slide nybble so that on next loop iteration, bits 12-15 = current nybble
+
     if(scale <= 12) {
       s <<= scale;
       s >>= 1;
@@ -24,8 +22,8 @@ void sDSP::brr_decode(voice_t &v) {
     }
 
     //apply IIR filter (2 is the most commonly used)
-    const int p1 = pos[brr_buf_size - 1];
-    const int p2 = pos[brr_buf_size - 2] >> 1;
+    const int p1 = v.buffer[v.buf_pos - 1];
+    const int p2 = v.buffer[v.buf_pos - 2] >> 1;
 
     switch(filter) {
       case 0: break; //no filter
@@ -55,8 +53,9 @@ void sDSP::brr_decode(voice_t &v) {
 
     //adjust and write sample
     s = sclamp<16>(s);
-    s = sclip<16>(s << 1);
-    pos[brr_buf_size] = pos[0] = s; //second copy simplifies wrap-around
+    s = (int16)(s << 1);
+    v.buffer.write(v.buf_pos++, s);
+    if(v.buf_pos >= brr_buf_size) v.buf_pos = 0;
   }
 }
 

@@ -1,32 +1,27 @@
 #ifdef SDSP_CPP
 
-//current echo buffer pointer for left/right channel
-#define ECHO_PTR(ch) (&ram[state.t_echo_ptr + ch * 2])
-
-//sample in echo history buffer, where 0 is the oldest
-#define ECHO_FIR(i) state.echo_hist_pos[i]
-
-//calculate FIR point for left/right channel
-#define CALC_FIR(i, ch) ((ECHO_FIR(i + 1)[ch] * (int8)REG(fir + i * 0x10)) >> 6)
-
-void sDSP::echo_read(bool channel) {
-  uint8 *in = ECHO_PTR(channel);
-  int s = (int8)in[1] * 0x100 + in[0];
-  //second copy simplifies wrap-around handling
-  ECHO_FIR(0)[channel] = ECHO_FIR(8)[channel] = s >> 1;
+int sDSP::calc_fir(int i, bool channel) {
+  int s = state.echo_hist[channel][state.echo_hist_pos + i + 1];
+  return (s * (int8)REG(fir + i * 0x10)) >> 6;
 }
 
 int sDSP::echo_output(bool channel) {
-  int output = sclip<16>((state.t_main_out[channel] * (int8)REG(mvoll + channel * 0x10)) >> 7)
-             + sclip<16>((state.t_echo_in [channel] * (int8)REG(evoll + channel * 0x10)) >> 7);
+  int output = (int16)((state.t_main_out[channel] * (int8)REG(mvoll + channel * 0x10)) >> 7)
+             + (int16)((state.t_echo_in [channel] * (int8)REG(evoll + channel * 0x10)) >> 7);
   return sclamp<16>(output);
 }
 
+void sDSP::echo_read(bool channel) {
+  uint8 *in = &ram[state.t_echo_ptr + channel * 2];
+  int s = (int16)((in[1] << 8) + in[0]);
+  state.echo_hist[channel].write(state.echo_hist_pos, s >> 1);
+}
+
 void sDSP::echo_write(bool channel) {
-  if(!(state.t_echo_enabled & 0x20)) {
-    uint8 *out = ECHO_PTR(channel);
+  if(!(state.t_echo_disabled & 0x20)) {
+    uint8 *out = &ram[state.t_echo_ptr + channel * 2];
     int s = state.t_echo_out[channel];
-    out[0] = (uint8)s;
+    out[0] = (uint8)(s);
     out[1] = (uint8)(s >> 8);
   }
 
@@ -36,22 +31,22 @@ void sDSP::echo_write(bool channel) {
 void sDSP::echo_22() {
   //history
   state.echo_hist_pos++;
-  if(state.echo_hist_pos >= &state.echo_hist[8]) state.echo_hist_pos = state.echo_hist;
+  if(state.echo_hist_pos >= echo_hist_size) state.echo_hist_pos = 0;
 
   state.t_echo_ptr = (uint16)((state.t_esa << 8) + state.echo_offset);
   echo_read(0);
 
   //FIR
-  int l = CALC_FIR(0, 0);
-  int r = CALC_FIR(0, 1);
+  int l = calc_fir(0, 0);
+  int r = calc_fir(0, 1);
 
   state.t_echo_in[0] = l;
   state.t_echo_in[1] = r;
 }
 
 void sDSP::echo_23() {
-  int l = CALC_FIR(1, 0) + CALC_FIR(2, 0);
-  int r = CALC_FIR(1, 1) + CALC_FIR(2, 1);
+  int l = calc_fir(1, 0) + calc_fir(2, 0);
+  int r = calc_fir(1, 1) + calc_fir(2, 1);
 
   state.t_echo_in[0] += l;
   state.t_echo_in[1] += r;
@@ -60,22 +55,22 @@ void sDSP::echo_23() {
 }
 
 void sDSP::echo_24() {
-  int l = CALC_FIR(3, 0) + CALC_FIR(4, 0) + CALC_FIR(5, 0);
-  int r = CALC_FIR(3, 1) + CALC_FIR(4, 1) + CALC_FIR(5, 1);
+  int l = calc_fir(3, 0) + calc_fir(4, 0) + calc_fir(5, 0);
+  int r = calc_fir(3, 1) + calc_fir(4, 1) + calc_fir(5, 1);
 
   state.t_echo_in[0] += l;
   state.t_echo_in[1] += r;
 }
 
 void sDSP::echo_25() {
-  int l = state.t_echo_in[0] + CALC_FIR(6, 0);
-  int r = state.t_echo_in[1] + CALC_FIR(6, 1);
+  int l = state.t_echo_in[0] + calc_fir(6, 0);
+  int r = state.t_echo_in[1] + calc_fir(6, 1);
 
-  l = sclip<16>(l);
-  r = sclip<16>(r);
+  l = (int16)l;
+  r = (int16)r;
 
-  l += (int16)CALC_FIR(7, 0);
-  r += (int16)CALC_FIR(7, 1);
+  l += (int16)calc_fir(7, 0);
+  r += (int16)calc_fir(7, 1);
 
   state.t_echo_in[0] = sclamp<16>(l) & ~1;
   state.t_echo_in[1] = sclamp<16>(r) & ~1;
@@ -87,8 +82,8 @@ void sDSP::echo_26() {
   state.t_main_out[0] = echo_output(0);
 
   //echo feedback
-  int l = state.t_echo_out[0] + sclip<16>((state.t_echo_in[0] * (int8)REG(efb)) >> 7);
-  int r = state.t_echo_out[1] + sclip<16>((state.t_echo_in[1] * (int8)REG(efb)) >> 7);
+  int l = state.t_echo_out[0] + (int16)((state.t_echo_in[0] * (int8)REG(efb)) >> 7);
+  int r = state.t_echo_out[1] + (int16)((state.t_echo_in[1] * (int8)REG(efb)) >> 7);
 
   state.t_echo_out[0] = sclamp<16>(l) & ~1;
   state.t_echo_out[1] = sclamp<16>(r) & ~1;
@@ -113,7 +108,7 @@ void sDSP::echo_27() {
 }
 
 void sDSP::echo_28() {
-  state.t_echo_enabled = REG(flg);
+  state.t_echo_disabled = REG(flg);
 }
 
 void sDSP::echo_29() {
@@ -127,7 +122,7 @@ void sDSP::echo_29() {
   //write left echo
   echo_write(0);
 
-  state.t_echo_enabled = REG(flg);
+  state.t_echo_disabled = REG(flg);
 }
 
 void sDSP::echo_30() {

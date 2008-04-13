@@ -1,192 +1,221 @@
-void sSMP::op_inc_a() {
+//inc_a
+case 0xbc: {
   op_io();
   regs.a = op_inc(regs.a);
-}
+} break;
 
-void sSMP::op_inc_x() {
+//inc_x
+case 0x3d: {
   op_io();
   regs.x = op_inc(regs.x);
-}
+} break;
 
-void sSMP::op_inc_y() {
+//inc_y
+case 0xfc: {
   op_io();
   regs.y = op_inc(regs.y);
-}
+} break;
 
-void sSMP::op_dec_a() {
+//dec_a
+case 0x9c: {
   op_io();
   regs.a = op_dec(regs.a);
-}
+} break;
 
-void sSMP::op_dec_x() {
+//dec_x
+case 0x1d: {
   op_io();
   regs.x = op_dec(regs.x);
-}
+} break;
 
-void sSMP::op_dec_y() {
+//dec_y
+case 0xdc: {
   op_io();
   regs.y = op_dec(regs.y);
-}
+} break;
 
-void sSMP::op_asl_a() {
+//asl_a
+case 0x1c: {
   op_io();
   regs.a = op_asl(regs.a);
-}
+} break;
 
-void sSMP::op_lsr_a() {
+//lsr_a
+case 0x5c: {
   op_io();
   regs.a = op_lsr(regs.a);
-}
+} break;
 
-void sSMP::op_rol_a() {
+//rol_a
+case 0x3c: {
   op_io();
   regs.a = op_rol(regs.a);
-}
+} break;
 
-void sSMP::op_ror_a() {
+//ror_a
+case 0x7c: {
   op_io();
   regs.a = op_ror(regs.a);
-}
+} break;
 
-void sSMP::op_inc_dp() {
+//inc_dp
+case 0xab: {
   dp = op_readpc();
   rd = op_readdp(dp);
   rd = op_inc(rd);
   op_writedp(dp, rd);
-}
+} break;
 
-void sSMP::op_dec_dp() {
+//dec_dp
+case 0x8b: {
   dp = op_readpc();
   rd = op_readdp(dp);
   rd = op_dec(rd);
   op_writedp(dp, rd);
-}
+} break;
 
-void sSMP::op_asl_dp() {
+//asl_dp
+case 0x0b: {
   dp = op_readpc();
   rd = op_readdp(dp);
   rd = op_asl(rd);
   op_writedp(dp, rd);
-}
+} break;
 
-void sSMP::op_lsr_dp() {
+//lsr_dp
+case 0x4b: {
   dp = op_readpc();
   rd = op_readdp(dp);
   rd = op_lsr(rd);
   op_writedp(dp, rd);
-}
+} break;
 
-void sSMP::op_rol_dp() {
+//rol_dp
+case 0x2b: {
   dp = op_readpc();
   rd = op_readdp(dp);
   rd = op_rol(rd);
   op_writedp(dp, rd);
-}
+} break;
 
-void sSMP::op_ror_dp() {
+//ror_dp
+case 0x6b: {
   dp = op_readpc();
   rd = op_readdp(dp);
   rd = op_ror(rd);
   op_writedp(dp, rd);
-}
+} break;
 
-void sSMP::op_inc_dpx() {
+//inc_dpx
+case 0xbb: {
   dp = op_readpc();
   op_io();
   rd = op_readdp(dp + regs.x);
   rd = op_inc(rd);
   op_writedp(dp + regs.x, rd);
-}
+} break;
 
-void sSMP::op_dec_dpx() {
+//dec_dpx
+case 0x9b: {
   dp = op_readpc();
   op_io();
   rd = op_readdp(dp + regs.x);
   rd = op_dec(rd);
   op_writedp(dp + regs.x, rd);
-}
+} break;
 
-void sSMP::op_asl_dpx() {
+//asl_dpx
+case 0x1b: {
   dp = op_readpc();
   op_io();
   rd = op_readdp(dp + regs.x);
   rd = op_asl(rd);
   op_writedp(dp + regs.x, rd);
-}
+} break;
 
-void sSMP::op_lsr_dpx() {
+//lsr_dpx
+case 0x5b: {
   dp = op_readpc();
   op_io();
   rd = op_readdp(dp + regs.x);
   rd = op_lsr(rd);
   op_writedp(dp + regs.x, rd);
-}
+} break;
 
-void sSMP::op_rol_dpx() {
+//rol_dpx
+case 0x3b: {
   dp = op_readpc();
   op_io();
   rd = op_readdp(dp + regs.x);
   rd = op_rol(rd);
   op_writedp(dp + regs.x, rd);
-}
+} break;
 
-void sSMP::op_ror_dpx() {
+//ror_dpx
+case 0x7b: {
   dp = op_readpc();
   op_io();
   rd = op_readdp(dp + regs.x);
   rd = op_ror(rd);
   op_writedp(dp + regs.x, rd);
-}
+} break;
 
-void sSMP::op_inc_addr() {
+//inc_addr
+case 0xac: {
   dp  = op_readpc();
   dp |= op_readpc() << 8;
   rd = op_readaddr(dp);
   rd = op_inc(rd);
   op_writeaddr(dp, rd);
-}
+} break;
 
-void sSMP::op_dec_addr() {
+//dec_addr
+case 0x8c: {
   dp  = op_readpc();
   dp |= op_readpc() << 8;
   rd = op_readaddr(dp);
   rd = op_dec(rd);
   op_writeaddr(dp, rd);
-}
+} break;
 
-void sSMP::op_asl_addr() {
+//asl_addr
+case 0x0c: {
   dp  = op_readpc();
   dp |= op_readpc() << 8;
   rd = op_readaddr(dp);
   rd = op_asl(rd);
   op_writeaddr(dp, rd);
-}
+} break;
 
-void sSMP::op_lsr_addr() {
+//lsr_addr
+case 0x4c: {
   dp  = op_readpc();
   dp |= op_readpc() << 8;
   rd = op_readaddr(dp);
   rd = op_lsr(rd);
   op_writeaddr(dp, rd);
-}
+} break;
 
-void sSMP::op_rol_addr() {
+//rol_addr
+case 0x2c: {
   dp  = op_readpc();
   dp |= op_readpc() << 8;
   rd = op_readaddr(dp);
   rd = op_rol(rd);
   op_writeaddr(dp, rd);
-}
+} break;
 
-void sSMP::op_ror_addr() {
+//ror_addr
+case 0x6c: {
   dp  = op_readpc();
   dp |= op_readpc() << 8;
   rd = op_readaddr(dp);
   rd = op_ror(rd);
   op_writeaddr(dp, rd);
-}
+} break;
 
-void sSMP::op_tset_addr_a() {
+//tset_addr_a
+case 0x0e: {
   dp  = op_readpc();
   dp |= op_readpc() << 8;
   rd = op_readaddr(dp);
@@ -194,9 +223,10 @@ void sSMP::op_tset_addr_a() {
   regs.p.z = ((regs.a - rd) == 0);
   op_readaddr(dp);
   op_writeaddr(dp, rd | regs.a);
-}
+} break;
 
-void sSMP::op_tclr_addr_a() {
+//tclr_addr_a
+case 0x4e: {
   dp  = op_readpc();
   dp |= op_readpc() << 8;
   rd = op_readaddr(dp);
@@ -204,9 +234,10 @@ void sSMP::op_tclr_addr_a() {
   regs.p.z = ((regs.a - rd) == 0);
   op_readaddr(dp);
   op_writeaddr(dp, rd &~ regs.a);
-}
+} break;
 
-void sSMP::op_incw_dp() {
+//incw_dp
+case 0x3a: {
   dp = op_readpc();
   rd = op_readdp(dp);
   rd++;
@@ -215,9 +246,10 @@ void sSMP::op_incw_dp() {
   op_writedp(dp, rd >> 8);
   regs.p.n = !!(rd & 0x8000);
   regs.p.z = (rd == 0);
-}
+} break;
 
-void sSMP::op_decw_dp() {
+//decw_dp
+case 0x1a: {
   dp = op_readpc();
   rd = op_readdp(dp);
   rd--;
@@ -226,5 +258,5 @@ void sSMP::op_decw_dp() {
   op_writedp(dp, rd >> 8);
   regs.p.n = !!(rd & 0x8000);
   regs.p.z = (rd == 0);
-}
+} break;
 

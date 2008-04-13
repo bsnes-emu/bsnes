@@ -51,6 +51,11 @@ void Cartridge::read_header() {
     info.sdd1 = true;
   }
 
+  if(mapper == 0x3a && (rom_type == 0xf5 || rom_type == 0xf9)) {
+    //rom_type: 0xf5 = no S-RTC, 0xf9 = S-RTC
+    info.spc7110 = true;
+  }
+
   if(mapper == 0x20 && rom_type == 0xf3) {
     info.cx4 = true;
   }

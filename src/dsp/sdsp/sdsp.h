@@ -15,6 +15,9 @@ private:
   //external
   uint8 *ram;
 
+  //USE_STATE_MACHINE variable
+  unsigned phase_index;
+
   //global registers
   enum global_reg_t {
     r_mvoll = 0x0c, r_mvolr = 0x1c,
@@ -39,7 +42,8 @@ private:
   //internal envelope modes
   enum env_mode_t { env_release, env_attack, env_decay, env_sustain };
 
-  //internal voice state
+  //internal constants
+  enum { echo_hist_size =  8 };
   enum { brr_buf_size   = 12 };
   enum { brr_block_size =  9 };
 
@@ -47,9 +51,8 @@ private:
   struct state_t {
     uint8 regs[128];
 
-    //echo history keeps most recent 8 samples (twice the size to simplify wrap handling)
-    int echo_hist[8 * 2][2];
-    int (*echo_hist_pos)[2]; //&echo_hist[0 to 7]
+    modulo_array<int, echo_hist_size> echo_hist[2]; //echo history keeps most recent 8 samples
+    int echo_hist_pos;
 
     bool every_other_sample; //toggles every sample
     int kon;                 //KON value when last checked
@@ -80,7 +83,7 @@ private:
     int t_brr_byte;
     int t_srcn;
     int t_esa;
-    int t_echo_enabled;
+    int t_echo_disabled;
 
     //internal state that is recalculated every sample
     int t_dir_addr;
@@ -97,18 +100,18 @@ private:
 
   //voice state
   struct voice_t {
-    int buf[brr_buf_size * 2]; //decoded samples (twice the size to simplify wrap handling)
-    int buf_pos;               //place in buffer where next samples will be decoded
-    int interp_pos;            //relative fractional position in sample (0x1000 = 1.0)
-    int brr_addr;              //address of current BRR block
-    int brr_offset;            //current decoding offset in BRR block
-    int vbit;                  //bitmask for voice: 0x01 for voice 0, 0x02 for voice 1, etc
-    int vidx;                  //voice channel register index: 0x00 for voice 0, 0x10 for voice 1, etc
-    int kon_delay;             //KON delay/current setup phase
+    modulo_array<int, brr_buf_size> buffer; //decoded samples
+    int buf_pos;         //place in buffer where next samples will be decoded
+    int interp_pos;      //relative fractional position in sample (0x1000 = 1.0)
+    int brr_addr;        //address of current BRR block
+    int brr_offset;      //current decoding offset in BRR block
+    int vbit;            //bitmask for voice: 0x01 for voice 0, 0x02 for voice 1, etc
+    int vidx;            //voice channel register index: 0x00 for voice 0, 0x10 for voice 1, etc
+    int kon_delay;       //KON delay/current setup phase
     env_mode_t env_mode;
-    int env;                   //current envelope level
+    int env;             //current envelope level
     int t_envx_out;
-    int hidden_env;            //used by GAIN mode 7, very obscure quirk
+    int hidden_env;      //used by GAIN mode 7, very obscure quirk
   } voice[8];
 
   //gaussian
@@ -150,8 +153,9 @@ private:
   void voice_9 (voice_t &v);
 
   //echo
-  void echo_read(bool channel);
+  int calc_fir(int i, bool channel);
   int echo_output(bool channel);
+  void echo_read(bool channel);
   void echo_write(bool channel);
   void echo_22();
   void echo_23();

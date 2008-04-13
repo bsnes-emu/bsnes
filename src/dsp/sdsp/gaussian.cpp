@@ -41,13 +41,13 @@ int sDSP::gaussian_interpolate(const voice_t &v) {
   const int16 *fwd = gaussian_table + 255 - offset;
   const int16 *rev = gaussian_table       + offset; //mirror left half of gaussian table
 
-  const int* in = &v.buf[(v.interp_pos >> 12) + v.buf_pos];
+  offset = v.buf_pos + (v.interp_pos >> 12);
   int output;
-  output  = (fwd[  0] * in[0]) >> 11;
-  output += (fwd[256] * in[1]) >> 11;
-  output += (rev[256] * in[2]) >> 11;
-  output = sclip<16>(output);
-  output += (rev[  0] * in[3]) >> 11;
+  output  = (fwd[  0] * v.buffer[offset + 0]) >> 11;
+  output += (fwd[256] * v.buffer[offset + 1]) >> 11;
+  output += (rev[256] * v.buffer[offset + 2]) >> 11;
+  output  = (int16)output;
+  output += (rev[  0] * v.buffer[offset + 3]) >> 11;
   return sclamp<16>(output) & ~1;
 }
 

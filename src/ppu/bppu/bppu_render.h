@@ -49,9 +49,9 @@ struct {
   uint16 scx, scy; //sc index offsets
 } bg_info[4];
 
-inline void   update_bg_info();
-inline uint16 bg_get_tile(uint8 bg, uint16 x, uint16 y);
-void render_line_bg(uint8 bg, uint8 color_depth, uint8 pri0_pos, uint8 pri1_pos);
+void   update_bg_info();
+uint16 bg_get_tile(uint8 bg, uint16 x, uint16 y);
+void   render_line_bg(uint8 bg, uint8 color_depth, uint8 pri0_pos, uint8 pri1_pos);
 
 //bppu_render_oam.cpp
 struct sprite_item {

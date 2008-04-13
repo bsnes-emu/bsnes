@@ -74,6 +74,10 @@ char* Cartridge::get_path_filename(char *filename, const char *path, const char 
   return filename;
 }
 
+char* Cartridge::get_patch_filename(const char *source, const char *extension) {
+  return get_path_filename(patchfn, config::path.patch, source, extension);
+}
+
 char* Cartridge::get_save_filename(const char *source, const char *extension) {
   return get_path_filename(savefn, config::path.save, source, extension);
 }
@@ -82,13 +86,19 @@ char* Cartridge::get_cheat_filename(const char *source, const char *extension) {
   return get_path_filename(cheatfn, config::path.cheat, source, extension);
 }
 
-bool Cartridge::load_file(const char *fn, uint8 *&data, uint &size) {
-  dprintf("* Loading \"%s\"...", fn);
+bool Cartridge::load_file(const char *fn, uint8 *&data, uint &size, CompressionMode compression) {
+  dprintf("* Loading \"%s\" ...", fn);
 
   if(fexists(fn) == false) return false;
 
-  switch(Reader::detect(fn)) {
+  Reader::Type filetype = Reader::Normal;
+  if(compression == CompressionInspect) filetype = Reader::detect(fn, true);
+  if(compression == CompressionAuto) filetype = Reader::detect(fn, config::file.autodetect_type);
+
+  switch(filetype) {
     default:
+      dprintf("* Warning: filetype detected as unsupported compression type.");
+      dprintf("* Will attempt to load as uncompressed file -- may fail.");
     case Reader::Normal: {
       FileReader ff(fn);
       if(!ff.ready()) {
@@ -132,6 +142,30 @@ bool Cartridge::load_file(const char *fn, uint8 *&data, uint &size) {
   }
 
   return true;
+}
+
+bool Cartridge::apply_patch(const uint8_t *pdata, const unsigned psize, uint8_t *&data, unsigned &size) {
+  uint8_t *outdata = 0;
+  unsigned outsize;
+  ups patcher;
+  ups::result result = patcher.apply(pdata, psize, data, size, outdata, outsize);
+
+  bool apply = false;
+  if(result == ups::ok) apply = true;
+  if(config::file.bypass_patch_crc32 == true) {
+    if(result == ups::input_crc32_invalid) apply = true;
+    if(result == ups::output_crc32_invalid) apply = true;
+  }
+
+  if(apply == true) {
+    free(data);
+    data = (uint8_t*)malloc(size = outsize);
+    memcpy(data, outdata, outsize);
+  } else {
+    dprintf("* Warning: patch application failed!");
+  }
+
+  if(outdata) delete[] outdata;
 }
 
 bool Cartridge::save_file(const char *fn, uint8 *data, uint size) {

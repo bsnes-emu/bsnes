@@ -12,7 +12,7 @@
   #include "jmareader.cpp"
 #endif
 
-Reader::Type Reader::detect(const char *fn) {
+Reader::Type Reader::detect(const char *fn, bool inspectheader) {
   FILE *fp = fopen(fn, "rb");
   if(!fp) return Unknown;
 
@@ -21,7 +21,7 @@ Reader::Type Reader::detect(const char *fn) {
   fread(p, 1, 8, fp);
   fclose(fp);
 
-  if(config::file.autodetect_type == true) {
+  if(inspectheader == true) {
     //inspect file header to determine type
     if(p[0] == 0x1f && p[1] == 0x8b && p[2] == 0x08 && p[3] <= 0x1f) return GZIP;
     if(p[0] == 0x50 && p[1] == 0x4b && p[2] == 0x03 && p[3] == 0x04) return ZIP;

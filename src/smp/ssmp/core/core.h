@@ -1,6 +1,5 @@
-void (sSMP::*optbl[256])();
+  uint16 dp, sp, rd, wr, bit, ya;
 
-uint16 dp, sp, rd, wr, bit, ya;
   bool   in_opcode() { return status.in_opcode; }
 
   uint8  op_adc (uint8  x, uint8  y);
@@ -18,5 +17,3 @@ uint16 dp, sp, rd, wr, bit, ya;
   uint8  op_lsr (uint8  x);
   uint8  op_rol (uint8  x);
   uint8  op_ror (uint8  x);
-
-#include "op.h"

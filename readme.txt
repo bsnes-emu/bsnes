@@ -1,5 +1,5 @@
 bsnes
-Version: 0.030
+Version: 0.031
 Author: byuu
 
 --------
@@ -17,7 +17,7 @@ Please see license.txt for important licensing information.
 Known Limitations:
 ------------------
 S-CPU
-- Multiply / Divide register delays not implemented
+- Multiply / divide register delays not implemented
 
 S-PPU
 - Uses scanline-based renderer. This is very inaccurate, but few (if any)

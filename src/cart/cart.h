@@ -84,6 +84,7 @@ public:
     bool sa1;
     bool srtc;
     bool sdd1;
+    bool spc7110;
     bool cx4;
     bool dsp1;
     bool dsp2;
@@ -121,11 +122,18 @@ public:
   void read_header();
   void read_extended_header();
 
-  bool load_file(const char *fn, uint8 *&data, uint &size);
+  enum CompressionMode {
+    CompressionNone,    //always load without compression
+    CompressionInspect, //use file header inspection
+    CompressionAuto,    //use file extension or file header inspection (configured by user)
+  };
+  bool load_file(const char *fn, uint8 *&data, uint &size, CompressionMode compression = CompressionNone);
   bool save_file(const char *fn, uint8 *data, uint size);
+  bool apply_patch(const uint8_t *pdata, unsigned psize, uint8_t *&data, unsigned &size);
   char* modify_extension(char *filename, const char *extension);
   char* get_base_filename(char *filename);
   char* get_path_filename(char *filename, const char *path, const char *source, const char *extension);
+  char* get_patch_filename(const char *source, const char *extension);
   char* get_save_filename(const char *source, const char *extension);
   char* get_cheat_filename(const char *source, const char *extension);
 
@@ -133,6 +141,7 @@ public:
   ~Cartridge();
 
 private:
+  char patchfn[PATH_MAX];
   char savefn[PATH_MAX];
   char cheatfn[PATH_MAX];
 };

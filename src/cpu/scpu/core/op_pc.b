@@ -6,7 +6,7 @@ bpl(0x10, !regs.p.n),
 bmi(0x30, regs.p.n),
 bvc(0x50, !regs.p.v),
 bvs(0x70, regs.p.v) {
-1:if(!$1)last_cycle();
+1:if(!$1) last_cycle();
   rd.l = op_readpc();
   if($1) {
     aa.w = regs.pc.d + (int8)rd.l;
@@ -102,7 +102,7 @@ jsr_long(0x22) {
 7:last_cycle();
   op_writestackn(regs.pc.l);
   regs.pc.d = aa.d & 0xffffff;
-  if(regs.e)regs.s.h = 0x01;
+  if(regs.e) regs.s.h = 0x01;
 }
 
 jsr_iaddrx(0xfc) {
@@ -115,20 +115,20 @@ jsr_iaddrx(0xfc) {
 7:last_cycle();
   rd.h = op_readpbr(aa.w + regs.x.w + 1);
   regs.pc.w = rd.w;
-  if(regs.e)regs.s.h = 0x01;
+  if(regs.e) regs.s.h = 0x01;
 }
 
 rti(0x40) {
 1:op_io();
 2:op_io();
 3:regs.p = op_readstack();
-  if(regs.e)regs.p |= 0x30;
+  if(regs.e) regs.p |= 0x30;
   if(regs.p.x) {
     regs.x.h = 0x00;
     regs.y.h = 0x00;
   }
 4:rd.l = op_readstack();
-5:if(regs.e)last_cycle();
+5:if(regs.e) last_cycle();
   rd.h = op_readstack();
   if(regs.e) {
     regs.pc.w = rd.w;
@@ -159,5 +159,5 @@ rtl(0x6b) {
   rd.b = op_readstackn();
   regs.pc.d = rd.d & 0xffffff;
   regs.pc.w++;
-  if(regs.e)regs.s.h = 0x01;
+  if(regs.e) regs.s.h = 0x01;
 }

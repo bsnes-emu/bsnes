@@ -40,6 +40,7 @@ void pHiro::init() {
   free(argv);
 
   is_composited = false;
+  *default_path = 0;
   screen = gdk_screen_get_default();
   if(gdk_screen_is_composited(screen)) {
     colormap = gdk_screen_get_rgba_colormap(screen);
@@ -76,10 +77,12 @@ bool pHiro::folder_select(Window *focus, char *filename, const char *path) {
     (const gchar*)0);
 
   if(path && *path) gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dialog), path);
+  else if(*default_path) gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dialog), default_path);
 
   if(gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT) {
     char *fn = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
     strcpy(filename, fn);
+    set_default_path(fn);
     g_free(fn);
   }
 
@@ -99,10 +102,12 @@ bool pHiro::file_open(Window *focus, char *filename, const char *path, const cha
     (const gchar*)0);
 
   if(path && *path) gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dialog), path);
+  else if(*default_path) gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dialog), default_path);
 
   if(gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT) {
     char *fn = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
     strcpy(filename, fn);
+    set_default_path(fn);
     g_free(fn);
   }
 
@@ -122,11 +127,13 @@ bool pHiro::file_save(Window *focus, char *filename, const char *path, const cha
     (const gchar*)0);
 
   if(path && *path) gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dialog), path);
+  else if(*default_path) gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dialog), default_path);
   gtk_file_chooser_set_do_overwrite_confirmation(GTK_FILE_CHOOSER(dialog), TRUE);
 
   if(gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT) {
     char *fn = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
     strcpy(filename, fn);
+    set_default_path(fn);
     g_free(fn);
   }
 
@@ -167,6 +174,19 @@ pHiro& phiro() {
 }
 
 /* internal */
+
+//GTK+ does not save the most recent path to a file.
+//Strip trailing filename / folder to save path for next file dialog request.
+//This is only called when file dialog filename / folder is accepted, not when dialog cancelled.
+void pHiro::set_default_path(const char *p) {
+  strcpy(default_path, p);
+  for(int i = strlen(default_path) - 1; i >= 0; i--) {
+    if(default_path[i] == '/' || default_path[i] == '\\') {
+      default_path[i] = 0;
+      break;
+    }
+  }
+}
 
 void pHiro::screensaver_tick() {
   static clock_t delta_x = 0, delta_y = 0;

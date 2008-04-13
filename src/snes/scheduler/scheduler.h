@@ -65,12 +65,18 @@ public:
     clock.cpusmp += clocks * (uint64)clock.cpu_freq;
     if(clock.cpusmp > +(250000 * (int64)20000000)) sync_smpcpu();
     clock.smpdsp -= clocks;
+    #if !defined(USE_STATE_MACHINE)
     sync_smpdsp();
+    #else
+    while(clock.smpdsp < 0) dsp.enter();
+    #endif
   }
 
   alwaysinline void addclocks_dsp(uint clocks) {
     clock.smpdsp += clocks;
+    #if !defined(USE_STATE_MACHINE)
     sync_dspsmp();
+    #endif
   }
 
   void enter();

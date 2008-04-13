@@ -48,7 +48,6 @@ void sCPU::reset() {
 }
 
 sCPU::sCPU() {
-  #include "core/optable.cpp"
 }
 
 sCPU::~sCPU() {

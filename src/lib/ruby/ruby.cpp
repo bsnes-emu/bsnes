@@ -27,11 +27,15 @@ void VideoInterface::driver(const char *driver) {
   #endif
 
   #ifdef VIDEO_GLX
-  else if(!strcmp(driver, "opengl")) p = new VideoGLX();
+  else if(!strcmp(driver, "glx")) p = new VideoGLX();
   #endif
 
   #ifdef VIDEO_SDL
   else if(!strcmp(driver, "sdl")) p = new VideoSDL();
+  #endif
+
+  #ifdef VIDEO_WGL
+  else if(!strcmp(driver, "wgl")) p = new VideoWGL();
   #endif
 
   #ifdef VIDEO_XV
@@ -42,6 +46,8 @@ void VideoInterface::driver(const char *driver) {
 
   #if defined(VIDEO_DIRECT3D)
   p = new VideoD3D();
+  #elif defined(VIDEO_WGL)
+  p = new VideoWGL();
   #elif defined(VIDEO_DIRECTDRAW)
   p = new VideoDD();
   #elif defined(VIDEO_GDI)

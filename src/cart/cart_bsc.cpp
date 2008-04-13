@@ -9,13 +9,22 @@ void Cartridge::load_cart_bsc(const char *base, const char *slot) {
 
   uint8_t *data = 0;
   unsigned size;
-  load_file(cart.fn, data, size);
+  load_file(cart.fn, data, size, CompressionAuto);
   cart.rom = data, cart.rom_size = size;
 
+  if(load_file(get_patch_filename(cart.fn, "ups"), data, size, CompressionInspect) == true) {
+    apply_patch(data, size, cart.rom, cart.rom_size);
+    if(data) { free(data); data = 0; }
+  }
+
   if(*bs.fn) {
-    if(load_file(bs.fn, data, size) == true) {
+    if(load_file(bs.fn, data, size, CompressionAuto) == true) {
       info.bsxflash = true;
       bs.ram = data, bs.ram_size = size;
+      if(load_file(get_patch_filename(bs.fn, "ups"), data, size, CompressionInspect) == true) {
+        apply_patch(data, size, bs.ram, bs.ram_size);
+        if(data) { free(data); data = 0; }
+      }
     }
   }
 
@@ -29,7 +38,7 @@ void Cartridge::load_cart_bsc(const char *base, const char *slot) {
     cart.ram = (uint8*)malloc(cart.ram_size = info.ram_size);
     memset(cart.ram, 0xff, cart.ram_size);
 
-    if(load_file(get_save_filename(cart.fn, "srm"), data, size) == true) {
+    if(load_file(get_save_filename(cart.fn, "srm"), data, size, CompressionNone) == true) {
       memcpy(cart.ram, data, min(size, cart.ram_size));
       safe_free(data);
     }

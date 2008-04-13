@@ -66,7 +66,6 @@ void sSMP::reset() {
 }
 
 sSMP::sSMP() {
-  #include "core/optable.cpp"
 }
 
 sSMP::~sSMP() {

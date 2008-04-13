@@ -39,7 +39,7 @@ ifeq ($(platform),x) # X11
   link += $(call mklib,Xtst)
   delete = rm -f $1
 else ifeq ($(platform),win) # Windows
-  ruby = video.direct3d video.directdraw video.gdi audio.directsound input.directinput
+  ruby = video.direct3d video.wgl video.directdraw video.gdi audio.directsound input.directinput
   link += $(if $(findstring mingw,$(compiler)),-mwindows)
   link += $(call mklib,uuid)
   link += $(call mklib,kernel32)
@@ -64,6 +64,7 @@ rubyflags += $(if $(findstring .sdl,$(ruby)),`sdl-config --cflags`)
 link += $(if $(findstring video.direct3d,$(ruby)),$(call mklib,d3d9))
 link += $(if $(findstring video.directdraw,$(ruby)),$(call mklib,ddraw))
 link += $(if $(findstring video.glx,$(ruby)),$(call mklib,GL))
+link += $(if $(findstring video.wgl,$(ruby)),$(call mklib,opengl32))
 link += $(if $(findstring video.xv,$(ruby)),$(call mklib,Xv))
 link += $(if $(findstring audio.ao,$(ruby)),$(call mklib,ao))
 link += $(if $(findstring audio.directsound,$(ruby)),$(call mklib,dsound))

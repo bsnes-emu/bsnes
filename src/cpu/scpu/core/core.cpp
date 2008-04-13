@@ -2,12 +2,6 @@
 
 #include "opfn.cpp"
 
-#include "op_read.cpp"
-#include "op_write.cpp"
-#include "op_rmw.cpp"
-#include "op_pc.cpp"
-#include "op_misc.cpp"
-
 void sCPU::enter() { loop:
   if(event.irq) {
     event.irq = false;
@@ -24,7 +18,13 @@ void sCPU::enter() { loop:
   tracer.trace_cpuop(); //traces CPU opcode (only if tracer is enabled)
 
   status.in_opcode = true;
-  (this->*optbl[op_readpc()])();
+  switch(op_readpc()) {
+    #include "op_read.cpp"
+    #include "op_write.cpp"
+    #include "op_rmw.cpp"
+    #include "op_pc.cpp"
+    #include "op_misc.cpp"
+  }
   status.in_opcode = false;
 
   goto loop;
@@ -43,6 +43,23 @@ void sCPU::op_irq() {
   regs.p.d  = 0;
   rd.h = op_read(event.irq_vector + 1);
   regs.pc.w = rd.w;
+}
+
+//immediate, 2-cycle opcodes with I/O cycle will become bus read
+//when an IRQ is to be triggered immediately after opcode completion
+//this affects the following opcodes:
+//  clc, cld, cli, clv, sec, sed, sei,
+//  tax, tay, txa, txy, tya, tyx,
+//  tcd, tcs, tdc, tsc, tsx, tcs,
+//  inc, inx, iny, dec, dex, dey,
+//  asl, lsr, rol, ror, nop, xce.
+alwaysinline void sCPU::op_io_irq() {
+  if(event.irq) {
+    //IRQ pending, modify I/O cycle to bus read cycle, do not increment PC
+    op_read(regs.pc.d);
+  } else {
+    op_io();
+  }
 }
 
 alwaysinline void sCPU::op_io_cond2() {

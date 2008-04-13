@@ -1,4 +1,4 @@
-#define BSNES_VERSION "0.030"
+#define BSNES_VERSION "0.031"
 #define BSNES_TITLE   "bsnes v" BSNES_VERSION
 
 #define BUSCORE sBus
@@ -7,12 +7,16 @@
 #define DSPCORE sDSP
 #define PPUCORE bPPU
 
+//S-DSP can be encapsulated into a state machine using #define magic
+//this avoids ~2.048m co_switch() calls per second (~5% speedup)
+#define USE_STATE_MACHINE
+
 //FAST_FRAMESKIP disables calculation of RTO during frameskip
 //frameskip offers near-zero speedup if RTO is calculated
 //accuracy is not affected by this define when frameskipping is off
 #define FAST_FRAMESKIP
 
-//game genie + pro action replay code support (~1-3% speed hit)
+//game genie + pro action replay code support (~2% speed hit)
 #define CHEAT_SYSTEM
 
 #include <nall/algorithm.hpp>
@@ -21,6 +25,7 @@
 #include <nall/config.hpp>
 #include <nall/detect.hpp>
 #include <nall/function.hpp>
+#include <nall/modulo.hpp>
 #include <nall/new.hpp>
 #include <nall/sort.hpp>
 #include <nall/stdint.hpp>

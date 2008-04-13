@@ -56,7 +56,9 @@ public:
   GdkScreen *screen;
   GdkColormap *colormap;
   bool is_composited;
+  char default_path[PATH_MAX];
 
+  void set_default_path(const char*);
   bool is_screensaver_enabled;
   void screensaver_tick();
   uint16_t translate_key(uint key);

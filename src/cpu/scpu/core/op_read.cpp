@@ -1,1525 +1,1651 @@
-void sCPU::op_adc_const() {
-  if(regs.p.m)last_cycle();
+//adc_const
+case 0x69: {
+  if(regs.p.m) last_cycle();
   rd.l = op_readpc();
-  if(regs.p.m) { op_adc_b(); return; }
+  if(regs.p.m) { op_adc_b(); break; }
   last_cycle();
   rd.h = op_readpc();
   op_adc_w();
-}
+} break;
 
-void sCPU::op_and_const() {
-  if(regs.p.m)last_cycle();
+//and_const
+case 0x29: {
+  if(regs.p.m) last_cycle();
   rd.l = op_readpc();
-  if(regs.p.m) { op_and_b(); return; }
+  if(regs.p.m) { op_and_b(); break; }
   last_cycle();
   rd.h = op_readpc();
   op_and_w();
-}
+} break;
 
-void sCPU::op_cmp_const() {
-  if(regs.p.m)last_cycle();
+//cmp_const
+case 0xc9: {
+  if(regs.p.m) last_cycle();
   rd.l = op_readpc();
-  if(regs.p.m) { op_cmp_b(); return; }
+  if(regs.p.m) { op_cmp_b(); break; }
   last_cycle();
   rd.h = op_readpc();
   op_cmp_w();
-}
+} break;
 
-void sCPU::op_cpx_const() {
-  if(regs.p.x)last_cycle();
+//cpx_const
+case 0xe0: {
+  if(regs.p.x) last_cycle();
   rd.l = op_readpc();
-  if(regs.p.x) { op_cpx_b(); return; }
+  if(regs.p.x) { op_cpx_b(); break; }
   last_cycle();
   rd.h = op_readpc();
   op_cpx_w();
-}
+} break;
 
-void sCPU::op_cpy_const() {
-  if(regs.p.x)last_cycle();
+//cpy_const
+case 0xc0: {
+  if(regs.p.x) last_cycle();
   rd.l = op_readpc();
-  if(regs.p.x) { op_cpy_b(); return; }
+  if(regs.p.x) { op_cpy_b(); break; }
   last_cycle();
   rd.h = op_readpc();
   op_cpy_w();
-}
+} break;
 
-void sCPU::op_eor_const() {
-  if(regs.p.m)last_cycle();
+//eor_const
+case 0x49: {
+  if(regs.p.m) last_cycle();
   rd.l = op_readpc();
-  if(regs.p.m) { op_eor_b(); return; }
+  if(regs.p.m) { op_eor_b(); break; }
   last_cycle();
   rd.h = op_readpc();
   op_eor_w();
-}
+} break;
 
-void sCPU::op_lda_const() {
-  if(regs.p.m)last_cycle();
+//lda_const
+case 0xa9: {
+  if(regs.p.m) last_cycle();
   rd.l = op_readpc();
-  if(regs.p.m) { op_lda_b(); return; }
+  if(regs.p.m) { op_lda_b(); break; }
   last_cycle();
   rd.h = op_readpc();
   op_lda_w();
-}
+} break;
 
-void sCPU::op_ldx_const() {
-  if(regs.p.x)last_cycle();
+//ldx_const
+case 0xa2: {
+  if(regs.p.x) last_cycle();
   rd.l = op_readpc();
-  if(regs.p.x) { op_ldx_b(); return; }
+  if(regs.p.x) { op_ldx_b(); break; }
   last_cycle();
   rd.h = op_readpc();
   op_ldx_w();
-}
+} break;
 
-void sCPU::op_ldy_const() {
-  if(regs.p.x)last_cycle();
+//ldy_const
+case 0xa0: {
+  if(regs.p.x) last_cycle();
   rd.l = op_readpc();
-  if(regs.p.x) { op_ldy_b(); return; }
+  if(regs.p.x) { op_ldy_b(); break; }
   last_cycle();
   rd.h = op_readpc();
   op_ldy_w();
-}
+} break;
 
-void sCPU::op_ora_const() {
-  if(regs.p.m)last_cycle();
+//ora_const
+case 0x09: {
+  if(regs.p.m) last_cycle();
   rd.l = op_readpc();
-  if(regs.p.m) { op_ora_b(); return; }
+  if(regs.p.m) { op_ora_b(); break; }
   last_cycle();
   rd.h = op_readpc();
   op_ora_w();
-}
+} break;
 
-void sCPU::op_sbc_const() {
-  if(regs.p.m)last_cycle();
+//sbc_const
+case 0xe9: {
+  if(regs.p.m) last_cycle();
   rd.l = op_readpc();
-  if(regs.p.m) { op_sbc_b(); return; }
+  if(regs.p.m) { op_sbc_b(); break; }
   last_cycle();
   rd.h = op_readpc();
   op_sbc_w();
-}
+} break;
 
-void sCPU::op_adc_addr() {
+//adc_addr
+case 0x6d: {
   aa.l = op_readpc();
   aa.h = op_readpc();
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readdbr(aa.w);
-  if(regs.p.m) { op_adc_b(); return; }
+  if(regs.p.m) { op_adc_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + 1);
   op_adc_w();
-}
+} break;
 
-void sCPU::op_and_addr() {
+//and_addr
+case 0x2d: {
   aa.l = op_readpc();
   aa.h = op_readpc();
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readdbr(aa.w);
-  if(regs.p.m) { op_and_b(); return; }
+  if(regs.p.m) { op_and_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + 1);
   op_and_w();
-}
+} break;
 
-void sCPU::op_bit_addr() {
+//bit_addr
+case 0x2c: {
   aa.l = op_readpc();
   aa.h = op_readpc();
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readdbr(aa.w);
-  if(regs.p.m) { op_bit_b(); return; }
+  if(regs.p.m) { op_bit_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + 1);
   op_bit_w();
-}
+} break;
 
-void sCPU::op_cmp_addr() {
+//cmp_addr
+case 0xcd: {
   aa.l = op_readpc();
   aa.h = op_readpc();
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readdbr(aa.w);
-  if(regs.p.m) { op_cmp_b(); return; }
+  if(regs.p.m) { op_cmp_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + 1);
   op_cmp_w();
-}
+} break;
 
-void sCPU::op_cpx_addr() {
+//cpx_addr
+case 0xec: {
   aa.l = op_readpc();
   aa.h = op_readpc();
-  if(regs.p.x)last_cycle();
+  if(regs.p.x) last_cycle();
   rd.l = op_readdbr(aa.w);
-  if(regs.p.x) { op_cpx_b(); return; }
+  if(regs.p.x) { op_cpx_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + 1);
   op_cpx_w();
-}
+} break;
 
-void sCPU::op_cpy_addr() {
+//cpy_addr
+case 0xcc: {
   aa.l = op_readpc();
   aa.h = op_readpc();
-  if(regs.p.x)last_cycle();
+  if(regs.p.x) last_cycle();
   rd.l = op_readdbr(aa.w);
-  if(regs.p.x) { op_cpy_b(); return; }
+  if(regs.p.x) { op_cpy_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + 1);
   op_cpy_w();
-}
+} break;
 
-void sCPU::op_eor_addr() {
+//eor_addr
+case 0x4d: {
   aa.l = op_readpc();
   aa.h = op_readpc();
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readdbr(aa.w);
-  if(regs.p.m) { op_eor_b(); return; }
+  if(regs.p.m) { op_eor_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + 1);
   op_eor_w();
-}
+} break;
 
-void sCPU::op_lda_addr() {
+//lda_addr
+case 0xad: {
   aa.l = op_readpc();
   aa.h = op_readpc();
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readdbr(aa.w);
-  if(regs.p.m) { op_lda_b(); return; }
+  if(regs.p.m) { op_lda_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + 1);
   op_lda_w();
-}
+} break;
 
-void sCPU::op_ldx_addr() {
+//ldx_addr
+case 0xae: {
   aa.l = op_readpc();
   aa.h = op_readpc();
-  if(regs.p.x)last_cycle();
+  if(regs.p.x) last_cycle();
   rd.l = op_readdbr(aa.w);
-  if(regs.p.x) { op_ldx_b(); return; }
+  if(regs.p.x) { op_ldx_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + 1);
   op_ldx_w();
-}
+} break;
 
-void sCPU::op_ldy_addr() {
+//ldy_addr
+case 0xac: {
   aa.l = op_readpc();
   aa.h = op_readpc();
-  if(regs.p.x)last_cycle();
+  if(regs.p.x) last_cycle();
   rd.l = op_readdbr(aa.w);
-  if(regs.p.x) { op_ldy_b(); return; }
+  if(regs.p.x) { op_ldy_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + 1);
   op_ldy_w();
-}
+} break;
 
-void sCPU::op_ora_addr() {
+//ora_addr
+case 0x0d: {
   aa.l = op_readpc();
   aa.h = op_readpc();
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readdbr(aa.w);
-  if(regs.p.m) { op_ora_b(); return; }
+  if(regs.p.m) { op_ora_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + 1);
   op_ora_w();
-}
+} break;
 
-void sCPU::op_sbc_addr() {
+//sbc_addr
+case 0xed: {
   aa.l = op_readpc();
   aa.h = op_readpc();
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readdbr(aa.w);
-  if(regs.p.m) { op_sbc_b(); return; }
+  if(regs.p.m) { op_sbc_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + 1);
   op_sbc_w();
-}
+} break;
 
-void sCPU::op_adc_addrx() {
+//adc_addrx
+case 0x7d: {
   aa.l = op_readpc();
   aa.h = op_readpc();
   op_io_cond4(aa.w, aa.w + regs.x.w);
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readdbr(aa.w + regs.x.w);
-  if(regs.p.m) { op_adc_b(); return; }
+  if(regs.p.m) { op_adc_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + regs.x.w + 1);
   op_adc_w();
-}
+} break;
 
-void sCPU::op_and_addrx() {
+//and_addrx
+case 0x3d: {
   aa.l = op_readpc();
   aa.h = op_readpc();
   op_io_cond4(aa.w, aa.w + regs.x.w);
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readdbr(aa.w + regs.x.w);
-  if(regs.p.m) { op_and_b(); return; }
+  if(regs.p.m) { op_and_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + regs.x.w + 1);
   op_and_w();
-}
+} break;
 
-void sCPU::op_bit_addrx() {
+//bit_addrx
+case 0x3c: {
   aa.l = op_readpc();
   aa.h = op_readpc();
   op_io_cond4(aa.w, aa.w + regs.x.w);
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readdbr(aa.w + regs.x.w);
-  if(regs.p.m) { op_bit_b(); return; }
+  if(regs.p.m) { op_bit_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + regs.x.w + 1);
   op_bit_w();
-}
+} break;
 
-void sCPU::op_cmp_addrx() {
+//cmp_addrx
+case 0xdd: {
   aa.l = op_readpc();
   aa.h = op_readpc();
   op_io_cond4(aa.w, aa.w + regs.x.w);
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readdbr(aa.w + regs.x.w);
-  if(regs.p.m) { op_cmp_b(); return; }
+  if(regs.p.m) { op_cmp_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + regs.x.w + 1);
   op_cmp_w();
-}
+} break;
 
-void sCPU::op_eor_addrx() {
+//eor_addrx
+case 0x5d: {
   aa.l = op_readpc();
   aa.h = op_readpc();
   op_io_cond4(aa.w, aa.w + regs.x.w);
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readdbr(aa.w + regs.x.w);
-  if(regs.p.m) { op_eor_b(); return; }
+  if(regs.p.m) { op_eor_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + regs.x.w + 1);
   op_eor_w();
-}
+} break;
 
-void sCPU::op_lda_addrx() {
+//lda_addrx
+case 0xbd: {
   aa.l = op_readpc();
   aa.h = op_readpc();
   op_io_cond4(aa.w, aa.w + regs.x.w);
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readdbr(aa.w + regs.x.w);
-  if(regs.p.m) { op_lda_b(); return; }
+  if(regs.p.m) { op_lda_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + regs.x.w + 1);
   op_lda_w();
-}
+} break;
 
-void sCPU::op_ldy_addrx() {
+//ldy_addrx
+case 0xbc: {
   aa.l = op_readpc();
   aa.h = op_readpc();
   op_io_cond4(aa.w, aa.w + regs.x.w);
-  if(regs.p.x)last_cycle();
+  if(regs.p.x) last_cycle();
   rd.l = op_readdbr(aa.w + regs.x.w);
-  if(regs.p.x) { op_ldy_b(); return; }
+  if(regs.p.x) { op_ldy_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + regs.x.w + 1);
   op_ldy_w();
-}
+} break;
 
-void sCPU::op_ora_addrx() {
+//ora_addrx
+case 0x1d: {
   aa.l = op_readpc();
   aa.h = op_readpc();
   op_io_cond4(aa.w, aa.w + regs.x.w);
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readdbr(aa.w + regs.x.w);
-  if(regs.p.m) { op_ora_b(); return; }
+  if(regs.p.m) { op_ora_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + regs.x.w + 1);
   op_ora_w();
-}
+} break;
 
-void sCPU::op_sbc_addrx() {
+//sbc_addrx
+case 0xfd: {
   aa.l = op_readpc();
   aa.h = op_readpc();
   op_io_cond4(aa.w, aa.w + regs.x.w);
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readdbr(aa.w + regs.x.w);
-  if(regs.p.m) { op_sbc_b(); return; }
+  if(regs.p.m) { op_sbc_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + regs.x.w + 1);
   op_sbc_w();
-}
+} break;
 
-void sCPU::op_adc_addry() {
+//adc_addry
+case 0x79: {
   aa.l = op_readpc();
   aa.h = op_readpc();
   op_io_cond4(aa.w, aa.w + regs.y.w);
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readdbr(aa.w + regs.y.w);
-  if(regs.p.m) { op_adc_b(); return; }
+  if(regs.p.m) { op_adc_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + regs.y.w + 1);
   op_adc_w();
-}
+} break;
 
-void sCPU::op_and_addry() {
+//and_addry
+case 0x39: {
   aa.l = op_readpc();
   aa.h = op_readpc();
   op_io_cond4(aa.w, aa.w + regs.y.w);
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readdbr(aa.w + regs.y.w);
-  if(regs.p.m) { op_and_b(); return; }
+  if(regs.p.m) { op_and_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + regs.y.w + 1);
   op_and_w();
-}
+} break;
 
-void sCPU::op_cmp_addry() {
+//cmp_addry
+case 0xd9: {
   aa.l = op_readpc();
   aa.h = op_readpc();
   op_io_cond4(aa.w, aa.w + regs.y.w);
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readdbr(aa.w + regs.y.w);
-  if(regs.p.m) { op_cmp_b(); return; }
+  if(regs.p.m) { op_cmp_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + regs.y.w + 1);
   op_cmp_w();
-}
+} break;
 
-void sCPU::op_eor_addry() {
+//eor_addry
+case 0x59: {
   aa.l = op_readpc();
   aa.h = op_readpc();
   op_io_cond4(aa.w, aa.w + regs.y.w);
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readdbr(aa.w + regs.y.w);
-  if(regs.p.m) { op_eor_b(); return; }
+  if(regs.p.m) { op_eor_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + regs.y.w + 1);
   op_eor_w();
-}
+} break;
 
-void sCPU::op_lda_addry() {
+//lda_addry
+case 0xb9: {
   aa.l = op_readpc();
   aa.h = op_readpc();
   op_io_cond4(aa.w, aa.w + regs.y.w);
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readdbr(aa.w + regs.y.w);
-  if(regs.p.m) { op_lda_b(); return; }
+  if(regs.p.m) { op_lda_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + regs.y.w + 1);
   op_lda_w();
-}
+} break;
 
-void sCPU::op_ldx_addry() {
+//ldx_addry
+case 0xbe: {
   aa.l = op_readpc();
   aa.h = op_readpc();
   op_io_cond4(aa.w, aa.w + regs.y.w);
-  if(regs.p.x)last_cycle();
+  if(regs.p.x) last_cycle();
   rd.l = op_readdbr(aa.w + regs.y.w);
-  if(regs.p.x) { op_ldx_b(); return; }
+  if(regs.p.x) { op_ldx_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + regs.y.w + 1);
   op_ldx_w();
-}
+} break;
 
-void sCPU::op_ora_addry() {
+//ora_addry
+case 0x19: {
   aa.l = op_readpc();
   aa.h = op_readpc();
   op_io_cond4(aa.w, aa.w + regs.y.w);
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readdbr(aa.w + regs.y.w);
-  if(regs.p.m) { op_ora_b(); return; }
+  if(regs.p.m) { op_ora_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + regs.y.w + 1);
   op_ora_w();
-}
+} break;
 
-void sCPU::op_sbc_addry() {
+//sbc_addry
+case 0xf9: {
   aa.l = op_readpc();
   aa.h = op_readpc();
   op_io_cond4(aa.w, aa.w + regs.y.w);
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readdbr(aa.w + regs.y.w);
-  if(regs.p.m) { op_sbc_b(); return; }
+  if(regs.p.m) { op_sbc_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + regs.y.w + 1);
   op_sbc_w();
-}
+} break;
 
-void sCPU::op_adc_long() {
+//adc_long
+case 0x6f: {
   aa.l = op_readpc();
   aa.h = op_readpc();
   aa.b = op_readpc();
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readlong(aa.d);
-  if(regs.p.m) { op_adc_b(); return; }
+  if(regs.p.m) { op_adc_b(); break; }
   last_cycle();
   rd.h = op_readlong(aa.d + 1);
   op_adc_w();
-}
+} break;
 
-void sCPU::op_and_long() {
+//and_long
+case 0x2f: {
   aa.l = op_readpc();
   aa.h = op_readpc();
   aa.b = op_readpc();
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readlong(aa.d);
-  if(regs.p.m) { op_and_b(); return; }
+  if(regs.p.m) { op_and_b(); break; }
   last_cycle();
   rd.h = op_readlong(aa.d + 1);
   op_and_w();
-}
+} break;
 
-void sCPU::op_cmp_long() {
+//cmp_long
+case 0xcf: {
   aa.l = op_readpc();
   aa.h = op_readpc();
   aa.b = op_readpc();
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readlong(aa.d);
-  if(regs.p.m) { op_cmp_b(); return; }
+  if(regs.p.m) { op_cmp_b(); break; }
   last_cycle();
   rd.h = op_readlong(aa.d + 1);
   op_cmp_w();
-}
+} break;
 
-void sCPU::op_eor_long() {
+//eor_long
+case 0x4f: {
   aa.l = op_readpc();
   aa.h = op_readpc();
   aa.b = op_readpc();
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readlong(aa.d);
-  if(regs.p.m) { op_eor_b(); return; }
+  if(regs.p.m) { op_eor_b(); break; }
   last_cycle();
   rd.h = op_readlong(aa.d + 1);
   op_eor_w();
-}
+} break;
 
-void sCPU::op_lda_long() {
+//lda_long
+case 0xaf: {
   aa.l = op_readpc();
   aa.h = op_readpc();
   aa.b = op_readpc();
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readlong(aa.d);
-  if(regs.p.m) { op_lda_b(); return; }
+  if(regs.p.m) { op_lda_b(); break; }
   last_cycle();
   rd.h = op_readlong(aa.d + 1);
   op_lda_w();
-}
+} break;
 
-void sCPU::op_ora_long() {
+//ora_long
+case 0x0f: {
   aa.l = op_readpc();
   aa.h = op_readpc();
   aa.b = op_readpc();
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readlong(aa.d);
-  if(regs.p.m) { op_ora_b(); return; }
+  if(regs.p.m) { op_ora_b(); break; }
   last_cycle();
   rd.h = op_readlong(aa.d + 1);
   op_ora_w();
-}
+} break;
 
-void sCPU::op_sbc_long() {
+//sbc_long
+case 0xef: {
   aa.l = op_readpc();
   aa.h = op_readpc();
   aa.b = op_readpc();
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readlong(aa.d);
-  if(regs.p.m) { op_sbc_b(); return; }
+  if(regs.p.m) { op_sbc_b(); break; }
   last_cycle();
   rd.h = op_readlong(aa.d + 1);
   op_sbc_w();
-}
+} break;
 
-void sCPU::op_adc_longx() {
+//adc_longx
+case 0x7f: {
   aa.l = op_readpc();
   aa.h = op_readpc();
   aa.b = op_readpc();
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readlong(aa.d + regs.x.w);
-  if(regs.p.m) { op_adc_b(); return; }
+  if(regs.p.m) { op_adc_b(); break; }
   last_cycle();
   rd.h = op_readlong(aa.d + regs.x.w + 1);
   op_adc_w();
-}
+} break;
 
-void sCPU::op_and_longx() {
+//and_longx
+case 0x3f: {
   aa.l = op_readpc();
   aa.h = op_readpc();
   aa.b = op_readpc();
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readlong(aa.d + regs.x.w);
-  if(regs.p.m) { op_and_b(); return; }
+  if(regs.p.m) { op_and_b(); break; }
   last_cycle();
   rd.h = op_readlong(aa.d + regs.x.w + 1);
   op_and_w();
-}
+} break;
 
-void sCPU::op_cmp_longx() {
+//cmp_longx
+case 0xdf: {
   aa.l = op_readpc();
   aa.h = op_readpc();
   aa.b = op_readpc();
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readlong(aa.d + regs.x.w);
-  if(regs.p.m) { op_cmp_b(); return; }
+  if(regs.p.m) { op_cmp_b(); break; }
   last_cycle();
   rd.h = op_readlong(aa.d + regs.x.w + 1);
   op_cmp_w();
-}
+} break;
 
-void sCPU::op_eor_longx() {
+//eor_longx
+case 0x5f: {
   aa.l = op_readpc();
   aa.h = op_readpc();
   aa.b = op_readpc();
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readlong(aa.d + regs.x.w);
-  if(regs.p.m) { op_eor_b(); return; }
+  if(regs.p.m) { op_eor_b(); break; }
   last_cycle();
   rd.h = op_readlong(aa.d + regs.x.w + 1);
   op_eor_w();
-}
+} break;
 
-void sCPU::op_lda_longx() {
+//lda_longx
+case 0xbf: {
   aa.l = op_readpc();
   aa.h = op_readpc();
   aa.b = op_readpc();
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readlong(aa.d + regs.x.w);
-  if(regs.p.m) { op_lda_b(); return; }
+  if(regs.p.m) { op_lda_b(); break; }
   last_cycle();
   rd.h = op_readlong(aa.d + regs.x.w + 1);
   op_lda_w();
-}
+} break;
 
-void sCPU::op_ora_longx() {
+//ora_longx
+case 0x1f: {
   aa.l = op_readpc();
   aa.h = op_readpc();
   aa.b = op_readpc();
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readlong(aa.d + regs.x.w);
-  if(regs.p.m) { op_ora_b(); return; }
+  if(regs.p.m) { op_ora_b(); break; }
   last_cycle();
   rd.h = op_readlong(aa.d + regs.x.w + 1);
   op_ora_w();
-}
+} break;
 
-void sCPU::op_sbc_longx() {
+//sbc_longx
+case 0xff: {
   aa.l = op_readpc();
   aa.h = op_readpc();
   aa.b = op_readpc();
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readlong(aa.d + regs.x.w);
-  if(regs.p.m) { op_sbc_b(); return; }
+  if(regs.p.m) { op_sbc_b(); break; }
   last_cycle();
   rd.h = op_readlong(aa.d + regs.x.w + 1);
   op_sbc_w();
-}
+} break;
 
-void sCPU::op_adc_dp() {
+//adc_dp
+case 0x65: {
   dp = op_readpc();
   op_io_cond2();
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readdp(dp);
-  if(regs.p.m) { op_adc_b(); return; }
+  if(regs.p.m) { op_adc_b(); break; }
   last_cycle();
   rd.h = op_readdp(dp + 1);
   op_adc_w();
-}
+} break;
 
-void sCPU::op_and_dp() {
+//and_dp
+case 0x25: {
   dp = op_readpc();
   op_io_cond2();
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readdp(dp);
-  if(regs.p.m) { op_and_b(); return; }
+  if(regs.p.m) { op_and_b(); break; }
   last_cycle();
   rd.h = op_readdp(dp + 1);
   op_and_w();
-}
+} break;
 
-void sCPU::op_bit_dp() {
+//bit_dp
+case 0x24: {
   dp = op_readpc();
   op_io_cond2();
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readdp(dp);
-  if(regs.p.m) { op_bit_b(); return; }
+  if(regs.p.m) { op_bit_b(); break; }
   last_cycle();
   rd.h = op_readdp(dp + 1);
   op_bit_w();
-}
+} break;
 
-void sCPU::op_cmp_dp() {
+//cmp_dp
+case 0xc5: {
   dp = op_readpc();
   op_io_cond2();
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readdp(dp);
-  if(regs.p.m) { op_cmp_b(); return; }
+  if(regs.p.m) { op_cmp_b(); break; }
   last_cycle();
   rd.h = op_readdp(dp + 1);
   op_cmp_w();
-}
+} break;
 
-void sCPU::op_cpx_dp() {
+//cpx_dp
+case 0xe4: {
   dp = op_readpc();
   op_io_cond2();
-  if(regs.p.x)last_cycle();
+  if(regs.p.x) last_cycle();
   rd.l = op_readdp(dp);
-  if(regs.p.x) { op_cpx_b(); return; }
+  if(regs.p.x) { op_cpx_b(); break; }
   last_cycle();
   rd.h = op_readdp(dp + 1);
   op_cpx_w();
-}
+} break;
 
-void sCPU::op_cpy_dp() {
+//cpy_dp
+case 0xc4: {
   dp = op_readpc();
   op_io_cond2();
-  if(regs.p.x)last_cycle();
+  if(regs.p.x) last_cycle();
   rd.l = op_readdp(dp);
-  if(regs.p.x) { op_cpy_b(); return; }
+  if(regs.p.x) { op_cpy_b(); break; }
   last_cycle();
   rd.h = op_readdp(dp + 1);
   op_cpy_w();
-}
+} break;
 
-void sCPU::op_eor_dp() {
+//eor_dp
+case 0x45: {
   dp = op_readpc();
   op_io_cond2();
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readdp(dp);
-  if(regs.p.m) { op_eor_b(); return; }
+  if(regs.p.m) { op_eor_b(); break; }
   last_cycle();
   rd.h = op_readdp(dp + 1);
   op_eor_w();
-}
+} break;
 
-void sCPU::op_lda_dp() {
+//lda_dp
+case 0xa5: {
   dp = op_readpc();
   op_io_cond2();
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readdp(dp);
-  if(regs.p.m) { op_lda_b(); return; }
+  if(regs.p.m) { op_lda_b(); break; }
   last_cycle();
   rd.h = op_readdp(dp + 1);
   op_lda_w();
-}
+} break;
 
-void sCPU::op_ldx_dp() {
+//ldx_dp
+case 0xa6: {
   dp = op_readpc();
   op_io_cond2();
-  if(regs.p.x)last_cycle();
+  if(regs.p.x) last_cycle();
   rd.l = op_readdp(dp);
-  if(regs.p.x) { op_ldx_b(); return; }
+  if(regs.p.x) { op_ldx_b(); break; }
   last_cycle();
   rd.h = op_readdp(dp + 1);
   op_ldx_w();
-}
+} break;
 
-void sCPU::op_ldy_dp() {
+//ldy_dp
+case 0xa4: {
   dp = op_readpc();
   op_io_cond2();
-  if(regs.p.x)last_cycle();
+  if(regs.p.x) last_cycle();
   rd.l = op_readdp(dp);
-  if(regs.p.x) { op_ldy_b(); return; }
+  if(regs.p.x) { op_ldy_b(); break; }
   last_cycle();
   rd.h = op_readdp(dp + 1);
   op_ldy_w();
-}
+} break;
 
-void sCPU::op_ora_dp() {
+//ora_dp
+case 0x05: {
   dp = op_readpc();
   op_io_cond2();
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readdp(dp);
-  if(regs.p.m) { op_ora_b(); return; }
+  if(regs.p.m) { op_ora_b(); break; }
   last_cycle();
   rd.h = op_readdp(dp + 1);
   op_ora_w();
-}
+} break;
 
-void sCPU::op_sbc_dp() {
+//sbc_dp
+case 0xe5: {
   dp = op_readpc();
   op_io_cond2();
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readdp(dp);
-  if(regs.p.m) { op_sbc_b(); return; }
+  if(regs.p.m) { op_sbc_b(); break; }
   last_cycle();
   rd.h = op_readdp(dp + 1);
   op_sbc_w();
-}
+} break;
 
-void sCPU::op_adc_dpx() {
+//adc_dpx
+case 0x75: {
   dp = op_readpc();
   op_io_cond2();
   op_io();
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readdp(dp + regs.x.w);
-  if(regs.p.m) { op_adc_b(); return; }
+  if(regs.p.m) { op_adc_b(); break; }
   last_cycle();
   rd.h = op_readdp(dp + regs.x.w + 1);
   op_adc_w();
-}
+} break;
 
-void sCPU::op_and_dpx() {
+//and_dpx
+case 0x35: {
   dp = op_readpc();
   op_io_cond2();
   op_io();
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readdp(dp + regs.x.w);
-  if(regs.p.m) { op_and_b(); return; }
+  if(regs.p.m) { op_and_b(); break; }
   last_cycle();
   rd.h = op_readdp(dp + regs.x.w + 1);
   op_and_w();
-}
+} break;
 
-void sCPU::op_bit_dpx() {
+//bit_dpx
+case 0x34: {
   dp = op_readpc();
   op_io_cond2();
   op_io();
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readdp(dp + regs.x.w);
-  if(regs.p.m) { op_bit_b(); return; }
+  if(regs.p.m) { op_bit_b(); break; }
   last_cycle();
   rd.h = op_readdp(dp + regs.x.w + 1);
   op_bit_w();
-}
+} break;
 
-void sCPU::op_cmp_dpx() {
+//cmp_dpx
+case 0xd5: {
   dp = op_readpc();
   op_io_cond2();
   op_io();
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readdp(dp + regs.x.w);
-  if(regs.p.m) { op_cmp_b(); return; }
+  if(regs.p.m) { op_cmp_b(); break; }
   last_cycle();
   rd.h = op_readdp(dp + regs.x.w + 1);
   op_cmp_w();
-}
+} break;
 
-void sCPU::op_eor_dpx() {
+//eor_dpx
+case 0x55: {
   dp = op_readpc();
   op_io_cond2();
   op_io();
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readdp(dp + regs.x.w);
-  if(regs.p.m) { op_eor_b(); return; }
+  if(regs.p.m) { op_eor_b(); break; }
   last_cycle();
   rd.h = op_readdp(dp + regs.x.w + 1);
   op_eor_w();
-}
+} break;
 
-void sCPU::op_lda_dpx() {
+//lda_dpx
+case 0xb5: {
   dp = op_readpc();
   op_io_cond2();
   op_io();
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readdp(dp + regs.x.w);
-  if(regs.p.m) { op_lda_b(); return; }
+  if(regs.p.m) { op_lda_b(); break; }
   last_cycle();
   rd.h = op_readdp(dp + regs.x.w + 1);
   op_lda_w();
-}
+} break;
 
-void sCPU::op_ldy_dpx() {
+//ldy_dpx
+case 0xb4: {
   dp = op_readpc();
   op_io_cond2();
   op_io();
-  if(regs.p.x)last_cycle();
+  if(regs.p.x) last_cycle();
   rd.l = op_readdp(dp + regs.x.w);
-  if(regs.p.x) { op_ldy_b(); return; }
+  if(regs.p.x) { op_ldy_b(); break; }
   last_cycle();
   rd.h = op_readdp(dp + regs.x.w + 1);
   op_ldy_w();
-}
+} break;
 
-void sCPU::op_ora_dpx() {
+//ora_dpx
+case 0x15: {
   dp = op_readpc();
   op_io_cond2();
   op_io();
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readdp(dp + regs.x.w);
-  if(regs.p.m) { op_ora_b(); return; }
+  if(regs.p.m) { op_ora_b(); break; }
   last_cycle();
   rd.h = op_readdp(dp + regs.x.w + 1);
   op_ora_w();
-}
+} break;
 
-void sCPU::op_sbc_dpx() {
+//sbc_dpx
+case 0xf5: {
   dp = op_readpc();
   op_io_cond2();
   op_io();
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readdp(dp + regs.x.w);
-  if(regs.p.m) { op_sbc_b(); return; }
+  if(regs.p.m) { op_sbc_b(); break; }
   last_cycle();
   rd.h = op_readdp(dp + regs.x.w + 1);
   op_sbc_w();
-}
+} break;
 
-void sCPU::op_ldx_dpy() {
+//ldx_dpy
+case 0xb6: {
   dp = op_readpc();
   op_io_cond2();
   op_io();
-  if(regs.p.x)last_cycle();
+  if(regs.p.x) last_cycle();
   rd.l = op_readdp(dp + regs.y.w);
-  if(regs.p.x) { op_ldx_b(); return; }
+  if(regs.p.x) { op_ldx_b(); break; }
   last_cycle();
   rd.h = op_readdp(dp + regs.y.w + 1);
   op_ldx_w();
-}
+} break;
 
-void sCPU::op_adc_idp() {
+//adc_idp
+case 0x72: {
   dp = op_readpc();
   op_io_cond2();
   aa.l = op_readdp(dp);
   aa.h = op_readdp(dp + 1);
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readdbr(aa.w);
-  if(regs.p.m) { op_adc_b(); return; }
+  if(regs.p.m) { op_adc_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + 1);
   op_adc_w();
-}
+} break;
 
-void sCPU::op_and_idp() {
+//and_idp
+case 0x32: {
   dp = op_readpc();
   op_io_cond2();
   aa.l = op_readdp(dp);
   aa.h = op_readdp(dp + 1);
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readdbr(aa.w);
-  if(regs.p.m) { op_and_b(); return; }
+  if(regs.p.m) { op_and_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + 1);
   op_and_w();
-}
+} break;
 
-void sCPU::op_cmp_idp() {
+//cmp_idp
+case 0xd2: {
   dp = op_readpc();
   op_io_cond2();
   aa.l = op_readdp(dp);
   aa.h = op_readdp(dp + 1);
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readdbr(aa.w);
-  if(regs.p.m) { op_cmp_b(); return; }
+  if(regs.p.m) { op_cmp_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + 1);
   op_cmp_w();
-}
+} break;
 
-void sCPU::op_eor_idp() {
+//eor_idp
+case 0x52: {
   dp = op_readpc();
   op_io_cond2();
   aa.l = op_readdp(dp);
   aa.h = op_readdp(dp + 1);
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readdbr(aa.w);
-  if(regs.p.m) { op_eor_b(); return; }
+  if(regs.p.m) { op_eor_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + 1);
   op_eor_w();
-}
+} break;
 
-void sCPU::op_lda_idp() {
+//lda_idp
+case 0xb2: {
   dp = op_readpc();
   op_io_cond2();
   aa.l = op_readdp(dp);
   aa.h = op_readdp(dp + 1);
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readdbr(aa.w);
-  if(regs.p.m) { op_lda_b(); return; }
+  if(regs.p.m) { op_lda_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + 1);
   op_lda_w();
-}
+} break;
 
-void sCPU::op_ora_idp() {
+//ora_idp
+case 0x12: {
   dp = op_readpc();
   op_io_cond2();
   aa.l = op_readdp(dp);
   aa.h = op_readdp(dp + 1);
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readdbr(aa.w);
-  if(regs.p.m) { op_ora_b(); return; }
+  if(regs.p.m) { op_ora_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + 1);
   op_ora_w();
-}
+} break;
 
-void sCPU::op_sbc_idp() {
+//sbc_idp
+case 0xf2: {
   dp = op_readpc();
   op_io_cond2();
   aa.l = op_readdp(dp);
   aa.h = op_readdp(dp + 1);
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readdbr(aa.w);
-  if(regs.p.m) { op_sbc_b(); return; }
+  if(regs.p.m) { op_sbc_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + 1);
   op_sbc_w();
-}
+} break;
 
-void sCPU::op_adc_idpx() {
+//adc_idpx
+case 0x61: {
   dp = op_readpc();
   op_io_cond2();
   op_io();
   aa.l = op_readdp(dp + regs.x.w);
   aa.h = op_readdp(dp + regs.x.w + 1);
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readdbr(aa.w);
-  if(regs.p.m) { op_adc_b(); return; }
+  if(regs.p.m) { op_adc_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + 1);
   op_adc_w();
-}
+} break;
 
-void sCPU::op_and_idpx() {
+//and_idpx
+case 0x21: {
   dp = op_readpc();
   op_io_cond2();
   op_io();
   aa.l = op_readdp(dp + regs.x.w);
   aa.h = op_readdp(dp + regs.x.w + 1);
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readdbr(aa.w);
-  if(regs.p.m) { op_and_b(); return; }
+  if(regs.p.m) { op_and_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + 1);
   op_and_w();
-}
+} break;
 
-void sCPU::op_cmp_idpx() {
+//cmp_idpx
+case 0xc1: {
   dp = op_readpc();
   op_io_cond2();
   op_io();
   aa.l = op_readdp(dp + regs.x.w);
   aa.h = op_readdp(dp + regs.x.w + 1);
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readdbr(aa.w);
-  if(regs.p.m) { op_cmp_b(); return; }
+  if(regs.p.m) { op_cmp_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + 1);
   op_cmp_w();
-}
+} break;
 
-void sCPU::op_eor_idpx() {
+//eor_idpx
+case 0x41: {
   dp = op_readpc();
   op_io_cond2();
   op_io();
   aa.l = op_readdp(dp + regs.x.w);
   aa.h = op_readdp(dp + regs.x.w + 1);
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readdbr(aa.w);
-  if(regs.p.m) { op_eor_b(); return; }
+  if(regs.p.m) { op_eor_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + 1);
   op_eor_w();
-}
+} break;
 
-void sCPU::op_lda_idpx() {
+//lda_idpx
+case 0xa1: {
   dp = op_readpc();
   op_io_cond2();
   op_io();
   aa.l = op_readdp(dp + regs.x.w);
   aa.h = op_readdp(dp + regs.x.w + 1);
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readdbr(aa.w);
-  if(regs.p.m) { op_lda_b(); return; }
+  if(regs.p.m) { op_lda_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + 1);
   op_lda_w();
-}
+} break;
 
-void sCPU::op_ora_idpx() {
+//ora_idpx
+case 0x01: {
   dp = op_readpc();
   op_io_cond2();
   op_io();
   aa.l = op_readdp(dp + regs.x.w);
   aa.h = op_readdp(dp + regs.x.w + 1);
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readdbr(aa.w);
-  if(regs.p.m) { op_ora_b(); return; }
+  if(regs.p.m) { op_ora_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + 1);
   op_ora_w();
-}
+} break;
 
-void sCPU::op_sbc_idpx() {
+//sbc_idpx
+case 0xe1: {
   dp = op_readpc();
   op_io_cond2();
   op_io();
   aa.l = op_readdp(dp + regs.x.w);
   aa.h = op_readdp(dp + regs.x.w + 1);
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readdbr(aa.w);
-  if(regs.p.m) { op_sbc_b(); return; }
+  if(regs.p.m) { op_sbc_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + 1);
   op_sbc_w();
-}
+} break;
 
-void sCPU::op_adc_idpy() {
+//adc_idpy
+case 0x71: {
   dp = op_readpc();
   op_io_cond2();
   aa.l = op_readdp(dp);
   aa.h = op_readdp(dp + 1);
   op_io_cond4(aa.w, aa.w + regs.y.w);
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readdbr(aa.w + regs.y.w);
-  if(regs.p.m) { op_adc_b(); return; }
+  if(regs.p.m) { op_adc_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + regs.y.w + 1);
   op_adc_w();
-}
+} break;
 
-void sCPU::op_and_idpy() {
+//and_idpy
+case 0x31: {
   dp = op_readpc();
   op_io_cond2();
   aa.l = op_readdp(dp);
   aa.h = op_readdp(dp + 1);
   op_io_cond4(aa.w, aa.w + regs.y.w);
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readdbr(aa.w + regs.y.w);
-  if(regs.p.m) { op_and_b(); return; }
+  if(regs.p.m) { op_and_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + regs.y.w + 1);
   op_and_w();
-}
+} break;
 
-void sCPU::op_cmp_idpy() {
+//cmp_idpy
+case 0xd1: {
   dp = op_readpc();
   op_io_cond2();
   aa.l = op_readdp(dp);
   aa.h = op_readdp(dp + 1);
   op_io_cond4(aa.w, aa.w + regs.y.w);
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readdbr(aa.w + regs.y.w);
-  if(regs.p.m) { op_cmp_b(); return; }
+  if(regs.p.m) { op_cmp_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + regs.y.w + 1);
   op_cmp_w();
-}
+} break;
 
-void sCPU::op_eor_idpy() {
+//eor_idpy
+case 0x51: {
   dp = op_readpc();
   op_io_cond2();
   aa.l = op_readdp(dp);
   aa.h = op_readdp(dp + 1);
   op_io_cond4(aa.w, aa.w + regs.y.w);
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readdbr(aa.w + regs.y.w);
-  if(regs.p.m) { op_eor_b(); return; }
+  if(regs.p.m) { op_eor_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + regs.y.w + 1);
   op_eor_w();
-}
+} break;
 
-void sCPU::op_lda_idpy() {
+//lda_idpy
+case 0xb1: {
   dp = op_readpc();
   op_io_cond2();
   aa.l = op_readdp(dp);
   aa.h = op_readdp(dp + 1);
   op_io_cond4(aa.w, aa.w + regs.y.w);
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readdbr(aa.w + regs.y.w);
-  if(regs.p.m) { op_lda_b(); return; }
+  if(regs.p.m) { op_lda_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + regs.y.w + 1);
   op_lda_w();
-}
+} break;
 
-void sCPU::op_ora_idpy() {
+//ora_idpy
+case 0x11: {
   dp = op_readpc();
   op_io_cond2();
   aa.l = op_readdp(dp);
   aa.h = op_readdp(dp + 1);
   op_io_cond4(aa.w, aa.w + regs.y.w);
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readdbr(aa.w + regs.y.w);
-  if(regs.p.m) { op_ora_b(); return; }
+  if(regs.p.m) { op_ora_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + regs.y.w + 1);
   op_ora_w();
-}
+} break;
 
-void sCPU::op_sbc_idpy() {
+//sbc_idpy
+case 0xf1: {
   dp = op_readpc();
   op_io_cond2();
   aa.l = op_readdp(dp);
   aa.h = op_readdp(dp + 1);
   op_io_cond4(aa.w, aa.w + regs.y.w);
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readdbr(aa.w + regs.y.w);
-  if(regs.p.m) { op_sbc_b(); return; }
+  if(regs.p.m) { op_sbc_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + regs.y.w + 1);
   op_sbc_w();
-}
+} break;
 
-void sCPU::op_adc_ildp() {
+//adc_ildp
+case 0x67: {
   dp = op_readpc();
   op_io_cond2();
   aa.l = op_readdp(dp);
   aa.h = op_readdp(dp + 1);
   aa.b = op_readdp(dp + 2);
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readlong(aa.d);
-  if(regs.p.m) { op_adc_b(); return; }
+  if(regs.p.m) { op_adc_b(); break; }
   last_cycle();
   rd.h = op_readlong(aa.d + 1);
   op_adc_w();
-}
+} break;
 
-void sCPU::op_and_ildp() {
+//and_ildp
+case 0x27: {
   dp = op_readpc();
   op_io_cond2();
   aa.l = op_readdp(dp);
   aa.h = op_readdp(dp + 1);
   aa.b = op_readdp(dp + 2);
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readlong(aa.d);
-  if(regs.p.m) { op_and_b(); return; }
+  if(regs.p.m) { op_and_b(); break; }
   last_cycle();
   rd.h = op_readlong(aa.d + 1);
   op_and_w();
-}
+} break;
 
-void sCPU::op_cmp_ildp() {
+//cmp_ildp
+case 0xc7: {
   dp = op_readpc();
   op_io_cond2();
   aa.l = op_readdp(dp);
   aa.h = op_readdp(dp + 1);
   aa.b = op_readdp(dp + 2);
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readlong(aa.d);
-  if(regs.p.m) { op_cmp_b(); return; }
+  if(regs.p.m) { op_cmp_b(); break; }
   last_cycle();
   rd.h = op_readlong(aa.d + 1);
   op_cmp_w();
-}
+} break;
 
-void sCPU::op_eor_ildp() {
+//eor_ildp
+case 0x47: {
   dp = op_readpc();
   op_io_cond2();
   aa.l = op_readdp(dp);
   aa.h = op_readdp(dp + 1);
   aa.b = op_readdp(dp + 2);
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readlong(aa.d);
-  if(regs.p.m) { op_eor_b(); return; }
+  if(regs.p.m) { op_eor_b(); break; }
   last_cycle();
   rd.h = op_readlong(aa.d + 1);
   op_eor_w();
-}
+} break;
 
-void sCPU::op_lda_ildp() {
+//lda_ildp
+case 0xa7: {
   dp = op_readpc();
   op_io_cond2();
   aa.l = op_readdp(dp);
   aa.h = op_readdp(dp + 1);
   aa.b = op_readdp(dp + 2);
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readlong(aa.d);
-  if(regs.p.m) { op_lda_b(); return; }
+  if(regs.p.m) { op_lda_b(); break; }
   last_cycle();
   rd.h = op_readlong(aa.d + 1);
   op_lda_w();
-}
+} break;
 
-void sCPU::op_ora_ildp() {
+//ora_ildp
+case 0x07: {
   dp = op_readpc();
   op_io_cond2();
   aa.l = op_readdp(dp);
   aa.h = op_readdp(dp + 1);
   aa.b = op_readdp(dp + 2);
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readlong(aa.d);
-  if(regs.p.m) { op_ora_b(); return; }
+  if(regs.p.m) { op_ora_b(); break; }
   last_cycle();
   rd.h = op_readlong(aa.d + 1);
   op_ora_w();
-}
+} break;
 
-void sCPU::op_sbc_ildp() {
+//sbc_ildp
+case 0xe7: {
   dp = op_readpc();
   op_io_cond2();
   aa.l = op_readdp(dp);
   aa.h = op_readdp(dp + 1);
   aa.b = op_readdp(dp + 2);
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readlong(aa.d);
-  if(regs.p.m) { op_sbc_b(); return; }
+  if(regs.p.m) { op_sbc_b(); break; }
   last_cycle();
   rd.h = op_readlong(aa.d + 1);
   op_sbc_w();
-}
+} break;
 
-void sCPU::op_adc_ildpy() {
+//adc_ildpy
+case 0x77: {
   dp = op_readpc();
   op_io_cond2();
   aa.l = op_readdp(dp);
   aa.h = op_readdp(dp + 1);
   aa.b = op_readdp(dp + 2);
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readlong(aa.d + regs.y.w);
-  if(regs.p.m) { op_adc_b(); return; }
+  if(regs.p.m) { op_adc_b(); break; }
   last_cycle();
   rd.h = op_readlong(aa.d + regs.y.w + 1);
   op_adc_w();
-}
+} break;
 
-void sCPU::op_and_ildpy() {
+//and_ildpy
+case 0x37: {
   dp = op_readpc();
   op_io_cond2();
   aa.l = op_readdp(dp);
   aa.h = op_readdp(dp + 1);
   aa.b = op_readdp(dp + 2);
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readlong(aa.d + regs.y.w);
-  if(regs.p.m) { op_and_b(); return; }
+  if(regs.p.m) { op_and_b(); break; }
   last_cycle();
   rd.h = op_readlong(aa.d + regs.y.w + 1);
   op_and_w();
-}
+} break;
 
-void sCPU::op_cmp_ildpy() {
+//cmp_ildpy
+case 0xd7: {
   dp = op_readpc();
   op_io_cond2();
   aa.l = op_readdp(dp);
   aa.h = op_readdp(dp + 1);
   aa.b = op_readdp(dp + 2);
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readlong(aa.d + regs.y.w);
-  if(regs.p.m) { op_cmp_b(); return; }
+  if(regs.p.m) { op_cmp_b(); break; }
   last_cycle();
   rd.h = op_readlong(aa.d + regs.y.w + 1);
   op_cmp_w();
-}
+} break;
 
-void sCPU::op_eor_ildpy() {
+//eor_ildpy
+case 0x57: {
   dp = op_readpc();
   op_io_cond2();
   aa.l = op_readdp(dp);
   aa.h = op_readdp(dp + 1);
   aa.b = op_readdp(dp + 2);
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readlong(aa.d + regs.y.w);
-  if(regs.p.m) { op_eor_b(); return; }
+  if(regs.p.m) { op_eor_b(); break; }
   last_cycle();
   rd.h = op_readlong(aa.d + regs.y.w + 1);
   op_eor_w();
-}
+} break;
 
-void sCPU::op_lda_ildpy() {
+//lda_ildpy
+case 0xb7: {
   dp = op_readpc();
   op_io_cond2();
   aa.l = op_readdp(dp);
   aa.h = op_readdp(dp + 1);
   aa.b = op_readdp(dp + 2);
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readlong(aa.d + regs.y.w);
-  if(regs.p.m) { op_lda_b(); return; }
+  if(regs.p.m) { op_lda_b(); break; }
   last_cycle();
   rd.h = op_readlong(aa.d + regs.y.w + 1);
   op_lda_w();
-}
+} break;
 
-void sCPU::op_ora_ildpy() {
+//ora_ildpy
+case 0x17: {
   dp = op_readpc();
   op_io_cond2();
   aa.l = op_readdp(dp);
   aa.h = op_readdp(dp + 1);
   aa.b = op_readdp(dp + 2);
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readlong(aa.d + regs.y.w);
-  if(regs.p.m) { op_ora_b(); return; }
+  if(regs.p.m) { op_ora_b(); break; }
   last_cycle();
   rd.h = op_readlong(aa.d + regs.y.w + 1);
   op_ora_w();
-}
+} break;
 
-void sCPU::op_sbc_ildpy() {
+//sbc_ildpy
+case 0xf7: {
   dp = op_readpc();
   op_io_cond2();
   aa.l = op_readdp(dp);
   aa.h = op_readdp(dp + 1);
   aa.b = op_readdp(dp + 2);
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readlong(aa.d + regs.y.w);
-  if(regs.p.m) { op_sbc_b(); return; }
+  if(regs.p.m) { op_sbc_b(); break; }
   last_cycle();
   rd.h = op_readlong(aa.d + regs.y.w + 1);
   op_sbc_w();
-}
+} break;
 
-void sCPU::op_adc_sr() {
+//adc_sr
+case 0x63: {
   sp = op_readpc();
   op_io();
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readsp(sp);
-  if(regs.p.m) { op_adc_b(); return; }
+  if(regs.p.m) { op_adc_b(); break; }
   last_cycle();
   rd.h = op_readsp(sp + 1);
   op_adc_w();
-}
+} break;
 
-void sCPU::op_and_sr() {
+//and_sr
+case 0x23: {
   sp = op_readpc();
   op_io();
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readsp(sp);
-  if(regs.p.m) { op_and_b(); return; }
+  if(regs.p.m) { op_and_b(); break; }
   last_cycle();
   rd.h = op_readsp(sp + 1);
   op_and_w();
-}
+} break;
 
-void sCPU::op_cmp_sr() {
+//cmp_sr
+case 0xc3: {
   sp = op_readpc();
   op_io();
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readsp(sp);
-  if(regs.p.m) { op_cmp_b(); return; }
+  if(regs.p.m) { op_cmp_b(); break; }
   last_cycle();
   rd.h = op_readsp(sp + 1);
   op_cmp_w();
-}
+} break;
 
-void sCPU::op_eor_sr() {
+//eor_sr
+case 0x43: {
   sp = op_readpc();
   op_io();
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readsp(sp);
-  if(regs.p.m) { op_eor_b(); return; }
+  if(regs.p.m) { op_eor_b(); break; }
   last_cycle();
   rd.h = op_readsp(sp + 1);
   op_eor_w();
-}
+} break;
 
-void sCPU::op_lda_sr() {
+//lda_sr
+case 0xa3: {
   sp = op_readpc();
   op_io();
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readsp(sp);
-  if(regs.p.m) { op_lda_b(); return; }
+  if(regs.p.m) { op_lda_b(); break; }
   last_cycle();
   rd.h = op_readsp(sp + 1);
   op_lda_w();
-}
+} break;
 
-void sCPU::op_ora_sr() {
+//ora_sr
+case 0x03: {
   sp = op_readpc();
   op_io();
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readsp(sp);
-  if(regs.p.m) { op_ora_b(); return; }
+  if(regs.p.m) { op_ora_b(); break; }
   last_cycle();
   rd.h = op_readsp(sp + 1);
   op_ora_w();
-}
+} break;
 
-void sCPU::op_sbc_sr() {
+//sbc_sr
+case 0xe3: {
   sp = op_readpc();
   op_io();
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readsp(sp);
-  if(regs.p.m) { op_sbc_b(); return; }
+  if(regs.p.m) { op_sbc_b(); break; }
   last_cycle();
   rd.h = op_readsp(sp + 1);
   op_sbc_w();
-}
+} break;
 
-void sCPU::op_adc_isry() {
+//adc_isry
+case 0x73: {
   sp = op_readpc();
   op_io();
   aa.l = op_readsp(sp);
   aa.h = op_readsp(sp + 1);
   op_io();
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readdbr(aa.w + regs.y.w);
-  if(regs.p.m) { op_adc_b(); return; }
+  if(regs.p.m) { op_adc_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + regs.y.w + 1);
   op_adc_w();
-}
+} break;
 
-void sCPU::op_and_isry() {
+//and_isry
+case 0x33: {
   sp = op_readpc();
   op_io();
   aa.l = op_readsp(sp);
   aa.h = op_readsp(sp + 1);
   op_io();
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readdbr(aa.w + regs.y.w);
-  if(regs.p.m) { op_and_b(); return; }
+  if(regs.p.m) { op_and_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + regs.y.w + 1);
   op_and_w();
-}
+} break;
 
-void sCPU::op_cmp_isry() {
+//cmp_isry
+case 0xd3: {
   sp = op_readpc();
   op_io();
   aa.l = op_readsp(sp);
   aa.h = op_readsp(sp + 1);
   op_io();
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readdbr(aa.w + regs.y.w);
-  if(regs.p.m) { op_cmp_b(); return; }
+  if(regs.p.m) { op_cmp_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + regs.y.w + 1);
   op_cmp_w();
-}
+} break;
 
-void sCPU::op_eor_isry() {
+//eor_isry
+case 0x53: {
   sp = op_readpc();
   op_io();
   aa.l = op_readsp(sp);
   aa.h = op_readsp(sp + 1);
   op_io();
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readdbr(aa.w + regs.y.w);
-  if(regs.p.m) { op_eor_b(); return; }
+  if(regs.p.m) { op_eor_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + regs.y.w + 1);
   op_eor_w();
-}
+} break;
 
-void sCPU::op_lda_isry() {
+//lda_isry
+case 0xb3: {
   sp = op_readpc();
   op_io();
   aa.l = op_readsp(sp);
   aa.h = op_readsp(sp + 1);
   op_io();
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readdbr(aa.w + regs.y.w);
-  if(regs.p.m) { op_lda_b(); return; }
+  if(regs.p.m) { op_lda_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + regs.y.w + 1);
   op_lda_w();
-}
+} break;
 
-void sCPU::op_ora_isry() {
+//ora_isry
+case 0x13: {
   sp = op_readpc();
   op_io();
   aa.l = op_readsp(sp);
   aa.h = op_readsp(sp + 1);
   op_io();
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readdbr(aa.w + regs.y.w);
-  if(regs.p.m) { op_ora_b(); return; }
+  if(regs.p.m) { op_ora_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + regs.y.w + 1);
   op_ora_w();
-}
+} break;
 
-void sCPU::op_sbc_isry() {
+//sbc_isry
+case 0xf3: {
   sp = op_readpc();
   op_io();
   aa.l = op_readsp(sp);
   aa.h = op_readsp(sp + 1);
   op_io();
-  if(regs.p.m)last_cycle();
+  if(regs.p.m) last_cycle();
   rd.l = op_readdbr(aa.w + regs.y.w);
-  if(regs.p.m) { op_sbc_b(); return; }
+  if(regs.p.m) { op_sbc_b(); break; }
   last_cycle();
   rd.h = op_readdbr(aa.w + regs.y.w + 1);
   op_sbc_w();
-}
+} break;
 
-void sCPU::op_bit_const() {
-  if(regs.p.m)last_cycle();
+//bit_const
+case 0x89: {
+  if(regs.p.m) last_cycle();
   rd.l = op_readpc();
   if(regs.p.m) {
     regs.p.z = ((rd.l & regs.a.l) == 0);
-    return;
+    break;
   }
   last_cycle();
   rd.h = op_readpc();
   regs.p.z = ((rd.w & regs.a.w) == 0);
-}
+} break;
 

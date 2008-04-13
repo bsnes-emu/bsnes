@@ -1,621 +1,705 @@
-void sSMP::op_adc_a_const() {
+//adc_a_const
+case 0x88: {
   rd = op_readpc();
   regs.a = op_adc(regs.a, rd);
-}
+} break;
 
-void sSMP::op_and_a_const() {
+//and_a_const
+case 0x28: {
   rd = op_readpc();
   regs.a = op_and(regs.a, rd);
-}
+} break;
 
-void sSMP::op_cmp_a_const() {
+//cmp_a_const
+case 0x68: {
   rd = op_readpc();
   regs.a = op_cmp(regs.a, rd);
-}
+} break;
 
-void sSMP::op_cmp_x_const() {
+//cmp_x_const
+case 0xc8: {
   rd = op_readpc();
   regs.x = op_cmp(regs.x, rd);
-}
+} break;
 
-void sSMP::op_cmp_y_const() {
+//cmp_y_const
+case 0xad: {
   rd = op_readpc();
   regs.y = op_cmp(regs.y, rd);
-}
+} break;
 
-void sSMP::op_eor_a_const() {
+//eor_a_const
+case 0x48: {
   rd = op_readpc();
   regs.a = op_eor(regs.a, rd);
-}
+} break;
 
-void sSMP::op_or_a_const() {
+//or_a_const
+case 0x08: {
   rd = op_readpc();
   regs.a = op_or(regs.a, rd);
-}
+} break;
 
-void sSMP::op_sbc_a_const() {
+//sbc_a_const
+case 0xa8: {
   rd = op_readpc();
   regs.a = op_sbc(regs.a, rd);
-}
+} break;
 
-void sSMP::op_adc_a_ix() {
+//adc_a_ix
+case 0x86: {
   op_io();
   rd = op_readdp(regs.x);
   regs.a = op_adc(regs.a, rd);
-}
+} break;
 
-void sSMP::op_and_a_ix() {
+//and_a_ix
+case 0x26: {
   op_io();
   rd = op_readdp(regs.x);
   regs.a = op_and(regs.a, rd);
-}
+} break;
 
-void sSMP::op_cmp_a_ix() {
+//cmp_a_ix
+case 0x66: {
   op_io();
   rd = op_readdp(regs.x);
   regs.a = op_cmp(regs.a, rd);
-}
+} break;
 
-void sSMP::op_eor_a_ix() {
+//eor_a_ix
+case 0x46: {
   op_io();
   rd = op_readdp(regs.x);
   regs.a = op_eor(regs.a, rd);
-}
+} break;
 
-void sSMP::op_or_a_ix() {
+//or_a_ix
+case 0x06: {
   op_io();
   rd = op_readdp(regs.x);
   regs.a = op_or(regs.a, rd);
-}
+} break;
 
-void sSMP::op_sbc_a_ix() {
+//sbc_a_ix
+case 0xa6: {
   op_io();
   rd = op_readdp(regs.x);
   regs.a = op_sbc(regs.a, rd);
-}
+} break;
 
-void sSMP::op_adc_a_dp() {
+//adc_a_dp
+case 0x84: {
   dp = op_readpc();
   rd = op_readdp(dp);
   regs.a = op_adc(regs.a, rd);
-}
+} break;
 
-void sSMP::op_and_a_dp() {
+//and_a_dp
+case 0x24: {
   dp = op_readpc();
   rd = op_readdp(dp);
   regs.a = op_and(regs.a, rd);
-}
+} break;
 
-void sSMP::op_cmp_a_dp() {
+//cmp_a_dp
+case 0x64: {
   dp = op_readpc();
   rd = op_readdp(dp);
   regs.a = op_cmp(regs.a, rd);
-}
+} break;
 
-void sSMP::op_cmp_x_dp() {
+//cmp_x_dp
+case 0x3e: {
   dp = op_readpc();
   rd = op_readdp(dp);
   regs.x = op_cmp(regs.x, rd);
-}
+} break;
 
-void sSMP::op_cmp_y_dp() {
+//cmp_y_dp
+case 0x7e: {
   dp = op_readpc();
   rd = op_readdp(dp);
   regs.y = op_cmp(regs.y, rd);
-}
+} break;
 
-void sSMP::op_eor_a_dp() {
+//eor_a_dp
+case 0x44: {
   dp = op_readpc();
   rd = op_readdp(dp);
   regs.a = op_eor(regs.a, rd);
-}
+} break;
 
-void sSMP::op_or_a_dp() {
+//or_a_dp
+case 0x04: {
   dp = op_readpc();
   rd = op_readdp(dp);
   regs.a = op_or(regs.a, rd);
-}
+} break;
 
-void sSMP::op_sbc_a_dp() {
+//sbc_a_dp
+case 0xa4: {
   dp = op_readpc();
   rd = op_readdp(dp);
   regs.a = op_sbc(regs.a, rd);
-}
+} break;
 
-void sSMP::op_adc_a_dpx() {
+//adc_a_dpx
+case 0x94: {
   dp = op_readpc();
   op_io();
   rd = op_readdp(dp + regs.x);
   regs.a = op_adc(regs.a, rd);
-}
+} break;
 
-void sSMP::op_and_a_dpx() {
+//and_a_dpx
+case 0x34: {
   dp = op_readpc();
   op_io();
   rd = op_readdp(dp + regs.x);
   regs.a = op_and(regs.a, rd);
-}
+} break;
 
-void sSMP::op_cmp_a_dpx() {
+//cmp_a_dpx
+case 0x74: {
   dp = op_readpc();
   op_io();
   rd = op_readdp(dp + regs.x);
   regs.a = op_cmp(regs.a, rd);
-}
+} break;
 
-void sSMP::op_eor_a_dpx() {
+//eor_a_dpx
+case 0x54: {
   dp = op_readpc();
   op_io();
   rd = op_readdp(dp + regs.x);
   regs.a = op_eor(regs.a, rd);
-}
+} break;
 
-void sSMP::op_or_a_dpx() {
+//or_a_dpx
+case 0x14: {
   dp = op_readpc();
   op_io();
   rd = op_readdp(dp + regs.x);
   regs.a = op_or(regs.a, rd);
-}
+} break;
 
-void sSMP::op_sbc_a_dpx() {
+//sbc_a_dpx
+case 0xb4: {
   dp = op_readpc();
   op_io();
   rd = op_readdp(dp + regs.x);
   regs.a = op_sbc(regs.a, rd);
-}
+} break;
 
-void sSMP::op_adc_a_addr() {
+//adc_a_addr
+case 0x85: {
   dp  = op_readpc();
   dp |= op_readpc() << 8;
   rd = op_readaddr(dp);
   regs.a = op_adc(regs.a, rd);
-}
+} break;
 
-void sSMP::op_and_a_addr() {
+//and_a_addr
+case 0x25: {
   dp  = op_readpc();
   dp |= op_readpc() << 8;
   rd = op_readaddr(dp);
   regs.a = op_and(regs.a, rd);
-}
+} break;
 
-void sSMP::op_cmp_a_addr() {
+//cmp_a_addr
+case 0x65: {
   dp  = op_readpc();
   dp |= op_readpc() << 8;
   rd = op_readaddr(dp);
   regs.a = op_cmp(regs.a, rd);
-}
+} break;
 
-void sSMP::op_cmp_x_addr() {
+//cmp_x_addr
+case 0x1e: {
   dp  = op_readpc();
   dp |= op_readpc() << 8;
   rd = op_readaddr(dp);
   regs.x = op_cmp(regs.x, rd);
-}
+} break;
 
-void sSMP::op_cmp_y_addr() {
+//cmp_y_addr
+case 0x5e: {
   dp  = op_readpc();
   dp |= op_readpc() << 8;
   rd = op_readaddr(dp);
   regs.y = op_cmp(regs.y, rd);
-}
+} break;
 
-void sSMP::op_eor_a_addr() {
+//eor_a_addr
+case 0x45: {
   dp  = op_readpc();
   dp |= op_readpc() << 8;
   rd = op_readaddr(dp);
   regs.a = op_eor(regs.a, rd);
-}
+} break;
 
-void sSMP::op_or_a_addr() {
+//or_a_addr
+case 0x05: {
   dp  = op_readpc();
   dp |= op_readpc() << 8;
   rd = op_readaddr(dp);
   regs.a = op_or(regs.a, rd);
-}
+} break;
 
-void sSMP::op_sbc_a_addr() {
+//sbc_a_addr
+case 0xa5: {
   dp  = op_readpc();
   dp |= op_readpc() << 8;
   rd = op_readaddr(dp);
   regs.a = op_sbc(regs.a, rd);
-}
+} break;
 
-void sSMP::op_adc_a_addrx() {
+//adc_a_addrx
+case 0x95: {
   dp  = op_readpc();
   dp |= op_readpc() << 8;
   op_io();
   rd = op_readaddr(dp + regs.x);
   regs.a = op_adc(regs.a, rd);
-}
+} break;
 
-void sSMP::op_adc_a_addry() {
+//adc_a_addry
+case 0x96: {
   dp  = op_readpc();
   dp |= op_readpc() << 8;
   op_io();
   rd = op_readaddr(dp + regs.y);
   regs.a = op_adc(regs.a, rd);
-}
+} break;
 
-void sSMP::op_and_a_addrx() {
+//and_a_addrx
+case 0x35: {
   dp  = op_readpc();
   dp |= op_readpc() << 8;
   op_io();
   rd = op_readaddr(dp + regs.x);
   regs.a = op_and(regs.a, rd);
-}
+} break;
 
-void sSMP::op_and_a_addry() {
+//and_a_addry
+case 0x36: {
   dp  = op_readpc();
   dp |= op_readpc() << 8;
   op_io();
   rd = op_readaddr(dp + regs.y);
   regs.a = op_and(regs.a, rd);
-}
+} break;
 
-void sSMP::op_cmp_a_addrx() {
+//cmp_a_addrx
+case 0x75: {
   dp  = op_readpc();
   dp |= op_readpc() << 8;
   op_io();
   rd = op_readaddr(dp + regs.x);
   regs.a = op_cmp(regs.a, rd);
-}
+} break;
 
-void sSMP::op_cmp_a_addry() {
+//cmp_a_addry
+case 0x76: {
   dp  = op_readpc();
   dp |= op_readpc() << 8;
   op_io();
   rd = op_readaddr(dp + regs.y);
   regs.a = op_cmp(regs.a, rd);
-}
+} break;
 
-void sSMP::op_eor_a_addrx() {
+//eor_a_addrx
+case 0x55: {
   dp  = op_readpc();
   dp |= op_readpc() << 8;
   op_io();
   rd = op_readaddr(dp + regs.x);
   regs.a = op_eor(regs.a, rd);
-}
+} break;
 
-void sSMP::op_eor_a_addry() {
+//eor_a_addry
+case 0x56: {
   dp  = op_readpc();
   dp |= op_readpc() << 8;
   op_io();
   rd = op_readaddr(dp + regs.y);
   regs.a = op_eor(regs.a, rd);
-}
+} break;
 
-void sSMP::op_or_a_addrx() {
+//or_a_addrx
+case 0x15: {
   dp  = op_readpc();
   dp |= op_readpc() << 8;
   op_io();
   rd = op_readaddr(dp + regs.x);
   regs.a = op_or(regs.a, rd);
-}
+} break;
 
-void sSMP::op_or_a_addry() {
+//or_a_addry
+case 0x16: {
   dp  = op_readpc();
   dp |= op_readpc() << 8;
   op_io();
   rd = op_readaddr(dp + regs.y);
   regs.a = op_or(regs.a, rd);
-}
+} break;
 
-void sSMP::op_sbc_a_addrx() {
+//sbc_a_addrx
+case 0xb5: {
   dp  = op_readpc();
   dp |= op_readpc() << 8;
   op_io();
   rd = op_readaddr(dp + regs.x);
   regs.a = op_sbc(regs.a, rd);
-}
+} break;
 
-void sSMP::op_sbc_a_addry() {
+//sbc_a_addry
+case 0xb6: {
   dp  = op_readpc();
   dp |= op_readpc() << 8;
   op_io();
   rd = op_readaddr(dp + regs.y);
   regs.a = op_sbc(regs.a, rd);
-}
+} break;
 
-void sSMP::op_adc_a_idpx() {
+//adc_a_idpx
+case 0x87: {
   dp = op_readpc() + regs.x;
   op_io();
   sp  = op_readdp(dp);
   sp |= op_readdp(dp + 1) << 8;
   rd = op_readaddr(sp);
   regs.a = op_adc(regs.a, rd);
-}
+} break;
 
-void sSMP::op_and_a_idpx() {
+//and_a_idpx
+case 0x27: {
   dp = op_readpc() + regs.x;
   op_io();
   sp  = op_readdp(dp);
   sp |= op_readdp(dp + 1) << 8;
   rd = op_readaddr(sp);
   regs.a = op_and(regs.a, rd);
-}
+} break;
 
-void sSMP::op_cmp_a_idpx() {
+//cmp_a_idpx
+case 0x67: {
   dp = op_readpc() + regs.x;
   op_io();
   sp  = op_readdp(dp);
   sp |= op_readdp(dp + 1) << 8;
   rd = op_readaddr(sp);
   regs.a = op_cmp(regs.a, rd);
-}
+} break;
 
-void sSMP::op_eor_a_idpx() {
+//eor_a_idpx
+case 0x47: {
   dp = op_readpc() + regs.x;
   op_io();
   sp  = op_readdp(dp);
   sp |= op_readdp(dp + 1) << 8;
   rd = op_readaddr(sp);
   regs.a = op_eor(regs.a, rd);
-}
+} break;
 
-void sSMP::op_or_a_idpx() {
+//or_a_idpx
+case 0x07: {
   dp = op_readpc() + regs.x;
   op_io();
   sp  = op_readdp(dp);
   sp |= op_readdp(dp + 1) << 8;
   rd = op_readaddr(sp);
   regs.a = op_or(regs.a, rd);
-}
+} break;
 
-void sSMP::op_sbc_a_idpx() {
+//sbc_a_idpx
+case 0xa7: {
   dp = op_readpc() + regs.x;
   op_io();
   sp  = op_readdp(dp);
   sp |= op_readdp(dp + 1) << 8;
   rd = op_readaddr(sp);
   regs.a = op_sbc(regs.a, rd);
-}
+} break;
 
-void sSMP::op_adc_a_idpy() {
+//adc_a_idpy
+case 0x97: {
   dp  = op_readpc();
   op_io();
   sp  = op_readdp(dp);
   sp |= op_readdp(dp + 1) << 8;
   rd = op_readaddr(sp + regs.y);
   regs.a = op_adc(regs.a, rd);
-}
+} break;
 
-void sSMP::op_and_a_idpy() {
+//and_a_idpy
+case 0x37: {
   dp  = op_readpc();
   op_io();
   sp  = op_readdp(dp);
   sp |= op_readdp(dp + 1) << 8;
   rd = op_readaddr(sp + regs.y);
   regs.a = op_and(regs.a, rd);
-}
+} break;
 
-void sSMP::op_cmp_a_idpy() {
+//cmp_a_idpy
+case 0x77: {
   dp  = op_readpc();
   op_io();
   sp  = op_readdp(dp);
   sp |= op_readdp(dp + 1) << 8;
   rd = op_readaddr(sp + regs.y);
   regs.a = op_cmp(regs.a, rd);
-}
+} break;
 
-void sSMP::op_eor_a_idpy() {
+//eor_a_idpy
+case 0x57: {
   dp  = op_readpc();
   op_io();
   sp  = op_readdp(dp);
   sp |= op_readdp(dp + 1) << 8;
   rd = op_readaddr(sp + regs.y);
   regs.a = op_eor(regs.a, rd);
-}
+} break;
 
-void sSMP::op_or_a_idpy() {
+//or_a_idpy
+case 0x17: {
   dp  = op_readpc();
   op_io();
   sp  = op_readdp(dp);
   sp |= op_readdp(dp + 1) << 8;
   rd = op_readaddr(sp + regs.y);
   regs.a = op_or(regs.a, rd);
-}
+} break;
 
-void sSMP::op_sbc_a_idpy() {
+//sbc_a_idpy
+case 0xb7: {
   dp  = op_readpc();
   op_io();
   sp  = op_readdp(dp);
   sp |= op_readdp(dp + 1) << 8;
   rd = op_readaddr(sp + regs.y);
   regs.a = op_sbc(regs.a, rd);
-}
+} break;
 
-void sSMP::op_adc_ix_iy() {
+//adc_ix_iy
+case 0x99: {
   op_io();
   rd = op_readdp(regs.y);
   wr = op_readdp(regs.x);
   wr = op_adc(wr, rd);
   (1) ? op_writedp(regs.x, wr) : op_io();
-}
+} break;
 
-void sSMP::op_and_ix_iy() {
+//and_ix_iy
+case 0x39: {
   op_io();
   rd = op_readdp(regs.y);
   wr = op_readdp(regs.x);
   wr = op_and(wr, rd);
   (1) ? op_writedp(regs.x, wr) : op_io();
-}
+} break;
 
-void sSMP::op_cmp_ix_iy() {
+//cmp_ix_iy
+case 0x79: {
   op_io();
   rd = op_readdp(regs.y);
   wr = op_readdp(regs.x);
   wr = op_cmp(wr, rd);
   (0) ? op_writedp(regs.x, wr) : op_io();
-}
+} break;
 
-void sSMP::op_eor_ix_iy() {
+//eor_ix_iy
+case 0x59: {
   op_io();
   rd = op_readdp(regs.y);
   wr = op_readdp(regs.x);
   wr = op_eor(wr, rd);
   (1) ? op_writedp(regs.x, wr) : op_io();
-}
+} break;
 
-void sSMP::op_or_ix_iy() {
+//or_ix_iy
+case 0x19: {
   op_io();
   rd = op_readdp(regs.y);
   wr = op_readdp(regs.x);
   wr = op_or(wr, rd);
   (1) ? op_writedp(regs.x, wr) : op_io();
-}
+} break;
 
-void sSMP::op_sbc_ix_iy() {
+//sbc_ix_iy
+case 0xb9: {
   op_io();
   rd = op_readdp(regs.y);
   wr = op_readdp(regs.x);
   wr = op_sbc(wr, rd);
   (1) ? op_writedp(regs.x, wr) : op_io();
-}
+} break;
 
-void sSMP::op_adc_dp_dp() {
+//adc_dp_dp
+case 0x89: {
   sp = op_readpc();
   rd = op_readdp(sp);
   dp = op_readpc();
   wr = op_readdp(dp);
   wr = op_adc(wr, rd);
   (1) ? op_writedp(dp, wr) : op_io();
-}
+} break;
 
-void sSMP::op_and_dp_dp() {
+//and_dp_dp
+case 0x29: {
   sp = op_readpc();
   rd = op_readdp(sp);
   dp = op_readpc();
   wr = op_readdp(dp);
   wr = op_and(wr, rd);
   (1) ? op_writedp(dp, wr) : op_io();
-}
+} break;
 
-void sSMP::op_cmp_dp_dp() {
+//cmp_dp_dp
+case 0x69: {
   sp = op_readpc();
   rd = op_readdp(sp);
   dp = op_readpc();
   wr = op_readdp(dp);
   wr = op_cmp(wr, rd);
   (0) ? op_writedp(dp, wr) : op_io();
-}
+} break;
 
-void sSMP::op_eor_dp_dp() {
+//eor_dp_dp
+case 0x49: {
   sp = op_readpc();
   rd = op_readdp(sp);
   dp = op_readpc();
   wr = op_readdp(dp);
   wr = op_eor(wr, rd);
   (1) ? op_writedp(dp, wr) : op_io();
-}
+} break;
 
-void sSMP::op_or_dp_dp() {
+//or_dp_dp
+case 0x09: {
   sp = op_readpc();
   rd = op_readdp(sp);
   dp = op_readpc();
   wr = op_readdp(dp);
   wr = op_or(wr, rd);
   (1) ? op_writedp(dp, wr) : op_io();
-}
+} break;
 
-void sSMP::op_sbc_dp_dp() {
+//sbc_dp_dp
+case 0xa9: {
   sp = op_readpc();
   rd = op_readdp(sp);
   dp = op_readpc();
   wr = op_readdp(dp);
   wr = op_sbc(wr, rd);
   (1) ? op_writedp(dp, wr) : op_io();
-}
+} break;
 
-void sSMP::op_adc_dp_const() {
+//adc_dp_const
+case 0x98: {
   rd = op_readpc();
   dp = op_readpc();
   wr = op_readdp(dp);
   wr = op_adc(wr, rd);
   (1) ? op_writedp(dp, wr) : op_io();
-}
+} break;
 
-void sSMP::op_and_dp_const() {
+//and_dp_const
+case 0x38: {
   rd = op_readpc();
   dp = op_readpc();
   wr = op_readdp(dp);
   wr = op_and(wr, rd);
   (1) ? op_writedp(dp, wr) : op_io();
-}
+} break;
 
-void sSMP::op_cmp_dp_const() {
+//cmp_dp_const
+case 0x78: {
   rd = op_readpc();
   dp = op_readpc();
   wr = op_readdp(dp);
   wr = op_cmp(wr, rd);
   (0) ? op_writedp(dp, wr) : op_io();
-}
+} break;
 
-void sSMP::op_eor_dp_const() {
+//eor_dp_const
+case 0x58: {
   rd = op_readpc();
   dp = op_readpc();
   wr = op_readdp(dp);
   wr = op_eor(wr, rd);
   (1) ? op_writedp(dp, wr) : op_io();
-}
+} break;
 
-void sSMP::op_or_dp_const() {
+//or_dp_const
+case 0x18: {
   rd = op_readpc();
   dp = op_readpc();
   wr = op_readdp(dp);
   wr = op_or(wr, rd);
   (1) ? op_writedp(dp, wr) : op_io();
-}
+} break;
 
-void sSMP::op_sbc_dp_const() {
+//sbc_dp_const
+case 0xb8: {
   rd = op_readpc();
   dp = op_readpc();
   wr = op_readdp(dp);
   wr = op_sbc(wr, rd);
   (1) ? op_writedp(dp, wr) : op_io();
-}
+} break;
 
-void sSMP::op_addw_ya_dp() {
+//addw_ya_dp
+case 0x7a: {
   dp  = op_readpc();
   rd  = op_readdp(dp);
   op_io();
   rd |= op_readdp(dp + 1) << 8;
   regs.ya = op_addw(regs.ya, rd);
-}
+} break;
 
-void sSMP::op_subw_ya_dp() {
+//subw_ya_dp
+case 0x9a: {
   dp  = op_readpc();
   rd  = op_readdp(dp);
   op_io();
   rd |= op_readdp(dp + 1) << 8;
   regs.ya = op_subw(regs.ya, rd);
-}
+} break;
 
-void sSMP::op_cmpw_ya_dp() {
+//cmpw_ya_dp
+case 0x5a: {
   dp  = op_readpc();
   rd  = op_readdp(dp);
   rd |= op_readdp(dp + 1) << 8;
   op_cmpw(regs.ya, rd);
-}
+} break;
 
-void sSMP::op_and1_bit() {
+//and1_bit
+case 0x4a: {
   dp  = op_readpc();
   dp |= op_readpc() << 8;
   bit = dp >> 13;
   dp &= 0x1fff;
   rd = op_readaddr(dp);
   regs.p.c = regs.p.c & !!(rd & (1 << bit));
-}
+} break;
 
-void sSMP::op_and1_notbit() {
+//and1_notbit
+case 0x6a: {
   dp  = op_readpc();
   dp |= op_readpc() << 8;
   bit = dp >> 13;
   dp &= 0x1fff;
   rd = op_readaddr(dp);
   regs.p.c = regs.p.c & !(rd & (1 << bit));
-}
+} break;
 
-void sSMP::op_eor1_bit() {
+//eor1_bit
+case 0x8a: {
   dp  = op_readpc();
   dp |= op_readpc() << 8;
   bit = dp >> 13;
@@ -623,9 +707,10 @@ void sSMP::op_eor1_bit() {
   rd = op_readaddr(dp);
   op_io();
   regs.p.c = regs.p.c ^ !!(rd & (1 << bit));
-}
+} break;
 
-void sSMP::op_not1_bit() {
+//not1_bit
+case 0xea: {
   dp  = op_readpc();
   dp |= op_readpc() << 8;
   bit = dp >> 13;
@@ -633,9 +718,10 @@ void sSMP::op_not1_bit() {
   rd = op_readaddr(dp);
   rd ^= (1 << bit);
   op_writeaddr(dp, rd);
-}
+} break;
 
-void sSMP::op_or1_bit() {
+//or1_bit
+case 0x0a: {
   dp  = op_readpc();
   dp |= op_readpc() << 8;
   bit = dp >> 13;
@@ -643,9 +729,10 @@ void sSMP::op_or1_bit() {
   rd = op_readaddr(dp);
   op_io();
   regs.p.c = regs.p.c | !!(rd & (1 << bit));
-}
+} break;
 
-void sSMP::op_or1_notbit() {
+//or1_notbit
+case 0x2a: {
   dp  = op_readpc();
   dp |= op_readpc() << 8;
   bit = dp >> 13;
@@ -653,5 +740,5 @@ void sSMP::op_or1_notbit() {
   rd = op_readaddr(dp);
   op_io();
   regs.p.c = regs.p.c | !(rd & (1 << bit));
-}
+} break;
 

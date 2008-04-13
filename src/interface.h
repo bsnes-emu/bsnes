@@ -19,11 +19,7 @@
 #include "ppu/ppu.h"
 #include "ppu/bppu/bppu.h"
 
-#include "snes/snes.h"
-#include "chip/chip.h"
-
 #ifdef INTERFACE_MAIN
-  #include "config/config.cpp"
   #define extern
 #endif
 
@@ -34,3 +30,10 @@ extern DSPCORE dsp;
 extern PPUCORE ppu;
 
 #undef extern
+
+#include "snes/snes.h"
+#include "chip/chip.h"
+
+#ifdef INTERFACE_MAIN
+  #include "config/config.cpp"
+#endif

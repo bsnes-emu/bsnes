@@ -74,12 +74,7 @@ void set_config_filename() {
 
 void get_base_path(const char *image) {
   char full_name[PATH_MAX] = "";
-
-  #if defined(PLATFORM_WIN)
-  GetFullPathName(image, PATH_MAX, full_name, 0);
-  #elif defined(PLATFORM_X)
   realpath(image, full_name);
-  #endif
 
   string t = full_name;
   if(strlen(t) != 0) {
@@ -117,11 +112,7 @@ void run() {
 
   if(cartridge.loaded() == false || app.pause == true || app.autopause == true) {
     //prevent bsnes from consuming 100% CPU resources when idle
-    #if defined(PLATFORM_WIN)
-    Sleep(20);
-    #elif defined(PLATFORM_X)
     usleep(20 * 1000);
-    #endif
   } else {
     snes.runtoframe();
     event::update_status();

@@ -6,10 +6,11 @@ string file_updatepath(const char*, const char*);
 
 extern struct File {
   static integral_setting autodetect_type;
+  static integral_setting bypass_patch_crc32;
 } file;
 
 extern struct Path {
-  static string_setting base, rom, save, cheat;
+  static string_setting base, rom, patch, save, cheat;
   static string_setting bsx, st;
 } path;
 

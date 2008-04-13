@@ -1,14 +1,17 @@
-void sCPU::op_nop() {
+//nop
+case 0xea: {
   last_cycle();
-  op_io();
-}
+  op_io_irq();
+} break;
 
-void sCPU::op_wdm() {
+//wdm
+case 0x42: {
   last_cycle();
   op_readpc();
-}
+} break;
 
-void sCPU::op_xba() {
+//xba
+case 0xeb: {
   op_io();
   last_cycle();
   op_io();
@@ -17,9 +20,10 @@ void sCPU::op_xba() {
   regs.a.l ^= regs.a.h;
   regs.p.n = !!(regs.a.l & 0x80);
   regs.p.z = (regs.a.l == 0);
-}
+} break;
 
-void sCPU::op_mvn() {
+//mvn
+case 0x54: {
   dp = op_readpc();
   sp = op_readpc();
   regs.db = dp;
@@ -35,10 +39,11 @@ void sCPU::op_mvn() {
   }
   last_cycle();
   op_io();
-  if(regs.a.w--)regs.pc.w -= 3;
-}
+  if(regs.a.w--) regs.pc.w -= 3;
+} break;
 
-void sCPU::op_mvp() {
+//mvp
+case 0x44: {
   dp = op_readpc();
   sp = op_readpc();
   regs.db = dp;
@@ -54,60 +59,64 @@ void sCPU::op_mvp() {
   }
   last_cycle();
   op_io();
-  if(regs.a.w--)regs.pc.w -= 3;
-}
+  if(regs.a.w--) regs.pc.w -= 3;
+} break;
 
-void sCPU::op_brk() {
+//brk
+case 0x00: {
   op_readpc();
-  if(!regs.e)op_writestack(regs.pc.b);
+  if(!regs.e) op_writestack(regs.pc.b);
   op_writestack(regs.pc.h);
   op_writestack(regs.pc.l);
   op_writestack(regs.p);
-  rd.l = op_readlong((regs.e) ? 0xfffe : 0xffe6);
+  rd.l = op_readlong(regs.e ? 0xfffe : 0xffe6);
   regs.pc.b = 0x00;
   regs.p.i  = 1;
   regs.p.d  = 0;
   last_cycle();
-  rd.h = op_readlong((regs.e) ? 0xffff : 0xffe7);
+  rd.h = op_readlong(regs.e ? 0xffff : 0xffe7);
   regs.pc.w = rd.w;
-}
+} break;
 
-void sCPU::op_cop() {
+//cop
+case 0x02: {
   op_readpc();
-  if(!regs.e)op_writestack(regs.pc.b);
+  if(!regs.e) op_writestack(regs.pc.b);
   op_writestack(regs.pc.h);
   op_writestack(regs.pc.l);
   op_writestack(regs.p);
-  rd.l = op_readlong((regs.e) ? 0xfff4 : 0xffe4);
+  rd.l = op_readlong(regs.e ? 0xfff4 : 0xffe4);
   regs.pc.b = 0x00;
   regs.p.i  = 1;
   regs.p.d  = 0;
   last_cycle();
-  rd.h = op_readlong((regs.e) ? 0xfff5 : 0xffe5);
+  rd.h = op_readlong(regs.e ? 0xfff5 : 0xffe5);
   regs.pc.w = rd.w;
-}
+} break;
 
-void sCPU::op_stp() {
+//stp
+case 0xdb: {
   op_io();
   last_cycle();
-  while(1) { op_io(); }
-}
+  while(true) op_io();
+} break;
 
-void sCPU::op_wai() {
-  //last_cycle() will set event.wai to false
-//once an NMI / IRQ edge is reached
+//wai
+case 0xcb: {
+  //last_cycle() will clear event.wai once an NMI / IRQ edge is reached
   event.wai = true;
   while(event.wai) {
     last_cycle();
     op_io();
   }
   op_io();
-}
+} break;
 
-void sCPU::op_xce() {
+//xce
+case 0xfb: {
   last_cycle();
-  op_io();
-bool carry = regs.p.c;
+  op_io_irq();
+  bool carry = regs.p.c;
   regs.p.c = regs.e;
   regs.e = carry;
   if(regs.e) {
@@ -118,77 +127,87 @@ bool carry = regs.p.c;
     regs.x.h = 0x00;
     regs.y.h = 0x00;
   }
-}
+} break;
 
-void sCPU::op_clc() {
+//clc
+case 0x18: {
   last_cycle();
-  op_io();
+  op_io_irq();
   regs.p.c = 0;
-}
+} break;
 
-void sCPU::op_cld() {
+//cld
+case 0xd8: {
   last_cycle();
-  op_io();
+  op_io_irq();
   regs.p.d = 0;
-}
+} break;
 
-void sCPU::op_cli() {
+//cli
+case 0x58: {
   last_cycle();
-  op_io();
+  op_io_irq();
   regs.p.i = 0;
-}
+} break;
 
-void sCPU::op_clv() {
+//clv
+case 0xb8: {
   last_cycle();
-  op_io();
+  op_io_irq();
   regs.p.v = 0;
-}
+} break;
 
-void sCPU::op_sec() {
+//sec
+case 0x38: {
   last_cycle();
-  op_io();
+  op_io_irq();
   regs.p.c = 1;
-}
+} break;
 
-void sCPU::op_sed() {
+//sed
+case 0xf8: {
   last_cycle();
-  op_io();
+  op_io_irq();
   regs.p.d = 1;
-}
+} break;
 
-void sCPU::op_sei() {
+//sei
+case 0x78: {
   last_cycle();
-  op_io();
+  op_io_irq();
   regs.p.i = 1;
-}
+} break;
 
-void sCPU::op_rep() {
+//rep
+case 0xc2: {
   rd.l = op_readpc();
   last_cycle();
   op_io();
   regs.p &=~ rd.l;
-  if(regs.e)regs.p |= 0x30;
+  if(regs.e) regs.p |= 0x30;
   if(regs.p.x) {
     regs.x.h = 0x00;
     regs.y.h = 0x00;
   }
-}
+} break;
 
-void sCPU::op_sep() {
+//sep
+case 0xe2: {
   rd.l = op_readpc();
   last_cycle();
   op_io();
   regs.p |= rd.l;
-  if(regs.e)regs.p |= 0x30;
+  if(regs.e) regs.p |= 0x30;
   if(regs.p.x) {
     regs.x.h = 0x00;
     regs.y.h = 0x00;
   }
-}
+} break;
 
-void sCPU::op_tax() {
+//tax
+case 0xaa: {
   last_cycle();
-  op_io();
+  op_io_irq();
   if(regs.p.x) {
     regs.x.l = regs.a.l;
     regs.p.n = !!(regs.x.l & 0x80);
@@ -198,11 +217,12 @@ void sCPU::op_tax() {
     regs.p.n = !!(regs.x.w & 0x8000);
     regs.p.z = (regs.x.w == 0);
   }
-}
+} break;
 
-void sCPU::op_tay() {
+//tay
+case 0xa8: {
   last_cycle();
-  op_io();
+  op_io_irq();
   if(regs.p.x) {
     regs.y.l = regs.a.l;
     regs.p.n = !!(regs.y.l & 0x80);
@@ -212,11 +232,12 @@ void sCPU::op_tay() {
     regs.p.n = !!(regs.y.w & 0x8000);
     regs.p.z = (regs.y.w == 0);
   }
-}
+} break;
 
-void sCPU::op_txa() {
+//txa
+case 0x8a: {
   last_cycle();
-  op_io();
+  op_io_irq();
   if(regs.p.m) {
     regs.a.l = regs.x.l;
     regs.p.n = !!(regs.a.l & 0x80);
@@ -226,11 +247,12 @@ void sCPU::op_txa() {
     regs.p.n = !!(regs.a.w & 0x8000);
     regs.p.z = (regs.a.w == 0);
   }
-}
+} break;
 
-void sCPU::op_txy() {
+//txy
+case 0x9b: {
   last_cycle();
-  op_io();
+  op_io_irq();
   if(regs.p.x) {
     regs.y.l = regs.x.l;
     regs.p.n = !!(regs.y.l & 0x80);
@@ -240,11 +262,12 @@ void sCPU::op_txy() {
     regs.p.n = !!(regs.y.w & 0x8000);
     regs.p.z = (regs.y.w == 0);
   }
-}
+} break;
 
-void sCPU::op_tya() {
+//tya
+case 0x98: {
   last_cycle();
-  op_io();
+  op_io_irq();
   if(regs.p.m) {
     regs.a.l = regs.y.l;
     regs.p.n = !!(regs.a.l & 0x80);
@@ -254,11 +277,12 @@ void sCPU::op_tya() {
     regs.p.n = !!(regs.a.w & 0x8000);
     regs.p.z = (regs.a.w == 0);
   }
-}
+} break;
 
-void sCPU::op_tyx() {
+//tyx
+case 0xbb: {
   last_cycle();
-  op_io();
+  op_io_irq();
   if(regs.p.x) {
     regs.x.l = regs.y.l;
     regs.p.n = !!(regs.x.l & 0x80);
@@ -268,34 +292,38 @@ void sCPU::op_tyx() {
     regs.p.n = !!(regs.x.w & 0x8000);
     regs.p.z = (regs.x.w == 0);
   }
-}
+} break;
 
-void sCPU::op_tcd() {
+//tcd
+case 0x5b: {
   last_cycle();
-  op_io();
+  op_io_irq();
   regs.d.w = regs.a.w;
   regs.p.n = !!(regs.d.w & 0x8000);
   regs.p.z = (regs.d.w == 0);
-}
+} break;
 
-void sCPU::op_tcs() {
+//tcs
+case 0x1b: {
   last_cycle();
-  op_io();
+  op_io_irq();
   regs.s.w = regs.a.w;
-  if(regs.e)regs.s.h = 0x01;
-}
+  if(regs.e) regs.s.h = 0x01;
+} break;
 
-void sCPU::op_tdc() {
+//tdc
+case 0x7b: {
   last_cycle();
-  op_io();
+  op_io_irq();
   regs.a.w = regs.d.w;
   regs.p.n = !!(regs.a.w & 0x8000);
   regs.p.z = (regs.a.w == 0);
-}
+} break;
 
-void sCPU::op_tsc() {
+//tsc
+case 0x3b: {
   last_cycle();
-  op_io();
+  op_io_irq();
   regs.a.w = regs.s.w;
   if(regs.e) {
     regs.p.n = !!(regs.a.l & 0x80);
@@ -304,11 +332,12 @@ void sCPU::op_tsc() {
     regs.p.n = !!(regs.a.w & 0x8000);
     regs.p.z = (regs.a.w == 0);
   }
-}
+} break;
 
-void sCPU::op_tsx() {
+//tsx
+case 0xba: {
   last_cycle();
-  op_io();
+  op_io_irq();
   if(regs.p.x) {
     regs.x.l = regs.s.l;
     regs.p.n = !!(regs.x.l & 0x80);
@@ -318,66 +347,75 @@ void sCPU::op_tsx() {
     regs.p.n = !!(regs.x.w & 0x8000);
     regs.p.z = (regs.x.w == 0);
   }
-}
+} break;
 
-void sCPU::op_txs() {
+//txs
+case 0x9a: {
   last_cycle();
-  op_io();
+  op_io_irq();
   if(regs.e) {
     regs.s.l = regs.x.l;
   } else {
     regs.s.w = regs.x.w;
   }
-}
+} break;
 
-void sCPU::op_pha() {
+//pha
+case 0x48: {
   op_io();
   if(!regs.p.m)op_writestack(regs.a.h);
   last_cycle();
   op_writestack(regs.a.l);
-}
+} break;
 
-void sCPU::op_phx() {
+//phx
+case 0xda: {
   op_io();
   if(!regs.p.x)op_writestack(regs.x.h);
   last_cycle();
   op_writestack(regs.x.l);
-}
+} break;
 
-void sCPU::op_phy() {
+//phy
+case 0x5a: {
   op_io();
   if(!regs.p.x)op_writestack(regs.y.h);
   last_cycle();
   op_writestack(regs.y.l);
-}
+} break;
 
-void sCPU::op_phd() {
+//phd
+case 0x0b: {
   op_io();
   op_writestackn(regs.d.h);
   last_cycle();
   op_writestackn(regs.d.l);
-  if(regs.e)regs.s.h = 0x01;
-}
+  if(regs.e) regs.s.h = 0x01;
+} break;
 
-void sCPU::op_phb() {
+//phb
+case 0x8b: {
   op_io();
   last_cycle();
   op_writestack(regs.db);
-}
+} break;
 
-void sCPU::op_phk() {
+//phk
+case 0x4b: {
   op_io();
   last_cycle();
   op_writestack(regs.pc.b);
-}
+} break;
 
-void sCPU::op_php() {
+//php
+case 0x08: {
   op_io();
   last_cycle();
   op_writestack(regs.p);
-}
+} break;
 
-void sCPU::op_pla() {
+//pla
+case 0x68: {
   op_io();
   op_io();
   if(regs.p.m)last_cycle();
@@ -385,15 +423,16 @@ void sCPU::op_pla() {
   if(regs.p.m) {
     regs.p.n = !!(regs.a.l & 0x80);
     regs.p.z = (regs.a.l == 0);
-    return;
+    break;
   }
   last_cycle();
   regs.a.h = op_readstack();
   regs.p.n = !!(regs.a.w & 0x8000);
   regs.p.z = (regs.a.w == 0);
-}
+} break;
 
-void sCPU::op_plx() {
+//plx
+case 0xfa: {
   op_io();
   op_io();
   if(regs.p.x)last_cycle();
@@ -401,15 +440,16 @@ void sCPU::op_plx() {
   if(regs.p.x) {
     regs.p.n = !!(regs.x.l & 0x80);
     regs.p.z = (regs.x.l == 0);
-    return;
+    break;
   }
   last_cycle();
   regs.x.h = op_readstack();
   regs.p.n = !!(regs.x.w & 0x8000);
   regs.p.z = (regs.x.w == 0);
-}
+} break;
 
-void sCPU::op_ply() {
+//ply
+case 0x7a: {
   op_io();
   op_io();
   if(regs.p.x)last_cycle();
@@ -417,15 +457,16 @@ void sCPU::op_ply() {
   if(regs.p.x) {
     regs.p.n = !!(regs.y.l & 0x80);
     regs.p.z = (regs.y.l == 0);
-    return;
+    break;
   }
   last_cycle();
   regs.y.h = op_readstack();
   regs.p.n = !!(regs.y.w & 0x8000);
   regs.p.z = (regs.y.w == 0);
-}
+} break;
 
-void sCPU::op_pld() {
+//pld
+case 0x2b: {
   op_io();
   op_io();
   regs.d.l = op_readstackn();
@@ -433,40 +474,44 @@ void sCPU::op_pld() {
   regs.d.h = op_readstackn();
   regs.p.n = !!(regs.d.w & 0x8000);
   regs.p.z = (regs.d.w == 0);
-  if(regs.e)regs.s.h = 0x01;
-}
+  if(regs.e) regs.s.h = 0x01;
+} break;
 
-void sCPU::op_plb() {
+//plb
+case 0xab: {
   op_io();
   op_io();
   last_cycle();
   regs.db = op_readstack();
   regs.p.n = !!(regs.db & 0x80);
   regs.p.z = (regs.db == 0);
-}
+} break;
 
-void sCPU::op_plp() {
+//plp
+case 0x28: {
   op_io();
   op_io();
   last_cycle();
   regs.p = op_readstack();
-  if(regs.e)regs.p |= 0x30;
+  if(regs.e) regs.p |= 0x30;
   if(regs.p.x) {
     regs.x.h = 0x00;
     regs.y.h = 0x00;
   }
-}
+} break;
 
-void sCPU::op_pea() {
+//pea
+case 0xf4: {
   aa.l = op_readpc();
   aa.h = op_readpc();
   op_writestackn(aa.h);
   last_cycle();
   op_writestackn(aa.l);
-  if(regs.e)regs.s.h = 0x01;
-}
+  if(regs.e) regs.s.h = 0x01;
+} break;
 
-void sCPU::op_pei() {
+//pei
+case 0xd4: {
   dp = op_readpc();
   op_io_cond2();
   aa.l = op_readdp(dp);
@@ -474,10 +519,11 @@ void sCPU::op_pei() {
   op_writestackn(aa.h);
   last_cycle();
   op_writestackn(aa.l);
-  if(regs.e)regs.s.h = 0x01;
-}
+  if(regs.e) regs.s.h = 0x01;
+} break;
 
-void sCPU::op_per() {
+//per
+case 0x62: {
   aa.l = op_readpc();
   aa.h = op_readpc();
   op_io();
@@ -485,6 +531,6 @@ void sCPU::op_per() {
   op_writestackn(rd.h);
   last_cycle();
   op_writestackn(rd.l);
-  if(regs.e)regs.s.h = 0x01;
-}
+  if(regs.e) regs.s.h = 0x01;
+} break;
 

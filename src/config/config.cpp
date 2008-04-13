@@ -13,6 +13,14 @@ integral_setting File::autodetect_type(config(), "file.autodetect_type",
   "option is enabled.",
   integral_setting::boolean, false);
 
+integral_setting File::bypass_patch_crc32(config(), "file.bypass_patch_crc32",
+  "UPS patches contain CRC32s to validate that a patch was applied successfully.\n"
+  "By default, if this validation fails, said patch will not be applied.\n"
+  "Setting this option to true will bypass the validation,\n"
+  "which may or may not result in a working image.\n"
+  "Enabling this option is strongly discouraged.",
+  integral_setting::boolean, false);
+
 string file_updatepath(const char *req_file, const char *req_path) {
   string file(req_file);
   replace(file, "\\", "/");
@@ -40,6 +48,8 @@ string_setting Path::base("path.base",
   "Path that bsnes resides in", "");
 string_setting Path::rom(config(), "path.rom",
   "Default path to look for ROM files in (\"\" = use default directory)", "");
+string_setting Path::patch(config(), "path.patch",
+  "Default path for all UPS patch files (\"\" = use current directory)", "");
 string_setting Path::save(config(), "path.save",
   "Default path for all save RAM files (\"\" = use current directory)", "");
 string_setting Path::cheat(config(), "path.cheat",

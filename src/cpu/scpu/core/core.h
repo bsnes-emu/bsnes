@@ -1,5 +1,3 @@
-  void (sCPU::*optbl[256])();
-
   CPUReg24 aa, rd;
   uint8_t dp, sp;
 
@@ -50,8 +48,7 @@
   void op_tsb_b();
   void op_tsb_w();
 
+  void op_io_irq();
   void op_io_cond2();
   void op_io_cond4(uint16 x, uint16 y);
   void op_io_cond6(uint16 addr);
-
-  #include "op.h"

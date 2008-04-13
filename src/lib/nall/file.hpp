@@ -23,15 +23,15 @@ public:
   }
 
   uintmax_t readl(unsigned length = 1) {
-  uintmax_t data = 0;
-    for(int i = length - 1; i >= 0; i--) {
+    uintmax_t data = 0;
+    for(int i = 0; i < length; i++) {
       data |= (uintmax_t)read() << (i << 3);
     }
     return data;
   }
 
   uintmax_t readm(unsigned length = 1) {
-  uintmax_t data = 0;
+    uintmax_t data = 0;
     while(length--) {
       data <<= 8;
       data |= read();
@@ -78,7 +78,7 @@ public:
     if(!fp) return; //file not open
     buffer_flush();
 
-  uintmax_t req_offset = file_offset;
+    uintmax_t req_offset = file_offset;
     switch(mode) {
       case seek_absolute: req_offset  = offset; break;
       case seek_relative: req_offset += offset; break;
@@ -166,7 +166,7 @@ private:
       buffer_flush();
       buffer_offset = file_offset & ~buffer_mask;
       fseek(fp, buffer_offset, SEEK_SET);
-    unsigned length = (buffer_offset + buffer_size) <= file_size ? buffer_size : (file_size & buffer_mask);
+      unsigned length = (buffer_offset + buffer_size) <= file_size ? buffer_size : (file_size & buffer_mask);
       if(length) fread(buffer, 1, length, fp);
     }
   }
@@ -177,7 +177,7 @@ private:
     if(buffer_offset < 0) return; //buffer unused
     if(buffer_dirty == false) return; //buffer unmodified since read
     fseek(fp, buffer_offset, SEEK_SET);
-  unsigned length = (buffer_offset + buffer_size) <= file_size ? buffer_size : (file_size & buffer_mask);
+    unsigned length = (buffer_offset + buffer_size) <= file_size ? buffer_size : (file_size & buffer_mask);
     if(length) fwrite(buffer, 1, length, fp);
     buffer_offset = -1; //invalidate buffer
     buffer_dirty = false;
