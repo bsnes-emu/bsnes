@@ -1,5 +1,6 @@
 void pLabel::create(uint style, uint width, uint height, const char *text) {
   label = gtk_label_new(text ? text : "");
+  set_default_font(label);
   gtk_misc_set_alignment(GTK_MISC(label), 0.0, 0.0);
   gtk_widget_set_size_request(label, width, height);
   gtk_widget_show(label);

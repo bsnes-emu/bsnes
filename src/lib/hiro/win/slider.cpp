@@ -1,7 +1,7 @@
 void pSlider::create(uint style, uint width, uint height, uint length) {
   if(length < 1) length = 1;
 
-  hwnd = CreateWindow(TRACKBAR_CLASS, "",
+  hwnd = CreateWindow(TRACKBAR_CLASS, L"",
     WS_CHILD | WS_VISIBLE | WS_TABSTOP | TBS_NOTICKS | TBS_BOTH |
     (style & Slider::Vertical ? TBS_VERT : TBS_HORZ),
     0, 0, width, height,

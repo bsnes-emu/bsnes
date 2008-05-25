@@ -9,6 +9,7 @@ public:
   pMenuCheckItem(MenuCheckItem&);
 
   /* internal */
-  GtkWidget *item;
   GtkWidget* gtk_handle();
+  GtkWidget *item;
+  bool locked;
 };

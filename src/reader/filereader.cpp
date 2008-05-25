@@ -15,19 +15,16 @@ uint8_t* FileReader::read(unsigned length) {
 
   if(length == 0) {
     //read the entire file into RAM
-    data = (uint8*)malloc(filesize);
-    memset(data, 0, filesize);
+    data = new(zeromemory) uint8_t[filesize];
     if(fp) fread(data, 1, filesize, fp);
   } else if(length > filesize) {
     //read the entire file into RAM, pad the rest with 0x00s
-    data = (uint8*)malloc(length);
-    memset(data, 0, length);
-    if(fp)fread(data, 1, filesize, fp);
+    data = new(zeromemory) uint8_t[length];
+    if(fp) fread(data, 1, filesize, fp);
   } else { //filesize >= length
     //read only what was requested
-    data = (uint8*)malloc(length);
-    memset(data, 0, length);
-    if(fp)fread(data, 1, length, fp);
+    data = new(zeromemory) uint8_t[length];
+    if(fp) fread(data, 1, length, fp);
   }
   return data;
 }
@@ -52,26 +49,6 @@ FileReader::FileReader(const char *fn) {
 }
 
 FileReader::~FileReader() {
-  if(fp) {
-    fclose(fp);
-    fp = 0;
-  }
-}
-
-void FileWriter::write(uint8_t *buffer, unsigned length) {
-  if(!fp) return;
-  fwrite(buffer, 1, length, fp);
-}
-
-bool FileWriter::ready() {
-  return (fp != 0);
-}
-
-FileWriter::FileWriter(const char *fn) {
-  fp = fopen(fn, "wb");
-}
-
-FileWriter::~FileWriter() {
   if(fp) {
     fclose(fp);
     fp = 0;

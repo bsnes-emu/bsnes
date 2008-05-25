@@ -20,7 +20,8 @@ void update_region(uint);
 void update_hardware_filter(uint);
 void update_software_filter(uint);
 
-void update_speed_regulation(uint);
+void update_frameskip(int);
+void update_emulation_speed(int);
 
 void update_status();
 void update_video_settings();
@@ -38,5 +39,7 @@ void load_cart_st(const char*, const char*, const char*);
 void unload_rom();
 void reset();
 void power();
+
+void quit();
 
 } //namespace event

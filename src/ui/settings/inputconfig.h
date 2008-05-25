@@ -16,8 +16,8 @@ public:
   uintptr_t set_tick(Event);
   uintptr_t clr_tick(Event);
 
-  static const int list_size;
-  static const char list_index[][64];
+  string_setting& acquire(unsigned index, const char *&name);
+  static const int inputcount;
   uint get_value(uint index);
   void set_value(uint index, uint16 value);
 } window_input_config;

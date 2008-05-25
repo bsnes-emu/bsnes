@@ -44,8 +44,9 @@ string file_updatepath(const char *req_file, const char *req_path) {
   return path;
 }
 
-string_setting Path::base("path.base",
-  "Path that bsnes resides in", "");
+string_setting Path::base("path.base", "Path that bsnes resides in", "");
+string_setting Path::user("path.user", "Path to user folder", "");
+
 string_setting Path::rom(config(), "path.rom",
   "Default path to look for ROM files in (\"\" = use default directory)", "");
 string_setting Path::patch(config(), "path.patch",

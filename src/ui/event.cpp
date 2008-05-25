@@ -12,6 +12,19 @@ void keydown(uint16_t key) {
     }
     if(key == input_manager.gui.reset) reset();
     if(key == input_manager.gui.power) power();
+    if(key == input_manager.gui.quit) quit();
+    if(key == input_manager.gui.speed_decrease) {
+      update_emulation_speed(config::system.emulation_speed - 1);
+    }
+    if(key == input_manager.gui.speed_increase) {
+      update_emulation_speed(config::system.emulation_speed + 1);
+    }
+    if(key == input_manager.gui.frameskip_decrease) {
+      update_frameskip(config::video.frameskip - 1);
+    }
+    if(key == input_manager.gui.frameskip_increase) {
+      update_frameskip(config::video.frameskip + 1);
+    }
     if(key == input_manager.gui.toggle_fullscreen) toggle_fullscreen();
     if(key == input_manager.gui.toggle_menubar) toggle_menubar();
     if(key == input_manager.gui.toggle_statusbar) toggle_statusbar();
@@ -99,25 +112,30 @@ void update_software_filter(uint software_filter) {
   update_video_settings();
 }
 
-void update_speed_regulation(uint speed) {
-  config::system.speed_regulation = speed <= 5 ? speed : 0;
+void update_frameskip(int speed) {
+  config::video.frameskip = max(0, min(9, speed));
+  window_main.sync();
+}
+
+void update_emulation_speed(int speed) {
+  config::system.emulation_speed = max(0, min(5, speed));
 
   //adjust audio frequency to match selected speed setting
   if(audio.cap(Audio::Frequency)) {
-    switch(config::system.speed_regulation) {
-      case 0: audio.set(Audio::Frequency, 32000); break; //disabled
-      case 1: audio.set(Audio::Frequency, 16000); break; //slowest (50%)
-      case 2: audio.set(Audio::Frequency, 24000); break; //slow (75%)
-      case 3: audio.set(Audio::Frequency, 32000); break; //normal (100%)
-      case 4: audio.set(Audio::Frequency, 48000); break; //fast (150%)
-      case 5: audio.set(Audio::Frequency, 64000); break; //fastest (200%)
+    switch(config::system.emulation_speed) {
+      case 0: audio.set(Audio::Frequency, 16000); break; //slowest (50%)
+      case 1: audio.set(Audio::Frequency, 24000); break; //slow (75%)
+      case 2: audio.set(Audio::Frequency, 32000); break; //normal (100%)
+      case 3: audio.set(Audio::Frequency, 48000); break; //fast (150%)
+      case 4: audio.set(Audio::Frequency, 64000); break; //fastest (200%)
+      case 5: audio.set(Audio::Frequency, 32000); break; //disabled
     }
   }
 
   //do not regulate speed when speed regulation is disabled
-  if(audio.cap(Audio::Synchronize)) {
-    audio.set(Audio::Synchronize, config::system.speed_regulation != 0);
-  }
+  audio.set(Audio::Synchronize, config::system.emulation_speed != 5);
+
+  window_main.sync();
 }
 
 void update_status() {
@@ -129,13 +147,13 @@ void update_status() {
     ppu.status.frames_updated = false;
 
     unsigned max_framerate = snes.region() == SNES::NTSC ? 60 : 50;
-    switch(config::system.speed_regulation) {
-      case 0: max_framerate = 0; break;
-      case 1: max_framerate = unsigned(0.50 * max_framerate); break;
-      case 2: max_framerate = unsigned(0.75 * max_framerate); break;
-      case 3: break;
-      case 4: max_framerate = unsigned(1.50 * max_framerate); break;
-      case 5: max_framerate = unsigned(2.00 * max_framerate); break;
+    switch(config::system.emulation_speed) {
+      case 0: max_framerate = unsigned(0.50 * max_framerate); break;
+      case 1: max_framerate = unsigned(0.75 * max_framerate); break;
+      case 2: break;
+      case 3: max_framerate = unsigned(1.50 * max_framerate); break;
+      case 4: max_framerate = unsigned(2.00 * max_framerate); break;
+      case 5: max_framerate = 0; break;
     }
 
     string output = (const char*)config::misc.status_text;
@@ -212,7 +230,7 @@ void update_video_settings() {
   video.set(Video::Filter, video_settings.hardware_filter);
 
   //update main window video mode checkbox settings
-  window_main.update_menu_settings();
+  window_main.sync();
 }
 
 void update_opacity() {
@@ -243,7 +261,8 @@ void toggle_menubar() {
 }
 
 void toggle_statusbar() {
-  window_main.status.show(!window_main.status.visible());
+  config::misc.status_enable = !window_main.status.visible();
+  window_main.status.show(config::misc.status_enable);
   update_video_settings();
 }
 
@@ -291,15 +310,20 @@ void load_cart_normal(const char *filename) {
   if(cartridge.loaded() == true) cartridge.unload();
   cartridge.load_cart_normal(filename);
 
-//warn if unsupported hardware detected
-  if(cartridge.info.superfx) alert("Warning: unsupported SuperFX chip detected.");
-  if(cartridge.info.sa1)     alert("Warning: unsupported SA-1 chip detected.");
-  if(cartridge.info.spc7110) alert("Warning: unsupported SPC7110 chip detected.");
-  if(cartridge.info.st011)   alert("Warning: unsupported ST011 chip detected.");
-  if(cartridge.info.st018)   alert("Warning: unsupported ST018 chip detected.");
+  //warn if unsupported hardware detected
+  string message = translate["Unsupported $ chip detected."];
+  const char *name;
+  if(cartridge.info.superfx) { name = "SuperFX"; replace(message, "$", name); alert(message); }
+  if(cartridge.info.sa1)     { name = "SA-1";    replace(message, "$", name); alert(message); }
+  if(cartridge.info.spc7110) { name = "SPC7110"; replace(message, "$", name); alert(message); }
+  if(cartridge.info.st011)   { name = "ST011";   replace(message, "$", name); alert(message); }
+  if(cartridge.info.st018)   { name = "ST018";   replace(message, "$", name); alert(message); }
 
   app.pause = false;
   snes.power();
+  window_main.menu_file_unload.enable();
+  window_main.menu_file_reset.enable();
+  window_main.menu_file_power.enable();
   window_cheat_editor.refresh();
 }
 
@@ -311,6 +335,9 @@ void load_cart_bsx(const char *base, const char *slot) {
 
   app.pause = false;
   snes.power();
+  window_main.menu_file_unload.enable();
+  window_main.menu_file_reset.enable();
+  window_main.menu_file_power.enable();
   window_cheat_editor.refresh();
 }
 
@@ -322,6 +349,9 @@ void load_cart_bsc(const char *base, const char *slot) {
 
   app.pause = false;
   snes.power();
+  window_main.menu_file_unload.enable();
+  window_main.menu_file_reset.enable();
+  window_main.menu_file_power.enable();
   window_cheat_editor.refresh();
 }
 
@@ -333,6 +363,9 @@ void load_cart_st(const char *base, const char *slotA, const char *slotB) {
 
   app.pause = false;
   snes.power();
+  window_main.menu_file_unload.enable();
+  window_main.menu_file_reset.enable();
+  window_main.menu_file_power.enable();
   window_cheat_editor.refresh();
 }
 
@@ -343,6 +376,9 @@ void unload_rom() {
     audio.clear();
   }
   event::update_status();
+  window_main.menu_file_unload.disable();
+  window_main.menu_file_reset.disable();
+  window_main.menu_file_power.disable();
   window_cheat_editor.refresh();
 }
 
@@ -358,6 +394,16 @@ void power() {
     snes.power();
     dprintf("* Power");
   }
+}
+
+void quit() {
+  app.term = true;
+  window_about.hide();
+  window_message.hide();
+  window_settings.hide();
+  window_bsxloader.hide();
+  window_stloader.hide();
+  window_main.hide();
 }
 
 };

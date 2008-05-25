@@ -58,10 +58,9 @@ void Tracer::enable(bool en) {
 
 void Tracer::cpuopmask_enable(bool en) {
   if(en == true && cpuopmask_enabled() == false) {
-    settings.cpuopmasktbl = (uint8*)malloc(0x200000);
-    memset(settings.cpuopmasktbl, 0x00, 0x200000);
+    settings.cpuopmasktbl = new(zeromemory) uint8_t[0x200000];
   } else if(en == false && cpuopmask_enabled() == true) {
-    safe_free(settings.cpuopmasktbl);
+    delete[] settings.cpuopmasktbl;
   }
 
   settings.cpuopmask = en;
@@ -69,10 +68,9 @@ void Tracer::cpuopmask_enable(bool en) {
 
 void Tracer::smpopmask_enable(bool en) {
   if(en == true && smpopmask_enabled() == false) {
-    settings.smpopmasktbl = (uint8*)malloc(0x2000);
-    memset(settings.smpopmasktbl, 0x00, 0x2000);
+    settings.smpopmasktbl = new(zeromemory) uint8_t[0x2000];
   } else if(en == false && smpopmask_enabled() == true) {
-    safe_free(settings.smpopmasktbl);
+    delete[] settings.smpopmasktbl;
   }
 
   settings.smpopmask = en;

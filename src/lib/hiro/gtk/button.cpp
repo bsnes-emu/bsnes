@@ -4,6 +4,7 @@ void hiro_pbutton_tick(pButton *p) {
 
 void pButton::create(uint style, uint width, uint height, const char *text) {
   button = gtk_button_new_with_label(text ? text : "");
+  set_default_font(button);
   gtk_widget_set_size_request(button, width, height);
   gtk_widget_show(button);
   g_signal_connect_swapped(G_OBJECT(button), "clicked", G_CALLBACK(hiro_pbutton_tick), (gpointer)this);

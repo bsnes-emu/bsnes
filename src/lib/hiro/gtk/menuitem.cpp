@@ -4,6 +4,7 @@ void hiro_pmenuitem_tick(pMenuItem *p) {
 
 void pMenuItem::create(const char *text) {
   item = gtk_menu_item_new_with_label(text ? text : "");
+  set_default_font(item);
   g_signal_connect_swapped(G_OBJECT(item), "activate", G_CALLBACK(hiro_pmenuitem_tick), (gpointer)this);
   gtk_widget_show(item);
 }

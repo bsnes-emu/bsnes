@@ -93,7 +93,7 @@ case 0xe0: {
 case 0xed: {
   op_io();
   op_io();
-  regs.p.c ^= 1;
+  regs.p.c = !regs.p.c;
 } break;
 
 //ei

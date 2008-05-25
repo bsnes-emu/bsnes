@@ -8,12 +8,12 @@ void pEditbox::create(uint style, uint width, uint height, const char *text) {
     gtk_widget_set_size_request(editbox, width, height);
     gtk_widget_show(editbox);
   } else {
-  GtkPolicyType hscroll = (style & Editbox::HorizontalScrollAlways) ? GTK_POLICY_ALWAYS :
-                          (style & Editbox::HorizontalScrollNever)  ? GTK_POLICY_NEVER  :
-                          GTK_POLICY_AUTOMATIC;
-  GtkPolicyType vscroll = (style & Editbox::VerticalScrollAlways) ? GTK_POLICY_ALWAYS :
-                          (style & Editbox::VerticalScrollNever)  ? GTK_POLICY_NEVER  :
-                          GTK_POLICY_AUTOMATIC;
+    GtkPolicyType hscroll = (style & Editbox::HorizontalScrollAlways) ? GTK_POLICY_ALWAYS :
+                            (style & Editbox::HorizontalScrollNever)  ? GTK_POLICY_NEVER  :
+                            GTK_POLICY_AUTOMATIC;
+    GtkPolicyType vscroll = (style & Editbox::VerticalScrollAlways) ? GTK_POLICY_ALWAYS :
+                            (style & Editbox::VerticalScrollNever)  ? GTK_POLICY_NEVER  :
+                            GTK_POLICY_AUTOMATIC;
     scrollbox = gtk_scrolled_window_new(0, 0);
     gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrollbox), hscroll, vscroll);
     gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(scrollbox), GTK_SHADOW_ETCHED_IN);
@@ -26,6 +26,8 @@ void pEditbox::create(uint style, uint width, uint height, const char *text) {
     gtk_widget_show(editbox);
     gtk_widget_show(scrollbox);
   }
+
+  set_default_font(editbox);
 }
 
 void pEditbox::set_text(const char *text) {
@@ -38,10 +40,10 @@ void pEditbox::set_text(const char *text) {
 
 uint pEditbox::get_text(char *text, uint length) {
   if(multiline == false) {
-  const char *temp = gtk_entry_get_text(GTK_ENTRY(editbox));
+    const char *temp = gtk_entry_get_text(GTK_ENTRY(editbox));
     return strlcpy(text, temp ? temp : "", length);
   } else {
-  GtkTextIter start, end;
+    GtkTextIter start, end;
     gtk_text_buffer_get_start_iter(buffer, &start);
     gtk_text_buffer_get_end_iter(buffer, &end);
     return strlcpy(text, gtk_text_buffer_get_text(buffer, &start, &end, true), length);

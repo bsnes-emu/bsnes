@@ -1,5 +1,5 @@
 /*
-  bbase : version 0.13 ~byuu (2008-04-02)
+  bbase : version 0.14 ~byuu (2008-04-16)
   license: public domain
 */
 
@@ -99,36 +99,11 @@ static char *userpath(char *output) {
 #else
 static char *userpath(char *output) {
   strcpy(output, "."); //failsafe
-struct passwd *userinfo = getpwuid(getuid());
+  struct passwd *userinfo = getpwuid(getuid());
   if(userinfo) { strcpy(output, userinfo->pw_dir); }
   return output;
 }
 #endif
-
-/*****
- * template functions
- *****/
-
-template<typename T> inline void safe_free(T &handle) {
-  if(handle) {
-    free(handle);
-    handle = 0;
-  }
-}
-
-template<typename T> inline void safe_delete(T &handle) {
-  if(handle) {
-    delete handle;
-    handle = 0;
-  }
-}
-
-template<typename T> inline void safe_release(T &handle) {
-  if(handle) {
-    handle->Release();
-    handle = 0;
-  }
-}
 
 template<int min, int max, typename T> inline T minmax(const T x) {
   return (x < (T)min) ? (T)min : (x > (T)max) ? (T)max : x;
@@ -177,47 +152,47 @@ template<int min, int max, typename T> inline T minmax(const T x) {
  *****/
 
 //pseudo-random number generator
-static uint prng() {
-static uint n = 0;
+static unsigned prng() {
+  static unsigned n = 0;
   return n = (n >> 1) ^ (((n & 1) - 1) & 0xedb88320);
 }
 
-static uint64 fget(FILE *fp, uint length = 1) {
-uint64 data = 0;
-  for(uint i = 0; i < length; i++) {
+static uint64 fget(FILE *fp, unsigned length = 1) {
+  uint64 data = 0;
+  for(unsigned i = 0; i < length; i++) {
     data |= fgetc(fp) << (i << 3);
   }
   return data;
 }
 
-static void fput(FILE *fp, uint64 data, uint length = 1) {
-  for(uint i = 0; i < length; i++) {
+static void fput(FILE *fp, uint64 data, unsigned length = 1) {
+  for(unsigned i = 0; i < length; i++) {
     fputc(data >> (i << 3), fp);
   }
 }
 
 static bool fexists(const char *fn) {
-FILE *fp = fopen(fn, "rb");
-  if(!fp)return false;
+  FILE *fp = fopen(fn, "rb");
+  if(!fp) return false;
   fclose(fp);
   fp = 0;
   return true;
 }
 
-static uint32 fsize(FILE *fp) {
-  if(!fp)return 0;
-uint32 pos = ftell(fp);
+static unsigned fsize(FILE *fp) {
+  if(!fp) return 0;
+  unsigned pos = ftell(fp);
   fseek(fp, 0, SEEK_END);
-uint32 size = ftell(fp);
+  unsigned size = ftell(fp);
   fseek(fp, pos, SEEK_SET);
   return size;
 }
 
-static uint32 fsize(const char *fn) {
-FILE *fp = fopen(fn, "rb");
-  if(!fp)return 0;
+static unsigned fsize(const char *fn) {
+  FILE *fp = fopen(fn, "rb");
+  if(!fp) return 0;
   fseek(fp, 0, SEEK_END);
-uint32 size = ftell(fp);
+  unsigned size = ftell(fp);
   fclose(fp);
   fp = 0;
   return size;

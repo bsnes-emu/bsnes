@@ -71,15 +71,15 @@ void HQ2xFilter::render(
   uint32_t *out0 = output;
   uint32_t *out1 = output + outpitch;
 
-  #define W1 input[-1 - pitch]
-  #define W2 input[ 0 - pitch]
-  #define W3 input[+1 - pitch]
+  #define W1 input[-1 - (int)pitch]
+  #define W2 input[ 0 - (int)pitch]
+  #define W3 input[+1 - (int)pitch]
   #define W4 input[-1]
   #define W5 input[ 0]
   #define W6 input[+1]
-  #define W7 input[-1 + pitch]
-  #define W8 input[ 0 + pitch]
-  #define W9 input[+1 + pitch]
+  #define W7 input[-1 + (int)pitch]
+  #define W8 input[ 0 + (int)pitch]
+  #define W9 input[+1 + (int)pitch]
 
   input += pitch;
   memset(out0, 0, 2048); out0 += outpitch << 1;

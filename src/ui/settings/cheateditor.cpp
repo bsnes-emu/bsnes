@@ -1,20 +1,21 @@
 void CheatEditorWindow::setup() {
   create(0, 475, 355);
 
-  list.create(Listbox::Header | Listbox::VerticalScrollAlways, 475, 285, "Status\tCode\tDescription");
-  add_code.create   (0, 155, 30, "Add Code");
-  toggle_code.create(0, 155, 30, "Toggle Status");
-  delete_code.create(0, 155, 30, "Delete Code");
-  code.create(0, 155, 30, "<code>");
-  desc.create(0, 315, 30, "<description>");
+  list.create(Listbox::Header | Listbox::VerticalScrollAlways, 475, 295,
+    string() << translate["Status"] << "\t" << translate["Code"] << "\t" << translate["Description"]);
+  add_code.create   (0, 155, 25, translate["Add Code"]);
+  toggle_code.create(0, 155, 25, translate["Toggle Status"]);
+  delete_code.create(0, 155, 25, translate["Delete Code"]);
+  code.create(0, 155, 25, translate["<code>"]);
+  desc.create(0, 315, 25, translate["<description>"]);
 
   unsigned y = 0;
-  attach(list,          0, y); y += 285 + 5;
+  attach(list,          0, y); y += 295 + 5;
   attach(add_code,      0, y);
   attach(toggle_code, 160, y);
-  attach(delete_code, 320, y); y += 30 + 5;
+  attach(delete_code, 320, y); y += 25 + 5;
   attach(code,          0, y);
-  attach(desc,        160, y); y += 30 + 5;
+  attach(desc,        160, y); y += 25 + 5;
 
   list.on_activate = bind(&CheatEditorWindow::toggle_event, this);
   add_code.on_tick = bind(&CheatEditorWindow::add_tick, this);
@@ -27,14 +28,14 @@ void CheatEditorWindow::setup() {
 void CheatEditorWindow::refresh() {
   list.reset();
 
-  for(uint i = 0; i < cheat.count(); i++) {
+  for(unsigned i = 0; i < cheat.count(); i++) {
     bool enabled;
     uint32 addr;
     uint8 data;
     char s_code[256], s_desc[256];
     cheat.get(i, enabled, addr, data, s_code, s_desc);
     list.add_item(string()
-      << (enabled ? "Enabled" : "Disabled") << "\t"
+      << (enabled ? translate["Enabled"] : translate["Disabled"]) << "\t"
       << s_code << "\t"
       << s_desc);
   }
@@ -60,7 +61,7 @@ uintptr_t CheatEditorWindow::toggle_event(Event) {
     char s_code[256], s_desc[256];
     cheat.get(index, enabled, addr, data, s_code, s_desc);
     list.set_item(index, string()
-      << (enabled ? "Enabled" : "Disabled") << "\t"
+      << (enabled ? translate["Enabled"] : translate["Disabled"]) << "\t"
       << s_code << "\t"
       << s_desc);
   }

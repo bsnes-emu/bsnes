@@ -36,7 +36,6 @@ public:
       MenuRadioItem menu_settings_videofilter_swntsc;
     MenuGroup menu_settings_videoframeskip;
       MenuRadioItem menu_settings_videoframeskip_0;
-      MenuSeparator menu_settings_videoframeskip_sep1;
       MenuRadioItem menu_settings_videoframeskip_1;
       MenuRadioItem menu_settings_videoframeskip_2;
       MenuRadioItem menu_settings_videoframeskip_3;
@@ -49,14 +48,13 @@ public:
     MenuSeparator menu_settings_sep1;
     MenuCheckItem menu_settings_mute;
     MenuSeparator menu_settings_sep2;
-    MenuGroup menu_settings_speedreg;
-      MenuRadioItem menu_settings_speedreg_disabled;
-      MenuSeparator menu_settings_speedreg_sep1;
-      MenuRadioItem menu_settings_speedreg_slowest;
-      MenuRadioItem menu_settings_speedreg_slow;
-      MenuRadioItem menu_settings_speedreg_normal;
-      MenuRadioItem menu_settings_speedreg_fast;
-      MenuRadioItem menu_settings_speedreg_fastest;
+    MenuGroup menu_settings_emuspeed;
+      MenuRadioItem menu_settings_emuspeed_slowest;
+      MenuRadioItem menu_settings_emuspeed_slow;
+      MenuRadioItem menu_settings_emuspeed_normal;
+      MenuRadioItem menu_settings_emuspeed_fast;
+      MenuRadioItem menu_settings_emuspeed_fastest;
+      MenuRadioItem menu_settings_emuspeed_disabled;
     MenuSeparator menu_settings_sep3;
     MenuItem menu_settings_config;
 
@@ -68,11 +66,10 @@ public:
 
   Canvas view;
 
-  bool locked;
-
   bool input_ready();
   void setup();
-  void update_menu_settings();
+  void sync();
+
   uintptr_t close(Event);
   uintptr_t event(Event);
   uintptr_t block(Event);

@@ -51,33 +51,33 @@ uintptr_t BSXLoaderWindow::cancel_tick(Event) {
 }
 
 void BSXLoaderWindow::setup() {
-  create(Window::AutoCenter, 640, 150, "Load BS-X Cartridge");
+  create(Window::AutoCenter, 565, 131, translate["Load BS-X Cartridge"]);
   set_icon(48, 48, (uint32_t*)resource::icon48);
 
-  lbase.create(0, 630, 20, "Base cartridge:");
-  tbase.create(0, 420, 30);
-  bbase.create(0, 100, 30, "Browse ...");
-  cbase.create(0, 100, 30, "Clear");
+  lbase.create(0, 555, 18, translate["Base cartridge:"]);
+  tbase.create(0, 345, 25);
+  bbase.create(0, 100, 25, translate["Browse ..."]);
+  cbase.create(0, 100, 25, translate["Clear"]);
 
-  lslot.create(0, 630, 20, "Slot cartridge:");
-  tslot.create(0, 420, 30);
-  bslot.create(0, 100, 30, "Browse ...");
-  cslot.create(0, 100, 30, "Clear");
+  lslot.create(0, 555, 18, translate["Slot cartridge:"]);
+  tslot.create(0, 345, 25);
+  bslot.create(0, 100, 25, translate["Browse ..."]);
+  cslot.create(0, 100, 25, translate["Clear"]);
 
-  load.create  (0, 312, 30, "Load");
-  cancel.create(0, 312, 30, "Cancel");
+  load.create  (0, 275, 25, translate["Load"]);
+  cancel.create(0, 275, 25, translate["Cancel"]);
 
-uint y = 5;
-  attach(lbase,    5, y); y += 20;
+  unsigned y = 5;
+  attach(lbase,    5, y); y += 18;
   attach(tbase,    5, y);
-  attach(bbase,  430, y);
-  attach(cbase,  535, y); y += 30 + 5;
-  attach(lslot,    5, y); y += 20;
+  attach(bbase,  355, y);
+  attach(cbase,  460, y); y += 25 + 5;
+  attach(lslot,    5, y); y += 18;
   attach(tslot,    5, y);
-  attach(bslot,  430, y);
-  attach(cslot,  535, y); y += 30 + 5;
+  attach(bslot,  355, y);
+  attach(cslot,  460, y); y += 25 + 5;
   attach(load,     5, y);
-  attach(cancel, 323, y); y += 30 + 5;
+  attach(cancel, 285, y); y += 25 + 5;
 
   on_close       = bind(&BSXLoaderWindow::close, this);
   bbase.on_tick  = bind(&BSXLoaderWindow::bbase_tick, this);

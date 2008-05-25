@@ -65,32 +65,57 @@ void dprintf(uint source, const char *s, ...) {
   fprintf(stdout, "[%d]: %s\r\n", source, str);
 }
 
-void set_config_filename() {
-  userpath(config::filename);
-  strcat(config::filename, "/.bsnes");
-  mkdir(config::filename); //always make directory in case it does not exist, fail silently if it does
-  strcat(config::filename, "/bsnes.cfg");
-}
+void get_paths(const char *image) {
+  char temp[PATH_MAX] = "";
+  realpath(image, temp);
 
-void get_base_path(const char *image) {
-  char full_name[PATH_MAX] = "";
-  realpath(image, full_name);
-
-  string t = full_name;
-  if(strlen(t) != 0) {
+  if(strlen(temp) != 0) {
+    for(int i = strlen(temp) - 1; i >= 0; i--) {
+      if(temp[i] == '\\') temp[i] = '/';
+    }
     //remove program name
-    //TODO: rewrite this to be cleaner ...
-    replace(t, "\\", "/");
-    for(int i = strlen(t) - 1; i >= 0; i--) {
-      if(t()[i] == '/' || t()[i] == '\\') {
-        t()[i] = 0;
+    for(int i = strlen(temp) - 1; i >= 0; i--) {
+      if(temp[i] == '/') {
+        temp[i] = 0;
         break;
       }
     }
   }
 
-  if(strend(t, "/") == false) strcat(t, "/");
-  config::path.base = t;
+  if(strend(temp, "/") == false) strcat(temp, "/");
+  config::path.base = temp;
+
+  userpath(temp);
+  if(strend(temp, "/") == false) strcat(temp, "/");
+  config::path.user = temp;
+}
+
+void set_config_filenames() {
+  char filename[PATH_MAX];
+
+  //locate bsnes.cfg
+  strcpy(filename, config::path.base);
+  strcat(filename, "bsnes.cfg");
+  if(!fexists(filename)) {
+    strcpy(filename, config::path.user);
+    strcat(filename, ".bsnes");
+    mkdir(filename);
+    strcat(filename, "/bsnes.cfg");
+  }
+  strcpy(config::bsnes_cfg, filename);
+  fprintf(stdout, "Config file: %s\n", config::bsnes_cfg);
+
+  //locate locale.cfg
+  strcpy(filename, config::path.base);
+  strcat(filename, "locale.cfg");
+  if(!fexists(filename)) {
+    strcpy(filename, config::path.user);
+    strcat(filename, ".bsnes");
+    mkdir(filename);
+    strcat(filename, "/locale.cfg");
+  }
+  strcpy(config::locale_cfg, filename);
+  fprintf(stdout, "Locale file: %s\n", config::locale_cfg);
 }
 
 void run() {
@@ -128,29 +153,34 @@ int main(int argc, char *argv[]) {
 #endif
 /*
 int main(int argc, char *argv[]) { */
-  set_config_filename();
-  get_base_path(argv[0]);
+  get_paths(argv[0]);
+  set_config_filenames();
 
-  config::config().load(config::filename);
-  if(fexists(config::filename) == false) {
+  config::config().load(config::bsnes_cfg);
+  if(fexists(config::bsnes_cfg) == false) {
     //in case program crashes on first run, save config file
     //settings, so that they can be modified by hand ...
-    config::config().save(config::filename);
+    config::config().save(config::bsnes_cfg);
   }
+  translate.import(config::locale_cfg);
+
   hiro().init();
   ui_init();
   snes.init();
 
-  if(argc >= 2) {
+  if(argc >= 2 && fexists(argv[1])) {
     cartridge.load_cart_normal(argv[1]);
     snes.power();
+    window_main.menu_file_unload.enable();
+    window_main.menu_file_reset.enable();
+    window_main.menu_file_power.enable();
   }
 
   while(app.term == false) run();
 
   event::unload_rom();
 
-  config::config().save(config::filename);
+  config::config().save(config::bsnes_cfg);
   snes.term();
   ui_term();
   hiro().term();

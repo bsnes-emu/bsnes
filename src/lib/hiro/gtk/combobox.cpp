@@ -4,6 +4,7 @@ void hiro_pcombobox_change(pCombobox *p) {
 
 void pCombobox::create(uint style, uint width, uint height, const char *text) {
   combobox = gtk_combo_box_new_text();
+  set_default_font(combobox);
   gtk_widget_set_size_request(combobox, width, height);
   gtk_widget_show(combobox);
 

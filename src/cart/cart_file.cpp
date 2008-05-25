@@ -158,8 +158,8 @@ bool Cartridge::apply_patch(const uint8_t *pdata, const unsigned psize, uint8_t 
   }
 
   if(apply == true) {
-    free(data);
-    data = (uint8_t*)malloc(size = outsize);
+    delete[] data;
+    data = new uint8_t[size = outsize];
     memcpy(data, outdata, outsize);
   } else {
     dprintf("* Warning: patch application failed!");
@@ -169,9 +169,10 @@ bool Cartridge::apply_patch(const uint8_t *pdata, const unsigned psize, uint8_t 
 }
 
 bool Cartridge::save_file(const char *fn, uint8 *data, uint size) {
-  FileWriter ff(fn);
-  if(!ff.ready())return false;
-  ff.write(data, size);
+  FILE *fp = fopen(fn, "wb");
+  if(!fp) return false;
+  fwrite(data, 1, size, fp);
+  fclose(fp);
   return true;
 }
 

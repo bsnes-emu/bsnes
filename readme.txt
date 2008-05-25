@@ -1,5 +1,5 @@
 bsnes
-Version: 0.031
+Version: 0.032
 Author: byuu
 
 --------
@@ -12,6 +12,29 @@ The latest version can be downloaded from:
 http://byuu.org/
 
 Please see license.txt for important licensing information.
+
+--------------
+Configuration:
+--------------
+bsnes has two configuration files: bsnes.cfg, for program settings; and
+locale.cfg, for localization.
+
+For each file, bsnes will start by looking inside the same folder where the
+bsnes executable is located. If said file is not found, it will then check your
+user profile folder. On Windows, this is located at "%APPDATA%/.bsnes". On all
+other operating systems, this is located at "~/.bsnes". If said file is still
+not found, it will automatically be created in your user profile folder.
+
+If you wish to use bsnes in single-user mode, be sure that both files exist
+inside the same folder as the bsnes executable. If they do not, you can simply
+create new blank files and bsnes will use them in the future.
+
+If you wish to use bsnes in multi-user mode, simply delete these two files from
+the bsnes executable directory if they exist.
+
+If you wish to have multiple configuration profiles for the same user, you will
+need to make copies of the bsnes executable, and use each one in single-user
+mode.
 
 ------------------
 Known Limitations:
@@ -60,10 +83,10 @@ Coprocessor used only by the following games:
 - Super Power League 4
 
 ST-011
-SETA DSP used only by Quick-move Shogi Match with Nidan Rank-holder Morita
+SETA DSP used by Quick-move Shogi Match with Nidan Rank-holder Morita
 
 ST-018
-SETA RISC CPU used only by Quick-move Shogi Match with Nidan Rank-holder Morita 2
+SETA RISC CPU used by Quick-move Shogi Match with Nidan Rank-holder Morita 2
 
 Super Gameboy
 Cartridge passthrough used for playing Gameboy games

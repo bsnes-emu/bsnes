@@ -1,5 +1,5 @@
 void pProgressbar::create(uint style, uint width, uint height) {
-  hwnd = CreateWindow(PROGRESS_CLASS, "", WS_CHILD | WS_VISIBLE | PBS_SMOOTH,
+  hwnd = CreateWindow(PROGRESS_CLASS, L"", WS_CHILD | WS_VISIBLE | PBS_SMOOTH,
     0, 0, width, height,
     phiro().default_hwnd, (HMENU)instance, GetModuleHandle(0), 0);
   SendMessage(hwnd, PBM_SETRANGE, 0, MAKELPARAM(0, 100));

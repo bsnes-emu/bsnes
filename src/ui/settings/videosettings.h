@@ -1,4 +1,4 @@
-class RasterSettingsWindow : public Window {
+class VideoSettingsWindow : public Window {
 public:
   Label  lcontrast;
   Label  lbrightness;
@@ -29,5 +29,5 @@ public:
   uintptr_t optimal_tick(Event);
   uintptr_t standard_tick(Event);
 
-  RasterSettingsWindow();
-} window_raster_settings;
+  VideoSettingsWindow();
+} window_video_settings;

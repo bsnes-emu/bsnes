@@ -8,7 +8,7 @@
 #include "loader/stloader.cpp"
 
 #include "settings/settings.cpp"
-#include "settings/rastersettings.cpp"
+#include "settings/videosettings.cpp"
 #include "settings/inputconfig.cpp"
 #include "settings/pathsettings.cpp"
 #include "settings/cheateditor.cpp"
@@ -25,7 +25,7 @@ void ui_init() {
   window_bsxloader.setup();
   window_stloader.setup();
 
-  window_raster_settings.setup();
+  window_video_settings.setup();
   window_input_config.setup();
   window_path_settings.setup();
   window_cheat_editor.setup();
@@ -44,7 +44,7 @@ void ui_init() {
   video.set(Video::Handle, window_main.view.handle());
   video.set(Video::Synchronize, false);
   audio.set(Audio::Handle, window_main.handle());
-  audio.set(Audio::Synchronize, config::system.speed_regulation != 0);
+  audio.set(Audio::Synchronize, config::system.emulation_speed != 0);
   audio.set(Audio::Frequency, 32000);
   input.set(Input::Handle, window_main.handle());
 

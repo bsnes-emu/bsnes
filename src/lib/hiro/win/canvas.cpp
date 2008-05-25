@@ -1,5 +1,5 @@
 void pCanvas::create(uint style, uint width, uint height) {
-  hwnd = CreateWindow("hiro_window", "", WS_CHILD,
+  hwnd = CreateWindow(L"hiro_window", L"", WS_CHILD,
     0, 0, width, height,
     phiro().default_hwnd, (HMENU)instance, GetModuleHandle(0), 0);
   SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)this);

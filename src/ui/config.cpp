@@ -1,10 +1,11 @@
 namespace config {
 
-char filename[PATH_MAX + 16] = "bsnes.cfg";
+char bsnes_cfg[PATH_MAX] = "";
+char locale_cfg[PATH_MAX] = "";
 
 struct System {
   static string_setting video, audio, input;
-  static integral_setting speed_regulation;
+  static integral_setting emulation_speed;
   static integral_setting gamma_ramp, sepia, grayscale, invert, contrast, brightness, gamma;
 } system;
 
@@ -12,15 +13,15 @@ string_setting System::video(config(), "system.video", "Video hardware interface
 string_setting System::audio(config(), "system.audio", "Audio hardware interface", "");
 string_setting System::input(config(), "system.input", "Input hardware interface", "");
 
-integral_setting System::speed_regulation(config(), "system.speed_regulation",
-  "Speed regulation setting\n"
-  "0 = Disabled\n"
-  "1 = Slowest\n"
-  "2 = Slow\n"
-  "3 = Normal\n"
-  "4 = Fast\n"
-  "5 = Fastest",
-  integral_setting::decimal, 3);
+integral_setting System::emulation_speed(config(), "system.emulation_speed",
+  "Relative speed of emulator compared to SNES hardware\n"
+  "0 = 50%\n"
+  "1 = 75%\n"
+  "2 = 100%\n"
+  "3 = 150%\n"
+  "4 = 200%\n"
+  "5 = Uncapped",
+  integral_setting::decimal, 2);
 
 integral_setting System::gamma_ramp(config(), "system.colorfilter.gamma_ramp",
   "Use precalculated TV-style gamma ramp", integral_setting::boolean, true);
@@ -118,6 +119,11 @@ struct Input {
     static string_setting pause;
     static string_setting reset;
     static string_setting power;
+    static string_setting quit;
+    static string_setting speed_decrease;
+    static string_setting speed_increase;
+    static string_setting frameskip_decrease;
+    static string_setting frameskip_increase;
     static string_setting toggle_fullscreen;
     static string_setting toggle_menubar;
     static string_setting toggle_statusbar;
@@ -164,13 +170,18 @@ string_setting Input::Joypad2::r     (config(), "input.joypad2.r",      "", "l")
 string_setting Input::Joypad2::select(config(), "input.joypad2.select", "", "lbracket");
 string_setting Input::Joypad2::start (config(), "input.joypad2.start",  "", "rbracket");
 
-string_setting Input::GUI::load             (config(), "input.gui.load",              "", "none");
-string_setting Input::GUI::pause            (config(), "input.gui.pause",             "", "f12");
-string_setting Input::GUI::reset            (config(), "input.gui.reset",             "", "none");
-string_setting Input::GUI::power            (config(), "input.gui.power",             "", "none");
-string_setting Input::GUI::toggle_fullscreen(config(), "input.gui.toggle_fullscreen", "", "f11");
-string_setting Input::GUI::toggle_menubar   (config(), "input.gui.toggle_menubar",    "", "escape");
-string_setting Input::GUI::toggle_statusbar (config(), "input.gui.toggle_statusbar",  "", "escape");
+string_setting Input::GUI::load              (config(), "input.gui.load",               "", "none");
+string_setting Input::GUI::pause             (config(), "input.gui.pause",              "", "f12");
+string_setting Input::GUI::reset             (config(), "input.gui.reset",              "", "none");
+string_setting Input::GUI::power             (config(), "input.gui.power",              "", "none");
+string_setting Input::GUI::quit              (config(), "input.gui.quit",               "", "none");
+string_setting Input::GUI::speed_decrease    (config(), "input.gui.speed_decrease",     "", "divide");
+string_setting Input::GUI::speed_increase    (config(), "input.gui.speed_increase",     "", "multiply");
+string_setting Input::GUI::frameskip_decrease(config(), "input.gui.frameskip_decrease", "", "subtract");
+string_setting Input::GUI::frameskip_increase(config(), "input.gui.frameskip_increase", "", "add");
+string_setting Input::GUI::toggle_fullscreen (config(), "input.gui.toggle_fullscreen",  "", "f11");
+string_setting Input::GUI::toggle_menubar    (config(), "input.gui.toggle_menubar",     "", "escape");
+string_setting Input::GUI::toggle_statusbar  (config(), "input.gui.toggle_statusbar",   "", "escape");
 
 struct Misc {
   static integral_setting opacity;
@@ -187,4 +198,11 @@ string_setting Misc::status_text(config(), "misc.status_text",
   "%f = executed frames per second\n"
   "%m = maximum frames per second"
   "", "%n : %f / %m");
-};
+
+struct Advanced {
+  static integral_setting enable;
+} advanced;
+
+integral_setting Advanced::enable(config(), "advanced.enable", "Enable advanced, developer-oriented UI options", integral_setting::boolean, false);
+
+} //namespace config

@@ -8,22 +8,22 @@ void hiro_plistbox_activate(pListbox *p) {
 }
 
 void pListbox::create(uint style, uint width, uint height, const char *columns, const char *text) {
-bool header = style & Listbox::Header;
-GtkPolicyType hscroll = (style & Listbox::HorizontalScrollAlways) ? GTK_POLICY_ALWAYS :
-                        (style & Listbox::HorizontalScrollNever) ? GTK_POLICY_NEVER :
-                        GTK_POLICY_AUTOMATIC;
-GtkPolicyType vscroll = (style & Listbox::VerticalScrollAlways) ? GTK_POLICY_ALWAYS :
-                        (style & Listbox::VerticalScrollNever) ? GTK_POLICY_NEVER :
-                        GTK_POLICY_AUTOMATIC;
+  bool header = style & Listbox::Header;
+  GtkPolicyType hscroll = (style & Listbox::HorizontalScrollAlways) ? GTK_POLICY_ALWAYS :
+                          (style & Listbox::HorizontalScrollNever) ? GTK_POLICY_NEVER :
+                          GTK_POLICY_AUTOMATIC;
+  GtkPolicyType vscroll = (style & Listbox::VerticalScrollAlways) ? GTK_POLICY_ALWAYS :
+                          (style & Listbox::VerticalScrollNever) ? GTK_POLICY_NEVER :
+                          GTK_POLICY_AUTOMATIC;
 
   scrollbox = gtk_scrolled_window_new(0, 0);
   gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrollbox), hscroll, vscroll);
   gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(scrollbox), GTK_SHADOW_ETCHED_IN);
 
-lstring list;
+  lstring list;
   split(list, "\t", columns);
 
-GType *v = (GType*)malloc(count(list) * sizeof(GType));
+  GType *v = (GType*)malloc(count(list) * sizeof(GType));
   for(uint i = 0; i < count(list); i++) v[i] = G_TYPE_STRING;
   store = gtk_list_store_newv(count(list), v);
   free(v);
@@ -35,7 +35,7 @@ GType *v = (GType*)malloc(count(list) * sizeof(GType));
   gtk_widget_show(listbox);
   gtk_widget_show(scrollbox);
 
-//alternate colors for each listbox entry if there are multiple columns ...
+  //alternate colors for each listbox entry if there are multiple columns ...
   gtk_tree_view_set_rules_hint(GTK_TREE_VIEW(listbox), count(list) >= 2 ? true : false);
   for(uint i = 0; i < count(list); i++) {
     renderer = gtk_cell_renderer_text_new();
@@ -54,6 +54,8 @@ GType *v = (GType*)malloc(count(list) * sizeof(GType));
 
   g_signal_connect_swapped(G_OBJECT(listbox), "cursor-changed", G_CALLBACK(hiro_plistbox_change), (gpointer)this);
   g_signal_connect_swapped(G_OBJECT(listbox), "row-activated", G_CALLBACK(hiro_plistbox_activate), (gpointer)this);
+
+  set_default_font(listbox);
 }
 
 void pListbox::autosize_columns() {

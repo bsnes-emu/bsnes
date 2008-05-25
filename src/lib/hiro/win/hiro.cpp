@@ -8,6 +8,7 @@ namespace libhiro {
 
 LRESULT CALLBACK phiro_wndproc(HWND, UINT, WPARAM, LPARAM);
 
+#include "utf.cpp"
 #include "keymap.cpp"
 #include "widget.cpp"
   #include "window.cpp"
@@ -43,14 +44,14 @@ void pHiro::init() {
   wc.hIcon = LoadIcon(0, IDI_APPLICATION);
   wc.hInstance = GetModuleHandle(0);
   wc.lpfnWndProc = phiro_wndproc;
-  wc.lpszClassName = "hiro_window";
+  wc.lpszClassName = L"hiro_window";
   wc.lpszMenuName = 0;
   wc.style = CS_HREDRAW | CS_VREDRAW;
   RegisterClass(&wc);
 
   InitCommonControls();
-  default_hwnd = CreateWindow("hiro_window", "", WS_POPUP, 0, 0, 640, 480, 0, 0, GetModuleHandle(0), 0);
-  default_font = create_font("Tahoma", 9);
+  default_hwnd = CreateWindow(L"hiro_window", L"", WS_POPUP, 0, 0, 640, 480, 0, 0, GetModuleHandle(0), 0);
+  default_font = create_font("Tahoma", 8);
   black_brush = CreateSolidBrush(RGB(0, 0, 0));
 }
 
@@ -76,12 +77,13 @@ bool pHiro::pending() {
 }
 
 bool pHiro::folder_select(Window *focus, char *filename, const char *path) {
+  wchar_t wfilename[_MAX_PATH] = L"";
   strcpy(filename, "");
   BROWSEINFO bi;
   bi.hwndOwner = focus ? focus->p.hwnd : 0;
   bi.pidlRoot = NULL;
-  bi.pszDisplayName = filename;
-  bi.lpszTitle = "Select Folder";
+  bi.pszDisplayName = wfilename;
+  bi.lpszTitle = L"";
   bi.ulFlags = BIF_NEWDIALOGSTYLE | BIF_RETURNONLYFSDIRS;
   bi.lpfn = NULL;
   bi.lParam = 0;
@@ -89,7 +91,7 @@ bool pHiro::folder_select(Window *focus, char *filename, const char *path) {
   bool result = false;
   LPITEMIDLIST pidl = SHBrowseForFolder(&bi);
   if(pidl) {
-    if(SHGetPathFromIDList(pidl, filename)) {
+    if(SHGetPathFromIDList(pidl, wfilename)) {
       result = true;
       IMalloc *imalloc = 0;
       if(SUCCEEDED(SHGetMalloc(&imalloc))) {
@@ -98,6 +100,7 @@ bool pHiro::folder_select(Window *focus, char *filename, const char *path) {
       }
     }
   }
+  strcpy(filename, utf8(wfilename));
   return result;
 }
 
@@ -127,19 +130,25 @@ bool pHiro::file_open(Window *focus, char *filename, const char *path, const cha
     if(pf[i] == '|') pf[i] = '\0';
   }
 
+  utf16 wpf(pf);
+  utf16 wdir(dir);
+  wchar_t wfilename[_MAX_PATH] = L"";
+
   OPENFILENAME ofn;
   strcpy(filename, "");
   memset(&ofn, 0, sizeof(ofn));
   ofn.lStructSize     = sizeof(ofn);
   ofn.hwndOwner       = focus ? focus->p.hwnd : 0;
-  ofn.lpstrFilter     = pf;
-  ofn.lpstrInitialDir = dir;
-  ofn.lpstrFile       = filename;
+  ofn.lpstrFilter     = wpf;
+  ofn.lpstrInitialDir = wdir;
+  ofn.lpstrFile       = wfilename;
   ofn.nMaxFile        = MAX_PATH;
   ofn.Flags           = OFN_EXPLORER | OFN_FILEMUSTEXIST;
-  ofn.lpstrDefExt     = "";
+  ofn.lpstrDefExt     = L"";
 
-  return GetOpenFileName(&ofn);
+  bool result = GetOpenFileName(&ofn);
+  strcpy(filename, utf8(wfilename));
+  return result;
 }
 
 bool pHiro::file_save(Window *focus, char *filename, const char *path, const char *filter) {
@@ -168,19 +177,25 @@ bool pHiro::file_save(Window *focus, char *filename, const char *path, const cha
     if(pf[i] == '|') pf[i] = '\0';
   }
 
+  utf16 wpf(pf);
+  utf16 wdir(dir);
+  wchar_t wfilename[_MAX_PATH] = L"";
+
   OPENFILENAME ofn;
   strcpy(filename, "");
   memset(&ofn, 0, sizeof(ofn));
   ofn.lStructSize     = sizeof(ofn);
   ofn.hwndOwner       = focus ? focus->p.hwnd : 0;
-  ofn.lpstrFilter     = pf;
-  ofn.lpstrInitialDir = dir;
-  ofn.lpstrFile       = filename;
+  ofn.lpstrFilter     = wpf;
+  ofn.lpstrInitialDir = wdir;
+  ofn.lpstrFile       = wfilename;
   ofn.nMaxFile        = MAX_PATH;
   ofn.Flags           = OFN_EXPLORER | OFN_FILEMUSTEXIST;
-  ofn.lpstrDefExt     = "";
+  ofn.lpstrDefExt     = L"";
 
-  return GetSaveFileName(&ofn);
+  bool result = GetSaveFileName(&ofn);
+  strcpy(filename, utf8(wfilename));
+  return result;
 }
 
 uint pHiro::screen_width() {
@@ -214,11 +229,11 @@ pHiro& phiro() {
 /* internal */
 
 HFONT pHiro::create_font(const char *name, uint size) {
-  HDC hdc = GetDC(0);
-  HFONT font = CreateFont(-MulDiv(size, GetDeviceCaps(hdc, LOGPIXELSY), 72),
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, name);
-  ReleaseDC(0, hdc);
-  return font;
+  return CreateFont(
+    -(size * 96.0 / 72.0 + 0.5), //96 = DPI
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    utf16(name)
+  );
 }
 
 Widget* pHiro::get_widget(uint instance) {
@@ -256,38 +271,38 @@ LRESULT pHiro::wndproc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
 
     case WM_CLOSE: {
       if(!p || p->self.type != Widget::WindowType) break;
-    Window &w = ((pWindow*)p)->self;
+      Window &w = ((pWindow*)p)->self;
       if(w.on_close) return (bool)w.on_close(Event(Event::Close, 0, &w));
       return TRUE; //true = destroy window
     } break;
 
     case WM_ENTERMENULOOP: {
       if(!p || p->self.type != Widget::WindowType) break;
-    Window &w = ((pWindow*)p)->self;
+      Window &w = ((pWindow*)p)->self;
       if(w.on_block) w.on_block(Event(Event::Block, 0, &w));
     } break;
 
     case WM_KEYDOWN: {
       if(!p || p->self.type != Widget::WindowType) break;
-    Window &w = ((pWindow*)p)->self;
+      Window &w = ((pWindow*)p)->self;
       if(w.on_keydown) w.on_keydown(Event(Event::KeyDown, translate_key(wparam), &w));
     } break;
 
     case WM_KEYUP: {
       if(!p || p->self.type != Widget::WindowType) break;
-    Window &w = ((pWindow*)p)->self;
+      Window &w = ((pWindow*)p)->self;
       if(w.on_keyup) w.on_keyup(Event(Event::KeyUp, translate_key(wparam), &w));
     } break;
 
     case WM_ERASEBKGND: {
       if(!p) break;
-    HBRUSH brush = 0;
+      HBRUSH brush = 0;
       if(p->self.type == Widget::WindowType) brush = ((pWindow*)p)->background;
       if(p->self.type == Widget::CanvasType) brush = phiro().black_brush;
       if(!brush) break;
-    RECT rc;
+      RECT rc;
       GetClientRect(hwnd, &rc);
-    PAINTSTRUCT ps;
+      PAINTSTRUCT ps;
       BeginPaint(hwnd, &ps);
       FillRect(ps.hdc, &rc, brush);
       EndPaint(hwnd, &ps);
@@ -299,36 +314,42 @@ LRESULT pHiro::wndproc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
     } break;
 
     case WM_COMMAND: {
-    Widget *widget = get_widget(LOWORD(wparam));
+      Widget *widget = get_widget(LOWORD(wparam));
       if(!widget) break;
 
       switch(widget->type) {
         case Widget::MenuItemType: {
-        MenuItem &w = (MenuItem&)*widget;
+          MenuItem &w = (MenuItem&)*widget;
           if(w.on_tick) w.on_tick(Event(Event::Tick, 0, &w));
         } break;
         case Widget::MenuCheckItemType: {
-        MenuCheckItem &w = (MenuCheckItem&)*widget;
+          MenuCheckItem &w = (MenuCheckItem&)*widget;
           w.check(!w.checked()); //invert check state
+          if(w.on_tick) w.on_tick(Event(Event::Tick, w.checked(), &w));
         } break;
         case Widget::MenuRadioItemType: {
-        MenuRadioItem &w = (MenuRadioItem&)*widget;
+          MenuRadioItem &w = (MenuRadioItem&)*widget;
+          bool checked = w.checked();
           w.check();
+          if(!checked && w.on_tick) w.on_tick(Event(Event::Tick, w.checked(), &w));
         } break;
         case Widget::ButtonType: {
-        Button &w = (Button&)*widget;
+          Button &w = (Button&)*widget;
           if(w.on_tick) w.on_tick(Event(Event::Tick, 0, &w));
         } break;
         case Widget::CheckboxType: {
-        Checkbox &w = (Checkbox&)*widget;
+          Checkbox &w = (Checkbox&)*widget;
           w.check(!w.checked()); //invert check state
+          if(w.on_tick) w.on_tick(Event(Event::Tick, w.checked(), &w));
         } break;
         case Widget::RadioboxType: {
-        Radiobox &w = (Radiobox&)*widget;
+          Radiobox &w = (Radiobox&)*widget;
+          bool checked = w.checked();
           w.check();
+          if(!checked && w.on_tick) w.on_tick(Event(Event::Tick, w.checked(), &w));
         } break;
         case Widget::ComboboxType: {
-        Combobox &combobox = (Combobox&)*widget;
+          Combobox &combobox = (Combobox&)*widget;
           if(HIWORD(wparam) == CBN_SELCHANGE) {
             if(combobox.p.combobox_selection == combobox.get_selection()) break;
             if(combobox.on_change) combobox.on_change(Event(Event::Change, combobox.p.combobox_selection = combobox.get_selection(), &combobox));
@@ -339,12 +360,12 @@ LRESULT pHiro::wndproc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
 
     case WM_HSCROLL:
     case WM_VSCROLL: {
-    Widget *widget = get_widget(GetDlgCtrlID((HWND)lparam));
+      Widget *widget = get_widget(GetDlgCtrlID((HWND)lparam));
       if(!widget) break;
 
       switch(widget->type) {
         case Widget::SliderType: {
-        Slider &slider = (Slider&)*widget;
+          Slider &slider = (Slider&)*widget;
           if(slider.p.slider_position == slider.get_position()) break;
           if(slider.on_change) slider.on_change(Event(Event::Change, slider.p.slider_position = slider.get_position(), &slider));
         } break;
@@ -352,12 +373,12 @@ LRESULT pHiro::wndproc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
     } break;
 
     case WM_NOTIFY: {
-    Widget *widget = get_widget(LOWORD(wparam));
+      Widget *widget = get_widget(LOWORD(wparam));
       if(!widget) break;
 
       switch(widget->type) {
         case Widget::ListboxType: {
-        Listbox &listbox = (Listbox&)*widget;
+          Listbox &listbox = (Listbox&)*widget;
           if(((LPNMHDR)lparam)->code == LVN_ITEMCHANGED
             && ((LPNMLISTVIEW)lparam)->uChanged & LVIF_STATE
             && ListView_GetItemState(listbox.p.hwnd, ((LPNMLISTVIEW)lparam)->iItem, LVIS_FOCUSED)

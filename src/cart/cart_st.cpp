@@ -15,51 +15,51 @@ void Cartridge::load_cart_st(const char *base, const char *slotA, const char *sl
   uint8_t *data = 0;
   unsigned size;
   if(load_file(cart.fn, data, size, CompressionAuto) == true) {
-    cart.rom = (uint8*)malloc(cart.rom_size = 0x040000);
+    cart.rom = new(zeromemory) uint8_t[cart.rom_size = 0x040000];
     memcpy(cart.rom, data, min(size, cart.rom_size));
-    safe_free(data);
+    delete[] data;
     if(load_file(get_patch_filename(cart.fn, "ups"), data, size, CompressionInspect) == true) {
       apply_patch(data, size, cart.rom, cart.rom_size);
-      if(data) { free(data); data = 0; }
+      delete[] data;
     }
   }
 
   if(*stA.fn) {
     if(load_file(stA.fn, data, size, CompressionAuto) == true) {
-      stA.rom = (uint8*)malloc(stA.rom_size = 0x100000);
+      stA.rom = new(zeromemory) uint8_t[stA.rom_size = 0x100000];
       memcpy(stA.rom, data, min(size, stA.rom_size));
-      safe_free(data);
+      delete[] data;
       if(load_file(get_patch_filename(stA.fn, "ups"), data, size, CompressionInspect) == true) {
         apply_patch(data, size, stA.rom, stA.rom_size);
-        if(data) { free(data); data = 0; }
+        delete[] data;
       }
 
-      stA.ram = (uint8*)malloc(stA.ram_size = 0x020000);
+      stA.ram = new uint8_t[stA.ram_size = 0x020000];
       memset(stA.ram, 0xff, stA.ram_size);
 
       if(load_file(get_save_filename(stA.fn, "srm"), data, size, CompressionNone) == true) {
         memcpy(stA.ram, data, min(size, 0x020000U));
-        safe_free(data);
+        delete[] data;
       }
     }
   }
 
   if(*stB.fn) {
     if(load_file(stB.fn, data, size, CompressionAuto) == true) {
-      stB.rom = (uint8*)malloc(stB.rom_size = 0x100000);
+      stB.rom = new(zeromemory) uint8_t[stB.rom_size = 0x100000];
       memcpy(stB.rom, data, min(size, stB.rom_size));
-      safe_free(data);
+      delete[] data;
       if(load_file(get_patch_filename(stB.fn, "ups"), data, size, CompressionInspect) == true) {
         apply_patch(data, size, stB.rom, stB.rom_size);
-        if(data) { free(data); data = 0; }
+        delete[] data;
       }
 
-      stB.ram = (uint8*)malloc(stB.ram_size = 0x020000);
+      stB.ram = new uint8_t[stB.ram_size = 0x020000];
       memset(stB.ram, 0xff, stB.ram_size);
 
       if(load_file(get_save_filename(stB.fn, "srm"), data, size, CompressionNone) == true) {
         memcpy(stB.ram, data, min(size, 0x020000U));
-        safe_free(data);
+        delete[] data;
       }
     }
   }

@@ -65,6 +65,7 @@ void pWindow::create(uint style, uint width, uint height, const char *text) {
   //without affecting the statusbar color
   statuscontainer = gtk_event_box_new();
   statusbar = gtk_statusbar_new();
+  set_default_font(statusbar);
   gtk_container_add(GTK_CONTAINER(statuscontainer), statusbar);
   gtk_statusbar_set_has_resize_grip(GTK_STATUSBAR(statusbar), false);
   gtk_box_pack_start(GTK_BOX(menucontainer), statuscontainer, false, false, 0);

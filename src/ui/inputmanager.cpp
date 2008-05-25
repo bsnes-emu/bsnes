@@ -12,6 +12,11 @@ public:
     uint16_t pause;
     uint16_t reset;
     uint16_t power;
+    uint16_t quit;
+    uint16_t speed_decrease;
+    uint16_t speed_increase;
+    uint16_t frameskip_decrease;
+    uint16_t frameskip_increase;
     uint16_t toggle_fullscreen;
     uint16_t toggle_menubar;
     uint16_t toggle_statusbar;
@@ -84,13 +89,18 @@ void InputManager::bind() {
   joypad2.l.state  = joypad2.r.state    = joypad2.select.state = joypad2.start.state =
   false;
 
-  gui.load              = input_find(config::input.gui.load);
-  gui.pause             = input_find(config::input.gui.pause);
-  gui.reset             = input_find(config::input.gui.reset);
-  gui.power             = input_find(config::input.gui.power);
-  gui.toggle_fullscreen = input_find(config::input.gui.toggle_fullscreen);
-  gui.toggle_menubar    = input_find(config::input.gui.toggle_menubar);
-  gui.toggle_statusbar  = input_find(config::input.gui.toggle_statusbar);
+  gui.load               = input_find(config::input.gui.load);
+  gui.pause              = input_find(config::input.gui.pause);
+  gui.reset              = input_find(config::input.gui.reset);
+  gui.power              = input_find(config::input.gui.power);
+  gui.quit               = input_find(config::input.gui.quit);
+  gui.speed_decrease     = input_find(config::input.gui.speed_decrease);
+  gui.speed_increase     = input_find(config::input.gui.speed_increase);
+  gui.frameskip_decrease = input_find(config::input.gui.frameskip_decrease);
+  gui.frameskip_increase = input_find(config::input.gui.frameskip_increase);
+  gui.toggle_fullscreen  = input_find(config::input.gui.toggle_fullscreen);
+  gui.toggle_menubar     = input_find(config::input.gui.toggle_menubar);
+  gui.toggle_statusbar   = input_find(config::input.gui.toggle_statusbar);
 }
 
 void InputManager::poll() {

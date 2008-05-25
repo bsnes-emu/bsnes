@@ -1,5 +1,6 @@
 void pFrame::create(uint style, uint width, uint height, const char *text) {
   frame = gtk_frame_new(text ? text : "");
+  set_default_font(frame);
   gtk_widget_set_size_request(frame, width, height);
   gtk_widget_show(frame);
 }

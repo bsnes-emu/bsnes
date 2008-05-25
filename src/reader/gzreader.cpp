@@ -15,19 +15,16 @@ uint8_t* GZReader::read(unsigned length) {
 
   if(length == 0) {
     //read the entire file into RAM
-    data = (uint8*)malloc(filesize);
-    memset(data, 0, filesize);
-    if(gp)gzread(gp, data, filesize);
+    data = new(zeromemory) uint8_t[filesize];
+    if(gp) gzread(gp, data, filesize);
   } else if(length > filesize) {
     //read the entire file into RAM, pad the rest with 0x00s
-    data = (uint8*)malloc(length);
-    memset(data, 0, length);
-    if(gp)gzread(gp, data, filesize);
+    data = new(zeromemory) uint8_t[length];
+    if(gp) gzread(gp, data, filesize);
   } else { //filesize >= length
     //read only what was requested
-    data = (uint8*)malloc(length);
-    memset(data, 0, length);
-    if(gp)gzread(gp, data, length);
+    data = new(zeromemory) uint8_t[length];
+    if(gp) gzread(gp, data, length);
   }
 
   return data;
@@ -40,7 +37,7 @@ bool GZReader::ready() {
 GZReader::GZReader(const char *fn) {
   gp = 0;
   FILE *fp = fopen(fn, "rb");
-  if(!fp)return;
+  if(!fp) return;
 
   fseek(fp, 0, SEEK_END);
   filesize = ftell(fp);
@@ -62,7 +59,7 @@ uint32 gzsize;
   fp = 0;
 
   gp = gzopen(fn, "rb");
-  if(!gp)return;
+  if(!gp) return;
 
   if(!gzdirect(gp)) {
     filesize = gzsize;

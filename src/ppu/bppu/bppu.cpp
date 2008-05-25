@@ -330,12 +330,9 @@ void bPPU::cgram_write(uint16 addr, uint8 value) {
 }
 
 bPPU::bPPU() {
-  vram  = (uint8*)malloc(65536);
-  oam   = (uint8*)malloc(  544);
-  cgram = (uint8*)malloc(  512);
-  memset(vram,  0, 65536);
-  memset(oam,   0,   544);
-  memset(cgram, 0,   512);
+  vram  = new(zeromemory) uint8_t[65536];
+  oam   = new(zeromemory) uint8_t[  544];
+  cgram = new(zeromemory) uint8_t[  512];
 
   init_tiledata_cache();
 
@@ -359,7 +356,7 @@ bPPU::bPPU() {
 }
 
 bPPU::~bPPU() {
-  free(vram);
-  free(oam);
-  free(cgram);
+  delete[] vram;
+  delete[] oam;
+  delete[] cgram;
 }

@@ -15,12 +15,11 @@ uint8_t* ZipReader::read(unsigned length) {
 
   if(length <= filesize) {
     //read the entire file into RAM
-    data = (uint8_t*)malloc(filesize);
+    data = new(zeromemory) uint8_t[filesize];
     unzReadCurrentFile(zipfile, data, filesize);
   } else if(length > filesize) {
     //read the entire file into RAM, pad the rest with 0x00s
-    data = (uint8_t*)malloc(length);
-    memset(data, 0, length);
+    data = new(zeromemory) uint8_t[length];
     unzReadCurrentFile(zipfile, data, filesize);
   }
 

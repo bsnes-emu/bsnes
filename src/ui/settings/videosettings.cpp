@@ -1,54 +1,54 @@
-void RasterSettingsWindow::setup() {
+void VideoSettingsWindow::setup() {
   create(0, 475, 355);
 
-  lcontrast.create      (0, 475, 20);
+  lcontrast.create      (0, 475, 18);
   contrast.create       (0, 475, 30, 192);
-  lbrightness.create    (0, 475, 20);
+  lbrightness.create    (0, 475, 18);
   brightness.create     (0, 475, 30, 192);
-  lgamma.create         (0, 475, 20);
+  lgamma.create         (0, 475, 18);
   gamma.create          (0, 475, 30, 191);
-  gamma_ramp.create     (0, 235, 20, "Gamma ramp");
-  sepia.create          (0, 235, 20, "Sepia");
-  grayscale.create      (0, 235, 20, "Grayscale");
-  invert.create         (0, 235, 20, "Invert colors");
-  preset_optimal.create (0, 235, 30, "Optimal Preset");
-  preset_standard.create(0, 235, 30, "Standard Preset");
+  gamma_ramp.create     (0, 235, 18, translate["Gamma ramp"]);
+  sepia.create          (0, 235, 18, translate["Sepia"]);
+  grayscale.create      (0, 235, 18, translate["Grayscale"]);
+  invert.create         (0, 235, 18, translate["Invert colors"]);
+  preset_optimal.create (0, 235, 25, translate["Optimal Preset"]);
+  preset_standard.create(0, 235, 25, translate["Standard Preset"]);
   sync_ui();
 
   uint y = 0;
-  attach(lcontrast,         0, y); y += 20;
+  attach(lcontrast,         0, y); y += 18;
   attach(contrast,          0, y); y += 30;
-  attach(lbrightness,       0, y); y += 20;
+  attach(lbrightness,       0, y); y += 18;
   attach(brightness,        0, y); y += 30;
-  attach(lgamma,            0, y); y += 20;
+  attach(lgamma,            0, y); y += 18;
   attach(gamma,             0, y); y += 30;
   attach(gamma_ramp,        0, y);
-  attach(sepia,           240, y); y += 20;
+  attach(sepia,           240, y); y += 18;
   attach(grayscale,         0, y);
-  attach(invert,          240, y); y += 20;
+  attach(invert,          240, y); y += 18;
   attach(preset_optimal,    0, y);
-  attach(preset_standard, 240, y); y += 30;
+  attach(preset_standard, 240, y); y += 25;
 
-  contrast.on_change      = bind(&RasterSettingsWindow::contrast_change, this);
-  brightness.on_change    = bind(&RasterSettingsWindow::brightness_change, this);
-  gamma.on_change         = bind(&RasterSettingsWindow::gamma_change, this);
-  gamma_ramp.on_tick      = bind(&RasterSettingsWindow::gammaramp_tick, this);
-  sepia.on_tick           = bind(&RasterSettingsWindow::sepia_tick, this);
-  grayscale.on_tick       = bind(&RasterSettingsWindow::grayscale_tick, this);
-  invert.on_tick          = bind(&RasterSettingsWindow::invert_tick, this);
-  preset_optimal.on_tick  = bind(&RasterSettingsWindow::optimal_tick, this);
-  preset_standard.on_tick = bind(&RasterSettingsWindow::standard_tick, this);
+  contrast.on_change      = bind(&VideoSettingsWindow::contrast_change, this);
+  brightness.on_change    = bind(&VideoSettingsWindow::brightness_change, this);
+  gamma.on_change         = bind(&VideoSettingsWindow::gamma_change, this);
+  gamma_ramp.on_tick      = bind(&VideoSettingsWindow::gammaramp_tick, this);
+  sepia.on_tick           = bind(&VideoSettingsWindow::sepia_tick, this);
+  grayscale.on_tick       = bind(&VideoSettingsWindow::grayscale_tick, this);
+  invert.on_tick          = bind(&VideoSettingsWindow::invert_tick, this);
+  preset_optimal.on_tick  = bind(&VideoSettingsWindow::optimal_tick, this);
+  preset_standard.on_tick = bind(&VideoSettingsWindow::standard_tick, this);
 }
 
 //update all UI controls to match config file values ...
-void RasterSettingsWindow::sync_ui() {
+void VideoSettingsWindow::sync_ui() {
   ui_lock = true; //supress event messages while syncing UI elements, prevents infinite recursion
   contrast.set_position(config::system.contrast + 96);
-  lcontrast.set_text(string() << "Contrast: " << (int)config::system.contrast);
+  lcontrast.set_text(string() << translate["Contrast"] << ": " << (int)config::system.contrast);
   brightness.set_position(config::system.brightness + 96);
-  lbrightness.set_text(string() << "Brightness: " << (int)config::system.brightness);
+  lbrightness.set_text(string() << translate["Brightness"] << ": " << (int)config::system.brightness);
   gamma.set_position(config::system.gamma - 10);
-  lgamma.set_text(string() << "Gamma: " << (int)config::system.gamma); //TODO: print gamma as "%0.2f" / 100.0
+  lgamma.set_text(string() << translate["Gamma"] << ": " << (int)config::system.gamma); //TODO: print gamma as "%0.2f" / 100.0
   gamma_ramp.check(config::system.gamma_ramp);
   sepia.check(config::system.sepia);
   grayscale.check(config::system.grayscale);
@@ -66,7 +66,7 @@ void RasterSettingsWindow::sync_ui() {
   ui_lock = false;
 }
 
-uintptr_t RasterSettingsWindow::contrast_change(Event) {
+uintptr_t VideoSettingsWindow::contrast_change(Event) {
   if(!ui_lock && config::system.contrast != contrast.get_position() - 96) {
     config::system.contrast = contrast.get_position() - 96;
     sync_ui();
@@ -74,7 +74,7 @@ uintptr_t RasterSettingsWindow::contrast_change(Event) {
   return true;
 }
 
-uintptr_t RasterSettingsWindow::brightness_change(Event) {
+uintptr_t VideoSettingsWindow::brightness_change(Event) {
   if(!ui_lock && config::system.brightness != brightness.get_position() - 96) {
     config::system.brightness = brightness.get_position() - 96;
     sync_ui();
@@ -82,7 +82,7 @@ uintptr_t RasterSettingsWindow::brightness_change(Event) {
   return true;
 }
 
-uintptr_t RasterSettingsWindow::gamma_change(Event) {
+uintptr_t VideoSettingsWindow::gamma_change(Event) {
   if(!ui_lock && config::system.gamma != gamma.get_position() + 10) {
     config::system.gamma = gamma.get_position() + 10;
     sync_ui();
@@ -90,7 +90,7 @@ uintptr_t RasterSettingsWindow::gamma_change(Event) {
   return true;
 }
 
-uintptr_t RasterSettingsWindow::gammaramp_tick(Event) {
+uintptr_t VideoSettingsWindow::gammaramp_tick(Event) {
   if(!ui_lock && config::system.gamma_ramp != gamma_ramp.checked()) {
     config::system.gamma_ramp = gamma_ramp.checked();
     sync_ui();
@@ -98,7 +98,7 @@ uintptr_t RasterSettingsWindow::gammaramp_tick(Event) {
   return true;
 }
 
-uintptr_t RasterSettingsWindow::sepia_tick(Event) {
+uintptr_t VideoSettingsWindow::sepia_tick(Event) {
   if(!ui_lock && config::system.sepia != sepia.checked()) {
     config::system.sepia = sepia.checked();
     sync_ui();
@@ -106,7 +106,7 @@ uintptr_t RasterSettingsWindow::sepia_tick(Event) {
   return true;
 }
 
-uintptr_t RasterSettingsWindow::grayscale_tick(Event) {
+uintptr_t VideoSettingsWindow::grayscale_tick(Event) {
   if(!ui_lock && config::system.grayscale != grayscale.checked()) {
     config::system.grayscale = grayscale.checked();
     sync_ui();
@@ -114,7 +114,7 @@ uintptr_t RasterSettingsWindow::grayscale_tick(Event) {
   return true;
 }
 
-uintptr_t RasterSettingsWindow::invert_tick(Event) {
+uintptr_t VideoSettingsWindow::invert_tick(Event) {
   if(!ui_lock && config::system.invert != invert.checked()) {
     config::system.invert = invert.checked();
     sync_ui();
@@ -122,7 +122,7 @@ uintptr_t RasterSettingsWindow::invert_tick(Event) {
   return true;
 }
 
-uintptr_t RasterSettingsWindow::optimal_tick(Event) {
+uintptr_t VideoSettingsWindow::optimal_tick(Event) {
   config::system.contrast   = 0;
   config::system.brightness = 0;
   config::system.gamma      = 80;
@@ -134,7 +134,7 @@ uintptr_t RasterSettingsWindow::optimal_tick(Event) {
   return true;
 }
 
-uintptr_t RasterSettingsWindow::standard_tick(Event) {
+uintptr_t VideoSettingsWindow::standard_tick(Event) {
   config::system.contrast   = 0;
   config::system.brightness = 0;
   config::system.gamma      = 100;
@@ -146,6 +146,6 @@ uintptr_t RasterSettingsWindow::standard_tick(Event) {
   return true;
 }
 
-RasterSettingsWindow::RasterSettingsWindow() {
+VideoSettingsWindow::VideoSettingsWindow() {
   ui_lock = false;
 }

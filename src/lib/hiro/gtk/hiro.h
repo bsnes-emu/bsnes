@@ -55,6 +55,7 @@ public:
   /* internal */
   GdkScreen *screen;
   GdkColormap *colormap;
+  PangoFontDescription *font;
   bool is_composited;
   char default_path[PATH_MAX];
 

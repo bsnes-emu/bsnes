@@ -1,5 +1,5 @@
 void pButton::create(uint style, uint width, uint height, const char *text) {
-  hwnd = CreateWindow("BUTTON", text ? text : "", WS_CHILD | WS_TABSTOP | WS_VISIBLE,
+  hwnd = CreateWindow(L"BUTTON", utf16(text), WS_CHILD | WS_TABSTOP | WS_VISIBLE,
     0, 0, width, height,
     phiro().default_hwnd, (HMENU)instance, GetModuleHandle(0), 0);
   SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)this);
@@ -7,7 +7,7 @@ void pButton::create(uint style, uint width, uint height, const char *text) {
 }
 
 void pButton::set_text(const char *text) {
-  SetWindowText(hwnd, text ? text : "");
+  SetWindowText(hwnd, utf16(text));
 }
 
 pButton::pButton(Button &self_) : pFormControl(self_), self(self_) {

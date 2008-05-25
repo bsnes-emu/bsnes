@@ -4,16 +4,16 @@ void pWindow::create(uint style, uint width_, uint height_, const char *text) {
   RECT rc;
   SystemParametersInfo(SPI_GETWORKAREA, 0, &rc, 0);
 
-  hwnd = CreateWindowEx(0, "hiro_window", text ? text : "",
+  hwnd = CreateWindowEx(0, L"hiro_window", utf16(text),
     WS_POPUP | WS_SYSMENU | WS_CAPTION | WS_MINIMIZEBOX,
     rc.left, rc.top, width_, height_,
     0, 0, GetModuleHandle(0), 0);
-  hwndr = CreateWindowEx(0, "hiro_window", text ? text : "",
+  hwndr = CreateWindowEx(0, L"hiro_window", utf16(text),
     WS_POPUP | WS_SYSMENU | WS_CAPTION | WS_MINIMIZEBOX,
     rc.left, rc.top, width_, height_,
     0, 0, GetModuleHandle(0), 0);
   hmenu = CreateMenu();
-  hstatus = CreateWindowEx(0, STATUSCLASSNAME, "",
+  hstatus = CreateWindowEx(0, STATUSCLASSNAME, L"",
     WS_CHILD, 0, 0, 0, 0, hwnd, 0, GetModuleHandle(0), 0);
   SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)this);
 
@@ -194,7 +194,7 @@ void pWindow::set_icon(unsigned width, unsigned height, const uint32_t *data) {
 }
 
 void pWindow::set_text(const char *text) {
-  SetWindowText(hwnd, text);
+  SetWindowText(hwnd, utf16(text));
 }
 
 void pWindow::attach(Window &window, uint x, uint y) {
@@ -214,7 +214,7 @@ void pWindow::attach(Window &window, uint x, uint y) {
 }
 
 void pWindow::attach(MenuGroup &menugroup) {
-  AppendMenu(hmenu, MF_STRING | MF_POPUP, (uint)menugroup.p.group, menugroup.p.text);
+  AppendMenu(hmenu, MF_STRING | MF_POPUP, (uint)menugroup.p.group, utf16(menugroup.p.text));
   if(menu_visible() == false) menu_show();
 }
 
@@ -317,7 +317,7 @@ bool pWindow::menu_visible() {
 }
 
 void pWindow::status_set_text(const char *text) {
-  SendMessage(hstatus, SB_SETTEXT, 0, (LPARAM)text);
+  SendMessage(hstatus, SB_SETTEXT, 0, (LPARAM)(wchar_t*)utf16(text));
 }
 
 void pWindow::status_show(bool state) {

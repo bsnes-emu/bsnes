@@ -30,6 +30,10 @@
 
 /* Audio */
 
+#ifdef AUDIO_ALSA
+  #include <ruby/audio/alsa.cpp>
+#endif
+
 #ifdef AUDIO_AO
   #include <ruby/audio/ao.cpp>
 #endif

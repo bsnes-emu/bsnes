@@ -102,19 +102,19 @@ bool Cartridge::unload() {
   bus.unload_cart();
 
   switch(info.type) {
-    case CartridgeNormal: unload_cart_normal(); break;
-    case CartridgeBSX: unload_cart_bsx(); break;
-    case CartridgeBSC: unload_cart_bsc(); break;
-    case CartridgeSufamiTurbo: unload_cart_st(); break;
+    case CartridgeNormal:      unload_cart_normal(); break;
+    case CartridgeBSX:         unload_cart_bsx();    break;
+    case CartridgeBSC:         unload_cart_bsc();    break;
+    case CartridgeSufamiTurbo: unload_cart_st();     break;
   }
 
-  safe_free(cart.rom);
-  safe_free(cart.ram);
-  safe_free(bs.ram);
-  safe_free(stA.rom);
-  safe_free(stA.ram);
-  safe_free(stB.rom);
-  safe_free(stB.ram);
+  if(cart.rom) { delete[] cart.rom; cart.rom = 0; }
+  if(cart.ram) { delete[] cart.ram; cart.ram = 0; }
+  if(bs.ram)   { delete[] bs.ram;   bs.ram   = 0; }
+  if(stA.rom)  { delete[] stA.rom;  stA.rom  = 0; }
+  if(stA.ram)  { delete[] stA.ram;  stA.ram  = 0; }
+  if(stB.rom)  { delete[] stB.rom;  stB.rom  = 0; }
+  if(stB.ram)  { delete[] stB.ram;  stB.ram  = 0; }
 
   char fn[PATH_MAX];
   strcpy(fn, cart.fn);

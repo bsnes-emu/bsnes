@@ -11,6 +11,7 @@
 #define _WIN32_IE 0x0600
 #define NOMINMAX
 
+#define UNICODE
 #include <windows.h>
 #include <commctrl.h>
 #include <shlobj.h>

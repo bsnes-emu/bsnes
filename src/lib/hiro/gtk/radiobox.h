@@ -9,6 +9,7 @@ public:
   pRadiobox(Radiobox&);
 
   /* internal */
-  GtkWidget *radiobox;
   GtkWidget* gtk_handle();
+  GtkWidget *radiobox;
+  bool locked;
 };

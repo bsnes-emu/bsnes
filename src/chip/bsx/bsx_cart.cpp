@@ -20,7 +20,7 @@ void BSXCart::reset() {
 }
 
 void BSXCart::update_memory_map() {
-Memory &cart = (regs.r[0x01] & 0x80) == 0x00 ? (Memory&)bsxflash : (Memory&)psram;
+  Memory &cart = (regs.r[0x01] & 0x80) == 0x00 ? (Memory&)bsxflash : (Memory&)psram;
 
   if((regs.r[0x02] & 0x80) == 0x00) { //LoROM mapping
     bus.map(Bus::MapLinear, 0x00, 0x7d, 0x8000, 0xffff, cart);
@@ -59,7 +59,7 @@ Memory &cart = (regs.r[0x01] & 0x80) == 0x00 ? (Memory&)bsxflash : (Memory&)psra
 
 uint8 BSXCart::mmio_read(uint addr) {
   if((addr & 0xf0ffff) == 0x005000) { //$[00-0f]:5000 MMIO
-  uint8 n = (addr >> 16) & 15;
+    uint8 n = (addr >> 16) & 15;
     return regs.r[n];
   }
 
@@ -72,7 +72,7 @@ uint8 BSXCart::mmio_read(uint addr) {
 
 void BSXCart::mmio_write(uint addr, uint8 data) {
   if((addr & 0xf0ffff) == 0x005000) { //$[00-0f]:5000 MMIO
-  uint8 n = (addr >> 16) & 15;
+    uint8 n = (addr >> 16) & 15;
     regs.r[n] = data;
     if(n == 0x0e && data & 0x80) update_memory_map();
     return;
@@ -84,16 +84,16 @@ void BSXCart::mmio_write(uint addr, uint8 data) {
 }
 
 BSXCart::BSXCart() {
-  sram_data  = (uint8*)malloc( 32 * 1024);
-  psram_data = (uint8*)malloc(512 * 1024);
+  sram_data  = new uint8_t[ 32 * 1024];
+  psram_data = new uint8_t[512 * 1024];
 
   sram.map (sram_data,   32 * 1024);
   psram.map(psram_data, 512 * 1024);
 }
 
 BSXCart::~BSXCart() {
-  safe_free(sram_data);
-  safe_free(psram_data);
+  delete[] sram_data;
+  delete[] psram_data;
 }
 
 #endif //ifdef BSX_CPP

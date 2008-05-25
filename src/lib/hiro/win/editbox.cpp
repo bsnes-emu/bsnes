@@ -8,7 +8,7 @@ void pEditbox::create(uint style, uint width, uint height, const char *text) {
                  (style & Editbox::HorizontalScrollNever) ? 0 :
                  ES_AUTOHSCROLL;
 
-  hwnd = CreateWindowEx(WS_EX_CLIENTEDGE, "EDIT", "",
+  hwnd = CreateWindowEx(WS_EX_CLIENTEDGE, L"EDIT", L"",
     WS_CHILD | WS_VISIBLE | vscroll | hscroll |
     (multiline == true ? ES_MULTILINE | ES_WANTRETURN : WS_TABSTOP) |
     (readonly == true ? ES_READONLY : 0),
@@ -22,14 +22,15 @@ void pEditbox::set_text(const char *text) {
   string temp = text ? text : "";
   replace(temp, "\r", "");
   replace(temp, "\n", "\r\n");
-  SetWindowText(hwnd, temp);
+  SetWindowText(hwnd, utf16(temp));
 }
 
 uint pEditbox::get_text(char *text, uint length) {
-  GetWindowText(hwnd, text, length);
-  string temp = text;
+  wchar_t buffer[length * 2 + 1];
+  GetWindowText(hwnd, buffer, length * 2);
+  string temp = (const char*)utf8(buffer);
   replace(temp, "\r", "");
-  strcpy(text, temp);
+  strlcpy(text, temp, length);
   return strlen(text);
 }
 

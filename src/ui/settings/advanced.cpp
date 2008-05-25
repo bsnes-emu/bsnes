@@ -7,7 +7,9 @@ uintptr_t AdvancedWindow::list_change(Event) {
     unsigned i = lookup[pos];
     string default_;
     config::config().list[i]->get_default(default_);
-    desc.set_text(string() << "(default = " << default_ << ")\n" << config::config().list[i]->description);
+    desc.set_text(string()
+      << "(" << translate["Default"] << " = " << default_ << ")\n"
+      << config::config().list[i]->description);
     string value_;
     config::config().list[i]->get(value_);
     edit_val.set_text(value_);
@@ -39,7 +41,7 @@ void AdvancedWindow::update(uint pos, const char *data) {
     << config::config().list[i]->name
     << (value_ == default_ ? "" : " (*)")
     << "\t"
-    << (config::config().list[i]->type == setting::string_type ? "string" : "integral")
+    << (config::config().list[i]->type == setting::string_type ? translate["string"] : translate["integer"])
     << "\t"
     << value_
   );
@@ -58,7 +60,7 @@ void AdvancedWindow::load() {
     if(strbegin(name, "snes.controller_port_")) continue;
     if(strpos(name, "colorfilter.") >= 0) continue;
     if(name == "misc.status_enable") continue;
-    if(name == "system.regulate_speed") continue;
+    if(name == "system.emulation_speed") continue;
     if(strbegin(name, "video.windowed.") && name != "video.windowed.synchronize") continue;
     if(strbegin(name, "video.fullscreen.") && name != "video.fullscreen.synchronize") continue;
     if(name == "audio.mute") continue;
@@ -73,7 +75,7 @@ void AdvancedWindow::load() {
       << name
       << (value_ == default_ ? "" : " (*)")
       << "\t"
-      << (config::config().list[i]->type == setting::string_type ? "string" : "integral")
+      << (config::config().list[i]->type == setting::string_type ? translate["string"] : translate["integer"])
       << "\t"
       << value_
     );
@@ -84,21 +86,19 @@ void AdvancedWindow::load() {
 void AdvancedWindow::setup() {
   create(0, 475, 355);
 
-  list.create(Listbox::Header | Listbox::VerticalScrollAlways, 475, 235, "Name\tType\tValue");
-  desc.create(Editbox::Multiline | Editbox::VerticalScrollAlways | Editbox::Readonly, 475, 80,
-    "Note: modification of certain variables will not take effect until\n"
-    "bsnes is restarted. (*) = modified"
-  );
-  edit_val.create(0, 265, 30, "<current value>");
-  set_val.create (0, 100, 30, "Set");
-  set_def.create (0, 100, 30, "Default");
+  list.create(Listbox::Header | Listbox::VerticalScrollAlways, 475, 240,
+    string() << translate["Name"] << "\t" << translate["Type"] << "\t" << translate["Value"]);
+  desc.create(Editbox::Multiline | Editbox::VerticalScrollAlways | Editbox::Readonly, 475, 80, translate["<description>"]);
+  edit_val.create(0, 265, 25, translate["<current value>"]);
+  set_val.create (0, 100, 25, translate["Set"]);
+  set_def.create (0, 100, 25, translate["Default"]);
 
   unsigned y = 0;
-  attach(list,       0, y); y += 235 + 5;
+  attach(list,       0, y); y += 240 + 5;
   attach(desc,       0, y); y +=  80 + 5;
   attach(edit_val,   0, y);
   attach(set_val,  270, y);
-  attach(set_def,  375, y); y +=  30 + 5;
+  attach(set_def,  375, y); y +=  25 + 5;
 
   load();
   list.autosize_columns();

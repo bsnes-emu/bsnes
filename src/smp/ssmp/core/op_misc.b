@@ -64,7 +64,7 @@ clrv(0xe0) {
 notc(0xed) {
 1:op_io();
 2:op_io();
-  regs.p.c ^= 1;
+  regs.p.c = !regs.p.c;
 }
 
 ei(0xa0, 1),

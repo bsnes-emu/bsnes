@@ -1,5 +1,5 @@
 void pCombobox::create(uint style, uint width, uint height, const char *text) {
-  hwnd = CreateWindowEx(WS_EX_CLIENTEDGE, "COMBOBOX", "",
+  hwnd = CreateWindowEx(WS_EX_CLIENTEDGE, L"COMBOBOX", L"",
     WS_CHILD | WS_TABSTOP | WS_VISIBLE | CBS_DROPDOWNLIST | CBS_HASSTRINGS,
     0, 0, width, 200,
     phiro().default_hwnd, (HMENU)instance, GetModuleHandle(0), 0);
@@ -17,7 +17,7 @@ void pCombobox::create(uint style, uint width, uint height, const char *text) {
 }
 
 void pCombobox::add_item(const char *text) {
-  SendMessage(hwnd, CB_ADDSTRING, 0, (LPARAM)text);
+  SendMessage(hwnd, CB_ADDSTRING, 0, (LPARAM)(wchar_t*)utf16(text));
   if(SendMessage(hwnd, CB_GETCOUNT, 0, 0) == 1) set_selection(0);
 }
 

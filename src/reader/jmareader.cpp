@@ -15,12 +15,11 @@ uint8_t* JMAReader::read(unsigned length) {
 
   if(length <= filesize) {
     //read the entire file into RAM
-    data = (uint8_t*)malloc(filesize);
+    data = new(zeromemory) uint8_t[filesize];
     JMAFile.extract_file(cname, data);
   } else if(length > filesize) {
     //read the entire file into RAM, pad the rest with 0x00s
-    data = (uint8_t*)malloc(length);
-    memset(data, 0, length);
+    data = new(zeromemory) uint8_t[length];
     JMAFile.extract_file(cname, data);
   }
 

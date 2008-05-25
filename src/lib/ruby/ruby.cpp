@@ -92,6 +92,10 @@ void AudioInterface::driver(const char *driver) {
 
   if(!strcmp(driver, "none")) p = new Audio();
 
+  #ifdef AUDIO_ALSA
+  else if(!strcmp(driver, "alsa")) p = new AudioALSA();
+  #endif
+
   #ifdef AUDIO_AO
   else if(!strcmp(driver, "ao")) p = new AudioAO();
   #endif
@@ -114,6 +118,8 @@ void AudioInterface::driver(const char *driver) {
   p = new AudioDS();
   #elif defined(AUDIO_AO)
   p = new AudioAO();
+  #elif defined(AUDIO_ALSA)
+  p = new AudioALSA();
   #elif defined(AUDIO_OPENAL)
   p = new AudioOpenAL();
   #elif defined(AUDIO_OSS)

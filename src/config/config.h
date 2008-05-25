@@ -10,7 +10,7 @@ extern struct File {
 } file;
 
 extern struct Path {
-  static string_setting base, rom, patch, save, cheat;
+  static string_setting base, user, rom, patch, save, cheat;
   static string_setting bsx, st;
 } path;
 

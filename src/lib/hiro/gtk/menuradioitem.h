@@ -8,6 +8,7 @@ public:
   pMenuRadioItem(MenuRadioItem&);
 
   /* internal */
-  GtkWidget *item;
   GtkWidget* gtk_handle();
+  GtkWidget *item;
+  bool locked;
 };

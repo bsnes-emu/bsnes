@@ -1,6 +1,6 @@
 /*
   hiro
-  version: 0.003 (2008-04-06)
+  version: 0.004 (2008-05-14)
   author: byuu
   license: public domain
 */
@@ -11,6 +11,7 @@
 #include <nall/array.hpp>
 #include <nall/function.hpp>
 #include <nall/input.hpp>
+#include <nall/new.hpp>
 #include <nall/stdint.hpp>
 #include <nall/string.hpp>
 #include <nall/utility.hpp>

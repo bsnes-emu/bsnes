@@ -10,6 +10,7 @@ public:
   pCheckbox(Checkbox&);
 
   /* internal */
-  GtkWidget *checkbox;
   GtkWidget* gtk_handle();
+  GtkWidget *checkbox;
+  bool locked;
 };

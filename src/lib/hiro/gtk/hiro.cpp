@@ -6,6 +6,17 @@ using nall::max;
 
 namespace libhiro {
 
+static void set_font(GtkWidget *widget, gpointer font) {
+  gtk_widget_modify_font(widget, (PangoFontDescription*)font);
+  if(GTK_IS_CONTAINER(widget)) {
+    gtk_container_foreach(GTK_CONTAINER(widget), (GtkCallback)set_font, font);
+  }
+}
+
+static void set_default_font(GtkWidget *widget) {
+  set_font(widget, phiro().font);
+}
+
 #include "keymap.cpp"
 #include "widget.cpp"
   #include "window.cpp"
@@ -49,9 +60,15 @@ void pHiro::init() {
   } else {
     colormap = gdk_screen_get_rgb_colormap(screen);
   }
+
+  font = pango_font_description_new();
+  pango_font_description_set_family(font, "Sans");
+  pango_font_description_set_absolute_size(font, 11.0 * PANGO_SCALE);
+  pango_font_description_set_style(font, PANGO_STYLE_NORMAL);
 }
 
 void pHiro::term() {
+  pango_font_description_free(font);
   enable_screensaver();
 }
 
