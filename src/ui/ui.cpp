@@ -44,9 +44,9 @@ void ui_init() {
   video.set(Video::Handle, window_main.view.handle());
   video.set(Video::Synchronize, false);
   audio.set(Audio::Handle, window_main.handle());
-  audio.set(Audio::Synchronize, config::system.emulation_speed != 0);
-  audio.set(Audio::Frequency, 32000);
   input.set(Input::Handle, window_main.handle());
+  //sets Audio::Synchronize and Audio::Frequency
+  event::update_emulation_speed(config::system.emulation_speed);
 
   video.init();
   audio.init();

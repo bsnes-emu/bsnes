@@ -287,14 +287,17 @@ bool load_rom(char *fn) {
 
   return hiro().file_open(0, fn,
     dir[0],
-    "SNES images;*.smc,*.sfc,*.swc,*.fig,*.bs,*.st"
+    "SNES images\t"
+    "*.smc,*.sfc,*.swc,*.fig,*.bs,*.st"
     #if defined(GZIP_SUPPORT)
     ",*.gz,*.z,*.zip"
     #endif
     #if defined(JMA_SUPPORT)
     ",*.jma"
     #endif
-    "|All files;*.*"
+    "\n"
+    "All files\t"
+    "*.*"
   );
 }
 

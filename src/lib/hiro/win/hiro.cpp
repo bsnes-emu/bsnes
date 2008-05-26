@@ -111,35 +111,36 @@ bool pHiro::file_open(Window *focus, char *filename, const char *path, const cha
 
   lstring type, part;
   strcpy(f, "");
-  split(type, "|", filter);
+  split(type, "\n", filter);
   for(int i = 0; i < count(type); i++) {
-    split(part, ";", type[i]);
-    if(count(part) != 2)continue;
+    split(part, "\t", type[i]);
+    if(count(part) != 2) continue;
 
     strcat(f, part[0]);
     strcat(f, " (");
     strcat(f, part[1]);
-    strcat(f, ")|");
+    strcat(f, ")\t");
     replace(part[1], ",", ";");
     strcat(f, part[1]);
-    strcat(f, "|");
+    strcat(f, "\t");
   }
 
-  char *pf = f();
-  for(int i = strlen(pf) - 1; i >= 0; i--) {
-    if(pf[i] == '|') pf[i] = '\0';
-  }
-
-  utf16 wpf(pf);
+  utf16 wfilter(f);
   utf16 wdir(dir);
   wchar_t wfilename[_MAX_PATH] = L"";
+
+  wchar_t *p = wfilter;
+  while(*p != L'\0') {
+    if(*p == L'\t') *p = L'\0';
+    p++;
+  }
 
   OPENFILENAME ofn;
   strcpy(filename, "");
   memset(&ofn, 0, sizeof(ofn));
   ofn.lStructSize     = sizeof(ofn);
   ofn.hwndOwner       = focus ? focus->p.hwnd : 0;
-  ofn.lpstrFilter     = wpf;
+  ofn.lpstrFilter     = wfilter;
   ofn.lpstrInitialDir = wdir;
   ofn.lpstrFile       = wfilename;
   ofn.nMaxFile        = MAX_PATH;
@@ -158,35 +159,36 @@ bool pHiro::file_save(Window *focus, char *filename, const char *path, const cha
 
   lstring type, part;
   strcpy(f, "");
-  split(type, "|", filter);
+  split(type, "\n", filter);
   for(int i = 0; i < count(type); i++) {
-    split(part, ";", type[i]);
-    if(count(part) != 2)continue;
+    split(part, "\t", type[i]);
+    if(count(part) != 2) continue;
 
     strcat(f, part[0]);
     strcat(f, " (");
     strcat(f, part[1]);
-    strcat(f, ")|");
+    strcat(f, ")\t");
     replace(part[1], ",", ";");
     strcat(f, part[1]);
-    strcat(f, "|");
+    strcat(f, "\t");
   }
 
-  char *pf = f();
-  for(int i = strlen(pf) - 1; i >= 0; i--) {
-    if(pf[i] == '|') pf[i] = '\0';
-  }
-
-  utf16 wpf(pf);
+  utf16 wfilter(f);
   utf16 wdir(dir);
   wchar_t wfilename[_MAX_PATH] = L"";
+
+  wchar_t *p = wfilter;
+  while(*p != L'\0') {
+    if(*p == L'\t') *p = L'\0';
+    p++;
+  }
 
   OPENFILENAME ofn;
   strcpy(filename, "");
   memset(&ofn, 0, sizeof(ofn));
   ofn.lStructSize     = sizeof(ofn);
   ofn.hwndOwner       = focus ? focus->p.hwnd : 0;
-  ofn.lpstrFilter     = wpf;
+  ofn.lpstrFilter     = wfilter;
   ofn.lpstrInitialDir = wdir;
   ofn.lpstrFile       = wfilename;
   ofn.nMaxFile        = MAX_PATH;
