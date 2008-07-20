@@ -4,7 +4,7 @@ uintptr_t AboutWindow::close(Event) {
 }
 
 void AboutWindow::setup() {
-  create(Window::AutoCenter, 320, 130, translate["About bsnes ..."]);
+  create(Window::AutoCenter, 360, 135, translate["About bsnes ..."]);
   set_icon(48, 48, (uint32_t*)resource::icon48);
 
   icon.create(0, 48, 48);
@@ -13,10 +13,10 @@ void AboutWindow::setup() {
     << translate["Author"] << ": byuu\n"
     << translate["Project began: October 14th, 2004"]
   );
-  contributors.create(0, 275, 70, string()
+  contributors.create(0, 350, 75, string()
     << translate["Contributors:"] << "\n"
-    << "   anomie, blargg, DMV27, GIGO, kode54, Nach,\n"
-    << "   Overload, Richard Bannister, TRAC, zones\n"
+    << "   Andreas Naive, anomie, blargg, DMV27, GIGO, kode54,\n"
+    << "   neviksti, Nach, Overload, Richard Bannister, TRAC, zones\n"
     << "\n"
     << translate["Localization by: byuu"]
   );

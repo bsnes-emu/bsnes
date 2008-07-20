@@ -312,7 +312,7 @@ LRESULT pHiro::wndproc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
     } break;
 
     case WM_PAINT: {
-      if(p && p->self.type == Widget::CanvasType) ((pCanvas*)p)->blit();
+      if(p && p->self.type == Widget::CanvasType) ((pCanvas*)p)->redraw();
     } break;
 
     case WM_COMMAND: {

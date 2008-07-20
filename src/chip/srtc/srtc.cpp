@@ -1,80 +1,9 @@
-/*
-  S-RTC chip emulation
-  Used by Hudson Soft in Dai Kaijuu Monogatari II and Far East of Eden Zero.
-  Currently, only the former is supported by bsnes.
-
-  Original S-RTC emulation code via John Weidman/SNES9x
-  Rewritten for compatibility with bsnes via byuu
-
-  The S-RTC is a real-time clock chip that was added to the above two carts
-  to allow the games to maintain the current time, even when the game was not
-  powered on. Thus allowing special events at certain times, and on certain
-  dates. Hudson Soft called this the PLG (Player's Life Gameplay System).
-
-  This chip is a special case to the term 'emulation' itself.
-  There are a few different ways to go about emulating this chip, and each
-  result in a different style of emulation.
-
-  The first is to simply return the current PC system time when the S-RTC is
-  read from. This emulates the original S-RTC in the sense that it always
-  returns the true current time, ignoring the speed that the SNES itself is
-  running at. The downside to this method is that you lose the ability to set
-  the time to whatever you choose inside the game itself. It will always return
-  the true time, regardless. This can be overcome by changing the PC system time,
-  which actually adds a greater degree of control over event timing, very useful
-  for emulation. It also has a timeshifting flaw discussed below.
-
-  The second is to run the S-RTC relative to the SNES speed. This means that
-  if the emulator is sped up (via fast forward key, frameskipping, etc), or
-  slowed down (via slowdown key, system bottlenecking, etc); the time increments
-  slower, thus ~60 frames on the SNES equal one second. Without this, timeshifting
-  will occur between the S-RTC and the real SNES.
-
-  The third and final method is to save a copy of the local system time when the
-  S-RTC is initially set, and compare the current system time against this value
-  when setting the S-RTC time. This overcomes the first methods' shortcoming of
-  not allowing the player to set the time in-game, however a new problem arises.
-  You now have to save the time when the RTC was initially set to both savestates
-  and to save-game data. This would require an extra file, or the breaking of
-  perhaps the only standard format (.srm savegame backups) in the entire SNES
-  emulation scene. You also give up the control of being able to override the
-  RTC clock at will via the PC system time outside of emulation.
-  The first method has another advantage over the third: Dai Kaijuu Monogatari II
-  only allows dates in the range of the years 1996-2199. The first method gets
-  around this limitation. But who knows, maybe it will break something in the
-  game if the date exceeds 2199... I guess we'll worry about that in two hundred
-  years from now.
-
-  For my implementation, I chose to go with the first method. Both for simplicity
-  and because I did not wish to create a new method for saving the system time
-  whenever the RTC is set.
-*/
-
 #include "../../base.h"
 
-void SRTC::set_time() {
-time_t rawtime;
-tm *t;
-  ::time(&rawtime);
-  t = localtime(&rawtime);
+const unsigned SRTC::months[12] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
 
-//see srtc.h for format of srtc.data[]
-  srtc.data[0]  = t->tm_sec % 10;
-  srtc.data[1]  = t->tm_sec / 10;
-  srtc.data[2]  = t->tm_min % 10;
-  srtc.data[3]  = t->tm_min / 10;
-  srtc.data[4]  = t->tm_hour % 10;
-  srtc.data[5]  = t->tm_hour / 10;
-  srtc.data[6]  = t->tm_mday % 10;
-  srtc.data[7]  = t->tm_mday / 10;
-  srtc.data[8]  = t->tm_mon + 1;
-  srtc.data[9]  = t->tm_year % 10;
-  srtc.data[10] = (t->tm_year / 10) % 10;
-  srtc.data[11] = 9 + (t->tm_year / 100);
-  srtc.data[12] = t->tm_wday;
+void SRTC::init() {
 }
-
-void SRTC::init() {}
 
 void SRTC::enable() {
   memory::mmio.map(0x2800, *this);
@@ -82,108 +11,203 @@ void SRTC::enable() {
 }
 
 void SRTC::power() {
-  memset(&srtc, 0, sizeof(srtc));
   reset();
 }
 
 void SRTC::reset() {
-  srtc.index = -1;
-  srtc.mode  = SRTC_READ;
+  rtc_mode = RTCM_Read;
+  rtc_index = -1;
+  update_time();
+}
+
+void SRTC::update_time() {
+  time_t rtc_time;
+  rtc_time  = memory::cartrtc.read(16);
+  rtc_time |= memory::cartrtc.read(17) << 8;
+  rtc_time |= memory::cartrtc.read(18) << 16;
+  rtc_time |= memory::cartrtc.read(19) << 24;
+
+  time_t current_time = time(0);
+  if(current_time > rtc_time) {
+    unsigned second  = memory::cartrtc.read( 0) + memory::cartrtc.read( 1) * 10;
+    unsigned minute  = memory::cartrtc.read( 2) + memory::cartrtc.read( 3) * 10;
+    unsigned hour    = memory::cartrtc.read( 4) + memory::cartrtc.read( 5) * 10;
+    unsigned day     = memory::cartrtc.read( 6) + memory::cartrtc.read( 7) * 10;
+    unsigned month   = memory::cartrtc.read( 8);
+    unsigned year    = memory::cartrtc.read( 9) + memory::cartrtc.read(10) * 10 + memory::cartrtc.read(11) * 100;
+    unsigned weekday = memory::cartrtc.read(12);
+
+    day--;
+    month--;
+    year += 1000;
+
+    second += (unsigned)(current_time - rtc_time);
+
+    while(second >= 60) {
+      second -= 60;
+
+      minute++;
+      if(minute < 60) continue;
+      minute = 0;
+
+      hour++;
+      if(hour < 24) continue;
+      hour = 0;
+
+      day++;
+      weekday = (weekday + 1) % 7;
+      unsigned days = months[month % 12];
+      if(days == 28) {
+        bool leapyear = false;
+        if((year % 4) == 0) {
+          leapyear = true;
+          if((year % 100) == 0 && (year % 400) != 0) leapyear = false;
+        }
+        if(leapyear) days++;
+      }
+      if(day < days) continue;
+      day = 0;
+
+      month++;
+      if(month < 12) continue;
+      month = 0;
+
+      year++;
+    }
+
+    day++;
+    month++;
+    year -= 1000;
+
+    memory::cartrtc.write( 0, second % 10);
+    memory::cartrtc.write( 1, second / 10);
+    memory::cartrtc.write( 2, minute % 10);
+    memory::cartrtc.write( 3, minute / 10);
+    memory::cartrtc.write( 4, hour % 10);
+    memory::cartrtc.write( 5, hour / 10);
+    memory::cartrtc.write( 6, day % 10);
+    memory::cartrtc.write( 7, day / 10);
+    memory::cartrtc.write( 8, month);
+    memory::cartrtc.write( 9, year % 10);
+    memory::cartrtc.write(10, (year / 10) % 10);
+    memory::cartrtc.write(11, year / 100);
+    memory::cartrtc.write(12, weekday % 7);
+  }
+
+  memory::cartrtc.write(16, current_time);
+  memory::cartrtc.write(17, current_time >> 8);
+  memory::cartrtc.write(18, current_time >> 16);
+  memory::cartrtc.write(19, current_time >> 24);
+}
+
+//returns day of week for specified date
+//eg 0 = Sunday, 1 = Monday, ... 6 = Saturday
+//usage: weekday(2008, 1, 1) returns weekday of January 1st, 2008
+unsigned SRTC::weekday(unsigned year, unsigned month, unsigned day) {
+  unsigned y = 1900, m = 1; //epoch is 1900-01-01
+  unsigned sum = 0; //number of days passed since epoch
+
+  year = max(1900, year);
+  month = max(1, min(12, month));
+  day = max(1, min(31, day));
+
+  while(y < year) {
+    bool leapyear = false;
+    if((y % 4) == 0) {
+      leapyear = true;
+      if((y % 100) == 0 && (y % 400) != 0) leapyear = false;
+    }
+    sum += leapyear ? 366 : 365;
+    y++;
+  }
+
+  while(m < month) {
+    unsigned days = months[m - 1];
+    if(days == 28) {
+      bool leapyear = false;
+      if((y % 4) == 0) {
+        leapyear = true;
+        if((y % 100) == 0 && (y % 400) != 0) leapyear = false;
+      }
+      if(leapyear) days++;
+    }
+    sum += days;
+    m++;
+  }
+
+  sum += day - 1;
+  return (sum + 1) % 7; //1900-01-01 was a Monday
 }
 
 uint8 SRTC::mmio_read(uint addr) {
-  switch(addr & 0xffff) {
+  addr &= 0xffff;
 
-  case 0x2800: {
-    if(srtc.mode == SRTC_READ) {
-      if(srtc.index < 0) {
-        set_time();
-        srtc.index++;
-        return 0x0f; //send start message
-      } else if(srtc.index > MAX_SRTC_INDEX) {
-        srtc.index = -1;
-        return 0x0f; //send finished message
-      } else {
-        return srtc.data[srtc.index++];
-      }
+  if(addr == 0x2800) {
+    if(rtc_mode != RTCM_Read) return 0x00;
+
+    if(rtc_index < 0) {
+      update_time();
+      rtc_index++;
+      return 0x0f;
+    } else if(rtc_index > 12) {
+      rtc_index = -1;
+      return 0x0f;
     } else {
-      return 0x00;
+      return memory::cartrtc.read(rtc_index++);
     }
-  } break;
-
-  case 0x2801: {
-  } break;
-
   }
 
   return cpu.regs.mdr;
 }
 
-//Please see notes above about the implementation of the S-RTC
-//Writes are stored the srtc.data[] array, but they are ignored
-//as reads will refresh the data array with the current system
-//time. The write method is only here for the sake of faux
-//emulation of the real hardware.
 void SRTC::mmio_write(uint addr, uint8 data) {
-  switch(addr & 0xffff) {
+  addr &= 0xffff;
 
-  case 0x2800: {
-  } break;
-
-  case 0x2801: {
+  if(addr == 0x2801) {
     data &= 0x0f; //only the low four bits are used
 
-    if(data >= 0x0d) {
-      switch(data) {
-      case 0x0d:
-        srtc.mode  = SRTC_READ;
-        srtc.index = -1;
-        break;
-      case 0x0e:
-        srtc.mode = SRTC_COMMAND;
-        break;
-      case 0x0f:
-      //unknown behaviour
-        break;
-      }
+    if(data == 0x0d) {
+      rtc_mode = RTCM_Read;
+      rtc_index = -1;
       return;
     }
 
-    if(srtc.mode == SRTC_WRITE) {
-      if(srtc.index >= 0 && srtc.index < MAX_SRTC_INDEX) {
-        srtc.data[srtc.index++] = data;
+    if(data == 0x0e) {
+      rtc_mode = RTCM_Command;
+      return;
+    }
 
-        if(srtc.index == MAX_SRTC_INDEX) {
-        //all S-RTC data has been loaded by program
-          srtc.data[srtc.index++] = 0x00; //day_of_week
+    if(data == 0x0f) return; //unknown behavior
+
+    if(rtc_mode == RTCM_Write) {
+      if(rtc_index >= 0 && rtc_index < 12) {
+        memory::cartrtc.write(rtc_index++, data);
+
+        if(rtc_index == 12) {
+          //day of week is automatically calculated and written
+          unsigned day   = memory::cartrtc.read( 6) + memory::cartrtc.read( 7) * 10;
+          unsigned month = memory::cartrtc.read( 8);
+          unsigned year  = memory::cartrtc.read( 9) + memory::cartrtc.read(10) * 10 + memory::cartrtc.read(11) * 100;
+          year += 1000;
+
+          memory::cartrtc.write(rtc_index++, weekday(year, month, day));
         }
       }
-    } else if(srtc.mode == SRTC_COMMAND) {
-      switch(data) {
-      case SRTC_COMMAND_CLEAR:
-        memset(srtc.data, 0, MAX_SRTC_INDEX + 1);
-        srtc.index = -1;
-        srtc.mode  = SRTC_READY;
-        break;
-      case SRTC_COMMAND_WRITE:
-        srtc.index = 0;
-        srtc.mode  = SRTC_WRITE;
-        break;
-      default:
-      //unknown behaviour
-        srtc.mode  = SRTC_READY;
-        break;
-      }
-    } else {
-      if(srtc.mode == SRTC_READ) {
-      //ignore writes while in read mode
-      } else if(srtc.mode == SRTC_READY) {
-      //unknown behaviour
+    } else if(rtc_mode == RTCM_Command) {
+      if(data == 0) {
+        rtc_mode = RTCM_Write;
+        rtc_index = 0;
+      } else if(data == 4) {
+        rtc_mode = RTCM_Ready;
+        rtc_index = -1;
+        for(unsigned i = 0; i < 13; i++) memory::cartrtc.write(i, 0);
+      } else {
+        //unknown behavior
+        rtc_mode = RTCM_Ready;
       }
     }
-  } break;
-
   }
 }
 
-SRTC::SRTC() {}
+SRTC::SRTC() {
+}

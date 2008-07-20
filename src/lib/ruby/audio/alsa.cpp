@@ -13,15 +13,16 @@ public:
   struct {
     snd_pcm_t *handle;
     snd_pcm_format_t format;
+    snd_pcm_uframes_t buffer_size;
+    snd_pcm_uframes_t period_size;
     int channels;
     const char *name;
     unsigned latency;
   } device;
 
   struct {
-    uint16_t *data;
+    uint32_t *data;
     unsigned length;
-    unsigned size;
   } buffer;
 
   struct {
@@ -53,30 +54,27 @@ public:
   void sample(uint16_t left, uint16_t right) {
     if(!device.handle) return;
 
-    buffer.data[buffer.length++] = left;
-    buffer.data[buffer.length++] = right;
-    if(buffer.length + 2 < buffer.size) return; //will crash in some cases if not stopped two before
-
-    snd_pcm_sframes_t written = snd_pcm_writei(device.handle, buffer.data, buffer.length);
-    if(written < 0) {
-      snd_pcm_recover(device.handle, written, 1);
-      //no samples written, drop one sample to prevent possible emulation stall
-      buffer.length -= 2;
-      memmove(buffer.data, buffer.data + 2, buffer.length * sizeof(uint16_t));
-    } else if(written < buffer.length) {
-      //only some samples written
-      buffer.length -= written;
-      memmove(buffer.data, buffer.data + written, buffer.length * sizeof(uint16_t));
-    } else {
-      //all samples written
-      buffer.length = 0;
-    }
+    buffer.data[buffer.length++] = left + (right << 16);
+    if(buffer.length < device.period_size) return;
+    uint32_t *buffer_ptr = buffer.data;
+    do {
+      snd_pcm_sframes_t written = snd_pcm_writei(device.handle, buffer_ptr, buffer.length);
+      if(written < 0) {
+        //no samples written
+        snd_pcm_recover(device.handle, written, 1);
+      } else if(written < buffer.length) {
+        //only some samples written
+        buffer.length -= written;
+        buffer_ptr += written;
+      } else {
+        //all samples written
+        buffer.length = 0;
+      }
+    } while(buffer.length > 0);
   }
 
   bool init() {
-    buffer.data = new uint16_t[buffer.size];
-
-    if(snd_pcm_open(&device.handle, device.name, SND_PCM_STREAM_PLAYBACK, SND_PCM_NONBLOCK) < 0) {
+    if(snd_pcm_open(&device.handle, device.name, SND_PCM_STREAM_PLAYBACK, 0) < 0) {
       //failed to initialize
       term();
       return false;
@@ -89,6 +87,11 @@ public:
       return false;
     }
 
+    if(snd_pcm_get_params(device.handle, &device.buffer_size, &device.period_size) < 0) {
+      device.period_size = device.latency * 1e-6 * settings.frequency / 4;
+    }
+
+    buffer.data = new uint32_t[device.period_size];
     return true;
   }
 
@@ -110,11 +113,10 @@ public:
     device.format = SND_PCM_FORMAT_S16_LE;
     device.channels = 2;
     device.name = "default";
-    device.latency = 90;
+    device.latency = 100000;
 
     buffer.data = 0;
     buffer.length = 0;
-    buffer.size = device.latency * 32;
 
     settings.frequency = 22050;
   }

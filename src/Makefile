@@ -79,7 +79,7 @@ link += $(if $(findstring input.sdl,$(ruby)),`sdl-config --libs`)
 
 objects = main libco hiro ruby libfilter string reader cart cheat \
   memory smemory cpu scpu smp ssmp sdsp ppu bppu snes \
-  bsx srtc sdd1 cx4 dsp1 dsp2 dsp3 dsp4 obc1 st010
+  bsx srtc sdd1 spc7110 cx4 dsp1 dsp2 dsp3 dsp4 obc1 st010
 
 ifeq ($(enable_gzip),true)
   objects += adler32 compress crc32 deflate gzio inffast inflate inftrees ioapi trees unzip zip zutil
@@ -196,16 +196,17 @@ obj/snes.$(obj): snes/snes.cpp snes/* snes/scheduler/* snes/video/* snes/audio/*
 ### special chips ###
 #####################
 
-obj/bsx.$(obj)  : chip/bsx/bsx.cpp chip/bsx/*
-obj/srtc.$(obj) : chip/srtc/srtc.cpp chip/srtc/*
-obj/sdd1.$(obj) : chip/sdd1/sdd1.cpp chip/sdd1/*
-obj/cx4.$(obj)  : chip/cx4/cx4.cpp chip/cx4/*
-obj/dsp1.$(obj) : chip/dsp1/dsp1.cpp chip/dsp1/*
-obj/dsp2.$(obj) : chip/dsp2/dsp2.cpp chip/dsp2/*
-obj/dsp3.$(obj) : chip/dsp3/dsp3.cpp chip/dsp3/*
-obj/dsp4.$(obj) : chip/dsp4/dsp4.cpp chip/dsp4/*
-obj/obc1.$(obj) : chip/obc1/obc1.cpp chip/obc1/*
-obj/st010.$(obj): chip/st010/st010.cpp chip/st010/*
+obj/bsx.$(obj)    : chip/bsx/bsx.cpp chip/bsx/*
+obj/srtc.$(obj)   : chip/srtc/srtc.cpp chip/srtc/*
+obj/sdd1.$(obj)   : chip/sdd1/sdd1.cpp chip/sdd1/*
+obj/spc7110.$(obj): chip/spc7110/spc7110.cpp chip/spc7110/*
+obj/cx4.$(obj)    : chip/cx4/cx4.cpp chip/cx4/*
+obj/dsp1.$(obj)   : chip/dsp1/dsp1.cpp chip/dsp1/*
+obj/dsp2.$(obj)   : chip/dsp2/dsp2.cpp chip/dsp2/*
+obj/dsp3.$(obj)   : chip/dsp3/dsp3.cpp chip/dsp3/*
+obj/dsp4.$(obj)   : chip/dsp4/dsp4.cpp chip/dsp4/*
+obj/obc1.$(obj)   : chip/obc1/obc1.cpp chip/obc1/*
+obj/st010.$(obj)  : chip/st010/st010.cpp chip/st010/*
 
 ############
 ### zlib ###

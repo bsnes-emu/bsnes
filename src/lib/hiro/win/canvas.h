@@ -12,6 +12,5 @@ public:
   BITMAPINFO bmi;
   uint32_t *ibuffer;
   uint ipitch, iwidth, iheight;
-  void blit();
   void resize(uint width, uint height);
 };

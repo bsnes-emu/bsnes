@@ -30,6 +30,13 @@ uint16_t pHiro::translate_key(uint key) {
     case '8': return keyboard::num_8;
     case '9': return keyboard::num_9;
 
+    case VK_INSERT: return keyboard::insert;
+    case VK_DELETE: return keyboard::delete_;
+    case VK_HOME:   return keyboard::home;
+    case VK_END:    return keyboard::end;
+    case VK_PRIOR:  return keyboard::page_up;
+    case VK_NEXT:   return keyboard::page_down;
+
     case 'A': return keyboard::a;
     case 'B': return keyboard::b;
     case 'C': return keyboard::c;

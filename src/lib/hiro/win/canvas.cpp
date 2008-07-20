@@ -8,6 +8,11 @@ void pCanvas::create(uint style, uint width, uint height) {
 }
 
 void pCanvas::redraw() {
+  PAINTSTRUCT ps;
+  BeginPaint(hwnd, &ps);
+  SetDIBitsToDevice(ps.hdc, 0, 0, iwidth, iheight, 0, 0, 0, iheight, (void*)ibuffer, &bmi, DIB_RGB_COLORS);
+  EndPaint(hwnd, &ps);
+  InvalidateRect(hwnd, 0, FALSE);
 }
 
 uint32_t* pCanvas::buffer() {
@@ -29,13 +34,6 @@ pCanvas::~pCanvas() {
 }
 
 /* internal */
-
-void pCanvas::blit() {
-  PAINTSTRUCT ps;
-  BeginPaint(hwnd, &ps);
-  SetDIBitsToDevice(ps.hdc, 0, 0, iwidth, iheight, 0, 0, 0, iheight, (void*)ibuffer, &bmi, DIB_RGB_COLORS);
-  EndPaint(hwnd, &ps);
-}
 
 void pCanvas::resize(uint width, uint height) {
   if(ibuffer) free(ibuffer);

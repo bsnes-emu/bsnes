@@ -32,9 +32,18 @@ void sBus::map_generic() {
       map_generic_sram();
     } break;
 
+    case Cartridge::SPC7110ROM: {
+      map(MapDirect, 0x00, 0x00, 0x6000, 0x7fff, spc7110);
+      map(MapDirect, 0x00, 0x0f, 0x8000, 0xffff, spc7110);
+      map(MapDirect, 0x30, 0x30, 0x6000, 0x7fff, spc7110);
+      map(MapDirect, 0x50, 0x50, 0x0000, 0xffff, spc7110);
+      map(MapDirect, 0x80, 0x8f, 0x8000, 0xffff, spc7110);
+      map(MapDirect, 0xc0, 0xff, 0x0000, 0xffff, spc7110);
+    } break;
+
     case Cartridge::BSXROM: {
-    //full map is dynamically mapped by:
-    //src/chip/bsx/bsx_cart.cpp : BSXCart::update_memory_map();
+      //full map is dynamically mapped by:
+      //src/chip/bsx/bsx_cart.cpp : BSXCart::update_memory_map();
       map(MapLinear, 0x00, 0x3f, 0x8000, 0xffff, memory::cartrom);
       map(MapLinear, 0x80, 0xbf, 0x8000, 0xffff, memory::cartrom);
     } break;

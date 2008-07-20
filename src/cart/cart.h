@@ -32,6 +32,7 @@ public:
     HiROM,
     ExLoROM,
     ExHiROM,
+    SPC7110ROM,
     BSXROM,
     BSCLoROM,
     BSCHiROM,
@@ -48,8 +49,8 @@ public:
   struct {
     bool loaded;
     char fn[PATH_MAX];
-    uint8 *rom, *ram;
-    uint rom_size, ram_size;
+    uint8 *rom, *ram, *rtc;
+    uint rom_size, ram_size, rtc_size;
   } cart;
 
   struct {
@@ -85,6 +86,7 @@ public:
     bool srtc;
     bool sdd1;
     bool spc7110;
+    bool spc7110rtc;
     bool cx4;
     bool dsp1;
     bool dsp2;
@@ -143,11 +145,12 @@ public:
 private:
   char patchfn[PATH_MAX];
   char savefn[PATH_MAX];
+  char rtcfn[PATH_MAX];
   char cheatfn[PATH_MAX];
 };
 
 namespace memory {
-  extern MappedRAM cartrom, cartram;
+  extern MappedRAM cartrom, cartram, cartrtc;
   extern MappedRAM bscram;
   extern MappedRAM stArom, stAram;
   extern MappedRAM stBrom, stBram;

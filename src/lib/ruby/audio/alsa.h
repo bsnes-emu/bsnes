@@ -1,6 +1,6 @@
 /*
-  audio.alsa (2008-05-04)
-  author: Nach
+  audio.alsa (2008-06-01)
+  authors: Nach, RedDwarf
 */
 
 class pAudioALSA;

@@ -7,6 +7,7 @@ BSXCart  bsxcart;
 BSXFlash bsxflash;
 SRTC     srtc;
 SDD1     sdd1;
+SPC7110  spc7110;
 Cx4      cx4;
 DSP1     dsp1;
 DSP2     dsp2;
@@ -34,6 +35,7 @@ void SNES::init() {
   bsxflash.init();
   srtc.init();
   sdd1.init();
+  spc7110.init();
   cx4.init();
   dsp1.init();
   dsp2.init();
@@ -67,6 +69,7 @@ void SNES::power() {
   if(cartridge.info.bsxflash) bsxflash.power();
   if(cartridge.info.srtc)     srtc.power();
   if(cartridge.info.sdd1)     sdd1.power();
+  if(cartridge.info.spc7110)  spc7110.power();
   if(cartridge.info.cx4)      cx4.power();
   if(cartridge.info.dsp1)     dsp1.power();
   if(cartridge.info.dsp2)     dsp2.power();
@@ -87,6 +90,7 @@ void SNES::power() {
   if(cartridge.info.bsxflash) bsxflash.enable();
   if(cartridge.info.srtc)     srtc.enable();
   if(cartridge.info.sdd1)     sdd1.enable();
+  if(cartridge.info.spc7110)  spc7110.enable();
   if(cartridge.info.cx4)      cx4.enable();
   if(cartridge.info.dsp1)     dsp1.enable();
   if(cartridge.info.dsp2)     dsp2.enable();
@@ -112,6 +116,7 @@ void SNES::reset() {
   if(cartridge.info.bsxflash) bsxflash.reset();
   if(cartridge.info.srtc)     srtc.reset();
   if(cartridge.info.sdd1)     sdd1.reset();
+  if(cartridge.info.spc7110)  spc7110.reset();
   if(cartridge.info.cx4)      cx4.reset();
   if(cartridge.info.dsp1)     dsp1.reset();
   if(cartridge.info.dsp2)     dsp2.reset();

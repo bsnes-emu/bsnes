@@ -13,7 +13,7 @@
 #include "cart_header.cpp"
 
 namespace memory {
-  MappedRAM cartrom, cartram;
+  MappedRAM cartrom, cartram, cartrtc;
   MappedRAM bscram;
   MappedRAM stArom, stAram;
   MappedRAM stBrom, stBram;
@@ -27,12 +27,12 @@ Cartridge::Region Cartridge::region() { return info.region; }
 bool Cartridge::loaded() { return cart.loaded; }
 
 void Cartridge::load_begin(CartridgeType cart_type) {
-  cart.rom = cart.ram = 0;
+  cart.rom = cart.ram = cart.rtc = 0;
   bs.ram   = 0;
   stA.rom  = stA.ram  = 0;
   stB.rom  = stB.ram  = 0;
 
-  cart.rom_size = cart.ram_size = 0;
+  cart.rom_size = cart.ram_size = cart.rtc_size = 0;
   bs.ram_size   = 0;
   stA.rom_size  = stA.ram_size  = 0;
   stB.rom_size  = stB.ram_size  = 0;
@@ -44,20 +44,21 @@ void Cartridge::load_begin(CartridgeType cart_type) {
   info.bsxflash = false;
   info.st       = false;
 
-  info.superfx = false;
-  info.sa1     = false;
-  info.spc7110 = false;
-  info.srtc    = false;
-  info.sdd1    = false;
-  info.cx4     = false;
-  info.dsp1    = false;
-  info.dsp2    = false;
-  info.dsp3    = false;
-  info.dsp4    = false;
-  info.obc1    = false;
-  info.st010   = false;
-  info.st011   = false;
-  info.st018   = false;
+  info.superfx    = false;
+  info.sa1        = false;
+  info.srtc       = false;
+  info.sdd1       = false;
+  info.spc7110    = false;
+  info.spc7110rtc = false;
+  info.cx4        = false;
+  info.dsp1       = false;
+  info.dsp2       = false;
+  info.dsp3       = false;
+  info.dsp4       = false;
+  info.obc1       = false;
+  info.st010      = false;
+  info.st011      = false;
+  info.st018      = false;
 
   info.dsp1_mapper = DSP1Unmapped;
 
@@ -73,6 +74,7 @@ void Cartridge::load_begin(CartridgeType cart_type) {
 void Cartridge::load_end() {
   memory::cartrom.map(cart.rom, cart.rom_size);
   memory::cartram.map(cart.ram, cart.ram_size);
+  memory::cartrtc.map(cart.rtc, cart.rtc_size);
   memory::bscram.map(bs.ram, bs.ram_size);
   memory::stArom.map(stA.rom, stA.rom_size);
   memory::stAram.map(stA.ram, stA.ram_size);
@@ -110,6 +112,7 @@ bool Cartridge::unload() {
 
   if(cart.rom) { delete[] cart.rom; cart.rom = 0; }
   if(cart.ram) { delete[] cart.ram; cart.ram = 0; }
+  if(cart.rtc) { delete[] cart.rtc; cart.rtc = 0; }
   if(bs.ram)   { delete[] bs.ram;   bs.ram   = 0; }
   if(stA.rom)  { delete[] stA.rom;  stA.rom  = 0; }
   if(stA.ram)  { delete[] stA.ram;  stA.ram  = 0; }

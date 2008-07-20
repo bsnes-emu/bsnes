@@ -40,6 +40,14 @@ void Cartridge::load_cart_normal(const char *filename) {
     }
   }
 
+  if(info.srtc || info.spc7110rtc) {
+    cart.rtc = new(zeromemory) uint8_t[cart.rtc_size = 20];
+    if(load_file(get_save_filename(cart.fn, "rtc"), data, size, CompressionNone) == true) {
+      memcpy(cart.rtc, data, min(size, cart.rtc_size));
+      delete[] data;
+    }
+  }
+
   load_end();
 
   //set base filename
@@ -49,6 +57,7 @@ void Cartridge::load_cart_normal(const char *filename) {
 
 void Cartridge::unload_cart_normal() {
   if(cart.ram) save_file(get_save_filename(cart.fn, "srm"), cart.ram, cart.ram_size);
+  if(cart.rtc) save_file(get_save_filename(cart.fn, "rtc"), cart.rtc, cart.rtc_size);
 }
 
 #endif //ifdef CART_CPP

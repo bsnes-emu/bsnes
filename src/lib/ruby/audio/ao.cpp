@@ -47,16 +47,23 @@ public:
 
   bool init() {
     driver_id = ao_default_driver_id(); //ao_driver_id((const char*)driver)
-    if(driver_id < 0) driver_id = ao_default_driver_id(); //fallback on default if driver doesn't exist
+    if(driver_id < 0) return false;
+
     driver_format.bits = 16;
     driver_format.channels = 2;
     driver_format.rate = settings.frequency;
     driver_format.byte_format = AO_FMT_LITTLE;
 
-    audio_device = ao_open_live(driver_id, &driver_format, 0);
+    ao_option *options = 0;
+    ao_info *di = ao_driver_info(driver_id);
+    if(!di) return false;
+    if(!strcmp(di->short_name, "alsa")) {
+      ao_append_option(&options, "buffer_time", "100000"); //100ms latency (default was 500ms)
+    }
+
+    audio_device = ao_open_live(driver_id, &driver_format, options);
     if(!audio_device) return false;
 
-    ao_info *di = ao_driver_info(driver_id);
     return true;
   }
 

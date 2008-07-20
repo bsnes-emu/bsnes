@@ -66,7 +66,8 @@ such software.
 libco, author: byuu
 libui, author: byuu
 OBC-1 emu, author: byuu
-S-DD1 emu, author: Andreas Naive
+S-DD1 decompressor, author: Andreas Naive
+SPC7110 decompressor, author: neviksti
 S-RTC emu, author: byuu
 
 Any software listed above as exemptions may be relicensed individually from

@@ -1,10 +1,10 @@
 bsnes
-Version: 0.032a
+Version: 0.033
 Author: byuu
 
---------
+========
 General:
---------
+========
 bsnes is a Super Nintendo / Super Famicom emulator that began on
 October 14th, 2004.
 
@@ -13,9 +13,9 @@ http://byuu.org/
 
 Please see license.txt for important licensing information.
 
---------------
+==============
 Configuration:
---------------
+==============
 bsnes has two configuration files: bsnes.cfg, for program settings; and
 locale.cfg, for localization.
 
@@ -36,9 +36,9 @@ If you wish to have multiple configuration profiles for the same user, you will
 need to make copies of the bsnes executable, and use each one in single-user
 mode.
 
-------------------
+==================
 Known Limitations:
-------------------
+==================
 S-CPU
 - Multiply / divide register delays not implemented
 
@@ -56,9 +56,9 @@ Hardware Bugs
 - S-CPU.r1 HDMA crashing bug not emulated
 - S-CPU<>S-SMP communication bus conflicts not emulated
 
----------------------
+=====================
 Unsupported Hardware:
----------------------
+=====================
 SA-1
 Coprocessor used in many popular games, including:
 - Dragon Ball Z Hyper Dimension
@@ -75,13 +75,6 @@ Coprocessor used in many popular games, including:
 - Star Fox 2 (unreleased beta)
 - Super Mario World 2: Yoshi's Island
 
-SPC7110
-Coprocessor used only by the following games:
-- Far East of Eden Zero
-- Far East of Eden Zero: Shounen Jump no Shou
-- Momotarou Densetsu Happy
-- Super Power League 4
-
 ST-011
 SETA DSP used by Quick-move Shogi Match with Nidan Rank-holder Morita
 
@@ -91,9 +84,9 @@ SETA RISC CPU used by Quick-move Shogi Match with Nidan Rank-holder Morita 2
 Super Gameboy
 Cartridge passthrough used for playing Gameboy games
 
-------------------------
+========================
 Unsupported Controllers:
-------------------------
+========================
 Mouse
 Super Scope
 Justifier

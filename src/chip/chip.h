@@ -1,6 +1,7 @@
 #include "bsx/bsx.h"
 #include "srtc/srtc.h"
 #include "sdd1/sdd1.h"
+#include "spc7110/spc7110.h"
 #include "cx4/cx4.h"
 #include "dsp1/dsp1.h"
 #include "dsp2/dsp2.h"

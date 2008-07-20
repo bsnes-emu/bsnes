@@ -318,7 +318,6 @@ void load_cart_normal(const char *filename) {
   const char *name;
   if(cartridge.info.superfx) { name = "SuperFX"; replace(message, "$", name); alert(message); }
   if(cartridge.info.sa1)     { name = "SA-1";    replace(message, "$", name); alert(message); }
-  if(cartridge.info.spc7110) { name = "SPC7110"; replace(message, "$", name); alert(message); }
   if(cartridge.info.st011)   { name = "ST011";   replace(message, "$", name); alert(message); }
   if(cartridge.info.st018)   { name = "ST018";   replace(message, "$", name); alert(message); }
 

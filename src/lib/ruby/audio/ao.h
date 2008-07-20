@@ -1,6 +1,6 @@
 /*
-  audio.ao (2007-12-26)
-  author: Nach
+  audio.ao (2008-06-01)
+  authors: Nach, RedDwarf
 */
 
 class pAudioAO;

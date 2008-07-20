@@ -52,8 +52,9 @@ void Cartridge::read_header() {
   }
 
   if(mapper == 0x3a && (rom_type == 0xf5 || rom_type == 0xf9)) {
-    //rom_type: 0xf5 = no S-RTC, 0xf9 = S-RTC
     info.spc7110 = true;
+    info.spc7110rtc = (rom_type == 0xf9);
+    info.mapper = SPC7110ROM;
   }
 
   if(mapper == 0x20 && rom_type == 0xf3) {
@@ -179,7 +180,7 @@ void Cartridge::find_header() {
     score_ex = 0;
   } else {
     if(rom[0x7fc0 + MAPPER] == 0x32) score_lo++;
-    else score_ex += 16;
+    else score_ex += 12;
   }
 
   if(score_lo >= score_hi && score_lo >= score_ex) {
