@@ -2,7 +2,6 @@
 
 #include "base/main.cpp"
 #include "base/about.cpp"
-#include "base/message.cpp"
 
 #include "loader/bsxloader.cpp"
 #include "loader/stloader.cpp"
@@ -20,7 +19,6 @@ void ui_init() {
 
   window_main.setup();
   window_about.setup();
-  window_message.setup();
 
   window_bsxloader.setup();
   window_stloader.setup();
@@ -45,6 +43,7 @@ void ui_init() {
   video.set(Video::Synchronize, false);
   audio.set(Audio::Handle, window_main.handle());
   input.set(Input::Handle, window_main.handle());
+  input.set(Input::AnalogAxisResistance, config::input.analog_axis_resistance);
   //sets Audio::Synchronize and Audio::Frequency
   event::update_emulation_speed(config::system.emulation_speed);
 

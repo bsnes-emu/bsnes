@@ -71,6 +71,7 @@ public:
     uint32 crc32;
     char filename[PATH_MAX * 4];
     char name[128];
+    bool patched;
 
     Region region;
     MemoryMapper mapper;

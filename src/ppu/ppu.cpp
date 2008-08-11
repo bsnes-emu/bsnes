@@ -37,7 +37,7 @@ PPU::PPU() {
   status.frames_executed = 0;
 
   ppu1_version = 1;
-  ppu2_version = 1;
+  ppu2_version = 3;
 }
 
 PPU::~PPU() {

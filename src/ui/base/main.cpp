@@ -49,6 +49,14 @@ uintptr_t MainWindow::event(Event e) {
       event::power();
     }
 
+    if(e.widget == &menu_system_controller_port1_none)     { event::update_controller_port1(0); }
+    if(e.widget == &menu_system_controller_port1_joypad)   { event::update_controller_port1(1); }
+    if(e.widget == &menu_system_controller_port1_multitap) { event::update_controller_port1(2); }
+
+    if(e.widget == &menu_system_controller_port2_none)     { event::update_controller_port2(0); }
+    if(e.widget == &menu_system_controller_port2_joypad)   { event::update_controller_port2(1); }
+    if(e.widget == &menu_system_controller_port2_multitap) { event::update_controller_port2(2); }
+
     if(e.widget == &menu_file_exit) {
       event(Event(Event::Close));
     }
@@ -133,11 +141,31 @@ void MainWindow::setup() {
       menu_file_load_special.attach(menu_file_load_bsc.create(string() << translate["Load BS-X Slotted Cartridge"] << " ..."));
       menu_file_load_special.attach(menu_file_load_st.create(string() << translate["Load Sufami Turbo Cartridge"] << " ..."));
     menu_file.attach(menu_file_unload.create(translate["Unload Cartridge"]));
+
     menu_file.attach(menu_file_sep1.create());
     menu_file.attach(menu_file_reset.create(translate["Reset"]));
     menu_file_power.create(translate["Power Cycle"]);
     if(config::advanced.enable) menu_file.attach(menu_file_power);
+
     menu_file.attach(menu_file_sep2.create());
+    menu_file.attach(menu_system_controller_port1.create(translate["Controller Port 1"]));
+      group.add(&menu_system_controller_port1_none);
+      group.add(&menu_system_controller_port1_joypad);
+      group.add(&menu_system_controller_port1_multitap);
+      menu_system_controller_port1.attach(menu_system_controller_port1_none.create    (group, translate["None"]));
+      menu_system_controller_port1.attach(menu_system_controller_port1_joypad.create  (group, translate["Joypad"]));
+      menu_system_controller_port1.attach(menu_system_controller_port1_multitap.create(group, translate["Multitap"]));
+      group.reset();
+    menu_file.attach(menu_system_controller_port2.create(translate["Controller Port 2"]));
+      group.add(&menu_system_controller_port2_none);
+      group.add(&menu_system_controller_port2_joypad);
+      group.add(&menu_system_controller_port2_multitap);
+      menu_system_controller_port2.attach(menu_system_controller_port2_none.create    (group, translate["None"]));
+      menu_system_controller_port2.attach(menu_system_controller_port2_joypad.create  (group, translate["Joypad"]));
+      menu_system_controller_port2.attach(menu_system_controller_port2_multitap.create(group, translate["Multitap"]));
+      group.reset();
+
+    menu_file.attach(menu_file_sep3.create());
     menu_file.attach(menu_file_exit.create(translate["Exit"]));
 
   attach(menu_settings.create(translate["Settings"]));
@@ -206,8 +234,8 @@ void MainWindow::setup() {
 
     menu_settings.attach(menu_settings_sep1.create());
     menu_settings.attach(menu_settings_mute.create(translate["Mute Audio Output"]));
-    menu_settings.attach(menu_settings_sep2.create());
 
+    menu_settings.attach(menu_settings_sep2.create());
     menu_settings.attach(menu_settings_emuspeed.create(translate["Emulation Speed"]));
       group.add(&menu_settings_emuspeed_slowest);
       group.add(&menu_settings_emuspeed_slow);
@@ -222,8 +250,6 @@ void MainWindow::setup() {
       menu_settings_emuspeed.attach(menu_settings_emuspeed_fastest.create(group, translate["200%"]));
       menu_settings_emuspeed.attach(menu_settings_emuspeed_disabled.create(group, translate["Uncapped"]));
       group.reset();
-
-    menu_settings.attach(menu_settings_sep3.create());
     menu_settings.attach(menu_settings_config.create(string() << translate["Configuration"] << " ..."));
 
   attach(menu_misc.create(translate["Misc"]));
@@ -251,6 +277,14 @@ void MainWindow::setup() {
   menu_file_unload.on_tick =
   menu_file_reset.on_tick =
   menu_file_power.on_tick =
+
+  menu_system_controller_port1_none.on_tick =
+  menu_system_controller_port1_joypad.on_tick =
+  menu_system_controller_port1_multitap.on_tick =
+
+  menu_system_controller_port2_none.on_tick =
+  menu_system_controller_port2_joypad.on_tick =
+  menu_system_controller_port2_multitap.on_tick =
 
   menu_settings_videomode_1x.on_tick =
   menu_settings_videomode_2x.on_tick =
@@ -300,6 +334,18 @@ void MainWindow::setup() {
 
 void MainWindow::sync() {
   event::load_video_settings();
+
+  switch(config::snes.controller_port1) { default:
+    case SNES::Input::DeviceNone:     menu_system_controller_port1_none.check();     break;
+    case SNES::Input::DeviceJoypad:   menu_system_controller_port1_joypad.check();   break;
+    case SNES::Input::DeviceMultitap: menu_system_controller_port1_multitap.check(); break;
+  }
+
+  switch(config::snes.controller_port2) {
+    case SNES::Input::DeviceNone:     menu_system_controller_port2_none.check();     break;
+    case SNES::Input::DeviceJoypad:   menu_system_controller_port2_joypad.check();   break;
+    case SNES::Input::DeviceMultitap: menu_system_controller_port2_multitap.check(); break;
+  }
 
   switch(event::video_settings.multiplier) { default:
     case 1: menu_settings_videomode_1x.check(); break;

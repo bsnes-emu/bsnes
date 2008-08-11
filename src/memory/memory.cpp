@@ -6,6 +6,7 @@
 namespace memory {
   MMIOAccess mmio;
   StaticRAM  wram(128 * 1024);
+  StaticRAM  apuram(64 * 1024);
 
   UnmappedMemory memory_unmapped;
   UnmappedMMIO   mmio_unmapped;

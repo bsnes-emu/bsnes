@@ -1,102 +1,78 @@
 #ifdef SNES_CPP
 
-bool SNES::Input::port_read(bool port) {
-  if(port == 0) {
-    switch(input.port0_device) {
-      case DeviceNone: return false;
+uint8 SNES::Input::port_read(bool port) {
+  switch(port_device[port]) {
+    case DeviceJoypad: {
+      if(port_counter0[port] >= 16) return 1;
 
-      default: {
-        if(input.port0_devicebitpos < input.port0_devicebits) {
-          return input.port0_bits[input.port0_devicebitpos++];
+      unsigned deviceid = port == 0 ? DeviceIDJoypad1 : DeviceIDJoypad2;
+      return snesinterface.input_poll(deviceid, port_counter0[port]++);
+    } //case DeviceJoypad
+
+    case DeviceMultitap: {
+      if(cpu.joylatch()) return 2; //when latch is high -- data2 = 1, data1 = 0
+
+      unsigned deviceidx, deviceid0, deviceid1;
+      if(port == 0) {
+        if(cpu.pio() & 0x40) {
+          deviceidx = port_counter0[port];
+          if(deviceidx >= 16) return 3;
+          port_counter0[port]++;
+
+          deviceid0 = DeviceIDMultitap1A;
+          deviceid1 = DeviceIDMultitap1B;
         } else {
-          return true;
+          deviceidx = port_counter1[port];
+          if(deviceidx >= 16) return 3;
+          port_counter1[port]++;
+
+          deviceid0 = DeviceIDMultitap1C;
+          deviceid1 = DeviceIDMultitap1D;
+        }
+      } else {
+        if(cpu.pio() & 0x80) {
+          deviceidx = port_counter0[port];
+          if(deviceidx >= 16) return 3;
+          port_counter0[port]++;
+
+          deviceid0 = DeviceIDMultitap2A;
+          deviceid1 = DeviceIDMultitap2B;
+        } else {
+          deviceidx = port_counter1[port];
+          if(deviceidx >= 16) return 3;
+          port_counter1[port]++;
+
+          deviceid0 = DeviceIDMultitap2C;
+          deviceid1 = DeviceIDMultitap2D;
         }
       }
-    }
-  } else {
-    switch(input.port1_device) {
-      case DeviceNone: return false;
 
-      default: {
-        if(input.port1_devicebitpos < input.port1_devicebits) {
-          return input.port1_bits[input.port1_devicebitpos++];
-        } else {
-          return true;
-        }
-      }
-    }
+      return (snesinterface.input_poll(deviceid0, deviceidx) << 0)
+           | (snesinterface.input_poll(deviceid1, deviceidx) << 1);
+    } //case DeviceMultitap
   }
+
+  //no device connected
+  return 0;
 }
 
-void SNES::Input::port_set_deviceid(bool port, uint deviceid) {
-  if(port == 0) {
-    switch(deviceid) {
-      case DeviceIDNone: {
-        input.port0_device = DeviceNone;
-      } break;
-
-      case DeviceIDJoypad1:
-      case DeviceIDJoypad2: {
-        input.port0_device = DeviceJoypad;
-        input.port0_devicebits = 16;
-      } break;
-    }
-
-    memset(input.port0_bits, 0, sizeof(input.port0_bits));
-    input.port0_devicebitpos = 0;
-    input.port0_deviceid = deviceid;
-  } else {
-    switch(deviceid) {
-      case DeviceIDNone: {
-        input.port1_device = DeviceNone;
-      } break;
-
-      case DeviceIDJoypad1:
-      case DeviceIDJoypad2: {
-        input.port1_device = DeviceJoypad;
-        input.port1_devicebits = 16;
-      } break;
-    }
-
-    memset(input.port1_bits, 0, sizeof(input.port1_bits));
-    input.port1_devicebitpos = 0;
-    input.port1_deviceid = deviceid;
-  }
+void SNES::Input::port_set_device(bool port, unsigned device) {
+  port_device[port] = device;
+  port_counter0[port] = 0;
+  port_counter1[port] = 0;
 }
 
 void SNES::Input::poll() {
   snesinterface.input_poll();
-
-  bool *p0 = input.port0_bits;
-  bool *p1 = input.port1_bits;
-
-  switch(input.port0_device) {
-    case DeviceNone: break;
-
-    default: {
-      for(int i = 0; i < input.port0_devicebits; i++) {
-        *p0++ = snesinterface.input_poll(input.port0_deviceid, i);
-      }
-    } break;
-  }
-
-  switch(input.port1_device) {
-    case DeviceNone: break;
-
-    default: {
-      for(int i = 0; i < input.port1_devicebits; i++) {
-        *p1++ = snesinterface.input_poll(input.port1_deviceid, i);
-      }
-    } break;
-  }
-
-  input.port0_devicebitpos = 0;
-  input.port1_devicebitpos = 0;
+  port_counter0[0] = 0;
+  port_counter1[0] = 0;
+  port_counter0[1] = 0;
+  port_counter1[1] = 0;
 }
 
 void SNES::Input::init() {
-  port_set_deviceid(0, config::snes.controller_port0);
-  port_set_deviceid(1, config::snes.controller_port1);
+  port_set_device(0, config::snes.controller_port1);
+  port_set_device(1, config::snes.controller_port2);
 }
 
 #endif //ifdef SNES_CPP

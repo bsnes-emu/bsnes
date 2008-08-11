@@ -12,9 +12,6 @@ public:
   ~sDSP();
 
 private:
-  //external
-  uint8 *ram;
-
   //USE_STATE_MACHINE variable
   unsigned phase_index;
 

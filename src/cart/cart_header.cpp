@@ -5,6 +5,7 @@ void Cartridge::read_header() {
   uint index = info.header_index;
   uint8 mapper   = rom[index + MAPPER];
   uint8 rom_type = rom[index + ROM_TYPE];
+  uint8 rom_size = rom[index + ROM_SIZE];
   uint8 company  = rom[index + COMPANY];
   uint8 region   = rom[index + REGION] & 0x7f;
 
@@ -99,11 +100,12 @@ void Cartridge::read_header() {
     info.obc1 = true;
   }
 
-  if(mapper == 0x30 && rom_type == 0xf6) {
-    //TODO: both ST010 and ST011 share the same mapper + rom_type.
-    //need way to determine which is which.
-    //for now, default to supported ST010.
+  if(mapper == 0x30 && rom_type == 0xf6 && rom_size >= 10) {
     info.st010 = true;
+  }
+
+  if(mapper == 0x30 && rom_type == 0xf6 && rom_size < 10) {
+    info.st011 = true;
   }
 
   if(mapper == 0x30 && rom_type == 0xf5) {

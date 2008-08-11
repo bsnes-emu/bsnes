@@ -1,10 +1,5 @@
 #ifdef SCPU_CPP
 
-#define ntsc_color_burst_phase_shift_scanline() ( \
-  snes.region() == SNES::NTSC && status.vcounter == 240 && \
-  ppu.interlace() == false && ppu.field() == 1 \
-)
-
 #include "irq.cpp"
 #include "joypad.cpp"
 
@@ -22,6 +17,12 @@ uint sCPU::dma_counter() { return (status.dma_counter + status.hcounter) & 7; }
  * Dot 323 range = { 1292, 1294, 1296 }
  * Dot 327 range = { 1310, 1312, 1314 }
  *****/
+
+#define ntsc_color_burst_phase_shift_scanline() ( \
+  snes.region() == SNES::NTSC && status.vcounter == 240 && \
+  ppu.interlace() == false && ppu.field() == 1 \
+)
+
 uint16 sCPU::hdot() {
   if(ntsc_color_burst_phase_shift_scanline() == true) return (status.hcounter >> 2);
   return (status.hcounter - ((status.hcounter > 1292) << 1) - ((status.hcounter > 1310) << 1)) >> 2;
@@ -55,15 +56,7 @@ void sCPU::scanline() {
 
   //dram refresh occurs once every scanline
   status.dram_refreshed = false;
-  if(cpu_version == 2) {
-    if(ntsc_color_burst_phase_shift_scanline() == false) {
-      if(status.dram_refresh_position == 534) {
-        status.dram_refresh_position = 538;
-      } else {
-        status.dram_refresh_position = 534;
-      }
-    }
-  }
+  if(cpu_version == 2) status.dram_refresh_position = 530 + 8 - dma_counter();
 
   //hdma triggers once every visible scanline
   status.line_rendered  = false;
@@ -86,8 +79,7 @@ void sCPU::frame() {
 
   status.vcounter = 0;
   status.field_lines = (snes.region() == SNES::NTSC ? 525 : 625) >> 1;
-  //interlaced even fields have one extra scanline
-  //(263+262=525 NTSC, 313+312=625 PAL)
+  //interlaced even fields have one extra scanline (263+262=525 NTSC, 313+312=625 PAL)
   if(ppu.interlace() == true && ppu.field() == 0) status.field_lines++;
 
   status.hdmainit_triggered = false;
@@ -101,20 +93,19 @@ void sCPU::frame() {
 /*****
  * precycle_edge()
  *
- * Used for DMA/HDMA bus synchronization
+ * Used for H/DMA bus synchronization
  *****/
-alwaysinline void sCPU::precycle_edge() {
-  if(status.dma_state == DMASTATE_CPUSYNC) {
-    status.dma_state = DMASTATE_INACTIVE;
-    uint n = status.clock_count - (status.dma_clocks % status.clock_count);
-    add_clocks(n ? n : status.clock_count);
+void sCPU::precycle_edge() {
+  if(status.dma_state == DMA_CPUsync) {
+    add_clocks(status.clock_count - (status.dma_clocks % status.clock_count));
+    status.dma_state = DMA_Inactive;
   }
 }
 
 /*****
  * cycle_edge()
  *
- * Used to test for HDMA, which can trigger on the edge of every opcode cycle.
+ * Used to test for H/DMA, which can trigger on the edge of every opcode cycle.
  *****/
 void sCPU::cycle_edge() {
   if(status.line_rendered == false) {
@@ -129,47 +120,55 @@ void sCPU::cycle_edge() {
       status.hdmainit_triggered = true;
       hdma_init_reset();
       if(hdma_enabled_channels()) {
-        if(status.dma_state == DMASTATE_INACTIVE) {
-          status.dma_state = DMASTATE_DMASYNC;
-          status.hdmainit_pending = true;
-        } else {
-          hdma_init();
-        }
+        status.hdma_pending = true;
+        status.hdma_mode = 0;
       }
     }
   }
 
   if(status.hdma_triggered == false) {
-    if(status.hcounter >= 1106) {
+    if(status.hcounter >= 1104) {
       status.hdma_triggered = true;
       if(hdma_active_channels()) {
-        if(status.dma_state == DMASTATE_INACTIVE) {
-          status.dma_state = DMASTATE_DMASYNC;
-          status.hdma_pending = true;
-        } else {
-          hdma_run();
-        }
+        status.hdma_pending = true;
+        status.hdma_mode = 1;
       }
     }
   }
 
-  switch(status.dma_state) {
-    case DMASTATE_INACTIVE: break;
+  //H/DMA pending && DMA inactive?
+  //.. Run one full CPU cycle
+  //.. HDMA pending && HDMA enabled ? DMA sync + HDMA run
+  //.. DMA pending && DMA enabled ? DMA sync + DMA run
+  //.... HDMA during DMA && HDMA enabled ? DMA sync + HDMA run
+  //.. Run one bus CPU cycle
+  //.. CPU sync
 
-    case DMASTATE_DMASYNC: {
-      status.dma_state = DMASTATE_RUN;
-    } break;
+  if(status.dma_state == DMA_Run) {
+    if(status.hdma_pending) {
+      status.hdma_pending = false;
+      if(hdma_enabled_channels()) {
+        dma_add_clocks(8 - dma_counter()); //DMA sync
+        status.hdma_mode == 0 ? hdma_init() : hdma_run();
+        status.dma_state = DMA_CPUsync;
+      }
+    }
 
-    case DMASTATE_RUN: {
-      status.dma_state = DMASTATE_CPUSYNC;
-      status.dma_clocks = 8 - dma_counter() + 8;
-      add_clocks(status.dma_clocks);
+    if(status.dma_pending) {
+      status.dma_pending = false;
+      if(dma_enabled_channels()) {
+        dma_add_clocks(8 - dma_counter()); //DMA sync
+        dma_run();
+        status.dma_state = DMA_CPUsync;
+      }
+    }
+  }
 
-      if(status.hdmainit_pending) { hdma_init(); status.hdmainit_pending = false; }
-      if(status.hdma_pending)     { hdma_run();  status.hdma_pending     = false; }
-      if(status.dma_pending)      { dma_run();   status.dma_pending      = false; }
-
-    } break;
+  if(status.dma_state == DMA_Inactive) {
+    if(status.dma_pending || status.hdma_pending) {
+      status.dma_clocks = 0;
+      status.dma_state = DMA_Run;
+    }
   }
 }
 
@@ -212,7 +211,7 @@ void sCPU::timing_reset() {
   status.line_clocks = 1364;
 
   status.line_rendered = false;
-  status.line_render_position = min(1112U, (uint)config::ppu.hack.render_scanline_position);
+  status.line_render_position = min(1112U, (unsigned)config::ppu.hack.render_scanline_position);
 
   status.dram_refreshed = false;
   status.dram_refresh_position = (cpu_version == 1) ? 530 : 538;
@@ -236,11 +235,12 @@ void sCPU::timing_reset() {
 
   update_interrupts();
 
-  status.dma_counter      = 0;
-  status.dma_state        = DMASTATE_INACTIVE;
-  status.dma_pending      = false;
-  status.hdma_pending     = false;
-  status.hdmainit_pending = false;
+  status.dma_counter  = 0;
+  status.dma_clocks   = 0;
+  status.dma_pending  = false;
+  status.hdma_pending = false;
+  status.hdma_mode    = 0;
+  status.dma_state    = DMA_Inactive;
 
   history.reset();
 

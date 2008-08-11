@@ -32,9 +32,11 @@ using namespace libhiro;
  *****/
 
 #include "ui.h"
+#include "status.h"
 #include "event.h"
 
 #include "ui.cpp"
+#include "status.cpp"
 #include "event.cpp"
 
 void alert(const char *s, ...) {
@@ -44,7 +46,7 @@ void alert(const char *s, ...) {
   vsprintf(str, s, args);
   va_end(args);
 
-  window_message.show(str);
+  status.enqueue(str);
 }
 
 void dprintf(const char *s, ...) {
@@ -54,15 +56,6 @@ void dprintf(const char *s, ...) {
   vsprintf(str, s, args);
   va_end(args);
   fprintf(stdout, "%s\r\n", str);
-}
-
-void dprintf(uint source, const char *s, ...) {
-  char str[4096];
-  va_list args;
-  va_start(args, s);
-  vsprintf(str, s, args);
-  va_end(args);
-  fprintf(stdout, "[%d]: %s\r\n", source, str);
 }
 
 void get_paths(const char *image) {
@@ -103,7 +96,6 @@ void set_config_filenames() {
     strcat(filename, "/bsnes.cfg");
   }
   strcpy(config::bsnes_cfg, filename);
-  fprintf(stdout, "Config file: %s\n", config::bsnes_cfg);
 
   //locate locale.cfg
   strcpy(filename, config::path.base);
@@ -115,11 +107,11 @@ void set_config_filenames() {
     strcat(filename, "/locale.cfg");
   }
   strcpy(config::locale_cfg, filename);
-  fprintf(stdout, "Locale file: %s\n", config::locale_cfg);
 }
 
 void run() {
   while(hiro().pending()) hiro().run();
+  status.update();
   input_manager.refresh();
 
   if(config::input.capture_mode == 2) {
@@ -127,7 +119,6 @@ void run() {
     if(app.autopause == false && inactive == true) {
       app.autopause = true;
       audio.clear();
-      if(cartridge.loaded()) event::update_status();
     } else if(app.autopause == true && inactive == false) {
       app.autopause = false;
     }
@@ -140,7 +131,6 @@ void run() {
     usleep(20 * 1000);
   } else {
     snes.runtoframe();
-    event::update_status();
   }
 }
 

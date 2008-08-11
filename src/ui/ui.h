@@ -6,7 +6,6 @@ nall::dictionary translate;
 
 #include "base/main.h"
 #include "base/about.h"
-#include "base/message.h"
 
 #include "loader/bsxloader.h"
 #include "loader/stloader.h"

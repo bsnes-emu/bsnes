@@ -1,4 +1,4 @@
-#define BSNES_VERSION "0.033"
+#define BSNES_VERSION "0.034"
 #define BSNES_TITLE   "bsnes v" BSNES_VERSION
 
 #define BUSCORE sBus
@@ -39,18 +39,5 @@ using namespace nall;
 //platform-specific global functions
 void alert(const char*, ...);
 void dprintf(const char*, ...);
-void dprintf(uint, const char*, ...);
-
-namespace source {
-  enum {
-    none = 0,
-    debug,
-    cpu,
-    ppu,
-    smp,
-    dsp,
-    bus,
-  };
-};
 
 #include "interface.h"

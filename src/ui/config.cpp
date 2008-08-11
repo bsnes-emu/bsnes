@@ -105,14 +105,19 @@ integral_setting Audio::mute(config(), "audio.mute", "Mute audio playback", inte
 struct Input {
   static integral_setting capture_mode;
   static integral_setting allow_invalid_input;
+  static integral_setting analog_axis_resistance;
 
-  struct Joypad1 {
-    static string_setting up, down, left, right, a, b, x, y, l, r, select, start;
-  } joypad1;
+  struct Joypad1    { static string_setting up, down, left, right, a, b, x, y, l, r, select, start; } joypad1;
+  struct Joypad2    { static string_setting up, down, left, right, a, b, x, y, l, r, select, start; } joypad2;
 
-  struct Joypad2 {
-    static string_setting up, down, left, right, a, b, x, y, l, r, select, start;
-  } joypad2;
+  struct Multitap1A { static string_setting up, down, left, right, a, b, x, y, l, r, select, start; } multitap1a;
+  struct Multitap1B { static string_setting up, down, left, right, a, b, x, y, l, r, select, start; } multitap1b;
+  struct Multitap1C { static string_setting up, down, left, right, a, b, x, y, l, r, select, start; } multitap1c;
+  struct Multitap1D { static string_setting up, down, left, right, a, b, x, y, l, r, select, start; } multitap1d;
+  struct Multitap2A { static string_setting up, down, left, right, a, b, x, y, l, r, select, start; } multitap2a;
+  struct Multitap2B { static string_setting up, down, left, right, a, b, x, y, l, r, select, start; } multitap2b;
+  struct Multitap2C { static string_setting up, down, left, right, a, b, x, y, l, r, select, start; } multitap2c;
+  struct Multitap2D { static string_setting up, down, left, right, a, b, x, y, l, r, select, start; } multitap2d;
 
   struct GUI {
     static string_setting load;
@@ -144,6 +149,15 @@ integral_setting Input::allow_invalid_input(config(), "input.allow_invalid_input
   "Enabling this option can trigger bugs in certain games.\n",
   integral_setting::boolean, false);
 
+integral_setting Input::analog_axis_resistance(config(), "input.analog_axis_resistance",
+  "Resistance required to activate analog stick in any given direction.\n"
+  "This value ranges from 1 (1%, virtually no resistance) to 99 (99%, near full resistance.)\n"
+  "For instance, a value of 50 means that to register 'left', the analog stick must be moved\n"
+  "50% between the center and the left.\n"
+  "Less resistance allows for more fluid movement; whereas more resistance helps to prevent\n"
+  "accidental movements, eg attempting to press up whilst bumping the stick slightly left.",
+  integral_setting::decimal, 50);
+
 string_setting Input::Joypad1::up    (config(), "input.joypad1.up",     "", "up");
 string_setting Input::Joypad1::down  (config(), "input.joypad1.down",   "", "down");
 string_setting Input::Joypad1::left  (config(), "input.joypad1.left",   "", "left");
@@ -170,6 +184,31 @@ string_setting Input::Joypad2::r     (config(), "input.joypad2.r",      "", "l")
 string_setting Input::Joypad2::select(config(), "input.joypad2.select", "", "lbracket");
 string_setting Input::Joypad2::start (config(), "input.joypad2.start",  "", "rbracket");
 
+#define DeclMultitap(uname, lname) \
+string_setting Input::uname::up    (config(), "input.multitap" lname ".up",     "", "none"); \
+string_setting Input::uname::down  (config(), "input.multitap" lname ".down",   "", "none"); \
+string_setting Input::uname::left  (config(), "input.multitap" lname ".left",   "", "none"); \
+string_setting Input::uname::right (config(), "input.multitap" lname ".right",  "", "none"); \
+string_setting Input::uname::a     (config(), "input.multitap" lname ".a",      "", "none"); \
+string_setting Input::uname::b     (config(), "input.multitap" lname ".b",      "", "none"); \
+string_setting Input::uname::x     (config(), "input.multitap" lname ".x",      "", "none"); \
+string_setting Input::uname::y     (config(), "input.multitap" lname ".y",      "", "none"); \
+string_setting Input::uname::l     (config(), "input.multitap" lname ".l",      "", "none"); \
+string_setting Input::uname::r     (config(), "input.multitap" lname ".r",      "", "none"); \
+string_setting Input::uname::select(config(), "input.multitap" lname ".select", "", "none"); \
+string_setting Input::uname::start (config(), "input.multitap" lname ".start",  "", "none");
+
+DeclMultitap(Multitap1A, "1a")
+DeclMultitap(Multitap1B, "1b")
+DeclMultitap(Multitap1C, "1c")
+DeclMultitap(Multitap1D, "1d")
+DeclMultitap(Multitap2A, "2a")
+DeclMultitap(Multitap2B, "2b")
+DeclMultitap(Multitap2C, "2c")
+DeclMultitap(Multitap2D, "2d")
+
+#undef DeclMultitap
+
 string_setting Input::GUI::load              (config(), "input.gui.load",               "", "none");
 string_setting Input::GUI::pause             (config(), "input.gui.pause",              "", "f12");
 string_setting Input::GUI::reset             (config(), "input.gui.reset",              "", "none");
@@ -186,18 +225,10 @@ string_setting Input::GUI::toggle_statusbar  (config(), "input.gui.toggle_status
 struct Misc {
   static integral_setting opacity;
   static integral_setting status_enable;
-  static string_setting status_text;
 } misc;
 
 integral_setting Misc::opacity(config(), "misc.opacity", "Opacity of user interface windows", integral_setting::decimal, 100);
 integral_setting Misc::status_enable(config(), "misc.status_enable", "Display information statusbar", integral_setting::boolean, true);
-string_setting Misc::status_text(config(), "misc.status_text",
-  "Text to print inside statusbar\n"
-  "%n = cartridge file name\n"
-  "%t = internal cartridge header name\n"
-  "%f = executed frames per second\n"
-  "%m = maximum frames per second"
-  "", "%n : %f / %m");
 
 struct Advanced {
   static integral_setting enable;

@@ -54,6 +54,29 @@ public:
   Display *display;
   #endif
 
+  struct {
+    unsigned analog_axis_resistance;
+  } settings;
+
+  bool cap(Input::Setting setting) {
+    if(setting == Input::AnalogAxisResistance) return true;
+    return false;
+  }
+
+  uintptr_t get(Input::Setting setting) {
+    if(setting == Input::AnalogAxisResistance) return settings.analog_axis_resistance;
+    return false;
+  }
+
+  bool set(Input::Setting setting, uintptr_t param) {
+    if(setting == Input::AnalogAxisResistance) {
+      settings.analog_axis_resistance = param;
+      return true;
+    }
+
+    return false;
+  }
+
   bool key_down(uint16_t key) {
     #if !defined(_WIN32)
     #define map(i) (keystate[i >> 3] & (1 << (i & 7)))
@@ -220,6 +243,10 @@ public:
       joystate[i][joy_left]  = false;
       joystate[i][joy_right] = false;
 
+      int resistance = settings.analog_axis_resistance;
+      resistance = max(1, min(99, resistance));
+      resistance = int(double(resistance) * 32768.0 / 100.0);
+
       //only poll X,Y axes for D-pad, left analog and right analog.
       //note 1: right analog is swapped on some controllers, this cannot be helped.
       //note 2: some controllers report more axes than physically exist.
@@ -229,11 +256,11 @@ public:
       for(int a = 0; a < min(axes, 6); a++) {
         int value = SDL_JoystickGetAxis(joy[i], a);
         if((a & 1) == 0) { //X axis
-          joystate[i][joy_left]  |= value < -16384;
-          joystate[i][joy_right] |= value > +16384;
+          joystate[i][joy_left]  |= value < -resistance;
+          joystate[i][joy_right] |= value > +resistance;
         } else { //Y axis
-          joystate[i][joy_up]    |= value < -16384;
-          joystate[i][joy_down]  |= value > +16384;
+          joystate[i][joy_up]    |= value < -resistance;
+          joystate[i][joy_down]  |= value > +resistance;
         }
       }
 
@@ -268,10 +295,15 @@ public:
   pInputSDL(InputSDL &self_) : self(self_) {
     for(int i = 0; i < 16; i++) joy[i] = 0;
     clear();
+
+    settings.analog_axis_resistance = 75;
   }
 };
 
 
+bool InputSDL::cap(Setting setting) { return p.cap(setting); }
+uintptr_t InputSDL::get(Setting setting) { return p.get(setting); }
+bool InputSDL::set(Setting setting, uintptr_t param) { return p.set(setting, param); }
 bool InputSDL::key_down(uint16_t key) { return p.key_down(key); }
 void InputSDL::clear() { p.clear(); }
 void InputSDL::poll() { p.poll(); }

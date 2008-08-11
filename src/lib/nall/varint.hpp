@@ -3,6 +3,7 @@
 
 #include <nall/bit.hpp>
 #include <nall/static.hpp>
+#include <nall/traits.hpp>
 
 namespace nall {
 
@@ -27,21 +28,21 @@ private:
 
 public:
   inline operator T() const { return data; }
-  inline T  operator ++(int) { T r = data; data = uclip<bits>(data + 1); return r; }
-  inline T  operator --(int) { T r = data; data = uclip<bits>(data - 1); return r; }
-  inline T& operator ++() { data = uclip<bits>(data + 1); return *this; }
-  inline T& operator --() { data = uclip<bits>(data - 1); return *this; }
-  inline T& operator  =(const T i) { data = uclip<bits>(i); return *this; }
-  inline T& operator |=(const T i) { data = uclip<bits>(data  | i); return *this; }
-  inline T& operator ^=(const T i) { data = uclip<bits>(data  ^ i); return *this; }
-  inline T& operator &=(const T i) { data = uclip<bits>(data  & i); return *this; }
-  inline T& operator<<=(const T i) { data = uclip<bits>(data << i); return *this; }
-  inline T& operator>>=(const T i) { data = uclip<bits>(data >> i); return *this; }
-  inline T& operator +=(const T i) { data = uclip<bits>(data  + i); return *this; }
-  inline T& operator -=(const T i) { data = uclip<bits>(data  - i); return *this; }
-  inline T& operator *=(const T i) { data = uclip<bits>(data  * i); return *this; }
-  inline T& operator /=(const T i) { data = uclip<bits>(data  / i); return *this; }
-  inline T& operator %=(const T i) { data = uclip<bits>(data  % i); return *this; }
+  inline T operator ++(int) { T r = data; data = uclip<bits>(data + 1); return r; }
+  inline T operator --(int) { T r = data; data = uclip<bits>(data - 1); return r; }
+  inline T operator ++() { return data = uclip<bits>(data + 1); }
+  inline T operator --() { return data = uclip<bits>(data - 1); }
+  inline T operator  =(const T i) { return data = uclip<bits>(i); }
+  inline T operator |=(const T i) { return data = uclip<bits>(data  | i); }
+  inline T operator ^=(const T i) { return data = uclip<bits>(data  ^ i); }
+  inline T operator &=(const T i) { return data = uclip<bits>(data  & i); }
+  inline T operator<<=(const T i) { return data = uclip<bits>(data << i); }
+  inline T operator>>=(const T i) { return data = uclip<bits>(data >> i); }
+  inline T operator +=(const T i) { return data = uclip<bits>(data  + i); }
+  inline T operator -=(const T i) { return data = uclip<bits>(data  - i); }
+  inline T operator *=(const T i) { return data = uclip<bits>(data  * i); }
+  inline T operator /=(const T i) { return data = uclip<bits>(data  / i); }
+  inline T operator %=(const T i) { return data = uclip<bits>(data  % i); }
 
   inline uint_t() : data(0) {}
   inline uint_t(const T i) : data(uclip<bits>(i)) {}
@@ -68,36 +69,26 @@ private:
 
 public:
   inline operator T() const { return data; }
-  inline T  operator ++(int) { T r = data; data = sclip<bits>(data + 1); return r; }
-  inline T  operator --(int) { T r = data; data = sclip<bits>(data - 1); return r; }
-  inline T& operator ++() { data = sclip<bits>(data + 1); return *this; }
-  inline T& operator --() { data = sclip<bits>(data - 1); return *this; }
-  inline T& operator  =(const T i) { data = sclip<bits>(i); return *this; }
-  inline T& operator |=(const T i) { data = sclip<bits>(data  | i); return *this; }
-  inline T& operator ^=(const T i) { data = sclip<bits>(data  ^ i); return *this; }
-  inline T& operator &=(const T i) { data = sclip<bits>(data  & i); return *this; }
-  inline T& operator<<=(const T i) { data = sclip<bits>(data << i); return *this; }
-  inline T& operator>>=(const T i) { data = sclip<bits>(data >> i); return *this; }
-  inline T& operator +=(const T i) { data = sclip<bits>(data  + i); return *this; }
-  inline T& operator -=(const T i) { data = sclip<bits>(data  - i); return *this; }
-  inline T& operator *=(const T i) { data = sclip<bits>(data  * i); return *this; }
-  inline T& operator /=(const T i) { data = sclip<bits>(data  / i); return *this; }
-  inline T& operator %=(const T i) { data = sclip<bits>(data  % i); return *this; }
+  inline T operator ++(int) { T r = data; data = sclip<bits>(data + 1); return r; }
+  inline T operator --(int) { T r = data; data = sclip<bits>(data - 1); return r; }
+  inline T operator ++() { return data = sclip<bits>(data + 1); }
+  inline T operator --() { return data = sclip<bits>(data - 1); }
+  inline T operator  =(const T i) { return data = sclip<bits>(i); }
+  inline T operator |=(const T i) { return data = sclip<bits>(data  | i); }
+  inline T operator ^=(const T i) { return data = sclip<bits>(data  ^ i); }
+  inline T operator &=(const T i) { return data = sclip<bits>(data  & i); }
+  inline T operator<<=(const T i) { return data = sclip<bits>(data << i); }
+  inline T operator>>=(const T i) { return data = sclip<bits>(data >> i); }
+  inline T operator +=(const T i) { return data = sclip<bits>(data  + i); }
+  inline T operator -=(const T i) { return data = sclip<bits>(data  - i); }
+  inline T operator *=(const T i) { return data = sclip<bits>(data  * i); }
+  inline T operator /=(const T i) { return data = sclip<bits>(data  / i); }
+  inline T operator %=(const T i) { return data = sclip<bits>(data  % i); }
 
   inline int_t() : data(0) {}
   inline int_t(const T i) : data(sclip<bits>(i)) {}
 };
 
-typedef int_t<24> int24_t;
-typedef uint_t<24> uint24_t;
-typedef int_t<48> int48_t;
-typedef uint_t<48> uint48_t;
-
 } //namespace nall
-
-using nall::int24_t;
-using nall::uint24_t;
-using nall::int48_t;
-using nall::uint48_t;
 
 #endif //ifndef NALL_VARINT_HPP

@@ -23,7 +23,9 @@ void update_software_filter(uint);
 void update_frameskip(int);
 void update_emulation_speed(int);
 
-void update_status();
+void update_controller_port1(int);
+void update_controller_port2(int);
+
 void update_video_settings();
 void update_opacity();
 void toggle_fullscreen();

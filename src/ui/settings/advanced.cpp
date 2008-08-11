@@ -55,9 +55,8 @@ void AdvancedWindow::load() {
     string name = config::config().list[i]->name;
 
     //blacklist (omit/hide options that can be configured through the standard UI)
-    if(strbegin(name, "file.")) continue;
     if(strbegin(name, "path.")) continue;
-    if(strbegin(name, "snes.controller_port_")) continue;
+    if(strbegin(name, "snes.controller_port")) continue;
     if(strpos(name, "colorfilter.") >= 0) continue;
     if(name == "misc.status_enable") continue;
     if(name == "system.emulation_speed") continue;
@@ -66,6 +65,7 @@ void AdvancedWindow::load() {
     if(name == "audio.mute") continue;
     if(name == "input.capture_mode") continue;
     if(strbegin(name, "input.joypad")) continue;
+    if(strbegin(name, "input.multitap")) continue;
     if(strbegin(name, "input.gui")) continue;
 
     string value_, default_;

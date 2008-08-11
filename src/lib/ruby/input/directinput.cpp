@@ -25,15 +25,18 @@ public:
 
   struct {
     HWND handle;
+    unsigned analog_axis_resistance;
   } settings;
 
   bool cap(Input::Setting setting) {
     if(setting == Input::Handle) return true;
+    if(setting == Input::AnalogAxisResistance) return true;
     return false;
   }
 
   uintptr_t get(Input::Setting setting) {
     if(setting == Input::Handle) return (uintptr_t)settings.handle;
+    if(setting == Input::AnalogAxisResistance) return settings.analog_axis_resistance;
     return false;
   }
 
@@ -42,6 +45,12 @@ public:
       settings.handle = (HWND)param;
       return true;
     }
+
+    if(setting == Input::AnalogAxisResistance) {
+      settings.analog_axis_resistance = param;
+      return true;
+    }
+
     return false;
   }
 
@@ -79,9 +88,9 @@ public:
       memcpy(keystate + index, js.rgbButtons, 128);
 
       //map d-pad axes
-      int resistance = 75; //config::input.axis_resistance;
+      int resistance = settings.analog_axis_resistance;
       resistance = max(1, min(99, resistance));
-      resistance = int32_t(double(resistance) * 32768.0 / 100.0);
+      resistance = int(double(resistance) * 32768.0 / 100.0);
       int resistance_lo = 0x7fff - resistance;
       int resistance_hi = 0x8000 + resistance;
       keystate[index + 0x80] = (js.lY <= resistance_lo) ? 0x80 : 0x00;
@@ -297,6 +306,9 @@ public:
     di = 0;
     di_key = 0;
     for(int i = 0; i < DIRECTINPUT_JOYMAX; i++) di_joy[i] = 0;
+
+    settings.handle = 0;
+    settings.analog_axis_resistance = 75;
   }
 
   ~pInputDI() { term(); }

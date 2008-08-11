@@ -12,17 +12,19 @@ int sDSP::echo_output(bool channel) {
 }
 
 void sDSP::echo_read(bool channel) {
-  uint8 *in = &ram[state.t_echo_ptr + channel * 2];
-  int s = (int16)((in[1] << 8) + in[0]);
+  unsigned addr = state.t_echo_ptr + channel * 2;
+  uint8 lo = memory::apuram.read(uint16(addr + 0));
+  uint8 hi = memory::apuram.read(uint16(addr + 1));
+  int s = (int16)((hi << 8) + lo);
   state.echo_hist[channel].write(state.echo_hist_pos, s >> 1);
 }
 
 void sDSP::echo_write(bool channel) {
   if(!(state.t_echo_disabled & 0x20)) {
-    uint8 *out = &ram[state.t_echo_ptr + channel * 2];
+    unsigned addr = state.t_echo_ptr + channel * 2;
     int s = state.t_echo_out[channel];
-    out[0] = (uint8)(s);
-    out[1] = (uint8)(s >> 8);
+    memory::apuram.write(uint16(addr + 0), (uint8)(s >> 0));
+    memory::apuram.write(uint16(addr + 1), (uint8)(s >> 8));
   }
 
   state.t_echo_out[channel] = 0;

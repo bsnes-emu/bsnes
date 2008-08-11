@@ -3,12 +3,21 @@ public:
   enum Device {
     DeviceNone,
     DeviceJoypad,
+    DeviceMultitap,
   };
 
   enum {
     DeviceIDNone,
     DeviceIDJoypad1,
     DeviceIDJoypad2,
+    DeviceIDMultitap1A,
+    DeviceIDMultitap1B,
+    DeviceIDMultitap1C,
+    DeviceIDMultitap1D,
+    DeviceIDMultitap2A,
+    DeviceIDMultitap2B,
+    DeviceIDMultitap2C,
+    DeviceIDMultitap2D,
   };
 
   enum {
@@ -20,16 +29,11 @@ public:
     JoypadL      = 10, JoypadR      = 11,
   };
 
-  struct {
-    uint port0_device, port0_devicebits, port0_devicebitpos, port0_deviceid;
-    uint port1_device, port1_devicebits, port1_devicebitpos, port1_deviceid;
-
-    bool port0_bits[256];
-    bool port1_bits[256];
-  } input;
-
-  bool port_read(bool port);
-  void port_set_deviceid(bool port, uint deviceid);
+  uint8 port_read(bool port);
+  void port_set_device(bool port, unsigned device);
   void init();
   void poll();
+
+private:
+  unsigned port_device[2], port_counter0[2], port_counter1[2];
 } input;

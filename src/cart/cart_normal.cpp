@@ -23,6 +23,7 @@ void Cartridge::load_cart_normal(const char *filename) {
   if(load_file(get_patch_filename(cart.fn, "ups"), data, size, CompressionInspect) == true) {
     apply_patch(data, size, cart.rom, cart.rom_size);
     delete[] data;
+    info.patched = true;
   }
 
   info.crc32 = crc32_calculate(cart.rom, cart.rom_size);

@@ -1,10 +1,11 @@
 bsnes
-Version: 0.033
+Version: 0.034
 Author: byuu
 
 ========
 General:
 ========
+
 bsnes is a Super Nintendo / Super Famicom emulator that began on
 October 14th, 2004.
 
@@ -16,6 +17,7 @@ Please see license.txt for important licensing information.
 ==============
 Configuration:
 ==============
+
 bsnes has two configuration files: bsnes.cfg, for program settings; and
 locale.cfg, for localization.
 
@@ -39,8 +41,10 @@ mode.
 ==================
 Known Limitations:
 ==================
+
 S-CPU
 - Multiply / divide register delays not implemented
+- "Glitch" when reading joypad registers during auto polling not implemented
 
 S-PPU
 - Uses scanline-based renderer. This is very inaccurate, but few (if any)
@@ -59,6 +63,7 @@ Hardware Bugs
 =====================
 Unsupported Hardware:
 =====================
+
 SA-1
 Coprocessor used in many popular games, including:
 - Dragon Ball Z Hyper Dimension
@@ -87,7 +92,15 @@ Cartridge passthrough used for playing Gameboy games
 ========================
 Unsupported Controllers:
 ========================
+
 Mouse
 Super Scope
 Justifier
-Multitap (4-port and 5-port)
+
+=============
+Contributors:
+=============
+
+Andreas Naive, anomie, blargg, DMV27, FitzRoy, GIGO, Jonas Quinn, kode54, krom,
+mudlord, Nach, neviksti, Overload, RedDwarf, Richard Bannister, tetsuo55, TRAC,
+zones

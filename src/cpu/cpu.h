@@ -15,7 +15,8 @@ public:
   virtual uint16 hcounter() = 0;
   virtual uint16 hdot() = 0;
 
-  virtual uint8 pio_status() = 0;
+  virtual uint8 pio() = 0;
+  virtual bool joylatch() = 0;
   virtual uint8 port_read(uint8 port) = 0;
   virtual void port_write(uint8 port, uint8 value) = 0;
 

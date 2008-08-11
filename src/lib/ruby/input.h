@@ -2,6 +2,7 @@ class Input {
 public:
   enum Setting {
     Handle,
+    AnalogAxisResistance,
   };
 
   virtual bool cap(Setting) { return false; }

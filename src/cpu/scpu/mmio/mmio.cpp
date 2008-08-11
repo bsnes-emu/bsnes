@@ -1,8 +1,7 @@
 #ifdef SCPU_CPP
 
-uint8 sCPU::pio_status() {
-  return status.pio;
-}
+uint8 sCPU::pio() { return status.pio; }
+bool sCPU::joylatch() { return status.joypad_strobe_latch; }
 
 //WMDATA
 uint8 sCPU::mmio_r2180() {
@@ -55,7 +54,7 @@ void sCPU::mmio_w4016(uint8 data) {
 //realtime or buffered status of joypadN.b
 uint8 sCPU::mmio_r4016() {
   uint8 r = regs.mdr & 0xfc;
-  r |= (uint8)snes.input.port_read(0);
+  r |= snes.input.port_read(0) & 3;
   return r;
 }
 
@@ -65,7 +64,7 @@ uint8 sCPU::mmio_r4016() {
 //1-0 = Joypad serial data
 uint8 sCPU::mmio_r4017() {
   uint8 r = (regs.mdr & 0xe0) | 0x1c;
-  r |= (uint8)snes.input.port_read(1);
+  r |= snes.input.port_read(1) & 3;
   return r;
 }
 
@@ -143,19 +142,16 @@ void sCPU::mmio_w420a(uint8 data) {
 
 //DMAEN
 void sCPU::mmio_w420b(uint8 data) {
-  for(int i = 0; i < 8; i++) {
-    channel[i].dma_enabled  = !!(data & (1 << i));
+  for(unsigned i = 0; i < 8; i++) {
+    channel[i].dma_enabled = data & (1 << i);
   }
-  if(data) {
-    status.dma_state = DMASTATE_DMASYNC;
-    status.dma_pending = true;
-  }
+  if(data) status.dma_pending = true;
 }
 
 //HDMAEN
 void sCPU::mmio_w420c(uint8 data) {
-  for(int i = 0; i < 8; i++) {
-    channel[i].hdma_enabled = !!(data & (1 << i));
+  for(unsigned i = 0; i < 8; i++) {
+    channel[i].hdma_enabled = data & (1 << i);
   }
 }
 

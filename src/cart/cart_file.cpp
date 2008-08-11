@@ -87,8 +87,6 @@ char* Cartridge::get_cheat_filename(const char *source, const char *extension) {
 }
 
 bool Cartridge::load_file(const char *fn, uint8 *&data, uint &size, CompressionMode compression) {
-  dprintf("* Loading \"%s\" ...", fn);
-
   if(fexists(fn) == false) return false;
 
   Reader::Type filetype = Reader::Normal;

@@ -7,7 +7,7 @@ void keydown(uint16_t key) {
       app.pause = !app.pause; //toggle pause state
       if(app.pause) {
         audio.clear();
-        if(cartridge.loaded()) update_status();
+        if(cartridge.loaded()) status.update();
       }
     }
     if(key == input_manager.gui.reset) reset();
@@ -138,31 +138,38 @@ void update_emulation_speed(int speed) {
   window_main.sync();
 }
 
-void update_status() {
-  if(!cartridge.loaded()) {
-    window_main.status.set_text("");
-  } else if(app.pause || app.autopause) {
-    window_main.status.set_text("(paused)");
-  } else if(ppu.status.frames_updated) {
-    ppu.status.frames_updated = false;
+void update_controller_port1(int device) {
+  unsigned current_device = config::snes.controller_port1;
+  unsigned new_device;
 
-    unsigned max_framerate = snes.region() == SNES::NTSC ? 60 : 50;
-    switch(config::system.emulation_speed) {
-      case 0: max_framerate = unsigned(0.50 * max_framerate); break;
-      case 1: max_framerate = unsigned(0.75 * max_framerate); break;
-      case 2: break;
-      case 3: max_framerate = unsigned(1.50 * max_framerate); break;
-      case 4: max_framerate = unsigned(2.00 * max_framerate); break;
-      case 5: max_framerate = 0; break;
-    }
-
-    string output = (const char*)config::misc.status_text;
-    replace(output, "%f", string() << (int)ppu.status.frames_executed);
-    replace(output, "%m", string() << (int)max_framerate);
-    replace(output, "%n", cartridge.info.filename);
-    replace(output, "%t", cartridge.info.name);
-    window_main.status.set_text(output);
+  switch(device) { default:
+    case 0: new_device = SNES::Input::DeviceNone;     break;
+    case 1: new_device = SNES::Input::DeviceJoypad;   break;
+    case 2: new_device = SNES::Input::DeviceMultitap; break;
   }
+
+  if(new_device != current_device) {
+    snes.input.port_set_device(0, config::snes.controller_port1 = new_device);
+  }
+
+  window_main.sync();
+}
+
+void update_controller_port2(int device) {
+  unsigned current_device = config::snes.controller_port2;
+  unsigned new_device;
+
+  switch(device) { default:
+    case 0: new_device = SNES::Input::DeviceNone;     break;
+    case 1: new_device = SNES::Input::DeviceJoypad;   break;
+    case 2: new_device = SNES::Input::DeviceMultitap; break;
+  }
+
+  if(new_device != current_device) {
+    snes.input.port_set_device(1, config::snes.controller_port2 = new_device);
+  }
+
+  window_main.sync();
 }
 
 void update_video_settings() {
@@ -313,20 +320,25 @@ void load_cart_normal(const char *filename) {
   if(cartridge.loaded() == true) cartridge.unload();
   cartridge.load_cart_normal(filename);
 
-  //warn if unsupported hardware detected
-  string message = translate["Unsupported $ chip detected."];
-  const char *name;
-  if(cartridge.info.superfx) { name = "SuperFX"; replace(message, "$", name); alert(message); }
-  if(cartridge.info.sa1)     { name = "SA-1";    replace(message, "$", name); alert(message); }
-  if(cartridge.info.st011)   { name = "ST011";   replace(message, "$", name); alert(message); }
-  if(cartridge.info.st018)   { name = "ST018";   replace(message, "$", name); alert(message); }
-
   app.pause = false;
   snes.power();
   window_main.menu_file_unload.enable();
   window_main.menu_file_reset.enable();
   window_main.menu_file_power.enable();
   window_cheat_editor.refresh();
+
+  status.flush();
+  string t = translate["Loaded $."];
+  replace(t, "$", cartridge.info.filename);
+  status.enqueue(t);
+  if(cartridge.info.patched) status.enqueue(translate["UPS patch applied."]);
+
+  //warn if unsupported hardware detected
+  string message = translate["Warning: unsupported $ chip detected."];
+  if(cartridge.info.superfx) { replace(message, "$", "SuperFX"); status.enqueue(message); }
+  if(cartridge.info.sa1)     { replace(message, "$", "SA-1");    status.enqueue(message); }
+  if(cartridge.info.st011)   { replace(message, "$", "ST011");   status.enqueue(message); }
+  if(cartridge.info.st018)   { replace(message, "$", "ST018");   status.enqueue(message); }
 }
 
 void load_cart_bsx(const char *base, const char *slot) {
@@ -341,6 +353,11 @@ void load_cart_bsx(const char *base, const char *slot) {
   window_main.menu_file_reset.enable();
   window_main.menu_file_power.enable();
   window_cheat_editor.refresh();
+
+  status.flush();
+  string t = translate["Loaded $."];
+  replace(t, "$", cartridge.info.filename);
+  status.enqueue(t);
 }
 
 void load_cart_bsc(const char *base, const char *slot) {
@@ -355,6 +372,11 @@ void load_cart_bsc(const char *base, const char *slot) {
   window_main.menu_file_reset.enable();
   window_main.menu_file_power.enable();
   window_cheat_editor.refresh();
+
+  status.flush();
+  string t = translate["Loaded $."];
+  replace(t, "$", cartridge.info.filename);
+  status.enqueue(t);
 }
 
 void load_cart_st(const char *base, const char *slotA, const char *slotB) {
@@ -369,6 +391,11 @@ void load_cart_st(const char *base, const char *slotA, const char *slotB) {
   window_main.menu_file_reset.enable();
   window_main.menu_file_power.enable();
   window_cheat_editor.refresh();
+
+  status.flush();
+  string t = translate["Loaded $."];
+  replace(t, "$", cartridge.info.filename);
+  status.enqueue(t);
 }
 
 void unload_rom() {
@@ -377,31 +404,36 @@ void unload_rom() {
     video.clear();
     audio.clear();
   }
-  event::update_status();
   window_main.menu_file_unload.disable();
   window_main.menu_file_reset.disable();
   window_main.menu_file_power.disable();
   window_cheat_editor.refresh();
+
+  status.flush();
+  string t = translate["Unloaded $."];
+  replace(t, "$", cartridge.info.filename);
+  status.enqueue(t);
 }
 
 void reset() {
   if(cartridge.loaded() == true) {
     snes.reset();
-    dprintf("* Reset");
+    status.flush();
+    status.enqueue(translate["Reset"]);
   }
 }
 
 void power() {
   if(cartridge.loaded() == true) {
     snes.power();
-    dprintf("* Power");
+    status.flush();
+    status.enqueue(translate["Power cycle"]);
   }
 }
 
 void quit() {
   app.term = true;
   window_about.hide();
-  window_message.hide();
   window_settings.hide();
   window_bsxloader.hide();
   window_stloader.hide();

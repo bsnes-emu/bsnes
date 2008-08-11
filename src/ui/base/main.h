@@ -11,6 +11,15 @@ public:
     MenuItem menu_file_reset;
     MenuItem menu_file_power;
     MenuSeparator menu_file_sep2;
+    MenuGroup menu_system_controller_port1;
+      MenuRadioItem menu_system_controller_port1_none;
+      MenuRadioItem menu_system_controller_port1_joypad;
+      MenuRadioItem menu_system_controller_port1_multitap;
+    MenuGroup menu_system_controller_port2;
+      MenuRadioItem menu_system_controller_port2_none;
+      MenuRadioItem menu_system_controller_port2_joypad;
+      MenuRadioItem menu_system_controller_port2_multitap;
+    MenuSeparator menu_file_sep3;
     MenuItem menu_file_exit;
 
   MenuGroup menu_settings;
@@ -55,7 +64,6 @@ public:
       MenuRadioItem menu_settings_emuspeed_fast;
       MenuRadioItem menu_settings_emuspeed_fastest;
       MenuRadioItem menu_settings_emuspeed_disabled;
-    MenuSeparator menu_settings_sep3;
     MenuItem menu_settings_config;
 
   MenuGroup menu_misc;

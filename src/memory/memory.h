@@ -115,8 +115,9 @@ class Bus { public:
 };
 
 namespace memory {
-  extern MMIOAccess mmio;
-  extern StaticRAM  wram;
+  extern MMIOAccess mmio;   //S-CPU, S-PPU
+  extern StaticRAM  wram;   //S-CPU
+  extern StaticRAM  apuram; //S-SMP, S-DSP
 
   extern UnmappedMemory memory_unmapped;
   extern UnmappedMMIO   mmio_unmapped;

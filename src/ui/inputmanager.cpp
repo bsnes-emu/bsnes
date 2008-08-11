@@ -1,11 +1,15 @@
 class InputManager {
 public:
+  //  0 = Joypad 1
+  //  1 = Joypad 2
+  //2-5 = Multitap 1
+  //6-9 = Multitap 2
   struct Joypad {
     struct Button {
       uint16_t value;
       bool state;
     } up, down, left, right, a, b, x, y, l, r, select, start;
-  } joypad1, joypad2;
+  } joypad[10];
 
   struct GUI {
     uint16_t load;
@@ -24,7 +28,7 @@ public:
 
   void bind();
   void poll();
-  bool get_status(uint device, uint button);
+  bool get_status(unsigned deviceid, unsigned id);
 
   void refresh();
   function<void (uint16_t)> on_keydown;
@@ -53,41 +57,39 @@ void InputManager::refresh() {
 }
 
 void InputManager::bind() {
-  joypad1.up.value     = input_find(config::input.joypad1.up);
-  joypad1.down.value   = input_find(config::input.joypad1.down);
-  joypad1.left.value   = input_find(config::input.joypad1.left);
-  joypad1.right.value  = input_find(config::input.joypad1.right);
-  joypad1.a.value      = input_find(config::input.joypad1.a);
-  joypad1.b.value      = input_find(config::input.joypad1.b);
-  joypad1.x.value      = input_find(config::input.joypad1.x);
-  joypad1.y.value      = input_find(config::input.joypad1.y);
-  joypad1.l.value      = input_find(config::input.joypad1.l);
-  joypad1.r.value      = input_find(config::input.joypad1.r);
-  joypad1.select.value = input_find(config::input.joypad1.select);
-  joypad1.start.value  = input_find(config::input.joypad1.start);
+  #define map(i, n) \
+    joypad[i].up.value     = input_find(config::input.n.up); \
+    joypad[i].down.value   = input_find(config::input.n.down); \
+    joypad[i].left.value   = input_find(config::input.n.left); \
+    joypad[i].right.value  = input_find(config::input.n.right); \
+    joypad[i].a.value      = input_find(config::input.n.a); \
+    joypad[i].b.value      = input_find(config::input.n.b); \
+    joypad[i].x.value      = input_find(config::input.n.x); \
+    joypad[i].y.value      = input_find(config::input.n.y); \
+    joypad[i].l.value      = input_find(config::input.n.l); \
+    joypad[i].r.value      = input_find(config::input.n.r); \
+    joypad[i].select.value = input_find(config::input.n.select); \
+    joypad[i].start.value  = input_find(config::input.n.start);
 
-  joypad1.up.state = joypad1.down.state = joypad1.left.state   = joypad1.right.state =
-  joypad1.a.state  = joypad1.b.state    = joypad1.x.state      = joypad1.y.state     =
-  joypad1.l.state  = joypad1.r.state    = joypad1.select.state = joypad1.start.state =
-  false;
+  map(0, joypad1)
+  map(1, joypad2)
+  map(2, multitap1a)
+  map(3, multitap1b)
+  map(4, multitap1c)
+  map(5, multitap1d)
+  map(6, multitap2a)
+  map(7, multitap2b)
+  map(8, multitap2c)
+  map(9, multitap2d)
 
-  joypad2.up.value     = input_find(config::input.joypad2.up);
-  joypad2.down.value   = input_find(config::input.joypad2.down);
-  joypad2.left.value   = input_find(config::input.joypad2.left);
-  joypad2.right.value  = input_find(config::input.joypad2.right);
-  joypad2.a.value      = input_find(config::input.joypad2.a);
-  joypad2.b.value      = input_find(config::input.joypad2.b);
-  joypad2.x.value      = input_find(config::input.joypad2.x);
-  joypad2.y.value      = input_find(config::input.joypad2.y);
-  joypad2.l.value      = input_find(config::input.joypad2.l);
-  joypad2.r.value      = input_find(config::input.joypad2.r);
-  joypad2.select.value = input_find(config::input.joypad2.select);
-  joypad2.start.value  = input_find(config::input.joypad2.start);
+  #undef map
 
-  joypad2.up.state = joypad2.down.state = joypad2.left.state   = joypad2.right.state =
-  joypad2.a.state  = joypad2.b.state    = joypad2.x.state      = joypad2.y.state     =
-  joypad2.l.state  = joypad2.r.state    = joypad2.select.state = joypad2.start.state =
-  false;
+  for(unsigned i = 0; i < 10; i++) {
+    joypad[i].up.state = joypad[i].down.state = joypad[i].left.state   = joypad[i].right.state =
+    joypad[i].a.state  = joypad[i].b.state    = joypad[i].x.state      = joypad[i].y.state     =
+    joypad[i].l.state  = joypad[i].r.state    = joypad[i].select.state = joypad[i].start.state =
+    false;
+  }
 
   gui.load               = input_find(config::input.gui.load);
   gui.pause              = input_find(config::input.gui.pause);
@@ -104,68 +106,55 @@ void InputManager::bind() {
 }
 
 void InputManager::poll() {
-  joypad1.up.state     = input.key_down(joypad1.up.value);
-  joypad1.down.state   = input.key_down(joypad1.down.value);
-  joypad1.left.state   = input.key_down(joypad1.left.value);
-  joypad1.right.state  = input.key_down(joypad1.right.value);
-  joypad1.a.state      = input.key_down(joypad1.a.value);
-  joypad1.b.state      = input.key_down(joypad1.b.value);
-  joypad1.x.state      = input.key_down(joypad1.x.value);
-  joypad1.y.state      = input.key_down(joypad1.y.value);
-  joypad1.l.state      = input.key_down(joypad1.l.value);
-  joypad1.r.state      = input.key_down(joypad1.r.value);
-  joypad1.select.state = input.key_down(joypad1.select.value);
-  joypad1.start.state  = input.key_down(joypad1.start.value);
-
-  joypad2.up.state     = input.key_down(joypad2.up.value);
-  joypad2.down.state   = input.key_down(joypad2.down.value);
-  joypad2.left.state   = input.key_down(joypad2.left.value);
-  joypad2.right.state  = input.key_down(joypad2.right.value);
-  joypad2.a.state      = input.key_down(joypad2.a.value);
-  joypad2.b.state      = input.key_down(joypad2.b.value);
-  joypad2.x.state      = input.key_down(joypad2.x.value);
-  joypad2.y.state      = input.key_down(joypad2.y.value);
-  joypad2.l.state      = input.key_down(joypad2.l.value);
-  joypad2.r.state      = input.key_down(joypad2.r.value);
-  joypad2.select.state = input.key_down(joypad2.select.value);
-  joypad2.start.state  = input.key_down(joypad2.start.value);
+  for(unsigned i = 0; i < 10; i++) {
+    joypad[i].up.state     = input.key_down(joypad[i].up.value);
+    joypad[i].down.state   = input.key_down(joypad[i].down.value);
+    joypad[i].left.state   = input.key_down(joypad[i].left.value);
+    joypad[i].right.state  = input.key_down(joypad[i].right.value);
+    joypad[i].a.state      = input.key_down(joypad[i].a.value);
+    joypad[i].b.state      = input.key_down(joypad[i].b.value);
+    joypad[i].x.state      = input.key_down(joypad[i].x.value);
+    joypad[i].y.state      = input.key_down(joypad[i].y.value);
+    joypad[i].l.state      = input.key_down(joypad[i].l.value);
+    joypad[i].r.state      = input.key_down(joypad[i].r.value);
+    joypad[i].select.state = input.key_down(joypad[i].select.value);
+    joypad[i].start.state  = input.key_down(joypad[i].start.value);
+  }
 }
 
-bool InputManager::get_status(uint device, uint button) {
-  switch(device) {
-    case SNES::Input::DeviceIDJoypad1: {
-      switch(button) {
-        case SNES::Input::JoypadUp:     return joypad1.up.state;
-        case SNES::Input::JoypadDown:   return joypad1.down.state;
-        case SNES::Input::JoypadLeft:   return joypad1.left.state;
-        case SNES::Input::JoypadRight:  return joypad1.right.state;
-        case SNES::Input::JoypadA:      return joypad1.a.state;
-        case SNES::Input::JoypadB:      return joypad1.b.state;
-        case SNES::Input::JoypadX:      return joypad1.x.state;
-        case SNES::Input::JoypadY:      return joypad1.y.state;
-        case SNES::Input::JoypadL:      return joypad1.l.state;
-        case SNES::Input::JoypadR:      return joypad1.r.state;
-        case SNES::Input::JoypadSelect: return joypad1.select.state;
-        case SNES::Input::JoypadStart:  return joypad1.start.state;
-      }
-    } break;
+bool InputManager::get_status(unsigned deviceid, unsigned id) {
+  //=======
+  //Joypads
+  //=======
+  int index = -1;
+  switch(deviceid) {
+    case SNES::Input::DeviceIDJoypad1:    index = 0; break;
+    case SNES::Input::DeviceIDJoypad2:    index = 1; break;
+    case SNES::Input::DeviceIDMultitap1A: index = 2; break;
+    case SNES::Input::DeviceIDMultitap1B: index = 3; break;
+    case SNES::Input::DeviceIDMultitap1C: index = 4; break;
+    case SNES::Input::DeviceIDMultitap1D: index = 5; break;
+    case SNES::Input::DeviceIDMultitap2A: index = 6; break;
+    case SNES::Input::DeviceIDMultitap2B: index = 7; break;
+    case SNES::Input::DeviceIDMultitap2C: index = 8; break;
+    case SNES::Input::DeviceIDMultitap2D: index = 9; break;
+  }
 
-    case SNES::Input::DeviceIDJoypad2: {
-      switch(button) {
-        case SNES::Input::JoypadUp:     return joypad2.up.state;
-        case SNES::Input::JoypadDown:   return joypad2.down.state;
-        case SNES::Input::JoypadLeft:   return joypad2.left.state;
-        case SNES::Input::JoypadRight:  return joypad2.right.state;
-        case SNES::Input::JoypadA:      return joypad2.a.state;
-        case SNES::Input::JoypadB:      return joypad2.b.state;
-        case SNES::Input::JoypadX:      return joypad2.x.state;
-        case SNES::Input::JoypadY:      return joypad2.y.state;
-        case SNES::Input::JoypadL:      return joypad2.l.state;
-        case SNES::Input::JoypadR:      return joypad2.r.state;
-        case SNES::Input::JoypadSelect: return joypad2.select.state;
-        case SNES::Input::JoypadStart:  return joypad2.start.state;
-      }
-    } break;
+  if(index >= 0) {
+    switch(id) {
+      case SNES::Input::JoypadUp:     return joypad[index].up.state;
+      case SNES::Input::JoypadDown:   return joypad[index].down.state;
+      case SNES::Input::JoypadLeft:   return joypad[index].left.state;
+      case SNES::Input::JoypadRight:  return joypad[index].right.state;
+      case SNES::Input::JoypadA:      return joypad[index].a.state;
+      case SNES::Input::JoypadB:      return joypad[index].b.state;
+      case SNES::Input::JoypadX:      return joypad[index].x.state;
+      case SNES::Input::JoypadY:      return joypad[index].y.state;
+      case SNES::Input::JoypadL:      return joypad[index].l.state;
+      case SNES::Input::JoypadR:      return joypad[index].r.state;
+      case SNES::Input::JoypadSelect: return joypad[index].select.state;
+      case SNES::Input::JoypadStart:  return joypad[index].start.state;
+    }
   }
 
   return false;

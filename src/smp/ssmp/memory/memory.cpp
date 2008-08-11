@@ -2,27 +2,27 @@
 
 alwaysinline
 uint8 sSMP::ram_read(uint16 addr) {
-  if(addr < 0xffc0) return spcram[addr];
-  if(status.iplrom_enabled == false) return spcram[addr];
+  if(addr < 0xffc0) return memory::apuram.read(addr);
+  if(status.iplrom_enabled == false) return memory::apuram.read(addr);
   return iplrom[addr & 0x3f];
 }
 
 alwaysinline
 void sSMP::ram_write(uint16 addr, uint8 data) {
   //writes to $ffc0-$ffff always go to spcram, even if the iplrom is enabled
-  spcram[addr] = data;
+  memory::apuram.write(addr, data);
 }
 
 //
 
 alwaysinline
 uint8 sSMP::port_read(uint8 port) {
-  return spcram[0xf4 + (port & 3)];
+  return memory::apuram.read(0xf4 + (port & 3));
 }
 
 alwaysinline
 void sSMP::port_write(uint8 port, uint8 data) {
-  spcram[0xf4 + (port & 3)] = data;
+  memory::apuram.write(0xf4 + (port & 3), data);
 }
 
 //
@@ -87,14 +87,8 @@ uint8 sSMP::op_busread(uint16 addr) {
         t2.stage3_ticks = 0;
       } break;
     }
-  } else if(addr < 0xffc0) {
-    r = spcram[addr];
   } else {
-    if(status.iplrom_enabled == true) {
-      r = iplrom[addr & 0x3f];
-    } else {
-      r = spcram[addr];
-    }
+    r = ram_read(addr);
   }
 
   return r;
@@ -112,17 +106,17 @@ void sSMP::op_buswrite(uint16 addr, uint8 data) {
 
         //multiplier table may not be 100% accurate, some settings crash
         //the processor due to S-SMP <> S-DSP bus access misalignment
-        static uint8 clock_speed_tbl[16] =
-        { 3, 5, 9, 17, 4, 6, 10, 18, 6, 8, 12, 20, 10, 12, 16, 24 };
+        //static uint8 clock_speed_tbl[16] =
+        //{ 3, 5, 9, 17, 4, 6, 10, 18, 6, 8, 12, 20, 10, 12, 16, 24 };
 
-        status.clock_speed   = 24 * clock_speed_tbl[data >> 4] / 3;
+        //status.clock_speed   = 24 * clock_speed_tbl[data >> 4] / 3;
         status.mmio_disabled = !!(data & 0x04);
         status.ram_writable  = !!(data & 0x02);
 
-        if((data >> 4) != 0) {
-          dprintf(source::smp, "* S-SMP critical warning: $00f0 (TEST) clock speed control modified!");
-          dprintf(source::smp, "* S-SMP may crash on hardware as a result!");
-        }
+        //if((data >> 4) != 0) {
+          //dprintf("* S-SMP critical warning: $00f0 (TEST) clock speed control modified!");
+          //dprintf("* S-SMP may crash on hardware as a result!");
+        //}
       } break;
 
       case 0xf1: { //CONTROL

@@ -578,7 +578,7 @@ uint32 r;
 
 //SLHV
 uint8 bPPU::mmio_r2137() {
-  if(cpu.pio_status() & 0x80) {
+  if(cpu.pio() & 0x80) {
     latch_counters();
   }
   return cpu.regs.mdr;
@@ -679,7 +679,7 @@ uint8 r = 0x00;
   regs.latch_vcounter = 0;
 
   r |= field() << 7;
-  if(!(cpu.pio_status() & 0x80)) {
+  if(!(cpu.pio() & 0x80)) {
     r |= 0x40;
   } else if(regs.counters_latched == true) {
     r |= 0x40;

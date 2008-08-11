@@ -2,9 +2,7 @@ class AboutWindow : public Window {
 public:
   Canvas icon;
   Label about;
-  Label contributors;
-  static const char about_text[1024];
-  static const char contributors_text[1024];
+  Label localization;
 
   void setup();
   uintptr_t close(Event);

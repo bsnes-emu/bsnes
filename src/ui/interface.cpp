@@ -49,8 +49,8 @@ void SNESInterface::input_poll() {
   input_manager.poll();
 }
 
-bool SNESInterface::input_poll(uint deviceid, uint button) {
-  return input_manager.get_status(deviceid, button);
+bool SNESInterface::input_poll(unsigned deviceid, unsigned id) {
+  return input_manager.get_status(deviceid, id);
 }
 
 //core

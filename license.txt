@@ -53,22 +53,19 @@ information in the header. The lack of such a header indicates said file falls
 under the bsnes license.
 
 HQ2x filter, author: MaxST, license: LGPL
-JMA decompressor, author: NSRT Team, license: GPL (*)
+JMA decompressor, author: NSRT Team, license: GPL*
 NTSC filter, author: blargg, license: LGPL
 zlib decompressor, license: zlib license
 
-(*) bsnes has received an exemption from the copyright holder to use this work.
+(* bsnes has received an exemption from the copyright holder to use this work.)
 
 The software also includes works which have been released to the public domain,
 which are not bound to any licensing agreements. Below is a complete list of all
 such software.
 
 libco, author: byuu
-libui, author: byuu
-OBC-1 emu, author: byuu
 S-DD1 decompressor, author: Andreas Naive
 SPC7110 decompressor, author: neviksti
-S-RTC emu, author: byuu
 
 Any software listed above as exemptions may be relicensed individually from
 bsnes under their respective terms. However, no bsnes licensed portions can be

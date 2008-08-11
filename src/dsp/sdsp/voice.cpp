@@ -22,9 +22,11 @@ void sDSP::voice_1(voice_t &v) {
 
 void sDSP::voice_2(voice_t &v) {
   //read sample pointer (ignored if not needed)
-  const uint8 *entry = &ram[state.t_dir_addr];
-  if(!v.kon_delay) entry += 2;
-  state.t_brr_next_addr = (entry[1] << 8) + entry[0];
+  uint16 addr = state.t_dir_addr;
+  if(!v.kon_delay) addr += 2;
+  uint8 lo = memory::apuram.read(uint16(addr + 0));
+  uint8 hi = memory::apuram.read(uint16(addr + 1));
+  state.t_brr_next_addr = ((hi << 8) + lo);
 
   state.t_adsr0 = VREG(adsr0);
 
@@ -43,8 +45,8 @@ void sDSP::voice_3a(voice_t &v) {
 }
 
 void sDSP::voice_3b(voice_t &v) {
-  state.t_brr_byte = ram[(uint16)(v.brr_addr + v.brr_offset)];
-  state.t_brr_header = ram[(uint16)(v.brr_addr)];
+  state.t_brr_byte = memory::apuram.read(uint16(v.brr_addr + v.brr_offset));
+  state.t_brr_header = memory::apuram.read(uint16(v.brr_addr));
 }
 
 void sDSP::voice_3c(voice_t &v) {

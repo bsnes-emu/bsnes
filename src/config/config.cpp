@@ -58,15 +58,15 @@ string_setting Path::cheat(config(), "path.cheat",
 string_setting Path::bsx(config(), "path.bsx", "", "");
 string_setting Path::st(config(), "path.st", "", "");
 
-integral_setting SNES::controller_port0(config(), "snes.controller_port_1",
-  "Controller attached to SNES port 1", integral_setting::decimal, ::SNES::Input::DeviceIDJoypad1);
-integral_setting SNES::controller_port1(config(), "snes.controller_port_2",
-  "Controller attached to SNES port 2", integral_setting::decimal, ::SNES::Input::DeviceIDJoypad2);
+integral_setting SNES::controller_port1(config(), "snes.controller_port1",
+  "Controller attached to SNES port 1", integral_setting::decimal, ::SNES::Input::DeviceJoypad);
+integral_setting SNES::controller_port2(config(), "snes.controller_port2",
+  "Controller attached to SNES port 2", integral_setting::decimal, ::SNES::Input::DeviceJoypad);
 
 integral_setting CPU::ntsc_clock_rate(config(), "cpu.ntsc_clock_rate",
   "NTSC S-CPU clock rate (in hz)", integral_setting::decimal, 21477272);
 integral_setting CPU::pal_clock_rate(config(), "cpu.pal_clock_rate",
-  "PAL S-CPU clock rate (in hz)", integral_setting::decimal, 21281370);
+  "PAL S-CPU clock rate (in hz)", integral_setting::decimal,  21281370);
 integral_setting CPU::wram_init_value(config(), "cpu.wram_init_value",
   "Value to initialize 128k WRAM to upon power cycle.\n"
   "Note that on real hardware, this value is undefined; meaning it can vary\n"
@@ -81,13 +81,10 @@ integral_setting CPU::wram_init_value(config(), "cpu.wram_init_value",
   "which do not properly initialize WRAM upon power cycle.\n",
   integral_setting::hex, 0x55);
 
-integral_setting CPU::hdma_enable("cpu.hdma_enable",
-  "Enable HDMA effects", integral_setting::boolean, true);
-
 integral_setting SMP::ntsc_clock_rate(config(), "smp.ntsc_clock_rate",
-  "NTSC S-SMP clock rate (in hz)", integral_setting::decimal, 24606720);
+  "NTSC S-SMP clock rate (in hz)", integral_setting::decimal, 32040 * 768);
 integral_setting SMP::pal_clock_rate(config(), "smp.pal_clock_rate",
-  "PAL S-SMP clock rate (in hz)", integral_setting::decimal, 24606720);
+  "PAL S-SMP clock rate (in hz)", integral_setting::decimal,  32040 * 768);
 
 integral_setting PPU::Hack::render_scanline_position(config(), "ppu.hack.render_scanline_position",
   "Approximate HCLOCK position to render at for scanline-based renderers",

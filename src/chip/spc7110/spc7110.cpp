@@ -1,7 +1,7 @@
 #include "../../base.h"
 #define SPC7110_CPP
 
-#include "codec.cpp"
+#include "decomp.cpp"
 
 const unsigned SPC7110::months[12] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
 
@@ -30,9 +30,7 @@ void SPC7110::reset() {
   r480b = 0x00;
   r480c = 0x00;
 
-  memset(codec.output, 0, 65536);
-  memset(codec.buffer, 0, 65536);
-  decomp_offset = 0;
+  decomp.reset();
 
   r4811 = 0x00;
   r4812 = 0x00;
@@ -189,7 +187,7 @@ uint8 SPC7110::mmio_read(uint addr) {
       counter--;
       r4809 = counter;
       r480a = counter >> 8;
-      return codec.output[(decomp_offset++) & 0xffff];
+      return decomp.read();
     }
     case 0x4801: return r4801;
     case 0x4802: return r4802;
@@ -213,7 +211,7 @@ uint8 SPC7110::mmio_read(uint addr) {
     //==============
 
     case 0x4810: {
-      if(r481x != 0x1f) return 0x00;
+      if(r481x != 0x07) return 0x00;
 
       unsigned addr = data_pointer();
       unsigned adjust = data_adjust();
@@ -248,7 +246,7 @@ uint8 SPC7110::mmio_read(uint addr) {
     case 0x4817: return r4817;
     case 0x4818: return r4818;
     case 0x481a: {
-      if(r481x != 0x1f) return 0x00;
+      if(r481x != 0x07) return 0x00;
 
       unsigned addr = data_pointer();
       unsigned adjust = data_adjust();
@@ -349,27 +347,7 @@ void SPC7110::mmio_write(uint addr, uint8 data) {
                        + (memory::cartrom.read(addr + 2) <<  8)
                        + (memory::cartrom.read(addr + 3) <<  0);
 
-      //this can technically be 65536, but it has never been observed higher than 32768 ...
-      //really need a way to determine both compressed and decompressed lengths, though.
-      static const unsigned max_length = 32768;
-
-      offset = datarom_addr(offset);
-      for(unsigned i = 0; i < max_length; i++) codec.buffer[i] = memory::cartrom.read(offset + i);
-
-      #if 0
-      printf("decompression: 4805=$%0.2x,4806=$%0.2x,4807=$%0.2x,4808=$%0.2x,480b=$%0.2x\n",
-        r4805, r4806, r4807, r4808, r480b);
-      printf("table=$%0.6x,index=%3d,length=%5d,mode=%d,offset=$%0.6x\n",
-        table, r4804, length, mode, offset);
-      #endif
-
-      switch(mode) {
-        case 0: codec.decomp_mode0(max_length); break;
-        case 1: codec.decomp_mode1(max_length); break;
-        case 2: codec.decomp_mode2(max_length); break;
-      }
-
-      decomp_offset = (r4805 + (r4806 << 8)) << mode;
+      decomp.init(mode, offset, (r4805 + (r4806 << 8)) << mode);
       r480c = 0x80;
     } break;
 
@@ -388,7 +366,6 @@ void SPC7110::mmio_write(uint addr, uint8 data) {
     case 0x4813: r4813 = data; r481x |= 0x04; break;
     case 0x4814: {
       r4814 = data;
-      r481x |= 0x08;
       r4814_latch = true;
       if(!r4815_latch) break;
       if(!(r4818 & 2)) break;
@@ -406,7 +383,6 @@ void SPC7110::mmio_write(uint addr, uint8 data) {
     } break;
     case 0x4815: {
       r4815 = data;
-      r481x |= 0x10;
       r4815_latch = true;
       if(!r4814_latch) break;
       if(!(r4818 & 2)) break;
@@ -425,7 +401,7 @@ void SPC7110::mmio_write(uint addr, uint8 data) {
     case 0x4816: r4816 = data; break;
     case 0x4817: r4817 = data; break;
     case 0x4818: {
-      if(r481x != 0x1f) break;
+      if(r481x != 0x07) break;
 
       r4818 = data;
       r4814_latch = r4815_latch = false;
@@ -640,24 +616,16 @@ void SPC7110::mmio_write(uint addr, uint8 data) {
 }
 
 uint8 SPC7110::read(uint addr) {
+  //$[00-0f|80-8f]:[8000-ffff], $[c0-cf]:[0000-ffff] mapped directly to memory::cartrom
+
   if((addr & 0xffe000) == 0x006000 || (addr & 0xffe000) == 0x306000) {
     //$[00|30]:[6000-7fff]
     return memory::cartram.read(addr & 0x1fff);
   }
 
-  if((addr & 0x708000) == 0x008000) {
-    //$[00-0f|80-8f]:[8000-ffff]
-    return memory::cartrom.read(addr & 0x0fffff);
-  }
-
   if((addr & 0xff0000) == 0x500000) {
     //$[50]:[0000-ffff]
     return mmio_read(0x4800);
-  }
-
-  if((addr & 0xf00000) == 0xc00000) {
-    //$[c0-cf]:[0000-ffff]
-    return memory::cartrom.read(addr & 0x0fffff);
   }
 
   if((addr & 0xf00000) == 0xd00000) {

@@ -12,7 +12,7 @@ class SNESInterface { public:
 
   function<bool ()> input_ready;
   void input_poll();
-  bool input_poll(unsigned deviceid, unsigned button);
+  bool input_poll(unsigned deviceid, unsigned id);
 
   void init();
   void term();

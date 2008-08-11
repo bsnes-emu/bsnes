@@ -46,6 +46,8 @@
   } channel[8];
 
   void dma_add_clocks(uint clocks);
+  bool dma_addr_valid(uint32 abus);
+  uint8 dma_read(uint32 abus);
   void dma_transfer(bool direction, uint8 bbus, uint32 abus);
 
   uint8 dma_bbus(uint8 i, uint8 index);
@@ -56,6 +58,7 @@
   void dma_transfertobusb(uint8 i, uint8 bbus);
   void dma_transfertobusa(uint8 i, uint8 bbus);
   void dma_write(uint8 i, uint8 index);
+  uint8 dma_enabled_channels();
   void dma_run();
 
   bool hdma_active(uint8 i);

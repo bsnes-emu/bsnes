@@ -1,5 +1,5 @@
 /*****
- * SPC7110 emulator - version 0.1 (2008-07-19)
+ * SPC7110 emulator - version 0.03 (2008-08-10)
  * Copyright (c) 2008, byuu and neviksti
  *
  * Permission to use, copy, modify, and/or distribute this software for any
@@ -15,7 +15,7 @@
  * or in connection with the use or performance of this software.
  *****/
 
-#include "codec.h"
+#include "decomp.h"
 
 class SPC7110 : public MMIO, public Memory {
 public:
@@ -41,6 +41,10 @@ public:
   uint8 read (uint addr);
   void  write(uint addr, uint8 data);
 
+  //spc7110decomp
+  void decomp_init();
+  uint8 decomp_read();
+
   SPC7110();
 
 private:
@@ -60,8 +64,7 @@ private:
   uint8 r480b; //decompression control register
   uint8 r480c; //decompression status
 
-  SPC7110Codec codec;
-  uint16 decomp_offset;
+  SPC7110Decomp decomp;
 
   //==============
   //data port unit

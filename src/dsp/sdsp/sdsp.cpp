@@ -249,8 +249,6 @@ void sDSP::write(uint8 addr, uint8 data) {
 /* initialization */
 
 void sDSP::power() {
-  ram = (uint8*)smp.get_spcram_handle(); //TODO: move to sMemory
-
   memset(&state.regs, 0, sizeof state.regs);
   state.echo_hist_pos = 0;
   state.every_other_sample = false;

@@ -38,6 +38,7 @@ void Cartridge::load_begin(CartridgeType cart_type) {
   stB.rom_size  = stB.ram_size  = 0;
 
   info.type = cart_type;
+  info.patched = false;
 
   info.bsxbase  = false;
   info.bsxcart  = false;

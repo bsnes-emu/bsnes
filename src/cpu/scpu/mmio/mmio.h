@@ -3,7 +3,8 @@
   uint8 mmio_read(uint addr);
   void mmio_write(uint addr, uint8 data);
 
-  uint8 pio_status();
+  uint8 pio();
+  bool joylatch();
 
   uint8 mmio_r2180();
   uint8 mmio_r4016();

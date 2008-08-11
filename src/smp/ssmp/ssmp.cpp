@@ -6,13 +6,11 @@
 #include "timing/timing.cpp"
 
 void sSMP::power() {
-//SNES hardware SPCRAM contains pseudo-random data upon power up
-//for(unsigned i = 0; i < 65536; i += 64) {
-//  memset(spcram + i,      0x00, 32);
-//  memset(spcram + i + 32, 0xff, 32);
-//}
-
-  memset(spcram, 0x00, 65536);
+  for(unsigned i = 0; i < 65536; i++) {
+    //SNES hardware APURAM contains pseudo-random data upon power up
+    //memory::apuram.write(i, (i & 32) ? 0xff : 0x00);
+    memory::apuram.write(i, 0x00);
+  }
 
   //targets not initialized/changed upon reset
   t0.target = 0;

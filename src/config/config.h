@@ -15,14 +15,13 @@ extern struct Path {
 } path;
 
 extern struct SNES {
-  static integral_setting controller_port0;
   static integral_setting controller_port1;
+  static integral_setting controller_port2;
 } snes;
 
 extern struct CPU {
   static integral_setting ntsc_clock_rate, pal_clock_rate;
   static integral_setting wram_init_value;
-  static integral_setting hdma_enable;
 } cpu;
 
 extern struct SMP {
