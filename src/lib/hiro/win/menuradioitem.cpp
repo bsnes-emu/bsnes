@@ -5,7 +5,7 @@ void pMenuRadioItem::create(MenuRadioItemGroup &group_, const char *text_) {
 }
 
 void pMenuRadioItem::check() {
-  for(uint i = 0; i < group.size(); i++) {
+  for(unsigned i = 0; i < group.size(); i++) {
     CheckMenuItem(parent, group[i]->p.instance, (group[i] == &self) ? MF_CHECKED : MF_UNCHECKED);
   }
 }

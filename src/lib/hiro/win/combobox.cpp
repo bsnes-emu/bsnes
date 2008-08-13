@@ -1,4 +1,4 @@
-void pCombobox::create(uint style, uint width, uint height, const char *text) {
+void pCombobox::create(unsigned style, unsigned width, unsigned height, const char *text) {
   hwnd = CreateWindowEx(WS_EX_CLIENTEDGE, L"COMBOBOX", L"",
     WS_CHILD | WS_TABSTOP | WS_VISIBLE | CBS_DROPDOWNLIST | CBS_HASSTRINGS,
     0, 0, width, 200,

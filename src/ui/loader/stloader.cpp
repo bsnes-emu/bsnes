@@ -1,42 +1,42 @@
-uintptr_t STLoaderWindow::close(Event) {
+uintptr_t STLoaderWindow::close(event_t) {
   hide();
   return false;
 }
 
-uintptr_t STLoaderWindow::bbase_tick(Event) {
+uintptr_t STLoaderWindow::bbase_tick(event_t) {
 char fn[PATH_MAX];
   if(event::load_rom(fn) == true) tbase.set_text(fn);
   return true;
 }
 
-uintptr_t STLoaderWindow::cbase_tick(Event) {
+uintptr_t STLoaderWindow::cbase_tick(event_t) {
   tbase.set_text("");
   return true;
 }
 
-uintptr_t STLoaderWindow::bslotA_tick(Event) {
+uintptr_t STLoaderWindow::bslotA_tick(event_t) {
 char fn[PATH_MAX];
   if(event::load_rom(fn) == true) tslotA.set_text(fn);
   return true;
 }
 
-uintptr_t STLoaderWindow::cslotA_tick(Event) {
+uintptr_t STLoaderWindow::cslotA_tick(event_t) {
   tslotA.set_text("");
   return true;
 }
 
-uintptr_t STLoaderWindow::bslotB_tick(Event) {
+uintptr_t STLoaderWindow::bslotB_tick(event_t) {
 char fn[PATH_MAX];
   if(event::load_rom(fn) == true) tslotB.set_text(fn);
   return true;
 }
 
-uintptr_t STLoaderWindow::cslotB_tick(Event) {
+uintptr_t STLoaderWindow::cslotB_tick(event_t) {
   tslotB.set_text("");
   return true;
 }
 
-uintptr_t STLoaderWindow::load_tick(Event) {
+uintptr_t STLoaderWindow::load_tick(event_t) {
 char base[PATH_MAX], slotA[PATH_MAX], slotB[PATH_MAX];
   tbase.get_text(base, PATH_MAX);
   tslotA.get_text(slotA, PATH_MAX);
@@ -52,7 +52,7 @@ char base[PATH_MAX], slotA[PATH_MAX], slotB[PATH_MAX];
   return true;
 }
 
-uintptr_t STLoaderWindow::cancel_tick(Event) {
+uintptr_t STLoaderWindow::cancel_tick(event_t) {
   tbase.set_text("");
   tslotA.set_text("");
   tslotB.set_text("");

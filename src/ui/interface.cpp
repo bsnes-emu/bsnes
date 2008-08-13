@@ -9,7 +9,8 @@ SNESInterface snesinterface;
 
 //video
 
-static uint frameskip_counter = 0;
+static unsigned frameskip_counter = 0;
+static unsigned frameskip_offset  = 0;
 
 void SNESInterface::video_refresh(uint16_t *data, unsigned pitch, unsigned *line, unsigned width, unsigned height) {
   if(ppu.renderer_enabled() == true) {
@@ -23,9 +24,18 @@ void SNESInterface::video_refresh(uint16_t *data, unsigned pitch, unsigned *line
     }
   }
 
-  frameskip_counter++;
-  frameskip_counter %= (uint(config::video.frameskip) + 1);
-  ppu.enable_renderer(frameskip_counter == 0);
+  if(config::video.frameskip == 0) {
+    ppu.enable_renderer(true);
+  } else {
+    frameskip_counter++;
+    frameskip_counter %= config::video.frameskip + 1;
+    if(frameskip_counter == 0) {
+      //randomize which frame of set will be rendered,
+      //helps with two-frame animations (such as blinking)
+      frameskip_offset = rand() % (config::video.frameskip + 1);
+    }
+    ppu.enable_renderer(frameskip_counter == frameskip_offset);
+  }
 }
 
 //audio

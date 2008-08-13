@@ -1,4 +1,4 @@
-void pListbox::create(uint style, uint width, uint height, const char *columns, const char *text) {
+void pListbox::create(unsigned style, unsigned width, unsigned height, const char *columns, const char *text) {
   bool header = style & Listbox::Header;
   unsigned hscroll = (style & Listbox::HorizontalScrollAlways) ? WS_HSCROLL :
                      (style & Listbox::HorizontalScrollNever) ? 0 :
@@ -41,7 +41,7 @@ void pListbox::autosize_columns() {
   }
 }
 
-void pListbox::set_column_width(uint column, uint width) {
+void pListbox::set_column_width(unsigned column, unsigned width) {
   ListView_SetColumnWidth(hwnd, column, width);
 }
 
@@ -63,7 +63,7 @@ void pListbox::add_item(const char *text) {
   }
 }
 
-void pListbox::set_item(uint index, const char *text) {
+void pListbox::set_item(unsigned index, const char *text) {
   lstring list;
   split(list, "\t", text ? text : "");
   for(unsigned i = 0; i < count(list); i++) {

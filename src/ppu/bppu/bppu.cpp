@@ -69,9 +69,9 @@ void bPPU::frame() {
 void bPPU::power() {
   PPU::power();
 
-  memset(vram,  0, 65536);
-  memset(oam,   0,   544);
-  memset(cgram, 0,   512);
+  for(unsigned i = 0; i < memory::vram.size();  i++) memory::vram[i]  = 0x00;
+  for(unsigned i = 0; i < memory::oam.size();   i++) memory::oam[i]   = 0x00;
+  for(unsigned i = 0; i < memory::cgram.size(); i++) memory::cgram[i] = 0x00;
 
   region = snes.region();
 
@@ -298,42 +298,7 @@ void bPPU::reset() {
   clear_tiledata_cache();
 }
 
-uint8 bPPU::vram_read(uint16 addr) {
-  return vram[addr];
-}
-
-void bPPU::vram_write(uint16 addr, uint8 value) {
-  vram[addr] = value;
-}
-
-uint8 bPPU::oam_read(uint16 addr) {
-  if(addr >= 0x0200) { addr = 0x0200 | (addr & 31); }
-  return oam[addr];
-}
-
-void bPPU::oam_write(uint16 addr, uint8 value) {
-  if(addr >= 0x0200) { addr = 0x0200 | (addr & 31); }
-  oam[addr] = value;
-}
-
-uint8 bPPU::cgram_read(uint16 addr) {
-  addr &= 511;
-  uint8 r = cgram[addr];
-  if(addr & 1) { r &= 0x7f; }
-  return r;
-}
-
-void bPPU::cgram_write(uint16 addr, uint8 value) {
-  addr &= 511;
-  if(addr & 1) { value &= 0x7f; }
-  cgram[addr] = value;
-}
-
 bPPU::bPPU() {
-  vram  = new(zeromemory) uint8_t[65536];
-  oam   = new(zeromemory) uint8_t[  544];
-  cgram = new(zeromemory) uint8_t[  512];
-
   init_tiledata_cache();
 
   for(int l = 0; l < 16; l++) {
@@ -356,7 +321,4 @@ bPPU::bPPU() {
 }
 
 bPPU::~bPPU() {
-  delete[] vram;
-  delete[] oam;
-  delete[] cgram;
 }

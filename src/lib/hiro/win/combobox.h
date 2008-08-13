@@ -1,7 +1,7 @@
 class pCombobox : public pFormControl {
 public:
   Combobox &self;
-  void create(uint style, uint width, uint height, const char *text = "");
+  void create(unsigned style, unsigned width, unsigned height, const char *text = "");
   void add_item(const char *text);
   int  get_selection();
   void set_selection(int index);

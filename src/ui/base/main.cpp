@@ -7,13 +7,13 @@ bool MainWindow::input_ready() {
   return false;
 }
 
-uintptr_t MainWindow::close(Event) {
+uintptr_t MainWindow::close(event_t) {
   event::quit();
   return false;
 }
 
-uintptr_t MainWindow::event(Event e) {
-  if(e.type == Event::Tick) {
+uintptr_t MainWindow::event(event_t e) {
+  if(e.type == event_t::Tick) {
     if(e.widget == &menu_file_load) {
       event::load_rom();
     }
@@ -58,7 +58,7 @@ uintptr_t MainWindow::event(Event e) {
     if(e.widget == &menu_system_controller_port2_multitap) { event::update_controller_port2(2); }
 
     if(e.widget == &menu_file_exit) {
-      event(Event(Event::Close));
+      event(event_t(event_t::Close));
     }
 
     if(e.widget == &menu_settings_videomode_1x) { event::update_multiplier(1); }
@@ -123,7 +123,7 @@ uintptr_t MainWindow::event(Event e) {
   return true;
 }
 
-uintptr_t MainWindow::block(Event) {
+uintptr_t MainWindow::block(event_t) {
   audio.clear();
   return true;
 }

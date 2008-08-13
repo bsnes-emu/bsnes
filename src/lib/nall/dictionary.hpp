@@ -37,9 +37,9 @@ public:
       trim_once(part[0], "\"");
       trim_once(part[1], "\"");
 
-      unsigned i = index_input.size();
-      index_input[i]  = strdup(part[0]);
-      index_output[i] = strdup(part[1]);
+      unsigned n = index_input.size();
+      index_input[n]  = strdup(part[0]);
+      index_output[n] = strdup(part[1]);
     }
   }
 

@@ -65,7 +65,6 @@ void Cartridge::load_begin(CartridgeType cart_type) {
 
   info.header_index = 0xffc0;
   info.mapper = LoROM;
-  info.name[0] = 0;
   info.region = NTSC;
 
   info.rom_size = 0;

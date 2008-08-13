@@ -6,7 +6,7 @@ void pMenuGroup::create(const char *text_) {
 void pMenuGroup::attach(MenuControl &menucontrol) {
   switch(menucontrol.type) {
     case Widget::MenuGroupType: {
-      AppendMenu(group, MF_STRING | MF_POPUP, (uint)((MenuGroup&)menucontrol).p.group, utf16(menucontrol.p.text));
+      AppendMenu(group, MF_STRING | MF_POPUP, (unsigned)((MenuGroup&)menucontrol).p.group, utf16(menucontrol.p.text));
     } break;
 
     case Widget::MenuItemType:

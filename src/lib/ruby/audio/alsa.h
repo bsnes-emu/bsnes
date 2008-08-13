@@ -1,5 +1,5 @@
 /*
-  audio.alsa (2008-06-01)
+  audio.alsa (2008-08-12)
   authors: Nach, RedDwarf
 */
 

@@ -21,15 +21,15 @@ void PPU::frame() {
   prev = curr;
 }
 
-void PPU::power() {}
+void PPU::power() {
+}
 
 void PPU::reset() {
   memset(output, 0, 512 * 480 * sizeof(uint16));
 }
 
 PPU::PPU() {
-  output = (uint16*)malloc(512 * 480 * sizeof(uint16));
-  memset(output, 0, 512 * 480 * sizeof(uint16));
+  output = new(zeromemory) uint16[512 * 480];
 
   status.render_output   = true;
   status.frames_updated  = false;
@@ -41,5 +41,5 @@ PPU::PPU() {
 }
 
 PPU::~PPU() {
-  free(output);
+  delete[] output;
 }

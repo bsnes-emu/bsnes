@@ -1,7 +1,8 @@
 #ifdef BPPU_CPP
 
 inline uint16 bPPU::get_palette(uint8 index) {
-  return read16(cgram, index << 1);
+  unsigned addr = index << 1;
+  return memory::cgram[addr] + (memory::cgram[addr + 1] << 8);
 }
 
 inline uint16 bPPU::get_direct_color(uint8 p, uint8 t) {

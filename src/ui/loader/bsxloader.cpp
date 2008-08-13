@@ -1,31 +1,31 @@
-uintptr_t BSXLoaderWindow::close(Event) {
+uintptr_t BSXLoaderWindow::close(event_t) {
   hide();
   return false;
 }
 
-uintptr_t BSXLoaderWindow::bbase_tick(Event) {
+uintptr_t BSXLoaderWindow::bbase_tick(event_t) {
 char fn[PATH_MAX];
   if(event::load_rom(fn) == true) tbase.set_text(fn);
   return true;
 }
 
-uintptr_t BSXLoaderWindow::cbase_tick(Event) {
+uintptr_t BSXLoaderWindow::cbase_tick(event_t) {
   tbase.set_text("");
   return true;
 }
 
-uintptr_t BSXLoaderWindow::bslot_tick(Event) {
+uintptr_t BSXLoaderWindow::bslot_tick(event_t) {
 char fn[PATH_MAX];
   if(event::load_rom(fn) == true) tslot.set_text(fn);
   return true;
 }
 
-uintptr_t BSXLoaderWindow::cslot_tick(Event) {
+uintptr_t BSXLoaderWindow::cslot_tick(event_t) {
   tslot.set_text("");
   return true;
 }
 
-uintptr_t BSXLoaderWindow::load_tick(Event) {
+uintptr_t BSXLoaderWindow::load_tick(event_t) {
 char base[PATH_MAX], slot[PATH_MAX];
   tbase.get_text(base, PATH_MAX);
   tslot.get_text(slot, PATH_MAX);
@@ -43,7 +43,7 @@ char base[PATH_MAX], slot[PATH_MAX];
   return true;
 }
 
-uintptr_t BSXLoaderWindow::cancel_tick(Event) {
+uintptr_t BSXLoaderWindow::cancel_tick(event_t) {
   tbase.set_text("");
   tslot.set_text("");
   hide();

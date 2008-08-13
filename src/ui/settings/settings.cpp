@@ -21,12 +21,12 @@ void SettingsWindow::setup() {
   panel_list.set_selection(1); //default to input configuration (most frequently used panel)
 }
 
-uintptr_t SettingsWindow::close(Event) {
+uintptr_t SettingsWindow::close(event_t) {
   hide();
   return false;
 }
 
-uintptr_t SettingsWindow::list_change(Event) {
+uintptr_t SettingsWindow::list_change(event_t) {
   window_video_settings.hide();
   window_input_config.hide();
   window_path_settings.hide();

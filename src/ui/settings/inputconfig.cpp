@@ -124,32 +124,32 @@ void InputConfigWindow::refresh_list() {
   list.autosize_columns();
 }
 
-uintptr_t InputConfigWindow::capture_change(Event e) {
+uintptr_t InputConfigWindow::capture_change(event_t e) {
   if(e.widget == &capture_always) config::input.capture_mode = 0;
   if(e.widget == &capture_focus)  config::input.capture_mode = 1;
   if(e.widget == &capture_pause)  config::input.capture_mode = 2;
   return true;
 }
 
-uintptr_t InputConfigWindow::type_change(Event) {
+uintptr_t InputConfigWindow::type_change(event_t) {
   refresh_subtype();
   refresh_list();
   return true;
 }
 
-uintptr_t InputConfigWindow::subtype_change(Event) {
+uintptr_t InputConfigWindow::subtype_change(event_t) {
   refresh_list();
   return true;
 }
 
-uintptr_t InputConfigWindow::list_change(Event) {
+uintptr_t InputConfigWindow::list_change(event_t) {
   int pos = list.get_selection();
   setkey.enable(pos >= 0);
   clrkey.enable(pos >= 0);
   return true;
 }
 
-uintptr_t InputConfigWindow::set_tick(Event) {
+uintptr_t InputConfigWindow::set_tick(event_t) {
   int pos = list.get_selection();
   if(pos < 0) return true;
   window_input_capture.index = pos;
@@ -163,7 +163,7 @@ uintptr_t InputConfigWindow::set_tick(Event) {
   return true;
 }
 
-uintptr_t InputConfigWindow::clr_tick(Event) {
+uintptr_t InputConfigWindow::clr_tick(event_t) {
   int pos = list.get_selection();
   if(pos < 0) return true;
   set_value(pos, keyboard::none);
@@ -188,7 +188,7 @@ void InputCaptureWindow::show() {
   Window::focus();
 }
 
-uintptr_t InputCaptureWindow::close(Event) {
+uintptr_t InputCaptureWindow::close(event_t) {
   hide();
   return false;
 }

@@ -1,9 +1,9 @@
 class pProgressbar : public pFormControl {
 public:
   Progressbar &self;
-  void create(uint style, uint width, uint height);
-  uint get_progress();
-  void set_progress(uint progress);
+  void create(unsigned style, unsigned width, unsigned height);
+  unsigned get_progress();
+  void set_progress(unsigned progress);
 
   pProgressbar(Progressbar&);
 };

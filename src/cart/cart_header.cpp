@@ -120,70 +120,99 @@ void Cartridge::read_header() {
 
   //0, 1, 13 = NTSC; 2 - 12 = PAL
   info.region = (region <= 1 || region >= 13) ? NTSC : PAL;
+}
 
-  memcpy(&info.name, &rom[info.header_index + CART_NAME], 21);
-  info.name[21] = 0;
-  trim(info.name);
+unsigned Cartridge::score_header(unsigned addr) {
+  if(cart.rom_size < addr + 64) return 0; //image too small to contain header at this location?
+  uint8 *rom = cart.rom;
+  int score = 0;
 
-  //convert undisplayable characters (half-width katakana, etc) to '?' characters
-  for(int i = 0; i < 21; i++) {
-    if(info.name[i] & 0x80) info.name[i] = '?';
-  }
+  uint16 resetvector = rom[addr + RESETV] | (rom[addr + RESETV + 1] << 8);
+  uint16 checksum    = rom[addr +  CKSUM] | (rom[addr +  CKSUM + 1] << 8);
+  uint16 ichecksum   = rom[addr + ICKSUM] | (rom[addr + ICKSUM + 1] << 8);
 
-  //always display something
-  if(!info.name[0]) strcpy(info.name, "(untitled)");
+  uint8 resetop = rom[(addr & ~0x7fff) | (resetvector & 0x7fff)]; //first opcode executed upon reset
+  uint8 mapper  = rom[addr + MAPPER] & ~0x10; //mask off irrelevent FastROM-capable bit
+
+  //$00:[000-7fff] contains uninitialized RAM and MMIO.
+  //reset vector must point to ROM at $00:[8000-ffff] to be considered valid.
+  if(resetvector < 0x8000) return 0;
+
+  //some images duplicate the header in multiple locations, and others have completely
+  //invalid header information that cannot be relied upon.
+  //below code will analyze the first opcode executed at the specified reset vector to
+  //determine the probability that this is the correct header.
+
+  //most likely opcodes
+  if(resetop == 0x78 //sei
+  || resetop == 0x18 //clc (clc; xce)
+  || resetop == 0x38 //sec (sec; xce)
+  || resetop == 0x9c //stz $nnnn (stz $4200)
+  || resetop == 0x4c //jmp $nnnn
+  || resetop == 0x5c //jml $nnnnnn
+  ) score += 8;
+
+  //plausible opcodes
+  if(resetop == 0xc2 //rep #$nn
+  || resetop == 0xe2 //sep #$nn
+  || resetop == 0xad //lda $nnnn
+  || resetop == 0xae //ldx $nnnn
+  || resetop == 0xac //ldy $nnnn
+  || resetop == 0xaf //lda $nnnnnn
+  || resetop == 0xa9 //lda #$nn
+  || resetop == 0xa2 //ldx #$nn
+  || resetop == 0xa0 //ldy #$nn
+  || resetop == 0x20 //jsr $nnnn
+  || resetop == 0x22 //jsl $nnnnnn
+  ) score += 4;
+
+  //implausible opcodes
+  if(resetop == 0x40 //rti
+  || resetop == 0x60 //rts
+  || resetop == 0x6b //rtl
+  || resetop == 0xcd //cmp $nnnn
+  || resetop == 0xec //cpx $nnnn
+  || resetop == 0xcc //cpy $nnnn
+  ) score -= 4;
+
+  //least likely opcodes
+  if(resetop == 0x00 //brk #$nn
+  || resetop == 0x02 //cop #$nn
+  || resetop == 0xdb //stp
+  || resetop == 0x42 //wdm
+  || resetop == 0xff //sbc $nnnnnn,x
+  ) score -= 8;
+
+  //at times, both the header and reset vector's first opcode will match ...
+  //fallback and rely on info validity in these cases to determine more likely header.
+
+  //a valid checksum is the biggest indicator of a valid header.
+  if((checksum + ichecksum) == 0xffff && (checksum != 0) && (ichecksum != 0)) score += 4;
+
+  if(addr == 0x007fc0 && mapper == 0x20) score += 2; //0x20 is usually LoROM
+  if(addr == 0x00ffc0 && mapper == 0x21) score += 2; //0x21 is usually HiROM
+  if(addr == 0x007fc0 && mapper == 0x22) score += 2; //0x22 is usually ExLoROM
+  if(addr == 0x40ffc0 && mapper == 0x25) score += 2; //0x25 is usually ExHiROM
+
+  if(rom[addr + COMPANY] == 0x33) score += 2; //0x33 indicates extended header
+  if(rom[addr + ROM_TYPE] < 0x08) score++;
+  if(rom[addr + ROM_SIZE] < 0x10) score++;
+  if(rom[addr + RAM_SIZE] < 0x08) score++;
+  if(rom[addr + REGION] < 14) score++;
+
+  printf("* score @ %0.6x = %2d, resetop = %0.2x\n", addr, score, resetop);
+
+  if(score < 0) score = 0;
+  return score;
 }
 
 void Cartridge::find_header() {
-  int32 score_lo = 0, score_hi = 0, score_ex = 0;
-  uint8_t *rom = cart.rom;
+  unsigned score_lo = score_header(0x007fc0);
+  unsigned score_hi = score_header(0x00ffc0);
+  unsigned score_ex = score_header(0x40ffc0);
+  if(score_ex) score_ex += 4; //favor ExHiROM on images > 32mbits
 
-  if(cart.rom_size < 0x010000) {
-    //cart too small to be anything but lorom
-    info.header_index = 0x007fc0;
-    return;
-  }
-
-  if((rom[0x7fc0 + MAPPER] & ~0x10) == 0x20) score_lo++;
-  if((rom[0xffc0 + MAPPER] & ~0x10) == 0x21) score_hi++;
-
-  if(rom[0x7fc0 + ROM_TYPE] < 0x08) score_lo++;
-  if(rom[0xffc0 + ROM_TYPE] < 0x08) score_hi++;
-
-  if(rom[0x7fc0 + ROM_SIZE] < 0x10) score_lo++;
-  if(rom[0xffc0 + ROM_SIZE] < 0x10) score_hi++;
-
-  if(rom[0x7fc0 + RAM_SIZE] < 0x08) score_lo++;
-  if(rom[0xffc0 + RAM_SIZE] < 0x08) score_hi++;
-
-  if(rom[0x7fc0 + REGION] < 14) score_lo++;
-  if(rom[0xffc0 + REGION] < 14) score_hi++;
-
-  if(rom[0x7fc0 + COMPANY] < 3) score_lo++;
-  if(rom[0xffc0 + COMPANY] < 3) score_hi++;
-
-  if(rom[0x7fc0 + RESH] & 0x80) score_lo += 2;
-  if(rom[0xffc0 + RESH] & 0x80) score_hi += 2;
-
-  uint16 cksum, icksum;
-  cksum  = rom[0x7fc0 +  CKSUM] | (rom[0x7fc0 +  CKSUM + 1] << 8);
-  icksum = rom[0x7fc0 + ICKSUM] | (rom[0x7fc0 + ICKSUM + 1] << 8);
-  if((cksum + icksum) == 0xffff && (cksum != 0) && (icksum != 0)) {
-    score_lo += 8;
-  }
-
-  cksum  = rom[0xffc0 +  CKSUM] | (rom[0xffc0 +  CKSUM + 1] << 8);
-  icksum = rom[0xffc0 + ICKSUM] | (rom[0xffc0 + ICKSUM + 1] << 8);
-  if((cksum + icksum) == 0xffff && (cksum != 0) && (icksum != 0)) {
-    score_hi += 8;
-  }
-
-  if(cart.rom_size < 0x401000) {
-    score_ex = 0;
-  } else {
-    if(rom[0x7fc0 + MAPPER] == 0x32) score_lo++;
-    else score_ex += 12;
-  }
+  printf("\n");
 
   if(score_lo >= score_hi && score_lo >= score_ex) {
     info.header_index = 0x007fc0;

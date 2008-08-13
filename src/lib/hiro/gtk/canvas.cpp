@@ -1,8 +1,8 @@
 void hiro_pcanvas_expose(pCanvas *p) {
   uint32_t *f = p->fbuffer;
   uint32_t *r = p->rbuffer;
-  for(uint y = p->canvas->allocation.height; y; y--) {
-    for(uint x = p->canvas->allocation.width; x; x--) {
+  for(unsigned y = p->canvas->allocation.height; y; y--) {
+    for(unsigned x = p->canvas->allocation.width; x; x--) {
       uint32_t p = *f++;
       *r++ = ((p << 16) & 0xff0000) + (p & 0x00ff00) + ((p >> 16) & 0x0000ff);
     }
@@ -14,7 +14,7 @@ void hiro_pcanvas_expose(pCanvas *p) {
     GDK_RGB_DITHER_NONE, (guchar*)p->rbuffer, p->bpitch);
 }
 
-void pCanvas::create(uint style, uint width, uint height) {
+void pCanvas::create(unsigned style, unsigned width, unsigned height) {
   canvas = gtk_drawing_area_new();
   resize(width, height);
   GdkColor color;
@@ -54,7 +54,7 @@ pCanvas::~pCanvas() {
 
 /* internal */
 
-void pCanvas::resize(uint width, uint height) {
+void pCanvas::resize(unsigned width, unsigned height) {
   if(fbuffer) free(fbuffer);
   if(rbuffer) free(rbuffer);
 

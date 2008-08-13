@@ -1,6 +1,5 @@
 class bPPU : public PPU {
 public:
-  uint8 *vram, *oam, *cgram;
   uint8 region;
 
   enum { NTSC = 0, PAL = 1 };
@@ -150,13 +149,6 @@ public:
   alwaysinline bool overscan()  { return display.overscan;  }
   alwaysinline bool hires()     { return (regs.pseudo_hires || regs.bg_mode == 5 || regs.bg_mode == 6); }
 
-  uint8  vram_read  (uint16 addr);
-  void   vram_write (uint16 addr, uint8 value);
-  uint8  oam_read   (uint16 addr);
-  void   oam_write  (uint16 addr, uint8 value);
-  uint8  cgram_read (uint16 addr);
-  void   cgram_write(uint16 addr, uint8 value);
-
   uint16 get_vram_address();
   uint8  vram_mmio_read  (uint16 addr);
   void   vram_mmio_write (uint16 addr, uint8 data);
@@ -251,14 +243,6 @@ public:
   void frame();
   void power();
   void reset();
-
-  inline uint16 read16(uint8 *addr, uint pos) {
-    #if defined(ARCH_LSB)
-    return *((uint16*)(addr + pos));
-    #else
-    return (addr[pos]) | (addr[pos + 1] << 8);
-    #endif
-  }
 
   bPPU();
   ~bPPU();

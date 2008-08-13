@@ -23,37 +23,60 @@ uint16 bPPU::get_vram_address() {
 //write occurs during the very last clock cycle of vblank.
 
 uint8 bPPU::vram_mmio_read(uint16 addr) {
-  if(regs.display_disabled == true) return vram_read(addr);
+  uint8 data;
 
-  uint16 v = cpu.vcounter();
-  uint16 h = cpu.hcounter();
-  uint16 ls = ((snes.region() == SNES::NTSC ? 525 : 625) >> 1) - 1;
-  if(interlace() && !field()) ls++;
-  if(v == ls && h == 1362) return 0x00;
-  if(v < (!overscan() ? 224 : 239)) return 0x00;
-  if(v == (!overscan() ? 224 : 239)) {
-    if(h == 1362) return vram_read(addr);
-    return 0x00;
+  if(regs.display_disabled == true) {
+    data = memory::vram[addr];
+  } else {
+    uint16 v = cpu.vcounter();
+    uint16 h = cpu.hcounter();
+    uint16 ls = ((snes.region() == SNES::NTSC ? 525 : 625) >> 1) - 1;
+    if(interlace() && !field()) ls++;
+
+    if(v == ls && h == 1362) {
+      data = 0x00;
+    } else if(v < (!overscan() ? 224 : 239)) {
+      data = 0x00;
+    } else if(v == (!overscan() ? 224 : 239)) {
+      if(h == 1362) {
+        data = memory::vram[addr];
+      } else {
+        data = 0x00;
+      }
+    } else {
+      data = memory::vram[addr];
+    }
   }
-  return vram_read(addr);
+
+  return data;
 }
 
 void bPPU::vram_mmio_write(uint16 addr, uint8 data) {
-  if(regs.display_disabled == true) return vram_write(addr, data);
-
-  uint16 v = cpu.vcounter();
-  uint16 h = cpu.hcounter();
-  if(v == 0) {
-    if(h <= 4) return vram_write(addr, data);
-    if(h == 6) return vram_write(addr, cpu.regs.mdr);
-    return;
+  if(regs.display_disabled == true) {
+    memory::vram[addr] = data;
+  } else {
+    uint16 v = cpu.vcounter();
+    uint16 h = cpu.hcounter();
+    if(v == 0) {
+      if(h <= 4) {
+        memory::vram[addr] = data;
+      } else if(h == 6) {
+        memory::vram[addr] = cpu.regs.mdr;
+      } else {
+        //no write
+      }
+    } else if(v < (!overscan() ? 225 : 240)) {
+      //no write
+    } else if(v == (!overscan() ? 225 : 240)) {
+      if(h <= 4) {
+        //no write
+      } else {
+        memory::vram[addr] = data;
+      }
+    } else {
+      memory::vram[addr] = data;
+    }
   }
-  if(v < (!overscan() ? 225 : 240)) return;
-  if(v == (!overscan() ? 225 : 240)) {
-    if(h <= 4) return;
-    return vram_write(addr, data);
-  }
-  vram_write(addr, data);
 }
 
 //NOTE: OAM accesses during active display are rerouted to 0x0218 ... this can be considered
@@ -72,23 +95,36 @@ void bPPU::vram_mmio_write(uint16 addr, uint8 data) {
 //or by changing the address from 0x0218 to 0x0000 below if it bothers you that greatly.
 
 uint8 bPPU::oam_mmio_read(uint16 addr) {
+  addr &= 0x03ff;
+  if(addr & 0x0200) addr &= 0x021f;
+  uint8 data;
+
   if(config::ppu.hack.oam_address_invalidation == false || regs.display_disabled == true) {
-    return oam_read(addr);
+    data = memory::oam[addr];
+  } else {
+    if(cpu.vcounter() < (!overscan() ? 225 : 240)) {
+      data = memory::oam[0x0218];
+    } else {
+      data = memory::oam[addr];
+    }
   }
 
-  uint16 v = cpu.vcounter();
-  if(v < (!overscan() ? 225 : 240)) return oam_read(0x0218);
-  return oam_read(addr);
+  return data;
 }
 
 void bPPU::oam_mmio_write(uint16 addr, uint8 data) {
-  if(config::ppu.hack.oam_address_invalidation == false || regs.display_disabled == true) {
-    return oam_write(addr, data);
-  }
+  addr &= 0x03ff;
+  if(addr & 0x0200) addr &= 0x021f;
 
-  uint16 v = cpu.vcounter();
-  if(v < (!overscan() ? 225 : 240)) return oam_write(0x0218, data);
-  oam_write(addr, data);
+  if(config::ppu.hack.oam_address_invalidation == false || regs.display_disabled == true) {
+    memory::oam[addr] = data;
+  } else {
+    if(cpu.vcounter() < (!overscan() ? 225 : 240)) {
+      memory::oam[0x0218] = data;
+    } else {
+      memory::oam[addr] = data;
+    }
+  }
 }
 
 //NOTE: CGRAM writes during hblank are valid. During active display, the actual address the
@@ -98,29 +134,40 @@ void bPPU::oam_mmio_write(uint16 addr, uint8 data) {
 //about this address, it is simply more accurate to invalidate the 'expected' address than not.
 
 uint8 bPPU::cgram_mmio_read(uint16 addr) {
+  addr &= 0x01ff;
+  uint8 data;
+
   if(config::ppu.hack.cgram_address_invalidation == false || regs.display_disabled == true) {
-    return cgram_read(addr);
+    data = memory::cgram[addr];
+  } else {
+    uint16 v = cpu.vcounter();
+    uint16 h = cpu.hcounter();
+    if(v < (!overscan() ? 225 : 240) && h >= 72 && h < 1096) {
+      data = memory::cgram[0x01ff] & 0x7f;
+    } else {
+      data = memory::cgram[addr];
+    }
   }
 
-  uint16 v = cpu.vcounter();
-  uint16 h = cpu.hcounter();
-  if(v < (!overscan() ? 225 : 240) && h >= 72 && h < 1096) {
-    return cgram_read(0x01ff);
-  }
-  return cgram_read(addr);
+  if(addr & 1) data &= 0x7f;
+  return data;
 }
 
 void bPPU::cgram_mmio_write(uint16 addr, uint8 data) {
-  if(config::ppu.hack.cgram_address_invalidation == false || regs.display_disabled == true) {
-    return cgram_write(addr, data);
-  }
+  addr &= 0x01ff;
+  if(addr & 1) data &= 0x7f;
 
-  uint16 v = cpu.vcounter();
-  uint16 h = cpu.hcounter();
-  if(v < (!overscan() ? 225 : 240) && h >= 72 && h < 1096) {
-    return cgram_write(0x01ff, data);
+  if(config::ppu.hack.cgram_address_invalidation == false || regs.display_disabled == true) {
+    memory::cgram[addr] = data;
+  } else {
+    uint16 v = cpu.vcounter();
+    uint16 h = cpu.hcounter();
+    if(v < (!overscan() ? 225 : 240) && h >= 72 && h < 1096) {
+      memory::cgram[0x01ff] = data & 0x7f;
+    } else {
+      memory::cgram[addr] = data;
+    }
   }
-  cgram_write(addr, data);
 }
 
 //INIDISP

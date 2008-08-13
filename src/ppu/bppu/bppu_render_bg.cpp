@@ -31,7 +31,7 @@ uint16 bPPU::bg_get_tile(uint8 bg, uint16 x, uint16 y) {
   if(x & 0x20) pos += bg_info[bg].scx;
 
   uint16 addr = regs.bg_scaddr[bg] + (pos << 1);
-  return (vram_read(addr + 0) << 0) | (vram_read(addr + 1) << 8);
+  return memory::vram[addr] + (memory::vram[addr + 1] << 8);
 }
 
 #define setpixel_main(x) \

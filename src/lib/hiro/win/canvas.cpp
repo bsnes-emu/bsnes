@@ -1,4 +1,4 @@
-void pCanvas::create(uint style, uint width, uint height) {
+void pCanvas::create(unsigned style, unsigned width, unsigned height) {
   hwnd = CreateWindow(L"hiro_window", L"", WS_CHILD,
     0, 0, width, height,
     phiro().default_hwnd, (HMENU)instance, GetModuleHandle(0), 0);
@@ -35,7 +35,7 @@ pCanvas::~pCanvas() {
 
 /* internal */
 
-void pCanvas::resize(uint width, uint height) {
+void pCanvas::resize(unsigned width, unsigned height) {
   if(ibuffer) free(ibuffer);
 
   ipitch = width * sizeof(uint32_t);

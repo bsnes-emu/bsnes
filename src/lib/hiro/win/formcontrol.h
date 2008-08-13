@@ -1,6 +1,6 @@
 class pFormControl : public pWidget {
 public:
-  virtual void resize(uint width, uint height);
+  virtual void resize(unsigned width, unsigned height);
   void focus();
   bool focused();
   void enable(bool = true);

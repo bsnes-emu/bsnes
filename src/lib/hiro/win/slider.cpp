@@ -1,4 +1,4 @@
-void pSlider::create(uint style, uint width, uint height, uint length) {
+void pSlider::create(unsigned style, unsigned width, unsigned height, unsigned length) {
   if(length < 1) length = 1;
 
   hwnd = CreateWindow(TRACKBAR_CLASS, L"",
@@ -11,11 +11,11 @@ void pSlider::create(uint style, uint width, uint height, uint length) {
   SendMessage(hwnd, TBM_SETPOS, (WPARAM)true, (LPARAM)0);
 }
 
-uint pSlider::get_position() {
+unsigned pSlider::get_position() {
   return SendMessage(hwnd, TBM_GETPOS, 0, 0);
 }
 
-void pSlider::set_position(uint position) {
+void pSlider::set_position(unsigned position) {
   SendMessage(hwnd, TBM_SETPOS, (WPARAM)true, (LPARAM)(slider_position = position));
 }
 

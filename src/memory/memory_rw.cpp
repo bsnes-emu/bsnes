@@ -1,6 +1,6 @@
 #ifdef MEMORY_CPP
 
-uint16 Memory::read_word(uint addr, uint wrap) {
+uint16 Memory::read_word(unsigned addr, unsigned wrap) {
   uint16 r;
   switch(wrap) {
     case WRAP_NONE: {
@@ -19,7 +19,7 @@ uint16 Memory::read_word(uint addr, uint wrap) {
   return r;
 }
 
-void Memory::write_word(uint addr, uint16 data, uint wrap) {
+void Memory::write_word(unsigned addr, uint16 data, unsigned wrap) {
   switch(wrap) {
     case WRAP_NONE: {
       write(addr, data);
@@ -36,7 +36,7 @@ void Memory::write_word(uint addr, uint16 data, uint wrap) {
   }
 }
 
-uint32 Memory::read_long(uint addr, uint wrap) {
+uint32 Memory::read_long(unsigned addr, unsigned wrap) {
   uint32 r;
   switch(wrap) {
     case WRAP_NONE: {
@@ -58,7 +58,7 @@ uint32 Memory::read_long(uint addr, uint wrap) {
   return r;
 }
 
-void Memory::write_long(uint addr, uint32 data, uint wrap) {
+void Memory::write_long(unsigned addr, uint32 data, unsigned wrap) {
   switch(wrap) {
     case WRAP_NONE: {
       write(addr, data);

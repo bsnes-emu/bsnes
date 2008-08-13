@@ -1,5 +1,5 @@
 void hiro_pmenuitem_tick(pMenuItem *p) {
-  if(p->self.on_tick) p->self.on_tick(Event(Event::Tick, 0, &p->self));
+  if(p->self.on_tick) p->self.on_tick(event_t(event_t::Tick, 0, &p->self));
 }
 
 void pMenuItem::create(const char *text) {

@@ -158,11 +158,11 @@ bool pHiro::file_save(Window *focus, char *filename, const char *path, const cha
   return strcmp(filename, ""); //return true if filename exists
 }
 
-uint pHiro::screen_width() {
+unsigned pHiro::screen_width() {
   return gdk_screen_width();
 }
 
-uint pHiro::screen_height() {
+unsigned pHiro::screen_height() {
   return gdk_screen_height();
 }
 

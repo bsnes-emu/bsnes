@@ -5,5 +5,5 @@ public:
   Label localization;
 
   void setup();
-  uintptr_t close(Event);
+  uintptr_t close(event_t);
 } window_about;

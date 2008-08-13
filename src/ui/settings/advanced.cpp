@@ -1,4 +1,4 @@
-uintptr_t AdvancedWindow::list_change(Event) {
+uintptr_t AdvancedWindow::list_change(event_t) {
   int pos = list.get_selection();
   edit_val.enable(pos >= 0);
   set_val.enable(pos >= 0);
@@ -17,14 +17,14 @@ uintptr_t AdvancedWindow::list_change(Event) {
   return true;
 }
 
-uintptr_t AdvancedWindow::setval_tick(Event) {
+uintptr_t AdvancedWindow::setval_tick(event_t) {
   char t[4096];
   edit_val.get_text(t, sizeof t);
   update(list.get_selection(), t);
   return true;
 }
 
-uintptr_t AdvancedWindow::setdef_tick(Event) {
+uintptr_t AdvancedWindow::setdef_tick(event_t) {
   update(list.get_selection(), 0);
   return true;
 }

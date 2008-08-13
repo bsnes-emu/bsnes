@@ -10,7 +10,7 @@ public:
   void update(uint pos, const char *data);
   void load();
   void setup();
-  uintptr_t list_change(Event);
-  uintptr_t setval_tick(Event);
-  uintptr_t setdef_tick(Event);
+  uintptr_t list_change(event_t);
+  uintptr_t setval_tick(event_t);
+  uintptr_t setdef_tick(event_t);
 } window_advanced;

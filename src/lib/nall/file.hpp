@@ -1,10 +1,10 @@
 #ifndef NALL_FILE_HPP
 #define NALL_FILE_HPP
 
-#include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 
+#include <nall/stdint.hpp>
 #include <nall/utility.hpp>
 
 namespace nall {

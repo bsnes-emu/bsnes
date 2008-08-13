@@ -2,7 +2,7 @@
 #define NALL_UPS_HPP
 
 #include <stdio.h>
-#include <stdint.h>
+
 #include <nall/algorithm.hpp>
 #include <nall/crc32.hpp>
 #include <nall/new.hpp>

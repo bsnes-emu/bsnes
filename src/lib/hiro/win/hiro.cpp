@@ -200,11 +200,11 @@ bool pHiro::file_save(Window *focus, char *filename, const char *path, const cha
   return result;
 }
 
-uint pHiro::screen_width() {
+unsigned pHiro::screen_width() {
   return GetSystemMetrics(SM_CXSCREEN);
 }
 
-uint pHiro::screen_height() {
+unsigned pHiro::screen_height() {
   return GetSystemMetrics(SM_CYSCREEN);
 }
 
@@ -230,7 +230,7 @@ pHiro& phiro() {
 
 /* internal */
 
-HFONT pHiro::create_font(const char *name, uint size) {
+HFONT pHiro::create_font(const char *name, unsigned size) {
   return CreateFont(
     -(size * 96.0 / 72.0 + 0.5), //96 = DPI
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -238,9 +238,9 @@ HFONT pHiro::create_font(const char *name, uint size) {
   );
 }
 
-Widget* pHiro::get_widget(uint instance) {
+Widget* pHiro::get_widget(unsigned instance) {
   Widget *widget = 0;
-  for(uint i = 0; i < widget_list.size(); i++) {
+  for(unsigned i = 0; i < widget_list.size(); i++) {
     if(widget_list[i]->p.instance != instance) continue;
     widget = widget_list[i];
     break;
@@ -274,26 +274,26 @@ LRESULT pHiro::wndproc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
     case WM_CLOSE: {
       if(!p || p->self.type != Widget::WindowType) break;
       Window &w = ((pWindow*)p)->self;
-      if(w.on_close) return (bool)w.on_close(Event(Event::Close, 0, &w));
+      if(w.on_close) return (bool)w.on_close(event_t(event_t::Close, 0, &w));
       return TRUE; //true = destroy window
     } break;
 
     case WM_ENTERMENULOOP: {
       if(!p || p->self.type != Widget::WindowType) break;
       Window &w = ((pWindow*)p)->self;
-      if(w.on_block) w.on_block(Event(Event::Block, 0, &w));
+      if(w.on_block) w.on_block(event_t(event_t::Block, 0, &w));
     } break;
 
     case WM_KEYDOWN: {
       if(!p || p->self.type != Widget::WindowType) break;
       Window &w = ((pWindow*)p)->self;
-      if(w.on_keydown) w.on_keydown(Event(Event::KeyDown, translate_key(wparam), &w));
+      if(w.on_keydown) w.on_keydown(event_t(event_t::KeyDown, translate_key(wparam), &w));
     } break;
 
     case WM_KEYUP: {
       if(!p || p->self.type != Widget::WindowType) break;
       Window &w = ((pWindow*)p)->self;
-      if(w.on_keyup) w.on_keyup(Event(Event::KeyUp, translate_key(wparam), &w));
+      if(w.on_keyup) w.on_keyup(event_t(event_t::KeyUp, translate_key(wparam), &w));
     } break;
 
     case WM_ERASEBKGND: {
@@ -322,39 +322,39 @@ LRESULT pHiro::wndproc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
       switch(widget->type) {
         case Widget::MenuItemType: {
           MenuItem &w = (MenuItem&)*widget;
-          if(w.on_tick) w.on_tick(Event(Event::Tick, 0, &w));
+          if(w.on_tick) w.on_tick(event_t(event_t::Tick, 0, &w));
         } break;
         case Widget::MenuCheckItemType: {
           MenuCheckItem &w = (MenuCheckItem&)*widget;
           w.check(!w.checked()); //invert check state
-          if(w.on_tick) w.on_tick(Event(Event::Tick, w.checked(), &w));
+          if(w.on_tick) w.on_tick(event_t(event_t::Tick, w.checked(), &w));
         } break;
         case Widget::MenuRadioItemType: {
           MenuRadioItem &w = (MenuRadioItem&)*widget;
           bool checked = w.checked();
           w.check();
-          if(!checked && w.on_tick) w.on_tick(Event(Event::Tick, w.checked(), &w));
+          if(!checked && w.on_tick) w.on_tick(event_t(event_t::Tick, w.checked(), &w));
         } break;
         case Widget::ButtonType: {
           Button &w = (Button&)*widget;
-          if(w.on_tick) w.on_tick(Event(Event::Tick, 0, &w));
+          if(w.on_tick) w.on_tick(event_t(event_t::Tick, 0, &w));
         } break;
         case Widget::CheckboxType: {
           Checkbox &w = (Checkbox&)*widget;
           w.check(!w.checked()); //invert check state
-          if(w.on_tick) w.on_tick(Event(Event::Tick, w.checked(), &w));
+          if(w.on_tick) w.on_tick(event_t(event_t::Tick, w.checked(), &w));
         } break;
         case Widget::RadioboxType: {
           Radiobox &w = (Radiobox&)*widget;
           bool checked = w.checked();
           w.check();
-          if(!checked && w.on_tick) w.on_tick(Event(Event::Tick, w.checked(), &w));
+          if(!checked && w.on_tick) w.on_tick(event_t(event_t::Tick, w.checked(), &w));
         } break;
         case Widget::ComboboxType: {
           Combobox &combobox = (Combobox&)*widget;
           if(HIWORD(wparam) == CBN_SELCHANGE) {
             if(combobox.p.combobox_selection == combobox.get_selection()) break;
-            if(combobox.on_change) combobox.on_change(Event(Event::Change, combobox.p.combobox_selection = combobox.get_selection(), &combobox));
+            if(combobox.on_change) combobox.on_change(event_t(event_t::Change, combobox.p.combobox_selection = combobox.get_selection(), &combobox));
           }
         } break;
       }
@@ -369,7 +369,7 @@ LRESULT pHiro::wndproc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
         case Widget::SliderType: {
           Slider &slider = (Slider&)*widget;
           if(slider.p.slider_position == slider.get_position()) break;
-          if(slider.on_change) slider.on_change(Event(Event::Change, slider.p.slider_position = slider.get_position(), &slider));
+          if(slider.on_change) slider.on_change(event_t(event_t::Change, slider.p.slider_position = slider.get_position(), &slider));
         } break;
       }
     } break;
@@ -386,9 +386,9 @@ LRESULT pHiro::wndproc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
             && ListView_GetItemState(listbox.p.hwnd, ((LPNMLISTVIEW)lparam)->iItem, LVIS_FOCUSED)
             && ListView_GetItemState(listbox.p.hwnd, ((LPNMLISTVIEW)lparam)->iItem, LVIS_SELECTED)
           ) {
-            if(listbox.on_change) listbox.on_change(Event(Event::Change, listbox.get_selection(), &listbox));
+            if(listbox.on_change) listbox.on_change(event_t(event_t::Change, listbox.get_selection(), &listbox));
           } else if(((LPNMHDR)lparam)->code == LVN_ITEMACTIVATE) {
-            if(listbox.on_activate) listbox.on_activate(Event(Event::Activate, listbox.get_selection(), &listbox));
+            if(listbox.on_activate) listbox.on_activate(event_t(event_t::Activate, listbox.get_selection(), &listbox));
           }
         } break;
       }

@@ -1,6 +1,6 @@
 class pCanvas : public pFormControl {
 public:
-  void create(uint style, uint width, uint height);
+  void create(unsigned style, unsigned width, unsigned height);
   void redraw();
   uint32_t* buffer();
 
@@ -11,6 +11,6 @@ public:
   /* internal */
   BITMAPINFO bmi;
   uint32_t *ibuffer;
-  uint ipitch, iwidth, iheight;
-  void resize(uint width, uint height);
+  unsigned ipitch, iwidth, iheight;
+  void resize(unsigned width, unsigned height);
 };

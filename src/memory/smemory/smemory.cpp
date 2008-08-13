@@ -6,8 +6,8 @@
 #include "mapper/chip.cpp"
 
 void sBus::power() {
-  for(uint i = 0x2000; i <= 0x5fff; i++) memory::mmio.map(i, memory::mmio_unmapped);
-  memset(memory::wram.data, config::cpu.wram_init_value, memory::wram.size());
+  for(unsigned i = 0x2000; i <= 0x5fff; i++) memory::mmio.map(i, memory::mmio_unmapped);
+  for(unsigned i = 0; i < memory::wram.size(); i++) memory::wram[i] = config::cpu.wram_init_value;
   reset();
 }
 

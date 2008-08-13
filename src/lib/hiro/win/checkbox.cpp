@@ -1,4 +1,4 @@
-void pCheckbox::create(uint style, uint width, uint height, const char *text) {
+void pCheckbox::create(unsigned style, unsigned width, unsigned height, const char *text) {
   hwnd = CreateWindow(L"BUTTON", utf16(text), WS_CHILD | WS_TABSTOP | WS_VISIBLE | BS_CHECKBOX,
     0, 0, width, height,
     phiro().default_hwnd, (HMENU)instance, GetModuleHandle(0), 0);

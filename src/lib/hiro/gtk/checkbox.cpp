@@ -1,8 +1,8 @@
 void hiro_pcheckbox_tick(pCheckbox *p) {
-  if(!p->locked && p->self.on_tick) p->self.on_tick(Event(Event::Tick, p->checked(), &p->self));
+  if(!p->locked && p->self.on_tick) p->self.on_tick(event_t(event_t::Tick, p->checked(), &p->self));
 }
 
-void pCheckbox::create(uint style, uint width, uint height, const char *text) {
+void pCheckbox::create(unsigned style, unsigned width, unsigned height, const char *text) {
   checkbox = gtk_check_button_new_with_label(text ? text : "");
   set_default_font(checkbox);
   gtk_widget_set_size_request(checkbox, width, height);

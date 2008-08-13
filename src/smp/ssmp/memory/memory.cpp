@@ -2,27 +2,27 @@
 
 alwaysinline
 uint8 sSMP::ram_read(uint16 addr) {
-  if(addr < 0xffc0) return memory::apuram.read(addr);
-  if(status.iplrom_enabled == false) return memory::apuram.read(addr);
+  if(addr < 0xffc0) return memory::apuram[addr];
+  if(status.iplrom_enabled == false) return memory::apuram[addr];
   return iplrom[addr & 0x3f];
 }
 
 alwaysinline
 void sSMP::ram_write(uint16 addr, uint8 data) {
   //writes to $ffc0-$ffff always go to spcram, even if the iplrom is enabled
-  memory::apuram.write(addr, data);
+  memory::apuram[addr] = data;
 }
 
 //
 
 alwaysinline
 uint8 sSMP::port_read(uint8 port) {
-  return memory::apuram.read(0xf4 + (port & 3));
+  return memory::apuram[0xf4 + (port & 3)];
 }
 
 alwaysinline
 void sSMP::port_write(uint8 port, uint8 data) {
-  memory::apuram.write(0xf4 + (port & 3), data);
+  memory::apuram[0xf4 + (port & 3)] = data;
 }
 
 //

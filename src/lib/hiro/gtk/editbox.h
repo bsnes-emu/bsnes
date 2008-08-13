@@ -1,8 +1,8 @@
 class pEditbox : public pFormControl {
 public:
   Editbox &self;
-  void create(uint style, uint width, uint height, const char *text = "");
-  uint get_text(char *text, uint length = -1U);
+  void create(unsigned style, unsigned width, unsigned height, const char *text = "");
+  unsigned get_text(char *text, unsigned length = -1U);
   void set_text(const char *text = "");
 
   pEditbox(Editbox&);

@@ -51,7 +51,7 @@ void CheatEditorWindow::refresh() {
   delete_code.enable(loaded);
 }
 
-uintptr_t CheatEditorWindow::toggle_event(Event) {
+uintptr_t CheatEditorWindow::toggle_event(event_t) {
   int index = list.get_selection();
   if(index >= 0 && index < cheat.count()) {
     cheat.enabled(index) ? cheat.disable(index) : cheat.enable(index);
@@ -68,7 +68,7 @@ uintptr_t CheatEditorWindow::toggle_event(Event) {
   return true;
 }
 
-uintptr_t CheatEditorWindow::add_tick(Event) {
+uintptr_t CheatEditorWindow::add_tick(event_t) {
   char s_code[256], s_desc[256];
   code.get_text(s_code, sizeof s_code);
   desc.get_text(s_desc, sizeof s_desc);
@@ -77,7 +77,7 @@ uintptr_t CheatEditorWindow::add_tick(Event) {
   return true;
 }
 
-uintptr_t CheatEditorWindow::delete_tick(Event) {
+uintptr_t CheatEditorWindow::delete_tick(event_t) {
   int index = list.get_selection();
   if(index >= 0 && index < cheat.count()) {
     cheat.remove(index);

@@ -66,7 +66,7 @@ void VideoSettingsWindow::sync_ui() {
   ui_lock = false;
 }
 
-uintptr_t VideoSettingsWindow::contrast_change(Event) {
+uintptr_t VideoSettingsWindow::contrast_change(event_t) {
   if(!ui_lock && config::system.contrast != contrast.get_position() - 96) {
     config::system.contrast = contrast.get_position() - 96;
     sync_ui();
@@ -74,7 +74,7 @@ uintptr_t VideoSettingsWindow::contrast_change(Event) {
   return true;
 }
 
-uintptr_t VideoSettingsWindow::brightness_change(Event) {
+uintptr_t VideoSettingsWindow::brightness_change(event_t) {
   if(!ui_lock && config::system.brightness != brightness.get_position() - 96) {
     config::system.brightness = brightness.get_position() - 96;
     sync_ui();
@@ -82,7 +82,7 @@ uintptr_t VideoSettingsWindow::brightness_change(Event) {
   return true;
 }
 
-uintptr_t VideoSettingsWindow::gamma_change(Event) {
+uintptr_t VideoSettingsWindow::gamma_change(event_t) {
   if(!ui_lock && config::system.gamma != gamma.get_position() + 10) {
     config::system.gamma = gamma.get_position() + 10;
     sync_ui();
@@ -90,7 +90,7 @@ uintptr_t VideoSettingsWindow::gamma_change(Event) {
   return true;
 }
 
-uintptr_t VideoSettingsWindow::gammaramp_tick(Event) {
+uintptr_t VideoSettingsWindow::gammaramp_tick(event_t) {
   if(!ui_lock && config::system.gamma_ramp != gamma_ramp.checked()) {
     config::system.gamma_ramp = gamma_ramp.checked();
     sync_ui();
@@ -98,7 +98,7 @@ uintptr_t VideoSettingsWindow::gammaramp_tick(Event) {
   return true;
 }
 
-uintptr_t VideoSettingsWindow::sepia_tick(Event) {
+uintptr_t VideoSettingsWindow::sepia_tick(event_t) {
   if(!ui_lock && config::system.sepia != sepia.checked()) {
     config::system.sepia = sepia.checked();
     sync_ui();
@@ -106,7 +106,7 @@ uintptr_t VideoSettingsWindow::sepia_tick(Event) {
   return true;
 }
 
-uintptr_t VideoSettingsWindow::grayscale_tick(Event) {
+uintptr_t VideoSettingsWindow::grayscale_tick(event_t) {
   if(!ui_lock && config::system.grayscale != grayscale.checked()) {
     config::system.grayscale = grayscale.checked();
     sync_ui();
@@ -114,7 +114,7 @@ uintptr_t VideoSettingsWindow::grayscale_tick(Event) {
   return true;
 }
 
-uintptr_t VideoSettingsWindow::invert_tick(Event) {
+uintptr_t VideoSettingsWindow::invert_tick(event_t) {
   if(!ui_lock && config::system.invert != invert.checked()) {
     config::system.invert = invert.checked();
     sync_ui();
@@ -122,7 +122,7 @@ uintptr_t VideoSettingsWindow::invert_tick(Event) {
   return true;
 }
 
-uintptr_t VideoSettingsWindow::optimal_tick(Event) {
+uintptr_t VideoSettingsWindow::optimal_tick(event_t) {
   config::system.contrast   = 0;
   config::system.brightness = 0;
   config::system.gamma      = 80;
@@ -134,7 +134,7 @@ uintptr_t VideoSettingsWindow::optimal_tick(Event) {
   return true;
 }
 
-uintptr_t VideoSettingsWindow::standard_tick(Event) {
+uintptr_t VideoSettingsWindow::standard_tick(event_t) {
   config::system.contrast   = 0;
   config::system.brightness = 0;
   config::system.gamma      = 100;

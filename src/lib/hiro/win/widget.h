@@ -14,6 +14,6 @@ public:
   //Windows API controls often require a unique ID for each control to identify it.
   //Simulate this with an instance counter, so that each Widget has a unique ID.
   //In each pWidget() constructor, instance = instance_counter++; is called.
-  static uint instance_counter;
-  uint instance;
+  static unsigned instance_counter;
+  unsigned instance;
 };

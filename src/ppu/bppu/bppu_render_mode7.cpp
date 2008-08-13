@@ -76,8 +76,8 @@ void bPPU::render_line_mode7(uint8 bg, uint8 pri0_pos, uint8 pri1_pos) {
         py &= 1023;
         tx = ((px >> 3) & 127);
         ty = ((py >> 3) & 127);
-        tile    = vram[(ty * 128 + tx) << 1];
-        palette = vram[(((tile << 6) + ((py & 7) << 3) + (px & 7)) << 1) + 1];
+        tile    = memory::vram[(ty * 128 + tx) << 1];
+        palette = memory::vram[(((tile << 6) + ((py & 7) << 3) + (px & 7)) << 1) + 1];
       } break;
       case 2: { //palette color 0 outside of screen area
         if(px < 0 || px > 1023 || py < 0 || py > 1023) {
@@ -87,8 +87,8 @@ void bPPU::render_line_mode7(uint8 bg, uint8 pri0_pos, uint8 pri1_pos) {
           py &= 1023;
           tx = ((px >> 3) & 127);
           ty = ((py >> 3) & 127);
-          tile    = vram[(ty * 128 + tx) << 1];
-          palette = vram[(((tile << 6) + ((py & 7) << 3) + (px & 7)) << 1) + 1];
+          tile    = memory::vram[(ty * 128 + tx) << 1];
+          palette = memory::vram[(((tile << 6) + ((py & 7) << 3) + (px & 7)) << 1) + 1];
         }
       } break;
       case 3: { //character 0 repetition outside of screen area
@@ -99,9 +99,9 @@ void bPPU::render_line_mode7(uint8 bg, uint8 pri0_pos, uint8 pri1_pos) {
           py &= 1023;
           tx = ((px >> 3) & 127);
           ty = ((py >> 3) & 127);
-          tile = vram[(ty * 128 + tx) << 1];
+          tile = memory::vram[(ty * 128 + tx) << 1];
         }
-        palette = vram[(((tile << 6) + ((py & 7) << 3) + (px & 7)) << 1) + 1];
+        palette = memory::vram[(((tile << 6) + ((py & 7) << 3) + (px & 7)) << 1) + 1];
       } break;
     }
 

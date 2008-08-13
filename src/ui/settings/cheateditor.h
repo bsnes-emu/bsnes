@@ -10,7 +10,7 @@ public:
   void setup();
   void refresh();
 
-  uintptr_t toggle_event(Event);
-  uintptr_t add_tick(Event);
-  uintptr_t delete_tick(Event);
+  uintptr_t toggle_event(event_t);
+  uintptr_t add_tick(event_t);
+  uintptr_t delete_tick(event_t);
 } window_cheat_editor;

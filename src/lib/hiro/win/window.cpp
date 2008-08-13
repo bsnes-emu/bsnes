@@ -1,4 +1,4 @@
-void pWindow::create(uint style, uint width_, uint height_, const char *text) {
+void pWindow::create(unsigned style, unsigned width_, unsigned height_, const char *text) {
   auto_center = style & Window::AutoCenter;
 
   RECT rc;
@@ -24,12 +24,12 @@ void pWindow::close() {
   CloseWindow(hwnd);
 }
 
-void pWindow::move(uint x, uint y) {
+void pWindow::move(unsigned x, unsigned y) {
   if(is_fullscreen == true) return;
   SetWindowPos(hwnd, 0, x, y, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
 }
 
-void pWindow::resize(uint width_, uint height_) {
+void pWindow::resize(unsigned width_, unsigned height_) {
   int screen_width = GetSystemMetrics(SM_CXSCREEN);
   int screen_height = GetSystemMetrics(SM_CYSCREEN);
 
@@ -119,13 +119,13 @@ void pWindow::unfullscreen() {
   resize(width, height);
 }
 
-uint pWindow::get_width() {
+unsigned pWindow::get_width() {
   RECT rc;
   GetClientRect(hwnd, &rc);
   return rc.right - rc.left;
 }
 
-uint pWindow::get_height() {
+unsigned pWindow::get_height() {
   RECT rc;
   GetClientRect(hwnd, &rc);
   if(status.visible() == false) return rc.bottom - rc.top;
@@ -197,7 +197,7 @@ void pWindow::set_text(const char *text) {
   SetWindowText(hwnd, utf16(text));
 }
 
-void pWindow::attach(Window &window, uint x, uint y) {
+void pWindow::attach(Window &window, unsigned x, unsigned y) {
   if(!window.p.hwnd) return;
 
   //toplevel window size is larger, because it includes window borders
@@ -214,11 +214,11 @@ void pWindow::attach(Window &window, uint x, uint y) {
 }
 
 void pWindow::attach(MenuGroup &menugroup) {
-  AppendMenu(hmenu, MF_STRING | MF_POPUP, (uint)menugroup.p.group, utf16(menugroup.p.text));
+  AppendMenu(hmenu, MF_STRING | MF_POPUP, (unsigned)menugroup.p.group, utf16(menugroup.p.text));
   if(menu_visible() == false) menu_show();
 }
 
-void pWindow::attach(FormControl &formcontrol, uint x, uint y) {
+void pWindow::attach(FormControl &formcontrol, unsigned x, unsigned y) {
   SetWindowPos(formcontrol.p.hwnd, 0, x, y, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
   SetParent(formcontrol.p.hwnd, hwnd);
   //SetParent() sets Z-order to topmost ...
@@ -227,11 +227,11 @@ void pWindow::attach(FormControl &formcontrol, uint x, uint y) {
   SetWindowPos(formcontrol.p.hwnd, HWND_BOTTOM, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
 }
 
-void pWindow::move(Window &window, uint x, uint y) {
+void pWindow::move(Window &window, unsigned x, unsigned y) {
   SetWindowPos(window.p.hwnd, 0, x, y, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
 }
 
-void pWindow::move(FormControl &formcontrol, uint x, uint y) {
+void pWindow::move(FormControl &formcontrol, unsigned x, unsigned y) {
   SetWindowPos(formcontrol.p.hwnd, 0, x, y, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
 }
 

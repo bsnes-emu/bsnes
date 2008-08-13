@@ -28,22 +28,15 @@ public:
   virtual bool overscan() = 0;
   virtual bool hires() = 0;
 
-  virtual uint8 vram_read  (uint16 addr) = 0;
-  virtual void  vram_write (uint16 addr, uint8 value) = 0;
-  virtual uint8 oam_read   (uint16 addr) = 0;
-  virtual void  oam_write  (uint16 addr, uint8 value) = 0;
-  virtual uint8 cgram_read (uint16 addr) = 0;
-  virtual void  cgram_write(uint16 addr, uint8 value) = 0;
+  virtual void latch_counters() = 0;
 
-  virtual void  latch_counters() = 0;
-
-  virtual void  render_scanline() = 0;
-  virtual void  scanline() = 0;
-  virtual void  frame();
-  virtual void  power();
-  virtual void  reset();
-  virtual void  enable_renderer(bool r);
-  virtual bool  renderer_enabled();
+  virtual void render_scanline() = 0;
+  virtual void scanline() = 0;
+  virtual void frame();
+  virtual void power();
+  virtual void reset();
+  virtual void enable_renderer(bool r);
+  virtual bool renderer_enabled();
 
   PPU();
   virtual ~PPU();

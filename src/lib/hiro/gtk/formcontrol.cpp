@@ -1,4 +1,4 @@
-void pFormControl::resize(uint width, uint height) {
+void pFormControl::resize(unsigned width, unsigned height) {
   gtk_widget_set_size_request(gtk_handle(), width, height);
 }
 

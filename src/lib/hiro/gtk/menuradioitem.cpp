@@ -1,7 +1,7 @@
 void hiro_pmenuradioitem_tick(pMenuRadioItem *p) {
   //GTK+ sends two messages: one for the activated radio item,
   //and one for the deactivated radio item. ignore the latter.
-  if(!p->locked && p->checked() && p->self.on_tick) p->self.on_tick(Event(Event::Tick, 0, &p->self));
+  if(!p->locked && p->checked() && p->self.on_tick) p->self.on_tick(event_t(event_t::Tick, 0, &p->self));
 }
 
 void pMenuRadioItem::create(MenuRadioItemGroup &group, const char *text) {

@@ -1,5 +1,5 @@
 void hiro_pmenucheckitem_tick(pMenuCheckItem *p) {
-  if(!p->locked && p->self.on_tick) p->self.on_tick(Event(Event::Tick, p->checked(), &p->self));
+  if(!p->locked && p->self.on_tick) p->self.on_tick(event_t(event_t::Tick, p->checked(), &p->self));
 }
 
 void pMenuCheckItem::create(const char *text) {

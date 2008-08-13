@@ -1,8 +1,8 @@
 void hiro_pcombobox_change(pCombobox *p) {
-  if(p->self.on_change) p->self.on_change(Event(Event::Change, p->get_selection(), &p->self));
+  if(p->self.on_change) p->self.on_change(event_t(event_t::Change, p->get_selection(), &p->self));
 }
 
-void pCombobox::create(uint style, uint width, uint height, const char *text) {
+void pCombobox::create(unsigned style, unsigned width, unsigned height, const char *text) {
   combobox = gtk_combo_box_new_text();
   set_default_font(combobox);
   gtk_widget_set_size_request(combobox, width, height);

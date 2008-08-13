@@ -1,4 +1,4 @@
-void pEditbox::create(uint style, uint width, uint height, const char *text) {
+void pEditbox::create(unsigned style, unsigned width, unsigned height, const char *text) {
   multiline = bool(style & Editbox::Multiline);
 
   if(multiline == false) {
@@ -38,7 +38,7 @@ void pEditbox::set_text(const char *text) {
   }
 }
 
-uint pEditbox::get_text(char *text, uint length) {
+unsigned pEditbox::get_text(char *text, unsigned length) {
   if(multiline == false) {
     const char *temp = gtk_entry_get_text(GTK_ENTRY(editbox));
     return strlcpy(text, temp ? temp : "", length);

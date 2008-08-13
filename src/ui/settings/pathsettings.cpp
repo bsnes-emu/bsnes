@@ -2,7 +2,7 @@
 //ROM path
 //========
 
-uintptr_t PathSettingsWindow::selectpath_rom(Event) {
+uintptr_t PathSettingsWindow::selectpath_rom(event_t) {
   char t[PATH_MAX];
   if(hiro().folder_select(&window_settings, t) == true) {
     config::path.rom = t;
@@ -11,7 +11,7 @@ uintptr_t PathSettingsWindow::selectpath_rom(Event) {
   return true;
 }
 
-uintptr_t PathSettingsWindow::defaultpath_rom(Event) {
+uintptr_t PathSettingsWindow::defaultpath_rom(event_t) {
   config::path.rom = "";
   rompath.set_text("");
   return true;
@@ -21,7 +21,7 @@ uintptr_t PathSettingsWindow::defaultpath_rom(Event) {
 //UPS patch path
 //==============
 
-uintptr_t PathSettingsWindow::selectpath_patch(Event) {
+uintptr_t PathSettingsWindow::selectpath_patch(event_t) {
   char t[PATH_MAX];
   if(hiro().folder_select(&window_settings, t) == true) {
     config::path.patch = t;
@@ -30,7 +30,7 @@ uintptr_t PathSettingsWindow::selectpath_patch(Event) {
   return true;
 }
 
-uintptr_t PathSettingsWindow::defaultpath_patch(Event) {
+uintptr_t PathSettingsWindow::defaultpath_patch(event_t) {
   config::path.patch = "";
   patchpath.set_text("");
   return true;
@@ -40,7 +40,7 @@ uintptr_t PathSettingsWindow::defaultpath_patch(Event) {
 //save RAM path
 //=============
 
-uintptr_t PathSettingsWindow::selectpath_save(Event) {
+uintptr_t PathSettingsWindow::selectpath_save(event_t) {
   char t[PATH_MAX];
   if(hiro().folder_select(&window_settings, t) == true) {
     config::path.save = t;
@@ -49,7 +49,7 @@ uintptr_t PathSettingsWindow::selectpath_save(Event) {
   return true;
 }
 
-uintptr_t PathSettingsWindow::defaultpath_save(Event) {
+uintptr_t PathSettingsWindow::defaultpath_save(event_t) {
   config::path.save = "";
   savepath.set_text("");
   return true;
@@ -59,7 +59,7 @@ uintptr_t PathSettingsWindow::defaultpath_save(Event) {
 //cheat path
 //==========
 
-uintptr_t PathSettingsWindow::selectpath_cheat(Event) {
+uintptr_t PathSettingsWindow::selectpath_cheat(event_t) {
   char t[PATH_MAX];
   if(hiro().folder_select(&window_settings, t) == true) {
     config::path.cheat = t;
@@ -68,7 +68,7 @@ uintptr_t PathSettingsWindow::selectpath_cheat(Event) {
   return true;
 }
 
-uintptr_t PathSettingsWindow::defaultpath_cheat(Event) {
+uintptr_t PathSettingsWindow::defaultpath_cheat(event_t) {
   config::path.cheat = "";
   cheatpath.set_text("");
   return true;

@@ -20,17 +20,17 @@ public:
   Button cheatselect;
   Button cheatdefault;
 
-  uintptr_t selectpath_rom(Event);
-  uintptr_t defaultpath_rom(Event);
+  uintptr_t selectpath_rom(event_t);
+  uintptr_t defaultpath_rom(event_t);
 
-  uintptr_t selectpath_patch(Event);
-  uintptr_t defaultpath_patch(Event);
+  uintptr_t selectpath_patch(event_t);
+  uintptr_t defaultpath_patch(event_t);
 
-  uintptr_t selectpath_save(Event);
-  uintptr_t defaultpath_save(Event);
+  uintptr_t selectpath_save(event_t);
+  uintptr_t defaultpath_save(event_t);
 
-  uintptr_t selectpath_cheat(Event);
-  uintptr_t defaultpath_cheat(Event);
+  uintptr_t selectpath_cheat(event_t);
+  uintptr_t defaultpath_cheat(event_t);
 
   void setup();
 } window_path_settings;

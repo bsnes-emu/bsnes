@@ -1,24 +1,24 @@
 class pWindow : public pWidget {
 public:
-  void create(uint style, uint width, uint height, const char *text = "");
+  void create(unsigned style, unsigned width, unsigned height, const char *text = "");
   void close();
-  void move(uint x, uint y);
-  void resize(uint width, uint height);
+  void move(unsigned x, unsigned y);
+  void resize(unsigned width, unsigned height);
   void focus();
   bool focused();
   void fullscreen();
   void unfullscreen();
-  uint get_width();
-  uint get_height();
+  unsigned get_width();
+  unsigned get_height();
   void set_opacity(uint8_t opacity);
   void set_background_color(uint8_t r, uint8_t g, uint8_t b);
   void set_icon(unsigned width, unsigned height, const uint32_t *data);
   void set_text(const char *text = "");
-  void attach(Window &window, uint x, uint y);
+  void attach(Window &window, unsigned x, unsigned y);
   void attach(MenuGroup &menugroup);
-  void attach(FormControl &formcontrol, uint x, uint y);
-  void move(Window &window, uint x, uint y);
-  void move(FormControl &formcontrol, uint x, uint y);
+  void attach(FormControl &formcontrol, unsigned x, unsigned y);
+  void move(Window &window, unsigned x, unsigned y);
+  void move(FormControl &formcontrol, unsigned x, unsigned y);
 
   class Statusbar {
   public:
@@ -55,7 +55,7 @@ public:
   uint8_t opacity;
   bool is_fullscreen;
   bool auto_center;
-  uint width, height;
+  unsigned width, height;
 
   uintptr_t handle();
 

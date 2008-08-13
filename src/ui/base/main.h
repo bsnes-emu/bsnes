@@ -78,7 +78,7 @@ public:
   void setup();
   void sync();
 
-  uintptr_t close(Event);
-  uintptr_t event(Event);
-  uintptr_t block(Event);
+  uintptr_t close(event_t);
+  uintptr_t event(event_t);
+  uintptr_t block(event_t);
 } window_main;

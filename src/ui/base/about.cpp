@@ -1,4 +1,4 @@
-uintptr_t AboutWindow::close(Event) {
+uintptr_t AboutWindow::close(event_t) {
   hide();
   return false;
 }

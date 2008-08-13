@@ -1,4 +1,4 @@
-uint16_t pHiro::translate_key(uint key) {
+uint16_t pHiro::translate_key(unsigned key) {
   switch(key) {
     case GDK_Escape: return keyboard::escape;
 

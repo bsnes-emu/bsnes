@@ -18,8 +18,7 @@ public:
     VERSION   = 0x1b,
     ICKSUM    = 0x1c,
     CKSUM     = 0x1e,
-    RESL      = 0x3c,
-    RESH      = 0x3d,
+    RESETV    = 0x3c,
   };
 
   enum Region {
@@ -70,7 +69,6 @@ public:
 
     uint32 crc32;
     char filename[PATH_MAX * 4];
-    char name[128];
     bool patched;
 
     Region region;
@@ -121,6 +119,7 @@ public:
   void load_end();
   bool unload();
 
+  unsigned score_header(unsigned);
   void find_header();
   void read_header();
   void read_extended_header();

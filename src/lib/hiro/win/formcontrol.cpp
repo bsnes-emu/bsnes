@@ -1,4 +1,4 @@
-void pFormControl::resize(uint width, uint height) {
+void pFormControl::resize(unsigned width, unsigned height) {
   SetWindowPos(hwnd, 0, 0, 0, width, height, SWP_NOZORDER | SWP_NOMOVE);
 }
 

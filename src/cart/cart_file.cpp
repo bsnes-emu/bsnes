@@ -47,6 +47,8 @@ char* Cartridge::get_base_filename(char *filename) {
       break;
     }
   }
+
+  return filename;
 }
 
 char* Cartridge::get_path_filename(char *filename, const char *path, const char *source, const char *extension) {
@@ -155,15 +157,15 @@ bool Cartridge::apply_patch(const uint8_t *pdata, const unsigned psize, uint8_t 
     if(result == ups::output_crc32_invalid) apply = true;
   }
 
+  //if patch application was successful, replace old data, size with new data, size
   if(apply == true) {
     delete[] data;
     data = new uint8_t[size = outsize];
     memcpy(data, outdata, outsize);
-  } else {
-    dprintf("* Warning: patch application failed!");
   }
 
   if(outdata) delete[] outdata;
+  return apply;
 }
 
 bool Cartridge::save_file(const char *fn, uint8 *data, uint size) {

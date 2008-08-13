@@ -1,6 +1,6 @@
 /*
   hiro
-  version: 0.005 (2008-05-25)
+  version: 0.006 (2008-08-12)
   author: byuu
   license: public domain
 */
@@ -15,7 +15,6 @@
 #include <nall/stdint.hpp>
 #include <nall/string.hpp>
 #include <nall/utility.hpp>
-typedef unsigned int uint;
 
 namespace libhiro {
 
@@ -89,8 +88,8 @@ class Widget;
 typedef nall::array<MenuRadioItem*> MenuRadioItemGroup;
 typedef nall::array<Radiobox*> RadioboxGroup;
 
-struct Event {
-  enum Type {
+struct event_t {
+  enum type_t {
     Close,
     Block,
     KeyDown,
@@ -102,7 +101,7 @@ struct Event {
   uintptr_t param;
   Widget *widget;
 
-  Event(Type type_, uintptr_t param_ = 0, Widget *widget_ = 0) :
+  event_t(type_t type_, uintptr_t param_ = 0, Widget *widget_ = 0) :
     type(type_), param(param_), widget(widget_) {}
 };
 
@@ -117,8 +116,8 @@ public:
   bool file_open(Window *focus, char *filename, const char *path = "", const char *filter = "");
   bool file_save(Window *focus, char *filename, const char *path = "", const char *filter = "");
 
-  uint screen_width();
-  uint screen_height();
+  unsigned screen_width();
+  unsigned screen_height();
 
   void enable_screensaver();
   void disable_screensaver();
@@ -182,26 +181,26 @@ public:
     AutoCenter = 1 << 1,
   };
 
-  void create(uint style, uint width, uint height, const char *text = "");
+  void create(unsigned style, unsigned width, unsigned height, const char *text = "");
   void close();
-  void move(uint x, uint y);
-  void resize(uint width, uint height);
+  void move(unsigned x, unsigned y);
+  void resize(unsigned width, unsigned height);
   void focus();
   bool focused();
   void fullscreen();
   void unfullscreen();
-  uint get_width();
-  uint get_height();
+  unsigned get_width();
+  unsigned get_height();
   void set_opacity(uint8_t opacity);
   void set_background_color(uint8_t r, uint8_t g, uint8_t b);
   void set_icon(unsigned width, unsigned height, const uint32_t *data);
   void set_status_text(const char *text = "");
   void set_text(const char *text = "");
-  void attach(Window &window, uint x, uint y);
+  void attach(Window &window, unsigned x, unsigned y);
   void attach(MenuGroup &menugroup);
-  void attach(FormControl &formcontrol, uint x, uint y);
-  void move(Window &window, uint x, uint y);
-  void move(FormControl &formcontrol, uint x, uint y);
+  void attach(FormControl &formcontrol, unsigned x, unsigned y);
+  void move(Window &window, unsigned x, unsigned y);
+  void move(FormControl &formcontrol, unsigned x, unsigned y);
 
   class Menubar {
   public:
@@ -224,10 +223,10 @@ public:
     Statusbar(pWindow&);
   } status;
 
-  nall::function<uintptr_t (Event)> on_close;
-  nall::function<uintptr_t (Event)> on_block;
-  nall::function<uintptr_t (Event)> on_keydown;
-  nall::function<uintptr_t (Event)> on_keyup;
+  nall::function<uintptr_t (event_t)> on_close;
+  nall::function<uintptr_t (event_t)> on_block;
+  nall::function<uintptr_t (event_t)> on_keydown;
+  nall::function<uintptr_t (event_t)> on_keyup;
 
   Window();
 
@@ -268,7 +267,7 @@ public:
   MenuItem& create(const char *text);
   MenuItem();
 
-  nall::function<uintptr_t (Event)> on_tick;
+  nall::function<uintptr_t (event_t)> on_tick;
 
 private:
   pFriends;
@@ -283,7 +282,7 @@ public:
   bool checked();
   MenuCheckItem();
 
-  nall::function<uintptr_t (Event)> on_tick;
+  nall::function<uintptr_t (event_t)> on_tick;
 
 private:
   pFriends;
@@ -297,7 +296,7 @@ public:
   bool checked();
   MenuRadioItem();
 
-  nall::function<uintptr_t (Event)> on_tick;
+  nall::function<uintptr_t (event_t)> on_tick;
 
 private:
   pFriends;
@@ -316,7 +315,7 @@ private:
 
 class FormControl : private nall::base_from_member<pFormControl&>, public Widget {
 public:
-  void resize(uint width, uint height);
+  void resize(unsigned width, unsigned height);
   void focus();
   bool focused();
   void enable(bool = true);
@@ -335,7 +334,7 @@ private:
 
 class Frame : private nall::base_from_member<pFrame&>, public FormControl {
 public:
-  void create(uint style, uint width, uint height, const char *text = "");
+  void create(unsigned style, unsigned width, unsigned height, const char *text = "");
   void set_text(const char *text = "");
 
   Frame();
@@ -347,7 +346,7 @@ private:
 
 class Canvas : private nall::base_from_member<pCanvas&>, public FormControl {
 public:
-  void create(uint style, uint width, uint height);
+  void create(unsigned style, unsigned width, unsigned height);
   void redraw();
   uint32_t* buffer();
 
@@ -360,7 +359,7 @@ private:
 
 class Label : private nall::base_from_member<pLabel&>, public FormControl {
 public:
-  void create(uint style, uint width, uint height, const char *text = "");
+  void create(unsigned style, unsigned width, unsigned height, const char *text = "");
   void set_text(const char *text = "");
 
   Label();
@@ -372,10 +371,10 @@ private:
 
 class Button : private nall::base_from_member<pButton&>, public FormControl {
 public:
-  void create(uint style, uint width, uint height, const char *text = "");
+  void create(unsigned style, unsigned width, unsigned height, const char *text = "");
   void set_text(const char *text = "");
 
-  nall::function<uintptr_t (Event)> on_tick;
+  nall::function<uintptr_t (event_t)> on_tick;
 
   Button();
 
@@ -386,13 +385,13 @@ private:
 
 class Checkbox : private nall::base_from_member<pCheckbox&>, public FormControl {
 public:
-  void create(uint style, uint width, uint height, const char *text = "");
+  void create(unsigned style, unsigned width, unsigned height, const char *text = "");
   void set_text(const char *text = "");
   void check(bool = true);
   void uncheck();
   bool checked();
 
-  nall::function<uintptr_t (Event)> on_tick;
+  nall::function<uintptr_t (event_t)> on_tick;
 
   Checkbox();
 
@@ -403,12 +402,12 @@ private:
 
 class Radiobox : private nall::base_from_member<pRadiobox&>, public FormControl {
 public:
-  void create(RadioboxGroup &group, uint style, uint width, uint height, const char *text = "");
+  void create(RadioboxGroup &group, unsigned style, unsigned width, unsigned height, const char *text = "");
   void set_text(const char *text = "");
   void check();
   bool checked();
 
-  nall::function<uintptr_t (Event)> on_tick;
+  nall::function<uintptr_t (event_t)> on_tick;
 
   Radiobox();
 
@@ -432,8 +431,8 @@ public:
     VerticalScrollNever  = 1 << 6,
   };
 
-  void create(uint style, uint width, uint height, const char *text = "");
-  uint get_text(char *text, uint length = -1U);
+  void create(unsigned style, unsigned width, unsigned height, const char *text = "");
+  unsigned get_text(char *text, unsigned length = -1U);
   void set_text(const char *text = "");
 
   Editbox();
@@ -457,17 +456,17 @@ public:
     VerticalScrollNever  = 1 << 5,
   };
 
-  void create(uint style, uint width, uint height, const char *columns = "", const char *text = "");
+  void create(unsigned style, unsigned width, unsigned height, const char *columns = "", const char *text = "");
   void autosize_columns();
-  void set_column_width(uint column, uint width);
+  void set_column_width(unsigned column, unsigned width);
   void add_item(const char *text);
-  void set_item(uint index, const char *text);
+  void set_item(unsigned index, const char *text);
   int  get_selection();
   void set_selection(int index);
   void reset();
 
-  nall::function<uintptr_t (Event)> on_change;
-  nall::function<uintptr_t (Event)> on_activate;
+  nall::function<uintptr_t (event_t)> on_change;
+  nall::function<uintptr_t (event_t)> on_activate;
 
   Listbox();
 
@@ -478,13 +477,13 @@ private:
 
 class Combobox : private nall::base_from_member<pCombobox&>, public FormControl {
 public:
-  void create(uint style, uint width, uint height, const char *text = "");
+  void create(unsigned style, unsigned width, unsigned height, const char *text = "");
   void add_item(const char *text);
   int  get_selection();
   void set_selection(int index);
   void reset();
 
-  nall::function<uintptr_t (Event)> on_change;
+  nall::function<uintptr_t (event_t)> on_change;
 
   Combobox();
 
@@ -495,9 +494,9 @@ private:
 
 class Progressbar : private nall::base_from_member<pProgressbar&>, public FormControl {
 public:
-  void create(uint style, uint width, uint height);
-  uint get_progress();
-  void set_progress(uint progress);
+  void create(unsigned style, unsigned width, unsigned height);
+  unsigned get_progress();
+  void set_progress(unsigned progress);
 
   Progressbar();
 
@@ -513,11 +512,11 @@ public:
     Vertical = 1 << 1,
   };
 
-  void create(uint style, uint width, uint height, uint length);
-  uint get_position();
-  void set_position(uint position);
+  void create(unsigned style, unsigned width, unsigned height, unsigned length);
+  unsigned get_position();
+  void set_position(unsigned position);
 
-  nall::function<uintptr_t (Event)> on_change;
+  nall::function<uintptr_t (event_t)> on_change;
 
   Slider();
 

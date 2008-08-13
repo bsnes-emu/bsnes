@@ -51,8 +51,8 @@ public:
   bool file_open(Window *focus, char *filename, const char *path = "", const char *filter = "");
   bool file_save(Window *focus, char *filename, const char *path = "", const char *filter = "");
 
-  uint screen_width();
-  uint screen_height();
+  unsigned screen_width();
+  unsigned screen_height();
 
   void enable_screensaver();
   void disable_screensaver();
@@ -66,12 +66,12 @@ public:
   HWND default_hwnd; //default parent window for all windowless controls
   HFONT default_font; //default font for all controls
   HBRUSH black_brush; //used for Canvas background
-  HFONT create_font(const char *name, uint size);
+  HFONT create_font(const char *name, unsigned size);
 
   array<Widget*> widget_list;
-  Widget* get_widget(uint instance);
+  Widget* get_widget(unsigned instance);
   LRESULT wndproc(HWND, UINT, WPARAM, LPARAM);
-  uint16_t translate_key(uint key);
+  uint16_t translate_key(unsigned key);
 };
 
 pHiro& phiro();

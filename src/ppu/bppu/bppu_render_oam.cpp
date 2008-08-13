@@ -1,41 +1,41 @@
 #ifdef BPPU_CPP
 
 void bPPU::build_sprite_list() {
-uint8 *tableA = oam, *tableB = oam + 512;
-uint8 y_offset = (config::ppu.hack.obj_cache == true) ? 0 : 1;
+  uint8 *tableA = memory::oam.handle(), *tableB = memory::oam.handle() + 512;
+  uint8 y_offset = (config::ppu.hack.obj_cache == true) ? 0 : 1;
 
-  for(int i = 0; i < 128; i++) {
-  uint x    = !!(*tableB & (1 << ((i & 3) << 1))); //0x01, 0x04, 0x10, 0x40
-  bool size = !!(*tableB & (2 << ((i & 3) << 1))); //0x02, 0x08, 0x20, 0x80
+  for(unsigned i = 0; i < 128; i++) {
+    unsigned x = !!(*tableB & (1 << ((i & 3) << 1))); //0x01, 0x04, 0x10, 0x40
+    bool size  = !!(*tableB & (2 << ((i & 3) << 1))); //0x02, 0x08, 0x20, 0x80
 
     switch(regs.oam_basesize) {
-    case 0: sprite_list[i].width  = (!size) ?  8 : 16;
-            sprite_list[i].height = (!size) ?  8 : 16;
-            break;
-    case 1: sprite_list[i].width  = (!size) ?  8 : 32;
-            sprite_list[i].height = (!size) ?  8 : 32;
-            break;
-    case 2: sprite_list[i].width  = (!size) ?  8 : 64;
-            sprite_list[i].height = (!size) ?  8 : 64;
-            break;
-    case 3: sprite_list[i].width  = (!size) ? 16 : 32;
-            sprite_list[i].height = (!size) ? 16 : 32;
-            break;
-    case 4: sprite_list[i].width  = (!size) ? 16 : 64;
-            sprite_list[i].height = (!size) ? 16 : 64;
-            break;
-    case 5: sprite_list[i].width  = (!size) ? 32 : 64;
-            sprite_list[i].height = (!size) ? 32 : 64;
-            break;
-    case 6: sprite_list[i].width  = (!size) ? 16 : 32;
-            sprite_list[i].height = (!size) ? 32 : 64;
-            if(regs.oam_interlace && !size)sprite_list[i].height = 16;
-          //32x64 height is not affected by oam_interlace setting
-            break;
-    case 7: sprite_list[i].width  = (!size) ? 16 : 32;
-            sprite_list[i].height = (!size) ? 32 : 32;
-            if(regs.oam_interlace && !size)sprite_list[i].height = 16;
-            break;
+      case 0: sprite_list[i].width  = (!size) ?  8 : 16;
+              sprite_list[i].height = (!size) ?  8 : 16;
+              break;
+      case 1: sprite_list[i].width  = (!size) ?  8 : 32;
+              sprite_list[i].height = (!size) ?  8 : 32;
+              break;
+      case 2: sprite_list[i].width  = (!size) ?  8 : 64;
+              sprite_list[i].height = (!size) ?  8 : 64;
+              break;
+      case 3: sprite_list[i].width  = (!size) ? 16 : 32;
+              sprite_list[i].height = (!size) ? 16 : 32;
+              break;
+      case 4: sprite_list[i].width  = (!size) ? 16 : 64;
+              sprite_list[i].height = (!size) ? 16 : 64;
+              break;
+      case 5: sprite_list[i].width  = (!size) ? 32 : 64;
+              sprite_list[i].height = (!size) ? 32 : 64;
+              break;
+      case 6: sprite_list[i].width  = (!size) ? 16 : 32;
+              sprite_list[i].height = (!size) ? 32 : 64;
+              if(regs.oam_interlace && !size)sprite_list[i].height = 16;
+              //32x64 height is not affected by oam_interlace setting
+              break;
+      case 7: sprite_list[i].width  = (!size) ? 16 : 32;
+              sprite_list[i].height = (!size) ? 32 : 32;
+              if(regs.oam_interlace && !size)sprite_list[i].height = 16;
+              break;
     }
 
     sprite_list[i].x              = (x << 8) + tableA[0];

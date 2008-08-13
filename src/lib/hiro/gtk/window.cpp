@@ -1,5 +1,5 @@
 static gint hiro_pwindow_close(pWindow *p) {
-  uintptr_t r = p->self.on_close ? p->self.on_close(Event(Event::Close, 0, &p->self)) : true;
+  uintptr_t r = p->self.on_close ? p->self.on_close(event_t(event_t::Close, 0, &p->self)) : true;
   return !bool(r);
 }
 
@@ -25,16 +25,16 @@ static gboolean hiro_pwindow_expose(pWindow *p) {
 }
 
 static gint hiro_pwindow_keydown(GtkWidget *w, GdkEventKey *key, pWindow *p) {
-  if(p && p->self.on_keydown) p->self.on_keydown(Event(Event::KeyDown, phiro().translate_key(key->keyval), &p->self));
+  if(p && p->self.on_keydown) p->self.on_keydown(event_t(event_t::KeyDown, phiro().translate_key(key->keyval), &p->self));
   return FALSE;
 }
 
 static gint hiro_pwindow_keyup(GtkWidget *w, GdkEventKey *key, pWindow *p) {
-  if(p && p->self.on_keyup) p->self.on_keyup(Event(Event::KeyUp, phiro().translate_key(key->keyval), &p->self));
+  if(p && p->self.on_keyup) p->self.on_keyup(event_t(event_t::KeyUp, phiro().translate_key(key->keyval), &p->self));
   return FALSE;
 }
 
-void pWindow::create(uint style, uint width, uint height, const char *text) {
+void pWindow::create(unsigned style, unsigned width, unsigned height, const char *text) {
   window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
   gtk_widget_set_colormap(window, phiro().colormap);
 
@@ -81,12 +81,12 @@ void pWindow::close() {
   gtk_widget_destroy(window);
 }
 
-void pWindow::move(uint x, uint y) {
+void pWindow::move(unsigned x, unsigned y) {
   gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_NONE);
   gtk_window_move(GTK_WINDOW(window), x, y);
 }
 
-void pWindow::resize(uint width, uint height) {
+void pWindow::resize(unsigned width, unsigned height) {
   gtk_widget_set_size_request(formcontainer, width, height);
   state.width = width;
   state.height = height;
@@ -132,14 +132,14 @@ void pWindow::unfullscreen() {
 //is unreliable, as it will usually report the previous window size.
 //therefore, calculate it manually by using state information.
 
-uint pWindow::get_width() {
+unsigned pWindow::get_width() {
   if(state.is_fullscreen == false) return state.width;
   return gdk_screen_width();
 }
 
-uint pWindow::get_height() {
+unsigned pWindow::get_height() {
   if(state.is_fullscreen == false) return state.height;
-  uint height = gdk_screen_height();
+  unsigned height = gdk_screen_height();
 
   //do not include menubar height in client area height
   if(menu.visible()) {
@@ -198,7 +198,7 @@ void pWindow::set_text(const char *text) {
   gtk_window_set_title(GTK_WINDOW(window), text ? text : "");
 }
 
-void pWindow::attach(Window &window, uint x, uint y) {
+void pWindow::attach(Window &window, unsigned x, unsigned y) {
   window.p.owner = this;
 
   //GTK+ does not support attaching a window to another window,
@@ -216,15 +216,15 @@ void pWindow::attach(MenuGroup &menugroup) {
   gtk_widget_show(menubar);
 }
 
-void pWindow::attach(FormControl &formcontrol, uint x, uint y) {
+void pWindow::attach(FormControl &formcontrol, unsigned x, unsigned y) {
   gtk_fixed_put(GTK_FIXED(formcontainer), formcontrol.p.gtk_handle(), x, y);
 }
 
-void pWindow::move(Window &window, uint x, uint y) {
+void pWindow::move(Window &window, unsigned x, unsigned y) {
   gtk_fixed_move(GTK_FIXED(formcontainer), window.p.gtk_handle(), x, y);
 }
 
-void pWindow::move(FormControl &formcontrol, uint x, uint y) {
+void pWindow::move(FormControl &formcontrol, unsigned x, unsigned y) {
   gtk_fixed_move(GTK_FIXED(formcontainer), formcontrol.p.gtk_handle(), x, y);
 }
 

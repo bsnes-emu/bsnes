@@ -1,14 +1,14 @@
 class pSlider : public pFormControl {
 public:
-  void create(uint style, uint width, uint height, uint length);
-  uint get_position();
-  void set_position(uint position);
+  void create(unsigned style, unsigned width, unsigned height, unsigned length);
+  unsigned get_position();
+  void set_position(unsigned position);
 
   Slider &self;
   pSlider(Slider&);
 
   /* internal */
   GtkWidget *slider;
-  uint slider_position;
+  unsigned slider_position;
   GtkWidget* gtk_handle();
 };

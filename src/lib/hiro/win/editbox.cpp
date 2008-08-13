@@ -1,12 +1,12 @@
-void pEditbox::create(uint style, uint width, uint height, const char *text) {
+void pEditbox::create(unsigned style, unsigned width, unsigned height, const char *text) {
   bool multiline = style & Editbox::Multiline;
-  bool readonly = style & Editbox::Readonly;
-  uint vscroll = (style & Editbox::VerticalScrollAlways) ? WS_VSCROLL :
-                 (style & Editbox::VerticalScrollNever) ? 0 :
-                 ES_AUTOVSCROLL;
-  uint hscroll = (style & Editbox::HorizontalScrollAlways) ? WS_HSCROLL :
-                 (style & Editbox::HorizontalScrollNever) ? 0 :
-                 ES_AUTOHSCROLL;
+  bool readonly  = style & Editbox::Readonly;
+  unsigned vscroll = (style & Editbox::VerticalScrollAlways) ? WS_VSCROLL :
+                     (style & Editbox::VerticalScrollNever) ? 0 :
+                     ES_AUTOVSCROLL;
+  unsigned hscroll = (style & Editbox::HorizontalScrollAlways) ? WS_HSCROLL :
+                     (style & Editbox::HorizontalScrollNever) ? 0 :
+                     ES_AUTOHSCROLL;
 
   hwnd = CreateWindowEx(WS_EX_CLIENTEDGE, L"EDIT", L"",
     WS_CHILD | WS_VISIBLE | vscroll | hscroll |
@@ -25,10 +25,11 @@ void pEditbox::set_text(const char *text) {
   SetWindowText(hwnd, utf16(temp));
 }
 
-uint pEditbox::get_text(char *text, uint length) {
-  wchar_t buffer[length * 2 + 1];
-  GetWindowText(hwnd, buffer, length * 2);
+unsigned pEditbox::get_text(char *text, unsigned length) {
+  wchar_t *buffer = new wchar_t[length + 1];
+  GetWindowText(hwnd, buffer, length);
   string temp = (const char*)utf8(buffer);
+  delete[] buffer;
   replace(temp, "\r", "");
   strlcpy(text, temp, length);
   return strlen(text);

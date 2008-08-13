@@ -24,4 +24,4 @@ pWidget::~pWidget() {
 
 //100 is the standard start index for control IDs in the Windows API
 //avoids duplicate IDs when they are not explicitly set (and are thus 0)
-uint pWidget::instance_counter = 100;
+unsigned pWidget::instance_counter = 100;

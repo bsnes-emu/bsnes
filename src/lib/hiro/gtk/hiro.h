@@ -43,8 +43,8 @@ public:
   bool file_open(Window *focus, char *filename, const char *path = "", const char *filter = "");
   bool file_save(Window *focus, char *filename, const char *path = "", const char *filter = "");
 
-  uint screen_width();
-  uint screen_height();
+  unsigned screen_width();
+  unsigned screen_height();
 
   void enable_screensaver();
   void disable_screensaver();
@@ -62,7 +62,7 @@ public:
   void set_default_path(const char*);
   bool is_screensaver_enabled;
   void screensaver_tick();
-  uint16_t translate_key(uint key);
+  uint16_t translate_key(unsigned key);
 };
 
 pHiro& phiro();

@@ -34,12 +34,12 @@ public:
 
   InputType get_input_type(unsigned &length);
 
-  uintptr_t capture_change(Event);
-  uintptr_t type_change(Event);
-  uintptr_t subtype_change(Event);
-  uintptr_t list_change(Event);
-  uintptr_t set_tick(Event);
-  uintptr_t clr_tick(Event);
+  uintptr_t capture_change(event_t);
+  uintptr_t type_change(event_t);
+  uintptr_t subtype_change(event_t);
+  uintptr_t list_change(event_t);
+  uintptr_t set_tick(event_t);
+  uintptr_t clr_tick(event_t);
 
   string_setting& acquire(unsigned index, const char *&name);
   uint get_value(uint index);
@@ -59,7 +59,7 @@ public:
   void show();
   void setup();
 
-  uintptr_t close(Event);
+  uintptr_t close(event_t);
 
   InputCaptureWindow();
 } window_input_capture;

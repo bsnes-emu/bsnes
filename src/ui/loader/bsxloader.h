@@ -16,13 +16,13 @@ public:
   Button  load, cancel;
 
   void setup();
-  uintptr_t close(Event);
-  uintptr_t bbase_tick(Event);
-  uintptr_t cbase_tick(Event);
-  uintptr_t bslot_tick(Event);
-  uintptr_t cslot_tick(Event);
-  uintptr_t load_tick(Event);
-  uintptr_t cancel_tick(Event);
+  uintptr_t close(event_t);
+  uintptr_t bbase_tick(event_t);
+  uintptr_t cbase_tick(event_t);
+  uintptr_t bslot_tick(event_t);
+  uintptr_t cslot_tick(event_t);
+  uintptr_t load_tick(event_t);
+  uintptr_t cancel_tick(event_t);
 
   BSXLoaderWindow();
 } window_bsxloader;
