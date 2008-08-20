@@ -55,14 +55,14 @@ void AdvancedWindow::load() {
     string name = config::config().list[i]->name;
 
     //blacklist (omit/hide options that can be configured through the standard UI)
+    if(strbegin(name, "system.")) continue;
     if(strbegin(name, "path.")) continue;
     if(strbegin(name, "snes.controller_port")) continue;
     if(strpos(name, "colorfilter.") >= 0) continue;
-    if(name == "misc.status_enable") continue;
     if(name == "system.emulation_speed") continue;
-    if(strbegin(name, "video.windowed.") && name != "video.windowed.synchronize") continue;
-    if(strbegin(name, "video.fullscreen.") && name != "video.fullscreen.synchronize") continue;
-    if(name == "audio.mute") continue;
+    if(strbegin(name, "video.windowed.")) continue;
+    if(strbegin(name, "video.fullscreen.")) continue;
+    if(strbegin(name, "audio.")) continue;
     if(name == "input.capture_mode") continue;
     if(strbegin(name, "input.joypad")) continue;
     if(strbegin(name, "input.multitap")) continue;

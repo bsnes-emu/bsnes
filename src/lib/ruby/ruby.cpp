@@ -12,55 +12,99 @@ InputInterface input;
 void VideoInterface::driver(const char *driver) {
   if(p) term();
 
-  if(!strcmp(driver, "none")) p = new Video();
+  if(driver == "") driver = default_driver();
+
+  if(0);
 
   #ifdef VIDEO_DIRECT3D
-  else if(!strcmp(driver, "direct3d")) p = new VideoD3D();
+  else if(!strcmp(driver, "Direct3D")) p = new VideoD3D();
   #endif
 
   #ifdef VIDEO_DIRECTDRAW
-  else if(!strcmp(driver, "directdraw")) p = new VideoDD();
+  else if(!strcmp(driver, "DirectDraw")) p = new VideoDD();
   #endif
 
   #ifdef VIDEO_GDI
-  else if(!strcmp(driver, "gdi")) p = new VideoGDI();
+  else if(!strcmp(driver, "GDI")) p = new VideoGDI();
   #endif
 
   #ifdef VIDEO_GLX
-  else if(!strcmp(driver, "glx")) p = new VideoGLX();
+  else if(!strcmp(driver, "OpenGL")) p = new VideoGLX();
   #endif
 
   #ifdef VIDEO_SDL
-  else if(!strcmp(driver, "sdl")) p = new VideoSDL();
+  else if(!strcmp(driver, "SDL")) p = new VideoSDL();
   #endif
 
   #ifdef VIDEO_WGL
-  else if(!strcmp(driver, "wgl")) p = new VideoWGL();
+  else if(!strcmp(driver, "OpenGL")) p = new VideoWGL();
   #endif
 
   #ifdef VIDEO_XV
-  else if(!strcmp(driver, "xv")) p = new VideoXv();
+  else if(!strcmp(driver, "X-Video")) p = new VideoXv();
   #endif
 
-  else //select the *safest* available driver, not the fastest
+  else p = new Video();
+}
+
+//select the *safest* available driver, not the fastest
+const char* VideoInterface::default_driver() {
+  #if defined(VIDEO_DIRECT3D)
+  return "Direct3D";
+  #elif defined(VIDEO_WGL)
+  return "OpenGL";
+  #elif defined(VIDEO_DIRECTDRAW)
+  return "DirectDraw";
+  #elif defined(VIDEO_GDI)
+  return "GDI";
+  #elif defined(VIDEO_SDL)
+  return "SDL";
+  #elif defined(VIDEO_XV)
+  return "X-Video";
+  #elif defined(VIDEO_GLX)
+  return "OpenGL";
+  #else
+  return "None";
+  #endif
+}
+
+//returns list of available drivers, sorted from most to least optimal
+const char* VideoInterface::driver_list() {
+  return
+
+  //Windows
 
   #if defined(VIDEO_DIRECT3D)
-  p = new VideoD3D();
-  #elif defined(VIDEO_WGL)
-  p = new VideoWGL();
-  #elif defined(VIDEO_DIRECTDRAW)
-  p = new VideoDD();
-  #elif defined(VIDEO_GDI)
-  p = new VideoGDI();
-  #elif defined(VIDEO_SDL)
-  p = new VideoSDL();
-  #elif defined(VIDEO_XV)
-  p = new VideoXv();
-  #elif defined(VIDEO_GLX)
-  p = new VideoGLX();
-  #else
-  p = new Video();
+  "Direct3D;"
   #endif
+
+  #if defined(VIDEO_WGL)
+  "OpenGL;"
+  #endif
+
+  #if defined(VIDEO_DIRECTDRAW)
+  "DirectDraw;"
+  #endif
+
+  #if defined(VIDEO_GDI)
+  "GDI;"
+  #endif
+
+  //Linux
+
+  #if defined(VIDEO_GLX)
+  "OpenGL;"
+  #endif
+
+  #if defined(VIDEO_XV)
+  "X-Video;"
+  #endif
+
+  #if defined(VIDEO_SDL)
+  "SDL;"
+  #endif
+
+  "None";
 }
 
 bool VideoInterface::init() {
@@ -90,95 +134,140 @@ VideoInterface::~VideoInterface() { term(); }
 void AudioInterface::driver(const char *driver) {
   if(p) term();
 
-  if(!strcmp(driver, "none")) p = new Audio();
+  if(driver == "") driver = default_driver();
+
+  if(0);
 
   #ifdef AUDIO_ALSA
-  else if(!strcmp(driver, "alsa")) p = new AudioALSA();
+  else if(!strcmp(driver, "ALSA")) p = new AudioALSA();
   #endif
 
   #ifdef AUDIO_AO
-  else if(!strcmp(driver, "ao")) p = new AudioAO();
+  else if(!strcmp(driver, "libao")) p = new AudioAO();
   #endif
 
   #ifdef AUDIO_DIRECTSOUND
-  else if(!strcmp(driver, "directsound")) p = new AudioDS();
+  else if(!strcmp(driver, "DirectSound")) p = new AudioDS();
   #endif
 
   #ifdef AUDIO_OPENAL
-  else if(!strcmp(driver, "openal")) p = new AudioOpenAL();
+  else if(!strcmp(driver, "OpenAL")) p = new AudioOpenAL();
   #endif
 
   #ifdef AUDIO_OSS
-  else if(!strcmp(driver, "oss")) p = new AudioOSS();
+  else if(!strcmp(driver, "OSS")) p = new AudioOSS();
   #endif
 
-  else //select the *safest* available driver, not the fastest
+  else p = new Audio();
+}
+
+//select the *safest* available driver, not the fastest
+const char* AudioInterface::default_driver() {
+  #if defined(AUDIO_DIRECTSOUND)
+  return "DirectSound";
+  #elif defined(AUDIO_AO)
+  return "libao";
+  #elif defined(AUDIO_ALSA)
+  return "ALSA";
+  #elif defined(AUDIO_OPENAL)
+  return "OpenAL";
+  #elif defined(AUDIO_OSS)
+  return "OSS";
+  #else
+  return "None";
+  #endif
+}
+
+//returns list of available drivers, sorted from most to least optimal
+const char* AudioInterface::driver_list() {
+  return
+
+  //Windows
 
   #if defined(AUDIO_DIRECTSOUND)
-  p = new AudioDS();
-  #elif defined(AUDIO_AO)
-  p = new AudioAO();
-  #elif defined(AUDIO_ALSA)
-  p = new AudioALSA();
-  #elif defined(AUDIO_OPENAL)
-  p = new AudioOpenAL();
-  #elif defined(AUDIO_OSS)
-  p = new AudioOSS();
-  #else
-  p = new Audio();
+  "DirectSound;"
   #endif
+
+  //Linux
+
+  #if defined(AUDIO_ALSA)
+  "ALSA;"
+  #endif
+
+  #if defined(AUDIO_OPENAL)
+  "OpenAL;"
+  #endif
+
+  #if defined(AUDIO_OSS)
+  "OSS;"
+  #endif
+
+  #if defined(AUDIO_AO)
+  "libao;"
+  #endif
+
+  "None";
 }
 
-bool AudioInterface::init() {
-  if(!p) driver();
-  return p->init();
-}
-
-void AudioInterface::term() {
-  if(p) {
-    delete p;
-    p = 0;
-  }
-}
-
-bool AudioInterface::cap(Audio::Setting setting) { return p ? p->cap(setting) : false; }
-uintptr_t AudioInterface::get(Audio::Setting setting) { return p ? p->get(setting) : false; }
-bool AudioInterface::set(Audio::Setting setting, uintptr_t param) { return p ? p->set(setting, param) : false; }
-void AudioInterface::sample(uint16_t left, uint16_t right) { if(p) p->sample(left, right); }
-void AudioInterface::clear() { if(p) p->clear(); }
-AudioInterface::AudioInterface() : p(0) {}
-AudioInterface::~AudioInterface() { term(); }
+#include "ruby_audio.cpp"
 
 /* InputInterface */
 
 void InputInterface::driver(const char *driver) {
   if(p) term();
 
-  if(!strcmp(driver, "none")) p = new Input();
+  if(driver == "") driver = default_driver();
+
+  if(0);
 
   #ifdef INPUT_DIRECTINPUT
-  else if(!strcmp(driver, "directinput")) p = new InputDI();
+  else if(!strcmp(driver, "DirectInput")) p = new InputDI();
   #endif
 
   #ifdef INPUT_SDL
-  else if(!strcmp(driver, "sdl")) p = new InputSDL();
+  else if(!strcmp(driver, "SDL")) p = new InputSDL();
   #endif
 
   #ifdef INPUT_X
-  else if(!strcmp(driver, "x")) p = new InputX();
+  else if(!strcmp(driver, "X-Windows")) p = new InputX();
   #endif
 
-  else //select the *safest* available driver, not the fastest
+  else p = new Input();
+}
+
+//select the *safest* available driver, not the fastest
+const char* InputInterface::default_driver() {
+  #if defined(INPUT_DIRECTINPUT)
+  return "DirectInput";
+  #elif defined(INPUT_SDL)
+  return "SDL";
+  #elif defined(INPUT_X)
+  return "X-Windows";
+  #else
+  return "none";
+  #endif
+}
+
+const char* InputInterface::driver_list() {
+  return
+
+  //Windows
 
   #if defined(INPUT_DIRECTINPUT)
-  p = new InputDI();
-  #elif defined(INPUT_SDL)
-  p = new InputSDL();
-  #elif defined(INPUT_X)
-  p = new InputX();
-  #else
-  p = new Input();
+  "DirectInput;"
   #endif
+
+  //Linux
+
+  #if defined(INPUT_SDL)
+  "SDL;"
+  #endif
+
+  #if defined(INPUT_X)
+  "X-Windows;"
+  #endif
+
+  "None";
 }
 
 bool InputInterface::init() {

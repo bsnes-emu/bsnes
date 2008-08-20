@@ -30,6 +30,8 @@ public:
 
   bool cap(Input::Setting setting) {
     if(setting == Input::Handle) return true;
+    if(setting == Input::KeyboardSupport) return true;
+    if(setting == Input::JoypadSupport) return true;
     if(setting == Input::AnalogAxisResistance) return true;
     return false;
   }

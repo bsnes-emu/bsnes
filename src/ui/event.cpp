@@ -118,22 +118,19 @@ void update_frameskip(int speed) {
 }
 
 void update_emulation_speed(int speed) {
-  config::system.emulation_speed = max(0, min(5, speed));
+  config::system.emulation_speed = max(0, min(4, speed));
 
-  //adjust audio frequency to match selected speed setting
-  if(audio.cap(Audio::Frequency)) {
-    switch(config::system.emulation_speed) {
-      case 0: audio.set(Audio::Frequency, 16000); break; //slowest (50%)
-      case 1: audio.set(Audio::Frequency, 24000); break; //slow (75%)
-      case 2: audio.set(Audio::Frequency, 32000); break; //normal (100%)
-      case 3: audio.set(Audio::Frequency, 48000); break; //fast (150%)
-      case 4: audio.set(Audio::Frequency, 64000); break; //fastest (200%)
-      case 5: audio.set(Audio::Frequency, 32000); break; //disabled
-    }
+  double scale;
+  switch(config::system.emulation_speed) {
+    case 0: scale = 0.50; break; //slowest
+    case 1: scale = 0.75; break; //slow
+    case 2: scale = 1.00; break; //normal
+    case 3: scale = 1.50; break; //fast
+    case 4: scale = 2.00; break; //fastest
   }
 
-  //do not regulate speed when speed regulation is disabled
-  audio.set(Audio::Synchronize, config::system.emulation_speed != 5);
+  audio.set(Audio::ResampleOutputFrequency, config::audio.output_frequency);
+  audio.set(Audio::ResampleInputFrequency,  config::audio.input_frequency * scale + 0.5);
 
   window_main.sync();
 }
@@ -268,8 +265,7 @@ void toggle_menubar() {
 }
 
 void toggle_statusbar() {
-  config::misc.status_enable = !window_main.status.visible();
-  window_main.status.show(config::misc.status_enable);
+  window_main.status.show(!window_main.status.visible());
   update_video_settings();
 }
 

@@ -53,9 +53,32 @@ public:
   }
 
   void clear() {
+    if(SDL_MUSTLOCK(buffer)) SDL_LockSurface(buffer);
+    uint32_t *data = (uint32_t*)buffer->pixels;
+    for(unsigned y = 0; y < 1024; y++) {
+      for(unsigned x = 0; x < 1024; x++) {
+        *data++ |= 0xff000000;
+      }
+      data += (buffer->pitch >> 2) - 1024;
+    }
+    if(SDL_MUSTLOCK(buffer)) SDL_UnlockSurface(buffer);
+    refresh(1024, 1024);
   }
 
   void refresh(unsigned width, unsigned height) {
+    //ruby input is X8R8G8B8, top 8-bits are ignored.
+    //as SDL forces us to use a 32-bit buffer, we must set alpha to 255 (full opacity)
+    //to prevent blending against the window beneath when X window visual is 32-bits.
+    if(SDL_MUSTLOCK(buffer)) SDL_LockSurface(buffer);
+    uint32_t *data = (uint32_t*)buffer->pixels;
+    for(unsigned y = 0; y < height; y++) {
+      for(unsigned x = 0; x < width; x++) {
+        *data++ |= 0xff000000;
+      }
+      data += (buffer->pitch >> 2) - width;
+    }
+    if(SDL_MUSTLOCK(buffer)) SDL_UnlockSurface(buffer);
+
     XWindowAttributes attributes;
     XGetWindowAttributes(display, settings.handle, &attributes);
 
@@ -81,10 +104,11 @@ public:
     sprintf(env, "SDL_WINDOWID=%ld", settings.handle);
     putenv(env);
     SDL_InitSubSystem(SDL_INIT_VIDEO);
+    //screen depth must be 32, as 24bpp with a 32-bit X window visual produces no output.
     screen = SDL_SetVideoMode(2560, 1600, 32, SDL_HWSURFACE);
+    //buffer depth must be 32, as this is the input format used by all ruby drivers.
     buffer = SDL_CreateRGBSurface(SDL_HWSURFACE,
-      1024, 1024,
-      32, 0x00ff0000, 0x0000ff00, 0x000000ff, 0x00000000
+      1024, 1024, 32, 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000
     );
     return true;
   }

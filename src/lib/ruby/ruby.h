@@ -1,6 +1,6 @@
 /*
   ruby
-  version: 0.03 (2008-05-04)
+  version: 0.04 (2008-08-20)
   license: public domain
 */
 
@@ -8,6 +8,7 @@
 #define RUBY_H
 
 #include <nall/algorithm.hpp>
+#include <nall/bit.hpp>
 #include <nall/input.hpp>
 #include <nall/new.hpp>
 #include <nall/stdint.hpp>
@@ -24,6 +25,8 @@ namespace ruby {
 class VideoInterface {
 public:
   void driver(const char *driver = "");
+  const char* default_driver();
+  const char* driver_list();
   bool init();
   void term();
 
@@ -44,6 +47,8 @@ private:
 class AudioInterface {
 public:
   void driver(const char *driver = "");
+  const char* default_driver();
+  const char* driver_list();
   bool init();
   void term();
 
@@ -57,11 +62,22 @@ public:
 
 private:
   Audio *p;
+
+  unsigned volume;
+
+  //resample unit
+  double hermite(double mu, double a, double b, double c, double d);
+  bool   resample_enabled;
+  double r_outfreq, r_infreq;
+  double r_step, r_frac;
+  int    r_left[4], r_right[4];
 };
 
 class InputInterface {
 public:
   void driver(const char *driver = "");
+  const char* default_driver();
+  const char* driver_list();
   bool init();
   void term();
 

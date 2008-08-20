@@ -17,7 +17,6 @@ public:
     snd_pcm_uframes_t period_size;
     int channels;
     const char *name;
-    unsigned latency;
   } device;
 
   struct {
@@ -28,37 +27,57 @@ public:
   struct {
     bool synchronize;
     unsigned frequency;
+    unsigned latency;
   } settings;
 
   bool cap(Audio::Setting setting) {
     if(setting == Audio::Synchronize) return true;
     if(setting == Audio::Frequency) return true;
+    if(setting == Audio::Latency) return true;
     return false;
   }
 
   uintptr_t get(Audio::Setting setting) {
     if(setting == Audio::Synchronize) return settings.synchronize;
     if(setting == Audio::Frequency) return settings.frequency;
+    if(setting == Audio::Latency) return settings.latency;
     return false;
   }
 
   bool set(Audio::Setting setting, uintptr_t param) {
     if(setting == Audio::Synchronize) {
-      settings.synchronize = param;
-      if(device.handle) {
-        term();
-        init();
+      if(settings.synchronize != param) {
+        settings.synchronize = param;
+        if(device.handle) {
+          term();
+          init();
+        }
       }
       return true;
     }
+
     if(setting == Audio::Frequency) {
-      settings.frequency = param;
-      if(device.handle) {
-        term();
-        init();
+      if(settings.frequency != param) {
+        settings.frequency = param;
+        if(device.handle) {
+          term();
+          init();
+        }
       }
       return true;
     }
+
+    if(setting == Audio::Latency) {
+      if(settings.latency != param) {
+        settings.latency = param;
+        if(device.handle) {
+          term();
+          init();
+        }
+      }
+      return true;
+    }
+
     return false;
   }
 
@@ -94,13 +113,13 @@ public:
       }
     }
 
-  /*if(i < 0) {
+    if(i < 0) {
       if(buffer.data == buffer_ptr) {
         buffer.length--;
         buffer_ptr++;
       }
       memmove(buffer.data, buffer_ptr, buffer.length * sizeof(uint32_t));
-    }*/
+    }
   }
 
   bool init() {
@@ -109,23 +128,23 @@ public:
       return false;
     }
 
-    /* //below code will not work with 24khz mode (ALSA library bug)
+    /* //below code will not work with 24khz frequency rate (ALSA library bug)
     if(snd_pcm_set_params(device.handle, device.format, SND_PCM_ACCESS_RW_INTERLEAVED,
-      device.channels, settings.frequency, 1, device.latency) < 0) {
+      device.channels, settings.frequency, 1, settings.latency * 100) < 0) {
       //failed to set device parameters
       term();
       return false;
     }
 
     if(snd_pcm_get_params(device.handle, &device.buffer_size, &device.period_size) < 0) {
-      device.period_size = device.latency * 1e-6 * settings.frequency / 4;
+      device.period_size = settings.latency * 100 * 1e-6 * settings.frequency / 4;
     }*/
 
     snd_pcm_hw_params_t *hwparams;
     snd_pcm_sw_params_t *swparams;
     unsigned rate = settings.frequency;
-    unsigned buffer_time = device.latency;
-    unsigned period_time = device.latency / 4;
+    unsigned buffer_time = settings.latency * 100;
+    unsigned period_time = settings.latency * 100 / 4;
 
     snd_pcm_hw_params_alloca(&hwparams);
     if(snd_pcm_hw_params_any(device.handle, hwparams) < 0) {
@@ -194,13 +213,13 @@ public:
     device.format = SND_PCM_FORMAT_S16_LE;
     device.channels = 2;
     device.name = "default";
-    device.latency = 60000;
 
     buffer.data = 0;
     buffer.length = 0;
 
     settings.synchronize = false;
     settings.frequency = 22050;
+    settings.latency = 60;
   }
 
   ~pAudioALSA() {

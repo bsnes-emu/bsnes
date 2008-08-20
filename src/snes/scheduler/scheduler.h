@@ -58,12 +58,12 @@ public:
 
   alwaysinline void addclocks_cpu(uint clocks) {
     clock.cpusmp -= clocks * (uint64)clock.smp_freq;
-    if(clock.cpusmp < -(250000 * (int64)20000000)) sync_cpusmp();
+    if(clock.cpusmp < -(20000 * (int64)24000000)) sync_cpusmp();
   }
 
   alwaysinline void addclocks_smp(uint clocks) {
     clock.cpusmp += clocks * (uint64)clock.cpu_freq;
-    if(clock.cpusmp > +(250000 * (int64)20000000)) sync_smpcpu();
+    if(clock.cpusmp > +(20000 * (int64)24000000)) sync_smpcpu();
     clock.smpdsp -= clocks;
     #if !defined(USE_STATE_MACHINE)
     sync_smpdsp();

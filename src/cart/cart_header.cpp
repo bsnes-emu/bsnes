@@ -200,8 +200,6 @@ unsigned Cartridge::score_header(unsigned addr) {
   if(rom[addr + RAM_SIZE] < 0x08) score++;
   if(rom[addr + REGION] < 14) score++;
 
-  printf("* score @ %0.6x = %2d, resetop = %0.2x\n", addr, score, resetop);
-
   if(score < 0) score = 0;
   return score;
 }
@@ -211,8 +209,6 @@ void Cartridge::find_header() {
   unsigned score_hi = score_header(0x00ffc0);
   unsigned score_ex = score_header(0x40ffc0);
   if(score_ex) score_ex += 4; //favor ExHiROM on images > 32mbits
-
-  printf("\n");
 
   if(score_lo >= score_hi && score_lo >= score_ex) {
     info.header_index = 0x007fc0;

@@ -2,7 +2,7 @@
   video.wgl
   authors: byuu, krom, mudlord
   license: public domain
-  date: 2008-03-26
+  last updated: 2008-08-20
 */
 
 #include <windows.h>
@@ -28,17 +28,20 @@ public:
 
   struct {
     HWND handle;
+    bool synchronize;
     unsigned filter;
   } settings;
 
   bool cap(Video::Setting setting) {
     if(setting == Video::Handle) return true;
+    if(setting == Video::Synchronize) return true;
     if(setting == Video::Filter) return true;
     return false;
   }
 
   uintptr_t get(Video::Setting setting) {
     if(setting == Video::Handle) return (uintptr_t)settings.handle;
+    if(setting == Video::Synchronize) return settings.synchronize;
     if(setting == Video::Filter) return settings.filter;
     return false;
   }
@@ -48,10 +51,22 @@ public:
       settings.handle = (HWND)param;
       return true;
     }
+
+    if(setting == Video::Synchronize) {
+      if(settings.synchronize != param) {
+        settings.synchronize = param;
+        if(wglcontext) {
+          term();
+          init();
+        }
+      }
+    }
+
     if(setting == Video::Filter) {
       settings.filter = param;
       return true;
     }
+
     return false;
   }
 
@@ -114,14 +129,14 @@ public:
   }
 
   bool init() {
-    buffer = new(zeromemory) uint32_t[1024 * 1024 * sizeof(uint32_t)];
+    buffer = new(zeromemory) uint32_t[1024 * 1024];
 
     GLuint pixel_format;
     PIXELFORMATDESCRIPTOR pfd;
     memset(&pfd, 0, sizeof(PIXELFORMATDESCRIPTOR));
     pfd.nSize      = sizeof(PIXELFORMATDESCRIPTOR);
     pfd.nVersion   = 1;
-    pfd.dwFlags    = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
+    pfd.dwFlags    = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | (settings.synchronize ? PFD_DOUBLEBUFFER : 0);
     pfd.iPixelType = PFD_TYPE_RGBA;
 
     display = GetDC(settings.handle);
@@ -174,6 +189,9 @@ public:
 
   pVideoWGL(VideoWGL &self_) : self(self_) {
     settings.handle = 0;
+    settings.synchronize = false;
+    settings.filter = 0;
+
     window = 0;
     wglcontext = 0;
     glwindow = 0;

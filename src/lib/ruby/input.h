@@ -2,6 +2,8 @@ class Input {
 public:
   enum Setting {
     Handle,
+    KeyboardSupport,
+    JoypadSupport,
     AnalogAxisResistance,
   };
 

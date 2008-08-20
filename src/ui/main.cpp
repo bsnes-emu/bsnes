@@ -156,6 +156,7 @@ int main(int argc, char *argv[]) { */
 
   hiro().init();
   ui_init();
+  if(app.term == true) goto app_term;
   snes.init();
 
   if(argc >= 2 && fexists(argv[1])) {
@@ -170,6 +171,7 @@ int main(int argc, char *argv[]) { */
 
   event::unload_rom();
 
+  app_term:
   config::config().save(config::bsnes_cfg);
   snes.term();
   ui_term();

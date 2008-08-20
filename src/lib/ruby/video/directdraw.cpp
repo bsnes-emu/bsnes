@@ -67,11 +67,10 @@ public:
 
   void refresh(unsigned r_width, unsigned r_height) {
     if(settings.synchronize) {
-      for(;;) {
+      while(true) {
         BOOL in_vblank;
         lpdd7->GetVerticalBlankStatus(&in_vblank);
-        if(bool(in_vblank) == true) break;
-      //Sleep(1);
+        if(in_vblank == true) break;
       }
     }
 

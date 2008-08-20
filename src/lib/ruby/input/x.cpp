@@ -16,6 +16,19 @@ public:
   Display *display;
   char keymap[32];
 
+  bool cap(Input::Setting setting) {
+    if(setting == Input::KeyboardSupport) return true;
+    return false;
+  }
+
+  uintptr_t get(Input::Setting setting) {
+    return false;
+  }
+
+  bool set(Input::Setting setting, uintptr_t param) {
+    return false;
+  }
+
   bool key_down(uint16_t key) {
     using namespace nall;
     #define map(i) (keymap[i >> 3] & (1 << (i & 7)))
@@ -161,6 +174,9 @@ public:
   pInputX(InputX &self_) : self(self_) {}
 };
 
+bool InputX::cap(Setting setting) { return p.cap(setting); }
+uintptr_t InputX::get(Setting setting) { return p.get(setting); }
+bool InputX::set(Setting setting, uintptr_t param) { return p.set(setting, param); }
 bool InputX::key_down(uint16_t key) { return p.key_down(key); }
 void InputX::clear() { p.clear(); }
 void InputX::poll() { p.poll(); }

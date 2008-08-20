@@ -71,15 +71,18 @@ public:
       settings.handle = (HWND)param;
       return true;
     }
+
     if(setting == Video::Synchronize) {
       settings.synchronize = param;
       return true;
     }
+
     if(setting == Video::Filter) {
       settings.filter = param;
-      update_filter();
+      if(lpd3d) update_filter();
       return true;
     }
+
     return false;
   }
 
@@ -172,7 +175,7 @@ public:
 
   void unlock() {
     surface->UnlockRect();
-    if(caps.stretchrect == false)surface->Release();
+    if(caps.stretchrect == false) surface->Release();
   }
 
   void refresh(unsigned width, unsigned height) {
@@ -204,11 +207,10 @@ public:
     device->EndScene();
 
     if(settings.synchronize) {
-      D3DRASTER_STATUS status;
-      for(;;) {
+      while(true) {
+        D3DRASTER_STATUS status;
         device->GetRasterStatus(0, &status);
-        if(bool(status.InVBlank) == true) break;
-      //Sleep(1);
+        if(status.InVBlank == true) break;
       }
     }
 

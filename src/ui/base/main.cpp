@@ -103,16 +103,26 @@ uintptr_t MainWindow::event(event_t e) {
     if(e.widget == &menu_settings_emuspeed_normal)   { event::update_emulation_speed(2); }
     if(e.widget == &menu_settings_emuspeed_fast)     { event::update_emulation_speed(3); }
     if(e.widget == &menu_settings_emuspeed_fastest)  { event::update_emulation_speed(4); }
-    if(e.widget == &menu_settings_emuspeed_disabled) { event::update_emulation_speed(5); }
+
+    if(e.widget == &menu_settings_emuspeed_videosync) {
+      if(config::video.mode == 0) {
+        config::video.windowed.synchronize = menu_settings_emuspeed_videosync.checked();
+        video.set(Video::Synchronize, config::video.windowed.synchronize);
+      } else {
+        config::video.fullscreen.synchronize = menu_settings_emuspeed_videosync.checked();
+        video.set(Video::Synchronize, config::video.fullscreen.synchronize);
+      }
+    }
+
+    if(e.widget == &menu_settings_emuspeed_audiosync) {
+      config::audio.synchronize = menu_settings_emuspeed_audiosync.checked();
+      audio.set(Audio::Synchronize, config::audio.synchronize);
+    }
 
     if(e.widget == &menu_settings_config) { window_settings.show(); }
 
     if(e.widget == &menu_misc_logaudio) {
       (menu_misc_logaudio.checked() == true) ? snes.audio.log_enable() : snes.audio.log_disable();
-    }
-
-    if(e.widget == &menu_misc_showstatus) {
-      status.show(config::misc.status_enable = menu_misc_showstatus.checked());
     }
 
     if(e.widget == &menu_misc_about) {
@@ -193,10 +203,15 @@ void MainWindow::setup() {
     menu_settings.attach(menu_settings_videofilter.create(translate["Video Filter"]));
       group.add(&menu_settings_videofilter_hwpoint);
       group.add(&menu_settings_videofilter_hwlinear);
-      menu_settings_videofilter.attach(menu_settings_videofilter_hwpoint.create(group, translate["Point"]));
-      menu_settings_videofilter.attach(menu_settings_videofilter_hwlinear.create(group, translate["Linear"]));
+      menu_settings_videofilter_hwpoint.create(group, translate["Point"]);
+      menu_settings_videofilter_hwlinear.create(group, translate["Linear"]);
       group.reset();
-      menu_settings_videofilter.attach(menu_settings_videofilter_sep1.create());
+      menu_settings_videofilter_sep1.create();
+      if(video.cap(Video::Filter)) {
+        menu_settings_videofilter.attach(menu_settings_videofilter_hwpoint);
+        menu_settings_videofilter.attach(menu_settings_videofilter_hwlinear);
+        menu_settings_videofilter.attach(menu_settings_videofilter_sep1);
+      }
       group.add(&menu_settings_videofilter_swnone);
       group.add(&menu_settings_videofilter_swscanline);
       group.add(&menu_settings_videofilter_swscale2x);
@@ -236,25 +251,46 @@ void MainWindow::setup() {
     menu_settings.attach(menu_settings_mute.create(translate["Mute Audio Output"]));
 
     menu_settings.attach(menu_settings_sep2.create());
-    menu_settings.attach(menu_settings_emuspeed.create(translate["Emulation Speed"]));
+    menu_settings_emuspeed.create(translate["Emulation Speed"]);
       group.add(&menu_settings_emuspeed_slowest);
       group.add(&menu_settings_emuspeed_slow);
       group.add(&menu_settings_emuspeed_normal);
       group.add(&menu_settings_emuspeed_fast);
       group.add(&menu_settings_emuspeed_fastest);
-      group.add(&menu_settings_emuspeed_disabled);
-      menu_settings_emuspeed.attach(menu_settings_emuspeed_slowest.create(group, translate["50%"]));
-      menu_settings_emuspeed.attach(menu_settings_emuspeed_slow.create(group, translate["75%"]));
-      menu_settings_emuspeed.attach(menu_settings_emuspeed_normal.create(group, translate["100%"]));
-      menu_settings_emuspeed.attach(menu_settings_emuspeed_fast.create(group, translate["150%"]));
-      menu_settings_emuspeed.attach(menu_settings_emuspeed_fastest.create(group, translate["200%"]));
-      menu_settings_emuspeed.attach(menu_settings_emuspeed_disabled.create(group, translate["Uncapped"]));
+      menu_settings_emuspeed_slowest.create(group, translate["50%"]);
+      menu_settings_emuspeed_slow.create(group, translate["75%"]);
+      menu_settings_emuspeed_normal.create(group, translate["100%"]);
+      menu_settings_emuspeed_fast.create(group, translate["150%"]);
+      menu_settings_emuspeed_fastest.create(group, translate["200%"]);
       group.reset();
+      menu_settings_emuspeed_sep1.create();
+      menu_settings_emuspeed_videosync.create(translate["Sync to Video"]);
+      menu_settings_emuspeed_audiosync.create(translate["Sync to Audio"]);
+
+      if(audio.cap(Audio::Frequency)) {
+        //only audio can sync to specific frequency rates; video syncs only to monitor refresh rate
+        menu_settings_emuspeed.attach(menu_settings_emuspeed_slowest);
+        menu_settings_emuspeed.attach(menu_settings_emuspeed_slow);
+        menu_settings_emuspeed.attach(menu_settings_emuspeed_normal);
+        menu_settings_emuspeed.attach(menu_settings_emuspeed_fast);
+        menu_settings_emuspeed.attach(menu_settings_emuspeed_fastest);
+        menu_settings_emuspeed.attach(menu_settings_emuspeed_sep1);
+      }
+
+      if(video.cap(Video::Synchronize)) {
+        menu_settings_emuspeed.attach(menu_settings_emuspeed_videosync);
+      }
+      if(audio.cap(Audio::Synchronize)) {
+        menu_settings_emuspeed.attach(menu_settings_emuspeed_audiosync);
+      }
+
+    if(video.cap(Video::Synchronize) || audio.cap(Audio::Synchronize)) {
+      menu_settings.attach(menu_settings_emuspeed);
+    }
     menu_settings.attach(menu_settings_config.create(string() << translate["Configuration"] << " ..."));
 
   attach(menu_misc.create(translate["Misc"]));
     menu_misc.attach(menu_misc_logaudio.create(translate["Log Audio Data"]));
-    menu_misc.attach(menu_misc_showstatus.create(translate["Show Statusbar"]));
     menu_misc.attach(menu_misc_sep1.create());
     menu_misc.attach(menu_misc_about.create(string() << translate["About"] << " ..."));
 
@@ -320,16 +356,16 @@ void MainWindow::setup() {
   menu_settings_emuspeed_normal.on_tick =
   menu_settings_emuspeed_fast.on_tick =
   menu_settings_emuspeed_fastest.on_tick =
-  menu_settings_emuspeed_disabled.on_tick =
+  menu_settings_emuspeed_videosync.on_tick =
+  menu_settings_emuspeed_audiosync.on_tick =
   menu_settings_config.on_tick =
 
   menu_misc_logaudio.on_tick =
-  menu_misc_showstatus.on_tick =
   menu_misc_about.on_tick =
 
   bind(&MainWindow::event, this);
 
-  if(config::misc.status_enable) status.show();
+  status.show();
 }
 
 void MainWindow::sync() {
@@ -396,8 +432,12 @@ void MainWindow::sync() {
     case 2: menu_settings_emuspeed_normal.check(); break;
     case 3: menu_settings_emuspeed_fast.check(); break;
     case 4: menu_settings_emuspeed_fastest.check(); break;
-    case 5: menu_settings_emuspeed_disabled.check(); break;
   }
 
-  menu_misc_showstatus.check(config::misc.status_enable);
+  if(config::video.mode == 0) {
+    menu_settings_emuspeed_videosync.check(config::video.windowed.synchronize);
+  } else {
+    menu_settings_emuspeed_videosync.check(config::video.fullscreen.synchronize);
+  }
+  menu_settings_emuspeed_audiosync.check(config::audio.synchronize);
 }

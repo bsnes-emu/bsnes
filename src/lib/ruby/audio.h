@@ -1,9 +1,17 @@
 class Audio {
 public:
   enum Setting {
+    //AudioInterface settings
+    Volume,
+    Resample,
+    ResampleOutputFrequency,
+    ResampleInputFrequency,
+
+    //Audio settings
     Handle,
     Synchronize,
     Frequency,
+    Latency,
   };
 
   virtual bool cap(Setting) { return false; }

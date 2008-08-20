@@ -11,7 +11,9 @@ nall::dictionary translate;
 #include "loader/stloader.h"
 
 #include "settings/settings.h"
+#include "settings/driverselect.h"
 #include "settings/videosettings.h"
+#include "settings/audiosettings.h"
 #include "settings/inputconfig.h"
 #include "settings/pathsettings.h"
 #include "settings/cheateditor.h"

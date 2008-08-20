@@ -5,6 +5,7 @@ char locale_cfg[PATH_MAX] = "";
 
 struct System {
   static string_setting video, audio, input;
+  static integral_setting invoke_crash_handler;
   static integral_setting emulation_speed;
   static integral_setting gamma_ramp, sepia, grayscale, invert, contrast, brightness, gamma;
 } system;
@@ -13,14 +14,20 @@ string_setting System::video(config(), "system.video", "Video hardware interface
 string_setting System::audio(config(), "system.audio", "Audio hardware interface", "");
 string_setting System::input(config(), "system.input", "Input hardware interface", "");
 
+integral_setting System::invoke_crash_handler(config(), "system.invoke_crash_handler",
+  "Do not modify this setting!\n"
+  "Used to detect crashes caused by initialization of video / audio / input drivers.\n"
+  "When the emulator crashes during driver initialization, this value will be left as true.\n"
+  "When true, driver selection crash handler window will appear on next start-up.\n"
+  "", integral_setting::boolean, false);
+
 integral_setting System::emulation_speed(config(), "system.emulation_speed",
   "Relative speed of emulator compared to SNES hardware\n"
   "0 = 50%\n"
   "1 = 75%\n"
   "2 = 100%\n"
   "3 = 150%\n"
-  "4 = 200%\n"
-  "5 = Uncapped",
+  "4 = 200%\n",
   integral_setting::decimal, 2);
 
 integral_setting System::gamma_ramp(config(), "system.colorfilter.gamma_ramp",
@@ -96,11 +103,17 @@ integral_setting Video::aspect_pal_y (config(), "video.aspect_pal_y",  "", integ
 integral_setting Video::frameskip("video.frameskip", "Video frameskip", integral_setting::decimal, 0);
 
 struct Audio {
+  static integral_setting output_frequency, input_frequency;
+  static integral_setting latency;
+  static integral_setting volume, mute;
   static integral_setting synchronize;
-  static integral_setting mute;
 } audio;
-integral_setting Audio::synchronize(config(), "audio.synchronize", "Synchronize to audio sample rate", integral_setting::boolean, true);
+integral_setting Audio::output_frequency(config(), "audio.output_frequency", "Sound card audio output frequency", integral_setting::decimal, 48000);
+integral_setting Audio::input_frequency(config(), "audio.input_frequency", "Emulator audio input frequency", integral_setting::decimal, 31950);
+integral_setting Audio::latency(config(), "audio.latency", "Sound card latency (in ms)", integral_setting::decimal, 100);
+integral_setting Audio::volume(config(), "audio.volume", "Audio volume (0 - 100)", integral_setting::decimal, 100);
 integral_setting Audio::mute(config(), "audio.mute", "Mute audio playback", integral_setting::boolean, false);
+integral_setting Audio::synchronize(config(), "audio.synchronize", "Synchronize to audio sample rate", integral_setting::boolean, true);
 
 struct Input {
   static integral_setting capture_mode;
@@ -224,11 +237,9 @@ string_setting Input::GUI::toggle_statusbar  (config(), "input.gui.toggle_status
 
 struct Misc {
   static integral_setting opacity;
-  static integral_setting status_enable;
 } misc;
 
 integral_setting Misc::opacity(config(), "misc.opacity", "Opacity of user interface windows", integral_setting::decimal, 100);
-integral_setting Misc::status_enable(config(), "misc.status_enable", "Display information statusbar", integral_setting::boolean, true);
 
 struct Advanced {
   static integral_setting enable;

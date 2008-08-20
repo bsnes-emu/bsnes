@@ -65,7 +65,7 @@ void NTSCFilter::adjust(
 
 NTSCFilter::NTSCFilter() {
   ntsc = 0;
-  adjust(0, 0, 0, 0, 0, true);
+  adjust(0, 0, 0, 0, 0, false);
 }
 
 NTSCFilter::~NTSCFilter() {

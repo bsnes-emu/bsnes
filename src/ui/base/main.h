@@ -63,12 +63,13 @@ public:
       MenuRadioItem menu_settings_emuspeed_normal;
       MenuRadioItem menu_settings_emuspeed_fast;
       MenuRadioItem menu_settings_emuspeed_fastest;
-      MenuRadioItem menu_settings_emuspeed_disabled;
+      MenuSeparator menu_settings_emuspeed_sep1;
+      MenuCheckItem menu_settings_emuspeed_videosync;
+      MenuCheckItem menu_settings_emuspeed_audiosync;
     MenuItem menu_settings_config;
 
   MenuGroup menu_misc;
     MenuCheckItem menu_misc_logaudio;
-    MenuCheckItem menu_misc_showstatus;
     MenuSeparator menu_misc_sep1;
     MenuItem menu_misc_about;
 

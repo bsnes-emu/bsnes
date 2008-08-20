@@ -2,7 +2,7 @@
   video.glx
   author: byuu
   license: public domain
-  date: 2008-02-06
+  last updated: 2008-08-20
 
   Design notes:
   SGI's GLX is the X11/Xlib interface to OpenGL.
@@ -33,7 +33,7 @@ namespace ruby {
 #include "glx.h"
 
 //returns true once window is mapped (created and displayed onscreen)
-static Bool x_wait_for_map_notify(Display *d, XEvent *e, char *arg) {
+static Bool glx_wait_for_map_notify(Display *d, XEvent *e, char *arg) {
   return (e->type == MapNotify) && (e->xmap.window == (Window)arg);
 }
 
@@ -45,6 +45,7 @@ public:
   Display *display;
   int screen;
   Window xwindow;
+  Colormap colormap;
   GLXContext glxcontext;
   GLXWindow glxwindow;
   GLuint gltexture;
@@ -57,17 +58,20 @@ public:
 
   struct {
     Window handle;
+    bool synchronize;
     unsigned filter;
   } settings;
 
   bool cap(Video::Setting setting) {
     if(setting == Video::Handle) return true;
+    if(setting == Video::Synchronize) return true;
     if(setting == Video::Filter) return true;
     return false;
   }
 
   uintptr_t get(Video::Setting setting) {
     if(setting == Video::Handle) return settings.handle;
+    if(setting == Video::Synchronize) return settings.synchronize;
     if(setting == Video::Filter) return settings.filter;
     return false;
   }
@@ -77,10 +81,23 @@ public:
       settings.handle = param;
       return true;
     }
+
+    if(setting == Video::Synchronize) {
+      if(settings.synchronize != param) {
+        settings.synchronize = param;
+        if(glxcontext) {
+          term();
+          init();
+        }
+        return true;
+      }
+    }
+
     if(setting == Video::Filter) {
       settings.filter = param;
       return true;
     }
+
     return false;
   }
 
@@ -157,37 +174,37 @@ public:
     //require GLX 1.2+ API
     if(glx.version_major < 1 || (glx.version_major == 1 && glx.version_minor < 2)) return false;
 
-    buffer = new(zeromemory) uint32_t[1024 * 1024 * sizeof(uint32_t)];
+    buffer = new(zeromemory) uint32_t[1024 * 1024];
 
-    XWindowAttributes wa;
-    XGetWindowAttributes(display, settings.handle, &wa);
+    XWindowAttributes window_attributes;
+    XGetWindowAttributes(display, settings.handle, &window_attributes);
 
     //let GLX determine the best Visual to use for GL output; provide a few hints
+    //note: some video drivers will override double buffering attribute
     int elements = 0;
-    int attributelist[] = {
-      GLX_RGBA,
-      GLX_DOUBLEBUFFER,
-      None
-    };
-    XVisualInfo *vi = glXChooseVisual(display, screen, attributelist);
+    int attributelist[] = { GLX_RGBA, None };
+    int attributelist_sync[] = { GLX_RGBA, GLX_DOUBLEBUFFER, None };
+    XVisualInfo *vi = glXChooseVisual(display, screen,
+      settings.synchronize ? attributelist_sync : attributelist);
 
     //Window settings.handle has already been realized, most likely with DefaultVisual.
     //GLX requires that the GL output window has the same Visual as the GLX context.
     //it is not possible to change the Visual of an already realized (created) window.
     //therefore a new child window, using the same GLX Visual, must be created and binded to settings.handle.
-    Colormap colormap = XCreateColormap(display, RootWindow(display, vi->screen), vi->visual, AllocNone);
-    XSetWindowAttributes swa;
-    swa.colormap = colormap;
-    swa.border_pixel = 0;
-    swa.event_mask = StructureNotifyMask;
+    colormap = XCreateColormap(display, RootWindow(display, vi->screen), vi->visual, AllocNone);
+    XSetWindowAttributes attributes;
+    attributes.colormap = colormap;
+    attributes.border_pixel = 0;
+    attributes.event_mask = StructureNotifyMask;
     xwindow = XCreateWindow(display, /* parent = */ settings.handle,
-      /* x = */ 0, /* y = */ 0, wa.width, wa.height,
+      /* x = */ 0, /* y = */ 0, window_attributes.width, window_attributes.height,
       /* border_width = */ 0, vi->depth, InputOutput, vi->visual,
-      CWColormap | CWBorderPixel | CWEventMask, &swa);
+      CWColormap | CWBorderPixel | CWEventMask, &attributes);
     XSetWindowBackground(display, xwindow, /* color = */ 0);
     XMapWindow(display, xwindow);
     XEvent event;
-    XIfEvent(display, &event, x_wait_for_map_notify, (char*)xwindow); //wait for window to appear onscreen
+    //window must be realized (appear onscreen) before we make the context current
+    XIfEvent(display, &event, glx_wait_for_map_notify, (char*)xwindow);
 
     glxcontext = glXCreateContext(display, vi, /* sharelist = */ 0, /* direct = */ GL_TRUE);
     glXMakeCurrent(display, glxwindow = xwindow, glxcontext);
@@ -233,6 +250,16 @@ public:
       glxcontext = 0;
     }
 
+    if(xwindow) {
+      XUnmapWindow(display, xwindow);
+      xwindow = 0;
+    }
+
+    if(colormap) {
+      XFreeColormap(display, colormap);
+      colormap = 0;
+    }
+
     if(buffer) {
       delete[] buffer;
       buffer = 0;
@@ -241,7 +268,9 @@ public:
 
   pVideoGLX(VideoGLX &self_) : self(self_) {
     settings.handle = 0;
+    settings.synchronize = false;
     xwindow = 0;
+    colormap = 0;
     glxcontext = 0;
     glxwindow = 0;
     gltexture = 0;

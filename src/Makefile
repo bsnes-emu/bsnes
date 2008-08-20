@@ -133,7 +133,7 @@ obj/bsnesrc.$(obj): ui/bsnes.rc; windres ui/bsnes.rc obj/bsnesrc.$(obj)
 ### libraries ###
 #################
 
-obj/ruby.$(obj): lib/ruby/ruby.cpp lib/ruby/*
+obj/ruby.$(obj): lib/ruby/ruby.cpp lib/ruby/* lib/ruby/video/* lib/ruby/audio/* lib/ruby/input/*
 	$(call compile,$(rubydef) $(rubyflags))
 obj/hiro.$(obj): lib/hiro/hiro.cpp lib/hiro/* lib/hiro/gtk/* lib/hiro/win/*
 	$(call compile,$(if $(call streq,$(platform),x),`pkg-config --cflags gtk+-2.0`))

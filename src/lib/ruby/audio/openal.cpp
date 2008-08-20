@@ -29,17 +29,20 @@ public:
   struct {
     bool synchronize;
     unsigned frequency;
+    unsigned latency;
   } settings;
 
   bool cap(Audio::Setting setting) {
     if(setting == Audio::Synchronize) return true;
     if(setting == Audio::Frequency) return true;
+    if(setting == Audio::Latency) return true;
     return false;
   }
 
   uintptr_t get(Audio::Setting setting) {
     if(setting == Audio::Synchronize) return settings.synchronize;
     if(setting == Audio::Frequency) return settings.frequency;
+    if(setting == Audio::Latency) return settings.latency;
     return false;
   }
 
@@ -48,10 +51,20 @@ public:
       settings.synchronize = param;
       return true;
     }
+
     if(setting == Audio::Frequency) {
       settings.frequency = param;
       return true;
     }
+
+    if(setting == Audio::Latency) {
+      if(settings.latency != param) {
+        settings.latency = param;
+        update_latency();
+      }
+      return true;
+    }
+
     return false;
   }
 
@@ -61,7 +74,7 @@ public:
 
     ALuint albuffer = 0;
     int processed = 0;
-    for(;;) {
+    while(true) {
       alGetSourcei(device.source, AL_BUFFERS_PROCESSED, &processed);
       while(processed--) {
         alSourceUnqueueBuffers(device.source, 1, &albuffer);
@@ -85,8 +98,14 @@ public:
     buffer.length = 0;
   }
 
-  bool init() {
+  void update_latency() {
+    if(buffer.data) delete[] buffer.data;
+    buffer.size = settings.frequency * settings.latency / 1000.0 + 0.5;
     buffer.data = new uint32_t[buffer.size];
+  }
+
+  bool init() {
+    update_latency();
     device.queue_length = 0;
 
     bool success = false;
@@ -95,18 +114,17 @@ public:
         alcMakeContextCurrent(device.context);
         alGenSources(1, &device.source);
 
-        //disable unused 3D features
-        alSourcef (device.source, AL_PITCH, 1.0);
-        alSourcef (device.source, AL_GAIN, 1.0);
-        alSource3f(device.source, AL_POSITION, 0.0, 0.0, 0.0);
-        alSource3f(device.source, AL_VELOCITY, 0.0, 0.0, 0.0);
-        alSource3f(device.source, AL_DIRECTION, 0.0, 0.0, 0.0);
-        alSourcef (device.source, AL_ROLLOFF_FACTOR, 0.0);
-        alSourcei (device.source, AL_SOURCE_RELATIVE, AL_TRUE);
+        //alSourcef (device.source, AL_PITCH, 1.0);
+        //alSourcef (device.source, AL_GAIN, 1.0);
+        //alSource3f(device.source, AL_POSITION, 0.0, 0.0, 0.0);
+        //alSource3f(device.source, AL_VELOCITY, 0.0, 0.0, 0.0);
+        //alSource3f(device.source, AL_DIRECTION, 0.0, 0.0, 0.0);
+        //alSourcef (device.source, AL_ROLLOFF_FACTOR, 0.0);
+        //alSourcei (device.source, AL_SOURCE_RELATIVE, AL_TRUE);
 
         alListener3f(AL_POSITION, 0.0, 0.0, 0.0);
         alListener3f(AL_VELOCITY, 0.0, 0.0, 0.0);
-        ALfloat listener_orientation[] = { 0.0, 0.0, -1.0, 0.0, 1.0, 0.0 };
+        ALfloat listener_orientation[] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
         alListenerfv(AL_ORIENTATION, listener_orientation);
 
         success = true;
@@ -163,15 +181,15 @@ public:
     device.handle = 0;
     device.context = 0;
     device.format = AL_FORMAT_STEREO16;
-    device.latency = 40;
     device.queue_length = 0;
 
     buffer.data = 0;
     buffer.length = 0;
-    buffer.size = device.latency * 32;
+    buffer.size = 0;
 
     settings.synchronize = true;
     settings.frequency = 22050;
+    settings.latency = 40;
   }
 
   ~pAudioOpenAL() {
