@@ -18,7 +18,7 @@ void Status::update() {
   } else if(!cartridge.loaded()) {
     output = "";
   } else if(app.pause || app.autopause) {
-    output = translate["Paused"];
+    output = translate["Paused."];
   } else if(ppu.status.frames_updated) {
     ppu.status.frames_updated = false;
 

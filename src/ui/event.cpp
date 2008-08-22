@@ -118,19 +118,15 @@ void update_frameskip(int speed) {
 }
 
 void update_emulation_speed(int speed) {
-  config::system.emulation_speed = max(0, min(4, speed));
+  config::system.emulation_speed = speed = max(0, min(4, speed));
 
-  double scale;
-  switch(config::system.emulation_speed) {
-    case 0: scale = 0.50; break; //slowest
-    case 1: scale = 0.75; break; //slow
-    case 2: scale = 1.00; break; //normal
-    case 3: scale = 1.50; break; //fast
-    case 4: scale = 2.00; break; //fastest
-  }
+  double scale[] = { 0.50, 0.75, 1.00, 1.50, 2.00 };
+  unsigned outfreq = config::audio.output_frequency;
+  unsigned infreq  = config::audio.input_frequency * scale[speed] + 0.5;
 
-  audio.set(Audio::ResampleOutputFrequency, config::audio.output_frequency);
-  audio.set(Audio::ResampleInputFrequency,  config::audio.input_frequency * scale + 0.5);
+  audio.set(Audio::Resample, outfreq != infreq); //only resample when necessary
+  audio.set(Audio::ResampleOutputFrequency, outfreq);
+  audio.set(Audio::ResampleInputFrequency,  infreq);
 
   window_main.sync();
 }
@@ -178,9 +174,11 @@ void update_video_settings() {
   width  *= multiplier;
   height *= multiplier;
   if(video_settings.aspect_correction == true) {
-    if(video_settings.region == 0) { //NTSC
+    if(video_settings.region == 0) {
+      //NTSC
       width = uint( double(width) * double(config::video.aspect_ntsc_x) / double(config::video.aspect_ntsc_y) );
-    } else { //PAL
+    } else {
+      //PAL
       width = uint( double(width) * double(config::video.aspect_pal_x)  / double(config::video.aspect_pal_y)  );
     }
   }
@@ -415,7 +413,7 @@ void reset() {
   if(cartridge.loaded() == true) {
     snes.reset();
     status.flush();
-    status.enqueue(translate["Reset"]);
+    status.enqueue(translate["System was reset."]);
   }
 }
 
@@ -423,7 +421,7 @@ void power() {
   if(cartridge.loaded() == true) {
     snes.power();
     status.flush();
-    status.enqueue(translate["Power cycle"]);
+    status.enqueue(translate["System power was cycled."]);
   }
 }
 

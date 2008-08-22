@@ -41,7 +41,7 @@ public:
   uintptr_t set_tick(event_t);
   uintptr_t clr_tick(event_t);
 
-  string_setting& acquire(unsigned index, const char *&name);
+  string_setting& acquire(unsigned index, string &name);
   uint get_value(uint index);
   void set_value(uint index, uint16 value);
 } window_input_config;

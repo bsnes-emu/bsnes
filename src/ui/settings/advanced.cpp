@@ -8,7 +8,7 @@ uintptr_t AdvancedWindow::list_change(event_t) {
     string default_;
     config::config().list[i]->get_default(default_);
     desc.set_text(string()
-      << "(" << translate["Default"] << " = " << default_ << ")\n"
+      << "(" << translate["{{advanced}}Default"] << " = " << default_ << ")\n"
       << config::config().list[i]->description);
     string value_;
     config::config().list[i]->get(value_);
@@ -90,8 +90,8 @@ void AdvancedWindow::setup() {
     string() << translate["Name"] << "\t" << translate["Type"] << "\t" << translate["Value"]);
   desc.create(Editbox::Multiline | Editbox::VerticalScrollAlways | Editbox::Readonly, 475, 80, translate["<description>"]);
   edit_val.create(0, 265, 25, translate["<current value>"]);
-  set_val.create (0, 100, 25, translate["Set"]);
-  set_def.create (0, 100, 25, translate["Default"]);
+  set_val.create (0, 100, 25, translate["{{advanced}}Set"]);
+  set_def.create (0, 100, 25, translate["{{advanced}}Default"]);
 
   unsigned y = 0;
   attach(list,       0, y); y += 240 + 5;

@@ -165,12 +165,12 @@ void AudioInterface::driver(const char *driver) {
 const char* AudioInterface::default_driver() {
   #if defined(AUDIO_DIRECTSOUND)
   return "DirectSound";
-  #elif defined(AUDIO_AO)
-  return "libao";
   #elif defined(AUDIO_ALSA)
   return "ALSA";
   #elif defined(AUDIO_OPENAL)
   return "OpenAL";
+  #elif defined(AUDIO_AO)
+  return "libao";
   #elif defined(AUDIO_OSS)
   return "OSS";
   #else

@@ -13,15 +13,15 @@ void InputConfigWindow::setup() {
   capture_pause.create (group, 0, 155, 18, translate["Pause emulation"]);
 
   config_type.create(0, 235, 25);
-  config_type.add_item(translate["Controller Port 1"]);
-  config_type.add_item(translate["Controller Port 2"]);
-  config_type.add_item(translate["User Interface"]);
+  config_type.add_item(translate["{{input}}Controller Port 1"]);
+  config_type.add_item(translate["{{input}}Controller Port 2"]);
+  config_type.add_item(translate["{{input}}User Interface"]);
   config_type.set_selection(0);
 
   config_subtype.create(0, 235, 25);
   refresh_subtype();
 
-  list.create(Listbox::Header | Listbox::VerticalScrollAlways, 475, 254, string() << translate["Name"] << "\t" << translate["Value"]);
+  list.create(Listbox::Header | Listbox::VerticalScrollAlways, 475, 254, string() << translate["{{input}}Name"] << "\t" << translate["{{input}}Value"]);
   setkey.create(0, 235, 25, translate["Assign Key"]);
   setkey.disable();
   clrkey.create(0, 235, 25, translate["Unassign Key"]);
@@ -117,7 +117,7 @@ void InputConfigWindow::refresh_list() {
   unsigned length;
   get_input_type(length);
   for(unsigned i = 0; i < length; i++) {
-    const char *name;
+    string name;
     acquire(i, name);
     list.add_item(string() << name << "\t" << input_find(get_value(i)));
   }
@@ -154,7 +154,7 @@ uintptr_t InputConfigWindow::set_tick(event_t) {
   if(pos < 0) return true;
   window_input_capture.index = pos;
   string message = translate["Press a key to assign to $ ..."];
-  const char *name;
+  string name;
   acquire(pos, name);
   replace(message, "$", name);
   window_input_capture.label.set_text(message);
@@ -211,7 +211,7 @@ InputCaptureWindow::InputCaptureWindow() {
 
 /* Misc */
 
-string_setting& InputConfigWindow::acquire(unsigned index, const char *&name) {
+string_setting& InputConfigWindow::acquire(unsigned index, string &name) {
   #define map(n, lname) \
     case n: { \
       switch(index) { \
@@ -270,12 +270,12 @@ string_setting& InputConfigWindow::acquire(unsigned index, const char *&name) {
 }
 
 uint InputConfigWindow::get_value(uint index) {
-  const char *name;
+  string name;
   return input_find(acquire(index, name));
 }
 
 void InputConfigWindow::set_value(uint index, uint16 value) {
-  const char *name;
+  string name;
   acquire(index, name) = input_find(value);
   input_manager.bind();
 }

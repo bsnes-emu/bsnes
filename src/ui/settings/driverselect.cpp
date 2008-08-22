@@ -30,7 +30,7 @@ void DriverSelectWindow::setup() {
 
   lstring part;
 
-  lvideo.create(0, 155, 18, translate["Video Driver:"]);
+  lvideo.create(0, 155, 18, translate["Video driver:"]);
   cvideo.create(0, 155, 25);
 
   split(part, ";", video.driver_list());
@@ -39,7 +39,7 @@ void DriverSelectWindow::setup() {
     if(part[i] == config::system.video) cvideo.set_selection(i);
   }
 
-  laudio.create(0, 155, 18, translate["Audio Driver:"]);
+  laudio.create(0, 155, 18, translate["Audio driver:"]);
   caudio.create(0, 155, 25);
 
   split(part, ";", audio.driver_list());
@@ -48,7 +48,7 @@ void DriverSelectWindow::setup() {
     if(part[i] == config::system.audio) caudio.set_selection(i);
   }
 
-  linput.create(0, 155, 18, translate["Input Driver:"]);
+  linput.create(0, 155, 18, translate["Input driver:"]);
   cinput.create(0, 155, 25);
 
   split(part, ";", input.driver_list());
@@ -59,31 +59,29 @@ void DriverSelectWindow::setup() {
 
   video_caps.create(0, 475, 18);
 
-  video_sync.create(0, 155, 18, translate["Synchronize"]);
+  video_sync.create(0, 155, 18, translate["{{video}}Synchronize"]);
   video_sync.disable();
-  video_filter.create(0, 155, 18, translate["Hardware Filtering"]);
+  video_filter.create(0, 155, 18, translate["Hardware filtering"]);
   video_filter.disable();
 
   audio_caps.create(0, 475, 18);
 
-  audio_sync.create(0, 155, 18, translate["Synchronize"]);
+  audio_sync.create(0, 155, 18, translate["{{audio}}Synchronize"]);
   audio_sync.disable();
-  audio_freq.create(0, 155, 18, translate["Frequency Control"]);
+  audio_freq.create(0, 155, 18, translate["Frequency control"]);
   audio_freq.disable();
-  audio_latency.create(0, 155, 18, translate["Latency Control"]);
+  audio_latency.create(0, 155, 18, translate["Latency control"]);
   audio_latency.disable();
 
   input_caps.create(0, 475, 18);
 
-  input_keyboard.create(0, 155, 18, translate["Keyboard Support"]);
+  input_keyboard.create(0, 155, 18, translate["Keyboard support"]);
   input_keyboard.disable();
-  input_joypad.create(0, 155, 18, translate["Joypad Support"]);
+  input_joypad.create(0, 155, 18, translate["Joypad support"]);
   input_joypad.disable();
 
-  restart_message.create(0, 475, 36, string()
-    << translate["Note: bsnes must be restarted for changes to take effect."] << "\n"
-    << translate["If bsnes then crashes on startup, restart it again to adjust driver settings."]
-  );
+  restart_message.create(0, 475, 36,
+    translate["Note: bsnes must be restarted for changes to take effect."]);
 
   bool crashed = config::system.invoke_crash_handler;
 

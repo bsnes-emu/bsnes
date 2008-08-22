@@ -80,20 +80,23 @@ double AudioInterface::hermite(double mu1, double a, double b, double c, double 
 }
 
 void AudioInterface::sample(uint16_t left, uint16_t right) {
+  int s_left  = (int16_t)left;
+  int s_right = (int16_t)right;
+
   if(volume != 100) {
-    left  = sclamp<16>((double)left  * (double)volume / 100.0);
-    right = sclamp<16>((double)right * (double)volume / 100.0);
+    s_left  = sclamp<16>((double)s_left  * (double)volume / 100.0);
+    s_right = sclamp<16>((double)s_right * (double)volume / 100.0);
   }
 
   r_left [0] = r_left [1];
   r_left [1] = r_left [2];
   r_left [2] = r_left [3];
-  r_left [3] = (int16_t)left;
+  r_left [3] = s_left;
 
   r_right[0] = r_right[1];
   r_right[1] = r_right[2];
   r_right[2] = r_right[3];
-  r_right[3] = (int16_t)right;
+  r_right[3] = s_right;
 
   if(resample_enabled == false) {
     if(p) p->sample(left, right);

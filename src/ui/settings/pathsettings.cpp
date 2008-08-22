@@ -79,23 +79,23 @@ void PathSettingsWindow::setup() {
 
   lrompath.create(0, 475, 18, translate["Default game ROM path:"]);
   rompath.create(Editbox::Readonly, 265, 25);
-  romselect.create(0, 100, 25, translate["Select"]);
-  romdefault.create(0, 100, 25, translate["Default"]);
+  romselect.create(0, 100, 25, translate["{{path}}Select"]);
+  romdefault.create(0, 100, 25, translate["{{path}}Default"]);
 
   lpatchpath.create(0, 475, 18, translate["Default UPS patch path:"]);
   patchpath.create(Editbox::Readonly, 265, 25);
-  patchselect.create(0, 100, 25, translate["Select"]);
-  patchdefault.create(0, 100, 25, translate["Default"]);
+  patchselect.create(0, 100, 25, translate["{{path}}Select"]);
+  patchdefault.create(0, 100, 25, translate["{{path}}Default"]);
 
   lsavepath.create(0, 475, 18, translate["Default save RAM path:"]);
   savepath.create(Editbox::Readonly, 265, 25);
-  saveselect.create(0, 100, 25, translate["Select"]);
-  savedefault.create(0, 100, 25, translate["Default"]);
+  saveselect.create(0, 100, 25, translate["{{path}}Select"]);
+  savedefault.create(0, 100, 25, translate["{{path}}Default"]);
 
   lcheatpath.create(0, 475, 18, translate["Default cheat file path:"]);
   cheatpath.create(Editbox::Readonly, 265, 25);
-  cheatselect.create(0, 100, 25, translate["Select"]);
-  cheatdefault.create(0, 100, 25, translate["Default"]);
+  cheatselect.create(0, 100, 25, translate["{{path}}Select"]);
+  cheatdefault.create(0, 100, 25, translate["{{path}}Default"]);
 
   unsigned y = 0;
   attach(lrompath, 0, y); y += 18;

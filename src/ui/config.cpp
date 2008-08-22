@@ -109,9 +109,9 @@ struct Audio {
   static integral_setting synchronize;
 } audio;
 integral_setting Audio::output_frequency(config(), "audio.output_frequency", "Sound card audio output frequency", integral_setting::decimal, 48000);
-integral_setting Audio::input_frequency(config(), "audio.input_frequency", "Emulator audio input frequency", integral_setting::decimal, 31950);
+integral_setting Audio::input_frequency(config(), "audio.input_frequency", "Emulator audio input frequency", integral_setting::decimal, 31960);
 integral_setting Audio::latency(config(), "audio.latency", "Sound card latency (in ms)", integral_setting::decimal, 100);
-integral_setting Audio::volume(config(), "audio.volume", "Audio volume (0 - 100)", integral_setting::decimal, 100);
+integral_setting Audio::volume(config(), "audio.volume", "Audio volume (10 - 100)", integral_setting::decimal, 100);
 integral_setting Audio::mute(config(), "audio.mute", "Mute audio playback", integral_setting::boolean, false);
 integral_setting Audio::synchronize(config(), "audio.synchronize", "Synchronize to audio sample rate", integral_setting::boolean, true);
 

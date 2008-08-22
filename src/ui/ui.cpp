@@ -70,7 +70,6 @@ void ui_init() {
 
   video.set(Video::Handle, window_main.view.handle());
   video.set(Video::Synchronize, config::video.windowed.synchronize);
-  audio.set(Audio::Resample, true);
   audio.set(Audio::Handle, window_main.handle());
   audio.set(Audio::Synchronize, config::audio.synchronize);
   audio.set(Audio::Volume, config::audio.volume);
@@ -79,7 +78,7 @@ void ui_init() {
   input.set(Input::Handle, window_main.handle());
   input.set(Input::AnalogAxisResistance, config::input.analog_axis_resistance);
 
-  //sets Audio::ResampleOutputFrequency and Audio::ResampleInputFrequency
+  //sets Audio::Resample, Audio::ResampleOutputFrequency and Audio::ResampleInputFrequency
   event::update_emulation_speed(config::system.emulation_speed);
 
   video.init();

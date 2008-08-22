@@ -9,16 +9,27 @@ namespace nall {
 
 class dictionary : noncopyable {
 public:
-  const char* operator[](const char *input) const {
+  string operator[](const char *input) {
     for(unsigned i = 0; i < index_input.size(); i++) {
-      if(!strcmp(input, index_input[i])) return index_output[i];
+      if(index_input[i] == input) return index_output[i];
     }
-    return input; //no match, return input rather than null string
+
+    //no match, use input; remove input identifier, if one exists
+    if(strbegin(input, "{{")) {
+      int pos = strpos(input, "}}");
+      if(pos >= 0) {
+        string temp = substr(input, pos + 2);
+        return temp;
+      }
+    }
+
+    return input;
   }
 
   bool import(const char *filename) {
     string data;
     if(fread(data, filename) == false) return false;
+    ltrim_once(data, "\xef\xbb\xbf"); //remove UTF-8 marker, if it exists
     replace(data, "\r", "");
 
     lstring line;
@@ -38,16 +49,12 @@ public:
       trim_once(part[1], "\"");
 
       unsigned n = index_input.size();
-      index_input[n]  = strdup(part[0]);
-      index_output[n] = strdup(part[1]);
+      index_input[n]  = part[0];
+      index_output[n] = part[1];
     }
   }
 
   void reset() {
-    for(unsigned i = 0; i < index_input.size(); i++) {
-      free(index_input[i]);
-      free(index_output[i]);
-    }
     index_input.reset();
     index_output.reset();
   }
@@ -56,9 +63,9 @@ public:
     reset();
   }
 
-private:
-  array<char*> index_input;
-  array<char*> index_output;
+protected:
+  lstring index_input;
+  lstring index_output;
 };
 
 } //namespace nall

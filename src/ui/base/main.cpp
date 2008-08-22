@@ -221,7 +221,7 @@ void MainWindow::setup() {
       menu_settings_videofilter.attach(menu_settings_videofilter_swscanline.create(group, translate["Scanline"]));
       menu_settings_videofilter.attach(menu_settings_videofilter_swscale2x.create(group, translate["Scale2x"]));
       menu_settings_videofilter.attach(menu_settings_videofilter_swhq2x.create(group, translate["HQ2x"]));
-      menu_settings_videofilter.attach(menu_settings_videofilter_swntsc.create(group, translate["NTSC"]));
+      menu_settings_videofilter.attach(menu_settings_videofilter_swntsc.create(group, translate["{{filter}}NTSC"]));
       group.reset();
 
     menu_settings.attach(menu_settings_videoframeskip.create(translate["Video Frameskip"]));
@@ -264,8 +264,8 @@ void MainWindow::setup() {
       menu_settings_emuspeed_fastest.create(group, translate["200%"]);
       group.reset();
       menu_settings_emuspeed_sep1.create();
-      menu_settings_emuspeed_videosync.create(translate["Sync to Video"]);
-      menu_settings_emuspeed_audiosync.create(translate["Sync to Audio"]);
+      menu_settings_emuspeed_videosync.create(translate["Sync Video"]);
+      menu_settings_emuspeed_audiosync.create(translate["Sync Audio"]);
 
       if(audio.cap(Audio::Frequency)) {
         //only audio can sync to specific frequency rates; video syncs only to monitor refresh rate
