@@ -2,6 +2,7 @@
 #define NALL_FILEMAP_HPP
 
 #include <nall/stdint.hpp>
+#include <nall/utf8.hpp>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -72,7 +73,7 @@ private:
         break;
     }
 
-    p_filehandle = CreateFile(filename, desired_access, FILE_SHARE_READ, NULL,
+    p_filehandle = CreateFileW(utf16(filename), desired_access, FILE_SHARE_READ, NULL,
       creation_disposition, FILE_ATTRIBUTE_NORMAL, NULL);
     if(p_filehandle == INVALID_HANDLE_VALUE) return false;
 

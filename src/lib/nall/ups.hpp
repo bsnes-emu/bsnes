@@ -5,6 +5,7 @@
 
 #include <nall/algorithm.hpp>
 #include <nall/crc32.hpp>
+#include <nall/file.hpp>
 #include <nall/new.hpp>
 #include <nall/stdint.hpp>
 
@@ -25,8 +26,7 @@ public:
   };
 
   ups::result create(const char *patch_fn, const uint8_t *x_data, unsigned x_size, const uint8_t *y_data, unsigned y_size) {
-    fp = fopen(patch_fn, "wb");
-    if(!fp) return patch_unwritable;
+    if(!fp.open(patch_fn, file::mode_write)) return patch_unwritable;
 
     crc32 = ~0;
     uint32_t x_crc32 = crc32_calculate(x_data, x_size);
@@ -77,7 +77,7 @@ public:
     uint32_t p_crc32 = ~crc32;
     for(unsigned i = 0; i < 4; i++) write(p_crc32 >> (i << 3));
 
-    fclose(fp);
+    fp.close();
     return ok;
   }
 
@@ -147,7 +147,7 @@ public:
   }
 
 private:
-  FILE *fp;
+  file fp;
   uint32_t crc32;
   const uint8_t *p_buffer;
 
@@ -158,7 +158,7 @@ private:
   }
 
   void write(uint8_t n) {
-    fputc(n, fp);
+    fp.write(n);
     crc32 = crc32_adjust(crc32, n);
   }
 

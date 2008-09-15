@@ -26,7 +26,11 @@ uint8_t* ZipReader::read(unsigned length) {
   return data;
 }
 
-ZipReader::ZipReader(const char *fn) : filesize(0) {
+bool ZipReader::ready() {
+  return zipready;
+}
+
+ZipReader::ZipReader(const char *fn) : filesize(0), zipready(false) {
   unz_file_info cFileInfo; //Create variable to hold info for a compressed file
   char cFileName[sizeof(cname)];
 
@@ -44,6 +48,7 @@ ZipReader::ZipReader(const char *fn) : filesize(0) {
     if(filesize) {
       unzLocateFile(zipfile, cname, 1);
       unzOpenCurrentFile(zipfile);
+      zipready = true;
     }
   }
 }

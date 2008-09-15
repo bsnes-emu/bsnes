@@ -55,6 +55,7 @@ void dprintf(const char *s, ...) {
   va_start(args, s);
   vsprintf(str, s, args);
   va_end(args);
+
   fprintf(stdout, "%s\r\n", str);
 }
 
@@ -89,7 +90,7 @@ void set_config_filenames() {
   //locate bsnes.cfg
   strcpy(filename, config::path.base);
   strcat(filename, "bsnes.cfg");
-  if(!fexists(filename)) {
+  if(!file::exists(filename)) {
     strcpy(filename, config::path.user);
     strcat(filename, ".bsnes");
     mkdir(filename);
@@ -100,7 +101,7 @@ void set_config_filenames() {
   //locate locale.cfg
   strcpy(filename, config::path.base);
   strcat(filename, "locale.cfg");
-  if(!fexists(filename)) {
+  if(!file::exists(filename)) {
     strcpy(filename, config::path.user);
     strcat(filename, ".bsnes");
     mkdir(filename);
@@ -136,18 +137,26 @@ void run() {
 
 #if defined(PLATFORM_WIN)
 int __stdcall WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
-int argc = __argc;
-char **argv = __argv;
+  //On Windows, argv[] is in 7-bit ANSI format, UTF-8 chars are converted to '?'s.
+  //Need argv[] to be in UTF-8 format to properly determine realpath() and default image filepaths.
+  //To do this, parse command line in UTF-16, and then convert to UTF-8.
+  int argc;
+  wchar_t **wargv = CommandLineToArgvW(GetCommandLineW(), &argc);
+  char **argv = new char*[argc];
+  for(unsigned i = 0; i < argc; i++) {
+    argv[i] = new(zeromemory) char[PATH_MAX];
+    strcpy(argv[i], utf8(wargv[i]));
+  }
 #else
 int main(int argc, char *argv[]) {
-#endif
-/*
+#endif /*
+
 int main(int argc, char *argv[]) { */
   get_paths(argv[0]);
   set_config_filenames();
 
   config::config().load(config::bsnes_cfg);
-  if(fexists(config::bsnes_cfg) == false) {
+  if(file::exists(config::bsnes_cfg) == false) {
     //in case program crashes on first run, save config file
     //settings, so that they can be modified by hand ...
     config::config().save(config::bsnes_cfg);
@@ -159,12 +168,14 @@ int main(int argc, char *argv[]) { */
   if(app.term == true) goto app_term;
   snes.init();
 
-  if(argc >= 2 && fexists(argv[1])) {
+  if(argc >= 2 && file::exists(argv[1])) {
     cartridge.load_cart_normal(argv[1]);
-    snes.power();
-    window_main.menu_file_unload.enable();
-    window_main.menu_file_reset.enable();
-    window_main.menu_file_power.enable();
+    if(cartridge.loaded()) {
+      snes.power();
+      window_main.menu_file_unload.enable();
+      window_main.menu_file_reset.enable();
+      window_main.menu_file_power.enable();
+    }
   }
 
   while(app.term == false) run();

@@ -89,7 +89,7 @@ char* Cartridge::get_cheat_filename(const char *source, const char *extension) {
 }
 
 bool Cartridge::load_file(const char *fn, uint8 *&data, uint &size, CompressionMode compression) {
-  if(fexists(fn) == false) return false;
+  if(file::exists(fn) == false) return false;
 
   Reader::Type filetype = Reader::Normal;
   if(compression == CompressionInspect) filetype = Reader::detect(fn, true);
@@ -122,6 +122,10 @@ bool Cartridge::load_file(const char *fn, uint8 *&data, uint &size, CompressionM
 
     case Reader::ZIP: {
       ZipReader zf(fn);
+      if(!zf.ready()) {
+        alert("Error loading image file (%s)!", fn);
+        return false;
+      }
       size = zf.size();
       data = zf.read();
     } break;
@@ -169,10 +173,10 @@ bool Cartridge::apply_patch(const uint8_t *pdata, const unsigned psize, uint8_t 
 }
 
 bool Cartridge::save_file(const char *fn, uint8 *data, uint size) {
-  FILE *fp = fopen(fn, "wb");
-  if(!fp) return false;
-  fwrite(data, 1, size, fp);
-  fclose(fp);
+  file fp;
+  if(!fp.open(fn, file::mode_write)) return false;
+  fp.write(data, size);
+  fp.close();
   return true;
 }
 

@@ -7,6 +7,7 @@ class ZipReader : public Reader {
 public:
   unsigned size();
   uint8_t* read(unsigned length = 0);
+  bool ready();
 
   ZipReader(const char *fn);
   ~ZipReader();
@@ -14,5 +15,6 @@ public:
 private:
   unzFile zipfile;
   uint32 filesize;
+  bool zipready;
   char cname[4096];
 };

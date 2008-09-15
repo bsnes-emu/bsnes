@@ -3,7 +3,7 @@
 #include "filereader.h"
 
 unsigned FileReader::size() {
-  return filesize;
+  return fp.size();
 }
 
 //This function will allocate memory even if open() fails.
@@ -15,44 +15,35 @@ uint8_t* FileReader::read(unsigned length) {
 
   if(length == 0) {
     //read the entire file into RAM
-    data = new(zeromemory) uint8_t[filesize];
-    if(fp) fread(data, 1, filesize, fp);
-  } else if(length > filesize) {
+    data = new(zeromemory) uint8_t[fp.size()];
+    if(fp.open()) fp.read(data, fp.size());
+  } else if(length > fp.size()) {
     //read the entire file into RAM, pad the rest with 0x00s
     data = new(zeromemory) uint8_t[length];
-    if(fp) fread(data, 1, filesize, fp);
+    if(fp.open()) fp.read(data, fp.size());
   } else { //filesize >= length
     //read only what was requested
     data = new(zeromemory) uint8_t[length];
-    if(fp) fread(data, 1, length, fp);
+    if(fp.open()) fp.read(data, length);
   }
   return data;
 }
 
 bool FileReader::ready() {
-  return (fp != 0);
+  return fp.open();
 }
 
 FileReader::FileReader(const char *fn) {
-  fp = fopen(fn, "rb");
-  if(!fp) return;
-
-  fseek(fp, 0, SEEK_END);
-  filesize = ftell(fp);
-  rewind(fp);
+  if(!fp.open(fn, file::mode_read)) return;
 
   //empty file?
-  if(filesize == 0) {
-    fclose(fp);
-    fp = 0;
+  if(fp.size() == 0) {
+    fp.close();
   }
 }
 
 FileReader::~FileReader() {
-  if(fp) {
-    fclose(fp);
-    fp = 0;
-  }
+  if(fp.open()) fp.close();
 }
 
 #endif //ifdef READER_CPP

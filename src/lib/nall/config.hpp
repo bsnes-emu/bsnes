@@ -2,6 +2,7 @@
 #define NALL_CONFIG_HPP
 
 #include <nall/array.hpp>
+#include <nall/file.hpp>
 #include <nall/stdint.hpp>
 #include <nall/string.hpp>
 
@@ -13,7 +14,7 @@ class configuration {
 public:
   array<setting*> list;
 
-  bool load(const char *fn) const;
+  bool load(const char *fn);
   bool save(const char *fn) const;
   void add(setting *setting_) { list.add(setting_); }
 };
@@ -116,28 +117,17 @@ private:
   }
 };
 
-inline bool configuration::load(const char *fn) const {
-  FILE *fp = fopen(fn, "rb");
-  if(!fp) return false;
-
-  string data;
-  lstring line, part, subpart;
-
+inline bool configuration::load(const char *fn) {
   //load the config file into memory
-  fseek(fp, 0, SEEK_END);
-  int size = ftell(fp);
-  fseek(fp, 0, SEEK_SET);
-  char *buffer = (char*)malloc(size + 1);
-  fread(buffer, 1, size, fp);
-  fclose(fp);
-  buffer[size] = 0;
-  strcpy(data, buffer);
-  free(buffer);
+  string data;
+  if(!fread(data, fn)) return false;
 
   //split the file into lines
   replace(data, "\r\n", "\n");
   qreplace(data, "\t", "");
   qreplace(data, " ", "");
+
+  lstring line, part, subpart;
   split(line, "\n", data);
 
   for(unsigned i = 0; i < count(line); i++) {
@@ -157,8 +147,8 @@ inline bool configuration::load(const char *fn) const {
 }
 
 inline bool configuration::save(const char *fn) const {
-  FILE *fp = fopen(fn, "wb");
-  if(!fp) return false;
+  file fp;
+  if(!fp.open(fn, file::mode_write)) return false;
 
   for(unsigned i = 0; i < list.size(); i++) {
     string data;
@@ -166,18 +156,20 @@ inline bool configuration::save(const char *fn) const {
     strcpy(data, list[i]->description);
     replace(data, "\r\n", "\n");
     split(line, "\n", data);
+
+    string temp;
     for(unsigned l = 0; l < count(line); l++) {
-      if(line[l] != "") fprintf(fp, "# %s\r\n", (const char*)line[l]);
+      if(line[l] != "") fp.print(string() << "# " << line[l] << "\r\n");
     }
 
     string default_, value_;
     list[i]->get_default(default_);
-    fprintf(fp, "# (default = %s)\r\n", (const char*)default_);
+    fp.print(string() << "# (default = " << default_ << ")\r\n");
     list[i]->get(value_);
-    fprintf(fp, "%s = %s\r\n\r\n", list[i]->name, (const char*)value_);
+    fp.print(string() << list[i]->name << " = " << value_ << "\r\n\r\n");
   }
 
-  fclose(fp);
+  fp.close();
   return true;
 }
 

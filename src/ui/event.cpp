@@ -302,6 +302,7 @@ bool load_rom(char *fn) {
   );
 }
 
+//File -> Load ROM action
 void load_rom() {
   char fn[PATH_MAX];
   if(load_rom(fn) == false) return;
@@ -311,8 +312,9 @@ void load_rom() {
 void load_cart_normal(const char *filename) {
   if(!filename || !*filename) return;
 
-  if(cartridge.loaded() == true) cartridge.unload();
+  unload_rom();
   cartridge.load_cart_normal(filename);
+  if(cartridge.loaded() == false) return;
 
   app.pause = false;
   snes.power();
@@ -338,8 +340,9 @@ void load_cart_normal(const char *filename) {
 void load_cart_bsx(const char *base, const char *slot) {
   if(!base || !*base) return;
 
-  if(cartridge.loaded() == true) cartridge.unload();
+  unload_rom();
   cartridge.load_cart_bsx(base, slot);
+  if(cartridge.loaded() == false) return;
 
   app.pause = false;
   snes.power();
@@ -357,8 +360,9 @@ void load_cart_bsx(const char *base, const char *slot) {
 void load_cart_bsc(const char *base, const char *slot) {
   if(!base || !*base) return;
 
-  if(cartridge.loaded() == true) cartridge.unload();
+  unload_rom();
   cartridge.load_cart_bsc(base, slot);
+  if(cartridge.loaded() == false) return;
 
   app.pause = false;
   snes.power();
@@ -376,8 +380,9 @@ void load_cart_bsc(const char *base, const char *slot) {
 void load_cart_st(const char *base, const char *slotA, const char *slotB) {
   if(!base || !*base) return;
 
-  if(cartridge.loaded() == true) cartridge.unload();
+  unload_rom();
   cartridge.load_cart_st(base, slotA, slotB);
+  if(cartridge.loaded() == false) return;
 
   app.pause = false;
   snes.power();
@@ -393,11 +398,12 @@ void load_cart_st(const char *base, const char *slotA, const char *slotB) {
 }
 
 void unload_rom() {
-  if(cartridge.loaded() == true) {
-    cartridge.unload();
-    video.clear();
-    audio.clear();
-  }
+  if(cartridge.loaded() == false) return;
+
+  cartridge.unload();
+  video.clear();
+  audio.clear();
+
   window_main.menu_file_unload.disable();
   window_main.menu_file_reset.disable();
   window_main.menu_file_power.disable();

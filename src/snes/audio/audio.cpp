@@ -4,8 +4,10 @@
 
 void SNES::Audio::update(uint16 l_sample, uint16 r_sample) {
   if(pcmfp) {
-    fput(pcmfp, l_sample, 2);
-    fput(pcmfp, r_sample, 2);
+    fputc(l_sample >> 0, pcmfp);
+    fputc(l_sample >> 8, pcmfp);
+    fputc(r_sample >> 0, pcmfp);
+    fputc(r_sample >> 8, pcmfp);
   }
 
   snesinterface.audio_sample(l_sample, r_sample);

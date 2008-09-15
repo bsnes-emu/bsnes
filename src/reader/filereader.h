@@ -8,6 +8,5 @@ public:
   ~FileReader();
 
 private:
-  FILE *fp;
-  unsigned filesize;
+  file fp;
 };

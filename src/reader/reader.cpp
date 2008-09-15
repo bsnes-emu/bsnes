@@ -13,13 +13,13 @@
 #endif
 
 Reader::Type Reader::detect(const char *fn, bool inspectheader) {
-  FILE *fp = fopen(fn, "rb");
-  if(!fp) return Unknown;
+  file fp;
+  if(!fp.open(fn, file::mode_read)) return Unknown;
 
   uint8_t p[8];
   memset(p, 0, sizeof p);
-  fread(p, 1, 8, fp);
-  fclose(fp);
+  fp.read(p, 8);
+  fp.close();
 
   if(inspectheader == true) {
     //inspect file header to determine type

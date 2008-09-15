@@ -1,5 +1,5 @@
 /*
-  bbase : version 0.14 ~byuu (2008-04-16)
+  bbase : version 0.15 ~byuu (2008-09-14)
   license: public domain
 */
 
@@ -41,7 +41,7 @@ using std::max;
 #endif
 
 #if defined(_MSC_VER)
-//disable libc deprecation warnings in MSVC 2k5+
+  //disable libc deprecation warnings in MSVC 2k5+
   #pragma warning(disable:4996)
 
   #define NOMINMAX
@@ -52,17 +52,10 @@ using std::max;
 #if defined(_MSC_VER) || defined(__MINGW32__)
   #define getcwd    _getcwd
   #define ftruncate _chsize
-  #define mkdir     _mkdir
   #define putenv    _putenv
   #define rmdir     _rmdir
   #define vsnprintf _vsnprintf
   #define usleep(n) Sleep(n / 1000)
-
-  static char *realpath(const char *file_name, char *resolved_name) {
-    return _fullpath(resolved_name, file_name, PATH_MAX);
-  }
-#else
-  #define mkdir(path) (mkdir)(path, 0755);
 #endif
 
 /*****
@@ -87,22 +80,29 @@ using std::max;
  * OS localization
  *****/
 
-//userpath(output) retrieves path to user's home folder
-//output must be at least as large as PATH_MAX
-
 #if defined(_MSC_VER) || defined(__MINGW32__)
-static char *userpath(char *output) {
-  strcpy(output, "."); //failsafe
-  SHGetFolderPath(0, CSIDL_APPDATA | CSIDL_FLAG_CREATE, 0, 0, output);
+static char* realpath(const char *file_name, char *resolved_name) {
+  wchar_t filename[PATH_MAX] = L"";
+  _wfullpath(filename, utf16(file_name), PATH_MAX);
+  strcpy(resolved_name, utf8(filename));
+  return resolved_name;
+}
+
+static char* userpath(char *output) {
+  wchar_t path[PATH_MAX] = L"."; //failsafe
+  SHGetFolderPathW(0, CSIDL_APPDATA | CSIDL_FLAG_CREATE, 0, 0, path);
+  strcpy(output, utf8(path));
   return output;
 }
+#define mkdir(path) _wmkdir(utf16(path))
 #else
-static char *userpath(char *output) {
+static char* userpath(char *output) {
   strcpy(output, "."); //failsafe
   struct passwd *userinfo = getpwuid(getuid());
   if(userinfo) { strcpy(output, userinfo->pw_dir); }
   return output;
 }
+#define mkdir(path) (mkdir)(path, 0755);
 #endif
 
 template<int min, int max, typename T> inline T minmax(const T x) {
@@ -155,51 +155,6 @@ template<int min, int max, typename T> inline T minmax(const T x) {
 static unsigned prng() {
   static unsigned n = 0;
   return n = (n >> 1) ^ (((n & 1) - 1) & 0xedb88320);
-}
-
-static uint64 fget(FILE *fp, unsigned length = 1) {
-  uint64 data = 0;
-  for(unsigned i = 0; i < length; i++) {
-    data |= fgetc(fp) << (i << 3);
-  }
-  return data;
-}
-
-static void fput(FILE *fp, uint64 data, unsigned length = 1) {
-  for(unsigned i = 0; i < length; i++) {
-    fputc(data >> (i << 3), fp);
-  }
-}
-
-static bool fexists(const char *fn) {
-  FILE *fp = fopen(fn, "rb");
-  if(!fp) return false;
-  fclose(fp);
-  fp = 0;
-  return true;
-}
-
-static unsigned fsize(FILE *fp) {
-  if(!fp) return 0;
-  unsigned pos = ftell(fp);
-  fseek(fp, 0, SEEK_END);
-  unsigned size = ftell(fp);
-  fseek(fp, pos, SEEK_SET);
-  return size;
-}
-
-static unsigned fsize(const char *fn) {
-  FILE *fp = fopen(fn, "rb");
-  if(!fp) return 0;
-  fseek(fp, 0, SEEK_END);
-  unsigned size = ftell(fp);
-  fclose(fp);
-  fp = 0;
-  return size;
-}
-
-static int fresize(FILE *fp, long size) {
-  return ftruncate(fileno(fp), size);
 }
 
 #endif //ifndef BBASE_H

@@ -63,7 +63,7 @@ string& string::operator=(const string &str) {
 }
 
 string& string::operator<<(int num) {
-string temp(num);
+  string temp(num);
   strcat(*this, temp);
   return *this;
 }
@@ -147,7 +147,7 @@ size_t strlcat(nall::string &dest, const char *src, size_t length) {
 }
 
 nall::string substr(const char *src, size_t start, size_t length) {
-nall::string dest;
+  nall::string dest;
   if(length == 0) { //copy entire string
     strcpy(dest, src + start);
   } else { //copy partial string
@@ -171,28 +171,28 @@ nall::string& trim_once (nall::string &str, const char *key) { trim_once (str(),
 /* arithmetic <> string */
 
 nall::string strhex(uintmax_t value) {
-nall::string temp;
+  nall::string temp;
   temp.reserve(strhex(0, value));
   strhex(temp(), value);
   return temp;
 }
 
 nall::string strdec(intmax_t value) {
-nall::string temp;
+  nall::string temp;
   temp.reserve(strdec(0, value));
   strdec(temp(), value);
   return temp;
 }
 
 nall::string strbin(uintmax_t value) {
-nall::string temp;
+  nall::string temp;
   temp.reserve(strbin(0, value));
   strbin(temp(), value);
   return temp;
 }
 
 nall::string strdouble(double value) {
-nall::string temp;
+  nall::string temp;
   temp.reserve(strdouble(0, value));
   strdouble(temp(), value);
   return temp;
@@ -203,13 +203,17 @@ nall::string temp;
 bool fread(nall::string &str, const char *filename) {
   strcpy(str, "");
 
-FILE *fp = fopen(filename, "rb");
+  #if !defined(_WIN32)
+  FILE *fp = fopen(filename, "rb");
+  #else
+  FILE *fp = _wfopen(nall::utf16(filename), L"rb");
+  #endif
   if(!fp)return false;
 
   fseek(fp, 0, SEEK_END);
-size_t size = ftell(fp);
+  size_t size = ftell(fp);
   rewind(fp);
-char *fdata = (char*)malloc(size + 1);
+  char *fdata = (char*)malloc(size + 1);
   fread(fdata, 1, size, fp);
   fclose(fp);
   fdata[size] = 0;

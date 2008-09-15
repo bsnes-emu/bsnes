@@ -4,6 +4,7 @@
 #include <math.h>
 #include <nall/algorithm.hpp>
 #include <nall/static.hpp>
+#include <nall/utf8.hpp>
 
 #include <nall/string.hpp>
 #include <nall/string/class.cpp>

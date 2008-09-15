@@ -1,6 +1,18 @@
-/*****
- * UTF-8 to UTF-16
- *****/
+#ifndef NALL_UTF8_HPP
+#define NALL_UTF8_HPP
+
+#include <nall/new.hpp>
+
+//UTF-8 <> UTF-16 conversion
+//used only for Win32; Linux, etc use UTF-8 internally
+
+#if defined(_WIN32)
+
+#include <windows.h>
+
+namespace nall {
+
+//UTF-8 to UTF-16
 class utf16 {
 public:
   operator wchar_t*() {
@@ -26,9 +38,7 @@ private:
   wchar_t *buffer;
 };
 
-/*****
- * UTF-16 to UTF-8
- *****/
+//UTF-16 to UTF-8
 class utf8 {
 public:
   operator char*() {
@@ -53,3 +63,9 @@ public:
 private:
   char *buffer;
 };
+
+} //namespace nall
+
+#endif //if defined(_WIN32)
+
+#endif //ifndef NALL_UTF8_HPP

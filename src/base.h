@@ -1,4 +1,4 @@
-#define BSNES_VERSION "0.035"
+#define BSNES_VERSION "0.036"
 #define BSNES_TITLE   "bsnes v" BSNES_VERSION
 
 #define BUSCORE sBus
@@ -24,6 +24,7 @@
 #include <nall/bit.hpp>
 #include <nall/config.hpp>
 #include <nall/detect.hpp>
+#include <nall/file.hpp>
 #include <nall/function.hpp>
 #include <nall/modulo.hpp>
 #include <nall/new.hpp>
@@ -41,3 +42,9 @@ void alert(const char*, ...);
 void dprintf(const char*, ...);
 
 #include "interface.h"
+
+//helper: disable access to FILE, when possible (GZIP / JMA require it)
+//reason: Windows fopen() does not support UTF-8 filenames; use nall::file instead.
+#if !defined(GZIP_SUPPORT) && !defined(JMA_SUPPORT)
+#define FILE FILE_deprecated
+#endif

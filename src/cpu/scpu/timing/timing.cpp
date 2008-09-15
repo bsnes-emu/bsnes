@@ -150,7 +150,7 @@ void sCPU::cycle_edge() {
       if(hdma_enabled_channels()) {
         dma_add_clocks(8 - dma_counter()); //DMA sync
         status.hdma_mode == 0 ? hdma_init() : hdma_run();
-        status.dma_state = DMA_CPUsync;
+        if(!dma_enabled_channels()) status.dma_state = DMA_CPUsync;
       }
     }
 

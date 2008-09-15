@@ -89,7 +89,7 @@ void Cartridge::load_end() {
   memory::stBrom.write_protect(true);
   memory::stBram.write_protect(false);
 
-  if(fexists(get_cheat_filename(cart.fn, "cht"))) {
+  if(file::exists(get_cheat_filename(cart.fn, "cht"))) {
     cheat.clear();
     cheat.load(cheatfn);
   }
@@ -122,7 +122,7 @@ bool Cartridge::unload() {
   char fn[PATH_MAX];
   strcpy(fn, cart.fn);
   modify_extension(fn, "cht");
-  if(cheat.count() > 0 || fexists(get_cheat_filename(cart.fn, "cht"))) {
+  if(cheat.count() > 0 || file::exists(get_cheat_filename(cart.fn, "cht"))) {
     cheat.save(cheatfn);
     cheat.clear();
   }

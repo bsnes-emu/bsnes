@@ -5,6 +5,7 @@
 #include <string.h>
 
 #include <nall/stdint.hpp>
+#include <nall/utf8.hpp>
 #include <nall/utility.hpp>
 
 namespace nall {
@@ -69,6 +70,11 @@ public:
     while(length--) write(*buffer++);
   }
 
+  void print(const char *string) {
+    if(!string) return;
+    while(*string) write(*string++);
+  }
+
   void flush() {
     buffer_flush();
     fflush(fp);
@@ -112,13 +118,38 @@ public:
     return file_offset >= file_size;
   }
 
+  static bool exists(const char *fn) {
+    #if !defined(_WIN32)
+    FILE *fp = fopen(fn, "rb");
+    #else
+    FILE *fp = _wfopen(utf16(fn), L"rb");
+    #endif
+    if(fp) {
+      fclose(fp);
+      return true;
+    }
+    return false;
+  }
+
+  bool open() {
+    return fp;
+  }
+
   bool open(const char *fn, FileMode mode) {
     if(fp) return false;
+
     switch(file_mode = mode) {
+      #if !defined(_WIN32)
       case mode_read:      fp = fopen(fn, "rb");  break;
       case mode_write:     fp = fopen(fn, "wb+"); break; //need read permission for buffering
       case mode_readwrite: fp = fopen(fn, "rb+"); break;
       case mode_writeread: fp = fopen(fn, "wb+"); break;
+      #else
+      case mode_read:      fp = _wfopen(utf16(fn), L"rb");  break;
+      case mode_write:     fp = _wfopen(utf16(fn), L"wb+"); break;
+      case mode_readwrite: fp = _wfopen(utf16(fn), L"rb+"); break;
+      case mode_writeread: fp = _wfopen(utf16(fn), L"wb+"); break;
+      #endif
     }
     if(!fp) return false;
     buffer_offset = -1; //invalidate buffer

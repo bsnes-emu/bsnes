@@ -4,15 +4,15 @@
 namespace nall {
 
 template<typename T> inline void swap(T &x, T &y) {
-T z = x;
+  T temp = x;
   x = y;
-  y = z;
+  y = temp;
 }
 
 template<typename T>
 void sort(T list[], unsigned length) {
   for(unsigned d = 0; d < length; d++) {
-  unsigned min = d;
+    unsigned min = d;
     for(unsigned s = d + 1; s < length; s++) {
       if(list[s] < list[min]) { min = s; }
     }
@@ -22,10 +22,10 @@ void sort(T list[], unsigned length) {
   }
 }
 
-template<typename T, typename Tcmp>
-void sort(T list[], unsigned length, Tcmp comparator) {
+template<typename T, typename Comparator>
+void sort(T list[], unsigned length, Comparator comparator) {
   for(unsigned d = 0; d < length; d++) {
-  unsigned min = d;
+    unsigned min = d;
     for(unsigned s = d + 1; s < length; s++) {
       if(comparator(list[s], list[min]) == true) { min = s; }
     }

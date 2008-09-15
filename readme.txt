@@ -1,5 +1,5 @@
 bsnes
-Version: 0.035
+Version: 0.036
 Author: byuu
 
 ========
@@ -38,9 +38,9 @@ If you wish to have multiple configuration profiles for the same user, you will
 need to make copies of the bsnes executable, and use each one in single-user
 mode.
 
-==================
-Known Limitations:
-==================
+====================
+Known Limitation(s):
+====================
 
 S-CPU
 - Multiply / divide register delays not implemented
@@ -59,6 +59,16 @@ S-PPU
 Hardware Bugs
 - S-CPU.r1 HDMA crashing bug not emulated
 - S-CPU<>S-SMP communication bus conflicts not emulated
+
+===============
+Known Issue(s):
+===============
+
+On Windows, attempting to load a ZIP, GZ or JMA compressed archive with
+non-ANSI characters in the filename will fail. This is because Windows
+requires UTF-16 encoding, but these libraries only work with UTF-8.
+Note that loading uncompressed images (SMC, SFC, etc) with non-ANSI characters
+works properly on all platforms.
 
 =====================
 Unsupported Hardware:
@@ -89,9 +99,9 @@ SETA RISC CPU used by Quick-move Shogi Match with Nidan Rank-holder Morita 2
 Super Gameboy
 Cartridge passthrough used for playing Gameboy games
 
-========================
-Unsupported Controllers:
-========================
+==========================
+Unsupported Controller(s):
+==========================
 
 Mouse
 Super Scope

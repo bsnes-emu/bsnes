@@ -295,15 +295,15 @@ bool Cheat::load(const char *fn) {
 }
 
 bool Cheat::save(const char *fn) {
-  FILE *fp = fopen(fn, "wb");
-  if(!fp) return false;
+  file fp;
+  if(!fp.open(fn, file::mode_write)) return false;
   for(unsigned i = 0; i < cheat_count; i++) {
-    fprintf(fp, "%9s = %8s, \"%s\"\r\n",
-      index[i].code,
-      index[i].enabled ? "enabled" : "disabled",
-      index[i].desc);
+    fp.print(string()
+      << index[i].code << " = "
+      << (index[i].enabled ? "enabled" : "disabled") << ", \""
+      << index[i].desc << "\"\r\n");
   }
-  fclose(fp);
+  fp.close();
   return true;
 }
 

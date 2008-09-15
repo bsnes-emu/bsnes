@@ -4,11 +4,14 @@
 using nall::min;
 using nall::max;
 
+#include <nall/utf8.hpp>
+using nall::utf8;
+using nall::utf16;
+
 namespace libhiro {
 
 LRESULT CALLBACK phiro_wndproc(HWND, UINT, WPARAM, LPARAM);
 
-#include "utf.cpp"
 #include "keymap.cpp"
 #include "widget.cpp"
   #include "window.cpp"
