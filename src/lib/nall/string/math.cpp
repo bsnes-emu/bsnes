@@ -1,13 +1,13 @@
 #ifdef NALL_STRING_CPP
 
 static int eval_integer(const char *&s) {
-  if(!*s) throw "nall::bad_eval_integer";
+  if(!*s) throw "unrecognized_integer";
   int value = 0, x = *s, y = *(s + 1);
 
   //hexadecimal
   if(x == '0' && (y == 'X' || y == 'x')) {
     s += 2;
-    for(;;) {
+    while(true) {
       if(*s >= '0' && *s <= '9') { value = value * 16 + (*s++ - '0');      continue; }
       if(*s >= 'A' && *s <= 'F') { value = value * 16 + (*s++ - 'A' + 10); continue; }
       if(*s >= 'a' && *s <= 'f') { value = value * 16 + (*s++ - 'a' + 10); continue; }
@@ -18,7 +18,7 @@ static int eval_integer(const char *&s) {
   //binary
   if(x == '0' && (y == 'B' || y == 'b')) {
     s += 2;
-    for(;;) {
+    while(true) {
       if(*s == '0' || *s == '1') { value = value * 2 + (*s++ - '0'); continue; }
       return value;
     }
@@ -27,7 +27,7 @@ static int eval_integer(const char *&s) {
   //octal (or decimal '0')
   if(x == '0') {
     s += 1;
-    for(;;) {
+    while(true) {
       if(*s >= '0' && *s <= '7') { value = value * 8 + (*s++ - '0'); continue; }
       return value;
     }
@@ -35,35 +35,45 @@ static int eval_integer(const char *&s) {
 
   //decimal
   if(x >= '0' && x <= '9') {
-    for(;;) {
+    while(true) {
       if(*s >= '0' && *s <= '9') { value = value * 10 + (*s++ - '0'); continue; }
       return value;
     }
   }
 
-  throw "nall::bad_eval_integer";
+  //char
+  if(x == '\'' && y != '\'') {
+    s += 1;
+    while(true) {
+      value = value * 256 + *s++;
+      if(*s == '\'') { s += 1; return value; }
+      if(!*s) throw "mismatched_char";
+    }
+  }
+
+  throw "unrecognized_integer";
 }
 
 static int eval(const char *&s, int depth = 0) {
-  if(!*s) throw "nall::bad_eval";
   while(*s == ' ' || *s == '\t') s++; //trim whitespace
+  if(!*s) throw "unrecognized_token";
   int value = 0, x = *s, y = *(s + 1);
 
   if(*s == '(') {
     value = eval(++s, 1);
-    if(*s++ != ')') throw "nall::bad_eval";
+    if(*s++ != ')') throw "mismatched_group";
   }
 
-  else if(x == '!') value = !eval(++s, 14);
-  else if(x == '~') value = ~eval(++s, 14);
-  else if(x == '+') value = +eval(++s, 14);
-  else if(x == '-') value = -eval(++s, 14);
+  else if(x == '!') value = !eval(++s, 13);
+  else if(x == '~') value = ~eval(++s, 13);
+  else if(x == '+') value = +eval(++s, 13);
+  else if(x == '-') value = -eval(++s, 13);
 
-  else if(x >= '0' && x <= '9') value = eval_integer(s);
+  else if((x >= '0' && x <= '9') || x == '\'') value = eval_integer(s);
 
-  else throw "nall::bad_eval";
+  else throw "unrecognized_token";
 
-  for(;;) {
+  while(true) {
     while(*s == ' ' || *s == '\t') s++; //trim whitespace
     if(!*s) break;
     x = *s, y = *(s + 1);
@@ -109,18 +119,18 @@ static int eval(const char *&s, int depth = 0) {
     if(depth >= 3) break;
     if(x == '|' && y == '|') { value = eval(++++s, 3) || value; continue; }
 
-    if(depth >= 2) break;
     if(x == '?') {
       int lhs = eval(++s, 2);
-      if(*s != ':') throw "nall::bad_eval";
+      if(*s != ':') throw "mismatched_ternary";
       int rhs = eval(++s, 2);
       value = value ? lhs : rhs;
       continue;
     }
+    if(depth >= 2) break;
 
     if(depth > 0 && x == ')') break;
 
-    throw "nall::bad_eval";
+    throw "unrecognized_token";
   }
 
   return value;

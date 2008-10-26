@@ -9,11 +9,9 @@
 #include <GL/gl.h>
 #include <GL/glext.h>
 
-#include <ruby/ruby.h>
-
 namespace ruby {
 
-#include "wgl.h"
+#include "wgl.hpp"
 
 class pVideoWGL {
 public:

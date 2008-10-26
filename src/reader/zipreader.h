@@ -1,7 +1,6 @@
 #include "zlib/unzip.h"
 
-//Could be up to 65536
-#define ZIP_MAX_FILE_NAME 4096
+#define ZIP_MAX_FILE_NAME PATH_MAX
 
 class ZipReader : public Reader {
 public:
@@ -14,7 +13,7 @@ public:
 
 private:
   unzFile zipfile;
-  uint32 filesize;
+  unsigned filesize;
   bool zipready;
-  char cname[4096];
+  char cname[PATH_MAX];
 };

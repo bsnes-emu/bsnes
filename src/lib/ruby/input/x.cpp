@@ -4,17 +4,14 @@
 #include <X11/Xutil.h>
 #include <X11/Xatom.h>
 
-#include <ruby/ruby.h>
-
 namespace ruby {
 
-#include "x.h"
+#include "x.hpp"
 
 class pInputX {
 public:
   InputX &self;
   Display *display;
-  char keymap[32];
 
   bool cap(Input::Setting setting) {
     if(setting == Input::KeyboardSupport) return true;
@@ -29,138 +26,133 @@ public:
     return false;
   }
 
-  bool key_down(uint16_t key) {
-    using namespace nall;
-    #define map(i) (keymap[i >> 3] & (1 << (i & 7)))
-    switch(key) {
-      case keyboard::escape: return map(0x09);
+  bool poll(int16_t *table) {
+    memset(table, 0, input_limit * sizeof(int16_t));
 
-      case keyboard::f1:  return map(0x43);
-      case keyboard::f2:  return map(0x44);
-      case keyboard::f3:  return map(0x45);
-      case keyboard::f4:  return map(0x46);
-      case keyboard::f5:  return map(0x47);
-      case keyboard::f6:  return map(0x48);
-      case keyboard::f7:  return map(0x49);
-      case keyboard::f8:  return map(0x4a);
-      case keyboard::f9:  return map(0x4b);
-      case keyboard::f10: return map(0x4c);
-      case keyboard::f11: return map(0x5f);
-      case keyboard::f12: return map(0x60);
+    #define key(n) (bool)(state[n >> 3] & (1 << (n & 7)))
+    char state[32];
+    XQueryKeymap(display, state);
 
-      case keyboard::print_screen: return map(0x6f);
-      case keyboard::scroll_lock:  return map(0x4e);
-      case keyboard::pause:        return map(0x6e);
+    table[keyboard::escape] = key(0x09);
 
-      case keyboard::tilde: return map(0x31);
+    table[keyboard::f1 ] = key(0x43);
+    table[keyboard::f2 ] = key(0x44);
+    table[keyboard::f3 ] = key(0x45);
+    table[keyboard::f4 ] = key(0x46);
+    table[keyboard::f5 ] = key(0x47);
+    table[keyboard::f6 ] = key(0x48);
+    table[keyboard::f7 ] = key(0x49);
+    table[keyboard::f8 ] = key(0x4a);
+    table[keyboard::f9 ] = key(0x4b);
+    table[keyboard::f10] = key(0x4c);
+    table[keyboard::f11] = key(0x5f);
+    table[keyboard::f12] = key(0x60);
 
-      case keyboard::num_1: return map(0x0a);
-      case keyboard::num_2: return map(0x0b);
-      case keyboard::num_3: return map(0x0c);
-      case keyboard::num_4: return map(0x0d);
-      case keyboard::num_5: return map(0x0e);
-      case keyboard::num_6: return map(0x0f);
-      case keyboard::num_7: return map(0x10);
-      case keyboard::num_8: return map(0x11);
-      case keyboard::num_9: return map(0x12);
-      case keyboard::num_0: return map(0x13);
+    table[keyboard::print_screen] = key(0x6f);
+    table[keyboard::scroll_lock ] = key(0x4e);
+    table[keyboard::pause       ] = key(0x6e);
 
-      case keyboard::dash:      return map(0x14);
-      case keyboard::equal:     return map(0x15);
-      case keyboard::backspace: return map(0x16);
+    table[keyboard::tilde] = key(0x31);
 
-      case keyboard::insert:    return map(0x6a);
-      case keyboard::delete_:   return map(0x6b);
-      case keyboard::home:      return map(0x61);
-      case keyboard::end:       return map(0x67);
-      case keyboard::page_up:   return map(0x63);
-      case keyboard::page_down: return map(0x69);
+    table[keyboard::num_0] = key(0x0a);
+    table[keyboard::num_1] = key(0x0b);
+    table[keyboard::num_2] = key(0x0c);
+    table[keyboard::num_3] = key(0x0d);
+    table[keyboard::num_4] = key(0x0e);
+    table[keyboard::num_5] = key(0x0f);
+    table[keyboard::num_6] = key(0x10);
+    table[keyboard::num_7] = key(0x11);
+    table[keyboard::num_8] = key(0x12);
+    table[keyboard::num_9] = key(0x13);
 
-      case keyboard::a: return map(0x26);
-      case keyboard::b: return map(0x38);
-      case keyboard::c: return map(0x36);
-      case keyboard::d: return map(0x28);
-      case keyboard::e: return map(0x1a);
-      case keyboard::f: return map(0x29);
-      case keyboard::g: return map(0x2a);
-      case keyboard::h: return map(0x2b);
-      case keyboard::i: return map(0x1f);
-      case keyboard::j: return map(0x2c);
-      case keyboard::k: return map(0x2d);
-      case keyboard::l: return map(0x2e);
-      case keyboard::m: return map(0x3a);
-      case keyboard::n: return map(0x39);
-      case keyboard::o: return map(0x20);
-      case keyboard::p: return map(0x21);
-      case keyboard::q: return map(0x18);
-      case keyboard::r: return map(0x1b);
-      case keyboard::s: return map(0x27);
-      case keyboard::t: return map(0x1c);
-      case keyboard::u: return map(0x1e);
-      case keyboard::v: return map(0x37);
-      case keyboard::w: return map(0x19);
-      case keyboard::x: return map(0x35);
-      case keyboard::y: return map(0x1d);
-      case keyboard::z: return map(0x34);
+    table[keyboard::dash     ] = key(0x14);
+    table[keyboard::equal    ] = key(0x15);
+    table[keyboard::backspace] = key(0x16);
 
-      case keyboard::lbracket:   return map(0x22);
-      case keyboard::rbracket:   return map(0x23);
-      case keyboard::backslash:  return map(0x33);
-      case keyboard::semicolon:  return map(0x2f);
-      case keyboard::apostrophe: return map(0x30);
-      case keyboard::comma:      return map(0x3b);
-      case keyboard::period:     return map(0x3c);
-      case keyboard::slash:      return map(0x3d);
+    table[keyboard::insert   ] = key(0x6a);
+    table[keyboard::delete_  ] = key(0x6b);
+    table[keyboard::home     ] = key(0x61);
+    table[keyboard::end      ] = key(0x67);
+    table[keyboard::page_up  ] = key(0x63);
+    table[keyboard::page_down] = key(0x69);
 
-      case keyboard::pad_1: return map(0x57);
-      case keyboard::pad_2: return map(0x58);
-      case keyboard::pad_3: return map(0x59);
-      case keyboard::pad_4: return map(0x53);
-      case keyboard::pad_5: return map(0x54);
-      case keyboard::pad_6: return map(0x55);
-      case keyboard::pad_7: return map(0x4f);
-      case keyboard::pad_8: return map(0x50);
-      case keyboard::pad_9: return map(0x51);
+    table[keyboard::a] = key(0x26);
+    table[keyboard::b] = key(0x38);
+    table[keyboard::c] = key(0x36);
+    table[keyboard::d] = key(0x28);
+    table[keyboard::e] = key(0x1a);
+    table[keyboard::f] = key(0x29);
+    table[keyboard::g] = key(0x2a);
+    table[keyboard::h] = key(0x2b);
+    table[keyboard::i] = key(0x1f);
+    table[keyboard::j] = key(0x2c);
+    table[keyboard::k] = key(0x2d);
+    table[keyboard::l] = key(0x2e);
+    table[keyboard::m] = key(0x3a);
+    table[keyboard::n] = key(0x39);
+    table[keyboard::o] = key(0x20);
+    table[keyboard::p] = key(0x21);
+    table[keyboard::q] = key(0x18);
+    table[keyboard::r] = key(0x1b);
+    table[keyboard::s] = key(0x27);
+    table[keyboard::t] = key(0x1c);
+    table[keyboard::u] = key(0x1e);
+    table[keyboard::v] = key(0x37);
+    table[keyboard::w] = key(0x19);
+    table[keyboard::x] = key(0x35);
+    table[keyboard::y] = key(0x1d);
+    table[keyboard::z] = key(0x34);
 
-      case keyboard::add:      return map(0x56);
-      case keyboard::subtract: return map(0x52);
-      case keyboard::multiply: return map(0x3f);
-      case keyboard::divide:   return map(0x70);
-      case keyboard::enter:    return map(0x6c);
+    table[keyboard::lbracket  ] = key(0x22);
+    table[keyboard::rbracket  ] = key(0x23);
+    table[keyboard::backslash ] = key(0x33);
+    table[keyboard::semicolon ] = key(0x2f);
+    table[keyboard::apostrophe] = key(0x30);
+    table[keyboard::comma     ] = key(0x3b);
+    table[keyboard::period    ] = key(0x3c);
+    table[keyboard::slash     ] = key(0x3d);
 
-      case keyboard::num_lock:  return map(0x4d);
-      case keyboard::caps_lock: return map(0x42);
+    table[keyboard::pad_0] = key(0x5a);
+    table[keyboard::pad_1] = key(0x57);
+    table[keyboard::pad_2] = key(0x58);
+    table[keyboard::pad_3] = key(0x59);
+    table[keyboard::pad_4] = key(0x53);
+    table[keyboard::pad_5] = key(0x54);
+    table[keyboard::pad_6] = key(0x55);
+    table[keyboard::pad_7] = key(0x4f);
+    table[keyboard::pad_8] = key(0x50);
+    table[keyboard::pad_9] = key(0x51);
 
-      case keyboard::up:    return map(0x62);
-      case keyboard::down:  return map(0x68);
-      case keyboard::left:  return map(0x64);
-      case keyboard::right: return map(0x66);
+    table[keyboard::add     ] = key(0x56);
+    table[keyboard::subtract] = key(0x52);
+    table[keyboard::multiply] = key(0x3f);
+    table[keyboard::divide  ] = key(0x70);
+    table[keyboard::enter   ] = key(0x6c);
 
-      case keyboard::tab:      return map(0x17);
-      case keyboard::return_:  return map(0x24);
-      case keyboard::spacebar: return map(0x41);
+    table[keyboard::num_lock ] = key(0x4d);
+    table[keyboard::caps_lock] = key(0x42);
 
-      case keyboard::lctrl:  return map(0x25);
-      case keyboard::rctrl:  return map(0x6d);
-      case keyboard::lalt:   return map(0x40);
-      case keyboard::ralt:   return map(0x71);
-      case keyboard::lshift: return map(0x32);
-      case keyboard::rshift: return map(0x3e);
-      case keyboard::lsuper: return map(0x73);
-      case keyboard::rsuper: return map(0x74);
-      case keyboard::menu:   return map(0x75);
-    }
+    table[keyboard::up   ] = key(0x62);
+    table[keyboard::down ] = key(0x68);
+    table[keyboard::left ] = key(0x64);
+    table[keyboard::right] = key(0x66);
 
-    #undef map
-    return false;
-  }
+    table[keyboard::tab     ] = key(0x17);
+    table[keyboard::return_ ] = key(0x24);
+    table[keyboard::spacebar] = key(0x41);
 
-  void clear() {
-    memset(keymap, 0, sizeof keymap);
-  }
+    table[keyboard::lctrl ] = key(0x25);
+    table[keyboard::rctrl ] = key(0x6d);
+    table[keyboard::lalt  ] = key(0x40);
+    table[keyboard::ralt  ] = key(0x71);
+    table[keyboard::lshift] = key(0x32);
+    table[keyboard::rshift] = key(0x3e);
+    table[keyboard::lsuper] = key(0x73);
+    table[keyboard::rsuper] = key(0x74);
+    table[keyboard::menu  ] = key(0x75);
+    #undef key
 
-  void poll() {
-    XQueryKeymap(display, keymap);
+    return true;
   }
 
   bool init() {
@@ -177,9 +169,7 @@ public:
 bool InputX::cap(Setting setting) { return p.cap(setting); }
 uintptr_t InputX::get(Setting setting) { return p.get(setting); }
 bool InputX::set(Setting setting, uintptr_t param) { return p.set(setting, param); }
-bool InputX::key_down(uint16_t key) { return p.key_down(key); }
-void InputX::clear() { p.clear(); }
-void InputX::poll() { p.poll(); }
+bool InputX::poll(int16_t *table) { return p.poll(table); }
 bool InputX::init() { return p.init(); }
 void InputX::term() { p.term(); }
 InputX::InputX() : p(*new pInputX(*this)) {}

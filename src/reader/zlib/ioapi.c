@@ -10,6 +10,12 @@
 #include <stdlib.h>
 #include <string.h>
 
+#if defined(_WIN32)
+#define WIN32_LEAN_AND_MEAN
+//needed for MultiByteToWideChar()
+#include <windows.h>
+#endif
+
 #include "zlib.h"
 #include "ioapi.h"
 
@@ -81,8 +87,18 @@ voidpf ZCALLBACK fopen_file_func (opaque, filename, mode)
     if (mode & ZLIB_FILEFUNC_MODE_CREATE)
         mode_fopen = "wb";
 
-    if ((filename!=NULL) && (mode_fopen != NULL))
+    if ((filename!=NULL) && (mode_fopen != NULL)) {
+        //[2008-10-17  byuu]  wrap Win32 fopen() to support UTF-8 filenames
+        #if !defined(_WIN32)
         file = fopen(filename, mode_fopen);
+        #else
+        wchar_t wfilename[_MAX_PATH + 1];
+        wchar_t wmode_fopen[_MAX_PATH + 1];
+        MultiByteToWideChar(CP_UTF8, 0, filename, -1, wfilename, _MAX_PATH);
+        MultiByteToWideChar(CP_UTF8, 0, mode_fopen, -1, wmode_fopen, _MAX_PATH);
+        file = _wfopen(wfilename, wmode_fopen);
+        #endif
+    }
     return file;
 }
 

@@ -5,15 +5,15 @@ public:
   void power();
   void reset();
 
-  uint8 read(uint addr);
-  void write(uint addr, uint8 data);
+  uint8 read(unsigned addr);
+  void write(unsigned addr, uint8 data);
 
   OBC1();
   ~OBC1();
 
 private:
-  uint8 ram_read(uint addr);
-  void ram_write(uint addr, uint8 data);
+  uint8 ram_read(unsigned addr);
+  void ram_write(unsigned addr, uint8 data);
 
   struct {
     uint16 address;

@@ -1,3 +1,9 @@
+void hiro_peditbox_change(pEditbox *p) {
+  if(p->self.on_change) {
+    p->self.on_change(event_t(event_t::Change, 0, &p->self));
+  }
+}
+
 void pEditbox::create(unsigned style, unsigned width, unsigned height, const char *text) {
   multiline = bool(style & Editbox::Multiline);
 
@@ -7,6 +13,7 @@ void pEditbox::create(unsigned style, unsigned width, unsigned height, const cha
     gtk_entry_set_text(GTK_ENTRY(editbox), text ? text : "");
     gtk_widget_set_size_request(editbox, width, height);
     gtk_widget_show(editbox);
+    g_signal_connect_swapped(G_OBJECT(editbox), "changed", G_CALLBACK(hiro_peditbox_change), (gpointer)this);
   } else {
     GtkPolicyType hscroll = (style & Editbox::HorizontalScrollAlways) ? GTK_POLICY_ALWAYS :
                             (style & Editbox::HorizontalScrollNever)  ? GTK_POLICY_NEVER  :
@@ -25,6 +32,7 @@ void pEditbox::create(unsigned style, unsigned width, unsigned height, const cha
     gtk_text_buffer_set_text(buffer, text ? text : "", -1);
     gtk_widget_show(editbox);
     gtk_widget_show(scrollbox);
+    g_signal_connect_swapped(G_OBJECT(buffer), "changed", G_CALLBACK(hiro_peditbox_change), (gpointer)this);
   }
 
   set_default_font(editbox);

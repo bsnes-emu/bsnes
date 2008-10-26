@@ -8,11 +8,9 @@
 #include <X11/extensions/XShm.h>
 #include <SDL/SDL.h>
 
-#include <ruby/ruby.h>
-
 namespace ruby {
 
-#include "sdl.h"
+#include "sdl.hpp"
 
 class pVideoSDL {
 public:
@@ -100,9 +98,11 @@ public:
 
   bool init() {
     display = XOpenDisplay(0);
+
     char env[512];
     sprintf(env, "SDL_WINDOWID=%ld", settings.handle);
     putenv(env);
+
     SDL_InitSubSystem(SDL_INIT_VIDEO);
     //screen depth must be 32, as 24bpp with a 32-bit X window visual produces no output.
     screen = SDL_SetVideoMode(2560, 1600, 32, SDL_HWSURFACE);

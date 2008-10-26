@@ -1,11 +1,9 @@
 #include <windows.h>
 #include <ddraw.h>
 
-#include <ruby/ruby.h>
-
 namespace ruby {
 
-#include "directdraw.h"
+#include "directdraw.hpp"
 
 class pVideoDD {
 public:

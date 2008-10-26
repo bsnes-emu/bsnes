@@ -1,5 +1,5 @@
 bsnes
-Version: 0.036
+Version: 0.037
 Author: byuu
 
 ========
@@ -99,18 +99,10 @@ SETA RISC CPU used by Quick-move Shogi Match with Nidan Rank-holder Morita 2
 Super Gameboy
 Cartridge passthrough used for playing Gameboy games
 
-==========================
-Unsupported Controller(s):
-==========================
-
-Mouse
-Super Scope
-Justifier
-
 =============
 Contributors:
 =============
 
 Andreas Naive, anomie, blargg, DMV27, FitzRoy, GIGO, Jonas Quinn, kode54, krom,
-mudlord, Nach, neviksti, Overload, RedDwarf, Richard Bannister, tetsuo55, TRAC,
-zones
+Matthew Callis, mudlord, Nach, neviksti, Overload, RedDwarf, Richard Bannister,
+tetsuo55, TRAC, zones

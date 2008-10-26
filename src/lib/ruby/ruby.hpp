@@ -14,13 +14,14 @@
 #include <nall/stdint.hpp>
 using nall::min;
 using nall::max;
+using nall::sclamp;
 using nall::zeromemory;
 
 namespace ruby {
 
-#include <ruby/video.h>
-#include <ruby/audio.h>
-#include <ruby/input.h>
+#include <ruby/video.hpp>
+#include <ruby/audio.hpp>
+#include <ruby/input.hpp>
 
 class VideoInterface {
 public:
@@ -84,10 +85,12 @@ public:
   bool cap(Input::Setting setting);
   uintptr_t get(Input::Setting setting);
   bool set(Input::Setting setting, uintptr_t param);
-  bool key_down(uint16_t key);
-  bool key_up(uint16_t key);
-  void clear();
-  void poll();
+
+  bool acquire();
+  bool unacquire();
+  bool acquired();
+
+  bool poll(int16_t *table);
   InputInterface();
   ~InputInterface();
 

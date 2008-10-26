@@ -3,9 +3,9 @@
 #include "irq.cpp"
 #include "joypad.cpp"
 
-uint16 sCPU::vcounter()  { return status.vcounter; }
-uint16 sCPU::hcounter()  { return status.hcounter; }
-uint sCPU::dma_counter() { return (status.dma_counter + status.hcounter) & 7; }
+unsigned sCPU::dma_counter() {
+  return (status.dma_counter + status.hcounter) & 7;
+}
 
 /*****
  * One PPU dot = 4 CPU clocks
@@ -28,7 +28,7 @@ uint16 sCPU::hdot() {
   return (status.hcounter - ((status.hcounter > 1292) << 1) - ((status.hcounter > 1310) << 1)) >> 2;
 }
 
-void sCPU::add_clocks(uint clocks) {
+void sCPU::add_clocks(unsigned clocks) {
   if(status.dram_refreshed == false) {
     if(status.hcounter + clocks >= status.dram_refresh_position) {
       status.dram_refreshed = true;
@@ -45,6 +45,7 @@ void sCPU::add_clocks(uint clocks) {
     status.hcounter += 2;
     if(status.hcounter >= status.line_clocks) scanline();
     poll_interrupts();
+    snes.input.tick();
   }
 }
 

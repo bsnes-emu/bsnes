@@ -47,22 +47,24 @@ integral_setting System::gamma(config(), "system.colorfilter.gamma",
 
 struct Video {
   static integral_setting mode;
+  static integral_setting synchronize;
+
   struct Windowed {
-    static integral_setting synchronize, aspect_correction;
+    static integral_setting aspect_correction;
     static integral_setting region, multiplier, hardware_filter, software_filter;
   } windowed;
   struct Fullscreen {
-    static integral_setting synchronize, aspect_correction;
+    static integral_setting aspect_correction;
     static integral_setting region, multiplier, hardware_filter, software_filter;
   } fullscreen;
   static integral_setting aspect_ntsc_x, aspect_ntsc_y, aspect_pal_x, aspect_pal_y;
   static integral_setting frameskip;
 } video;
 
-//0 = windowed, 1 = fullscreen, 2 = exclusive
+//0 = windowed, 1 = fullscreen, 2 = exclusive (not implemented yet)
 integral_setting Video::mode("video.mode", "Active video mode", integral_setting::decimal, 0);
+integral_setting Video::synchronize(config(), "video.synchronize", "Synchronize to video refresh rate", integral_setting::boolean, false);
 
-integral_setting Video::Windowed::synchronize(config(), "video.windowed.synchronize", "Synchronize to video refresh rate", integral_setting::boolean, false);
 integral_setting Video::Windowed::aspect_correction(config(), "video.windowed.aspect_correction",
   "Correct video aspect ratio\n"
   "Defaults assume display pixels are perfectly square\n"
@@ -88,7 +90,6 @@ integral_setting Video::Windowed::software_filter(config(), "video.windowed.soft
   "4 = NTSC\n",
   integral_setting::decimal, 0);
 
-integral_setting Video::Fullscreen::synchronize      (config(), "video.fullscreen.synchronize",       "", integral_setting::boolean, false);
 integral_setting Video::Fullscreen::aspect_correction(config(), "video.fullscreen.aspect_correction", "", integral_setting::boolean, true);
 integral_setting Video::Fullscreen::region           (config(), "video.fullscreen.region",            "", integral_setting::decimal, 0);
 integral_setting Video::Fullscreen::multiplier       (config(), "video.fullscreen.multiplier",        "", integral_setting::decimal, 2);
@@ -131,6 +132,13 @@ struct Input {
   struct Multitap2B { static string_setting up, down, left, right, a, b, x, y, l, r, select, start; } multitap2b;
   struct Multitap2C { static string_setting up, down, left, right, a, b, x, y, l, r, select, start; } multitap2c;
   struct Multitap2D { static string_setting up, down, left, right, a, b, x, y, l, r, select, start; } multitap2d;
+
+  struct Mouse1 { static string_setting x, y, l, r; } mouse1;
+  struct Mouse2 { static string_setting x, y, l, r; } mouse2;
+
+  struct SuperScope { static string_setting x, y, trigger, turbo, cursor, pause; } superscope;
+  struct Justifier1 { static string_setting x, y, trigger, start; } justifier1;
+  struct Justifier2 { static string_setting x, y, trigger, start; } justifier2;
 
   struct GUI {
     static string_setting load;
@@ -222,6 +230,33 @@ DeclMultitap(Multitap2D, "2d")
 
 #undef DeclMultitap
 
+string_setting Input::Mouse1::x(config(), "input.mouse1.x", "", "mouse.x");
+string_setting Input::Mouse1::y(config(), "input.mouse1.y", "", "mouse.y");
+string_setting Input::Mouse1::l(config(), "input.mouse1.l", "", "mouse.button00");
+string_setting Input::Mouse1::r(config(), "input.mouse1.r", "", "mouse.button02");
+
+string_setting Input::Mouse2::x(config(), "input.mouse2.x", "", "mouse.x");
+string_setting Input::Mouse2::y(config(), "input.mouse2.y", "", "mouse.y");
+string_setting Input::Mouse2::l(config(), "input.mouse2.l", "", "mouse.button00");
+string_setting Input::Mouse2::r(config(), "input.mouse2.r", "", "mouse.button02");
+
+string_setting Input::SuperScope::x      (config(), "input.superscope.x",       "", "mouse.x");
+string_setting Input::SuperScope::y      (config(), "input.superscope.y",       "", "mouse.y");
+string_setting Input::SuperScope::trigger(config(), "input.superscope.trigger", "", "mouse.button00");
+string_setting Input::SuperScope::cursor (config(), "input.superscope.cursor",  "", "mouse.button02");
+string_setting Input::SuperScope::turbo  (config(), "input.superscope.turbo",   "", "t");
+string_setting Input::SuperScope::pause  (config(), "input.superscope.pause",   "", "p");
+
+string_setting Input::Justifier1::x      (config(), "input.justifier1.x",       "", "mouse.x");
+string_setting Input::Justifier1::y      (config(), "input.justifier1.y",       "", "mouse.y");
+string_setting Input::Justifier1::trigger(config(), "input.justifier1.trigger", "", "mouse.button00");
+string_setting Input::Justifier1::start  (config(), "input.justifier1.start",   "", "mouse.button02");
+
+string_setting Input::Justifier2::x      (config(), "input.justifier2.x",       "", "none");
+string_setting Input::Justifier2::y      (config(), "input.justifier2.y",       "", "none");
+string_setting Input::Justifier2::trigger(config(), "input.justifier2.trigger", "", "none");
+string_setting Input::Justifier2::start  (config(), "input.justifier2.start",   "", "none");
+
 string_setting Input::GUI::load              (config(), "input.gui.load",               "", "none");
 string_setting Input::GUI::pause             (config(), "input.gui.pause",              "", "f12");
 string_setting Input::GUI::reset             (config(), "input.gui.reset",              "", "none");
@@ -236,9 +271,11 @@ string_setting Input::GUI::toggle_menubar    (config(), "input.gui.toggle_menuba
 string_setting Input::GUI::toggle_statusbar  (config(), "input.gui.toggle_statusbar",   "", "escape");
 
 struct Misc {
+  static integral_setting cheat_autosort;
   static integral_setting opacity;
 } misc;
 
+integral_setting Misc::cheat_autosort(config(), "misc.cheat_autosort", "Keep cheat code list sorted by description", integral_setting::boolean, false);
 integral_setting Misc::opacity(config(), "misc.opacity", "Opacity of user interface windows", integral_setting::decimal, 100);
 
 struct Advanced {

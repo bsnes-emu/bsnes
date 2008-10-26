@@ -77,6 +77,8 @@ void DriverSelectWindow::setup() {
 
   input_keyboard.create(0, 155, 18, translate["Keyboard support"]);
   input_keyboard.disable();
+  input_mouse.create(0, 155, 18, translate["Mouse support"]);
+  input_mouse.disable();
   input_joypad.create(0, 155, 18, translate["Joypad support"]);
   input_joypad.disable();
 
@@ -105,9 +107,10 @@ void DriverSelectWindow::setup() {
   input_caps.set_text(t);
 
   input_keyboard.check(input.cap(Input::KeyboardSupport));
+  input_mouse.check(input.cap(Input::MouseSupport));
   input_joypad.check(input.cap(Input::JoypadSupport));
 
-  unsigned y = 5;
+  unsigned y = 0;
 
   if(crashed == true) {
     attach(crash_message, 0, y); y += 36 + 5;
@@ -133,7 +136,8 @@ void DriverSelectWindow::setup() {
 
     attach(input_caps,       0, y); y += 18;
     attach(input_keyboard,   0, y);
-    attach(input_joypad,   160, y); y += 18 + 5;
+    attach(input_mouse,    160, y);
+    attach(input_joypad,   320, y); y += 18 + 5;
 
     attach(restart_message,  0, y); y += 36 + 5;
   }

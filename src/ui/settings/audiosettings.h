@@ -20,6 +20,8 @@ public:
   Editbox einput;
   Button  binput;
 
+  Label   note;
+
   uintptr_t volume_change(event_t);
   uintptr_t latency_change(event_t);
   uintptr_t output_change(event_t);

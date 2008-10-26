@@ -1,7 +1,20 @@
 #include "../base.h"
-#include "../reader/filereader.h"
 
 Cheat cheat;
+
+Cheat::cheat_t& Cheat::cheat_t::operator=(const Cheat::cheat_t& source) {
+  enabled = source.enabled;
+  addr    = source.addr;
+  data    = source.data;
+  code    = source.code;
+  desc    = source.desc;
+  return *this;
+}
+
+//used to sort cheat code list by description
+bool Cheat::cheat_t::operator<(const Cheat::cheat_t& source) {
+  return strcmp(desc, source.desc) < 0;
+}
 
 /*****
  * string <> binary code translation routines
@@ -9,22 +22,32 @@ Cheat cheat;
  * encode()  0x7e123456 -> "7e1234:56"
  *****/
 
-bool Cheat::decode(char *str, uint32 &addr, uint8 &data, uint8 &type) {
-  string t, part;
-  strcpy(t, str);
-  strlower(t());
-  if(strlen(t) == 8 || (strlen(t) == 9 && t()[6] == ':')) {
+bool Cheat::decode(const char *str, unsigned &addr, uint8 &data, type_t &type) {
+  string t = str;
+  strlower(t);
+
+  #define ischr(n) ((n >= '0' && n <= '9') || (n >= 'a' && n <= 'f'))
+
+  if(strlen(t) == 8 || (strlen(t) == 9 && t[6] == ':')) {
+    //strip ':'
+    if(strlen(t) == 9 && t[6] == ':') t = string() << substr(t, 0, 6) << substr(t, 7);
+    //validate input
+    for(unsigned i = 0; i < 8; i++) if(!ischr(t[i])) return false;
+
     type = ProActionReplay;
-    replace(t, ":", "");
-    uint32 r = strhex((const char*)t);
+    unsigned r = strhex((const char*)t);
     addr = r >> 8;
     data = r & 0xff;
     return true;
-  } else if(strlen(t) == 9 && t()[4] == '-') {
+  } else if(strlen(t) == 9 && t[4] == '-') {
+    //strip '-'
+    t = string() << substr(t, 0, 4) << substr(t, 5);
+    //validate input
+    for(unsigned i = 0; i < 8; i++) if(!ischr(t[i])) return false;
+
     type = GameGenie;
-    replace(t, "-", "");
     strtr(t, "df4709156bc8a23e", "0123456789abcdef");
-    uint32 r = strhex((const char*)t);
+    unsigned r = strhex((const char*)t);
     //8421 8421 8421 8421 8421 8421
     //abcd efgh ijkl mnop qrst uvwx
     //ijkl qrst opab cduv wxef ghmn
@@ -42,16 +65,20 @@ bool Cheat::decode(char *str, uint32 &addr, uint8 &data, uint8 &type) {
            (!!(r & 0x000080) <<  1) | (!!(r & 0x000040) <<  0);
     data = r >> 24;
     return true;
+  } else {
+    return false;
   }
-  return false;
 }
 
-bool Cheat::encode(char *str, uint32 addr, uint8 data, uint8 type) {
+bool Cheat::encode(string &str, unsigned addr, uint8 data, type_t type) {
+  char t[16];
+
   if(type == ProActionReplay) {
-    sprintf(str, "%0.6x:%0.2x", addr, data);
+    sprintf(t, "%0.6x:%0.2x", addr, data);
+    str = t;
     return true;
   } else if(type == GameGenie) {
-  uint32 r = addr;
+    unsigned r = addr;
     addr = (!!(r & 0x008000) << 23) | (!!(r & 0x004000) << 22) |
            (!!(r & 0x002000) << 21) | (!!(r & 0x001000) << 20) |
            (!!(r & 0x000080) << 19) | (!!(r & 0x000040) << 18) |
@@ -64,11 +91,13 @@ bool Cheat::encode(char *str, uint32 addr, uint8 data, uint8 type) {
            (!!(r & 0x080000) <<  5) | (!!(r & 0x040000) <<  4) |
            (!!(r & 0x020000) <<  3) | (!!(r & 0x010000) <<  2) |
            (!!(r & 0x000800) <<  1) | (!!(r & 0x000400) <<  0);
-    sprintf(str, "%0.2x%0.2x-%0.4x", data, addr >> 16, addr & 0xffff);
-    strtr(str, "0123456789abcdef", "df4709156bc8a23e");
+    sprintf(t, "%0.2x%0.2x-%0.4x", data, addr >> 16, addr & 0xffff);
+    strtr(t, "0123456789abcdef", "df4709156bc8a23e");
+    str = t;
     return true;
+  } else {
+    return false;
   }
-  return false;
 }
 
 /*****
@@ -78,21 +107,21 @@ bool Cheat::encode(char *str, uint32 addr, uint8 data, uint8 type) {
  * clear() disable specified address, mirror accordingly
  *****/
 
-uint Cheat::mirror_address(uint addr) {
+unsigned Cheat::mirror_address(unsigned addr) const {
   if((addr & 0x40e000) != 0x0000) return addr;
   //8k WRAM mirror
   //$[00-3f|80-bf]:[0000-1fff] -> $7e:[0000-1fff]
   return (0x7e0000 + (addr & 0x1fff));
 }
 
-void Cheat::set(uint32 addr) {
+void Cheat::set(unsigned addr) {
   addr = mirror_address(addr);
 
   mask[addr >> 3] |= 1 << (addr & 7);
   if((addr & 0xffe000) == 0x7e0000) {
     //mirror $7e:[0000-1fff] to $[00-3f|80-bf]:[0000-1fff]
-    uint mirror;
-    for(int x = 0; x <= 0x3f; x++) {
+    unsigned mirror;
+    for(unsigned x = 0; x <= 0x3f; x++) {
       mirror = ((0x00 + x) << 16) + (addr & 0x1fff);
       mask[mirror >> 3] |= 1 << (mirror & 7);
       mirror = ((0x80 + x) << 16) + (addr & 0x1fff);
@@ -101,20 +130,20 @@ void Cheat::set(uint32 addr) {
   }
 }
 
-void Cheat::clear(uint32 addr) {
+void Cheat::clear(unsigned addr) {
   addr = mirror_address(addr);
 
-  //is there more than one cheat code using the same address
-  //(and likely a different override value) that is enabled?
-  //if so, do not clear code lookup table entry for this address.
+  //if there is more than one cheat code using the same address,
+  //(eg with a different override value) then do not clear code
+  //lookup table entry.
   uint8 r;
-  if(read(addr, r) == true)return;
+  if(read(addr, r) == true) return;
 
   mask[addr >> 3] &= ~(1 << (addr & 7));
   if((addr & 0xffe000) == 0x7e0000) {
     //mirror $7e:[0000-1fff] to $[00-3f|80-bf]:[0000-1fff]
-    uint mirror;
-    for(int x = 0; x <= 0x3f; x++) {
+    unsigned mirror;
+    for(unsigned x = 0; x <= 0x3f; x++) {
       mirror = ((0x00 + x) << 16) + (addr & 0x1fff);
       mask[mirror >> 3] &= ~(1 << (mirror & 7));
       mirror = ((0x80 + x) << 16) + (addr & 0x1fff);
@@ -130,12 +159,12 @@ void Cheat::clear(uint32 addr) {
  * when true, cheat code substitution value is stored in data.
  *****/
 
-bool Cheat::read(uint32 addr, uint8 &data) {
+bool Cheat::read(unsigned addr, uint8 &data) const {
   addr = mirror_address(addr);
-  for(int i = 0; i < cheat_count; i++) {
+  for(unsigned i = 0; i < code.size(); i++) {
     if(enabled(i) == false) continue;
-    if(addr == mirror_address(index[i].addr)) {
-      data = index[i].data;
+    if(addr == mirror_address(code[i].addr)) {
+      data = code[i].data;
       return true;
     }
   }
@@ -150,96 +179,74 @@ bool Cheat::read(uint32 addr, uint8 &data) {
  *****/
 
 void Cheat::update_cheat_status() {
-  for(unsigned i = 0; i < cheat_count; i++) {
-    if(index[i].enabled) {
-      cheat_enabled = true;
+  for(unsigned i = 0; i < code.size(); i++) {
+    if(code[i].enabled) {
+      cheat_system_enabled = true;
       return;
     }
   }
-  cheat_enabled = false;
+  cheat_system_enabled = false;
 }
 
 /*****
  * cheat list manipulation routines
  *****/
 
-bool Cheat::add(bool enable, char *code, char *desc) {
-  if(cheat_count >= CheatLimit) return false;
+bool Cheat::add(bool enable, const char *code_, const char *desc_) {
+  unsigned addr;
+  uint8    data;
+  type_t   type;
+  if(decode(code_, addr, data, type) == false) return false;
 
-  uint32 addr, len;
-  uint8  data, type;
-  if(decode(code, addr, data, type) == false) return false;
-
-  index[cheat_count].enabled = enable;
-  index[cheat_count].addr = addr;
-  index[cheat_count].data = data;
-  len = strlen(code);
-  len = len > 16 ? 16 : len;
-  memcpy(index[cheat_count].code, code, len);
-  index[cheat_count].code[len] = 0;
-  len = strlen(desc);
-  len = len > 128 ? 128 : len;
-  memcpy(index[cheat_count].desc, desc, len);
-  index[cheat_count].desc[len] = 0;
-  cheat_count++;
+  unsigned n = code.size();
+  code[n].enabled = enable;
+  code[n].addr = addr;
+  code[n].data = data;
+  code[n].code = code_;
+  code[n].desc = desc_;
   (enable) ? set(addr) : clear(addr);
 
   update_cheat_status();
   return true;
 }
 
-bool Cheat::edit(uint32 n, bool enable, char *code, char *desc) {
-  if(n >= cheat_count) return false;
-
-  uint32 addr, len;
-  uint8  data, type;
-  if(decode(code, addr, data, type) == false) return false;
+bool Cheat::edit(unsigned n, bool enable, const char *code_, const char *desc_) {
+  unsigned addr;
+  uint8    data;
+  type_t   type;
+  if(decode(code_, addr, data, type) == false) return false;
 
   //disable current code and clear from code lookup table
-  index[n].enabled = false;
-  clear(index[n].addr);
+  code[n].enabled = false;
+  clear(code[n].addr);
 
   //update code and enable in code lookup table
-  index[n].enabled = enable;
-  index[n].addr = addr;
-  index[n].data = data;
-  len = strlen(code);
-  len = len > 16 ? 16 : len;
-  memcpy(index[n].code, code, len);
-  index[n].code[len] = 0;
-  len = strlen(desc);
-  len = len > 128 ? 128 : len;
-  memcpy(index[n].desc, desc, len);
-  index[n].desc[len] = 0;
+  code[n].enabled = enable;
+  code[n].addr = addr;
+  code[n].data = data;
+  code[n].code = code_;
+  code[n].desc = desc_;
   set(addr);
 
   update_cheat_status();
   return true;
 }
 
-bool Cheat::remove(uint32 n) {
-  if(n >= cheat_count) return false;
+bool Cheat::remove(unsigned n) {
+  unsigned size = code.size();
+  if(n >= size) return false; //also verifies size cannot be < 1
 
-  for(unsigned i = n; i < cheat_count; i++) {
-    index[i].enabled = index[i + 1].enabled;
-    index[i].addr    = index[i + 1].addr;
-    index[i].data    = index[i + 1].data;
-    strcpy(index[i].desc, index[i + 1].desc);
-  }
-
-  cheat_count--;
+  for(unsigned i = n; i < size - 1; i++) code[i] = code[i + 1];
+  code.resize(size - 1);
 
   update_cheat_status();
   return true;
 }
 
-bool Cheat::get(uint32 n, bool &enable, uint32 &addr, uint8 &data, char *code, char *desc) {
-  if(n >= cheat_count) return false;
-  enable = index[n].enabled;
-  addr   = index[n].addr;
-  data   = index[n].data;
-  strcpy(code, index[n].code);
-  strcpy(desc, index[n].desc);
+bool Cheat::get(unsigned n, cheat_t &cheat) const {
+  if(n >= code.size()) return false;
+
+  cheat = code[n];
   return true;
 }
 
@@ -247,22 +254,23 @@ bool Cheat::get(uint32 n, bool &enable, uint32 &addr, uint8 &data, char *code, c
  * code status modifier routines
  *****/
 
-bool Cheat::enabled(uint32 n) {
-  if(n >= cheat_count) return false;
-  return index[n].enabled;
+bool Cheat::enabled(unsigned n) const {
+  return (n < code.size()) ? code[n].enabled : false;
 }
 
-void Cheat::enable(uint32 n) {
-  if(n >= cheat_count) return;
-  index[n].enabled = true;
-  set(index[n].addr);
+void Cheat::enable(unsigned n) {
+  if(n >= code.size()) return;
+
+  code[n].enabled = true;
+  set(code[n].addr);
   update_cheat_status();
 }
 
-void Cheat::disable(uint32 n) {
-  if(n >= cheat_count) return;
-  index[n].enabled = false;
-  clear(index[n].addr);
+void Cheat::disable(unsigned n) {
+  if(n >= code.size()) return;
+
+  code[n].enabled = false;
+  clear(code[n].addr);
   update_cheat_status();
 }
 
@@ -288,40 +296,39 @@ bool Cheat::load(const char *fn) {
     split(part, ",", line[i]);
     if(::count(part) != 3) continue;
     trim(part[2], "\"");
-    add(part[1] == "enabled", part[0](), part[2]());
+    add(part[1] == "enabled", part[0], part[2]);
   }
 
   return true;
 }
 
-bool Cheat::save(const char *fn) {
+bool Cheat::save(const char *fn) const {
   file fp;
   if(!fp.open(fn, file::mode_write)) return false;
-  for(unsigned i = 0; i < cheat_count; i++) {
+  for(unsigned i = 0; i < code.size(); i++) {
     fp.print(string()
-      << index[i].code << " = "
-      << (index[i].enabled ? "enabled" : "disabled") << ", \""
-      << index[i].desc << "\"\r\n");
+      << code[i].code << " = "
+      << (code[i].enabled ? "enabled" : "disabled") << ", "
+      << "\"" << code[i].desc << "\""
+      << "\r\n");
   }
   fp.close();
   return true;
 }
 
-/*****
- * initialization routines
- *****/
+void Cheat::sort() {
+  if(code.size() <= 1) return;  //nothing to sort?
+  cheat_t *buffer = new cheat_t[code.size()];
+  for(unsigned i = 0; i < code.size(); i++) buffer[i] = code[i];
+  nall::sort(buffer, code.size());
+  for(unsigned i = 0; i < code.size(); i++) code[i] = buffer[i];
+  delete[] buffer;
+}
 
 void Cheat::clear() {
-  cheat_enabled = false;
-  cheat_count = 0;
+  cheat_system_enabled = false;
   memset(mask, 0, 0x200000);
-  for(unsigned i = 0; i <= CheatLimit; i++) {
-    index[i].enabled = false;
-    index[i].addr = 0x000000;
-    index[i].data = 0x00;
-    strcpy(index[i].code, "");
-    strcpy(index[i].desc, "");
-  }
+  code.reset();
 }
 
 Cheat::Cheat() {

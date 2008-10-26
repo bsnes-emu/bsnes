@@ -20,6 +20,7 @@ public:
 
   Label    input_caps;
   Checkbox input_keyboard;
+  Checkbox input_mouse;
   Checkbox input_joypad;
 
   Label    restart_message;

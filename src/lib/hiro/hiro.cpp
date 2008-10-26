@@ -1,4 +1,4 @@
-#include "hiro.h"
+#include "hiro.hpp"
 using namespace nall;
 
 #if defined(_WIN32)

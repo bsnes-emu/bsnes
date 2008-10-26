@@ -5,7 +5,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <nall/static.hpp>
 #include <nall/stdint.hpp>
 
 namespace nall {
@@ -31,41 +30,54 @@ struct keyboard {
   };
 };
 
+struct mouse {
+  enum { buttons = 8 };
+
+  enum {
+    none = keyboard::limit,
+    x, y, z,
+    button,
+    limit = button + buttons,
+  };
+};
+
 template<int number = -1> struct joypad {
+  enum { axes = 8 };
+  enum { buttons = 96 };
+
   enum {
     none = joypad<number - 1>::limit,
     up, down, left, right,
-    button_00, button_01, button_02, button_03,
-    button_04, button_05, button_06, button_07,
-    button_08, button_09, button_10, button_11,
-    button_12, button_13, button_14, button_15,
-    limit,
+    axis,
+    button = axis + axes,
+    limit = button + buttons,
   };
 };
 
 template<> struct joypad<-1> {
+  enum { count = 16 };
+  enum { axes = 8 };
+  enum { buttons = 96 };
+
   enum {
     none,
     up, down, left, right,
-    button_00, button_01, button_02, button_03,
-    button_04, button_05, button_06, button_07,
-    button_08, button_09, button_10, button_11,
-    button_12, button_13, button_14, button_15,
-    length = button_15 - none + 1, //number of syms per joypad
-    limit = keyboard::limit, //start joypad syms immediately after keyboard syms
+    axis,
+    button = axis + axes,
+    length = button + buttons - none,  //number of syms per joypad
+    limit = mouse::limit,
   };
 
-  static uint16_t index(int joypad_number, int joypad_enum) {
-    if(joypad_number < 0 || joypad_number > 15) return keyboard::none;
+  static uint16_t index(unsigned joypad_number, unsigned joypad_enum) {
+    if(joypad_number >= count) return keyboard::none;
     return limit + joypad_number * length + joypad_enum;
   }
 };
 
-enum { input_limit = joypad<15>::limit };
+enum { input_limit = joypad<joypad<>::count - 1>::limit };
 
-static static_assert<keyboard::limit < 256> keyboard_length_assert; //error if keyboard syms spill into joypad syms
-
-static const char keyboard_table[][64] = {
+static const char sym_table[][64] = {
+  //keyboard
   "none",
   "escape", "f1", "f2", "f3", "f4", "f5", "f6", "f7", "f8", "f9", "f10", "f11", "f12",
   "print_screen", "scroll_lock", "pause", "tilde",
@@ -81,24 +93,39 @@ static const char keyboard_table[][64] = {
   "up", "down", "left", "right",
   "tab", "return", "spacebar",
   "lctrl", "rctrl", "lalt", "ralt", "lshift", "rshift", "lsuper", "rsuper", "menu",
-  "limit",
+  "keyboard.limit",
+
+  //mouse
+  "mouse.x", "mouse.y", "mouse.z",
+  "mouse.button00", "mouse.button01", "mouse.button02", "mouse.button03",
+  "mouse.button04", "mouse.button05", "mouse.button06", "mouse.button07",
+  "mouse.limit",
 };
 
 static const char* input_find(uint16_t key) {
-  if(key < keyboard::limit) return keyboard_table[key];
+  if(key < mouse::limit) return sym_table[key];
+
   static char buffer[64];
-  for(uint16_t j = 0; j < 16; j++) {
+  for(unsigned j = 0; j < 16; j++) {
     if(key == joypad<>::index(j, joypad<>::up)) { sprintf(buffer, "joypad%0.2d.up", j); return buffer; }
     if(key == joypad<>::index(j, joypad<>::down)) { sprintf(buffer, "joypad%0.2d.down", j); return buffer; }
     if(key == joypad<>::index(j, joypad<>::left)) { sprintf(buffer, "joypad%0.2d.left", j); return buffer; }
     if(key == joypad<>::index(j, joypad<>::right)) { sprintf(buffer, "joypad%0.2d.right", j); return buffer; }
-    if(key >= joypad<>::index(j, joypad<>::button_00)
-    && key <= joypad<>::index(j, joypad<>::button_15)) {
-      sprintf(buffer, "joypad%0.2d.button_%0.2d", j, key - joypad<>::index(j, joypad<>::button_00));
+
+    if(key >= joypad<>::index(j, joypad<>::axis + 0)
+    && key <  joypad<>::index(j, joypad<>::axis + joypad<>::axes)) {
+      sprintf(buffer, "joypad%0.2d.axis%0.2d", j, key - joypad<>::index(j, joypad<>::axis));
+      return buffer;
+    }
+
+    if(key >= joypad<>::index(j, joypad<>::button + 0)
+    && key <  joypad<>::index(j, joypad<>::button + joypad<>::buttons)) {
+      sprintf(buffer, "joypad%0.2d.button%0.2d", j, key - joypad<>::index(j, joypad<>::button));
       return buffer;
     }
   }
-  return keyboard_table[0]; //"none"
+
+  return "none";
 }
 
 static char* input_find(char *out, uint16_t key) {
@@ -107,8 +134,8 @@ static char* input_find(char *out, uint16_t key) {
 }
 
 static uint16_t input_find(const char *key) {
-  for(uint16_t i = 0; i < keyboard::limit; i++) {
-    if(!strcmp(keyboard_table[i], key)) return i;
+  for(unsigned i = 0; i < mouse::limit; i++) {
+    if(!strcmp(sym_table[i], key)) return i;
   }
 
   if(memcmp(key, "joypad", 6)) return keyboard::none;
@@ -116,17 +143,30 @@ static uint16_t input_find(const char *key) {
   if(!*key || !*(key + 1)) return keyboard::none;
   uint8_t j = (*key - '0') * 10 + (*(key + 1) - '0');
   if(j > 15) return keyboard::none;
+
   key += 2;
   if(!strcmp(key, ".up")) return joypad<>::index(j, joypad<>::up);
   if(!strcmp(key, ".down")) return joypad<>::index(j, joypad<>::down);
   if(!strcmp(key, ".left")) return joypad<>::index(j, joypad<>::left);
   if(!strcmp(key, ".right")) return joypad<>::index(j, joypad<>::right);
-  if(memcmp(key, ".button_", 8)) return keyboard::none;
-  key += 8;
-  if(!*key || !*(key + 1)) return keyboard::none;
-  uint8_t button = (*key - '0') * 10 + (*(key + 1) - '0');
-  if(button > 15) return keyboard::none;
-  return joypad<>::index(j, joypad<>::button_00 + button);
+
+  if(!memcmp(key, ".axis", 5)) {
+    key += 5;
+    if(!*key || !*(key + 1)) return keyboard::none;
+    uint8_t axis = (*key - '0') * 10 + (*(key + 1) - '0');
+    if(axis >= joypad<>::axes) return keyboard::none;
+    return joypad<>::index(j, joypad<>::axis + axis);
+  }
+
+  if(!memcmp(key, ".button", 7)) {
+    key += 7;
+    if(!*key || !*(key + 1)) return keyboard::none;
+    uint8_t button = (*key - '0') * 10 + (*(key + 1) - '0');
+    if(button >= joypad<>::buttons) return keyboard::none;
+    return joypad<>::index(j, joypad<>::button + button);
+  }
+
+  return keyboard::none;
 }
 
 } //namespace nall

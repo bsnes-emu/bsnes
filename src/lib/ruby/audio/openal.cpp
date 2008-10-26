@@ -1,11 +1,9 @@
 #include <AL/al.h>
 #include <AL/alc.h>
 
-#include <ruby/ruby.h>
-
 namespace ruby {
 
-#include "openal.h"
+#include "openal.hpp"
 
 class pAudioOpenAL {
 public:

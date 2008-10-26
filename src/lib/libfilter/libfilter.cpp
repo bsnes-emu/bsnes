@@ -1,4 +1,4 @@
-#include "libfilter.h"
+#include "libfilter.hpp"
 using nall::min;
 using nall::max;
 

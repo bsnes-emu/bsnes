@@ -1,10 +1,8 @@
 #include <alsa/asoundlib.h>
 
-#include <ruby/ruby.h>
-
 namespace ruby {
 
-#include "alsa.h"
+#include "alsa.hpp"
 
 class pAudioALSA {
 public:

@@ -11,4 +11,6 @@ public:
 
 private:
   FILE *pcmfp;
+
+  friend class SNES;
 } audio;

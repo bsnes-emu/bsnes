@@ -1,12 +1,5 @@
-#include "hiro.h"
-
-#include <nall/algorithm.hpp>
-using nall::min;
-using nall::max;
-
-#include <nall/utf8.hpp>
-using nall::utf8;
-using nall::utf16;
+#include "hiro.hpp"
+#include "port.cpp"
 
 namespace libhiro {
 
@@ -66,10 +59,14 @@ bool pHiro::run() {
   MSG msg;
   if(PeekMessage(&msg, 0, 0, 0, PM_REMOVE)) {
     //TODO: IsDialogMessage() does not clear keyboard buffer, but is required for tab key to work ...
-    //if(!IsDialogMessage(GetParent(msg.hwnd) ? GetParent(msg.hwnd) : msg.hwnd, &msg)) {
+    #if defined(HIRO_WIN_TABSTOP)
+    if(!IsDialogMessage(GetParent(msg.hwnd) ? GetParent(msg.hwnd) : msg.hwnd, &msg)) {
+    #endif
       TranslateMessage(&msg);
       DispatchMessage(&msg);
-    //}
+    #if defined(HIRO_WIN_TABSTOP)
+    }
+    #endif
   }
   return pending();
 }
@@ -147,7 +144,7 @@ bool pHiro::file_open(Window *focus, char *filename, const char *path, const cha
   ofn.lpstrInitialDir = wdir;
   ofn.lpstrFile       = wfilename;
   ofn.nMaxFile        = MAX_PATH;
-  ofn.Flags           = OFN_EXPLORER | OFN_FILEMUSTEXIST;
+  ofn.Flags           = OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_HIDEREADONLY;
   ofn.lpstrDefExt     = L"";
 
   bool result = GetOpenFileName(&ofn);
@@ -195,7 +192,7 @@ bool pHiro::file_save(Window *focus, char *filename, const char *path, const cha
   ofn.lpstrInitialDir = wdir;
   ofn.lpstrFile       = wfilename;
   ofn.nMaxFile        = MAX_PATH;
-  ofn.Flags           = OFN_EXPLORER | OFN_FILEMUSTEXIST;
+  ofn.Flags           = OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_HIDEREADONLY;
   ofn.lpstrDefExt     = L"";
 
   bool result = GetSaveFileName(&ofn);
@@ -290,13 +287,29 @@ LRESULT pHiro::wndproc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
     case WM_KEYDOWN: {
       if(!p || p->self.type != Widget::WindowType) break;
       Window &w = ((pWindow*)p)->self;
-      if(w.on_keydown) w.on_keydown(event_t(event_t::KeyDown, translate_key(wparam), &w));
+      if(w.on_input) w.on_input(event_t(event_t::Input, translate_key(wparam) + (1 << 16), &w));
     } break;
 
     case WM_KEYUP: {
       if(!p || p->self.type != Widget::WindowType) break;
       Window &w = ((pWindow*)p)->self;
-      if(w.on_keyup) w.on_keyup(event_t(event_t::KeyUp, translate_key(wparam), &w));
+      if(w.on_input) w.on_input(event_t(event_t::Input, translate_key(wparam) + (0 << 16), &w));
+    } break;
+
+    case WM_LBUTTONDOWN:
+    case WM_RBUTTONDOWN: {
+      if(!p || p->self.type != Widget::CanvasType) break;
+      Canvas &canvas = ((pCanvas*)p)->self;
+      uintptr_t param = (msg == WM_LBUTTONDOWN ? mouse::button + 0 : mouse::button + 1) + (1 << 16);
+      if(canvas.on_input) canvas.on_input(event_t(event_t::Input, param, &canvas));
+    } break;
+
+    case WM_LBUTTONUP:
+    case WM_RBUTTONUP: {
+      if(!p || p->self.type != Widget::CanvasType) break;
+      Canvas &canvas = ((pCanvas*)p)->self;
+      uintptr_t param = (msg == WM_LBUTTONUP ? mouse::button + 0 : mouse::button + 1) + (0 << 16);
+      if(canvas.on_input) canvas.on_input(event_t(event_t::Input, param, &canvas));
     } break;
 
     case WM_ERASEBKGND: {
@@ -327,32 +340,45 @@ LRESULT pHiro::wndproc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
           MenuItem &w = (MenuItem&)*widget;
           if(w.on_tick) w.on_tick(event_t(event_t::Tick, 0, &w));
         } break;
+
         case Widget::MenuCheckItemType: {
           MenuCheckItem &w = (MenuCheckItem&)*widget;
           w.check(!w.checked()); //invert check state
           if(w.on_tick) w.on_tick(event_t(event_t::Tick, w.checked(), &w));
         } break;
+
         case Widget::MenuRadioItemType: {
           MenuRadioItem &w = (MenuRadioItem&)*widget;
           bool checked = w.checked();
           w.check();
           if(!checked && w.on_tick) w.on_tick(event_t(event_t::Tick, w.checked(), &w));
         } break;
+
         case Widget::ButtonType: {
           Button &w = (Button&)*widget;
           if(w.on_tick) w.on_tick(event_t(event_t::Tick, 0, &w));
         } break;
+
         case Widget::CheckboxType: {
           Checkbox &w = (Checkbox&)*widget;
           w.check(!w.checked()); //invert check state
           if(w.on_tick) w.on_tick(event_t(event_t::Tick, w.checked(), &w));
         } break;
+
         case Widget::RadioboxType: {
           Radiobox &w = (Radiobox&)*widget;
           bool checked = w.checked();
           w.check();
           if(!checked && w.on_tick) w.on_tick(event_t(event_t::Tick, w.checked(), &w));
         } break;
+
+        case Widget::EditboxType: {
+          Editbox &editbox = (Editbox&)*widget;
+          if(HIWORD(wparam) == EN_CHANGE) {
+            if(editbox.on_change) editbox.on_change(event_t(event_t::Change, 0, &editbox));
+          }
+        } break;
+
         case Widget::ComboboxType: {
           Combobox &combobox = (Combobox&)*widget;
           if(HIWORD(wparam) == CBN_SELCHANGE) {
@@ -384,13 +410,28 @@ LRESULT pHiro::wndproc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
       switch(widget->type) {
         case Widget::ListboxType: {
           Listbox &listbox = (Listbox&)*widget;
-          if(((LPNMHDR)lparam)->code == LVN_ITEMCHANGED
-            && ((LPNMLISTVIEW)lparam)->uChanged & LVIF_STATE
-            && ListView_GetItemState(listbox.p.hwnd, ((LPNMLISTVIEW)lparam)->iItem, LVIS_FOCUSED)
-            && ListView_GetItemState(listbox.p.hwnd, ((LPNMLISTVIEW)lparam)->iItem, LVIS_SELECTED)
-          ) {
-            if(listbox.on_change) listbox.on_change(event_t(event_t::Change, listbox.get_selection(), &listbox));
-          } else if(((LPNMHDR)lparam)->code == LVN_ITEMACTIVATE) {
+          LPNMHDR nmhdr = (LPNMHDR)lparam;
+          LPNMLISTVIEW nmlistview = (LPNMLISTVIEW)lparam;
+
+          if(nmhdr->code == LVN_ITEMCHANGED && (nmlistview->uChanged & LVIF_STATE)) {
+            //LVN_ITEMCHANGED is sent whenever an item gains or loses either focus or selection;
+            //it does not send a special message to indicate that no items are focused or selected.
+            //it will send two messages when a different item gains selection -- the first to remove
+            //focus from the old item, the second to set selection to the new item.
+            //hiro sends only one message whenever an item changed (eg gained selection),
+            //including for deselection of all items. below code adapts win32 model to hiro model.
+            //(focused means an item has a dotted outline box around it, but is not highlighted.)
+            //(selected means an item is highlighted.)
+            if((nmlistview->uOldState & LVIS_FOCUSED) && !(nmlistview->uNewState & LVIS_FOCUSED)) {
+              listbox.p.lostfocus = true;
+            } else {
+              if((!(nmlistview->uOldState & LVIS_SELECTED) && (nmlistview->uNewState & LVIS_SELECTED))
+              || (listbox.p.lostfocus == false && listbox.get_selection() == -1)) {
+                if(listbox.on_change) listbox.on_change(event_t(event_t::Change, listbox.get_selection(), &listbox));
+              }
+              listbox.p.lostfocus = false;
+            }
+          } else if(nmhdr->code == LVN_ITEMACTIVATE) {
             if(listbox.on_activate) listbox.on_activate(event_t(event_t::Activate, listbox.get_selection(), &listbox));
           }
         } break;

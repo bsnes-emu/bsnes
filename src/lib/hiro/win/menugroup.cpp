@@ -26,6 +26,23 @@ void pMenuGroup::attach(MenuControl &menucontrol) {
   menucontrol.p.parent = group;
 }
 
+void pMenuGroup::enable(bool state) {
+  EnableMenuItem(parent, (unsigned)group, MF_BYCOMMAND | (state ? MF_ENABLED : MF_GRAYED));
+}
+
+void pMenuGroup::disable() {
+  enable(false);
+}
+
+bool pMenuGroup::enabled() {
+  MENUITEMINFO info;
+  memset(&info, 0, sizeof info);
+  info.cbSize = sizeof info;
+  info.fMask = MIIM_STATE;
+  GetMenuItemInfo(parent, (unsigned)group, false, &info);
+  return info.fState & MFS_ENABLED;
+}
+
 pMenuGroup::pMenuGroup(MenuGroup &self_) : pMenuControl(self_), self(self_) {
   group = 0;
 }

@@ -7,6 +7,8 @@ class VideoFilter;
 class SNES {
 public:
   enum Region { NTSC = 0, PAL = 1 };
+  enum RegionAutodetect { Autodetect = 2 };
+  enum ExpansionPortDevice { ExpansionNone = 0, ExpansionBSX = 1 };
 
   //system functions
   virtual void run();
@@ -20,9 +22,10 @@ public:
   virtual void frame();
   virtual void scanline();
 
-  //PAL/NTSC
+  //return *active* region / expansion port device information
+  //settings cached upon power-on
   Region region();
-  void set_region(Region);
+  ExpansionPortDevice expansion();
 
   #include "video/video.h"
   #include "audio/audio.h"
@@ -32,7 +35,8 @@ public:
   virtual ~SNES() {}
 
 private:
-  Region snes_region;
+  unsigned snes_region;
+  unsigned snes_expansion;
 };
 
 extern SNES snes;

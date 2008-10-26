@@ -1,4 +1,5 @@
-#include "hiro.h"
+#include "hiro.hpp"
+#include "port.cpp"
 
 #include <nall/algorithm.hpp>
 using nall::min;
@@ -40,16 +41,6 @@ static void set_default_font(GtkWidget *widget) {
     #include "slider.cpp"
 
 void pHiro::init() {
-  //simulate passing argc, argv to gtk_init()
-  int argc = 1;
-  char **argv;
-  argv = (char**)malloc(1 * sizeof(char*));
-  argv[0] = (char*)malloc(64 * sizeof(char));
-  strcpy(argv[0], "./hiro");
-  gtk_init(&argc, &argv);
-  free(argv[0]);
-  free(argv);
-
   is_composited = false;
   *default_path = 0;
   screen = gdk_screen_get_default();

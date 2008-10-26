@@ -94,4 +94,5 @@ void pListbox::reset() {
 
 pListbox::pListbox(Listbox &self_) : pFormControl(self_), self(self_) {
   column_count = 0;
+  lostfocus = false;  //used for message parsing
 }

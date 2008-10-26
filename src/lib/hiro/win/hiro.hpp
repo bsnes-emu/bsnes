@@ -5,39 +5,53 @@
 #undef _WIN32_WINNT
 #undef _WIN32_IE
 #undef NOMINMAX
+#undef _NO_OLDNAMES
 
 #define WINVER 0x0501
 #define _WIN32_WINNT 0x0501
 #define _WIN32_IE 0x0600
 #define NOMINMAX
+#define _NO_OLDNAMES
 
 #define UNICODE
 #include <windows.h>
 #include <commctrl.h>
+#include <io.h>
+#include <direct.h>
 #include <shlobj.h>
+
+#include <nall/algorithm.hpp>
+using nall::min;
+using nall::max;
+
+#include <nall/utf8.hpp>
+using nall::utf8;
+using nall::utf16;
+
+extern int hiromain(int argc, const char *const argv[]);
 
 namespace libhiro {
 
-#include "widget.h"
-  #include "window.h"
-  #include "menucontrol.h"
-    #include "menugroup.h"
-    #include "menuitem.h"
-    #include "menucheckitem.h"
-    #include "menuradioitem.h"
-    #include "menuseparator.h"
-  #include "formcontrol.h"
-    #include "frame.h"
-    #include "canvas.h"
-    #include "label.h"
-    #include "button.h"
-    #include "checkbox.h"
-    #include "radiobox.h"
-    #include "editbox.h"
-    #include "listbox.h"
-    #include "combobox.h"
-    #include "progressbar.h"
-    #include "slider.h"
+#include "widget.hpp"
+  #include "window.hpp"
+  #include "menucontrol.hpp"
+    #include "menugroup.hpp"
+    #include "menuitem.hpp"
+    #include "menucheckitem.hpp"
+    #include "menuradioitem.hpp"
+    #include "menuseparator.hpp"
+  #include "formcontrol.hpp"
+    #include "frame.hpp"
+    #include "canvas.hpp"
+    #include "label.hpp"
+    #include "button.hpp"
+    #include "checkbox.hpp"
+    #include "radiobox.hpp"
+    #include "editbox.hpp"
+    #include "listbox.hpp"
+    #include "combobox.hpp"
+    #include "progressbar.hpp"
+    #include "slider.hpp"
 
 class pHiro {
 public:

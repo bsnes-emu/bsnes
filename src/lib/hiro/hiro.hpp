@@ -1,6 +1,6 @@
 /*
   hiro
-  version: 0.006 (2008-08-12)
+  version: 0.007b (2008-10-26)
   author: byuu
   license: public domain
 */
@@ -15,6 +15,10 @@
 #include <nall/stdint.hpp>
 #include <nall/string.hpp>
 #include <nall/utility.hpp>
+
+extern char* realpath(const char*, char*);
+extern char* userpath(char*);
+int mkdir(const char*);
 
 namespace libhiro {
 
@@ -92,8 +96,7 @@ struct event_t {
   enum type_t {
     Close,
     Block,
-    KeyDown,
-    KeyUp,
+    Input,
     Change,
     Tick,
     Activate,
@@ -225,8 +228,7 @@ public:
 
   nall::function<uintptr_t (event_t)> on_close;
   nall::function<uintptr_t (event_t)> on_block;
-  nall::function<uintptr_t (event_t)> on_keydown;
-  nall::function<uintptr_t (event_t)> on_keyup;
+  nall::function<uintptr_t (event_t)> on_input;
 
   Window();
 
@@ -352,6 +354,8 @@ public:
 
   Canvas();
 
+  nall::function<uintptr_t (event_t)> on_input;
+
 private:
   pFriends;
   pCanvas &p;
@@ -434,6 +438,8 @@ public:
   void create(unsigned style, unsigned width, unsigned height, const char *text = "");
   unsigned get_text(char *text, unsigned length = -1U);
   void set_text(const char *text = "");
+
+  nall::function<uintptr_t (event_t)> on_change;
 
   Editbox();
 

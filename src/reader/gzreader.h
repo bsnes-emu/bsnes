@@ -2,8 +2,9 @@
 
 class GZReader : public Reader {
 private:
+  FILE *fp;
   gzFile gp;
-  uint32 filesize;
+  unsigned filesize;
 
 public:
   unsigned size();

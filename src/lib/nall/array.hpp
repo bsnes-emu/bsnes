@@ -58,8 +58,8 @@ public:
   }
 
   void resize(unsigned size) {
-    reserve(findsize(size));
-    buffersize = size;
+    if(size > poolsize) reserve(findsize(size));
+    if(size > buffersize) buffersize = size;
   }
 
   array() {

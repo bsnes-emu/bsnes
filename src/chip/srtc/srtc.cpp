@@ -139,7 +139,7 @@ unsigned SRTC::weekday(unsigned year, unsigned month, unsigned day) {
   return (sum + 1) % 7; //1900-01-01 was a Monday
 }
 
-uint8 SRTC::mmio_read(uint addr) {
+uint8 SRTC::mmio_read(unsigned addr) {
   addr &= 0xffff;
 
   if(addr == 0x2800) {
@@ -160,7 +160,7 @@ uint8 SRTC::mmio_read(uint addr) {
   return cpu.regs.mdr;
 }
 
-void SRTC::mmio_write(uint addr, uint8 data) {
+void SRTC::mmio_write(unsigned addr, uint8 data) {
   addr &= 0xffff;
 
   if(addr == 0x2801) {

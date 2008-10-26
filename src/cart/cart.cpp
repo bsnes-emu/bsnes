@@ -4,6 +4,7 @@
 #include <nall/crc32.hpp>
 #include <nall/ups.hpp>
 
+#include "cart_load.cpp"
 #include "cart_normal.cpp"
 #include "cart_bsx.cpp"
 #include "cart_bsc.cpp"
@@ -21,12 +22,13 @@ namespace memory {
 
 Cartridge cartridge;
 
+const char* Cartridge::name() { return info.filename; }
+Cartridge::CartridgeMode Cartridge::mode() { return info.mode; }
 Cartridge::MemoryMapper Cartridge::mapper() { return info.mapper; }
 Cartridge::Region Cartridge::region() { return info.region; }
-
 bool Cartridge::loaded() { return cart.loaded; }
 
-void Cartridge::load_begin(CartridgeType cart_type) {
+void Cartridge::load_begin(CartridgeMode mode) {
   cart.rom = cart.ram = cart.rtc = 0;
   bs.ram   = 0;
   stA.rom  = stA.ram  = 0;
@@ -37,38 +39,11 @@ void Cartridge::load_begin(CartridgeType cart_type) {
   stA.rom_size  = stA.ram_size  = 0;
   stB.rom_size  = stB.ram_size  = 0;
 
-  info.type = cart_type;
+  info.mode = mode;
   info.patched = false;
 
-  info.bsxbase  = false;
   info.bsxcart  = false;
   info.bsxflash = false;
-  info.st       = false;
-
-  info.superfx    = false;
-  info.sa1        = false;
-  info.srtc       = false;
-  info.sdd1       = false;
-  info.spc7110    = false;
-  info.spc7110rtc = false;
-  info.cx4        = false;
-  info.dsp1       = false;
-  info.dsp2       = false;
-  info.dsp3       = false;
-  info.dsp4       = false;
-  info.obc1       = false;
-  info.st010      = false;
-  info.st011      = false;
-  info.st018      = false;
-
-  info.dsp1_mapper = DSP1Unmapped;
-
-  info.header_index = 0xffc0;
-  info.mapper = LoROM;
-  info.region = NTSC;
-
-  info.rom_size = 0;
-  info.ram_size = 0;
 }
 
 void Cartridge::load_end() {
@@ -103,11 +78,11 @@ bool Cartridge::unload() {
 
   bus.unload_cart();
 
-  switch(info.type) {
-    case CartridgeNormal:      unload_cart_normal(); break;
-    case CartridgeBSX:         unload_cart_bsx();    break;
-    case CartridgeBSC:         unload_cart_bsc();    break;
-    case CartridgeSufamiTurbo: unload_cart_st();     break;
+  switch(info.mode) {
+    case ModeNormal:      unload_cart_normal(); break;
+    case ModeBSX:         unload_cart_bsx();    break;
+    case ModeBSC:         unload_cart_bsc();    break;
+    case ModeSufamiTurbo: unload_cart_st();     break;
   }
 
   if(cart.rom) { delete[] cart.rom; cart.rom = 0; }
@@ -119,9 +94,6 @@ bool Cartridge::unload() {
   if(stB.rom)  { delete[] stB.rom;  stB.rom  = 0; }
   if(stB.ram)  { delete[] stB.ram;  stB.ram  = 0; }
 
-  char fn[PATH_MAX];
-  strcpy(fn, cart.fn);
-  modify_extension(fn, "cht");
   if(cheat.count() > 0 || file::exists(get_cheat_filename(cart.fn, "cht"))) {
     cheat.save(cheatfn);
     cheat.clear();
@@ -137,4 +109,59 @@ Cartridge::Cartridge() {
 
 Cartridge::~Cartridge() {
   if(cart.loaded == true) unload();
+}
+
+//
+
+void Cartridge::cartinfo_t::reset() {
+  type        = TypeUnknown;
+  mapper      = LoROM;
+  dsp1_mapper = DSP1Unmapped;
+  region      = NTSC;
+
+  rom_size = 0;
+  ram_size = 0;
+
+  bsxslot    = false;
+  superfx    = false;
+  sa1        = false;
+  srtc       = false;
+  sdd1       = false;
+  spc7110    = false;
+  spc7110rtc = false;
+  cx4        = false;
+  dsp1       = false;
+  dsp2       = false;
+  dsp3       = false;
+  dsp4       = false;
+  obc1       = false;
+  st010      = false;
+  st011      = false;
+  st018      = false;
+}
+
+//apply cart-specific settings to current cartridge mode settings
+Cartridge::info_t& Cartridge::info_t::operator=(const Cartridge::cartinfo_t &source) {
+  mapper      = source.mapper;
+  dsp1_mapper = source.dsp1_mapper;
+  region      = source.region;
+
+  bsxslot    = source.bsxslot;
+  superfx    = source.superfx;
+  sa1        = source.sa1;
+  srtc       = source.srtc;
+  sdd1       = source.sdd1;
+  spc7110    = source.spc7110;
+  spc7110rtc = source.spc7110rtc;
+  cx4        = source.cx4;
+  dsp1       = source.dsp1;
+  dsp2       = source.dsp2;
+  dsp3       = source.dsp3;
+  dsp4       = source.dsp4;
+  obc1       = source.obc1;
+  st010      = source.st010;
+  st011      = source.st011;
+  st018      = source.st018;
+
+  return *this;
 }

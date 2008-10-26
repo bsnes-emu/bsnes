@@ -14,6 +14,20 @@ void hiro_pcanvas_expose(pCanvas *p) {
     GDK_RGB_DITHER_NONE, (guchar*)p->rbuffer, p->bpitch);
 }
 
+gboolean hiro_pcanvas_button_press(GtkWidget *widget, GdkEventButton *event, pCanvas *p) {
+  if(p->self.on_input && event->button < mouse::buttons) {
+    p->self.on_input(event_t(event_t::Input, (mouse::button + event->button) + (1 << 16), &p->self));
+  }
+  return false;  //do not propogate the event to other handlers
+}
+
+gboolean hiro_pcanvas_button_release(GtkWidget *widget, GdkEventButton *event, pCanvas *p) {
+  if(p->self.on_input && event->button < mouse::buttons) {
+    p->self.on_input(event_t(event_t::Input, (mouse::button + event->button) + (0 << 16), &p->self));
+  }
+  return false;  //do not propogate the event to other handlers
+}
+
 void pCanvas::create(unsigned style, unsigned width, unsigned height) {
   canvas = gtk_drawing_area_new();
   resize(width, height);
@@ -21,8 +35,11 @@ void pCanvas::create(unsigned style, unsigned width, unsigned height) {
   color.pixel = color.red = color.green = color.blue = 0;
   gtk_widget_modify_bg(canvas, GTK_STATE_NORMAL, &color);
   gtk_widget_set_double_buffered(canvas, false);
+  gtk_widget_add_events(canvas, GDK_EXPOSURE_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK);
   gtk_widget_show(canvas);
   g_signal_connect_swapped(G_OBJECT(canvas), "expose_event", G_CALLBACK(hiro_pcanvas_expose), (gpointer)this);
+  g_signal_connect(G_OBJECT(canvas), "button_press_event", G_CALLBACK(hiro_pcanvas_button_press), (gpointer)this);
+  g_signal_connect(G_OBJECT(canvas), "button_release_event", G_CALLBACK(hiro_pcanvas_button_release), (gpointer)this);
 }
 
 void pCanvas::redraw() {

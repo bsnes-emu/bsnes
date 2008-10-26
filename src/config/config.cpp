@@ -62,6 +62,17 @@ integral_setting SNES::controller_port1(config(), "snes.controller_port1",
   "Controller attached to SNES port 1", integral_setting::decimal, ::SNES::Input::DeviceJoypad);
 integral_setting SNES::controller_port2(config(), "snes.controller_port2",
   "Controller attached to SNES port 2", integral_setting::decimal, ::SNES::Input::DeviceJoypad);
+integral_setting SNES::expansion_port(config(), "snes.expansion_port",
+  "Device attached to SNES expansion port\n"
+  "0 = None\n"
+  "1 = Satellaview BS-X\n"
+  "", integral_setting::decimal, ::SNES::ExpansionBSX);
+integral_setting SNES::region(config(), "snes.region",
+  "SNES regional model\n"
+  "0 = Auto-detect based on cartridge\n"
+  "1 = NTSC\n"
+  "2 = PAL\n"
+  "", integral_setting::decimal, ::SNES::Autodetect);
 
 integral_setting CPU::ntsc_clock_rate(config(), "cpu.ntsc_clock_rate",
   "NTSC S-CPU clock rate (in hz)", integral_setting::decimal, 21477272);
@@ -82,9 +93,9 @@ integral_setting CPU::wram_init_value(config(), "cpu.wram_init_value",
   integral_setting::hex, 0x55);
 
 integral_setting SMP::ntsc_clock_rate(config(), "smp.ntsc_clock_rate",
-  "NTSC S-SMP clock rate (in hz)", integral_setting::decimal, 32040 * 768);
+  "NTSC S-SMP clock rate (in hz)", integral_setting::decimal, 32041 * 768);
 integral_setting SMP::pal_clock_rate(config(), "smp.pal_clock_rate",
-  "PAL S-SMP clock rate (in hz)", integral_setting::decimal,  32040 * 768);
+  "PAL S-SMP clock rate (in hz)", integral_setting::decimal,  32041 * 768);
 
 integral_setting PPU::Hack::render_scanline_position(config(), "ppu.hack.render_scanline_position",
   "Approximate HCLOCK position to render at for scanline-based renderers",

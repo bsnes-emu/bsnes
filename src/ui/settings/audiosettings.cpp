@@ -146,6 +146,12 @@ void AudioSettingsWindow::setup() {
   einput.create(0, 130, 25);
   binput.create(0, 100, 25, translate["{{audio}}Set"]);
 
+  note.create(0, 475, 54, string()
+  << translate["{{audio}}Frequency adjust is used to improve video sync timing."] << "\n"
+  << translate["{{audio}}Lower value to clean audio output."] << "\n"
+  << translate["{{audio}}Raise value to smooth video output."]
+  );
+
   unsigned y = 0;
   if(config::advanced.enable == false) {
     attach(lvolume, 0, y); y += 18;
@@ -187,6 +193,8 @@ void AudioSettingsWindow::setup() {
       boutput.disable();
     }
   }
+
+  attach(note, 0, y);
 
   svolume.on_change = bind(&AudioSettingsWindow::volume_change, this);
   slatency.on_change = bind(&AudioSettingsWindow::latency_change, this);

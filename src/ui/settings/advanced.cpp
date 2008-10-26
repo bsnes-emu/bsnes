@@ -55,6 +55,8 @@ void AdvancedWindow::load() {
     string name = config::config().list[i]->name;
 
     //blacklist (omit/hide options that can be configured through the standard UI)
+    if(name == "snes.expansion_port") continue;
+    if(name == "snes.region") continue;
     if(strbegin(name, "system.")) continue;
     if(strbegin(name, "path.")) continue;
     if(strbegin(name, "snes.controller_port")) continue;
@@ -62,11 +64,16 @@ void AdvancedWindow::load() {
     if(name == "system.emulation_speed") continue;
     if(strbegin(name, "video.windowed.")) continue;
     if(strbegin(name, "video.fullscreen.")) continue;
+    if(name == "video.synchronize") continue;
     if(strbegin(name, "audio.")) continue;
     if(name == "input.capture_mode") continue;
     if(strbegin(name, "input.joypad")) continue;
     if(strbegin(name, "input.multitap")) continue;
+    if(strbegin(name, "input.mouse")) continue;
+    if(strbegin(name, "input.superscope")) continue;
+    if(strbegin(name, "input.justifier")) continue;
     if(strbegin(name, "input.gui")) continue;
+    if(name == "misc.cheat_autosort") continue;
 
     string value_, default_;
     config::config().list[i]->get(value_);

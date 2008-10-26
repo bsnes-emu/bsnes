@@ -1,9 +1,9 @@
-  uint16 vcounter();
-  uint16 hcounter();
+  alwaysinline uint16 vcounter() { return status.vcounter; }
+  alwaysinline uint16 hcounter() { return status.hcounter; }
   uint16 hdot();
-  uint dma_counter();
+  unsigned dma_counter();
 
-  void add_clocks(uint clocks);
+  void add_clocks(unsigned clocks);
   void scanline();
   void frame();
 

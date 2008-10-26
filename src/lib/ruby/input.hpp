@@ -3,6 +3,7 @@ public:
   enum Setting {
     Handle,
     KeyboardSupport,
+    MouseSupport,
     JoypadSupport,
     AnalogAxisResistance,
   };
@@ -11,11 +12,11 @@ public:
   virtual uintptr_t get(Setting) { return false; }
   virtual bool set(Setting, uintptr_t) { return false; }
 
-  virtual bool key_down(uint16_t key) { return false; }
-  virtual bool key_up  (uint16_t key) { return !key_down(key); }
+  virtual bool acquire() { return false; }
+  virtual bool unacquire() { return false; }
+  virtual bool acquired() { return false; }
 
-  virtual void clear() {}
-  virtual void poll() {}
+  virtual bool poll(int16_t *table) { return false; }
   virtual bool init() { return true; }
   virtual void term() {}
 

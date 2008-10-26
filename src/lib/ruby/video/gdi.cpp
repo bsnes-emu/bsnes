@@ -1,11 +1,9 @@
 #include <assert.h>
 #include <windows.h>
 
-#include <ruby/ruby.h>
-
 namespace ruby {
 
-#include "gdi.h"
+#include "gdi.hpp"
 
 class pVideoGDI {
 public:

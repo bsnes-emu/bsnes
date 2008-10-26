@@ -1,10 +1,20 @@
 class Cartridge {
 public:
+  enum CartridgeMode {
+    ModeNormal,
+    ModeBSC,
+    ModeBSX,
+    ModeSufamiTurbo,
+  };
+
   enum CartridgeType {
-    CartridgeNormal,
-    CartridgeBSX,
-    CartridgeBSC,
-    CartridgeSufamiTurbo,
+    TypeNormal,
+    TypeBSC,
+    TypeBSXBIOS,
+    TypeBSX,
+    TypeSufamiTurboBIOS,
+    TypeSufamiTurbo,
+    TypeUnknown,
   };
 
   enum HeaderField {
@@ -32,9 +42,9 @@ public:
     ExLoROM,
     ExHiROM,
     SPC7110ROM,
-    BSXROM,
     BSCLoROM,
     BSCHiROM,
+    BSXROM,
     STROM,
   };
 
@@ -44,6 +54,11 @@ public:
     DSP1LoROM2MB,
     DSP1HiROM,
   };
+
+  const char* name();
+  CartridgeMode mode();
+  MemoryMapper mapper();
+  Region region();
 
   struct {
     bool loaded;
@@ -64,22 +79,16 @@ public:
     uint rom_size, ram_size;
   } stA, stB;
 
-  struct {
+  struct cartinfo_t {
     CartridgeType type;
-
-    uint32 crc32;
-    char filename[PATH_MAX * 4];
-    bool patched;
-
-    Region region;
     MemoryMapper mapper;
-    uint rom_size;
-    uint ram_size;
+    DSP1MemoryMapper dsp1_mapper;
+    Region region;
 
-    bool bsxbase;
-    bool bsxcart;
-    bool bsxflash;
-    bool st;
+    unsigned rom_size;
+    unsigned ram_size;
+
+    bool bsxslot;
     bool superfx;
     bool sa1;
     bool srtc;
@@ -96,17 +105,53 @@ public:
     bool st011;
     bool st018;
 
-    DSP1MemoryMapper dsp1_mapper;
+    void reset();
+  };
 
-    uint header_index;
+  struct info_t {
+    char filename[PATH_MAX * 4];
+    bool patched;
+
+    CartridgeMode mode;
+    MemoryMapper mapper;
+    DSP1MemoryMapper dsp1_mapper;
+    Region region;
+
+    bool bsxcart;   //is BS-X cart inserted?
+    bool bsxflash;  //is BS-X flash cart inserted into BS-X cart?
+
+    bool bsxslot;
+    bool superfx;
+    bool sa1;
+    bool srtc;
+    bool sdd1;
+    bool spc7110;
+    bool spc7110rtc;
+    bool cx4;
+    bool dsp1;
+    bool dsp2;
+    bool dsp3;
+    bool dsp4;
+    bool obc1;
+    bool st010;
+    bool st011;
+    bool st018;
+
+    info_t& operator=(const cartinfo_t&);
   } info;
 
-  MemoryMapper mapper();
-  Region region();
+  struct {
+    char fn[PATH_MAX];
+    uint8_t *data;
+    unsigned size;
+  } image;
+  bool load_image(const char*);
+  bool inspect_image(cartinfo_t &cartinfo, const char *filename);
+  bool load_ram(const char *filename, uint8_t *&data, unsigned size, uint8_t init);
 
   void load_cart_normal(const char*);
-  void load_cart_bsx(const char*, const char*);
   void load_cart_bsc(const char*, const char*);
+  void load_cart_bsx(const char*, const char*);
   void load_cart_st(const char*, const char*, const char*);
 
   void unload_cart_normal();
@@ -115,14 +160,13 @@ public:
   void unload_cart_st();
 
   bool loaded();
-  void load_begin(CartridgeType);
+  void load_begin(CartridgeMode);
   void load_end();
   bool unload();
 
-  unsigned score_header(unsigned);
-  void find_header();
-  void read_header();
-  void read_extended_header();
+  void read_header(cartinfo_t &info, const uint8_t *data, unsigned size);
+  unsigned find_header(const uint8_t *data, unsigned size);
+  unsigned score_header(const uint8_t *data, unsigned size, unsigned addr);
 
   enum CompressionMode {
     CompressionNone,    //always load without compression

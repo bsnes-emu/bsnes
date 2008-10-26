@@ -34,39 +34,41 @@ bool GZReader::ready() {
   return (gp != 0);
 }
 
-GZReader::GZReader(const char *fn) {
-  gp = 0;
-  FILE *fp = fopen(fn, "rb");
+GZReader::GZReader(const char *fn) : gp(0) {
+  #if !defined(_WIN32)
+  fp = fopen(fn, "rb");
+  #else
+  fp = _wfopen(utf16(fn), L"rb");
+  #endif
   if(!fp) return;
 
   fseek(fp, 0, SEEK_END);
   filesize = ftell(fp);
 
   if(filesize < 4) {
+    //too small to be a valid GZ archive
     fclose(fp);
     fp = 0;
     return;
   }
 
-uint32 gzsize;
-  fseek(fp, -4, SEEK_END); //jump to 4 bytes before end
+  fseek(fp, -4, SEEK_END);
+  unsigned gzsize;
   gzsize  = fgetc(fp);
-  gzsize |= fgetc(fp) <<  8;
+  gzsize |= fgetc(fp) << 8;
   gzsize |= fgetc(fp) << 16;
   gzsize |= fgetc(fp) << 24;
+  fseek(fp, 0, SEEK_SET);
 
-  fclose(fp);
-  fp = 0;
-
-  gp = gzopen(fn, "rb");
+  //zlib does not support UTF-8 filenames on Windows,
+  //thus _wfopen() wrapper above + fileno() wrapper here.
+  gp = gzdopen(fileno(fp), "rb");
   if(!gp) return;
 
-  if(!gzdirect(gp)) {
-    filesize = gzsize;
-  }
+  if(gzdirect(gp) == false) filesize = gzsize;
 
-  //empty file?
   if(filesize == 0) {
+    //archive is empty
     gzclose(gp);
     gp = 0;
     return;

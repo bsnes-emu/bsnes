@@ -25,12 +25,20 @@ static gboolean hiro_pwindow_expose(pWindow *p) {
 }
 
 static gint hiro_pwindow_keydown(GtkWidget *w, GdkEventKey *key, pWindow *p) {
-  if(p && p->self.on_keydown) p->self.on_keydown(event_t(event_t::KeyDown, phiro().translate_key(key->keyval), &p->self));
+  if(p && p->self.on_input) {
+    p->self.on_input(event_t(event_t::Input,
+      phiro().translate_key(key->keyval) + (1 << 16),
+      &p->self));
+  }
   return FALSE;
 }
 
 static gint hiro_pwindow_keyup(GtkWidget *w, GdkEventKey *key, pWindow *p) {
-  if(p && p->self.on_keyup) p->self.on_keyup(event_t(event_t::KeyUp, phiro().translate_key(key->keyval), &p->self));
+  if(p && p->self.on_input) {
+    p->self.on_input(event_t(event_t::Input,
+      phiro().translate_key(key->keyval) + (0 << 16),
+      &p->self));
+  }
   return FALSE;
 }
 

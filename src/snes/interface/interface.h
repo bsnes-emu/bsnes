@@ -5,14 +5,15 @@
  * (video, audio, input, ...)
  *****/
 
-class SNESInterface { public:
+class SNESInterface {
+public:
   void video_refresh(uint16_t *data, unsigned pitch, unsigned *line, unsigned width, unsigned height);
 
   void audio_sample(uint16_t l_sample, uint16_t r_sample);
 
   function<bool ()> input_ready;
   void input_poll();
-  bool input_poll(unsigned deviceid, unsigned id);
+  int16_t input_poll(unsigned deviceid, unsigned id);
 
   void init();
   void term();

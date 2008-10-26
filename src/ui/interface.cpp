@@ -52,14 +52,13 @@ void SNESInterface::audio_sample(uint16 l_sample, uint16 r_sample) {
 
 void SNESInterface::input_poll() {
   if(input_ready && input_ready() == false) {
-    input.clear();
+    input_manager.clear();
   } else {
-    input.poll();
+    input_manager.poll();
   }
-  input_manager.poll();
 }
 
-bool SNESInterface::input_poll(unsigned deviceid, unsigned id) {
+int16_t SNESInterface::input_poll(unsigned deviceid, unsigned id) {
   return input_manager.get_status(deviceid, id);
 }
 

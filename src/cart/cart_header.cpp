@@ -1,30 +1,70 @@
 #ifdef CART_CPP
 
-void Cartridge::read_header() {
-  uint8 *rom = cart.rom;
-  uint index = info.header_index;
-  uint8 mapper   = rom[index + MAPPER];
-  uint8 rom_type = rom[index + ROM_TYPE];
-  uint8 rom_size = rom[index + ROM_SIZE];
-  uint8 company  = rom[index + COMPANY];
-  uint8 region   = rom[index + REGION] & 0x7f;
+void Cartridge::read_header(cartinfo_t &info, const uint8_t *data, unsigned size) {
+  info.reset();
+  unsigned index = find_header(data, size);
 
-  //detect presence of BS-X flash cartridge connector (reads extended header information)
-  bool has_bsxflash = false;
-  if(rom[index - 14] == 'Z') {
-    if(rom[index - 11] == 'J') {
-      uint8 n13 = rom[index - 13];
-      if((n13 >= 'A' && n13 <= 'Z') || (n13 >= '0' && n13 <= '9')) {
-        if(company == 0x33 || (rom[index - 10] == 0x00 && rom[index - 4] == 0x00)) {
-          has_bsxflash = true;
+  //detect BS-X flash carts
+  if(data[index + 0x13] == 0x00 || data[index + 0x13] == 0xff) {
+    if(data[index + 0x14] == 0x00) {
+      const uint8_t n15 = data[index + 0x15];
+      if(n15 == 0x00 || n15 == 0x80 || n15 == 0x84 || n15 == 0x9c || n15 == 0xbc || n15 == 0xfc) {
+        if(data[index + 0x1a] == 0x33 || data[index + 0x1a] == 0xff) {
+          info.type = TypeBSX;
+          info.mapper = BSXROM;
+          info.region = NTSC;  //BS-X only released in Japan
+          return;
         }
       }
     }
   }
 
-  if(has_bsxflash == true) {
-    info.mapper = index == 0x7fc0 ? BSCLoROM : BSCHiROM;
-  } else if(index == 0x7fc0 && cart.rom_size >= 0x401000) {
+  //detect Sufami Turbo carts
+  if(!memcmp(data, "BANDAI SFC-ADX", 14)) {
+    if(!memcmp(data + 16, "SFC-ADX BACKUP", 14)) {
+      info.type = TypeSufamiTurboBIOS;
+    } else {
+      info.type = TypeSufamiTurbo;
+    }
+    info.mapper = STROM;
+    info.region = NTSC;  //Sufami Turbo only released in Japan
+    return;
+  }
+
+  //standard cart
+  uint8 mapper   = data[index + MAPPER];
+  uint8 rom_type = data[index + ROM_TYPE];
+  uint8 rom_size = data[index + ROM_SIZE];
+  uint8 company  = data[index + COMPANY];
+  uint8 region   = data[index + REGION] & 0x7f;
+
+  //detect presence of BS-X flash cartridge connector (reads extended header information)
+  if(data[index - 14] == 'Z') {
+    if(data[index - 11] == 'J') {
+      uint8 n13 = data[index - 13];
+      if((n13 >= 'A' && n13 <= 'Z') || (n13 >= '0' && n13 <= '9')) {
+        if(company == 0x33 || (data[index - 10] == 0x00 && data[index - 4] == 0x00)) {
+          info.bsxslot = true;
+        }
+      }
+    }
+  }
+
+  if(info.bsxslot == true) {
+    if(!memcmp(data + index, "Satellaview BS-X     ", 21)) {
+      //BS-X base cart
+      info.type = TypeBSXBIOS;
+      info.mapper = BSXROM;
+    } else {
+      info.type = TypeBSC;
+      info.mapper = (index == 0x7fc0 ? BSCLoROM : BSCHiROM);
+    }
+    return;
+  }
+
+  info.type = TypeNormal;
+
+  if(index == 0x7fc0 && size >= 0x401000) {
     info.mapper = ExLoROM;
   } else if(index == 0x7fc0 && mapper == 0x32) {
     info.mapper = ExLoROM;
@@ -75,7 +115,7 @@ void Cartridge::read_header() {
   }
 
   if(info.dsp1 == true) {
-    if((mapper & 0x2f) == 0x20 && cart.rom_size <= 0x100000) {
+    if((mapper & 0x2f) == 0x20 && size <= 0x100000) {
       info.dsp1_mapper = DSP1LoROM1MB;
     } else if((mapper & 0x2f) == 0x20) {
       info.dsp1_mapper = DSP1LoROM2MB;
@@ -112,8 +152,8 @@ void Cartridge::read_header() {
     info.st018 = true;
   }
 
-  if(rom[info.header_index + RAM_SIZE] & 7) {
-    info.ram_size = 1024 << (rom[info.header_index + RAM_SIZE] & 7);
+  if(data[index + RAM_SIZE] & 7) {
+    info.ram_size = 1024 << (data[index + RAM_SIZE] & 7);
   } else {
     info.ram_size = 0;
   }
@@ -122,17 +162,31 @@ void Cartridge::read_header() {
   info.region = (region <= 1 || region >= 13) ? NTSC : PAL;
 }
 
-unsigned Cartridge::score_header(unsigned addr) {
-  if(cart.rom_size < addr + 64) return 0; //image too small to contain header at this location?
-  uint8 *rom = cart.rom;
+unsigned Cartridge::find_header(const uint8_t *data, unsigned size) {
+  unsigned score_lo = score_header(data, size, 0x007fc0);
+  unsigned score_hi = score_header(data, size, 0x00ffc0);
+  unsigned score_ex = score_header(data, size, 0x40ffc0);
+  if(score_ex) score_ex += 4; //favor ExHiROM on images > 32mbits
+
+  if(score_lo >= score_hi && score_lo >= score_ex) {
+    return 0x007fc0;
+  } else if(score_hi >= score_ex) {
+    return 0x00ffc0;
+  } else {
+    return 0x40ffc0;
+  }
+}
+
+unsigned Cartridge::score_header(const uint8_t *data, unsigned size, unsigned addr) {
+  if(size < addr + 64) return 0; //image too small to contain header at this location?
   int score = 0;
 
-  uint16 resetvector = rom[addr + RESETV] | (rom[addr + RESETV + 1] << 8);
-  uint16 checksum    = rom[addr +  CKSUM] | (rom[addr +  CKSUM + 1] << 8);
-  uint16 ichecksum   = rom[addr + ICKSUM] | (rom[addr + ICKSUM + 1] << 8);
+  uint16 resetvector = data[addr + RESETV] | (data[addr + RESETV + 1] << 8);
+  uint16 checksum    = data[addr +  CKSUM] | (data[addr +  CKSUM + 1] << 8);
+  uint16 ichecksum   = data[addr + ICKSUM] | (data[addr + ICKSUM + 1] << 8);
 
-  uint8 resetop = rom[(addr & ~0x7fff) | (resetvector & 0x7fff)]; //first opcode executed upon reset
-  uint8 mapper  = rom[addr + MAPPER] & ~0x10; //mask off irrelevent FastROM-capable bit
+  uint8 resetop = data[(addr & ~0x7fff) | (resetvector & 0x7fff)]; //first opcode executed upon reset
+  uint8 mapper  = data[addr + MAPPER] & ~0x10; //mask off irrelevent FastROM-capable bit
 
   //$00:[000-7fff] contains uninitialized RAM and MMIO.
   //reset vector must point to ROM at $00:[8000-ffff] to be considered valid.
@@ -194,29 +248,14 @@ unsigned Cartridge::score_header(unsigned addr) {
   if(addr == 0x007fc0 && mapper == 0x22) score += 2; //0x22 is usually ExLoROM
   if(addr == 0x40ffc0 && mapper == 0x25) score += 2; //0x25 is usually ExHiROM
 
-  if(rom[addr + COMPANY] == 0x33) score += 2; //0x33 indicates extended header
-  if(rom[addr + ROM_TYPE] < 0x08) score++;
-  if(rom[addr + ROM_SIZE] < 0x10) score++;
-  if(rom[addr + RAM_SIZE] < 0x08) score++;
-  if(rom[addr + REGION] < 14) score++;
+  if(data[addr + COMPANY] == 0x33) score += 2; //0x33 indicates extended header
+  if(data[addr + ROM_TYPE] < 0x08) score++;
+  if(data[addr + ROM_SIZE] < 0x10) score++;
+  if(data[addr + RAM_SIZE] < 0x08) score++;
+  if(data[addr + REGION] < 14) score++;
 
   if(score < 0) score = 0;
   return score;
-}
-
-void Cartridge::find_header() {
-  unsigned score_lo = score_header(0x007fc0);
-  unsigned score_hi = score_header(0x00ffc0);
-  unsigned score_ex = score_header(0x40ffc0);
-  if(score_ex) score_ex += 4; //favor ExHiROM on images > 32mbits
-
-  if(score_lo >= score_hi && score_lo >= score_ex) {
-    info.header_index = 0x007fc0;
-  } else if(score_hi >= score_ex) {
-    info.header_index = 0x00ffc0;
-  } else {
-    info.header_index = 0x40ffc0;
-  }
 }
 
 #endif //ifdef CART_CPP

@@ -1,58 +1,29 @@
 #ifdef CART_CPP
 
-void Cartridge::load_cart_normal(const char *filename) {
-  if(!filename || !*filename) return;
-
-  uint8_t *data = 0;
+void Cartridge::load_cart_normal(const char *base) {
+  uint8_t *data;
   unsigned size;
-  if(load_file(filename, data, size, CompressionAuto) == false) return;
-  strcpy(cart.fn, filename);
+  strcpy(cart.fn, base);
 
-  load_begin(CartridgeNormal);
+  load_begin(ModeNormal);
+  if(load_image(base) == false) return;
 
-  //load ROM data, ignore 512-byte header if detected
-  if((size & 0x7fff) != 512) {
-    cart.rom = new uint8_t[cart.rom_size = size];
-    memcpy(cart.rom, data, size);
-  } else {
-    cart.rom = new uint8_t[cart.rom_size = size - 512];
-    memcpy(cart.rom, data + 512, size - 512);
-  }
-  delete[] data;
+  cartinfo_t cartinfo;
+  read_header(cartinfo, cart.rom = image.data, cart.rom_size = image.size);
+  info = cartinfo;
 
-  if(load_file(get_patch_filename(cart.fn, "ups"), data, size, CompressionInspect) == true) {
-    apply_patch(data, size, cart.rom, cart.rom_size);
-    delete[] data;
-    info.patched = true;
+  if(cartinfo.ram_size > 0) {
+    load_ram(get_save_filename(base, "srm"), cart.ram, cart.ram_size = cartinfo.ram_size, 0xff);
   }
 
-  info.crc32 = crc32_calculate(cart.rom, cart.rom_size);
-
-  find_header();
-  read_header();
-
-  if(info.ram_size > 0) {
-    cart.ram = new uint8_t[cart.ram_size = info.ram_size];
-    memset(cart.ram, 0xff, cart.ram_size);
-
-    if(load_file(get_save_filename(cart.fn, "srm"), data, size, CompressionNone) == true) {
-      memcpy(cart.ram, data, min(size, cart.ram_size));
-      delete[] data;
-    }
-  }
-
-  if(info.srtc || info.spc7110rtc) {
-    cart.rtc = new(zeromemory) uint8_t[cart.rtc_size = 20];
-    if(load_file(get_save_filename(cart.fn, "rtc"), data, size, CompressionNone) == true) {
-      memcpy(cart.rtc, data, min(size, cart.rtc_size));
-      delete[] data;
-    }
+  if(cartinfo.srtc || cartinfo.spc7110rtc) {
+    load_ram(get_save_filename(base, "rtc"), cart.rtc, cart.rtc_size = 20, 0x00);
   }
 
   load_end();
 
   //set base filename
-  strcpy(info.filename, cart.fn);
+  strcpy(info.filename, base);
   get_base_filename(info.filename);
 }
 

@@ -7,8 +7,6 @@ unsigned JMAReader::size() {
   return filesize;
 }
 
-#define MAXROM 0x800000
-
 uint8_t* JMAReader::read(unsigned length) {
   uint8_t *data = 0;
   if(!filesize) return 0;
@@ -30,7 +28,7 @@ JMAReader::JMAReader(const char *fn) : JMAFile(fn), filesize(0) {
   std::vector<JMA::jma_public_file_info> file_info = JMAFile.get_files_info();
   for(std::vector<JMA::jma_public_file_info>::iterator i = file_info.begin(); i != file_info.end(); i++) {
     //Check for valid ROM based on size
-    if((i->size <= MAXROM + 512) && (i->size > filesize)) {
+    if((i->size <= 0x1000000 + 512) && (i->size > filesize)) {
       cname = i->name;
       filesize = i->size;
     }

@@ -17,6 +17,8 @@ extern struct Path {
 extern struct SNES {
   static integral_setting controller_port1;
   static integral_setting controller_port2;
+  static integral_setting expansion_port;
+  static integral_setting region;
 } snes;
 
 extern struct CPU {

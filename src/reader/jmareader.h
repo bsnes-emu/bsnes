@@ -9,6 +9,6 @@ public:
 
 private:
   JMA::jma_open JMAFile;
-  uint32 filesize;
+  unsigned filesize;
   std::string cname;
 };

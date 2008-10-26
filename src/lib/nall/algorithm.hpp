@@ -16,6 +16,12 @@ T max(const T& t, const U& u) {
   return t > u ? t : u;
 }
 
+//pseudo-random number generator
+inline unsigned prng() {
+  static unsigned n = 0;
+  return n = (n >> 1) ^ (((n & 1) - 1) & 0xedb88320);
+}
+
 } //namespace nall
 
 #endif //ifndef NALL_ALGORITHM_HPP

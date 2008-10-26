@@ -6,18 +6,15 @@ unsigned ZipReader::size() {
   return filesize;
 }
 
-#define MAXROM 0x800000
-
 uint8_t* ZipReader::read(unsigned length) {
-  uint8_t *data = 0;
-
   if(!filesize) return 0;
 
+  uint8_t *data = 0;
   if(length <= filesize) {
     //read the entire file into RAM
     data = new(zeromemory) uint8_t[filesize];
     unzReadCurrentFile(zipfile, data, filesize);
-  } else if(length > filesize) {
+  } else { /* length > filesize */
     //read the entire file into RAM, pad the rest with 0x00s
     data = new(zeromemory) uint8_t[length];
     unzReadCurrentFile(zipfile, data, filesize);
@@ -31,15 +28,16 @@ bool ZipReader::ready() {
 }
 
 ZipReader::ZipReader(const char *fn) : filesize(0), zipready(false) {
-  unz_file_info cFileInfo; //Create variable to hold info for a compressed file
+  unz_file_info cFileInfo;  //Create variable to hold info for a compressed file
   char cFileName[sizeof(cname)];
 
-  if(zipfile = unzOpen(fn)) { //Open zip file
+  if(zipfile = unzOpen(fn)) {  //Open zip file
     for(int cFile = unzGoToFirstFile(zipfile); cFile == UNZ_OK; cFile = unzGoToNextFile(zipfile)) {
       //Gets info on current file, and places it in cFileInfo
       unzGetCurrentFileInfo(zipfile, &cFileInfo, cFileName, sizeof(cname), 0, 0, 0, 0);
 
-      if((cFileInfo.uncompressed_size <= MAXROM+512) && (cFileInfo.uncompressed_size > filesize)) {
+      //verify uncompressed file is not bigger than max ROM size
+      if((cFileInfo.uncompressed_size <= 0x1000000 + 512) && (cFileInfo.uncompressed_size > filesize)) {
         strcpy(cname, cFileName);
         filesize = cFileInfo.uncompressed_size;
       }

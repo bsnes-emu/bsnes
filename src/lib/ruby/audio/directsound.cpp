@@ -1,11 +1,9 @@
 #include <windows.h>
 #include <dsound.h>
 
-#include <ruby/ruby.h>
-
 namespace ruby {
 
-#include "directsound.h"
+#include "directsound.hpp"
 
 class pAudioDS {
 public:

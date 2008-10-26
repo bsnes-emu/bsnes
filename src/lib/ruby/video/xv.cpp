@@ -9,11 +9,9 @@
 
 extern "C" XvImage* XvShmCreateImage(Display*, XvPortID, int, char*, int, int, XShmSegmentInfo*);
 
-#include <ruby/ruby.h>
-
 namespace ruby {
 
-#include "xv.h"
+#include "xv.hpp"
 
 class pVideoXv {
 public:

@@ -6,10 +6,11 @@ public:
   uintptr_t get(Setting);
   bool set(Setting, uintptr_t);
 
-  bool key_down(uint16_t key);
+  bool acquire();
+  bool unacquire();
+  bool acquired();
 
-  void clear();
-  void poll();
+  bool poll(int16_t *table);
   bool init();
   void term();
 

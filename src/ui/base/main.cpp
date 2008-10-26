@@ -14,52 +14,35 @@ uintptr_t MainWindow::close(event_t) {
 
 uintptr_t MainWindow::event(event_t e) {
   if(e.type == event_t::Tick) {
-    if(e.widget == &menu_file_load) {
-      event::load_rom();
+    if(e.widget == &menu_system_load) {
+      event::load_cart();
     }
 
-    if(e.widget == &menu_file_load_bsx) {
-      window_bsxloader.mode = BSXLoaderWindow::ModeBSX;
-      window_bsxloader.set_text(translate["Load BS-X Cartridge"]);
-      window_bsxloader.tbase.set_text(config::path.bsx);
-      window_bsxloader.focus();
-    }
+    if(e.widget == &menu_system_power_on) { event::modify_system_state(event::PowerOn); }
+    if(e.widget == &menu_system_power_off) { event::modify_system_state(event::PowerOff); }
+    if(e.widget == &menu_system_reset) { event::modify_system_state(event::Reset); }
 
-    if(e.widget == &menu_file_load_bsc) {
-      window_bsxloader.mode = BSXLoaderWindow::ModeBSC;
-      window_bsxloader.set_text(translate["Load BS-X Slotted Cartridge"]);
-      window_bsxloader.tbase.set_text("");
-      window_bsxloader.focus();
-    }
+    if(e.widget == &menu_system_controller_port1_none)       { event::update_controller_port1(SNES::Input::DeviceNone); }
+    if(e.widget == &menu_system_controller_port1_joypad)     { event::update_controller_port1(SNES::Input::DeviceJoypad); }
+    if(e.widget == &menu_system_controller_port1_multitap)   { event::update_controller_port1(SNES::Input::DeviceMultitap); }
+    if(e.widget == &menu_system_controller_port1_mouse)      { event::update_controller_port1(SNES::Input::DeviceMouse); }
 
-    if(e.widget == &menu_file_load_st) {
-      window_stloader.tbase.set_text(config::path.st);
-      window_stloader.focus();
-    }
+    if(e.widget == &menu_system_controller_port2_none)       { event::update_controller_port2(SNES::Input::DeviceNone); }
+    if(e.widget == &menu_system_controller_port2_joypad)     { event::update_controller_port2(SNES::Input::DeviceJoypad); }
+    if(e.widget == &menu_system_controller_port2_multitap)   { event::update_controller_port2(SNES::Input::DeviceMultitap); }
+    if(e.widget == &menu_system_controller_port2_mouse)      { event::update_controller_port2(SNES::Input::DeviceMouse); }
+    if(e.widget == &menu_system_controller_port2_superscope) { event::update_controller_port2(SNES::Input::DeviceSuperScope); }
+    if(e.widget == &menu_system_controller_port2_justifier)  { event::update_controller_port2(SNES::Input::DeviceJustifier); }
+    if(e.widget == &menu_system_controller_port2_justifiers) { event::update_controller_port2(SNES::Input::DeviceJustifiers); }
 
-    if(e.widget == &menu_file_unload) {
-      event::unload_rom();
-    }
+    if(e.widget == &menu_system_expansion_port_none) { config::snes.expansion_port = SNES::ExpansionNone; }
+    if(e.widget == &menu_system_expansion_port_bsx)  { config::snes.expansion_port = SNES::ExpansionBSX;  }
 
-    if(e.widget == &menu_file_reset) {
-      event::reset();
-    }
+    if(e.widget == &menu_system_region_auto) { config::snes.region = SNES::Autodetect; }
+    if(e.widget == &menu_system_region_ntsc) { config::snes.region = SNES::NTSC; }
+    if(e.widget == &menu_system_region_pal)  { config::snes.region = SNES::PAL; }
 
-    if(e.widget == &menu_file_power) {
-      event::power();
-    }
-
-    if(e.widget == &menu_system_controller_port1_none)     { event::update_controller_port1(0); }
-    if(e.widget == &menu_system_controller_port1_joypad)   { event::update_controller_port1(1); }
-    if(e.widget == &menu_system_controller_port1_multitap) { event::update_controller_port1(2); }
-
-    if(e.widget == &menu_system_controller_port2_none)     { event::update_controller_port2(0); }
-    if(e.widget == &menu_system_controller_port2_joypad)   { event::update_controller_port2(1); }
-    if(e.widget == &menu_system_controller_port2_multitap) { event::update_controller_port2(2); }
-
-    if(e.widget == &menu_file_exit) {
-      event(event_t(event_t::Close));
-    }
+    if(e.widget == &menu_system_exit) { event::quit(); }
 
     if(e.widget == &menu_settings_videomode_1x) { event::update_multiplier(1); }
     if(e.widget == &menu_settings_videomode_2x) { event::update_multiplier(2); }
@@ -70,6 +53,8 @@ uintptr_t MainWindow::event(event_t e) {
     if(e.widget == &menu_settings_videomode_aspect_correction) {
       event::update_aspect_correction(menu_settings_videomode_aspect_correction.checked());
     }
+
+    if(e.widget == &menu_settings_videomode_fullscreen) { event::toggle_fullscreen(); }
 
     if(e.widget == &menu_settings_videomode_ntsc) { event::update_region(0); }
     if(e.widget == &menu_settings_videomode_pal)  { event::update_region(1); }
@@ -105,13 +90,8 @@ uintptr_t MainWindow::event(event_t e) {
     if(e.widget == &menu_settings_emuspeed_fastest)  { event::update_emulation_speed(4); }
 
     if(e.widget == &menu_settings_emuspeed_videosync) {
-      if(config::video.mode == 0) {
-        config::video.windowed.synchronize = menu_settings_emuspeed_videosync.checked();
-        video.set(Video::Synchronize, config::video.windowed.synchronize);
-      } else {
-        config::video.fullscreen.synchronize = menu_settings_emuspeed_videosync.checked();
-        video.set(Video::Synchronize, config::video.fullscreen.synchronize);
-      }
+      config::video.synchronize = menu_settings_emuspeed_videosync.checked();
+      video.set(Video::Synchronize, config::video.synchronize);
     }
 
     if(e.widget == &menu_settings_emuspeed_audiosync) {
@@ -133,6 +113,17 @@ uintptr_t MainWindow::event(event_t e) {
   return true;
 }
 
+uintptr_t MainWindow::input(event_t e) {
+  uint16_t code = e.param;
+  int16_t state = e.param >> 16;
+
+  if(state == 0 && code >= mouse::button && code < mouse::button + mouse::buttons) {
+    event::acquire();
+  }
+
+  return true;
+}
+
 uintptr_t MainWindow::block(event_t) {
   audio.clear();
   return true;
@@ -144,41 +135,74 @@ void MainWindow::setup() {
   set_icon(48, 48, (uint32_t*)resource::icon48);
 
   MenuRadioItemGroup group;
-  attach(menu_file.create(translate["System"]));
-    menu_file.attach(menu_file_load.create(string() << translate["Load Cartridge"] << " ..."));
-    menu_file.attach(menu_file_load_special.create(translate["Load Special"]));
-      menu_file_load_special.attach(menu_file_load_bsx.create(string() << translate["Load BS-X Cartridge"] << " ..."));
-      menu_file_load_special.attach(menu_file_load_bsc.create(string() << translate["Load BS-X Slotted Cartridge"] << " ..."));
-      menu_file_load_special.attach(menu_file_load_st.create(string() << translate["Load Sufami Turbo Cartridge"] << " ..."));
-    menu_file.attach(menu_file_unload.create(translate["Unload Cartridge"]));
+  attach(menu_system.create(translate["{{menu}}System"]));
+    menu_system.attach(menu_system_load.create(string() << translate["{{system}}Load Cartridge"] << " ..."));
 
-    menu_file.attach(menu_file_sep1.create());
-    menu_file.attach(menu_file_reset.create(translate["Reset"]));
-    menu_file_power.create(translate["Power Cycle"]);
-    if(config::advanced.enable) menu_file.attach(menu_file_power);
+    menu_system.attach(menu_system_sep1.create());
+    menu_system.attach(menu_system_power.create(translate["{{system}}Power"]));
+      group.add(&menu_system_power_on);
+      group.add(&menu_system_power_off);
+      menu_system_power.attach(menu_system_power_on.create(group, translate["{{power}}On"]));
+      menu_system_power.attach(menu_system_power_off.create(group, translate["{{power}}Off"]));
+      group.reset();
+    menu_system.attach(menu_system_reset.create(translate["{{system}}Reset"]));
 
-    menu_file.attach(menu_file_sep2.create());
-    menu_file.attach(menu_system_controller_port1.create(translate["Controller Port 1"]));
+    menu_system.attach(menu_system_sep2.create());
+    menu_system.attach(menu_system_controller_port1.create(translate["{{system}}Controller Port 1"]));
       group.add(&menu_system_controller_port1_none);
       group.add(&menu_system_controller_port1_joypad);
       group.add(&menu_system_controller_port1_multitap);
-      menu_system_controller_port1.attach(menu_system_controller_port1_none.create    (group, translate["None"]));
-      menu_system_controller_port1.attach(menu_system_controller_port1_joypad.create  (group, translate["Joypad"]));
-      menu_system_controller_port1.attach(menu_system_controller_port1_multitap.create(group, translate["Multitap"]));
+      group.add(&menu_system_controller_port1_mouse);
+      menu_system_controller_port1.attach(menu_system_controller_port1_none.create    (group, translate["{{controllerport}}None"]));
+      menu_system_controller_port1.attach(menu_system_controller_port1_joypad.create  (group, translate["{{controllerport}}Joypad"]));
+      menu_system_controller_port1.attach(menu_system_controller_port1_multitap.create(group, translate["{{controllerport}}Multitap"]));
+      menu_system_controller_port1.attach(menu_system_controller_port1_mouse.create   (group, translate["{{controllerport}}Mouse"]));
       group.reset();
-    menu_file.attach(menu_system_controller_port2.create(translate["Controller Port 2"]));
+    menu_system.attach(menu_system_controller_port2.create(translate["{{system}}Controller Port 2"]));
       group.add(&menu_system_controller_port2_none);
       group.add(&menu_system_controller_port2_joypad);
       group.add(&menu_system_controller_port2_multitap);
-      menu_system_controller_port2.attach(menu_system_controller_port2_none.create    (group, translate["None"]));
-      menu_system_controller_port2.attach(menu_system_controller_port2_joypad.create  (group, translate["Joypad"]));
-      menu_system_controller_port2.attach(menu_system_controller_port2_multitap.create(group, translate["Multitap"]));
+      group.add(&menu_system_controller_port2_mouse);
+      group.add(&menu_system_controller_port2_superscope);
+      group.add(&menu_system_controller_port2_justifier);
+      group.add(&menu_system_controller_port2_justifiers);
+      menu_system_controller_port2.attach(menu_system_controller_port2_none.create      (group, translate["{{controllerport}}None"]));
+      menu_system_controller_port2.attach(menu_system_controller_port2_joypad.create    (group, translate["{{controllerport}}Joypad"]));
+      menu_system_controller_port2.attach(menu_system_controller_port2_multitap.create  (group, translate["{{controllerport}}Multitap"]));
+      menu_system_controller_port2.attach(menu_system_controller_port2_mouse.create     (group, translate["{{controllerport}}Mouse"]));
+      menu_system_controller_port2.attach(menu_system_controller_port2_superscope.create(group, translate["{{controllerport}}Super Scope"]));
+      menu_system_controller_port2.attach(menu_system_controller_port2_justifier.create (group, translate["{{controllerport}}Justifier"]));
+      menu_system_controller_port2.attach(menu_system_controller_port2_justifiers.create(group, translate["{{controllerport}}Two Justifiers"]));
       group.reset();
 
-    menu_file.attach(menu_file_sep3.create());
-    menu_file.attach(menu_file_exit.create(translate["Exit"]));
+    menu_system_sep3.create();
+    menu_system_expansion_port.create(translate["{{system}}Expansion Port"]);
+      group.add(&menu_system_expansion_port_none);
+      group.add(&menu_system_expansion_port_bsx);
+      menu_system_expansion_port.attach(menu_system_expansion_port_none.create(group, translate["{{expansionport}}None"]));
+      menu_system_expansion_port.attach(menu_system_expansion_port_bsx.create (group, translate["{{expansionport}}Satellaview"]));
+      group.reset();
+    menu_system_region.create(translate["{{system}}Region"]);
+      group.add(&menu_system_region_auto);
+      group.add(&menu_system_region_ntsc);
+      group.add(&menu_system_region_pal);
+      menu_system_region.attach(menu_system_region_auto.create(group, translate["{{region}}Auto-detect"]));
+      menu_system_region.attach(menu_system_region_ntsc.create(group, translate["{{region}}NTSC"]));
+      menu_system_region.attach(menu_system_region_pal.create (group, translate["{{region}}PAL"]));
+      group.reset();
 
-  attach(menu_settings.create(translate["Settings"]));
+    if(config::advanced.enable == true) {
+      menu_system.attach(menu_system_sep3);
+      menu_system.attach(menu_system_expansion_port);
+      menu_system.attach(menu_system_region);
+    }
+
+    menu_system_sep4.create();
+    menu_system_exit.create(translate["{{system}}Exit"]);
+    //menu_system.attach(menu_system_sep4);
+    //menu_system.attach(menu_system_exit);
+
+  attach(menu_settings.create(translate["{{menu}}Settings"]));
     menu_settings.attach(menu_settings_videomode.create(translate["Video Mode"]));
       group.add(&menu_settings_videomode_1x);
       group.add(&menu_settings_videomode_2x);
@@ -193,6 +217,7 @@ void MainWindow::setup() {
       group.reset();
       menu_settings_videomode.attach(menu_settings_videomode_sep1.create());
       menu_settings_videomode.attach(menu_settings_videomode_aspect_correction.create(translate["Correct Aspect Ratio"]));
+      menu_settings_videomode.attach(menu_settings_videomode_fullscreen.create(translate["Fullscreen"]));
       menu_settings_videomode.attach(menu_settings_videomode_sep2.create());
       group.add(&menu_settings_videomode_ntsc);
       group.add(&menu_settings_videomode_pal);
@@ -289,38 +314,47 @@ void MainWindow::setup() {
     }
     menu_settings.attach(menu_settings_config.create(string() << translate["Configuration"] << " ..."));
 
-  attach(menu_misc.create(translate["Misc"]));
-    menu_misc.attach(menu_misc_logaudio.create(translate["Log Audio Data"]));
+  attach(menu_misc.create(translate["{{menu}}Misc"]));
+    menu_misc.attach(menu_misc_logaudio.create(translate["{{misc}}Log Audio Data"]));
     menu_misc.attach(menu_misc_sep1.create());
-    menu_misc.attach(menu_misc_about.create(string() << translate["About"] << " ..."));
+    menu_misc.attach(menu_misc_about.create(string() << translate["{{misc}}About"] << " ..."));
 
-  menu_file_unload.disable();
-  menu_file_reset.disable();
-  menu_file_power.disable();
+  menu_system_power.disable();
+  menu_system_reset.disable();
 
   view.create(0, 256, 224);
+  view.on_input = bind(&MainWindow::input, this);
   attach(view, 0, 0);
 
   on_close = bind(&MainWindow::close, this);
   on_block = bind(&MainWindow::block, this);
 
-  menu_file_exit.on_tick = bind(&MainWindow::close, this);
-
-  menu_file_load.on_tick =
-  menu_file_load_bsx.on_tick =
-  menu_file_load_bsc.on_tick =
-  menu_file_load_st.on_tick =
-  menu_file_unload.on_tick =
-  menu_file_reset.on_tick =
-  menu_file_power.on_tick =
+  menu_system_load.on_tick =
+  menu_system_power_on.on_tick =
+  menu_system_power_off.on_tick =
+  menu_system_reset.on_tick =
 
   menu_system_controller_port1_none.on_tick =
   menu_system_controller_port1_joypad.on_tick =
   menu_system_controller_port1_multitap.on_tick =
+  menu_system_controller_port1_mouse.on_tick =
 
   menu_system_controller_port2_none.on_tick =
   menu_system_controller_port2_joypad.on_tick =
   menu_system_controller_port2_multitap.on_tick =
+  menu_system_controller_port2_mouse.on_tick =
+  menu_system_controller_port2_superscope.on_tick =
+  menu_system_controller_port2_justifier.on_tick =
+  menu_system_controller_port2_justifiers.on_tick =
+
+  menu_system_expansion_port_none.on_tick =
+  menu_system_expansion_port_bsx.on_tick =
+
+  menu_system_region_auto.on_tick =
+  menu_system_region_ntsc.on_tick =
+  menu_system_region_pal.on_tick =
+
+  menu_system_exit.on_tick =
 
   menu_settings_videomode_1x.on_tick =
   menu_settings_videomode_2x.on_tick =
@@ -328,6 +362,7 @@ void MainWindow::setup() {
   menu_settings_videomode_4x.on_tick =
   menu_settings_videomode_5x.on_tick =
   menu_settings_videomode_aspect_correction.on_tick =
+  menu_settings_videomode_fullscreen.on_tick =
   menu_settings_videomode_ntsc.on_tick =
   menu_settings_videomode_pal.on_tick =
 
@@ -372,15 +407,31 @@ void MainWindow::sync() {
   event::load_video_settings();
 
   switch(config::snes.controller_port1) { default:
-    case SNES::Input::DeviceNone:     menu_system_controller_port1_none.check();     break;
-    case SNES::Input::DeviceJoypad:   menu_system_controller_port1_joypad.check();   break;
-    case SNES::Input::DeviceMultitap: menu_system_controller_port1_multitap.check(); break;
+    case SNES::Input::DeviceNone:       menu_system_controller_port1_none.check();       break;
+    case SNES::Input::DeviceJoypad:     menu_system_controller_port1_joypad.check();     break;
+    case SNES::Input::DeviceMultitap:   menu_system_controller_port1_multitap.check();   break;
+    case SNES::Input::DeviceMouse:      menu_system_controller_port1_mouse.check();      break;
   }
 
-  switch(config::snes.controller_port2) {
-    case SNES::Input::DeviceNone:     menu_system_controller_port2_none.check();     break;
-    case SNES::Input::DeviceJoypad:   menu_system_controller_port2_joypad.check();   break;
-    case SNES::Input::DeviceMultitap: menu_system_controller_port2_multitap.check(); break;
+  switch(config::snes.controller_port2) { default:
+    case SNES::Input::DeviceNone:       menu_system_controller_port2_none.check();       break;
+    case SNES::Input::DeviceJoypad:     menu_system_controller_port2_joypad.check();     break;
+    case SNES::Input::DeviceMultitap:   menu_system_controller_port2_multitap.check();   break;
+    case SNES::Input::DeviceMouse:      menu_system_controller_port2_mouse.check();      break;
+    case SNES::Input::DeviceSuperScope: menu_system_controller_port2_superscope.check(); break;
+    case SNES::Input::DeviceJustifier:  menu_system_controller_port2_justifier.check();  break;
+    case SNES::Input::DeviceJustifiers: menu_system_controller_port2_justifiers.check(); break;
+  }
+
+  switch(config::snes.expansion_port) { default:
+    case SNES::ExpansionNone: menu_system_expansion_port_none.check(); break;
+    case SNES::ExpansionBSX:  menu_system_expansion_port_bsx.check();  break;
+  }
+
+  switch(config::snes.region) { default:
+    case SNES::Autodetect: menu_system_region_auto.check(); break;
+    case SNES::NTSC:       menu_system_region_ntsc.check(); break;
+    case SNES::PAL:        menu_system_region_pal.check();  break;
   }
 
   switch(event::video_settings.multiplier) { default:
@@ -392,6 +443,7 @@ void MainWindow::sync() {
   }
 
   menu_settings_videomode_aspect_correction.check(event::video_settings.aspect_correction);
+  menu_settings_videomode_fullscreen.check(event::video_settings.mode == 1);
 
   switch(event::video_settings.region) { default:
     case 0: menu_settings_videomode_ntsc.check(); break;
@@ -434,10 +486,6 @@ void MainWindow::sync() {
     case 4: menu_settings_emuspeed_fastest.check(); break;
   }
 
-  if(config::video.mode == 0) {
-    menu_settings_emuspeed_videosync.check(config::video.windowed.synchronize);
-  } else {
-    menu_settings_emuspeed_videosync.check(config::video.fullscreen.synchronize);
-  }
+  menu_settings_emuspeed_videosync.check(config::video.synchronize);
   menu_settings_emuspeed_audiosync.check(config::audio.synchronize);
 }

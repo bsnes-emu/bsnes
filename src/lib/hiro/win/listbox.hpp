@@ -14,4 +14,5 @@ public:
 
   /* internal */
   unsigned column_count;
+  bool lostfocus;
 };

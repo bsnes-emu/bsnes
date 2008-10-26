@@ -26,11 +26,9 @@
 #include <GL/gl.h>
 #include <GL/glx.h>
 
-#include <ruby/ruby.h>
-
 namespace ruby {
 
-#include "glx.h"
+#include "glx.hpp"
 
 //returns true once window is mapped (created and displayed onscreen)
 static Bool glx_wait_for_map_notify(Display *d, XEvent *e, char *arg) {

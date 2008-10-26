@@ -25,7 +25,7 @@ void VideoSettingsWindow::setup() {
   attach(gamma_ramp,        0, y);
   attach(sepia,           240, y); y += 18;
   attach(grayscale,         0, y);
-  attach(invert,          240, y); y += 18;
+  attach(invert,          240, y); y += 18 + 5;
   attach(preset_optimal,    0, y);
   attach(preset_standard, 240, y); y += 25;
 

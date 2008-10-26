@@ -5,7 +5,7 @@ uintptr_t STLoaderWindow::close(event_t) {
 
 uintptr_t STLoaderWindow::bbase_tick(event_t) {
 char fn[PATH_MAX];
-  if(event::load_rom(fn) == true) tbase.set_text(fn);
+  if(event::load_cart(fn) == true) tbase.set_text(fn);
   return true;
 }
 
@@ -16,7 +16,7 @@ uintptr_t STLoaderWindow::cbase_tick(event_t) {
 
 uintptr_t STLoaderWindow::bslotA_tick(event_t) {
 char fn[PATH_MAX];
-  if(event::load_rom(fn) == true) tslotA.set_text(fn);
+  if(event::load_cart(fn) == true) tslotA.set_text(fn);
   return true;
 }
 
@@ -27,7 +27,7 @@ uintptr_t STLoaderWindow::cslotA_tick(event_t) {
 
 uintptr_t STLoaderWindow::bslotB_tick(event_t) {
 char fn[PATH_MAX];
-  if(event::load_rom(fn) == true) tslotB.set_text(fn);
+  if(event::load_cart(fn) == true) tslotB.set_text(fn);
   return true;
 }
 

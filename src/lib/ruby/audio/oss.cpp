@@ -18,11 +18,9 @@
   #define SNDCTL_DSP_POLICY _IOW('P', 45, int)
 #endif
 
-#include <ruby/ruby.h>
-
 namespace ruby {
 
-#include "oss.h"
+#include "oss.hpp"
 
 class pAudioOSS {
 public:

@@ -1,57 +1,36 @@
 #ifdef CART_CPP
 
 void Cartridge::load_cart_bsc(const char *base, const char *slot) {
-  if(!base || !*base) return;
-
-  strcpy(cart.fn, base);
-  strcpy(bs.fn, slot ? slot : "");
-  load_begin(CartridgeBSC);
-
-  uint8_t *data = 0;
+  uint8_t *data;
   unsigned size;
-  load_file(cart.fn, data, size, CompressionAuto);
-  cart.rom = data, cart.rom_size = size;
+  strcpy(cart.fn, base);
+  strcpy(bs.fn, slot);
 
-  if(load_file(get_patch_filename(cart.fn, "ups"), data, size, CompressionInspect) == true) {
-    apply_patch(data, size, cart.rom, cart.rom_size);
-    delete[] data;
+  load_begin(ModeBSC);
+  if(load_image(base) == false) return;
+
+  cartinfo_t cartinfo;
+  read_header(cartinfo, cart.rom = image.data, cart.rom_size = image.size);
+  info = cartinfo;
+
+  if(load_image(slot) == true) {
+    info.bsxflash = true;
+    bs.ram = image.data;
+    bs.ram_size = image.size;
   }
 
-  if(*bs.fn) {
-    if(load_file(bs.fn, data, size, CompressionAuto) == true) {
-      info.bsxflash = true;
-      bs.ram = data, bs.ram_size = size;
-      if(load_file(get_patch_filename(bs.fn, "ups"), data, size, CompressionInspect) == true) {
-        apply_patch(data, size, bs.ram, bs.ram_size);
-        delete[] data;
-      }
-    }
-  }
-
-  find_header();
-  read_header();
-
-  info.mapper = cartridge.info.header_index == 0x7fc0 ? BSCLoROM : BSCHiROM;
-  info.region = NTSC;
-
-  if(info.ram_size > 0) {
-    cart.ram = new uint8_t[cart.ram_size = info.ram_size];
-    memset(cart.ram, 0xff, cart.ram_size);
-
-    if(load_file(get_save_filename(cart.fn, "srm"), data, size, CompressionNone) == true) {
-      memcpy(cart.ram, data, min(size, cart.ram_size));
-      delete[] data;
-    }
+  if(cartinfo.ram_size > 0) {
+    load_ram(get_save_filename(base, "srm"), cart.ram, cart.ram_size = cartinfo.ram_size, 0xff);
   }
 
   load_end();
 
   //set base filename
-  strcpy(info.filename, cart.fn);
+  strcpy(info.filename, base);
   get_base_filename(info.filename);
-  if(*bs.fn) {
+  if(*slot) {
     char filenameBS[PATH_MAX];
-    strcpy(filenameBS, bs.fn);
+    strcpy(filenameBS, slot);
     get_base_filename(filenameBS);
     strcat(info.filename, " + ");
     strcat(info.filename, filenameBS);

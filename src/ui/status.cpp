@@ -17,6 +17,8 @@ void Status::update() {
     }
   } else if(!cartridge.loaded()) {
     output = "";
+  } else if(app.power == false) {
+    output = string() << cartridge.name() << " : " << translate["Power off."];
   } else if(app.pause || app.autopause) {
     output = translate["Paused."];
   } else if(ppu.status.frames_updated) {
@@ -32,7 +34,7 @@ void Status::update() {
       case 5: max_framerate = 0; break;
     }
 
-    output = string() << cartridge.info.filename << " : " << (int)ppu.status.frames_executed;
+    output = string() << cartridge.name() << " : " << (int)ppu.status.frames_executed;
     if(max_framerate != 0) {
       output << " / ";
       output << (int)max_framerate;

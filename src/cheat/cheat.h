@@ -1,51 +1,55 @@
 class Cheat {
 public:
-  enum { CheatLimit = 1024 };
-
-  enum Type {
+  enum type_t {
     ProActionReplay,
     GameGenie,
   };
 
-  struct CheatIndex {
-    bool enabled;
-    uint32 addr;
-    uint8 data;
-    char code[ 16 + 1];
-    char desc[128 + 1];
-  } index[CheatLimit + 1];
+  struct cheat_t {
+    bool     enabled;
+    unsigned addr;
+    uint8    data;
+    string   code;
+    string   desc;
 
-  bool cheat_enabled;
-  uint32 cheat_count;
-  uint8 mask[0x200000];
+    cheat_t& operator=(const cheat_t&);
+    bool operator<(const cheat_t&);
+  };
 
-  inline bool enabled() { return cheat_enabled; }
-  inline uint count() { return cheat_count; }
-  inline bool exists(uint32 addr) { return bool(mask[addr >> 3] & 1 << (addr & 7)); }
+  static bool decode(const char *str, unsigned &addr, uint8 &data, type_t &type);
+  static bool encode(string &str, unsigned addr, uint8 data, type_t type);
 
-  bool decode(char *str, uint32 &addr, uint8 &data, uint8 &type);
-  bool encode(char *str, uint32  addr, uint8  data, uint8  type);
+  inline bool enabled() const { return cheat_system_enabled; }
+  inline unsigned count() const { return code.size(); }
+  inline bool exists(unsigned addr) const { return bool(mask[addr >> 3] & 1 << (addr & 7)); }
 
-  bool read(uint32 addr, uint8 &data);
+  bool read(unsigned addr, uint8 &data) const;
 
-  void update_cheat_status();
-  bool add(bool enable, char *code, char *desc);
-  bool edit(uint32 n, bool enable, char *code, char *desc);
-  bool get(uint32 n, bool &enable, uint32 &addr, uint8 &data, char *code, char *desc);
-  bool remove(uint32 n);
-  bool enabled(uint32 n);
-  void enable(uint32 n);
-  void disable(uint32 n);
+  bool add(bool enable, const char *code, const char *desc);
+  bool edit(unsigned n, bool enable, const char *code, const char *desc);
+  bool get(unsigned n, cheat_t &cheat) const;
+  bool remove(unsigned n);
+  bool enabled(unsigned n) const;
+  void enable(unsigned n);
+  void disable(unsigned n);
+
   bool load(const char *fn);
-  bool save(const char *fn);
+  bool save(const char *fn) const;
+
+  void sort();
   void clear();
 
   Cheat();
 
 private:
-  uint mirror_address(uint addr);
-  void set(uint32 addr);
-  void clear(uint32 addr);
+  bool cheat_system_enabled;
+  uint8 mask[0x200000];
+  vector<cheat_t> code;
+
+  void update_cheat_status();
+  unsigned mirror_address(unsigned addr) const;
+  void set(unsigned addr);
+  void clear(unsigned addr);
 };
 
 extern Cheat cheat;

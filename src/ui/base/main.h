@@ -1,26 +1,36 @@
 class MainWindow : public Window {
 public:
-  MenuGroup menu_file;
-    MenuItem menu_file_load;
-    MenuGroup menu_file_load_special;
-      MenuItem menu_file_load_bsx;
-      MenuItem menu_file_load_bsc;
-      MenuItem menu_file_load_st;
-    MenuItem menu_file_unload;
-    MenuSeparator menu_file_sep1;
-    MenuItem menu_file_reset;
-    MenuItem menu_file_power;
-    MenuSeparator menu_file_sep2;
+  MenuGroup menu_system;
+    MenuItem menu_system_load;
+    MenuSeparator menu_system_sep1;
+    MenuGroup menu_system_power;
+      MenuRadioItem menu_system_power_on;
+      MenuRadioItem menu_system_power_off;
+    MenuItem menu_system_reset;
+    MenuSeparator menu_system_sep2;
     MenuGroup menu_system_controller_port1;
       MenuRadioItem menu_system_controller_port1_none;
       MenuRadioItem menu_system_controller_port1_joypad;
       MenuRadioItem menu_system_controller_port1_multitap;
+      MenuRadioItem menu_system_controller_port1_mouse;
     MenuGroup menu_system_controller_port2;
       MenuRadioItem menu_system_controller_port2_none;
       MenuRadioItem menu_system_controller_port2_joypad;
       MenuRadioItem menu_system_controller_port2_multitap;
-    MenuSeparator menu_file_sep3;
-    MenuItem menu_file_exit;
+      MenuRadioItem menu_system_controller_port2_mouse;
+      MenuRadioItem menu_system_controller_port2_superscope;
+      MenuRadioItem menu_system_controller_port2_justifier;
+      MenuRadioItem menu_system_controller_port2_justifiers;
+    MenuSeparator menu_system_sep3;
+    MenuGroup menu_system_expansion_port;
+      MenuRadioItem menu_system_expansion_port_none;
+      MenuRadioItem menu_system_expansion_port_bsx;
+    MenuGroup menu_system_region;
+      MenuRadioItem menu_system_region_auto;
+      MenuRadioItem menu_system_region_ntsc;
+      MenuRadioItem menu_system_region_pal;
+    MenuSeparator menu_system_sep4;
+    MenuItem menu_system_exit;
 
   MenuGroup menu_settings;
     MenuGroup menu_settings_videomode;
@@ -31,6 +41,7 @@ public:
       MenuRadioItem menu_settings_videomode_5x;
       MenuSeparator menu_settings_videomode_sep1;
       MenuCheckItem menu_settings_videomode_aspect_correction;
+      MenuCheckItem menu_settings_videomode_fullscreen;
       MenuSeparator menu_settings_videomode_sep2;
       MenuRadioItem menu_settings_videomode_ntsc;
       MenuRadioItem menu_settings_videomode_pal;
@@ -81,5 +92,6 @@ public:
 
   uintptr_t close(event_t);
   uintptr_t event(event_t);
+  uintptr_t input(event_t);
   uintptr_t block(event_t);
 } window_main;

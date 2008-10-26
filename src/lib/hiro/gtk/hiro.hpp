@@ -1,6 +1,10 @@
 #ifndef HIRO_GTK_H
 #define HIRO_GTK_H
 
+#include <unistd.h>
+#include <pwd.h>
+#include <sys/stat.h>
+
 #include <gtk/gtk.h>
 #include <gdk/gdkx.h>
 #include <cairo.h>
@@ -8,28 +12,30 @@
 #include <X11/extensions/dpms.h>
 #include <X11/extensions/XTest.h>
 
+extern int hiromain(int argc, const char *const argv[]);
+
 namespace libhiro {
 
-#include "widget.h"
-  #include "window.h"
-  #include "menucontrol.h"
-    #include "menugroup.h"
-    #include "menuitem.h"
-    #include "menucheckitem.h"
-    #include "menuradioitem.h"
-    #include "menuseparator.h"
-  #include "formcontrol.h"
-    #include "frame.h"
-    #include "canvas.h"
-    #include "label.h"
-    #include "button.h"
-    #include "checkbox.h"
-    #include "radiobox.h"
-    #include "editbox.h"
-    #include "listbox.h"
-    #include "combobox.h"
-    #include "progressbar.h"
-    #include "slider.h"
+#include "widget.hpp"
+  #include "window.hpp"
+  #include "menucontrol.hpp"
+    #include "menugroup.hpp"
+    #include "menuitem.hpp"
+    #include "menucheckitem.hpp"
+    #include "menuradioitem.hpp"
+    #include "menuseparator.hpp"
+  #include "formcontrol.hpp"
+    #include "frame.hpp"
+    #include "canvas.hpp"
+    #include "label.hpp"
+    #include "button.hpp"
+    #include "checkbox.hpp"
+    #include "radiobox.hpp"
+    #include "editbox.hpp"
+    #include "listbox.hpp"
+    #include "combobox.hpp"
+    #include "progressbar.hpp"
+    #include "slider.hpp"
 
 class pHiro {
 public:

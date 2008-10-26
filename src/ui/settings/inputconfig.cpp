@@ -3,14 +3,14 @@
 void InputConfigWindow::setup() {
   create(0, 475, 355);
 
-  capture_mode.create(0, 475, 18, translate["When emulation window does not have focus:"]);
+  capture_mode.create(0, 475, 18, translate["{{input}}When emulation window does not have focus:"]);
   RadioboxGroup group;
   group.add(&capture_always);
   group.add(&capture_focus);
   group.add(&capture_pause);
-  capture_always.create(group, 0, 155, 18, translate["Allow input"]);
-  capture_focus.create (group, 0, 155, 18, translate["Ignore input"]);
-  capture_pause.create (group, 0, 155, 18, translate["Pause emulation"]);
+  capture_always.create(group, 0, 155, 18, translate["{{input}}Allow input"]);
+  capture_focus.create (group, 0, 155, 18, translate["{{input}}Ignore input"]);
+  capture_pause.create (group, 0, 155, 18, translate["{{input}}Pause emulation"]);
 
   config_type.create(0, 235, 25);
   config_type.add_item(translate["{{input}}Controller Port 1"]);
@@ -21,10 +21,11 @@ void InputConfigWindow::setup() {
   config_subtype.create(0, 235, 25);
   refresh_subtype();
 
-  list.create(Listbox::Header | Listbox::VerticalScrollAlways, 475, 254, string() << translate["{{input}}Name"] << "\t" << translate["{{input}}Value"]);
-  setkey.create(0, 235, 25, translate["Assign Key"]);
+  list.create(Listbox::Header | Listbox::VerticalScrollAlways, 475, 254,
+    string() << translate["{{input}}Name"] << "\t" << translate["{{input}}Value"]);
+  setkey.create(0, 235, 25, string() << translate["{{input}}Assign Key"] << " ...");
   setkey.disable();
-  clrkey.create(0, 235, 25, translate["Unassign Key"]);
+  clrkey.create(0, 235, 25, translate["{{input}}Unassign Key"]);
   clrkey.disable();
 
   unsigned y = 0;
@@ -56,71 +57,91 @@ void InputConfigWindow::setup() {
   window_input_capture.setup();
 }
 
-InputConfigWindow::InputType InputConfigWindow::get_input_type(unsigned &length) {
-  unsigned type = config_type.get_selection();
-  unsigned subtype = config_subtype.get_selection();
+InputGroup* InputConfigWindow::get_group() {
+  unsigned port  = config_type.get_selection();
+  unsigned index = config_subtype.get_selection();
 
-  switch(type) {
-    case 0: {
-      switch(subtype) {
-        case 0: length = 12; return Port1_Joypad;
-        case 1: length = 12; return Port1_Multitap1;
-        case 2: length = 12; return Port1_Multitap2;
-        case 3: length = 12; return Port1_Multitap3;
-        case 4: length = 12; return Port1_Multitap4;
+  if(port == 0 || port == 1) {
+    //SNES controller
+    InputDevice *device = 0;
+    for(unsigned i = 0; i < inputpool.list.size(); i++) {
+      if(inputpool.list[i]->port == port) {
+        if(index-- == 0) {
+          device = inputpool.list[i];
+          break;
+        }
       }
+    }
+    return device;
+  } else {
+    //user interface
+    return &inputuigeneral;
+  }
+}
+
+bool InputConfigWindow::assign(uint16_t code) {
+  InputGroup *group = get_group();
+  if(!group) return false;
+
+  int pos = list.get_selection();
+  if(pos < 0 || pos >= group->list.size()) return false;
+
+  //make sure boolean buttons map to boolean input; axes to mouse / joypad axes
+  switch(group->list[pos]->type) {
+    case InputObject::Button: {
+      if(InputCode::is_button(code) == false) return false;
     } break;
 
-    case 1: {
-      switch(subtype) {
-        case 0: length = 12; return Port2_Joypad;
-        case 1: length = 12; return Port2_Multitap1;
-        case 2: length = 12; return Port2_Multitap2;
-        case 3: length = 12; return Port2_Multitap3;
-        case 4: length = 12; return Port2_Multitap4;
-      }
-    } break;
-
-    case 2: {
-      switch(subtype) {
-        case 0: length = 12; return UI_General;
-      }
+    case InputObject::Axis: {
+      if(InputCode::is_axis(code) == false) return false;
+      int16_t state = input_manager.state(code);
+      //add a bit of resistance to prevent infinitesimally small movements from triggering assignment
+      if(InputCode::type(code) == InputCode::MouseAxis  && abs(state) < 8) return false;
+      //joypad axis range = -32768 to +32767
+      //some joypads have pressure-sensitive buttons that read +32767 when depressed ...
+      //therefore, range test between 25% and 75% pressure before triggering assignment
+      if(InputCode::type(code) == InputCode::JoypadAxis && (abs(state) < 8192 || abs(state) > 24576)) return false;
     } break;
   }
 
-  return TypeUnknown;
+  group->list[pos]->setting = input_find(code);
+  input_manager.bind();
+  return true;
 }
 
 void InputConfigWindow::refresh_subtype() {
   config_subtype.reset();
+  unsigned port = config_type.get_selection();
 
-  switch(config_type.get_selection()) {
-    case 0:
-    case 1: {
-      config_subtype.add_item(translate["Joypad"]);
-      config_subtype.add_item(translate["Multitap Port 1"]);
-      config_subtype.add_item(translate["Multitap Port 2"]);
-      config_subtype.add_item(translate["Multitap Port 3"]);
-      config_subtype.add_item(translate["Multitap Port 4"]);
-    } break;
-
-    case 2: {
-      config_subtype.add_item(translate["General"]);
-    } break;
+  if(port == 0 || port == 1) {
+    //SNES controller
+    for(unsigned device = 0; device < inputpool.list.size(); device++) {
+      if(inputpool.list[device]->port == port) {
+        config_subtype.add_item(translate[inputpool.list[device]->name]);
+      }
+    }
+  } else {
+    //user interface
+    config_subtype.add_item(translate[inputuigeneral.name]);
   }
 
   config_subtype.set_selection(0);
 }
 
 void InputConfigWindow::refresh_list() {
+  setkey.disable();
+  clrkey.disable();
   list.reset();
-  unsigned length;
-  get_input_type(length);
-  for(unsigned i = 0; i < length; i++) {
-    string name;
-    acquire(i, name);
-    list.add_item(string() << name << "\t" << input_find(get_value(i)));
+  InputGroup *group = get_group();
+  if(!group) return;
+
+  for(unsigned i = 0; i < group->list.size(); i++) {
+    list.add_item(string()
+    << translate[group->list[i]->name]
+    << "\t"
+    << group->list[i]->setting);
   }
+
   list.autosize_columns();
 }
 
@@ -150,41 +171,71 @@ uintptr_t InputConfigWindow::list_change(event_t) {
 }
 
 uintptr_t InputConfigWindow::set_tick(event_t) {
+  InputGroup *group = get_group();
+  if(!group) return true;
+
   int pos = list.get_selection();
-  if(pos < 0) return true;
-  window_input_capture.index = pos;
-  string message = translate["Press a key to assign to $ ..."];
-  string name;
-  acquire(pos, name);
-  replace(message, "$", name);
+  if(pos < 0 || pos >= group->list.size()) return true;
+
+  string message;
+  if(group->list[pos]->type == InputObject::Button) {
+    message = translate["Press a key or button to assign to $ ..."];
+  } else {
+    message = translate["Move mouse or analog joypad axis to assign to $ ..."];
+  }
+
+  replace(message, "$", group->list[pos]->name);
   window_input_capture.label.set_text(message);
-  window_input_capture.canvas.show(config_type.get_selection() < 2); //only show joypad graphic if setting joypad button
+
+  bool show_controller_graphic = false;
+  InputDevice *device = dynamic_cast<InputDevice*>(group);
+  if(device) {
+    SNES::Input::DeviceID id = device->id;
+    if(id == SNES::Input::DeviceIDJoypad1    || id == SNES::Input::DeviceIDJoypad2
+    || id == SNES::Input::DeviceIDMultitap1A || id == SNES::Input::DeviceIDMultitap2A
+    || id == SNES::Input::DeviceIDMultitap1B || id == SNES::Input::DeviceIDMultitap2B
+    || id == SNES::Input::DeviceIDMultitap1C || id == SNES::Input::DeviceIDMultitap2C
+    || id == SNES::Input::DeviceIDMultitap1D || id == SNES::Input::DeviceIDMultitap2D
+    ) {
+      show_controller_graphic = true;
+    }
+  }
+
+  window_input_capture.index = pos;
+  window_input_capture.canvas.show(show_controller_graphic);
   window_input_capture.show();
   return true;
 }
 
 uintptr_t InputConfigWindow::clr_tick(event_t) {
-  int pos = list.get_selection();
-  if(pos < 0) return true;
-  set_value(pos, keyboard::none);
-  refresh_list();
+  if(list.get_selection() >= 0) {
+    assign(keyboard::none);
+    refresh_list();
+  }
   return true;
 }
 
 /* InputCaptureWindow */
 
-void InputCaptureWindow::assign(uint16_t key) {
-  waiting = false;
-  hide();
-  window_input_config.set_value(index, key);
-  window_input_config.refresh_list();
-  input.clear();
+void InputCaptureWindow::assign(uint16_t code) {
+  if(window_input_config.assign(code)) {
+    waiting = false;
+    hide();
+    window_input_config.refresh_list();
+    input_manager.flush();
+  }
 }
 
 void InputCaptureWindow::show() {
-  input.poll();
+  input_manager.refresh();
   waiting = true;
-  locked = input.key_down(keyboard::return_) || input.key_down(keyboard::spacebar);
+  //certain keys (eg spacebar) can activate the key assignment window,
+  //which would then auto-bind those keys. detect these keys, and set
+  //a lock so that these keys will not be registered unless they
+  //are released and then re-pressed.
+  locked = input_manager.state(keyboard::return_)
+        || input_manager.state(keyboard::spacebar)
+        || input_manager.state(mouse::button + 0);
   Window::focus();
 }
 
@@ -207,75 +258,4 @@ InputCaptureWindow::InputCaptureWindow() {
   waiting = false;
   locked = false;
   index = 0;
-}
-
-/* Misc */
-
-string_setting& InputConfigWindow::acquire(unsigned index, string &name) {
-  #define map(n, lname) \
-    case n: { \
-      switch(index) { \
-        case  0: name = translate["Up"];     return config::input.lname.up;     \
-        case  1: name = translate["Down"];   return config::input.lname.down;   \
-        case  2: name = translate["Left"];   return config::input.lname.left;   \
-        case  3: name = translate["Right"];  return config::input.lname.right;  \
-        case  4: name = translate["A"];      return config::input.lname.a;      \
-        case  5: name = translate["B"];      return config::input.lname.b;      \
-        case  6: name = translate["X"];      return config::input.lname.x;      \
-        case  7: name = translate["Y"];      return config::input.lname.y;      \
-        case  8: name = translate["L"];      return config::input.lname.l;      \
-        case  9: name = translate["R"];      return config::input.lname.r;      \
-        case 10: name = translate["Select"]; return config::input.lname.select; \
-        case 11: name = translate["Start"];  return config::input.lname.start;  \
-      } \
-    } break;
-
-  unsigned length;
-  switch(get_input_type(length)) { default:
-    map(Port1_Joypad,    joypad1)
-    map(Port1_Multitap1, multitap1a)
-    map(Port1_Multitap2, multitap1b)
-    map(Port1_Multitap3, multitap1c)
-    map(Port1_Multitap4, multitap1d)
-
-    map(Port2_Joypad,    joypad2)
-    map(Port2_Multitap1, multitap2a)
-    map(Port2_Multitap2, multitap2b)
-    map(Port2_Multitap3, multitap2c)
-    map(Port2_Multitap4, multitap2d)
-
-    case UI_General: {
-      switch(index) {
-        case  0: name = translate["Load Cartridge"];            return config::input.gui.load;
-        case  1: name = translate["Pause Emulation"];           return config::input.gui.pause;
-        case  2: name = translate["Reset System"];              return config::input.gui.reset;
-        case  3: name = translate["Power Cycle System"];        return config::input.gui.power;
-        case  4: name = translate["Exit Emulator"];             return config::input.gui.quit;
-        case  5: name = translate["Emulation Speed Decrease"];  return config::input.gui.speed_decrease;
-        case  6: name = translate["Emulation Speed Increase"];  return config::input.gui.speed_increase;
-        case  7: name = translate["Frameskip Decrease"];        return config::input.gui.frameskip_decrease;
-        case  8: name = translate["Frameskip Increase"];        return config::input.gui.frameskip_increase;
-        case  9: name = translate["Toggle Fullscreen"];         return config::input.gui.toggle_fullscreen;
-        case 10: name = translate["Toggle Menubar"];            return config::input.gui.toggle_menubar;
-        case 11: name = translate["Toggle Statusbar"];          return config::input.gui.toggle_statusbar;
-      }
-    } break;
-  }
-
-  #undef map
-
-  name = "";
-  static string_setting notfound("", "", "");
-  return notfound;
-}
-
-uint InputConfigWindow::get_value(uint index) {
-  string name;
-  return input_find(acquire(index, name));
-}
-
-void InputConfigWindow::set_value(uint index, uint16 value) {
-  string name;
-  acquire(index, name) = input_find(value);
-  input_manager.bind();
 }

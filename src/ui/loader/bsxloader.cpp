@@ -5,7 +5,7 @@ uintptr_t BSXLoaderWindow::close(event_t) {
 
 uintptr_t BSXLoaderWindow::bbase_tick(event_t) {
 char fn[PATH_MAX];
-  if(event::load_rom(fn) == true) tbase.set_text(fn);
+  if(event::load_cart(fn) == true) tbase.set_text(fn);
   return true;
 }
 
@@ -16,7 +16,7 @@ uintptr_t BSXLoaderWindow::cbase_tick(event_t) {
 
 uintptr_t BSXLoaderWindow::bslot_tick(event_t) {
 char fn[PATH_MAX];
-  if(event::load_rom(fn) == true) tslot.set_text(fn);
+  if(event::load_cart(fn) == true) tslot.set_text(fn);
   return true;
 }
 

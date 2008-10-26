@@ -89,7 +89,7 @@ public:
   }
 
   void reserve(unsigned size) {
-    if(size == poolsize)return;
+    if(size == poolsize) return;
 
     if(size < poolsize) {
       for(unsigned i = size; i < objectsize; i++) { pool[i].~T(); }
@@ -100,9 +100,9 @@ public:
     poolsize = size;
   }
 
-  void resize(int size) {
-    if(size == objectsize)return;
-    if(size > poolsize)reserve(size);
+  void resize(unsigned size) {
+    if(size == objectsize) return;
+    if(size > poolsize) reserve(size);
 
     if(size < objectsize) {
       for(unsigned i = size; i < objectsize; i++) { pool[i].~T(); }
@@ -122,14 +122,24 @@ public:
   ~linear_vector() { reset(); }
 
   inline operator T&() {
-    if(objectsize == 0)resize(1);
-    if(objectsize == 0)throw "vector[] out of bounds";
+    if(objectsize == 0) resize(1);
+    if(objectsize == 0) throw "vector[] out of bounds";
     return pool[0];
   }
 
-  inline T &operator[](int index) {
-    if(index >= objectsize)resize(index + 1);
-    if(index >= objectsize)throw "vector[] out of bounds";
+  inline operator const T&() const {
+    if(objectsize == 0) throw "vector[] out of bounds";
+    return pool[0];
+  }
+
+  inline T& operator[](int index) {
+    if(index >= objectsize) resize(index + 1);
+    if(index >= objectsize) throw "vector[] out of bounds";
+    return pool[index];
+  }
+
+  inline const T& operator[](int index) const {
+    if(index >= objectsize) throw "vector[] out of bounds";
     return pool[index];
   }
 };
@@ -144,7 +154,7 @@ public:
   unsigned capacity() const { return poolsize; }
 
   void reset() {
-    for(unsigned i = 0; i < objectsize; i++) { if(pool[i])delete pool[i]; }
+    for(unsigned i = 0; i < objectsize; i++) { if(pool[i]) delete pool[i]; }
 
     if(pool) {
       free(pool);
@@ -156,10 +166,10 @@ public:
   }
 
   void reserve(unsigned size) {
-    if(size == poolsize)return;
+    if(size == poolsize) return;
 
     if(size < poolsize) {
-      for(unsigned i = size; i < objectsize; i++) { if(pool[i])delete pool[i]; }
+      for(unsigned i = size; i < objectsize; i++) { if(pool[i]) delete pool[i]; }
       objectsize = size;
     }
 
@@ -170,12 +180,12 @@ public:
     poolsize = size;
   }
 
-  void resize(int size) {
-    if(size == objectsize)return;
-    if(size > poolsize)reserve(size);
+  void resize(unsigned size) {
+    if(size == objectsize) return;
+    if(size > poolsize) reserve(size);
 
     if(size < objectsize) {
-      for(unsigned i = size; i < objectsize; i++) { if(pool[i])delete pool[i]; }
+      for(unsigned i = size; i < objectsize; i++) { if(pool[i]) delete pool[i]; }
     }
 
     objectsize = size;
@@ -190,16 +200,26 @@ public:
   ~ptr_vector() { reset(); }
 
   inline operator T&() {
-    if(objectsize == 0)resize(1);
-    if(objectsize == 0)throw "vector[] out of bounds";
-    if(!pool[0])pool[0] = new T;
+    if(objectsize == 0) resize(1);
+    if(objectsize == 0) throw "vector[] out of bounds";
+    if(!pool[0]) pool[0] = new T;
     return *pool[0];
   }
 
-  inline T &operator[](int index) {
-    if(index >= objectsize)resize(index + 1);
-    if(index >= objectsize)throw "vector[] out of bounds";
-    if(!pool[index])pool[index] = new T;
+  inline operator const T&() const {
+    if(objectsize == 0 || !pool[0]) throw "vector[] out of bounds";
+    return *pool[0];
+  }
+
+  inline T& operator[](int index) {
+    if(index >= objectsize) resize(index + 1);
+    if(index >= objectsize) throw "vector[] out of bounds";
+    if(!pool[index]) pool[index] = new T;
+    return *pool[index];
+  }
+
+  inline const T& operator[](int index) const {
+    if(index >= objectsize || !pool[index]) throw "vector[] out of bounds";
     return *pool[index];
   }
 };

@@ -13,6 +13,7 @@ void pButton::create(unsigned style, unsigned width, unsigned height, const char
 void pButton::set_text(const char *text) {
   if(!button) return;
   gtk_button_set_label(GTK_BUTTON(button), text ? text : "");
+  set_default_font(button);
 }
 
 pButton::pButton(Button &self_) : pFormControl(self_), self(self_) {

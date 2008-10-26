@@ -73,7 +73,11 @@ void bPPU::power() {
   for(unsigned i = 0; i < memory::oam.size();   i++) memory::oam[i]   = 0x00;
   for(unsigned i = 0; i < memory::cgram.size(); i++) memory::cgram[i] = 0x00;
 
-  region = snes.region();
+  if(snes.region() == SNES::NTSC) {
+    region = 0;
+  } else /* (snes.region == SNES::PAL) */ {
+    region = 1;
+  }
 
   //$2100
   regs.display_disabled   = 1;

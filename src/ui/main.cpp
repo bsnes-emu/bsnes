@@ -12,19 +12,16 @@ void term_snes();
  * hardware abstraction layer
  *****/
 
-#include <ruby/ruby.h>
+#include <ruby/ruby.hpp>
 using namespace ruby;
 
-#include <libfilter/libfilter.h>
-
-#include "inputmanager.cpp"
-#include "interface.cpp"
+#include <libfilter/libfilter.hpp>
 
 /*****
  * platform abstraction layer
  *****/
 
-#include <hiro/hiro.h>
+#include <hiro/hiro.hpp>
 using namespace libhiro;
 
 /*****
@@ -34,6 +31,9 @@ using namespace libhiro;
 #include "ui.h"
 #include "status.h"
 #include "event.h"
+
+#include "inputmanager.cpp"
+#include "interface.cpp"
 
 #include "ui.cpp"
 #include "status.cpp"
@@ -128,30 +128,13 @@ void run() {
   }
 
   if(cartridge.loaded() == false || app.pause == true || app.autopause == true) {
-    //prevent bsnes from consuming 100% CPU resources when idle
-    usleep(20 * 1000);
+    usleep(20 * 1000);  //prevent bsnes from consuming 100% CPU resources when idle
   } else {
     snes.runtoframe();
   }
 }
 
-#if defined(PLATFORM_WIN)
-int __stdcall WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
-  //On Windows, argv[] is in 7-bit ANSI format, UTF-8 chars are converted to '?'s.
-  //Need argv[] to be in UTF-8 format to properly determine realpath() and default image filepaths.
-  //To do this, parse command line in UTF-16, and then convert to UTF-8.
-  int argc;
-  wchar_t **wargv = CommandLineToArgvW(GetCommandLineW(), &argc);
-  char **argv = new char*[argc];
-  for(unsigned i = 0; i < argc; i++) {
-    argv[i] = new(zeromemory) char[PATH_MAX];
-    strcpy(argv[i], utf8(wargv[i]));
-  }
-#else
-int main(int argc, char *argv[]) {
-#endif /*
-
-int main(int argc, char *argv[]) { */
+int hiromain(int argc, const char *const argv[]) {
   get_paths(argv[0]);
   set_config_filenames();
 
@@ -163,29 +146,16 @@ int main(int argc, char *argv[]) { */
   }
   translate.import(config::locale_cfg);
 
-  hiro().init();
   ui_init();
-  if(app.term == true) goto app_term;
-  snes.init();
-
-  if(argc >= 2 && file::exists(argv[1])) {
-    cartridge.load_cart_normal(argv[1]);
-    if(cartridge.loaded()) {
-      snes.power();
-      window_main.menu_file_unload.enable();
-      window_main.menu_file_reset.enable();
-      window_main.menu_file_power.enable();
-    }
+  if(app.term == false) {
+    snes.init();
+    if(argc >= 2) event::load_image(argv[1]);
+    while(app.term == false) run();
+    event::unload_cart();
   }
 
-  while(app.term == false) run();
-
-  event::unload_rom();
-
-  app_term:
   config::config().save(config::bsnes_cfg);
   snes.term();
   ui_term();
-  hiro().term();
   return 0;
 }

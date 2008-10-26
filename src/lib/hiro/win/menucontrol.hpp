@@ -1,8 +1,8 @@
 class pMenuControl : public pWidget {
 public:
-  void enable(bool = true);
-  void disable();
-  bool enabled();
+  virtual void enable(bool = true);
+  virtual void disable();
+  virtual bool enabled();
 
   MenuControl &self;
   pMenuControl(MenuControl&);

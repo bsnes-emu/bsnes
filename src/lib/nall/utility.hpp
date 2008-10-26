@@ -3,6 +3,12 @@
 
 namespace nall {
 
+template<typename T> inline void swap(T &x, T &y) {
+  T temp = x;
+  x = y;
+  y = temp;
+}
+
 template<typename T>
 struct base_from_member {
   T value;

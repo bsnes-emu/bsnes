@@ -3,11 +3,9 @@
 
 #define D3DVERTEX (D3DFVF_XYZRHW | D3DFVF_TEX1)
 
-#include <ruby/ruby.h>
-
 namespace ruby {
 
-#include "direct3d.h"
+#include "direct3d.hpp"
 
 class pVideoD3D {
 public:

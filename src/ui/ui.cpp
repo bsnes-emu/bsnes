@@ -69,7 +69,7 @@ void ui_init() {
   config::config().save(config::bsnes_cfg);
 
   video.set(Video::Handle, window_main.view.handle());
-  video.set(Video::Synchronize, config::video.windowed.synchronize);
+  video.set(Video::Synchronize, config::video.synchronize);
   audio.set(Audio::Handle, window_main.handle());
   audio.set(Audio::Synchronize, config::audio.synchronize);
   audio.set(Audio::Volume, config::audio.volume);
@@ -87,7 +87,6 @@ void ui_init() {
 
   video.clear();
   audio.clear();
-  input.clear();
 
   //if code has reached this point, driver initialized successfully
   config::system.invoke_crash_handler = false;
@@ -95,10 +94,9 @@ void ui_init() {
 
   event::update_video_settings(); //call second time to update video class settings
 
-  //UI setup complete, hook keyboard callbacks
+  //UI setup complete, hook input callbacks
   snesinterface.input_ready = bind(&MainWindow::input_ready, &window_main);
-  input_manager.on_keydown = bind(&event::keydown);
-  input_manager.on_keyup = bind(&event::keyup);
+  input_manager.on_input = bind(&event::input_event);
 }
 
 void ui_term() {

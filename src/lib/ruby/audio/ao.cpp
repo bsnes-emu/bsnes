@@ -1,10 +1,8 @@
 #include <ao/ao.h>
 
-#include <ruby/ruby.h>
-
 namespace ruby {
 
-#include "ao.h"
+#include "ao.hpp"
 
 class pAudioAO {
 public:

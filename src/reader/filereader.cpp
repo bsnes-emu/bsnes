@@ -26,6 +26,7 @@ uint8_t* FileReader::read(unsigned length) {
     data = new(zeromemory) uint8_t[length];
     if(fp.open()) fp.read(data, length);
   }
+
   return data;
 }
 
@@ -36,8 +37,8 @@ bool FileReader::ready() {
 FileReader::FileReader(const char *fn) {
   if(!fp.open(fn, file::mode_read)) return;
 
-  //empty file?
   if(fp.size() == 0) {
+    //empty file
     fp.close();
   }
 }

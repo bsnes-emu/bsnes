@@ -1,86 +1,52 @@
 #ifdef CART_CPP
 
 void Cartridge::load_cart_st(const char *base, const char *slotA, const char *slotB) {
-  if(!base || !*base) return;
-
-  strcpy(cart.fn, base);
-  strcpy(stA.fn, slotA ? slotA : "");
-  strcpy(stB.fn, slotB ? slotB : "");
-
-  load_begin(CartridgeSufamiTurbo);
-  info.st = true;
-  info.mapper = STROM;
-  info.region = NTSC;
-
-  uint8_t *data = 0;
+  uint8_t *data;
   unsigned size;
-  if(load_file(cart.fn, data, size, CompressionAuto) == true) {
-    cart.rom = new(zeromemory) uint8_t[cart.rom_size = 0x040000];
-    memcpy(cart.rom, data, min(size, cart.rom_size));
-    delete[] data;
-    if(load_file(get_patch_filename(cart.fn, "ups"), data, size, CompressionInspect) == true) {
-      apply_patch(data, size, cart.rom, cart.rom_size);
-      delete[] data;
-    }
+  strcpy(cart.fn, base);
+  strcpy(stA.fn, slotA);
+  strcpy(stB.fn, slotB);
+
+  load_begin(ModeSufamiTurbo);
+  if(load_image(base) == false) return;
+
+  cartinfo_t cartinfo;
+  read_header(cartinfo, cart.rom = image.data, cart.rom_size = image.size);
+  info = cartinfo;
+
+  if(load_image(slotA)) {
+    stA.rom = new(zeromemory) uint8_t[stA.rom_size = 0x100000];
+    memcpy(stA.rom, image.data, min(image.size, stA.rom_size));
+    delete[] image.data;
+
+    load_ram(get_save_filename(slotA, "srm"), stA.ram, stA.ram_size = 0x020000, 0xff);
   }
 
-  if(*stA.fn) {
-    if(load_file(stA.fn, data, size, CompressionAuto) == true) {
-      stA.rom = new(zeromemory) uint8_t[stA.rom_size = 0x100000];
-      memcpy(stA.rom, data, min(size, stA.rom_size));
-      delete[] data;
-      if(load_file(get_patch_filename(stA.fn, "ups"), data, size, CompressionInspect) == true) {
-        apply_patch(data, size, stA.rom, stA.rom_size);
-        delete[] data;
-      }
+  if(load_image(slotB)) {
+    stB.rom = new(zeromemory) uint8_t[stB.rom_size = 0x100000];
+    memcpy(stB.rom, image.data, min(image.size, stB.rom_size));
+    delete[] image.data;
 
-      stA.ram = new uint8_t[stA.ram_size = 0x020000];
-      memset(stA.ram, 0xff, stA.ram_size);
-
-      if(load_file(get_save_filename(stA.fn, "srm"), data, size, CompressionNone) == true) {
-        memcpy(stA.ram, data, min(size, 0x020000U));
-        delete[] data;
-      }
-    }
-  }
-
-  if(*stB.fn) {
-    if(load_file(stB.fn, data, size, CompressionAuto) == true) {
-      stB.rom = new(zeromemory) uint8_t[stB.rom_size = 0x100000];
-      memcpy(stB.rom, data, min(size, stB.rom_size));
-      delete[] data;
-      if(load_file(get_patch_filename(stB.fn, "ups"), data, size, CompressionInspect) == true) {
-        apply_patch(data, size, stB.rom, stB.rom_size);
-        delete[] data;
-      }
-
-      stB.ram = new uint8_t[stB.ram_size = 0x020000];
-      memset(stB.ram, 0xff, stB.ram_size);
-
-      if(load_file(get_save_filename(stB.fn, "srm"), data, size, CompressionNone) == true) {
-        memcpy(stB.ram, data, min(size, 0x020000U));
-        delete[] data;
-      }
-    }
+    load_ram(get_save_filename(slotB, "srm"), stB.ram, stB.ram_size = 0x020000, 0xff);
   }
 
   load_end();
 
   //set base filename
-  if(!*stA.fn && !*stB.fn) {
+  if(!*slotA && !*slotB) {
     strcpy(info.filename, cart.fn);
     get_base_filename(info.filename);
-  } else if(*stA.fn && !*stB.fn) {
-    strcpy(info.filename, stA.fn);
+  } else if(*slotA && !*slotB) {
+    strcpy(info.filename, slotA);
     get_base_filename(info.filename);
-  } else if(!*stA.fn && *stB.fn) {
-    strcpy(info.filename, stB.fn);
+  } else if(!*slotA && *slotB) {
+    strcpy(info.filename, slotB);
     get_base_filename(info.filename);
   } else {
     char filenameA[PATH_MAX], filenameB[PATH_MAX];
-    strcpy(filenameA, stA.fn);
+    strcpy(filenameA, slotA);
     get_base_filename(filenameA);
-    strcpy(filenameB, stB.fn);
+    strcpy(filenameB, slotB);
     get_base_filename(filenameB);
     strcpy(info.filename, filenameA);
     strcat(info.filename, " + ");

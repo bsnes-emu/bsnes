@@ -19,6 +19,23 @@ bool pMenuRadioItem::checked() {
   return info.fState & MFS_CHECKED;
 }
 
+void pMenuRadioItem::enable(bool state) {
+  EnableMenuItem(parent, instance, MF_BYCOMMAND | (state ? MF_ENABLED : MF_GRAYED));
+}
+
+void pMenuRadioItem::disable() {
+  enable(false);
+}
+
+bool pMenuRadioItem::enabled() {
+  MENUITEMINFO info;
+  memset(&info, 0, sizeof info);
+  info.cbSize = sizeof info;
+  info.fMask = MIIM_STATE;
+  GetMenuItemInfo(parent, instance, false, &info);
+  return info.fState & MFS_ENABLED;
+}
+
 pMenuRadioItem::pMenuRadioItem(MenuRadioItem &self_) : pMenuControl(self_), self(self_) {
   create_checked = false;
 }

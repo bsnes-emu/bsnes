@@ -4,6 +4,10 @@ public:
   void check();
   bool checked();
 
+  void enable(bool = true);
+  void disable();
+  bool enabled();
+
   MenuRadioItem &self;
   pMenuRadioItem(MenuRadioItem&);
 

@@ -1,4 +1,4 @@
-#include <ruby/ruby.h>
+#include <ruby/ruby.hpp>
 #include <ruby/ruby_impl.cpp>
 
 namespace ruby {
@@ -285,10 +285,10 @@ void InputInterface::term() {
 bool InputInterface::cap(Input::Setting setting) { return p ? p->cap(setting) : false; }
 uintptr_t InputInterface::get(Input::Setting setting) { return p ? p->get(setting) : false; }
 bool InputInterface::set(Input::Setting setting, uintptr_t param) { return p ? p->set(setting, param) : false; }
-bool InputInterface::key_down(uint16_t key) { return p ? p->key_down(key) : false; }
-bool InputInterface::key_up(uint16_t key) { return p ? p->key_up(key) : true; }
-void InputInterface::clear() { if(p) p->clear(); }
-void InputInterface::poll() { if(p) p->poll(); }
+bool InputInterface::acquire() { return p ? p->acquire() : false; }
+bool InputInterface::unacquire() { return p ? p->unacquire() : false; }
+bool InputInterface::acquired() { return p ? p->acquired() : false; }
+bool InputInterface::poll(int16_t *table) { return p ? p->poll(table) : false; }
 InputInterface::InputInterface() : p(0) {}
 InputInterface::~InputInterface() { term(); }
 
