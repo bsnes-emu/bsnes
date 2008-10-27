@@ -1,5 +1,5 @@
 bsnes
-Version: 0.037
+Version: 0.037a
 Author: byuu
 
 ========

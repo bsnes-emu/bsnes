@@ -1,6 +1,6 @@
 /*
   hiro
-  version: 0.007b (2008-10-26)
+  version: 0.008 (2008-10-27)
   author: byuu
   license: public domain
 */

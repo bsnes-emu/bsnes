@@ -22,9 +22,9 @@ uintptr_t DriverSelectWindow::input_change(event_t) {
 void DriverSelectWindow::setup() {
   create(0, 475, 355);
 
-  //this is only displayed if app.crashed_on_last_run == true
+  //this is only displayed if application crashed on last run
   crash_message.create(0, 475, 36, string()
-    << translate["WARNING: bsnes crashed on last startup due to incompatible driver settings."] << "\n"
+    << translate["Warning: bsnes crashed on last startup due to incompatible driver settings."] << "\n"
     << translate["Please select a different driver configuration below."]
   );
 
@@ -35,7 +35,7 @@ void DriverSelectWindow::setup() {
 
   split(part, ";", video.driver_list());
   for(unsigned i = 0; i < count(part); i++) {
-    cvideo.add_item(part[i]);
+    cvideo.add_item(translate[string() << "{{videodriver}}" << part[i]]);
     if(part[i] == config::system.video) cvideo.set_selection(i);
   }
 
@@ -44,7 +44,7 @@ void DriverSelectWindow::setup() {
 
   split(part, ";", audio.driver_list());
   for(unsigned i = 0; i < count(part); i++) {
-    caudio.add_item(part[i]);
+    caudio.add_item(translate[string() << "{{audiodriver}}" << part[i]]);
     if(part[i] == config::system.audio) caudio.set_selection(i);
   }
 
@@ -53,7 +53,7 @@ void DriverSelectWindow::setup() {
 
   split(part, ";", input.driver_list());
   for(unsigned i = 0; i < count(part); i++) {
-    cinput.add_item(part[i]);
+    cinput.add_item(translate[string() << "{{inputdriver}}" << part[i]]);
     if(part[i] == config::system.input) cinput.set_selection(i);
   }
 

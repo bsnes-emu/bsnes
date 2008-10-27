@@ -1,19 +1,27 @@
-void hiro_plistbox_change(pListbox *p) {
+static void hiro_plistbox_change(pListbox *p) {
+  //only send message when active item changes
   if(p->listbox_selection == p->get_selection()) return;
-  if(p->self.on_change) p->self.on_change(event_t(event_t::Change, p->listbox_selection = p->get_selection(), &p->self));
+
+  p->listbox_selection = p->get_selection();
+  if(p->self.on_change) {
+    p->self.on_change(event_t(event_t::Change, p->listbox_selection, &p->self));
+  }
 }
 
-void hiro_plistbox_activate(pListbox *p) {
-  if(p->self.on_activate) p->self.on_activate(event_t(event_t::Activate, p->listbox_selection = p->get_selection(), &p->self));
+static void hiro_plistbox_activate(pListbox *p) {
+  p->listbox_selection = p->get_selection();
+  if(p->self.on_activate) {
+    p->self.on_activate(event_t(event_t::Activate, p->listbox_selection, &p->self));
+  }
 }
 
 void pListbox::create(unsigned style, unsigned width, unsigned height, const char *columns, const char *text) {
   bool header = style & Listbox::Header;
   GtkPolicyType hscroll = (style & Listbox::HorizontalScrollAlways) ? GTK_POLICY_ALWAYS :
-                          (style & Listbox::HorizontalScrollNever) ? GTK_POLICY_NEVER :
+                          (style & Listbox::HorizontalScrollNever ) ? GTK_POLICY_NEVER  :
                           GTK_POLICY_AUTOMATIC;
   GtkPolicyType vscroll = (style & Listbox::VerticalScrollAlways) ? GTK_POLICY_ALWAYS :
-                          (style & Listbox::VerticalScrollNever) ? GTK_POLICY_NEVER :
+                          (style & Listbox::VerticalScrollNever ) ? GTK_POLICY_NEVER  :
                           GTK_POLICY_AUTOMATIC;
 
   scrollbox = gtk_scrolled_window_new(0, 0);
@@ -35,7 +43,7 @@ void pListbox::create(unsigned style, unsigned width, unsigned height, const cha
   gtk_widget_show(listbox);
   gtk_widget_show(scrollbox);
 
-  //alternate colors for each listbox entry if there are multiple columns ...
+  //alternate colors for each listbox entry if there are multiple columns
   gtk_tree_view_set_rules_hint(GTK_TREE_VIEW(listbox), count(list) >= 2 ? true : false);
   for(unsigned i = 0; i < count(list); i++) {
     renderer = gtk_cell_renderer_text_new();
@@ -68,58 +76,65 @@ void pListbox::set_column_width(unsigned column, unsigned width) {
 }
 
 void pListbox::add_item(const char *text) {
-lstring list;
+  lstring list;
   split(list, "\t", text);
   gtk_list_store_append(store, &iter);
   for(unsigned i = 0; i < count(list); i++) {
-    gtk_list_store_set(store, &iter, i, list[i](), -1);
+    gtk_list_store_set(store, &iter, i, (const char*)list[i], -1);
   }
 }
 
 void pListbox::set_item(unsigned index, const char *text) {
-GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(listbox));
+  GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(listbox));
   for(unsigned i = 0; i <= index; i++) {
     i == 0 ?
       gtk_tree_model_get_iter_first(model, &iter) :
       gtk_tree_model_iter_next(model, &iter);
   }
 
-lstring list;
+  lstring list;
   split(list, "\t", text);
   for(unsigned i = 0; i < count(list); i++) {
-    gtk_list_store_set(store, &iter, i, list[i](), -1);
+    gtk_list_store_set(store, &iter, i, (const char*)list[i], -1);
   }
 }
 
 int pListbox::get_selection() {
-GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(listbox));
-GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(listbox));
-  if(gtk_tree_model_get_iter_first(model, &iter) == false) { return -1; }
-  if(gtk_tree_selection_iter_is_selected(selection, &iter) == true) { return 0; }
+  GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(listbox));
+  GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(listbox));
+  if(gtk_tree_model_get_iter_first(model, &iter) == false) return -1;
+  if(gtk_tree_selection_iter_is_selected(selection, &iter) == true) return 0;
   for(unsigned i = 1; i < 100000; i++) {
-    if(gtk_tree_model_iter_next(model, &iter) == false) { return -1; }
-    if(gtk_tree_selection_iter_is_selected(selection, &iter) == true) { return i; }
+    if(gtk_tree_model_iter_next(model, &iter) == false) return -1;
+    if(gtk_tree_selection_iter_is_selected(selection, &iter) == true) return i;
   }
   return -1;
 }
 
 void pListbox::set_selection(int index) {
-int current = get_selection();
-GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(listbox));
-GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(listbox));
+  int current = get_selection();
+  GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(listbox));
+  GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(listbox));
   gtk_tree_selection_unselect_all(selection);
-  if(index < 0) { goto end; }
-  if(gtk_tree_model_get_iter_first(model, &iter) == false) { goto end; }
-  if(index == 0) { gtk_tree_selection_select_iter(selection, &iter); goto end; }
-  for(unsigned i = 1; i < 100000; i++) {
-    if(gtk_tree_model_iter_next(model, &iter) == false) { goto end; }
-    if(index == i) { gtk_tree_selection_select_iter(selection, &iter); goto end; }
+  if(index < 0) return;  //nothing to select?
+
+  if(gtk_tree_model_get_iter_first(model, &iter)) {
+    if(index == 0) {
+      gtk_tree_selection_select_iter(selection, &iter);
+    } else {
+      for(unsigned i = 1; i < 100000; i++) {
+        if(gtk_tree_model_iter_next(model, &iter) == false) break;
+        if(index == i) {
+          gtk_tree_selection_select_iter(selection, &iter);
+          break;
+        }
+      }
+    }
   }
-end:
-  if(current != index); //{ owner->message(Message::Changed, (uintptr_t)this); }
 }
 
 void pListbox::reset() {
+  listbox_selection = -1;
   gtk_list_store_clear(GTK_LIST_STORE(store));
   gtk_tree_view_set_model(GTK_TREE_VIEW(listbox), GTK_TREE_MODEL(store));
 }

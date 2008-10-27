@@ -1,4 +1,4 @@
-#define BSNES_VERSION "0.037"
+#define BSNES_VERSION "0.037a"
 #define BSNES_TITLE   "bsnes v" BSNES_VERSION
 
 #define BUSCORE sBus

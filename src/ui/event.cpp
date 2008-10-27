@@ -126,7 +126,7 @@ void update_emulation_speed(int speed) {
   unsigned outfreq = config::audio.output_frequency;
   unsigned infreq  = config::audio.input_frequency * scale[speed] + 0.5;
 
-  audio.set(Audio::Resample, outfreq != infreq); //only resample when necessary
+  audio.set(Audio::Resample, outfreq != infreq);  //only resample when necessary
   audio.set(Audio::ResampleOutputFrequency, outfreq);
   audio.set(Audio::ResampleInputFrequency,  infreq);
 

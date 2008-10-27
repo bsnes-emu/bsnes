@@ -184,7 +184,7 @@ uintptr_t InputConfigWindow::set_tick(event_t) {
     message = translate["Move mouse or analog joypad axis to assign to $ ..."];
   }
 
-  replace(message, "$", group->list[pos]->name);
+  replace(message, "$", translate[group->list[pos]->name]);
   window_input_capture.label.set_text(message);
 
   bool show_controller_graphic = false;
