@@ -1,6 +1,6 @@
 #ifdef READER_CPP
 
-#include "zipreader.h"
+#include "zipreader.hpp"
 
 unsigned ZipReader::size() {
   return filesize;

@@ -1,4 +1,4 @@
-#include "../../base.h"
+#include <../base.hpp>
 #define ADSP_CPP
 
 #include "adsp_tables.cpp"

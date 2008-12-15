@@ -1,4 +1,4 @@
-#include "../../base.h"
+#include <../base.hpp>
 #define DSP1_CPP
 
 #include "dsp1emu.cpp"

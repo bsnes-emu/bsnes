@@ -24,4 +24,4 @@ inline uint16 bPPU::addsub(uint32 x, uint32 y, bool halve) {
   }
 }
 
-#endif //ifdef BPPU_CPP
+#endif  //ifdef BPPU_CPP

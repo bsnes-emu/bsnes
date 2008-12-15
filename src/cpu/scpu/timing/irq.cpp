@@ -1,13 +1,20 @@
 #ifdef SCPU_CPP
 
 void sCPU::update_interrupts() {
-  if(irq_pos_valid() == true) {
-    status.virq_trigger_pos = status.virq_pos;
-    status.hirq_trigger_pos = 4 * ((status.hirq_enabled) ? (status.hirq_pos + 1) : 0);
-  } else {
-    status.virq_trigger_pos = IRQ_TRIGGER_NEVER;
-    status.hirq_trigger_pos = IRQ_TRIGGER_NEVER;
+  unsigned vtime = status.virq_pos;
+  unsigned htime = status.hirq_enabled ? status.hirq_pos : 0;
+  unsigned vlimit = (snes.region() == SNES::NTSC ? 525 : 625) >> 1;
+
+  //an IRQ for the very last dot of a field cannot trigger an IRQ
+  if((vtime == (vlimit - 1) && htime == 339 && ppu.interlace() == false)
+  || (vtime == vlimit && htime == 339)
+  ) {
+    vtime = 0x03ff;
+    htime = 0x03ff;
   }
+
+  status.virq_trigger_pos = vtime;
+  status.hirq_trigger_pos = 4 * (status.hirq_enabled ? htime + 1 : 0);
 }
 
 alwaysinline void sCPU::poll_interrupts() {
@@ -22,7 +29,8 @@ alwaysinline void sCPU::poll_interrupts() {
   }
 
   //NMI test
-  history.query(2, vpos, hpos);
+  vpos = ppucounter.vcounter(2);
+  hpos = ppucounter.hcounter(2);
   bool nmi_valid = (vpos >= (!ppu.overscan() ? 225 : 240));
   if(status.nmi_valid == false && nmi_valid == true) {
     //0->1 edge sensitive transition
@@ -41,7 +49,8 @@ alwaysinline void sCPU::poll_interrupts() {
   }
 
   //IRQ test
-  history.query(10, vpos, hpos);
+  vpos = ppucounter.vcounter(10);
+  hpos = ppucounter.hcounter(10);
   bool irq_valid = (status.virq_enabled == true || status.hirq_enabled == true);
   if(irq_valid == true) {
     if(status.virq_enabled == true && vpos != status.virq_trigger_pos) irq_valid = false;
@@ -103,23 +112,6 @@ bool sCPU::timeup() {
   return result;
 }
 
-bool sCPU::irq_pos_valid() {
-  uint vpos = status.virq_pos;
-  uint hpos = (status.hirq_enabled) ? status.hirq_pos : 0;
-  uint vlimit = (snes.region() == SNES::NTSC ? 525 : 625) >> 1;
-  //positions that can never be latched
-  //vlimit = 262/NTSC, 312/PAL
-  //PAL results are unverified on hardware
-  if(vpos == 240 && hpos == 339 && ppu.interlace() == false && ppu.field() == 1) return false;
-  if(vpos == (vlimit - 1) && hpos == 339 && ppu.interlace() == false) return false;
-  if(vpos == vlimit && ppu.interlace() == false) return false;
-  if(vpos == vlimit && hpos == 339) return false;
-  if(vpos  > vlimit) return false;
-  if(hpos  > 339) return false;
-
-  return true;
-}
-
 alwaysinline bool sCPU::nmi_test() {
   if(status.nmi_transition == false) return false;
   status.nmi_transition = false;
@@ -131,7 +123,7 @@ alwaysinline bool sCPU::irq_test() {
   if(status.irq_transition == false) return false;
   status.irq_transition = false;
   event.wai = false;
-  return regs.p.i ? false : true;
+  return !regs.p.i;
 }
 
-#endif //ifdef SCPU_CPP
+#endif  //ifdef SCPU_CPP

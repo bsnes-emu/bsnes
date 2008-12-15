@@ -73,6 +73,7 @@ void AdvancedWindow::load() {
     if(strbegin(name, "input.superscope")) continue;
     if(strbegin(name, "input.justifier")) continue;
     if(strbegin(name, "input.gui")) continue;
+    if(strbegin(name, "input.debugger")) continue;
     if(name == "misc.cheat_autosort") continue;
 
     string value_, default_;
@@ -91,21 +92,22 @@ void AdvancedWindow::load() {
 }
 
 void AdvancedWindow::setup() {
-  create(0, 475, 355);
+  create(0, 451, 370);
 
-  list.create(Listbox::Header | Listbox::VerticalScrollAlways, 475, 240,
-    string() << translate["Name"] << "\t" << translate["Type"] << "\t" << translate["Value"]);
-  desc.create(Editbox::Multiline | Editbox::VerticalScrollAlways | Editbox::Readonly, 475, 80, translate["<description>"]);
-  edit_val.create(0, 265, 25, translate["<current value>"]);
+  list.create(Listbox::Header | Listbox::VerticalScrollAlways,
+    451, 263, string() << translate["Name"] << "\t" << translate["Type"] << "\t" << translate["Value"]);
+  desc.create(Editbox::Multiline | Editbox::HorizontalScrollNever | Editbox::VerticalScrollAlways | Editbox::Readonly,
+    451, 72, translate["<description>"]);
+  edit_val.create(0, 241, 25, translate["<current value>"]);
   set_val.create (0, 100, 25, translate["{{advanced}}Set"]);
   set_def.create (0, 100, 25, translate["{{advanced}}Default"]);
 
   unsigned y = 0;
-  attach(list,       0, y); y += 240 + 5;
-  attach(desc,       0, y); y +=  80 + 5;
+  attach(list,       0, y); y += 263 + 5;
+  attach(desc,       0, y); y +=  72 + 5;
   attach(edit_val,   0, y);
-  attach(set_val,  270, y);
-  attach(set_def,  375, y); y +=  25 + 5;
+  attach(set_val,  246, y);
+  attach(set_def,  351, y); y +=  25 + 5;
 
   load();
   list.autosize_columns();

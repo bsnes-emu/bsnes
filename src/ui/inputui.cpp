@@ -33,3 +33,24 @@ struct InputUIGeneral : InputGroup {
     attach(toggle_fullscreen); attach(toggle_menubar); attach(toggle_statusbar);
   }
 } inputuigeneral;
+
+struct InputUIDebug : InputGroup {
+  InputObject export_memory;
+  InputObject toggle_cputrace;
+  InputObject toggle_cputracemask;
+  InputObject toggle_smptrace;
+  InputObject toggle_smptracemask;
+
+  InputUIDebug()
+  : InputGroup("Debugger"),
+    export_memory      (InputObject::Button, "Export memory", config::input.debugger.export_memory),
+    toggle_cputrace    (InputObject::Button, "Toggle S-CPU tracing", config::input.debugger.toggle_cputrace),
+    toggle_cputracemask(InputObject::Button, "Toggle S-CPU trace mask", config::input.debugger.toggle_cputracemask),
+    toggle_smptrace    (InputObject::Button, "Toggle S-SMP tracing", config::input.debugger.toggle_smptrace),
+    toggle_smptracemask(InputObject::Button, "Toggle S-SMP trace mask", config::input.debugger.toggle_smptracemask)
+  {
+    attach(export_memory);
+    attach(toggle_cputrace); attach(toggle_cputracemask);
+    attach(toggle_smptrace); attach(toggle_smptracemask);
+  }
+} inputuidebugger;

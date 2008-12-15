@@ -338,4 +338,4 @@ void SNES::Input::poll() {
 void SNES::Input::init() {
 }
 
-#endif //ifdef SNES_CPP
+#endif  //ifdef SNES_CPP

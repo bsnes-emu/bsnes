@@ -9,14 +9,14 @@
 #include <nall/stdint.hpp>
 
 namespace libfilter {
-  #include "colortable.h"
-  #include "filter.h"
+  #include "colortable.hpp"
+  #include "filter.hpp"
 
-  #include "direct.h"
-  #include "scanline.h"
-  #include "scale2x.h"
-  #include "hq2x.h"
-  #include "ntsc.h"
-} //namespace libfilter
+  #include "direct.hpp"
+  #include "scanline.hpp"
+  #include "scale2x.hpp"
+  #include "hq2x.hpp"
+  #include "ntsc.hpp"
+}  //namespace libfilter
 
-#endif //ifndef LIBFILTER_H
+#endif  //ifndef LIBFILTER_H

@@ -124,26 +124,26 @@ void AudioSettingsWindow::sync_ui() {
 }
 
 void AudioSettingsWindow::setup() {
-  create(0, 475, 355);
+  create(0, 451, 370);
 
-  lvolume.create(0, 235, 18);
-  svolume.create(0, 475, 30, 91);
-  evolume.create(0, 130, 25);
+  lvolume.create(0, 223, 18);
+  svolume.create(0, 451, 30, 91);
+  evolume.create(0, 118, 25);
   bvolume.create(0, 100, 25, translate["{{audio}}Set"]);
 
-  llatency.create(0, 235, 18);
-  slatency.create(0, 475, 30, 26);
-  elatency.create(0, 130, 25);
+  llatency.create(0, 223, 18);
+  slatency.create(0, 451, 30, 26);
+  elatency.create(0, 118, 25);
   blatency.create(0, 100, 25, translate["{{audio}}Set"]);
 
-  loutput.create(0, 235, 18);
-  soutput.create(0, 475, 30, 3);
-  eoutput.create(0, 130, 25);
+  loutput.create(0, 223, 18);
+  soutput.create(0, 451, 30, 3);
+  eoutput.create(0, 118, 25);
   boutput.create(0, 100, 25, translate["{{audio}}Set"]);
 
-  linput.create(0, 235, 18);
-  sinput.create(0, 475, 30, 401);
-  einput.create(0, 130, 25);
+  linput.create(0, 223, 18);
+  sinput.create(0, 451, 30, 401);
+  einput.create(0, 118, 25);
   binput.create(0, 100, 25, translate["{{audio}}Set"]);
 
   note.create(0, 475, 54, string()
@@ -168,20 +168,20 @@ void AudioSettingsWindow::setup() {
     attach(sinput, 0, y); y += 30;
   } else {
     attach(lvolume,    0, y);
-    attach(llatency, 240, y); y += 18;
+    attach(llatency, 228, y); y += 18;
 
     attach(evolume,    0, y);
-    attach(bvolume,  135, y);
-    attach(elatency, 240, y);
-    attach(blatency, 375, y); y += 25 + 5;
+    attach(bvolume,  123, y);
+    attach(elatency, 228, y);
+    attach(blatency, 351, y); y += 25 + 5;
 
     attach(loutput,    0, y);
-    attach(linput,   240, y); y += 18;
+    attach(linput,   228, y); y += 18;
 
     attach(eoutput,    0, y);
-    attach(boutput,  135, y);
-    attach(einput,   240, y);
-    attach(binput,   375, y); y += 25 + 5;
+    attach(boutput,  123, y);
+    attach(einput,   228, y);
+    attach(binput,   351, y); y += 25 + 5;
 
     if(audio.cap(Audio::Latency) == false) {
       elatency.disable();

@@ -16,9 +16,12 @@ public:
   GtkWidget *scrollbox;
   GtkWidget *listbox;
   GtkListStore *store;
-  GtkCellRenderer *renderer;
-  GtkTreeViewColumn *column;
-  array<GtkTreeViewColumn*> column_list;
+  struct GtkColumn {
+    GtkCellRenderer *renderer;
+    GtkTreeViewColumn *column;
+    GtkWidget *label;
+  };
+  vector<GtkColumn> column;
   GtkTreeIter iter;
   int listbox_selection;
   GtkWidget* gtk_handle();

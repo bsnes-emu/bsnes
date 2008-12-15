@@ -1,63 +1,26 @@
-#define INTERFACE_MAIN
+#include <../base.hpp>
 
-#include "../base.h"
-
-#include "main.h"
+#include "main.hpp"
 #include "config.cpp"
-
-void init_snes();
-void term_snes();
-
-/*****
- * hardware abstraction layer
- *****/
 
 #include <ruby/ruby.hpp>
 using namespace ruby;
 
-#include <libfilter/libfilter.hpp>
-
-/*****
- * platform abstraction layer
- *****/
-
 #include <hiro/hiro.hpp>
 using namespace libhiro;
 
-/*****
- * core
- *****/
+#include <libfilter/libfilter.hpp>
 
-#include "ui.h"
-#include "status.h"
-#include "event.h"
+#include "ui.hpp"
+#include "status.hpp"
+#include "event/event.hpp"
 
 #include "inputmanager.cpp"
 #include "interface.cpp"
 
 #include "ui.cpp"
 #include "status.cpp"
-#include "event.cpp"
-
-void alert(const char *s, ...) {
-  char str[4096];
-  va_list args;
-  va_start(args, s);
-  vsprintf(str, s, args);
-  va_end(args);
-
-  status.enqueue(str);
-}
-
-void dprintf(const char *s, ...) {
-  char str[4096];
-  va_list args;
-  va_start(args, s);
-  vsprintf(str, s, args);
-  va_end(args);
-
-  fprintf(stdout, "%s\r\n", str);
-}
+#include "event/event.cpp"
 
 void get_paths(const char *image) {
   char temp[PATH_MAX] = "";
@@ -116,7 +79,7 @@ void run() {
   input_manager.refresh();
 
   if(config::input.capture_mode == 2) {
-    bool inactive = window_main.focused() == false;
+    bool inactive = (window_main.focused() == false);
     if(app.autopause == false && inactive == true) {
       app.autopause = true;
       audio.clear();

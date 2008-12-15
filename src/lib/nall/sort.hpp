@@ -1,6 +1,8 @@
 #ifndef NALL_SORT_HPP
 #define NALL_SORT_HPP
 
+#include <nall/utility.hpp>
+
 //class:   merge sort
 //average: O(n log n)
 //worst:   O(n log n)

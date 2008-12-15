@@ -190,13 +190,13 @@ uint8 sCPU::mmio_r4212() {
   uint16 vs = ppu.overscan() == false ? 225 : 240;
 
   //auto joypad polling
-  if(status.vcounter >= vs && status.vcounter <= (vs + 2))r |= 0x01;
+  if(ppucounter.vcounter() >= vs && ppucounter.vcounter() <= (vs + 2))r |= 0x01;
 
   //hblank
-  if(status.hcounter <= 2 || status.hcounter >= 1096)r |= 0x40;
+  if(ppucounter.hcounter() <= 2 || ppucounter.hcounter() >= 1096)r |= 0x40;
 
   //vblank
-  if(status.vcounter >= vs)r |= 0x80;
+  if(ppucounter.vcounter() >= vs)r |= 0x80;
 
   return r;
 }

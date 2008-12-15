@@ -4,7 +4,7 @@ Scheduler scheduler;
 
 void threadentry_cpu() { cpu.enter(); }
 void threadentry_smp() { smp.enter(); }
-void threadentry_ppu() {              }
+void threadentry_ppu() { ppu.enter(); }
 void threadentry_dsp() { dsp.enter(); }
 
 void Scheduler::enter() {
@@ -29,6 +29,7 @@ void Scheduler::init() {
                  : config::smp.pal_clock_rate;
 
   clock.active = THREAD_CPU;
+  clock.cpuppu = 0;
   clock.cpusmp = 0;
   clock.smpdsp = 0;
 
@@ -38,10 +39,10 @@ void Scheduler::init() {
   if(thread_dsp) co_delete(thread_dsp);
 
   thread_snes = co_active();
-  thread_cpu  = co_create(sizeof(void*) * 64 * 1024, threadentry_cpu);
-  thread_smp  = co_create(sizeof(void*) * 64 * 1024, threadentry_smp);
-  thread_ppu  = co_create(sizeof(void*) * 64 * 1024, threadentry_ppu);
-  thread_dsp  = co_create(sizeof(void*) * 64 * 1024, threadentry_dsp);
+  thread_cpu  = co_create(65536 * sizeof(void*), threadentry_cpu);
+  thread_smp  = co_create(65536 * sizeof(void*), threadentry_smp);
+  thread_ppu  = co_create(65536 * sizeof(void*), threadentry_ppu);
+  thread_dsp  = co_create(65536 * sizeof(void*), threadentry_dsp);
 }
 
 Scheduler::Scheduler() {
@@ -52,4 +53,4 @@ Scheduler::Scheduler() {
   thread_dsp  = 0;
 }
 
-#endif //ifdef SNES_CPP
+#endif  //ifdef SNES_CPP

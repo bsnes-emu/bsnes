@@ -1,4 +1,7 @@
-#include "../base.h"
+#include <../base.hpp>
+#define PPU_CPP
+
+#include "counter.cpp"
 
 void PPU::enable_renderer(bool r) { status.render_output = r; }
 bool PPU::renderer_enabled() { return status.render_output; }

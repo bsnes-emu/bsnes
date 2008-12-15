@@ -1,7 +1,14 @@
-#include "../base.h"
+#include <../base.hpp>
 #define SNES_CPP
 
-SNES     snes;
+SNES       snes;
+BUSCORE    bus;
+CPUCORE    cpu;
+SMPCORE    smp;
+DSPCORE    dsp;
+PPUCORE    ppu;
+PPUcounter ppucounter;
+
 BSXBase  bsxbase;
 BSXCart  bsxcart;
 BSXFlash bsxflash;
@@ -52,7 +59,6 @@ void SNES::init() {
 }
 
 void SNES::term() {
-  audio.term();
   snesinterface.term();
 }
 
@@ -66,6 +72,7 @@ void SNES::power() {
 
   scheduler.init();
 
+  ppucounter.reset();
   cpu.power();
   smp.power();
   dsp.power();
@@ -118,6 +125,7 @@ void SNES::power() {
 void SNES::reset() {
   scheduler.init();
 
+  ppucounter.reset();
   cpu.reset();
   smp.reset();
   dsp.reset();
@@ -148,7 +156,7 @@ void SNES::reset() {
 void SNES::scanline() {
   video.scanline();
 
-  if(cpu.vcounter() == 241) {
+  if(ppucounter.vcounter() == 241) {
     input.update();
     video.update();
     scheduler.exit();

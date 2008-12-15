@@ -1,4 +1,4 @@
-#include "../../base.h"
+#include <../base.hpp>
 #define BSX_CPP
 
 #include "bsx_base.cpp"

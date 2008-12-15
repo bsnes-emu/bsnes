@@ -2,70 +2,21 @@
 #define NALL_VECTOR_HPP
 
 #include <new>
+#include <nall/algorithm.hpp>
 
 namespace nall {
 
-/*****
- * Dynamic vector allocation template class library
- *
- * Implements auto-allocating, auto-resizing vectors that allow for
- * theoretically infinitely-sized arrays of objects.
- * Array indexes are not bounds checked, and reallocate to requested size when
- * accessing out of bounds.
- * These class are intended only for use with objects that require
- * construction. Significant overhead will result if used for raw memory
- * management. See libarray for a far more suitable raw memory vector array
- * class.
- *
- * Vectors also reserve an internal pool of memory that can be larger to
- * minimize memory allocation requests, but by default the pools only grow to
- * the requested vector index, as some objects may have substantial memory
- * requirements per object. The reserve() function may be used to allocate
- * memory in advance when possible.
- *
- * Two types of vectors are implemented. Their public interfaces are identical,
- * however they operate very differently internally.
- *
- * [linear_vector]
- * Works by allocating one giant heap of memory to contain all objects.
- * Constructors and destructors are called during resize() as needed.
- *
- * Pros:
- * - memory is allocated and objects are prebuilt in advance, so accessing
- *   array objects will be very fast.
- * - all objects are in contigious memory, which helps for processor caching.
- * Cons:
- * - accessing object 15 will require objects 0-14 to be constructed first.
- * - resizing array may invalidate pointers to member objects inside classes
- *   (eg object "this" pointer may change).
- *
- * Use when:
- * You need an array of objects that do not rely on pointers to member
- * variables, you have an idea of how many objects you will need, and
- * speed is critical.
- *
- * [ptr_vector]
- * Works by allocating a smaller heap of memory used as an array of pointers to
- * individual objects.
- *
- * Pros:
- * - accessing object 15 does not require objects 0-14 to be constructed first.
- * - resizing array will not invalidate pointers to member objects inside
- *   classes.
- * Cons:
- * - memory for individual objects cannot be allocated in advance. Each "first"
- *   access to an array object will require memory allocation and object
- *   construction.
- * - objects are not guaranteed to be aligned in contigious memory, and
- *   individual array indexes require two indirect memory lookups. Will affect
- *   speed adversely when indexing very large arrays of objects.
- *
- * Use when:
- * Objects rely on pointers to member variables, you do not know how many
- * objects you will need in advance, you need to access vector elements out of
- * order and prefer not to have all previous objects constructed in advance,
- * and speed is less critical.
- *****/
+//linear_vector
+//memory: O(capacity * 2)
+//
+//linear_vector uses placement new + manual destructor calls to create a
+//contiguous block of memory for all objects. accessing individual elements
+//is fast, though resizing the array incurs significant overhead.
+//reserve() overhead is reduced from quadratic time to amortized constant time
+//by resizing twice as much as requested.
+//
+//if objects hold memory address references to themselves (introspection), a
+//valid copy constructor will be needed to keep pointers valid.
 
 template<typename T> class linear_vector {
 protected:
@@ -77,74 +28,71 @@ public:
   unsigned capacity() const { return poolsize; }
 
   void reset() {
-    for(unsigned i = 0; i < objectsize; i++) { pool[i].~T(); }
-
     if(pool) {
+      for(unsigned i = 0; i < objectsize; i++) pool[i].~T();
       free(pool);
-      pool = 0;
     }
-
-    poolsize = 0;
-    objectsize = 0;
-  }
-
-  void reserve(unsigned size) {
-    if(size == poolsize) return;
-
-    if(size < poolsize) {
-      for(unsigned i = size; i < objectsize; i++) { pool[i].~T(); }
-      objectsize = size;
-    }
-
-    pool = (T*)realloc(pool, sizeof(T) * size);
-    poolsize = size;
-  }
-
-  void resize(unsigned size) {
-    if(size == objectsize) return;
-    if(size > poolsize) reserve(size);
-
-    if(size < objectsize) {
-      for(unsigned i = size; i < objectsize; i++) { pool[i].~T(); }
-    } else {
-      for(unsigned i = objectsize; i < size; i++) { new(pool + i) T; }
-    }
-
-    objectsize = size;
-  }
-
-  linear_vector() {
     pool = 0;
     poolsize = 0;
     objectsize = 0;
   }
 
-  ~linear_vector() { reset(); }
+  void reserve(unsigned newsize) {
+    newsize <<= 1;  //amortized constant growth
 
-  inline operator T&() {
-    if(objectsize == 0) resize(1);
-    if(objectsize == 0) throw "vector[] out of bounds";
-    return pool[0];
+    T *poolcopy = (T*)malloc(newsize * sizeof(T));
+    for(unsigned i = 0; i < min(objectsize, newsize); i++) new(poolcopy + i) T(pool[i]);
+    for(unsigned i = 0; i < objectsize; i++) pool[i].~T();
+    free(pool);
+    pool = poolcopy;
+    poolsize = newsize;
+    objectsize = min(objectsize, newsize);
   }
 
-  inline operator const T&() const {
-    if(objectsize == 0) throw "vector[] out of bounds";
-    return pool[0];
+  void resize(unsigned newsize) {
+    if(newsize > poolsize) reserve(newsize);
+
+    if(newsize < objectsize) {
+      //vector is shrinking; destroy excess objects
+      for(unsigned i = newsize; i < objectsize; i++) pool[i].~T();
+    } else if(newsize > objectsize) {
+      //vector is expanding; allocate new objects
+      for(unsigned i = objectsize; i < newsize; i++) new(pool + i) T;
+    }
+
+    objectsize = newsize;
   }
 
-  inline T& operator[](int index) {
+  void add(const T data) {
+    if(objectsize + 1 > poolsize) reserve(objectsize + 1);
+    new(pool + objectsize++) T(data);
+  }
+
+  inline T& operator[](unsigned index) {
     if(index >= objectsize) resize(index + 1);
+    return pool[index];
+  }
+
+  inline const T& operator[](unsigned index) const {
     if(index >= objectsize) throw "vector[] out of bounds";
     return pool[index];
   }
 
-  inline const T& operator[](int index) const {
-    if(index >= objectsize) throw "vector[] out of bounds";
-    return pool[index];
-  }
+  linear_vector() : pool(0), poolsize(0), objectsize(0) {}
+  ~linear_vector() { reset(); }
 };
 
-template<typename T> class ptr_vector {
+//pointer_vector
+//memory: O(1)
+//
+//pointer_vector keeps an array of pointers to each vector object. this adds
+//significant overhead to individual accesses, but allows for optimal memory
+//utilization.
+//
+//by guaranteeing that the base memory address of each objects never changes,
+//this avoids the need for an object to have a valid copy constructor.
+
+template<typename T> class pointer_vector {
 protected:
   T **pool;
   unsigned poolsize, objectsize;
@@ -154,76 +102,59 @@ public:
   unsigned capacity() const { return poolsize; }
 
   void reset() {
-    for(unsigned i = 0; i < objectsize; i++) { if(pool[i]) delete pool[i]; }
-
     if(pool) {
+      for(unsigned i = 0; i < objectsize; i++) { if(pool[i]) delete pool[i]; }
       free(pool);
-      pool = 0;
     }
-
-    poolsize = 0;
-    objectsize = 0;
-  }
-
-  void reserve(unsigned size) {
-    if(size == poolsize) return;
-
-    if(size < poolsize) {
-      for(unsigned i = size; i < objectsize; i++) { if(pool[i]) delete pool[i]; }
-      objectsize = size;
-    }
-
-    pool = (T**)realloc(pool, sizeof(T*) * size);
-    if(size > poolsize) {
-      memset(pool + poolsize, 0, sizeof(T*) * (size - poolsize));
-    }
-    poolsize = size;
-  }
-
-  void resize(unsigned size) {
-    if(size == objectsize) return;
-    if(size > poolsize) reserve(size);
-
-    if(size < objectsize) {
-      for(unsigned i = size; i < objectsize; i++) { if(pool[i]) delete pool[i]; }
-    }
-
-    objectsize = size;
-  }
-
-  ptr_vector() {
     pool = 0;
     poolsize = 0;
     objectsize = 0;
   }
 
-  ~ptr_vector() { reset(); }
+  void reserve(unsigned newsize) {
+    newsize <<= 1;  //amortized constant growth
 
-  inline operator T&() {
-    if(objectsize == 0) resize(1);
-    if(objectsize == 0) throw "vector[] out of bounds";
-    if(!pool[0]) pool[0] = new T;
-    return *pool[0];
+    for(unsigned i = newsize; i < objectsize; i++) {
+      if(pool[i]) { delete pool[i]; pool[i] = 0; }
+    }
+
+    pool = (T**)realloc(pool, newsize * sizeof(T*));
+    for(unsigned i = poolsize; i < newsize; i++) pool[i] = 0;
+    poolsize = newsize;
+    objectsize = min(objectsize, newsize);
   }
 
-  inline operator const T&() const {
-    if(objectsize == 0 || !pool[0]) throw "vector[] out of bounds";
-    return *pool[0];
+  void resize(unsigned newsize) {
+    if(newsize > poolsize) reserve(newsize);
+
+    for(unsigned i = newsize; i < objectsize; i++) {
+      if(pool[i]) { delete pool[i]; pool[i] = 0; }
+    }
+
+    objectsize = newsize;
   }
 
-  inline T& operator[](int index) {
+  void add(const T data) {
+    if(objectsize + 1 > poolsize) reserve(objectsize + 1);
+    pool[objectsize++] = new T(data);
+  }
+
+  inline T& operator[](unsigned index) {
     if(index >= objectsize) resize(index + 1);
-    if(index >= objectsize) throw "vector[] out of bounds";
     if(!pool[index]) pool[index] = new T;
     return *pool[index];
   }
 
-  inline const T& operator[](int index) const {
+  inline const T& operator[](unsigned index) const {
     if(index >= objectsize || !pool[index]) throw "vector[] out of bounds";
     return *pool[index];
   }
+
+  pointer_vector() : pool(0), poolsize(0), objectsize(0) {}
+  ~pointer_vector() { reset(); }
 };
 
+//default vector type
 template<typename T> class vector : public linear_vector<T> {};
 
 } //namespace nall

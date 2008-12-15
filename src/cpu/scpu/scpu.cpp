@@ -1,4 +1,4 @@
-#include "../../base.h"
+#include <../base.hpp>
 #define SCPU_CPP
 
 #include "core/core.cpp"

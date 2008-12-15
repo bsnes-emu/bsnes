@@ -95,8 +95,9 @@ public:
       //restore cursor acceleration and release cursor
       XChangePointerControl(display, True, True, device.accel_numerator, device.accel_denominator, device.threshold);
       XUngrabPointer(display, CurrentTime);
-      return mouseacquired = false;
+      mouseacquired = false;
     }
+    return true;
   }
 
   bool acquired() {

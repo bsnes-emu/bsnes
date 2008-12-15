@@ -1,11 +1,46 @@
-#include "../../base.h"
+#include <../base.hpp>
 #define BPPU_CPP
 
 #include "bppu_mmio.cpp"
 #include "bppu_render.cpp"
 
+void bPPU::enter() {
+  loop:
+  //H =    0 (initialize)
+  scanline();
+  if(ppucounter.vcounter() == 0) frame();
+  add_clocks(10);
+
+  //H =   10 (OAM address reset)
+  if(ppucounter.vcounter() == (!overscan() ? 225 : 240)) {
+    if(regs.display_disabled == false) {
+      regs.oam_addr = regs.oam_baseaddr << 1;
+      regs.oam_firstsprite = (regs.oam_priority == false) ? 0 : (regs.oam_addr >> 2) & 127;
+    }
+  }
+  add_clocks(502);
+
+  //H =  512 (render)
+  render_scanline();
+  add_clocks(640);
+
+  //H = 1152 (cache OBSEL)
+  cache.oam_basesize   = regs.oam_basesize;
+  cache.oam_nameselect = regs.oam_nameselect;
+  cache.oam_tdaddr     = regs.oam_tdaddr;
+  add_clocks(ppucounter.ppulineclocks() - 1152);  //seek to start of next scanline
+
+  goto loop;
+}
+
+void bPPU::add_clocks(unsigned clocks) {
+  ppucounter.tock(clocks);
+  scheduler.addclocks_ppu(clocks);
+}
+
 void bPPU::scanline() {
-  line.y = cpu.vcounter();
+  snes.scanline();
+  line.y = ppucounter.ppuvcounter();
 
   if(line.y == 0) {
     //RTO flag reset
@@ -25,42 +60,25 @@ void bPPU::scanline() {
     if(!regs.mosaic_countdown) regs.mosaic_countdown = regs.mosaic_size + 1;
     regs.mosaic_countdown--;
   }
-
-  //note: this should actually occur at V=225,HC=10.
-  //this is a limitation of the scanline-based renderer.
-  if(line.y == (!overscan() ? 225 : 240)) {
-    if(regs.display_disabled == false) {
-      //OAM address reset
-      regs.oam_addr = regs.oam_baseaddr << 1;
-      regs.oam_firstsprite = (regs.oam_priority == false) ? 0 : (regs.oam_addr >> 2) & 127;
-    }
-  }
 }
 
 void bPPU::render_scanline() {
   #ifdef FAST_FRAMESKIP
-  //bypass RTO status flag calculations
+  //note: this bypasses RTO status flag calculations, which is observable by software
   if(status.render_output == false) return;
   #endif
 
-  if(line.y >= 0 && line.y < (!overscan() ? 225 : 240)) {
-    if(config::ppu.hack.obj_cache == false) {
-      if(line.y != 0) {
-        render_line_oam_rto();
-        render_line();
-      }
-    } else {
-      if(line.y != 0) render_line();
-      render_line_oam_rto();
-    }
+  if(line.y >= 1 && line.y < (!overscan() ? 225 : 240)) {
+    render_line_oam_rto();
+    render_line();
   }
 }
 
 void bPPU::frame() {
   PPU::frame();
+  snes.frame();
 
-  display.field ^= 1;
-  if(display.field == 0) {
+  if(ppucounter.ppufield() == 0) {
     display.interlace = regs.interlace;
     regs.scanlines = (regs.overscan == false) ? 224 : 239;
   }
@@ -72,21 +90,22 @@ void bPPU::power() {
   for(unsigned i = 0; i < memory::vram.size();  i++) memory::vram[i]  = 0x00;
   for(unsigned i = 0; i < memory::oam.size();   i++) memory::oam[i]   = 0x00;
   for(unsigned i = 0; i < memory::cgram.size(); i++) memory::cgram[i] = 0x00;
+  flush_tiledata_cache();
 
-  if(snes.region() == SNES::NTSC) {
-    region = 0;
-  } else /* (snes.region == SNES::PAL) */ {
-    region = 1;
-  }
+  region = (snes.region() == SNES::NTSC ? 0 : 1);  //0 = NTSC, 1 = PAL
 
   //$2100
   regs.display_disabled   = 1;
   regs.display_brightness = 15;
 
   //$2101
-  regs.oam_basesize   = 0;
-  regs.oam_nameselect = 0;
-  regs.oam_tdaddr     = 0x0000;
+  regs.oam_basesize    = 0;
+  regs.oam_nameselect  = 0;
+  regs.oam_tdaddr      = 0x0000;
+
+  cache.oam_basesize   = 0;
+  cache.oam_nameselect = 0;
+  cache.oam_tdaddr     = 0x0000;
 
   //$2102-$2103
   regs.oam_baseaddr    = 0x0000;
@@ -281,11 +300,11 @@ void bPPU::power() {
 
 void bPPU::reset() {
   PPU::reset();
-  frame();
+  PPU::frame();
 
-  display.field = 0;
   display.interlace = false;
-  display.overscan = false;
+  display.overscan  = false;
+  regs.scanlines    = 224;
 
   memset(sprite_list, 0, sizeof(sprite_list));
 
@@ -298,12 +317,10 @@ void bPPU::reset() {
   regs.bg_y[1] = 0;
   regs.bg_y[2] = 0;
   regs.bg_y[3] = 0;
-
-  clear_tiledata_cache();
 }
 
 bPPU::bPPU() {
-  init_tiledata_cache();
+  alloc_tiledata_cache();
 
   for(int l = 0; l < 16; l++) {
     for(int i = 0; i < 4096; i++) {
@@ -325,4 +342,5 @@ bPPU::bPPU() {
 }
 
 bPPU::~bPPU() {
+  free_tiledata_cache();
 }

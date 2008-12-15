@@ -16,18 +16,18 @@ string_setting System::input(config(), "system.input", "Input hardware interface
 
 integral_setting System::invoke_crash_handler(config(), "system.invoke_crash_handler",
   "Do not modify this setting!\n"
-  "Used to detect crashes caused by initialization of video / audio / input drivers.\n"
-  "When the emulator crashes during driver initialization, this value will be left as true.\n"
-  "When true, driver selection crash handler window will appear on next start-up.\n"
-  "", integral_setting::boolean, false);
+  "Used to detect crashes caused by initialization of video / audio / input drivers. "
+  "When the emulator crashes during driver initialization, this value will be left as true. "
+  "When true, driver selection crash handler window will appear on next start-up.",
+  integral_setting::boolean, false);
 
 integral_setting System::emulation_speed(config(), "system.emulation_speed",
-  "Relative speed of emulator compared to SNES hardware\n"
+  "Relative speed of emulator compared to SNES hardware:\n"
   "0 = 50%\n"
   "1 = 75%\n"
   "2 = 100%\n"
   "3 = 150%\n"
-  "4 = 200%\n",
+  "4 = 200%",
   integral_setting::decimal, 2);
 
 integral_setting System::gamma_ramp(config(), "system.colorfilter.gamma_ramp",
@@ -66,28 +66,33 @@ integral_setting Video::mode("video.mode", "Active video mode", integral_setting
 integral_setting Video::synchronize(config(), "video.synchronize", "Synchronize to video refresh rate", integral_setting::boolean, false);
 
 integral_setting Video::Windowed::aspect_correction(config(), "video.windowed.aspect_correction",
-  "Correct video aspect ratio\n"
-  "Defaults assume display pixels are perfectly square\n"
-  "Formula: width = width * video.aspect_<region>_x / video.aspect_<region>_y\n",
+  "Correct video aspect ratio.\n"
+  "Defaults assume display pixels are perfectly square."
+  "Formula: width = width * video.aspect_<region>_x / video.aspect_<region>_y",
   integral_setting::boolean, true);
-integral_setting Video::Windowed::region(config(), "video.windowed.region", "Video output region\n"
-  "0 = NTSC, 1 = PAL",
+integral_setting Video::Windowed::region(config(), "video.windowed.region",
+  "Video output region:\n"
+  "0 = NTSC\n"
+  "1 = PAL",
   integral_setting::decimal, 0);
-integral_setting Video::Windowed::multiplier(config(), "video.windowed.multiplier", "Video output size multiplier (1-5x)\n"
+integral_setting Video::Windowed::multiplier(config(), "video.windowed.multiplier",
+  "Video output size multiplier (1-5x)\n"
   "1 = 1x (<= 320x240)\n"
   "2 = 2x (<= 640x480)\n"
   "etc.",
   integral_setting::decimal, 2);
-integral_setting Video::Windowed::hardware_filter(config(), "video.windowed.hardware_filter", "Video hardware filter\n"
+integral_setting Video::Windowed::hardware_filter(config(), "video.windowed.hardware_filter",
+  "Video hardware filter:\n"
   "0 = Point\n"
-  "1 = Linear\n",
+  "1 = Linear",
   integral_setting::decimal, 1);
-integral_setting Video::Windowed::software_filter(config(), "video.windowed.software_filter", "Video software filter\n"
+integral_setting Video::Windowed::software_filter(config(), "video.windowed.software_filter",
+  "Video software filter:\n"
   "0 = None\n"
   "1 = Scanline\n"
   "2 = Scale2x\n"
   "3 = HQ2x\n"
-  "4 = NTSC\n",
+  "4 = NTSC",
   integral_setting::decimal, 0);
 
 integral_setting Video::Fullscreen::aspect_correction(config(), "video.fullscreen.aspect_correction", "", integral_setting::boolean, true);
@@ -154,10 +159,18 @@ struct Input {
     static string_setting toggle_menubar;
     static string_setting toggle_statusbar;
   } gui;
+
+  struct Debugger {
+    static string_setting export_memory;
+    static string_setting toggle_cputrace;
+    static string_setting toggle_cputracemask;
+    static string_setting toggle_smptrace;
+    static string_setting toggle_smptracemask;
+  } debugger;
 } input;
 
 integral_setting Input::capture_mode(config(), "input.capture_mode",
-  "Capture method for input to main emulation window\n"
+  "Capture method for input to main emulation window.\n"
   "When emulation window does not have focus:\n"
   "0 = Allow input\n"
   "1 = Ignore input\n"
@@ -166,16 +179,16 @@ integral_setting Input::capture_mode(config(), "input.capture_mode",
 
 integral_setting Input::allow_invalid_input(config(), "input.allow_invalid_input",
   "Allow up+down and left+right combinations (not recommended.)\n"
-  "This is not possible on an actual SNES controller, due to its design.\n"
-  "Enabling this option can trigger bugs in certain games.\n",
+  "This is not possible on an actual SNES controller, due to its design. "
+  "Enabling this option can trigger bugs in certain games.",
   integral_setting::boolean, false);
 
 integral_setting Input::analog_axis_resistance(config(), "input.analog_axis_resistance",
   "Resistance required to activate analog stick in any given direction.\n"
-  "This value ranges from 1 (1%, virtually no resistance) to 99 (99%, near full resistance.)\n"
-  "For instance, a value of 50 means that to register 'left', the analog stick must be moved\n"
+  "This value ranges from 1 (1%, virtually no resistance) to 99 (99%, near full resistance.) "
+  "For instance, a value of 50 means that to register 'left', the analog stick must be moved "
   "50% between the center and the left.\n"
-  "Less resistance allows for more fluid movement; whereas more resistance helps to prevent\n"
+  "Less resistance allows for more fluid movement; whereas more resistance helps to prevent "
   "accidental movements, eg attempting to press up whilst bumping the stick slightly left.",
   integral_setting::decimal, 50);
 
@@ -269,6 +282,12 @@ string_setting Input::GUI::frameskip_increase(config(), "input.gui.frameskip_inc
 string_setting Input::GUI::toggle_fullscreen (config(), "input.gui.toggle_fullscreen",  "", "f11");
 string_setting Input::GUI::toggle_menubar    (config(), "input.gui.toggle_menubar",     "", "escape");
 string_setting Input::GUI::toggle_statusbar  (config(), "input.gui.toggle_statusbar",   "", "escape");
+
+string_setting Input::Debugger::export_memory      (config(), "input.debugger.export_memory",       "", "none");
+string_setting Input::Debugger::toggle_cputrace    (config(), "input.debugger.toggle_cputrace",     "", "none");
+string_setting Input::Debugger::toggle_cputracemask(config(), "input.debugger.toggle_cputracemask", "", "none");
+string_setting Input::Debugger::toggle_smptrace    (config(), "input.debugger.toggle_smptrace",     "", "none");
+string_setting Input::Debugger::toggle_smptracemask(config(), "input.debugger.toggle_smptracemask", "", "none");
 
 struct Misc {
   static integral_setting cheat_autosort;

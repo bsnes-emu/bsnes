@@ -8,37 +8,8 @@
 #include "bppu_render_addsub.cpp"
 #include "bppu_render_line.cpp"
 
+//this function can be used to disable BG / OAM layer rendering (currently unused)
 bool bPPU::render_enabled(uint8 bg, uint8 pri) {
-  switch(bg) {
-  case BG1:
-    switch(pri) {
-    case 0: return config::ppu.bg1_pri0_enable;
-    case 1: return config::ppu.bg1_pri1_enable;
-    } break;
-  case BG2:
-    switch(pri) {
-    case 0: return config::ppu.bg2_pri0_enable;
-    case 1: return config::ppu.bg2_pri1_enable;
-    } break;
-  case BG3:
-    switch(pri) {
-    case 0: return config::ppu.bg3_pri0_enable;
-    case 1: return config::ppu.bg3_pri1_enable;
-    } break;
-  case BG4:
-    switch(pri) {
-    case 0: return config::ppu.bg4_pri0_enable;
-    case 1: return config::ppu.bg4_pri1_enable;
-    } break;
-  case OAM:
-    switch(pri) {
-    case 0: return config::ppu.oam_pri0_enable;
-    case 1: return config::ppu.oam_pri1_enable;
-    case 2: return config::ppu.oam_pri2_enable;
-    case 3: return config::ppu.oam_pri3_enable;
-    } break;
-  }
-
   return true;
 }
 
@@ -158,22 +129,22 @@ void bPPU::render_line() {
     return;
   }
 
-  clear_pixel_cache();
+  flush_pixel_cache();
   build_window_tables(COL);
   update_bg_info();
 
   switch(regs.bg_mode) {
-  case 0: render_line_mode0(); break;
-  case 1: render_line_mode1(); break;
-  case 2: render_line_mode2(); break;
-  case 3: render_line_mode3(); break;
-  case 4: render_line_mode4(); break;
-  case 5: render_line_mode5(); break;
-  case 6: render_line_mode6(); break;
-  case 7: render_line_mode7(); break;
+    case 0: render_line_mode0(); break;
+    case 1: render_line_mode1(); break;
+    case 2: render_line_mode2(); break;
+    case 3: render_line_mode3(); break;
+    case 4: render_line_mode4(); break;
+    case 5: render_line_mode5(); break;
+    case 6: render_line_mode6(); break;
+    case 7: render_line_mode7(); break;
   }
 
   render_line_output();
 }
 
-#endif //ifdef BPPU_CPP
+#endif  //ifdef BPPU_CPP

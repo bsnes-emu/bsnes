@@ -2,10 +2,10 @@ void pEditbox::create(unsigned style, unsigned width, unsigned height, const cha
   bool multiline = style & Editbox::Multiline;
   bool readonly  = style & Editbox::Readonly;
   unsigned vscroll = (style & Editbox::VerticalScrollAlways) ? WS_VSCROLL :
-                     (style & Editbox::VerticalScrollNever) ? 0 :
+                     (style & Editbox::VerticalScrollNever ) ? 0 :
                      ES_AUTOVSCROLL;
   unsigned hscroll = (style & Editbox::HorizontalScrollAlways) ? WS_HSCROLL :
-                     (style & Editbox::HorizontalScrollNever) ? 0 :
+                     (style & Editbox::HorizontalScrollNever ) ? 0 :
                      ES_AUTOHSCROLL;
 
   hwnd = CreateWindowEx(WS_EX_CLIENTEDGE, L"EDIT", L"",

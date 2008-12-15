@@ -1,4 +1,4 @@
-#include "../../base.h"
+#include <../base.hpp>
 #define SPC7110_CPP
 
 #include "decomp.cpp"

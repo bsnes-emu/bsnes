@@ -1,6 +1,6 @@
 #ifdef READER_CPP
 
-#include "jmareader.h"
+#include "jmareader.hpp"
 #include "jma/jma.h"
 
 unsigned JMAReader::size() {

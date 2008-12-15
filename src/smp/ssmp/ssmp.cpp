@@ -1,4 +1,4 @@
-#include "../../base.h"
+#include <../base.hpp>
 #define SSMP_CPP
 
 #include "core/core.cpp"

@@ -106,7 +106,7 @@ void HQ2xFilter::render(
       pattern |= hdiff(center, W9) ? 0x80 : 0x00;
 
       switch(pattern) {
-        #include "hq2x_table.h"
+        #include "hq2x_table.hpp"
       }
 
       input++;

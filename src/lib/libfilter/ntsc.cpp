@@ -54,12 +54,12 @@ void NTSCFilter::adjust(
   if(!ntsc) {
     ntsc = (snes_ntsc_t*)malloc(sizeof *ntsc);
     if(!ntsc) {
-      return; //to do: report out of memory error
+      return;  //to do: report out of memory error
     }
   }
 
   burst = 0;
-  burst_toggle = (merge_fields ? 0 : 1); // don't toggle burst when fields are merged
+  burst_toggle = (merge_fields ? 0 : 1);  //don't toggle burst when fields are merged
   snes_ntsc_init(ntsc, &setup);
 }
 

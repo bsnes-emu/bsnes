@@ -7,15 +7,15 @@ void sCPU::dma_add_clocks(uint clocks) {
 
 bool sCPU::dma_addr_valid(uint32 abus) {
   //reads from B-bus or S-CPU registers are invalid
-  if((abus & 0x40ff00) == 0x2100) return false; //$[00-3f|80-bf]:[2100-21ff]
-  if((abus & 0x40fe00) == 0x4000) return false; //$[00-3f|80-bf]:[4000-41ff]
-  if((abus & 0x40ffe0) == 0x4200) return false; //$[00-3f|80-bf]:[4200-421f]
-  if((abus & 0x40ff80) == 0x4300) return false; //$[00-3f|80-bf]:[4300-437f]
+  if((abus & 0x40ff00) == 0x2100) return false;  //$[00-3f|80-bf]:[2100-21ff]
+  if((abus & 0x40fe00) == 0x4000) return false;  //$[00-3f|80-bf]:[4000-41ff]
+  if((abus & 0x40ffe0) == 0x4200) return false;  //$[00-3f|80-bf]:[4200-421f]
+  if((abus & 0x40ff80) == 0x4300) return false;  //$[00-3f|80-bf]:[4300-437f]
   return true;
 }
 
 uint8 sCPU::dma_read(uint32 abus) {
-  if(dma_addr_valid(abus) == false) return 0x00; //does not return S-CPU MDR
+  if(dma_addr_valid(abus) == false) return 0x00;  //does not return S-CPU MDR
   return bus.read(abus);
 }
 
@@ -39,7 +39,7 @@ void sCPU::dma_transfer(bool direction, uint8 bbus, uint32 abus) {
       //illegal WRAM->WRAM transfer (bus conflict)
       //no read occurs; write does occur
       dma_add_clocks(8);
-      bus.write(abus, 0x00); //does not write S-CPU MDR
+      bus.write(abus, 0x00);  //does not write S-CPU MDR
     } else {
       dma_add_clocks(4);
       uint8 data = bus.read(0x2100 | bbus);
@@ -59,14 +59,14 @@ void sCPU::dma_transfer(bool direction, uint8 bbus, uint32 abus) {
 
 uint8 sCPU::dma_bbus(uint8 i, uint8 index) {
   switch(channel[i].xfermode) { default:
-    case 0: return (channel[i].destaddr);                      //0
-    case 1: return (channel[i].destaddr + (index & 1));        //0,1
-    case 2: return (channel[i].destaddr);                      //0,0
-    case 3: return (channel[i].destaddr + ((index >> 1) & 1)); //0,0,1,1
-    case 4: return (channel[i].destaddr + (index & 3));        //0,1,2,3
-    case 5: return (channel[i].destaddr + (index & 1));        //0,1,0,1
-    case 6: return (channel[i].destaddr);                      //0,0     [2]
-    case 7: return (channel[i].destaddr + ((index >> 1) & 1)); //0,0,1,1 [3]
+    case 0: return (channel[i].destaddr);                       //0
+    case 1: return (channel[i].destaddr + (index & 1));         //0,1
+    case 2: return (channel[i].destaddr);                       //0,0
+    case 3: return (channel[i].destaddr + ((index >> 1) & 1));  //0,0,1,1
+    case 4: return (channel[i].destaddr + (index & 3));         //0,1,2,3
+    case 5: return (channel[i].destaddr + (index & 1));         //0,1,0,1
+    case 6: return (channel[i].destaddr);                       //0,0     [2]
+    case 7: return (channel[i].destaddr + ((index >> 1) & 1));  //0,0,1,1 [3]
   }
 }
 
@@ -96,29 +96,6 @@ inline uint32 sCPU::hdma_iaddr(uint8 i) {
  * DMA functions
  *****/
 
-void sCPU::dma_transfertobusb(uint8 i, uint8 bbus) {
-  if(cartridge.info.sdd1 == true && sdd1.dma_active() == true) {
-    bus.write(0x2100 | bbus, sdd1.dma_read());
-  } else {
-    dma_transfer(0, bbus, dma_addr(i));
-  }
-  channel[i].xfersize--;
-}
-
-void sCPU::dma_transfertobusa(uint8 i, uint8 bbus) {
-  dma_transfer(1, bbus, dma_addr(i));
-  channel[i].xfersize--;
-}
-
-inline void sCPU::dma_write(uint8 i, uint8 index) {
-  //cannot use dma_transfer() directly, due to current S-DD1 implementation
-  if(channel[i].direction == 0) {
-    dma_transfertobusb(i, index);
-  } else {
-    dma_transfertobusa(i, index);
-  }
-}
-
 uint8 sCPU::dma_enabled_channels() {
   uint8 r = 0;
   for(unsigned i = 0; i < 8; i++) {
@@ -136,23 +113,10 @@ void sCPU::dma_run() {
     dma_add_clocks(8);
     cycle_edge();
 
-    if(cartridge.info.sdd1 == true) {
-      sdd1.dma_begin(i, (channel[i].srcbank << 16) | (channel[i].srcaddr), channel[i].xfersize);
-    }
-
-    if(tracer.enabled() == true && tracer.cpudma_enabled() == true) {
-      tprintf("[DMA] channel:%d direction:%s reverse:%c fixed:%c mode:%d b_addr:$21%0.2x "
-              "a_addr:$%0.2x%0.4x length:$%0.4x (%5d)",
-        i, channel[i].direction ? "b->a" : "a->b", channel[i].reversexfer ? '1' : '0',
-        channel[i].fixedxfer ? '1' : '0', channel[i].xfermode, channel[i].destaddr,
-        channel[i].srcbank, channel[i].srcaddr,
-        channel[i].xfersize, channel[i].xfersize ? channel[i].xfersize : 65536);
-    }
-
     unsigned index = 0;
     do {
-      dma_write(i, dma_bbus(i, index++));
-    } while(channel[i].dma_enabled && channel[i].xfersize);
+      dma_transfer(channel[i].direction, dma_bbus(i, index++), dma_addr(i));
+    } while(channel[i].dma_enabled && --channel[i].xfersize);
 
     channel[i].dma_enabled = false;
   }
@@ -215,7 +179,7 @@ void sCPU::hdma_run() {
 
   for(unsigned i = 0; i < 8; i++) {
     if(hdma_active(i) == false) continue;
-    channel[i].dma_enabled = false; //HDMA run during DMA will stop DMA mid-transfer
+    channel[i].dma_enabled = false;  //HDMA run during DMA will stop DMA mid-transfer
 
     if(channel[i].hdma_do_transfer) {
       static const unsigned transfer_length[8] = { 1, 2, 2, 4, 4, 4, 2, 4 };
@@ -254,7 +218,7 @@ void sCPU::hdma_init() {
 
   for(unsigned i = 0; i < 8; i++) {
     if(!channel[i].hdma_enabled) continue;
-    channel[i].dma_enabled = false; //HDMA init during DMA will stop DMA mid-transfer
+    channel[i].dma_enabled = false;  //HDMA init during DMA will stop DMA mid-transfer
 
     channel[i].hdma_addr = channel[i].srcaddr;
     hdma_update(i);
@@ -282,7 +246,7 @@ void sCPU::dma_power() {
     channel[i].srcbank           = 0xff;
 
     channel[i].xfersize          = 0xffff;
-  //channel[i].hdma_iaddr        = 0xffff; //union with xfersize
+  //channel[i].hdma_iaddr        = 0xffff;  //union with xfersize
     channel[i].hdma_ibank        = 0xff;
 
     channel[i].hdma_addr         = 0xffff;

@@ -1,7 +1,7 @@
-#include "../../base.h"
+#include <../base.hpp>
 #define ST010_CPP
 
-#include "st010_data.h"
+#include "st010_data.hpp"
 #include "st010_op.cpp"
 
 int16 ST010::sin(int16 theta) {

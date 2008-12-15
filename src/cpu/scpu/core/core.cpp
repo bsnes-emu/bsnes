@@ -2,7 +2,14 @@
 
 #include "opfn.cpp"
 
-void sCPU::enter() { loop:
+void sCPU::enter() {
+  initialize:
+  //initial latch values for $213c/$213d
+  //[x]0035 : [y]0000 (53.0 -> 212) [lda $2137]
+  //[x]0038 : [y]0000 (56.5 -> 226) [nop : lda $2137]
+  add_clocks(186);
+
+  loop:
   if(event.irq) {
     event.irq = false;
     if(status.nmi_pending == true) {

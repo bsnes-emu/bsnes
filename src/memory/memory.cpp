@@ -1,4 +1,4 @@
-#include "../base.h"
+#include <../base.hpp>
 #define MEMORY_CPP
 
 #include "memory_rw.cpp"
@@ -24,6 +24,10 @@ void UnmappedMMIO::mmio_write(unsigned, uint8) {}
 void MMIOAccess::map(unsigned addr, MMIO &access) {
   //MMIO: $[00-3f]:[2000-5fff]
   mmio[(addr - 0x2000) & 0x3fff] = &access;
+}
+
+MMIO* MMIOAccess::get(unsigned addr) {
+  return mmio[(addr - 0x2000) & 0x3fff];
 }
 
 uint8 MMIOAccess::read(unsigned addr) {

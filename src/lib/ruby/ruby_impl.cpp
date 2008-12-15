@@ -50,6 +50,10 @@
   #include <ruby/audio/oss.cpp>
 #endif
 
+#ifdef AUDIO_PULSEAUDIO
+  #include <ruby/audio/pulseaudio.cpp>
+#endif
+
 /* Input */
 
 #ifdef INPUT_DIRECTINPUT

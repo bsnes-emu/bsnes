@@ -52,6 +52,8 @@ public:
       index_input[n]  = part[0];
       index_output[n] = part[1];
     }
+
+    return true;
   }
 
   void reset() {

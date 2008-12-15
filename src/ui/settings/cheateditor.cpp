@@ -1,23 +1,23 @@
 void CheatEditorWindow::setup() {
-  create(0, 475, 355);
+  create(0, 451, 370);
 
-  list.create(Listbox::Header | Listbox::VerticalScrollAlways, 475, 272,
+  list.create(Listbox::Header | Listbox::VerticalScrollAlways, 451, 287,
     string() << translate["Status"] << "\t" << translate["Code"] << "\t" << translate["Description"]);
-  autosort.create   (0, 475, 18, translate["Keep cheat code list sorted by description"]);
-  add_code.create   (0, 155, 25, translate["Add Code"]);
-  toggle_code.create(0, 155, 25, translate["Toggle Status"]);
-  delete_code.create(0, 155, 25, translate["Delete Code"]);
-  code.create(0, 155, 25, translate["<code>"]);
-  desc.create(0, 315, 25, translate["<description>"]);
+  autosort.create   (0, 451, 18, translate["Keep cheat code list sorted by description"]);
+  add_code.create   (0, 147, 25, translate["Add Code"]);
+  toggle_code.create(0, 147, 25, translate["Toggle Status"]);
+  delete_code.create(0, 147, 25, translate["Delete Code"]);
+  code.create(0, 147, 25, translate["<code>"]);
+  desc.create(0, 299, 25, translate["<description>"]);
 
   unsigned y = 0;
-  attach(list,          0, y); y += 272 + 5;
+  attach(list,          0, y); y += 287 + 5;
   attach(autosort,      0, y); y +=  18 + 5;
   attach(add_code,      0, y);
-  attach(toggle_code, 160, y);
-  attach(delete_code, 320, y); y +=  25 + 5;
+  attach(toggle_code, 152, y);
+  attach(delete_code, 304, y); y +=  25 + 5;
   attach(code,          0, y);
-  attach(desc,        160, y); y +=  25 + 5;
+  attach(desc,        152, y); y +=  25 + 5;
 
   autosort.check(config::misc.cheat_autosort);
 

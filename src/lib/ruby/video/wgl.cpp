@@ -1,6 +1,6 @@
 /*
   video.wgl
-  authors: byuu, krom, mudlord
+  authors: byuu, krom
   license: public domain
   last updated: 2008-08-20
 */

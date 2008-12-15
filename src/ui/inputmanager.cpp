@@ -70,6 +70,7 @@ void InputManager::refresh() {
 void InputManager::bind() {
   inputpool.bind();
   inputuigeneral.bind();
+  inputuidebugger.bind();
 }
 
 void InputManager::poll() {

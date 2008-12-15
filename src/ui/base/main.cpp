@@ -101,13 +101,19 @@ uintptr_t MainWindow::event(event_t e) {
 
     if(e.widget == &menu_settings_config) { window_settings.show(); }
 
-    if(e.widget == &menu_misc_logaudio) {
-      (menu_misc_logaudio.checked() == true) ? snes.audio.log_enable() : snes.audio.log_disable();
+    if(e.widget == &menu_help_readme) {
+      window_textview.set_text(translate["bsnes Readme"]);
+      window_textview.text.set_text(text_readme);
+      window_textview.focus();
+      window_textview.ok.focus();
     }
-
-    if(e.widget == &menu_misc_about) {
-      window_about.focus();
+    if(e.widget == &menu_help_license) {
+      window_textview.set_text(translate["bsnes License"]);
+      window_textview.text.set_text(text_license);
+      window_textview.focus();
+      window_textview.ok.focus();
     }
+    if(e.widget == &menu_help_about) { window_about.focus(); }
   }
 
   return true;
@@ -314,10 +320,11 @@ void MainWindow::setup() {
     }
     menu_settings.attach(menu_settings_config.create(string() << translate["Configuration"] << " ..."));
 
-  attach(menu_misc.create(translate["{{menu}}Misc"]));
-    menu_misc.attach(menu_misc_logaudio.create(translate["{{misc}}Log Audio Data"]));
-    menu_misc.attach(menu_misc_sep1.create());
-    menu_misc.attach(menu_misc_about.create(string() << translate["{{misc}}About"] << " ..."));
+  attach(menu_help.create(translate["{{menu}}Help"]));
+    menu_help.attach(menu_help_readme.create(string() << translate["{{help}}Readme"] << " ..."));
+    menu_help.attach(menu_help_license.create(string() << translate["{{help}}License"] << " ..."));
+    menu_help.attach(menu_help_sep1.create());
+    menu_help.attach(menu_help_about.create(string() << translate["{{help}}About"] << " ..."));
 
   menu_system_power.disable();
   menu_system_reset.disable();
@@ -395,8 +402,9 @@ void MainWindow::setup() {
   menu_settings_emuspeed_audiosync.on_tick =
   menu_settings_config.on_tick =
 
-  menu_misc_logaudio.on_tick =
-  menu_misc_about.on_tick =
+  menu_help_readme.on_tick =
+  menu_help_license.on_tick =
+  menu_help_about.on_tick =
 
   bind(&MainWindow::event, this);
 

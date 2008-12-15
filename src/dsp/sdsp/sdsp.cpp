@@ -1,4 +1,3 @@
-
 /*
   S-DSP emulator
   license: LGPLv2
@@ -7,7 +6,7 @@
   The actual algorithms, timing information, tables, variable names, etc were all from him.
 */
 
-#include "../../base.h"
+#include <../base.hpp>
 #define SDSP_CPP
 
 #define REG(n) state.regs[r_##n]

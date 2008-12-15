@@ -12,7 +12,7 @@ InputInterface input;
 void VideoInterface::driver(const char *driver) {
   if(p) term();
 
-  if(driver == "") driver = default_driver();
+  if(!driver || !*driver) driver = default_driver();
 
   if(0);
 
@@ -134,7 +134,7 @@ VideoInterface::~VideoInterface() { term(); }
 void AudioInterface::driver(const char *driver) {
   if(p) term();
 
-  if(driver == "") driver = default_driver();
+  if(!driver || !*driver) driver = default_driver();
 
   if(0);
 
@@ -158,6 +158,10 @@ void AudioInterface::driver(const char *driver) {
   else if(!strcmp(driver, "OSS")) p = new AudioOSS();
   #endif
 
+  #ifdef AUDIO_PULSEAUDIO
+  else if(!strcmp(driver, "PulseAudio")) p = new AudioPulseAudio();
+  #endif
+
   else p = new Audio();
 }
 
@@ -169,6 +173,8 @@ const char* AudioInterface::default_driver() {
   return "ALSA";
   #elif defined(AUDIO_OPENAL)
   return "OpenAL";
+  #elif defined(AUDIO_PULSEAUDIO)
+  return "PulseAudio";
   #elif defined(AUDIO_AO)
   return "libao";
   #elif defined(AUDIO_OSS)
@@ -202,6 +208,10 @@ const char* AudioInterface::driver_list() {
   "OSS;"
   #endif
 
+  #if defined(AUDIO_PULSEAUDIO)
+  "PulseAudio;"
+  #endif
+
   #if defined(AUDIO_AO)
   "libao;"
   #endif
@@ -216,7 +226,7 @@ const char* AudioInterface::driver_list() {
 void InputInterface::driver(const char *driver) {
   if(p) term();
 
-  if(driver == "") driver = default_driver();
+  if(!driver || !*driver) driver = default_driver();
 
   if(0);
 

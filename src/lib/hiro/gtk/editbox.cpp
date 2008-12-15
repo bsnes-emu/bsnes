@@ -1,4 +1,4 @@
-void hiro_peditbox_change(pEditbox *p) {
+static void hiro_peditbox_change(pEditbox *p) {
   if(p->self.on_change) {
     p->self.on_change(event_t(event_t::Change, 0, &p->self));
   }
@@ -16,16 +16,18 @@ void pEditbox::create(unsigned style, unsigned width, unsigned height, const cha
     g_signal_connect_swapped(G_OBJECT(editbox), "changed", G_CALLBACK(hiro_peditbox_change), (gpointer)this);
   } else {
     GtkPolicyType hscroll = (style & Editbox::HorizontalScrollAlways) ? GTK_POLICY_ALWAYS :
-                            (style & Editbox::HorizontalScrollNever)  ? GTK_POLICY_NEVER  :
+                            (style & Editbox::HorizontalScrollNever ) ? GTK_POLICY_NEVER  :
                             GTK_POLICY_AUTOMATIC;
     GtkPolicyType vscroll = (style & Editbox::VerticalScrollAlways) ? GTK_POLICY_ALWAYS :
-                            (style & Editbox::VerticalScrollNever)  ? GTK_POLICY_NEVER  :
+                            (style & Editbox::VerticalScrollNever ) ? GTK_POLICY_NEVER  :
                             GTK_POLICY_AUTOMATIC;
     scrollbox = gtk_scrolled_window_new(0, 0);
     gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrollbox), hscroll, vscroll);
     gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(scrollbox), GTK_SHADOW_ETCHED_IN);
     gtk_widget_set_size_request(scrollbox, width, height);
     editbox = gtk_text_view_new();
+    gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(editbox),
+      (hscroll == GTK_POLICY_NEVER ? GTK_WRAP_WORD_CHAR : GTK_WRAP_NONE));
     gtk_container_add(GTK_CONTAINER(scrollbox), editbox);
     buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(editbox));
     if(style & Editbox::Readonly) { gtk_text_view_set_editable(GTK_TEXT_VIEW(editbox), false); }

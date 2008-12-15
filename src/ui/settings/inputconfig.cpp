@@ -1,43 +1,43 @@
 /* InputConfigWindow */
 
 void InputConfigWindow::setup() {
-  create(0, 475, 355);
+  create(0, 451, 370);
 
-  capture_mode.create(0, 475, 18, translate["{{input}}When emulation window does not have focus:"]);
+  capture_mode.create(0, 451, 18, translate["{{input}}When emulation window does not have focus:"]);
   RadioboxGroup group;
   group.add(&capture_always);
   group.add(&capture_focus);
   group.add(&capture_pause);
-  capture_always.create(group, 0, 155, 18, translate["{{input}}Allow input"]);
-  capture_focus.create (group, 0, 155, 18, translate["{{input}}Ignore input"]);
-  capture_pause.create (group, 0, 155, 18, translate["{{input}}Pause emulation"]);
+  capture_always.create(group, 0, 147, 18, translate["{{input}}Allow input"]);
+  capture_focus.create (group, 0, 147, 18, translate["{{input}}Ignore input"]);
+  capture_pause.create (group, 0, 147, 18, translate["{{input}}Pause emulation"]);
 
-  config_type.create(0, 235, 25);
+  config_type.create(0, 223, 25);
   config_type.add_item(translate["{{input}}Controller Port 1"]);
   config_type.add_item(translate["{{input}}Controller Port 2"]);
   config_type.add_item(translate["{{input}}User Interface"]);
   config_type.set_selection(0);
 
-  config_subtype.create(0, 235, 25);
+  config_subtype.create(0, 223, 25);
   refresh_subtype();
 
-  list.create(Listbox::Header | Listbox::VerticalScrollAlways, 475, 254,
+  list.create(Listbox::Header | Listbox::VerticalScrollAlways, 451, 269,
     string() << translate["{{input}}Name"] << "\t" << translate["{{input}}Value"]);
-  setkey.create(0, 235, 25, string() << translate["{{input}}Assign Key"] << " ...");
+  setkey.create(0, 223, 25, string() << translate["{{input}}Assign Key"] << " ...");
   setkey.disable();
-  clrkey.create(0, 235, 25, translate["{{input}}Unassign Key"]);
+  clrkey.create(0, 223, 25, translate["{{input}}Unassign Key"]);
   clrkey.disable();
 
   unsigned y = 0;
   attach(capture_mode,           0, y); y +=  18;
   attach(capture_always,         0, y);
-  attach(capture_focus,        160, y);
-  attach(capture_pause,        320, y); y +=  18 + 5;
+  attach(capture_focus,        152, y);
+  attach(capture_pause,        304, y); y +=  18 + 5;
   attach(config_type,            0, y);
-  attach(config_subtype,       240, y); y +=  25 + 5;
-  attach(list,                   0, y); y += 254 + 5;
+  attach(config_subtype,       228, y); y +=  25 + 5;
+  attach(list,                   0, y); y += 269 + 5;
   attach(setkey,                 0, y);
-  attach(clrkey,               240, y); y +=  25 + 5;
+  attach(clrkey,               228, y); y +=  25 + 5;
 
   capture_always.on_tick   = bind(&InputConfigWindow::capture_change, this);
   capture_focus.on_tick    = bind(&InputConfigWindow::capture_change, this);
@@ -75,7 +75,10 @@ InputGroup* InputConfigWindow::get_group() {
     return device;
   } else {
     //user interface
-    return &inputuigeneral;
+    switch(index) {
+      case 0: return &inputuigeneral;
+      case 1: return &inputuidebugger;
+    }
   }
 }
 
@@ -123,6 +126,7 @@ void InputConfigWindow::refresh_subtype() {
   } else {
     //user interface
     config_subtype.add_item(translate[inputuigeneral.name]);
+    config_subtype.add_item(translate[inputuidebugger.name]);
   }
 
   config_subtype.set_selection(0);

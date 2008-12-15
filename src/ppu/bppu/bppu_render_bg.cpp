@@ -90,7 +90,7 @@ void bPPU::render_line_bg(uint8 bg, uint8 color_depth, uint8 pri0_pos, uint8 pri
 
   if(hires) {
     hscroll <<= 1;
-    if(regs.interlace) y = (y << 1) + field();
+    if(regs.interlace) y = (y << 1) + ppucounter.field();
   }
 
   uint16 *mtable = mosaic_table[(regs.mosaic_enabled[bg]) ? regs.mosaic_size : 0];
@@ -102,7 +102,7 @@ void bPPU::render_line_bg(uint8 bg, uint8 color_depth, uint8 pri0_pos, uint8 pri
   uint   xpos, ypos;
   uint16 hoffset, voffset, opt_x, col;
   bool   mirror_x, mirror_y;
-  const bool is_opt_mode = (config::ppu.opt_enable == true) && (regs.bg_mode == 2 || regs.bg_mode == 4 || regs.bg_mode == 6);
+  const bool is_opt_mode = (regs.bg_mode == 2 || regs.bg_mode == 4 || regs.bg_mode == 6);
 
   build_window_tables(bg);
   uint8 *wt_main = window[bg].main;
@@ -200,7 +200,7 @@ void bPPU::render_line_bg(uint8 bg, uint8 color_depth, uint8 pri0_pos, uint8 pri
         if(bg_enabled    == true && !wt_main[x]) { setpixel_main(x); }
         if(bgsub_enabled == true && !wt_sub[x])  { setpixel_sub(x);  }
       } else {
-      int hx = x >> 1;
+        int hx = x >> 1;
         if(x & 1) {
           if(bg_enabled    == true && !wt_main[hx]) { setpixel_main(hx); }
         } else {
@@ -214,4 +214,4 @@ void bPPU::render_line_bg(uint8 bg, uint8 color_depth, uint8 pri0_pos, uint8 pri
 #undef setpixel_main
 #undef setpixel_sub
 
-#endif //ifdef BPPU_CPP
+#endif  //ifdef BPPU_CPP

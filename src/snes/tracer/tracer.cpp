@@ -47,7 +47,7 @@ char t[1024];
 
 void Tracer::enable(bool en) {
   if(en == true && enabled() == false) {
-    fp = fopen("trace.log", "wb");
+    fp = fopen(config::filepath("trace.log", config::path.exportdata), "wb");
   } else if(en == false && enabled() == true) {
     fclose(fp);
     fp = 0;
@@ -82,7 +82,6 @@ Tracer::Tracer() {
   settings.cpuop        = false;
   settings.cpuopmask    = false;
   settings.cpuopmasktbl = 0;
-  settings.cpudma       = false;
 
   settings.smpop        = false;
   settings.smpopmask    = false;

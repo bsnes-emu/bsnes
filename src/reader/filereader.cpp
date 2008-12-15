@@ -1,6 +1,6 @@
 #ifdef READER_CPP
 
-#include "filereader.h"
+#include "filereader.hpp"
 
 unsigned FileReader::size() {
   return fp.size();

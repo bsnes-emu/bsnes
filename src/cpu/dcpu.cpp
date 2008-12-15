@@ -103,7 +103,7 @@ uint32 r = 0;
 }
 
 void CPU::disassemble_opcode(char *output) {
-static CPUReg24 pc;
+static reg24_t pc;
 char t[256];
 char *s = output;
 
@@ -425,7 +425,7 @@ uint8 op2 = dreadb(pc.d);
   strcat(s, t);
   strcat(s, " ");
 
-  sprintf(t, "V:%3d H:%4d", vcounter(), hcounter());
+  sprintf(t, "V:%3d H:%4d", ppucounter.vcounter(), ppucounter.hcounter());
   strcat(s, t);
 }
 

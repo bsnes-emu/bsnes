@@ -5,7 +5,7 @@
   Portions (c) anomie, Overload, zsKnight, Nach, byuu
 */
 
-#include "../../base.h"
+#include <../base.hpp>
 #define CX4_CPP
 
 #include "cx4data.cpp"

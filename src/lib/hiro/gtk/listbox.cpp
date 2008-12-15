@@ -46,10 +46,18 @@ void pListbox::create(unsigned style, unsigned width, unsigned height, const cha
   //alternate colors for each listbox entry if there are multiple columns
   gtk_tree_view_set_rules_hint(GTK_TREE_VIEW(listbox), count(list) >= 2 ? true : false);
   for(unsigned i = 0; i < count(list); i++) {
-    renderer = gtk_cell_renderer_text_new();
-    column = gtk_tree_view_column_new_with_attributes(list[i], renderer, "text", i, (void*)0);
-    column_list[column_list.size()] = column;
-    gtk_tree_view_append_column(GTK_TREE_VIEW(listbox), column);
+    unsigned i = column.size();
+    column[i].renderer = gtk_cell_renderer_text_new();
+    column[i].column = gtk_tree_view_column_new_with_attributes(
+      list[i], column[i].renderer, "text", i, (void*)0
+    );
+    //default header widget is GtkLabel with stock font size;
+    //only way to assign a custom font to header widget is to create custom GtkLabel widget.
+    column[i].label = gtk_label_new(list[i]);
+    set_default_font(column[i].label);
+    gtk_widget_show(column[i].label);
+    gtk_tree_view_column_set_widget(GTK_TREE_VIEW_COLUMN(column[i].column), column[i].label);
+    gtk_tree_view_append_column(GTK_TREE_VIEW(listbox), column[i].column);
   }
 
   if(text && *text) {
@@ -70,9 +78,9 @@ void pListbox::autosize_columns() {
   gtk_tree_view_columns_autosize(GTK_TREE_VIEW(listbox));
 }
 
-void pListbox::set_column_width(unsigned column, unsigned width) {
-  gtk_tree_view_column_set_min_width(column_list[column], width);
-  gtk_tree_view_column_set_max_width(column_list[column], width);
+void pListbox::set_column_width(unsigned index, unsigned width) {
+  gtk_tree_view_column_set_min_width(column[index].column, width);
+  gtk_tree_view_column_set_max_width(column[index].column, width);
 }
 
 void pListbox::add_item(const char *text) {

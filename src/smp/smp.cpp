@@ -1,5 +1,5 @@
-#include "../base.h"
+#include <../base.hpp>
 #define SMP_CPP
 
-#include "iplrom.h"
+#include "iplrom.hpp"
 #include "dsmp.cpp"

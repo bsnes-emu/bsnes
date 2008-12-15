@@ -1,14 +1,14 @@
 #ifdef CART_CPP
 
-#include "../reader/filereader.h"
+#include "../reader/filereader.hpp"
 
 #if defined(GZIP_SUPPORT)
-  #include "../reader/gzreader.h"
-  #include "../reader/zipreader.h"
+  #include "../reader/gzreader.hpp"
+  #include "../reader/zipreader.hpp"
 #endif
 
 #if defined(JMA_SUPPORT)
-  #include "../reader/jmareader.h"
+  #include "../reader/jmareader.hpp"
 #endif
 
 char* Cartridge::modify_extension(char *filename, const char *extension) {
@@ -53,26 +53,8 @@ char* Cartridge::get_base_filename(char *filename) {
 
 char* Cartridge::get_path_filename(char *filename, const char *path, const char *source, const char *extension) {
   strcpy(filename, source);
-  for(char *p = filename; *p; p++) { if(*p == '\\') *p = '/'; }
   modify_extension(filename, extension);
-
-  //override path with user-specified folder, if one was defined
-  if(*path) {
-    lstring part;
-    split(part, "/", filename);
-    string fn = path;
-    if(strend(fn, "/") == false) strcat(fn, "/");
-    strcat(fn, part[count(part) - 1]);
-    strcpy(filename, fn);
-
-    //resolve relative path, if found
-    if(strbegin(fn, "./") == true) {
-      ltrim(fn, "./");
-      strcpy(filename, config::path.base);
-      strcat(filename, fn);
-    }
-  }
-
+  strcpy(filename, config::filepath(filename, path));
   return filename;
 }
 
@@ -95,16 +77,10 @@ bool Cartridge::load_file(const char *fn, uint8 *&data, uint &size, CompressionM
   if(compression == CompressionInspect) filetype = Reader::detect(fn, true);
   if(compression == CompressionAuto) filetype = Reader::detect(fn, config::file.autodetect_type);
 
-  switch(filetype) {
-    default:
-      dprintf("* Warning: filetype detected as unsupported compression type.");
-      dprintf("* Will attempt to load as uncompressed file -- may fail.");
+  switch(filetype) { default:
     case Reader::Normal: {
       FileReader ff(fn);
-      if(!ff.ready()) {
-        alert("Error loading image file (%s)!", fn);
-        return false;
-      }
+      if(!ff.ready()) return false;
       size = ff.size();
       data = ff.read();
     } break;
@@ -112,20 +88,14 @@ bool Cartridge::load_file(const char *fn, uint8 *&data, uint &size, CompressionM
     #ifdef GZIP_SUPPORT
     case Reader::GZIP: {
       GZReader gf(fn);
-      if(!gf.ready()) {
-        alert("Error loading image file (%s)!", fn);
-        return false;
-      }
+      if(!gf.ready()) return false;
       size = gf.size();
       data = gf.read();
     } break;
 
     case Reader::ZIP: {
       ZipReader zf(fn);
-      if(!zf.ready()) {
-        alert("Error loading image file (%s)!", fn);
-        return false;
-      }
+      if(!zf.ready()) return false;
       size = zf.size();
       data = zf.read();
     } break;
@@ -138,7 +108,6 @@ bool Cartridge::load_file(const char *fn, uint8 *&data, uint &size, CompressionM
         size = jf.size();
         data = jf.read();
       } catch(JMA::jma_errors jma_error) {
-        alert("Error loading image file (%s)!", fn);
         return false;
       }
     } break;

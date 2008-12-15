@@ -32,11 +32,11 @@ void Cartridge::read_header(cartinfo_t &info, const uint8_t *data, unsigned size
   }
 
   //standard cart
-  uint8 mapper   = data[index + MAPPER];
-  uint8 rom_type = data[index + ROM_TYPE];
-  uint8 rom_size = data[index + ROM_SIZE];
-  uint8 company  = data[index + COMPANY];
-  uint8 region   = data[index + REGION] & 0x7f;
+  uint8 mapper   = data[index + Mapper];
+  uint8 rom_type = data[index + RomType];
+  uint8 rom_size = data[index + RomSize];
+  uint8 company  = data[index + Company];
+  uint8 region   = data[index + CartRegion] & 0x7f;
 
   //detect presence of BS-X flash cartridge connector (reads extended header information)
   if(data[index - 14] == 'Z') {
@@ -152,8 +152,8 @@ void Cartridge::read_header(cartinfo_t &info, const uint8_t *data, unsigned size
     info.st018 = true;
   }
 
-  if(data[index + RAM_SIZE] & 7) {
-    info.ram_size = 1024 << (data[index + RAM_SIZE] & 7);
+  if(data[index + RamSize] & 7) {
+    info.ram_size = 1024 << (data[index + RamSize] & 7);
   } else {
     info.ram_size = 0;
   }
@@ -166,7 +166,7 @@ unsigned Cartridge::find_header(const uint8_t *data, unsigned size) {
   unsigned score_lo = score_header(data, size, 0x007fc0);
   unsigned score_hi = score_header(data, size, 0x00ffc0);
   unsigned score_ex = score_header(data, size, 0x40ffc0);
-  if(score_ex) score_ex += 4; //favor ExHiROM on images > 32mbits
+  if(score_ex) score_ex += 4;  //favor ExHiROM on images > 32mbits
 
   if(score_lo >= score_hi && score_lo >= score_ex) {
     return 0x007fc0;
@@ -178,15 +178,15 @@ unsigned Cartridge::find_header(const uint8_t *data, unsigned size) {
 }
 
 unsigned Cartridge::score_header(const uint8_t *data, unsigned size, unsigned addr) {
-  if(size < addr + 64) return 0; //image too small to contain header at this location?
+  if(size < addr + 64) return 0;  //image too small to contain header at this location?
   int score = 0;
 
-  uint16 resetvector = data[addr + RESETV] | (data[addr + RESETV + 1] << 8);
-  uint16 checksum    = data[addr +  CKSUM] | (data[addr +  CKSUM + 1] << 8);
-  uint16 ichecksum   = data[addr + ICKSUM] | (data[addr + ICKSUM + 1] << 8);
+  uint16 resetvector = data[addr + ResetVector] | (data[addr + ResetVector + 1] << 8);
+  uint16 checksum    = data[addr + Checksum   ] | (data[addr + Checksum    + 1] << 8);
+  uint16 complement  = data[addr + Complement ] | (data[addr + Complement  + 1] << 8);
 
-  uint8 resetop = data[(addr & ~0x7fff) | (resetvector & 0x7fff)]; //first opcode executed upon reset
-  uint8 mapper  = data[addr + MAPPER] & ~0x10; //mask off irrelevent FastROM-capable bit
+  uint8 resetop = data[(addr & ~0x7fff) | (resetvector & 0x7fff)];  //first opcode executed upon reset
+  uint8 mapper  = data[addr + Mapper] & ~0x10;  //mask off irrelevent FastROM-capable bit
 
   //$00:[000-7fff] contains uninitialized RAM and MMIO.
   //reset vector must point to ROM at $00:[8000-ffff] to be considered valid.
@@ -198,61 +198,61 @@ unsigned Cartridge::score_header(const uint8_t *data, unsigned size, unsigned ad
   //determine the probability that this is the correct header.
 
   //most likely opcodes
-  if(resetop == 0x78 //sei
-  || resetop == 0x18 //clc (clc; xce)
-  || resetop == 0x38 //sec (sec; xce)
-  || resetop == 0x9c //stz $nnnn (stz $4200)
-  || resetop == 0x4c //jmp $nnnn
-  || resetop == 0x5c //jml $nnnnnn
+  if(resetop == 0x78  //sei
+  || resetop == 0x18  //clc (clc; xce)
+  || resetop == 0x38  //sec (sec; xce)
+  || resetop == 0x9c  //stz $nnnn (stz $4200)
+  || resetop == 0x4c  //jmp $nnnn
+  || resetop == 0x5c  //jml $nnnnnn
   ) score += 8;
 
   //plausible opcodes
-  if(resetop == 0xc2 //rep #$nn
-  || resetop == 0xe2 //sep #$nn
-  || resetop == 0xad //lda $nnnn
-  || resetop == 0xae //ldx $nnnn
-  || resetop == 0xac //ldy $nnnn
-  || resetop == 0xaf //lda $nnnnnn
-  || resetop == 0xa9 //lda #$nn
-  || resetop == 0xa2 //ldx #$nn
-  || resetop == 0xa0 //ldy #$nn
-  || resetop == 0x20 //jsr $nnnn
-  || resetop == 0x22 //jsl $nnnnnn
+  if(resetop == 0xc2  //rep #$nn
+  || resetop == 0xe2  //sep #$nn
+  || resetop == 0xad  //lda $nnnn
+  || resetop == 0xae  //ldx $nnnn
+  || resetop == 0xac  //ldy $nnnn
+  || resetop == 0xaf  //lda $nnnnnn
+  || resetop == 0xa9  //lda #$nn
+  || resetop == 0xa2  //ldx #$nn
+  || resetop == 0xa0  //ldy #$nn
+  || resetop == 0x20  //jsr $nnnn
+  || resetop == 0x22  //jsl $nnnnnn
   ) score += 4;
 
   //implausible opcodes
-  if(resetop == 0x40 //rti
-  || resetop == 0x60 //rts
-  || resetop == 0x6b //rtl
-  || resetop == 0xcd //cmp $nnnn
-  || resetop == 0xec //cpx $nnnn
-  || resetop == 0xcc //cpy $nnnn
+  if(resetop == 0x40  //rti
+  || resetop == 0x60  //rts
+  || resetop == 0x6b  //rtl
+  || resetop == 0xcd  //cmp $nnnn
+  || resetop == 0xec  //cpx $nnnn
+  || resetop == 0xcc  //cpy $nnnn
   ) score -= 4;
 
   //least likely opcodes
-  if(resetop == 0x00 //brk #$nn
-  || resetop == 0x02 //cop #$nn
-  || resetop == 0xdb //stp
-  || resetop == 0x42 //wdm
-  || resetop == 0xff //sbc $nnnnnn,x
+  if(resetop == 0x00  //brk #$nn
+  || resetop == 0x02  //cop #$nn
+  || resetop == 0xdb  //stp
+  || resetop == 0x42  //wdm
+  || resetop == 0xff  //sbc $nnnnnn,x
   ) score -= 8;
 
   //at times, both the header and reset vector's first opcode will match ...
   //fallback and rely on info validity in these cases to determine more likely header.
 
   //a valid checksum is the biggest indicator of a valid header.
-  if((checksum + ichecksum) == 0xffff && (checksum != 0) && (ichecksum != 0)) score += 4;
+  if((checksum + complement) == 0xffff && (checksum != 0) && (complement != 0)) score += 4;
 
-  if(addr == 0x007fc0 && mapper == 0x20) score += 2; //0x20 is usually LoROM
-  if(addr == 0x00ffc0 && mapper == 0x21) score += 2; //0x21 is usually HiROM
-  if(addr == 0x007fc0 && mapper == 0x22) score += 2; //0x22 is usually ExLoROM
-  if(addr == 0x40ffc0 && mapper == 0x25) score += 2; //0x25 is usually ExHiROM
+  if(addr == 0x007fc0 && mapper == 0x20) score += 2;  //0x20 is usually LoROM
+  if(addr == 0x00ffc0 && mapper == 0x21) score += 2;  //0x21 is usually HiROM
+  if(addr == 0x007fc0 && mapper == 0x22) score += 2;  //0x22 is usually ExLoROM
+  if(addr == 0x40ffc0 && mapper == 0x25) score += 2;  //0x25 is usually ExHiROM
 
-  if(data[addr + COMPANY] == 0x33) score += 2; //0x33 indicates extended header
-  if(data[addr + ROM_TYPE] < 0x08) score++;
-  if(data[addr + ROM_SIZE] < 0x10) score++;
-  if(data[addr + RAM_SIZE] < 0x08) score++;
-  if(data[addr + REGION] < 14) score++;
+  if(data[addr + Company] == 0x33) score += 2;  //0x33 indicates extended header
+  if(data[addr + RomType] < 0x08) score++;
+  if(data[addr + RomSize] < 0x10) score++;
+  if(data[addr + RamSize] < 0x08) score++;
+  if(data[addr + CartRegion] < 14) score++;
 
   if(score < 0) score = 0;
   return score;

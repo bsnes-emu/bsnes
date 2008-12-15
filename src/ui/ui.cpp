@@ -1,6 +1,7 @@
 #include "resource.cpp"
 
 #include "base/main.cpp"
+#include "base/textview.cpp"
 #include "base/about.cpp"
 
 #include "loader/bsxloader.cpp"
@@ -31,6 +32,7 @@ void ui_init() {
   }
 
   window_main.setup();
+  window_textview.setup();
   window_about.setup();
 
   window_bsxloader.setup();

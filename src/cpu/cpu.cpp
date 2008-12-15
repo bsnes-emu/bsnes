@@ -1,4 +1,4 @@
-#include "../base.h"
+#include <../base.hpp>
 #define CPU_CPP
 
 #include "dcpu.cpp"

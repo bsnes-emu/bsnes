@@ -1,4 +1,4 @@
-#include "../../base.h"
+#include <../base.hpp>
 #define DSP4_CPP
 
 namespace DSP4i {

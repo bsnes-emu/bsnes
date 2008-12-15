@@ -2,8 +2,13 @@
 #define NALL_ARRAY_HPP
 
 #include <stdlib.h>
+#include <nall/algorithm.hpp>
 
 namespace nall {
+
+//dynamic vector array
+//neither constructor nor destructor is ever invoked;
+//this this should only be used for POD objects.
 
 template<typename T> class array {
 protected:
@@ -27,40 +32,33 @@ public:
   unsigned capacity() const { return poolsize; }
 
   void reset() {
-    if(pool) {
-      free(pool);
-      pool = 0;
-    }
+    if(pool) free(pool);
+    pool = 0;
     poolsize = 0;
     buffersize = 0;
   }
 
-  void reserve(unsigned size) {
-    if(size == poolsize) return;
-    if(size < poolsize) buffersize = size;
+  void reserve(unsigned newsize) {
+    if(newsize == poolsize) return;
 
-    pool = (T*)realloc(pool, sizeof(T) * size);
-    poolsize = size;
+    pool = (T*)realloc(pool, newsize * sizeof(T));
+    poolsize = newsize;
+    buffersize = min(buffersize, newsize);
   }
 
-  T* get(unsigned size = 0) {
-    if(size > buffersize) resize(size);
-    if(size > buffersize) throw "array[] out of bounds";
+  void resize(unsigned newsize) {
+    if(newsize > poolsize) reserve(findsize(newsize));
+    buffersize = newsize;
+  }
+
+  T* get(unsigned minsize = 0) {
+    if(minsize > buffersize) resize(minsize);
+    if(minsize > buffersize) throw "array[] out of bounds";
     return pool;
   }
 
-  void add(T data) {
-    operator[](buffersize) = data;
-  }
-
-  void clear() {
-    memset(pool, 0, sizeof(T) * buffersize);
-  }
-
-  void resize(unsigned size) {
-    if(size > poolsize) reserve(findsize(size));
-    if(size > buffersize) buffersize = size;
-  }
+  void add(const T data) { operator[](buffersize) = data; }
+  void clear() { memset(pool, 0, buffersize * sizeof(T)); }
 
   array() {
     pool = 0;
@@ -70,22 +68,22 @@ public:
 
   ~array() { reset(); }
 
-  array& operator=(array &source) {
+  array& operator=(const array &source) {
     if(pool) free(pool);
     buffersize = source.buffersize;
     poolsize = source.poolsize;
-    pool = (T*)realloc(pool, sizeof(T) * poolsize); //allocate entire pool size ...
-    memcpy(pool, source.pool, sizeof(T) * buffersize); //... but only copy used pool objects
+    pool = (T*)realloc(pool, sizeof(T) * poolsize);     //allocate entire pool size,
+    memcpy(pool, source.pool, sizeof(T) * buffersize);  //... but only copy used pool objects
     return *this;
   }
 
-  inline T& operator[](int index) {
+  inline T& operator[](unsigned index) {
     if(index >= buffersize) resize(index + 1);
     if(index >= buffersize) throw "array[] out of bounds";
     return pool[index];
   }
 
-  inline const T& operator[](int index) const {
+  inline const T& operator[](unsigned index) const {
     if(index >= buffersize) throw "array[] out of bounds";
     return pool[index];
   }

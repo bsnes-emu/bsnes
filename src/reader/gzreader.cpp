@@ -1,6 +1,6 @@
 #ifdef READER_CPP
 
-#include "gzreader.h"
+#include "gzreader.hpp"
 
 unsigned GZReader::size() {
   return filesize;

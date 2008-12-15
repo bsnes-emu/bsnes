@@ -56,6 +56,23 @@ void pHiro::init() {
   pango_font_description_set_family(font, "Sans");
   pango_font_description_set_absolute_size(font, 11.0 * PANGO_SCALE);
   pango_font_description_set_style(font, PANGO_STYLE_NORMAL);
+
+  //apply custom GTK+-2.0 stylesheet.
+  //it's obviously not ideal to override the global GTK+ theme settings;
+  //however it is necessary to ensure consistency between ports of hiro.
+  //without this, it would be impossible to develop a hiro application
+  //on one platform, and be assured text wouldn't clipped off, etc on
+  //another platform.
+  gtk_rc_parse_string(
+  "style \"ruby-gtk\"\n"
+  "{\n"
+  "  GtkComboBox::appears-as-list = 1\n"     //text tends to get cut off in some themes otherwise
+  "  GtkTreeView::vertical-separator = 0\n"  //GTK+ lists tend to have way more space than on Windows
+  "}\n"
+  "\n"
+  "class \"GtkComboBox\" style \"ruby-gtk\"\n"
+  "class \"GtkTreeView\" style \"ruby-gtk\"\n"
+  );
 }
 
 void pHiro::term() {
@@ -112,6 +129,23 @@ bool pHiro::file_open(Window *focus, char *filename, const char *path, const cha
   if(path && *path) gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dialog), path);
   else if(*default_path) gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dialog), default_path);
 
+  if(filter && *filter) {
+    lstring filterlist;
+    split(filterlist, "\n", filter);
+    for(unsigned i = 0; i < count(filterlist); i++) {
+      GtkFileFilter *filter = gtk_file_filter_new();
+      lstring filterpart;
+      split(filterpart, "\t", filterlist[i]);
+      gtk_file_filter_set_name(filter, string() << filterpart[0] << " (" << filterpart[1] << ")");
+      lstring patternlist;
+      split(patternlist, ",", filterpart[1]);
+      for(unsigned l = 0; l < count(patternlist); l++) {
+        gtk_file_filter_add_pattern(filter, patternlist[l]);
+      }
+      gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog), filter);
+    }
+  }
+
   if(gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT) {
     char *fn = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
     strcpy(filename, fn);
@@ -137,6 +171,23 @@ bool pHiro::file_save(Window *focus, char *filename, const char *path, const cha
   if(path && *path) gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dialog), path);
   else if(*default_path) gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dialog), default_path);
   gtk_file_chooser_set_do_overwrite_confirmation(GTK_FILE_CHOOSER(dialog), TRUE);
+
+  if(filter && *filter) {
+    lstring filterlist;
+    split(filterlist, "\n", filter);
+    for(unsigned i = 0; i < count(filterlist); i++) {
+      GtkFileFilter *filter = gtk_file_filter_new();
+      lstring filterpart;
+      split(filterpart, "\t", filterlist[i]);
+      gtk_file_filter_set_name(filter, string() << filterpart[0] << " (" << filterpart[1] << ")");
+      lstring patternlist;
+      split(patternlist, ",", filterpart[1]);
+      for(unsigned l = 0; l < count(patternlist); l++) {
+        gtk_file_filter_add_pattern(filter, patternlist[l]);
+      }
+      gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog), filter);
+    }
+  }
 
   if(gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT) {
     char *fn = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));

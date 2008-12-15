@@ -1,18 +1,18 @@
 void VideoSettingsWindow::setup() {
-  create(0, 475, 355);
+  create(0, 451, 370);
 
-  lcontrast.create      (0, 475, 18);
-  contrast.create       (0, 475, 30, 192);
-  lbrightness.create    (0, 475, 18);
-  brightness.create     (0, 475, 30, 192);
-  lgamma.create         (0, 475, 18);
-  gamma.create          (0, 475, 30, 191);
-  gamma_ramp.create     (0, 235, 18, translate["Gamma ramp"]);
-  sepia.create          (0, 235, 18, translate["Sepia"]);
-  grayscale.create      (0, 235, 18, translate["Grayscale"]);
-  invert.create         (0, 235, 18, translate["Invert colors"]);
-  preset_optimal.create (0, 235, 25, translate["Optimal Preset"]);
-  preset_standard.create(0, 235, 25, translate["Standard Preset"]);
+  lcontrast.create      (0, 451, 18);
+  contrast.create       (0, 451, 30, 192);
+  lbrightness.create    (0, 451, 18);
+  brightness.create     (0, 451, 30, 192);
+  lgamma.create         (0, 451, 18);
+  gamma.create          (0, 451, 30, 191);
+  gamma_ramp.create     (0, 223, 18, translate["Gamma ramp"]);
+  sepia.create          (0, 223, 18, translate["Sepia"]);
+  grayscale.create      (0, 223, 18, translate["Grayscale"]);
+  invert.create         (0, 223, 18, translate["Invert colors"]);
+  preset_optimal.create (0, 223, 25, translate["Optimal Preset"]);
+  preset_standard.create(0, 223, 25, translate["Standard Preset"]);
   sync_ui();
 
   uint y = 0;
@@ -23,11 +23,11 @@ void VideoSettingsWindow::setup() {
   attach(lgamma,            0, y); y += 18;
   attach(gamma,             0, y); y += 30;
   attach(gamma_ramp,        0, y);
-  attach(sepia,           240, y); y += 18;
+  attach(sepia,           228, y); y += 18;
   attach(grayscale,         0, y);
-  attach(invert,          240, y); y += 18 + 5;
+  attach(invert,          228, y); y += 18 + 5;
   attach(preset_optimal,    0, y);
-  attach(preset_standard, 240, y); y += 25;
+  attach(preset_standard, 228, y); y += 25;
 
   contrast.on_change      = bind(&VideoSettingsWindow::contrast_change, this);
   brightness.on_change    = bind(&VideoSettingsWindow::brightness_change, this);

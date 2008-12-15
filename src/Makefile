@@ -6,7 +6,7 @@ prefix = /usr/local
 ################
 
 ifneq ($(findstring gcc,$(compiler)),) # GCC family
-  flags = -O3 -fomit-frame-pointer -Ilib
+  flags = -O3 -fomit-frame-pointer $(if $(call streq,$(platform),x),-mtune=native,) -Ilib
   c = $(compiler) $(flags)
   cpp = $(subst cc,++,$(compiler)) $(flags)
   obj = o
@@ -34,7 +34,7 @@ endif
 ##########
 
 ifeq ($(platform),x) # X11
-  ruby = video.glx video.xv video.sdl audio.openal audio.oss audio.alsa audio.ao input.sdl input.x
+  ruby = video.glx video.xv video.sdl audio.alsa audio.openal audio.oss audio.pulseaudio audio.ao input.sdl input.x
   link += `pkg-config --libs gtk+-2.0`
   link += $(call mklib,Xtst)
   delete = rm -f $1
@@ -70,6 +70,7 @@ link += $(if $(findstring audio.alsa,$(ruby)),$(call mklib,asound))
 link += $(if $(findstring audio.ao,$(ruby)),$(call mklib,ao))
 link += $(if $(findstring audio.directsound,$(ruby)),$(call mklib,dsound))
 link += $(if $(findstring audio.openal,$(ruby)),$(if $(call streq,$(platform),x),$(call mklib,openal),$(call mklib,openal32)))
+link += $(if $(findstring audio.pulseaudio,$(ruby)),$(call mklib,pulse-simple))
 link += $(if $(findstring input.directinput,$(ruby)),$(call mklib,dinput8) $(call mklib,dxguid))
 link += $(if $(findstring input.sdl,$(ruby)),`sdl-config --libs`)
 
@@ -77,7 +78,8 @@ link += $(if $(findstring input.sdl,$(ruby)),`sdl-config --libs`)
 ### main target and dependencies ###
 ####################################
 
-objects = main libco hiro ruby libfilter string reader cart cheat \
+objects = main libco hiro ruby libfilter string \
+  config reader cart cheat \
   memory smemory cpu scpu smp ssmp sdsp ppu bppu snes \
   bsx srtc sdd1 spc7110 cx4 dsp1 dsp2 dsp3 dsp4 obc1 st010
 
@@ -125,7 +127,7 @@ all: build;
 ### main ###
 ############
 
-obj/main.$(obj): ui/main.cpp ui/* ui/base/* ui/loader/* ui/settings/*
+obj/main.$(obj): ui/main.cpp ui/* ui/base/* ui/event/* ui/loader/* ui/settings/*
 obj/bsnes.res: ui/bsnes.rc; rc /r /foobj/bsnes.res ui/bsnes.rc
 obj/bsnesrc.$(obj): ui/bsnes.rc; windres ui/bsnes.rc obj/bsnesrc.$(obj)
 
@@ -146,6 +148,7 @@ obj/string.$(obj):    lib/nall/string.cpp lib/nall/*
 ### utilities ###
 #################
 
+obj/config.$(obj): config/config.cpp config/*
 obj/reader.$(obj): reader/reader.cpp reader/*
 obj/cart.$(obj)  : cart/cart.cpp cart/*
 obj/cheat.$(obj) : cheat/cheat.cpp cheat/*
@@ -176,7 +179,6 @@ obj/ssmp.$(obj): smp/ssmp/ssmp.cpp smp/ssmp/* smp/ssmp/core/* smp/ssmp/memory/* 
 ###########
 
 obj/adsp.$(obj): dsp/adsp/adsp.cpp dsp/adsp/*
-obj/bdsp.$(obj): dsp/bdsp/bdsp.cpp dsp/bdsp/*
 obj/sdsp.$(obj): dsp/sdsp/sdsp.cpp dsp/sdsp/*
 
 ###########
