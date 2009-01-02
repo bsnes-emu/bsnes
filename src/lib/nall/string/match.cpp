@@ -68,4 +68,4 @@ bool match(const char *p, const char *s) {
   }
 }
 
-#endif //ifdef NALL_STRING_CPP
+#endif  //ifdef NALL_STRING_CPP

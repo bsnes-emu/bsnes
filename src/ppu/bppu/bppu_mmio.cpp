@@ -1,8 +1,8 @@
 #ifdef BPPU_CPP
 
 void bPPU::latch_counters() {
-  regs.hcounter = ppucounter.hdot();
-  regs.vcounter = ppucounter.vcounter();
+  regs.hcounter = hdot();
+  regs.vcounter = vcounter();
   regs.counters_latched = true;
 }
 
@@ -28,10 +28,10 @@ uint8 bPPU::vram_mmio_read(uint16 addr) {
   if(regs.display_disabled == true) {
     data = memory::vram[addr];
   } else {
-    uint16 v = ppucounter.vcounter();
-    uint16 h = ppucounter.hcounter();
+    uint16 v = vcounter();
+    uint16 h = hcounter();
     uint16 ls = ((snes.region() == SNES::NTSC ? 525 : 625) >> 1) - 1;
-    if(interlace() && !ppucounter.field()) ls++;
+    if(interlace() && !field()) ls++;
 
     if(v == ls && h == 1362) {
       data = 0x00;
@@ -55,8 +55,8 @@ void bPPU::vram_mmio_write(uint16 addr, uint8 data) {
   if(regs.display_disabled == true) {
     memory::vram[addr] = data;
   } else {
-    uint16 v = ppucounter.vcounter();
-    uint16 h = ppucounter.hcounter();
+    uint16 v = vcounter();
+    uint16 h = hcounter();
     if(v == 0) {
       if(h <= 4) {
         memory::vram[addr] = data;
@@ -100,7 +100,7 @@ uint8 bPPU::oam_mmio_read(uint16 addr) {
   if(regs.display_disabled == true) {
     data = memory::oam[addr];
   } else {
-    if(ppucounter.vcounter() < (!overscan() ? 225 : 240)) {
+    if(vcounter() < (!overscan() ? 225 : 240)) {
       data = memory::oam[0x0218];
     } else {
       data = memory::oam[addr];
@@ -117,7 +117,7 @@ void bPPU::oam_mmio_write(uint16 addr, uint8 data) {
   if(regs.display_disabled == true) {
     memory::oam[addr] = data;
   } else {
-    if(ppucounter.vcounter() < (!overscan() ? 225 : 240)) {
+    if(vcounter() < (!overscan() ? 225 : 240)) {
       memory::oam[0x0218] = data;
     } else {
       memory::oam[addr] = data;
@@ -138,8 +138,8 @@ uint8 bPPU::cgram_mmio_read(uint16 addr) {
   if(regs.display_disabled == true) {
     data = memory::cgram[addr];
   } else {
-    uint16 v = ppucounter.vcounter();
-    uint16 h = ppucounter.hcounter();
+    uint16 v = vcounter();
+    uint16 h = hcounter();
     if(v < (!overscan() ? 225 : 240) && h >= 72 && h < 1096) {
       data = memory::cgram[0x01ff] & 0x7f;
     } else {
@@ -158,8 +158,8 @@ void bPPU::cgram_mmio_write(uint16 addr, uint8 data) {
   if(regs.display_disabled == true) {
     memory::cgram[addr] = data;
   } else {
-    uint16 v = ppucounter.vcounter();
-    uint16 h = ppucounter.hcounter();
+    uint16 v = vcounter();
+    uint16 h = hcounter();
     if(v < (!overscan() ? 225 : 240) && h >= 72 && h < 1096) {
       memory::cgram[0x01ff] = data & 0x7f;
     } else {
@@ -170,7 +170,7 @@ void bPPU::cgram_mmio_write(uint16 addr, uint8 data) {
 
 //INIDISP
 void bPPU::mmio_w2100(uint8 value) {
-  if(regs.display_disabled == true && ppucounter.vcounter() == (!overscan() ? 225 : 240)) {
+  if(regs.display_disabled == true && vcounter() == (!overscan() ? 225 : 240)) {
     regs.oam_addr = regs.oam_baseaddr << 1;
     regs.oam_firstsprite = (regs.oam_priority == false) ? 0 : (regs.oam_addr >> 2) & 127;
   }
@@ -723,7 +723,7 @@ uint8 r = 0x00;
   regs.latch_hcounter = 0;
   regs.latch_vcounter = 0;
 
-  r |= ppucounter.field() << 7;
+  r |= field() << 7;
   if(!(cpu.pio() & 0x80)) {
     r |= 0x40;
   } else if(regs.counters_latched == true) {

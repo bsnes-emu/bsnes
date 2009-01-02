@@ -32,4 +32,4 @@ char* trim_once(char *str, const char *key) {
   return ltrim_once(rtrim_once(str, key), key);
 }
 
-#endif //ifdef NALL_STRING_CPP
+#endif  //ifdef NALL_STRING_CPP

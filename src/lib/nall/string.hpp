@@ -69,6 +69,7 @@ public:
   string& operator=(const char *str);
   string& operator=(const string &str);
   string& operator<<(int num);
+  string& operator<<(double num);
   string& operator<<(const char *str);
   string& operator<<(const string& str);
 
@@ -89,7 +90,7 @@ public:
 
 typedef vector<string> lstring;
 
-} //namespace nall
+}  //namespace nall
 
 size_t count(nall::lstring&);
 int find(nall::lstring &str, const char *key);
@@ -117,4 +118,4 @@ nall::string& ltrim_once(nall::string &str, const char *key = " ");
 nall::string& rtrim_once(nall::string &str, const char *key = " ");
 nall::string& trim_once (nall::string &str, const char *key = " ");
 
-#endif //ifndef NALL_STRING_HPP
+#endif  //ifndef NALL_STRING_HPP

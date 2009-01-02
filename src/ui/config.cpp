@@ -43,7 +43,7 @@ integral_setting System::contrast(config(), "system.colorfilter.contrast",
 integral_setting System::brightness(config(), "system.colorfilter.brightness",
   "Brightness", integral_setting::decimal, 0);
 integral_setting System::gamma(config(), "system.colorfilter.gamma",
-  "Gamma", integral_setting::decimal, 80);
+  "Gamma", integral_setting::decimal, 100);
 
 struct Video {
   static integral_setting mode;
@@ -59,6 +59,7 @@ struct Video {
   } fullscreen;
   static integral_setting aspect_ntsc_x, aspect_ntsc_y, aspect_pal_x, aspect_pal_y;
   static integral_setting frameskip;
+  static integral_setting start_in_fullscreen_mode;
 } video;
 
 //0 = windowed, 1 = fullscreen, 2 = exclusive (not implemented yet)
@@ -107,6 +108,9 @@ integral_setting Video::aspect_pal_x (config(), "video.aspect_pal_x",  "", integ
 integral_setting Video::aspect_pal_y (config(), "video.aspect_pal_y",  "", integral_setting::decimal, 23);
 
 integral_setting Video::frameskip("video.frameskip", "Video frameskip", integral_setting::decimal, 0);
+integral_setting Video::start_in_fullscreen_mode(config(), "video.start_in_fullscreen_mode",
+  "If true, bsnes will start in fullscreen mode, rather than windowed mode.",
+  integral_setting::boolean, false);
 
 struct Audio {
   static integral_setting output_frequency, input_frequency;

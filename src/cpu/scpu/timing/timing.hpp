@@ -1,12 +1,24 @@
+  enum {
+    EventNone,
+    EventIrqLockRelease,
+    EventAluLockRelease,
+    EventDramRefresh,
+    EventHdmaInit,
+    EventHdmaRun,
+
+    //cycle edge
+    EventFlagHdmaInit = 1 << 0,
+    EventFlagHdmaRun  = 1 << 1,
+  };
+
   //timing.cpp
   unsigned dma_counter();
 
   void add_clocks(unsigned clocks);
   void scanline();
-  void frame();
 
-  void precycle_edge();
-  void cycle_edge();
+  alwaysinline void precycle_edge();
+  alwaysinline void cycle_edge();
   void last_cycle();
 
   void timing_power();
@@ -25,3 +37,6 @@
 
   //joypad.cpp
   void run_auto_joypad_poll();
+
+  //event.cpp
+  void queue_event(unsigned);  //deltaqueue callback function

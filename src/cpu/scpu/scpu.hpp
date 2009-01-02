@@ -12,31 +12,15 @@ public:
     bool wai;
     bool irq;
     uint16 irq_vector;
+    unsigned cycle_edge;
   } event;
 
+  enum DmaState { DmaInactive, DmaRun, DmaCpuSync };
+
   struct {
-    unsigned nmi_hold;
-    unsigned irq_hold;
-
-    unsigned nmi_fire;
-    unsigned irq_fire;
-    unsigned irq_delay;
-    unsigned hw_math;
-
-    alwaysinline void set(uint &ctr, uint clocks) {
-      if(clocks >= ctr) { ctr = clocks; }
-    }
-
-    alwaysinline void sub(uint &ctr, uint clocks) {
-      if(ctr >= clocks) {
-        ctr -= clocks;
-      } else {
-        ctr  = 0;
-      }
-    }
-  } counter;
-
-  enum DMA_State { DMA_Inactive, DMA_Run, DMA_CPUsync };
+    unsigned alu_mul_delay;
+    unsigned alu_div_delay;
+  } temp_;
 
   struct {
     //core
@@ -47,34 +31,30 @@ public:
     unsigned line_clocks;
 
     //timing
-    bool dram_refreshed;
-    uint16 dram_refresh_position;
-
-    bool hdmainit_triggered;
-    uint16 hdmainit_trigger_position;
-
-    bool hdma_triggered;
-
-    uint16 irq_delay;
+    bool irq_lock;
+    bool alu_lock;
+    unsigned dram_refresh_position;
 
     bool nmi_valid;
     bool nmi_line;
     bool nmi_transition;
     bool nmi_pending;
+    unsigned nmi_hold;
 
     uint16 virq_trigger_pos, hirq_trigger_pos;
     bool irq_valid;
     bool irq_line;
     bool irq_transition;
     bool irq_pending;
+    unsigned irq_hold;
 
     //dma
     unsigned dma_counter;
     unsigned dma_clocks;
     bool dma_pending;
     bool hdma_pending;
-    bool hdma_mode; //0 = init, 1 = run
-    DMA_State dma_state;
+    bool hdma_mode;  //0 = init, 1 = run
+    DmaState dma_state;
 
     //mmio
 

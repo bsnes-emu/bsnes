@@ -17,7 +17,6 @@ public:
   regs_t regs;
 
   virtual void scanline() = 0;
-  virtual void frame() = 0;
   virtual void power() = 0;
   virtual void reset() = 0;
 

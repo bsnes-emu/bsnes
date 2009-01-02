@@ -21,21 +21,21 @@ alwaysinline void sCPU::poll_interrupts() {
   uint16_t vpos, hpos;
 
   //NMI hold
-  if(counter.nmi_hold) {
-    counter.nmi_hold -= 2;
-    if(counter.nmi_hold == 0) {
+  if(status.nmi_hold) {
+    status.nmi_hold -= 2;
+    if(status.nmi_hold == 0) {
       if(status.nmi_enabled == true) status.nmi_transition = true;
     }
   }
 
   //NMI test
-  vpos = ppucounter.vcounter(2);
-  hpos = ppucounter.hcounter(2);
+  vpos = ppu.vcounter(2);
+  hpos = ppu.hcounter(2);
   bool nmi_valid = (vpos >= (!ppu.overscan() ? 225 : 240));
   if(status.nmi_valid == false && nmi_valid == true) {
     //0->1 edge sensitive transition
     status.nmi_line = true;
-    counter.nmi_hold = 4;
+    status.nmi_hold = 4;
   } else if(status.nmi_valid == true && nmi_valid == false) {
     //1->0 edge sensitive transition
     status.nmi_line = false;
@@ -43,14 +43,14 @@ alwaysinline void sCPU::poll_interrupts() {
   status.nmi_valid = nmi_valid;
 
   //IRQ hold
-  if(counter.irq_hold) counter.irq_hold -= 2;
-  if(status.irq_line == true && counter.irq_hold == 0) {
+  if(status.irq_hold) status.irq_hold -= 2;
+  if(status.irq_line == true && status.irq_hold == 0) {
     if(status.virq_enabled == true || status.hirq_enabled == true) status.irq_transition = true;
   }
 
   //IRQ test
-  vpos = ppucounter.vcounter(10);
-  hpos = ppucounter.hcounter(10);
+  vpos = ppu.vcounter(10);
+  hpos = ppu.hcounter(10);
   bool irq_valid = (status.virq_enabled == true || status.hirq_enabled == true);
   if(irq_valid == true) {
     if(status.virq_enabled == true && vpos != status.virq_trigger_pos) irq_valid = false;
@@ -59,7 +59,7 @@ alwaysinline void sCPU::poll_interrupts() {
   if(status.irq_valid == false && irq_valid == true) {
     //0->1 edge sensitive transition
     status.irq_line = true;
-    counter.irq_hold = 4;
+    status.irq_hold = 4;
   }
   status.irq_valid = irq_valid;
 }
@@ -88,7 +88,8 @@ void sCPU::nmitimen_update(uint8 data) {
   }
 
   update_interrupts();
-  counter.set(counter.irq_delay, 2);
+  status.irq_lock = true;
+  delta.enqueue(EventIrqLockRelease, 2);
 }
 
 void sCPU::hvtime_update(uint16 addr) {
@@ -97,7 +98,7 @@ void sCPU::hvtime_update(uint16 addr) {
 
 bool sCPU::rdnmi() {
   bool result = status.nmi_line;
-  if(counter.nmi_hold == 0) {
+  if(status.nmi_hold == 0) {
     status.nmi_line = false;
   }
   return result;
@@ -105,7 +106,7 @@ bool sCPU::rdnmi() {
 
 bool sCPU::timeup() {
   bool result = status.irq_line;
-  if(counter.irq_hold == 0) {
+  if(status.irq_hold == 0) {
     status.irq_line = false;
     status.irq_transition = false;
   }

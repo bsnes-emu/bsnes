@@ -102,4 +102,9 @@ integral_setting SMP::ntsc_clock_rate(config(), "smp.ntsc_clock_rate",
 integral_setting SMP::pal_clock_rate(config(), "smp.pal_clock_rate",
   "PAL S-SMP clock rate (in hz)", integral_setting::decimal,  32041 * 768);
 
+integral_setting Temp::alu_mul_delay(config(), "temp.alu_mul_delay",
+  "", integral_setting::decimal, 32);
+integral_setting Temp::alu_div_delay(config(), "temp.alu_div_delay",
+  "", integral_setting::decimal, 64);
+
 } //namespace config

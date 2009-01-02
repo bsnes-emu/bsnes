@@ -24,27 +24,28 @@ using namespace libhiro;
 
 void get_paths(const char *image) {
   char temp[PATH_MAX] = "";
-  realpath(image, temp);
 
-  if(strlen(temp) != 0) {
-    for(int i = strlen(temp) - 1; i >= 0; i--) {
-      if(temp[i] == '\\') temp[i] = '/';
-    }
+  if(realpath(image, temp)) {
     //remove program name
-    for(int i = strlen(temp) - 1; i >= 0; i--) {
-      if(temp[i] == '/') {
+    for(signed i = strlen(temp) - 1; i >= 0; i--) {
+      if(temp[i] == '/' || temp[i] == '\\') {
         temp[i] = 0;
         break;
       }
     }
+
+    if(strend(temp, "/") == false) strcat(temp, "/");
+    config::path.base = temp;
+  } else {
+    config::path.base = "";
   }
 
-  if(strend(temp, "/") == false) strcat(temp, "/");
-  config::path.base = temp;
-
-  userpath(temp);
-  if(strend(temp, "/") == false) strcat(temp, "/");
-  config::path.user = temp;
+  if(userpath(temp)) {
+    if(strend(temp, "/") == false) strcat(temp, "/");
+    config::path.user = temp;
+  } else {
+    config::path.user = "";
+  }
 }
 
 void set_config_filenames() {

@@ -68,6 +68,12 @@ string& string::operator<<(int num) {
   return *this;
 }
 
+string& string::operator<<(double num) {
+  string temp(num);
+  strcat(*this, temp);
+  return *this;
+}
+
 string& string::operator<<(const char *str) {
   strcat(*this, str);
   return *this;
@@ -208,13 +214,13 @@ bool fread(nall::string &str, const char *filename) {
   #else
   FILE *fp = _wfopen(nall::utf16(filename), L"rb");
   #endif
-  if(!fp)return false;
+  if(!fp) return false;
 
   fseek(fp, 0, SEEK_END);
   size_t size = ftell(fp);
   rewind(fp);
   char *fdata = (char*)malloc(size + 1);
-  fread(fdata, 1, size, fp);
+  unsigned unused = fread(fdata, 1, size, fp);
   fclose(fp);
   fdata[size] = 0;
   strcpy(str, fdata);
@@ -223,4 +229,4 @@ bool fread(nall::string &str, const char *filename) {
   return true;
 }
 
-#endif //ifdef NALL_STRING_CPP
+#endif  //ifdef NALL_STRING_CPP

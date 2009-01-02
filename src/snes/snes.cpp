@@ -1,13 +1,12 @@
 #include <../base.hpp>
 #define SNES_CPP
 
-SNES       snes;
-BUSCORE    bus;
-CPUCORE    cpu;
-SMPCORE    smp;
-DSPCORE    dsp;
-PPUCORE    ppu;
-PPUcounter ppucounter;
+SNES     snes;
+BUSCORE  bus;
+CPUCORE  cpu;
+SMPCORE  smp;
+DSPCORE  dsp;
+PPUCORE  ppu;
 
 BSXBase  bsxbase;
 BSXCart  bsxcart;
@@ -72,7 +71,6 @@ void SNES::power() {
 
   scheduler.init();
 
-  ppucounter.reset();
   cpu.power();
   smp.power();
   dsp.power();
@@ -101,7 +99,7 @@ void SNES::power() {
   for(unsigned i = 0x4200; i <= 0x421f; i++) memory::mmio.map(i, cpu);
   for(unsigned i = 0x4300; i <= 0x437f; i++) memory::mmio.map(i, cpu);
 
-  if(expansion() == ExpansionBSX) { bsxbase.enable(); }
+  if(expansion() == ExpansionBSX) bsxbase.enable();
 
   if(cartridge.info.bsxcart)  bsxcart.enable();
   if(cartridge.info.bsxflash) bsxflash.enable();
@@ -125,14 +123,13 @@ void SNES::power() {
 void SNES::reset() {
   scheduler.init();
 
-  ppucounter.reset();
   cpu.reset();
   smp.reset();
   dsp.reset();
   ppu.reset();
   bus.reset();
 
-  if(expansion() == ExpansionBSX) { bsxbase.reset(); }
+  if(expansion() == ExpansionBSX) bsxbase.reset();
 
   if(cartridge.info.bsxcart)  bsxcart.reset();
   if(cartridge.info.bsxflash) bsxflash.reset();
@@ -156,7 +153,7 @@ void SNES::reset() {
 void SNES::scanline() {
   video.scanline();
 
-  if(ppucounter.vcounter() == 241) {
+  if(ppu.vcounter() == 241) {
     input.update();
     video.update();
     scheduler.exit();

@@ -80,7 +80,7 @@ void bPPU::load_oam_tiles() {
   }
 
   if(regs.oam_interlace == true) {
-    y = (spr->vflip == false) ? (y + ppucounter.field()) : (y - ppucounter.field());
+    y = (spr->vflip == false) ? (y + ifield()) : (y - ifield());
   }
 
   x &= 511;

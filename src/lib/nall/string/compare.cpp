@@ -96,4 +96,4 @@ bool striend(const char *str, const char *key) {
   return true;
 }
 
-#endif //ifdef NALL_STRING_CPP
+#endif  //ifdef NALL_STRING_CPP

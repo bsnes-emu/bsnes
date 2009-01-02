@@ -121,7 +121,8 @@ void sCPU::dma_run() {
     channel[i].dma_enabled = false;
   }
 
-  counter.set(counter.irq_delay, 2);
+  status.irq_lock = true;
+  delta.enqueue(EventIrqLockRelease, 2);
 }
 
 /*****
@@ -203,7 +204,8 @@ void sCPU::hdma_run() {
     }
   }
 
-  counter.set(counter.irq_delay, 2);
+  status.irq_lock = true;
+  delta.enqueue(EventIrqLockRelease, 2);
 }
 
 void sCPU::hdma_init_reset() {
@@ -224,7 +226,8 @@ void sCPU::hdma_init() {
     hdma_update(i);
   }
 
-  counter.set(counter.irq_delay, 2);
+  status.irq_lock = true;
+  delta.enqueue(EventIrqLockRelease, 2);
 }
 
 /*****

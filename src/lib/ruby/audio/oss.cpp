@@ -61,7 +61,7 @@ public:
 
   void sample(uint16_t sl, uint16_t sr) {
     uint32_t sample = sl + (sr << 16);
-    write(device.fd, &sample, 4);
+    unsigned unused = write(device.fd, &sample, 4);
   }
 
   bool init() {

@@ -11,14 +11,14 @@ void bPPU::update_bg_info() {
 
     bg_info[bg].mx = (bg_info[bg].th == 4) ? (width << 1) : width;
     bg_info[bg].my = bg_info[bg].mx;
-    if(regs.bg_scsize[bg] & 0x01)bg_info[bg].mx <<= 1;
-    if(regs.bg_scsize[bg] & 0x02)bg_info[bg].my <<= 1;
+    if(regs.bg_scsize[bg] & 0x01) bg_info[bg].mx <<= 1;
+    if(regs.bg_scsize[bg] & 0x02) bg_info[bg].my <<= 1;
     bg_info[bg].mx--;
     bg_info[bg].my--;
 
     bg_info[bg].scy = (regs.bg_scsize[bg] & 0x02) ? (32 << 5) : 0;
     bg_info[bg].scx = (regs.bg_scsize[bg] & 0x01) ? (32 << 5) : 0;
-    if(regs.bg_scsize[bg] == 3)bg_info[bg].scy <<= 1;
+    if(regs.bg_scsize[bg] == 3) bg_info[bg].scy <<= 1;
   }
 }
 
@@ -90,7 +90,7 @@ void bPPU::render_line_bg(uint8 bg, uint8 color_depth, uint8 pri0_pos, uint8 pri
 
   if(hires) {
     hscroll <<= 1;
-    if(regs.interlace) y = (y << 1) + ppucounter.field();
+    if(regs.interlace) y = (y << 1) + ifield();
   }
 
   uint16 *mtable = mosaic_table[(regs.mosaic_enabled[bg]) ? regs.mosaic_size : 0];

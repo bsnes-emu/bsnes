@@ -91,7 +91,9 @@ void sCPU::mmio_w4202(uint8 data) {
 void sCPU::mmio_w4203(uint8 data) {
   status.mul_b = data;
   status.r4216 = status.mul_a * status.mul_b;
-//counter.set(counter.hw_math, 48);
+
+  status.alu_lock = true;
+  delta.enqueue(EventAluLockRelease, temp_.alu_mul_delay);
 }
 
 //WRDIVL
@@ -109,7 +111,9 @@ void sCPU::mmio_w4206(uint8 data) {
   status.div_b = data;
   status.r4214 = (status.div_b) ? status.div_a / status.div_b : 0xffff;
   status.r4216 = (status.div_b) ? status.div_a % status.div_b : status.div_a;
-//counter.set(counter.hw_math, 96);
+
+  status.alu_lock = true;
+  delta.enqueue(EventAluLockRelease, temp_.alu_div_delay);
 }
 
 //HTIMEL
@@ -190,13 +194,13 @@ uint8 sCPU::mmio_r4212() {
   uint16 vs = ppu.overscan() == false ? 225 : 240;
 
   //auto joypad polling
-  if(ppucounter.vcounter() >= vs && ppucounter.vcounter() <= (vs + 2))r |= 0x01;
+  if(ppu.vcounter() >= vs && ppu.vcounter() <= (vs + 2))r |= 0x01;
 
   //hblank
-  if(ppucounter.hcounter() <= 2 || ppucounter.hcounter() >= 1096)r |= 0x40;
+  if(ppu.hcounter() <= 2 || ppu.hcounter() >= 1096)r |= 0x40;
 
   //vblank
-  if(ppucounter.vcounter() >= vs)r |= 0x80;
+  if(ppu.vcounter() >= vs)r |= 0x80;
 
   return r;
 }
@@ -208,25 +212,25 @@ uint8 sCPU::mmio_r4213() {
 
 //RDDIVL
 uint8 sCPU::mmio_r4214() {
-  if(counter.hw_math) { return 0x00; }
+  if(status.alu_lock) return 0;
   return status.r4214;
 }
 
 //RDDIVH
 uint8 sCPU::mmio_r4215() {
-  if(counter.hw_math) { return 0x00; }
+  if(status.alu_lock) return 0;
   return status.r4214 >> 8;
 }
 
 //RDMPYL
 uint8 sCPU::mmio_r4216() {
-  if(counter.hw_math) { return 0x00; }
+  if(status.alu_lock) return 0;
   return status.r4216;
 }
 
 //RDMPYH
 uint8 sCPU::mmio_r4217() {
-  if(counter.hw_math) { return 0x00; }
+  if(status.alu_lock) return 0;
   return status.r4216 >> 8;
 }
 

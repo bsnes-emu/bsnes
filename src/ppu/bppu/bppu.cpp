@@ -8,11 +8,11 @@ void bPPU::enter() {
   loop:
   //H =    0 (initialize)
   scanline();
-  if(ppucounter.vcounter() == 0) frame();
+  if(ivcounter() == 0) frame();
   add_clocks(10);
 
   //H =   10 (OAM address reset)
-  if(ppucounter.vcounter() == (!overscan() ? 225 : 240)) {
+  if(ivcounter() == (!overscan() ? 225 : 240)) {
     if(regs.display_disabled == false) {
       regs.oam_addr = regs.oam_baseaddr << 1;
       regs.oam_firstsprite = (regs.oam_priority == false) ? 0 : (regs.oam_addr >> 2) & 127;
@@ -28,19 +28,19 @@ void bPPU::enter() {
   cache.oam_basesize   = regs.oam_basesize;
   cache.oam_nameselect = regs.oam_nameselect;
   cache.oam_tdaddr     = regs.oam_tdaddr;
-  add_clocks(ppucounter.ppulineclocks() - 1152);  //seek to start of next scanline
+  add_clocks(ilineclocks() - 1152);  //seek to start of next scanline
 
   goto loop;
 }
 
 void bPPU::add_clocks(unsigned clocks) {
-  ppucounter.tock(clocks);
+  tock(clocks);
   scheduler.addclocks_ppu(clocks);
 }
 
 void bPPU::scanline() {
   snes.scanline();
-  line.y = ppucounter.ppuvcounter();
+  line.y = ivcounter();
 
   if(line.y == 0) {
     //RTO flag reset
@@ -78,7 +78,7 @@ void bPPU::frame() {
   PPU::frame();
   snes.frame();
 
-  if(ppucounter.ppufield() == 0) {
+  if(ifield() == 0) {
     display.interlace = regs.interlace;
     regs.scanlines = (regs.overscan == false) ? 224 : 239;
   }

@@ -1,6 +1,9 @@
 #include <../base.hpp>
 #define SCPU_CPP
 
+#include "deltaqueue.cpp"
+deltaqueue delta;
+
 #include "core/core.cpp"
 #include "dma/dma.cpp"
 #include "memory/memory.cpp"
@@ -35,7 +38,7 @@ void sCPU::reset() {
 
   event.wai = false;
   event.irq = false;
-  event.irq_vector = 0xfffc; //reset vector address
+  event.irq_vector = 0xfffc;  //reset vector address
 
   mmio_reset();
   dma_reset();

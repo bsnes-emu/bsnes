@@ -31,20 +31,23 @@ public:
     history.ppudiff -= clocks;
   }
 
+  //timing information relative to S-CPU
   alwaysinline bool   field   () { return status.field; }
   alwaysinline uint16 vcounter() { return status.vcounter; }
   alwaysinline uint16 hcounter() { return status.hcounter; }
   uint16 hdot();
   uint16 lineclocks();
 
+  //timing history information relative to S-CPU
   alwaysinline bool   field   (unsigned offset) { return history.field   [(history.index - (offset >> 1)) & 2047]; }
   alwaysinline uint16 vcounter(unsigned offset) { return history.vcounter[(history.index - (offset >> 1)) & 2047]; }
   alwaysinline uint16 hcounter(unsigned offset) { return history.hcounter[(history.index - (offset >> 1)) & 2047]; }
 
-  alwaysinline bool   ppufield()    { return history.field   [(history.index - (history.ppudiff >> 1)) & 2047]; }
-  alwaysinline uint16 ppuvcounter() { return history.vcounter[(history.index - (history.ppudiff >> 1)) & 2047]; }
-  alwaysinline uint16 ppuhcounter() { return history.hcounter[(history.index - (history.ppudiff >> 1)) & 2047]; }
-  uint16 ppulineclocks();
+  //timing information relative to S-PPU
+  alwaysinline bool   ifield()    { return history.field   [(history.index - (history.ppudiff >> 1)) & 2047]; }
+  alwaysinline uint16 ivcounter() { return history.vcounter[(history.index - (history.ppudiff >> 1)) & 2047]; }
+  alwaysinline uint16 ihcounter() { return history.hcounter[(history.index - (history.ppudiff >> 1)) & 2047]; }
+  uint16 ilineclocks();
 
   void reset();
 
@@ -68,5 +71,3 @@ private:
     signed ppudiff;
   } history;
 };
-
-extern PPUcounter ppucounter;

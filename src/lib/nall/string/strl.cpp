@@ -44,4 +44,4 @@ size_t strlcat(char *dest, const char *src, size_t length) {
   return dlength + (s - src); //return length of resulting string, sans null terminator
 }
 
-#endif //ifdef NALL_STRING_CPP
+#endif  //ifdef NALL_STRING_CPP

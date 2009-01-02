@@ -47,6 +47,7 @@ void ui_init() {
   window_advanced.setup();
   window_settings.setup();
 
+  config::video.mode = (config::video.start_in_fullscreen_mode == false) ? 0 : 1;
   event::update_opacity();
   event::update_video_settings(); //call first time to resize main window and update menubar
 

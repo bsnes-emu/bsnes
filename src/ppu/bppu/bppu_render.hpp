@@ -14,16 +14,16 @@ enum { COLORDEPTH_4 = 0, COLORDEPTH_16 = 1, COLORDEPTH_256 = 2 };
 enum { TILE_2BIT = 0, TILE_4BIT = 1, TILE_8BIT = 2 };
 
 struct _pixel {
-//bgr555 color data for main/subscreen pixels: 0x0000 = transparent / use palette color # 0
-//needs to be bgr555 instead of palette index for direct color mode ($2130 bit 0) to work
-uint16 src_main, src_sub;
-//indicates source of palette # for main/subscreen (BG1-4, OAM, or back)
-uint8  bg_main,  bg_sub;
-//color_exemption -- true when bg == OAM && palette index >= 192, disables color add/sub effects
-uint8  ce_main,  ce_sub;
-//priority level of src_n. to set src_n,
-//the priority of the pixel must be >pri_n
-uint8  pri_main, pri_sub;
+  //bgr555 color data for main/subscreen pixels: 0x0000 = transparent / use palette color # 0
+  //needs to be bgr555 instead of palette index for direct color mode ($2130 bit 0) to work
+  uint16 src_main, src_sub;
+  //indicates source of palette # for main/subscreen (BG1-4, OAM, or back)
+  uint8  bg_main,  bg_sub;
+  //color_exemption -- true when bg == OAM && palette index >= 192, disables color add/sub effects
+  uint8  ce_main,  ce_sub;
+  //priority level of src_n. to set src_n,
+  //the priority of the pixel must be >pri_n
+  uint8  pri_main, pri_sub;
 } pixel_cache[256];
 
 uint8 *bg_tiledata[3];

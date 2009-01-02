@@ -1,5 +1,5 @@
 uintptr_t AudioSettingsWindow::volume_change(event_t) {
-  config::audio.volume = 10 + svolume.get_position();
+  config::audio.volume = 25 + cvolume.get_selection() * 25;
   audio.set(Audio::Volume, config::audio.volume);
 
   sync_ui();
@@ -7,18 +7,19 @@ uintptr_t AudioSettingsWindow::volume_change(event_t) {
 }
 
 uintptr_t AudioSettingsWindow::latency_change(event_t) {
-  config::audio.latency = 25 + slatency.get_position() * 5;
+  config::audio.latency = 20 + clatency.get_selection() * 20;
   audio.set(Audio::Latency, config::audio.latency);
 
   sync_ui();
   return true;
 }
 
-uintptr_t AudioSettingsWindow::output_change(event_t) {
-  switch(soutput.get_position()) {
+uintptr_t AudioSettingsWindow::frequency_change(event_t) {
+  switch(cfrequency.get_selection()) {
     case 0: config::audio.output_frequency = 32000; break;
     case 1: config::audio.output_frequency = 44100; break; default:
     case 2: config::audio.output_frequency = 48000; break;
+    case 3: config::audio.output_frequency = 96000; break;
   }
 
   audio.set(Audio::Frequency, config::audio.output_frequency);
@@ -28,49 +29,8 @@ uintptr_t AudioSettingsWindow::output_change(event_t) {
   return true;
 }
 
-uintptr_t AudioSettingsWindow::input_change(event_t) {
-  config::audio.input_frequency = sinput.get_position() + 32000 - 200;
-  event::update_emulation_speed(config::system.emulation_speed);
-
-  sync_ui();
-  return true;
-}
-
-uintptr_t AudioSettingsWindow::volume_tick(event_t) {
-  char t[256];
-  evolume.get_text(t, sizeof t);
-  config::audio.volume = strdec(t);
-  audio.set(Audio::Volume, config::audio.volume);
-
-  sync_ui();
-  return true;
-}
-
-uintptr_t AudioSettingsWindow::latency_tick(event_t) {
-  char t[256];
-  elatency.get_text(t, sizeof t);
-  config::audio.latency = strdec(t);
-  audio.set(Audio::Latency, config::audio.latency);
-
-  sync_ui();
-  return true;
-}
-
-uintptr_t AudioSettingsWindow::output_tick(event_t) {
-  char t[256];
-  eoutput.get_text(t, sizeof t);
-  config::audio.output_frequency = strdec(t);
-  audio.set(Audio::Frequency, config::audio.output_frequency);
-  event::update_emulation_speed(config::system.emulation_speed);
-
-  sync_ui();
-  return true;
-}
-
-uintptr_t AudioSettingsWindow::input_tick(event_t) {
-  char t[256];
-  einput.get_text(t, sizeof t);
-  config::audio.input_frequency = strdec(t);
+uintptr_t AudioSettingsWindow::skew_change(event_t) {
+  config::audio.input_frequency = sskew.get_position() + 32000 - 200;
   event::update_emulation_speed(config::system.emulation_speed);
 
   sync_ui();
@@ -78,133 +38,87 @@ uintptr_t AudioSettingsWindow::input_tick(event_t) {
 }
 
 void AudioSettingsWindow::sync_ui() {
-  lvolume.set_text(string()
-    << translate["Volume:"] << " "
-    << (int)config::audio.volume << "%"
-  );
+  cvolume.set_selection((config::audio.volume - 25) / 25);
 
-  llatency.set_text(string()
-    << translate["Latency:"] << " "
-    << (int)config::audio.latency << "ms"
-  );
+  unsigned position;
+       if(config::audio.output_frequency <= 32000) position = 0;
+  else if(config::audio.output_frequency <= 44100) position = 1;
+  else if(config::audio.output_frequency <= 48000) position = 2;
+  else position = 3;
+  cfrequency.set_selection(position);
 
-  loutput.set_text(string()
-    << translate["Frequency:"] << " "
-    << (int)config::audio.output_frequency << "hz"
-  );
+  clatency.set_selection((config::audio.latency - 20) / 20);
 
-  if(config::advanced.enable == false) {
-    int input_freq = config::audio.input_frequency - 32000;
-    string adjust;
-    if(input_freq > 0) adjust << "+";
-    adjust << input_freq << "hz";
-    linput.set_text(string()
-      << translate["Frequency adjust:"] << " "
-      << adjust
-    );
-  } else {
-    linput.set_text(string() << translate["Frequency adjust:"] << " " << (int)config::audio.input_frequency << "hz");
-  }
-
-  if(config::advanced.enable == false) {
-    svolume.set_position(config::audio.volume - 10);
-    slatency.set_position((config::audio.latency - 25) / 5);
-    unsigned position;
-         if(config::audio.output_frequency <= 32000) position = 0;
-    else if(config::audio.output_frequency <= 44100) position = 1;
-    else position = 2;
-    soutput.set_position(position);
-    sinput.set_position(config::audio.input_frequency - 32000 + 200);
-  } else {
-    evolume.set_text(string() << (int)config::audio.volume);
-    elatency.set_text(string() << (int)config::audio.latency);
-    eoutput.set_text(string() << (int)config::audio.output_frequency);
-    einput.set_text(string() << (int)config::audio.input_frequency);
-  }
+  lskew.set_text(string() << translate["{{audio}}Frequency adjust:"] << " " << (int)config::audio.input_frequency << "hz");
+  sskew.set_position(config::audio.input_frequency - 32000 + 200);
 }
 
 void AudioSettingsWindow::setup() {
   create(0, 451, 370);
 
-  lvolume.create(0, 223, 18);
-  svolume.create(0, 451, 30, 91);
-  evolume.create(0, 118, 25);
-  bvolume.create(0, 100, 25, translate["{{audio}}Set"]);
+  lvolume.create(0, 147, 18, translate["{{audio}}Volume:"]);
+  cvolume.create(0, 147, 25);
+  cvolume.add_item( "25%");
+  cvolume.add_item( "50%");
+  cvolume.add_item( "75%");
+  cvolume.add_item("100%");
+  if(config::advanced.enable == true) {
+    cvolume.add_item("125%");
+    cvolume.add_item("150%");
+    cvolume.add_item("175%");
+    cvolume.add_item("200%");
+  }
 
-  llatency.create(0, 223, 18);
-  slatency.create(0, 451, 30, 26);
-  elatency.create(0, 118, 25);
-  blatency.create(0, 100, 25, translate["{{audio}}Set"]);
+  lfrequency.create(0, 147, 18, translate["{{audio}}Frequency:"]);
+  cfrequency.create(0, 147, 25);
+  cfrequency.add_item("32Khz");
+  cfrequency.add_item("44.1Khz");
+  cfrequency.add_item("48Khz");
+  if(config::advanced.enable == true) {
+    cfrequency.add_item("96Khz");
+  }
 
-  loutput.create(0, 223, 18);
-  soutput.create(0, 451, 30, 3);
-  eoutput.create(0, 118, 25);
-  boutput.create(0, 100, 25, translate["{{audio}}Set"]);
+  llatency.create(0, 147, 18, translate["{{audio}}Latency:"]);
+  clatency.create(0, 147, 25);
+  clatency.add_item( "20ms");
+  clatency.add_item( "40ms");
+  clatency.add_item( "60ms");
+  clatency.add_item( "80ms");
+  clatency.add_item("100ms");
+  clatency.add_item("120ms");
+  if(config::advanced.enable == true) {
+    clatency.add_item("140ms");
+    clatency.add_item("160ms");
+  }
 
-  linput.create(0, 223, 18);
-  sinput.create(0, 451, 30, 401);
-  einput.create(0, 118, 25);
-  binput.create(0, 100, 25, translate["{{audio}}Set"]);
+  lskew.create(0, 451, 18, translate["{{audio}}Frequency adjust:"]);
+  sskew.create(0, 451, 30, 401);
 
-  note.create(0, 475, 54, string()
+  note.create(0, 451, 54, string()
   << translate["{{audio}}Frequency adjust is used to improve video sync timing."] << "\n"
   << translate["{{audio}}Lower value to clean audio output."] << "\n"
   << translate["{{audio}}Raise value to smooth video output."]
   );
 
   unsigned y = 0;
-  if(config::advanced.enable == false) {
-    attach(lvolume, 0, y); y += 18;
-    attach(svolume, 0, y); y += 30;
-    if(audio.cap(Audio::Latency) == true) {
-      attach(llatency, 0, y); y += 18;
-      attach(slatency, 0, y); y += 30;
-    }
-    if(audio.cap(Audio::Frequency) == true) {
-      attach(loutput, 0, y); y += 18;
-      attach(soutput, 0, y); y += 30;
-    }
-    attach(linput, 0, y); y += 18;
-    attach(sinput, 0, y); y += 30;
-  } else {
-    attach(lvolume,    0, y);
-    attach(llatency, 228, y); y += 18;
 
-    attach(evolume,    0, y);
-    attach(bvolume,  123, y);
-    attach(elatency, 228, y);
-    attach(blatency, 351, y); y += 25 + 5;
+  attach(lvolume,      0, y);
+  attach(lfrequency, 152, y);
+  attach(llatency,   304, y); y += 18;
 
-    attach(loutput,    0, y);
-    attach(linput,   228, y); y += 18;
+  attach(cvolume,      0, y);
+  attach(cfrequency, 152, y);
+  attach(clatency,   304, y); y += 30;
 
-    attach(eoutput,    0, y);
-    attach(boutput,  123, y);
-    attach(einput,   228, y);
-    attach(binput,   351, y); y += 25 + 5;
+  attach(lskew,        0, y); y += 18;
+  attach(sskew,        0, y); y += 30;
 
-    if(audio.cap(Audio::Latency) == false) {
-      elatency.disable();
-      blatency.disable();
-    }
+  attach(note,         0, y);
 
-    if(audio.cap(Audio::Frequency) == false) {
-      eoutput.disable();
-      boutput.disable();
-    }
-  }
-
-  attach(note, 0, y);
-
-  svolume.on_change = bind(&AudioSettingsWindow::volume_change, this);
-  slatency.on_change = bind(&AudioSettingsWindow::latency_change, this);
-  soutput.on_change = bind(&AudioSettingsWindow::output_change, this);
-  sinput.on_change = bind(&AudioSettingsWindow::input_change, this);
-
-  bvolume.on_tick = bind(&AudioSettingsWindow::volume_tick, this);
-  blatency.on_tick = bind(&AudioSettingsWindow::latency_tick, this);
-  boutput.on_tick = bind(&AudioSettingsWindow::output_tick, this);
-  binput.on_tick = bind(&AudioSettingsWindow::input_tick, this);
+  cvolume.on_change    = bind(&AudioSettingsWindow::volume_change,    this);
+  cfrequency.on_change = bind(&AudioSettingsWindow::frequency_change, this);
+  clatency.on_change   = bind(&AudioSettingsWindow::latency_change,   this);
+  sskew.on_change      = bind(&AudioSettingsWindow::skew_change,      this);
 
   sync_ui();
 }

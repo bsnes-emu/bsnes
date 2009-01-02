@@ -205,8 +205,8 @@ void MainWindow::setup() {
 
     menu_system_sep4.create();
     menu_system_exit.create(translate["{{system}}Exit"]);
-    //menu_system.attach(menu_system_sep4);
-    //menu_system.attach(menu_system_exit);
+    menu_system.attach(menu_system_sep4);
+    menu_system.attach(menu_system_exit);
 
   attach(menu_settings.create(translate["{{menu}}Settings"]));
     menu_settings.attach(menu_settings_videomode.create(translate["Video Mode"]));

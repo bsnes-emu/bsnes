@@ -27,8 +27,8 @@ uint16 PPUcounter::lineclocks() {
   return 1364;
 }
 
-uint16 PPUcounter::ppulineclocks() {
-  if(region() == 0 && interlace() == false && ppuvcounter() == 240 && status.field == 1) return 1360;
+uint16 PPUcounter::ilineclocks() {
+  if(region() == 0 && interlace() == false && ivcounter() == 240 && status.field == 1) return 1360;
   return 1364;
 }
 

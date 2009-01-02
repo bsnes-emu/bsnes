@@ -106,9 +106,11 @@ void bPPU::render_bg_tile(uint8 color_depth, uint16 tile_num) {
 
 void bPPU::flush_pixel_cache() {
   uint16 main = get_palette(0);
-  uint16 sub  = (regs.pseudo_hires || regs.bg_mode == 5 || regs.bg_mode == 6) ? main : regs.color_rgb;
-  uint32 i    = 255;
+  uint16 sub  = (regs.pseudo_hires || regs.bg_mode == 5 || regs.bg_mode == 6)
+              ? main
+              : regs.color_rgb;
 
+  unsigned i = 255;
   do {
     pixel_cache[i].src_main = main;
     pixel_cache[i].src_sub  = sub;

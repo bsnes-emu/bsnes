@@ -1,9 +1,9 @@
 Colortable colortable;
 
 void Colortable::set_format(Format format_) { format = format_; }
-void Colortable::set_contrast(int32_t contrast_) { contrast = contrast_; }
-void Colortable::set_brightness(int32_t brightness_) { brightness = brightness_; }
-void Colortable::set_gamma(int32_t gamma_) { gamma = gamma_; }
+void Colortable::set_contrast(signed contrast_) { contrast = contrast_; }
+void Colortable::set_brightness(signed brightness_) { brightness = brightness_; }
+void Colortable::set_gamma(signed gamma_) { gamma = gamma_; }
 
 void Colortable::enable_gamma_ramp(bool value) { gamma_ramp = value; }
 void Colortable::enable_sepia(bool value) { sepia = value; }
@@ -11,18 +11,18 @@ void Colortable::enable_grayscale(bool value) { grayscale = value; }
 void Colortable::enable_invert(bool value) { invert = value; }
 
 void Colortable::update() {
-  int32_t l, r, g, b;
-  double kr = 0.2126, kb = 0.0722, kg = (1.0 - kr - kb); //luminance
-  uint32_t col;
-  for(unsigned i = 0; i < 32768; i++) {
-    //bgr555->rgb888
-    col = ((i & 0x001f) << 19) | ((i & 0x001c) << 14)
-        | ((i & 0x03e0) <<  6) | ((i & 0x0380) <<  1)
-        | ((i & 0x7c00) >>  7) | ((i & 0x7000) >> 12);
+  double kr = 0.2126, kb = 0.0722, kg = (1.0 - kr - kb);  //luminance weights
 
-    r = (col >> 16) & 0xff;
-    g = (col >>  8) & 0xff;
-    b = (col      ) & 0xff;
+  for(unsigned i = 0; i < 32768; i++) {
+    unsigned color  //bgr555->rgb888 conversion
+    = ((i & 0x001f) << 19) | ((i & 0x001c) << 14)
+    | ((i & 0x03e0) <<  6) | ((i & 0x0380) <<  1)
+    | ((i & 0x7c00) >>  7) | ((i & 0x7000) >> 12);
+
+    signed l;
+    signed r = (color >> 16) & 0xff;
+    signed g = (color >>  8) & 0xff;
+    signed b = (color      ) & 0xff;
 
     if(gamma_ramp == true) {
       r = gamma_ramp_table[r >> 3];
@@ -30,17 +30,31 @@ void Colortable::update() {
       b = gamma_ramp_table[b >> 3];
     }
 
-    contrast_adjust(r); brightness_adjust(r); gamma_adjust(r);
-    contrast_adjust(g); brightness_adjust(g); gamma_adjust(g);
-    contrast_adjust(b); brightness_adjust(b); gamma_adjust(b);
+    if(contrast != 0) {
+      r = contrast_adjust(r);
+      g = contrast_adjust(g);
+      b = contrast_adjust(b);
+    }
+
+    if(brightness != 0) {
+      r = brightness_adjust(r);
+      g = brightness_adjust(g);
+      b = brightness_adjust(b);
+    }
+
+    if(gamma != 100) {
+      r = gamma_adjust(r);
+      g = gamma_adjust(g);
+      b = gamma_adjust(b);
+    }
 
     if(sepia == true) {
-      l = (int32_t)((double)r * kr + (double)g * kg + (double)b * kb);
+      l = (signed)((double)r * kr + (double)g * kg + (double)b * kb);
       l = max(0, min(255, l));
 
-      r = (int32_t)((double)l * (1.0 + 0.300));
-      g = (int32_t)((double)l * (1.0 - 0.055));
-      b = (int32_t)((double)l * (1.0 - 0.225));
+      r = (signed)((double)l * (1.0 + 0.300));
+      g = (signed)((double)l * (1.0 - 0.055));
+      b = (signed)((double)l * (1.0 - 0.225));
 
       r = max(0, min(255, r));
       g = max(0, min(255, g));
@@ -48,7 +62,7 @@ void Colortable::update() {
     }
 
     if(grayscale == true) {
-      l = (int32_t)((double)r * kr + (double)g * kg + (double)b * kb);
+      l = (signed)((double)r * kr + (double)g * kg + (double)b * kb);
       l = max(0, min(255, l));
       r = g = b = l;
     }
@@ -79,7 +93,7 @@ void Colortable::update() {
       } break;
 
       default: {
-        table[i] = -1U;
+        table[i] = ~0;
       } break;
     }
   }
@@ -90,13 +104,16 @@ Colortable::Colortable() {
   contrast = 0;
   brightness = 0;
   gamma = 100;
+
+  gamma_ramp = false;
+  sepia = false;
+  grayscale = false;
+  invert = false;
 }
 
 Colortable::~Colortable() {
   delete[] table;
 }
-
-/* internal */
 
 const uint8_t Colortable::gamma_ramp_table[32] = {
   0x00, 0x01, 0x03, 0x06, 0x0a, 0x0f, 0x15, 0x1c,
@@ -105,19 +122,17 @@ const uint8_t Colortable::gamma_ramp_table[32] = {
   0xc8, 0xd0, 0xd8, 0xe0, 0xe8, 0xf0, 0xf8, 0xff,
 };
 
-void Colortable::contrast_adjust(int32_t &input) {
-  double lmin =   0.0 - (double)contrast;
-  double lmax = 255.0 + (double)contrast;
-  int32_t result = (int32_t)(lmin + (double)input * ((lmax - lmin) / 256.0));
-  input = max(0, min(255, result));
+uint8_t Colortable::contrast_adjust(uint8_t input) {
+  signed result = input - contrast + (2 * contrast * input + 127) / 255;
+  return max(0, min(255, result));
 }
 
-void Colortable::brightness_adjust(int32_t &input) {
-  int32_t result = input + brightness;
-  input = max(0, min(255, result));
+uint8_t Colortable::brightness_adjust(uint8_t input) {
+  signed result = input + brightness;
+  return max(0, min(255, result));
 }
 
-void Colortable::gamma_adjust(int32_t &input) {
-  int32_t result = (int32_t)(pow(((double)(input + 1) / 256.0), (double)gamma / 100.0) * 256.0);
-  input = max(0, min(255, result));
+uint8_t Colortable::gamma_adjust(uint8_t input) {
+  signed result = (signed)(pow(((double)input / 255.0), (double)gamma / 100.0) * 255.0 + 0.5);
+  return max(0, min(255, result));
 }

@@ -107,20 +107,20 @@ static const char* input_find(uint16_t key) {
 
   static char buffer[64];
   for(unsigned j = 0; j < 16; j++) {
-    if(key == joypad<>::index(j, joypad<>::up)) { sprintf(buffer, "joypad%0.2d.up", j); return buffer; }
-    if(key == joypad<>::index(j, joypad<>::down)) { sprintf(buffer, "joypad%0.2d.down", j); return buffer; }
-    if(key == joypad<>::index(j, joypad<>::left)) { sprintf(buffer, "joypad%0.2d.left", j); return buffer; }
-    if(key == joypad<>::index(j, joypad<>::right)) { sprintf(buffer, "joypad%0.2d.right", j); return buffer; }
+    if(key == joypad<>::index(j, joypad<>::up)) { sprintf(buffer, "joypad%.2d.up", j); return buffer; }
+    if(key == joypad<>::index(j, joypad<>::down)) { sprintf(buffer, "joypad%.2d.down", j); return buffer; }
+    if(key == joypad<>::index(j, joypad<>::left)) { sprintf(buffer, "joypad%.2d.left", j); return buffer; }
+    if(key == joypad<>::index(j, joypad<>::right)) { sprintf(buffer, "joypad%.2d.right", j); return buffer; }
 
     if(key >= joypad<>::index(j, joypad<>::axis + 0)
     && key <  joypad<>::index(j, joypad<>::axis + joypad<>::axes)) {
-      sprintf(buffer, "joypad%0.2d.axis%0.2d", j, key - joypad<>::index(j, joypad<>::axis));
+      sprintf(buffer, "joypad%.2d.axis%.2d", j, key - joypad<>::index(j, joypad<>::axis));
       return buffer;
     }
 
     if(key >= joypad<>::index(j, joypad<>::button + 0)
     && key <  joypad<>::index(j, joypad<>::button + joypad<>::buttons)) {
-      sprintf(buffer, "joypad%0.2d.button%0.2d", j, key - joypad<>::index(j, joypad<>::button));
+      sprintf(buffer, "joypad%.2d.button%.2d", j, key - joypad<>::index(j, joypad<>::button));
       return buffer;
     }
   }

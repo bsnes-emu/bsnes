@@ -74,7 +74,7 @@ bool Cheat::encode(string &str, unsigned addr, uint8 data, type_t type) {
   char t[16];
 
   if(type == ProActionReplay) {
-    sprintf(t, "%0.6x:%0.2x", addr, data);
+    sprintf(t, "%.6x:%.2x", addr, data);
     str = t;
     return true;
   } else if(type == GameGenie) {
@@ -91,7 +91,7 @@ bool Cheat::encode(string &str, unsigned addr, uint8 data, type_t type) {
            (!!(r & 0x080000) <<  5) | (!!(r & 0x040000) <<  4) |
            (!!(r & 0x020000) <<  3) | (!!(r & 0x010000) <<  2) |
            (!!(r & 0x000800) <<  1) | (!!(r & 0x000400) <<  0);
-    sprintf(t, "%0.2x%0.2x-%0.4x", data, addr >> 16, addr & 0xffff);
+    sprintf(t, "%.2x%.2x-%.4x", data, addr >> 16, addr & 0xffff);
     strtr(t, "0123456789abcdef", "df4709156bc8a23e");
     str = t;
     return true;

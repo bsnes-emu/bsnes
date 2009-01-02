@@ -28,6 +28,7 @@ void PPU::power() {
 }
 
 void PPU::reset() {
+  PPUcounter::reset();
   memset(output, 0, 512 * 480 * sizeof(uint16));
 }
 

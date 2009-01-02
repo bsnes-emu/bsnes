@@ -68,8 +68,8 @@ public:
   alwaysinline void tick() {
     //only test if Super Scope or Justifier is connected
     if(iobit) {
-      if(ppucounter.vcounter() == latchy        //test Y cursor position
-      && ppucounter.hcounter() == latchx << 2   //test X cursor position (cycles == pixels << 2)
+      if(ppu.vcounter() == latchy               //test Y cursor position
+      && ppu.hcounter() == latchx << 2          //test X cursor position (cycles == pixels << 2)
       && latchy < (ppu.overscan() ? 240 : 225)  //verify Y is not offscreen
       && latchx < 256                           //verify X is not offscreen
       ) ppu.latch_counters();

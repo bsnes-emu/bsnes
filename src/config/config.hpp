@@ -31,4 +31,8 @@ extern struct SMP {
   static integral_setting ntsc_clock_rate, pal_clock_rate;
 } smp;
 
+extern struct Temp {
+  static integral_setting alu_mul_delay, alu_div_delay;
+} temp;
+
 };

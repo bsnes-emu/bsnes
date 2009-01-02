@@ -1,18 +1,18 @@
-class PPU : public MMIO {
+#include "counter.hpp"
+
+class PPU : public PPUcounter, public MMIO {
 public:
   virtual void enter() = 0;
 
   uint16 *output;
 
-  //this struct should be read-only to
-  //functions outside of this class
   struct {
-    bool   render_output;
+    bool render_output;
 
-    bool   frame_executed;
-    bool   frames_updated;
-    uint32 frames_rendered;
-    uint32 frames_executed;
+    bool frame_executed;
+    bool frames_updated;
+    unsigned frames_rendered;
+    unsigned frames_executed;
   } status;
 
   //PPU1 version number
@@ -40,5 +40,3 @@ public:
   PPU();
   virtual ~PPU();
 };
-
-#include "counter.hpp"

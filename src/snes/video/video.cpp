@@ -77,12 +77,12 @@ void SNES::Video::update() {
 }
 
 void SNES::Video::scanline() {
-  unsigned y = ppucounter.vcounter();
+  unsigned y = ppu.vcounter();
   if(y >= 240) return;
 
   unsigned width = (ppu.hires() == false ? 256 : 512);
   pline_width[y] = width;
-  iline_width[y * 2 + (int)ppucounter.field()] = width;
+  iline_width[y * 2 + (int)ppu.field()] = width;
 
   frame_hires |= ppu.hires();
   frame_interlace |= ppu.interlace();

@@ -198,7 +198,7 @@ private:
       buffer_offset = file_offset & ~buffer_mask;
       fseek(fp, buffer_offset, SEEK_SET);
       unsigned length = (buffer_offset + buffer_size) <= file_size ? buffer_size : (file_size & buffer_mask);
-      if(length) fread(buffer, 1, length, fp);
+      if(length) unsigned unused = fread(buffer, 1, length, fp);
     }
   }
 
@@ -209,7 +209,7 @@ private:
     if(buffer_dirty == false) return; //buffer unmodified since read
     fseek(fp, buffer_offset, SEEK_SET);
     unsigned length = (buffer_offset + buffer_size) <= file_size ? buffer_size : (file_size & buffer_mask);
-    if(length) fwrite(buffer, 1, length, fp);
+    if(length) unsigned unused = fwrite(buffer, 1, length, fp);
     buffer_offset = -1; //invalidate buffer
     buffer_dirty = false;
   }

@@ -24,7 +24,7 @@ char* strtr(char *dest, const char *before, const char *after) {
   if(!dest || !before || !after) return dest;
   int sl = strlen(dest), bsl = strlen(before), asl = strlen(after);
 
-  if(bsl != asl || bsl == 0) return dest; //patterns must be the same length for 1:1 replace
+  if(bsl != asl || bsl == 0) return dest;  //patterns must be the same length for 1:1 replace
   for(unsigned i = 0; i < sl; i++) {
     for(unsigned l = 0; l < bsl; l++) {
       if(dest[i] == before[l]) {
@@ -62,7 +62,7 @@ uintmax_t strhex(const char *str) {
     if(x >= '0' && x <= '9') x -= '0';
     else if(x >= 'A' && x <= 'F') x -= 'A' - 10;
     else if(x >= 'a' && x <= 'f') x -= 'a' - 10;
-    else break; //stop at first invalid character
+    else break;  //stop at first invalid character
     result = result * 16 + x;
   }
 
@@ -83,7 +83,7 @@ intmax_t strdec(const char *str) {
   while(*str) {
     uint8_t x = *str++;
     if(x >= '0' && x <= '9') x -= '0';
-    else break; //stop at first invalid character
+    else break;  //stop at first invalid character
     result = result * 10 + x;
   }
 
@@ -101,7 +101,7 @@ uintmax_t strbin(const char *str) {
   while(*str) {
     uint8_t x = *str++;
     if(x == '0' || x == '1') x -= '0';
-    else break; //stop at first invalid character
+    else break;  //stop at first invalid character
     result = result * 2 + x;
   }
 
@@ -122,8 +122,8 @@ double strdouble(const char *str) {
   while(*str) {
     uint8_t x = *str++;
     if(x >= '0' && x <= '9') x -= '0';
-    else if(x == '.') break; //break loop and read fractional part
-    else return (double)result_integral; //invalid value, assume no fractional part
+    else if(x == '.') break;  //break loop and read fractional part
+    else return (double)result_integral;  //invalid value, assume no fractional part
     result_integral = result_integral * 10 + x;
   }
 
@@ -131,7 +131,7 @@ double strdouble(const char *str) {
   while(*str) {
     uint8_t x = *str++;
     if(x >= '0' && x <= '9') x -= '0';
-    else break; //stop at first invalid character
+    else break;  //stop at first invalid character
     result_fractional = result_fractional * 10 + x;
   }
 
@@ -144,7 +144,7 @@ double strdouble(const char *str) {
 }
 
 size_t strhex(char *str, uintmax_t value, size_t length /* = 0 */) {
-  if(!length) length -= 1U; //"infinite" length
+  if(length == 0) length -= 1U;  //"infinite" length
   size_t initial_length = length;
 
   //count number of digits in value
@@ -153,23 +153,23 @@ size_t strhex(char *str, uintmax_t value, size_t length /* = 0 */) {
   while(digits_integral_ /= 16) digits_integral++;
 
   int digits = digits_integral;
-  if(!str) return digits + 1; //only computing required length?
+  if(!str) return digits + 1;  //only computing required length?
 
   length = nall::min(digits, length - 1);
-  str += length; //seek to end of target string
-  *str = 0; //set null terminator
+  str += length;  //seek to end of target string
+  *str = 0;  //set null terminator
 
   while(length--) {
     uint8_t x = value % 16;
     value /= 16;
-    *--str = x < 10 ? (x + '0') : (x + 'a' - 10); //iterate backwards to write string
+    *--str = x < 10 ? (x + '0') : (x + 'a' - 10);  //iterate backwards to write string
   }
 
   return nall::min(initial_length, digits + 1);
 }
 
 size_t strdec(char *str, intmax_t value_, size_t length /* = 0 */) {
-  if(!length) length = -1U; //"infinite" length
+  if(length == 0) length = -1U;  //"infinite" length
   size_t initial_length = length;
 
   bool negate = value_ < 0;
@@ -181,15 +181,15 @@ size_t strdec(char *str, intmax_t value_, size_t length /* = 0 */) {
   while(digits_integral_ /= 10) digits_integral++;
 
   int digits = (negate ? 1 : 0) + digits_integral;
-  if(!str) return digits + 1; //only computing required length?
+  if(!str) return digits + 1;  //only computing required length?
 
   length = nall::min(digits, length - 1);
-  str += length; //seek to end of target string
-  *str = 0; //set null terminator
+  str += length;  //seek to end of target string
+  *str = 0;  //set null terminator
   while(length && digits_integral--) {
     uint8_t x = '0' + (value % 10);
     value /= 10;
-    *--str = x; //iterate backwards to write string
+    *--str = x;  //iterate backwards to write string
     length--;
   }
 
@@ -201,7 +201,7 @@ size_t strdec(char *str, intmax_t value_, size_t length /* = 0 */) {
 }
 
 size_t strbin(char *str, uintmax_t value, size_t length /* = 0 */) {
-  if(!length) length = -1U; //"infinite" length
+  if(length == 0) length = -1U;  //"infinite" length
   size_t initial_length = length;
 
   //count number of digits in value
@@ -210,79 +210,46 @@ size_t strbin(char *str, uintmax_t value, size_t length /* = 0 */) {
   while(digits_integral_ /= 2) digits_integral++;
 
   int digits = digits_integral;
-  if(!str) return digits + 1; //only computing required length?
+  if(!str) return digits + 1;  //only computing required length?
 
   length = nall::min(digits, length - 1);
-  str += length; //seek to end of target string
-  *str = 0; //set null terminator
+  str += length;  //seek to end of target string
+  *str = 0;  //set null terminator
 
   while(length--) {
     uint8_t x = '0' + (value % 2);
     value /= 2;
-    *--str = x; //iterate backwards to write string
+    *--str = x;  //iterate backwards to write string
   }
 
   return nall::min(initial_length, digits + 1);
 }
 
+//using sprintf is certainly not the most ideal method to convert
+//a double to a string ... but attempting to parse a double by
+//hand, digit-by-digit, results in subtle rounding errors.
+//
+//note: length parameter is currently ignored.
+//it remains for consistency and possible future support.
 size_t strdouble(char *str, double value, size_t length /* = 0 */) {
-  if(!length) length = -1U; //"infinite" length
-  size_t initial_length = length;
+  char buffer[256];
+  sprintf(buffer, "%f", value);
 
-  double fractional, integral;
-  fractional = modf(value, &integral);
-  uintmax_t value_integral = (uintmax_t)integral;
-  uintmax_t value_fractional = 0;
-
-  //convert fractional portion to integral number (eg 0.275 -> 275)
-  //six nibbles of precision, one nibble for rounding
-  for(int i = 0; i < 7; i++) {
-    fractional *= 10.0;
-    value_fractional = value_fractional * 10 + ((uintmax_t)fractional % 10);
+  //remove excess 0's in fraction (2.500000 -> 2.5)
+  for(char *p = buffer; *p; p++) {
+    if(*p == '.') {
+      char *p = buffer + strlen(buffer) - 1;
+      while(*p == '0') {
+        if(*(p - 1) != '.') *p = 0;  //... but not for eg 1.0 -> 1.
+        p--;
+      }
+      break;
+    }
   }
 
-  //use seventh nibble to round fraction
-  value_fractional = (uintmax_t)((double)value_fractional / 10.0 + 0.5);
-
-  //cull fractional zero nibbles (eg 275000 -> 275)
-  while(value_fractional && !(value_fractional % 10)) value_fractional /= 10;
-
-  //count number of digits in integral value
-  int digits_integral = 1;
-  uintmax_t digits_integral_ = value_integral;
-  while(digits_integral_ /= 10) digits_integral++;
-
-  //count number of digits in fractional value
-  int digits_fractional = 1;
-  uintmax_t digits_fractional_ = value_fractional;
-  while(digits_fractional_ /= 10) digits_fractional++;
-
-  int digits = digits_integral + 1 + digits_fractional; //integral '.' fractional
-  if(!str) return digits + 1; //only computing required length?
-
-  length = nall::min(digits, length - 1);
-  str += length; //seek to end of target string
-  *str = 0; //set null terminator
-
-  while(length && digits_fractional--) {
-    uint8_t x = '0' + (value_fractional % 10);
-    value_fractional /= 10;
-    *--str = x; //iterate backwards to write string
-    length--;
-  }
-
-  if(length) {
-    *--str = '.';
-    length--;
-  }
-
-  while(length-- && digits_integral--) {
-    uint8_t x = '0' + (value_integral % 10);
-    value_integral /= 10;
-    *--str = x; //interate backwards to write string
-  }
-
-  return nall::min(initial_length, digits + 1);
+  length = strlen(buffer);
+  if(str) strcpy(str, buffer);
+  return length + 1;
 }
 
-#endif //ifdef NALL_STRING_CPP
+#endif  //ifdef NALL_STRING_CPP
