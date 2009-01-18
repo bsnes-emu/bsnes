@@ -1,21 +1,21 @@
 uintptr_t DriverSelectWindow::video_change(event_t) {
   lstring part;
   split(part, ";", video.driver_list());
-  config::system.video = part[cvideo.get_selection()];
+  config.system.video = part[cvideo.get_selection()];
   return true;
 }
 
 uintptr_t DriverSelectWindow::audio_change(event_t) {
   lstring part;
   split(part, ";", audio.driver_list());
-  config::system.audio = part[caudio.get_selection()];
+  config.system.audio = part[caudio.get_selection()];
   return true;
 }
 
 uintptr_t DriverSelectWindow::input_change(event_t) {
   lstring part;
   split(part, ";", input.driver_list());
-  config::system.input = part[cinput.get_selection()];
+  config.system.input = part[cinput.get_selection()];
   return true;
 }
 
@@ -36,7 +36,7 @@ void DriverSelectWindow::setup() {
   split(part, ";", video.driver_list());
   for(unsigned i = 0; i < count(part); i++) {
     cvideo.add_item(translate[string() << "{{videodriver}}" << part[i]]);
-    if(part[i] == config::system.video) cvideo.set_selection(i);
+    if(part[i] == config.system.video) cvideo.set_selection(i);
   }
 
   laudio.create(0, 147, 18, translate["Audio driver:"]);
@@ -45,7 +45,7 @@ void DriverSelectWindow::setup() {
   split(part, ";", audio.driver_list());
   for(unsigned i = 0; i < count(part); i++) {
     caudio.add_item(translate[string() << "{{audiodriver}}" << part[i]]);
-    if(part[i] == config::system.audio) caudio.set_selection(i);
+    if(part[i] == config.system.audio) caudio.set_selection(i);
   }
 
   linput.create(0, 147, 18, translate["Input driver:"]);
@@ -54,7 +54,7 @@ void DriverSelectWindow::setup() {
   split(part, ";", input.driver_list());
   for(unsigned i = 0; i < count(part); i++) {
     cinput.add_item(translate[string() << "{{inputdriver}}" << part[i]]);
-    if(part[i] == config::system.input) cinput.set_selection(i);
+    if(part[i] == config.system.input) cinput.set_selection(i);
   }
 
   video_caps.create(0, 451, 18);
@@ -85,17 +85,17 @@ void DriverSelectWindow::setup() {
   restart_message.create(0, 451, 36,
     translate["Note: bsnes must be restarted for changes to take effect."]);
 
-  bool crashed = config::system.invoke_crash_handler;
+  bool crashed = config.system.invoke_crash_handler;
 
   string t = translate["Capabilities of active video driver ($):"];
-  replace(t, "$", config::system.video);
+  replace(t, "$", config.system.video);
   video_caps.set_text(t);
 
   video_sync.check(video.cap(Video::Synchronize));
   video_filter.check(video.cap(Video::Filter));
 
   t = translate["Capabilities of active audio driver ($):"];
-  replace(t, "$", config::system.audio);
+  replace(t, "$", config.system.audio);
   audio_caps.set_text(t);
 
   audio_sync.check(audio.cap(Audio::Synchronize));
@@ -103,7 +103,7 @@ void DriverSelectWindow::setup() {
   audio_latency.check(audio.cap(Audio::Latency));
 
   t = translate["Capabilities of active input driver ($):"];
-  replace(t, "$", config::system.input);
+  replace(t, "$", config.system.input);
   input_caps.set_text(t);
 
   input_keyboard.check(input.cap(Input::KeyboardSupport));

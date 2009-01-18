@@ -13,12 +13,14 @@
 #define NOMINMAX
 #define _NO_OLDNAMES
 
+#define mkdir _mkdir
 #define UNICODE
 #include <windows.h>
 #include <commctrl.h>
 #include <io.h>
 #include <direct.h>
 #include <shlobj.h>
+#undef mkdir
 
 #include <nall/algorithm.hpp>
 using nall::min;

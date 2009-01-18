@@ -252,4 +252,4 @@ size_t strdouble(char *str, double value, size_t length /* = 0 */) {
   return length + 1;
 }
 
-#endif  //ifdef NALL_STRING_CPP
+#endif

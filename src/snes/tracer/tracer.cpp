@@ -3,10 +3,10 @@
 Tracer tracer;
 
 void tprintf(const char *s, ...) {
-  if(tracer.enabled() == false) { return; }
+  if(tracer.enabled() == false) return;
 
-char str[4096];
-va_list args;
+  char str[4096];
+  va_list args;
   va_start(args, s);
   vsprintf(str, s, args);
   va_end(args);
@@ -14,40 +14,40 @@ va_list args;
 }
 
 void Tracer::trace_cpuop() {
-  if(enabled() == false) { return; }
-  if(cpuop_enabled() == false) { return; }
-  if(cpu.in_opcode() == true) { return; }
+  if(enabled() == false) return;
+  if(cpuop_enabled() == false) return;
+  if(cpu.in_opcode() == true) return;
 
   if(cpuopmask_enabled() == true) {
-  uint addr = cpu.regs.pc.d;
-    if(settings.cpuopmasktbl[addr >> 3] & 0x80 >> (addr & 7)) { return; }
+    unsigned addr = cpu.regs.pc.d;
+    if(settings.cpuopmasktbl[addr >> 3] & 0x80 >> (addr & 7)) return;
     settings.cpuopmasktbl[addr >> 3] |= 0x80 >> (addr & 7);
   }
 
-char t[1024];
+  char t[1024];
   cpu.disassemble_opcode(t);
   fprintf(fp, "%s\r\n", t);
 }
 
 void Tracer::trace_smpop() {
-  if(enabled() == false) { return; }
-  if(smpop_enabled() == false) { return; }
-  if(smp.in_opcode() == true) { return; }
+  if(enabled() == false) return;
+  if(smpop_enabled() == false) return;
+  if(smp.in_opcode() == true) return;
 
   if(smpopmask_enabled() == true) {
-  uint addr = smp.regs.pc;
-    if(settings.smpopmasktbl[addr >> 3] & 0x80 >> (addr & 7)) { return; }
+    unsigned addr = smp.regs.pc;
+    if(settings.smpopmasktbl[addr >> 3] & 0x80 >> (addr & 7)) return;
     settings.smpopmasktbl[addr >> 3] |= 0x80 >> (addr & 7);
   }
 
-char t[1024];
+  char t[1024];
   smp.disassemble_opcode(t);
   fprintf(fp, "%s\r\n", t);
 }
 
 void Tracer::enable(bool en) {
   if(en == true && enabled() == false) {
-    fp = fopen(config::filepath("trace.log", config::path.exportdata), "wb");
+    fp = fopen(Cartridge::filepath("trace.log", snes.config.path.exportdata), "wb");
   } else if(en == false && enabled() == true) {
     fclose(fp);
     fp = 0;

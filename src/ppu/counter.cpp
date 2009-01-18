@@ -1,9 +1,9 @@
 #ifdef PPU_CPP
 
 //wrappers to allow PPUcounter::tick()/tock() to be inlined
-bool PPUcounter::region()    { return snes.region() == SNES::NTSC ? 0 : 1; }
-bool PPUcounter::interlace() { return ppu.interlace(); }
-void PPUcounter::scanline()  { cpu.scanline(); }
+bool PPUcounter::region() const { return snes.region() == SNES::NTSC ? 0 : 1; }
+bool PPUcounter::interlace() const { return ppu.interlace(); }
+void PPUcounter::scanline() { cpu.scanline(); }
 
 //one PPU dot = 4 CPU clocks
 //
@@ -14,7 +14,7 @@ void PPUcounter::scanline()  { cpu.scanline(); }
 //dot 323 range = { 1292, 1294, 1296 }
 //dot 327 range = { 1310, 1312, 1314 }
 
-uint16 PPUcounter::hdot() {
+uint16 PPUcounter::hdot() const {
   if(region() == 0 && interlace() == false && status.vcounter == 240 && status.field == 1) {
     return (status.hcounter >> 2);
   } else {
@@ -22,12 +22,12 @@ uint16 PPUcounter::hdot() {
   }
 }
 
-uint16 PPUcounter::lineclocks() {
+uint16 PPUcounter::lineclocks() const {
   if(region() == 0 && interlace() == false && vcounter() == 240 && status.field == 1) return 1360;
   return 1364;
 }
 
-uint16 PPUcounter::ilineclocks() {
+uint16 PPUcounter::ilineclocks() const {
   if(region() == 0 && interlace() == false && ivcounter() == 240 && status.field == 1) return 1360;
   return 1364;
 }
@@ -47,4 +47,4 @@ void PPUcounter::reset() {
   }
 }
 
-#endif  //ifndef PPU_CPP
+#endif

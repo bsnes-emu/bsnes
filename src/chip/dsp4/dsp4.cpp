@@ -1,6 +1,7 @@
 #include <../base.hpp>
 #define DSP4_CPP
 
+#include "dsp4.hpp"
 namespace DSP4i {
   inline uint16 READ_WORD(uint8 *addr) {
     return (addr[0]) + (addr[1] << 8);
@@ -34,7 +35,7 @@ void DSP4::reset() {
   DSP4i::InitDSP4();
 }
 
-uint8 DSP4::read(uint addr) {
+uint8 DSP4::read(unsigned addr) {
   addr &= 0xffff;
   if(addr < 0xc000) {
     DSP4i::dsp4_address = addr;
@@ -44,7 +45,7 @@ uint8 DSP4::read(uint addr) {
   return 0x80;
 }
 
-void DSP4::write(uint addr, uint8 data) {
+void DSP4::write(unsigned addr, uint8 data) {
   addr &= 0xffff;
   if(addr < 0xc000) {
     DSP4i::dsp4_address = addr;

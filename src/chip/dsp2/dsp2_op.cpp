@@ -174,4 +174,4 @@ uint8  pixelarray[512];
   }
 }
 
-#endif //ifdef DSP2_CPP
+#endif

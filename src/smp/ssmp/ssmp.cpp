@@ -6,8 +6,8 @@
 #include "timing/timing.cpp"
 
 void sSMP::power() {
-  for(unsigned i = 0; i < 65536; i++) {
-    //SNES hardware APURAM contains pseudo-random data upon power up
+  for(unsigned i = 0; i < memory::apuram.size(); i++) {
+    //SNES hardware APURAM contains pseudo-random data upon power up (exact formula is unknown.)
     //memory::apuram.write(i, (i & 32) ? 0xff : 0x00);
     memory::apuram.write(i, 0x00);
   }

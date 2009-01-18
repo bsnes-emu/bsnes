@@ -25,4 +25,4 @@ void sCPU::run_auto_joypad_poll() {
   status.joy4h = joy4 >> 8;
 }
 
-#endif  //ifdef SCPU_CPP
+#endif

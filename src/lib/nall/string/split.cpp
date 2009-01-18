@@ -48,4 +48,4 @@ void qsplit(nall::lstring &dest, const char *key, const char *src, size_t limit)
   strcpy(dest[split_count++], src + lp);
 }
 
-#endif  //ifdef NALL_STRING_CPP
+#endif

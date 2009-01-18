@@ -1,23 +1,23 @@
 void export_memory() {
   file fp;
 
-  fp.open(config::filepath("wram.bin", config::path.exportdata), file::mode_write);
+  fp.open(Cartridge::filepath("wram.bin", snes.config.path.exportdata), file::mode_write);
   for(unsigned i = 0; i < memory::wram.size(); i++) fp.write(memory::wram[i]);
   fp.close();
 
-  fp.open(config::filepath("apuram.bin", config::path.exportdata), file::mode_write);
+  fp.open(Cartridge::filepath("apuram.bin", snes.config.path.exportdata), file::mode_write);
   for(unsigned i = 0; i < memory::apuram.size(); i++) fp.write(memory::apuram[i]);
   fp.close();
 
-  fp.open(config::filepath("vram.bin", config::path.exportdata), file::mode_write);
+  fp.open(Cartridge::filepath("vram.bin", snes.config.path.exportdata), file::mode_write);
   for(unsigned i = 0; i < memory::vram.size(); i++) fp.write(memory::vram[i]);
   fp.close();
 
-  fp.open(config::filepath("oam.bin", config::path.exportdata), file::mode_write);
+  fp.open(Cartridge::filepath("oam.bin", snes.config.path.exportdata), file::mode_write);
   for(unsigned i = 0; i < memory::oam.size(); i++) fp.write(memory::oam[i]);
   fp.close();
 
-  fp.open(config::filepath("cgram.bin", config::path.exportdata), file::mode_write);
+  fp.open(Cartridge::filepath("cgram.bin", snes.config.path.exportdata), file::mode_write);
   for(unsigned i = 0; i < memory::cgram.size(); i++) fp.write(memory::cgram[i]);
   fp.close();
 

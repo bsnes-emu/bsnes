@@ -25,7 +25,7 @@ void Status::update() {
     ppu.status.frames_updated = false;
 
     unsigned max_framerate = snes.region() == SNES::NTSC ? 60 : 50;
-    switch(config::system.emulation_speed) {
+    switch(config.system.emulation_speed) {
       case 0: max_framerate = unsigned(0.50 * max_framerate); break;
       case 1: max_framerate = unsigned(0.75 * max_framerate); break;
       case 2: max_framerate = unsigned(1.00 * max_framerate); break;

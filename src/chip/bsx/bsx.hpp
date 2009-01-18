@@ -5,8 +5,8 @@ public:
   void power();
   void reset();
 
-  uint8 mmio_read(uint addr);
-  void mmio_write(uint addr, uint8 data);
+  uint8 mmio_read(unsigned addr);
+  void mmio_write(unsigned addr, uint8 data);
 
 private:
   struct {
@@ -29,8 +29,8 @@ public:
   void power();
   void reset();
 
-  uint8 mmio_read(uint addr);
-  void mmio_write(uint addr, uint8 data);
+  uint8 mmio_read(unsigned addr);
+  void mmio_write(unsigned addr, uint8 data);
 
   MappedRAM sram;
   MappedRAM psram;
@@ -56,13 +56,13 @@ public:
   void power();
   void reset();
 
-  uint size();
-  uint8 read(uint addr);
-  void write(uint addr, uint8 data);
+  unsigned size();
+  uint8 read(unsigned addr);
+  void write(unsigned addr, uint8 data);
 
 private:
   struct {
-    uint command;
+    unsigned command;
     uint8 write_old;
     uint8 write_new;
 

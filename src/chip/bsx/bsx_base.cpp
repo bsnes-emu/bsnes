@@ -15,7 +15,7 @@ void BSXBase::reset() {
   memset(&regs, 0x00, sizeof regs);
 }
 
-uint8 BSXBase::mmio_read(uint addr) {
+uint8 BSXBase::mmio_read(unsigned addr) {
   addr &= 0xffff;
 
   switch(addr) {
@@ -28,7 +28,7 @@ uint8 BSXBase::mmio_read(uint addr) {
     case 0x2190: return regs.r2190;
 
     case 0x2192: {
-    uint counter = regs.r2192_counter++;
+      unsigned counter = regs.r2192_counter++;
       if(regs.r2192_counter >= 18) regs.r2192_counter = 0;
 
       if(counter == 0) {
@@ -73,7 +73,7 @@ uint8 BSXBase::mmio_read(uint addr) {
   return cpu.regs.mdr;
 }
 
-void BSXBase::mmio_write(uint addr, uint8 data) {
+void BSXBase::mmio_write(unsigned addr, uint8 data) {
   addr &= 0xffff;
 
   switch(addr) {
@@ -134,4 +134,4 @@ void BSXBase::mmio_write(uint addr, uint8 data) {
   }
 }
 
-#endif //ifdef BSX_CPP
+#endif

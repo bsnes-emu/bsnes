@@ -1,6 +1,8 @@
 #include <../base.hpp>
+#include <../cart/cart.hpp>
 #define SDD1_CPP
 
+#include "sdd1.hpp"
 #include "sdd1emu.cpp"
 
 void SDD1::init() {}
@@ -42,7 +44,7 @@ void SDD1::reset() {
   bus.map(Bus::MapDirect, 0xc0, 0xff, 0x0000, 0xffff, *this);
 }
 
-uint8 SDD1::mmio_read(uint addr) {
+uint8 SDD1::mmio_read(unsigned addr) {
   addr &= 0xffff;
 
   if((addr & 0x4380) == 0x4300) {
@@ -59,7 +61,7 @@ uint8 SDD1::mmio_read(uint addr) {
   return cpu.regs.mdr;
 }
 
-void SDD1::mmio_write(uint addr, uint8 data) {
+void SDD1::mmio_write(unsigned addr, uint8 data) {
   addr &= 0xffff;
 
   if((addr & 0x4380) == 0x4300) {

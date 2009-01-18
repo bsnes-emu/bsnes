@@ -1,3 +1,5 @@
+#ifdef SSMP_CPP
+
 //inc_a
 case 0xbc: {
   op_io();
@@ -260,3 +262,4 @@ case 0x1a: {
   regs.p.z = (rd == 0);
 } break;
 
+#endif

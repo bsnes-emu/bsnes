@@ -58,15 +58,15 @@ bool bPPU::is_sprite_on_scanline() {
   if(spr->x > 256 && (spr->x + spr->width - 1) < 512) return false;
 
   int spr_height = (regs.oam_interlace == false) ? (spr->height) : (spr->height >> 1);
-  if(line.y >= spr->y && line.y < (spr->y + spr_height)) return true;
-  if((spr->y + spr_height) >= 256 && line.y < ((spr->y + spr_height) & 255)) return true;
+  if(line >= spr->y && line < (spr->y + spr_height)) return true;
+  if((spr->y + spr_height) >= 256 && line < ((spr->y + spr_height) & 255)) return true;
   return false;
 }
 
 void bPPU::load_oam_tiles() {
   uint16 tile_width = spr->width >> 3;
   int x = spr->x;
-  int y = line.y - spr->y;
+  int y = line - spr->y;
   if(regs.oam_interlace == true) {
     y <<= 1;
   }
@@ -96,21 +96,21 @@ void bPPU::load_oam_tiles() {
   chry  &= 15;
   chry <<= 4;
 
-  for(uint tx = 0; tx < tile_width; tx++) {
-    uint sx = (x + (tx << 3)) & 511;
+  for(unsigned tx = 0; tx < tile_width; tx++) {
+    unsigned sx = (x + (tx << 3)) & 511;
     //ignore sprites that are offscreen, x==256 is a special case that loads all tiles in OBJ
     if(x != 256 && sx >= 256 && (sx + 7) < 512) continue;
 
     if(regs.oam_tilecount++ > 34) break;
-    uint n = regs.oam_tilecount - 1;
+    unsigned n = regs.oam_tilecount - 1;
     oam_tilelist[n].x     = sx;
     oam_tilelist[n].y     = y;
     oam_tilelist[n].pri   = spr->priority;
     oam_tilelist[n].pal   = 128 + (spr->palette << 4);
     oam_tilelist[n].hflip = spr->hflip;
 
-    uint mx  = (spr->hflip == false) ? tx : ((tile_width - 1) - tx);
-    uint pos = tdaddr + ((chry + ((chrx + mx) & 15)) << 5);
+    unsigned mx  = (spr->hflip == false) ? tx : ((tile_width - 1) - tx);
+    unsigned pos = tdaddr + ((chry + ((chrx + mx) & 15)) << 5);
     oam_tilelist[n].tile = (pos >> 5) & 0x07ff;
   }
 }
@@ -124,12 +124,12 @@ void bPPU::render_oam_tile(int tile_num) {
     render_bg_tile(COLORDEPTH_16, t->tile);
   }
 
-  uint   sx = t->x;
+  unsigned sx = t->x;
   uint8 *tile_ptr = (uint8*)oam_td + (t->tile << 6) + ((t->y & 7) << 3);
-  for(uint x = 0; x < 8; x++) {
+  for(unsigned x = 0; x < 8; x++) {
     sx &= 511;
     if(sx < 256) {
-      uint col = *(tile_ptr + ((t->hflip == false) ? x : (7 - x)));
+      unsigned col = *(tile_ptr + ((t->hflip == false) ? x : (7 - x)));
       if(col) {
         col += t->pal;
         oam_line_pal[sx] = col;

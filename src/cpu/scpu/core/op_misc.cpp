@@ -1,3 +1,5 @@
+#ifdef SCPU_CPP
+
 //nop
 case 0xea: {
   last_cycle();
@@ -103,9 +105,9 @@ case 0xdb: {
 
 //wai
 case 0xcb: {
-  //last_cycle() will clear event.wai once an NMI / IRQ edge is reached
-  event.wai = true;
-  while(event.wai) {
+  //last_cycle() will clear status.wai_lock once an NMI / IRQ edge is reached
+  status.wai_lock = true;
+  while(status.wai_lock) {
     last_cycle();
     op_io();
   }
@@ -534,3 +536,4 @@ case 0x62: {
   if(regs.e) regs.s.h = 0x01;
 } break;
 
+#endif

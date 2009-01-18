@@ -47,4 +47,4 @@ bool Cartridge::load_ram(const char *filename, uint8_t *&data, unsigned size, ui
   return true;
 }
 
-#endif //ifdef CART_CPP
+#endif

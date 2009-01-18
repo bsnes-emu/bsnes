@@ -59,4 +59,4 @@ void Cartridge::unload_cart_st() {
   if(stB.ram) save_file(get_save_filename(stB.fn, "srm"), stB.ram, stB.ram_size);
 }
 
-#endif //ifdef CART_CPP
+#endif

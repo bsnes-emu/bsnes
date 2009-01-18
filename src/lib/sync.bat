@@ -9,3 +9,8 @@ mkdir ruby
 xcopy /E ..\..\..\nall nall
 xcopy /E ..\..\..\hiro hiro
 xcopy /E ..\..\..\ruby ruby
+
+del hiro\test*
+del hiro\cc.*
+del ruby\test*
+del ruby\cc.*

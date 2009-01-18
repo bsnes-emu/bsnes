@@ -1,4 +1,6 @@
 #include <../base.hpp>
+#include <../cart/cart.hpp>
+#include "srtc.hpp"
 
 const unsigned SRTC::months[12] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
 
@@ -21,14 +23,26 @@ void SRTC::reset() {
 }
 
 void SRTC::update_time() {
-  time_t rtc_time;
-  rtc_time  = memory::cartrtc.read(16);
-  rtc_time |= memory::cartrtc.read(17) << 8;
-  rtc_time |= memory::cartrtc.read(18) << 16;
-  rtc_time |= memory::cartrtc.read(19) << 24;
-
+  time_t rtc_time
+  = (memory::cartrtc.read(16) <<  0)
+  | (memory::cartrtc.read(17) <<  8)
+  | (memory::cartrtc.read(18) << 16)
+  | (memory::cartrtc.read(19) << 24);
   time_t current_time = time(0);
-  if(current_time > rtc_time) {
+
+  //sizeof(time_t) is platform-dependent; though memory::cartrtc needs to be platform-agnostic.
+  //yet platforms with 32-bit signed time_t will overflow every ~68 years. handle this by
+  //accounting for overflow at the cost of 1-bit precision (to catch underflow). this will allow
+  //memory::cartrtc timestamp to remain valid for up to ~34 years from the last update, even if
+  //time_t overflows. calculation should be valid regardless of number representation, time_t size,
+  //or whether time_t is signed or unsigned.
+  time_t diff
+  = (current_time >= rtc_time)
+  ? (current_time - rtc_time)
+  : (std::numeric_limits<time_t>::max() - rtc_time + current_time + 1);  //compensate for overflow
+  if(diff > std::numeric_limits<time_t>::max() / 2) diff = 0;            //compensate for underflow
+
+  if(diff > 0) {
     unsigned second  = memory::cartrtc.read( 0) + memory::cartrtc.read( 1) * 10;
     unsigned minute  = memory::cartrtc.read( 2) + memory::cartrtc.read( 3) * 10;
     unsigned hour    = memory::cartrtc.read( 4) + memory::cartrtc.read( 5) * 10;
@@ -41,8 +55,7 @@ void SRTC::update_time() {
     month--;
     year += 1000;
 
-    second += (unsigned)(current_time - rtc_time);
-
+    second += diff;
     while(second >= 60) {
       second -= 60;
 
@@ -94,8 +107,8 @@ void SRTC::update_time() {
     memory::cartrtc.write(12, weekday % 7);
   }
 
-  memory::cartrtc.write(16, current_time);
-  memory::cartrtc.write(17, current_time >> 8);
+  memory::cartrtc.write(16, current_time >>  0);
+  memory::cartrtc.write(17, current_time >>  8);
   memory::cartrtc.write(18, current_time >> 16);
   memory::cartrtc.write(19, current_time >> 24);
 }
@@ -104,8 +117,8 @@ void SRTC::update_time() {
 //eg 0 = Sunday, 1 = Monday, ... 6 = Saturday
 //usage: weekday(2008, 1, 1) returns weekday of January 1st, 2008
 unsigned SRTC::weekday(unsigned year, unsigned month, unsigned day) {
-  unsigned y = 1900, m = 1; //epoch is 1900-01-01
-  unsigned sum = 0; //number of days passed since epoch
+  unsigned y = 1900, m = 1;  //epoch is 1900-01-01
+  unsigned sum = 0;          //number of days passed since epoch
 
   year = max(1900, year);
   month = max(1, min(12, month));
@@ -136,7 +149,7 @@ unsigned SRTC::weekday(unsigned year, unsigned month, unsigned day) {
   }
 
   sum += day - 1;
-  return (sum + 1) % 7; //1900-01-01 was a Monday
+  return (sum + 1) % 7;  //1900-01-01 was a Monday
 }
 
 uint8 SRTC::mmio_read(unsigned addr) {
@@ -164,7 +177,7 @@ void SRTC::mmio_write(unsigned addr, uint8 data) {
   addr &= 0xffff;
 
   if(addr == 0x2801) {
-    data &= 0x0f; //only the low four bits are used
+    data &= 0x0f;  //only the low four bits are used
 
     if(data == 0x0d) {
       rtc_mode = RTCM_Read;
@@ -177,7 +190,7 @@ void SRTC::mmio_write(unsigned addr, uint8 data) {
       return;
     }
 
-    if(data == 0x0f) return; //unknown behavior
+    if(data == 0x0f) return;  //unknown behavior
 
     if(rtc_mode == RTCM_Write) {
       if(rtc_index >= 0 && rtc_index < 12) {

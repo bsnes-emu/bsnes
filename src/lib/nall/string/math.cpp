@@ -156,4 +156,4 @@ bool strmath(const char *s, int &result) {
   }
 }
 
-#endif  //ifdef NALL_STRING_CPP
+#endif

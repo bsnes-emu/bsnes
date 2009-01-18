@@ -1,3 +1,5 @@
+#ifdef SSMP_CPP
+
 //bra
 case 0x2f: {
   rd = op_readpc();
@@ -601,3 +603,4 @@ case 0x7f: {
   regs.pc = rd;
 } break;
 
+#endif

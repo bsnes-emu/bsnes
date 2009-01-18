@@ -30,17 +30,15 @@
 #endif
 
 namespace nall {
+  static static_assert<sizeof(int8_t)   == 1> int8_t_assert;
+  static static_assert<sizeof(int16_t)  == 2> int16_t_assert;
+  static static_assert<sizeof(int32_t)  == 4> int32_t_assert;
+  static static_assert<sizeof(int64_t)  == 8> int64_t_assert;
 
-static static_assert<sizeof(int8_t)   == 1> int8_t_assert;
-static static_assert<sizeof(int16_t)  == 2> int16_t_assert;
-static static_assert<sizeof(int32_t)  == 4> int32_t_assert;
-static static_assert<sizeof(int64_t)  == 8> int64_t_assert;
+  static static_assert<sizeof(uint8_t)  == 1> uint8_t_assert;
+  static static_assert<sizeof(uint16_t) == 2> uint16_t_assert;
+  static static_assert<sizeof(uint32_t) == 4> uint32_t_assert;
+  static static_assert<sizeof(uint64_t) == 8> uint64_t_assert;
+}
 
-static static_assert<sizeof(uint8_t)  == 1> uint8_t_assert;
-static static_assert<sizeof(uint16_t) == 2> uint16_t_assert;
-static static_assert<sizeof(uint32_t) == 4> uint32_t_assert;
-static static_assert<sizeof(uint64_t) == 8> uint64_t_assert;
-
-} //namespace nall
-
-#endif //ifndef NALL_STDINT_HPP
+#endif

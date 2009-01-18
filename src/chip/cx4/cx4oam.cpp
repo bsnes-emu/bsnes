@@ -220,4 +220,4 @@ uint16 mask2   = 0x3f3f;
   }
 }
 
-#endif //ifdef CX4_CPP
+#endif

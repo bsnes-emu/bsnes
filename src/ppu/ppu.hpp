@@ -25,9 +25,9 @@ public:
   //* reported by $213f
   uint8 ppu2_version;
 
-  virtual bool interlace() = 0;
-  virtual bool overscan() = 0;
-  virtual bool hires() = 0;
+  virtual bool interlace() const = 0;
+  virtual bool overscan() const = 0;
+  virtual bool hires() const = 0;
 
   virtual void latch_counters() = 0;
 

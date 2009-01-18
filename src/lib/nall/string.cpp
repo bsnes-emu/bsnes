@@ -17,4 +17,4 @@
 #include <nall/string/strl.cpp>
 #include <nall/string/trim.cpp>
 
-#endif //ifndef NALL_STRING_CPP
+#endif

@@ -1,3 +1,5 @@
+#ifdef SSMP_CPP
+
 //mov_a_x
 case 0x7d: {
   op_io();
@@ -387,3 +389,4 @@ case 0xca: {
   op_writeaddr(dp, rd);
 } break;
 
+#endif

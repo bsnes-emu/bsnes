@@ -32,4 +32,4 @@ void Cartridge::unload_cart_normal() {
   if(cart.rtc) save_file(get_save_filename(cart.fn, "rtc"), cart.rtc, cart.rtc_size);
 }
 
-#endif //ifdef CART_CPP
+#endif

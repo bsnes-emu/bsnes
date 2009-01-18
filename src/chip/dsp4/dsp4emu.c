@@ -2147,4 +2147,4 @@ void DSP4GetByte()
   }
 }
 
-#endif //ifdef DSP4_CPP
+#endif

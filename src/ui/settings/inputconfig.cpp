@@ -49,9 +49,9 @@ void InputConfigWindow::setup() {
   setkey.on_tick           = bind(&InputConfigWindow::set_tick, this);
   clrkey.on_tick           = bind(&InputConfigWindow::clr_tick, this);
 
-  if(config::input.capture_mode == 1) capture_focus.check();
-  else if(config::input.capture_mode == 2) capture_pause.check();
-  else config::input.capture_mode = 0; //capture_always
+  if(config.input.capture_mode == 1) capture_focus.check();
+  else if(config.input.capture_mode == 2) capture_pause.check();
+  else config.input.capture_mode = 0; //capture_always
 
   refresh_list();
   window_input_capture.setup();
@@ -75,7 +75,7 @@ InputGroup* InputConfigWindow::get_group() {
     return device;
   } else {
     //user interface
-    switch(index) {
+    switch(index) { default:
       case 0: return &inputuigeneral;
       case 1: return &inputuidebugger;
     }
@@ -150,9 +150,9 @@ void InputConfigWindow::refresh_list() {
 }
 
 uintptr_t InputConfigWindow::capture_change(event_t e) {
-  if(e.widget == &capture_always) config::input.capture_mode = 0;
-  if(e.widget == &capture_focus)  config::input.capture_mode = 1;
-  if(e.widget == &capture_pause)  config::input.capture_mode = 2;
+  if(e.widget == &capture_always) config.input.capture_mode = 0;
+  if(e.widget == &capture_focus)  config.input.capture_mode = 1;
+  if(e.widget == &capture_pause)  config.input.capture_mode = 2;
   return true;
 }
 
@@ -250,6 +250,8 @@ uintptr_t InputCaptureWindow::close(event_t) {
 
 void InputCaptureWindow::setup() {
   create(Window::AutoCenter, 382, 206, translate["bsnes Key Capture"]);
+  set_icon(48, 48, (uint32_t*)resource::icon48);
+
   label.create(0, 340, 18);
   canvas.create(0, 372, 178);
   memcpy(canvas.buffer(), resource::controller, 372 * 178 * 4);

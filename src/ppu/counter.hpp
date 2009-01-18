@@ -32,28 +32,28 @@ public:
   }
 
   //timing information relative to S-CPU
-  alwaysinline bool   field   () { return status.field; }
-  alwaysinline uint16 vcounter() { return status.vcounter; }
-  alwaysinline uint16 hcounter() { return status.hcounter; }
-  uint16 hdot();
-  uint16 lineclocks();
+  alwaysinline bool   field   () const { return status.field; }
+  alwaysinline uint16 vcounter() const { return status.vcounter; }
+  alwaysinline uint16 hcounter() const { return status.hcounter; }
+  uint16 hdot() const;
+  uint16 lineclocks() const;
 
   //timing history information relative to S-CPU
-  alwaysinline bool   field   (unsigned offset) { return history.field   [(history.index - (offset >> 1)) & 2047]; }
-  alwaysinline uint16 vcounter(unsigned offset) { return history.vcounter[(history.index - (offset >> 1)) & 2047]; }
-  alwaysinline uint16 hcounter(unsigned offset) { return history.hcounter[(history.index - (offset >> 1)) & 2047]; }
+  alwaysinline bool   field   (unsigned offset) const { return history.field   [(history.index - (offset >> 1)) & 2047]; }
+  alwaysinline uint16 vcounter(unsigned offset) const { return history.vcounter[(history.index - (offset >> 1)) & 2047]; }
+  alwaysinline uint16 hcounter(unsigned offset) const { return history.hcounter[(history.index - (offset >> 1)) & 2047]; }
 
   //timing information relative to S-PPU
-  alwaysinline bool   ifield()    { return history.field   [(history.index - (history.ppudiff >> 1)) & 2047]; }
-  alwaysinline uint16 ivcounter() { return history.vcounter[(history.index - (history.ppudiff >> 1)) & 2047]; }
-  alwaysinline uint16 ihcounter() { return history.hcounter[(history.index - (history.ppudiff >> 1)) & 2047]; }
-  uint16 ilineclocks();
+  alwaysinline bool   ifield()    const { return history.field   [(history.index - (history.ppudiff >> 1)) & 2047]; }
+  alwaysinline uint16 ivcounter() const { return history.vcounter[(history.index - (history.ppudiff >> 1)) & 2047]; }
+  alwaysinline uint16 ihcounter() const { return history.hcounter[(history.index - (history.ppudiff >> 1)) & 2047]; }
+  uint16 ilineclocks() const;
 
   void reset();
 
 private:
-  bool region();
-  bool interlace();
+  bool region() const;
+  bool interlace() const;
   void scanline();
 
   struct {

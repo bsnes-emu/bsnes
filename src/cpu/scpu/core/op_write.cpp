@@ -1,3 +1,5 @@
+#ifdef SCPU_CPP
+
 //sta_addr
 case 0x8d: {
   aa.l = op_readpc();
@@ -288,3 +290,4 @@ case 0x93: {
   op_writedbr(aa.w + regs.y.w + 1, regs.a.h);
 } break;
 
+#endif

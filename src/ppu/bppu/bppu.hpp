@@ -4,14 +4,11 @@ public:
   void add_clocks(unsigned clocks);
 
   uint8 region;
+  unsigned line;
 
   enum { NTSC = 0, PAL = 1 };
   enum { BG1 = 0, BG2 = 1, BG3 = 2, BG4 = 3, OAM = 4, BACK = 5, COL = 5 };
   enum { SC_32x32 = 0, SC_64x32 = 1, SC_32x64 = 2, SC_64x64 = 3 };
-
-  struct {
-    uint y;
-  } line;
 
   struct {
     bool interlace;
@@ -153,9 +150,9 @@ public:
     uint16 oam_tdaddr;
   } cache;
 
-  alwaysinline bool interlace() { return display.interlace; }
-  alwaysinline bool overscan()  { return display.overscan;  }
-  alwaysinline bool hires()     { return (regs.pseudo_hires || regs.bg_mode == 5 || regs.bg_mode == 6); }
+  alwaysinline bool interlace() const { return display.interlace; }
+  alwaysinline bool overscan()  const { return display.overscan;  }
+  alwaysinline bool hires()     const { return (regs.pseudo_hires || regs.bg_mode == 5 || regs.bg_mode == 6); }
 
   uint16 get_vram_address();
   uint8  vram_mmio_read  (uint16 addr);
@@ -230,8 +227,8 @@ public:
   uint8  mmio_r213e();            //STAT77
   uint8  mmio_r213f();            //STAT78
 
-  uint8 mmio_read(uint addr);
-  void mmio_write(uint addr, uint8 data);
+  uint8 mmio_read(unsigned addr);
+  void mmio_write(unsigned addr, uint8 data);
 
   void latch_counters();
 

@@ -1,6 +1,7 @@
 #include <../base.hpp>
 #define READER_CPP
 
+#include "reader.hpp"
 #include "filereader.cpp"
 
 #if defined(GZIP_SUPPORT)

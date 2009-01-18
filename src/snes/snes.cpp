@@ -1,4 +1,6 @@
 #include <../base.hpp>
+#include <../chip/chip.hpp>
+#include <../cart/cart.hpp>
 #define SNES_CPP
 
 SNES     snes;
@@ -62,8 +64,8 @@ void SNES::term() {
 }
 
 void SNES::power() {
-  snes_region = max(0, min(2, config::snes.region));
-  snes_expansion = max(0, min(1, config::snes.expansion_port));
+  snes_region = max(0, min(2, snes.config.region));
+  snes_expansion = max(0, min(1, snes.config.expansion_port));
 
   if(snes_region == Autodetect) {
     snes_region = cartridge.region() == Cartridge::NTSC ? NTSC : PAL;
@@ -71,13 +73,14 @@ void SNES::power() {
 
   scheduler.init();
 
+  ppu.PPUcounter::reset();
   cpu.power();
   smp.power();
   dsp.power();
   ppu.power();
   bus.power();
 
-  if(expansion() == ExpansionBSX) { bsxbase.power(); }
+  if(expansion() == ExpansionBSX) bsxbase.power();
 
   if(cartridge.info.bsxcart)  bsxcart.power();
   if(cartridge.info.bsxflash) bsxflash.power();
@@ -114,8 +117,8 @@ void SNES::power() {
   if(cartridge.info.obc1)     obc1.enable();
   if(cartridge.info.st010)    st010.enable();
 
-  input.port_set_device(0, config::snes.controller_port1);
-  input.port_set_device(1, config::snes.controller_port2);
+  input.port_set_device(0, snes.config.controller_port1);
+  input.port_set_device(1, snes.config.controller_port2);
   input.update();
   video.update();
 }
@@ -123,6 +126,7 @@ void SNES::power() {
 void SNES::reset() {
   scheduler.init();
 
+  ppu.PPUcounter::reset();
   cpu.reset();
   smp.reset();
   dsp.reset();
@@ -144,8 +148,8 @@ void SNES::reset() {
   if(cartridge.info.obc1)     obc1.reset();
   if(cartridge.info.st010)    st010.reset();
 
-  input.port_set_device(0, config::snes.controller_port1);
-  input.port_set_device(1, config::snes.controller_port2);
+  input.port_set_device(0, snes.config.controller_port1);
+  input.port_set_device(1, snes.config.controller_port2);
   input.update();
   video.update();
 }
@@ -163,13 +167,39 @@ void SNES::scanline() {
 void SNES::frame() {
 }
 
-SNES::Region SNES::region() {
+SNES::Region SNES::region() const {
   return (SNES::Region)snes_region;
 }
 
-SNES::ExpansionPortDevice SNES::expansion() {
+SNES::ExpansionPortDevice SNES::expansion() const {
   return (SNES::ExpansionPortDevice)snes_expansion;
 }
 
 SNES::SNES() : snes_region(NTSC), snes_expansion(ExpansionNone) {
+  config.controller_port1 = Input::DeviceJoypad;
+  config.controller_port2 = Input::DeviceJoypad;
+  config.expansion_port   = ExpansionBSX;
+  config.region           = Autodetect;
+
+  config.file.autodetect_type    = false;
+  config.file.bypass_patch_crc32 = false;
+
+  config.path.base       = "";
+  config.path.user       = "";
+  config.path.rom        = "";
+  config.path.save       = "";
+  config.path.patch      = "";
+  config.path.cheat      = "";
+  config.path.exportdata = "";
+  config.path.bsx        = "";
+  config.path.st         = "";
+
+  config.cpu.ntsc_clock_rate = 21477272;
+  config.cpu.pal_clock_rate  = 21281370;
+  config.cpu.alu_mul_delay   = 2;
+  config.cpu.alu_div_delay   = 2;
+  config.cpu.wram_init_value = 0x55;
+
+  config.smp.ntsc_clock_rate = 32041 * 768;
+  config.smp.pal_clock_rate  = 32041 * 768;
 }

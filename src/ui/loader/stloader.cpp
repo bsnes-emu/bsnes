@@ -4,7 +4,7 @@ uintptr_t STLoaderWindow::close(event_t) {
 }
 
 uintptr_t STLoaderWindow::bbase_tick(event_t) {
-char fn[PATH_MAX];
+  char fn[PATH_MAX];
   if(event::load_cart(fn) == true) tbase.set_text(fn);
   return true;
 }
@@ -15,7 +15,7 @@ uintptr_t STLoaderWindow::cbase_tick(event_t) {
 }
 
 uintptr_t STLoaderWindow::bslotA_tick(event_t) {
-char fn[PATH_MAX];
+  char fn[PATH_MAX];
   if(event::load_cart(fn) == true) tslotA.set_text(fn);
   return true;
 }
@@ -26,7 +26,7 @@ uintptr_t STLoaderWindow::cslotA_tick(event_t) {
 }
 
 uintptr_t STLoaderWindow::bslotB_tick(event_t) {
-char fn[PATH_MAX];
+  char fn[PATH_MAX];
   if(event::load_cart(fn) == true) tslotB.set_text(fn);
   return true;
 }
@@ -37,12 +37,12 @@ uintptr_t STLoaderWindow::cslotB_tick(event_t) {
 }
 
 uintptr_t STLoaderWindow::load_tick(event_t) {
-char base[PATH_MAX], slotA[PATH_MAX], slotB[PATH_MAX];
+  char base[PATH_MAX], slotA[PATH_MAX], slotB[PATH_MAX];
   tbase.get_text(base, PATH_MAX);
   tslotA.get_text(slotA, PATH_MAX);
   tslotB.get_text(slotB, PATH_MAX);
 
-  config::path.st = base;
+  snes.config.path.st = base;
   event::load_cart_st(base, slotA, slotB);
 
   tbase.set_text("");

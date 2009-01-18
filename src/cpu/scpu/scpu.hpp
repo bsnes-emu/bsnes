@@ -8,24 +8,16 @@ public:
   #include "mmio/mmio.hpp"
   #include "timing/timing.hpp"
 
-  struct {
-    bool wai;
-    bool irq;
-    uint16 irq_vector;
-    unsigned cycle_edge;
-  } event;
-
   enum DmaState { DmaInactive, DmaRun, DmaCpuSync };
-
-  struct {
-    unsigned alu_mul_delay;
-    unsigned alu_div_delay;
-  } temp_;
 
   struct {
     //core
     uint8 opcode;
     bool in_opcode;
+
+    bool wai_lock;
+    bool interrupt_pending;
+    uint16 interrupt_vector;
 
     unsigned clock_count;
     unsigned line_clocks;
@@ -39,16 +31,15 @@ public:
     bool nmi_line;
     bool nmi_transition;
     bool nmi_pending;
-    unsigned nmi_hold;
+    bool nmi_hold;
 
-    uint16 virq_trigger_pos, hirq_trigger_pos;
     bool irq_valid;
     bool irq_line;
     bool irq_transition;
     bool irq_pending;
-    unsigned irq_hold;
+    bool irq_hold;
 
-    //dma
+    //DMA
     unsigned dma_counter;
     unsigned dma_clocks;
     bool dma_pending;
@@ -56,7 +47,7 @@ public:
     bool hdma_mode;  //0 = init, 1 = run
     DmaState dma_state;
 
-    //mmio
+    //MMIO
 
     //$2181-$2183
     uint32 wram_addr;

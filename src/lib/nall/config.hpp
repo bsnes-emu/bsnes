@@ -1,178 +1,114 @@
 #ifndef NALL_CONFIG_HPP
 #define NALL_CONFIG_HPP
 
-#include <nall/array.hpp>
 #include <nall/file.hpp>
-#include <nall/stdint.hpp>
 #include <nall/string.hpp>
+#include <nall/vector.hpp>
 
 namespace nall {
+  namespace configuration_traits {
+    template<typename T> struct is_boolean { enum { value = false }; };
+    template<> struct is_boolean<bool> { enum { value = true }; };
 
-class setting;
+    template<typename T> struct is_signed { enum { value = false }; };
+    template<> struct is_signed<signed> { enum { value = true }; };
 
-class configuration {
-public:
-  array<setting*> list;
+    template<typename T> struct is_unsigned { enum { value = false }; };
+    template<> struct is_unsigned<unsigned> { enum { value = true }; };
 
-  bool load(const char *fn);
-  bool save(const char *fn) const;
-  void add(setting *setting_) { list.add(setting_); }
-};
-
-class setting {
-public:
-  enum setting_type {
-    integral_type,
-    string_type,
-  } type;
-
-  const char *name;
-  const char *description;
-
-  virtual void set(const char *input) = 0;
-  virtual void get(string &output) const = 0;
-  virtual void get_default(string &output) const = 0;
-};
-
-class integral_setting : public setting {
-public:
-  enum integral_type {
-    boolean,
-    decimal,
-    hex,
-  } type;
-
-  intmax_t value;
-  intmax_t default_value;
-
-  void set(const char *input) {
-    if(type == boolean) { value = !strcmp(input, "true"); }
-    if(type == decimal) { value = strdec(input); }
-    if(type == hex) { value = strhex(input); }
+    template<typename T> struct is_string { enum { value = false }; };
+    template<> struct is_string<string> { enum { value = true }; };
   }
 
-  void get(string &output) const {
-    if(type == boolean) { output = value ? "true" : "false"; }
-    if(type == decimal) { output = strdec(value); }
-    if(type == hex) { output = string() << "0x" << strhex(value); }
-  }
+  class configuration {
+  public:
+    enum type_t { boolean_t, signed_t, unsigned_t, string_t, unknown_t };
+    struct item_t {
+      uintptr_t data;
+      string name;
+      string desc;
+      type_t type;
 
-  void get_default(string &output) const {
-    if(type == boolean) { output = default_value ? "true" : "false"; }
-    if(type == decimal) { output = strdec(default_value); }
-    if(type == hex) { output = string() << "0x" << strhex(default_value); }
-  }
+      string get() {
+        switch(type) {
+          case boolean_t:  return (*(bool*)data == false ? "false" : "true");
+          case signed_t:   return string() << (int)*(signed*)data;
+          case unsigned_t: return string() << (int)*(unsigned*)data;
+          case string_t:   return string() << "\"" << *(string*)data << "\"";
+        }
+        return "???";
+      }
 
-  operator intmax_t() const { return value; }
-  integral_setting& operator=(intmax_t value_) { value = value_; return *this; }
+      void set(string s) {
+        switch(type) {
+          case boolean_t:  *(bool*)data = (s == "true");      break;
+          case signed_t:   *(signed*)data = s;                break;
+          case unsigned_t: *(unsigned*)data = s;              break;
+          case string_t:   trim(s, "\""); *(string*)data = s; break;
+        }
+      }
+    };
+    vector<item_t> list;
 
-  integral_setting(const char *name_, const char *description_, integral_type type_, intmax_t value_) {
-    initialize(name_, description_, type_, value_);
-  }
+    template<typename T>
+    void attach(T &data, const char *name, const char *desc = "") {
+      unsigned n = list.size();
+      list[n].data = (uintptr_t)&data;
+      list[n].name = name;
+      list[n].desc = desc;
 
-  integral_setting(configuration &parent, const char *name_, const char *description_, integral_type type_, intmax_t value_) {
-    initialize(name_, description_, type_, value_);
-    parent.add(this);
-  }
+      if(configuration_traits::is_boolean<T>::value) list[n].type = boolean_t;
+      else if(configuration_traits::is_signed<T>::value) list[n].type = signed_t;
+      else if(configuration_traits::is_unsigned<T>::value) list[n].type = unsigned_t;
+      else if(configuration_traits::is_string<T>::value) list[n].type = string_t;
+      else list[n].type = unknown_t;
+    }
 
-private:
-  void initialize(const char *name_, const char *description_, integral_type type_, intmax_t value_) {
-    setting::type = setting::integral_type;
-    name = name_;
-    description = description_;
-    type = type_;
-    value = default_value = value_;
-  }
-};
+    bool load(const char *filename) {
+      string data;
+      if(fread(data, filename) == true) {
+        replace(data, "\r", "");
+        lstring line;
+        split(line, "\n", data);
 
-class string_setting : public setting {
-public:
-  string value;
-  string default_value;
+        for(unsigned i = 0; i < count(line); i++) {
+          int position = qstrpos(line[i], "#");
+          if(position >= 0) line[i][position] = 0;
+          if(qstrpos(line[i], " = ") < 0) continue;
 
-  void set(const char *input) { value = input; trim(value(), "\""); }
-  void get(string &output) const { output = string() << "\"" << value << "\""; }
-  void get_default(string &output) const { output = string() << "\"" << default_value << "\""; }
+          lstring part;
+          qsplit(part, " = ", line[i]);
+          trim(part[0]);
+          trim(part[1]);
 
-  operator const char*() const { return value; }
-  string_setting& operator=(const char *value_) { value = value_; return *this; }
-  bool operator==(const char *value_) const { return value == value_; }
-  bool operator!=(const char *value_) const { return value != value_; }
+          for(unsigned n = 0; n < list.size(); n++) {
+            if(part[0] == list[n].name) {
+              list[n].set(part[1]);
+              break;
+            }
+          }
+        }
 
-  string_setting(const char *name_, const char *description_, const char *value_) {
-    initialize(name_, description_, value_);
-  }
-
-  string_setting(configuration &parent, const char *name_, const char *description_, const char *value_) {
-    initialize(name_, description_, value_);
-    parent.add(this);
-  }
-
-private:
-  void initialize(const char *name_, const char *description_, const char *value_) {
-    setting::type = setting::string_type;
-    name = name_;
-    description = description_;
-    value = default_value = value_;
-  }
-};
-
-inline bool configuration::load(const char *fn) {
-  //load the config file into memory
-  string data;
-  if(!fread(data, fn)) return false;
-
-  //split the file into lines
-  replace(data, "\r\n", "\n");
-  qreplace(data, "\t", "");
-  qreplace(data, " ", "");
-
-  lstring line, part, subpart;
-  split(line, "\n", data);
-
-  for(unsigned i = 0; i < count(line); i++) {
-    if(strlen(line[i]) == 0) continue;
-    if(strbegin(line[i], "#")) continue;
-
-    qsplit(part, "=", line[i]);
-    for(unsigned l = 0; l < list.size(); l++) {
-      if(part[0] == list[l]->name) {
-        list[l]->set(part[1]);
-        break;
+        return true;
+      } else {
+        return false;
       }
     }
-  }
 
-  return true;
-}
+    bool save(const char *filename) {
+      file fp;
+      if(fp.open(filename, file::mode_write)) {
+        for(unsigned i = 0; i < list.size(); i++) {
+          fp.print(string() << list[i].name << " = " << list[i].get() << " # " << list[i].desc << "\r\n");
+        }
 
-inline bool configuration::save(const char *fn) const {
-  file fp;
-  if(!fp.open(fn, file::mode_write)) return false;
-
-  for(unsigned i = 0; i < list.size(); i++) {
-    string data;
-    lstring line, part, subpart;
-    strcpy(data, list[i]->description);
-    replace(data, "\r\n", "\n");
-    split(line, "\n", data);
-
-    string temp;
-    for(unsigned l = 0; l < count(line); l++) {
-      if(line[l] != "") fp.print(string() << "# " << line[l] << "\r\n");
+        fp.close();
+        return true;
+      } else {
+        return false;
+      }
     }
-
-    string default_, value_;
-    list[i]->get_default(default_);
-    fp.print(string() << "# (default = " << default_ << ")\r\n");
-    list[i]->get(value_);
-    fp.print(string() << list[i]->name << " = " << value_ << "\r\n\r\n");
-  }
-
-  fp.close();
-  return true;
+  };
 }
 
-} //namespace nall
-
-#endif //ifndef NALL_CONFIG_HPP
+#endif

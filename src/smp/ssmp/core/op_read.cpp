@@ -1,3 +1,5 @@
+#ifdef SSMP_CPP
+
 //adc_a_const
 case 0x88: {
   rd = op_readpc();
@@ -742,3 +744,4 @@ case 0x2a: {
   regs.p.c = regs.p.c | !(rd & (1 << bit));
 } break;
 
+#endif

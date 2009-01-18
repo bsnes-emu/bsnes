@@ -55,28 +55,28 @@ public:
     DSP1HiROM,
   };
 
-  const char* name();
-  CartridgeMode mode();
-  MemoryMapper mapper();
-  Region region();
+  const char* name() const;
+  CartridgeMode mode() const;
+  MemoryMapper mapper() const;
+  Region region() const;
 
   struct {
     bool loaded;
     char fn[PATH_MAX];
     uint8 *rom, *ram, *rtc;
-    uint rom_size, ram_size, rtc_size;
+    unsigned rom_size, ram_size, rtc_size;
   } cart;
 
   struct {
     char fn[PATH_MAX];
     uint8 *ram;
-    uint ram_size;
+    unsigned ram_size;
   } bs;
 
   struct {
     char fn[PATH_MAX];
     uint8 *rom, *ram;
-    uint rom_size, ram_size;
+    unsigned rom_size, ram_size;
   } stA, stB;
 
   struct cartinfo_t {
@@ -159,7 +159,7 @@ public:
   void unload_cart_bsc();
   void unload_cart_st();
 
-  bool loaded();
+  bool loaded() const;
   void load_begin(CartridgeMode);
   void load_end();
   bool unload();
@@ -169,12 +169,12 @@ public:
   unsigned score_header(const uint8_t *data, unsigned size, unsigned addr);
 
   enum CompressionMode {
-    CompressionNone,    //always load without compression
-    CompressionInspect, //use file header inspection
-    CompressionAuto,    //use file extension or file header inspection (configured by user)
+    CompressionNone,     //always load without compression
+    CompressionInspect,  //use file header inspection
+    CompressionAuto,     //use file extension or file header inspection (configured by user)
   };
-  bool load_file(const char *fn, uint8 *&data, uint &size, CompressionMode compression = CompressionNone);
-  bool save_file(const char *fn, uint8 *data, uint size);
+  bool load_file(const char *fn, uint8 *&data, unsigned &size, CompressionMode compression = CompressionNone);
+  bool save_file(const char *fn, uint8 *data, unsigned size);
   bool apply_patch(const uint8_t *pdata, unsigned psize, uint8_t *&data, unsigned &size);
   char* modify_extension(char *filename, const char *extension);
   char* get_base_filename(char *filename);
@@ -182,6 +182,8 @@ public:
   char* get_patch_filename(const char *source, const char *extension);
   char* get_save_filename(const char *source, const char *extension);
   char* get_cheat_filename(const char *source, const char *extension);
+
+  static string filepath(const char *filename, const char *pathname);
 
   Cartridge();
   ~Cartridge();

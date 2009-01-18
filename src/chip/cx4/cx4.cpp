@@ -8,6 +8,7 @@
 #include <../base.hpp>
 #define CX4_CPP
 
+#include "cx4.hpp"
 #include "cx4data.cpp"
 #include "cx4fn.cpp"
 #include "cx4oam.cpp"
@@ -78,7 +79,7 @@ uint16 dest, count;
   }
 }
 
-void Cx4::write(uint addr, uint8 data) {
+void Cx4::write(unsigned addr, uint8 data) {
   addr &= 0x1fff;
 
   if(addr < 0x0c00) {
@@ -160,7 +161,7 @@ void Cx4::writel(uint16 addr, uint32 data) {
   write(addr + 2, data >> 16);
 }
 
-uint8 Cx4::read(uint addr) {
+uint8 Cx4::read(unsigned addr) {
   addr &= 0x1fff;
 
   if(addr < 0x0c00) {

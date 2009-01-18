@@ -1,6 +1,7 @@
 #include <../base.hpp>
 #define DSP2_CPP
 
+#include "dsp2.hpp"
 #include "dsp2_op.cpp"
 
 void DSP2::init() {}
@@ -29,8 +30,8 @@ void DSP2::reset() {
   status.op0dinlen       = 0;
 }
 
-uint8 DSP2::read(uint addr) {
-uint8 r = 0xff;
+uint8 DSP2::read(unsigned addr) {
+  uint8 r = 0xff;
   if(status.out_count) {
     r = status.output[status.out_index++];
     status.out_index &= 511;
@@ -41,7 +42,7 @@ uint8 r = 0xff;
   return r;
 }
 
-void DSP2::write(uint addr, uint8 data) {
+void DSP2::write(unsigned addr, uint8 data) {
   if(status.waiting_for_command) {
     status.command  = data;
     status.in_index = 0;

@@ -35,11 +35,11 @@ public:
   void update_time(int offset = 0);
   time_t create_time();
 
-  uint8 mmio_read (uint addr);
-  void  mmio_write(uint addr, uint8 data);
+  uint8 mmio_read (unsigned addr);
+  void  mmio_write(unsigned addr, uint8 data);
 
-  uint8 read (uint addr);
-  void  write(uint addr, uint8 data);
+  uint8 read (unsigned addr);
+  void  write(unsigned addr, uint8 data);
 
   //spc7110decomp
   void decomp_init();

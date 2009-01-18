@@ -21,14 +21,14 @@ void ui_init() {
   resource::init();
 
   //ruby can initialize with "", but driver selection window needs active driver name
-  if(config::system.video == "") config::system.video = video.default_driver();
-  if(config::system.audio == "") config::system.audio = audio.default_driver();
-  if(config::system.input == "") config::system.input = input.default_driver();
+  if(config.system.video == "") config.system.video = video.default_driver();
+  if(config.system.audio == "") config.system.audio = audio.default_driver();
+  if(config.system.input == "") config.system.input = input.default_driver();
 
-  if(config::system.invoke_crash_handler == false) {
-    video.driver(config::system.video);
-    audio.driver(config::system.audio);
-    input.driver(config::system.input);
+  if(config.system.invoke_crash_handler == false) {
+    video.driver(config.system.video);
+    audio.driver(config.system.audio);
+    input.driver(config.system.input);
   }
 
   window_main.setup();
@@ -47,11 +47,11 @@ void ui_init() {
   window_advanced.setup();
   window_settings.setup();
 
-  config::video.mode = (config::video.start_in_fullscreen_mode == false) ? 0 : 1;
+  config.video.mode = (config.misc.start_in_fullscreen_mode == false ? 0 : 1);
   event::update_opacity();
-  event::update_video_settings(); //call first time to resize main window and update menubar
+  event::update_video_settings();  //call first time to resize main window and update menubar
 
-  if(config::system.invoke_crash_handler == true) {
+  if(config.system.invoke_crash_handler == true) {
     //application crashed during driver setup on last run ...
     //allow selection of new drivers, and then exit emulator.
     window_settings.show();
@@ -59,7 +59,7 @@ void ui_init() {
       while(hiro().pending()) hiro().run();
       usleep(20 * 1000);
     }
-    config::system.invoke_crash_handler = false;
+    config.system.invoke_crash_handler = false;
     event::quit();
     return;
   }
@@ -68,21 +68,21 @@ void ui_init() {
   while(hiro().pending()) hiro().run();
 
   //detect crashes during driver initialization
-  config::system.invoke_crash_handler = true;
-  config::config().save(config::bsnes_cfg);
+  config.system.invoke_crash_handler = true;
+  config.save(config.bsnes_cfg);
 
   video.set(Video::Handle, window_main.view.handle());
-  video.set(Video::Synchronize, config::video.synchronize);
+  video.set(Video::Synchronize, config.video.synchronize);
   audio.set(Audio::Handle, window_main.handle());
-  audio.set(Audio::Synchronize, config::audio.synchronize);
-  audio.set(Audio::Volume, config::audio.volume);
-  audio.set(Audio::Frequency, config::audio.output_frequency);
-  audio.set(Audio::Latency, config::audio.latency);
+  audio.set(Audio::Synchronize, config.audio.synchronize);
+  audio.set(Audio::Volume, config.audio.volume);
+  audio.set(Audio::Frequency, config.audio.output_frequency);
+  audio.set(Audio::Latency, config.audio.latency);
   input.set(Input::Handle, window_main.handle());
-  input.set(Input::AnalogAxisResistance, config::input.analog_axis_resistance);
+  input.set(Input::AnalogAxisResistance, config.input.analog_axis_resistance);
 
   //sets Audio::Resample, Audio::ResampleOutputFrequency and Audio::ResampleInputFrequency
-  event::update_emulation_speed(config::system.emulation_speed);
+  event::update_emulation_speed(config.system.emulation_speed);
 
   video.init();
   audio.init();
@@ -92,10 +92,10 @@ void ui_init() {
   audio.clear();
 
   //if code has reached this point, driver initialized successfully
-  config::system.invoke_crash_handler = false;
-  config::config().save(config::bsnes_cfg);
+  config.system.invoke_crash_handler = false;
+  config.save(config.bsnes_cfg);
 
-  event::update_video_settings(); //call second time to update video class settings
+  event::update_video_settings();  //call second time to update video class settings
 
   //UI setup complete, hook input callbacks
   snesinterface.input_ready = bind(&MainWindow::input_ready, &window_main);

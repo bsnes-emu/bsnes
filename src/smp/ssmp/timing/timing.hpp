@@ -29,6 +29,6 @@ public:
   sSMPTimer<128> t1;
   sSMPTimer< 16> t2;
 
-  void add_clocks(uint clocks);
-  void tick_timers();
+  alwaysinline void add_clocks(unsigned clocks);
+  alwaysinline void tick_timers();
   uint32 clocks_executed();

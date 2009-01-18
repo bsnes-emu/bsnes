@@ -1,8 +1,8 @@
 #include <../base.hpp>
 #define SCPU_CPP
 
-#include "deltaqueue.cpp"
-deltaqueue delta;
+#include <nall/priorityqueue.hpp>
+priority_queue<unsigned> event(512, bind(&sCPU::queue_event, &cpu));
 
 #include "core/core.cpp"
 #include "dma/dma.cpp"
@@ -36,9 +36,9 @@ void sCPU::reset() {
   regs.e    = 1;
   regs.mdr  = 0x00;
 
-  event.wai = false;
-  event.irq = false;
-  event.irq_vector = 0xfffc;  //reset vector address
+  status.wai_lock = false;
+  status.interrupt_pending = false;
+  status.interrupt_vector  = 0xfffc;  //reset vector address
 
   mmio_reset();
   dma_reset();

@@ -51,46 +51,44 @@ char* rtrim_once(char *str, const char *key = " ");
 char* trim_once (char *str, const char *key = " ");
 
 namespace nall {
+  class string {
+  public:
+    char *data;
+    size_t size;
 
-class string {
-public:
-  char *data;
-  size_t size;
+    void reserve(size_t size_);
 
-  void reserve(size_t size_);
+    operator int() const;
+    operator const char*() const;
+    char* operator()();
+    char& operator[](int);
 
-  operator int() const;
-  operator const char*() const;
-  char* operator()();
-  char& operator[](int);
+    string& operator=(int num);
+    string& operator=(double num);
+    string& operator=(const char *str);
+    string& operator=(const string &str);
+    string& operator<<(int num);
+    string& operator<<(double num);
+    string& operator<<(const char *str);
+    string& operator<<(const string& str);
 
-  string& operator=(int num);
-  string& operator=(double num);
-  string& operator=(const char *str);
-  string& operator=(const string &str);
-  string& operator<<(int num);
-  string& operator<<(double num);
-  string& operator<<(const char *str);
-  string& operator<<(const string& str);
+    bool operator==(const char *str) const;
+    bool operator!=(const char *str) const;
+    bool operator< (const char *str) const;
+    bool operator<=(const char *str) const;
+    bool operator> (const char *str) const;
+    bool operator>=(const char *str) const;
 
-  bool operator==(const char *str) const;
-  bool operator!=(const char *str) const;
-  bool operator< (const char *str) const;
-  bool operator<=(const char *str) const;
-  bool operator> (const char *str) const;
-  bool operator>=(const char *str) const;
+    string();
+    string(int num);
+    string(double num);
+    string(const char *source);
+    string(const string &source);
+    ~string();
+  };
 
-  string();
-  string(int num);
-  string(double num);
-  string(const char *source);
-  string(const string &source);
-  ~string();
-};
-
-typedef vector<string> lstring;
-
-}  //namespace nall
+  typedef vector<string> lstring;
+}
 
 size_t count(nall::lstring&);
 int find(nall::lstring &str, const char *key);
@@ -118,4 +116,4 @@ nall::string& ltrim_once(nall::string &str, const char *key = " ");
 nall::string& rtrim_once(nall::string &str, const char *key = " ");
 nall::string& trim_once (nall::string &str, const char *key = " ");
 
-#endif  //ifndef NALL_STRING_HPP
+#endif

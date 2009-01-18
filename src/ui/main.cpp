@@ -1,4 +1,5 @@
 #include <../base.hpp>
+#include <../cart/cart.hpp>
 
 #include "main.hpp"
 #include "config.cpp"
@@ -35,16 +36,16 @@ void get_paths(const char *image) {
     }
 
     if(strend(temp, "/") == false) strcat(temp, "/");
-    config::path.base = temp;
+    snes.config.path.base = temp;
   } else {
-    config::path.base = "";
+    snes.config.path.base = "";
   }
 
   if(userpath(temp)) {
     if(strend(temp, "/") == false) strcat(temp, "/");
-    config::path.user = temp;
+    snes.config.path.user = temp;
   } else {
-    config::path.user = "";
+    snes.config.path.user = "";
   }
 }
 
@@ -52,26 +53,26 @@ void set_config_filenames() {
   char filename[PATH_MAX];
 
   //locate bsnes.cfg
-  strcpy(filename, config::path.base);
+  strcpy(filename, snes.config.path.base);
   strcat(filename, "bsnes.cfg");
   if(!file::exists(filename)) {
-    strcpy(filename, config::path.user);
+    strcpy(filename, snes.config.path.user);
     strcat(filename, ".bsnes");
     mkdir(filename);
     strcat(filename, "/bsnes.cfg");
   }
-  strcpy(config::bsnes_cfg, filename);
+  strcpy(config.bsnes_cfg, filename);
 
   //locate locale.cfg
-  strcpy(filename, config::path.base);
+  strcpy(filename, snes.config.path.base);
   strcat(filename, "locale.cfg");
   if(!file::exists(filename)) {
-    strcpy(filename, config::path.user);
+    strcpy(filename, snes.config.path.user);
     strcat(filename, ".bsnes");
     mkdir(filename);
     strcat(filename, "/locale.cfg");
   }
-  strcpy(config::locale_cfg, filename);
+  strcpy(config.locale_cfg, filename);
 }
 
 void run() {
@@ -79,7 +80,7 @@ void run() {
   status.update();
   input_manager.refresh();
 
-  if(config::input.capture_mode == 2) {
+  if(config.input.capture_mode == 2) {
     bool inactive = (window_main.focused() == false);
     if(app.autopause == false && inactive == true) {
       app.autopause = true;
@@ -102,13 +103,13 @@ int hiromain(int argc, const char *const argv[]) {
   get_paths(argv[0]);
   set_config_filenames();
 
-  config::config().load(config::bsnes_cfg);
-  if(file::exists(config::bsnes_cfg) == false) {
+  config.load(config.bsnes_cfg);
+  if(file::exists(config.bsnes_cfg) == false) {
     //in case program crashes on first run, save config file
     //settings, so that they can be modified by hand ...
-    config::config().save(config::bsnes_cfg);
+    config.save(config.bsnes_cfg);
   }
-  translate.import(config::locale_cfg);
+  translate.import(config.locale_cfg);
 
   ui_init();
   if(app.term == false) {
@@ -118,7 +119,7 @@ int hiromain(int argc, const char *const argv[]) {
     event::unload_cart();
   }
 
-  config::config().save(config::bsnes_cfg);
+  config.save(config.bsnes_cfg);
   snes.term();
   ui_term();
   return 0;

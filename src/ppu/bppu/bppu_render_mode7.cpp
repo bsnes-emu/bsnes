@@ -46,7 +46,7 @@ void bPPU::render_line_mode7(uint8 bg, uint8 pri0_pos, uint8 pri1_pos) {
   uint8 *wt_main = window[bg].main;
   uint8 *wt_sub  = window[bg].sub;
 
-  int32 y = (regs.mode7_vflip == false) ? (line.y) : (255 - line.y);
+  int32 y = (regs.mode7_vflip == false ? line : 255 - line);
 
   uint16 *mtable_x, *mtable_y;
   if(bg == BG1) {

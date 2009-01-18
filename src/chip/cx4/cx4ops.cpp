@@ -223,4 +223,4 @@ void Cx4::op89() {
   str(1, 0xffffff);
 }
 
-#endif //ifdef CX4_CPP
+#endif

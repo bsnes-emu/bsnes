@@ -2,7 +2,7 @@ bool MainWindow::input_ready() {
   //allow input if main window has focus
   if(focused() == true) return true;
   //allow input if config set to never block input
-  if(config::input.capture_mode == 0) return true;
+  if(config.input.capture_mode == 0) return true;
   //block input
   return false;
 }
@@ -35,12 +35,12 @@ uintptr_t MainWindow::event(event_t e) {
     if(e.widget == &menu_system_controller_port2_justifier)  { event::update_controller_port2(SNES::Input::DeviceJustifier); }
     if(e.widget == &menu_system_controller_port2_justifiers) { event::update_controller_port2(SNES::Input::DeviceJustifiers); }
 
-    if(e.widget == &menu_system_expansion_port_none) { config::snes.expansion_port = SNES::ExpansionNone; }
-    if(e.widget == &menu_system_expansion_port_bsx)  { config::snes.expansion_port = SNES::ExpansionBSX;  }
+    if(e.widget == &menu_system_expansion_port_none) { snes.config.expansion_port = SNES::ExpansionNone; }
+    if(e.widget == &menu_system_expansion_port_bsx)  { snes.config.expansion_port = SNES::ExpansionBSX;  }
 
-    if(e.widget == &menu_system_region_auto) { config::snes.region = SNES::Autodetect; }
-    if(e.widget == &menu_system_region_ntsc) { config::snes.region = SNES::NTSC; }
-    if(e.widget == &menu_system_region_pal)  { config::snes.region = SNES::PAL; }
+    if(e.widget == &menu_system_region_auto) { snes.config.region = SNES::Autodetect; }
+    if(e.widget == &menu_system_region_ntsc) { snes.config.region = SNES::NTSC; }
+    if(e.widget == &menu_system_region_pal)  { snes.config.region = SNES::PAL; }
 
     if(e.widget == &menu_system_exit) { event::quit(); }
 
@@ -80,7 +80,7 @@ uintptr_t MainWindow::event(event_t e) {
     if(e.widget == &menu_settings_videoframeskip_9) { event::update_frameskip(9); }
 
     if(e.widget == &menu_settings_mute) {
-      config::audio.mute = menu_settings_mute.checked();
+      config.audio.mute = menu_settings_mute.checked();
     }
 
     if(e.widget == &menu_settings_emuspeed_slowest)  { event::update_emulation_speed(0); }
@@ -90,13 +90,13 @@ uintptr_t MainWindow::event(event_t e) {
     if(e.widget == &menu_settings_emuspeed_fastest)  { event::update_emulation_speed(4); }
 
     if(e.widget == &menu_settings_emuspeed_videosync) {
-      config::video.synchronize = menu_settings_emuspeed_videosync.checked();
-      video.set(Video::Synchronize, config::video.synchronize);
+      config.video.synchronize = menu_settings_emuspeed_videosync.checked();
+      video.set(Video::Synchronize, config.video.synchronize);
     }
 
     if(e.widget == &menu_settings_emuspeed_audiosync) {
-      config::audio.synchronize = menu_settings_emuspeed_audiosync.checked();
-      audio.set(Audio::Synchronize, config::audio.synchronize);
+      config.audio.synchronize = menu_settings_emuspeed_audiosync.checked();
+      audio.set(Audio::Synchronize, config.audio.synchronize);
     }
 
     if(e.widget == &menu_settings_config) { window_settings.show(); }
@@ -197,7 +197,7 @@ void MainWindow::setup() {
       menu_system_region.attach(menu_system_region_pal.create (group, translate["{{region}}PAL"]));
       group.reset();
 
-    if(config::advanced.enable == true) {
+    if(config.misc.show_advanced_options == true) {
       menu_system.attach(menu_system_sep3);
       menu_system.attach(menu_system_expansion_port);
       menu_system.attach(menu_system_region);
@@ -414,14 +414,14 @@ void MainWindow::setup() {
 void MainWindow::sync() {
   event::load_video_settings();
 
-  switch(config::snes.controller_port1) { default:
+  switch(snes.config.controller_port1) { default:
     case SNES::Input::DeviceNone:       menu_system_controller_port1_none.check();       break;
     case SNES::Input::DeviceJoypad:     menu_system_controller_port1_joypad.check();     break;
     case SNES::Input::DeviceMultitap:   menu_system_controller_port1_multitap.check();   break;
     case SNES::Input::DeviceMouse:      menu_system_controller_port1_mouse.check();      break;
   }
 
-  switch(config::snes.controller_port2) { default:
+  switch(snes.config.controller_port2) { default:
     case SNES::Input::DeviceNone:       menu_system_controller_port2_none.check();       break;
     case SNES::Input::DeviceJoypad:     menu_system_controller_port2_joypad.check();     break;
     case SNES::Input::DeviceMultitap:   menu_system_controller_port2_multitap.check();   break;
@@ -431,12 +431,12 @@ void MainWindow::sync() {
     case SNES::Input::DeviceJustifiers: menu_system_controller_port2_justifiers.check(); break;
   }
 
-  switch(config::snes.expansion_port) { default:
+  switch(snes.config.expansion_port) { default:
     case SNES::ExpansionNone: menu_system_expansion_port_none.check(); break;
     case SNES::ExpansionBSX:  menu_system_expansion_port_bsx.check();  break;
   }
 
-  switch(config::snes.region) { default:
+  switch(snes.config.region) { default:
     case SNES::Autodetect: menu_system_region_auto.check(); break;
     case SNES::NTSC:       menu_system_region_ntsc.check(); break;
     case SNES::PAL:        menu_system_region_pal.check();  break;
@@ -471,9 +471,9 @@ void MainWindow::sync() {
     case 4: menu_settings_videofilter_swntsc.check(); break;
   }
 
-  menu_settings_mute.check(config::audio.mute);
+  menu_settings_mute.check(config.audio.mute);
 
-  switch(config::video.frameskip) {
+  switch(config.video.frameskip) {
     case 0: menu_settings_videoframeskip_0.check(); break;
     case 1: menu_settings_videoframeskip_1.check(); break;
     case 2: menu_settings_videoframeskip_2.check(); break;
@@ -486,7 +486,7 @@ void MainWindow::sync() {
     case 9: menu_settings_videoframeskip_9.check(); break;
   }
 
-  switch(config::system.emulation_speed) {
+  switch(config.system.emulation_speed) {
     case 0: menu_settings_emuspeed_slowest.check(); break;
     case 1: menu_settings_emuspeed_slow.check(); break;
     case 2: menu_settings_emuspeed_normal.check(); break;
@@ -494,6 +494,6 @@ void MainWindow::sync() {
     case 4: menu_settings_emuspeed_fastest.check(); break;
   }
 
-  menu_settings_emuspeed_videosync.check(config::video.synchronize);
-  menu_settings_emuspeed_audiosync.check(config::audio.synchronize);
+  menu_settings_emuspeed_videosync.check(config.video.synchronize);
+  menu_settings_emuspeed_audiosync.check(config.audio.synchronize);
 }

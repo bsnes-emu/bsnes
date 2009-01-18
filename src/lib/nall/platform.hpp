@@ -5,6 +5,8 @@
 //standard platform headers
 //=========================
 
+#include <limits>
+
 #include <assert.h>
 #include <limits.h>
 #include <math.h>
@@ -70,4 +72,4 @@
   #define alwaysinline  inline
 #endif
 
-#endif  //ifndef NALL_PLATFORM_HPP
+#endif

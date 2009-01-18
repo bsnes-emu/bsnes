@@ -34,12 +34,12 @@ struct InputCode {
 struct InputObject {
   enum Type { Button, Axis } type;
   const char *name;
-  string_setting &setting;
+  string &setting;
   uint16_t code;
   int16_t state;
 
-  void bind() { code = input_find(setting); }
-  InputObject(Type t, const char *n, string_setting &s) : type(t), name(n), setting(s) {}
+  void bind() { code = input_find((const char*)setting); }
+  InputObject(Type t, const char *n, string &s) : type(t), name(n), setting(s) {}
 };
 
 struct InputGroup {
@@ -96,6 +96,13 @@ struct Joypad : InputDevice {
   InputObject l, r, select, start;
 
   int16_t state(unsigned index) {
+    if(config.input.allow_invalid_input == false) {
+      //SNES D-pads have central pivot point, making up+down or left+right combinations impossible.
+      //some software programs rely on this, and will crash if these combinations are allowed.
+      if(index == SNES::Input::JoypadDown  && up.state  ) return 0;
+      if(index == SNES::Input::JoypadRight && left.state) return 0;
+    }
+
     switch(index) {
       case SNES::Input::JoypadUp:     return up.state;
       case SNES::Input::JoypadDown:   return down.state;
@@ -115,9 +122,9 @@ struct Joypad : InputDevice {
 
   Joypad(
   SNES::Input::DeviceID id, bool port, const char *name,
-  string_setting &up_t, string_setting &down_t, string_setting &left_t, string_setting &right_t,
-  string_setting &a_t, string_setting &b_t, string_setting &x_t, string_setting &y_t,
-  string_setting &l_t, string_setting &r_t, string_setting &select_t, string_setting &start_t
+  string &up_t, string &down_t, string &left_t, string &right_t,
+  string &a_t, string &b_t, string &x_t, string &y_t,
+  string &l_t, string &r_t, string &select_t, string &start_t
   ) :
     InputDevice(id, port, name),
     up    (InputObject::Button, "Up",     up_t),
@@ -155,8 +162,7 @@ struct Mouse : InputDevice {
 
   Mouse(
   SNES::Input::DeviceID id, bool port, const char *name,
-  string_setting &x_t, string_setting &y_t,
-  string_setting &left_t, string_setting &right_t
+  string &x_t, string &y_t, string &left_t, string &right_t
   ) :
     InputDevice(id, port, name),
     x    (InputObject::Axis,   "X-axis",       x_t),
@@ -186,8 +192,7 @@ struct SuperScope : InputDevice {
 
   SuperScope(
   SNES::Input::DeviceID id, bool port, const char *name,
-  string_setting &x_t, string_setting &y_t,
-  string_setting &trigger_t, string_setting &cursor_t, string_setting &turbo_t, string_setting &pause_t
+  string &x_t, string &y_t, string &trigger_t, string &cursor_t, string &turbo_t, string &pause_t
   ) :
     InputDevice(id, port, name),
     x      (InputObject::Axis,   "X-axis",  x_t),
@@ -218,8 +223,7 @@ struct Justifier : InputDevice {
 
   Justifier(
   SNES::Input::DeviceID id, bool port, const char *name,
-  string_setting &x_t, string_setting &y_t,
-  string_setting &trigger_t, string_setting &start_t
+  string &x_t, string &y_t, string &trigger_t, string &start_t
   ) :
     InputDevice(id, port, name),
     x      (InputObject::Axis,   "X-axis",  x_t),
@@ -263,101 +267,101 @@ struct InputDevicePool {
 
 Joypad joypad1(
 SNES::Input::DeviceIDJoypad1, InputDevice::Port1, "Joypad",
-config::input.joypad1.up, config::input.joypad1.down, config::input.joypad1.left,   config::input.joypad1.right,
-config::input.joypad1.a,  config::input.joypad1.b,    config::input.joypad1.x,      config::input.joypad1.y,
-config::input.joypad1.l,  config::input.joypad1.r,    config::input.joypad1.select, config::input.joypad1.start
+config.input.joypad1.up, config.input.joypad1.down, config.input.joypad1.left,   config.input.joypad1.right,
+config.input.joypad1.a,  config.input.joypad1.b,    config.input.joypad1.x,      config.input.joypad1.y,
+config.input.joypad1.l,  config.input.joypad1.r,    config.input.joypad1.select, config.input.joypad1.start
 );
 
 Joypad joypad2(
 SNES::Input::DeviceIDJoypad2, InputDevice::Port2, "Joypad",
-config::input.joypad2.up, config::input.joypad2.down, config::input.joypad2.left,   config::input.joypad2.right,
-config::input.joypad2.a,  config::input.joypad2.b,    config::input.joypad2.x,      config::input.joypad2.y,
-config::input.joypad2.l,  config::input.joypad2.r,    config::input.joypad2.select, config::input.joypad2.start
+config.input.joypad2.up, config.input.joypad2.down, config.input.joypad2.left,   config.input.joypad2.right,
+config.input.joypad2.a,  config.input.joypad2.b,    config.input.joypad2.x,      config.input.joypad2.y,
+config.input.joypad2.l,  config.input.joypad2.r,    config.input.joypad2.select, config.input.joypad2.start
 );
 
 Joypad multitap1a(
 SNES::Input::DeviceIDMultitap1A, InputDevice::Port1, "Multitap - Port 1",
-config::input.multitap1a.up, config::input.multitap1a.down, config::input.multitap1a.left, config::input.multitap1a.right,
-config::input.multitap1a.a, config::input.multitap1a.b, config::input.multitap1a.x, config::input.multitap1a.y,
-config::input.multitap1a.l, config::input.multitap1a.r, config::input.multitap1a.select, config::input.multitap1a.start
+config.input.multitap1a.up, config.input.multitap1a.down, config.input.multitap1a.left, config.input.multitap1a.right,
+config.input.multitap1a.a, config.input.multitap1a.b, config.input.multitap1a.x, config.input.multitap1a.y,
+config.input.multitap1a.l, config.input.multitap1a.r, config.input.multitap1a.select, config.input.multitap1a.start
 );
 
 Joypad multitap1b(
 SNES::Input::DeviceIDMultitap1B, InputDevice::Port1, "Multitap - Port 2",
-config::input.multitap1b.up, config::input.multitap1b.down, config::input.multitap1b.left, config::input.multitap1b.right,
-config::input.multitap1b.a, config::input.multitap1b.b, config::input.multitap1b.x, config::input.multitap1b.y,
-config::input.multitap1b.l, config::input.multitap1b.r, config::input.multitap1b.select, config::input.multitap1b.start
+config.input.multitap1b.up, config.input.multitap1b.down, config.input.multitap1b.left, config.input.multitap1b.right,
+config.input.multitap1b.a, config.input.multitap1b.b, config.input.multitap1b.x, config.input.multitap1b.y,
+config.input.multitap1b.l, config.input.multitap1b.r, config.input.multitap1b.select, config.input.multitap1b.start
 );
 
 Joypad multitap1c(
 SNES::Input::DeviceIDMultitap1C, InputDevice::Port1, "Multitap - Port 3",
-config::input.multitap1c.up, config::input.multitap1c.down, config::input.multitap1c.left, config::input.multitap1c.right,
-config::input.multitap1c.a, config::input.multitap1c.b, config::input.multitap1c.x, config::input.multitap1c.y,
-config::input.multitap1c.l, config::input.multitap1c.r, config::input.multitap1c.select, config::input.multitap1c.start
+config.input.multitap1c.up, config.input.multitap1c.down, config.input.multitap1c.left, config.input.multitap1c.right,
+config.input.multitap1c.a, config.input.multitap1c.b, config.input.multitap1c.x, config.input.multitap1c.y,
+config.input.multitap1c.l, config.input.multitap1c.r, config.input.multitap1c.select, config.input.multitap1c.start
 );
 
 Joypad multitap1d(
 SNES::Input::DeviceIDMultitap1D, InputDevice::Port1, "Multitap - Port 4",
-config::input.multitap1d.up, config::input.multitap1d.down, config::input.multitap1d.left, config::input.multitap1d.right,
-config::input.multitap1d.a, config::input.multitap1d.b, config::input.multitap1d.x, config::input.multitap1d.y,
-config::input.multitap1d.l, config::input.multitap1d.r, config::input.multitap1d.select, config::input.multitap1d.start
+config.input.multitap1d.up, config.input.multitap1d.down, config.input.multitap1d.left, config.input.multitap1d.right,
+config.input.multitap1d.a, config.input.multitap1d.b, config.input.multitap1d.x, config.input.multitap1d.y,
+config.input.multitap1d.l, config.input.multitap1d.r, config.input.multitap1d.select, config.input.multitap1d.start
 );
 
 Joypad multitap2a(
 SNES::Input::DeviceIDMultitap2A, InputDevice::Port2, "Multitap - Port 1",
-config::input.multitap2a.up, config::input.multitap2a.down, config::input.multitap2a.left, config::input.multitap2a.right,
-config::input.multitap2a.a, config::input.multitap2a.b, config::input.multitap2a.x, config::input.multitap2a.y,
-config::input.multitap2a.l, config::input.multitap2a.r, config::input.multitap2a.select, config::input.multitap2a.start
+config.input.multitap2a.up, config.input.multitap2a.down, config.input.multitap2a.left, config.input.multitap2a.right,
+config.input.multitap2a.a, config.input.multitap2a.b, config.input.multitap2a.x, config.input.multitap2a.y,
+config.input.multitap2a.l, config.input.multitap2a.r, config.input.multitap2a.select, config.input.multitap2a.start
 );
 
 Joypad multitap2b(
 SNES::Input::DeviceIDMultitap2B, InputDevice::Port2, "Multitap - Port 2",
-config::input.multitap2b.up, config::input.multitap2b.down, config::input.multitap2b.left, config::input.multitap2b.right,
-config::input.multitap2b.a, config::input.multitap2b.b, config::input.multitap2b.x, config::input.multitap2b.y,
-config::input.multitap2b.l, config::input.multitap2b.r, config::input.multitap2b.select, config::input.multitap2b.start
+config.input.multitap2b.up, config.input.multitap2b.down, config.input.multitap2b.left, config.input.multitap2b.right,
+config.input.multitap2b.a, config.input.multitap2b.b, config.input.multitap2b.x, config.input.multitap2b.y,
+config.input.multitap2b.l, config.input.multitap2b.r, config.input.multitap2b.select, config.input.multitap2b.start
 );
 
 Joypad multitap2c(
 SNES::Input::DeviceIDMultitap2C, InputDevice::Port2, "Multitap - Port 3",
-config::input.multitap2c.up, config::input.multitap2c.down, config::input.multitap2c.left, config::input.multitap2c.right,
-config::input.multitap2c.a, config::input.multitap2c.b, config::input.multitap2c.x, config::input.multitap2c.y,
-config::input.multitap2c.l, config::input.multitap2c.r, config::input.multitap2c.select, config::input.multitap2c.start
+config.input.multitap2c.up, config.input.multitap2c.down, config.input.multitap2c.left, config.input.multitap2c.right,
+config.input.multitap2c.a, config.input.multitap2c.b, config.input.multitap2c.x, config.input.multitap2c.y,
+config.input.multitap2c.l, config.input.multitap2c.r, config.input.multitap2c.select, config.input.multitap2c.start
 );
 
 Joypad multitap2d(
 SNES::Input::DeviceIDMultitap2D, InputDevice::Port2, "Multitap - Port 4",
-config::input.multitap2d.up, config::input.multitap2d.down, config::input.multitap2d.left, config::input.multitap2d.right,
-config::input.multitap2d.a, config::input.multitap2d.b, config::input.multitap2d.x, config::input.multitap2d.y,
-config::input.multitap2d.l, config::input.multitap2d.r, config::input.multitap2d.select, config::input.multitap2d.start
+config.input.multitap2d.up, config.input.multitap2d.down, config.input.multitap2d.left, config.input.multitap2d.right,
+config.input.multitap2d.a, config.input.multitap2d.b, config.input.multitap2d.x, config.input.multitap2d.y,
+config.input.multitap2d.l, config.input.multitap2d.r, config.input.multitap2d.select, config.input.multitap2d.start
 );
 
 Mouse mouse1(
 SNES::Input::DeviceIDMouse1, InputDevice::Port1, "Mouse",
-config::input.mouse1.x, config::input.mouse1.y, config::input.mouse1.l, config::input.mouse1.r
+config.input.mouse1.x, config.input.mouse1.y, config.input.mouse1.l, config.input.mouse1.r
 );
 
 Mouse mouse2(
 SNES::Input::DeviceIDMouse2, InputDevice::Port2, "Mouse",
-config::input.mouse2.x, config::input.mouse2.y, config::input.mouse2.l, config::input.mouse2.r
+config.input.mouse2.x, config.input.mouse2.y, config.input.mouse2.l, config.input.mouse2.r
 );
 
 SuperScope superscope(
 SNES::Input::DeviceIDSuperScope, InputDevice::Port2, "Super Scope",
-config::input.superscope.x, config::input.superscope.y,
-config::input.superscope.trigger, config::input.superscope.cursor,
-config::input.superscope.turbo, config::input.superscope.pause
+config.input.superscope.x, config.input.superscope.y,
+config.input.superscope.trigger, config.input.superscope.cursor,
+config.input.superscope.turbo, config.input.superscope.pause
 );
 
 Justifier justifier1(
 SNES::Input::DeviceIDJustifier1, InputDevice::Port2, "Justifier 1",
-config::input.justifier1.x, config::input.justifier1.y,
-config::input.justifier1.trigger, config::input.justifier1.start
+config.input.justifier1.x, config.input.justifier1.y,
+config.input.justifier1.trigger, config.input.justifier1.start
 );
 
 Justifier justifier2(
 SNES::Input::DeviceIDJustifier2, InputDevice::Port2, "Justifier 2",
-config::input.justifier2.x, config::input.justifier2.y,
-config::input.justifier2.trigger, config::input.justifier2.start
+config.input.justifier2.x, config.input.justifier2.y,
+config.input.justifier2.trigger, config.input.justifier2.start
 );
 
 InputDevicePool::InputDevicePool() {

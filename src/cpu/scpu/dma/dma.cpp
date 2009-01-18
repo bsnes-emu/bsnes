@@ -1,6 +1,6 @@
 #ifdef SCPU_CPP
 
-void sCPU::dma_add_clocks(uint clocks) {
+void sCPU::dma_add_clocks(unsigned clocks) {
   status.dma_clocks += clocks;
   add_clocks(clocks);
 }
@@ -122,7 +122,7 @@ void sCPU::dma_run() {
   }
 
   status.irq_lock = true;
-  delta.enqueue(EventIrqLockRelease, 2);
+  event.enqueue(2, EventIrqLockRelease);
 }
 
 /*****
@@ -205,7 +205,7 @@ void sCPU::hdma_run() {
   }
 
   status.irq_lock = true;
-  delta.enqueue(EventIrqLockRelease, 2);
+  event.enqueue(2, EventIrqLockRelease);
 }
 
 void sCPU::hdma_init_reset() {
@@ -227,7 +227,7 @@ void sCPU::hdma_init() {
   }
 
   status.irq_lock = true;
-  delta.enqueue(EventIrqLockRelease, 2);
+  event.enqueue(2, EventIrqLockRelease);
 }
 
 /*****

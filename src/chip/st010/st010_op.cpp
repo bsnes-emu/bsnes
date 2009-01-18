@@ -258,4 +258,4 @@ int16 x1, y1;
   writew(0x0012, y1);
 }
 
-#endif //ifdef ST010_CPP
+#endif

@@ -1,3 +1,7 @@
+#if defined(_MSC_VER)
+//TODO: Visual C++ cannot handle strings > 65536 bytes. Need to find workaround.
+static char enc_controller[65536 * 2] = { 0 };
+#else
 static char enc_controller[] = {
   "_v8B8AHwAfAB8AHwAfAB8P8B8AHwAfAB8AHwAfAB8AHw_wHwAfAB8AHwAfAB8AHw"
   "AfB_AfAB8AHwAfAB8AHwAeD9AP396OjomJiZAHBwcG5ubmpqAGpYWFhLS0tBAEFB"
@@ -1032,3 +1036,4 @@ static char enc_controller[] = {
   "AfAB8AHwAfAB8AHw_wHwAfAB8AHwAfAB8AHwAfD_AfAB8AHwAfAB8AHwAfAB8P9G"
   "8kbyRvJG8kbyRvJG8kby_0byqPAB8AHwAfAB8AHwAfAPAfAB8AHwATA"
 };
+#endif

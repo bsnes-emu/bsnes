@@ -232,7 +232,7 @@ pHiro& phiro() {
 
 HFONT pHiro::create_font(const char *name, unsigned size) {
   return CreateFont(
-    -(size * 96.0 / 72.0 + 0.5), //96 = DPI
+    -(size * 96.0 / 72.0 + 0.5),  //96 = DPI
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     utf16(name)
   );
@@ -375,6 +375,7 @@ LRESULT pHiro::wndproc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
         case Widget::EditboxType: {
           Editbox &editbox = (Editbox&)*widget;
           if(HIWORD(wparam) == EN_CHANGE) {
+            editbox.p.update();  //called to dynamically display vertical scrollbar if needed
             if(editbox.on_change) editbox.on_change(event_t(event_t::Change, 0, &editbox));
           }
         } break;

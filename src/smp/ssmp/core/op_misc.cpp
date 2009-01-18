@@ -1,3 +1,5 @@
+#ifdef SSMP_CPP
+
 //nop
 case 0x00: {
   op_io();
@@ -344,3 +346,4 @@ case 0x9e: {
   regs.p.z = (regs.a == 0);
 } break;
 
+#endif

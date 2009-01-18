@@ -22,11 +22,11 @@ void Scheduler::exit() {
 
 void Scheduler::init() {
   clock.cpu_freq = snes.region() == SNES::NTSC
-                 ? config::cpu.ntsc_clock_rate
-                 : config::cpu.pal_clock_rate;
+                 ? snes.config.cpu.ntsc_clock_rate
+                 : snes.config.cpu.pal_clock_rate;
   clock.smp_freq = snes.region() == SNES::NTSC
-                 ? config::smp.ntsc_clock_rate
-                 : config::smp.pal_clock_rate;
+                 ? snes.config.smp.ntsc_clock_rate
+                 : snes.config.smp.pal_clock_rate;
 
   clock.active = THREAD_CPU;
   clock.cpuppu = 0;

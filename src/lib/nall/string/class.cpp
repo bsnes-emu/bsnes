@@ -229,4 +229,4 @@ bool fread(nall::string &str, const char *filename) {
   return true;
 }
 
-#endif  //ifdef NALL_STRING_CPP
+#endif

@@ -258,12 +258,12 @@ void sSMP::op_writeaddr(uint16 addr, uint8 data) {
 
 alwaysinline
 uint8 sSMP::op_readdp(uint8 addr) {
-  return op_read((uint(regs.p.p) << 8) + addr);
+  return op_read((unsigned(regs.p.p) << 8) + addr);
 }
 
 alwaysinline
 void sSMP::op_writedp(uint8 addr, uint8 data) {
-  op_write((uint(regs.p.p) << 8) + addr, data);
+  op_write((unsigned(regs.p.p) << 8) + addr, data);
 }
 
 #endif //ifdef SSMP_CPP

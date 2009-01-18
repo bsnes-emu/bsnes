@@ -62,9 +62,9 @@ stp(0xdb) {
 }
 
 wai(0xcb) {
-//last_cycle() will clear event.wai once an NMI / IRQ edge is reached
-1:event.wai = true;
-  while(event.wai) {
+//last_cycle() will clear status.wai_lock once an NMI / IRQ edge is reached
+1:status.wai_lock = true;
+  while(status.wai_lock) {
     last_cycle();
     op_io();
   }

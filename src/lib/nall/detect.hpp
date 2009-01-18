@@ -27,4 +27,4 @@
   #define ARCH_MSB
 #endif
 
-#endif //ifndef NALL_DETECT_HPP
+#endif

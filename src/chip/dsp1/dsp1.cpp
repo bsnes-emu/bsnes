@@ -1,6 +1,8 @@
 #include <../base.hpp>
+#include <../cart/cart.hpp>
 #define DSP1_CPP
 
+#include "dsp1.hpp"
 #include "dsp1emu.cpp"
 
 void DSP1::init() {}
@@ -46,11 +48,11 @@ bool DSP1::addr_decode(uint16 addr) {
   return 0;
 }
 
-uint8 DSP1::read(uint addr) {
+uint8 DSP1::read(unsigned addr) {
   return (addr_decode(addr) == 0) ? dsp1.getDr() : dsp1.getSr();
 }
 
-void DSP1::write(uint addr, uint8 data) {
+void DSP1::write(unsigned addr, uint8 data) {
   if(addr_decode(addr) == 0) {
     dsp1.setDr(data);
   }

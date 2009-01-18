@@ -1,65 +1,47 @@
 #ifdef SCPU_CPP
 
-void sCPU::update_interrupts() {
-  unsigned vtime = status.virq_pos;
-  unsigned htime = status.hirq_enabled ? status.hirq_pos : 0;
-  unsigned vlimit = (snes.region() == SNES::NTSC ? 525 : 625) >> 1;
-
-  //an IRQ for the very last dot of a field cannot trigger an IRQ
-  if((vtime == (vlimit - 1) && htime == 339 && ppu.interlace() == false)
-  || (vtime == vlimit && htime == 339)
-  ) {
-    vtime = 0x03ff;
-    htime = 0x03ff;
-  }
-
-  status.virq_trigger_pos = vtime;
-  status.hirq_trigger_pos = 4 * (status.hirq_enabled ? htime + 1 : 0);
-}
-
-alwaysinline void sCPU::poll_interrupts() {
-  uint16_t vpos, hpos;
-
+//called once every four clock cycles;
+//as NMI steps by scanlines (divisible by 4) and IRQ by PPU 4-cycle dots.
+//
+//ppu.(vh)counter(n) returns the value of said counters n-clocks before current time;
+//it is used to emulate hardware communication delay between opcode and interrupt units.
+void sCPU::poll_interrupts() {
   //NMI hold
   if(status.nmi_hold) {
-    status.nmi_hold -= 2;
-    if(status.nmi_hold == 0) {
-      if(status.nmi_enabled == true) status.nmi_transition = true;
-    }
+    status.nmi_hold = false;
+    if(status.nmi_enabled) status.nmi_transition = true;
   }
 
   //NMI test
-  vpos = ppu.vcounter(2);
-  hpos = ppu.hcounter(2);
-  bool nmi_valid = (vpos >= (!ppu.overscan() ? 225 : 240));
-  if(status.nmi_valid == false && nmi_valid == true) {
+  bool nmi_valid = (ppu.vcounter(2) >= (!ppu.overscan() ? 225 : 240));
+  if(!status.nmi_valid && nmi_valid) {
     //0->1 edge sensitive transition
     status.nmi_line = true;
-    status.nmi_hold = 4;
-  } else if(status.nmi_valid == true && nmi_valid == false) {
+    status.nmi_hold = true;  //hold /NMI for four cycles
+  } else if(status.nmi_valid && !nmi_valid) {
     //1->0 edge sensitive transition
     status.nmi_line = false;
   }
   status.nmi_valid = nmi_valid;
 
   //IRQ hold
-  if(status.irq_hold) status.irq_hold -= 2;
-  if(status.irq_line == true && status.irq_hold == 0) {
-    if(status.virq_enabled == true || status.hirq_enabled == true) status.irq_transition = true;
+  status.irq_hold = false;
+  if(status.irq_line) {
+    if(status.virq_enabled || status.hirq_enabled) status.irq_transition = true;
   }
 
   //IRQ test
-  vpos = ppu.vcounter(10);
-  hpos = ppu.hcounter(10);
-  bool irq_valid = (status.virq_enabled == true || status.hirq_enabled == true);
-  if(irq_valid == true) {
-    if(status.virq_enabled == true && vpos != status.virq_trigger_pos) irq_valid = false;
-    if(status.hirq_enabled == true && hpos != status.hirq_trigger_pos) irq_valid = false;
+  bool irq_valid = (status.virq_enabled || status.hirq_enabled);
+  if(irq_valid) {
+    if((status.virq_enabled && ppu.vcounter(10) != (status.virq_pos))
+    || (status.hirq_enabled && ppu.hcounter(10) != (status.hirq_pos + 1) * 4)
+    || (status.virq_pos && ppu.vcounter(6) == 0)  //IRQs cannot trigger on last dot of field
+    ) irq_valid = false;
   }
-  if(status.irq_valid == false && irq_valid == true) {
+  if(!status.irq_valid && irq_valid) {
     //0->1 edge sensitive transition
     status.irq_line = true;
-    status.irq_hold = 4;
+    status.irq_hold = true;  //hold /IRQ for four cycles
   }
   status.irq_valid = irq_valid;
 }
@@ -68,37 +50,32 @@ void sCPU::nmitimen_update(uint8 data) {
   bool nmi_enabled  = status.nmi_enabled;
   bool virq_enabled = status.virq_enabled;
   bool hirq_enabled = status.hirq_enabled;
-  status.nmi_enabled  = !!(data & 0x80);
-  status.virq_enabled = !!(data & 0x20);
-  status.hirq_enabled = !!(data & 0x10);
+  status.nmi_enabled  = data & 0x80;
+  status.virq_enabled = data & 0x20;
+  status.hirq_enabled = data & 0x10;
 
   //0->1 edge sensitive transition
-  if(nmi_enabled == false && status.nmi_enabled == true && status.nmi_line == true) {
+  if(!nmi_enabled && status.nmi_enabled && status.nmi_line) {
     status.nmi_transition = true;
   }
 
   //?->1 level sensitive transition
-  if(status.virq_enabled == true && status.hirq_enabled == false && status.irq_line == true) {
+  if(status.virq_enabled && !status.hirq_enabled && status.irq_line) {
     status.irq_transition = true;
   }
 
-  if(status.virq_enabled == false && status.hirq_enabled == false) {
+  if(!status.virq_enabled && !status.hirq_enabled) {
     status.irq_line = false;
     status.irq_transition = false;
   }
 
-  update_interrupts();
   status.irq_lock = true;
-  delta.enqueue(EventIrqLockRelease, 2);
-}
-
-void sCPU::hvtime_update(uint16 addr) {
-  update_interrupts();
+  event.enqueue(2, EventIrqLockRelease);
 }
 
 bool sCPU::rdnmi() {
   bool result = status.nmi_line;
-  if(status.nmi_hold == 0) {
+  if(!status.nmi_hold) {
     status.nmi_line = false;
   }
   return result;
@@ -106,25 +83,25 @@ bool sCPU::rdnmi() {
 
 bool sCPU::timeup() {
   bool result = status.irq_line;
-  if(status.irq_hold == 0) {
+  if(!status.irq_hold) {
     status.irq_line = false;
     status.irq_transition = false;
   }
   return result;
 }
 
-alwaysinline bool sCPU::nmi_test() {
-  if(status.nmi_transition == false) return false;
+bool sCPU::nmi_test() {
+  if(!status.nmi_transition) return false;
   status.nmi_transition = false;
-  event.wai = false;
+  status.wai_lock = false;
   return true;
 }
 
-alwaysinline bool sCPU::irq_test() {
-  if(status.irq_transition == false) return false;
+bool sCPU::irq_test() {
+  if(!status.irq_transition) return false;
   status.irq_transition = false;
-  event.wai = false;
+  status.wai_lock = false;
   return !regs.p.i;
 }
 
-#endif  //ifdef SCPU_CPP
+#endif

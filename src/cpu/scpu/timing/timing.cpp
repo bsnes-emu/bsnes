@@ -9,14 +9,16 @@ unsigned sCPU::dma_counter() {
 }
 
 void sCPU::add_clocks(unsigned clocks) {
-  delta.tick(clocks);
+  event.tick(clocks);
   unsigned ticks = clocks >> 1;
   while(ticks--) {
     ppu.tick();
-    snes.input.tick();
-    poll_interrupts();
+    if((ppu.hcounter() & 2) == 0) {
+      snes.input.tick();
+    } else {
+      poll_interrupts();
+    }
   }
-
   scheduler.addclocks_cpu(clocks);
 }
 
@@ -26,19 +28,17 @@ void sCPU::scanline() {
 
   if(ppu.vcounter() == 0) {
     //hdma init triggers once every frame
-    delta.enqueue(EventHdmaInit, cpu_version == 1 ? 12 + 8 - dma_counter() : 12 + dma_counter());
+    event.enqueue(cpu_version == 1 ? 12 + 8 - dma_counter() : 12 + dma_counter(), EventHdmaInit);
   }
 
   //dram refresh occurs once every scanline
   if(cpu_version == 2) status.dram_refresh_position = 530 + 8 - dma_counter();
-  delta.enqueue(EventDramRefresh, status.dram_refresh_position);
+  event.enqueue(status.dram_refresh_position, EventDramRefresh);
 
   //hdma triggers once every visible scanline
   if(ppu.vcounter() <= (ppu.overscan() == false ? 224 : 239)) {
-    delta.enqueue(EventHdmaRun, 1104);
+    event.enqueue(1104, EventHdmaRun);
   }
-
-  update_interrupts();
 
   if(status.auto_joypad_poll == true && ppu.vcounter() == (ppu.overscan() == false ? 227 : 242)) {
     snes.input.poll();
@@ -56,8 +56,8 @@ void sCPU::precycle_edge() {
 
 //used to test for H/DMA, which can trigger on the edge of every opcode cycle.
 void sCPU::cycle_edge() {
-  while(event.cycle_edge) {
-    switch(event.cycle_edge & -event.cycle_edge) {  //switch on lowest bit (flag) set
+  while(cycle_edge_state) {
+    switch(bit::lowest(cycle_edge_state)) {
       case EventFlagHdmaInit: {
         hdma_init_reset();
         if(hdma_enabled_channels()) {
@@ -74,7 +74,7 @@ void sCPU::cycle_edge() {
       } break;
     }
 
-    event.cycle_edge &= event.cycle_edge - 1;  //clear lowest bit set
+    cycle_edge_state = bit::clear_lowest(cycle_edge_state);
   }
 
   //H/DMA pending && DMA inactive?
@@ -119,43 +119,39 @@ void sCPU::cycle_edge() {
 //status.irq_lock is used to simulate hardware delay before interrupts can
 //trigger during certain events (immediately after DMA, writes to $4200, etc)
 void sCPU::last_cycle() {
-  if(status.irq_lock) return;
+  if(!status.irq_lock) {
+    status.nmi_pending |= nmi_test();
+    status.irq_pending |= irq_test();
 
-  status.nmi_pending |= nmi_test();
-  status.irq_pending |= irq_test();
-
-  event.irq = (status.nmi_pending || status.irq_pending);
+    status.interrupt_pending = (status.nmi_pending || status.irq_pending);
+  }
 }
 
 void sCPU::timing_power() {
 }
 
 void sCPU::timing_reset() {
-  delta.reset();
-
-  temp_.alu_mul_delay = config::temp.alu_mul_delay;
-  temp_.alu_div_delay = config::temp.alu_div_delay;
+  event.reset();
 
   status.clock_count = 0;
   status.line_clocks = ppu.lineclocks();
 
   status.irq_lock = false;
   status.alu_lock = false;
-  status.dram_refresh_position = (cpu_version == 1) ? 530 : 538;
+  status.dram_refresh_position = (cpu_version == 1 ? 530 : 538);
+  event.enqueue(status.dram_refresh_position, EventDramRefresh);
 
   status.nmi_valid      = false;
   status.nmi_line       = false;
   status.nmi_transition = false;
   status.nmi_pending    = false;
-  status.nmi_hold       = 0;
+  status.nmi_hold       = false;
 
   status.irq_valid      = false;
   status.irq_line       = false;
   status.irq_transition = false;
   status.irq_pending    = false;
-  status.irq_hold       = 0;
-
-  update_interrupts();
+  status.irq_hold       = false;
 
   status.dma_counter  = 0;
   status.dma_clocks   = 0;
@@ -164,9 +160,7 @@ void sCPU::timing_reset() {
   status.hdma_mode    = 0;
   status.dma_state    = DmaInactive;
 
-  event.cycle_edge = 0;
+  cycle_edge_state = 0;
 }
 
-#undef ntsc_color_burst_phase_shift_scanline
-
-#endif  //ifdef SCPU_CPP
+#endif

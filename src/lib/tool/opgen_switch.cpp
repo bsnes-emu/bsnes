@@ -3,8 +3,8 @@ using namespace nall;
 
 FILE *fp;
 
-string data;
-lstring line, part, subpart, output_op;
+string data, output_op;
+lstring line, part, subpart;
 
 struct OpList {
   string name;
@@ -89,7 +89,7 @@ void gen_op() {
 void gen_end() {
   string t;
   for(unsigned i = 0; i < op_count; i++) {
-    t = output_op[0];
+    t = output_op;
     replace(t, "$$", op_list[i].name);
     replace(t, "$0", op_list[i].arg[0]);
     replace(t, "$1", op_list[i].arg[1]);
@@ -103,12 +103,14 @@ void gen_end() {
   }
 }
 
-void generate(char *dest, char *src) {
+void generate(const char *dest, const char *src) {
   fread(data, src);
   replace(data, "\r\n", "\n");
   split(line, "\n", data);
 
   fp = fopen(dest, "wb");
+  string header = CLASS_NAME;
+  fprintf(fp, "#ifdef %s_CPP\n\n", (const char*)strupper(header));  //inclusion guard
 
   line_num = 0;
   while(line_num < count(line)) {
@@ -120,5 +122,6 @@ void generate(char *dest, char *src) {
     gen_end();
   }
 
+  fprintf(fp, "#endif\n");
   fclose(fp);
 }

@@ -2,8 +2,8 @@
 
 //called once at the start of every rendered scanline
 void bPPU::update_bg_info() {
-  uint hires = (regs.bg_mode == 5 || regs.bg_mode == 6);
-  uint width = (!hires) ? 256 : 512;
+  unsigned hires = (regs.bg_mode == 5 || regs.bg_mode == 6);
+  unsigned width = (!hires) ? 256 : 512;
 
   for(int bg = 0; bg < 4; bg++) {
     bg_info[bg].th = (regs.bg_tilesize[bg]) ? 4 : 3;
@@ -71,7 +71,7 @@ void bPPU::render_line_bg(uint8 bg, uint8 color_depth, uint8 pri0_pos, uint8 pri
   uint16 tile_mask = 0x0fff >> color_depth; //0x0fff, 0x07ff, 0x03ff
   //4 + color_depth = >>(4-6) -- / {16, 32, 64 } bytes/tile
   //index is a tile number count to add to base tile number
-  uint   tiledata_index = regs.bg_tdaddr[bg] >> (4 + color_depth);
+  unsigned tiledata_index = regs.bg_tdaddr[bg] >> (4 + color_depth);
 
   uint8 *bg_td       = bg_tiledata[color_depth];
   uint8 *bg_td_state = bg_tiledata_state[color_depth];
@@ -85,8 +85,8 @@ void bPPU::render_line_bg(uint8 bg, uint8 color_depth, uint8 pri0_pos, uint8 pri
   uint16 hscroll = regs.bg_hofs[bg];
   uint16 vscroll = regs.bg_vofs[bg];
 
-  uint hires = (regs.bg_mode == 5 || regs.bg_mode == 6);
-  uint width = (!hires) ? 256 : 512;
+  unsigned hires = (regs.bg_mode == 5 || regs.bg_mode == 6);
+  unsigned width = (!hires) ? 256 : 512;
 
   if(hires) {
     hscroll <<= 1;
@@ -95,13 +95,13 @@ void bPPU::render_line_bg(uint8 bg, uint8 color_depth, uint8 pri0_pos, uint8 pri
 
   uint16 *mtable = mosaic_table[(regs.mosaic_enabled[bg]) ? regs.mosaic_size : 0];
 
-  uint16 hval, vval;
-  uint16 t, tile_pri, tile_num;
-  uint8  pal_index, pal_num;
-  uint8 *tile_ptr;
-  uint   xpos, ypos;
-  uint16 hoffset, voffset, opt_x, col;
-  bool   mirror_x, mirror_y;
+  uint16     hval, vval;
+  uint16     t, tile_pri, tile_num;
+  uint8      pal_index, pal_num;
+  uint8     *tile_ptr;
+  unsigned   xpos, ypos;
+  uint16     hoffset, voffset, opt_x, col;
+  bool       mirror_x, mirror_y;
   const bool is_opt_mode = (regs.bg_mode == 2 || regs.bg_mode == 4 || regs.bg_mode == 6);
 
   build_window_tables(bg);

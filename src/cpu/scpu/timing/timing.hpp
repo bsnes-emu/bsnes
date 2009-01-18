@@ -10,6 +10,7 @@
     EventFlagHdmaInit = 1 << 0,
     EventFlagHdmaRun  = 1 << 1,
   };
+  unsigned cycle_edge_state;
 
   //timing.cpp
   unsigned dma_counter();
@@ -25,18 +26,16 @@
   void timing_reset();
 
   //irq.cpp
-  void update_interrupts();
-  void poll_interrupts();
+  alwaysinline void poll_interrupts();
   void nmitimen_update(uint8 data);
-  void hvtime_update(uint16 addr);
   bool rdnmi();
   bool timeup();
 
-  bool nmi_test();
-  bool irq_test();
+  alwaysinline bool nmi_test();
+  alwaysinline bool irq_test();
 
   //joypad.cpp
   void run_auto_joypad_poll();
 
   //event.cpp
-  void queue_event(unsigned);  //deltaqueue callback function
+  void queue_event(unsigned);  //priorityqueue callback function

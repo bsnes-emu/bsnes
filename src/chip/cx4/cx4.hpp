@@ -90,8 +90,8 @@ public:
   void   power();
   void   reset();
 
-  uint8  read (uint addr);
-  void   write(uint addr, uint8 data);
+  uint8  read (unsigned addr);
+  void   write(unsigned addr, uint8 data);
 };
 
 extern Cx4 cx4;

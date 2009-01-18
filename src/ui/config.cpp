@@ -1,310 +1,263 @@
-namespace config {
+#include <nall/config.hpp>
 
-char bsnes_cfg[PATH_MAX] = "";
-char locale_cfg[PATH_MAX] = "";
+class bsnes_configuration : public configuration {
+public:
+  char bsnes_cfg[PATH_MAX], locale_cfg[PATH_MAX];
 
-struct System {
-  static string_setting video, audio, input;
-  static integral_setting invoke_crash_handler;
-  static integral_setting emulation_speed;
-  static integral_setting gamma_ramp, sepia, grayscale, invert, contrast, brightness, gamma;
-} system;
+  struct System {
+    string video, audio, input;
+    bool invoke_crash_handler;
+    unsigned emulation_speed;
+  } system;
 
-string_setting System::video(config(), "system.video", "Video hardware interface", "");
-string_setting System::audio(config(), "system.audio", "Audio hardware interface", "");
-string_setting System::input(config(), "system.input", "Input hardware interface", "");
+  struct Video {
+    unsigned mode;
+    bool synchronize;
 
-integral_setting System::invoke_crash_handler(config(), "system.invoke_crash_handler",
-  "Do not modify this setting!\n"
-  "Used to detect crashes caused by initialization of video / audio / input drivers. "
-  "When the emulator crashes during driver initialization, this value will be left as true. "
-  "When true, driver selection crash handler window will appear on next start-up.",
-  integral_setting::boolean, false);
+    struct Windowed {
+      bool aspect_correction;
+      unsigned region, multiplier, hardware_filter, software_filter;
+    } windowed;
 
-integral_setting System::emulation_speed(config(), "system.emulation_speed",
-  "Relative speed of emulator compared to SNES hardware:\n"
-  "0 = 50%\n"
-  "1 = 75%\n"
-  "2 = 100%\n"
-  "3 = 150%\n"
-  "4 = 200%",
-  integral_setting::decimal, 2);
+    struct Fullscreen {
+      bool aspect_correction;
+      unsigned region, multiplier, hardware_filter, software_filter;
+    } fullscreen;
 
-integral_setting System::gamma_ramp(config(), "system.colorfilter.gamma_ramp",
-  "Use precalculated TV-style gamma ramp", integral_setting::boolean, true);
-integral_setting System::sepia(config(), "system.colorfilter.sepia",
-  "Convert color to sepia tone", integral_setting::boolean, false);
-integral_setting System::grayscale(config(), "system.colorfilter.grayscale",
-  "Convert color to grayscale tone", integral_setting::boolean, false);
-integral_setting System::invert(config(), "system.colorfilter.invert",
-  "Invert output image colors", integral_setting::boolean, false);
-integral_setting System::contrast(config(), "system.colorfilter.contrast",
-  "Contrast", integral_setting::decimal, 0);
-integral_setting System::brightness(config(), "system.colorfilter.brightness",
-  "Brightness", integral_setting::decimal, 0);
-integral_setting System::gamma(config(), "system.colorfilter.gamma",
-  "Gamma", integral_setting::decimal, 100);
+    unsigned aspect_ntsc_x, aspect_ntsc_y, aspect_pal_x, aspect_pal_y;
+    unsigned frameskip;
 
-struct Video {
-  static integral_setting mode;
-  static integral_setting synchronize;
+    unsigned contrast, brightness, gamma;
+    bool gamma_ramp, sepia, grayscale, invert;
+    bool ntsc_filter_merge_fields;
+  } video;
 
-  struct Windowed {
-    static integral_setting aspect_correction;
-    static integral_setting region, multiplier, hardware_filter, software_filter;
-  } windowed;
-  struct Fullscreen {
-    static integral_setting aspect_correction;
-    static integral_setting region, multiplier, hardware_filter, software_filter;
-  } fullscreen;
-  static integral_setting aspect_ntsc_x, aspect_ntsc_y, aspect_pal_x, aspect_pal_y;
-  static integral_setting frameskip;
-  static integral_setting start_in_fullscreen_mode;
-} video;
+  struct Audio {
+    unsigned output_frequency, input_frequency;
+    unsigned latency;
+    unsigned volume, mute;
+    bool synchronize;
+  } audio;
 
-//0 = windowed, 1 = fullscreen, 2 = exclusive (not implemented yet)
-integral_setting Video::mode("video.mode", "Active video mode", integral_setting::decimal, 0);
-integral_setting Video::synchronize(config(), "video.synchronize", "Synchronize to video refresh rate", integral_setting::boolean, false);
+  struct Input {
+    unsigned capture_mode;
+    bool allow_invalid_input;
+    unsigned analog_axis_resistance;
 
-integral_setting Video::Windowed::aspect_correction(config(), "video.windowed.aspect_correction",
-  "Correct video aspect ratio.\n"
-  "Defaults assume display pixels are perfectly square."
-  "Formula: width = width * video.aspect_<region>_x / video.aspect_<region>_y",
-  integral_setting::boolean, true);
-integral_setting Video::Windowed::region(config(), "video.windowed.region",
-  "Video output region:\n"
-  "0 = NTSC\n"
-  "1 = PAL",
-  integral_setting::decimal, 0);
-integral_setting Video::Windowed::multiplier(config(), "video.windowed.multiplier",
-  "Video output size multiplier (1-5x)\n"
-  "1 = 1x (<= 320x240)\n"
-  "2 = 2x (<= 640x480)\n"
-  "etc.",
-  integral_setting::decimal, 2);
-integral_setting Video::Windowed::hardware_filter(config(), "video.windowed.hardware_filter",
-  "Video hardware filter:\n"
-  "0 = Point\n"
-  "1 = Linear",
-  integral_setting::decimal, 1);
-integral_setting Video::Windowed::software_filter(config(), "video.windowed.software_filter",
-  "Video software filter:\n"
-  "0 = None\n"
-  "1 = Scanline\n"
-  "2 = Scale2x\n"
-  "3 = HQ2x\n"
-  "4 = NTSC",
-  integral_setting::decimal, 0);
+    struct Joypad {
+      string up, down, left, right, a, b, x, y, l, r, select, start;
+    } joypad1, joypad2,
+      multitap1a, multitap1b, multitap1c, multitap1d,
+      multitap2a, multitap2b, multitap2c, multitap2d;
 
-integral_setting Video::Fullscreen::aspect_correction(config(), "video.fullscreen.aspect_correction", "", integral_setting::boolean, true);
-integral_setting Video::Fullscreen::region           (config(), "video.fullscreen.region",            "", integral_setting::decimal, 0);
-integral_setting Video::Fullscreen::multiplier       (config(), "video.fullscreen.multiplier",        "", integral_setting::decimal, 2);
-integral_setting Video::Fullscreen::hardware_filter  (config(), "video.fullscreen.hardware_filter",   "", integral_setting::decimal, 1);
-integral_setting Video::Fullscreen::software_filter  (config(), "video.fullscreen.software_filter",   "", integral_setting::decimal, 0);
+    struct Mouse {
+      string x, y, l, r;
+    } mouse1, mouse2;
 
-integral_setting Video::aspect_ntsc_x(config(), "video.aspect_ntsc_x", "", integral_setting::decimal, 54);
-integral_setting Video::aspect_ntsc_y(config(), "video.aspect_ntsc_y", "", integral_setting::decimal, 47);
-integral_setting Video::aspect_pal_x (config(), "video.aspect_pal_x",  "", integral_setting::decimal, 32);
-integral_setting Video::aspect_pal_y (config(), "video.aspect_pal_y",  "", integral_setting::decimal, 23);
+    struct SuperScope {
+      string x, y, trigger, turbo, cursor, pause;
+    } superscope;
 
-integral_setting Video::frameskip("video.frameskip", "Video frameskip", integral_setting::decimal, 0);
-integral_setting Video::start_in_fullscreen_mode(config(), "video.start_in_fullscreen_mode",
-  "If true, bsnes will start in fullscreen mode, rather than windowed mode.",
-  integral_setting::boolean, false);
+    struct Justifier {
+      string x, y, trigger, start;
+    } justifier1, justifier2;
 
-struct Audio {
-  static integral_setting output_frequency, input_frequency;
-  static integral_setting latency;
-  static integral_setting volume, mute;
-  static integral_setting synchronize;
-} audio;
-integral_setting Audio::output_frequency(config(), "audio.output_frequency", "Sound card audio output frequency", integral_setting::decimal, 48000);
-integral_setting Audio::input_frequency(config(), "audio.input_frequency", "Emulator audio input frequency", integral_setting::decimal, 32000);
-integral_setting Audio::latency(config(), "audio.latency", "Sound card latency (in ms)", integral_setting::decimal, 100);
-integral_setting Audio::volume(config(), "audio.volume", "Audio volume (10 - 100)", integral_setting::decimal, 100);
-integral_setting Audio::mute(config(), "audio.mute", "Mute audio playback", integral_setting::boolean, false);
-integral_setting Audio::synchronize(config(), "audio.synchronize", "Synchronize to audio sample rate", integral_setting::boolean, true);
+    struct GUI {
+      string load, pause, reset, power, quit;
+      string speed_decrease, speed_increase;
+      string frameskip_decrease, frameskip_increase;
+      string toggle_fullscreen, toggle_menubar, toggle_statusbar;
+    } gui;
 
-struct Input {
-  static integral_setting capture_mode;
-  static integral_setting allow_invalid_input;
-  static integral_setting analog_axis_resistance;
+    struct Debugger {
+      string export_memory;
+      string toggle_cputrace, toggle_cputracemask;
+      string toggle_smptrace, toggle_smptracemask;
+    } debugger;
+  } input;
 
-  struct Joypad1    { static string_setting up, down, left, right, a, b, x, y, l, r, select, start; } joypad1;
-  struct Joypad2    { static string_setting up, down, left, right, a, b, x, y, l, r, select, start; } joypad2;
+  struct Misc {
+    bool start_in_fullscreen_mode;
+    unsigned window_opacity;
+    unsigned cheat_autosort;
+    bool show_advanced_options;
+  } misc;
 
-  struct Multitap1A { static string_setting up, down, left, right, a, b, x, y, l, r, select, start; } multitap1a;
-  struct Multitap1B { static string_setting up, down, left, right, a, b, x, y, l, r, select, start; } multitap1b;
-  struct Multitap1C { static string_setting up, down, left, right, a, b, x, y, l, r, select, start; } multitap1c;
-  struct Multitap1D { static string_setting up, down, left, right, a, b, x, y, l, r, select, start; } multitap1d;
-  struct Multitap2A { static string_setting up, down, left, right, a, b, x, y, l, r, select, start; } multitap2a;
-  struct Multitap2B { static string_setting up, down, left, right, a, b, x, y, l, r, select, start; } multitap2b;
-  struct Multitap2C { static string_setting up, down, left, right, a, b, x, y, l, r, select, start; } multitap2c;
-  struct Multitap2D { static string_setting up, down, left, right, a, b, x, y, l, r, select, start; } multitap2d;
+  bsnes_configuration() {
+    //========
+    //external
+    //========
 
-  struct Mouse1 { static string_setting x, y, l, r; } mouse1;
-  struct Mouse2 { static string_setting x, y, l, r; } mouse2;
+    attach(snes.config.controller_port1 = SNES::Input::DeviceJoypad, "snes.controller_port1");
+    attach(snes.config.controller_port2 = SNES::Input::DeviceJoypad, "snes.controller_port2");
+    attach(snes.config.expansion_port   =        SNES::ExpansionBSX, "snes.expansion_port");
+    attach(snes.config.region           =          SNES::Autodetect, "snes.region");
 
-  struct SuperScope { static string_setting x, y, trigger, turbo, cursor, pause; } superscope;
-  struct Justifier1 { static string_setting x, y, trigger, start; } justifier1;
-  struct Justifier2 { static string_setting x, y, trigger, start; } justifier2;
+    attach(snes.config.file.autodetect_type    = false, "file.autodetect_type", "Detect filetype by header, rather than file extension");
+    attach(snes.config.file.bypass_patch_crc32 = false, "file.bypass_patch_crc32", "Apply UPS patches even when checksum match fails");
 
-  struct GUI {
-    static string_setting load;
-    static string_setting pause;
-    static string_setting reset;
-    static string_setting power;
-    static string_setting quit;
-    static string_setting speed_decrease;
-    static string_setting speed_increase;
-    static string_setting frameskip_decrease;
-    static string_setting frameskip_increase;
-    static string_setting toggle_fullscreen;
-    static string_setting toggle_menubar;
-    static string_setting toggle_statusbar;
-  } gui;
+    attach(snes.config.path.rom        = "", "path.rom");
+    attach(snes.config.path.save       = "", "path.save");
+    attach(snes.config.path.patch      = "", "path.patch");
+    attach(snes.config.path.cheat      = "", "path.cheat");
+    attach(snes.config.path.exportdata = "", "path.exportdata");
+    attach(snes.config.path.bsx        = "", "path.bsx");
+    attach(snes.config.path.st         = "", "path.st");
 
-  struct Debugger {
-    static string_setting export_memory;
-    static string_setting toggle_cputrace;
-    static string_setting toggle_cputracemask;
-    static string_setting toggle_smptrace;
-    static string_setting toggle_smptracemask;
-  } debugger;
-} input;
+    attach(snes.config.cpu.ntsc_clock_rate = 21477272, "cpu.ntsc_clock_rate");
+    attach(snes.config.cpu.pal_clock_rate  = 21281370, "cpu.pal_clock_rate");
+    attach(snes.config.cpu.alu_mul_delay   =        2, "cpu.alu_mul_delay");
+    attach(snes.config.cpu.alu_div_delay   =        2, "cpu.alu_div_delay");
+    attach(snes.config.cpu.wram_init_value =     0x55, "cpu.wram_init_value");
 
-integral_setting Input::capture_mode(config(), "input.capture_mode",
-  "Capture method for input to main emulation window.\n"
-  "When emulation window does not have focus:\n"
-  "0 = Allow input\n"
-  "1 = Ignore input\n"
-  "2 = Pause emulator",
-  integral_setting::decimal, 2);
+    attach(snes.config.smp.ntsc_clock_rate = 32041 * 768, "smp.ntsc_clock_rate");
+    attach(snes.config.smp.pal_clock_rate  = 32041 * 768, "smp.pal_clock_rate");
 
-integral_setting Input::allow_invalid_input(config(), "input.allow_invalid_input",
-  "Allow up+down and left+right combinations (not recommended.)\n"
-  "This is not possible on an actual SNES controller, due to its design. "
-  "Enabling this option can trigger bugs in certain games.",
-  integral_setting::boolean, false);
+    //========
+    //internal
+    //========
 
-integral_setting Input::analog_axis_resistance(config(), "input.analog_axis_resistance",
-  "Resistance required to activate analog stick in any given direction.\n"
-  "This value ranges from 1 (1%, virtually no resistance) to 99 (99%, near full resistance.) "
-  "For instance, a value of 50 means that to register 'left', the analog stick must be moved "
-  "50% between the center and the left.\n"
-  "Less resistance allows for more fluid movement; whereas more resistance helps to prevent "
-  "accidental movements, eg attempting to press up whilst bumping the stick slightly left.",
-  integral_setting::decimal, 50);
+    *bsnes_cfg  = 0;
+    *locale_cfg = 0;
 
-string_setting Input::Joypad1::up    (config(), "input.joypad1.up",     "", "up");
-string_setting Input::Joypad1::down  (config(), "input.joypad1.down",   "", "down");
-string_setting Input::Joypad1::left  (config(), "input.joypad1.left",   "", "left");
-string_setting Input::Joypad1::right (config(), "input.joypad1.right",  "", "right");
-string_setting Input::Joypad1::a     (config(), "input.joypad1.a",      "", "x");
-string_setting Input::Joypad1::b     (config(), "input.joypad1.b",      "", "z");
-string_setting Input::Joypad1::x     (config(), "input.joypad1.x",      "", "s");
-string_setting Input::Joypad1::y     (config(), "input.joypad1.y",      "", "a");
-string_setting Input::Joypad1::l     (config(), "input.joypad1.l",      "", "d");
-string_setting Input::Joypad1::r     (config(), "input.joypad1.r",      "", "c");
-string_setting Input::Joypad1::select(config(), "input.joypad1.select", "", "rshift");
-string_setting Input::Joypad1::start (config(), "input.joypad1.start",  "", "return");
+    attach(system.video = "", "system.video", "Video hardware interface");
+    attach(system.audio = "", "system.audio", "Audio hardware interface");
+    attach(system.input = "", "system.input", "Input hardware interface");
 
-string_setting Input::Joypad2::up    (config(), "input.joypad2.up",     "", "t");
-string_setting Input::Joypad2::down  (config(), "input.joypad2.down",   "", "g");
-string_setting Input::Joypad2::left  (config(), "input.joypad2.left",   "", "f");
-string_setting Input::Joypad2::right (config(), "input.joypad2.right",  "", "h");
-string_setting Input::Joypad2::a     (config(), "input.joypad2.a",      "", "k");
-string_setting Input::Joypad2::b     (config(), "input.joypad2.b",      "", "j");
-string_setting Input::Joypad2::x     (config(), "input.joypad2.x",      "", "i");
-string_setting Input::Joypad2::y     (config(), "input.joypad2.y",      "", "u");
-string_setting Input::Joypad2::l     (config(), "input.joypad2.l",      "", "o");
-string_setting Input::Joypad2::r     (config(), "input.joypad2.r",      "", "l");
-string_setting Input::Joypad2::select(config(), "input.joypad2.select", "", "lbracket");
-string_setting Input::Joypad2::start (config(), "input.joypad2.start",  "", "rbracket");
+    attach(system.invoke_crash_handler = false, "system.invoke_crash_handler", "Do not modify! Used to detect crashes caused by driver initialization");
+    attach(system.emulation_speed      =     2, "system.emulation_speed", "Relative speed of emulator compared to hardware");
 
-#define DeclMultitap(uname, lname) \
-string_setting Input::uname::up    (config(), "input.multitap" lname ".up",     "", "none"); \
-string_setting Input::uname::down  (config(), "input.multitap" lname ".down",   "", "none"); \
-string_setting Input::uname::left  (config(), "input.multitap" lname ".left",   "", "none"); \
-string_setting Input::uname::right (config(), "input.multitap" lname ".right",  "", "none"); \
-string_setting Input::uname::a     (config(), "input.multitap" lname ".a",      "", "none"); \
-string_setting Input::uname::b     (config(), "input.multitap" lname ".b",      "", "none"); \
-string_setting Input::uname::x     (config(), "input.multitap" lname ".x",      "", "none"); \
-string_setting Input::uname::y     (config(), "input.multitap" lname ".y",      "", "none"); \
-string_setting Input::uname::l     (config(), "input.multitap" lname ".l",      "", "none"); \
-string_setting Input::uname::r     (config(), "input.multitap" lname ".r",      "", "none"); \
-string_setting Input::uname::select(config(), "input.multitap" lname ".select", "", "none"); \
-string_setting Input::uname::start (config(), "input.multitap" lname ".start",  "", "none");
+    video.mode = 0;
+    attach(video.synchronize = false, "video.synchronize", "Synchronize to video refresh rate");
 
-DeclMultitap(Multitap1A, "1a")
-DeclMultitap(Multitap1B, "1b")
-DeclMultitap(Multitap1C, "1c")
-DeclMultitap(Multitap1D, "1d")
-DeclMultitap(Multitap2A, "2a")
-DeclMultitap(Multitap2B, "2b")
-DeclMultitap(Multitap2C, "2c")
-DeclMultitap(Multitap2D, "2d")
+    attach(video.windowed.aspect_correction = true, "video.windowed.aspect_correction");
+    attach(video.windowed.region            =    0, "video.windowed.region");
+    attach(video.windowed.multiplier        =    2, "video.windowed.multiplier");
+    attach(video.windowed.hardware_filter   =    1, "video.windowed.hardware_filter");
+    attach(video.windowed.software_filter   =    0, "video.windowed.software_filter");
 
-#undef DeclMultitap
+    attach(video.fullscreen.aspect_correction = true, "video.fullscreen.aspect_correction");
+    attach(video.fullscreen.region            =    0, "video.fullscreen.region");
+    attach(video.fullscreen.multiplier        =    2, "video.fullscreen.multiplier");
+    attach(video.fullscreen.hardware_filter   =    1, "video.fullscreen.hardware_filter");
+    attach(video.fullscreen.software_filter   =    0, "video.fullscreen.software_filter");
 
-string_setting Input::Mouse1::x(config(), "input.mouse1.x", "", "mouse.x");
-string_setting Input::Mouse1::y(config(), "input.mouse1.y", "", "mouse.y");
-string_setting Input::Mouse1::l(config(), "input.mouse1.l", "", "mouse.button00");
-string_setting Input::Mouse1::r(config(), "input.mouse1.r", "", "mouse.button02");
+    attach(video.aspect_ntsc_x = 54, "video.aspect_ntsc_x", "NTSC TV aspect correction ratio");
+    attach(video.aspect_ntsc_y = 47, "video.aspect_ntsc_y");
+    attach(video.aspect_pal_x  = 32, "video.aspect_pal_x", "PAL TV aspect correction ratio");
+    attach(video.aspect_pal_y  = 23, "video.aspect_pal_y");
 
-string_setting Input::Mouse2::x(config(), "input.mouse2.x", "", "mouse.x");
-string_setting Input::Mouse2::y(config(), "input.mouse2.y", "", "mouse.y");
-string_setting Input::Mouse2::l(config(), "input.mouse2.l", "", "mouse.button00");
-string_setting Input::Mouse2::r(config(), "input.mouse2.r", "", "mouse.button02");
+    video.frameskip = 0;
+    attach(video.contrast   =   0, "video.contrast");
+    attach(video.brightness =   0, "video.brightness");
+    attach(video.gamma      = 100, "video.gamma");
 
-string_setting Input::SuperScope::x      (config(), "input.superscope.x",       "", "mouse.x");
-string_setting Input::SuperScope::y      (config(), "input.superscope.y",       "", "mouse.y");
-string_setting Input::SuperScope::trigger(config(), "input.superscope.trigger", "", "mouse.button00");
-string_setting Input::SuperScope::cursor (config(), "input.superscope.cursor",  "", "mouse.button02");
-string_setting Input::SuperScope::turbo  (config(), "input.superscope.turbo",   "", "t");
-string_setting Input::SuperScope::pause  (config(), "input.superscope.pause",   "", "p");
+    attach(video.gamma_ramp               =  true, "video.gamma_ramp");
+    attach(video.sepia                    = false, "video.sepia");
+    attach(video.grayscale                = false, "video.grayscale");
+    attach(video.invert                   = false, "video.invert");
+    attach(video.ntsc_filter_merge_fields =  true, "video.ntsc_filter_merge_fields");
 
-string_setting Input::Justifier1::x      (config(), "input.justifier1.x",       "", "mouse.x");
-string_setting Input::Justifier1::y      (config(), "input.justifier1.y",       "", "mouse.y");
-string_setting Input::Justifier1::trigger(config(), "input.justifier1.trigger", "", "mouse.button00");
-string_setting Input::Justifier1::start  (config(), "input.justifier1.start",   "", "mouse.button02");
+    attach(audio.output_frequency = 48000, "audio.output_frequency");
+    attach(audio.input_frequency  = 32000, "audio.input_frequency");
+    attach(audio.latency          =   100, "audio.latency");
+    attach(audio.volume           =   100, "audio.volume");
+    attach(audio.mute             = false, "audio.mute");
+    attach(audio.synchronize      =  true, "audio.synchronize");
 
-string_setting Input::Justifier2::x      (config(), "input.justifier2.x",       "", "none");
-string_setting Input::Justifier2::y      (config(), "input.justifier2.y",       "", "none");
-string_setting Input::Justifier2::trigger(config(), "input.justifier2.trigger", "", "none");
-string_setting Input::Justifier2::start  (config(), "input.justifier2.start",   "", "none");
+    attach(input.capture_mode           =     2, "input.capture_mode", "Capture method: 0 = allow, 1 = ignore, 2 = pause");
+    attach(input.allow_invalid_input    = false, "input.allow_invalid_input", "Allow D-pad up+down and left+right combinations (not recommended)");
+    attach(input.analog_axis_resistance =    50, "input.analog_axis_resistance", "Analog stick resistance percentage; lower = less, higher = more");
 
-string_setting Input::GUI::load              (config(), "input.gui.load",               "", "none");
-string_setting Input::GUI::pause             (config(), "input.gui.pause",              "", "f12");
-string_setting Input::GUI::reset             (config(), "input.gui.reset",              "", "none");
-string_setting Input::GUI::power             (config(), "input.gui.power",              "", "none");
-string_setting Input::GUI::quit              (config(), "input.gui.quit",               "", "none");
-string_setting Input::GUI::speed_decrease    (config(), "input.gui.speed_decrease",     "", "divide");
-string_setting Input::GUI::speed_increase    (config(), "input.gui.speed_increase",     "", "multiply");
-string_setting Input::GUI::frameskip_decrease(config(), "input.gui.frameskip_decrease", "", "subtract");
-string_setting Input::GUI::frameskip_increase(config(), "input.gui.frameskip_increase", "", "add");
-string_setting Input::GUI::toggle_fullscreen (config(), "input.gui.toggle_fullscreen",  "", "f11");
-string_setting Input::GUI::toggle_menubar    (config(), "input.gui.toggle_menubar",     "", "escape");
-string_setting Input::GUI::toggle_statusbar  (config(), "input.gui.toggle_statusbar",   "", "escape");
+    attach(input.joypad1.up     =     "up", "input.joypad1.up");
+    attach(input.joypad1.down   =   "down", "input.joypad1.down");
+    attach(input.joypad1.left   =   "left", "input.joypad1.left");
+    attach(input.joypad1.right  =  "right", "input.joypad1.right");
+    attach(input.joypad1.a      =      "x", "input.joypad1.a");
+    attach(input.joypad1.b      =      "z", "input.joypad1.b");
+    attach(input.joypad1.x      =      "s", "input.joypad1.x");
+    attach(input.joypad1.y      =      "a", "input.joypad1.y");
+    attach(input.joypad1.l      =      "d", "input.joypad1.l");
+    attach(input.joypad1.r      =      "c", "input.joypad1.r");
+    attach(input.joypad1.select = "rshift", "input.joypad1.select");
+    attach(input.joypad1.start  = "return", "input.joypad1.start");
 
-string_setting Input::Debugger::export_memory      (config(), "input.debugger.export_memory",       "", "none");
-string_setting Input::Debugger::toggle_cputrace    (config(), "input.debugger.toggle_cputrace",     "", "none");
-string_setting Input::Debugger::toggle_cputracemask(config(), "input.debugger.toggle_cputracemask", "", "none");
-string_setting Input::Debugger::toggle_smptrace    (config(), "input.debugger.toggle_smptrace",     "", "none");
-string_setting Input::Debugger::toggle_smptracemask(config(), "input.debugger.toggle_smptracemask", "", "none");
+    attach_joypad(input.joypad2,    "input.joypad2");
+    attach_joypad(input.multitap1a, "input.multitap1a");
+    attach_joypad(input.multitap1b, "input.multitap1b");
+    attach_joypad(input.multitap1c, "input.multitap1c");
+    attach_joypad(input.multitap1d, "input.multitap1d");
+    attach_joypad(input.multitap2a, "input.multitap2a");
+    attach_joypad(input.multitap2b, "input.multitap2b");
+    attach_joypad(input.multitap2c, "input.multitap2c");
+    attach_joypad(input.multitap2d, "input.multitap2d");
 
-struct Misc {
-  static integral_setting cheat_autosort;
-  static integral_setting opacity;
-} misc;
+    attach(input.mouse1.x =        "mouse1.x", "input.mouse1.x");
+    attach(input.mouse1.y =        "mouse1.y", "input.mouse1.y");
+    attach(input.mouse1.l = "mouse1.button00", "input.mouse1.l");
+    attach(input.mouse1.r = "mouse1.button02", "input.mouse1.r");
 
-integral_setting Misc::cheat_autosort(config(), "misc.cheat_autosort", "Keep cheat code list sorted by description", integral_setting::boolean, false);
-integral_setting Misc::opacity(config(), "misc.opacity", "Opacity of user interface windows", integral_setting::decimal, 100);
+    attach(input.mouse2.x =        "mouse2.x", "input.mouse2.x");
+    attach(input.mouse2.y =        "mouse2.y", "input.mouse2.y");
+    attach(input.mouse2.l = "mouse2.button00", "input.mouse2.l");
+    attach(input.mouse2.r = "mouse2.button02", "input.mouse2.r");
 
-struct Advanced {
-  static integral_setting enable;
-} advanced;
+    attach(input.superscope.x       =        "mouse.x", "input.superscope.x");
+    attach(input.superscope.y       =        "mouse.y", "input.superscope.y");
+    attach(input.superscope.trigger = "mouse.button00", "input.superscope.trigger");
+    attach(input.superscope.cursor  = "mouse.button02", "input.superscope.cursor");
+    attach(input.superscope.turbo   =              "t", "input.superscope.turbo");
+    attach(input.superscope.pause   =              "p", "input.superscope.pause");
 
-integral_setting Advanced::enable(config(), "advanced.enable", "Enable advanced, developer-oriented UI options", integral_setting::boolean, false);
+    attach(input.justifier1.x       =        "mouse.x", "input.justifier1.x");
+    attach(input.justifier1.y       =        "mouse.y", "input.justifier1.y");
+    attach(input.justifier1.trigger = "mouse.button00", "input.justifier1.trigger");
+    attach(input.justifier1.start   = "mouse.button02", "input.justifier1.start");
 
-} //namespace config
+    attach(input.justifier2.x       = "none", "input.justifier2.x");
+    attach(input.justifier2.y       = "none", "input.justifier2.y");
+    attach(input.justifier2.trigger = "none", "input.justifier2.trigger");
+    attach(input.justifier2.start   = "none", "input.justifier2.start");
+
+    attach(input.gui.load  = "none", "input.gui.load");
+    attach(input.gui.pause =  "f12", "input.gui.pause");
+    attach(input.gui.reset = "none", "input.gui.reset");
+    attach(input.gui.power = "none", "input.gui.power");
+    attach(input.gui.quit  = "none", "input.gui.quit");
+
+    attach(input.gui.speed_decrease     =   "divide", "input.gui.speed_decrease");
+    attach(input.gui.speed_increase     = "multiply", "input.gui.speed_increase");
+    attach(input.gui.frameskip_decrease = "subtract", "input.gui.frameskip_decrease");
+    attach(input.gui.frameskip_increase =      "add", "input.gui.frameskip_increase");
+
+    attach(input.gui.toggle_fullscreen =    "f11", "input.gui.toggle_fullscreen");
+    attach(input.gui.toggle_menubar    = "escape", "input.gui.toggle_menubar");
+    attach(input.gui.toggle_statusbar  = "escape", "input.gui.toggle_statusbar");
+
+    attach(input.debugger.export_memory       = "none", "input.debugger.export_memory");
+    attach(input.debugger.toggle_cputrace     = "none", "input.debugger.toggle_cputrace");
+    attach(input.debugger.toggle_cputracemask = "none", "input.debugger.toggle_cputracemask");
+    attach(input.debugger.toggle_smptrace     = "none", "input.debugger.toggle_smptrace");
+    attach(input.debugger.toggle_smptracemask = "none", "input.debugger.toggle_smptracemask");
+
+    attach(misc.start_in_fullscreen_mode = false, "misc.start_in_fullscreen_mode");
+    attach(misc.window_opacity           =   100, "misc.window_opacity", "Translucency percentage of helper windows (50%-100%)");
+    attach(misc.cheat_autosort           = false, "misc.cheat_autosort");
+    attach(misc.show_advanced_options    = false, "misc.show_advanced_options", "Enable developer-oriented GUI options");
+  }
+
+  void attach_joypad(Input::Joypad &joypad, const char *name) {
+    attach(joypad.up     = "none", string() << name << ".up");
+    attach(joypad.down   = "none", string() << name << ".down");
+    attach(joypad.left   = "none", string() << name << ".left");
+    attach(joypad.right  = "none", string() << name << ".right");
+    attach(joypad.a      = "none", string() << name << ".a");
+    attach(joypad.b      = "none", string() << name << ".b");
+    attach(joypad.x      = "none", string() << name << ".x");
+    attach(joypad.y      = "none", string() << name << ".y");
+    attach(joypad.l      = "none", string() << name << ".l");
+    attach(joypad.r      = "none", string() << name << ".r");
+    attach(joypad.select = "none", string() << name << ".select");
+    attach(joypad.start  = "none", string() << name << ".start");
+  }
+} config;

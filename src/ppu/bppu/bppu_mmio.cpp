@@ -737,7 +737,7 @@ uint8 r = 0x00;
   return regs.ppu2_mdr;
 }
 
-uint8 bPPU::mmio_read(uint addr) {
+uint8 bPPU::mmio_read(unsigned addr) {
   scheduler.sync_cpuppu();
 
   switch(addr & 0xffff) {
@@ -777,7 +777,7 @@ uint8 bPPU::mmio_read(uint addr) {
   return cpu.regs.mdr;
 }
 
-void bPPU::mmio_write(uint addr, uint8 data) {
+void bPPU::mmio_write(unsigned addr, uint8 data) {
   scheduler.sync_cpuppu();
 
   switch(addr & 0xffff) {

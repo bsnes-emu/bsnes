@@ -35,4 +35,4 @@
   #define order_msb8(a,b,c,d,e,f,g,h) a,b,c,d,e,f,g,h
 #endif
 
-#endif  //ifndef NALL_ENDIAN_HPP
+#endif

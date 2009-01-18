@@ -46,4 +46,4 @@ void Cartridge::unload_cart_bsx() {
   save_file(get_save_filename(cart.fn, "psr"), bsxcart.psram.handle(), bsxcart.psram.size());
 }
 
-#endif //ifdef CART_CPP
+#endif

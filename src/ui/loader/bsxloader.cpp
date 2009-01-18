@@ -4,7 +4,7 @@ uintptr_t BSXLoaderWindow::close(event_t) {
 }
 
 uintptr_t BSXLoaderWindow::bbase_tick(event_t) {
-char fn[PATH_MAX];
+  char fn[PATH_MAX];
   if(event::load_cart(fn) == true) tbase.set_text(fn);
   return true;
 }
@@ -15,7 +15,7 @@ uintptr_t BSXLoaderWindow::cbase_tick(event_t) {
 }
 
 uintptr_t BSXLoaderWindow::bslot_tick(event_t) {
-char fn[PATH_MAX];
+  char fn[PATH_MAX];
   if(event::load_cart(fn) == true) tslot.set_text(fn);
   return true;
 }
@@ -26,12 +26,12 @@ uintptr_t BSXLoaderWindow::cslot_tick(event_t) {
 }
 
 uintptr_t BSXLoaderWindow::load_tick(event_t) {
-char base[PATH_MAX], slot[PATH_MAX];
+  char base[PATH_MAX], slot[PATH_MAX];
   tbase.get_text(base, PATH_MAX);
   tslot.get_text(slot, PATH_MAX);
 
   if(mode == ModeBSX) {
-    config::path.bsx = base;
+    snes.config.path.bsx = base;
     event::load_cart_bsx(base, slot);
   } else if(mode == ModeBSC) {
     event::load_cart_bsc(base, slot);

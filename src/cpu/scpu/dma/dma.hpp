@@ -45,7 +45,7 @@
     bool   hdma_do_transfer;
   } channel[8];
 
-  void dma_add_clocks(uint clocks);
+  void dma_add_clocks(unsigned clocks);
   bool dma_addr_valid(uint32 abus);
   uint8 dma_read(uint32 abus);
   void dma_transfer(bool direction, uint8 bbus, uint32 abus);

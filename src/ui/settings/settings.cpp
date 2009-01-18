@@ -25,8 +25,8 @@ void SettingsWindow::setup() {
 
   //if emulator crashed on last run, default to driver select window and disable list selection,
   //otherwise default to input configuration (most frequently used panel)
-  panel_list.set_selection(config::system.invoke_crash_handler == true ? 0 : 3);
-  panel_list.enable(config::system.invoke_crash_handler == false);
+  panel_list.set_selection(config.system.invoke_crash_handler == true ? 0 : 3);
+  panel_list.enable(config.system.invoke_crash_handler == false);
   list_change(event_t(event_t::Change));
 }
 

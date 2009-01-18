@@ -11,7 +11,7 @@ void input_event(uint16_t code) {
   if(window_main.focused()) {
     if(code == inputuigeneral.load.code) load_cart();
     if(code == inputuigeneral.pause.code) {
-      app.pause = !app.pause; //toggle pause state
+      app.pause = !app.pause;  //toggle pause state
       if(app.pause) {
         audio.clear();
         if(cartridge.loaded()) status.update();
@@ -21,16 +21,16 @@ void input_event(uint16_t code) {
     if(code == inputuigeneral.power.code) modify_system_state(PowerCycle);
     if(code == inputuigeneral.quit.code) quit();
     if(code == inputuigeneral.speed_decrease.code) {
-      update_emulation_speed(config::system.emulation_speed - 1);
+      update_emulation_speed(config.system.emulation_speed - 1);
     }
     if(code == inputuigeneral.speed_increase.code) {
-      update_emulation_speed(config::system.emulation_speed + 1);
+      update_emulation_speed(config.system.emulation_speed + 1);
     }
     if(code == inputuigeneral.frameskip_decrease.code) {
-      update_frameskip(config::video.frameskip - 1);
+      update_frameskip(config.video.frameskip - 1);
     }
     if(code == inputuigeneral.frameskip_increase.code) {
-      update_frameskip(config::video.frameskip + 1);
+      update_frameskip(config.video.frameskip + 1);
     }
     if(code == inputuigeneral.toggle_fullscreen.code) toggle_fullscreen();
     if(code == inputuigeneral.toggle_menubar.code) toggle_menubar();
@@ -46,11 +46,11 @@ void input_event(uint16_t code) {
 
 void acquire() {
   if(cartridge.loaded() == true) {
-    if(config::snes.controller_port1 == SNES::Input::DeviceMouse
-    || config::snes.controller_port2 == SNES::Input::DeviceMouse
-    || config::snes.controller_port2 == SNES::Input::DeviceSuperScope
-    || config::snes.controller_port2 == SNES::Input::DeviceJustifier
-    || config::snes.controller_port2 == SNES::Input::DeviceJustifiers
+    if(snes.config.controller_port1 == SNES::Input::DeviceMouse
+    || snes.config.controller_port2 == SNES::Input::DeviceMouse
+    || snes.config.controller_port2 == SNES::Input::DeviceSuperScope
+    || snes.config.controller_port2 == SNES::Input::DeviceJustifier
+    || snes.config.controller_port2 == SNES::Input::DeviceJustifiers
     ) input.acquire();
   }
 }
@@ -60,79 +60,79 @@ void unacquire() {
 }
 
 void load_video_settings() {
-  video_settings.mode = config::video.mode;
-  video_settings.synchronize = config::video.synchronize;
+  video_settings.mode = config.video.mode;
+  video_settings.synchronize = config.video.synchronize;
 
   switch(video_settings.mode) { default:
     case 0: {  //windowed
-      video_settings.aspect_correction = config::video.windowed.aspect_correction;
-      video_settings.region            = config::video.windowed.region;
-      video_settings.multiplier        = config::video.windowed.multiplier;
-      video_settings.hardware_filter   = config::video.windowed.hardware_filter;
-      video_settings.software_filter   = config::video.windowed.software_filter;
+      video_settings.aspect_correction = config.video.windowed.aspect_correction;
+      video_settings.region            = config.video.windowed.region;
+      video_settings.multiplier        = config.video.windowed.multiplier;
+      video_settings.hardware_filter   = config.video.windowed.hardware_filter;
+      video_settings.software_filter   = config.video.windowed.software_filter;
     } break;
 
     case 1: {  //fullscreen
-      video_settings.aspect_correction = config::video.fullscreen.aspect_correction;
-      video_settings.region            = config::video.fullscreen.region;
-      video_settings.multiplier        = config::video.fullscreen.multiplier;
-      video_settings.hardware_filter   = config::video.fullscreen.hardware_filter;
-      video_settings.software_filter   = config::video.fullscreen.software_filter;
+      video_settings.aspect_correction = config.video.fullscreen.aspect_correction;
+      video_settings.region            = config.video.fullscreen.region;
+      video_settings.multiplier        = config.video.fullscreen.multiplier;
+      video_settings.hardware_filter   = config.video.fullscreen.hardware_filter;
+      video_settings.software_filter   = config.video.fullscreen.software_filter;
     } break;
   }
 }
 
 void update_aspect_correction(bool aspect_correction) {
-  switch(config::video.mode) { default:
-    case 0: config::video.windowed.aspect_correction   = aspect_correction; break;
-    case 1: config::video.fullscreen.aspect_correction = aspect_correction; break;
+  switch(config.video.mode) { default:
+    case 0: config.video.windowed.aspect_correction   = aspect_correction; break;
+    case 1: config.video.fullscreen.aspect_correction = aspect_correction; break;
   }
   update_video_settings();
 }
 
-void update_multiplier(uint multiplier) {
-  switch(config::video.mode) { default:
-    case 0: config::video.windowed.multiplier   = multiplier; break;
-    case 1: config::video.fullscreen.multiplier = multiplier; break;
+void update_multiplier(unsigned multiplier) {
+  switch(config.video.mode) { default:
+    case 0: config.video.windowed.multiplier   = multiplier; break;
+    case 1: config.video.fullscreen.multiplier = multiplier; break;
   }
   update_video_settings();
 }
 
-void update_region(uint region) {
-  switch(config::video.mode) { default:
-    case 0: config::video.windowed.region   = region; break;
-    case 1: config::video.fullscreen.region = region; break;
+void update_region(unsigned region) {
+  switch(config.video.mode) { default:
+    case 0: config.video.windowed.region   = region; break;
+    case 1: config.video.fullscreen.region = region; break;
   }
   update_video_settings();
 }
 
-void update_hardware_filter(uint hardware_filter) {
-  switch(config::video.mode) { default:
-    case 0: config::video.windowed.hardware_filter   = hardware_filter; break;
-    case 1: config::video.fullscreen.hardware_filter = hardware_filter; break;
+void update_hardware_filter(unsigned hardware_filter) {
+  switch(config.video.mode) { default:
+    case 0: config.video.windowed.hardware_filter   = hardware_filter; break;
+    case 1: config.video.fullscreen.hardware_filter = hardware_filter; break;
   }
   update_video_settings();
 }
 
-void update_software_filter(uint software_filter) {
-  switch(config::video.mode) { default:
-    case 0: config::video.windowed.software_filter   = software_filter; break;
-    case 1: config::video.fullscreen.software_filter = software_filter; break;
+void update_software_filter(unsigned software_filter) {
+  switch(config.video.mode) { default:
+    case 0: config.video.windowed.software_filter   = software_filter; break;
+    case 1: config.video.fullscreen.software_filter = software_filter; break;
   }
   update_video_settings();
 }
 
 void update_frameskip(int speed) {
-  config::video.frameskip = max(0, min(9, speed));
+  config.video.frameskip = max(0, min(9, speed));
   window_main.sync();
 }
 
 void update_emulation_speed(int speed) {
-  config::system.emulation_speed = speed = max(0, min(4, speed));
+  config.system.emulation_speed = speed = max(0, min(4, speed));
 
   double scale[] = { 0.50, 0.75, 1.00, 1.50, 2.00 };
-  unsigned outfreq = config::audio.output_frequency;
-  unsigned infreq  = config::audio.input_frequency * scale[speed] + 0.5;
+  unsigned outfreq = config.audio.output_frequency;
+  unsigned infreq  = config.audio.input_frequency * scale[speed] + 0.5;
 
   audio.set(Audio::Resample, outfreq != infreq);  //only resample when necessary
   audio.set(Audio::ResampleOutputFrequency, outfreq);
@@ -238,23 +238,24 @@ void modify_system_state(system_state_t state) {
     ? window_main.menu_system_power_on.check()
     : window_main.menu_system_power_off.check();
   window_cheat_editor.refresh();
+  if(cartridge.loaded() == false) window_cheat_code_editor.hide();
 }
 
 void update_controller_port1(int device) {
-  unsigned current_device = config::snes.controller_port1;
+  unsigned current_device = snes.config.controller_port1;
 
   if(device != current_device) {
-    snes.input.port_set_device(0, config::snes.controller_port1 = device);
+    snes.input.port_set_device(0, snes.config.controller_port1 = device);
   }
 
   window_main.sync();
 }
 
 void update_controller_port2(int device) {
-  unsigned current_device = config::snes.controller_port2;
+  unsigned current_device = snes.config.controller_port2;
 
   if(device != current_device) {
-    snes.input.port_set_device(1, config::snes.controller_port2 = device);
+    snes.input.port_set_device(1, snes.config.controller_port2 = device);
   }
 
   window_main.sync();
@@ -273,9 +274,9 @@ void update_video_settings() {
   if(video_settings.aspect_correction == true) {
     double scalar;
     if(mode == SNES::Video::ModeNTSC) {
-      scalar = (double)config::video.aspect_ntsc_x / (double)config::video.aspect_ntsc_y;
+      scalar = (double)config.video.aspect_ntsc_x / (double)config.video.aspect_ntsc_y;
     } else {
-      scalar = (double)config::video.aspect_pal_x  / (double)config::video.aspect_pal_y;
+      scalar = (double)config.video.aspect_pal_x  / (double)config.video.aspect_pal_y;
     }
     width = (unsigned)((double)width * (double)scalar);
   }
@@ -309,6 +310,7 @@ void update_video_settings() {
   window_main.move(window_main.view, (viewwidth - width) / 2, (viewheight - height) / 2);
   window_main.view.resize(width, height);
 
+  //update software filter mode
   libfilter::FilterInterface::FilterType filter;
   switch(video_settings.software_filter) { default:
     case 0: filter = libfilter::FilterInterface::Direct;   break;
@@ -317,8 +319,8 @@ void update_video_settings() {
     case 3: filter = libfilter::FilterInterface::HQ2x;     break;
     case 4: filter = libfilter::FilterInterface::NTSC;     break;
   }
-
   libfilter::filter.set(filter);
+
   snes.video.set_mode(mode);
   video.set(Video::Synchronize, video_settings.synchronize);
   video.set(Video::Filter, video_settings.hardware_filter);
@@ -327,22 +329,24 @@ void update_video_settings() {
 
 void update_opacity() {
   //convert opacity from 50-100 (percentage) to 128-255 (8-bit alpha)
-  unsigned opacity = max(50, min(100, config::misc.opacity));
+  unsigned opacity = max(50, min(100, config.misc.window_opacity));
   opacity = unsigned(256.0 / 100.0 * opacity);
   opacity = max(128, min(255, opacity));
 
-  window_settings.set_opacity(opacity);
-  window_input_capture.set_opacity(opacity);
-  window_bsxloader.set_opacity(opacity);
-  window_stloader.set_opacity(opacity);
   window_about.set_opacity(opacity);
+  window_bsxloader.set_opacity(opacity);
+  window_cheat_code_editor.set_opacity(opacity);
+  window_input_capture.set_opacity(opacity);
+  window_settings.set_opacity(opacity);
+  window_stloader.set_opacity(opacity);
+  window_textview.set_opacity(opacity);
 }
 
 void toggle_fullscreen() {
-  if(config::video.mode != 1) { //switch to fullscreen mode if not already in it
-    config::video.mode = 1;
+  if(config.video.mode != 1) { //switch to fullscreen mode if not already in it
+    config.video.mode = 1;
   } else { //switch to windowed mode if already in fullscreen mode
-    config::video.mode = 0;
+    config.video.mode = 0;
   }
   update_video_settings();
 }
@@ -364,7 +368,7 @@ bool load_cart(char *fn) {
 
   lstring dir;
   strcpy(fn, "");
-  strcpy(dir[0], config::path.rom);
+  strcpy(dir[0], snes.config.path.rom);
   replace(dir[0], "\\", "/");
   if(strlen(dir[0]) && !strend(dir[0], "/")) strcat(dir[0], "/");
 
@@ -372,7 +376,7 @@ bool load_cart(char *fn) {
   if(strbegin(dir[0], "./")) {
     ltrim(dir[0], "./");
     strcpy(dir[1], dir[0]);
-    strcpy(dir[0], config::path.base);
+    strcpy(dir[0], snes.config.path.base);
     strcat(dir[0], dir[1]);
   }
 
@@ -429,7 +433,7 @@ void load_image(const char *filename) {
     case Cartridge::TypeBSX: {
       window_bsxloader.mode = BSXLoaderWindow::ModeBSX;
       window_bsxloader.set_text(translate["Load BS-X Cartridge"]);
-      window_bsxloader.tbase.set_text(config::path.bsx);
+      window_bsxloader.tbase.set_text(snes.config.path.bsx);
       window_bsxloader.tslot.set_text(filename);
       window_bsxloader.load.focus();
       window_bsxloader.focus();
@@ -444,7 +448,7 @@ void load_image(const char *filename) {
     } break;
 
     case Cartridge::TypeSufamiTurbo: {
-      window_stloader.tbase.set_text(config::path.st);
+      window_stloader.tbase.set_text(snes.config.path.st);
       window_stloader.tslotA.set_text(filename);
       window_stloader.tslotB.set_text("");
       window_stloader.load.focus();
@@ -497,12 +501,15 @@ void unload_cart() {
 
 void quit() {
   app.term = true;
-  window_textview.hide();
-  window_about.hide();
-  window_settings.hide();
-  window_bsxloader.hide();
-  window_stloader.hide();
   window_main.hide();
+
+  window_about.hide();
+  window_bsxloader.hide();
+  window_cheat_code_editor.hide();
+  window_input_capture.hide();
+  window_settings.hide();
+  window_stloader.hide();
+  window_textview.hide();
 }
 
 };

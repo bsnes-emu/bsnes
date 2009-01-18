@@ -10,6 +10,37 @@ public:
   enum RegionAutodetect { Autodetect = 2 };
   enum ExpansionPortDevice { ExpansionNone = 0, ExpansionBSX = 1 };
 
+  struct Config {
+    unsigned controller_port1;
+    unsigned controller_port2;
+    unsigned expansion_port;
+    unsigned region;
+
+    struct File {
+      bool autodetect_type;
+      bool bypass_patch_crc32;
+    } file;
+
+    struct Path {
+      string base, user;
+      string rom, save, patch, cheat, exportdata;
+      string bsx, st;
+    } path;
+
+    struct CPU {
+      unsigned ntsc_clock_rate;
+      unsigned pal_clock_rate;
+      unsigned alu_mul_delay;
+      unsigned alu_div_delay;
+      unsigned wram_init_value;
+    } cpu;
+
+    struct SMP {
+      unsigned ntsc_clock_rate;
+      unsigned pal_clock_rate;
+    } smp;
+  } config;
+
   //system functions
   virtual void run();
   virtual void runtoframe();
@@ -24,8 +55,8 @@ public:
 
   //return *active* region / expansion port device information
   //settings cached upon power-on
-  Region region();
-  ExpansionPortDevice expansion();
+  Region region() const;
+  ExpansionPortDevice expansion() const;
 
   #include "video/video.hpp"
   #include "audio/audio.hpp"

@@ -10,14 +10,14 @@ void sCPU::enter() {
   add_clocks(186);
 
   loop:
-  if(event.irq) {
-    event.irq = false;
-    if(status.nmi_pending == true) {
+  if(status.interrupt_pending) {
+    status.interrupt_pending = false;
+    if(status.nmi_pending) {
       status.nmi_pending = false;
-      event.irq_vector = (regs.e == false) ? 0xffea : 0xfffa;
-    } else if(status.irq_pending == true) {
+      status.interrupt_vector = (regs.e == false ? 0xffea : 0xfffa);
+    } else if(status.irq_pending) {
       status.irq_pending = false;
-      event.irq_vector = (regs.e == false) ? 0xffee : 0xfffe;
+      status.interrupt_vector = (regs.e == false ? 0xffee : 0xfffe);
     }
     op_irq();
   }
@@ -40,15 +40,15 @@ void sCPU::enter() {
 void sCPU::op_irq() {
   op_read(regs.pc.d);
   op_io();
-  if(!regs.e)op_writestack(regs.pc.b);
+  if(!regs.e) op_writestack(regs.pc.b);
   op_writestack(regs.pc.h);
   op_writestack(regs.pc.l);
   op_writestack(regs.e ? (regs.p & ~0x10) : regs.p);
-  rd.l = op_read(event.irq_vector + 0);
+  rd.l = op_read(status.interrupt_vector + 0);
   regs.pc.b = 0x00;
   regs.p.i  = 1;
   regs.p.d  = 0;
-  rd.h = op_read(event.irq_vector + 1);
+  rd.h = op_read(status.interrupt_vector + 1);
   regs.pc.w = rd.w;
 }
 
@@ -57,11 +57,11 @@ void sCPU::op_irq() {
 //this affects the following opcodes:
 //  clc, cld, cli, clv, sec, sed, sei,
 //  tax, tay, txa, txy, tya, tyx,
-//  tcd, tcs, tdc, tsc, tsx, tcs,
+//  tcd, tcs, tdc, tsc, tsx, txs,
 //  inc, inx, iny, dec, dex, dey,
 //  asl, lsr, rol, ror, nop, xce.
 alwaysinline void sCPU::op_io_irq() {
-  if(event.irq) {
+  if(status.interrupt_pending) {
     //IRQ pending, modify I/O cycle to bus read cycle, do not increment PC
     op_read(regs.pc.d);
   } else {
@@ -87,4 +87,4 @@ alwaysinline void sCPU::op_io_cond6(uint16 addr) {
   }
 }
 
-#endif //ifdef SCPU_CPP
+#endif

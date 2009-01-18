@@ -1,9 +1,12 @@
 #include <../base.hpp>
+#include <../chip/chip.hpp>
+#include <../reader/reader.hpp>
 #define CART_CPP
 
 #include <nall/crc32.hpp>
 #include <nall/ups.hpp>
 
+#include "cart.hpp"
 #include "cart_load.cpp"
 #include "cart_normal.cpp"
 #include "cart_bsx.cpp"
@@ -22,11 +25,11 @@ namespace memory {
 
 Cartridge cartridge;
 
-const char* Cartridge::name() { return info.filename; }
-Cartridge::CartridgeMode Cartridge::mode() { return info.mode; }
-Cartridge::MemoryMapper Cartridge::mapper() { return info.mapper; }
-Cartridge::Region Cartridge::region() { return info.region; }
-bool Cartridge::loaded() { return cart.loaded; }
+const char* Cartridge::name() const { return info.filename; }
+Cartridge::CartridgeMode Cartridge::mode() const { return info.mode; }
+Cartridge::MemoryMapper Cartridge::mapper() const { return info.mapper; }
+Cartridge::Region Cartridge::region() const { return info.region; }
+bool Cartridge::loaded() const { return cart.loaded; }
 
 void Cartridge::load_begin(CartridgeMode mode) {
   cart.rom = cart.ram = cart.rtc = 0;
@@ -111,7 +114,9 @@ Cartridge::~Cartridge() {
   if(cart.loaded == true) unload();
 }
 
-//
+//==========
+//cartinfo_t
+//==========
 
 void Cartridge::cartinfo_t::reset() {
   type        = TypeUnknown;
@@ -164,4 +169,31 @@ Cartridge::info_t& Cartridge::info_t::operator=(const Cartridge::cartinfo_t &sou
   st018      = source.st018;
 
   return *this;
+}
+
+//=======
+//utility
+//=======
+
+string Cartridge::filepath(const char *filename, const char *pathname) {
+  //if no pathname, return filename as-is
+  string file(filename);
+  replace(file, "\\", "/");
+  if(!pathname || !*pathname) return file;
+
+  //ensure path ends with trailing '/'
+  string path(pathname);
+  replace(path, "\\", "/");
+  if(!strend(path, "/")) strcat(path, "/");
+
+  //replace relative path with absolute path
+  if(strbegin(path, "./")) {
+    ltrim(path, "./");
+    path = string() << snes.config.path.base << path;
+  }
+
+  //remove folder part of filename
+  lstring part;
+  split(part, "/", file);
+  return path << part[count(part) - 1];
 }

@@ -2,7 +2,6 @@ class sSMP : public SMP {
 public:
   void enter();
 
-public:
   #include "core/core.hpp"
   #include "memory/memory.hpp"
   #include "timing/timing.hpp"

@@ -54,28 +54,28 @@ char* Cartridge::get_base_filename(char *filename) {
 char* Cartridge::get_path_filename(char *filename, const char *path, const char *source, const char *extension) {
   strcpy(filename, source);
   modify_extension(filename, extension);
-  strcpy(filename, config::filepath(filename, path));
+  strcpy(filename, filepath(filename, path));
   return filename;
 }
 
 char* Cartridge::get_patch_filename(const char *source, const char *extension) {
-  return get_path_filename(patchfn, config::path.patch, source, extension);
+  return get_path_filename(patchfn, snes.config.path.patch, source, extension);
 }
 
 char* Cartridge::get_save_filename(const char *source, const char *extension) {
-  return get_path_filename(savefn, config::path.save, source, extension);
+  return get_path_filename(savefn, snes.config.path.save, source, extension);
 }
 
 char* Cartridge::get_cheat_filename(const char *source, const char *extension) {
-  return get_path_filename(cheatfn, config::path.cheat, source, extension);
+  return get_path_filename(cheatfn, snes.config.path.cheat, source, extension);
 }
 
-bool Cartridge::load_file(const char *fn, uint8 *&data, uint &size, CompressionMode compression) {
+bool Cartridge::load_file(const char *fn, uint8 *&data, unsigned &size, CompressionMode compression) {
   if(file::exists(fn) == false) return false;
 
   Reader::Type filetype = Reader::Normal;
   if(compression == CompressionInspect) filetype = Reader::detect(fn, true);
-  if(compression == CompressionAuto) filetype = Reader::detect(fn, config::file.autodetect_type);
+  if(compression == CompressionAuto) filetype = Reader::detect(fn, snes.config.file.autodetect_type);
 
   switch(filetype) { default:
     case Reader::Normal: {
@@ -125,7 +125,7 @@ bool Cartridge::apply_patch(const uint8_t *pdata, const unsigned psize, uint8_t 
 
   bool apply = false;
   if(result == ups::ok) apply = true;
-  if(config::file.bypass_patch_crc32 == true) {
+  if(snes.config.file.bypass_patch_crc32 == true) {
     if(result == ups::input_crc32_invalid) apply = true;
     if(result == ups::output_crc32_invalid) apply = true;
   }
@@ -141,7 +141,7 @@ bool Cartridge::apply_patch(const uint8_t *pdata, const unsigned psize, uint8_t 
   return apply;
 }
 
-bool Cartridge::save_file(const char *fn, uint8 *data, uint size) {
+bool Cartridge::save_file(const char *fn, uint8 *data, unsigned size) {
   file fp;
   if(!fp.open(fn, file::mode_write)) return false;
   fp.write(data, size);
@@ -149,4 +149,4 @@ bool Cartridge::save_file(const char *fn, uint8 *data, uint size) {
   return true;
 }
 
-#endif //ifdef CART_CPP
+#endif

@@ -243,4 +243,4 @@ uint8 bit    = 0x80;
   }
 }
 
-#endif //ifdef CX4_CPP
+#endif

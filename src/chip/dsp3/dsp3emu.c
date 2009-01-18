@@ -1143,4 +1143,4 @@ void InitDSP3()
   DSP3_Reset();
 }
 
-#endif //ifdef DSP3_CPP
+#endif

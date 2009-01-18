@@ -6,7 +6,7 @@ prefix = /usr/local
 ################
 
 ifneq ($(findstring gcc,$(compiler)),) # GCC family
-  flags = -O3 -fomit-frame-pointer $(if $(call streq,$(platform),x),-mtune=native,) -Ilib
+  flags = -O3 -fomit-frame-pointer -Ilib
   c = $(compiler) $(flags)
   cpp = $(subst cc,++,$(compiler)) $(flags)
   obj = o
@@ -16,7 +16,7 @@ ifneq ($(findstring gcc,$(compiler)),) # GCC family
   mkdef = -D$1
   mklib = -l$1
 else ifeq ($(compiler),cl) # Visual C++
-  flags = /nologo /wd4355 /wd4996 /O2 /EHsc /Ilib
+  flags = /nologo /wd4355 /wd4805 /wd4996 /Ox /GL /EHsc /Ilib
   c = cl $(flags)
   cpp = cl $(flags)
   obj = obj
@@ -79,7 +79,7 @@ link += $(if $(findstring input.sdl,$(ruby)),`sdl-config --libs`)
 ####################################
 
 objects = main libco hiro ruby libfilter string \
-  config reader cart cheat \
+  reader cart cheat \
   memory smemory cpu scpu smp ssmp sdsp ppu bppu snes \
   bsx srtc sdd1 spc7110 cx4 dsp1 dsp2 dsp3 dsp4 obc1 st010
 
@@ -98,11 +98,7 @@ rubydef := $(foreach c,$(subst .,_,$(call strupper,$(ruby))),$(call mkdef,$c))
 
 # Windows resource file
 ifeq ($(platform),win)
-  ifeq ($(compiler),cl)
-    objects += obj/bsnes.res
-  else ifneq ($(findstring gcc,$(compiler)),)
-    objects += obj/bsnesrc.$(obj)
-  endif
+  objects += obj/resource.$(obj)
 endif
 
 ################
@@ -127,9 +123,8 @@ all: build;
 ### main ###
 ############
 
-obj/main.$(obj): ui/main.cpp ui/* ui/base/* ui/event/* ui/loader/* ui/settings/*
-obj/bsnes.res: ui/bsnes.rc; rc /r /foobj/bsnes.res ui/bsnes.rc
-obj/bsnesrc.$(obj): ui/bsnes.rc; windres ui/bsnes.rc obj/bsnesrc.$(obj)
+obj/main.$(obj)    : ui/main.cpp ui/* ui/base/* ui/event/* ui/loader/* ui/settings/*
+obj/resource.$(obj): ui/bsnes.rc; windres ui/bsnes.rc obj/resource.$(obj)
 
 #################
 ### libraries ###
@@ -139,16 +134,15 @@ obj/ruby.$(obj): lib/ruby/ruby.cpp lib/ruby/* lib/ruby/video/* lib/ruby/audio/* 
 	$(call compile,$(rubydef) $(rubyflags))
 obj/hiro.$(obj): lib/hiro/hiro.cpp lib/hiro/* lib/hiro/gtk/* lib/hiro/win/*
 	$(call compile,$(if $(call streq,$(platform),x),`pkg-config --cflags gtk+-2.0`))
-obj/libco.$(obj):     lib/libco/libco.c lib/libco/*
-	$(call compile,-static)
+obj/libco.$(obj): lib/libco/libco.c lib/libco/*
+	$(call compile,$(if $(call strne,$(compiler),cl),-static))
 obj/libfilter.$(obj): lib/libfilter/libfilter.cpp lib/libfilter/*
-obj/string.$(obj):    lib/nall/string.cpp lib/nall/*
+obj/string.$(obj): lib/nall/string.cpp lib/nall/*
 
 #################
 ### utilities ###
 #################
 
-obj/config.$(obj): config/config.cpp config/*
 obj/reader.$(obj): reader/reader.cpp reader/*
 obj/cart.$(obj)  : cart/cart.cpp cart/*
 obj/cheat.$(obj) : cheat/cheat.cpp cheat/*

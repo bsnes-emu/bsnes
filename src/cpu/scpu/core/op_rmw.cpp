@@ -1,3 +1,5 @@
+#ifdef SCPU_CPP
+
 //inc
 case 0x1a: {
   last_cycle();
@@ -568,3 +570,4 @@ case 0x76: {
   op_writedp(dp + regs.x.w,     rd.l);
 } break;
 
+#endif

@@ -87,4 +87,4 @@ nall::string &qreplace(nall::string &str, const char *key, const char *token) {
   return str;
 }
 
-#endif  //ifdef NALL_STRING_CPP
+#endif

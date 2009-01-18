@@ -40,22 +40,22 @@ void bPPU::add_clocks(unsigned clocks) {
 
 void bPPU::scanline() {
   snes.scanline();
-  line.y = ivcounter();
+  line = ivcounter();
 
-  if(line.y == 0) {
+  if(line == 0) {
     //RTO flag reset
     regs.time_over  = false;
     regs.range_over = false;
   }
 
-  if(line.y == 1) {
+  if(line == 1) {
     //mosaic reset
     for(int bg = BG1; bg <= BG4; bg++) regs.bg_y[bg] = 1;
     regs.mosaic_countdown = regs.mosaic_size + 1;
     regs.mosaic_countdown--;
   } else {
     for(int bg = BG1; bg <= BG4; bg++) {
-      if(!regs.mosaic_enabled[bg] || !regs.mosaic_countdown) regs.bg_y[bg] = line.y;
+      if(!regs.mosaic_enabled[bg] || !regs.mosaic_countdown) regs.bg_y[bg] = line;
     }
     if(!regs.mosaic_countdown) regs.mosaic_countdown = regs.mosaic_size + 1;
     regs.mosaic_countdown--;
@@ -68,7 +68,7 @@ void bPPU::render_scanline() {
   if(status.render_output == false) return;
   #endif
 
-  if(line.y >= 1 && line.y < (!overscan() ? 225 : 240)) {
+  if(line >= 1 && line < (!overscan() ? 225 : 240)) {
     render_line_oam_rto();
     render_line();
   }

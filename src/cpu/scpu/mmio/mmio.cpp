@@ -93,7 +93,7 @@ void sCPU::mmio_w4203(uint8 data) {
   status.r4216 = status.mul_a * status.mul_b;
 
   status.alu_lock = true;
-  delta.enqueue(EventAluLockRelease, temp_.alu_mul_delay);
+  event.enqueue(snes.config.cpu.alu_mul_delay, EventAluLockRelease);
 }
 
 //WRDIVL
@@ -113,35 +113,31 @@ void sCPU::mmio_w4206(uint8 data) {
   status.r4216 = (status.div_b) ? status.div_a % status.div_b : status.div_a;
 
   status.alu_lock = true;
-  delta.enqueue(EventAluLockRelease, temp_.alu_div_delay);
+  event.enqueue(snes.config.cpu.alu_div_delay, EventAluLockRelease);
 }
 
 //HTIMEL
 void sCPU::mmio_w4207(uint8 data) {
   status.hirq_pos  = (status.hirq_pos & ~0xff) | (data);
   status.hirq_pos &= 0x01ff;
-  hvtime_update(0x4207);
 }
 
 //HTIMEH
 void sCPU::mmio_w4208(uint8 data) {
   status.hirq_pos  = (status.hirq_pos &  0xff) | (data << 8);
   status.hirq_pos &= 0x01ff;
-  hvtime_update(0x4208);
 }
 
 //VTIMEL
 void sCPU::mmio_w4209(uint8 data) {
   status.virq_pos  = (status.virq_pos & ~0xff) | (data);
   status.virq_pos &= 0x01ff;
-  hvtime_update(0x4209);
 }
 
 //VTIMEH
 void sCPU::mmio_w420a(uint8 data) {
   status.virq_pos  = (status.virq_pos &  0xff) | (data << 8);
   status.virq_pos &= 0x01ff;
-  hvtime_update(0x420a);
 }
 
 //DMAEN
@@ -421,7 +417,7 @@ void sCPU::mmio_reset() {
   status.joy4h = 0x00;
 }
 
-uint8 sCPU::mmio_read(uint addr) {
+uint8 sCPU::mmio_read(unsigned addr) {
   addr &= 0xffff;
 
   //APU
@@ -432,7 +428,7 @@ uint8 sCPU::mmio_read(uint addr) {
 
   //DMA
   if((addr & 0xff80) == 0x4300) { //$4300-$437f
-    uint i = (addr >> 4) & 7;
+    unsigned i = (addr >> 4) & 7;
     switch(addr & 0xf) {
       case 0x0: return mmio_r43x0(i);
       case 0x1: return mmio_r43x1(i);
@@ -478,7 +474,7 @@ uint8 sCPU::mmio_read(uint addr) {
   return regs.mdr;
 }
 
-void sCPU::mmio_write(uint addr, uint8 data) {
+void sCPU::mmio_write(unsigned addr, uint8 data) {
   addr &= 0xffff;
 
   //APU
@@ -490,7 +486,7 @@ void sCPU::mmio_write(uint addr, uint8 data) {
 
   //DMA
   if((addr & 0xff80) == 0x4300) { //$4300-$437f
-  uint i = (addr >> 4) & 7;
+    unsigned i = (addr >> 4) & 7;
     switch(addr & 0xf) {
       case 0x0: mmio_w43x0(i, data); return;
       case 0x1: mmio_w43x1(i, data); return;

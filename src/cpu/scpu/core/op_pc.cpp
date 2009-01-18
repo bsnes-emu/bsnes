@@ -1,3 +1,5 @@
+#ifdef SCPU_CPP
+
 //bcc
 case 0x90: {
   if(!!regs.p.c) last_cycle();
@@ -274,3 +276,4 @@ case 0x6b: {
   if(regs.e) regs.s.h = 0x01;
 } break;
 
+#endif

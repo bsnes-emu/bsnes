@@ -5,14 +5,14 @@
 uintptr_t PathSettingsWindow::selectpath_rom(event_t) {
   char t[PATH_MAX];
   if(hiro().folder_select(&window_settings, t) == true) {
-    config::path.rom = t;
+    snes.config.path.rom = t;
     update_paths();
   }
   return true;
 }
 
 uintptr_t PathSettingsWindow::defaultpath_rom(event_t) {
-  config::path.rom = "";
+  snes.config.path.rom = "";
   update_paths();
   return true;
 }
@@ -24,14 +24,14 @@ uintptr_t PathSettingsWindow::defaultpath_rom(event_t) {
 uintptr_t PathSettingsWindow::selectpath_save(event_t) {
   char t[PATH_MAX];
   if(hiro().folder_select(&window_settings, t) == true) {
-    config::path.save = t;
+    snes.config.path.save = t;
     update_paths();
   }
   return true;
 }
 
 uintptr_t PathSettingsWindow::defaultpath_save(event_t) {
-  config::path.save = "";
+  snes.config.path.save = "";
   update_paths();
   return true;
 }
@@ -43,14 +43,14 @@ uintptr_t PathSettingsWindow::defaultpath_save(event_t) {
 uintptr_t PathSettingsWindow::selectpath_patch(event_t) {
   char t[PATH_MAX];
   if(hiro().folder_select(&window_settings, t) == true) {
-    config::path.patch = t;
+    snes.config.path.patch = t;
     update_paths();
   }
   return true;
 }
 
 uintptr_t PathSettingsWindow::defaultpath_patch(event_t) {
-  config::path.patch = "";
+  snes.config.path.patch = "";
   update_paths();
   return true;
 }
@@ -62,14 +62,14 @@ uintptr_t PathSettingsWindow::defaultpath_patch(event_t) {
 uintptr_t PathSettingsWindow::selectpath_cheat(event_t) {
   char t[PATH_MAX];
   if(hiro().folder_select(&window_settings, t) == true) {
-    config::path.cheat = t;
+    snes.config.path.cheat = t;
     update_paths();
   }
   return true;
 }
 
 uintptr_t PathSettingsWindow::defaultpath_cheat(event_t) {
-  config::path.cheat = "";
+  snes.config.path.cheat = "";
   update_paths();
   return true;
 }
@@ -81,14 +81,14 @@ uintptr_t PathSettingsWindow::defaultpath_cheat(event_t) {
 uintptr_t PathSettingsWindow::selectpath_export(event_t) {
   char t[PATH_MAX];
   if(hiro().folder_select(&window_settings, t) == true) {
-    config::path.exportdata = t;
+    snes.config.path.exportdata = t;
     update_paths();
   }
   return true;
 }
 
 uintptr_t PathSettingsWindow::defaultpath_export(event_t) {
-  config::path.exportdata = "";
+  snes.config.path.exportdata = "";
   update_paths();
   return true;
 }
@@ -98,19 +98,19 @@ uintptr_t PathSettingsWindow::defaultpath_export(event_t) {
 //==============
 
 void PathSettingsWindow::update_paths() {
-  if(config::path.rom != "") rompath.set_text(config::path.rom);
+  if(snes.config.path.rom != "") rompath.set_text(snes.config.path.rom);
   else rompath.set_text(translate["<last loaded from>"]);
 
-  if(config::path.save != "") savepath.set_text(config::path.save);
+  if(snes.config.path.save != "") savepath.set_text(snes.config.path.save);
   else savepath.set_text(translate["<same as loaded game>"]);
 
-  if(config::path.patch != "") patchpath.set_text(config::path.patch);
+  if(snes.config.path.patch != "") patchpath.set_text(snes.config.path.patch);
   else patchpath.set_text(translate["<same as loaded game>"]);
 
-  if(config::path.cheat != "") cheatpath.set_text(config::path.cheat);
+  if(snes.config.path.cheat != "") cheatpath.set_text(snes.config.path.cheat);
   else cheatpath.set_text(translate["<same as loaded game>"]);
 
-  if(config::path.exportdata != "") exportpath.set_text(config::path.exportdata);
+  if(snes.config.path.exportdata != "") exportpath.set_text(snes.config.path.exportdata);
   else exportpath.set_text(translate["<startup path>"]);
 }
 

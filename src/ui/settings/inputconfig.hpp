@@ -35,7 +35,7 @@ public:
 
   bool waiting;
   bool locked;
-  uint index;
+  unsigned index;
 
   void assign(uint16_t code);
   void show();

@@ -184,4 +184,4 @@ const int16 Cx4::CosTable[512] = {
    32610,  32647,  32679,  32706,  32728,  32745,  32758,  32765
 };
 
-#endif //ifdef CX4_CPP
+#endif

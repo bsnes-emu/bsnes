@@ -8,21 +8,21 @@ void acquire();
 void unacquire();
 
 struct VideoSettings {
-  uint mode;
+  unsigned mode;
   bool synchronize;
   bool aspect_correction;
-  uint region;
-  uint multiplier;
-  uint hardware_filter;
-  uint software_filter;
+  unsigned region;
+  unsigned multiplier;
+  unsigned hardware_filter;
+  unsigned software_filter;
 } video_settings;
 void load_video_settings();
 
 void update_aspect_correction(bool);
-void update_multiplier(uint);
-void update_region(uint);
-void update_hardware_filter(uint);
-void update_software_filter(uint);
+void update_multiplier(unsigned);
+void update_region(unsigned);
+void update_hardware_filter(unsigned);
+void update_software_filter(unsigned);
 
 void update_frameskip(int);
 void update_emulation_speed(int);

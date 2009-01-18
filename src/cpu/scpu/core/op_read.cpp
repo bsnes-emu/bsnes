@@ -1,3 +1,5 @@
+#ifdef SCPU_CPP
+
 //adc_const
 case 0x69: {
   if(regs.p.m) last_cycle();
@@ -1649,3 +1651,4 @@ case 0x89: {
   regs.p.z = ((rd.w & regs.a.w) == 0);
 } break;
 
+#endif
