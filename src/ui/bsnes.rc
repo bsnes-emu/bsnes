@@ -1,4 +1,0 @@
-#define IDI_APP_ICON 100
-
-1 24 "ui/bsnes.Manifest"
-IDI_APP_ICON ICON DISCARDABLE "data/bsnes.ico"

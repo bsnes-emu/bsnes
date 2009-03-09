@@ -1,0 +1,10 @@
+<!DOCTYPE RCC>
+<RCC version="1.0">
+  <qresource>
+    <file alias="bsnes.png">../../data/bsnes.png</file>
+    <file alias="logo.png">../../data/logo.png</file>
+    <file alias="joypad.png">../../data/joypad.png</file>
+    <file alias="documentation.html">../../data/documentation.html</file>
+    <file alias="license.html">../../data/license.html</file>
+  </qresource>
+</RCC>

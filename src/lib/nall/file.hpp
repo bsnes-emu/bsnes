@@ -121,7 +121,7 @@ namespace nall {
       #if !defined(_WIN32)
       FILE *fp = fopen(fn, "rb");
       #else
-      FILE *fp = _wfopen(utf16(fn), L"rb");
+      FILE *fp = _wfopen(utf16_t(fn), L"rb");
       #endif
       if(fp) {
         fclose(fp);
@@ -144,10 +144,10 @@ namespace nall {
         case mode_readwrite: fp = fopen(fn, "rb+"); break;
         case mode_writeread: fp = fopen(fn, "wb+"); break;
         #else
-        case mode_read:      fp = _wfopen(utf16(fn), L"rb");  break;
-        case mode_write:     fp = _wfopen(utf16(fn), L"wb+"); break;
-        case mode_readwrite: fp = _wfopen(utf16(fn), L"rb+"); break;
-        case mode_writeread: fp = _wfopen(utf16(fn), L"wb+"); break;
+        case mode_read:      fp = _wfopen(utf16_t(fn), L"rb");  break;
+        case mode_write:     fp = _wfopen(utf16_t(fn), L"wb+"); break;
+        case mode_readwrite: fp = _wfopen(utf16_t(fn), L"rb+"); break;
+        case mode_writeread: fp = _wfopen(utf16_t(fn), L"wb+"); break;
         #endif
       }
       if(!fp) return false;

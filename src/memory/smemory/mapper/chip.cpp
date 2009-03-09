@@ -6,7 +6,7 @@ void sBus::map_cx4() {
 }
 
 void sBus::map_dsp1() {
-  switch(cartridge.info.dsp1_mapper) {
+  switch(cartridge.dsp1_mapper()) {
     case Cartridge::DSP1LoROM1MB: {
       map(MapDirect, 0x20, 0x3f, 0x8000, 0xffff, dsp1);
       map(MapDirect, 0xa0, 0xbf, 0x8000, 0xffff, dsp1);
@@ -51,4 +51,4 @@ void sBus::map_st010() {
   map(MapDirect, 0xe8, 0xef, 0x0000, 0x0fff, st010);
 }
 
-#endif //ifdef SMEMORY_CPP
+#endif

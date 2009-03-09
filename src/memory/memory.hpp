@@ -1,14 +1,7 @@
 struct Memory {
-  virtual unsigned size() { return 0; }
+  virtual unsigned size() const { return 0; }
   virtual uint8 read(unsigned addr) = 0;
   virtual void write(unsigned addr, uint8 data) = 0;
-
-  //deprecated, still used by S-CPU, S-SMP disassemblers
-  enum { WRAP_NONE = 0, WRAP_BANK = 1, WRAP_PAGE = 2 };
-  virtual uint16 read_word(unsigned addr, unsigned wrap = WRAP_NONE);
-  virtual void write_word(unsigned addr, uint16 data, unsigned wrap = WRAP_NONE);
-  virtual uint32 read_long(unsigned addr, unsigned wrap = WRAP_NONE);
-  virtual void write_long(unsigned addr, uint32 data, unsigned wrap = WRAP_NONE);
 };
 
 struct MMIO {
@@ -28,7 +21,7 @@ struct UnmappedMMIO : MMIO {
 
 struct StaticRAM : Memory {
   uint8* handle() { return data; }
-  unsigned size() { return datasize; }
+  unsigned size() const { return datasize; }
 
   inline uint8 read(unsigned addr) { return data[addr]; }
   inline void write(unsigned addr, uint8 n) { data[addr] = n; }
@@ -47,7 +40,7 @@ struct MappedRAM : Memory {
   void map(uint8 *source, unsigned length) { data = source; datasize = length > 0 ? length : -1U; }
   void write_protect(bool status) { write_protection = status; }
   uint8* handle() { return data; }
-  unsigned size() { return datasize; }
+  unsigned size() const { return datasize; }
 
   inline uint8 read(unsigned addr) { return data[addr]; }
   inline void write(unsigned addr, uint8 n) { if(!write_protection) data[addr] = n; }
@@ -83,7 +76,7 @@ public:
 
   alwaysinline uint8 read(unsigned addr) {
     #if defined(CHEAT_SYSTEM)
-    if(cheat.enabled() && cheat.exists(addr)) {
+    if(cheat.active() && cheat.exists(addr)) {
       uint8 r;
       if(cheat.read(addr, r)) return r;
     }
@@ -112,9 +105,8 @@ public:
     return 12;
   }
 
-  virtual void load_cart() = 0;
+  virtual bool load_cart() = 0;
   virtual void unload_cart() = 0;
-  virtual bool cart_loaded() = 0;
 
   virtual void power() = 0;
   virtual void reset() = 0;
@@ -131,12 +123,12 @@ protected:
 };
 
 namespace memory {
-  extern MMIOAccess mmio;   //S-CPU, S-PPU
-  extern StaticRAM  wram;   //S-CPU
-  extern StaticRAM  apuram; //S-SMP, S-DSP
-  extern StaticRAM  vram;   //S-PPU
-  extern StaticRAM  oam;    //S-PPU
-  extern StaticRAM  cgram;  //S-PPU
+  extern MMIOAccess mmio;    //S-CPU, S-PPU
+  extern StaticRAM  wram;    //S-CPU
+  extern StaticRAM  apuram;  //S-SMP, S-DSP
+  extern StaticRAM  vram;    //S-PPU
+  extern StaticRAM  oam;     //S-PPU
+  extern StaticRAM  cgram;   //S-PPU
 
   extern UnmappedMemory memory_unmapped;
   extern UnmappedMMIO   mmio_unmapped;

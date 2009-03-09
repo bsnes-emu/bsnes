@@ -29,11 +29,11 @@ void pListbox::create(unsigned style, unsigned width, unsigned height, const cha
   gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(scrollbox), GTK_SHADOW_ETCHED_IN);
 
   lstring list;
-  split(list, "\t", columns);
+  list.split("\t", columns);
 
-  GType *v = (GType*)malloc(count(list) * sizeof(GType));
-  for(unsigned i = 0; i < count(list); i++) v[i] = G_TYPE_STRING;
-  store = gtk_list_store_newv(count(list), v);
+  GType *v = (GType*)malloc(list.size() * sizeof(GType));
+  for(unsigned i = 0; i < list.size(); i++) v[i] = G_TYPE_STRING;
+  store = gtk_list_store_newv(list.size(), v);
   free(v);
 
   listbox = gtk_tree_view_new_with_model(GTK_TREE_MODEL(store));
@@ -44,8 +44,8 @@ void pListbox::create(unsigned style, unsigned width, unsigned height, const cha
   gtk_widget_show(scrollbox);
 
   //alternate colors for each listbox entry if there are multiple columns
-  gtk_tree_view_set_rules_hint(GTK_TREE_VIEW(listbox), count(list) >= 2 ? true : false);
-  for(unsigned i = 0; i < count(list); i++) {
+  gtk_tree_view_set_rules_hint(GTK_TREE_VIEW(listbox), list.size() >= 2 ? true : false);
+  for(unsigned i = 0; i < list.size(); i++) {
     unsigned i = column.size();
     column[i].renderer = gtk_cell_renderer_text_new();
     column[i].column = gtk_tree_view_column_new_with_attributes(
@@ -61,8 +61,8 @@ void pListbox::create(unsigned style, unsigned width, unsigned height, const cha
   }
 
   if(text && *text) {
-    split(list, "\n", text);
-    for(unsigned i = 0; i < count(list); i++) add_item(list[i]);
+    list.split("\n", text);
+    for(unsigned i = 0; i < list.size(); i++) add_item(list[i]);
   }
 
   gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(listbox), header);
@@ -85,9 +85,9 @@ void pListbox::set_column_width(unsigned index, unsigned width) {
 
 void pListbox::add_item(const char *text) {
   lstring list;
-  split(list, "\t", text);
+  list.split("\t", text);
   gtk_list_store_append(store, &iter);
-  for(unsigned i = 0; i < count(list); i++) {
+  for(unsigned i = 0; i < list.size(); i++) {
     gtk_list_store_set(store, &iter, i, (const char*)list[i], -1);
   }
 }
@@ -101,8 +101,8 @@ void pListbox::set_item(unsigned index, const char *text) {
   }
 
   lstring list;
-  split(list, "\t", text);
-  for(unsigned i = 0; i < count(list); i++) {
+  list.split("\t", text);
+  for(unsigned i = 0; i < list.size(); i++) {
     gtk_list_store_set(store, &iter, i, (const char*)list[i], -1);
   }
 }

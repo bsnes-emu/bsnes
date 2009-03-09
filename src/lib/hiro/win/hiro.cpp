@@ -106,23 +106,22 @@ bool pHiro::folder_select(Window *focus, char *filename, const char *path) {
 
 bool pHiro::file_open(Window *focus, char *filename, const char *path, const char *filter) {
   string dir, f;
-  strcpy(dir, path ? path : "");
-  replace(dir, "/", "\\");
+  dir = path ? path : "";
+  dir.replace("/", "\\");
 
   lstring type, part;
-  strcpy(f, "");
-  split(type, "\n", filter);
-  for(int i = 0; i < count(type); i++) {
-    split(part, "\t", type[i]);
-    if(count(part) != 2) continue;
+  type.split("\n", filter);
+  for(int i = 0; i < type.size(); i++) {
+    part.split("\t", type[i]);
+    if(part.size() != 2) continue;
 
-    strcat(f, part[0]);
-    strcat(f, " (");
-    strcat(f, part[1]);
-    strcat(f, ")\t");
-    replace(part[1], ",", ";");
-    strcat(f, part[1]);
-    strcat(f, "\t");
+    f.append(part[0]);
+    f.append(" (");
+    f.append(part[1]);
+    f.append(")\t");
+    part[1].replace(",", ";");
+    f.append(part[1]);
+    f.append("\t");
   }
 
   utf16 wfilter(f);
@@ -154,23 +153,22 @@ bool pHiro::file_open(Window *focus, char *filename, const char *path, const cha
 
 bool pHiro::file_save(Window *focus, char *filename, const char *path, const char *filter) {
   string dir, f;
-  strcpy(dir, path ? path : "");
-  replace(dir, "/", "\\");
+  dir = path ? path : "";
+  dir.replace("/", "\\");
 
   lstring type, part;
-  strcpy(f, "");
-  split(type, "\n", filter);
-  for(int i = 0; i < count(type); i++) {
-    split(part, "\t", type[i]);
-    if(count(part) != 2) continue;
+  type.split("\n", filter);
+  for(int i = 0; i < type.size(); i++) {
+    part.split("\t", type[i]);
+    if(part.size() != 2) continue;
 
-    strcat(f, part[0]);
-    strcat(f, " (");
-    strcat(f, part[1]);
-    strcat(f, ")\t");
-    replace(part[1], ",", ";");
-    strcat(f, part[1]);
-    strcat(f, "\t");
+    f.append(part[0]);
+    f.append(" (");
+    f.append(part[1]);
+    f.append(")\t");
+    part[1].replace(",", ";");
+    f.append(part[1]);
+    f.append("\t");
   }
 
   utf16 wfilter(f);

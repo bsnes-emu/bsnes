@@ -70,7 +70,7 @@ void bPPU::render_line_mode7(uint8 bg, uint8 pri0_pos, uint8 pri1_pos) {
     py >>= 8;
 
     switch(regs.mode7_repeat) {
-      case 0:   //screen repitition outside of screen area
+      case 0:   //screen repetition outside of screen area
       case 1: { //same as case 0
         px &= 1023;
         py &= 1023;

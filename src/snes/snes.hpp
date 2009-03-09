@@ -22,12 +22,15 @@ public:
     } file;
 
     struct Path {
-      string base, user;
-      string rom, save, patch, cheat, exportdata;
+      string base;     //binary path
+      string user;     //user profile path (bsnes.cfg, ...)
+      string current;  //current working directory (path to currently loaded cartridge)
+      string rom, save, patch, cheat, data;
       string bsx, st;
     } path;
 
     struct CPU {
+      unsigned version;
       unsigned ntsc_clock_rate;
       unsigned pal_clock_rate;
       unsigned alu_mul_delay;
@@ -39,6 +42,14 @@ public:
       unsigned ntsc_clock_rate;
       unsigned pal_clock_rate;
     } smp;
+
+    struct PPU1 {
+      unsigned version;
+    } ppu1;
+
+    struct PPU2 {
+      unsigned version;
+    } ppu2;
   } config;
 
   //system functions

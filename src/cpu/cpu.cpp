@@ -3,8 +3,14 @@
 
 #include "dcpu.cpp"
 
+void CPU::power() {
+  cpu_version = snes.config.cpu.version;
+}
+
+void CPU::reset() {
+}
+
 CPU::CPU() {
-  cpu_version = 2;
 }
 
 CPU::~CPU() {

@@ -12,10 +12,6 @@
 #include <nall/input.hpp>
 #include <nall/new.hpp>
 #include <nall/stdint.hpp>
-using nall::min;
-using nall::max;
-using nall::sclamp;
-using nall::zeromemory;
 
 namespace ruby {
 

@@ -28,8 +28,8 @@ void pEditbox::resize(unsigned width, unsigned height) {
 
 void pEditbox::set_text(const char *text) {
   string temp = text ? text : "";
-  replace(temp, "\r", "");
-  replace(temp, "\n", "\r\n");
+  temp.replace("\r", "");
+  temp.replace("\n", "\r\n");
   SetWindowText(hwnd, utf16(temp));
   update();
 }
@@ -39,7 +39,7 @@ unsigned pEditbox::get_text(char *text, unsigned length) {
   GetWindowText(hwnd, buffer, length);
   string temp = (const char*)utf8(buffer);
   delete[] buffer;
-  replace(temp, "\r", "");
+  temp.replace("\r", "");
   strlcpy(text, temp, length);
   return strlen(text);
 }

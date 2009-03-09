@@ -1,8 +1,7 @@
 class sBus : public Bus {
 public:
-  void load_cart();
+  bool load_cart();
   void unload_cart();
-  bool cart_loaded();
 
   void power();
   void reset();
@@ -11,8 +10,6 @@ public:
   ~sBus();
 
 private:
-  bool is_cart_loaded;
-
   void map_reset();
   void map_system();
   void map_generic();

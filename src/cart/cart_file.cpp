@@ -11,66 +11,23 @@
   #include "../reader/jmareader.hpp"
 #endif
 
-char* Cartridge::modify_extension(char *filename, const char *extension) {
+string Cartridge::modify_extension(const char *filename_, const char *extension) const {
+  string filename = filename_;
   int i;
   for(i = strlen(filename); i >= 0; i--) {
-    if(filename[i] == '.') break;
-    if(filename[i] == '/') break;
+    if(filename[i] == '.')  break;
+    if(filename[i] == '/')  break;
     if(filename[i] == '\\') break;
   }
   if(i > 0 && filename[i] == '.') filename[i] = 0;
-  strcat(filename, ".");
-  strcat(filename, extension);
-  return filename;
+  return filename << "." << extension;
 }
 
-//remove directory information and file extension ("/foo/bar.ext" -> "bar")
-char* Cartridge::get_base_filename(char *filename) {
-  //remove extension
-  for(int i = strlen(filename) - 1; i >= 0; i--) {
-    if(filename[i] == '.') {
-      filename[i] = 0;
-      break;
-    }
-  }
-
-  //remove directory information
-  for(int i = strlen(filename) - 1; i >= 0; i--) {
-    if(filename[i] == '/' || filename[i] == '\\') {
-      i++;
-      char *output = filename;
-      while(true) {
-        *output++ = filename[i];
-        if(!filename[i]) break;
-        i++;
-      }
-      break;
-    }
-  }
-
-  return filename;
+string Cartridge::get_filename(const char *source, const char *extension, const char *path) const {
+  return filepath(modify_extension(source, extension), path);
 }
 
-char* Cartridge::get_path_filename(char *filename, const char *path, const char *source, const char *extension) {
-  strcpy(filename, source);
-  modify_extension(filename, extension);
-  strcpy(filename, filepath(filename, path));
-  return filename;
-}
-
-char* Cartridge::get_patch_filename(const char *source, const char *extension) {
-  return get_path_filename(patchfn, snes.config.path.patch, source, extension);
-}
-
-char* Cartridge::get_save_filename(const char *source, const char *extension) {
-  return get_path_filename(savefn, snes.config.path.save, source, extension);
-}
-
-char* Cartridge::get_cheat_filename(const char *source, const char *extension) {
-  return get_path_filename(cheatfn, snes.config.path.cheat, source, extension);
-}
-
-bool Cartridge::load_file(const char *fn, uint8 *&data, unsigned &size, CompressionMode compression) {
+bool Cartridge::load_file(const char *fn, uint8 *&data, unsigned &size, CompressionMode compression) const {
   if(file::exists(fn) == false) return false;
 
   Reader::Type filetype = Reader::Normal;
@@ -117,7 +74,7 @@ bool Cartridge::load_file(const char *fn, uint8 *&data, unsigned &size, Compress
   return true;
 }
 
-bool Cartridge::apply_patch(const uint8_t *pdata, const unsigned psize, uint8_t *&data, unsigned &size) {
+bool Cartridge::apply_patch(const uint8_t *pdata, const unsigned psize, uint8_t *&data, unsigned &size) const {
   uint8_t *outdata = 0;
   unsigned outsize;
   ups patcher;
@@ -126,7 +83,7 @@ bool Cartridge::apply_patch(const uint8_t *pdata, const unsigned psize, uint8_t 
   bool apply = false;
   if(result == ups::ok) apply = true;
   if(snes.config.file.bypass_patch_crc32 == true) {
-    if(result == ups::input_crc32_invalid) apply = true;
+    if(result == ups::input_crc32_invalid)  apply = true;
     if(result == ups::output_crc32_invalid) apply = true;
   }
 
@@ -141,7 +98,7 @@ bool Cartridge::apply_patch(const uint8_t *pdata, const unsigned psize, uint8_t 
   return apply;
 }
 
-bool Cartridge::save_file(const char *fn, uint8 *data, unsigned size) {
+bool Cartridge::save_file(const char *fn, uint8 *data, unsigned size) const {
   file fp;
   if(!fp.open(fn, file::mode_write)) return false;
   fp.write(data, size);

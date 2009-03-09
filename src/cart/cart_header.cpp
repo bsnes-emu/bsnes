@@ -1,6 +1,6 @@
 #ifdef CART_CPP
 
-void Cartridge::read_header(cartinfo_t &info, const uint8_t *data, unsigned size) {
+void Cartridge::read_header(cartinfo_t &info, const uint8_t *data, unsigned size) const {
   info.reset();
   unsigned index = find_header(data, size);
 
@@ -13,7 +13,7 @@ void Cartridge::read_header(cartinfo_t &info, const uint8_t *data, unsigned size
       const uint8_t n15 = data[index + 0x15];
       if(n15 == 0x00 || n15 == 0x80 || n15 == 0x84 || n15 == 0x9c || n15 == 0xbc || n15 == 0xfc) {
         if(data[index + 0x1a] == 0x33 || data[index + 0x1a] == 0xff) {
-          info.type = TypeBSX;
+          info.type = TypeBsx;
           info.mapper = BSXROM;
           info.region = NTSC;  //BS-X only released in Japan
           return;
@@ -28,7 +28,7 @@ void Cartridge::read_header(cartinfo_t &info, const uint8_t *data, unsigned size
 
   if(!memcmp(data, "BANDAI SFC-ADX", 14)) {
     if(!memcmp(data + 16, "SFC-ADX BACKUP", 14)) {
-      info.type = TypeSufamiTurboBIOS;
+      info.type = TypeSufamiTurboBios;
     } else {
       info.type = TypeSufamiTurbo;
     }
@@ -53,22 +53,21 @@ void Cartridge::read_header(cartinfo_t &info, const uint8_t *data, unsigned size
       uint8 n13 = data[index - 13];
       if((n13 >= 'A' && n13 <= 'Z') || (n13 >= '0' && n13 <= '9')) {
         if(company == 0x33 || (data[index - 10] == 0x00 && data[index - 4] == 0x00)) {
-          info.bsxslot = true;
+          info.bsx_slot = true;
         }
       }
     }
   }
 
-  if(info.bsxslot == true) {
+  if(info.bsx_slot == true) {
     if(!memcmp(data + index, "Satellaview BS-X     ", 21)) {
       //BS-X base cart
-      info.type = TypeBSXBIOS;
+      info.type = TypeBsxBios;
       info.mapper = BSXROM;
       info.region = NTSC;  //BS-X only released in Japan
       return;              //RAM size handled internally by load_cart_bsx() -> BSXCart class
     } else {
-      //BS-X slotted cart
-      info.type = TypeBSC;
+      info.type = TypeBsxSlotted;
       info.mapper = (index == 0x7fc0 ? BSCLoROM : BSCHiROM);
     }
   } else {
@@ -174,7 +173,7 @@ void Cartridge::read_header(cartinfo_t &info, const uint8_t *data, unsigned size
   info.region = (region <= 1 || region >= 13) ? NTSC : PAL;
 }
 
-unsigned Cartridge::find_header(const uint8_t *data, unsigned size) {
+unsigned Cartridge::find_header(const uint8_t *data, unsigned size) const {
   unsigned score_lo = score_header(data, size, 0x007fc0);
   unsigned score_hi = score_header(data, size, 0x00ffc0);
   unsigned score_ex = score_header(data, size, 0x40ffc0);
@@ -189,7 +188,7 @@ unsigned Cartridge::find_header(const uint8_t *data, unsigned size) {
   }
 }
 
-unsigned Cartridge::score_header(const uint8_t *data, unsigned size, unsigned addr) {
+unsigned Cartridge::score_header(const uint8_t *data, unsigned size, unsigned addr) const {
   if(size < addr + 64) return 0;  //image too small to contain header at this location?
   int score = 0;
 

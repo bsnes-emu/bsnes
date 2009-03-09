@@ -1,90 +1,98 @@
 #ifdef NALL_STRING_CPP
 
-nall::string &replace(nall::string &str, const char *key, const char *token) {
-  int i, z, ksl = strlen(key), tsl = strlen(token), ssl = strlen(str);
+string& string::replace(const char *key, const char *token) {
+  int i, z, ksl = strlen(key), tsl = strlen(token), ssl = length();
   unsigned int replace_count = 0, size = ssl;
-  char *data;
+  char *buffer;
 
-  if(ksl > ssl)return str;
-  if(tsl > ksl) {                      //the new string may be longer than the old string...
-    for(i = 0; i <= ssl - ksl;) {      //so let's find out how big of a string we'll need...
-      if(!memcmp(str() + i, key, ksl)) {
-        replace_count++;
-        i += ksl;
-      } else i++;
+  if(ksl <= ssl) {
+    if(tsl > ksl) {                      //the new string may be longer than the old string...
+      for(i = 0; i <= ssl - ksl;) {      //so let's find out how big of a string we'll need...
+        if(!memcmp(data + i, key, ksl)) {
+          replace_count++;
+          i += ksl;
+        } else i++;
+      }
+      size = ssl + ((tsl - ksl) * replace_count);
+      reserve(size);
     }
-    size = ssl + ((tsl - ksl) * replace_count);
-    str.reserve(size);
+
+    buffer = new char[size + 1];
+    for(i = z = 0; i < ssl;) {
+      if(i <= ssl - ksl) {
+        if(!memcmp(data + i, key, ksl)) {
+          memcpy(buffer + z, token, tsl);
+          z += tsl;
+          i += ksl;
+        } else buffer[z++] = data[i++];
+      } else buffer[z++] = data[i++];
+    }
+    buffer[z] = 0;
+
+    assign(buffer);
+    delete[] buffer;
   }
-  data = (char*)malloc(size + 1);
-  for(i = z = 0; i < ssl;) {
-    if(i <= ssl - ksl) {
-      if(!memcmp(str() + i, key, ksl)) {
-        memcpy(data + z, token, tsl);
-        z += tsl;
-        i += ksl;
-      } else data[z++] = str()[i++];
-    } else data[z++] = str()[i++];
-  }
-  data[z] = 0;
-  strcpy(str, data);
-  free(data);
-  return str;
+
+  return *this;
 }
 
-nall::string &qreplace(nall::string &str, const char *key, const char *token) {
-  int i, l, z, ksl = strlen(key), tsl = strlen(token), ssl = strlen(str);
+string& string::qreplace(const char *key, const char *token) {
+  int i, l, z, ksl = strlen(key), tsl = strlen(token), ssl = length();
   unsigned int replace_count = 0, size = ssl;
   uint8_t x;
-  char *data;
+  char *buffer;
 
-  if(ksl > ssl)return str;
-  if(tsl > ksl) {
-    for(i = 0; i <= ssl - ksl;) {
-      x = str()[i];
-      if(x == '\"' || x == '\'') {
-        l = i;
-        i++;
-        while(str()[i++] != x) {
-          if(i == ssl) {
-            i = l;
-            break;
+  if(ksl <= ssl) {
+    if(tsl > ksl) {
+      for(i = 0; i <= ssl - ksl;) {
+        x = data[i];
+        if(x == '\"' || x == '\'') {
+          l = i;
+          i++;
+          while(data[i++] != x) {
+            if(i == ssl) {
+              i = l;
+              break;
+            }
           }
         }
+        if(!memcmp(data + i, key, ksl)) {
+          replace_count++;
+          i += ksl;
+        } else i++;
       }
-      if(!memcmp(str() + i, key, ksl)) {
-        replace_count++;
-        i += ksl;
-      } else i++;
+      size = ssl + ((tsl - ksl) * replace_count);
+      reserve(size);
     }
-    size = ssl + ((tsl - ksl) * replace_count);
-    str.reserve(size);
-  }
-  data = (char*)malloc(size + 1);
-  for(i = z = 0; i < ssl;) {
-    x = str()[i];
-    if(x == '\"' || x == '\'') {
-      l = i++;
-      while(str()[i] != x && i < ssl)i++;
-      if(i >= ssl)i = l;
-      else {
-        memcpy(data + z, str() + l, i - l);
-        z += i - l;
+
+    buffer = new char[size + 1];
+    for(i = z = 0; i < ssl;) {
+      x = data[i];
+      if(x == '\"' || x == '\'') {
+        l = i++;
+        while(data[i] != x && i < ssl)i++;
+        if(i >= ssl)i = l;
+        else {
+          memcpy(buffer + z, data + l, i - l);
+          z += i - l;
+        }
       }
+      if(i <= ssl - ksl) {
+        if(!memcmp(data + i, key, ksl)) {
+          memcpy(buffer + z, token, tsl);
+          z += tsl;
+          i += ksl;
+          replace_count++;
+        } else buffer[z++] = data[i++];
+      } else buffer[z++] = data[i++];
     }
-    if(i <= ssl - ksl) {
-      if(!memcmp(str() + i, key, ksl)) {
-        memcpy(data + z, token, tsl);
-        z += tsl;
-        i += ksl;
-        replace_count++;
-      } else data[z++] = str()[i++];
-    } else data[z++] = str()[i++];
+    buffer[z] = 0;
+
+    assign(buffer);
+    delete[] buffer;
   }
-  data[z] = 0;
-  strcpy(str, data);
-  free(data);
-  return str;
+
+  return *this;
 }
 
 #endif

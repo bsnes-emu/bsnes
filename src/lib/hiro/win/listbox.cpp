@@ -16,21 +16,21 @@ void pListbox::create(unsigned style, unsigned width, unsigned height, const cha
   ListView_SetExtendedListViewStyle(hwnd, LVS_EX_FULLROWSELECT);
 
   lstring list;
-  split(list, "\t", columns ? columns : "");
-  column_count = count(list);
-  for(unsigned i = 0; i < count(list); i++) {
+  list.split("\t", columns ? columns : "");
+  column_count = list.size();
+  for(unsigned i = 0; i < list.size(); i++) {
     LVCOLUMN column;
     column.mask = LVCF_FMT | LVCF_TEXT | LVCF_SUBITEM;
     column.fmt = LVCFMT_LEFT;
-    column.iSubItem = count(list);
+    column.iSubItem = list.size();
     utf16 ulist(list[i]);
     column.pszText = ulist;
     ListView_InsertColumn(hwnd, i, &column);
   }
 
   if(text && *text) {
-    split(list, "\n", text);
-    for(unsigned i = 0; i < count(list); i++) add_item(list[i]);
+    list.split("\n", text);
+    for(unsigned i = 0; i < list.size(); i++) add_item(list[i]);
   }
   autosize_columns();
 }
@@ -47,7 +47,7 @@ void pListbox::set_column_width(unsigned column, unsigned width) {
 
 void pListbox::add_item(const char *text) {
   lstring list;
-  split(list, "\t", text ? text : "");
+  list.split("\t", text ? text : "");
   LVITEM item;
   unsigned pos = ListView_GetItemCount(hwnd);
   item.mask = LVIF_TEXT;
@@ -57,7 +57,7 @@ void pListbox::add_item(const char *text) {
   item.pszText = wtext;
   ListView_InsertItem(hwnd, &item);
 
-  for(unsigned i = 1; i < count(list); i++) {
+  for(unsigned i = 1; i < list.size(); i++) {
     utf16 wtext(list[i]);
     ListView_SetItemText(hwnd, pos, i, wtext);
   }
@@ -65,8 +65,8 @@ void pListbox::add_item(const char *text) {
 
 void pListbox::set_item(unsigned index, const char *text) {
   lstring list;
-  split(list, "\t", text ? text : "");
-  for(unsigned i = 0; i < count(list); i++) {
+  list.split("\t", text ? text : "");
+  for(unsigned i = 0; i < list.size(); i++) {
     utf16 wtext(list[i]);
     ListView_SetItemText(hwnd, index, i, wtext);
   }

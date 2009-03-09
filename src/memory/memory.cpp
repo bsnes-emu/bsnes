@@ -1,8 +1,6 @@
 #include <../base.hpp>
 #define MEMORY_CPP
 
-#include "memory_rw.cpp"
-
 namespace memory {
   MMIOAccess mmio;
   StaticRAM  wram(128 * 1024);

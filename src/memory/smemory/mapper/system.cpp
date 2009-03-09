@@ -18,4 +18,4 @@ void sBus::map_system() {
   map(MapLinear, 0x7e, 0x7f, 0x0000, 0xffff, memory::wram);
 }
 
-#endif //ifdef SMEMORY_CPP
+#endif

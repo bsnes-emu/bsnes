@@ -17,38 +17,29 @@ void sBus::reset() {
   set_speed(false);
 }
 
-void sBus::load_cart() {
-  if(is_cart_loaded == true) return;
+bool sBus::load_cart() {
+  if(cartridge.loaded() == true) return false;
 
   map_reset();
   map_generic();
   map_system();
 
-  if(cartridge.info.cx4)   map_cx4();
-  if(cartridge.info.dsp1)  map_dsp1();
-  if(cartridge.info.dsp2)  map_dsp2();
-  if(cartridge.info.dsp3)  map_dsp3();
-  if(cartridge.info.dsp4)  map_dsp4();
-  if(cartridge.info.obc1)  map_obc1();
-  if(cartridge.info.st010) map_st010();
+  if(cartridge.has_cx4())   map_cx4();
+  if(cartridge.has_dsp1())  map_dsp1();
+  if(cartridge.has_dsp2())  map_dsp2();
+  if(cartridge.has_dsp3())  map_dsp3();
+  if(cartridge.has_dsp4())  map_dsp4();
+  if(cartridge.has_obc1())  map_obc1();
+  if(cartridge.has_st010()) map_st010();
 
-  is_cart_loaded = true;
+  return true;
 }
 
 void sBus::unload_cart() {
-  if(is_cart_loaded == false) return;
-
-  is_cart_loaded = false;
-}
-
-bool sBus::cart_loaded() {
-  return is_cart_loaded;
 }
 
 sBus::sBus() {
-  is_cart_loaded = false;
 }
 
 sBus::~sBus() {
-  unload_cart();
 }

@@ -38,7 +38,7 @@ GZReader::GZReader(const char *fn) : gp(0) {
   #if !defined(_WIN32)
   fp = fopen(fn, "rb");
   #else
-  fp = _wfopen(utf16(fn), L"rb");
+  fp = _wfopen(utf16_t(fn), L"rb");
   #endif
   if(!fp) return;
 

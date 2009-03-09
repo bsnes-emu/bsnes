@@ -1,5 +1,6 @@
 include lib/nall/Makefile.string
 prefix = /usr/local
+ui = ui_qt
 
 ################
 ### compiler ###
@@ -7,23 +8,33 @@ prefix = /usr/local
 
 ifneq ($(findstring gcc,$(compiler)),) # GCC family
   flags = -O3 -fomit-frame-pointer -Ilib
-  c = $(compiler) $(flags)
-  cpp = $(subst cc,++,$(compiler)) $(flags)
+  # note: libco *requires* -fomit-frame-pointer on i386 arch
+  libcoflags := $(flags) -static
+  c = $(compiler)
+  cpp = $(subst cc,++,$(compiler))
   obj = o
   rule = -c $< -o $@
   link = -s
   mkbin = -o$1
   mkdef = -D$1
+  mkinc = -I$1
   mklib = -l$1
+
+  # profile-guided optimization:
+  # flags += -fprofile-generate
+  # link += -lgcov
+  # flags += -fprofile-use
 else ifeq ($(compiler),cl) # Visual C++
   flags = /nologo /wd4355 /wd4805 /wd4996 /Ox /GL /EHsc /Ilib
-  c = cl $(flags)
-  cpp = cl $(flags)
+  libcoflags = $(flags)
+  c = cl
+  cpp = cl
   obj = obj
   rule = /c $< /Fo$@
   link = /link
   mkbin = /Fe$1
   mkdef = /D$1
+  mkinc = /I$1
   mklib = $1.lib
 else
   unknown_compiler: help;
@@ -35,21 +46,19 @@ endif
 
 ifeq ($(platform),x) # X11
   ruby = video.glx video.xv video.sdl audio.alsa audio.openal audio.oss audio.pulseaudio audio.ao input.sdl input.x
-  link += `pkg-config --libs gtk+-2.0`
-  link += $(call mklib,Xtst)
   delete = rm -f $1
 else ifeq ($(platform),win) # Windows
+  # enable static linking to Qt for Windows build
+  mingw_link_flags = -mwindows -enable-stdcall-fixup -Wl,-s -Wl,-enable-auto-import -Wl,-enable-runtime-pseudo-reloc
+
   ruby = video.direct3d video.wgl video.directdraw video.gdi audio.directsound input.directinput
-  link += $(if $(findstring mingw,$(compiler)),-mwindows)
+  delete = $(if $(findstring i586-mingw-gcc,$(compiler)),rm -f $1,del $(subst /,\,$1))
+  link += $(if $(findstring mingw,$(compiler)),$(mingw_link_flags))
   link += $(call mklib,uuid)
   link += $(call mklib,kernel32)
   link += $(call mklib,user32)
   link += $(call mklib,gdi32)
   link += $(call mklib,shell32)
-  link += $(call mklib,winmm)
-  link += $(call mklib,comdlg32)
-  link += $(call mklib,comctl32)
-  delete = $(if $(findstring i586-mingw-gcc,$(compiler)),rm -f $1,del $(subst /,\,$1))
 else
   unknown_platform: help;
 endif
@@ -58,8 +67,7 @@ endif
 ### ruby ###
 ############
 
-rubyflags =
-rubyflags += $(if $(findstring .sdl,$(ruby)),`sdl-config --cflags`)
+rubyflags = $(if $(findstring .sdl,$(ruby)),`sdl-config --cflags`)
 
 link += $(if $(findstring video.direct3d,$(ruby)),$(call mklib,d3d9))
 link += $(if $(findstring video.directdraw,$(ruby)),$(call mklib,ddraw))
@@ -74,11 +82,11 @@ link += $(if $(findstring audio.pulseaudio,$(ruby)),$(call mklib,pulse-simple))
 link += $(if $(findstring input.directinput,$(ruby)),$(call mklib,dinput8) $(call mklib,dxguid))
 link += $(if $(findstring input.sdl,$(ruby)),`sdl-config --libs`)
 
-####################################
-### main target and dependencies ###
-####################################
+####################
+### core objects ###
+####################
 
-objects = main libco hiro ruby libfilter string \
+objects = libco ruby libfilter string \
   reader cart cheat \
   memory smemory cpu scpu smp ssmp sdsp ppu bppu snes \
   bsx srtc sdd1 spc7110 cx4 dsp1 dsp2 dsp3 dsp4 obc1 st010
@@ -93,38 +101,27 @@ ifeq ($(enable_jma),true)
   flags += $(call mkdef,JMA_SUPPORT)
 endif
 
-objects := $(patsubst %,obj/%.$(obj),$(objects))
-rubydef := $(foreach c,$(subst .,_,$(call strupper,$(ruby))),$(call mkdef,$c))
-
-# Windows resource file
-ifeq ($(platform),win)
-  objects += obj/resource.$(obj)
-endif
-
-################
-### implicit ###
-################
+######################
+### implicit rules ###
+######################
 
 compile = \
   $(strip \
     $(if $(filter %.c,$<), \
-      $(c) $1 $(rule), \
+      $(c) $(flags) $1 $(rule), \
       $(if $(filter %.cpp,$<), \
-        $(cpp) $1 $(rule) \
+        $(cpp) $(flags) $1 $(rule) \
       ) \
     ) \
   )
 
-%.$(obj): $<; $(call compile)
+%.$(obj): $<;	$(call compile)
 
 all: build;
 
-############
-### main ###
-############
-
-obj/main.$(obj)    : ui/main.cpp ui/* ui/base/* ui/event/* ui/loader/* ui/settings/*
-obj/resource.$(obj): ui/bsnes.rc; windres ui/bsnes.rc obj/resource.$(obj)
+include $(ui)/Makefile
+objects := $(patsubst %,obj/%.$(obj),$(objects))
+rubydef := $(foreach c,$(subst .,_,$(call strupper,$(ruby))),$(call mkdef,$c))
 
 #################
 ### libraries ###
@@ -132,10 +129,8 @@ obj/resource.$(obj): ui/bsnes.rc; windres ui/bsnes.rc obj/resource.$(obj)
 
 obj/ruby.$(obj): lib/ruby/ruby.cpp lib/ruby/* lib/ruby/video/* lib/ruby/audio/* lib/ruby/input/*
 	$(call compile,$(rubydef) $(rubyflags))
-obj/hiro.$(obj): lib/hiro/hiro.cpp lib/hiro/* lib/hiro/gtk/* lib/hiro/win/*
-	$(call compile,$(if $(call streq,$(platform),x),`pkg-config --cflags gtk+-2.0`))
 obj/libco.$(obj): lib/libco/libco.c lib/libco/*
-	$(call compile,$(if $(call strne,$(compiler),cl),-static))
+	$(c) $(libcoflags) $(rule)
 obj/libfilter.$(obj): lib/libfilter/libfilter.cpp lib/libfilter/*
 obj/string.$(obj): lib/nall/string.cpp lib/nall/*
 
@@ -239,14 +234,15 @@ obj/winout.$(obj) : reader/jma/winout.cpp reader/jma/*
 ### targets ###
 ###############
 
-build: $(objects)
+build: ui_build $(objects)
 	$(strip $(cpp) $(call mkbin,../bsnes) $(objects) $(link))
 
 install:
 	install -D -m 755 ../bsnes $(DESTDIR)$(prefix)/bin/bsnes
-	install -D -m 644 data/bsnes.png $(DESTDIR)$(prefix)/share/icons/bsnes.png
+	install -D -m 644 data/bsnes.png $(DESTDIR)$(prefix)/share/pixmaps/bsnes.png
+	install -D -m 644 data/bsnes.desktop $(DESTDIR)$(prefix)/share/applications/bsnes.desktop
 
-clean:
+clean: ui_clean
 	-@$(call delete,obj/*.$(obj))
 	-@$(call delete,*.res)
 	-@$(call delete,*.pgd)

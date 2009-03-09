@@ -21,8 +21,12 @@ public:
   bool decode(const char *s, cheat_t &item) const;
   bool read(unsigned addr, uint8_t &data) const;
 
-  inline bool enabled() const { return cheat_system_enabled; }
+  bool enabled() const;
+  void enable();
+  void disable();
+
   inline unsigned count() const { return code.size(); }
+  inline bool active() const { return cheat_enabled; }
   inline bool exists(unsigned addr) const { return mask[addr >> 3] & 1 << (addr & 7); }
 
   bool add(bool enable, const char *code, const char *desc);
@@ -36,14 +40,15 @@ public:
 
   bool load(const char *fn);
   bool save(const char *fn) const;
-
-  void sort();
   void clear();
 
   Cheat();
 
 private:
+  bool cheat_enabled;  //cheat_enabled == (cheat_enabled_code_exists && cheat_system_enabled);
+  bool cheat_enabled_code_exists;
   bool cheat_system_enabled;
+
   uint8_t mask[0x200000];
   vector<cheat_t> code;
 

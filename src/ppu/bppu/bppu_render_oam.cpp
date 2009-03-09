@@ -39,7 +39,7 @@ void bPPU::build_sprite_list() {
     }
 
     sprite_list[i].x              = (x << 8) + tableA[0];
-    sprite_list[i].y              = tableA[1] + 1;
+    sprite_list[i].y              = (tableA[1] + 1) & 0xff;
     sprite_list[i].character      = tableA[2];
     sprite_list[i].vflip          = !!(tableA[3] & 0x80);
     sprite_list[i].hflip          = !!(tableA[3] & 0x40);
@@ -66,7 +66,7 @@ bool bPPU::is_sprite_on_scanline() {
 void bPPU::load_oam_tiles() {
   uint16 tile_width = spr->width >> 3;
   int x = spr->x;
-  int y = line - spr->y;
+  int y = (line - spr->y) & 0xff;
   if(regs.oam_interlace == true) {
     y <<= 1;
   }

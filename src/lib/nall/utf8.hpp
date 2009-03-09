@@ -14,7 +14,7 @@
 
 namespace nall {
   //UTF-8 to UTF-16
-  class utf16 {
+  class utf16_t {
   public:
     operator wchar_t*() {
       return buffer;
@@ -24,14 +24,14 @@ namespace nall {
       return buffer;
     }
 
-    utf16(const char *s = "") {
+    utf16_t(const char *s = "") {
       if(!s) s = "";
       unsigned length = MultiByteToWideChar(CP_UTF8, 0, s, -1, 0, 0);
       buffer = new(zeromemory) wchar_t[length + 1];
       MultiByteToWideChar(CP_UTF8, 0, s, -1, buffer, length);
     }
 
-    ~utf16() {
+    ~utf16_t() {
       delete[] buffer;
     }
 
@@ -40,7 +40,7 @@ namespace nall {
   };
 
   //UTF-16 to UTF-8
-  class utf8 {
+  class utf8_t {
   public:
     operator char*() {
       return buffer;
@@ -50,14 +50,14 @@ namespace nall {
       return buffer;
     }
 
-    utf8(const wchar_t *s = L"") {
+    utf8_t(const wchar_t *s = L"") {
       if(!s) s = L"";
       unsigned length = WideCharToMultiByte(CP_UTF8, 0, s, -1, 0, 0, (const char*)0, (BOOL*)0);
       buffer = new(zeromemory) char[length + 1];
       WideCharToMultiByte(CP_UTF8, 0, s, -1, buffer, length, (const char*)0, (BOOL*)0);
     }
 
-    ~utf8() {
+    ~utf8_t() {
       delete[] buffer;
     }
 

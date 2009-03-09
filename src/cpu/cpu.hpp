@@ -17,8 +17,8 @@ public:
   regs_t regs;
 
   virtual void scanline() = 0;
-  virtual void power() = 0;
-  virtual void reset() = 0;
+  virtual void power();
+  virtual void reset();
 
   /*****
    * in opcode-based CPU emulators, the main emulation routine

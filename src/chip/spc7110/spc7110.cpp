@@ -10,7 +10,7 @@ const unsigned SPC7110::months[12] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 3
 void SPC7110::init() {}
 
 void SPC7110::enable() {
-  uint16_t limit = (cartridge.info.spc7110rtc ? 0x4842 : 0x483f);
+  uint16_t limit = (cartridge.has_spc7110rtc() ? 0x4842 : 0x483f);
   for(uint16_t i = 0x4800; i <= limit; i++) memory::mmio.map(i, *this);
 }
 
@@ -74,7 +74,7 @@ void SPC7110::reset() {
   r4841 = 0x00;
   r4842 = 0x00;
 
-  if(cartridge.info.spc7110rtc) {
+  if(cartridge.has_spc7110rtc()) {
     rtc_state = RTCS_Inactive;
     rtc_mode  = RTCM_Linear;
     rtc_index = 0;
@@ -99,7 +99,7 @@ void SPC7110::update_time(int offset) {
   | (memory::cartrtc.read(17) <<  8)
   | (memory::cartrtc.read(18) << 16)
   | (memory::cartrtc.read(19) << 24);
-  time_t current_time = time(0);
+  time_t current_time = time(0) - offset;
 
   //sizeof(time_t) is platform-dependent; though memory::cartrtc needs to be platform-agnostic.
   //yet platforms with 32-bit signed time_t will overflow every ~68 years. handle this by

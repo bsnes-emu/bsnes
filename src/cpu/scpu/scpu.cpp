@@ -11,6 +11,8 @@ priority_queue<unsigned> event(512, bind(&sCPU::queue_event, &cpu));
 #include "timing/timing.cpp"
 
 void sCPU::power() {
+  CPU::power();
+
   regs.a = regs.x = regs.y = 0x0000;
   regs.s = 0x01ff;
 
@@ -22,6 +24,8 @@ void sCPU::power() {
 }
 
 void sCPU::reset() {
+  CPU::reset();
+
   regs.pc.d = 0x000000;
   regs.pc.l = bus.read(0xfffc);
   regs.pc.h = bus.read(0xfffd);

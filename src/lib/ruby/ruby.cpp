@@ -1,4 +1,6 @@
 #include <ruby/ruby.hpp>
+using namespace nall;
+
 #include <ruby/ruby_impl.cpp>
 
 namespace ruby {

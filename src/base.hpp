@@ -1,4 +1,4 @@
-#define BSNES_VERSION "0.039"
+#define BSNES_VERSION "0.040"
 #define BSNES_TITLE   "bsnes v" BSNES_VERSION
 
 #define BUSCORE sBus
@@ -27,10 +27,10 @@
 #include <nall/detect.hpp>
 #include <nall/endian.hpp>
 #include <nall/file.hpp>
-#include <nall/function.hpp>
 #include <nall/moduloarray.hpp>
 #include <nall/new.hpp>
 #include <nall/platform.hpp>
+#include <nall/property.hpp>
 #include <nall/stdint.hpp>
 #include <nall/string.hpp>
 #include <nall/utility.hpp>

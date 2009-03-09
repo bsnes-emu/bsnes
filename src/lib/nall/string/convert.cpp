@@ -37,18 +37,6 @@ char* strtr(char *dest, const char *before, const char *after) {
   return dest;
 }
 
-//note: ISO C++ only guarantees that 0-9 is contigious,
-//it does not guarantee that either A-F or a-f are also contigious
-//however, A-F and a-f are contigious on virtually every platform in existence
-//the optimizations and simplifications made possible by this are therefore unignorable
-//however, just to be safe, this is tested at compile-time with the below assertion ...
-//if false, a compiler error will be thrown
-
-static nall::static_assert<
-  ('A' == 'B' - 1) && ('B' == 'C' - 1) && ('C' == 'D' - 1) && ('D' == 'E' - 1) && ('E' == 'F' - 1) &&
-  ('a' == 'b' - 1) && ('b' == 'c' - 1) && ('c' == 'd' - 1) && ('d' == 'e' - 1) && ('e' == 'f' - 1)
-> hex_contigious_assertion_;
-
 uintmax_t strhex(const char *str) {
   if(!str) return 0;
   uintmax_t result = 0;
@@ -69,7 +57,7 @@ uintmax_t strhex(const char *str) {
   return result;
 }
 
-intmax_t strdec(const char *str) {
+intmax_t strsigned(const char *str) {
   if(!str) return 0;
   intmax_t result = 0;
   bool negate = false;
@@ -88,6 +76,20 @@ intmax_t strdec(const char *str) {
   }
 
   return !negate ? result : -result;
+}
+
+uintmax_t strunsigned(const char *str) {
+  if(!str) return 0;
+  uintmax_t result = 0;
+
+  while(*str) {
+    uint8_t x = *str++;
+    if(x >= '0' && x <= '9') x -= '0';
+    else break;  //stop at first invalid character
+    result = result * 10 + x;
+  }
+
+  return result;
 }
 
 uintmax_t strbin(const char *str) {
@@ -143,6 +145,8 @@ double strdouble(const char *str) {
   return !negate ? result : -result;
 }
 
+//
+
 size_t strhex(char *str, uintmax_t value, size_t length /* = 0 */) {
   if(length == 0) length -= 1U;  //"infinite" length
   size_t initial_length = length;
@@ -168,7 +172,7 @@ size_t strhex(char *str, uintmax_t value, size_t length /* = 0 */) {
   return nall::min(initial_length, digits + 1);
 }
 
-size_t strdec(char *str, intmax_t value_, size_t length /* = 0 */) {
+size_t strsigned(char *str, intmax_t value_, size_t length /* = 0 */) {
   if(length == 0) length = -1U;  //"infinite" length
   size_t initial_length = length;
 
@@ -195,6 +199,31 @@ size_t strdec(char *str, intmax_t value_, size_t length /* = 0 */) {
 
   if(length && negate) {
     *--str = '-';
+  }
+
+  return nall::min(initial_length, digits + 1);
+}
+
+size_t strunsigned(char *str, uintmax_t value, size_t length /* = 0 */) {
+  if(length == 0) length = -1U;  //"infinite" length
+  size_t initial_length = length;
+
+  //count number of digits in value
+  int digits_integral = 1;
+  uintmax_t digits_integral_ = value;
+  while(digits_integral_ /= 10) digits_integral++;
+
+  int digits = digits_integral;
+  if(!str) return digits_integral + 1;  //only computing required length?
+
+  length = nall::min(digits, length - 1);
+  str += length;  //seek to end of target string
+  *str = 0;  //set null terminator
+
+  while(length--) {
+    uint8_t x = '0' + (value % 10);
+    value /= 10;
+    *--str = x;  //iterate backwards to write string
   }
 
   return nall::min(initial_length, digits + 1);

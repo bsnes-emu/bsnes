@@ -47,7 +47,7 @@ void Tracer::trace_smpop() {
 
 void Tracer::enable(bool en) {
   if(en == true && enabled() == false) {
-    fp = fopen(Cartridge::filepath("trace.log", snes.config.path.exportdata), "wb");
+    fp = fopen(Cartridge::filepath("trace.log", snes.config.path.data), "wb");
   } else if(en == false && enabled() == true) {
     fclose(fp);
     fp = 0;

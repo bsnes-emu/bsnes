@@ -27,17 +27,17 @@ namespace nall {
 
     bool import(const char *filename) {
       string data;
-      if(fread(data, filename) == false) return false;
+      if(data.readfile(filename) == false) return false;
       ltrim_once(data, "\xef\xbb\xbf"); //remove UTF-8 marker, if it exists
-      replace(data, "\r", "");
+      data.replace("\r", "");
 
       lstring line;
-      split(line, "\n", data);
-      for(unsigned i = 0; i < count(line); i++) {
+      line.split("\n", data);
+      for(unsigned i = 0; i < line.size(); i++) {
         lstring part;
         //format: "Input" = "Output"
-        qsplit(part, "=", line[i]);
-        if(count(part) != 2) continue;
+        part.qsplit("=", line[i]);
+        if(part.size() != 2) continue;
 
         //remove whitespace
         trim(part[0]);

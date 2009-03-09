@@ -25,6 +25,8 @@ void PPU::frame() {
 }
 
 void PPU::power() {
+  ppu1_version = snes.config.ppu1.version;
+  ppu2_version = snes.config.ppu2.version;
 }
 
 void PPU::reset() {
@@ -38,9 +40,6 @@ PPU::PPU() {
   status.frames_updated  = false;
   status.frames_rendered = 0;
   status.frames_executed = 0;
-
-  ppu1_version = 1;
-  ppu2_version = 3;
 }
 
 PPU::~PPU() {

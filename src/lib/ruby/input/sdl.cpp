@@ -3,7 +3,7 @@
 //================
 //Keyboard and mouse are controlled directly via Xlib,
 //as SDL cannot capture input from windows it does not create itself.
-//SDL is used only to handle joysticks.
+//SDL is used only to handle joysticks / gamepads.
 
 #include <SDL/SDL.h>
 #include <sys/ipc.h>
@@ -15,21 +15,21 @@
 namespace ruby {
 
 #include "sdl.hpp"
-using namespace nall;
 
-class pInputSDL {
-public:
+struct pInputSDL {
   #include "xlibkeys.hpp"
   InputSDL &self;
-  Display *display;
-  Window rootwindow;
-  unsigned screenwidth, screenheight;
-  unsigned relativex, relativey;
-  bool mouseacquired;
-  Cursor InvisibleCursor;
-  SDL_Joystick *gamepad[joypad<>::count];
 
   struct {
+    Display *display;
+    Window rootwindow;
+    Cursor InvisibleCursor;
+    SDL_Joystick *gamepad[joypad<>::count];
+
+    unsigned screenwidth, screenheight;
+    unsigned relativex, relativey;
+    bool mouseacquired;
+
     //mouse device settings
     int accel_numerator;
     int accel_denominator;
@@ -73,35 +73,35 @@ public:
   bool acquire() {
     if(acquired()) return true;
 
-    if(XGrabPointer(display, settings.handle, True, 0, GrabModeAsync, GrabModeAsync,
-    rootwindow, InvisibleCursor, CurrentTime) == GrabSuccess) {
+    if(XGrabPointer(device.display, settings.handle, True, 0, GrabModeAsync, GrabModeAsync,
+    device.rootwindow, device.InvisibleCursor, CurrentTime) == GrabSuccess) {
       //backup existing cursor acceleration settings
-      XGetPointerControl(display, &device.accel_numerator, &device.accel_denominator, &device.threshold);
+      XGetPointerControl(device.display, &device.accel_numerator, &device.accel_denominator, &device.threshold);
 
       //disable cursor acceleration
-      XChangePointerControl(display, True, False, 1, 1, 0);
+      XChangePointerControl(device.display, True, False, 1, 1, 0);
 
       //center cursor (so that first relative poll returns 0, 0 if mouse has not moved)
-      XWarpPointer(display, None, rootwindow, 0, 0, 0, 0, screenwidth / 2, screenheight / 2);
+      XWarpPointer(device.display, None, device.rootwindow, 0, 0, 0, 0, device.screenwidth / 2, device.screenheight / 2);
 
-      return mouseacquired = true;
+      return device.mouseacquired = true;
     } else {
-      return mouseacquired = false;
+      return device.mouseacquired = false;
     }
   }
 
   bool unacquire() {
     if(acquired()) {
       //restore cursor acceleration and release cursor
-      XChangePointerControl(display, True, True, device.accel_numerator, device.accel_denominator, device.threshold);
-      XUngrabPointer(display, CurrentTime);
-      mouseacquired = false;
+      XChangePointerControl(device.display, True, True, device.accel_numerator, device.accel_denominator, device.threshold);
+      XUngrabPointer(device.display, CurrentTime);
+      device.mouseacquired = false;
     }
     return true;
   }
 
   bool acquired() {
-    return mouseacquired;
+    return device.mouseacquired;
   }
 
   bool poll(int16_t *table) {
@@ -112,7 +112,7 @@ public:
     //========
 
     char state[32];
-    XQueryKeymap(display, state);
+    XQueryKeymap(device.display, state);
 
     for(unsigned i = 0; i < keyboard::limit; i++) {
       uint8_t code = keycode[i];
@@ -128,28 +128,28 @@ public:
     int root_x_return = 0, root_y_return = 0;
     int win_x_return = 0, win_y_return = 0;
     unsigned int mask_return = 0;
-    XQueryPointer(display, settings.handle,
+    XQueryPointer(device.display, settings.handle,
       &root_return, &child_return, &root_x_return, &root_y_return,
       &win_x_return, &win_y_return, &mask_return);
 
     if(acquired()) {
       XWindowAttributes attributes;
-      XGetWindowAttributes(display, settings.handle, &attributes);
+      XGetWindowAttributes(device.display, settings.handle, &attributes);
 
       //absolute -> relative conversion
-      table[mouse::x] = (int16_t)(root_x_return - screenwidth  / 2);
-      table[mouse::y] = (int16_t)(root_y_return - screenheight / 2);
+      table[mouse::x] = (int16_t)(root_x_return - device.screenwidth  / 2);
+      table[mouse::y] = (int16_t)(root_y_return - device.screenheight / 2);
 
       if(table[mouse::x] != 0 || table[mouse::y] != 0) {
         //if mouse movement occurred, re-center mouse for next poll
-        XWarpPointer(display, None, rootwindow, 0, 0, 0, 0, screenwidth / 2, screenheight / 2);
+        XWarpPointer(device.display, None, device.rootwindow, 0, 0, 0, 0, device.screenwidth / 2, device.screenheight / 2);
       }
     } else {
-      table[mouse::x] = (int16_t)(root_x_return - relativex);
-      table[mouse::y] = (int16_t)(root_y_return - relativey);
+      table[mouse::x] = (int16_t)(root_x_return - device.relativex);
+      table[mouse::y] = (int16_t)(root_y_return - device.relativey);
 
-      relativex = root_x_return;
-      relativey = root_y_return;
+      device.relativex = root_x_return;
+      device.relativey = root_y_return;
     }
 
     //manual device polling is limited to only five buttons ...
@@ -165,7 +165,7 @@ public:
 
     SDL_JoystickUpdate();
     for(unsigned i = 0; i < joypad<>::count; i++) {
-      if(!gamepad[i]) continue;
+      if(!device.gamepad[i]) continue;
 
       unsigned index = joypad<>::index(i, joypad<>::none);
       table[index + joypad<>::up   ] = false;
@@ -177,11 +177,12 @@ public:
       resistance = max(1, min(99, resistance));
       resistance = (int)((double)resistance * 32768.0 / 100.0);
 
-      unsigned axes = min((unsigned)joypad<>::axes, SDL_JoystickNumAxes(gamepad[i]));
+      //axes
+      unsigned axes = min((unsigned)joypad<>::axes, SDL_JoystickNumAxes(device.gamepad[i]));
       for(unsigned axis = 0; axis < axes; axis++) {
-        int16_t value = (int16_t)SDL_JoystickGetAxis(gamepad[i], axis);
+        int16_t value = (int16_t)SDL_JoystickGetAxis(device.gamepad[i], axis);
         table[index + joypad<>::axis + axis] = value;
-        if(axis == 0) {  //X-axis
+        if(axis == 0) {         //X-axis
           table[index + joypad<>::left ] |= value < -resistance;
           table[index + joypad<>::right] |= value > +resistance;
         } else if(axis == 1) {  //Y-axis
@@ -190,8 +191,18 @@ public:
         }
       }
 
+      //POV hats
+      if(SDL_JoystickNumHats(device.gamepad[i]) >= 1) {
+        uint8_t state = SDL_JoystickGetHat(device.gamepad[i], 0);
+        table[index + joypad<>::up   ] |= state & SDL_HAT_UP;
+        table[index + joypad<>::down ] |= state & SDL_HAT_DOWN;
+        table[index + joypad<>::left ] |= state & SDL_HAT_LEFT;
+        table[index + joypad<>::right] |= state & SDL_HAT_RIGHT;
+      }
+
+      //buttons
       for(unsigned button = 0; button < joypad<>::buttons; button++) {
-        table[index + joypad<>::button + button] = SDL_JoystickGetButton(gamepad[i], button);
+        table[index + joypad<>::button + button] = SDL_JoystickGetButton(device.gamepad[i], button);
       }
     }
 
@@ -203,12 +214,12 @@ public:
     SDL_InitSubSystem(SDL_INIT_JOYSTICK);
     SDL_JoystickEventState(SDL_IGNORE);
 
-    display = XOpenDisplay(0);
-    rootwindow = DefaultRootWindow(display);
+    device.display = XOpenDisplay(0);
+    device.rootwindow = DefaultRootWindow(device.display);
     XWindowAttributes attributes;
-    XGetWindowAttributes(display, rootwindow, &attributes);
-    screenwidth  = attributes.width;
-    screenheight = attributes.height;
+    XGetWindowAttributes(device.display, device.rootwindow, &attributes);
+    device.screenwidth  = attributes.width;
+    device.screenheight = attributes.height;
 
     //Xlib: "because XShowCursor(false) would be too easy."
     //create a fully transparent cursor named InvisibleCursor,
@@ -216,19 +227,19 @@ public:
     Pixmap pixmap;
     XColor black, unused;
     static char invisible_data[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
-    Colormap colormap = DefaultColormap(display, DefaultScreen(display));
-    XAllocNamedColor(display, colormap, "black", &black, &unused);
-    pixmap = XCreateBitmapFromData(display, settings.handle, invisible_data, 8, 8);
-    InvisibleCursor = XCreatePixmapCursor(display, pixmap, pixmap, &black, &black, 0, 0);
-    XFreePixmap(display, pixmap);
-    XFreeColors(display, colormap, &black.pixel, 1, 0);
+    Colormap colormap = DefaultColormap(device.display, DefaultScreen(device.display));
+    XAllocNamedColor(device.display, colormap, "black", &black, &unused);
+    pixmap = XCreateBitmapFromData(device.display, settings.handle, invisible_data, 8, 8);
+    device.InvisibleCursor = XCreatePixmapCursor(device.display, pixmap, pixmap, &black, &black, 0, 0);
+    XFreePixmap(device.display, pixmap);
+    XFreeColors(device.display, colormap, &black.pixel, 1, 0);
 
-    mouseacquired = false;
-    relativex = 0;
-    relativey = 0;
+    device.mouseacquired = false;
+    device.relativex = 0;
+    device.relativey = 0;
 
     for(unsigned i = 0; i < joypad<>::count && i < SDL_NumJoysticks(); i++) {
-      gamepad[i] = SDL_JoystickOpen(i);
+      device.gamepad[i] = SDL_JoystickOpen(i);
     }
 
     return true;
@@ -236,18 +247,18 @@ public:
 
   void term() {
     unacquire();
-    XFreeCursor(display, InvisibleCursor);
+    XFreeCursor(device.display, device.InvisibleCursor);
 
     for(unsigned i = 0; i < joypad<>::count; i++) {
-      if(gamepad[i]) SDL_JoystickClose(gamepad[i]);
-      gamepad[i] = 0;
+      if(device.gamepad[i]) SDL_JoystickClose(device.gamepad[i]);
+      device.gamepad[i] = 0;
     }
 
     SDL_QuitSubSystem(SDL_INIT_JOYSTICK);
   }
 
   pInputSDL(InputSDL &self_) : self(self_) {
-    for(unsigned i = 0; i < joypad<>::count; i++) gamepad[i] = 0;
+    for(unsigned i = 0; i < joypad<>::count; i++) device.gamepad[i] = 0;
     settings.analog_axis_resistance = 75;
   }
 };
@@ -265,4 +276,4 @@ void InputSDL::term() { p.term(); }
 InputSDL::InputSDL() : p(*new pInputSDL(*this)) {}
 InputSDL::~InputSDL() { delete &p; }
 
-} //namespace ruby
+}

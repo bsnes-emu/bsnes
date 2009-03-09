@@ -72,7 +72,7 @@ namespace nall {
           break;
       }
 
-      p_filehandle = CreateFileW(utf16(filename), desired_access, FILE_SHARE_READ, NULL,
+      p_filehandle = CreateFileW(utf16_t(filename), desired_access, FILE_SHARE_READ, NULL,
         creation_disposition, FILE_ATTRIBUTE_NORMAL, NULL);
       if(p_filehandle == INVALID_HANDLE_VALUE) return false;
 

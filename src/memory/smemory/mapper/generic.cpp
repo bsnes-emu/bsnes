@@ -33,13 +33,13 @@ void sBus::map_generic() {
     } break;
 
     case Cartridge::SPC7110ROM: {
-      map(MapDirect, 0x00, 0x00, 0x6000, 0x7fff, spc7110);         //save RAM w/custom logic
-      map(MapShadow, 0x00, 0x0f, 0x8000, 0xffff, memory::cartrom); //program ROM
-      map(MapDirect, 0x30, 0x30, 0x6000, 0x7fff, spc7110);         //save RAM w/custom logic
-      map(MapDirect, 0x50, 0x50, 0x0000, 0xffff, spc7110);         //decompression MMIO port
-      map(MapShadow, 0x80, 0x8f, 0x8000, 0xffff, memory::cartrom); //program ROM
-      map(MapLinear, 0xc0, 0xcf, 0x0000, 0xffff, memory::cartrom); //program ROM
-      map(MapDirect, 0xd0, 0xff, 0x0000, 0xffff, spc7110);         //MMC-controlled data ROM
+      map(MapDirect, 0x00, 0x00, 0x6000, 0x7fff, spc7110);          //save RAM w/custom logic
+      map(MapShadow, 0x00, 0x0f, 0x8000, 0xffff, memory::cartrom);  //program ROM
+      map(MapDirect, 0x30, 0x30, 0x6000, 0x7fff, spc7110);          //save RAM w/custom logic
+      map(MapDirect, 0x50, 0x50, 0x0000, 0xffff, spc7110);          //decompression MMIO port
+      map(MapShadow, 0x80, 0x8f, 0x8000, 0xffff, memory::cartrom);  //program ROM
+      map(MapLinear, 0xc0, 0xcf, 0x0000, 0xffff, memory::cartrom);  //program ROM
+      map(MapDirect, 0xd0, 0xff, 0x0000, 0xffff, spc7110);          //MMC-controlled data ROM
     } break;
 
     case Cartridge::BSXROM: {
@@ -97,8 +97,8 @@ void sBus::map_generic_sram() {
   //otherwise, default to safer, larger SRAM address window
   uint16 addr_hi = (memory::cartrom.size() > 0x200000 || memory::cartram.size() > 32 * 1024) ? 0x7fff : 0xffff;
   map(MapLinear, 0x70, 0x7f, 0x0000, addr_hi, memory::cartram);
-  if(cartridge.info.mapper != Cartridge::LoROM) return;
+  if(cartridge.mapper() != Cartridge::LoROM) return;
   map(MapLinear, 0xf0, 0xff, 0x0000, addr_hi, memory::cartram);
 }
 
-#endif //ifdef SMEMORY_CPP
+#endif

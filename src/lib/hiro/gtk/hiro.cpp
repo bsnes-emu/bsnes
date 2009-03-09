@@ -131,15 +131,15 @@ bool pHiro::file_open(Window *focus, char *filename, const char *path, const cha
 
   if(filter && *filter) {
     lstring filterlist;
-    split(filterlist, "\n", filter);
-    for(unsigned i = 0; i < count(filterlist); i++) {
+    filterlist.split("\n", filter);
+    for(unsigned i = 0; i < filterlist.size(); i++) {
       GtkFileFilter *filter = gtk_file_filter_new();
       lstring filterpart;
-      split(filterpart, "\t", filterlist[i]);
+      filterpart.split("\t", filterlist[i]);
       gtk_file_filter_set_name(filter, string() << filterpart[0] << " (" << filterpart[1] << ")");
       lstring patternlist;
-      split(patternlist, ",", filterpart[1]);
-      for(unsigned l = 0; l < count(patternlist); l++) {
+      patternlist.split(",", filterpart[1]);
+      for(unsigned l = 0; l < patternlist.size(); l++) {
         gtk_file_filter_add_pattern(filter, patternlist[l]);
       }
       gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog), filter);
@@ -174,15 +174,15 @@ bool pHiro::file_save(Window *focus, char *filename, const char *path, const cha
 
   if(filter && *filter) {
     lstring filterlist;
-    split(filterlist, "\n", filter);
-    for(unsigned i = 0; i < count(filterlist); i++) {
+    filterlist.split("\n", filter);
+    for(unsigned i = 0; i < filterlist.size(); i++) {
       GtkFileFilter *filter = gtk_file_filter_new();
       lstring filterpart;
-      split(filterpart, "\t", filterlist[i]);
+      filterpart.split("\t", filterlist[i]);
       gtk_file_filter_set_name(filter, string() << filterpart[0] << " (" << filterpart[1] << ")");
       lstring patternlist;
-      split(patternlist, ",", filterpart[1]);
-      for(unsigned l = 0; l < count(patternlist); l++) {
+      patternlist.split(",", filterpart[1]);
+      for(unsigned l = 0; l < patternlist.size(); l++) {
         gtk_file_filter_add_pattern(filter, patternlist[l]);
       }
       gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog), filter);

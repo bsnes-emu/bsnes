@@ -27,8 +27,8 @@ using nall::min;
 using nall::max;
 
 #include <nall/utf8.hpp>
-using nall::utf8;
-using nall::utf16;
+#define utf8  nall::utf8_t
+#define utf16 nall::utf16_t
 
 extern int hiromain(int argc, const char *const argv[]);
 

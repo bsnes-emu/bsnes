@@ -7,14 +7,9 @@
 #include <nall/ups.hpp>
 
 #include "cart.hpp"
-#include "cart_load.cpp"
-#include "cart_normal.cpp"
-#include "cart_bsx.cpp"
-#include "cart_bsc.cpp"
-#include "cart_st.cpp"
-
 #include "cart_file.cpp"
 #include "cart_header.cpp"
+#include "cart_loader.cpp"
 
 namespace memory {
   MappedRAM cartrom, cartram, cartrtc;
@@ -25,13 +20,7 @@ namespace memory {
 
 Cartridge cartridge;
 
-const char* Cartridge::name() const { return info.filename; }
-Cartridge::CartridgeMode Cartridge::mode() const { return info.mode; }
-Cartridge::MemoryMapper Cartridge::mapper() const { return info.mapper; }
-Cartridge::Region Cartridge::region() const { return info.region; }
-bool Cartridge::loaded() const { return cart.loaded; }
-
-void Cartridge::load_begin(CartridgeMode mode) {
+void Cartridge::load_begin(Mode cartridge_mode) {
   cart.rom = cart.ram = cart.rtc = 0;
   bs.ram   = 0;
   stA.rom  = stA.ram  = 0;
@@ -42,11 +31,10 @@ void Cartridge::load_begin(CartridgeMode mode) {
   stA.rom_size  = stA.ram_size  = 0;
   stB.rom_size  = stB.ram_size  = 0;
 
-  info.mode = mode;
-  info.patched = false;
-
-  info.bsxcart  = false;
-  info.bsxflash = false;
+  set(loaded,           false);
+  set(bsx_flash_loaded, false);
+  set(patched,          false);
+  set(mode,             cartridge_mode);
 }
 
 void Cartridge::load_end() {
@@ -67,25 +55,25 @@ void Cartridge::load_end() {
   memory::stBrom.write_protect(true);
   memory::stBram.write_protect(false);
 
-  if(file::exists(get_cheat_filename(cart.fn, "cht"))) {
+  string cheat_file = get_filename(cart.filename, "cht", snes.config.path.cheat);
+  if(file::exists(cheat_file)) {
     cheat.clear();
-    cheat.load(cheatfn);
+    cheat.load(cheat_file);
   }
 
-  cart.loaded = true;
   bus.load_cart();
+  set(loaded, true);
 }
 
-bool Cartridge::unload() {
-  if(cart.loaded == false) return false;
-
+void Cartridge::unload() {
+  if(loaded() == false) return;
   bus.unload_cart();
 
-  switch(info.mode) {
-    case ModeNormal:      unload_cart_normal(); break;
-    case ModeBSX:         unload_cart_bsx();    break;
-    case ModeBSC:         unload_cart_bsc();    break;
-    case ModeSufamiTurbo: unload_cart_st();     break;
+  switch(mode()) {
+    case ModeNormal:      unload_normal();       break;
+    case ModeBsxSlotted:  unload_bsx_slotted();  break;
+    case ModeBsx:         unload_bsx();          break;
+    case ModeSufamiTurbo: unload_sufami_turbo(); break;
   }
 
   if(cart.rom) { delete[] cart.rom; cart.rom = 0; }
@@ -97,21 +85,44 @@ bool Cartridge::unload() {
   if(stB.rom)  { delete[] stB.rom;  stB.rom  = 0; }
   if(stB.ram)  { delete[] stB.ram;  stB.ram  = 0; }
 
-  if(cheat.count() > 0 || file::exists(get_cheat_filename(cart.fn, "cht"))) {
-    cheat.save(cheatfn);
+  string cheat_file = get_filename(cart.filename, "cht", snes.config.path.cheat);
+  if(cheat.count() > 0 || file::exists(cheat_file)) {
+    cheat.save(cheat_file);
     cheat.clear();
   }
 
-  cart.loaded = false;
-  return true;
+  set(loaded, false);
 }
 
 Cartridge::Cartridge() {
-  cart.loaded = false;
+  set(loaded, false);
 }
 
 Cartridge::~Cartridge() {
-  if(cart.loaded == true) unload();
+  if(loaded() == true) unload();
+}
+
+void Cartridge::set_cartinfo(const Cartridge::cartinfo_t &source) {
+  set(region,         source.region);
+  set(mapper,         source.mapper);
+  set(dsp1_mapper,    source.dsp1_mapper);
+
+  set(has_bsx_slot,   source.bsx_slot);
+  set(has_superfx,    source.superfx);
+  set(has_sa1,        source.sa1);
+  set(has_srtc,       source.srtc);
+  set(has_sdd1,       source.sdd1);
+  set(has_spc7110,    source.spc7110);
+  set(has_spc7110rtc, source.spc7110rtc);
+  set(has_cx4,        source.cx4);
+  set(has_dsp1,       source.dsp1);
+  set(has_dsp2,       source.dsp2);
+  set(has_dsp3,       source.dsp3);
+  set(has_dsp4,       source.dsp4);
+  set(has_obc1,       source.obc1);
+  set(has_st010,      source.st010);
+  set(has_st011,      source.st011);
+  set(has_st018,      source.st018);
 }
 
 //==========
@@ -127,7 +138,7 @@ void Cartridge::cartinfo_t::reset() {
   rom_size = 0;
   ram_size = 0;
 
-  bsxslot    = false;
+  bsx_slot   = false;
   superfx    = false;
   sa1        = false;
   srtc       = false;
@@ -145,46 +156,24 @@ void Cartridge::cartinfo_t::reset() {
   st018      = false;
 }
 
-//apply cart-specific settings to current cartridge mode settings
-Cartridge::info_t& Cartridge::info_t::operator=(const Cartridge::cartinfo_t &source) {
-  mapper      = source.mapper;
-  dsp1_mapper = source.dsp1_mapper;
-  region      = source.region;
-
-  bsxslot    = source.bsxslot;
-  superfx    = source.superfx;
-  sa1        = source.sa1;
-  srtc       = source.srtc;
-  sdd1       = source.sdd1;
-  spc7110    = source.spc7110;
-  spc7110rtc = source.spc7110rtc;
-  cx4        = source.cx4;
-  dsp1       = source.dsp1;
-  dsp2       = source.dsp2;
-  dsp3       = source.dsp3;
-  dsp4       = source.dsp4;
-  obc1       = source.obc1;
-  st010      = source.st010;
-  st011      = source.st011;
-  st018      = source.st018;
-
-  return *this;
+Cartridge::cartinfo_t::cartinfo_t() {
+  reset();
 }
 
 //=======
 //utility
 //=======
 
+//ensure file path is absolute (eg resolve relative paths)
 string Cartridge::filepath(const char *filename, const char *pathname) {
   //if no pathname, return filename as-is
   string file(filename);
-  replace(file, "\\", "/");
-  if(!pathname || !*pathname) return file;
+  file.replace("\\", "/");
 
+  string path = (!pathname || !*pathname) ? (const char*)snes.config.path.current : pathname;
   //ensure path ends with trailing '/'
-  string path(pathname);
-  replace(path, "\\", "/");
-  if(!strend(path, "/")) strcat(path, "/");
+  path.replace("\\", "/");
+  if(!strend(path, "/")) path.append("/");
 
   //replace relative path with absolute path
   if(strbegin(path, "./")) {
@@ -194,6 +183,52 @@ string Cartridge::filepath(const char *filename, const char *pathname) {
 
   //remove folder part of filename
   lstring part;
-  split(part, "/", file);
-  return path << part[count(part) - 1];
+  part.split("/", file);
+  return path << part[part.size() - 1];
+}
+
+//remove directory information and file extension ("/foo/bar.ext" -> "bar")
+string Cartridge::basename(const char *filename) {
+  string name(filename);
+
+  //remove extension
+  for(signed i = strlen(name) - 1; i >= 0; i--) {
+    if(name[i] == '.') {
+      name[i] = 0;
+      break;
+    }
+  }
+
+  //remove directory information
+  for(signed i = strlen(name) - 1; i >= 0; i--) {
+    if(name[i] == '/' || name[i] == '\\') {
+      i++;
+      char *output = name();
+      while(true) {
+        *output++ = name[i];
+        if(!name[i]) break;
+        i++;
+      }
+      break;
+    }
+  }
+
+  return name;
+}
+
+//remove filename and return path only ("/foo/bar.ext" -> "/foo/bar/")
+string Cartridge::basepath(const char *filename) {
+  string path(filename);
+  path.replace("\\", "/");
+
+  //remove filename
+  for(signed i = strlen(path) - 1; i >= 0; i--) {
+    if(path[i] == '/') {
+      path[i] = 0;
+      break;
+    }
+  }
+
+  if(!strend(path, "/")) path.append("/");
+  return path;
 }

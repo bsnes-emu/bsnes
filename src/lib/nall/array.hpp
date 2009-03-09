@@ -48,6 +48,11 @@ namespace nall {
       operator[](buffersize) = data;
     }
 
+    signed find(const T data) {
+      for(unsigned i = 0; i < size(); i++) if(pool[i] == data) return i;
+      return -1;  //not found
+    }
+
     void clear() {
       memset(pool, 0, buffersize * sizeof(T));
     }

@@ -1,5 +1,4 @@
 #include <../base.hpp>
-#include <nall/sort.hpp>
 
 Cheat cheat;
 
@@ -31,7 +30,7 @@ bool Cheat::decode(const char *s, Cheat::cheat_t &item) const {
   item.count = 0;
 
   lstring list;
-  split(list, "+", s);
+  list.split("+", s);
 
   for(unsigned n = 0; n < list.size(); n++) {
     unsigned addr;
@@ -65,6 +64,28 @@ bool Cheat::read(unsigned addr, uint8_t &data) const {
 
   //code not found, or code is disabled
   return false;
+}
+
+//==============
+//master control
+//==============
+
+//global cheat system enable/disable:
+//if disabled, *all* cheat codes are disabled;
+//otherwise only individually disabled codes are.
+
+bool Cheat::enabled() const {
+  return cheat_system_enabled;
+}
+
+void Cheat::enable() {
+  cheat_system_enabled = true;
+  cheat_enabled = (cheat_system_enabled && cheat_enabled_code_exists);
+}
+
+void Cheat::disable() {
+  cheat_system_enabled = false;
+  cheat_enabled = false;
 }
 
 //================================
@@ -159,15 +180,15 @@ void Cheat::disable(unsigned i) {
 
 bool Cheat::load(const char *fn) {
   string data;
-  if(!fread(data, fn)) return false;
-  replace(data, "\r\n", "\n");
-  qreplace(data, " ", "");
+  if(!data.readfile(fn)) return false;
+  data.replace("\r\n", "\n");
+  data.qreplace(" ", "");
 
   lstring line;
-  split(line, "\n", data);
+  line.split("\n", data);
   for(unsigned i = 0; i < line.size(); i++) {
     lstring part;
-    qsplit(part, ",", line[i]);
+    part.qsplit(",", line[i]);
     if(part.size() != 3) continue;
     trim(part[0], "\"");
     add(part[1] == "enabled", /* code = */ part[2], /* desc = */ part[0]);
@@ -189,22 +210,13 @@ bool Cheat::save(const char *fn) const {
   return true;
 }
 
-void Cheat::sort() {
-  if(code.size() <= 1) return;  //nothing to sort?
-  cheat_t *buffer = new cheat_t[code.size()];
-  for(unsigned i = 0; i < code.size(); i++) buffer[i] = code[i];
-  nall::sort(buffer, code.size());
-  for(unsigned i = 0; i < code.size(); i++) code[i] = buffer[i];
-  delete[] buffer;
-}
-
 void Cheat::clear() {
-  cheat_system_enabled = false;
+  cheat_enabled_code_exists = false;
   memset(mask, 0, 0x200000);
   code.reset();
 }
 
-Cheat::Cheat() {
+Cheat::Cheat() : cheat_system_enabled(true) {
   clear();
 }
 
@@ -294,17 +306,18 @@ bool Cheat::encode(string &s, unsigned addr, uint8_t data, type_t type) const {
   }
 }
 
-//update_cheat_status() will scan to see if any codes are
-//enabled. if any are, make sure the cheat system is on.
-//otherwise, turn cheat system off to speed up emulation.
+//speed up S-CPU memory reads by disabling cheat code lookup when either:
+//a) cheat system is disabled by user, or b) no enabled cheat codes exist
 void Cheat::update_cheat_status() {
   for(unsigned i = 0; i < code.size(); i++) {
     if(code[i].enabled) {
-      cheat_system_enabled = true;
+      cheat_enabled_code_exists = true;
+      cheat_enabled = (cheat_system_enabled && cheat_enabled_code_exists);
       return;
     }
   }
-  cheat_system_enabled = false;
+  cheat_enabled_code_exists = false;
+  cheat_enabled = false;
 }
 
 //address lookup table manipulation and mirroring
@@ -367,13 +380,13 @@ void Cheat::clear(unsigned addr) {
 //these two functions are used to safely store description text inside .cfg file format.
 
 string& Cheat::encode_description(string &desc) const {
-  replace(desc, "\"", "\\q");
-  replace(desc, "\n", "\\n");
+  desc.replace("\"", "\\q");
+  desc.replace("\n", "\\n");
   return desc;
 }
 
 string& Cheat::decode_description(string &desc) const {
-  replace(desc, "\\q", "\"");
-  replace(desc, "\\n", "\n");
+  desc.replace("\\q", "\"");
+  desc.replace("\\n", "\n");
   return desc;
 }

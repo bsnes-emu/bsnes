@@ -80,20 +80,20 @@ void SNES::power() {
   ppu.power();
   bus.power();
 
-  if(expansion() == ExpansionBSX) bsxbase.power();
+  if(expansion() == ExpansionBSX)            bsxbase.power();
+  if(cartridge.mode() == Cartridge::ModeBsx) bsxcart.power();
+  if(cartridge.bsx_flash_loaded())           bsxflash.power();
 
-  if(cartridge.info.bsxcart)  bsxcart.power();
-  if(cartridge.info.bsxflash) bsxflash.power();
-  if(cartridge.info.srtc)     srtc.power();
-  if(cartridge.info.sdd1)     sdd1.power();
-  if(cartridge.info.spc7110)  spc7110.power();
-  if(cartridge.info.cx4)      cx4.power();
-  if(cartridge.info.dsp1)     dsp1.power();
-  if(cartridge.info.dsp2)     dsp2.power();
-  if(cartridge.info.dsp3)     dsp3.power();
-  if(cartridge.info.dsp4)     dsp4.power();
-  if(cartridge.info.obc1)     obc1.power();
-  if(cartridge.info.st010)    st010.power();
+  if(cartridge.has_srtc())    srtc.power();
+  if(cartridge.has_sdd1())    sdd1.power();
+  if(cartridge.has_spc7110()) spc7110.power();
+  if(cartridge.has_cx4())     cx4.power();
+  if(cartridge.has_dsp1())    dsp1.power();
+  if(cartridge.has_dsp2())    dsp2.power();
+  if(cartridge.has_dsp3())    dsp3.power();
+  if(cartridge.has_dsp4())    dsp4.power();
+  if(cartridge.has_obc1())    obc1.power();
+  if(cartridge.has_st010())   st010.power();
 
   for(unsigned i = 0x2100; i <= 0x213f; i++) memory::mmio.map(i, ppu);
   for(unsigned i = 0x2140; i <= 0x217f; i++) memory::mmio.map(i, cpu);
@@ -102,20 +102,20 @@ void SNES::power() {
   for(unsigned i = 0x4200; i <= 0x421f; i++) memory::mmio.map(i, cpu);
   for(unsigned i = 0x4300; i <= 0x437f; i++) memory::mmio.map(i, cpu);
 
-  if(expansion() == ExpansionBSX) bsxbase.enable();
+  if(expansion() == ExpansionBSX)            bsxbase.enable();
+  if(cartridge.mode() == Cartridge::ModeBsx) bsxcart.enable();
+  if(cartridge.bsx_flash_loaded())           bsxflash.enable();
 
-  if(cartridge.info.bsxcart)  bsxcart.enable();
-  if(cartridge.info.bsxflash) bsxflash.enable();
-  if(cartridge.info.srtc)     srtc.enable();
-  if(cartridge.info.sdd1)     sdd1.enable();
-  if(cartridge.info.spc7110)  spc7110.enable();
-  if(cartridge.info.cx4)      cx4.enable();
-  if(cartridge.info.dsp1)     dsp1.enable();
-  if(cartridge.info.dsp2)     dsp2.enable();
-  if(cartridge.info.dsp3)     dsp3.enable();
-  if(cartridge.info.dsp4)     dsp4.enable();
-  if(cartridge.info.obc1)     obc1.enable();
-  if(cartridge.info.st010)    st010.enable();
+  if(cartridge.has_srtc())    srtc.enable();
+  if(cartridge.has_sdd1())    sdd1.enable();
+  if(cartridge.has_spc7110()) spc7110.enable();
+  if(cartridge.has_cx4())     cx4.enable();
+  if(cartridge.has_dsp1())    dsp1.enable();
+  if(cartridge.has_dsp2())    dsp2.enable();
+  if(cartridge.has_dsp3())    dsp3.enable();
+  if(cartridge.has_dsp4())    dsp4.enable();
+  if(cartridge.has_obc1())    obc1.enable();
+  if(cartridge.has_st010())   st010.enable();
 
   input.port_set_device(0, snes.config.controller_port1);
   input.port_set_device(1, snes.config.controller_port2);
@@ -133,20 +133,20 @@ void SNES::reset() {
   ppu.reset();
   bus.reset();
 
-  if(expansion() == ExpansionBSX) bsxbase.reset();
+  if(expansion() == ExpansionBSX)            bsxbase.reset();
+  if(cartridge.mode() == Cartridge::ModeBsx) bsxcart.reset();
+  if(cartridge.bsx_flash_loaded())           bsxflash.reset();
 
-  if(cartridge.info.bsxcart)  bsxcart.reset();
-  if(cartridge.info.bsxflash) bsxflash.reset();
-  if(cartridge.info.srtc)     srtc.reset();
-  if(cartridge.info.sdd1)     sdd1.reset();
-  if(cartridge.info.spc7110)  spc7110.reset();
-  if(cartridge.info.cx4)      cx4.reset();
-  if(cartridge.info.dsp1)     dsp1.reset();
-  if(cartridge.info.dsp2)     dsp2.reset();
-  if(cartridge.info.dsp3)     dsp3.reset();
-  if(cartridge.info.dsp4)     dsp4.reset();
-  if(cartridge.info.obc1)     obc1.reset();
-  if(cartridge.info.st010)    st010.reset();
+  if(cartridge.has_srtc())    srtc.reset();
+  if(cartridge.has_sdd1())    sdd1.reset();
+  if(cartridge.has_spc7110()) spc7110.reset();
+  if(cartridge.has_cx4())     cx4.reset();
+  if(cartridge.has_dsp1())    dsp1.reset();
+  if(cartridge.has_dsp2())    dsp2.reset();
+  if(cartridge.has_dsp3())    dsp3.reset();
+  if(cartridge.has_dsp4())    dsp4.reset();
+  if(cartridge.has_obc1())    obc1.reset();
+  if(cartridge.has_st010())   st010.reset();
 
   input.port_set_device(0, snes.config.controller_port1);
   input.port_set_device(1, snes.config.controller_port2);
@@ -184,16 +184,18 @@ SNES::SNES() : snes_region(NTSC), snes_expansion(ExpansionNone) {
   config.file.autodetect_type    = false;
   config.file.bypass_patch_crc32 = false;
 
-  config.path.base       = "";
-  config.path.user       = "";
-  config.path.rom        = "";
-  config.path.save       = "";
-  config.path.patch      = "";
-  config.path.cheat      = "";
-  config.path.exportdata = "";
-  config.path.bsx        = "";
-  config.path.st         = "";
+  config.path.base    = "";
+  config.path.user    = "";
+  config.path.current = "";
+  config.path.rom     = "";
+  config.path.save    = "";
+  config.path.patch   = "";
+  config.path.cheat   = "";
+  config.path.data    = "";
+  config.path.bsx     = "";
+  config.path.st      = "";
 
+  config.cpu.version         = 2;
   config.cpu.ntsc_clock_rate = 21477272;
   config.cpu.pal_clock_rate  = 21281370;
   config.cpu.alu_mul_delay   = 2;
@@ -202,4 +204,7 @@ SNES::SNES() : snes_region(NTSC), snes_expansion(ExpansionNone) {
 
   config.smp.ntsc_clock_rate = 32041 * 768;
   config.smp.pal_clock_rate  = 32041 * 768;
+
+  config.ppu1.version = 1;
+  config.ppu2.version = 3;
 }
