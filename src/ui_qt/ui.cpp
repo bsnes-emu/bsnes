@@ -108,6 +108,8 @@ void Application::init() {
   config.save(configFilename);
 
   inputManager.bind();
+  inputManager.refresh();
+  inputManager.refresh();
   inputManager.onInput = bind(&Utility::inputEvent, &utility);
 
   utility.updateAvSync();

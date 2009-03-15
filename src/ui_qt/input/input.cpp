@@ -47,8 +47,8 @@ void InputManager::refresh() {
 
   input.poll(stateTable[next]);
   for(unsigned i = 0; i < nall::input_limit; i++) {
-    //call on_input() whenever button is pressed down; ignore axes
-    if(!stateTable[last][i] && stateTable[next][i] && InputCode::isButton(i) && onInput) onInput(i);
+    //alert via callback whenever input state changes for any ID ...
+    if(onInput && stateTable[last][i] != stateTable[next][i]) onInput(i);
   }
 }
 

@@ -8,16 +8,17 @@ public:
     void closeEvent(QCloseEvent*);
   } *window;
     QVBoxLayout *layout;
-      QLabel *title;
-      QGroupBox *axisGroup;
-        QHBoxLayout *axisLayout;
-          QPushButton *mouseAxisX;
-          QPushButton *mouseAxisY;
-      QGroupBox *buttonGroup;
-        QGridLayout *buttonLayout;
-          QPushButton *mouseButton[6];
+      QHBoxLayout *hlayout;
+        QLabel *title;
+        QPushButton *mouseAxes;
+          QMenu *mouseAxisMenu;
+            QAction *mouseAxisX;
+            QAction *mouseAxisY;
+        QPushButton *mouseButtons;
+          QMenu *mouseButtonMenu;
+            QAction *mouseButton[8];
       QWidget *imageSpacer;
-      struct InputImage : public QWidget {
+      struct ImageWidget : public QWidget {
         void paintEvent(QPaintEvent*);
       } *imageWidget;
       QWidget *spacer;
@@ -36,4 +37,6 @@ public slots:
   void assignMouse3();
   void assignMouse4();
   void assignMouse5();
+  void assignMouse6();
+  void assignMouse7();
 } *winInputCapture;

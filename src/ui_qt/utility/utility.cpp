@@ -5,6 +5,10 @@ void Utility::inputEvent(uint16_t code) {
   //if input capture assignment window is currently active, forward key-press event
   if(winInputCapture->activeObject) winInputCapture->inputEvent(code);
 
+  //only match buttons being pressed down ...
+  if(InputCode::isButton(code) == false) return;
+  if(inputManager.state(code) == false) return;
+
   if(code == keyboard::escape && input.acquired()) {
     input.unacquire();
     return;  //do not trigger other UI actions that may be bound to escape key

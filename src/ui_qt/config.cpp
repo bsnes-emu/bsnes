@@ -71,13 +71,13 @@ public:
     //external
     //========
 
-    attach(snes.config.controller_port1 = SNES::Input::DeviceJoypad, "snes.controller_port1");
-    attach(snes.config.controller_port2 = SNES::Input::DeviceJoypad, "snes.controller_port2");
-    attach(snes.config.expansion_port   = SNES::ExpansionBSX,        "snes.expansion_port");
+    attach(snes.config.controller_port1 = SNES::Input::DeviceJoypad, "snes.controllerPort1");
+    attach(snes.config.controller_port2 = SNES::Input::DeviceJoypad, "snes.controllerPort2");
+    attach(snes.config.expansion_port   = SNES::ExpansionBSX,        "snes.expansionPort");
     attach(snes.config.region           = SNES::Autodetect,          "snes.region");
 
-    attach(snes.config.file.autodetect_type    = false, "file.autodetect_type");
-    attach(snes.config.file.bypass_patch_crc32 = false, "file.bypass_patch_crc32");
+    attach(snes.config.file.autodetect_type    = false, "file.autodetectType");
+    attach(snes.config.file.bypass_patch_crc32 = false, "file.bypassPatchCrc32");
 
     attach(snes.config.path.rom   = "", "path.rom");
     attach(snes.config.path.save  = "", "path.save");
@@ -88,14 +88,14 @@ public:
     attach(snes.config.path.st    = "", "path.st");
 
     attach(snes.config.cpu.version         =        2, "cpu.version", "Valid version(s) are: 1, 2");
-    attach(snes.config.cpu.ntsc_clock_rate = 21477272, "cpu.ntsc_clock_rate");
-    attach(snes.config.cpu.pal_clock_rate  = 21281370, "cpu.pal_clock_rate");
-    attach(snes.config.cpu.alu_mul_delay   =        2, "cpu.alu_mul_delay");
-    attach(snes.config.cpu.alu_div_delay   =        2, "cpu.alu_div_delay");
-    attach(snes.config.cpu.wram_init_value =     0x55, "cpu.wram_init_value");
+    attach(snes.config.cpu.ntsc_clock_rate = 21477272, "cpu.ntscClockRate");
+    attach(snes.config.cpu.pal_clock_rate  = 21281370, "cpu.palClockRate");
+    attach(snes.config.cpu.alu_mul_delay   =        2, "cpu.aluMulDelay");
+    attach(snes.config.cpu.alu_div_delay   =        2, "cpu.aluDivDelay");
+    attach(snes.config.cpu.wram_init_value =     0x55, "cpu.wramInitValue");
 
-    attach(snes.config.smp.ntsc_clock_rate = 32041 * 768, "smp.ntsc_clock_rate");
-    attach(snes.config.smp.pal_clock_rate  = 32041 * 768, "smp.pal_clock_rate");
+    attach(snes.config.smp.ntsc_clock_rate = 32041 * 768, "smp.ntscClockRate");
+    attach(snes.config.smp.pal_clock_rate  = 32041 * 768, "smp.palClockRate");
 
     attach(snes.config.ppu1.version = 1, "ppu1.version", "Valid version(s) are: 1");
     attach(snes.config.ppu2.version = 3, "ppu2.version", "Valid version(s) are: 1, 2, 3");

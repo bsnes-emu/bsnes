@@ -31,10 +31,10 @@ void InputSettingsWindow::setup() {
   layout->addSpacing(Style::WidgetSpacing);
 
   controls = new QHBoxLayout; {
-    assign = new QPushButton("Assign Key ...");
+    assign = new QPushButton("Assign ...");
     controls->addWidget(assign);
 
-    unassign = new QPushButton("Unassign Key");
+    unassign = new QPushButton("Unassign");
     controls->addWidget(unassign);
   }
   controls->setSpacing(Style::WidgetSpacing);
