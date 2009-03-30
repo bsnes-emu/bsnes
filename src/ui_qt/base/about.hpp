@@ -11,7 +11,6 @@ public:
       QWidget *spacer;
 
   void setup();
-  void show();
 
 public slots:
 } *winAbout;

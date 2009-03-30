@@ -30,7 +30,6 @@ public:
   struct Input {
     enum policy_t { FocusPolicyPauseEmulation, FocusPolicyIgnoreInput, FocusPolicyAllowInput };
     unsigned focusPolicy;
-    unsigned analogAxisResistance;
     bool allowInvalidInput;
 
     struct Joypad {
@@ -147,22 +146,22 @@ public:
     attach(audio.inputFrequency  = 32000, "audio.inputFrequency");
 
     attach(input.focusPolicy = Input::FocusPolicyPauseEmulation, "input.focusPolicy");
-    attach(input.analogAxisResistance =    50, "input.analogAxisResistance", "Percentage; lower = less resistance");
-    attach(input.allowInvalidInput    = false, "input.allowInvalidInput", "Allow up+down / left+right combinations; may trigger bugs in some games");
+    attach(input.allowInvalidInput = false, "input.allowInvalidInput", "Allow up+down / left+right combinations; may trigger bugs in some games");
 
-    attach(input.joypad1.up     = "up",     "input.joypad1.up");
-    attach(input.joypad1.down   = "down",   "input.joypad1.down");
-    attach(input.joypad1.left   = "left",   "input.joypad1.left");
-    attach(input.joypad1.right  = "right",  "input.joypad1.right");
-    attach(input.joypad1.a      = "x",      "input.joypad1.a");
-    attach(input.joypad1.b      = "z",      "input.joypad1.b");
-    attach(input.joypad1.x      = "s",      "input.joypad1.x");
-    attach(input.joypad1.y      = "a",      "input.joypad1.y");
-    attach(input.joypad1.l      = "d",      "input.joypad1.l");
-    attach(input.joypad1.r      = "c",      "input.joypad1.r");
-    attach(input.joypad1.select = "rshift", "input.joypad1.select");
-    attach(input.joypad1.start  = "return", "input.joypad1.start");
+    attach(input.joypad1.up     = "keyboard00.up",     "input.joypad1.up");
+    attach(input.joypad1.down   = "keyboard00.down",   "input.joypad1.down");
+    attach(input.joypad1.left   = "keyboard00.left",   "input.joypad1.left");
+    attach(input.joypad1.right  = "keyboard00.right",  "input.joypad1.right");
+    attach(input.joypad1.a      = "keyboard00.x",      "input.joypad1.a");
+    attach(input.joypad1.b      = "keyboard00.z",      "input.joypad1.b");
+    attach(input.joypad1.x      = "keyboard00.s",      "input.joypad1.x");
+    attach(input.joypad1.y      = "keyboard00.a",      "input.joypad1.y");
+    attach(input.joypad1.l      = "keyboard00.d",      "input.joypad1.l");
+    attach(input.joypad1.r      = "keyboard00.c",      "input.joypad1.r");
+    attach(input.joypad1.select = "keyboard00.rshift", "input.joypad1.select");
+    attach(input.joypad1.start  = "keyboard00.return", "input.joypad1.start");
 
+    //these are all mapped to "none" by default
     attachJoypad(input.joypad2,    "input.joypad2");
     attachJoypad(input.multitap1a, "input.multitap1a");
     attachJoypad(input.multitap1b, "input.multitap1b");
@@ -173,44 +172,46 @@ public:
     attachJoypad(input.multitap2c, "input.multitap2c");
     attachJoypad(input.multitap2d, "input.multitap2d");
 
-    attach(input.mouse1.x     = "mouse.x",        "input.mouse1.x");
-    attach(input.mouse1.y     = "mouse.y",        "input.mouse1.y");
-    attach(input.mouse1.left  = "mouse.button00", "input.mouse1.left");
-    attach(input.mouse1.right = "mouse.button02", "input.mouse1.right");
+    attach(input.mouse1.x     = "mouse00.x",        "input.mouse1.x");
+    attach(input.mouse1.y     = "mouse00.y",        "input.mouse1.y");
+    attach(input.mouse1.left  = "mouse00.button00", "input.mouse1.left");
+    attach(input.mouse1.right = "mouse00.button02", "input.mouse1.right");
 
-    attach(input.mouse2.x     = "mouse.x",        "input.mouse2.x");
-    attach(input.mouse2.y     = "mouse.y",        "input.mouse2.y");
-    attach(input.mouse2.left  = "mouse.button00", "input.mouse2.left");
-    attach(input.mouse2.right = "mouse.button02", "input.mouse2.right");
+    //more likely a user will only use one mouse at a time, than for a system to have two mice
+    attach(input.mouse2.x     = "mouse00.x",        "input.mouse2.x");
+    attach(input.mouse2.y     = "mouse00.y",        "input.mouse2.y");
+    attach(input.mouse2.left  = "mouse00.button00", "input.mouse2.left");
+    attach(input.mouse2.right = "mouse00.button02", "input.mouse2.right");
 
-    attach(input.superscope.x       = "mouse.x",        "input.superscope.x");
-    attach(input.superscope.y       = "mouse.y",        "input.superscope.y");
-    attach(input.superscope.trigger = "mouse.button00", "input.superscope.trigger");
-    attach(input.superscope.cursor  = "mouse.button02", "input.superscope.cursor");
-    attach(input.superscope.turbo   = "t",              "input.superscope.turbo");
-    attach(input.superscope.pause   = "p",              "input.superscope.pause");
+    //unlikely a user will have a five-button mouse for turbo / pause mapping
+    attach(input.superscope.x       = "mouse00.x",        "input.superscope.x");
+    attach(input.superscope.y       = "mouse00.y",        "input.superscope.y");
+    attach(input.superscope.trigger = "mouse00.button00", "input.superscope.trigger");
+    attach(input.superscope.cursor  = "mouse00.button02", "input.superscope.cursor");
+    attach(input.superscope.turbo   = "keyboard00.t",     "input.superscope.turbo");
+    attach(input.superscope.pause   = "keyboard00.p",     "input.superscope.pause");
 
-    attach(input.justifier1.x       = "mouse.x",        "input.justifier1.x");
-    attach(input.justifier1.y       = "mouse.y",        "input.justifier1.y");
-    attach(input.justifier1.trigger = "mouse.button00", "input.justifier1.trigger");
-    attach(input.justifier1.start   = "mouse.button02", "input.jusitifer1.start");
+    attach(input.justifier1.x       = "mouse00.x",        "input.justifier1.x");
+    attach(input.justifier1.y       = "mouse00.y",        "input.justifier1.y");
+    attach(input.justifier1.trigger = "mouse00.button00", "input.justifier1.trigger");
+    attach(input.justifier1.start   = "mouse00.button02", "input.jusitifer1.start");
 
-    attach(input.justifier2.x       = "none", "input.justifier2.x");
-    attach(input.justifier2.y       = "none", "input.justifier2.y");
-    attach(input.justifier2.trigger = "none", "input.justifier2.trigger");
-    attach(input.justifier2.start   = "none", "input.justifier2.start");
+    attach(input.justifier2.x       = "mouse01.x",        "input.justifier2.x");
+    attach(input.justifier2.y       = "mouse01.y",        "input.justifier2.y");
+    attach(input.justifier2.trigger = "mouse01.button00", "input.justifier2.trigger");
+    attach(input.justifier2.start   = "mouse01.button02", "input.justifier2.start");
 
-    attach(input.uiGeneral.loadCartridge     = "none",     "input.uiGeneral.loadCartridge");
-    attach(input.uiGeneral.pauseEmulation    = "pause",    "input.uiGeneral.pauseEmulation");
-    attach(input.uiGeneral.resetSystem       = "none",     "input.uiGeneral.resetSystem");
-    attach(input.uiGeneral.powerCycleSystem  = "none",     "input.uiGeneral.powerCycleSystem");
-    attach(input.uiGeneral.lowerSpeed        = "subtract", "input.uiGeneral.lowerSpeed");
-    attach(input.uiGeneral.raiseSpeed        = "add",      "input.uiGeneral.raiseSpeed");
-    attach(input.uiGeneral.toggleCheatSystem = "none",     "input.uiGeneral.toggleCheatSystem");
-    attach(input.uiGeneral.toggleFullscreen  = "f11",      "input.uiGeneral.toggleFullscreen");
-    attach(input.uiGeneral.toggleMenu        = "escape",   "input.uiGeneral.toggleMenu");
-    attach(input.uiGeneral.toggleStatus      = "escape",   "input.uiGeneral.toggleStatus");
-    attach(input.uiGeneral.exitEmulator      = "none",     "input.uiGeneral.exitEmulator");
+    attach(input.uiGeneral.loadCartridge     = "none",                "input.uiGeneral.loadCartridge");
+    attach(input.uiGeneral.pauseEmulation    = "keyboard00.pause",    "input.uiGeneral.pauseEmulation");
+    attach(input.uiGeneral.resetSystem       = "none",                "input.uiGeneral.resetSystem");
+    attach(input.uiGeneral.powerCycleSystem  = "none",                "input.uiGeneral.powerCycleSystem");
+    attach(input.uiGeneral.lowerSpeed        = "keyboard00.divide",   "input.uiGeneral.lowerSpeed");
+    attach(input.uiGeneral.raiseSpeed        = "keyboard00.multiply", "input.uiGeneral.raiseSpeed");
+    attach(input.uiGeneral.toggleCheatSystem = "none",                "input.uiGeneral.toggleCheatSystem");
+    attach(input.uiGeneral.toggleFullscreen  = "keyboard00.f11",      "input.uiGeneral.toggleFullscreen");
+    attach(input.uiGeneral.toggleMenu        = "keyboard00.escape",   "input.uiGeneral.toggleMenu");
+    attach(input.uiGeneral.toggleStatus      = "keyboard00.escape",   "input.uiGeneral.toggleStatus");
+    attach(input.uiGeneral.exitEmulator      = "none",                "input.uiGeneral.exitEmulator");
   }
 
   void attachJoypad(Input::Joypad &joypad, const char *name) {

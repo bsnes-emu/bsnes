@@ -34,6 +34,9 @@ void InputSettingsWindow::setup() {
     assign = new QPushButton("Assign ...");
     controls->addWidget(assign);
 
+    assignAll = new QPushButton("Assign All ...");
+    controls->addWidget(assignAll);
+
     unassign = new QPushButton("Unassign");
     controls->addWidget(unassign);
   }
@@ -46,6 +49,7 @@ void InputSettingsWindow::setup() {
   connect(list, SIGNAL(itemActivated(QTreeWidgetItem*, int)), this, SLOT(assignKey()));
   connect(list, SIGNAL(itemSelectionChanged()), this, SLOT(listChanged()));
   connect(assign, SIGNAL(released()), this, SLOT(assignKey()));
+  connect(assignAll, SIGNAL(released()), this, SLOT(assignAllKeys()));
   connect(unassign, SIGNAL(released()), this, SLOT(unassignKey()));
 
   portChanged();
@@ -54,6 +58,8 @@ void InputSettingsWindow::setup() {
 void InputSettingsWindow::syncUi() {
   QList<QTreeWidgetItem*> itemList = list->selectedItems();
   assign->setEnabled(itemList.count() == 1);
+  //allow rapid assign for controllers from both ports, but not for UI shortcuts
+  assignAll->setEnabled(port->currentIndex() < 2);
   unassign->setEnabled(itemList.count() == 1);
 }
 
@@ -136,6 +142,16 @@ void InputSettingsWindow::assignKey() {
     if(item && item->isSelected()) {
       signed i = listItem.find(item);
       if(i >= 0) winInputCapture->activate(group[i]);
+    }
+  }
+}
+
+void InputSettingsWindow::assignAllKeys() {
+  int index = port->currentIndex();
+  if(index < 2) {
+    index = device->currentIndex();
+    if(index < deviceItem.size()) {
+      winInputCapture->activate(deviceItem[index]);
     }
   }
 }

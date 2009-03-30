@@ -15,7 +15,7 @@ void AboutWindow::setup() {
       "<table>"
       "<tr><td align='right'><b>Version: </b></td><td>" BSNES_VERSION "</td></tr>"
       "<tr><td align='right'><b>Author: </b></td><td>byuu</td></tr>"
-      "<tr><td align='right'><b>Homepage: </b></td><td><a href='http://byuu.org/'>http://byuu.org/</a></td></tr>"
+      "<tr><td align='right'><b>Homepage: </b></td><td>http://byuu.org/</td></tr>"
       "</table>"
     );
     layout->addWidget(info);
@@ -26,20 +26,6 @@ void AboutWindow::setup() {
   }
 
   window->setLayout(layout);
-}
-
-void AboutWindow::show() {
-  window->show();
-
-  static bool firstShow = true;
-  if(firstShow == true) {
-    firstShow = false;
-    utility.centerWindow(window);
-  }
-
-  application.processEvents();
-  window->activateWindow();
-  window->raise();
 }
 
 void AboutWindow::Logo::paintEvent(QPaintEvent*) {

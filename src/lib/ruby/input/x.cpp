@@ -33,7 +33,7 @@ public:
     char state[32];
     XQueryKeymap(display, state);
 
-    for(unsigned i = 0; i < keyboard::limit; i++) {
+    for(unsigned i = 0; i < keyboard<>::length; i++) {
       uint8_t code = keycode[i];
       if(code == 0) continue;  //unmapped
       table[i] = (bool)(state[code >> 3] & (1 << (code & 7)));

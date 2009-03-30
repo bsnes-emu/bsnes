@@ -1,5 +1,10 @@
 /* Video */
 
+#ifdef _WIN32
+  #define _WIN32_WINNT 0x0501
+  #include <windows.h>
+#endif
+
 #ifdef VIDEO_DIRECT3D
   #include <ruby/video/direct3d.cpp>
 #endif
@@ -58,6 +63,10 @@
 
 #ifdef INPUT_DIRECTINPUT
   #include <ruby/input/directinput.cpp>
+#endif
+
+#ifdef INPUT_RAWINPUT
+  #include <ruby/input/rawinput.cpp>
 #endif
 
 #ifdef INPUT_SDL

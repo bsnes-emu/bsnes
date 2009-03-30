@@ -61,7 +61,7 @@ void CodeEditorWindow::setup() {
   layout->addLayout(finishControls);
 
   window->setLayout(layout);
-  window->resize(400, 375);
+  window->setMinimumSize(400, 375);
 
   connect(codeList, SIGNAL(itemSelectionChanged()), this, SLOT(listChanged()));
   connect(codeValue, SIGNAL(textChanged(const QString&)), this, SLOT(codeChanged()));
@@ -148,7 +148,7 @@ void CodeEditorWindow::addCode() {
   codeList->clear();
   codeValue->setText("");
   enabled->setCheckState(Qt::Unchecked);
-  showWindow("Add new cheat code");
+  showWindow("Add New Cheat Code");
 }
 
 void CodeEditorWindow::editCode(unsigned code) {
@@ -166,23 +166,13 @@ void CodeEditorWindow::editCode(unsigned code) {
 
   for(unsigned i = 0; i < item.count; i++) codeList->addItem(utf8() << part[i]);
   enabled->setCheckState(item.enabled ? Qt::Checked : Qt::Unchecked);
-  showWindow("Edit existing cheat code");
+  showWindow("Edit Existing Cheat Code");
 }
 
 void CodeEditorWindow::showWindow(const char *title) {
   syncUi();
   window->setWindowTitle(title);
-  window->show();
-
-  static bool firstShow = true;
-  if(firstShow == true) {
-    firstShow = false;
-    utility.centerWindow(window);
-  }
-
-  application.processEvents();
-  window->activateWindow();
-  window->raise();
+  utility.showCentered(window);
 }
 
 CodeEditorWindow::CodeEditorWindow() {

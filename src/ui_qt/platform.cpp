@@ -39,7 +39,27 @@
       strcpy(argv[i], nall::utf8_t(wargv[i]));
     }
   }
+
+  bool Application::App::winEventFilter(MSG *msg, long *result) {
+    if(msg->message == WM_SYSCOMMAND) {
+      if(msg->wParam == SC_SCREENSAVE || msg->wParam == SC_MONITORPOWER) {
+        *result = 0;
+        return true;
+      }
+    }
+    return false;
+  }
+
+  void supressScreenSaver() {
+    //handled by event filter above
+  }
 #else
+  #define None XNone
+  #define Window XWindow
+  #include <X11/extensions/XTest.h>
+  #undef None
+  #undef Window
+
   //POSIX-compatible (Linux, BSD, etc.)
   char* userpath(char *path) {
     *path = 0;
@@ -55,5 +75,25 @@
   #define mkdir(path) (mkdir)(path, 0755)
 
   void initargs(int &argc, char **&argv) {
+  }
+
+  void supressScreenSaver() {
+    static clock_t delta_x = 0, delta_y = 0;
+
+    delta_y = clock();
+    if(delta_y - delta_x < CLOCKS_PER_SEC * 20) return;
+    delta_x = delta_y;
+
+    //XSetScreenSaver(timeout = 0) does not work
+    //XResetScreenSaver() does not work
+    //XScreenSaverSuspend() does not work
+    //DPMSDisable() does not work
+    //XSendEvent(KeyPressMask) does not work
+    //use XTest extension to send fake keypress every ~20 seconds.
+    //keycode of 255 does not map to any actual key,
+    //but it will block screensaver and power management.
+    Display *display = XOpenDisplay(0);
+    XTestFakeKeyEvent(display, 255, True,  0);
+    XTestFakeKeyEvent(display, 255, False, 0);
   }
 #endif

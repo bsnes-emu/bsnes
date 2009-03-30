@@ -97,7 +97,7 @@ void VideoSettingsWindow::gammaRampToggle(int state) {
 void VideoSettingsWindow::ntscFieldsToggle(int state) {
   config.video.enableNtscMergeFields = (state == Qt::Checked);
   syncUi();
-  utility.updateColorFilter();
+  utility.updateSoftwareFilter();
 }
 
 void VideoSettingsWindow::contrastAdjust(int value) {

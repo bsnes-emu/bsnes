@@ -32,9 +32,9 @@ uint8 BSXBase::mmio_read(unsigned addr) {
       if(regs.r2192_counter >= 18) regs.r2192_counter = 0;
 
       if(counter == 0) {
-      time_t rawtime;
+        time_t rawtime;
         time(&rawtime);
-      tm *t = localtime(&rawtime);
+        tm *t = localtime(&rawtime);
 
         regs.r2192_hour   = t->tm_hour;
         regs.r2192_minute = t->tm_min;
@@ -42,11 +42,11 @@ uint8 BSXBase::mmio_read(unsigned addr) {
       }
 
       switch(counter) {
-        case  0: return 0x00; //???
-        case  1: return 0x00; //???
-        case  2: return 0x00; //???
-        case  3: return 0x00; //???
-        case  4: return 0x00; //???
+        case  0: return 0x00;  //???
+        case  1: return 0x00;  //???
+        case  2: return 0x00;  //???
+        case  3: return 0x00;  //???
+        case  4: return 0x00;  //???
         case  5: return 0x01;
         case  6: return 0x01;
         case  7: return 0x00;
@@ -55,11 +55,11 @@ uint8 BSXBase::mmio_read(unsigned addr) {
         case 10: return regs.r2192_second;
         case 11: return regs.r2192_minute;
         case 12: return regs.r2192_hour;
-        case 13: return 0x00; //???
-        case 14: return 0x00; //???
-        case 15: return 0x00; //???
-        case 16: return 0x00; //???
-        case 17: return 0x00; //???
+        case 13: return 0x00;  //???
+        case 14: return 0x00;  //???
+        case 15: return 0x00;  //???
+        case 16: return 0x00;  //???
+        case 17: return 0x00;  //???
       }
     } break;
 

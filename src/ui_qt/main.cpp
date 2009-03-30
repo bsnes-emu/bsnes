@@ -1,12 +1,10 @@
 #include "main.hpp"
 #include "resource/resource.rcc"
 
+//nall::string <> QString interface: allows string streaming; automatically converts to UTF-16
 class utf8 : public nall::string {
 public:
-  utf8& operator<<(const string &s) { string::operator<<(s); return *this; }
-  utf8& operator<<(const char *s) { string::operator<<(s); return *this; }
-  utf8& operator<<(int n) { string::operator<<(n); return *this; }
-  utf8& operator<<(double d) { string::operator<<(d); return *this; }
+  template<typename T> utf8& operator<<(T t) { string::operator<<(t); return *this; }
   operator const QString() const { return QString::fromUtf8(*this); }
 };
 
@@ -19,21 +17,25 @@ public:
 #include "utility/utility.cpp"
 
 const char defaultStylesheet[] =
-  "QLabel.title {\n"
-  "  background: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 0, stop: 0 rgba(255, 0, 0, 48), stop: 1 rgba(0, 0, 0, 32));\n"
-  "  font-weight: bold;\n"
-  "  margin-bottom: 5px;\n"
-  "  padding: 3px;\n"
-  "}\n"
+  "QLabel.title {"
+  "  background: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 0, stop: 0 rgba(255, 0, 0, 48), stop: 1 rgba(128, 0, 0, 96));"
+  "  font-weight: bold;"
+  "  margin-bottom: 5px;"
+  "  padding: 3px;"
+  "}"
   "\n"
-  "#backdrop {\n"
-  "  background: #000000;\n"
-  "}\n"
+  "#backdrop {"
+  "  background: #000000;"
+  "}"
   "\n"
-  "#about-window {\n"
-  "  background: qlineargradient(x1: 0, y1: 0, x2: 0.5, y2: 1, stop: 0 #555555, stop: 1 #aaaaaa);\n"
-  "}\n"
-  "";
+  "#mouse-capture-box {"
+  "  background: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, "
+  "    stop: 0.00 rgba(128, 0, 0, 96), stop: 0.25 rgba(255, 0, 0, 48), "
+  "    stop: 0.75 rgba(255, 0, 0, 48), stop: 1.00 rgba(128, 0, 0, 96));"
+  "  color: #000000;"
+  "  font-weight: bold;"
+  "}"
+  "\n";
 
 void Application::initPaths(const char *basename) {
   char temp[PATH_MAX];
@@ -82,7 +84,7 @@ void Application::locateFile(string &filename, bool createDataDirectory) {
 }
 
 int Application::main(int argc, char **argv) {
-  app = new QApplication(argc, argv);
+  app = new App(argc, argv);
   #if !defined(_WIN32)
   //Windows port uses 256x256 icon from resource file
   app->setWindowIcon(QIcon(":/bsnes.png"));
@@ -131,6 +133,8 @@ int Application::main(int argc, char **argv) {
     } else {
       usleep(20 * 1000);
     }
+
+    supressScreenSaver();
   }
 
   config.save(configFilename);

@@ -68,7 +68,7 @@ void SNES::power() {
   snes_expansion = max(0, min(1, snes.config.expansion_port));
 
   if(snes_region == Autodetect) {
-    snes_region = cartridge.region() == Cartridge::NTSC ? NTSC : PAL;
+    snes_region = (cartridge.region() == Cartridge::NTSC ? NTSC : PAL);
   }
 
   scheduler.init();

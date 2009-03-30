@@ -25,7 +25,6 @@ public:
         QStackedLayout *panelLayout;
 
   void setup();
-  void show();
 
 public slots:
   void listChanged();

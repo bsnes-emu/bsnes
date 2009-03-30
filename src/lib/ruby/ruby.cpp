@@ -236,6 +236,10 @@ void InputInterface::driver(const char *driver) {
   else if(!strcmp(driver, "DirectInput")) p = new InputDI();
   #endif
 
+  #ifdef INPUT_RAWINPUT
+  else if(!strcmp(driver, "RawInput")) p = new InputRaw();
+  #endif
+
   #ifdef INPUT_SDL
   else if(!strcmp(driver, "SDL")) p = new InputSDL();
   #endif
@@ -249,7 +253,9 @@ void InputInterface::driver(const char *driver) {
 
 //select the *safest* available driver, not the fastest
 const char* InputInterface::default_driver() {
-  #if defined(INPUT_DIRECTINPUT)
+  #if defined(INPUT_RAWINPUT)
+  return "RawInput";
+  #elif defined(INPUT_DIRECTINPUT)
   return "DirectInput";
   #elif defined(INPUT_SDL)
   return "SDL";
@@ -264,6 +270,10 @@ const char* InputInterface::driver_list() {
   return
 
   //Windows
+
+  #if defined(INPUT_RAWINPUT)
+  "RawInput;"
+  #endif
 
   #if defined(INPUT_DIRECTINPUT)
   "DirectInput;"

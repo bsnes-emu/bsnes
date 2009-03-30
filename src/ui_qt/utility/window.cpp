@@ -1,26 +1,36 @@
-//center specified top-level window onscreen:
-//accounts for taskbar, dock, window frame, etc.
-void Utility::centerWindow(QWidget *window) {
-  QRect deskRect = QApplication::desktop()->availableGeometry();
-  unsigned deskWidth  = (deskRect.right() - deskRect.left() + 1);
-  unsigned deskHeight = (deskRect.bottom() - deskRect.top() + 1);
+//show specified window in the center of the screen.
+void Utility::showCentered(QWidget *window) {
+  QRect deskRect = QApplication::desktop()->availableGeometry(window);
 
-  if(window->isVisible()) {
-    QRect windowRect = window->frameGeometry();
-    unsigned windowWidth  = (windowRect.right() - windowRect.left() + 1);
-    unsigned windowHeight = (windowRect.bottom() - windowRect.top() + 1);
+  //place window offscreen, so that it can be shown to get proper frameSize()
+  window->move(std::numeric_limits<signed>::max(), std::numeric_limits<signed>::max());
+  window->showNormal();
 
-    unsigned x = (deskWidth  >= windowWidth ) ? (deskWidth  - windowWidth ) / 2 : 0;
-    unsigned y = (deskHeight >= windowHeight) ? (deskHeight - windowHeight) / 2 : 0;
-    window->move(deskRect.left() + x, deskRect.top() + y);
-  } else {
-    unsigned x = (deskWidth  >= window->size().width() ) ? (deskWidth  - window->size().width() ) / 2 : 0;
-    unsigned y = (deskHeight >= window->size().height()) ? (deskHeight - window->size().height()) / 2 : 0;
-    window->setGeometry(
-      deskRect.left() + x, deskRect.top() + y,
-      window->size().width(), window->size().height()
-    );
+  //force-resize window to be as small as minimumSize() will allow, and then center it
+  window->resize(0, 0);
+  window->move(
+    deskRect.center().x() - (window->frameSize().width()  / 2),
+    deskRect.center().y() - (window->frameSize().height() / 2)
+  );
+
+  #ifndef _WIN32
+  //Xlib frame size (excluding inside) is QSize(0, 0) at first, wait for it to be valid
+  for(unsigned counter = 0; counter < 4096; counter++) {
+    if(window->frameSize() != window->size()) break;
+    application.processEvents();
   }
+  #endif
+
+  //in case frame size changed, recenter window
+  window->move(
+    deskRect.center().x() - (window->frameSize().width()  / 2),
+    deskRect.center().y() - (window->frameSize().height() / 2)
+  );
+
+  //ensure window has focus
+  application.processEvents();
+  window->activateWindow();
+  window->raise();
 }
 
 void Utility::updateFullscreenState() {
@@ -57,9 +67,7 @@ void Utility::constrainSize(unsigned &x, unsigned &y, unsigned max) {
 }
 
 void Utility::resizeMainWindow() {
-  //Xlib requires time to propogate window messages to window manager;
-  //repeat resize a few times to ensure window ends up correctly sized and centered
-  for(unsigned i = 0; i < 10; i++) {
+  for(unsigned i = 0; i < 8; i++) {
     unsigned multiplier = config.video.context->multiplier;
     unsigned width  = 256 * config.video.context->multiplier;
     unsigned height = (config.video.context->region == 0 ? 224 : 239) * config.video.context->multiplier;
@@ -72,45 +80,33 @@ void Utility::resizeMainWindow() {
       }
     }
 
-    QDesktopWidget *desktop = QApplication::desktop();
-    application.processEvents();
-
     if(config.video.isFullscreen == false) {
       //get effective desktop work area region (ignore Windows taskbar, OS X doc, etc.)
-      QRect deskRect = desktop->availableGeometry();
-      unsigned deskWidth  = (deskRect.right() - deskRect.left() + 1);
-      unsigned deskHeight = (deskRect.bottom() - deskRect.top() + 1);
+      QRect deskRect = QApplication::desktop()->availableGeometry(winMain->window);
 
       //calculate frame geometry (window border + menubar + statusbar)
-      unsigned frameWidth, frameHeight;
-      if(winMain->window->isVisible()) {
-        QRect frameRect = winMain->window->frameGeometry();
-        frameWidth  = (frameRect.right() - frameRect.left() + 1) - winMain->canvasContainer->size().width();
-        frameHeight = (frameRect.bottom() - frameRect.top() + 1) - winMain->canvasContainer->size().height();
-      } else {
-        //frameGeometry() is inaccurate when window is not visible
-        //(especially before it is shown for the first time)
-        frameWidth  = 10;  //use reasonable defaults
-        frameHeight = 80;  //for frame size
-      }
+      unsigned frameWidth  = winMain->window->frameSize().width()  - winMain->canvasContainer->size().width();
+      unsigned frameHeight = winMain->window->frameSize().height() - winMain->canvasContainer->size().height();
 
       //ensure window size will not be larger than viewable desktop area
-      constrainSize(height, width, deskHeight - frameHeight);
-      constrainSize(width, height, deskWidth  - frameWidth );
+      constrainSize(height, width, deskRect.height() - frameHeight);
+      constrainSize(width, height, deskRect.width()  - frameWidth );
 
-      //resize window such that it is as small as possible to hold canvas
-      //of size (width, height); and center resultant window onscreen
+      //resize window such that it is as small as possible to hold canvas of size (width, height)
       winMain->canvas->setFixedSize(width, height);
-      winMain->window->move(
-        deskRect.left() + ((deskWidth  - (frameWidth  + width )) / 2),
-        deskRect.top () + ((deskHeight - (frameHeight + height)) / 2)
-      );
       winMain->window->resize(width, height);
+
+      //center window onscreen
+      winMain->window->move(
+        deskRect.center().x() - (winMain->window->frameSize().width()  / 2),
+        deskRect.center().y() - (winMain->window->frameSize().height() / 2)
+      );
     } else {
-      //center canvas onscreen, ensure it is not larger than viewable area
-      winMain->canvas->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
       constrainSize(height, width, winMain->canvasContainer->size().height());
       constrainSize(width, height, winMain->canvasContainer->size().width());
+
+      //center canvas onscreen; ensure it is not larger than viewable area
+      winMain->canvas->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
       winMain->canvas->setMaximumSize(width, height);
     }
 

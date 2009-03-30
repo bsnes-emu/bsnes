@@ -1,6 +1,6 @@
 /*
   ruby
-  version: 0.04 (2008-08-20)
+  version: 0.05 (2009-03-21)
   license: public domain
 */
 
@@ -8,10 +8,13 @@
 #define RUBY_H
 
 #include <nall/algorithm.hpp>
+#include <nall/array.hpp>
 #include <nall/bit.hpp>
 #include <nall/input.hpp>
 #include <nall/new.hpp>
+#include <nall/sort.hpp>
 #include <nall/stdint.hpp>
+#include <nall/vector.hpp>
 
 namespace ruby {
 

@@ -70,21 +70,7 @@ void SettingsWindow::setup() {
   connect(list, SIGNAL(currentRowChanged(int)), this, SLOT(listChanged()));
 
   listChanged();
-  window->resize(600, 360);
-}
-
-void SettingsWindow::show() {
-  window->show();
-
-  static bool firstShow = true;
-  if(firstShow == true) {
-    firstShow = false;
-    utility.centerWindow(window);
-  }
-
-  application.processEvents();
-  window->activateWindow();
-  window->raise();
+  window->setMinimumSize(600, 360);
 }
 
 void SettingsWindow::listChanged() {

@@ -133,21 +133,8 @@ void LoaderWindow::loadSufamiTurboCartridge(const char *fileBase, const char *fi
 
 void LoaderWindow::showWindow(const char *title) {
   window->setWindowTitle(title);
-  window->resize(0, 0);  //shrink window as much as possible (visible widgets will forcefully increase size)
-  window->show();
-  window->resize(0, 0);
+  utility.showCentered(window);
   load->setFocus();
-
-  static bool firstShow = true;
-  if(firstShow) {
-    //center window, but only on first show (to save user positioning for later shows)
-    firstShow = false;
-    utility.centerWindow(window);
-  }
-
-  application.processEvents();
-  window->activateWindow();
-  window->raise();
 }
 
 void LoaderWindow::selectBaseCartridge() {
@@ -190,9 +177,19 @@ void LoaderWindow::onLoad() {
   string slot2 = slot2File->text().toUtf8().data();
 
   switch(mode) {
-    case ModeBsxSlotted: utility.loadCartridgeBsxSlotted(base, slot1); break;
-    case ModeBsx: utility.loadCartridgeBsx(snes.config.path.bsx = base, slot1); break;
-    case ModeSufamiTurbo: utility.loadCartridgeSufamiTurbo(snes.config.path.st = base, slot1, slot2); break;
+    case ModeBsxSlotted: {
+      utility.loadCartridgeBsxSlotted(base, slot1);
+    } break;
+
+    case ModeBsx: {
+      snes.config.path.bsx = base;
+      utility.loadCartridgeBsx(base, slot1);
+    } break;
+
+    case ModeSufamiTurbo: {
+      snes.config.path.st = base;
+      utility.loadCartridgeSufamiTurbo(base, slot1, slot2);
+    } break;
   }
 }
 

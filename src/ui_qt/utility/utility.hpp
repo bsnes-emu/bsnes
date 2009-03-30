@@ -1,6 +1,7 @@
 class Utility {
 public:
   //utility.cpp
+  bool isButtonDown(uint16_t inputCode, InputObject &object);
   void inputEvent(uint16_t code);
   void showMessage(const char *message);
   void updateSystemState();
@@ -29,7 +30,7 @@ public:
   void modifySystemState(system_state_t state);
 
   //window.cpp
-  void centerWindow(QWidget *window);
+  void showCentered(QWidget *window);
   void updateFullscreenState();
   void constrainSize(unsigned &x, unsigned &y, unsigned max);
   void resizeMainWindow();

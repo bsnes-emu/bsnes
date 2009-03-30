@@ -11,6 +11,7 @@ public:
       QTreeWidget *list;
       QHBoxLayout *controls;
         QPushButton *assign;
+        QPushButton *assignAll;
         QPushButton *unassign;
 
   void setup();
@@ -22,6 +23,7 @@ public slots:
   void listChanged();
   void updateList();
   void assignKey();
+  void assignAllKeys();
   void unassignKey();
 
 private:

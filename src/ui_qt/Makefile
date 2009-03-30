@@ -8,11 +8,15 @@ moc = moc
 rcc = rcc
 
 ifeq ($(platform),x) # X11
+  link += $(call mklib,Xtst)
   link += `pkg-config --libs QtCore QtGui`
   qtflags = `pkg-config --cflags QtCore QtGui`
 else ifeq ($(platform),win) # Windows
   qtdir = c:/qt450
-  link += -L$(qtdir)/lib
+
+  link += $(call mklibpath,$(qtdir)/lib)
+  link += $(call mklibpath,$(qtdir)/plugins/imageformats)
+
   link += $(call mklib,mingw32)
   link += $(call mklib,qtmain)
   link += $(call mklib,QtGui)
@@ -27,9 +31,15 @@ else ifeq ($(platform),win) # Windows
   link += $(call mklib,advapi32)
   link += $(call mklib,ws2_32)
   link += $(call mklib,uuid)
-  qtflags  = $(call mkinc,$(qtdir)/include)
-  qtflags += $(call mkinc,$(qtdir)/include/QtCore)
-  qtflags += $(call mkinc,$(qtdir)/include/QtGui)
+  link += $(call mklib,gdi32)
+
+  # optional image-file support:
+  # link += $(call mklib,qjpeg)
+  # link += $(call mklib,qmng)
+
+  qtflags  = $(call mkincpath,$(qtdir)/include)
+  qtflags += $(call mkincpath,$(qtdir)/include/QtCore)
+  qtflags += $(call mkincpath,$(qtdir)/include/QtGui)
 endif
 
 moc_objects = \

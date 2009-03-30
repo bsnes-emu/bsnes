@@ -6,6 +6,8 @@
 
 #include <QApplication>
 #include <QtGui>
+//Q_IMPORT_PLUGIN(QJpegPlugin)
+//Q_IMPORT_PLUGIN(QMngPlugin)
 
 #include <../base.hpp>
 #include <../cart/cart.hpp>
@@ -25,7 +27,13 @@ using namespace ruby;
 
 class Application {
 public:
-  QApplication *app;
+  class App : public QApplication {
+  public:
+    #ifdef _WIN32
+    bool winEventFilter(MSG *msg, long *result);
+    #endif
+    App(int argc, char **argv) : QApplication(argc, argv) {}
+  } *app;
 
   bool terminate;  //set to true to terminate main() loop and exit emulator
   bool power;

@@ -118,7 +118,7 @@ bool Cartridge::load_bsx(const char *base, const char *slot) {
     delete[] data;
   }
 
-  if(load_image(slot, data, size, patch_applied)) {
+  if(load_image(slot, data, size, patch_applied) == true) {
     set(bsx_flash_loaded, true);
     if(patch_applied) set(patched, true);
     bs.ram = data;
@@ -157,7 +157,7 @@ bool Cartridge::load_sufami_turbo(const char *base, const char *slotA, const cha
   read_header(cartinfo, cart.rom = data, cart.rom_size = size);
   set_cartinfo(cartinfo);
 
-  if(load_image(slotA, data, size, patch_applied)) {
+  if(load_image(slotA, data, size, patch_applied) == true) {
     if(patch_applied) set(patched, true);
     stA.rom = new(zeromemory) uint8_t[stA.rom_size = 0x100000];
     memcpy(stA.rom, data, min(size, stA.rom_size));
@@ -166,7 +166,7 @@ bool Cartridge::load_sufami_turbo(const char *base, const char *slotA, const cha
     load_ram(get_filename(slotA, "srm", snes.config.path.save), stA.ram, stA.ram_size = 0x020000, 0xff);
   }
 
-  if(load_image(slotB, data, size, patch_applied)) {
+  if(load_image(slotB, data, size, patch_applied) == true) {
     if(patch_applied) set(patched, true);
     stB.rom = new(zeromemory) uint8_t[stB.rom_size = 0x100000];
     memcpy(stB.rom, data, min(size, stB.rom_size));

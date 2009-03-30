@@ -22,10 +22,12 @@ void BSXCart::reset() {
 void BSXCart::update_memory_map() {
   Memory &cart = (regs.r[0x01] & 0x80) == 0x00 ? (Memory&)bsxflash : (Memory&)psram;
 
-  if((regs.r[0x02] & 0x80) == 0x00) { //LoROM mapping
+  if((regs.r[0x02] & 0x80) == 0x00) {
+    //LoROM mapping
     bus.map(Bus::MapLinear, 0x00, 0x7d, 0x8000, 0xffff, cart);
     bus.map(Bus::MapLinear, 0x80, 0xff, 0x8000, 0xffff, cart);
-  } else { //HiROM mapping
+  } else {
+    //HiROM mapping
     bus.map(Bus::MapShadow, 0x00, 0x3f, 0x8000, 0xffff, cart);
     bus.map(Bus::MapLinear, 0x40, 0x7d, 0x0000, 0xffff, cart);
     bus.map(Bus::MapShadow, 0x80, 0xbf, 0x8000, 0xffff, cart);
@@ -58,12 +60,12 @@ void BSXCart::update_memory_map() {
 }
 
 uint8 BSXCart::mmio_read(unsigned addr) {
-  if((addr & 0xf0ffff) == 0x005000) { //$[00-0f]:5000 MMIO
+  if((addr & 0xf0ffff) == 0x005000) {  //$[00-0f]:5000 MMIO
     uint8 n = (addr >> 16) & 15;
     return regs.r[n];
   }
 
-  if((addr & 0xf8f000) == 0x105000) { //$[10-17]:[5000-5fff] SRAM
+  if((addr & 0xf8f000) == 0x105000) {  //$[10-17]:[5000-5fff] SRAM
     return sram.read(((addr >> 16) & 7) * 0x1000 + (addr & 0xfff));
   }
 
@@ -71,14 +73,14 @@ uint8 BSXCart::mmio_read(unsigned addr) {
 }
 
 void BSXCart::mmio_write(unsigned addr, uint8 data) {
-  if((addr & 0xf0ffff) == 0x005000) { //$[00-0f]:5000 MMIO
+  if((addr & 0xf0ffff) == 0x005000) {  //$[00-0f]:5000 MMIO
     uint8 n = (addr >> 16) & 15;
     regs.r[n] = data;
     if(n == 0x0e && data & 0x80) update_memory_map();
     return;
   }
 
-  if((addr & 0xf8f000) == 0x105000) { //$[10-17]:[5000-5fff] SRAM
+  if((addr & 0xf8f000) == 0x105000) {  //$[10-17]:[5000-5fff] SRAM
     return sram.write(((addr >> 16) & 7) * 0x1000 + (addr & 0xfff), data);
   }
 }

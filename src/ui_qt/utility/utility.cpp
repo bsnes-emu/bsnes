@@ -1,52 +1,85 @@
 #include "cartridge.cpp"
 #include "window.cpp"
 
+//returns true if requested code is a button, and it has just been pressed down
+bool Utility::isButtonDown(uint16_t inputCode, InputObject &object) {
+  if(inputCode != object.code) return false;
+
+  if(object.codetype != InputCode::KeyboardButton
+  && object.codetype != InputCode::MouseButton
+  && object.codetype != InputCode::JoypadHat
+  && object.codetype != InputCode::JoypadAxis
+  && object.codetype != InputCode::JoypadButton) return false;
+
+  int16_t state     = inputManager.state(object.code);
+  int16_t lastState = inputManager.lastState(object.code);
+
+  if(object.codetype == InputCode::JoypadHat) {
+    switch(object.modifier) {
+      case InputObject::Up:    return (state & joypad<>::hat_up   ) && !(lastState & joypad<>::hat_up   );
+      case InputObject::Down:  return (state & joypad<>::hat_down ) && !(lastState & joypad<>::hat_down );
+      case InputObject::Left:  return (state & joypad<>::hat_left ) && !(lastState & joypad<>::hat_left );
+      case InputObject::Right: return (state & joypad<>::hat_right) && !(lastState & joypad<>::hat_right);
+    }
+  } else if(object.codetype == InputCode::JoypadAxis) {
+    switch(object.modifier) {
+      case InputObject::Lo: return (state < -16384) && !(lastState < -16384);
+      case InputObject::Hi: return (state > +16384) && !(lastState > +16384);
+      case InputObject::Trigger: return (state < 0) && !(lastState < 0);
+    }
+  } else {
+    return (state == 1) && !(lastState == 1);
+  }
+
+  return false;  //fall-through for modifier-less hats / axes
+}
+
 void Utility::inputEvent(uint16_t code) {
-  //if input capture assignment window is currently active, forward key-press event
-  if(winInputCapture->activeObject) winInputCapture->inputEvent(code);
+  //forward key-press event
+  //(in case window is currently active and capturing a new button / axis assignment)
+  winInputCapture->inputEvent(code);
 
-  //only match buttons being pressed down ...
-  if(InputCode::isButton(code) == false) return;
-  if(inputManager.state(code) == false) return;
-
-  if(code == keyboard::escape && input.acquired()) {
-    input.unacquire();
-    return;  //do not trigger other UI actions that may be bound to escape key
+  //if escape key is pressed on *any* keyboard; release the mouse if it is acquired
+  for(unsigned i = 0; i < keyboard<>::count; i++) {
+    if(code == keyboard<>::index(i, keyboard<>::escape) && inputManager.state(code) && input.acquired()) {
+      input.unacquire();
+      return;  //do not trigger other UI actions that may be bound to escape key
+    }
   }
 
   if(winMain->window->isActiveWindow()) {
     bool resizeWindow = false;
 
-    if(code == inputUiGeneral.loadCartridge.code) {
+    if(isButtonDown(code, inputUiGeneral.loadCartridge)) {
       string filename = selectCartridge();
       if(filename.length() > 0) loadCartridge(filename);
     }
 
-    if(code == inputUiGeneral.pauseEmulation.code) {
+    if(isButtonDown(code, inputUiGeneral.pauseEmulation)) {
       application.pause = !application.pause;
     }
 
-    if(code == inputUiGeneral.resetSystem.code) {
+    if(isButtonDown(code, inputUiGeneral.resetSystem)) {
       modifySystemState(Reset);
     }
 
-    if(code == inputUiGeneral.powerCycleSystem.code) {
+    if(isButtonDown(code, inputUiGeneral.powerCycleSystem)) {
       modifySystemState(PowerCycle);
     }
 
-    if(code == inputUiGeneral.lowerSpeed.code) {
+    if(isButtonDown(code, inputUiGeneral.lowerSpeed)) {
       config.system.speed--;
       updateEmulationSpeed();
       winMain->syncUi();
     }
 
-    if(code == inputUiGeneral.raiseSpeed.code) {
+    if(isButtonDown(code, inputUiGeneral.raiseSpeed)) {
       config.system.speed++;
       updateEmulationSpeed();
       winMain->syncUi();
     }
 
-    if(code == inputUiGeneral.toggleCheatSystem.code) {
+    if(isButtonDown(code, inputUiGeneral.toggleCheatSystem)) {
       if(cheat.enabled() == false) {
         cheat.enable();
         showMessage("Cheat system enabled.");
@@ -56,18 +89,18 @@ void Utility::inputEvent(uint16_t code) {
       }
     }
 
-    if(code == inputUiGeneral.toggleFullscreen.code) {
+    if(isButtonDown(code, inputUiGeneral.toggleFullscreen)) {
       config.video.isFullscreen = !config.video.isFullscreen;
       updateFullscreenState();
       winMain->syncUi();
     }
 
-    if(code == inputUiGeneral.toggleMenu.code) {
+    if(isButtonDown(code, inputUiGeneral.toggleMenu)) {
       winMain->window->menuBar()->setVisible(!winMain->window->menuBar()->isVisibleTo(winMain->window));
       resizeWindow = true;
     }
 
-    if(code == inputUiGeneral.toggleStatus.code) {
+    if(isButtonDown(code, inputUiGeneral.toggleStatus)) {
       winMain->window->statusBar()->setVisible(!winMain->window->statusBar()->isVisibleTo(winMain->window));
       resizeWindow = true;
     }
@@ -77,7 +110,7 @@ void Utility::inputEvent(uint16_t code) {
       resizeMainWindow();
     }
 
-    if(code == inputUiGeneral.exitEmulator.code) {
+    if(isButtonDown(code, inputUiGeneral.exitEmulator)) {
       application.terminate = true;
     }
   }
@@ -154,13 +187,17 @@ void Utility::updateHardwareFilter() {
 void Utility::updateSoftwareFilter() {
   libfilter::FilterInterface::FilterType type;
   switch(config.video.context->swFilter) { default:
-    case 0: type = libfilter::FilterInterface::Direct; break;
+    case 0: type = libfilter::FilterInterface::Direct;   break;
     case 1: type = libfilter::FilterInterface::Scanline; break;
-    case 2: type = libfilter::FilterInterface::Scale2x; break;
-    case 3: type = libfilter::FilterInterface::HQ2x; break;
-    case 4: type = libfilter::FilterInterface::NTSC; break;
+    case 2: type = libfilter::FilterInterface::Scale2x;  break;
+    case 3: type = libfilter::FilterInterface::HQ2x;     break;
+    case 4: type = libfilter::FilterInterface::NTSC;     break;
   }
   libfilter::filter.set(type);
+
+  if(type == libfilter::FilterInterface::NTSC) {
+    libfilter::filter_ntsc.adjust(0, 0, 0, 0, 0, config.video.enableNtscMergeFields);
+  }
 }
 
 void Utility::updateEmulationSpeed() {

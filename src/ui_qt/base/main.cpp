@@ -124,7 +124,7 @@ void MainWindow::setup() {
 
     canvasLayout = new QVBoxLayout; {
       canvasLayout->setMargin(0);
-      canvasLayout->setAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
+      canvasLayout->setAlignment(Qt::AlignCenter);
 
       canvas = new CanvasWidget;
       canvas->setAcceptDrops(true);
@@ -191,8 +191,6 @@ void MainWindow::setup() {
   connect(help_license, SIGNAL(triggered()), this, SLOT(showLicense()));
   connect(help_about, SIGNAL(triggered()), this, SLOT(showAbout()));
 
-  utility.resizeMainWindow();
-  utility.centerWindow(window);
   syncUi();
 }
 
@@ -306,7 +304,7 @@ void MainWindow::syncVideo() { config.video.synchronize = settings_emulationSpee
 void MainWindow::syncAudio() { config.audio.synchronize = settings_emulationSpeed_syncAudio->isChecked(); utility.updateAvSync(); }
 
 void MainWindow::showConfigWindow() {
-  winSettings->show();
+  utility.showCentered(winSettings->window);
 }
 
 void MainWindow::showDocumentation()  {
@@ -325,7 +323,7 @@ void MainWindow::showLicense() {
   }
 }
 void MainWindow::showAbout() {
-  winAbout->show();
+  utility.showCentered(winAbout->window);
 }
 
 void MainWindow::Window::closeEvent(QCloseEvent*) {

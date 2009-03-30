@@ -56,7 +56,7 @@ public:
   void power();
   void reset();
 
-  unsigned size();
+  unsigned size() const;
   uint8 read(unsigned addr);
   void write(unsigned addr, uint8 data);
 

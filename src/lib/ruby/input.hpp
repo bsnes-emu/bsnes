@@ -5,7 +5,6 @@ public:
     KeyboardSupport,
     MouseSupport,
     JoypadSupport,
-    AnalogAxisResistance,
   };
 
   virtual bool cap(Setting) { return false; }

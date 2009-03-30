@@ -48,7 +48,8 @@ void Application::init() {
   winAbout->setup();
 
   //window must be onscreen and visible before initializing video interface
-  winMain->window->show();
+  utility.updateSystemState();
+  utility.resizeMainWindow();
   utility.updateFullscreenState();
   application.processEvents();
 
@@ -74,7 +75,7 @@ void Application::init() {
   }
 
   audio.driver(config.system.audio);
-  audio.set(Audio::Handle, (uintptr_t)winMain->window->winId());
+  audio.set(Audio::Handle, (uintptr_t)winMain->canvas->winId());
   audio.set(Audio::Frequency, config.audio.outputFrequency);
   audio.set(Audio::Latency, config.audio.latency);
   audio.set(Audio::Volume, config.audio.volume);
@@ -90,8 +91,7 @@ void Application::init() {
   }
 
   input.driver(config.system.input);
-  input.set(Input::Handle, (uintptr_t)winMain->window->winId());
-  input.set(Input::AnalogAxisResistance, config.input.analogAxisResistance);
+  input.set(Input::Handle, (uintptr_t)winMain->canvas->winId());
   if(input.init() == false) {
     QMessageBox::warning(0, "bsnes", utf8() <<
       "<p><b>Warning:</b> " << config.system.input << " input driver failed to initialize. "

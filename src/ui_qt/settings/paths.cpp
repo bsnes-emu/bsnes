@@ -5,7 +5,7 @@ void PathSettingsWindow::setup() {
   layout->setMargin(0);
   layout->setSpacing(0);
 
-  title = new QLabel("Default File Paths");
+  title = new QLabel("Default Folder Paths");
   title->setProperty("class", "title");
   layout->addWidget(title);
 
@@ -127,11 +127,11 @@ void PathSettingsWindow::setup() {
 }
 
 void PathSettingsWindow::syncUi() {
-  gamePath->setText (snes.config.path.rom   == "" ? "<last loaded from>"    : (const char*)snes.config.path.rom);
-  savePath->setText (snes.config.path.save  == "" ? "<same as loaded game>" : (const char*)snes.config.path.save);
-  patchPath->setText(snes.config.path.patch == "" ? "<same as loaded game>" : (const char*)snes.config.path.patch);
-  cheatPath->setText(snes.config.path.cheat == "" ? "<same as loaded game>" : (const char*)snes.config.path.cheat);
-  dataPath->setText (snes.config.path.data  == "" ? "<same as loaded game>" : (const char*)snes.config.path.data);
+  gamePath->setText (snes.config.path.rom   == "" ? "<startup path>"               : (const char*)snes.config.path.rom);
+  savePath->setText (snes.config.path.save  == "" ? "<same folder as loaded game>" : (const char*)snes.config.path.save);
+  patchPath->setText(snes.config.path.patch == "" ? "<same folder as loaded game>" : (const char*)snes.config.path.patch);
+  cheatPath->setText(snes.config.path.cheat == "" ? "<same folder as loaded game>" : (const char*)snes.config.path.cheat);
+  dataPath->setText (snes.config.path.data  == "" ? "<same folder as loaded game>" : (const char*)snes.config.path.data);
 }
 
 void PathSettingsWindow::selectGamePath() {
