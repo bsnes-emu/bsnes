@@ -68,7 +68,13 @@ struct regs_t {
   reg24_t  pc;
   reg16_t  a, x, y, s, d;
   flag_t   p;
-  uint8_t  db, mdr;
+  uint8_t  db;
   bool     e;
-  regs_t() : db(0), mdr(0), e(false) {}
+
+  bool     irq;  //IRQ pin (0 = low, 1 = trigger)
+  bool     wai;  //raised during wai, cleared after interrupt triggered
+  uint32_t bus;  //address on bus; -1U = I/O cycle
+  uint8_t  mdr;  //memory data register
+
+  regs_t() : db(0), e(false), irq(false), wai(false), bus(-1U), mdr(0) {}
 };

@@ -6,6 +6,8 @@ class VideoFilter;
 
 class SNES {
 public:
+  void coprocessor_enter();
+
   enum Region { NTSC = 0, PAL = 1 };
   enum RegionAutodetect { Autodetect = 2 };
   enum ExpansionPortDevice { ExpansionNone = 0, ExpansionBSX = 1 };

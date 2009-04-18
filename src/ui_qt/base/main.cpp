@@ -3,7 +3,7 @@ void MainWindow::setup() {
   window->setObjectName("main-window");
   window->setWindowTitle(BSNES_TITLE);
 
-  system = window->menuBar()->addMenu("&System");
+  system = window->menuBar()->addMenu("System");
     system_load = system->addAction("&Load Cartridge ...");
     system->addSeparator();
     system_power = system->addMenu("&Power");
@@ -41,7 +41,7 @@ void MainWindow::setup() {
     system_exit = system->addAction("E&xit");
     system_exit->setMenuRole(QAction::QuitRole);
 
-  settings = window->menuBar()->addMenu("S&ettings");
+  settings = window->menuBar()->addMenu("Settings");
     settings_videoMode = settings->addMenu("&Video Mode");
       settings_videoMode_1x = settings_videoMode->addAction("Scale &1x");
       settings_videoMode_1x->setCheckable(true);
@@ -110,7 +110,7 @@ void MainWindow::setup() {
     settings_configuration = settings->addAction("&Configuration ...");
     settings_configuration->setMenuRole(QAction::PreferencesRole);
 
-  help = window->menuBar()->addMenu("&Help");
+  help = window->menuBar()->addMenu("Help");
     help_documentation = help->addAction("Documentation ...");
     help_license = help->addAction("License ...");
     help->addSeparator();

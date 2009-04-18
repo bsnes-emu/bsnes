@@ -91,25 +91,11 @@ public:
     return p.access->write(p.offset + addr, data);
   }
 
-  void set_speed(bool fast) {
-    fastSpeed = fast ? 6 : 8;
-  }
+  virtual bool load_cart() { return false; }
+  virtual void unload_cart() {}
 
-  alwaysinline unsigned speed(unsigned addr) const {
-    if(addr & 0x408000) {
-      if(addr & 0x800000) return fastSpeed;
-      return 8;
-    }
-    if((addr + 0x6000) & 0x4000) return 8;
-    if((addr - 0x4000) & 0x7e00) return 6;
-    return 12;
-  }
-
-  virtual bool load_cart() = 0;
-  virtual void unload_cart() = 0;
-
-  virtual void power() = 0;
-  virtual void reset() = 0;
+  virtual void power() {}
+  virtual void reset() {}
 
   Bus() {}
   virtual ~Bus() {}
@@ -119,7 +105,6 @@ protected:
     Memory *access;
     unsigned offset;
   } page[65536];
-  unsigned fastSpeed;
 };
 
 namespace memory {

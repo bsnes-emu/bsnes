@@ -67,7 +67,6 @@ void Bus::map(
 ) {
   assert(bank_lo <= bank_hi);
   assert(addr_lo <= addr_hi);
-
   if(access.size() == -1U) return;
 
   uint8 page_lo = addr_lo >> 8;

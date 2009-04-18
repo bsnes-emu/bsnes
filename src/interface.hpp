@@ -4,6 +4,7 @@
 #include "memory/smemory/smemory.hpp"
 
 #include "cpu/cpu.hpp"
+#include "cpu/core/core.hpp"
 #include "cpu/scpu/scpu.hpp"
 
 #include "ppu/ppu.hpp"

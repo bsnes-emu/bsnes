@@ -2,30 +2,38 @@
 void Utility::showCentered(QWidget *window) {
   QRect deskRect = QApplication::desktop()->availableGeometry(window);
 
-  //place window offscreen, so that it can be shown to get proper frameSize()
-  window->move(std::numeric_limits<signed>::max(), std::numeric_limits<signed>::max());
+  #ifdef _WIN32
+  if(window->isMinimized() == false) {
+    //place window offscreen, so that it can be shown to get proper frameSize()
+    window->move(std::numeric_limits<signed>::max(), std::numeric_limits<signed>::max());
+  }
   window->showNormal();
-
-  //force-resize window to be as small as minimumSize() will allow, and then center it
   window->resize(0, 0);
   window->move(
     deskRect.center().x() - (window->frameSize().width()  / 2),
     deskRect.center().y() - (window->frameSize().height() / 2)
   );
+  #else
+  if(window->isVisible() == false) window->showMinimized();
+  window->resize(0, 0);
 
-  #ifndef _WIN32
-  //Xlib frame size (excluding inside) is QSize(0, 0) at first, wait for it to be valid
+  //Xlib returns a frame size of 0,0 at first; wait for it to be valid
   for(unsigned counter = 0; counter < 4096; counter++) {
     if(window->frameSize() != window->size()) break;
     application.processEvents();
   }
-  #endif
 
-  //in case frame size changed, recenter window
   window->move(
     deskRect.center().x() - (window->frameSize().width()  / 2),
     deskRect.center().y() - (window->frameSize().height() / 2)
   );
+
+  for(unsigned counter = 0; counter < 4096; counter++) {
+    window->showNormal();
+    application.processEvents();
+    if(window->isMinimized() == false) break;
+  }
+  #endif
 
   //ensure window has focus
   application.processEvents();
@@ -83,6 +91,15 @@ void Utility::resizeMainWindow() {
     if(config.video.isFullscreen == false) {
       //get effective desktop work area region (ignore Windows taskbar, OS X doc, etc.)
       QRect deskRect = QApplication::desktop()->availableGeometry(winMain->window);
+
+      if(winMain->window->isVisible() == false) {
+        #ifdef _WIN32
+        winMain->window->move(std::numeric_limits<signed>::max(), std::numeric_limits<signed>::max());
+        winMain->window->showNormal();
+        #else
+        winMain->window->showMinimized();
+        #endif
+      }
 
       //calculate frame geometry (window border + menubar + statusbar)
       unsigned frameWidth  = winMain->window->frameSize().width()  - winMain->canvasContainer->size().width();

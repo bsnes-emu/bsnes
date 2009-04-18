@@ -16,7 +16,6 @@ void tprintf(const char *s, ...) {
 void Tracer::trace_cpuop() {
   if(enabled() == false) return;
   if(cpuop_enabled() == false) return;
-  if(cpu.in_opcode() == true) return;
 
   if(cpuopmask_enabled() == true) {
     unsigned addr = cpu.regs.pc.d;
@@ -32,7 +31,6 @@ void Tracer::trace_cpuop() {
 void Tracer::trace_smpop() {
   if(enabled() == false) return;
   if(smpop_enabled() == false) return;
-  if(smp.in_opcode() == true) return;
 
   if(smpopmask_enabled() == true) {
     unsigned addr = smp.regs.pc;

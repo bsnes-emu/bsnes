@@ -29,6 +29,9 @@ void sCPU::scanline() {
   if(ppu.vcounter() == 0) {
     //hdma init triggers once every frame
     event.enqueue(cpu_version == 1 ? 12 + 8 - dma_counter() : 12 + dma_counter(), EventHdmaInit);
+
+    //forcefully sync S-CPU and S-SMP, in case chips are not communicating
+    scheduler.sync_cpusmp();
   }
 
   //dram refresh occurs once every scanline

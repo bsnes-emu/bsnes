@@ -1,0 +1,397 @@
+@macro op_nop()
+  void {class}::op_nop() {
+{lc}op_io_irq();
+  }
+@endmacro
+
+@macro op_wdm()
+  void {class}::op_wdm() {
+{lc}op_readpc();
+  }
+@endmacro
+
+@macro op_xba()
+  void {class}::op_xba() {
+    op_io();
+{lc}op_io();
+    regs.a.l ^= regs.a.h;
+    regs.a.h ^= regs.a.l;
+    regs.a.l ^= regs.a.h;
+    regs.p.n = (regs.a.l & 0x80);
+    regs.p.z = (regs.a.l == 0);
+  }
+@endmacro
+
+@macro op_move(name, op)
+  void {class}::op_{name}_b() {
+    dp = op_readpc();
+    sp = op_readpc();
+    regs.db = dp;
+    rd.l = op_readlong((sp << 16) | regs.x.w);
+    op_writelong((dp << 16) | regs.y.w, rd.l);
+    op_io();
+    regs.x.l {op};
+    regs.y.l {op};
+{lc}op_io();
+    if(regs.a.w--) regs.pc.w -= 3;
+  }
+
+  void {class}::op_{name}_w() {
+    dp = op_readpc();
+    sp = op_readpc();
+    regs.db = dp;
+    rd.l = op_readlong((sp << 16) | regs.x.w);
+    op_writelong((dp << 16) | regs.y.w, rd.l);
+    op_io();
+    regs.x.w {op};
+    regs.y.w {op};
+{lc}op_io();
+    if(regs.a.w--) regs.pc.w -= 3;
+  }
+@endmacro
+
+@macro op_interrupt(name, vectorE, vectorN)
+  void {class}::op_{name}_e() {
+    op_readpc();
+    op_writestack(regs.pc.h);
+    op_writestack(regs.pc.l);
+    op_writestack(regs.p);
+    rd.l = op_readlong({vectorE} + 0);
+    regs.pc.b = 0;
+    regs.p.i = 1;
+    regs.p.d = 0;
+{lc}rd.h = op_readlong({vectorE} + 1);
+    regs.pc.w = rd.w;
+  }
+
+  void {class}::op_{name}_n() {
+    op_readpc();
+    op_writestack(regs.pc.b);
+    op_writestack(regs.pc.h);
+    op_writestack(regs.pc.l);
+    op_writestack(regs.p);
+    rd.l = op_readlong({vectorN} + 0);
+    regs.pc.b = 0x00;
+    regs.p.i = 1;
+    regs.p.d = 0;
+{lc}rd.h = op_readlong({vectorN} + 1);
+    regs.pc.w = rd.w;
+  }
+@endmacro
+
+@macro op_stp()
+  void {class}::op_stp() {
+    while({wai} = true) {
+{lc}  op_io();
+    }
+  }
+@endmacro
+
+@macro op_wai()
+  void {class}::op_wai() {
+    {wai} = true;
+    while({wai}) {
+{lc}  op_io();
+    }
+    op_io();
+  }
+@endmacro
+
+@macro op_xce()
+  void {class}::op_xce() {
+{lc}op_io_irq();
+    bool carry = regs.p.c;
+    regs.p.c = regs.e;
+    regs.e = carry;
+    if(regs.e) {
+      regs.p |= 0x30;
+      regs.s.h = 0x01;
+    }
+    if(regs.p.x) {
+      regs.x.h = 0x00;
+      regs.y.h = 0x00;
+    }
+    update_table();
+  }
+@endmacro
+
+@macro op_flag(name, rule)
+  void {class}::op_{name}() {
+{lc}op_io_irq();
+    {rule};
+  }
+@endmacro
+
+@macro op_pflag(name, op)
+  void {class}::op_{name}_e() {
+    rd.l = op_readpc();
+{lc}op_io();
+    regs.p {op} rd.l;
+    regs.p |= 0x30;
+    if(regs.p.x) {
+      regs.x.h = 0x00;
+      regs.y.h = 0x00;
+    }
+    update_table();
+  }
+
+  void {class}::op_{name}_n() {
+    rd.l = op_readpc();
+{lc}op_io();
+    regs.p {op} rd.l;
+    if(regs.p.x) {
+      regs.x.h = 0x00;
+      regs.y.h = 0x00;
+    }
+    update_table();
+  }
+@endmacro
+
+@macro op_transfer(name, from, to)
+  void {class}::op_{name}_b() {
+{lc}op_io_irq();
+    regs.{to}.l = regs.{from}.l;
+    regs.p.n = (regs.{to}.l & 0x80);
+    regs.p.z = (regs.{to}.l == 0);
+  }
+
+  void {class}::op_{name}_w() {
+{lc}op_io_irq();
+    regs.{to}.w = regs.{from}.w;
+    regs.p.n = (regs.{to}.w & 0x8000);
+    regs.p.z = (regs.{to}.w == 0);
+  }
+@endmacro
+
+@macro op_transfer_word(name, from, to)
+  void {class}::op_{name}() {
+{lc}op_io_irq();
+    regs.{to}.w = regs.{from}.w;
+    regs.p.n = (regs.{to}.w & 0x8000);
+    regs.p.z = (regs.{to}.w == 0);
+  }
+@endmacro
+
+@macro op_tcs()
+  void {class}::op_tcs_e() {
+{lc}op_io_irq();
+    regs.s.l = regs.a.l;
+  }
+
+  void {class}::op_tcs_n() {
+{lc}op_io_irq();
+    regs.s.w = regs.a.w;
+  }
+@endmacro
+
+@macro op_tsc()
+  void {class}::op_tsc_e() {
+{lc}op_io_irq();
+    regs.a.w = regs.s.w;
+    regs.p.n = (regs.a.l & 0x80);
+    regs.p.z = (regs.a.l == 0);
+  }
+
+  void {class}::op_tsc_n() {
+{lc}op_io_irq();
+    regs.a.w = regs.s.w;
+    regs.p.n = (regs.a.w & 0x8000);
+    regs.p.z = (regs.a.w == 0);
+  }
+@endmacro
+
+@macro op_tsx()
+  void {class}::op_tsx_b() {
+{lc}op_io_irq();
+    regs.x.l = regs.s.l;
+    regs.p.n = (regs.x.l & 0x80);
+    regs.p.z = (regs.x.l == 0);
+  }
+
+  void {class}::op_tsx_w() {
+{lc}op_io_irq();
+    regs.x.w = regs.s.w;
+    regs.p.n = (regs.x.w & 0x8000);
+    regs.p.z = (regs.x.w == 0);
+  }
+@endmacro
+
+@macro op_txs()
+  void {class}::op_txs_e() {
+{lc}op_io_irq();
+    regs.s.l = regs.x.l;
+  }
+
+  void {class}::op_txs_n() {
+{lc}op_io_irq();
+    regs.s.w = regs.x.w;
+  }
+@endmacro
+
+@macro op_push(name, r)
+  void {class}::op_{name}_b() {
+    op_io();
+{lc}op_writestack(regs.{r}.l);
+  }
+
+  void {class}::op_{name}_w() {
+    op_io();
+    op_writestack(regs.{r}.h);
+{lc}op_writestack(regs.{r}.l);
+  }
+@endmacro
+
+@macro op_phd()
+  void {class}::op_phd_e() {
+    op_io();
+    op_writestackn(regs.d.h);
+{lc}op_writestackn(regs.d.l);
+    regs.s.h = 0x01;
+  }
+
+  void {class}::op_phd_n() {
+    op_io();
+    op_writestackn(regs.d.h);
+{lc}op_writestackn(regs.d.l);
+  }
+@endmacro
+
+@macro op_push_byte(name, r)
+  void {class}::op_{name}() {
+    op_io();
+{lc}op_writestack({r});
+  }
+@endmacro
+
+@macro op_pull(name, r)
+  void {class}::op_{name}_b() {
+    op_io();
+    op_io();
+{lc}regs.{r}.l = op_readstack();
+    regs.p.n = (regs.{r}.l & 0x80);
+    regs.p.z = (regs.{r}.l == 0);
+  }
+
+  void {class}::op_{name}_w() {
+    op_io();
+    op_io();
+    regs.{r}.l = op_readstack();
+{lc}regs.{r}.h = op_readstack();
+    regs.p.n = (regs.{r}.w & 0x8000);
+    regs.p.z = (regs.{r}.w == 0);
+  }
+@endmacro
+
+@macro op_pld()
+  void {class}::op_pld_e() {
+    op_io();
+    op_io();
+    regs.d.l = op_readstackn();
+{lc}regs.d.h = op_readstackn();
+    regs.p.n = (regs.d.w & 0x8000);
+    regs.p.z = (regs.d.w == 0);
+    regs.s.h = 0x01;
+  }
+
+  void {class}::op_pld_n() {
+    op_io();
+    op_io();
+    regs.d.l = op_readstackn();
+{lc}regs.d.h = op_readstackn();
+    regs.p.n = (regs.d.w & 0x8000);
+    regs.p.z = (regs.d.w == 0);
+  }
+@endmacro
+
+@macro op_plb()
+  void {class}::op_plb() {
+    op_io();
+    op_io();
+{lc}regs.db = op_readstack();
+    regs.p.n = (regs.db & 0x80);
+    regs.p.z = (regs.db == 0);
+  }
+@endmacro
+
+@macro op_plp()
+  void {class}::op_plp_e() {
+    op_io();
+    op_io();
+{lc}regs.p = op_readstack() | 0x30;
+    if(regs.p.x) {
+      regs.x.h = 0x00;
+      regs.y.h = 0x00;
+    }
+    update_table();
+  }
+
+  void {class}::op_plp_n() {
+    op_io();
+    op_io();
+{lc}regs.p = op_readstack();
+    if(regs.p.x) {
+      regs.x.h = 0x00;
+      regs.y.h = 0x00;
+    }
+    update_table();
+  }
+@endmacro
+
+@macro op_pea()
+  void {class}::op_pea_e() {
+    aa.l = op_readpc();
+    aa.h = op_readpc();
+    op_writestackn(aa.h);
+{lc}op_writestackn(aa.l);
+    regs.s.h = 0x01;
+  }
+
+  void {class}::op_pea_n() {
+    aa.l = op_readpc();
+    aa.h = op_readpc();
+    op_writestackn(aa.h);
+{lc}op_writestackn(aa.l);
+  }
+@endmacro
+
+@macro op_pei()
+  void {class}::op_pei_e() {
+    dp = op_readpc();
+    op_io_cond2();
+    aa.l = op_readdp(dp + 0);
+    aa.h = op_readdp(dp + 1);
+    op_writestackn(aa.h);
+{lc}op_writestackn(aa.l);
+    regs.s.h = 0x01;
+  }
+
+  void {class}::op_pei_n() {
+    dp = op_readpc();
+    op_io_cond2();
+    aa.l = op_readdp(dp + 0);
+    aa.h = op_readdp(dp + 1);
+    op_writestackn(aa.h);
+{lc}op_writestackn(aa.l);
+  }
+@endmacro
+
+@macro op_per()
+  void {class}::op_per_e() {
+    aa.l = op_readpc();
+    aa.h = op_readpc();
+    op_io();
+    rd.w = regs.pc.d + (int16_t)aa.w;
+    op_writestackn(rd.h);
+{lc}op_writestackn(rd.l);
+    regs.s.h = 0x01;
+  }
+
+  void {class}::op_per_n() {
+    aa.l = op_readpc();
+    aa.h = op_readpc();
+    op_io();
+    rd.w = regs.pc.d + (int16_t)aa.w;
+    op_writestackn(rd.h);
+{lc}op_writestackn(rd.l);
+  }
+@endmacro

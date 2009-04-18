@@ -1,8 +1,9 @@
-class sCPU : public CPU {
+class sCPU : public CPU, public CPUcore {
 public:
   void enter();
+  void op_irq();
+  bool interrupt_pending() { return status.interrupt_pending; }
 
-  #include "core/core.hpp"
   #include "dma/dma.hpp"
   #include "memory/memory.hpp"
   #include "mmio/mmio.hpp"
@@ -11,11 +12,6 @@ public:
   enum DmaState { DmaInactive, DmaRun, DmaCpuSync };
 
   struct {
-    //core
-    uint8 opcode;
-    bool in_opcode;
-
-    bool wai_lock;
     bool interrupt_pending;
     uint16 interrupt_vector;
 
@@ -74,6 +70,9 @@ public:
 
     //$4207-$420a
     uint16 hirq_pos, virq_pos;
+
+    //$420d
+    unsigned rom_speed;
 
     //$4214-$4217
     uint16 r4214;

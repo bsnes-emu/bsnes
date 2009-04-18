@@ -10,6 +10,8 @@ SMPCORE  smp;
 DSPCORE  dsp;
 PPUCORE  ppu;
 
+SA1      sa1;
+SA1Bus   sa1bus;
 BSXBase  bsxbase;
 BSXCart  bsxcart;
 BSXFlash bsxflash;
@@ -31,6 +33,15 @@ ST010    st010;
 #include "audio/audio.cpp"
 #include "input/input.cpp"
 
+void SNES::coprocessor_enter() {
+  if(cartridge.has_sa1()) sa1.enter();
+
+  while(true) {
+    scheduler.addclocks_cop(64 * 1024 * 1024);
+    scheduler.sync_copcpu();
+  }
+}
+
 void SNES::run() {
 }
 
@@ -39,6 +50,7 @@ void SNES::runtoframe() {
 }
 
 void SNES::init() {
+  sa1.init();
   bsxbase.init();
   bsxcart.init();
   bsxflash.init();
@@ -84,6 +96,7 @@ void SNES::power() {
   if(cartridge.mode() == Cartridge::ModeBsx) bsxcart.power();
   if(cartridge.bsx_flash_loaded())           bsxflash.power();
 
+  if(cartridge.has_sa1())     sa1.power();
   if(cartridge.has_srtc())    srtc.power();
   if(cartridge.has_sdd1())    sdd1.power();
   if(cartridge.has_spc7110()) spc7110.power();
@@ -106,6 +119,7 @@ void SNES::power() {
   if(cartridge.mode() == Cartridge::ModeBsx) bsxcart.enable();
   if(cartridge.bsx_flash_loaded())           bsxflash.enable();
 
+  if(cartridge.has_sa1())     sa1.enable();
   if(cartridge.has_srtc())    srtc.enable();
   if(cartridge.has_sdd1())    sdd1.enable();
   if(cartridge.has_spc7110()) spc7110.enable();
@@ -137,6 +151,7 @@ void SNES::reset() {
   if(cartridge.mode() == Cartridge::ModeBsx) bsxcart.reset();
   if(cartridge.bsx_flash_loaded())           bsxflash.reset();
 
+  if(cartridge.has_sa1())     sa1.reset();
   if(cartridge.has_srtc())    srtc.reset();
   if(cartridge.has_sdd1())    sdd1.reset();
   if(cartridge.has_spc7110()) spc7110.reset();

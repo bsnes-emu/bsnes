@@ -94,8 +94,8 @@ link += $(if $(findstring input.rawinput,$(ruby)),$(call mklib,xinput) $(call mk
 
 objects = libco ruby libfilter string \
   reader cart cheat \
-  memory smemory cpu scpu smp ssmp sdsp ppu bppu snes \
-  bsx srtc sdd1 spc7110 cx4 dsp1 dsp2 dsp3 dsp4 obc1 st010
+  memory smemory cpu cpucore scpu smp ssmp sdsp ppu bppu snes \
+  sa1 bsx srtc sdd1 spc7110 cx4 dsp1 dsp2 dsp3 dsp4 obc1 st010
 
 ifeq ($(enable_gzip),true)
   objects += adler32 compress crc32 deflate gzio inffast inflate inftrees ioapi trees unzip zip zutil
@@ -159,8 +159,9 @@ obj/smemory.$(obj): memory/smemory/smemory.cpp memory/smemory/* memory/smemory/m
 ### cpu ###
 ###########
 
-obj/cpu.$(obj) : cpu/cpu.cpp cpu/*
-obj/scpu.$(obj): cpu/scpu/scpu.cpp cpu/scpu/* cpu/scpu/core/* cpu/scpu/dma/* cpu/scpu/memory/* cpu/scpu/mmio/* cpu/scpu/timing/*
+obj/cpu.$(obj)    : cpu/cpu.cpp cpu/*
+obj/cpucore.$(obj): cpu/core/core.cpp cpu/core/* cpu/core/disasm/*
+obj/scpu.$(obj)   : cpu/scpu/scpu.cpp cpu/scpu/* cpu/scpu/dma/* cpu/scpu/memory/* cpu/scpu/mmio/* cpu/scpu/timing/*
 
 ###########
 ### smp ###
@@ -193,6 +194,7 @@ obj/snes.$(obj): snes/snes.cpp snes/* snes/scheduler/* snes/video/* snes/audio/*
 ### special chips ###
 #####################
 
+obj/sa1.$(obj)    : chip/sa1/sa1.cpp chip/sa1/* chip/sa1/bus/* chip/sa1/dma/* chip/sa1/memory/* chip/sa1/mmio/*
 obj/bsx.$(obj)    : chip/bsx/bsx.cpp chip/bsx/*
 obj/srtc.$(obj)   : chip/srtc/srtc.cpp chip/srtc/*
 obj/sdd1.$(obj)   : chip/sdd1/sdd1.cpp chip/sdd1/*

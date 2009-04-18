@@ -582,6 +582,7 @@ int32 fir_samplel, fir_sampler;
 
   snes.audio.update(msamplel, msampler);
   scheduler.addclocks_dsp(32 * 3 * 8);
+  scheduler.sync_dspsmp();
 }
 
 aDSP::aDSP()  {}

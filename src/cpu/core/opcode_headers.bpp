@@ -1,0 +1,386 @@
+//===============
+//opcode_read.bpp
+//===============
+
+@macro op_read_const(name)
+void op_{name}_const_b();
+void op_{name}_const_w();
+@endmacro
+
+@macro op_read_bit_const()
+void op_bit_const_b();
+void op_bit_const_w();
+@endmacro
+
+@macro op_read_addr(name)
+void op_{name}_addr_b();
+void op_{name}_addr_w();
+@endmacro
+
+@macro op_read_addrx(name)
+void op_{name}_addrx_b();
+void op_{name}_addrx_w();
+@endmacro
+
+@macro op_read_addry(name)
+void op_{name}_addry_b();
+void op_{name}_addry_w();
+@endmacro
+
+@macro op_read_long(name)
+void op_{name}_long_b();
+void op_{name}_long_w();
+@endmacro
+
+@macro op_read_longx(name)
+void op_{name}_longx_b();
+void op_{name}_longx_w();
+@endmacro
+
+@macro op_read_dp(name)
+void op_{name}_dp_b();
+void op_{name}_dp_w();
+@endmacro
+
+@macro op_read_dpr(name, r)
+void op_{name}_dpr_b();
+void op_{name}_dpr_w();
+@endmacro
+
+@macro op_read_idp(name)
+void op_{name}_idp_b();
+void op_{name}_idp_w();
+@endmacro
+
+@macro op_read_idpx(name)
+void op_{name}_idpx_b();
+void op_{name}_idpx_w();
+@endmacro
+
+@macro op_read_idpy(name)
+void op_{name}_idpy_b();
+void op_{name}_idpy_w();
+@endmacro
+
+@macro op_read_ildp(name)
+void op_{name}_ildp_b();
+void op_{name}_ildp_w();
+@endmacro
+
+@macro op_read_ildpy(name)
+void op_{name}_ildpy_b();
+void op_{name}_ildpy_w();
+@endmacro
+
+@macro op_read_sr(name)
+void op_{name}_sr_b();
+void op_{name}_sr_w();
+@endmacro
+
+@macro op_read_isry(name)
+void op_{name}_isry_b();
+void op_{name}_isry_w();
+@endmacro
+
+//================
+//opcode_write.bpp
+//================
+
+@macro op_store_addr(name, r)
+void op_{name}_addr_b();
+void op_{name}_addr_w();
+@endmacro
+
+@macro op_store_addrr(name, suffix, r, index)
+void op_{name}_addr{suffix}_b();
+void op_{name}_addr{suffix}_w();
+@endmacro
+
+@macro op_store_longr(name, suffix, index)
+void op_{name}_long{suffix}_b();
+void op_{name}_long{suffix}_w();
+@endmacro
+
+@macro op_store_dp(name, r)
+void op_{name}_dp_b();
+void op_{name}_dp_w();
+@endmacro
+
+@macro op_store_dpr(name, r, index)
+void op_{name}_dpr_b();
+void op_{name}_dpr_w();
+@endmacro
+
+@macro op_sta_idp()
+void op_sta_idp_b();
+void op_sta_idp_w();
+@endmacro
+
+@macro op_sta_ildp()
+void op_sta_ildp_b();
+void op_sta_ildp_w();
+@endmacro
+
+@macro op_sta_idpx()
+void op_sta_idpx_b();
+void op_sta_idpx_w();
+@endmacro
+
+@macro op_sta_idpy()
+void op_sta_idpy_b();
+void op_sta_idpy_w();
+@endmacro
+
+@macro op_sta_ildpy()
+void op_sta_ildpy_b();
+void op_sta_ildpy_w();
+@endmacro
+
+@macro op_sta_sr()
+void op_sta_sr_b();
+void op_sta_sr_w();
+@endmacro
+
+@macro op_sta_isry()
+void op_sta_isry_b();
+void op_sta_isry_w();
+@endmacro
+
+//==============
+//opcode_rmw.bpp
+//==============
+
+@macro op_adjust(name, r, op)
+void op_{name}_imm_b();
+void op_{name}_imm_w();
+@endmacro
+
+@macro op_asl()
+void op_asl_imm_b();
+void op_asl_imm_w();
+@endmacro
+
+@macro op_lsr()
+void op_lsr_imm_b();
+void op_lsr_imm_w();
+@endmacro
+
+@macro op_rol()
+void op_rol_imm_b();
+void op_rol_imm_w();
+@endmacro
+
+@macro op_ror()
+void op_ror_imm_b();
+void op_ror_imm_w();
+@endmacro
+
+@macro op_adjust_addr(name)
+void op_{name}_addr_b();
+void op_{name}_addr_w();
+@endmacro
+
+@macro op_adjust_addrx(name)
+void op_{name}_addrx_b();
+void op_{name}_addrx_w();
+@endmacro
+
+@macro op_adjust_dp(name)
+void op_{name}_dp_b();
+void op_{name}_dp_w();
+@endmacro
+
+@macro op_adjust_dpx(name)
+void op_{name}_dpx_b();
+void op_{name}_dpx_w();
+@endmacro
+
+//=============
+//opcode_pc.bpp
+//=============
+
+@macro op_branch(name, condition)
+void op_{name}();
+@endmacro
+
+@macro op_bra()
+void op_bra();
+@endmacro
+
+@macro op_brl()
+void op_brl();
+@endmacro
+
+@macro op_jmp_addr()
+void op_jmp_addr();
+@endmacro
+
+@macro op_jmp_long()
+void op_jmp_long();
+@endmacro
+
+@macro op_jmp_iaddr()
+void op_jmp_iaddr();
+@endmacro
+
+@macro op_jmp_iaddrx()
+void op_jmp_iaddrx();
+@endmacro
+
+@macro op_jmp_iladdr()
+void op_jmp_iladdr();
+@endmacro
+
+@macro op_jsr_addr()
+void op_jsr_addr();
+@endmacro
+
+@macro op_jsr_long()
+void op_jsr_long_e();
+void op_jsr_long_n();
+@endmacro
+
+@macro op_jsr_iaddrx()
+void op_jsr_iaddrx_e();
+void op_jsr_iaddrx_n();
+@endmacro
+
+@macro op_rti()
+void op_rti_e();
+void op_rti_n();
+@endmacro
+
+@macro op_rts()
+void op_rts();
+@endmacro
+
+@macro op_rtl()
+void op_rtl_e();
+void op_rtl_n();
+@endmacro
+
+//===============
+//opcode_misc.bpp
+//===============
+
+@macro op_nop()
+void op_nop();
+@endmacro
+
+@macro op_wdm()
+void op_wdm();
+@endmacro
+
+@macro op_xba()
+void op_xba();
+@endmacro
+
+@macro op_move(name, op)
+void op_{name}_b();
+void op_{name}_w();
+@endmacro
+
+@macro op_interrupt(name, vectorE, vectorN)
+void op_{name}_e();
+void op_{name}_n();
+@endmacro
+
+@macro op_stp()
+void op_stp();
+@endmacro
+
+@macro op_wai()
+void op_wai();
+@endmacro
+
+@macro op_xce()
+void op_xce();
+@endmacro
+
+@macro op_flag(name, rule)
+void op_{name}();
+@endmacro
+
+@macro op_pflag(name, op)
+void op_{name}_e();
+void op_{name}_n();
+@endmacro
+
+@macro op_transfer(name, from, to)
+void op_{name}_b();
+void op_{name}_w();
+@endmacro
+
+@macro op_transfer_word(name, from, to)
+void op_{name}();
+@endmacro
+
+@macro op_tcs()
+void op_tcs_e();
+void op_tcs_n();
+@endmacro
+
+@macro op_tsc()
+void op_tsc_e();
+void op_tsc_n();
+@endmacro
+
+@macro op_tsx()
+void op_tsx_b();
+void op_tsx_w();
+@endmacro
+
+@macro op_txs()
+void op_txs_e();
+void op_txs_n();
+@endmacro
+
+@macro op_push(name, r)
+void op_{name}_b();
+void op_{name}_w();
+@endmacro
+
+@macro op_phd()
+void op_phd_e();
+void op_phd_n();
+@endmacro
+
+@macro op_push_byte(name, r)
+void op_{name}();
+@endmacro
+
+@macro op_pull(name, r)
+void op_{name}_b();
+void op_{name}_w();
+@endmacro
+
+@macro op_pld()
+void op_pld_e();
+void op_pld_n();
+@endmacro
+
+@macro op_plb()
+void op_plb();
+@endmacro
+
+@macro op_plp()
+void op_plp_e();
+void op_plp_n();
+@endmacro
+
+@macro op_pea()
+void op_pea_e();
+void op_pea_n();
+@endmacro
+
+@macro op_pei()
+void op_pei_e();
+void op_pei_n();
+@endmacro
+
+@macro op_per()
+void op_per_e();
+void op_per_n();
+@endmacro
+
+@include "opcode_list.bpp"

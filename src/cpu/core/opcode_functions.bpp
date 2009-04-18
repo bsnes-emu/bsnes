@@ -1,0 +1,13 @@
+//opcode_functions.cpp was generated via bpp -> opcode_functions.bpp
+
+@global class CPUcore
+@global lc last_cycle();
+@global wai regs.wai
+
+@include "opcode_read.bpp"
+@include "opcode_write.bpp"
+@include "opcode_rmw.bpp"
+@include "opcode_pc.bpp"
+@include "opcode_misc.bpp"
+
+@include "opcode_list.bpp"

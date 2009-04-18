@@ -117,7 +117,8 @@ int Application::main(int argc, char **argv) {
     inputManager.refresh();
 
     if(config.input.focusPolicy == Configuration::Input::FocusPolicyPauseEmulation) {
-      bool inactive = (winMain->window->isActiveWindow() == false);
+      bool inactive  = (winMain->window->isActiveWindow() == false)
+                    || (winMain->window->isMinimized() == true);
       if(!autopause && inactive) {
         autopause = true;
         audio.clear();

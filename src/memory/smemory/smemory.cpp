@@ -14,7 +14,6 @@ void sBus::power() {
 }
 
 void sBus::reset() {
-  set_speed(false);
 }
 
 bool sBus::load_cart() {

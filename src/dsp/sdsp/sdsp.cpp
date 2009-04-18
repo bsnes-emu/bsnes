@@ -15,7 +15,7 @@
 #if !defined(USE_STATE_MACHINE)
   #define phase_start() while(true) {
   #define phase(n)
-  #define tick()          scheduler.addclocks_dsp(3 * 8)
+  #define tick()          scheduler.addclocks_dsp(3 * 8); scheduler.sync_dspsmp()
   #define phase_end()   }
 #else
   #define phase_start() switch(phase_index) {

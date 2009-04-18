@@ -91,8 +91,9 @@ void Cartridge::read_header(cartinfo_t &info, const uint8_t *data, unsigned size
     info.superfx = true;
   }
 
-  if(mapper == 0x23 && (rom_type == 0x34 || rom_type == 0x35)) {
+  if(mapper == 0x23 && (rom_type == 0x32 || rom_type == 0x34 || rom_type == 0x35)) {
     info.sa1 = true;
+    info.mapper = SA1ROM;
   }
 
   if(mapper == 0x35 && rom_type == 0x55) {

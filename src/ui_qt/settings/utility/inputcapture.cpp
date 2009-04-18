@@ -37,8 +37,8 @@ void InputCaptureWindow::setup() {
   connect(mouseAxes, SIGNAL(released()), this, SLOT(assignMouseAxis()));
   connect(mouseButtons, SIGNAL(released()), this, SLOT(assignMouseButton()));
 
-  winInputMouseCaptureWindow = new InputMouseCaptureWindow;
-  winInputMouseCaptureWindow->setup();
+  winInputMouseCapture = new InputMouseCaptureWindow;
+  winInputMouseCapture->setup();
 
   winInputCalibration = new InputCalibrationWindow;
   winInputCalibration->setup();
@@ -96,8 +96,8 @@ void InputCaptureWindow::inputEvent(uint16_t code, bool forceAssign /* = false *
   //input polling is global, need to block mouse actions that may be UI interactions.
   //custom controls on window allow mouse assignment instead.
   if(forceAssign == false) {
-    if(winInputMouseCaptureWindow->window->isActiveWindow()) {
-      winInputMouseCaptureWindow->inputEvent(code);
+    if(winInputMouseCapture->window->isActiveWindow()) {
+      winInputMouseCapture->inputEvent(code);
       return;
     }
     if(!window->isActiveWindow()) return;
@@ -205,7 +205,7 @@ void InputCaptureWindow::inputEvent(uint16_t code, bool forceAssign /* = false *
 
   if(!activeGroup) {
     window->hide();
-    winInputMouseCaptureWindow->window->hide();
+    winInputMouseCapture->window->hide();
   } else {
     //try and map the next code in this input group
     groupIndex++;
@@ -214,7 +214,7 @@ void InputCaptureWindow::inputEvent(uint16_t code, bool forceAssign /* = false *
     } else {
       //all group codes mapped
       window->hide();
-      winInputMouseCaptureWindow->window->hide();
+      winInputMouseCapture->window->hide();
       activeGroup = 0;
     }
   }
@@ -224,12 +224,12 @@ void InputCaptureWindow::assignMouseAxis() {
   //refresh input state so that mouse release event (from SIGNAL(released())
   //is not sent immediately after window is visible.
   inputManager.refresh();
-  winInputMouseCaptureWindow->activate(InputMouseCaptureWindow::AxisMode);
+  winInputMouseCapture->activate(InputMouseCaptureWindow::AxisMode);
 }
 
 void InputCaptureWindow::assignMouseButton() {
   inputManager.refresh();
-  winInputMouseCaptureWindow->activate(InputMouseCaptureWindow::ButtonMode);
+  winInputMouseCapture->activate(InputMouseCaptureWindow::ButtonMode);
 }
 
 InputCaptureWindow::InputCaptureWindow() {
@@ -243,6 +243,9 @@ void InputCaptureWindow::Window::closeEvent(QCloseEvent*) {
   //window closed by user, cancel key assignment
   winInputCapture->activeObject = 0;
   winInputCapture->activeGroup = 0;
+
+  winInputMouseCapture->window->hide();
+  winInputCalibration->dismiss();
 }
 
 void InputCaptureWindow::ImageWidget::paintEvent(QPaintEvent*) {
@@ -451,4 +454,8 @@ void InputCalibrationWindow::dismiss() {
 
 void InputCalibrationWindow::Window::closeEvent(QCloseEvent*) {
   winInputCalibration->dismiss();
+}
+
+InputCalibrationWindow::InputCalibrationWindow() {
+  activeJoypad = -1;
 }

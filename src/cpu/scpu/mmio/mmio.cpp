@@ -157,7 +157,7 @@ void sCPU::mmio_w420c(uint8 data) {
 
 //MEMSEL
 void sCPU::mmio_w420d(uint8 data) {
-  bus.set_speed(data & 1);
+  status.rom_speed = (data & 1 ? 6 : 8);
 }
 
 //RDNMI
@@ -401,6 +401,9 @@ void sCPU::mmio_reset() {
   //$4207-$420a
   status.hirq_pos = 0x01ff;
   status.virq_pos = 0x01ff;
+
+  //$420d
+  status.rom_speed = 8;
 
   //$4214-$4217
   status.r4214 = 0x0000;

@@ -32,6 +32,10 @@ void sBus::map_generic() {
       map_generic_sram();
     } break;
 
+    case Cartridge::SA1ROM: {
+      //mapped via SA1Bus::init();
+    } break;
+
     case Cartridge::SPC7110ROM: {
       map(MapDirect, 0x00, 0x00, 0x6000, 0x7fff, spc7110);          //save RAM w/custom logic
       map(MapShadow, 0x00, 0x0f, 0x8000, 0xffff, memory::cartrom);  //program ROM

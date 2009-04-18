@@ -36,6 +36,7 @@ void bPPU::enter() {
 void bPPU::add_clocks(unsigned clocks) {
   tock(clocks);
   scheduler.addclocks_ppu(clocks);
+  scheduler.sync_ppucpu();
 }
 
 void bPPU::scanline() {

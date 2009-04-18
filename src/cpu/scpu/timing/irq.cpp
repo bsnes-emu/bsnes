@@ -93,14 +93,14 @@ bool sCPU::timeup() {
 bool sCPU::nmi_test() {
   if(!status.nmi_transition) return false;
   status.nmi_transition = false;
-  status.wai_lock = false;
+  regs.wai = false;
   return true;
 }
 
 bool sCPU::irq_test() {
-  if(!status.irq_transition) return false;
+  if(!status.irq_transition && !regs.irq) return false;
   status.irq_transition = false;
-  status.wai_lock = false;
+  regs.wai = false;
   return !regs.p.i;
 }
 

@@ -30,8 +30,8 @@ uint16 addr = 0x0080 + (r * 3);
 }
 
 void Cx4::mul(uint32 x, uint32 y, uint32 &rl, uint32 &rh) {
-int64 rx = x & 0xffffff;
-int64 ry = y & 0xffffff;
+int64_t rx = x & 0xffffff;
+int64_t ry = y & 0xffffff;
   if(rx & 0x800000)rx |= ~0x7fffff;
   if(ry & 0x800000)ry |= ~0x7fffff;
 

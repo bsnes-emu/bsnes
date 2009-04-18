@@ -27,6 +27,7 @@ public:
     HiROM,
     ExLoROM,
     ExHiROM,
+    SA1ROM,
     SPC7110ROM,
     BSCLoROM,
     BSCHiROM,

@@ -61,7 +61,7 @@ public slots:
 private:
   Mode activeMode;
   signed activeMouse;
-} *winInputMouseCaptureWindow;
+} *winInputMouseCapture;
 
 class InputCalibrationWindow : public QObject {
   Q_OBJECT
@@ -77,6 +77,7 @@ public:
 
   void setup();
   void activate(unsigned joy);
+  InputCalibrationWindow();
 
 public slots:
   void dismiss();

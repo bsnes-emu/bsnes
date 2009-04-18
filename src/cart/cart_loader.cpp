@@ -217,10 +217,11 @@ bool Cartridge::load_image(const char *filename, uint8_t *&data, unsigned &size,
 
   uint8_t *pdata;
   unsigned psize;
-  if(load_file(get_filename(filename, "ups", snes.config.path.patch), pdata, psize, CompressionInspect) == true) {
-    apply_patch(pdata, psize, data, size);
+  string path = (snes.config.path.patch == "" ? basepath(filename) : snes.config.path.patch);
+  if(load_file(get_filename(filename, "ups", path), pdata, psize, CompressionInspect) == true) {
+    bool result = apply_patch(pdata, psize, data, size);
     delete[] pdata;
-    patched = true;
+    patched = result;
   } else {
     patched = false;
   }

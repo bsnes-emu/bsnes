@@ -90,10 +90,9 @@ void Utility::modifySystemState(system_state_t state) {
       //warn if unsupported hardware detected
       string chip;
       if(cartridge.has_superfx())    chip = "SuperFX";
-      else if(cartridge.has_sa1())   chip = "SA-1";
       else if(cartridge.has_st011()) chip = "ST011";
       else if(cartridge.has_st018()) chip = "ST018";
-      else if(cartridge.has_dsp3())  chip = "DSP-3";
+      else if(cartridge.has_dsp3())  chip = "DSP-3";  //unplayable; only partially supported
       if(chip != "") {
         QMessageBox::warning(winMain->window, "Warning", utf8()
         << "<p><b>Warning:</b><br>Unsupported " << chip << " chip detected. "

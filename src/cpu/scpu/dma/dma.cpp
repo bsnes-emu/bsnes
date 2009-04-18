@@ -3,6 +3,8 @@
 void sCPU::dma_add_clocks(unsigned clocks) {
   status.dma_clocks += clocks;
   add_clocks(clocks);
+  scheduler.sync_cpucop();
+  scheduler.sync_cpuppu();
 }
 
 bool sCPU::dma_addr_valid(uint32 abus) {

@@ -1,13 +1,20 @@
+//scheduler thread relationships:
+//S-PPU <-> S-CPU <-> cartridge co-processor
+//           <|>
+//          S-SMP <-> S-DSP
+
 class Scheduler {
 public:
   cothread_t thread_snes;
-  cothread_t thread_cpu;
-  cothread_t thread_smp;
-  cothread_t thread_ppu;
-  cothread_t thread_dsp;
+  cothread_t thread_cpu;  //S-CPU (5a22)
+  cothread_t thread_cop;  //cartridge co-processor (SuperFX, SA-1, ...)
+  cothread_t thread_smp;  //S-SMP (SPC700)
+  cothread_t thread_ppu;  //S-PPU
+  cothread_t thread_dsp;  //S-DSP
 
   enum ActiveThread {
     THREAD_CPU,
+    THREAD_COP,
     THREAD_SMP,
     THREAD_PPU,
     THREAD_DSP,
@@ -18,10 +25,29 @@ public:
     unsigned smp_freq;
 
     ActiveThread active;
-    int64 cpuppu;
-    int64 cpusmp;
-    int64 smpdsp;
+    int64_t cpucop;
+    int64_t cpuppu;
+    int64_t cpusmp;
+    int64_t smpdsp;
   } clock;
+
+  //==========
+  //CPU <> COP
+  //==========
+
+  alwaysinline void sync_cpucop() {
+    if(clock.cpucop < 0) {
+      clock.active = THREAD_COP;
+      co_switch(thread_cop);
+    }
+  }
+
+  alwaysinline void sync_copcpu() {
+    if(clock.cpucop >= 0) {
+      clock.active = THREAD_CPU;
+      co_switch(thread_cpu);
+    }
+  }
 
   //==========
   //CPU <> PPU
@@ -77,40 +103,31 @@ public:
     }
   }
 
-  //======
-  //timing
-  //======
+  //==========
+  //add clocks
+  //==========
 
   alwaysinline void addclocks_cpu(unsigned clocks) {
+    clock.cpucop -= clocks;
     clock.cpuppu -= clocks;
-    sync_cpuppu();
+    clock.cpusmp -= clocks * (uint64_t)clock.smp_freq;
+  }
 
-    clock.cpusmp -= clocks * (uint64)clock.smp_freq;
-    if(clock.cpusmp < -(20000 * (int64)24000000)) sync_cpusmp();
+  alwaysinline void addclocks_cop(unsigned clocks) {
+    clock.cpucop += clocks;
   }
 
   alwaysinline void addclocks_ppu(unsigned clocks) {
     clock.cpuppu += clocks;
-    sync_ppucpu();
   }
 
   alwaysinline void addclocks_smp(unsigned clocks) {
-    clock.cpusmp += clocks * (uint64)clock.cpu_freq;
-    if(clock.cpusmp > +(20000 * (int64)24000000)) sync_smpcpu();
-
+    clock.cpusmp += clocks * (uint64_t)clock.cpu_freq;
     clock.smpdsp -= clocks;
-    #if !defined(USE_STATE_MACHINE)
-    sync_smpdsp();
-    #else
-    while(clock.smpdsp < 0) dsp.enter();
-    #endif
   }
 
   alwaysinline void addclocks_dsp(unsigned clocks) {
     clock.smpdsp += clocks;
-    #if !defined(USE_STATE_MACHINE)
-    sync_dspsmp();
-    #endif
   }
 
   void enter();
