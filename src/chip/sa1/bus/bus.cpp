@@ -1,16 +1,11 @@
 #ifdef SA1_CPP
 
 namespace memory {
-  namespace cpu {
-    CPUIRAM iram;
-    CPUBWRAM bwram;
-  }
-
-  namespace sa1 {
-    SA1IRAM iram;
-    SA1BWRAM bwram;
-    SA1BitmapRAM bitmapram;
-  }
+  VectorSelectionPage vectorsp;
+  StaticRAM iram(2048);
+  MappedRAM &bwram = memory::cartram;
+  CC1BWRAM cc1bwram;
+  BitmapRAM bitmapram;
 }
 
 void SA1Bus::init() {
@@ -22,124 +17,103 @@ void SA1Bus::init() {
     memory::mmio.map(i, sa1);
   }
 
-  map(MapLinear, 0x00, 0x3f, 0x0000, 0x07ff, memory::sa1::iram);
+  map(MapLinear, 0x00, 0x3f, 0x0000, 0x07ff, memory::iram);
   map(MapDirect, 0x00, 0x3f, 0x2200, 0x23ff, memory::mmio);
-  map(MapLinear, 0x00, 0x3f, 0x3000, 0x37ff, memory::sa1::iram);
-  map(MapLinear, 0x00, 0x3f, 0x6000, 0x7fff, memory::sa1::bwram);
+  map(MapLinear, 0x00, 0x3f, 0x3000, 0x37ff, memory::iram);
+  map(MapLinear, 0x00, 0x3f, 0x6000, 0x7fff, memory::bwram);
   map(MapLinear, 0x00, 0x3f, 0x8000, 0xffff, memory::cartrom);
-  map(MapLinear, 0x40, 0x4f, 0x0000, 0xffff, memory::sa1::bwram, 0, 0x040000);
-  map(MapLinear, 0x60, 0x6f, 0x0000, 0xffff, memory::sa1::bitmapram);
-  map(MapLinear, 0x80, 0xbf, 0x0000, 0x07ff, memory::sa1::iram);
+  map(MapLinear, 0x40, 0x4f, 0x0000, 0xffff, memory::bwram);
+  map(MapLinear, 0x60, 0x6f, 0x0000, 0xffff, memory::bitmapram);
+  map(MapLinear, 0x80, 0xbf, 0x0000, 0x07ff, memory::iram);
   map(MapDirect, 0x80, 0xbf, 0x2200, 0x23ff, memory::mmio);
-  map(MapLinear, 0x80, 0xbf, 0x3000, 0x37ff, memory::sa1::iram);
-  map(MapLinear, 0x80, 0xbf, 0x6000, 0x7fff, memory::sa1::bwram);
+  map(MapLinear, 0x80, 0xbf, 0x3000, 0x37ff, memory::iram);
+  map(MapLinear, 0x80, 0xbf, 0x6000, 0x7fff, memory::bwram);
   map(MapLinear, 0x80, 0xbf, 0x8000, 0xffff, memory::cartrom);
   map(MapLinear, 0xc0, 0xff, 0x0000, 0xffff, memory::cartrom);
 
-  bus.map(MapLinear, 0x00, 0x3f, 0x3000, 0x37ff, memory::cpu::iram);
-  bus.map(MapLinear, 0x00, 0x3f, 0x6000, 0x7fff, memory::cpu::bwram);
+  bus.map(MapLinear, 0x00, 0x3f, 0x3000, 0x37ff, memory::iram);
+  bus.map(MapLinear, 0x00, 0x3f, 0x6000, 0x7fff, memory::cc1bwram);
   bus.map(MapLinear, 0x00, 0x3f, 0x8000, 0xffff, memory::cartrom);
-  bus.map(MapLinear, 0x40, 0x4f, 0x0000, 0xffff, memory::cpu::bwram, 0, 0x040000);
-  bus.map(MapLinear, 0x80, 0xbf, 0x3000, 0x37ff, memory::cpu::iram);
-  bus.map(MapLinear, 0x80, 0xbf, 0x6000, 0x7fff, memory::cpu::bwram);
+  bus.map(MapLinear, 0x40, 0x4f, 0x0000, 0xffff, memory::cc1bwram);
+  bus.map(MapLinear, 0x80, 0xbf, 0x3000, 0x37ff, memory::iram);
+  bus.map(MapLinear, 0x80, 0xbf, 0x6000, 0x7fff, memory::cc1bwram);
   bus.map(MapLinear, 0x80, 0xbf, 0x8000, 0xffff, memory::cartrom);
   bus.map(MapLinear, 0xc0, 0xff, 0x0000, 0xffff, memory::cartrom);
+
+  memory::vectorsp.sync();
 }
 
-//=======
-//CPUIRAM
-//=======
+//===================
+//VectorSelectionPage
+//===================
 
-unsigned CPUIRAM::size() const {
-  return sizeof(sa1.iram);
+//this class maps $00:[ff00-ffff] for the purpose of supporting:
+//$2209.d6 IVSW (S-CPU IRQ vector selection) (0 = cart, 1 = SA-1)
+//$2209.d4 NVSW (S-CPU NMI vector selection) (0 = cart, 1 = SA-1)
+//when set, vector addresses are over-ridden with SA-1 register settings:
+//SIV = S-CPU IRQ vector address override
+//SNV = S-CPU NMI vector address override
+//
+//$00:[ffea-ffeb|ffee-ffef] are special cased on read;
+//all other addresses return original mapped data.
+
+uint8_t VectorSelectionPage::read(unsigned addr) {
+  switch(0xff00 | (addr & 0xff)) {
+    case 0xffea: case 0xffeb: {
+      if(sa1.mmio.cpu_nvsw == true) return (sa1.mmio.snv >> ((addr & 1) << 3));
+    } break;
+
+    case 0xffee: case 0xffef: {
+      if(sa1.mmio.cpu_ivsw == true) return (sa1.mmio.siv >> ((addr & 1) << 3));
+    } break;
+  }
+
+  return access->read(addr);
 }
 
-uint8_t CPUIRAM::read(unsigned addr) {
-  return sa1.iram[addr];
+void VectorSelectionPage::write(unsigned addr, uint8_t data) {
+  return access->write(addr, data);
 }
 
-void CPUIRAM::write(unsigned addr, uint8_t data) {
-  uint8_t wpbit = (addr >> 8) & 7;
-  if(1 || sa1.mmio.siwp & wpbit) {
-    //allow only when write-protection is disabled
-    sa1.iram[addr] = data;
+//call this whenever bus is remapped.
+//note: S-CPU and SA-1 bus always share $00:[ff00-ffff] as cartridge ROM data;
+//the SA-1 MMC does not allow mapping these independently between processors.
+//this allows this class to be shared for both, caching only ones' access class.
+void VectorSelectionPage::sync() {
+  if(bus.page[0x00ff00 >> 8].access != this) {
+    //bus was re-mapped, hook access routine
+    access = bus.page[0x00ff00 >> 8].access;
+       bus.page[0x00ff00 >> 8].access = this;
+    sa1bus.page[0x00ff00 >> 8].access = this;
   }
 }
 
 //========
-//CPUBWRAM
+//CC1BWRAM
 //========
 
-unsigned CPUBWRAM::size() const {
+unsigned CC1BWRAM::size() const {
   return memory::cartram.size();
 }
 
-uint8_t CPUBWRAM::read(unsigned addr) {
-  if(cc1dma) return sa1.dma_cc1_read(addr);
+uint8_t CC1BWRAM::read(unsigned addr) {
+  if(dma) return sa1.dma_cc1_read(addr);
   return memory::cartram.read(addr);
 }
 
-void CPUBWRAM::write(unsigned addr, uint8_t data) {
-  if(sa1.mmio.swen == false) {
-    //write-protection enabled
-    unsigned limit = 0x100 << sa1.mmio.bwp;
-    //if(addr < limit) return;
-  }
-
+void CC1BWRAM::write(unsigned addr, uint8_t data) {
   memory::cartram.write(addr, data);
 }
 
-//=======
-//SA1IRAM
-//=======
+//=========
+//BitmapRAM
+//=========
 
-unsigned SA1IRAM::size() const {
-  return sizeof(sa1.iram);
-}
-
-uint8_t SA1IRAM::read(unsigned addr) {
-  return sa1.iram[addr];
-}
-
-void SA1IRAM::write(unsigned addr, uint8_t data) {
-  uint8_t wpbit = (addr >> 8) & 7;
-  if(1 || sa1.mmio.ciwp & wpbit) {
-    //allow only when write-protection is disabled
-    sa1.iram[addr] = data;
-  }
-}
-
-//========
-//SA1BWRAM
-//========
-
-unsigned SA1BWRAM::size() const {
-  return memory::cartram.size();
-}
-
-uint8_t SA1BWRAM::read(unsigned addr) {
-  return memory::cartram.read(addr);
-}
-
-void SA1BWRAM::write(unsigned addr, uint8_t data) {
-  if(sa1.mmio.cwen == false) {
-    //write-protection enabled
-    unsigned limit = 0x100 << sa1.mmio.bwp;
-    //if(addr < limit) return;
-  }
-
-  memory::cartram.write(addr, data);
-}
-
-//============
-//SA1BitmapRAM
-//============
-
-unsigned SA1BitmapRAM::size() const {
+unsigned BitmapRAM::size() const {
   return 0x100000;
 }
 
-uint8_t SA1BitmapRAM::read(unsigned addr) {
+uint8_t BitmapRAM::read(unsigned addr) {
   if(sa1.mmio.bbf == 0) {
     //4bpp
     unsigned shift = addr & 1;
@@ -161,7 +135,7 @@ uint8_t SA1BitmapRAM::read(unsigned addr) {
   }
 }
 
-void SA1BitmapRAM::write(unsigned addr, uint8_t data) {
+void BitmapRAM::write(unsigned addr, uint8_t data) {
   if(sa1.mmio.bbf == 0) {
     //4bpp
     uint8_t shift = addr & 1;

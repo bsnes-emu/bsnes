@@ -1,5 +1,13 @@
 #ifdef SA1_CPP
 
+//BS-X flash carts, when present, are mapped to 0x400000+
+Memory& SA1::mmio_access(unsigned &addr) {
+  if(cartridge.bsx_flash_loaded() == false) return memory::cartrom;
+  if(addr < 0x400000) return memory::cartrom;
+  addr &= 0x3fffff;
+  return bsxflash;
+}
+
 //(CCNT) SA-1 control
 void SA1::mmio_w2200(uint8_t data) {
   if(mmio.sa1_resb && !(data & 0x80)) {
@@ -86,17 +94,10 @@ void SA1::mmio_w2209(uint8_t data) {
 
 //(CIE) SA-1 interrupt enable
 void SA1::mmio_w220a(uint8_t data) {
-  if(!mmio.sa1_irqen && (data & 0x80)) {
-    if(mmio.sa1_irqfl) mmio.sa1_irqcl = 0;
-  }
-
-  if(!mmio.dma_irqen && (data & 0x20)) {
-    if(mmio.dma_irqfl) mmio.dma_irqcl = 0;
-  }
-
-  if(!mmio.sa1_nmien && (data & 0x10)) {
-    if(mmio.sa1_nmifl) mmio.sa1_nmicl = 0;
-  }
+  if(!mmio.sa1_irqen   && (data & 0x80) && mmio.sa1_irqfl  ) mmio.sa1_irqcl   = 0;
+  if(!mmio.timer_irqen && (data & 0x40) && mmio.timer_irqfl) mmio.timer_irqcl = 0;
+  if(!mmio.dma_irqen   && (data & 0x20) && mmio.dma_irqfl  ) mmio.dma_irqcl   = 0;
+  if(!mmio.sa1_nmien   && (data & 0x10) && mmio.sa1_nmifl  ) mmio.sa1_nmicl   = 0;
 
   mmio.sa1_irqen   = (data & 0x80);
   mmio.timer_irqen = (data & 0x40);
@@ -111,17 +112,18 @@ void SA1::mmio_w220b(uint8_t data) {
   mmio.dma_irqcl   = (data & 0x20);
   mmio.sa1_nmicl   = (data & 0x10);
 
-  if(mmio.sa1_irqcl) mmio.sa1_irqfl = false;
-  if(mmio.dma_irqcl) mmio.dma_irqfl = false;
-  if(mmio.sa1_nmicl) mmio.sa1_nmifl = false;
+  if(mmio.sa1_irqcl)   mmio.sa1_irqfl   = false;
+  if(mmio.timer_irqcl) mmio.timer_irqfl = false;
+  if(mmio.dma_irqcl)   mmio.dma_irqfl   = false;
+  if(mmio.sa1_nmicl)   mmio.sa1_nmifl   = false;
 }
 
 //(SNV) S-CPU NMI vector
-void SA1::mmio_w220c(uint8_t data) { mmio.snv = (mmio.snv & 0xff00) | data; }
+void SA1::mmio_w220c(uint8_t data) { mmio.snv = (mmio.snv & 0xff00) | data;      }
 void SA1::mmio_w220d(uint8_t data) { mmio.snv = (data << 8) | (mmio.snv & 0xff); }
 
 //(SIV) S-CPU IRQ vector
-void SA1::mmio_w220e(uint8_t data) { mmio.siv = (mmio.siv & 0xff00) | data; }
+void SA1::mmio_w220e(uint8_t data) { mmio.siv = (mmio.siv & 0xff00) | data;      }
 void SA1::mmio_w220f(uint8_t data) { mmio.siv = (data << 8) | (mmio.siv & 0xff); }
 
 //(TMC) H/V timer control
@@ -150,10 +152,21 @@ void SA1::mmio_w2220(uint8_t data) {
   mmio.cbmode = (data & 0x80);
   mmio.cb     = (data & 0x07);
 
-     bus.map(Bus::MapLinear, 0x00, 0x1f, 0x8000, 0xffff, memory::cartrom, (mmio.cbmode == 0) ? 0x000000 : (mmio.cb << 20));
-  sa1bus.map(Bus::MapLinear, 0x00, 0x1f, 0x8000, 0xffff, memory::cartrom, (mmio.cbmode == 0) ? 0x000000 : (mmio.cb << 20));
-     bus.map(Bus::MapLinear, 0xc0, 0xcf, 0x0000, 0xffff, memory::cartrom, mmio.cb << 20);
-  sa1bus.map(Bus::MapLinear, 0xc0, 0xcf, 0x0000, 0xffff, memory::cartrom, mmio.cb << 20);
+  unsigned addr = mmio.cb << 20;
+  Memory &access = mmio_access(addr);
+
+  if(mmio.cbmode == 0) {
+       bus.map(Bus::MapLinear, 0x00, 0x1f, 0x8000, 0xffff, memory::cartrom, 0x000000);
+    sa1bus.map(Bus::MapLinear, 0x00, 0x1f, 0x8000, 0xffff, memory::cartrom, 0x000000);
+  } else {
+       bus.map(Bus::MapLinear, 0x00, 0x1f, 0x8000, 0xffff, access, addr);
+    sa1bus.map(Bus::MapLinear, 0x00, 0x1f, 0x8000, 0xffff, access, addr);
+  }
+
+     bus.map(Bus::MapLinear, 0xc0, 0xcf, 0x0000, 0xffff, access, addr);
+  sa1bus.map(Bus::MapLinear, 0xc0, 0xcf, 0x0000, 0xffff, access, addr);
+
+  memory::vectorsp.sync();
 }
 
 //(DXB) Super MMC bank D
@@ -161,10 +174,19 @@ void SA1::mmio_w2221(uint8_t data) {
   mmio.dbmode = (data & 0x80);
   mmio.db     = (data & 0x07);
 
-     bus.map(Bus::MapLinear, 0x20, 0x3f, 0x8000, 0xffff, memory::cartrom, (mmio.dbmode == 0) ? 0x100000 : (mmio.db << 20));
-  sa1bus.map(Bus::MapLinear, 0x20, 0x3f, 0x8000, 0xffff, memory::cartrom, (mmio.dbmode == 0) ? 0x100000 : (mmio.db << 20));
-     bus.map(Bus::MapLinear, 0xd0, 0xdf, 0x0000, 0xffff, memory::cartrom, mmio.db << 20);
-  sa1bus.map(Bus::MapLinear, 0xd0, 0xdf, 0x0000, 0xffff, memory::cartrom, mmio.db << 20);
+  unsigned addr = mmio.db << 20;
+  Memory &access = mmio_access(addr);
+
+  if(mmio.dbmode == 0) {
+       bus.map(Bus::MapLinear, 0x20, 0x3f, 0x8000, 0xffff, memory::cartrom, 0x100000);
+    sa1bus.map(Bus::MapLinear, 0x20, 0x3f, 0x8000, 0xffff, memory::cartrom, 0x100000);
+  } else {
+       bus.map(Bus::MapLinear, 0x20, 0x3f, 0x8000, 0xffff, access, addr);
+    sa1bus.map(Bus::MapLinear, 0x20, 0x3f, 0x8000, 0xffff, access, addr);
+  }
+
+     bus.map(Bus::MapLinear, 0xd0, 0xdf, 0x0000, 0xffff, access, addr);
+  sa1bus.map(Bus::MapLinear, 0xd0, 0xdf, 0x0000, 0xffff, access, addr);
 }
 
 //(EXB) Super MMC bank E
@@ -172,10 +194,19 @@ void SA1::mmio_w2222(uint8_t data) {
   mmio.ebmode = (data & 0x80);
   mmio.eb     = (data & 0x07);
 
-     bus.map(Bus::MapLinear, 0x80, 0x9f, 0x8000, 0xffff, memory::cartrom, (mmio.ebmode == 0) ? 0x200000 : (mmio.eb << 20));
-  sa1bus.map(Bus::MapLinear, 0x80, 0x9f, 0x8000, 0xffff, memory::cartrom, (mmio.ebmode == 0) ? 0x200000 : (mmio.eb << 20));
-     bus.map(Bus::MapLinear, 0xe0, 0xef, 0x0000, 0xffff, memory::cartrom, mmio.eb << 20);
-  sa1bus.map(Bus::MapLinear, 0xe0, 0xef, 0x0000, 0xffff, memory::cartrom, mmio.eb << 20);
+  unsigned addr = mmio.eb << 20;
+  Memory &access = mmio_access(addr);
+
+  if(mmio.ebmode == 0) {
+       bus.map(Bus::MapLinear, 0x80, 0x9f, 0x8000, 0xffff, memory::cartrom, 0x200000);
+    sa1bus.map(Bus::MapLinear, 0x80, 0x9f, 0x8000, 0xffff, memory::cartrom, 0x200000);
+  } else {
+       bus.map(Bus::MapLinear, 0x80, 0x9f, 0x8000, 0xffff, access, addr);
+    sa1bus.map(Bus::MapLinear, 0x80, 0x9f, 0x8000, 0xffff, access, addr);
+  }
+
+     bus.map(Bus::MapLinear, 0xe0, 0xef, 0x0000, 0xffff, access, addr);
+  sa1bus.map(Bus::MapLinear, 0xe0, 0xef, 0x0000, 0xffff, access, addr);
 }
 
 //(FXB) Super MMC bank F
@@ -183,18 +214,27 @@ void SA1::mmio_w2223(uint8_t data) {
   mmio.fbmode = (data & 0x80);
   mmio.fb     = (data & 0x07);
 
-     bus.map(Bus::MapLinear, 0xa0, 0xbf, 0x8000, 0xffff, memory::cartrom, (mmio.fbmode == 0) ? 0x300000 : (mmio.fb << 20));
-  sa1bus.map(Bus::MapLinear, 0xa0, 0xbf, 0x8000, 0xffff, memory::cartrom, (mmio.fbmode == 0) ? 0x300000 : (mmio.fb << 20));
-     bus.map(Bus::MapLinear, 0xf0, 0xff, 0x0000, 0xffff, memory::cartrom, mmio.fb << 20);
-  sa1bus.map(Bus::MapLinear, 0xf0, 0xff, 0x0000, 0xffff, memory::cartrom, mmio.fb << 20);
+  unsigned addr = mmio.fb << 20;
+  Memory &access = mmio_access(addr);
+
+  if(mmio.fbmode == 0) {
+       bus.map(Bus::MapLinear, 0xa0, 0xbf, 0x8000, 0xffff, memory::cartrom, 0x300000);
+    sa1bus.map(Bus::MapLinear, 0xa0, 0xbf, 0x8000, 0xffff, memory::cartrom, 0x300000);
+  } else {
+       bus.map(Bus::MapLinear, 0xa0, 0xbf, 0x8000, 0xffff, access, addr);
+    sa1bus.map(Bus::MapLinear, 0xa0, 0xbf, 0x8000, 0xffff, access, addr);
+  }
+
+     bus.map(Bus::MapLinear, 0xf0, 0xff, 0x0000, 0xffff, access, addr);
+  sa1bus.map(Bus::MapLinear, 0xf0, 0xff, 0x0000, 0xffff, access, addr);
 }
 
 //(BMAPS) S-CPU BW-RAM address mapping
 void SA1::mmio_w2224(uint8_t data) {
   mmio.sbm = (data & 0x1f);
 
-  bus.map(Bus::MapLinear, 0x00, 0x3f, 0x6000, 0x7fff, memory::cpu::bwram, mmio.sbm * 0x2000, 0x2000);
-  bus.map(Bus::MapLinear, 0x80, 0xbf, 0x6000, 0x7fff, memory::cpu::bwram, mmio.sbm * 0x2000, 0x2000);
+  bus.map(Bus::MapLinear, 0x00, 0x3f, 0x6000, 0x7fff, memory::cc1bwram, mmio.sbm * 0x2000, 0x2000);
+  bus.map(Bus::MapLinear, 0x80, 0xbf, 0x6000, 0x7fff, memory::cc1bwram, mmio.sbm * 0x2000, 0x2000);
 }
 
 //(BMAP) SA-1 BW-RAM address mapping
@@ -204,12 +244,12 @@ void SA1::mmio_w2225(uint8_t data) {
 
   if(mmio.sw46 == 0) {
     //$[40-43]:[0000-ffff] x  32 projection
-    sa1bus.map(Bus::MapLinear, 0x00, 0x3f, 0x6000, 0x7fff, memory::sa1::bwram, (mmio.cbm & 0x1f) * 0x2000, 0x2000);
-    sa1bus.map(Bus::MapLinear, 0x80, 0xbf, 0x6000, 0x7fff, memory::sa1::bwram, (mmio.cbm & 0x1f) * 0x2000, 0x2000);
+    sa1bus.map(Bus::MapLinear, 0x00, 0x3f, 0x6000, 0x7fff, memory::bwram, (mmio.cbm & 0x1f) * 0x2000, 0x2000);
+    sa1bus.map(Bus::MapLinear, 0x80, 0xbf, 0x6000, 0x7fff, memory::bwram, (mmio.cbm & 0x1f) * 0x2000, 0x2000);
   } else {
     //$[60-6f]:[0000-ffff] x 128 projection
-    sa1bus.map(Bus::MapLinear, 0x00, 0x3f, 0x6000, 0x7fff, memory::sa1::bitmapram, mmio.cbm * 0x2000, 0x2000);
-    sa1bus.map(Bus::MapLinear, 0x80, 0xbf, 0x6000, 0x7fff, memory::sa1::bitmapram, mmio.cbm * 0x2000, 0x2000);
+    sa1bus.map(Bus::MapLinear, 0x00, 0x3f, 0x6000, 0x7fff, memory::bitmapram, mmio.cbm * 0x2000, 0x2000);
+    sa1bus.map(Bus::MapLinear, 0x80, 0xbf, 0x6000, 0x7fff, memory::bitmapram, mmio.cbm * 0x2000, 0x2000);
   }
 }
 
@@ -256,7 +296,7 @@ void SA1::mmio_w2231(uint8_t data) {
   mmio.dmasize = (data >> 2) & 7;
   mmio.dmacb   = (data & 0x03);
 
-  if(mmio.chdend) memory::cpu::bwram.cc1dma = false;
+  if(mmio.chdend) memory::cc1bwram.dma = false;
   if(mmio.dmasize > 5) mmio.dmasize = 5;
   if(mmio.dmacb   > 2) mmio.dmacb   = 2;
 }
@@ -274,11 +314,11 @@ void SA1::mmio_w2235(uint8_t data) {
 void SA1::mmio_w2236(uint8_t data) {
   mmio.dda = (mmio.dda & 0xff00ff) | (data <<  8);
 
-  if(dma.mode == DMA::Inactive) {
+  if(mmio.dmaen == true) {
     if(mmio.cden == 0 && mmio.dd == DMA::DestIRAM) {
-      dma.mode = DMA::Normal;
+      dma_normal();
     } else if(mmio.cden == 1 && mmio.cdsel == 1) {
-      dma.mode = DMA::CC1;
+      dma_cc1();
     }
   }
 }
@@ -286,9 +326,9 @@ void SA1::mmio_w2236(uint8_t data) {
 void SA1::mmio_w2237(uint8_t data) {
   mmio.dda = (mmio.dda & 0x00ffff) | (data << 16);
 
-  if(dma.mode == DMA::Inactive) {
+  if(mmio.dmaen == true) {
     if(mmio.cden == 0 && mmio.dd == DMA::DestBWRAM) {
-      dma.mode = DMA::Normal;
+      dma_normal();
     }
   }
 }
@@ -311,9 +351,9 @@ void SA1::mmio_w2244(uint8_t data) { mmio.brf[ 4] = data; }
 void SA1::mmio_w2245(uint8_t data) { mmio.brf[ 5] = data; }
 void SA1::mmio_w2246(uint8_t data) { mmio.brf[ 6] = data; }
 void SA1::mmio_w2247(uint8_t data) { mmio.brf[ 7] = data;
-  if(dma.mode == DMA::Inactive) {
+  if(mmio.dmaen == true) {
     if(mmio.cden == 1 && mmio.cdsel == 0) {
-      dma.mode = DMA::CC2;
+      dma_cc2();
     }
   }
 }
@@ -326,9 +366,9 @@ void SA1::mmio_w224c(uint8_t data) { mmio.brf[12] = data; }
 void SA1::mmio_w224d(uint8_t data) { mmio.brf[13] = data; }
 void SA1::mmio_w224e(uint8_t data) { mmio.brf[14] = data; }
 void SA1::mmio_w224f(uint8_t data) { mmio.brf[15] = data;
-  if(dma.mode == DMA::Inactive) {
+  if(mmio.dmaen == true) {
     if(mmio.cden == 1 && mmio.cdsel == 0) {
-      dma.mode = DMA::CC2;
+      dma_cc2();
     }
   }
 }
@@ -384,7 +424,7 @@ void SA1::mmio_w2254(uint8_t data) {
     mmio.mr += (int16_t)mmio.ma * (int16_t)mmio.mb;
     mmio.overflow = (mmio.mr >= (1ULL << 40));
     mmio.mr &= (1ULL << 40) - 1;
-    mmio.ma = 0;
+    mmio.mb = 0;
   }
 }
 

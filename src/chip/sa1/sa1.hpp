@@ -5,7 +5,6 @@ public:
   #include "dma/dma.hpp"
   #include "memory/memory.hpp"
   #include "mmio/mmio.hpp"
-  uint8_t iram[2048];
 
   struct Status {
     bool interrupt_pending;
@@ -18,10 +17,11 @@ public:
 
   void enter();
   void interrupt(uint16_t vector);
-  void add_clocks(unsigned);
+  void tick();
 
-  void last_cycle();
-  bool interrupt_pending();
+  alwaysinline void trigger_irq();
+  alwaysinline void last_cycle();
+  alwaysinline bool interrupt_pending();
 
   void init();
   void enable();

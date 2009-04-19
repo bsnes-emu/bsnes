@@ -1,7 +1,6 @@
 #ifdef SCPU_CPP
 
 void sCPU::op_io() {
-  regs.bus = -1U;
   status.clock_count = 6;
   precycle_edge();
   add_clocks(6);
@@ -10,7 +9,7 @@ void sCPU::op_io() {
 }
 
 uint8 sCPU::op_read(uint32 addr) {
-  status.clock_count = speed(regs.bus = addr);
+  status.clock_count = speed(addr);
   precycle_edge();
   add_clocks(status.clock_count - 4);
 
@@ -23,7 +22,7 @@ uint8 sCPU::op_read(uint32 addr) {
 }
 
 void sCPU::op_write(uint32 addr, uint8 data) {
-  status.clock_count = speed(regs.bus = addr);
+  status.clock_count = speed(addr);
   precycle_edge();
   add_clocks(status.clock_count);
 

@@ -1,5 +1,6 @@
 #include <../base.hpp>
 #include <../cart/cart.hpp>
+#include <../chip/bsx/bsx.hpp>
 #define SA1_CPP
 
 #include "sa1.hpp"
@@ -12,16 +13,9 @@ void SA1::enter() {
   while(true) {
     while(mmio.sa1_rdyb || mmio.sa1_resb) {
       //SA-1 co-processor is asleep
-      add_clocks(4);
+      tick();
       scheduler.sync_copcpu();
     }
-
-    #if 0
-    static FILE *fp = fopen("/home/byuu/Desktop/sa1log.txt", "wb");
-    char t[1024];
-    disassemble_opcode(t);
-    fprintf(fp, "%s\n", t);
-    #endif
 
     if(status.interrupt_pending) {
       status.interrupt_pending = false;
@@ -39,33 +33,23 @@ void SA1::last_cycle() {
     mmio.sa1_nmifl = true;
     mmio.sa1_nmicl = 1;
     regs.wai = false;
-    return;
-  }
-
-  if(mmio.timer_irqen && !mmio.timer_irqcl) {
-    status.interrupt_pending = true;
-    status.interrupt_vector  = mmio.civ;
-    mmio.timer_irqfl = true;
-    mmio.timer_irqcl = 1;
-    regs.wai = false;
-    return;
-  }
-
-  if(mmio.dma_irqen && !mmio.dma_irqcl) {
-    status.interrupt_pending = true;
-    status.interrupt_vector  = mmio.civ;
-    mmio.dma_irqfl = true;
-    mmio.dma_irqcl = 1;
-    regs.wai = false;
-    return;
-  }
-
-  if(!regs.p.i && mmio.sa1_irq && !mmio.sa1_irqcl) {
-    status.interrupt_pending = true;
-    status.interrupt_vector  = mmio.civ;
-    mmio.sa1_irqfl = true;
-    regs.wai = false;
-    return;
+  } else if(!regs.p.i) {
+    if(mmio.timer_irqen && !mmio.timer_irqcl) {
+      status.interrupt_pending = true;
+      status.interrupt_vector  = mmio.civ;
+      mmio.timer_irqfl = true;
+      regs.wai = false;
+    } else if(mmio.dma_irqen && !mmio.dma_irqcl) {
+      status.interrupt_pending = true;
+      status.interrupt_vector  = mmio.civ;
+      mmio.dma_irqfl = true;
+      regs.wai = false;
+    } else if(mmio.sa1_irq && !mmio.sa1_irqcl) {
+      status.interrupt_pending = true;
+      status.interrupt_vector  = mmio.civ;
+      mmio.sa1_irqfl = true;
+      regs.wai = false;
+    }
   }
 }
 
@@ -76,7 +60,6 @@ void SA1::interrupt(uint16_t vector) {
   op_writestack(regs.pc.h);
   op_writestack(regs.pc.l);
   op_writestack(regs.e ? (regs.p & ~0x10) : regs.p);
-  add_clocks(8);
   regs.pc.w = vector;
   regs.pc.b = 0x00;
   regs.p.i  = 1;
@@ -87,47 +70,37 @@ bool SA1::interrupt_pending() {
   return status.interrupt_pending;
 }
 
-void SA1::add_clocks(unsigned clocks) {
-  scheduler.addclocks_cop(clocks);
-
-  uint16_t last_hcounter = status.hcounter;
-  uint16_t last_vcounter = status.vcounter;
+void SA1::tick() {
+  scheduler.addclocks_cop(2);
 
   //adjust counters:
   //note that internally, status counters are in clocks;
   //whereas MMIO register counters are in dots (4 clocks = 1 dot)
   if(mmio.hvselb == 0) {
     //HV timer
-    status.hcounter += clocks;
+    status.hcounter += 2;
     if(status.hcounter >= 1364) {
-      status.hcounter -= 1364;
-      status.vcounter++;
-      if(status.vcounter >= status.scanlines) {
-        status.vcounter = 0;
-      }
+      status.hcounter = 0;
+      if(++status.vcounter >= status.scanlines) status.vcounter = 0;
     }
   } else {
     //linear timer
-    status.hcounter += clocks;
+    status.hcounter += 2;
     status.vcounter += (status.hcounter >> 11);
     status.hcounter &= 0x07ff;
     status.vcounter &= 0x01ff;
   }
 
   //test counters for timer IRQ
-  uint32_t lo = (last_vcounter << 11) + last_hcounter;
-  uint32_t hi = (status.vcounter << 11) + status.hcounter;
-  uint32_t trigger = (mmio.vcnt << 11) + (mmio.hcnt << 2);
-
-  if(lo > hi) {
-    if(trigger <= hi) goto trigger_irq;
-    hi += 1 << 20;
+  switch((mmio.ven << 1) + (mmio.hen << 0)) {
+    case 0: break;
+    case 1: if(status.hcounter == (mmio.hcnt << 2)) trigger_irq(); break;
+    case 2: if(status.vcounter == mmio.vcnt && status.hcounter == 0) trigger_irq(); break;
+    case 3: if(status.vcounter == mmio.hcnt && status.hcounter == (mmio.hcnt << 2)) trigger_irq(); break;
   }
+}
 
-  if(lo < trigger && trigger <= hi) goto trigger_irq;
-  return;
-
-  trigger_irq:
+void SA1::trigger_irq() {
   mmio.timer_irqfl = true;
   if(mmio.timer_irqen) mmio.timer_irqcl = 0;
 }
@@ -146,6 +119,11 @@ void SA1::power() {
 }
 
 void SA1::reset() {
+  memory::vectorsp.access = 0;
+  memory::cc1bwram.dma = false;
+  for(unsigned addr = 0; addr < memory::iram.size(); addr++) {
+    memory::iram.write(addr, 0x00);
+  }
   sa1bus.init();
 
   regs.pc.d = 0x000000;
@@ -160,19 +138,14 @@ void SA1::reset() {
   regs.wai  = false;
   update_table();
 
-  memset(iram, 0, sizeof iram);
-
   status.interrupt_pending = false;
   status.interrupt_vector  = 0x0000;
 
-  status.scanlines = (snes.region() == SNES::NTSC ? 261 : 311);
+  status.scanlines = (snes.region() == SNES::NTSC ? 262 : 312);
   status.vcounter  = 0;
   status.hcounter  = 0;
 
-  dma.mode   = DMA::Inactive;
-  dma.clocks = 4;
-  dma.tile   = 0;
-  dma.line   = 0;
+  dma.line = 0;
 
   //$2200 CCNT
   mmio.sa1_irq  = false;

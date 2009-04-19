@@ -1,49 +1,31 @@
-class SA1Bus : public Bus {
-public:
+struct SA1Bus : Bus {
   void init();
 };
 
-struct CPUIRAM : Memory {
-  unsigned size() const;
-  uint8_t read(unsigned);
-  void write(unsigned, uint8_t);
+struct VectorSelectionPage : Memory {
+  alwaysinline uint8_t read(unsigned);
+  alwaysinline void write(unsigned, uint8_t);
+  void sync();
+  Memory *access;
 };
 
-struct CPUBWRAM : Memory {
-  bool cc1dma;
-
+struct CC1BWRAM : Memory {
   unsigned size() const;
-  uint8_t read(unsigned);
-  void write(unsigned, uint8_t);
+  alwaysinline uint8_t read(unsigned);
+  alwaysinline void write(unsigned, uint8_t);
+  bool dma;
 };
 
-struct SA1IRAM : Memory {
+struct BitmapRAM : Memory {
   unsigned size() const;
-  uint8_t read(unsigned);
-  void write(unsigned, uint8_t);
-};
-
-struct SA1BWRAM : Memory {
-  unsigned size() const;
-  uint8_t read(unsigned);
-  void write(unsigned, uint8_t);
-};
-
-struct SA1BitmapRAM : Memory {
-  unsigned size() const;
-  uint8_t read(unsigned);
-  void write(unsigned, uint8_t);
+  alwaysinline uint8_t read(unsigned);
+  alwaysinline void write(unsigned, uint8_t);
 };
 
 namespace memory {
-  namespace cpu {
-    extern CPUIRAM iram;
-    extern CPUBWRAM bwram;
-  }
-
-  namespace sa1 {
-    extern SA1IRAM iram;
-    extern SA1BWRAM bwram;
-    extern SA1BitmapRAM bitmapram;
-  }
+  extern VectorSelectionPage vectorsp;
+  extern StaticRAM iram;
+  extern MappedRAM &bwram;
+  extern CC1BWRAM cc1bwram;
+  extern BitmapRAM bitmapram;
 }

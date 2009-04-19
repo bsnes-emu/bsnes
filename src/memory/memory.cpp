@@ -24,10 +24,6 @@ void MMIOAccess::map(unsigned addr, MMIO &access) {
   mmio[(addr - 0x2000) & 0x3fff] = &access;
 }
 
-MMIO* MMIOAccess::get(unsigned addr) {
-  return mmio[(addr - 0x2000) & 0x3fff];
-}
-
 uint8 MMIOAccess::read(unsigned addr) {
   return mmio[(addr - 0x2000) & 0x3fff]->mmio_read(addr);
 }

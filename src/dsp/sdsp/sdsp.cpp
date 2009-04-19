@@ -12,7 +12,7 @@
 #define REG(n) state.regs[r_##n]
 #define VREG(n) state.regs[v.vidx + v_##n]
 
-#if !defined(USE_STATE_MACHINE)
+#if !defined(DSP_STATE_MACHINE)
   #define phase_start() while(true) {
   #define phase(n)
   #define tick()          scheduler.addclocks_dsp(3 * 8); scheduler.sync_dspsmp()

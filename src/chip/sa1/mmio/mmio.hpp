@@ -1,5 +1,6 @@
 uint8_t mmio_read(unsigned addr);
 void mmio_write(unsigned addr, uint8_t data);
+Memory& mmio_access(unsigned &addr);
 
 struct MMIO {
   //$2200 CCNT

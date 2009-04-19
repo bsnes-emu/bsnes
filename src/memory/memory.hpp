@@ -56,16 +56,13 @@ private:
 
 struct MMIOAccess : Memory {
   void map(unsigned addr, MMIO &access);
-  MMIO* get(unsigned addr);
   uint8 read(unsigned addr);
   void write(unsigned addr, uint8 data);
 
-private:
   MMIO *mmio[0x4000];
 };
 
-class Bus {
-public:
+struct Bus {
   unsigned mirror(unsigned addr, unsigned size);
   void map(unsigned addr, Memory &access, unsigned offset);
   enum MapMode { MapDirect, MapLinear, MapShadow };
@@ -100,7 +97,6 @@ public:
   Bus() {}
   virtual ~Bus() {}
 
-protected:
   struct Page {
     Memory *access;
     unsigned offset;

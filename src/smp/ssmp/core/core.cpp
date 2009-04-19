@@ -16,11 +16,11 @@ void sSMP::enter() {
 
     //forcefully sync S-CPU and S-SMP, in case chips are not communicating
     static unsigned counter = 0;
-    if(++counter & 4096) {
+    if(++counter >= 128) {
       counter = 0;
       scheduler.sync_smpcpu();
     }
   }
 }
 
-#endif //ifdef SSMP_CPP
+#endif

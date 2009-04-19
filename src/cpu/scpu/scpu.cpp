@@ -12,10 +12,6 @@ priority_queue<unsigned> event(512, bind(&sCPU::queue_event, &cpu));
 void sCPU::enter() {
   regs.pc.l = bus.read(0xfffc);
   regs.pc.h = bus.read(0xfffd);
-
-  //initial latch values for $213c/$213d
-  //[x]0035 : [y]0000 (53.0 -> 212) [lda $2137]
-  //[x]0038 : [y]0000 (56.5 -> 226) [nop : lda $2137]
   add_clocks(186);
 
   while(true) {

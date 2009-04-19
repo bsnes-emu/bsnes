@@ -2,7 +2,7 @@
 
 void sSMP::add_clocks(unsigned clocks) {
   scheduler.addclocks_smp(clocks);
-  #if !defined(USE_STATE_MACHINE)
+  #if !defined(DSP_STATE_MACHINE)
   scheduler.sync_smpdsp();
   #else
   while(scheduler.clock.smpdsp < 0) dsp.enter();

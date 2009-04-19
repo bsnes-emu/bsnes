@@ -2,10 +2,6 @@ struct DMA {
   enum CDEN { DmaNormal = 0, DmaCharConversion = 1 };
   enum SD { SourceROM = 0, SourceBWRAM = 1, SourceIRAM = 2 };
   enum DD { DestIRAM = 0, DestBWRAM = 1 };
-
-  enum Mode { Inactive, Normal, CC1, CC2 } mode;
-  unsigned clocks;
-  bool tile;
   unsigned line;
 } dma;
 

@@ -5,55 +5,35 @@
 //==========================
 
 void SA1::op_io() {
-  add_clocks(2);
+  tick();
   if(regs.wai) scheduler.sync_copcpu();
-  cycle_edge();
 }
 
+//ROM, I-RAM and MMIO registers are accessed at ~10.74MHz (2 clock ticks)
+//BW-RAM is accessed at ~5.37MHz (4 clock ticks)
+//tick() == 2 clock ticks
+//note: bus conflict delays are not emulated at this time
+
+#define is_bwram(addr) (\
+   ((addr & 0x40e000) == 0x006000) \
+|| ((addr & 0xf00000) == 0x400000) \
+|| ((addr & 0xf00000) == 0x600000) \
+)
+
 uint8_t SA1::op_read(unsigned addr) {
-  add_clocks(bus_speed(addr));
+  tick();
+  if(is_bwram(addr)) tick();
   scheduler.sync_copcpu();
-  regs.mdr = sa1bus.read(addr);
-  cycle_edge();
-  return regs.mdr;
+  return sa1bus.read(addr);
 }
 
 void SA1::op_write(unsigned addr, uint8_t data) {
-  add_clocks(bus_speed(addr));
+  tick();
+  if(is_bwram(addr)) tick();
   scheduler.sync_copcpu();
-  sa1bus.write(addr, regs.mdr = data);
-  cycle_edge();
+  sa1bus.write(addr, data);
 }
 
-void SA1::cycle_edge() {
-  switch(dma.mode) {
-    case DMA::Normal: dma_normal(); break;
-    case DMA::CC1:    dma_cc1();    break;
-    case DMA::CC2:    dma_cc2();    break;
-  }
-}
-
-//$[00-3f:80-bf]:[8000-ffff]
-//$[c0-ff]      :[0000-ffff]
-#define ROM(n) ( \
-   ((n & 0x408000) == 0x008000) \
-|| ((n & 0xc00000) == 0xc00000) \
-)
-
-//$[00-3f|80-bf]:[0000-07ff]
-//$[00-3f|80-bf]:[3000-37ff]
-#define IRAM(n) ( \
-   ((n & 0x40f800) == 0x000000) \
-|| ((n & 0x40f800) == 0x003000) \
-)
-
-unsigned SA1::bus_speed(unsigned addr) {
-  if(IRAM(addr)) return 2;
-  if(ROM(addr)) return (ROM(cpu.regs.bus) ? 4 : 2);
-  return 4;  //MMIO, BW-RAM
-}
-
-#undef ROM
-#undef IRAM
+#undef is_bwram
 
 #endif
