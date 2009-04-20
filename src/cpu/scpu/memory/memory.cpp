@@ -4,7 +4,11 @@ void sCPU::op_io() {
   status.clock_count = 6;
   precycle_edge();
   add_clocks(6);
-  if(regs.wai) scheduler.sync_cpucop();
+
+  if(regs.wai) {
+    scheduler.sync_cpucop();
+    scheduler.sync_cpuppu();
+  }
   cycle_edge();
 }
 
