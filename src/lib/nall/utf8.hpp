@@ -11,6 +11,7 @@
 #undef  NOMINMAX
 #define NOMINMAX
 #include <windows.h>
+#undef interface
 
 namespace nall {
   //UTF-8 to UTF-16

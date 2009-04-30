@@ -13,6 +13,7 @@ public:
 #include "interface.cpp"
 #include "ui.cpp"
 
+#include "cartridge/cartridge.cpp"
 #include "input/input.cpp"
 #include "utility/utility.cpp"
 
@@ -51,30 +52,30 @@ void Application::initPaths(const char *basename) {
     }
 
     if(strend(temp, "/") == false) strcat(temp, "/");
-    snes.config.path.base = temp;
+    config.path.base = temp;
   } else {
-    snes.config.path.base = "";
+    config.path.base = "";
   }
 
   if(userpath(temp)) {
     strtr(temp, "\\", "/");
     if(strend(temp, "/") == false) strcat(temp, "/");
-    snes.config.path.user = temp;
+    config.path.user = temp;
   } else {
-    snes.config.path.user = "";
+    config.path.user = "";
   }
 
   char cwd[PATH_MAX];
-  snes.config.path.current = getcwd(cwd);
+  config.path.current = getcwd(cwd);
 }
 
 void Application::locateFile(string &filename, bool createDataDirectory) {
   //first, check if file exists in executable directory (single-user mode)
-  string temp = string() << snes.config.path.base << filename;
+  string temp = string() << config.path.base << filename;
 
   if(file::exists(temp) == false) {
     //if not, use user data path (multi-user mode)
-    temp = snes.config.path.user;
+    temp = config.path.user;
     temp << ".bsnes";
     if(createDataDirectory) mkdir(temp);  //ensure directory exists
     temp << "/" << filename;
@@ -104,7 +105,7 @@ int Application::main(int argc, char **argv) {
 
   config.load(configFilename);
   init();
-  snes.init();
+  SNES::system.init(&interface);
 
   if(argc == 2) {
     //if valid file was specified on the command-line, attempt to load it now
@@ -129,8 +130,8 @@ int Application::main(int argc, char **argv) {
       autopause = false;
     }
 
-    if(cartridge.loaded() && !pause && !autopause) {
-      snes.runtoframe();
+    if(SNES::cartridge.loaded() && !pause && !autopause) {
+      SNES::system.runtoframe();
     } else {
       usleep(20 * 1000);
     }
@@ -138,6 +139,7 @@ int Application::main(int argc, char **argv) {
     supressScreenSaver();
   }
 
+  cartridge.unload();
   config.save(configFilename);
   return 0;
 }

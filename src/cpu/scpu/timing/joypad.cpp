@@ -3,8 +3,8 @@
 void sCPU::run_auto_joypad_poll() {
   uint16 joy1 = 0, joy2 = 0, joy3 = 0, joy4 = 0;
   for(unsigned i = 0; i < 16; i++) {
-    uint8 port0 = snes.input.port_read(0);
-    uint8 port1 = snes.input.port_read(1);
+    uint8 port0 = system.input.port_read(0);
+    uint8 port1 = system.input.port_read(1);
 
     joy1 |= (port0 & 1) ? (0x8000 >> i) : 0;
     joy2 |= (port1 & 1) ? (0x8000 >> i) : 0;

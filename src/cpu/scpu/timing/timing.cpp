@@ -14,7 +14,7 @@ void sCPU::add_clocks(unsigned clocks) {
   while(ticks--) {
     ppu.tick();
     if((ppu.hcounter() & 2) == 0) {
-      snes.input.tick();
+      system.input.tick();
     } else {
       poll_interrupts();
     }
@@ -44,7 +44,7 @@ void sCPU::scanline() {
   }
 
   if(status.auto_joypad_poll == true && ppu.vcounter() == (ppu.overscan() == false ? 227 : 242)) {
-    snes.input.poll();
+    system.input.poll();
     run_auto_joypad_poll();
   }
 }

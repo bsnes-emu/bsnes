@@ -6,6 +6,19 @@ public:
     unsigned speed;
   } system;
 
+  struct File {
+    bool autodetect_type;
+    bool bypass_patch_crc32;
+  } file;
+
+  struct Path {
+    string base;     //binary path
+    string user;     //user profile path
+    string current;  //current working directory (path to currently loaded cartridge)
+    string rom, save, patch, cheat, data;
+    string bsx, st, sgb;
+  } path;
+
   struct Video {
     bool isFullscreen;
     bool synchronize;
@@ -70,44 +83,48 @@ public:
     //external
     //========
 
-    attach(snes.config.controller_port1 = SNES::Input::DeviceJoypad, "snes.controllerPort1");
-    attach(snes.config.controller_port2 = SNES::Input::DeviceJoypad, "snes.controllerPort2");
-    attach(snes.config.expansion_port   = SNES::ExpansionBSX,        "snes.expansionPort");
-    attach(snes.config.region           = SNES::Autodetect,          "snes.region");
+    attach(SNES::config.controller_port1 = SNES::System::Input::DeviceJoypad, "snes.controllerPort1");
+    attach(SNES::config.controller_port2 = SNES::System::Input::DeviceJoypad, "snes.controllerPort2");
+    attach(SNES::config.expansion_port   = SNES::System::ExpansionBSX,        "snes.expansionPort");
+    attach(SNES::config.region           = SNES::System::Autodetect,          "snes.region");
 
-    attach(snes.config.file.autodetect_type    = false, "file.autodetectType");
-    attach(snes.config.file.bypass_patch_crc32 = false, "file.bypassPatchCrc32");
+    attach(SNES::config.cpu.version         =        2, "cpu.version", "Valid version(s) are: 1, 2");
+    attach(SNES::config.cpu.ntsc_clock_rate = 21477272, "cpu.ntscClockRate");
+    attach(SNES::config.cpu.pal_clock_rate  = 21281370, "cpu.palClockRate");
+    attach(SNES::config.cpu.alu_mul_delay   =        2, "cpu.aluMulDelay");
+    attach(SNES::config.cpu.alu_div_delay   =        2, "cpu.aluDivDelay");
+    attach(SNES::config.cpu.wram_init_value =     0x55, "cpu.wramInitValue");
 
-    attach(snes.config.path.rom   = "", "path.rom");
-    attach(snes.config.path.save  = "", "path.save");
-    attach(snes.config.path.patch = "", "path.patch");
-    attach(snes.config.path.cheat = "", "path.cheat");
-    attach(snes.config.path.data  = "", "path.data");
-    attach(snes.config.path.bsx   = "", "path.bsx");
-    attach(snes.config.path.st    = "", "path.st");
+    attach(SNES::config.smp.ntsc_clock_rate = 32041 * 768, "smp.ntscClockRate");
+    attach(SNES::config.smp.pal_clock_rate  = 32041 * 768, "smp.palClockRate");
 
-    attach(snes.config.cpu.version         =        2, "cpu.version", "Valid version(s) are: 1, 2");
-    attach(snes.config.cpu.ntsc_clock_rate = 21477272, "cpu.ntscClockRate");
-    attach(snes.config.cpu.pal_clock_rate  = 21281370, "cpu.palClockRate");
-    attach(snes.config.cpu.alu_mul_delay   =        2, "cpu.aluMulDelay");
-    attach(snes.config.cpu.alu_div_delay   =        2, "cpu.aluDivDelay");
-    attach(snes.config.cpu.wram_init_value =     0x55, "cpu.wramInitValue");
-
-    attach(snes.config.smp.ntsc_clock_rate = 32041 * 768, "smp.ntscClockRate");
-    attach(snes.config.smp.pal_clock_rate  = 32041 * 768, "smp.palClockRate");
-
-    attach(snes.config.ppu1.version = 1, "ppu1.version", "Valid version(s) are: 1");
-    attach(snes.config.ppu2.version = 3, "ppu2.version", "Valid version(s) are: 1, 2, 3");
+    attach(SNES::config.ppu1.version = 1, "ppu1.version", "Valid version(s) are: 1");
+    attach(SNES::config.ppu2.version = 3, "ppu2.version", "Valid version(s) are: 1, 2, 3");
 
     //========
     //internal
     //========
 
-    attach(system.video = "", "system.video");
-    attach(system.audio = "", "system.audio");
-    attach(system.input = "", "system.input");
-    attach(system.crashedOnLastRun = false, "system.crashedOnLastRun");
-    attach(system.speed = 2, "system.speed");
+    attach(system.video = "", "driver.video");
+    attach(system.audio = "", "driver.audio");
+    attach(system.input = "", "driver.input");
+    attach(system.crashedOnLastRun = false, "emulator.crashedOnLastRun");
+    attach(system.speed = 2, "emulator.speed");
+
+    attach(file.autodetect_type    = false, "file.autodetectType");
+    attach(file.bypass_patch_crc32 = false, "file.bypassPatchCrc32");
+
+    path.base = "";
+    path.user = "";
+    path.current = "";
+    attach(path.rom   = "", "path.rom");
+    attach(path.save  = "", "path.save");
+    attach(path.patch = "", "path.patch");
+    attach(path.cheat = "", "path.cheat");
+    attach(path.data  = "", "path.data");
+    attach(path.bsx   = "", "path.bsx");
+    attach(path.st    = "", "path.st");
+    attach(path.sgb   = "", "path.sgb");
 
     video.context = &video.windowed;
     attach(video.isFullscreen = false, "video.isFullscreen");

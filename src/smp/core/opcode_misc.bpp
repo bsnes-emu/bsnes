@@ -1,0 +1,157 @@
+@macro op_nop()
+  void {class}::op_nop() {
+    op_io();
+  }
+@endmacro
+
+@macro op_stall(name)
+  void {class}::op_{name}() {
+    op_io();
+    op_io();
+    regs.pc--;
+  }
+@endmacro
+
+@macro op_xcn()
+  void {class}::op_xcn() {
+    op_io();
+    op_io();
+    op_io();
+    op_io();
+    regs.a = (regs.a >> 4) | (regs.a << 4);
+    regs.p.n = (regs.a & 0x80);
+    regs.p.z = (regs.a == 0);
+  }
+@endmacro
+
+@macro op_daa()
+  void {class}::op_daa() {
+    op_io();
+    op_io();
+    if(regs.p.c || (regs.a) > 0x99) {
+      regs.a += 0x60;
+      regs.p.c = 1;
+    }
+    if(regs.p.h || (regs.a & 15) > 0x09) {
+      regs.a += 0x06;
+    }
+    regs.p.n = (regs.a & 0x80);
+    regs.p.z = (regs.a == 0);
+  }
+@endmacro
+
+@macro op_das()
+  void {class}::op_das() {
+    op_io();
+    op_io();
+    if(!regs.p.c || (regs.a) > 0x99) {
+      regs.a -= 0x60;
+      regs.p.c = 0;
+    }
+    if(!regs.p.h || (regs.a & 15) > 0x09) {
+      regs.a -= 0x06;
+    }
+    regs.p.n = (regs.a & 0x80);
+    regs.p.z = (regs.a == 0);
+  }
+@endmacro
+
+@macro op_flagadjust(name, op)
+  void {class}::op_{name}() {
+    op_io();
+    {op};
+  }
+@endmacro
+
+@macro op_notc()
+  void {class}::op_notc() {
+    op_io();
+    op_io();
+    regs.p.c = !regs.p.c;
+  }
+@endmacro
+
+@macro op_seti(name, state)
+  void {class}::op_{name}() {
+    op_io();
+    op_io();
+    regs.p.i = {state};
+  }
+@endmacro
+
+@macro op_bit_dp(name, op)
+  void {class}::op_{name}_dp() {
+    dp = op_readpc();
+    rd = op_readdp(dp);
+    rd {op};
+    op_writedp(dp, rd);
+  }
+@endmacro
+
+@macro op_push(r)
+  void {class}::op_push_{r}() {
+    op_io();
+    op_io();
+    op_writestack(regs.{r});
+  }
+@endmacro
+
+@macro op_pop(r)
+  void {class}::op_pop_{r}() {
+    op_io();
+    op_io();
+    regs.{r} = op_readstack();
+  }
+@endmacro
+
+@macro op_mul_ya()
+  void {class}::op_mul_ya() {
+    op_io();
+    op_io();
+    op_io();
+    op_io();
+    op_io();
+    op_io();
+    op_io();
+    op_io();
+    ya = regs.y * regs.a;
+    regs.a = ya;
+    regs.y = ya >> 8;
+    //result is set based on y (high-byte) only
+    regs.p.n = (regs.y & 0x80);
+    regs.p.z = (regs.y == 0);
+  }
+@endmacro
+
+@macro op_div_ya_x()
+  void {class}::op_div_ya_x() {
+    op_io();
+    op_io();
+    op_io();
+    op_io();
+    op_io();
+    op_io();
+    op_io();
+    op_io();
+    op_io();
+    op_io();
+    op_io();
+    ya = regs.ya;
+    //overflow set if quotient >= 256
+    regs.p.v = (regs.y >= regs.x);
+    regs.p.h = ((regs.y & 15) >= (regs.x & 15));
+    if(regs.y < (regs.x << 1)) {
+      //if quotient is <= 511 (will fit into 9-bit result)
+      regs.a = ya / regs.x;
+      regs.y = ya % regs.x;
+    } else {
+      //otherwise, the quotient won't fit into regs.p.v + regs.a
+      //this emulates the odd behavior of the S-SMP in this case
+      regs.a = 255    - (ya - (regs.x << 9)) / (256 - regs.x);
+      regs.y = regs.x + (ya - (regs.x << 9)) % (256 - regs.x);
+    }
+    //result is set based on a (quotient) only
+    regs.p.n = (regs.a & 0x80);
+    regs.p.z = (regs.a == 0);
+  }
+@endmacro

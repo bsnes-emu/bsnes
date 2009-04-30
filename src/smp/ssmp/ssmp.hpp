@@ -1,8 +1,7 @@
-class sSMP : public SMP {
+class sSMP : public SMP, public SMPcore {
 public:
   void enter();
 
-  #include "core/core.hpp"
   #include "memory/memory.hpp"
   #include "timing/timing.hpp"
 

@@ -1,6 +1,7 @@
 #include <../base.hpp>
-#include <../cart/cart.hpp>
-#include "srtc.hpp"
+
+#define SRTC_CPP
+namespace SNES {
 
 const unsigned SRTC::months[12] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
 
@@ -224,3 +225,5 @@ void SRTC::mmio_write(unsigned addr, uint8 data) {
 
 SRTC::SRTC() {
 }
+
+};

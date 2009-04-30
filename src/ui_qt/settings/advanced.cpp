@@ -147,12 +147,12 @@ void AdvancedSettingsWindow::initializeUi() {
     if(part[i] == config.system.input) inputDriver->setCurrentIndex(i);
   }
 
-  regionAuto->setChecked(snes.config.region == SNES::Autodetect);
-  regionNTSC->setChecked(snes.config.region == SNES::NTSC);
-  regionPAL->setChecked (snes.config.region == SNES::PAL);
+  regionAuto->setChecked(SNES::config.region == SNES::System::Autodetect);
+  regionNTSC->setChecked(SNES::config.region == SNES::System::NTSC);
+  regionPAL->setChecked (SNES::config.region == SNES::System::PAL);
 
-  portSatellaview->setChecked(snes.config.expansion_port == SNES::ExpansionBSX);
-  portNone->setChecked       (snes.config.expansion_port == SNES::ExpansionNone);
+  portSatellaview->setChecked(SNES::config.expansion_port == SNES::System::ExpansionBSX);
+  portNone->setChecked       (SNES::config.expansion_port == SNES::System::ExpansionNone);
 
   focusPause->setChecked (config.input.focusPolicy == Configuration::Input::FocusPolicyPauseEmulation);
   focusIgnore->setChecked(config.input.focusPolicy == Configuration::Input::FocusPolicyIgnoreInput);
@@ -171,12 +171,12 @@ void AdvancedSettingsWindow::inputDriverChange(int index) {
   if(index >= 0) config.system.input = inputDriver->itemText(index).toUtf8().data();
 }
 
-void AdvancedSettingsWindow::setRegionAuto() { snes.config.region = SNES::Autodetect; }
-void AdvancedSettingsWindow::setRegionNTSC() { snes.config.region = SNES::NTSC; }
-void AdvancedSettingsWindow::setRegionPAL()  { snes.config.region = SNES::PAL; }
+void AdvancedSettingsWindow::setRegionAuto() { SNES::config.region = SNES::System::Autodetect; }
+void AdvancedSettingsWindow::setRegionNTSC() { SNES::config.region = SNES::System::NTSC; }
+void AdvancedSettingsWindow::setRegionPAL()  { SNES::config.region = SNES::System::PAL; }
 
-void AdvancedSettingsWindow::setPortSatellaview() { snes.config.expansion_port = SNES::ExpansionBSX; }
-void AdvancedSettingsWindow::setPortNone()        { snes.config.expansion_port = SNES::ExpansionNone; }
+void AdvancedSettingsWindow::setPortSatellaview() { SNES::config.expansion_port = SNES::System::ExpansionBSX; }
+void AdvancedSettingsWindow::setPortNone()        { SNES::config.expansion_port = SNES::System::ExpansionNone; }
 
 void AdvancedSettingsWindow::pauseWithoutFocus()       { config.input.focusPolicy = Configuration::Input::FocusPolicyPauseEmulation; }
 void AdvancedSettingsWindow::ignoreInputWithoutFocus() { config.input.focusPolicy = Configuration::Input::FocusPolicyIgnoreInput; }

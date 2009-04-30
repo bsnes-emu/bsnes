@@ -65,7 +65,7 @@ moc_objects = \
 $(foreach object,$(moc_objects),$(eval $(object): $(patsubst %.moc,%.hpp,$(object))))
 
 obj/main.$(obj): $(ui)/main.cpp \
-$(ui)/* $(ui)/input/* $(ui)/utility/* $(ui)/base/* $(ui)/settings/* $(ui)/settings/utility/* \
+$(ui)/* $(ui)/cartridge/* $(ui)/input/* $(ui)/utility/* $(ui)/base/* $(ui)/settings/* $(ui)/settings/utility/* \
 data/*
 	$(call compile,$(qtflags))
 

@@ -1,0 +1,11 @@
+//opcode_functions.cpp was generated via bpp -> opcode_functions.bpp
+
+@global class SMPcore
+
+@include "opcode_move.bpp"
+@include "opcode_pc.bpp"
+@include "opcode_read.bpp"
+@include "opcode_rmw.bpp"
+@include "opcode_misc.bpp"
+
+@include "opcode_list.bpp"

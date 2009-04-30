@@ -1,5 +1,8 @@
 #include <../base.hpp>
 
+#define CHEAT_CPP
+namespace SNES {
+
 Cheat cheat;
 
 Cheat::cheat_t& Cheat::cheat_t::operator=(const Cheat::cheat_t& source) {
@@ -390,3 +393,5 @@ string& Cheat::decode_description(string &desc) const {
   desc.replace("\\n", "\n");
   return desc;
 }
+
+};

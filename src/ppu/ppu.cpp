@@ -1,5 +1,7 @@
 #include <../base.hpp>
+
 #define PPU_CPP
+namespace SNES {
 
 #include "counter.cpp"
 
@@ -25,8 +27,8 @@ void PPU::frame() {
 }
 
 void PPU::power() {
-  ppu1_version = snes.config.ppu1.version;
-  ppu2_version = snes.config.ppu2.version;
+  ppu1_version = config.ppu1.version;
+  ppu2_version = config.ppu2.version;
 }
 
 void PPU::reset() {
@@ -45,3 +47,5 @@ PPU::PPU() {
 PPU::~PPU() {
   delete[] output;
 }
+
+};

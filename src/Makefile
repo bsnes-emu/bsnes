@@ -93,9 +93,9 @@ link += $(if $(findstring input.rawinput,$(ruby)),$(call mklib,xinput) $(call mk
 ####################
 
 objects = libco ruby libfilter string \
-  reader cart cheat \
-  memory smemory cpu cpucore scpu smp ssmp sdsp ppu bppu snes \
-  sa1 bsx srtc sdd1 spc7110 cx4 dsp1 dsp2 dsp3 dsp4 obc1 st010
+  reader cartridge cheat \
+  memory smemory cpu cpucore scpu smp smpcore ssmp sdsp ppu bppu system \
+  sgb sa1 bsx srtc sdd1 spc7110 cx4 dsp1 dsp2 dsp3 dsp4 obc1 st010
 
 ifeq ($(enable_gzip),true)
   objects += adler32 compress crc32 deflate gzio inffast inflate inftrees ioapi trees unzip zip zutil
@@ -105,6 +105,13 @@ endif
 ifeq ($(enable_jma),true)
   objects += jma jcrc32 lzmadec 7zlzma iiostrm inbyte lzma winout
   flags += $(call mkdef,JMA_SUPPORT)
+endif
+
+sgbflags =
+ifeq ($(sgb),gambatte)
+  sgbflags += $(call mkdef,SGB_GAMBATTE)
+  link += $(call mklibpath,lib/libgambatte)
+  link += $(call mklib,gambatte)
 endif
 
 ######################
@@ -139,14 +146,14 @@ obj/libco.$(obj): lib/libco/libco.c lib/libco/*
 	$(c) $(libcoflags) $(rule)
 obj/libfilter.$(obj): lib/libfilter/libfilter.cpp lib/libfilter/*
 obj/string.$(obj): lib/nall/string.cpp lib/nall/*
+obj/reader.$(obj): lib/reader/reader.cpp lib/reader/*
 
 #################
 ### utilities ###
 #################
 
-obj/reader.$(obj): reader/reader.cpp reader/*
-obj/cart.$(obj)  : cart/cart.cpp cart/*
-obj/cheat.$(obj) : cheat/cheat.cpp cheat/*
+obj/cartridge.$(obj): cartridge/cartridge.cpp cartridge/*
+obj/cheat.$(obj)    : cheat/cheat.cpp cheat/*
 
 ##############
 ### memory ###
@@ -167,8 +174,9 @@ obj/scpu.$(obj)   : cpu/scpu/scpu.cpp cpu/scpu/* cpu/scpu/dma/* cpu/scpu/memory/
 ### smp ###
 ###########
 
-obj/smp.$(obj) : smp/smp.cpp smp/*
-obj/ssmp.$(obj): smp/ssmp/ssmp.cpp smp/ssmp/* smp/ssmp/core/* smp/ssmp/memory/* smp/ssmp/timing/*
+obj/smp.$(obj)    : smp/smp.cpp smp/*
+obj/smpcore.$(obj): smp/core/core.cpp smp/core/* smp/core/disasm/*
+obj/ssmp.$(obj)   : smp/ssmp/ssmp.cpp smp/ssmp/* smp/ssmp/memory/* smp/ssmp/timing/*
 
 ###########
 ### dsp ###
@@ -184,16 +192,18 @@ obj/sdsp.$(obj): dsp/sdsp/sdsp.cpp dsp/sdsp/*
 obj/ppu.$(obj) : ppu/ppu.cpp ppu/*
 obj/bppu.$(obj): ppu/bppu/bppu.cpp ppu/bppu/*
 
-############
-### snes ###
-############
+##############
+### system ###
+##############
 
-obj/snes.$(obj): snes/snes.cpp snes/* snes/scheduler/* snes/video/* snes/audio/* snes/input/*
+obj/system.$(obj): system/system.cpp system/* system/scheduler/* system/video/* system/audio/* system/input/*
 
 #####################
 ### special chips ###
 #####################
 
+obj/sgb.$(obj): chip/sgb/sgb.cpp chip/sgb/* chip/sgb/interface/*
+	$(call compile,$(sgbflags))
 obj/sa1.$(obj)    : chip/sa1/sa1.cpp chip/sa1/* chip/sa1/bus/* chip/sa1/dma/* chip/sa1/memory/* chip/sa1/mmio/*
 obj/bsx.$(obj)    : chip/bsx/bsx.cpp chip/bsx/*
 obj/srtc.$(obj)   : chip/srtc/srtc.cpp chip/srtc/*
@@ -211,32 +221,32 @@ obj/st010.$(obj)  : chip/st010/st010.cpp chip/st010/*
 ### zlib ###
 ############
 
-obj/adler32.$(obj) : reader/zlib/adler32.c reader/zlib/*
-obj/compress.$(obj): reader/zlib/compress.c reader/zlib/*
-obj/crc32.$(obj)   : reader/zlib/crc32.c reader/zlib/*
-obj/deflate.$(obj) : reader/zlib/deflate.c reader/zlib/*
-obj/gzio.$(obj)    : reader/zlib/gzio.c reader/zlib/*
-obj/inffast.$(obj) : reader/zlib/inffast.c reader/zlib/*
-obj/inflate.$(obj) : reader/zlib/inflate.c reader/zlib/*
-obj/inftrees.$(obj): reader/zlib/inftrees.c reader/zlib/*
-obj/ioapi.$(obj)   : reader/zlib/ioapi.c reader/zlib/*
-obj/trees.$(obj)   : reader/zlib/trees.c reader/zlib/*
-obj/unzip.$(obj)   : reader/zlib/unzip.c reader/zlib/*
-obj/zip.$(obj)     : reader/zlib/zip.c reader/zlib/*
-obj/zutil.$(obj)   : reader/zlib/zutil.c reader/zlib/*
+obj/adler32.$(obj) : lib/zlib/adler32.c lib/zlib/*
+obj/compress.$(obj): lib/zlib/compress.c lib/zlib/*
+obj/crc32.$(obj)   : lib/zlib/crc32.c lib/zlib/*
+obj/deflate.$(obj) : lib/zlib/deflate.c lib/zlib/*
+obj/gzio.$(obj)    : lib/zlib/gzio.c lib/zlib/*
+obj/inffast.$(obj) : lib/zlib/inffast.c lib/zlib/*
+obj/inflate.$(obj) : lib/zlib/inflate.c lib/zlib/*
+obj/inftrees.$(obj): lib/zlib/inftrees.c lib/zlib/*
+obj/ioapi.$(obj)   : lib/zlib/ioapi.c lib/zlib/*
+obj/trees.$(obj)   : lib/zlib/trees.c lib/zlib/*
+obj/unzip.$(obj)   : lib/zlib/unzip.c lib/zlib/*
+obj/zip.$(obj)     : lib/zlib/zip.c lib/zlib/*
+obj/zutil.$(obj)   : lib/zlib/zutil.c lib/zlib/*
 
-###########
-### jma ###
-###########
+##############
+### libjma ###
+##############
 
-obj/jma.$(obj)    : reader/jma/jma.cpp reader/jma/*
-obj/jcrc32.$(obj) : reader/jma/jcrc32.cpp reader/jma/*
-obj/lzmadec.$(obj): reader/jma/lzmadec.cpp reader/jma/*
-obj/7zlzma.$(obj) : reader/jma/7zlzma.cpp reader/jma/*
-obj/iiostrm.$(obj): reader/jma/iiostrm.cpp reader/jma/*
-obj/inbyte.$(obj) : reader/jma/inbyte.cpp reader/jma/*
-obj/lzma.$(obj)   : reader/jma/lzma.cpp reader/jma/*
-obj/winout.$(obj) : reader/jma/winout.cpp reader/jma/*
+obj/jma.$(obj)    : lib/libjma/jma.cpp lib/libjma/*
+obj/jcrc32.$(obj) : lib/libjma/jcrc32.cpp lib/libjma/*
+obj/lzmadec.$(obj): lib/libjma/lzmadec.cpp lib/libjma/*
+obj/7zlzma.$(obj) : lib/libjma/7zlzma.cpp lib/libjma/*
+obj/iiostrm.$(obj): lib/libjma/iiostrm.cpp lib/libjma/*
+obj/inbyte.$(obj) : lib/libjma/inbyte.cpp lib/libjma/*
+obj/lzma.$(obj)   : lib/libjma/lzma.cpp lib/libjma/*
+obj/winout.$(obj) : lib/libjma/winout.cpp lib/libjma/*
 
 ###############
 ### targets ###

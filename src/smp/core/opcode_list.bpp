@@ -1,0 +1,321 @@
+//===============
+//opcode_move.bpp
+//===============
+
+@op_move_reg(a, x)
+@op_move_reg(a, y)
+@op_move_reg(x, a)
+@op_move_reg(y, a)
+@op_move_reg(x, sp)
+@op_move_sp_x()
+
+@op_move_const(a)
+@op_move_const(x)
+@op_move_const(y)
+
+@op_move_a_ix()
+@op_move_a_ixinc()
+
+@op_move_dp(a)
+@op_move_dp(x)
+@op_move_dp(y)
+
+@op_move_dpi(a, x)
+@op_move_dpi(x, y)
+@op_move_dpi(y, x)
+
+@op_move_addr(a)
+@op_move_addr(x)
+@op_move_addr(y)
+
+@op_move_addri(x)
+@op_move_addri(y)
+
+@op_move_a_idpx()
+@op_move_a_idpy()
+@op_move_dp_dp()
+@op_move_dp_const()
+@op_move_ix_a()
+@op_move_ixinc_a()
+
+@op_move_dp_reg(a)
+@op_move_dp_reg(x)
+@op_move_dp_reg(y)
+
+@op_move_dpi_reg(x, a)
+@op_move_dpi_reg(y, x)
+@op_move_dpi_reg(x, y)
+
+@op_move_addr_reg(a)
+@op_move_addr_reg(x)
+@op_move_addr_reg(y)
+
+@op_move_addri_reg(x)
+@op_move_addri_reg(y)
+
+@op_move_idpx_a()
+@op_move_idpy_a()
+
+@op_move_ya_dp()
+@op_move_dp_ya()
+
+@op_mov1_c_bit()
+@op_mov1_bit_c()
+
+//=============
+//opcode_pc.bpp
+//=============
+
+@op_branch(bra, 0)
+@op_branch(beq, !regs.p.z)
+@op_branch(bne,  regs.p.z)
+@op_branch(bcs, !regs.p.c)
+@op_branch(bcc,  regs.p.c)
+@op_branch(bvs, !regs.p.v)
+@op_branch(bvc,  regs.p.v)
+@op_branch(bmi, !regs.p.n)
+@op_branch(bpl,  regs.p.n)
+
+@op_bitbranch(bbs0, 0x01, !=)
+@op_bitbranch(bbc0, 0x01, ==)
+@op_bitbranch(bbs1, 0x02, !=)
+@op_bitbranch(bbc1, 0x02, ==)
+@op_bitbranch(bbs2, 0x04, !=)
+@op_bitbranch(bbc2, 0x04, ==)
+@op_bitbranch(bbs3, 0x08, !=)
+@op_bitbranch(bbc3, 0x08, ==)
+@op_bitbranch(bbs4, 0x10, !=)
+@op_bitbranch(bbc4, 0x10, ==)
+@op_bitbranch(bbs5, 0x20, !=)
+@op_bitbranch(bbc5, 0x20, ==)
+@op_bitbranch(bbs6, 0x40, !=)
+@op_bitbranch(bbc6, 0x40, ==)
+@op_bitbranch(bbs7, 0x80, !=)
+@op_bitbranch(bbc7, 0x80, ==)
+
+@op_cbne_dp()
+@op_cbne_dpx()
+@op_dbnz_dp()
+@op_dbnz_y()
+@op_jmp_addr()
+@op_jmp_iaddrx()
+@op_call()
+@op_pcall()
+
+@op_tcall( 0)
+@op_tcall( 1)
+@op_tcall( 2)
+@op_tcall( 3)
+@op_tcall( 4)
+@op_tcall( 5)
+@op_tcall( 6)
+@op_tcall( 7)
+@op_tcall( 8)
+@op_tcall( 9)
+@op_tcall(10)
+@op_tcall(11)
+@op_tcall(12)
+@op_tcall(13)
+@op_tcall(14)
+@op_tcall(15)
+
+@op_brk()
+@op_ret()
+@op_reti()
+
+//===============
+//opcode_read.bpp
+//===============
+
+@op_read_const(adc, a)
+@op_read_const(and, a)
+@op_read_const(cmp, a)
+@op_read_const(cmp, x)
+@op_read_const(cmp, y)
+@op_read_const(eor, a)
+@op_read_const(or,  a)
+@op_read_const(sbc, a)
+
+@op_read_ix(adc)
+@op_read_ix(and)
+@op_read_ix(cmp)
+@op_read_ix(eor)
+@op_read_ix(or)
+@op_read_ix(sbc)
+
+@op_read_dp(adc, a)
+@op_read_dp(and, a)
+@op_read_dp(cmp, a)
+@op_read_dp(cmp, x)
+@op_read_dp(cmp, y)
+@op_read_dp(eor, a)
+@op_read_dp(or,  a)
+@op_read_dp(sbc, a)
+
+@op_read_dpx(adc)
+@op_read_dpx(and)
+@op_read_dpx(cmp)
+@op_read_dpx(eor)
+@op_read_dpx(or)
+@op_read_dpx(sbc)
+
+@op_read_addr(adc, a)
+@op_read_addr(and, a)
+@op_read_addr(cmp, a)
+@op_read_addr(cmp, x)
+@op_read_addr(cmp, y)
+@op_read_addr(eor, a)
+@op_read_addr(or,  a)
+@op_read_addr(sbc, a)
+
+@op_read_addrn(adc, x)
+@op_read_addrn(adc, y)
+@op_read_addrn(and, x)
+@op_read_addrn(and, y)
+@op_read_addrn(cmp, x)
+@op_read_addrn(cmp, y)
+@op_read_addrn(eor, x)
+@op_read_addrn(eor, y)
+@op_read_addrn(or,  x)
+@op_read_addrn(or,  y)
+@op_read_addrn(sbc, x)
+@op_read_addrn(sbc, y)
+
+@op_read_idpx(adc)
+@op_read_idpx(and)
+@op_read_idpx(cmp)
+@op_read_idpx(eor)
+@op_read_idpx(or)
+@op_read_idpx(sbc)
+
+@op_read_idpy(adc)
+@op_read_idpy(and)
+@op_read_idpy(cmp)
+@op_read_idpy(eor)
+@op_read_idpy(or)
+@op_read_idpy(sbc)
+
+@op_rmw_ix_iy(adc, true)
+@op_rmw_ix_iy(and, true)
+@op_rmw_ix_iy(cmp, false)
+@op_rmw_ix_iy(eor, true)
+@op_rmw_ix_iy(or,  true)
+@op_rmw_ix_iy(sbc, true)
+
+@op_rmw_dp_dp(adc, true)
+@op_rmw_dp_dp(and, true)
+@op_rmw_dp_dp(cmp, false)
+@op_rmw_dp_dp(eor, true)
+@op_rmw_dp_dp(or,  true)
+@op_rmw_dp_dp(sbc, true)
+
+@op_rmw_dp_const(adc, true)
+@op_rmw_dp_const(and, true)
+@op_rmw_dp_const(cmp, false)
+@op_rmw_dp_const(eor, true)
+@op_rmw_dp_const(or,  true)
+@op_rmw_dp_const(sbc, true)
+
+@op_read_ya_dp(addw)
+@op_read_ya_dp(subw)
+@op_cmpw_ya_dp()
+
+@op_and1(bit,    !!)
+@op_and1(notbit,  !)
+@op_eor1()
+@op_not1()
+@op_or1(bit,     !!)
+@op_or1(notbit,   !)
+
+//==============
+//opcode_rmw.bpp
+//==============
+
+@op_rmw_immediate(inc, a)
+@op_rmw_immediate(inc, x)
+@op_rmw_immediate(inc, y)
+@op_rmw_immediate(dec, a)
+@op_rmw_immediate(dec, x)
+@op_rmw_immediate(dec, y)
+@op_rmw_immediate(asl, a)
+@op_rmw_immediate(lsr, a)
+@op_rmw_immediate(rol, a)
+@op_rmw_immediate(ror, a)
+
+@op_rmw_dp(inc)
+@op_rmw_dp(dec)
+@op_rmw_dp(asl)
+@op_rmw_dp(lsr)
+@op_rmw_dp(rol)
+@op_rmw_dp(ror)
+
+@op_rmw_dpx(inc)
+@op_rmw_dpx(dec)
+@op_rmw_dpx(asl)
+@op_rmw_dpx(lsr)
+@op_rmw_dpx(rol)
+@op_rmw_dpx(ror)
+
+@op_rmw_addr(inc)
+@op_rmw_addr(dec)
+@op_rmw_addr(asl)
+@op_rmw_addr(lsr)
+@op_rmw_addr(rol)
+@op_rmw_addr(ror)
+
+@op_rmw_taddr(tset, |)
+@op_rmw_taddr(tclr, &~)
+
+@op_rmw_adjust(incw, ++)
+@op_rmw_adjust(decw, --)
+
+//===============
+//opcode_misc.bpp
+//===============
+
+@op_nop()
+@op_stall(sleep)
+@op_stall(stop)
+@op_xcn()
+@op_daa()
+@op_das()
+
+@op_flagadjust(clrc, regs.p.c = 0)
+@op_flagadjust(clrp, regs.p.p = 0)
+@op_flagadjust(setc, regs.p.c = 1)
+@op_flagadjust(setp, regs.p.p = 1)
+@op_flagadjust(clrv, regs.p.v = regs.p.h = 0)
+@op_notc()
+
+@op_seti(ei, 1)
+@op_seti(di, 0)
+
+@op_bit_dp(set0, |=  0x01)
+@op_bit_dp(clr0, &= ~0x01)
+@op_bit_dp(set1, |=  0x02)
+@op_bit_dp(clr1, &= ~0x02)
+@op_bit_dp(set2, |=  0x04)
+@op_bit_dp(clr2, &= ~0x04)
+@op_bit_dp(set3, |=  0x08)
+@op_bit_dp(clr3, &= ~0x08)
+@op_bit_dp(set4, |=  0x10)
+@op_bit_dp(clr4, &= ~0x10)
+@op_bit_dp(set5, |=  0x20)
+@op_bit_dp(clr5, &= ~0x20)
+@op_bit_dp(set6, |=  0x40)
+@op_bit_dp(clr6, &= ~0x40)
+@op_bit_dp(set7, |=  0x80)
+@op_bit_dp(clr7, &= ~0x80)
+
+@op_push(a)
+@op_push(x)
+@op_push(y)
+@op_push(p)
+
+@op_pop(a)
+@op_pop(x)
+@op_pop(y)
+@op_pop(p)
+
+@op_mul_ya()
+@op_div_ya_x()

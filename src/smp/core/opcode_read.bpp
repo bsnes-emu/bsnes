@@ -1,0 +1,169 @@
+@macro op_read_const(name, r)
+  void {class}::op_{name}_{r}_const() {
+    rd = op_readpc();
+    regs.{r} = op_{name}(regs.{r}, rd);
+  }
+@endmacro
+
+@macro op_read_ix(name)
+  void {class}::op_{name}_a_ix() {
+    op_io();
+    rd = op_readdp(regs.x);
+    regs.a = op_{name}(regs.a, rd);
+  }
+@endmacro
+
+@macro op_read_dp(name, r)
+  void {class}::op_{name}_{r}_dp() {
+    dp = op_readpc();
+    rd = op_readdp(dp);
+    regs.{r} = op_{name}(regs.{r}, rd);
+  }
+@endmacro
+
+@macro op_read_dpx(name)
+  void {class}::op_{name}_a_dpx() {
+    dp = op_readpc();
+    op_io();
+    rd = op_readdp(dp + regs.x);
+    regs.a = op_{name}(regs.a, rd);
+  }
+@endmacro
+
+@macro op_read_addr(name, r)
+  void {class}::op_{name}_{r}_addr() {
+    dp  = op_readpc() << 0;
+    dp |= op_readpc() << 8;
+    rd  = op_readaddr(dp);
+    regs.{r} = op_{name}(regs.{r}, rd);
+  }
+@endmacro
+
+@macro op_read_addrn(name, r)
+  void {class}::op_{name}_a_addr{r}() {
+    dp  = op_readpc() << 0;
+    dp |= op_readpc() << 8;
+    op_io();
+    rd  = op_readaddr(dp + regs.{r});
+    regs.a = op_{name}(regs.a, rd);
+  }
+@endmacro
+
+@macro op_read_idpx(name)
+  void {class}::op_{name}_a_idpx() {
+    dp  = op_readpc() + regs.x;
+    op_io();
+    sp  = op_readdp(dp + 0) << 0;
+    sp |= op_readdp(dp + 1) << 8;
+    rd  = op_readaddr(sp);
+    regs.a = op_{name}(regs.a, rd);
+  }
+@endmacro
+
+@macro op_read_idpy(name)
+  void {class}::op_{name}_a_idpy() {
+    dp  = op_readpc();
+    op_io();
+    sp  = op_readdp(dp + 0) << 0;
+    sp |= op_readdp(dp + 1) << 8;
+    rd  = op_readaddr(sp + regs.y);
+    regs.a = op_{name}(regs.a, rd);
+  }
+@endmacro
+
+@macro op_rmw_ix_iy(name, write)
+  void {class}::op_{name}_ix_iy() {
+    op_io();
+    rd = op_readdp(regs.y);
+    wr = op_readdp(regs.x);
+    wr = op_{name}(wr, rd);
+    {write} ? op_writedp(regs.x, wr) : op_io();
+  }
+@endmacro
+
+@macro op_rmw_dp_dp(name, write)
+  void {class}::op_{name}_dp_dp() {
+    sp = op_readpc();
+    rd = op_readdp(sp);
+    dp = op_readpc();
+    wr = op_readdp(dp);
+    wr = op_{name}(wr, rd);
+    {write} ? op_writedp(dp, wr) : op_io();
+  }
+@endmacro
+
+@macro op_rmw_dp_const(name, write)
+  void {class}::op_{name}_dp_const() {
+    rd = op_readpc();
+    dp = op_readpc();
+    wr = op_readdp(dp);
+    wr = op_{name}(wr, rd);
+    {write} ? op_writedp(dp, wr) : op_io();
+  }
+@endmacro
+
+@macro op_read_ya_dp(name)
+  void {class}::op_{name}_ya_dp() {
+    dp  = op_readpc();
+    rd  = op_readdp(dp + 0) << 0;
+    op_io();
+    rd |= op_readdp(dp + 1) << 8;
+    regs.ya = op_{name}(regs.ya, rd);
+  }
+@endmacro
+
+@macro op_cmpw_ya_dp()
+  void {class}::op_cmpw_ya_dp() {
+    dp  = op_readpc();
+    rd  = op_readdp(dp + 0) << 0;
+    rd |= op_readdp(dp + 1) << 8;
+    op_cmpw(regs.ya, rd);
+  }
+@endmacro
+
+@macro op_and1(name, op)
+  void {class}::op_and1_{name}() {
+    dp  = op_readpc() << 0;
+    dp |= op_readpc() << 8;
+    bit = dp >> 13;
+    dp &= 0x1fff;
+    rd  = op_readaddr(dp);
+    regs.p.c = regs.p.c & {op}(rd & (1 << bit));
+  }
+@endmacro
+
+@macro op_eor1()
+  void {class}::op_eor1_bit() {
+    dp  = op_readpc() << 0;
+    dp |= op_readpc() << 8;
+    bit = dp >> 13;
+    dp &= 0x1fff;
+    rd  = op_readaddr(dp);
+    op_io();
+    regs.p.c = regs.p.c ^ !!(rd & (1 << bit));
+  }
+@endmacro
+
+@macro op_not1()
+  void {class}::op_not1_bit() {
+    dp  = op_readpc() << 0;
+    dp |= op_readpc() << 8;
+    bit = dp >> 13;
+    dp &= 0x1fff;
+    rd  = op_readaddr(dp);
+    rd ^= (1 << bit);
+    op_writeaddr(dp, rd);
+  }
+@endmacro
+
+@macro op_or1(name, op)
+  void {class}::op_or1_{name}() {
+    dp  = op_readpc() << 0;
+    dp |= op_readpc() << 8;
+    bit = dp >> 13;
+    dp &= 0x1fff;
+    rd  = op_readaddr(dp);
+    op_io();
+    regs.p.c = regs.p.c | {op}(rd & (1 << bit));
+  }
+@endmacro

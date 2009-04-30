@@ -42,7 +42,7 @@ void sCPU::mmio_w4016(uint8 data) {
   status.joypad_strobe_latch = !!(data & 1);
 
   if(status.joypad_strobe_latch == 1) {
-    snes.input.poll();
+    system.input.poll();
   }
 }
 
@@ -54,7 +54,7 @@ void sCPU::mmio_w4016(uint8 data) {
 //realtime or buffered status of joypadN.b
 uint8 sCPU::mmio_r4016() {
   uint8 r = regs.mdr & 0xfc;
-  r |= snes.input.port_read(0) & 3;
+  r |= system.input.port_read(0) & 3;
   return r;
 }
 
@@ -64,7 +64,7 @@ uint8 sCPU::mmio_r4016() {
 //1-0 = Joypad serial data
 uint8 sCPU::mmio_r4017() {
   uint8 r = (regs.mdr & 0xe0) | 0x1c;
-  r |= snes.input.port_read(1) & 3;
+  r |= system.input.port_read(1) & 3;
   return r;
 }
 
@@ -93,7 +93,7 @@ void sCPU::mmio_w4203(uint8 data) {
   status.r4216 = status.mul_a * status.mul_b;
 
   status.alu_lock = true;
-  event.enqueue(snes.config.cpu.alu_mul_delay, EventAluLockRelease);
+  event.enqueue(config.cpu.alu_mul_delay, EventAluLockRelease);
 }
 
 //WRDIVL
@@ -113,7 +113,7 @@ void sCPU::mmio_w4206(uint8 data) {
   status.r4216 = (status.div_b) ? status.div_a % status.div_b : status.div_a;
 
   status.alu_lock = true;
-  event.enqueue(snes.config.cpu.alu_div_delay, EventAluLockRelease);
+  event.enqueue(config.cpu.alu_div_delay, EventAluLockRelease);
 }
 
 //HTIMEL

@@ -130,6 +130,21 @@ namespace nall {
       return false;
     }
 
+    static unsigned size(const char *fn) {
+      #if !defined(_WIN32)
+      FILE *fp = fopen(fn, "rb");
+      #else
+      FILE *fp = _wfopen(utf16_t(fn), L"rb");
+      #endif
+      unsigned filesize = 0;
+      if(fp) {
+        fseek(fp, 0, SEEK_END);
+        filesize = ftell(fp);
+        fclose(fp);
+      }
+      return filesize;
+    }
+
     bool open() {
       return fp;
     }

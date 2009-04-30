@@ -42,10 +42,10 @@ void CheatEditorWindow::setup() {
 }
 
 void CheatEditorWindow::syncUi() {
-  addCode->setEnabled(cartridge.loaded());
+  addCode->setEnabled(SNES::cartridge.loaded());
   QList<QTreeWidgetItem*> itemList = list->selectedItems();
-  editCode->setEnabled(cartridge.loaded() && itemList.count() == 1);
-  deleteCode->setEnabled(cartridge.loaded() && itemList.count() == 1);
+  editCode->setEnabled(SNES::cartridge.loaded() && itemList.count() == 1);
+  deleteCode->setEnabled(SNES::cartridge.loaded() && itemList.count() == 1);
 }
 
 //called when loading a new game, or after adding / deleting a code:
@@ -57,10 +57,10 @@ void CheatEditorWindow::reloadList() {
   list->setSortingEnabled(false);
   listItem.reset();
 
-  if(cartridge.loaded()) {
-    for(unsigned i = 0; i < cheat.count(); i++) {
-      Cheat::cheat_t code;
-      cheat.get(i, code);
+  if(SNES::cartridge.loaded()) {
+    for(unsigned i = 0; i < SNES::cheat.count(); i++) {
+      SNES::Cheat::cheat_t code;
+      SNES::cheat.get(i, code);
 
       //only want to show one code / description line in list
       lstring lcode, ldesc;
@@ -91,8 +91,8 @@ void CheatEditorWindow::updateList() {
   disconnect(list, SIGNAL(itemChanged(QTreeWidgetItem*, int)), this, SLOT(itemChanged(QTreeWidgetItem*)));
 
   for(unsigned i = 0; i < listItem.size(); i++) {
-    Cheat::cheat_t code;
-    cheat.get(i, code);
+    SNES::Cheat::cheat_t code;
+    SNES::cheat.get(i, code);
 
     //only want to show one code / description line in list
     lstring lcode, ldesc;
@@ -116,7 +116,7 @@ void CheatEditorWindow::updateList() {
 //called when item enabled checkbox was clicked (eg cheat code enable state was toggled on or off)
 void CheatEditorWindow::itemChanged(QTreeWidgetItem *item) {
   signed i = listItem.find(item);
-  if(i >= 0) item->checkState(1) == Qt::Checked ? cheat.enable(i) : cheat.disable(i);
+  if(i >= 0) item->checkState(1) == Qt::Checked ? SNES::cheat.enable(i) : SNES::cheat.disable(i);
 }
 
 void CheatEditorWindow::listChanged() {
@@ -124,11 +124,11 @@ void CheatEditorWindow::listChanged() {
 }
 
 void CheatEditorWindow::addNewCode() {
-  if(cartridge.loaded()) winCodeEditor->addCode();
+  if(SNES::cartridge.loaded()) winCodeEditor->addCode();
 }
 
 void CheatEditorWindow::editSelectedCode() {
-  if(cartridge.loaded()) {
+  if(SNES::cartridge.loaded()) {
     QTreeWidgetItem *item = list->currentItem();
     if(item && item->isSelected()) {
       signed i = listItem.find(item);
@@ -138,7 +138,7 @@ void CheatEditorWindow::editSelectedCode() {
 }
 
 void CheatEditorWindow::deleteSelectedCode() {
-  if(cartridge.loaded()) {
+  if(SNES::cartridge.loaded()) {
     QTreeWidgetItem *item = list->currentItem();
     if(item && item->isSelected()) {
       signed i = listItem.find(item);
@@ -148,7 +148,7 @@ void CheatEditorWindow::deleteSelectedCode() {
         if(winCodeEditor->activeCode >= 0) winCodeEditor->dismiss();
 
         //remove code, and resync listItem with cheat list
-        cheat.remove(i);
+        SNES::cheat.remove(i);
         reloadList();
       }
     }

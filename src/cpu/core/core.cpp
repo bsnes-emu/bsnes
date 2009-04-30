@@ -1,5 +1,8 @@
 #include <../base.hpp>
 
+#define CPUCORE_CPP
+namespace SNES {
+
 #include "opcode_algorithms.cpp"
 #include "opcode_functions.cpp"
 #include "opcode_tables.cpp"
@@ -43,3 +46,5 @@ alwaysinline void CPUcore::op_io_cond6(uint16 addr) {
 CPUcore::CPUcore() {
   initialize_opcode_table();
 }
+
+};

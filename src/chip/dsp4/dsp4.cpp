@@ -1,7 +1,8 @@
 #include <../base.hpp>
-#define DSP4_CPP
 
-#include "dsp4.hpp"
+#define DSP4_CPP
+namespace SNES {
+
 namespace DSP4i {
   inline uint16 READ_WORD(uint8 *addr) {
     return (addr[0]) + (addr[1] << 8);
@@ -53,3 +54,5 @@ void DSP4::write(unsigned addr, uint8 data) {
     DSP4i::DSP4SetByte();
   }
 }
+
+};

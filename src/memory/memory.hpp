@@ -41,6 +41,7 @@ struct MappedRAM : Memory {
   void write_protect(bool status) { write_protection = status; }
   uint8* handle() { return data; }
   unsigned size() const { return datasize; }
+  void reset() { delete[] data; data = 0; datasize = -1U; write_protection = false; }
 
   inline uint8 read(unsigned addr) { return data[addr]; }
   inline void write(unsigned addr, uint8 n) { if(!write_protection) data[addr] = n; }

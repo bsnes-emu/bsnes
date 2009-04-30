@@ -17,6 +17,7 @@ public:
         QLineEdit *slot2File;
         QPushButton *slot2Browse;
         QPushButton *slot2Clear;
+        QCheckBox *bypassSuperGameboy;
       QHBoxLayout *controls;
         QPushButton *load;
         QPushButton *cancel;
@@ -27,6 +28,7 @@ public:
   void loadBsxSlottedCartridge(const char*, const char*);
   void loadBsxCartridge(const char*, const char*);
   void loadSufamiTurboCartridge(const char*, const char*, const char*);
+  void loadSuperGameboyCartridge(const char*, const char*);
 
 public slots:
   void selectBaseCartridge();
@@ -40,6 +42,6 @@ public slots:
   void onCancel();
 
 private:
-  enum mode_t { ModeBsxSlotted, ModeBsx, ModeSufamiTurbo } mode;
+  SNES::Cartridge::Mode mode;
   void showWindow(const char *title);
 } *winLoader;

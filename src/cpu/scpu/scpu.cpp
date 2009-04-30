@@ -1,7 +1,9 @@
 #include <../base.hpp>
-#define SCPU_CPP
-
 #include <nall/priorityqueue.hpp>
+
+#define SCPU_CPP
+namespace SNES {
+
 priority_queue<unsigned> event(512, bind(&sCPU::queue_event, &cpu));
 
 #include "dma/dma.cpp"
@@ -94,3 +96,5 @@ sCPU::sCPU() {
 
 sCPU::~sCPU() {
 }
+
+};

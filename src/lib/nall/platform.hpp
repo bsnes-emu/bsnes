@@ -20,6 +20,7 @@
   #include <io.h>
   #include <direct.h>
   #include <shlobj.h>
+  #undef interface
 #else
   #include <unistd.h>
   #include <pwd.h>

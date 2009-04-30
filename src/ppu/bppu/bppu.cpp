@@ -1,5 +1,7 @@
 #include <../base.hpp>
+
 #define BPPU_CPP
+namespace SNES {
 
 #include "bppu_mmio.cpp"
 #include "bppu_render.cpp"
@@ -40,7 +42,7 @@ void bPPU::add_clocks(unsigned clocks) {
 }
 
 void bPPU::scanline() {
-  snes.scanline();
+  system.scanline();
   line = ivcounter();
 
   if(line == 0) {
@@ -77,7 +79,7 @@ void bPPU::render_scanline() {
 
 void bPPU::frame() {
   PPU::frame();
-  snes.frame();
+  system.frame();
 
   if(ifield() == 0) {
     display.interlace = regs.interlace;
@@ -93,7 +95,7 @@ void bPPU::power() {
   for(unsigned i = 0; i < memory::cgram.size(); i++) memory::cgram[i] = 0x00;
   flush_tiledata_cache();
 
-  region = (snes.region() == SNES::NTSC ? 0 : 1);  //0 = NTSC, 1 = PAL
+  region = (system.region() == System::NTSC ? 0 : 1);  //0 = NTSC, 1 = PAL
 
   //$2100
   regs.display_disabled   = 1;
@@ -345,3 +347,5 @@ bPPU::bPPU() {
 bPPU::~bPPU() {
   free_tiledata_cache();
 }
+
+};

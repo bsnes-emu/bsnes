@@ -1,0 +1,323 @@
+//===============
+//opcode_move.bpp
+//===============
+
+@macro op_move_reg(rd, rs)
+void op_mov_{rd}_{rs}();
+@endmacro
+
+@macro op_move_sp_x()
+void op_mov_sp_x();
+@endmacro
+
+@macro op_move_const(r)
+void op_mov_{r}_const();
+@endmacro
+
+@macro op_move_a_ix()
+void op_mov_a_ix();
+@endmacro
+
+@macro op_move_a_ixinc()
+void op_mov_a_ixinc();
+@endmacro
+
+@macro op_move_dp(r)
+void op_mov_{r}_dp();
+@endmacro
+
+@macro op_move_dpi(rd, rs)
+void op_mov_{rd}_dp{rs}();
+@endmacro
+
+@macro op_move_addr(r)
+void op_mov_{r}_addr();
+@endmacro
+
+@macro op_move_addri(r)
+void op_mov_a_addr{r}();
+@endmacro
+
+@macro op_move_a_idpx()
+void op_mov_a_idpx();
+@endmacro
+
+@macro op_move_a_idpy()
+void op_mov_a_idpy();
+@endmacro
+
+@macro op_move_dp_dp()
+void op_mov_dp_dp();
+@endmacro
+
+@macro op_move_dp_const()
+void op_mov_dp_const();
+@endmacro
+
+@macro op_move_ix_a()
+void op_mov_ix_a();
+@endmacro
+
+@macro op_move_ixinc_a()
+void op_mov_ixinc_a();
+@endmacro
+
+@macro op_move_dp_reg(r)
+void op_mov_dp_{r}();
+@endmacro
+
+@macro op_move_dpi_reg(ri, rs)
+void op_mov_dp{ri}_{rs}();
+@endmacro
+
+@macro op_move_addr_reg(r)
+void op_mov_addr_{r}();
+@endmacro
+
+@macro op_move_addri_reg(r)
+void op_mov_addr{r}_a();
+@endmacro
+
+@macro op_move_idpx_a()
+void op_mov_idpx_a();
+@endmacro
+
+@macro op_move_idpy_a()
+void op_mov_idpy_a();
+@endmacro
+
+@macro op_move_ya_dp()
+void op_movw_ya_dp();
+@endmacro
+
+@macro op_move_dp_ya()
+void op_movw_dp_ya();
+@endmacro
+
+@macro op_mov1_c_bit()
+void op_mov1_c_bit();
+@endmacro
+
+@macro op_mov1_bit_c()
+void op_mov1_bit_c();
+@endmacro
+
+//=============
+//opcode_pc.bpp
+//=============
+
+@macro op_branch(name, condition)
+void op_{name}();
+@endmacro
+
+@macro op_bitbranch(name, bit, condition)
+void op_{name}();
+@endmacro
+
+@macro op_cbne_dp()
+void op_cbne_dp();
+@endmacro
+
+@macro op_cbne_dpx()
+void op_cbne_dpx();
+@endmacro
+
+@macro op_dbnz_dp()
+void op_dbnz_dp();
+@endmacro
+
+@macro op_dbnz_y()
+void op_dbnz_y();
+@endmacro
+
+@macro op_jmp_addr()
+void op_jmp_addr();
+@endmacro
+
+@macro op_jmp_iaddrx()
+void op_jmp_iaddrx();
+@endmacro
+
+@macro op_call()
+void op_call();
+@endmacro
+
+@macro op_pcall()
+void op_pcall();
+@endmacro
+
+@macro op_tcall(bit)
+void op_tcall_{bit}();
+@endmacro
+
+@macro op_brk()
+void op_brk();
+@endmacro
+
+@macro op_ret()
+void op_ret();
+@endmacro
+
+@macro op_reti()
+void op_reti();
+@endmacro
+
+//===============
+//opcode_read.bpp
+//===============
+
+@macro op_read_const(name, r)
+void op_{name}_{r}_const();
+@endmacro
+
+@macro op_read_ix(name)
+void op_{name}_a_ix();
+@endmacro
+
+@macro op_read_dp(name, r)
+void op_{name}_{r}_dp();
+@endmacro
+
+@macro op_read_dpx(name)
+void op_{name}_a_dpx();
+@endmacro
+
+@macro op_read_addr(name, r)
+void op_{name}_{r}_addr();
+@endmacro
+
+@macro op_read_addrn(name, r)
+void op_{name}_a_addr{r}();
+@endmacro
+
+@macro op_read_idpx(name)
+void op_{name}_a_idpx();
+@endmacro
+
+@macro op_read_idpy(name)
+void op_{name}_a_idpy();
+@endmacro
+
+@macro op_rmw_ix_iy(name, write)
+void op_{name}_ix_iy();
+@endmacro
+
+@macro op_rmw_dp_dp(name, write)
+void op_{name}_dp_dp();
+@endmacro
+
+@macro op_rmw_dp_const(name, write)
+void op_{name}_dp_const();
+@endmacro
+
+@macro op_read_ya_dp(name)
+void op_{name}_ya_dp();
+@endmacro
+
+@macro op_cmpw_ya_dp()
+void op_cmpw_ya_dp();
+@endmacro
+
+@macro op_and1(name, op)
+void op_and1_{name}();
+@endmacro
+
+@macro op_eor1()
+void op_eor1_bit();
+@endmacro
+
+@macro op_not1()
+void op_not1_bit();
+@endmacro
+
+@macro op_or1(name, op)
+void op_or1_{name}();
+@endmacro
+
+//==============
+//opcode_rmw.bpp
+//==============
+
+@macro op_rmw_immediate(name, r)
+void op_{name}_{r}();
+@endmacro
+
+@macro op_rmw_dp(name)
+void op_{name}_dp();
+@endmacro
+
+@macro op_rmw_dpx(name)
+void op_{name}_dpx();
+@endmacro
+
+@macro op_rmw_addr(name)
+void op_{name}_addr();
+@endmacro
+
+@macro op_rmw_taddr(name, op)
+void op_{name}_addr_a();
+@endmacro
+
+@macro op_rmw_adjust(name, op)
+void op_{name}_dp();
+@endmacro
+
+//===============
+//opcode_misc.bpp
+//===============
+
+@macro op_nop()
+void op_nop();
+@endmacro
+
+@macro op_stall(name)
+void op_{name}();
+@endmacro
+
+@macro op_xcn()
+void op_xcn();
+@endmacro
+
+@macro op_daa()
+void op_daa();
+@endmacro
+
+@macro op_das()
+void op_das();
+@endmacro
+
+@macro op_flagadjust(name, op)
+void op_{name}();
+@endmacro
+
+@macro op_notc()
+void op_notc();
+@endmacro
+
+@macro op_seti(name, state)
+void op_{name}();
+@endmacro
+
+@macro op_bit_dp(name, op)
+void op_{name}_dp();
+@endmacro
+
+@macro op_push(r)
+void op_push_{r}();
+@endmacro
+
+@macro op_pop(r)
+void op_pop_{r}();
+@endmacro
+
+@macro op_mul_ya()
+void op_mul_ya();
+@endmacro
+
+@macro op_div_ya_x()
+void op_div_ya_x();
+@endmacro
+
+//
+
+@include "opcode_list.bpp"

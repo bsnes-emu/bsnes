@@ -1,8 +1,8 @@
 #include <../base.hpp>
-#include <../cart/cart.hpp>
-#define SPC7110_CPP
 
-#include "spc7110.hpp"
+#define SPC7110_CPP
+namespace SNES {
+
 #include "decomp.cpp"
 
 const unsigned SPC7110::months[12] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
@@ -670,3 +670,5 @@ void SPC7110::write(unsigned addr, uint8 data) {
 
 SPC7110::SPC7110() {
 }
+
+};

@@ -30,7 +30,7 @@ uint8 bPPU::vram_mmio_read(uint16 addr) {
   } else {
     uint16 v = vcounter();
     uint16 h = hcounter();
-    uint16 ls = ((snes.region() == SNES::NTSC ? 525 : 625) >> 1) - 1;
+    uint16 ls = ((system.region() == System::NTSC ? 525 : 625) >> 1) - 1;
     if(interlace() && !field()) ls++;
 
     if(v == ls && h == 1362) {

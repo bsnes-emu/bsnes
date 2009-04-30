@@ -103,7 +103,7 @@ int16_t InputManager::lastState(uint16_t code) const {
 }
 
 int16_t InputManager::getStatus(unsigned deviceid, unsigned id) const {
-  InputDevice *device = inputPool.find((SNES::Input::DeviceID)deviceid);
+  InputDevice *device = inputPool.find((SNES::System::Input::DeviceID)deviceid);
   if(device) return device->state(id);
   return 0;
 }

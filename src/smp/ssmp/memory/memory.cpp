@@ -1,34 +1,29 @@
 #ifdef SSMP_CPP
 
-alwaysinline
-uint8 sSMP::ram_read(uint16 addr) {
+alwaysinline uint8 sSMP::ram_read(uint16 addr) {
   if(addr < 0xffc0) return memory::apuram[addr];
   if(status.iplrom_enabled == false) return memory::apuram[addr];
   return iplrom[addr & 0x3f];
 }
 
-alwaysinline
-void sSMP::ram_write(uint16 addr, uint8 data) {
+alwaysinline void sSMP::ram_write(uint16 addr, uint8 data) {
   //writes to $ffc0-$ffff always go to spcram, even if the iplrom is enabled
   memory::apuram[addr] = data;
 }
 
 //
 
-alwaysinline
-uint8 sSMP::port_read(uint8 port) {
+alwaysinline uint8 sSMP::port_read(uint8 port) {
   return memory::apuram[0xf4 + (port & 3)];
 }
 
-alwaysinline
-void sSMP::port_write(uint8 port, uint8 data) {
+alwaysinline void sSMP::port_write(uint8 port, uint8 data) {
   memory::apuram[0xf4 + (port & 3)] = data;
 }
 
 //
 
-alwaysinline
-uint8 sSMP::op_busread(uint16 addr) {
+alwaysinline uint8 sSMP::op_busread(uint16 addr) {
   uint8 r;
   if((addr & 0xfff0) == 0x00f0) {
     //addr >= 0x00f0 && addr <= 0x00ff
@@ -94,8 +89,7 @@ uint8 sSMP::op_busread(uint16 addr) {
   return r;
 }
 
-alwaysinline
-void sSMP::op_buswrite(uint16 addr, uint8 data) {
+alwaysinline void sSMP::op_buswrite(uint16 addr, uint8 data) {
   if((addr & 0xfff0) == 0x00f0) {
     //addr >= 0x00f0 && addr >= 0x00ff
     if(status.mmio_disabled == true) return;
@@ -229,41 +223,4 @@ void sSMP::op_write(uint16 addr, uint8 data) {
   tick_timers();
 }
 
-//
-
-alwaysinline
-uint8 sSMP::op_readpc() {
-  return op_read(regs.pc++);
-}
-
-alwaysinline
-uint8 sSMP::op_readstack() {
-  return op_read(0x0100 | ++regs.sp);
-}
-
-alwaysinline
-void sSMP::op_writestack(uint8 data) {
-  op_write(0x0100 | regs.sp--, data);
-}
-
-alwaysinline
-uint8 sSMP::op_readaddr(uint16 addr) {
-  return op_read(addr);
-}
-
-alwaysinline
-void sSMP::op_writeaddr(uint16 addr, uint8 data) {
-  op_write(addr, data);
-}
-
-alwaysinline
-uint8 sSMP::op_readdp(uint8 addr) {
-  return op_read((unsigned(regs.p.p) << 8) + addr);
-}
-
-alwaysinline
-void sSMP::op_writedp(uint8 addr, uint8 data) {
-  op_write((unsigned(regs.p.p) << 8) + addr, data);
-}
-
-#endif //ifdef SSMP_CPP
+#endif

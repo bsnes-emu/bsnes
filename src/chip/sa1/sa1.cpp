@@ -1,9 +1,8 @@
 #include <../base.hpp>
-#include <../cart/cart.hpp>
-#include <../chip/bsx/bsx.hpp>
-#define SA1_CPP
 
-#include "sa1.hpp"
+#define SA1_CPP
+namespace SNES {
+
 #include "bus/bus.cpp"
 #include "dma/dma.cpp"
 #include "memory/memory.cpp"
@@ -141,7 +140,7 @@ void SA1::reset() {
   status.interrupt_pending = false;
   status.interrupt_vector  = 0x0000;
 
-  status.scanlines = (snes.region() == SNES::NTSC ? 262 : 312);
+  status.scanlines = (system.region() == System::NTSC ? 262 : 312);
   status.vcounter  = 0;
   status.hcounter  = 0;
 
@@ -312,3 +311,5 @@ void SA1::reset() {
 
 SA1::SA1() {
 }
+
+};

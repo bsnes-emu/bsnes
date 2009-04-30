@@ -1,9 +1,25 @@
 #include <../base.hpp>
-#define SSMP_CPP
 
-#include "core/core.cpp"
+#define SSMP_CPP
+namespace SNES {
+
 #include "memory/memory.cpp"
 #include "timing/timing.cpp"
+
+void sSMP::enter() {
+  unsigned counter = 0;
+
+  while(true) {
+    tracer.trace_smpop();  //traces SMP opcode (only if tracer is enabled)
+    (this->*opcode_table[op_readpc()])();
+
+    //forcefully sync S-CPU and S-SMP, in case chips are not communicating
+    if(++counter >= 128) {
+      counter = 0;
+      scheduler.sync_smpcpu();
+    }
+  }
+}
 
 void sSMP::power() {
   //targets not initialized/changed upon reset
@@ -66,3 +82,5 @@ sSMP::sSMP() {
 
 sSMP::~sSMP() {
 }
+
+};

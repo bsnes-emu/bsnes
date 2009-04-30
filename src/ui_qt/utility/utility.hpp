@@ -17,13 +17,14 @@ public:
   void updateControllers();
 
   //cartridge.cpp
-  string selectCartridge();
+  enum CartridgeType {
+    AnyCartridge     = 1 << 0,
+    SnesCartridge    = 1 << 1,
+    GameboyCartridge = 1 << 2,
+  };
+  string selectCartridge(unsigned cartridgeType);
   string selectFolder(const char *title);
   void loadCartridge(const char*);
-  bool loadCartridgeNormal(const char*);
-  bool loadCartridgeBsxSlotted(const char*, const char*);
-  bool loadCartridgeBsx(const char*, const char*);
-  bool loadCartridgeSufamiTurbo(const char*, const char *, const char*);
   void unloadCartridge();
 
   enum system_state_t { LoadCartridge, UnloadCartridge, PowerOn, PowerOff, PowerCycle, Reset };

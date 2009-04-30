@@ -1,8 +1,10 @@
 #include <../base.hpp>
-#include <../cart/cart.hpp>
-#define BSX_CPP
 
-#include "bsx.hpp"
+#define BSX_CPP
+namespace SNES {
+
 #include "bsx_base.cpp"
 #include "bsx_cart.cpp"
 #include "bsx_flash.cpp"
+
+};

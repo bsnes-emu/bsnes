@@ -1,7 +1,7 @@
 #ifdef PPU_CPP
 
 //wrappers to allow PPUcounter::tick()/tock() to be inlined
-bool PPUcounter::region() const { return snes.region() == SNES::NTSC ? 0 : 1; }
+bool PPUcounter::region() const { return system.region() == System::NTSC ? 0 : 1; }
 bool PPUcounter::interlace() const { return ppu.interlace(); }
 void PPUcounter::scanline() { cpu.scanline(); }
 

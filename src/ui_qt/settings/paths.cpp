@@ -127,74 +127,79 @@ void PathSettingsWindow::setup() {
 }
 
 void PathSettingsWindow::syncUi() {
-  gamePath->setText (snes.config.path.rom   == "" ? "<startup path>"               : (const char*)snes.config.path.rom);
-  savePath->setText (snes.config.path.save  == "" ? "<same folder as loaded game>" : (const char*)snes.config.path.save);
-  patchPath->setText(snes.config.path.patch == "" ? "<same folder as loaded game>" : (const char*)snes.config.path.patch);
-  cheatPath->setText(snes.config.path.cheat == "" ? "<same folder as loaded game>" : (const char*)snes.config.path.cheat);
-  dataPath->setText (snes.config.path.data  == "" ? "<same folder as loaded game>" : (const char*)snes.config.path.data);
+  gamePath->setText (config.path.rom   == "" ? "<startup path>"               : (const char*)config.path.rom);
+  savePath->setText (config.path.save  == "" ? "<same folder as loaded game>" : (const char*)config.path.save);
+  patchPath->setText(config.path.patch == "" ? "<same folder as loaded game>" : (const char*)config.path.patch);
+  cheatPath->setText(config.path.cheat == "" ? "<same folder as loaded game>" : (const char*)config.path.cheat);
+  dataPath->setText (config.path.data  == "" ? "<same folder as loaded game>" : (const char*)config.path.data);
 }
 
 void PathSettingsWindow::selectGamePath() {
   string path = utility.selectFolder("Default Game Path");
   if(path.length() > 0) {
-    snes.config.path.rom = path;
+    config.path.rom = strtr(path, "\\", "/");
+    if(!strend(config.path.rom, "/")) config.path.rom << "/";
     syncUi();
   }
 }
 
 void PathSettingsWindow::defaultGamePath() {
-  snes.config.path.rom = "";
+  config.path.rom = "";
   syncUi();
 }
 
 void PathSettingsWindow::selectSavePath() {
   string path = utility.selectFolder("Default Save RAM Path");
   if(path.length() > 0) {
-    snes.config.path.save = path;
+    config.path.save = strtr(path, "\\", "/");
+    if(!strend(config.path.save, "/")) config.path.save << "/";
     syncUi();
   }
 }
 
 void PathSettingsWindow::defaultSavePath() {
-  snes.config.path.save = "";
+  config.path.save = "";
   syncUi();
 }
 
 void PathSettingsWindow::selectPatchPath() {
   string path = utility.selectFolder("Default UPS Patch Path");
   if(path.length() > 0) {
-    snes.config.path.patch = path;
+    config.path.patch = strtr(path, "\\", "/");
+    if(!strend(config.path.patch, "/")) config.path.patch << "/";
     syncUi();
   }
 }
 
 void PathSettingsWindow::defaultPatchPath() {
-  snes.config.path.patch = "";
+  config.path.patch = "";
   syncUi();
 }
 
 void PathSettingsWindow::selectCheatPath() {
   string path = utility.selectFolder("Default Cheat File Path");
   if(path.length() > 0) {
-    snes.config.path.cheat = path;
+    config.path.cheat = strtr(path, "\\", "/");
+    if(!strend(config.path.cheat, "/")) config.path.cheat << "/";
     syncUi();
   }
 }
 
 void PathSettingsWindow::defaultCheatPath() {
-  snes.config.path.cheat = "";
+  config.path.cheat = "";
   syncUi();
 }
 
 void PathSettingsWindow::selectDataPath() {
   string path = utility.selectFolder("Default Export Data Path");
   if(path.length() > 0) {
-    snes.config.path.data = path;
+    config.path.data = strtr(path, "\\", "/");
+    if(!strend(config.path.data, "/")) config.path.data << "/";
     syncUi();
   }
 }
 
 void PathSettingsWindow::defaultDataPath() {
-  snes.config.path.data = "";
+  config.path.data = "";
   syncUi();
 }

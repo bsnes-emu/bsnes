@@ -9,8 +9,19 @@
 //Q_IMPORT_PLUGIN(QJpegPlugin)
 //Q_IMPORT_PLUGIN(QMngPlugin)
 
+#include <reader/reader.hpp>
+#include <reader/filereader.hpp>
+
+#if defined(GZIP_SUPPORT)
+  #include <reader/gzreader.hpp>
+  #include <reader/zipreader.hpp>
+#endif
+
+#if defined(JMA_SUPPORT)
+  #include <reader/jmareader.hpp>
+#endif
+
 #include <../base.hpp>
-#include <../cart/cart.hpp>
 
 #include <nall/config.hpp>
 #include <nall/function.hpp>
@@ -22,6 +33,7 @@ using namespace ruby;
 
 #include <libfilter/libfilter.hpp>
 
+#include "cartridge/cartridge.hpp"
 #include "input/input.hpp"
 #include "utility/utility.hpp"
 

@@ -75,8 +75,8 @@ void CodeEditorWindow::setup() {
 void CodeEditorWindow::syncUi() {
   //only activate add button when code is valid
   string code = codeValue->text().toUtf8().data();
-  Cheat::cheat_t temp;
-  bool valid = cheat.decode(code, temp);
+  SNES::Cheat::cheat_t temp;
+  bool valid = SNES::cheat.decode(code, temp);
   codeAdd->setEnabled(valid);
 
   //only activate delete button when a code is selected
@@ -93,8 +93,8 @@ void CodeEditorWindow::codeChanged() { syncUi(); }
 
 void CodeEditorWindow::addCodeToList() {
   string code = codeValue->text().toUtf8().data();
-  Cheat::cheat_t temp;
-  if(cheat.decode(code, temp) == true) codeList->addItem(utf8() << code);
+  SNES::Cheat::cheat_t temp;
+  if(SNES::cheat.decode(code, temp) == true) codeList->addItem(utf8() << code);
   syncUi();
 }
 
@@ -122,15 +122,15 @@ void CodeEditorWindow::accept() {
 
   if(activeCode == -1) {
     //adding a new code
-    cheat.add(enabled->isChecked(), code, desc);
+    SNES::cheat.add(enabled->isChecked(), code, desc);
     winCheatEditor->reloadList();
   } else if(codeList->count() > 0) {
     //editing an existing code
-    cheat.edit(activeCode, enabled->isChecked(), code, desc);
+    SNES::cheat.edit(activeCode, enabled->isChecked(), code, desc);
     winCheatEditor->updateList();
   } else {
     //deleting an existing code
-    cheat.remove(activeCode);
+    SNES::cheat.remove(activeCode);
     winCheatEditor->reloadList();
   }
 
@@ -156,8 +156,8 @@ void CodeEditorWindow::editCode(unsigned code) {
   codeList->clear();
   codeValue->setText("");
 
-  Cheat::cheat_t item;
-  cheat.get(activeCode, item);
+  SNES::Cheat::cheat_t item;
+  SNES::cheat.get(activeCode, item);
 
   description->setPlainText(utf8() << item.desc);
 

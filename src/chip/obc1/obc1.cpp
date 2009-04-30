@@ -1,6 +1,7 @@
 #include <../base.hpp>
-#include <../cart/cart.hpp>
-#include "obc1.hpp"
+
+#define OBC1_CPP
+namespace SNES {
 
 void OBC1::init() {}
 void OBC1::enable() {}
@@ -70,3 +71,5 @@ void OBC1::ram_write(unsigned addr, uint8 data) {
 
 OBC1::OBC1() {}
 OBC1::~OBC1() {}
+
+};

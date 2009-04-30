@@ -6,9 +6,10 @@
 */
 
 #include <../base.hpp>
-#define CX4_CPP
 
-#include "cx4.hpp"
+#define CX4_CPP
+namespace SNES {
+
 #include "cx4data.cpp"
 #include "cx4fn.cpp"
 #include "cx4oam.cpp"
@@ -195,3 +196,5 @@ void Cx4::reset() {
   memset(ram, 0, 0x0c00);
   memset(reg, 0, 0x0100);
 }
+
+};

@@ -51,12 +51,13 @@ void Utility::inputEvent(uint16_t code) {
     bool resizeWindow = false;
 
     if(isButtonDown(code, inputUiGeneral.loadCartridge)) {
-      string filename = selectCartridge();
+      string filename = selectCartridge(AnyCartridge);
       if(filename.length() > 0) loadCartridge(filename);
     }
 
     if(isButtonDown(code, inputUiGeneral.pauseEmulation)) {
       application.pause = !application.pause;
+      if(application.pause) audio.clear();
     }
 
     if(isButtonDown(code, inputUiGeneral.resetSystem)) {
@@ -80,11 +81,11 @@ void Utility::inputEvent(uint16_t code) {
     }
 
     if(isButtonDown(code, inputUiGeneral.toggleCheatSystem)) {
-      if(cheat.enabled() == false) {
-        cheat.enable();
+      if(SNES::cheat.enabled() == false) {
+        SNES::cheat.enable();
         showMessage("Cheat system enabled.");
       } else {
-        cheat.disable();
+        SNES::cheat.disable();
         showMessage("Cheat system disabled.");
       }
     }
@@ -125,15 +126,15 @@ void Utility::showMessage(const char *message) {
 void Utility::updateSystemState() {
   string text;
 
-  if(cartridge.loaded() == false) {
+  if(SNES::cartridge.loaded() == false) {
     text = "No cartridge loaded";
   } else if(application.power == false) {
     text = "Power off";
   } else if(application.pause == true || application.autopause == true) {
     text = "Paused";
-  } else if(ppu.status.frames_updated == true) {
-    ppu.status.frames_updated = false;
-    text << (int)ppu.status.frames_executed;
+  } else if(SNES::ppu.status.frames_updated == true) {
+    SNES::ppu.status.frames_updated = false;
+    text << (int)SNES::ppu.status.frames_executed;
     text << " fps";
   } else {
     //nothing to update
@@ -144,12 +145,12 @@ void Utility::updateSystemState() {
 }
 
 void Utility::acquireMouse() {
-  if(cartridge.loaded()) {
-    if(snes.config.controller_port1 == SNES::Input::DeviceMouse
-    || snes.config.controller_port2 == SNES::Input::DeviceMouse
-    || snes.config.controller_port2 == SNES::Input::DeviceSuperScope
-    || snes.config.controller_port2 == SNES::Input::DeviceJustifier
-    || snes.config.controller_port2 == SNES::Input::DeviceJustifiers
+  if(SNES::cartridge.loaded()) {
+    if(SNES::config.controller_port1 == SNES::System::Input::DeviceMouse
+    || SNES::config.controller_port2 == SNES::System::Input::DeviceMouse
+    || SNES::config.controller_port2 == SNES::System::Input::DeviceSuperScope
+    || SNES::config.controller_port2 == SNES::System::Input::DeviceJustifier
+    || SNES::config.controller_port2 == SNES::System::Input::DeviceJustifiers
     ) input.acquire();
   }
 }
@@ -165,9 +166,9 @@ void Utility::updateAvSync() {
 
 void Utility::updateVideoMode() {
   if(config.video.context->region == 0) {
-    snes.video.set_mode(SNES::Video::ModeNTSC);
+    SNES::system.video.set_mode(SNES::System::Video::ModeNTSC);
   } else {
-    snes.video.set_mode(SNES::Video::ModePAL);
+    SNES::system.video.set_mode(SNES::System::Video::ModePAL);
   }
 }
 
@@ -213,6 +214,6 @@ void Utility::updateEmulationSpeed() {
 }
 
 void Utility::updateControllers() {
-  snes.input.port_set_device(0, snes.config.controller_port1);
-  snes.input.port_set_device(1, snes.config.controller_port2);
+  SNES::system.input.port_set_device(0, SNES::config.controller_port1);
+  SNES::system.input.port_set_device(1, SNES::config.controller_port2);
 }

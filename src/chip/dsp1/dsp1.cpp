@@ -1,8 +1,8 @@
 #include <../base.hpp>
-#include <../cart/cart.hpp>
-#define DSP1_CPP
 
-#include "dsp1.hpp"
+#define DSP1_CPP
+namespace SNES {
+
 #include "dsp1emu.cpp"
 
 void DSP1::init() {}
@@ -57,3 +57,5 @@ void DSP1::write(unsigned addr, uint8 data) {
     dsp1.setDr(data);
   }
 }
+
+};

@@ -195,22 +195,22 @@ void MainWindow::setup() {
 }
 
 void MainWindow::syncUi() {
-  system_power->setEnabled(cartridge.loaded());
+  system_power->setEnabled(SNES::cartridge.loaded());
   system_power_on->setChecked (application.power == true);
   system_power_off->setChecked(application.power == false);
-  system_reset->setEnabled(cartridge.loaded() && application.power);
+  system_reset->setEnabled(SNES::cartridge.loaded() && application.power);
 
-  system_port1_none->setChecked      (snes.config.controller_port1 == SNES::Input::DeviceNone);
-  system_port1_joypad->setChecked    (snes.config.controller_port1 == SNES::Input::DeviceJoypad);
-  system_port1_multitap->setChecked  (snes.config.controller_port1 == SNES::Input::DeviceMultitap);
-  system_port1_mouse->setChecked     (snes.config.controller_port1 == SNES::Input::DeviceMouse);
-  system_port2_none->setChecked      (snes.config.controller_port2 == SNES::Input::DeviceNone);
-  system_port2_joypad->setChecked    (snes.config.controller_port2 == SNES::Input::DeviceJoypad);
-  system_port2_multitap->setChecked  (snes.config.controller_port2 == SNES::Input::DeviceMultitap);
-  system_port2_mouse->setChecked     (snes.config.controller_port2 == SNES::Input::DeviceMouse);
-  system_port2_superscope->setChecked(snes.config.controller_port2 == SNES::Input::DeviceSuperScope);
-  system_port2_justifier->setChecked (snes.config.controller_port2 == SNES::Input::DeviceJustifier);
-  system_port2_justifiers->setChecked(snes.config.controller_port2 == SNES::Input::DeviceJustifiers);
+  system_port1_none->setChecked      (SNES::config.controller_port1 == SNES::System::Input::DeviceNone);
+  system_port1_joypad->setChecked    (SNES::config.controller_port1 == SNES::System::Input::DeviceJoypad);
+  system_port1_multitap->setChecked  (SNES::config.controller_port1 == SNES::System::Input::DeviceMultitap);
+  system_port1_mouse->setChecked     (SNES::config.controller_port1 == SNES::System::Input::DeviceMouse);
+  system_port2_none->setChecked      (SNES::config.controller_port2 == SNES::System::Input::DeviceNone);
+  system_port2_joypad->setChecked    (SNES::config.controller_port2 == SNES::System::Input::DeviceJoypad);
+  system_port2_multitap->setChecked  (SNES::config.controller_port2 == SNES::System::Input::DeviceMultitap);
+  system_port2_mouse->setChecked     (SNES::config.controller_port2 == SNES::System::Input::DeviceMouse);
+  system_port2_superscope->setChecked(SNES::config.controller_port2 == SNES::System::Input::DeviceSuperScope);
+  system_port2_justifier->setChecked (SNES::config.controller_port2 == SNES::System::Input::DeviceJustifier);
+  system_port2_justifiers->setChecked(SNES::config.controller_port2 == SNES::System::Input::DeviceJustifiers);
 
   settings_videoMode_1x->setChecked (config.video.context->multiplier == 1);
   settings_videoMode_2x->setChecked (config.video.context->multiplier == 2);
@@ -244,7 +244,7 @@ void MainWindow::syncUi() {
 }
 
 void MainWindow::loadCartridge() {
-  string filename = utility.selectCartridge();
+  string filename = utility.selectCartridge(Utility::AnyCartridge);
   if(filename.length() > 0) utility.loadCartridge(filename);
 }
 
@@ -252,17 +252,17 @@ void MainWindow::powerOn()  { utility.modifySystemState(Utility::PowerOn); }
 void MainWindow::powerOff() { utility.modifySystemState(Utility::PowerOff); }
 void MainWindow::reset()    { utility.modifySystemState(Utility::Reset); }
 
-void MainWindow::setPort1None()       { snes.config.controller_port1 = SNES::Input::DeviceNone;       utility.updateControllers(); syncUi(); }
-void MainWindow::setPort1Joypad()     { snes.config.controller_port1 = SNES::Input::DeviceJoypad;     utility.updateControllers(); syncUi(); }
-void MainWindow::setPort1Multitap()   { snes.config.controller_port1 = SNES::Input::DeviceMultitap;   utility.updateControllers(); syncUi(); }
-void MainWindow::setPort1Mouse()      { snes.config.controller_port1 = SNES::Input::DeviceMouse;      utility.updateControllers(); syncUi(); }
-void MainWindow::setPort2None()       { snes.config.controller_port2 = SNES::Input::DeviceNone;       utility.updateControllers(); syncUi(); }
-void MainWindow::setPort2Joypad()     { snes.config.controller_port2 = SNES::Input::DeviceJoypad;     utility.updateControllers(); syncUi(); }
-void MainWindow::setPort2Multitap()   { snes.config.controller_port2 = SNES::Input::DeviceMultitap;   utility.updateControllers(); syncUi(); }
-void MainWindow::setPort2Mouse()      { snes.config.controller_port2 = SNES::Input::DeviceMouse;      utility.updateControllers(); syncUi(); }
-void MainWindow::setPort2SuperScope() { snes.config.controller_port2 = SNES::Input::DeviceSuperScope; utility.updateControllers(); syncUi(); }
-void MainWindow::setPort2Justifier()  { snes.config.controller_port2 = SNES::Input::DeviceJustifier;  utility.updateControllers(); syncUi(); }
-void MainWindow::setPort2Justifiers() { snes.config.controller_port2 = SNES::Input::DeviceJustifiers; utility.updateControllers(); syncUi(); }
+void MainWindow::setPort1None()       { SNES::config.controller_port1 = SNES::System::Input::DeviceNone;       utility.updateControllers(); syncUi(); }
+void MainWindow::setPort1Joypad()     { SNES::config.controller_port1 = SNES::System::Input::DeviceJoypad;     utility.updateControllers(); syncUi(); }
+void MainWindow::setPort1Multitap()   { SNES::config.controller_port1 = SNES::System::Input::DeviceMultitap;   utility.updateControllers(); syncUi(); }
+void MainWindow::setPort1Mouse()      { SNES::config.controller_port1 = SNES::System::Input::DeviceMouse;      utility.updateControllers(); syncUi(); }
+void MainWindow::setPort2None()       { SNES::config.controller_port2 = SNES::System::Input::DeviceNone;       utility.updateControllers(); syncUi(); }
+void MainWindow::setPort2Joypad()     { SNES::config.controller_port2 = SNES::System::Input::DeviceJoypad;     utility.updateControllers(); syncUi(); }
+void MainWindow::setPort2Multitap()   { SNES::config.controller_port2 = SNES::System::Input::DeviceMultitap;   utility.updateControllers(); syncUi(); }
+void MainWindow::setPort2Mouse()      { SNES::config.controller_port2 = SNES::System::Input::DeviceMouse;      utility.updateControllers(); syncUi(); }
+void MainWindow::setPort2SuperScope() { SNES::config.controller_port2 = SNES::System::Input::DeviceSuperScope; utility.updateControllers(); syncUi(); }
+void MainWindow::setPort2Justifier()  { SNES::config.controller_port2 = SNES::System::Input::DeviceJustifier;  utility.updateControllers(); syncUi(); }
+void MainWindow::setPort2Justifiers() { SNES::config.controller_port2 = SNES::System::Input::DeviceJustifiers; utility.updateControllers(); syncUi(); }
 
 void MainWindow::quit() {
   application.terminate = true;
@@ -356,7 +356,7 @@ void CanvasObject::dropEvent(QDropEvent *event) {
 //custom video render and mouse capture functionality
 
 QPaintEngine* CanvasWidget::paintEngine() const {
-  if(cartridge.loaded()) return 0;
+  if(SNES::cartridge.loaded()) return 0;
   return QWidget::paintEngine();
 }
 

@@ -8,6 +8,7 @@
 
 #include <../base.hpp>
 #define SDSP_CPP
+namespace SNES {
 
 #define REG(n) state.regs[r_##n]
 #define VREG(n) state.regs[v.vidx + v_##n]
@@ -324,3 +325,5 @@ sDSP::sDSP() {
 
 sDSP::~sDSP() {
 }
+
+};

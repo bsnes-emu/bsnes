@@ -1,5 +1,7 @@
 #include <../base.hpp>
+
 #define MEMORY_CPP
+namespace SNES {
 
 namespace memory {
   MMIOAccess mmio;
@@ -105,3 +107,5 @@ void Bus::map(
     } break;
   }
 }
+
+};
