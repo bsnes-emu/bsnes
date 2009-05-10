@@ -1,82 +1,98 @@
 #include <../base.hpp>
 
-#define CART_CPP
+#define CARTRIDGE_CPP
 namespace SNES {
 
-#include "cartridge_header.cpp"
-#include "cartridge_loader.cpp"
+#include "header.cpp"
 
 namespace memory {
   MappedRAM cartrom, cartram, cartrtc;
-  MappedRAM bscram;
+  MappedRAM bsxflash, bsxram, bsxpram;
   MappedRAM stArom, stAram;
   MappedRAM stBrom, stBram;
-  MappedRAM dmgrom, dmgram, dmgrtc;
+  MappedRAM gbrom, gbram;
 };
 
 Cartridge cartridge;
 
-void Cartridge::load_begin(Mode cartridge_mode) {
-  memory::cartrom.map(0, 0);
-  memory::cartram.map(0, 0);
-  memory::cartrtc.map(0, 0);
-  memory::bscram.map (0, 0);
-  memory::stArom.map (0, 0);
-  memory::stAram.map (0, 0);
-  memory::stBrom.map (0, 0);
-  memory::stBram.map (0, 0);
-  memory::dmgrom.map (0, 0);
-  memory::dmgram.map (0, 0);
-  memory::dmgrtc.map (0, 0);
+void Cartridge::load(Mode cartridge_mode) {
+  cartinfo_t cartinfo;
+  read_header(cartinfo, memory::cartrom.data(), memory::cartrom.size());
+  set_cartinfo(cartinfo);
 
-  set(loaded,           false);
-  set(bsx_flash_loaded, false);
-  set(patched,          false);
-  set(mode,             cartridge_mode);
-}
+  set(mode, cartridge_mode);
 
-void Cartridge::load_end() {
+  if(cartinfo.ram_size > 0) {
+    memory::cartram.map(new(zeromemory) uint8_t[cartinfo.ram_size], cartinfo.ram_size);
+  }
+
+  if(cartinfo.srtc || cartinfo.spc7110rtc) {
+    memory::cartrtc.map(new(zeromemory) uint8_t[20], 20);
+  }
+
+  if(mode() == ModeBsx) {
+    memory::bsxram.map (new(zeromemory) uint8_t[ 32 * 1024],  32 * 1024);
+    memory::bsxpram.map(new(zeromemory) uint8_t[512 * 1024], 512 * 1024);
+  }
+
+  if(mode() == ModeSufamiTurbo) {
+    if(memory::stArom.data()) memory::stAram.map(new(zeromemory) uint8_t[128 * 1024], 128 * 1024);
+    if(memory::stBrom.data()) memory::stBram.map(new(zeromemory) uint8_t[128 * 1024], 128 * 1024);
+  }
+
+  if(mode() == ModeSuperGameBoy) {
+    if(memory::gbrom.data()) memory::gbram.map(new(zeromemory) uint8_t[64 * 1024], 64 * 1024);
+  }
+
   memory::cartrom.write_protect(true);
   memory::cartram.write_protect(false);
   memory::cartrtc.write_protect(false);
-  memory::bscram.write_protect (true);
-  memory::stArom.write_protect (true);
-  memory::stAram.write_protect (false);
-  memory::stBrom.write_protect (true);
-  memory::stBram.write_protect (false);
-  memory::dmgrom.write_protect (true);
-  memory::dmgram.write_protect (false);
-  memory::dmgrtc.write_protect (false);
+  memory::bsxflash.write_protect(true);
+  memory::bsxram.write_protect(false);
+  memory::bsxpram.write_protect(false);
+  memory::stArom.write_protect(true);
+  memory::stAram.write_protect(false);
+  memory::stBrom.write_protect(true);
+  memory::stBram.write_protect(false);
+  memory::gbrom.write_protect(true);
+  memory::gbram.write_protect(false);
 
   bus.load_cart();
   set(loaded, true);
 }
 
 void Cartridge::unload() {
-  if(loaded() == false) return;
-  bus.unload_cart();
-
   memory::cartrom.reset();
   memory::cartram.reset();
   memory::cartrtc.reset();
-  memory::bscram.reset();
+  memory::bsxflash.reset();
+  memory::bsxram.reset();
+  memory::bsxpram.reset();
   memory::stArom.reset();
   memory::stAram.reset();
   memory::stBrom.reset();
   memory::stBram.reset();
-  memory::dmgrom.reset();
-  memory::dmgram.reset();
-  memory::dmgrtc.reset();
+  memory::gbrom.reset();
+  memory::gbram.reset();
 
+  if(loaded() == false) return;
+  bus.unload_cart();
   set(loaded, false);
+}
+
+Cartridge::Type Cartridge::detect_image_type(uint8_t *data, unsigned size) const {
+  cartinfo_t info;
+  read_header(info, data, size);
+  return info.type;
 }
 
 Cartridge::Cartridge() {
   set(loaded, false);
+  unload();
 }
 
 Cartridge::~Cartridge() {
-  if(loaded() == true) unload();
+  unload();
 }
 
 void Cartridge::set_cartinfo(const Cartridge::cartinfo_t &source) {
@@ -138,3 +154,4 @@ Cartridge::cartinfo_t::cartinfo_t() {
 }
 
 };
+

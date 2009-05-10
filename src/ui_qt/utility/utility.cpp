@@ -51,7 +51,7 @@ void Utility::inputEvent(uint16_t code) {
     bool resizeWindow = false;
 
     if(isButtonDown(code, inputUiGeneral.loadCartridge)) {
-      string filename = selectCartridge(AnyCartridge);
+      string filename = selectCartridge();
       if(filename.length() > 0) loadCartridge(filename);
     }
 
@@ -146,11 +146,11 @@ void Utility::updateSystemState() {
 
 void Utility::acquireMouse() {
   if(SNES::cartridge.loaded()) {
-    if(SNES::config.controller_port1 == SNES::System::Input::DeviceMouse
-    || SNES::config.controller_port2 == SNES::System::Input::DeviceMouse
-    || SNES::config.controller_port2 == SNES::System::Input::DeviceSuperScope
-    || SNES::config.controller_port2 == SNES::System::Input::DeviceJustifier
-    || SNES::config.controller_port2 == SNES::System::Input::DeviceJustifiers
+    if(SNES::config.controller_port1 == SNES::Input::DeviceMouse
+    || SNES::config.controller_port2 == SNES::Input::DeviceMouse
+    || SNES::config.controller_port2 == SNES::Input::DeviceSuperScope
+    || SNES::config.controller_port2 == SNES::Input::DeviceJustifier
+    || SNES::config.controller_port2 == SNES::Input::DeviceJustifiers
     ) input.acquire();
   }
 }
@@ -166,9 +166,9 @@ void Utility::updateAvSync() {
 
 void Utility::updateVideoMode() {
   if(config.video.context->region == 0) {
-    SNES::system.video.set_mode(SNES::System::Video::ModeNTSC);
+    SNES::video.set_mode(SNES::Video::ModeNTSC);
   } else {
-    SNES::system.video.set_mode(SNES::System::Video::ModePAL);
+    SNES::video.set_mode(SNES::Video::ModePAL);
   }
 }
 
@@ -214,6 +214,6 @@ void Utility::updateEmulationSpeed() {
 }
 
 void Utility::updateControllers() {
-  SNES::system.input.port_set_device(0, SNES::config.controller_port1);
-  SNES::system.input.port_set_device(1, SNES::config.controller_port2);
+  SNES::input.port_set_device(0, SNES::config.controller_port1);
+  SNES::input.port_set_device(1, SNES::config.controller_port2);
 }

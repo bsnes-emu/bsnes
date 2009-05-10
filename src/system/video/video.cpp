@@ -1,6 +1,8 @@
-#ifdef SNES_CPP
+#ifdef SYSTEM_CPP
 
-const uint8_t System::Video::cursor[15 * 15] = {
+Video video;
+
+const uint8_t Video::cursor[15 * 15] = {
   0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,
   0,0,0,0,1,1,2,2,2,1,1,0,0,0,0,
   0,0,0,1,2,2,1,2,1,2,2,1,0,0,0,
@@ -18,7 +20,7 @@ const uint8_t System::Video::cursor[15 * 15] = {
   0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,
 };
 
-void System::Video::draw_cursor(uint16_t color, int x, int y) {
+void Video::draw_cursor(uint16_t color, int x, int y) {
   for(int cy = 0; cy < 15; cy++) {
     int vy = y + cy - 7;
     if(vy <= 0 || vy >= 240) continue;  //do not draw offscreen
@@ -44,14 +46,14 @@ void System::Video::draw_cursor(uint16_t color, int x, int y) {
   }
 }
 
-void System::Video::update() {
+void Video::update() {
   uint16_t *data = (uint16_t*)ppu.output;
   unsigned width, height;
 
-  switch(system.input.port[1].device) {
-    case System::Input::DeviceSuperScope: draw_cursor(0x001f, system.input.port[1].superscope.x, system.input.port[1].superscope.y); break;
-    case System::Input::DeviceJustifiers: draw_cursor(0x02e0, system.input.port[1].justifier.x2, system.input.port[1].justifier.y2); //fallthrough
-    case System::Input::DeviceJustifier:  draw_cursor(0x001f, system.input.port[1].justifier.x1, system.input.port[1].justifier.y1); break;
+  switch(input.port[1].device) {
+    case Input::DeviceSuperScope: draw_cursor(0x001f, input.port[1].superscope.x, input.port[1].superscope.y); break;
+    case Input::DeviceJustifiers: draw_cursor(0x02e0, input.port[1].justifier.x2, input.port[1].justifier.y2); //fallthrough
+    case Input::DeviceJustifier:  draw_cursor(0x001f, input.port[1].justifier.x1, input.port[1].justifier.y1); break;
   }
 
   unsigned yoffset = 1;  //scanline 0 is always black, skip this line for video output
@@ -76,7 +78,7 @@ void System::Video::update() {
   frame_interlace = false;
 }
 
-void System::Video::scanline() {
+void Video::scanline() {
   unsigned y = ppu.vcounter();
   if(y >= 240) return;
 
@@ -88,11 +90,11 @@ void System::Video::scanline() {
   frame_interlace |= ppu.interlace();
 }
 
-void System::Video::set_mode(Mode mode_) {
+void Video::set_mode(Mode mode_) {
   mode = mode_;
 }
 
-void System::Video::init() {
+void Video::init() {
   for(unsigned i = 0; i < 240; i++) pline_width[i] = 256;
   for(unsigned i = 0; i < 480; i++) iline_width[i] = 256;
   frame_hires = false;
@@ -101,3 +103,4 @@ void System::Video::init() {
 }
 
 #endif
+

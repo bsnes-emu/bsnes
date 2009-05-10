@@ -4,11 +4,12 @@
   }
 @endmacro
 
-@macro op_stall(name)
+@macro op_wait(name)
   void {class}::op_{name}() {
-    op_io();
-    op_io();
-    regs.pc--;
+    while(true) {
+      op_io();
+      op_io();
+    }
   }
 @endmacro
 
@@ -35,7 +36,7 @@
     if(regs.p.h || (regs.a & 15) > 0x09) {
       regs.a += 0x06;
     }
-    regs.p.n = (regs.a & 0x80);
+    regs.p.n = !!(regs.a & 0x80);
     regs.p.z = (regs.a == 0);
   }
 @endmacro
@@ -51,12 +52,12 @@
     if(!regs.p.h || (regs.a & 15) > 0x09) {
       regs.a -= 0x06;
     }
-    regs.p.n = (regs.a & 0x80);
+    regs.p.n = !!(regs.a & 0x80);
     regs.p.z = (regs.a == 0);
   }
 @endmacro
 
-@macro op_flagadjust(name, op)
+@macro op_setbit(name, op)
   void {class}::op_{name}() {
     op_io();
     {op};
@@ -71,15 +72,15 @@
   }
 @endmacro
 
-@macro op_seti(name, state)
+@macro op_seti(name, bit)
   void {class}::op_{name}() {
     op_io();
     op_io();
-    regs.p.i = {state};
+    regs.p.i = {bit};
   }
 @endmacro
 
-@macro op_bit_dp(name, op)
+@macro op_setbit_dp(name, op)
   void {class}::op_{name}_dp() {
     dp = op_readpc();
     rd = op_readdp(dp);
@@ -118,7 +119,7 @@
     regs.a = ya;
     regs.y = ya >> 8;
     //result is set based on y (high-byte) only
-    regs.p.n = (regs.y & 0x80);
+    regs.p.n = !!(regs.y & 0x80);
     regs.p.z = (regs.y == 0);
   }
 @endmacro
@@ -138,8 +139,8 @@
     op_io();
     ya = regs.ya;
     //overflow set if quotient >= 256
-    regs.p.v = (regs.y >= regs.x);
-    regs.p.h = ((regs.y & 15) >= (regs.x & 15));
+    regs.p.v = !!(regs.y >= regs.x);
+    regs.p.h = !!((regs.y & 15) >= (regs.x & 15));
     if(regs.y < (regs.x << 1)) {
       //if quotient is <= 511 (will fit into 9-bit result)
       regs.a = ya / regs.x;
@@ -151,7 +152,8 @@
       regs.y = regs.x + (ya - (regs.x << 9)) % (256 - regs.x);
     }
     //result is set based on a (quotient) only
-    regs.p.n = (regs.a & 0x80);
+    regs.p.n = !!(regs.a & 0x80);
     regs.p.z = (regs.a == 0);
   }
 @endmacro
+

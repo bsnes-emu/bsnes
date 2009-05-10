@@ -26,6 +26,6 @@ namespace SNES {
 
   #include "system/system.hpp"
   #include "chip/chip.hpp"
-
   #include "cartridge/cartridge.hpp"
-}
+};
+

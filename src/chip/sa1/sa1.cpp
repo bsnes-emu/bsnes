@@ -3,6 +3,8 @@
 #define SA1_CPP
 namespace SNES {
 
+SA1 sa1;
+
 #include "bus/bus.cpp"
 #include "dma/dma.cpp"
 #include "memory/memory.cpp"
@@ -313,3 +315,4 @@ SA1::SA1() {
 }
 
 };
+

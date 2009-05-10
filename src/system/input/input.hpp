@@ -67,12 +67,8 @@ public:
   //latchx, latchy are updated during update() (once per frame)
   alwaysinline void tick() {
     //only test if Super Scope or Justifier is connected
-    if(iobit) {
-      if(ppu.vcounter() == latchy               //test Y cursor position
-      && ppu.hcounter() == latchx << 2          //test X cursor position (cycles == pixels << 2)
-      && latchy < (ppu.overscan() ? 240 : 225)  //verify Y is not offscreen
-      && latchx < 256                           //verify X is not offscreen
-      ) ppu.latch_counters();
+    if(iobit && ppu.vcounter() == latchy && ppu.hcounter() == latchx) {
+      ppu.latch_counters();
     }
   }
 
@@ -111,4 +107,8 @@ private:
   } port[2];
 
   friend class System;
-} input;
+  friend class Video;
+};
+
+extern Input input;
+

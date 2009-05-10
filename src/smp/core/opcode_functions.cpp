@@ -77,9 +77,14 @@
 
 
 
-//===============
-//opcode_move.bpp
-//===============
+
+
+
+
+
+//==============
+//opcode_mov.bpp
+//==============
 
   void SMPcore::op_mov_a_x() {
     op_io();
@@ -139,7 +144,6 @@
     regs.p.n = (regs.y & 0x80);
     regs.p.z = (regs.y == 0);
   }
-
 
   void SMPcore::op_mov_a_ix() {
     op_io();
@@ -400,7 +404,6 @@
     op_writeaddr(dp, regs.a);
   }
 
-
   void SMPcore::op_movw_ya_dp() {
     sp = op_readpc();
     regs.a = op_readdp(sp + 0);
@@ -417,14 +420,13 @@
     op_writedp(dp + 1, regs.y);
   }
 
-
   void SMPcore::op_mov1_c_bit() {
     sp  = op_readpc() << 0;
     sp |= op_readpc() << 8;
     bit = sp >> 13;
     sp &= 0x1fff;
     rd = op_readaddr(sp);
-    regs.p.c = !!(rd & (1 << bit));
+    regs.p.c = (rd & (1 << bit));
   }
 
   void SMPcore::op_mov1_bit_c() {
@@ -433,8 +435,7 @@
     bit = dp >> 13;
     dp &= 0x1fff;
     rd = op_readaddr(dp);
-    if(regs.p.c) rd |=  (1 << bit);
-    else         rd &= ~(1 << bit);
+    (regs.p.c) ? rd |= (1 << bit) : rd &= ~(1 << bit);
     op_io();
     op_writeaddr(dp, rd);
   }
@@ -714,7 +715,7 @@
     if(regs.a == sp) return;
     op_io();
     op_io();
-    regs.pc += (int8_t)rd;
+    regs.pc += (int8_t)rd;   
   }
 
   void SMPcore::op_dbnz_dp() {
@@ -1235,7 +1236,7 @@
     dp  = op_readpc() << 0;
     dp |= op_readpc() << 8;
     op_io();
-    rd  = op_readaddr(dp + regs.x);
+    rd = op_readaddr(dp + regs.x);
     regs.a = op_adc(regs.a, rd);
   }
 
@@ -1243,7 +1244,7 @@
     dp  = op_readpc() << 0;
     dp |= op_readpc() << 8;
     op_io();
-    rd  = op_readaddr(dp + regs.y);
+    rd = op_readaddr(dp + regs.y);
     regs.a = op_adc(regs.a, rd);
   }
 
@@ -1251,7 +1252,7 @@
     dp  = op_readpc() << 0;
     dp |= op_readpc() << 8;
     op_io();
-    rd  = op_readaddr(dp + regs.x);
+    rd = op_readaddr(dp + regs.x);
     regs.a = op_and(regs.a, rd);
   }
 
@@ -1259,7 +1260,7 @@
     dp  = op_readpc() << 0;
     dp |= op_readpc() << 8;
     op_io();
-    rd  = op_readaddr(dp + regs.y);
+    rd = op_readaddr(dp + regs.y);
     regs.a = op_and(regs.a, rd);
   }
 
@@ -1267,7 +1268,7 @@
     dp  = op_readpc() << 0;
     dp |= op_readpc() << 8;
     op_io();
-    rd  = op_readaddr(dp + regs.x);
+    rd = op_readaddr(dp + regs.x);
     regs.a = op_cmp(regs.a, rd);
   }
 
@@ -1275,7 +1276,7 @@
     dp  = op_readpc() << 0;
     dp |= op_readpc() << 8;
     op_io();
-    rd  = op_readaddr(dp + regs.y);
+    rd = op_readaddr(dp + regs.y);
     regs.a = op_cmp(regs.a, rd);
   }
 
@@ -1283,7 +1284,7 @@
     dp  = op_readpc() << 0;
     dp |= op_readpc() << 8;
     op_io();
-    rd  = op_readaddr(dp + regs.x);
+    rd = op_readaddr(dp + regs.x);
     regs.a = op_eor(regs.a, rd);
   }
 
@@ -1291,7 +1292,7 @@
     dp  = op_readpc() << 0;
     dp |= op_readpc() << 8;
     op_io();
-    rd  = op_readaddr(dp + regs.y);
+    rd = op_readaddr(dp + regs.y);
     regs.a = op_eor(regs.a, rd);
   }
 
@@ -1299,7 +1300,7 @@
     dp  = op_readpc() << 0;
     dp |= op_readpc() << 8;
     op_io();
-    rd  = op_readaddr(dp + regs.x);
+    rd = op_readaddr(dp + regs.x);
     regs.a = op_or(regs.a, rd);
   }
 
@@ -1307,7 +1308,7 @@
     dp  = op_readpc() << 0;
     dp |= op_readpc() << 8;
     op_io();
-    rd  = op_readaddr(dp + regs.y);
+    rd = op_readaddr(dp + regs.y);
     regs.a = op_or(regs.a, rd);
   }
 
@@ -1315,7 +1316,7 @@
     dp  = op_readpc() << 0;
     dp |= op_readpc() << 8;
     op_io();
-    rd  = op_readaddr(dp + regs.x);
+    rd = op_readaddr(dp + regs.x);
     regs.a = op_sbc(regs.a, rd);
   }
 
@@ -1323,7 +1324,7 @@
     dp  = op_readpc() << 0;
     dp |= op_readpc() << 8;
     op_io();
-    rd  = op_readaddr(dp + regs.y);
+    rd = op_readaddr(dp + regs.y);
     regs.a = op_sbc(regs.a, rd);
   }
 
@@ -1443,7 +1444,7 @@
     rd = op_readdp(regs.y);
     wr = op_readdp(regs.x);
     wr = op_adc(wr, rd);
-    true ? op_writedp(regs.x, wr) : op_io();
+    1 ? op_writedp(regs.x, wr) : op_io();
   }
 
   void SMPcore::op_and_ix_iy() {
@@ -1451,7 +1452,7 @@
     rd = op_readdp(regs.y);
     wr = op_readdp(regs.x);
     wr = op_and(wr, rd);
-    true ? op_writedp(regs.x, wr) : op_io();
+    1 ? op_writedp(regs.x, wr) : op_io();
   }
 
   void SMPcore::op_cmp_ix_iy() {
@@ -1459,7 +1460,7 @@
     rd = op_readdp(regs.y);
     wr = op_readdp(regs.x);
     wr = op_cmp(wr, rd);
-    false ? op_writedp(regs.x, wr) : op_io();
+    0 ? op_writedp(regs.x, wr) : op_io();
   }
 
   void SMPcore::op_eor_ix_iy() {
@@ -1467,7 +1468,7 @@
     rd = op_readdp(regs.y);
     wr = op_readdp(regs.x);
     wr = op_eor(wr, rd);
-    true ? op_writedp(regs.x, wr) : op_io();
+    1 ? op_writedp(regs.x, wr) : op_io();
   }
 
   void SMPcore::op_or_ix_iy() {
@@ -1475,7 +1476,7 @@
     rd = op_readdp(regs.y);
     wr = op_readdp(regs.x);
     wr = op_or(wr, rd);
-    true ? op_writedp(regs.x, wr) : op_io();
+    1 ? op_writedp(regs.x, wr) : op_io();
   }
 
   void SMPcore::op_sbc_ix_iy() {
@@ -1483,7 +1484,7 @@
     rd = op_readdp(regs.y);
     wr = op_readdp(regs.x);
     wr = op_sbc(wr, rd);
-    true ? op_writedp(regs.x, wr) : op_io();
+    1 ? op_writedp(regs.x, wr) : op_io();
   }
 
 
@@ -1493,7 +1494,7 @@
     dp = op_readpc();
     wr = op_readdp(dp);
     wr = op_adc(wr, rd);
-    true ? op_writedp(dp, wr) : op_io();
+    1 ? op_writedp(dp, wr) : op_io();
   }
 
   void SMPcore::op_and_dp_dp() {
@@ -1502,7 +1503,7 @@
     dp = op_readpc();
     wr = op_readdp(dp);
     wr = op_and(wr, rd);
-    true ? op_writedp(dp, wr) : op_io();
+    1 ? op_writedp(dp, wr) : op_io();
   }
 
   void SMPcore::op_cmp_dp_dp() {
@@ -1511,7 +1512,7 @@
     dp = op_readpc();
     wr = op_readdp(dp);
     wr = op_cmp(wr, rd);
-    false ? op_writedp(dp, wr) : op_io();
+    0 ? op_writedp(dp, wr) : op_io();
   }
 
   void SMPcore::op_eor_dp_dp() {
@@ -1520,7 +1521,7 @@
     dp = op_readpc();
     wr = op_readdp(dp);
     wr = op_eor(wr, rd);
-    true ? op_writedp(dp, wr) : op_io();
+    1 ? op_writedp(dp, wr) : op_io();
   }
 
   void SMPcore::op_or_dp_dp() {
@@ -1529,7 +1530,7 @@
     dp = op_readpc();
     wr = op_readdp(dp);
     wr = op_or(wr, rd);
-    true ? op_writedp(dp, wr) : op_io();
+    1 ? op_writedp(dp, wr) : op_io();
   }
 
   void SMPcore::op_sbc_dp_dp() {
@@ -1538,7 +1539,7 @@
     dp = op_readpc();
     wr = op_readdp(dp);
     wr = op_sbc(wr, rd);
-    true ? op_writedp(dp, wr) : op_io();
+    1 ? op_writedp(dp, wr) : op_io();
   }
 
 
@@ -1547,7 +1548,7 @@
     dp = op_readpc();
     wr = op_readdp(dp);
     wr = op_adc(wr, rd);
-    true ? op_writedp(dp, wr) : op_io();
+    1 ? op_writedp(dp, wr) : op_io();
   }
 
   void SMPcore::op_and_dp_const() {
@@ -1555,7 +1556,7 @@
     dp = op_readpc();
     wr = op_readdp(dp);
     wr = op_and(wr, rd);
-    true ? op_writedp(dp, wr) : op_io();
+    1 ? op_writedp(dp, wr) : op_io();
   }
 
   void SMPcore::op_cmp_dp_const() {
@@ -1563,7 +1564,7 @@
     dp = op_readpc();
     wr = op_readdp(dp);
     wr = op_cmp(wr, rd);
-    false ? op_writedp(dp, wr) : op_io();
+    0 ? op_writedp(dp, wr) : op_io();
   }
 
   void SMPcore::op_eor_dp_const() {
@@ -1571,7 +1572,7 @@
     dp = op_readpc();
     wr = op_readdp(dp);
     wr = op_eor(wr, rd);
-    true ? op_writedp(dp, wr) : op_io();
+    1 ? op_writedp(dp, wr) : op_io();
   }
 
   void SMPcore::op_or_dp_const() {
@@ -1579,7 +1580,7 @@
     dp = op_readpc();
     wr = op_readdp(dp);
     wr = op_or(wr, rd);
-    true ? op_writedp(dp, wr) : op_io();
+    1 ? op_writedp(dp, wr) : op_io();
   }
 
   void SMPcore::op_sbc_dp_const() {
@@ -1587,7 +1588,7 @@
     dp = op_readpc();
     wr = op_readdp(dp);
     wr = op_sbc(wr, rd);
-    true ? op_writedp(dp, wr) : op_io();
+    1 ? op_writedp(dp, wr) : op_io();
   }
 
 
@@ -1649,7 +1650,7 @@
     bit = dp >> 13;
     dp &= 0x1fff;
     rd  = op_readaddr(dp);
-    rd ^= (1 << bit);
+    rd ^= 1 << bit;
     op_writeaddr(dp, rd);
   }
 
@@ -1893,7 +1894,7 @@
 
   void SMPcore::op_incw_dp() {
     dp  = op_readpc();
-    rd  = op_readdp(dp);
+    rd  = op_readdp(dp) << 0;
     rd ++;
     op_writedp(dp++, rd);
     rd += op_readdp(dp) << 8;
@@ -1904,7 +1905,7 @@
 
   void SMPcore::op_decw_dp() {
     dp  = op_readpc();
-    rd  = op_readdp(dp);
+    rd  = op_readdp(dp) << 0;
     rd --;
     op_writedp(dp++, rd);
     rd += op_readdp(dp) << 8;
@@ -1923,15 +1924,17 @@
   }
 
   void SMPcore::op_sleep() {
-    op_io();
-    op_io();
-    regs.pc--;
+    while(true) {
+      op_io();
+      op_io();
+    }
   }
 
   void SMPcore::op_stop() {
-    op_io();
-    op_io();
-    regs.pc--;
+    while(true) {
+      op_io();
+      op_io();
+    }
   }
 
   void SMPcore::op_xcn() {
@@ -1954,7 +1957,7 @@
     if(regs.p.h || (regs.a & 15) > 0x09) {
       regs.a += 0x06;
     }
-    regs.p.n = (regs.a & 0x80);
+    regs.p.n = !!(regs.a & 0x80);
     regs.p.z = (regs.a == 0);
   }
 
@@ -1968,7 +1971,7 @@
     if(!regs.p.h || (regs.a & 15) > 0x09) {
       regs.a -= 0x06;
     }
-    regs.p.n = (regs.a & 0x80);
+    regs.p.n = !!(regs.a & 0x80);
     regs.p.z = (regs.a == 0);
   }
 
@@ -1998,12 +2001,12 @@
     regs.p.v=regs.p.h=0;
   }
 
+
   void SMPcore::op_notc() {
     op_io();
     op_io();
     regs.p.c = !regs.p.c;
   }
-
 
   void SMPcore::op_ei() {
     op_io();
@@ -2194,7 +2197,7 @@
     regs.a = ya;
     regs.y = ya >> 8;
     //result is set based on y (high-byte) only
-    regs.p.n = (regs.y & 0x80);
+    regs.p.n = !!(regs.y & 0x80);
     regs.p.z = (regs.y == 0);
   }
 
@@ -2212,8 +2215,8 @@
     op_io();
     ya = regs.ya;
     //overflow set if quotient >= 256
-    regs.p.v = (regs.y >= regs.x);
-    regs.p.h = ((regs.y & 15) >= (regs.x & 15));
+    regs.p.v = !!(regs.y >= regs.x);
+    regs.p.h = !!((regs.y & 15) >= (regs.x & 15));
     if(regs.y < (regs.x << 1)) {
       //if quotient is <= 511 (will fit into 9-bit result)
       regs.a = ya / regs.x;
@@ -2225,9 +2228,11 @@
       regs.y = regs.x + (ya - (regs.x << 9)) % (256 - regs.x);
     }
     //result is set based on a (quotient) only
-    regs.p.n = (regs.a & 0x80);
+    regs.p.n = !!(regs.a & 0x80);
     regs.p.z = (regs.a == 0);
   }
+
+
 
 
 

@@ -5,7 +5,7 @@ public:
     ModeBsxSlotted,
     ModeBsx,
     ModeSufamiTurbo,
-    ModeSuperGameboy,
+    ModeSuperGameBoy,
   };
 
   enum Type {
@@ -15,8 +15,8 @@ public:
     TypeBsx,
     TypeSufamiTurboBios,
     TypeSufamiTurbo,
-    TypeSuperGameboyBios,
-    TypeGameboy,
+    TypeSuperGameBoyBios,
+    TypeGameBoy,
     TypeUnknown,
   };
 
@@ -48,9 +48,7 @@ public:
   //properties can be read via operator(), eg "if(cartridge.loaded() == true)";
   //warning: if loaded() == false, no other property is considered valid!
 
-  property_t<bool> loaded;            //is a base cartridge inserted?
-  property_t<bool> bsx_flash_loaded;  //is a BS-X flash cart connected?
-  property_t<bool> patched;           //has a UPS patch been applied?
+  property_t<bool> loaded;  //is a base cartridge inserted?
 
   property_t<Mode>             mode;
   property_t<Region>           region;
@@ -69,21 +67,16 @@ public:
   property_t<bool> has_st010, has_st011, has_st018;
 
   //main interface
-  Type detect_image_type (uint8_t*, unsigned) const;
-  bool load_normal       (uint8_t*, unsigned);
-  bool load_bsx_slotted  (uint8_t*, unsigned, uint8_t*, unsigned);
-  bool load_bsx          (uint8_t*, unsigned, uint8_t*, unsigned);
-  bool load_sufami_turbo (uint8_t*, unsigned, uint8_t*, unsigned, uint8_t*, unsigned);
-  bool load_super_gameboy(uint8_t*, unsigned, uint8_t*, unsigned);
+  void load(Mode);
+//void read();
+//void load();
   void unload();
+  Type detect_image_type(uint8_t *data, unsigned size) const;
 
   Cartridge();
   ~Cartridge();
 
 private:
-  void load_begin(Mode);
-  void load_end();
-
   struct cartinfo_t {
     Type type;
     Region region;
@@ -128,10 +121,10 @@ private:
 
 namespace memory {
   extern MappedRAM cartrom, cartram, cartrtc;
-  extern MappedRAM bscram;
+  extern MappedRAM bsxflash, bsxram, bsxpram;
   extern MappedRAM stArom, stAram;
   extern MappedRAM stBrom, stBram;
-  extern MappedRAM dmgrom, dmgram, dmgrtc;
+  extern MappedRAM gbrom, gbram;
 };
 
 extern Cartridge cartridge;

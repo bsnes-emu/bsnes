@@ -1,27 +1,6 @@
-class Gameboy;
-
-class SuperGameboy : public Memory {
+class SuperGameBoy : public Memory {
 public:
-  Gameboy *gameboy;
   void enter();
-
-  struct Packet {
-    uint8_t data[16];
-    uint8_t& operator[](unsigned addr) { return data[addr & 15]; }
-  };
-  vector<Packet> packet;
-
-  struct MMIO {
-    unsigned r6000;
-    uint8_t  r6003;
-
-    //$6004-$6007
-    uint8_t  joypadid;
-    uint8_t  joypad[4];
-
-    Packet   r7000;
-    unsigned r7800;
-  } mmio;
 
   uint8_t read(unsigned addr);
   void write(unsigned addr, uint8_t data);
@@ -30,15 +9,20 @@ public:
   void enable();
   void power();
   void reset();
-  void unload();
 
-  SuperGameboy();
-  ~SuperGameboy();
+private:
+  library libsgb;
+  uint32_t samplebuffer[4096];
 
-protected:
-  uint64_t multiplier;
-  uint64_t counter;
-  void command_1e();
+  enum { SGB1 = 0, SGB2 = 1 };
+  function<bool (bool, uint8_t*, unsigned, uint8_t*, unsigned)> sgb_init;
+  function<void ()> sgb_term;
+  function<void ()> sgb_power;
+  function<void ()> sgb_reset;
+  function<uint8_t (unsigned)> sgb_read;
+  function<void (unsigned, uint8_t)> sgb_write;
+  function<unsigned (uint32_t*, unsigned)> sgb_run;
 };
 
-extern SuperGameboy sgb;
+extern SuperGameBoy sgb;
+

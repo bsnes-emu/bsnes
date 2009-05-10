@@ -1,3 +1,5 @@
+#ifdef CPUCORE_CPP
+
 inline void CPUcore::op_adc_b() {
   int r;
   if(regs.p.d) {
@@ -363,3 +365,5 @@ inline void CPUcore::op_tsb_w() {
   regs.p.z = (rd.w & regs.a.w) == 0;
   rd.w |= regs.a.w;
 }
+#endif
+

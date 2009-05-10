@@ -181,9 +181,7 @@ void Cheat::disable(unsigned i) {
 //...
 //===============================
 
-bool Cheat::load(const char *fn) {
-  string data;
-  if(!data.readfile(fn)) return false;
+void Cheat::load(string data) {
   data.replace("\r\n", "\n");
   data.qreplace(" ", "");
 
@@ -196,21 +194,16 @@ bool Cheat::load(const char *fn) {
     trim(part[0], "\"");
     add(part[1] == "enabled", /* code = */ part[2], /* desc = */ part[0]);
   }
-
-  return true;
 }
 
-bool Cheat::save(const char *fn) const {
-  file fp;
-  if(!fp.open(fn, file::mode_write)) return false;
+string Cheat::save() const {
+  string data;
   for(unsigned i = 0; i < code.size(); i++) {
-    fp.print(string()
-      << "\"" << code[i].desc << "\", "
-      << (code[i].enabled ? "enabled, " : "disabled, ")
-      << code[i].code << "\r\n");
+    data << "\"" << code[i].desc << "\", "
+         << (code[i].enabled ? "enabled, " : "disabled, ")
+         << code[i].code << "\r\n";
   }
-  fp.close();
-  return true;
+  return data;
 }
 
 void Cheat::clear() {
@@ -395,3 +388,4 @@ string& Cheat::decode_description(string &desc) const {
 }
 
 };
+

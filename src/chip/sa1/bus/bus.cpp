@@ -1,5 +1,7 @@
 #ifdef SA1_CPP
 
+SA1Bus sa1bus;
+
 namespace memory {
   VectorSelectionPage vectorsp;
   StaticRAM iram(2048);

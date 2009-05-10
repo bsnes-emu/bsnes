@@ -1,11 +1,11 @@
-@macro op_rmw_immediate(name, r)
+@macro op_adjust_reg(name, r)
   void {class}::op_{name}_{r}() {
     op_io();
     regs.{r} = op_{name}(regs.{r});
   }
 @endmacro
 
-@macro op_rmw_dp(name)
+@macro op_adjust_dp(name)
   void {class}::op_{name}_dp() {
     dp = op_readpc();
     rd = op_readdp(dp);
@@ -14,7 +14,7 @@
   }
 @endmacro
 
-@macro op_rmw_dpx(name)
+@macro op_adjust_dpx(name)
   void {class}::op_{name}_dpx() {
     dp = op_readpc();
     op_io();
@@ -24,7 +24,7 @@
   }
 @endmacro
 
-@macro op_rmw_addr(name)
+@macro op_adjust_addr(name)
   void {class}::op_{name}_addr() {
     dp  = op_readpc() << 0;
     dp |= op_readpc() << 8;
@@ -34,7 +34,7 @@
   }
 @endmacro
 
-@macro op_rmw_taddr(name, op)
+@macro op_tadjust_addr(name, op)
   void {class}::op_{name}_addr_a() {
     dp  = op_readpc() << 0;
     dp |= op_readpc() << 8;
@@ -46,10 +46,10 @@
   }
 @endmacro
 
-@macro op_rmw_adjust(name, op)
+@macro op_adjustw_dp(name, op)
   void {class}::op_{name}_dp() {
     dp  = op_readpc();
-    rd  = op_readdp(dp);
+    rd  = op_readdp(dp) << 0;
     rd {op};
     op_writedp(dp++, rd);
     rd += op_readdp(dp) << 8;
@@ -58,3 +58,4 @@
     regs.p.z = (rd == 0);
   }
 @endmacro
+

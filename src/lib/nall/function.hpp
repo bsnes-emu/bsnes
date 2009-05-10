@@ -135,6 +135,11 @@ namespace nall {
 
     function() { data.fn_call = 0; }
 
+    function(void *fn) {
+      data.fn_call = &fn_call_global;
+      data.fn_global = (R (*)(PL))fn;
+    }
+
     function(R (*fn)(PL)) {
       data.fn_call = &fn_call_global;
       data.fn_global = fn;
@@ -156,7 +161,8 @@ namespace nall {
       data.object = obj;
     }
 
-    function &operator=(const function &source) { memcpy(&data, &source.data, sizeof(data_t)); return *this; }
+    function& operator=(void *fn) { return operator=(function(fn)); }
+    function& operator=(const function &source) { memcpy(&data, &source.data, sizeof(data_t)); return *this; }
     function(const function &source) { memcpy(&data, &source.data, sizeof(data_t)); }
   };
 

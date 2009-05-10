@@ -32,16 +32,10 @@ public:
   uint8 mmio_read(unsigned addr);
   void mmio_write(unsigned addr, uint8 data);
 
-  MappedRAM sram;
-  MappedRAM psram;
-
   BSXCart();
   ~BSXCart();
 
 private:
-  uint8 *sram_data;  //256kbit SRAM
-  uint8 *psram_data; //  4mbit PSRAM
-
   struct {
     uint8 r[16];
   } regs;

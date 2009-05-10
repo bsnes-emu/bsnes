@@ -1,37 +1,37 @@
-void CPUcore::initialize_opcode_table() {
-  for(unsigned i = 0; i < 256 * 5; i++) op_table[i] = 0;
+#ifdef CPUCORE_CPP
 
+void CPUcore::initialize_opcode_table() {
   //same implementation for all processor states
   #define opA(id, name) \
-    op_table[table_EM + id] = &sCPU::op_ ## name; \
-    op_table[table_MX + id] = &sCPU::op_ ## name; \
-    op_table[table_Mx + id] = &sCPU::op_ ## name; \
-    op_table[table_mX + id] = &sCPU::op_ ## name; \
-    op_table[table_mx + id] = &sCPU::op_ ## name;
+    op_table[table_EM + id] = &CPUcore::op_ ## name; \
+    op_table[table_MX + id] = &CPUcore::op_ ## name; \
+    op_table[table_Mx + id] = &CPUcore::op_ ## name; \
+    op_table[table_mX + id] = &CPUcore::op_ ## name; \
+    op_table[table_mx + id] = &CPUcore::op_ ## name;
 
   //implementation changes based on E processor state
   #define opE(id, name) \
-    op_table[table_EM + id] = &sCPU::op_ ## name ## _e; \
-    op_table[table_MX + id] = &sCPU::op_ ## name ## _n; \
-    op_table[table_Mx + id] = &sCPU::op_ ## name ## _n; \
-    op_table[table_mX + id] = &sCPU::op_ ## name ## _n; \
-    op_table[table_mx + id] = &sCPU::op_ ## name ## _n; \
+    op_table[table_EM + id] = &CPUcore::op_ ## name ## _e; \
+    op_table[table_MX + id] = &CPUcore::op_ ## name ## _n; \
+    op_table[table_Mx + id] = &CPUcore::op_ ## name ## _n; \
+    op_table[table_mX + id] = &CPUcore::op_ ## name ## _n; \
+    op_table[table_mx + id] = &CPUcore::op_ ## name ## _n; \
 
   //implementation changes based on M processor state
   #define opM(id, name) \
-    op_table[table_EM + id] = &sCPU::op_ ## name ## _b; \
-    op_table[table_MX + id] = &sCPU::op_ ## name ## _b; \
-    op_table[table_Mx + id] = &sCPU::op_ ## name ## _b; \
-    op_table[table_mX + id] = &sCPU::op_ ## name ## _w; \
-    op_table[table_mx + id] = &sCPU::op_ ## name ## _w;
+    op_table[table_EM + id] = &CPUcore::op_ ## name ## _b; \
+    op_table[table_MX + id] = &CPUcore::op_ ## name ## _b; \
+    op_table[table_Mx + id] = &CPUcore::op_ ## name ## _b; \
+    op_table[table_mX + id] = &CPUcore::op_ ## name ## _w; \
+    op_table[table_mx + id] = &CPUcore::op_ ## name ## _w;
 
   //implementation changes based on X processor state
   #define opX(id, name) \
-    op_table[table_EM + id] = &sCPU::op_ ## name ## _b; \
-    op_table[table_MX + id] = &sCPU::op_ ## name ## _b; \
-    op_table[table_Mx + id] = &sCPU::op_ ## name ## _w; \
-    op_table[table_mX + id] = &sCPU::op_ ## name ## _b; \
-    op_table[table_mx + id] = &sCPU::op_ ## name ## _w;
+    op_table[table_EM + id] = &CPUcore::op_ ## name ## _b; \
+    op_table[table_MX + id] = &CPUcore::op_ ## name ## _b; \
+    op_table[table_Mx + id] = &CPUcore::op_ ## name ## _w; \
+    op_table[table_mX + id] = &CPUcore::op_ ## name ## _b; \
+    op_table[table_mx + id] = &CPUcore::op_ ## name ## _w;
 
   opE(0x00, brk)         opM(0x01, ora_idpx)   opE(0x02, cop)        opM(0x03, ora_sr)
   opM(0x04, tsb_dp)      opM(0x05, ora_dp)     opM(0x06, asl_dp)     opM(0x07, ora_ildp)
@@ -136,3 +136,6 @@ void CPUcore::update_table() {
     }
   }
 }
+
+#endif
+

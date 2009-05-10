@@ -1,4 +1,4 @@
-#define BSNES_VERSION "0.045.09"
+#define BSNES_VERSION "0.046"
 #define BSNES_TITLE   "bsnes v" BSNES_VERSION
 
 #define BUSCORE sBus
@@ -20,8 +20,9 @@
 #include <nall/array.hpp>
 #include <nall/bit.hpp>
 #include <nall/detect.hpp>
+#include <nall/dl.hpp>
 #include <nall/endian.hpp>
-#include <nall/file.hpp>
+#include <nall/function.hpp>
 #include <nall/moduloarray.hpp>
 #include <nall/new.hpp>
 #include <nall/platform.hpp>
@@ -40,3 +41,4 @@ typedef uint16_t uint16;
 typedef uint32_t uint32;
 
 #include "interface.hpp"
+

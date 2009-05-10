@@ -137,8 +137,7 @@ void PathSettingsWindow::syncUi() {
 void PathSettingsWindow::selectGamePath() {
   string path = utility.selectFolder("Default Game Path");
   if(path.length() > 0) {
-    config.path.rom = strtr(path, "\\", "/");
-    if(!strend(config.path.rom, "/")) config.path.rom << "/";
+    config.path.rom = path;
     syncUi();
   }
 }
@@ -151,8 +150,7 @@ void PathSettingsWindow::defaultGamePath() {
 void PathSettingsWindow::selectSavePath() {
   string path = utility.selectFolder("Default Save RAM Path");
   if(path.length() > 0) {
-    config.path.save = strtr(path, "\\", "/");
-    if(!strend(config.path.save, "/")) config.path.save << "/";
+    config.path.save = path;
     syncUi();
   }
 }
@@ -165,8 +163,7 @@ void PathSettingsWindow::defaultSavePath() {
 void PathSettingsWindow::selectPatchPath() {
   string path = utility.selectFolder("Default UPS Patch Path");
   if(path.length() > 0) {
-    config.path.patch = strtr(path, "\\", "/");
-    if(!strend(config.path.patch, "/")) config.path.patch << "/";
+    config.path.patch = path;
     syncUi();
   }
 }
@@ -179,8 +176,7 @@ void PathSettingsWindow::defaultPatchPath() {
 void PathSettingsWindow::selectCheatPath() {
   string path = utility.selectFolder("Default Cheat File Path");
   if(path.length() > 0) {
-    config.path.cheat = strtr(path, "\\", "/");
-    if(!strend(config.path.cheat, "/")) config.path.cheat << "/";
+    config.path.cheat = path;
     syncUi();
   }
 }
@@ -193,8 +189,7 @@ void PathSettingsWindow::defaultCheatPath() {
 void PathSettingsWindow::selectDataPath() {
   string path = utility.selectFolder("Default Export Data Path");
   if(path.length() > 0) {
-    config.path.data = strtr(path, "\\", "/");
-    if(!strend(config.path.data, "/")) config.path.data << "/";
+    config.path.data = path;
     syncUi();
   }
 }

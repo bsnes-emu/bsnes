@@ -13,21 +13,24 @@ void sCPU::add_clocks(unsigned clocks) {
   unsigned ticks = clocks >> 1;
   while(ticks--) {
     ppu.tick();
-    if((ppu.hcounter() & 2) == 0) {
-      system.input.tick();
-    } else {
+    if(ppu.hcounter() & 2) {
+      input.tick();
       poll_interrupts();
     }
   }
   scheduler.addclocks_cpu(clocks);
 }
 
+//called by ppu.tick() when Hcounter=0
 void sCPU::scanline() {
   status.dma_counter = (status.dma_counter + status.line_clocks) & 7;
   status.line_clocks = ppu.lineclocks();
 
-  //forcefully sync S-CPU and S-SMP, in case chips are not communicating
-  if((ppu.vcounter() & 7) == 0) scheduler.sync_cpusmp();
+  //forcefully sync S-CPU to other processors, in case chips are not communicating
+  scheduler.sync_cpuppu();
+  scheduler.sync_cpucop();
+  scheduler.sync_cpusmp();
+  system.scanline();
 
   if(ppu.vcounter() == 0) {
     //hdma init triggers once every frame
@@ -44,7 +47,7 @@ void sCPU::scanline() {
   }
 
   if(status.auto_joypad_poll == true && ppu.vcounter() == (ppu.overscan() == false ? 227 : 242)) {
-    system.input.poll();
+    input.poll();
     run_auto_joypad_poll();
   }
 }

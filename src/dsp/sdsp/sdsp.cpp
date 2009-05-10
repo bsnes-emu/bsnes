@@ -1,12 +1,11 @@
 /*
   S-DSP emulator
-  license: LGPLv2
-
   Note: this is basically a C++ cothreaded implementation of Shay Green's (blargg's) S-DSP emulator.
   The actual algorithms, timing information, tables, variable names, etc were all from him.
 */
 
 #include <../base.hpp>
+
 #define SDSP_CPP
 namespace SNES {
 
@@ -327,3 +326,4 @@ sDSP::~sDSP() {
 }
 
 };
+

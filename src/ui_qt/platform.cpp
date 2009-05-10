@@ -56,9 +56,19 @@
 #else
   #define None XNone
   #define Window XWindow
-  #include <X11/extensions/XTest.h>
+  #include <X11/Xlib.h>
   #undef None
   #undef Window
+
+  struct LibXtst : public library {
+    function<int (Display*, unsigned int, Bool, unsigned long)> XTestFakeKeyEvent;
+
+    LibXtst() {
+      if(open("Xtst")) {
+        XTestFakeKeyEvent = sym("XTestFakeKeyEvent");
+      }
+    }
+  } libXtst;
 
   //POSIX-compatible (Linux, BSD, etc.)
   char* userpath(char *path) {
@@ -78,11 +88,7 @@
   }
 
   void supressScreenSaver() {
-    static clock_t delta_x = 0, delta_y = 0;
-
-    delta_y = clock();
-    if(delta_y - delta_x < CLOCKS_PER_SEC * 20) return;
-    delta_x = delta_y;
+    if(!libXtst.XTestFakeKeyEvent) return;
 
     //XSetScreenSaver(timeout = 0) does not work
     //XResetScreenSaver() does not work
@@ -93,7 +99,7 @@
     //keycode of 255 does not map to any actual key,
     //but it will block screensaver and power management.
     Display *display = XOpenDisplay(0);
-    XTestFakeKeyEvent(display, 255, True,  0);
-    XTestFakeKeyEvent(display, 255, False, 0);
+    libXtst.XTestFakeKeyEvent(display, 255, True,  0);
+    libXtst.XTestFakeKeyEvent(display, 255, False, 0);
   }
 #endif

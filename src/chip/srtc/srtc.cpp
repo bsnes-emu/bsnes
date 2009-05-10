@@ -3,6 +3,8 @@
 #define SRTC_CPP
 namespace SNES {
 
+SRTC srtc;
+
 const unsigned SRTC::months[12] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
 
 void SRTC::init() {
@@ -227,3 +229,4 @@ SRTC::SRTC() {
 }
 
 };
+

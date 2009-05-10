@@ -24,3 +24,4 @@ public:
     return inputManager.getStatus(deviceid, id);
   }
 } interface;
+

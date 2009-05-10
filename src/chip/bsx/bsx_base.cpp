@@ -1,5 +1,7 @@
 #ifdef BSX_CPP
 
+BSXBase bsxbase;
+
 void BSXBase::init() {
 }
 
@@ -135,3 +137,4 @@ void BSXBase::mmio_write(unsigned addr, uint8 data) {
 }
 
 #endif
+

@@ -1,6 +1,8 @@
-#ifdef SNES_CPP
+#ifdef SYSTEM_CPP
 
-uint8 System::Input::port_read(bool portnumber) {
+Input input;
+
+uint8 Input::port_read(bool portnumber) {
   port_t &p = port[portnumber];
 
   switch(p.device) {
@@ -230,7 +232,7 @@ uint8 System::Input::port_read(bool portnumber) {
 }
 
 //scan all input; update cursor positions if needed
-void System::Input::update() {
+void Input::update() {
   system.interface->input_poll();
   port_t &p = port[1];
 
@@ -272,9 +274,20 @@ void System::Input::update() {
       }
     } break;
   }
+
+  if(latchy < 0 || latchy >= (ppu.overscan() ? 240 : 225) || latchx < 0 || latchx >= 256) {
+    //cursor is offscreen, set to invalid position so counters are not latched
+    latchx = ~0;
+    latchy = ~0;
+  } else {
+    //cursor is onscreen
+    latchx += 40;  //offset trigger position to simulate hardware latching delay
+    latchx <<= 2;  //dot -> clock conversion
+    latchx +=  2;  //align trigger on half-dot ala interrupts (speed optimization for sCPU::add_clocks)
+  }
 }
 
-void System::Input::port_set_device(bool portnumber, unsigned device) {
+void Input::port_set_device(bool portnumber, unsigned device) {
   port_t &p = port[portnumber];
 
   p.device = device;
@@ -326,7 +339,7 @@ void System::Input::port_set_device(bool portnumber, unsigned device) {
   }
 }
 
-void System::Input::poll() {
+void Input::poll() {
   port[0].counter0 = 0;
   port[0].counter1 = 0;
   port[1].counter0 = 0;
@@ -335,7 +348,8 @@ void System::Input::poll() {
   port[1].justifier.active = !port[1].justifier.active;
 }
 
-void System::Input::init() {
+void Input::init() {
 }
 
 #endif
+

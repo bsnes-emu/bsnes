@@ -46,10 +46,6 @@ void LoaderWindow::setup() {
 
     slot2Clear = new QPushButton("Clear");
     grid->addWidget(slot2Clear, 2, 3);
-
-    bypassSuperGameboy = new QCheckBox("Bypass Super Gameboy BIOS");
-    bypassSuperGameboy->setEnabled(false);
-    grid->addWidget(bypassSuperGameboy, 3, 0, 1, 3);
   }
   grid->setSpacing(Style::WidgetSpacing);
   layout->addLayout(grid);
@@ -90,7 +86,6 @@ void LoaderWindow::loadBsxSlottedCartridge(const char *filebase, const char *fil
   baseLabel->show(),  baseFile->show(),  baseBrowse->show(),  baseClear->show();
   slot1Label->show(), slot1File->show(), slot1Browse->show(), slot1Clear->show();
   slot2Label->hide(), slot2File->hide(), slot2Browse->hide(), slot2Clear->hide();
-  bypassSuperGameboy->hide();
 
   slot1Label->setText("Slot cartridge:");
 
@@ -107,7 +102,6 @@ void LoaderWindow::loadBsxCartridge(const char *fileBase, const char *fileSlot1)
   baseLabel->show(),  baseFile->show(),  baseBrowse->show(),  baseClear->show();
   slot1Label->show(), slot1File->show(), slot1Browse->show(), slot1Clear->show();
   slot2Label->hide(), slot2File->hide(), slot2Browse->hide(), slot2Clear->hide();
-  bypassSuperGameboy->hide();
 
   slot1Label->setText("Slot cartridge:");
 
@@ -124,7 +118,6 @@ void LoaderWindow::loadSufamiTurboCartridge(const char *fileBase, const char *fi
   baseLabel->show(),  baseFile->show(),  baseBrowse->show(),  baseClear->show();
   slot1Label->show(), slot1File->show(), slot1Browse->show(), slot1Clear->show();
   slot2Label->show(), slot2File->show(), slot2Browse->show(), slot2Clear->show();
-  bypassSuperGameboy->hide();
 
   slot1Label->setText("Slot A cartridge:");
   slot2Label->setText("Slot B cartridge:");
@@ -138,21 +131,20 @@ void LoaderWindow::loadSufamiTurboCartridge(const char *fileBase, const char *fi
   showWindow("Load Sufami Turbo Cartridge");
 }
 
-void LoaderWindow::loadSuperGameboyCartridge(const char *fileBase, const char *fileSlot1) {
+void LoaderWindow::loadSuperGameBoyCartridge(const char *fileBase, const char *fileSlot1) {
   window->hide();
   baseLabel->show(),  baseFile->show(),  baseBrowse->show(),  baseClear->show();
   slot1Label->show(), slot1File->show(), slot1Browse->show(), slot1Clear->show();
   slot2Label->hide(), slot2File->hide(), slot2Browse->hide(), slot2Clear->hide();
-  bypassSuperGameboy->show();
 
-  slot1Label->setText("Gameboy cartridge:");
+  slot1Label->setText("Game Boy cartridge:");
 
   baseFile->setText(fileBase);
   slot1File->setText(fileSlot1);
 
   syncUi();
-  mode = SNES::Cartridge::ModeSuperGameboy;
-  showWindow("Load Super Gameboy Cartridge");
+  mode = SNES::Cartridge::ModeSuperGameBoy;
+  showWindow("Load Super Game Boy Cartridge");
 }
 
 void LoaderWindow::showWindow(const char *title) {
@@ -162,7 +154,7 @@ void LoaderWindow::showWindow(const char *title) {
 }
 
 void LoaderWindow::selectBaseCartridge() {
-  string filename = utility.selectCartridge(Utility::SnesCartridge);
+  string filename = utility.selectCartridge();
   if(filename.length() > 0) baseFile->setText(utf8() << filename);
   syncUi();
 }
@@ -173,12 +165,7 @@ void LoaderWindow::clearBaseCartridge() {
 }
 
 void LoaderWindow::selectSlot1Cartridge() {
-  string filename;
-  if(mode == SNES::Cartridge::ModeSuperGameboy) {
-    filename = utility.selectCartridge(Utility::GameboyCartridge);
-  } else {
-    filename = utility.selectCartridge(Utility::SnesCartridge);
-  }
+  string filename = utility.selectCartridge();
   if(filename.length() > 0) slot1File->setText(utf8() << filename);
   syncUi();
 }
@@ -189,7 +176,7 @@ void LoaderWindow::clearSlot1Cartridge() {
 }
 
 void LoaderWindow::selectSlot2Cartridge() {
-  string filename = utility.selectCartridge(Utility::SnesCartridge);
+  string filename = utility.selectCartridge();
   if(filename.length() > 0) slot2File->setText(utf8() << filename);
   syncUi();
 }
@@ -207,22 +194,22 @@ void LoaderWindow::onLoad() {
 
   switch(mode) {
     case SNES::Cartridge::ModeBsxSlotted: {
-      cartridge.loadBsxSlotted(base, slot1);
+      utility.loadCartridgeBsxSlotted(base, slot1);
     } break;
 
     case SNES::Cartridge::ModeBsx: {
       config.path.bsx = base;
-      cartridge.loadBsx(base, slot1);
+      utility.loadCartridgeBsx(base, slot1);
     } break;
 
     case SNES::Cartridge::ModeSufamiTurbo: {
       config.path.st = base;
-      cartridge.loadSufamiTurbo(base, slot1, slot2);
+      utility.loadCartridgeSufamiTurbo(base, slot1, slot2);
     } break;
 
-    case SNES::Cartridge::ModeSuperGameboy: {
+    case SNES::Cartridge::ModeSuperGameBoy: {
       config.path.sgb = base;
-      cartridge.loadSuperGameboy(base, slot1);
+      utility.loadCartridgeSuperGameBoy(base, slot1);
     } break;
   }
 }

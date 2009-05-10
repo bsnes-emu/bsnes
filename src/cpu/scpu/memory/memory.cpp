@@ -4,11 +4,6 @@ void sCPU::op_io() {
   status.clock_count = 6;
   precycle_edge();
   add_clocks(6);
-
-  if(regs.wai) {
-    scheduler.sync_cpucop();
-    scheduler.sync_cpuppu();
-  }
   cycle_edge();
 }
 
@@ -16,9 +11,7 @@ uint8 sCPU::op_read(uint32 addr) {
   status.clock_count = speed(addr);
   precycle_edge();
   add_clocks(status.clock_count - 4);
-
   scheduler.sync_cpucop();
-  scheduler.sync_cpuppu();
   regs.mdr = bus.read(addr);
   add_clocks(4);
   cycle_edge();
@@ -29,9 +22,7 @@ void sCPU::op_write(uint32 addr, uint8 data) {
   status.clock_count = speed(addr);
   precycle_edge();
   add_clocks(status.clock_count);
-
   scheduler.sync_cpucop();
-  scheduler.sync_cpuppu();
   bus.write(addr, regs.mdr = data);
   cycle_edge();
 }
@@ -47,3 +38,4 @@ unsigned sCPU::speed(unsigned addr) const {
 }
 
 #endif
+

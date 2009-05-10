@@ -3,6 +3,8 @@
 #define SDD1_CPP
 namespace SNES {
 
+SDD1 sdd1;
+
 #include "sdd1emu.cpp"
 
 void SDD1::init() {}
@@ -156,5 +158,5 @@ SDD1::SDD1() {
 SDD1::~SDD1() {
   delete[] buffer.data;
 }
-
 };
+

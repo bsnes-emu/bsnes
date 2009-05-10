@@ -42,7 +42,7 @@ void sCPU::mmio_w4016(uint8 data) {
   status.joypad_strobe_latch = !!(data & 1);
 
   if(status.joypad_strobe_latch == 1) {
-    system.input.poll();
+    input.poll();
   }
 }
 
@@ -54,7 +54,7 @@ void sCPU::mmio_w4016(uint8 data) {
 //realtime or buffered status of joypadN.b
 uint8 sCPU::mmio_r4016() {
   uint8 r = regs.mdr & 0xfc;
-  r |= system.input.port_read(0) & 3;
+  r |= input.port_read(0) & 3;
   return r;
 }
 
@@ -64,7 +64,7 @@ uint8 sCPU::mmio_r4016() {
 //1-0 = Joypad serial data
 uint8 sCPU::mmio_r4017() {
   uint8 r = (regs.mdr & 0xe0) | 0x1c;
-  r |= system.input.port_read(1) & 3;
+  r |= input.port_read(1) & 3;
   return r;
 }
 

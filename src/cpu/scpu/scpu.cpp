@@ -96,5 +96,5 @@ sCPU::sCPU() {
 
 sCPU::~sCPU() {
 }
-
 };
+

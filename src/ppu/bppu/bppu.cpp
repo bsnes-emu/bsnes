@@ -7,32 +7,31 @@ namespace SNES {
 #include "bppu_render.cpp"
 
 void bPPU::enter() {
-  loop:
-  //H =    0 (initialize)
-  scanline();
-  if(ivcounter() == 0) frame();
-  add_clocks(10);
+  while(true) {
+    //H =    0 (initialize)
+    scanline();
+    if(ivcounter() == 0) frame();
+    add_clocks(10);
 
-  //H =   10 (OAM address reset)
-  if(ivcounter() == (!overscan() ? 225 : 240)) {
-    if(regs.display_disabled == false) {
-      regs.oam_addr = regs.oam_baseaddr << 1;
-      regs.oam_firstsprite = (regs.oam_priority == false) ? 0 : (regs.oam_addr >> 2) & 127;
+    //H =   10 (OAM address reset)
+    if(ivcounter() == (!overscan() ? 225 : 240)) {
+      if(regs.display_disabled == false) {
+        regs.oam_addr = regs.oam_baseaddr << 1;
+        regs.oam_firstsprite = (regs.oam_priority == false) ? 0 : (regs.oam_addr >> 2) & 127;
+      }
     }
+    add_clocks(502);
+
+    //H =  512 (render)
+    render_scanline();
+    add_clocks(640);
+
+    //H = 1152 (cache OBSEL)
+    cache.oam_basesize   = regs.oam_basesize;
+    cache.oam_nameselect = regs.oam_nameselect;
+    cache.oam_tdaddr     = regs.oam_tdaddr;
+    add_clocks(ilineclocks() - 1152);  //seek to start of next scanline
   }
-  add_clocks(502);
-
-  //H =  512 (render)
-  render_scanline();
-  add_clocks(640);
-
-  //H = 1152 (cache OBSEL)
-  cache.oam_basesize   = regs.oam_basesize;
-  cache.oam_nameselect = regs.oam_nameselect;
-  cache.oam_tdaddr     = regs.oam_tdaddr;
-  add_clocks(ilineclocks() - 1152);  //seek to start of next scanline
-
-  goto loop;
 }
 
 void bPPU::add_clocks(unsigned clocks) {
@@ -42,7 +41,6 @@ void bPPU::add_clocks(unsigned clocks) {
 }
 
 void bPPU::scanline() {
-  system.scanline();
   line = ivcounter();
 
   if(line == 0) {
@@ -347,5 +345,5 @@ bPPU::bPPU() {
 bPPU::~bPPU() {
   free_tiledata_cache();
 }
-
 };
+

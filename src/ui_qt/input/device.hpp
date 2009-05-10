@@ -1,16 +1,16 @@
 struct InputDevice : InputGroup {
-  SNES::System::Input::DeviceID id;
+  SNES::Input::DeviceID id;
   enum Port { Port1, Port2 };
   const bool port;
 
-  InputDevice(SNES::System::Input::DeviceID i, bool p, const char *n);
+  InputDevice(SNES::Input::DeviceID i, bool p, const char *n);
 };
 
 struct Joypad : InputDevice {
   InputObject up, down, left, right, a, b, x, y, l, r, select, start;
 
   int16_t state(unsigned index) const;
-  Joypad(SNES::System::Input::DeviceID id, bool port, const char *name,
+  Joypad(SNES::Input::DeviceID id, bool port, const char *name,
   string&, string&, string&, string&, string&, string&,
   string&, string&, string&, string&, string&, string&);
 };
@@ -19,7 +19,7 @@ struct Mouse : InputDevice {
   InputObject x, y, left, right;
 
   int16_t state(unsigned index) const;
-  Mouse(SNES::System::Input::DeviceID id, bool port, const char *name,
+  Mouse(SNES::Input::DeviceID id, bool port, const char *name,
   string&, string&, string&, string&);
 };
 
@@ -27,7 +27,7 @@ struct SuperScope : InputDevice {
   InputObject x, y, trigger, cursor, turbo, pause;
 
   int16_t state(unsigned index) const;
-  SuperScope(SNES::System::Input::DeviceID id, bool port, const char *name,
+  SuperScope(SNES::Input::DeviceID id, bool port, const char *name,
   string&, string&, string&, string&, string&, string&);
 };
 
@@ -35,7 +35,7 @@ struct Justifier : InputDevice {
   InputObject x, y, trigger, start;
 
   int16_t state(unsigned index) const;
-  Justifier(SNES::System::Input::DeviceID id, bool port, const char *name,
+  Justifier(SNES::Input::DeviceID id, bool port, const char *name,
   string&, string&, string&, string&);
 };
 
@@ -44,7 +44,7 @@ struct InputDevicePool : public array<InputDevice*> {
   void bind();
   void clear();
   void poll(const int16_t *table);
-  InputDevice* find(SNES::System::Input::DeviceID id);
+  InputDevice* find(SNES::Input::DeviceID id);
   InputDevicePool();
 
 private:

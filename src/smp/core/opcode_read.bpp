@@ -1,11 +1,11 @@
-@macro op_read_const(name, r)
+@macro op_read_reg_const(name, r)
   void {class}::op_{name}_{r}_const() {
     rd = op_readpc();
     regs.{r} = op_{name}(regs.{r}, rd);
   }
 @endmacro
 
-@macro op_read_ix(name)
+@macro op_read_a_ix(name)
   void {class}::op_{name}_a_ix() {
     op_io();
     rd = op_readdp(regs.x);
@@ -13,7 +13,7 @@
   }
 @endmacro
 
-@macro op_read_dp(name, r)
+@macro op_read_reg_dp(name, r)
   void {class}::op_{name}_{r}_dp() {
     dp = op_readpc();
     rd = op_readdp(dp);
@@ -21,7 +21,7 @@
   }
 @endmacro
 
-@macro op_read_dpx(name)
+@macro op_read_a_dpx(name)
   void {class}::op_{name}_a_dpx() {
     dp = op_readpc();
     op_io();
@@ -30,7 +30,7 @@
   }
 @endmacro
 
-@macro op_read_addr(name, r)
+@macro op_read_reg_addr(name, r)
   void {class}::op_{name}_{r}_addr() {
     dp  = op_readpc() << 0;
     dp |= op_readpc() << 8;
@@ -39,17 +39,17 @@
   }
 @endmacro
 
-@macro op_read_addrn(name, r)
-  void {class}::op_{name}_a_addr{r}() {
+@macro op_read_a_addri(name, i)
+  void {class}::op_{name}_a_addr{i}() {
     dp  = op_readpc() << 0;
     dp |= op_readpc() << 8;
     op_io();
-    rd  = op_readaddr(dp + regs.{r});
+    rd = op_readaddr(dp + regs.{i});
     regs.a = op_{name}(regs.a, rd);
   }
 @endmacro
 
-@macro op_read_idpx(name)
+@macro op_read_a_idpx(name)
   void {class}::op_{name}_a_idpx() {
     dp  = op_readpc() + regs.x;
     op_io();
@@ -60,7 +60,7 @@
   }
 @endmacro
 
-@macro op_read_idpy(name)
+@macro op_read_a_idpy(name)
   void {class}::op_{name}_a_idpy() {
     dp  = op_readpc();
     op_io();
@@ -71,7 +71,7 @@
   }
 @endmacro
 
-@macro op_rmw_ix_iy(name, write)
+@macro op_read_ix_iy(name, write)
   void {class}::op_{name}_ix_iy() {
     op_io();
     rd = op_readdp(regs.y);
@@ -81,7 +81,7 @@
   }
 @endmacro
 
-@macro op_rmw_dp_dp(name, write)
+@macro op_read_dp_dp(name, write)
   void {class}::op_{name}_dp_dp() {
     sp = op_readpc();
     rd = op_readdp(sp);
@@ -92,7 +92,7 @@
   }
 @endmacro
 
-@macro op_rmw_dp_const(name, write)
+@macro op_read_dp_const(name, write)
   void {class}::op_{name}_dp_const() {
     rd = op_readpc();
     dp = op_readpc();
@@ -151,7 +151,7 @@
     bit = dp >> 13;
     dp &= 0x1fff;
     rd  = op_readaddr(dp);
-    rd ^= (1 << bit);
+    rd ^= 1 << bit;
     op_writeaddr(dp, rd);
   }
 @endmacro
@@ -167,3 +167,4 @@
     regs.p.c = regs.p.c | {op}(rd & (1 << bit));
   }
 @endmacro
+

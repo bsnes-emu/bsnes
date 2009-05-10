@@ -13,7 +13,7 @@ void SMPcore::disassemble_opcode(char *output) {
 
   sprintf(s, "..%.4x ", regs.pc);
 
-  //todo: this needs to access IPLROM at $ffc0+, when enabled
+  //TODO: read from IPLROM when applicable
   op  = memory::apuram[(uint16_t)(regs.pc + 0)];
   op0 = memory::apuram[(uint16_t)(regs.pc + 1)];
   op1 = memory::apuram[(uint16_t)(regs.pc + 2)];
@@ -302,3 +302,4 @@ void SMPcore::disassemble_opcode(char *output) {
 }
 
 #endif
+

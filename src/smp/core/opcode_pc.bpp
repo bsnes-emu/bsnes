@@ -44,7 +44,7 @@
     if(regs.a == sp) return;
     op_io();
     op_io();
-    regs.pc += (int8_t)rd;
+    regs.pc += (int8_t)rd;   
   }
 @endmacro
 
@@ -167,3 +167,4 @@
     regs.pc = rd;
   }
 @endmacro
+

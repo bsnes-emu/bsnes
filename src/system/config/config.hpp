@@ -1,4 +1,4 @@
-struct Config {
+struct Configuration {
   unsigned controller_port1;
   unsigned controller_port2;
   unsigned expansion_port;
@@ -26,7 +26,8 @@ struct Config {
     unsigned version;
   } ppu2;
 
-  Config();
+  Configuration();
 };
 
-extern Config config;
+extern Configuration config;
+

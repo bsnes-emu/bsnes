@@ -1,79 +1,58 @@
-##############################
-### platform configuration ###
-##############################
-
 objects := main $(if $(call streq,$(platform),win),resource) $(objects)
 
-moc = moc
-rcc = rcc
-
-ifeq ($(platform),x) # X11
-  link += $(call mklib,Xtst)
-  link += `pkg-config --libs QtCore QtGui`
-  qtflags = `pkg-config --cflags QtCore QtGui`
-else ifeq ($(platform),win) # Windows
-  qtdir = c:/qt450
-
-  link += $(call mklibpath,$(qtdir)/lib)
-  link += $(call mklibpath,$(qtdir)/plugins/imageformats)
-
-  link += $(call mklib,mingw32)
-  link += $(call mklib,qtmain)
-  link += $(call mklib,QtGui)
-  link += $(call mklib,comdlg32)
-  link += $(call mklib,oleaut32)
-  link += $(call mklib,imm32)
-  link += $(call mklib,winmm)
-  link += $(call mklib,winspool)
-  link += $(call mklib,msimg32)
-  link += $(call mklib,QtCore)
-  link += $(call mklib,ole32)
-  link += $(call mklib,advapi32)
-  link += $(call mklib,ws2_32)
-  link += $(call mklib,uuid)
-  link += $(call mklib,gdi32)
-
-  # optional image-file support:
-  # link += $(call mklib,qjpeg)
-  # link += $(call mklib,qmng)
-
-  qtflags  = $(call mkincpath,$(qtdir)/include)
-  qtflags += $(call mkincpath,$(qtdir)/include/QtCore)
-  qtflags += $(call mkincpath,$(qtdir)/include/QtGui)
+ifeq ($(moc),)
+moc := moc
 endif
 
-moc_objects = \
-  $(ui)/base/main.moc \
-  $(ui)/base/loader.moc \
-  $(ui)/base/htmlviewer.moc \
-  $(ui)/base/about.moc \
-  $(ui)/settings/settings.moc \
-  $(ui)/settings/video.moc \
-  $(ui)/settings/audio.moc \
-  $(ui)/settings/input.moc \
-  $(ui)/settings/paths.moc \
-  $(ui)/settings/cheateditor.moc \
-  $(ui)/settings/advanced.moc \
-  $(ui)/settings/utility/inputcapture.moc \
-  $(ui)/settings/utility/codeeditor.moc \
+ifeq ($(rcc),)
+rcc := rcc
+endif
+
+ifeq ($(platform),x)
+  qtflags = `pkg-config --cflags QtCore QtGui`
+  link += `pkg-config --libs QtCore QtGui`
+else ifeq ($(platform),win)
+  ifeq ($(qtpath),)
+    # find Qt install directory from PATH environment variable
+    qtpath := $(foreach path,$(subst ;, ,$(PATH)),$(if $(wildcard $(path)/$(moc).exe),$(path)))
+    qtpath := $(strip $(qtpath))
+    qtpath := $(subst \,/,$(qtpath))
+    qtpath := $(patsubst %/bin,%,$(qtpath))
+  endif
+
+  qtflags := -I$(qtpath)/include
+  qtflags += -I$(qtpath)/include/QtCore
+  qtflags += -I$(qtpath)/include/QtGui
+
+  link += -L$(qtpath)/lib
+  link += -L$(qtpath)/plugins/imageformats
+
+  link += -lmingw32 -lqtmain -lQtGui -lcomdlg32 -loleaut32 -limm32 -lwinmm
+  link += -lwinspool -lmsimg32 -lQtCore -lole32 -ladvapi32 -lws2_32 -luuid -lgdi32
+
+  # optional image-file support:
+  # link += -lqjpeg -lqmng
+endif
+
+moc_headers := $(call rwildcard,$(ui)/,%.mh)
+moc_objects := $(patsubst %.mh,%.moc,$(moc_headers))
 
 #############
 ### rules ###
 #############
 
-%.moc: $<; $(moc) $(patsubst %.moc,%.hpp,$@) -o $@
-$(foreach object,$(moc_objects),$(eval $(object): $(patsubst %.moc,%.hpp,$(object))))
+# automatically run moc on all .mh (.MocHeader) files
+%.moc: $<; $(moc) -f $< -o $@
+$(foreach f,$(moc_objects),$(eval $f: $(patsubst %.moc,%.mh,$f)))
 
-obj/main.$(obj): $(ui)/main.cpp \
-$(ui)/* $(ui)/cartridge/* $(ui)/input/* $(ui)/utility/* $(ui)/base/* $(ui)/settings/* $(ui)/settings/utility/* \
-data/*
+obj/main.o: $(ui)/main.cpp $(call rwildcard,$(ui)/)
 	$(call compile,$(qtflags))
 
 $(ui)/resource/resource.rcc: $(ui)/resource/resource.qrc data/*
 	$(rcc) $(ui)/resource/resource.qrc -o $(ui)/resource/resource.rcc
 
-obj/resource.$(obj): $(ui)/resource/resource.rc
-	windres $(ui)/resource/resource.rc obj/resource.$(obj)
+obj/resource.o: $(ui)/resource/resource.rc
+	windres $(ui)/resource/resource.rc obj/resource.o
 
 ###############
 ### targets ###
@@ -81,5 +60,5 @@ obj/resource.$(obj): $(ui)/resource/resource.rc
 
 ui_build: $(ui)/resource/resource.rcc $(moc_objects);
 ui_clean:
-	-$(foreach object,$(moc_objects),@$(call delete,$(object)))
+	-$(foreach f,$(moc_objects),@$(call delete,$f))
 	-@$(call delete,$(ui)/resource/resource.rcc)

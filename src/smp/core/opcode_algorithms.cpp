@@ -124,3 +124,4 @@ uint8 SMPcore::op_ror(uint8 x) {
 }
 
 #endif
+

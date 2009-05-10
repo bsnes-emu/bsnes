@@ -1,5 +1,7 @@
 #ifdef BSX_CPP
 
+BSXCart bsxcart;
+
 void BSXCart::init() {
 }
 
@@ -20,7 +22,7 @@ void BSXCart::reset() {
 }
 
 void BSXCart::update_memory_map() {
-  Memory &cart = (regs.r[0x01] & 0x80) == 0x00 ? (Memory&)bsxflash : (Memory&)psram;
+  Memory &cart = (regs.r[0x01] & 0x80) == 0x00 ? (Memory&)bsxflash : (Memory&)memory::bsxpram;
 
   if((regs.r[0x02] & 0x80) == 0x00) {
     //LoROM mapping
@@ -35,16 +37,16 @@ void BSXCart::update_memory_map() {
   }
 
   if(regs.r[0x03] & 0x80) {
-    bus.map(Bus::MapLinear, 0x60, 0x6f, 0x0000, 0xffff, psram);
-  //bus.map(Bus::MapLinear, 0x70, 0x77, 0x0000, 0xffff, psram);
+    bus.map(Bus::MapLinear, 0x60, 0x6f, 0x0000, 0xffff, memory::bsxpram);
+  //bus.map(Bus::MapLinear, 0x70, 0x77, 0x0000, 0xffff, memory::bsxpram);
   }
 
   if((regs.r[0x05] & 0x80) == 0x00) {
-    bus.map(Bus::MapLinear, 0x40, 0x4f, 0x0000, 0xffff, psram);
+    bus.map(Bus::MapLinear, 0x40, 0x4f, 0x0000, 0xffff, memory::bsxpram);
   }
 
   if((regs.r[0x06] & 0x80) == 0x00) {
-    bus.map(Bus::MapLinear, 0x50, 0x5f, 0x0000, 0xffff, psram);
+    bus.map(Bus::MapLinear, 0x50, 0x5f, 0x0000, 0xffff, memory::bsxpram);
   }
 
   if(regs.r[0x07] & 0x80) {
@@ -55,8 +57,8 @@ void BSXCart::update_memory_map() {
     bus.map(Bus::MapLinear, 0x80, 0x9f, 0x8000, 0xffff, memory::cartrom);
   }
 
-  bus.map(Bus::MapShadow, 0x20, 0x3f, 0x6000, 0x7fff, psram);
-  bus.map(Bus::MapLinear, 0x70, 0x77, 0x0000, 0xffff, psram);
+  bus.map(Bus::MapShadow, 0x20, 0x3f, 0x6000, 0x7fff, memory::bsxpram);
+  bus.map(Bus::MapLinear, 0x70, 0x77, 0x0000, 0xffff, memory::bsxpram);
 }
 
 uint8 BSXCart::mmio_read(unsigned addr) {
@@ -66,7 +68,7 @@ uint8 BSXCart::mmio_read(unsigned addr) {
   }
 
   if((addr & 0xf8f000) == 0x105000) {  //$[10-17]:[5000-5fff] SRAM
-    return sram.read(((addr >> 16) & 7) * 0x1000 + (addr & 0xfff));
+    return memory::bsxram.read(((addr >> 16) & 7) * 0x1000 + (addr & 0xfff));
   }
 
   return 0x00;
@@ -81,21 +83,15 @@ void BSXCart::mmio_write(unsigned addr, uint8 data) {
   }
 
   if((addr & 0xf8f000) == 0x105000) {  //$[10-17]:[5000-5fff] SRAM
-    return sram.write(((addr >> 16) & 7) * 0x1000 + (addr & 0xfff), data);
+    return memory::bsxram.write(((addr >> 16) & 7) * 0x1000 + (addr & 0xfff), data);
   }
 }
 
 BSXCart::BSXCart() {
-  sram_data  = new uint8_t[ 32 * 1024];
-  psram_data = new uint8_t[512 * 1024];
-
-  sram.map (sram_data,   32 * 1024);
-  psram.map(psram_data, 512 * 1024);
 }
 
 BSXCart::~BSXCart() {
-  delete[] sram_data;
-  delete[] psram_data;
 }
 
 #endif
+

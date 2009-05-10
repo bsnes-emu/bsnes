@@ -2,7 +2,7 @@
 
 //BS-X flash carts, when present, are mapped to 0x400000+
 Memory& SA1::mmio_access(unsigned &addr) {
-  if(cartridge.bsx_flash_loaded() == false) return memory::cartrom;
+  if(!memory::bsxflash.data()) return memory::cartrom;
   if(addr < 0x400000) return memory::cartrom;
   addr &= 0x3fffff;
   return bsxflash;

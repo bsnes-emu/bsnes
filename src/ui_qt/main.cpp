@@ -13,7 +13,6 @@ public:
 #include "interface.cpp"
 #include "ui.cpp"
 
-#include "cartridge/cartridge.cpp"
 #include "input/input.cpp"
 #include "utility/utility.cpp"
 
@@ -136,10 +135,25 @@ int Application::main(int argc, char **argv) {
       usleep(20 * 1000);
     }
 
-    supressScreenSaver();
+    clock_t currentTime = clock();
+    autosaveTime += currentTime - clockTime;
+    screensaverTime += currentTime - clockTime;
+    clockTime = currentTime;
+
+    if(autosaveTime >= CLOCKS_PER_SEC * 60) {
+      //auto-save RAM once per minute in case of emulator crash
+      autosaveTime = 0;
+      utility.saveMemory();
+    }
+
+    if(screensaverTime >= CLOCKS_PER_SEC * 30) {
+      //supress screen saver every 30 seconds so it will not trigger during gameplay
+      screensaverTime = 0;
+      supressScreenSaver();
+    }
   }
 
-  cartridge.unload();
+  utility.unloadCartridge();
   config.save(configFilename);
   return 0;
 }
@@ -153,6 +167,10 @@ Application::Application() {
   power     = false;
   pause     = false;
   autopause = false;
+
+  clockTime       = clock();
+  autosaveTime    = 0;
+  screensaverTime = 0;
 }
 
 Application::~Application() {

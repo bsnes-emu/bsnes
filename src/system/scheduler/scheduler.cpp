@@ -1,4 +1,4 @@
-#ifdef SNES_CPP
+#ifdef SYSTEM_CPP
 
 Scheduler scheduler;
 
@@ -60,3 +60,4 @@ Scheduler::Scheduler() {
 }
 
 #endif
+

@@ -1,6 +1,6 @@
-//===============
-//opcode_move.bpp
-//===============
+//==============
+//opcode_mov.bpp
+//==============
 
 
 
@@ -95,9 +95,9 @@
 
 //
 
-//===============
-//opcode_move.bpp
-//===============
+//==============
+//opcode_mov.bpp
+//==============
 
 void op_mov_a_x();
 
@@ -117,7 +117,6 @@ void op_mov_a_const();
 void op_mov_x_const();
 
 void op_mov_y_const();
-
 
 void op_mov_a_ix();
 
@@ -193,11 +192,9 @@ void op_mov_idpx_a();
 
 void op_mov_idpy_a();
 
-
 void op_movw_ya_dp();
 
 void op_movw_dp_ya();
-
 
 void op_mov1_c_bit();
 
@@ -609,8 +606,8 @@ void op_setp();
 
 void op_clrv();
 
-void op_notc();
 
+void op_notc();
 
 void op_ei();
 
@@ -671,6 +668,8 @@ void op_pop_p();
 void op_mul_ya();
 
 void op_div_ya_x();
+
+
 
 
 

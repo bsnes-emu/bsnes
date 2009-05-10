@@ -22,4 +22,7 @@ private:
   void draw_cursor(uint16_t color, int x, int y);
 
   friend class System;
-} video;
+};
+
+extern Video video;
+

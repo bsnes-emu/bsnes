@@ -1,8 +1,3 @@
-struct Chip {
-  virtual void load() {}
-  virtual void unload() {}
-};
-
 #include "sgb/sgb.hpp"
 #include "sa1/sa1.hpp"
 #include "bsx/bsx.hpp"

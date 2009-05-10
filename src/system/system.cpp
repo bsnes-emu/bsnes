@@ -1,33 +1,14 @@
 #include <../base.hpp>
 
-#define SNES_CPP
+#define SYSTEM_CPP
 namespace SNES {
 
-System system;
-Config config;
-
+System  system;
 BUSCORE bus;
 CPUCORE cpu;
 SMPCORE smp;
 DSPCORE dsp;
 PPUCORE ppu;
-
-SuperGameboy sgb;
-SA1          sa1;
-SA1Bus       sa1bus;
-BSXBase      bsxbase;
-BSXCart      bsxcart;
-BSXFlash     bsxflash;
-SRTC         srtc;
-SDD1         sdd1;
-SPC7110      spc7110;
-Cx4          cx4;
-DSP1         dsp1;
-DSP2         dsp2;
-DSP3         dsp3;
-DSP4         dsp4;
-OBC1         obc1;
-ST010        st010;
 
 #include "scheduler/scheduler.cpp"
 #include "tracer/tracer.cpp"
@@ -38,10 +19,9 @@ ST010        st010;
 #include "input/input.cpp"
 
 void System::coprocessor_enter() {
-  if(cartridge.mode() == Cartridge::ModeSuperGameboy) sgb.enter();
+  if(cartridge.mode() == Cartridge::ModeSuperGameBoy) sgb.enter();
   if(cartridge.has_sa1()) sa1.enter();
 
-  //no active co-processor
   while(true) {
     scheduler.addclocks_cop(64 * 1024 * 1024);
     scheduler.sync_copcpu();
@@ -57,6 +37,7 @@ void System::runtoframe() {
 
 void System::init(Interface *interface_) {
   interface = interface_;
+  assert(interface != 0);
 
   sgb.init();
   sa1.init();
@@ -77,11 +58,9 @@ void System::init(Interface *interface_) {
   video.init();
   audio.init();
   input.init();
-  interface->init();
 }
 
 void System::term() {
-  interface->term();
 }
 
 void System::power() {
@@ -93,9 +72,6 @@ void System::power() {
   }
 
   scheduler.init();
-  unsigned freq = (snes_region == NTSC ? config.smp.ntsc_clock_rate : config.smp.pal_clock_rate);
-  audio.set_dsp_frequency(freq / 768);
-  audio.set_cop_frequency(0);  //disable bus audio by default
 
   ppu.PPUcounter::reset();
   cpu.power();
@@ -105,9 +81,9 @@ void System::power() {
   bus.power();
 
   if(expansion() == ExpansionBSX) bsxbase.power();
+  if(memory::bsxflash.data()) bsxflash.power();
   if(cartridge.mode() == Cartridge::ModeBsx) bsxcart.power();
-  if(cartridge.bsx_flash_loaded()) bsxflash.power();
-  if(cartridge.mode() == Cartridge::ModeSuperGameboy) sgb.power();
+  if(cartridge.mode() == Cartridge::ModeSuperGameBoy) sgb.power();
 
   if(cartridge.has_sa1())     sa1.power();
   if(cartridge.has_srtc())    srtc.power();
@@ -129,9 +105,9 @@ void System::power() {
   for(unsigned i = 0x4300; i <= 0x437f; i++) memory::mmio.map(i, cpu);
 
   if(expansion() == ExpansionBSX) bsxbase.enable();
+  if(memory::bsxflash.data()) bsxflash.enable();
   if(cartridge.mode() == Cartridge::ModeBsx) bsxcart.enable();
-  if(cartridge.bsx_flash_loaded()) bsxflash.enable();
-  if(cartridge.mode() == Cartridge::ModeSuperGameboy) sgb.enable();
+  if(cartridge.mode() == Cartridge::ModeSuperGameBoy) sgb.enable();
 
   if(cartridge.has_sa1())     sa1.enable();
   if(cartridge.has_srtc())    srtc.enable();
@@ -153,9 +129,6 @@ void System::power() {
 
 void System::reset() {
   scheduler.init();
-  unsigned freq = (snes_region == NTSC ? config.smp.ntsc_clock_rate : config.smp.pal_clock_rate);
-  audio.set_dsp_frequency(freq / 768);
-  audio.set_cop_frequency(0);  //disable bus audio by default
 
   ppu.PPUcounter::reset();
   cpu.reset();
@@ -165,9 +138,9 @@ void System::reset() {
   bus.reset();
 
   if(expansion() == ExpansionBSX) bsxbase.reset();
+  if(memory::bsxflash.data()) bsxflash.reset();
   if(cartridge.mode() == Cartridge::ModeBsx) bsxcart.reset();
-  if(cartridge.bsx_flash_loaded()) bsxflash.reset();
-  if(cartridge.mode() == Cartridge::ModeSuperGameboy) sgb.reset();
+  if(cartridge.mode() == Cartridge::ModeSuperGameBoy) sgb.reset();
 
   if(cartridge.has_sa1())     sa1.reset();
   if(cartridge.has_srtc())    srtc.reset();
@@ -208,7 +181,8 @@ System::ExpansionPortDevice System::expansion() const {
   return (System::ExpansionPortDevice)snes_expansion;
 }
 
-System::System() : snes_region(NTSC), snes_expansion(ExpansionNone) {
+System::System() : interface(0), snes_region(NTSC), snes_expansion(ExpansionNone) {
 }
 
 };
+

@@ -7,13 +7,13 @@ namespace SNES {
 #include "timing/timing.cpp"
 
 void sSMP::enter() {
-  unsigned counter = 0;
-
   while(true) {
     tracer.trace_smpop();  //traces SMP opcode (only if tracer is enabled)
+
     (this->*opcode_table[op_readpc()])();
 
     //forcefully sync S-CPU and S-SMP, in case chips are not communicating
+    static unsigned counter = 0;
     if(++counter >= 128) {
       counter = 0;
       scheduler.sync_smpcpu();
@@ -78,9 +78,10 @@ void sSMP::reset() {
 }
 
 sSMP::sSMP() {
+  initialize_opcode_table();
 }
 
 sSMP::~sSMP() {
 }
-
 };
+

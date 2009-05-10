@@ -1,7 +1,7 @@
 #include <../base.hpp>
 
 #define ADSP_CPP
-namespace SNES {
+namespaec SNES {
 
 #include "adsp_tables.cpp"
 
@@ -582,7 +582,7 @@ int32 fir_samplel, fir_sampler;
     msampler  = sclamp<16>(msampler);
   }
 
-  system.audio.dsp_sample(msamplel, msampler);
+  audio.sample(msamplel, msampler);
   scheduler.addclocks_dsp(32 * 3 * 8);
   scheduler.sync_dspsmp();
 }
@@ -591,3 +591,4 @@ aDSP::aDSP()  {}
 aDSP::~aDSP() {}
 
 };
+

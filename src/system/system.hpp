@@ -1,9 +1,11 @@
+#include "config/config.hpp"
 #include "interface/interface.hpp"
 #include "scheduler/scheduler.hpp"
 #include "tracer/tracer.hpp"
-#include "config/config.hpp"
 
-class VideoFilter;
+#include "video/video.hpp"
+#include "audio/audio.hpp"
+#include "input/input.hpp"
 
 class System {
 public:
@@ -26,13 +28,9 @@ public:
   virtual void scanline();
 
   //return *active* region / expansion port device information
-  //config settings are cached upon power-on
+  //settings cached upon power-on
   Region region() const;
   ExpansionPortDevice expansion() const;
-
-  #include "video/video.hpp"
-  #include "audio/audio.hpp"
-  #include "input/input.hpp"
 
   System();
   virtual ~System() {}
@@ -41,6 +39,10 @@ private:
   Interface *interface;
   unsigned snes_region;
   unsigned snes_expansion;
+
+  friend class Video;
+  friend class Audio;
+  friend class Input;
 };
 
 extern System system;

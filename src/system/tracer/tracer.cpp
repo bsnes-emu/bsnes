@@ -1,4 +1,4 @@
-#ifdef SNES_CPP
+#ifdef SYSTEM_CPP
 
 Tracer tracer;
 
@@ -89,4 +89,5 @@ Tracer::Tracer() {
 Tracer::~Tracer() {
 }
 
-#endif //ifdef SNES_CPP
+#endif
+

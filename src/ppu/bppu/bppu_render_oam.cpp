@@ -1,8 +1,8 @@
 #ifdef BPPU_CPP
 
 void bPPU::build_sprite_list() {
-  uint8 *tableA = memory::oam.handle();
-  uint8 *tableB = memory::oam.handle() + 512;
+  uint8 *tableA = memory::oam.data();
+  uint8 *tableB = memory::oam.data() + 512;
 
   for(unsigned i = 0; i < 128; i++) {
     unsigned x = !!(*tableB & (1 << ((i & 3) << 1)));  //0x01, 0x04, 0x10, 0x40

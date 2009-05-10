@@ -383,6 +383,4 @@ void op_per_e();
 void op_per_n();
 @endmacro
 
-//
-
 @include "opcode_list.bpp"

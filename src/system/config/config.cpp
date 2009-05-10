@@ -1,6 +1,10 @@
-Config::Config() {
-  controller_port1 = System::Input::DeviceJoypad;
-  controller_port2 = System::Input::DeviceJoypad;
+#ifdef SYSTEM_CPP
+
+Configuration config;
+
+Configuration::Configuration() {
+  controller_port1 = Input::DeviceJoypad;
+  controller_port2 = Input::DeviceJoypad;
   expansion_port   = System::ExpansionBSX;
   region           = System::Autodetect;
 
@@ -17,3 +21,6 @@ Config::Config() {
   ppu1.version = 1;
   ppu2.version = 3;
 }
+
+#endif
+

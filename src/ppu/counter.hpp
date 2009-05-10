@@ -1,9 +1,7 @@
 class PPUcounter {
 public:
   alwaysinline void tick() {
-    history.ppudiff += 2;
     status.hcounter += 2;
-
     if(status.hcounter >= 1360 && status.hcounter == lineclocks()) {
       status.hcounter = 0;
       status.vcounter++;
@@ -17,7 +15,6 @@ public:
         status.vcounter = 0;
         status.field = !status.field;
       }
-
       scanline();
     }
 
@@ -25,6 +22,7 @@ public:
     history.field   [history.index] = status.field;
     history.vcounter[history.index] = status.vcounter;
     history.hcounter[history.index] = status.hcounter;
+    history.ppudiff += 2;
   }
 
   alwaysinline void tock(unsigned clocks) {
@@ -67,7 +65,7 @@ private:
     uint16 vcounter[2048];
     uint16 hcounter[2048];
 
-    unsigned index;
-    signed ppudiff;
+    int32 index;
+    int32 ppudiff;
   } history;
 };

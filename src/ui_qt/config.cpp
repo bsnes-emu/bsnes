@@ -13,7 +13,7 @@ public:
 
   struct Path {
     string base;     //binary path
-    string user;     //user profile path
+    string user;     //user profile path (bsnes.cfg, ...)
     string current;  //current working directory (path to currently loaded cartridge)
     string rom, save, patch, cheat, data;
     string bsx, st, sgb;
@@ -83,10 +83,10 @@ public:
     //external
     //========
 
-    attach(SNES::config.controller_port1 = SNES::System::Input::DeviceJoypad, "snes.controllerPort1");
-    attach(SNES::config.controller_port2 = SNES::System::Input::DeviceJoypad, "snes.controllerPort2");
-    attach(SNES::config.expansion_port   = SNES::System::ExpansionBSX,        "snes.expansionPort");
-    attach(SNES::config.region           = SNES::System::Autodetect,          "snes.region");
+    attach(SNES::config.controller_port1 = SNES::Input::DeviceJoypad,  "snes.controllerPort1");
+    attach(SNES::config.controller_port2 = SNES::Input::DeviceJoypad,  "snes.controllerPort2");
+    attach(SNES::config.expansion_port   = SNES::System::ExpansionBSX, "snes.expansionPort");
+    attach(SNES::config.region           = SNES::System::Autodetect,   "snes.region");
 
     attach(SNES::config.cpu.version         =        2, "cpu.version", "Valid version(s) are: 1, 2");
     attach(SNES::config.cpu.ntsc_clock_rate = 21477272, "cpu.ntscClockRate");
@@ -105,18 +105,15 @@ public:
     //internal
     //========
 
-    attach(system.video = "", "driver.video");
-    attach(system.audio = "", "driver.audio");
-    attach(system.input = "", "driver.input");
-    attach(system.crashedOnLastRun = false, "emulator.crashedOnLastRun");
-    attach(system.speed = 2, "emulator.speed");
+    attach(system.video = "", "system.video");
+    attach(system.audio = "", "system.audio");
+    attach(system.input = "", "system.input");
+    attach(system.crashedOnLastRun = false, "system.crashedOnLastRun");
+    attach(system.speed = 2, "system.speed");
 
     attach(file.autodetect_type    = false, "file.autodetectType");
     attach(file.bypass_patch_crc32 = false, "file.bypassPatchCrc32");
 
-    path.base = "";
-    path.user = "";
-    path.current = "";
     attach(path.rom   = "", "path.rom");
     attach(path.save  = "", "path.save");
     attach(path.patch = "", "path.patch");

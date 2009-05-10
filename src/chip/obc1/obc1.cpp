@@ -3,6 +3,8 @@
 #define OBC1_CPP
 namespace SNES {
 
+OBC1 obc1;
+
 void OBC1::init() {}
 void OBC1::enable() {}
 
@@ -73,3 +75,4 @@ OBC1::OBC1() {}
 OBC1::~OBC1() {}
 
 };
+

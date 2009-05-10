@@ -38,8 +38,8 @@ public:
   void enable(unsigned i);
   void disable(unsigned i);
 
-  bool load(const char *fn);
-  bool save(const char *fn) const;
+  void load(string data);
+  string save() const;
   void clear();
 
   Cheat();

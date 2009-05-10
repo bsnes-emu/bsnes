@@ -1,5 +1,7 @@
+#ifdef SMPCORE_CPP
+
 void SMPcore::initialize_opcode_table() {
-  #define op(id, name) opcode_table[id] = &SMPcore::op_ ## name;
+  #define op(id, name) opcode_table[id] = &sSMP::op_ ## name;
 
   op(0x00, nop)           op(0x01, tcall_0)      op(0x02, set0_dp)      op(0x03, bbs0)
   op(0x04, or_a_dp)       op(0x05, or_a_addr)    op(0x06, or_a_ix)      op(0x07, or_a_idpx)
@@ -68,3 +70,6 @@ void SMPcore::initialize_opcode_table() {
 
   #undef op
 }
+
+#endif
+

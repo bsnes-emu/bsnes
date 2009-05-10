@@ -3,6 +3,8 @@
 #define SPC7110_CPP
 namespace SNES {
 
+SPC7110 spc7110;
+
 #include "decomp.cpp"
 
 const unsigned SPC7110::months[12] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
@@ -672,3 +674,4 @@ SPC7110::SPC7110() {
 }
 
 };
+
