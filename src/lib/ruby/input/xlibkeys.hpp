@@ -10,7 +10,7 @@
 
 uint8_t keycode[256];
 
-bool init_keycodes() {
+void init_keycodes() {
   Display *display = XOpenDisplay(0);
   memset(&keycode, 0, sizeof keycode);
 

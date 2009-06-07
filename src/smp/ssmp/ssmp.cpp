@@ -83,5 +83,5 @@ sSMP::sSMP() {
 
 sSMP::~sSMP() {
 }
-};
 
+};

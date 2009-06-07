@@ -1,3 +1,12 @@
+const char *Audio::Volume = "Volume";
+const char *Audio::Resample = "Resample";
+const char *Audio::ResampleRatio = "ResampleRatio";
+
+const char *Audio::Handle = "Handle";
+const char *Audio::Synchronize = "Synchronize";
+const char *Audio::Frequency = "Frequency";
+const char *Audio::Latency = "Latency";
+
 bool AudioInterface::init() {
   if(!p) driver();
   return p->init();
@@ -10,50 +19,40 @@ void AudioInterface::term() {
   }
 }
 
-bool AudioInterface::cap(Audio::Setting setting) {
-  if(setting == Audio::Volume) return true;
-  if(setting == Audio::Resample) return true;
-  if(setting == Audio::ResampleOutputFrequency) return true;
-  if(setting == Audio::ResampleInputFrequency) return true;
+bool AudioInterface::cap(const string& name) {
+  if(name == Audio::Volume) return true;
+  if(name == Audio::Resample) return true;
+  if(name == Audio::ResampleRatio) return true;
 
-  return p ? p->cap(setting) : false;
+  return p ? p->cap(name) : false;
 }
 
-uintptr_t AudioInterface::get(Audio::Setting setting) {
-  if(setting == Audio::Volume) return volume;
-  if(setting == Audio::Resample) return resample_enabled;
-  if(setting == Audio::ResampleOutputFrequency) return r_outfreq;
-  if(setting == Audio::ResampleInputFrequency) return r_infreq;
+any AudioInterface::get(const string& name) {
+  if(name == Audio::Volume) return volume;
+  if(name == Audio::Resample) return resample_enabled;
+  if(name == Audio::ResampleRatio);
 
-  return p ? p->get(setting) : false;
+  return p ? p->get(name) : false;
 }
 
-bool AudioInterface::set(Audio::Setting setting, uintptr_t param) {
-  if(setting == Audio::Volume) {
-    volume = param;
+bool AudioInterface::set(const string& name, const any& value) {
+  if(name == Audio::Volume) {
+    volume = any_cast<unsigned>(value);
     return true;
   }
 
-  if(setting == Audio::Resample) {
-    resample_enabled = param;
+  if(name == Audio::Resample) {
+    resample_enabled = any_cast<bool>(value);
     return true;
   }
 
-  if(setting == Audio::ResampleOutputFrequency) {
-    r_outfreq = max(1, param);
-    r_step = (double)r_infreq / (double)r_outfreq;
+  if(name == Audio::ResampleRatio) {
+    r_step = any_cast<double>(value);
     r_frac = 0;
     return true;
   }
 
-  if(setting == Audio::ResampleInputFrequency) {
-    r_infreq = max(1, param);
-    r_step = (double)r_infreq / (double)r_outfreq;
-    r_frac = 0;
-    return true;
-  }
-
-  return p ? p->set(setting, param) : false;
+  return p ? p->set(name, value) : false;
 }
 
 //4-tap hermite interpolation
@@ -124,7 +123,6 @@ AudioInterface::AudioInterface() {
   p = 0;
   volume = 100;
   resample_enabled = false;
-  r_outfreq = r_infreq = 1;
   r_step = r_frac = 0;
   r_left [0] = r_left [1] = r_left [2] = r_left [3] = 0;
   r_right[0] = r_right[1] = r_right[2] = r_right[3] = 0;

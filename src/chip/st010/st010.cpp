@@ -88,5 +88,5 @@ void ST010::write(unsigned addr, uint8 data) {
     ram[0x0021] &= ~0x80;
   }
 }
-};
 
+};

@@ -365,5 +365,5 @@ inline void CPUcore::op_tsb_w() {
   regs.p.z = (rd.w & regs.a.w) == 0;
   rd.w |= regs.a.w;
 }
-#endif
 
+#endif

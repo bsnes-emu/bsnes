@@ -138,4 +138,3 @@ void CPUcore::update_table() {
 }
 
 #endif
-

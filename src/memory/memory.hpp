@@ -10,6 +10,7 @@ struct MMIO {
 };
 
 struct UnmappedMemory : Memory {
+  unsigned size() const;
   uint8 read(unsigned);
   void write(unsigned, uint8);
 };

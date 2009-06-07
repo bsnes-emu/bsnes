@@ -1,4 +1,5 @@
 include lib/nall/Makefile
+include lib/nall/Makefile-qt
 ui = ui_qt
 
 ################
@@ -8,7 +9,7 @@ ui = ui_qt
 c     := $(compiler)
 cpp   := $(subst cc,++,$(compiler))
 flags := -O3 -fomit-frame-pointer -Ilib
-link  := -s
+link  :=
 
 # profile-guided instrumentation:
 # flags += -fprofile-generate
@@ -22,19 +23,31 @@ link  := -s
 ################
 
 ifeq ($(platform),x)
-  ruby := video.glx video.xv video.sdl
+  link += -s
+
+  ruby := video.glx video.xv video.sdl video.qtimage
   ruby += audio.alsa audio.openal audio.oss audio.pulseaudio audio.ao
   ruby += input.sdl input.x
+
+  link += $(if $(findstring audio.openal,$(ruby)),-lopenal)
+else ifeq ($(platform),osx)
+  ruby := video.qtimage
+  ruby += audio.openal
+  ruby += input.carbon
+
+  link += $(if $(findstring audio.openal,$(ruby)),-framework OpenAL)
 else ifeq ($(platform),win)
-  ruby := video.direct3d video.wgl video.directdraw video.gdi
+  link += -mwindows
+# link += -mconsole
+  link += -s -luuid -lkernel32 -luser32 -lgdi32 -lshell32
+  # statically link Qt for Windows build
+  link += -enable-stdcall-fixup -Wl,-enable-auto-import -Wl,-enable-runtime-pseudo-reloc
+
+  ruby := video.direct3d video.wgl video.directdraw video.gdi video.qtimage
   ruby += audio.directsound
   ruby += input.rawinput input.directinput
 
-  link += -mwindows
-# link += -mconsole
-  link += -luuid -lkernel32 -luser32 -lgdi32 -lshell32
-  # statically link Qt for Windows build
-  link += -enable-stdcall-fixup -Wl,-s -Wl,-enable-auto-import -Wl,-enable-runtime-pseudo-reloc
+  link += $(if $(findstring audio.openal,$(ruby)),-lopenal32)
 else
   unknown_platform: help;
 endif
@@ -43,7 +56,8 @@ endif
 ### ruby ###
 ############
 
-rubyflags = $(call ifhas,.sdl,$(ruby),`sdl-config --cflags`)
+rubyflags := $(call ifhas,.sdl,$(ruby),`sdl-config --cflags`)
+rubyflags += $(call ifhas,.qt,$(ruby),$(qtinc))
 
 link += $(call ifhas,.sdl,$(ruby),`sdl-config --libs`)
 link += $(call ifhas,video.direct3d,$(ruby),-ld3d9)
@@ -54,19 +68,18 @@ link += $(call ifhas,video.xv,$(ruby),-lXv)
 link += $(call ifhas,audio.alsa,$(ruby),-lasound)
 link += $(call ifhas,audio.ao,$(ruby),-lao)
 link += $(call ifhas,audio.directsound,$(ruby),-ldsound)
-link += $(call ifhas,audio.openal,$(ruby),$(if $(call streq,$(platform),x),-lopenal,-lopenal32))
 link += $(call ifhas,audio.pulseaudio,$(ruby),-lpulse-simple)
 link += $(call ifhas,input.directinput,$(ruby),-ldinput8 -ldxguid)
-link += $(call ifhas,input.rawinput,$(ruby),-lxinput -ldinput8 -ldxguid)
+link += $(call ifhas,input.rawinput,$(ruby),-ldinput8 -ldxguid)
 
 ####################
 ### core objects ###
 ####################
 
-objects = libco ruby libreader libfilter string \
-  system cartridge cheat \
-  memory smemory cpu cpucore scpu smp smpcore ssmp sdsp ppu bppu \
-  sgb sa1 bsx srtc sdd1 spc7110 cx4 dsp1 dsp2 dsp3 dsp4 obc1 st010
+objects := libco ruby libreader libfilter
+objects += system cartridge cheat
+objects += memory smemory cpu cpucore scpu smp smpcore ssmp sdsp ppu bppu
+objects += sgb superfx sa1 bsx srtc sdd1 spc7110 cx4 dsp1 dsp2 dsp3 dsp4 obc1 st010
 
 ifeq ($(enable_gzip),true)
   objects += adler32 compress crc32 deflate gzio inffast inflate inftrees ioapi trees unzip zip zutil
@@ -110,7 +123,6 @@ obj/libco.o: lib/libco/libco.c lib/libco/*
 	$(c) -O3 -fomit-frame-pointer -static -Ilib -c $< -o $@
 obj/libreader.o: lib/libreader/libreader.cpp lib/libreader/*
 obj/libfilter.o: lib/libfilter/libfilter.cpp lib/libfilter/*
-obj/string.o: lib/nall/string.cpp lib/nall/*
 
 #################
 ### utilities ###
@@ -167,6 +179,7 @@ obj/system.o: system/system.cpp $(call rwildcard,system/)
 #####################
 
 obj/sgb.o    : chip/sgb/sgb.cpp $(call rwildcard,chip/sgb/)
+obj/superfx.o: chip/superfx/superfx.cpp $(call rwildcard,chip/superfx/)
 obj/sa1.o    : chip/sa1/sa1.cpp $(call rwildcard,chip/sa1/)
 obj/bsx.o    : chip/bsx/bsx.cpp chip/bsx/*
 obj/srtc.o   : chip/srtc/srtc.cpp chip/srtc/*
@@ -216,7 +229,12 @@ obj/winout.o : lib/libjma/winout.cpp lib/libjma/*
 ###############
 
 build: ui_build $(objects)
-	$(strip $(cpp) -o../bsnes $(objects) $(link))
+ifeq ($(platform),osx)
+	test -d ../bsnes.app || mkdir -p ../bsnes.app/Contents/MacOS
+	$(strip $(cpp) -o ../bsnes.app/Contents/MacOS/bsnes $(objects) $(link))
+else
+	$(strip $(cpp) -o ../bsnes $(objects) $(link))
+endif
 
 install:
 	install -D -m 755 ../bsnes $(DESTDIR)$(prefix)/bin/bsnes
@@ -250,4 +268,3 @@ help:
 	@echo ""
 	@echo "Example: $(MAKE) platform=x compiler=gcc enable_gzip=true"
 	@echo ""
-

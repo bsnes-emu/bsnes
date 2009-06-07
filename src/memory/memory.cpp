@@ -15,6 +15,7 @@ namespace memory {
   UnmappedMMIO   mmio_unmapped;
 };
 
+unsigned UnmappedMemory::size() const { return 16 * 1024 * 1024; }
 uint8 UnmappedMemory::read(unsigned) { return cpu.regs.mdr; }
 void UnmappedMemory::write(unsigned, uint8) {}
 
@@ -109,4 +110,3 @@ void Bus::map(
 }
 
 };
-

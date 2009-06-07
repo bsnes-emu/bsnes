@@ -147,4 +147,4 @@ void bPPU::render_line() {
   render_line_output();
 }
 
-#endif  //ifdef BPPU_CPP
+#endif

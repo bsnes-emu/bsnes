@@ -1,16 +1,14 @@
-#include <windows.h>
+#undef interface
+#define interface struct
 #include <d3d9.h>
+#undef interface
 
 #define D3DVERTEX (D3DFVF_XYZRHW | D3DFVF_TEX1)
 
 namespace ruby {
 
-#include "direct3d.hpp"
-
 class pVideoD3D {
 public:
-  VideoD3D &self;
-
   LPDIRECT3D9             lpd3d;
   LPDIRECT3DDEVICE9       device;
   LPDIRECT3DVERTEXBUFFER9 vertex_buffer, *vertex_ptr;
@@ -21,10 +19,12 @@ public:
   D3DCAPS9                d3dcaps;
   LPDIRECT3DTEXTURE9      texture;
   LPDIRECT3DSURFACE9      surface;
+  bool lost;
+  unsigned iwidth, iheight;
 
   struct d3dvertex {
-    float x, y, z, rhw; //screen coords
-    float u, v;         //texture coords
+    float x, y, z, rhw;  //screen coords
+    float u, v;          //texture coords
   };
 
   struct {
@@ -35,14 +35,17 @@ public:
   } flags;
 
   struct {
-    bool dynamic;     //device supports dynamic textures
-    bool stretchrect; //device supports StretchRect
+    bool dynamic;      //device supports dynamic textures
+    bool stretchrect;  //device supports StretchRect
   } caps;
 
   struct {
     HWND handle;
     bool synchronize;
     unsigned filter;
+
+    unsigned width;
+    unsigned height;
   } settings;
 
   struct {
@@ -50,33 +53,33 @@ public:
     unsigned height;
   } state;
 
-  bool cap(Video::Setting setting) {
-    if(setting == Video::Handle) return true;
-    if(setting == Video::Synchronize) return true;
-    if(setting == Video::Filter) return true;
+  bool cap(const string& name) {
+    if(name == Video::Handle) return true;
+    if(name == Video::Synchronize) return true;
+    if(name == Video::Filter) return true;
     return false;
   }
 
-  uintptr_t get(Video::Setting setting) {
-    if(setting == Video::Handle) return (uintptr_t)settings.handle;
-    if(setting == Video::Synchronize) return settings.synchronize;
-    if(setting == Video::Filter) return settings.filter;
+  any get(const string& name) {
+    if(name == Video::Handle) return (uintptr_t)settings.handle;
+    if(name == Video::Synchronize) return settings.synchronize;
+    if(name == Video::Filter) return settings.filter;
     return false;
   }
 
-  bool set(Video::Setting setting, uintptr_t param) {
-    if(setting == Video::Handle) {
-      settings.handle = (HWND)param;
+  bool set(const string& name, const any& value) {
+    if(name == Video::Handle) {
+      settings.handle = (HWND)any_cast<uintptr_t>(value);
       return true;
     }
 
-    if(setting == Video::Synchronize) {
-      settings.synchronize = param;
+    if(name == Video::Synchronize) {
+      settings.synchronize = any_cast<bool>(value);
       return true;
     }
 
-    if(setting == Video::Filter) {
-      settings.filter = param;
+    if(name == Video::Filter) {
+      settings.filter = any_cast<unsigned>(value);
       if(lpd3d) update_filter();
       return true;
     }
@@ -84,8 +87,82 @@ public:
     return false;
   }
 
+  bool recover() {
+    if(!device) return false;
+
+    if(lost) {
+      release_resources();
+      if(device->Reset(&presentation) != D3D_OK) return false;
+    }
+
+    lost = false;
+
+    device->SetDialogBoxMode(false);
+
+    device->SetTextureStageState(0, D3DTSS_COLOROP,   D3DTOP_SELECTARG1);
+    device->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
+    device->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
+
+    device->SetTextureStageState(0, D3DTSS_ALPHAOP,   D3DTOP_SELECTARG1);
+    device->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
+    device->SetTextureStageState(0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE);
+
+    device->SetRenderState(D3DRS_LIGHTING, false);
+    device->SetRenderState(D3DRS_ZENABLE,  false);
+    device->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
+
+    device->SetRenderState(D3DRS_SRCBLEND,  D3DBLEND_SRCALPHA);
+    device->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+    device->SetRenderState(D3DRS_ALPHABLENDENABLE, false);
+
+    device->SetVertexShader(NULL);
+    device->SetFVF(D3DVERTEX);
+
+    device->CreateVertexBuffer(sizeof(d3dvertex) * 4, flags.v_usage, D3DVERTEX,
+      static_cast<D3DPOOL>(flags.v_pool), &vertex_buffer, NULL);
+    iwidth  = 0;
+    iheight = 0;
+    resize(settings.width = 256, settings.height = 256);
+    update_filter();
+    clear();
+    return true;
+  }
+
+  unsigned rounded_power_of_two(unsigned n) {
+    n--;
+    n |= n >>  1;
+    n |= n >>  2;
+    n |= n >>  4;
+    n |= n >>  8;
+    n |= n >> 16;
+    return n + 1;
+  }
+
+  void resize(unsigned width, unsigned height) {
+    if(iwidth >= width && iheight >= height) return;
+
+    iwidth  = rounded_power_of_two(max(width,  iwidth ));
+    iheight = rounded_power_of_two(max(height, iheight));
+
+    if(d3dcaps.MaxTextureWidth < iwidth || d3dcaps.MaxTextureWidth < iheight) {
+      //TODO: attempt to handle this more gracefully
+      return;
+    }
+
+    if(caps.stretchrect == true) {
+      if(surface) surface->Release();
+      device->CreateOffscreenPlainSurface(iwidth, iheight, D3DFMT_X8R8G8B8,
+        D3DPOOL_DEFAULT, &surface, NULL);
+    } else {
+      if(texture) texture->Release();
+      device->CreateTexture(iwidth, iheight, 1, flags.t_usage, D3DFMT_X8R8G8B8,
+        static_cast<D3DPOOL>(flags.t_pool), &texture, NULL);
+    }
+  }
+
   void update_filter() {
     if(!device) return;
+    if(lost && !recover()) return;
 
     switch(settings.filter) { default:
       case Video::FilterPoint:  flags.filter = D3DTEXF_POINT;  break;
@@ -96,19 +173,18 @@ public:
     device->SetSamplerState(0, D3DSAMP_MAGFILTER, flags.filter);
   }
 
-  /* Vertex format:
-
-     0----------1
-     |         /|
-     |       /  |
-     |     /    |
-     |   /      |
-     | /        |
-     2----------3
-
-    (x,y) screen coords, in pixels
-    (u,v) texture coords, betweeen 0.0 (top, left) to 1.0 (bottom, right)
-  */
+  //  Vertex format:
+  //
+  //  0----------1
+  //  |         /|
+  //  |       /  |
+  //  |     /    |
+  //  |   /      |
+  //  | /        |
+  //  2----------3
+  //
+  //  (x,y) screen coords, in pixels
+  //  (u,v) texture coords, betweeen 0.0 (top, left) to 1.0 (bottom, right)
   void set_vertex(
     uint32_t px, uint32_t py, uint32_t pw, uint32_t ph,
     uint32_t tw, uint32_t th,
@@ -139,8 +215,7 @@ public:
   }
 
   void clear() {
-    if(!device) return;
-    if(caps.stretchrect == false && !texture) return;
+    if(lost && !recover()) return;
 
     if(caps.stretchrect == false) {
       texture->GetLevelDesc(0, &d3dsd);
@@ -149,23 +224,28 @@ public:
 
     if(surface) {
       device->ColorFill(surface, 0, D3DCOLOR_XRGB(0x00, 0x00, 0x00));
-      if(caps.stretchrect == false) {
-        surface->Release();
-      }
+      if(caps.stretchrect == false) surface->Release();
     }
 
     //clear primary display and all backbuffers
-    for(int i = 0; i < 3; i++) {
+    for(unsigned i = 0; i < 3; i++) {
       device->Clear(0, 0, D3DCLEAR_TARGET, D3DCOLOR_XRGB(0x00, 0x00, 0x00), 1.0f, 0);
       device->Present(0, 0, 0, 0);
     }
   }
 
-  bool lock(uint32_t *&data, unsigned &pitch) {
+  bool lock(uint32_t *&data, unsigned &pitch, unsigned width, unsigned height) {
+    if(lost && !recover()) return false;
+
+    if(width != settings.width || height != settings.height) {
+      resize(settings.width = width, settings.height = height);
+    }
+
     if(caps.stretchrect == false) {
       texture->GetLevelDesc(0, &d3dsd);
       texture->GetSurfaceLevel(0, &surface);
     }
+
     surface->LockRect(&d3dlr, 0, flags.lock);
     pitch = d3dlr.Pitch;
     return data = (uint32_t*)d3dlr.pBits;
@@ -176,17 +256,18 @@ public:
     if(caps.stretchrect == false) surface->Release();
   }
 
-  void refresh(unsigned width, unsigned height) {
-    if(!device) return;
+  void refresh() {
+    if(lost && !recover()) return;
 
-    RECT rd, rs; //dest, source rectangles
+    RECT rd, rs;  //dest, source rectangles
     GetClientRect(settings.handle, &rd);
-    SetRect(&rs, 0, 0, width, height);
+    SetRect(&rs, 0, 0, settings.width, settings.height);
 
+    //if output size changed, driver must be re-initialized.
+    //failure to do so causes scaling issues on some video drivers.
     if(state.width != rd.right || state.height != rd.bottom) {
-      //if window size changed, D3DPRESENT_PARAMETERS must be updated
-      //failure to do so causes scaling issues on some ATI drivers
       init();
+      return;
     }
 
     device->BeginScene();
@@ -197,7 +278,7 @@ public:
       device->StretchRect(surface, &rs, temp, 0, static_cast<D3DTEXTUREFILTERTYPE>(flags.filter));
       temp->Release();
     } else {
-      set_vertex(0, 0, width, height, 1024, 1024, 0, 0, rd.right, rd.bottom);
+      set_vertex(0, 0, settings.width, settings.height, iwidth, iheight, 0, 0, rd.right, rd.bottom);
       device->SetTexture(0, texture);
       device->DrawPrimitive(D3DPT_TRIANGLESTRIP, 0, 2);
     }
@@ -212,7 +293,7 @@ public:
       }
     }
 
-    device->Present(0, 0, 0, 0);
+    if(device->Present(0, 0, 0, 0) == D3DERR_DEVICELOST) lost = true;
   }
 
   bool init() {
@@ -246,9 +327,7 @@ public:
       return false;
     }
 
-    //detect device capabilities
     device->GetDeviceCaps(&d3dcaps);
-    if(d3dcaps.MaxTextureWidth < 1024 || d3dcaps.MaxTextureWidth < 1024) return false;
 
     caps.dynamic = bool(d3dcaps.Caps2 & D3DCAPS2_DYNAMICTEXTURES);
     caps.stretchrect = (d3dcaps.DevCaps2 & D3DDEVCAPS2_CAN_STRETCHRECT_FROM_TEXTURES) &&
@@ -271,57 +350,30 @@ public:
       flags.lock    = D3DLOCK_NOSYSLOCK | D3DLOCK_DISCARD;
     }
 
-    device->SetDialogBoxMode(false);
-
-    device->SetTextureStageState(0, D3DTSS_COLOROP,   D3DTOP_SELECTARG1);
-    device->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
-    device->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
-
-    device->SetTextureStageState(0, D3DTSS_ALPHAOP,   D3DTOP_SELECTARG1);
-    device->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
-    device->SetTextureStageState(0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE);
-
-    device->SetRenderState(D3DRS_LIGHTING, false);
-    device->SetRenderState(D3DRS_ZENABLE,  false);
-    device->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
-
-    device->SetRenderState(D3DRS_SRCBLEND,  D3DBLEND_SRCALPHA);
-    device->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
-    device->SetRenderState(D3DRS_ALPHABLENDENABLE, false);
-
-    device->SetVertexShader(NULL);
-    device->SetFVF(D3DVERTEX);
-
-    if(caps.stretchrect == true) {
-      device->CreateOffscreenPlainSurface(1024, 1024, D3DFMT_X8R8G8B8,
-        D3DPOOL_DEFAULT, &surface, NULL);
-    } else {
-      device->CreateTexture(1024, 1024, 1, flags.t_usage, D3DFMT_X8R8G8B8,
-        static_cast<D3DPOOL>(flags.t_pool), &texture, NULL);
-    }
-
-    device->CreateVertexBuffer(sizeof(d3dvertex) * 4, flags.v_usage, D3DVERTEX,
-      static_cast<D3DPOOL>(flags.v_pool), &vertex_buffer, NULL);
-
-    update_filter();
-    clear();
+    lost = false;
+    recover();
     return true;
   }
 
-  void term() {
+  void release_resources() {
     if(vertex_buffer) { vertex_buffer->Release(); vertex_buffer = 0; }
     if(surface) { surface->Release(); surface = 0; }
     if(texture) { texture->Release(); texture = 0; }
+  }
+
+  void term() {
+    release_resources();
     if(device) { device->Release(); device = 0; }
     if(lpd3d) { lpd3d->Release(); lpd3d = 0; }
   }
 
-  pVideoD3D(VideoD3D &self_) : self(self_) {
+  pVideoD3D() {
     vertex_buffer = 0;
     surface = 0;
     texture = 0;
     device = 0;
     lpd3d = 0;
+    lost = true;
 
     settings.handle = 0;
     settings.synchronize = false;
@@ -329,18 +381,8 @@ public:
   }
 };
 
-bool VideoD3D::cap(Setting setting) { return p.cap(setting); }
-uintptr_t VideoD3D::get(Setting setting) { return p.get(setting); }
-bool VideoD3D::set(Setting setting, uintptr_t param) { return p.set(setting, param); }
-bool VideoD3D::lock(uint32_t *&data, unsigned &pitch) { return p.lock(data, pitch); }
-void VideoD3D::unlock() { p.unlock(); }
-void VideoD3D::clear() { p.clear(); }
-void VideoD3D::refresh(unsigned width, unsigned height) { p.refresh(width, height); }
-bool VideoD3D::init() { return p.init(); }
-void VideoD3D::term() { p.term(); }
-VideoD3D::VideoD3D() : p(*new pVideoD3D(*this)) {}
-VideoD3D::~VideoD3D() { delete &p; }
+DeclareVideo(D3D)
 
-} //namespace ruby
+};
 
 #undef D3DVERTEX

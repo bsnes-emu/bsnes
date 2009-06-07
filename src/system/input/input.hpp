@@ -74,7 +74,7 @@ public:
 
 private:
   bool iobit;
-  uint16_t latchx, latchy;
+  int16_t latchx, latchy;
 
   struct port_t {
     unsigned device;
@@ -111,4 +111,3 @@ private:
 };
 
 extern Input input;
-

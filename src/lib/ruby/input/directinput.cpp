@@ -1,10 +1,7 @@
 #define DIRECTINPUT_VERSION 0x0800
-#include <windows.h>
 #include <dinput.h>
 
 namespace ruby {
-
-#include "directinput.hpp"
 
 static BOOL CALLBACK DI_EnumJoypadsCallback(const DIDEVICEINSTANCE*, void*);
 static BOOL CALLBACK DI_EnumJoypadAxesCallback(const DIDEVICEOBJECTINSTANCE*, void*);
@@ -13,8 +10,6 @@ using namespace nall;
 
 class pInputDI {
 public:
-  InputDI &self;
-
   struct {
     LPDIRECTINPUT8 context;
     LPDIRECTINPUTDEVICE8 keyboard;
@@ -27,22 +22,22 @@ public:
     HWND handle;
   } settings;
 
-  bool cap(Input::Setting setting) {
-    if(setting == Input::Handle) return true;
-    if(setting == Input::KeyboardSupport) return true;
-    if(setting == Input::MouseSupport) return true;
-    if(setting == Input::JoypadSupport) return true;
+  bool cap(const string& name) {
+    if(name == Input::Handle) return true;
+    if(name == Input::KeyboardSupport) return true;
+    if(name == Input::MouseSupport) return true;
+    if(name == Input::JoypadSupport) return true;
     return false;
   }
 
-  uintptr_t get(Input::Setting setting) {
-    if(setting == Input::Handle) return (uintptr_t)settings.handle;
+  any get(const string& name) {
+    if(name == Input::Handle) return (uintptr_t)settings.handle;
     return false;
   }
 
-  bool set(Input::Setting setting, uintptr_t param) {
-    if(setting == Input::Handle) {
-      settings.handle = (HWND)param;
+  bool set(const string& name, const any& value) {
+    if(name == Input::Handle) {
+      settings.handle = (HWND)any_cast<uintptr_t>(value);
       return true;
     }
 
@@ -367,7 +362,7 @@ public:
     return device.mouseacquired;
   }
 
-  pInputDI(InputDI &self_) : self(self_) {
+  pInputDI() {
     device.context = 0;
     device.keyboard = 0;
     device.mouse = 0;
@@ -388,16 +383,6 @@ BOOL CALLBACK DI_EnumJoypadAxesCallback(const DIDEVICEOBJECTINSTANCE *instance, 
   return ((pInputDI*)p)->init_axis(instance);
 }
 
-bool InputDI::cap(Setting setting) { return p.cap(setting); }
-uintptr_t InputDI::get(Setting setting) { return p.get(setting); }
-bool InputDI::set(Setting setting, uintptr_t param) { return p.set(setting, param); }
-bool InputDI::acquire() { return p.acquire(); }
-bool InputDI::unacquire() { return p.unacquire(); }
-bool InputDI::acquired() { return p.acquired(); }
-bool InputDI::poll(int16_t *table) { return p.poll(table); }
-bool InputDI::init() { return p.init(); }
-void InputDI::term() { p.term(); }
-InputDI::InputDI() : p(*new pInputDI(*this)) {}
-InputDI::~InputDI() { delete &p; }
+DeclareInput(DI)
 
-} //namespace ruby
+};

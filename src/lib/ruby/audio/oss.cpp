@@ -1,3 +1,8 @@
+/*
+  audio.oss (2007-12-26)
+  author: Nach
+*/
+
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
@@ -20,12 +25,8 @@
 
 namespace ruby {
 
-#include "oss.hpp"
-
 class pAudioOSS {
 public:
-  AudioOSS &self;
-
   struct {
     int fd;
     int format;
@@ -37,25 +38,23 @@ public:
     unsigned frequency;
   } settings;
 
-  bool cap(Audio::Setting setting) {
-    if(setting == Audio::Frequency) return true;
+  bool cap(const string& name) {
+    if(name == Audio::Frequency) return true;
     return false;
   }
 
-  uintptr_t get(Audio::Setting setting) {
-    if(setting == Audio::Frequency) return settings.frequency;
+  any get(const string& name) {
+    if(name == Audio::Frequency) return settings.frequency;
     return false;
   }
 
-  bool set(Audio::Setting setting, uintptr_t param) {
-    if(setting == Audio::Frequency) {
-      settings.frequency = param;
-      if(device.fd > 0) {
-        term();
-        init();
-      }
+  bool set(const string& name, const any& value) {
+    if(name == Audio::Frequency) {
+      settings.frequency = any_cast<unsigned>(value);
+      if(device.fd > 0) init();
       return true;
     }
+
     return false;
   }
 
@@ -64,7 +63,12 @@ public:
     unsigned unused = write(device.fd, &sample, 4);
   }
 
+  void clear() {
+  }
+
   bool init() {
+    term();
+
     device.fd = open(device.name, O_WRONLY, O_NONBLOCK);
     if(device.fd < 0) return false;
 
@@ -90,7 +94,7 @@ public:
     }
   }
 
-  pAudioOSS(AudioOSS &self_) : self(self_) {
+  pAudioOSS() {
     device.fd = -1;
     device.format = AFMT_S16_LE;
     device.channels = 2;
@@ -104,13 +108,6 @@ public:
   }
 };
 
-bool AudioOSS::cap(Setting setting) { return p.cap(setting); }
-uintptr_t AudioOSS::get(Setting setting) { return p.get(setting); }
-bool AudioOSS::set(Setting setting, uintptr_t param) { return p.set(setting, param); }
-void AudioOSS::sample(uint16_t sl, uint16_t sr) { p.sample(sl, sr); }
-bool AudioOSS::init() { return p.init(); }
-void AudioOSS::term() { p.term(); }
-AudioOSS::AudioOSS() : p(*new pAudioOSS(*this)) {}
-AudioOSS::~AudioOSS() { delete &p; }
+DeclareAudio(OSS)
 
-} //namespace ruby
+};

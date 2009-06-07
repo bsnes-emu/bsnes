@@ -49,4 +49,4 @@ inline bool sDSP::counter_poll(unsigned rate) {
   return (((unsigned)state.counter + counter_offset[rate]) % counter_rate[rate]) == 0;
 }
 
-#endif //ifdef SDSP_CPP
+#endif

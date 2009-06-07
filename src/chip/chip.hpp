@@ -1,4 +1,5 @@
 #include "sgb/sgb.hpp"
+#include "superfx/superfx.hpp"
 #include "sa1/sa1.hpp"
 #include "bsx/bsx.hpp"
 #include "srtc/srtc.hpp"

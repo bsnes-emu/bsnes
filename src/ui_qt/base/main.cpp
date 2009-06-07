@@ -3,7 +3,13 @@ void MainWindow::setup() {
   window->setObjectName("main-window");
   window->setWindowTitle(BSNES_TITLE);
 
-  system = window->menuBar()->addMenu("System");
+  #if defined(PLATFORM_OSX)
+  window->menu = new QMenuBar(0);
+  #else
+  window->menu = window->menuBar();
+  #endif
+
+  system = window->menu->addMenu("System");
     system_load = system->addAction("&Load Cartridge ...");
     system->addSeparator();
     system_power = system->addMenu("&Power");
@@ -37,11 +43,13 @@ void MainWindow::setup() {
       system_port2_justifier->setCheckable(true);
       system_port2_justifiers = system_port2->addAction("&Two Justifiers");
       system_port2_justifiers->setCheckable(true);
+    #if !defined(PLATFORM_OSX)
     system->addSeparator();
+    #endif
     system_exit = system->addAction("E&xit");
     system_exit->setMenuRole(QAction::QuitRole);
 
-  settings = window->menuBar()->addMenu("Settings");
+  settings = window->menu->addMenu("Settings");
     settings_videoMode = settings->addMenu("&Video Mode");
       settings_videoMode_1x = settings_videoMode->addAction("Scale &1x");
       settings_videoMode_1x->setCheckable(true);
@@ -110,10 +118,12 @@ void MainWindow::setup() {
     settings_configuration = settings->addAction("&Configuration ...");
     settings_configuration->setMenuRole(QAction::PreferencesRole);
 
-  help = window->menuBar()->addMenu("Help");
-    help_documentation = help->addAction("Documentation ...");
-    help_license = help->addAction("License ...");
+  help = window->menu->addMenu("Help");
+    help_documentation = help->addAction("&Documentation ...");
+    help_license = help->addAction("&License ...");
+    #if !defined(PLATFORM_OSX)
     help->addSeparator();
+    #endif
     help_about = help->addAction("&About ...");
     help_about->setMenuRole(QAction::AboutRole);
 
@@ -356,7 +366,10 @@ void CanvasObject::dropEvent(QDropEvent *event) {
 //custom video render and mouse capture functionality
 
 QPaintEngine* CanvasWidget::paintEngine() const {
-  if(SNES::cartridge.loaded()) return 0;
+  if(SNES::cartridge.loaded()) {
+    video.refresh();
+    return 0;
+  }
   return QWidget::paintEngine();
 }
 

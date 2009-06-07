@@ -8,17 +8,11 @@
 #include <SDL/SDL.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
-#include <X11/Xlib.h>
-#include <X11/Xutil.h>
-#include <X11/Xatom.h>
 
 namespace ruby {
 
-#include "sdl.hpp"
-
 struct pInputSDL {
   #include "xlibkeys.hpp"
-  InputSDL &self;
 
   struct {
     Display *display;
@@ -40,22 +34,22 @@ struct pInputSDL {
     uintptr_t handle;
   } settings;
 
-  bool cap(Input::Setting setting) {
-    if(setting == Input::Handle) return true;
-    if(setting == Input::KeyboardSupport) return true;
-    if(setting == Input::MouseSupport) return true;
-    if(setting == Input::JoypadSupport) return true;
+  bool cap(const string& name) {
+    if(name == Input::Handle) return true;
+    if(name == Input::KeyboardSupport) return true;
+    if(name == Input::MouseSupport) return true;
+    if(name == Input::JoypadSupport) return true;
     return false;
   }
 
-  uintptr_t get(Input::Setting setting) {
-    if(setting == Input::Handle) return settings.handle;
+  any get(const string& name) {
+    if(name == Input::Handle) return (uintptr_t)settings.handle;
     return false;
   }
 
-  bool set(Input::Setting setting, uintptr_t param) {
-    if(setting == Input::Handle) {
-      settings.handle = param;
+  bool set(const string& name, const any &value) {
+    if(name == Input::Handle) {
+      settings.handle = any_cast<uintptr_t>(value);
       return true;
     }
 
@@ -232,23 +226,12 @@ struct pInputSDL {
     SDL_QuitSubSystem(SDL_INIT_JOYSTICK);
   }
 
-  pInputSDL(InputSDL &self_) : self(self_) {
+  pInputSDL() {
     for(unsigned i = 0; i < joypad<>::count; i++) device.gamepad[i] = 0;
     settings.handle = 0;
   }
 };
 
+DeclareInput(SDL)
 
-bool InputSDL::cap(Setting setting) { return p.cap(setting); }
-uintptr_t InputSDL::get(Setting setting) { return p.get(setting); }
-bool InputSDL::set(Setting setting, uintptr_t param) { return p.set(setting, param); }
-bool InputSDL::acquire() { return p.acquire(); }
-bool InputSDL::unacquire() { return p.unacquire(); }
-bool InputSDL::acquired() { return p.acquired(); }
-bool InputSDL::poll(int16_t *table) { return p.poll(table); }
-bool InputSDL::init() { return p.init(); }
-void InputSDL::term() { p.term(); }
-InputSDL::InputSDL() : p(*new pInputSDL(*this)) {}
-InputSDL::~InputSDL() { delete &p; }
-
-}
+};

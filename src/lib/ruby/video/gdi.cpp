@@ -1,14 +1,9 @@
 #include <assert.h>
-#include <windows.h>
 
 namespace ruby {
 
-#include "gdi.hpp"
-
 class pVideoGDI {
 public:
-  VideoGDI &self;
-
   uint32_t *buffer;
   HBITMAP bitmap;
   HDC bitmapdc;
@@ -16,40 +11,49 @@ public:
 
   struct {
     HWND handle;
+
+    unsigned width;
+    unsigned height;
   } settings;
 
-  bool cap(Video::Setting setting) {
-    if(setting == Video::Handle) return true;
+  bool cap(const string& name) {
+    if(name == Video::Handle) return true;
     return false;
   }
 
-  uintptr_t get(Video::Setting setting) {
-    if(setting == Video::Handle) return (uintptr_t)settings.handle;
+  any get(const string& name) {
+    if(name == Video::Handle) return (uintptr_t)settings.handle;
     return false;
   }
 
-  bool set(Video::Setting setting, uintptr_t param) {
-    if(setting == Video::Handle) {
-      settings.handle = (HWND)param;
+  bool set(const string& name, const any& value) {
+    if(name == Video::Handle) {
+      settings.handle = (HWND)any_cast<uintptr_t>(value);
       return true;
     }
+
     return false;
   }
 
-  bool lock(uint32_t *&data, unsigned &pitch) {
+  bool lock(uint32_t *&data, unsigned &pitch, unsigned width, unsigned height) {
+    settings.width  = width;
+    settings.height = height;
+
     pitch = 1024 * 4;
     return data = buffer;
   }
 
   void unlock() {}
 
-  void refresh(unsigned r_width, unsigned r_height) {
-  RECT rc;
+  void clear() {}
+
+  void refresh() {
+    RECT rc;
     GetClientRect(settings.handle, &rc);
 
-    SetDIBits(bitmapdc, bitmap, 0, r_height, (void*)buffer, &bmi, DIB_RGB_COLORS);
-  HDC hdc = GetDC(settings.handle);
-    StretchBlt(hdc, rc.left, rc.top, rc.right, rc.bottom, bitmapdc, 0, 1024 - r_height, r_width, r_height, SRCCOPY);
+    SetDIBits(bitmapdc, bitmap, 0, settings.height, (void*)buffer, &bmi, DIB_RGB_COLORS);
+    HDC hdc = GetDC(settings.handle);
+    StretchBlt(hdc, rc.left, rc.top, rc.right, rc.bottom, bitmapdc, 0, 1024 - settings.height, settings.width, settings.height, SRCCOPY);
     ReleaseDC(settings.handle, hdc);
   }
 
@@ -71,6 +75,8 @@ public:
     bmi.bmiHeader.biCompression = BI_RGB;
     bmi.bmiHeader.biSizeImage   = 1024 * 1024 * sizeof(uint32_t);
 
+    settings.width  = 256;
+    settings.height = 256;
     return true;
   }
 
@@ -79,7 +85,7 @@ public:
     DeleteDC(bitmapdc);
   }
 
-  pVideoGDI(VideoGDI &self_) : self(self_) {
+  pVideoGDI() {
     buffer = (uint32_t*)malloc(1024 * 1024 * sizeof(uint32_t));
     settings.handle = 0;
   }
@@ -89,15 +95,6 @@ public:
   }
 };
 
-bool VideoGDI::cap(Setting setting) { return p.cap(setting); }
-uintptr_t VideoGDI::get(Setting setting) { return p.get(setting); }
-bool VideoGDI::set(Setting setting, uintptr_t param) { return p.set(setting, param); }
-bool VideoGDI::lock(uint32_t *&data, unsigned &pitch) { return p.lock(data, pitch); }
-void VideoGDI::unlock() { p.unlock(); }
-void VideoGDI::refresh(unsigned width, unsigned height) { p.refresh(width, height); }
-bool VideoGDI::init() { return p.init(); }
-void VideoGDI::term() { p.term(); }
-VideoGDI::VideoGDI() : p(*new pVideoGDI(*this)) {}
-VideoGDI::~VideoGDI() { delete &p; }
+DeclareVideo(GDI)
 
-} //namespace ruby
+};

@@ -1,8 +1,10 @@
 class Filter {
 public:
+  virtual void size(unsigned &outwidth, unsigned &outheight, unsigned width, unsigned height) = 0;
+
   virtual void render(
-    uint32_t *output, unsigned outpitch, unsigned &outwidth, unsigned &outheight,
-    uint16_t *input, unsigned pitch, unsigned *line, unsigned width, unsigned height
+    uint32_t *output, unsigned outpitch, uint16_t *input, unsigned pitch,
+    unsigned *line, unsigned width, unsigned height
   ) = 0;
 };
 
@@ -18,9 +20,11 @@ public:
 
   void set(FilterType type);
 
+  void size(unsigned &outwidth, unsigned &outheight, unsigned width, unsigned height);
+
   void render(
-    uint32_t *output, unsigned outpitch, unsigned &outwidth, unsigned &outheight,
-    uint16_t *input, unsigned pitch, unsigned *line, unsigned width, unsigned height
+    uint32_t *output, unsigned outpitch, uint16_t *input, unsigned pitch,
+    unsigned *line, unsigned width, unsigned height
   );
 
   FilterInterface();

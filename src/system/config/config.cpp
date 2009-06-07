@@ -20,7 +20,11 @@ Configuration::Configuration() {
 
   ppu1.version = 1;
   ppu2.version = 3;
+
+  superfx.fast_cache_speed  = 2;
+  superfx.slow_cache_speed  = 2;
+  superfx.fast_memory_speed = 5;
+  superfx.slow_memory_speed = 6;
 }
 
 #endif
-

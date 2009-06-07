@@ -1,14 +1,21 @@
-#include <AL/al.h>
-#include <AL/alc.h>
+/*
+  audio.openal (2007-12-26)
+  author: Nach
+  contributors: byuu, wertigon, _willow_
+*/
+
+#if defined(PLATFORM_OSX)
+  #include <OpenAL/al.h>
+  #include <OpenAL/alc.h>
+#else
+  #include <AL/al.h>
+  #include <AL/alc.h>
+#endif
 
 namespace ruby {
 
-#include "openal.hpp"
-
 class pAudioOpenAL {
 public:
-  AudioOpenAL &self;
-
   struct {
     ALCdevice *handle;
     ALCcontext *context;
@@ -30,34 +37,34 @@ public:
     unsigned latency;
   } settings;
 
-  bool cap(Audio::Setting setting) {
-    if(setting == Audio::Synchronize) return true;
-    if(setting == Audio::Frequency) return true;
-    if(setting == Audio::Latency) return true;
+  bool cap(const string& name) {
+    if(name == Audio::Synchronize) return true;
+    if(name == Audio::Frequency) return true;
+    if(name == Audio::Latency) return true;
     return false;
   }
 
-  uintptr_t get(Audio::Setting setting) {
-    if(setting == Audio::Synchronize) return settings.synchronize;
-    if(setting == Audio::Frequency) return settings.frequency;
-    if(setting == Audio::Latency) return settings.latency;
+  any get(const string& name) {
+    if(name == Audio::Synchronize) return settings.synchronize;
+    if(name == Audio::Frequency) return settings.frequency;
+    if(name == Audio::Latency) return settings.latency;
     return false;
   }
 
-  bool set(Audio::Setting setting, uintptr_t param) {
-    if(setting == Audio::Synchronize) {
-      settings.synchronize = param;
+  bool set(const string& name, const any& value) {
+    if(name == Audio::Synchronize) {
+      settings.synchronize = any_cast<bool>(value);
       return true;
     }
 
-    if(setting == Audio::Frequency) {
-      settings.frequency = param;
+    if(name == Audio::Frequency) {
+      settings.frequency = any_cast<unsigned>(value);
       return true;
     }
 
-    if(setting == Audio::Latency) {
-      if(settings.latency != param) {
-        settings.latency = param;
+    if(name == Audio::Latency) {
+      if(settings.latency != any_cast<unsigned>(value)) {
+        settings.latency = any_cast<unsigned>(value);
         update_latency();
       }
       return true;
@@ -94,6 +101,9 @@ public:
     alGetSourcei(device.source, AL_SOURCE_STATE, &playing);
     if(playing != AL_PLAYING) alSourcePlay(device.source);
     buffer.length = 0;
+  }
+
+  void clear() {
   }
 
   void update_latency() {
@@ -174,7 +184,7 @@ public:
     }
   }
 
-  pAudioOpenAL(AudioOpenAL &self_) : self(self_) {
+  pAudioOpenAL() {
     device.source = 0;
     device.handle = 0;
     device.context = 0;
@@ -195,13 +205,6 @@ public:
   }
 };
 
-bool AudioOpenAL::cap(Setting setting) { return p.cap(setting); }
-uintptr_t AudioOpenAL::get(Setting setting) { return p.get(setting); }
-bool AudioOpenAL::set(Setting setting, uintptr_t param) { return p.set(setting, param); }
-void AudioOpenAL::sample(uint16_t sl, uint16_t sr) { p.sample(sl, sr); }
-bool AudioOpenAL::init() { return p.init(); }
-void AudioOpenAL::term() { p.term(); }
-AudioOpenAL::AudioOpenAL() : p(*new pAudioOpenAL(*this)) {}
-AudioOpenAL::~AudioOpenAL() { delete &p; }
+DeclareAudio(OpenAL)
 
-} //namespace ruby
+};

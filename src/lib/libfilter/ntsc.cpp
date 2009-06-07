@@ -2,37 +2,42 @@
 
 NTSCFilter filter_ntsc;
 
-void NTSCFilter::render(
-  uint32_t *output, unsigned outpitch, unsigned &outwidth, unsigned &outheight,
-  uint16_t *input, unsigned pitch, unsigned *line, unsigned width, unsigned height
-) {
-  if(!ntsc)return;
+void NTSCFilter::size(unsigned &outwidth, unsigned &outheight, unsigned width, unsigned height) {
+  outwidth  = SNES_NTSC_OUT_WIDTH(256);
+  outheight = height;
+}
 
-  int const out_width = outwidth = SNES_NTSC_OUT_WIDTH(256);
-  int const out_height = outheight = height;
+void NTSCFilter::render(
+  uint32_t *output, unsigned outpitch, uint16_t *input, unsigned pitch,
+  unsigned *line, unsigned width, unsigned height
+) {
+  if(!ntsc) return;
+
+  width = SNES_NTSC_OUT_WIDTH(256);
   burst ^= burst_toggle;
 
-  //blit multiple scanlines of same width, rather than one at a time
-  int run_start = 0;
-  int run_width = line[0];
-  int l = 0;
+  pitch >>= 1;
+  outpitch >>= 2;
 
-  while(1) {
-    if(run_width != line[l] || l >= out_height) {
-    uint16_t const *in = (uint16_t*)((uint8_t*)input + pitch * run_start);
-    uint16_t *out = (uint16_t*)((uint8_t*)output + outpitch * run_start);
-    int height = l - run_start;
-    int line_burst = (burst + run_start) % 3;
-      if(run_width == 256) {
-        snes_ntsc_blit(ntsc, in, (pitch >> 1), line_burst, out_width, height, out, outpitch);
-      } else {
-        snes_ntsc_blit_hires(ntsc, in, (pitch >> 1), line_burst, out_width, height, out, outpitch);
-      }
-      if(l >= out_height) break;
-      run_width = line[l];
-      run_start = l;
+  unsigned line_burst = burst;
+  for(unsigned y = 0; y < height; y++) {
+    uint16_t *in  = input  + y * pitch;
+    uint32_t *out = output + y * outpitch;
+
+    //render as many lines in one snes_ntsc_blit as possible:
+    //do this by determining for how many lines the width stays the same
+    unsigned rheight = 1;
+    unsigned rwidth  = line[y];
+    while(y + rheight < height && rwidth == line[y + rheight]) rheight++;
+
+    if(rwidth == 256) {
+      snes_ntsc_blit      (ntsc, in, pitch, line_burst, rwidth, rheight, out, outpitch << 2);
+    } else {
+      snes_ntsc_blit_hires(ntsc, in, pitch, line_burst, rwidth, rheight, out, outpitch << 2);
     }
-    l++;
+
+    line_burst = (line_burst + rheight) % 3;
+    y += rheight;
   }
 }
 
@@ -54,7 +59,8 @@ void NTSCFilter::adjust(
   if(!ntsc) {
     ntsc = (snes_ntsc_t*)malloc(sizeof *ntsc);
     if(!ntsc) {
-      return;  //to do: report out of memory error
+      fprintf(stderr, "error: snes_ntsc: out of memory\n");
+      return;
     }
   }
 

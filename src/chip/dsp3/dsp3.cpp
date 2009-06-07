@@ -36,5 +36,5 @@ void DSP3::write(unsigned addr, uint8 data) {
   DSP3i::dsp3_byte = data;
   DSP3i::DSP3SetByte();
 }
-};
 
+};

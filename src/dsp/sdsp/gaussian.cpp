@@ -51,4 +51,4 @@ int sDSP::gaussian_interpolate(const voice_t &v) {
   return sclamp<16>(output) & ~1;
 }
 
-#endif //ifdef SDSP_CPP
+#endif

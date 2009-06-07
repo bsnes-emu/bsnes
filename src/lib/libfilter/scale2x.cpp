@@ -1,11 +1,16 @@
 Scale2xFilter filter_scale2x;
 
+void Scale2xFilter::size(unsigned &outwidth, unsigned &outheight, unsigned width, unsigned height) {
+  outwidth  = width  * 2;
+  outheight = height * 2;
+}
+
 void Scale2xFilter::render(
-  uint32_t *output, unsigned outpitch, unsigned &outwidth, unsigned &outheight,
-  uint16_t *input, unsigned pitch, unsigned *line, unsigned width, unsigned height
+  uint32_t *output, unsigned outpitch, uint16_t *input, unsigned pitch,
+  unsigned *line, unsigned width, unsigned height
 ) {
   if(width > 256 || height > 240) {
-    filter_direct.render(output, outpitch, outwidth, outheight, input, pitch, line, width, height);
+    filter_direct.render(output, outpitch, input, pitch, line, width, height);
     return;
   }
 
@@ -41,7 +46,4 @@ void Scale2xFilter::render(
     input += pitch - 256;
     output += outpitch + outpitch - 512;
   }
-
-  outwidth = width * 2;
-  outheight = height * 2;
 }

@@ -1,22 +1,17 @@
 class Audio {
 public:
-  enum Setting {
-    //AudioInterface settings
-    Volume,
-    Resample,
-    ResampleOutputFrequency,
-    ResampleInputFrequency,
+  static const char *Volume;
+  static const char *Resample;
+  static const char *ResampleRatio;
 
-    //Audio settings
-    Handle,
-    Synchronize,
-    Frequency,
-    Latency,
-  };
+  static const char *Handle;
+  static const char *Synchronize;
+  static const char *Frequency;
+  static const char *Latency;
 
-  virtual bool cap(Setting) { return false; }
-  virtual uintptr_t get(Setting) { return false; }
-  virtual bool set(Setting, uintptr_t) { return false; }
+  virtual bool cap(const nall::string& name) { return false; }
+  virtual nall::any get(const nall::string& name) { return false; }
+  virtual bool set(const nall::string& name, const nall::any& value) { return false; }
 
   virtual void sample(uint16_t left, uint16_t right) {}
   virtual void clear() {}

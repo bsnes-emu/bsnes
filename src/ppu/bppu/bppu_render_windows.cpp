@@ -96,4 +96,4 @@ void bPPU::build_window_tables(uint8 bg) {
   build_window_table(bg, false);
 }
 
-#endif  //ifdef BPPU_CPP
+#endif

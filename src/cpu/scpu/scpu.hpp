@@ -9,8 +9,6 @@ public:
   #include "mmio/mmio.hpp"
   #include "timing/timing.hpp"
 
-  enum DmaState { DmaInactive, DmaRun, DmaCpuSync };
-
   struct {
     bool interrupt_pending;
     uint16 interrupt_vector;
@@ -36,12 +34,12 @@ public:
     bool irq_hold;
 
     //DMA
+    bool dma_active;
     unsigned dma_counter;
     unsigned dma_clocks;
     bool dma_pending;
     bool hdma_pending;
     bool hdma_mode;  //0 = init, 1 = run
-    DmaState dma_state;
 
     //MMIO
 

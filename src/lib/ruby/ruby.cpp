@@ -11,6 +11,10 @@ InputInterface input;
 
 /* VideoInterface */
 
+const char *Video::Handle = "Handle";
+const char *Video::Synchronize = "Synchronize";
+const char *Video::Filter = "Filter";
+
 void VideoInterface::driver(const char *driver) {
   if(p) term();
 
@@ -32,6 +36,10 @@ void VideoInterface::driver(const char *driver) {
 
   #ifdef VIDEO_GLX
   else if(!strcmp(driver, "OpenGL")) p = new VideoGLX();
+  #endif
+
+  #ifdef VIDEO_QTIMAGE
+  else if(!strcmp(driver, "QtImage")) p = new VideoQtImage();
   #endif
 
   #ifdef VIDEO_SDL
@@ -61,6 +69,8 @@ const char* VideoInterface::default_driver() {
   return "GDI";
   #elif defined(VIDEO_SDL)
   return "SDL";
+  #elif defined(VIDEO_QTIMAGE)
+  return "QtImage";
   #elif defined(VIDEO_XV)
   return "X-Video";
   #elif defined(VIDEO_GLX)
@@ -106,6 +116,10 @@ const char* VideoInterface::driver_list() {
   "SDL;"
   #endif
 
+  #if defined(VIDEO_QTIMAGE)
+  "QtImage;"
+  #endif
+
   "None";
 }
 
@@ -121,13 +135,13 @@ void VideoInterface::term() {
   }
 }
 
-bool VideoInterface::cap(Video::Setting setting) { return p ? p->cap(setting) : false; }
-uintptr_t VideoInterface::get(Video::Setting setting) { return p ? p->get(setting) : false; }
-bool VideoInterface::set(Video::Setting setting, uintptr_t param) { return p ? p->set(setting, param) : false; }
-bool VideoInterface::lock(uint32_t *&data, unsigned &pitch) { return p ? p->lock(data, pitch) : false; }
+bool VideoInterface::cap(const string& name) { return p ? p->cap(name) : false; }
+any VideoInterface::get(const string& name) { return p ? p->get(name) : false; }
+bool VideoInterface::set(const string& name, const any& value) { return p ? p->set(name, value) : false; }
+bool VideoInterface::lock(uint32_t *&data, unsigned &pitch, unsigned width, unsigned height) { return p ? p->lock(data, pitch, width, height) : false; }
 void VideoInterface::unlock() { if(p) p->unlock(); }
 void VideoInterface::clear() { if(p) p->clear(); }
-void VideoInterface::refresh(unsigned width, unsigned height) { if(p) p->refresh(width, height); }
+void VideoInterface::refresh() { if(p) p->refresh(); }
 VideoInterface::VideoInterface() : p(0) {}
 VideoInterface::~VideoInterface() { term(); }
 
@@ -225,6 +239,11 @@ const char* AudioInterface::driver_list() {
 
 /* InputInterface */
 
+const char *Input::Handle = "Handle";
+const char *Input::KeyboardSupport = "KeyboardSupport";
+const char *Input::MouseSupport = "MouseSupport";
+const char *Input::JoypadSupport = "JoypadSupport";
+
 void InputInterface::driver(const char *driver) {
   if(p) term();
 
@@ -248,6 +267,10 @@ void InputInterface::driver(const char *driver) {
   else if(!strcmp(driver, "X-Windows")) p = new InputX();
   #endif
 
+  #ifdef INPUT_CARBON
+  else if(!strcmp(driver, "Carbon")) p = new InputCarbon();
+  #endif
+
   else p = new Input();
 }
 
@@ -261,6 +284,8 @@ const char* InputInterface::default_driver() {
   return "SDL";
   #elif defined(INPUT_X)
   return "X-Windows";
+  #elif defined(INPUT_CARBON)
+  return "Carbon";
   #else
   return "none";
   #endif
@@ -289,6 +314,12 @@ const char* InputInterface::driver_list() {
   "X-Windows;"
   #endif
 
+  //OS X
+
+  #if defined(INPUT_CARBON)
+  "Carbon;"
+  #endif
+
   "None";
 }
 
@@ -304,9 +335,9 @@ void InputInterface::term() {
   }
 }
 
-bool InputInterface::cap(Input::Setting setting) { return p ? p->cap(setting) : false; }
-uintptr_t InputInterface::get(Input::Setting setting) { return p ? p->get(setting) : false; }
-bool InputInterface::set(Input::Setting setting, uintptr_t param) { return p ? p->set(setting, param) : false; }
+bool InputInterface::cap(const string& name) { return p ? p->cap(name) : false; }
+any InputInterface::get(const string& name) { return p ? p->get(name) : false; }
+bool InputInterface::set(const string& name, const any& value) { return p ? p->set(name, value) : false; }
 bool InputInterface::acquire() { return p ? p->acquire() : false; }
 bool InputInterface::unacquire() { return p ? p->unacquire() : false; }
 bool InputInterface::acquired() { return p ? p->acquired() : false; }
@@ -314,4 +345,4 @@ bool InputInterface::poll(int16_t *table) { return p ? p->poll(table) : false; }
 InputInterface::InputInterface() : p(0) {}
 InputInterface::~InputInterface() { term(); }
 
-} //namespace ruby
+};

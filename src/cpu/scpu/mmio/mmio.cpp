@@ -534,4 +534,4 @@ void sCPU::mmio_write(unsigned addr, uint8 data) {
   }
 }
 
-#endif //ifdef SCPU_CPP
+#endif

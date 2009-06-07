@@ -26,8 +26,14 @@ struct Configuration {
     unsigned version;
   } ppu2;
 
+  struct SuperFX {
+    unsigned fast_cache_speed;
+    unsigned slow_cache_speed;
+    unsigned fast_memory_speed;
+    unsigned slow_memory_speed;
+  } superfx;
+
   Configuration();
 };
 
 extern Configuration config;
-

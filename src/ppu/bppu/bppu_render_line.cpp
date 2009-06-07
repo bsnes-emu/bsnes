@@ -137,4 +137,4 @@ inline void bPPU::render_line_clear() {
   memset(ptr, 0, width * 2 * sizeof(uint16));
 }
 
-#endif  //ifdef BPPU_CPP
+#endif

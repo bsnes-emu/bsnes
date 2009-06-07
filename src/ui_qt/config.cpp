@@ -101,6 +101,11 @@ public:
     attach(SNES::config.ppu1.version = 1, "ppu1.version", "Valid version(s) are: 1");
     attach(SNES::config.ppu2.version = 3, "ppu2.version", "Valid version(s) are: 1, 2, 3");
 
+    attach(SNES::config.superfx.fast_cache_speed  = 2, "superfx.fast_cache_speed",  "Cache access speed @ 21.48MHz: valid range is 1-6" );
+    attach(SNES::config.superfx.slow_cache_speed  = 2, "superfx.slow_cache_speed",  "Cache access speed @ 10.74MHz: valid range is 1-6" );
+    attach(SNES::config.superfx.fast_memory_speed = 5, "superfx.fast_memory_speed", "Memory access speed @ 21.48MHz: valid range is 1-6");
+    attach(SNES::config.superfx.slow_memory_speed = 6, "superfx.slow_memory_speed", "Memory access speed @ 10.74MHz: valid range is 1-6");
+
     //========
     //internal
     //========
@@ -245,6 +250,10 @@ public:
 
   bool load(const char *filename) {
     if(configuration::load(filename) == false) return false;
+    SNES::config.superfx.fast_cache_speed  = max(1, min(6, SNES::config.superfx.fast_cache_speed ));
+    SNES::config.superfx.slow_cache_speed  = max(1, min(6, SNES::config.superfx.slow_cache_speed ));
+    SNES::config.superfx.fast_memory_speed = max(1, min(6, SNES::config.superfx.fast_memory_speed));
+    SNES::config.superfx.slow_memory_speed = max(1, min(6, SNES::config.superfx.slow_memory_speed));
     video.context = (video.isFullscreen == false) ? &video.windowed : &video.fullscreen;
     return true;
   }

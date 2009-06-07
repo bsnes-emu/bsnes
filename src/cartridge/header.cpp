@@ -22,11 +22,8 @@ void Cartridge::read_header(cartinfo_t &info, const uint8_t *data, unsigned size
   const uint8 company  = data[index + Company];
   const uint8 region   = data[index + CartRegion] & 0x7f;
 
-  if(data[index + RamSize] & 7) {
-    info.ram_size = 1024 << (data[index + RamSize] & 7);
-  } else {
-    info.ram_size = 0;
-  }
+  info.ram_size = 1024 << (data[index + RamSize] & 7);
+  if(info.ram_size == 1024) info.ram_size = 0;  //no RAM present, eg RamSize == 0
 
   //0, 1, 13 = NTSC; 2 - 12 = PAL
   info.region = (region <= 1 || region >= 13) ? NTSC : PAL;
@@ -119,6 +116,9 @@ void Cartridge::read_header(cartinfo_t &info, const uint8_t *data, unsigned size
 
   if(mapper == 0x20 && (rom_type == 0x13 || rom_type == 0x14 || rom_type == 0x15 || rom_type == 0x1a)) {
     info.superfx = true;
+    info.mapper = SuperFXROM;
+    info.ram_size = 1024 << (data[index - 3] & 7);
+    if(info.ram_size == 1024) info.ram_size = 0;
   }
 
   if(mapper == 0x23 && (rom_type == 0x32 || rom_type == 0x34 || rom_type == 0x35)) {

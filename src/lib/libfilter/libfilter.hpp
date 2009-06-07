@@ -17,6 +17,6 @@ namespace libfilter {
   #include "scale2x.hpp"
   #include "hq2x.hpp"
   #include "ntsc.hpp"
-}  //namespace libfilter
+};
 
-#endif  //ifndef LIBFILTER_H
+#endif

@@ -59,4 +59,4 @@ void sDSP::brr_decode(voice_t &v) {
   }
 }
 
-#endif //ifdef SDSP_CPP
+#endif

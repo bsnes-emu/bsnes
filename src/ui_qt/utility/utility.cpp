@@ -209,8 +209,7 @@ void Utility::updateEmulationSpeed() {
   unsigned infreq  = config.audio.inputFrequency * scale[config.system.speed] + 0.5;
 
   audio.set(Audio::Resample, outfreq != infreq);  //only resample when necessary
-  audio.set(Audio::ResampleOutputFrequency, outfreq);
-  audio.set(Audio::ResampleInputFrequency,  infreq);
+  audio.set(Audio::ResampleRatio, (double)infreq / (double)outfreq);
 }
 
 void Utility::updateControllers() {

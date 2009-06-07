@@ -1,13 +1,14 @@
+/*
+  audio.ao (2008-06-01)
+  authors: Nach, RedDwarf
+*/
+
 #include <ao/ao.h>
 
 namespace ruby {
 
-#include "ao.hpp"
-
 class pAudioAO {
 public:
-  AudioAO &self;
-
   int driver_id;
   ao_sample_format driver_format;
   ao_device *audio_device;
@@ -16,25 +17,23 @@ public:
     unsigned frequency;
   } settings;
 
-  bool cap(Audio::Setting setting) {
-    if(setting == Audio::Frequency) return true;
+  bool cap(const string& name) {
+    if(name == Audio::Frequency) return true;
     return false;
   }
 
-  uintptr_t get(Audio::Setting setting) {
-    if(setting == Audio::Frequency) return settings.frequency;
+  any get(const string& name) {
+    if(name == Audio::Frequency) return settings.frequency;
     return false;
   }
 
-  bool set(Audio::Setting setting, uintptr_t param) {
-    if(setting == Audio::Frequency) {
-      settings.frequency = param;
-      if(audio_device) {
-        term();
-        init();
-      }
+  bool set(const string& name, const any& value) {
+    if(name == Audio::Frequency) {
+      settings.frequency = any_cast<unsigned>(value);
+      if(audio_device) init();
       return true;
     }
+
     return false;
   }
 
@@ -43,7 +42,12 @@ public:
     ao_play(audio_device, (char*)&samp, 4); //This may need to be byte swapped for Big Endian
   }
 
+  void clear() {
+  }
+
   bool init() {
+    term();
+
     driver_id = ao_default_driver_id(); //ao_driver_id((const char*)driver)
     if(driver_id < 0) return false;
 
@@ -72,7 +76,7 @@ public:
     }
   }
 
-  pAudioAO(AudioAO &self_) : self(self_) {
+  pAudioAO() {
     audio_device = 0;
     ao_initialize();
 
@@ -85,13 +89,6 @@ public:
   }
 };
 
-bool AudioAO::cap(Setting setting) { return p.cap(setting); }
-uintptr_t AudioAO::get(Setting setting) { return p.get(setting); }
-bool AudioAO::set(Setting setting, uintptr_t param) { return p.set(setting, param); }
-void AudioAO::sample(uint16_t l_sample, uint16_t r_sample) { p.sample(l_sample, r_sample); }
-bool AudioAO::init() { return p.init(); }
-void AudioAO::term() { p.term(); }
-AudioAO::AudioAO() : p(*new pAudioAO(*this)) {}
-AudioAO::~AudioAO() { delete &p; }
+DeclareAudio(AO)
 
-} //namespace ruby
+};

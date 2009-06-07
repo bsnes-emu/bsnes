@@ -148,4 +148,4 @@ void bPPU::free_tiledata_cache() {
   delete[] bg_tiledata_state[TILE_8BIT];
 }
 
-#endif  //ifdef BPPU_CPP
+#endif

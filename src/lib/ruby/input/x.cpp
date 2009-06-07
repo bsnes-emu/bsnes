@@ -6,26 +6,27 @@
 
 namespace ruby {
 
-#include "x.hpp"
-
 class pInputX {
 public:
-  InputX &self;
   Display *display;
   #include "xlibkeys.hpp"
 
-  bool cap(Input::Setting setting) {
-    if(setting == Input::KeyboardSupport) return true;
+  bool cap(const string& name) {
+    if(name == Input::KeyboardSupport) return true;
     return false;
   }
 
-  uintptr_t get(Input::Setting setting) {
+  any get(const string& name) {
     return false;
   }
 
-  bool set(Input::Setting setting, uintptr_t param) {
+  bool set(const string& name, const any &value) {
     return false;
   }
+
+  bool acquire() { return false; }
+  bool unacquire() { return false; }
+  bool acquired() { return false; }
 
   bool poll(int16_t *table) {
     memset(table, 0, input_limit * sizeof(int16_t));
@@ -50,17 +51,8 @@ public:
 
   void term() {
   }
-
-  pInputX(InputX &self_) : self(self_) {}
 };
 
-bool InputX::cap(Setting setting) { return p.cap(setting); }
-uintptr_t InputX::get(Setting setting) { return p.get(setting); }
-bool InputX::set(Setting setting, uintptr_t param) { return p.set(setting, param); }
-bool InputX::poll(int16_t *table) { return p.poll(table); }
-bool InputX::init() { return p.init(); }
-void InputX::term() { p.term(); }
-InputX::InputX() : p(*new pInputX(*this)) {}
-InputX::~InputX() { delete &p; }
+DeclareInput(X)
 
-} //namespace ruby
+};

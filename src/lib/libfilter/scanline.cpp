@@ -1,11 +1,16 @@
 ScanlineFilter filter_scanline;
 
+void ScanlineFilter::size(unsigned &outwidth, unsigned &outheight, unsigned width, unsigned height) {
+  outwidth  = width;
+  outheight = height * 2;
+}
+
 void ScanlineFilter::render(
-  uint32_t *output, unsigned outpitch, unsigned &outwidth, unsigned &outheight,
-  uint16_t *input, unsigned pitch, unsigned *line, unsigned width, unsigned height
+  uint32_t *output, unsigned outpitch, uint16_t *input, unsigned pitch,
+  unsigned *line, unsigned width, unsigned height
 ) {
   if(height > 240) {
-    filter_direct.render(output, outpitch, outwidth, outheight, input, pitch, line, width, height);
+    filter_direct.render(output, outpitch, input, pitch, line, width, height);
     return;
   }
 
@@ -14,7 +19,7 @@ void ScanlineFilter::render(
 
   for(unsigned y = 0; y < height; y++) {
     uint32_t *out0 = output;
-    uint32_t *out1 = output + pitch;
+    uint32_t *out1 = output + outpitch;
     if(width == 512 && line[y] == 256) {
       for(unsigned x = 0; x < 256; x++) {
         uint16_t p = *input++;
@@ -34,7 +39,4 @@ void ScanlineFilter::render(
     input += pitch - width;
     output += outpitch * 2;
   }
-
-  outwidth = width;
-  outheight = height * 2;
 }

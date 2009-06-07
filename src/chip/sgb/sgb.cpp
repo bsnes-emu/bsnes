@@ -63,4 +63,3 @@ void SuperGameBoy::reset() {
 }
 
 };
-

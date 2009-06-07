@@ -2,12 +2,13 @@ class Interface : public SNES::Interface {
 public:
   void video_refresh(uint16_t *data, unsigned pitch, unsigned *line, unsigned width, unsigned height) {
     uint32_t *output;
-    unsigned outpitch;
-    if(video.lock(output, outpitch) == true) {
-      unsigned outwidth, outheight;
-      libfilter::filter.render(output, outpitch, outwidth, outheight, data, pitch, line, width, height);
+    unsigned outwidth, outheight, outpitch;
+    libfilter::filter.size(outwidth, outheight, width, height);
+
+    if(video.lock(output, outpitch, outwidth, outheight) == true) {
+      libfilter::filter.render(output, outpitch, data, pitch, line, width, height);
       video.unlock();
-      video.refresh(outwidth, outheight);
+      video.refresh();
     }
   }
 
@@ -24,4 +25,3 @@ public:
     return inputManager.getStatus(deviceid, id);
   }
 } interface;
-

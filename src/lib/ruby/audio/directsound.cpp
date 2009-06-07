@@ -1,14 +1,14 @@
-#include <windows.h>
+/*
+  audio.directsound (2007-12-26)
+  author: byuu
+*/
+
 #include <dsound.h>
 
 namespace ruby {
 
-#include "directsound.hpp"
-
 class pAudioDS {
 public:
-  AudioDS &self;
-
   LPDIRECTSOUND ds;
   LPDIRECTSOUNDBUFFER dsb_p, dsb_b;
   DSBUFFERDESC dsbd;
@@ -33,42 +33,42 @@ public:
     unsigned latency;
   } settings;
 
-  bool cap(Audio::Setting setting) {
-    if(setting == Audio::Handle) return true;
-    if(setting == Audio::Synchronize) return true;
-    if(setting == Audio::Frequency) return true;
-    if(setting == Audio::Latency) return true;
+  bool cap(const string& name) {
+    if(name == Audio::Handle) return true;
+    if(name == Audio::Synchronize) return true;
+    if(name == Audio::Frequency) return true;
+    if(name == Audio::Latency) return true;
     return false;
   }
 
-  uintptr_t get(Audio::Setting setting) {
-    if(setting == Audio::Handle) return (uintptr_t)settings.handle;
-    if(setting == Audio::Synchronize) return settings.synchronize;
-    if(setting == Audio::Frequency) return settings.frequency;
-    if(setting == Audio::Latency) return settings.latency;
+  any get(const string& name) {
+    if(name == Audio::Handle) return (uintptr_t)settings.handle;
+    if(name == Audio::Synchronize) return settings.synchronize;
+    if(name == Audio::Frequency) return settings.frequency;
+    if(name == Audio::Latency) return settings.latency;
     return false;
   }
 
-  bool set(Audio::Setting setting, uintptr_t param) {
-    if(setting == Audio::Handle) {
-      settings.handle = (HWND)param;
+  bool set(const string& name, const any& value) {
+    if(name == Audio::Handle) {
+      settings.handle = (HWND)any_cast<uintptr_t>(value);
       return true;
     }
 
-    if(setting == Audio::Synchronize) {
-      settings.synchronize = param;
+    if(name == Audio::Synchronize) {
+      settings.synchronize = any_cast<bool>(value);
       if(ds) clear();
       return true;
     }
 
-    if(setting == Audio::Frequency) {
-      settings.frequency = param;
+    if(name == Audio::Frequency) {
+      settings.frequency = any_cast<unsigned>(value);
       if(ds) init();
       return true;
     }
 
-    if(setting == Audio::Latency) {
-      settings.latency = param;
+    if(name == Audio::Latency) {
+      settings.latency = any_cast<unsigned>(value);
       if(ds) init();
       return true;
     }
@@ -90,7 +90,7 @@ public:
         dsb_b->GetCurrentPosition(&pos, 0);
         unsigned activering = pos / (device.latency * 4);
         if(activering == device.readring) {
-          if(video.get(Video::Synchronize) == false) Sleep(1);
+          if(settings.synchronize == false) Sleep(1);
           continue;
         }
 
@@ -189,7 +189,7 @@ public:
     if(ds) { ds->Release(); ds = 0; }
   }
 
-  pAudioDS(AudioDS &self_) : self(self_) {
+  pAudioDS() {
     ds = 0;
     dsb_p = 0;
     dsb_b = 0;
@@ -207,14 +207,6 @@ public:
   }
 };
 
-bool AudioDS::cap(Setting setting) { return p.cap(setting); }
-uintptr_t AudioDS::get(Setting setting) { return p.get(setting); }
-bool AudioDS::set(Setting setting, uintptr_t param) { return p.set(setting, param); }
-void AudioDS::sample(uint16_t left, uint16_t right) { p.sample(left, right); }
-void AudioDS::clear() { p.clear(); }
-bool AudioDS::init() { return p.init(); }
-void AudioDS::term() { p.term(); }
-AudioDS::AudioDS() : p(*new pAudioDS(*this)) {}
-AudioDS::~AudioDS() { delete &p; }
+DeclareAudio(DS)
 
-} //namespace ruby
+};

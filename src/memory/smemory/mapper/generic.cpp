@@ -32,6 +32,10 @@ void sBus::map_generic() {
       map_generic_sram();
     } break;
 
+    case Cartridge::SuperFXROM: {
+      //mapped via SuperFXBus::init();
+    } break;
+
     case Cartridge::SA1ROM: {
       //mapped via SA1Bus::init();
     } break;

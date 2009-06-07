@@ -3,21 +3,16 @@
 SA1Bus sa1bus;
 
 namespace memory {
-  VectorSelectionPage vectorsp;
-  StaticRAM iram(2048);
-  MappedRAM &bwram = memory::cartram;
-  CC1BWRAM cc1bwram;
-  BitmapRAM bitmapram;
+  static VectorSelectionPage vectorsp;
+  static StaticRAM iram(2048);
+  static MappedRAM &bwram = memory::cartram;
+  static CC1BWRAM cc1bwram;
+  static BitmapRAM bitmapram;
 }
 
 void SA1Bus::init() {
-  for(uint32_t i = 0x0000; i <= 0xffff; i++) {
-    map(i << 8, memory::memory_unmapped, 0);
-  }
-
-  for(uint16_t i = 0x2200; i <= 0x23ff; i++) {
-    memory::mmio.map(i, sa1);
-  }
+  map(MapDirect, 0x00, 0xff, 0x0000, 0xffff, memory::memory_unmapped);
+  for(uint16_t i = 0x2200; i <= 0x23ff; i++) memory::mmio.map(i, sa1);
 
   map(MapLinear, 0x00, 0x3f, 0x0000, 0x07ff, memory::iram);
   map(MapDirect, 0x00, 0x3f, 0x2200, 0x23ff, memory::mmio);
@@ -120,7 +115,7 @@ uint8_t BitmapRAM::read(unsigned addr) {
     //4bpp
     unsigned shift = addr & 1;
     addr = (addr >> 1) & (memory::cartram.size() - 1);
-    switch(shift) {
+    switch(shift) { default:
       case 0: return (memory::cartram.read(addr) >> 0) & 15;
       case 1: return (memory::cartram.read(addr) >> 4) & 15;
     }
@@ -128,7 +123,7 @@ uint8_t BitmapRAM::read(unsigned addr) {
     //2bpp
     unsigned shift = addr & 3;
     addr = (addr >> 2) & (memory::cartram.size() - 1);
-    switch(shift) {
+    switch(shift) { default:
       case 0: return (memory::cartram.read(addr) >> 0) & 3;
       case 1: return (memory::cartram.read(addr) >> 2) & 3;
       case 2: return (memory::cartram.read(addr) >> 4) & 3;
@@ -142,7 +137,7 @@ void BitmapRAM::write(unsigned addr, uint8_t data) {
     //4bpp
     uint8_t shift = addr & 1;
     addr = (addr >> 1) & (memory::cartram.size() - 1);
-    switch(shift) {
+    switch(shift) { default:
       case 0: data = (memory::cartram.read(addr) & 0xf0) | ((data & 15) << 0); break;
       case 1: data = (memory::cartram.read(addr) & 0x0f) | ((data & 15) << 4); break;
     }
@@ -150,7 +145,7 @@ void BitmapRAM::write(unsigned addr, uint8_t data) {
     //2bpp
     uint8_t shift = addr & 3;
     addr = (addr >> 2) & (memory::cartram.size() - 1);
-    switch(shift) {
+    switch(shift) { default:
       case 0: data = (memory::cartram.read(addr) & 0xfc) | ((data &  3) << 0); break;
       case 1: data = (memory::cartram.read(addr) & 0xf3) | ((data &  3) << 2); break;
       case 2: data = (memory::cartram.read(addr) & 0xcf) | ((data &  3) << 4); break;

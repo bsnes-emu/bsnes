@@ -5,4 +5,3 @@ public:
   virtual void input_poll() {}
   virtual int16_t input_poll(unsigned deviceid, unsigned id) { return 0; }
 };
-

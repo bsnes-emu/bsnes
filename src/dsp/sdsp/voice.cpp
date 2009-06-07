@@ -171,4 +171,4 @@ void sDSP::voice_9(voice_t &v) {
   VREG(envx) = (uint8)state.envx_buf;
 }
 
-#endif //ifdef SDSP_CPP
+#endif

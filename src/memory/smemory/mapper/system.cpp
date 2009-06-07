@@ -1,11 +1,8 @@
 #ifdef SMEMORY_CPP
 
 void sBus::map_reset() {
-  for(uint32_t i = 0x0000; i <= 0xffff; i++)
-    map(i << 8, memory::memory_unmapped, 0);
-
-  for(uint16_t i = 0x2000; i <= 0x5fff; i++)
-    memory::mmio.map(i, memory::mmio_unmapped);
+  map(MapDirect, 0x00, 0xff, 0x0000, 0xffff, memory::memory_unmapped);
+  for(unsigned i = 0x2000; i <= 0x5fff; i++) memory::mmio.map(i, memory::mmio_unmapped);
 }
 
 void sBus::map_system() {

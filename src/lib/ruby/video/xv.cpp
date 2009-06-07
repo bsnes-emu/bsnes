@@ -1,8 +1,5 @@
 #include <sys/ipc.h>
 #include <sys/shm.h>
-#include <X11/Xlib.h>
-#include <X11/Xutil.h>
-#include <X11/Xatom.h>
 #include <X11/extensions/XShm.h>
 #include <X11/extensions/Xv.h>
 #include <X11/extensions/Xvlib.h>
@@ -11,12 +8,8 @@ extern "C" XvImage* XvShmCreateImage(Display*, XvPortID, int, char*, int, int, X
 
 namespace ruby {
 
-#include "xv.hpp"
-
 class pVideoXv {
 public:
-  VideoXv &self;
-
   uint32_t *buffer;
   uint8_t  *ytable, *utable, *vtable;
 
@@ -49,33 +42,36 @@ public:
   struct {
     Window handle;
     bool synchronize;
+
+    unsigned width;
+    unsigned height;
   } settings;
 
-  bool cap(Video::Setting setting) {
-    if(setting == Video::Handle) return true;
-    if(setting == Video::Synchronize) {
+  bool cap(const string& name) {
+    if(name == Video::Handle) return true;
+    if(name == Video::Synchronize) {
       return XInternAtom(XOpenDisplay(0), "XV_SYNC_TO_VBLANK", true) != None;
     }
     return false;
   }
 
-  uintptr_t get(Video::Setting setting) {
-    if(setting == Video::Handle) return settings.handle;
-    if(setting == Video::Synchronize) return settings.synchronize;
+  any get(const string& name) {
+    if(name == Video::Handle) return settings.handle;
+    if(name == Video::Synchronize) return settings.synchronize;
     return false;
   }
 
-  bool set(Video::Setting setting, uintptr_t param) {
-    if(setting == Video::Handle) {
-      settings.handle = param;
+  bool set(const string& name, const any& value) {
+    if(name == Video::Handle) {
+      settings.handle = any_cast<uintptr_t>(value);
       return true;
     }
 
-    if(setting == Video::Synchronize) {
+    if(name == Video::Synchronize) {
       Display *display = XOpenDisplay(0);
       Atom atom = XInternAtom(display, "XV_SYNC_TO_VBLANK", true);
       if(atom != None && device.port >= 0) {
-        settings.synchronize = param;
+        settings.synchronize = any_cast<bool>(value);
         XvSetPortAttribute(display, device.port, atom, settings.synchronize);
         return true;
       }
@@ -85,7 +81,10 @@ public:
     return false;
   }
 
-  bool lock(uint32_t *&data, unsigned &pitch) {
+  bool lock(uint32_t *&data, unsigned &pitch, unsigned width, unsigned height) {
+    settings.width  = width;
+    settings.height = height;
+
     pitch = 1024 * 4;
     return data = buffer;
   }
@@ -96,11 +95,14 @@ public:
   void clear() {
     memset(buffer, 0, 1024 * 1024 * sizeof(uint32_t));
     //clear twice in case video is double buffered ...
-    refresh(1024, 1024);
-    refresh(1024, 1024);
+    refresh();
+    refresh();
   }
 
-  void refresh(unsigned width, unsigned height) {
+  void refresh() {
+    unsigned width  = settings.width;
+    unsigned height = settings.height;
+
     XWindowAttributes target;
     XGetWindowAttributes(device.display, device.window, &target);
 
@@ -282,6 +284,8 @@ public:
     }
 
     buffer = new uint32_t[1024 * 1024];
+    settings.width  = 256;
+    settings.height = 256;
     init_yuv_tables();
     clear();
     return true;
@@ -440,7 +444,7 @@ public:
     }
   }
 
-  pVideoXv(VideoXv &self_) : self(self_) {
+  pVideoXv() {
     device.window   = 0;
     device.colormap = 0;
     device.port     = -1;
@@ -454,16 +458,6 @@ public:
   }
 };
 
-bool VideoXv::cap(Setting setting) { return p.cap(setting); }
-uintptr_t VideoXv::get(Setting setting) { return p.get(setting); }
-bool VideoXv::set(Setting setting, uintptr_t param) { return p.set(setting, param); }
-bool VideoXv::lock(uint32_t *&data, unsigned &pitch) { return p.lock(data, pitch); }
-void VideoXv::unlock() { p.unlock(); }
-void VideoXv::clear() { p.clear(); }
-void VideoXv::refresh(unsigned width, unsigned height) { p.refresh(width, height); }
-bool VideoXv::init() { return p.init(); }
-void VideoXv::term() { p.term(); }
-VideoXv::VideoXv() : p(*new pVideoXv(*this)) {}
-VideoXv::~VideoXv() { delete &p; }
+DeclareVideo(Xv)
 
-}
+};

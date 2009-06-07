@@ -30,7 +30,8 @@ void AdvancedSettingsWindow::setup() {
     inputDriver = new QComboBox;
     driverLayout->addWidget(inputDriver, 1, 2);
 
-    driverInfo = new QLabel("<i>Note: driver changes require restart to take effect.</i>");
+    driverInfo = new QLabel("<small>Note: driver changes require restart to take effect.</small>");
+    driverInfo->setStyleSheet("margin-left: -3px; margin-top: 5px;");
     driverLayout->addWidget(driverInfo, 2, 0, 1, 3);
   }
   layout->addLayout(driverLayout);

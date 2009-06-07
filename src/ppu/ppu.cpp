@@ -47,5 +47,5 @@ PPU::PPU() {
 PPU::~PPU() {
   delete[] output;
 }
-};
 
+};

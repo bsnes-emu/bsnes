@@ -208,4 +208,4 @@ void bPPU::render_line_bg(uint8 bg, uint8 color_depth, uint8 pri0_pos, uint8 pri
 #undef setpixel_main
 #undef setpixel_sub
 
-#endif  //ifdef BPPU_CPP
+#endif

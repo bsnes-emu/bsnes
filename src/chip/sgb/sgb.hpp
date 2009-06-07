@@ -25,4 +25,3 @@ private:
 };
 
 extern SuperGameBoy sgb;
-

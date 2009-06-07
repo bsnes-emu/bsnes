@@ -1,9 +1,12 @@
+/*
+  audio.pulseaudio (2008-10-31)
+  author: byuu
+*/
+
 #include <pulse/simple.h>
 #include <pulse/error.h>
 
 namespace ruby {
-
-#include "pulseaudio.hpp"
 
 class pAudioPulseAudio {
 public:
@@ -21,25 +24,20 @@ public:
     unsigned frequency;
   } settings;
 
-  AudioPulseAudio &self;
-
-  bool cap(Audio::Setting setting) {
-    if(setting == Audio::Frequency) return true;
+  bool cap(const string& name) {
+    if(name == Audio::Frequency) return true;
     return false;
   }
 
-  uintptr_t get(Audio::Setting setting) {
-    if(setting == Audio::Frequency) return settings.frequency;
+  any get(const string& name) {
+    if(name == Audio::Frequency) return settings.frequency;
     return false;
   }
 
-  bool set(Audio::Setting setting, uintptr_t param) {
-    if(setting == Audio::Frequency) {
-      settings.frequency = param;
-      if(device.handle) {
-        term();
-        init();
-      }
+  bool set(const string& name, const any& value) {
+    if(name == Audio::Frequency) {
+      settings.frequency = any_cast<unsigned>(value);
+      if(device.handle) init();
       return true;
     }
 
@@ -57,7 +55,12 @@ public:
     }
   }
 
+  void clear() {
+  }
+
   bool init() {
+    term();
+
     device.spec.format   = PA_SAMPLE_S16LE;
     device.spec.channels = 2;
     device.spec.rate     = settings.frequency;
@@ -98,7 +101,7 @@ public:
     }
   }
 
-  pAudioPulseAudio(AudioPulseAudio &self_) : self(self_) {
+  pAudioPulseAudio() {
     device.handle = 0;
     buffer.data = 0;
     settings.frequency = 22050;
@@ -109,13 +112,6 @@ public:
   }
 };
 
-bool AudioPulseAudio::cap(Setting setting) { return p.cap(setting); }
-uintptr_t AudioPulseAudio::get(Setting setting) { return p.get(setting); }
-bool AudioPulseAudio::set(Setting setting, uintptr_t param) { return p.set(setting, param); }
-void AudioPulseAudio::sample(uint16_t left, uint16_t right) { return p.sample(left, right); }
-bool AudioPulseAudio::init() { return p.init(); }
-void AudioPulseAudio::term() { p.term(); }
-AudioPulseAudio::AudioPulseAudio() : p(*new pAudioPulseAudio(*this)) {}
-AudioPulseAudio::~AudioPulseAudio() { delete &p; }
+DeclareAudio(PulseAudio)
 
-} //namespace ruby
+};

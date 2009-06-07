@@ -158,5 +158,5 @@ SDD1::SDD1() {
 SDD1::~SDD1() {
   delete[] buffer.data;
 }
-};
 
+};

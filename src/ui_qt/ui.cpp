@@ -63,6 +63,7 @@ void Application::init() {
 
   video.driver(config.system.video);
   video.set(Video::Handle, (uintptr_t)winMain->canvas->winId());
+  video.set("QWidget", (QWidget*)winMain->canvas);
   if(video.init() == false) {
     QMessageBox::warning(0, "bsnes", utf8() <<
       "<p><b>Warning:</b> " << config.system.video << " video driver failed to initialize. "
@@ -91,7 +92,7 @@ void Application::init() {
   }
 
   input.driver(config.system.input);
-  input.set(Input::Handle, (uintptr_t)winMain->canvas->winId());
+  input.set("Handle", (uintptr_t)winMain->canvas->winId());
   if(input.init() == false) {
     QMessageBox::warning(0, "bsnes", utf8() <<
       "<p><b>Warning:</b> " << config.system.input << " input driver failed to initialize. "

@@ -302,4 +302,3 @@ void SMPcore::disassemble_opcode(char *output) {
 }
 
 #endif
-

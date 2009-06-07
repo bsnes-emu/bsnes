@@ -20,6 +20,7 @@ PPUCORE ppu;
 
 void System::coprocessor_enter() {
   if(cartridge.mode() == Cartridge::ModeSuperGameBoy) sgb.enter();
+  if(cartridge.has_superfx()) superfx.enter();
   if(cartridge.has_sa1()) sa1.enter();
 
   while(true) {
@@ -33,6 +34,8 @@ void System::run() {
 
 void System::runtoframe() {
   scheduler.enter();
+  input.update();
+  video.update();
 }
 
 void System::init(Interface *interface_) {
@@ -41,6 +44,7 @@ void System::init(Interface *interface_) {
 
   sgb.init();
   sa1.init();
+  superfx.init();
   bsxbase.init();
   bsxcart.init();
   bsxflash.init();
@@ -85,6 +89,7 @@ void System::power() {
   if(cartridge.mode() == Cartridge::ModeBsx) bsxcart.power();
   if(cartridge.mode() == Cartridge::ModeSuperGameBoy) sgb.power();
 
+  if(cartridge.has_superfx()) superfx.power();
   if(cartridge.has_sa1())     sa1.power();
   if(cartridge.has_srtc())    srtc.power();
   if(cartridge.has_sdd1())    sdd1.power();
@@ -109,6 +114,7 @@ void System::power() {
   if(cartridge.mode() == Cartridge::ModeBsx) bsxcart.enable();
   if(cartridge.mode() == Cartridge::ModeSuperGameBoy) sgb.enable();
 
+  if(cartridge.has_superfx()) superfx.enable();
   if(cartridge.has_sa1())     sa1.enable();
   if(cartridge.has_srtc())    srtc.enable();
   if(cartridge.has_sdd1())    sdd1.enable();
@@ -142,6 +148,7 @@ void System::reset() {
   if(cartridge.mode() == Cartridge::ModeBsx) bsxcart.reset();
   if(cartridge.mode() == Cartridge::ModeSuperGameBoy) sgb.reset();
 
+  if(cartridge.has_superfx()) superfx.reset();
   if(cartridge.has_sa1())     sa1.reset();
   if(cartridge.has_srtc())    srtc.reset();
   if(cartridge.has_sdd1())    sdd1.reset();
@@ -162,12 +169,7 @@ void System::reset() {
 
 void System::scanline() {
   video.scanline();
-
-  if(ppu.vcounter() == 241) {
-    input.update();
-    video.update();
-    scheduler.exit();
-  }
+  if(ppu.vcounter() == 241) scheduler.exit();
 }
 
 void System::frame() {
@@ -185,4 +187,3 @@ System::System() : interface(0), snes_region(NTSC), snes_expansion(ExpansionNone
 }
 
 };
-

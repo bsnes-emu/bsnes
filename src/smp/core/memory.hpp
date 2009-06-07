@@ -25,4 +25,3 @@ alwaysinline uint8_t op_readdp(uint8_t addr) {
 alwaysinline void op_writedp(uint8_t addr, uint8_t data) {
   op_write(((unsigned)regs.p.p << 8) + addr, data);
 }
-

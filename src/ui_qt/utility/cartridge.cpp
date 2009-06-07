@@ -174,10 +174,9 @@ void Utility::modifySystemState(system_state_t state) {
 
       //warn if unsupported hardware detected
       string chip;
-      if(SNES::cartridge.has_superfx())    chip = "SuperFX";
+      if(0);
       else if(SNES::cartridge.has_st011()) chip = "ST011";
       else if(SNES::cartridge.has_st018()) chip = "ST018";
-      else if(SNES::cartridge.has_dsp3())  chip = "DSP-3";  //unplayable; only partially supported
       if(chip != "") {
         QMessageBox::warning(winMain->window, "Warning", utf8()
         << "<p><b>Warning:</b><br>Unsupported " << chip << " chip detected. "
@@ -186,7 +185,7 @@ void Utility::modifySystemState(system_state_t state) {
 
       showMessage(utf8()
       << "Loaded " << cartridge.name
-      << (false ? ", and applied UPS patch." : "."));
+      << (cartridge.patchApplied ? ", and applied UPS patch." : "."));
       winMain->window->setWindowTitle(utf8() << BSNES_TITLE << " - " << cartridge.name);
     } break;
 
@@ -293,7 +292,44 @@ bool Utility::loadCartridge(const char *filename, SNES::MappedRAM &memory) {
     #endif
   }
 
+  //remove copier header, if it exists
   if((size & 0x7fff) == 512) memmove(data, data + 512, size -= 512);
+
+  cartridge.patchApplied = false;
+  string name;
+  name << filepath(basename(filename), config.path.patch);
+  name << ".ups";
+
+  file fp;
+  if(fp.open(name, file::mode_read) == true) {
+    unsigned patchsize = fp.size();
+    uint8_t *patchdata = new uint8_t[patchsize];
+    fp.read(patchdata, patchsize);
+    fp.close();
+
+    uint8_t *outdata = 0;
+    unsigned outsize = 0;
+    ups patcher;
+    ups::result result = patcher.apply(patchdata, patchsize, data, size, outdata, outsize);
+    delete[] patchdata;
+
+    bool apply = false;
+    if(result == ups::ok) apply = true;
+    if(config.file.bypass_patch_crc32) {
+      if(result == ups::input_crc32_invalid ) apply = true;
+      if(result == ups::output_crc32_invalid) apply = true;
+    }
+
+    if(apply == true) {
+      delete[] data;
+      data = outdata;
+      size = outsize;
+      cartridge.patchApplied = true;
+    } else {
+      delete[] outdata;
+    }
+  }
+
   memory.map(data, size);
   return true;
 }
@@ -308,12 +344,13 @@ bool Utility::loadMemory(const char *filename, const char *extension, SNES::Mapp
   file fp;
   if(fp.open(name, file::mode_read) == false) return false;
 
-  unsigned size;
-  uint8_t *data = new uint8_t[size = fp.size()];
+  unsigned size = fp.size();
+  uint8_t *data = new uint8_t[size];
   fp.read(data, size);
   fp.close();
 
   memcpy(memory.data(), data, min(size, memory.size()));
+  delete[] data;
   return true;
 }
 

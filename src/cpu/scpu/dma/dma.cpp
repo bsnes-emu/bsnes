@@ -270,4 +270,4 @@ void sCPU::dma_reset() {
   }
 }
 
-#endif //ifdef SCPU_CPP
+#endif

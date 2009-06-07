@@ -2,18 +2,7 @@
 void Utility::showCentered(QWidget *window) {
   QRect deskRect = QApplication::desktop()->availableGeometry(window);
 
-  #ifdef _WIN32
-  if(window->isMinimized() == false) {
-    //place window offscreen, so that it can be shown to get proper frameSize()
-    window->move(std::numeric_limits<signed>::max(), std::numeric_limits<signed>::max());
-  }
-  window->showNormal();
-  window->resize(0, 0);
-  window->move(
-    deskRect.center().x() - (window->frameSize().width()  / 2),
-    deskRect.center().y() - (window->frameSize().height() / 2)
-  );
-  #else
+  #if defined(PLATFORM_X)
   if(window->isVisible() == false) window->showMinimized();
   window->resize(0, 0);
 
@@ -33,6 +22,24 @@ void Utility::showCentered(QWidget *window) {
     application.processEvents();
     if(window->isMinimized() == false) break;
   }
+  #elif defined(PLATFORM_OSX)
+  window->showNormal();
+  window->resize(0, 0);
+  window->move(
+    deskRect.center().x() - (window->frameSize().width()  / 2),
+    deskRect.center().y() - (window->frameSize().height() / 2)
+  );
+  #elif defined(PLATFORM_WIN)
+  if(window->isMinimized() == false) {
+    //place window offscreen, so that it can be shown to get proper frameSize()
+    window->move(std::numeric_limits<signed>::max(), std::numeric_limits<signed>::max());
+  }
+  window->showNormal();
+  window->resize(0, 0);
+  window->move(
+    deskRect.center().x() - (window->frameSize().width()  / 2),
+    deskRect.center().y() - (window->frameSize().height() / 2)
+  );
   #endif
 
   //ensure window has focus
@@ -52,10 +59,12 @@ void Utility::updateFullscreenState() {
     winMain->window->showFullScreen();
   }
 
+  application.processEvents();
+  #if defined(PLATFORM_X)
   //Xlib requires time to propogate fullscreen state change message to window manager;
   //if window is resized before this occurs, canvas may not resize correctly
-  application.processEvents();
   usleep(50000);
+  #endif
 
   //refresh options that are unique to each video context
   resizeMainWindow();
@@ -89,15 +98,17 @@ void Utility::resizeMainWindow() {
     }
 
     if(config.video.isFullscreen == false) {
-      //get effective desktop work area region (ignore Windows taskbar, OS X doc, etc.)
+      //get effective desktop work area region (ignore Windows taskbar, OS X dock, etc.)
       QRect deskRect = QApplication::desktop()->availableGeometry(winMain->window);
 
       if(winMain->window->isVisible() == false) {
-        #ifdef _WIN32
+        #if defined(PLATFORM_X)
+        winMain->window->showMinimized();
+        #elif defined(PLATFORM_OSX)
+        winMain->window->showNormal();
+        #elif defined(PLATFORM_WIN)
         winMain->window->move(std::numeric_limits<signed>::max(), std::numeric_limits<signed>::max());
         winMain->window->showNormal();
-        #else
-        winMain->window->showMinimized();
         #endif
       }
 
@@ -111,7 +122,7 @@ void Utility::resizeMainWindow() {
 
       //resize window such that it is as small as possible to hold canvas of size (width, height)
       winMain->canvas->setFixedSize(width, height);
-      winMain->window->resize(width, height);
+      winMain->window->resize(0, 0);
 
       //center window onscreen
       winMain->window->move(

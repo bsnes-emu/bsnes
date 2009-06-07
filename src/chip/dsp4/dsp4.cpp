@@ -56,5 +56,5 @@ void DSP4::write(unsigned addr, uint8 data) {
     DSP4i::DSP4SetByte();
   }
 }
-};
 
+};

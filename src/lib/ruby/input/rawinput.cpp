@@ -24,10 +24,8 @@
 
 namespace ruby {
 
-#include "rawinput.hpp"
-
-DWORD WINAPI RawInputThreadProc(void*);
-LRESULT CALLBACK RawInputWindowProc(HWND, UINT, WPARAM, LPARAM);
+static DWORD WINAPI RawInputThreadProc(void*);
+static LRESULT CALLBACK RawInputWindowProc(HWND, UINT, WPARAM, LPARAM);
 
 class RawInput {
 public:
@@ -381,6 +379,9 @@ LRESULT CALLBACK RawInputWindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM l
 
 class XInput {
 public:
+  HMODULE libxinput;
+  DWORD WINAPI (*pXInputGetState)(DWORD, XINPUT_STATE*);
+
   struct Gamepad {
     unsigned id;
 
@@ -434,24 +435,41 @@ public:
   vector<Gamepad> lgamepad;
 
   void poll() {
+    if(!pXInputGetState) return;
+
     for(unsigned i = 0; i < lgamepad.size(); i++) {
       XINPUT_STATE state;
-      DWORD result = XInputGetState(lgamepad[i].id, &state);
+      DWORD result = pXInputGetState(lgamepad[i].id, &state);
       if(result == ERROR_SUCCESS) lgamepad[i].poll(state);
     }
   }
 
   void init() {
+    if(!pXInputGetState) return;
+
     //XInput only supports up to four controllers
     for(unsigned i = 0; i <= 3; i++) {
       XINPUT_STATE state;
-      DWORD result = XInputGetState(i, &state);
+      DWORD result = pXInputGetState(i, &state);
       if(result == ERROR_SUCCESS) {
         //valid controller detected, add to gamepad list
         unsigned n = lgamepad.size();
         lgamepad[n].id = i;
       }
     }
+  }
+
+  XInput() : pXInputGetState(0) {
+    //bind xinput1 dynamically, as it does not ship with Windows Vista or below
+    libxinput = LoadLibraryA("xinput1_3.dll");
+    if(!libxinput) libxinput = LoadLibraryA("xinput1_2.dll");
+    if(!libxinput) libxinput = LoadLibraryA("xinput1_1.dll");
+    if(!libxinput) return;
+    pXInputGetState = (DWORD WINAPI (*)(DWORD, XINPUT_STATE*))GetProcAddress(libxinput, "XInputGetState");
+  }
+
+  ~XInput() {
+    if(libxinput) FreeLibrary(libxinput);
   }
 };
 
@@ -592,7 +610,6 @@ BOOL CALLBACK DirectInput_EnumJoypadAxesCallback(const DIDEVICEOBJECTINSTANCE *i
 
 class pInputRaw {
 public:
-  InputRaw &self;
   XInput xinput;
   DirectInput dinput;
 
@@ -603,24 +620,25 @@ public:
     HWND handle;
   } settings;
 
-  bool cap(Input::Setting setting) {
-    if(setting == Input::Handle) return true;
-    if(setting == Input::KeyboardSupport) return true;
-    if(setting == Input::MouseSupport) return true;
-    if(setting == Input::JoypadSupport) return true;
+  bool cap(const string& name) {
+    if(name == Input::Handle) return true;
+    if(name == Input::KeyboardSupport) return true;
+    if(name == Input::MouseSupport) return true;
+    if(name == Input::JoypadSupport) return true;
     return false;
   }
 
-  uintptr_t get(Input::Setting setting) {
-    if(setting == Input::Handle) return (uintptr_t)settings.handle;
+  any get(const string& name) {
+    if(name == Input::Handle) return (uintptr_t)settings.handle;
     return false;
   }
 
-  bool set(Input::Setting setting, uintptr_t param) {
-    if(setting == Input::Handle) {
-      settings.handle = (HWND)param;
+  bool set(const string& name, const any& value) {
+    if(name == Input::Handle) {
+      settings.handle = (HWND)any_cast<uintptr_t>(value);
       return true;
     }
+
     return false;
   }
 
@@ -729,6 +747,8 @@ public:
         table[index + joypad<>::button + button] = dinput.lgamepad[i].button[button];
       }
     }
+
+    return true;
   }
 
   bool init() {
@@ -762,20 +782,10 @@ public:
     dinput.term();
   }
 
-  pInputRaw(InputRaw &self_) : self(self_) {
+  pInputRaw() {
   }
 };
 
-bool InputRaw::cap(Setting setting) { return p.cap(setting); }
-uintptr_t InputRaw::get(Setting setting) { return p.get(setting); }
-bool InputRaw::set(Setting setting, uintptr_t param) { return p.set(setting, param); }
-bool InputRaw::acquire() { return p.acquire(); }
-bool InputRaw::unacquire() { return p.unacquire(); }
-bool InputRaw::acquired() { return p.acquired(); }
-bool InputRaw::poll(int16_t *table) { return p.poll(table); }
-bool InputRaw::init() { return p.init(); }
-void InputRaw::term() { p.term(); }
-InputRaw::InputRaw() : p(*new pInputRaw(*this)) {}
-InputRaw::~InputRaw() { delete &p; }
+DeclareInput(Raw)
 
-}
+};

@@ -52,14 +52,6 @@ void sCPU::scanline() {
   }
 }
 
-//used for H/DMA bus synchronization
-void sCPU::precycle_edge() {
-  if(status.dma_state == DmaCpuSync) {
-    add_clocks(status.clock_count - (status.dma_clocks % status.clock_count));
-    status.dma_state = DmaInactive;
-  }
-}
-
 //used to test for H/DMA, which can trigger on the edge of every opcode cycle.
 void sCPU::cycle_edge() {
   while(cycle_edge_state) {
@@ -91,30 +83,34 @@ void sCPU::cycle_edge() {
   //.. Run one bus CPU cycle
   //.. CPU sync
 
-  if(status.dma_state == DmaRun) {
+  if(status.dma_active == true) {
     if(status.hdma_pending) {
       status.hdma_pending = false;
       if(hdma_enabled_channels()) {
-        dma_add_clocks(8 - dma_counter());  //DMA sync
+        dma_add_clocks(8 - dma_counter());
         status.hdma_mode == 0 ? hdma_init() : hdma_run();
-        if(!dma_enabled_channels()) status.dma_state = DmaCpuSync;
+        if(!dma_enabled_channels()) {
+          add_clocks(status.clock_count - (status.dma_clocks % status.clock_count));
+          status.dma_active = false;
+        }
       }
     }
 
     if(status.dma_pending) {
       status.dma_pending = false;
       if(dma_enabled_channels()) {
-        dma_add_clocks(8 - dma_counter());  //DMA sync
+        dma_add_clocks(8 - dma_counter());
         dma_run();
-        status.dma_state = DmaCpuSync;
+        add_clocks(status.clock_count - (status.dma_clocks % status.clock_count));
+        status.dma_active = false;
       }
     }
   }
 
-  if(status.dma_state == DmaInactive) {
+  if(status.dma_active == false) {
     if(status.dma_pending || status.hdma_pending) {
       status.dma_clocks = 0;
-      status.dma_state = DmaRun;
+      status.dma_active = true;
     }
   }
 }
@@ -159,12 +155,12 @@ void sCPU::timing_reset() {
   status.irq_pending    = false;
   status.irq_hold       = false;
 
+  status.dma_active   = false;
   status.dma_counter  = 0;
   status.dma_clocks   = 0;
   status.dma_pending  = false;
   status.hdma_pending = false;
   status.hdma_mode    = 0;
-  status.dma_state    = DmaInactive;
 
   cycle_edge_state = 0;
 }

@@ -1,48 +1,88 @@
-#include <windows.h>
 #include <ddraw.h>
 
 namespace ruby {
 
-#include "directdraw.hpp"
-
 class pVideoDD {
 public:
-  VideoDD &self;
-
   LPDIRECTDRAW lpdd;
   LPDIRECTDRAW7 lpdd7;
   LPDIRECTDRAWSURFACE7 screen, raster;
   LPDIRECTDRAWCLIPPER clipper;
   DDSURFACEDESC2 ddsd;
   DDSCAPS2 ddscaps;
+  unsigned iwidth, iheight;
 
   struct {
     HWND handle;
     bool synchronize;
+
+    unsigned width;
+    unsigned height;
   } settings;
 
-  bool cap(Video::Setting setting) {
-    if(setting == Video::Handle) return true;
-    if(setting == Video::Synchronize) return true;
+  bool cap(const string& name) {
+    if(name == Video::Handle) return true;
+    if(name == Video::Synchronize) return true;
     return false;
   }
 
-  uintptr_t get(Video::Setting setting) {
-    if(setting == Video::Handle) return (uintptr_t)settings.handle;
-    if(setting == Video::Synchronize) return settings.synchronize;
+  any get(const string& name) {
+    if(name == Video::Handle) return (uintptr_t)settings.handle;
+    if(name == Video::Synchronize) return settings.synchronize;
     return false;
   }
 
-  bool set(Video::Setting setting, uintptr_t param) {
-    if(setting == Video::Handle) {
-      settings.handle = (HWND)param;
+  bool set(const string& name, const any& value) {
+    if(name == Video::Handle) {
+      settings.handle = (HWND)any_cast<uintptr_t>(value);
       return true;
     }
-    if(setting == Video::Synchronize) {
-      settings.synchronize = param;
+
+    if(name == Video::Synchronize) {
+      settings.synchronize = any_cast<bool>(value);
       return true;
     }
+
     return false;
+  }
+
+  void resize(unsigned width, unsigned height) {
+    if(iwidth >= width && iheight >= height) return;
+
+    iwidth  = max(width,  iwidth);
+    iheight = max(height, iheight);
+
+    if(raster) raster->Release();
+
+    screen->GetSurfaceDesc(&ddsd);
+    int depth = ddsd.ddpfPixelFormat.dwRGBBitCount;
+    if(depth == 32) goto try_native_surface;
+
+    memset(&ddsd, 0, sizeof(DDSURFACEDESC2));
+    ddsd.dwSize = sizeof(DDSURFACEDESC2);
+    ddsd.dwFlags = DDSD_CAPS | DDSD_WIDTH | DDSD_HEIGHT | DDSD_PIXELFORMAT;
+    ddsd.ddsCaps.dwCaps = DDSCAPS_OFFSCREENPLAIN | DDSCAPS_VIDEOMEMORY;  //DDSCAPS_SYSTEMMEMORY
+    ddsd.dwWidth  = iwidth;
+    ddsd.dwHeight = iheight;
+
+    ddsd.ddpfPixelFormat.dwSize = sizeof(DDPIXELFORMAT);
+    ddsd.ddpfPixelFormat.dwFlags = DDPF_RGB;
+    ddsd.ddpfPixelFormat.dwRGBBitCount = 32;
+    ddsd.ddpfPixelFormat.dwRBitMask = 0xff0000;
+    ddsd.ddpfPixelFormat.dwGBitMask = 0x00ff00;
+    ddsd.ddpfPixelFormat.dwBBitMask = 0x0000ff;
+
+    if(lpdd7->CreateSurface(&ddsd, &raster, 0) == DD_OK) return clear();
+
+    try_native_surface:
+    memset(&ddsd, 0, sizeof(DDSURFACEDESC2));
+    ddsd.dwSize = sizeof(DDSURFACEDESC2);
+    ddsd.dwFlags = DDSD_CAPS | DDSD_WIDTH | DDSD_HEIGHT;
+    ddsd.ddsCaps.dwCaps = DDSCAPS_OFFSCREENPLAIN | DDSCAPS_VIDEOMEMORY;  //DDSCAPS_SYSTEMMEMORY
+    ddsd.dwWidth  = iwidth;
+    ddsd.dwHeight = iheight;
+
+    if(lpdd7->CreateSurface(&ddsd, &raster, 0) == DD_OK) return clear();
   }
 
   void clear() {
@@ -53,8 +93,15 @@ public:
     raster->Blt(0, 0, 0, DDBLT_WAIT | DDBLT_COLORFILL, &fx);
   }
 
-  bool lock(uint32_t *&data, unsigned &pitch) {
-    if(raster->Lock(0, &ddsd, DDLOCK_WAIT, 0) != DD_OK) return false;
+  bool lock(uint32_t *&data, unsigned &pitch, unsigned width, unsigned height) {
+    if(width != settings.width || height != settings.height) {
+      resize(settings.width = width, settings.height = height);
+    }
+
+    if(raster->Lock(0, &ddsd, DDLOCK_WAIT, 0) != DD_OK) {
+      raster->Restore();
+      if(raster->Lock(0, &ddsd, DDLOCK_WAIT, 0) != DD_OK) return false;
+    }
     pitch = ddsd.lPitch;
     return data = (uint32_t*)ddsd.lpSurface;
   }
@@ -63,7 +110,7 @@ public:
     raster->Unlock(0);
   }
 
-  void refresh(unsigned r_width, unsigned r_height) {
+  void refresh() {
     if(settings.synchronize) {
       while(true) {
         BOOL in_vblank;
@@ -74,7 +121,7 @@ public:
 
     HRESULT hr;
     RECT rd, rs;
-    SetRect(&rs, 0, 0, r_width, r_height);
+    SetRect(&rs, 0, 0, settings.width, settings.height);
 
     POINT p = { 0, 0 };
     ClientToScreen(settings.handle, &p);
@@ -107,41 +154,12 @@ public:
     clipper->SetHWnd(0, settings.handle);
     screen->SetClipper(clipper);
 
-    create_raster();
-    clear();
+    raster  = 0;
+    iwidth  = 0;
+    iheight = 0;
+    resize(settings.width = 256, settings.height = 256);
+
     return true;
-  }
-
-  void create_raster() {
-    screen->GetSurfaceDesc(&ddsd);
-    int depth = ddsd.ddpfPixelFormat.dwRGBBitCount;
-    if(depth == 32) goto try_native_surface;
-
-    memset(&ddsd, 0, sizeof(DDSURFACEDESC2));
-    ddsd.dwSize = sizeof(DDSURFACEDESC2);
-    ddsd.dwFlags = DDSD_CAPS | DDSD_WIDTH | DDSD_HEIGHT | DDSD_PIXELFORMAT;
-    ddsd.ddsCaps.dwCaps = DDSCAPS_OFFSCREENPLAIN | DDSCAPS_VIDEOMEMORY; //DDSCAPS_SYSTEMMEMORY
-    ddsd.dwWidth  = 1024;
-    ddsd.dwHeight = 1024;
-
-    ddsd.ddpfPixelFormat.dwSize = sizeof(DDPIXELFORMAT);
-    ddsd.ddpfPixelFormat.dwFlags = DDPF_RGB;
-    ddsd.ddpfPixelFormat.dwRGBBitCount = 32;
-    ddsd.ddpfPixelFormat.dwRBitMask = 0xff0000;
-    ddsd.ddpfPixelFormat.dwGBitMask = 0x00ff00;
-    ddsd.ddpfPixelFormat.dwBBitMask = 0x0000ff;
-
-    if(lpdd7->CreateSurface(&ddsd, &raster, 0) == DD_OK) return;
-
-    try_native_surface:
-    memset(&ddsd, 0, sizeof(DDSURFACEDESC2));
-    ddsd.dwSize = sizeof(DDSURFACEDESC2);
-    ddsd.dwFlags = DDSD_CAPS | DDSD_WIDTH | DDSD_HEIGHT;
-    ddsd.ddsCaps.dwCaps = DDSCAPS_OFFSCREENPLAIN | DDSCAPS_VIDEOMEMORY; //DDSCAPS_SYSTEMMEMORY
-    ddsd.dwWidth  = 1024;
-    ddsd.dwHeight = 1024;
-
-    if(lpdd7->CreateSurface(&ddsd, &raster, 0) == DD_OK) return;
   }
 
   void term() {
@@ -152,7 +170,7 @@ public:
     if(lpdd) { lpdd->Release(); lpdd = 0; }
   }
 
-  pVideoDD(VideoDD &self_) : self(self_) {
+  pVideoDD() {
     lpdd = 0;
     lpdd7 = 0;
     screen = 0;
@@ -163,16 +181,6 @@ public:
   }
 };
 
-bool VideoDD::cap(Setting setting) { return p.cap(setting); }
-uintptr_t VideoDD::get(Setting setting) { return p.get(setting); }
-bool VideoDD::set(Setting setting, uintptr_t param) { return p.set(setting, param); }
-bool VideoDD::lock(uint32_t *&data, unsigned &pitch) { return p.lock(data, pitch); }
-void VideoDD::unlock() { p.unlock(); }
-void VideoDD::clear() { p.clear(); }
-void VideoDD::refresh(unsigned width, unsigned height) { p.refresh(width, height); }
-bool VideoDD::init() { return p.init(); }
-void VideoDD::term() { p.term(); }
-VideoDD::VideoDD() : p(*new pVideoDD(*this)) {}
-VideoDD::~VideoDD() { delete &p; }
+DeclareVideo(DD)
 
-} //namespace ruby
+};

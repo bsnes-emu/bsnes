@@ -11,4 +11,4 @@ namespace libfilter {
   #include "scale2x.cpp"
   #include "hq2x.cpp"
   #include "ntsc.cpp"
-}  //namespace libfilter
+}

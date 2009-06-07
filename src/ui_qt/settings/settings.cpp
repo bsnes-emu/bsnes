@@ -14,21 +14,15 @@ void SettingsWindow::setup() {
   window->setWindowTitle("Configuration Settings");
 
   list = new QListWidget;
-    video      = new QListWidgetItem("Video");
-    audio      = new QListWidgetItem("Audio");
-    input      = new QListWidgetItem("Input");
-    paths      = new QListWidgetItem("Paths");
-    cheatcodes = new QListWidgetItem("Cheat Codes");
-    advanced   = new QListWidgetItem("Advanced");
-  list->addItem(video);
-  list->addItem(audio);
-  list->addItem(input);
-  list->addItem(paths);
-  list->addItem(cheatcodes);
-  list->addItem(advanced);
+  list->addItem(video = new QListWidgetItem("Video"));
+  list->addItem(audio = new QListWidgetItem("Audio"));
+  list->addItem(input = new QListWidgetItem("Input"));
+  list->addItem(paths = new QListWidgetItem("Paths"));
+  list->addItem(cheatcodes = new QListWidgetItem("Cheat Codes"));
+  list->addItem(advanced = new QListWidgetItem("Advanced"));
   list->setCurrentItem(input);  //select most frequently used panel by default
-  list->setFixedWidth(135);
   list->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
+  list->setFixedWidth(135);
 
   panel = new QWidget;
   panel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -70,11 +64,12 @@ void SettingsWindow::setup() {
   connect(list, SIGNAL(currentRowChanged(int)), this, SLOT(listChanged()));
 
   listChanged();
-  window->setMinimumSize(600, 360);
+  window->setMinimumSize(625, 360);
 }
 
 void SettingsWindow::listChanged() {
   QListWidgetItem *item = list->currentItem();
+
   if(item == video)      panelLayout->setCurrentWidget(winVideoSettings->panel);
   if(item == audio)      panelLayout->setCurrentWidget(winAudioSettings->panel);
   if(item == input)      panelLayout->setCurrentWidget(winInputSettings->panel);

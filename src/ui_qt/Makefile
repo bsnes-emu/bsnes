@@ -1,52 +1,19 @@
 objects := main $(if $(call streq,$(platform),win),resource) $(objects)
+link += $(qtlib)
 
-ifeq ($(moc),)
-moc := moc
-endif
-
-ifeq ($(rcc),)
-rcc := rcc
-endif
-
-ifeq ($(platform),x)
-  qtflags = `pkg-config --cflags QtCore QtGui`
-  link += `pkg-config --libs QtCore QtGui`
-else ifeq ($(platform),win)
-  ifeq ($(qtpath),)
-    # find Qt install directory from PATH environment variable
-    qtpath := $(foreach path,$(subst ;, ,$(PATH)),$(if $(wildcard $(path)/$(moc).exe),$(path)))
-    qtpath := $(strip $(qtpath))
-    qtpath := $(subst \,/,$(qtpath))
-    qtpath := $(patsubst %/bin,%,$(qtpath))
-  endif
-
-  qtflags := -I$(qtpath)/include
-  qtflags += -I$(qtpath)/include/QtCore
-  qtflags += -I$(qtpath)/include/QtGui
-
-  link += -L$(qtpath)/lib
-  link += -L$(qtpath)/plugins/imageformats
-
-  link += -lmingw32 -lqtmain -lQtGui -lcomdlg32 -loleaut32 -limm32 -lwinmm
-  link += -lwinspool -lmsimg32 -lQtCore -lole32 -ladvapi32 -lws2_32 -luuid -lgdi32
-
-  # optional image-file support:
-  # link += -lqjpeg -lqmng
-endif
-
-moc_headers := $(call rwildcard,$(ui)/,%.mh)
-moc_objects := $(patsubst %.mh,%.moc,$(moc_headers))
+moc_headers := $(call rwildcard,$(ui)/,%.moc.hpp)
+moc_objects := $(patsubst %.moc.hpp,%.moc,$(moc_headers))
 
 #############
 ### rules ###
 #############
 
-# automatically run moc on all .mh (.MocHeader) files
+# automatically run moc on all .moc.hpp (MOC header) files
 %.moc: $<; $(moc) -f $< -o $@
-$(foreach f,$(moc_objects),$(eval $f: $(patsubst %.moc,%.mh,$f)))
+$(foreach f,$(moc_objects),$(eval $f: $(patsubst %.moc,%.moc.hpp,$f)))
 
 obj/main.o: $(ui)/main.cpp $(call rwildcard,$(ui)/)
-	$(call compile,$(qtflags))
+	$(call compile,$(qtinc))
 
 $(ui)/resource/resource.rcc: $(ui)/resource/resource.qrc data/*
 	$(rcc) $(ui)/resource/resource.qrc -o $(ui)/resource/resource.rcc

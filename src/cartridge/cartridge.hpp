@@ -30,6 +30,7 @@ public:
     HiROM,
     ExLoROM,
     ExHiROM,
+    SuperFXROM,
     SA1ROM,
     SPC7110ROM,
     BSCLoROM,

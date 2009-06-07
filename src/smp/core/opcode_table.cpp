@@ -72,4 +72,3 @@ void SMPcore::initialize_opcode_table() {
 }
 
 #endif
-

@@ -345,5 +345,5 @@ bPPU::bPPU() {
 bPPU::~bPPU() {
   free_tiledata_cache();
 }
-};
 
+};

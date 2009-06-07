@@ -56,12 +56,17 @@ static uint16_t blend10(uint32_t c1, uint32_t c2, uint32_t c3) {
   return c1;
 }
 
+void HQ2xFilter::size(unsigned &outwidth, unsigned &outheight, unsigned width, unsigned height) {
+  outwidth  = width  * 2;
+  outheight = height * 2;
+}
+
 void HQ2xFilter::render(
-  uint32_t *output, unsigned outpitch, unsigned &outwidth, unsigned &outheight,
-  uint16_t *input, unsigned pitch, unsigned *line, unsigned width, unsigned height
+  uint32_t *output, unsigned outpitch, uint16_t *input, unsigned pitch,
+  unsigned *line, unsigned width, unsigned height
 ) {
   if(width > 256 || height > 240) {
-    filter_direct.render(output, outpitch, outwidth, outheight, input, pitch, line, width, height);
+    filter_direct.render(output, outpitch, input, pitch, line, width, height);
     return;
   }
 
@@ -125,9 +130,6 @@ void HQ2xFilter::render(
 
   memset(out0, 0, 2048);
   memset(out1, 0, 2048);
-
-  outwidth = width * 2;
-  outheight = height * 2;
 }
 
 HQ2xFilter::HQ2xFilter() {

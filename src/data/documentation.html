@@ -5,15 +5,19 @@
 
 <h1>bsnes&trade; Usage Documentation</h1><br>
 
-bsnes is a Super Nintendo / Super Famicom emulator that strives to provide
-the most faithful emulation experience possible. It focuses on accuracy and
-clean code; over speed and features.
+bsnes is a Super Nintendo / Super Famicom emulator that strives to provide the
+most faithful hardware emulation possible. It focuses on accuracy and clean
+code, rather than speed and special features. It is meant as a reference
+emulator to document how the underlying hardware works. It is thus very useful
+for development and research. And while it can be used for general purpose
+gaming, it will require significantly more powerful hardware than a typical
+emulator.
 <hr>
 
 <h2><u>Modes of Operation</u></h2><br>
 
-bsnes is capable of running both in its default multi-user mode, as well as
-in single-user mode.<br>
+bsnes is capable of running both in its default multi-user mode, as well as in
+single-user mode.<br>
 <br>
 
 In multi-user mode, configuration data is stored inside the user's home
@@ -39,16 +43,15 @@ configuration data.
 
 <h2><u>Known Limitations</u></h2><br>
 
-<b>Cartridge co-processors:</b> certain cartridges contain special co-processor chips to enhance
-their functionality. Some of these are either partially or completely unsupported. A message box
-warning will pop up when attempting to load such a cartridge.<br>
+<b>Satellaview BS-X emulation:</b> this hardware is only partially supported.
+This is mostly because the satellite network it used (St. GIGA) has been shut
+down. Access to this network would be required to properly reverse engineer much
+of the hardware. Working around this would require game-specific hacks, which
+are contrary to the design goals of this emulator. As a result, most BS-X
+software will not function correctly.<br>
 <br>
 
-<b>Satellaview BS-X emulation:</b> this hardware is only partially supported. As a result,
-most BS-X software will not function correctly.<br>
-<br>
-
-<b>Savestates:</b> due to the design of bsnes, it is not plausible to
+<b>Savestates:</b> due to the internal design of bsnes, it is not plausible to
 implement support for savestate and/or rewind functionality.<br>
 <br>
 
@@ -58,6 +61,7 @@ implement support for savestate and/or rewind functionality.<br>
 <h2><u>Contributors</u></h2>
 &bull; Andreas Naive<br>
 &bull; anomie<br>
+&bull; _Demo_<br>
 &bull; Derrick Sobodash<br>
 &bull; DMV27<br>
 &bull; FirebrandX<br>

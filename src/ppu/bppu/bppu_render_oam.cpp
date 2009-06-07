@@ -221,4 +221,4 @@ void bPPU::render_line_oam_lores(uint8 pri0_pos, uint8 pri1_pos, uint8 pri2_pos,
 #undef setpixel_main
 #undef setpixel_sub
 
-#endif  //ifdef BPPU_CPP
+#endif

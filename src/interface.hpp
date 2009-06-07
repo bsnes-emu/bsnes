@@ -28,4 +28,3 @@ namespace SNES {
   #include "chip/chip.hpp"
   #include "cartridge/cartridge.hpp"
 };
-

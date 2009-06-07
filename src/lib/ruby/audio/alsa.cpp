@@ -1,13 +1,14 @@
+/*
+  audio.alsa (2008-08-12)
+  authors: Nach, RedDwarf
+*/
+
 #include <alsa/asoundlib.h>
 
 namespace ruby {
 
-#include "alsa.hpp"
-
 class pAudioALSA {
 public:
-  AudioALSA &self;
-
   struct {
     snd_pcm_t *handle;
     snd_pcm_format_t format;
@@ -28,50 +29,41 @@ public:
     unsigned latency;
   } settings;
 
-  bool cap(Audio::Setting setting) {
-    if(setting == Audio::Synchronize) return true;
-    if(setting == Audio::Frequency) return true;
-    if(setting == Audio::Latency) return true;
+  bool cap(const string& name) {
+    if(name == Audio::Synchronize) return true;
+    if(name == Audio::Frequency) return true;
+    if(name == Audio::Latency) return true;
     return false;
   }
 
-  uintptr_t get(Audio::Setting setting) {
-    if(setting == Audio::Synchronize) return settings.synchronize;
-    if(setting == Audio::Frequency) return settings.frequency;
-    if(setting == Audio::Latency) return settings.latency;
+  any get(const string& name) {
+    if(name == Audio::Synchronize) return settings.synchronize;
+    if(name == Audio::Frequency) return settings.frequency;
+    if(name == Audio::Latency) return settings.latency;
     return false;
   }
 
-  bool set(Audio::Setting setting, uintptr_t param) {
-    if(setting == Audio::Synchronize) {
-      if(settings.synchronize != param) {
-        settings.synchronize = param;
-        if(device.handle) {
-          term();
-          init();
-        }
+  bool set(const string& name, const any& value) {
+    if(name == Audio::Synchronize) {
+      if(settings.synchronize != any_cast<bool>(value)) {
+        settings.synchronize = any_cast<bool>(value);
+        if(device.handle) init();
       }
       return true;
     }
 
-    if(setting == Audio::Frequency) {
-      if(settings.frequency != param) {
-        settings.frequency = param;
-        if(device.handle) {
-          term();
-          init();
-        }
+    if(name == Audio::Frequency) {
+      if(settings.frequency != any_cast<unsigned>(value)) {
+        settings.frequency = any_cast<unsigned>(value);
+        if(device.handle) init();
       }
       return true;
     }
 
-    if(setting == Audio::Latency) {
-      if(settings.latency != param) {
-        settings.latency = param;
-        if(device.handle) {
-          term();
-          init();
-        }
+    if(name == Audio::Latency) {
+      if(settings.latency != any_cast<unsigned>(value)) {
+        settings.latency = any_cast<unsigned>(value);
+        if(device.handle) init();
       }
       return true;
     }
@@ -86,12 +78,8 @@ public:
     if(buffer.length < device.period_size) return;
 
     if(settings.synchronize == false) {
-      snd_pcm_avail_update(device.handle);
-      snd_pcm_sframes_t delay;
-      snd_pcm_delay(device.handle, &delay);
-      if(delay < 0) {
-        snd_pcm_prepare(device.handle);
-      } else if(delay > device.buffer_size - device.period_size) {
+      snd_pcm_sframes_t avail = snd_pcm_avail_update(device.handle);
+      if(avail < device.period_size) {
         buffer.length = 0;
         return;
       }
@@ -120,7 +108,12 @@ public:
     }
   }
 
+  void clear() {
+  }
+
   bool init() {
+    term();
+
     if(snd_pcm_open(&device.handle, device.name, SND_PCM_STREAM_PLAYBACK, 0) < 0) {
       term();
       return false;
@@ -128,21 +121,21 @@ public:
 
     /* //below code will not work with 24khz frequency rate (ALSA library bug)
     if(snd_pcm_set_params(device.handle, device.format, SND_PCM_ACCESS_RW_INTERLEAVED,
-      device.channels, settings.frequency, 1, settings.latency * 100) < 0) {
+      device.channels, settings.frequency, 1, settings.latency * 1000) < 0) {
       //failed to set device parameters
       term();
       return false;
     }
 
     if(snd_pcm_get_params(device.handle, &device.buffer_size, &device.period_size) < 0) {
-      device.period_size = settings.latency * 100 * 1e-6 * settings.frequency / 4;
+      device.period_size = settings.latency * 1000 * 1e-6 * settings.frequency / 4;
     }*/
 
     snd_pcm_hw_params_t *hwparams;
     snd_pcm_sw_params_t *swparams;
     unsigned rate = settings.frequency;
-    unsigned buffer_time = settings.latency * 100;
-    unsigned period_time = settings.latency * 100 / 4;
+    unsigned buffer_time = settings.latency * 1000;
+    unsigned period_time = settings.latency * 1000 / 4;
 
     snd_pcm_hw_params_alloca(&hwparams);
     if(snd_pcm_hw_params_any(device.handle, hwparams) < 0) {
@@ -206,7 +199,7 @@ public:
 	}
   }
 
-  pAudioALSA(AudioALSA &self_) : self(self_) {
+  pAudioALSA() {
     device.handle = 0;
     device.format = SND_PCM_FORMAT_S16_LE;
     device.channels = 2;
@@ -225,13 +218,6 @@ public:
   }
 };
 
-bool AudioALSA::cap(Setting setting) { return p.cap(setting); }
-uintptr_t AudioALSA::get(Setting setting) { return p.get(setting); }
-bool AudioALSA::set(Setting setting, uintptr_t param) { return p.set(setting, param); }
-void AudioALSA::sample(uint16_t left, uint16_t right) { p.sample(left, right); }
-bool AudioALSA::init() { return p.init(); }
-void AudioALSA::term() { p.term(); }
-AudioALSA::AudioALSA() : p(*new pAudioALSA(*this)) {}
-AudioALSA::~AudioALSA() { delete &p; }
+DeclareAudio(ALSA)
 
-} //namespace ruby
+};

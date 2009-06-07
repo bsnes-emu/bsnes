@@ -59,4 +59,4 @@ void sDSP::envelope_run(voice_t &v) {
   if(counter_poll(rate) == true) v.env = env;
 }
 
-#endif //ifdef SDSP_CPP
+#endif

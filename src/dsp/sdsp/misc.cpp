@@ -32,4 +32,4 @@ void sDSP::misc_30() {
   }
 }
 
-#endif //ifdef SDSP_CPP
+#endif

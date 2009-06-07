@@ -19,6 +19,7 @@ public:
   //cartridge.cpp
   struct Cartridge {
     string name, baseName, slotAName, slotBName;
+    bool patchApplied;
   } cartridge;
 
   string selectCartridge();

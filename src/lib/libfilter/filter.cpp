@@ -4,30 +4,26 @@ void FilterInterface::set(FilterInterface::FilterType type) {
   active_filter = type;
 }
 
+void FilterInterface::size(unsigned &outwidth, unsigned &outheight, unsigned width, unsigned height) {
+  switch(active_filter) { default:
+    case Direct: return filter_direct.size(outwidth, outheight, width, height);
+    case Scanline: return filter_scanline.size(outwidth, outheight, width, height);
+    case Scale2x: return filter_scale2x.size(outwidth, outheight, width, height);
+    case HQ2x: return filter_hq2x.size(outwidth, outheight, width, height);
+    case NTSC: return filter_ntsc.size(outwidth, outheight, width, height);
+  }
+}
+
 void FilterInterface::render(
-  uint32_t *output, unsigned outpitch, unsigned &outwidth, unsigned &outheight,
-  uint16_t *input, unsigned pitch, unsigned *line, unsigned width, unsigned height
+  uint32_t *output, unsigned outpitch, uint16_t *input, unsigned pitch,
+  unsigned *line, unsigned width, unsigned height
 ) {
   switch(active_filter) { default:
-    case Direct: {
-      filter_direct.render(output, outpitch, outwidth, outheight, input, pitch, line, width, height);
-    } break;
-
-    case Scanline: {
-      filter_scanline.render(output, outpitch, outwidth, outheight, input, pitch, line, width, height);
-    } break;
-
-    case Scale2x: {
-      filter_scale2x.render(output, outpitch, outwidth, outheight, input, pitch, line, width, height);
-    } break;
-
-    case HQ2x: {
-      filter_hq2x.render(output, outpitch, outwidth, outheight, input, pitch, line, width, height);
-    } break;
-
-    case NTSC: {
-      filter_ntsc.render(output, outpitch, outwidth, outheight, input, pitch, line, width, height);
-    } break;
+    case Direct: return filter_direct.render(output, outpitch, input, pitch, line, width, height);
+    case Scanline: return filter_scanline.render(output, outpitch, input, pitch, line, width, height);
+    case Scale2x: return filter_scale2x.render(output, outpitch, input, pitch, line, width, height);
+    case HQ2x: return filter_hq2x.render(output, outpitch, input, pitch, line, width, height);
+    case NTSC: return filter_ntsc.render(output, outpitch, input, pitch, line, width, height);
   }
 }
 

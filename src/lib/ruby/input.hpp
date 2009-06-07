@@ -1,15 +1,13 @@
 class Input {
 public:
-  enum Setting {
-    Handle,
-    KeyboardSupport,
-    MouseSupport,
-    JoypadSupport,
-  };
+  static const char *Handle;
+  static const char *KeyboardSupport;
+  static const char *MouseSupport;
+  static const char *JoypadSupport;
 
-  virtual bool cap(Setting) { return false; }
-  virtual uintptr_t get(Setting) { return false; }
-  virtual bool set(Setting, uintptr_t) { return false; }
+  virtual bool cap(const nall::string& name) { return false; }
+  virtual nall::any get(const nall::string& name) { return false; }
+  virtual bool set(const nall::string& name, const nall::any& value) { return false; }
 
   virtual bool acquire() { return false; }
   virtual bool unacquire() { return false; }
