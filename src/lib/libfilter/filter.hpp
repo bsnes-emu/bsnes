@@ -14,6 +14,7 @@ public:
     Direct,
     Scanline,
     Scale2x,
+    LQ2x,
     HQ2x,
     NTSC,
   };

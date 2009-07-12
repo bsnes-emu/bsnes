@@ -55,6 +55,7 @@ void bPPU::build_sprite_list() {
 bool bPPU::is_sprite_on_scanline() {
   //if sprite is entirely offscreen and doesn't wrap around to the left side of the screen,
   //then it is not counted. this *should* be 256, and not 255, even though dot 256 is offscreen.
+  sprite_item *spr = &sprite_list[active_sprite];
   if(spr->x > 256 && (spr->x + spr->width - 1) < 512) return false;
 
   int spr_height = (regs.oam_interlace == false) ? (spr->height) : (spr->height >> 1);
@@ -64,6 +65,7 @@ bool bPPU::is_sprite_on_scanline() {
 }
 
 void bPPU::load_oam_tiles() {
+  sprite_item *spr = &sprite_list[active_sprite];
   uint16 tile_width = spr->width >> 3;
   int x = spr->x;
   int y = (line - spr->y) & 0xff;
@@ -80,7 +82,7 @@ void bPPU::load_oam_tiles() {
   }
 
   if(regs.oam_interlace == true) {
-    y = (spr->vflip == false) ? (y + ifield()) : (y - ifield());
+    y = (spr->vflip == false) ? (y + field()) : (y - field());
   }
 
   x &= 511;
@@ -150,7 +152,7 @@ void bPPU::render_line_oam_rto() {
   for(int s = 0; s < 34; s++) oam_tilelist[s].tile = 0xffff;
 
   for(int s = 0; s < 128; s++) {
-    spr = &sprite_list[(s + regs.oam_firstsprite) & 127];
+    active_sprite = (s + regs.oam_firstsprite) & 127;
     if(is_sprite_on_scanline() == false) continue;
     if(regs.oam_itemcount++ > 32) break;
     oam_itemlist[regs.oam_itemcount - 1] = (s + regs.oam_firstsprite) & 127;
@@ -158,7 +160,7 @@ void bPPU::render_line_oam_rto() {
 
   for(int s = 31; s >= 0; s--) {
     if(oam_itemlist[s] == 0xff) continue;
-    spr = &sprite_list[oam_itemlist[s]];
+    active_sprite = oam_itemlist[s];
     load_oam_tiles();
   }
 

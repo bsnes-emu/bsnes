@@ -62,11 +62,11 @@
 #if defined(__GNUC__)
   #define noinline      __attribute__((noinline))
   #define inline        inline
-  #define alwaysinline  __attribute__((always_inline))
+  #define alwaysinline  inline __attribute__((always_inline))
 #elif defined(_MSC_VER)
   #define noinline      __declspec(noinline)
   #define inline        inline
-  #define alwaysinline  __forceinline
+  #define alwaysinline  inline __forceinline
 #else
   #define noinline
   #define inline        inline

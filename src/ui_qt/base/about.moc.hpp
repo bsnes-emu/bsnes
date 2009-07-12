@@ -13,4 +13,4 @@ public:
   void setup();
 
 public slots:
-} *winAbout;
+} *aboutWindow;

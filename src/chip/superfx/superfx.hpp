@@ -14,6 +14,10 @@ public:
   void enable();
   void power();
   void reset();
+
+private:
+  unsigned clockmode;
+  unsigned instruction_counter;
 };
 
 extern SuperFX superfx;

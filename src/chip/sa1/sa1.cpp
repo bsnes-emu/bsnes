@@ -54,7 +54,7 @@ void SA1::last_cycle() {
   }
 }
 
-void SA1::interrupt(uint16_t vector) {
+void SA1::interrupt(uint16 vector) {
   op_read(regs.pc.d);
   op_io();
   if(!regs.e) op_writestack(regs.pc.b);
@@ -73,6 +73,7 @@ bool SA1::interrupt_pending() {
 
 void SA1::tick() {
   scheduler.addclocks_cop(2);
+  if(++status.tick_counter == 0) scheduler.sync_copcpu();
 
   //adjust counters:
   //note that internally, status counters are in clocks;
@@ -125,6 +126,7 @@ void SA1::reset() {
   for(unsigned addr = 0; addr < memory::iram.size(); addr++) {
     memory::iram.write(addr, 0x00);
   }
+  vbrbus.init();
   sa1bus.init();
 
   regs.pc.d = 0x000000;
@@ -138,6 +140,8 @@ void SA1::reset() {
   regs.mdr  = 0x00;
   regs.wai  = false;
   update_table();
+
+  status.tick_counter = 0;
 
   status.interrupt_pending = false;
   status.interrupt_vector  = 0x0000;

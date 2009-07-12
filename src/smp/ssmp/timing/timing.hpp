@@ -1,4 +1,4 @@
-template<uint8_t cycle_frequency>
+template<unsigned cycle_frequency>
 class sSMPTimer {
 public:
   uint8 target;
@@ -25,10 +25,10 @@ public:
   }
 };
 
-  sSMPTimer<128> t0;
-  sSMPTimer<128> t1;
-  sSMPTimer< 16> t2;
+sSMPTimer<128> t0;
+sSMPTimer<128> t1;
+sSMPTimer< 16> t2;
 
-  alwaysinline void add_clocks(unsigned clocks);
-  alwaysinline void tick_timers();
-  uint32_t clocks_executed();
+alwaysinline void add_clocks(unsigned clocks);
+alwaysinline void tick_timers();
+uint32 clocks_executed();

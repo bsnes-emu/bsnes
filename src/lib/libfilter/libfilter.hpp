@@ -6,6 +6,7 @@
 #include <string.h>
 #include <math.h>
 #include <nall/algorithm.hpp>
+#include <nall/platform.hpp>
 #include <nall/stdint.hpp>
 
 namespace libfilter {
@@ -15,6 +16,7 @@ namespace libfilter {
   #include "direct.hpp"
   #include "scanline.hpp"
   #include "scale2x.hpp"
+  #include "lq2x.hpp"
   #include "hq2x.hpp"
   #include "ntsc.hpp"
 };

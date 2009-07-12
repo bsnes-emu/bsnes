@@ -1,9 +1,8 @@
-/*
-  C4 emulation
-
-  Used in Rockman X2/X3 (Megaman X2/X3)
-  Portions (c) anomie, Overload, zsKnight, Nach, byuu
-*/
+//=============
+//Cx4 emulation
+//=============
+//Used in Rockman X2/X3 (Megaman X2/X3)
+//Portions (c) anomie, Overload, zsKnight, Nach, byuu
 
 #include <../base.hpp>
 
@@ -17,24 +16,31 @@ Cx4 cx4;
 #include "cx4oam.cpp"
 #include "cx4ops.cpp"
 
-void Cx4::init() {}
-void Cx4::enable() {}
+void Cx4::init() {
+}
+
+void Cx4::enable() {
+  bus.map(Bus::MapDirect, 0x00, 0x3f, 0x6000, 0x7fff, *this);
+  bus.map(Bus::MapDirect, 0x80, 0xbf, 0x6000, 0x7fff, *this);
+}
 
 uint32 Cx4::ldr(uint8 r) {
-uint16 addr = 0x0080 + (r * 3);
-  return (reg[addr]) | (reg[addr + 1] << 8) | (reg[addr + 2] << 16);
+  uint16 addr = 0x0080 + (r * 3);
+  return (reg[addr + 0] <<  0)
+       | (reg[addr + 1] <<  8)
+       | (reg[addr + 2] << 16);
 }
 
 void Cx4::str(uint8 r, uint32 data) {
-uint16 addr = 0x0080 + (r * 3);
-  reg[addr    ] = (data);
-  reg[addr + 1] = (data >> 8);
+  uint16 addr = 0x0080 + (r * 3);
+  reg[addr + 0] = (data >>  0);
+  reg[addr + 1] = (data >>  8);
   reg[addr + 2] = (data >> 16);
 }
 
 void Cx4::mul(uint32 x, uint32 y, uint32 &rl, uint32 &rh) {
-int64_t rx = x & 0xffffff;
-int64_t ry = y & 0xffffff;
+  int64 rx = x & 0xffffff;
+  int64 ry = y & 0xffffff;
   if(rx & 0x800000)rx |= ~0x7fffff;
   if(ry & 0x800000)ry |= ~0x7fffff;
 
@@ -71,8 +77,9 @@ void Cx4::immediate_reg(uint32 start) {
 }
 
 void Cx4::transfer_data() {
-uint32 src;
-uint16 dest, count;
+  uint32 src;
+  uint16 dest, count;
+
   src   = (reg[0x40]) | (reg[0x41] << 8) | (reg[0x42] << 16);
   count = (reg[0x43]) | (reg[0x44] << 8);
   dest  = (reg[0x45]) | (reg[0x46] << 8);
@@ -86,29 +93,29 @@ void Cx4::write(unsigned addr, uint8 data) {
   addr &= 0x1fff;
 
   if(addr < 0x0c00) {
-  //ram
+    //ram
     ram[addr] = data;
     return;
   }
 
   if(addr < 0x1f00) {
-  //unmapped
+    //unmapped
     return;
   }
 
-//command register
+  //command register
   reg[addr & 0xff] = data;
 
   if(addr == 0x1f47) {
-  //memory transfer
+    //memory transfer
     transfer_data();
     return;
   }
 
   if(addr == 0x1f4f) {
-  //c4 command
+    //c4 command
     if(reg[0x4d] == 0x0e && !(data & 0xc3)) {
-    //c4 test command
+      //c4 test command
       reg[0x80] = data >> 2;
       return;
     }
@@ -154,12 +161,12 @@ void Cx4::writeb(uint16 addr, uint8 data) {
 }
 
 void Cx4::writew(uint16 addr, uint16 data) {
-  write(addr,     data);
+  write(addr + 0, data >> 0);
   write(addr + 1, data >> 8);
 }
 
 void Cx4::writel(uint16 addr, uint32 data) {
-  write(addr,     data);
+  write(addr + 0, data >>  0);
   write(addr + 1, data >>  8);
   write(addr + 2, data >> 16);
 }
@@ -198,5 +205,5 @@ void Cx4::reset() {
   memset(ram, 0, 0x0c00);
   memset(reg, 0, 0x0100);
 }
-};
 
+};

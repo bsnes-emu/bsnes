@@ -8,6 +8,12 @@ void CPU::power() {
 }
 
 void CPU::reset() {
+  PPUcounter::reset();
+}
+
+void CPU::serialize(serializer &s) {
+  PPUcounter::serialize(s);
+  s.integer(cpu_version);
 }
 
 CPU::CPU() {

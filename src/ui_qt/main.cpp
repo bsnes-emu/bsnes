@@ -20,7 +20,6 @@ public:
 
 #include "config.cpp"
 #include "interface.cpp"
-#include "ui.cpp"
 
 const char defaultStylesheet[] =
   "QLabel.title {"

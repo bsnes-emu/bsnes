@@ -25,12 +25,12 @@ public:
   void enable();
   void disable();
 
-  inline unsigned count() const { return code.size(); }
-  inline bool active() const { return cheat_enabled; }
-  inline bool exists(unsigned addr) const { return mask[addr >> 3] & 1 << (addr & 7); }
+  inline unsigned count() const;
+  inline bool active() const;
+  inline bool exists(unsigned addr) const;
 
-  bool add(bool enable, const char *code, const char *desc);
-  bool edit(unsigned i, bool enable, const char *code, const char *desc);
+  void add(bool enable, const char *code, const char *desc);
+  void edit(unsigned i, bool enable, const char *code, const char *desc);
   bool remove(unsigned i);
   bool get(unsigned i, cheat_t &item) const;
 

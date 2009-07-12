@@ -11,9 +11,9 @@ void AboutWindow::setup() {
     layout->addWidget(logo);
     layout->addSpacing(Style::WidgetSpacing);
 
-    info = new QLabel(
+    info = new QLabel(utf8() <<
       "<table>"
-      "<tr><td align='right'><b>Version: </b></td><td>" BSNES_VERSION "</td></tr>"
+      "<tr><td align='right'><b>Version: </b></td><td>" << bsnesVersion << "</td></tr>"
       "<tr><td align='right'><b>Author: </b></td><td>byuu</td></tr>"
       "<tr><td align='right'><b>Homepage: </b></td><td>http://byuu.org/</td></tr>"
       "</table>"

@@ -4,6 +4,7 @@ public:
   void init(unsigned mode, unsigned offset, unsigned index);
   void reset();
 
+  void serialize(serializer&);
   SPC7110Decomp();
   ~SPC7110Decomp();
 

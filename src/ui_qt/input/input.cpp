@@ -76,7 +76,7 @@ void InputManager::bind() {
 
 void InputManager::poll() {
   if(config.input.focusPolicy == Configuration::Input::FocusPolicyIgnoreInput
-  && winMain->window->isActiveWindow() == false) {
+  && mainWindow->window->isActiveWindow() == false) {
     inputPool.clear();
   } else {
     inputPool.poll(stateTable[activeState]);

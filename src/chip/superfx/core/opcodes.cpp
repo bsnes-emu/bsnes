@@ -47,66 +47,66 @@ void SuperFX::op_rol() {
 
 //$05 bra e
 void SuperFX::op_bra() {
-  regs.r[15] += (int8_t)pipe();
+  regs.r[15] += (int8)pipe();
 }
 
 //$06 blt e
 void SuperFX::op_blt() {
-  int e = (int8_t)pipe();
+  int e = (int8)pipe();
   if((regs.sfr.s ^ regs.sfr.ov) == 0) regs.r[15] += e;
 }
 
 //$07 bge e
 void SuperFX::op_bge() {
-  int e = (int8_t)pipe();
+  int e = (int8)pipe();
   if((regs.sfr.s ^ regs.sfr.ov) == 1) regs.r[15] += e;
 }
 
 //$08 bne e
 void SuperFX::op_bne() {
-  int e = (int8_t)pipe();
+  int e = (int8)pipe();
   if(regs.sfr.z == 0) regs.r[15] += e;
 }
 
 //$09 beq e
 void SuperFX::op_beq() {
-  int e = (int8_t)pipe();
+  int e = (int8)pipe();
   if(regs.sfr.z == 1) regs.r[15] += e;
 }
 
 //$0a bpl e
 void SuperFX::op_bpl() {
-  int e = (int8_t)pipe();
+  int e = (int8)pipe();
   if(regs.sfr.s == 0) regs.r[15] += e;
 }
 
 //$0b bmi e
 void SuperFX::op_bmi() {
-  int e = (int8_t)pipe();
+  int e = (int8)pipe();
   if(regs.sfr.s == 1) regs.r[15] += e;
 }
 
 //$0c bcc e
 void SuperFX::op_bcc() {
-  int e = (int8_t)pipe();
+  int e = (int8)pipe();
   if(regs.sfr.cy == 0) regs.r[15] += e;
 }
 
 //$0d bcs e
 void SuperFX::op_bcs() {
-  int e = (int8_t)pipe();
+  int e = (int8)pipe();
   if(regs.sfr.cy == 1) regs.r[15] += e;
 }
 
 //$0e bvc e
 void SuperFX::op_bvc() {
-  int e = (int8_t)pipe();
+  int e = (int8)pipe();
   if(regs.sfr.ov == 0) regs.r[15] += e;
 }
 
 //$0f bvs e
 void SuperFX::op_bvs() {
-  int e = (int8_t)pipe();
+  int e = (int8)pipe();
   if(regs.sfr.ov == 1) regs.r[15] += e;
 }
 
@@ -362,7 +362,7 @@ template<int n> void SuperFX::op_bic_i() {
 
 //$80-8f(alt0): mult rN
 template<int n> void SuperFX::op_mult_r() {
-  regs.dr() = (int8_t)regs.sr() * (int8_t)regs.r[n];
+  regs.dr() = (int8)regs.sr() * (int8)regs.r[n];
   regs.sfr.s = (regs.dr() & 0x8000);
   regs.sfr.z = (regs.dr() == 0);
   regs.reset();
@@ -371,7 +371,7 @@ template<int n> void SuperFX::op_mult_r() {
 
 //$80-8f(alt1): umult rN
 template<int n> void SuperFX::op_umult_r() {
-  regs.dr() = (uint8_t)regs.sr() * (uint8_t)regs.r[n];
+  regs.dr() = (uint8)regs.sr() * (uint8)regs.r[n];
   regs.sfr.s = (regs.dr() & 0x8000);
   regs.sfr.z = (regs.dr() == 0);
   regs.reset();
@@ -380,7 +380,7 @@ template<int n> void SuperFX::op_umult_r() {
 
 //$80-8f(alt2): mult #N
 template<int n> void SuperFX::op_mult_i() {
-  regs.dr() = (int8_t)regs.sr() * (int8_t)n;
+  regs.dr() = (int8)regs.sr() * (int8)n;
   regs.sfr.s = (regs.dr() & 0x8000);
   regs.sfr.z = (regs.dr() == 0);
   regs.reset();
@@ -389,7 +389,7 @@ template<int n> void SuperFX::op_mult_i() {
 
 //$80-8f(alt3): umult #N
 template<int n> void SuperFX::op_umult_i() {
-  regs.dr() = (uint8_t)regs.sr() * (uint8_t)n;
+  regs.dr() = (uint8)regs.sr() * (uint8)n;
   regs.sfr.s = (regs.dr() & 0x8000);
   regs.sfr.z = (regs.dr() == 0);
   regs.reset();
@@ -411,7 +411,7 @@ template<int n> void SuperFX::op_link() {
 
 //$95: sex
 void SuperFX::op_sex() {
-  regs.dr() = (int8_t)regs.sr();
+  regs.dr() = (int8)regs.sr();
   regs.sfr.s = (regs.dr() & 0x8000);
   regs.sfr.z = (regs.dr() == 0);
   regs.reset();
@@ -493,7 +493,7 @@ void SuperFX::op_lmult() {
 
 //$a0-af(alt0): ibt rN,#pp
 template<int n> void SuperFX::op_ibt_r() {
-  regs.r[n] = (int8_t)pipe();
+  regs.r[n] = (int8)pipe();
   regs.reset();
 }
 
@@ -625,7 +625,7 @@ void SuperFX::op_getbl() {
 
 //$ef(alt3): getbs
 void SuperFX::op_getbs() {
-  regs.dr() = (int8_t)rombuffer_read();
+  regs.dr() = (int8)rombuffer_read();
   regs.reset();
 }
 

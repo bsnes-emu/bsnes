@@ -57,6 +57,7 @@ public:
         QAction *settings_videoFilter_none;
         QAction *settings_videoFilter_scanline;
         QAction *settings_videoFilter_scale2x;
+        QAction *settings_videoFilter_lq2x;
         QAction *settings_videoFilter_hq2x;
         QAction *settings_videoFilter_ntsc;
       QAction *settings_muteAudio;
@@ -69,6 +70,9 @@ public:
         QAction *settings_emulationSpeed_syncVideo;
         QAction *settings_emulationSpeed_syncAudio;
       QAction *settings_configuration;
+    QMenu *tools;
+      QAction *tools_cheatEditor;
+      QAction *tools_stateManager;
     QMenu *help;
       QAction *help_documentation;
       QAction *help_license;
@@ -113,6 +117,7 @@ public slots:
   void setNoFilter();
   void setScanlineFilter();
   void setScale2xFilter();
+  void setLq2xFilter();
   void setHq2xFilter();
   void setNtscFilter();
   void muteAudio();
@@ -124,7 +129,9 @@ public slots:
   void syncVideo();
   void syncAudio();
   void showConfigWindow();
+  void showCheatEditor();
+  void showStateManager();
   void showDocumentation();
   void showLicense();
   void showAbout();
-} *winMain;
+} *mainWindow;

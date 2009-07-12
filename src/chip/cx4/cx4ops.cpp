@@ -3,13 +3,13 @@
 //Sprite Functions
 void Cx4::op00() {
   switch(reg[0x4d]) {
-  case 0x00:op00_00();break;
-  case 0x03:op00_03();break;
-  case 0x05:op00_05();break;
-  case 0x07:op00_07();break;
-  case 0x08:op00_08();break;
-  case 0x0b:op00_0b();break;
-  case 0x0c:op00_0c();break;
+    case 0x00: op00_00(); break;
+    case 0x03: op00_03(); break;
+    case 0x05: op00_05(); break;
+    case 0x07: op00_07(); break;
+    case 0x08: op00_08(); break;
+    case 0x0b: op00_0b(); break;
+    case 0x0c: op00_0c(); break;
   }
 }
 
@@ -21,7 +21,7 @@ void Cx4::op01() {
 
 //Propulsion
 void Cx4::op05() {
-int32 temp = 0x10000;
+  int32 temp = 0x10000;
   if(readw(0x1f83)) {
     temp = sar((temp / readw(0x1f83)) * readw(0x1f81), 8);
   }
@@ -116,12 +116,13 @@ void Cx4::op1f() {
 
 //Trapezoid
 void Cx4::op22() {
-int16 angle1 = readw(0x1f8c) & 0x1ff;
-int16 angle2 = readw(0x1f8f) & 0x1ff;
-int32 tan1 = Tan(angle1);
-int32 tan2 = Tan(angle2);
-int16 y = readw(0x1f83) - readw(0x1f89);
-int16 left, right;
+  int16 angle1 = readw(0x1f8c) & 0x1ff;
+  int16 angle2 = readw(0x1f8f) & 0x1ff;
+  int32 tan1 = Tan(angle1);
+  int32 tan2 = Tan(angle2);
+  int16 y = readw(0x1f83) - readw(0x1f89);
+  int16 left, right;
+
   for(int32 j = 0; j < 225; j++, y++) {
     if(y >= 0) {
       left  = sar((int32)tan1 * y, 16) - readw(0x1f80) + readw(0x1f86);

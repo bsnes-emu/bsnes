@@ -1,9 +1,8 @@
 #include "registers.hpp"
 
-void exec_opcode();
-uint8_t color(uint8_t source);
-void plot(uint8_t x, uint8_t y);
-uint8_t rpix(uint8_t x, uint8_t y);
+uint8 color(uint8 source);
+void plot(uint8 x, uint8 y);
+uint8 rpix(uint8 x, uint8 y);
 void pixelcache_flush(pixelcache_t &cache);
 
 void (SuperFX::*opcode_table[1024])();

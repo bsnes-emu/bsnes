@@ -3,6 +3,7 @@
 
 #include <limits>
 #include <nall/function.hpp>
+#include <nall/serializer.hpp>
 #include <nall/utility.hpp>
 
 namespace nall {
@@ -65,9 +66,19 @@ namespace nall {
       heapsize = 0;
     }
 
+    void serialize(serializer &s) {
+      s.integer(basecounter);
+      s.integer(heapsize);
+      for(unsigned n = 0; n < heapcapacity; n++) {
+        s.integer(heap[n].counter);
+        s.integer(heap[n].event);
+      }
+    }
+
     priority_queue(unsigned size, function<void (type_t)> callback_ = &priority_queue_nocallback<type_t>)
     : callback(callback_) {
       heap = new heap_t[size];
+      heapcapacity = size;
       reset();
     }
 
@@ -79,6 +90,7 @@ namespace nall {
     function<void (type_t)> callback;
     unsigned basecounter;
     unsigned heapsize;
+    unsigned heapcapacity;
     struct heap_t {
       unsigned counter;
       type_t event;

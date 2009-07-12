@@ -28,7 +28,7 @@ understood.
 
 ************************************************************************/
 
-typedef uint8_t bool8;
+#define bool8 uint8
 
 class SDD1_IM {  //Input Manager
 
@@ -160,3 +160,5 @@ class SDD1emu {
   SDD1_OL OL;
 
 };
+
+#undef bool8

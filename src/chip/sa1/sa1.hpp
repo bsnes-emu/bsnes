@@ -7,16 +7,18 @@ public:
   #include "mmio/mmio.hpp"
 
   struct Status {
-    bool interrupt_pending;
-    uint16_t interrupt_vector;
+    uint8 tick_counter;
 
-    uint16_t scanlines;
-    uint16_t vcounter;
-    uint16_t hcounter;
+    bool interrupt_pending;
+    uint16 interrupt_vector;
+
+    uint16 scanlines;
+    uint16 vcounter;
+    uint16 hcounter;
   } status;
 
   void enter();
-  void interrupt(uint16_t vector);
+  void interrupt(uint16 vector);
   void tick();
 
   alwaysinline void trigger_irq();

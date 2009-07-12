@@ -3,6 +3,13 @@ struct InputUiGeneral : public InputGroup {
   InputObject pauseEmulation;
   InputObject resetSystem;
   InputObject powerCycleSystem;
+  InputObject showStateManager;
+  InputObject quickLoad1;
+  InputObject quickLoad2;
+  InputObject quickLoad3;
+  InputObject quickSave1;
+  InputObject quickSave2;
+  InputObject quickSave3;
   InputObject lowerSpeed;
   InputObject raiseSpeed;
   InputObject toggleCheatSystem;

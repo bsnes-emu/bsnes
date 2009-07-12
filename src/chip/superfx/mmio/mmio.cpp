@@ -1,6 +1,7 @@
 #ifdef SUPERFX_CPP
 
-uint8_t SuperFX::mmio_read(unsigned addr) {
+uint8 SuperFX::mmio_read(unsigned addr) {
+  scheduler.sync_cpucop();
   addr &= 0xffff;
 
   if(addr >= 0x3100 && addr <= 0x32ff) {
@@ -17,7 +18,7 @@ uint8_t SuperFX::mmio_read(unsigned addr) {
     }
 
     case 0x3031: {
-      uint8_t r = regs.sfr >> 8;
+      uint8 r = regs.sfr >> 8;
       regs.sfr.irq = 0;
       cpu.regs.irq = 0;
       return r;
@@ -51,7 +52,8 @@ uint8_t SuperFX::mmio_read(unsigned addr) {
   return 0x00;
 }
 
-void SuperFX::mmio_write(unsigned addr, uint8_t data) {
+void SuperFX::mmio_write(unsigned addr, uint8 data) {
+  scheduler.sync_cpucop();
   addr &= 0xffff;
 
   if(addr >= 0x3100 && addr <= 0x32ff) {
@@ -95,7 +97,7 @@ void SuperFX::mmio_write(unsigned addr, uint8_t data) {
 
     case 0x3037: {
       regs.cfgr = data;
-      if(regs.clsr) regs.cfgr.ms0 = 0;  //cannot use high-speed multiplication in 21MHz mode
+      update_speed();
     } break;
 
     case 0x3038: {
@@ -104,9 +106,7 @@ void SuperFX::mmio_write(unsigned addr, uint8_t data) {
 
     case 0x3039: {
       regs.clsr = data;
-      if(regs.clsr) regs.cfgr.ms0 = 0;  //cannot use high-speed multiplication in 21MHz mode
-      cache_access_speed  = (regs.clsr ? config.superfx.fast_cache_speed  : config.superfx.slow_cache_speed );
-      memory_access_speed = (regs.clsr ? config.superfx.fast_memory_speed : config.superfx.slow_memory_speed);
+      update_speed();
     } break;
 
     case 0x303a: {

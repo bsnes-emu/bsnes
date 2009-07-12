@@ -90,7 +90,7 @@ void bPPU::render_line_bg(uint8 bg, uint8 color_depth, uint8 pri0_pos, uint8 pri
 
   if(hires) {
     hscroll <<= 1;
-    if(regs.interlace) y = (y << 1) + ifield();
+    if(regs.interlace) y = (y << 1) + field();
   }
 
   uint16 hval, vval;

@@ -32,14 +32,20 @@ bool Cheat::decode(const char *s, Cheat::cheat_t &item) const {
   item.enabled = false;
   item.count = 0;
 
+  string code = s;
+  code.replace(" ", "");
+
   lstring list;
-  list.split("+", s);
+  list.split("+", code);
 
   for(unsigned n = 0; n < list.size(); n++) {
     unsigned addr;
     uint8_t data;
     type_t type;
-    if(decode(list[n], addr, data, type) == false) return false;
+    if(decode(list[n], addr, data, type) == false) {
+      item.count = 0;
+      return false;
+    }
 
     item.addr[item.count] = addr;
     item.data[item.count] = data;
@@ -95,9 +101,9 @@ void Cheat::disable() {
 //cheat list manipulation routines
 //================================
 
-bool Cheat::add(bool enable, const char *code_, const char *desc_) {
+void Cheat::add(bool enable, const char *code_, const char *desc_) {
   cheat_t item;
-  if(decode(code_, item) == false) return false;
+  decode(code_, item);
 
   unsigned i = code.size();
   code[i] = item;
@@ -108,12 +114,11 @@ bool Cheat::add(bool enable, const char *code_, const char *desc_) {
   update(code[i]);
 
   update_cheat_status();
-  return true;
 }
 
-bool Cheat::edit(unsigned i, bool enable, const char *code_, const char *desc_) {
+void Cheat::edit(unsigned i, bool enable, const char *code_, const char *desc_) {
   cheat_t item;
-  if(decode(code_, item) == false) return false;
+  decode(code_, item);
 
   //disable current code and clear from code lookup table
   code[i].enabled = false;
@@ -127,7 +132,6 @@ bool Cheat::edit(unsigned i, bool enable, const char *code_, const char *desc_) 
   update(code[i]);
 
   update_cheat_status();
-  return true;
 }
 
 bool Cheat::remove(unsigned i) {

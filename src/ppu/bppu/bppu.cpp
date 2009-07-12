@@ -3,18 +3,22 @@
 #define BPPU_CPP
 namespace SNES {
 
+#include "serialization.cpp"
 #include "bppu_mmio.cpp"
 #include "bppu_render.cpp"
 
 void bPPU::enter() {
   while(true) {
+    if(scheduler.sync == Scheduler::SyncAll) scheduler.exit();
+
     //H =    0 (initialize)
+    scheduler.sync_ppucpu();
     scanline();
-    if(ivcounter() == 0) frame();
+    if(vcounter() == 0) frame();
     add_clocks(10);
 
     //H =   10 (OAM address reset)
-    if(ivcounter() == (!overscan() ? 225 : 240)) {
+    if(vcounter() == (!overscan() ? 225 : 240)) {
       if(regs.display_disabled == false) {
         regs.oam_addr = regs.oam_baseaddr << 1;
         regs.oam_firstsprite = (regs.oam_priority == false) ? 0 : (regs.oam_addr >> 2) & 127;
@@ -30,18 +34,17 @@ void bPPU::enter() {
     cache.oam_basesize   = regs.oam_basesize;
     cache.oam_nameselect = regs.oam_nameselect;
     cache.oam_tdaddr     = regs.oam_tdaddr;
-    add_clocks(ilineclocks() - 1152);  //seek to start of next scanline
+    add_clocks(lineclocks() - 1152);  //seek to start of next scanline
   }
 }
 
 void bPPU::add_clocks(unsigned clocks) {
-  tock(clocks);
+  tick(clocks);
   scheduler.addclocks_ppu(clocks);
-  scheduler.sync_ppucpu();
 }
 
 void bPPU::scanline() {
-  line = ivcounter();
+  line = vcounter();
 
   if(line == 0) {
     //RTO flag reset
@@ -79,7 +82,7 @@ void bPPU::frame() {
   PPU::frame();
   system.frame();
 
-  if(ifield() == 0) {
+  if(field() == 0) {
     display.interlace = regs.interlace;
     regs.scanlines = (regs.overscan == false) ? 224 : 239;
   }

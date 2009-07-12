@@ -50,10 +50,11 @@ public:
   //warning: if loaded() == false, no other property is considered valid!
 
   property_t<bool> loaded;  //is a base cartridge inserted?
+  property_t<unsigned> crc32;  //crc32 of all files sans headers
 
-  property_t<Mode>             mode;
-  property_t<Region>           region;
-  property_t<MemoryMapper>     mapper;
+  property_t<Mode> mode;
+  property_t<Region> region;
+  property_t<MemoryMapper> mapper;
   property_t<DSP1MemoryMapper> dsp1_mapper;
 
   property_t<bool> has_bsx_slot;
@@ -69,11 +70,10 @@ public:
 
   //main interface
   void load(Mode);
-//void read();
-//void load();
   void unload();
   Type detect_image_type(uint8_t *data, unsigned size) const;
 
+  void serialize(serializer&);
   Cartridge();
   ~Cartridge();
 

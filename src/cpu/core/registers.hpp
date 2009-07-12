@@ -6,7 +6,7 @@ struct flag_t {
          + (d << 3) + (i << 2) + (z << 1) + (c << 0);
   }
 
-  inline unsigned operator=(uint8_t data) {
+  inline unsigned operator=(uint8 data) {
     n = data & 0x80; v = data & 0x40; m = data & 0x20; x = data & 0x10;
     d = data & 0x08; i = data & 0x04; z = data & 0x02; c = data & 0x01;
     return data;
@@ -65,15 +65,17 @@ struct reg24_t {
 };
 
 struct regs_t {
-  reg24_t  pc;
-  reg16_t  a, x, y, s, d;
-  flag_t   p;
-  uint8_t  db;
-  bool     e;
+  reg24_t pc;
+  reg16_t r[6], &a, &x, &y, &z, &s, &d;
+  flag_t p;
+  uint8 db;
+  bool e;
 
-  bool    irq;  //IRQ pin (0 = low, 1 = trigger)
-  bool    wai;  //raised during wai, cleared after interrupt triggered
-  uint8_t mdr;  //memory data register
+  bool irq;   //IRQ pin (0 = low, 1 = trigger)
+  bool wai;   //raised during wai, cleared after interrupt triggered
+  uint8 mdr;  //memory data register
 
-  regs_t() : db(0), e(false), irq(false), wai(false), mdr(0) {}
+  regs_t() : a(r[0]), x(r[1]), y(r[2]), z(r[3]), s(r[4]), d(r[5]), db(0), e(false), irq(false), wai(false), mdr(0) {
+    z = 0;
+  }
 };

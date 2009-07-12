@@ -5,15 +5,15 @@
 #include "joypad.cpp"
 
 unsigned sCPU::dma_counter() {
-  return (status.dma_counter + ppu.hcounter()) & 7;
+  return (status.dma_counter + hcounter()) & 7;
 }
 
 void sCPU::add_clocks(unsigned clocks) {
   event.tick(clocks);
   unsigned ticks = clocks >> 1;
   while(ticks--) {
-    ppu.tick();
-    if(ppu.hcounter() & 2) {
+    tick();
+    if(hcounter() & 2) {
       input.tick();
       poll_interrupts();
     }
@@ -24,7 +24,7 @@ void sCPU::add_clocks(unsigned clocks) {
 //called by ppu.tick() when Hcounter=0
 void sCPU::scanline() {
   status.dma_counter = (status.dma_counter + status.line_clocks) & 7;
-  status.line_clocks = ppu.lineclocks();
+  status.line_clocks = lineclocks();
 
   //forcefully sync S-CPU to other processors, in case chips are not communicating
   scheduler.sync_cpuppu();
@@ -32,7 +32,7 @@ void sCPU::scanline() {
   scheduler.sync_cpusmp();
   system.scanline();
 
-  if(ppu.vcounter() == 0) {
+  if(vcounter() == 0) {
     //hdma init triggers once every frame
     event.enqueue(cpu_version == 1 ? 12 + 8 - dma_counter() : 12 + dma_counter(), EventHdmaInit);
   }
@@ -42,11 +42,11 @@ void sCPU::scanline() {
   event.enqueue(status.dram_refresh_position, EventDramRefresh);
 
   //hdma triggers once every visible scanline
-  if(ppu.vcounter() <= (ppu.overscan() == false ? 224 : 239)) {
+  if(vcounter() <= (ppu.overscan() == false ? 224 : 239)) {
     event.enqueue(1104, EventHdmaRun);
   }
 
-  if(status.auto_joypad_poll == true && ppu.vcounter() == (ppu.overscan() == false ? 227 : 242)) {
+  if(status.auto_joypad_poll == true && vcounter() == (ppu.overscan() == false ? 227 : 242)) {
     input.poll();
     run_auto_joypad_poll();
   }
@@ -136,7 +136,7 @@ void sCPU::timing_reset() {
   event.reset();
 
   status.clock_count = 0;
-  status.line_clocks = ppu.lineclocks();
+  status.line_clocks = lineclocks();
 
   status.irq_lock = false;
   status.alu_lock = false;

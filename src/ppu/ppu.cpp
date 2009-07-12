@@ -3,7 +3,7 @@
 #define PPU_CPP
 namespace SNES {
 
-#include "counter.cpp"
+#include "serialization.cpp"
 
 void PPU::enable_renderer(bool r) { status.render_output = r; }
 bool PPU::renderer_enabled() { return status.render_output; }
@@ -32,6 +32,7 @@ void PPU::power() {
 }
 
 void PPU::reset() {
+  PPUcounter::reset();
   memset(output, 0, 512 * 480 * sizeof(uint16));
 }
 

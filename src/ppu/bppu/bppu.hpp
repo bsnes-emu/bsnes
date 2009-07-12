@@ -249,6 +249,7 @@ public:
   void power();
   void reset();
 
+  void serialize(serializer&);
   bPPU();
   ~bPPU();
 };

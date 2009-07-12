@@ -26,7 +26,9 @@ void InputSettingsWindow::setup() {
   list = new QTreeWidget;
   list->setColumnCount(3);
   list->setHeaderLabels(QStringList() << "Hidden" << "Name" << "Assignment");
-  list->hideColumn(0);  //used for default sorting + hides child expansion box
+  list->setAllColumnsShowFocus(true);
+  list->setRootIsDecorated(false);
+  list->hideColumn(0);  //used for default sorting
   layout->addWidget(list);
   layout->addSpacing(Style::WidgetSpacing);
 

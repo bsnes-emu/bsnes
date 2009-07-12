@@ -9,6 +9,8 @@ public:
   #include "mmio/mmio.hpp"
   #include "timing/timing.hpp"
 
+  priority_queue<unsigned> event;
+
   struct {
     bool interrupt_pending;
     uint16 interrupt_vector;
@@ -86,6 +88,7 @@ public:
   void power();
   void reset();
 
+  void serialize(serializer&);
   sCPU();
   ~sCPU();
 };

@@ -1,4 +1,5 @@
 #include "cartridge.cpp"
+#include "state.cpp"
 #include "window.cpp"
 
 //returns true if requested code is a button, and it has just been pressed down
@@ -39,15 +40,23 @@ void Utility::inputEvent(uint16_t code) {
   //(in case window is currently active and capturing a new button / axis assignment)
   winInputCapture->inputEvent(code);
 
-  //if escape key is pressed on *any* keyboard; release the mouse if it is acquired
   for(unsigned i = 0; i < keyboard<>::count; i++) {
-    if(code == keyboard<>::index(i, keyboard<>::escape) && inputManager.state(code) && input.acquired()) {
-      input.unacquire();
-      return;  //do not trigger other UI actions that may be bound to escape key
+    if(code == keyboard<>::index(i, keyboard<>::escape) && inputManager.state(code)) {
+      if(mainWindow->window->isActiveWindow() && input.acquired()) {
+        //release mouse capture
+        input.unacquire();
+        return;  //do not trigger other UI actions that may be bound to escape key
+      } else if(settingsWindow->window->isActiveWindow()) {
+        settingsWindow->window->hide();
+        return;
+      } else if(toolsWindow->window->isActiveWindow()) {
+        toolsWindow->window->hide();
+        return;
+      }
     }
   }
 
-  if(winMain->window->isActiveWindow()) {
+  if(mainWindow->window->isActiveWindow()) {
     bool resizeWindow = false;
 
     if(isButtonDown(code, inputUiGeneral.loadCartridge)) {
@@ -68,16 +77,27 @@ void Utility::inputEvent(uint16_t code) {
       modifySystemState(PowerCycle);
     }
 
+    if(isButtonDown(code, inputUiGeneral.showStateManager)) {
+      toolsWindow->showStateManager();
+    }
+
+    if(isButtonDown(code, inputUiGeneral.quickLoad1)) utility.quickLoad(0);
+    if(isButtonDown(code, inputUiGeneral.quickLoad2)) utility.quickLoad(1);
+    if(isButtonDown(code, inputUiGeneral.quickLoad3)) utility.quickLoad(2);
+    if(isButtonDown(code, inputUiGeneral.quickSave1)) utility.quickSave(0);
+    if(isButtonDown(code, inputUiGeneral.quickSave2)) utility.quickSave(1);
+    if(isButtonDown(code, inputUiGeneral.quickSave3)) utility.quickSave(2);
+
     if(isButtonDown(code, inputUiGeneral.lowerSpeed)) {
       config.system.speed--;
       updateEmulationSpeed();
-      winMain->syncUi();
+      mainWindow->syncUi();
     }
 
     if(isButtonDown(code, inputUiGeneral.raiseSpeed)) {
       config.system.speed++;
       updateEmulationSpeed();
-      winMain->syncUi();
+      mainWindow->syncUi();
     }
 
     if(isButtonDown(code, inputUiGeneral.toggleCheatSystem)) {
@@ -93,16 +113,16 @@ void Utility::inputEvent(uint16_t code) {
     if(isButtonDown(code, inputUiGeneral.toggleFullscreen)) {
       config.video.isFullscreen = !config.video.isFullscreen;
       updateFullscreenState();
-      winMain->syncUi();
+      mainWindow->syncUi();
     }
 
     if(isButtonDown(code, inputUiGeneral.toggleMenu)) {
-      winMain->window->menuBar()->setVisible(!winMain->window->menuBar()->isVisibleTo(winMain->window));
+      mainWindow->window->menuBar()->setVisible(!mainWindow->window->menuBar()->isVisibleTo(mainWindow->window));
       resizeWindow = true;
     }
 
     if(isButtonDown(code, inputUiGeneral.toggleStatus)) {
-      winMain->window->statusBar()->setVisible(!winMain->window->statusBar()->isVisibleTo(winMain->window));
+      mainWindow->window->statusBar()->setVisible(!mainWindow->window->statusBar()->isVisibleTo(mainWindow->window));
       resizeWindow = true;
     }
 
@@ -119,7 +139,7 @@ void Utility::inputEvent(uint16_t code) {
 
 //display message in main window statusbar area for three seconds
 void Utility::showMessage(const char *message) {
-  winMain->window->statusBar()->showMessage(utf8() << message, 3000);
+  mainWindow->window->statusBar()->showMessage(utf8() << message, 3000);
 }
 
 //updates system state text at bottom-right of main window statusbar
@@ -141,7 +161,7 @@ void Utility::updateSystemState() {
     return;
   }
 
-  winMain->systemState->setText(utf8() << text);
+  mainWindow->systemState->setText(utf8() << text);
 }
 
 void Utility::acquireMouse() {
@@ -191,8 +211,9 @@ void Utility::updateSoftwareFilter() {
     case 0: type = libfilter::FilterInterface::Direct;   break;
     case 1: type = libfilter::FilterInterface::Scanline; break;
     case 2: type = libfilter::FilterInterface::Scale2x;  break;
-    case 3: type = libfilter::FilterInterface::HQ2x;     break;
-    case 4: type = libfilter::FilterInterface::NTSC;     break;
+    case 3: type = libfilter::FilterInterface::LQ2x;     break;
+    case 4: type = libfilter::FilterInterface::HQ2x;     break;
+    case 5: type = libfilter::FilterInterface::NTSC;     break;
   }
   libfilter::filter.set(type);
 

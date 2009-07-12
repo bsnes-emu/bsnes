@@ -33,6 +33,8 @@ using namespace ruby;
 
 #include <libfilter/libfilter.hpp>
 
+#include "config.hpp"
+#include "interface.hpp"
 #include "application/application.moc"
 #include "input/input.hpp"
 #include "utility/utility.hpp"

@@ -1,10 +1,9 @@
 #include <../base.hpp>
-#include <nall/priorityqueue.hpp>
 
 #define SCPU_CPP
 namespace SNES {
 
-priority_queue<unsigned> event(512, bind(&sCPU::queue_event, &cpu));
+#include "serialization.cpp"
 
 #include "dma/dma.cpp"
 #include "memory/memory.cpp"
@@ -12,11 +11,12 @@ priority_queue<unsigned> event(512, bind(&sCPU::queue_event, &cpu));
 #include "timing/timing.cpp"
 
 void sCPU::enter() {
-  regs.pc.l = bus.read(0xfffc);
-  regs.pc.h = bus.read(0xfffd);
-  add_clocks(186);
-
   while(true) {
+    if(scheduler.sync == Scheduler::SyncCpu) {
+      scheduler.sync = Scheduler::SyncAll;
+      scheduler.exit();
+    }
+
     if(status.interrupt_pending) {
       status.interrupt_pending = false;
       if(status.nmi_pending) {
@@ -89,9 +89,13 @@ void sCPU::reset() {
   apu_port[1] = 0x00;
   apu_port[2] = 0x00;
   apu_port[3] = 0x00;
+
+  regs.pc.l = bus.read(0xfffc);
+  regs.pc.h = bus.read(0xfffd);
 }
 
-sCPU::sCPU() {
+sCPU::sCPU() : event(512, bind(&sCPU::queue_event, this)) {
+  PPUcounter::scanline = bind(&sCPU::scanline, this);
 }
 
 sCPU::~sCPU() {

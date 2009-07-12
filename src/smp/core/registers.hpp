@@ -1,3 +1,19 @@
+struct regya_t {
+  uint8_t &hi, &lo;
+
+  inline operator uint16_t() const {
+    return (hi << 8) + lo;
+  }
+
+  inline regya_t& operator=(uint16_t data) {
+    hi = data >> 8;
+    lo = data;
+    return *this;
+  }
+
+  regya_t(uint8_t &hi_, uint8_t &lo_) : hi(hi_), lo(lo_) {}
+};
+
 struct flag_t {
   bool n, v, p, b, h, i, z, c;
 
@@ -21,11 +37,8 @@ struct flag_t {
 
 struct regs_t {
   uint16_t pc;
-  union {
-    uint16 ya;
-    struct { uint8 order_lsb2(a, y); };
-  };
-  uint8_t x, sp;
+  uint8_t r[4], &a, &x, &y, &sp;
+  regya_t ya;
   flag_t p;
-  regs_t() : pc(0), ya(0), x(0), sp(0) {}
+  regs_t() : a(r[0]), x(r[1]), y(r[2]), sp(r[3]), ya(r[2], r[0]) {}
 };

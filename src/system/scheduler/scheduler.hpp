@@ -6,30 +6,24 @@
 class Scheduler {
 public:
   cothread_t thread_snes;
-  cothread_t thread_cpu;  //S-CPU (5a22)
-  cothread_t thread_cop;  //cartridge co-processor (SuperFX, SA-1, ...)
-  cothread_t thread_smp;  //S-SMP (SPC700)
-  cothread_t thread_ppu;  //S-PPU
-  cothread_t thread_dsp;  //S-DSP
-
-  enum ActiveThread {
-    THREAD_CPU,
-    THREAD_COP,
-    THREAD_SMP,
-    THREAD_PPU,
-    THREAD_DSP,
-  };
+  cothread_t thread_cpu;     //S-CPU (5a22)
+  cothread_t thread_cop;     //cartridge co-processor (SuperFX, SA-1, ...)
+  cothread_t thread_smp;     //S-SMP (SPC700)
+  cothread_t thread_ppu;     //S-PPU
+  cothread_t thread_dsp;     //S-DSP
+  cothread_t thread_active;  //reference to active thread
 
   struct {
-    unsigned cpu_freq;
-    unsigned smp_freq;
+    uint32 cpu_freq;
+    uint32 smp_freq;
 
-    ActiveThread active;
-    int64_t cpucop;
-    int64_t cpuppu;
-    int64_t cpusmp;
-    int64_t smpdsp;
+    int64 cpucop;
+    int64 cpuppu;
+    int64 cpusmp;
+    int64 smpdsp;
   } clock;
+
+  enum sync_t { SyncNone, SyncCpu, SyncAll } sync;
 
   //==========
   //CPU <> COP
@@ -37,14 +31,14 @@ public:
 
   alwaysinline void sync_cpucop() {
     if(clock.cpucop < 0) {
-      clock.active = THREAD_COP;
+      thread_active = thread_cop;
       co_switch(thread_cop);
     }
   }
 
   alwaysinline void sync_copcpu() {
-    if(clock.cpucop >= 0) {
-      clock.active = THREAD_CPU;
+    if(clock.cpucop >= 0 && sync != SyncAll) {
+      thread_active = thread_cpu;
       co_switch(thread_cpu);
     }
   }
@@ -55,14 +49,14 @@ public:
 
   alwaysinline void sync_cpuppu() {
     if(clock.cpuppu < 0) {
-      clock.active = THREAD_PPU;
+      thread_active = thread_ppu;
       co_switch(thread_ppu);
     }
   }
 
   alwaysinline void sync_ppucpu() {
-    if(clock.cpuppu >= 0) {
-      clock.active = THREAD_CPU;
+    if(clock.cpuppu >= 0 && sync != SyncAll) {
+      thread_active = thread_cpu;
       co_switch(thread_cpu);
     }
   }
@@ -73,14 +67,14 @@ public:
 
   alwaysinline void sync_cpusmp() {
     if(clock.cpusmp < 0) {
-      clock.active = THREAD_SMP;
+      thread_active = thread_smp;
       co_switch(thread_smp);
     }
   }
 
   alwaysinline void sync_smpcpu() {
-    if(clock.cpusmp >= 0) {
-      clock.active = THREAD_CPU;
+    if(clock.cpusmp >= 0 && sync != SyncAll) {
+      thread_active = thread_cpu;
       co_switch(thread_cpu);
     }
   }
@@ -90,15 +84,15 @@ public:
   //==========
 
   alwaysinline void sync_smpdsp() {
-    if(clock.smpdsp < 0) {
-      clock.active = THREAD_DSP;
+    if(clock.smpdsp < 0 && sync != SyncAll) {
+      thread_active = thread_dsp;
       co_switch(thread_dsp);
     }
   }
 
   alwaysinline void sync_dspsmp() {
-    if(clock.smpdsp >= 0) {
-      clock.active = THREAD_SMP;
+    if(clock.smpdsp >= 0 && sync != SyncAll) {
+      thread_active = thread_smp;
       co_switch(thread_smp);
     }
   }
@@ -110,7 +104,7 @@ public:
   alwaysinline void addclocks_cpu(unsigned clocks) {
     clock.cpucop -= clocks;
     clock.cpuppu -= clocks;
-    clock.cpusmp -= clocks * (uint64_t)clock.smp_freq;
+    clock.cpusmp -= clocks * (uint64)clock.smp_freq;
   }
 
   alwaysinline void addclocks_cop(unsigned clocks) {
@@ -122,7 +116,7 @@ public:
   }
 
   alwaysinline void addclocks_smp(unsigned clocks) {
-    clock.cpusmp += clocks * (uint64_t)clock.cpu_freq;
+    clock.cpusmp += clocks * (uint64)clock.cpu_freq;
     clock.smpdsp -= clocks;
   }
 

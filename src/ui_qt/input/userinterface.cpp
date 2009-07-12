@@ -31,6 +31,15 @@ loadCartridge(InputObject::Button, "Load cartridge", config.input.uiGeneral.load
 pauseEmulation(InputObject::Button, "Pause emulation", config.input.uiGeneral.pauseEmulation),
 resetSystem(InputObject::Button, "Reset system", config.input.uiGeneral.resetSystem),
 powerCycleSystem(InputObject::Button, "Power cycle system", config.input.uiGeneral.powerCycleSystem),
+
+showStateManager(InputObject::Button, "Show state manager window", config.input.uiGeneral.showStateManager),
+quickLoad1(InputObject::Button, "Load from temporary state 1", config.input.uiGeneral.quickLoad1),
+quickLoad2(InputObject::Button, "Load from temporary state 2", config.input.uiGeneral.quickLoad2),
+quickLoad3(InputObject::Button, "Load from temporary state 3", config.input.uiGeneral.quickLoad3),
+quickSave1(InputObject::Button, "Save to temporary state 1", config.input.uiGeneral.quickSave1),
+quickSave2(InputObject::Button, "Save to temporary state 2", config.input.uiGeneral.quickSave2),
+quickSave3(InputObject::Button, "Save to temporary state 3", config.input.uiGeneral.quickSave3),
+
 lowerSpeed(InputObject::Button, "Decrease emulation speed", config.input.uiGeneral.lowerSpeed),
 raiseSpeed(InputObject::Button, "Increase emulation speed", config.input.uiGeneral.raiseSpeed),
 toggleCheatSystem(InputObject::Button, "Toggle cheat system on or off", config.input.uiGeneral.toggleCheatSystem),
@@ -42,6 +51,15 @@ exitEmulator(InputObject::Button, "Exit emulator", config.input.uiGeneral.exitEm
   attach(pauseEmulation);
   attach(resetSystem);
   attach(powerCycleSystem);
+
+  attach(showStateManager);
+  attach(quickLoad1);
+  attach(quickLoad2);
+  attach(quickLoad3);
+  attach(quickSave1);
+  attach(quickSave2);
+  attach(quickSave3);
+
   attach(lowerSpeed);
   attach(raiseSpeed);
   attach(toggleCheatSystem);

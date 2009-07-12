@@ -17,33 +17,36 @@ void Scale2xFilter::render(
   pitch >>= 1;
   outpitch >>= 2;
 
-  uint32_t A, B, C, D, P;
-  int prevline, nextline;
+  uint32_t *out0 = output;
+  uint32_t *out1 = output + outpitch;
 
-  for(int y = 0; y < height; y++) {
-    prevline = (y > 0)          ? -pitch : 0;
-    nextline = (y < height - 1) ?  pitch : 0;
-    for(int x = 0; x < 256; x++) {
-      A = *(input + prevline);
-      B = (x >   0) ? *(input - 1) : *input;
-      C = (x < 255) ? *(input + 1) : *input;
-      D = *(input + nextline);
-      P = colortable[*input];
-      if(A != D && B != C) {
-        *(output)                = A == B ? colortable[A] : P;
-        *(output + 1)            = A == C ? colortable[A] : P;
-        *(output + outpitch)     = D == B ? colortable[D] : P;
-        *(output + outpitch + 1) = D == C ? colortable[D] : P;
+  for(unsigned y = 0; y < height; y++) {
+    int prevline = (y == 0) ? 0 : pitch;
+    int nextline = (y == height - 1) ? 0 : pitch;
+
+    for(unsigned x = 0; x < 256; x++) {
+      uint16_t A = *(input - prevline);
+      uint16_t B = (x >   0) ? *(input - 1) : *input;
+      uint16_t C = *input;
+      uint16_t D = (x < 255) ? *(input + 1) : *input;
+      uint16_t E = *(input++ + nextline);
+      uint32_t c = colortable[C];
+
+      if(A != E && B != D) {
+        *out0++ = (A == B ? colortable[A] : c);
+        *out0++ = (A == D ? colortable[A] : c);
+        *out1++ = (E == B ? colortable[E] : c);
+        *out1++ = (E == D ? colortable[E] : c);
       } else {
-        *(output)                = P;
-        *(output + 1)            = P;
-        *(output + outpitch)     = P;
-        *(output + outpitch + 1) = P;
+        *out0++ = c;
+        *out0++ = c;
+        *out1++ = c;
+        *out1++ = c;
       }
-      input++;
-      output += 2;
     }
+
     input += pitch - 256;
-    output += outpitch + outpitch - 512;
+    out0 += outpitch + outpitch - 512;
+    out1 += outpitch + outpitch - 512;
   }
 }

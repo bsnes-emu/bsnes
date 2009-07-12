@@ -12,3 +12,5 @@
 #include "dsp4/dsp4.hpp"
 #include "obc1/obc1.hpp"
 #include "st010/st010.hpp"
+#include "st011/st011.hpp"
+#include "st018/st018.hpp"

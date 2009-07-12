@@ -38,13 +38,13 @@ void Utility::loadCartridge(const char *filename) {
 
   switch(type) {
     case SNES::Cartridge::TypeNormal:           loadCartridgeNormal(filename);                                     break;
-    case SNES::Cartridge::TypeBsxSlotted:       winLoader->loadBsxSlottedCartridge(filename, "");                  break;
-    case SNES::Cartridge::TypeBsxBios:          winLoader->loadBsxCartridge(filename, "");                         break;
-    case SNES::Cartridge::TypeBsx:              winLoader->loadBsxCartridge(config.path.bsx, filename);            break;
-    case SNES::Cartridge::TypeSufamiTurboBios:  winLoader->loadSufamiTurboCartridge(filename, "", "");             break;
-    case SNES::Cartridge::TypeSufamiTurbo:      winLoader->loadSufamiTurboCartridge(config.path.st, filename, ""); break;
-    case SNES::Cartridge::TypeSuperGameBoyBios: winLoader->loadSuperGameBoyCartridge(filename, "");                break;
-    case SNES::Cartridge::TypeGameBoy:          winLoader->loadSuperGameBoyCartridge(config.path.sgb, filename);   break;
+    case SNES::Cartridge::TypeBsxSlotted:       loaderWindow->loadBsxSlottedCartridge(filename, "");                  break;
+    case SNES::Cartridge::TypeBsxBios:          loaderWindow->loadBsxCartridge(filename, "");                         break;
+    case SNES::Cartridge::TypeBsx:              loaderWindow->loadBsxCartridge(config.path.bsx, filename);            break;
+    case SNES::Cartridge::TypeSufamiTurboBios:  loaderWindow->loadSufamiTurboCartridge(filename, "", "");             break;
+    case SNES::Cartridge::TypeSufamiTurbo:      loaderWindow->loadSufamiTurboCartridge(config.path.st, filename, ""); break;
+    case SNES::Cartridge::TypeSuperGameBoyBios: loaderWindow->loadSuperGameBoyCartridge(filename, "");                break;
+    case SNES::Cartridge::TypeGameBoy:          loaderWindow->loadSuperGameBoyCartridge(config.path.sgb, filename);   break;
   }
 }
 
@@ -175,18 +175,19 @@ void Utility::modifySystemState(system_state_t state) {
       //warn if unsupported hardware detected
       string chip;
       if(0);
+      else if(SNES::cartridge.has_dsp3())  chip = "DSP3";
       else if(SNES::cartridge.has_st011()) chip = "ST011";
       else if(SNES::cartridge.has_st018()) chip = "ST018";
       if(chip != "") {
-        QMessageBox::warning(winMain->window, "Warning", utf8()
-        << "<p><b>Warning:</b><br>Unsupported " << chip << " chip detected. "
+        QMessageBox::warning(mainWindow->window, "Warning", utf8()
+        << "<p><b>Warning:</b><br> The " << chip << " chip was detected, which is not fully emulated yet.<br>"
         << "It is unlikely that this title will work properly.</p>");
       }
 
       showMessage(utf8()
       << "Loaded " << cartridge.name
       << (cartridge.patchApplied ? ", and applied UPS patch." : "."));
-      winMain->window->setWindowTitle(utf8() << BSNES_TITLE << " - " << cartridge.name);
+      mainWindow->window->setWindowTitle(utf8() << bsnesTitle << " v" << bsnesVersion << " - " << cartridge.name);
     } break;
 
     case UnloadCartridge: {
@@ -199,7 +200,7 @@ void Utility::modifySystemState(system_state_t state) {
       application.pause = true;
 
       showMessage(utf8() << "Unloaded " << cartridge.name << ".");
-      winMain->window->setWindowTitle(utf8() << BSNES_TITLE);
+      mainWindow->window->setWindowTitle(utf8() << bsnesTitle << " v" << bsnesVersion);
     } break;
 
     case PowerOn: {
@@ -241,10 +242,9 @@ void Utility::modifySystemState(system_state_t state) {
     } break;
   }
 
-  winMain->syncUi();
-  winCodeEditor->dismiss();
-  winCheatEditor->reloadList();
-  winCheatEditor->syncUi();
+  mainWindow->syncUi();
+  cheatEditorWindow->reloadList();
+  stateManagerWindow->reloadList();
 }
 //
 

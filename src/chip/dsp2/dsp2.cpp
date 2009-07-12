@@ -7,8 +7,15 @@ DSP2 dsp2;
 
 #include "dsp2_op.cpp"
 
-void DSP2::init() {}
-void DSP2::enable() {}
+void DSP2::init() {
+}
+
+void DSP2::enable() {
+  bus.map(Bus::MapDirect, 0x20, 0x3f, 0x6000, 0x6fff, *this);
+  bus.map(Bus::MapDirect, 0x20, 0x3f, 0x8000, 0xbfff, *this);
+  bus.map(Bus::MapDirect, 0xa0, 0xbf, 0x6000, 0x6fff, *this);
+  bus.map(Bus::MapDirect, 0xa0, 0xbf, 0x8000, 0xbfff, *this);
+}
 
 void DSP2::power() {
   reset();

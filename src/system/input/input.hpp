@@ -67,7 +67,7 @@ public:
   //latchx, latchy are updated during update() (once per frame)
   alwaysinline void tick() {
     //only test if Super Scope or Justifier is connected
-    if(iobit && ppu.vcounter() == latchy && ppu.hcounter() == latchx) {
+    if(iobit && cpu.vcounter() == latchy && cpu.hcounter() == latchx) {
       ppu.latch_counters();
     }
   }

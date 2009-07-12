@@ -1,5 +1,5 @@
-#define BSNES_VERSION "0.047"
-#define BSNES_TITLE   "bsnes v" BSNES_VERSION
+static const char bsnesVersion[] = "0.048";
+static const char bsnesTitle[] = "bsnes";
 
 #define BUSCORE sBus
 #define CPUCORE sCPU
@@ -22,11 +22,14 @@
 #include <nall/detect.hpp>
 #include <nall/dl.hpp>
 #include <nall/endian.hpp>
+#include <nall/file.hpp>
 #include <nall/function.hpp>
 #include <nall/moduloarray.hpp>
 #include <nall/new.hpp>
 #include <nall/platform.hpp>
+#include <nall/priorityqueue.hpp>
 #include <nall/property.hpp>
+#include <nall/serializer.hpp>
 #include <nall/stdint.hpp>
 #include <nall/string.hpp>
 #include <nall/utility.hpp>
@@ -36,8 +39,10 @@ using namespace nall;
 typedef int8_t   int8;
 typedef int16_t  int16;
 typedef int32_t  int32;
+typedef int64_t  int64;
 typedef uint8_t  uint8;
 typedef uint16_t uint16;
 typedef uint32_t uint32;
+typedef uint64_t uint64;
 
 #include "interface.hpp"

@@ -4,6 +4,12 @@
 #include <stdio.h>
 #include <string.h>
 
+#if !defined(_WIN32)
+  #include <unistd.h>
+#else
+  #include <io.h>
+#endif
+
 #include <nall/stdint.hpp>
 #include <nall/utf8.hpp>
 #include <nall/utility.hpp>
@@ -110,6 +116,15 @@ namespace nall {
     int size() {
       if(!fp) return -1;  //file not open
       return file_size;
+    }
+
+    bool truncate(unsigned size) {
+      if(!fp) return false;  //file not open
+      #if !defined(_WIN32)
+      return ftruncate(fileno(fp), size) == 0;
+      #else
+      return _chsize(fileno(fp), size) == 0;
+      #endif
     }
 
     bool end() {

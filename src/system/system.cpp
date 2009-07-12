@@ -10,9 +10,11 @@ SMPCORE smp;
 DSPCORE dsp;
 PPUCORE ppu;
 
-#include "scheduler/scheduler.cpp"
-#include "tracer/tracer.cpp"
 #include "config/config.cpp"
+#include "serialization.cpp"
+#include "scheduler/scheduler.cpp"
+#include "statemanager/statemanager.cpp"
+#include "tracer/tracer.cpp"
 
 #include "video/video.cpp"
 #include "audio/audio.cpp"
@@ -33,9 +35,33 @@ void System::run() {
 }
 
 void System::runtoframe() {
+  scheduler.sync = Scheduler::SyncNone;
+
   scheduler.enter();
   input.update();
   video.update();
+}
+
+void System::runtosave() {
+  scheduler.sync = Scheduler::SyncCpu;
+
+  while(true) {
+    scheduler.enter();
+    if(scheduler.sync == Scheduler::SyncAll) break;
+    input.update();
+    video.update();
+  }
+
+  scheduler.thread_active = scheduler.thread_smp;
+  scheduler.enter();
+
+  scheduler.thread_active = scheduler.thread_ppu;
+  scheduler.enter();
+
+  #if !defined(DSP_STATE_MACHINE)
+  scheduler.thread_active = scheduler.thread_dsp;
+  scheduler.enter();
+  #endif
 }
 
 void System::init(Interface *interface_) {
@@ -58,6 +84,8 @@ void System::init(Interface *interface_) {
   dsp4.init();
   obc1.init();
   st010.init();
+  st011.init();
+  st018.init();
 
   video.init();
   audio.init();
@@ -76,31 +104,7 @@ void System::power() {
   }
 
   scheduler.init();
-
-  ppu.PPUcounter::reset();
-  cpu.power();
-  smp.power();
-  dsp.power();
-  ppu.power();
   bus.power();
-
-  if(expansion() == ExpansionBSX) bsxbase.power();
-  if(memory::bsxflash.data()) bsxflash.power();
-  if(cartridge.mode() == Cartridge::ModeBsx) bsxcart.power();
-  if(cartridge.mode() == Cartridge::ModeSuperGameBoy) sgb.power();
-
-  if(cartridge.has_superfx()) superfx.power();
-  if(cartridge.has_sa1())     sa1.power();
-  if(cartridge.has_srtc())    srtc.power();
-  if(cartridge.has_sdd1())    sdd1.power();
-  if(cartridge.has_spc7110()) spc7110.power();
-  if(cartridge.has_cx4())     cx4.power();
-  if(cartridge.has_dsp1())    dsp1.power();
-  if(cartridge.has_dsp2())    dsp2.power();
-  if(cartridge.has_dsp3())    dsp3.power();
-  if(cartridge.has_dsp4())    dsp4.power();
-  if(cartridge.has_obc1())    obc1.power();
-  if(cartridge.has_st010())   st010.power();
 
   for(unsigned i = 0x2100; i <= 0x213f; i++) memory::mmio.map(i, ppu);
   for(unsigned i = 0x2140; i <= 0x217f; i++) memory::mmio.map(i, cpu);
@@ -126,6 +130,34 @@ void System::power() {
   if(cartridge.has_dsp4())    dsp4.enable();
   if(cartridge.has_obc1())    obc1.enable();
   if(cartridge.has_st010())   st010.enable();
+  if(cartridge.has_st011())   st011.enable();
+  if(cartridge.has_st018())   st018.enable();
+
+  if(expansion() == ExpansionBSX) bsxbase.power();
+  if(memory::bsxflash.data()) bsxflash.power();
+  if(cartridge.mode() == Cartridge::ModeBsx) bsxcart.power();
+  if(cartridge.mode() == Cartridge::ModeSuperGameBoy) sgb.power();
+
+  if(cartridge.has_superfx()) superfx.power();
+  if(cartridge.has_sa1())     sa1.power();
+  if(cartridge.has_srtc())    srtc.power();
+  if(cartridge.has_sdd1())    sdd1.power();
+  if(cartridge.has_spc7110()) spc7110.power();
+  if(cartridge.has_cx4())     cx4.power();
+  if(cartridge.has_dsp1())    dsp1.power();
+  if(cartridge.has_dsp2())    dsp2.power();
+  if(cartridge.has_dsp3())    dsp3.power();
+  if(cartridge.has_dsp4())    dsp4.power();
+  if(cartridge.has_obc1())    obc1.power();
+  if(cartridge.has_st010())   st010.power();
+  if(cartridge.has_st011())   st011.power();
+  if(cartridge.has_st018())   st018.power();
+
+  //ppu.PPUcounter::reset();
+  cpu.power();
+  smp.power();
+  dsp.power();
+  ppu.power();
 
   input.port_set_device(0, config.controller_port1);
   input.port_set_device(1, config.controller_port2);
@@ -136,7 +168,7 @@ void System::power() {
 void System::reset() {
   scheduler.init();
 
-  ppu.PPUcounter::reset();
+  //ppu.PPUcounter::reset();
   cpu.reset();
   smp.reset();
   dsp.reset();
@@ -160,6 +192,8 @@ void System::reset() {
   if(cartridge.has_dsp4())    dsp4.reset();
   if(cartridge.has_obc1())    obc1.reset();
   if(cartridge.has_st010())   st010.reset();
+  if(cartridge.has_st011())   st011.reset();
+  if(cartridge.has_st018())   st018.reset();
 
   input.port_set_device(0, config.controller_port1);
   input.port_set_device(1, config.controller_port2);
@@ -169,7 +203,7 @@ void System::reset() {
 
 void System::scanline() {
   video.scanline();
-  if(ppu.vcounter() == 241) scheduler.exit();
+  if(cpu.vcounter() == 241) scheduler.exit();
 }
 
 void System::frame() {

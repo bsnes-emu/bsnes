@@ -1,6 +1,7 @@
 #include "config/config.hpp"
 #include "interface/interface.hpp"
 #include "scheduler/scheduler.hpp"
+#include "statemanager/statemanager.hpp"
 #include "tracer/tracer.hpp"
 
 #include "video/video.hpp"
@@ -18,6 +19,7 @@ public:
   //system functions
   virtual void run();
   virtual void runtoframe();
+  virtual void runtosave();
 
   virtual void init(Interface*);
   virtual void term();
@@ -32,10 +34,16 @@ public:
   Region region() const;
   ExpansionPortDevice expansion() const;
 
+  serializer serialize();
+  bool unserialize(serializer&);
+
   System();
   virtual ~System() {}
 
 private:
+  void serialize(serializer&);
+  void serialize_all(serializer&);
+
   Interface *interface;
   unsigned snes_region;
   unsigned snes_expansion;

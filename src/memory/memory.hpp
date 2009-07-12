@@ -1,5 +1,5 @@
 struct Memory {
-  virtual unsigned size() const { return 0; }
+  virtual inline unsigned size() const;
   virtual uint8 read(unsigned addr) = 0;
   virtual void write(unsigned addr, uint8 data) = 0;
 };
@@ -21,16 +21,16 @@ struct UnmappedMMIO : MMIO {
 };
 
 struct StaticRAM : Memory {
-  uint8* data() { return data_; }
-  unsigned size() const { return size_; }
+  inline uint8* data();
+  inline unsigned size() const;
 
-  inline uint8 read(unsigned addr) { return data_[addr]; }
-  inline void write(unsigned addr, uint8 n) { data_[addr] = n; }
-  inline uint8& operator[](unsigned addr) { return data_[addr]; }
-  inline const uint8& operator[](unsigned addr) const { return data_[addr]; }
+  inline uint8 read(unsigned addr);
+  inline void write(unsigned addr, uint8 n);
+  inline uint8& operator[](unsigned addr);
+  inline const uint8& operator[](unsigned addr) const;
 
-  StaticRAM(unsigned n) : size_(n) { data_ = new uint8[size_]; }
-  ~StaticRAM() { delete[] data_; }
+  inline StaticRAM(unsigned size);
+  inline ~StaticRAM();
 
 private:
   uint8 *data_;
@@ -38,29 +38,17 @@ private:
 };
 
 struct MappedRAM : Memory {
-  void reset() {
-    if(data_) {
-      delete[] data_;
-      data_ = 0;
-    }
-    size_ = -1U;
-    write_protect_ = false;
-  }
+  inline void reset();
+  inline void map(uint8 *source, unsigned length);
 
-  void map(uint8 *source, unsigned length) {
-    reset();
-    data_ = source;
-    size_ = data_ && length > 0 ? length : -1U;
-  }
+  inline void write_protect(bool status);
+  inline uint8* data();
+  inline unsigned size() const;
 
-  void write_protect(bool status) { write_protect_ = status; }
-  uint8* data() { return data_; }
-  unsigned size() const { return size_; }
-
-  inline uint8 read(unsigned addr) { return data_[addr]; }
-  inline void write(unsigned addr, uint8 n) { if(!write_protect_) data_[addr] = n; }
-  inline const uint8 operator[](unsigned addr) const { return data_[addr]; }
-  MappedRAM() : data_(0), size_(-1U), write_protect_(false) {}
+  inline uint8 read(unsigned addr);
+  inline void write(unsigned addr, uint8 n);
+  inline const uint8 operator[](unsigned addr) const;
+  inline MappedRAM();
 
 private:
   uint8 *data_;
@@ -85,36 +73,21 @@ struct Bus {
     uint16 addr_lo, uint16 addr_hi,
     Memory &access, unsigned offset = 0, unsigned size = 0);
 
-  alwaysinline uint8 read(unsigned addr) {
-    #if defined(CHEAT_SYSTEM)
-    if(cheat.active() && cheat.exists(addr)) {
-      uint8 r;
-      if(cheat.read(addr, r)) return r;
-    }
-    #endif
+  alwaysinline uint8 read(unsigned addr);
+  alwaysinline void write(unsigned addr, uint8 data);
 
-    Page &p = page[addr >> 8];
-    return p.access->read(p.offset + addr);
-  }
+  virtual inline bool load_cart();
+  virtual inline void unload_cart();
 
-  alwaysinline void write(unsigned addr, uint8 data) {
-    Page &p = page[addr >> 8];
-    return p.access->write(p.offset + addr, data);
-  }
-
-  virtual bool load_cart() { return false; }
-  virtual void unload_cart() {}
-
-  virtual void power() {}
-  virtual void reset() {}
-
-  Bus() {}
-  virtual ~Bus() {}
+  virtual inline void power();
+  virtual inline void reset();
 
   struct Page {
     Memory *access;
     unsigned offset;
   } page[65536];
+
+  virtual void serialize(serializer&) {}
 };
 
 namespace memory {

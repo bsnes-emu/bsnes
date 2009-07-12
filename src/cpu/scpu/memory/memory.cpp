@@ -10,7 +10,6 @@ uint8 sCPU::op_read(uint32 addr) {
   status.clock_count = speed(addr);
   cycle_edge();
   add_clocks(status.clock_count - 4);
-  scheduler.sync_cpucop();
   regs.mdr = bus.read(addr);
   add_clocks(4);
   return regs.mdr;
@@ -20,7 +19,6 @@ void sCPU::op_write(uint32 addr, uint8 data) {
   status.clock_count = speed(addr);
   cycle_edge();
   add_clocks(status.clock_count);
-  scheduler.sync_cpucop();
   bus.write(addr, regs.mdr = data);
 }
 

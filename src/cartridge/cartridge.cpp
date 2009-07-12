@@ -1,4 +1,5 @@
 #include <../base.hpp>
+#include <nall/crc32.hpp>
 
 #define CARTRIDGE_CPP
 namespace SNES {
@@ -57,6 +58,18 @@ void Cartridge::load(Mode cartridge_mode) {
   memory::gbrom.write_protect(true);
   memory::gbram.write_protect(false);
 
+  unsigned checksum = ~0;
+  for(unsigned n = 0; n < memory::cartrom.size(); n++) checksum = crc32_adjust(checksum, memory::cartrom[n]);
+  if(memory::bsxflash.size() != 0 && memory::bsxflash.size() != ~0)
+  for(unsigned n = 0; n < memory::bsxflash.size(); n++) checksum = crc32_adjust(checksum, memory::bsxflash[n]);
+  if(memory::stArom.size() != 0 && memory::stArom.size() != ~0)
+  for(unsigned n = 0; n < memory::stArom.size(); n++) checksum = crc32_adjust(checksum, memory::stArom[n]);
+  if(memory::stBrom.size() != 0 && memory::stBrom.size() != ~0)
+  for(unsigned n = 0; n < memory::stBrom.size(); n++) checksum = crc32_adjust(checksum, memory::stBrom[n]);
+  if(memory::gbrom.size() != 0 && memory::gbrom.size() != ~0)
+  for(unsigned n = 0; n < memory::gbrom.size(); n++) checksum = crc32_adjust(checksum, memory::gbrom[n]);
+  set(crc32, ~checksum);
+
   bus.load_cart();
   set(loaded, true);
 }
@@ -84,6 +97,36 @@ Cartridge::Type Cartridge::detect_image_type(uint8_t *data, unsigned size) const
   cartinfo_t info;
   read_header(info, data, size);
   return info.type;
+}
+
+void Cartridge::serialize(serializer &s) {
+  if(memory::cartram.size() != 0 && memory::cartram.size() != ~0) {
+    s.array(memory::cartram.data(), memory::cartram.size());
+  }
+
+  if(memory::cartrtc.size() != 0 && memory::cartrtc.size() != ~0) {
+    s.array(memory::cartrtc.data(), memory::cartrtc.size());
+  }
+
+  if(memory::bsxram.size() != 0 && memory::bsxram.size() != ~0) {
+    s.array(memory::bsxram.data(), memory::bsxram.size());
+  }
+
+  if(memory::bsxpram.size() != 0 && memory::bsxpram.size() != ~0) {
+    s.array(memory::bsxpram.data(), memory::bsxpram.size());
+  }
+
+  if(memory::stAram.size() != 0 && memory::stAram.size() != ~0) {
+    s.array(memory::stAram.data(), memory::stAram.size());
+  }
+
+  if(memory::stBram.size() != 0 && memory::stBram.size() != ~0) {
+    s.array(memory::stBram.data(), memory::stBram.size());
+  }
+
+  if(memory::gbram.size() != 0 && memory::gbram.size() != ~0) {
+    s.array(memory::gbram.data(), memory::gbram.size());
+  }
 }
 
 Cartridge::Cartridge() {

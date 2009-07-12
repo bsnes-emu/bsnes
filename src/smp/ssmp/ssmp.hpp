@@ -5,7 +5,10 @@ public:
   #include "memory/memory.hpp"
   #include "timing/timing.hpp"
 
+  unsigned instruction_counter;
+
   struct {
+
     uint8 opcode;
     bool in_opcode;
 
@@ -32,6 +35,7 @@ public:
   void power();
   void reset();
 
+  void serialize(serializer&);
   sSMP();
   ~sSMP();
 };

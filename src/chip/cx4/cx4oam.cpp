@@ -2,17 +2,18 @@
 
 //Build OAM
 void Cx4::op00_00() {
-uint32 oamptr = ram[0x626] << 2;
+  uint32 oamptr = ram[0x626] << 2;
   for(int32 i = 0x1fd; i > oamptr && i >= 0; i -= 4) {
-  //clear oam-to-be
+    //clear oam-to-be
     if(i >= 0)ram[i] = 0xe0;
   }
 
-uint16 globalx, globaly;
-uint32 oamptr2;
-int16  sprx, spry;
-uint8  sprname, sprattr;
-uint8  sprcount;
+  uint16 globalx, globaly;
+  uint32 oamptr2;
+  int16  sprx, spry;
+  uint8  sprname, sprattr;
+  uint8  sprcount;
+
   globalx = readw(0x621);
   globaly = readw(0x623);
   oamptr2 = 0x200 + (ram[0x626] >> 2);
@@ -20,17 +21,18 @@ uint8  sprcount;
   if(!ram[0x620])return;
 
   sprcount = 128 - ram[0x626];
-uint8 offset = (ram[0x626] & 3) * 2;
-uint32 srcptr = 0x220;
+  uint8 offset = (ram[0x626] & 3) * 2;
+  uint32 srcptr = 0x220;
+
   for(int i = ram[0x620]; i > 0 && sprcount > 0; i--, srcptr += 16) {
     sprx = readw(srcptr)     - globalx;
     spry = readw(srcptr + 2) - globaly;
     sprname = ram[srcptr + 5];
     sprattr = ram[srcptr + 4] | ram[srcptr + 6];
 
-  uint32 spraddr = readl(srcptr + 7);
+    uint32 spraddr = readl(srcptr + 7);
     if(bus.read(spraddr)) {
-    int16 x, y;
+      int16 x, y;
       for(int sprcnt = bus.read(spraddr++); sprcnt > 0 && sprcount > 0; sprcnt--, spraddr += 4) {
         x = (int8)bus.read(spraddr + 1);
         if(sprattr & 0x40) {
@@ -94,7 +96,7 @@ uint32 ptr = 0;
     C4WFZVal = readw(ptr + 9);
     C4TransfWireFrame();
 
-  //Displace
+    //Displace
     writew(ptr + 1, C4WFXVal + 0x80);
     writew(ptr + 5, C4WFYVal + 0x50);
   }
@@ -107,7 +109,8 @@ uint32 ptr = 0;
   writew(0x605 + 8, 0x40);
 
   ptr = 0xb02;
-uint32 ptr2 = 0;
+  uint32 ptr2 = 0;
+
   for(int32 i = readw(0xb00); i > 0; i--, ptr += 2, ptr2 += 8) {
     C4WFXVal  = readw((read(ptr + 0) << 4) + 1);
     C4WFYVal  = readw((read(ptr + 0) << 4) + 5);
@@ -132,13 +135,14 @@ void Cx4::op00_08() {
 
 //Disintegrate
 void Cx4::op00_0b() {
-uint8  width, height;
-uint32 startx, starty;
-uint32 srcptr;
-uint32 x, y;
-int32  scalex, scaley;
-int32  cx, cy;
-int32  i, j;
+  uint8  width, height;
+  uint32 startx, starty;
+  uint32 srcptr;
+  uint32 x, y;
+  int32  scalex, scaley;
+  int32  cx, cy;
+  int32  i, j;
+
   width  = read(0x1f89);
   height = read(0x1f8c);
   cx     = readw(0x1f80);
@@ -157,9 +161,10 @@ int32  i, j;
   for(y = starty, i = 0;i < height; i++, y += scaley) {
     for(x = startx, j = 0;j < width; j++, x += scalex) {
       if((x >> 8) < width && (y >> 8) < height && (y >> 8) * width + (x >> 8) < 0x2000) {
-      uint8 pixel = (j & 1) ? (ram[srcptr] >> 4) : (ram[srcptr]);
-      int32 index = (y >> 11) * width * 4 + (x >> 11) * 32 + ((y >> 8) & 7) * 2;
-      uint8 mask = 0x80 >> ((x >> 8) & 7);
+        uint8 pixel = (j & 1) ? (ram[srcptr] >> 4) : (ram[srcptr]);
+        int32 index = (y >> 11) * width * 4 + (x >> 11) * 32 + ((y >> 8) & 7) * 2;
+        uint8 mask = 0x80 >> ((x >> 8) & 7);
+
         if(pixel & 1)ram[index     ] |= mask;
         if(pixel & 2)ram[index +  1] |= mask;
         if(pixel & 4)ram[index + 16] |= mask;
@@ -172,16 +177,16 @@ int32  i, j;
 
 //Bitplane Wave
 void Cx4::op00_0c() {
-uint32 destptr = 0;
-uint32 waveptr = read(0x1f83);
-uint16 mask1   = 0xc0c0;
-uint16 mask2   = 0x3f3f;
+  uint32 destptr = 0;
+  uint32 waveptr = read(0x1f83);
+  uint16 mask1   = 0xc0c0;
+  uint16 mask2   = 0x3f3f;
 
   for(int j = 0; j < 0x10; j++) {
     do {
-    int16 height = -((int8)read(waveptr + 0xb00)) - 16;
+      int16 height = -((int8)read(waveptr + 0xb00)) - 16;
       for(int i = 0; i < 40; i++) {
-      uint16 temp = readw(destptr + wave_data[i]) & mask2;
+        uint16 temp = readw(destptr + wave_data[i]) & mask2;
         if(height >= 0) {
           if(height < 8) {
             temp |= mask1 & readw(0xa00 + height * 2);
@@ -199,9 +204,9 @@ uint16 mask2   = 0x3f3f;
     destptr += 16;
 
     do {
-    int16 height = -((int8)read(waveptr + 0xb00)) - 16;
+      int16 height = -((int8)read(waveptr + 0xb00)) - 16;
       for(int i = 0; i < 40; i++) {
-      uint16 temp = readw(destptr + wave_data[i]) & mask2;
+        uint16 temp = readw(destptr + wave_data[i]) & mask2;
         if(height >= 0) {
           if(height < 8) {
             temp |= mask1 & readw(0xa10 + height * 2);

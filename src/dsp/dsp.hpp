@@ -8,6 +8,5 @@ public:
   virtual void power() = 0;
   virtual void reset() = 0;
 
-  DSP() {}
-  virtual ~DSP() {}
+  virtual void serialize(serializer&) {}
 };

@@ -15,16 +15,13 @@ Configuration::Configuration() {
   cpu.alu_div_delay   = 2;
   cpu.wram_init_value = 0x55;
 
-  smp.ntsc_clock_rate = 32041 * 768;
-  smp.pal_clock_rate  = 32041 * 768;
+  smp.ntsc_clock_rate = 24607104;  //32040.5 * 768
+  smp.pal_clock_rate  = 24607104;
 
   ppu1.version = 1;
   ppu2.version = 3;
 
-  superfx.fast_cache_speed  = 2;
-  superfx.slow_cache_speed  = 2;
-  superfx.fast_memory_speed = 5;
-  superfx.slow_memory_speed = 6;
+  superfx.speed = 0;  //0 = auto-select, 1 = force 10.74MHz, 2 = force 21.48MHz
 }
 
 #endif

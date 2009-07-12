@@ -1,3 +1,5 @@
+#include "init.cpp"
+
 void Application::initPaths(const char *basename) {
   char temp[PATH_MAX];
 
@@ -94,8 +96,8 @@ void Application::run() {
   inputManager.refresh();
 
   if(config.input.focusPolicy == Configuration::Input::FocusPolicyPauseEmulation) {
-    bool inactive  = (winMain->window->isActiveWindow() == false)
-                  || (winMain->window->isMinimized() == true);
+    bool inactive  = (mainWindow->window->isActiveWindow() == false)
+                  || (mainWindow->window->isMinimized() == true);
     if(!autopause && inactive) {
       autopause = true;
       audio.clear();
@@ -120,7 +122,7 @@ void Application::run() {
   if(autosaveTime >= CLOCKS_PER_SEC * 60) {
     //auto-save RAM once per minute in case of emulator crash
     autosaveTime = 0;
-    utility.saveMemory();
+    if(config.system.autoSaveMemory == true) utility.saveMemory();
   }
 
   if(screensaverTime >= CLOCKS_PER_SEC * 30) {

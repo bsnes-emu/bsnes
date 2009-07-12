@@ -3,10 +3,34 @@
 #define CPUCORE_CPP
 namespace SNES {
 
-#include "opcode_algorithms.cpp"
-#include "opcode_functions.cpp"
-#include "opcode_tables.cpp"
+#include "serialization.cpp"
+#include "algorithms.cpp"
 #include "disasm/disasm.cpp"
+
+#define L last_cycle();
+#define A 0
+#define X 1
+#define Y 2
+#define Z 3
+#define S 4
+#define D 5
+#define call(op) (this->*op)()
+
+#include "opcode_read.cpp"
+#include "opcode_write.cpp"
+#include "opcode_rmw.cpp"
+#include "opcode_pc.cpp"
+#include "opcode_misc.cpp"
+#include "table.cpp"
+
+#undef L
+#undef A
+#undef X
+#undef Y
+#undef Z
+#undef S
+#undef D
+#undef call
 
 //immediate, 2-cycle opcodes with I/O cycle will become bus read
 //when an IRQ is to be triggered immediately after opcode completion.

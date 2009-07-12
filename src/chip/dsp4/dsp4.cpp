@@ -5,6 +5,14 @@ namespace SNES {
 
 DSP4 dsp4;
 
+void DSP4::init() {
+}
+
+void DSP4::enable() {
+  bus.map(Bus::MapDirect, 0x30, 0x3f, 0x8000, 0xffff, *this);
+  bus.map(Bus::MapDirect, 0xb0, 0xbf, 0x8000, 0xffff, *this);
+}
+
 namespace DSP4i {
   inline uint16 READ_WORD(uint8 *addr) {
     return (addr[0]) + (addr[1] << 8);
@@ -23,12 +31,6 @@ namespace DSP4i {
   #include "dsp4emu.c"
   #undef bool8
 };
-
-void DSP4::init() {
-}
-
-void DSP4::enable() {
-}
 
 void DSP4::power() {
   reset();

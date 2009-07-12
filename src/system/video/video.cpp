@@ -79,12 +79,12 @@ void Video::update() {
 }
 
 void Video::scanline() {
-  unsigned y = ppu.vcounter();
+  unsigned y = cpu.vcounter();
   if(y >= 240) return;
 
   unsigned width = (ppu.hires() == false ? 256 : 512);
   pline_width[y] = width;
-  iline_width[y * 2 + (int)ppu.field()] = width;
+  iline_width[y * 2 + (int)cpu.field()] = width;
 
   frame_hires |= ppu.hires();
   frame_interlace |= ppu.interlace();

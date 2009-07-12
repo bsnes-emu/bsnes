@@ -27,7 +27,7 @@ void SuperFX::rombuffer_update() {
   regs.romcl = memory_access_speed;
 }
 
-uint8_t SuperFX::rombuffer_read() {
+uint8 SuperFX::rombuffer_read() {
   rombuffer_sync();
   return regs.romdr;
 }
@@ -36,31 +36,52 @@ void SuperFX::rambuffer_sync() {
   if(regs.ramcl) add_clocks(regs.ramcl);
 }
 
-uint8_t SuperFX::rambuffer_read(uint16_t addr) {
+uint8 SuperFX::rambuffer_read(uint16 addr) {
   rambuffer_sync();
   return superfxbus.read(0x700000 + (regs.rambr << 16) + addr);
 }
 
-void SuperFX::rambuffer_write(uint16_t addr, uint8_t data) {
+void SuperFX::rambuffer_write(uint16 addr, uint8 data) {
   rambuffer_sync();
   regs.ramcl = memory_access_speed;
   regs.ramar = addr;
   regs.ramdr = data;
 }
 
-void SuperFX::r14_modify(uint16_t data) {
+void SuperFX::r14_modify(uint16 data) {
   regs.r[14].data = data;
   rombuffer_update();
 }
 
-void SuperFX::r15_modify(uint16_t data) {
+void SuperFX::r15_modify(uint16 data) {
   regs.r[15].data = data;
   r15_modified = true;
 }
 
+void SuperFX::update_speed() {
+  //force SuperFX1 mode?
+  if(clockmode == 1) {
+    cache_access_speed  = 2;
+    memory_access_speed = 6;
+    return;
+  }
+
+  //force SuperFX2 mode?
+  if(clockmode == 2) {
+    cache_access_speed  = 1;
+    memory_access_speed = 5;
+    regs.cfgr.ms0 = 0;  //cannot use high-speed multiplication in 21MHz mode
+    return;
+  }
+
+  //default: allow S-CPU to select mode
+  cache_access_speed  = (regs.clsr ? 1 : 2);
+  memory_access_speed = (regs.clsr ? 5 : 6);
+  if(regs.clsr) regs.cfgr.ms0 = 0;  //cannot use high-speed multiplication in 21MHz mode
+}
+
 void SuperFX::timing_reset() {
-  cache_access_speed  = config.superfx.slow_cache_speed;
-  memory_access_speed = config.superfx.slow_memory_speed;
+  update_speed();
   r15_modified = false;
 
   regs.romcl = 0;

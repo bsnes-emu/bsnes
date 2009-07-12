@@ -14,9 +14,9 @@ void SMPcore::disassemble_opcode(char *output) {
   sprintf(s, "..%.4x ", regs.pc);
 
   //TODO: read from IPLROM when applicable
-  op  = memory::apuram[(uint16_t)(regs.pc + 0)];
-  op0 = memory::apuram[(uint16_t)(regs.pc + 1)];
-  op1 = memory::apuram[(uint16_t)(regs.pc + 2)];
+  op  = memory::apuram[(uint16)(regs.pc + 0)];
+  op0 = memory::apuram[(uint16)(regs.pc + 1)];
+  op1 = memory::apuram[(uint16)(regs.pc + 2)];
   opw = (op0) | (op1 << 8);
   opdp0 = ((unsigned)regs.p.p << 8) + op0;
   opdp1 = ((unsigned)regs.p.p << 8) + op1;
@@ -286,7 +286,7 @@ void SMPcore::disassemble_opcode(char *output) {
   strcat(s, t);
 
   sprintf(t, "A:%.2x X:%.2x Y:%.2x SP:01%.2x YA:%.4x ",
-    regs.a, regs.x, regs.y, regs.sp, regs.ya);
+    regs.a, regs.x, regs.y, regs.sp, (uint16)regs.ya);
   strcat(s, t);
 
   sprintf(t, "%c%c%c%c%c%c%c%c",

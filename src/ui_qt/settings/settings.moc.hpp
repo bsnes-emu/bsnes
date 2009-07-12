@@ -2,11 +2,8 @@
 #include "audio.moc"
 #include "input.moc"
 #include "paths.moc"
-#include "cheateditor.moc"
 #include "advanced.moc"
-
 #include "utility/inputcapture.moc"
-#include "utility/codeeditor.moc"
 
 class SettingsWindow : public QObject {
   Q_OBJECT
@@ -19,7 +16,6 @@ public:
       QListWidgetItem *audio;
       QListWidgetItem *input;
       QListWidgetItem *paths;
-      QListWidgetItem *cheatcodes;
       QListWidgetItem *advanced;
     QWidget *panel;
     QStackedLayout *panelLayout;
@@ -28,4 +24,4 @@ public:
 
 public slots:
   void listChanged();
-} *winSettings;
+} *settingsWindow;

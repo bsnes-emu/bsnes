@@ -9,13 +9,7 @@ void threadentry_ppu() { ppu.enter(); }
 void threadentry_dsp() { dsp.enter(); }
 
 void Scheduler::enter() {
-  switch(clock.active) {
-    case THREAD_CPU: co_switch(thread_cpu); break;
-    case THREAD_COP: co_switch(thread_cop); break;
-    case THREAD_SMP: co_switch(thread_smp); break;
-    case THREAD_PPU: co_switch(thread_ppu); break;
-    case THREAD_DSP: co_switch(thread_dsp); break;
-  }
+  co_switch(thread_active);
 }
 
 void Scheduler::exit() {
@@ -30,7 +24,6 @@ void Scheduler::init() {
                  ? config.smp.ntsc_clock_rate
                  : config.smp.pal_clock_rate;
 
-  clock.active = THREAD_CPU;
   clock.cpucop = 0;
   clock.cpuppu = 0;
   clock.cpusmp = 0;
@@ -48,15 +41,19 @@ void Scheduler::init() {
   thread_smp  = co_create(65536 * sizeof(void*), threadentry_smp);
   thread_ppu  = co_create(65536 * sizeof(void*), threadentry_ppu);
   thread_dsp  = co_create(65536 * sizeof(void*), threadentry_dsp);
+
+  //start execution with S-CPU after reset
+  thread_active = thread_cpu;
 }
 
 Scheduler::Scheduler() {
-  thread_snes = 0;
-  thread_cpu  = 0;
-  thread_cop  = 0;
-  thread_smp  = 0;
-  thread_ppu  = 0;
-  thread_dsp  = 0;
+  thread_snes   = 0;
+  thread_cpu    = 0;
+  thread_cop    = 0;
+  thread_smp    = 0;
+  thread_ppu    = 0;
+  thread_dsp    = 0;
+  thread_active = 0;
 }
 
 #endif

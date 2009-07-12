@@ -46,6 +46,16 @@ public:
   string basename(const char *filename);
   string basepath(const char *filename);
 
+  //state.cpp
+  bool saveStatesSupported();
+  void quickLoad(uint8 slot);
+  void quickSave(uint8 slot);
+  void loadStateInfo(lstring&);
+  void setStateDescription(uint8 slot, const char *description);
+  void loadState(uint8 slot);
+  void saveState(uint8 slot, const char *description);
+  void deleteState(uint8 slot);
+
   //window.cpp
   void showCentered(QWidget *window);
   void updateFullscreenState();

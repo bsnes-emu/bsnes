@@ -5,8 +5,15 @@ namespace SNES {
 
 OBC1 obc1;
 
-void OBC1::init() {}
-void OBC1::enable() {}
+#include "serialization.cpp"
+
+void OBC1::init() {
+}
+
+void OBC1::enable() {
+  bus.map(Bus::MapDirect, 0x00, 0x3f, 0x6000, 0x7fff, *this);
+  bus.map(Bus::MapDirect, 0x80, 0xbf, 0x6000, 0x7fff, *this);
+}
 
 void OBC1::power() {
   reset();

@@ -2,11 +2,8 @@
 #include "audio.cpp"
 #include "input.cpp"
 #include "paths.cpp"
-#include "cheateditor.cpp"
 #include "advanced.cpp"
-
 #include "utility/inputcapture.cpp"
-#include "utility/codeeditor.cpp"
 
 void SettingsWindow::setup() {
   window = new QWidget;
@@ -18,7 +15,6 @@ void SettingsWindow::setup() {
   list->addItem(audio = new QListWidgetItem("Audio"));
   list->addItem(input = new QListWidgetItem("Input"));
   list->addItem(paths = new QListWidgetItem("Paths"));
-  list->addItem(cheatcodes = new QListWidgetItem("Cheat Codes"));
   list->addItem(advanced = new QListWidgetItem("Advanced"));
   list->setCurrentItem(input);  //select most frequently used panel by default
   list->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
@@ -38,26 +34,21 @@ void SettingsWindow::setup() {
   winAudioSettings    = new AudioSettingsWindow;
   winInputSettings    = new InputSettingsWindow;
   winPathSettings     = new PathSettingsWindow;
-  winCheatEditor      = new CheatEditorWindow;
   winAdvancedSettings = new AdvancedSettingsWindow;
   winInputCapture     = new InputCaptureWindow;
-  winCodeEditor       = new CodeEditorWindow;
 
   winVideoSettings->setup();
   winAudioSettings->setup();
   winInputSettings->setup();
   winPathSettings->setup();
-  winCheatEditor->setup();
   winAdvancedSettings->setup();
   winInputCapture->setup();
-  winCodeEditor->setup();
 
   panelLayout = new QStackedLayout(panel);
   panelLayout->addWidget(winVideoSettings->panel);
   panelLayout->addWidget(winAudioSettings->panel);
   panelLayout->addWidget(winInputSettings->panel);
   panelLayout->addWidget(winPathSettings->panel);
-  panelLayout->addWidget(winCheatEditor->panel);
   panelLayout->addWidget(winAdvancedSettings->panel);
   panel->setLayout(panelLayout);
 
@@ -70,10 +61,9 @@ void SettingsWindow::setup() {
 void SettingsWindow::listChanged() {
   QListWidgetItem *item = list->currentItem();
 
-  if(item == video)      panelLayout->setCurrentWidget(winVideoSettings->panel);
-  if(item == audio)      panelLayout->setCurrentWidget(winAudioSettings->panel);
-  if(item == input)      panelLayout->setCurrentWidget(winInputSettings->panel);
-  if(item == paths)      panelLayout->setCurrentWidget(winPathSettings->panel);
-  if(item == cheatcodes) panelLayout->setCurrentWidget(winCheatEditor->panel);
-  if(item == advanced)   panelLayout->setCurrentWidget(winAdvancedSettings->panel);
+  if(item == video)    panelLayout->setCurrentWidget(winVideoSettings->panel);
+  if(item == audio)    panelLayout->setCurrentWidget(winAudioSettings->panel);
+  if(item == input)    panelLayout->setCurrentWidget(winInputSettings->panel);
+  if(item == paths)    panelLayout->setCurrentWidget(winPathSettings->panel);
+  if(item == advanced) panelLayout->setCurrentWidget(winAdvancedSettings->panel);
 }

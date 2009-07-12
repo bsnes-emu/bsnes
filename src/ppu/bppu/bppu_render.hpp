@@ -63,7 +63,8 @@ struct sprite_item {
   bool   vflip, hflip;
   uint8  palette;
   uint8  priority;
-} sprite_list[128], *spr;
+} sprite_list[128];
+unsigned active_sprite;
 
 uint8 oam_itemlist[32];
 struct oam_tileitem {

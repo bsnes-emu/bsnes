@@ -2,6 +2,7 @@
 #define NALL_MODULO_HPP
 
 #include <nall/new.hpp>
+#include <nall/serializer.hpp>
 
 namespace nall {
   template<typename T, int size> class modulo_array {
@@ -18,6 +19,10 @@ namespace nall {
       buffer[index] =
       buffer[index + size] =
       buffer[index + size + size] = value;
+    }
+
+    void serialize(serializer &s) {
+      s.array(buffer, size * 3);
     }
 
     modulo_array() {

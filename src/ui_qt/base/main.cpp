@@ -1,7 +1,7 @@
 void MainWindow::setup() {
   window = new Window;
   window->setObjectName("main-window");
-  window->setWindowTitle(BSNES_TITLE);
+  window->setWindowTitle(utf8() << bsnesTitle << " v" << bsnesVersion);
 
   #if defined(PLATFORM_OSX)
   window->menu = new QMenuBar(0);
@@ -19,7 +19,7 @@ void MainWindow::setup() {
       system_power_off->setCheckable(true);
     system_reset = system->addAction("&Reset");
     system->addSeparator();
-    system_port1 = system->addMenu("Controller Port 1");
+    system_port1 = system->addMenu("Controller Port &1");
       system_port1_none = system_port1->addAction("&None");
       system_port1_none->setCheckable(true);
       system_port1_joypad = system_port1->addAction("&Joypad");
@@ -28,7 +28,7 @@ void MainWindow::setup() {
       system_port1_multitap->setCheckable(true);
       system_port1_mouse = system_port1->addAction("M&ouse");
       system_port1_mouse->setCheckable(true);
-    system_port2 = system->addMenu("Controller Port 2");
+    system_port2 = system->addMenu("Controller Port &2");
       system_port2_none = system_port2->addAction("&None");
       system_port2_none->setCheckable(true);
       system_port2_joypad = system_port2->addAction("&Joypad");
@@ -89,6 +89,8 @@ void MainWindow::setup() {
       settings_videoFilter_scanline->setCheckable(true);
       settings_videoFilter_scale2x = settings_videoFilter->addAction("S&cale2x");
       settings_videoFilter_scale2x->setCheckable(true);
+      settings_videoFilter_lq2x = settings_videoFilter->addAction("&LQ2x");
+      settings_videoFilter_lq2x->setCheckable(true);
       settings_videoFilter_hq2x = settings_videoFilter->addAction("&HQ2x");
       settings_videoFilter_hq2x->setCheckable(true);
       settings_videoFilter_ntsc = settings_videoFilter->addAction("N&TSC");
@@ -117,6 +119,10 @@ void MainWindow::setup() {
       settings_emulationSpeed_syncAudio->setStatusTip("Sync audio output to sound card output rate");
     settings_configuration = settings->addAction("&Configuration ...");
     settings_configuration->setMenuRole(QAction::PreferencesRole);
+
+  tools = window->menu->addMenu("Tools");
+    tools_cheatEditor = tools->addAction("&Cheat Editor ...");
+    tools_stateManager = tools->addAction("&State Manager ...");
 
   help = window->menu->addMenu("Help");
     help_documentation = help->addAction("&Documentation ...");
@@ -186,6 +192,7 @@ void MainWindow::setup() {
   connect(settings_videoFilter_none, SIGNAL(triggered()), this, SLOT(setNoFilter()));
   connect(settings_videoFilter_scanline, SIGNAL(triggered()), this, SLOT(setScanlineFilter()));
   connect(settings_videoFilter_scale2x, SIGNAL(triggered()), this, SLOT(setScale2xFilter()));
+  connect(settings_videoFilter_lq2x, SIGNAL(triggered()), this, SLOT(setLq2xFilter()));
   connect(settings_videoFilter_hq2x, SIGNAL(triggered()), this, SLOT(setHq2xFilter()));
   connect(settings_videoFilter_ntsc, SIGNAL(triggered()), this, SLOT(setNtscFilter()));
   connect(settings_muteAudio, SIGNAL(triggered()), this, SLOT(muteAudio()));
@@ -197,6 +204,8 @@ void MainWindow::setup() {
   connect(settings_emulationSpeed_syncVideo, SIGNAL(triggered()), this, SLOT(syncVideo()));
   connect(settings_emulationSpeed_syncAudio, SIGNAL(triggered()), this, SLOT(syncAudio()));
   connect(settings_configuration, SIGNAL(triggered()), this, SLOT(showConfigWindow()));
+  connect(tools_cheatEditor, SIGNAL(triggered()), this, SLOT(showCheatEditor()));
+  connect(tools_stateManager, SIGNAL(triggered()), this, SLOT(showStateManager()));
   connect(help_documentation, SIGNAL(triggered()), this, SLOT(showDocumentation()));
   connect(help_license, SIGNAL(triggered()), this, SLOT(showLicense()));
   connect(help_about, SIGNAL(triggered()), this, SLOT(showAbout()));
@@ -238,8 +247,9 @@ void MainWindow::syncUi() {
   settings_videoFilter_none->setChecked    (config.video.context->swFilter == 0);
   settings_videoFilter_scanline->setChecked(config.video.context->swFilter == 1);
   settings_videoFilter_scale2x->setChecked (config.video.context->swFilter == 2);
-  settings_videoFilter_hq2x->setChecked    (config.video.context->swFilter == 3);
-  settings_videoFilter_ntsc->setChecked    (config.video.context->swFilter == 4);
+  settings_videoFilter_lq2x->setChecked    (config.video.context->swFilter == 3);
+  settings_videoFilter_hq2x->setChecked    (config.video.context->swFilter == 4);
+  settings_videoFilter_ntsc->setChecked    (config.video.context->swFilter == 5);
 
   settings_muteAudio->setChecked(config.audio.mute);
 
@@ -299,8 +309,9 @@ void MainWindow::setLinearFilter()   { config.video.context->hwFilter = 1; utili
 void MainWindow::setNoFilter()       { config.video.context->swFilter = 0; utility.updateSoftwareFilter(); syncUi(); }
 void MainWindow::setScanlineFilter() { config.video.context->swFilter = 1; utility.updateSoftwareFilter(); syncUi(); }
 void MainWindow::setScale2xFilter()  { config.video.context->swFilter = 2; utility.updateSoftwareFilter(); syncUi(); }
-void MainWindow::setHq2xFilter()     { config.video.context->swFilter = 3; utility.updateSoftwareFilter(); syncUi(); }
-void MainWindow::setNtscFilter()     { config.video.context->swFilter = 4; utility.updateSoftwareFilter(); syncUi(); }
+void MainWindow::setLq2xFilter()     { config.video.context->swFilter = 3; utility.updateSoftwareFilter(); syncUi(); }
+void MainWindow::setHq2xFilter()     { config.video.context->swFilter = 4; utility.updateSoftwareFilter(); syncUi(); }
+void MainWindow::setNtscFilter()     { config.video.context->swFilter = 5; utility.updateSoftwareFilter(); syncUi(); }
 
 void MainWindow::muteAudio() { config.audio.mute = settings_muteAudio->isChecked(); }
 
@@ -314,13 +325,16 @@ void MainWindow::syncVideo() { config.video.synchronize = settings_emulationSpee
 void MainWindow::syncAudio() { config.audio.synchronize = settings_emulationSpeed_syncAudio->isChecked(); utility.updateAvSync(); }
 
 void MainWindow::showConfigWindow() {
-  utility.showCentered(winSettings->window);
+  utility.showCentered(settingsWindow->window);
 }
+
+void MainWindow::showCheatEditor()  { toolsWindow->showCheatEditor();  }
+void MainWindow::showStateManager() { toolsWindow->showStateManager(); }
 
 void MainWindow::showDocumentation()  {
   QFile file(":/documentation.html");
   if(file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-    winHtmlViewer->show("Usage Documentation", file.readAll().constData());
+    htmlViewerWindow->show("Usage Documentation", file.readAll().constData());
     file.close();
   }
 }
@@ -328,16 +342,16 @@ void MainWindow::showDocumentation()  {
 void MainWindow::showLicense() {
   QFile file(":/license.html");
   if(file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-    winHtmlViewer->show("License Agreement", file.readAll().constData());
+    htmlViewerWindow->show("License Agreement", file.readAll().constData());
     file.close();
   }
 }
 void MainWindow::showAbout() {
-  utility.showCentered(winAbout->window);
+  utility.showCentered(aboutWindow->window);
 }
 
 void MainWindow::Window::closeEvent(QCloseEvent*) {
-  winMain->quit();
+  mainWindow->quit();
 }
 
 //============

@@ -5,8 +5,8 @@ public:
   void power();
   void reset();
 
-  uint8 read (unsigned addr);
-  void  write(unsigned addr, uint8 data);
+  uint8 read(unsigned addr);
+  void write(unsigned addr, uint8 data);
 
 private:
   uint8 ram[0x1000];
@@ -14,11 +14,11 @@ private:
   static const int16 mode7_scale[176];
   static const uint8 arctan[32][32];
 
-//interfaces to sin table
+  //interfaces to sin table
   int16 sin(int16 theta);
   int16 cos(int16 theta);
 
-//interfaces to ram buffer
+  //interfaces to ram buffer
   uint8  readb (uint16 addr);
   uint16 readw (uint16 addr);
   uint32 readd (uint16 addr);
@@ -26,7 +26,7 @@ private:
   void   writew(uint16 addr, uint16 data);
   void   writed(uint16 addr, uint32 data);
 
-//opcodes
+  //opcodes
   void op_01();
   void op_02();
   void op_03();

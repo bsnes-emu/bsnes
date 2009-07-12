@@ -7,8 +7,27 @@ DSP1 dsp1;
 
 #include "dsp1emu.cpp"
 
-void DSP1::init() {}
-void DSP1::enable() {}
+void DSP1::init() {
+}
+
+void DSP1::enable() {
+  switch(cartridge.dsp1_mapper()) {
+    case Cartridge::DSP1LoROM1MB: {
+      bus.map(Bus::MapDirect, 0x20, 0x3f, 0x8000, 0xffff, *this);
+      bus.map(Bus::MapDirect, 0xa0, 0xbf, 0x8000, 0xffff, *this);
+    } break;
+
+    case Cartridge::DSP1LoROM2MB: {
+      bus.map(Bus::MapDirect, 0x60, 0x6f, 0x0000, 0x7fff, *this);
+      bus.map(Bus::MapDirect, 0xe0, 0xef, 0x0000, 0x7fff, *this);
+    } break;
+
+    case Cartridge::DSP1HiROM: {
+      bus.map(Bus::MapDirect, 0x00, 0x1f, 0x6000, 0x7fff, *this);
+      bus.map(Bus::MapDirect, 0x80, 0x9f, 0x6000, 0x7fff, *this);
+    } break;
+  }
+}
 
 void DSP1::power() {
   reset();

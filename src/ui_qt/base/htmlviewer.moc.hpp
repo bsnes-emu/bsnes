@@ -10,4 +10,4 @@ public:
   void show(const char *title, const char *htmlData);
 
 public slots:
-} *winHtmlViewer;
+} *htmlViewerWindow;

@@ -13,6 +13,7 @@ public:
   virtual void power() = 0;
   virtual void reset() = 0;
 
+  virtual void serialize(serializer&) {}
   SMP() {}
   virtual ~SMP() {}
 };

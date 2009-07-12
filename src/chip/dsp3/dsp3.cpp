@@ -15,6 +15,8 @@ void DSP3::init() {
 }
 
 void DSP3::enable() {
+  bus.map(Bus::MapDirect, 0x20, 0x3f, 0x8000, 0xffff, *this);
+  bus.map(Bus::MapDirect, 0xa0, 0xbf, 0x8000, 0xffff, *this);
 }
 
 void DSP3::power() {

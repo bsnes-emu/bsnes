@@ -9,6 +9,7 @@ namespace libfilter {
   #include "direct.cpp"
   #include "scanline.cpp"
   #include "scale2x.cpp"
+  #include "lq2x.cpp"
   #include "hq2x.cpp"
   #include "ntsc.cpp"
 }

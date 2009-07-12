@@ -1,4 +1,4 @@
-class CPU : public MMIO {
+class CPU : public PPUcounter, public MMIO {
 public:
   virtual void enter() = 0;
 
@@ -17,6 +17,7 @@ public:
   virtual void power();
   virtual void reset();
 
+  virtual void serialize(serializer&);
   CPU();
   virtual ~CPU();
 };

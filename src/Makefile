@@ -79,7 +79,8 @@ link += $(call ifhas,input.rawinput,$(ruby),-ldinput8 -ldxguid)
 objects := libco ruby libreader libfilter
 objects += system cartridge cheat
 objects += memory smemory cpu cpucore scpu smp smpcore ssmp sdsp ppu bppu
-objects += sgb superfx sa1 bsx srtc sdd1 spc7110 cx4 dsp1 dsp2 dsp3 dsp4 obc1 st010
+objects += sgb superfx sa1
+objects += bsx srtc sdd1 spc7110 cx4 dsp1 dsp2 dsp3 dsp4 obc1 st010 st011 st018
 
 ifeq ($(enable_gzip),true)
   objects += adler32 compress crc32 deflate gzio inffast inflate inftrees ioapi trees unzip zip zutil
@@ -192,6 +193,8 @@ obj/dsp3.o   : chip/dsp3/dsp3.cpp chip/dsp3/*
 obj/dsp4.o   : chip/dsp4/dsp4.cpp chip/dsp4/*
 obj/obc1.o   : chip/obc1/obc1.cpp chip/obc1/*
 obj/st010.o  : chip/st010/st010.cpp chip/st010/*
+obj/st011.o  : chip/st011/st011.cpp chip/st011/*
+obj/st018.o  : chip/st018/st018.cpp chip/st018/*
 
 ############
 ### zlib ###

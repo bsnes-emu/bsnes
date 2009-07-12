@@ -7,5 +7,5 @@ struct DMA {
 
 void dma_normal();
 void dma_cc1();
-uint8_t dma_cc1_read(unsigned addr);
+uint8 dma_cc1_read(unsigned addr);
 void dma_cc2();

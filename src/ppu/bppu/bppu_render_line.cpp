@@ -86,7 +86,7 @@ inline uint16 bPPU::get_pixel_swap(uint32 x) {
 
 inline void bPPU::render_line_output() {
   uint16 *ptr  = (uint16*)output + (line * 1024) +
-                 ((interlace() && ifield()) ? 512 : 0);
+                 ((interlace() && field()) ? 512 : 0);
   uint16 *luma_b  = light_table_b [regs.display_brightness];
   uint16 *luma_gr = light_table_gr[regs.display_brightness];
   uint16 curr, prev;
@@ -132,7 +132,7 @@ inline void bPPU::render_line_output() {
 
 inline void bPPU::render_line_clear() {
   uint16 *ptr = (uint16*)output + (line * 1024) +
-                ((interlace() && ifield()) ? 512 : 0);
+                ((interlace() && field()) ? 512 : 0);
   uint16 width = (!regs.pseudo_hires && regs.bg_mode != 5 && regs.bg_mode != 6) ? 256 : 512;
   memset(ptr, 0, width * 2 * sizeof(uint16));
 }
