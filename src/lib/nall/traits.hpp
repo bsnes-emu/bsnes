@@ -26,6 +26,9 @@ namespace nall {
   template<> struct is_floating_point<double> { enum { value = true }; };
   template<> struct is_floating_point<long double> { enum { value = true }; };
 
+  template<typename T> struct is_bool { enum { value = false }; };
+  template<> struct is_bool<bool> { enum { value = true }; };
+
   template<typename T> struct is_void { enum { value = false }; };
   template<> struct is_void<void> { enum { value = true }; };
 

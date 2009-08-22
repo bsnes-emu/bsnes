@@ -17,7 +17,7 @@ public:
     string base;     //binary path
     string user;     //user profile path (bsnes.cfg, ...)
     string current;  //current working directory (path to currently loaded cartridge)
-    string rom, save, patch, cheat, data;
+    string rom, save, state, patch, cheat, data;
     string bsx, st, sgb;
   } path;
 
@@ -70,6 +70,7 @@ public:
       string pauseEmulation;
       string resetSystem;
       string powerCycleSystem;
+      string saveScreenshot;
       string showStateManager;
       string quickLoad1;
       string quickLoad2;

@@ -1,29 +1,20 @@
 #ifdef BPPU_CPP
 
-/*****
- * bsnes mode7 renderer
- *
- * base algorithm written by anomie
- * bsnes implementation written by byuu
- *
- * supports mode 7 + extbg + rotate + zoom +
- *   direct color + scrolling + m7sel + windowing + mosaic
- * interlace and pseudo-hires support are automatic via main rendering routine
- *****/
+//bsnes mode7 renderer
+//
+//base algorithm written by anomie
+//bsnes implementation written by byuu
+//
+//supports mode 7 + extbg + rotate + zoom + direct color + scrolling + m7sel + windowing + mosaic
+//interlace and pseudo-hires support are automatic via main rendering routine
 
 //13-bit sign extend
 //--s---vvvvvvvvvv -> ssssssvvvvvvvvvv
 #define CLIP(x) ( ((x) & 0x2000) ? ( (x) | ~0x03ff) : ((x) & 0x03ff) )
 
-void bPPU::render_line_mode7(uint8 bg, uint8 pri0_pos, uint8 pri1_pos) {
+template<unsigned bg>
+void bPPU::render_line_mode7(uint8 pri0_pos, uint8 pri1_pos) {
   if(regs.bg_enabled[bg] == false && regs.bgsub_enabled[bg] == false) return;
-
-  //are layers disabled by user?
-  if(render_enabled(bg, 0) == false) pri0_pos = 0;
-  if(render_enabled(bg, 1) == false) pri1_pos = 0;
-
-  //nothing to render?
-  if(!pri0_pos && !pri1_pos) return;
 
   int32 px, py;
   int32 tx, ty, tile, palette;
@@ -52,7 +43,7 @@ void bPPU::render_line_mode7(uint8 bg, uint8 pri0_pos, uint8 pri1_pos) {
   if(bg == BG1) {
     mtable_x = (uint16*)mosaic_table[(regs.mosaic_enabled[BG1] == true) ? regs.mosaic_size : 0];
     mtable_y = (uint16*)mosaic_table[(regs.mosaic_enabled[BG1] == true) ? regs.mosaic_size : 0];
-  } else { //bg == BG2
+  } else {  //bg == BG2
     //Mode7 EXTBG BG2 uses BG1 mosaic enable to control vertical mosaic,
     //and BG2 mosaic enable to control horizontal mosaic...
     mtable_x = (uint16*)mosaic_table[(regs.mosaic_enabled[BG2] == true) ? regs.mosaic_size : 0];
@@ -70,8 +61,8 @@ void bPPU::render_line_mode7(uint8 bg, uint8 pri0_pos, uint8 pri1_pos) {
     py >>= 8;
 
     switch(regs.mode7_repeat) {
-      case 0:   //screen repetition outside of screen area
-      case 1: { //same as case 0
+      case 0:    //screen repetition outside of screen area
+      case 1: {  //same as case 0
         px &= 1023;
         py &= 1023;
         tx = ((px >> 3) & 127);
@@ -79,7 +70,7 @@ void bPPU::render_line_mode7(uint8 bg, uint8 pri0_pos, uint8 pri1_pos) {
         tile    = memory::vram[(ty * 128 + tx) << 1];
         palette = memory::vram[(((tile << 6) + ((py & 7) << 3) + (px & 7)) << 1) + 1];
       } break;
-      case 2: { //palette color 0 outside of screen area
+      case 2: {  //palette color 0 outside of screen area
         if(px < 0 || px > 1023 || py < 0 || py > 1023) {
           palette = 0;
         } else {
@@ -91,7 +82,7 @@ void bPPU::render_line_mode7(uint8 bg, uint8 pri0_pos, uint8 pri1_pos) {
           palette = memory::vram[(((tile << 6) + ((py & 7) << 3) + (px & 7)) << 1) + 1];
         }
       } break;
-      case 3: { //character 0 repetition outside of screen area
+      case 3: {  //character 0 repetition outside of screen area
         if(px < 0 || px > 1023 || py < 0 || py > 1023) {
           tile = 0;
         } else {

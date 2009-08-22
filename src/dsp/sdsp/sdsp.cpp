@@ -7,6 +7,8 @@
 #define SDSP_CPP
 namespace SNES {
 
+sDSP dsp;
+
 #include "serialization.cpp"
 
 #define REG(n) state.regs[r_##n]

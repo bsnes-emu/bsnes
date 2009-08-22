@@ -8,7 +8,7 @@ public:
     bool winEventFilter(MSG *msg, long *result);
     #endif
 
-    App(int argc, char **argv) : QApplication(argc, argv) {}
+    App(int &argc, char **argv) : QApplication(argc, argv) {}
   } *app;
 
   QTimer *timer;
@@ -25,7 +25,7 @@ public:
   string configFilename;
   string styleSheetFilename;
 
-  int main(int argc, char **argv);
+  int main(int &argc, char **argv);
   void processEvents();
   void locateFile(string &filename, bool createDataDirectory = false);
   void initPaths(const char *basename);
@@ -37,4 +37,3 @@ public:
 public slots:
   void run();
 } application;
-

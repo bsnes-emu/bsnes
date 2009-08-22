@@ -3,9 +3,12 @@
 #define BPPU_CPP
 namespace SNES {
 
+bPPU ppu;
+
+#include "memory/memory.cpp"
+#include "mmio/mmio.cpp"
+#include "render/render.cpp"
 #include "serialization.cpp"
-#include "bppu_mmio.cpp"
-#include "bppu_render.cpp"
 
 void bPPU::enter() {
   while(true) {
@@ -31,9 +34,12 @@ void bPPU::enter() {
     add_clocks(640);
 
     //H = 1152 (cache OBSEL)
-    cache.oam_basesize   = regs.oam_basesize;
+    if(cache.oam_basesize != regs.oam_basesize) {
+      cache.oam_basesize = regs.oam_basesize;
+      sprite_list_valid = false;
+    }
     cache.oam_nameselect = regs.oam_nameselect;
-    cache.oam_tdaddr     = regs.oam_tdaddr;
+    cache.oam_tdaddr = regs.oam_tdaddr;
     add_clocks(lineclocks() - 1152);  //seek to start of next scanline
   }
 }
@@ -99,7 +105,7 @@ void bPPU::power() {
   region = (system.region() == System::NTSC ? 0 : 1);  //0 = NTSC, 1 = PAL
 
   //$2100
-  regs.display_disabled   = 1;
+  regs.display_disabled   = true;
   regs.display_brightness = 15;
 
   //$2101
@@ -306,11 +312,15 @@ void bPPU::reset() {
   PPU::reset();
   PPU::frame();
 
+  //$2100
+  regs.display_disabled = true;
+
   display.interlace = false;
   display.overscan  = false;
   regs.scanlines    = 224;
 
   memset(sprite_list, 0, sizeof(sprite_list));
+  sprite_list_valid = false;
 
   //open bus support
   regs.ppu1_mdr = 0xff;

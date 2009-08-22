@@ -10,7 +10,6 @@ void ToolsWindow::setup() {
   list->addItem(cheatEditor = new QListWidgetItem("Cheat Editor"));
   list->addItem(stateManager = new QListWidgetItem("State Manager"));
   list->setCurrentItem(cheatEditor);
-  list->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
   list->setFixedWidth(135);
 
   panel = new QWidget;

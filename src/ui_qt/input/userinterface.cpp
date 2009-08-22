@@ -32,6 +32,7 @@ pauseEmulation(InputObject::Button, "Pause emulation", config.input.uiGeneral.pa
 resetSystem(InputObject::Button, "Reset system", config.input.uiGeneral.resetSystem),
 powerCycleSystem(InputObject::Button, "Power cycle system", config.input.uiGeneral.powerCycleSystem),
 
+saveScreenshot(InputObject::Button, "Save screenshot", config.input.uiGeneral.saveScreenshot),
 showStateManager(InputObject::Button, "Show state manager window", config.input.uiGeneral.showStateManager),
 quickLoad1(InputObject::Button, "Load from temporary state 1", config.input.uiGeneral.quickLoad1),
 quickLoad2(InputObject::Button, "Load from temporary state 2", config.input.uiGeneral.quickLoad2),
@@ -52,6 +53,7 @@ exitEmulator(InputObject::Button, "Exit emulator", config.input.uiGeneral.exitEm
   attach(resetSystem);
   attach(powerCycleSystem);
 
+  attach(saveScreenshot);
   attach(showStateManager);
   attach(quickLoad1);
   attach(quickLoad2);

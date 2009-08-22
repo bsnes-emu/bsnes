@@ -139,17 +139,22 @@ void Utility::resizeMainWindow() {
 
       //center canvas onscreen; ensure it is not larger than viewable area
       mainWindow->canvas->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-      mainWindow->canvas->setMaximumSize(width, height);
+      mainWindow->canvas->setFixedSize(width, height);
+      mainWindow->canvas->setMinimumSize(0, 0);
     }
 
     application.processEvents();
     usleep(2000);
   }
 
-  //work around for Qt/Xlib bug:
+  //workaround for Qt/Xlib bug:
   //if window resize occurs with cursor over it, Qt shows Qt::Size*DiagCursor;
   //so force it to show Qt::ArrowCursor, as expected
   mainWindow->window->setCursor(Qt::ArrowCursor);
   mainWindow->canvasContainer->setCursor(Qt::ArrowCursor);
   mainWindow->canvas->setCursor(Qt::ArrowCursor);
+
+  //workaround for DirectSound(?) bug:
+  //window resizing sometimes breaks audio sync, this call re-initializes it
+  updateAvSync();
 }

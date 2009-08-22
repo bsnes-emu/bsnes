@@ -71,6 +71,7 @@ void Cartridge::load(Mode cartridge_mode) {
   set(crc32, ~checksum);
 
   bus.load_cart();
+  system.serialize_init();
   set(loaded, true);
 }
 

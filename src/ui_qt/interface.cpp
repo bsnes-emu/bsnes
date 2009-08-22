@@ -7,6 +7,7 @@ void Interface::video_refresh(uint16_t *data, unsigned pitch, unsigned *line, un
     libfilter::filter.render(output, outpitch, data, pitch, line, width, height);
     video.unlock();
     video.refresh();
+    if(saveScreenshot == true) captureScreenshot(output, outpitch, outwidth, outheight);
   }
 }
 
@@ -21,4 +22,28 @@ void Interface::input_poll() {
 
 int16_t Interface::input_poll(unsigned deviceid, unsigned id) {
   return inputManager.getStatus(deviceid, id);
+}
+
+void Interface::captureScreenshot(uint32_t *data, unsigned pitch, unsigned width, unsigned height) {
+  saveScreenshot = false;
+  QImage image((const unsigned char*)data, width, height, pitch, QImage::Format_RGB32);
+
+  string filename = "screenshot-";
+  time_t systemTime = time(0);
+  tm *currentTime = localtime(&systemTime);
+  char t[512];
+  sprintf(t, "%.4u%.2u%.2u-%.2u%.2u%.2u",
+    1900 + currentTime->tm_year, 1 + currentTime->tm_mon, currentTime->tm_mday,
+    currentTime->tm_hour, currentTime->tm_min, currentTime->tm_sec
+  );
+  filename << t << ".png";
+
+  string path = config.path.data;
+  if(path == "") path = config.path.current;
+  image.save(utf8() << path << filename);
+  utility.showMessage("Screenshot saved.");
+}
+
+Interface::Interface() {
+  saveScreenshot = false;
 }

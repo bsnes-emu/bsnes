@@ -1,12 +1,15 @@
 #ifdef BPPU_CPP
 
 void bPPU::build_sprite_list() {
-  uint8 *tableA = memory::oam.data();
-  uint8 *tableB = memory::oam.data() + 512;
+  if(sprite_list_valid == true) return;
+  sprite_list_valid = true;
+
+  const uint8 *tableA = memory::oam.data();
+  const uint8 *tableB = memory::oam.data() + 512;
 
   for(unsigned i = 0; i < 128; i++) {
-    unsigned x = !!(*tableB & (1 << ((i & 3) << 1)));  //0x01, 0x04, 0x10, 0x40
-    bool size  = !!(*tableB & (2 << ((i & 3) << 1)));  //0x02, 0x08, 0x20, 0x80
+    const bool x    = *tableB & (1 << ((i & 3) << 1));  //0x01, 0x04, 0x10, 0x40
+    const bool size = *tableB & (2 << ((i & 3) << 1));  //0x02, 0x08, 0x20, 0x80
 
     switch(cache.oam_basesize) {
       case 0: sprite_list[i].width  = (!size) ?  8 : 16;
@@ -41,8 +44,8 @@ void bPPU::build_sprite_list() {
     sprite_list[i].x              = (x << 8) + tableA[0];
     sprite_list[i].y              = (tableA[1] + 1) & 0xff;
     sprite_list[i].character      = tableA[2];
-    sprite_list[i].vflip          = !!(tableA[3] & 0x80);
-    sprite_list[i].hflip          = !!(tableA[3] & 0x40);
+    sprite_list[i].vflip          = tableA[3] & 0x80;
+    sprite_list[i].hflip          = tableA[3] & 0x40;
     sprite_list[i].priority       = (tableA[3] >> 4) & 3;
     sprite_list[i].palette        = (tableA[3] >> 1) & 7;
     sprite_list[i].use_nameselect = tableA[3] & 1;
@@ -123,7 +126,7 @@ void bPPU::render_oam_tile(int tile_num) {
   uint8 *oam_td_state = (uint8*)bg_tiledata_state[COLORDEPTH_16];
 
   if(oam_td_state[t->tile] == 1) {
-    render_bg_tile(COLORDEPTH_16, t->tile);
+    render_bg_tile<COLORDEPTH_16>(t->tile);
   }
 
   unsigned sx = t->x;
@@ -168,25 +171,6 @@ void bPPU::render_line_oam_rto() {
   regs.range_over |= (regs.oam_itemcount > 32);
 }
 
-void bPPU::render_line_oam(uint8 pri0_pos, uint8 pri1_pos, uint8 pri2_pos, uint8 pri3_pos) {
-  if(regs.bg_enabled[OAM] == false && regs.bgsub_enabled[OAM] == false) return;
-
-  //are layers disabled by user?
-  if(render_enabled(OAM, 0) == false) pri0_pos = 0;
-  if(render_enabled(OAM, 1) == false) pri1_pos = 0;
-  if(render_enabled(OAM, 2) == false) pri2_pos = 0;
-  if(render_enabled(OAM, 3) == false) pri3_pos = 0;
-  //nothing to render?
-  if(!pri0_pos && !pri1_pos && !pri2_pos && !pri3_pos) return;
-
-  for(int s = 0; s < 34; s++) {
-    if(oam_tilelist[s].tile == 0xffff) continue;
-    render_oam_tile(s);
-  }
-
-  render_line_oam_lores(pri0_pos, pri1_pos, pri2_pos, pri3_pos);
-}
-
 #define setpixel_main(x) \
   if(pixel_cache[x].pri_main < pri) { \
     pixel_cache[x].pri_main = pri; \
@@ -202,7 +186,14 @@ void bPPU::render_line_oam(uint8 pri0_pos, uint8 pri1_pos, uint8 pri2_pos, uint8
     pixel_cache[x].ce_sub  = (oam_line_pal[x] < 192); \
   }
 
-void bPPU::render_line_oam_lores(uint8 pri0_pos, uint8 pri1_pos, uint8 pri2_pos, uint8 pri3_pos) {
+void bPPU::render_line_oam(uint8 pri0_pos, uint8 pri1_pos, uint8 pri2_pos, uint8 pri3_pos) {
+  if(regs.bg_enabled[OAM] == false && regs.bgsub_enabled[OAM] == false) return;
+
+  for(unsigned s = 0; s < 34; s++) {
+    if(oam_tilelist[s].tile == 0xffff) continue;
+    render_oam_tile(s);
+  }
+
   bool bg_enabled    = regs.bg_enabled[OAM];
   bool bgsub_enabled = regs.bgsub_enabled[OAM];
 
@@ -210,11 +201,11 @@ void bPPU::render_line_oam_lores(uint8 pri0_pos, uint8 pri1_pos, uint8 pri2_pos,
   uint8 *wt_main = window[OAM].main;
   uint8 *wt_sub  = window[OAM].sub;
 
-  int pri_tbl[4] = { pri0_pos, pri1_pos, pri2_pos, pri3_pos };
+  unsigned pri_tbl[4] = { pri0_pos, pri1_pos, pri2_pos, pri3_pos };
   for(int x = 0; x < 256; x++) {
     if(oam_line_pri[x] == OAM_PRI_NONE) continue;
 
-    int pri = pri_tbl[oam_line_pri[x]];
+    unsigned pri = pri_tbl[oam_line_pri[x]];
     if(bg_enabled    == true && !wt_main[x]) { setpixel_main(x); }
     if(bgsub_enabled == true && !wt_sub[x])  { setpixel_sub(x); }
   }

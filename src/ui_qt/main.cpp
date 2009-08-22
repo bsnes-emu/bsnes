@@ -41,6 +41,7 @@ const char defaultStylesheet[] =
   "\n";
 
 #include "application/application.cpp"
+#include "debugger/debugger.cpp"
 #include "input/input.cpp"
 #include "utility/utility.cpp"
 

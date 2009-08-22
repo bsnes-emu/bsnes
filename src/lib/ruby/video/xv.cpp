@@ -224,7 +224,7 @@ public:
     }
 
     if(device.format == XvFormatUnknown) for(signed i = 0; i < format_count; i++) {
-      if(format[i].type == XvRGB && format[i].bits_per_pixel == 16) {
+      if(format[i].type == XvRGB && format[i].bits_per_pixel <= 16 && format[i].red_mask == 0xf800) {
         device.format = XvFormatRGB16;
         device.fourcc = format[i].id;
         break;
@@ -232,7 +232,7 @@ public:
     }
 
     if(device.format == XvFormatUnknown) for(signed i = 0; i < format_count; i++) {
-      if(format[i].type == XvRGB && format[i].bits_per_pixel == 15) {
+      if(format[i].type == XvRGB && format[i].bits_per_pixel <= 16 && format[i].red_mask == 0x7c00) {
         device.format = XvFormatRGB15;
         device.fourcc = format[i].id;
         break;
@@ -316,8 +316,8 @@ public:
 
     for(unsigned y = 0; y < height; y++) {
       memcpy(output, input, width * 4);
-      input  += 1024 - width;
-      output += 1024 - width;
+      input  += 1024;
+      output += 1024;
     }
   }
 

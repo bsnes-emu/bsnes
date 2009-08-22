@@ -1,8 +1,13 @@
 Scale2xFilter filter_scale2x;
 
 void Scale2xFilter::size(unsigned &outwidth, unsigned &outheight, unsigned width, unsigned height) {
-  outwidth  = width  * 2;
-  outheight = height * 2;
+  outwidth  = width;
+  outheight = height;
+
+  if(width <= 256 && height <= 240) {
+    outwidth  *= 2;
+    outheight *= 2;
+  }
 }
 
 void Scale2xFilter::render(

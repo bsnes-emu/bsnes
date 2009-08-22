@@ -3,8 +3,14 @@
 #define SCPU_CPP
 namespace SNES {
 
-#include "serialization.cpp"
+#if defined(DEBUGGER)
+  #include "debugger/debugger.cpp"
+  sCPUdebug cpu;
+#else
+  sCPU cpu;
+#endif
 
+#include "serialization.cpp"
 #include "dma/dma.cpp"
 #include "memory/memory.cpp"
 #include "mmio/mmio.cpp"
@@ -22,16 +28,25 @@ void sCPU::enter() {
       if(status.nmi_pending) {
         status.nmi_pending = false;
         status.interrupt_vector = (regs.e == false ? 0xffea : 0xfffa);
+        op_irq();
       } else if(status.irq_pending) {
         status.irq_pending = false;
         status.interrupt_vector = (regs.e == false ? 0xffee : 0xfffe);
+        op_irq();
+      } else if(status.reset_pending) {
+        status.reset_pending = false;
+        add_clocks(186);
+        regs.pc.l = bus.read(0xfffc);
+        regs.pc.h = bus.read(0xfffd);
       }
-      op_irq();
     }
 
-    tracer.trace_cpuop();  //traces CPU opcode (only if tracer is enabled)
-    (this->*opcode_table[op_readpc()])();
+    op_step();
   }
+}
+
+void sCPU::op_step() {
+  (this->*opcode_table[op_readpc()])();
 }
 
 void sCPU::op_irq() {
@@ -78,9 +93,6 @@ void sCPU::reset() {
   regs.wai  = false;
   update_table();
 
-  status.interrupt_pending = false;
-  status.interrupt_vector  = 0xfffc;  //reset vector address
-
   mmio_reset();
   dma_reset();
   timing_reset();
@@ -89,9 +101,6 @@ void sCPU::reset() {
   apu_port[1] = 0x00;
   apu_port[2] = 0x00;
   apu_port[3] = 0x00;
-
-  regs.pc.l = bus.read(0xfffc);
-  regs.pc.h = bus.read(0xfffd);
 }
 
 sCPU::sCPU() : event(512, bind(&sCPU::queue_event, this)) {

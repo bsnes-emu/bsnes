@@ -22,7 +22,8 @@ void bPPU::update_bg_info() {
   }
 }
 
-uint16 bPPU::bg_get_tile(uint8 bg, uint16 x, uint16 y) {
+template<unsigned bg>
+uint16 bPPU::bg_get_tile(uint16 x, uint16 y) {
   x = (x & bg_info[bg].mx) >> bg_info[bg].tw;
   y = (y & bg_info[bg].my) >> bg_info[bg].th;
 
@@ -50,22 +51,15 @@ uint16 bPPU::bg_get_tile(uint8 bg, uint16 x, uint16 y) {
     pixel_cache[x].ce_sub  = false; \
   }
 
-void bPPU::render_line_bg(uint8 bg, uint8 color_depth, uint8 pri0_pos, uint8 pri1_pos) {
-  if(regs.bg_enabled[bg] == false && regs.bgsub_enabled[bg] == false) {
-    return;
-  }
-
-  //are layers disabled by user?
-  if(render_enabled(bg, 0) == false) pri0_pos = 0;
-  if(render_enabled(bg, 1) == false) pri1_pos = 0;
-  //nothing to render?
-  if(!pri0_pos && !pri1_pos) return;
+template<unsigned mode, unsigned bg, unsigned color_depth>
+void bPPU::render_line_bg(uint8 pri0_pos, uint8 pri1_pos) {
+  if(regs.bg_enabled[bg] == false && regs.bgsub_enabled[bg] == false) return;
 
   const bool bg_enabled    = regs.bg_enabled[bg];
   const bool bgsub_enabled = regs.bgsub_enabled[bg];
 
   const uint16 opt_valid_bit = (bg == BG1) ? 0x2000 : (bg == BG2) ? 0x4000 : 0x0000;
-  const uint8  bgpal_index   = (regs.bg_mode == 0 ? (bg << 5) : 0);
+  const uint8  bgpal_index   = (mode == 0 ? (bg << 5) : 0);
 
   const uint8  pal_size  = 2 << color_depth;       //<<2 (*4), <<4 (*16), <<8 (*256)
   const uint16 tile_mask = 0x0fff >> color_depth;  //0x0fff, 0x07ff, 0x03ff
@@ -85,7 +79,7 @@ void bPPU::render_line_bg(uint8 bg, uint8 color_depth, uint8 pri0_pos, uint8 pri
   uint16 hscroll = regs.bg_hofs[bg];
   uint16 vscroll = regs.bg_vofs[bg];
 
-  const unsigned hires = (regs.bg_mode == 5 || regs.bg_mode == 6);
+  const unsigned hires = (mode == 5 || mode == 6);
   const unsigned width = (!hires ? 256 : 512);
 
   if(hires) {
@@ -101,8 +95,8 @@ void bPPU::render_line_bg(uint8 bg, uint8 color_depth, uint8 pri0_pos, uint8 pri
 
   const uint8  *tile_ptr;
   const uint16 *mtable = mosaic_table[regs.mosaic_enabled[bg] ? regs.mosaic_size : 0];
-  const bool   is_opt_mode = (regs.bg_mode == 2 || regs.bg_mode == 4 || regs.bg_mode == 6);
-  const bool   is_direct_color_mode = (regs.direct_color == true && bg == BG1 && (regs.bg_mode == 3 || regs.bg_mode == 4));
+  const bool   is_opt_mode = (mode == 2 || mode == 4 || mode == 6);
+  const bool   is_direct_color_mode = (regs.direct_color == true && bg == BG1 && (mode == 3 || mode == 4));
 
   build_window_tables(bg);
   const uint8 *wt_main = window[bg].main;
@@ -122,13 +116,13 @@ void bPPU::render_line_bg(uint8 bg, uint8 color_depth, uint8 pri0_pos, uint8 pri
         if((opt_x >> 3) != (prev_optx >> 3)) {
           prev_optx = opt_x;
 
-          hval = bg_get_tile(BG3, (opt_x - 8) + (regs.bg_hofs[BG3] & ~7), regs.bg_vofs[BG3]);
-          if(regs.bg_mode != 4) {
-            vval = bg_get_tile(BG3, (opt_x - 8) + (regs.bg_hofs[BG3] & ~7), regs.bg_vofs[BG3] + 8);
+          hval = bg_get_tile<BG3>((opt_x - 8) + (regs.bg_hofs[BG3] & ~7), regs.bg_vofs[BG3]);
+          if(mode != 4) {
+            vval = bg_get_tile<BG3>((opt_x - 8) + (regs.bg_hofs[BG3] & ~7), regs.bg_vofs[BG3] + 8);
           }
         }
 
-        if(regs.bg_mode == 4) {
+        if(mode == 4) {
           if(hval & opt_valid_bit) {
             if(!(hval & 0x8000)) {
               hoffset = opt_x + (hval & ~7);
@@ -154,7 +148,7 @@ void bPPU::render_line_bg(uint8 bg, uint8 color_depth, uint8 pri0_pos, uint8 pri
       prev_x = (hoffset >> 3);
       prev_y = (voffset >> 3);
 
-      tile_num  = bg_get_tile(bg, hoffset, voffset);  //format = vhopppcc cccccccc
+      tile_num  = bg_get_tile<bg>(hoffset, voffset);  //format = vhopppcc cccccccc
       mirror_y  = (tile_num & 0x8000);
       mirror_x  = (tile_num & 0x4000);
       tile_pri  = (tile_num & 0x2000) ? pri1_pos : pri0_pos;
@@ -174,7 +168,7 @@ void bPPU::render_line_bg(uint8 bg, uint8 color_depth, uint8 pri0_pos, uint8 pri
       tile_num &= tile_mask;
 
       if(bg_td_state[tile_num] == 1) {
-        render_bg_tile(color_depth, tile_num);
+        render_bg_tile<color_depth>(tile_num);
       }
 
       if(mirror_y) voffset ^= 7;  //invert y tile pos

@@ -21,7 +21,7 @@ void SMPcore::disassemble_opcode(char *output) {
   opdp0 = ((unsigned)regs.p.p << 8) + op0;
   opdp1 = ((unsigned)regs.p.p << 8) + op1;
 
-  strcpy(t, "                        ");
+  strcpy(t, "                       ");
 
   switch(op) {
     case 0x00: sprintf(t, "nop");                                        break;

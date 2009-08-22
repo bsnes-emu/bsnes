@@ -170,3 +170,5 @@ public:
   aDSP();
   ~aDSP();
 };
+
+extern aDSP dsp;

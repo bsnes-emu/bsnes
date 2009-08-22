@@ -1,5 +1,6 @@
 string Utility::selectCartridge() {
   audio.clear();
+  application.timer->stop();
   QString filename = QFileDialog::getOpenFileName(0,
     "Load Cartridge",
     utf8() << (config.path.rom != "" ? config.path.rom : config.path.current),
@@ -13,6 +14,7 @@ string Utility::selectCartridge() {
     ");;"
     "All files (*)"
   );
+  application.timer->start(0);
 
   string name = filename.toUtf8().constData();
   if(strlen(name) > 0) config.path.current = basepath(name);
@@ -21,12 +23,15 @@ string Utility::selectCartridge() {
 
 string Utility::selectFolder(const char *title) {
   audio.clear();
+  application.timer->stop();
   QString pathname = QFileDialog::getExistingDirectory(0,
     title, utf8() << config.path.current,
     QFileDialog::ShowDirsOnly);
+  application.timer->start(0);
+
   string path = pathname.toUtf8().constData();
   strtr(path, "\\", "/");
-  if(strend(path, "/") == false) path << "/";
+  if(path.length() > 0 && strend(path, "/") == false) path << "/";
   return path;
 }
 
@@ -188,6 +193,7 @@ void Utility::modifySystemState(system_state_t state) {
       << "Loaded " << cartridge.name
       << (cartridge.patchApplied ? ", and applied UPS patch." : "."));
       mainWindow->window->setWindowTitle(utf8() << bsnesTitle << " v" << bsnesVersion << " - " << cartridge.name);
+      debugger->echo(utf8() << "Loaded " << cartridge.name << ".\n");
     } break;
 
     case UnloadCartridge: {
@@ -243,10 +249,10 @@ void Utility::modifySystemState(system_state_t state) {
   }
 
   mainWindow->syncUi();
+  debugger->syncUi();
   cheatEditorWindow->reloadList();
   stateManagerWindow->reloadList();
 }
-//
 
 bool Utility::loadCartridge(const char *filename, SNES::MappedRAM &memory) {
   if(file::exists(filename) == false) return false;
@@ -330,7 +336,8 @@ bool Utility::loadCartridge(const char *filename, SNES::MappedRAM &memory) {
     }
   }
 
-  memory.map(data, size);
+  memory.copy(data, size);
+  delete[] data;
   return true;
 }
 
@@ -349,7 +356,7 @@ bool Utility::loadMemory(const char *filename, const char *extension, SNES::Mapp
   fp.read(data, size);
   fp.close();
 
-  memcpy(memory.data(), data, min(size, memory.size()));
+  memory.copy(data, size);
   delete[] data;
   return true;
 }

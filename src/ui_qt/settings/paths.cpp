@@ -49,6 +49,26 @@ void PathSettingsWindow::setup() {
   layout->addLayout(saves);
   layout->addSpacing(Style::WidgetSpacing);
 
+  stateLabel = new QLabel("Save states:");
+  layout->addWidget(stateLabel);
+
+  states = new QHBoxLayout; {
+    states->setMargin(0);
+
+    statePath = new QLineEdit;
+    statePath->setReadOnly(true);
+    states->addWidget(statePath);
+
+    stateSelect = new QPushButton("Select ...");
+    states->addWidget(stateSelect);
+
+    stateDefault = new QPushButton("Default");
+    states->addWidget(stateDefault);
+  }
+  states->setSpacing(Style::WidgetSpacing);
+  layout->addLayout(states);
+  layout->addSpacing(Style::WidgetSpacing);
+
   patchLabel = new QLabel("UPS patches:");
   layout->addWidget(patchLabel);
 
@@ -89,23 +109,24 @@ void PathSettingsWindow::setup() {
   layout->addLayout(cheats);
   layout->addSpacing(Style::WidgetSpacing);
 
-  dataLabel = new QLabel("Export data:");
+  dataLabel = new QLabel("Exported data:");
   layout->addWidget(dataLabel);
 
-  data = new QHBoxLayout;
-  data->setMargin(0);
-  data->setSpacing(Style::WidgetSpacing); {
+  datum = new QHBoxLayout; {
+    datum->setMargin(0);
+    datum->setSpacing(Style::WidgetSpacing);
+
     dataPath = new QLineEdit;
     dataPath->setReadOnly(true);
-    data->addWidget(dataPath);
+    datum->addWidget(dataPath);
 
     dataSelect = new QPushButton("Select ...");
-    data->addWidget(dataSelect);
+    datum->addWidget(dataSelect);
 
     dataDefault = new QPushButton("Default");
-    data->addWidget(dataDefault);
+    datum->addWidget(dataDefault);
   }
-  layout->addLayout(data);
+  layout->addLayout(datum);
 
   spacer = new QWidget;
   spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -118,6 +139,8 @@ void PathSettingsWindow::setup() {
   connect(gameDefault, SIGNAL(released()), this, SLOT(defaultGamePath()));
   connect(saveSelect, SIGNAL(released()), this, SLOT(selectSavePath()));
   connect(saveDefault, SIGNAL(released()), this, SLOT(defaultSavePath()));
+  connect(stateSelect, SIGNAL(released()), this, SLOT(selectStatePath()));
+  connect(stateDefault, SIGNAL(released()), this, SLOT(defaultStatePath()));
   connect(patchSelect, SIGNAL(released()), this, SLOT(selectPatchPath()));
   connect(patchDefault, SIGNAL(released()), this, SLOT(defaultPatchPath()));
   connect(cheatSelect, SIGNAL(released()), this, SLOT(selectCheatPath()));
@@ -127,11 +150,22 @@ void PathSettingsWindow::setup() {
 }
 
 void PathSettingsWindow::syncUi() {
-  gamePath->setText (config.path.rom   == "" ? "<startup path>"               : (const char*)config.path.rom);
-  savePath->setText (config.path.save  == "" ? "<same folder as loaded game>" : (const char*)config.path.save);
-  patchPath->setText(config.path.patch == "" ? "<same folder as loaded game>" : (const char*)config.path.patch);
-  cheatPath->setText(config.path.cheat == "" ? "<same folder as loaded game>" : (const char*)config.path.cheat);
-  dataPath->setText (config.path.data  == "" ? "<same folder as loaded game>" : (const char*)config.path.data);
+  syncPath(gamePath,  config.path.rom,   "Startup path");
+  syncPath(savePath,  config.path.save,  "Same folder as loaded game");
+  syncPath(statePath, config.path.state, "Same folder as loaded game");
+  syncPath(patchPath, config.path.patch, "Same folder as loaded game");
+  syncPath(cheatPath, config.path.cheat, "Same folder as loaded game");
+  syncPath(dataPath,  config.path.data,  "Same folder as loaded game");
+}
+
+void PathSettingsWindow::syncPath(QLineEdit *control, const string &path, const char *caption) {
+  if(path == "") {
+    control->setStyleSheet("color: #808080");
+    control->setText(caption);
+  } else {
+    control->setStyleSheet("color: #000000");
+    control->setText((const char*)path);
+  }
 }
 
 void PathSettingsWindow::selectGamePath() {
@@ -157,6 +191,19 @@ void PathSettingsWindow::selectSavePath() {
 
 void PathSettingsWindow::defaultSavePath() {
   config.path.save = "";
+  syncUi();
+}
+
+void PathSettingsWindow::selectStatePath() {
+  string path = utility.selectFolder("Default Save State Path");
+  if(path.length() > 0) {
+    config.path.state = path;
+    syncUi();
+  }
+}
+
+void PathSettingsWindow::defaultStatePath() {
+  config.path.state = "";
   syncUi();
 }
 
@@ -187,7 +234,7 @@ void PathSettingsWindow::defaultCheatPath() {
 }
 
 void PathSettingsWindow::selectDataPath() {
-  string path = utility.selectFolder("Default Export Data Path");
+  string path = utility.selectFolder("Default Exported Data Path");
   if(path.length() > 0) {
     config.path.data = path;
     syncUi();

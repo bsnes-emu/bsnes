@@ -15,6 +15,11 @@ public:
         QLineEdit *savePath;
         QPushButton *saveSelect;
         QPushButton *saveDefault;
+      QLabel *stateLabel;
+      QHBoxLayout *states;
+        QLineEdit *statePath;
+        QPushButton *stateSelect;
+        QPushButton *stateDefault;
       QLabel *patchLabel;
       QHBoxLayout *patches;
         QLineEdit *patchPath;
@@ -26,7 +31,7 @@ public:
         QPushButton *cheatSelect;
         QPushButton *cheatDefault;
       QLabel *dataLabel;
-      QHBoxLayout *data;
+      QHBoxLayout *datum;
         QLineEdit *dataPath;
         QPushButton *dataSelect;
         QPushButton *dataDefault;
@@ -34,12 +39,15 @@ public:
 
   void setup();
   void syncUi();
+  void syncPath(QLineEdit *control, const string &path, const char *caption);
 
 public slots:
   void selectGamePath();
   void defaultGamePath();
   void selectSavePath();
   void defaultSavePath();
+  void selectStatePath();
+  void defaultStatePath();
   void selectPatchPath();
   void defaultPatchPath();
   void selectCheatPath();

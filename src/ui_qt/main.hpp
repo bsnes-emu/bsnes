@@ -36,13 +36,24 @@ using namespace ruby;
 #include "config.hpp"
 #include "interface.hpp"
 #include "application/application.moc"
+#include "debugger/debugger.moc"
 #include "input/input.hpp"
 #include "utility/utility.hpp"
 
 struct Style {
+  static const char Monospace[];
+
   enum {
     WindowMargin     = 5,
     WidgetSpacing    = 5,
     SeparatorSpacing = 5,
   };
 };
+
+#if defined(PLATFORM_X)
+  const char Style::Monospace[] = "Monospace";
+#elif defined(PLATFORM_WIN)
+  const char Style::Monospace[] = "Lucida Console";
+#else
+  const char Style::Monospace[] = "Courier New";
+#endif

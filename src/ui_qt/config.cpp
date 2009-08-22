@@ -62,6 +62,7 @@ Configuration::Configuration() {
 
   attach(path.rom   = "", "path.rom");
   attach(path.save  = "", "path.save");
+  attach(path.state = "", "path.state");
   attach(path.patch = "", "path.patch");
   attach(path.cheat = "", "path.cheat");
   attach(path.data  = "", "path.data");
@@ -166,7 +167,9 @@ Configuration::Configuration() {
   attach(input.uiGeneral.resetSystem       = "none",                "input.uiGeneral.resetSystem");
   attach(input.uiGeneral.powerCycleSystem  = "none",                "input.uiGeneral.powerCycleSystem");
 
+  attach(input.uiGeneral.saveScreenshot   = "none",          "input.uiGeneral.saveScreenshot");
   attach(input.uiGeneral.showStateManager = "keyboard00.f3", "input.uiGeneral.showStateManager");
+
   attach(input.uiGeneral.quickLoad1     = "keyboard00.f4", "input.uiGeneral.quickLoad1");
   attach(input.uiGeneral.quickLoad2     = "none",          "input.uiGeneral.quickLoad2");
   attach(input.uiGeneral.quickLoad3     = "none",          "input.uiGeneral.quickLoad3");

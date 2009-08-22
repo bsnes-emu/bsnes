@@ -39,7 +39,8 @@ private:
 
 struct MappedRAM : Memory {
   inline void reset();
-  inline void map(uint8 *source, unsigned length);
+  inline void map(uint8*, unsigned);
+  inline void copy(uint8*, unsigned);
 
   inline void write_protect(bool status);
   inline uint8* data();

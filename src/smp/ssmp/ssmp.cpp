@@ -3,6 +3,13 @@
 #define SSMP_CPP
 namespace SNES {
 
+#if defined(DEBUGGER)
+  #include "debugger/debugger.cpp"
+  sSMPdebug smp;
+#else
+  sSMP smp;
+#endif
+
 #include "serialization.cpp"
 #include "memory/memory.cpp"
 #include "timing/timing.cpp"
@@ -11,9 +18,7 @@ void sSMP::enter() {
   while(true) {
     if(scheduler.sync == Scheduler::SyncAll) scheduler.exit();
 
-    tracer.trace_smpop();  //traces SMP opcode (only if tracer is enabled)
-
-    (this->*opcode_table[op_readpc()])();
+    op_step();
 
     //forcefully sync S-CPU and S-SMP, in case chips are not communicating
     if(++instruction_counter >= 128) {
@@ -21,6 +26,10 @@ void sSMP::enter() {
       scheduler.sync_smpcpu();
     }
   }
+}
+
+void sSMP::op_step() {
+  (this->*opcode_table[op_readpc()])();
 }
 
 void sSMP::power() {

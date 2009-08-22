@@ -28,6 +28,8 @@ void sCPU::serialize(serializer &s) {
   s.integer(status.irq_pending);
   s.integer(status.irq_hold);
 
+  s.integer(status.reset_pending);
+
   s.integer(status.dma_active);
   s.integer(status.dma_counter);
   s.integer(status.dma_clocks);

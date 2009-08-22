@@ -57,6 +57,9 @@ void Application::init() {
   utility.updateFullscreenState();
   application.processEvents();
 
+  debugger = new Debugger;
+  debugger->setup();
+
   settingsWindow = new SettingsWindow;
   settingsWindow->setup();
 

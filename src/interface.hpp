@@ -1,3 +1,9 @@
+#ifdef DEBUGGER
+  #define debugvirtual virtual
+#else
+  #define debugvirtual
+#endif
+
 namespace SNES {
   #include "memory/memory.hpp"
   #include "memory/smemory/smemory.hpp"
@@ -16,12 +22,6 @@ namespace SNES {
   #include "dsp/dsp.hpp"
   #include "dsp/sdsp/sdsp.hpp"
 
-  extern BUSCORE bus;
-  extern CPUCORE cpu;
-  extern SMPCORE smp;
-  extern PPUCORE ppu;
-  extern DSPCORE dsp;
-
   #include "system/system.hpp"
   #include "chip/chip.hpp"
   #include "cartridge/cartridge.hpp"
@@ -31,3 +31,5 @@ namespace SNES {
   #include "ppu/ppu-inline.hpp"
   #include "cheat/cheat-inline.hpp"
 };
+
+#undef debugvirtual

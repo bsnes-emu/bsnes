@@ -46,7 +46,7 @@ void Application::locateFile(string &filename, bool createDataDirectory) {
   filename = temp;
 }
 
-int Application::main(int argc, char **argv) {
+int Application::main(int &argc, char **argv) {
   app = new App(argc, argv);
   #if !defined(PLATFORM_WIN)
   //Windows port uses 256x256 icon from resource file
@@ -109,7 +109,10 @@ void Application::run() {
   }
 
   if(SNES::cartridge.loaded() && !pause && !autopause) {
-    SNES::system.runtoframe();
+    if(SNES::debugger.break_event == SNES::Debugger::None) {
+      SNES::system.run();
+      if(SNES::debugger.break_event != SNES::Debugger::None) debugger->event();
+    }
   } else {
     usleep(20 * 1000);
   }
@@ -153,4 +156,3 @@ Application::~Application() {
   //deleting (QApplication)app will segfault the application upon exit
   //delete app;
 }
-

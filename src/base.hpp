@@ -1,11 +1,6 @@
-static const char bsnesVersion[] = "0.048";
+static const char bsnesVersion[] = "0.049";
 static const char bsnesTitle[] = "bsnes";
-
-#define BUSCORE sBus
-#define CPUCORE sCPU
-#define SMPCORE sSMP
-#define DSPCORE sDSP
-#define PPUCORE bPPU
+static const unsigned bsnesSaveStateVersion = 2;
 
 //S-DSP can be encapsulated into a state machine using #define magic
 //this avoids ~2.048m co_switch() calls per second (~5% speedup)
@@ -13,6 +8,9 @@ static const char bsnesTitle[] = "bsnes";
 
 //game genie + pro action replay code support (~2% speed hit)
 #define CHEAT_SYSTEM
+
+//enable debugging extensions (~15% speed hit)
+//#define DEBUGGER
 
 #include <libco/libco.h>
 

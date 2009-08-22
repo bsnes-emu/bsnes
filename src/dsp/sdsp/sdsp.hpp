@@ -165,3 +165,5 @@ private:
   void echo_29();
   void echo_30();
 };
+
+extern sDSP dsp;

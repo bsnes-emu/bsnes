@@ -16,3 +16,5 @@ private:
   void map_generic();
   void map_generic_sram();
 };
+
+extern sBus bus;

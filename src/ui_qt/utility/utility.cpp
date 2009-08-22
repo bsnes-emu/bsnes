@@ -77,6 +77,11 @@ void Utility::inputEvent(uint16_t code) {
       modifySystemState(PowerCycle);
     }
 
+    if(isButtonDown(code, inputUiGeneral.saveScreenshot)) {
+      //tell SNES::Interface to save a screenshot at the next video_refresh() event
+      interface.saveScreenshot = true;
+    }
+
     if(isButtonDown(code, inputUiGeneral.showStateManager)) {
       toolsWindow->showStateManager();
     }
@@ -229,7 +234,7 @@ void Utility::updateEmulationSpeed() {
   unsigned outfreq = config.audio.outputFrequency;
   unsigned infreq  = config.audio.inputFrequency * scale[config.system.speed] + 0.5;
 
-  audio.set(Audio::Resample, outfreq != infreq);  //only resample when necessary
+  audio.set(Audio::Resample, true);  //always resample (required for volume adjust + frequency scaler)
   audio.set(Audio::ResampleRatio, (double)infreq / (double)outfreq);
 }
 

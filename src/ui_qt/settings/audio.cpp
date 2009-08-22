@@ -108,6 +108,7 @@ void AudioSettingsWindow::frequencyChange(int value) {
     case 3: config.audio.outputFrequency = 96000; break;
   }
   audio.set(Audio::Frequency, config.audio.outputFrequency);
+  utility.updateEmulationSpeed();
 }
 
 void AudioSettingsWindow::latencyChange(int value) {

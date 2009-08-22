@@ -1,8 +1,8 @@
 #include "config/config.hpp"
+#include "debugger/debugger.hpp"
 #include "interface/interface.hpp"
 #include "scheduler/scheduler.hpp"
 #include "statemanager/statemanager.hpp"
-#include "tracer/tracer.hpp"
 
 #include "video/video.hpp"
 #include "audio/audio.hpp"
@@ -18,7 +18,6 @@ public:
 
   //system functions
   virtual void run();
-  virtual void runtoframe();
   virtual void runtosave();
 
   virtual void init(Interface*);
@@ -41,16 +40,20 @@ public:
   virtual ~System() {}
 
 private:
+  unsigned serialize_size;
   void serialize(serializer&);
   void serialize_all(serializer&);
+  void serialize_init();
 
   Interface *interface;
   unsigned snes_region;
   unsigned snes_expansion;
 
+  friend class Cartridge;
   friend class Video;
   friend class Audio;
   friend class Input;
+  friend class StateManager;
 };
 
 extern System system;

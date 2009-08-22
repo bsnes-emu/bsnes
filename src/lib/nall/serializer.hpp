@@ -34,11 +34,14 @@ namespace nall {
     }
 
     template<typename T> void integer(T &value) {
-      if(save) {
-        for(unsigned n = 0; n < sizeof(T); n++) idata[isize++] = value >> (n << 3);
-      } else {
+      enum { size = is_bool<T>::value ? 1 : sizeof(T) };
+      if(mode == Save) {
+        for(unsigned n = 0; n < size; n++) idata[isize++] = value >> (n << 3);
+      } else if(mode == Load) {
         value = 0;
-        for(unsigned n = 0; n < sizeof(T); n++) value |= idata[isize++] << (n << 3);
+        for(unsigned n = 0; n < size; n++) value |= idata[isize++] << (n << 3);
+      } else if(mode == Size) {
+        isize += size;
       }
     }
 
@@ -54,7 +57,7 @@ namespace nall {
     serializer& operator=(const serializer &s) {
       if(idata) delete[] idata;
 
-      save = s.save;
+      mode = s.mode;
       idata = new uint8_t[s.icapacity];
       isize = s.isize;
       icapacity = s.icapacity;
@@ -67,15 +70,21 @@ namespace nall {
       operator=(s);
     }
 
+    serializer() {
+      mode = Size;
+      idata = 0;
+      isize = 0;
+    }
+
     serializer(unsigned capacity) {
-      save = true;
+      mode = Save;
       idata = new(zeromemory) uint8_t[capacity];
       isize = 0;
       icapacity = capacity;
     }
 
     serializer(const uint8_t *data, unsigned capacity) {
-      save = false;
+      mode = Load;
       idata = new uint8_t[capacity];
       isize = 0;
       icapacity = capacity;
@@ -83,11 +92,11 @@ namespace nall {
     }
 
     ~serializer() {
-      delete[] idata;
+      if(idata) delete[] idata;
     }
 
   private:
-    bool save;
+    enum mode_t { Load, Save, Size } mode;
     uint8_t *idata;
     unsigned isize;
     unsigned icapacity;

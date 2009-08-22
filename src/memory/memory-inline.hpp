@@ -32,6 +32,14 @@ void MappedRAM::map(uint8 *source, unsigned length) {
   size_ = data_ && length > 0 ? length : -1U;
 }
 
+void MappedRAM::copy(uint8 *data, unsigned size) {
+  if(!data_) {
+    size_ = (size & ~255) + ((bool)(size & 255) << 8);
+    data_ = new(zeromemory) uint8[size_];
+  }
+  memcpy(data_, data, min(size_, size));
+}
+
 void MappedRAM::write_protect(bool status) { write_protect_ = status; }
 uint8* MappedRAM::data() { return data_; }
 unsigned MappedRAM::size() const { return size_; }

@@ -73,6 +73,7 @@ public:
     QMenu *tools;
       QAction *tools_cheatEditor;
       QAction *tools_stateManager;
+      QAction *tools_debugger;
     QMenu *help;
       QAction *help_documentation;
       QAction *help_license;
@@ -131,6 +132,7 @@ public slots:
   void showConfigWindow();
   void showCheatEditor();
   void showStateManager();
+  void showDebugger();
   void showDocumentation();
   void showLicense();
   void showAbout();

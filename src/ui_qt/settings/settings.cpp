@@ -17,7 +17,6 @@ void SettingsWindow::setup() {
   list->addItem(paths = new QListWidgetItem("Paths"));
   list->addItem(advanced = new QListWidgetItem("Advanced"));
   list->setCurrentItem(input);  //select most frequently used panel by default
-  list->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
   list->setFixedWidth(135);
 
   panel = new QWidget;

@@ -5,14 +5,14 @@
 inline uint16 bPPU::addsub(uint32 x, uint32 y, bool halve) {
   if(!regs.color_mode) {
     if(!halve) {
-      unsigned sum   = x + y;
+      unsigned sum = x + y;
       unsigned carry = (sum - ((x ^ y) & 0x0421)) & 0x8420;
       return (sum - carry) | (carry - (carry >> 5));
     } else {
       return (x + y - ((x ^ y) & 0x0421)) >> 1;
     }
   } else {
-    unsigned diff   = x - y + 0x8420;
+    unsigned diff = x - y + 0x8420;
     unsigned borrow = (diff - ((x ^ y) & 0x8420)) & 0x8420;
     if(!halve) {
       return   (diff - borrow) & (borrow - (borrow >> 5));

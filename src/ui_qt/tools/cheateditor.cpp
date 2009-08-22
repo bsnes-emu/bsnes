@@ -11,10 +11,10 @@ void CheatEditorWindow::setup() {
   layout->addWidget(title);
 
   list = new QTreeWidget;
-  list->setColumnCount(4);
-  list->setHeaderLabels(QStringList() << "" << "Slot" << "Code" << "Description");
+  list->setColumnCount(3);
+  list->setHeaderLabels(QStringList() << "Slot" << "Code" << "Description");
   list->setAllColumnsShowFocus(true);
-  list->sortByColumn(1, Qt::AscendingOrder);
+  list->sortByColumn(0, Qt::AscendingOrder);
   list->setRootIsDecorated(false);
   list->setContextMenuPolicy(Qt::CustomContextMenu);
   layout->addWidget(list);
@@ -43,10 +43,10 @@ void CheatEditorWindow::setup() {
   buttonLayout->setSpacing(Style::WidgetSpacing);
   layout->addLayout(buttonLayout);
 
-  addCode = new QPushButton("Add");
+  addCode = new QPushButton("Add Slot");
   buttonLayout->addWidget(addCode);
 
-  deleteCode = new QPushButton("Delete");
+  deleteCode = new QPushButton("Delete Slot");
   buttonLayout->addWidget(deleteCode);
 
   reloadList();
@@ -98,33 +98,27 @@ void CheatEditorWindow::updateItem(QTreeWidgetItem *item) {
   SNES::Cheat::cheat_t code, temp;
   SNES::cheat.get(n, code);
 
-  QFont font = item->font(2);
   if(SNES::cheat.decode(code.code, temp) == false) {
-    font.setBold(true);
-    font.setItalic(false);
-    item->setForeground(2, QBrush(QColor(224, 0, 0)));
+    item->setForeground(1, QBrush(QColor(224, 0, 0)));
   } else {
-    font.setBold(false);
     lstring part;
     part.split("+", code.code);
     if(part.size() > 1) {
-      font.setItalic(true);
-      item->setForeground(2, QBrush(QColor(0, 128, 0)));
+      item->setForeground(1, QBrush(QColor(0, 128, 0)));
     } else {
-      font.setItalic(false);
-      item->setForeground(2, QBrush(QColor(0, 0, 0)));
+      item->setForeground(1, QBrush(QColor(0, 0, 128)));
     }
   }
-  item->setFont(2, font);
 
   string scode = code.code;
   scode.replace(" ", "");
   lstring lcode;
   lcode.split("+", scode);
+  if(lcode.size() > 1) lcode[0] << "+" << lcode.size() - 1;
 
-  item->setCheckState(0, code.enabled ? Qt::Checked : Qt::Unchecked);
-  item->setText(2, utf8() << lcode[0]);
-  item->setText(3, utf8() << code.desc);
+  item->setCheckState(1, code.enabled ? Qt::Checked : Qt::Unchecked);
+  item->setText(1, utf8() << lcode[0]);
+  item->setText(2, utf8() << code.desc);
 }
 
 void CheatEditorWindow::popupMenu(const QPoint &point) {
@@ -144,7 +138,9 @@ void CheatEditorWindow::reloadList() {
     for(unsigned n = 0; n < SNES::cheat.count(); n++) {
       QTreeWidgetItem *item = new QTreeWidgetItem(list);
       item->setData(0, Qt::UserRole, QVariant(n));
-      item->setText(1, utf8() << n + 1);
+      char slot[16];
+      sprintf(slot, "%3u", n + 1);
+      item->setText(0, utf8() << slot);
       updateItem(item);
     }
   }
@@ -194,7 +190,7 @@ void CheatEditorWindow::updateCodeStatus() {
   if(items.count() > 0) {
     QTreeWidgetItem *item = items[0];
     unsigned n = item->data(0, Qt::UserRole).toUInt();
-    item->checkState(0) == Qt::Checked ? SNES::cheat.enable(n) : SNES::cheat.disable(n);
+    item->checkState(1) == Qt::Checked ? SNES::cheat.enable(n) : SNES::cheat.disable(n);
   }
 }
 
@@ -205,7 +201,7 @@ void CheatEditorWindow::toggleCodeStatus() {
     QTreeWidgetItem *item = items[0];
     unsigned n = item->data(0, Qt::UserRole).toUInt();
     SNES::cheat.enabled(n) == false ? SNES::cheat.enable(n) : SNES::cheat.disable(n);
-    item->setCheckState(0, SNES::cheat.enabled(n) ? Qt::Checked : Qt::Unchecked);
+    item->setCheckState(1, SNES::cheat.enabled(n) ? Qt::Checked : Qt::Unchecked);
   }
 }
 

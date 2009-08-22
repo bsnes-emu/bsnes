@@ -3,18 +3,13 @@
 #define SYSTEM_CPP
 namespace SNES {
 
-System  system;
-BUSCORE bus;
-CPUCORE cpu;
-SMPCORE smp;
-DSPCORE dsp;
-PPUCORE ppu;
+System system;
 
 #include "config/config.cpp"
+#include "debugger/debugger.cpp"
 #include "serialization.cpp"
 #include "scheduler/scheduler.cpp"
 #include "statemanager/statemanager.cpp"
-#include "tracer/tracer.cpp"
 
 #include "video/video.cpp"
 #include "audio/audio.cpp"
@@ -32,9 +27,6 @@ void System::coprocessor_enter() {
 }
 
 void System::run() {
-}
-
-void System::runtoframe() {
   scheduler.sync = Scheduler::SyncNone;
 
   scheduler.enter();

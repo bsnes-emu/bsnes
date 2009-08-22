@@ -3,6 +3,8 @@
 #define SMEMORY_CPP
 namespace SNES {
 
+sBus bus;
+
 #include "system.cpp"
 #include "generic.cpp"
 #include "serialization.cpp"

@@ -74,7 +74,7 @@ void PPUcounter::reset() {
   status.interlace = false;
   status.field     = 0;
   status.vcounter  = 0;
-  status.hcounter  = 186;
+  status.hcounter  = 0;
   history.index    = 0;
 
   for(unsigned i = 0; i < 2048; i++) {

@@ -6,7 +6,6 @@ public:
     SlotSize        = 1,
     DateTimeSize    = 19,
     DescriptionSize = 512,
-    StateSize       = 1024 * 1024,
 
     HeaderSize      = 8 + (256 * SlotSize) + (256 * DateTimeSize) + (256 * DescriptionSize),
     SlotIndex       = 8,

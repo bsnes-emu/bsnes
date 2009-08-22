@@ -9,6 +9,10 @@ void bPPU::serialize(serializer &s) {
   s.integer(display.interlace);
   s.integer(display.overscan);
 
+  s.integer(cache.oam_basesize);
+  s.integer(cache.oam_nameselect);
+  s.integer(cache.oam_tdaddr);
+
   s.integer(regs.ppu1_mdr);
   s.integer(regs.ppu2_mdr);
   for(unsigned n = 0; n < 4; n++) s.integer(regs.bg_y[n]);
@@ -118,10 +122,6 @@ void bPPU::serialize(serializer &s) {
   s.integer(regs.oam_itemcount);
   s.integer(regs.oam_tilecount);
 
-  s.integer(cache.oam_basesize);
-  s.integer(cache.oam_nameselect);
-  s.integer(cache.oam_tdaddr);
-
   for(unsigned n = 0; n < 256; n++) {
     s.integer(pixel_cache[n].src_main);
     s.integer(pixel_cache[n].src_sub);
@@ -162,6 +162,7 @@ void bPPU::serialize(serializer &s) {
     s.integer(sprite_list[n].palette);
     s.integer(sprite_list[n].priority);
   }
+  s.integer(sprite_list_valid);
   s.integer(active_sprite);
 
   s.array(oam_itemlist, 32);

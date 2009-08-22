@@ -1,3 +1,10 @@
+//HQ2x filter
+//authors: byuu and blargg
+//license: public domain
+//
+//note: this is a clean reimplementation of the original HQ2x filter, which was
+//written by Maxim Stepin (MaxSt). it is not 100% identical, but very similar.
+
 HQ2xFilter filter_hq2x;
 
 const uint8_t HQ2xFilter::hqTable[256] = {
@@ -87,8 +94,13 @@ alwaysinline uint16_t HQ2xFilter::blend(unsigned rule, uint16_t E, uint16_t A, u
 }
 
 void HQ2xFilter::size(unsigned &outwidth, unsigned &outheight, unsigned width, unsigned height) {
-  outwidth  = width  * 2;
-  outheight = height * 2;
+  outwidth  = width;
+  outheight = height;
+
+  if(width <= 256 && height <= 240) {
+    outwidth  *= 2;
+    outheight *= 2;
+  }
 }
 
 void HQ2xFilter::render(

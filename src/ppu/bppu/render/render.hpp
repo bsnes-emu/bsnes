@@ -1,5 +1,4 @@
-//bppu_render.cpp
-inline bool render_enabled(uint8 bg, uint8 pri);
+//render.cpp
 inline void render_line_mode0();
 inline void render_line_mode1();
 inline void render_line_mode2();
@@ -9,11 +8,11 @@ inline void render_line_mode5();
 inline void render_line_mode6();
 inline void render_line_mode7();
 
-//bppu_render_cache.cpp
+//cache.cpp
 enum { COLORDEPTH_4 = 0, COLORDEPTH_16 = 1, COLORDEPTH_256 = 2 };
 enum { TILE_2BIT = 0, TILE_4BIT = 1, TILE_8BIT = 2 };
 
-struct _pixel {
+struct pixel_t {
   //bgr555 color data for main/subscreen pixels: 0x0000 = transparent / use palette color # 0
   //needs to be bgr555 instead of palette index for direct color mode ($2130 bit 0) to work
   uint16 src_main, src_sub;
@@ -29,32 +28,32 @@ struct _pixel {
 uint8 *bg_tiledata[3];
 uint8 *bg_tiledata_state[3];  //0 = valid, 1 = dirty
 
-void render_bg_tile(uint8 color_depth, uint16 tile_num);
+template<unsigned color_depth> void render_bg_tile(uint16 tile_num);
 inline void flush_pixel_cache();
 void alloc_tiledata_cache();
 void flush_tiledata_cache();
 void free_tiledata_cache();
 
-//bppu_render_windows.cpp
-struct _window {
+//windows.cpp
+struct window_t {
   uint8 main[256], sub[256];
 } window[6];
 
 void build_window_table(uint8 bg, bool mainscreen);
 void build_window_tables(uint8 bg);
 
-//bppu_render_bg.cpp
+//bg.cpp
 struct {
   uint16 tw,  th;  //tile width, height
   uint16 mx,  my;  //screen mask x, y
   uint16 scx, scy; //sc index offsets
 } bg_info[4];
+void update_bg_info();
 
-void   update_bg_info();
-uint16 bg_get_tile(uint8 bg, uint16 x, uint16 y);
-void   render_line_bg(uint8 bg, uint8 color_depth, uint8 pri0_pos, uint8 pri1_pos);
+template<unsigned bg> uint16 bg_get_tile(uint16 x, uint16 y);
+template<unsigned mode, unsigned bg, unsigned color_depth> void render_line_bg(uint8 pri0_pos, uint8 pri1_pos);
 
-//bppu_render_oam.cpp
+//oam.cpp
 struct sprite_item {
   uint8  width, height;
   uint16 x, y;
@@ -64,6 +63,7 @@ struct sprite_item {
   uint8  palette;
   uint8  priority;
 } sprite_list[128];
+bool sprite_list_valid;
 unsigned active_sprite;
 
 uint8 oam_itemlist[32];
@@ -81,15 +81,14 @@ void load_oam_tiles();
 void render_oam_tile(int tile_num);
 void render_line_oam_rto();
 void render_line_oam(uint8 pri0_pos, uint8 pri1_pos, uint8 pri2_pos, uint8 pri3_pos);
-void render_line_oam_lores(uint8 pri0_pos, uint8 pri1_pos, uint8 pri2_pos, uint8 pri3_pos);
 
-//bppu_render_mode7.cpp
-void render_line_mode7(uint8 bg, uint8 pri0_pos, uint8 pri1_pos);
+//mode7.cpp
+template<unsigned bg> void render_line_mode7(uint8 pri0_pos, uint8 pri1_pos);
 
-//bppu_render_addsub.cpp
+//addsub.cpp
 inline uint16 addsub(uint32 x, uint32 y, bool halve);
 
-//bppu_render_line.cpp
+//line.cpp
 inline uint16 get_palette(uint8 index);
 inline uint16 get_direct_color(uint8 p, uint8 t);
 inline uint16 get_pixel_normal(uint32 x);

@@ -1,6 +1,9 @@
+class sCPUdebug;
+
 class sCPU : public CPU, public CPUcore {
 public:
   void enter();
+  debugvirtual void op_step();
   void op_irq();
   bool interrupt_pending() { return status.interrupt_pending; }
 
@@ -34,6 +37,8 @@ public:
     bool irq_transition;
     bool irq_pending;
     bool irq_hold;
+
+    bool reset_pending;
 
     //DMA
     bool dma_active;
@@ -91,4 +96,13 @@ public:
   void serialize(serializer&);
   sCPU();
   ~sCPU();
+
+  friend class sCPUdebug;
 };
+
+#if defined(DEBUGGER)
+  #include "debugger/debugger.hpp"
+  extern sCPUdebug cpu;
+#else
+  extern sCPU cpu;
+#endif

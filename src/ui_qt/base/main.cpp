@@ -10,96 +10,96 @@ void MainWindow::setup() {
   #endif
 
   system = window->menu->addMenu("System");
-    system_load = system->addAction("&Load Cartridge ...");
+    system_load = system->addAction("Load Cartridge ...");
     system->addSeparator();
-    system_power = system->addMenu("&Power");
+    system_power = system->addMenu("Power");
       system_power_on = system_power->addAction("On");
       system_power_on->setCheckable(true);
       system_power_off = system_power->addAction("Off");
       system_power_off->setCheckable(true);
-    system_reset = system->addAction("&Reset");
+    system_reset = system->addAction("Reset");
     system->addSeparator();
-    system_port1 = system->addMenu("Controller Port &1");
-      system_port1_none = system_port1->addAction("&None");
+    system_port1 = system->addMenu("Controller Port 1");
+      system_port1_none = system_port1->addAction("None");
       system_port1_none->setCheckable(true);
-      system_port1_joypad = system_port1->addAction("&Joypad");
+      system_port1_joypad = system_port1->addAction("Joypad");
       system_port1_joypad->setCheckable(true);
-      system_port1_multitap = system_port1->addAction("&Multitap");
+      system_port1_multitap = system_port1->addAction("Multitap");
       system_port1_multitap->setCheckable(true);
-      system_port1_mouse = system_port1->addAction("M&ouse");
+      system_port1_mouse = system_port1->addAction("Mouse");
       system_port1_mouse->setCheckable(true);
-    system_port2 = system->addMenu("Controller Port &2");
-      system_port2_none = system_port2->addAction("&None");
+    system_port2 = system->addMenu("Controller Port 2");
+      system_port2_none = system_port2->addAction("None");
       system_port2_none->setCheckable(true);
-      system_port2_joypad = system_port2->addAction("&Joypad");
+      system_port2_joypad = system_port2->addAction("Joypad");
       system_port2_joypad->setCheckable(true);
-      system_port2_multitap = system_port2->addAction("&Multitap");
+      system_port2_multitap = system_port2->addAction("Multitap");
       system_port2_multitap->setCheckable(true);
-      system_port2_mouse = system_port2->addAction("M&ouse");
+      system_port2_mouse = system_port2->addAction("Mouse");
       system_port2_mouse->setCheckable(true);
-      system_port2_superscope = system_port2->addAction("&Super Scope");
+      system_port2_superscope = system_port2->addAction("Super Scope");
       system_port2_superscope->setCheckable(true);
-      system_port2_justifier = system_port2->addAction("&Justifier");
+      system_port2_justifier = system_port2->addAction("Justifier");
       system_port2_justifier->setCheckable(true);
-      system_port2_justifiers = system_port2->addAction("&Two Justifiers");
+      system_port2_justifiers = system_port2->addAction("Two Justifiers");
       system_port2_justifiers->setCheckable(true);
     #if !defined(PLATFORM_OSX)
     system->addSeparator();
     #endif
-    system_exit = system->addAction("E&xit");
+    system_exit = system->addAction("Exit");
     system_exit->setMenuRole(QAction::QuitRole);
 
   settings = window->menu->addMenu("Settings");
-    settings_videoMode = settings->addMenu("&Video Mode");
-      settings_videoMode_1x = settings_videoMode->addAction("Scale &1x");
+    settings_videoMode = settings->addMenu("Video Mode");
+      settings_videoMode_1x = settings_videoMode->addAction("Scale 1x");
       settings_videoMode_1x->setCheckable(true);
-      settings_videoMode_2x = settings_videoMode->addAction("Scale &2x");
+      settings_videoMode_2x = settings_videoMode->addAction("Scale 2x");
       settings_videoMode_2x->setCheckable(true);
-      settings_videoMode_3x = settings_videoMode->addAction("Scale &3x");
+      settings_videoMode_3x = settings_videoMode->addAction("Scale 3x");
       settings_videoMode_3x->setCheckable(true);
-      settings_videoMode_4x = settings_videoMode->addAction("Scale &4x");
+      settings_videoMode_4x = settings_videoMode->addAction("Scale 4x");
       settings_videoMode_4x->setCheckable(true);
-      settings_videoMode_max = settings_videoMode->addAction("Scale &Max");
+      settings_videoMode_max = settings_videoMode->addAction("Scale Max");
       settings_videoMode_max->setCheckable(true);
       settings_videoMode_max->setStatusTip("Scale video output to fill as much of the screen as possible");
       settings_videoMode->addSeparator();
-      settings_videoMode_correctAspectRatio = settings_videoMode->addAction("&Correct Aspect Ratio");
+      settings_videoMode_correctAspectRatio = settings_videoMode->addAction("Correct Aspect Ratio");
       settings_videoMode_correctAspectRatio->setStatusTip("Match pixel width-to-height ratio of TV");
       settings_videoMode_correctAspectRatio->setCheckable(true);
-      settings_videoMode_fullscreen = settings_videoMode->addAction("&Fullscreen");
+      settings_videoMode_fullscreen = settings_videoMode->addAction("Fullscreen");
       settings_videoMode_fullscreen->setCheckable(true);
       settings_videoMode->addSeparator();
-      settings_videoMode_ntsc = settings_videoMode->addAction("&NTSC");
+      settings_videoMode_ntsc = settings_videoMode->addAction("NTSC");
       settings_videoMode_ntsc->setCheckable(true);
       settings_videoMode_ntsc->setStatusTip("Size video output window to match NTSC TV spec");
-      settings_videoMode_pal = settings_videoMode->addAction("&PAL");
+      settings_videoMode_pal = settings_videoMode->addAction("PAL");
       settings_videoMode_pal->setCheckable(true);
       settings_videoMode_pal->setStatusTip("Size video output window to match PAL TV spec");
-    settings_videoFilter = settings->addMenu("Video &Filter");
-      settings_videoFilter_point = settings_videoFilter->addAction("&Point");
+    settings_videoFilter = settings->addMenu("Video Filter");
+      settings_videoFilter_point = settings_videoFilter->addAction("Point");
       settings_videoFilter_point->setCheckable(true);
       settings_videoFilter_point->setStatusTip("Use pixellated hardware video scaling");
-      settings_videoFilter_linear = settings_videoFilter->addAction("&Linear");
+      settings_videoFilter_linear = settings_videoFilter->addAction("Linear");
       settings_videoFilter_linear->setCheckable(true);
       settings_videoFilter_linear->setStatusTip("Use smoothed hardware video scaling");
       settings_videoFilter->addSeparator();
-      settings_videoFilter_none = settings_videoFilter->addAction("&None");
+      settings_videoFilter_none = settings_videoFilter->addAction("None");
       settings_videoFilter_none->setCheckable(true);
-      settings_videoFilter_scanline = settings_videoFilter->addAction("&Scanline");
+      settings_videoFilter_scanline = settings_videoFilter->addAction("Scanline");
       settings_videoFilter_scanline->setCheckable(true);
-      settings_videoFilter_scale2x = settings_videoFilter->addAction("S&cale2x");
+      settings_videoFilter_scale2x = settings_videoFilter->addAction("Scale2x");
       settings_videoFilter_scale2x->setCheckable(true);
-      settings_videoFilter_lq2x = settings_videoFilter->addAction("&LQ2x");
+      settings_videoFilter_lq2x = settings_videoFilter->addAction("LQ2x");
       settings_videoFilter_lq2x->setCheckable(true);
-      settings_videoFilter_hq2x = settings_videoFilter->addAction("&HQ2x");
+      settings_videoFilter_hq2x = settings_videoFilter->addAction("HQ2x");
       settings_videoFilter_hq2x->setCheckable(true);
-      settings_videoFilter_ntsc = settings_videoFilter->addAction("N&TSC");
+      settings_videoFilter_ntsc = settings_videoFilter->addAction("NTSC");
       settings_videoFilter_ntsc->setCheckable(true);
     settings->addSeparator();
-    settings_muteAudio = settings->addAction("&Mute Audio Output");
+    settings_muteAudio = settings->addAction("Mute Audio Output");
     settings_muteAudio->setCheckable(true);
     settings->addSeparator();
-    settings_emulationSpeed = settings->addMenu("&Emulation Speed");
+    settings_emulationSpeed = settings->addMenu("Emulation Speed");
       settings_emulationSpeed_slowest = settings_emulationSpeed->addAction("50%");
       settings_emulationSpeed_slowest->setCheckable(true);
       settings_emulationSpeed_slow = settings_emulationSpeed->addAction("75%");
@@ -111,26 +111,33 @@ void MainWindow::setup() {
       settings_emulationSpeed_fastest = settings_emulationSpeed->addAction("200%");
       settings_emulationSpeed_fastest->setCheckable(true);
       settings_emulationSpeed->addSeparator();
-      settings_emulationSpeed_syncVideo = settings_emulationSpeed->addAction("Sync &Video");
+      settings_emulationSpeed_syncVideo = settings_emulationSpeed->addAction("Sync Video");
       settings_emulationSpeed_syncVideo->setCheckable(true);
       settings_emulationSpeed_syncVideo->setStatusTip("Sync video output to vertical refresh rate");
-      settings_emulationSpeed_syncAudio = settings_emulationSpeed->addAction("Sync &Audio");
+      settings_emulationSpeed_syncAudio = settings_emulationSpeed->addAction("Sync Audio");
       settings_emulationSpeed_syncAudio->setCheckable(true);
       settings_emulationSpeed_syncAudio->setStatusTip("Sync audio output to sound card output rate");
-    settings_configuration = settings->addAction("&Configuration ...");
+    settings_configuration = settings->addAction("Configuration ...");
     settings_configuration->setMenuRole(QAction::PreferencesRole);
 
   tools = window->menu->addMenu("Tools");
-    tools_cheatEditor = tools->addAction("&Cheat Editor ...");
-    tools_stateManager = tools->addAction("&State Manager ...");
+    tools_cheatEditor = tools->addAction("Cheat Editor ...");
+    tools_stateManager = tools->addAction("State Manager ...");
+    #if defined(DEBUGGER)
+    tools->addSeparator();
+    #endif
+    tools_debugger = tools->addAction("Debugger ...");
+    #if !defined(DEBUGGER)
+    tools_debugger->setVisible(false);
+    #endif
 
   help = window->menu->addMenu("Help");
-    help_documentation = help->addAction("&Documentation ...");
-    help_license = help->addAction("&License ...");
+    help_documentation = help->addAction("Documentation ...");
+    help_license = help->addAction("License ...");
     #if !defined(PLATFORM_OSX)
     help->addSeparator();
     #endif
-    help_about = help->addAction("&About ...");
+    help_about = help->addAction("About ...");
     help_about->setMenuRole(QAction::AboutRole);
 
   canvasContainer = new CanvasObject;
@@ -206,6 +213,7 @@ void MainWindow::setup() {
   connect(settings_configuration, SIGNAL(triggered()), this, SLOT(showConfigWindow()));
   connect(tools_cheatEditor, SIGNAL(triggered()), this, SLOT(showCheatEditor()));
   connect(tools_stateManager, SIGNAL(triggered()), this, SLOT(showStateManager()));
+  connect(tools_debugger, SIGNAL(triggered()), this, SLOT(showDebugger()));
   connect(help_documentation, SIGNAL(triggered()), this, SLOT(showDocumentation()));
   connect(help_license, SIGNAL(triggered()), this, SLOT(showLicense()));
   connect(help_about, SIGNAL(triggered()), this, SLOT(showAbout()));
@@ -330,6 +338,7 @@ void MainWindow::showConfigWindow() {
 
 void MainWindow::showCheatEditor()  { toolsWindow->showCheatEditor();  }
 void MainWindow::showStateManager() { toolsWindow->showStateManager(); }
+void MainWindow::showDebugger()     { debugger->show(); }
 
 void MainWindow::showDocumentation()  {
   QFile file(":/documentation.html");

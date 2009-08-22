@@ -167,7 +167,7 @@ obj/sdsp.o: dsp/sdsp/sdsp.cpp dsp/sdsp/*
 ###########
 
 obj/ppu.o : ppu/ppu.cpp ppu/*
-obj/bppu.o: ppu/bppu/bppu.cpp ppu/bppu/*
+obj/bppu.o: ppu/bppu/bppu.cpp $(call rwildcard,ppu/bppu/)
 
 ##############
 ### system ###

@@ -2,7 +2,7 @@ ScanlineFilter filter_scanline;
 
 void ScanlineFilter::size(unsigned &outwidth, unsigned &outheight, unsigned width, unsigned height) {
   outwidth  = width;
-  outheight = height * 2;
+  outheight = height > 240 ? height : height * 2;
 }
 
 void ScanlineFilter::render(

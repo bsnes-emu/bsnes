@@ -52,10 +52,10 @@ serializer StateManager::load(const char *filename, uint8 slot) {
   file fp;
   if(fp.open(filename, file::mode_read) == false) throw;
 
-  fp.seek(HeaderSize + StateSize * index);
-  uint8 *data = new uint8[StateSize];
-  fp.read(data, StateSize);
-  serializer s(data, StateSize);
+  fp.seek(HeaderSize + system.serialize_size * index);
+  uint8 *data = new uint8[system.serialize_size];
+  fp.read(data, system.serialize_size);
+  serializer s(data, system.serialize_size);
   delete[] data;
   fp.close();
   return s;
@@ -98,9 +98,9 @@ bool StateManager::save(const char *filename, uint8 slot, serializer &s, const c
   fp.seek(DescIndex + index * DescriptionSize);
   fp.write((uint8*)&desc[0], DescriptionSize);
 
-  fp.seek(HeaderSize + index * StateSize);
+  fp.seek(HeaderSize + index * system.serialize_size);
   fp.write(s.data(), s.size());
-  for(unsigned n = 0; n < StateSize - s.size(); n++) fp.write(0x00);
+  for(unsigned n = 0; n < system.serialize_size - s.size(); n++) fp.write(0x00);
 
   fp.close();
   return true;
@@ -126,12 +126,12 @@ bool StateManager::erase(const char *filename, uint8 slot) {
   fp.seek(DescIndex + index * DescriptionSize);
   fp.write((uint8*)&info.description[lastslot * DescriptionSize], DescriptionSize);
 
-  fp.seek(HeaderSize + StateSize * lastslot);
-  uint8 *data = new uint8[StateSize];
-  fp.read(data, StateSize);
+  fp.seek(HeaderSize + system.serialize_size * lastslot);
+  uint8 *data = new uint8[system.serialize_size];
+  fp.read(data, system.serialize_size);
 
-  fp.seek(HeaderSize + StateSize * index);
-  fp.write(data, StateSize);
+  fp.seek(HeaderSize + system.serialize_size * index);
+  fp.write(data, system.serialize_size);
   delete[] data;
 
   //decrement all IDs after the deleted one (removes empty slot ID from deletion)
@@ -143,7 +143,7 @@ bool StateManager::erase(const char *filename, uint8 slot) {
   fp.write(info.slot, 256);
 
   unsigned size = fp.size();
-  fp.truncate(size - StateSize);
+  fp.truncate(size - system.serialize_size);
   return true;
 }
 
@@ -154,19 +154,19 @@ bool StateManager::load(const char *filename) {
   if(filesize < HeaderSize) return false;
   fp.seek(0);
   if(fp.readl(4) != 0x31415342) return false;
-  if(fp.readl(4) != 1) return false;
+  if(fp.readl(4) != bsnesSaveStateVersion) return false;
   fp.read((uint8*)&info.slot[0], 256);
   fp.read((uint8*)&info.datetime[0], 256 * DateTimeSize);
   fp.read((uint8*)&info.description[0], 256 * DescriptionSize);
-  info.slotcount = (filesize - HeaderSize) / StateSize;
+  info.slotcount = (filesize - HeaderSize) / system.serialize_size;
   return true;
 }
 
 bool StateManager::create(const char *filename) const {
   file fp;
   if(fp.open(filename, file::mode_write) == false) return false;
-  fp.writel(0x31415342, 4);  //signature ('BSA1')
-  fp.writel(1, 4);           //version
+  fp.writel(0x31415342, 4);             //signature ('BSA1')
+  fp.writel(bsnesSaveStateVersion, 4);  //version
   for(unsigned i = 0; i < 256 * SlotSize; i++) fp.write(SlotInvalid);  //slot index
   for(unsigned i = 0; i < 256 * DateTimeSize; i++) fp.write(0x20);     //date / time
   for(unsigned i = 0; i < 256 * DescriptionSize; i++) fp.write(0x00);  //description

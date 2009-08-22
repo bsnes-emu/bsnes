@@ -1,6 +1,9 @@
+class sSMPdebug;
+
 class sSMP : public SMP, public SMPcore {
 public:
   void enter();
+  debugvirtual void op_step();
 
   #include "memory/memory.hpp"
   #include "timing/timing.hpp"
@@ -38,4 +41,13 @@ public:
   void serialize(serializer&);
   sSMP();
   ~sSMP();
+
+  friend class sSMPdebug;
 };
+
+#if defined(DEBUGGER)
+  #include "debugger/debugger.hpp"
+  extern sSMPdebug smp;
+#else
+  extern sSMP smp;
+#endif

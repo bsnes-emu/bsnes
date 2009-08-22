@@ -155,6 +155,10 @@ void sCPU::timing_reset() {
   status.irq_pending    = false;
   status.irq_hold       = false;
 
+  status.reset_pending     = true;
+  status.interrupt_pending = true;
+  status.interrupt_vector  = 0xfffc;  //reset vector address
+
   status.dma_active   = false;
   status.dma_counter  = 0;
   status.dma_clocks   = 0;

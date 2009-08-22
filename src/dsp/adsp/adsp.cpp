@@ -3,6 +3,8 @@
 #define ADSP_CPP
 namespaec SNES {
 
+aDSP dsp;
+
 #include "adsp_tables.cpp"
 
 void aDSP::enter() { loop:
