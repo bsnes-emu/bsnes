@@ -52,6 +52,7 @@ void System::serialize_all(serializer &s) {
   dsp.serialize(s);
 
   if(cartridge.has_spc7110()) spc7110.serialize(s);
+  if(cartridge.has_cx4())     cx4.serialize(s);
   if(cartridge.has_obc1())    obc1.serialize(s);
 }
 

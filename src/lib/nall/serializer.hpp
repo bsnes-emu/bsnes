@@ -17,7 +17,7 @@ namespace nall {
   //
   //caveats:
   //- only plain-old-data can be stored. complex classes must provide serialize(serializer&);
-  //- floating-point values are not supported.
+  //- floating-point usage is not portable across platforms
 
   class serializer {
   public:
@@ -31,6 +31,20 @@ namespace nall {
 
     unsigned capacity() const {
       return icapacity;
+    }
+
+    template<typename T> void floatingpoint(T &value) {
+      enum { size = sizeof(T) };
+      //this is rather dangerous, and not cross-platform safe;
+      //but there is no standardized way to export FP-values
+      uint8_t *p = (uint8_t*)&value;
+      if(mode == Save) {
+        for(unsigned n = 0; n < size; n++) idata[isize++] = p[n];
+      } else if(mode == Load) {
+        for(unsigned n = 0; n < size; n++) p[n] = idata[isize++];
+      } else {
+        isize += size;
+      }
     }
 
     template<typename T> void integer(T &value) {

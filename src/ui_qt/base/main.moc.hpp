@@ -86,6 +86,7 @@ public:
 
   void setup();
   void syncUi();
+  bool isActive();
 
 public slots:
   void loadCartridge();

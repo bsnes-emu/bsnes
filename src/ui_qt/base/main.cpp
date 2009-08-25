@@ -271,6 +271,10 @@ void MainWindow::syncUi() {
   settings_emulationSpeed_syncAudio->setChecked(config.audio.synchronize);
 }
 
+bool MainWindow::isActive() {
+  return window->isActiveWindow() && !window->isMinimized();
+}
+
 void MainWindow::loadCartridge() {
   string filename = utility.selectCartridge();
   if(filename.length() > 0) utility.loadCartridge(filename);

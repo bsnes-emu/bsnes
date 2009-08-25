@@ -15,9 +15,7 @@ void bPPU::enter() {
     if(scheduler.sync == Scheduler::SyncAll) scheduler.exit();
 
     //H =    0 (initialize)
-    scheduler.sync_ppucpu();
     scanline();
-    if(vcounter() == 0) frame();
     add_clocks(10);
 
     //H =   10 (OAM address reset)
@@ -47,12 +45,15 @@ void bPPU::enter() {
 void bPPU::add_clocks(unsigned clocks) {
   tick(clocks);
   scheduler.addclocks_ppu(clocks);
+  scheduler.sync_ppucpu();
 }
 
 void bPPU::scanline() {
   line = vcounter();
 
   if(line == 0) {
+    frame();
+
     //RTO flag reset
     regs.time_over  = false;
     regs.range_over = false;

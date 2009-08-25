@@ -11,10 +11,11 @@ namespace SNES {
 
 Cx4 cx4;
 
-#include "cx4data.cpp"
-#include "cx4fn.cpp"
-#include "cx4oam.cpp"
-#include "cx4ops.cpp"
+#include "serialization.cpp"
+#include "data.cpp"
+#include "functions.cpp"
+#include "oam.cpp"
+#include "opcodes.cpp"
 
 void Cx4::init() {
 }

@@ -42,7 +42,7 @@ void Utility::inputEvent(uint16_t code) {
 
   for(unsigned i = 0; i < keyboard<>::count; i++) {
     if(code == keyboard<>::index(i, keyboard<>::escape) && inputManager.state(code)) {
-      if(mainWindow->window->isActiveWindow() && input.acquired()) {
+      if(mainWindow->isActive() && input.acquired()) {
         //release mouse capture
         input.unacquire();
         return;  //do not trigger other UI actions that may be bound to escape key
@@ -56,7 +56,7 @@ void Utility::inputEvent(uint16_t code) {
     }
   }
 
-  if(mainWindow->window->isActiveWindow()) {
+  if(mainWindow->isActive()) {
     bool resizeWindow = false;
 
     if(isButtonDown(code, inputUiGeneral.loadCartridge)) {

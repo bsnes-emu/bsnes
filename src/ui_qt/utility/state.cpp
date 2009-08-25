@@ -9,7 +9,6 @@ bool Utility::saveStatesSupported() {
   if(SNES::cartridge.has_sa1())     return false;
   if(SNES::cartridge.has_srtc())    return false;
   if(SNES::cartridge.has_sdd1())    return false;
-  if(SNES::cartridge.has_cx4())     return false;
   if(SNES::cartridge.has_dsp1())    return false;
   if(SNES::cartridge.has_dsp2())    return false;
   if(SNES::cartridge.has_dsp3())    return false;

@@ -1,4 +1,15 @@
 class Cx4 : public Memory {
+public:
+  void init();
+  void enable();
+  void power();
+  void reset();
+
+  uint8 read(unsigned addr);
+  void write(unsigned addr, uint8 data);
+
+  void serialize(serializer&);
+
 private:
   uint8  ram[0x0c00];
   uint8  reg[0x0100];
@@ -15,6 +26,7 @@ private:
   int16 C4WFXVal, C4WFYVal, C4WFZVal, C4WFX2Val, C4WFY2Val, C4WFDist, C4WFScale;
   int16 C41FXVal, C41FYVal, C41FAngleRes, C41FDist, C41FDistVal;
 
+  //todo: get rid of floating-point values, replace with integers
   double tanval;
   double c4x,c4y,c4z, c4x2,c4y2,c4z2;
 
@@ -82,16 +94,6 @@ public:
   void   writeb(uint16 addr, uint8 data);
   void   writew(uint16 addr, uint16 data);
   void   writel(uint16 addr, uint32 data);
-
-//
-
-  void   init();
-  void   enable();
-  void   power();
-  void   reset();
-
-  uint8  read (unsigned addr);
-  void   write(unsigned addr, uint8 data);
 };
 
 extern Cx4 cx4;
