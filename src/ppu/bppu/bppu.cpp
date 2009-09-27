@@ -3,7 +3,12 @@
 #define BPPU_CPP
 namespace SNES {
 
-bPPU ppu;
+#if defined(DEBUGGER)
+  #include "debugger/debugger.cpp"
+  bPPUDebug ppu;
+#else
+  bPPU ppu;
+#endif
 
 #include "memory/memory.cpp"
 #include "mmio/mmio.cpp"

@@ -33,6 +33,8 @@ class Dsp1
       void setDr(uint8 iDr);
       void reset();
 
+      void serialize(serializer&);
+
    private:
       enum FsmMajorState {WAIT_COMMAND, READ_DATA, WRITE_DATA};
       enum MaxDataAccesses {MAX_READS=7, MAX_WRITES=1024};
@@ -72,7 +74,7 @@ class Dsp1
       uint8 mSr;            // status register
       int mSrLowByteAccess;
       uint16 mDr;           // "internal" representation of the data register
-      FsmMajorState mFsmMajorState;     // current major state of the FSM
+      unsigned mFsmMajorState;     // current major state of the FSM
       uint8 mCommand;                  // current command processed by the FSM
       uint8 mDataCounter;                 // #uint16 read/writes counter used by the FSM
       int16 mReadBuffer[MAX_READS];

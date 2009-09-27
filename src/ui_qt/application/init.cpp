@@ -1,4 +1,5 @@
 #include "../base/main.moc"
+#include "../base/diskbrowser.moc"
 #include "../base/loader.moc"
 #include "../base/htmlviewer.moc"
 #include "../base/about.moc"
@@ -7,12 +8,34 @@
 #include "../tools/tools.moc"
 
 #include "../base/main.cpp"
+#include "../base/diskbrowser.cpp"
 #include "../base/loader.cpp"
 #include "../base/htmlviewer.cpp"
 #include "../base/about.cpp"
 
 #include "../settings/settings.cpp"
 #include "../tools/tools.cpp"
+
+FileReader::FileReader() {
+  if(open("snesreader")) {
+    supported = sym("snesreader_supported");
+    load = sym("snesreader_load");
+  }
+
+  if(!supported || !load) {
+    supported = bind(&FileReader::direct_supported, this);
+    load = bind(&FileReader::direct_load, this);
+  }
+
+  filterList = supported();
+  if(filterList.length() > 0) {
+    filterList = string()
+    << " *.swc *.fig *.ufo *.gd3 *.gd7 *.dx2 *.mgd *.mgh"
+    << " *.048 *.058 *.068 *.078 *.bin"
+    << " *.usa *.eur *.jap *.aus *.bsx"
+    << " " << filterList;
+  }
+}
 
 void Application::init() {
   if(config.system.crashedOnLastRun == true) {
@@ -40,31 +63,20 @@ void Application::init() {
   if(config.system.input == "") config.system.input = input.default_driver();
 
   mainWindow = new MainWindow;
-  mainWindow->setup();
-
   loaderWindow = new LoaderWindow;
-  loaderWindow->setup();
-
   htmlViewerWindow = new HtmlViewerWindow;
-  htmlViewerWindow->setup();
-
   aboutWindow = new AboutWindow;
-  aboutWindow->setup();
+  diskBrowser = new DiskBrowser;
 
   //window must be onscreen and visible before initializing video interface
   utility.updateSystemState();
   utility.resizeMainWindow();
   utility.updateFullscreenState();
-  application.processEvents();
+  QApplication::processEvents();
 
   debugger = new Debugger;
-  debugger->setup();
-
   settingsWindow = new SettingsWindow;
-  settingsWindow->setup();
-
   toolsWindow = new ToolsWindow;
-  toolsWindow->setup();
 
   //if emulator crashes while initializing drivers, next run will disable them all.
   //this will allow user to choose different driver settings.

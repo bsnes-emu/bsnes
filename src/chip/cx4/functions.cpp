@@ -10,9 +10,10 @@
 
 //Wireframe Helpers
 void Cx4::C4TransfWireFrame() {
-  c4x = (double)C4WFXVal;
-  c4y = (double)C4WFYVal;
-  c4z = (double)C4WFZVal - 0x95;
+  double c4x = (double)C4WFXVal;
+  double c4y = (double)C4WFYVal;
+  double c4z = (double)C4WFZVal - 0x95;
+  double tanval, c4x2, c4y2, c4z2;
 
   //Rotate X
   tanval = -(double)C4WFX2Val * PI * 2 / 128;
@@ -52,9 +53,10 @@ void Cx4::C4CalcWireFrame() {
 }
 
 void Cx4::C4TransfWireFrame2() {
-  c4x = (double)C4WFXVal;
-  c4y = (double)C4WFYVal;
-  c4z = (double)C4WFZVal;
+  double c4x = (double)C4WFXVal;
+  double c4y = (double)C4WFYVal;
+  double c4z = (double)C4WFZVal;
+  double tanval, c4x2, c4y2, c4z2;
 
   //Rotate X
   tanval = -(double)C4WFX2Val * PI * 2 / 128;
@@ -140,8 +142,8 @@ void Cx4::C4DrawLine(int32 X1, int32 Y1, int16 Z1, int32 X2, int32 Y2, int16 Z2,
       uint8 bit = 0x80 >> ((X1 >> 8) & 7);
       ram[addr + 0x300] &= ~bit;
       ram[addr + 0x301] &= ~bit;
-      if(Color & 1) { ram[addr + 0x300] |= bit; }
-      if(Color & 2) { ram[addr + 0x301] |= bit; }
+      if(Color & 1) ram[addr + 0x300] |= bit;
+      if(Color & 2) ram[addr + 0x301] |= bit;
     }
     X1 += X2;
     Y1 += Y2;
@@ -158,22 +160,22 @@ void Cx4::C4DoScaleRotate(int row_padding) {
   if(XScale & 0x8000)XScale = 0x7fff;
   if(YScale & 0x8000)YScale = 0x7fff;
 
-  if(readw(0x1f80) == 0) { //no rotation
+  if(readw(0x1f80) == 0) {  //no rotation
     A = (int16)XScale;
     B = 0;
     C = 0;
     D = (int16)YScale;
-  } else if(readw(0x1f80) == 128) { //90 degree rotation
+  } else if(readw(0x1f80) == 128) {  //90 degree rotation
     A = 0;
     B = (int16)(-YScale);
     C = (int16)XScale;
     D = 0;
-  } else if(readw(0x1f80) == 256) { //180 degree rotation
+  } else if(readw(0x1f80) == 256) {  //180 degree rotation
     A = (int16)(-XScale);
     B = 0;
     C = 0;
     D = (int16)(-YScale);
-  } else if(readw(0x1f80) == 384) { //270 degree rotation
+  } else if(readw(0x1f80) == 384) {  //270 degree rotation
     A = 0;
     B = (int16)YScale;
     C = (int16)(-XScale);
@@ -221,10 +223,10 @@ void Cx4::C4DoScaleRotate(int row_padding) {
       }
 
       //De-bitplanify
-      if(byte & 1) { ram[outidx     ] |= bit; }
-      if(byte & 2) { ram[outidx +  1] |= bit; }
-      if(byte & 4) { ram[outidx + 16] |= bit; }
-      if(byte & 8) { ram[outidx + 17] |= bit; }
+      if(byte & 1) ram[outidx     ] |= bit;
+      if(byte & 2) ram[outidx +  1] |= bit;
+      if(byte & 4) ram[outidx + 16] |= bit;
+      if(byte & 8) ram[outidx + 17] |= bit;
 
       bit >>= 1;
       if(!bit) {
@@ -232,7 +234,7 @@ void Cx4::C4DoScaleRotate(int row_padding) {
         outidx += 32;
       }
 
-      X += A; //Add 1 to output x => add an A and a C
+      X += A;  //Add 1 to output x => add an A and a C
       Y += C;
     }
     outidx += 2 + row_padding;
@@ -241,7 +243,7 @@ void Cx4::C4DoScaleRotate(int row_padding) {
     } else {
       outidx -= w * 4 + row_padding;
     }
-    LineX += B; //Add 1 to output y => add a B and a D
+    LineX += B;  //Add 1 to output y => add a B and a D
     LineY += D;
   }
 }

@@ -44,5 +44,6 @@ void supressScreenSaver() {
   Display *display = XOpenDisplay(0);
   libXtst.XTestFakeKeyEvent(display, 255, True,  0);
   libXtst.XTestFakeKeyEvent(display, 255, False, 0);
+  XCloseDisplay(display);
 }
 

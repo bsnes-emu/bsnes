@@ -22,8 +22,6 @@ public:
     bool patchApplied;
   } cartridge;
 
-  string selectCartridge();
-  string selectFolder(const char *title);
   void loadCartridge(const char*);
   bool loadCartridgeNormal(const char*);
   bool loadCartridgeBsxSlotted(const char*, const char*);
@@ -57,7 +55,6 @@ public:
   void deleteState(uint8 slot);
 
   //window.cpp
-  void showCentered(QWidget *window);
   void updateFullscreenState();
   void constrainSize(unsigned &x, unsigned &y, unsigned max);
   void resizeMainWindow();

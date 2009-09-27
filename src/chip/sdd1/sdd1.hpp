@@ -13,6 +13,7 @@ public:
   uint8 read(unsigned addr);
   void write(unsigned addr, uint8 data);
 
+  void serialize(serializer&);
   SDD1();
   ~SDD1();
 
@@ -30,7 +31,7 @@ private:
 
   SDD1emu sdd1emu;
   struct {
-    uint8 *data;         //pointer to decompressed S-DD1 data (65536 bytes)
+    uint8 data[65536];   //pointer to decompressed S-DD1 data
     uint16 offset;       //read index into S-DD1 decompression buffer
     unsigned size;       //length of data buffer; reads decrement counter, set ready to false at 0
     bool ready;          //true when data[] is valid; false to invoke sdd1emu.decompress()

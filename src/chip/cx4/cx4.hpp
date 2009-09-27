@@ -26,10 +26,6 @@ private:
   int16 C4WFXVal, C4WFYVal, C4WFZVal, C4WFX2Val, C4WFY2Val, C4WFDist, C4WFScale;
   int16 C41FXVal, C41FYVal, C41FAngleRes, C41FDist, C41FDistVal;
 
-  //todo: get rid of floating-point values, replace with integers
-  double tanval;
-  double c4x,c4y,c4z, c4x2,c4y2,c4z2;
-
   void C4TransfWireFrame();
   void C4TransfWireFrame2();
   void C4CalcWireFrame();

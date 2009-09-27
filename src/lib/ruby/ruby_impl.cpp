@@ -1,8 +1,15 @@
 /* Global Headers */
 
-#if defined(VIDEO_QTIMAGE)
+#if defined(VIDEO_QTOPENGL) || defined(VIDEO_QTRASTER)
   #include <QApplication>
   #include <QtGui>
+#endif
+
+#if defined(VIDEO_QTOPENGL)
+  #include <QGLWidget>
+  #if defined(PLATFORM_WIN)
+    #include <GL/glext.h>
+  #endif
 #endif
 
 #if defined(PLATFORM_X)
@@ -56,8 +63,12 @@
   #include <ruby/video/glx.cpp>
 #endif
 
-#ifdef VIDEO_QTIMAGE
-  #include <ruby/video/qtimage.cpp>
+#ifdef VIDEO_QTOPENGL
+  #include <ruby/video/qtopengl.cpp>
+#endif
+
+#ifdef VIDEO_QTRASTER
+  #include <ruby/video/qtraster.cpp>
 #endif
 
 #ifdef VIDEO_SDL

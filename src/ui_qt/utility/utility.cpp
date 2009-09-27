@@ -46,11 +46,11 @@ void Utility::inputEvent(uint16_t code) {
         //release mouse capture
         input.unacquire();
         return;  //do not trigger other UI actions that may be bound to escape key
-      } else if(settingsWindow->window->isActiveWindow()) {
-        settingsWindow->window->hide();
+      } else if(settingsWindow->isActiveWindow()) {
+        settingsWindow->hide();
         return;
-      } else if(toolsWindow->window->isActiveWindow()) {
-        toolsWindow->window->hide();
+      } else if(toolsWindow->isActiveWindow()) {
+        toolsWindow->hide();
         return;
       }
     }
@@ -60,8 +60,7 @@ void Utility::inputEvent(uint16_t code) {
     bool resizeWindow = false;
 
     if(isButtonDown(code, inputUiGeneral.loadCartridge)) {
-      string filename = selectCartridge();
-      if(filename.length() > 0) loadCartridge(filename);
+      diskBrowser->loadAnyCartridge();
     }
 
     if(isButtonDown(code, inputUiGeneral.pauseEmulation)) {
@@ -118,16 +117,17 @@ void Utility::inputEvent(uint16_t code) {
     if(isButtonDown(code, inputUiGeneral.toggleFullscreen)) {
       config.video.isFullscreen = !config.video.isFullscreen;
       updateFullscreenState();
+      resizeMainWindow();
       mainWindow->syncUi();
     }
 
     if(isButtonDown(code, inputUiGeneral.toggleMenu)) {
-      mainWindow->window->menuBar()->setVisible(!mainWindow->window->menuBar()->isVisibleTo(mainWindow->window));
+      mainWindow->menuBar->setVisible(!mainWindow->menuBar->isVisibleTo(mainWindow));
       resizeWindow = true;
     }
 
     if(isButtonDown(code, inputUiGeneral.toggleStatus)) {
-      mainWindow->window->statusBar()->setVisible(!mainWindow->window->statusBar()->isVisibleTo(mainWindow->window));
+      mainWindow->statusBar->setVisible(!mainWindow->statusBar->isVisibleTo(mainWindow));
       resizeWindow = true;
     }
 
@@ -144,7 +144,7 @@ void Utility::inputEvent(uint16_t code) {
 
 //display message in main window statusbar area for three seconds
 void Utility::showMessage(const char *message) {
-  mainWindow->window->statusBar()->showMessage(utf8() << message, 3000);
+  mainWindow->statusBar->showMessage(utf8() << message, 3000);
 }
 
 //updates system state text at bottom-right of main window statusbar

@@ -1,4 +1,4 @@
-class sSMPdebug : public sSMP {
+class sSMPDebug : public sSMP {
 public:
   void op_step();
 };

@@ -9,6 +9,8 @@ void Interface::video_refresh(uint16_t *data, unsigned pitch, unsigned *line, un
     video.refresh();
     if(saveScreenshot == true) captureScreenshot(output, outpitch, outwidth, outheight);
   }
+
+  debugger->frameTick();
 }
 
 void Interface::audio_sample(uint16_t left, uint16_t right) {

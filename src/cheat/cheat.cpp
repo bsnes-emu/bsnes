@@ -186,7 +186,7 @@ void Cheat::disable(unsigned i) {
 //===============================
 
 void Cheat::load(string data) {
-  data.replace("\r\n", "\n");
+  data.replace("\r", "");
   data.qreplace(" ", "");
 
   lstring line;
@@ -195,17 +195,17 @@ void Cheat::load(string data) {
     lstring part;
     part.qsplit(",", line[i]);
     if(part.size() != 3) continue;
-    trim(part[0], "\"");
-    add(part[1] == "enabled", /* code = */ part[2], /* desc = */ part[0]);
+    trim(part[2], "\"");
+    add(part[0] == "enabled", /* code = */ part[1], /* desc = */ part[2]);
   }
 }
 
 string Cheat::save() const {
   string data;
   for(unsigned i = 0; i < code.size(); i++) {
-    data << "\"" << code[i].desc << "\", "
-         << (code[i].enabled ? "enabled, " : "disabled, ")
-         << code[i].code << "\r\n";
+    data << (code[i].enabled ? "enabled," : "disabled,")
+         << code[i].code << ","
+         << "\"" << code[i].desc << "\"\r\n";
   }
   return data;
 }

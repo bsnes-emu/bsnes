@@ -5,7 +5,7 @@ namespace SNES {
 
 #if defined(DEBUGGER)
   #include "debugger/debugger.cpp"
-  sSMPdebug smp;
+  sSMPDebug smp;
 #else
   sSMP smp;
 #endif
@@ -17,14 +17,7 @@ namespace SNES {
 void sSMP::enter() {
   while(true) {
     if(scheduler.sync == Scheduler::SyncAll) scheduler.exit();
-
     op_step();
-
-    //forcefully sync S-CPU and S-SMP, in case chips are not communicating
-    if(++instruction_counter >= 128) {
-      instruction_counter = 0;
-      scheduler.sync_smpcpu();
-    }
   }
 }
 
@@ -42,8 +35,6 @@ void sSMP::power() {
 }
 
 void sSMP::reset() {
-  instruction_counter = 0;
-
   regs.pc = 0xffc0;
   regs.a  = 0x00;
   regs.x  = 0x00;

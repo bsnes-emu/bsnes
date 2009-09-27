@@ -18,6 +18,7 @@ public:
   #error "unsupported platform"
 #endif
 
+#include "libqb/libqb.cpp"
 #include "config.cpp"
 #include "interface.cpp"
 

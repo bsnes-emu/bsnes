@@ -5,7 +5,7 @@ namespace SNES {
 
 #if defined(DEBUGGER)
   #include "debugger/debugger.cpp"
-  sCPUdebug cpu;
+  sCPUDebug cpu;
 #else
   sCPU cpu;
 #endif

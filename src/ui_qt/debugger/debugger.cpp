@@ -1,147 +1,159 @@
 #include "breakpoint.cpp"
 #include "memory.cpp"
+#include "vramviewer.cpp"
 
-void Debugger::setup() {
-  window = new QWidget;
-  window->setObjectName("debugger");
-  window->setWindowTitle("Debugger");
+Debugger::Debugger() {
+  setObjectName("debugger");
+  setWindowTitle("Debugger");
 
-  layout = new QVBoxLayout;
+  layout = new QHBoxLayout;
   layout->setMargin(Style::WindowMargin);
   layout->setSpacing(Style::WidgetSpacing);
-  window->setLayout(layout);
+  setLayout(layout);
 
   menu = new QMenuBar;
   layout->setMenuBar(menu);
 
   tools = menu->addMenu("Tools");
-  tools_breakpoint = tools->addAction("Breakpoint Editor");
-  tools_memory = tools->addAction("Memory Editor");
+  tools_breakpoint = tools->addAction("Breakpoint Editor ...");
+  tools_memory = tools->addAction("Memory Editor ...");
+  tools_vramViewer = tools->addAction("Video RAM Viewer ...");
 
-  options = menu->addMenu("Options");
-  options->setEnabled(false);
+  miscOptions = menu->addMenu("Misc");
+  miscOptions_clear = miscOptions->addAction("Clear Console");
 
   console = new QTextEdit;
-  console->setFont(QFont(Style::Monospace));
+  console->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
   console->setReadOnly(true);
+  console->setFont(QFont(Style::Monospace));
+  console->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
+  console->setMinimumWidth((92 + 4) * console->fontMetrics().width(' '));
+  console->setMinimumHeight((25 + 1) * console->fontMetrics().height());
   layout->addWidget(console);
 
-  command = new QLineEdit;
-  command->setFont(QFont(Style::Monospace));
-  layout->addWidget(command);
+  controlLayout = new QVBoxLayout;
+  controlLayout->setSpacing(0);
+  layout->addLayout(controlLayout);
 
-  window->setMinimumSize(725, 425);
-  window->resize(725, 425);
-  connect(command, SIGNAL(returnPressed()), this, SLOT(execCommand()));
+  commandLayout = new QHBoxLayout;
+  controlLayout->addLayout(commandLayout);
+
+  runBreak = new QPushButton("Break");
+  commandLayout->addWidget(runBreak);
+  commandLayout->addSpacing(Style::WidgetSpacing);
+
+  stepInstruction = new QPushButton("Step");
+  commandLayout->addWidget(stepInstruction);
+
+  controlLayout->addSpacing(Style::WidgetSpacing);
+
+  stepCPU = new QCheckBox("Step CPU");
+  controlLayout->addWidget(stepCPU);
+
+  stepSMP = new QCheckBox("Step SMP");
+  controlLayout->addWidget(stepSMP);
+
+  traceCPU = new QCheckBox("Trace CPU opcodes");
+  controlLayout->addWidget(traceCPU);
+
+  traceSMP = new QCheckBox("Trace SMP opcodes");
+  controlLayout->addWidget(traceSMP);
+
+  spacer = new QWidget;
+  spacer->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Expanding);
+  controlLayout->addWidget(spacer);
+
+  resize(855, 425);
+
   connect(tools_breakpoint, SIGNAL(triggered()), this, SLOT(showBreakpointEditor()));
   connect(tools_memory, SIGNAL(triggered()), this, SLOT(showMemoryEditor()));
+  connect(tools_vramViewer, SIGNAL(triggered()), this, SLOT(showVramViewer()));
+  connect(miscOptions_clear, SIGNAL(triggered()), this, SLOT(clear()));
+
+  connect(runBreak, SIGNAL(released()), this, SLOT(toggleRunStatus()));
+  connect(stepInstruction, SIGNAL(released()), this, SLOT(stepAction()));
+  connect(stepCPU, SIGNAL(released()), this, SLOT(synchronize()));
+  connect(stepSMP, SIGNAL(released()), this, SLOT(synchronize()));
+  connect(traceCPU, SIGNAL(released()), this, SLOT(toggleTraceCPU()));
+  connect(traceSMP, SIGNAL(released()), this, SLOT(toggleTraceSMP()));
 
   breakpointEditor = new BreakpointEditor;
-  breakpointEditor->setup();
-
   memoryEditor = new MemoryEditor;
-  memoryEditor->setup();
+  vramViewer = new VramViewer;
 
-  syncUi();
+  frameCounter = 0;
+  synchronize();
 }
 
-void Debugger::syncUi() {
-  memoryEditor->syncUi();
+void Debugger::synchronize() {
+  runBreak->setText(application.debug ? "Run" : "Break");
+  stepInstruction->setEnabled(SNES::cartridge.loaded() && application.debug && (stepCPU->isChecked() || stepSMP->isChecked()));
+  SNES::debugger.step_cpu = application.debug && stepCPU->isChecked();
+  SNES::debugger.step_smp = application.debug && stepSMP->isChecked();
+
+  memoryEditor->synchronize();
 }
 
 void Debugger::show() {
-  utility.showCentered(window);
-  command->setFocus();
+  showAt(-1.0, +1.0);
+  setFocus();
 }
 
 void Debugger::echo(const char *message) {
   console->moveCursor(QTextCursor::End);
-  console->insertPlainText(message);
+  console->insertHtml(message);
 }
 
 void Debugger::clear() {
   console->setHtml("");
 }
 
-void Debugger::execCommand() {
-  string s = command->text().toUtf8().data();
-  command->setText("");
-
-  if(s == "clear") {
-    clear();
-    return;
-  }
-
-  if(s == "run") {
-    SNES::debugger.break_event = SNES::Debugger::None;
-    SNES::debugger.step_cpu = false;
-    SNES::debugger.step_smp = false;
-    return;
-  }
-
-  if(s == "step cpu") {
-    SNES::debugger.step_cpu = true;
-    return;
-  }
-
-  if(s == "step smp") {
-    SNES::debugger.step_smp = true;
-    return;
-  }
-
-  if(s == "trace on") {
-    SNES::debugger.tracefile.open("trace.log", file::mode_write);
-    echo("Tracing enabled.\n");
-    return;
-  }
-
-  if(s == "trace off") {
-    SNES::debugger.trace_cpu = false;
-    SNES::debugger.trace_smp = false;
-    SNES::debugger.tracefile.close();
-    echo("Tracing disabled.\n");
-    return;
-  }
-
-  if(s == "trace cpu on") {
-    if(SNES::debugger.tracefile.open() == false) return;
-    SNES::debugger.trace_cpu = true;
-    echo("S-CPU tracing enabled.\n");
-    return;
-  }
-
-  if(s == "trace cpu off") {
-    SNES::debugger.trace_cpu = false;
-    echo("S-CPU tracing disabled.\n");
-    return;
-  }
-
-  if(s == "trace smp on") {
-    if(SNES::debugger.tracefile.open() == false) return;
-    SNES::debugger.trace_smp = true;
-    echo("S-SMP tracing enabled.\n");
-    return;
-  }
-
-  if(s == "trace smp off") {
-    SNES::debugger.trace_smp = false;
-    echo("S-SMP tracing disabled.\n");
-    return;
-  }
-
-  if(SNES::cartridge.loaded() == false) return;
-
-  if(s == "") {
-    SNES::debugger.break_event = SNES::Debugger::None;
-  }
-}
-
 void Debugger::showBreakpointEditor() {
-  utility.showCentered(breakpointEditor->window);
+  breakpointEditor->showAt(-1.0, -1.0);
+  breakpointEditor->setFocus();
 }
 
 void Debugger::showMemoryEditor() {
-  utility.showCentered(memoryEditor->window);
+  memoryEditor->showAt(0.0, -1.0);
+  memoryEditor->setFocus();
+}
+
+void Debugger::showVramViewer() {
+  vramViewer->showAt(+1.0, -1.0);
+  vramViewer->setFocus();
+  vramViewer->refresh();
+}
+
+void Debugger::toggleRunStatus() {
+  application.debug = !application.debug;
+  if(!application.debug) application.debugrun = false;
+  synchronize();
+}
+
+void Debugger::stepAction() {
+  application.debugrun = true;
+}
+
+void Debugger::tracerUpdate() {
+  if(SNES::debugger.trace_cpu || SNES::debugger.trace_smp) {
+    if(SNES::debugger.tracefile.open() == false) {
+      SNES::debugger.tracefile.open(utf8() << config.path.data << "trace.log", file::mode_write);
+    }
+  } else if(!SNES::debugger.trace_cpu && !SNES::debugger.trace_smp) {
+    if(SNES::debugger.tracefile.open() == true) {
+      SNES::debugger.tracefile.close();
+    }
+  }
+}
+
+void Debugger::toggleTraceCPU() {
+  SNES::debugger.trace_cpu = traceCPU->isChecked();
+  tracerUpdate();
+}
+
+void Debugger::toggleTraceSMP() {
+  SNES::debugger.trace_smp = traceSMP->isChecked();
+  tracerUpdate();
 }
 
 void Debugger::event() {
@@ -150,31 +162,44 @@ void Debugger::event() {
   switch(SNES::debugger.break_event) {
     case SNES::Debugger::BreakpointHit: {
       unsigned n = SNES::debugger.breakpoint_hit;
-      echo(utf8() << "Breakpoint " << n << " hit (" << SNES::debugger.breakpoint[n].counter << ").\n");
+      echo(utf8() << "Breakpoint " << n << " hit (" << SNES::debugger.breakpoint[n].counter << ").<br>");
 
       if(SNES::debugger.breakpoint[n].mode == SNES::Debugger::Breakpoint::Exec) {
         if(SNES::debugger.breakpoint[n].source == SNES::Debugger::Breakpoint::CPUBus) {
           SNES::debugger.step_cpu = true;
           SNES::cpu.disassemble_opcode(t);
-          echo(utf8() << t << "\n");
+          echo(utf8() << t << "<br>");
         }
 
         if(SNES::debugger.breakpoint[n].source == SNES::Debugger::Breakpoint::APURAM) {
           SNES::debugger.step_smp = true;
           SNES::smp.disassemble_opcode(t);
-          echo(utf8() << t << "\n");
+          echo(utf8() << t << "<br>");
         }
       }
     } break;
 
     case SNES::Debugger::CPUStep: {
       SNES::cpu.disassemble_opcode(t);
-      echo(utf8() << t << "\n");
+      string s = t;
+      s.replace(" ", "&nbsp;");
+      echo(utf8() << "<font color='#0000a0'>" << s << "</font><br>");
     } break;
 
     case SNES::Debugger::SMPStep: {
       SNES::smp.disassemble_opcode(t);
-      echo(utf8() << t << "\n");
+      string s = t;
+      s.replace(" ", "&nbsp;");
+      echo(utf8() << "<font color='#a00000'>" << s << "</font><br>");
     } break;
+  }
+}
+
+//called once every time a video frame is rendered, used to update "auto refresh" tool windows
+void Debugger::frameTick() {
+  if(++frameCounter >= (SNES::system.region() == SNES::System::NTSC ? 60 : 50)) {
+    frameCounter = 0;
+    memoryEditor->autoUpdate();
+    vramViewer->autoUpdate();
   }
 }

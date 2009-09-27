@@ -91,7 +91,7 @@ void SuperFX::mmio_write(unsigned addr, uint8 data) {
     } break;
 
     case 0x3034: {
-      regs.pbr = data;
+      regs.pbr = data & 0x7f;
       cache_flush();
     } break;
 

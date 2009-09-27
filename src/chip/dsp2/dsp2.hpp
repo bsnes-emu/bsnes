@@ -29,6 +29,7 @@ public:
   uint8 read(unsigned addr);
   void write(unsigned addr, uint8 data);
 
+  void serialize(serializer&);
   DSP2();
   ~DSP2();
 

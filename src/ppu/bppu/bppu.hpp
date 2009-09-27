@@ -47,6 +47,13 @@ public:
   void serialize(serializer&);
   bPPU();
   ~bPPU();
+
+  friend class bPPUDebug;
 };
 
-extern bPPU ppu;
+#if defined(DEBUGGER)
+  #include "debugger/debugger.hpp"
+  extern bPPUDebug ppu;
+#else
+  extern bPPU ppu;
+#endif

@@ -36,8 +36,8 @@ public:
         QRadioButton *focusAllow;
       QWidget *spacer;
 
-  void setup();
   void initializeUi();
+  AdvancedSettingsWindow();
 
 public slots:
   void videoDriverChange(int index);

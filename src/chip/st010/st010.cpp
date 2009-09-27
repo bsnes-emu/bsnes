@@ -5,6 +5,10 @@ namespace SNES {
 
 ST010 st010;
 
+#include "st010_data.hpp"
+#include "serialization.cpp"
+#include "st010_op.cpp"
+
 void ST010::init() {
 }
 
@@ -12,9 +16,6 @@ void ST010::enable() {
   bus.map(Bus::MapDirect, 0x68, 0x6f, 0x0000, 0x0fff, *this);
   bus.map(Bus::MapDirect, 0xe8, 0xef, 0x0000, 0x0fff, *this);
 }
-
-#include "st010_data.hpp"
-#include "st010_op.cpp"
 
 int16 ST010::sin(int16 theta) {
   return sin_table[(theta >> 8) & 0xff];

@@ -191,10 +191,10 @@ public:
     uint32_t x, uint32_t y, uint32_t w, uint32_t h
   ) {
     d3dvertex vertex[4];
-    vertex[0].x = vertex[2].x = (double)(x    );
-    vertex[1].x = vertex[3].x = (double)(x + w);
-    vertex[0].y = vertex[1].y = (double)(y    );
-    vertex[2].y = vertex[3].y = (double)(y + h);
+    vertex[0].x = vertex[2].x = (double)(x     - 0.5);
+    vertex[1].x = vertex[3].x = (double)(x + w - 0.5);
+    vertex[0].y = vertex[1].y = (double)(y     - 0.5);
+    vertex[2].y = vertex[3].y = (double)(y + h - 0.5);
 
     //Z-buffer and RHW are unused for 2D blit, set to normal values
     vertex[0].z = vertex[1].z = vertex[2].z = vertex[3].z = 0.0;

@@ -1,4 +1,4 @@
-void AudioSettingsWindow::setup() {
+AudioSettingsWindow::AudioSettingsWindow() {
   panel = new QWidget;
 
   layout = new QVBoxLayout;

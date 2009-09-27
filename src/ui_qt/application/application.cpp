@@ -1,5 +1,28 @@
 #include "init.cpp"
 
+const char* FileReader::direct_supported() {
+  return "";
+}
+
+bool FileReader::direct_load(const char *filename, uint8_t **outdata, unsigned *outsize) {
+  if(file::exists(filename) == false) return false;
+
+  file fp;
+  if(fp.open(filename, file::mode_read) == false) return false;
+
+  unsigned size;
+  uint8_t *data = new uint8_t[size = fp.size()];
+  fp.read(data, size);
+  fp.close();
+
+  //remove copier header, if it exists
+  if((size & 0x7fff) == 512) memmove(data, data + 512, size -= 512);
+
+  *outdata = data;
+  *outsize = size;
+  return true;
+}
+
 void Application::initPaths(const char *basename) {
   char temp[PATH_MAX];
 
@@ -91,27 +114,30 @@ void Application::run() {
     return;
   }
 
-  processEvents();
+  QApplication::processEvents();
   utility.updateSystemState();
   inputManager.refresh();
 
   if(config.input.focusPolicy == Configuration::Input::FocusPolicyPauseEmulation) {
-    bool inactive  = (mainWindow->window->isActiveWindow() == false)
-                  || (mainWindow->window->isMinimized() == true);
-    if(!autopause && inactive) {
+    bool active = mainWindow->isActive();
+    if(!autopause && !active) {
       autopause = true;
       audio.clear();
-    } else if(autopause && !inactive) {
+    } else if(autopause && active) {
       autopause = false;
     }
   } else {
     autopause = false;
   }
 
-  if(SNES::cartridge.loaded() && !pause && !autopause) {
-    if(SNES::debugger.break_event == SNES::Debugger::None) {
-      SNES::system.run();
-      if(SNES::debugger.break_event != SNES::Debugger::None) debugger->event();
+  if(SNES::cartridge.loaded() && !pause && !autopause && (!debug || debugrun)) {
+    SNES::system.run();
+    if(SNES::debugger.break_event != SNES::Debugger::None) {
+      debug = true;
+      debugrun = false;
+      debugger->synchronize();
+      debugger->event();
+      SNES::debugger.break_event = SNES::Debugger::None;
     }
   } else {
     usleep(20 * 1000);
@@ -135,15 +161,13 @@ void Application::run() {
   }
 }
 
-void Application::processEvents() {
-  app->processEvents();
-}
-
 Application::Application() : timer(0) {
   terminate = false;
   power     = false;
   pause     = false;
   autopause = false;
+  debug     = false;
+  debugrun  = false;
 
   clockTime       = clock();
   autosaveTime    = 0;

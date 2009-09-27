@@ -1,10 +1,10 @@
 #include "cheateditor.cpp"
 #include "statemanager.cpp"
 
-void ToolsWindow::setup() {
-  window = new QWidget;
-  window->setObjectName("tools-window");
-  window->setWindowTitle("Tools");
+ToolsWindow::ToolsWindow() {
+  setObjectName("tools-window");
+  setWindowTitle("Tools");
+  setMinimumSize(625, 360);
 
   list = new QListWidget;
   list->addItem(cheatEditor = new QListWidgetItem("Cheat Editor"));
@@ -20,13 +20,10 @@ void ToolsWindow::setup() {
   layout->setSpacing(Style::WidgetSpacing);
   layout->addWidget(list);
   layout->addWidget(panel);
-  window->setLayout(layout);
+  setLayout(layout);
 
   cheatEditorWindow = new CheatEditorWindow;
   stateManagerWindow = new StateManagerWindow;
-
-  cheatEditorWindow->setup();
-  stateManagerWindow->setup();
 
   panelLayout = new QStackedLayout(panel);
   panelLayout->addWidget(cheatEditorWindow->panel);
@@ -36,7 +33,6 @@ void ToolsWindow::setup() {
   connect(list, SIGNAL(currentRowChanged(int)), this, SLOT(listChanged()));
 
   listChanged();
-  window->setMinimumSize(625, 360);
 }
 
 void ToolsWindow::listChanged() {
@@ -48,10 +44,12 @@ void ToolsWindow::listChanged() {
 
 void ToolsWindow::showCheatEditor() {
   list->setCurrentItem(cheatEditor);
-  utility.showCentered(window);
+  showAt(1.0, 1.0);
+  setFocus();
 }
 
 void ToolsWindow::showStateManager() {
   list->setCurrentItem(stateManager);
-  utility.showCentered(window);
+  showAt(1.0, 1.0);
+  setFocus();
 }

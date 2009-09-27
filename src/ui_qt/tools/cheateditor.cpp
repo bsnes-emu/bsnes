@@ -1,4 +1,4 @@
-void CheatEditorWindow::setup() {
+CheatEditorWindow::CheatEditorWindow() {
   panel = new QWidget;
 
   layout = new QVBoxLayout;

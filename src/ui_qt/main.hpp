@@ -19,19 +19,8 @@ using namespace nall;
 #include <ruby/ruby.hpp>
 using namespace ruby;
 
-#include <libreader/libreader.hpp>
-#include <libreader/filereader.hpp>
-
-#if defined(GZIP_SUPPORT)
-  #include <libreader/gzreader.hpp>
-  #include <libreader/zipreader.hpp>
-#endif
-
-#if defined(JMA_SUPPORT)
-  #include <libreader/jmareader.hpp>
-#endif
-
 #include <libfilter/libfilter.hpp>
+#include "libqb/libqb.hpp"
 
 #include "config.hpp"
 #include "interface.hpp"

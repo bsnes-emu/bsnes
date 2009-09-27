@@ -1,4 +1,4 @@
-void VideoSettingsWindow::setup() {
+VideoSettingsWindow::VideoSettingsWindow() {
   panel = new QWidget;
 
   layout = new QVBoxLayout;

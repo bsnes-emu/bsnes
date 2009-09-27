@@ -1,13 +1,12 @@
-class HtmlViewerWindow : public QObject {
+class HtmlViewerWindow : public QbWindow {
   Q_OBJECT
 
 public:
-  QWidget *window;
-    QVBoxLayout *layout;
-      QTextBrowser *document;
+  QVBoxLayout *layout;
+    QTextBrowser *document;
 
-  void setup();
   void show(const char *title, const char *htmlData);
+  HtmlViewerWindow();
 
 public slots:
 } *htmlViewerWindow;

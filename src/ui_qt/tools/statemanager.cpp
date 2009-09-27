@@ -1,4 +1,4 @@
-void StateManagerWindow::setup() {
+StateManagerWindow::StateManagerWindow() {
   panel = new QWidget;
 
   layout = new QVBoxLayout;
@@ -128,6 +128,16 @@ void StateManagerWindow::reloadList() {
   syncUi();
 }
 
+void StateManagerWindow::updateItem(QTreeWidgetItem *item) {
+  unsigned n = item->data(0, Qt::UserRole).toUInt();
+  lstring state, part;
+  utility.loadStateInfo(state);
+  part.split("\t", state[n]);
+  item->setText(0, utf8() << part[0]);
+  item->setText(1, utf8() << part[1]);
+  item->setText(2, utf8() << part[2]);
+}
+
 void StateManagerWindow::listChanged() {
   QList<QTreeWidgetItem*> items = list->selectedItems();
   if(items.count() > 0) {
@@ -144,7 +154,7 @@ void StateManagerWindow::textEdited() {
     QTreeWidgetItem *item = items[0];
     unsigned n = item->data(0, Qt::UserRole).toUInt();
     utility.setStateDescription(n, descEdit->text().toUtf8().data());
-    item->setText(2, descEdit->text().toUtf8().data());
+    updateItem(item);
   }
 }
 
@@ -163,6 +173,7 @@ void StateManagerWindow::saveSelectedState() {
     QTreeWidgetItem *item = items[0];
     unsigned n = item->data(0, Qt::UserRole).toUInt();
     utility.saveState(n, descEdit->text().toUtf8().data());
+    updateItem(item);
   }
 }
 

@@ -5,6 +5,7 @@ namespace SNES {
 
 SDD1 sdd1;
 
+#include "serialization.cpp"
 #include "sdd1emu.cpp"
 
 void SDD1::init() {}
@@ -152,11 +153,9 @@ void SDD1::write(unsigned addr, uint8 data) {
 }
 
 SDD1::SDD1() {
-  buffer.data = new uint8[65536];
 }
 
 SDD1::~SDD1() {
-  delete[] buffer.data;
 }
 
 };

@@ -33,7 +33,7 @@ void Cx4::op0d() {
   C41FXVal    = readw(0x1f80);
   C41FYVal    = readw(0x1f83);
   C41FDistVal = readw(0x1f86);
-  tanval = sqrt(((double)C41FYVal) * ((double)C41FYVal) + ((double)C41FXVal) * ((double)C41FXVal));
+  double tanval = sqrt(((double)C41FYVal) * ((double)C41FYVal) + ((double)C41FXVal) * ((double)C41FXVal));
   tanval = (double)C41FDistVal / tanval;
   C41FYVal = (int16)(((double)C41FYVal * tanval) * 0.99);
   C41FXVal = (int16)(((double)C41FXVal * tanval) * 0.98);
@@ -103,7 +103,7 @@ void Cx4::op1f() {
   if(!C41FXVal) {
     C41FAngleRes = (C41FYVal > 0) ? 0x080 : 0x180;
   } else {
-    tanval = ((double)C41FYVal) / ((double)C41FXVal);
+    double tanval = ((double)C41FYVal) / ((double)C41FXVal);
     C41FAngleRes = (short)(atan(tanval) / (PI * 2) * 512);
     C41FAngleRes = C41FAngleRes;
     if(C41FXVal < 0) {

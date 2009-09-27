@@ -1,20 +1,26 @@
-class MemoryEditor : public QObject {
+class MemoryEditor : public QbWindow {
   Q_OBJECT
 
 public:
-  QWidget *window;
   QVBoxLayout *layout;
-    QHBoxLayout *controls;
+    QHBoxLayout *controlLayout;
       QWidget *spacer;
       QLineEdit *addr;
       QComboBox *source;
-      QPushButton *refresh;
-      QCheckBox *autoUpdate;
-    QTextEdit *editor;
+      QCheckBox *autoUpdateBox;
+      QPushButton *refreshButton;
+    QbHexEdit *editor;
 
-  void setup();
-  void syncUi();
+  void autoUpdate();
+  void synchronize();
+
+  SNES::Debugger::MemorySource memorySource;
+  uint8 reader(unsigned addr);
+  void writer(unsigned addr, uint8 data);
+
+  MemoryEditor();
 
 public slots:
-  void refreshView();
+  void refresh();
+  void sourceChanged(int);
 } *memoryEditor;

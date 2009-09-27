@@ -21,9 +21,10 @@ public:
     QAction *createStateItem;
     QAction *deleteStateItem;
 
-  void setup();
   void syncUi();
   void reloadList();
+  void updateItem(QTreeWidgetItem*);
+  StateManagerWindow();
 
 public slots:
   void popupMenu(const QPoint&);

@@ -62,10 +62,18 @@ serializer StateManager::load(const char *filename, uint8 slot) {
 }
 
 bool StateManager::save(const char *filename, uint8 slot, serializer &s, const char *description) {
+  //if no state archive exists ...
   if(file::exists(filename) == false) {
+    //try and create one
     if(create(filename) == false) return false;
   }
-  if(load(filename) == false) return false;
+  //if we cannot load the existing state archive ...
+  if(load(filename) == false) {
+    //it's probably an older version, try and create a new one
+    if(create(filename) == false) return false;
+    //it still needs to be loaded before we can write to it
+    if(load(filename) == false) return false;
+  }
 
   uint8 index = findslot(slot);
   if(index == SlotInvalid) {

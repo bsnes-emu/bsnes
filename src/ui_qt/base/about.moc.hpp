@@ -1,16 +1,14 @@
-class AboutWindow : public QObject {
+class AboutWindow : public QbWindow {
   Q_OBJECT
 
 public:
-  QWidget *window;
-    QVBoxLayout *layout;
-      struct Logo : public QWidget {
-        void paintEvent(QPaintEvent*);
-      } *logo;
-      QLabel *info;
-      QWidget *spacer;
+  QVBoxLayout *layout;
+    struct Logo : public QWidget {
+      void paintEvent(QPaintEvent*);
+    } *logo;
+    QLabel *info;
 
-  void setup();
+  AboutWindow();
 
 public slots:
 } *aboutWindow;

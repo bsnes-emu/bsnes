@@ -51,9 +51,14 @@ void System::serialize_all(serializer &s) {
   ppu.serialize(s);
   dsp.serialize(s);
 
+  if(cartridge.has_srtc())    srtc.serialize(s);
+  if(cartridge.has_sdd1())    sdd1.serialize(s);
   if(cartridge.has_spc7110()) spc7110.serialize(s);
   if(cartridge.has_cx4())     cx4.serialize(s);
+  if(cartridge.has_dsp1())    dsp1.serialize(s);
+  if(cartridge.has_dsp2())    dsp2.serialize(s);
   if(cartridge.has_obc1())    obc1.serialize(s);
+  if(cartridge.has_st010())   st010.serialize(s);
 }
 
 //called once upon cartridge load event: perform dry-run state save.

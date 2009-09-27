@@ -1,40 +1,3 @@
-string Utility::selectCartridge() {
-  audio.clear();
-  application.timer->stop();
-  QString filename = QFileDialog::getOpenFileName(0,
-    "Load Cartridge",
-    utf8() << (config.path.rom != "" ? config.path.rom : config.path.current),
-    "SNES images (*.smc *.sfc *.swc *.fig *.bs *.st"
-    #if defined(GZIP_SUPPORT)
-    " *.zip *.gz"
-    #endif
-    #if defined(JMA_SUPPORT)
-    " *.jma"
-    #endif
-    ");;"
-    "All files (*)"
-  );
-  application.timer->start(0);
-
-  string name = filename.toUtf8().constData();
-  if(strlen(name) > 0) config.path.current = basepath(name);
-  return name;
-}
-
-string Utility::selectFolder(const char *title) {
-  audio.clear();
-  application.timer->stop();
-  QString pathname = QFileDialog::getExistingDirectory(0,
-    title, utf8() << config.path.current,
-    QFileDialog::ShowDirsOnly);
-  application.timer->start(0);
-
-  string path = pathname.toUtf8().constData();
-  strtr(path, "\\", "/");
-  if(path.length() > 0 && strend(path, "/") == false) path << "/";
-  return path;
-}
-
 void Utility::loadCartridge(const char *filename) {
   SNES::MappedRAM memory;
   if(loadCartridge(filename, memory) == false) return;
@@ -55,6 +18,7 @@ void Utility::loadCartridge(const char *filename) {
 
 bool Utility::loadCartridgeNormal(const char *base) {
   unloadCartridge();
+  config.path.current = basepath(base);
   if(loadCartridge(cartridge.baseName = base, SNES::memory::cartrom) == false) return false;
   SNES::cartridge.load(SNES::Cartridge::ModeNormal);
 
@@ -69,6 +33,7 @@ bool Utility::loadCartridgeNormal(const char *base) {
 
 bool Utility::loadCartridgeBsxSlotted(const char *base, const char *slot) {
   unloadCartridge();
+  config.path.current = basepath(base);
   if(loadCartridge(cartridge.baseName = base, SNES::memory::cartrom) == false) return false;
   loadCartridge(cartridge.slotAName = slot, SNES::memory::bsxflash);
   SNES::cartridge.load(SNES::Cartridge::ModeBsxSlotted);
@@ -85,6 +50,7 @@ bool Utility::loadCartridgeBsxSlotted(const char *base, const char *slot) {
 
 bool Utility::loadCartridgeBsx(const char *base, const char *slot) {
   unloadCartridge();
+  config.path.current = basepath(base);
   if(loadCartridge(cartridge.baseName = base, SNES::memory::cartrom) == false) return false;
   loadCartridge(cartridge.slotAName = slot, SNES::memory::bsxflash);
   SNES::cartridge.load(SNES::Cartridge::ModeBsx);
@@ -100,6 +66,7 @@ bool Utility::loadCartridgeBsx(const char *base, const char *slot) {
 
 bool Utility::loadCartridgeSufamiTurbo(const char *base, const char *slotA, const char *slotB) {
   unloadCartridge();
+  config.path.current = basepath(base);
   if(loadCartridge(cartridge.baseName = base, SNES::memory::cartrom) == false) return false;
   loadCartridge(cartridge.slotAName = slotA, SNES::memory::stArom);
   loadCartridge(cartridge.slotBName = slotB, SNES::memory::stBrom);
@@ -119,6 +86,7 @@ bool Utility::loadCartridgeSufamiTurbo(const char *base, const char *slotA, cons
 
 bool Utility::loadCartridgeSuperGameBoy(const char *base, const char *slot) {
   unloadCartridge();
+  config.path.current = basepath(base);
   if(loadCartridge(cartridge.baseName = base, SNES::memory::cartrom) == false) return false;
   loadCartridge(cartridge.slotAName = slot, SNES::memory::gbrom);
   SNES::cartridge.load(SNES::Cartridge::ModeSuperGameBoy);
@@ -184,7 +152,7 @@ void Utility::modifySystemState(system_state_t state) {
       else if(SNES::cartridge.has_st011()) chip = "ST011";
       else if(SNES::cartridge.has_st018()) chip = "ST018";
       if(chip != "") {
-        QMessageBox::warning(mainWindow->window, "Warning", utf8()
+        QMessageBox::warning(mainWindow, "Warning", utf8()
         << "<p><b>Warning:</b><br> The " << chip << " chip was detected, which is not fully emulated yet.<br>"
         << "It is unlikely that this title will work properly.</p>");
       }
@@ -192,8 +160,8 @@ void Utility::modifySystemState(system_state_t state) {
       showMessage(utf8()
       << "Loaded " << cartridge.name
       << (cartridge.patchApplied ? ", and applied UPS patch." : "."));
-      mainWindow->window->setWindowTitle(utf8() << bsnesTitle << " v" << bsnesVersion << " - " << cartridge.name);
-      debugger->echo(utf8() << "Loaded " << cartridge.name << ".\n");
+      mainWindow->setWindowTitle(utf8() << bsnesTitle << " v" << bsnesVersion << " - " << cartridge.name);
+      debugger->echo(utf8() << "Loaded " << cartridge.name << ".<br>");
     } break;
 
     case UnloadCartridge: {
@@ -206,7 +174,7 @@ void Utility::modifySystemState(system_state_t state) {
       application.pause = true;
 
       showMessage(utf8() << "Unloaded " << cartridge.name << ".");
-      mainWindow->window->setWindowTitle(utf8() << bsnesTitle << " v" << bsnesVersion);
+      mainWindow->setWindowTitle(utf8() << bsnesTitle << " v" << bsnesVersion);
     } break;
 
     case PowerOn: {
@@ -249,57 +217,17 @@ void Utility::modifySystemState(system_state_t state) {
   }
 
   mainWindow->syncUi();
-  debugger->syncUi();
+  debugger->synchronize();
   cheatEditorWindow->reloadList();
   stateManagerWindow->reloadList();
 }
 
 bool Utility::loadCartridge(const char *filename, SNES::MappedRAM &memory) {
   if(file::exists(filename) == false) return false;
-  Reader::Type filetype = Reader::detect(filename, config.file.autodetect_type);
 
   uint8_t *data;
   unsigned size;
-
-  switch(filetype) { default:
-    case Reader::Normal: {
-      FileReader fp(filename);
-      if(!fp.ready()) return false;
-      size = fp.size();
-      data = fp.read();
-    } break;
-
-    #ifdef GZIP_SUPPORT
-    case Reader::GZIP: {
-      GZReader fp(filename);
-      if(!fp.ready()) return false;
-      size = fp.size();
-      data = fp.read();
-    } break;
-
-    case Reader::ZIP: {
-      ZipReader fp(filename);
-      if(!fp.ready()) return false;
-      size = fp.size();
-      data = fp.read();
-    } break;
-    #endif
-
-    #ifdef JMA_SUPPORT
-    case Reader::JMA: {
-      try {
-        JMAReader fp(filename);
-        size = fp.size();
-        data = fp.read();
-      } catch(JMA::jma_errors) {
-        return false;
-      }
-    } break;
-    #endif
-  }
-
-  //remove copier header, if it exists
-  if((size & 0x7fff) == 512) memmove(data, data + 512, size -= 512);
+  if(libsnesreader.load(filename, &data, &size) == false) return false;
 
   cartridge.patchApplied = false;
   string name;

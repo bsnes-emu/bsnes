@@ -5,7 +5,7 @@ void Cx4::op00_00() {
   uint32 oamptr = ram[0x626] << 2;
   for(int32 i = 0x1fd; i > oamptr && i >= 0; i -= 4) {
     //clear oam-to-be
-    if(i >= 0)ram[i] = 0xe0;
+    if(i >= 0) ram[i] = 0xe0;
   }
 
   uint16 globalx, globaly;
@@ -18,7 +18,7 @@ void Cx4::op00_00() {
   globaly = readw(0x623);
   oamptr2 = 0x200 + (ram[0x626] >> 2);
 
-  if(!ram[0x620])return;
+  if(!ram[0x620]) return;
 
   sprcount = 128 - ram[0x626];
   uint8 offset = (ram[0x626] & 3) * 2;
@@ -51,8 +51,8 @@ void Cx4::op00_00() {
             ram[oamptr + 2] = sprname + bus.read(spraddr + 3);
             ram[oamptr + 3] = sprattr ^ (bus.read(spraddr) & 0xc0);
             ram[oamptr2] &= ~(3 << offset);
-            if(x & 0x100)ram[oamptr2] |= 1 << offset;
-            if(bus.read(spraddr) & 0x20)ram[oamptr2] |= 2 << offset;
+            if(x & 0x100) ram[oamptr2] |= 1 << offset;
+            if(bus.read(spraddr) & 0x20) ram[oamptr2] |= 2 << offset;
             oamptr += 4;
             sprcount--;
             offset = (offset + 2) & 6;
@@ -66,12 +66,12 @@ void Cx4::op00_00() {
       ram[oamptr + 2] = sprname;
       ram[oamptr + 3] = sprattr;
       ram[oamptr2] &= ~(3 << offset);
-      if(sprx & 0x100)ram[oamptr2] |= 3 << offset;
+      if(sprx & 0x100) ram[oamptr2] |= 3 << offset;
       else ram[oamptr2] |= 2 << offset;
       oamptr += 4;
       sprcount--;
       offset = (offset + 2) & 6;
-      if(!offset)oamptr2++;
+      if(!offset) oamptr2++;
     }
   }
 }
@@ -165,12 +165,12 @@ void Cx4::op00_0b() {
         int32 index = (y >> 11) * width * 4 + (x >> 11) * 32 + ((y >> 8) & 7) * 2;
         uint8 mask = 0x80 >> ((x >> 8) & 7);
 
-        if(pixel & 1)ram[index     ] |= mask;
-        if(pixel & 2)ram[index +  1] |= mask;
-        if(pixel & 4)ram[index + 16] |= mask;
-        if(pixel & 8)ram[index + 17] |= mask;
+        if(pixel & 1) ram[index     ] |= mask;
+        if(pixel & 2) ram[index +  1] |= mask;
+        if(pixel & 4) ram[index + 16] |= mask;
+        if(pixel & 8) ram[index + 17] |= mask;
       }
-      if(j & 1)srcptr++;
+      if(j & 1) srcptr++;
     }
   }
 }

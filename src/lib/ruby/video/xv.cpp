@@ -293,6 +293,9 @@ public:
 
   void term() {
     XShmDetach(device.display, &device.shminfo);
+    shmdt(device.shminfo.shmaddr);
+    shmctl(device.shminfo.shmid, IPC_RMID, NULL);
+    XFree(device.image);
 
     if(device.window) {
       XUnmapWindow(device.display, device.window);
@@ -455,6 +458,10 @@ public:
 
     settings.handle      = 0;
     settings.synchronize = false;
+  }
+
+  ~pVideoXv() {
+    term();
   }
 };
 

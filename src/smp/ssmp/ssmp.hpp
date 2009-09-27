@@ -1,5 +1,3 @@
-class sSMPdebug;
-
 class sSMP : public SMP, public SMPcore {
 public:
   void enter();
@@ -7,8 +5,6 @@ public:
 
   #include "memory/memory.hpp"
   #include "timing/timing.hpp"
-
-  unsigned instruction_counter;
 
   struct {
 
@@ -42,12 +38,12 @@ public:
   sSMP();
   ~sSMP();
 
-  friend class sSMPdebug;
+  friend class sSMPDebug;
 };
 
 #if defined(DEBUGGER)
   #include "debugger/debugger.hpp"
-  extern sSMPdebug smp;
+  extern sSMPDebug smp;
 #else
   extern sSMP smp;
 #endif

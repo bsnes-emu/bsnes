@@ -1,4 +1,4 @@
-void InputSettingsWindow::setup() {
+InputSettingsWindow::InputSettingsWindow() {
   panel = new QWidget;
 
   layout = new QVBoxLayout;

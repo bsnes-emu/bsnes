@@ -17,15 +17,12 @@ private:
   const unsigned id;
 };
 
-class BreakpointEditor : public QObject {
+class BreakpointEditor : public QbWindow {
   Q_OBJECT
 
 public:
-  QWidget *window;
   QVBoxLayout *layout;
   BreakpointItem *breakpoint[SNES::Debugger::Breakpoints];
 
-  void setup();
-
-public slots:
+  BreakpointEditor();
 } *breakpointEditor;

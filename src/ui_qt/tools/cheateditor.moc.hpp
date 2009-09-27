@@ -19,9 +19,9 @@ public:
     QAction *deleteCodeItem;
     QAction *addCodeItem;
 
-  void setup();
   void syncUi();
   void updateItem(QTreeWidgetItem*);
+  CheatEditorWindow();
 
 public slots:
   void popupMenu(const QPoint&);

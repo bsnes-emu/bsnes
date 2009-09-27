@@ -8,11 +8,11 @@ BreakpointItem::BreakpointItem(unsigned id_) : id(id_) {
   layout->addWidget(enabled);
 
   addr = new QLineEdit;
-  addr->setMinimumWidth(80);
+  addr->setFixedWidth(80);
   layout->addWidget(addr);
 
   data = new QLineEdit;
-  data->setMinimumWidth(40);
+  data->setFixedWidth(40);
   layout->addWidget(data);
 
   mode = new QComboBox;
@@ -58,20 +58,20 @@ void BreakpointItem::toggle() {
   }
 }
 
-void BreakpointEditor::setup() {
-  window = new QWidget;
-  window->setObjectName("breakpoint-editor");
-  window->setWindowTitle("Breakpoint Editor");
+BreakpointEditor::BreakpointEditor() {
+  setObjectName("breakpoint-editor");
+  setWindowTitle("Breakpoint Editor");
 
   layout = new QVBoxLayout;
+  layout->setSizeConstraint(QLayout::SetFixedSize);
   layout->setMargin(Style::WindowMargin);
   layout->setSpacing(Style::WidgetSpacing);
-  window->setLayout(layout);
+  setLayout(layout);
 
   for(unsigned n = 0; n < SNES::Debugger::Breakpoints; n++) {
     breakpoint[n] = new BreakpointItem(n);
     layout->addWidget(breakpoint[n]);
   }
 
-  window->resize(0, 0);
+  resize(0, 0);
 }

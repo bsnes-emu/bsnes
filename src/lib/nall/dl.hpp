@@ -31,11 +31,17 @@ namespace nall {
   #if defined(PLATFORM_X)
   inline bool library::open(const char *name) {
     if(handle) close();
-    char *t = new char[strlen(name) + 8];
+    char *t = new char[strlen(name) + 256];
     strcpy(t, "lib");
     strcat(t, name);
     strcat(t, ".so");
     handle = (uintptr_t)dlopen(t, RTLD_LAZY);
+    if(!handle) {
+      strcpy(t, "/usr/local/lib/lib");
+      strcat(t, name);
+      strcat(t, ".so");
+      handle = (uintptr_t)dlopen(t, RTLD_LAZY);
+    }
     delete[] t;
     return handle;
   }

@@ -1,5 +1,3 @@
-class sCPUdebug;
-
 class sCPU : public CPU, public CPUcore {
 public:
   void enter();
@@ -97,12 +95,12 @@ public:
   sCPU();
   ~sCPU();
 
-  friend class sCPUdebug;
+  friend class sCPUDebug;
 };
 
 #if defined(DEBUGGER)
   #include "debugger/debugger.hpp"
-  extern sCPUdebug cpu;
+  extern sCPUDebug cpu;
 #else
   extern sCPU cpu;
 #endif

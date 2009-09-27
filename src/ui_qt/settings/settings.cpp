@@ -5,10 +5,10 @@
 #include "advanced.cpp"
 #include "utility/inputcapture.cpp"
 
-void SettingsWindow::setup() {
-  window = new QWidget;
-  window->setObjectName("settings-window");
-  window->setWindowTitle("Configuration Settings");
+SettingsWindow::SettingsWindow() {
+  setObjectName("settings-window");
+  setWindowTitle("Configuration Settings");
+  setMinimumSize(625, 360);
 
   list = new QListWidget;
   list->addItem(video = new QListWidgetItem("Video"));
@@ -27,7 +27,7 @@ void SettingsWindow::setup() {
   layout->setSpacing(Style::WidgetSpacing);
   layout->addWidget(list);
   layout->addWidget(panel);
-  window->setLayout(layout);
+  setLayout(layout);
 
   winVideoSettings    = new VideoSettingsWindow;
   winAudioSettings    = new AudioSettingsWindow;
@@ -35,13 +35,6 @@ void SettingsWindow::setup() {
   winPathSettings     = new PathSettingsWindow;
   winAdvancedSettings = new AdvancedSettingsWindow;
   winInputCapture     = new InputCaptureWindow;
-
-  winVideoSettings->setup();
-  winAudioSettings->setup();
-  winInputSettings->setup();
-  winPathSettings->setup();
-  winAdvancedSettings->setup();
-  winInputCapture->setup();
 
   panelLayout = new QStackedLayout(panel);
   panelLayout->addWidget(winVideoSettings->panel);
@@ -54,7 +47,6 @@ void SettingsWindow::setup() {
   connect(list, SIGNAL(currentRowChanged(int)), this, SLOT(listChanged()));
 
   listChanged();
-  window->setMinimumSize(625, 360);
 }
 
 void SettingsWindow::listChanged() {

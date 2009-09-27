@@ -1,6 +1,5 @@
-void HtmlViewerWindow::setup() {
-  window = new QWidget;
-  window->setObjectName("html-window");
+HtmlViewerWindow::HtmlViewerWindow() {
+  setObjectName("html-window");
 
   layout = new QVBoxLayout;
   layout->setMargin(Style::WindowMargin);
@@ -9,12 +8,13 @@ void HtmlViewerWindow::setup() {
     layout->addWidget(document);
   }
 
-  window->setLayout(layout);
-  window->setMinimumSize(560, 480);
+  setLayout(layout);
+  setMinimumSize(560, 480);
 }
 
 void HtmlViewerWindow::show(const char *title, const char *htmlData) {
   document->setHtml(utf8() << htmlData);
-  window->setWindowTitle(title);
-  utility.showCentered(window);
+  setWindowTitle(title);
+  showAt(0.0, 0.0);
+  setFocus();
 }

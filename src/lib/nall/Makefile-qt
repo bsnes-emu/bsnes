@@ -18,16 +18,17 @@ ifeq ($(platform),x)
   qtinc := `pkg-config --cflags QtCore QtGui`
   qtlib := `pkg-config --libs QtCore QtGui`
 else ifeq ($(platform),osx)
-  qtinc := -I/usr/include/QtCore
-  qtinc += -I/usr/include/QtGui
-  qtinc += -I/Library/Frameworks/QtCore.framework/Versions/4/Headers
+  qtinc := -I/Library/Frameworks/QtCore.framework/Versions/4/Headers
   qtinc += -I/Library/Frameworks/QtGui.framework/Versions/4/Headers
+  qtinc += -I/Library/Frameworks/QtOpenGL.framework/Versions/4/Headers
 
   qtlib := -L/Library/Frameworks
   qtlib += -framework QtCore
   qtlib += -framework QtGui
+  qtlib += -framework QtOpenGL
   qtlib += -framework Carbon
   qtlib += -framework Cocoa
+  qtlib += -framework OpenGL
   qtlib += -framework AppKit
   qtlib += -framework ApplicationServices
 else ifeq ($(platform),win)

@@ -1,15 +1,14 @@
-void AboutWindow::setup() {
-  window = new QWidget;
-  window->setObjectName("about-window");
-  window->setWindowTitle("About bsnes ...");
+AboutWindow::AboutWindow() {
+  setObjectName("about-window");
+  setWindowTitle("About bsnes ...");
 
   layout = new QVBoxLayout;
+  layout->setSizeConstraint(QLayout::SetFixedSize);
   layout->setMargin(Style::WindowMargin);
-  layout->setSpacing(0); {
+  layout->setSpacing(Style::WidgetSpacing); {
     logo = new Logo;
     logo->setFixedSize(600, 106);
     layout->addWidget(logo);
-    layout->addSpacing(Style::WidgetSpacing);
 
     info = new QLabel(utf8() <<
       "<table>"
@@ -19,13 +18,9 @@ void AboutWindow::setup() {
       "</table>"
     );
     layout->addWidget(info);
-
-    spacer = new QWidget;
-    spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    layout->addWidget(spacer);
   }
 
-  window->setLayout(layout);
+  setLayout(layout);
 }
 
 void AboutWindow::Logo::paintEvent(QPaintEvent*) {

@@ -8,6 +8,8 @@ public:
   uint8 read(unsigned addr);
   void write(unsigned addr, uint8 data);
 
+  void serialize(serializer&);
+
 private:
   uint8 ram[0x1000];
   static const int16 sin_table[256];

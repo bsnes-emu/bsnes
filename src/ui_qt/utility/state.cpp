@@ -7,13 +7,8 @@ bool Utility::saveStatesSupported() {
 
   if(SNES::cartridge.has_superfx()) return false;
   if(SNES::cartridge.has_sa1())     return false;
-  if(SNES::cartridge.has_srtc())    return false;
-  if(SNES::cartridge.has_sdd1())    return false;
-  if(SNES::cartridge.has_dsp1())    return false;
-  if(SNES::cartridge.has_dsp2())    return false;
   if(SNES::cartridge.has_dsp3())    return false;
   if(SNES::cartridge.has_dsp4())    return false;
-  if(SNES::cartridge.has_st010())   return false;
   if(SNES::cartridge.has_st011())   return false;
   if(SNES::cartridge.has_st018())   return false;
 

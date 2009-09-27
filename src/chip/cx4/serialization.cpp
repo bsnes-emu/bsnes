@@ -34,14 +34,6 @@ void Cx4::serialize(serializer &s) {
   s.integer(C41FAngleRes);
   s.integer(C41FDist);
   s.integer(C41FDistVal);
-
-  s.floatingpoint(tanval);
-  s.floatingpoint(c4x);
-  s.floatingpoint(c4y);
-  s.floatingpoint(c4z);
-  s.floatingpoint(c4x2);
-  s.floatingpoint(c4y2);
-  s.floatingpoint(c4z2);
 }
 
 #endif

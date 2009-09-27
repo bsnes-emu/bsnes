@@ -17,8 +17,8 @@ public:
         QCheckBox *enableNtscMergeFields;
       QWidget *spacer;
 
-  void setup();
   void syncUi();
+  VideoSettingsWindow();
 
 public slots:
   void gammaRampToggle(int);

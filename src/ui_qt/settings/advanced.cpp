@@ -1,4 +1,4 @@
-void AdvancedSettingsWindow::setup() {
+AdvancedSettingsWindow::AdvancedSettingsWindow() {
   panel = new QWidget;
 
   layout = new QVBoxLayout;

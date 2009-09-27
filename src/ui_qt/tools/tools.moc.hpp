@@ -1,11 +1,10 @@
 #include "cheateditor.moc"
 #include "statemanager.moc"
 
-class ToolsWindow : public QObject {
+class ToolsWindow : public QbWindow {
   Q_OBJECT
 
 public:
-  QWidget *window;
   QHBoxLayout *layout;
     QListWidget *list;
       QListWidgetItem *cheatEditor;
@@ -13,9 +12,9 @@ public:
     QWidget *panel;
     QStackedLayout *panelLayout;
 
-  void setup();
   void showCheatEditor();
   void showStateManager();
+  ToolsWindow();
 
 public slots:
   void listChanged();

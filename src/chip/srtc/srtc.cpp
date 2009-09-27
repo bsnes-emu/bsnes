@@ -5,6 +5,8 @@ namespace SNES {
 
 SRTC srtc;
 
+#include "serialization.cpp"
+
 const unsigned SRTC::months[12] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
 
 void SRTC::init() {
@@ -20,7 +22,7 @@ void SRTC::power() {
 }
 
 void SRTC::reset() {
-  rtc_mode = RTCM_Read;
+  rtc_mode = RtcRead;
   rtc_index = -1;
   update_time();
 }
@@ -159,7 +161,7 @@ uint8 SRTC::mmio_read(unsigned addr) {
   addr &= 0xffff;
 
   if(addr == 0x2800) {
-    if(rtc_mode != RTCM_Read) return 0x00;
+    if(rtc_mode != RtcRead) return 0x00;
 
     if(rtc_index < 0) {
       update_time();
@@ -183,19 +185,19 @@ void SRTC::mmio_write(unsigned addr, uint8 data) {
     data &= 0x0f;  //only the low four bits are used
 
     if(data == 0x0d) {
-      rtc_mode = RTCM_Read;
+      rtc_mode = RtcRead;
       rtc_index = -1;
       return;
     }
 
     if(data == 0x0e) {
-      rtc_mode = RTCM_Command;
+      rtc_mode = RtcCommand;
       return;
     }
 
     if(data == 0x0f) return;  //unknown behavior
 
-    if(rtc_mode == RTCM_Write) {
+    if(rtc_mode == RtcWrite) {
       if(rtc_index >= 0 && rtc_index < 12) {
         memory::cartrtc.write(rtc_index++, data);
 
@@ -209,17 +211,17 @@ void SRTC::mmio_write(unsigned addr, uint8 data) {
           memory::cartrtc.write(rtc_index++, weekday(year, month, day));
         }
       }
-    } else if(rtc_mode == RTCM_Command) {
+    } else if(rtc_mode == RtcCommand) {
       if(data == 0) {
-        rtc_mode = RTCM_Write;
+        rtc_mode = RtcWrite;
         rtc_index = 0;
       } else if(data == 4) {
-        rtc_mode = RTCM_Ready;
+        rtc_mode = RtcReady;
         rtc_index = -1;
         for(unsigned i = 0; i < 13; i++) memory::cartrtc.write(i, 0);
       } else {
         //unknown behavior
-        rtc_mode = RTCM_Ready;
+        rtc_mode = RtcReady;
       }
     }
   }

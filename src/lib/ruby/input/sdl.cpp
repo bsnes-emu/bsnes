@@ -224,6 +224,7 @@ struct pInputSDL {
     }
 
     SDL_QuitSubSystem(SDL_INIT_JOYSTICK);
+    XCloseDisplay(device.display);
   }
 
   pInputSDL() {

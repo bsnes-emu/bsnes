@@ -453,7 +453,7 @@ template<int n> void SuperFX::op_jmp_r() {
 
 //$98-9d(alt1): ljmp rN
 template<int n> void SuperFX::op_ljmp_r() {
-  regs.pbr = regs.r[n];
+  regs.pbr = regs.r[n] & 0x7f;
   regs.r[15] = regs.sr();
   regs.cbr = regs.r[15] & 0xfff0;
   cache_flush();
@@ -593,7 +593,7 @@ void SuperFX::op_ramb() {
 //$df(alt3): romb
 void SuperFX::op_romb() {
   rombuffer_sync();
-  regs.rombr = regs.sr();
+  regs.rombr = regs.sr() & 0x7f;
   regs.reset();
 }
 

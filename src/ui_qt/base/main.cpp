@@ -1,15 +1,15 @@
-void MainWindow::setup() {
-  window = new Window;
-  window->setObjectName("main-window");
-  window->setWindowTitle(utf8() << bsnesTitle << " v" << bsnesVersion);
+MainWindow::MainWindow() {
+  setObjectName("main-window");
+  setWindowTitle(utf8() << bsnesTitle << " v" << bsnesVersion);
 
+  //menu bar
   #if defined(PLATFORM_OSX)
-  window->menu = new QMenuBar(0);
+  menuBar = new QMenuBar(0);
   #else
-  window->menu = window->menuBar();
+  menuBar = new QMenuBar;
   #endif
 
-  system = window->menu->addMenu("System");
+  system = menuBar->addMenu("System");
     system_load = system->addAction("Load Cartridge ...");
     system->addSeparator();
     system_power = system->addMenu("Power");
@@ -49,7 +49,7 @@ void MainWindow::setup() {
     system_exit = system->addAction("Exit");
     system_exit->setMenuRole(QAction::QuitRole);
 
-  settings = window->menu->addMenu("Settings");
+  settings = menuBar->addMenu("Settings");
     settings_videoMode = settings->addMenu("Video Mode");
       settings_videoMode_1x = settings_videoMode->addAction("Scale 1x");
       settings_videoMode_1x->setCheckable(true);
@@ -61,27 +61,21 @@ void MainWindow::setup() {
       settings_videoMode_4x->setCheckable(true);
       settings_videoMode_max = settings_videoMode->addAction("Scale Max");
       settings_videoMode_max->setCheckable(true);
-      settings_videoMode_max->setStatusTip("Scale video output to fill as much of the screen as possible");
       settings_videoMode->addSeparator();
       settings_videoMode_correctAspectRatio = settings_videoMode->addAction("Correct Aspect Ratio");
-      settings_videoMode_correctAspectRatio->setStatusTip("Match pixel width-to-height ratio of TV");
       settings_videoMode_correctAspectRatio->setCheckable(true);
       settings_videoMode_fullscreen = settings_videoMode->addAction("Fullscreen");
       settings_videoMode_fullscreen->setCheckable(true);
       settings_videoMode->addSeparator();
       settings_videoMode_ntsc = settings_videoMode->addAction("NTSC");
       settings_videoMode_ntsc->setCheckable(true);
-      settings_videoMode_ntsc->setStatusTip("Size video output window to match NTSC TV spec");
       settings_videoMode_pal = settings_videoMode->addAction("PAL");
       settings_videoMode_pal->setCheckable(true);
-      settings_videoMode_pal->setStatusTip("Size video output window to match PAL TV spec");
     settings_videoFilter = settings->addMenu("Video Filter");
       settings_videoFilter_point = settings_videoFilter->addAction("Point");
       settings_videoFilter_point->setCheckable(true);
-      settings_videoFilter_point->setStatusTip("Use pixellated hardware video scaling");
       settings_videoFilter_linear = settings_videoFilter->addAction("Linear");
       settings_videoFilter_linear->setCheckable(true);
-      settings_videoFilter_linear->setStatusTip("Use smoothed hardware video scaling");
       settings_videoFilter->addSeparator();
       settings_videoFilter_none = settings_videoFilter->addAction("None");
       settings_videoFilter_none->setCheckable(true);
@@ -113,14 +107,12 @@ void MainWindow::setup() {
       settings_emulationSpeed->addSeparator();
       settings_emulationSpeed_syncVideo = settings_emulationSpeed->addAction("Sync Video");
       settings_emulationSpeed_syncVideo->setCheckable(true);
-      settings_emulationSpeed_syncVideo->setStatusTip("Sync video output to vertical refresh rate");
       settings_emulationSpeed_syncAudio = settings_emulationSpeed->addAction("Sync Audio");
       settings_emulationSpeed_syncAudio->setCheckable(true);
-      settings_emulationSpeed_syncAudio->setStatusTip("Sync audio output to sound card output rate");
     settings_configuration = settings->addAction("Configuration ...");
     settings_configuration->setMenuRole(QAction::PreferencesRole);
 
-  tools = window->menu->addMenu("Tools");
+  tools = menuBar->addMenu("Tools");
     tools_cheatEditor = tools->addAction("Cheat Editor ...");
     tools_stateManager = tools->addAction("State Manager ...");
     #if defined(DEBUGGER)
@@ -131,7 +123,7 @@ void MainWindow::setup() {
     tools_debugger->setVisible(false);
     #endif
 
-  help = window->menu->addMenu("Help");
+  help = menuBar->addMenu("Help");
     help_documentation = help->addAction("Documentation ...");
     help_license = help->addAction("License ...");
     #if !defined(PLATFORM_OSX)
@@ -140,6 +132,7 @@ void MainWindow::setup() {
     help_about = help->addAction("About ...");
     help_about->setMenuRole(QAction::AboutRole);
 
+  //canvas
   canvasContainer = new CanvasObject;
   canvasContainer->setAcceptDrops(true); {
     canvasContainer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -151,6 +144,7 @@ void MainWindow::setup() {
 
       canvas = new CanvasWidget;
       canvas->setAcceptDrops(true);
+      canvas->setFocusPolicy(Qt::StrongFocus);
       canvas->setAttribute(Qt::WA_PaintOnScreen, true);  //disable Qt painting on focus / resize
 
       QPalette palette;
@@ -162,11 +156,22 @@ void MainWindow::setup() {
   }
   canvasContainer->setLayout(canvasLayout);
 
-  window->statusBar()->showMessage("");
+  //status bar
+  statusBar = new QStatusBar;
+  statusBar->showMessage("");
   systemState = new QLabel;
-  window->statusBar()->addPermanentWidget(systemState);
+  statusBar->addPermanentWidget(systemState);
 
-  window->setCentralWidget(canvasContainer);
+  //layout
+  layout = new QVBoxLayout;
+  layout->setMargin(0);
+  layout->setSpacing(0);
+  #if !defined(PLATFORM_OSX)
+  layout->addWidget(menuBar);
+  #endif
+  layout->addWidget(canvasContainer);
+  layout->addWidget(statusBar);
+  setLayout(layout);
 
   //slots
   connect(system_load, SIGNAL(triggered()), this, SLOT(loadCartridge()));
@@ -272,12 +277,11 @@ void MainWindow::syncUi() {
 }
 
 bool MainWindow::isActive() {
-  return window->isActiveWindow() && !window->isMinimized();
+  return isActiveWindow() && !isMinimized();
 }
 
 void MainWindow::loadCartridge() {
-  string filename = utility.selectCartridge();
-  if(filename.length() > 0) utility.loadCartridge(filename);
+  diskBrowser->loadAnyCartridge();
 }
 
 void MainWindow::powerOn()  { utility.modifySystemState(Utility::PowerOn); }
@@ -311,7 +315,12 @@ void MainWindow::toggleAspectCorrection() {
   utility.resizeMainWindow();
 }
 
-void MainWindow::toggleFullscreen() { config.video.isFullscreen = settings_videoMode_fullscreen->isChecked(); utility.updateFullscreenState(); syncUi(); }
+void MainWindow::toggleFullscreen() {
+  config.video.isFullscreen = settings_videoMode_fullscreen->isChecked();
+  utility.updateFullscreenState();
+  utility.resizeMainWindow();
+  syncUi();
+}
 
 void MainWindow::setVideoNtsc() { config.video.context->region = 0; utility.updateVideoMode(); utility.resizeMainWindow(); syncUi(); }
 void MainWindow::setVideoPal()  { config.video.context->region = 1; utility.updateVideoMode(); utility.resizeMainWindow(); syncUi(); }
@@ -337,7 +346,8 @@ void MainWindow::syncVideo() { config.video.synchronize = settings_emulationSpee
 void MainWindow::syncAudio() { config.audio.synchronize = settings_emulationSpeed_syncAudio->isChecked(); utility.updateAvSync(); }
 
 void MainWindow::showConfigWindow() {
-  utility.showCentered(settingsWindow->window);
+  settingsWindow->showAt(-1.0, 1.0);
+  settingsWindow->setFocus();
 }
 
 void MainWindow::showCheatEditor()  { toolsWindow->showCheatEditor();  }
@@ -360,16 +370,18 @@ void MainWindow::showLicense() {
   }
 }
 void MainWindow::showAbout() {
-  utility.showCentered(aboutWindow->window);
+  aboutWindow->showAt(0.0, 0.0);
+  aboutWindow->setFocus();
 }
 
-void MainWindow::Window::closeEvent(QCloseEvent*) {
-  mainWindow->quit();
+void MainWindow::closeEvent(QCloseEvent*) {
+  quit();
 }
 
 //============
 //CanvasObject
 //============
+
 //implement drag-and-drop support:
 //drag cartridge image onto main window canvas area to load
 
@@ -387,9 +399,19 @@ void CanvasObject::dropEvent(QDropEvent *event) {
   }
 }
 
+//accept all key events for this widget to prevent system chime from playing on OS X
+//key events are actually handled by Input class
+
+void CanvasObject::keyPressEvent(QKeyEvent *event) {
+}
+
+void CanvasObject::keyReleaseEvent(QKeyEvent *event) {
+}
+
 //===========
 //CanvasWidget
 //============
+
 //custom video render and mouse capture functionality
 
 QPaintEngine* CanvasWidget::paintEngine() const {

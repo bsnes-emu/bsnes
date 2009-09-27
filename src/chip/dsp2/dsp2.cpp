@@ -5,7 +5,8 @@ namespace SNES {
 
 DSP2 dsp2;
 
-#include "dsp2_op.cpp"
+#include "serialization.cpp"
+#include "opcodes.cpp"
 
 void DSP2::init() {
 }

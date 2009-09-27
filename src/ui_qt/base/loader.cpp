@@ -1,11 +1,11 @@
-void LoaderWindow::setup() {
-  window = new QWidget;
-  window->setObjectName("loader-window");
-  window->setMinimumWidth(520);
+LoaderWindow::LoaderWindow() {
+  setObjectName("loader-window");
+  setMinimumWidth(520);
 
   layout = new QVBoxLayout;
   layout->setMargin(Style::WindowMargin);
   layout->setSpacing(0);
+  setLayout(layout);
 
   grid = new QGridLayout; {
     baseLabel = new QLabel("Base cartridge:");
@@ -65,7 +65,6 @@ void LoaderWindow::setup() {
   spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
   layout->addWidget(spacer);
 
-  window->setLayout(layout);
   connect(baseBrowse, SIGNAL(released()), this, SLOT(selectBaseCartridge()));
   connect(baseClear, SIGNAL(released()), this, SLOT(clearBaseCartridge()));
   connect(slot1Browse, SIGNAL(released()), this, SLOT(selectSlot1Cartridge()));
@@ -82,7 +81,7 @@ void LoaderWindow::syncUi() {
 }
 
 void LoaderWindow::loadBsxSlottedCartridge(const char *filebase, const char *fileSlot1) {
-  window->hide();
+  hide();
   baseLabel->show(),  baseFile->show(),  baseBrowse->show(),  baseClear->show();
   slot1Label->show(), slot1File->show(), slot1Browse->show(), slot1Clear->show();
   slot2Label->hide(), slot2File->hide(), slot2Browse->hide(), slot2Clear->hide();
@@ -98,7 +97,7 @@ void LoaderWindow::loadBsxSlottedCartridge(const char *filebase, const char *fil
 }
 
 void LoaderWindow::loadBsxCartridge(const char *fileBase, const char *fileSlot1) {
-  window->hide();
+  hide();
   baseLabel->show(),  baseFile->show(),  baseBrowse->show(),  baseClear->show();
   slot1Label->show(), slot1File->show(), slot1Browse->show(), slot1Clear->show();
   slot2Label->hide(), slot2File->hide(), slot2Browse->hide(), slot2Clear->hide();
@@ -114,7 +113,7 @@ void LoaderWindow::loadBsxCartridge(const char *fileBase, const char *fileSlot1)
 }
 
 void LoaderWindow::loadSufamiTurboCartridge(const char *fileBase, const char *fileSlot1, const char *fileSlot2) {
-  window->hide();
+  hide();
   baseLabel->show(),  baseFile->show(),  baseBrowse->show(),  baseClear->show();
   slot1Label->show(), slot1File->show(), slot1Browse->show(), slot1Clear->show();
   slot2Label->show(), slot2File->show(), slot2Browse->show(), slot2Clear->show();
@@ -132,7 +131,7 @@ void LoaderWindow::loadSufamiTurboCartridge(const char *fileBase, const char *fi
 }
 
 void LoaderWindow::loadSuperGameBoyCartridge(const char *fileBase, const char *fileSlot1) {
-  window->hide();
+  hide();
   baseLabel->show(),  baseFile->show(),  baseBrowse->show(),  baseClear->show();
   slot1Label->show(), slot1File->show(), slot1Browse->show(), slot1Clear->show();
   slot2Label->hide(), slot2File->hide(), slot2Browse->hide(), slot2Clear->hide();
@@ -148,15 +147,29 @@ void LoaderWindow::loadSuperGameBoyCartridge(const char *fileBase, const char *f
 }
 
 void LoaderWindow::showWindow(const char *title) {
-  window->setWindowTitle(title);
-  utility.showCentered(window);
+  setWindowTitle(title);
+  showAt(0.0, 0.0);
+  setFocus();
   load->setFocus();
 }
 
-void LoaderWindow::selectBaseCartridge() {
-  string filename = utility.selectCartridge();
-  if(filename.length() > 0) baseFile->setText(utf8() << filename);
+void LoaderWindow::selectBaseCartridge(const char *filename) {
+  baseFile->setText(utf8() << filename);
   syncUi();
+}
+
+void LoaderWindow::selectSlot1Cartridge(const char *filename) {
+  slot1File->setText(utf8() << filename);
+  syncUi();
+}
+
+void LoaderWindow::selectSlot2Cartridge(const char *filename) {
+  slot2File->setText(utf8() << filename);
+  syncUi();
+}
+
+void LoaderWindow::selectBaseCartridge() {
+  diskBrowser->loadBaseCartridge();
 }
 
 void LoaderWindow::clearBaseCartridge() {
@@ -165,9 +178,18 @@ void LoaderWindow::clearBaseCartridge() {
 }
 
 void LoaderWindow::selectSlot1Cartridge() {
-  string filename = utility.selectCartridge();
-  if(filename.length() > 0) slot1File->setText(utf8() << filename);
-  syncUi();
+  switch(mode) {
+    case SNES::Cartridge::ModeBsx:
+    case SNES::Cartridge::ModeBsxSlotted:
+      diskBrowser->loadBsxCartridge();
+      break;
+    case SNES::Cartridge::ModeSufamiTurbo:
+      diskBrowser->loadSufamiTurboCartridge1();
+      break;
+    case SNES::Cartridge::ModeSuperGameBoy:
+      diskBrowser->loadSuperGameBoyCartridge();
+      break;
+  }
 }
 
 void LoaderWindow::clearSlot1Cartridge() {
@@ -176,9 +198,7 @@ void LoaderWindow::clearSlot1Cartridge() {
 }
 
 void LoaderWindow::selectSlot2Cartridge() {
-  string filename = utility.selectCartridge();
-  if(filename.length() > 0) slot2File->setText(utf8() << filename);
-  syncUi();
+  diskBrowser->loadSufamiTurboCartridge2();
 }
 
 void LoaderWindow::clearSlot2Cartridge() {
@@ -187,7 +207,7 @@ void LoaderWindow::clearSlot2Cartridge() {
 }
 
 void LoaderWindow::onLoad() {
-  window->hide();
+  hide();
   string base  = baseFile->text().toUtf8().data();
   string slot1 = slot1File->text().toUtf8().data();
   string slot2 = slot2File->text().toUtf8().data();
@@ -215,5 +235,5 @@ void LoaderWindow::onLoad() {
 }
 
 void LoaderWindow::onCancel() {
-  window->hide();
+  hide();
 }

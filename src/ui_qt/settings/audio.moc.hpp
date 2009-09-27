@@ -17,8 +17,8 @@ public:
         QSlider *frequencySkew;
       QWidget *spacer;
 
-  void setup();
   void syncUi();
+  AudioSettingsWindow();
 
 public slots:
   void frequencyChange(int value);

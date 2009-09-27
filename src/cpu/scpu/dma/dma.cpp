@@ -51,8 +51,6 @@ void sCPU::dma_transfer(bool direction, uint8 bbus, uint32 abus) {
       }
     }
   }
-
-  cycle_edge();
 }
 
 /*****
@@ -118,6 +116,7 @@ void sCPU::dma_run() {
     unsigned index = 0;
     do {
       dma_transfer(channel[i].direction, dma_bbus(i, index++), dma_addr(i));
+      cycle_edge();
     } while(channel[i].dma_enabled && --channel[i].xfersize);
 
     channel[i].dma_enabled = false;

@@ -4,8 +4,6 @@ void sSMP::serialize(serializer &s) {
   SMP::serialize(s);
   SMPcore::core_serialize(s);
 
-  s.integer(instruction_counter);
-
   s.integer(status.opcode);
   s.integer(status.in_opcode);
   s.integer(status.clock_counter);

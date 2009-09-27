@@ -50,6 +50,7 @@ public:
   }
 
   void term() {
+    XCloseDisplay(display);
   }
 };
 

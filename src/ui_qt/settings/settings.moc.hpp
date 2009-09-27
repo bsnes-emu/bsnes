@@ -5,11 +5,10 @@
 #include "advanced.moc"
 #include "utility/inputcapture.moc"
 
-class SettingsWindow : public QObject {
+class SettingsWindow : public QbWindow {
   Q_OBJECT
 
 public:
-  QWidget *window;
   QHBoxLayout *layout;
     QListWidget *list;
       QListWidgetItem *video;
@@ -20,7 +19,7 @@ public:
     QWidget *panel;
     QStackedLayout *panelLayout;
 
-  void setup();
+  SettingsWindow();
 
 public slots:
   void listChanged();

@@ -14,8 +14,8 @@ public:
         QPushButton *assignAll;
         QPushButton *unassign;
 
-  void setup();
   void syncUi();
+  InputSettingsWindow();
 
 public slots:
   void portChanged();

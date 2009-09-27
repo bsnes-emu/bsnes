@@ -164,6 +164,13 @@ private:
   void echo_28();
   void echo_29();
   void echo_30();
+
+  friend class sDSPDebug;
 };
 
-extern sDSP dsp;
+#if defined(DEBUGGER)
+  #include "debugger/debugger.hpp"
+  extern sDSPDebug dsp;
+#else
+  extern sDSP dsp;
+#endif
