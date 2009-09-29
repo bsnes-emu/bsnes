@@ -16,11 +16,15 @@ Debugger::Debugger() {
 
   tools = menu->addMenu("Tools");
   tools_breakpoint = tools->addAction("Breakpoint Editor ...");
+  tools_breakpoint->setIcon(QIcon(":/16x16/process-stop.png"));
   tools_memory = tools->addAction("Memory Editor ...");
+  tools_memory->setIcon(QIcon(":/16x16/text-x-generic.png"));
   tools_vramViewer = tools->addAction("Video RAM Viewer ...");
+  tools_vramViewer->setIcon(QIcon(":/16x16/image-x-generic.png"));
 
   miscOptions = menu->addMenu("Misc");
   miscOptions_clear = miscOptions->addAction("Clear Console");
+  miscOptions_clear->setIcon(QIcon(":/16x16/document-new.png"));
 
   console = new QTextEdit;
   console->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);

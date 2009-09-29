@@ -152,6 +152,6 @@ QbHexEdit::QbHexEdit() {
   scrollBar = new QbHexEditScrollBar;
   scrollBar->setEnabled(false);
   setVerticalScrollBar(scrollBar);
-  setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
+  setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
   setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 }

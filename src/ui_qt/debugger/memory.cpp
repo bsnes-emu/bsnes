@@ -35,7 +35,7 @@ MemoryEditor::MemoryEditor() {
 
   editor = new QbHexEdit;
   editor->setFont(QFont(Style::Monospace));
-  editor->setMinimumWidth((60 + 2) * editor->fontMetrics().width(' '));
+  editor->setMinimumWidth((58 + 2) * editor->fontMetrics().width(' '));
   editor->setMinimumHeight((16 + 1) * editor->fontMetrics().height());
 
   editor->reader = bind(&MemoryEditor::reader, this);

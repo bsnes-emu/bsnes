@@ -1,11 +1,5 @@
 void QbWindow::showHidden(bool state) {
-  #if defined(PLATFORM_X)
-  if(state) {
-    showMinimized();
-  } else {
-    showNormal();
-  }
-  #else
+  #if !defined(PLATFORM_X)
   if(state) {
     setWindowOpacity(0.0);
   } else {
@@ -16,17 +10,13 @@ void QbWindow::showHidden(bool state) {
 }
 
 void QbWindow::showAt(double x, double y) {
+  #if defined(PLATFORM_X)
+  resize(0, 0);
+  showNormal();
+  #else
   if(isVisible() == false) showHidden(true);
   resize(0, 0);
   QApplication::processEvents();
-
-  #if defined(PLATFORM_X)
-  for(unsigned counter = 0; counter < 4096; counter++) {
-    if(frameSize() != size()) break;
-    usleep(5000);
-    QApplication::processEvents();
-  }
-  #endif
 
   QRect deskRect = QApplication::desktop()->availableGeometry(this);
 
@@ -39,6 +29,7 @@ void QbWindow::showAt(double x, double y) {
 
   move(deskRect.left() + availableWidth * x, deskRect.top() + availableHeight * y);
   showHidden(false);
+  #endif
 }
 
 void QbWindow::setFocus() {

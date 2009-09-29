@@ -1,5 +1,3 @@
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
 #include <nall/utf8.hpp>
 
 char* realpath(const char *filename, char *resolvedname) {

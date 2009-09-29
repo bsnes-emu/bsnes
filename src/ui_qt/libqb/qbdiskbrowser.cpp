@@ -40,15 +40,16 @@ QPushButton *QbDiskBrowser::acceptButton() { return load; }
 void QbDiskBrowser::setPath(const QString &reqPath) {
   disconnect(path, SIGNAL(currentIndexChanged(int)), this, SLOT(updatePath()));
 
+  QString effectivePath = reqPath;
+  if(effectivePath == "<root>") effectivePath = "";
   path->clear();
-  view->setRootIndex(model->index(reqPath));
+  model->setRootPath(effectivePath);
+  view->setRootIndex(model->index(effectivePath));
   view->setCurrentIndex(view->rootIndex());
   view->setFocus();
 
-  string effectivePath = reqPath.toUtf8().constData();
-  if(effectivePath == "<root>") effectivePath = "";
   if(effectivePath.length() > 0) {
-    QDir directory((const char*)effectivePath);
+    QDir directory(effectivePath);
     while(true) {
       path->addItem(directory.absolutePath());
       if(directory.isRoot()) break;
@@ -157,7 +158,6 @@ QbDiskBrowser::QbDiskBrowser() {
   controlLayout->addWidget(cancel);
 
   model = new QFileSystemModel;
-  model->setRootPath("");
   model->setFilter(QDir::AllDirs | QDir::Files | QDir::NoDotAndDotDot);
   model->setNameFilterDisables(false);
 

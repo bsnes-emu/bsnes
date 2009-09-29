@@ -6,11 +6,17 @@ ToolsWindow::ToolsWindow() {
   setWindowTitle("Tools");
   setMinimumSize(625, 360);
 
-  list = new QListWidget;
-  list->addItem(cheatEditor = new QListWidgetItem("Cheat Editor"));
-  list->addItem(stateManager = new QListWidgetItem("State Manager"));
+  list = new QTreeWidget;
+  list->addTopLevelItem(cheatEditor = new QTreeWidgetItem(QStringList() << "Cheat Editor"));
+  list->addTopLevelItem(stateManager = new QTreeWidgetItem(QStringList() << "State Manager"));
   list->setCurrentItem(cheatEditor);
   list->setFixedWidth(135);
+  list->setHeaderHidden(true);
+  list->setRootIsDecorated(false);
+  list->setAllColumnsShowFocus(true);
+  list->setIconSize(QSize(22, 22));
+  cheatEditor->setIcon(0, QIcon(":/22x22/accessories-text-editor.png"));
+  stateManager->setIcon(0, QIcon(":/22x22/system-file-manager.png"));
 
   panel = new QWidget;
   panel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -30,13 +36,13 @@ ToolsWindow::ToolsWindow() {
   panelLayout->addWidget(stateManagerWindow->panel);
   panel->setLayout(panelLayout);
 
-  connect(list, SIGNAL(currentRowChanged(int)), this, SLOT(listChanged()));
+  connect(list, SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)), this, SLOT(itemChanged()));
 
-  listChanged();
+  itemChanged();
 }
 
-void ToolsWindow::listChanged() {
-  QListWidgetItem *item = list->currentItem();
+void ToolsWindow::itemChanged() {
+  QTreeWidgetItem *item = list->currentItem();
 
   if(item == cheatEditor)  panelLayout->setCurrentWidget(cheatEditorWindow->panel);
   if(item == stateManager) panelLayout->setCurrentWidget(stateManagerWindow->panel);

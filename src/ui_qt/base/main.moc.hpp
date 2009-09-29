@@ -24,9 +24,7 @@ public:
   QVBoxLayout *layout;
   QMenu *system;
     QAction *system_load;
-    QMenu *system_power;
-      QAction *system_power_on;
-      QAction *system_power_off;
+    QAction *system_power;
     QAction *system_reset;
     QMenu *system_port1;
       QAction *system_port1_none;
@@ -92,8 +90,7 @@ public:
 
 public slots:
   void loadCartridge();
-  void powerOn();
-  void powerOff();
+  void power();
   void reset();
   void setPort1None();
   void setPort1Joypad();

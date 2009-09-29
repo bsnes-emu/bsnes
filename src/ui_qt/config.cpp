@@ -106,7 +106,7 @@ Configuration::Configuration() {
   attach(audio.outputFrequency = 48000, "audio.outputFrequency");
   attach(audio.inputFrequency  = 32000, "audio.inputFrequency");
 
-  attach(input.focusPolicy = Input::FocusPolicyPauseEmulation, "input.focusPolicy");
+  attach(input.focusPolicy = Input::FocusPolicyIgnoreInput, "input.focusPolicy");
   attach(input.allowInvalidInput = false, "input.allowInvalidInput", "Allow up+down / left+right combinations; may trigger bugs in some games");
 
   attach(input.joypad1.up     = "keyboard00.up",     "input.joypad1.up");

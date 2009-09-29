@@ -202,7 +202,7 @@ DiskBrowser::DiskBrowser() {
   applyPatch = new QCheckBox("Apply UPS patch");
   applyPatch->setChecked(true);
   applyPatch->setVisible(false);
-//applyPatch->setEnabled(false);
+  applyPatch->setEnabled(false);
   layout->addWidget(applyPatch);
 
   connect(this, SIGNAL(itemActivated(const QString&, bool)), this, SLOT(onActivate(const QString&, bool)));

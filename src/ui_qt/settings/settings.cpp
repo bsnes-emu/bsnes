@@ -10,14 +10,26 @@ SettingsWindow::SettingsWindow() {
   setWindowTitle("Configuration Settings");
   setMinimumSize(625, 360);
 
-  list = new QListWidget;
-  list->addItem(video = new QListWidgetItem("Video"));
-  list->addItem(audio = new QListWidgetItem("Audio"));
-  list->addItem(input = new QListWidgetItem("Input"));
-  list->addItem(paths = new QListWidgetItem("Paths"));
-  list->addItem(advanced = new QListWidgetItem("Advanced"));
+  //use QTreeWidget instead of QListWidget, as only the former has setAllColumnsShowFocus()
+  //this is needed to have the dotted-selection rectangle encompass the icons
+  list = new QTreeWidget;
+  list->addTopLevelItem(video = new QTreeWidgetItem(QStringList() << "Video"));
+  list->addTopLevelItem(audio = new QTreeWidgetItem(QStringList() << "Audio"));
+  list->addTopLevelItem(input = new QTreeWidgetItem(QStringList() << "Input"));
+  list->addTopLevelItem(paths = new QTreeWidgetItem(QStringList() << "Paths"));
+  list->addTopLevelItem(advanced = new QTreeWidgetItem(QStringList() << "Advanced"));
   list->setCurrentItem(input);  //select most frequently used panel by default
   list->setFixedWidth(135);
+  list->setHeaderHidden(true);
+  list->setRootIsDecorated(false);
+  list->setAllColumnsShowFocus(true);
+  list->setIconSize(QSize(22, 22));
+
+  video->setIcon(0, QIcon(":/22x22/video-display.png"));
+  audio->setIcon(0, QIcon(":/22x22/audio-volume-high.png"));
+  input->setIcon(0, QIcon(":/22x22/input-gaming.png"));
+  paths->setIcon(0, QIcon(":/22x22/folder.png"));
+  advanced->setIcon(0, QIcon(":/22x22/preferences-system.png"));
 
   panel = new QWidget;
   panel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -44,13 +56,13 @@ SettingsWindow::SettingsWindow() {
   panelLayout->addWidget(winAdvancedSettings->panel);
   panel->setLayout(panelLayout);
 
-  connect(list, SIGNAL(currentRowChanged(int)), this, SLOT(listChanged()));
+  connect(list, SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)), this, SLOT(itemChanged()));
 
-  listChanged();
+  itemChanged();
 }
 
-void SettingsWindow::listChanged() {
-  QListWidgetItem *item = list->currentItem();
+void SettingsWindow::itemChanged() {
+  QTreeWidgetItem *item = list->currentItem();
 
   if(item == video)    panelLayout->setCurrentWidget(winVideoSettings->panel);
   if(item == audio)    panelLayout->setCurrentWidget(winAudioSettings->panel);

@@ -32,7 +32,7 @@ PathSettingWidget::PathSettingWidget(string &pathValue_, const char *labelText, 
 }
 
 void PathSettingWidget::selectPath(const string &newPath) {
-  pathValue = newPath;
+  pathValue = string() << newPath << "/";
   updatePath();
 }
 

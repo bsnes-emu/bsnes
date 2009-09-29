@@ -6,9 +6,9 @@ class ToolsWindow : public QbWindow {
 
 public:
   QHBoxLayout *layout;
-    QListWidget *list;
-      QListWidgetItem *cheatEditor;
-      QListWidgetItem *stateManager;
+    QTreeWidget *list;
+      QTreeWidgetItem *cheatEditor;
+      QTreeWidgetItem *stateManager;
     QWidget *panel;
     QStackedLayout *panelLayout;
 
@@ -17,5 +17,5 @@ public:
   ToolsWindow();
 
 public slots:
-  void listChanged();
+  void itemChanged();
 } *toolsWindow;

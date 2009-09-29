@@ -10,17 +10,17 @@ class SettingsWindow : public QbWindow {
 
 public:
   QHBoxLayout *layout;
-    QListWidget *list;
-      QListWidgetItem *video;
-      QListWidgetItem *audio;
-      QListWidgetItem *input;
-      QListWidgetItem *paths;
-      QListWidgetItem *advanced;
+    QTreeWidget *list;
+      QTreeWidgetItem *video;
+      QTreeWidgetItem *audio;
+      QTreeWidgetItem *input;
+      QTreeWidgetItem *paths;
+      QTreeWidgetItem *advanced;
     QWidget *panel;
     QStackedLayout *panelLayout;
 
   SettingsWindow();
 
 public slots:
-  void listChanged();
+  void itemChanged();
 } *settingsWindow;

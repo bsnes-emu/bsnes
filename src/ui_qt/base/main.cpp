@@ -11,31 +11,39 @@ MainWindow::MainWindow() {
 
   system = menuBar->addMenu("System");
     system_load = system->addAction("Load Cartridge ...");
+    system_load->setIcon(QIcon(":/16x16/document-open.png"));
     system->addSeparator();
-    system_power = system->addMenu("Power");
-      system_power_on = system_power->addAction("On");
-      system_power_on->setCheckable(true);
-      system_power_off = system_power->addAction("Off");
-      system_power_off->setCheckable(true);
+    system_power = system->addAction("Power");
+    system_power->setIcon(QIcon(":/16x16/system-shutdown.png"));
+    system_power->setCheckable(true);
     system_reset = system->addAction("Reset");
+    system_reset->setIcon(QIcon(":/16x16/view-refresh.png"));
     system->addSeparator();
     system_port1 = system->addMenu("Controller Port 1");
+    system_port1->setIcon(QIcon(":/16x16/input-gaming.png"));
       system_port1_none = system_port1->addAction("None");
       system_port1_none->setCheckable(true);
       system_port1_joypad = system_port1->addAction("Joypad");
+      system_port1_joypad->setIcon(QIcon(":/16x16/input-gaming.png"));
       system_port1_joypad->setCheckable(true);
       system_port1_multitap = system_port1->addAction("Multitap");
+      system_port1_multitap->setIcon(QIcon(":/16x16/input-gaming.png"));
       system_port1_multitap->setCheckable(true);
       system_port1_mouse = system_port1->addAction("Mouse");
+      system_port1_mouse->setIcon(QIcon(":/16x16/input-mouse.png"));
       system_port1_mouse->setCheckable(true);
     system_port2 = system->addMenu("Controller Port 2");
+    system_port2->setIcon(QIcon(":/16x16/input-gaming.png"));
       system_port2_none = system_port2->addAction("None");
       system_port2_none->setCheckable(true);
       system_port2_joypad = system_port2->addAction("Joypad");
+      system_port2_joypad->setIcon(QIcon(":/16x16/input-gaming.png"));
       system_port2_joypad->setCheckable(true);
       system_port2_multitap = system_port2->addAction("Multitap");
+      system_port2_multitap->setIcon(QIcon(":/16x16/input-gaming.png"));
       system_port2_multitap->setCheckable(true);
       system_port2_mouse = system_port2->addAction("Mouse");
+      system_port2_mouse->setIcon(QIcon(":/16x16/input-mouse.png"));
       system_port2_mouse->setCheckable(true);
       system_port2_superscope = system_port2->addAction("Super Scope");
       system_port2_superscope->setCheckable(true);
@@ -47,10 +55,12 @@ MainWindow::MainWindow() {
     system->addSeparator();
     #endif
     system_exit = system->addAction("Exit");
+    system_exit->setIcon(QIcon(":/16x16/process-stop.png"));
     system_exit->setMenuRole(QAction::QuitRole);
 
   settings = menuBar->addMenu("Settings");
     settings_videoMode = settings->addMenu("Video Mode");
+    settings_videoMode->setIcon(QIcon(":/16x16/video-display.png"));
       settings_videoMode_1x = settings_videoMode->addAction("Scale 1x");
       settings_videoMode_1x->setCheckable(true);
       settings_videoMode_2x = settings_videoMode->addAction("Scale 2x");
@@ -65,6 +75,7 @@ MainWindow::MainWindow() {
       settings_videoMode_correctAspectRatio = settings_videoMode->addAction("Correct Aspect Ratio");
       settings_videoMode_correctAspectRatio->setCheckable(true);
       settings_videoMode_fullscreen = settings_videoMode->addAction("Fullscreen");
+      settings_videoMode_fullscreen->setIcon(QIcon(":/16x16/view-fullscreen.png"));
       settings_videoMode_fullscreen->setCheckable(true);
       settings_videoMode->addSeparator();
       settings_videoMode_ntsc = settings_videoMode->addAction("NTSC");
@@ -72,6 +83,7 @@ MainWindow::MainWindow() {
       settings_videoMode_pal = settings_videoMode->addAction("PAL");
       settings_videoMode_pal->setCheckable(true);
     settings_videoFilter = settings->addMenu("Video Filter");
+    settings_videoFilter->setIcon(QIcon(":/16x16/image-x-generic.png"));
       settings_videoFilter_point = settings_videoFilter->addAction("Point");
       settings_videoFilter_point->setCheckable(true);
       settings_videoFilter_linear = settings_videoFilter->addAction("Linear");
@@ -91,9 +103,11 @@ MainWindow::MainWindow() {
       settings_videoFilter_ntsc->setCheckable(true);
     settings->addSeparator();
     settings_muteAudio = settings->addAction("Mute Audio Output");
+    settings_muteAudio->setIcon(QIcon(":/16x16/audio-volume-muted.png"));
     settings_muteAudio->setCheckable(true);
     settings->addSeparator();
     settings_emulationSpeed = settings->addMenu("Emulation Speed");
+    settings_emulationSpeed->setIcon(QIcon(":/16x16/appointment-new.png"));
       settings_emulationSpeed_slowest = settings_emulationSpeed->addAction("50%");
       settings_emulationSpeed_slowest->setCheckable(true);
       settings_emulationSpeed_slow = settings_emulationSpeed->addAction("75%");
@@ -106,30 +120,39 @@ MainWindow::MainWindow() {
       settings_emulationSpeed_fastest->setCheckable(true);
       settings_emulationSpeed->addSeparator();
       settings_emulationSpeed_syncVideo = settings_emulationSpeed->addAction("Sync Video");
+      settings_emulationSpeed_syncVideo->setIcon(QIcon(":/16x16/video-display.png"));
       settings_emulationSpeed_syncVideo->setCheckable(true);
       settings_emulationSpeed_syncAudio = settings_emulationSpeed->addAction("Sync Audio");
+      settings_emulationSpeed_syncAudio->setIcon(QIcon(":/16x16/audio-volume-high.png"));
       settings_emulationSpeed_syncAudio->setCheckable(true);
     settings_configuration = settings->addAction("Configuration ...");
+    settings_configuration->setIcon(QIcon(":/16x16/preferences-desktop.png"));
     settings_configuration->setMenuRole(QAction::PreferencesRole);
 
   tools = menuBar->addMenu("Tools");
     tools_cheatEditor = tools->addAction("Cheat Editor ...");
+    tools_cheatEditor->setIcon(QIcon(":/16x16/accessories-text-editor.png"));
     tools_stateManager = tools->addAction("State Manager ...");
+    tools_stateManager->setIcon(QIcon(":/16x16/system-file-manager.png"));
     #if defined(DEBUGGER)
     tools->addSeparator();
     #endif
     tools_debugger = tools->addAction("Debugger ...");
+    tools_debugger->setIcon(QIcon(":/16x16/utilities-terminal.png"));
     #if !defined(DEBUGGER)
     tools_debugger->setVisible(false);
     #endif
 
   help = menuBar->addMenu("Help");
     help_documentation = help->addAction("Documentation ...");
+    help_documentation->setIcon(QIcon(":/16x16/text-x-generic.png"));
     help_license = help->addAction("License ...");
+    help_license->setIcon(QIcon(":/16x16/text-x-generic.png"));
     #if !defined(PLATFORM_OSX)
     help->addSeparator();
     #endif
     help_about = help->addAction("About ...");
+    help_about->setIcon(QIcon(":/16x16/help-browser.png"));
     help_about->setMenuRole(QAction::AboutRole);
 
   //canvas
@@ -175,8 +198,7 @@ MainWindow::MainWindow() {
 
   //slots
   connect(system_load, SIGNAL(triggered()), this, SLOT(loadCartridge()));
-  connect(system_power_on, SIGNAL(triggered()), this, SLOT(powerOn()));
-  connect(system_power_off, SIGNAL(triggered()), this, SLOT(powerOff()));
+  connect(system_power, SIGNAL(triggered()), this, SLOT(power()));
   connect(system_reset, SIGNAL(triggered()), this, SLOT(reset()));
   connect(system_port1_none, SIGNAL(triggered()), this, SLOT(setPort1None()));
   connect(system_port1_joypad, SIGNAL(triggered()), this, SLOT(setPort1Joypad()));
@@ -228,8 +250,8 @@ MainWindow::MainWindow() {
 
 void MainWindow::syncUi() {
   system_power->setEnabled(SNES::cartridge.loaded());
-  system_power_on->setChecked (application.power == true);
-  system_power_off->setChecked(application.power == false);
+  system_power->setChecked (application.power == true);
+  system_power->setEnabled(SNES::cartridge.loaded());
   system_reset->setEnabled(SNES::cartridge.loaded() && application.power);
 
   system_port1_none->setChecked      (SNES::config.controller_port1 == SNES::Input::DeviceNone);
@@ -284,9 +306,17 @@ void MainWindow::loadCartridge() {
   diskBrowser->loadAnyCartridge();
 }
 
-void MainWindow::powerOn()  { utility.modifySystemState(Utility::PowerOn); }
-void MainWindow::powerOff() { utility.modifySystemState(Utility::PowerOff); }
-void MainWindow::reset()    { utility.modifySystemState(Utility::Reset); }
+void MainWindow::power() {
+  if(system_power->isChecked()) {
+    utility.modifySystemState(Utility::PowerOn);
+  } else {
+    utility.modifySystemState(Utility::PowerOff);
+  }
+}
+
+void MainWindow::reset() {
+  utility.modifySystemState(Utility::Reset);
+}
 
 void MainWindow::setPort1None()       { SNES::config.controller_port1 = SNES::Input::DeviceNone;       utility.updateControllers(); syncUi(); }
 void MainWindow::setPort1Joypad()     { SNES::config.controller_port1 = SNES::Input::DeviceJoypad;     utility.updateControllers(); syncUi(); }
