@@ -59,19 +59,18 @@ void BreakpointItem::toggle() {
 }
 
 BreakpointEditor::BreakpointEditor() {
-  setObjectName("breakpoint-editor");
-  setWindowTitle("Breakpoint Editor");
+  window = new QbWindow(config.geometry.breakpointEditor);
+  window->setObjectName("breakpoint-editor");
+  window->setWindowTitle("Breakpoint Editor");
 
   layout = new QVBoxLayout;
   layout->setSizeConstraint(QLayout::SetFixedSize);
   layout->setMargin(Style::WindowMargin);
   layout->setSpacing(Style::WidgetSpacing);
-  setLayout(layout);
+  window->setLayout(layout);
 
   for(unsigned n = 0; n < SNES::Debugger::Breakpoints; n++) {
     breakpoint[n] = new BreakpointItem(n);
     layout->addWidget(breakpoint[n]);
   }
-
-  resize(0, 0);
 }

@@ -38,7 +38,7 @@ bool Utility::isButtonDown(uint16_t inputCode, InputObject &object) {
 void Utility::inputEvent(uint16_t code) {
   //forward key-press event
   //(in case window is currently active and capturing a new button / axis assignment)
-  winInputCapture->inputEvent(code);
+  inputCaptureWindow->inputEvent(code);
 
   for(unsigned i = 0; i < keyboard<>::count; i++) {
     if(code == keyboard<>::index(i, keyboard<>::escape) && inputManager.state(code)) {
@@ -46,11 +46,11 @@ void Utility::inputEvent(uint16_t code) {
         //release mouse capture
         input.unacquire();
         return;  //do not trigger other UI actions that may be bound to escape key
-      } else if(settingsWindow->isActiveWindow()) {
-        settingsWindow->hide();
+      } else if(settingsWindow->window->isActiveWindow()) {
+        settingsWindow->window->hide();
         return;
-      } else if(toolsWindow->isActiveWindow()) {
-        toolsWindow->hide();
+      } else if(toolsWindow->window->isActiveWindow()) {
+        toolsWindow->window->hide();
         return;
       }
     }
@@ -60,7 +60,7 @@ void Utility::inputEvent(uint16_t code) {
     bool resizeWindow = false;
 
     if(isButtonDown(code, inputUiGeneral.loadCartridge)) {
-      diskBrowser->loadAnyCartridge();
+      diskBrowser->loadCartridge();
     }
 
     if(isButtonDown(code, inputUiGeneral.pauseEmulation)) {
@@ -122,12 +122,12 @@ void Utility::inputEvent(uint16_t code) {
     }
 
     if(isButtonDown(code, inputUiGeneral.toggleMenu)) {
-      mainWindow->menuBar->setVisible(!mainWindow->menuBar->isVisibleTo(mainWindow));
+      mainWindow->menuBar->setVisible(!mainWindow->menuBar->isVisibleTo(mainWindow->window));
       resizeWindow = true;
     }
 
     if(isButtonDown(code, inputUiGeneral.toggleStatus)) {
-      mainWindow->statusBar->setVisible(!mainWindow->statusBar->isVisibleTo(mainWindow));
+      mainWindow->statusBar->setVisible(!mainWindow->statusBar->isVisibleTo(mainWindow->window));
       resizeWindow = true;
     }
 
@@ -198,12 +198,11 @@ void Utility::updateVideoMode() {
 }
 
 void Utility::updateColorFilter() {
-  libfilter::colortable.set_format(libfilter::Colortable::RGB888);
-  libfilter::colortable.set_contrast(config.video.contrastAdjust);
-  libfilter::colortable.set_brightness(config.video.brightnessAdjust);
-  libfilter::colortable.set_gamma(100 + config.video.gammaAdjust);
-  libfilter::colortable.enable_gamma_ramp(config.video.enableGammaRamp);
-  libfilter::colortable.update();
+  filter.contrast = config.video.contrastAdjust;
+  filter.brightness = config.video.brightnessAdjust;
+  filter.gamma = 100 + config.video.gammaAdjust;
+  filter.gamma_ramp = config.video.enableGammaRamp;
+  filter.colortable_update();
 }
 
 void Utility::updateHardwareFilter() {
@@ -211,7 +210,9 @@ void Utility::updateHardwareFilter() {
 }
 
 void Utility::updateSoftwareFilter() {
-  libfilter::FilterInterface::FilterType type;
+  filter.renderer = config.video.context->swFilter;
+
+/*libfilter::FilterInterface::FilterType type;
   switch(config.video.context->swFilter) { default:
     case 0: type = libfilter::FilterInterface::Direct;   break;
     case 1: type = libfilter::FilterInterface::Scanline; break;
@@ -224,7 +225,7 @@ void Utility::updateSoftwareFilter() {
 
   if(type == libfilter::FilterInterface::NTSC) {
     libfilter::filter_ntsc.adjust(0, 0, 0, 0, 0, config.video.enableNtscMergeFields);
-  }
+  }*/
 }
 
 void Utility::updateEmulationSpeed() {

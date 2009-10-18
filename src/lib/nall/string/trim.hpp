@@ -3,7 +3,14 @@
 
 char* ltrim(char *str, const char *key) {
   if(!key || !*key) return str;
-  while(strbegin(str, key)) strcpy(str, str + strlen(key));
+  while(strbegin(str, key)) {
+    char *dest = str, *src = str + strlen(key);
+    while(true) {
+      *dest = *src++;
+      if(!*dest) break;
+      dest++;
+    }
+  }
   return str;
 }
 
@@ -19,7 +26,14 @@ char* trim(char *str, const char *key) {
 
 char* ltrim_once(char *str, const char *key) {
   if(!key || !*key) return str;
-  if(strbegin(str, key)) strcpy(str, str + strlen(key));
+  if(strbegin(str, key)) {
+    char *dest = str, *src = str + strlen(key);
+    while(true) {
+      *dest = *src++;
+      if(!*dest) break;
+      dest++;
+    }
+  }
   return str;
 }
 

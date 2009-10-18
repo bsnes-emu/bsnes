@@ -11,6 +11,7 @@
 
 #include <../base.hpp>
 
+#include <nall/base64.hpp>
 #include <nall/config.hpp>
 #include <nall/input.hpp>
 #include <nall/ups.hpp>
@@ -19,14 +20,13 @@ using namespace nall;
 #include <ruby/ruby.hpp>
 using namespace ruby;
 
-#include <libfilter/libfilter.hpp>
-#include "libqb/libqb.hpp"
-
 #include "config.hpp"
 #include "interface.hpp"
 #include "application/application.moc"
 #include "debugger/debugger.moc"
 #include "input/input.hpp"
+#include "link/filter.hpp"
+#include "link/reader.hpp"
 #include "utility/utility.hpp"
 
 struct Style {

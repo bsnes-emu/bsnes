@@ -1,4 +1,5 @@
-objects := main $(if $(call streq,$(platform),win),resource) $(objects)
+objects := ui-main $(objects)
+objects += $(if $(call streq,$(platform),win),resource)
 link += $(qtlib)
 
 moc_headers := $(call rwildcard,$(ui)/,%.moc.hpp)
@@ -12,7 +13,7 @@ moc_objects := $(patsubst %.moc.hpp,%.moc,$(moc_headers))
 %.moc: $<; $(moc) -f $< -o $@
 $(foreach f,$(moc_objects),$(eval $f: $(patsubst %.moc,%.moc.hpp,$f)))
 
-obj/main.o: $(ui)/main.cpp $(call rwildcard,$(ui)/)
+obj/ui-main.o: $(ui)/main.cpp $(call rwildcard,$(ui)/)
 	$(call compile,$(qtinc))
 
 $(ui)/resource/resource.rcc: $(ui)/resource/resource.qrc data/*

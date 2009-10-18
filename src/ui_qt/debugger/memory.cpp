@@ -1,11 +1,12 @@
 MemoryEditor::MemoryEditor() {
-  setObjectName("memory-editor");
-  setWindowTitle("Memory Editor");
+  window = new QbWindow(config.geometry.memoryEditor);
+  window->setObjectName("memory-editor");
+  window->setWindowTitle("Memory Editor");
 
   layout = new QVBoxLayout;
   layout->setMargin(Style::WindowMargin);
   layout->setSpacing(Style::WidgetSpacing);
-  setLayout(layout);
+  window->setLayout(layout);
 
   controlLayout = new QHBoxLayout;
   controlLayout->setSpacing(Style::WidgetSpacing);
@@ -33,21 +34,13 @@ MemoryEditor::MemoryEditor() {
   refreshButton = new QPushButton("Refresh");
   controlLayout->addWidget(refreshButton);
 
-  editor = new QbHexEdit;
-  editor->setFont(QFont(Style::Monospace));
-  editor->setMinimumWidth((58 + 2) * editor->fontMetrics().width(' '));
-  editor->setMinimumHeight((16 + 1) * editor->fontMetrics().height());
-
+  editor = new HexEditor;
   editor->reader = bind(&MemoryEditor::reader, this);
   editor->writer = bind(&MemoryEditor::writer, this);
-  editor->setColumns(16);
-  editor->setRows(16);
-  editor->setDocumentSize(16 * 1024 * 1024);
-  editor->setDocumentOffset(0);
+  editor->setSize(16 * 1024 * 1024);
   memorySource = SNES::Debugger::CPUBus;
   layout->addWidget(editor);
 
-  resize(0, 0);
   connect(addr, SIGNAL(textEdited(const QString&)), this, SLOT(refresh()));
   connect(source, SIGNAL(currentIndexChanged(int)), this, SLOT(sourceChanged(int)));
   connect(refreshButton, SIGNAL(released()), this, SLOT(refresh()));
@@ -59,10 +52,18 @@ void MemoryEditor::autoUpdate() {
 
 void MemoryEditor::synchronize() {
   if(SNES::cartridge.loaded() == false) {
-    editor->setHtml("");
+    addr->setEnabled(false);
+    source->setEnabled(false);
+    autoUpdateBox->setEnabled(false);
     refreshButton->setEnabled(false);
+    editor->setHtml("");
+    editor->scrollbar->setEnabled(false);
   } else {
+    addr->setEnabled(true);
+    source->setEnabled(true);
+    autoUpdateBox->setEnabled(true);
     refreshButton->setEnabled(true);
+    editor->scrollbar->setEnabled(true);
   }
 }
 
@@ -72,20 +73,20 @@ void MemoryEditor::refresh() {
     return;
   }
 
-  editor->setDocumentOffset(strhex(addr->text().toUtf8().data()));
+  editor->setOffset(strhex(addr->text().toUtf8().data()));
   editor->update();
 }
 
 void MemoryEditor::sourceChanged(int index) {
   switch(index) { default:
-    case 0: memorySource = SNES::Debugger::CPUBus; editor->setDocumentSize(16 * 1024 * 1024); break;
-    case 1: memorySource = SNES::Debugger::APURAM; editor->setDocumentSize(64 * 1024);        break;
-    case 2: memorySource = SNES::Debugger::VRAM;   editor->setDocumentSize(64 * 1024);        break;
-    case 3: memorySource = SNES::Debugger::OAM;    editor->setDocumentSize(544);              break;
-    case 4: memorySource = SNES::Debugger::CGRAM;  editor->setDocumentSize(512);              break;
+    case 0: memorySource = SNES::Debugger::CPUBus; editor->setSize(16 * 1024 * 1024); break;
+    case 1: memorySource = SNES::Debugger::APURAM; editor->setSize(64 * 1024);        break;
+    case 2: memorySource = SNES::Debugger::VRAM;   editor->setSize(64 * 1024);        break;
+    case 3: memorySource = SNES::Debugger::OAM;    editor->setSize(544);              break;
+    case 4: memorySource = SNES::Debugger::CGRAM;  editor->setSize(512);              break;
   }
 
-  editor->setDocumentOffset(strhex(addr->text().toUtf8().data()));
+  editor->setOffset(strhex(addr->text().toUtf8().data()));
   editor->update();
 }
 

@@ -14,7 +14,6 @@ public:
         QSlider *gamma;
       QHBoxLayout *options;
         QCheckBox *enableGammaRamp;
-        QCheckBox *enableNtscMergeFields;
       QWidget *spacer;
 
   void syncUi();
@@ -22,8 +21,7 @@ public:
 
 public slots:
   void gammaRampToggle(int);
-  void ntscFieldsToggle(int);
   void contrastAdjust(int);
   void brightnessAdjust(int);
   void gammaAdjust(int);
-} *winVideoSettings;
+} *videoSettingsWindow;

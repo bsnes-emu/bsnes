@@ -17,6 +17,7 @@
 
 namespace nall {
   struct library : noncopyable {
+    bool opened() const { return handle; }
     bool open(const char*);
     void* sym(const char*);
     void close();

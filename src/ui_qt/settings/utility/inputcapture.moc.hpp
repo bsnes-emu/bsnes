@@ -1,7 +1,12 @@
-class InputCaptureWindow : public QbWindow {
+class InputCaptureWindow : public QObject {
   Q_OBJECT
 
 public:
+  class Window : public QbWindow {
+  public:
+    void closeEvent(QCloseEvent*);
+    Window(string&);
+  } *window;
   QVBoxLayout *layout;
     QHBoxLayout *hlayout;
       QLabel *title;
@@ -12,8 +17,6 @@ public:
       void paintEvent(QPaintEvent*);
     } *imageWidget;
     QWidget *spacer;
-
-  void closeEvent(QCloseEvent*);
 
   void activate(InputObject *object);
   void activate(InputGroup *group);
@@ -29,14 +32,15 @@ private:
   InputGroup *activeGroup;
   unsigned groupIndex;
   bool inputLock;
-} *winInputCapture;
+} *inputCaptureWindow;
 
-class InputMouseCaptureWindow : public QbWindow {
+class InputMouseCaptureWindow : public QObject {
   Q_OBJECT
 
 public:
   enum Mode { AxisMode, ButtonMode };
 
+  QbWindow *window;
   QVBoxLayout *layout;
     QLabel *info;
     QLabel *captureBox;
@@ -56,12 +60,17 @@ public slots:
 private:
   Mode activeMode;
   signed activeMouse;
-} *winInputMouseCapture;
+} *inputMouseCaptureWindow;
 
-class InputCalibrationWindow : public QbWindow {
+class InputCalibrationWindow : public QObject {
   Q_OBJECT
 
 public:
+  class Window : public QbWindow {
+  public:
+    void closeEvent(QCloseEvent*);
+    Window(string&);
+  } *window;
   QVBoxLayout *layout;
     QLabel *info;
     QPushButton *ok;
@@ -70,11 +79,9 @@ public:
   void activate(unsigned joy);
   InputCalibrationWindow();
 
-  void closeEvent(QCloseEvent*);
-
 public slots:
   void dismiss();
 
 private:
   int activeJoypad;
-} *winInputCalibration;
+} *inputCalibrationWindow;

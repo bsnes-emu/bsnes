@@ -1,7 +1,8 @@
-class LoaderWindow : public QbWindow {
+class LoaderWindow : public QObject {
   Q_OBJECT
 
 public:
+  QbWindow *window;
   QVBoxLayout *layout;
     QGridLayout *grid;
       QLabel *baseLabel;

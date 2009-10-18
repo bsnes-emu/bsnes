@@ -44,13 +44,6 @@ VideoSettingsWindow::VideoSettingsWindow() {
     enableGammaRamp = new QCheckBox("Simulate NTSC TV gamma ramp");
     enableGammaRamp->setToolTip("Lower monitor gamma to more accurately match a CRT television");
     options->addWidget(enableGammaRamp);
-
-    enableNtscMergeFields = new QCheckBox("Merge scan fields for NTSC filter");
-    enableNtscMergeFields->setToolTip(
-      "NTSC filter requires 60hz w/video sync to simulate alternating field effect.\n"
-      "If this is not the case, this option should be enabled to prevent excessive video shimmering."
-    );
-    options->addWidget(enableNtscMergeFields);
   }
   options->setSpacing(Style::WidgetSpacing);
   layout->addLayout(options);
@@ -64,7 +57,6 @@ VideoSettingsWindow::VideoSettingsWindow() {
   connect(brightness, SIGNAL(valueChanged(int)), this, SLOT(brightnessAdjust(int)));
   connect(gamma, SIGNAL(valueChanged(int)), this, SLOT(gammaAdjust(int)));
   connect(enableGammaRamp, SIGNAL(stateChanged(int)), this, SLOT(gammaRampToggle(int)));
-  connect(enableNtscMergeFields, SIGNAL(stateChanged(int)), this, SLOT(ntscFieldsToggle(int)));
 
   syncUi();
 }
@@ -85,19 +77,12 @@ void VideoSettingsWindow::syncUi() {
   gamma->setSliderPosition(n);
 
   enableGammaRamp->setChecked(config.video.enableGammaRamp);
-  enableNtscMergeFields->setChecked(config.video.enableNtscMergeFields);
 }
 
 void VideoSettingsWindow::gammaRampToggle(int state) {
   config.video.enableGammaRamp = (state == Qt::Checked);
   syncUi();
   utility.updateColorFilter();
-}
-
-void VideoSettingsWindow::ntscFieldsToggle(int state) {
-  config.video.enableNtscMergeFields = (state == Qt::Checked);
-  syncUi();
-  utility.updateSoftwareFilter();
 }
 
 void VideoSettingsWindow::contrastAdjust(int value) {

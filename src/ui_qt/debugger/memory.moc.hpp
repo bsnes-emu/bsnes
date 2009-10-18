@@ -1,7 +1,8 @@
-class MemoryEditor : public QbWindow {
+class MemoryEditor : public QObject {
   Q_OBJECT
 
 public:
+  QbWindow *window;
   QVBoxLayout *layout;
     QHBoxLayout *controlLayout;
       QWidget *spacer;
@@ -9,7 +10,7 @@ public:
       QComboBox *source;
       QCheckBox *autoUpdateBox;
       QPushButton *refreshButton;
-    QbHexEdit *editor;
+    HexEditor *editor;
 
   void autoUpdate();
   void synchronize();

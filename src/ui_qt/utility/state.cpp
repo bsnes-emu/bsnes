@@ -23,7 +23,7 @@ void Utility::quickLoad(uint8 slot) {
   }
 
   string name;
-  name << filepath(basename(cartridge.baseName), config.path.state);
+  name << filepath(nall::basename(cartridge.baseName), config.path.state);
   name << "-" << (unsigned)(slot + 1) << ".bst";
 
   file fp;
@@ -55,7 +55,7 @@ void Utility::quickSave(uint8 slot) {
   SNES::system.runtosave();
 
   string name;
-  name << filepath(basename(cartridge.baseName), config.path.state);
+  name << filepath(nall::basename(cartridge.baseName), config.path.state);
   name << "-" << (unsigned)(slot + 1) << ".bst";
 
   serializer state = SNES::system.serialize();
@@ -72,20 +72,20 @@ void Utility::quickSave(uint8 slot) {
 
 void Utility::loadStateInfo(lstring &info) {
   info.reset();
-  string name = string() << filepath(basename(cartridge.baseName), config.path.state) << ".bsa";
+  string name = string() << filepath(nall::basename(cartridge.baseName), config.path.state) << ".bsa";
   if(SNES::statemanager.load(name) == false) return;
   SNES::statemanager.list(info);
 }
 
 void Utility::setStateDescription(uint8 slot, const char *description) {
   if(SNES::cartridge.loaded() == false) return;
-  string name = string() << filepath(basename(cartridge.baseName), config.path.state) << ".bsa";
+  string name = string() << filepath(nall::basename(cartridge.baseName), config.path.state) << ".bsa";
   SNES::statemanager.set_description(name, slot, description);
 }
 
 void Utility::loadState(uint8 slot) {
   if(SNES::cartridge.loaded() == false || application.power == false) return;
-  string name = string() << filepath(basename(cartridge.baseName), config.path.state) << ".bsa";
+  string name = string() << filepath(nall::basename(cartridge.baseName), config.path.state) << ".bsa";
 
   try {
     serializer state = SNES::statemanager.load(name, slot);
@@ -106,7 +106,7 @@ void Utility::saveState(uint8 slot, const char *description) {
   SNES::system.runtosave();
 
   serializer state = SNES::system.serialize();
-  string name = string() << filepath(basename(cartridge.baseName), config.path.state) << ".bsa";
+  string name = string() << filepath(nall::basename(cartridge.baseName), config.path.state) << ".bsa";
   if(SNES::statemanager.save(name, slot, state, description) == true) {
     showMessage(utf8() << "State saved.");
   } else {
@@ -116,7 +116,7 @@ void Utility::saveState(uint8 slot, const char *description) {
 
 void Utility::deleteState(uint8 slot) {
   if(SNES::cartridge.loaded() == false) return;
-  string name = string() << filepath(basename(cartridge.baseName), config.path.state) << ".bsa";
+  string name = string() << filepath(nall::basename(cartridge.baseName), config.path.state) << ".bsa";
   if(SNES::statemanager.erase(name, slot) == true) {
     showMessage(utf8() << "State deleted.");
   } else {

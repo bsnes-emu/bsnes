@@ -51,4 +51,4 @@ public slots:
   void pauseWithoutFocus();
   void ignoreInputWithoutFocus();
   void allowInputWithoutFocus();
-} *winAdvancedSettings;
+} *advancedSettingsWindow;

@@ -47,8 +47,8 @@ else ifeq ($(platform),win)
   qtlib := -L$(qtpath)/lib
   qtlib += -L$(qtpath)/plugins/imageformats
 
-  qtlib += -lmingw32 -lqtmain -lQtGui -lcomdlg32 -loleaut32 -limm32 -lwinmm
-  qtlib += -lwinspool -lmsimg32 -lQtCore -lole32 -ladvapi32 -lws2_32 -luuid -lgdi32
+  qtlib += -lmingw32 -lqtmain -lQtGui4 -lcomdlg32 -loleaut32 -limm32 -lwinmm
+  qtlib += -lwinspool -lmsimg32 -lQtCore4 -lole32 -ladvapi32 -lws2_32 -luuid -lgdi32
 
   # optional image-file support:
   # qtlib += -lqjpeg -lqmng

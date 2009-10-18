@@ -4,13 +4,14 @@ InputCaptureWindow::InputCaptureWindow() {
   groupIndex = 0;
   inputLock = false;
 
-  setObjectName("input-capture-window");
-  setWindowTitle("Input Capture");
+  window = new Window(config.geometry.inputCaptureWindow);
+  window->setObjectName("input-capture-window");
+  window->setWindowTitle("Input Capture");
 
   layout = new QVBoxLayout;
   layout->setMargin(Style::WindowMargin);
   layout->setSpacing(0);
-  setLayout(layout);
+  window->setLayout(layout);
 
   hlayout = new QHBoxLayout;
   hlayout->setSpacing(Style::WidgetSpacing); {
@@ -41,12 +42,12 @@ InputCaptureWindow::InputCaptureWindow() {
   connect(mouseAxes, SIGNAL(released()), this, SLOT(assignMouseAxis()));
   connect(mouseButtons, SIGNAL(released()), this, SLOT(assignMouseButton()));
 
-  winInputMouseCapture = new InputMouseCaptureWindow;
-  winInputCalibration = new InputCalibrationWindow;
+  inputMouseCaptureWindow = new InputMouseCaptureWindow;
+  inputCalibrationWindow = new InputCalibrationWindow;
 }
 
 void InputCaptureWindow::activate(InputObject *object) {
-  if(!activeGroup) hide();
+  if(!activeGroup) window->hide();
 
   utf8 info;
   info << "<b>ID:</b> ";
@@ -81,13 +82,14 @@ void InputCaptureWindow::activate(InputObject *object) {
   }
 
   title->setText(info);
-  showAt(0.0, 0.0);
+  window->show();
+  window->shrink();
 }
 
 void InputCaptureWindow::activate(InputGroup *group) {
   activeGroup = group;
   groupIndex = 0;
-  hide();
+  window->hide();
   activate((*activeGroup)[groupIndex]);
 }
 
@@ -97,11 +99,11 @@ void InputCaptureWindow::inputEvent(uint16_t code, bool forceAssign /* = false *
   //input polling is global, need to block mouse actions that may be UI interactions.
   //custom controls on window allow mouse assignment instead.
   if(forceAssign == false) {
-    if(winInputMouseCapture->isActiveWindow()) {
-      winInputMouseCapture->inputEvent(code);
+    if(inputMouseCaptureWindow->window->isActiveWindow()) {
+      inputMouseCaptureWindow->inputEvent(code);
       return;
     }
-    if(!isActiveWindow()) return;
+    if(!window->isActiveWindow()) return;
 
     //get as much info as possible about this code
     InputCode::type_t type = InputCode::type(code);
@@ -134,7 +136,7 @@ void InputCaptureWindow::inputEvent(uint16_t code, bool forceAssign /* = false *
         if(state > -8192 && state < +8192) return;  //ignore center motion
 
         if(inputManager.calibrated(joypadNumber) == false) {
-          winInputCalibration->activate(joypadNumber);
+          inputCalibrationWindow->activate(joypadNumber);
         }
 
         //block assignment until controller is fully calibrated
@@ -194,7 +196,7 @@ void InputCaptureWindow::inputEvent(uint16_t code, bool forceAssign /* = false *
 
   //bind code and update GUI input assignment list
   activeObject->bind(code);
-  winInputSettings->updateList();
+  inputSettingsWindow->updateList();
   activeObject = 0;
 
   //ignore multiple simultaneous state changes.
@@ -205,8 +207,8 @@ void InputCaptureWindow::inputEvent(uint16_t code, bool forceAssign /* = false *
   inputLock = false;
 
   if(!activeGroup) {
-    hide();
-    winInputMouseCapture->hide();
+    window->hide();
+    inputMouseCaptureWindow->window->hide();
   } else {
     //try and map the next code in this input group
     groupIndex++;
@@ -214,8 +216,8 @@ void InputCaptureWindow::inputEvent(uint16_t code, bool forceAssign /* = false *
       activate((*activeGroup)[groupIndex]);
     } else {
       //all group codes mapped
-      hide();
-      winInputMouseCapture->hide();
+      window->hide();
+      inputMouseCaptureWindow->window->hide();
       activeGroup = 0;
     }
   }
@@ -225,22 +227,24 @@ void InputCaptureWindow::assignMouseAxis() {
   //refresh input state so that mouse release event (from SIGNAL(released())
   //is not sent immediately after window is visible.
   inputManager.refresh();
-  winInputMouseCapture->activate(InputMouseCaptureWindow::AxisMode);
+  inputMouseCaptureWindow->activate(InputMouseCaptureWindow::AxisMode);
 }
 
 void InputCaptureWindow::assignMouseButton() {
   inputManager.refresh();
-  winInputMouseCapture->activate(InputMouseCaptureWindow::ButtonMode);
+  inputMouseCaptureWindow->activate(InputMouseCaptureWindow::ButtonMode);
 }
 
-void InputCaptureWindow::closeEvent(QCloseEvent*) {
+void InputCaptureWindow::Window::closeEvent(QCloseEvent*) {
   //window closed by user, cancel key assignment
-  activeObject = 0;
-  activeGroup = 0;
+  inputCaptureWindow->activeObject = 0;
+  inputCaptureWindow->activeGroup = 0;
 
-  winInputMouseCapture->hide();
-  winInputCalibration->dismiss();
+  inputMouseCaptureWindow->window->hide();
+  inputCalibrationWindow->dismiss();
 }
+
+InputCaptureWindow::Window::Window(string &geometry) : QbWindow(geometry) {}
 
 void InputCaptureWindow::ImageWidget::paintEvent(QPaintEvent*) {
   //currently, there is only an image available for the joypad.
@@ -256,13 +260,14 @@ void InputCaptureWindow::ImageWidget::paintEvent(QPaintEvent*) {
 //=======================
 
 InputMouseCaptureWindow::InputMouseCaptureWindow() {
-  setObjectName("input-mouse-capture-window");
-  setWindowTitle("Mouse Input Capture");
+  window = new QbWindow(config.geometry.inputMouseCaptureWindow);
+  window->setObjectName("input-mouse-capture-window");
+  window->setWindowTitle("Mouse Input Capture");
 
   layout = new QVBoxLayout;
   layout->setMargin(Style::WindowMargin);
   layout->setSpacing(0);
-  setLayout(layout);
+  window->setLayout(layout);
 
   info = new QLabel;
   layout->addWidget(info);
@@ -293,7 +298,7 @@ InputMouseCaptureWindow::InputMouseCaptureWindow() {
 }
 
 void InputMouseCaptureWindow::activate(InputMouseCaptureWindow::Mode mode_) {
-  hide();
+  window->hide();
   activeMode = mode_;
 
   if(activeMode == AxisMode) {
@@ -318,7 +323,7 @@ void InputMouseCaptureWindow::activate(InputMouseCaptureWindow::Mode mode_) {
     );
   }
 
-  showAt(0.0, 0.0);
+  window->show();
 }
 
 //this is only called when isActiveWindow() == true
@@ -337,7 +342,7 @@ void InputMouseCaptureWindow::inputEvent(uint16_t code) {
     //if this is a mouse button that is being released ...
     if(type == InputCode::MouseButton && state == false) {
       //ensure button was clicked inside active capture box
-      QRect windowRect = geometry();
+      QRect windowRect = window->geometry();
       QRect widgetRect = captureBox->geometry();
       unsigned wx = windowRect.left() + widgetRect.left();
       unsigned wy = windowRect.top() + widgetRect.top();
@@ -347,7 +352,7 @@ void InputMouseCaptureWindow::inputEvent(uint16_t code) {
       if(px < wx || px >= wx + widgetRect.size().width() ) return;
       if(py < wy || py >= wy + widgetRect.size().height()) return;
 
-      winInputCapture->inputEvent(code, true);
+      inputCaptureWindow->inputEvent(code, true);
       return;
     }
   }
@@ -355,13 +360,13 @@ void InputMouseCaptureWindow::inputEvent(uint16_t code) {
 
 void InputMouseCaptureWindow::assignAxisX() {
   if(activeMouse >= 0) {
-    winInputCapture->inputEvent(mouse<>::index(activeMouse, mouse<>::x), true);
+    inputCaptureWindow->inputEvent(mouse<>::index(activeMouse, mouse<>::x), true);
   }
 }
 
 void InputMouseCaptureWindow::assignAxisY() {
   if(activeMouse >= 0) {
-    winInputCapture->inputEvent(mouse<>::index(activeMouse, mouse<>::y), true);
+    inputCaptureWindow->inputEvent(mouse<>::index(activeMouse, mouse<>::y), true);
   }
 }
 
@@ -400,7 +405,7 @@ void InputMouseCaptureWindow::assignAxisY() {
 
 void InputCalibrationWindow::activate(unsigned joy) {
   //do not override an already active calibration window
-  if(isVisible()) return;
+  if(window->isVisible()) return;
 
   activeJoypad = joy;
   info->setText(utf8()
@@ -409,20 +414,21 @@ void InputCalibrationWindow::activate(unsigned joy) {
   << "and all axes are centered before pressing okay."
   );
 
-  showAt(0.0, 0.0);
+  window->show();
   ok->setFocus();
 }
 
 InputCalibrationWindow::InputCalibrationWindow() {
   activeJoypad = -1;
 
-  setObjectName("input-calibrate-window");
-  setWindowTitle("Joypad Calibration");
+  window = new Window(config.geometry.inputCalibrationWindow);
+  window->setObjectName("input-calibrate-window");
+  window->setWindowTitle("Joypad Calibration");
 
   layout = new QVBoxLayout;
   layout->setMargin(Style::WindowMargin);
   layout->setSpacing(0);
-  setLayout(layout);
+  window->setLayout(layout);
 
   info = new QLabel;
   layout->addWidget(info);
@@ -439,13 +445,15 @@ InputCalibrationWindow::InputCalibrationWindow() {
 }
 
 void InputCalibrationWindow::dismiss() {
-  hide();
+  window->hide();
   if(activeJoypad != -1) {
     inputManager.calibrate(activeJoypad);
     activeJoypad = -1;
   }
 }
 
-void InputCalibrationWindow::closeEvent(QCloseEvent*) {
-  dismiss();
+void InputCalibrationWindow::Window::closeEvent(QCloseEvent*) {
+  inputCalibrationWindow->dismiss();
 }
+
+InputCalibrationWindow::Window::Window(string &geometry) : QbWindow(geometry) {}

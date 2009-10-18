@@ -24,6 +24,13 @@ namespace nall {
     noncopyable(const noncopyable&);
     const noncopyable& operator=(const noncopyable&);
   };
+
+  template<typename T>
+  inline T* allocate(size_t size, const T &value) {
+    T *array = new T[size];
+    for(size_t i = 0; i < size; i++) array[i] = value;
+    return array;
+  }
 }
 
 #endif

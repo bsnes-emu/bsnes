@@ -1,31 +1,12 @@
-void Utility::loadCartridge(const char *filename) {
-  SNES::MappedRAM memory;
-  if(loadCartridge(filename, memory) == false) return;
-  SNES::Cartridge::Type type = SNES::cartridge.detect_image_type(memory.data(), memory.size());
-  memory.reset();
-
-  switch(type) {
-    case SNES::Cartridge::TypeNormal:           loadCartridgeNormal(filename);                                     break;
-    case SNES::Cartridge::TypeBsxSlotted:       loaderWindow->loadBsxSlottedCartridge(filename, "");                  break;
-    case SNES::Cartridge::TypeBsxBios:          loaderWindow->loadBsxCartridge(filename, "");                         break;
-    case SNES::Cartridge::TypeBsx:              loaderWindow->loadBsxCartridge(config.path.bsx, filename);            break;
-    case SNES::Cartridge::TypeSufamiTurboBios:  loaderWindow->loadSufamiTurboCartridge(filename, "", "");             break;
-    case SNES::Cartridge::TypeSufamiTurbo:      loaderWindow->loadSufamiTurboCartridge(config.path.st, filename, ""); break;
-    case SNES::Cartridge::TypeSuperGameBoyBios: loaderWindow->loadSuperGameBoyCartridge(filename, "");                break;
-    case SNES::Cartridge::TypeGameBoy:          loaderWindow->loadSuperGameBoyCartridge(config.path.sgb, filename);   break;
-  }
-}
-
 bool Utility::loadCartridgeNormal(const char *base) {
   unloadCartridge();
-  config.path.current = basepath(base);
   if(loadCartridge(cartridge.baseName = base, SNES::memory::cartrom) == false) return false;
   SNES::cartridge.load(SNES::Cartridge::ModeNormal);
 
   loadMemory(cartridge.baseName, ".srm", SNES::memory::cartram);
   loadMemory(cartridge.baseName, ".rtc", SNES::memory::cartrtc);
 
-  cartridge.name = basename(base);
+  cartridge.name = notdir(nall::basename(cartridge.baseName));
 
   modifySystemState(LoadCartridge);
   return true;
@@ -33,7 +14,6 @@ bool Utility::loadCartridgeNormal(const char *base) {
 
 bool Utility::loadCartridgeBsxSlotted(const char *base, const char *slot) {
   unloadCartridge();
-  config.path.current = basepath(base);
   if(loadCartridge(cartridge.baseName = base, SNES::memory::cartrom) == false) return false;
   loadCartridge(cartridge.slotAName = slot, SNES::memory::bsxflash);
   SNES::cartridge.load(SNES::Cartridge::ModeBsxSlotted);
@@ -41,8 +21,8 @@ bool Utility::loadCartridgeBsxSlotted(const char *base, const char *slot) {
   loadMemory(cartridge.baseName, ".srm", SNES::memory::cartram);
   loadMemory(cartridge.baseName, ".rtc", SNES::memory::cartrtc);
 
-  cartridge.name = basename(base);
-  if(*slot) cartridge.name << " + " << basename(slot);
+  cartridge.name = notdir(nall::basename(cartridge.baseName));
+  if(*slot) cartridge.name << " + " << notdir(nall::basename(cartridge.slotAName));
 
   modifySystemState(LoadCartridge);
   return true;
@@ -50,7 +30,6 @@ bool Utility::loadCartridgeBsxSlotted(const char *base, const char *slot) {
 
 bool Utility::loadCartridgeBsx(const char *base, const char *slot) {
   unloadCartridge();
-  config.path.current = basepath(base);
   if(loadCartridge(cartridge.baseName = base, SNES::memory::cartrom) == false) return false;
   loadCartridge(cartridge.slotAName = slot, SNES::memory::bsxflash);
   SNES::cartridge.load(SNES::Cartridge::ModeBsx);
@@ -58,7 +37,9 @@ bool Utility::loadCartridgeBsx(const char *base, const char *slot) {
   loadMemory(cartridge.baseName, ".srm", SNES::memory::bsxram );
   loadMemory(cartridge.baseName, ".psr", SNES::memory::bsxpram);
 
-  cartridge.name = (*slot ? basename(slot) : basename(base));
+  cartridge.name = *slot
+  ? notdir(nall::basename(cartridge.slotAName))
+  : notdir(nall::basename(cartridge.baseName));
 
   modifySystemState(LoadCartridge);
   return true;
@@ -66,7 +47,6 @@ bool Utility::loadCartridgeBsx(const char *base, const char *slot) {
 
 bool Utility::loadCartridgeSufamiTurbo(const char *base, const char *slotA, const char *slotB) {
   unloadCartridge();
-  config.path.current = basepath(base);
   if(loadCartridge(cartridge.baseName = base, SNES::memory::cartrom) == false) return false;
   loadCartridge(cartridge.slotAName = slotA, SNES::memory::stArom);
   loadCartridge(cartridge.slotBName = slotB, SNES::memory::stBrom);
@@ -75,10 +55,10 @@ bool Utility::loadCartridgeSufamiTurbo(const char *base, const char *slotA, cons
   loadMemory(cartridge.slotAName, ".srm", SNES::memory::stAram);
   loadMemory(cartridge.slotBName, ".srm", SNES::memory::stBram);
 
-  if(!*slotA && !*slotB) cartridge.name = basename(base);
-  else if(!*slotB) cartridge.name = basename(slotA);
-  else if(!*slotA) cartridge.name = basename(slotB);
-  else cartridge.name = string() << basename(slotA) << " + " << basename(slotB);
+  if(!*slotA && !*slotB) cartridge.name = notdir(nall::basename(cartridge.baseName));
+  else if(!*slotB) cartridge.name = notdir(nall::basename(cartridge.slotAName));
+  else if(!*slotA) cartridge.name = notdir(nall::basename(cartridge.slotBName));
+  else cartridge.name = notdir(nall::basename(cartridge.slotAName)) << " + " << notdir(nall::basename(cartridge.slotBName));
 
   modifySystemState(LoadCartridge);
   return true;
@@ -86,14 +66,15 @@ bool Utility::loadCartridgeSufamiTurbo(const char *base, const char *slotA, cons
 
 bool Utility::loadCartridgeSuperGameBoy(const char *base, const char *slot) {
   unloadCartridge();
-  config.path.current = basepath(base);
   if(loadCartridge(cartridge.baseName = base, SNES::memory::cartrom) == false) return false;
   loadCartridge(cartridge.slotAName = slot, SNES::memory::gbrom);
   SNES::cartridge.load(SNES::Cartridge::ModeSuperGameBoy);
 
   loadMemory(cartridge.slotAName, ".sav", SNES::memory::gbram);
 
-  cartridge.name = (*slot ? basename(slot) : basename(base));
+  cartridge.name = *slot
+  ? notdir(nall::basename(cartridge.slotAName))
+  : notdir(nall::basename(cartridge.baseName));
 
   modifySystemState(LoadCartridge);
   return true;
@@ -152,7 +133,7 @@ void Utility::modifySystemState(system_state_t state) {
       else if(SNES::cartridge.has_st011()) chip = "ST011";
       else if(SNES::cartridge.has_st018()) chip = "ST018";
       if(chip != "") {
-        QMessageBox::warning(mainWindow, "Warning", utf8()
+        QMessageBox::warning(mainWindow->window, "Warning", utf8()
         << "<p><b>Warning:</b><br> The " << chip << " chip was detected, which is not fully emulated yet.<br>"
         << "It is unlikely that this title will work properly.</p>");
       }
@@ -160,7 +141,7 @@ void Utility::modifySystemState(system_state_t state) {
       showMessage(utf8()
       << "Loaded " << cartridge.name
       << (cartridge.patchApplied ? ", and applied UPS patch." : "."));
-      mainWindow->setWindowTitle(utf8() << bsnesTitle << " v" << bsnesVersion << " - " << cartridge.name);
+      mainWindow->window->setWindowTitle(utf8() << bsnesTitle << " v" << bsnesVersion << " - " << cartridge.name);
       debugger->echo(utf8() << "Loaded " << cartridge.name << ".<br>");
     } break;
 
@@ -174,7 +155,7 @@ void Utility::modifySystemState(system_state_t state) {
       application.pause = true;
 
       showMessage(utf8() << "Unloaded " << cartridge.name << ".");
-      mainWindow->setWindowTitle(utf8() << bsnesTitle << " v" << bsnesVersion);
+      mainWindow->window->setWindowTitle(utf8() << bsnesTitle << " v" << bsnesVersion);
     } break;
 
     case PowerOn: {
@@ -219,19 +200,21 @@ void Utility::modifySystemState(system_state_t state) {
   mainWindow->syncUi();
   debugger->synchronize();
   cheatEditorWindow->reloadList();
+  cheatFinderWindow->synchronize();
   stateManagerWindow->reloadList();
 }
 
-bool Utility::loadCartridge(const char *filename, SNES::MappedRAM &memory) {
+bool Utility::loadCartridge(string &filename, SNES::MappedRAM &memory) {
   if(file::exists(filename) == false) return false;
 
   uint8_t *data;
   unsigned size;
-  if(libsnesreader.load(filename, &data, &size) == false) return false;
+  audio.clear();
+  if(reader.load(filename, data, size) == false) return false;
 
   cartridge.patchApplied = false;
   string name;
-  name << filepath(basename(filename), config.path.patch);
+  name << filepath(nall::basename(filename), config.path.patch);
   name << ".ups";
 
   file fp;
@@ -273,7 +256,7 @@ bool Utility::loadMemory(const char *filename, const char *extension, SNES::Mapp
   if(memory.size() == 0 || memory.size() == -1U) return false;
 
   string name;
-  name << filepath(basename(filename), config.path.save);
+  name << filepath(nall::basename(filename), config.path.save);
   name << extension;
 
   file fp;
@@ -293,7 +276,7 @@ bool Utility::saveMemory(const char *filename, const char *extension, SNES::Mapp
   if(memory.size() == 0 || memory.size() == -1U) return false;
 
   string name;
-  name << filepath(basename(filename), config.path.save);
+  name << filepath(nall::basename(filename), config.path.save);
   name << extension;
 
   file fp;
@@ -306,7 +289,7 @@ bool Utility::saveMemory(const char *filename, const char *extension, SNES::Mapp
 
 void Utility::loadCheats() {
   string name, data;
-  name << filepath(basename(cartridge.baseName), config.path.cheat);
+  name << filepath(nall::basename(cartridge.baseName), config.path.cheat);
   name << ".cht";
 
   SNES::cheat.clear();
@@ -315,7 +298,7 @@ void Utility::loadCheats() {
 
 void Utility::saveCheats() {
   string name;
-  name << filepath(basename(cartridge.baseName), config.path.cheat);
+  name << filepath(nall::basename(cartridge.baseName), config.path.cheat);
   name << ".cht";
 
   file fp;
@@ -327,15 +310,13 @@ void Utility::saveCheats() {
   }
 }
 
-//
-
 //ensure file path is absolute (eg resolve relative paths)
 string Utility::filepath(const char *filename, const char *pathname) {
   //if no pathname, return filename as-is
   string file(filename);
   file.replace("\\", "/");
 
-  string path = (!pathname || !*pathname) ? (const char*)config.path.current : pathname;
+  string path = (!pathname || !*pathname) ? (const char*)dir(filename) : pathname;
   //ensure path ends with trailing '/'
   path.replace("\\", "/");
   if(!strend(path, "/")) path.append("/");
@@ -351,50 +332,3 @@ string Utility::filepath(const char *filename, const char *pathname) {
   part.split("/", file);
   return path << part[part.size() - 1];
 }
-
-//remove directory information and file extension ("/foo/bar.ext" -> "bar")
-string Utility::basename(const char *filename) {
-  string name(filename);
-
-  //remove extension
-  for(signed i = strlen(name) - 1; i >= 0; i--) {
-    if(name[i] == '.') {
-      name[i] = 0;
-      break;
-    }
-  }
-
-  //remove directory information
-  for(signed i = strlen(name) - 1; i >= 0; i--) {
-    if(name[i] == '/' || name[i] == '\\') {
-      i++;
-      char *output = name();
-      while(true) {
-        *output++ = name[i];
-        if(!name[i]) break;
-        i++;
-      }
-      break;
-    }
-  }
-
-  return name;
-}
-
-//remove filename and return path only ("/foo/bar.ext" -> "/foo/")
-string Utility::basepath(const char *filename) {
-  string path(filename);
-  path.replace("\\", "/");
-
-  //remove filename
-  for(signed i = strlen(path) - 1; i >= 0; i--) {
-    if(path[i] == '/') {
-      path[i] = 0;
-      break;
-    }
-  }
-
-  if(!strend(path, "/")) path.append("/");
-  return path;
-}
-

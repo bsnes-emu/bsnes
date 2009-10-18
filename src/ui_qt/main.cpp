@@ -18,7 +18,6 @@ public:
   #error "unsupported platform"
 #endif
 
-#include "libqb/libqb.cpp"
 #include "config.cpp"
 #include "interface.cpp"
 
@@ -44,8 +43,16 @@ const char defaultStylesheet[] =
 #include "application/application.cpp"
 #include "debugger/debugger.cpp"
 #include "input/input.cpp"
+#include "link/filter.cpp"
+#include "link/reader.cpp"
 #include "utility/utility.cpp"
 
 int main(int argc, char **argv) {
-  return application.main(argc, argv);
+  application.main(argc, argv);
+  #if defined(PLATFORM_WIN)
+  //workaround: one of the Qt DLLs hangs during its termination, well after main() returns.
+  //to prevent the process from remaining open in the background, it must be forcefully terminated.
+  TerminateProcess(GetCurrentProcess(), 0);
+  #endif
+  return 0;
 }

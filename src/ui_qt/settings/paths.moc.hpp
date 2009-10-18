@@ -37,4 +37,4 @@ public:
       QWidget *spacer;
 
   PathSettingsWindow();
-} *winPathSettings;
+} *pathSettingsWindow;

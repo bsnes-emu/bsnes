@@ -6,7 +6,6 @@
 #include <nall/algorithm.hpp>
 #include <nall/crc32.hpp>
 #include <nall/file.hpp>
-#include <nall/new.hpp>
 #include <nall/stdint.hpp>
 
 namespace nall {
@@ -98,7 +97,7 @@ namespace nall {
       //mirror
       if(x_size != px_size && x_size != py_size) return input_invalid;
       y_size = (x_size == px_size) ? py_size : px_size;
-      y_data = new(zeromemory) uint8_t[y_size];
+      y_data = new uint8_t[y_size]();
 
       for(unsigned i = 0; i < x_size && i < y_size; i++) y_data[i] = x_data[i];
       for(unsigned i = x_size; i < y_size; i++) y_data[i] = 0x00;

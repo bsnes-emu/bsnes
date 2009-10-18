@@ -1,26 +1,26 @@
 AboutWindow::AboutWindow() {
-  setObjectName("about-window");
-  setWindowTitle("About bsnes ...");
+  window = new QbWindow(config.geometry.aboutWindow);
+  window->setObjectName("about-window");
+  window->setWindowTitle("About bsnes ...");
 
   layout = new QVBoxLayout;
   layout->setSizeConstraint(QLayout::SetFixedSize);
   layout->setMargin(Style::WindowMargin);
-  layout->setSpacing(Style::WidgetSpacing); {
-    logo = new Logo;
-    logo->setFixedSize(600, 106);
-    layout->addWidget(logo);
+  layout->setSpacing(Style::WidgetSpacing);
+  window->setLayout(layout);
 
-    info = new QLabel(utf8() <<
-      "<table>"
-      "<tr><td align='right'><b>Version: </b></td><td>" << bsnesVersion << "</td></tr>"
-      "<tr><td align='right'><b>Author: </b></td><td>byuu</td></tr>"
-      "<tr><td align='right'><b>Homepage: </b></td><td>http://byuu.org/</td></tr>"
-      "</table>"
-    );
-    layout->addWidget(info);
-  }
+  logo = new Logo;
+  logo->setFixedSize(600, 106);
+  layout->addWidget(logo);
 
-  setLayout(layout);
+  info = new QLabel(utf8() <<
+    "<table>"
+    "<tr><td align='right'><b>Version: </b></td><td>" << bsnesVersion << "</td></tr>"
+    "<tr><td align='right'><b>Author: </b></td><td>byuu</td></tr>"
+    "<tr><td align='right'><b>Homepage: </b></td><td>http://byuu.org/</td></tr>"
+    "</table>"
+  );
+  layout->addWidget(info);
 }
 
 void AboutWindow::Logo::paintEvent(QPaintEvent*) {

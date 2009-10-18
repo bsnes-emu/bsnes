@@ -1,15 +1,17 @@
+#include "hexeditor.cpp"
 #include "breakpoint.cpp"
 #include "memory.cpp"
 #include "vramviewer.cpp"
 
 Debugger::Debugger() {
-  setObjectName("debugger");
-  setWindowTitle("Debugger");
+  window = new QbWindow(config.geometry.debugger);
+  window->setObjectName("debugger");
+  window->setWindowTitle("Debugger");
 
   layout = new QHBoxLayout;
   layout->setMargin(Style::WindowMargin);
   layout->setSpacing(Style::WidgetSpacing);
-  setLayout(layout);
+  window->setLayout(layout);
 
   menu = new QMenuBar;
   layout->setMenuBar(menu);
@@ -67,8 +69,6 @@ Debugger::Debugger() {
   spacer->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Expanding);
   controlLayout->addWidget(spacer);
 
-  resize(855, 425);
-
   connect(tools_breakpoint, SIGNAL(triggered()), this, SLOT(showBreakpointEditor()));
   connect(tools_memory, SIGNAL(triggered()), this, SLOT(showMemoryEditor()));
   connect(tools_vramViewer, SIGNAL(triggered()), this, SLOT(showVramViewer()));
@@ -87,6 +87,7 @@ Debugger::Debugger() {
 
   frameCounter = 0;
   synchronize();
+  window->resize(855, 425);
 }
 
 void Debugger::synchronize() {
@@ -96,11 +97,6 @@ void Debugger::synchronize() {
   SNES::debugger.step_smp = application.debug && stepSMP->isChecked();
 
   memoryEditor->synchronize();
-}
-
-void Debugger::show() {
-  showAt(-1.0, +1.0);
-  setFocus();
 }
 
 void Debugger::echo(const char *message) {
@@ -113,18 +109,15 @@ void Debugger::clear() {
 }
 
 void Debugger::showBreakpointEditor() {
-  breakpointEditor->showAt(-1.0, -1.0);
-  breakpointEditor->setFocus();
+  breakpointEditor->window->show();
 }
 
 void Debugger::showMemoryEditor() {
-  memoryEditor->showAt(0.0, -1.0);
-  memoryEditor->setFocus();
+  memoryEditor->window->show();
 }
 
 void Debugger::showVramViewer() {
-  vramViewer->showAt(+1.0, -1.0);
-  vramViewer->setFocus();
+  vramViewer->window->show();
   vramViewer->refresh();
 }
 

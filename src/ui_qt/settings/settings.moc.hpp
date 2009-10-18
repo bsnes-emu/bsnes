@@ -5,11 +5,13 @@
 #include "advanced.moc"
 #include "utility/inputcapture.moc"
 
-class SettingsWindow : public QbWindow {
+class SettingsWindow : public QObject {
   Q_OBJECT
 
 public:
+  QbWindow *window;
   QHBoxLayout *layout;
+  QSplitter *splitter;
     QTreeWidget *list;
       QTreeWidgetItem *video;
       QTreeWidgetItem *audio;

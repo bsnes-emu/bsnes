@@ -1,7 +1,6 @@
 #ifndef NALL_SERIALIZER_HPP
 #define NALL_SERIALIZER_HPP
 
-#include <nall/new.hpp>
 #include <nall/stdint.hpp>
 #include <nall/traits.hpp>
 #include <nall/utility.hpp>
@@ -92,7 +91,7 @@ namespace nall {
 
     serializer(unsigned capacity) {
       mode = Save;
-      idata = new(zeromemory) uint8_t[capacity];
+      idata = new uint8_t[capacity]();
       isize = 0;
       icapacity = capacity;
     }

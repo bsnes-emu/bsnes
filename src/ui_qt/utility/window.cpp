@@ -3,12 +3,12 @@ void Utility::updateFullscreenState() {
 
   if(config.video.isFullscreen == false) {
     config.video.context = &config.video.windowed;
-    mainWindow->showNormal();
+    mainWindow->window->showNormal();
     mainWindow->menuBar->setVisible(true);
     mainWindow->statusBar->setVisible(true);
   } else {
     config.video.context = &config.video.fullscreen;
-    mainWindow->showFullScreen();
+    mainWindow->window->showFullScreen();
     mainWindow->menuBar->setVisible(!config.system.autoHideMenus);
     mainWindow->statusBar->setVisible(!config.system.autoHideMenus);
   }
@@ -51,29 +51,15 @@ void Utility::resizeMainWindow() {
   }
 
   if(config.video.isFullscreen == false) {
-    if(mainWindow->isVisible() == false) mainWindow->showHidden(true);
-
     //get effective desktop work area region (ignore Windows taskbar, OS X dock, etc.)
-    QRect deskRect = QApplication::desktop()->availableGeometry(mainWindow);
-
-    //calculate frame geometry (window border + menubar + statusbar)
-    unsigned frameWidth  = mainWindow->frameSize().width()  - mainWindow->canvasContainer->size().width();
-    unsigned frameHeight = mainWindow->frameSize().height() - mainWindow->canvasContainer->size().height();
+    QRect deskRect = QApplication::desktop()->availableGeometry(mainWindow->window);
 
     //ensure window size will not be larger than viewable desktop area
-    constrainSize(height, width, deskRect.height() - frameHeight);
-    constrainSize(width, height, deskRect.width()  - frameWidth );
+    constrainSize(height, width, deskRect.height()); //- frameHeight);
+    constrainSize(width, height, deskRect.width());  //- frameWidth );
 
-    //resize window such that it is as small as possible to hold canvas of size (width, height)
-    for(unsigned i = 0; i < 2; i++) {
-      mainWindow->canvas->setFixedSize(width, height);
-      mainWindow->resize(0, 0);
-
-      usleep(2000);
-      QApplication::processEvents();
-    }
-
-    mainWindow->showAt(0.0, 0.0);
+    mainWindow->canvas->setFixedSize(width, height);
+    mainWindow->window->show();
   } else {
     for(unsigned i = 0; i < 2; i++) {
       unsigned iWidth = width, iHeight = height;
@@ -94,7 +80,7 @@ void Utility::resizeMainWindow() {
   //workaround for Qt/Xlib bug:
   //if window resize occurs with cursor over it, Qt shows Qt::Size*DiagCursor;
   //so force it to show Qt::ArrowCursor, as expected
-  mainWindow->setCursor(Qt::ArrowCursor);
+  mainWindow->window->setCursor(Qt::ArrowCursor);
   mainWindow->canvasContainer->setCursor(Qt::ArrowCursor);
   mainWindow->canvas->setCursor(Qt::ArrowCursor);
 

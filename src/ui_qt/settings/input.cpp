@@ -143,7 +143,7 @@ void InputSettingsWindow::assignKey() {
     QTreeWidgetItem *item = list->currentItem();
     if(item && item->isSelected()) {
       signed i = listItem.find(item);
-      if(i >= 0) winInputCapture->activate(group[i]);
+      if(i >= 0) inputCaptureWindow->activate(group[i]);
     }
   }
 }
@@ -153,7 +153,7 @@ void InputSettingsWindow::assignAllKeys() {
   if(index < 2) {
     index = device->currentIndex();
     if(index < deviceItem.size()) {
-      winInputCapture->activate(deviceItem[index]);
+      inputCaptureWindow->activate(deviceItem[index]);
     }
   }
 }

@@ -18,11 +18,11 @@ public:
 
   //cartridge.cpp
   struct Cartridge {
-    string name, baseName, slotAName, slotBName;
+    string name;  //printable cartridge name
+    string baseName, slotAName, slotBName;
     bool patchApplied;
   } cartridge;
 
-  void loadCartridge(const char*);
   bool loadCartridgeNormal(const char*);
   bool loadCartridgeBsxSlotted(const char*, const char*);
   bool loadCartridgeBsx(const char*, const char*);
@@ -34,15 +34,13 @@ public:
   enum system_state_t { LoadCartridge, UnloadCartridge, PowerOn, PowerOff, PowerCycle, Reset };
   void modifySystemState(system_state_t state);
 
-  bool loadCartridge(const char*, SNES::MappedRAM&);
+  bool loadCartridge(string&, SNES::MappedRAM&);
   bool loadMemory(const char*, const char*, SNES::MappedRAM&);
   bool saveMemory(const char*, const char*, SNES::MappedRAM&);
   void loadCheats();
   void saveCheats();
 
   string filepath(const char *filename, const char *pathname);
-  string basename(const char *filename);
-  string basepath(const char *filename);
 
   //state.cpp
   bool saveStatesSupported();

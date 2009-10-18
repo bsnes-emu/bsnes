@@ -29,4 +29,4 @@ public slots:
 private:
   array<InputGroup*> deviceItem;
   array<QTreeWidgetItem*> listItem;
-} *winInputSettings;
+} *inputSettingsWindow;

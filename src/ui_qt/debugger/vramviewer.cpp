@@ -1,13 +1,14 @@
 VramViewer::VramViewer() {
-  setObjectName("vram-viewer");
-  setWindowTitle("Video RAM Viewer");
+  window = new QbWindow(config.geometry.vramViewer);
+  window->setObjectName("vram-viewer");
+  window->setWindowTitle("Video RAM Viewer");
 
   layout = new QVBoxLayout;
   layout->setSizeConstraint(QLayout::SetFixedSize);
   layout->setAlignment(Qt::AlignCenter);
   layout->setMargin(Style::WindowMargin);
   layout->setSpacing(Style::WidgetSpacing);
-  setLayout(layout);
+  window->setLayout(layout);
 
   controlLayout = new QHBoxLayout;
   controlLayout->setSizeConstraint(QLayout::SetMinimumSize);

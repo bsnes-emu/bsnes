@@ -1,5 +1,6 @@
 #include <../base.hpp>
 #include <nall/crc32.hpp>
+#include <nall/sha256.hpp>
 
 #define CARTRIDGE_CPP
 namespace SNES {
@@ -24,25 +25,25 @@ void Cartridge::load(Mode cartridge_mode) {
   set(mode, cartridge_mode);
 
   if(cartinfo.ram_size > 0) {
-    memory::cartram.map(new(zeromemory) uint8_t[cartinfo.ram_size], cartinfo.ram_size);
+    memory::cartram.map(allocate<uint8_t>(cartinfo.ram_size, 0xff), cartinfo.ram_size);
   }
 
   if(cartinfo.srtc || cartinfo.spc7110rtc) {
-    memory::cartrtc.map(new(zeromemory) uint8_t[20], 20);
+    memory::cartrtc.map(allocate<uint8_t>(20, 0xff), 20);
   }
 
   if(mode() == ModeBsx) {
-    memory::bsxram.map (new(zeromemory) uint8_t[ 32 * 1024],  32 * 1024);
-    memory::bsxpram.map(new(zeromemory) uint8_t[512 * 1024], 512 * 1024);
+    memory::bsxram.map (allocate<uint8_t>( 32 * 1024, 0xff),  32 * 1024);
+    memory::bsxpram.map(allocate<uint8_t>(512 * 1024, 0xff), 512 * 1024);
   }
 
   if(mode() == ModeSufamiTurbo) {
-    if(memory::stArom.data()) memory::stAram.map(new(zeromemory) uint8_t[128 * 1024], 128 * 1024);
-    if(memory::stBrom.data()) memory::stBram.map(new(zeromemory) uint8_t[128 * 1024], 128 * 1024);
+    if(memory::stArom.data()) memory::stAram.map(allocate<uint8_t>(128 * 1024, 0xff), 128 * 1024);
+    if(memory::stBrom.data()) memory::stBram.map(allocate<uint8_t>(128 * 1024, 0xff), 128 * 1024);
   }
 
   if(mode() == ModeSuperGameBoy) {
-    if(memory::gbrom.data()) memory::gbram.map(new(zeromemory) uint8_t[64 * 1024], 64 * 1024);
+    if(memory::gbrom.data()) memory::gbram.map(allocate<uint8_t>(64 * 1024, 0xff), 64 * 1024);
   }
 
   memory::cartrom.write_protect(true);
@@ -69,6 +70,21 @@ void Cartridge::load(Mode cartridge_mode) {
   if(memory::gbrom.size() != 0 && memory::gbrom.size() != ~0)
   for(unsigned n = 0; n < memory::gbrom.size(); n++) checksum = crc32_adjust(checksum, memory::gbrom[n]);
   set(crc32, ~checksum);
+
+#if 0
+  fprintf(stdout, "crc32  = %.8x\n", crc32());
+
+  sha256_ctx sha;
+  uint8_t shahash[32];
+  sha256_init(&sha);
+  sha256_chunk(&sha, memory::cartrom.data(), memory::cartrom.size());
+  sha256_final(&sha);
+  sha256_hash(&sha, shahash);
+
+  fprintf(stdout, "sha256 = ");
+  for(unsigned i = 0; i < 32; i++) fprintf(stdout, "%.2x", shahash[i]);
+  fprintf(stdout, "\n");
+#endif
 
   bus.load_cart();
   system.serialize_init();

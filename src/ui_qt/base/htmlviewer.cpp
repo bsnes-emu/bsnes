@@ -1,20 +1,19 @@
 HtmlViewerWindow::HtmlViewerWindow() {
-  setObjectName("html-window");
+  window = new QbWindow(config.geometry.htmlViewerWindow);
+  window->setObjectName("html-window");
+  window->resize(560, 480);
 
   layout = new QVBoxLayout;
   layout->setMargin(Style::WindowMargin);
-  layout->setSpacing(0); {
-    document = new QTextBrowser;
-    layout->addWidget(document);
-  }
+  layout->setSpacing(0);
+  window->setLayout(layout);
 
-  setLayout(layout);
-  setMinimumSize(560, 480);
+  document = new QTextBrowser;
+  layout->addWidget(document);
 }
 
 void HtmlViewerWindow::show(const char *title, const char *htmlData) {
   document->setHtml(utf8() << htmlData);
-  setWindowTitle(title);
-  showAt(0.0, 0.0);
-  setFocus();
+  window->setWindowTitle(title);
+  window->show();
 }

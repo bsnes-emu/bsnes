@@ -1,7 +1,8 @@
-class HtmlViewerWindow : public QbWindow {
+class HtmlViewerWindow : public QObject {
   Q_OBJECT
 
 public:
+  QbWindow *window;
   QVBoxLayout *layout;
     QTextBrowser *document;
 

@@ -1,11 +1,12 @@
 LoaderWindow::LoaderWindow() {
-  setObjectName("loader-window");
-  setMinimumWidth(520);
+  window = new QbWindow(config.geometry.loaderWindow);
+  window->setObjectName("loader-window");
+  window->setMinimumWidth(520);
 
   layout = new QVBoxLayout;
   layout->setMargin(Style::WindowMargin);
   layout->setSpacing(0);
-  setLayout(layout);
+  window->setLayout(layout);
 
   grid = new QGridLayout; {
     baseLabel = new QLabel("Base cartridge:");
@@ -81,7 +82,7 @@ void LoaderWindow::syncUi() {
 }
 
 void LoaderWindow::loadBsxSlottedCartridge(const char *filebase, const char *fileSlot1) {
-  hide();
+  window->hide();
   baseLabel->show(),  baseFile->show(),  baseBrowse->show(),  baseClear->show();
   slot1Label->show(), slot1File->show(), slot1Browse->show(), slot1Clear->show();
   slot2Label->hide(), slot2File->hide(), slot2Browse->hide(), slot2Clear->hide();
@@ -97,7 +98,7 @@ void LoaderWindow::loadBsxSlottedCartridge(const char *filebase, const char *fil
 }
 
 void LoaderWindow::loadBsxCartridge(const char *fileBase, const char *fileSlot1) {
-  hide();
+  window->hide();
   baseLabel->show(),  baseFile->show(),  baseBrowse->show(),  baseClear->show();
   slot1Label->show(), slot1File->show(), slot1Browse->show(), slot1Clear->show();
   slot2Label->hide(), slot2File->hide(), slot2Browse->hide(), slot2Clear->hide();
@@ -113,7 +114,7 @@ void LoaderWindow::loadBsxCartridge(const char *fileBase, const char *fileSlot1)
 }
 
 void LoaderWindow::loadSufamiTurboCartridge(const char *fileBase, const char *fileSlot1, const char *fileSlot2) {
-  hide();
+  window->hide();
   baseLabel->show(),  baseFile->show(),  baseBrowse->show(),  baseClear->show();
   slot1Label->show(), slot1File->show(), slot1Browse->show(), slot1Clear->show();
   slot2Label->show(), slot2File->show(), slot2Browse->show(), slot2Clear->show();
@@ -131,7 +132,7 @@ void LoaderWindow::loadSufamiTurboCartridge(const char *fileBase, const char *fi
 }
 
 void LoaderWindow::loadSuperGameBoyCartridge(const char *fileBase, const char *fileSlot1) {
-  hide();
+  window->hide();
   baseLabel->show(),  baseFile->show(),  baseBrowse->show(),  baseClear->show();
   slot1Label->show(), slot1File->show(), slot1Browse->show(), slot1Clear->show();
   slot2Label->hide(), slot2File->hide(), slot2Browse->hide(), slot2Clear->hide();
@@ -147,9 +148,9 @@ void LoaderWindow::loadSuperGameBoyCartridge(const char *fileBase, const char *f
 }
 
 void LoaderWindow::showWindow(const char *title) {
-  setWindowTitle(title);
-  showAt(0.0, 0.0);
-  setFocus();
+  window->setWindowTitle(title);
+  window->show();
+  window->shrink();
   load->setFocus();
 }
 
@@ -207,7 +208,7 @@ void LoaderWindow::clearSlot2Cartridge() {
 }
 
 void LoaderWindow::onLoad() {
-  hide();
+  window->hide();
   string base  = baseFile->text().toUtf8().data();
   string slot1 = slot1File->text().toUtf8().data();
   string slot2 = slot2File->text().toUtf8().data();
@@ -235,5 +236,5 @@ void LoaderWindow::onLoad() {
 }
 
 void LoaderWindow::onCancel() {
-  hide();
+  window->hide();
 }

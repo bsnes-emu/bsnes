@@ -35,7 +35,7 @@ void MappedRAM::map(uint8 *source, unsigned length) {
 void MappedRAM::copy(uint8 *data, unsigned size) {
   if(!data_) {
     size_ = (size & ~255) + ((bool)(size & 255) << 8);
-    data_ = new(zeromemory) uint8[size_];
+    data_ = new uint8[size_]();
   }
   memcpy(data_, data, min(size_, size));
 }

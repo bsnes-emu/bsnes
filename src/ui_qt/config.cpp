@@ -60,26 +60,25 @@ Configuration::Configuration() {
   attach(file.autodetect_type    = false, "file.autodetectType");
   attach(file.bypass_patch_crc32 = false, "file.bypassPatchCrc32");
 
-  attach(path.rom   = "", "path.rom");
-  attach(path.save  = "", "path.save");
-  attach(path.state = "", "path.state");
-  attach(path.patch = "", "path.patch");
-  attach(path.cheat = "", "path.cheat");
-  attach(path.data  = "", "path.data");
-  attach(path.bsx   = "", "path.bsx");
-  attach(path.st    = "", "path.st");
-  attach(path.sgb   = "", "path.sgb");
+  attach(path.current = "", "path.current");
+  attach(path.rom     = "", "path.rom");
+  attach(path.save    = "", "path.save");
+  attach(path.state   = "", "path.state");
+  attach(path.patch   = "", "path.patch");
+  attach(path.cheat   = "", "path.cheat");
+  attach(path.data    = "", "path.data");
+  attach(path.bsx     = "", "path.bsx");
+  attach(path.st      = "", "path.st");
+  attach(path.sgb     = "", "path.sgb");
 
   video.context = &video.windowed;
   attach(video.isFullscreen = false, "video.isFullscreen");
   attach(video.synchronize  = false, "video.synchronize");
 
-  attach(video.contrastAdjust   = 0, "video.contrastAdjust");
-  attach(video.brightnessAdjust = 0, "video.brightnessAdjust");
-  attach(video.gammaAdjust      = 0, "video.gammaAdjust");
-
-  attach(video.enableGammaRamp       =  true, "video.enableGammaRamp");
-  attach(video.enableNtscMergeFields = false, "video.enableNtscMergeFields");
+  attach(video.contrastAdjust   = 0,    "video.contrastAdjust");
+  attach(video.brightnessAdjust = 0,    "video.brightnessAdjust");
+  attach(video.gammaAdjust      = 0,    "video.gammaAdjust");
+  attach(video.enableGammaRamp  = true, "video.enableGammaRamp");
 
   attach(video.ntscAspectRatio = 54.0 / 47.0, "video.ntscAspectRatio", "NTSC aspect ratio (x / y)");
   attach(video.palAspectRatio  = 32.0 / 23.0, "video.palAspectRatio",  "PAL aspect ratio (x / y)");
@@ -184,4 +183,20 @@ Configuration::Configuration() {
   attach(input.uiGeneral.toggleMenu        = "keyboard00.escape",   "input.uiGeneral.toggleMenu");
   attach(input.uiGeneral.toggleStatus      = "keyboard00.escape",   "input.uiGeneral.toggleStatus");
   attach(input.uiGeneral.exitEmulator      = "none",                "input.uiGeneral.exitEmulator");
+
+  attach(geometry.mainWindow              = "", "geometry.mainWindow");
+  attach(geometry.loaderWindow            = "", "geometry.loaderWindow");
+  attach(geometry.htmlViewerWindow        = "", "geometry.htmlViewerWindow");
+  attach(geometry.aboutWindow             = "", "geometry.aboutWindow");
+  attach(geometry.diskBrowser             = "", "geometry.diskBrowser");
+  attach(geometry.folderCreator           = "", "geometry.folderCreator");
+  attach(geometry.settingsWindow          = "", "geometry.settingsWindow");
+  attach(geometry.inputCaptureWindow      = "", "geometry.inputCaptureWindow");
+  attach(geometry.inputMouseCaptureWindow = "", "geometry.inputMouseCaptureWindow");
+  attach(geometry.inputCalibrationWindow  = "", "geometry.inputCalibrationWindow");
+  attach(geometry.toolsWindow             = "", "geometry.toolsWindow");
+  attach(geometry.debugger                = "", "geometry.debugger");
+  attach(geometry.breakpointEditor        = "", "geometry.breakpointEditor");
+  attach(geometry.memoryEditor            = "", "geometry.memoryEditor");
+  attach(geometry.vramViewer              = "", "geometry.vramViewer");
 }

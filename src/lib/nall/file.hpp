@@ -15,6 +15,14 @@
 #include <nall/utility.hpp>
 
 namespace nall {
+  inline FILE* fopen_utf8(const char *utf8_filename, const char *mode) {
+    #if !defined(_WIN32)
+    return fopen(utf8_filename, mode);
+    #else
+    return _wfopen(utf16_t(utf8_filename), utf16_t(mode));
+    #endif
+  }
+
   class file : noncopyable {
   public:
     enum FileMode { mode_read, mode_write, mode_readwrite, mode_writeread };

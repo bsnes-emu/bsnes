@@ -1,10 +1,10 @@
 void Interface::video_refresh(uint16_t *data, unsigned pitch, unsigned *line, unsigned width, unsigned height) {
   uint32_t *output;
   unsigned outwidth, outheight, outpitch;
-  libfilter::filter.size(outwidth, outheight, width, height);
+  filter.size(outwidth, outheight, width, height);
 
   if(video.lock(output, outpitch, outwidth, outheight) == true) {
-    libfilter::filter.render(output, outpitch, data, pitch, line, width, height);
+    filter.render(output, outpitch, data, pitch, line, width, height);
     video.unlock();
     video.refresh();
     if(saveScreenshot == true) captureScreenshot(output, outpitch, outwidth, outheight);

@@ -1,7 +1,8 @@
-class VramViewer : public QbWindow {
+class VramViewer : public QObject {
   Q_OBJECT
 
 public:
+  QbWindow *window;
   QVBoxLayout *layout;
     QHBoxLayout *controlLayout;
       QRadioButton *depth2bpp;

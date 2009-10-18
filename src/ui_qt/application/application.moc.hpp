@@ -1,14 +1,4 @@
-struct FileReader : public library {
-  string filterList;
-
-  function<const char* ()> supported;
-  function<bool (const char*, uint8_t**, unsigned*)> load;
-
-  const char* direct_supported();
-  bool direct_load(const char*, uint8_t**, unsigned*);
-
-  FileReader();
-} libsnesreader;
+#include "qb.hpp"
 
 class Application : public QObject {
   Q_OBJECT

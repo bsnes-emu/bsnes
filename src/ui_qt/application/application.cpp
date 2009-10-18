@@ -1,27 +1,5 @@
 #include "init.cpp"
-
-const char* FileReader::direct_supported() {
-  return "";
-}
-
-bool FileReader::direct_load(const char *filename, uint8_t **outdata, unsigned *outsize) {
-  if(file::exists(filename) == false) return false;
-
-  file fp;
-  if(fp.open(filename, file::mode_read) == false) return false;
-
-  unsigned size;
-  uint8_t *data = new uint8_t[size = fp.size()];
-  fp.read(data, size);
-  fp.close();
-
-  //remove copier header, if it exists
-  if((size & 0x7fff) == 512) memmove(data, data + 512, size -= 512);
-
-  *outdata = data;
-  *outsize = size;
-  return true;
-}
+#include "qb.cpp"
 
 void Application::initPaths(const char *basename) {
   char temp[PATH_MAX];
@@ -94,13 +72,29 @@ int Application::main(int &argc, char **argv) {
 
   if(argc == 2) {
     //if valid file was specified on the command-line, attempt to load it now
-    utility.loadCartridge(argv[1]);
+    utility.loadCartridgeNormal(argv[1]);
   }
 
   timer = new QTimer(this);
   connect(timer, SIGNAL(timeout()), this, SLOT(run()));
   timer->start(0);
   app->exec();
+
+  //QbWindow::hide() saves window geometry for next run
+  loaderWindow->window->hide();
+  htmlViewerWindow->window->hide();
+  aboutWindow->window->hide();
+  diskBrowser->window->hide();
+  folderCreator->window->hide();
+  settingsWindow->window->hide();
+  inputCaptureWindow->window->hide();
+  inputMouseCaptureWindow->window->hide();
+  inputCalibrationWindow->window->hide();
+  toolsWindow->window->hide();
+  debugger->window->hide();
+  breakpointEditor->window->hide();
+  memoryEditor->window->hide();
+  vramViewer->window->hide();
 
   utility.unloadCartridge();
   config.save(configFilename);

@@ -1,7 +1,6 @@
 #ifndef NALL_MODULO_HPP
 #define NALL_MODULO_HPP
 
-#include <nall/new.hpp>
 #include <nall/serializer.hpp>
 
 namespace nall {
@@ -26,7 +25,7 @@ namespace nall {
     }
 
     modulo_array() {
-      buffer = new(zeromemory) T[size * 3];
+      buffer = new T[size * 3]();
     }
 
     ~modulo_array() {

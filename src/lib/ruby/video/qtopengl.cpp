@@ -1,3 +1,7 @@
+#ifdef __APPLE__
+  #include <OpenGL/OpenGL.h>
+#endif
+
 namespace ruby {
 
 class pVideoQtOpenGL {
@@ -13,6 +17,7 @@ public:
     uint32_t *buffer;
     unsigned rasterWidth, rasterHeight;
 
+    bool synchronize;
     unsigned filter;
 
     void resize(unsigned width, unsigned height) {
@@ -33,6 +38,15 @@ public:
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, textureWidth, textureHeight, 0, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, buffer);
       }
+    }
+
+    void updateSynchronization() {
+      #ifdef __APPLE__
+      makeCurrent();
+      CGLContextObj context = CGLGetCurrentContext();
+      GLint value = synchronize;  //0 = draw immediately (no vsync), 1 = draw once per frame (vsync)
+      CGLSetParameter(context, kCGLCPSwapInterval, &value);
+      #endif
     }
 
     void paintGL() {
@@ -85,18 +99,26 @@ public:
   } *widget;
 
   bool cap(const string& name) {
+    if(name == Video::Synchronize) return true;
     if(name == Video::Filter) return true;
     if(name == "QWidget") return true;
     return false;
   }
 
   any get(const string& name) {
+    if(name == Video::Synchronize) return widget->synchronize;
     if(name == Video::Filter) return widget->filter;
     if(name == "QWidget") return parent;
     return false;
   }
 
   bool set(const string& name, const any& value) {
+    if(name == Video::Synchronize) {
+      widget->synchronize = any_cast<bool>(value);
+      widget->updateSynchronization();
+      return true;
+    }
+
     if(name == Video::Filter) {
       widget->filter = any_cast<unsigned>(value);
       return true;

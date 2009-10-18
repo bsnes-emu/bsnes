@@ -1,7 +1,8 @@
-class AboutWindow : public QbWindow {
+class AboutWindow : public QObject {
   Q_OBJECT
 
 public:
+  QbWindow *window;
   QVBoxLayout *layout;
     struct Logo : public QWidget {
       void paintEvent(QPaintEvent*);

@@ -26,7 +26,6 @@ public:
     bool synchronize;
     signed contrastAdjust, brightnessAdjust, gammaAdjust;
     bool enableGammaRamp;
-    bool enableNtscMergeFields;
     double ntscAspectRatio, palAspectRatio;
 
     struct Context {
@@ -87,6 +86,27 @@ public:
       string exitEmulator;
     } uiGeneral;
   } input;
+
+  struct Geometry {
+    string mainWindow;
+    string loaderWindow;
+    string htmlViewerWindow;
+    string aboutWindow;
+    string diskBrowser;
+    string folderCreator;
+
+    string settingsWindow;
+    string inputCaptureWindow;
+    string inputMouseCaptureWindow;
+    string inputCalibrationWindow;
+
+    string toolsWindow;
+
+    string debugger;
+    string breakpointEditor;
+    string memoryEditor;
+    string vramViewer;
+  } geometry;
 
   bool load(const char *filename);
   void attachJoypad(Configuration::Input::Joypad &joypad, const char *name);

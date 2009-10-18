@@ -37,8 +37,8 @@ else ifeq ($(platform),osx)
 
   link += $(if $(findstring audio.openal,$(ruby)),-framework OpenAL)
 else ifeq ($(platform),win)
-  link += -mwindows
-# link += -mconsole
+  link += -mwindows -mthreads
+# link += -mconsole -mthreads
   link += -s -luuid -lkernel32 -luser32 -lgdi32 -lshell32
   # statically link Qt for Windows build
   link += -enable-stdcall-fixup -Wl,-enable-auto-import -Wl,-enable-runtime-pseudo-reloc
@@ -76,7 +76,7 @@ link += $(call ifhas,input.rawinput,$(ruby),-ldinput8 -ldxguid)
 ### objects ###
 ###############
 
-objects := libco ruby libfilter
+objects := libco ruby
 objects += system cartridge cheat
 objects += memory smemory cpu cpucore scpu smp smpcore ssmp sdsp ppu bppu
 objects += sgb superfx sa1
@@ -111,8 +111,6 @@ rubydef := $(foreach c,$(subst .,_,$(call strupper,$(ruby))),-D$c)
 obj/ruby.o: lib/ruby/ruby.cpp $(call rwildcard,lib/ruby/*)
 	$(call compile,$(rubydef) $(rubyflags))
 obj/libco.o: lib/libco/libco.c lib/libco/*
-	$(c) -O3 -fomit-frame-pointer -static -Ilib -c $< -o $@
-obj/libfilter.o: lib/libfilter/libfilter.cpp lib/libfilter/*
 
 #################
 ### utilities ###

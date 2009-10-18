@@ -37,7 +37,7 @@ void PPU::reset() {
 }
 
 PPU::PPU() {
-  output = new(zeromemory) uint16[512 * 480];
+  output = new uint16[512 * 480];
 
   status.render_output   = true;
   status.frames_updated  = false;

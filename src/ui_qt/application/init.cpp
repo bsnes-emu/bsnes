@@ -16,27 +16,6 @@
 #include "../settings/settings.cpp"
 #include "../tools/tools.cpp"
 
-FileReader::FileReader() {
-  if(open("snesreader")) {
-    supported = sym("snesreader_supported");
-    load = sym("snesreader_load");
-  }
-
-  if(!supported || !load) {
-    supported = bind(&FileReader::direct_supported, this);
-    load = bind(&FileReader::direct_load, this);
-  }
-
-  filterList = supported();
-  if(filterList.length() > 0) {
-    filterList = string()
-    << " *.swc *.fig *.ufo *.gd3 *.gd7 *.dx2 *.mgd *.mgh"
-    << " *.048 *.058 *.068 *.078 *.bin"
-    << " *.usa *.eur *.jap *.aus *.bsx"
-    << " " << filterList;
-  }
-}
-
 void Application::init() {
   if(config.system.crashedOnLastRun == true) {
     //emulator crashed on last run, disable all drivers

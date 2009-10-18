@@ -1,8 +1,6 @@
 #ifndef NALL_UTF8_HPP
 #define NALL_UTF8_HPP
 
-#include <nall/new.hpp>
-
 //UTF-8 <> UTF-16 conversion
 //used only for Win32; Linux, etc use UTF-8 internally
 
@@ -30,7 +28,7 @@ namespace nall {
     utf16_t(const char *s = "") {
       if(!s) s = "";
       unsigned length = MultiByteToWideChar(CP_UTF8, 0, s, -1, 0, 0);
-      buffer = new(zeromemory) wchar_t[length + 1];
+      buffer = new wchar_t[length + 1]();
       MultiByteToWideChar(CP_UTF8, 0, s, -1, buffer, length);
     }
 
@@ -56,7 +54,7 @@ namespace nall {
     utf8_t(const wchar_t *s = L"") {
       if(!s) s = L"";
       unsigned length = WideCharToMultiByte(CP_UTF8, 0, s, -1, 0, 0, (const char*)0, (BOOL*)0);
-      buffer = new(zeromemory) char[length + 1];
+      buffer = new char[length + 1]();
       WideCharToMultiByte(CP_UTF8, 0, s, -1, buffer, length, (const char*)0, (BOOL*)0);
     }
 

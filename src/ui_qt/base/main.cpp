@@ -1,6 +1,7 @@
 MainWindow::MainWindow() {
-  setObjectName("main-window");
-  setWindowTitle(utf8() << bsnesTitle << " v" << bsnesVersion);
+  window = new Window(config.geometry.mainWindow);
+  window->setObjectName("main-window");
+  window->setWindowTitle(utf8() << bsnesTitle << " v" << bsnesVersion);
 
   //menu bar
   #if defined(PLATFORM_OSX)
@@ -12,45 +13,37 @@ MainWindow::MainWindow() {
   system = menuBar->addMenu("System");
     system_load = system->addAction("Load Cartridge ...");
     system_load->setIcon(QIcon(":/16x16/document-open.png"));
+    system_loadSpecial = system->addMenu("Load Special");
+    system_loadSpecial->setIcon(QIcon(":/16x16/document-open.png"));
+      system_loadSpecial_bsxSlotted = system_loadSpecial->addAction("Load BS-X Slotted Cartridge ...");
+      system_loadSpecial_bsxSlotted->setIcon(QIcon(":/16x16/document-open.png"));
+      system_loadSpecial_bsx = system_loadSpecial->addAction("Load BS-X Cartridge ...");
+      system_loadSpecial_bsx->setIcon(QIcon(":/16x16/document-open.png"));
+      system_loadSpecial_sufamiTurbo = system_loadSpecial->addAction("Load Sufami Turbo Cartridge ...");
+      system_loadSpecial_sufamiTurbo->setIcon(QIcon(":/16x16/document-open.png"));
+      system_loadSpecial_superGameBoy = system_loadSpecial->addAction("Load Super Game Boy Cartridge ...");
+      system_loadSpecial_superGameBoy->setIcon(QIcon(":/16x16/document-open.png"));
+      system_loadSpecial_superGameBoy->setVisible(false);
     system->addSeparator();
-    system_power = system->addAction("Power");
-    system_power->setIcon(QIcon(":/16x16/system-shutdown.png"));
-    system_power->setCheckable(true);
+    system->addAction(system_power = new QbCheckAction("Power", 0));
     system_reset = system->addAction("Reset");
     system_reset->setIcon(QIcon(":/16x16/view-refresh.png"));
     system->addSeparator();
     system_port1 = system->addMenu("Controller Port 1");
     system_port1->setIcon(QIcon(":/16x16/input-gaming.png"));
-      system_port1_none = system_port1->addAction("None");
-      system_port1_none->setCheckable(true);
-      system_port1_joypad = system_port1->addAction("Joypad");
-      system_port1_joypad->setIcon(QIcon(":/16x16/input-gaming.png"));
-      system_port1_joypad->setCheckable(true);
-      system_port1_multitap = system_port1->addAction("Multitap");
-      system_port1_multitap->setIcon(QIcon(":/16x16/input-gaming.png"));
-      system_port1_multitap->setCheckable(true);
-      system_port1_mouse = system_port1->addAction("Mouse");
-      system_port1_mouse->setIcon(QIcon(":/16x16/input-mouse.png"));
-      system_port1_mouse->setCheckable(true);
+      system_port1->addAction(system_port1_none = new QbRadioAction("None", 0));
+      system_port1->addAction(system_port1_joypad = new QbRadioAction("Joypad", 0));
+      system_port1->addAction(system_port1_multitap = new QbRadioAction("Multitap", 0));
+      system_port1->addAction(system_port1_mouse = new QbRadioAction("Mouse", 0));
     system_port2 = system->addMenu("Controller Port 2");
     system_port2->setIcon(QIcon(":/16x16/input-gaming.png"));
-      system_port2_none = system_port2->addAction("None");
-      system_port2_none->setCheckable(true);
-      system_port2_joypad = system_port2->addAction("Joypad");
-      system_port2_joypad->setIcon(QIcon(":/16x16/input-gaming.png"));
-      system_port2_joypad->setCheckable(true);
-      system_port2_multitap = system_port2->addAction("Multitap");
-      system_port2_multitap->setIcon(QIcon(":/16x16/input-gaming.png"));
-      system_port2_multitap->setCheckable(true);
-      system_port2_mouse = system_port2->addAction("Mouse");
-      system_port2_mouse->setIcon(QIcon(":/16x16/input-mouse.png"));
-      system_port2_mouse->setCheckable(true);
-      system_port2_superscope = system_port2->addAction("Super Scope");
-      system_port2_superscope->setCheckable(true);
-      system_port2_justifier = system_port2->addAction("Justifier");
-      system_port2_justifier->setCheckable(true);
-      system_port2_justifiers = system_port2->addAction("Two Justifiers");
-      system_port2_justifiers->setCheckable(true);
+      system_port2->addAction(system_port2_none = new QbRadioAction("None", 0));
+      system_port2->addAction(system_port2_joypad = new QbRadioAction("Joypad", 0));
+      system_port2->addAction(system_port2_multitap = new QbRadioAction("Multitap", 0));
+      system_port2->addAction(system_port2_mouse = new QbRadioAction("Mouse", 0));
+      system_port2->addAction(system_port2_superscope = new QbRadioAction("Super Scope", 0));
+      system_port2->addAction(system_port2_justifier = new QbRadioAction("Justifier", 0));
+      system_port2->addAction(system_port2_justifiers = new QbRadioAction("Two Justifiers", 0));
     #if !defined(PLATFORM_OSX)
     system->addSeparator();
     #endif
@@ -61,70 +54,52 @@ MainWindow::MainWindow() {
   settings = menuBar->addMenu("Settings");
     settings_videoMode = settings->addMenu("Video Mode");
     settings_videoMode->setIcon(QIcon(":/16x16/video-display.png"));
-      settings_videoMode_1x = settings_videoMode->addAction("Scale 1x");
-      settings_videoMode_1x->setCheckable(true);
-      settings_videoMode_2x = settings_videoMode->addAction("Scale 2x");
-      settings_videoMode_2x->setCheckable(true);
-      settings_videoMode_3x = settings_videoMode->addAction("Scale 3x");
-      settings_videoMode_3x->setCheckable(true);
-      settings_videoMode_4x = settings_videoMode->addAction("Scale 4x");
-      settings_videoMode_4x->setCheckable(true);
-      settings_videoMode_max = settings_videoMode->addAction("Scale Max");
-      settings_videoMode_max->setCheckable(true);
+      settings_videoMode->addAction(settings_videoMode_1x = new QbRadioAction("Scale 1x", 0));
+      settings_videoMode->addAction(settings_videoMode_2x = new QbRadioAction("Scale 2x", 0));
+      settings_videoMode->addAction(settings_videoMode_3x = new QbRadioAction("Scale 3x", 0));
+      settings_videoMode->addAction(settings_videoMode_4x = new QbRadioAction("Scale 4x", 0));
+      settings_videoMode->addAction(settings_videoMode_max = new QbRadioAction("Scale Max", 0));
       settings_videoMode->addSeparator();
-      settings_videoMode_correctAspectRatio = settings_videoMode->addAction("Correct Aspect Ratio");
-      settings_videoMode_correctAspectRatio->setCheckable(true);
-      settings_videoMode_fullscreen = settings_videoMode->addAction("Fullscreen");
-      settings_videoMode_fullscreen->setIcon(QIcon(":/16x16/view-fullscreen.png"));
-      settings_videoMode_fullscreen->setCheckable(true);
+      settings_videoMode->addAction(settings_videoMode_correctAspectRatio = new QbCheckAction("Correct Aspect Ratio", 0));
+      settings_videoMode->addAction(settings_videoMode_fullscreen = new QbCheckAction("Fullscreen", 0));
       settings_videoMode->addSeparator();
-      settings_videoMode_ntsc = settings_videoMode->addAction("NTSC");
-      settings_videoMode_ntsc->setCheckable(true);
-      settings_videoMode_pal = settings_videoMode->addAction("PAL");
-      settings_videoMode_pal->setCheckable(true);
-    settings_videoFilter = settings->addMenu("Video Filter");
-    settings_videoFilter->setIcon(QIcon(":/16x16/image-x-generic.png"));
-      settings_videoFilter_point = settings_videoFilter->addAction("Point");
-      settings_videoFilter_point->setCheckable(true);
-      settings_videoFilter_linear = settings_videoFilter->addAction("Linear");
-      settings_videoFilter_linear->setCheckable(true);
+      settings_videoMode->addAction(settings_videoMode_ntsc = new QbRadioAction("NTSC", 0));
+      settings_videoMode->addAction(settings_videoMode_pal = new QbRadioAction("PAL", 0));
+
+    if(filter.opened()) {
+      settings_videoFilter = settings->addMenu("Video Filter");
+      settings_videoFilter->setIcon(QIcon(":/16x16/image-x-generic.png"));
+
+      settings_videoFilter_configure = settings_videoFilter->addAction("Configure Active Filter ...");
+      settings_videoFilter_configure->setIcon(QIcon(":/16x16/preferences-desktop.png"));
       settings_videoFilter->addSeparator();
-      settings_videoFilter_none = settings_videoFilter->addAction("None");
-      settings_videoFilter_none->setCheckable(true);
-      settings_videoFilter_scanline = settings_videoFilter->addAction("Scanline");
-      settings_videoFilter_scanline->setCheckable(true);
-      settings_videoFilter_scale2x = settings_videoFilter->addAction("Scale2x");
-      settings_videoFilter_scale2x->setCheckable(true);
-      settings_videoFilter_lq2x = settings_videoFilter->addAction("LQ2x");
-      settings_videoFilter_lq2x->setCheckable(true);
-      settings_videoFilter_hq2x = settings_videoFilter->addAction("HQ2x");
-      settings_videoFilter_hq2x->setCheckable(true);
-      settings_videoFilter_ntsc = settings_videoFilter->addAction("NTSC");
-      settings_videoFilter_ntsc->setCheckable(true);
+
+      settings_videoFilter->addAction(settings_videoFilter_none = new QbRadioAction("None", 0));
+      settings_videoFilter_list.add(settings_videoFilter_none);
+
+      lstring filterlist;
+      filterlist.split(";", filter.dl_supported());
+      for(unsigned i = 0; i < filterlist.size(); i++) {
+        QbRadioAction *action = new QbRadioAction(utf8() << filterlist[i], 0);
+        settings_videoFilter->addAction(action);
+        settings_videoFilter_list.add(action);
+      }
+    }
+
+    settings->addAction(settings_smoothVideo = new QbCheckAction("Smooth Video Output", 0));
     settings->addSeparator();
-    settings_muteAudio = settings->addAction("Mute Audio Output");
-    settings_muteAudio->setIcon(QIcon(":/16x16/audio-volume-muted.png"));
-    settings_muteAudio->setCheckable(true);
+    settings->addAction(settings_muteAudio = new QbCheckAction("Mute Audio Output", 0));
     settings->addSeparator();
     settings_emulationSpeed = settings->addMenu("Emulation Speed");
     settings_emulationSpeed->setIcon(QIcon(":/16x16/appointment-new.png"));
-      settings_emulationSpeed_slowest = settings_emulationSpeed->addAction("50%");
-      settings_emulationSpeed_slowest->setCheckable(true);
-      settings_emulationSpeed_slow = settings_emulationSpeed->addAction("75%");
-      settings_emulationSpeed_slow->setCheckable(true);
-      settings_emulationSpeed_normal = settings_emulationSpeed->addAction("100%");
-      settings_emulationSpeed_normal->setCheckable(true);
-      settings_emulationSpeed_fast = settings_emulationSpeed->addAction("150%");
-      settings_emulationSpeed_fast->setCheckable(true);
-      settings_emulationSpeed_fastest = settings_emulationSpeed->addAction("200%");
-      settings_emulationSpeed_fastest->setCheckable(true);
+      settings_emulationSpeed->addAction(settings_emulationSpeed_slowest = new QbRadioAction("50%", 0));
+      settings_emulationSpeed->addAction(settings_emulationSpeed_slow = new QbRadioAction("75%", 0));
+      settings_emulationSpeed->addAction(settings_emulationSpeed_normal = new QbRadioAction("100%", 0));
+      settings_emulationSpeed->addAction(settings_emulationSpeed_fast = new QbRadioAction("150%", 0));
+      settings_emulationSpeed->addAction(settings_emulationSpeed_fastest = new QbRadioAction("200%", 0));
       settings_emulationSpeed->addSeparator();
-      settings_emulationSpeed_syncVideo = settings_emulationSpeed->addAction("Sync Video");
-      settings_emulationSpeed_syncVideo->setIcon(QIcon(":/16x16/video-display.png"));
-      settings_emulationSpeed_syncVideo->setCheckable(true);
-      settings_emulationSpeed_syncAudio = settings_emulationSpeed->addAction("Sync Audio");
-      settings_emulationSpeed_syncAudio->setIcon(QIcon(":/16x16/audio-volume-high.png"));
-      settings_emulationSpeed_syncAudio->setCheckable(true);
+      settings_emulationSpeed->addAction(settings_emulationSpeed_syncVideo = new QbCheckAction("Sync Video", 0));
+      settings_emulationSpeed->addAction(settings_emulationSpeed_syncAudio = new QbCheckAction("Sync Audio", 0));
     settings_configuration = settings->addAction("Configuration ...");
     settings_configuration->setIcon(QIcon(":/16x16/preferences-desktop.png"));
     settings_configuration->setMenuRole(QAction::PreferencesRole);
@@ -132,6 +107,8 @@ MainWindow::MainWindow() {
   tools = menuBar->addMenu("Tools");
     tools_cheatEditor = tools->addAction("Cheat Editor ...");
     tools_cheatEditor->setIcon(QIcon(":/16x16/accessories-text-editor.png"));
+    tools_cheatFinder = tools->addAction("Cheat Finder ...");
+    tools_cheatFinder->setIcon(QIcon(":/16x16/system-search.png"));
     tools_stateManager = tools->addAction("State Manager ...");
     tools_stateManager->setIcon(QIcon(":/16x16/system-file-manager.png"));
     #if defined(DEBUGGER)
@@ -194,10 +171,14 @@ MainWindow::MainWindow() {
   #endif
   layout->addWidget(canvasContainer);
   layout->addWidget(statusBar);
-  setLayout(layout);
+  window->setLayout(layout);
 
   //slots
   connect(system_load, SIGNAL(triggered()), this, SLOT(loadCartridge()));
+  connect(system_loadSpecial_bsxSlotted, SIGNAL(triggered()), this, SLOT(loadBsxSlottedCartridge()));
+  connect(system_loadSpecial_bsx, SIGNAL(triggered()), this, SLOT(loadBsxCartridge()));
+  connect(system_loadSpecial_sufamiTurbo, SIGNAL(triggered()), this, SLOT(loadSufamiTurboCartridge()));
+  connect(system_loadSpecial_superGameBoy, SIGNAL(triggered()), this, SLOT(loadSuperGameBoyCartridge()));
   connect(system_power, SIGNAL(triggered()), this, SLOT(power()));
   connect(system_reset, SIGNAL(triggered()), this, SLOT(reset()));
   connect(system_port1_none, SIGNAL(triggered()), this, SLOT(setPort1None()));
@@ -221,14 +202,13 @@ MainWindow::MainWindow() {
   connect(settings_videoMode_fullscreen, SIGNAL(triggered()), this, SLOT(toggleFullscreen()));
   connect(settings_videoMode_ntsc, SIGNAL(triggered()), this, SLOT(setVideoNtsc()));
   connect(settings_videoMode_pal, SIGNAL(triggered()), this, SLOT(setVideoPal()));
-  connect(settings_videoFilter_point, SIGNAL(triggered()), this, SLOT(setPointFilter()));
-  connect(settings_videoFilter_linear, SIGNAL(triggered()), this, SLOT(setLinearFilter()));
-  connect(settings_videoFilter_none, SIGNAL(triggered()), this, SLOT(setNoFilter()));
-  connect(settings_videoFilter_scanline, SIGNAL(triggered()), this, SLOT(setScanlineFilter()));
-  connect(settings_videoFilter_scale2x, SIGNAL(triggered()), this, SLOT(setScale2xFilter()));
-  connect(settings_videoFilter_lq2x, SIGNAL(triggered()), this, SLOT(setLq2xFilter()));
-  connect(settings_videoFilter_hq2x, SIGNAL(triggered()), this, SLOT(setHq2xFilter()));
-  connect(settings_videoFilter_ntsc, SIGNAL(triggered()), this, SLOT(setNtscFilter()));
+  if(filter.opened()) {
+    connect(settings_videoFilter_configure, SIGNAL(triggered()), this, SLOT(configureFilter()));
+    for(unsigned i = 0; i < settings_videoFilter_list.size(); i++) {
+      connect(settings_videoFilter_list[i], SIGNAL(triggered()), this, SLOT(setFilter()));
+    }
+  }
+  connect(settings_smoothVideo, SIGNAL(triggered()), this, SLOT(toggleSmoothVideo()));
   connect(settings_muteAudio, SIGNAL(triggered()), this, SLOT(muteAudio()));
   connect(settings_emulationSpeed_slowest, SIGNAL(triggered()), this, SLOT(setSpeedSlowest()));
   connect(settings_emulationSpeed_slow, SIGNAL(triggered()), this, SLOT(setSpeedSlow()));
@@ -239,6 +219,7 @@ MainWindow::MainWindow() {
   connect(settings_emulationSpeed_syncAudio, SIGNAL(triggered()), this, SLOT(syncAudio()));
   connect(settings_configuration, SIGNAL(triggered()), this, SLOT(showConfigWindow()));
   connect(tools_cheatEditor, SIGNAL(triggered()), this, SLOT(showCheatEditor()));
+  connect(tools_cheatFinder, SIGNAL(triggered()), this, SLOT(showCheatFinder()));
   connect(tools_stateManager, SIGNAL(triggered()), this, SLOT(showStateManager()));
   connect(tools_debugger, SIGNAL(triggered()), this, SLOT(showDebugger()));
   connect(help_documentation, SIGNAL(triggered()), this, SLOT(showDocumentation()));
@@ -277,15 +258,16 @@ void MainWindow::syncUi() {
   settings_videoMode_ntsc->setChecked(config.video.context->region == 0);
   settings_videoMode_pal->setChecked (config.video.context->region == 1);
 
-  settings_videoFilter_point->setChecked   (config.video.context->hwFilter == 0);
-  settings_videoFilter_linear->setChecked  (config.video.context->hwFilter == 1);
-  settings_videoFilter_none->setChecked    (config.video.context->swFilter == 0);
-  settings_videoFilter_scanline->setChecked(config.video.context->swFilter == 1);
-  settings_videoFilter_scale2x->setChecked (config.video.context->swFilter == 2);
-  settings_videoFilter_lq2x->setChecked    (config.video.context->swFilter == 3);
-  settings_videoFilter_hq2x->setChecked    (config.video.context->swFilter == 4);
-  settings_videoFilter_ntsc->setChecked    (config.video.context->swFilter == 5);
+  if(filter.opened()) {
+    //only enable configuration option if the active filter supports it ...
+    settings_videoFilter_configure->setEnabled(filter.settings());
 
+    for(unsigned i = 0; i < settings_videoFilter_list.size(); i++) {
+      settings_videoFilter_list[i]->setChecked(config.video.context->swFilter == i);
+    }
+  }
+
+  settings_smoothVideo->setChecked(config.video.context->hwFilter == 1);
   settings_muteAudio->setChecked(config.audio.mute);
 
   settings_emulationSpeed_slowest->setChecked(config.system.speed == 0);
@@ -299,14 +281,31 @@ void MainWindow::syncUi() {
 }
 
 bool MainWindow::isActive() {
-  return isActiveWindow() && !isMinimized();
+  return window->isActiveWindow() && !window->isMinimized();
 }
 
 void MainWindow::loadCartridge() {
-  diskBrowser->loadAnyCartridge();
+  diskBrowser->loadCartridge();
+}
+
+void MainWindow::loadBsxSlottedCartridge() {
+  loaderWindow->loadBsxSlottedCartridge("", "");
+}
+
+void MainWindow::loadBsxCartridge() {
+  loaderWindow->loadBsxCartridge(config.path.bsx, "");
+}
+
+void MainWindow::loadSufamiTurboCartridge() {
+  loaderWindow->loadSufamiTurboCartridge(config.path.st, "", "");
+}
+
+void MainWindow::loadSuperGameBoyCartridge() {
+  loaderWindow->loadSuperGameBoyCartridge(config.path.sgb, "");
 }
 
 void MainWindow::power() {
+  system_power->toggleChecked();
   if(system_power->isChecked()) {
     utility.modifySystemState(Utility::PowerOn);
   } else {
@@ -331,6 +330,7 @@ void MainWindow::setPort2Justifier()  { SNES::config.controller_port2 = SNES::In
 void MainWindow::setPort2Justifiers() { SNES::config.controller_port2 = SNES::Input::DeviceJustifiers; utility.updateControllers(); syncUi(); }
 
 void MainWindow::quit() {
+  window->hide();
   application.terminate = true;
 }
 
@@ -341,11 +341,13 @@ void MainWindow::setVideoMode4x()  { config.video.context->multiplier = 4; utili
 void MainWindow::setVideoModeMax() { config.video.context->multiplier = 9; utility.resizeMainWindow(); syncUi(); }
 
 void MainWindow::toggleAspectCorrection() {
+  settings_videoMode_correctAspectRatio->toggleChecked();
   config.video.context->correctAspectRatio = settings_videoMode_correctAspectRatio->isChecked();
   utility.resizeMainWindow();
 }
 
 void MainWindow::toggleFullscreen() {
+  settings_videoMode_fullscreen->toggleChecked();
   config.video.isFullscreen = settings_videoMode_fullscreen->isChecked();
   utility.updateFullscreenState();
   utility.resizeMainWindow();
@@ -355,16 +357,37 @@ void MainWindow::toggleFullscreen() {
 void MainWindow::setVideoNtsc() { config.video.context->region = 0; utility.updateVideoMode(); utility.resizeMainWindow(); syncUi(); }
 void MainWindow::setVideoPal()  { config.video.context->region = 1; utility.updateVideoMode(); utility.resizeMainWindow(); syncUi(); }
 
-void MainWindow::setPointFilter()    { config.video.context->hwFilter = 0; utility.updateHardwareFilter(); syncUi(); }
-void MainWindow::setLinearFilter()   { config.video.context->hwFilter = 1; utility.updateHardwareFilter(); syncUi(); }
-void MainWindow::setNoFilter()       { config.video.context->swFilter = 0; utility.updateSoftwareFilter(); syncUi(); }
-void MainWindow::setScanlineFilter() { config.video.context->swFilter = 1; utility.updateSoftwareFilter(); syncUi(); }
-void MainWindow::setScale2xFilter()  { config.video.context->swFilter = 2; utility.updateSoftwareFilter(); syncUi(); }
-void MainWindow::setLq2xFilter()     { config.video.context->swFilter = 3; utility.updateSoftwareFilter(); syncUi(); }
-void MainWindow::setHq2xFilter()     { config.video.context->swFilter = 4; utility.updateSoftwareFilter(); syncUi(); }
-void MainWindow::setNtscFilter()     { config.video.context->swFilter = 5; utility.updateSoftwareFilter(); syncUi(); }
+void MainWindow::toggleSmoothVideo() {
+  settings_smoothVideo->toggleChecked();
+  config.video.context->hwFilter = settings_smoothVideo->isChecked();
+  utility.updateHardwareFilter();
+  syncUi();
+}
 
-void MainWindow::muteAudio() { config.audio.mute = settings_muteAudio->isChecked(); }
+void MainWindow::configureFilter() {
+  QWidget *widget = filter.settings();
+  if(widget) {
+    widget->show();
+    widget->activateWindow();
+    widget->raise();
+  }
+}
+
+void MainWindow::setFilter() {
+  for(unsigned i = 0; i < settings_videoFilter_list.size(); i++) {
+    if(sender() == settings_videoFilter_list[i]) {
+      config.video.context->swFilter = i;
+      utility.updateSoftwareFilter();
+      syncUi();
+      return;
+    }
+  }
+}
+
+void MainWindow::muteAudio() {
+  settings_muteAudio->toggleChecked();
+  config.audio.mute = settings_muteAudio->isChecked();
+}
 
 void MainWindow::setSpeedSlowest() { config.system.speed = 0; utility.updateEmulationSpeed(); syncUi(); }
 void MainWindow::setSpeedSlow()    { config.system.speed = 1; utility.updateEmulationSpeed(); syncUi(); }
@@ -372,17 +395,24 @@ void MainWindow::setSpeedNormal()  { config.system.speed = 2; utility.updateEmul
 void MainWindow::setSpeedFast()    { config.system.speed = 3; utility.updateEmulationSpeed(); syncUi(); }
 void MainWindow::setSpeedFastest() { config.system.speed = 4; utility.updateEmulationSpeed(); syncUi(); }
 
-void MainWindow::syncVideo() { config.video.synchronize = settings_emulationSpeed_syncVideo->isChecked(); utility.updateAvSync(); }
-void MainWindow::syncAudio() { config.audio.synchronize = settings_emulationSpeed_syncAudio->isChecked(); utility.updateAvSync(); }
-
-void MainWindow::showConfigWindow() {
-  settingsWindow->showAt(-1.0, 1.0);
-  settingsWindow->setFocus();
+void MainWindow::syncVideo() {
+  settings_emulationSpeed_syncVideo->toggleChecked();
+  config.video.synchronize = settings_emulationSpeed_syncVideo->isChecked();
+  utility.updateAvSync();
 }
 
-void MainWindow::showCheatEditor()  { toolsWindow->showCheatEditor();  }
+void MainWindow::syncAudio() {
+  settings_emulationSpeed_syncAudio->toggleChecked();
+  config.audio.synchronize = settings_emulationSpeed_syncAudio->isChecked();
+  utility.updateAvSync();
+}
+
+void MainWindow::showConfigWindow() { settingsWindow->window->show(); }
+
+void MainWindow::showCheatEditor()  { toolsWindow->showCheatEditor(); }
+void MainWindow::showCheatFinder()  { toolsWindow->showCheatFinder(); }
 void MainWindow::showStateManager() { toolsWindow->showStateManager(); }
-void MainWindow::showDebugger()     { debugger->show(); }
+void MainWindow::showDebugger()     { debugger->window->show(); }
 
 void MainWindow::showDocumentation()  {
   QFile file(":/documentation.html");
@@ -400,12 +430,14 @@ void MainWindow::showLicense() {
   }
 }
 void MainWindow::showAbout() {
-  aboutWindow->showAt(0.0, 0.0);
-  aboutWindow->setFocus();
+  aboutWindow->window->show();
 }
 
-void MainWindow::closeEvent(QCloseEvent*) {
-  quit();
+void MainWindow::Window::closeEvent(QCloseEvent*) {
+  mainWindow->quit();
+}
+
+MainWindow::Window::Window(string &geometry) : QbWindow(geometry) {
 }
 
 //============
@@ -425,7 +457,7 @@ void CanvasObject::dragEnterEvent(QDragEnterEvent *event) {
 void CanvasObject::dropEvent(QDropEvent *event) {
   if(event->mimeData()->hasUrls()) {
     QList<QUrl> list = event->mimeData()->urls();
-    if(list.count() == 1) utility.loadCartridge(list.at(0).toLocalFile().toUtf8().constData());
+    if(list.count() == 1) utility.loadCartridgeNormal(list.at(0).toLocalFile().toUtf8().constData());
   }
 }
 

@@ -1,11 +1,13 @@
+#include "hexeditor.moc"
 #include "breakpoint.moc"
 #include "memory.moc"
 #include "vramviewer.moc"
 
-class Debugger : public QbWindow {
+class Debugger : public QObject {
   Q_OBJECT
 
 public:
+  QbWindow *window;
   QMenuBar *menu;
     QMenu *tools;
       QAction *tools_breakpoint;
@@ -25,7 +27,6 @@ public:
       QCheckBox *traceSMP;
       QWidget *spacer;
 
-  void show();
   void echo(const char *message);
   void tracerUpdate();
   void event();

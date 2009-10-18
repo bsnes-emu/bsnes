@@ -1,4 +1,4 @@
-static const char bsnesVersion[] = "0.052";
+static const char bsnesVersion[] = "0.053";
 static const char bsnesTitle[] = "bsnes";
 static const unsigned bsnesSaveStateVersion = 3;
 
@@ -23,7 +23,6 @@ static const unsigned bsnesSaveStateVersion = 3;
 #include <nall/file.hpp>
 #include <nall/function.hpp>
 #include <nall/moduloarray.hpp>
-#include <nall/new.hpp>
 #include <nall/platform.hpp>
 #include <nall/priorityqueue.hpp>
 #include <nall/property.hpp>

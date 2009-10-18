@@ -2,15 +2,13 @@
 #define NALL_BASE64_HPP
 
 #include <string.h>
-
-#include <nall/new.hpp>
 #include <nall/stdint.hpp>
 
 namespace nall {
   class base64 {
   public:
     static bool encode(char *&output, const uint8_t* input, unsigned inlength) {
-      output = new(zeromemory) char[inlength * 8 / 6 + 6];
+      output = new char[inlength * 8 / 6 + 6]();
 
       unsigned i = 0, o = 0;
       while(i < inlength) {
@@ -41,7 +39,7 @@ namespace nall {
 
     static bool decode(uint8_t *&output, unsigned &outlength, const char *input) {
       unsigned inlength = strlen(input), infix = 0;
-      output = new(zeromemory) uint8_t[inlength];
+      output = new uint8_t[inlength]();
 
       unsigned i = 0, o = 0;
       while(i < inlength) {
