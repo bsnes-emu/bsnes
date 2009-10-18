@@ -1,5 +1,5 @@
 /*
-  libco.x86 (2008-01-28)
+  libco.x86 (2009-10-12)
   author: byuu
   license: public domain
 */
@@ -13,26 +13,63 @@
 extern "C" {
 #endif
 
-static thread_local long co_active_buffer[32];
-static thread_local cothread_t co_active_ = 0;
+#if defined(_MSC_VER)
+  #define fastcall __fastcall
+#elif defined(__GNUC__)
+  #define fastcall __attribute__((fastcall))
+#else
+  #error "libco: please define fastcall macro"
+#endif
+
+static thread_local long co_active_buffer[64];
+static thread_local cothread_t co_active_handle = 0;
+static void (fastcall *co_swap)(cothread_t, cothread_t) = 0;
+
+//ABI: fastcall
+static unsigned char co_swap_function[] = {
+  0x89, 0x22, 0x8B, 0x21, 0x58, 0x89, 0x6A, 0x04, 0x89, 0x72, 0x08, 0x89, 0x7A, 0x0C, 0x89, 0x5A,
+  0x10, 0x8B, 0x69, 0x04, 0x8B, 0x71, 0x08, 0x8B, 0x79, 0x0C, 0x8B, 0x59, 0x10, 0xFF, 0xE0,
+};
+
+#ifdef _WIN32
+  #include <windows.h>
+
+  void co_init() {
+    DWORD old_privileges;
+    VirtualProtect(co_swap_function, sizeof co_swap_function, PAGE_EXECUTE_READWRITE, &old_privileges);
+  }
+#else
+  #include <unistd.h>
+  #include <sys/mman.h>
+
+  void co_init() {
+    unsigned long addr = (unsigned long)co_swap_function;
+    unsigned long base = addr - (addr % sysconf(_SC_PAGESIZE));
+    unsigned long size = (addr - base) + sizeof co_swap_function;
+    mprotect((void*)base, size, PROT_READ | PROT_WRITE | PROT_EXEC);
+  }
+#endif
 
 static void crash() {
   assert(0); /* called only if cothread_t entrypoint returns */
 }
 
 cothread_t co_active() {
-  if(!co_active_) co_active_ = &co_active_buffer;
-  return co_active_;
+  if(!co_active_handle) co_active_handle = &co_active_buffer;
+  return co_active_handle;
 }
 
 cothread_t co_create(unsigned int size, void (*entrypoint)(void)) {
   cothread_t handle;
-  assert(sizeof(long) == 4);
-  if(!co_active_) co_active_ = &co_active_buffer;
-  size += 128; /* allocate additional space for storage */
+  if(!co_swap) {
+    co_init();
+    co_swap = (void (fastcall*)(cothread_t, cothread_t))co_swap_function;
+  }
+  if(!co_active_handle) co_active_handle = &co_active_buffer;
+  size += 256; /* allocate additional space for storage */
   size &= ~15; /* align stack to 16-byte boundary */
 
-  if(handle = (cothread_t)calloc(size, 1)) {
+  if(handle = (cothread_t)malloc(size)) {
     long *p = (long*)((char*)handle + size); /* seek to top of stack */
     *--p = (long)crash;                      /* crash if entrypoint returns */
     *--p = (long)entrypoint;                 /* start of function */
@@ -46,64 +83,10 @@ void co_delete(cothread_t handle) {
   free(handle);
 }
 
-#if defined(__GNUC__)
-
-void co_switch(cothread_t to) {
-  register long stack = *(long*)to; /* stack[0] = "to" thread entry point */
-  register cothread_t from = co_active_;
-  co_active_ = to;
-
-  __asm__ __volatile__(
-    "movl %%esp,(%1)            \n\t" /* save old stack pointer */
-    "movl (%0),%%esp            \n\t" /* load new stack pointer */
-    "addl $4,%%esp              \n\t" /* "pop" return address off stack */
-
-    "movl %%ebp, 4(%1)          \n\t" /* backup non-volatile registers */
-    "movl %%esi, 8(%1)          \n\t"
-    "movl %%edi,12(%1)          \n\t"
-    "movl %%ebx,16(%1)          \n\t"
-
-    "movl  4(%0),%%ebp          \n\t" /* restore non-volatile registers */
-    "movl  8(%0),%%esi          \n\t"
-    "movl 12(%0),%%edi          \n\t"
-    "movl 16(%0),%%ebx          \n\t"
-
-    "jmp  *(%2)                 \n\t" /* jump into "to" thread */
-    : /* no outputs */
-    : "r" (to), "r" (from), "r" (stack)
-  );
-}
-
-#elif defined(_MSC_VER)
-
-__declspec(naked) __declspec(noinline)
-static void __fastcall co_swap(register cothread_t to, register cothread_t from) {
-  /* ecx = to, edx = from */
-  __asm {
-    mov [edx],esp
-    mov esp,[ecx]
-    pop eax
-
-    mov [edx+ 4],ebp
-    mov [edx+ 8],esi
-    mov [edx+12],edi
-    mov [edx+16],ebx
-
-    mov ebp,[ecx+ 4]
-    mov esi,[ecx+ 8]
-    mov edi,[ecx+12]
-    mov ebx,[ecx+16]
-
-    jmp eax
-  }
-}
-
 void co_switch(cothread_t handle) {
-  register cothread_t co_prev_ = co_active_;
-  co_swap(co_active_ = handle, co_prev_);
+  register cothread_t co_previous_handle = co_active_handle;
+  co_swap(co_active_handle = handle, co_previous_handle);
 }
-
-#endif
 
 #ifdef __cplusplus
 }
