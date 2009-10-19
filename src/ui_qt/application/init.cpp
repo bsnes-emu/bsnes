@@ -114,6 +114,7 @@ void Application::init() {
   inputManager.refresh();
   inputManager.onInput = bind(&Utility::inputEvent, &utility);
 
+  utility.resizeMainWindow();
   utility.updateAvSync();
   utility.updateVideoMode();
   utility.updateColorFilter();

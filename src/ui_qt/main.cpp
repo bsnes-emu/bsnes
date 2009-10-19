@@ -50,9 +50,12 @@ const char defaultStylesheet[] =
 int main(int argc, char **argv) {
   application.main(argc, argv);
   #if defined(PLATFORM_WIN)
-  //workaround: one of the Qt DLLs hangs during its termination, well after main() returns.
-  //to prevent the process from remaining open in the background, it must be forcefully terminated.
-  TerminateProcess(GetCurrentProcess(), 0);
+  //Qt/Windows has a few bugs that cause the process to hang and/or crash when
+  //unloading DLLs. 4.5.x always hangs, and 4.6.x crashes under certain
+  //circumstances. However, all DLLs must unload for profiling to work.
+  //The below code bypasses Qt DLL unloading, but only when the binary is named
+  //as such to indicate that profile generation is taking place.
+  if(strpos(argv[0], "bsnes-profile") < 0) TerminateProcess(GetCurrentProcess(), 0);
   #endif
   return 0;
 }

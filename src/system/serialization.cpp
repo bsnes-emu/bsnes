@@ -20,7 +20,7 @@ bool System::unserialize(serializer &s) {
 
   if(signature != 0x31545342) return false;
   if(version != bsnesSaveStateVersion) return false;
-  if(crc32 != cartridge.crc32()) return false;
+//if(crc32 != cartridge.crc32()) return false;
   scheduler.init();
 
   serialize_all(s);
