@@ -1,21 +1,19 @@
-class AudioSettingsWindow : public QObject {
+class AudioSettingsWindow : public QWidget {
   Q_OBJECT
 
 public:
-  QWidget *panel;
-    QVBoxLayout *layout;
-      QLabel *title;
-      QHBoxLayout *boxes;
-        QLabel *frequencyLabel;
-        QComboBox *frequency;
-        QLabel *latencyLabel;
-        QComboBox *latency;
-      QGridLayout *sliders;
-        QLabel *volumeLabel;
-        QSlider *volume;
-        QLabel *frequencySkewLabel;
-        QSlider *frequencySkew;
-      QWidget *spacer;
+  QVBoxLayout *layout;
+  QLabel *title;
+  QHBoxLayout *boxes;
+  QLabel *frequencyLabel;
+  QComboBox *frequency;
+  QLabel *latencyLabel;
+  QComboBox *latency;
+  QGridLayout *sliders;
+  QLabel *volumeLabel;
+  QSlider *volume;
+  QLabel *frequencySkewLabel;
+  QSlider *frequencySkew;
 
   void syncUi();
   AudioSettingsWindow();

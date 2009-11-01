@@ -71,6 +71,7 @@ bool Utility::loadCartridgeSuperGameBoy(const char *base, const char *slot) {
   SNES::cartridge.load(SNES::Cartridge::ModeSuperGameBoy);
 
   loadMemory(cartridge.slotAName, ".sav", SNES::memory::gbram);
+  loadMemory(cartridge.slotBName, ".rtc", SNES::memory::gbrtc);
 
   cartridge.name = *slot
   ? notdir(nall::basename(cartridge.slotAName))
@@ -102,13 +103,13 @@ void Utility::saveMemory() {
 
     case SNES::Cartridge::ModeSuperGameBoy: {
       saveMemory(cartridge.slotAName, ".sav", SNES::memory::gbram);
+      saveMemory(cartridge.slotAName, ".rtc", SNES::memory::gbrtc);
     } break;
   }
 }
 
 void Utility::unloadCartridge() {
   if(SNES::cartridge.loaded() == false) return;
-  saveMemory();
   modifySystemState(UnloadCartridge);
 }
 
@@ -133,7 +134,7 @@ void Utility::modifySystemState(system_state_t state) {
       else if(SNES::cartridge.has_st011()) chip = "ST011";
       else if(SNES::cartridge.has_st018()) chip = "ST018";
       if(chip != "") {
-        QMessageBox::warning(mainWindow->window, "Warning", utf8()
+        QMessageBox::warning(mainWindow, "Warning", utf8()
         << "<p><b>Warning:</b><br> The " << chip << " chip was detected, which is not fully emulated yet.<br>"
         << "It is unlikely that this title will work properly.</p>");
       }
@@ -141,7 +142,7 @@ void Utility::modifySystemState(system_state_t state) {
       showMessage(utf8()
       << "Loaded " << cartridge.name
       << (cartridge.patchApplied ? ", and applied UPS patch." : "."));
-      mainWindow->window->setWindowTitle(utf8() << bsnesTitle << " v" << bsnesVersion << " - " << cartridge.name);
+      mainWindow->setWindowTitle(utf8() << bsnesTitle << " v" << bsnesVersion << " - " << cartridge.name);
       debugger->echo(utf8() << "Loaded " << cartridge.name << ".<br>");
     } break;
 
@@ -149,13 +150,15 @@ void Utility::modifySystemState(system_state_t state) {
       if(SNES::cartridge.loaded() == false) break;  //no cart to unload?
       saveCheats();
 
-      SNES::cartridge.unload();
+      SNES::system.unload();     //flush all memory to memory::* devices
+      saveMemory();              //save memory to disk
+      SNES::cartridge.unload();  //deallocate memory
 
       application.power = false;
       application.pause = true;
 
       showMessage(utf8() << "Unloaded " << cartridge.name << ".");
-      mainWindow->window->setWindowTitle(utf8() << bsnesTitle << " v" << bsnesVersion);
+      mainWindow->setWindowTitle(utf8() << bsnesTitle << " v" << bsnesVersion);
     } break;
 
     case PowerOn: {

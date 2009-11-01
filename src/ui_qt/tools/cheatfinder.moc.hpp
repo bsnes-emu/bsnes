@@ -1,8 +1,7 @@
-class CheatFinderWindow : public QObject {
+class CheatFinderWindow : public QWidget {
   Q_OBJECT
 
 public:
-  QWidget *panel;
   QVBoxLayout *layout;
   QLabel *title;
   QTreeWidget *list;

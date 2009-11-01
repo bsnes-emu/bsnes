@@ -1,4 +1,4 @@
-#include "sgb/sgb.hpp"
+#include "supergameboy/supergameboy.hpp"
 #include "superfx/superfx.hpp"
 #include "sa1/sa1.hpp"
 #include "bsx/bsx.hpp"

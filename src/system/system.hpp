@@ -24,6 +24,7 @@ public:
   virtual void term();
   virtual void power();
   virtual void reset();
+  virtual void unload();
 
   virtual void frame();
   virtual void scanline();

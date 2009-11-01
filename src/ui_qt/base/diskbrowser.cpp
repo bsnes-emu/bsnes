@@ -2,16 +2,15 @@
 //FolderCreator
 //=============
 
-FolderCreator::FolderCreator() {
-  window = new QbWindow(config.geometry.folderCreator);
-  window->setObjectName("folder-creator");
-  window->setWindowTitle("Create New Folder");
+FolderCreator::FolderCreator() : QbWindow(config.geometry.folderCreator) {
+  setObjectName("folder-creator");
+  setWindowTitle("Create New Folder");
 
   layout = new QVBoxLayout;
   layout->setMargin(Style::WindowMargin);
   layout->setSpacing(Style::WidgetSpacing);
   layout->setAlignment(Qt::AlignTop);
-  window->setLayout(layout);
+  setLayout(layout);
 
   label = new QLabel("Folder name:");
   layout->addWidget(label);
@@ -31,12 +30,12 @@ FolderCreator::FolderCreator() {
 
   connect(name, SIGNAL(returnPressed()), this, SLOT(createFolder()));
   connect(ok, SIGNAL(released()), this, SLOT(createFolder()));
-  connect(cancel, SIGNAL(released()), window, SLOT(hide()));
+  connect(cancel, SIGNAL(released()), this, SLOT(close()));
 }
 
 void FolderCreator::show() {
   name->setText("");
-  window->show();
+  QbWindow::show();
   name->setFocus();
 }
 
@@ -45,12 +44,12 @@ void FolderCreator::createFolder() {
     QMessageBox::warning(0, "Create New Folder", "<b>Note:</b> you must enter a folder name.");
   } else {
     string folderName = string()
-    << diskBrowser->path->currentText().toUtf8().constData()
+    << diskBrowser->model->rootPath().toUtf8().constData()
     << "/"
     << name->text().toUtf8().constData();
 
     if(mkdir(folderName) == 0) {
-      window->hide();
+      hide();
     } else {
       QMessageBox::warning(0, "Create new Folder", "<b>Error:</b> failed to create folder. Please ensure only valid characters were used in the folder name.");
     }
@@ -78,17 +77,6 @@ void DiskBrowserView::keyPressEvent(QKeyEvent *event) {
   QTreeView::keyPressEvent(event);
 }
 
-void DiskBrowserView::keyReleaseEvent(QKeyEvent *event) {
-  //act like a modal dialog; close window on escape keypress
-  if(event->key() == Qt::Key_Escape) {
-    emit escape();
-    return;
-  }
-
-  //fallback: unrecognized keypresses get handled by the widget itself
-  QTreeView::keyReleaseEvent(event);
-}
-
 void DiskBrowserView::currentChanged(const QModelIndex &current, const QModelIndex &previous) {
   QAbstractItemView::currentChanged(current, previous);
   emit changed(current);
@@ -113,79 +101,79 @@ void DiskBrowserImage::paintEvent(QPaintEvent*) {
 void DiskBrowser::chooseFolder(PathSettingWidget *widget, const char *title) {
   browseMode = Folder;
   activePath = widget;
-  window->hide();
+  hide();
   group->hide();
   ok->setText("Choose");
-  window->setWindowTitle(utf8() << title);
+  setWindowTitle(utf8() << title);
   setPath(utf8() << (config.path.rom != "" ? config.path.rom : config.path.current));
   setNameFilters("Folders ()");
-  window->show();
+  show();
 }
 
 void DiskBrowser::loadCartridge() {
   browseMode = Cartridge;
-  window->hide();
-  group->show();
+  hide();
+  group->setVisible(config.diskBrowser.showPanel);
   ok->setText("Load");
-  window->setWindowTitle("Load Cartridge");
+  setWindowTitle("Load Cartridge");
   setPath(utf8() << (config.path.rom != "" ? config.path.rom : config.path.current));
-  setNameFilters(utf8() << "SNES cartridges (*.sfc *.smc" << reader.filterList << ");;All files (*)");
-  window->show();
+  setNameFilters(utf8() << "SNES cartridges (*.sfc" << reader.filterList << ");;All files (*)");
+  show();
 }
 
 void DiskBrowser::loadBaseCartridge() {
   browseMode = BaseCartridge;
-  window->hide();
-  group->show();
+  hide();
+  group->setVisible(config.diskBrowser.showPanel);
   ok->setText("Load");
-  window->setWindowTitle("Load Base Cartridge");
+  setWindowTitle("Load Base Cartridge");
   setPath(utf8() << (config.path.rom != "" ? config.path.rom : config.path.current));
-  setNameFilters(utf8() << "SNES cartridges (*.sfc *.smc" << reader.filterList << ");;All files (*)");
-  window->show();
+  setNameFilters(utf8() << "SNES cartridges (*.sfc" << reader.filterList << ");;All files (*)");
+  show();
 }
 
 void DiskBrowser::loadBsxCartridge() {
   browseMode = BsxCartridge;
-  window->hide();
-  group->show();
+  hide();
+  group->setVisible(config.diskBrowser.showPanel);
   ok->setText("Load");
-  window->setWindowTitle("Load BS-X Cartridge");
+  setWindowTitle("Load BS-X Cartridge");
   setPath(utf8() << (config.path.rom != "" ? config.path.rom : config.path.current));
   setNameFilters(utf8() << "BS-X cartridges (*.bs" << reader.filterList << ");;All files (*)");
-  window->show();
+  show();
 }
 
 void DiskBrowser::loadSufamiTurboCartridge1() {
   browseMode = SufamiTurboCartridge1;
-  window->hide();
-  group->show();
+  hide();
+  group->setVisible(config.diskBrowser.showPanel);
   ok->setText("Load");
-  window->setWindowTitle("Load Slot-A Sufami Turbo Cartridge");
+  setWindowTitle("Load Slot-A Sufami Turbo Cartridge");
   setPath(utf8() << (config.path.rom != "" ? config.path.rom : config.path.current));
   setNameFilters(utf8() << "Sufami Turbo cartridges (*.st" << reader.filterList << ");;All files (*)");
-  window->show();
+  show();
 }
 
 void DiskBrowser::loadSufamiTurboCartridge2() {
   browseMode = SufamiTurboCartridge2;
-  window->hide();
-  group->show();
+  hide();
+  group->setVisible(config.diskBrowser.showPanel);
   ok->setText("Load");
-  window->setWindowTitle("Load Slot-B Sufami Turbo Cartridge");
+  setWindowTitle("Load Slot-B Sufami Turbo Cartridge");
   setPath(utf8() << (config.path.rom != "" ? config.path.rom : config.path.current));
   setNameFilters(utf8() << "Sufami Turbo Cartridges (*.st" << reader.filterList << ");;All files (*)");
-  window->show();
+  show();
 }
 
 void DiskBrowser::loadSuperGameBoyCartridge() {
   browseMode = SuperGameBoyCartridge;
-  window->hide();
-  group->show();
+  hide();
+  group->setVisible(config.diskBrowser.showPanel);
   ok->setText("Load");
-  window->setWindowTitle("Load Super Game Boy Cartridge");
+  setWindowTitle("Load Super Game Boy Cartridge");
   setPath(utf8() << (config.path.rom != "" ? config.path.rom : config.path.current));
   setNameFilters(utf8() << "Game Boy cartridges (*.gb *.gbc" << reader.filterList << ");;All files (*)");
-  window->show();
+  show();
 }
 
 string DiskBrowser::queryImageInformation() {
@@ -247,7 +235,7 @@ void DiskBrowser::loadSelected() {
   if(browseMode == Folder || loadable == true) {
     QModelIndex item = view->currentIndex();
     config.path.current = dir(model->filePath(item).toUtf8().constData());
-    window->hide();
+    hide();
 
     switch(browseMode) { default:
       case Folder: activePath->selectPath(filename); break;
@@ -271,7 +259,7 @@ void DiskBrowser::setPath(const QString &reqPath) {
   disconnect(path, SIGNAL(currentIndexChanged(int)), this, SLOT(updatePath()));
 
   QString effectivePath = reqPath;
-  if(effectivePath == "<root>") {
+  if(effectivePath == "<root>" || QDir(reqPath).exists() == false) {
     effectivePath = "";
     newFolder->setEnabled(false);
   } else {
@@ -314,7 +302,7 @@ void DiskBrowser::setNameFilters(const QString &filters) {
 }
 
 void DiskBrowser::cdUp() {
-  folderCreator->window->hide();
+  folderCreator->hide();
   //if we aren't already at the root node, select the second node, which is one path higher than the current
   if(path->count() > 1) path->setCurrentIndex(1);
 }
@@ -350,7 +338,7 @@ bool DiskBrowser::currentFilename(string &filename) {
   if(browseMode != Folder) {
     if(model->isDir(item) == true) {
       QDir directory(utf8() << filename);
-      directory.setNameFilters(QStringList() << "*.sfc" << "*.smc");
+      directory.setNameFilters(QStringList() << "*.sfc");
       QStringList list = directory.entryList(QDir::Files | QDir::NoDotAndDotDot);
       if(list.count() == 1) {
         filename << "/" << list[0].toUtf8().constData();
@@ -364,15 +352,20 @@ bool DiskBrowser::currentFilename(string &filename) {
   return loadable;
 }
 
-DiskBrowser::DiskBrowser() {
-  window = new QbWindow(config.geometry.diskBrowser);
-  window->setObjectName("disk-browser");
-  window->resize(720, 480);
+void DiskBrowser::toggleShowPanel() {
+  showPanel->setChecked(!showPanel->isChecked());
+  config.diskBrowser.showPanel = showPanel->isChecked();
+  group->setVisible(config.diskBrowser.showPanel);
+}
+
+DiskBrowser::DiskBrowser() : QbWindow(config.geometry.diskBrowser) {
+  setObjectName("disk-browser");
+  resize(720, 480);
 
   layout = new QVBoxLayout;
   layout->setMargin(Style::WindowMargin);
   layout->setSpacing(Style::WidgetSpacing);
-  window->setLayout(layout);
+  setLayout(layout);
 
   topLayout = new QHBoxLayout;
   layout->addLayout(topLayout);
@@ -384,6 +377,7 @@ DiskBrowser::DiskBrowser() {
   browseLayout->addLayout(pathLayout);
 
   path = new QComboBox;
+  path->setEditable(true);
   path->setMinimumContentsLength(16);
   path->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLength);
   path->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
@@ -434,11 +428,13 @@ DiskBrowser::DiskBrowser() {
   controlLayout->addWidget(filter);
 
   options = new QPushButton("Options");
-  options->setEnabled(false);
   controlLayout->addWidget(options);
 
-  QMenu *menu = new QMenu;
+  menu = new QMenu;
   options->setMenu(menu);
+
+  menu->addAction(showPanel = new QbCheckAction("Show Side Panel", 0));
+  showPanel->setChecked(config.diskBrowser.showPanel);
 
   ok = new QPushButton("Ok");
   ok->setEnabled(false);
@@ -468,7 +464,8 @@ DiskBrowser::DiskBrowser() {
   connect(view, SIGNAL(cdUp()), this, SLOT(cdUp()));
   connect(view, SIGNAL(activated(const QModelIndex&)), this, SLOT(activateItem(const QModelIndex&)));
   connect(view, SIGNAL(changed(const QModelIndex&)), this, SLOT(changeItem(const QModelIndex&)));
-  connect(view, SIGNAL(escape()), window, SLOT(hide()));
   connect(ok, SIGNAL(released()), this, SLOT(loadSelected()));
-  connect(cancel, SIGNAL(released()), window, SLOT(hide()));
+  connect(cancel, SIGNAL(released()), this, SLOT(close()));
+
+  connect(showPanel, SIGNAL(triggered()), this, SLOT(toggleShowPanel()));
 }

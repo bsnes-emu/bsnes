@@ -31,6 +31,11 @@ namespace nall {
   inline string basename(char const *name) {
     string result = name;
     for(signed i = strlen(result); i >= 0; i--) {
+      if(result[i] == '/' || result[i] == '\\') {
+        //file has no extension
+        break;
+      }
+
       if(result[i] == '.') {
         result[i] = 0;
         break;

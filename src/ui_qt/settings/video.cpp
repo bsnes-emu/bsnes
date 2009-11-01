@@ -1,9 +1,9 @@
 VideoSettingsWindow::VideoSettingsWindow() {
-  panel = new QWidget;
-
   layout = new QVBoxLayout;
   layout->setMargin(0);
   layout->setSpacing(0);
+  layout->setAlignment(Qt::AlignTop);
+  setLayout(layout);
 
   title = new QLabel("Video Settings");
   title->setProperty("class", "title");
@@ -48,11 +48,6 @@ VideoSettingsWindow::VideoSettingsWindow() {
   options->setSpacing(Style::WidgetSpacing);
   layout->addLayout(options);
 
-  spacer = new QWidget;
-  spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-  layout->addWidget(spacer);
-
-  panel->setLayout(layout);
   connect(contrast, SIGNAL(valueChanged(int)), this, SLOT(contrastAdjust(int)));
   connect(brightness, SIGNAL(valueChanged(int)), this, SLOT(brightnessAdjust(int)));
   connect(gamma, SIGNAL(valueChanged(int)), this, SLOT(gammaAdjust(int)));

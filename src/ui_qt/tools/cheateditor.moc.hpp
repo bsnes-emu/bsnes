@@ -1,23 +1,22 @@
-class CheatEditorWindow : public QObject {
+class CheatEditorWindow : public QWidget {
   Q_OBJECT
 
 public:
-  QWidget *panel;
-    QVBoxLayout *layout;
-      QLabel *title;
-      QTreeWidget *list;
-      QGridLayout *controlLayout;
-        QLabel *descLabel;
-        QLineEdit *descEdit;
-        QLabel *codeLabel;
-        QLineEdit *codeEdit;
-      QHBoxLayout *buttonLayout;
-        QPushButton *addCode;
-        QPushButton *deleteCode;
+  QVBoxLayout *layout;
+  QLabel *title;
+  QTreeWidget *list;
+  QGridLayout *controlLayout;
+  QLabel *descLabel;
+  QLineEdit *descEdit;
+  QLabel *codeLabel;
+  QLineEdit *codeEdit;
+  QHBoxLayout *buttonLayout;
+  QPushButton *addCode;
+  QPushButton *deleteCode;
 
   QMenu *menu;
-    QAction *deleteCodeItem;
-    QAction *addCodeItem;
+  QAction *deleteCodeItem;
+  QAction *addCodeItem;
 
   void syncUi();
   void updateItem(QTreeWidgetItem*);

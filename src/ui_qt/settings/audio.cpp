@@ -1,9 +1,9 @@
 AudioSettingsWindow::AudioSettingsWindow() {
-  panel = new QWidget;
-
   layout = new QVBoxLayout;
   layout->setMargin(0);
   layout->setSpacing(0);
+  layout->setAlignment(Qt::AlignTop);
+  setLayout(layout);
 
   title = new QLabel("Audio Settings");
   title->setProperty("class", "title");
@@ -65,11 +65,6 @@ AudioSettingsWindow::AudioSettingsWindow() {
   sliders->setSpacing(Style::WidgetSpacing);
   layout->addLayout(sliders);
 
-  spacer = new QWidget;
-  spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-  layout->addWidget(spacer);
-
-  panel->setLayout(layout);
   connect(frequency, SIGNAL(currentIndexChanged(int)), this, SLOT(frequencyChange(int)));
   connect(latency, SIGNAL(currentIndexChanged(int)), this, SLOT(latencyChange(int)));
   connect(volume, SIGNAL(valueChanged(int)), this, SLOT(volumeAdjust(int)));

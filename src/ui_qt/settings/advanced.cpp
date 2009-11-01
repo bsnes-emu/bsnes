@@ -1,9 +1,9 @@
 AdvancedSettingsWindow::AdvancedSettingsWindow() {
-  panel = new QWidget;
-
   layout = new QVBoxLayout;
   layout->setMargin(0);
   layout->setSpacing(0);
+  layout->setAlignment(Qt::AlignTop);
+  setLayout(layout);
 
   title = new QLabel("Advanced Configuration Settings");
   title->setProperty("class", "title");
@@ -42,7 +42,7 @@ AdvancedSettingsWindow::AdvancedSettingsWindow() {
 
   regionLayout = new QHBoxLayout;
   regionLayout->setSpacing(Style::WidgetSpacing); {
-    regionGroup = new QButtonGroup(panel);
+    regionGroup = new QButtonGroup(this);
 
     regionAuto = new QRadioButton("Auto-detect");
     regionAuto->setToolTip("Automatically select hardware region on cartridge load");
@@ -67,7 +67,7 @@ AdvancedSettingsWindow::AdvancedSettingsWindow() {
 
   portLayout = new QHBoxLayout;
   portLayout->setSpacing(Style::WidgetSpacing); {
-    portGroup = new QButtonGroup(panel);
+    portGroup = new QButtonGroup(this);
 
     portSatellaview = new QRadioButton("Satellaview");
     portGroup->addButton(portSatellaview);
@@ -88,7 +88,7 @@ AdvancedSettingsWindow::AdvancedSettingsWindow() {
 
   focusLayout = new QHBoxLayout;
   focusLayout->setSpacing(Style::WidgetSpacing); {
-    focusButtonGroup = new QButtonGroup(panel);
+    focusButtonGroup = new QButtonGroup(this);
 
     focusPause = new QRadioButton("Pause emulation");
     focusPause->setToolTip("Ideal for prolonged multi-tasking");
@@ -107,11 +107,6 @@ AdvancedSettingsWindow::AdvancedSettingsWindow() {
   }
   layout->addLayout(focusLayout);
 
-  spacer = new QWidget;
-  spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-  layout->addWidget(spacer);
-
-  panel->setLayout(layout);
   initializeUi();
 
   connect(videoDriver, SIGNAL(currentIndexChanged(int)), this, SLOT(videoDriverChange(int)));

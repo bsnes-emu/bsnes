@@ -56,12 +56,11 @@ void PathSettingWidget::defaultPath() {
 }
 
 PathSettingsWindow::PathSettingsWindow() {
-  panel = new QWidget;
-
   layout = new QVBoxLayout;
   layout->setMargin(0);
   layout->setSpacing(0);
-  panel->setLayout(layout);
+  layout->setAlignment(Qt::AlignTop);
+  setLayout(layout);
 
   title = new QLabel("Default Folder Paths");
   title->setProperty("class", "title");
@@ -80,8 +79,4 @@ PathSettingsWindow::PathSettingsWindow() {
   layout->addWidget(patchPath);
   layout->addWidget(cheatPath);
   layout->addWidget(dataPath);
-
-  spacer = new QWidget;
-  spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-  layout->addWidget(spacer);
 }

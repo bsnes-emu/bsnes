@@ -5,9 +5,9 @@ public:
   QVBoxLayout *layout;
   QLabel *label;
   QHBoxLayout *controlLayout;
-    QLineEdit *path;
-    QPushButton *pathSelect;
-    QPushButton *pathDefault;
+  QLineEdit *path;
+  QPushButton *pathSelect;
+  QPushButton *pathDefault;
 
   string &pathValue;
   string pathDefaultLabel;
@@ -21,20 +21,18 @@ public slots:
   void defaultPath();
 };
 
-class PathSettingsWindow : public QObject {
+class PathSettingsWindow : public QWidget {
   Q_OBJECT
 
 public:
-  QWidget *panel;
-    QVBoxLayout *layout;
-      QLabel *title;
-      PathSettingWidget *gamePath;
-      PathSettingWidget *savePath;
-      PathSettingWidget *statePath;
-      PathSettingWidget *patchPath;
-      PathSettingWidget *cheatPath;
-      PathSettingWidget *dataPath;
-      QWidget *spacer;
+  QVBoxLayout *layout;
+  QLabel *title;
+  PathSettingWidget *gamePath;
+  PathSettingWidget *savePath;
+  PathSettingWidget *statePath;
+  PathSettingWidget *patchPath;
+  PathSettingWidget *cheatPath;
+  PathSettingWidget *dataPath;
 
   PathSettingsWindow();
 } *pathSettingsWindow;

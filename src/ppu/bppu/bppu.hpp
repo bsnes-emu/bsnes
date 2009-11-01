@@ -24,6 +24,12 @@ public:
     uint8  oam_basesize;
     uint8  oam_nameselect;
     uint16 oam_tdaddr;
+
+    //$210d-$210e
+    uint16 m7_hofs, m7_vofs;
+
+    //$211b-$2120
+    uint16 m7a, m7b, m7c, m7d, m7x, m7y;
   } cache;
 
   alwaysinline bool interlace() const { return display.interlace; }

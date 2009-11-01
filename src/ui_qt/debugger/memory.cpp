@@ -1,12 +1,11 @@
-MemoryEditor::MemoryEditor() {
-  window = new QbWindow(config.geometry.memoryEditor);
-  window->setObjectName("memory-editor");
-  window->setWindowTitle("Memory Editor");
+MemoryEditor::MemoryEditor() : QbWindow(config.geometry.memoryEditor) {
+  setObjectName("memory-editor");
+  setWindowTitle("Memory Editor");
 
   layout = new QVBoxLayout;
   layout->setMargin(Style::WindowMargin);
   layout->setSpacing(Style::WidgetSpacing);
-  window->setLayout(layout);
+  setLayout(layout);
 
   controlLayout = new QHBoxLayout;
   controlLayout->setSpacing(Style::WidgetSpacing);

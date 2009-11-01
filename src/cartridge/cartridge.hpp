@@ -118,6 +118,9 @@ private:
   unsigned find_header(const uint8_t *data, unsigned size) const;
   unsigned score_header(const uint8_t *data, unsigned size, unsigned addr) const;
   void set_cartinfo(const cartinfo_t&);
+
+  unsigned gameboy_ram_size() const;
+  unsigned gameboy_rtc_size() const;
 };
 
 namespace memory {
@@ -125,7 +128,7 @@ namespace memory {
   extern MappedRAM bsxflash, bsxram, bsxpram;
   extern MappedRAM stArom, stAram;
   extern MappedRAM stBrom, stBram;
-  extern MappedRAM gbrom, gbram;
+  extern MappedRAM gbrom, gbram, gbrtc;
 };
 
 extern Cartridge cartridge;

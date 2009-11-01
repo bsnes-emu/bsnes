@@ -1,10 +1,9 @@
 class PathSettingWidget;
 
-class FolderCreator : public QObject {
+class FolderCreator : public QbWindow {
   Q_OBJECT
 
 public:
-  QbWindow *window;
   QVBoxLayout *layout;
   QLabel *label;
   QLineEdit *name;
@@ -24,12 +23,10 @@ class DiskBrowserView : public QTreeView {
 
 public:
   void keyPressEvent(QKeyEvent*);
-  void keyReleaseEvent(QKeyEvent*);
 
 signals:
   void cdUp();
   void changed(const QModelIndex&);
-  void escape();
 
 public slots:
   void currentChanged(const QModelIndex&, const QModelIndex&);
@@ -41,11 +38,10 @@ public:
   void paintEvent(QPaintEvent*);
 };
 
-class DiskBrowser : public QObject {
+class DiskBrowser : public QbWindow {
   Q_OBJECT
 
 public:
-  QbWindow *window;
   QVBoxLayout *layout;
   QHBoxLayout *topLayout;
   QVBoxLayout *browseLayout;
@@ -68,6 +64,9 @@ public:
   QFileSystemModel *model;
   PathSettingWidget *activePath;
 
+  QMenu *menu;
+  QbCheckAction *showPanel;
+
   void chooseFolder(PathSettingWidget*, const char*);
   void loadCartridge();
   void loadBaseCartridge();
@@ -89,6 +88,8 @@ public slots:
   void activateItem(const QModelIndex&);
   void changeItem(const QModelIndex&);
   void loadSelected();
+
+  void toggleShowPanel();
 
 private:
   enum BrowseMode {

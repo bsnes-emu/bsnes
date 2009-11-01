@@ -13,6 +13,10 @@ public:
     bool bypass_patch_crc32;
   } file;
 
+  struct DiskBrowser {
+    bool showPanel;
+  } diskBrowser;
+
   struct Path {
     string base;     //binary path
     string user;     //user profile path (bsnes.cfg, ...)
@@ -69,7 +73,7 @@ public:
       string pauseEmulation;
       string resetSystem;
       string powerCycleSystem;
-      string saveScreenshot;
+      string captureScreenshot;
       string showStateManager;
       string quickLoad1;
       string quickLoad2;

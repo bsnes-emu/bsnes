@@ -42,7 +42,14 @@ void QbWindow::closeEvent(QCloseEvent *event) {
   QWidget::hide();
 }
 
+void QbWindow::keyReleaseEvent(QKeyEvent *event) {
+  if(event->key() == Qt::Key_Escape) close();
+  QWidget::keyReleaseEvent(event);
+}
+
 QbWindow::QbWindow(string &geometryString_) : geometryString(geometryString_) {
+  //keep track of all created windows (for geometry save on exit, always-on-top control, etc)
+  application.windowList.add(this);
 }
 
 //

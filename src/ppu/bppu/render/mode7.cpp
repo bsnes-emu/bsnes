@@ -19,15 +19,15 @@ void bPPU::render_line_mode7(uint8 pri0_pos, uint8 pri1_pos) {
   int32 px, py;
   int32 tx, ty, tile, palette;
 
-  int32 a = sclip<16>(regs.m7a);
-  int32 b = sclip<16>(regs.m7b);
-  int32 c = sclip<16>(regs.m7c);
-  int32 d = sclip<16>(regs.m7d);
+  int32 a = sclip<16>(cache.m7a);
+  int32 b = sclip<16>(cache.m7b);
+  int32 c = sclip<16>(cache.m7c);
+  int32 d = sclip<16>(cache.m7d);
 
-  int32 cx   = sclip<13>(regs.m7x);
-  int32 cy   = sclip<13>(regs.m7y);
-  int32 hofs = sclip<13>(regs.m7_hofs);
-  int32 vofs = sclip<13>(regs.m7_vofs);
+  int32 cx   = sclip<13>(cache.m7x);
+  int32 cy   = sclip<13>(cache.m7y);
+  int32 hofs = sclip<13>(cache.m7_hofs);
+  int32 vofs = sclip<13>(cache.m7_vofs);
 
   int  _pri, _x;
   bool _bg_enabled    = regs.bg_enabled[bg];

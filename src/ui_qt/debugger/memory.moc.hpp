@@ -1,16 +1,15 @@
-class MemoryEditor : public QObject {
+class MemoryEditor : public QbWindow {
   Q_OBJECT
 
 public:
-  QbWindow *window;
   QVBoxLayout *layout;
-    QHBoxLayout *controlLayout;
-      QWidget *spacer;
-      QLineEdit *addr;
-      QComboBox *source;
-      QCheckBox *autoUpdateBox;
-      QPushButton *refreshButton;
-    HexEditor *editor;
+  QHBoxLayout *controlLayout;
+  QWidget *spacer;
+  QLineEdit *addr;
+  QComboBox *source;
+  QCheckBox *autoUpdateBox;
+  QPushButton *refreshButton;
+  HexEditor *editor;
 
   void autoUpdate();
   void synchronize();

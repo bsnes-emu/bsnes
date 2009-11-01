@@ -3,12 +3,12 @@ void Utility::updateFullscreenState() {
 
   if(config.video.isFullscreen == false) {
     config.video.context = &config.video.windowed;
-    mainWindow->window->showNormal();
+    mainWindow->showNormal();
     mainWindow->menuBar->setVisible(true);
     mainWindow->statusBar->setVisible(true);
   } else {
     config.video.context = &config.video.fullscreen;
-    mainWindow->window->showFullScreen();
+    mainWindow->showFullScreen();
     mainWindow->menuBar->setVisible(!config.system.autoHideMenus);
     mainWindow->statusBar->setVisible(!config.system.autoHideMenus);
   }
@@ -52,14 +52,14 @@ void Utility::resizeMainWindow() {
 
   if(config.video.isFullscreen == false) {
     //get effective desktop work area region (ignore Windows taskbar, OS X dock, etc.)
-    QRect deskRect = QApplication::desktop()->availableGeometry(mainWindow->window);
+    QRect deskRect = QApplication::desktop()->availableGeometry(mainWindow);
 
     //ensure window size will not be larger than viewable desktop area
     constrainSize(height, width, deskRect.height()); //- frameHeight);
     constrainSize(width, height, deskRect.width());  //- frameWidth );
 
     mainWindow->canvas->setFixedSize(width, height);
-    mainWindow->window->show();
+    mainWindow->show();
   } else {
     for(unsigned i = 0; i < 2; i++) {
       unsigned iWidth = width, iHeight = height;
@@ -80,7 +80,7 @@ void Utility::resizeMainWindow() {
   //workaround for Qt/Xlib bug:
   //if window resize occurs with cursor over it, Qt shows Qt::Size*DiagCursor;
   //so force it to show Qt::ArrowCursor, as expected
-  mainWindow->window->setCursor(Qt::ArrowCursor);
+  mainWindow->setCursor(Qt::ArrowCursor);
   mainWindow->canvasContainer->setCursor(Qt::ArrowCursor);
   mainWindow->canvas->setCursor(Qt::ArrowCursor);
 

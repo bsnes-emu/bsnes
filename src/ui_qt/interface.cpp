@@ -41,7 +41,7 @@ void Interface::captureScreenshot(uint32_t *data, unsigned pitch, unsigned width
   filename << t << ".png";
 
   string path = config.path.data;
-  if(path == "") path = config.path.current;
+  if(path == "") path = dir(utility.cartridge.baseName);
   image.save(utf8() << path << filename);
   utility.showMessage("Screenshot saved.");
 }

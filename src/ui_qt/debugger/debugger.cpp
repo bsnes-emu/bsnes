@@ -3,15 +3,14 @@
 #include "memory.cpp"
 #include "vramviewer.cpp"
 
-Debugger::Debugger() {
-  window = new QbWindow(config.geometry.debugger);
-  window->setObjectName("debugger");
-  window->setWindowTitle("Debugger");
+Debugger::Debugger() : QbWindow(config.geometry.debugger) {
+  setObjectName("debugger");
+  setWindowTitle("Debugger");
 
   layout = new QHBoxLayout;
   layout->setMargin(Style::WindowMargin);
   layout->setSpacing(Style::WidgetSpacing);
-  window->setLayout(layout);
+  setLayout(layout);
 
   menu = new QMenuBar;
   layout->setMenuBar(menu);
@@ -87,7 +86,7 @@ Debugger::Debugger() {
 
   frameCounter = 0;
   synchronize();
-  window->resize(855, 425);
+  resize(855, 425);
 }
 
 void Debugger::synchronize() {
@@ -109,15 +108,15 @@ void Debugger::clear() {
 }
 
 void Debugger::showBreakpointEditor() {
-  breakpointEditor->window->show();
+  breakpointEditor->show();
 }
 
 void Debugger::showMemoryEditor() {
-  memoryEditor->window->show();
+  memoryEditor->show();
 }
 
 void Debugger::showVramViewer() {
-  vramViewer->window->show();
+  vramViewer->show();
   vramViewer->refresh();
 }
 

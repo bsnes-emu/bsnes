@@ -1,26 +1,21 @@
-class InputCaptureWindow : public QObject {
+class InputCaptureWindow : public QbWindow {
   Q_OBJECT
 
 public:
-  class Window : public QbWindow {
-  public:
-    void closeEvent(QCloseEvent*);
-    Window(string&);
-  } *window;
   QVBoxLayout *layout;
-    QHBoxLayout *hlayout;
-      QLabel *title;
-      QPushButton *mouseAxes;
-      QPushButton *mouseButtons;
-    QWidget *imageSpacer;
-    struct ImageWidget : public QWidget {
-      void paintEvent(QPaintEvent*);
-    } *imageWidget;
-    QWidget *spacer;
+  QHBoxLayout *hlayout;
+  QLabel *title;
+  QPushButton *mouseAxes;
+  QPushButton *mouseButtons;
+  QWidget *imageSpacer;
+  struct ImageWidget : public QWidget {
+    void paintEvent(QPaintEvent*);
+  } *imageWidget;
 
   void activate(InputObject *object);
   void activate(InputGroup *group);
   void inputEvent(uint16_t code, bool forceAssign = false);
+  void closeEvent(QCloseEvent*);
   InputCaptureWindow();
 
 public slots:
@@ -34,20 +29,18 @@ private:
   bool inputLock;
 } *inputCaptureWindow;
 
-class InputMouseCaptureWindow : public QObject {
+class InputMouseCaptureWindow : public QbWindow {
   Q_OBJECT
 
 public:
   enum Mode { AxisMode, ButtonMode };
 
-  QbWindow *window;
   QVBoxLayout *layout;
-    QLabel *info;
-    QLabel *captureBox;
-    QHBoxLayout *buttonLayout;
-      QPushButton *xAxis;
-      QPushButton *yAxis;
-    QWidget *spacer;
+  QLabel *info;
+  QLabel *captureBox;
+  QHBoxLayout *buttonLayout;
+  QPushButton *xAxis;
+  QPushButton *yAxis;
 
   void activate(Mode);
   void inputEvent(uint16_t code);
@@ -62,21 +55,17 @@ private:
   signed activeMouse;
 } *inputMouseCaptureWindow;
 
-class InputCalibrationWindow : public QObject {
+class InputCalibrationWindow : public QbWindow {
   Q_OBJECT
 
 public:
-  class Window : public QbWindow {
-  public:
-    void closeEvent(QCloseEvent*);
-    Window(string&);
-  } *window;
   QVBoxLayout *layout;
-    QLabel *info;
-    QPushButton *ok;
-    QWidget *spacer;
+  QLabel *info;
+  QHBoxLayout *controlLayout;
+  QPushButton *ok;
 
   void activate(unsigned joy);
+  void closeEvent(QCloseEvent*);
   InputCalibrationWindow();
 
 public slots:

@@ -1,18 +1,17 @@
-class InputSettingsWindow : public QObject {
+class InputSettingsWindow : public QWidget {
   Q_OBJECT
 
 public:
-  QWidget *panel;
-    QVBoxLayout *layout;
-      QLabel *title;
-      QHBoxLayout *selection;
-        QComboBox *port;
-        QComboBox *device;
-      QTreeWidget *list;
-      QHBoxLayout *controls;
-        QPushButton *assign;
-        QPushButton *assignAll;
-        QPushButton *unassign;
+  QVBoxLayout *layout;
+  QLabel *title;
+  QHBoxLayout *selection;
+  QComboBox *port;
+  QComboBox *device;
+  QTreeWidget *list;
+  QHBoxLayout *controls;
+  QPushButton *assign;
+  QPushButton *assignAll;
+  QPushButton *unassign;
 
   void syncUi();
   InputSettingsWindow();

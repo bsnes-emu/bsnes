@@ -2,19 +2,18 @@
 #include "cheatfinder.moc"
 #include "statemanager.moc"
 
-class ToolsWindow : public QObject {
+class ToolsWindow : public QbWindow {
   Q_OBJECT
 
 public:
-  QbWindow *window;
   QHBoxLayout *layout;
   QSplitter *splitter;
-    QTreeWidget *list;
-      QTreeWidgetItem *cheatEditor;
-      QTreeWidgetItem *cheatFinder;
-      QTreeWidgetItem *stateManager;
-    QWidget *panel;
-    QStackedLayout *panelLayout;
+  QTreeWidget *list;
+  QTreeWidgetItem *cheatEditor;
+  QTreeWidgetItem *cheatFinder;
+  QTreeWidgetItem *stateManager;
+  QWidget *panel;
+  QStackedLayout *panelLayout;
 
   void showCheatEditor();
   void showCheatFinder();

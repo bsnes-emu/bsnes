@@ -1,10 +1,8 @@
 CheatFinderWindow::CheatFinderWindow() {
-  panel = new QWidget;
-
   layout = new QVBoxLayout;
   layout->setMargin(0);
   layout->setSpacing(0);
-  panel->setLayout(layout);
+  setLayout(layout);
 
   title = new QLabel("Cheat Code Finder");
   title->setProperty("class", "title");
@@ -25,7 +23,7 @@ CheatFinderWindow::CheatFinderWindow() {
   sizeLabel = new QLabel("Data size: ");
   controlLayout->addWidget(sizeLabel, 0, 0);
 
-  sizeGroup = new QButtonGroup(panel);
+  sizeGroup = new QButtonGroup(this);
 
   size8bit = new QRadioButton("8-bit");
   size8bit->setChecked(true);
@@ -47,7 +45,7 @@ CheatFinderWindow::CheatFinderWindow() {
   compareLabel = new QLabel("Compare mode: ");
   controlLayout->addWidget(compareLabel, 1, 0);
 
-  compareGroup = new QButtonGroup(panel);
+  compareGroup = new QButtonGroup(this);
 
   compareEqual = new QRadioButton("Equal to");
   compareEqual->setChecked(true);

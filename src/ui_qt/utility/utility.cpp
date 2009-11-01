@@ -46,12 +46,6 @@ void Utility::inputEvent(uint16_t code) {
         //release mouse capture
         input.unacquire();
         return;  //do not trigger other UI actions that may be bound to escape key
-      } else if(settingsWindow->window->isActiveWindow()) {
-        settingsWindow->window->hide();
-        return;
-      } else if(toolsWindow->window->isActiveWindow()) {
-        toolsWindow->window->hide();
-        return;
       }
     }
   }
@@ -76,7 +70,7 @@ void Utility::inputEvent(uint16_t code) {
       modifySystemState(PowerCycle);
     }
 
-    if(isButtonDown(code, inputUiGeneral.saveScreenshot)) {
+    if(isButtonDown(code, inputUiGeneral.captureScreenshot)) {
       //tell SNES::Interface to save a screenshot at the next video_refresh() event
       interface.saveScreenshot = true;
     }
@@ -122,12 +116,12 @@ void Utility::inputEvent(uint16_t code) {
     }
 
     if(isButtonDown(code, inputUiGeneral.toggleMenu)) {
-      mainWindow->menuBar->setVisible(!mainWindow->menuBar->isVisibleTo(mainWindow->window));
+      mainWindow->menuBar->setVisible(!mainWindow->menuBar->isVisibleTo(mainWindow));
       resizeWindow = true;
     }
 
     if(isButtonDown(code, inputUiGeneral.toggleStatus)) {
-      mainWindow->statusBar->setVisible(!mainWindow->statusBar->isVisibleTo(mainWindow->window));
+      mainWindow->statusBar->setVisible(!mainWindow->statusBar->isVisibleTo(mainWindow));
       resizeWindow = true;
     }
 

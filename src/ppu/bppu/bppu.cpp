@@ -23,7 +23,15 @@ void bPPU::enter() {
     scanline();
     add_clocks(10);
 
-    //H =   10 (OAM address reset)
+    //H =   10 (cache mode7 registers + OAM address reset)
+    cache.m7_hofs = regs.m7_hofs;
+    cache.m7_vofs = regs.m7_vofs;
+    cache.m7a = regs.m7a;
+    cache.m7b = regs.m7b;
+    cache.m7c = regs.m7c;
+    cache.m7d = regs.m7d;
+    cache.m7x = regs.m7x;
+    cache.m7y = regs.m7y;
     if(vcounter() == (!overscan() ? 225 : 240)) {
       if(regs.display_disabled == false) {
         regs.oam_addr = regs.oam_baseaddr << 1;

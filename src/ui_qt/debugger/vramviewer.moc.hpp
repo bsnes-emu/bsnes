@@ -1,21 +1,20 @@
-class VramViewer : public QObject {
+class VramViewer : public QbWindow {
   Q_OBJECT
 
 public:
-  QbWindow *window;
   QVBoxLayout *layout;
-    QHBoxLayout *controlLayout;
-      QRadioButton *depth2bpp;
-      QRadioButton *depth4bpp;
-      QRadioButton *depth8bpp;
-      QRadioButton *depthMode7;
-      QCheckBox *autoUpdateBox;
-      QPushButton *refreshButton;
-    struct Canvas : public QWidget {
-      QImage *image;
-      void paintEvent(QPaintEvent*);
-      Canvas();
-    } *canvas;
+  QHBoxLayout *controlLayout;
+  QRadioButton *depth2bpp;
+  QRadioButton *depth4bpp;
+  QRadioButton *depth8bpp;
+  QRadioButton *depthMode7;
+  QCheckBox *autoUpdateBox;
+  QPushButton *refreshButton;
+  struct Canvas : public QWidget {
+    QImage *image;
+    void paintEvent(QPaintEvent*);
+    Canvas();
+  } *canvas;
 
   void autoUpdate();
   VramViewer();

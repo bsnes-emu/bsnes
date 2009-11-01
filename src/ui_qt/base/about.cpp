@@ -1,13 +1,12 @@
-AboutWindow::AboutWindow() {
-  window = new QbWindow(config.geometry.aboutWindow);
-  window->setObjectName("about-window");
-  window->setWindowTitle("About bsnes ...");
+AboutWindow::AboutWindow() : QbWindow(config.geometry.aboutWindow) {
+  setObjectName("about-window");
+  setWindowTitle("About bsnes ...");
 
   layout = new QVBoxLayout;
   layout->setSizeConstraint(QLayout::SetFixedSize);
   layout->setMargin(Style::WindowMargin);
   layout->setSpacing(Style::WidgetSpacing);
-  window->setLayout(layout);
+  setLayout(layout);
 
   logo = new Logo;
   logo->setFixedSize(600, 106);

@@ -1,9 +1,8 @@
 InputSettingsWindow::InputSettingsWindow() {
-  panel = new QWidget;
-
   layout = new QVBoxLayout;
   layout->setMargin(0);
   layout->setSpacing(0);
+  setLayout(layout);
 
   title = new QLabel("Input Configuration Editor");
   title->setProperty("class", "title");
@@ -45,7 +44,6 @@ InputSettingsWindow::InputSettingsWindow() {
   controls->setSpacing(Style::WidgetSpacing);
   layout->addLayout(controls);
 
-  panel->setLayout(layout);
   connect(port, SIGNAL(currentIndexChanged(int)), this, SLOT(portChanged()));
   connect(device, SIGNAL(currentIndexChanged(int)), this, SLOT(reloadList()));
   connect(list, SIGNAL(itemActivated(QTreeWidgetItem*, int)), this, SLOT(assignKey()));

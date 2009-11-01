@@ -16,7 +16,7 @@ System system;
 #include "input/input.cpp"
 
 void System::coprocessor_enter() {
-  if(cartridge.mode() == Cartridge::ModeSuperGameBoy) sgb.enter();
+  if(cartridge.mode() == Cartridge::ModeSuperGameBoy) supergameboy.enter();
   if(cartridge.has_superfx()) superfx.enter();
   if(cartridge.has_sa1()) sa1.enter();
 
@@ -60,7 +60,7 @@ void System::init(Interface *interface_) {
   interface = interface_;
   assert(interface != 0);
 
-  sgb.init();
+  supergameboy.init();
   sa1.init();
   superfx.init();
   bsxbase.init();
@@ -95,6 +95,8 @@ void System::power() {
     snes_region = (cartridge.region() == Cartridge::NTSC ? NTSC : PAL);
   }
 
+  audio.coprocessor_enable(false);
+
   scheduler.init();
   bus.power();
 
@@ -108,7 +110,7 @@ void System::power() {
   if(expansion() == ExpansionBSX) bsxbase.enable();
   if(memory::bsxflash.data()) bsxflash.enable();
   if(cartridge.mode() == Cartridge::ModeBsx) bsxcart.enable();
-  if(cartridge.mode() == Cartridge::ModeSuperGameBoy) sgb.enable();
+  if(cartridge.mode() == Cartridge::ModeSuperGameBoy) supergameboy.enable();
 
   if(cartridge.has_superfx()) superfx.enable();
   if(cartridge.has_sa1())     sa1.enable();
@@ -128,7 +130,7 @@ void System::power() {
   if(expansion() == ExpansionBSX) bsxbase.power();
   if(memory::bsxflash.data()) bsxflash.power();
   if(cartridge.mode() == Cartridge::ModeBsx) bsxcart.power();
-  if(cartridge.mode() == Cartridge::ModeSuperGameBoy) sgb.power();
+  if(cartridge.mode() == Cartridge::ModeSuperGameBoy) supergameboy.power();
 
   if(cartridge.has_superfx()) superfx.power();
   if(cartridge.has_sa1())     sa1.power();
@@ -170,7 +172,7 @@ void System::reset() {
   if(expansion() == ExpansionBSX) bsxbase.reset();
   if(memory::bsxflash.data()) bsxflash.reset();
   if(cartridge.mode() == Cartridge::ModeBsx) bsxcart.reset();
-  if(cartridge.mode() == Cartridge::ModeSuperGameBoy) sgb.reset();
+  if(cartridge.mode() == Cartridge::ModeSuperGameBoy) supergameboy.reset();
 
   if(cartridge.has_superfx()) superfx.reset();
   if(cartridge.has_sa1())     sa1.reset();
@@ -191,6 +193,10 @@ void System::reset() {
   input.port_set_device(1, config.controller_port2);
   input.update();
   video.update();
+}
+
+void System::unload() {
+  if(cartridge.mode() == Cartridge::ModeSuperGameBoy) supergameboy.unload();
 }
 
 void System::scanline() {

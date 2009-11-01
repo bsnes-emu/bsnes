@@ -1,10 +1,8 @@
 CheatEditorWindow::CheatEditorWindow() {
-  panel = new QWidget;
-
   layout = new QVBoxLayout;
   layout->setMargin(0);
   layout->setSpacing(0);
-  panel->setLayout(layout);
+  setLayout(layout);
 
   title = new QLabel("Cheat Code Editor");
   title->setProperty("class", "title");

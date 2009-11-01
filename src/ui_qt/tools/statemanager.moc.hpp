@@ -1,25 +1,24 @@
-class StateManagerWindow : public QObject {
+class StateManagerWindow : public QWidget {
   Q_OBJECT
 
 public:
-  QWidget *panel;
-    QVBoxLayout *layout;
-      QLabel *title;
-      QTreeWidget *list;
-      QHBoxLayout *controlLayout;
-        QLabel *descLabel;
-        QLineEdit *descEdit;
-      QHBoxLayout *buttonLayout;
-        QPushButton *loadState;
-        QPushButton *saveState;
-        QPushButton *createState;
-        QPushButton *deleteState;
+  QVBoxLayout *layout;
+  QLabel *title;
+  QTreeWidget *list;
+  QHBoxLayout *controlLayout;
+  QLabel *descLabel;
+  QLineEdit *descEdit;
+  QHBoxLayout *buttonLayout;
+  QPushButton *loadState;
+  QPushButton *saveState;
+  QPushButton *createState;
+  QPushButton *deleteState;
 
   QMenu *menu;
-    QAction *loadStateItem;
-    QAction *saveStateItem;
-    QAction *createStateItem;
-    QAction *deleteStateItem;
+  QAction *loadStateItem;
+  QAction *saveStateItem;
+  QAction *createStateItem;
+  QAction *deleteStateItem;
 
   void syncUi();
   void reloadList();

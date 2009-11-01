@@ -4,6 +4,7 @@ public:
   void show();
   void hide();
   void closeEvent(QCloseEvent*);
+  void keyReleaseEvent(QKeyEvent*);
   QbWindow(string&);
 
 private:

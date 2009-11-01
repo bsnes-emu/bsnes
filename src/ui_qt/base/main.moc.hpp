@@ -13,14 +13,10 @@ public:
   void paintEvent(QPaintEvent*);
 };
 
-class MainWindow : public QObject {
+class MainWindow : public QbWindow {
   Q_OBJECT
 
 public:
-  struct Window : public QbWindow {
-    void closeEvent(QCloseEvent*);
-    Window(string&);
-  } *window;
   QMenuBar *menuBar;
   QStatusBar *statusBar;
   QVBoxLayout *layout;
@@ -77,6 +73,7 @@ public:
     QAction *tools_cheatEditor;
     QAction *tools_cheatFinder;
     QAction *tools_stateManager;
+    QAction *tools_captureScreenshot;
     QAction *tools_debugger;
   QMenu *help;
     QAction *help_documentation;
@@ -90,6 +87,7 @@ public:
 
   void syncUi();
   bool isActive();
+  void closeEvent(QCloseEvent*);
   MainWindow();
 
 public slots:
@@ -136,6 +134,7 @@ public slots:
   void showCheatEditor();
   void showCheatFinder();
   void showStateManager();
+  void saveScreenshot();
   void showDebugger();
   void showDocumentation();
   void showLicense();

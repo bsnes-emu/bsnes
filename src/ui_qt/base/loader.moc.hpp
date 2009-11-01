@@ -1,26 +1,23 @@
-class LoaderWindow : public QObject {
+class LoaderWindow : public QbWindow {
   Q_OBJECT
 
 public:
-  QbWindow *window;
   QVBoxLayout *layout;
-    QGridLayout *grid;
-      QLabel *baseLabel;
-      QLineEdit *baseFile;
-      QPushButton *baseBrowse;
-      QPushButton *baseClear;
-      QLabel *slot1Label;
-      QLineEdit *slot1File;
-      QPushButton *slot1Browse;
-      QPushButton *slot1Clear;
-      QLabel *slot2Label;
-      QLineEdit *slot2File;
-      QPushButton *slot2Browse;
-      QPushButton *slot2Clear;
-    QHBoxLayout *controls;
-      QPushButton *load;
-      QPushButton *cancel;
-    QWidget *spacer;
+  QGridLayout *grid;
+  QLabel *baseLabel;
+  QLineEdit *baseFile;
+  QPushButton *baseBrowse;
+  QPushButton *baseClear;
+  QLabel *slot1Label;
+  QLineEdit *slot1File;
+  QPushButton *slot1Browse;
+  QPushButton *slot1Clear;
+  QLabel *slot2Label;
+  QLineEdit *slot2File;
+  QPushButton *slot2Browse;
+  QPushButton *slot2Clear;
+  QPushButton *load;
+  QPushButton *cancel;
 
   void syncUi();
   void loadBsxSlottedCartridge(const char*, const char*);
@@ -40,9 +37,7 @@ public slots:
   void clearSlot1Cartridge();
   void selectSlot2Cartridge();
   void clearSlot2Cartridge();
-
   void onLoad();
-  void onCancel();
 
 private:
   SNES::Cartridge::Mode mode;

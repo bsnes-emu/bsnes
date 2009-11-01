@@ -1,7 +1,6 @@
-MainWindow::MainWindow() {
-  window = new Window(config.geometry.mainWindow);
-  window->setObjectName("main-window");
-  window->setWindowTitle(utf8() << bsnesTitle << " v" << bsnesVersion);
+MainWindow::MainWindow() : QbWindow(config.geometry.mainWindow) {
+  setObjectName("main-window");
+  setWindowTitle(utf8() << bsnesTitle << " v" << bsnesVersion);
 
   //menu bar
   #if defined(PLATFORM_OSX)
@@ -23,7 +22,6 @@ MainWindow::MainWindow() {
       system_loadSpecial_sufamiTurbo->setIcon(QIcon(":/16x16/document-open.png"));
       system_loadSpecial_superGameBoy = system_loadSpecial->addAction("Load Super Game Boy Cartridge ...");
       system_loadSpecial_superGameBoy->setIcon(QIcon(":/16x16/document-open.png"));
-      system_loadSpecial_superGameBoy->setVisible(false);
     system->addSeparator();
     system->addAction(system_power = new QbCheckAction("Power", 0));
     system_reset = system->addAction("Reset");
@@ -111,9 +109,9 @@ MainWindow::MainWindow() {
     tools_cheatFinder->setIcon(QIcon(":/16x16/system-search.png"));
     tools_stateManager = tools->addAction("State Manager ...");
     tools_stateManager->setIcon(QIcon(":/16x16/system-file-manager.png"));
-    #if defined(DEBUGGER)
     tools->addSeparator();
-    #endif
+    tools_captureScreenshot = tools->addAction("Capture Screenshot");
+    tools_captureScreenshot->setIcon(QIcon(":/16x16/image-x-generic.png"));
     tools_debugger = tools->addAction("Debugger ...");
     tools_debugger->setIcon(QIcon(":/16x16/utilities-terminal.png"));
     #if !defined(DEBUGGER)
@@ -171,7 +169,7 @@ MainWindow::MainWindow() {
   #endif
   layout->addWidget(canvasContainer);
   layout->addWidget(statusBar);
-  window->setLayout(layout);
+  setLayout(layout);
 
   //slots
   connect(system_load, SIGNAL(triggered()), this, SLOT(loadCartridge()));
@@ -221,6 +219,7 @@ MainWindow::MainWindow() {
   connect(tools_cheatEditor, SIGNAL(triggered()), this, SLOT(showCheatEditor()));
   connect(tools_cheatFinder, SIGNAL(triggered()), this, SLOT(showCheatFinder()));
   connect(tools_stateManager, SIGNAL(triggered()), this, SLOT(showStateManager()));
+  connect(tools_captureScreenshot, SIGNAL(triggered()), this, SLOT(saveScreenshot()));
   connect(tools_debugger, SIGNAL(triggered()), this, SLOT(showDebugger()));
   connect(help_documentation, SIGNAL(triggered()), this, SLOT(showDocumentation()));
   connect(help_license, SIGNAL(triggered()), this, SLOT(showLicense()));
@@ -281,7 +280,7 @@ void MainWindow::syncUi() {
 }
 
 bool MainWindow::isActive() {
-  return window->isActiveWindow() && !window->isMinimized();
+  return isActiveWindow() && !isMinimized();
 }
 
 void MainWindow::loadCartridge() {
@@ -330,7 +329,7 @@ void MainWindow::setPort2Justifier()  { SNES::config.controller_port2 = SNES::In
 void MainWindow::setPort2Justifiers() { SNES::config.controller_port2 = SNES::Input::DeviceJustifiers; utility.updateControllers(); syncUi(); }
 
 void MainWindow::quit() {
-  window->hide();
+  hide();
   application.terminate = true;
 }
 
@@ -407,12 +406,18 @@ void MainWindow::syncAudio() {
   utility.updateAvSync();
 }
 
-void MainWindow::showConfigWindow() { settingsWindow->window->show(); }
+void MainWindow::showConfigWindow() { settingsWindow->show(); }
 
 void MainWindow::showCheatEditor()  { toolsWindow->showCheatEditor(); }
 void MainWindow::showCheatFinder()  { toolsWindow->showCheatFinder(); }
 void MainWindow::showStateManager() { toolsWindow->showStateManager(); }
-void MainWindow::showDebugger()     { debugger->window->show(); }
+
+void MainWindow::saveScreenshot() {
+  //tell SNES::Interface to save a screenshot at the next video_refresh() event
+  interface.saveScreenshot = true;
+}
+
+void MainWindow::showDebugger() { debugger->show(); }
 
 void MainWindow::showDocumentation()  {
   QFile file(":/documentation.html");
@@ -430,14 +435,12 @@ void MainWindow::showLicense() {
   }
 }
 void MainWindow::showAbout() {
-  aboutWindow->window->show();
+  aboutWindow->show();
 }
 
-void MainWindow::Window::closeEvent(QCloseEvent*) {
-  mainWindow->quit();
-}
-
-MainWindow::Window::Window(string &geometry) : QbWindow(geometry) {
+void MainWindow::closeEvent(QCloseEvent *event) {
+  QbWindow::closeEvent(event);
+  quit();
 }
 
 //============

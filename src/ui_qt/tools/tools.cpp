@@ -2,16 +2,15 @@
 #include "cheatfinder.cpp"
 #include "statemanager.cpp"
 
-ToolsWindow::ToolsWindow() {
-  window = new QbWindow(config.geometry.toolsWindow);
-  window->setObjectName("tools-window");
-  window->setWindowTitle("Tools");
-  window->resize(625, 360);
+ToolsWindow::ToolsWindow() : QbWindow(config.geometry.toolsWindow) {
+  setObjectName("tools-window");
+  setWindowTitle("Tools");
+  resize(625, 360);
 
   layout = new QHBoxLayout;
   layout->setMargin(Style::WindowMargin);
   layout->setSpacing(Style::WidgetSpacing);
-  window->setLayout(layout);
+  setLayout(layout);
 
   splitter = new QSplitter;
   layout->addWidget(splitter);
@@ -43,9 +42,9 @@ ToolsWindow::ToolsWindow() {
   stateManagerWindow = new StateManagerWindow;
 
   panelLayout = new QStackedLayout(panel);
-  panelLayout->addWidget(cheatEditorWindow->panel);
-  panelLayout->addWidget(cheatFinderWindow->panel);
-  panelLayout->addWidget(stateManagerWindow->panel);
+  panelLayout->addWidget(cheatEditorWindow);
+  panelLayout->addWidget(cheatFinderWindow);
+  panelLayout->addWidget(stateManagerWindow);
   panel->setLayout(panelLayout);
 
   connect(list, SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)), this, SLOT(itemChanged()));
@@ -56,22 +55,22 @@ ToolsWindow::ToolsWindow() {
 void ToolsWindow::itemChanged() {
   QTreeWidgetItem *item = list->currentItem();
 
-  if(item == cheatEditor)  panelLayout->setCurrentWidget(cheatEditorWindow->panel);
-  if(item == cheatFinder)  panelLayout->setCurrentWidget(cheatFinderWindow->panel);
-  if(item == stateManager) panelLayout->setCurrentWidget(stateManagerWindow->panel);
+  if(item == cheatEditor)  panelLayout->setCurrentWidget(cheatEditorWindow);
+  if(item == cheatFinder)  panelLayout->setCurrentWidget(cheatFinderWindow);
+  if(item == stateManager) panelLayout->setCurrentWidget(stateManagerWindow);
 }
 
 void ToolsWindow::showCheatEditor() {
   list->setCurrentItem(cheatEditor);
-  window->show();
+  show();
 }
 
 void ToolsWindow::showCheatFinder() {
   list->setCurrentItem(cheatFinder);
-  window->show();
+  show();
 }
 
 void ToolsWindow::showStateManager() {
   list->setCurrentItem(stateManager);
-  window->show();
+  show();
 }

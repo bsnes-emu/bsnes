@@ -5,16 +5,15 @@
 #include "advanced.cpp"
 #include "utility/inputcapture.cpp"
 
-SettingsWindow::SettingsWindow() {
-  window = new QbWindow(config.geometry.settingsWindow);
-  window->setObjectName("settings-window");
-  window->setWindowTitle("Configuration Settings");
-  window->resize(625, 360);
+SettingsWindow::SettingsWindow() : QbWindow(config.geometry.settingsWindow) {
+  setObjectName("settings-window");
+  setWindowTitle("Configuration Settings");
+  resize(625, 360);
 
   layout = new QHBoxLayout;
   layout->setMargin(Style::WindowMargin);
   layout->setSpacing(Style::WidgetSpacing);
-  window->setLayout(layout);
+  setLayout(layout);
 
   splitter = new QSplitter;
   layout->addWidget(splitter);
@@ -56,11 +55,11 @@ SettingsWindow::SettingsWindow() {
   inputCaptureWindow  = new InputCaptureWindow;
 
   panelLayout = new QStackedLayout(panel);
-  panelLayout->addWidget(videoSettingsWindow->panel);
-  panelLayout->addWidget(audioSettingsWindow->panel);
-  panelLayout->addWidget(inputSettingsWindow->panel);
-  panelLayout->addWidget(pathSettingsWindow->panel);
-  panelLayout->addWidget(advancedSettingsWindow->panel);
+  panelLayout->addWidget(videoSettingsWindow);
+  panelLayout->addWidget(audioSettingsWindow);
+  panelLayout->addWidget(inputSettingsWindow);
+  panelLayout->addWidget(pathSettingsWindow);
+  panelLayout->addWidget(advancedSettingsWindow);
   panel->setLayout(panelLayout);
 
   connect(list, SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)), this, SLOT(itemChanged()));
@@ -71,9 +70,9 @@ SettingsWindow::SettingsWindow() {
 void SettingsWindow::itemChanged() {
   QTreeWidgetItem *item = list->currentItem();
 
-  if(item == video)    panelLayout->setCurrentWidget(videoSettingsWindow->panel);
-  if(item == audio)    panelLayout->setCurrentWidget(audioSettingsWindow->panel);
-  if(item == input)    panelLayout->setCurrentWidget(inputSettingsWindow->panel);
-  if(item == paths)    panelLayout->setCurrentWidget(pathSettingsWindow->panel);
-  if(item == advanced) panelLayout->setCurrentWidget(advancedSettingsWindow->panel);
+  if(item == video)    panelLayout->setCurrentWidget(videoSettingsWindow);
+  if(item == audio)    panelLayout->setCurrentWidget(audioSettingsWindow);
+  if(item == input)    panelLayout->setCurrentWidget(inputSettingsWindow);
+  if(item == paths)    panelLayout->setCurrentWidget(pathSettingsWindow);
+  if(item == advanced) panelLayout->setCurrentWidget(advancedSettingsWindow);
 }

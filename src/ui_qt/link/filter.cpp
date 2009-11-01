@@ -90,7 +90,7 @@ void Filter::colortable_update() {
 }
 
 void Filter::size(unsigned &outwidth, unsigned &outheight, unsigned width, unsigned height) {
-  if(renderer > 0) {
+  if(opened() && renderer > 0) {
     return dl_size(renderer - 1, outwidth, outheight, width, height);
   }
 
@@ -103,7 +103,7 @@ void Filter::render(
   const uint16_t *input, unsigned pitch,
   const unsigned *line, unsigned width, unsigned height
 ) {
-  if(renderer > 0) {
+  if(opened() && renderer > 0) {
     return dl_render(renderer - 1, output, outpitch, input, pitch, line, width, height);
   }
 
@@ -130,7 +130,7 @@ void Filter::render(
 }
 
 QWidget* Filter::settings() {
-  if(renderer > 0) {
+  if(opened() && renderer > 0) {
     return dl_settings(renderer - 1);
   } else {
     return 0;

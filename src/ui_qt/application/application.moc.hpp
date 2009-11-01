@@ -29,6 +29,8 @@ public:
   string configFilename;
   string styleSheetFilename;
 
+  array<QbWindow*> windowList;
+
   int main(int &argc, char **argv);
   void locateFile(string &filename, bool createDataDirectory = false);
   void initPaths(const char *basename);

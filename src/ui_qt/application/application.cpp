@@ -69,6 +69,7 @@ int Application::main(int &argc, char **argv) {
   config.load(configFilename);
   init();
   SNES::system.init(&interface);
+  mainWindow->system_loadSpecial_superGameBoy->setVisible(SNES::supergameboy.opened());
 
   if(argc == 2) {
     //if valid file was specified on the command-line, attempt to load it now
@@ -81,20 +82,9 @@ int Application::main(int &argc, char **argv) {
   app->exec();
 
   //QbWindow::hide() saves window geometry for next run
-  loaderWindow->window->hide();
-  htmlViewerWindow->window->hide();
-  aboutWindow->window->hide();
-  diskBrowser->window->hide();
-  folderCreator->window->hide();
-  settingsWindow->window->hide();
-  inputCaptureWindow->window->hide();
-  inputMouseCaptureWindow->window->hide();
-  inputCalibrationWindow->window->hide();
-  toolsWindow->window->hide();
-  debugger->window->hide();
-  breakpointEditor->window->hide();
-  memoryEditor->window->hide();
-  vramViewer->window->hide();
+  for(unsigned i = 0; i < windowList.size(); i++) {
+    windowList[i]->hide();
+  }
 
   utility.unloadCartridge();
   config.save(configFilename);

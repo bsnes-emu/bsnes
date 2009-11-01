@@ -79,7 +79,7 @@ link += $(call ifhas,input.rawinput,$(ruby),-ldinput8 -ldxguid)
 objects := libco ruby
 objects += system cartridge cheat
 objects += memory smemory cpu cpucore scpu smp smpcore ssmp sdsp ppu bppu
-objects += sgb superfx sa1
+objects += supergameboy superfx sa1
 objects += bsx srtc sdd1 spc7110 cx4 dsp1 dsp2 dsp3 dsp4 obc1 st010 st011 st018
 
 ######################
@@ -166,22 +166,22 @@ obj/system.o: system/system.cpp $(call rwildcard,system/)
 ### special chips ###
 #####################
 
-obj/sgb.o    : chip/sgb/sgb.cpp $(call rwildcard,chip/sgb/)
-obj/superfx.o: chip/superfx/superfx.cpp $(call rwildcard,chip/superfx/)
-obj/sa1.o    : chip/sa1/sa1.cpp $(call rwildcard,chip/sa1/)
-obj/bsx.o    : chip/bsx/bsx.cpp chip/bsx/*
-obj/srtc.o   : chip/srtc/srtc.cpp chip/srtc/*
-obj/sdd1.o   : chip/sdd1/sdd1.cpp chip/sdd1/*
-obj/spc7110.o: chip/spc7110/spc7110.cpp chip/spc7110/*
-obj/cx4.o    : chip/cx4/cx4.cpp chip/cx4/*
-obj/dsp1.o   : chip/dsp1/dsp1.cpp chip/dsp1/*
-obj/dsp2.o   : chip/dsp2/dsp2.cpp chip/dsp2/*
-obj/dsp3.o   : chip/dsp3/dsp3.cpp chip/dsp3/*
-obj/dsp4.o   : chip/dsp4/dsp4.cpp chip/dsp4/*
-obj/obc1.o   : chip/obc1/obc1.cpp chip/obc1/*
-obj/st010.o  : chip/st010/st010.cpp chip/st010/*
-obj/st011.o  : chip/st011/st011.cpp chip/st011/*
-obj/st018.o  : chip/st018/st018.cpp chip/st018/*
+obj/supergameboy.o: chip/supergameboy/supergameboy.cpp $(call rwildcard,chip/supergameboy/)
+obj/superfx.o     : chip/superfx/superfx.cpp $(call rwildcard,chip/superfx/)
+obj/sa1.o         : chip/sa1/sa1.cpp $(call rwildcard,chip/sa1/)
+obj/bsx.o         : chip/bsx/bsx.cpp chip/bsx/*
+obj/srtc.o        : chip/srtc/srtc.cpp chip/srtc/*
+obj/sdd1.o        : chip/sdd1/sdd1.cpp chip/sdd1/*
+obj/spc7110.o     : chip/spc7110/spc7110.cpp chip/spc7110/*
+obj/cx4.o         : chip/cx4/cx4.cpp chip/cx4/*
+obj/dsp1.o        : chip/dsp1/dsp1.cpp chip/dsp1/*
+obj/dsp2.o        : chip/dsp2/dsp2.cpp chip/dsp2/*
+obj/dsp3.o        : chip/dsp3/dsp3.cpp chip/dsp3/*
+obj/dsp4.o        : chip/dsp4/dsp4.cpp chip/dsp4/*
+obj/obc1.o        : chip/obc1/obc1.cpp chip/obc1/*
+obj/st010.o       : chip/st010/st010.cpp chip/st010/*
+obj/st011.o       : chip/st011/st011.cpp chip/st011/*
+obj/st018.o       : chip/st018/st018.cpp chip/st018/*
 
 ###############
 ### targets ###

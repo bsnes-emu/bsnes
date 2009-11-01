@@ -6,13 +6,14 @@
 namespace SNES {
 
 #include "header.cpp"
+#include "gameboyheader.cpp"
 
 namespace memory {
   MappedRAM cartrom, cartram, cartrtc;
   MappedRAM bsxflash, bsxram, bsxpram;
   MappedRAM stArom, stAram;
   MappedRAM stBrom, stBram;
-  MappedRAM gbrom, gbram;
+  MappedRAM gbrom, gbram, gbrtc;
 };
 
 Cartridge cartridge;
@@ -43,7 +44,13 @@ void Cartridge::load(Mode cartridge_mode) {
   }
 
   if(mode() == ModeSuperGameBoy) {
-    if(memory::gbrom.data()) memory::gbram.map(allocate<uint8_t>(64 * 1024, 0xff), 64 * 1024);
+    if(memory::gbrom.data()) {
+      unsigned ram_size = gameboy_ram_size();
+      unsigned rtc_size = gameboy_rtc_size();
+
+      if(ram_size) memory::gbram.map(allocate<uint8_t>(ram_size, 0xff), ram_size);
+      if(rtc_size) memory::gbrtc.map(allocate<uint8_t>(rtc_size, 0x00), rtc_size);
+    }
   }
 
   memory::cartrom.write_protect(true);
@@ -58,6 +65,7 @@ void Cartridge::load(Mode cartridge_mode) {
   memory::stBram.write_protect(false);
   memory::gbrom.write_protect(true);
   memory::gbram.write_protect(false);
+  memory::gbrtc.write_protect(false);
 
   unsigned checksum = ~0;
   for(unsigned n = 0; n < memory::cartrom.size(); n++) checksum = crc32_adjust(checksum, memory::cartrom[n]);
@@ -104,6 +112,7 @@ void Cartridge::unload() {
   memory::stBram.reset();
   memory::gbrom.reset();
   memory::gbram.reset();
+  memory::gbrtc.reset();
 
   if(loaded() == false) return;
   bus.unload_cart();
@@ -143,6 +152,10 @@ void Cartridge::serialize(serializer &s) {
 
   if(memory::gbram.size() != 0 && memory::gbram.size() != ~0) {
     s.array(memory::gbram.data(), memory::gbram.size());
+  }
+
+  if(memory::gbrtc.size() != 0 && memory::gbrtc.size() != ~0) {
+    s.array(memory::gbrtc.data(), memory::gbrtc.size());
   }
 }
 
@@ -213,5 +226,4 @@ Cartridge::cartinfo_t::cartinfo_t() {
   reset();
 }
 
-};
-
+}

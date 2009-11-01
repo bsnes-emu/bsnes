@@ -1,70 +1,60 @@
-LoaderWindow::LoaderWindow() {
-  window = new QbWindow(config.geometry.loaderWindow);
-  window->setObjectName("loader-window");
-  window->setMinimumWidth(520);
+LoaderWindow::LoaderWindow() : QbWindow(config.geometry.loaderWindow) {
+  setObjectName("loader-window");
+  setMinimumWidth(520);
 
   layout = new QVBoxLayout;
   layout->setMargin(Style::WindowMargin);
-  layout->setSpacing(0);
-  window->setLayout(layout);
+  layout->setSpacing(Style::WidgetSpacing);
+  layout->setAlignment(Qt::AlignTop);
+  setLayout(layout);
 
-  grid = new QGridLayout; {
-    baseLabel = new QLabel("Base cartridge:");
-    grid->addWidget(baseLabel, 0, 0);
-
-    baseFile = new QLineEdit;
-    baseFile->setReadOnly(true);
-    grid->addWidget(baseFile, 0, 1);
-
-    baseBrowse = new QPushButton("Browse ...");
-    grid->addWidget(baseBrowse, 0, 2);
-
-    baseClear = new QPushButton("Clear");
-    grid->addWidget(baseClear, 0, 3);
-
-    slot1Label = new QLabel("Slot A cartridge:");
-    grid->addWidget(slot1Label, 1, 0);
-
-    slot1File = new QLineEdit;
-    slot1File->setReadOnly(true);
-    grid->addWidget(slot1File, 1, 1);
-
-    slot1Browse = new QPushButton("Browse ...");
-    grid->addWidget(slot1Browse, 1, 2);
-
-    slot1Clear = new QPushButton("Clear");
-    grid->addWidget(slot1Clear, 1, 3);
-
-    slot2Label = new QLabel("Slot B cartridge:");
-    grid->addWidget(slot2Label, 2, 0);
-
-    slot2File = new QLineEdit;
-    slot2File->setReadOnly(true);
-    grid->addWidget(slot2File, 2, 1);
-
-    slot2Browse = new QPushButton("Browse ...");
-    grid->addWidget(slot2Browse, 2, 2);
-
-    slot2Clear = new QPushButton("Clear");
-    grid->addWidget(slot2Clear, 2, 3);
-  }
-  grid->setSpacing(Style::WidgetSpacing);
+  grid = new QGridLayout;
   layout->addLayout(grid);
-  layout->addSpacing(Style::WidgetSpacing);
 
-  controls = new QHBoxLayout; {
-    load = new QPushButton("Load");
-    controls->addWidget(load);
+  baseLabel = new QLabel("Base cartridge:");
+  grid->addWidget(baseLabel, 0, 0);
 
-    cancel = new QPushButton("Cancel");
-    controls->addWidget(cancel);
-  }
-  controls->setSpacing(Style::WidgetSpacing);
-  layout->addLayout(controls);
+  baseFile = new QLineEdit;
+  baseFile->setReadOnly(true);
+  grid->addWidget(baseFile, 0, 1);
 
-  spacer = new QWidget;
-  spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-  layout->addWidget(spacer);
+  baseBrowse = new QPushButton("Browse ...");
+  grid->addWidget(baseBrowse, 0, 2);
+
+  baseClear = new QPushButton("Clear");
+  grid->addWidget(baseClear, 0, 3);
+
+  slot1Label = new QLabel("Slot A cartridge:");
+  grid->addWidget(slot1Label, 1, 0);
+
+  slot1File = new QLineEdit;
+  slot1File->setReadOnly(true);
+  grid->addWidget(slot1File, 1, 1);
+
+  slot1Browse = new QPushButton("Browse ...");
+  grid->addWidget(slot1Browse, 1, 2);
+
+  slot1Clear = new QPushButton("Clear");
+  grid->addWidget(slot1Clear, 1, 3);
+
+  slot2Label = new QLabel("Slot B cartridge:");
+  grid->addWidget(slot2Label, 2, 0);
+
+  slot2File = new QLineEdit;
+  slot2File->setReadOnly(true);
+  grid->addWidget(slot2File, 2, 1);
+
+  slot2Browse = new QPushButton("Browse ...");
+  grid->addWidget(slot2Browse, 2, 2);
+
+  slot2Clear = new QPushButton("Clear");
+  grid->addWidget(slot2Clear, 2, 3);
+
+  load = new QPushButton("Load");
+  grid->addWidget(load, 3, 2);
+
+  cancel = new QPushButton("Cancel");
+  grid->addWidget(cancel, 3, 3);
 
   connect(baseBrowse, SIGNAL(released()), this, SLOT(selectBaseCartridge()));
   connect(baseClear, SIGNAL(released()), this, SLOT(clearBaseCartridge()));
@@ -73,7 +63,7 @@ LoaderWindow::LoaderWindow() {
   connect(slot2Browse, SIGNAL(released()), this, SLOT(selectSlot2Cartridge()));
   connect(slot2Clear, SIGNAL(released()), this, SLOT(clearSlot2Cartridge()));
   connect(load, SIGNAL(released()), this, SLOT(onLoad()));
-  connect(cancel, SIGNAL(released()), this, SLOT(onCancel()));
+  connect(cancel, SIGNAL(released()), this, SLOT(close()));
 }
 
 void LoaderWindow::syncUi() {
@@ -82,7 +72,7 @@ void LoaderWindow::syncUi() {
 }
 
 void LoaderWindow::loadBsxSlottedCartridge(const char *filebase, const char *fileSlot1) {
-  window->hide();
+  hide();
   baseLabel->show(),  baseFile->show(),  baseBrowse->show(),  baseClear->show();
   slot1Label->show(), slot1File->show(), slot1Browse->show(), slot1Clear->show();
   slot2Label->hide(), slot2File->hide(), slot2Browse->hide(), slot2Clear->hide();
@@ -98,7 +88,7 @@ void LoaderWindow::loadBsxSlottedCartridge(const char *filebase, const char *fil
 }
 
 void LoaderWindow::loadBsxCartridge(const char *fileBase, const char *fileSlot1) {
-  window->hide();
+  hide();
   baseLabel->show(),  baseFile->show(),  baseBrowse->show(),  baseClear->show();
   slot1Label->show(), slot1File->show(), slot1Browse->show(), slot1Clear->show();
   slot2Label->hide(), slot2File->hide(), slot2Browse->hide(), slot2Clear->hide();
@@ -114,7 +104,7 @@ void LoaderWindow::loadBsxCartridge(const char *fileBase, const char *fileSlot1)
 }
 
 void LoaderWindow::loadSufamiTurboCartridge(const char *fileBase, const char *fileSlot1, const char *fileSlot2) {
-  window->hide();
+  hide();
   baseLabel->show(),  baseFile->show(),  baseBrowse->show(),  baseClear->show();
   slot1Label->show(), slot1File->show(), slot1Browse->show(), slot1Clear->show();
   slot2Label->show(), slot2File->show(), slot2Browse->show(), slot2Clear->show();
@@ -132,7 +122,7 @@ void LoaderWindow::loadSufamiTurboCartridge(const char *fileBase, const char *fi
 }
 
 void LoaderWindow::loadSuperGameBoyCartridge(const char *fileBase, const char *fileSlot1) {
-  window->hide();
+  hide();
   baseLabel->show(),  baseFile->show(),  baseBrowse->show(),  baseClear->show();
   slot1Label->show(), slot1File->show(), slot1Browse->show(), slot1Clear->show();
   slot2Label->hide(), slot2File->hide(), slot2Browse->hide(), slot2Clear->hide();
@@ -148,9 +138,9 @@ void LoaderWindow::loadSuperGameBoyCartridge(const char *fileBase, const char *f
 }
 
 void LoaderWindow::showWindow(const char *title) {
-  window->setWindowTitle(title);
-  window->show();
-  window->shrink();
+  setWindowTitle(title);
+  show();
+  shrink();
   load->setFocus();
 }
 
@@ -208,7 +198,7 @@ void LoaderWindow::clearSlot2Cartridge() {
 }
 
 void LoaderWindow::onLoad() {
-  window->hide();
+  hide();
   string base  = baseFile->text().toUtf8().data();
   string slot1 = slot1File->text().toUtf8().data();
   string slot2 = slot2File->text().toUtf8().data();
@@ -233,8 +223,4 @@ void LoaderWindow::onLoad() {
       utility.loadCartridgeSuperGameBoy(base, slot1);
     } break;
   }
-}
-
-void LoaderWindow::onCancel() {
-  window->hide();
 }

@@ -57,6 +57,8 @@ Configuration::Configuration() {
   attach(system.autoSaveMemory = false, "system.autoSaveMemory", "Automatically save cartridge back-up RAM once every minute");
   attach(system.autoHideMenus = false, "system.autoHideMenus", "Automatically hide the menu and status bars when entering fullscreen mode");
 
+  attach(diskBrowser.showPanel = true, "diskBrowser.showPanel");
+
   attach(file.autodetect_type    = false, "file.autodetectType");
   attach(file.bypass_patch_crc32 = false, "file.bypassPatchCrc32");
 
@@ -166,8 +168,8 @@ Configuration::Configuration() {
   attach(input.uiGeneral.resetSystem       = "none",                "input.uiGeneral.resetSystem");
   attach(input.uiGeneral.powerCycleSystem  = "none",                "input.uiGeneral.powerCycleSystem");
 
-  attach(input.uiGeneral.saveScreenshot   = "none",          "input.uiGeneral.saveScreenshot");
-  attach(input.uiGeneral.showStateManager = "keyboard00.f3", "input.uiGeneral.showStateManager");
+  attach(input.uiGeneral.captureScreenshot = "none",          "input.uiGeneral.captureScreenshot");
+  attach(input.uiGeneral.showStateManager  = "keyboard00.f3", "input.uiGeneral.showStateManager");
 
   attach(input.uiGeneral.quickLoad1     = "keyboard00.f4", "input.uiGeneral.quickLoad1");
   attach(input.uiGeneral.quickLoad2     = "none",          "input.uiGeneral.quickLoad2");

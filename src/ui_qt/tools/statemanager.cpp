@@ -1,10 +1,8 @@
 StateManagerWindow::StateManagerWindow() {
-  panel = new QWidget;
-
   layout = new QVBoxLayout;
   layout->setMargin(0);
   layout->setSpacing(0);
-  panel->setLayout(layout);
+  setLayout(layout);
 
   title = new QLabel("Save State Manager");
   title->setProperty("class", "title");
@@ -164,6 +162,7 @@ void StateManagerWindow::loadSelectedState() {
     QTreeWidgetItem *item = items[0];
     unsigned n = item->data(0, Qt::UserRole).toUInt();
     utility.loadState(n);
+    toolsWindow->close();
   }
 }
 

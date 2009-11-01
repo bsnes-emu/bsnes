@@ -34,7 +34,7 @@ Reader::Reader() {
   filterList = supported();
   if(filterList.length() > 0) {
     filterList = string()
-    << " *.swc *.fig"
+    << " *.smc *.swc *.fig"
     << " *.ufo *.gd3 *.gd7 *.dx2 *.mgd *.mgh"
     << " *.048 *.058 *.068 *.078 *.bin"
     << " *.usa *.eur *.jap *.aus *.bsx"
