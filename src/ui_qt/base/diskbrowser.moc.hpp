@@ -1,5 +1,3 @@
-class PathSettingWidget;
-
 class FolderCreator : public QbWindow {
   Q_OBJECT
 
@@ -62,18 +60,22 @@ public:
   QPushButton *ok;
   QPushButton *cancel;
   QFileSystemModel *model;
-  PathSettingWidget *activePath;
 
   QMenu *menu;
   QbCheckAction *showPanel;
 
-  void chooseFolder(PathSettingWidget*, const char*);
+  void inputEvent(uint16_t scancode);
+
+  void chooseFolder(const function<void (string)>&, string&, const char*);
+  void chooseFile(const function<void (string)>&, string&, const char*);
+
   void loadCartridge();
   void loadBaseCartridge();
   void loadBsxCartridge();
   void loadSufamiTurboCartridge1();
   void loadSufamiTurboCartridge2();
   void loadSuperGameBoyCartridge();
+
   string queryImageInformation();
 
   void setPath(const QString&);
@@ -92,8 +94,12 @@ public slots:
   void toggleShowPanel();
 
 private:
+  function<void (string)> callback;
+  string *currentPath;
+
   enum BrowseMode {
     Folder,
+    File,
     Cartridge,
     BaseCartridge,
     BsxCartridge,

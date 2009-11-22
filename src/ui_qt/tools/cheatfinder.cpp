@@ -144,7 +144,7 @@ void CheatFinderWindow::searchMemory() {
   string text = valueEdit->text().toUtf8().constData();
 
   //auto-detect input data type
-  if(strbegin(text, "0x")) data = strhex(text + 2);
+  if(strbegin(text, "0x")) data = strhex((const char*)text + 2);
   else if(strbegin(text, "-")) data = strsigned(text);
   else data = strunsigned(text);
 

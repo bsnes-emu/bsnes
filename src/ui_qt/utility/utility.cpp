@@ -2,46 +2,9 @@
 #include "state.cpp"
 #include "window.cpp"
 
-//returns true if requested code is a button, and it has just been pressed down
-bool Utility::isButtonDown(uint16_t inputCode, InputObject &object) {
-  if(inputCode != object.code) return false;
-
-  if(object.codetype != InputCode::KeyboardButton
-  && object.codetype != InputCode::MouseButton
-  && object.codetype != InputCode::JoypadHat
-  && object.codetype != InputCode::JoypadAxis
-  && object.codetype != InputCode::JoypadButton) return false;
-
-  int16_t state     = inputManager.state(object.code);
-  int16_t lastState = inputManager.lastState(object.code);
-
-  if(object.codetype == InputCode::JoypadHat) {
-    switch(object.modifier) {
-      case InputObject::Up:    return (state & joypad<>::hat_up   ) && !(lastState & joypad<>::hat_up   );
-      case InputObject::Down:  return (state & joypad<>::hat_down ) && !(lastState & joypad<>::hat_down );
-      case InputObject::Left:  return (state & joypad<>::hat_left ) && !(lastState & joypad<>::hat_left );
-      case InputObject::Right: return (state & joypad<>::hat_right) && !(lastState & joypad<>::hat_right);
-    }
-  } else if(object.codetype == InputCode::JoypadAxis) {
-    switch(object.modifier) {
-      case InputObject::Lo: return (state < -16384) && !(lastState < -16384);
-      case InputObject::Hi: return (state > +16384) && !(lastState > +16384);
-      case InputObject::Trigger: return (state < 0) && !(lastState < 0);
-    }
-  } else {
-    return (state == 1) && !(lastState == 1);
-  }
-
-  return false;  //fall-through for modifier-less hats / axes
-}
-
-void Utility::inputEvent(uint16_t code) {
-  //forward key-press event
-  //(in case window is currently active and capturing a new button / axis assignment)
-  inputCaptureWindow->inputEvent(code);
-
-  for(unsigned i = 0; i < keyboard<>::count; i++) {
-    if(code == keyboard<>::index(i, keyboard<>::escape) && inputManager.state(code)) {
+void Utility::inputEvent(uint16_t scancode) {
+  for(unsigned i = 0; i < Keyboard::Count; i++) {
+    if(scancode == keyboard(i)[Keyboard::Escape] && mapper().state(scancode)) {
       if(mainWindow->isActive() && input.acquired()) {
         //release mouse capture
         input.unacquire();
@@ -49,96 +12,11 @@ void Utility::inputEvent(uint16_t code) {
       }
     }
   }
-
-  if(mainWindow->isActive()) {
-    bool resizeWindow = false;
-
-    if(isButtonDown(code, inputUiGeneral.loadCartridge)) {
-      diskBrowser->loadCartridge();
-    }
-
-    if(isButtonDown(code, inputUiGeneral.pauseEmulation)) {
-      application.pause = !application.pause;
-      if(application.pause) audio.clear();
-    }
-
-    if(isButtonDown(code, inputUiGeneral.resetSystem)) {
-      modifySystemState(Reset);
-    }
-
-    if(isButtonDown(code, inputUiGeneral.powerCycleSystem)) {
-      modifySystemState(PowerCycle);
-    }
-
-    if(isButtonDown(code, inputUiGeneral.captureScreenshot)) {
-      //tell SNES::Interface to save a screenshot at the next video_refresh() event
-      interface.saveScreenshot = true;
-    }
-
-    if(isButtonDown(code, inputUiGeneral.showStateManager)) {
-      toolsWindow->showStateManager();
-    }
-
-    if(isButtonDown(code, inputUiGeneral.quickLoad1)) utility.quickLoad(0);
-    if(isButtonDown(code, inputUiGeneral.quickLoad2)) utility.quickLoad(1);
-    if(isButtonDown(code, inputUiGeneral.quickLoad3)) utility.quickLoad(2);
-    if(isButtonDown(code, inputUiGeneral.quickSave1)) utility.quickSave(0);
-    if(isButtonDown(code, inputUiGeneral.quickSave2)) utility.quickSave(1);
-    if(isButtonDown(code, inputUiGeneral.quickSave3)) utility.quickSave(2);
-
-    if(isButtonDown(code, inputUiGeneral.lowerSpeed)) {
-      config.system.speed--;
-      updateEmulationSpeed();
-      mainWindow->syncUi();
-    }
-
-    if(isButtonDown(code, inputUiGeneral.raiseSpeed)) {
-      config.system.speed++;
-      updateEmulationSpeed();
-      mainWindow->syncUi();
-    }
-
-    if(isButtonDown(code, inputUiGeneral.toggleCheatSystem)) {
-      if(SNES::cheat.enabled() == false) {
-        SNES::cheat.enable();
-        showMessage("Cheat system enabled.");
-      } else {
-        SNES::cheat.disable();
-        showMessage("Cheat system disabled.");
-      }
-    }
-
-    if(isButtonDown(code, inputUiGeneral.toggleFullscreen)) {
-      config.video.isFullscreen = !config.video.isFullscreen;
-      updateFullscreenState();
-      resizeMainWindow();
-      mainWindow->syncUi();
-    }
-
-    if(isButtonDown(code, inputUiGeneral.toggleMenu)) {
-      mainWindow->menuBar->setVisible(!mainWindow->menuBar->isVisibleTo(mainWindow));
-      resizeWindow = true;
-    }
-
-    if(isButtonDown(code, inputUiGeneral.toggleStatus)) {
-      mainWindow->statusBar->setVisible(!mainWindow->statusBar->isVisibleTo(mainWindow));
-      resizeWindow = true;
-    }
-
-    //prevent calling twice when toggleMenu == toggleStatus
-    if(resizeWindow == true) {
-      resizeMainWindow();
-    }
-
-    if(isButtonDown(code, inputUiGeneral.exitEmulator)) {
-      application.terminate = true;
-    }
-  }
 }
 
 //display message in main window statusbar area for three seconds
 void Utility::showMessage(const char *message) {
-  mainWindow->statusBar->showMessage(utf8() << message, 3000);
+  mainWindow->statusBar->showMessage(string() << message, 3000);
 }
 
 //updates system state text at bottom-right of main window statusbar
@@ -160,7 +38,7 @@ void Utility::updateSystemState() {
     return;
   }
 
-  mainWindow->systemState->setText(utf8() << text);
+  mainWindow->systemState->setText(text);
 }
 
 void Utility::acquireMouse() {
@@ -179,12 +57,12 @@ void Utility::unacquireMouse() {
 }
 
 void Utility::updateAvSync() {
-  video.set(Video::Synchronize, config.video.synchronize);
-  audio.set(Audio::Synchronize, config.audio.synchronize);
+  video.set(Video::Synchronize, config().video.synchronize);
+  audio.set(Audio::Synchronize, config().audio.synchronize);
 }
 
 void Utility::updateVideoMode() {
-  if(config.video.context->region == 0) {
+  if(config().video.context->region == 0) {
     SNES::video.set_mode(SNES::Video::ModeNTSC);
   } else {
     SNES::video.set_mode(SNES::Video::ModePAL);
@@ -192,42 +70,43 @@ void Utility::updateVideoMode() {
 }
 
 void Utility::updateColorFilter() {
-  filter.contrast = config.video.contrastAdjust;
-  filter.brightness = config.video.brightnessAdjust;
-  filter.gamma = 100 + config.video.gammaAdjust;
-  filter.gamma_ramp = config.video.enableGammaRamp;
+  filter.contrast = config().video.contrastAdjust;
+  filter.brightness = config().video.brightnessAdjust;
+  filter.gamma = 100 + config().video.gammaAdjust;
+  filter.gamma_ramp = config().video.enableGammaRamp;
   filter.colortable_update();
 }
 
+void Utility::updatePixelShader() {
+  string filedata;
+
+  if(filedata.readfile(config().path.fragmentShader)) {
+    video.set(Video::FragmentShader, (const char*)filedata);
+  } else {
+    video.set(Video::FragmentShader, (const char*)0);
+  }
+
+  if(filedata.readfile(config().path.vertexShader)) {
+    video.set(Video::VertexShader, (const char*)filedata);
+  } else {
+    video.set(Video::VertexShader, (const char*)0);
+  }
+}
+
 void Utility::updateHardwareFilter() {
-  video.set(Video::Filter, config.video.context->hwFilter);
+  video.set(Video::Filter, config().video.context->hwFilter);
 }
 
 void Utility::updateSoftwareFilter() {
-  filter.renderer = config.video.context->swFilter;
-
-/*libfilter::FilterInterface::FilterType type;
-  switch(config.video.context->swFilter) { default:
-    case 0: type = libfilter::FilterInterface::Direct;   break;
-    case 1: type = libfilter::FilterInterface::Scanline; break;
-    case 2: type = libfilter::FilterInterface::Scale2x;  break;
-    case 3: type = libfilter::FilterInterface::LQ2x;     break;
-    case 4: type = libfilter::FilterInterface::HQ2x;     break;
-    case 5: type = libfilter::FilterInterface::NTSC;     break;
-  }
-  libfilter::filter.set(type);
-
-  if(type == libfilter::FilterInterface::NTSC) {
-    libfilter::filter_ntsc.adjust(0, 0, 0, 0, 0, config.video.enableNtscMergeFields);
-  }*/
+  filter.renderer = config().video.context->swFilter;
 }
 
 void Utility::updateEmulationSpeed() {
-  config.system.speed = max(0, min(4, (signed)config.system.speed));
+  config().system.speed = max(0, min(4, (signed)config().system.speed));
 
   double scale[] = { 0.50, 0.75, 1.00, 1.50, 2.00 };
-  unsigned outfreq = config.audio.outputFrequency;
-  unsigned infreq  = config.audio.inputFrequency * scale[config.system.speed] + 0.5;
+  unsigned outfreq = config().audio.outputFrequency;
+  unsigned infreq  = config().audio.inputFrequency * scale[config().system.speed] + 0.5;
 
   audio.set(Audio::Resample, true);  //always resample (required for volume adjust + frequency scaler)
   audio.set(Audio::ResampleRatio, (double)infreq / (double)outfreq);
@@ -236,4 +115,25 @@ void Utility::updateEmulationSpeed() {
 void Utility::updateControllers() {
   SNES::input.port_set_device(0, SNES::config.controller_port1);
   SNES::input.port_set_device(1, SNES::config.controller_port2);
+
+  switch(config().input.port1) { default:
+    case ControllerPort1::None: mapper().port1 = 0; break;
+    case ControllerPort1::Gamepad: mapper().port1 = &Controllers::gamepad1; break;
+    case ControllerPort1::Asciipad: mapper().port1 = &Controllers::asciipad1; break;
+    case ControllerPort1::Multitap: mapper().port1 = &Controllers::multitap1; break;
+    case ControllerPort1::Mouse: mapper().port1 = &Controllers::mouse1; break;
+  }
+
+  switch(config().input.port2) { default:
+    case ControllerPort2::None: mapper().port2 = 0; break;
+    case ControllerPort2::Gamepad: mapper().port2 = &Controllers::gamepad2; break;
+    case ControllerPort2::Asciipad: mapper().port2 = &Controllers::asciipad2; break;
+    case ControllerPort2::Multitap: mapper().port2 = &Controllers::multitap2; break;
+    case ControllerPort2::Mouse: mapper().port2 = &Controllers::mouse2; break;
+    case ControllerPort2::SuperScope: mapper().port2 = &Controllers::superscope; break;
+    case ControllerPort2::Justifier: mapper().port2 = &Controllers::justifier1; break;
+    case ControllerPort2::Justifiers: mapper().port2 = &Controllers::justifiers; break;
+  }
+
+  mainWindow->syncUi();
 }

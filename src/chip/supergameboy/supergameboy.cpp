@@ -15,7 +15,11 @@ void SuperGameBoy::enter() {
   while(true) {
     unsigned samples = sgb_run(samplebuffer, 16);
     for(unsigned i = 0; i < samples; i++) {
-      audio.coprocessor_sample(samplebuffer[i] >> 0, samplebuffer[i] >> 16);
+      int16 left  = samplebuffer[i] >>  0;
+      int16 right = samplebuffer[i] >> 16;
+
+      //SNES audio is notoriously quiet; lower Game Boy samples to match SGB sound effects
+      audio.coprocessor_sample(left / 3, right / 3);
     }
     scheduler.addclocks_cop(samples * 10);
     scheduler.sync_copcpu();
@@ -65,18 +69,19 @@ void SuperGameBoy::write(unsigned addr, uint8 data) {
 
 void SuperGameBoy::init() {
   if(open("supergameboy")) {
-    sgb_rom   = sym("sgb_rom");
-    sgb_ram   = sym("sgb_ram");
-    sgb_rtc   = sym("sgb_rtc");
-    sgb_init  = sym("sgb_init");
-    sgb_term  = sym("sgb_term");
-    sgb_power = sym("sgb_power");
-    sgb_reset = sym("sgb_reset");
-    sgb_row   = sym("sgb_row");
-    sgb_read  = sym("sgb_read");
-    sgb_write = sym("sgb_write");
-    sgb_run   = sym("sgb_run");
-    sgb_save  = sym("sgb_save");
+    sgb_rom       = sym("sgb_rom");
+    sgb_ram       = sym("sgb_ram");
+    sgb_rtc       = sym("sgb_rtc");
+    sgb_init      = sym("sgb_init");
+    sgb_term      = sym("sgb_term");
+    sgb_power     = sym("sgb_power");
+    sgb_reset     = sym("sgb_reset");
+    sgb_row       = sym("sgb_row");
+    sgb_read      = sym("sgb_read");
+    sgb_write     = sym("sgb_write");
+    sgb_run       = sym("sgb_run");
+    sgb_save      = sym("sgb_save");
+    sgb_serialize = sym("sgb_serialize");
   }
 }
 
@@ -112,6 +117,11 @@ void SuperGameBoy::reset() {
 
 void SuperGameBoy::unload() {
   if(sgb_term) sgb_term();
+}
+
+void SuperGameBoy::serialize(serializer &s) {
+  s.integer(row);
+  if(sgb_serialize) sgb_serialize(s);
 }
 
 }

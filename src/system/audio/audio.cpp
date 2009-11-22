@@ -9,7 +9,7 @@ void Audio::coprocessor_enable(bool state) {
   dsp_wroffset = cop_wroffset = 0;
   dsp_length = cop_length = 0;
 
-  for(unsigned i = 0; i < 4; i++) r_left[i] = r_right[i] = 0;
+  r_sum_l = r_sum_r = 0;
 }
 
 void Audio::coprocessor_frequency(double input_frequency) {
@@ -24,70 +24,43 @@ void Audio::coprocessor_frequency(double input_frequency) {
   r_frac = 0;
 }
 
-void Audio::sample(uint16 left, uint16 right) {
+void Audio::sample(int16 left, int16 right) {
   if(coprocessor == false) {
     system.interface->audio_sample(left, right);
   } else {
-    dsp_buffer[dsp_wroffset] = (left << 0) + (right << 16);
+    dsp_buffer[dsp_wroffset] = ((uint16)left << 0) + ((uint16)right << 16);
     dsp_wroffset = (dsp_wroffset + 1) & 32767;
     dsp_length = (dsp_length + 1) & 32767;
     flush();
   }
 }
 
-void Audio::coprocessor_sample(uint16 left, uint16 right) {
-  r_left [0] = r_left [1];
-  r_left [1] = r_left [2];
-  r_left [2] = r_left [3];
-  r_left [3] = (int16)left;
-
-  r_right[0] = r_right[1];
-  r_right[1] = r_right[2];
-  r_right[2] = r_right[3];
-  r_right[3] = (int16)right;
-
-  while(r_frac <= 1.0) {
-    left  = sclamp<16>(hermite(r_frac, r_left [0], r_left [1], r_left [2], r_left [3]));
-    right = sclamp<16>(hermite(r_frac, r_right[0], r_right[1], r_right[2], r_right[3]));
-    r_frac += r_step;
-
-    cop_buffer[cop_wroffset] = (left << 0) + (right << 16);
-    cop_wroffset = (cop_wroffset + 1) & 32767;
-    cop_length = (cop_length + 1) & 32767;
-    flush();
+void Audio::coprocessor_sample(int16 left, int16 right) {
+  if(r_frac >= 1.0) {
+    r_frac -= 1.0;
+    r_sum_l += left;
+    r_sum_r += right;
+    return;
   }
 
-  r_frac -= 1.0;
+  r_sum_l += left  * r_frac;
+  r_sum_r += right * r_frac;
+
+  uint16 output_left  = sclamp<16>(int(r_sum_l / r_step));
+  uint16 output_right = sclamp<16>(int(r_sum_r / r_step));
+
+  double first = 1.0 - r_frac;
+  r_sum_l = left  * first;
+  r_sum_r = right * first;
+  r_frac = r_step - first;
+
+  cop_buffer[cop_wroffset] = (output_left << 0) + (output_right << 16);
+  cop_wroffset = (cop_wroffset + 1) & 32767;
+  cop_length = (cop_length + 1) & 32767;
+  flush();
 }
 
 void Audio::init() {
-}
-
-//========
-//private:
-//========
-
-//4-tap hermite interpolation
-double Audio::hermite(double mu1, double a, double b, double c, double d) {
-  const double tension = 0.0; //-1 = low, 0 = normal, 1 = high
-  const double bias    = 0.0; //-1 = left, 0 = even, 1 = right
-
-  double mu2, mu3, m0, m1, a0, a1, a2, a3;
-
-  mu2 = mu1 * mu1;
-  mu3 = mu2 * mu1;
-
-  m0  = (b - a) * (1 + bias) * (1 - tension) / 2;
-  m0 += (c - b) * (1 - bias) * (1 - tension) / 2;
-  m1  = (c - b) * (1 + bias) * (1 - tension) / 2;
-  m1 += (d - c) * (1 - bias) * (1 - tension) / 2;
-
-  a0 = +2 * mu3 - 3 * mu2 + 1;
-  a1 =      mu3 - 2 * mu2 + mu1;
-  a2 =      mu3 -     mu2;
-  a3 = -2 * mu3 + 3 * mu2;
-
-  return (a0 * b) + (a1 * m0) + (a2 * m1) + (a3 * c);
 }
 
 void Audio::flush() {

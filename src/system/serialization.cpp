@@ -51,6 +51,8 @@ void System::serialize_all(serializer &s) {
   ppu.serialize(s);
   dsp.serialize(s);
 
+  if(cartridge.mode() == Cartridge::ModeSuperGameBoy) supergameboy.serialize(s);
+
   if(cartridge.has_srtc())    srtc.serialize(s);
   if(cartridge.has_sdd1())    sdd1.serialize(s);
   if(cartridge.has_spc7110()) spc7110.serialize(s);

@@ -31,13 +31,14 @@ Reader::Reader() {
     load = bind(&Reader::direct_load, this);
   }
 
-  filterList = supported();
-  if(filterList.length() > 0) {
-    filterList = string()
+  compressionList = supported();
+  if(compressionList.length() > 0) compressionList = string() << " " << compressionList;
+
+  if(opened()) {
+    extensionList = string()
     << " *.smc *.swc *.fig"
     << " *.ufo *.gd3 *.gd7 *.dx2 *.mgd *.mgh"
     << " *.048 *.058 *.068 *.078 *.bin"
-    << " *.usa *.eur *.jap *.aus *.bsx"
-    << " " << filterList;
+    << " *.usa *.eur *.jap *.aus *.bsx";
   }
 }

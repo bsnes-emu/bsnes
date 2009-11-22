@@ -1,9 +1,9 @@
 #include "video.moc"
+#include "pixelshader.moc"
 #include "audio.moc"
 #include "input.moc"
 #include "paths.moc"
 #include "advanced.moc"
-#include "utility/inputcapture.moc"
 
 class SettingsWindow : public QbWindow {
   Q_OBJECT

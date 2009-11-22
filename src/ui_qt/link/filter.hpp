@@ -1,3 +1,20 @@
+class ScanlineFilter {
+public:
+  bool enabled;
+
+  void size(unsigned&, unsigned&);
+  void render(const uint16_t*&, unsigned&, const unsigned*&, unsigned, unsigned&);
+  void setIntensity(unsigned);
+
+  ScanlineFilter();
+  ~ScanlineFilter();
+
+private:
+  uint16_t *adjust;
+  uint16_t *buffer;
+  unsigned linewidth[480];
+};
+
 class Filter : public library {
 public:
   function<const char* ()> dl_supported;
@@ -34,4 +51,5 @@ private:
   uint8_t gamma_adjust(uint8_t input);
 };
 
+extern ScanlineFilter scanlineFilter;
 extern Filter filter;

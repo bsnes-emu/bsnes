@@ -1,4 +1,4 @@
-AboutWindow::AboutWindow() : QbWindow(config.geometry.aboutWindow) {
+AboutWindow::AboutWindow() : QbWindow(config().geometry.aboutWindow) {
   setObjectName("about-window");
   setWindowTitle("About bsnes ...");
 
@@ -12,7 +12,7 @@ AboutWindow::AboutWindow() : QbWindow(config.geometry.aboutWindow) {
   logo->setFixedSize(600, 106);
   layout->addWidget(logo);
 
-  info = new QLabel(utf8() <<
+  info = new QLabel(string() <<
     "<table>"
     "<tr><td align='right'><b>Version: </b></td><td>" << bsnesVersion << "</td></tr>"
     "<tr><td align='right'><b>Author: </b></td><td>byuu</td></tr>"

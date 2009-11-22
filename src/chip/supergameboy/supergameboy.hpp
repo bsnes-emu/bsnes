@@ -15,6 +15,8 @@ public:
   void reset();
   void unload();
 
+  void serialize(serializer&);
+
 private:
   uint32_t samplebuffer[4096];
   unsigned row;
@@ -32,6 +34,7 @@ private:
   function<void (uint16, uint8)> sgb_write;
   function<unsigned (uint32_t*, unsigned)> sgb_run;
   function<void ()> sgb_save;
+  function<void (serializer&)> sgb_serialize;
 };
 
 extern SuperGameBoy supergameboy;

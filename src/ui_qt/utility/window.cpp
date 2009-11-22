@@ -1,16 +1,16 @@
 void Utility::updateFullscreenState() {
   video.clear();
 
-  if(config.video.isFullscreen == false) {
-    config.video.context = &config.video.windowed;
+  if(config().video.isFullscreen == false) {
+    config().video.context = &config().video.windowed;
     mainWindow->showNormal();
     mainWindow->menuBar->setVisible(true);
     mainWindow->statusBar->setVisible(true);
   } else {
-    config.video.context = &config.video.fullscreen;
+    config().video.context = &config().video.fullscreen;
     mainWindow->showFullScreen();
-    mainWindow->menuBar->setVisible(!config.system.autoHideMenus);
-    mainWindow->statusBar->setVisible(!config.system.autoHideMenus);
+    mainWindow->menuBar->setVisible(!config().system.autoHideMenus);
+    mainWindow->statusBar->setVisible(!config().system.autoHideMenus);
   }
 
   QApplication::processEvents();
@@ -37,20 +37,20 @@ void Utility::constrainSize(unsigned &x, unsigned &y, unsigned max) {
 }
 
 void Utility::resizeMainWindow() {
-  unsigned region = config.video.context->region;
-  unsigned multiplier = config.video.context->multiplier;
+  unsigned region = config().video.context->region;
+  unsigned multiplier = config().video.context->multiplier;
   unsigned width = 256 * multiplier;
   unsigned height = (region == 0 ? 224 : 239) * multiplier;
 
-  if(config.video.context->correctAspectRatio) {
+  if(config().video.context->correctAspectRatio) {
     if(region == 0) {
-      width = (double)width * config.video.ntscAspectRatio + 0.5;  //NTSC adjust
+      width = (double)width * config().video.ntscAspectRatio + 0.5;  //NTSC adjust
     } else {
-      width = (double)width * config.video.palAspectRatio  + 0.5;  //PAL adjust
+      width = (double)width * config().video.palAspectRatio  + 0.5;  //PAL adjust
     }
   }
 
-  if(config.video.isFullscreen == false) {
+  if(config().video.isFullscreen == false) {
     //get effective desktop work area region (ignore Windows taskbar, OS X dock, etc.)
     QRect deskRect = QApplication::desktop()->availableGeometry(mainWindow);
 
@@ -87,4 +87,73 @@ void Utility::resizeMainWindow() {
   //workaround for DirectSound(?) bug:
   //window resizing sometimes breaks audio sync, this call re-initializes it
   updateAvSync();
+}
+
+void Utility::toggleSynchronizeVideo() {
+  mainWindow->settings_emulationSpeed_syncVideo->toggleChecked();
+  config().video.synchronize = mainWindow->settings_emulationSpeed_syncVideo->isChecked();
+  updateAvSync();
+}
+
+void Utility::toggleSynchronizeAudio() {
+  mainWindow->settings_emulationSpeed_syncAudio->toggleChecked();
+  config().audio.synchronize = mainWindow->settings_emulationSpeed_syncAudio->isChecked();
+  updateAvSync();
+}
+
+void Utility::setNtscMode() {
+  config().video.context->region = 0;
+  updateVideoMode();
+  resizeMainWindow();
+  mainWindow->shrink();
+  mainWindow->syncUi();
+}
+
+void Utility::setPalMode() {
+  config().video.context->region = 1;
+  updateVideoMode();
+  resizeMainWindow();
+  mainWindow->shrink();
+  mainWindow->syncUi();
+}
+
+void Utility::toggleSmoothVideoOutput() {
+  mainWindow->settings_smoothVideo->toggleChecked();
+  config().video.context->hwFilter = mainWindow->settings_smoothVideo->isChecked();
+  updateHardwareFilter();
+  mainWindow->syncUi();
+}
+
+void Utility::toggleAspectCorrection() {
+  mainWindow->settings_videoMode_correctAspectRatio->toggleChecked();
+  config().video.context->correctAspectRatio = mainWindow->settings_videoMode_correctAspectRatio->isChecked();
+  resizeMainWindow();
+  mainWindow->shrink();
+}
+
+void Utility::setScale(unsigned scale) {
+  config().video.context->multiplier = scale;
+  resizeMainWindow();
+  mainWindow->shrink();
+  mainWindow->syncUi();
+}
+
+void Utility::toggleFullscreen() {
+  mainWindow->settings_videoMode_fullscreen->toggleChecked();
+  config().video.isFullscreen = mainWindow->settings_videoMode_fullscreen->isChecked();
+  updateFullscreenState();
+  resizeMainWindow();
+  mainWindow->syncUi();
+}
+
+void Utility::toggleMenubar() {
+  mainWindow->menuBar->setVisible(!mainWindow->menuBar->isVisibleTo(mainWindow));
+  resizeMainWindow();
+  mainWindow->shrink();
+}
+
+void Utility::toggleStatusbar() {
+  mainWindow->statusBar->setVisible(!mainWindow->statusBar->isVisibleTo(mainWindow));
+  resizeMainWindow();
+  mainWindow->shrink();
 }

@@ -12,8 +12,9 @@ public:
   string &pathValue;
   string pathDefaultLabel;
   string pathBrowseLabel;
-  void selectPath(const string&);
+  void assignPath(string);
   void updatePath();
+
   PathSettingWidget(string&, const char*, const char*, const char*);
 
 public slots:

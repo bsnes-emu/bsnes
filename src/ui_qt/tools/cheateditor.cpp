@@ -115,8 +115,8 @@ void CheatEditorWindow::updateItem(QTreeWidgetItem *item) {
   if(lcode.size() > 1) lcode[0] << "+" << lcode.size() - 1;
 
   item->setCheckState(1, code.enabled ? Qt::Checked : Qt::Unchecked);
-  item->setText(1, utf8() << lcode[0]);
-  item->setText(2, utf8() << code.desc);
+  item->setText(1, lcode[0]);
+  item->setText(2, code.desc);
 }
 
 void CheatEditorWindow::popupMenu(const QPoint &point) {
@@ -138,7 +138,7 @@ void CheatEditorWindow::reloadList() {
       item->setData(0, Qt::UserRole, QVariant(n));
       char slot[16];
       sprintf(slot, "%3u", n + 1);
-      item->setText(0, utf8() << slot);
+      item->setText(0, slot);
       updateItem(item);
     }
   }
@@ -157,8 +157,8 @@ void CheatEditorWindow::listChanged() {
     SNES::Cheat::cheat_t code;
     SNES::cheat.get(n, code);
 
-    descEdit->setText(utf8() << code.desc);
-    codeEdit->setText(utf8() << code.code);
+    descEdit->setText(code.desc);
+    codeEdit->setText(code.code);
   }
 
   syncUi();

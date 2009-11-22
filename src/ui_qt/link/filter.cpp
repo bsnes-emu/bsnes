@@ -1,3 +1,81 @@
+//==============
+//ScanlineFilter
+//==============
+
+ScanlineFilter scanlineFilter;
+
+void ScanlineFilter::size(unsigned &width, unsigned &height) {
+  if(enabled && height <= 240) height *= 2;
+}
+
+void ScanlineFilter::render(
+  const uint16_t *&input, unsigned &pitch,
+  const unsigned *&line, unsigned width, unsigned &height
+) {
+  if(enabled && height <= 240) {
+    pitch >>= 1;
+
+    const uint16_t *sp = input;
+    uint16_t *dp = buffer;
+    unsigned *lp = linewidth;
+    for(unsigned y = 0; y < height; y++) {
+      for(unsigned x = 0; x < line[y]; x++) {
+        uint16_t color = *sp++;
+        *(dp +   0) = color;
+        *(dp + 512) = adjust[color];
+        dp++;
+      }
+
+      sp += pitch - line[y];
+      dp += 1024 - line[y];
+
+      *lp++ = line[y];
+      *lp++ = line[y];
+    }
+
+    input = buffer;
+    pitch = 1024;
+    line = linewidth;
+    height *= 2;
+  }
+}
+
+void ScanlineFilter::setIntensity(unsigned intensity) {
+  if(intensity >= 100) {
+    enabled = false;
+  } else {
+    enabled = true;
+
+    for(unsigned i = 0; i < 32768; i++) {
+      unsigned r = (i >>  0) & 31;
+      unsigned g = (i >>  5) & 31;
+      unsigned b = (i >> 10) & 31;
+
+      r = (double)r * (double)intensity / 100.0;
+      g = (double)g * (double)intensity / 100.0;
+      b = (double)b * (double)intensity / 100.0;
+
+      adjust[i] = (r << 0) + (g << 5) + (b << 10);
+    }
+  }
+}
+
+ScanlineFilter::ScanlineFilter() {
+  enabled = false;
+  adjust = new uint16_t[32768];
+  buffer = new uint16_t[512 * 480];
+  setIntensity(50);
+}
+
+ScanlineFilter::~ScanlineFilter() {
+  delete[] adjust;
+  delete[] buffer;
+}
+
+//======
+//Filter
+//======
+
 Filter filter;
 
 const uint8_t Filter::gamma_ramp_table[32] = {
@@ -90,8 +168,10 @@ void Filter::colortable_update() {
 }
 
 void Filter::size(unsigned &outwidth, unsigned &outheight, unsigned width, unsigned height) {
+  scanlineFilter.size(width, height);
+
   if(opened() && renderer > 0) {
-    return dl_size(renderer - 1, outwidth, outheight, width, height);
+    return dl_size(renderer, outwidth, outheight, width, height);
   }
 
   outwidth  = width;
@@ -103,8 +183,10 @@ void Filter::render(
   const uint16_t *input, unsigned pitch,
   const unsigned *line, unsigned width, unsigned height
 ) {
+  scanlineFilter.render(input, pitch, line, width, height);
+
   if(opened() && renderer > 0) {
-    return dl_render(renderer - 1, output, outpitch, input, pitch, line, width, height);
+    return dl_render(renderer, output, outpitch, input, pitch, line, width, height);
   }
 
   pitch >>= 1;
@@ -131,7 +213,7 @@ void Filter::render(
 
 QWidget* Filter::settings() {
   if(opened() && renderer > 0) {
-    return dl_settings(renderer - 1);
+    return dl_settings(renderer);
   } else {
     return 0;
   }
@@ -161,10 +243,10 @@ Filter::Filter() {
     dl_settings = sym("snesfilter_settings");
 
     dl_colortable(colortable);
-    dl_configuration(config);
+    dl_configuration(config());
   } else {
-    config.video.windowed.swFilter   = 0;
-    config.video.fullscreen.swFilter = 0;
+    config().video.windowed.swFilter   = 0;
+    config().video.fullscreen.swFilter = 0;
   }
 }
 

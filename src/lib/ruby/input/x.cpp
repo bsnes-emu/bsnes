@@ -29,22 +29,13 @@ public:
   bool acquired() { return false; }
 
   bool poll(int16_t *table) {
-    memset(table, 0, input_limit * sizeof(int16_t));
-
-    char state[32];
-    XQueryKeymap(display, state);
-
-    for(unsigned i = 0; i < keyboard<>::length; i++) {
-      uint8_t code = keycode[i];
-      if(code == 0) continue;  //unmapped
-      table[i] = (bool)(state[code >> 3] & (1 << (code & 7)));
-    }
-
+    memset(table, 0, Scancode::Limit * sizeof(int16_t));
+    x_poll(table);
     return true;
   }
 
   bool init() {
-    init_keycodes();
+    x_init();
     display = XOpenDisplay(0);
     return true;
   }

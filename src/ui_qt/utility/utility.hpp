@@ -1,8 +1,7 @@
 class Utility {
 public:
   //utility.cpp
-  bool isButtonDown(uint16_t inputCode, InputObject &object);
-  void inputEvent(uint16_t code);
+  void inputEvent(uint16_t scancode);
   void showMessage(const char *message);
   void updateSystemState();
   void acquireMouse();
@@ -11,6 +10,7 @@ public:
   void updateAvSync();
   void updateVideoMode();
   void updateColorFilter();
+  void updatePixelShader();
   void updateHardwareFilter();
   void updateSoftwareFilter();
   void updateEmulationSpeed();
@@ -18,7 +18,8 @@ public:
 
   //cartridge.cpp
   struct Cartridge {
-    string name;  //printable cartridge name
+    string name;      //printable cartridge name
+    string fileName;  //ideal file name for saving eg states to disk
     string baseName, slotAName, slotBName;
     bool patchApplied;
   } cartridge;
@@ -56,4 +57,14 @@ public:
   void updateFullscreenState();
   void constrainSize(unsigned &x, unsigned &y, unsigned max);
   void resizeMainWindow();
+  void toggleSynchronizeVideo();
+  void toggleSynchronizeAudio();
+  void setNtscMode();
+  void setPalMode();
+  void toggleSmoothVideoOutput();
+  void toggleAspectCorrection();
+  void setScale(unsigned);
+  void toggleFullscreen();
+  void toggleMenubar();
+  void toggleStatusbar();
 } utility;

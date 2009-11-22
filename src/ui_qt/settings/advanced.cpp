@@ -127,20 +127,20 @@ void AdvancedSettingsWindow::initializeUi() {
 
   part.split(";", video.driver_list());
   for(unsigned i = 0; i < part.size(); i++) {
-    videoDriver->addItem(utf8() << part[i]);
-    if(part[i] == config.system.video) videoDriver->setCurrentIndex(i);
+    videoDriver->addItem(part[i]);
+    if(part[i] == config().system.video) videoDriver->setCurrentIndex(i);
   }
 
   part.split(";", audio.driver_list());
   for(unsigned i = 0; i < part.size(); i++) {
-    audioDriver->addItem(utf8() << part[i]);
-    if(part[i] == config.system.audio) audioDriver->setCurrentIndex(i);
+    audioDriver->addItem(part[i]);
+    if(part[i] == config().system.audio) audioDriver->setCurrentIndex(i);
   }
 
   part.split(";", input.driver_list());
   for(unsigned i = 0; i < part.size(); i++) {
-    inputDriver->addItem(utf8() << part[i]);
-    if(part[i] == config.system.input) inputDriver->setCurrentIndex(i);
+    inputDriver->addItem(part[i]);
+    if(part[i] == config().system.input) inputDriver->setCurrentIndex(i);
   }
 
   regionAuto->setChecked(SNES::config.region == SNES::System::Autodetect);
@@ -150,21 +150,21 @@ void AdvancedSettingsWindow::initializeUi() {
   portSatellaview->setChecked(SNES::config.expansion_port == SNES::System::ExpansionBSX);
   portNone->setChecked       (SNES::config.expansion_port == SNES::System::ExpansionNone);
 
-  focusPause->setChecked (config.input.focusPolicy == Configuration::Input::FocusPolicyPauseEmulation);
-  focusIgnore->setChecked(config.input.focusPolicy == Configuration::Input::FocusPolicyIgnoreInput);
-  focusAllow->setChecked (config.input.focusPolicy == Configuration::Input::FocusPolicyAllowInput);
+  focusPause->setChecked (config().input.focusPolicy == Configuration::Input::FocusPolicyPauseEmulation);
+  focusIgnore->setChecked(config().input.focusPolicy == Configuration::Input::FocusPolicyIgnoreInput);
+  focusAllow->setChecked (config().input.focusPolicy == Configuration::Input::FocusPolicyAllowInput);
 }
 
 void AdvancedSettingsWindow::videoDriverChange(int index) {
-  if(index >= 0) config.system.video = videoDriver->itemText(index).toUtf8().data();
+  if(index >= 0) config().system.video = videoDriver->itemText(index).toUtf8().data();
 }
 
 void AdvancedSettingsWindow::audioDriverChange(int index) {
-  if(index >= 0) config.system.audio = audioDriver->itemText(index).toUtf8().data();
+  if(index >= 0) config().system.audio = audioDriver->itemText(index).toUtf8().data();
 }
 
 void AdvancedSettingsWindow::inputDriverChange(int index) {
-  if(index >= 0) config.system.input = inputDriver->itemText(index).toUtf8().data();
+  if(index >= 0) config().system.input = inputDriver->itemText(index).toUtf8().data();
 }
 
 void AdvancedSettingsWindow::setRegionAuto() { SNES::config.region = SNES::System::Autodetect; }
@@ -174,6 +174,6 @@ void AdvancedSettingsWindow::setRegionPAL()  { SNES::config.region = SNES::Syste
 void AdvancedSettingsWindow::setPortSatellaview() { SNES::config.expansion_port = SNES::System::ExpansionBSX; }
 void AdvancedSettingsWindow::setPortNone()        { SNES::config.expansion_port = SNES::System::ExpansionNone; }
 
-void AdvancedSettingsWindow::pauseWithoutFocus()       { config.input.focusPolicy = Configuration::Input::FocusPolicyPauseEmulation; }
-void AdvancedSettingsWindow::ignoreInputWithoutFocus() { config.input.focusPolicy = Configuration::Input::FocusPolicyIgnoreInput; }
-void AdvancedSettingsWindow::allowInputWithoutFocus()  { config.input.focusPolicy = Configuration::Input::FocusPolicyAllowInput; }
+void AdvancedSettingsWindow::pauseWithoutFocus()       { config().input.focusPolicy = Configuration::Input::FocusPolicyPauseEmulation; }
+void AdvancedSettingsWindow::ignoreInputWithoutFocus() { config().input.focusPolicy = Configuration::Input::FocusPolicyIgnoreInput; }
+void AdvancedSettingsWindow::allowInputWithoutFocus()  { config().input.focusPolicy = Configuration::Input::FocusPolicyAllowInput; }

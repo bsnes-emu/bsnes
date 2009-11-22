@@ -18,7 +18,7 @@ struct pInputSDL {
     Display *display;
     Window rootwindow;
     Cursor InvisibleCursor;
-    SDL_Joystick *gamepad[joypad<>::count];
+    SDL_Joystick *gamepad[Joypad::Count];
 
     unsigned screenwidth, screenheight;
     unsigned relativex, relativey;
@@ -91,20 +91,13 @@ struct pInputSDL {
   }
 
   bool poll(int16_t *table) {
-    memset(table, 0, nall::input_limit * sizeof(int16_t));
+    memset(table, 0, Scancode::Limit * sizeof(int16_t));
 
     //========
     //Keyboard
     //========
 
-    char state[32];
-    XQueryKeymap(device.display, state);
-
-    for(unsigned i = 0; i < keyboard<>::length; i++) {
-      uint8_t code = keycode[i];
-      if(code == 0) continue;  //unmapped
-      table[i] = (bool)(state[code >> 3] & (1 << (code & 7)));
-    }
+    x_poll(table);
 
     //=====
     //Mouse
@@ -123,56 +116,55 @@ struct pInputSDL {
       XGetWindowAttributes(device.display, settings.handle, &attributes);
 
       //absolute -> relative conversion
-      table[mouse<0>::x] = (int16_t)(root_x_return - device.screenwidth  / 2);
-      table[mouse<0>::y] = (int16_t)(root_y_return - device.screenheight / 2);
+      table[mouse(0).axis(0)] = (int16_t)(root_x_return - device.screenwidth  / 2);
+      table[mouse(0).axis(1)] = (int16_t)(root_y_return - device.screenheight / 2);
 
-      if(table[mouse<0>::x] != 0 || table[mouse<0>::y] != 0) {
+      if(table[mouse(0).axis(0)] != 0 || table[mouse(0).axis(1)] != 0) {
         //if mouse movement occurred, re-center mouse for next poll
         XWarpPointer(device.display, None, device.rootwindow, 0, 0, 0, 0, device.screenwidth / 2, device.screenheight / 2);
       }
     } else {
-      table[mouse<0>::x] = (int16_t)(root_x_return - device.relativex);
-      table[mouse<0>::y] = (int16_t)(root_y_return - device.relativey);
+      table[mouse(0).axis(0)] = (int16_t)(root_x_return - device.relativex);
+      table[mouse(0).axis(1)] = (int16_t)(root_y_return - device.relativey);
 
       device.relativex = root_x_return;
       device.relativey = root_y_return;
     }
 
     //manual device polling is limited to only five buttons ...
-    table[mouse<0>::button + 0] = (bool)(mask_return & Button1Mask);
-    table[mouse<0>::button + 1] = (bool)(mask_return & Button2Mask);
-    table[mouse<0>::button + 2] = (bool)(mask_return & Button3Mask);
-    table[mouse<0>::button + 3] = (bool)(mask_return & Button4Mask);
-    table[mouse<0>::button + 4] = (bool)(mask_return & Button5Mask);
+    table[mouse(0).button(0)] = (bool)(mask_return & Button1Mask);
+    table[mouse(0).button(1)] = (bool)(mask_return & Button2Mask);
+    table[mouse(0).button(2)] = (bool)(mask_return & Button3Mask);
+    table[mouse(0).button(3)] = (bool)(mask_return & Button4Mask);
+    table[mouse(0).button(4)] = (bool)(mask_return & Button5Mask);
 
     //=========
     //Joypad(s)
     //=========
 
     SDL_JoystickUpdate();
-    for(unsigned i = 0; i < joypad<>::count; i++) {
+    for(unsigned i = 0; i < Joypad::Count; i++) {
       if(!device.gamepad[i]) continue;
-      unsigned index = joypad<>::index(i, joypad<>::none);
 
       //POV hats
-      unsigned hats = min((unsigned)joypad<>::hats, SDL_JoystickNumHats(device.gamepad[i]));
+      unsigned hats = min((unsigned)Joypad::Hats, SDL_JoystickNumHats(device.gamepad[i]));
       for(unsigned hat = 0; hat < hats; hat++) {
         uint8_t state = SDL_JoystickGetHat(device.gamepad[i], hat);
-        if(state & SDL_HAT_UP   ) table[index + joypad<>::hat + hat] |= joypad<>::hat_up;
-        if(state & SDL_HAT_RIGHT) table[index + joypad<>::hat + hat] |= joypad<>::hat_right;
-        if(state & SDL_HAT_DOWN ) table[index + joypad<>::hat + hat] |= joypad<>::hat_down;
-        if(state & SDL_HAT_LEFT ) table[index + joypad<>::hat + hat] |= joypad<>::hat_left;
+        if(state & SDL_HAT_UP   ) table[joypad(i).hat(hat)] |= Joypad::HatUp;
+        if(state & SDL_HAT_RIGHT) table[joypad(i).hat(hat)] |= Joypad::HatRight;
+        if(state & SDL_HAT_DOWN ) table[joypad(i).hat(hat)] |= Joypad::HatDown;
+        if(state & SDL_HAT_LEFT ) table[joypad(i).hat(hat)] |= Joypad::HatLeft;
       }
 
       //axes
-      unsigned axes = min((unsigned)joypad<>::axes, SDL_JoystickNumAxes(device.gamepad[i]));
+      unsigned axes = min((unsigned)Joypad::Axes, SDL_JoystickNumAxes(device.gamepad[i]));
       for(unsigned axis = 0; axis < axes; axis++) {
-        table[index + joypad<>::axis + axis] = (int16_t)SDL_JoystickGetAxis(device.gamepad[i], axis);
+        table[joypad(i).axis(axis)] = (int16_t)SDL_JoystickGetAxis(device.gamepad[i], axis);
       }
 
       //buttons
-      for(unsigned button = 0; button < joypad<>::buttons; button++) {
-        table[index + joypad<>::button + button] = (bool)SDL_JoystickGetButton(device.gamepad[i], button);
+      for(unsigned button = 0; button < Joypad::Buttons; button++) {
+        table[joypad(i).button(button)] = (bool)SDL_JoystickGetButton(device.gamepad[i], button);
       }
     }
 
@@ -180,7 +172,7 @@ struct pInputSDL {
   }
 
   bool init() {
-    init_keycodes();
+    x_init();
     SDL_InitSubSystem(SDL_INIT_JOYSTICK);
     SDL_JoystickEventState(SDL_IGNORE);
 
@@ -208,7 +200,7 @@ struct pInputSDL {
     device.relativex = 0;
     device.relativey = 0;
 
-    unsigned joypads = min((unsigned)joypad<>::count, SDL_NumJoysticks());
+    unsigned joypads = min((unsigned)Joypad::Count, SDL_NumJoysticks());
     for(unsigned i = 0; i < joypads; i++) device.gamepad[i] = SDL_JoystickOpen(i);
 
     return true;
@@ -218,7 +210,7 @@ struct pInputSDL {
     unacquire();
     XFreeCursor(device.display, device.InvisibleCursor);
 
-    for(unsigned i = 0; i < joypad<>::count; i++) {
+    for(unsigned i = 0; i < Joypad::Count; i++) {
       if(device.gamepad[i]) SDL_JoystickClose(device.gamepad[i]);
       device.gamepad[i] = 0;
     }
@@ -228,7 +220,7 @@ struct pInputSDL {
   }
 
   pInputSDL() {
-    for(unsigned i = 0; i < joypad<>::count; i++) device.gamepad[i] = 0;
+    for(unsigned i = 0; i < Joypad::Count; i++) device.gamepad[i] = 0;
     settings.handle = 0;
   }
 };

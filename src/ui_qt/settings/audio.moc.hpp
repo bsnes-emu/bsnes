@@ -11,8 +11,10 @@ public:
   QComboBox *latency;
   QGridLayout *sliders;
   QLabel *volumeLabel;
+  QLabel *volumeValue;
   QSlider *volume;
   QLabel *frequencySkewLabel;
+  QLabel *frequencySkewValue;
   QSlider *frequencySkew;
 
   void syncUi();

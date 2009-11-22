@@ -78,7 +78,7 @@ void HexEditor::update() {
     if(y != 15) output << "<br>";
   }
 
-  setHtml(utf8() << output);
+  setHtml(output);
 }
 
 void HexEditor::sliderMoved() {

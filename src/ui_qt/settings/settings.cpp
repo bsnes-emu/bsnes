@@ -1,11 +1,11 @@
 #include "video.cpp"
+#include "pixelshader.cpp"
 #include "audio.cpp"
 #include "input.cpp"
 #include "paths.cpp"
 #include "advanced.cpp"
-#include "utility/inputcapture.cpp"
 
-SettingsWindow::SettingsWindow() : QbWindow(config.geometry.settingsWindow) {
+SettingsWindow::SettingsWindow() : QbWindow(config().geometry.settingsWindow) {
   setObjectName("settings-window");
   setWindowTitle("Configuration Settings");
   resize(625, 360);
@@ -18,14 +18,20 @@ SettingsWindow::SettingsWindow() : QbWindow(config.geometry.settingsWindow) {
   splitter = new QSplitter;
   layout->addWidget(splitter);
 
+  video = new QTreeWidgetItem(QStringList() << "Video");
+  audio = new QTreeWidgetItem(QStringList() << "Audio");
+  input = new QTreeWidgetItem(QStringList() << "Input");
+  paths = new QTreeWidgetItem(QStringList() << "Paths");
+  advanced = new QTreeWidgetItem(QStringList() << "Advanced");
+
   //use QTreeWidget instead of QListWidget, as only the former has setAllColumnsShowFocus()
   //this is needed to have the dotted-selection rectangle encompass the icons
   list = new QTreeWidget;
-  list->addTopLevelItem(video = new QTreeWidgetItem(QStringList() << "Video"));
-  list->addTopLevelItem(audio = new QTreeWidgetItem(QStringList() << "Audio"));
-  list->addTopLevelItem(input = new QTreeWidgetItem(QStringList() << "Input"));
-  list->addTopLevelItem(paths = new QTreeWidgetItem(QStringList() << "Paths"));
-  list->addTopLevelItem(advanced = new QTreeWidgetItem(QStringList() << "Advanced"));
+  list->addTopLevelItem(video);
+  list->addTopLevelItem(audio);
+  list->addTopLevelItem(input);
+  list->addTopLevelItem(paths);
+  list->addTopLevelItem(advanced);
   list->setCurrentItem(input);  //select most frequently used panel by default
   list->setHeaderHidden(true);
   list->setRootIsDecorated(false);
@@ -52,8 +58,6 @@ SettingsWindow::SettingsWindow() : QbWindow(config.geometry.settingsWindow) {
   pathSettingsWindow     = new PathSettingsWindow;
   advancedSettingsWindow = new AdvancedSettingsWindow;
 
-  inputCaptureWindow  = new InputCaptureWindow;
-
   panelLayout = new QStackedLayout(panel);
   panelLayout->addWidget(videoSettingsWindow);
   panelLayout->addWidget(audioSettingsWindow);
@@ -70,9 +74,9 @@ SettingsWindow::SettingsWindow() : QbWindow(config.geometry.settingsWindow) {
 void SettingsWindow::itemChanged() {
   QTreeWidgetItem *item = list->currentItem();
 
-  if(item == video)    panelLayout->setCurrentWidget(videoSettingsWindow);
-  if(item == audio)    panelLayout->setCurrentWidget(audioSettingsWindow);
-  if(item == input)    panelLayout->setCurrentWidget(inputSettingsWindow);
-  if(item == paths)    panelLayout->setCurrentWidget(pathSettingsWindow);
+  if(item == video) panelLayout->setCurrentWidget(videoSettingsWindow);
+  if(item == audio) panelLayout->setCurrentWidget(audioSettingsWindow);
+  if(item == input) panelLayout->setCurrentWidget(inputSettingsWindow);
+  if(item == paths) panelLayout->setCurrentWidget(pathSettingsWindow);
   if(item == advanced) panelLayout->setCurrentWidget(advancedSettingsWindow);
 }

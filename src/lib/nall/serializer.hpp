@@ -20,6 +20,12 @@ namespace nall {
 
   class serializer {
   public:
+    enum mode_t { Load, Save, Size };
+
+    mode_t mode() const {
+      return imode;
+    }
+
     const uint8_t* data() const {
       return idata;
     }
@@ -37,9 +43,9 @@ namespace nall {
       //this is rather dangerous, and not cross-platform safe;
       //but there is no standardized way to export FP-values
       uint8_t *p = (uint8_t*)&value;
-      if(mode == Save) {
+      if(imode == Save) {
         for(unsigned n = 0; n < size; n++) idata[isize++] = p[n];
-      } else if(mode == Load) {
+      } else if(imode == Load) {
         for(unsigned n = 0; n < size; n++) p[n] = idata[isize++];
       } else {
         isize += size;
@@ -48,12 +54,12 @@ namespace nall {
 
     template<typename T> void integer(T &value) {
       enum { size = is_bool<T>::value ? 1 : sizeof(T) };
-      if(mode == Save) {
+      if(imode == Save) {
         for(unsigned n = 0; n < size; n++) idata[isize++] = value >> (n << 3);
-      } else if(mode == Load) {
+      } else if(imode == Load) {
         value = 0;
         for(unsigned n = 0; n < size; n++) value |= idata[isize++] << (n << 3);
-      } else if(mode == Size) {
+      } else if(imode == Size) {
         isize += size;
       }
     }
@@ -70,7 +76,7 @@ namespace nall {
     serializer& operator=(const serializer &s) {
       if(idata) delete[] idata;
 
-      mode = s.mode;
+      imode = s.imode;
       idata = new uint8_t[s.icapacity];
       isize = s.isize;
       icapacity = s.icapacity;
@@ -84,20 +90,20 @@ namespace nall {
     }
 
     serializer() {
-      mode = Size;
+      imode = Size;
       idata = 0;
       isize = 0;
     }
 
     serializer(unsigned capacity) {
-      mode = Save;
+      imode = Save;
       idata = new uint8_t[capacity]();
       isize = 0;
       icapacity = capacity;
     }
 
     serializer(const uint8_t *data, unsigned capacity) {
-      mode = Load;
+      imode = Load;
       idata = new uint8_t[capacity];
       isize = 0;
       icapacity = capacity;
@@ -109,7 +115,7 @@ namespace nall {
     }
 
   private:
-    enum mode_t { Load, Save, Size } mode;
+    mode_t imode;
     uint8_t *idata;
     unsigned isize;
     unsigned icapacity;

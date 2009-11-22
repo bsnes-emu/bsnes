@@ -39,139 +39,151 @@ public:
   };
 
   struct Keyboard : Device {
-    bool state[keyboard<>::length];
+    bool state[nall::Keyboard::Size];
 
     void update(RAWINPUT *input) {
       unsigned code  = input->data.keyboard.MakeCode;
       unsigned flags = input->data.keyboard.Flags;
 
       #define map(id, flag, name) if(code == id) state[name] = (bool)(flags == flag);
-      map(0x0001, 0, keyboard<>::escape)
-      map(0x003b, 0, keyboard<>::f1)
-      map(0x003c, 0, keyboard<>::f2)
-      map(0x003d, 0, keyboard<>::f3)
-      map(0x003e, 0, keyboard<>::f4)
-      map(0x003f, 0, keyboard<>::f5)
-      map(0x0040, 0, keyboard<>::f6)
-      map(0x0041, 0, keyboard<>::f7)
-      map(0x0042, 0, keyboard<>::f8)
-      map(0x0043, 0, keyboard<>::f9)
-      map(0x0044, 0, keyboard<>::f10)
-      map(0x0057, 0, keyboard<>::f11)
-      map(0x0058, 0, keyboard<>::f12)
+      map(0x0001, 0, nall::Keyboard::Escape)
+      map(0x003b, 0, nall::Keyboard::F1)
+      map(0x003c, 0, nall::Keyboard::F2)
+      map(0x003d, 0, nall::Keyboard::F3)
+      map(0x003e, 0, nall::Keyboard::F4)
+      map(0x003f, 0, nall::Keyboard::F5)
+      map(0x0040, 0, nall::Keyboard::F6)
+      map(0x0041, 0, nall::Keyboard::F7)
+      map(0x0042, 0, nall::Keyboard::F8)
+      map(0x0043, 0, nall::Keyboard::F9)
+      map(0x0044, 0, nall::Keyboard::F10)
+      map(0x0057, 0, nall::Keyboard::F11)
+      map(0x0058, 0, nall::Keyboard::F12)
 
-      map(0x0037, 2, keyboard<>::print_screen)
-      map(0x0046, 0, keyboard<>::scroll_lock)
-      map(0x001d, 4, keyboard<>::pause)
-      map(0x0029, 0, keyboard<>::tilde)
+      map(0x0037, 2, nall::Keyboard::PrintScreen)
+      map(0x0046, 0, nall::Keyboard::ScrollLock)
+      map(0x001d, 4, nall::Keyboard::Pause)
+      map(0x0029, 0, nall::Keyboard::Tilde)
 
-      map(0x0002, 0, keyboard<>::num_1)
-      map(0x0003, 0, keyboard<>::num_2)
-      map(0x0004, 0, keyboard<>::num_3)
-      map(0x0005, 0, keyboard<>::num_4)
-      map(0x0006, 0, keyboard<>::num_5)
-      map(0x0007, 0, keyboard<>::num_6)
-      map(0x0008, 0, keyboard<>::num_7)
-      map(0x0009, 0, keyboard<>::num_8)
-      map(0x000a, 0, keyboard<>::num_9)
-      map(0x000b, 0, keyboard<>::num_0)
+      map(0x0002, 0, nall::Keyboard::Num1)
+      map(0x0003, 0, nall::Keyboard::Num2)
+      map(0x0004, 0, nall::Keyboard::Num3)
+      map(0x0005, 0, nall::Keyboard::Num4)
+      map(0x0006, 0, nall::Keyboard::Num5)
+      map(0x0007, 0, nall::Keyboard::Num6)
+      map(0x0008, 0, nall::Keyboard::Num7)
+      map(0x0009, 0, nall::Keyboard::Num8)
+      map(0x000a, 0, nall::Keyboard::Num9)
+      map(0x000b, 0, nall::Keyboard::Num0)
 
-      map(0x000c, 0, keyboard<>::dash)
-      map(0x000d, 0, keyboard<>::equal)
-      map(0x000e, 0, keyboard<>::backspace)
+      map(0x000c, 0, nall::Keyboard::Dash)
+      map(0x000d, 0, nall::Keyboard::Equal)
+      map(0x000e, 0, nall::Keyboard::Backspace)
 
-      map(0x0052, 2, keyboard<>::insert)
-      map(0x0053, 2, keyboard<>::delete_)
-      map(0x0047, 2, keyboard<>::home)
-      map(0x004f, 2, keyboard<>::end)
-      map(0x0049, 2, keyboard<>::page_up)
-      map(0x0051, 2, keyboard<>::page_down)
+      map(0x0052, 2, nall::Keyboard::Insert)
+      map(0x0053, 2, nall::Keyboard::Delete)
+      map(0x0047, 2, nall::Keyboard::Home)
+      map(0x004f, 2, nall::Keyboard::End)
+      map(0x0049, 2, nall::Keyboard::PageUp)
+      map(0x0051, 2, nall::Keyboard::PageDown)
 
-      map(0x001e, 0, keyboard<>::a)
-      map(0x0030, 0, keyboard<>::b)
-      map(0x002e, 0, keyboard<>::c)
-      map(0x0020, 0, keyboard<>::d)
-      map(0x0012, 0, keyboard<>::e)
-      map(0x0021, 0, keyboard<>::f)
-      map(0x0022, 0, keyboard<>::g)
-      map(0x0023, 0, keyboard<>::h)
-      map(0x0017, 0, keyboard<>::i)
-      map(0x0024, 0, keyboard<>::j)
-      map(0x0025, 0, keyboard<>::k)
-      map(0x0026, 0, keyboard<>::l)
-      map(0x0032, 0, keyboard<>::m)
-      map(0x0031, 0, keyboard<>::n)
-      map(0x0018, 0, keyboard<>::o)
-      map(0x0019, 0, keyboard<>::p)
-      map(0x0010, 0, keyboard<>::q)
-      map(0x0013, 0, keyboard<>::r)
-      map(0x001f, 0, keyboard<>::s)
-      map(0x0014, 0, keyboard<>::t)
-      map(0x0016, 0, keyboard<>::u)
-      map(0x002f, 0, keyboard<>::v)
-      map(0x0011, 0, keyboard<>::w)
-      map(0x002d, 0, keyboard<>::x)
-      map(0x0015, 0, keyboard<>::y)
-      map(0x002c, 0, keyboard<>::z)
+      map(0x001e, 0, nall::Keyboard::A)
+      map(0x0030, 0, nall::Keyboard::B)
+      map(0x002e, 0, nall::Keyboard::C)
+      map(0x0020, 0, nall::Keyboard::D)
+      map(0x0012, 0, nall::Keyboard::E)
+      map(0x0021, 0, nall::Keyboard::F)
+      map(0x0022, 0, nall::Keyboard::G)
+      map(0x0023, 0, nall::Keyboard::H)
+      map(0x0017, 0, nall::Keyboard::I)
+      map(0x0024, 0, nall::Keyboard::J)
+      map(0x0025, 0, nall::Keyboard::K)
+      map(0x0026, 0, nall::Keyboard::L)
+      map(0x0032, 0, nall::Keyboard::M)
+      map(0x0031, 0, nall::Keyboard::N)
+      map(0x0018, 0, nall::Keyboard::O)
+      map(0x0019, 0, nall::Keyboard::P)
+      map(0x0010, 0, nall::Keyboard::Q)
+      map(0x0013, 0, nall::Keyboard::R)
+      map(0x001f, 0, nall::Keyboard::S)
+      map(0x0014, 0, nall::Keyboard::T)
+      map(0x0016, 0, nall::Keyboard::U)
+      map(0x002f, 0, nall::Keyboard::V)
+      map(0x0011, 0, nall::Keyboard::W)
+      map(0x002d, 0, nall::Keyboard::X)
+      map(0x0015, 0, nall::Keyboard::Y)
+      map(0x002c, 0, nall::Keyboard::Z)
 
-      map(0x001a, 0, keyboard<>::lbracket)
-      map(0x001b, 0, keyboard<>::rbracket)
-      map(0x002b, 0, keyboard<>::backslash)
-      map(0x0027, 0, keyboard<>::semicolon)
-      map(0x0028, 0, keyboard<>::apostrophe)
-      map(0x0033, 0, keyboard<>::comma)
-      map(0x0034, 0, keyboard<>::period)
-      map(0x0035, 0, keyboard<>::slash)
+      map(0x001a, 0, nall::Keyboard::LeftBracket)
+      map(0x001b, 0, nall::Keyboard::RightBracket)
+      map(0x002b, 0, nall::Keyboard::Backslash)
+      map(0x0027, 0, nall::Keyboard::Semicolon)
+      map(0x0028, 0, nall::Keyboard::Apostrophe)
+      map(0x0033, 0, nall::Keyboard::Comma)
+      map(0x0034, 0, nall::Keyboard::Period)
+      map(0x0035, 0, nall::Keyboard::Slash)
 
-      map(0x004f, 0, keyboard<>::pad_1)
-      map(0x0050, 0, keyboard<>::pad_2)
-      map(0x0051, 0, keyboard<>::pad_3)
-      map(0x004b, 0, keyboard<>::pad_4)
-      map(0x004c, 0, keyboard<>::pad_5)
-      map(0x004d, 0, keyboard<>::pad_6)
-      map(0x0047, 0, keyboard<>::pad_7)
-      map(0x0048, 0, keyboard<>::pad_8)
-      map(0x0049, 0, keyboard<>::pad_9)
-      map(0x0052, 0, keyboard<>::pad_0)
+      map(0x004f, 0, nall::Keyboard::Keypad1)
+      map(0x0050, 0, nall::Keyboard::Keypad2)
+      map(0x0051, 0, nall::Keyboard::Keypad3)
+      map(0x004b, 0, nall::Keyboard::Keypad4)
+      map(0x004c, 0, nall::Keyboard::Keypad5)
+      map(0x004d, 0, nall::Keyboard::Keypad6)
+      map(0x0047, 0, nall::Keyboard::Keypad7)
+      map(0x0048, 0, nall::Keyboard::Keypad8)
+      map(0x0049, 0, nall::Keyboard::Keypad9)
+      map(0x0052, 0, nall::Keyboard::Keypad0)
 
-      map(0x0053, 0, keyboard<>::point)
-      map(0x001c, 2, keyboard<>::enter)
-      map(0x004e, 0, keyboard<>::add)
-      map(0x004a, 0, keyboard<>::subtract)
-      map(0x0037, 0, keyboard<>::multiply)
-      map(0x0035, 2, keyboard<>::divide)
+      map(0x0053, 0, nall::Keyboard::Point)
+      map(0x001c, 2, nall::Keyboard::Enter)
+      map(0x004e, 0, nall::Keyboard::Add)
+      map(0x004a, 0, nall::Keyboard::Subtract)
+      map(0x0037, 0, nall::Keyboard::Multiply)
+      map(0x0035, 2, nall::Keyboard::Divide)
 
-      map(0x0045, 0, keyboard<>::num_lock)
-      map(0x003a, 0, keyboard<>::caps_lock)
+      map(0x0045, 0, nall::Keyboard::NumLock)
+      map(0x003a, 0, nall::Keyboard::CapsLock)
 
-      //pause signals 0x1d:4 + 0x45:0, whereas num_lock signals only 0x45:0.
-      //this makes it impractical to detect both pause+num_lock independently.
-      //workaround: always detect pause; detect num_lock only when pause is released.
-      if(state[keyboard<>::pause]) state[keyboard<>::num_lock] = false;
+      //Pause signals 0x1d:4 + 0x45:0, whereas NumLock signals only 0x45:0.
+      //this makes it impractical to detect both Pause+NumLock independently.
+      //workaround: always detect Pause; detect NumLock only when Pause is released.
+      if(state[nall::Keyboard::Pause]) state[nall::Keyboard::NumLock] = false;
 
-      map(0x0048, 2, keyboard<>::up)
-      map(0x0050, 2, keyboard<>::down)
-      map(0x004b, 2, keyboard<>::left)
-      map(0x004d, 2, keyboard<>::right)
+      map(0x0048, 2, nall::Keyboard::Up)
+      map(0x0050, 2, nall::Keyboard::Down)
+      map(0x004b, 2, nall::Keyboard::Left)
+      map(0x004d, 2, nall::Keyboard::Right)
 
-      map(0x000f, 0, keyboard<>::tab)
-      map(0x001c, 0, keyboard<>::return_)
-      map(0x0039, 0, keyboard<>::spacebar)
+      map(0x000f, 0, nall::Keyboard::Tab)
+      map(0x001c, 0, nall::Keyboard::Return)
+      map(0x0039, 0, nall::Keyboard::Spacebar)
+      map(0x005d, 2, nall::Keyboard::Menu)
 
-      map(0x001d, 0, keyboard<>::lctrl)
-      map(0x001d, 2, keyboard<>::rctrl)
-      map(0x0038, 0, keyboard<>::lalt)
-      map(0x0038, 2, keyboard<>::ralt)
-      map(0x002a, 0, keyboard<>::lshift)
-      map(0x0036, 0, keyboard<>::rshift)
-      map(0x005b, 2, keyboard<>::lsuper)
-      map(0x005c, 2, keyboard<>::rsuper)
-      map(0x005d, 2, keyboard<>::menu)
+      //merge left and right modifiers to one ID
+      if(code == 0x002a && flags == 0) state[nall::Keyboard::Shift] = 1;  //left shift
+      if(code == 0x002a && flags == 1) state[nall::Keyboard::Shift] = 0;
+      if(code == 0x0036 && flags == 0) state[nall::Keyboard::Shift] = 1;  //right shift
+      if(code == 0x0036 && flags == 1) state[nall::Keyboard::Shift] = 0;
+
+      if(code == 0x001d && flags == 0) state[nall::Keyboard::Control] = 1;  //left control
+      if(code == 0x001d && flags == 1) state[nall::Keyboard::Control] = 0;
+      if(code == 0x001d && flags == 2) state[nall::Keyboard::Control] = 1;  //right control
+      if(code == 0x001d && flags == 3) state[nall::Keyboard::Control] = 0;
+
+      if(code == 0x0038 && flags == 0) state[nall::Keyboard::Alt] = 1;  //left alt
+      if(code == 0x0038 && flags == 1) state[nall::Keyboard::Alt] = 0;
+      if(code == 0x0038 && flags == 2) state[nall::Keyboard::Alt] = 1;  //right alt
+      if(code == 0x0038 && flags == 3) state[nall::Keyboard::Alt] = 0;
+
+      if(code == 0x005b && flags == 2) state[nall::Keyboard::Super] = 1;  //left super
+      if(code == 0x005b && flags == 3) state[nall::Keyboard::Super] = 0;
+      if(code == 0x005c && flags == 2) state[nall::Keyboard::Super] = 1;  //right super
+      if(code == 0x005c && flags == 3) state[nall::Keyboard::Super] = 0;
       #undef map
     }
 
     Keyboard() {
-      for(unsigned i = 0; i < keyboard<>::length; i++) state[i] = false;
+      for(unsigned i = 0; i < nall::Keyboard::Size; i++) state[i] = false;
     }
   };
 
@@ -390,11 +402,11 @@ public:
     bool button[10];
 
     void poll(XINPUT_STATE &state) {
-      hat = joypad<>::hat_center;
-      if(state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP   ) hat |= joypad<>::hat_up;
-      if(state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT) hat |= joypad<>::hat_right;
-      if(state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN ) hat |= joypad<>::hat_down;
-      if(state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT ) hat |= joypad<>::hat_left;
+      hat = Joypad::HatCenter;
+      if(state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP   ) hat |= Joypad::HatUp;
+      if(state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT) hat |= Joypad::HatRight;
+      if(state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN ) hat |= Joypad::HatDown;
+      if(state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT ) hat |= Joypad::HatLeft;
 
       axis[0] = (int16_t)state.Gamepad.sThumbLX;
       axis[1] = (int16_t)state.Gamepad.sThumbLY;
@@ -426,7 +438,7 @@ public:
     }
 
     Gamepad() {
-      hat = joypad<>::hat_center;
+      hat = Joypad::HatCenter;
       for(unsigned n = 0; n < 6; n++) axis[n] = 0;
       for(unsigned n = 0; n < 10; n++) button[n] = false;
     }
@@ -490,7 +502,7 @@ public:
     void poll(DIJOYSTATE2 &state) {
       //POV hats
       for(unsigned n = 0; n < 4; n++) {
-        hat[n] = joypad<>::hat_center;
+        hat[n] = Joypad::HatCenter;
 
         //POV value is in clockwise-hundredth degree units
         unsigned pov = state.rgdwPOV[n];
@@ -499,10 +511,10 @@ public:
         //>= 36000 will match both, as well as invalid ranges.
         if(pov >= 36000) continue;
 
-        if(pov >= 31500 || pov <=  4500) hat[n] |= joypad<>::hat_up;
-        if(pov >=  4500 && pov <= 13500) hat[n] |= joypad<>::hat_right;
-        if(pov >= 13500 && pov <= 22500) hat[n] |= joypad<>::hat_down;
-        if(pov >= 22500 && pov <= 31500) hat[n] |= joypad<>::hat_left;
+        if(pov >= 31500 || pov <=  4500) hat[n] |= Joypad::HatUp;
+        if(pov >=  4500 && pov <= 13500) hat[n] |= Joypad::HatRight;
+        if(pov >= 13500 && pov <= 22500) hat[n] |= Joypad::HatDown;
+        if(pov >= 22500 && pov <= 31500) hat[n] |= Joypad::HatLeft;
       }
 
       //axes
@@ -521,7 +533,7 @@ public:
 
     Gamepad() {
       handle = 0;
-      for(unsigned n = 0; n < 4; n++) hat[n] = joypad<>::hat_center;
+      for(unsigned n = 0; n < 4; n++) hat[n] = Joypad::HatCenter;
       for(unsigned n = 0; n < 6; n++) axis[n] = 0;
       for(unsigned n = 0; n < 128; n++) button[n] = false;
     }
@@ -672,33 +684,29 @@ public:
   }
 
   bool poll(int16_t *table) {
-    memset(table, 0, nall::input_limit * sizeof(int16_t));
+    memset(table, 0, Scancode::Limit * sizeof(int16_t));
 
     WaitForSingleObject(rawinput.mutex, INFINITE);
 
     //=========
     //Keyboards
     //=========
-    for(unsigned i = 0; i < min(rawinput.lkeyboard.size(), (unsigned)keyboard<>::count); i++) {
-      unsigned index = keyboard<>::index(i, keyboard<>::none);
-
-      for(unsigned n = 0; n < keyboard<>::length; n++) {
-        table[index + n] = rawinput.lkeyboard[i].state[n];
+    for(unsigned i = 0; i < min(rawinput.lkeyboard.size(), (unsigned)Keyboard::Count); i++) {
+      for(unsigned n = 0; n < nall::Keyboard::Size; n++) {
+        table[keyboard(i).key(n)] = rawinput.lkeyboard[i].state[n];
       }
     }
 
     //====
     //Mice
     //====
-    for(unsigned i = 0; i < min(rawinput.lmouse.size(), (unsigned)mouse<>::count); i++) {
-      unsigned index = mouse<>::index(i, mouse<>::none);
+    for(unsigned i = 0; i < min(rawinput.lmouse.size(), (unsigned)Mouse::Count); i++) {
+      table[mouse(i).axis(0)] = rawinput.lmouse[i].xDistance;
+      table[mouse(i).axis(1)] = rawinput.lmouse[i].yDistance;
+      table[mouse(i).axis(2)] = rawinput.lmouse[i].zDistance;
 
-      table[index + mouse<>::x] = rawinput.lmouse[i].xDistance;
-      table[index + mouse<>::y] = rawinput.lmouse[i].yDistance;
-      table[index + mouse<>::z] = rawinput.lmouse[i].zDistance;
-
-      for(unsigned n = 0; n < min(5U, (unsigned)mouse<>::buttons); n++) {
-        table[index + mouse<>::button + n] = (bool)(rawinput.lmouse[i].buttonState & (1 << n));
+      for(unsigned n = 0; n < min(5U, (unsigned)Mouse::Buttons); n++) {
+        table[mouse(i).button(n)] = (bool)(rawinput.lmouse[i].buttonState & (1 << n));
       }
 
       rawinput.lmouse[i].sync();
@@ -713,17 +721,16 @@ public:
     //==================
     xinput.poll();
     for(unsigned i = 0; i < xinput.lgamepad.size(); i++) {
-      if(joy >= joypad<>::count) break;
-      unsigned index = joypad<>::index(joy++, joypad<>::none);
+      if(joy >= Joypad::Count) break;
 
-      table[index + joypad<>::hat + 0] = xinput.lgamepad[i].hat;
+      table[joypad(i).hat(0)] = xinput.lgamepad[i].hat;
 
-      for(unsigned axis = 0; axis < min(6U, (unsigned)joypad<>::axes); axis++) {
-        table[index + joypad<>::axis + axis] = xinput.lgamepad[i].axis[axis];
+      for(unsigned axis = 0; axis < min(6U, (unsigned)Joypad::Axes); axis++) {
+        table[joypad(i).axis(axis)] = xinput.lgamepad[i].axis[axis];
       }
 
-      for(unsigned button = 0; button < min(10U, (unsigned)joypad<>::buttons); button++) {
-        table[index + joypad<>::button + button] = xinput.lgamepad[i].button[button];
+      for(unsigned button = 0; button < min(10U, (unsigned)Joypad::Buttons); button++) {
+        table[joypad(i).button(button)] = xinput.lgamepad[i].button[button];
       }
     }
 
@@ -732,19 +739,18 @@ public:
     //=======================
     dinput.poll();
     for(unsigned i = 0; i < dinput.lgamepad.size(); i++) {
-      if(joy >= joypad<>::count) break;
-      unsigned index = joypad<>::index(joy++, joypad<>::none);
+      if(joy >= Joypad::Count) break;
 
-      for(unsigned hat = 0; hat < min(4U, (unsigned)joypad<>::hats); hat++) {
-        table[index + joypad<>::hat + hat] = dinput.lgamepad[i].hat[hat];
+      for(unsigned hat = 0; hat < min(4U, (unsigned)Joypad::Hats); hat++) {
+        table[joypad(i).hat(hat)] = dinput.lgamepad[i].hat[hat];
       }
 
-      for(unsigned axis = 0; axis < min(6U, (unsigned)joypad<>::axes); axis++) {
-        table[index + joypad<>::axis + axis] = dinput.lgamepad[i].axis[axis];
+      for(unsigned axis = 0; axis < min(6U, (unsigned)Joypad::Axes); axis++) {
+        table[joypad(i).axis(axis)] = dinput.lgamepad[i].axis[axis];
       }
 
-      for(unsigned button = 0; button < min(128U, (unsigned)joypad<>::buttons); button++) {
-        table[index + joypad<>::button + button] = dinput.lgamepad[i].button[button];
+      for(unsigned button = 0; button < min(128U, (unsigned)Joypad::Buttons); button++) {
+        table[joypad(i).button(button)] = dinput.lgamepad[i].button[button];
       }
     }
 

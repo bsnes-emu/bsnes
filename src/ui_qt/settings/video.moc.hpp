@@ -5,12 +5,18 @@ public:
   QVBoxLayout *layout;
   QLabel *title;
   QGridLayout *sliders;
-  QLabel *lcontrast;
+  QLabel *contrastLabel;
+  QLabel *contrastValue;
   QSlider *contrast;
-  QLabel *lbrightness;
+  QLabel *brightnessLabel;
+  QLabel *brightnessValue;
   QSlider *brightness;
-  QLabel *lgamma;
+  QLabel *gammaLabel;
+  QLabel *gammaValue;
   QSlider *gamma;
+  QLabel *scanlineLabel;
+  QLabel *scanlineValue;
+  QSlider *scanline;
   QHBoxLayout *options;
   QCheckBox *enableGammaRamp;
 
@@ -18,8 +24,9 @@ public:
   VideoSettingsWindow();
 
 public slots:
-  void gammaRampToggle(int);
   void contrastAdjust(int);
   void brightnessAdjust(int);
   void gammaAdjust(int);
+  void scanlineAdjust(int);
+  void gammaRampToggle(int);
 } *videoSettingsWindow;

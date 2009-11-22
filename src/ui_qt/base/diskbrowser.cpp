@@ -2,7 +2,7 @@
 //FolderCreator
 //=============
 
-FolderCreator::FolderCreator() : QbWindow(config.geometry.folderCreator) {
+FolderCreator::FolderCreator() : QbWindow(config().geometry.folderCreator) {
   setObjectName("folder-creator");
   setWindowTitle("Create New Folder");
 
@@ -89,7 +89,7 @@ void DiskBrowserView::currentChanged(const QModelIndex &current, const QModelInd
 void DiskBrowserImage::paintEvent(QPaintEvent*) {
   QPainter painter(this);
   if(name != "") {
-    QImage image(name);
+    QImage image(QString::fromUtf8(name));
     painter.drawImage(0, 0, image);
   }
 }
@@ -98,81 +98,160 @@ void DiskBrowserImage::paintEvent(QPaintEvent*) {
 //DiskBrowser
 //===========
 
-void DiskBrowser::chooseFolder(PathSettingWidget *widget, const char *title) {
+void DiskBrowser::inputEvent(uint16_t scancode) {
+  if(!isActiveWindow() || isMinimized()) return;
+
+  //provide very simple support for controlling the window via gamepads
+  if(Joypad::isAnyHat(scancode)) {
+    int16_t state = mapper().state(scancode);
+
+    if(state == Joypad::HatUp) {
+      QKeyEvent event((QEvent::Type)6, Qt::Key_Up, Qt::NoModifier);
+      view->keyPressEvent(&event);
+    }
+
+    if(state == Joypad::HatDown) {
+      QKeyEvent event((QEvent::Type)6, Qt::Key_Down, Qt::NoModifier);
+      view->keyPressEvent(&event);
+    }
+
+    if(state == Joypad::HatLeft) {
+      QKeyEvent event((QEvent::Type)6, Qt::Key_Backspace, Qt::NoModifier);
+      view->keyPressEvent(&event);
+    }
+
+    if(state == Joypad::HatRight) {
+      QKeyEvent event((QEvent::Type)6, Qt::Key_Return, Qt::NoModifier);
+      view->keyPressEvent(&event);
+    }
+  }
+}
+
+void DiskBrowser::chooseFolder(const function<void (string)> &callback_, string &currentPath_, const char *title) {
+  callback = callback_;
+  currentPath = &currentPath_;
   browseMode = Folder;
-  activePath = widget;
+
   hide();
   group->hide();
   ok->setText("Choose");
-  setWindowTitle(utf8() << title);
-  setPath(utf8() << (config.path.rom != "" ? config.path.rom : config.path.current));
+  setWindowTitle(string() << title);
+  setPath(*currentPath);
   setNameFilters("Folders ()");
   show();
 }
 
-void DiskBrowser::loadCartridge() {
-  browseMode = Cartridge;
+void DiskBrowser::chooseFile(const function<void (string)> &callback_, string &currentPath_, const char *title) {
+  callback = callback_;
+  currentPath = &currentPath_;
+  browseMode = File;
+
   hide();
-  group->setVisible(config.diskBrowser.showPanel);
+  group->hide();
+  ok->setText("Choose");
+  setWindowTitle(string() << title);
+  setPath(*currentPath);
+  setNameFilters("All Files (*)");
+  show();
+}
+
+void DiskBrowser::loadCartridge() {
+  currentPath = &config().path.current.cartridge;
+  browseMode = Cartridge;
+
+  hide();
+  group->setVisible(config().diskBrowser.showPanel);
   ok->setText("Load");
   setWindowTitle("Load Cartridge");
-  setPath(utf8() << (config.path.rom != "" ? config.path.rom : config.path.current));
-  setNameFilters(utf8() << "SNES cartridges (*.sfc" << reader.filterList << ");;All files (*)");
+  setPath(config().path.rom == "" ? *currentPath : config().path.rom);
+  setNameFilters(string()
+  << "SNES cartridges (*.sfc" << reader.extensionList << reader.compressionList << ");;"
+  << "BS-X cartridges (*.bs" << reader.compressionList << ");;"
+  << "Sufami Turbo cartridges (*.st" << reader.compressionList << ");;"
+  << "Game Boy cartridges (*.gb *.sgb *.gbc" << reader.compressionList << ");;"
+  << "All files (*)"
+  );
+  filter->setCurrentIndex(config().path.current.filter);
   show();
 }
 
 void DiskBrowser::loadBaseCartridge() {
+  currentPath = &config().path.current.cartridge;
   browseMode = BaseCartridge;
+
   hide();
-  group->setVisible(config.diskBrowser.showPanel);
+  group->setVisible(config().diskBrowser.showPanel);
   ok->setText("Load");
   setWindowTitle("Load Base Cartridge");
-  setPath(utf8() << (config.path.rom != "" ? config.path.rom : config.path.current));
-  setNameFilters(utf8() << "SNES cartridges (*.sfc" << reader.filterList << ");;All files (*)");
+  setPath(config().path.rom == "" ? *currentPath : config().path.rom);
+  setNameFilters(string()
+  << "SNES cartridges (*.sfc" << reader.extensionList << reader.compressionList << ");;"
+  << "All files (*)"
+  );
   show();
 }
 
 void DiskBrowser::loadBsxCartridge() {
+  currentPath = &config().path.current.bsx;
   browseMode = BsxCartridge;
+
   hide();
-  group->setVisible(config.diskBrowser.showPanel);
+  group->setVisible(config().diskBrowser.showPanel);
   ok->setText("Load");
   setWindowTitle("Load BS-X Cartridge");
-  setPath(utf8() << (config.path.rom != "" ? config.path.rom : config.path.current));
-  setNameFilters(utf8() << "BS-X cartridges (*.bs" << reader.filterList << ");;All files (*)");
+  setPath(config().path.rom == "" ? *currentPath : config().path.rom);
+  setNameFilters(string()
+  << "BS-X cartridges (*.bs" << reader.compressionList << ");;"
+  << "All files (*)"
+  );
   show();
 }
 
 void DiskBrowser::loadSufamiTurboCartridge1() {
+  currentPath = &config().path.current.st;
   browseMode = SufamiTurboCartridge1;
+
   hide();
-  group->setVisible(config.diskBrowser.showPanel);
+  group->setVisible(config().diskBrowser.showPanel);
   ok->setText("Load");
   setWindowTitle("Load Slot-A Sufami Turbo Cartridge");
-  setPath(utf8() << (config.path.rom != "" ? config.path.rom : config.path.current));
-  setNameFilters(utf8() << "Sufami Turbo cartridges (*.st" << reader.filterList << ");;All files (*)");
+  setPath(config().path.rom == "" ? *currentPath : config().path.rom);
+  setNameFilters(string()
+  << "Sufami Turbo cartridges (*.st" << reader.compressionList << ");;"
+  << "All files (*)"
+  );
   show();
 }
 
 void DiskBrowser::loadSufamiTurboCartridge2() {
+  currentPath = &config().path.current.st;
   browseMode = SufamiTurboCartridge2;
+
   hide();
-  group->setVisible(config.diskBrowser.showPanel);
+  group->setVisible(config().diskBrowser.showPanel);
   ok->setText("Load");
   setWindowTitle("Load Slot-B Sufami Turbo Cartridge");
-  setPath(utf8() << (config.path.rom != "" ? config.path.rom : config.path.current));
-  setNameFilters(utf8() << "Sufami Turbo Cartridges (*.st" << reader.filterList << ");;All files (*)");
+  setPath(config().path.rom == "" ? *currentPath : config().path.rom);
+  setNameFilters(string()
+  << "Sufami Turbo Cartridges (*.st" << reader.compressionList << ");;"
+  << "All files (*)"
+  );
   show();
 }
 
 void DiskBrowser::loadSuperGameBoyCartridge() {
+  currentPath = &config().path.current.sgb;
   browseMode = SuperGameBoyCartridge;
+
   hide();
-  group->setVisible(config.diskBrowser.showPanel);
+  group->setVisible(config().diskBrowser.showPanel);
   ok->setText("Load");
   setWindowTitle("Load Super Game Boy Cartridge");
-  setPath(utf8() << (config.path.rom != "" ? config.path.rom : config.path.current));
-  setNameFilters(utf8() << "Game Boy cartridges (*.gb *.gbc" << reader.filterList << ");;All files (*)");
+  setPath(config().path.rom == "" ? *currentPath : config().path.rom);
+  setNameFilters(string()
+  << "Game Boy cartridges (*.gb *.sgb *.gbc" << reader.compressionList << ");;"
+  << "All files (*)"
+  );
   show();
 }
 
@@ -219,7 +298,7 @@ void DiskBrowser::changeItem(const QModelIndex &item) {
       ok->setEnabled(true);
       image->name = nall::basename(filename) << ".png";
       if(file::exists(image->name) == false) image->name = "";
-      info->setText(utf8() << queryImageInformation());
+      info->setText(string() << queryImageInformation());
       string patch = nall::basename(filename) << ".ups";
       applyPatch->setVisible(file::exists(patch));
     }
@@ -234,17 +313,48 @@ void DiskBrowser::loadSelected() {
 
   if(browseMode == Folder || loadable == true) {
     QModelIndex item = view->currentIndex();
-    config.path.current = dir(model->filePath(item).toUtf8().constData());
+    if(currentPath) *currentPath = dir(model->filePath(item).toUtf8().constData());
     hide();
 
-    switch(browseMode) { default:
-      case Folder: activePath->selectPath(filename); break;
-      case Cartridge: utility.loadCartridgeNormal(filename); break;
-      case BaseCartridge: loaderWindow->selectBaseCartridge(filename); break;
-      case BsxCartridge: loaderWindow->selectSlot1Cartridge(filename); break;
-      case SufamiTurboCartridge1: loaderWindow->selectSlot1Cartridge(filename); break;
-      case SufamiTurboCartridge2: loaderWindow->selectSlot2Cartridge(filename); break;
-      case SuperGameBoyCartridge: loaderWindow->selectSlot1Cartridge(filename); break;
+    if(browseMode == Folder || browseMode == File) {
+      callback(filename);
+    } else if(browseMode == Cartridge) {
+      //quick-loading mode: determine load type via active filter
+      config().path.current.filter = filter->currentIndex();
+
+      if(config().path.current.filter == 1) {  //"BS-X cartridges"
+        if(config().path.bsx == "") {
+          loaderWindow->loadBsxCartridge("", filename);
+        } else {
+          utility.loadCartridgeBsx(config().path.bsx, filename);
+        }
+      } else if(config().path.current.filter == 2) {  //"Sufami Turbo cartridges"
+        if(config().path.st == "") {
+          loaderWindow->loadSufamiTurboCartridge("", filename, "");
+        } else {
+          utility.loadCartridgeSufamiTurbo(config().path.st, filename, "");
+        }
+      } else if(config().path.current.filter == 3) {  //"Game Boy cartridges"
+        if(SNES::supergameboy.opened() == false) {
+          QMessageBox::warning(0, "Warning", "Super Game Boy support missing - cartridge cannot be loaded.");
+        } else if(config().path.sgb == "") {
+          loaderWindow->loadSuperGameBoyCartridge("", filename);
+        } else {
+          utility.loadCartridgeSuperGameBoy(config().path.sgb, filename);
+        }
+      } else {  //"SNES cartridges" (0) or "All files" (4)
+        utility.loadCartridgeNormal(filename);
+      }
+    } else if(browseMode == BaseCartridge) {
+      loaderWindow->selectBaseCartridge(filename);
+    } else if(browseMode == BsxCartridge) {
+      loaderWindow->selectSlot1Cartridge(filename);
+    } else if(browseMode == SufamiTurboCartridge1) {
+      loaderWindow->selectSlot1Cartridge(filename);
+    } else if(browseMode == SufamiTurboCartridge2) {
+      loaderWindow->selectSlot2Cartridge(filename);
+    } else if(browseMode == SuperGameBoyCartridge) {
+      loaderWindow->selectSlot1Cartridge(filename);
     }
   } else {
     //this is a standard folder in ROM loading mode; enter into the folder
@@ -259,6 +369,9 @@ void DiskBrowser::setPath(const QString &reqPath) {
   disconnect(path, SIGNAL(currentIndexChanged(int)), this, SLOT(updatePath()));
 
   QString effectivePath = reqPath;
+  if(effectivePath == "") {
+    effectivePath = QString::fromUtf8(config().path.startup);
+  }
   if(effectivePath == "<root>" || QDir(reqPath).exists() == false) {
     effectivePath = "";
     newFolder->setEnabled(false);
@@ -294,7 +407,7 @@ void DiskBrowser::setNameFilters(const QString &filters) {
   filterPart.split(";;", filterData);
 
   for(unsigned i = 0; i < filterPart.size(); i++) {
-    filter->addItem(utf8() << filterPart[i]);
+    filter->addItem(filterPart[i]);
   }
 
   connect(filter, SIGNAL(currentIndexChanged(int)), this, SLOT(updateFilter()));
@@ -337,7 +450,7 @@ bool DiskBrowser::currentFilename(string &filename) {
 
   if(browseMode != Folder) {
     if(model->isDir(item) == true) {
-      QDir directory(utf8() << filename);
+      QDir directory(filename);
       directory.setNameFilters(QStringList() << "*.sfc");
       QStringList list = directory.entryList(QDir::Files | QDir::NoDotAndDotDot);
       if(list.count() == 1) {
@@ -354,11 +467,11 @@ bool DiskBrowser::currentFilename(string &filename) {
 
 void DiskBrowser::toggleShowPanel() {
   showPanel->setChecked(!showPanel->isChecked());
-  config.diskBrowser.showPanel = showPanel->isChecked();
-  group->setVisible(config.diskBrowser.showPanel);
+  config().diskBrowser.showPanel = showPanel->isChecked();
+  group->setVisible(config().diskBrowser.showPanel);
 }
 
-DiskBrowser::DiskBrowser() : QbWindow(config.geometry.diskBrowser) {
+DiskBrowser::DiskBrowser() : QbWindow(config().geometry.diskBrowser) {
   setObjectName("disk-browser");
   resize(720, 480);
 
@@ -434,7 +547,7 @@ DiskBrowser::DiskBrowser() : QbWindow(config.geometry.diskBrowser) {
   options->setMenu(menu);
 
   menu->addAction(showPanel = new QbCheckAction("Show Side Panel", 0));
-  showPanel->setChecked(config.diskBrowser.showPanel);
+  showPanel->setChecked(config().diskBrowser.showPanel);
 
   ok = new QPushButton("Ok");
   ok->setEnabled(false);

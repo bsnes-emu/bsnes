@@ -14,16 +14,16 @@ void Interface::video_refresh(uint16_t *data, unsigned pitch, unsigned *line, un
 }
 
 void Interface::audio_sample(uint16_t left, uint16_t right) {
-  if(config.audio.mute) left = right = 0;
+  if(config().audio.mute) left = right = 0;
   audio.sample(left, right);
 }
 
 void Interface::input_poll() {
-  inputManager.poll();
+  mapper().cache();
 }
 
-int16_t Interface::input_poll(unsigned deviceid, unsigned id) {
-  return inputManager.getStatus(deviceid, id);
+int16_t Interface::input_poll(bool port, unsigned device, unsigned index, unsigned id) {
+  return mapper().status(port, device, index, id);
 }
 
 void Interface::captureScreenshot(uint32_t *data, unsigned pitch, unsigned width, unsigned height) {
@@ -40,9 +40,9 @@ void Interface::captureScreenshot(uint32_t *data, unsigned pitch, unsigned width
   );
   filename << t << ".png";
 
-  string path = config.path.data;
+  string path = config().path.data;
   if(path == "") path = dir(utility.cartridge.baseName);
-  image.save(utf8() << path << filename);
+  image.save(string() << path << filename);
   utility.showMessage("Screenshot saved.");
 }
 

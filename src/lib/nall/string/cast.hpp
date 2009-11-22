@@ -20,6 +20,11 @@ namespace nall {
     operator[](size()).assign(to_string<T>(value));
     return *this;
   }
+
+  #if defined(QT_CORE_LIB)
+  template<> inline string to_string<const QString&>(const QString &v) { return v.toUtf8().constData(); }
+  string::operator QString() const { return QString::fromUtf8(*this); }
+  #endif
 };
 
 #endif

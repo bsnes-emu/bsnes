@@ -1,6 +1,7 @@
 class Reader : public library {
 public:
-  string filterList;
+  string compressionList;
+  string extensionList;
 
   function<const char* ()> supported;
   function<bool (string&, uint8_t*&, unsigned&)> load;

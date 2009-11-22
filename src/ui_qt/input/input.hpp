@@ -1,88 +1,89 @@
-struct InputCode {
-  enum type_t {
-    KeyboardButton,
-    MouseAxis,
-    MouseButton,
-    JoypadHat,
-    JoypadAxis,
-    JoypadButton,
-    Unknown,
-  };
-  enum axistype_t {
-    Stick,        //bi-directional, centered analog stick (min = -32768, inactive = 0, max = +32767)
-    Trigger,      //uni-directional, pressure-sensitive analog trigger button (min = -32768, inactive = max = +32767)
-    InvalidAxis,  //not a joypad axis code, or said joypad is not calibrated
-  };
-  static type_t type(uint16_t code);
-  static axistype_t axisType(uint16_t code);
-  static int mouseNumber(uint16_t code);
-  static int joypadNumber(uint16_t code);
-};
-
-class InputManager {
-public:
-  void bind();
-  void poll();
-  void clear();
-  void flush();
-
-  int16_t state(uint16_t code) const;
-  int16_t lastState(uint16_t code) const;
-  int16_t getStatus(unsigned deviceid, unsigned id) const;
-
-  void refresh();
-  void calibrate(unsigned joypad);
-  bool calibrated(unsigned joypad) const;
-  InputCode::axistype_t axisType(unsigned joypad, unsigned axis) const;
-  function<void (uint16_t)> onInput;
-
-  InputManager();
-
-private:
-  bool activeState;
-  int16_t stateTable[2][nall::input_limit];
-
-  //joypad axis calibration data
-  struct Pad {
-    bool calibrated;
-    InputCode::axistype_t axis[joypad<>::axes];
-  } pad[joypad<>::count];
-} inputManager;
+struct InputSpecifier { enum { None, Up, Down, Left, Right, Lo, Hi, Trigger }; };
+struct InputModifier { enum { None = 0, Shift = 1, Control = 2, Alt = 4, Super = 8 }; };
+struct InputCategory { enum { Port1 = 0, Port2 = 1, UserInterface = 2, Hidden = 3 }; };
 
 struct InputGroup;
 
-struct InputObject {
+struct MappedInput {
   InputGroup *parent;
-  enum type_t { Button, Axis };
-  enum modifier_t { None, Up, Down, Left, Right, Lo, Hi, Trigger };
-
-  type_t type;                 //type of input this object is mapped to
-  const char *name;            //plain-text name ("Up", "Down", ... "Start")
-  string &id;                  //config-item reference ("joypad1.start") name ("joypad00.button00")
-  uint16_t code;               //nall::input code ID
-  InputCode::type_t codetype;  //hardware button / axis type
-  modifier_t modifier;         //hardware specialization (joypad-axis "::lo", "::hi", etc)
-  int16_t state;               //code state as of last inputManager.poll()
+  string name;
+  string label;
+  unsigned specifier;
+  unsigned modifier;
+  unsigned scancode;
+  int16_t state;
+  int16_t previousState;
+  int16_t cachedState;
 
   void bind();
-  void bind(uint16_t code);
-  void poll(int16_t state);
-  InputObject(type_t t, const char *n, string &s);
+  virtual void poll() = 0;
+  virtual void cache();
+
+  MappedInput(const char*, const char*);
 };
 
-struct InputGroup : public array<InputObject*> {
-  const char *name;
+struct DigitalInput : MappedInput {
+  void poll();
 
-  void attach(InputObject &object);
+  bool isPressed() const;
+  bool wasPressed() const;
+
+  DigitalInput(const char*, const char*);
+};
+
+struct AnalogInput : MappedInput {
+  void poll();
+
+  AnalogInput(const char*, const char*);
+};
+
+struct HotkeyInput : DigitalInput {
+  void poll();
+  virtual void pressed() {}
+
+  HotkeyInput(const char*, const char*);
+};
+
+struct InputGroup : public array<MappedInput*> {
+  unsigned category;
+  string label;
+
+  void attach(MappedInput*);
   void bind();
-  void clear();
-  void poll(const int16_t *table);
-  virtual int16_t state(unsigned index) const;
-  InputGroup(const char *n);
+  void poll();
+  void cache();
+  void flushCache();
+  virtual int16_t status(unsigned, unsigned) const { return 0; }
 
-private:
-  array<InputObject*> &list;
+  InputGroup(unsigned, const char*);
 };
 
-#include "device.hpp"
+struct InputMapper : public array<InputGroup*> {
+  InputGroup *port1;
+  InputGroup *port2;
+
+  bool calibrated;
+  bool isTrigger[Joypad::Count][Joypad::Axes];
+
+  bool activeState;
+  int16_t stateTable[2][Scancode::Limit];
+  unsigned modifier;
+
+  void calibrate();
+  void bind();
+  void poll();
+  void cache();
+  int16_t status(bool, unsigned, unsigned, unsigned);
+
+  string modifierString() const;
+  int16_t state(uint16_t) const;
+  int16_t previousState(uint16_t) const;
+  unsigned distance(uint16_t) const;
+
+  InputMapper();
+};
+
+InputMapper& mapper();
+
+#include "controller.hpp"
 #include "userinterface.hpp"

@@ -1,4 +1,4 @@
-MemoryEditor::MemoryEditor() : QbWindow(config.geometry.memoryEditor) {
+MemoryEditor::MemoryEditor() : QbWindow(config().geometry.memoryEditor) {
   setObjectName("memory-editor");
   setWindowTitle("Memory Editor");
 

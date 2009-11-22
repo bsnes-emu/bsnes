@@ -2,8 +2,8 @@ class Audio {
 public:
   void coprocessor_enable(bool state);
   void coprocessor_frequency(double frequency);
-  void sample(uint16 left, uint16 right);
-  void coprocessor_sample(uint16 left, uint16 right);
+  void sample(int16 left, int16 right);
+  void coprocessor_sample(int16 left, int16 right);
   void init();
 
 private:
@@ -13,9 +13,8 @@ private:
   unsigned dsp_wroffset, cop_wroffset;
   unsigned dsp_length, cop_length;
 
-  double hermite(double mu, double a, double b, double c, double d);
   double r_step, r_frac;
-  int r_left[4], r_right[4];
+  int r_sum_l, r_sum_r;
 
   void flush();
 };

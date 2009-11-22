@@ -3,7 +3,7 @@
 #include "memory.cpp"
 #include "vramviewer.cpp"
 
-Debugger::Debugger() : QbWindow(config.geometry.debugger) {
+Debugger::Debugger() : QbWindow(config().geometry.debugger) {
   setObjectName("debugger");
   setWindowTitle("Debugger");
 
@@ -133,7 +133,7 @@ void Debugger::stepAction() {
 void Debugger::tracerUpdate() {
   if(SNES::debugger.trace_cpu || SNES::debugger.trace_smp) {
     if(SNES::debugger.tracefile.open() == false) {
-      SNES::debugger.tracefile.open(utf8() << config.path.data << "trace.log", file::mode_write);
+      SNES::debugger.tracefile.open(string() << config().path.data << "trace.log", file::mode_write);
     }
   } else if(!SNES::debugger.trace_cpu && !SNES::debugger.trace_smp) {
     if(SNES::debugger.tracefile.open() == true) {
@@ -158,19 +158,19 @@ void Debugger::event() {
   switch(SNES::debugger.break_event) {
     case SNES::Debugger::BreakpointHit: {
       unsigned n = SNES::debugger.breakpoint_hit;
-      echo(utf8() << "Breakpoint " << n << " hit (" << SNES::debugger.breakpoint[n].counter << ").<br>");
+      echo(string() << "Breakpoint " << n << " hit (" << SNES::debugger.breakpoint[n].counter << ").<br>");
 
       if(SNES::debugger.breakpoint[n].mode == SNES::Debugger::Breakpoint::Exec) {
         if(SNES::debugger.breakpoint[n].source == SNES::Debugger::Breakpoint::CPUBus) {
           SNES::debugger.step_cpu = true;
           SNES::cpu.disassemble_opcode(t);
-          echo(utf8() << t << "<br>");
+          echo(string() << t << "<br>");
         }
 
         if(SNES::debugger.breakpoint[n].source == SNES::Debugger::Breakpoint::APURAM) {
           SNES::debugger.step_smp = true;
           SNES::smp.disassemble_opcode(t);
-          echo(utf8() << t << "<br>");
+          echo(string() << t << "<br>");
         }
       }
     } break;
@@ -179,14 +179,14 @@ void Debugger::event() {
       SNES::cpu.disassemble_opcode(t);
       string s = t;
       s.replace(" ", "&nbsp;");
-      echo(utf8() << "<font color='#0000a0'>" << s << "</font><br>");
+      echo(string() << "<font color='#0000a0'>" << s << "</font><br>");
     } break;
 
     case SNES::Debugger::SMPStep: {
       SNES::smp.disassemble_opcode(t);
       string s = t;
       s.replace(" ", "&nbsp;");
-      echo(utf8() << "<font color='#a00000'>" << s << "</font><br>");
+      echo(string() << "<font color='#a00000'>" << s << "</font><br>");
     } break;
   }
 }

@@ -10,32 +10,13 @@ public:
     DeviceJustifiers,
   };
 
-  enum DeviceID {
-    DeviceIDNone,
-    DeviceIDJoypad1,
-    DeviceIDJoypad2,
-    DeviceIDMultitap1A,
-    DeviceIDMultitap1B,
-    DeviceIDMultitap1C,
-    DeviceIDMultitap1D,
-    DeviceIDMultitap2A,
-    DeviceIDMultitap2B,
-    DeviceIDMultitap2C,
-    DeviceIDMultitap2D,
-    DeviceIDMouse1,
-    DeviceIDMouse2,
-    DeviceIDSuperScope,
-    DeviceIDJustifier1,
-    DeviceIDJustifier2,
-  };
-
   enum JoypadID {
-    JoypadB      =  0, JoypadY      =  1,
-    JoypadSelect =  2, JoypadStart  =  3,
-    JoypadUp     =  4, JoypadDown   =  5,
-    JoypadLeft   =  6, JoypadRight  =  7,
-    JoypadA      =  8, JoypadX      =  9,
-    JoypadL      = 10, JoypadR      = 11,
+    JoypadB      =  0, JoypadY     =  1,
+    JoypadSelect =  2, JoypadStart =  3,
+    JoypadUp     =  4, JoypadDown  =  5,
+    JoypadLeft   =  6, JoypadRight =  7,
+    JoypadA      =  8, JoypadX     =  9,
+    JoypadL      = 10, JoypadR     = 11,
   };
 
   enum MouseID {

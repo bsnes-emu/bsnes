@@ -1,4 +1,4 @@
-LoaderWindow::LoaderWindow() : QbWindow(config.geometry.loaderWindow) {
+LoaderWindow::LoaderWindow() : QbWindow(config().geometry.loaderWindow) {
   setObjectName("loader-window");
   setMinimumWidth(520);
 
@@ -145,17 +145,17 @@ void LoaderWindow::showWindow(const char *title) {
 }
 
 void LoaderWindow::selectBaseCartridge(const char *filename) {
-  baseFile->setText(utf8() << filename);
+  baseFile->setText(string() << filename);
   syncUi();
 }
 
 void LoaderWindow::selectSlot1Cartridge(const char *filename) {
-  slot1File->setText(utf8() << filename);
+  slot1File->setText(string() << filename);
   syncUi();
 }
 
 void LoaderWindow::selectSlot2Cartridge(const char *filename) {
-  slot2File->setText(utf8() << filename);
+  slot2File->setText(string() << filename);
   syncUi();
 }
 
@@ -209,17 +209,17 @@ void LoaderWindow::onLoad() {
     } break;
 
     case SNES::Cartridge::ModeBsx: {
-      config.path.bsx = base;
+      config().path.bsx = base;
       utility.loadCartridgeBsx(base, slot1);
     } break;
 
     case SNES::Cartridge::ModeSufamiTurbo: {
-      config.path.st = base;
+      config().path.st = base;
       utility.loadCartridgeSufamiTurbo(base, slot1, slot2);
     } break;
 
     case SNES::Cartridge::ModeSuperGameBoy: {
-      config.path.sgb = base;
+      config().path.sgb = base;
       utility.loadCartridgeSuperGameBoy(base, slot1);
     } break;
   }

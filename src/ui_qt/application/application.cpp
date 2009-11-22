@@ -15,30 +15,30 @@ void Application::initPaths(const char *basename) {
     }
 
     if(strend(temp, "/") == false) strcat(temp, "/");
-    config.path.base = temp;
+    config().path.base = temp;
   } else {
-    config.path.base = "";
+    config().path.base = "";
   }
 
   if(userpath(temp)) {
     strtr(temp, "\\", "/");
     if(strend(temp, "/") == false) strcat(temp, "/");
-    config.path.user = temp;
+    config().path.user = temp;
   } else {
-    config.path.user = "";
+    config().path.user = "";
   }
 
   char cwd[PATH_MAX];
-  config.path.current = getcwd(cwd);
+  config().path.startup = getcwd(cwd);
 }
 
 void Application::locateFile(string &filename, bool createDataDirectory) {
   //first, check if file exists in executable directory (single-user mode)
-  string temp = string() << config.path.base << filename;
+  string temp = string() << config().path.base << filename;
 
   if(file::exists(temp) == false) {
     //if not, use user data path (multi-user mode)
-    temp = config.path.user;
+    temp = config().path.user;
     temp << ".bsnes";
     if(createDataDirectory) mkdir(temp);  //ensure directory exists
     temp << "/" << filename;
@@ -66,7 +66,8 @@ int Application::main(int &argc, char **argv) {
     app->setStyleSheet(defaultStylesheet);
   }
 
-  config.load(configFilename);
+  config().load(configFilename);
+  mapper().bind();
   init();
   SNES::system.init(&interface);
   mainWindow->system_loadSpecial_superGameBoy->setVisible(SNES::supergameboy.opened());
@@ -87,7 +88,7 @@ int Application::main(int &argc, char **argv) {
   }
 
   utility.unloadCartridge();
-  config.save(configFilename);
+  config().save(configFilename);
   return 0;
 }
 
@@ -100,9 +101,9 @@ void Application::run() {
 
   QApplication::processEvents();
   utility.updateSystemState();
-  inputManager.refresh();
+  mapper().poll();
 
-  if(config.input.focusPolicy == Configuration::Input::FocusPolicyPauseEmulation) {
+  if(config().input.focusPolicy == Configuration::Input::FocusPolicyPauseEmulation) {
     bool active = mainWindow->isActive();
     if(!autopause && !active) {
       autopause = true;
@@ -135,7 +136,7 @@ void Application::run() {
   if(autosaveTime >= CLOCKS_PER_SEC * 60) {
     //auto-save RAM once per minute in case of emulator crash
     autosaveTime = 0;
-    if(config.system.autoSaveMemory == true) utility.saveMemory();
+    if(config().system.autoSaveMemory == true) utility.saveMemory();
   }
 
   if(screensaverTime >= CLOCKS_PER_SEC * 30) {

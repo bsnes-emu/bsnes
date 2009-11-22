@@ -1,4 +1,4 @@
-HtmlViewerWindow::HtmlViewerWindow() : QbWindow(config.geometry.htmlViewerWindow) {
+HtmlViewerWindow::HtmlViewerWindow() : QbWindow(config().geometry.htmlViewerWindow) {
   setObjectName("html-window");
   resize(560, 480);
 
@@ -12,7 +12,7 @@ HtmlViewerWindow::HtmlViewerWindow() : QbWindow(config.geometry.htmlViewerWindow
 }
 
 void HtmlViewerWindow::show(const char *title, const char *htmlData) {
-  document->setHtml(utf8() << htmlData);
+  document->setHtml(string() << htmlData);
   setWindowTitle(title);
   QbWindow::show();
 }

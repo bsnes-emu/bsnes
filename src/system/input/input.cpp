@@ -8,58 +8,40 @@ uint8 Input::port_read(bool portnumber) {
   switch(p.device) {
     case DeviceJoypad: {
       if(p.counter0 >= 16) return 1;
-      unsigned deviceid = (portnumber == 0 ? DeviceIDJoypad1 : DeviceIDJoypad2);
-      return system.interface->input_poll(deviceid, p.counter0++);
+      return system.interface->input_poll(portnumber, p.device, 0, p.counter0++);
     } //case DeviceJoypad
 
     case DeviceMultitap: {
       if(cpu.joylatch()) return 2; //when latch is high -- data2 = 1, data1 = 0
 
-      unsigned deviceidx, deviceid0, deviceid1;
-      if(portnumber == 0) {
-        if(cpu.pio() & 0x40) {
-          deviceidx = p.counter0;
-          if(deviceidx >= 16) return 3;
-          p.counter0++;
+      unsigned deviceidx, deviceindex0, deviceindex1;
+      uint8 mask = (portnumber == 0 ? 0x40 : 0x80);
 
-          deviceid0 = DeviceIDMultitap1A;
-          deviceid1 = DeviceIDMultitap1B;
-        } else {
-          deviceidx = p.counter1;
-          if(deviceidx >= 16) return 3;
-          p.counter1++;
+      if(cpu.pio() & mask) {
+        deviceidx = p.counter0;
+        if(deviceidx >= 16) return 3;
+        p.counter0++;
 
-          deviceid0 = DeviceIDMultitap1C;
-          deviceid1 = DeviceIDMultitap1D;
-        }
+        deviceindex0 = 0;  //controller 1
+        deviceindex1 = 1;  //controller 2
       } else {
-        if(cpu.pio() & 0x80) {
-          deviceidx = p.counter0;
-          if(deviceidx >= 16) return 3;
-          p.counter0++;
+        deviceidx = p.counter1;
+        if(deviceidx >= 16) return 3;
+        p.counter1++;
 
-          deviceid0 = DeviceIDMultitap2A;
-          deviceid1 = DeviceIDMultitap2B;
-        } else {
-          deviceidx = p.counter1;
-          if(deviceidx >= 16) return 3;
-          p.counter1++;
-
-          deviceid0 = DeviceIDMultitap2C;
-          deviceid1 = DeviceIDMultitap2D;
-        }
+        deviceindex0 = 2;  //controller 3
+        deviceindex1 = 3;  //controller 4
       }
 
-      return (system.interface->input_poll(deviceid0, deviceidx) << 0)
-           | (system.interface->input_poll(deviceid1, deviceidx) << 1);
+      return (system.interface->input_poll(portnumber, p.device, deviceindex0, deviceidx) << 0)
+           | (system.interface->input_poll(portnumber, p.device, deviceindex1, deviceidx) << 1);
     } //case DeviceMultitap
 
     case DeviceMouse: {
       if(p.counter0 >= 32) return 1;
-      unsigned deviceid = (portnumber == 0 ? DeviceIDMouse1 : DeviceIDMouse2);
 
-      int position_x = system.interface->input_poll(deviceid, MouseX);  //-n = left, 0 = center, +n = right
-      int position_y = system.interface->input_poll(deviceid, MouseY);  //-n = up,   0 = center, +n = right
+      int position_x = system.interface->input_poll(portnumber, p.device, 0, MouseX);  //-n = left, 0 = center, +n = right
+      int position_y = system.interface->input_poll(portnumber, p.device, 0, MouseY);  //-n = up,   0 = center, +n = right
 
       bool direction_x = position_x < 0;  //0 = right, 1 = left
       bool direction_y = position_y < 0;  //0 = down,  1 = up
@@ -80,8 +62,8 @@ uint8 Input::port_read(bool portnumber) {
         case  6: return 0;
         case  7: return 0;
 
-        case  8: return system.interface->input_poll(deviceid, MouseRight);
-        case  9: return system.interface->input_poll(deviceid, MouseLeft);
+        case  8: return system.interface->input_poll(portnumber, p.device, 0, MouseRight);
+        case  9: return system.interface->input_poll(portnumber, p.device, 0, MouseLeft);
         case 10: return 0;  //speed (0 = slow, 1 = normal, 2 = fast, 3 = unused)
         case 11: return 0;  // ||
 
@@ -116,7 +98,7 @@ uint8 Input::port_read(bool portnumber) {
 
       if(p.counter0 == 0) {
         //turbo is a switch; toggle is edge sensitive
-        bool turbo = system.interface->input_poll(DeviceIDSuperScope, SuperScopeTurbo);
+        bool turbo = system.interface->input_poll(portnumber, p.device, 0, SuperScopeTurbo);
         if(turbo && !p.superscope.turbolock) {
           p.superscope.turbo = !p.superscope.turbo;  //toggle state
           p.superscope.turbolock = true;
@@ -127,7 +109,7 @@ uint8 Input::port_read(bool portnumber) {
         //trigger is a button
         //if turbo is active, trigger is level sensitive; otherwise it is edge sensitive
         p.superscope.trigger = false;
-        bool trigger = system.interface->input_poll(DeviceIDSuperScope, SuperScopeTrigger);
+        bool trigger = system.interface->input_poll(portnumber, p.device, 0, SuperScopeTrigger);
         if(trigger && (p.superscope.turbo || !p.superscope.triggerlock)) {
           p.superscope.trigger = true;
           p.superscope.triggerlock = true;
@@ -136,11 +118,11 @@ uint8 Input::port_read(bool portnumber) {
         }
 
         //cursor is a button; it is always level sensitive
-        p.superscope.cursor = system.interface->input_poll(DeviceIDSuperScope, SuperScopeCursor);
+        p.superscope.cursor = system.interface->input_poll(portnumber, p.device, 0, SuperScopeCursor);
 
         //pause is a button; it is always edge sensitive
         p.superscope.pause = false;
-        bool pause = system.interface->input_poll(DeviceIDSuperScope, SuperScopePause);
+        bool pause = system.interface->input_poll(portnumber, p.device, 0, SuperScopePause);
         if(pause && !p.superscope.pauselock) {
           p.superscope.pause = true;
           p.superscope.pauselock = true;
@@ -171,12 +153,12 @@ uint8 Input::port_read(bool portnumber) {
       if(p.counter0 >= 32) return 1;
 
       if(p.counter0 == 0) {
-        p.justifier.trigger1 = system.interface->input_poll(DeviceIDJustifier1, JustifierTrigger);
-        p.justifier.start1   = system.interface->input_poll(DeviceIDJustifier1, JustifierStart);
+        p.justifier.trigger1 = system.interface->input_poll(portnumber, p.device, 0, JustifierTrigger);
+        p.justifier.start1   = system.interface->input_poll(portnumber, p.device, 0, JustifierStart);
 
         if(p.device == DeviceJustifiers) {
-          p.justifier.trigger2 = system.interface->input_poll(DeviceIDJustifier2, JustifierTrigger);
-          p.justifier.start2   = system.interface->input_poll(DeviceIDJustifier2, JustifierStart);
+          p.justifier.trigger2 = system.interface->input_poll(portnumber, p.device, 1, JustifierTrigger);
+          p.justifier.start2   = system.interface->input_poll(portnumber, p.device, 1, JustifierStart);
         } else {
           p.justifier.x2 = -1;
           p.justifier.y2 = -1;
@@ -238,8 +220,8 @@ void Input::update() {
 
   switch(p.device) {
     case DeviceSuperScope: {
-      int x = system.interface->input_poll(DeviceIDSuperScope, SuperScopeX);
-      int y = system.interface->input_poll(DeviceIDSuperScope, SuperScopeY);
+      int x = system.interface->input_poll(1, p.device, 0, SuperScopeX);
+      int y = system.interface->input_poll(1, p.device, 0, SuperScopeY);
       x += p.superscope.x;
       y += p.superscope.y;
       p.superscope.x = max(-16, min(256 + 16, x));
@@ -251,15 +233,15 @@ void Input::update() {
 
     case DeviceJustifier:
     case DeviceJustifiers: {
-      int x1 = system.interface->input_poll(DeviceIDJustifier1, JustifierX);
-      int y1 = system.interface->input_poll(DeviceIDJustifier1, JustifierY);
+      int x1 = system.interface->input_poll(1, p.device, 0, JustifierX);
+      int y1 = system.interface->input_poll(1, p.device, 0, JustifierY);
       x1 += p.justifier.x1;
       y1 += p.justifier.y1;
       p.justifier.x1 = max(-16, min(256 + 16, x1));
       p.justifier.y1 = max(-16, min(240 + 16, y1));
 
-      int x2 = system.interface->input_poll(DeviceIDJustifier2, JustifierX);
-      int y2 = system.interface->input_poll(DeviceIDJustifier2, JustifierY);
+      int x2 = system.interface->input_poll(1, p.device, 1, JustifierX);
+      int y2 = system.interface->input_poll(1, p.device, 1, JustifierY);
       x2 += p.justifier.x2;
       y2 += p.justifier.y2;
       p.justifier.x2 = max(-16, min(256 + 16, x2));

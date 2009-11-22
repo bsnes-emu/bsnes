@@ -31,12 +31,14 @@ public:
     QAction *system_reset;
     QMenu *system_port1;
       QbRadioAction *system_port1_none;
-      QbRadioAction *system_port1_joypad;
+      QbRadioAction *system_port1_gamepad;
+      QbRadioAction *system_port1_asciipad;
       QbRadioAction *system_port1_multitap;
       QbRadioAction *system_port1_mouse;
     QMenu *system_port2;
       QbRadioAction *system_port2_none;
-      QbRadioAction *system_port2_joypad;
+      QbRadioAction *system_port2_gamepad;
+      QbRadioAction *system_port2_asciipad;
       QbRadioAction *system_port2_multitap;
       QbRadioAction *system_port2_mouse;
       QbRadioAction *system_port2_superscope;
@@ -49,7 +51,7 @@ public:
       QbRadioAction *settings_videoMode_2x;
       QbRadioAction *settings_videoMode_3x;
       QbRadioAction *settings_videoMode_4x;
-      QbRadioAction *settings_videoMode_max;
+      QbRadioAction *settings_videoMode_5x;
       QbCheckAction *settings_videoMode_correctAspectRatio;
       QbCheckAction *settings_videoMode_fullscreen;
       QbRadioAction *settings_videoMode_ntsc;
@@ -79,10 +81,10 @@ public:
     QAction *help_documentation;
     QAction *help_license;
     QAction *help_about;
-  //
+
   CanvasObject *canvasContainer;
-    QVBoxLayout *canvasLayout;
-      CanvasWidget *canvas;
+  QVBoxLayout *canvasLayout;
+  CanvasWidget *canvas;
   QLabel *systemState;
 
   void syncUi();
@@ -99,11 +101,13 @@ public slots:
   void power();
   void reset();
   void setPort1None();
-  void setPort1Joypad();
+  void setPort1Gamepad();
+  void setPort1Asciipad();
   void setPort1Multitap();
   void setPort1Mouse();
   void setPort2None();
-  void setPort2Joypad();
+  void setPort2Gamepad();
+  void setPort2Asciipad();
   void setPort2Multitap();
   void setPort2Mouse();
   void setPort2SuperScope();
@@ -114,7 +118,7 @@ public slots:
   void setVideoMode2x();
   void setVideoMode3x();
   void setVideoMode4x();
-  void setVideoModeMax();
+  void setVideoMode5x();
   void toggleAspectCorrection();
   void toggleFullscreen();
   void setVideoNtsc();

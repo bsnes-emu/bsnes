@@ -60,6 +60,9 @@ public:
     if(name == Video::Handle) return true;
     if(name == Video::Synchronize) return true;
     if(name == Video::Filter) return true;
+    if(name == Video::GLSL) return true;
+    if(name == Video::FragmentShader) return true;
+    if(name == Video::VertexShader) return true;
     return false;
   }
 
@@ -86,6 +89,16 @@ public:
 
     if(name == Video::Filter) {
       settings.filter = any_cast<unsigned>(value);
+      return true;
+    }
+
+    if(name == Video::FragmentShader) {
+      OpenGL::set_fragment_shader(any_cast<const char*>(value));
+      return true;
+    }
+
+    if(name == Video::VertexShader) {
+      OpenGL::set_vertex_shader(any_cast<const char*>(value));
       return true;
     }
 
@@ -175,6 +188,16 @@ public:
     OpenGL::init();
     settings.width  = 256;
     settings.height = 256;
+
+    //vertical synchronization
+    int (*glSwapInterval)(int);
+    glSwapInterval = (int (*)(int))glGetProcAddress("glXSwapIntervalEXT");
+    if(glSwapInterval) glSwapInterval(settings.synchronize);
+    glSwapInterval = (int (*)(int))glGetProcAddress("glXSwapIntervalSGI");
+    if(glSwapInterval) glSwapInterval(settings.synchronize);
+    glSwapInterval = (int (*)(int))glGetProcAddress("glXSwapIntervalMESA");
+    if(glSwapInterval) glSwapInterval(settings.synchronize);
+
     return true;
   }
 

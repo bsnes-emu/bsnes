@@ -39,16 +39,21 @@ AudioSettingsWindow::AudioSettingsWindow() {
   layout->addSpacing(Style::WidgetSpacing);
 
   sliders = new QGridLayout; {
-    volumeLabel = new QLabel("Volume: 100%");
+    volumeLabel = new QLabel("Volume:");
     volumeLabel->setToolTip("Warning: any volume other than 100% will result in a slight audio quality loss");
     sliders->addWidget(volumeLabel, 0, 0);
+
+    volumeValue = new QLabel;
+    volumeValue->setAlignment(Qt::AlignHCenter);
+    volumeValue->setMinimumWidth(volumeValue->fontMetrics().width("262144hz"));
+    sliders->addWidget(volumeValue, 0, 1);
 
     volume = new QSlider(Qt::Horizontal);
     volume->setMinimum(0);
     volume->setMaximum(200);
-    sliders->addWidget(volume, 0, 1);
+    sliders->addWidget(volume, 0, 2);
 
-    frequencySkewLabel = new QLabel("Input frequency: 32000hz");
+    frequencySkewLabel = new QLabel("Input frequency:");
     frequencySkewLabel->setToolTip(
       "Adjusts audio resampling rate.\n"
       "When both video sync and audio sync are enabled, use this setting to fine-tune the output.\n"
@@ -57,10 +62,14 @@ AudioSettingsWindow::AudioSettingsWindow() {
     );
     sliders->addWidget(frequencySkewLabel, 1, 0);
 
+    frequencySkewValue = new QLabel;
+    frequencySkewValue->setAlignment(Qt::AlignHCenter);
+    sliders->addWidget(frequencySkewValue, 1, 1);
+
     frequencySkew = new QSlider(Qt::Horizontal);
-    frequencySkew->setMinimum(31800);
-    frequencySkew->setMaximum(32200);
-    sliders->addWidget(frequencySkew);
+    frequencySkew->setMinimum(31500);
+    frequencySkew->setMaximum(32500);
+    sliders->addWidget(frequencySkew, 1, 2);
   }
   sliders->setSpacing(Style::WidgetSpacing);
   layout->addLayout(sliders);
@@ -76,50 +85,50 @@ AudioSettingsWindow::AudioSettingsWindow() {
 void AudioSettingsWindow::syncUi() {
   int n;
 
-  n = config.audio.outputFrequency;
+  n = config().audio.outputFrequency;
        if(n <= 32000) frequency->setCurrentIndex(0);
   else if(n <= 44100) frequency->setCurrentIndex(1);
   else if(n <= 48000) frequency->setCurrentIndex(2);
   else if(n <= 96000) frequency->setCurrentIndex(3);
   else frequency->setCurrentIndex(0);
 
-  n = config.audio.latency;
+  n = config().audio.latency;
   latency->setCurrentIndex((n - 20) / 20);
 
-  n = config.audio.volume;
-  volumeLabel->setText(utf8() << "Volume: " << n << "%");
+  n = config().audio.volume;
+  volumeValue->setText(string() << n << "%");
   volume->setSliderPosition(n);
 
-  n = config.audio.inputFrequency;
-  frequencySkewLabel->setText(utf8() << "Input frequency: " << n << "hz");
+  n = config().audio.inputFrequency;
+  frequencySkewValue->setText(string() << n << "hz");
   frequencySkew->setSliderPosition(n);
 }
 
 void AudioSettingsWindow::frequencyChange(int value) {
   switch(value) { default:
-    case 0: config.audio.outputFrequency = 32000; break;
-    case 1: config.audio.outputFrequency = 44100; break;
-    case 2: config.audio.outputFrequency = 48000; break;
-    case 3: config.audio.outputFrequency = 96000; break;
+    case 0: config().audio.outputFrequency = 32000; break;
+    case 1: config().audio.outputFrequency = 44100; break;
+    case 2: config().audio.outputFrequency = 48000; break;
+    case 3: config().audio.outputFrequency = 96000; break;
   }
-  audio.set(Audio::Frequency, config.audio.outputFrequency);
+  audio.set(Audio::Frequency, config().audio.outputFrequency);
   utility.updateEmulationSpeed();
 }
 
 void AudioSettingsWindow::latencyChange(int value) {
   value = max(0, min(5, value));
-  config.audio.latency = 20 + value * 20;
-  audio.set(Audio::Latency, config.audio.latency);
+  config().audio.latency = 20 + value * 20;
+  audio.set(Audio::Latency, config().audio.latency);
 }
 
 void AudioSettingsWindow::volumeAdjust(int value) {
-  config.audio.volume = value;
-  audio.set(Audio::Volume, config.audio.volume);
+  config().audio.volume = value;
+  audio.set(Audio::Volume, config().audio.volume);
   syncUi();
 }
 
 void AudioSettingsWindow::frequencySkewAdjust(int value) {
-  config.audio.inputFrequency = value;
+  config().audio.inputFrequency = value;
   utility.updateEmulationSpeed();
   syncUi();
 }

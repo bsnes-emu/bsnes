@@ -6,6 +6,7 @@ bool Utility::loadCartridgeNormal(const char *base) {
   loadMemory(cartridge.baseName, ".srm", SNES::memory::cartram);
   loadMemory(cartridge.baseName, ".rtc", SNES::memory::cartrtc);
 
+  cartridge.fileName = cartridge.baseName;
   cartridge.name = notdir(nall::basename(cartridge.baseName));
 
   modifySystemState(LoadCartridge);
@@ -21,6 +22,7 @@ bool Utility::loadCartridgeBsxSlotted(const char *base, const char *slot) {
   loadMemory(cartridge.baseName, ".srm", SNES::memory::cartram);
   loadMemory(cartridge.baseName, ".rtc", SNES::memory::cartrtc);
 
+  cartridge.fileName = cartridge.baseName;
   cartridge.name = notdir(nall::basename(cartridge.baseName));
   if(*slot) cartridge.name << " + " << notdir(nall::basename(cartridge.slotAName));
 
@@ -37,6 +39,7 @@ bool Utility::loadCartridgeBsx(const char *base, const char *slot) {
   loadMemory(cartridge.baseName, ".srm", SNES::memory::bsxram );
   loadMemory(cartridge.baseName, ".psr", SNES::memory::bsxpram);
 
+  cartridge.fileName = cartridge.slotAName;
   cartridge.name = *slot
   ? notdir(nall::basename(cartridge.slotAName))
   : notdir(nall::basename(cartridge.baseName));
@@ -55,6 +58,7 @@ bool Utility::loadCartridgeSufamiTurbo(const char *base, const char *slotA, cons
   loadMemory(cartridge.slotAName, ".srm", SNES::memory::stAram);
   loadMemory(cartridge.slotBName, ".srm", SNES::memory::stBram);
 
+  cartridge.fileName = cartridge.slotAName;
   if(!*slotA && !*slotB) cartridge.name = notdir(nall::basename(cartridge.baseName));
   else if(!*slotB) cartridge.name = notdir(nall::basename(cartridge.slotAName));
   else if(!*slotA) cartridge.name = notdir(nall::basename(cartridge.slotBName));
@@ -73,6 +77,7 @@ bool Utility::loadCartridgeSuperGameBoy(const char *base, const char *slot) {
   loadMemory(cartridge.slotAName, ".sav", SNES::memory::gbram);
   loadMemory(cartridge.slotBName, ".rtc", SNES::memory::gbrtc);
 
+  cartridge.fileName = cartridge.slotAName;
   cartridge.name = *slot
   ? notdir(nall::basename(cartridge.slotAName))
   : notdir(nall::basename(cartridge.baseName));
@@ -134,16 +139,16 @@ void Utility::modifySystemState(system_state_t state) {
       else if(SNES::cartridge.has_st011()) chip = "ST011";
       else if(SNES::cartridge.has_st018()) chip = "ST018";
       if(chip != "") {
-        QMessageBox::warning(mainWindow, "Warning", utf8()
+        QMessageBox::warning(mainWindow, "Warning", string()
         << "<p><b>Warning:</b><br> The " << chip << " chip was detected, which is not fully emulated yet.<br>"
         << "It is unlikely that this title will work properly.</p>");
       }
 
-      showMessage(utf8()
+      showMessage(string()
       << "Loaded " << cartridge.name
       << (cartridge.patchApplied ? ", and applied UPS patch." : "."));
-      mainWindow->setWindowTitle(utf8() << bsnesTitle << " v" << bsnesVersion << " - " << cartridge.name);
-      debugger->echo(utf8() << "Loaded " << cartridge.name << ".<br>");
+      mainWindow->setWindowTitle(string() << bsnesTitle << " v" << bsnesVersion << " - " << cartridge.name);
+      debugger->echo(string() << "Loaded " << cartridge.name << ".<br>");
     } break;
 
     case UnloadCartridge: {
@@ -157,8 +162,8 @@ void Utility::modifySystemState(system_state_t state) {
       application.power = false;
       application.pause = true;
 
-      showMessage(utf8() << "Unloaded " << cartridge.name << ".");
-      mainWindow->setWindowTitle(utf8() << bsnesTitle << " v" << bsnesVersion);
+      showMessage(string() << "Unloaded " << cartridge.name << ".");
+      mainWindow->setWindowTitle(string() << bsnesTitle << " v" << bsnesVersion);
     } break;
 
     case PowerOn: {
@@ -217,7 +222,7 @@ bool Utility::loadCartridge(string &filename, SNES::MappedRAM &memory) {
 
   cartridge.patchApplied = false;
   string name;
-  name << filepath(nall::basename(filename), config.path.patch);
+  name << filepath(nall::basename(filename), config().path.patch);
   name << ".ups";
 
   file fp;
@@ -235,7 +240,7 @@ bool Utility::loadCartridge(string &filename, SNES::MappedRAM &memory) {
 
     bool apply = false;
     if(result == ups::ok) apply = true;
-    if(config.file.bypass_patch_crc32) {
+    if(config().file.bypass_patch_crc32) {
       if(result == ups::input_crc32_invalid ) apply = true;
       if(result == ups::output_crc32_invalid) apply = true;
     }
@@ -259,7 +264,7 @@ bool Utility::loadMemory(const char *filename, const char *extension, SNES::Mapp
   if(memory.size() == 0 || memory.size() == -1U) return false;
 
   string name;
-  name << filepath(nall::basename(filename), config.path.save);
+  name << filepath(nall::basename(filename), config().path.save);
   name << extension;
 
   file fp;
@@ -279,7 +284,7 @@ bool Utility::saveMemory(const char *filename, const char *extension, SNES::Mapp
   if(memory.size() == 0 || memory.size() == -1U) return false;
 
   string name;
-  name << filepath(nall::basename(filename), config.path.save);
+  name << filepath(nall::basename(filename), config().path.save);
   name << extension;
 
   file fp;
@@ -292,7 +297,7 @@ bool Utility::saveMemory(const char *filename, const char *extension, SNES::Mapp
 
 void Utility::loadCheats() {
   string name, data;
-  name << filepath(nall::basename(cartridge.baseName), config.path.cheat);
+  name << filepath(nall::basename(cartridge.baseName), config().path.cheat);
   name << ".cht";
 
   SNES::cheat.clear();
@@ -301,7 +306,7 @@ void Utility::loadCheats() {
 
 void Utility::saveCheats() {
   string name;
-  name << filepath(nall::basename(cartridge.baseName), config.path.cheat);
+  name << filepath(nall::basename(cartridge.baseName), config().path.cheat);
   name << ".cht";
 
   file fp;
@@ -327,7 +332,7 @@ string Utility::filepath(const char *filename, const char *pathname) {
   //replace relative path with absolute path
   if(strbegin(path, "./")) {
     ltrim(path, "./");
-    path = string() << config.path.base << path;
+    path = string() << config().path.base << path;
   }
 
   //remove folder part of filename

@@ -31,7 +31,7 @@ PathSettingWidget::PathSettingWidget(string &pathValue_, const char *labelText, 
   updatePath();
 }
 
-void PathSettingWidget::selectPath(const string &newPath) {
+void PathSettingWidget::assignPath(string newPath) {
   pathValue = string() << newPath << "/";
   updatePath();
 }
@@ -39,15 +39,19 @@ void PathSettingWidget::selectPath(const string &newPath) {
 void PathSettingWidget::updatePath() {
   if(pathValue == "") {
     path->setStyleSheet("color: #808080");
-    path->setText(utf8() << pathDefaultLabel);
+    path->setText(pathDefaultLabel);
   } else {
     path->setStyleSheet("color: #000000");
-    path->setText(utf8() << pathValue);
+    path->setText(pathValue);
   }
 }
 
 void PathSettingWidget::selectPath() {
-  diskBrowser->chooseFolder(this, pathBrowseLabel);
+  diskBrowser->chooseFolder(
+    bind(&PathSettingWidget::assignPath, this),
+    config().path.current.folder,
+    pathBrowseLabel
+  );
 }
 
 void PathSettingWidget::defaultPath() {
@@ -66,12 +70,12 @@ PathSettingsWindow::PathSettingsWindow() {
   title->setProperty("class", "title");
   layout->addWidget(title);
 
-  gamePath  = new PathSettingWidget(config.path.rom,   "Games:",         "Startup path",        "Default Game Path");
-  savePath  = new PathSettingWidget(config.path.save,  "Save RAM:",      "Same as loaded game", "Default Save RAM Path");
-  statePath = new PathSettingWidget(config.path.state, "Save states:",   "Same as loaded game", "Default Save State Path");
-  patchPath = new PathSettingWidget(config.path.patch, "UPS patches:",   "Same as loaded game", "Default UPS Patch Path");
-  cheatPath = new PathSettingWidget(config.path.cheat, "Cheat codes:",   "Same as loaded game", "Default Cheat Code Path");
-  dataPath  = new PathSettingWidget(config.path.data,  "Exported data:", "Same as loaded game", "Default Exported Data Path");
+  gamePath  = new PathSettingWidget(config().path.rom,   "Games:",         "Remember last path",  "Default Game Path");
+  savePath  = new PathSettingWidget(config().path.save,  "Save RAM:",      "Same as loaded game", "Default Save RAM Path");
+  statePath = new PathSettingWidget(config().path.state, "Save states:",   "Same as loaded game", "Default Save State Path");
+  patchPath = new PathSettingWidget(config().path.patch, "UPS patches:",   "Same as loaded game", "Default UPS Patch Path");
+  cheatPath = new PathSettingWidget(config().path.cheat, "Cheat codes:",   "Same as loaded game", "Default Cheat Code Path");
+  dataPath  = new PathSettingWidget(config().path.data,  "Exported data:", "Same as loaded game", "Default Exported Data Path");
 
   layout->addWidget(gamePath);
   layout->addWidget(savePath);

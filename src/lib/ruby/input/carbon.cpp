@@ -19,129 +19,126 @@ public:
   bool acquired() { return false; }
 
   bool poll(int16_t *table) {
-    memset(table, 0, nall::input_limit * sizeof(int16_t));
+    memset(table, 0, Scancode::Limit * sizeof(int16_t));
 
     KeyMap keys;
     GetKeys(keys);
     uint8_t *keymap = (uint8_t*)keys;
 
-    #define map(id, name) table[keyboard<0>::name] = (bool)(keymap[id >> 3] & (1 << (id & 7)))
-    map(0x35, escape);
+    #define map(id, name) table[keyboard(0)[name]] = (bool)(keymap[id >> 3] & (1 << (id & 7)))
+    map(0x35, Keyboard::Escape);
 
-    map(0x7a, f1);
-    map(0x78, f2);
-    map(0x63, f3);
-    map(0x76, f4);
-    map(0x60, f5);
-    map(0x61, f6);
-    map(0x62, f7);
-    map(0x64, f8);
-    map(0x65, f9);
-    map(0x6d, f10);
-    map(0x67, f11);
-  //map(0x??, f12);
+    map(0x7a, Keyboard::F1);
+    map(0x78, Keyboard::F2);
+    map(0x63, Keyboard::F3);
+    map(0x76, Keyboard::F4);
+    map(0x60, Keyboard::F5);
+    map(0x61, Keyboard::F6);
+    map(0x62, Keyboard::F7);
+    map(0x64, Keyboard::F8);
+    map(0x65, Keyboard::F9);
+    map(0x6d, Keyboard::F10);
+    map(0x67, Keyboard::F11);
+  //map(0x??, Keyboard::F12);
 
-    map(0x69, print_screen);
-  //map(0x??, scroll_lock);
-    map(0x71, pause);
+    map(0x69, Keyboard::PrintScreen);
+  //map(0x??, Keyboard::ScrollLock);
+    map(0x71, Keyboard::Pause);
 
-    map(0x32, tilde);
-    map(0x12, num_1);
-    map(0x13, num_2);
-    map(0x14, num_3);
-    map(0x15, num_4);
-    map(0x17, num_5);
-    map(0x16, num_6);
-    map(0x1a, num_7);
-    map(0x1c, num_8);
-    map(0x19, num_9);
-    map(0x1d, num_0);
+    map(0x32, Keyboard::Tilde);
+    map(0x12, Keyboard::Num1);
+    map(0x13, Keyboard::Num2);
+    map(0x14, Keyboard::Num3);
+    map(0x15, Keyboard::Num4);
+    map(0x17, Keyboard::Num5);
+    map(0x16, Keyboard::Num6);
+    map(0x1a, Keyboard::Num7);
+    map(0x1c, Keyboard::Num8);
+    map(0x19, Keyboard::Num9);
+    map(0x1d, Keyboard::Num0);
 
-    map(0x1b, dash);
-    map(0x18, equal);
-    map(0x33, backspace);
+    map(0x1b, Keyboard::Dash);
+    map(0x18, Keyboard::Equal);
+    map(0x33, Keyboard::Backspace);
 
-    map(0x72, insert);
-    map(0x75, delete_);
-    map(0x73, home);
-    map(0x77, end);
-    map(0x74, page_up);
-    map(0x79, page_down);
+    map(0x72, Keyboard::Insert);
+    map(0x75, Keyboard::Delete);
+    map(0x73, Keyboard::Home);
+    map(0x77, Keyboard::End);
+    map(0x74, Keyboard::PageUp);
+    map(0x79, Keyboard::PageDown);
 
-    map(0x00, a);
-    map(0x0b, b);
-    map(0x08, c);
-    map(0x02, d);
-    map(0x0e, e);
-    map(0x03, f);
-    map(0x05, g);
-    map(0x04, h);
-    map(0x22, i);
-    map(0x26, j);
-    map(0x28, k);
-    map(0x25, l);
-    map(0x2e, m);
-    map(0x2d, n);
-    map(0x1f, o);
-    map(0x23, p);
-    map(0x0c, q);
-    map(0x0f, r);
-    map(0x01, s);
-    map(0x11, t);
-    map(0x20, u);
-    map(0x09, v);
-    map(0x0d, w);
-    map(0x07, x);
-    map(0x10, y);
-    map(0x06, z);
+    map(0x00, Keyboard::A);
+    map(0x0b, Keyboard::B);
+    map(0x08, Keyboard::C);
+    map(0x02, Keyboard::D);
+    map(0x0e, Keyboard::E);
+    map(0x03, Keyboard::F);
+    map(0x05, Keyboard::G);
+    map(0x04, Keyboard::H);
+    map(0x22, Keyboard::I);
+    map(0x26, Keyboard::J);
+    map(0x28, Keyboard::K);
+    map(0x25, Keyboard::L);
+    map(0x2e, Keyboard::M);
+    map(0x2d, Keyboard::N);
+    map(0x1f, Keyboard::O);
+    map(0x23, Keyboard::P);
+    map(0x0c, Keyboard::Q);
+    map(0x0f, Keyboard::R);
+    map(0x01, Keyboard::S);
+    map(0x11, Keyboard::T);
+    map(0x20, Keyboard::U);
+    map(0x09, Keyboard::V);
+    map(0x0d, Keyboard::W);
+    map(0x07, Keyboard::X);
+    map(0x10, Keyboard::Y);
+    map(0x06, Keyboard::Z);
 
-    map(0x21, lbracket);
-    map(0x1e, rbracket);
-    map(0x2a, backslash);
-    map(0x29, semicolon);
-    map(0x27, apostrophe);
-    map(0x2b, comma);
-    map(0x2f, period);
-    map(0x2c, slash);
+    map(0x21, Keyboard::LeftBracket);
+    map(0x1e, Keyboard::RightBracket);
+    map(0x2a, Keyboard::Backslash);
+    map(0x29, Keyboard::Semicolon);
+    map(0x27, Keyboard::Apostrophe);
+    map(0x2b, Keyboard::Comma);
+    map(0x2f, Keyboard::Period);
+    map(0x2c, Keyboard::Slash);
 
-    map(0x52, pad_0);
-    map(0x53, pad_1);
-    map(0x54, pad_2);
-    map(0x55, pad_3);
-    map(0x56, pad_4);
-    map(0x57, pad_5);
-    map(0x58, pad_6);
-    map(0x59, pad_7);
-    map(0x5b, pad_8);
-    map(0x5c, pad_9);
+    map(0x53, Keyboard::Keypad1);
+    map(0x54, Keyboard::Keypad2);
+    map(0x55, Keyboard::Keypad3);
+    map(0x56, Keyboard::Keypad4);
+    map(0x57, Keyboard::Keypad5);
+    map(0x58, Keyboard::Keypad6);
+    map(0x59, Keyboard::Keypad7);
+    map(0x5b, Keyboard::Keypad8);
+    map(0x5c, Keyboard::Keypad9);
+    map(0x52, Keyboard::Keypad0);
 
-    map(0x45, add);
-    map(0x4e, subtract);
-    map(0x43, multiply);
-    map(0x4b, divide);
-    map(0x4c, enter);
+  //map(0x??, Keyboard::Point);
+    map(0x4c, Keyboard::Enter);
+    map(0x45, Keyboard::Add);
+    map(0x4e, Keyboard::Subtract);
+    map(0x43, Keyboard::Multiply);
+    map(0x4b, Keyboard::Divide);
 
-    map(0x47, num_lock);
-  //map(0x39, caps_lock);
+    map(0x47, Keyboard::NumLock);
+  //map(0x39, Keyboard::CapsLock);
 
-    map(0x7e, up);
-    map(0x7d, down);
-    map(0x7b, left);
-    map(0x7c, right);
+    map(0x7e, Keyboard::Up);
+    map(0x7d, Keyboard::Down);
+    map(0x7b, Keyboard::Left);
+    map(0x7c, Keyboard::Right);
 
-    map(0x30, tab);
-    map(0x24, return_);
-    map(0x31, spacebar);
+    map(0x30, Keyboard::Tab);
+    map(0x24, Keyboard::Return);
+    map(0x31, Keyboard::Spacebar);
+  //map(0x??, Keyboard::Menu);
 
-    map(0x3b, lctrl);
-  //map(0x3b, rctrl);
-    map(0x3a, lalt);
-  //map(0x3a, ralt);
-    map(0x38, lshift);
-  //map(0x38, rshift);
-    map(0x37, lsuper);
-  //map(0x37, rsuper);
-  //map(0x??, menu);
+    map(0x38, Keyboard::Shift);
+    map(0x3b, Keyboard::Control);
+    map(0x3a, Keyboard::Alt);
+    map(0x37, Keyboard::Super);
     #undef map
 
     return true;

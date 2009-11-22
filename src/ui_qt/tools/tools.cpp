@@ -2,7 +2,7 @@
 #include "cheatfinder.cpp"
 #include "statemanager.cpp"
 
-ToolsWindow::ToolsWindow() : QbWindow(config.geometry.toolsWindow) {
+ToolsWindow::ToolsWindow() : QbWindow(config().geometry.toolsWindow) {
   setObjectName("tools-window");
   setWindowTitle("Tools");
   resize(625, 360);

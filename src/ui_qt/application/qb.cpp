@@ -1,8 +1,10 @@
 void QbWindow::shrink() {
-  for(unsigned i = 0; i < 2; i++) {
-    resize(0, 0);
-    usleep(2000);
-    QApplication::processEvents();
+  if(config().video.isFullscreen == false) {
+    for(unsigned i = 0; i < 2; i++) {
+      resize(0, 0);
+      usleep(2000);
+      QApplication::processEvents();
+    }
   }
 }
 

@@ -58,7 +58,7 @@ void BreakpointItem::toggle() {
   }
 }
 
-BreakpointEditor::BreakpointEditor() : QbWindow(config.geometry.breakpointEditor) {
+BreakpointEditor::BreakpointEditor() : QbWindow(config().geometry.breakpointEditor) {
   setObjectName("breakpoint-editor");
   setWindowTitle("Breakpoint Editor");
 

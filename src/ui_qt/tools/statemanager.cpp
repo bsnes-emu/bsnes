@@ -116,9 +116,9 @@ void StateManagerWindow::reloadList() {
     lstring part;
     part.split("\t", state[n]);
     item->setData(0, Qt::UserRole, QVariant(n));
-    item->setText(0, utf8() << part[0]);
-    item->setText(1, utf8() << part[1]);
-    item->setText(2, utf8() << part[2]);
+    item->setText(0, part[0]);
+    item->setText(1, part[1]);
+    item->setText(2, part[2]);
   }
 
   list->setSortingEnabled(true);
@@ -131,9 +131,9 @@ void StateManagerWindow::updateItem(QTreeWidgetItem *item) {
   lstring state, part;
   utility.loadStateInfo(state);
   part.split("\t", state[n]);
-  item->setText(0, utf8() << part[0]);
-  item->setText(1, utf8() << part[1]);
-  item->setText(2, utf8() << part[2]);
+  item->setText(0, part[0]);
+  item->setText(1, part[1]);
+  item->setText(2, part[2]);
 }
 
 void StateManagerWindow::listChanged() {

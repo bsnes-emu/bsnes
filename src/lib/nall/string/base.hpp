@@ -80,6 +80,11 @@ namespace nall {
   protected:
     char *data;
     size_t size;
+
+  #if defined(QT_CORE_LIB)
+  public:
+    inline operator QString() const;
+  #endif
   };
 
   class lstring : public vector<string> {

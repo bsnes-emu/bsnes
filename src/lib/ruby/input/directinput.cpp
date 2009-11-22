@@ -14,7 +14,7 @@ public:
     LPDIRECTINPUT8 context;
     LPDIRECTINPUTDEVICE8 keyboard;
     LPDIRECTINPUTDEVICE8 mouse;
-    LPDIRECTINPUTDEVICE8 gamepad[joypad<>::count];
+    LPDIRECTINPUTDEVICE8 gamepad[Joypad::Count];
     bool mouseacquired;
   } device;
 
@@ -45,7 +45,7 @@ public:
   }
 
   bool poll(int16_t *table) {
-    memset(table, 0, nall::input_limit * sizeof(int16_t));
+    memset(table, 0, Scancode::Limit * sizeof(int16_t));
 
     //========
     //Keyboard
@@ -60,122 +60,122 @@ public:
         }
       }
 
-      table[keyboard<0>::escape] = (bool)(state[0x01] & 0x80);
-      table[keyboard<0>::f1    ] = (bool)(state[0x3b] & 0x80);
-      table[keyboard<0>::f2    ] = (bool)(state[0x3c] & 0x80);
-      table[keyboard<0>::f3    ] = (bool)(state[0x3d] & 0x80);
-      table[keyboard<0>::f4    ] = (bool)(state[0x3e] & 0x80);
-      table[keyboard<0>::f5    ] = (bool)(state[0x3f] & 0x80);
-      table[keyboard<0>::f6    ] = (bool)(state[0x40] & 0x80);
-      table[keyboard<0>::f7    ] = (bool)(state[0x41] & 0x80);
-      table[keyboard<0>::f8    ] = (bool)(state[0x42] & 0x80);
-      table[keyboard<0>::f9    ] = (bool)(state[0x43] & 0x80);
-      table[keyboard<0>::f10   ] = (bool)(state[0x44] & 0x80);
-      table[keyboard<0>::f11   ] = (bool)(state[0x57] & 0x80);
-      table[keyboard<0>::f12   ] = (bool)(state[0x58] & 0x80);
+      #define key(id) table[keyboard(0)[id]]
 
-      table[keyboard<0>::print_screen] = (bool)(state[0xb7] & 0x80);
-      table[keyboard<0>::scroll_lock ] = (bool)(state[0x46] & 0x80);
-      table[keyboard<0>::pause       ] = (bool)(state[0xc5] & 0x80);
-      table[keyboard<0>::tilde       ] = (bool)(state[0x29] & 0x80);
+      key(Keyboard::Escape) = (bool)(state[0x01] & 0x80);
+      key(Keyboard::F1    ) = (bool)(state[0x3b] & 0x80);
+      key(Keyboard::F2    ) = (bool)(state[0x3c] & 0x80);
+      key(Keyboard::F3    ) = (bool)(state[0x3d] & 0x80);
+      key(Keyboard::F4    ) = (bool)(state[0x3e] & 0x80);
+      key(Keyboard::F5    ) = (bool)(state[0x3f] & 0x80);
+      key(Keyboard::F6    ) = (bool)(state[0x40] & 0x80);
+      key(Keyboard::F7    ) = (bool)(state[0x41] & 0x80);
+      key(Keyboard::F8    ) = (bool)(state[0x42] & 0x80);
+      key(Keyboard::F9    ) = (bool)(state[0x43] & 0x80);
+      key(Keyboard::F10   ) = (bool)(state[0x44] & 0x80);
+      key(Keyboard::F11   ) = (bool)(state[0x57] & 0x80);
+      key(Keyboard::F12   ) = (bool)(state[0x58] & 0x80);
 
-      table[keyboard<0>::num_1] = (bool)(state[0x02] & 0x80);
-      table[keyboard<0>::num_2] = (bool)(state[0x03] & 0x80);
-      table[keyboard<0>::num_3] = (bool)(state[0x04] & 0x80);
-      table[keyboard<0>::num_4] = (bool)(state[0x05] & 0x80);
-      table[keyboard<0>::num_5] = (bool)(state[0x06] & 0x80);
-      table[keyboard<0>::num_6] = (bool)(state[0x07] & 0x80);
-      table[keyboard<0>::num_7] = (bool)(state[0x08] & 0x80);
-      table[keyboard<0>::num_8] = (bool)(state[0x09] & 0x80);
-      table[keyboard<0>::num_9] = (bool)(state[0x0a] & 0x80);
-      table[keyboard<0>::num_0] = (bool)(state[0x0b] & 0x80);
+      key(Keyboard::PrintScreen) = (bool)(state[0xb7] & 0x80);
+      key(Keyboard::ScrollLock ) = (bool)(state[0x46] & 0x80);
+      key(Keyboard::Pause      ) = (bool)(state[0xc5] & 0x80);
+      key(Keyboard::Tilde      ) = (bool)(state[0x29] & 0x80);
 
-      table[keyboard<0>::dash     ] = (bool)(state[0x0c] & 0x80);
-      table[keyboard<0>::equal    ] = (bool)(state[0x0d] & 0x80);
-      table[keyboard<0>::backspace] = (bool)(state[0x0e] & 0x80);
+      key(Keyboard::Num1) = (bool)(state[0x02] & 0x80);
+      key(Keyboard::Num2) = (bool)(state[0x03] & 0x80);
+      key(Keyboard::Num3) = (bool)(state[0x04] & 0x80);
+      key(Keyboard::Num4) = (bool)(state[0x05] & 0x80);
+      key(Keyboard::Num5) = (bool)(state[0x06] & 0x80);
+      key(Keyboard::Num6) = (bool)(state[0x07] & 0x80);
+      key(Keyboard::Num7) = (bool)(state[0x08] & 0x80);
+      key(Keyboard::Num8) = (bool)(state[0x09] & 0x80);
+      key(Keyboard::Num9) = (bool)(state[0x0a] & 0x80);
+      key(Keyboard::Num0) = (bool)(state[0x0b] & 0x80);
 
-      table[keyboard<0>::insert   ] = (bool)(state[0xd2] & 0x80);
-      table[keyboard<0>::delete_  ] = (bool)(state[0xd3] & 0x80);
-      table[keyboard<0>::home     ] = (bool)(state[0xc7] & 0x80);
-      table[keyboard<0>::end      ] = (bool)(state[0xcf] & 0x80);
-      table[keyboard<0>::page_up  ] = (bool)(state[0xc9] & 0x80);
-      table[keyboard<0>::page_down] = (bool)(state[0xd1] & 0x80);
+      key(Keyboard::Dash     ) = (bool)(state[0x0c] & 0x80);
+      key(Keyboard::Equal    ) = (bool)(state[0x0d] & 0x80);
+      key(Keyboard::Backspace) = (bool)(state[0x0e] & 0x80);
 
-      table[keyboard<0>::a] = (bool)(state[0x1e] & 0x80);
-      table[keyboard<0>::b] = (bool)(state[0x30] & 0x80);
-      table[keyboard<0>::c] = (bool)(state[0x2e] & 0x80);
-      table[keyboard<0>::d] = (bool)(state[0x20] & 0x80);
-      table[keyboard<0>::e] = (bool)(state[0x12] & 0x80);
-      table[keyboard<0>::f] = (bool)(state[0x21] & 0x80);
-      table[keyboard<0>::g] = (bool)(state[0x22] & 0x80);
-      table[keyboard<0>::h] = (bool)(state[0x23] & 0x80);
-      table[keyboard<0>::i] = (bool)(state[0x17] & 0x80);
-      table[keyboard<0>::j] = (bool)(state[0x24] & 0x80);
-      table[keyboard<0>::k] = (bool)(state[0x25] & 0x80);
-      table[keyboard<0>::l] = (bool)(state[0x26] & 0x80);
-      table[keyboard<0>::m] = (bool)(state[0x32] & 0x80);
-      table[keyboard<0>::n] = (bool)(state[0x31] & 0x80);
-      table[keyboard<0>::o] = (bool)(state[0x18] & 0x80);
-      table[keyboard<0>::p] = (bool)(state[0x19] & 0x80);
-      table[keyboard<0>::q] = (bool)(state[0x10] & 0x80);
-      table[keyboard<0>::r] = (bool)(state[0x13] & 0x80);
-      table[keyboard<0>::s] = (bool)(state[0x1f] & 0x80);
-      table[keyboard<0>::t] = (bool)(state[0x14] & 0x80);
-      table[keyboard<0>::u] = (bool)(state[0x16] & 0x80);
-      table[keyboard<0>::v] = (bool)(state[0x2f] & 0x80);
-      table[keyboard<0>::w] = (bool)(state[0x11] & 0x80);
-      table[keyboard<0>::x] = (bool)(state[0x2d] & 0x80);
-      table[keyboard<0>::y] = (bool)(state[0x15] & 0x80);
-      table[keyboard<0>::z] = (bool)(state[0x2c] & 0x80);
+      key(Keyboard::Insert  ) = (bool)(state[0xd2] & 0x80);
+      key(Keyboard::Delete  ) = (bool)(state[0xd3] & 0x80);
+      key(Keyboard::Home    ) = (bool)(state[0xc7] & 0x80);
+      key(Keyboard::End     ) = (bool)(state[0xcf] & 0x80);
+      key(Keyboard::PageUp  ) = (bool)(state[0xc9] & 0x80);
+      key(Keyboard::PageDown) = (bool)(state[0xd1] & 0x80);
 
-      table[keyboard<0>::lbracket  ] = (bool)(state[0x1a] & 0x80);
-      table[keyboard<0>::rbracket  ] = (bool)(state[0x1b] & 0x80);
-      table[keyboard<0>::backslash ] = (bool)(state[0x2b] & 0x80);
-      table[keyboard<0>::semicolon ] = (bool)(state[0x27] & 0x80);
-      table[keyboard<0>::apostrophe] = (bool)(state[0x28] & 0x80);
-      table[keyboard<0>::comma     ] = (bool)(state[0x33] & 0x80);
-      table[keyboard<0>::period    ] = (bool)(state[0x34] & 0x80);
-      table[keyboard<0>::slash     ] = (bool)(state[0x35] & 0x80);
+      key(Keyboard::A) = (bool)(state[0x1e] & 0x80);
+      key(Keyboard::B) = (bool)(state[0x30] & 0x80);
+      key(Keyboard::C) = (bool)(state[0x2e] & 0x80);
+      key(Keyboard::D) = (bool)(state[0x20] & 0x80);
+      key(Keyboard::E) = (bool)(state[0x12] & 0x80);
+      key(Keyboard::F) = (bool)(state[0x21] & 0x80);
+      key(Keyboard::G) = (bool)(state[0x22] & 0x80);
+      key(Keyboard::H) = (bool)(state[0x23] & 0x80);
+      key(Keyboard::I) = (bool)(state[0x17] & 0x80);
+      key(Keyboard::J) = (bool)(state[0x24] & 0x80);
+      key(Keyboard::K) = (bool)(state[0x25] & 0x80);
+      key(Keyboard::L) = (bool)(state[0x26] & 0x80);
+      key(Keyboard::M) = (bool)(state[0x32] & 0x80);
+      key(Keyboard::N) = (bool)(state[0x31] & 0x80);
+      key(Keyboard::O) = (bool)(state[0x18] & 0x80);
+      key(Keyboard::P) = (bool)(state[0x19] & 0x80);
+      key(Keyboard::Q) = (bool)(state[0x10] & 0x80);
+      key(Keyboard::R) = (bool)(state[0x13] & 0x80);
+      key(Keyboard::S) = (bool)(state[0x1f] & 0x80);
+      key(Keyboard::T) = (bool)(state[0x14] & 0x80);
+      key(Keyboard::U) = (bool)(state[0x16] & 0x80);
+      key(Keyboard::V) = (bool)(state[0x2f] & 0x80);
+      key(Keyboard::W) = (bool)(state[0x11] & 0x80);
+      key(Keyboard::X) = (bool)(state[0x2d] & 0x80);
+      key(Keyboard::Y) = (bool)(state[0x15] & 0x80);
+      key(Keyboard::Z) = (bool)(state[0x2c] & 0x80);
 
-      table[keyboard<0>::pad_0] = (bool)(state[0x4f] & 0x80);
-      table[keyboard<0>::pad_1] = (bool)(state[0x50] & 0x80);
-      table[keyboard<0>::pad_2] = (bool)(state[0x51] & 0x80);
-      table[keyboard<0>::pad_3] = (bool)(state[0x4b] & 0x80);
-      table[keyboard<0>::pad_4] = (bool)(state[0x4c] & 0x80);
-      table[keyboard<0>::pad_5] = (bool)(state[0x4d] & 0x80);
-      table[keyboard<0>::pad_6] = (bool)(state[0x47] & 0x80);
-      table[keyboard<0>::pad_7] = (bool)(state[0x48] & 0x80);
-      table[keyboard<0>::pad_8] = (bool)(state[0x49] & 0x80);
-      table[keyboard<0>::pad_9] = (bool)(state[0x52] & 0x80);
-      table[keyboard<0>::point] = (bool)(state[0x53] & 0x80);
+      key(Keyboard::LeftBracket ) = (bool)(state[0x1a] & 0x80);
+      key(Keyboard::RightBracket) = (bool)(state[0x1b] & 0x80);
+      key(Keyboard::Backslash   ) = (bool)(state[0x2b] & 0x80);
+      key(Keyboard::Semicolon   ) = (bool)(state[0x27] & 0x80);
+      key(Keyboard::Apostrophe  ) = (bool)(state[0x28] & 0x80);
+      key(Keyboard::Comma       ) = (bool)(state[0x33] & 0x80);
+      key(Keyboard::Period      ) = (bool)(state[0x34] & 0x80);
+      key(Keyboard::Slash       ) = (bool)(state[0x35] & 0x80);
 
-      table[keyboard<0>::add]      = (bool)(state[0x4e] & 0x80);
-      table[keyboard<0>::subtract] = (bool)(state[0x4a] & 0x80);
-      table[keyboard<0>::multiply] = (bool)(state[0x37] & 0x80);
-      table[keyboard<0>::divide]   = (bool)(state[0xb5] & 0x80);
-      table[keyboard<0>::enter]    = (bool)(state[0x9c] & 0x80);
+      key(Keyboard::Keypad0) = (bool)(state[0x4f] & 0x80);
+      key(Keyboard::Keypad1) = (bool)(state[0x50] & 0x80);
+      key(Keyboard::Keypad2) = (bool)(state[0x51] & 0x80);
+      key(Keyboard::Keypad3) = (bool)(state[0x4b] & 0x80);
+      key(Keyboard::Keypad4) = (bool)(state[0x4c] & 0x80);
+      key(Keyboard::Keypad5) = (bool)(state[0x4d] & 0x80);
+      key(Keyboard::Keypad6) = (bool)(state[0x47] & 0x80);
+      key(Keyboard::Keypad7) = (bool)(state[0x48] & 0x80);
+      key(Keyboard::Keypad8) = (bool)(state[0x49] & 0x80);
+      key(Keyboard::Keypad9) = (bool)(state[0x52] & 0x80);
+      key(Keyboard::Point  ) = (bool)(state[0x53] & 0x80);
 
-      table[keyboard<0>::num_lock ] = (bool)(state[0x45] & 0x80);
-      table[keyboard<0>::caps_lock] = (bool)(state[0x3a] & 0x80);
+      key(Keyboard::Add     ) = (bool)(state[0x4e] & 0x80);
+      key(Keyboard::Subtract) = (bool)(state[0x4a] & 0x80);
+      key(Keyboard::Multiply) = (bool)(state[0x37] & 0x80);
+      key(Keyboard::Divide  ) = (bool)(state[0xb5] & 0x80);
+      key(Keyboard::Enter   ) = (bool)(state[0x9c] & 0x80);
 
-      table[keyboard<0>::up   ] = (bool)(state[0xc8] & 0x80);
-      table[keyboard<0>::down ] = (bool)(state[0xd0] & 0x80);
-      table[keyboard<0>::left ] = (bool)(state[0xcb] & 0x80);
-      table[keyboard<0>::right] = (bool)(state[0xcd] & 0x80);
+      key(Keyboard::NumLock ) = (bool)(state[0x45] & 0x80);
+      key(Keyboard::CapsLock) = (bool)(state[0x3a] & 0x80);
 
-      table[keyboard<0>::tab     ] = (bool)(state[0x0f] & 0x80);
-      table[keyboard<0>::return_ ] = (bool)(state[0x1c] & 0x80);
-      table[keyboard<0>::spacebar] = (bool)(state[0x39] & 0x80);
+      key(Keyboard::Up   ) = (bool)(state[0xc8] & 0x80);
+      key(Keyboard::Down ) = (bool)(state[0xd0] & 0x80);
+      key(Keyboard::Left ) = (bool)(state[0xcb] & 0x80);
+      key(Keyboard::Right) = (bool)(state[0xcd] & 0x80);
 
-      table[keyboard<0>::lctrl ] = (bool)(state[0x1d] & 0x80);
-      table[keyboard<0>::rctrl ] = (bool)(state[0x9d] & 0x80);
-      table[keyboard<0>::lalt  ] = (bool)(state[0x38] & 0x80);
-      table[keyboard<0>::ralt  ] = (bool)(state[0xb8] & 0x80);
-      table[keyboard<0>::lshift] = (bool)(state[0x2a] & 0x80);
-      table[keyboard<0>::rshift] = (bool)(state[0x36] & 0x80);
-      table[keyboard<0>::lsuper] = (bool)(state[0xdb] & 0x80);
-      table[keyboard<0>::rsuper] = (bool)(state[0xdc] & 0x80);
-      table[keyboard<0>::menu  ] = (bool)(state[0xdd] & 0x80);
+      key(Keyboard::Tab     ) = (bool)(state[0x0f] & 0x80);
+      key(Keyboard::Return  ) = (bool)(state[0x1c] & 0x80);
+      key(Keyboard::Spacebar) = (bool)(state[0x39] & 0x80);
+      key(Keyboard::Menu   ) = (bool)(state[0xdd] & 0x80);
+
+      key(Keyboard::Shift  ) = (bool)(state[0x2a] & 0x80) || (bool)(state[0x36] & 0x80);
+      key(Keyboard::Control) = (bool)(state[0x1d] & 0x80) || (bool)(state[0x9d] & 0x80);
+      key(Keyboard::Alt    ) = (bool)(state[0x38] & 0x80) || (bool)(state[0xb8] & 0x80);
+      key(Keyboard::Super  ) = (bool)(state[0xdb] & 0x80) || (bool)(state[0xdc] & 0x80);
+
+      #undef key
     }
 
     //=====
@@ -191,27 +191,26 @@ public:
         }
       }
 
-      table[mouse<0>::x] = state.lX;
-      table[mouse<0>::y] = state.lY;
-      table[mouse<0>::z] = state.lZ / WHEEL_DELTA;
-      for(unsigned n = 0; n < mouse<>::buttons; n++) {
-        table[mouse<0>::button + n] = (bool)state.rgbButtons[n];
+      table[mouse(0).axis(0)] = state.lX;
+      table[mouse(0).axis(1)] = state.lY;
+      table[mouse(0).axis(2)] = state.lZ / WHEEL_DELTA;
+      for(unsigned n = 0; n < Mouse::Buttons; n++) {
+        table[mouse(0).button(n)] = (bool)state.rgbButtons[n];
       }
 
       //on Windows, 0 = left, 1 = right, 2 = middle
       //swap middle and right buttons for consistency with Linux
-      int16_t temp = table[mouse<0>::button + 1];
-      table[mouse<0>::button + 1] = table[mouse<0>::button + 2];
-      table[mouse<0>::button + 2] = temp;
+      int16_t temp = table[mouse(0).button(1)];
+      table[mouse(0).button(1)] = table[mouse(0).button(2)];
+      table[mouse(0).button(2)] = temp;
     }
 
     //=========
     //Joypad(s)
     //=========
 
-    for(unsigned i = 0; i < joypad<>::count; i++) {
+    for(unsigned i = 0; i < Joypad::Count; i++) {
       if(!device.gamepad[i]) continue;
-      unsigned index = joypad<>::index(i, joypad<>::none);
 
       if(FAILED(device.gamepad[i]->Poll())) {
         device.gamepad[i]->Acquire();
@@ -222,30 +221,30 @@ public:
       device.gamepad[i]->GetDeviceState(sizeof(DIJOYSTATE2), &state);
 
       //POV hats
-      for(unsigned n = 0; n < min((unsigned)joypad<>::hats, 4); n++) {
+      for(unsigned n = 0; n < min((unsigned)Joypad::Hats, 4); n++) {
         //POV value is in clockwise-hundredth degree units.
         unsigned pov = state.rgdwPOV[n];
         //some drivers report a centered POV hat as -1U, others as 65535U.
         //>= 36000 will match both, as well as invalid ranges.
         if(pov < 36000) {
-          if(pov >= 31500 || pov <=  4500) table[index + joypad<>::hat + n] |= joypad<>::hat_up;
-          if(pov >=  4500 && pov <= 13500) table[index + joypad<>::hat + n] |= joypad<>::hat_right;
-          if(pov >= 13500 && pov <= 22500) table[index + joypad<>::hat + n] |= joypad<>::hat_down;
-          if(pov >= 22500 && pov <= 31500) table[index + joypad<>::hat + n] |= joypad<>::hat_left;
+          if(pov >= 31500 || pov <=  4500) table[joypad(i).hat(n)] |= Joypad::HatUp;
+          if(pov >=  4500 && pov <= 13500) table[joypad(i).hat(n)] |= Joypad::HatRight;
+          if(pov >= 13500 && pov <= 22500) table[joypad(i).hat(n)] |= Joypad::HatDown;
+          if(pov >= 22500 && pov <= 31500) table[joypad(i).hat(n)] |= Joypad::HatLeft;
         }
       }
 
       //axes
-      table[index + joypad<>::axis + 0] = state.lX;
-      table[index + joypad<>::axis + 1] = state.lY;
-      table[index + joypad<>::axis + 2] = state.lZ;
-      table[index + joypad<>::axis + 3] = state.lRx;
-      table[index + joypad<>::axis + 4] = state.lRy;
-      table[index + joypad<>::axis + 5] = state.lRz;
+      table[joypad(i).axis(0)] = state.lX;
+      table[joypad(i).axis(1)] = state.lY;
+      table[joypad(i).axis(2)] = state.lZ;
+      table[joypad(i).axis(3)] = state.lRx;
+      table[joypad(i).axis(4)] = state.lRy;
+      table[joypad(i).axis(5)] = state.lRz;
 
       //buttons
-      for(unsigned n = 0; n < min((unsigned)joypad<>::buttons, 128); n++) {
-        table[index + joypad<>::button + n] = (bool)state.rgbButtons[n];
+      for(unsigned n = 0; n < min((unsigned)Joypad::Buttons, 128); n++) {
+        table[joypad(i).button(n)] = (bool)state.rgbButtons[n];
       }
     }
 
@@ -254,8 +253,8 @@ public:
 
   bool init_joypad(const DIDEVICEINSTANCE *instance) {
     unsigned n;
-    for(n = 0; n < joypad<>::count; n++) { if(!device.gamepad[n]) break; }
-    if(n >= joypad<>::count) return DIENUM_STOP;
+    for(n = 0; n < Joypad::Count; n++) { if(!device.gamepad[n]) break; }
+    if(n >= Joypad::Count) return DIENUM_STOP;
 
     if(FAILED(device.context->CreateDevice(instance->guidInstance, &device.gamepad[n], 0))) {
       return DIENUM_CONTINUE;  //continue and try next gamepad
@@ -270,7 +269,7 @@ public:
 
   bool init_axis(const DIDEVICEOBJECTINSTANCE *instance) {
     signed n;
-    for(n = joypad<>::count - 1; n >= 0; n--) { if(device.gamepad[n]) break; }
+    for(n = Joypad::Count - 1; n >= 0; n--) { if(device.gamepad[n]) break; }
     if(n < 0) return DIENUM_STOP;
 
     DIPROPRANGE range;
@@ -289,7 +288,7 @@ public:
     device.context = 0;
     device.keyboard = 0;
     device.mouse = 0;
-    for(unsigned i = 0; i < joypad<>::count; i++) device.gamepad[i] = 0;
+    for(unsigned i = 0; i < Joypad::Count; i++) device.gamepad[i] = 0;
     device.mouseacquired = false;
 
     DirectInput8Create(GetModuleHandle(0), 0x0800, IID_IDirectInput8, (void**)&device.context, 0);
@@ -322,7 +321,7 @@ public:
       device.mouse = 0;
     }
 
-    for(unsigned i = 0; i < joypad<>::count; i++) {
+    for(unsigned i = 0; i < Joypad::Count; i++) {
       if(device.gamepad[i]) {
         device.gamepad[i]->Unacquire();
         device.gamepad[i]->Release();
@@ -366,7 +365,7 @@ public:
     device.context = 0;
     device.keyboard = 0;
     device.mouse = 0;
-    for(unsigned i = 0; i < joypad<>::count; i++) device.gamepad[i] = 0;
+    for(unsigned i = 0; i < Joypad::Count; i++) device.gamepad[i] = 0;
     device.mouseacquired = false;
 
     settings.handle = 0;
