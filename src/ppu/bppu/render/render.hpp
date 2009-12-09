@@ -1,4 +1,6 @@
 //render.cpp
+bool render_enabled(unsigned bg, unsigned pri) const;
+
 inline void render_line_mode0();
 inline void render_line_mode1();
 inline void render_line_mode2();

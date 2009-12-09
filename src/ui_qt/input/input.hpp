@@ -40,6 +40,7 @@ struct AnalogInput : MappedInput {
 struct HotkeyInput : DigitalInput {
   void poll();
   virtual void pressed() {}
+  virtual void released() {}
 
   HotkeyInput(const char*, const char*);
 };

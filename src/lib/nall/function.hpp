@@ -136,7 +136,7 @@ namespace nall {
     function() { data.fn_call = 0; }
 
     function(void *fn) {
-      data.fn_call = &fn_call_global;
+      data.fn_call = fn ? &fn_call_global : 0;
       data.fn_global = (R (*)(PL))fn;
     }
 

@@ -1,12 +1,20 @@
 #ifdef SYSTEM_CPP
 
-serializer System::serialize() {
-  serializer s(serialize_size);
+unsigned System::serialize_size() const {
+  return serializer_size;
+}
 
-  unsigned signature = 0x31545342, version = bsnesSaveStateVersion, crc32 = cartridge.crc32();
+serializer System::serialize() {
+  serializer s(serializer_size);
+
+  unsigned signature = 0x31545342, version = bsnesSerializerVersion, crc32 = cartridge.crc32();
+  char description[512];
+  memset(&description, 0, sizeof description);
+
   s.integer(signature);
   s.integer(version);
   s.integer(crc32);
+  s.array(description);
 
   serialize_all(s);
   return s;
@@ -14,12 +22,15 @@ serializer System::serialize() {
 
 bool System::unserialize(serializer &s) {
   unsigned signature, version, crc32;
+  char description[512];
+
   s.integer(signature);
   s.integer(version);
   s.integer(crc32);
+  s.array(description);
 
   if(signature != 0x31545342) return false;
-  if(version != bsnesSaveStateVersion) return false;
+  if(version != bsnesSerializerVersion) return false;
 //if(crc32 != cartridge.crc32()) return false;
   scheduler.init();
 
@@ -27,7 +38,9 @@ bool System::unserialize(serializer &s) {
   return true;
 }
 
+//========
 //internal
+//========
 
 void System::serialize(serializer &s) {
   s.integer(snes_region);
@@ -61,6 +74,7 @@ void System::serialize_all(serializer &s) {
   if(cartridge.has_dsp2())    dsp2.serialize(s);
   if(cartridge.has_obc1())    obc1.serialize(s);
   if(cartridge.has_st010())   st010.serialize(s);
+  if(cartridge.has_21fx())    s21fx.serialize(s);
 }
 
 //called once upon cartridge load event: perform dry-run state save.
@@ -70,12 +84,15 @@ void System::serialize_init() {
   serializer s;
 
   unsigned signature = 0, version = 0, crc32 = 0;
+  char description[512];
+
   s.integer(signature);
   s.integer(version);
   s.integer(crc32);
+  s.array(description);
 
   serialize_all(s);
-  serialize_size = s.size();
+  serializer_size = s.size();
 }
 
 #endif

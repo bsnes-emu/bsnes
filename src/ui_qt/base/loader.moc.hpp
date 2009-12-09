@@ -42,4 +42,6 @@ public slots:
 private:
   SNES::Cartridge::Mode mode;
   void showWindow(const char *title);
-} *loaderWindow;
+};
+
+extern LoaderWindow *loaderWindow;

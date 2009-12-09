@@ -15,6 +15,7 @@ public:
 
   struct {
     uint32 cpu_freq;
+    uint32 cop_freq;
     uint32 smp_freq;
 
     int64 cpucop;
@@ -102,13 +103,13 @@ public:
   //==========
 
   alwaysinline void addclocks_cpu(unsigned clocks) {
-    clock.cpucop -= clocks;
+    clock.cpucop -= clocks * (uint64)clock.cop_freq;
     clock.cpuppu -= clocks;
     clock.cpusmp -= clocks * (uint64)clock.smp_freq;
   }
 
   alwaysinline void addclocks_cop(unsigned clocks) {
-    clock.cpucop += clocks;
+    clock.cpucop += clocks * (uint64)clock.cpu_freq;
   }
 
   alwaysinline void addclocks_ppu(unsigned clocks) {

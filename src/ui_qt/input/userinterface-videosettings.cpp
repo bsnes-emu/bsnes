@@ -8,7 +8,7 @@ struct ToggleFullscreen : HotkeyInput {
   }
 
   ToggleFullscreen() : HotkeyInput("Toggle Fullscreen Mode", "input.userInterface.videoSettings.toggleFullscreen") {
-    name = "KB0::F11";
+    name = "Alt+KB0::Return";
     userInterfaceVideoSettings.attach(this);
   }
 } toggleFullscreen;

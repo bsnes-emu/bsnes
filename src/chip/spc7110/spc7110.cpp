@@ -535,17 +535,17 @@ void SPC7110::mmio_write(unsigned addr, uint8 data) {
 
     case 0x4831: {
       r4831 = data;
-      dx_offset = datarom_addr((data & 7) * 0x100000);
+      dx_offset = datarom_addr(data * 0x100000);
     } break;
 
     case 0x4832: {
       r4832 = data;
-      ex_offset = datarom_addr((data & 7) * 0x100000);
+      ex_offset = datarom_addr(data * 0x100000);
     } break;
 
     case 0x4833: {
       r4833 = data;
-      fx_offset = datarom_addr((data & 7) * 0x100000);
+      fx_offset = datarom_addr(data * 0x100000);
     } break;
 
     case 0x4834: r4834 = data; break;

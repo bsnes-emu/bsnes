@@ -14,7 +14,9 @@ public:
 public slots:
   void show();
   void createFolder();
-} *folderCreator;
+};
+
+extern FolderCreator *folderCreator;
 
 class DiskBrowserView : public QTreeView {
   Q_OBJECT
@@ -109,4 +111,6 @@ private:
   } browseMode;
 
   bool currentFilename(string&);
-} *diskBrowser;
+};
+
+extern DiskBrowser *diskBrowser;

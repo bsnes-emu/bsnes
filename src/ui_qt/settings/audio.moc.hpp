@@ -25,4 +25,6 @@ public slots:
   void latencyChange(int value);
   void volumeAdjust(int value);
   void frequencySkewAdjust(int value);
-} *audioSettingsWindow;
+};
+
+extern AudioSettingsWindow *audioSettingsWindow;

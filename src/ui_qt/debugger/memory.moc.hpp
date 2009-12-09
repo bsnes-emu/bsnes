@@ -2,14 +2,16 @@ class MemoryEditor : public QbWindow {
   Q_OBJECT
 
 public:
-  QVBoxLayout *layout;
-  QHBoxLayout *controlLayout;
-  QWidget *spacer;
-  QLineEdit *addr;
+  QHBoxLayout *layout;
+  HexEditor *editor;
+  QVBoxLayout *controlLayout;
   QComboBox *source;
+  QLineEdit *addr;
   QCheckBox *autoUpdateBox;
   QPushButton *refreshButton;
-  HexEditor *editor;
+  QPushButton *exportButton;
+  QWidget *spacer;
+  QPushButton *importButton;
 
   void autoUpdate();
   void synchronize();
@@ -21,6 +23,12 @@ public:
   MemoryEditor();
 
 public slots:
-  void refresh();
   void sourceChanged(int);
-} *memoryEditor;
+  void refresh();
+  void exportMemory();
+  void importMemory();
+  void exportMemory(SNES::Memory&, const string&) const;
+  void importMemory(SNES::Memory&, const string&) const;
+};
+
+extern MemoryEditor *memoryEditor;

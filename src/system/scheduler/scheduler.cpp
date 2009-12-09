@@ -23,6 +23,7 @@ void Scheduler::init() {
   clock.smp_freq = system.region() == System::NTSC
                  ? config.smp.ntsc_clock_rate
                  : config.smp.pal_clock_rate;
+  clock.cop_freq = clock.cpu_freq;
 
   clock.cpucop = 0;
   clock.cpuppu = 0;

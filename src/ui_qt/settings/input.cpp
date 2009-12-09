@@ -1,3 +1,6 @@
+#include "input.moc"
+InputSettingsWindow *inputSettingsWindow;
+
 InputSettingsWindow::InputSettingsWindow() : activeObject(0) {
   layout = new QVBoxLayout;
   layout->setMargin(0);

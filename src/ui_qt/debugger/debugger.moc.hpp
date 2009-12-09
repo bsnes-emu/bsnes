@@ -1,14 +1,10 @@
-#include "hexeditor.moc"
-#include "breakpoint.moc"
-#include "memory.moc"
-#include "vramviewer.moc"
-
 class Debugger : public QbWindow {
   Q_OBJECT
 
 public:
   QMenuBar *menu;
   QMenu *tools;
+  QAction *tools_disassembler;
   QAction *tools_breakpoint;
   QAction *tools_memory;
   QAction *tools_vramViewer;
@@ -25,15 +21,17 @@ public:
   QCheckBox *stepSMP;
   QCheckBox *traceCPU;
   QCheckBox *traceSMP;
+  QCheckBox *traceMask;
   QWidget *spacer;
 
+  void modifySystemState(unsigned);
   void echo(const char *message);
-  void tracerUpdate();
   void event();
   void frameTick();
   Debugger();
 
 public slots:
+  void showDisassembler();
   void showBreakpointEditor();
   void showMemoryEditor();
   void showVramViewer();
@@ -42,9 +40,9 @@ public slots:
 
   void toggleRunStatus();
   void stepAction();
-  void toggleTraceCPU();
-  void toggleTraceSMP();
 
 private:
   unsigned frameCounter;
-} *debugger;
+};
+
+extern Debugger *debugger;

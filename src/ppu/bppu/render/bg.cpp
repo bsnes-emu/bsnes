@@ -55,6 +55,10 @@ template<unsigned mode, unsigned bg, unsigned color_depth>
 void bPPU::render_line_bg(uint8 pri0_pos, uint8 pri1_pos) {
   if(regs.bg_enabled[bg] == false && regs.bgsub_enabled[bg] == false) return;
 
+  if(render_enabled(bg, 0) == false) pri0_pos = 0;
+  if(render_enabled(bg, 1) == false) pri1_pos = 0;
+  if(pri0_pos == 0 && pri1_pos == 0) return;
+
   const bool bg_enabled    = regs.bg_enabled[bg];
   const bool bgsub_enabled = regs.bgsub_enabled[bg];
 

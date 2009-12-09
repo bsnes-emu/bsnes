@@ -1,7 +1,10 @@
+#include "cheateditor.moc"
+CheatEditorWindow *cheatEditorWindow;
+
 CheatEditorWindow::CheatEditorWindow() {
   layout = new QVBoxLayout;
   layout->setMargin(0);
-  layout->setSpacing(0);
+  layout->setSpacing(Style::WidgetSpacing);
   setLayout(layout);
 
   title = new QLabel("Cheat Code Editor");
@@ -16,12 +19,9 @@ CheatEditorWindow::CheatEditorWindow() {
   list->setRootIsDecorated(false);
   list->setContextMenuPolicy(Qt::CustomContextMenu);
   layout->addWidget(list);
-  layout->addSpacing(Style::WidgetSpacing);
 
   controlLayout = new QGridLayout;
-  controlLayout->setSpacing(Style::WidgetSpacing);
   layout->addLayout(controlLayout);
-  layout->addSpacing(Style::WidgetSpacing);
 
   descLabel = new QLabel("Description:");
   descLabel->setAlignment(Qt::AlignRight);
@@ -38,7 +38,6 @@ CheatEditorWindow::CheatEditorWindow() {
   controlLayout->addWidget(codeEdit, 1, 1);
 
   buttonLayout = new QHBoxLayout;
-  buttonLayout->setSpacing(Style::WidgetSpacing);
   layout->addLayout(buttonLayout);
 
   addCode = new QPushButton("Add Slot");

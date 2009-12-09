@@ -1,3 +1,6 @@
+#include "main.moc"
+MainWindow *mainWindow;
+
 MainWindow::MainWindow() : QbWindow(config().geometry.mainWindow) {
   setObjectName("main-window");
   setWindowTitle(string() << bsnesTitle << " v" << bsnesVersion);
@@ -84,8 +87,6 @@ MainWindow::MainWindow() : QbWindow(config().geometry.mainWindow) {
 
   settings_videoMode->addAction(settings_videoMode_correctAspectRatio = new QbCheckAction("Correct &Aspect Ratio", 0));
 
-  settings_videoMode->addAction(settings_videoMode_fullscreen = new QbCheckAction("&Fullscreen", 0));
-
   settings_videoMode->addSeparator();
 
   settings_videoMode->addAction(settings_videoMode_ntsc = new QbRadioAction("&NTSC", 0));
@@ -122,15 +123,15 @@ MainWindow::MainWindow() : QbWindow(config().geometry.mainWindow) {
   settings_emulationSpeed = settings->addMenu("Emulation &Speed");
   settings_emulationSpeed->setIcon(QIcon(":/16x16/appointment-new.png"));
 
-  settings_emulationSpeed->addAction(settings_emulationSpeed_slowest = new QbRadioAction("50%", 0));
+  settings_emulationSpeed->addAction(settings_emulationSpeed_slowest = new QbRadioAction("Slowest", 0));
 
-  settings_emulationSpeed->addAction(settings_emulationSpeed_slow = new QbRadioAction("75%", 0));
+  settings_emulationSpeed->addAction(settings_emulationSpeed_slow = new QbRadioAction("Slow", 0));
 
-  settings_emulationSpeed->addAction(settings_emulationSpeed_normal = new QbRadioAction("100%", 0));
+  settings_emulationSpeed->addAction(settings_emulationSpeed_normal = new QbRadioAction("Normal", 0));
 
-  settings_emulationSpeed->addAction(settings_emulationSpeed_fast = new QbRadioAction("150%", 0));
+  settings_emulationSpeed->addAction(settings_emulationSpeed_fast = new QbRadioAction("Fast", 0));
 
-  settings_emulationSpeed->addAction(settings_emulationSpeed_fastest = new QbRadioAction("200%", 0));
+  settings_emulationSpeed->addAction(settings_emulationSpeed_fastest = new QbRadioAction("Fastest", 0));
 
   settings_emulationSpeed->addSeparator();
 
@@ -144,25 +145,34 @@ MainWindow::MainWindow() : QbWindow(config().geometry.mainWindow) {
 
   tools = menuBar->addMenu("&Tools");
 
-  tools_cheatEditor = tools->addAction("Cheat &Editor ...");
-  tools_cheatEditor->setIcon(QIcon(":/16x16/accessories-text-editor.png"));
+  tools_movies = tools->addMenu("&Movies");
+  tools_movies->setIcon(QIcon(":/16x16/applications-multimedia.png"));
 
-  tools_cheatFinder = tools->addAction("Cheat &Finder ...");
-  tools_cheatFinder->setIcon(QIcon(":/16x16/system-search.png"));
+  tools_movies_play = tools_movies->addAction("Play Movie ...");
+  tools_movies_play->setIcon(QIcon(":/16x16/media-playback-start.png"));
 
-  tools_stateManager = tools->addAction("&State Manager ...");
-  tools_stateManager->setIcon(QIcon(":/16x16/system-file-manager.png"));
+  tools_movies_stop = tools_movies->addAction("Stop");
+  tools_movies_stop->setIcon(QIcon(":/16x16/media-playback-stop.png"));
 
-  tools->addSeparator();
+  tools_movies_recordFromPowerOn = tools_movies->addAction("Record Movie (and restart system)");
+  tools_movies_recordFromPowerOn->setIcon(QIcon(":/16x16/media-record.png"));
+
+  tools_movies_recordFromHere = tools_movies->addAction("Record Movie (starting from here)");
+  tools_movies_recordFromHere->setIcon(QIcon(":/16x16/media-record.png"));
 
   tools_captureScreenshot = tools->addAction("&Capture Screenshot");
   tools_captureScreenshot->setIcon(QIcon(":/16x16/image-x-generic.png"));
+
+  tools->addSeparator();
 
   tools_debugger = tools->addAction("&Debugger ...");
   tools_debugger->setIcon(QIcon(":/16x16/utilities-terminal.png"));
   #if !defined(DEBUGGER)
   tools_debugger->setVisible(false);
   #endif
+
+  tools_dialog = tools->addAction("&Tools Dialog ...");
+  tools_dialog->setIcon(QIcon(":/16x16/preferences-desktop.png"));
 
   help = menuBar->addMenu("&Help");
 
@@ -249,7 +259,6 @@ MainWindow::MainWindow() : QbWindow(config().geometry.mainWindow) {
   connect(settings_videoMode_4x, SIGNAL(triggered()), this, SLOT(setVideoMode4x()));
   connect(settings_videoMode_5x, SIGNAL(triggered()), this, SLOT(setVideoMode5x()));
   connect(settings_videoMode_correctAspectRatio, SIGNAL(triggered()), this, SLOT(toggleAspectCorrection()));
-  connect(settings_videoMode_fullscreen, SIGNAL(triggered()), this, SLOT(toggleFullscreen()));
   connect(settings_videoMode_ntsc, SIGNAL(triggered()), this, SLOT(setVideoNtsc()));
   connect(settings_videoMode_pal, SIGNAL(triggered()), this, SLOT(setVideoPal()));
   if(filter.opened()) {
@@ -268,11 +277,13 @@ MainWindow::MainWindow() : QbWindow(config().geometry.mainWindow) {
   connect(settings_emulationSpeed_syncVideo, SIGNAL(triggered()), this, SLOT(syncVideo()));
   connect(settings_emulationSpeed_syncAudio, SIGNAL(triggered()), this, SLOT(syncAudio()));
   connect(settings_configuration, SIGNAL(triggered()), this, SLOT(showConfigWindow()));
-  connect(tools_cheatEditor, SIGNAL(triggered()), this, SLOT(showCheatEditor()));
-  connect(tools_cheatFinder, SIGNAL(triggered()), this, SLOT(showCheatFinder()));
-  connect(tools_stateManager, SIGNAL(triggered()), this, SLOT(showStateManager()));
+  connect(tools_movies_play, SIGNAL(triggered()), this, SLOT(playMovie()));
+  connect(tools_movies_stop, SIGNAL(triggered()), this, SLOT(stopMovie()));
+  connect(tools_movies_recordFromPowerOn, SIGNAL(triggered()), this, SLOT(recordMovieFromPowerOn()));
+  connect(tools_movies_recordFromHere, SIGNAL(triggered()), this, SLOT(recordMovieFromHere()));
   connect(tools_captureScreenshot, SIGNAL(triggered()), this, SLOT(saveScreenshot()));
   connect(tools_debugger, SIGNAL(triggered()), this, SLOT(showDebugger()));
+  connect(tools_dialog, SIGNAL(triggered()), this, SLOT(showToolsDialog()));
   connect(help_documentation, SIGNAL(triggered()), this, SLOT(showDocumentation()));
   connect(help_license, SIGNAL(triggered()), this, SLOT(showLicense()));
   connect(help_about, SIGNAL(triggered()), this, SLOT(showAbout()));
@@ -308,7 +319,6 @@ void MainWindow::syncUi() {
   settings_videoMode_5x->setChecked(config().video.context->multiplier == 5);
 
   settings_videoMode_correctAspectRatio->setChecked(config().video.context->correctAspectRatio);
-  settings_videoMode_fullscreen->setChecked(config().video.isFullscreen);
   settings_videoMode_ntsc->setChecked(config().video.context->region == 0);
   settings_videoMode_pal->setChecked (config().video.context->region == 1);
 
@@ -332,6 +342,15 @@ void MainWindow::syncUi() {
 
   settings_emulationSpeed_syncVideo->setChecked(config().video.synchronize);
   settings_emulationSpeed_syncAudio->setChecked(config().audio.synchronize);
+
+  //movies contian save states to synchronize playback to recorded input
+  tools_movies->setEnabled(SNES::cartridge.loaded() && utility.saveStatesSupported());
+  if(tools_movies->isEnabled()) {
+    tools_movies_play->setEnabled(movie.state == Movie::Inactive);
+    tools_movies_stop->setEnabled(movie.state != Movie::Inactive);
+    tools_movies_recordFromPowerOn->setEnabled(movie.state == Movie::Inactive);
+    tools_movies_recordFromHere->setEnabled(movie.state == Movie::Inactive);
+  }
 }
 
 bool MainWindow::isActive() {
@@ -461,7 +480,6 @@ void MainWindow::setVideoMode4x() { utility.setScale(4); }
 void MainWindow::setVideoMode5x() { utility.setScale(5); }
 
 void MainWindow::toggleAspectCorrection() { utility.toggleAspectCorrection(); }
-void MainWindow::toggleFullscreen()       { utility.toggleFullscreen(); }
 
 void MainWindow::setVideoNtsc() { utility.setNtscMode(); }
 void MainWindow::setVideoPal()  { utility.setPalMode(); }
@@ -504,16 +522,39 @@ void MainWindow::syncAudio() { utility.toggleSynchronizeAudio(); }
 
 void MainWindow::showConfigWindow() { settingsWindow->show(); }
 
-void MainWindow::showCheatEditor()  { toolsWindow->showCheatEditor(); }
-void MainWindow::showCheatFinder()  { toolsWindow->showCheatFinder(); }
-void MainWindow::showStateManager() { toolsWindow->showStateManager(); }
+void MainWindow::playMovie() {
+  movie.chooseFile();
+  syncUi();
+}
+
+void MainWindow::stopMovie() {
+  movie.stop();
+  syncUi();
+}
+
+void MainWindow::recordMovieFromPowerOn() {
+  utility.modifySystemState(Utility::PowerCycle);
+  movie.record();
+  syncUi();
+}
+
+void MainWindow::recordMovieFromHere() {
+  movie.record();
+  syncUi();
+}
 
 void MainWindow::saveScreenshot() {
   //tell SNES::Interface to save a screenshot at the next video_refresh() event
   interface.saveScreenshot = true;
 }
 
-void MainWindow::showDebugger() { debugger->show(); }
+void MainWindow::showDebugger() {
+  #if defined(DEBUGGER)
+  debugger->show();
+  #endif
+}
+
+void MainWindow::showToolsDialog() { toolsWindow->show(); }
 
 void MainWindow::showDocumentation()  {
   QFile file(":/documentation.html");

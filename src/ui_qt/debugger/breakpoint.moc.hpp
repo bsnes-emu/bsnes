@@ -25,4 +25,6 @@ public:
   BreakpointItem *breakpoint[SNES::Debugger::Breakpoints];
 
   BreakpointEditor();
-} *breakpointEditor;
+};
+
+extern BreakpointEditor *breakpointEditor;

@@ -1,7 +1,10 @@
+#include "video.moc"
+VideoSettingsWindow *videoSettingsWindow;
+
 VideoSettingsWindow::VideoSettingsWindow() {
   layout = new QVBoxLayout;
   layout->setMargin(0);
-  layout->setSpacing(0);
+  layout->setSpacing(Style::WidgetSpacing);
   layout->setAlignment(Qt::AlignTop);
   setLayout(layout);
 
@@ -9,70 +12,65 @@ VideoSettingsWindow::VideoSettingsWindow() {
   title->setProperty("class", "title");
   layout->addWidget(title);
 
-  sliders = new QGridLayout; {
-    contrastLabel = new QLabel("Contrast adjust:");
-    sliders->addWidget(contrastLabel, 0, 0);
-
-    contrastValue = new QLabel;
-    contrastValue->setAlignment(Qt::AlignHCenter);
-    contrastValue->setMinimumWidth(contrastValue->fontMetrics().width("+100%"));
-    sliders->addWidget(contrastValue, 0, 1);
-
-    contrast = new QSlider(Qt::Horizontal);
-    contrast->setMinimum(-95);
-    contrast->setMaximum(+95);
-    sliders->addWidget(contrast, 0, 2);
-
-    brightnessLabel = new QLabel("Brightness adjust:");
-    sliders->addWidget(brightnessLabel, 1, 0);
-
-    brightnessValue = new QLabel;
-    brightnessValue->setAlignment(Qt::AlignHCenter);
-    sliders->addWidget(brightnessValue, 1, 1);
-
-    brightness = new QSlider(Qt::Horizontal);
-    brightness->setMinimum(-95);
-    brightness->setMaximum(+95);
-    sliders->addWidget(brightness, 1, 2);
-
-    gammaLabel = new QLabel("Gamma adjust:");
-    sliders->addWidget(gammaLabel, 2, 0);
-
-    gammaValue = new QLabel;
-    gammaValue->setAlignment(Qt::AlignHCenter);
-    sliders->addWidget(gammaValue, 2, 1);
-
-    gamma = new QSlider(Qt::Horizontal);
-    gamma->setMinimum(-95);
-    gamma->setMaximum(+95);
-    sliders->addWidget(gamma, 2, 2);
-
-    scanlineLabel = new QLabel("Scanline adjust:");
-    sliders->addWidget(scanlineLabel, 3, 0);
-
-    scanlineValue = new QLabel;
-    scanlineValue->setAlignment(Qt::AlignHCenter);
-    sliders->addWidget(scanlineValue, 3, 1);
-
-    scanline = new QSlider(Qt::Horizontal);
-    scanline->setMinimum(0);
-    scanline->setMaximum(20);
-    scanline->setPageStep(4);
-    sliders->addWidget(scanline, 3, 2);
-  }
-  sliders->setSpacing(Style::WidgetSpacing);
+  sliders = new QGridLayout;
   layout->addLayout(sliders);
-  layout->addSpacing(Style::WidgetSpacing);
 
-  options = new QHBoxLayout; {
-    options->setMargin(0);
+  contrastLabel = new QLabel("Contrast adjust:");
+  sliders->addWidget(contrastLabel, 0, 0);
 
-    enableGammaRamp = new QCheckBox("Simulate NTSC TV gamma ramp");
-    enableGammaRamp->setToolTip("Lower monitor gamma to more accurately match a CRT television");
-    options->addWidget(enableGammaRamp);
-  }
-  options->setSpacing(Style::WidgetSpacing);
+  contrastValue = new QLabel;
+  contrastValue->setAlignment(Qt::AlignHCenter);
+  contrastValue->setMinimumWidth(contrastValue->fontMetrics().width("+100%"));
+  sliders->addWidget(contrastValue, 0, 1);
+
+  contrast = new QSlider(Qt::Horizontal);
+  contrast->setMinimum(-95);
+  contrast->setMaximum(+95);
+  sliders->addWidget(contrast, 0, 2);
+
+  brightnessLabel = new QLabel("Brightness adjust:");
+  sliders->addWidget(brightnessLabel, 1, 0);
+
+  brightnessValue = new QLabel;
+  brightnessValue->setAlignment(Qt::AlignHCenter);
+  sliders->addWidget(brightnessValue, 1, 1);
+
+  brightness = new QSlider(Qt::Horizontal);
+  brightness->setMinimum(-95);
+  brightness->setMaximum(+95);
+  sliders->addWidget(brightness, 1, 2);
+
+  gammaLabel = new QLabel("Gamma adjust:");
+  sliders->addWidget(gammaLabel, 2, 0);
+
+  gammaValue = new QLabel;
+  gammaValue->setAlignment(Qt::AlignHCenter);
+  sliders->addWidget(gammaValue, 2, 1);
+
+  gamma = new QSlider(Qt::Horizontal);
+  gamma->setMinimum(-95);
+  gamma->setMaximum(+95);
+  sliders->addWidget(gamma, 2, 2);
+
+  scanlineLabel = new QLabel("Scanline adjust:");
+  sliders->addWidget(scanlineLabel, 3, 0);
+
+  scanlineValue = new QLabel;
+  scanlineValue->setAlignment(Qt::AlignHCenter);
+  sliders->addWidget(scanlineValue, 3, 1);
+
+  scanline = new QSlider(Qt::Horizontal);
+  scanline->setMinimum(0);
+  scanline->setMaximum(20);
+  scanline->setPageStep(4);
+  sliders->addWidget(scanline, 3, 2);
+
+  options = new QHBoxLayout;
   layout->addLayout(options);
+
+  enableGammaRamp = new QCheckBox("Simulate NTSC TV gamma ramp");
+  enableGammaRamp->setToolTip("Lower monitor gamma to more accurately match a CRT television");
+  options->addWidget(enableGammaRamp);
 
   pixelShaderWindow = new PixelShaderWindow;
   layout->addWidget(pixelShaderWindow);

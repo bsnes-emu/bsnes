@@ -22,10 +22,6 @@ public:
   bool step_cpu;
   bool step_smp;
 
-  file tracefile;
-  bool trace_cpu;
-  bool trace_smp;
-
   enum MemorySource { CPUBus, APURAM, VRAM, OAM, CGRAM };
   uint8 read(MemorySource, unsigned addr);
   void write(MemorySource, unsigned addr, uint8 data);

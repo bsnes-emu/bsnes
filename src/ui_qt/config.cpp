@@ -44,8 +44,13 @@ Configuration::Configuration() {
   attach(system.input = "", "system.input");
   attach(system.crashedOnLastRun = false, "system.crashedOnLastRun");
   attach(system.speed = 2, "system.speed");
+  attach(system.speedSlowest =  50, "system.speedSlowest");
+  attach(system.speedSlow    =  75, "system.speedSlow");
+  attach(system.speedNormal  = 100, "system.speedNormal");
+  attach(system.speedFast    = 150, "system.speedFast");
+  attach(system.speedFastest = 200, "system.speedFastest");
   attach(system.autoSaveMemory = false, "system.autoSaveMemory", "Automatically save cartridge back-up RAM once every minute");
-  attach(system.autoHideMenus = false, "system.autoHideMenus", "Automatically hide the menu and status bars when entering fullscreen mode");
+  attach(system.rewindEnabled = false, "system.rewindEnabled", "Automatically save states periodically to allow auto-rewind support");
 
   attach(diskBrowser.showPanel = true, "diskBrowser.showPanel");
 
@@ -65,6 +70,7 @@ Configuration::Configuration() {
   attach(path.vertexShader   = "", "path.vertexShader");
 
   attach(path.current.folder    = "", "path.current.folder");
+  attach(path.current.movie     = "", "path.current.movie");
   attach(path.current.shader    = "", "path.current.shader");
   attach(path.current.cartridge = "", "path.current.cartridge");
   attach(path.current.bsx       = "", "path.current.bsx");
@@ -121,6 +127,7 @@ Configuration::Configuration() {
   attach(geometry.settingsWindow   = "", "geometry.settingsWindow");
   attach(geometry.toolsWindow      = "", "geometry.toolsWindow");
   attach(geometry.debugger         = "", "geometry.debugger");
+  attach(geometry.disassembler     = "", "geometry.disassembler");
   attach(geometry.breakpointEditor = "", "geometry.breakpointEditor");
   attach(geometry.memoryEditor     = "", "geometry.memoryEditor");
   attach(geometry.vramViewer       = "", "geometry.vramViewer");

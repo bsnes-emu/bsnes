@@ -1,10 +1,3 @@
-#include "video.moc"
-#include "pixelshader.moc"
-#include "audio.moc"
-#include "input.moc"
-#include "paths.moc"
-#include "advanced.moc"
-
 class SettingsWindow : public QbWindow {
   Q_OBJECT
 
@@ -24,4 +17,6 @@ public:
 
 public slots:
   void itemChanged();
-} *settingsWindow;
+};
+
+extern SettingsWindow *settingsWindow;

@@ -1,3 +1,7 @@
+#include "diskbrowser.moc"
+FolderCreator *folderCreator;
+DiskBrowser *diskBrowser;
+
 //=============
 //FolderCreator
 //=============

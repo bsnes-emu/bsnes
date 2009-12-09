@@ -1,9 +1,14 @@
-#include "video.cpp"
+#include "../ui-base.hpp"
+
 #include "pixelshader.cpp"
+#include "video.cpp"
 #include "audio.cpp"
 #include "input.cpp"
 #include "paths.cpp"
 #include "advanced.cpp"
+
+#include "settings.moc"
+SettingsWindow *settingsWindow;
 
 SettingsWindow::SettingsWindow() : QbWindow(config().geometry.settingsWindow) {
   setObjectName("settings-window");

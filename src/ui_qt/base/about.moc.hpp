@@ -9,4 +9,6 @@ public:
   QLabel *info;
 
   AboutWindow();
-} *aboutWindow;
+};
+
+extern AboutWindow *aboutWindow;

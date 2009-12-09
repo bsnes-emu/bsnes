@@ -1,7 +1,10 @@
+#include "pixelshader.moc"
+PixelShaderWindow *pixelShaderWindow;
+
 PixelShaderWindow::PixelShaderWindow() {
   layout = new QVBoxLayout;
   layout->setMargin(0);
-  layout->setSpacing(0);
+  layout->setSpacing(Style::WidgetSpacing);
   layout->setAlignment(Qt::AlignTop);
   setLayout(layout);
 
@@ -10,7 +13,7 @@ PixelShaderWindow::PixelShaderWindow() {
   layout->addWidget(title);
 
   gridLayout = new QGridLayout;
-  gridLayout->setHorizontalSpacing(Style::WidgetSpacing);
+  gridLayout->setVerticalSpacing(0);
   layout->addLayout(gridLayout);
 
   fragmentLabel = new QLabel("Fragment shader:");

@@ -5,18 +5,18 @@ uint16 SMPcore::__relb(int8 offset, int op_len) {
   return pc + offset;
 }
 
-void SMPcore::disassemble_opcode(char *output) {
+void SMPcore::disassemble_opcode(char *output, uint16 addr) {
   char *s, t[512];
   uint8  op, op0, op1;
   uint16 opw, opdp0, opdp1;
   s = output;
 
-  sprintf(s, "..%.4x ", regs.pc);
+  sprintf(s, "..%.4x ", addr);
 
   //TODO: read from IPLROM when applicable
-  op  = memory::apuram[(uint16)(regs.pc + 0)];
-  op0 = memory::apuram[(uint16)(regs.pc + 1)];
-  op1 = memory::apuram[(uint16)(regs.pc + 2)];
+  op  = memory::apuram[(uint16)(addr + 0)];
+  op0 = memory::apuram[(uint16)(addr + 1)];
+  op1 = memory::apuram[(uint16)(addr + 2)];
   opw = (op0) | (op1 << 8);
   opdp0 = ((unsigned)regs.p.p << 8) + op0;
   opdp1 = ((unsigned)regs.p.p << 8) + op1;

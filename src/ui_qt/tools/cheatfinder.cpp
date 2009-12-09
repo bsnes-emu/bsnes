@@ -1,7 +1,10 @@
+#include "cheatfinder.moc"
+CheatFinderWindow *cheatFinderWindow;
+
 CheatFinderWindow::CheatFinderWindow() {
   layout = new QVBoxLayout;
   layout->setMargin(0);
-  layout->setSpacing(0);
+  layout->setSpacing(Style::WidgetSpacing);
   setLayout(layout);
 
   title = new QLabel("Cheat Code Finder");
@@ -15,9 +18,9 @@ CheatFinderWindow::CheatFinderWindow() {
   list->sortByColumn(0, Qt::AscendingOrder);
   list->setRootIsDecorated(false);
   layout->addWidget(list);
-  layout->addSpacing(Style::WidgetSpacing);
 
   controlLayout = new QGridLayout;
+  controlLayout->setSpacing(0);
   layout->addLayout(controlLayout);
 
   sizeLabel = new QLabel("Data size: ");

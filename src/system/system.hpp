@@ -2,7 +2,6 @@
 #include "debugger/debugger.hpp"
 #include "interface/interface.hpp"
 #include "scheduler/scheduler.hpp"
-#include "statemanager/statemanager.hpp"
 
 #include "video/video.hpp"
 #include "audio/audio.hpp"
@@ -17,23 +16,24 @@ public:
   enum ExpansionPortDevice { ExpansionNone = 0, ExpansionBSX = 1 };
 
   //system functions
-  virtual void run();
-  virtual void runtosave();
+  void run();
+  void runtosave();
 
-  virtual void init(Interface*);
-  virtual void term();
-  virtual void power();
-  virtual void reset();
-  virtual void unload();
+  void init(Interface*);
+  void term();
+  void power();
+  void reset();
+  void unload();
 
-  virtual void frame();
-  virtual void scanline();
+  void frame();
+  void scanline();
 
   //return *active* region / expansion port device information
   //settings cached upon power-on
   Region region() const;
   ExpansionPortDevice expansion() const;
 
+  unsigned serialize_size() const;
   serializer serialize();
   bool unserialize(serializer&);
 
@@ -41,7 +41,7 @@ public:
   virtual ~System() {}
 
 private:
-  unsigned serialize_size;
+  unsigned serializer_size;
   void serialize(serializer&);
   void serialize_all(serializer&);
   void serialize_init();

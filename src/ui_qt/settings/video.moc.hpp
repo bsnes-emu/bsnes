@@ -29,4 +29,6 @@ public slots:
   void gammaAdjust(int);
   void scanlineAdjust(int);
   void gammaRampToggle(int);
-} *videoSettingsWindow;
+};
+
+extern VideoSettingsWindow *videoSettingsWindow;

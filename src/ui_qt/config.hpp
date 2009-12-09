@@ -4,8 +4,13 @@ public:
     string video, audio, input;
     bool crashedOnLastRun;
     unsigned speed;
+    unsigned speedSlowest;
+    unsigned speedSlow;
+    unsigned speedNormal;
+    unsigned speedFast;
+    unsigned speedFastest;
     bool autoSaveMemory;
-    bool autoHideMenus;
+    bool rewindEnabled;
   } system;
 
   struct File {
@@ -26,7 +31,7 @@ public:
     string fragmentShader, vertexShader;
 
     struct Current {
-      string folder, shader, cartridge, bsx, st, sgb;
+      string folder, movie, shader, cartridge, bsx, st, sgb;
       unsigned filter;  //current active filter for "Load Cartridge"
     } current;
   } path;
@@ -69,6 +74,7 @@ public:
     string settingsWindow;
     string toolsWindow;
     string debugger;
+    string disassembler;
     string breakpointEditor;
     string memoryEditor;
     string vramViewer;

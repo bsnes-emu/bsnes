@@ -30,6 +30,8 @@ public:
   QRadioButton *focusPause;
   QRadioButton *focusIgnore;
   QRadioButton *focusAllow;
+  QLabel *rewindTitle;
+  QCheckBox *rewindEnable;
 
   void initializeUi();
   AdvancedSettingsWindow();
@@ -46,4 +48,7 @@ public slots:
   void pauseWithoutFocus();
   void ignoreInputWithoutFocus();
   void allowInputWithoutFocus();
-} *advancedSettingsWindow;
+  void toggleRewindEnable();
+};
+
+extern AdvancedSettingsWindow *advancedSettingsWindow;

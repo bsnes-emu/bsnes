@@ -1,3 +1,6 @@
+#include "htmlviewer.moc"
+HtmlViewerWindow *htmlViewerWindow;
+
 HtmlViewerWindow::HtmlViewerWindow() : QbWindow(config().geometry.htmlViewerWindow) {
   setObjectName("html-window");
   resize(560, 480);

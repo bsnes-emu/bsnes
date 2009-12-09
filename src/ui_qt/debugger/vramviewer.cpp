@@ -1,3 +1,6 @@
+#include "vramviewer.moc"
+VramViewer *vramViewer;
+
 VramViewer::VramViewer() : QbWindow(config().geometry.vramViewer) {
   setObjectName("vram-viewer");
   setWindowTitle("Video RAM Viewer");

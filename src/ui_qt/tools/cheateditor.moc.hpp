@@ -31,4 +31,6 @@ public slots:
   void toggleCodeStatus();
   void addNewCode();
   void deleteSelectedCode();
-} *cheatEditorWindow;
+};
+
+extern CheatEditorWindow *cheatEditorWindow;

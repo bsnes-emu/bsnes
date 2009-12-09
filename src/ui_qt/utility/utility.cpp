@@ -1,5 +1,6 @@
+Utility utility;
+
 #include "cartridge.cpp"
-#include "state.cpp"
 #include "window.cpp"
 
 void Utility::inputEvent(uint16_t scancode) {
@@ -104,7 +105,13 @@ void Utility::updateSoftwareFilter() {
 void Utility::updateEmulationSpeed() {
   config().system.speed = max(0, min(4, (signed)config().system.speed));
 
-  double scale[] = { 0.50, 0.75, 1.00, 1.50, 2.00 };
+  double scale[] = {
+    config().system.speedSlowest / 100.0,
+    config().system.speedSlow    / 100.0,
+    config().system.speedNormal  / 100.0,
+    config().system.speedFast    / 100.0,
+    config().system.speedFastest / 100.0,
+  };
   unsigned outfreq = config().audio.outputFrequency;
   unsigned infreq  = config().audio.inputFrequency * scale[config().system.speed] + 0.5;
 

@@ -53,7 +53,6 @@ public:
       QbRadioAction *settings_videoMode_4x;
       QbRadioAction *settings_videoMode_5x;
       QbCheckAction *settings_videoMode_correctAspectRatio;
-      QbCheckAction *settings_videoMode_fullscreen;
       QbRadioAction *settings_videoMode_ntsc;
       QbRadioAction *settings_videoMode_pal;
     QMenu *settings_videoFilter;
@@ -72,11 +71,14 @@ public:
       QbCheckAction *settings_emulationSpeed_syncAudio;
     QAction *settings_configuration;
   QMenu *tools;
-    QAction *tools_cheatEditor;
-    QAction *tools_cheatFinder;
-    QAction *tools_stateManager;
+    QMenu *tools_movies;
+      QAction *tools_movies_play;
+      QAction *tools_movies_stop;
+      QAction *tools_movies_recordFromPowerOn;
+      QAction *tools_movies_recordFromHere;
     QAction *tools_captureScreenshot;
     QAction *tools_debugger;
+    QAction *tools_dialog;
   QMenu *help;
     QAction *help_documentation;
     QAction *help_license;
@@ -120,7 +122,6 @@ public slots:
   void setVideoMode4x();
   void setVideoMode5x();
   void toggleAspectCorrection();
-  void toggleFullscreen();
   void setVideoNtsc();
   void setVideoPal();
   void configureFilter();
@@ -135,12 +136,16 @@ public slots:
   void syncVideo();
   void syncAudio();
   void showConfigWindow();
-  void showCheatEditor();
-  void showCheatFinder();
-  void showStateManager();
+  void playMovie();
+  void stopMovie();
+  void recordMovieFromPowerOn();
+  void recordMovieFromHere();
   void saveScreenshot();
   void showDebugger();
+  void showToolsDialog();
   void showDocumentation();
   void showLicense();
   void showAbout();
-} *mainWindow;
+};
+
+extern MainWindow *mainWindow;

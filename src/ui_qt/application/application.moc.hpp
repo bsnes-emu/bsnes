@@ -41,4 +41,6 @@ public:
 
 public slots:
   void run();
-} application;
+};
+
+extern Application application;

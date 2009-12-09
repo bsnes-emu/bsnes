@@ -9,6 +9,8 @@ namespace ruby {
 
 class pVideoWGL : public OpenGL {
 public:
+  BOOL (APIENTRY *glSwapInterval)(int);
+
   HDC display;
   HGLRC wglcontext;
   HWND window;
@@ -27,7 +29,6 @@ public:
     if(name == Video::Handle) return true;
     if(name == Video::Synchronize) return true;
     if(name == Video::Filter) return true;
-    if(name == Video::GLSL) return true;
     if(name == Video::FragmentShader) return true;
     if(name == Video::VertexShader) return true;
     return false;
@@ -105,7 +106,7 @@ public:
     memset(&pfd, 0, sizeof(PIXELFORMATDESCRIPTOR));
     pfd.nSize      = sizeof(PIXELFORMATDESCRIPTOR);
     pfd.nVersion   = 1;
-    pfd.dwFlags    = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | (settings.synchronize ? PFD_DOUBLEBUFFER : 0);
+    pfd.dwFlags    = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
     pfd.iPixelType = PFD_TYPE_RGBA;
 
     display = GetDC(settings.handle);
@@ -120,9 +121,8 @@ public:
     settings.height = 256;
 
     //vertical synchronization
-    BOOL (APIENTRY *glSwapInterval)(int);
-    glSwapInterval = (BOOL (APIENTRY*)(int))glGetProcAddress("wglSwapIntervalEXT");
-    if(glSwapInterval) glSwapInterval(settings.synchronize);
+    if(!glSwapInterval) glSwapInterval = (BOOL (APIENTRY*)(int))glGetProcAddress("wglSwapIntervalEXT");
+    if( glSwapInterval) glSwapInterval(settings.synchronize);
 
     return true;
   }
@@ -136,7 +136,7 @@ public:
     }
   }
 
-  pVideoWGL() {
+  pVideoWGL() : glSwapInterval(0) {
     settings.handle = 0;
     settings.synchronize = false;
     settings.filter = 0;

@@ -1,21 +1,3 @@
-#include "../base/main.moc"
-#include "../base/diskbrowser.moc"
-#include "../base/loader.moc"
-#include "../base/htmlviewer.moc"
-#include "../base/about.moc"
-
-#include "../settings/settings.moc"
-#include "../tools/tools.moc"
-
-#include "../base/main.cpp"
-#include "../base/diskbrowser.cpp"
-#include "../base/loader.cpp"
-#include "../base/htmlviewer.cpp"
-#include "../base/about.cpp"
-
-#include "../settings/settings.cpp"
-#include "../tools/tools.cpp"
-
 void Application::init() {
   if(config().system.crashedOnLastRun == true) {
     //emulator crashed on last run, disable all drivers
@@ -53,7 +35,9 @@ void Application::init() {
   utility.updateFullscreenState();
   QApplication::processEvents();
 
+  #if defined(DEBUGGER)
   debugger = new Debugger;
+  #endif
   settingsWindow = new SettingsWindow;
   toolsWindow = new ToolsWindow;
 

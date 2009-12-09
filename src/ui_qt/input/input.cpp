@@ -1,3 +1,5 @@
+#include "../ui-base.hpp"
+
 #include "controller.cpp"
 #include "userinterface-general.cpp"
 #include "userinterface-system.cpp"
@@ -112,7 +114,9 @@ AnalogInput::AnalogInput(const char *label, const char *configName) : MappedInpu
 
 void HotkeyInput::poll() {
   DigitalInput::poll();
-  if(state && state != previousState && mainWindow->isActive()) pressed();
+  if(mainWindow->isActive() && state != previousState) {
+    state ? pressed() : released();
+  }
 }
 
 HotkeyInput::HotkeyInput(const char *label, const char *configName) : DigitalInput(label, configName) {
@@ -227,9 +231,18 @@ void InputMapper::cache() {
 }
 
 int16_t InputMapper::status(bool port, unsigned device, unsigned index, unsigned id) {
-  if(port == InputCategory::Port1 && port1) return port1->status(index, id);
-  if(port == InputCategory::Port2 && port2) return port2->status(index, id);
-  return 0;
+  int16_t result = 0;
+
+  if(port == InputCategory::Port1 && port1) result = port1->status(index, id);
+  if(port == InputCategory::Port2 && port2) result = port2->status(index, id);
+
+  if(movie.state == Movie::Playback) {
+    result = movie.read();
+  } else if(movie.state == Movie::Record) {
+    movie.write(result);
+  }
+
+  return result;
 }
 
 string InputMapper::modifierString() const {

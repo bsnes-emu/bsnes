@@ -6,9 +6,20 @@ namespace UserInterfaceStates {
 //for the sake of users, this is displayed as 1-10 in the GUI
 unsigned activeState = 0;
 
+struct Rewind : HotkeyInput {
+  void pressed() {
+    ::state.rewind();
+  }
+
+  Rewind() : HotkeyInput("Rewind", "input.userInterface.states.rewind") {
+    name = "KB0::Backspace";
+    userInterfaceStates.attach(this);
+  }
+} rewind;
+
 struct LoadActiveState : HotkeyInput {
   void pressed() {
-    utility.quickLoad(activeState);
+    ::state.load(activeState);
   }
 
   LoadActiveState() : HotkeyInput("Load Active Quick State", "input.userInterface.states.loadActiveQuickState") {
@@ -19,7 +30,7 @@ struct LoadActiveState : HotkeyInput {
 
 struct SaveActiveState : HotkeyInput {
   void pressed() {
-    utility.quickSave(activeState);
+    ::state.save(activeState);
   }
 
   SaveActiveState() : HotkeyInput("Save Active Quick State", "input.userInterface.states.saveActiveQuickState") {
@@ -27,6 +38,28 @@ struct SaveActiveState : HotkeyInput {
     userInterfaceStates.attach(this);
   }
 } saveActiveState;
+
+struct DecrementAndLoadState : HotkeyInput {
+  void pressed() {
+    activeState = (activeState + 10 - 1) % 10;
+    ::state.load(activeState);
+  }
+
+  DecrementAndLoadState() : HotkeyInput("Decrement and Load State", "input.userInterface.states.decrementAndLoadState") {
+    userInterfaceStates.attach(this);
+  }
+} decrementAndLoadState;
+
+struct SaveAndIncrementState : HotkeyInput {
+  void pressed() {
+    ::state.save(activeState);
+    activeState = (activeState + 10 + 1) % 10;
+  }
+
+  SaveAndIncrementState() : HotkeyInput("Save and Increment State", "input.userInterface.states.saveAndIncrementState") {
+    userInterfaceStates.attach(this);
+  }
+} saveAndIncrementState;
 
 struct DecrementActiveState : HotkeyInput {
   void pressed() {
@@ -54,7 +87,7 @@ struct IncrementActiveState : HotkeyInput {
 
 struct LoadState1 : HotkeyInput {
   void pressed() {
-    utility.quickLoad(0);
+    ::state.load(0);
   }
 
   LoadState1() : HotkeyInput("Load Quick State 1", "input.userInterface.states.loadQuickState1") {
@@ -64,7 +97,7 @@ struct LoadState1 : HotkeyInput {
 
 struct LoadState2 : HotkeyInput {
   void pressed() {
-    utility.quickLoad(1);
+    ::state.load(1);
   }
 
   LoadState2() : HotkeyInput("Load Quick State 2", "input.userInterface.states.loadQuickState2") {
@@ -74,7 +107,7 @@ struct LoadState2 : HotkeyInput {
 
 struct LoadState3 : HotkeyInput {
   void pressed() {
-    utility.quickLoad(2);
+    ::state.load(2);
   }
 
   LoadState3() : HotkeyInput("Load Quick State 3", "input.userInterface.states.loadQuickState3") {
@@ -84,7 +117,7 @@ struct LoadState3 : HotkeyInput {
 
 struct SaveState1 : HotkeyInput {
   void pressed() {
-    utility.quickSave(0);
+    ::state.save(0);
   }
 
   SaveState1() : HotkeyInput("Save Quick State 1", "input.userInterface.states.saveQuickState1") {
@@ -94,7 +127,7 @@ struct SaveState1 : HotkeyInput {
 
 struct SaveState2 : HotkeyInput {
   void pressed() {
-    utility.quickSave(1);
+    ::state.save(1);
   }
 
   SaveState2() : HotkeyInput("Save Quick State 2", "input.userInterface.states.saveQuickState2") {
@@ -104,7 +137,7 @@ struct SaveState2 : HotkeyInput {
 
 struct SaveState3 : HotkeyInput {
   void pressed() {
-    utility.quickSave(2);
+    ::state.save(2);
   }
 
   SaveState3() : HotkeyInput("Save Quick State 3", "input.userInterface.states.saveQuickState3") {

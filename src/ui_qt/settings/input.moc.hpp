@@ -58,4 +58,6 @@ private:
   void beginAssignment();
   void assignObject(MappedInput *object);
   void endAssignment();
-} *inputSettingsWindow;
+};
+
+extern InputSettingsWindow *inputSettingsWindow;

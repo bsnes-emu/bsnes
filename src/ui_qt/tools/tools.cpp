@@ -1,6 +1,12 @@
+#include "../ui-base.hpp"
+
+#include "tools.moc"
+ToolsWindow *toolsWindow;
+
 #include "cheateditor.cpp"
 #include "cheatfinder.cpp"
 #include "statemanager.cpp"
+#include "layertoggle.cpp"
 
 ToolsWindow::ToolsWindow() : QbWindow(config().geometry.toolsWindow) {
   setObjectName("tools-window");
@@ -19,6 +25,7 @@ ToolsWindow::ToolsWindow() : QbWindow(config().geometry.toolsWindow) {
   list->addTopLevelItem(cheatEditor = new QTreeWidgetItem(QStringList() << "Cheat Editor"));
   list->addTopLevelItem(cheatFinder = new QTreeWidgetItem(QStringList() << "Cheat Finder"));
   list->addTopLevelItem(stateManager = new QTreeWidgetItem(QStringList() << "State Manager"));
+  list->addTopLevelItem(layerToggle = new QTreeWidgetItem(QStringList() << "Layer Toggle"));
   list->setCurrentItem(cheatEditor);
   list->setHeaderHidden(true);
   list->setRootIsDecorated(false);
@@ -28,6 +35,7 @@ ToolsWindow::ToolsWindow() : QbWindow(config().geometry.toolsWindow) {
   cheatEditor->setIcon(0, QIcon(":/22x22/accessories-text-editor.png"));
   cheatFinder->setIcon(0, QIcon(":/22x22/system-search.png"));
   stateManager->setIcon(0, QIcon(":/22x22/system-file-manager.png"));
+  layerToggle->setIcon(0, QIcon(":/22x22/image-x-generic.png"));
 
   panel = new QWidget;
   panel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -37,14 +45,16 @@ ToolsWindow::ToolsWindow() : QbWindow(config().geometry.toolsWindow) {
   splitter->setStretchFactor(0, 2);
   splitter->setStretchFactor(1, 5);
 
-  cheatEditorWindow  = new CheatEditorWindow;
-  cheatFinderWindow  = new CheatFinderWindow;
+  cheatEditorWindow = new CheatEditorWindow;
+  cheatFinderWindow = new CheatFinderWindow;
   stateManagerWindow = new StateManagerWindow;
+  layerToggleWindow = new LayerToggleWindow;
 
   panelLayout = new QStackedLayout(panel);
   panelLayout->addWidget(cheatEditorWindow);
   panelLayout->addWidget(cheatFinderWindow);
   panelLayout->addWidget(stateManagerWindow);
+  panelLayout->addWidget(layerToggleWindow);
   panel->setLayout(panelLayout);
 
   connect(list, SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)), this, SLOT(itemChanged()));
@@ -55,22 +65,8 @@ ToolsWindow::ToolsWindow() : QbWindow(config().geometry.toolsWindow) {
 void ToolsWindow::itemChanged() {
   QTreeWidgetItem *item = list->currentItem();
 
-  if(item == cheatEditor)  panelLayout->setCurrentWidget(cheatEditorWindow);
-  if(item == cheatFinder)  panelLayout->setCurrentWidget(cheatFinderWindow);
+  if(item == cheatEditor) panelLayout->setCurrentWidget(cheatEditorWindow);
+  if(item == cheatFinder) panelLayout->setCurrentWidget(cheatFinderWindow);
   if(item == stateManager) panelLayout->setCurrentWidget(stateManagerWindow);
-}
-
-void ToolsWindow::showCheatEditor() {
-  list->setCurrentItem(cheatEditor);
-  show();
-}
-
-void ToolsWindow::showCheatFinder() {
-  list->setCurrentItem(cheatFinder);
-  show();
-}
-
-void ToolsWindow::showStateManager() {
-  list->setCurrentItem(stateManager);
-  show();
+  if(item == layerToggle) panelLayout->setCurrentWidget(layerToggleWindow);
 }

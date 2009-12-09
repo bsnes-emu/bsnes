@@ -1,7 +1,16 @@
+#include "../ui-base.hpp"
+
+#if defined(DEBUGGER)
+
+#include "debugger.moc"
+Debugger *debugger;
+
 #include "hexeditor.cpp"
+#include "disassembler.cpp"
 #include "breakpoint.cpp"
 #include "memory.cpp"
 #include "vramviewer.cpp"
+#include "tracer.cpp"
 
 Debugger::Debugger() : QbWindow(config().geometry.debugger) {
   setObjectName("debugger");
@@ -16,16 +25,13 @@ Debugger::Debugger() : QbWindow(config().geometry.debugger) {
   layout->setMenuBar(menu);
 
   tools = menu->addMenu("Tools");
+  tools_disassembler = tools->addAction("Disassembler ...");
   tools_breakpoint = tools->addAction("Breakpoint Editor ...");
-  tools_breakpoint->setIcon(QIcon(":/16x16/process-stop.png"));
   tools_memory = tools->addAction("Memory Editor ...");
-  tools_memory->setIcon(QIcon(":/16x16/text-x-generic.png"));
   tools_vramViewer = tools->addAction("Video RAM Viewer ...");
-  tools_vramViewer->setIcon(QIcon(":/16x16/image-x-generic.png"));
 
   miscOptions = menu->addMenu("Misc");
   miscOptions_clear = miscOptions->addAction("Clear Console");
-  miscOptions_clear->setIcon(QIcon(":/16x16/document-new.png"));
 
   console = new QTextEdit;
   console->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -52,22 +58,32 @@ Debugger::Debugger() : QbWindow(config().geometry.debugger) {
 
   controlLayout->addSpacing(Style::WidgetSpacing);
 
-  stepCPU = new QCheckBox("Step CPU");
+  stepCPU = new QCheckBox("Step S-CPU");
   controlLayout->addWidget(stepCPU);
 
-  stepSMP = new QCheckBox("Step SMP");
+  stepSMP = new QCheckBox("Step S-SMP");
   controlLayout->addWidget(stepSMP);
 
-  traceCPU = new QCheckBox("Trace CPU opcodes");
+  traceCPU = new QCheckBox("Trace S-CPU opcodes");
   controlLayout->addWidget(traceCPU);
 
-  traceSMP = new QCheckBox("Trace SMP opcodes");
+  traceSMP = new QCheckBox("Trace S-SMP opcodes");
   controlLayout->addWidget(traceSMP);
+
+  traceMask = new QCheckBox("Enable trace mask");
+  controlLayout->addWidget(traceMask);
 
   spacer = new QWidget;
   spacer->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Expanding);
   controlLayout->addWidget(spacer);
 
+  disassembler = new Disassembler;
+  breakpointEditor = new BreakpointEditor;
+  memoryEditor = new MemoryEditor;
+  vramViewer = new VramViewer;
+  tracer = new Tracer;
+
+  connect(tools_disassembler, SIGNAL(triggered()), this, SLOT(showDisassembler()));
   connect(tools_breakpoint, SIGNAL(triggered()), this, SLOT(showBreakpointEditor()));
   connect(tools_memory, SIGNAL(triggered()), this, SLOT(showMemoryEditor()));
   connect(tools_vramViewer, SIGNAL(triggered()), this, SLOT(showVramViewer()));
@@ -77,16 +93,37 @@ Debugger::Debugger() : QbWindow(config().geometry.debugger) {
   connect(stepInstruction, SIGNAL(released()), this, SLOT(stepAction()));
   connect(stepCPU, SIGNAL(released()), this, SLOT(synchronize()));
   connect(stepSMP, SIGNAL(released()), this, SLOT(synchronize()));
-  connect(traceCPU, SIGNAL(released()), this, SLOT(toggleTraceCPU()));
-  connect(traceSMP, SIGNAL(released()), this, SLOT(toggleTraceSMP()));
-
-  breakpointEditor = new BreakpointEditor;
-  memoryEditor = new MemoryEditor;
-  vramViewer = new VramViewer;
+  connect(traceCPU, SIGNAL(stateChanged(int)), tracer, SLOT(setCpuTraceState(int)));
+  connect(traceSMP, SIGNAL(stateChanged(int)), tracer, SLOT(setSmpTraceState(int)));
+  connect(traceMask, SIGNAL(stateChanged(int)), tracer, SLOT(setTraceMaskState(int)));
 
   frameCounter = 0;
   synchronize();
   resize(855, 425);
+}
+
+void Debugger::modifySystemState(unsigned state) {
+  string usagefile = string() << dir(utility.cartridge.baseName) << "usage.bin";
+  file fp;
+
+  if(state == Utility::LoadCartridge) {
+    if(fp.open(usagefile, file::mode_read)) {
+      fp.read(SNES::cpu.usage, 1 << 24);
+      fp.read(SNES::smp.usage, 1 << 16);
+      fp.close();
+    } else {
+      memset(SNES::cpu.usage, 0x00, 1 << 24);
+      memset(SNES::smp.usage, 0x00, 1 << 16);
+    }
+  }
+
+  if(state == Utility::UnloadCartridge) {
+    if(fp.open(usagefile, file::mode_write)) {
+      fp.write(SNES::cpu.usage, 1 << 24);
+      fp.write(SNES::smp.usage, 1 << 16);
+      fp.close();
+    }
+  }
 }
 
 void Debugger::synchronize() {
@@ -105,6 +142,10 @@ void Debugger::echo(const char *message) {
 
 void Debugger::clear() {
   console->setHtml("");
+}
+
+void Debugger::showDisassembler() {
+  disassembler->show();
 }
 
 void Debugger::showBreakpointEditor() {
@@ -130,28 +171,6 @@ void Debugger::stepAction() {
   application.debugrun = true;
 }
 
-void Debugger::tracerUpdate() {
-  if(SNES::debugger.trace_cpu || SNES::debugger.trace_smp) {
-    if(SNES::debugger.tracefile.open() == false) {
-      SNES::debugger.tracefile.open(string() << config().path.data << "trace.log", file::mode_write);
-    }
-  } else if(!SNES::debugger.trace_cpu && !SNES::debugger.trace_smp) {
-    if(SNES::debugger.tracefile.open() == true) {
-      SNES::debugger.tracefile.close();
-    }
-  }
-}
-
-void Debugger::toggleTraceCPU() {
-  SNES::debugger.trace_cpu = traceCPU->isChecked();
-  tracerUpdate();
-}
-
-void Debugger::toggleTraceSMP() {
-  SNES::debugger.trace_smp = traceSMP->isChecked();
-  tracerUpdate();
-}
-
 void Debugger::event() {
   char t[256];
 
@@ -160,33 +179,39 @@ void Debugger::event() {
       unsigned n = SNES::debugger.breakpoint_hit;
       echo(string() << "Breakpoint " << n << " hit (" << SNES::debugger.breakpoint[n].counter << ").<br>");
 
-      if(SNES::debugger.breakpoint[n].mode == SNES::Debugger::Breakpoint::Exec) {
-        if(SNES::debugger.breakpoint[n].source == SNES::Debugger::Breakpoint::CPUBus) {
-          SNES::debugger.step_cpu = true;
-          SNES::cpu.disassemble_opcode(t);
-          echo(string() << t << "<br>");
-        }
+      if(SNES::debugger.breakpoint[n].source == SNES::Debugger::Breakpoint::CPUBus) {
+        SNES::debugger.step_cpu = true;
+        SNES::cpu.disassemble_opcode(t, SNES::cpu.opcode_pc);
+        string s = t;
+        s.replace(" ", "&nbsp;");
+        echo(string() << "<font color='#a00000'>" << s << "</font><br>");
+        disassembler->refresh(Disassembler::CPU, SNES::cpu.opcode_pc);
+      }
 
-        if(SNES::debugger.breakpoint[n].source == SNES::Debugger::Breakpoint::APURAM) {
-          SNES::debugger.step_smp = true;
-          SNES::smp.disassemble_opcode(t);
-          echo(string() << t << "<br>");
-        }
+      if(SNES::debugger.breakpoint[n].source == SNES::Debugger::Breakpoint::APURAM) {
+        SNES::debugger.step_smp = true;
+        SNES::smp.disassemble_opcode(t, SNES::smp.opcode_pc);
+        string s = t;
+        s.replace(" ", "&nbsp;");
+        echo(string() << "<font color='#a00000'>" << t << "</font><br>");
+        disassembler->refresh(Disassembler::SMP, SNES::smp.opcode_pc);
       }
     } break;
 
     case SNES::Debugger::CPUStep: {
-      SNES::cpu.disassemble_opcode(t);
+      SNES::cpu.disassemble_opcode(t, SNES::cpu.regs.pc);
       string s = t;
       s.replace(" ", "&nbsp;");
       echo(string() << "<font color='#0000a0'>" << s << "</font><br>");
+      disassembler->refresh(Disassembler::CPU, SNES::cpu.regs.pc);
     } break;
 
     case SNES::Debugger::SMPStep: {
-      SNES::smp.disassemble_opcode(t);
+      SNES::smp.disassemble_opcode(t, SNES::smp.regs.pc);
       string s = t;
       s.replace(" ", "&nbsp;");
       echo(string() << "<font color='#a00000'>" << s << "</font><br>");
+      disassembler->refresh(Disassembler::SMP, SNES::smp.regs.pc);
     } break;
   }
 }
@@ -199,3 +224,5 @@ void Debugger::frameTick() {
     vramViewer->autoUpdate();
   }
 }
+
+#endif

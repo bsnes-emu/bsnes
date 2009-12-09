@@ -2,7 +2,7 @@
   video.glx
   author: byuu
   license: public domain
-  last updated: 2008-08-20
+  last updated: 2009-12-08
 
   Design notes:
   SGI's GLX is the X11/Xlib interface to OpenGL.
@@ -34,6 +34,8 @@ static Bool glx_wait_for_map_notify(Display *d, XEvent *e, char *arg) {
 
 class pVideoGLX : public OpenGL {
 public:
+  int (*glSwapInterval)(int);
+
   Display *display;
   int screen;
   Window xwindow;
@@ -60,7 +62,6 @@ public:
     if(name == Video::Handle) return true;
     if(name == Video::Synchronize) return true;
     if(name == Video::Filter) return true;
-    if(name == Video::GLSL) return true;
     if(name == Video::FragmentShader) return true;
     if(name == Video::VertexShader) return true;
     return false;
@@ -82,7 +83,7 @@ public:
     if(name == Video::Synchronize) {
       if(settings.synchronize != any_cast<bool>(value)) {
         settings.synchronize = any_cast<bool>(value);
-        if(glxcontext) init();
+        if(glSwapInterval) glSwapInterval(settings.synchronize);
         return true;
       }
     }
@@ -151,11 +152,8 @@ public:
 
     //let GLX determine the best Visual to use for GL output; provide a few hints
     //note: some video drivers will override double buffering attribute
-    int elements = 0;
-    int attributelist[] = { GLX_RGBA, None };
-    int attributelist_sync[] = { GLX_RGBA, GLX_DOUBLEBUFFER, None };
-    XVisualInfo *vi = glXChooseVisual(display, screen,
-      settings.synchronize ? attributelist_sync : attributelist);
+    int attributelist[] = { GLX_RGBA, GLX_DOUBLEBUFFER, None };
+    XVisualInfo *vi = glXChooseVisual(display, screen, attributelist);
 
     //Window settings.handle has already been realized, most likely with DefaultVisual.
     //GLX requires that the GL output window has the same Visual as the GLX context.
@@ -190,13 +188,10 @@ public:
     settings.height = 256;
 
     //vertical synchronization
-    int (*glSwapInterval)(int);
-    glSwapInterval = (int (*)(int))glGetProcAddress("glXSwapIntervalEXT");
-    if(glSwapInterval) glSwapInterval(settings.synchronize);
-    glSwapInterval = (int (*)(int))glGetProcAddress("glXSwapIntervalSGI");
-    if(glSwapInterval) glSwapInterval(settings.synchronize);
-    glSwapInterval = (int (*)(int))glGetProcAddress("glXSwapIntervalMESA");
-    if(glSwapInterval) glSwapInterval(settings.synchronize);
+    if(!glSwapInterval) glSwapInterval = (int (*)(int))glGetProcAddress("glXSwapIntervalEXT");
+    if(!glSwapInterval) glSwapInterval = (int (*)(int))glGetProcAddress("glXSwapIntervalSGI");
+    if(!glSwapInterval) glSwapInterval = (int (*)(int))glGetProcAddress("glXSwapIntervalMESA");
+    if( glSwapInterval) glSwapInterval(settings.synchronize);
 
     return true;
   }
@@ -220,7 +215,7 @@ public:
     }
   }
 
-  pVideoGLX() {
+  pVideoGLX() : glSwapInterval(0) {
     settings.handle = 0;
     settings.synchronize = false;
     xwindow = 0;

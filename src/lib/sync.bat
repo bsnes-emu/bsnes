@@ -5,5 +5,3 @@ mkdir nall
 mkdir ruby
 xcopy /E ..\..\..\nall nall
 xcopy /E ..\..\..\ruby ruby
-del ruby\test*
-del ruby\cc.*

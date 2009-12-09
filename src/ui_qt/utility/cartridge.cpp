@@ -1,6 +1,7 @@
 bool Utility::loadCartridgeNormal(const char *base) {
   unloadCartridge();
   if(loadCartridge(cartridge.baseName = base, SNES::memory::cartrom) == false) return false;
+  SNES::s21fx.base(dir(cartridge.baseName));
   SNES::cartridge.load(SNES::Cartridge::ModeNormal);
 
   loadMemory(cartridge.baseName, ".srm", SNES::memory::cartram);
@@ -118,11 +119,15 @@ void Utility::unloadCartridge() {
   modifySystemState(UnloadCartridge);
 }
 
-void Utility::modifySystemState(system_state_t state) {
+void Utility::modifySystemState(system_state_t systemState) {
+  diskBrowser->hide();  //avoid edge case oddities (eg movie playback window still open from previous game)
+  state.resetHistory();  //do not allow rewinding past a destructive system action
+  movie.stop();  //movies cannot continue to record after destructive system actions
+
   video.clear();
   audio.clear();
 
-  switch(state) {
+  switch(systemState) {
     case LoadCartridge: {
       //must call cartridge.load_cart_...() before calling modifySystemState(LoadCartridge)
       if(SNES::cartridge.loaded() == false) break;
@@ -148,7 +153,9 @@ void Utility::modifySystemState(system_state_t state) {
       << "Loaded " << cartridge.name
       << (cartridge.patchApplied ? ", and applied UPS patch." : "."));
       mainWindow->setWindowTitle(string() << bsnesTitle << " v" << bsnesVersion << " - " << cartridge.name);
+      #if defined(DEBUGGER)
       debugger->echo(string() << "Loaded " << cartridge.name << ".<br>");
+      #endif
     } break;
 
     case UnloadCartridge: {
@@ -206,10 +213,13 @@ void Utility::modifySystemState(system_state_t state) {
   }
 
   mainWindow->syncUi();
+  #if defined(DEBUGGER)
+  debugger->modifySystemState(systemState);
   debugger->synchronize();
+  #endif
   cheatEditorWindow->reloadList();
   cheatFinderWindow->synchronize();
-  stateManagerWindow->reloadList();
+  stateManagerWindow->reload();
 }
 
 bool Utility::loadCartridge(string &filename, SNES::MappedRAM &memory) {
@@ -316,6 +326,19 @@ void Utility::saveCheats() {
       fp.close();
     }
   }
+}
+
+bool Utility::saveStatesSupported() {
+  if(SNES::cartridge.mode() == SNES::Cartridge::ModeBsx) return false;
+
+  if(SNES::cartridge.has_superfx()) return false;
+  if(SNES::cartridge.has_sa1())     return false;
+  if(SNES::cartridge.has_dsp3())    return false;
+  if(SNES::cartridge.has_dsp4())    return false;
+  if(SNES::cartridge.has_st011())   return false;
+  if(SNES::cartridge.has_st018())   return false;
+
+  return true;
 }
 
 //ensure file path is absolute (eg resolve relative paths)

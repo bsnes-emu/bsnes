@@ -25,8 +25,6 @@ char *getcwd(char *path) {
   return getcwd(path, PATH_MAX);
 }
 
-#define mkdir(path) (mkdir)(path, 0755)
-
 void initargs(int &argc, char **&argv) {
 }
 

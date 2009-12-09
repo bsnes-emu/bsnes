@@ -14,3 +14,4 @@
 #include "st010/st010.hpp"
 #include "st011/st011.hpp"
 #include "st018/st018.hpp"
+#include "21fx/21fx.hpp"

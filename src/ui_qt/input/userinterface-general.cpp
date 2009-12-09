@@ -8,7 +8,7 @@ struct ToggleMenubar : HotkeyInput {
   }
 
   ToggleMenubar() : HotkeyInput("Toggle Menubar", "input.userInterface.general.toggleMenubar") {
-    name = "KB0::F12";
+    name = "KB0::Tab";
     userInterfaceGeneral.attach(this);
   }
 } toggleMenubar;
@@ -19,7 +19,7 @@ struct ToggleStatusbar : HotkeyInput {
   }
 
   ToggleStatusbar() : HotkeyInput("Toggle Statusbar", "input.userInterface.general.toggleStatusbar") {
-    name = "KB0::F12";
+    name = "KB0::Tab";
     userInterfaceGeneral.attach(this);
   }
 } toggleStatusbar;

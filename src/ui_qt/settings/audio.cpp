@@ -1,7 +1,10 @@
+#include "audio.moc"
+AudioSettingsWindow *audioSettingsWindow;
+
 AudioSettingsWindow::AudioSettingsWindow() {
   layout = new QVBoxLayout;
   layout->setMargin(0);
-  layout->setSpacing(0);
+  layout->setSpacing(Style::WidgetSpacing);
   layout->setAlignment(Qt::AlignTop);
   setLayout(layout);
 
@@ -9,70 +12,67 @@ AudioSettingsWindow::AudioSettingsWindow() {
   title->setProperty("class", "title");
   layout->addWidget(title);
 
-  boxes = new QHBoxLayout; {
-    frequencyLabel = new QLabel("Frequency:");
-    frequencyLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    boxes->addWidget(frequencyLabel);
-
-    frequency = new QComboBox;
-    frequency->addItem("32000hz");
-    frequency->addItem("44100hz");
-    frequency->addItem("48000hz");
-    frequency->addItem("96000hz");
-    boxes->addWidget(frequency);
-
-    latencyLabel = new QLabel("Latency:");
-    latencyLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    boxes->addWidget(latencyLabel);
-
-    latency = new QComboBox;
-    latency->addItem("20ms");
-    latency->addItem("40ms");
-    latency->addItem("60ms");
-    latency->addItem("80ms");
-    latency->addItem("100ms");
-    latency->addItem("120ms");
-    boxes->addWidget(latency);
-  }
-  boxes->setSpacing(Style::WidgetSpacing);
+  boxes = new QHBoxLayout;
   layout->addLayout(boxes);
-  layout->addSpacing(Style::WidgetSpacing);
 
-  sliders = new QGridLayout; {
-    volumeLabel = new QLabel("Volume:");
-    volumeLabel->setToolTip("Warning: any volume other than 100% will result in a slight audio quality loss");
-    sliders->addWidget(volumeLabel, 0, 0);
+  frequencyLabel = new QLabel("Frequency:");
+  frequencyLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+  boxes->addWidget(frequencyLabel);
 
-    volumeValue = new QLabel;
-    volumeValue->setAlignment(Qt::AlignHCenter);
-    volumeValue->setMinimumWidth(volumeValue->fontMetrics().width("262144hz"));
-    sliders->addWidget(volumeValue, 0, 1);
+  frequency = new QComboBox;
+  frequency->addItem("32000hz");
+  frequency->addItem("44100hz");
+  frequency->addItem("48000hz");
+  frequency->addItem("96000hz");
+  boxes->addWidget(frequency);
 
-    volume = new QSlider(Qt::Horizontal);
-    volume->setMinimum(0);
-    volume->setMaximum(200);
-    sliders->addWidget(volume, 0, 2);
+  latencyLabel = new QLabel("Latency:");
+  latencyLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+  boxes->addWidget(latencyLabel);
 
-    frequencySkewLabel = new QLabel("Input frequency:");
-    frequencySkewLabel->setToolTip(
-      "Adjusts audio resampling rate.\n"
-      "When both video sync and audio sync are enabled, use this setting to fine-tune the output.\n"
-      "Lower the input frequency to clean audio output, eliminating crackling / popping.\n"
-      "Raise the input frequency to smooth video output, eliminating duplicated frames."
-    );
-    sliders->addWidget(frequencySkewLabel, 1, 0);
+  latency = new QComboBox;
+  latency->addItem("20ms");
+  latency->addItem("40ms");
+  latency->addItem("60ms");
+  latency->addItem("80ms");
+  latency->addItem("100ms");
+  latency->addItem("120ms");
+  boxes->addWidget(latency);
 
-    frequencySkewValue = new QLabel;
-    frequencySkewValue->setAlignment(Qt::AlignHCenter);
-    sliders->addWidget(frequencySkewValue, 1, 1);
-
-    frequencySkew = new QSlider(Qt::Horizontal);
-    frequencySkew->setMinimum(31500);
-    frequencySkew->setMaximum(32500);
-    sliders->addWidget(frequencySkew, 1, 2);
-  }
-  sliders->setSpacing(Style::WidgetSpacing);
+  sliders = new QGridLayout;
   layout->addLayout(sliders);
+
+  volumeLabel = new QLabel("Volume:");
+  volumeLabel->setToolTip("Warning: any volume other than 100% will result in a slight audio quality loss");
+  sliders->addWidget(volumeLabel, 0, 0);
+
+  volumeValue = new QLabel;
+  volumeValue->setAlignment(Qt::AlignHCenter);
+  volumeValue->setMinimumWidth(volumeValue->fontMetrics().width("262144hz"));
+  sliders->addWidget(volumeValue, 0, 1);
+
+  volume = new QSlider(Qt::Horizontal);
+  volume->setMinimum(0);
+  volume->setMaximum(200);
+  sliders->addWidget(volume, 0, 2);
+
+  frequencySkewLabel = new QLabel("Input frequency:");
+  frequencySkewLabel->setToolTip(
+    "Adjusts audio resampling rate.\n"
+    "When both video sync and audio sync are enabled, use this setting to fine-tune the output.\n"
+    "Lower the input frequency to clean audio output, eliminating crackling / popping.\n"
+    "Raise the input frequency to smooth video output, eliminating duplicated frames."
+  );
+  sliders->addWidget(frequencySkewLabel, 1, 0);
+
+  frequencySkewValue = new QLabel;
+  frequencySkewValue->setAlignment(Qt::AlignHCenter);
+  sliders->addWidget(frequencySkewValue, 1, 1);
+
+  frequencySkew = new QSlider(Qt::Horizontal);
+  frequencySkew->setMinimum(31500);
+  frequencySkew->setMaximum(32500);
+  sliders->addWidget(frequencySkew, 1, 2);
 
   connect(frequency, SIGNAL(currentIndexChanged(int)), this, SLOT(frequencyChange(int)));
   connect(latency, SIGNAL(currentIndexChanged(int)), this, SLOT(latencyChange(int)));

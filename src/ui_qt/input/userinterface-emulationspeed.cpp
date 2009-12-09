@@ -2,6 +2,69 @@ InputGroup userInterfaceEmulationSpeed(InputCategory::UserInterface, "Emulation 
 
 namespace UserInterfaceEmulationSpeed {
 
+//slowdown and speedup do not work well with Vsync enabled, as it locks the
+//speed to the monitor refresh rate. thus, when one is pressed, it is disabled
+//until the key is released.
+
+struct Slowdown : HotkeyInput {
+  bool syncVideo;
+
+  void pressed() {
+    config().system.speed = 0;
+    utility.updateEmulationSpeed();
+    syncVideo = config().video.synchronize;
+    if(syncVideo) {
+      config().video.synchronize = false;
+      utility.updateAvSync();
+    }
+    mainWindow->syncUi();
+  }
+
+  void released() {
+    config().system.speed = 2;
+    utility.updateEmulationSpeed();
+    if(syncVideo) {
+      config().video.synchronize = true;
+      utility.updateAvSync();
+    }
+    mainWindow->syncUi();
+  }
+
+  Slowdown() : HotkeyInput("Slowdown", "config.userInterface.emulationSpeed.slowdown") {
+    userInterfaceEmulationSpeed.attach(this);
+  }
+} slowdown;
+
+struct Speedup : HotkeyInput {
+  bool syncVideo;
+
+  void pressed() {
+    config().system.speed = 4;
+    utility.updateEmulationSpeed();
+    syncVideo = config().video.synchronize;
+    if(syncVideo) {
+      config().video.synchronize = false;
+      utility.updateAvSync();
+    }
+    mainWindow->syncUi();
+  }
+
+  void released() {
+    config().system.speed = 2;
+    utility.updateEmulationSpeed();
+    if(syncVideo) {
+      config().video.synchronize = true;
+      utility.updateAvSync();
+    }
+    mainWindow->syncUi();
+  }
+
+  Speedup() : HotkeyInput("Speedup", "config.userInterface.emulationSpeed.speedup") {
+    name = "KB0::Tilde";
+    userInterfaceEmulationSpeed.attach(this);
+  }
+} speedup;
+
 struct Decrease : HotkeyInput {
   void pressed() {
     if(config().system.speed > 0) config().system.speed--;

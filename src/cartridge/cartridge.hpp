@@ -67,6 +67,7 @@ public:
   property_t<bool> has_dsp1, has_dsp2, has_dsp3, has_dsp4;
   property_t<bool> has_obc1;
   property_t<bool> has_st010, has_st011, has_st018;
+  bool has_21fx() const;
 
   //main interface
   void load(Mode);

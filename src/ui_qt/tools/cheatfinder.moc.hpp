@@ -37,4 +37,6 @@ private:
   array<unsigned> dataList;
 
   unsigned read(unsigned addr, unsigned size);
-} *cheatFinderWindow;
+};
+
+extern CheatFinderWindow *cheatFinderWindow;

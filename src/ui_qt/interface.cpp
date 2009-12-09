@@ -1,3 +1,5 @@
+Interface interface;
+
 void Interface::video_refresh(uint16_t *data, unsigned pitch, unsigned *line, unsigned width, unsigned height) {
   uint32_t *output;
   unsigned outwidth, outheight, outpitch;
@@ -10,7 +12,10 @@ void Interface::video_refresh(uint16_t *data, unsigned pitch, unsigned *line, un
     if(saveScreenshot == true) captureScreenshot(output, outpitch, outwidth, outheight);
   }
 
+  state.frame();
+  #if defined(DEBUGGER)
   debugger->frameTick();
+  #endif
 }
 
 void Interface::audio_sample(uint16_t left, uint16_t right) {
@@ -30,7 +35,7 @@ void Interface::captureScreenshot(uint32_t *data, unsigned pitch, unsigned width
   saveScreenshot = false;
   QImage image((const unsigned char*)data, width, height, pitch, QImage::Format_RGB32);
 
-  string filename = "screenshot-";
+  string filename = nall::basename(notdir(utility.cartridge.fileName));
   time_t systemTime = time(0);
   tm *currentTime = localtime(&systemTime);
   char t[512];
@@ -38,7 +43,7 @@ void Interface::captureScreenshot(uint32_t *data, unsigned pitch, unsigned width
     1900 + currentTime->tm_year, 1 + currentTime->tm_mon, currentTime->tm_mday,
     currentTime->tm_hour, currentTime->tm_min, currentTime->tm_sec
   );
-  filename << t << ".png";
+  filename << "-" << t << ".png";
 
   string path = config().path.data;
   if(path == "") path = dir(utility.cartridge.baseName);

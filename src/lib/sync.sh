@@ -8,5 +8,3 @@ cp -r ../../../ruby ./ruby
 
 rm -r libco/doc
 rm -r libco/test
-rm ruby/test*
-rm ruby/cc.*

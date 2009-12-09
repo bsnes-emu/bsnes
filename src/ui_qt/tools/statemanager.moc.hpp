@@ -2,35 +2,39 @@ class StateManagerWindow : public QWidget {
   Q_OBJECT
 
 public:
+  enum { StateCount = 32 };
+
   QVBoxLayout *layout;
   QLabel *title;
   QTreeWidget *list;
+  QHBoxLayout *infoLayout;
+  QLabel *descriptionLabel;
+  QLineEdit *descriptionText;
   QHBoxLayout *controlLayout;
-  QLabel *descLabel;
-  QLineEdit *descEdit;
-  QHBoxLayout *buttonLayout;
-  QPushButton *loadState;
-  QPushButton *saveState;
-  QPushButton *createState;
-  QPushButton *deleteState;
+  QPushButton *loadButton;
+  QPushButton *saveButton;
+  QPushButton *eraseButton;
 
-  QMenu *menu;
-  QAction *loadStateItem;
-  QAction *saveStateItem;
-  QAction *createStateItem;
-  QAction *deleteStateItem;
+  void reload();
+  void update();
 
-  void syncUi();
-  void reloadList();
-  void updateItem(QTreeWidgetItem*);
   StateManagerWindow();
 
 public slots:
-  void popupMenu(const QPoint&);
-  void listChanged();
-  void textEdited();
-  void loadSelectedState();
-  void saveSelectedState();
-  void createNewState();
-  void deleteSelectedState();
-} *stateManagerWindow;
+  void synchronize();
+  void writeDescription();
+  void loadAction();
+  void saveAction();
+  void eraseAction();
+
+private:
+  string filename() const;
+  bool isStateValid(unsigned slot);
+  string getStateDescription(unsigned slot);
+  void setStateDescription(unsigned slot, const string&);
+  void loadState(unsigned slot);
+  void saveState(unsigned slot);
+  void eraseState(unsigned slot);
+};
+
+extern StateManagerWindow *stateManagerWindow;

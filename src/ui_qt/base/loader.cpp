@@ -1,3 +1,6 @@
+#include "loader.moc"
+LoaderWindow *loaderWindow;
+
 LoaderWindow::LoaderWindow() : QbWindow(config().geometry.loaderWindow) {
   setObjectName("loader-window");
   setMinimumWidth(520);

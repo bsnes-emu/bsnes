@@ -1,3 +1,6 @@
+#include "breakpoint.moc"
+BreakpointEditor *breakpointEditor;
+
 BreakpointItem::BreakpointItem(unsigned id_) : id(id_) {
   layout = new QHBoxLayout;
   layout->setMargin(0);

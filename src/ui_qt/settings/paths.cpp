@@ -1,3 +1,6 @@
+#include "paths.moc"
+PathSettingsWindow *pathSettingsWindow;
+
 PathSettingWidget::PathSettingWidget(string &pathValue_, const char *labelText, const char *pathDefaultLabel_, const char *pathBrowseLabel_) : pathValue(pathValue_) {
   pathDefaultLabel = pathDefaultLabel_;
   pathBrowseLabel = pathBrowseLabel_;
@@ -23,8 +26,6 @@ PathSettingWidget::PathSettingWidget(string &pathValue_, const char *labelText, 
 
   pathDefault = new QPushButton("Default");
   controlLayout->addWidget(pathDefault);
-
-  layout->addSpacing(Style::WidgetSpacing);
 
   connect(pathSelect, SIGNAL(released()), this, SLOT(selectPath()));
   connect(pathDefault, SIGNAL(released()), this, SLOT(defaultPath()));
@@ -62,7 +63,7 @@ void PathSettingWidget::defaultPath() {
 PathSettingsWindow::PathSettingsWindow() {
   layout = new QVBoxLayout;
   layout->setMargin(0);
-  layout->setSpacing(0);
+  layout->setSpacing(Style::WidgetSpacing);
   layout->setAlignment(Qt::AlignTop);
   setLayout(layout);
 

@@ -1,12 +1,15 @@
-#include "main.hpp"
-#include "resource/resource.rcc"
+#include "ui-base.hpp"
+#include "resource.rcc"
 
 #if defined(PLATFORM_X)
   #include "platform/platform_x.cpp"
+  const char Style::Monospace[64] = "Monospace";
 #elif defined(PLATFORM_OSX)
   #include "platform/platform_osx.cpp"
+  const char Style::Monospace[64] = "Courier New";
 #elif defined(PLATFORM_WIN)
   #include "platform/platform_win.cpp"
+  const char Style::Monospace[64] = "Lucida Console";
 #else
   #error "unsupported platform"
 #endif
@@ -17,9 +20,6 @@
 const char defaultStylesheet[] =
   "QLabel.title {"
   "  font: bold 18px \"Georgia\";"
-  "  margin-bottom: 5px;"
-  "  margin-left: -5px;"
-  "  margin-top: 5px;"
   "}\n"
 
   "#backdrop {"
@@ -27,21 +27,10 @@ const char defaultStylesheet[] =
   "}\n";
 
 #include "application/application.cpp"
-#include "debugger/debugger.cpp"
-#include "input/input.cpp"
 #include "link/filter.cpp"
 #include "link/reader.cpp"
 #include "utility/utility.cpp"
 
 int main(int argc, char **argv) {
-  application.main(argc, argv);
-  #if defined(PLATFORM_WIN)
-  //Qt/Windows has a few bugs that cause the process to hang and/or crash when
-  //unloading DLLs. 4.5.x always hangs, and 4.6.x crashes under certain
-  //circumstances. However, all DLLs must unload for profiling to work.
-  //The below code bypasses Qt DLL unloading, but only when the binary is named
-  //as such to indicate that profile generation is taking place.
-  if(strpos(argv[0], "bsnes-profile") < 0) TerminateProcess(GetCurrentProcess(), 0);
-  #endif
-  return 0;
+  return application.main(argc, argv);
 }

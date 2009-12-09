@@ -125,6 +125,8 @@ Cartridge::Type Cartridge::detect_image_type(uint8_t *data, unsigned size) const
   return info.type;
 }
 
+bool Cartridge::has_21fx() const { return s21fx.exists(); }
+
 void Cartridge::serialize(serializer &s) {
   if(memory::cartram.size() != 0 && memory::cartram.size() != ~0) {
     s.array(memory::cartram.data(), memory::cartram.size());

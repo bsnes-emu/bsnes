@@ -1,7 +1,10 @@
+#include "statemanager.moc"
+StateManagerWindow *stateManagerWindow;
+
 StateManagerWindow::StateManagerWindow() {
   layout = new QVBoxLayout;
   layout->setMargin(0);
-  layout->setSpacing(0);
+  layout->setSpacing(Style::WidgetSpacing);
   setLayout(layout);
 
   title = new QLabel("Save State Manager");
@@ -9,184 +12,270 @@ StateManagerWindow::StateManagerWindow() {
   layout->addWidget(title);
 
   list = new QTreeWidget;
-  list->setColumnCount(3);
-  list->setHeaderLabels(QStringList() << "Slot" << "Last Updated" << "Description");
+  list->setColumnCount(2);
+  list->setHeaderLabels(QStringList() << "Slot" << "Description");
   list->setAllColumnsShowFocus(true);
   list->sortByColumn(0, Qt::AscendingOrder);
   list->setRootIsDecorated(false);
-  list->setContextMenuPolicy(Qt::CustomContextMenu);
   layout->addWidget(list);
-  layout->addSpacing(Style::WidgetSpacing);
+
+  infoLayout = new QHBoxLayout;
+  layout->addLayout(infoLayout);
+
+  descriptionLabel = new QLabel("Description:");
+  infoLayout->addWidget(descriptionLabel);
+
+  descriptionText = new QLineEdit;
+  infoLayout->addWidget(descriptionText);
 
   controlLayout = new QHBoxLayout;
-  controlLayout->setSpacing(Style::WidgetSpacing);
   layout->addLayout(controlLayout);
-  layout->addSpacing(Style::WidgetSpacing);
 
-  descLabel = new QLabel("Description:");
-  controlLayout->addWidget(descLabel);
+  loadButton = new QPushButton("Load");
+  controlLayout->addWidget(loadButton);
 
-  descEdit = new QLineEdit;
-  controlLayout->addWidget(descEdit);
+  saveButton = new QPushButton("Save");
+  controlLayout->addWidget(saveButton);
 
-  buttonLayout = new QHBoxLayout;
-  buttonLayout->setSpacing(Style::WidgetSpacing);
-  layout->addLayout(buttonLayout);
+  eraseButton = new QPushButton("Erase");
+  controlLayout->addWidget(eraseButton);
 
-  loadState = new QPushButton("Load");
-  loadState->setToolTip("Load state from the currently selected slot");
-  buttonLayout->addWidget(loadState);
+  connect(list, SIGNAL(itemSelectionChanged()), this, SLOT(synchronize()));
+  connect(list, SIGNAL(itemActivated(QTreeWidgetItem*, int)), this, SLOT(loadAction()));
+  connect(descriptionText, SIGNAL(textEdited(const QString&)), this, SLOT(writeDescription()));
+  connect(loadButton, SIGNAL(released()), this, SLOT(loadAction()));
+  connect(saveButton, SIGNAL(released()), this, SLOT(saveAction()));
+  connect(eraseButton, SIGNAL(released()), this, SLOT(eraseAction()));
 
-  saveState = new QPushButton("Save");
-  saveState->setToolTip("Save state to the currently selected slot");
-  buttonLayout->addWidget(saveState);
-
-  createState = new QPushButton("Create");
-  createState->setToolTip("Save state to a new slot");
-  buttonLayout->addWidget(createState);
-
-  deleteState = new QPushButton("Delete");
-  deleteState->setToolTip("Delete the currently selected slot");
-  buttonLayout->addWidget(deleteState);
-
-  reloadList();
-
-  menu = new QMenu(list);
-  loadStateItem = menu->addAction("&Load State From Selected Slot");
-  saveStateItem = menu->addAction("&Save State To Selected Slot");
-  createStateItem = menu->addAction("Save State To &New Slot");
-  deleteStateItem = menu->addAction("Permanently &Delete Selected Slot");
-
-  connect(list, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(popupMenu(const QPoint&)));
-  connect(list, SIGNAL(itemSelectionChanged()), this, SLOT(listChanged()));
-  connect(list, SIGNAL(itemActivated(QTreeWidgetItem*, int)), this, SLOT(loadSelectedState()));
-  connect(descEdit, SIGNAL(textEdited(const QString&)), this, SLOT(textEdited()));
-  connect(loadState, SIGNAL(released()), this, SLOT(loadSelectedState()));
-  connect(saveState, SIGNAL(released()), this, SLOT(saveSelectedState()));
-  connect(createState, SIGNAL(released()), this, SLOT(createNewState()));
-  connect(deleteState, SIGNAL(released()), this, SLOT(deleteSelectedState()));
-
-  connect(loadStateItem, SIGNAL(triggered()), this, SLOT(loadSelectedState()));
-  connect(saveStateItem, SIGNAL(triggered()), this, SLOT(saveSelectedState()));
-  connect(createStateItem, SIGNAL(triggered()), this, SLOT(createNewState()));
-  connect(deleteStateItem, SIGNAL(triggered()), this, SLOT(deleteSelectedState()));
+  synchronize();
 }
 
-void StateManagerWindow::syncUi() {
-  QList<QTreeWidgetItem*> items = list->selectedItems();
-  descEdit->setEnabled(items.count() > 0);
-  if(descEdit->isEnabled() == false) descEdit->setText("");
-  for(unsigned n = 0; n <= 1; n++) list->resizeColumnToContents(n);
-
-  if(utility.saveStatesSupported() == false) {
-    loadState->setEnabled(false);
-    saveState->setEnabled(false);
-    createState->setEnabled(false);
-    deleteState->setEnabled(false);
-  } else {
-    loadState->setEnabled(items.count() == 1);
-    saveState->setEnabled(items.count() == 1);
-    createState->setEnabled(SNES::cartridge.loaded() && application.power);
-    deleteState->setEnabled(items.count() == 1);
-  }
-}
-
-void StateManagerWindow::popupMenu(const QPoint &point) {
-  if(SNES::cartridge.loaded() == false) return;
-  if(utility.saveStatesSupported() == false) return;
-  QTreeWidgetItem *item = list->itemAt(point);
-  if(!item && !application.power) return;
-
-  if(item) list->setCurrentItem(item);
-  loadStateItem->setVisible(item);
-  saveStateItem->setVisible(item);
-  createStateItem->setVisible(application.power);
-  deleteStateItem->setVisible(item);
-  menu->popup(QCursor::pos());
-}
-
-void StateManagerWindow::reloadList() {
+void StateManagerWindow::reload() {
   list->clear();
   list->setSortingEnabled(false);
 
-  lstring state;
-  utility.loadStateInfo(state);
-  for(unsigned n = 0; n < state.size(); n++) {
-    QTreeWidgetItem *item = new QTreeWidgetItem(list);
-    lstring part;
-    part.split("\t", state[n]);
-    item->setData(0, Qt::UserRole, QVariant(n));
-    item->setText(0, part[0]);
-    item->setText(1, part[1]);
-    item->setText(2, part[2]);
+  if(SNES::cartridge.loaded()) {
+    for(unsigned n = 0; n < StateCount; n++) {
+      QTreeWidgetItem *item = new QTreeWidgetItem(list);
+      item->setData(0, Qt::UserRole, QVariant(n));
+      char slot[16];
+      sprintf(slot, "%2u", n + 1);
+      item->setText(0, slot);
+    }
+    update();
   }
 
   list->setSortingEnabled(true);
   list->header()->setSortIndicatorShown(false);
-  syncUi();
+  synchronize();
 }
 
-void StateManagerWindow::updateItem(QTreeWidgetItem *item) {
-  unsigned n = item->data(0, Qt::UserRole).toUInt();
-  lstring state, part;
-  utility.loadStateInfo(state);
-  part.split("\t", state[n]);
-  item->setText(0, part[0]);
-  item->setText(1, part[1]);
-  item->setText(2, part[2]);
-}
-
-void StateManagerWindow::listChanged() {
-  QList<QTreeWidgetItem*> items = list->selectedItems();
-  if(items.count() > 0) {
-    QTreeWidgetItem *item = items[0];
-    descEdit->setText(item->text(2));
+void StateManagerWindow::update() {
+  //iterate all list items
+  QList<QTreeWidgetItem*> items = list->findItems("", Qt::MatchContains);
+  for(unsigned i = 0; i < items.count(); i++) {
+    QTreeWidgetItem *item = items[i];
+    unsigned n = item->data(0, Qt::UserRole).toUInt();
+    if(isStateValid(n) == false) {
+      item->setForeground(0, QBrush(QColor(128, 128, 128)));
+      item->setForeground(1, QBrush(QColor(128, 128, 128)));
+      item->setText(1, "Empty");
+    } else {
+      item->setForeground(0, QBrush(QColor(0, 0, 0)));
+      item->setForeground(1, QBrush(QColor(0, 0, 0)));
+      item->setText(1, getStateDescription(n));
+    }
   }
 
-  syncUi();
+  for(unsigned n = 0; n <= 1; n++) list->resizeColumnToContents(n);
 }
 
-void StateManagerWindow::textEdited() {
+void StateManagerWindow::synchronize() {
   QList<QTreeWidgetItem*> items = list->selectedItems();
   if(items.count() > 0) {
     QTreeWidgetItem *item = items[0];
     unsigned n = item->data(0, Qt::UserRole).toUInt();
-    utility.setStateDescription(n, descEdit->text().toUtf8().data());
-    updateItem(item);
+
+    if(isStateValid(n)) {
+      descriptionText->setText(getStateDescription(n));
+      descriptionText->setEnabled(true);
+      loadButton->setEnabled(true);
+      eraseButton->setEnabled(true);
+    } else {
+      descriptionText->setText("");
+      descriptionText->setEnabled(false);
+      loadButton->setEnabled(false);
+      eraseButton->setEnabled(false);
+    }
+    saveButton->setEnabled(true);
+  } else {
+    descriptionText->setText("");
+    descriptionText->setEnabled(false);
+    loadButton->setEnabled(false);
+    saveButton->setEnabled(false);
+    eraseButton->setEnabled(false);
   }
 }
 
-void StateManagerWindow::loadSelectedState() {
+void StateManagerWindow::writeDescription() {
   QList<QTreeWidgetItem*> items = list->selectedItems();
   if(items.count() > 0) {
     QTreeWidgetItem *item = items[0];
     unsigned n = item->data(0, Qt::UserRole).toUInt();
-    utility.loadState(n);
-    toolsWindow->close();
+    string description = descriptionText->text().toUtf8().constData();
+    setStateDescription(n, description);
+    update();
   }
 }
 
-void StateManagerWindow::saveSelectedState() {
+void StateManagerWindow::loadAction() {
   QList<QTreeWidgetItem*> items = list->selectedItems();
   if(items.count() > 0) {
     QTreeWidgetItem *item = items[0];
     unsigned n = item->data(0, Qt::UserRole).toUInt();
-    utility.saveState(n, descEdit->text().toUtf8().data());
-    updateItem(item);
+    loadState(n);
   }
 }
 
-void StateManagerWindow::createNewState() {
-  utility.saveState(SNES::StateManager::SlotInvalid, "");
-  reloadList();
-}
-
-void StateManagerWindow::deleteSelectedState() {
+void StateManagerWindow::saveAction() {
   QList<QTreeWidgetItem*> items = list->selectedItems();
   if(items.count() > 0) {
     QTreeWidgetItem *item = items[0];
     unsigned n = item->data(0, Qt::UserRole).toUInt();
-    utility.deleteState(n);
-    reloadList();
+    saveState(n);
+    writeDescription();
+    synchronize();
+    descriptionText->setFocus();
+  }
+}
+
+void StateManagerWindow::eraseAction() {
+  QList<QTreeWidgetItem*> items = list->selectedItems();
+  if(items.count() > 0) {
+    QTreeWidgetItem *item = items[0];
+    unsigned n = item->data(0, Qt::UserRole).toUInt();
+    eraseState(n);
+    update();
+    synchronize();
+  }
+}
+
+string StateManagerWindow::filename() const {
+  string name = config().path.state;
+  if(name == "") name = dir(utility.cartridge.fileName);
+  name << nall::basename(notdir(utility.cartridge.fileName));
+  name << ".bsa";
+  return name;
+}
+
+bool StateManagerWindow::isStateValid(unsigned slot) {
+  if(SNES::cartridge.loaded() == false) return false;
+  file fp;
+  if(fp.open(filename(), file::mode_read) == false) return false;
+  if(fp.size() < (slot + 1) * SNES::system.serialize_size()) { fp.close(); return false; }
+  fp.seek(slot * SNES::system.serialize_size());
+  uint32_t signature = fp.readl(4);
+  if(signature == 0) { fp.close(); return false; }
+  uint32_t version = fp.readl(4);
+  if(version != bsnesSerializerVersion) { fp.close(); return false; }
+  fp.close();
+  return true;
+}
+
+string StateManagerWindow::getStateDescription(unsigned slot) {
+  if(isStateValid(slot) == false) return "";
+  file fp;
+  fp.open(filename(), file::mode_read);
+  char description[513];
+  fp.seek(slot * SNES::system.serialize_size() + 12);
+  fp.read((uint8_t*)description, 512);
+  fp.close();
+  description[512] = 0;
+  return description;
+}
+
+void StateManagerWindow::setStateDescription(unsigned slot, const string &text) {
+  if(isStateValid(slot) == false) return;
+  file fp;
+  fp.open(filename(), file::mode_readwrite);
+  char description[512];
+  memset(&description, 0, sizeof description);
+  strncpy(description, text, 512);
+  fp.seek(slot * SNES::system.serialize_size() + 12);
+  fp.write((uint8_t*)description, 512);
+  fp.close();
+}
+
+void StateManagerWindow::loadState(unsigned slot) {
+  if(isStateValid(slot) == false) return;
+  file fp;
+  fp.open(filename(), file::mode_read);
+  fp.seek(slot * SNES::system.serialize_size());
+  unsigned size = SNES::system.serialize_size();
+  uint8_t *data = new uint8_t[size];
+  fp.read(data, size);
+  fp.close();
+
+  serializer state(data, size);
+  delete[] data;
+
+  if(SNES::system.unserialize(state) == true) {
+    //toolsWindow->close();
+  }
+}
+
+void StateManagerWindow::saveState(unsigned slot) {
+  file fp;
+  if(file::exists(filename()) == false) {
+    //try and create the file, bail out on failure (eg read-only device)
+    if(fp.open(filename(), file::mode_write) == false) return;
+    fp.close();
+  }
+
+  SNES::system.runtosave();
+  serializer state = SNES::system.serialize();
+
+  fp.open(filename(), file::mode_readwrite);
+
+  //user may save to slot #2 when slot #1 is empty; pad file to current slot if needed
+  unsigned stateOffset = SNES::system.serialize_size() * slot;
+  fp.seek(fp.size());
+  while(fp.size() < stateOffset) fp.write(0x00);
+
+  fp.seek(stateOffset);
+  fp.write(state.data(), state.size());
+  fp.close();
+}
+
+void StateManagerWindow::eraseState(unsigned slot) {
+  if(isStateValid(slot) == false) return;
+  file fp;
+  fp.open(filename(), file::mode_readwrite);
+  unsigned size = SNES::system.serialize_size();
+  fp.seek(slot * size);
+  for(unsigned i = 0; i < size; i++) fp.write(0x00);
+  fp.close();
+
+  //shrink state archive as much as possible:
+  //eg if only slot #2 and slot #31 were valid, but slot #31 was erased,
+  //file can be resized to only hold blank slot #1 + valid slot #2
+  signed lastValidState = -1;
+  for(signed i = StateCount - 1; i >= 0; i--) {
+    if(isStateValid(i)) {
+      lastValidState = i;
+      break;
+    }
+  }
+
+  if(lastValidState == -1) {
+    //no states used, remove empty file
+    unlink(filename());
+  } else {
+    unsigned neededFileSize = (lastValidState + 1) * SNES::system.serialize_size();
+    file fp;
+    if(fp.open(filename(), file::mode_readwrite)) {
+      if(fp.size() > neededFileSize) fp.truncate(neededFileSize);
+      fp.close();
+    }
   }
 }

@@ -8,7 +8,7 @@
 #include <nall/stdint.hpp>
 #include <nall/utility.hpp>
 
-#if defined(PLATFORM_X)
+#if defined(PLATFORM_X) || defined(PLATFORM_OSX)
   #include <dlfcn.h>
 #elif defined(PLATFORM_WIN)
   #include <windows.h>
@@ -41,6 +41,34 @@ namespace nall {
       strcpy(t, "/usr/local/lib/lib");
       strcat(t, name);
       strcat(t, ".so");
+      handle = (uintptr_t)dlopen(t, RTLD_LAZY);
+    }
+    delete[] t;
+    return handle;
+  }
+
+  inline void* library::sym(const char *name) {
+    if(!handle) return 0;
+    return dlsym((void*)handle, name);
+  }
+
+  inline void library::close() {
+    if(!handle) return;
+    dlclose((void*)handle);
+    handle = 0;
+  }
+  #elif defined(PLATFORM_OSX)
+  inline bool library::open(const char *name) {
+    if(handle) close();
+    char *t = new char[strlen(name) + 256];
+    strcpy(t, "lib");
+    strcat(t, name);
+    strcat(t, ".dylib");
+    handle = (uintptr_t)dlopen(t, RTLD_LAZY);
+    if(!handle) {
+      strcpy(t, "/usr/local/lib/lib");
+      strcat(t, name);
+      strcat(t, ".dylib");
       handle = (uintptr_t)dlopen(t, RTLD_LAZY);
     }
     delete[] t;

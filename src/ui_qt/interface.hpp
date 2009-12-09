@@ -8,4 +8,6 @@ public:
   Interface();
   void captureScreenshot(uint32_t*, unsigned, unsigned, unsigned);
   bool saveScreenshot;
-} interface;
+};
+
+extern Interface interface;

@@ -20,6 +20,7 @@ public:
 private:
   uint32_t samplebuffer[4096];
   unsigned row;
+  bool version;
 
   enum { SuperGameBoy1 = 0, SuperGameBoy2 = 1 };
   function<void (uint8_t*, unsigned)> sgb_rom;

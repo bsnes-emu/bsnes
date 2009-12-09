@@ -9,7 +9,6 @@ System system;
 #include "debugger/debugger.cpp"
 #include "serialization.cpp"
 #include "scheduler/scheduler.cpp"
-#include "statemanager/statemanager.cpp"
 
 #include "video/video.cpp"
 #include "audio/audio.cpp"
@@ -19,6 +18,7 @@ void System::coprocessor_enter() {
   if(cartridge.mode() == Cartridge::ModeSuperGameBoy) supergameboy.enter();
   if(cartridge.has_superfx()) superfx.enter();
   if(cartridge.has_sa1()) sa1.enter();
+  if(cartridge.has_21fx()) s21fx.enter();
 
   while(true) {
     scheduler.addclocks_cop(64 * 1024 * 1024);
@@ -78,6 +78,7 @@ void System::init(Interface *interface_) {
   st010.init();
   st011.init();
   st018.init();
+  s21fx.init();
 
   video.init();
   audio.init();
@@ -126,6 +127,7 @@ void System::power() {
   if(cartridge.has_st010())   st010.enable();
   if(cartridge.has_st011())   st011.enable();
   if(cartridge.has_st018())   st018.enable();
+  if(cartridge.has_21fx())    s21fx.enable();
 
   if(expansion() == ExpansionBSX) bsxbase.power();
   if(memory::bsxflash.data()) bsxflash.power();
@@ -146,8 +148,8 @@ void System::power() {
   if(cartridge.has_st010())   st010.power();
   if(cartridge.has_st011())   st011.power();
   if(cartridge.has_st018())   st018.power();
+  if(cartridge.has_21fx())    s21fx.power();
 
-  //ppu.PPUcounter::reset();
   cpu.power();
   smp.power();
   dsp.power();
@@ -162,7 +164,6 @@ void System::power() {
 void System::reset() {
   scheduler.init();
 
-  //ppu.PPUcounter::reset();
   cpu.reset();
   smp.reset();
   dsp.reset();
@@ -188,6 +189,7 @@ void System::reset() {
   if(cartridge.has_st010())   st010.reset();
   if(cartridge.has_st011())   st011.reset();
   if(cartridge.has_st018())   st018.reset();
+  if(cartridge.has_21fx())    s21fx.reset();
 
   input.port_set_device(0, config.controller_port1);
   input.port_set_device(1, config.controller_port2);

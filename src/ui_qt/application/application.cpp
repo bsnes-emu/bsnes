@@ -1,3 +1,6 @@
+#include "application.moc"
+Application application;
+
 #include "init.cpp"
 #include "qb.cpp"
 
@@ -117,6 +120,7 @@ void Application::run() {
 
   if(SNES::cartridge.loaded() && !pause && !autopause && (!debug || debugrun)) {
     SNES::system.run();
+    #if defined(DEBUGGER)
     if(SNES::debugger.break_event != SNES::Debugger::None) {
       debug = true;
       debugrun = false;
@@ -124,6 +128,7 @@ void Application::run() {
       debugger->event();
       SNES::debugger.break_event = SNES::Debugger::None;
     }
+    #endif
   } else {
     usleep(20 * 1000);
   }

@@ -1,3 +1,5 @@
+#include "hexeditor.moc"
+
 void HexEditor::keyPressEvent(QKeyEvent *event) {
   QTextCursor cursor = textCursor();
   unsigned x = cursor.position() % 56;

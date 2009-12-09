@@ -41,17 +41,8 @@ public:
   void loadCheats();
   void saveCheats();
 
-  string filepath(const char *filename, const char *pathname);
-
-  //state.cpp
   bool saveStatesSupported();
-  void quickLoad(uint8 slot);
-  void quickSave(uint8 slot);
-  void loadStateInfo(lstring&);
-  void setStateDescription(uint8 slot, const char *description);
-  void loadState(uint8 slot);
-  void saveState(uint8 slot, const char *description);
-  void deleteState(uint8 slot);
+  string filepath(const char *filename, const char *pathname);
 
   //window.cpp
   void updateFullscreenState();
@@ -67,4 +58,6 @@ public:
   void toggleFullscreen();
   void toggleMenubar();
   void toggleStatusbar();
-} utility;
+};
+
+extern Utility utility;

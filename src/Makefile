@@ -81,6 +81,7 @@ objects += system cartridge cheat
 objects += memory smemory cpu cpucore scpu smp smpcore ssmp sdsp ppu bppu
 objects += supergameboy superfx sa1
 objects += bsx srtc sdd1 spc7110 cx4 dsp1 dsp2 dsp3 dsp4 obc1 st010 st011 st018
+objects += 21fx
 
 ######################
 ### implicit rules ###
@@ -182,6 +183,7 @@ obj/obc1.o        : chip/obc1/obc1.cpp chip/obc1/*
 obj/st010.o       : chip/st010/st010.cpp chip/st010/*
 obj/st011.o       : chip/st011/st011.cpp chip/st011/*
 obj/st018.o       : chip/st018/st018.cpp chip/st018/*
+obj/21fx.o        : chip/21fx/21fx.cpp chip/21fx/*
 
 ###############
 ### targets ###

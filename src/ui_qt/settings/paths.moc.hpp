@@ -36,4 +36,6 @@ public:
   PathSettingWidget *dataPath;
 
   PathSettingsWindow();
-} *pathSettingsWindow;
+};
+
+extern PathSettingsWindow *pathSettingsWindow;

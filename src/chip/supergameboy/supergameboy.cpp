@@ -6,9 +6,11 @@ namespace SNES {
 SuperGameBoy supergameboy;
 
 void SuperGameBoy::enter() {
+  scheduler.clock.cop_freq = (version == SuperGameBoy1 ? 2147727 : 2097152);
+
   if(!sgb_run) while(true) {
     audio.coprocessor_sample(0, 0);
-    scheduler.addclocks_cop(10);
+    scheduler.addclocks_cop(1);
     scheduler.sync_copcpu();
   }
 
@@ -21,7 +23,7 @@ void SuperGameBoy::enter() {
       //SNES audio is notoriously quiet; lower Game Boy samples to match SGB sound effects
       audio.coprocessor_sample(left / 3, right / 3);
     }
-    scheduler.addclocks_cop(samples * 10);
+    scheduler.addclocks_cop(samples);
     scheduler.sync_copcpu();
   }
 }
@@ -96,8 +98,11 @@ void SuperGameBoy::enable() {
 }
 
 void SuperGameBoy::power() {
+  //determine whether to use SGB1 or SGB2 mode based on the cartridge title (look for the '2')
+  version = memory::cartrom[0x7fcd] != 0x32 ? SuperGameBoy1 : SuperGameBoy2;
+
   audio.coprocessor_enable(true);
-  audio.coprocessor_frequency(2147727.2);
+  audio.coprocessor_frequency(version == SuperGameBoy1 ? 2147727.0 : 2097152.0);
 
   bus.map(Bus::MapDirect, 0x00, 0x3f, 0x6000, 0x7fff, *this);
   bus.map(Bus::MapDirect, 0x80, 0xbf, 0x6000, 0x7fff, *this);
@@ -107,7 +112,7 @@ void SuperGameBoy::power() {
   sgb_rtc(memory::gbrtc.data(), memory::gbrtc.size() == -1U ? 0 : memory::gbrtc.size());
 
   //determine whether to use SGB1 or SGB2 mode based on the cartridge title (look for the '2')
-  if(sgb_init) sgb_init(memory::cartrom[0x7fcd] != 0x32 ? SuperGameBoy1 : SuperGameBoy2);
+  if(sgb_init) sgb_init(version);
   if(sgb_power) sgb_power();
 }
 
@@ -121,6 +126,7 @@ void SuperGameBoy::unload() {
 
 void SuperGameBoy::serialize(serializer &s) {
   s.integer(row);
+  s.integer(version);
   if(sgb_serialize) sgb_serialize(s);
 }
 

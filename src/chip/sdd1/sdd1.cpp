@@ -55,10 +55,10 @@ uint8 SDD1::mmio_read(unsigned addr) {
   }
 
   switch(addr) {
-    case 0x4804: return (mmc[0] >> 20) & 7;
-    case 0x4805: return (mmc[1] >> 20) & 7;
-    case 0x4806: return (mmc[2] >> 20) & 7;
-    case 0x4807: return (mmc[3] >> 20) & 7;
+    case 0x4804: return mmc[0] >> 20;
+    case 0x4805: return mmc[1] >> 20;
+    case 0x4806: return mmc[2] >> 20;
+    case 0x4807: return mmc[3] >> 20;
   }
 
   return cpu.regs.mdr;
@@ -84,10 +84,10 @@ void SDD1::mmio_write(unsigned addr, uint8 data) {
     case 0x4800: sdd1_enable = data; break;
     case 0x4801: xfer_enable = data; break;
 
-    case 0x4804: mmc[0] = (data & 7) << 20; break;
-    case 0x4805: mmc[1] = (data & 7) << 20; break;
-    case 0x4806: mmc[2] = (data & 7) << 20; break;
-    case 0x4807: mmc[3] = (data & 7) << 20; break;
+    case 0x4804: mmc[0] = data << 20; break;
+    case 0x4805: mmc[1] = data << 20; break;
+    case 0x4806: mmc[2] = data << 20; break;
+    case 0x4807: mmc[3] = data << 20; break;
   }
 }
 

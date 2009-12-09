@@ -32,4 +32,6 @@ private:
   void refresh4bpp(const uint8_t*, uint32_t*);
   void refresh8bpp(const uint8_t*, uint32_t*);
   void refreshMode7(const uint8_t*, uint32_t*);
-} *vramViewer;
+};
+
+extern VramViewer *vramViewer;

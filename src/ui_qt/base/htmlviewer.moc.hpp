@@ -9,4 +9,6 @@ public:
   HtmlViewerWindow();
 
 public slots:
-} *htmlViewerWindow;
+};
+
+extern HtmlViewerWindow *htmlViewerWindow;

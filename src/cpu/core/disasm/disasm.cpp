@@ -102,7 +102,7 @@ uint32 CPUcore::decode(uint8 offset_type, uint32 addr) {
   return(r & 0xffffff);
 }
 
-void CPUcore::disassemble_opcode(char *output) {
+void CPUcore::disassemble_opcode(char *output, uint32 addr) {
   static reg24_t pc;
   char t[256];
   char *s = output;
@@ -112,7 +112,7 @@ void CPUcore::disassemble_opcode(char *output) {
     return;
   }
 
-  pc.d = regs.pc.d;
+  pc.d = addr;
   sprintf(s, "%.6x ", (uint32)pc.d);
 
   uint8 op  = dreadb(pc.d); pc.w++;

@@ -1,3 +1,6 @@
+#include "about.moc"
+AboutWindow *aboutWindow;
+
 AboutWindow::AboutWindow() : QbWindow(config().geometry.aboutWindow) {
   setObjectName("about-window");
   setWindowTitle("About bsnes ...");
