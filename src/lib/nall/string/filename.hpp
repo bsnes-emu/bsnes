@@ -43,6 +43,18 @@ namespace nall {
     }
     return result;
   }
+
+  // "foo/bar.c" -> "c"
+  inline string extension(char const *name) {
+    for(signed i = strlen(name); i >= 0; i--) {
+      if(name[i] == '.') {
+        name += i + 1;
+        break;
+      }
+    }
+    string result = name;
+    return result;
+  }
 }
 
 #endif

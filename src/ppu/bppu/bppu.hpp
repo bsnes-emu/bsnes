@@ -59,7 +59,7 @@ public:
 
 #if defined(DEBUGGER)
   #include "debugger/debugger.hpp"
-  extern bPPUDebug ppu;
+  extern bPPUDebugger ppu;
 #else
   extern bPPU ppu;
 #endif

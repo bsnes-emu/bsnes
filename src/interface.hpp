@@ -5,6 +5,10 @@
 #endif
 
 namespace SNES {
+  struct ChipDebugger {
+    virtual bool property(unsigned id, string &name, string &value) = 0;
+  };
+
   #include "memory/memory.hpp"
   #include "memory/smemory/smemory.hpp"
 

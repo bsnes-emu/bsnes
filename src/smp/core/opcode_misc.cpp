@@ -1,3 +1,5 @@
+#ifdef SMPCORE_CPP
+
 void SMPcore::op_nop() {
   op_io();
 }
@@ -142,3 +144,5 @@ void SMPcore::op_div_ya_x() {
   regs.p.n = !!(regs.a & 0x80);
   regs.p.z = (regs.a == 0);
 }
+
+#endif

@@ -1,3 +1,5 @@
+#ifdef CPUCORE_CPP
+
 template<int n, int adjust> void CPUcore::op_adjust_imm_b() {
 L op_io_irq();
   regs.r[n].l += adjust;
@@ -163,3 +165,5 @@ template<void (CPUcore::*op)()> void CPUcore::op_adjust_dpx_w() {
   op_writedp(dp + regs.x.w + 1, rd.h);
 L op_writedp(dp + regs.x.w + 0, rd.l);
 }
+
+#endif

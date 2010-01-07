@@ -1,3 +1,5 @@
+#ifdef CPUCORE_CPP
+
 void CPUcore::op_nop() {
 L op_io_irq();
 }
@@ -346,3 +348,5 @@ void CPUcore::op_per_n() {
   op_writestackn(rd.h);
 L op_writestackn(rd.l);
 }
+
+#endif

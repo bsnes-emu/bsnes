@@ -149,17 +149,17 @@ struct regs_t {
   uint16 ramar;     //RAM buffer address register
   uint8 ramdr;      //RAM buffer data register
 
-  reg16_t *sreg, *dreg;
-  reg16_t& sr() { return *sreg; }  //source register (from)
-  reg16_t& dr() { return *dreg; }  //destination register (to)
+  unsigned sreg, dreg;
+  reg16_t& sr() { return r[sreg]; }  //source register (from)
+  reg16_t& dr() { return r[dreg]; }  //destination register (to)
 
   void reset() {
     sfr.b    = 0;
     sfr.alt1 = 0;
     sfr.alt2 = 0;
 
-    sreg = &r[0];
-    dreg = &r[0];
+    sreg = 0;
+    dreg = 0;
   }
 } regs;
 

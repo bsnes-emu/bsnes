@@ -190,6 +190,10 @@ void AudioInterface::driver(const char *driver) {
   else if(!strcmp(driver, "PulseAudio")) p = new AudioPulseAudio();
   #endif
 
+  #ifdef AUDIO_PULSEAUDIOSIMPLE
+  else if(!strcmp(driver, "PulseAudioSimple")) p = new AudioPulseAudioSimple();
+  #endif
+
   else p = new Audio();
 }
 
@@ -203,6 +207,8 @@ const char* AudioInterface::default_driver() {
   return "OpenAL";
   #elif defined(AUDIO_PULSEAUDIO)
   return "PulseAudio";
+  #elif defined(AUDIO_PULSEAUDIOSIMPLE)
+  return "PulseAudioSimple";
   #elif defined(AUDIO_AO)
   return "libao";
   #elif defined(AUDIO_OSS)
@@ -238,6 +244,10 @@ const char* AudioInterface::driver_list() {
 
   #if defined(AUDIO_PULSEAUDIO)
   "PulseAudio;"
+  #endif
+
+  #if defined(AUDIO_PULSEAUDIOSIMPLE)
+  "PulseAudioSimple;"
   #endif
 
   #if defined(AUDIO_AO)

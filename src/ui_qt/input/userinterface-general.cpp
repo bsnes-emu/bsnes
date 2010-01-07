@@ -27,10 +27,10 @@ struct ToggleStatusbar : HotkeyInput {
 struct ToggleCheatSystem : HotkeyInput {
   void pressed() {
     if(SNES::cheat.enabled() == false) {
-      SNES::cheat.enable();
+      SNES::cheat.enable(true);
       utility.showMessage("Cheat system enabled.");
     } else {
-      SNES::cheat.disable();
+      SNES::cheat.enable(false);
       utility.showMessage("Cheat system disabled.");
     }
   }

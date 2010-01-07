@@ -35,7 +35,7 @@ void Interface::captureScreenshot(uint32_t *data, unsigned pitch, unsigned width
   saveScreenshot = false;
   QImage image((const unsigned char*)data, width, height, pitch, QImage::Format_RGB32);
 
-  string filename = nall::basename(notdir(utility.cartridge.fileName));
+  string filename = nall::basename(cartridge.fileName);
   time_t systemTime = time(0);
   tm *currentTime = localtime(&systemTime);
   char t[512];
@@ -45,9 +45,7 @@ void Interface::captureScreenshot(uint32_t *data, unsigned pitch, unsigned width
   );
   filename << "-" << t << ".png";
 
-  string path = config().path.data;
-  if(path == "") path = dir(utility.cartridge.baseName);
-  image.save(string() << path << filename);
+  image.save(filepath(filename, config().path.data));
   utility.showMessage("Screenshot saved.");
 }
 

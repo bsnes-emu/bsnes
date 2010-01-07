@@ -31,14 +31,24 @@ using namespace ruby;
 #include "base/loader.moc.hpp"
 #include "base/main.moc.hpp"
 
+#include "cartridge/cartridge.hpp"
+
 #if defined(DEBUGGER)
   #include "debugger/debugger.moc.hpp"
-  #include "debugger/disassembler.moc.hpp"
-  #include "debugger/breakpoint.moc.hpp"
   #include "debugger/hexeditor.moc.hpp"
-  #include "debugger/memory.moc.hpp"
-  #include "debugger/vramviewer.moc.hpp"
   #include "debugger/tracer.moc.hpp"
+
+  #include "debugger/tools/disassembler.moc.hpp"
+  #include "debugger/tools/breakpoint.moc.hpp"
+  #include "debugger/tools/memory.moc.hpp"
+  #include "debugger/tools/properties.moc.hpp"
+
+  #include "debugger/ppu/layer-toggle.moc.hpp"
+  #include "debugger/ppu/vram-viewer.moc.hpp"
+  #include "debugger/ppu/oam-viewer.moc.hpp"
+  #include "debugger/ppu/cgram-viewer.moc.hpp"
+
+  #include "debugger/misc/debugger-options.moc.hpp"
 #endif
 
 #include "input/input.hpp"
@@ -62,7 +72,6 @@ using namespace ruby;
 #include "tools/cheateditor.moc.hpp"
 #include "tools/cheatfinder.moc.hpp"
 #include "tools/statemanager.moc.hpp"
-#include "tools/layertoggle.moc.hpp"
 
 #include "utility/utility.hpp"
 
@@ -75,6 +84,8 @@ struct Style {
     SeparatorSpacing = 5,
   };
 };
+
+extern string filepath(const char *filename, const char *filepath);
 
 #if !defined(PLATFORM_WIN)
   #define mkdir(path) (mkdir)(path, 0755)

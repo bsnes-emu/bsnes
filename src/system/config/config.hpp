@@ -18,14 +18,6 @@ struct Configuration {
     unsigned pal_clock_rate;
   } smp;
 
-  struct PPU {
-    bool bg1_enabled[2];
-    bool bg2_enabled[2];
-    bool bg3_enabled[2];
-    bool bg4_enabled[2];
-    bool oam_enabled[4];
-  } ppu;
-
   struct PPU1 {
     unsigned version;
   } ppu1;

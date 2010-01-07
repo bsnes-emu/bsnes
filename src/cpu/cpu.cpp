@@ -3,6 +3,10 @@
 #define CPU_CPP
 namespace SNES {
 
+#if defined(DEBUGGER)
+  #include "cpu-debugger.cpp"
+#endif
+
 void CPU::power() {
   cpu_version = config.cpu.version;
 }

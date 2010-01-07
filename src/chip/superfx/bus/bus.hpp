@@ -25,3 +25,10 @@ struct SuperFXCPURAM : Memory {
   uint8 read(unsigned);
   void write(unsigned, uint8);
 };
+
+namespace memory {
+  extern SuperFXGSUROM gsurom;
+  extern SuperFXGSURAM gsuram;
+  extern SuperFXCPUROM fxrom;
+  extern SuperFXCPURAM fxram;
+}

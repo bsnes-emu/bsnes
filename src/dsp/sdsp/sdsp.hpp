@@ -170,7 +170,7 @@ private:
 
 #if defined(DEBUGGER)
   #include "debugger/debugger.hpp"
-  extern sDSPDebug dsp;
+  extern sDSPDebugger dsp;
 #else
   extern sDSP dsp;
 #endif

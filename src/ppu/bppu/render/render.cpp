@@ -8,17 +8,6 @@
 #include "addsub.cpp"
 #include "line.cpp"
 
-bool bPPU::render_enabled(unsigned bg, unsigned pri) const {
-  switch(bg) {
-    case BG1: return config.ppu.bg1_enabled[pri];
-    case BG2: return config.ppu.bg2_enabled[pri];
-    case BG3: return config.ppu.bg3_enabled[pri];
-    case BG4: return config.ppu.bg4_enabled[pri];
-    case OAM: return config.ppu.oam_enabled[pri];
-  }
-  return true;
-}
-
 //Mode 0: ->
 //     1,    2,    3,    4,    5,    6,    7,    8,    9,   10,   11,   12
 //  BG4B, BG3B, OAM0, BG4A, BG3A, OAM1, BG2B, BG1B, OAM2, BG2A, BG1A, OAM3
@@ -41,12 +30,12 @@ void bPPU::render_line_mode1() {
   if(regs.bg3_priority) {
     render_line_bg<1, BG1, COLORDEPTH_16>(5,  8);
     render_line_bg<1, BG2, COLORDEPTH_16>(4,  7);
-    render_line_bg<1, BG3, COLORDEPTH_4 >( 1, 10);
+    render_line_bg<1, BG3, COLORDEPTH_4 >(1, 10);
     render_line_oam(2, 3, 6, 9);
   } else {
     render_line_bg<1, BG1, COLORDEPTH_16>(6,  9);
     render_line_bg<1, BG2, COLORDEPTH_16>(5,  8);
-    render_line_bg<1, BG3, COLORDEPTH_4 >( 1,  3);
+    render_line_bg<1, BG3, COLORDEPTH_4 >(1,  3);
     render_line_oam(2, 4, 7, 10);
   }
 }

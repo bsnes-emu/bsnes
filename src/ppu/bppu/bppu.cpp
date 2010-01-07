@@ -5,7 +5,7 @@ namespace SNES {
 
 #if defined(DEBUGGER)
   #include "debugger/debugger.cpp"
-  bPPUDebug ppu;
+  bPPUDebugger ppu;
 #else
   bPPU ppu;
 #endif
@@ -17,7 +17,9 @@ namespace SNES {
 
 void bPPU::enter() {
   while(true) {
-    if(scheduler.sync == Scheduler::SyncAll) scheduler.exit();
+    if(scheduler.sync == Scheduler::SyncAll) {
+      scheduler.exit(Scheduler::SynchronizeEvent);
+    }
 
     //H =    0 (initialize)
     scanline();

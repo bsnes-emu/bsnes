@@ -30,7 +30,7 @@ struct Slowdown : HotkeyInput {
     mainWindow->syncUi();
   }
 
-  Slowdown() : HotkeyInput("Slowdown", "config.userInterface.emulationSpeed.slowdown") {
+  Slowdown() : HotkeyInput("Slowdown", "input.userInterface.emulationSpeed.slowdown") {
     userInterfaceEmulationSpeed.attach(this);
   }
 } slowdown;
@@ -59,7 +59,7 @@ struct Speedup : HotkeyInput {
     mainWindow->syncUi();
   }
 
-  Speedup() : HotkeyInput("Speedup", "config.userInterface.emulationSpeed.speedup") {
+  Speedup() : HotkeyInput("Speedup", "input.userInterface.emulationSpeed.speedup") {
     name = "KB0::Tilde";
     userInterfaceEmulationSpeed.attach(this);
   }
@@ -72,7 +72,7 @@ struct Decrease : HotkeyInput {
     mainWindow->syncUi();
   }
 
-  Decrease() : HotkeyInput("Decrease", "config.userInterface.emulationSpeed.decrease") {
+  Decrease() : HotkeyInput("Decrease", "input.userInterface.emulationSpeed.decrease") {
     name = "Control+KB0::Divide";
     userInterfaceEmulationSpeed.attach(this);
   }
@@ -85,7 +85,7 @@ struct Increase : HotkeyInput {
     mainWindow->syncUi();
   }
 
-  Increase() : HotkeyInput("Increase", "config.userInterface.emulationSpeed.increase") {
+  Increase() : HotkeyInput("Increase", "input.userInterface.emulationSpeed.increase") {
     name = "Control+KB0::Multiply";
     userInterfaceEmulationSpeed.attach(this);
   }
@@ -98,7 +98,7 @@ struct SetSlowestSpeed : HotkeyInput {
     mainWindow->syncUi();
   }
 
-  SetSlowestSpeed() : HotkeyInput("Set Slowest Speed", "config.userInterface.emulationSpeed.setSlowest") {
+  SetSlowestSpeed() : HotkeyInput("Set Slowest Speed", "input.userInterface.emulationSpeed.setSlowest") {
     name = "Control+KB0::Num1";
     userInterfaceEmulationSpeed.attach(this);
   }
@@ -111,7 +111,7 @@ struct SetSlowSpeed : HotkeyInput {
     mainWindow->syncUi();
   }
 
-  SetSlowSpeed() : HotkeyInput("Set Slow Speed", "config.userInterface.emulationSpeed.setSlow") {
+  SetSlowSpeed() : HotkeyInput("Set Slow Speed", "input.userInterface.emulationSpeed.setSlow") {
     name = "Control+KB0::Num2";
     userInterfaceEmulationSpeed.attach(this);
   }
@@ -124,7 +124,7 @@ struct SetNormalSpeed : HotkeyInput {
     mainWindow->syncUi();
   }
 
-  SetNormalSpeed() : HotkeyInput("Set Normal Speed", "config.userInterface.emulationSpeed.setNormal") {
+  SetNormalSpeed() : HotkeyInput("Set Normal Speed", "input.userInterface.emulationSpeed.setNormal") {
     name = "Control+KB0::Num3";
     userInterfaceEmulationSpeed.attach(this);
   }
@@ -137,7 +137,7 @@ struct SetFastSpeed : HotkeyInput {
     mainWindow->syncUi();
   }
 
-  SetFastSpeed() : HotkeyInput("Set Fast Speed", "config.userInterface.emulationSpeed.setFast") {
+  SetFastSpeed() : HotkeyInput("Set Fast Speed", "input.userInterface.emulationSpeed.setFast") {
     name = "Control+KB0::Num4";
     userInterfaceEmulationSpeed.attach(this);
   }
@@ -150,7 +150,7 @@ struct SetFastestSpeed : HotkeyInput {
     mainWindow->syncUi();
   }
 
-  SetFastestSpeed() : HotkeyInput("Set Fastest Speed", "config.userInterface.emulationSpeed.setFastest") {
+  SetFastestSpeed() : HotkeyInput("Set Fastest Speed", "input.userInterface.emulationSpeed.setFastest") {
     name = "Control+KB0::Num5";
     userInterfaceEmulationSpeed.attach(this);
   }
@@ -161,7 +161,7 @@ struct SynchronizeVideo : HotkeyInput {
     utility.toggleSynchronizeVideo();
   }
 
-  SynchronizeVideo() : HotkeyInput("Synchronize Video", "config.userInterface.emulationSpeed.synchronizeVideo") {
+  SynchronizeVideo() : HotkeyInput("Synchronize Video", "input.userInterface.emulationSpeed.synchronizeVideo") {
     name = "Control+KB0::V";
     userInterfaceEmulationSpeed.attach(this);
   }
@@ -172,7 +172,7 @@ struct SynchronizeAudio : HotkeyInput {
     utility.toggleSynchronizeAudio();
   }
 
-  SynchronizeAudio() : HotkeyInput("Synchronize Audio", "config.userInterface.emulationSpeed.synchronizeAudio") {
+  SynchronizeAudio() : HotkeyInput("Synchronize Audio", "input.userInterface.emulationSpeed.synchronizeAudio") {
     name = "Control+KB0::A";
     userInterfaceEmulationSpeed.attach(this);
   }

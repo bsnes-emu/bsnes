@@ -3,11 +3,11 @@
 SuperFXBus superfxbus;
 
 namespace memory {
-  static SuperFXGSUROM gsurom;
-  static SuperFXGSURAM gsuram;
-  static SuperFXCPUROM fxrom;
-  static SuperFXCPURAM fxram;
-};
+  SuperFXGSUROM gsurom;
+  SuperFXGSURAM gsuram;
+  SuperFXCPUROM fxrom;
+  SuperFXCPURAM fxram;
+}
 
 void SuperFXBus::init() {
   map(MapDirect, 0x00, 0xff, 0x0000, 0xffff, memory::memory_unmapped);
@@ -34,7 +34,7 @@ unsigned SuperFXGSUROM::size() const {
 }
 
 uint8 SuperFXGSUROM::read(unsigned addr) {
-  while(!superfx.regs.scmr.ron) {
+  while(!superfx.regs.scmr.ron && scheduler.sync != Scheduler::SyncAll) {
     superfx.add_clocks(6);
     scheduler.sync_copcpu();
   }
@@ -42,7 +42,7 @@ uint8 SuperFXGSUROM::read(unsigned addr) {
 }
 
 void SuperFXGSUROM::write(unsigned addr, uint8 data) {
-  while(!superfx.regs.scmr.ron) {
+  while(!superfx.regs.scmr.ron && scheduler.sync != Scheduler::SyncAll) {
     superfx.add_clocks(6);
     scheduler.sync_copcpu();
   }
@@ -54,7 +54,7 @@ unsigned SuperFXGSURAM::size() const {
 }
 
 uint8 SuperFXGSURAM::read(unsigned addr) {
-  while(!superfx.regs.scmr.ran) {
+  while(!superfx.regs.scmr.ran && scheduler.sync != Scheduler::SyncAll) {
     superfx.add_clocks(6);
     scheduler.sync_copcpu();
   }
@@ -62,7 +62,7 @@ uint8 SuperFXGSURAM::read(unsigned addr) {
 }
 
 void SuperFXGSURAM::write(unsigned addr, uint8 data) {
-  while(!superfx.regs.scmr.ran) {
+  while(!superfx.regs.scmr.ran && scheduler.sync != Scheduler::SyncAll) {
     superfx.add_clocks(6);
     scheduler.sync_copcpu();
   }

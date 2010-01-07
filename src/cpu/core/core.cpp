@@ -5,7 +5,7 @@ namespace SNES {
 
 #include "serialization.cpp"
 #include "algorithms.cpp"
-#include "disasm/disasm.cpp"
+#include "disassembler/disassembler.cpp"
 
 #define L last_cycle();
 #define A 0

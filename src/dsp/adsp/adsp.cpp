@@ -1,7 +1,7 @@
 #include <../base.hpp>
 
 #define ADSP_CPP
-namespaec SNES {
+namespace SNES {
 
 aDSP dsp;
 

@@ -3,6 +3,10 @@
 #define PPU_CPP
 namespace SNES {
 
+#if defined(DEBUGGER)
+  #include "ppu-debugger.cpp"
+#endif
+
 #include "serialization.cpp"
 
 void PPU::enable_renderer(bool r) { status.render_output = r; }

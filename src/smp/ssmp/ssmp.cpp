@@ -5,7 +5,7 @@ namespace SNES {
 
 #if defined(DEBUGGER)
   #include "debugger/debugger.cpp"
-  sSMPDebug smp;
+  sSMPDebugger smp;
 #else
   sSMP smp;
 #endif
@@ -16,7 +16,10 @@ namespace SNES {
 
 void sSMP::enter() {
   while(true) {
-    if(scheduler.sync == Scheduler::SyncAll) scheduler.exit();
+    if(scheduler.sync == Scheduler::SyncAll) {
+      scheduler.exit(Scheduler::SynchronizeEvent);
+    }
+
     op_step();
   }
 }

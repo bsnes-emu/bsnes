@@ -8,10 +8,6 @@ PixelShaderWindow::PixelShaderWindow() {
   layout->setAlignment(Qt::AlignTop);
   setLayout(layout);
 
-  title = new QLabel("Pixel Shader Selection");
-  title->setProperty("class", "title");
-  layout->addWidget(title);
-
   gridLayout = new QGridLayout;
   gridLayout->setVerticalSpacing(0);
   layout->addLayout(gridLayout);

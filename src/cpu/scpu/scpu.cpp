@@ -5,7 +5,7 @@ namespace SNES {
 
 #if defined(DEBUGGER)
   #include "debugger/debugger.cpp"
-  sCPUDebug cpu;
+  sCPUDebugger cpu;
 #else
   sCPU cpu;
 #endif
@@ -20,7 +20,7 @@ void sCPU::enter() {
   while(true) {
     if(scheduler.sync == Scheduler::SyncCpu) {
       scheduler.sync = Scheduler::SyncAll;
-      scheduler.exit();
+      scheduler.exit(Scheduler::SynchronizeEvent);
     }
 
     if(status.interrupt_pending) {

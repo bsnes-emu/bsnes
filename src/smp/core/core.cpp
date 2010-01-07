@@ -5,7 +5,7 @@ namespace SNES {
 
 #include "serialization.cpp"
 #include "algorithms.cpp"
-#include "disasm/disasm.cpp"
+#include "disassembler/disassembler.cpp"
 
 #define A  0
 #define X  1

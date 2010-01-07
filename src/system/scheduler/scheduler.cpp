@@ -12,8 +12,13 @@ void Scheduler::enter() {
   co_switch(thread_active);
 }
 
-void Scheduler::exit() {
+void Scheduler::exit(ExitReason reason) {
+  exit_reason_ = reason;
   co_switch(thread_snes);
+}
+
+Scheduler::ExitReason Scheduler::exit_reason() const {
+  return exit_reason_;
 }
 
 void Scheduler::init() {
@@ -55,6 +60,8 @@ Scheduler::Scheduler() {
   thread_ppu    = 0;
   thread_dsp    = 0;
   thread_active = 0;
+
+  exit_reason_ = UnknownEvent;
 }
 
 #endif

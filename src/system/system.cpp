@@ -21,6 +21,10 @@ void System::coprocessor_enter() {
   if(cartridge.has_21fx()) s21fx.enter();
 
   while(true) {
+    if(scheduler.sync == Scheduler::SyncAll) {
+      scheduler.exit(Scheduler::SynchronizeEvent);
+    }
+
     scheduler.addclocks_cop(64 * 1024 * 1024);
     scheduler.sync_copcpu();
   }
@@ -30,30 +34,40 @@ void System::run() {
   scheduler.sync = Scheduler::SyncNone;
 
   scheduler.enter();
-  input.update();
-  video.update();
+  if(scheduler.exit_reason() == Scheduler::FrameEvent) {
+    input.update();
+    video.update();
+  }
 }
 
 void System::runtosave() {
   scheduler.sync = Scheduler::SyncCpu;
+  runthreadtosave();
 
-  while(true) {
-    scheduler.enter();
-    if(scheduler.sync == Scheduler::SyncAll) break;
-    input.update();
-    video.update();
-  }
+  scheduler.thread_active = scheduler.thread_cop;
+  runthreadtosave();
 
   scheduler.thread_active = scheduler.thread_smp;
-  scheduler.enter();
+  runthreadtosave();
 
   scheduler.thread_active = scheduler.thread_ppu;
-  scheduler.enter();
+  runthreadtosave();
 
   #if !defined(DSP_STATE_MACHINE)
   scheduler.thread_active = scheduler.thread_dsp;
-  scheduler.enter();
+  runthreadtosave();
   #endif
+}
+
+void System::runthreadtosave() {
+  while(true) {
+    scheduler.enter();
+    if(scheduler.exit_reason() == Scheduler::SynchronizeEvent) break;
+    if(scheduler.exit_reason() == Scheduler::FrameEvent) {
+      input.update();
+      video.update();
+    }
+  }
 }
 
 void System::init(Interface *interface_) {
@@ -61,8 +75,8 @@ void System::init(Interface *interface_) {
   assert(interface != 0);
 
   supergameboy.init();
-  sa1.init();
   superfx.init();
+  sa1.init();
   bsxbase.init();
   bsxcart.init();
   bsxflash.init();
@@ -89,11 +103,11 @@ void System::term() {
 }
 
 void System::power() {
-  snes_region = max(0, min(2, config.region));
-  snes_expansion = max(0, min(1, config.expansion_port));
+  region = max(0, min(2, config.region));
+  expansion = max(0, min(1, config.expansion_port));
 
-  if(snes_region == Autodetect) {
-    snes_region = (cartridge.region() == Cartridge::NTSC ? NTSC : PAL);
+  if(region == Autodetect) {
+    region = (cartridge.region() == Cartridge::NTSC ? NTSC : PAL);
   }
 
   audio.coprocessor_enable(false);
@@ -203,21 +217,15 @@ void System::unload() {
 
 void System::scanline() {
   video.scanline();
-  if(cpu.vcounter() == 241) scheduler.exit();
+  if(cpu.vcounter() == 241) scheduler.exit(Scheduler::FrameEvent);
 }
 
 void System::frame() {
 }
 
-System::Region System::region() const {
-  return (System::Region)snes_region;
-}
-
-System::ExpansionPortDevice System::expansion() const {
-  return (System::ExpansionPortDevice)snes_expansion;
-}
-
-System::System() : interface(0), snes_region(NTSC), snes_expansion(ExpansionNone) {
+System::System() : interface(0) {
+  region = NTSC;
+  expansion = ExpansionNone;
 }
 
 };

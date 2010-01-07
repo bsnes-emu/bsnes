@@ -2,7 +2,7 @@ class SMPcore {
 public:
   #include "registers.hpp"
   #include "memory.hpp"
-  #include "disasm/disasm.hpp"
+  #include "disassembler/disassembler.hpp"
 
   regs_t regs;
   uint16 dp, sp, rd, wr, bit, ya;

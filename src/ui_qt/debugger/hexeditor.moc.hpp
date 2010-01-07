@@ -17,6 +17,9 @@ public:
   void update();
   HexEditor();
 
-public slots:
+private slots:
   void sliderMoved();
+
+private:
+  bool slotLock;
 };

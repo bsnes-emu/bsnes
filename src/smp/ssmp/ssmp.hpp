@@ -43,7 +43,7 @@ public:
 
 #if defined(DEBUGGER)
   #include "debugger/debugger.hpp"
-  extern sSMPDebug smp;
+  extern sSMPDebugger smp;
 #else
   extern sSMP smp;
 #endif

@@ -3,13 +3,9 @@ CheatFinderWindow *cheatFinderWindow;
 
 CheatFinderWindow::CheatFinderWindow() {
   layout = new QVBoxLayout;
-  layout->setMargin(0);
+  layout->setMargin(Style::WindowMargin);
   layout->setSpacing(Style::WidgetSpacing);
   setLayout(layout);
-
-  title = new QLabel("Cheat Code Finder");
-  title->setProperty("class", "title");
-  layout->addWidget(title);
 
   list = new QTreeWidget;
   list->setColumnCount(3);
@@ -20,10 +16,10 @@ CheatFinderWindow::CheatFinderWindow() {
   layout->addWidget(list);
 
   controlLayout = new QGridLayout;
-  controlLayout->setSpacing(0);
+  controlLayout->setVerticalSpacing(0);
   layout->addLayout(controlLayout);
 
-  sizeLabel = new QLabel("Data size: ");
+  sizeLabel = new QLabel("Data size:");
   controlLayout->addWidget(sizeLabel, 0, 0);
 
   sizeGroup = new QButtonGroup(this);
@@ -45,7 +41,7 @@ CheatFinderWindow::CheatFinderWindow() {
   sizeGroup->addButton(size32bit);
   controlLayout->addWidget(size32bit, 0, 4);
 
-  compareLabel = new QLabel("Compare mode: ");
+  compareLabel = new QLabel("Compare mode:");
   controlLayout->addWidget(compareLabel, 1, 0);
 
   compareGroup = new QButtonGroup(this);
@@ -67,7 +63,7 @@ CheatFinderWindow::CheatFinderWindow() {
   compareGroup->addButton(compareGreaterThan);
   controlLayout->addWidget(compareGreaterThan, 1, 4);
 
-  valueLabel = new QLabel("Search value: ");
+  valueLabel = new QLabel("Search value:");
   controlLayout->addWidget(valueLabel, 2, 0);
 
   actionLayout = new QHBoxLayout;

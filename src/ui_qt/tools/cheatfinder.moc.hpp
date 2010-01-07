@@ -3,7 +3,6 @@ class CheatFinderWindow : public QWidget {
 
 public:
   QVBoxLayout *layout;
-  QLabel *title;
   QTreeWidget *list;
   QGridLayout *controlLayout;
   QLabel *sizeLabel;

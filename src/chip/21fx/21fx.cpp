@@ -1,7 +1,9 @@
 #include <../base.hpp>
 
+//B-bus interface
+
 //$21f0  command port (r/w)
-//-------------------
+//-------------------------
 //$00  set data port address (sr[3-0] = address)
 //$01  set audio track number (sr[1-0] = track number)
 //$02  set volume (sr[1] = left, sr[0] = right)
@@ -11,16 +13,37 @@
 //d6 = audio port busy
 //d5 = audio playing
 //d4 = reserved (0)
-//d3-d0 = version (1)
+//d3-d0 = version (0)
 //
 //
 //$21f1  parameter port (w)
-//---------------------
+//-------------------------
 //(shift register)
 //
 //
 //$21f2  data port (r)
-//----------------
+//--------------------
+//(auto-increment read port)
+
+//A-bus interface
+
+//$2200  command port (r/w)
+//-------------------------
+//$00  set data port address (sr[3-0] = address)
+//$01  set audio track number (sr[1-0] = track number)
+//$02  set volume (sr[1] = left, sr[0] = right)
+//$03  set audio state (sr[0].d1 = pause, sr[0].d0 = repeat)
+//
+//d7 = data port busy
+//d6 = audio port busy
+//d5 = audio playing
+//d4 = reserved (0)
+//d3-d0 = version (0)
+//
+//$2201  data port (r/w)
+//----------------------
+//(shift register)
+//
 //(auto-increment read port)
 
 #define S21FX_CPP
@@ -34,6 +57,10 @@ void S21fx::enter() {
   scheduler.clock.cop_freq = 44100;
 
   while(true) {
+    if(scheduler.sync == Scheduler::SyncAll) {
+      scheduler.exit(Scheduler::SynchronizeEvent);
+    }
+
     int16 left = 0, right = 0;
 
     if((mmio.status & AudioPlaying) && !mmio.audio_pause) {
@@ -71,6 +98,9 @@ void S21fx::enable() {
     memory::mmio.map(i, *this);
   }
 
+  memory::mmio.map(0x2200, *this);
+  memory::mmio.map(0x2201, *this);
+
   if(datafile.open()) datafile.close();
   datafile.open(string() << basepath << "21fx.bin", file::mode_read);
 }
@@ -95,11 +125,11 @@ void S21fx::reset() {
 uint8 S21fx::mmio_read(unsigned addr) {
   addr &= 0xffff;
 
-  if(addr == 0x21f0) {
-    return mmio.status | 0x01;
+  if((addr == 0x21f0) || (addr == 0x2200)) {
+    return mmio.status | 0x00;
   }
 
-  if(addr == 0x21f2) {
+  if((addr == 0x21f2) || (addr == 0x2201)) {
     if(mmio.status & DataPortBusy) return 0x00;
     mmio.data_offset++;
     if(datafile.open()) return datafile.read();
@@ -112,7 +142,7 @@ uint8 S21fx::mmio_read(unsigned addr) {
 void S21fx::mmio_write(unsigned addr, uint8 data) {
   addr &= 0xffff;
 
-  if(addr == 0x21f0) {
+  if((addr == 0x21f0) || (addr == 0x2200)) {
     if(data == 0x00) {
       mmio.data_offset = mmio.shift_register & 0xffffffff;
       if(datafile.open()) {
@@ -146,7 +176,7 @@ void S21fx::mmio_write(unsigned addr, uint8 data) {
     mmio.shift_register = 0;
   }
 
-  if(addr == 0x21f1) {
+  if((addr == 0x21f1) || (addr == 0x2201)) {
     mmio.shift_register = (mmio.shift_register << 8) | data;
   }
 }

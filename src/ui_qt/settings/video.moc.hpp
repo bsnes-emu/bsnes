@@ -3,7 +3,6 @@ class VideoSettingsWindow : public QWidget {
 
 public:
   QVBoxLayout *layout;
-  QLabel *title;
   QGridLayout *sliders;
   QLabel *contrastLabel;
   QLabel *contrastValue;

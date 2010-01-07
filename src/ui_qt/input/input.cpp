@@ -31,6 +31,9 @@ void MappedInput::bind() {
   if(part[1] == "Hi") specifier = InputSpecifier::Hi;
   if(part[1] == "Trigger") specifier = InputSpecifier::Trigger;
 
+  //bypass modifier matching if scancode is itself a modifier
+  modifierOverride = Keyboard::isAnyModifier(scancode);
+
   //re-encode name, in case previous name was invalid
   name = "";
   if(modifier & InputModifier::Shift) name << "Shift+";
@@ -53,6 +56,7 @@ void MappedInput::cache() {
 
 MappedInput::MappedInput(const char *label_, const char *configName) : parent(0), label(label_) {
   specifier = InputSpecifier::None;
+  modifierOverride = false;
   state = 0;
   previousState = 0;
   cachedState = 0;
@@ -63,7 +67,7 @@ MappedInput::MappedInput(const char *label_, const char *configName) : parent(0)
 
 void DigitalInput::poll() {
   previousState = state;
-  if(modifier == mapper().modifier) {
+  if(modifier == mapper().modifier || modifierOverride) {
     if(specifier == InputSpecifier::None) {
       state = mapper().state(scancode);
     } else if(specifier == InputSpecifier::Up) {

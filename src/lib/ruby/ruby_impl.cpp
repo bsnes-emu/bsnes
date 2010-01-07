@@ -128,6 +128,10 @@
   #include <ruby/audio/pulseaudio.cpp>
 #endif
 
+#ifdef AUDIO_PULSEAUDIOSIMPLE
+  #include <ruby/audio/pulseaudiosimple.cpp>
+#endif
+
 /* Input */
 
 #define DeclareInput(Name) \

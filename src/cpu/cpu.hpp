@@ -1,3 +1,7 @@
+#if defined(DEBUGGER)
+  #include "cpu-debugger.hpp"
+#endif
+
 class CPU : public PPUcounter, public MMIO {
 public:
   virtual void enter() = 0;

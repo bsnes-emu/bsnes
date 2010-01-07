@@ -5,12 +5,12 @@ public:
   enum { StateCount = 32 };
 
   QVBoxLayout *layout;
-  QLabel *title;
   QTreeWidget *list;
   QHBoxLayout *infoLayout;
   QLabel *descriptionLabel;
   QLineEdit *descriptionText;
   QHBoxLayout *controlLayout;
+  QWidget *spacer;
   QPushButton *loadButton;
   QPushButton *saveButton;
   QPushButton *eraseButton;

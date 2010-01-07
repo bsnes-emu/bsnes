@@ -3,13 +3,19 @@ class Debugger : public QbWindow {
 
 public:
   QMenuBar *menu;
-  QMenu *tools;
-  QAction *tools_disassembler;
-  QAction *tools_breakpoint;
-  QAction *tools_memory;
-  QAction *tools_vramViewer;
-  QMenu *miscOptions;
-  QAction *miscOptions_clear;
+  QMenu *menu_tools;
+  QAction *menu_tools_disassembler;
+  QAction *menu_tools_breakpoint;
+  QAction *menu_tools_memory;
+  QAction *menu_tools_propertiesViewer;
+  QMenu *menu_ppu;
+  QAction *menu_ppu_layerToggle;
+  QAction *menu_ppu_vramViewer;
+  QAction *menu_ppu_oamViewer;
+  QAction *menu_ppu_cgramViewer;
+  QMenu *menu_misc;
+  QAction *menu_misc_clear;
+  QAction *menu_misc_options;
 
   QHBoxLayout *layout;
   QTextEdit *console;
@@ -28,13 +34,10 @@ public:
   void echo(const char *message);
   void event();
   void frameTick();
+  void autoUpdate();
   Debugger();
 
 public slots:
-  void showDisassembler();
-  void showBreakpointEditor();
-  void showMemoryEditor();
-  void showVramViewer();
   void clear();
   void synchronize();
 

@@ -93,6 +93,7 @@ public slots:
   void changeItem(const QModelIndex&);
   void loadSelected();
 
+  void toggleApplyPatches();
   void toggleShowPanel();
 
 private:

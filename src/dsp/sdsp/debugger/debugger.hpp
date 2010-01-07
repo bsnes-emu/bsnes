@@ -1,3 +1,3 @@
-class sDSPDebug : public sDSP {
+class sDSPDebugger : public sDSP {
 public:
 };

@@ -1,3 +1,5 @@
+#ifdef CPUCORE_CPP
+
 template<void (CPUcore::*op)()> void CPUcore::op_read_const_b() {
 L rd.l = op_readpc();
   call(op);
@@ -273,3 +275,5 @@ template<void (CPUcore::*op)()> void CPUcore::op_read_isry_w() {
 L rd.h = op_readdbr(aa.w + regs.y.w + 1);
   call(op);
 }
+
+#endif

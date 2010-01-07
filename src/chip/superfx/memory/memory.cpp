@@ -1,3 +1,5 @@
+#ifdef SUPERFX_CPP
+
 uint8 SuperFX::op_read(uint16 addr) {
   uint16 offset = addr - regs.cbr;
   if(offset < 512) {
@@ -65,3 +67,5 @@ void SuperFX::memory_reset() {
     pixelcache[n].bitpend = 0x00;
   }
 }
+
+#endif

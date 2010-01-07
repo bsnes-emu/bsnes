@@ -1,7 +1,28 @@
 #ifdef CARTRIDGE_CPP
 
-void Cartridge::read_header(cartinfo_t &info, const uint8_t *data, unsigned size) const {
-  info.reset();
+void Cartridge::read_header(const uint8_t *data, unsigned size) {
+  type        = TypeUnknown;
+  mapper      = LoROM;
+  dsp1_mapper = DSP1Unmapped;
+  region      = NTSC;
+  ram_size    = 0;
+
+  has_bsx_slot   = false;
+  has_superfx    = false;
+  has_sa1        = false;
+  has_srtc       = false;
+  has_sdd1       = false;
+  has_spc7110    = false;
+  has_spc7110rtc = false;
+  has_cx4        = false;
+  has_dsp1       = false;
+  has_dsp2       = false;
+  has_dsp3       = false;
+  has_dsp4       = false;
+  has_obc1       = false;
+  has_st010      = false;
+  has_st011      = false;
+  has_st018      = false;
 
   //=====================
   //detect Game Boy carts
@@ -10,23 +31,23 @@ void Cartridge::read_header(cartinfo_t &info, const uint8_t *data, unsigned size
   if(size >= 0x0140) {
     if(data[0x0104] == 0xce && data[0x0105] == 0xed && data[0x0106] == 0x66 && data[0x0107] == 0x66
     && data[0x0108] == 0xcc && data[0x0109] == 0x0d && data[0x010a] == 0x00 && data[0x010b] == 0x0b) {
-      info.type = TypeGameBoy;
+      type = TypeGameBoy;
       return;
     }
   }
 
   const unsigned index = find_header(data, size);
-  const uint8 mapper   = data[index + Mapper];
+  const uint8 mapperid = data[index + Mapper];
   const uint8 rom_type = data[index + RomType];
   const uint8 rom_size = data[index + RomSize];
   const uint8 company  = data[index + Company];
-  const uint8 region   = data[index + CartRegion] & 0x7f;
+  const uint8 regionid = data[index + CartRegion] & 0x7f;
 
-  info.ram_size = 1024 << (data[index + RamSize] & 7);
-  if(info.ram_size == 1024) info.ram_size = 0;  //no RAM present, eg RamSize == 0
+  ram_size = 1024 << (data[index + RamSize] & 7);
+  if(ram_size == 1024) ram_size = 0;  //no RAM present
 
   //0, 1, 13 = NTSC; 2 - 12 = PAL
-  info.region = (region <= 1 || region >= 13) ? NTSC : PAL;
+  region = (regionid <= 1 || regionid >= 13) ? NTSC : PAL;
 
   //=======================
   //detect BS-X flash carts
@@ -37,9 +58,9 @@ void Cartridge::read_header(cartinfo_t &info, const uint8_t *data, unsigned size
       const uint8_t n15 = data[index + 0x15];
       if(n15 == 0x00 || n15 == 0x80 || n15 == 0x84 || n15 == 0x9c || n15 == 0xbc || n15 == 0xfc) {
         if(data[index + 0x1a] == 0x33 || data[index + 0x1a] == 0xff) {
-          info.type = TypeBsx;
-          info.mapper = BSXROM;
-          info.region = NTSC;  //BS-X only released in Japan
+          type = TypeBsx;
+          mapper = BSXROM;
+          region = NTSC;  //BS-X only released in Japan
           return;
         }
       }
@@ -52,21 +73,26 @@ void Cartridge::read_header(cartinfo_t &info, const uint8_t *data, unsigned size
 
   if(!memcmp(data, "BANDAI SFC-ADX", 14)) {
     if(!memcmp(data + 16, "SFC-ADX BACKUP", 14)) {
-      info.type = TypeSufamiTurboBios;
+      type = TypeSufamiTurboBios;
     } else {
-      info.type = TypeSufamiTurbo;
+      type = TypeSufamiTurbo;
     }
-    info.mapper = STROM;
-    info.region = NTSC;  //Sufami Turbo only released in Japan
-    return;              //RAM size handled internally by load_cart_st();
+    mapper = STROM;
+    region = NTSC;  //Sufami Turbo only released in Japan
+    return;         //RAM size handled outside this routine
   }
 
   //==========================
   //detect Super Game Boy BIOS
   //==========================
 
+  if(!memcmp(data + index, "Super GAMEBOY2", 14)) {
+    type = TypeSuperGameBoy2Bios;
+    return;
+  }
+
   if(!memcmp(data + index, "Super GAMEBOY", 13)) {
-    info.type = TypeSuperGameBoyBios;
+    type = TypeSuperGameBoy1Bios;
     return;
   }
 
@@ -80,118 +106,119 @@ void Cartridge::read_header(cartinfo_t &info, const uint8_t *data, unsigned size
       uint8 n13 = data[index - 13];
       if((n13 >= 'A' && n13 <= 'Z') || (n13 >= '0' && n13 <= '9')) {
         if(company == 0x33 || (data[index - 10] == 0x00 && data[index - 4] == 0x00)) {
-          info.bsx_slot = true;
+          has_bsx_slot = true;
         }
       }
     }
   }
 
-  if(info.bsx_slot == true) {
+  if(has_bsx_slot) {
     if(!memcmp(data + index, "Satellaview BS-X     ", 21)) {
       //BS-X base cart
-      info.type = TypeBsxBios;
-      info.mapper = BSXROM;
-      info.region = NTSC;  //BS-X only released in Japan
-      return;              //RAM size handled internally by load_cart_bsx() -> BSXCart class
+      type = TypeBsxBios;
+      mapper = BSXROM;
+      region = NTSC;  //BS-X only released in Japan
+      return;         //RAM size handled internally by load_cart_bsx() -> BSXCart class
     } else {
-      info.type = TypeBsxSlotted;
-      info.mapper = (index == 0x7fc0 ? BSCLoROM : BSCHiROM);
+      type = TypeBsxSlotted;
+      mapper = (index == 0x7fc0 ? BSCLoROM : BSCHiROM);
+      region = NTSC;  //BS-X slotted cartridges only released in Japan
     }
   } else {
     //standard cart
-    info.type = TypeNormal;
+    type = TypeNormal;
 
     if(index == 0x7fc0 && size >= 0x401000) {
-      info.mapper = ExLoROM;
-    } else if(index == 0x7fc0 && mapper == 0x32) {
-      info.mapper = ExLoROM;
+      mapper = ExLoROM;
+    } else if(index == 0x7fc0 && mapperid == 0x32) {
+      mapper = ExLoROM;
     } else if(index == 0x7fc0) {
-      info.mapper = LoROM;
+      mapper = LoROM;
     } else if(index == 0xffc0) {
-      info.mapper = HiROM;
+      mapper = HiROM;
     } else {  //index == 0x40ffc0
-      info.mapper = ExHiROM;
+      mapper = ExHiROM;
     }
   }
 
-  if(mapper == 0x20 && (rom_type == 0x13 || rom_type == 0x14 || rom_type == 0x15 || rom_type == 0x1a)) {
-    info.superfx = true;
-    info.mapper = SuperFXROM;
-    info.ram_size = 1024 << (data[index - 3] & 7);
-    if(info.ram_size == 1024) info.ram_size = 0;
+  if(mapperid == 0x20 && (rom_type == 0x13 || rom_type == 0x14 || rom_type == 0x15 || rom_type == 0x1a)) {
+    has_superfx = true;
+    mapper = SuperFXROM;
+    ram_size = 1024 << (data[index - 3] & 7);
+    if(ram_size == 1024) ram_size = 0;
   }
 
-  if(mapper == 0x23 && (rom_type == 0x32 || rom_type == 0x34 || rom_type == 0x35)) {
-    info.sa1 = true;
-    info.mapper = SA1ROM;
+  if(mapperid == 0x23 && (rom_type == 0x32 || rom_type == 0x34 || rom_type == 0x35)) {
+    has_sa1 = true;
+    mapper = SA1ROM;
   }
 
-  if(mapper == 0x35 && rom_type == 0x55) {
-    info.srtc = true;
+  if(mapperid == 0x35 && rom_type == 0x55) {
+    has_srtc = true;
   }
 
-  if(mapper == 0x32 && (rom_type == 0x43 || rom_type == 0x45)) {
-    info.sdd1 = true;
+  if(mapperid == 0x32 && (rom_type == 0x43 || rom_type == 0x45)) {
+    has_sdd1 = true;
   }
 
-  if(mapper == 0x3a && (rom_type == 0xf5 || rom_type == 0xf9)) {
-    info.spc7110 = true;
-    info.spc7110rtc = (rom_type == 0xf9);
-    info.mapper = SPC7110ROM;
+  if(mapperid == 0x3a && (rom_type == 0xf5 || rom_type == 0xf9)) {
+    has_spc7110 = true;
+    has_spc7110rtc = (rom_type == 0xf9);
+    mapper = SPC7110ROM;
   }
 
-  if(mapper == 0x20 && rom_type == 0xf3) {
-    info.cx4 = true;
+  if(mapperid == 0x20 && rom_type == 0xf3) {
+    has_cx4 = true;
   }
 
-  if((mapper == 0x20 || mapper == 0x21) && rom_type == 0x03) {
-    info.dsp1 = true;
+  if((mapperid == 0x20 || mapperid == 0x21) && rom_type == 0x03) {
+    has_dsp1 = true;
   }
 
-  if(mapper == 0x30 && rom_type == 0x05 && company != 0xb2) {
-    info.dsp1 = true;
+  if(mapperid == 0x30 && rom_type == 0x05 && company != 0xb2) {
+    has_dsp1 = true;
   }
 
-  if(mapper == 0x31 && (rom_type == 0x03 || rom_type == 0x05)) {
-    info.dsp1 = true;
+  if(mapperid == 0x31 && (rom_type == 0x03 || rom_type == 0x05)) {
+    has_dsp1 = true;
   }
 
-  if(info.dsp1 == true) {
-    if((mapper & 0x2f) == 0x20 && size <= 0x100000) {
-      info.dsp1_mapper = DSP1LoROM1MB;
-    } else if((mapper & 0x2f) == 0x20) {
-      info.dsp1_mapper = DSP1LoROM2MB;
-    } else if((mapper & 0x2f) == 0x21) {
-      info.dsp1_mapper = DSP1HiROM;
+  if(has_dsp1 == true) {
+    if((mapperid & 0x2f) == 0x20 && size <= 0x100000) {
+      dsp1_mapper = DSP1LoROM1MB;
+    } else if((mapperid & 0x2f) == 0x20) {
+      dsp1_mapper = DSP1LoROM2MB;
+    } else if((mapperid & 0x2f) == 0x21) {
+      dsp1_mapper = DSP1HiROM;
     }
   }
 
-  if(mapper == 0x20 && rom_type == 0x05) {
-    info.dsp2 = true;
+  if(mapperid == 0x20 && rom_type == 0x05) {
+    has_dsp2 = true;
   }
 
-  if(mapper == 0x30 && rom_type == 0x05 && company == 0xb2) {
-    info.dsp3 = true;
+  if(mapperid == 0x30 && rom_type == 0x05 && company == 0xb2) {
+    has_dsp3 = true;
   }
 
-  if(mapper == 0x30 && rom_type == 0x03) {
-    info.dsp4 = true;
+  if(mapperid == 0x30 && rom_type == 0x03) {
+    has_dsp4 = true;
   }
 
-  if(mapper == 0x30 && rom_type == 0x25) {
-    info.obc1 = true;
+  if(mapperid == 0x30 && rom_type == 0x25) {
+    has_obc1 = true;
   }
 
-  if(mapper == 0x30 && rom_type == 0xf6 && rom_size >= 10) {
-    info.st010 = true;
+  if(mapperid == 0x30 && rom_type == 0xf6 && rom_size >= 10) {
+    has_st010 = true;
   }
 
-  if(mapper == 0x30 && rom_type == 0xf6 && rom_size < 10) {
-    info.st011 = true;
+  if(mapperid == 0x30 && rom_type == 0xf6 && rom_size < 10) {
+    has_st011 = true;
   }
 
-  if(mapper == 0x30 && rom_type == 0xf5) {
-    info.st018 = true;
+  if(mapperid == 0x30 && rom_type == 0xf5) {
+    has_st018 = true;
   }
 }
 

@@ -4,6 +4,7 @@ MainWindow *mainWindow;
 MainWindow::MainWindow() : QbWindow(config().geometry.mainWindow) {
   setObjectName("main-window");
   setWindowTitle(string() << bsnesTitle << " v" << bsnesVersion);
+  setCloseOnEscape(false);
 
   //menu bar
   #if defined(PLATFORM_OSX)
@@ -165,14 +166,14 @@ MainWindow::MainWindow() : QbWindow(config().geometry.mainWindow) {
 
   tools->addSeparator();
 
+  tools_dialog = tools->addAction("&Tools Dialog ...");
+  tools_dialog->setIcon(QIcon(":/16x16/preferences-desktop.png"));
+
   tools_debugger = tools->addAction("&Debugger ...");
   tools_debugger->setIcon(QIcon(":/16x16/utilities-terminal.png"));
   #if !defined(DEBUGGER)
   tools_debugger->setVisible(false);
   #endif
-
-  tools_dialog = tools->addAction("&Tools Dialog ...");
-  tools_dialog->setIcon(QIcon(":/16x16/preferences-desktop.png"));
 
   help = menuBar->addMenu("&Help");
 
@@ -344,7 +345,7 @@ void MainWindow::syncUi() {
   settings_emulationSpeed_syncAudio->setChecked(config().audio.synchronize);
 
   //movies contian save states to synchronize playback to recorded input
-  tools_movies->setEnabled(SNES::cartridge.loaded() && utility.saveStatesSupported());
+  tools_movies->setEnabled(SNES::cartridge.loaded() && cartridge.saveStatesSupported());
   if(tools_movies->isEnabled()) {
     tools_movies_play->setEnabled(movie.state == Movie::Inactive);
     tools_movies_stop->setEnabled(movie.state != Movie::Inactive);
@@ -597,7 +598,7 @@ void CanvasObject::dragEnterEvent(QDragEnterEvent *event) {
 void CanvasObject::dropEvent(QDropEvent *event) {
   if(event->mimeData()->hasUrls()) {
     QList<QUrl> list = event->mimeData()->urls();
-    if(list.count() == 1) utility.loadCartridgeNormal(list.at(0).toLocalFile().toUtf8().constData());
+    if(list.count() == 1) cartridge.loadNormal(list.at(0).toLocalFile().toUtf8().constData());
   }
 }
 

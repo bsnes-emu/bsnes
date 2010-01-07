@@ -3,7 +3,6 @@ class AudioSettingsWindow : public QWidget {
 
 public:
   QVBoxLayout *layout;
-  QLabel *title;
   QHBoxLayout *boxes;
   QLabel *frequencyLabel;
   QComboBox *frequency;

@@ -1,3 +1,5 @@
+#ifdef SUPERFX_CPP
+
 void SuperFX::add_clocks(unsigned clocks) {
   if(regs.romcl) {
     regs.romcl -= min(clocks, regs.romcl);
@@ -91,3 +93,5 @@ void SuperFX::timing_reset() {
   regs.ramar = 0;
   regs.ramdr = 0;
 }
+
+#endif

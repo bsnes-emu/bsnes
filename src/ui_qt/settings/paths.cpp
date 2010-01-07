@@ -62,14 +62,10 @@ void PathSettingWidget::defaultPath() {
 
 PathSettingsWindow::PathSettingsWindow() {
   layout = new QVBoxLayout;
-  layout->setMargin(0);
+  layout->setMargin(Style::WindowMargin);
   layout->setSpacing(Style::WidgetSpacing);
   layout->setAlignment(Qt::AlignTop);
   setLayout(layout);
-
-  title = new QLabel("Default Folder Paths");
-  title->setProperty("class", "title");
-  layout->addWidget(title);
 
   gamePath  = new PathSettingWidget(config().path.rom,   "Games:",         "Remember last path",  "Default Game Path");
   savePath  = new PathSettingWidget(config().path.save,  "Save RAM:",      "Same as loaded game", "Default Save RAM Path");

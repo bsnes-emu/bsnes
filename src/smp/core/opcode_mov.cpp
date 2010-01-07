@@ -1,3 +1,5 @@
+#ifdef SMPCORE_CPP
+
 template<int to, int from> void SMPcore::op_mov_reg_reg() {
   op_io();
   regs.r[to] = regs.r[from];
@@ -194,3 +196,5 @@ void SMPcore::op_mov1_bit_c() {
   op_io();
   op_writeaddr(dp, rd);
 }
+
+#endif

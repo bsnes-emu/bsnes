@@ -9,7 +9,7 @@ namespace SNES {
 
 #if defined(DEBUGGER)
   #include "debugger/debugger.cpp"
-  sDSPDebug dsp;
+  sDSPDebugger dsp;
 #else
   sDSP dsp;
 #endif
@@ -20,7 +20,10 @@ namespace SNES {
 #define VREG(n) state.regs[v.vidx + v_##n]
 
 #if !defined(DSP_STATE_MACHINE)
-  #define phase_start() while(true) { if(scheduler.sync == Scheduler::SyncAll) scheduler.exit();
+  #define phase_start() while(true) { \
+                          if(scheduler.sync == Scheduler::SyncAll) { \
+                            scheduler.exit(Scheduler::SynchronizeEvent); \
+                          }
   #define phase(n)
   #define tick()          scheduler.addclocks_dsp(3 * 8); scheduler.sync_dspsmp()
   #define phase_end()   }

@@ -94,13 +94,11 @@ State::~State() {
 bool State::allowed() const {
   if(!SNES::cartridge.loaded() || !application.power) return false;
   if(movie.state != Movie::Inactive) return false;
-  return utility.saveStatesSupported();
+  return cartridge.saveStatesSupported();
 }
 
 string State::name(unsigned slot) const {
-  string name = config().path.state;
-  if(name == "") name = dir(utility.cartridge.fileName);
-  name << nall::basename(notdir(utility.cartridge.fileName));
+  string name = filepath(nall::basename(cartridge.fileName), config().path.state);
   name << "-" << (slot + 1) << ".bst";
   return name;
 }

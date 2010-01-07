@@ -3,7 +3,6 @@ class PixelShaderWindow : public QWidget {
 
 public:
   QVBoxLayout *layout;
-  QLabel *title;
   QGridLayout *gridLayout;
   QLabel *fragmentLabel;
   QLineEdit *fragmentPath;

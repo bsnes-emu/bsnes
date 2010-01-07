@@ -37,6 +37,9 @@ public:
     XvImage *image;
     XvFormat format;
     uint32_t fourcc;
+
+    unsigned width;
+    unsigned height;
   } device;
 
   struct {
@@ -81,11 +84,33 @@ public:
     return false;
   }
 
-  bool lock(uint32_t *&data, unsigned &pitch, unsigned width, unsigned height) {
-    settings.width  = width;
-    settings.height = height;
+  void resize(unsigned width, unsigned height) {
+    if(device.width >= width && device.height >= height) return;
+    device.width  = max(width,  device.width);
+    device.height = max(height, device.height);
 
-    pitch = 1024 * 4;
+    XShmDetach(device.display, &device.shminfo);
+    shmdt(device.shminfo.shmaddr);
+    shmctl(device.shminfo.shmid, IPC_RMID, NULL);
+    XFree(device.image);
+    delete[] buffer;
+
+    device.image = XvShmCreateImage(device.display, device.port, device.fourcc, 0, device.width, device.height, &device.shminfo);
+
+    device.shminfo.shmid    = shmget(IPC_PRIVATE, device.image->data_size, IPC_CREAT | 0777);
+    device.shminfo.shmaddr  = device.image->data = (char*)shmat(device.shminfo.shmid, 0, 0);
+    device.shminfo.readOnly = false;
+    XShmAttach(device.display, &device.shminfo);
+
+    buffer = new uint32_t[device.width * device.height];
+  }
+
+  bool lock(uint32_t *&data, unsigned &pitch, unsigned width, unsigned height) {
+    if(width != settings.width || height != settings.height) {
+      resize(settings.width = width, settings.height = height);
+    }
+
+    pitch = device.width * 4;
     return data = buffer;
   }
 
@@ -93,7 +118,7 @@ public:
   }
 
   void clear() {
-    memset(buffer, 0, 1024 * 1024 * sizeof(uint32_t));
+    memset(buffer, 0, device.width * device.height * sizeof(uint32_t));
     //clear twice in case video is double buffered ...
     refresh();
     refresh();
@@ -269,7 +294,10 @@ public:
       return false;
     }
 
-    device.image = XvShmCreateImage(device.display, device.port, device.fourcc, 0, 1024, 1024, &device.shminfo);
+    device.width  = 256;
+    device.height = 256;
+
+    device.image = XvShmCreateImage(device.display, device.port, device.fourcc, 0, device.width, device.height, &device.shminfo);
     if(!device.image) {
       fprintf(stderr, "VideoXv: XShmCreateImage failed.\n");
       return false;
@@ -283,7 +311,7 @@ public:
       return false;
     }
 
-    buffer = new uint32_t[1024 * 1024];
+    buffer = new uint32_t[device.width * device.height];
     settings.width  = 256;
     settings.height = 256;
     init_yuv_tables();
@@ -319,8 +347,8 @@ public:
 
     for(unsigned y = 0; y < height; y++) {
       memcpy(output, input, width * 4);
-      input  += 1024;
-      output += 1024;
+      input  += device.width;
+      output += device.width;
     }
   }
 
@@ -336,8 +364,8 @@ public:
         *output++ = p >> 16;
       }
 
-      input  += (1024 - width);
-      output += (1024 - width) * 3;
+      input  += (device.width - width);
+      output += (device.width - width) * 3;
     }
   }
 
@@ -351,8 +379,8 @@ public:
         *output++ = ((p >> 8) & 0xf800) | ((p >> 5) & 0x07e0) | ((p >> 3) & 0x001f);  //RGB32->RGB16
       }
 
-      input  += 1024 - width;
-      output += 1024 - width;
+      input  += device.width - width;
+      output += device.width - width;
     }
   }
 
@@ -366,8 +394,8 @@ public:
         *output++ = ((p >> 9) & 0x7c00) | ((p >> 6) & 0x03e0) | ((p >> 3) & 0x001f);  //RGB32->RGB15
       }
 
-      input  += 1024 - width;
-      output += 1024 - width;
+      input  += device.width - width;
+      output += device.width - width;
     }
   }
 
@@ -389,8 +417,8 @@ public:
         *output++ = (v << 8) | ytable[p1];
       }
 
-      input  += 1024 - width;
-      output += 1024 - width;
+      input  += device.width - width;
+      output += device.width - width;
     }
   }
 
@@ -412,8 +440,8 @@ public:
         *output++ = (ytable[p1] << 8) | v;
       }
 
-      input  += 1024 - width;
-      output += 1024 - width;
+      input  += device.width - width;
+      output += device.width - width;
     }
   }
 

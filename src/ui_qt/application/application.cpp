@@ -77,7 +77,7 @@ int Application::main(int &argc, char **argv) {
 
   if(argc == 2) {
     //if valid file was specified on the command-line, attempt to load it now
-    utility.loadCartridgeNormal(argv[1]);
+    cartridge.loadNormal(argv[1]);
   }
 
   timer = new QTimer(this);
@@ -90,7 +90,7 @@ int Application::main(int &argc, char **argv) {
     windowList[i]->hide();
   }
 
-  utility.unloadCartridge();
+  cartridge.unload();
   config().save(configFilename);
   return 0;
 }
@@ -141,7 +141,7 @@ void Application::run() {
   if(autosaveTime >= CLOCKS_PER_SEC * 60) {
     //auto-save RAM once per minute in case of emulator crash
     autosaveTime = 0;
-    if(config().system.autoSaveMemory == true) utility.saveMemory();
+    if(config().system.autoSaveMemory == true) cartridge.saveMemory();
   }
 
   if(screensaverTime >= CLOCKS_PER_SEC * 30) {

@@ -55,6 +55,7 @@ Configuration::Configuration() {
   attach(diskBrowser.showPanel = true, "diskBrowser.showPanel");
 
   attach(file.autodetect_type    = false, "file.autodetectType");
+  attach(file.applyPatches       = true, "file.applyPatches");
   attach(file.bypass_patch_crc32 = false, "file.bypassPatchCrc32");
 
   attach(path.rom   = "", "path.rom");
@@ -118,6 +119,8 @@ Configuration::Configuration() {
   attach(input.focusPolicy = Input::FocusPolicyIgnoreInput, "input.focusPolicy");
   attach(input.allowInvalidInput = false, "input.allowInvalidInput", "Allow up+down / left+right combinations; may trigger bugs in some games");
 
+  attach(debugger.cacheUsageToDisk = false, "debugger.cacheUsageToDisk");
+
   attach(geometry.mainWindow       = "", "geometry.mainWindow");
   attach(geometry.loaderWindow     = "", "geometry.loaderWindow");
   attach(geometry.htmlViewerWindow = "", "geometry.htmlViewerWindow");
@@ -126,9 +129,15 @@ Configuration::Configuration() {
   attach(geometry.folderCreator    = "", "geometry.folderCreator");
   attach(geometry.settingsWindow   = "", "geometry.settingsWindow");
   attach(geometry.toolsWindow      = "", "geometry.toolsWindow");
+
   attach(geometry.debugger         = "", "geometry.debugger");
   attach(geometry.disassembler     = "", "geometry.disassembler");
   attach(geometry.breakpointEditor = "", "geometry.breakpointEditor");
   attach(geometry.memoryEditor     = "", "geometry.memoryEditor");
+  attach(geometry.propertiesViewer = "", "geometry.propertiesViewer");
+  attach(geometry.layerToggle      = "", "geometry.layerToggle");
   attach(geometry.vramViewer       = "", "geometry.vramViewer");
+  attach(geometry.oamViewer        = "", "geometry.oamViewer");
+  attach(geometry.cgramViewer      = "", "geometry.cgramViewer");
+  attach(geometry.debuggerOptions  = "", "geometry.debuggerOptions");
 }

@@ -15,6 +15,7 @@ public:
 
   struct File {
     bool autodetect_type;
+    bool applyPatches;
     bool bypass_patch_crc32;
   } file;
 
@@ -64,6 +65,10 @@ public:
     bool allowInvalidInput;
   } input;
 
+  struct Debugger {
+    bool cacheUsageToDisk;
+  } debugger;
+
   struct Geometry {
     string mainWindow;
     string loaderWindow;
@@ -73,11 +78,17 @@ public:
     string folderCreator;
     string settingsWindow;
     string toolsWindow;
+
     string debugger;
     string disassembler;
     string breakpointEditor;
     string memoryEditor;
+    string propertiesViewer;
+    string layerToggle;
     string vramViewer;
+    string oamViewer;
+    string cgramViewer;
+    string debuggerOptions;
   } geometry;
 
   bool load(const char *filename);

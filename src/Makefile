@@ -26,7 +26,7 @@ ifeq ($(platform),x)
   link += -s
 
   ruby := video.glx video.xv video.qtraster video.sdl
-  ruby += audio.alsa audio.openal audio.oss audio.pulseaudio audio.ao
+  ruby += audio.alsa audio.openal audio.oss audio.pulseaudio audio.pulseaudiosimple audio.ao
   ruby += input.sdl input.x
 
   link += $(if $(findstring audio.openal,$(ruby)),-lopenal)

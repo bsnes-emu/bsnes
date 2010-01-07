@@ -114,7 +114,7 @@ void SuperFX::op_bvs() {
 //$10-1f(b1): move rN
 template<int n> void SuperFX::op_to_r() {
   if(regs.sfr.b == 0) {
-    regs.dreg = &regs.r[n];
+    regs.dreg = n;
   } else {
     regs.r[n] = regs.sr();
     regs.reset();
@@ -123,8 +123,8 @@ template<int n> void SuperFX::op_to_r() {
 
 //$20-2f: with rN
 template<int n> void SuperFX::op_with_r() {
-  regs.sreg = &regs.r[n];
-  regs.dreg = &regs.r[n];
+  regs.sreg = n;
+  regs.dreg = n;
   regs.sfr.b = 1;
 }
 
@@ -519,7 +519,7 @@ template<int n> void SuperFX::op_sms_r() {
 //$b0-bf(b1): moves rN
 template<int n> void SuperFX::op_from_r() {
   if(regs.sfr.b == 0) {
-    regs.sreg = &regs.r[n];
+    regs.sreg = n;
   } else {
     regs.dr() = regs.r[n];
     regs.sfr.ov = (regs.dr() & 0x80);

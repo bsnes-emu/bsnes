@@ -11,6 +11,7 @@ struct MappedInput {
   unsigned specifier;
   unsigned modifier;
   unsigned scancode;
+  bool modifierOverride;
   int16_t state;
   int16_t previousState;
   int16_t cachedState;

@@ -9,12 +9,20 @@ void SuperGameBoy::enter() {
   scheduler.clock.cop_freq = (version == SuperGameBoy1 ? 2147727 : 2097152);
 
   if(!sgb_run) while(true) {
+    if(scheduler.sync == Scheduler::SyncAll) {
+      scheduler.exit(Scheduler::SynchronizeEvent);
+    }
+
     audio.coprocessor_sample(0, 0);
     scheduler.addclocks_cop(1);
     scheduler.sync_copcpu();
   }
 
   while(true) {
+    if(scheduler.sync == Scheduler::SyncAll) {
+      scheduler.exit(Scheduler::SynchronizeEvent);
+    }
+
     unsigned samples = sgb_run(samplebuffer, 16);
     for(unsigned i = 0; i < samples; i++) {
       int16 left  = samplebuffer[i] >>  0;
@@ -23,6 +31,7 @@ void SuperGameBoy::enter() {
       //SNES audio is notoriously quiet; lower Game Boy samples to match SGB sound effects
       audio.coprocessor_sample(left / 3, right / 3);
     }
+
     scheduler.addclocks_cop(samples);
     scheduler.sync_copcpu();
   }
@@ -98,8 +107,7 @@ void SuperGameBoy::enable() {
 }
 
 void SuperGameBoy::power() {
-  //determine whether to use SGB1 or SGB2 mode based on the cartridge title (look for the '2')
-  version = memory::cartrom[0x7fcd] != 0x32 ? SuperGameBoy1 : SuperGameBoy2;
+  version = (cartridge.type() == Cartridge::TypeSuperGameBoy1Bios ? SuperGameBoy1 : SuperGameBoy2);
 
   audio.coprocessor_enable(true);
   audio.coprocessor_frequency(version == SuperGameBoy1 ? 2147727.0 : 2097152.0);
@@ -111,7 +119,6 @@ void SuperGameBoy::power() {
   sgb_ram(memory::gbram.data(), memory::gbram.size() == -1U ? 0 : memory::gbram.size());
   sgb_rtc(memory::gbrtc.data(), memory::gbrtc.size() == -1U ? 0 : memory::gbrtc.size());
 
-  //determine whether to use SGB1 or SGB2 mode based on the cartridge title (look for the '2')
   if(sgb_init) sgb_init(version);
   if(sgb_power) sgb_power();
 }

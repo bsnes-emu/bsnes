@@ -27,7 +27,6 @@ class PathSettingsWindow : public QWidget {
 
 public:
   QVBoxLayout *layout;
-  QLabel *title;
   PathSettingWidget *gamePath;
   PathSettingWidget *savePath;
   PathSettingWidget *statePath;

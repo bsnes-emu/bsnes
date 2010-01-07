@@ -5,6 +5,7 @@ namespace SNES {
 
 SA1 sa1;
 
+#include "serialization.cpp"
 #include "bus/bus.cpp"
 #include "dma/dma.cpp"
 #include "memory/memory.cpp"
@@ -12,10 +13,15 @@ SA1 sa1;
 
 void SA1::enter() {
   while(true) {
-    while(mmio.sa1_rdyb || mmio.sa1_resb) {
+    if(scheduler.sync == Scheduler::SyncAll) {
+      scheduler.exit(Scheduler::SynchronizeEvent);
+    }
+
+    if(mmio.sa1_rdyb || mmio.sa1_resb) {
       //SA-1 co-processor is asleep
       tick();
       scheduler.sync_copcpu();
+      continue;
     }
 
     if(status.interrupt_pending) {
@@ -139,7 +145,7 @@ void SA1::reset() {
   regs.e    = 1;
   regs.mdr  = 0x00;
   regs.wai  = false;
-  update_table();
+  CPUcore::update_table();
 
   status.tick_counter = 0;
 

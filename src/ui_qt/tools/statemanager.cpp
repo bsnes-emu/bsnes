@@ -3,13 +3,9 @@ StateManagerWindow *stateManagerWindow;
 
 StateManagerWindow::StateManagerWindow() {
   layout = new QVBoxLayout;
-  layout->setMargin(0);
+  layout->setMargin(Style::WindowMargin);
   layout->setSpacing(Style::WidgetSpacing);
   setLayout(layout);
-
-  title = new QLabel("Save State Manager");
-  title->setProperty("class", "title");
-  layout->addWidget(title);
 
   list = new QTreeWidget;
   list->setColumnCount(2);
@@ -17,6 +13,7 @@ StateManagerWindow::StateManagerWindow() {
   list->setAllColumnsShowFocus(true);
   list->sortByColumn(0, Qt::AscendingOrder);
   list->setRootIsDecorated(false);
+  list->resizeColumnToContents(0);
   layout->addWidget(list);
 
   infoLayout = new QHBoxLayout;
@@ -30,6 +27,10 @@ StateManagerWindow::StateManagerWindow() {
 
   controlLayout = new QHBoxLayout;
   layout->addLayout(controlLayout);
+
+  spacer = new QWidget;
+  spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+  controlLayout->addWidget(spacer);
 
   loadButton = new QPushButton("Load");
   controlLayout->addWidget(loadButton);
@@ -54,7 +55,7 @@ void StateManagerWindow::reload() {
   list->clear();
   list->setSortingEnabled(false);
 
-  if(SNES::cartridge.loaded()) {
+  if(SNES::cartridge.loaded() && cartridge.saveStatesSupported()) {
     for(unsigned n = 0; n < StateCount; n++) {
       QTreeWidgetItem *item = new QTreeWidgetItem(list);
       item->setData(0, Qt::UserRole, QVariant(n));
@@ -161,9 +162,7 @@ void StateManagerWindow::eraseAction() {
 }
 
 string StateManagerWindow::filename() const {
-  string name = config().path.state;
-  if(name == "") name = dir(utility.cartridge.fileName);
-  name << nall::basename(notdir(utility.cartridge.fileName));
+  string name = filepath(nall::basename(cartridge.fileName), config().path.state);
   name << ".bsa";
   return name;
 }

@@ -1,3 +1,5 @@
+#ifdef SMPCORE_CPP
+
 template<uint8 (SMPcore::*op)(uint8, uint8), int n>
 void SMPcore::op_read_reg_const() {
   rd = op_readpc();
@@ -148,3 +150,5 @@ template<int op> void SMPcore::op_or1_bit() {
   op_io();
   regs.p.c = regs.p.c | ((bool)(rd & (1 << bit)) ^ op);
 }
+
+#endif

@@ -3,6 +3,7 @@
 #define SUPERFX_CPP
 namespace SNES {
 
+#include "serialization.cpp"
 #include "bus/bus.cpp"
 #include "core/core.cpp"
 #include "memory/memory.cpp"
@@ -14,9 +15,14 @@ SuperFX superfx;
 
 void SuperFX::enter() {
   while(true) {
-    while(regs.sfr.g == 0) {
+    if(scheduler.sync == Scheduler::SyncAll) {
+      scheduler.exit(Scheduler::SynchronizeEvent);
+    }
+
+    if(regs.sfr.g == 0) {
       add_clocks(6);
       scheduler.sync_copcpu();
+      continue;
     }
 
     (this->*opcode_table[(regs.sfr & 0x0300) + peekpipe()])();
@@ -70,4 +76,4 @@ void SuperFX::reset() {
   timing_reset();
 }
 
-};
+}

@@ -3,15 +3,10 @@ AdvancedSettingsWindow *advancedSettingsWindow;
 
 AdvancedSettingsWindow::AdvancedSettingsWindow() {
   layout = new QVBoxLayout;
-  layout->setMargin(0);
+  layout->setMargin(Style::WindowMargin);
   layout->setSpacing(0);
   layout->setAlignment(Qt::AlignTop);
   setLayout(layout);
-
-  title = new QLabel("Advanced Configuration Settings");
-  title->setProperty("class", "title");
-  layout->addWidget(title);
-  layout->addSpacing(Style::WidgetSpacing);
 
   driverLayout = new QGridLayout;
   driverLayout->setHorizontalSpacing(Style::WidgetSpacing);
@@ -44,6 +39,7 @@ AdvancedSettingsWindow::AdvancedSettingsWindow() {
   layout->addWidget(regionTitle);
 
   regionLayout = new QHBoxLayout;
+  regionLayout->setSpacing(Style::WidgetSpacing);
   layout->addLayout(regionLayout);
   layout->addSpacing(Style::WidgetSpacing);
 
@@ -68,6 +64,7 @@ AdvancedSettingsWindow::AdvancedSettingsWindow() {
   layout->addWidget(portTitle);
 
   portLayout = new QHBoxLayout;
+  portLayout->setSpacing(Style::WidgetSpacing);
   layout->addLayout(portLayout);
   layout->addSpacing(Style::WidgetSpacing);
 
@@ -88,6 +85,7 @@ AdvancedSettingsWindow::AdvancedSettingsWindow() {
   layout->addWidget(focusTitle);
 
   focusLayout = new QHBoxLayout;
+  focusLayout->setSpacing(Style::WidgetSpacing);
   layout->addLayout(focusLayout);
   layout->addSpacing(Style::WidgetSpacing);
 

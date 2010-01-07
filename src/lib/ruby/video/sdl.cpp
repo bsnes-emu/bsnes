@@ -110,7 +110,7 @@ public:
     display = XOpenDisplay(0);
 
     char env[512];
-    sprintf(env, "SDL_WINDOWID=%ld", settings.handle);
+    sprintf(env, "SDL_WINDOWID=%ld", (long int)settings.handle);
     putenv(env);
 
     SDL_InitSubSystem(SDL_INIT_VIDEO);

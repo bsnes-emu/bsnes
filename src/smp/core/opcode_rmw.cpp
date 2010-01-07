@@ -1,3 +1,5 @@
+#ifdef SMPCORE_CPP
+
 template<uint8 (SMPcore::*op)(uint8), int n>
 void SMPcore::op_adjust_reg() {
   op_io();
@@ -52,3 +54,5 @@ void SMPcore::op_adjustw_dp() {
   regs.p.n = (rd & 0x8000);
   regs.p.z = (rd == 0);
 }
+
+#endif

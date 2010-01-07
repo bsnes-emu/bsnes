@@ -100,7 +100,7 @@ public:
 
 #if defined(DEBUGGER)
   #include "debugger/debugger.hpp"
-  extern sCPUDebug cpu;
+  extern sCPUDebugger cpu;
 #else
   extern sCPU cpu;
 #endif

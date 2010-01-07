@@ -1,3 +1,7 @@
+void QbWindow::setCloseOnEscape(bool state) {
+  closeOnEscape = state;
+}
+
 void QbWindow::shrink() {
   if(config().video.isFullscreen == false) {
     for(unsigned i = 0; i < 2; i++) {
@@ -45,11 +49,13 @@ void QbWindow::closeEvent(QCloseEvent *event) {
 }
 
 void QbWindow::keyReleaseEvent(QKeyEvent *event) {
-  if(event->key() == Qt::Key_Escape) close();
+  if((closeOnEscape == true) && (event->key() == Qt::Key_Escape)) close();
   QWidget::keyReleaseEvent(event);
 }
 
 QbWindow::QbWindow(string &geometryString_) : geometryString(geometryString_) {
+  closeOnEscape = true;
+
   //keep track of all created windows (for geometry save on exit, always-on-top control, etc)
   application.windowList.add(this);
 }

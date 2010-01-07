@@ -1,11 +1,7 @@
 #ifdef SYSTEM_CPP
 
-unsigned System::serialize_size() const {
-  return serializer_size;
-}
-
 serializer System::serialize() {
-  serializer s(serializer_size);
+  serializer s(serialize_size);
 
   unsigned signature = 0x31545342, version = bsnesSerializerVersion, crc32 = cartridge.crc32();
   char description[512];
@@ -43,8 +39,8 @@ bool System::unserialize(serializer &s) {
 //========
 
 void System::serialize(serializer &s) {
-  s.integer(snes_region);
-  s.integer(snes_expansion);
+  s.integer((unsigned&)region);
+  s.integer((unsigned&)expansion);
 
   s.integer(scheduler.clock.cpu_freq);
   s.integer(scheduler.clock.smp_freq);
@@ -66,6 +62,8 @@ void System::serialize_all(serializer &s) {
 
   if(cartridge.mode() == Cartridge::ModeSuperGameBoy) supergameboy.serialize(s);
 
+  if(cartridge.has_superfx()) superfx.serialize(s);
+  if(cartridge.has_sa1())     sa1.serialize(s);
   if(cartridge.has_srtc())    srtc.serialize(s);
   if(cartridge.has_sdd1())    sdd1.serialize(s);
   if(cartridge.has_spc7110()) spc7110.serialize(s);
@@ -92,7 +90,7 @@ void System::serialize_init() {
   s.array(description);
 
   serialize_all(s);
-  serializer_size = s.size();
+  serialize_size = s.size();
 }
 
 #endif

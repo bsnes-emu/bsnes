@@ -3,14 +3,10 @@ VideoSettingsWindow *videoSettingsWindow;
 
 VideoSettingsWindow::VideoSettingsWindow() {
   layout = new QVBoxLayout;
-  layout->setMargin(0);
+  layout->setMargin(Style::WindowMargin);
   layout->setSpacing(Style::WidgetSpacing);
   layout->setAlignment(Qt::AlignTop);
   setLayout(layout);
-
-  title = new QLabel("Video Settings");
-  title->setProperty("class", "title");
-  layout->addWidget(title);
 
   sliders = new QGridLayout;
   layout->addLayout(sliders);

@@ -125,11 +125,18 @@ public:
     clock.smpdsp += clocks;
   }
 
+  enum ExitReason { UnknownEvent, FrameEvent, SynchronizeEvent, DebuggerEvent };
+
   void enter();
-  void exit();
+  void exit(ExitReason);
+  ExitReason exit_reason() const;
+
   void init();
 
   Scheduler();
+
+private:
+  ExitReason exit_reason_;
 };
 
 extern Scheduler scheduler;

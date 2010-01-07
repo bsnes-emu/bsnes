@@ -1,3 +1,5 @@
+#ifdef SUPERFX_CPP
+
 void SuperFX::disassemble_opcode(char *output) {
   *output = 0;
 
@@ -273,3 +275,5 @@ void SuperFX::disassemble_alt3(char *output) {
 #undef op0
 #undef op1
 #undef op2
+
+#endif

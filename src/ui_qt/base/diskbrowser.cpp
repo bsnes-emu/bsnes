@@ -263,11 +263,15 @@ string DiskBrowser::queryImageInformation() {
   string text;
   string filename;
   if(currentFilename(filename) == true) {
-    if(striend(filename, ".sfc") || striend(filename, ".smc")) {
+    Cartridge::Information info;
+    if(cartridge.information(filename, info)) {
       unsigned size = file::size(filename);
-      text << "<b>" << notdir(nall::basename(filename)) << "</b>";
-      text << "<small><table cellspacing='5'>";
-      text << "<tr><td><b>ROM size:</b></td><td>" << size * 8 / 1024 / 1024 << "mbit</td></tr>";
+      text << "<small><table>";
+      text << "<tr><td><b>Title: </b></td><td>" << info.name << "</td></tr>";
+      text << "<tr><td><b>Region: </b></td><td>" << info.region << "</td></tr>";
+      text << "<tr><td><b>ROM: </b></td><td>" << info.romSize * 8 / 1024 / 1024 << "mbit</td></tr>";
+      text << "<tr><td><b>RAM: </b></td><td>";
+      info.ramSize ? text << info.ramSize * 8 / 1024 << "kbit</td></tr>" : text << "None</td></tr>";
       text << "</table></small>";
     }
   }
@@ -330,13 +334,13 @@ void DiskBrowser::loadSelected() {
         if(config().path.bsx == "") {
           loaderWindow->loadBsxCartridge("", filename);
         } else {
-          utility.loadCartridgeBsx(config().path.bsx, filename);
+          cartridge.loadBsx(config().path.bsx, filename);
         }
       } else if(config().path.current.filter == 2) {  //"Sufami Turbo cartridges"
         if(config().path.st == "") {
           loaderWindow->loadSufamiTurboCartridge("", filename, "");
         } else {
-          utility.loadCartridgeSufamiTurbo(config().path.st, filename, "");
+          cartridge.loadSufamiTurbo(config().path.st, filename, "");
         }
       } else if(config().path.current.filter == 3) {  //"Game Boy cartridges"
         if(SNES::supergameboy.opened() == false) {
@@ -344,10 +348,10 @@ void DiskBrowser::loadSelected() {
         } else if(config().path.sgb == "") {
           loaderWindow->loadSuperGameBoyCartridge("", filename);
         } else {
-          utility.loadCartridgeSuperGameBoy(config().path.sgb, filename);
+          cartridge.loadSuperGameBoy(config().path.sgb, filename);
         }
       } else {  //"SNES cartridges" (0) or "All files" (4)
-        utility.loadCartridgeNormal(filename);
+        cartridge.loadNormal(filename);
       }
     } else if(browseMode == BaseCartridge) {
       loaderWindow->selectBaseCartridge(filename);
@@ -453,13 +457,18 @@ bool DiskBrowser::currentFilename(string &filename) {
   filename = model->filePath(item).toUtf8().constData();
 
   if(browseMode != Folder) {
-    if(model->isDir(item) == true) {
-      QDir directory(filename);
-      directory.setNameFilters(QStringList() << "*.sfc");
-      QStringList list = directory.entryList(QDir::Files | QDir::NoDotAndDotDot);
-      if(list.count() == 1) {
-        filename << "/" << list[0].toUtf8().constData();
-        loadable = true;
+    if(model->isDir(item)) {
+      if(browseMode != File) {
+        //folders ending in ".sfc" are treated as "packages", and loaded directly
+        if(striend(filename, ".sfc")) {
+          QDir directory(filename);
+          directory.setNameFilters(QStringList() << "*.sfc");
+          QStringList list = directory.entryList(QDir::Files | QDir::NoDotAndDotDot);
+          if(list.count() == 1) {
+            filename << "/" << list[0].toUtf8().constData();
+            loadable = true;
+          }
+        }
       }
     } else {
       loadable = true;
@@ -467,6 +476,10 @@ bool DiskBrowser::currentFilename(string &filename) {
   }
 
   return loadable;
+}
+
+void DiskBrowser::toggleApplyPatches() {
+  config().file.applyPatches = applyPatch->isChecked();
 }
 
 void DiskBrowser::toggleShowPanel() {
@@ -531,8 +544,7 @@ DiskBrowser::DiskBrowser() : QbWindow(config().geometry.diskBrowser) {
   groupLayout->addWidget(spacer);
 
   applyPatch = new QCheckBox("Apply UPS patch");
-  applyPatch->setChecked(true);
-  applyPatch->setEnabled(false);
+  applyPatch->setChecked(config().file.applyPatches);
   groupLayout->addWidget(applyPatch);
 
   controlLayout = new QHBoxLayout;
@@ -584,5 +596,6 @@ DiskBrowser::DiskBrowser() : QbWindow(config().geometry.diskBrowser) {
   connect(ok, SIGNAL(released()), this, SLOT(loadSelected()));
   connect(cancel, SIGNAL(released()), this, SLOT(close()));
 
+  connect(applyPatch, SIGNAL(stateChanged(int)), this, SLOT(toggleApplyPatches()));
   connect(showPanel, SIGNAL(triggered()), this, SLOT(toggleShowPanel()));
 }

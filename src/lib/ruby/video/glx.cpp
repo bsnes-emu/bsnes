@@ -2,7 +2,7 @@
   video.glx
   author: byuu
   license: public domain
-  last updated: 2009-12-08
+  last updated: 2010-01-05
 
   Design notes:
   SGI's GLX is the X11/Xlib interface to OpenGL.
@@ -188,7 +188,6 @@ public:
     settings.height = 256;
 
     //vertical synchronization
-    if(!glSwapInterval) glSwapInterval = (int (*)(int))glGetProcAddress("glXSwapIntervalEXT");
     if(!glSwapInterval) glSwapInterval = (int (*)(int))glGetProcAddress("glXSwapIntervalSGI");
     if(!glSwapInterval) glSwapInterval = (int (*)(int))glGetProcAddress("glXSwapIntervalMESA");
     if( glSwapInterval) glSwapInterval(settings.synchronize);

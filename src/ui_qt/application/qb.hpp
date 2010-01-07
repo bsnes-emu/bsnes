@@ -1,5 +1,6 @@
 class QbWindow : public QWidget {
 public:
+  void setCloseOnEscape(bool);
   void shrink();
   void show();
   void hide();
@@ -9,6 +10,7 @@ public:
 
 private:
   string &geometryString;
+  bool closeOnEscape;
 };
 
 class QbCheckAction : public QAction {

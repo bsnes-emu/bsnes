@@ -1,3 +1,5 @@
+#ifdef SMPCORE_CPP
+
 void SMPcore::op_bra() {
   rd = op_readpc();
   op_io();
@@ -146,3 +148,5 @@ void SMPcore::op_reti() {
   op_io();
   regs.pc = rd;
 }
+
+#endif

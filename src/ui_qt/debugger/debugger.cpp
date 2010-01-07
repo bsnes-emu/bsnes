@@ -6,11 +6,19 @@
 Debugger *debugger;
 
 #include "hexeditor.cpp"
-#include "disassembler.cpp"
-#include "breakpoint.cpp"
-#include "memory.cpp"
-#include "vramviewer.cpp"
 #include "tracer.cpp"
+
+#include "tools/disassembler.cpp"
+#include "tools/breakpoint.cpp"
+#include "tools/memory.cpp"
+#include "tools/properties.cpp"
+
+#include "ppu/layer-toggle.cpp"
+#include "ppu/vram-viewer.cpp"
+#include "ppu/oam-viewer.cpp"
+#include "ppu/cgram-viewer.cpp"
+
+#include "misc/debugger-options.cpp"
 
 Debugger::Debugger() : QbWindow(config().geometry.debugger) {
   setObjectName("debugger");
@@ -24,14 +32,21 @@ Debugger::Debugger() : QbWindow(config().geometry.debugger) {
   menu = new QMenuBar;
   layout->setMenuBar(menu);
 
-  tools = menu->addMenu("Tools");
-  tools_disassembler = tools->addAction("Disassembler ...");
-  tools_breakpoint = tools->addAction("Breakpoint Editor ...");
-  tools_memory = tools->addAction("Memory Editor ...");
-  tools_vramViewer = tools->addAction("Video RAM Viewer ...");
+  menu_tools = menu->addMenu("Tools");
+  menu_tools_disassembler = menu_tools->addAction("Disassembler ...");
+  menu_tools_breakpoint = menu_tools->addAction("Breakpoint Editor ...");
+  menu_tools_memory = menu_tools->addAction("Memory Editor ...");
+  menu_tools_propertiesViewer = menu_tools->addAction("Properties Viewer ...");
 
-  miscOptions = menu->addMenu("Misc");
-  miscOptions_clear = miscOptions->addAction("Clear Console");
+  menu_ppu = menu->addMenu("S-PPU");
+  menu_ppu_layerToggle = menu_ppu->addAction("Layer Toggle ...");
+  menu_ppu_vramViewer = menu_ppu->addAction("Video RAM Viewer ...");
+  menu_ppu_oamViewer = menu_ppu->addAction("Sprite Viewer ...");
+  menu_ppu_cgramViewer = menu_ppu->addAction("Palette Viewer ...");
+
+  menu_misc = menu->addMenu("Misc");
+  menu_misc_clear = menu_misc->addAction("Clear Console");
+  menu_misc_options = menu_misc->addAction("Options ...");
 
   console = new QTextEdit;
   console->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -77,17 +92,29 @@ Debugger::Debugger() : QbWindow(config().geometry.debugger) {
   spacer->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Expanding);
   controlLayout->addWidget(spacer);
 
+  tracer = new Tracer;
   disassembler = new Disassembler;
   breakpointEditor = new BreakpointEditor;
   memoryEditor = new MemoryEditor;
+  propertiesViewer = new PropertiesViewer;
+  layerToggle = new LayerToggle;
   vramViewer = new VramViewer;
-  tracer = new Tracer;
+  oamViewer = new OamViewer;
+  cgramViewer = new CgramViewer;
+  debuggerOptions = new DebuggerOptions;
 
-  connect(tools_disassembler, SIGNAL(triggered()), this, SLOT(showDisassembler()));
-  connect(tools_breakpoint, SIGNAL(triggered()), this, SLOT(showBreakpointEditor()));
-  connect(tools_memory, SIGNAL(triggered()), this, SLOT(showMemoryEditor()));
-  connect(tools_vramViewer, SIGNAL(triggered()), this, SLOT(showVramViewer()));
-  connect(miscOptions_clear, SIGNAL(triggered()), this, SLOT(clear()));
+  connect(menu_tools_disassembler, SIGNAL(triggered()), disassembler, SLOT(show()));
+  connect(menu_tools_breakpoint, SIGNAL(triggered()), breakpointEditor, SLOT(show()));
+  connect(menu_tools_memory, SIGNAL(triggered()), memoryEditor, SLOT(show()));
+  connect(menu_tools_propertiesViewer, SIGNAL(triggered()), propertiesViewer, SLOT(show()));
+
+  connect(menu_ppu_layerToggle, SIGNAL(triggered()), layerToggle, SLOT(show()));
+  connect(menu_ppu_vramViewer, SIGNAL(triggered()), vramViewer, SLOT(show()));
+  connect(menu_ppu_oamViewer, SIGNAL(triggered()), oamViewer, SLOT(show()));
+  connect(menu_ppu_cgramViewer, SIGNAL(triggered()), cgramViewer, SLOT(show()));
+
+  connect(menu_misc_clear, SIGNAL(triggered()), this, SLOT(clear()));
+  connect(menu_misc_options, SIGNAL(triggered()), debuggerOptions, SLOT(show()));
 
   connect(runBreak, SIGNAL(released()), this, SLOT(toggleRunStatus()));
   connect(stepInstruction, SIGNAL(released()), this, SLOT(stepAction()));
@@ -103,11 +130,12 @@ Debugger::Debugger() : QbWindow(config().geometry.debugger) {
 }
 
 void Debugger::modifySystemState(unsigned state) {
-  string usagefile = string() << dir(utility.cartridge.baseName) << "usage.bin";
+  string usagefile = filepath(nall::basename(cartridge.fileName), config().path.data);
+  usagefile << "-usage.bin";
   file fp;
 
   if(state == Utility::LoadCartridge) {
-    if(fp.open(usagefile, file::mode_read)) {
+    if(config().debugger.cacheUsageToDisk && fp.open(usagefile, file::mode_read)) {
       fp.read(SNES::cpu.usage, 1 << 24);
       fp.read(SNES::smp.usage, 1 << 16);
       fp.close();
@@ -118,7 +146,7 @@ void Debugger::modifySystemState(unsigned state) {
   }
 
   if(state == Utility::UnloadCartridge) {
-    if(fp.open(usagefile, file::mode_write)) {
+    if(config().debugger.cacheUsageToDisk && fp.open(usagefile, file::mode_write)) {
       fp.write(SNES::cpu.usage, 1 << 24);
       fp.write(SNES::smp.usage, 1 << 16);
       fp.close();
@@ -142,23 +170,6 @@ void Debugger::echo(const char *message) {
 
 void Debugger::clear() {
   console->setHtml("");
-}
-
-void Debugger::showDisassembler() {
-  disassembler->show();
-}
-
-void Debugger::showBreakpointEditor() {
-  breakpointEditor->show();
-}
-
-void Debugger::showMemoryEditor() {
-  memoryEditor->show();
-}
-
-void Debugger::showVramViewer() {
-  vramViewer->show();
-  vramViewer->refresh();
 }
 
 void Debugger::toggleRunStatus() {
@@ -214,15 +225,24 @@ void Debugger::event() {
       disassembler->refresh(Disassembler::SMP, SNES::smp.regs.pc);
     } break;
   }
+
+  autoUpdate();
 }
 
 //called once every time a video frame is rendered, used to update "auto refresh" tool windows
 void Debugger::frameTick() {
   if(++frameCounter >= (SNES::system.region() == SNES::System::NTSC ? 60 : 50)) {
     frameCounter = 0;
-    memoryEditor->autoUpdate();
-    vramViewer->autoUpdate();
+    autoUpdate();
   }
+}
+
+void Debugger::autoUpdate() {
+  memoryEditor->autoUpdate();
+  propertiesViewer->autoUpdate();
+  vramViewer->autoUpdate();
+  oamViewer->autoUpdate();
+  cgramViewer->autoUpdate();
 }
 
 #endif

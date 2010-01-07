@@ -1,3 +1,5 @@
+#ifdef CPUCORE_CPP
+
 template<int n> void CPUcore::op_write_addr_b() {
   aa.l = op_readpc();
   aa.h = op_readpc();
@@ -193,3 +195,5 @@ void CPUcore::op_sta_isry_w() {
   op_writedbr(aa.w + regs.y.w + 0, regs.a.l);
 L op_writedbr(aa.w + regs.y.w + 1, regs.a.h);
 }
+
+#endif

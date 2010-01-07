@@ -1,6 +1,7 @@
 #ifndef NALL_STRING_BASE_HPP
 #define NALL_STRING_BASE_HPP
 
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -48,6 +49,8 @@ namespace nall {
 
   class string {
   public:
+    static string printf(const char*, ...);
+
     inline void reserve(size_t);
     inline unsigned length() const;
 

@@ -4,14 +4,14 @@ VBRBus vbrbus;
 SA1Bus sa1bus;
 
 namespace memory {
-  static StaticRAM iram(2048);
-                                        //accessed by:
-  static VectorSelectionPage vectorsp;  //S-CPU + SA-1
-  static CPUIRAM cpuiram;               //S-CPU
-  static SA1IRAM sa1iram;               //SA-1
-  static SA1BWRAM sa1bwram;             //SA-1
-  static CC1BWRAM cc1bwram;             //S-CPU
-  static BitmapRAM bitmapram;           //SA-1
+  StaticRAM iram(2048);
+                                 //accessed by:
+  VectorSelectionPage vectorsp;  //S-CPU + SA-1
+  CPUIRAM cpuiram;               //S-CPU
+  SA1IRAM sa1iram;               //SA-1
+  SA1BWRAM sa1bwram;             //SA-1
+  CC1BWRAM cc1bwram;             //S-CPU
+  BitmapRAM bitmapram;           //SA-1
 }
 
 //$230c (VDPL), $230d (VDPH) use this bus to read variable-length data.

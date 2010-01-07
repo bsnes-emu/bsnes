@@ -73,9 +73,8 @@ void Movie::stop() {
 }
 
 string Movie::makeFilename() const {
-  string filename;
+  string filename = nall::basename(cartridge.fileName);
 
-  filename << utility.cartridge.name << "-";
   time_t systemTime = time(0);
   tm *currentTime = localtime(&systemTime);
   char t[512];
@@ -83,13 +82,9 @@ string Movie::makeFilename() const {
     1900 + currentTime->tm_year, 1 + currentTime->tm_mon, currentTime->tm_mday,
     currentTime->tm_hour, currentTime->tm_min, currentTime->tm_sec
   );
-  filename << t << ".bsv";
+  filename << "-" << t << ".bsv";
 
-  string filepath = config().path.data;
-  if(filepath == "") filepath = dir(utility.cartridge.fileName);
-  filepath << filename;
-
-  return filepath;
+  return filepath(filename, config().path.data);
 }
 
 int16_t Movie::read() {

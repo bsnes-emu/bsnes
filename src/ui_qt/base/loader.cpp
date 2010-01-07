@@ -208,22 +208,22 @@ void LoaderWindow::onLoad() {
 
   switch(mode) {
     case SNES::Cartridge::ModeBsxSlotted: {
-      utility.loadCartridgeBsxSlotted(base, slot1);
+      cartridge.loadBsxSlotted(base, slot1);
     } break;
 
     case SNES::Cartridge::ModeBsx: {
       config().path.bsx = base;
-      utility.loadCartridgeBsx(base, slot1);
+      cartridge.loadBsx(base, slot1);
     } break;
 
     case SNES::Cartridge::ModeSufamiTurbo: {
       config().path.st = base;
-      utility.loadCartridgeSufamiTurbo(base, slot1, slot2);
+      cartridge.loadSufamiTurbo(base, slot1, slot2);
     } break;
 
     case SNES::Cartridge::ModeSuperGameBoy: {
       config().path.sgb = base;
-      utility.loadCartridgeSuperGameBoy(base, slot1);
+      cartridge.loadSuperGameBoy(base, slot1);
     } break;
   }
 }

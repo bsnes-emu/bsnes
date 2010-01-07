@@ -16,10 +16,6 @@ template<unsigned bg>
 void bPPU::render_line_mode7(uint8 pri0_pos, uint8 pri1_pos) {
   if(regs.bg_enabled[bg] == false && regs.bgsub_enabled[bg] == false) return;
 
-  if(render_enabled(bg, 0) == false) pri0_pos = 0;
-  if(render_enabled(bg, 1) == false) pri1_pos = 1;
-  if(pri0_pos == 0 && pri1_pos == 0) return;
-
   int32 px, py;
   int32 tx, ty, tile, palette;
 

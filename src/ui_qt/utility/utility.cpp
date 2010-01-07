@@ -1,15 +1,15 @@
 Utility utility;
 
-#include "cartridge.cpp"
+#include "system-state.cpp"
 #include "window.cpp"
 
 void Utility::inputEvent(uint16_t scancode) {
+  //release mouse capture if escape key is pressed on any keyboard
   for(unsigned i = 0; i < Keyboard::Count; i++) {
     if(scancode == keyboard(i)[Keyboard::Escape] && mapper().state(scancode)) {
       if(mainWindow->isActive() && input.acquired()) {
-        //release mouse capture
         input.unacquire();
-        return;  //do not trigger other UI actions that may be bound to escape key
+        return;
       }
     }
   }
@@ -32,7 +32,7 @@ void Utility::updateSystemState() {
     text = "Paused";
   } else if(SNES::ppu.status.frames_updated == true) {
     SNES::ppu.status.frames_updated = false;
-    text << (int)SNES::ppu.status.frames_executed;
+    text << SNES::ppu.status.frames_executed;
     text << " fps";
   } else {
     //nothing to update

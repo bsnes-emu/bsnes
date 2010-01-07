@@ -3,216 +3,209 @@ CheatEditorWindow *cheatEditorWindow;
 
 CheatEditorWindow::CheatEditorWindow() {
   layout = new QVBoxLayout;
-  layout->setMargin(0);
+  layout->setMargin(Style::WindowMargin);
   layout->setSpacing(Style::WidgetSpacing);
   setLayout(layout);
-
-  title = new QLabel("Cheat Code Editor");
-  title->setProperty("class", "title");
-  layout->addWidget(title);
 
   list = new QTreeWidget;
   list->setColumnCount(3);
   list->setHeaderLabels(QStringList() << "Slot" << "Code" << "Description");
+  list->setColumnWidth(1, list->fontMetrics().width("  89AB-CDEF+...  "));
   list->setAllColumnsShowFocus(true);
   list->sortByColumn(0, Qt::AscendingOrder);
   list->setRootIsDecorated(false);
-  list->setContextMenuPolicy(Qt::CustomContextMenu);
+  list->setSelectionMode(QAbstractItemView::ExtendedSelection);
+  list->resizeColumnToContents(0);
   layout->addWidget(list);
 
-  controlLayout = new QGridLayout;
-  layout->addLayout(controlLayout);
-
-  descLabel = new QLabel("Description:");
-  descLabel->setAlignment(Qt::AlignRight);
-  controlLayout->addWidget(descLabel, 0, 0);
-
-  descEdit = new QLineEdit;
-  controlLayout->addWidget(descEdit, 0, 1);
+  gridLayout = new QGridLayout;
+  layout->addLayout(gridLayout);
 
   codeLabel = new QLabel("Code(s):");
-  codeLabel->setAlignment(Qt::AlignRight);
-  controlLayout->addWidget(codeLabel, 1, 0);
+  codeLabel->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+  gridLayout->addWidget(codeLabel, 0, 0);
 
   codeEdit = new QLineEdit;
-  controlLayout->addWidget(codeEdit, 1, 1);
+  gridLayout->addWidget(codeEdit, 0, 1);
 
-  buttonLayout = new QHBoxLayout;
-  layout->addLayout(buttonLayout);
+  descLabel = new QLabel("Description:");
+  descLabel->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+  gridLayout->addWidget(descLabel, 1, 0);
 
-  addCode = new QPushButton("Add Slot");
-  buttonLayout->addWidget(addCode);
+  descEdit = new QLineEdit;
+  gridLayout->addWidget(descEdit, 1, 1);
 
-  deleteCode = new QPushButton("Delete Slot");
-  buttonLayout->addWidget(deleteCode);
+  controlLayout = new QHBoxLayout;
+  controlLayout->setAlignment(Qt::AlignRight);
+  layout->addLayout(controlLayout);
 
-  reloadList();
+  clearButton = new QPushButton("Clear Selected");
+  controlLayout->addWidget(clearButton);
 
-  menu = new QMenu(list);
-  deleteCodeItem = menu->addAction("&Delete Selected Code");
-  addCodeItem = menu->addAction("&Add New Code");
+  synchronize();
 
-  connect(list, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(popupMenu(const QPoint&)));
-  connect(list, SIGNAL(itemChanged(QTreeWidgetItem*, int)), this, SLOT(updateCodeStatus()));
   connect(list, SIGNAL(itemSelectionChanged()), this, SLOT(listChanged()));
-  connect(list, SIGNAL(itemActivated(QTreeWidgetItem*, int)), this, SLOT(toggleCodeStatus()));
-  connect(descEdit, SIGNAL(textEdited(const QString&)), this, SLOT(textEdited()));
-  connect(codeEdit, SIGNAL(textEdited(const QString&)), this, SLOT(textEdited()));
-  connect(addCode, SIGNAL(released()), this, SLOT(addNewCode()));
-  connect(deleteCode, SIGNAL(released()), this, SLOT(deleteSelectedCode()));
-
-  connect(addCodeItem, SIGNAL(triggered()), this, SLOT(addNewCode()));
-  connect(deleteCodeItem, SIGNAL(triggered()), this, SLOT(deleteSelectedCode()));
+  connect(list, SIGNAL(itemChanged(QTreeWidgetItem*, int)), this, SLOT(bind()));
+  connect(codeEdit, SIGNAL(textEdited(const QString&)), this, SLOT(codeEdited()));
+  connect(descEdit, SIGNAL(textEdited(const QString&)), this, SLOT(descEdited()));
+  connect(clearButton, SIGNAL(released()), this, SLOT(clearSelected()));
 }
 
-void CheatEditorWindow::syncUi() {
+void CheatEditorWindow::synchronize() {
   QList<QTreeWidgetItem*> items = list->selectedItems();
-  descEdit->setEnabled(items.count() > 0);
-  codeEdit->setEnabled(items.count() > 0);
-  if(descEdit->isEnabled() == false) descEdit->setText("");
-  if(codeEdit->isEnabled() == false) codeEdit->setText("");
-  for(unsigned n = 0; n <= 2; n++) list->resizeColumnToContents(n);
-
-  bool badCode = false;
-  string scode = codeEdit->text().toUtf8().data();
-  if(scode.length() > 0) {
-    SNES::Cheat::cheat_t code;
-    if(SNES::cheat.decode(scode, code) == false) badCode = true;
-  }
-
-  if(badCode == false) {
-    codeEdit->setStyleSheet("");
+  if(items.count() == 1) {
+    descEdit->setEnabled(true);
+    codeEdit->setEnabled(true);
   } else {
-    codeEdit->setStyleSheet("background: #ffc0c0;");
+    descEdit->setText("");
+    codeEdit->setText("");
+    descEdit->setEnabled(false);
+    codeEdit->setEnabled(false);
   }
-
-  addCode->setEnabled(SNES::cartridge.loaded() == true);
-  deleteCode->setEnabled(list->selectedItems().count() == 1);
+  clearButton->setEnabled(items.count() > 0);
 }
 
-void CheatEditorWindow::updateItem(QTreeWidgetItem *item) {
-  unsigned n = item->data(0, Qt::UserRole).toUInt();
-  SNES::Cheat::cheat_t code, temp;
-  SNES::cheat.get(n, code);
-
-  if(SNES::cheat.decode(code.code, temp) == false) {
-    item->setForeground(1, QBrush(QColor(224, 0, 0)));
-  } else {
-    lstring part;
-    part.split("+", code.code);
-    if(part.size() > 1) {
-      item->setForeground(1, QBrush(QColor(0, 128, 0)));
-    } else {
-      item->setForeground(1, QBrush(QColor(0, 0, 128)));
-    }
-  }
-
-  string scode = code.code;
-  scode.replace(" ", "");
-  lstring lcode;
-  lcode.split("+", scode);
-  if(lcode.size() > 1) lcode[0] << "+" << lcode.size() - 1;
-
-  item->setCheckState(1, code.enabled ? Qt::Checked : Qt::Unchecked);
-  item->setText(1, lcode[0]);
-  item->setText(2, code.desc);
-}
-
-void CheatEditorWindow::popupMenu(const QPoint &point) {
-  if(SNES::cartridge.loaded() == false) return;
-
-  QTreeWidgetItem *item = list->itemAt(point);
-  if(item) list->setCurrentItem(item);
-  deleteCodeItem->setVisible(item);
-  menu->popup(QCursor::pos());
-}
-
-void CheatEditorWindow::reloadList() {
+void CheatEditorWindow::load(const char *filename) {
   list->clear();
   list->setSortingEnabled(false);
+  SNES::cheat.reset();
 
-  if(SNES::cartridge.loaded()) {
-    for(unsigned n = 0; n < SNES::cheat.count(); n++) {
-      QTreeWidgetItem *item = new QTreeWidgetItem(list);
-      item->setData(0, Qt::UserRole, QVariant(n));
-      char slot[16];
-      sprintf(slot, "%3u", n + 1);
-      item->setText(0, slot);
-      updateItem(item);
+  string data;
+  lstring line;
+
+  if(data.readfile(filename)) {
+    data.replace("\r", "");
+    line.split("\n", data);
+  }
+
+  for(unsigned i = 0; i < 128; i++) {
+    lstring part;
+    if(line.size() > i) part.qsplit(",", line[i]);
+    for(unsigned n = 0; n <= 2; n++) trim(part[n], " ");
+    trim(part[2], "\"");
+    part[2].replace("\\q", "\"");
+
+    QTreeWidgetItem *item = new QTreeWidgetItem(list);
+    item->setData(0, Qt::UserRole, QVariant(i));
+    item->setText(0, string::printf("%3u", i + 1));
+    item->setCheckState(0, part[0] == "enabled" ? Qt::Checked : Qt::Unchecked);
+    item->setText(1, part[1]);
+    item->setText(2, part[2]);
+  }
+
+  list->resizeColumnToContents(0);
+  list->setSortingEnabled(true);
+  list->header()->setSortIndicatorShown(false);
+
+  bind();
+  update();
+}
+
+void CheatEditorWindow::save(const char *filename) {
+  bool empty = true;
+  string data[128];
+
+  QList<QTreeWidgetItem*> items = list->findItems("", Qt::MatchContains);
+  for(unsigned i = 0; i < items.count(); i++) {
+    QTreeWidgetItem *item = items[i];
+    unsigned index = item->data(0, Qt::UserRole).toUInt();
+    string code = item->text(1).toUtf8().constData();
+    string desc = item->text(2).toUtf8().constData();
+    desc.replace("\"", "\\q");
+    if((code != "") || (desc != "")) empty = false;
+
+    data[index] << (item->checkState(0) == Qt::Checked ? "enabled," : "disabled,");
+    data[index] << code << ",";
+    data[index] << "\"" << desc << "\"\r\n";
+  }
+
+  if(empty == true) {
+    unlink(filename);
+  } else {
+    file fp;
+    if(fp.open(filename, file::mode_write)) {
+      for(unsigned i = 0; i < 128; i++) fp.print(data[i]);
+      fp.close();
     }
   }
 
-  list->setSortingEnabled(true);
-  list->header()->setSortIndicatorShown(false);
-  syncUi();
+  list->clear();
+  SNES::cheat.reset();
+  SNES::cheat.synchronize();
+}
+
+void CheatEditorWindow::update() {
+  QList<QTreeWidgetItem*> items = list->findItems("", Qt::MatchContains);
+  for(unsigned i = 0; i < items.count(); i++) {
+    QTreeWidgetItem *item = items[i];
+    string code = item->text(1).toUtf8().constData();
+    string desc = item->text(2).toUtf8().constData();
+    if((code != "") || (desc != "")) {
+      item->setForeground(0, QBrush(QColor(0, 0, 0)));
+    } else {
+      //highlight empty slots in gray
+      item->setForeground(0, QBrush(QColor(128, 128, 128)));
+    }
+    unsigned index = item->data(0, Qt::UserRole).toUInt();
+    if(SNES::cheat[index].addr.size() > 0) {
+      item->setForeground(1, QBrush(QColor(0, 0, 0)));
+    } else {
+      //highlight invalid codes in red
+      //(this will also highlight empty codes, but as there is no text, it's not an issue)
+      item->setForeground(1, QBrush(QColor(255, 0, 0)));
+    }
+  }
+}
+
+void CheatEditorWindow::bind() {
+  QList<QTreeWidgetItem*> items = list->findItems("", Qt::MatchContains);
+  for(unsigned i = 0; i < items.count(); i++) {
+    QTreeWidgetItem *item = items[i];
+    unsigned index = item->data(0, Qt::UserRole).toUInt();
+    SNES::cheat[index] = item->text(1).toUtf8().constData();
+    SNES::cheat[index].enabled = item->checkState(0) == Qt::Checked;
+  }
+  SNES::cheat.synchronize();
 }
 
 void CheatEditorWindow::listChanged() {
   QList<QTreeWidgetItem*> items = list->selectedItems();
   if(items.count() > 0) {
     QTreeWidgetItem *item = items[0];
-    unsigned n = item->data(0, Qt::UserRole).toUInt();
-
-    SNES::Cheat::cheat_t code;
-    SNES::cheat.get(n, code);
-
-    descEdit->setText(code.desc);
-    codeEdit->setText(code.code);
+    codeEdit->setText(item->text(1));
+    descEdit->setText(item->text(2));
   }
-
-  syncUi();
+  synchronize();
 }
 
-void CheatEditorWindow::textEdited() {
+void CheatEditorWindow::codeEdited() {
   QList<QTreeWidgetItem*> items = list->selectedItems();
-  if(items.count() > 0) {
+  if(items.count() == 1) {
     QTreeWidgetItem *item = items[0];
-    unsigned n = item->data(0, Qt::UserRole).toUInt();
-
-    string scode = codeEdit->text().toUtf8().data();
-    string sdesc = descEdit->text().toUtf8().data();
-
-    SNES::Cheat::cheat_t code;
-    SNES::cheat.get(n, code);
-    SNES::cheat.edit(n, code.enabled, scode, sdesc);
-
-    updateItem(item);
-    syncUi();
+    item->setText(1, codeEdit->text());
   }
+  bind();
+  update();
 }
 
-//user ticked checkbox, set code enable state to checkbox state
-void CheatEditorWindow::updateCodeStatus() {
+void CheatEditorWindow::descEdited() {
   QList<QTreeWidgetItem*> items = list->selectedItems();
-  if(items.count() > 0) {
+  if(items.count() == 1) {
     QTreeWidgetItem *item = items[0];
-    unsigned n = item->data(0, Qt::UserRole).toUInt();
-    item->checkState(1) == Qt::Checked ? SNES::cheat.enable(n) : SNES::cheat.disable(n);
+    item->setText(2, descEdit->text());
   }
+  update();
 }
 
-//user double-clicked line item, toggle current code enable state
-void CheatEditorWindow::toggleCodeStatus() {
+void CheatEditorWindow::clearSelected() {
   QList<QTreeWidgetItem*> items = list->selectedItems();
-  if(items.count() > 0) {
-    QTreeWidgetItem *item = items[0];
-    unsigned n = item->data(0, Qt::UserRole).toUInt();
-    SNES::cheat.enabled(n) == false ? SNES::cheat.enable(n) : SNES::cheat.disable(n);
-    item->setCheckState(1, SNES::cheat.enabled(n) ? Qt::Checked : Qt::Unchecked);
+  for(unsigned i = 0; i < items.count(); i++) {
+    QTreeWidgetItem *item = items[i];
+    item->setText(1, "");
+    item->setText(2, "");
   }
-}
-
-void CheatEditorWindow::addNewCode() {
-  SNES::cheat.add(false, "", "");
-  reloadList();
-}
-
-void CheatEditorWindow::deleteSelectedCode() {
-  QList<QTreeWidgetItem*> items = list->selectedItems();
-  if(items.count() > 0) {
-    QTreeWidgetItem *item = items[0];
-    unsigned n = item->data(0, Qt::UserRole).toUInt();
-    SNES::cheat.remove(n);
-    reloadList();
-  }
+  codeEdit->setText("");
+  descEdit->setText("");
+  bind();
+  update();
 }

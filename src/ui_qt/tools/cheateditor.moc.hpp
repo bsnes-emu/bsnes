@@ -3,34 +3,28 @@ class CheatEditorWindow : public QWidget {
 
 public:
   QVBoxLayout *layout;
-  QLabel *title;
   QTreeWidget *list;
-  QGridLayout *controlLayout;
-  QLabel *descLabel;
-  QLineEdit *descEdit;
+  QGridLayout *gridLayout;
   QLabel *codeLabel;
   QLineEdit *codeEdit;
-  QHBoxLayout *buttonLayout;
-  QPushButton *addCode;
-  QPushButton *deleteCode;
+  QLabel *descLabel;
+  QLineEdit *descEdit;
+  QHBoxLayout *controlLayout;
+  QPushButton *clearButton;
 
-  QMenu *menu;
-  QAction *deleteCodeItem;
-  QAction *addCodeItem;
+  void load(const char *filename);
+  void save(const char *filename);
+  void update();
 
-  void syncUi();
-  void updateItem(QTreeWidgetItem*);
+  void synchronize();
   CheatEditorWindow();
 
-public slots:
-  void popupMenu(const QPoint&);
-  void reloadList();
+private slots:
+  void bind();
   void listChanged();
-  void textEdited();
-  void updateCodeStatus();
-  void toggleCodeStatus();
-  void addNewCode();
-  void deleteSelectedCode();
+  void codeEdited();
+  void descEdited();
+  void clearSelected();
 };
 
 extern CheatEditorWindow *cheatEditorWindow;

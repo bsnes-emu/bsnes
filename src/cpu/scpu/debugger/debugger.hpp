@@ -1,4 +1,4 @@
-class sCPUDebug : public sCPU {
+class sCPUDebugger : public sCPU, public CPUDebugger {
 public:
   function<void ()> step_event;
 
@@ -16,6 +16,49 @@ public:
   uint8 op_read(uint32 addr);
   void op_write(uint32 addr, uint8 data);
 
-  sCPUDebug();
-  ~sCPUDebug();
+  sCPUDebugger();
+  ~sCPUDebugger();
+
+  //===========
+  //CPUDebugger
+  //===========
+
+  //internal
+  unsigned mdr();
+
+  //$2181-$2183
+  unsigned wram_address();
+
+  //$4016
+  bool joypad_strobe_latch();
+
+  //$4200
+  bool nmi_enable();
+  bool hirq_enable();
+  bool virq_enable();
+  bool auto_joypad_poll();
+
+  //$4201
+  unsigned pio_bits();
+
+  //$4202
+  unsigned multiplicand();
+
+  //$4203
+  unsigned multiplier();
+
+  //$4204-$4205
+  unsigned dividend();
+
+  //$4206
+  unsigned divisor();
+
+  //$4207-$4208
+  unsigned htime();
+
+  //$4209-$420a
+  unsigned vtime();
+
+  //$420d
+  bool fastrom_enable();
 };

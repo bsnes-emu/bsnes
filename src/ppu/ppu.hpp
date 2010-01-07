@@ -1,3 +1,7 @@
+#if defined(DEBUGGER)
+  #include "ppu-debugger.hpp"
+#endif
+
 //PPUcounter emulates the H/V latch counters of the S-PPU2.
 //
 //real hardware has the S-CPU maintain its own copy of these counters that are

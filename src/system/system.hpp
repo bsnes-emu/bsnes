@@ -7,15 +7,12 @@
 #include "audio/audio.hpp"
 #include "input/input.hpp"
 
-class System {
+class System : property<System> {
 public:
-  void coprocessor_enter();
-
   enum Region { NTSC = 0, PAL = 1 };
   enum RegionAutodetect { Autodetect = 2 };
   enum ExpansionPortDevice { ExpansionNone = 0, ExpansionBSX = 1 };
 
-  //system functions
   void run();
   void runtosave();
 
@@ -28,12 +25,11 @@ public:
   void frame();
   void scanline();
 
-  //return *active* region / expansion port device information
-  //settings cached upon power-on
-  Region region() const;
-  ExpansionPortDevice expansion() const;
+  //return *active* system information (settings are cached upon power-on)
+  readonly<unsigned> region;
+  readonly<unsigned> expansion;
+  readonly<unsigned> serialize_size;
 
-  unsigned serialize_size() const;
   serializer serialize();
   bool unserialize(serializer&);
 
@@ -41,20 +37,20 @@ public:
   virtual ~System() {}
 
 private:
-  unsigned serializer_size;
+  Interface *interface;
+  void coprocessor_enter();
+  void runthreadtosave();
+
   void serialize(serializer&);
   void serialize_all(serializer&);
   void serialize_init();
-
-  Interface *interface;
-  unsigned snes_region;
-  unsigned snes_expansion;
 
   friend class Cartridge;
   friend class Video;
   friend class Audio;
   friend class Input;
   friend class StateManager;
+  friend void threadentry_cop();
 };
 
 extern System system;

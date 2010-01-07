@@ -43,3 +43,14 @@ struct BitmapRAM : Memory {
   alwaysinline uint8 read(unsigned);
   alwaysinline void write(unsigned, uint8);
 };
+
+namespace memory {
+  extern StaticRAM iram;
+
+  extern VectorSelectionPage vectorsp;
+  extern CPUIRAM cpuiram;
+  extern SA1IRAM sa1iram;
+  extern SA1BWRAM sa1bwram;
+  extern CC1BWRAM cc1bwram;
+  extern BitmapRAM bitmapram;
+};

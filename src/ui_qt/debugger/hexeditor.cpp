@@ -51,8 +51,10 @@ void HexEditor::keyPressEvent(QKeyEvent *event) {
 }
 
 void HexEditor::setOffset(unsigned newOffset) {
+  slotLock = true;
   hexOffset = newOffset;
   scrollbar->setSliderPosition(hexOffset / 16);
+  slotLock = false;
 }
 
 void HexEditor::setSize(unsigned newSize) {
@@ -84,12 +86,16 @@ void HexEditor::update() {
 }
 
 void HexEditor::sliderMoved() {
+  if(slotLock) return;
   unsigned offset = scrollbar->sliderPosition();
   hexOffset = offset * 16;
   update();
 }
 
 HexEditor::HexEditor() {
+  hexOffset = 0;
+  hexSize = 0;
+
   QFont font(Style::Monospace);
   setFont(font);
   setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -109,5 +115,6 @@ HexEditor::HexEditor() {
   scrollbar->setPageStep(16);
   layout->addWidget(scrollbar);
 
+  slotLock = false;
   connect(scrollbar, SIGNAL(actionTriggered(int)), this, SLOT(sliderMoved()));
 }

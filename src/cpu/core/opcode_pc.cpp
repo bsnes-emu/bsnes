@@ -1,3 +1,5 @@
+#ifdef CPUCORE_CPP
+
 template<int bit, int val> void CPUcore::op_branch() {
   if((bool)(regs.p & bit) != val) {
 L   rd.l = op_readpc();
@@ -175,3 +177,5 @@ L rd.b = op_readstackn();
   regs.pc.b = rd.b;
   regs.pc.w = ++rd.w;
 }
+
+#endif

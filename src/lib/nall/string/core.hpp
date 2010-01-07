@@ -3,6 +3,15 @@
 
 namespace nall {
 
+inline string string::printf(const char *fmt, ...) {
+  static char text[4096];
+  va_list args;
+  va_start(args, fmt);
+  vsprintf(text, fmt, args);
+  va_end(args);
+  return text;
+}
+
 void string::reserve(size_t size_) {
   if(size_ > size) {
     size = size_;

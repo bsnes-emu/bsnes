@@ -1,4 +1,4 @@
-objects := ui-main ui-base ui-debugger ui-input ui-movie ui-settings ui-state ui-tools $(objects)
+objects := ui-main ui-base ui-cartridge ui-debugger ui-input ui-movie ui-settings ui-state ui-tools $(objects)
 objects += $(if $(call streq,$(platform),win),resource)
 link += $(qtlib)
 
@@ -24,7 +24,8 @@ $(foreach f,$(moc_objects), \
 
 obj/ui-main.o: $(ui)/main.cpp $(headers) $(wildcard $(ui)/*.cpp) $(wildcard $(ui)/platform/*.cpp) $(wildcard $(ui)/utility/*.cpp); $(qt_compile)
 obj/ui-base.o: $(ui)/base/base.cpp $(headers) $(wildcard $(ui)/base/*.cpp); $(qt_compile)
-obj/ui-debugger.o: $(ui)/debugger/debugger.cpp $(headers) $(wildcard $(ui)/debugger/*.cpp); $(qt_compile)
+obj/ui-cartridge.o: $(ui)/cartridge/cartridge.cpp $(headers) $(wildcard $(ui)/cartridge/*.cpp); $(qt_compile)
+obj/ui-debugger.o: $(ui)/debugger/debugger.cpp $(headers) $(call rwildcard,$(ui)/debugger/,%.cpp); $(qt_compile)
 obj/ui-input.o: $(ui)/input/input.cpp $(headers) $(wildcard $(ui)/input/*.cpp); $(qt_compile)
 obj/ui-movie.o: $(ui)/movie/movie.cpp $(headers) $(wildcard $(ui)/movie/*.cpp); $(qt_compile)
 obj/ui-settings.o: $(ui)/settings/settings.cpp $(headers) $(wildcard $(ui)/settings/*.cpp); $(qt_compile)

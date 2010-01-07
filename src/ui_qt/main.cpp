@@ -18,10 +18,6 @@
 #include "interface.cpp"
 
 const char defaultStylesheet[] =
-  "QLabel.title {"
-  "  font: bold 18px \"Georgia\";"
-  "}\n"
-
   "#backdrop {"
   "  background: #000000;"
   "}\n";
@@ -30,6 +26,13 @@ const char defaultStylesheet[] =
 #include "link/filter.cpp"
 #include "link/reader.cpp"
 #include "utility/utility.cpp"
+
+//override filename's path with filepath, but only if filepath isn't empty
+//used for GUI's "path selection" functionality
+string filepath(const char *filename, const char *filepath) {
+  if(!filepath || !*filepath) return filename;
+  return string() << dir(filepath) << notdir(filename);
+}
 
 int main(int argc, char **argv) {
   return application.main(argc, argv);

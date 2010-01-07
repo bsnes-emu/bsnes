@@ -77,8 +77,8 @@ public:
       QAction *tools_movies_recordFromPowerOn;
       QAction *tools_movies_recordFromHere;
     QAction *tools_captureScreenshot;
-    QAction *tools_debugger;
     QAction *tools_dialog;
+    QAction *tools_debugger;
   QMenu *help;
     QAction *help_documentation;
     QAction *help_license;
