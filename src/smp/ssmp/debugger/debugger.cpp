@@ -41,4 +41,19 @@ sSMPDebugger::~sSMPDebugger() {
   delete[] usage;
 }
 
+//===========
+//SMPDebugger
+//===========
+
+//$00f0
+unsigned sSMPDebugger::clock_speed() { return status.clock_speed; }
+bool sSMPDebugger::mmio_disable() { return status.mmio_disabled; }
+bool sSMPDebugger::ram_writable() { return status.ram_writable; }
+
+//$00f1
+bool sSMPDebugger::iplrom_enable() { return status.iplrom_enabled; }
+
+//$00f2
+unsigned sSMPDebugger::dsp_address() { return status.dsp_addr; }
+
 #endif

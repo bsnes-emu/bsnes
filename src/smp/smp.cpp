@@ -3,6 +3,10 @@
 #define SMP_CPP
 namespace SNES {
 
+#if defined(DEBUGGER)
+  #include "smp-debugger.cpp"
+#endif
+
 //this is the IPLROM for the S-SMP coprocessor.
 //the S-SMP does not allow writing to the IPLROM.
 //all writes are instead mapped to the extended

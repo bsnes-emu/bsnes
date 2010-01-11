@@ -33,5 +33,7 @@ public slots:
 };
 
 extern PropertiesWidget *cpuPropertiesTab;
+extern PropertiesWidget *smpPropertiesTab;
 extern PropertiesWidget *ppuPropertiesTab;
+extern PropertiesWidget *dspPropertiesTab;
 extern PropertiesViewer *propertiesViewer;

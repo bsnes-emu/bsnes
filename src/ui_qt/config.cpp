@@ -50,13 +50,12 @@ Configuration::Configuration() {
   attach(system.speedFast    = 150, "system.speedFast");
   attach(system.speedFastest = 200, "system.speedFastest");
   attach(system.autoSaveMemory = false, "system.autoSaveMemory", "Automatically save cartridge back-up RAM once every minute");
-  attach(system.rewindEnabled = false, "system.rewindEnabled", "Automatically save states periodically to allow auto-rewind support");
+  attach(system.rewindEnabled  = false, "system.rewindEnabled", "Automatically save states periodically to allow auto-rewind support");
 
   attach(diskBrowser.showPanel = true, "diskBrowser.showPanel");
 
-  attach(file.autodetect_type    = false, "file.autodetectType");
-  attach(file.applyPatches       = true, "file.applyPatches");
-  attach(file.bypass_patch_crc32 = false, "file.bypassPatchCrc32");
+  attach(file.applyPatches     = true,  "file.applyPatches");
+  attach(file.bypassPatchCrc32 = false, "file.bypassPatchCrc32");
 
   attach(path.rom   = "", "path.rom");
   attach(path.save  = "", "path.save");
@@ -118,6 +117,7 @@ Configuration::Configuration() {
   attach(input.port2 = ControllerPort2::Gamepad, "input.port2");
   attach(input.focusPolicy = Input::FocusPolicyIgnoreInput, "input.focusPolicy");
   attach(input.allowInvalidInput = false, "input.allowInvalidInput", "Allow up+down / left+right combinations; may trigger bugs in some games");
+  attach(input.modifierEnable = true, "input.modifierEnable");
 
   attach(debugger.cacheUsageToDisk = false, "debugger.cacheUsageToDisk");
 

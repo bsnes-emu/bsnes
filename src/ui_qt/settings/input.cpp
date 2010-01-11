@@ -3,6 +3,9 @@ InputSettingsWindow *inputSettingsWindow;
 
 InputSettingsWindow::InputSettingsWindow() {
   activeInput = 0;
+  activeGroup = 0;
+  groupIndex = 0;
+  activeMouse = 0;
 
   layout = new QVBoxLayout;
   layout->setMargin(Style::WindowMargin);
@@ -24,27 +27,36 @@ InputSettingsWindow::InputSettingsWindow() {
   message->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
   controlLayout->addWidget(message);
 
-  optionButton = new QPushButton("Options");
-  controlLayout->addWidget(optionButton);
-
-  optionMenu = new QMenu;
-  optionButton->setMenu(optionMenu);
-
-  optionAssignModifiers = new QbCheckAction("Assign Modifiers as Keys", 0);
-  optionMenu->addAction(optionAssignModifiers);
-
   assignButton = new QPushButton("Assign");
   controlLayout->addWidget(assignButton);
 
   unassignButton = new QPushButton("Unassign");
   controlLayout->addWidget(unassignButton);
 
+  buttonBox = new QLabel("Mouse Button");
+  buttonBox->setFrameStyle(QFrame::Panel | QFrame::Raised);
+  buttonBox->hide();
+  controlLayout->addWidget(buttonBox);
+
+  xAxisButton = new QPushButton("Mouse X-axis");
+  xAxisButton->hide();
+  controlLayout->addWidget(xAxisButton);
+
+  yAxisButton = new QPushButton("Mouse Y-axis");
+  yAxisButton->hide();
+  controlLayout->addWidget(yAxisButton);
+
+  stopButton = new QPushButton("Stop");
+  stopButton->hide();
+  controlLayout->addWidget(stopButton);
+
   connect(list, SIGNAL(itemSelectionChanged()), this, SLOT(synchronize()));
-  connect(list, SIGNAL(itemActivated(QTreeWidgetItem*, int)), this, SLOT(assign()));
+  connect(list, SIGNAL(itemActivated(QTreeWidgetItem*, int)), this, SLOT(activateAssign()));
   connect(assignButton, SIGNAL(released()), this, SLOT(assign()));
   connect(unassignButton, SIGNAL(released()), this, SLOT(unassign()));
-
-  connect(optionAssignModifiers, SIGNAL(triggered()), this, SLOT(toggleAssignModifiers()));
+  connect(xAxisButton, SIGNAL(released()), this, SLOT(xAxisAssign()));
+  connect(yAxisButton, SIGNAL(released()), this, SLOT(yAxisAssign()));
+  connect(stopButton, SIGNAL(released()), this, SLOT(stop()));
 
   //initialize list
 
@@ -86,14 +98,58 @@ InputSettingsWindow::InputSettingsWindow() {
 
 void InputSettingsWindow::synchronize() {
   bool enable = false;
+
   QList<QTreeWidgetItem*> items = list->selectedItems();
   if(items.count() > 0) {
     QTreeWidgetItem *item = items[0];
     signed index = item->data(0, Qt::UserRole).toInt();
-    enable = (index != -1);
+    if(index >= 0) enable = true;
+    else {
+      item = item->child(0);
+      if(item) {
+        index = item->data(0, Qt::UserRole).toInt();
+        if(index >= 0) enable = true;
+      }
+    }
   }
+
   assignButton->setEnabled(enable);
   unassignButton->setEnabled(enable);
+}
+
+void InputSettingsWindow::setActiveInput(MappedInput *input) {
+  //flush any pending events to prevent instantaneous assignment of scancodes
+  activeInput = 0;
+  mapper().poll();
+  activeInput = input;
+
+  if(activeInput) {
+    assignButton->hide();
+    unassignButton->hide();
+    if(dynamic_cast<DigitalInput*>(input)) {
+      buttonBox->show();
+      xAxisButton->hide();
+      yAxisButton->hide();
+    } else {
+      buttonBox->hide();
+      xAxisButton->show();
+      yAxisButton->show();
+    }
+    stopButton->show();
+
+    message->setFocus();
+    message->setText(string() << "Set assignment for: " << activeInput->label);
+  } else {
+    assignButton->show();
+    unassignButton->show();
+    buttonBox->hide();
+    xAxisButton->hide();
+    yAxisButton->hide();
+    stopButton->hide();
+
+    list->setFocus();
+    message->setText("");
+  }
 }
 
 void InputSettingsWindow::updateList() {
@@ -116,12 +172,26 @@ void InputSettingsWindow::updateList() {
 }
 
 void InputSettingsWindow::setAssignment(string name) {
+  //if all controls in a group are being assigned at once,
+  //ensure the same keycode is not used more than once
+  if(activeGroup) {
+    for(unsigned i = 0; i < groupIndex; i++) {
+      if((*activeGroup)[i]->name == name) return;
+    }
+  }
+
   activeInput->name = name;
-  activeInput = 0;
-  list->setFocus();
-  message->setText("");
   mapper().bind();
   updateList();
+
+  if(!activeGroup) {
+    setActiveInput(0);
+  } else if(++groupIndex >= activeGroup->size()) {
+    setActiveInput(0);
+    activeGroup = 0;
+  } else {
+    setActiveInput((*activeGroup)[groupIndex]);
+  }
 }
 
 void InputSettingsWindow::inputEvent(uint16_t scancode) {
@@ -137,12 +207,12 @@ void InputSettingsWindow::inputEvent(uint16_t scancode) {
       }
 
       setAssignment(string() << mapper().modifierString() << Scancode::encode(scancode));
-    } else if(Keyboard::isAnyModifier(scancode) && optionAssignModifiers->isChecked()) {
+    } else if(Keyboard::isAnyModifier(scancode) && !config().input.modifierEnable) {
       setAssignment(string() << Scancode::encode(scancode));
-    } else if(Mouse::isAnyButton(scancode) && mapper().state(scancode)) {
+    } else if(Mouse::isAnyButton(scancode) && !mapper().state(scancode)) {
       //ensure button was clicked inside list box
       unsigned wx = 0, wy = 0;
-      QWidget *widget = message;
+      QWidget *widget = buttonBox;
       while(widget) {
         wx += widget->geometry().x();
         wy += widget->geometry().y();
@@ -150,8 +220,8 @@ void InputSettingsWindow::inputEvent(uint16_t scancode) {
       }
       unsigned px = QCursor::pos().x();
       unsigned py = QCursor::pos().y();
-      if(px < wx || px >= wx + message->size().width()) return;
-      if(py < wy || py >= wy + message->size().height()) return;
+      if(px < wx || px >= wx + buttonBox->size().width()) return;
+      if(py < wy || py >= wy + buttonBox->size().height()) return;
 
       setAssignment(string() << mapper().modifierString() << Scancode::encode(scancode));
     } else if(Joypad::isAnyHat(scancode)) {
@@ -169,6 +239,7 @@ void InputSettingsWindow::inputEvent(uint16_t scancode) {
         activeInput = 0;
         mapper().calibrate();
         activeInput = temp;
+        return;
       }
 
       if(mapper().isTrigger[Joypad::numberDecode(scancode)][Joypad::axisDecode(scancode)] == false) {
@@ -187,30 +258,16 @@ void InputSettingsWindow::inputEvent(uint16_t scancode) {
       setAssignment(string() << mapper().modifierString() << Scancode::encode(scancode));
     }
   } else if(dynamic_cast<AnalogInput*>(activeInput)) {
-    if(Mouse::isAnyButton(scancode)) {
-      //ensure button was clicked inside list box
-      unsigned wx = 0, wy = 0;
-      QWidget *widget = message;
-      while(widget) {
-        wx += widget->geometry().x();
-        wy += widget->geometry().y();
-        widget = widget->parentWidget();
-      }
-      unsigned px = QCursor::pos().x();
-      unsigned py = QCursor::pos().y();
-      if(px < wx || px >= wx + message->size().width()) return;
-      if(py < wy || py >= wy + message->size().height()) return;
-
-      unsigned number = Mouse::numberDecode(scancode);
-      unsigned button = Mouse::buttonDecode(scancode);
-      if(button == 0) setAssignment(string() << Scancode::encode(mouse(number).axis(0)));
-      if(button == 2) setAssignment(string() << Scancode::encode(mouse(number).axis(1)));
+    if(Mouse::isAnyButton(scancode) && mapper().state(scancode)) {
+      //actual assignment occurs during (x,y)AxisButton::released()
+      activeMouse = Mouse::numberDecode(scancode);
     } else if(Joypad::isAnyAxis(scancode) && mapper().distance(scancode) > 64) {
       if(mapper().calibrated == false) {
         MappedInput *temp = activeInput;
         activeInput = 0;
         mapper().calibrate();
         activeInput = temp;
+        return;
       }
 
       if(mapper().isTrigger[Joypad::numberDecode(scancode)][Joypad::axisDecode(scancode)] == false) {
@@ -222,25 +279,43 @@ void InputSettingsWindow::inputEvent(uint16_t scancode) {
   }
 }
 
+//called when double-clicking any list item;
+//double-clicking a group expands or collapses it,
+//so avoid triggering assign() unless this is not a group
+void InputSettingsWindow::activateAssign() {
+  QTreeWidgetItem *item = list->currentItem();
+  if(!item) return;
+  signed index = item->data(0, Qt::UserRole).toInt();
+  if(index >= 0) assign();
+}
+
 void InputSettingsWindow::assign() {
   QTreeWidgetItem *item = list->currentItem();
   if(!item) return;
   signed index = item->data(0, Qt::UserRole).toInt();
+  if(index == -1) return assignGroup();
+  setActiveInput(inputTable[index]);
+}
+
+void InputSettingsWindow::assignGroup() {
+  QTreeWidgetItem *item = list->currentItem();
+  if(!item) return;
+  item->setExpanded(true);
+  item = item->child(0);
+  if(!item) return;
+  signed index = item->data(0, Qt::UserRole).toInt();
   if(index == -1) return;
 
-  //flush any pending events to prevent instantaneous assignment of scancodes
-  mapper().poll();
-
-  activeInput = inputTable[index];
-  message->setFocus();
-  message->setText(string() << "Set assignment for: " << activeInput->label);
+  MappedInput *input = inputTable[index];
+  activeGroup = input->parent;
+  setActiveInput((*activeGroup)[groupIndex = 0]);
 }
 
 void InputSettingsWindow::unassign() {
   QTreeWidgetItem *item = list->currentItem();
   if(!item) return;
   signed index = item->data(0, Qt::UserRole).toInt();
-  if(index == -1) return;
+  if(index == -1) return unassignGroup();
 
   MappedInput *input = inputTable[index];
   input->name = "None";
@@ -248,6 +323,32 @@ void InputSettingsWindow::unassign() {
   updateList();
 }
 
-void InputSettingsWindow::toggleAssignModifiers() {
-  optionAssignModifiers->setChecked(!optionAssignModifiers->isChecked());
+void InputSettingsWindow::unassignGroup() {
+  QTreeWidgetItem *item = list->currentItem();
+  if(!item) return;
+  item = item->child(0);
+  if(!item) return;
+  signed index = item->data(0, Qt::UserRole).toInt();
+  if(index == -1) return;
+
+  MappedInput *input = inputTable[index];
+  InputGroup &group = *(input->parent);
+  for(unsigned i = 0; i < group.size(); i++) {
+    group[i]->name = "None";
+  }
+  mapper().bind();
+  updateList();
+}
+
+void InputSettingsWindow::xAxisAssign() {
+  setAssignment(string() << Scancode::encode(mouse(activeMouse).axis(0)));
+}
+
+void InputSettingsWindow::yAxisAssign() {
+  setAssignment(string() << Scancode::encode(mouse(activeMouse).axis(1)));
+}
+
+void InputSettingsWindow::stop() {
+  setActiveInput(0);
+  activeGroup = 0;
 }

@@ -48,6 +48,7 @@ public:
   QHBoxLayout *pathLayout;
   QComboBox *path;
   QPushButton *newFolder;
+  QPushButton *upFolder;
   DiskBrowserView *view;
   QVBoxLayout *panelLayout;
   QGroupBox *group;

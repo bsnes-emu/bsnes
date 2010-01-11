@@ -12,7 +12,7 @@ public:
   sDSP();
   ~sDSP();
 
-private:
+protected:
   //DSP_STATE_MACHINE variable
   unsigned phase_index;
 

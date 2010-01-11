@@ -25,6 +25,9 @@ private slots:
   void codeEdited();
   void descEdited();
   void clearSelected();
+
+private:
+  bool lock;
 };
 
 extern CheatEditorWindow *cheatEditorWindow;

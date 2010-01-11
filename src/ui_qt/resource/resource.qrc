@@ -18,6 +18,7 @@
     <file alias="16x16/document-open.png">../../data/icons-16x16/document-open.png</file>
     <file alias="16x16/folder.png">../../data/icons-16x16/folder.png</file>
     <file alias="16x16/folder-new.png">../../data/icons-16x16/folder-new.png</file>
+    <file alias="16x16/go-up.png">../../data/icons-16x16/go-up.png</file>
     <file alias="16x16/help-browser.png">../../data/icons-16x16/help-browser.png</file>
     <file alias="16x16/image-x-generic.png">../../data/icons-16x16/image-x-generic.png</file>
     <file alias="16x16/input-gaming.png">../../data/icons-16x16/input-gaming.png</file>

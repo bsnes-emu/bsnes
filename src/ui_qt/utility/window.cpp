@@ -50,6 +50,17 @@ void Utility::resizeMainWindow() {
     }
   }
 
+  //at 5x scale, it is possible to correct the aspect ratio while maintaining
+  //an even number of pixels for every column and every row; very important for
+  //point / nearest-neighbor scaling ...
+  //
+  //NTSC: 1471x1120 -> 1536x1120 (6x5 scale)
+  //PAL : 1781x1195 -> 1792x1195 (7x5 scale)
+  if(multiplier == 5 && config().video.context->correctAspectRatio) {
+    width = 256 * (region == 0 ? 6 : 7);
+    height = (region == 0 ? 224 : 239) * 5;
+  }
+
   if(config().video.isFullscreen == false) {
     //get effective desktop work area region (ignore Windows taskbar, OS X dock, etc.)
     QRect deskRect = QApplication::desktop()->availableGeometry(mainWindow);

@@ -18,6 +18,14 @@ DigitalInput(label, configName) {
 }
 
 int16_t Gamepad::status(unsigned index, unsigned id) const {
+  if(config().input.allowInvalidInput == false) {
+    //block up+down and left+right combinations:
+    //a real gamepad has a pivot in the D-pad that makes this impossible;
+    //some software titles will crash if up+down or left+right are detected
+    if(id == SNES::Input::JoypadDown && up.cachedState) return 0;
+    if(id == SNES::Input::JoypadRight && left.cachedState) return 0;
+  }
+
   switch(id) {
     case SNES::Input::JoypadUp: return up.cachedState;
     case SNES::Input::JoypadDown: return down.cachedState;
@@ -177,6 +185,11 @@ DigitalInput(label, configName) {
 }
 
 int16_t Asciipad::status(unsigned index, unsigned id) const {
+  if(config().input.allowInvalidInput == false) {
+    if(id == SNES::Input::JoypadDown && up.cachedState) return 0;
+    if(id == SNES::Input::JoypadRight && left.cachedState) return 0;
+  }
+
   switch(id) {
     case SNES::Input::JoypadUp: return up.cachedState;
     case SNES::Input::JoypadDown: return down.cachedState;

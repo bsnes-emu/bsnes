@@ -1,6 +1,8 @@
 #include "properties.moc"
 PropertiesWidget *cpuPropertiesTab;
+PropertiesWidget *smpPropertiesTab;
 PropertiesWidget *ppuPropertiesTab;
+PropertiesWidget *dspPropertiesTab;
 PropertiesViewer *propertiesViewer;
 
 void PropertiesWidget::refresh() {
@@ -44,7 +46,9 @@ PropertiesWidget::PropertiesWidget(SNES::ChipDebugger &object) : object(object) 
 
 void PropertiesViewer::refresh() {
   cpuPropertiesTab->refresh();
+  smpPropertiesTab->refresh();
   ppuPropertiesTab->refresh();
+  dspPropertiesTab->refresh();
 }
 
 void PropertiesViewer::show() {
@@ -71,8 +75,14 @@ PropertiesViewer::PropertiesViewer() : QbWindow(config().geometry.propertiesView
   cpuPropertiesTab = new PropertiesWidget(SNES::cpu);
   tabWidget->addTab(cpuPropertiesTab, "S-CPU");
 
+  smpPropertiesTab = new PropertiesWidget(SNES::smp);
+  tabWidget->addTab(smpPropertiesTab, "S-SMP");
+
   ppuPropertiesTab = new PropertiesWidget(SNES::ppu);
   tabWidget->addTab(ppuPropertiesTab, "S-PPU");
+
+  dspPropertiesTab = new PropertiesWidget(SNES::dsp);
+  tabWidget->addTab(dspPropertiesTab, "S-DSP");
 
   controlLayout = new QHBoxLayout;
   controlLayout->setAlignment(Qt::AlignRight);

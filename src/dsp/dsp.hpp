@@ -1,3 +1,7 @@
+#if defined(DEBUGGER)
+  #include "dsp-debugger.hpp"
+#endif
+
 class DSP {
 public:
   virtual void enter() = 0;

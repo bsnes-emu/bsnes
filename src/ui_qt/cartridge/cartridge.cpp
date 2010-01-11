@@ -220,7 +220,7 @@ bool Cartridge::loadCartridge(string &filename, SNES::MappedRAM &memory) {
 
     bool apply = false;
     if(result == ups::ok) apply = true;
-    if(config().file.bypass_patch_crc32) {
+    if(config().file.bypassPatchCrc32) {
       if(result == ups::input_crc32_invalid ) apply = true;
       if(result == ups::output_crc32_invalid) apply = true;
     }

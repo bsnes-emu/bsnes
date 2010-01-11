@@ -78,7 +78,7 @@ link += $(call ifhas,input.rawinput,$(ruby),-ldinput8 -ldxguid)
 
 objects := libco ruby
 objects += system cartridge cheat
-objects += memory smemory cpu cpucore scpu smp smpcore ssmp sdsp ppu bppu
+objects += memory smemory cpu cpucore scpu smp smpcore ssmp dsp sdsp ppu bppu
 objects += supergameboy superfx sa1
 objects += bsx srtc sdd1 spc7110 cx4 dsp1 dsp2 dsp3 dsp4 obc1 st010 st011 st018
 objects += 21fx
@@ -147,6 +147,7 @@ obj/ssmp.o   : smp/ssmp/ssmp.cpp $(call rwildcard,smp/ssmp/)
 ### dsp ###
 ###########
 
+obj/dsp.o:  dsp/dsp.cpp dsp/*
 obj/adsp.o: dsp/adsp/adsp.cpp dsp/adsp/*
 obj/sdsp.o: dsp/sdsp/sdsp.cpp dsp/sdsp/*
 

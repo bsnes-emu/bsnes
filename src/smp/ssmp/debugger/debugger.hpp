@@ -1,4 +1,4 @@
-class sSMPDebugger : public sSMP {
+class sSMPDebugger : public sSMP, public SMPDebugger {
 public:
   function<void ()> step_event;
 
@@ -16,4 +16,19 @@ public:
 
   sSMPDebugger();
   ~sSMPDebugger();
+
+  //===========
+  //SMPDebugger
+  //===========
+
+  //$00f0
+  unsigned clock_speed();
+  bool mmio_disable();
+  bool ram_writable();
+
+  //$00f1
+  bool iplrom_enable();
+
+  //$00f2
+  unsigned dsp_address();
 };

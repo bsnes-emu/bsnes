@@ -137,6 +137,7 @@ void DiskBrowser::chooseFolder(const function<void (string)> &callback_, string 
   browseMode = Folder;
 
   hide();
+  newFolder->show();
   group->hide();
   ok->setText("Choose");
   setWindowTitle(string() << title);
@@ -151,6 +152,7 @@ void DiskBrowser::chooseFile(const function<void (string)> &callback_, string &c
   browseMode = File;
 
   hide();
+  newFolder->hide();
   group->hide();
   ok->setText("Choose");
   setWindowTitle(string() << title);
@@ -164,6 +166,7 @@ void DiskBrowser::loadCartridge() {
   browseMode = Cartridge;
 
   hide();
+  newFolder->hide();
   group->setVisible(config().diskBrowser.showPanel);
   ok->setText("Load");
   setWindowTitle("Load Cartridge");
@@ -184,6 +187,7 @@ void DiskBrowser::loadBaseCartridge() {
   browseMode = BaseCartridge;
 
   hide();
+  newFolder->hide();
   group->setVisible(config().diskBrowser.showPanel);
   ok->setText("Load");
   setWindowTitle("Load Base Cartridge");
@@ -200,6 +204,7 @@ void DiskBrowser::loadBsxCartridge() {
   browseMode = BsxCartridge;
 
   hide();
+  newFolder->hide();
   group->setVisible(config().diskBrowser.showPanel);
   ok->setText("Load");
   setWindowTitle("Load BS-X Cartridge");
@@ -216,6 +221,7 @@ void DiskBrowser::loadSufamiTurboCartridge1() {
   browseMode = SufamiTurboCartridge1;
 
   hide();
+  newFolder->hide();
   group->setVisible(config().diskBrowser.showPanel);
   ok->setText("Load");
   setWindowTitle("Load Slot-A Sufami Turbo Cartridge");
@@ -232,6 +238,7 @@ void DiskBrowser::loadSufamiTurboCartridge2() {
   browseMode = SufamiTurboCartridge2;
 
   hide();
+  newFolder->hide();
   group->setVisible(config().diskBrowser.showPanel);
   ok->setText("Load");
   setWindowTitle("Load Slot-B Sufami Turbo Cartridge");
@@ -248,6 +255,7 @@ void DiskBrowser::loadSuperGameBoyCartridge() {
   browseMode = SuperGameBoyCartridge;
 
   hide();
+  newFolder->hide();
   group->setVisible(config().diskBrowser.showPanel);
   ok->setText("Load");
   setWindowTitle("Load Super Game Boy Cartridge");
@@ -518,6 +526,11 @@ DiskBrowser::DiskBrowser() : QbWindow(config().geometry.diskBrowser) {
   newFolder->setIcon(QIcon(":/16x16/folder-new.png"));
   pathLayout->addWidget(newFolder);
 
+  upFolder = new QPushButton;
+  upFolder->setIconSize(QSize(16, 16));
+  upFolder->setIcon(QIcon(":/16x16/go-up.png"));
+  pathLayout->addWidget(upFolder);
+
   view = new DiskBrowserView;
   view->setIconSize(QSize(16, 16));
   browseLayout->addWidget(view);
@@ -590,6 +603,7 @@ DiskBrowser::DiskBrowser() : QbWindow(config().geometry.diskBrowser) {
   folderCreator = new FolderCreator;
 
   connect(newFolder, SIGNAL(released()), folderCreator, SLOT(show()));
+  connect(upFolder, SIGNAL(released()), this, SLOT(cdUp()));
   connect(view, SIGNAL(cdUp()), this, SLOT(cdUp()));
   connect(view, SIGNAL(activated(const QModelIndex&)), this, SLOT(activateItem(const QModelIndex&)));
   connect(view, SIGNAL(changed(const QModelIndex&)), this, SLOT(changeItem(const QModelIndex&)));

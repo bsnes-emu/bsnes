@@ -1,3 +1,7 @@
+#if defined(DEBUGGER)
+  #include "smp-debugger.hpp"
+#endif
+
 class SMP {
 public:
   virtual void enter() = 0;

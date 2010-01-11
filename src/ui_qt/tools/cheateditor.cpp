@@ -2,6 +2,8 @@
 CheatEditorWindow *cheatEditorWindow;
 
 CheatEditorWindow::CheatEditorWindow() {
+  lock = false;
+
   layout = new QVBoxLayout;
   layout->setMargin(Style::WindowMargin);
   layout->setSpacing(Style::WidgetSpacing);
@@ -66,6 +68,7 @@ void CheatEditorWindow::synchronize() {
 }
 
 void CheatEditorWindow::load(const char *filename) {
+  lock = true;
   list->clear();
   list->setSortingEnabled(false);
   SNES::cheat.reset();
@@ -97,6 +100,7 @@ void CheatEditorWindow::load(const char *filename) {
   list->setSortingEnabled(true);
   list->header()->setSortIndicatorShown(false);
 
+  lock = false;
   bind();
   update();
 }
@@ -158,6 +162,8 @@ void CheatEditorWindow::update() {
 }
 
 void CheatEditorWindow::bind() {
+  if(lock) return;
+
   QList<QTreeWidgetItem*> items = list->findItems("", Qt::MatchContains);
   for(unsigned i = 0; i < items.count(); i++) {
     QTreeWidgetItem *item = items[i];
@@ -169,6 +175,8 @@ void CheatEditorWindow::bind() {
 }
 
 void CheatEditorWindow::listChanged() {
+  if(lock) return;
+
   QList<QTreeWidgetItem*> items = list->selectedItems();
   if(items.count() > 0) {
     QTreeWidgetItem *item = items[0];
@@ -179,6 +187,8 @@ void CheatEditorWindow::listChanged() {
 }
 
 void CheatEditorWindow::codeEdited() {
+  if(lock) return;
+
   QList<QTreeWidgetItem*> items = list->selectedItems();
   if(items.count() == 1) {
     QTreeWidgetItem *item = items[0];
@@ -189,6 +199,8 @@ void CheatEditorWindow::codeEdited() {
 }
 
 void CheatEditorWindow::descEdited() {
+  if(lock) return;
+
   QList<QTreeWidgetItem*> items = list->selectedItems();
   if(items.count() == 1) {
     QTreeWidgetItem *item = items[0];
@@ -198,6 +210,8 @@ void CheatEditorWindow::descEdited() {
 }
 
 void CheatEditorWindow::clearSelected() {
+  if(lock) return;
+
   QList<QTreeWidgetItem*> items = list->selectedItems();
   for(unsigned i = 0; i < items.count(); i++) {
     QTreeWidgetItem *item = items[i];

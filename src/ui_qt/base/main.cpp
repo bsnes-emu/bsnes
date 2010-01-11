@@ -166,8 +166,14 @@ MainWindow::MainWindow() : QbWindow(config().geometry.mainWindow) {
 
   tools->addSeparator();
 
-  tools_dialog = tools->addAction("&Tools Dialog ...");
-  tools_dialog->setIcon(QIcon(":/16x16/preferences-desktop.png"));
+  tools_cheatEditor = tools->addAction("Cheat &Editor ...");
+  tools_cheatEditor->setIcon(QIcon(":/16x16/accessories-text-editor.png"));
+
+  tools_cheatFinder = tools->addAction("Cheat &Finder ...");
+  tools_cheatFinder->setIcon(QIcon(":/16x16/system-search.png"));
+
+  tools_stateManager = tools->addAction("&State Manager ...");
+  tools_stateManager->setIcon(QIcon(":/16x16/system-file-manager.png"));
 
   tools_debugger = tools->addAction("&Debugger ...");
   tools_debugger->setIcon(QIcon(":/16x16/utilities-terminal.png"));
@@ -283,8 +289,10 @@ MainWindow::MainWindow() : QbWindow(config().geometry.mainWindow) {
   connect(tools_movies_recordFromPowerOn, SIGNAL(triggered()), this, SLOT(recordMovieFromPowerOn()));
   connect(tools_movies_recordFromHere, SIGNAL(triggered()), this, SLOT(recordMovieFromHere()));
   connect(tools_captureScreenshot, SIGNAL(triggered()), this, SLOT(saveScreenshot()));
+  connect(tools_cheatEditor, SIGNAL(triggered()), this, SLOT(showCheatEditor()));
+  connect(tools_cheatFinder, SIGNAL(triggered()), this, SLOT(showCheatFinder()));
+  connect(tools_stateManager, SIGNAL(triggered()), this, SLOT(showStateManager()));
   connect(tools_debugger, SIGNAL(triggered()), this, SLOT(showDebugger()));
-  connect(tools_dialog, SIGNAL(triggered()), this, SLOT(showToolsDialog()));
   connect(help_documentation, SIGNAL(triggered()), this, SLOT(showDocumentation()));
   connect(help_license, SIGNAL(triggered()), this, SLOT(showLicense()));
   connect(help_about, SIGNAL(triggered()), this, SLOT(showAbout()));
@@ -549,13 +557,15 @@ void MainWindow::saveScreenshot() {
   interface.saveScreenshot = true;
 }
 
+void MainWindow::showCheatEditor()  { toolsWindow->tab->setCurrentIndex(0); toolsWindow->show(); }
+void MainWindow::showCheatFinder()  { toolsWindow->tab->setCurrentIndex(1); toolsWindow->show(); }
+void MainWindow::showStateManager() { toolsWindow->tab->setCurrentIndex(2); toolsWindow->show(); }
+
 void MainWindow::showDebugger() {
   #if defined(DEBUGGER)
   debugger->show();
   #endif
 }
-
-void MainWindow::showToolsDialog() { toolsWindow->show(); }
 
 void MainWindow::showDocumentation()  {
   QFile file(":/documentation.html");

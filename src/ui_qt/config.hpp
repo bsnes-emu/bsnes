@@ -14,9 +14,8 @@ public:
   } system;
 
   struct File {
-    bool autodetect_type;
     bool applyPatches;
-    bool bypass_patch_crc32;
+    bool bypassPatchCrc32;
   } file;
 
   struct DiskBrowser {
@@ -63,6 +62,7 @@ public:
     enum policy_t { FocusPolicyPauseEmulation, FocusPolicyIgnoreInput, FocusPolicyAllowInput };
     unsigned focusPolicy;
     bool allowInvalidInput;
+    bool modifierEnable;
   } input;
 
   struct Debugger {

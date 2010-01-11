@@ -53,4 +53,4 @@ PPU::~PPU() {
   delete[] output;
 }
 
-};
+}

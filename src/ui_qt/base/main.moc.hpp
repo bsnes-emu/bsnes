@@ -77,7 +77,9 @@ public:
       QAction *tools_movies_recordFromPowerOn;
       QAction *tools_movies_recordFromHere;
     QAction *tools_captureScreenshot;
-    QAction *tools_dialog;
+    QAction *tools_cheatEditor;
+    QAction *tools_cheatFinder;
+    QAction *tools_stateManager;
     QAction *tools_debugger;
   QMenu *help;
     QAction *help_documentation;
@@ -141,8 +143,10 @@ public slots:
   void recordMovieFromPowerOn();
   void recordMovieFromHere();
   void saveScreenshot();
+  void showCheatEditor();
+  void showCheatFinder();
+  void showStateManager();
   void showDebugger();
-  void showToolsDialog();
   void showDocumentation();
   void showLicense();
   void showAbout();

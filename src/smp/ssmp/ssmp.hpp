@@ -7,7 +7,6 @@ public:
   #include "timing/timing.hpp"
 
   struct {
-
     uint8 opcode;
     bool in_opcode;
 
