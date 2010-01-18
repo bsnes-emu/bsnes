@@ -82,7 +82,53 @@ unsigned sCPUDebugger::htime() { return status.hirq_pos; }
 //$4209-$420a
 unsigned sCPUDebugger::vtime() { return status.virq_pos; }
 
+//$420b
+unsigned sCPUDebugger::dma_enable() {
+  unsigned result = 0;
+  for(unsigned n = 0; n < 8; n++) {
+    result |= channel[n].dma_enabled << n;
+  }
+  return result;
+}
+
+//$420c
+unsigned sCPUDebugger::hdma_enable() {
+  unsigned result = 0;
+  for(unsigned n = 0; n < 8; n++) {
+    result |= channel[n].hdma_enabled << n;
+  }
+  return result;
+}
+
 //$420d
 bool sCPUDebugger::fastrom_enable() { return status.rom_speed; }
+
+//$43x0
+bool sCPUDebugger::dma_direction(unsigned n) { return channel[n].direction; }
+bool sCPUDebugger::dma_indirect(unsigned n) { return channel[n].hdma_indirect; }
+bool sCPUDebugger::dma_reverse_transfer(unsigned n) { return channel[n].reversexfer; }
+bool sCPUDebugger::dma_fixed_transfer(unsigned n) { return channel[n].fixedxfer; }
+unsigned sCPUDebugger::dma_transfer_mode(unsigned n) { return channel[n].xfermode; }
+
+//$43x1
+unsigned sCPUDebugger::dma_bbus_address(unsigned n) { return 0x2100 + channel[n].destaddr; }
+
+//$43x2-$43x3
+unsigned sCPUDebugger::dma_abus_address(unsigned n) { return channel[n].srcaddr; }
+
+//$43x4
+unsigned sCPUDebugger::dma_abus_bank(unsigned n) { return channel[n].srcbank; }
+
+//$43x5-$43x6
+unsigned sCPUDebugger::dma_transfer_size(unsigned n) { return channel[n].xfersize; }
+
+//$43x7
+unsigned sCPUDebugger::dma_indirect_bank(unsigned n) { return channel[n].hdma_ibank; }
+
+//$43x8-$43x9
+unsigned sCPUDebugger::dma_table_address(unsigned n) { return channel[n].hdma_addr; }
+
+//$43xa
+unsigned sCPUDebugger::dma_line_counter(unsigned n) { return channel[n].hdma_line_counter; }
 
 #endif

@@ -367,7 +367,7 @@ bool MainWindow::isActive() {
 }
 
 void MainWindow::loadCartridge() {
-  diskBrowser->loadCartridge();
+  fileBrowser->loadCartridge();
 }
 
 void MainWindow::loadBsxSlottedCartridge() {

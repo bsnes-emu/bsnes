@@ -32,7 +32,8 @@ PathSettingWidget::PathSettingWidget(string &pathValue_, const char *labelText, 
   updatePath();
 }
 
-void PathSettingWidget::assignPath(string newPath) {
+void PathSettingWidget::acceptPath(const string &newPath) {
+  fileBrowser->close();
   pathValue = string() << newPath << "/";
   updatePath();
 }
@@ -48,11 +49,12 @@ void PathSettingWidget::updatePath() {
 }
 
 void PathSettingWidget::selectPath() {
-  diskBrowser->chooseFolder(
-    bind(&PathSettingWidget::assignPath, this),
-    config().path.current.folder,
-    pathBrowseLabel
-  );
+  fileBrowser->onChange = (void*)0;
+  fileBrowser->onActivate = (void*)0;
+  fileBrowser->onAccept = bind(&PathSettingWidget::acceptPath, this);
+  fileBrowser->setWindowTitle(pathBrowseLabel);
+  fileBrowser->setPath(config().path.current.folder);
+  fileBrowser->chooseFolder();
 }
 
 void PathSettingWidget::defaultPath() {

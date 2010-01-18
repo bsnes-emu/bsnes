@@ -49,9 +49,49 @@ bool CPUDebugger::property(unsigned id, string &name, string &value) {
   if(id == n++) { name = "$4209-$420a"; value = ""; return true; }
   if(id == n++) { name = "V-Time"; value = string::printf("0x%.4x", vtime()); return true; }
 
+  //$420b
+  if(id == n++) { name = "$420b"; value = ""; return true; }
+  if(id == n++) { name = "DMA Enable"; value = string::printf("0x%.2x", dma_enable()); return true; }
+
+  //$420c
+  if(id == n++) { name = "$420c"; value = ""; return true; }
+  if(id == n++) { name = "HDMA Enable"; value = string::printf("0x%.2x", hdma_enable()); return true; }
+
   //$420d
   if(id == n++) { name = "$420d"; value = ""; return true; }
   if(id == n++) { name = "FastROM Enable"; value = fastrom_enable(); return true; }
+
+  for(unsigned i = 0; i < 8; i++) {
+    if(id == n++) { name = string() << "DMA Channel " << i; return true; }
+
+    //$43x0
+    if(id == n++) { name = "Direction"; value = dma_direction(i); return true; }
+    if(id == n++) { name = "Indirect"; value = dma_indirect(i); return true; }
+    if(id == n++) { name = "Reverse Transfer"; value = dma_reverse_transfer(i); return true; }
+    if(id == n++) { name = "Fixed Transfer"; value = dma_fixed_transfer(i); return true; }
+    if(id == n++) { name = "Transfer Mode"; value = dma_transfer_mode(i); return true; }
+
+    //$43x1
+    if(id == n++) { name = "B-Bus Address"; value = string::printf("0x%.4x", dma_bbus_address(i)); return true; }
+
+    //$43x2-$43x3
+    if(id == n++) { name = "A-Bus Address"; value = string::printf("0x%.4x", dma_abus_address(i)); return true; }
+
+    //$43x4
+    if(id == n++) { name = "A-Bus Bank"; value = string::printf("0x%.2x", dma_abus_bank(i)); return true; }
+
+    //$43x5-$43x6
+    if(id == n++) { name = "Transfer Size / Indirect Address"; value = string::printf("0x%.4x", dma_transfer_size(i)); return true; }
+
+    //$43x7
+    if(id == n++) { name = "Indirect Bank"; value = string::printf("0x%.2x", dma_indirect_bank(i)); return true; }
+
+    //$43x8-$43x9
+    if(id == n++) { name = "Table Address"; value = string::printf("0x%.4x", dma_table_address(i)); return true; }
+
+    //$43xa
+    if(id == n++) { name = "Line Counter"; value = string::printf("0x%.2x", dma_line_counter(i)); return true; }
+  }
 
   return false;
 }

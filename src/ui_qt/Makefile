@@ -3,7 +3,7 @@ objects += $(if $(call streq,$(platform),win),resource)
 link += $(qtlib)
 
 headers := $(call rwildcard,$(ui)/,%.hpp)
-moc_headers := $(call rwildcard,$(ui)/,%.moc.hpp)
+moc_headers := $(call rwildcard,lib/nall/qt/,%.moc.hpp) $(call rwildcard,$(ui)/,%.moc.hpp)
 moc_objects := $(foreach f,$(moc_headers),obj/$(notdir $(patsubst %.moc.hpp,%.moc,$f)))
 qt_compile = $(call compile,-Iobj $(qtinc))
 
@@ -22,7 +22,7 @@ $(foreach f,$(moc_objects), \
   $(eval $f: $(__file)) \
 )
 
-obj/ui-main.o: $(ui)/main.cpp $(headers) $(wildcard $(ui)/*.cpp) $(wildcard $(ui)/platform/*.cpp) $(wildcard $(ui)/utility/*.cpp); $(qt_compile)
+obj/ui-main.o: $(ui)/main.cpp $(headers) $(wildcard $(ui)/*.cpp) $(wildcard $(ui)/link/*.cpp) $(wildcard $(ui)/platform/*.cpp) $(wildcard $(ui)/utility/*.cpp); $(qt_compile)
 obj/ui-base.o: $(ui)/base/base.cpp $(headers) $(wildcard $(ui)/base/*.cpp); $(qt_compile)
 obj/ui-cartridge.o: $(ui)/cartridge/cartridge.cpp $(headers) $(wildcard $(ui)/cartridge/*.cpp); $(qt_compile)
 obj/ui-debugger.o: $(ui)/debugger/debugger.cpp $(headers) $(call rwildcard,$(ui)/debugger/,%.cpp); $(qt_compile)

@@ -126,6 +126,7 @@ Configuration::Configuration() {
   attach(geometry.htmlViewerWindow = "", "geometry.htmlViewerWindow");
   attach(geometry.aboutWindow      = "", "geometry.aboutWindow");
   attach(geometry.diskBrowser      = "", "geometry.diskBrowser");
+  attach(geometry.fileBrowser      = "", "geometry.fileBrowser");
   attach(geometry.folderCreator    = "", "geometry.folderCreator");
   attach(geometry.settingsWindow   = "", "geometry.settingsWindow");
   attach(geometry.toolsWindow      = "", "geometry.toolsWindow");

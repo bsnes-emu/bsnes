@@ -75,6 +75,7 @@ public:
     string htmlViewerWindow;
     string aboutWindow;
     string diskBrowser;
+    string fileBrowser;
     string folderCreator;
     string settingsWindow;
     string toolsWindow;

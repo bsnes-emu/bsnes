@@ -1,6 +1,8 @@
 include lib/nall/Makefile
+
+ui := ui_qt
+qtlibs := $(strip QtCore QtGui $(if $(findstring osx,$(platform)),QtOpenGL))
 include lib/nall/Makefile-qt
-ui = ui_qt
 
 ################
 ### compiler ###
@@ -56,21 +58,21 @@ endif
 ### ruby ###
 ############
 
-rubyflags := $(call ifhas,.sdl,$(ruby),`sdl-config --cflags`)
-rubyflags += $(call ifhas,.qt,$(ruby),$(qtinc))
+rubyflags := $(if $(finstring .sdl,$(ruby)),`sdl-config --cflags`)
+rubyflags += $(if $(findstring .qt,$(ruby)),$(qtinc))
 
-link += $(call ifhas,.sdl,$(ruby),`sdl-config --libs`)
-link += $(call ifhas,video.direct3d,$(ruby),-ld3d9)
-link += $(call ifhas,video.directdraw,$(ruby),-lddraw)
-link += $(call ifhas,video.glx,$(ruby),-lGL)
-link += $(call ifhas,video.wgl,$(ruby),-lopengl32)
-link += $(call ifhas,video.xv,$(ruby),-lXv)
-link += $(call ifhas,audio.alsa,$(ruby),-lasound)
-link += $(call ifhas,audio.ao,$(ruby),-lao)
-link += $(call ifhas,audio.directsound,$(ruby),-ldsound)
-link += $(call ifhas,audio.pulseaudio,$(ruby),-lpulse-simple)
-link += $(call ifhas,input.directinput,$(ruby),-ldinput8 -ldxguid)
-link += $(call ifhas,input.rawinput,$(ruby),-ldinput8 -ldxguid)
+link += $(if $(findstring .sdl,$(ruby)),`sdl-config --libs`)
+link += $(if $(findstring video.direct3d,$(ruby)),-ld3d9)
+link += $(if $(findstring video.directdraw,$(ruby)),-lddraw)
+link += $(if $(findstring video.glx,$(ruby)),-lGL)
+link += $(if $(findstring video.wgl,$(ruby)),-lopengl32)
+link += $(if $(findstring video.xv,$(ruby)),-lXv)
+link += $(if $(findstring audio.alsa,$(ruby)),-lasound)
+link += $(if $(findstring audio.ao,$(ruby)),-lao)
+link += $(if $(findstring audio.directsound,$(ruby)),-ldsound)
+link += $(if $(findstring audio.pulseaudio,$(ruby)),-lpulse-simple)
+link += $(if $(findstring input.directinput,$(ruby)),-ldinput8 -ldxguid)
+link += $(if $(findstring input.rawinput,$(ruby)),-ldinput8 -ldxguid)
 
 ###############
 ### objects ###
@@ -147,7 +149,7 @@ obj/ssmp.o   : smp/ssmp/ssmp.cpp $(call rwildcard,smp/ssmp/)
 ### dsp ###
 ###########
 
-obj/dsp.o:  dsp/dsp.cpp dsp/*
+obj/dsp.o : dsp/dsp.cpp dsp/*
 obj/adsp.o: dsp/adsp/adsp.cpp dsp/adsp/*
 obj/sdsp.o: dsp/sdsp/sdsp.cpp dsp/sdsp/*
 

@@ -1,5 +1,8 @@
 # requires nall/Makefile
 
+# imports:
+# $(qtlibs) -- list of Qt components to link against
+
 # exports the following symbols:
 # $(moc)   -- meta-object compiler
 # $(rcc)   -- resource compiler
@@ -15,17 +18,13 @@ rcc := rcc
 endif
 
 ifeq ($(platform),x)
-  qtinc := `pkg-config --cflags QtCore QtGui`
-  qtlib := `pkg-config --libs QtCore QtGui`
+  qtinc := `pkg-config --cflags $(qtlibs)`
+  qtlib := `pkg-config --libs $(qtlibs)`
 else ifeq ($(platform),osx)
-  qtinc := -I/Library/Frameworks/QtCore.framework/Versions/4/Headers
-  qtinc += -I/Library/Frameworks/QtGui.framework/Versions/4/Headers
-  qtinc += -I/Library/Frameworks/QtOpenGL.framework/Versions/4/Headers
+  qtinc := $(foreach lib,$(qtlibs),-I/Library/Frameworks/$(lib).framework/Versions/4/Headers
 
   qtlib := -L/Library/Frameworks
-  qtlib += -framework QtCore
-  qtlib += -framework QtGui
-  qtlib += -framework QtOpenGL
+  qtlib += $(foreach lib,$(qtlibs),-framework $(lib))
   qtlib += -framework Carbon
   qtlib += -framework Cocoa
   qtlib += -framework OpenGL
@@ -41,14 +40,15 @@ else ifeq ($(platform),win)
   endif
 
   qtinc := -I$(qtpath)/include
-  qtinc += -I$(qtpath)/include/QtCore
-  qtinc += -I$(qtpath)/include/QtGui
+  qtinc += $(foreach lib,$(qtlibs),-I$(qtpath)/include/$(lib))
 
   qtlib := -L$(qtpath)/lib
   qtlib += -L$(qtpath)/plugins/imageformats
 
-  qtlib += -lmingw32 -lqtmain -lQtGui4 -lcomdlg32 -loleaut32 -limm32 -lwinmm
-  qtlib += -lwinspool -lmsimg32 -lQtCore4 -lole32 -ladvapi32 -lws2_32 -luuid -lgdi32
+  qtlib += $(foreach lib,$(qtlibs),-l$(lib)4)
+  qtlib += -lmingw32 -lqtmain -lcomdlg32 -loleaut32 -limm32 -lwinmm
+  qtlib += -lwinspool -lmsimg32 -lole32 -ladvapi32 -lws2_32 -luuid -lgdi32
+  qtlib += $(foreach lib,$(qtlibs),-l$(lib)4)
 
   # optional image-file support:
   # qtlib += -lqjpeg -lqmng

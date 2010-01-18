@@ -15,6 +15,7 @@
 #include <nall/config.hpp>
 #include <nall/input.hpp>
 #include <nall/ups.hpp>
+#include <nall/qt/file-dialog.moc.hpp>
 using namespace nall;
 
 #include <ruby/ruby.hpp>
@@ -27,6 +28,7 @@ using namespace ruby;
 
 #include "base/about.moc.hpp"
 #include "base/diskbrowser.moc.hpp"
+#include "base/filebrowser.moc.hpp"
 #include "base/htmlviewer.moc.hpp"
 #include "base/loader.moc.hpp"
 #include "base/main.moc.hpp"

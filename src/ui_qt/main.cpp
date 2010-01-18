@@ -22,6 +22,8 @@ const char defaultStylesheet[] =
   "  background: #000000;"
   "}\n";
 
+#include "file-dialog.moc"
+
 #include "application/application.cpp"
 #include "link/filter.cpp"
 #include "link/reader.cpp"

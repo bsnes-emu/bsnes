@@ -29,7 +29,11 @@ ifeq ($(platform),)
 endif
 
 ifeq ($(compiler),)
-  compiler := gcc
+  ifeq ($(platform),osx)
+    compiler := gcc-4.2
+  else
+    compiler := gcc
+  endif
 endif
 
 ifeq ($(prefix),)
@@ -101,9 +105,3 @@ streq = $(if $(filter-out xx,x$(subst $1,,$2)$(subst $2,,$1)x),,1)
 # function strne(source)
 #####
 strne = $(if $(filter-out xx,x$(subst $1,,$2)$(subst $2,,$1)x),1,)
-
-#####
-# function ifhas(needle, haystack, true, false)
-#####
-ifhas = $(if $(findstring $1,$2),$3,$4)
-

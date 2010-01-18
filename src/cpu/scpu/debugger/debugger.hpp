@@ -59,6 +59,40 @@ public:
   //$4209-$420a
   unsigned vtime();
 
+  //$420b
+  unsigned dma_enable();
+
+  //$420c
+  unsigned hdma_enable();
+
   //$420d
   bool fastrom_enable();
+
+  //$43x0
+  bool dma_direction(unsigned);
+  bool dma_indirect(unsigned);
+  bool dma_reverse_transfer(unsigned);
+  bool dma_fixed_transfer(unsigned);
+  unsigned dma_transfer_mode(unsigned);
+
+  //$43x1
+  unsigned dma_bbus_address(unsigned);
+
+  //$43x2-$43x3
+  unsigned dma_abus_address(unsigned);
+
+  //$43x4
+  unsigned dma_abus_bank(unsigned);
+
+  //$43x5-$43x6
+  unsigned dma_transfer_size(unsigned);
+
+  //$43x7
+  unsigned dma_indirect_bank(unsigned);
+
+  //$43x8-$43x9
+  unsigned dma_table_address(unsigned);
+
+  //$43xa
+  unsigned dma_line_counter(unsigned);
 };

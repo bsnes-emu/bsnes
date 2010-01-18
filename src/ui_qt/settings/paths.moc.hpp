@@ -12,7 +12,7 @@ public:
   string &pathValue;
   string pathDefaultLabel;
   string pathBrowseLabel;
-  void assignPath(string);
+  void acceptPath(const string&);
   void updatePath();
 
   PathSettingWidget(string&, const char*, const char*, const char*);
