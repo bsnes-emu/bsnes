@@ -52,7 +52,7 @@ void PropertiesViewer::refresh() {
 }
 
 void PropertiesViewer::show() {
-  QbWindow::show();
+  Window::show();
   refresh();
 }
 
@@ -60,9 +60,11 @@ void PropertiesViewer::autoUpdate() {
   if(autoUpdateBox->isChecked()) refresh();
 }
 
-PropertiesViewer::PropertiesViewer() : QbWindow(config().geometry.propertiesViewer) {
+PropertiesViewer::PropertiesViewer() {
   setObjectName("properties-viewer");
   setWindowTitle("Properties");
+  setGeometryString(&config().geometry.propertiesViewer);
+  application.windowList.add(this);
 
   layout = new QVBoxLayout;
   layout->setMargin(Style::WindowMargin);

@@ -50,32 +50,42 @@ void PixelShaderWindow::synchronize() {
 }
 
 void PixelShaderWindow::selectFragmentShader() {
-  diskBrowser->chooseFile(
-    bind(&PixelShaderWindow::assignFragmentShader, this),
-    config().path.current.shader,
-    "Select Fragment Shader"
-  );
+  fileBrowser->onChange = (void*)0;
+  fileBrowser->onActivate = bind(&PixelShaderWindow::assignFragmentShader, this);
+  fileBrowser->onAccept = bind(&PixelShaderWindow::assignFragmentShader, this);
+  fileBrowser->setWindowTitle("Select Fragment Shader");
+  fileBrowser->setPath(config().path.current.shader);
+  fileBrowser->setNameFilters("All files (*)");
+  fileBrowser->showLoad();
 }
 
 void PixelShaderWindow::selectVertexShader() {
-  diskBrowser->chooseFile(
-    bind(&PixelShaderWindow::assignVertexShader, this),
-    config().path.current.shader,
-    "Select Vertex Shader"
-  );
+  fileBrowser->onChange = (void*)0;
+  fileBrowser->onActivate = bind(&PixelShaderWindow::assignVertexShader, this);
+  fileBrowser->onAccept = bind(&PixelShaderWindow::assignVertexShader, this);
+  fileBrowser->setWindowTitle("Select Vertex Shader");
+  fileBrowser->setPath(config().path.current.shader);
+  fileBrowser->setNameFilters("All files (*)");
+  fileBrowser->showLoad();
 }
 
 void PixelShaderWindow::defaultFragmentShader() { assignFragmentShader(""); }
 void PixelShaderWindow::defaultVertexShader() { assignVertexShader(""); }
 
-void PixelShaderWindow::assignFragmentShader(string filename) {
-  config().path.fragmentShader = filename;
-  synchronize();
-  utility.updatePixelShader();
+void PixelShaderWindow::assignFragmentShader(const string &filename) {
+  if(filename == "" || QDir(filename).exists() == false) {
+    config().path.fragmentShader = filename;
+    if(filename != "") config().path.current.shader = dir(filename);
+    synchronize();
+    utility.updatePixelShader();
+  }
 }
 
-void PixelShaderWindow::assignVertexShader(string filename) {
-  config().path.vertexShader = filename;
-  synchronize();
-  utility.updatePixelShader();
+void PixelShaderWindow::assignVertexShader(const string &filename) {
+  if(filename == "" || QDir(filename).exists() == false) {
+    config().path.vertexShader = filename;
+    if(filename != "") config().path.current.shader = dir(filename);
+    synchronize();
+    utility.updatePixelShader();
+  }
 }

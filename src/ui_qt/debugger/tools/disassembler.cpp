@@ -31,9 +31,11 @@ SMPDisassembler::SMPDisassembler() {
   layout->addWidget(view);
 }
 
-Disassembler::Disassembler() : QbWindow(config().geometry.disassembler) {
+Disassembler::Disassembler() {
   setObjectName("disassembler");
   setWindowTitle("Disassembler");
+  setGeometryString(&config().geometry.disassembler);
+  application.windowList.add(this);
 
   layout = new QVBoxLayout;
   layout->setMargin(Style::WindowMargin);

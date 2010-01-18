@@ -17,7 +17,7 @@ private:
   const unsigned id;
 };
 
-class BreakpointEditor : public QbWindow {
+class BreakpointEditor : public Window {
   Q_OBJECT
 
 public:

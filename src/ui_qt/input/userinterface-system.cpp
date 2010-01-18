@@ -4,7 +4,8 @@ namespace UserInterfaceSystem {
 
 struct LoadCartridge : HotkeyInput {
   void pressed() {
-    diskBrowser->loadCartridge();
+    fileBrowser->setWindowTitle("Load Cartridge");
+    fileBrowser->loadCartridge(FileBrowser::LoadDirect);
   }
 
   LoadCartridge() : HotkeyInput("Load Cartridge", "input.userInterface.system.loadCartridge") {

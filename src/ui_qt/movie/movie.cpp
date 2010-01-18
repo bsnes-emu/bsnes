@@ -3,14 +3,19 @@
 Movie movie;
 
 void Movie::chooseFile() {
-  diskBrowser->chooseFile(
-    bind(&Movie::play, this),
-    config().path.current.movie,
-    "Select Movie"
-  );
+  fileBrowser->onChange = (void*)0;
+  fileBrowser->onActivate = bind(&Movie::play, this);
+  fileBrowser->onChange = bind(&Movie::play, this);
+  fileBrowser->setWindowTitle("Select Movie");
+  fileBrowser->setPath(config().path.current.movie);
+  fileBrowser->setNameFilters("bsnes Movies (*.bsv)");
+  fileBrowser->showLoad();
 }
 
-void Movie::play(string filename) {
+void Movie::play(const string &filename) {
+  if(QDir(filename).exists()) return;  //ignore folders
+  config().path.current.movie = dir(filename);
+
   if(Movie::state != Inactive) stop();
 
   if(fp.open(filename, file::mode_read)) {

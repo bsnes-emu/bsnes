@@ -10,10 +10,12 @@
 #include "settings.moc"
 SettingsWindow *settingsWindow;
 
-SettingsWindow::SettingsWindow() : QbWindow(config().geometry.settingsWindow) {
+SettingsWindow::SettingsWindow() {
   setObjectName("settings-window");
   setWindowTitle("Configuration Settings");
   resize(600, 360);
+  setGeometryString(&config().geometry.settingsWindow);
+  application.windowList.add(this);
 
   layout = new QVBoxLayout;
   layout->setMargin(Style::WindowMargin);

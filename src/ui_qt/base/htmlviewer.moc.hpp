@@ -1,4 +1,4 @@
-class HtmlViewerWindow : public QbWindow {
+class HtmlViewerWindow : public Window {
   Q_OBJECT
 
 public:

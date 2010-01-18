@@ -22,8 +22,8 @@ public slots:
   void defaultFragmentShader();
   void defaultVertexShader();
 
-  void assignFragmentShader(string);
-  void assignVertexShader(string);
+  void assignFragmentShader(const string&);
+  void assignVertexShader(const string&);
 };
 
 extern PixelShaderWindow *pixelShaderWindow;

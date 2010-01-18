@@ -1,4 +1,4 @@
-class OamViewer : public QbWindow {
+class OamViewer : public Window {
   Q_OBJECT
 
 public:

@@ -1,4 +1,4 @@
-class SettingsWindow : public QbWindow {
+class SettingsWindow : public Window {
   Q_OBJECT
 
 public:

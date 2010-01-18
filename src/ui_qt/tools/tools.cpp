@@ -7,10 +7,12 @@ ToolsWindow *toolsWindow;
 #include "cheatfinder.cpp"
 #include "statemanager.cpp"
 
-ToolsWindow::ToolsWindow() : QbWindow(config().geometry.toolsWindow) {
+ToolsWindow::ToolsWindow() {
   setObjectName("tools-window");
   setWindowTitle("Tools");
   resize(600, 360);
+  setGeometryString(&config().geometry.toolsWindow);
+  application.windowList.add(this);
 
   layout = new QVBoxLayout;
   layout->setMargin(Style::WindowMargin);

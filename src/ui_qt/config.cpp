@@ -73,9 +73,6 @@ Configuration::Configuration() {
   attach(path.current.movie     = "", "path.current.movie");
   attach(path.current.shader    = "", "path.current.shader");
   attach(path.current.cartridge = "", "path.current.cartridge");
-  attach(path.current.bsx       = "", "path.current.bsx");
-  attach(path.current.st        = "", "path.current.st");
-  attach(path.current.sgb       = "", "path.current.sgb");
   attach(path.current.filter    = 0,  "path.current.filter");
 
   video.context = &video.windowed;
@@ -125,7 +122,6 @@ Configuration::Configuration() {
   attach(geometry.loaderWindow     = "", "geometry.loaderWindow");
   attach(geometry.htmlViewerWindow = "", "geometry.htmlViewerWindow");
   attach(geometry.aboutWindow      = "", "geometry.aboutWindow");
-  attach(geometry.diskBrowser      = "", "geometry.diskBrowser");
   attach(geometry.fileBrowser      = "", "geometry.fileBrowser");
   attach(geometry.folderCreator    = "", "geometry.folderCreator");
   attach(geometry.settingsWindow   = "", "geometry.settingsWindow");

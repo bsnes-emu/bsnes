@@ -35,6 +35,7 @@ PathSettingWidget::PathSettingWidget(string &pathValue_, const char *labelText, 
 void PathSettingWidget::acceptPath(const string &newPath) {
   fileBrowser->close();
   pathValue = string() << newPath << "/";
+  config().path.current.folder = dir(pathValue);
   updatePath();
 }
 

@@ -2,7 +2,6 @@
 Application application;
 
 #include "init.cpp"
-#include "qb.cpp"
 
 void Application::initPaths(const char *basename) {
   char temp[PATH_MAX];
@@ -85,9 +84,9 @@ int Application::main(int &argc, char **argv) {
   timer->start(0);
   app->exec();
 
-  //QbWindow::hide() saves window geometry for next run
+  //QbWindow::close() saves window geometry for next run
   for(unsigned i = 0; i < windowList.size(); i++) {
-    windowList[i]->hide();
+    windowList[i]->close();
   }
 
   cartridge.unload();

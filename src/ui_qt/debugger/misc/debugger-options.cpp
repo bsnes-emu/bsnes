@@ -1,9 +1,11 @@
 #include "debugger-options.moc"
 DebuggerOptions *debuggerOptions;
 
-DebuggerOptions::DebuggerOptions() : QbWindow(config().geometry.debuggerOptions) {
+DebuggerOptions::DebuggerOptions() {
   setObjectName("debugger-options");
   setWindowTitle("Debugger Options");
+  setGeometryString(&config().geometry.debuggerOptions);
+  application.windowList.add(this);
 
   layout = new QVBoxLayout;
   layout->setSizeConstraint(QLayout::SetFixedSize);

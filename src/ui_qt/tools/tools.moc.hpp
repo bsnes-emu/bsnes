@@ -1,4 +1,4 @@
-class ToolsWindow : public QbWindow {
+class ToolsWindow : public Window {
   Q_OBJECT
 
 public:

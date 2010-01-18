@@ -61,9 +61,11 @@ void BreakpointItem::toggle() {
   }
 }
 
-BreakpointEditor::BreakpointEditor() : QbWindow(config().geometry.breakpointEditor) {
+BreakpointEditor::BreakpointEditor() {
   setObjectName("breakpoint-editor");
   setWindowTitle("Breakpoint Editor");
+  setGeometryString(&config().geometry.breakpointEditor);
+  application.windowList.add(this);
 
   layout = new QVBoxLayout;
   layout->setSizeConstraint(QLayout::SetFixedSize);

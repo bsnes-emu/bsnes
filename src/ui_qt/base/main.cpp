@@ -1,10 +1,12 @@
 #include "main.moc"
 MainWindow *mainWindow;
 
-MainWindow::MainWindow() : QbWindow(config().geometry.mainWindow) {
+MainWindow::MainWindow() {
   setObjectName("main-window");
   setWindowTitle(string() << bsnesTitle << " v" << bsnesVersion);
   setCloseOnEscape(false);
+  setGeometryString(&config().geometry.mainWindow);
+  application.windowList.add(this);
 
   //menu bar
   #if defined(PLATFORM_OSX)
@@ -35,7 +37,7 @@ MainWindow::MainWindow() : QbWindow(config().geometry.mainWindow) {
 
   system->addSeparator();
 
-  system->addAction(system_power = new QbCheckAction("&Power", 0));
+  system->addAction(system_power = new CheckAction("&Power", 0));
 
   system_reset = system->addAction("&Reset");
   system_reset->setIcon(QIcon(":/16x16/view-refresh.png"));
@@ -44,22 +46,22 @@ MainWindow::MainWindow() : QbWindow(config().geometry.mainWindow) {
 
   system_port1 = system->addMenu("Controller Port &1");
   system_port1->setIcon(QIcon(":/16x16/input-gaming.png"));
-  system_port1->addAction(system_port1_none = new QbRadioAction("&None", 0));
-  system_port1->addAction(system_port1_gamepad = new QbRadioAction("&Gamepad", 0));
-  system_port1->addAction(system_port1_asciipad = new QbRadioAction("&asciiPad", 0));
-  system_port1->addAction(system_port1_multitap = new QbRadioAction("&Multitap", 0));
-  system_port1->addAction(system_port1_mouse = new QbRadioAction("&Mouse", 0));
+  system_port1->addAction(system_port1_none = new RadioAction("&None", 0));
+  system_port1->addAction(system_port1_gamepad = new RadioAction("&Gamepad", 0));
+  system_port1->addAction(system_port1_asciipad = new RadioAction("&asciiPad", 0));
+  system_port1->addAction(system_port1_multitap = new RadioAction("&Multitap", 0));
+  system_port1->addAction(system_port1_mouse = new RadioAction("&Mouse", 0));
 
   system_port2 = system->addMenu("Controller Port &2");
   system_port2->setIcon(QIcon(":/16x16/input-gaming.png"));
-  system_port2->addAction(system_port2_none = new QbRadioAction("&None", 0));
-  system_port2->addAction(system_port2_gamepad = new QbRadioAction("&Gamepad", 0));
-  system_port2->addAction(system_port2_asciipad = new QbRadioAction("&asciiPad", 0));
-  system_port2->addAction(system_port2_multitap = new QbRadioAction("&Multitap", 0));
-  system_port2->addAction(system_port2_mouse = new QbRadioAction("&Mouse", 0));
-  system_port2->addAction(system_port2_superscope = new QbRadioAction("&Super Scope", 0));
-  system_port2->addAction(system_port2_justifier = new QbRadioAction("&Justifier", 0));
-  system_port2->addAction(system_port2_justifiers = new QbRadioAction("Two &Justifiers", 0));
+  system_port2->addAction(system_port2_none = new RadioAction("&None", 0));
+  system_port2->addAction(system_port2_gamepad = new RadioAction("&Gamepad", 0));
+  system_port2->addAction(system_port2_asciipad = new RadioAction("&asciiPad", 0));
+  system_port2->addAction(system_port2_multitap = new RadioAction("&Multitap", 0));
+  system_port2->addAction(system_port2_mouse = new RadioAction("&Mouse", 0));
+  system_port2->addAction(system_port2_superscope = new RadioAction("&Super Scope", 0));
+  system_port2->addAction(system_port2_justifier = new RadioAction("&Justifier", 0));
+  system_port2->addAction(system_port2_justifiers = new RadioAction("Two &Justifiers", 0));
 
   #if !defined(PLATFORM_OSX)
   system->addSeparator();
@@ -74,24 +76,24 @@ MainWindow::MainWindow() : QbWindow(config().geometry.mainWindow) {
   settings_videoMode = settings->addMenu("Video &Mode");
   settings_videoMode->setIcon(QIcon(":/16x16/video-display.png"));
 
-  settings_videoMode->addAction(settings_videoMode_1x = new QbRadioAction("Scale &1x", 0));
+  settings_videoMode->addAction(settings_videoMode_1x = new RadioAction("Scale &1x", 0));
 
-  settings_videoMode->addAction(settings_videoMode_2x = new QbRadioAction("Scale &2x", 0));
+  settings_videoMode->addAction(settings_videoMode_2x = new RadioAction("Scale &2x", 0));
 
-  settings_videoMode->addAction(settings_videoMode_3x = new QbRadioAction("Scale &3x", 0));
+  settings_videoMode->addAction(settings_videoMode_3x = new RadioAction("Scale &3x", 0));
 
-  settings_videoMode->addAction(settings_videoMode_4x = new QbRadioAction("Scale &4x", 0));
+  settings_videoMode->addAction(settings_videoMode_4x = new RadioAction("Scale &4x", 0));
 
-  settings_videoMode->addAction(settings_videoMode_5x = new QbRadioAction("Scale &5x", 0));
-
-  settings_videoMode->addSeparator();
-
-  settings_videoMode->addAction(settings_videoMode_correctAspectRatio = new QbCheckAction("Correct &Aspect Ratio", 0));
+  settings_videoMode->addAction(settings_videoMode_5x = new RadioAction("Scale &5x", 0));
 
   settings_videoMode->addSeparator();
 
-  settings_videoMode->addAction(settings_videoMode_ntsc = new QbRadioAction("&NTSC", 0));
-  settings_videoMode->addAction(settings_videoMode_pal = new QbRadioAction("&PAL", 0));
+  settings_videoMode->addAction(settings_videoMode_correctAspectRatio = new CheckAction("Correct &Aspect Ratio", 0));
+
+  settings_videoMode->addSeparator();
+
+  settings_videoMode->addAction(settings_videoMode_ntsc = new RadioAction("&NTSC", 0));
+  settings_videoMode->addAction(settings_videoMode_pal = new RadioAction("&PAL", 0));
 
   if(filter.opened()) {
     settings_videoFilter = settings->addMenu("Video &Filter");
@@ -101,44 +103,44 @@ MainWindow::MainWindow() : QbWindow(config().geometry.mainWindow) {
     settings_videoFilter_configure->setIcon(QIcon(":/16x16/preferences-desktop.png"));
     settings_videoFilter->addSeparator();
 
-    settings_videoFilter->addAction(settings_videoFilter_none = new QbRadioAction("&None", 0));
+    settings_videoFilter->addAction(settings_videoFilter_none = new RadioAction("&None", 0));
     settings_videoFilter_list.add(settings_videoFilter_none);
 
     lstring filterlist;
     filterlist.split(";", filter.dl_supported());
     for(unsigned i = 0; i < filterlist.size(); i++) {
-      QbRadioAction *action = new QbRadioAction(filterlist[i], 0);
+      RadioAction *action = new RadioAction(filterlist[i], 0);
       settings_videoFilter->addAction(action);
       settings_videoFilter_list.add(action);
     }
   }
 
-  settings->addAction(settings_smoothVideo = new QbCheckAction("&Smooth Video Output", 0));
+  settings->addAction(settings_smoothVideo = new CheckAction("&Smooth Video Output", 0));
 
   settings->addSeparator();
 
-  settings->addAction(settings_muteAudio = new QbCheckAction("&Mute Audio Output", 0));
+  settings->addAction(settings_muteAudio = new CheckAction("&Mute Audio Output", 0));
 
   settings->addSeparator();
 
   settings_emulationSpeed = settings->addMenu("Emulation &Speed");
   settings_emulationSpeed->setIcon(QIcon(":/16x16/appointment-new.png"));
 
-  settings_emulationSpeed->addAction(settings_emulationSpeed_slowest = new QbRadioAction("Slowest", 0));
+  settings_emulationSpeed->addAction(settings_emulationSpeed_slowest = new RadioAction("Slowest", 0));
 
-  settings_emulationSpeed->addAction(settings_emulationSpeed_slow = new QbRadioAction("Slow", 0));
+  settings_emulationSpeed->addAction(settings_emulationSpeed_slow = new RadioAction("Slow", 0));
 
-  settings_emulationSpeed->addAction(settings_emulationSpeed_normal = new QbRadioAction("Normal", 0));
+  settings_emulationSpeed->addAction(settings_emulationSpeed_normal = new RadioAction("Normal", 0));
 
-  settings_emulationSpeed->addAction(settings_emulationSpeed_fast = new QbRadioAction("Fast", 0));
+  settings_emulationSpeed->addAction(settings_emulationSpeed_fast = new RadioAction("Fast", 0));
 
-  settings_emulationSpeed->addAction(settings_emulationSpeed_fastest = new QbRadioAction("Fastest", 0));
+  settings_emulationSpeed->addAction(settings_emulationSpeed_fastest = new RadioAction("Fastest", 0));
 
   settings_emulationSpeed->addSeparator();
 
-  settings_emulationSpeed->addAction(settings_emulationSpeed_syncVideo = new QbCheckAction("Sync &Video", 0));
+  settings_emulationSpeed->addAction(settings_emulationSpeed_syncVideo = new CheckAction("Sync &Video", 0));
 
-  settings_emulationSpeed->addAction(settings_emulationSpeed_syncAudio = new QbCheckAction("Sync &Audio", 0));
+  settings_emulationSpeed->addAction(settings_emulationSpeed_syncAudio = new CheckAction("Sync &Audio", 0));
 
   settings_configuration = settings->addAction("&Configuration ...");
   settings_configuration->setIcon(QIcon(":/16x16/preferences-desktop.png"));
@@ -367,7 +369,8 @@ bool MainWindow::isActive() {
 }
 
 void MainWindow::loadCartridge() {
-  fileBrowser->loadCartridge();
+  fileBrowser->setWindowTitle("Load Cartridge");
+  fileBrowser->loadCartridge(FileBrowser::LoadDirect);
 }
 
 void MainWindow::loadBsxSlottedCartridge() {
@@ -587,7 +590,7 @@ void MainWindow::showAbout() {
 }
 
 void MainWindow::closeEvent(QCloseEvent *event) {
-  QbWindow::closeEvent(event);
+  Window::closeEvent(event);
   quit();
 }
 

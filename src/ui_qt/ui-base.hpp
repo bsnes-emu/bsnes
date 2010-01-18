@@ -15,7 +15,11 @@
 #include <nall/config.hpp>
 #include <nall/input.hpp>
 #include <nall/ups.hpp>
+#include <nall/qt/check-action.moc.hpp>
 #include <nall/qt/file-dialog.moc.hpp>
+#include <nall/qt/hex-editor.moc.hpp>
+#include <nall/qt/radio-action.moc.hpp>
+#include <nall/qt/window.moc.hpp>
 using namespace nall;
 
 #include <ruby/ruby.hpp>
@@ -27,7 +31,6 @@ using namespace ruby;
 #include "application/application.moc.hpp"
 
 #include "base/about.moc.hpp"
-#include "base/diskbrowser.moc.hpp"
 #include "base/filebrowser.moc.hpp"
 #include "base/htmlviewer.moc.hpp"
 #include "base/loader.moc.hpp"
@@ -37,7 +40,6 @@ using namespace ruby;
 
 #if defined(DEBUGGER)
   #include "debugger/debugger.moc.hpp"
-  #include "debugger/hexeditor.moc.hpp"
   #include "debugger/tracer.moc.hpp"
 
   #include "debugger/tools/disassembler.moc.hpp"

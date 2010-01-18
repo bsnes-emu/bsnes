@@ -1,9 +1,11 @@
 #include "htmlviewer.moc"
 HtmlViewerWindow *htmlViewerWindow;
 
-HtmlViewerWindow::HtmlViewerWindow() : QbWindow(config().geometry.htmlViewerWindow) {
+HtmlViewerWindow::HtmlViewerWindow() {
   setObjectName("html-window");
   resize(560, 480);
+  setGeometryString(&config().geometry.htmlViewerWindow);
+  application.windowList.add(this);
 
   layout = new QVBoxLayout;
   layout->setMargin(Style::WindowMargin);
@@ -17,5 +19,5 @@ HtmlViewerWindow::HtmlViewerWindow() : QbWindow(config().geometry.htmlViewerWind
 void HtmlViewerWindow::show(const char *title, const char *htmlData) {
   document->setHtml(string() << htmlData);
   setWindowTitle(title);
-  QbWindow::show();
+  Window::show();
 }

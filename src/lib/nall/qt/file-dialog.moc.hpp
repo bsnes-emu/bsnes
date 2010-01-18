@@ -2,6 +2,7 @@
 #define NALL_QT_FILEDIALOG_HPP
 
 #include <nall/string.hpp>
+#include <nall/qt/window.moc.hpp>
 
 namespace nall {
 
@@ -19,16 +20,14 @@ protected slots:
   void currentChanged(const QModelIndex&, const QModelIndex&);
 };
 
-class FileDialog : public QWidget {
+class FileDialog : public Window {
   Q_OBJECT
 
 public:
   void showLoad();
-  void showOpen();
   void showSave();
   void showFolder();
 
-  void rejectSignal();
   void setPath(string path);
   void setNameFilters(const string &filters);
   FileDialog();
@@ -66,7 +65,6 @@ protected:
   QPushButton *rejectButton;
 
   bool lock;
-  bool signalRejected;
 };
 
 inline void FileView::currentChanged(const QModelIndex &current, const QModelIndex &previous) {
@@ -98,13 +96,6 @@ inline void FileDialog::showLoad() {
   show();
 }
 
-inline void FileDialog::showOpen() {
-  acceptButton->setText("Open");
-  fileNameEdit->hide();
-  filterBox->show();
-  show();
-}
-
 inline void FileDialog::showSave() {
   acceptButton->setText("Save");
   fileNameEdit->show();
@@ -122,20 +113,19 @@ inline void FileDialog::showFolder() {
 
 inline void FileDialog::fileViewChange(const QModelIndex &index) {
   string path = fileSystemModel->filePath(index).toUtf8().constData();
-  fileNameEdit->setText(path);
+  if(path == fileSystemModel->rootPath().toUtf8().constData()) path = "";
+  fileNameEdit->setText(notdir(path));
   emit changed(path);
 }
 
 inline void FileDialog::fileViewActivate(const QModelIndex &index) {
   string path = fileSystemModel->filePath(index).toUtf8().constData();
   if(fileSystemModel->isDir(index)) {
-    signalRejected = false;
     emit activated(path);
-    if(signalRejected == false) setPath(path);
+    setPath(path);
   } else {
-    signalRejected = false;
     emit activated(path);
-    if(signalRejected == false) close();
+    close();
   }
 }
 
@@ -165,10 +155,6 @@ inline void FileDialog::browseUp() {
   if(pathBox->count() > 1) pathBox->setCurrentIndex(1);
 }
 
-inline void FileDialog::rejectSignal() {
-  signalRejected = true;
-}
-
 inline void FileDialog::setPath(string path) {
   lock = true;
 
@@ -194,6 +180,7 @@ inline void FileDialog::setPath(string path) {
     }
   }
   pathBox->addItem("<root>");
+  fileNameEdit->setText("");
 
   lock = false;
 }
@@ -214,15 +201,15 @@ inline void FileDialog::setNameFilters(const string &filters) {
 }
 
 inline void FileDialog::acceptAction() {
-  string path = fileNameEdit->text().toUtf8().constData();
+  string path = fileSystemModel->rootPath().toUtf8().constData();
+  path << "/" << notdir(fileNameEdit->text().toUtf8().constData());
+  rtrim(path, "/");
   if(QDir(path).exists()) {
-    signalRejected = false;
     emit accepted(path);
-    if(signalRejected == false) setPath(path);
+    setPath(path);
   } else {
-    signalRejected = false;
     emit accepted(path);
-    if(signalRejected == false) close();
+    close();
   }
 }
 

@@ -1,4 +1,4 @@
-class VramViewer : public QbWindow {
+class VramViewer : public Window {
   Q_OBJECT
 
 public:

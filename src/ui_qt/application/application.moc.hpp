@@ -1,5 +1,3 @@
-#include "qb.hpp"
-
 class Application : public QObject {
   Q_OBJECT
 
@@ -29,7 +27,7 @@ public:
   string configFilename;
   string styleSheetFilename;
 
-  array<QbWindow*> windowList;
+  array<QWidget*> windowList;
 
   int main(int &argc, char **argv);
   void locateFile(string &filename, bool createDataDirectory = false);

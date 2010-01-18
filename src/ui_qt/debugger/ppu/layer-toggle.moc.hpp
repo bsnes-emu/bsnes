@@ -1,4 +1,4 @@
-class LayerToggle : public QbWindow {
+class LayerToggle : public Window {
   Q_OBJECT
 
 public:

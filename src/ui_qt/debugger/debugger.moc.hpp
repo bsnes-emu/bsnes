@@ -1,4 +1,4 @@
-class Debugger : public QbWindow {
+class Debugger : public Window {
   Q_OBJECT
 
 public:

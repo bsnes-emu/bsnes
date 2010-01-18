@@ -7,7 +7,8 @@ public:
   function<void (const string&)> onAccept;
 
   void chooseFolder();
-  void loadCartridge();
+  enum CartridgeMode { LoadDirect, LoadBase, LoadSlot1, LoadSlot2 } cartridgeMode;
+  void loadCartridge(CartridgeMode, signed = -1);
 
   FileBrowser();
 
@@ -21,6 +22,7 @@ private:
   QVBoxLayout *previewLayout;
   QLabel *previewInfo;
   QWidget *previewImage;
+  QWidget *previewSpacer;
   QCheckBox *previewApplyPatch;
 
   string resolveFilename(const string&);

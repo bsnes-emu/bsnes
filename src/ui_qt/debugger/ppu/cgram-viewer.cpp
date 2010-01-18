@@ -2,7 +2,7 @@
 CgramViewer *cgramViewer;
 
 void CgramViewer::show() {
-  QbWindow::show();
+  Window::show();
   refresh();
 }
 
@@ -75,11 +75,13 @@ void CgramViewer::setSelection(unsigned index) {
   refresh();
 }
 
-CgramViewer::CgramViewer() : QbWindow(config().geometry.cgramViewer) {
-  currentSelection = 0;
-
+CgramViewer::CgramViewer() {
   setObjectName("cgram-viewer");
   setWindowTitle("Palette Viewer");
+  setGeometryString(&config().geometry.cgramViewer);
+  application.windowList.add(this);
+
+  currentSelection = 0;
 
   layout = new QHBoxLayout;
   layout->setSizeConstraint(QLayout::SetFixedSize);

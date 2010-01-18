@@ -27,7 +27,6 @@ void Application::init() {
   loaderWindow = new LoaderWindow;
   htmlViewerWindow = new HtmlViewerWindow;
   aboutWindow = new AboutWindow;
-  diskBrowser = new DiskBrowser;
   fileBrowser = new FileBrowser;
 
   //window must be onscreen and visible before initializing video interface

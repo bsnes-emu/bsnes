@@ -6,12 +6,12 @@ void FileBrowser::chooseFolder() {
   showFolder();
 }
 
-void FileBrowser::loadCartridge() {
+void FileBrowser::loadCartridge(CartridgeMode mode, signed filterIndex) {
+  cartridgeMode = mode;
   onChange = bind(&FileBrowser::onChangeCartridge, this);
   onActivate = bind(&FileBrowser::onAcceptCartridge, this);
   onAccept = bind(&FileBrowser::onAcceptCartridge, this);
 
-  setWindowTitle("Load Cartridge");
   setPath(config().path.rom == "" ? config().path.current.cartridge : config().path.rom);
   setNameFilters(string()
   << "SNES cartridges (*.sfc" << reader.extensionList << reader.compressionList << ")\n"
@@ -21,7 +21,7 @@ void FileBrowser::loadCartridge() {
   << "All files (*)"
   );
   previewFrame->show();
-  filterBox->setCurrentIndex(config().path.current.filter);
+  filterBox->setCurrentIndex(filterIndex == -1 ? config().path.current.filter : filterIndex);
   showLoad();
 }
 
@@ -42,7 +42,10 @@ void FileBrowser::toggleApplyPatch() {
 }
 
 FileBrowser::FileBrowser() {
+  setObjectName("file-browser");
   resize(800, 480);
+  setGeometryString(&config().geometry.fileBrowser);
+  application.windowList.add(this);
 
   previewLayout = new QVBoxLayout;
   previewLayout->setAlignment(Qt::AlignTop);
@@ -54,6 +57,10 @@ FileBrowser::FileBrowser() {
   previewImage = new QWidget;
   previewImage->setFixedSize(256, 239);
   previewLayout->addWidget(previewImage);
+
+  previewSpacer = new QWidget;
+  previewSpacer->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
+  previewLayout->addWidget(previewSpacer);
 
   previewApplyPatch = new QCheckBox("Apply Patch");
   previewApplyPatch->setVisible(false);
@@ -122,33 +129,42 @@ void FileBrowser::onAcceptCartridge(const string &path) {
   }
 
   if(file::exists(filename)) {
-    config().path.current.filter = filterBox->currentIndex();
-    config().path.current.cartridge = fileSystemModel->rootPath().toUtf8().constData();
     close();
+    config().path.current.cartridge = fileSystemModel->rootPath().toUtf8().constData();
 
-    string filter = filterBox->currentText().toUtf8().constData();
-    if(strbegin(filter, "SNES cartridges")) {
-      cartridge.loadNormal(filename);
-    } else if(strbegin(filter, "BS-X cartridges")) {
-      if(config().path.bsx == "") {
-        loaderWindow->loadBsxCartridge("", filename);
+    if(cartridgeMode == LoadDirect) {
+      config().path.current.filter = filterBox->currentIndex();
+
+      string filter = filterBox->currentText().toUtf8().constData();
+      if(strbegin(filter, "SNES cartridges")) {
+        cartridge.loadNormal(filename);
+      } else if(strbegin(filter, "BS-X cartridges")) {
+        if(config().path.bsx == "") {
+          loaderWindow->loadBsxCartridge("", filename);
+        } else {
+          cartridge.loadBsx(config().path.bsx, filename);
+        }
+      } else if(strbegin(filter, "Sufami Turbo cartridges")) {
+        if(config().path.st == "") {
+          loaderWindow->loadSufamiTurboCartridge("", filename, "");
+        } else {
+          cartridge.loadSufamiTurbo(config().path.st, filename, "");
+        }
+      } else if(strbegin(filter, "Game Boy cartridges")) {
+        if(config().path.sgb == "") {
+          loaderWindow->loadSuperGameBoyCartridge("", filename);
+        } else {
+          cartridge.loadSuperGameBoy(config().path.sgb, filename);
+        }
       } else {
-        cartridge.loadBsx(config().path.bsx, filename);
+        cartridge.loadNormal(filename);
       }
-    } else if(strbegin(filter, "Sufami Turbo cartridges")) {
-      if(config().path.st == "") {
-        loaderWindow->loadSufamiTurboCartridge("", filename, "");
-      } else {
-        cartridge.loadSufamiTurbo(config().path.st, filename, "");
-      }
-    } else if(strbegin(filter, "Game Boy cartridges")) {
-      if(config().path.sgb == "") {
-        loaderWindow->loadSuperGameBoyCartridge("", filename);
-      } else {
-        cartridge.loadSuperGameBoy(config().path.sgb, filename);
-      }
-    } else {
-      cartridge.loadNormal(filename);
+    } else if(cartridgeMode == LoadBase) {
+      loaderWindow->selectBaseCartridge(filename);
+    } else if(cartridgeMode == LoadSlot1) {
+      loaderWindow->selectSlot1Cartridge(filename);
+    } else if(cartridgeMode == LoadSlot2) {
+      loaderWindow->selectSlot2Cartridge(filename);
     }
   }
 }

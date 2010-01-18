@@ -1,4 +1,4 @@
-class CgramViewer : public QbWindow {
+class CgramViewer : public Window {
   Q_OBJECT
 
 public:

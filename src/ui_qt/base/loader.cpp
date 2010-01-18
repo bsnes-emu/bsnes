@@ -1,9 +1,11 @@
 #include "loader.moc"
 LoaderWindow *loaderWindow;
 
-LoaderWindow::LoaderWindow() : QbWindow(config().geometry.loaderWindow) {
+LoaderWindow::LoaderWindow() {
   setObjectName("loader-window");
   setMinimumWidth(520);
+  setGeometryString(&config().geometry.loaderWindow);
+  application.windowList.add(this);
 
   layout = new QVBoxLayout;
   layout->setMargin(Style::WindowMargin);
@@ -163,7 +165,8 @@ void LoaderWindow::selectSlot2Cartridge(const char *filename) {
 }
 
 void LoaderWindow::selectBaseCartridge() {
-  diskBrowser->loadBaseCartridge();
+  fileBrowser->setWindowTitle("Load Base Cartridge");
+  fileBrowser->loadCartridge(FileBrowser::LoadBase, 0);
 }
 
 void LoaderWindow::clearBaseCartridge() {
@@ -175,13 +178,16 @@ void LoaderWindow::selectSlot1Cartridge() {
   switch(mode) {
     case SNES::Cartridge::ModeBsx:
     case SNES::Cartridge::ModeBsxSlotted:
-      diskBrowser->loadBsxCartridge();
+      fileBrowser->setWindowTitle("Load BS-X Cartridge");
+      fileBrowser->loadCartridge(FileBrowser::LoadSlot1, 1);
       break;
     case SNES::Cartridge::ModeSufamiTurbo:
-      diskBrowser->loadSufamiTurboCartridge1();
+      fileBrowser->setWindowTitle("Load Sufami Turbo Cartridge A");
+      fileBrowser->loadCartridge(FileBrowser::LoadSlot1, 2);
       break;
     case SNES::Cartridge::ModeSuperGameBoy:
-      diskBrowser->loadSuperGameBoyCartridge();
+      fileBrowser->setWindowTitle("Load Game Boy Cartridge");
+      fileBrowser->loadCartridge(FileBrowser::LoadSlot1, 3);
       break;
   }
 }
@@ -192,7 +198,8 @@ void LoaderWindow::clearSlot1Cartridge() {
 }
 
 void LoaderWindow::selectSlot2Cartridge() {
-  diskBrowser->loadSufamiTurboCartridge2();
+  fileBrowser->setWindowTitle("Load Sufami Turbo Cartridge B");
+  fileBrowser->loadCartridge(FileBrowser::LoadSlot2, 2);
 }
 
 void LoaderWindow::clearSlot2Cartridge() {

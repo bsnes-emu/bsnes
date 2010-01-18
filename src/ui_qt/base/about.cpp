@@ -1,9 +1,11 @@
 #include "about.moc"
 AboutWindow *aboutWindow;
 
-AboutWindow::AboutWindow() : QbWindow(config().geometry.aboutWindow) {
+AboutWindow::AboutWindow() {
   setObjectName("about-window");
   setWindowTitle("About bsnes ...");
+  setGeometryString(&config().geometry.aboutWindow);
+  application.windowList.add(this);
 
   layout = new QVBoxLayout;
   layout->setSizeConstraint(QLayout::SetFixedSize);

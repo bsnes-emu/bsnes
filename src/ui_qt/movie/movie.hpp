@@ -3,7 +3,7 @@ public:
   enum State { Inactive, Playback, Record } state;
 
   void chooseFile();
-  void play(string filename);
+  void play(const string &filename);
   void record();
   void stop();
 

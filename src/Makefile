@@ -2,7 +2,7 @@ include lib/nall/Makefile
 
 ui := ui_qt
 qtlibs := $(strip QtCore QtGui $(if $(findstring osx,$(platform)),QtOpenGL))
-include lib/nall/Makefile-qt
+include lib/nall/qt/Makefile
 
 ################
 ### compiler ###

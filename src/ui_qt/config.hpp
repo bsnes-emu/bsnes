@@ -31,7 +31,7 @@ public:
     string fragmentShader, vertexShader;
 
     struct Current {
-      string folder, movie, shader, cartridge, bsx, st, sgb;
+      string folder, movie, shader, cartridge;
       unsigned filter;  //current active filter for "Load Cartridge"
     } current;
   } path;
@@ -74,7 +74,6 @@ public:
     string loaderWindow;
     string htmlViewerWindow;
     string aboutWindow;
-    string diskBrowser;
     string fileBrowser;
     string folderCreator;
     string settingsWindow;

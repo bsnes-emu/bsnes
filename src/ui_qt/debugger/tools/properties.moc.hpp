@@ -14,7 +14,7 @@ private:
   SNES::ChipDebugger &object;
 };
 
-class PropertiesViewer : public QbWindow {
+class PropertiesViewer : public Window {
   Q_OBJECT
 
 public:

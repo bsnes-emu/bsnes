@@ -1,4 +1,4 @@
-class MemoryEditor : public QbWindow {
+class MemoryEditor : public Window {
   Q_OBJECT
 
 public:

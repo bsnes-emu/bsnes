@@ -1,9 +1,11 @@
 #include "vram-viewer.moc"
 VramViewer *vramViewer;
 
-VramViewer::VramViewer() : QbWindow(config().geometry.vramViewer) {
+VramViewer::VramViewer() {
   setObjectName("vram-viewer");
   setWindowTitle("Video RAM Viewer");
+  setGeometryString(&config().geometry.vramViewer);
+  application.windowList.add(this);
 
   layout = new QVBoxLayout;
   layout->setSizeConstraint(QLayout::SetFixedSize);
@@ -54,7 +56,7 @@ void VramViewer::autoUpdate() {
 }
 
 void VramViewer::show() {
-  QbWindow::show();
+  Window::show();
   refresh();
 }
 

@@ -1,4 +1,4 @@
-class LoaderWindow : public QbWindow {
+class LoaderWindow : public Window {
   Q_OBJECT
 
 public:

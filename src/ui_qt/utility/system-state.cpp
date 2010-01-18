@@ -1,5 +1,5 @@
 void Utility::modifySystemState(system_state_t systemState) {
-  diskBrowser->hide();  //avoid edge case oddities (eg movie playback window still open from previous game)
+  fileBrowser->close();  //avoid edge case oddities (eg movie playback window still open from previous game)
   state.resetHistory();  //do not allow rewinding past a destructive system action
   movie.stop();  //movies cannot continue to record after destructive system actions
 

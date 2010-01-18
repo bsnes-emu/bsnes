@@ -1,9 +1,11 @@
 #include "memory.moc"
 MemoryEditor *memoryEditor;
 
-MemoryEditor::MemoryEditor() : QbWindow(config().geometry.memoryEditor) {
+MemoryEditor::MemoryEditor() {
   setObjectName("memory-editor");
   setWindowTitle("Memory Editor");
+  setGeometryString(&config().geometry.memoryEditor);
+  application.windowList.add(this);
 
   layout = new QHBoxLayout;
   layout->setMargin(Style::WindowMargin);
@@ -13,6 +15,9 @@ MemoryEditor::MemoryEditor() : QbWindow(config().geometry.memoryEditor) {
   editor = new HexEditor;
   editor->reader = bind(&MemoryEditor::reader, this);
   editor->writer = bind(&MemoryEditor::writer, this);
+  editor->setFont(QFont(Style::Monospace));
+  editor->setMinimumWidth((HexEditor::LineWidth + 3) * editor->fontMetrics().width(' '));
+  editor->setMinimumHeight((16 + 1) * editor->fontMetrics().height());
   editor->setSize(16 * 1024 * 1024);
   memorySource = SNES::Debugger::CPUBus;
   layout->addWidget(editor);
@@ -58,13 +63,12 @@ MemoryEditor::MemoryEditor() : QbWindow(config().geometry.memoryEditor) {
 }
 
 void MemoryEditor::autoUpdate() {
-  if(SNES::cartridge.loaded() && autoUpdateBox->isChecked()) editor->update();
+  if(SNES::cartridge.loaded() && autoUpdateBox->isChecked()) editor->refresh();
 }
 
 void MemoryEditor::synchronize() {
   if(SNES::cartridge.loaded() == false) {
     editor->setHtml("");
-    editor->scrollbar->setEnabled(false);
     source->setEnabled(false);
     addr->setEnabled(false);
     autoUpdateBox->setEnabled(false);
@@ -72,7 +76,6 @@ void MemoryEditor::synchronize() {
     exportButton->setEnabled(false);
     importButton->setEnabled(false);
   } else {
-    editor->scrollbar->setEnabled(true);
     source->setEnabled(true);
     addr->setEnabled(true);
     autoUpdateBox->setEnabled(true);
@@ -83,7 +86,7 @@ void MemoryEditor::synchronize() {
 }
 
 void MemoryEditor::show() {
-  QbWindow::show();
+  Window::show();
   refresh();
 }
 
@@ -97,14 +100,14 @@ void MemoryEditor::sourceChanged(int index) {
   }
 
   editor->setOffset(strhex(addr->text().toUtf8().data()));
-  editor->update();
+  editor->refresh();
 }
 
 void MemoryEditor::refresh() {
   if(SNES::cartridge.loaded() == false) {
     editor->setHtml("");
   } else {
-    editor->update();
+    editor->refresh();
   }
 }
 

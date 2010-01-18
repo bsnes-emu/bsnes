@@ -208,7 +208,6 @@ void InputMapper::poll() {
   for(unsigned i = 0; i < Scancode::Limit; i++) {
     if(state(i) != previousState(i)) {
       utility.inputEvent(i);
-      diskBrowser->inputEvent(i);
       inputSettingsWindow->inputEvent(i);
     }
   }

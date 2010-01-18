@@ -5,7 +5,6 @@
 #include "debugger.moc"
 Debugger *debugger;
 
-#include "hexeditor.cpp"
 #include "tracer.cpp"
 
 #include "tools/disassembler.cpp"
@@ -20,9 +19,11 @@ Debugger *debugger;
 
 #include "misc/debugger-options.cpp"
 
-Debugger::Debugger() : QbWindow(config().geometry.debugger) {
+Debugger::Debugger() {
   setObjectName("debugger");
   setWindowTitle("Debugger");
+  setGeometryString(&config().geometry.debugger);
+  application.windowList.add(this);
 
   layout = new QHBoxLayout;
   layout->setMargin(Style::WindowMargin);

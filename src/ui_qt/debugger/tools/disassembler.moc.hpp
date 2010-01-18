@@ -12,7 +12,7 @@ public:
   SMPDisassembler();
 };
 
-class Disassembler : public QbWindow {
+class Disassembler : public Window {
   Q_OBJECT
 
 public:

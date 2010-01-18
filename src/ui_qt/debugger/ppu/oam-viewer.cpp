@@ -2,7 +2,7 @@
 OamViewer *oamViewer;
 
 void OamViewer::show() {
-  QbWindow::show();
+  Window::show();
   refresh();
 }
 
@@ -62,9 +62,11 @@ void OamViewer::autoUpdate() {
   if(autoUpdateBox->isChecked()) refresh();
 }
 
-OamViewer::OamViewer() : QbWindow(config().geometry.oamViewer) {
+OamViewer::OamViewer() {
   setObjectName("oam-viewer");
   setWindowTitle("Sprite Viewer");
+  setGeometryString(&config().geometry.oamViewer);
+  application.windowList.add(this);
 
   layout = new QHBoxLayout;
   layout->setAlignment(Qt::AlignLeft);
