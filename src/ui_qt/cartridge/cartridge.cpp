@@ -56,7 +56,7 @@ bool Cartridge::saveStatesSupported() {
 bool Cartridge::loadNormal(const char *base) {
   unload();
   if(loadCartridge(baseName = base, SNES::memory::cartrom) == false) return false;
-  SNES::s21fx.base(dir(baseName));
+  SNES::msu.base(nall::basename(baseName));
   SNES::cartridge.load(SNES::Cartridge::ModeNormal);
 
   loadMemory(baseName, ".srm", SNES::memory::cartram);

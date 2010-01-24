@@ -85,6 +85,8 @@ void CheatEditorWindow::load(const char *filename) {
     lstring part;
     if(line.size() > i) part.qsplit(",", line[i]);
     for(unsigned n = 0; n <= 2; n++) trim(part[n], " ");
+    trim(part[0], "\"");
+    trim(part[1], "\"");
     trim(part[2], "\"");
     part[2].replace("\\q", "\"");
 
@@ -118,8 +120,8 @@ void CheatEditorWindow::save(const char *filename) {
     desc.replace("\"", "\\q");
     if((code != "") || (desc != "")) empty = false;
 
-    data[index] << (item->checkState(0) == Qt::Checked ? "enabled," : "disabled,");
-    data[index] << code << ",";
+    data[index] << "\"" << (item->checkState(0) == Qt::Checked ? "enabled" : "disabled") << "\",";
+    data[index] << "\"" << code << "\",";
     data[index] << "\"" << desc << "\"\r\n";
   }
 
@@ -128,7 +130,14 @@ void CheatEditorWindow::save(const char *filename) {
   } else {
     file fp;
     if(fp.open(filename, file::mode_write)) {
-      for(unsigned i = 0; i < 128; i++) fp.print(data[i]);
+      //determine how many rows from the bottom up are empty, and exclude them from the file
+      //eg if only the first three slots are used, don't save the last 125 empty slots
+      unsigned last = 127;
+      do {
+        if(data[last] != "\"disabled\",\"\",\"\"\r\n") break;
+      } while(--last);
+
+      for(unsigned i = 0; i <= last; i++) fp.print(data[i]);
       fp.close();
     }
   }

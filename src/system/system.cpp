@@ -18,7 +18,7 @@ void System::coprocessor_enter() {
   if(cartridge.mode() == Cartridge::ModeSuperGameBoy) supergameboy.enter();
   if(cartridge.has_superfx()) superfx.enter();
   if(cartridge.has_sa1()) sa1.enter();
-  if(cartridge.has_21fx()) s21fx.enter();
+  if(cartridge.has_msu()) msu.enter();
 
   while(true) {
     if(scheduler.sync == Scheduler::SyncAll) {
@@ -92,7 +92,7 @@ void System::init(Interface *interface_) {
   st010.init();
   st011.init();
   st018.init();
-  s21fx.init();
+  msu.init();
 
   video.init();
   audio.init();
@@ -141,7 +141,7 @@ void System::power() {
   if(cartridge.has_st010())   st010.enable();
   if(cartridge.has_st011())   st011.enable();
   if(cartridge.has_st018())   st018.enable();
-  if(cartridge.has_21fx())    s21fx.enable();
+  if(cartridge.has_msu())     msu.enable();
 
   if(expansion() == ExpansionBSX) bsxbase.power();
   if(memory::bsxflash.data()) bsxflash.power();
@@ -162,7 +162,7 @@ void System::power() {
   if(cartridge.has_st010())   st010.power();
   if(cartridge.has_st011())   st011.power();
   if(cartridge.has_st018())   st018.power();
-  if(cartridge.has_21fx())    s21fx.power();
+  if(cartridge.has_msu())     msu.power();
 
   cpu.power();
   smp.power();
@@ -203,7 +203,7 @@ void System::reset() {
   if(cartridge.has_st010())   st010.reset();
   if(cartridge.has_st011())   st011.reset();
   if(cartridge.has_st018())   st018.reset();
-  if(cartridge.has_21fx())    s21fx.reset();
+  if(cartridge.has_msu())     msu.reset();
 
   input.port_set_device(0, config.controller_port1);
   input.port_set_device(1, config.controller_port2);

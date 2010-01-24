@@ -21,10 +21,6 @@ char* getcwd(char *path) {
   return path;
 }
 
-int mkdir(const char *path) {
-  return _wmkdir(nall::utf16_t(path));
-}
-
 void initargs(int &argc, char **&argv) {
   wchar_t **wargv = CommandLineToArgvW(GetCommandLineW(), &argc);
   argv = new char*[argc];

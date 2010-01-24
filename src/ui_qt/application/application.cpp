@@ -42,7 +42,7 @@ void Application::locateFile(string &filename, bool createDataDirectory) {
     //if not, use user data path (multi-user mode)
     temp = config().path.user;
     temp << ".bsnes";
-    if(createDataDirectory) mkdir(temp);  //ensure directory exists
+    if(createDataDirectory) mkdir(temp, 0755);  //ensure directory exists
     temp << "/" << filename;
   }
 

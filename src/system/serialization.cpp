@@ -72,7 +72,7 @@ void System::serialize_all(serializer &s) {
   if(cartridge.has_dsp2())    dsp2.serialize(s);
   if(cartridge.has_obc1())    obc1.serialize(s);
   if(cartridge.has_st010())   st010.serialize(s);
-  if(cartridge.has_21fx())    s21fx.serialize(s);
+  if(cartridge.has_msu())     msu.serialize(s);
 }
 
 //called once upon cartridge load event: perform dry-run state save.

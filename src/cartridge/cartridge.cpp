@@ -117,8 +117,8 @@ void Cartridge::unload() {
   loaded = false;
 }
 
-bool Cartridge::has_21fx() const {
-  return s21fx.exists();
+bool Cartridge::has_msu() const {
+  return msu.exists();
 }
 
 Cartridge::Cartridge() {

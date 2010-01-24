@@ -90,7 +90,3 @@ struct Style {
 };
 
 extern string filepath(const char *filename, const char *filepath);
-
-#if !defined(PLATFORM_WIN)
-  #define mkdir(path) (mkdir)(path, 0755)
-#endif

@@ -72,7 +72,7 @@ public:
   readonly<bool> has_st010;
   readonly<bool> has_st011;
   readonly<bool> has_st018;
-  bool has_21fx() const;
+  bool has_msu() const;
 
   void load(Mode);
   void unload();
