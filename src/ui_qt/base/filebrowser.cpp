@@ -77,9 +77,17 @@ FileBrowser::FileBrowser() {
 
 string FileBrowser::resolveFilename(const string &path) {
   if(QDir(path).exists()) {
-    if(striend(path, ".sfc") == false) return "";
+    string filter;
+    if(striend(path, ".sfc")) filter = "*.sfc";
+    if(striend(path, ".bs" )) filter = "*.bs";
+    if(striend(path, ".st" )) filter = "*.st";
+    if(striend(path, ".gb" )) filter = "*.gb";
+    if(striend(path, ".sgb")) filter = "*.sgb";
+    if(striend(path, ".gbc")) filter = "*.gbc";
+    if(filter == "") return "";
+
     QDir directory(path);
-    directory.setNameFilters(QStringList() << "*.sfc");
+    directory.setNameFilters(QStringList() << filter);
     QStringList list = directory.entryList(QDir::Files | QDir::NoDotAndDotDot);
     if(list.count() == 1) return string() << path << "/" << list[0].toUtf8().constData();
     return "";
@@ -93,31 +101,34 @@ void FileBrowser::onChangeCartridge(const string &path) {
   if(QDir(path).exists()) filename = resolveFilename(path);
   else filename = path;
 
-  if(file::exists(filename) && striend(filename, ".sfc")) {
-    Cartridge::Information info;
-    if(cartridge.information(filename, info)) {
+  string info;
+  string image = string() << nall::basename(filename) << ".png";
+  string patch = string() << nall::basename(filename) << ".ups";
+
+  if(file::exists(filename)) {
+    if(striend(filename, ".sfc")) {
+      Cartridge::Information cartinfo;
+      if(cartridge.information(filename, cartinfo)) {
+        info << "<small><table>";
+        info << "<tr><td><b>Title: </b></td><td>" << cartinfo.name << "</td></tr>";
+        info << "<tr><td><b>Region: </b></td><td>" << cartinfo.region << "</td></tr>";
+        info << "<tr><td><b>ROM: </b></td><td>" << cartinfo.romSize * 8 / 1024 / 1024 << "mbit</td></tr>";
+        info << "<tr><td><b>RAM: </b></td><td>";
+        cartinfo.ramSize ? info << cartinfo.ramSize * 8 / 1024 << "kbit</td></tr>" : info << "None</td></tr>";
+        info << "</table></small>";
+      }
+    } else if(striend(filename, ".st")) {
       unsigned size = file::size(filename);
-      string text;
-      text << "<small><table>";
-      text << "<tr><td><b>Title: </b></td><td>" << info.name << "</td></tr>";
-      text << "<tr><td><b>Region: </b></td><td>" << info.region << "</td></tr>";
-      text << "<tr><td><b>ROM: </b></td><td>" << info.romSize * 8 / 1024 / 1024 << "mbit</td></tr>";
-      text << "<tr><td><b>RAM: </b></td><td>";
-      info.ramSize ? text << info.ramSize * 8 / 1024 << "kbit</td></tr>" : text << "None</td></tr>";
-      text << "</table></small>";
-      previewInfo->setText(text);
+      info << "<small><table>";
+      info << "<tr><td><b>ROM: </b></td><td>" << size * 8 / 1024 / 1024 << "mbit</td></tr>";
+      info << "</table></small>";
     }
-
-    string image = string() << nall::basename(filename) << ".png";
-    previewImage->setStyleSheet(string() << "background: url(" << image << ") top left no-repeat;");
-
-    string patch = string() << nall::basename(filename) << ".ups";
-    previewApplyPatch->setVisible(file::exists(patch));
-  } else {
-    previewInfo->setText("");
-    previewImage->setStyleSheet("background: transparent;");
-    previewApplyPatch->hide();
   }
+
+  if(info == "") info = "<small><font color='#808080'>No preview available</font></small>";
+  previewInfo->setText(info);
+  previewImage->setStyleSheet(string() << "background: url(" << image << ") center left no-repeat;");
+  previewApplyPatch->setVisible(file::exists(patch));
 }
 
 void FileBrowser::onAcceptCartridge(const string &path) {
@@ -134,31 +145,23 @@ void FileBrowser::onAcceptCartridge(const string &path) {
 
     if(cartridgeMode == LoadDirect) {
       config().path.current.filter = filterBox->currentIndex();
-
       string filter = filterBox->currentText().toUtf8().constData();
-      if(strbegin(filter, "SNES cartridges")) {
-        cartridge.loadNormal(filename);
-      } else if(strbegin(filter, "BS-X cartridges")) {
-        if(config().path.bsx == "") {
-          loaderWindow->loadBsxCartridge("", filename);
-        } else {
-          cartridge.loadBsx(config().path.bsx, filename);
-        }
-      } else if(strbegin(filter, "Sufami Turbo cartridges")) {
-        if(config().path.st == "") {
-          loaderWindow->loadSufamiTurboCartridge("", filename, "");
-        } else {
-          cartridge.loadSufamiTurbo(config().path.st, filename, "");
-        }
-      } else if(strbegin(filter, "Game Boy cartridges")) {
-        if(config().path.sgb == "") {
-          loaderWindow->loadSuperGameBoyCartridge("", filename);
-        } else {
-          cartridge.loadSuperGameBoy(config().path.sgb, filename);
-        }
-      } else {
-        cartridge.loadNormal(filename);
-      }
+
+      if(0);
+      //file extension detection
+      else if(striend(filename, ".sfc")) acceptNormal(filename);
+      else if(striend(filename, ".bs"))  acceptBsx(filename);
+      else if(striend(filename, ".st"))  acceptSufamiTurbo(filename);
+      else if(striend(filename, ".gb"))  acceptSuperGameBoy(filename);
+      else if(striend(filename, ".sgb")) acceptSuperGameBoy(filename);
+      else if(striend(filename, ".gbc")) acceptSuperGameBoy(filename);
+      //filter detection
+      else if(strbegin(filter, "SNES cartridges")) acceptNormal(filename);
+      else if(strbegin(filter, "BS-X cartridges")) acceptBsx(filename);
+      else if(strbegin(filter, "Sufami Turbo cartridges")) acceptSufamiTurbo(filename);
+      else if(strbegin(filter, "Game Boy cartridges")) acceptSuperGameBoy(filename);
+      //fallback behavior
+      else acceptNormal(filename);
     } else if(cartridgeMode == LoadBase) {
       loaderWindow->selectBaseCartridge(filename);
     } else if(cartridgeMode == LoadSlot1) {
@@ -166,5 +169,33 @@ void FileBrowser::onAcceptCartridge(const string &path) {
     } else if(cartridgeMode == LoadSlot2) {
       loaderWindow->selectSlot2Cartridge(filename);
     }
+  }
+}
+
+void FileBrowser::acceptNormal(const string &filename) {
+  cartridge.loadNormal(filename);
+}
+
+void FileBrowser::acceptBsx(const string &filename) {
+  if(config().path.bsx == "") {
+    loaderWindow->loadBsxCartridge("", filename);
+  } else {
+    cartridge.loadBsx(config().path.bsx, filename);
+  }
+}
+
+void FileBrowser::acceptSufamiTurbo(const string &filename) {
+  if(config().path.st == "") {
+    loaderWindow->loadSufamiTurboCartridge("", filename, "");
+  } else {
+    cartridge.loadSufamiTurbo(config().path.st, filename, "");
+  }
+}
+
+void FileBrowser::acceptSuperGameBoy(const string &filename) {
+  if(config().path.sgb == "") {
+    loaderWindow->loadSuperGameBoyCartridge("", filename);
+  } else {
+    cartridge.loadSuperGameBoy(config().path.sgb, filename);
   }
 }

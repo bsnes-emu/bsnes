@@ -112,4 +112,37 @@ struct Scale5x : HotkeyInput {
   }
 } scale5x;
 
+struct ScaleMaxNormal : HotkeyInput {
+  void pressed() {
+    if(config().video.isFullscreen) utility.setScale(6);
+  }
+
+  ScaleMaxNormal() : HotkeyInput("Scale Max - Normal", "input.userInterface.videoSettings.scaleMaxNormal") {
+    name = "Shift+KB0::Num6";
+    userInterfaceVideoSettings.attach(this);
+  }
+} scaleMaxNormal;
+
+struct ScaleMaxFill : HotkeyInput {
+  void pressed() {
+    if(config().video.isFullscreen) utility.setScale(7);
+  }
+
+  ScaleMaxFill() : HotkeyInput("Scale Max - Fill", "input.userInterface.videoSettings.scaleMaxFill") {
+    name = "Shift+KB0::Num7";
+    userInterfaceVideoSettings.attach(this);
+  }
+} scaleMaxFill;
+
+struct ScaleMaxSmart : HotkeyInput {
+  void pressed() {
+    if(config().video.isFullscreen) utility.setScale(8);
+  }
+
+  ScaleMaxSmart() : HotkeyInput("Scale Max - Smart", "input.userInterface.videoSettings.scaleMaxSmart") {
+    name = "Shift+KB0::Num8";
+    userInterfaceVideoSettings.attach(this);
+  }
+} scaleMaxSmart;
+
 }

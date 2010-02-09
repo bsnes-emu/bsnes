@@ -193,21 +193,21 @@ void Filter::render(
   outpitch >>= 2;
 
   for(unsigned y = 0; y < height; y++) {
-    if(width == 512 && line[y] == 256) {
-      for(unsigned x = 0; x < 256; x++) {
-        uint16_t p = *input++;
-        *output++ = colortable[p];
-        *output++ = colortable[p];
+    const uint16_t *in = input + y * pitch;
+    uint32_t *out = output + y * outpitch;
+
+    if(width > 256 && line[y] <= 256) {
+      for(unsigned x = 0; x < line[y]; x++) {
+        uint16_t p = *in++;
+        *out++ = colortable[p];
+        *out++ = colortable[p];
       }
-      input += 256;
     } else {
       for(unsigned x = 0; x < width; x++) {
-        uint16_t p = *input++;
-        *output++ = colortable[p];
+        uint16_t p = *in++;
+        *out++ = colortable[p];
       }
     }
-    input  += pitch - width;
-    output += outpitch - width;
   }
 }
 

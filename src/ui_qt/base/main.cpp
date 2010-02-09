@@ -86,6 +86,12 @@ MainWindow::MainWindow() {
 
   settings_videoMode->addAction(settings_videoMode_5x = new RadioAction("Scale &5x", 0));
 
+  settings_videoMode->addAction(settings_videoMode_max_normal = new RadioAction("Scale Max - &Normal", 0));
+
+  settings_videoMode->addAction(settings_videoMode_max_wide = new RadioAction("Scale Max - &Wide", 0));
+
+  settings_videoMode->addAction(settings_videoMode_max_wideZoom = new RadioAction("Scale Max - Wide &Zoom", 0));
+
   settings_videoMode->addSeparator();
 
   settings_videoMode->addAction(settings_videoMode_correctAspectRatio = new CheckAction("Correct &Aspect Ratio", 0));
@@ -267,6 +273,9 @@ MainWindow::MainWindow() {
   connect(settings_videoMode_3x, SIGNAL(triggered()), this, SLOT(setVideoMode3x()));
   connect(settings_videoMode_4x, SIGNAL(triggered()), this, SLOT(setVideoMode4x()));
   connect(settings_videoMode_5x, SIGNAL(triggered()), this, SLOT(setVideoMode5x()));
+  connect(settings_videoMode_max_normal, SIGNAL(triggered()), this, SLOT(setVideoModeMaxNormal()));
+  connect(settings_videoMode_max_wide, SIGNAL(triggered()), this, SLOT(setVideoModeMaxWide()));
+  connect(settings_videoMode_max_wideZoom, SIGNAL(triggered()), this, SLOT(setVideoModeMaxWideZoom()));
   connect(settings_videoMode_correctAspectRatio, SIGNAL(triggered()), this, SLOT(toggleAspectCorrection()));
   connect(settings_videoMode_ntsc, SIGNAL(triggered()), this, SLOT(setVideoNtsc()));
   connect(settings_videoMode_pal, SIGNAL(triggered()), this, SLOT(setVideoPal()));
@@ -304,18 +313,18 @@ MainWindow::MainWindow() {
 
 void MainWindow::syncUi() {
   system_power->setEnabled(SNES::cartridge.loaded());
-  system_power->setChecked (application.power == true);
+  system_power->setChecked(application.power == true);
   system_power->setEnabled(SNES::cartridge.loaded());
   system_reset->setEnabled(SNES::cartridge.loaded() && application.power);
 
   system_port1_none->setChecked      (config().input.port1 == ControllerPort1::None);
-  system_port1_gamepad->setChecked    (config().input.port1 == ControllerPort1::Gamepad);
+  system_port1_gamepad->setChecked   (config().input.port1 == ControllerPort1::Gamepad);
   system_port1_asciipad->setChecked  (config().input.port1 == ControllerPort1::Asciipad);
   system_port1_multitap->setChecked  (config().input.port1 == ControllerPort1::Multitap);
   system_port1_mouse->setChecked     (config().input.port1 == ControllerPort1::Mouse);
 
   system_port2_none->setChecked      (config().input.port2 == ControllerPort2::None);
-  system_port2_gamepad->setChecked    (config().input.port2 == ControllerPort2::Gamepad);
+  system_port2_gamepad->setChecked   (config().input.port2 == ControllerPort2::Gamepad);
   system_port2_asciipad->setChecked  (config().input.port2 == ControllerPort2::Asciipad);
   system_port2_multitap->setChecked  (config().input.port2 == ControllerPort2::Multitap);
   system_port2_mouse->setChecked     (config().input.port2 == ControllerPort2::Mouse);
@@ -323,11 +332,18 @@ void MainWindow::syncUi() {
   system_port2_justifier->setChecked (config().input.port2 == ControllerPort2::Justifier);
   system_port2_justifiers->setChecked(config().input.port2 == ControllerPort2::Justifiers);
 
-  settings_videoMode_1x->setChecked(config().video.context->multiplier == 1);
-  settings_videoMode_2x->setChecked(config().video.context->multiplier == 2);
-  settings_videoMode_3x->setChecked(config().video.context->multiplier == 3);
-  settings_videoMode_4x->setChecked(config().video.context->multiplier == 4);
-  settings_videoMode_5x->setChecked(config().video.context->multiplier == 5);
+  settings_videoMode_1x->setChecked        (config().video.context->multiplier == 1);
+  settings_videoMode_2x->setChecked        (config().video.context->multiplier == 2);
+  settings_videoMode_3x->setChecked        (config().video.context->multiplier == 3);
+  settings_videoMode_4x->setChecked        (config().video.context->multiplier == 4);
+  settings_videoMode_5x->setChecked        (config().video.context->multiplier == 5);
+  settings_videoMode_max_normal->setChecked(config().video.context->multiplier == 6);
+  settings_videoMode_max_wide->setChecked  (config().video.context->multiplier == 7);
+  settings_videoMode_max_wideZoom->setChecked (config().video.context->multiplier == 8);
+
+  settings_videoMode_max_normal->setVisible(config().video.isFullscreen == true);
+  settings_videoMode_max_wide->setVisible  (config().video.isFullscreen == true);
+  settings_videoMode_max_wideZoom->setVisible (config().video.isFullscreen == true);
 
   settings_videoMode_correctAspectRatio->setChecked(config().video.context->correctAspectRatio);
   settings_videoMode_ntsc->setChecked(config().video.context->region == 0);
@@ -485,11 +501,14 @@ void MainWindow::quit() {
   application.terminate = true;
 }
 
-void MainWindow::setVideoMode1x() { utility.setScale(1); }
-void MainWindow::setVideoMode2x() { utility.setScale(2); }
-void MainWindow::setVideoMode3x() { utility.setScale(3); }
-void MainWindow::setVideoMode4x() { utility.setScale(4); }
-void MainWindow::setVideoMode5x() { utility.setScale(5); }
+void MainWindow::setVideoMode1x()          { utility.setScale(1); }
+void MainWindow::setVideoMode2x()          { utility.setScale(2); }
+void MainWindow::setVideoMode3x()          { utility.setScale(3); }
+void MainWindow::setVideoMode4x()          { utility.setScale(4); }
+void MainWindow::setVideoMode5x()          { utility.setScale(5); }
+void MainWindow::setVideoModeMaxNormal()   { utility.setScale(6); }
+void MainWindow::setVideoModeMaxWide()     { utility.setScale(7); }
+void MainWindow::setVideoModeMaxWideZoom() { utility.setScale(8); }
 
 void MainWindow::toggleAspectCorrection() { utility.toggleAspectCorrection(); }
 

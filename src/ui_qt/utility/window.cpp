@@ -37,10 +37,25 @@ void Utility::constrainSize(unsigned &x, unsigned &y, unsigned max) {
 }
 
 void Utility::resizeMainWindow() {
+  //process all pending events to ensure window size is correct (after fullscreen state change, etc)
+  usleep(2000);
+  QApplication::processEvents();
+
+  unsigned screenWidth, screenHeight;
+  if(config().video.isFullscreen == false) {
+    screenWidth = QApplication::desktop()->availableGeometry(mainWindow).width();
+    screenHeight = QApplication::desktop()->availableGeometry(mainWindow).height();
+  } else {
+    screenWidth = mainWindow->canvasContainer->size().width();
+    screenHeight = mainWindow->canvasContainer->size().height();
+  }
+
   unsigned region = config().video.context->region;
   unsigned multiplier = config().video.context->multiplier;
-  unsigned width = 256 * multiplier;
-  unsigned height = (region == 0 ? 224 : 239) * multiplier;
+  unsigned &width = display.outputWidth;
+  unsigned &height = display.outputHeight;
+  width = 256 * multiplier;
+  height = (region == 0 ? 224 : 239) * multiplier;
 
   if(config().video.context->correctAspectRatio) {
     if(region == 0) {
@@ -50,42 +65,53 @@ void Utility::resizeMainWindow() {
     }
   }
 
-  //at 5x scale, it is possible to correct the aspect ratio while maintaining
-  //an even number of pixels for every column and every row; very important for
-  //point / nearest-neighbor scaling ...
-  //
-  //NTSC: 1471x1120 -> 1536x1120 (6x5 scale)
-  //PAL : 1781x1195 -> 1792x1195 (7x5 scale)
-  if(multiplier == 5 && config().video.context->correctAspectRatio) {
-    width = 256 * (region == 0 ? 6 : 7);
-    height = (region == 0 ? 224 : 239) * 5;
-  }
+  display.cropLeft = config().video.cropLeft;
+  display.cropTop = config().video.cropTop;
+  display.cropRight = config().video.cropRight;
+  display.cropBottom = config().video.cropBottom;
+
+  //ensure window size will not be larger than viewable desktop area
+  constrainSize(height, width, screenHeight);
+  constrainSize(width, height, screenWidth);
 
   if(config().video.isFullscreen == false) {
-    //get effective desktop work area region (ignore Windows taskbar, OS X dock, etc.)
-    QRect deskRect = QApplication::desktop()->availableGeometry(mainWindow);
-
-    //ensure window size will not be larger than viewable desktop area
-    constrainSize(height, width, deskRect.height()); //- frameHeight);
-    constrainSize(width, height, deskRect.width());  //- frameWidth );
-
     mainWindow->canvas->setFixedSize(width, height);
     mainWindow->show();
   } else {
-    for(unsigned i = 0; i < 2; i++) {
-      unsigned iWidth = width, iHeight = height;
-
-      constrainSize(iHeight, iWidth, mainWindow->canvasContainer->size().height());
-      constrainSize(iWidth, iHeight, mainWindow->canvasContainer->size().width());
-
-      //center canvas onscreen; ensure it is not larger than viewable area
-      mainWindow->canvas->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-      mainWindow->canvas->setFixedSize(iWidth, iHeight);
-      mainWindow->canvas->setMinimumSize(0, 0);
-
-      usleep(2000);
-      QApplication::processEvents();
+    if(multiplier == 6) {
+      //Scale Max - Normal
+      width = (double)width * (double)screenHeight / (double)height;
+      height = screenHeight;
     }
+
+    if(multiplier == 7) {
+      //Scale Max - Wide
+      width = screenWidth;
+      height = screenHeight;
+    }
+
+    if(multiplier == 8) {
+      //Scale Max - Wide Zoom
+      //1. scale width and height proportionally until width of screen is completely filled
+      //2. determine how much height goes out of screen by
+      //3. cut half of the above value out of the visible input display region
+      //this results in a 50% compromise between correct aspect ratio and fill mode;
+      //while cropping out only 50% as much height as a fully proportional zoom would
+      width = (double)width * (double)screenHeight / (double)height;
+      height = screenHeight;
+      unsigned widthDifference = screenWidth - width;
+      unsigned adjustedHeight = (double)height * (double)(width + widthDifference) / (double)(width);
+      unsigned heightDifference = adjustedHeight - height;
+      width = screenWidth;
+      display.cropLeft = 0;
+      display.cropTop = 100.0 / (double)height * (heightDifference / 4);
+      display.cropRight = 0;
+      display.cropBottom = 100.0 / (double)height * (heightDifference / 4);
+    }
+
+    mainWindow->canvas->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    mainWindow->canvas->setFixedSize(width, height);
+    mainWindow->canvas->setMinimumSize(0, 0);
   }
 
   //workaround for Qt/Xlib bug:

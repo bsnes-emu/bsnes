@@ -4,6 +4,9 @@ class ToolsWindow : public Window {
 public:
   QVBoxLayout *layout;
   QTabWidget *tab;
+  QScrollArea *cheatEditorArea;
+  QScrollArea *cheatFinderArea;
+  QScrollArea *stateManagerArea;
 
   ToolsWindow();
 

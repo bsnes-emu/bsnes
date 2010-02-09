@@ -93,8 +93,8 @@ void Application::init() {
   config().system.crashedOnLastRun = false;
   config().save(configFilename);
 
-  //no sense showing unusable options ...
-  pixelShaderWindow->setVisible(video.cap(Video::FragmentShader) || video.cap(Video::VertexShader));
+  //hide pixel shader settings if driver does not support them
+  videoSettingsWindow->synchronizePixelShaderSettings();
 
   utility.resizeMainWindow();
   utility.updateAvSync();

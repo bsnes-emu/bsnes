@@ -21,7 +21,7 @@ ifeq ($(platform),x)
   qtinc := `pkg-config --cflags $(qtlibs)`
   qtlib := `pkg-config --libs $(qtlibs)`
 else ifeq ($(platform),osx)
-  qtinc := $(foreach lib,$(qtlibs),-I/Library/Frameworks/$(lib).framework/Versions/4/Headers
+  qtinc := $(foreach lib,$(qtlibs),-I/Library/Frameworks/$(lib).framework/Versions/4/Headers)
 
   qtlib := -L/Library/Frameworks
   qtlib += $(foreach lib,$(qtlibs),-framework $(lib))

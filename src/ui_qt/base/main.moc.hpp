@@ -52,6 +52,9 @@ public:
       RadioAction *settings_videoMode_3x;
       RadioAction *settings_videoMode_4x;
       RadioAction *settings_videoMode_5x;
+      RadioAction *settings_videoMode_max_normal;
+      RadioAction *settings_videoMode_max_wide;
+      RadioAction *settings_videoMode_max_wideZoom;
       CheckAction *settings_videoMode_correctAspectRatio;
       RadioAction *settings_videoMode_ntsc;
       RadioAction *settings_videoMode_pal;
@@ -123,6 +126,9 @@ public slots:
   void setVideoMode3x();
   void setVideoMode4x();
   void setVideoMode5x();
+  void setVideoModeMaxNormal();
+  void setVideoModeMaxWide();
+  void setVideoModeMaxWideZoom();
   void toggleAspectCorrection();
   void setVideoNtsc();
   void setVideoPal();

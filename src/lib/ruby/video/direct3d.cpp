@@ -1,9 +1,13 @@
 #undef interface
 #define interface struct
 #include <d3d9.h>
+#include <d3dx9.h>
 #undef interface
 
 #define D3DVERTEX (D3DFVF_XYZRHW | D3DFVF_TEX1)
+
+typedef HRESULT (__stdcall *EffectProc)(LPDIRECT3DDEVICE9, LPCVOID, UINT, D3DXMACRO const*, LPD3DXINCLUDE, DWORD, LPD3DXEFFECTPOOL, LPD3DXEFFECT*, LPD3DXBUFFER*);
+typedef HRESULT (__stdcall *TextureProc)(LPDIRECT3DDEVICE9, LPCTSTR, LPDIRECT3DTEXTURE9*);
 
 namespace ruby {
 
@@ -19,6 +23,9 @@ public:
   D3DCAPS9                d3dcaps;
   LPDIRECT3DTEXTURE9      texture;
   LPDIRECT3DSURFACE9      surface;
+  LPD3DXEFFECT            effect;
+  string                  shaderSource;
+
   bool lost;
   unsigned iwidth, iheight;
 
@@ -36,7 +43,7 @@ public:
 
   struct {
     bool dynamic;      //device supports dynamic textures
-    bool stretchrect;  //device supports StretchRect
+    bool shader;       //device supports pixel shaders
   } caps;
 
   struct {
@@ -57,6 +64,7 @@ public:
     if(name == Video::Handle) return true;
     if(name == Video::Synchronize) return true;
     if(name == Video::Filter) return true;
+    if(name == Video::FragmentShader) return true;
     return false;
   }
 
@@ -81,6 +89,11 @@ public:
     if(name == Video::Filter) {
       settings.filter = any_cast<unsigned>(value);
       if(lpd3d) update_filter();
+      return true;
+    }
+
+    if(name == Video::FragmentShader) {
+      set_fragment_shader(any_cast<const char*>(value));
       return true;
     }
 
@@ -118,8 +131,7 @@ public:
     device->SetVertexShader(NULL);
     device->SetFVF(D3DVERTEX);
 
-    device->CreateVertexBuffer(sizeof(d3dvertex) * 4, flags.v_usage, D3DVERTEX,
-      static_cast<D3DPOOL>(flags.v_pool), &vertex_buffer, NULL);
+    device->CreateVertexBuffer(sizeof(d3dvertex) * 4, flags.v_usage, D3DVERTEX, (D3DPOOL)flags.v_pool, &vertex_buffer, NULL);
     iwidth  = 0;
     iheight = 0;
     resize(settings.width = 256, settings.height = 256);
@@ -149,15 +161,8 @@ public:
       return;
     }
 
-    if(caps.stretchrect == true) {
-      if(surface) surface->Release();
-      device->CreateOffscreenPlainSurface(iwidth, iheight, D3DFMT_X8R8G8B8,
-        D3DPOOL_DEFAULT, &surface, NULL);
-    } else {
-      if(texture) texture->Release();
-      device->CreateTexture(iwidth, iheight, 1, flags.t_usage, D3DFMT_X8R8G8B8,
-        static_cast<D3DPOOL>(flags.t_pool), &texture, NULL);
-    }
+    if(texture) texture->Release();
+    device->CreateTexture(iwidth, iheight, 1, flags.t_usage, D3DFMT_X8R8G8B8, (D3DPOOL)flags.t_pool, &texture, NULL);
   }
 
   void update_filter() {
@@ -217,14 +222,12 @@ public:
   void clear() {
     if(lost && !recover()) return;
 
-    if(caps.stretchrect == false) {
-      texture->GetLevelDesc(0, &d3dsd);
-      texture->GetSurfaceLevel(0, &surface);
-    }
+    texture->GetLevelDesc(0, &d3dsd);
+    texture->GetSurfaceLevel(0, &surface);
 
     if(surface) {
       device->ColorFill(surface, 0, D3DCOLOR_XRGB(0x00, 0x00, 0x00));
-      if(caps.stretchrect == false) surface->Release();
+      surface->Release();
     }
 
     //clear primary display and all backbuffers
@@ -241,10 +244,8 @@ public:
       resize(settings.width = width, settings.height = height);
     }
 
-    if(caps.stretchrect == false) {
-      texture->GetLevelDesc(0, &d3dsd);
-      texture->GetSurfaceLevel(0, &surface);
-    }
+    texture->GetLevelDesc(0, &d3dsd);
+    texture->GetSurfaceLevel(0, &surface);
 
     surface->LockRect(&d3dlr, 0, flags.lock);
     pitch = d3dlr.Pitch;
@@ -253,7 +254,7 @@ public:
 
   void unlock() {
     surface->UnlockRect();
-    if(caps.stretchrect == false) surface->Release();
+    surface->Release();
   }
 
   void refresh() {
@@ -267,23 +268,53 @@ public:
     //failure to do so causes scaling issues on some video drivers.
     if(state.width != rd.right || state.height != rd.bottom) {
       init();
+      set_fragment_shader(shaderSource);
       return;
     }
 
-    device->BeginScene();
+    if(caps.shader && effect) {
+      device->BeginScene();
+      set_vertex(0, 0, settings.width, settings.height, iwidth, iheight, 0, 0, rd.right, rd.bottom);
 
-    if(caps.stretchrect == true) {
-      LPDIRECT3DSURFACE9 temp;
-      device->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &temp);
-      device->StretchRect(surface, &rs, temp, 0, static_cast<D3DTEXTUREFILTERTYPE>(flags.filter));
-      temp->Release();
+      D3DXVECTOR4 rubyTextureSize;
+      rubyTextureSize.x = iwidth;
+      rubyTextureSize.y = iheight;
+      rubyTextureSize.z = 1.0 / iheight;
+      rubyTextureSize.w = 1.0 / iwidth;
+      effect->SetVector("rubyTextureSize", &rubyTextureSize);
+
+      D3DXVECTOR4 rubyInputSize;
+      rubyInputSize.x = settings.width;
+      rubyInputSize.y = settings.height;
+      rubyInputSize.z = 1.0 / settings.height;
+      rubyInputSize.w = 1.0 / settings.width;
+      effect->SetVector("rubyInputSize", &rubyInputSize);
+
+      D3DXVECTOR4 rubyOutputSize;
+      rubyOutputSize.x = rd.right;
+      rubyOutputSize.y = rd.bottom;
+      rubyOutputSize.z = 1.0 / rd.bottom;
+      rubyOutputSize.w = 1.0 / rd.right;
+      effect->SetVector("rubyOutputSize", &rubyOutputSize);
+
+      UINT passes;
+      effect->Begin(&passes, 0);
+      effect->SetTexture("rubyTexture", texture);
+      device->SetTexture(0, texture);
+      for(unsigned pass = 0; pass < passes; pass++) {
+        effect->BeginPass(pass);
+        device->DrawPrimitive(D3DPT_TRIANGLESTRIP, 0, 2);
+        effect->EndPass();
+      }
+      effect->End();
+      device->EndScene();
     } else {
+      device->BeginScene();
       set_vertex(0, 0, settings.width, settings.height, iwidth, iheight, 0, 0, rd.right, rd.bottom);
       device->SetTexture(0, texture);
       device->DrawPrimitive(D3DPT_TRIANGLESTRIP, 0, 2);
+      device->EndScene();
     }
-
-    device->EndScene();
 
     if(settings.synchronize) {
       while(true) {
@@ -294,6 +325,42 @@ public:
     }
 
     if(device->Present(0, 0, 0, 0) == D3DERR_DEVICELOST) lost = true;
+  }
+
+  void set_fragment_shader(const char *source) {
+    if(!caps.shader) return;
+
+    if(effect) {
+      effect->Release();
+      effect = NULL;
+    }
+
+    if(!source || !*source) {
+      shaderSource = "";
+      return;
+    }
+
+    shaderSource = source;
+
+    HMODULE d3dx;
+    for(unsigned i = 0; i < 256; i++) {
+      char t[256];
+      sprintf(t, "d3dx9_%u.dll", i);
+      d3dx = LoadLibrary(t);
+      if(d3dx) break;
+    }
+    if(!d3dx) d3dx = LoadLibrary("d3dx9.dll");
+    if(!d3dx) return;
+
+    EffectProc effectProc = (EffectProc)GetProcAddress(d3dx, "D3DXCreateEffect");
+    TextureProc textureProc = (TextureProc)GetProcAddress(d3dx, "D3DXCreateTextureFromFileA");
+
+    LPD3DXBUFFER pBufferErrors = NULL;
+    effectProc(device, shaderSource, lstrlen(source), NULL, NULL, NULL, NULL, &effect, &pBufferErrors);
+
+    D3DXHANDLE hTech;
+    effect->FindNextValidTechnique(NULL, &hTech);
+    effect->SetTechnique(hTech);
   }
 
   bool init() {
@@ -330,11 +397,7 @@ public:
     device->GetDeviceCaps(&d3dcaps);
 
     caps.dynamic = bool(d3dcaps.Caps2 & D3DCAPS2_DYNAMICTEXTURES);
-    caps.stretchrect = (d3dcaps.DevCaps2 & D3DDEVCAPS2_CAN_STRETCHRECT_FROM_TEXTURES) &&
-      (d3dcaps.StretchRectFilterCaps & D3DPTFILTERCAPS_MINFPOINT)  &&
-      (d3dcaps.StretchRectFilterCaps & D3DPTFILTERCAPS_MAGFPOINT)  &&
-      (d3dcaps.StretchRectFilterCaps & D3DPTFILTERCAPS_MINFLINEAR) &&
-      (d3dcaps.StretchRectFilterCaps & D3DPTFILTERCAPS_MAGFLINEAR);
+    caps.shader = d3dcaps.PixelShaderVersion > D3DPS_VERSION(1, 4);
 
     if(caps.dynamic == true) {
       flags.t_usage = D3DUSAGE_DYNAMIC;
@@ -356,6 +419,7 @@ public:
   }
 
   void release_resources() {
+    if(effect) { effect->Release(); effect = 0; }
     if(vertex_buffer) { vertex_buffer->Release(); vertex_buffer = 0; }
     if(surface) { surface->Release(); surface = 0; }
     if(texture) { texture->Release(); texture = 0; }
@@ -368,6 +432,7 @@ public:
   }
 
   pVideoD3D() {
+    effect = 0;
     vertex_buffer = 0;
     surface = 0;
     texture = 0;

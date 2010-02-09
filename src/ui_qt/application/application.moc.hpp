@@ -1,3 +1,15 @@
+struct VideoDisplay {
+  unsigned outputWidth;
+  unsigned outputHeight;
+
+  unsigned cropLeft;
+  unsigned cropTop;
+  unsigned cropRight;
+  unsigned cropBottom;
+
+  VideoDisplay();
+};
+
 class Application : public QObject {
   Q_OBJECT
 
@@ -41,4 +53,5 @@ public slots:
   void run();
 };
 
+extern VideoDisplay display;
 extern Application application;

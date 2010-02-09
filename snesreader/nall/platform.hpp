@@ -1,6 +1,8 @@
 #ifndef NALL_PLATFORM_HPP
 #define NALL_PLATFORM_HPP
 
+#include <nall/utf8.hpp>
+
 //=========================
 //standard platform headers
 //=========================
@@ -50,7 +52,7 @@
   #define getcwd      _getcwd
   #define ftruncate   _chsize
   #define putenv      _putenv
-  #define mkdir(n, m) mkdir(n)
+  #define mkdir(n, m) _wmkdir(nall::utf16_t(n))
   #define rmdir       _rmdir
   #define vsnprintf   _vsnprintf
   #define usleep(n)   Sleep(n / 1000)

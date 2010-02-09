@@ -342,6 +342,7 @@ inline FileDialog::FileDialog() {
   fileSystemModel->setNameFilterDisables(false);
 
   fileView = new FileView;
+  fileView->setMinimumWidth(320);
   fileView->setModel(fileSystemModel);
   fileView->setIconSize(QSize(16, 16));
   browseLayout->addWidget(fileView);

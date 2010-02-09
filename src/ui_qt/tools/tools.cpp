@@ -23,9 +23,24 @@ ToolsWindow::ToolsWindow() {
   cheatFinderWindow = new CheatFinderWindow;
   stateManagerWindow = new StateManagerWindow;
 
+  cheatEditorArea = new QScrollArea;
+  cheatEditorArea->setWidget(cheatEditorWindow);
+  cheatEditorArea->setFrameStyle(0);
+  cheatEditorArea->setWidgetResizable(true);
+
+  cheatFinderArea = new QScrollArea;
+  cheatFinderArea->setWidget(cheatFinderWindow);
+  cheatFinderArea->setFrameStyle(0);
+  cheatFinderArea->setWidgetResizable(true);
+
+  stateManagerArea = new QScrollArea;
+  stateManagerArea->setWidget(stateManagerWindow);
+  stateManagerArea->setFrameStyle(0);
+  stateManagerArea->setWidgetResizable(true);
+
   tab = new QTabWidget;
-  tab->addTab(cheatEditorWindow, QIcon(":/16x16/accessories-text-editor.png"), "Cheat Editor");
-  tab->addTab(cheatFinderWindow, QIcon(":/16x16/system-search.png"), "Cheat Finder");
-  tab->addTab(stateManagerWindow, QIcon(":/16x16/system-file-manager.png"), "State Manager");
+  tab->addTab(cheatEditorArea, QIcon(":/16x16/accessories-text-editor.png"), "Cheat Editor");
+  tab->addTab(cheatFinderArea, QIcon(":/16x16/system-search.png"), "Cheat Finder");
+  tab->addTab(stateManagerArea, QIcon(":/16x16/system-file-manager.png"), "State Manager");
   layout->addWidget(tab);
 }

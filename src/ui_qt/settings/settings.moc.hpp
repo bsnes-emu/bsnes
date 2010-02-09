@@ -4,6 +4,11 @@ class SettingsWindow : public Window {
 public:
   QVBoxLayout *layout;
   QTabWidget *tab;
+  QScrollArea *videoArea;
+  QScrollArea *audioArea;
+  QScrollArea *inputArea;
+  QScrollArea *pathArea;
+  QScrollArea *advancedArea;
 
   SettingsWindow();
 

@@ -1,7 +1,18 @@
 #include "application.moc"
+VideoDisplay display;
 Application application;
 
 #include "init.cpp"
+
+VideoDisplay::VideoDisplay() {
+  outputWidth = 0;
+  outputHeight = 0;
+
+  cropLeft = 0;
+  cropTop = 0;
+  cropRight = 0;
+  cropBottom = 0;
+}
 
 void Application::initPaths(const char *basename) {
   char temp[PATH_MAX];

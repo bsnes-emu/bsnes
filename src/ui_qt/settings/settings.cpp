@@ -1,6 +1,5 @@
 #include "../ui-base.hpp"
 
-#include "pixelshader.cpp"
 #include "video.cpp"
 #include "audio.cpp"
 #include "input.cpp"
@@ -28,11 +27,36 @@ SettingsWindow::SettingsWindow() {
   pathSettingsWindow     = new PathSettingsWindow;
   advancedSettingsWindow = new AdvancedSettingsWindow;
 
+  videoArea = new QScrollArea;
+  videoArea->setWidget(videoSettingsWindow);
+  videoArea->setFrameStyle(0);
+  videoArea->setWidgetResizable(true);
+
+  audioArea = new QScrollArea;
+  audioArea->setWidget(audioSettingsWindow);
+  audioArea->setFrameStyle(0);
+  audioArea->setWidgetResizable(true);
+
+  inputArea = new QScrollArea;
+  inputArea->setWidget(inputSettingsWindow);
+  inputArea->setFrameStyle(0);
+  inputArea->setWidgetResizable(true);
+
+  pathArea = new QScrollArea;
+  pathArea->setWidget(pathSettingsWindow);
+  pathArea->setFrameStyle(0);
+  pathArea->setWidgetResizable(true);
+
+  advancedArea = new QScrollArea;
+  advancedArea->setWidget(advancedSettingsWindow);
+  advancedArea->setFrameStyle(0);
+  advancedArea->setWidgetResizable(true);
+
   tab = new QTabWidget;
-  tab->addTab(videoSettingsWindow, QIcon(":/16x16/video-display.png"), "Video");
-  tab->addTab(audioSettingsWindow, QIcon(":/16x16/audio-volume-high.png"), "Audio");
-  tab->addTab(inputSettingsWindow, QIcon(":/16x16/input-gaming.png"), "Input");
-  tab->addTab(pathSettingsWindow, QIcon(":/16x16/folder.png"), "Paths");
-  tab->addTab(advancedSettingsWindow, QIcon(":/16x16/preferences-system.png"), "Advanced");
+  tab->addTab(videoArea, QIcon(":/16x16/video-display.png"), "Video");
+  tab->addTab(audioArea, QIcon(":/16x16/audio-volume-high.png"), "Audio");
+  tab->addTab(inputArea, QIcon(":/16x16/input-gaming.png"), "Input");
+  tab->addTab(pathArea, QIcon(":/16x16/folder.png"), "Paths");
+  tab->addTab(advancedArea, QIcon(":/16x16/preferences-system.png"), "Advanced");
   layout->addWidget(tab);
 }

@@ -1,12 +1,22 @@
 Interface interface;
 
 void Interface::video_refresh(uint16_t *data, unsigned pitch, unsigned *line, unsigned width, unsigned height) {
+  //scale display.crop* values from percentage-based (0-100%) to exact pixel sizes (width, height)
+  unsigned cropLeft = (double)display.cropLeft / 100.0 * width;
+  unsigned cropTop = (double)display.cropTop / 100.0 * height;
+  unsigned cropRight = (double)display.cropRight / 100.0 * width;
+  unsigned cropBottom = (double)display.cropBottom / 100.0 * height;
+
+  width -= (cropLeft + cropRight);
+  height -= (cropTop + cropBottom);
+
   uint32_t *output;
   unsigned outwidth, outheight, outpitch;
   filter.size(outwidth, outheight, width, height);
 
   if(video.lock(output, outpitch, outwidth, outheight) == true) {
-    filter.render(output, outpitch, data, pitch, line, width, height);
+    data += cropTop * (pitch >> 1) + cropLeft;
+    filter.render(output, outpitch, data, pitch, line + cropTop, width, height);
     video.unlock();
     video.refresh();
     if(saveScreenshot == true) captureScreenshot(output, outpitch, outwidth, outheight);

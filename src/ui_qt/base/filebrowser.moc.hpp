@@ -28,6 +28,11 @@ private:
   string resolveFilename(const string&);
   void onChangeCartridge(const string&);
   void onAcceptCartridge(const string&);
+
+  void acceptNormal(const string &filename);
+  void acceptBsx(const string &filename);
+  void acceptSufamiTurbo(const string &filename);
+  void acceptSuperGameBoy(const string &filename);
 };
 
 extern FileBrowser *fileBrowser;

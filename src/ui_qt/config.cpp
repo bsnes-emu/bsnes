@@ -88,6 +88,11 @@ Configuration::Configuration() {
   attach(video.ntscAspectRatio = 54.0 / 47.0, "video.ntscAspectRatio", "NTSC aspect ratio (x / y)");
   attach(video.palAspectRatio  = 32.0 / 23.0, "video.palAspectRatio",  "PAL aspect ratio (x / y)");
 
+  attach(video.cropLeft   = 0, "video.cropLeft");
+  attach(video.cropTop    = 0, "video.cropTop");
+  attach(video.cropRight  = 0, "video.cropRight");
+  attach(video.cropBottom = 0, "video.cropBottom");
+
   attach(video.windowed.correctAspectRatio = true, "video.windowed.correctAspectRatio");
   attach(video.windowed.multiplier         =    2, "video.windowed.multiplier");
   attach(video.windowed.region             =    0, "video.windowed.region");

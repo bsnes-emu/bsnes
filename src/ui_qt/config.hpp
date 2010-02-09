@@ -43,6 +43,11 @@ public:
     bool enableGammaRamp;
     double ntscAspectRatio, palAspectRatio;
 
+    unsigned cropLeft;
+    unsigned cropTop;
+    unsigned cropRight;
+    unsigned cropBottom;
+
     struct Context {
       bool correctAspectRatio;
       unsigned multiplier, region;
