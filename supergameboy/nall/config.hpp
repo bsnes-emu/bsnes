@@ -53,7 +53,7 @@ namespace nall {
         }
       }
     };
-    vector<item_t> list;
+    linear_vector<item_t> list;
 
     template<typename T>
     void attach(T &data, const char *name, const char *desc = "") {

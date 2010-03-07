@@ -1,9 +1,12 @@
 #ifndef NALL_VECTOR_HPP
 #define NALL_VECTOR_HPP
 
+#include <initializer_list>
 #include <new>
 #include <nall/algorithm.hpp>
 #include <nall/bit.hpp>
+#include <nall/concept.hpp>
+#include <nall/traits.hpp>
 #include <nall/utility.hpp>
 
 namespace nall {
@@ -19,7 +22,7 @@ namespace nall {
   //if objects hold memory address references to themselves (introspection), a
   //valid copy constructor will be needed to keep pointers valid.
 
-  template<typename T> class linear_vector : noncopyable {
+  template<typename T> class linear_vector {
   protected:
     T *pool;
     unsigned poolsize, objectsize;
@@ -79,8 +82,43 @@ namespace nall {
       return pool[index];
     }
 
-    linear_vector() : pool(0), poolsize(0), objectsize(0) {}
-    ~linear_vector() { reset(); }
+    //copy
+    inline linear_vector<T>& operator=(const linear_vector<T> &source) {
+      reset();
+      reserve(source.capacity());
+      for(unsigned i = 0; i < source.size(); i++) add(source[i]);
+      return *this;
+    }
+
+    linear_vector(const linear_vector<T> &source) {
+      operator=(source);
+    }
+
+    //move
+    inline linear_vector<T>& operator=(linear_vector<T> &&source) {
+      reset();
+      pool = source.pool;
+      poolsize = source.poolsize;
+      objectsize = source.objectsize;
+      source.pool = 0;
+      return *this;
+    }
+
+    linear_vector(linear_vector<T> &&source) {
+      operator=(move(source));
+    }
+
+    //construction
+    linear_vector() : pool(0), poolsize(0), objectsize(0) {
+    }
+
+    linear_vector(std::initializer_list<T> list) : pool(0), poolsize(0), objectsize(0) {
+      for(const T *p = list.begin(); p != list.end(); ++p) add(*p);
+    }
+
+    ~linear_vector() {
+      reset();
+    }
   };
 
   //pointer_vector
@@ -93,7 +131,7 @@ namespace nall {
   //by guaranteeing that the base memory address of each objects never changes,
   //this avoids the need for an object to have a valid copy constructor.
 
-  template<typename T> class pointer_vector : noncopyable {
+  template<typename T> class pointer_vector {
   protected:
     T **pool;
     unsigned poolsize, objectsize;
@@ -151,12 +189,47 @@ namespace nall {
       return *pool[index];
     }
 
-    pointer_vector() : pool(0), poolsize(0), objectsize(0) {}
-    ~pointer_vector() { reset(); }
+    //copy
+    inline pointer_vector<T>& operator=(const pointer_vector<T> &source) {
+      reset();
+      reserve(source.capacity());
+      for(unsigned i = 0; i < source.size(); i++) add(source[i]);
+      return *this;
+    }
+
+    pointer_vector(const pointer_vector<T> &source) {
+      operator=(source);
+    }
+
+    //move
+    inline pointer_vector<T>& operator=(pointer_vector<T> &&source) {
+      reset();
+      pool = source.pool;
+      poolsize = source.poolsize;
+      objectsize = source.objectsize;
+      source.pool = 0;
+      return *this;
+    }
+
+    pointer_vector(pointer_vector<T> &&source) {
+      operator=(move(source));
+    }
+
+    //construction
+    pointer_vector() : pool(0), poolsize(0), objectsize(0) {
+    }
+
+    pointer_vector(std::initializer_list<T> list) : pool(0), poolsize(0), objectsize(0) {
+      for(const T *p = list.begin(); p != list.end(); ++p) add(*p);
+    }
+
+    ~pointer_vector() {
+      reset();
+    }
   };
 
-  //default vector type
-  template<typename T> class vector : public linear_vector<T> {};
+  template<typename T> struct has_size<linear_vector<T>> { enum { value = true }; };
+  template<typename T> struct has_size<pointer_vector<T>> { enum { value = true }; };
 }
 
 #endif

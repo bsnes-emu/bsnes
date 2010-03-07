@@ -6,7 +6,6 @@
 #include <nall/utility.hpp>
 
 namespace nall {
-
   //serializer: a class designed to save and restore the state of classes.
   //
   //benefits:
@@ -17,7 +16,6 @@ namespace nall {
   //caveats:
   //- only plain-old-data can be stored. complex classes must provide serialize(serializer&);
   //- floating-point usage is not portable across platforms
-
   class serializer {
   public:
     enum mode_t { Load, Save, Size };
@@ -73,6 +71,7 @@ namespace nall {
       for(unsigned n = 0; n < size; n++) integer(array[n]);
     }
 
+    //copy
     serializer& operator=(const serializer &s) {
       if(idata) delete[] idata;
 
@@ -89,6 +88,24 @@ namespace nall {
       operator=(s);
     }
 
+    //move
+    serializer& operator=(serializer &&s) {
+      if(idata) delete[] idata;
+
+      imode = s.imode;
+      idata = s.idata;
+      isize = s.isize;
+      icapacity = s.icapacity;
+
+      s.idata = 0;
+      return *this;
+    }
+
+    serializer(serializer &&s) {
+      operator=(move(s));
+    }
+
+    //construction
     serializer() {
       imode = Size;
       idata = 0;

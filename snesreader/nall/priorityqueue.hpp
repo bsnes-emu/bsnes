@@ -14,7 +14,7 @@ namespace nall {
   //O(1)     find   (tick)
   //O(log n) insert (enqueue)
   //O(log n) remove (dequeue)
-  template<typename type_t> class priority_queue : noncopyable {
+  template<typename type_t> class priority_queue {
   public:
     inline void tick(unsigned ticks) {
       basecounter += ticks;
@@ -85,6 +85,9 @@ namespace nall {
     ~priority_queue() {
       delete[] heap;
     }
+
+    priority_queue& operator=(const priority_queue&) = delete;
+    priority_queue(const priority_queue&) = delete;
 
   private:
     function<void (type_t)> callback;

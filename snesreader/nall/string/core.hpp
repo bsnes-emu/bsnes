@@ -3,15 +3,6 @@
 
 namespace nall {
 
-inline string string::printf(const char *fmt, ...) {
-  static char text[4096];
-  va_list args;
-  va_start(args, fmt);
-  vsprintf(text, fmt, args);
-  va_end(args);
-  return text;
-}
-
 void string::reserve(size_t size_) {
   if(size_ > size) {
     size = size_;
@@ -74,8 +65,22 @@ string::string(const string &value) {
   data = strdup(value);
 }
 
+string::string(string &&source) {
+  size = source.size;
+  data = source.data;
+  source.data = 0;
+}
+
 string& string::operator=(const string &value) {
   assign(value);
+  return *this;
+}
+
+string& string::operator=(string &&source) {
+  if(data) free(data);
+  size = source.size;
+  data = source.data;
+  source.data = 0;
   return *this;
 }
 
@@ -113,6 +118,15 @@ int lstring::find(const char *key) {
   return -1;
 }
 
-};
+inline lstring::lstring() {
+}
+
+inline lstring::lstring(std::initializer_list<string> list) {
+  for(const string *s = list.begin(); s != list.end(); ++s) {
+    operator<<(*s);
+  }
+}
+
+}
 
 #endif

@@ -23,7 +23,7 @@ namespace nall {
     #endif
   }
 
-  class file : noncopyable {
+  class file {
   public:
     enum FileMode { mode_read, mode_write, mode_readwrite, mode_writeread };
     enum SeekMode { seek_absolute, seek_relative };
@@ -217,6 +217,9 @@ namespace nall {
     ~file() {
       close();
     }
+
+    file& operator=(const file&) = delete;
+    file(const file&) = delete;
 
   private:
     enum { buffer_size = 1 << 12, buffer_mask = buffer_size - 1 };

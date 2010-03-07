@@ -17,6 +17,8 @@ extern "C" char* uncompressStream(int, int);  //micro-bunzip
 #include <nall/string.hpp>
 using namespace nall;
 
+#include "xml.cpp"
+
 dllexport const char* snesreader_supported() {
   //libjma does not work on 64-bit architectures
   #if !defined(__amd64) && !defined(_M_X64)
@@ -197,8 +199,9 @@ bool snesreader_load_jma(const char *filename, uint8_t *&data, unsigned &size) {
   }
 }
 
-dllexport bool snesreader_load(string &filename, uint8_t *&data, unsigned &size) {
+dllexport bool snesreader_load(string &filename, string &xmldata, uint8_t *&data, unsigned &size) {
   if(file::exists(filename) == false) return false;
+  xmldata = "";
 
   bool success = false;
   if(striend(filename, ".zip")
@@ -228,5 +231,6 @@ dllexport bool snesreader_load(string &filename, uint8_t *&data, unsigned &size)
   //remove copier header, if it exists
   if((size & 0x7fff) == 512) memmove(data, data + 512, size -= 512);
 
+  xml.generate(xmldata, data, size);
   return true;
 }

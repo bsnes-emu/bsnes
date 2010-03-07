@@ -3,8 +3,8 @@ include nall/Makefile
 qtlibs := QtCore QtGui
 include nall/qt/Makefile
 
-c     := $(compiler)
-cpp   := $(subst cc,++,$(compiler))
+c     := $(compiler) -std=gnu99
+cpp   := $(subst cc,++,$(compiler)) -std=gnu++0x
 flags := -O3 -I. -Iobj -fomit-frame-pointer
 link  :=
 

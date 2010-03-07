@@ -16,7 +16,7 @@
 #endif
 
 namespace nall {
-  struct library : noncopyable {
+  struct library {
     bool opened() const { return handle; }
     bool open(const char*);
     void* sym(const char*);
@@ -24,6 +24,9 @@ namespace nall {
 
     library() : handle(0) {}
     ~library() { close(); }
+
+    library& operator=(const library&) = delete;
+    library(const library&) = delete;
 
   private:
     uintptr_t handle;

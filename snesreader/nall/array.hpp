@@ -2,8 +2,11 @@
 #define NALL_ARRAY_HPP
 
 #include <stdlib.h>
+#include <initializer_list>
 #include <nall/algorithm.hpp>
 #include <nall/bit.hpp>
+#include <nall/concept.hpp>
+#include <nall/traits.hpp>
 
 namespace nall {
   //dynamic vector array
@@ -57,18 +60,18 @@ namespace nall {
       memset(pool, 0, buffersize * sizeof(T));
     }
 
-    array() {
-      pool = 0;
-      poolsize = 0;
-      buffersize = 0;
+    array() : pool(0), poolsize(0), buffersize(0) {
     }
 
-    ~array() { reset(); }
-
-    array(const array &source) : pool(0) {
-      operator=(source);
+    array(std::initializer_list<T> list) : pool(0), poolsize(0), buffersize(0) {
+      for(const T *p = list.begin(); p != list.end(); ++p) add(*p);
     }
 
+    ~array() {
+      reset();
+    }
+
+    //copy
     array& operator=(const array &source) {
       if(pool) free(pool);
       buffersize = source.buffersize;
@@ -78,6 +81,25 @@ namespace nall {
       return *this;
     }
 
+    array(const array &source) : pool(0) {
+      operator=(source);
+    }
+
+    //move
+    array& operator=(array &&source) {
+      if(pool) free(pool);
+      pool = source.pool;
+      poolsize = source.poolsize;
+      buffersize = source.buffersize;
+      source.pool = 0;
+      return *this;
+    }
+
+    array(array &&source) {
+      operator=(move(source));
+    }
+
+    //index
     inline T& operator[](unsigned index) {
       if(index >= buffersize) resize(index + 1);
       if(index >= buffersize) throw "array[] out of bounds";
@@ -89,6 +111,8 @@ namespace nall {
       return pool[index];
     }
   };
+
+  template<typename T> struct has_size<array<T>> { enum { value = true }; };
 }
 
 #endif

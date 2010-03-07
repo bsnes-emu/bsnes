@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <nall/concept.hpp>
 #include <nall/stdint.hpp>
 #include <nall/utf8.hpp>
 #include <nall/vector.hpp>
@@ -26,11 +27,6 @@ inline intmax_t  strsigned  (const char *str);
 inline uintmax_t strunsigned(const char *str);
 inline uintmax_t strbin     (const char *str);
 inline double    strdouble  (const char *str);
-inline size_t strhex     (char *str, uintmax_t value, size_t length = 0);
-inline size_t strsigned  (char *str, intmax_t  value, size_t length = 0);
-inline size_t strunsigned(char *str, uintmax_t value, size_t length = 0);
-inline size_t strbin     (char *str, uintmax_t value, size_t length = 0);
-inline size_t strdouble  (char *str, double    value, size_t length = 0);
 inline bool match(const char *pattern, const char *str);
 inline bool strint (const char *str, int &result);
 inline bool strmath(const char *str, int &result);
@@ -49,8 +45,6 @@ namespace nall {
 
   class string {
   public:
-    static string printf(const char*, ...);
-
     inline void reserve(size_t);
     inline unsigned length() const;
 
@@ -73,7 +67,9 @@ namespace nall {
     inline string();
     inline string(const char*);
     inline string(const string&);
+    inline string(string&&);
     inline string& operator=(const string&);
+    inline string& operator=(string&&);
     inline ~string();
 
     inline bool readfile(const char*);
@@ -90,18 +86,25 @@ namespace nall {
   #endif
   };
 
-  class lstring : public vector<string> {
+  class lstring : public linear_vector<string> {
   public:
     template<typename T> inline lstring& operator<<(T value);
 
     inline int find(const char*);
     inline void split (const char*, const char*, unsigned = 0);
     inline void qsplit(const char*, const char*, unsigned = 0);
+
+    lstring();
+    lstring(std::initializer_list<string>);
   };
+
+  template<typename... Args> inline string sprint(const char *s, Args... args);
+  template<typename... Args> inline void print(const char *s, Args... args);
 };
 
 inline size_t strlcpy(nall::string &dest, const char *src, size_t length);
 inline size_t strlcat(nall::string &dest, const char *src, size_t length);
+
 inline nall::string& strlower(nall::string &str);
 inline nall::string& strupper(nall::string &str);
 inline nall::string& strtr(nall::string &dest, const char *before, const char *after);
@@ -113,10 +116,11 @@ inline nall::string& rtrim_once(nall::string &str, const char *key = " ");
 inline nall::string& trim_once (nall::string &str, const char *key = " ");
 
 inline nall::string substr(const char *src, size_t start = 0, size_t length = 0);
-inline nall::string strhex     (uintmax_t value);
-inline nall::string strsigned  (intmax_t  value);
-inline nall::string strunsigned(uintmax_t value);
-inline nall::string strbin     (uintmax_t value);
-inline nall::string strdouble  (double    value);
+template<unsigned length = 0, char padding = '0'> inline nall::string strhex(uintmax_t value);
+template<unsigned length = 0, char padding = '0'> inline nall::string strsigned(intmax_t value);
+template<unsigned length = 0, char padding = '0'> inline nall::string strunsigned(uintmax_t value);
+template<unsigned length = 0, char padding = '0'> inline nall::string strbin(uintmax_t value);
+inline size_t strdouble(char *str, double value);
+inline nall::string strdouble(double value);
 
 #endif

@@ -2,8 +2,7 @@
 #define NALL_STRING_CAST_HPP
 
 namespace nall {
-  //this is needed, as C++98 does not support explicit template specialization inside classes;
-  //redundant memory allocation should hopefully be avoided via compiler optimizations.
+  //this is needed, as C++0x does not support explicit template specialization inside classes
   template<> inline string to_string<bool>         (bool v)          { return v ? "true" : "false"; }
   template<> inline string to_string<signed int>   (signed int v)    { return strsigned(v); }
   template<> inline string to_string<unsigned int> (unsigned int v)  { return strunsigned(v); }
@@ -25,6 +24,6 @@ namespace nall {
   template<> inline string to_string<const QString&>(const QString &v) { return v.toUtf8().constData(); }
   string::operator QString() const { return QString::fromUtf8(*this); }
   #endif
-};
+}
 
 #endif

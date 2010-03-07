@@ -6,7 +6,7 @@
 #include <nall/utility.hpp>
 
 namespace nall {
-  class dictionary : noncopyable {
+  class dictionary {
   public:
     string operator[](const char *input) {
       for(unsigned i = 0; i < index_input.size(); i++) {
@@ -63,6 +63,9 @@ namespace nall {
     ~dictionary() {
       reset();
     }
+
+    dictionary& operator=(const dictionary&) = delete;
+    dictionary(const dictionary&) = delete;
 
   protected:
     lstring index_input;
