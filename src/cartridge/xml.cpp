@@ -1,6 +1,7 @@
 #ifdef CARTRIDGE_CPP
 
 void Cartridge::parse_xml(const lstring &list) {
+  mapping.reset();
   parse_xml_cartridge(list[0]);
 
   if(mode == Mode::BsxSlotted) {
