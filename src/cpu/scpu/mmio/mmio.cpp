@@ -90,8 +90,11 @@ void sCPU::mmio_w4202(uint8 data) {
 //WRMPYB
 void sCPU::mmio_w4203(uint8 data) {
   status.wrmpyb = data;
-  status.wrmpyctr = 9;
   status.r4216 = 0;
+
+  //perform multiplication over the next 8 cycles (+1 to skip this cycle)
+  status.wrmpyctr = 9;
+  status.wrdivctr = 0;
 }
 
 //WRDIVL
@@ -107,9 +110,11 @@ void sCPU::mmio_w4205(uint8 data) {
 //WRDIVB
 void sCPU::mmio_w4206(uint8 data) {
   status.wrdivb = data;
-  status.wrdivctr = 9;
-  status.r4214 = 0;
-  status.r4216 = 0;
+  status.r4216 = status.wrdiva;
+
+  //perform division over the next 16 cycles (+1 to skip this cycle)
+  status.wrdivctr = 17;
+  status.wrmpyctr = 0;
 }
 
 //HTIMEL

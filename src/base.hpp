@@ -1,4 +1,4 @@
-static const char bsnesVersion[] = "061.03";
+static const char bsnesVersion[] = "062";
 static const char bsnesTitle[] = "bsnes";
 static const unsigned bsnesSerializerVersion = 6;
 

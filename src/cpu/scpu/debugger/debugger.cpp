@@ -65,16 +65,16 @@ bool sCPUDebugger::auto_joypad_poll() { return status.auto_joypad_poll; }
 unsigned sCPUDebugger::pio_bits() { return status.pio; }
 
 //$4202
-unsigned sCPUDebugger::multiplicand() { return status.mul_a; }
+unsigned sCPUDebugger::multiplicand() { return status.wrmpya; }
 
 //$4203
-unsigned sCPUDebugger::multiplier() { return status.mul_b; }
+unsigned sCPUDebugger::multiplier() { return status.wrmpyb; }
 
 //$4204-$4205
-unsigned sCPUDebugger::dividend() { return status.div_a; }
+unsigned sCPUDebugger::dividend() { return status.wrdiva; }
 
 //$4206
-unsigned sCPUDebugger::divisor() { return status.div_b; }
+unsigned sCPUDebugger::divisor() { return status.wrdivb; }
 
 //$4207-$4208
 unsigned sCPUDebugger::htime() { return status.hirq_pos; }
