@@ -11,8 +11,6 @@ Configuration::Configuration() {
   cpu.version         = 2;
   cpu.ntsc_clock_rate = 21477272;
   cpu.pal_clock_rate  = 21281370;
-  cpu.alu_mul_delay   = 2;
-  cpu.alu_div_delay   = 2;
   cpu.wram_init_value = 0x55;
 
   smp.ntsc_clock_rate = 24607104;  //32040.5 * 768

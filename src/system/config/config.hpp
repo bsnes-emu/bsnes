@@ -8,8 +8,6 @@ struct Configuration {
     unsigned version;
     unsigned ntsc_clock_rate;
     unsigned pal_clock_rate;
-    unsigned alu_mul_delay;
-    unsigned alu_div_delay;
     unsigned wram_init_value;
   } cpu;
 

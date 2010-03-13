@@ -23,8 +23,6 @@ Configuration::Configuration() {
   attach(SNES::config.cpu.version         =        2, "cpu.version", "Valid version(s) are: 1, 2");
   attach(SNES::config.cpu.ntsc_clock_rate = 21477272, "cpu.ntscClockRate");
   attach(SNES::config.cpu.pal_clock_rate  = 21281370, "cpu.palClockRate");
-  attach(SNES::config.cpu.alu_mul_delay   =        2, "cpu.aluMulDelay");
-  attach(SNES::config.cpu.alu_div_delay   =        2, "cpu.aluDivDelay");
   attach(SNES::config.cpu.wram_init_value =     0x55, "cpu.wramInitValue");
 
   attach(SNES::config.smp.ntsc_clock_rate = 24607104, "smp.ntscClockRate");

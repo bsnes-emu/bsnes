@@ -7,13 +7,6 @@ void sCPU::queue_event(unsigned id) {
       status.irq_lock = false;
     } break;
 
-    //ALU multiplication / division results are not immediately calculated;
-    //the exact formula for the calculations are unknown, but this lock at least
-    //allows emulation to avoid returning to fully computed results too soon.
-    case EventAluLockRelease: {
-      status.alu_lock = false;
-    } break;
-
     //S-CPU WRAM consists of two 64kbyte DRAM chips, which must be refreshed
     //once per scanline to avoid memory decay.
     case EventDramRefresh: {

@@ -1,7 +1,6 @@
   enum {
     EventNone,
     EventIrqLockRelease,
-    EventAluLockRelease,
     EventDramRefresh,
     EventHdmaInit,
     EventHdmaRun,

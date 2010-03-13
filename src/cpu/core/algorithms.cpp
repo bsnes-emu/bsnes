@@ -1,71 +1,51 @@
 #ifdef CPUCORE_CPP
 
 inline void CPUcore::op_adc_b() {
-  int r;
-  if(regs.p.d) {
-    uint8 n0 = (regs.a.l     ) & 15;
-    uint8 n1 = (regs.a.l >> 4) & 15;
-    n0 += (rd.l & 15) + regs.p.c;
-    if(n0 > 9) {
-      n0 = (n0 - 10) & 15;
-      n1++;
-    }
-    n1 += ((rd.l >> 4) & 15);
-    if(n1 > 9) {
-      n1 = (n1 - 10) & 15;
-      regs.p.c = 1;
-    } else {
-      regs.p.c = 0;
-    }
-    r = (n1 << 4) | n0;
+  int result;
+
+  if(!regs.p.d) {
+    result = regs.a.l + rd.l + regs.p.c;
   } else {
-    r = regs.a.l + rd.l + regs.p.c;
-    regs.p.c = r > 0xff;
+    result = (regs.a.l & 0x0f) + (rd.l & 0x0f) + (regs.p.c << 0);
+    if(result > 0x09) result += 0x06;
+    regs.p.c = result > 0x0f;
+    result = (regs.a.l & 0xf0) + (rd.l & 0xf0) + (regs.p.c << 4) + (result & 0x0f);
   }
-  regs.p.n = r & 0x80;
-  regs.p.v = ~(regs.a.l ^ rd.l) & (regs.a.l ^ r) & 0x80;
-  regs.p.z = (uint8)r == 0;
-  regs.a.l = r;
+
+  regs.p.v = ~(regs.a.l ^ rd.l) & (regs.a.l ^ result) & 0x80;
+  if(regs.p.d && result > 0x9f) result += 0x60;
+  regs.p.c = result > 0xff;
+  regs.p.n = result & 0x80;
+  regs.p.z = (uint8_t)result == 0;
+
+  regs.a.l = result;
 }
 
 inline void CPUcore::op_adc_w() {
-  int r;
-  if(regs.p.d) {
-    uint8 n0 = (regs.a.w      ) & 15;
-    uint8 n1 = (regs.a.w >>  4) & 15;
-    uint8 n2 = (regs.a.w >>  8) & 15;
-    uint8 n3 = (regs.a.w >> 12) & 15;
-    n0 += (rd.w & 15) + regs.p.c;
-    if(n0 > 9) {
-      n0 = (n0 - 10) & 15;
-      n1++;
-    }
-    n1 += ((rd.w >> 4) & 15);
-    if(n1 > 9) {
-      n1 = (n1 - 10) & 15;
-      n2++;
-    }
-    n2 += ((rd.w >> 8) & 15);
-    if(n2 > 9) {
-      n2 = (n2 - 10) & 15;
-      n3++;
-    }
-    n3 += ((rd.w >> 12) & 15);
-    if(n3 > 9) {
-      n3 = (n3 - 10) & 15;
-      regs.p.c = 1;
-    } else {
-      regs.p.c = 0;
-    }
-    r = (n3 << 12) | (n2 << 8) | (n1 << 4) | n0;
+  int result;
+
+  if(!regs.p.d) {
+    result = regs.a.w + rd.w + regs.p.c;
   } else {
-    r = regs.a.w + rd.w + regs.p.c;
-    regs.p.c = r > 0xffff;
+    result = (regs.a.w & 0x000f) + (rd.w & 0x000f) + (regs.p.c <<  0);
+    if(result > 0x0009) result += 0x0006;
+    regs.p.c = result > 0x000f;
+    result = (regs.a.w & 0x00f0) + (rd.w & 0x00f0) + (regs.p.c <<  4) + (result & 0x000f);
+    if(result > 0x009f) result += 0x0060;
+    regs.p.c = result > 0x00ff;
+    result = (regs.a.w & 0x0f00) + (rd.w & 0x0f00) + (regs.p.c <<  8) + (result & 0x00ff);
+    if(result > 0x09ff) result += 0x0600;
+    regs.p.c = result > 0x0fff;
+    result = (regs.a.w & 0xf000) + (rd.w & 0xf000) + (regs.p.c << 12) + (result & 0x0fff);
   }
-  regs.p.n = r & 0x8000;
-  regs.p.v = ~(regs.a.w ^ rd.w) & (regs.a.w ^ r) & 0x8000;
-  regs.p.z = (uint16)r == 0;
-  regs.a.w = r;
+
+  regs.p.v = ~(regs.a.w ^ rd.w) & (regs.a.w ^ result) & 0x8000;
+  if(regs.p.d && result > 0x9fff) result += 0x6000;
+  regs.p.c = result > 0xffff;
+  regs.p.n = result & 0x8000;
+  regs.p.z = (uint16_t)result == 0;
+
+  regs.a.w = result;
 }
 
 inline void CPUcore::op_and_b() {
@@ -195,71 +175,53 @@ inline void CPUcore::op_ora_w() {
 }
 
 inline void CPUcore::op_sbc_b() {
-  int r;
-  if(regs.p.d) {
-    uint8 n0 = (regs.a.l     ) & 15;
-    uint8 n1 = (regs.a.l >> 4) & 15;
-    n0 -= ((rd.l     ) & 15) + !regs.p.c;
-    n1 -= ((rd.l >> 4) & 15);
-    if(n0 > 9) {
-      n0 += 10;
-      n1--;
-    }
-    if(n1 > 9) {
-      n1 += 10;
-      regs.p.c = 0;
-    } else {
-      regs.p.c = 1;
-    }
-    r = (n1 << 4) | (n0);
+  int result;
+  rd.l ^= 0xff;
+
+  if(!regs.p.d) {
+    result = regs.a.l + rd.l + regs.p.c;
   } else {
-    r = regs.a.l - rd.l - !regs.p.c;
-    regs.p.c = r >= 0;
+    result = (regs.a.l & 0x0f) + (rd.l & 0x0f) + (regs.p.c << 0);
+    if(result <= 0x0f) result -= 0x06;
+    regs.p.c = result > 0x0f;
+    result = (regs.a.l & 0xf0) + (rd.l & 0xf0) + (regs.p.c << 4) + (result & 0x0f);
   }
-  regs.p.n = r & 0x80;
-  regs.p.v = (regs.a.l ^ rd.l) & (regs.a.l ^ r) & 0x80;
-  regs.p.z = (uint8)r == 0;
-  regs.a.l = r;
+
+  regs.p.v = ~(regs.a.l ^ rd.l) & (regs.a.l ^ result) & 0x80;
+  if(regs.p.d && result <= 0xff) result -= 0x60;
+  regs.p.c = result > 0xff;
+  regs.p.n = result & 0x80;
+  regs.p.z = (uint8_t)result == 0;
+
+  regs.a.l = result;
 }
 
 inline void CPUcore::op_sbc_w() {
-  int r;
-  if(regs.p.d) {
-    uint8 n0 = (regs.a.w      ) & 15;
-    uint8 n1 = (regs.a.w >>  4) & 15;
-    uint8 n2 = (regs.a.w >>  8) & 15;
-    uint8 n3 = (regs.a.w >> 12) & 15;
-    n0 -= ((rd.w      ) & 15) + !regs.p.c;
-    n1 -= ((rd.w >>  4) & 15);
-    n2 -= ((rd.w >>  8) & 15);
-    n3 -= ((rd.w >> 12) & 15);
-    if(n0 > 9) {
-      n0 += 10;
-      n1--;
-    }
-    if(n1 > 9) {
-      n1 += 10;
-      n2--;
-    }
-    if(n2 > 9) {
-      n2 += 10;
-      n3--;
-    }
-    if(n3 > 9) {
-      n3 += 10;
-      regs.p.c = 0;
-    } else {
-      regs.p.c = 1;
-    }
-    r = (n3 << 12) | (n2 << 8) | (n1 << 4) | (n0);
+  int result;
+  rd.w ^= 0xffff;
+
+  if(!regs.p.d) {
+    result = regs.a.w + rd.w + regs.p.c;
   } else {
-    r = regs.a.w - rd.w - !regs.p.c;
-    regs.p.c = r >= 0;
+    result = (regs.a.w & 0x000f) + (rd.w & 0x000f) + (regs.p.c <<  0);
+    if(result <= 0x000f) result -= 0x0006;
+    regs.p.c = result > 0x000f;
+    result = (regs.a.w & 0x00f0) + (rd.w & 0x00f0) + (regs.p.c <<  4) + (result & 0x000f);
+    if(result <= 0x00ff) result -= 0x0060;
+    regs.p.c = result > 0x00ff;
+    result = (regs.a.w & 0x0f00) + (rd.w & 0x0f00) + (regs.p.c <<  8) + (result & 0x00ff);
+    if(result <= 0x0fff) result -= 0x0600;
+    regs.p.c = result > 0x0fff;
+    result = (regs.a.w & 0xf000) + (rd.w & 0xf000) + (regs.p.c << 12) + (result & 0x0fff);
   }
-  regs.p.n = r & 0x8000;
-  regs.p.v = (regs.a.w ^ rd.w) & (regs.a.w ^ r) & 0x8000;
-  regs.p.z = (uint16)r == 0;
-  regs.a.w = r;
+
+  regs.p.v = ~(regs.a.w ^ rd.w) & (regs.a.w ^ result) & 0x8000;
+  if(regs.p.d && result <= 0xffff) result -= 0x6000;
+  regs.p.c = result > 0xffff;
+  regs.p.n = result & 0x8000;
+  regs.p.z = (uint16_t)result == 0;
+
+  regs.a.w = result;
 }
 
 inline void CPUcore::op_inc_b() {

@@ -13,7 +13,6 @@ void sCPU::serialize(serializer &s) {
   s.integer(status.line_clocks);
 
   s.integer(status.irq_lock);
-  s.integer(status.alu_lock);
   s.integer(status.dram_refresh_position);
 
   s.integer(status.nmi_valid);
@@ -50,11 +49,13 @@ void sCPU::serialize(serializer &s) {
 
   s.integer(status.pio);
 
-  s.integer(status.mul_a);
-  s.integer(status.mul_b);
+  s.integer(status.wrmpya);
+  s.integer(status.wrmpyb);
+  s.integer(status.wrmpyctr);
 
-  s.integer(status.div_a);
-  s.integer(status.div_b);
+  s.integer(status.wrdiva);
+  s.integer(status.wrdivb);
+  s.integer(status.wrdivctr);
 
   s.integer(status.hirq_pos);
   s.integer(status.virq_pos);

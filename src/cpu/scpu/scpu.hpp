@@ -12,7 +12,7 @@ public:
 
   priority_queue<unsigned> event;
 
-  struct {
+  struct Status {
     bool interrupt_pending;
     uint16 interrupt_vector;
 
@@ -21,7 +21,6 @@ public:
 
     //timing
     bool irq_lock;
-    bool alu_lock;
     unsigned dram_refresh_position;
 
     bool nmi_valid;
@@ -65,11 +64,14 @@ public:
     uint8 pio;
 
     //$4202-$4203
-    uint8 mul_a, mul_b;
+    uint8 wrmpya;
+    uint8 wrmpyb;
+    unsigned wrmpyctr;
 
     //$4204-$4206
-    uint16 div_a;
-    uint8  div_b;
+    uint16 wrdiva;
+    uint8  wrdivb;
+    unsigned wrdivctr;
 
     //$4207-$420a
     uint16 hirq_pos, virq_pos;

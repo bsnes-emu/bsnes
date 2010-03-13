@@ -84,36 +84,32 @@ void sCPU::mmio_w4201(uint8 data) {
 
 //WRMPYA
 void sCPU::mmio_w4202(uint8 data) {
-  status.mul_a = data;
+  status.wrmpya = data;
 }
 
 //WRMPYB
 void sCPU::mmio_w4203(uint8 data) {
-  status.mul_b = data;
-  status.r4216 = status.mul_a * status.mul_b;
-
-  status.alu_lock = true;
-  event.enqueue(config.cpu.alu_mul_delay, EventAluLockRelease);
+  status.wrmpyb = data;
+  status.wrmpyctr = 9;
+  status.r4216 = 0;
 }
 
 //WRDIVL
 void sCPU::mmio_w4204(uint8 data) {
-  status.div_a = (status.div_a & 0xff00) | (data);
+  status.wrdiva = (status.wrdiva & 0xff00) | (data);
 }
 
 //WRDIVH
 void sCPU::mmio_w4205(uint8 data) {
-  status.div_a = (status.div_a & 0x00ff) | (data << 8);
+  status.wrdiva = (status.wrdiva & 0x00ff) | (data << 8);
 }
 
 //WRDIVB
 void sCPU::mmio_w4206(uint8 data) {
-  status.div_b = data;
-  status.r4214 = (status.div_b) ? status.div_a / status.div_b : 0xffff;
-  status.r4216 = (status.div_b) ? status.div_a % status.div_b : status.div_a;
-
-  status.alu_lock = true;
-  event.enqueue(config.cpu.alu_div_delay, EventAluLockRelease);
+  status.wrdivb = data;
+  status.wrdivctr = 9;
+  status.r4214 = 0;
+  status.r4216 = 0;
 }
 
 //HTIMEL
@@ -208,37 +204,33 @@ uint8 sCPU::mmio_r4213() {
 
 //RDDIVL
 uint8 sCPU::mmio_r4214() {
-  if(status.alu_lock) return 0;
   return status.r4214;
 }
 
 //RDDIVH
 uint8 sCPU::mmio_r4215() {
-  if(status.alu_lock) return 0;
   return status.r4214 >> 8;
 }
 
 //RDMPYL
 uint8 sCPU::mmio_r4216() {
-  if(status.alu_lock) return 0;
   return status.r4216;
 }
 
 //RDMPYH
 uint8 sCPU::mmio_r4217() {
-  if(status.alu_lock) return 0;
   return status.r4216 >> 8;
 }
 
 //TODO: handle reads during joypad polling (v=225-227)
-uint8 sCPU::mmio_r4218() { return status.joy1l; } //JOY1L
-uint8 sCPU::mmio_r4219() { return status.joy1h; } //JOY1H
-uint8 sCPU::mmio_r421a() { return status.joy2l; } //JOY2L
-uint8 sCPU::mmio_r421b() { return status.joy2h; } //JOY2H
-uint8 sCPU::mmio_r421c() { return status.joy3l; } //JOY3L
-uint8 sCPU::mmio_r421d() { return status.joy3h; } //JOY3H
-uint8 sCPU::mmio_r421e() { return status.joy4l; } //JOY4L
-uint8 sCPU::mmio_r421f() { return status.joy4h; } //JOY4H
+uint8 sCPU::mmio_r4218() { return status.joy1l; }  //JOY1L
+uint8 sCPU::mmio_r4219() { return status.joy1h; }  //JOY1H
+uint8 sCPU::mmio_r421a() { return status.joy2l; }  //JOY2L
+uint8 sCPU::mmio_r421b() { return status.joy2h; }  //JOY2H
+uint8 sCPU::mmio_r421c() { return status.joy3l; }  //JOY3L
+uint8 sCPU::mmio_r421d() { return status.joy3h; }  //JOY3H
+uint8 sCPU::mmio_r421e() { return status.joy4l; }  //JOY4L
+uint8 sCPU::mmio_r421f() { return status.joy4h; }  //JOY4H
 
 //DMAPx
 uint8 sCPU::mmio_r43x0(uint8 i) {
@@ -391,12 +383,14 @@ void sCPU::mmio_reset() {
   status.pio = 0xff;
 
   //$4202-$4203
-  status.mul_a = 0xff;
-  status.mul_b = 0xff;
+  status.wrmpya = 0xff;
+  status.wrmpyb = 0xff;
+  status.wrmpyctr = 0;
 
   //$4204-$4206
-  status.div_a = 0xffff;
-  status.div_b = 0xff;
+  status.wrdiva = 0xffff;
+  status.wrdivb = 0xff;
+  status.wrdivctr = 0;
 
   //$4207-$420a
   status.hirq_pos = 0x01ff;
