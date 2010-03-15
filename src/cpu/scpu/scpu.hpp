@@ -19,7 +19,10 @@ public:
     unsigned clock_count;
     unsigned line_clocks;
 
+    //======
     //timing
+    //======
+
     bool irq_lock;
     unsigned dram_refresh_position;
 
@@ -37,7 +40,10 @@ public:
 
     bool reset_pending;
 
+    //===
     //DMA
+    //===
+
     bool dma_active;
     unsigned dma_counter;
     unsigned dma_clocks;
@@ -45,7 +51,9 @@ public:
     bool hdma_pending;
     bool hdma_mode;  //0 = init, 1 = run
 
+    //====
     //MMIO
+    //====
 
     //$2181-$2183
     uint32 wram_addr;
@@ -66,12 +74,10 @@ public:
     //$4202-$4203
     uint8 wrmpya;
     uint8 wrmpyb;
-    unsigned wrmpyctr;
 
     //$4204-$4206
     uint16 wrdiva;
     uint8  wrdivb;
-    unsigned wrdivctr;
 
     //$4207-$420a
     uint16 hirq_pos, virq_pos;
@@ -80,8 +86,8 @@ public:
     unsigned rom_speed;
 
     //$4214-$4217
-    uint16 r4214;
-    uint16 r4216;
+    uint16 rddiv;
+    uint16 rdmpy;
 
     //$4218-$421f
     uint8 joy1l, joy1h;
@@ -89,6 +95,12 @@ public:
     uint8 joy3l, joy3h;
     uint8 joy4l, joy4h;
   } status;
+
+  struct ALU {
+    unsigned mpyctr;
+    unsigned divctr;
+    unsigned shift;
+  } alu;
 
   void power();
   void reset();

@@ -52,37 +52,26 @@ void sCPU::scanline() {
   }
 }
 
-//used to test for ALU and H/DMA, which can trigger on the edge of every opcode cycle
-void sCPU::cycle_edge() {
-  //===
-  //ALU
-  //===
-
-  if(status.wrmpyctr) {
-    //MUL performs eight iterations; but because cycle_edge() is called after $4203 write,
-    //a ninth iteration is added and ignored. counter is inverted to indicate shift position
-    if(--status.wrmpyctr < 8) {
-      unsigned shift = 7 - status.wrmpyctr;
-      if((status.wrmpya >> shift) & 1) status.r4216 += status.wrmpyb << shift;
-    }
+void sCPU::alu_edge() {
+  if(alu.mpyctr) {
+    alu.mpyctr--;
+    if(status.rddiv & 1) status.rdmpy += alu.shift;
+    status.rddiv >>= 1;
+    alu.shift <<= 1;
   }
 
-  if(status.wrdivctr) {
-    //same as MUL; but with sixteen iterations, and counter is not inverted
-    if(--status.wrdivctr < 16) {
-      unsigned shift = status.wrdivctr;
-      status.r4214 <<= 1;
-      if(status.r4216 >= (status.wrdivb << shift)) {
-        status.r4216 -= (status.wrdivb << shift);
-        status.r4214 |= 1;
-      }
+  if(alu.divctr) {
+    alu.divctr--;
+    status.rddiv <<= 1;
+    if(status.rdmpy >= alu.shift) {
+      status.rdmpy -= alu.shift;
+      status.rddiv |= 1;
     }
+    alu.shift >>= 1;
   }
+}
 
-  //====
-  //HDMA
-  //====
-
+void sCPU::dma_edge() {
   while(cycle_edge_state) {
     switch(bit::lowest(cycle_edge_state)) {
       case EventFlagHdmaInit: {

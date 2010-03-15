@@ -51,19 +51,17 @@ void sCPU::serialize(serializer &s) {
 
   s.integer(status.wrmpya);
   s.integer(status.wrmpyb);
-  s.integer(status.wrmpyctr);
 
   s.integer(status.wrdiva);
   s.integer(status.wrdivb);
-  s.integer(status.wrdivctr);
 
   s.integer(status.hirq_pos);
   s.integer(status.virq_pos);
 
   s.integer(status.rom_speed);
 
-  s.integer(status.r4214);
-  s.integer(status.r4216);
+  s.integer(status.rddiv);
+  s.integer(status.rdmpy);
 
   s.integer(status.joy1l);
   s.integer(status.joy1h);
@@ -73,6 +71,10 @@ void sCPU::serialize(serializer &s) {
   s.integer(status.joy3h);
   s.integer(status.joy4l);
   s.integer(status.joy4h);
+
+  s.integer(alu.mpyctr);
+  s.integer(alu.divctr);
+  s.integer(alu.shift);
 
   for(unsigned i = 0; i < 8; i++) {
     s.integer(channel[i].dma_enabled);

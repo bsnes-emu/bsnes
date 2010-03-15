@@ -88,12 +88,14 @@ void sCPU::mmio_w4202(uint8 data) {
 
 //WRMPYB
 void sCPU::mmio_w4203(uint8 data) {
-  status.wrmpyb = data;
-  status.r4216 = 0;
+  status.rdmpy = 0;
+  if(alu.mpyctr || alu.divctr) return;
 
-  //perform multiplication over the next 8 cycles (+1 to skip this cycle)
-  status.wrmpyctr = 9;
-  status.wrdivctr = 0;
+  status.wrmpyb = data;
+  status.rddiv = (status.wrmpyb << 8) | status.wrmpya;
+
+  alu.mpyctr = 8;  //perform multiplication over the next eight cycles
+  alu.shift = status.wrmpyb;
 }
 
 //WRDIVL
@@ -108,12 +110,13 @@ void sCPU::mmio_w4205(uint8 data) {
 
 //WRDIVB
 void sCPU::mmio_w4206(uint8 data) {
-  status.wrdivb = data;
-  status.r4216 = status.wrdiva;
+  status.rdmpy = status.wrdiva;
+  if(alu.mpyctr || alu.divctr) return;
 
-  //perform division over the next 16 cycles (+1 to skip this cycle)
-  status.wrdivctr = 17;
-  status.wrmpyctr = 0;
+  status.wrdivb = data;
+
+  alu.divctr = 16;  //perform division over the next sixteen cycles
+  alu.shift = status.wrdivb << 15;
 }
 
 //HTIMEL
@@ -208,22 +211,22 @@ uint8 sCPU::mmio_r4213() {
 
 //RDDIVL
 uint8 sCPU::mmio_r4214() {
-  return status.r4214;
+  return status.rddiv;
 }
 
 //RDDIVH
 uint8 sCPU::mmio_r4215() {
-  return status.r4214 >> 8;
+  return status.rddiv >> 8;
 }
 
 //RDMPYL
 uint8 sCPU::mmio_r4216() {
-  return status.r4216;
+  return status.rdmpy;
 }
 
 //RDMPYH
 uint8 sCPU::mmio_r4217() {
-  return status.r4216 >> 8;
+  return status.rdmpy >> 8;
 }
 
 //TODO: handle reads during joypad polling (v=225-227)
@@ -389,12 +392,10 @@ void sCPU::mmio_reset() {
   //$4202-$4203
   status.wrmpya = 0xff;
   status.wrmpyb = 0xff;
-  status.wrmpyctr = 0;
 
   //$4204-$4206
   status.wrdiva = 0xffff;
   status.wrdivb = 0xff;
-  status.wrdivctr = 0;
 
   //$4207-$420a
   status.hirq_pos = 0x01ff;
@@ -404,8 +405,8 @@ void sCPU::mmio_reset() {
   status.rom_speed = 8;
 
   //$4214-$4217
-  status.r4214 = 0x0000;
-  status.r4216 = 0x0000;
+  status.rddiv = 0x0000;
+  status.rdmpy = 0x0000;
 
   //$4218-$421f
   status.joy1l = 0x00;
@@ -416,19 +417,24 @@ void sCPU::mmio_reset() {
   status.joy3h = 0x00;
   status.joy4l = 0x00;
   status.joy4h = 0x00;
+
+  //ALU
+  alu.mpyctr = 0;
+  alu.divctr = 0;
+  alu.shift  = 0;
 }
 
 uint8 sCPU::mmio_read(unsigned addr) {
   addr &= 0xffff;
 
   //APU
-  if((addr & 0xffc0) == 0x2140) { //$2140-$217f
+  if((addr & 0xffc0) == 0x2140) {  //$2140-$217f
     scheduler.sync_cpusmp();
     return smp.port_read(addr & 3);
   }
 
   //DMA
-  if((addr & 0xff80) == 0x4300) { //$4300-$437f
+  if((addr & 0xff80) == 0x4300) {  //$4300-$437f
     unsigned i = (addr >> 4) & 7;
     switch(addr & 0xf) {
       case 0x0: return mmio_r43x0(i);
@@ -443,10 +449,10 @@ uint8 sCPU::mmio_read(unsigned addr) {
       case 0x9: return mmio_r43x9(i);
       case 0xa: return mmio_r43xa(i);
       case 0xb: return mmio_r43xb(i);
-      case 0xc: return regs.mdr; //unmapped
-      case 0xd: return regs.mdr; //unmapped
-      case 0xe: return regs.mdr; //unmapped
-      case 0xf: return mmio_r43xb(i); //mirror of $43xb
+      case 0xc: return regs.mdr;  //unmapped
+      case 0xd: return regs.mdr;  //unmapped
+      case 0xe: return regs.mdr;  //unmapped
+      case 0xf: return mmio_r43xb(i);  //mirror of $43xb
     }
   }
 
@@ -479,14 +485,14 @@ void sCPU::mmio_write(unsigned addr, uint8 data) {
   addr &= 0xffff;
 
   //APU
-  if((addr & 0xffc0) == 0x2140) { //$2140-$217f
+  if((addr & 0xffc0) == 0x2140) {  //$2140-$217f
     scheduler.sync_cpusmp();
     port_write(addr & 3, data);
     return;
   }
 
   //DMA
-  if((addr & 0xff80) == 0x4300) { //$4300-$437f
+  if((addr & 0xff80) == 0x4300) {  //$4300-$437f
     unsigned i = (addr >> 4) & 7;
     switch(addr & 0xf) {
       case 0x0: mmio_w43x0(i, data); return;
@@ -501,10 +507,10 @@ void sCPU::mmio_write(unsigned addr, uint8 data) {
       case 0x9: mmio_w43x9(i, data); return;
       case 0xa: mmio_w43xa(i, data); return;
       case 0xb: mmio_w43xb(i, data); return;
-      case 0xc: return; //unmapped
-      case 0xd: return; //unmapped
-      case 0xe: return; //unmapped
-      case 0xf: mmio_w43xb(i, data); return; //mirror of $43xb
+      case 0xc: return;  //unmapped
+      case 0xd: return;  //unmapped
+      case 0xe: return;  //unmapped
+      case 0xf: mmio_w43xb(i, data); return;  //mirror of $43xb
     }
   }
 
@@ -514,7 +520,7 @@ void sCPU::mmio_write(unsigned addr, uint8 data) {
     case 0x2182: mmio_w2182(data); return;
     case 0x2183: mmio_w2183(data); return;
     case 0x4016: mmio_w4016(data); return;
-    case 0x4017: return; //unmapped
+    case 0x4017: return;  //unmapped
     case 0x4200: mmio_w4200(data); return;
     case 0x4201: mmio_w4201(data); return;
     case 0x4202: mmio_w4202(data); return;

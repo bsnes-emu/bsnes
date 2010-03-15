@@ -17,7 +17,8 @@
   void add_clocks(unsigned clocks);
   void scanline();
 
-  alwaysinline void cycle_edge();
+  alwaysinline void alu_edge();
+  alwaysinline void dma_edge();
   alwaysinline void last_cycle();
 
   void timing_power();

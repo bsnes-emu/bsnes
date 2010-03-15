@@ -106,17 +106,17 @@ uint8 sCPU::dma_enabled_channels() {
 
 void sCPU::dma_run() {
   dma_add_clocks(8);
-  cycle_edge();
+  dma_edge();
 
   for(unsigned i = 0; i < 8; i++) {
     if(channel[i].dma_enabled == false) continue;
     dma_add_clocks(8);
-    cycle_edge();
+    dma_edge();
 
     unsigned index = 0;
     do {
       dma_transfer(channel[i].direction, dma_bbus(i, index++), dma_addr(i));
-      cycle_edge();
+      dma_edge();
     } while(channel[i].dma_enabled && --channel[i].xfersize);
 
     channel[i].dma_enabled = false;
