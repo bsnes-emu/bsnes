@@ -23,8 +23,10 @@ public:
 
   //$00f0
   unsigned clock_speed();
-  bool mmio_disable();
+  bool timers_enable();
+  bool ram_disable();
   bool ram_writable();
+  bool timers_disable();
 
   //$00f1
   bool iplrom_enable();

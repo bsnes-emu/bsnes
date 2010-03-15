@@ -1,34 +1,21 @@
-template<unsigned cycle_frequency>
+template<unsigned frequency>
 class sSMPTimer {
 public:
-  uint8 target;
-  uint8 stage1_ticks, stage2_ticks, stage3_ticks;
+  double stage0_ticks;
+  uint8 stage1_ticks;
+  uint8 stage2_ticks;
+  uint8 stage3_ticks;
+  bool current_line;
   bool enabled;
+  uint8 target;
 
-  void tick() {
-    //stage 1 increment
-    stage1_ticks++;
-    if(stage1_ticks < cycle_frequency) return;
-
-    stage1_ticks -= cycle_frequency;
-    if(enabled == false) return;
-
-    //stage 2 increment
-    stage2_ticks++;
-
-    if(stage2_ticks != target) return;
-
-    //stage 3 increment
-    stage2_ticks = 0;
-    stage3_ticks++;
-    stage3_ticks &= 15;
-  }
+  void tick();
+  void sync_stage1();
 };
 
-sSMPTimer<128> t0;
-sSMPTimer<128> t1;
-sSMPTimer< 16> t2;
+sSMPTimer<64> t0;
+sSMPTimer<64> t1;
+sSMPTimer< 8> t2;
 
 alwaysinline void add_clocks(unsigned clocks);
-alwaysinline void tick_timers();
-uint32 clocks_executed();
+alwaysinline void cycle_edge();

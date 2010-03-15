@@ -6,8 +6,10 @@ bool SMPDebugger::property(unsigned id, string &name, string &value) {
   //$00f0
   if(id == n++) { name = "$00f0"; value = ""; return true; }
   if(id == n++) { name = "Clock Speed"; value = clock_speed(); return true; }
-  if(id == n++) { name = "MMIO Disable"; value = mmio_disable(); return true; }
+  if(id == n++) { name = "Timers Enable"; value = timers_enable(); return true; }
+  if(id == n++) { name = "RAM Disable"; value = ram_disable(); return true; }
   if(id == n++) { name = "RAM Writable"; value = ram_writable(); return true; }
+  if(id == n++) { name = "Timers Disable"; value = timers_disable(); return true; }
 
   //$00f1
   if(id == n++) { name = "$00f1"; value = ""; return true; }
@@ -15,7 +17,7 @@ bool SMPDebugger::property(unsigned id, string &name, string &value) {
 
   //$00f2
   if(id == n++) { name = "$00f2"; value = ""; return true; }
-  if(id == n++) { name = "DSP Address"; value = sprint("0x$", strhex<2>(dsp_address())); return true; }
+  if(id == n++) { name = "DSP Address"; value = sprint("0x", strhex<2>(dsp_address())); return true; }
 
   return false;
 }

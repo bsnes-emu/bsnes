@@ -2,35 +2,23 @@
 #define NALL_STRING_VARIADIC_HPP
 
 namespace nall {
-  static void sprint(string &output, unsigned &offset, const char *&s) {
-    while(*s) output[offset++] = *s++;
+  static void sprint(string &output) {
   }
 
   template<typename T, typename... Args>
-  static void sprint(string &output, unsigned &offset, const char *&s, T value, Args... args) {
-    while(*s) {
-      if(*s == '$') {
-        string data = to_string<T>(value);
-        unsigned i = 0;
-        while(data[i]) output[offset++] = data[i++];
-        sprint(output, offset, ++s, args...);
-        return;
-      } else {
-        output[offset++] = *s++;
-      }
-    }
+  static void sprint(string &output, T value, Args... args) {
+    output << to_string<T>(value);
+    sprint(output, args...);
   }
 
-  template<typename... Args> inline string sprint(const char *s, Args... args) {
+  template<typename... Args> inline string sprint(Args... args) {
     string output;
-    unsigned offset = 0;
-    sprint(output, offset, s, args...);
-    output[offset] = 0;
+    sprint(output, args...);
     return output;
   }
 
-  template<typename... Args> inline void print(const char *s, Args... args) {
-    printf("%s", (const char*)sprint(s, args...));
+  template<typename... Args> inline void print(Args... args) {
+    printf("%s", (const char*)sprint(args...));
   }
 }
 

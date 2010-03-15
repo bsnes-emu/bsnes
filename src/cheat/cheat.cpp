@@ -125,7 +125,7 @@ bool Cheat::encode(string &s, unsigned addr, uint8 data, Type type) {
   char t[16];
 
   if(type == Type::ProActionReplay) {
-    s = sprint("$$", strhex<6>(addr), strhex<2>(data));
+    s = sprint(strhex<6>(addr), strhex<2>(data));
     return true;
   } else if(type == Type::GameGenie) {
     unsigned r = addr;
@@ -141,7 +141,7 @@ bool Cheat::encode(string &s, unsigned addr, uint8 data, Type type) {
          | (!!(r & 0x080000) <<  5) | (!!(r & 0x040000) <<  4)
          | (!!(r & 0x020000) <<  3) | (!!(r & 0x010000) <<  2)
          | (!!(r & 0x000800) <<  1) | (!!(r & 0x000400) <<  0);
-    s = sprint("$$-$", strhex<2>(data), strhex<2>(addr >> 16), strhex<4>(addr & 0xffff));
+    s = sprint(strhex<2>(data), strhex<2>(addr >> 16), "-", strhex<4>(addr & 0xffff));
     strtr(s, "0123456789abcdef", "df4709156bc8a23e");
     return true;
   } else {

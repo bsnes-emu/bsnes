@@ -47,8 +47,10 @@ sSMPDebugger::~sSMPDebugger() {
 
 //$00f0
 unsigned sSMPDebugger::clock_speed() { return status.clock_speed; }
-bool sSMPDebugger::mmio_disable() { return status.mmio_disabled; }
+bool sSMPDebugger::timers_enable() { return status.timers_enabled; }
+bool sSMPDebugger::ram_disable() { return status.ram_disabled; }
 bool sSMPDebugger::ram_writable() { return status.ram_writable; }
+bool sSMPDebugger::timers_disable() { return status.timers_disabled; }
 
 //$00f1
 bool sSMPDebugger::iplrom_enable() { return status.iplrom_enabled; }

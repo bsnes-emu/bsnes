@@ -53,9 +53,13 @@ void sSMP::reset() {
   status.dsp_counter   = 0;
 
   //$00f0
-  status.clock_speed   = 24 * 3 / 3;
-  status.mmio_disabled = false;
-  status.ram_writable  = true;
+  status.clock_speed     = 0;  //100%
+  status.timer_speed     = 0;  //100%
+  status.timers_enabled  = true;
+  status.ram_disabled    = false;
+  status.ram_writable    = true;
+  status.timers_disabled = false;
+  status.timer_step      = 1.0;
 
   //$00f1
   status.iplrom_enabled = true;
@@ -67,9 +71,9 @@ void sSMP::reset() {
   status.smp_f8 = 0x00;
   status.smp_f9 = 0x00;
 
-  t0.enabled = false;
-  t1.enabled = false;
-  t2.enabled = false;
+  t0.stage0_ticks = 0;
+  t1.stage0_ticks = 0;
+  t2.stage0_ticks = 0;
 
   t0.stage1_ticks = 0;
   t1.stage1_ticks = 0;
@@ -82,6 +86,14 @@ void sSMP::reset() {
   t0.stage3_ticks = 0;
   t1.stage3_ticks = 0;
   t2.stage3_ticks = 0;
+
+  t0.current_line = 0;
+  t1.current_line = 0;
+  t2.current_line = 0;
+
+  t0.enabled = false;
+  t1.enabled = false;
+  t2.enabled = false;
 }
 
 sSMP::sSMP() {

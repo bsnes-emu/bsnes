@@ -7,8 +7,12 @@ uint8 Input::port_read(bool portnumber) {
 
   switch(p.device) {
     case Device::Joypad: {
-      if(p.counter0 >= 16) return 1;
-      return system.interface->input_poll(portnumber, p.device, 0, p.counter0++);
+      if(cpu.joylatch() == 0) {
+        if(p.counter0 >= 16) return 1;
+        return system.interface->input_poll(portnumber, p.device, 0, p.counter0++);
+      } else {
+        return system.interface->input_poll(portnumber, p.device, 0, 0);
+      }
     } //case Device::Joypad
 
     case Device::Multitap: {

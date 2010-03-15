@@ -98,8 +98,8 @@ namespace nall {
     lstring(std::initializer_list<string>);
   };
 
-  template<typename... Args> inline string sprint(const char *s, Args... args);
-  template<typename... Args> inline void print(const char *s, Args... args);
+  template<typename... Args> inline string sprint(Args... args);
+  template<typename... Args> inline void print(Args... args);
 };
 
 inline size_t strlcpy(nall::string &dest, const char *src, size_t length);

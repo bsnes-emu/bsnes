@@ -8,7 +8,6 @@ public:
 
   struct {
     uint8 opcode;
-    bool in_opcode;
 
     //timing
     uint32 clock_counter;
@@ -16,8 +15,12 @@ public:
 
     //$00f0
     uint8 clock_speed;
-    bool mmio_disabled;
+    uint8 timer_speed;
+    bool timers_enabled;
+    bool ram_disabled;
     bool ram_writable;
+    bool timers_disabled;
+    double timer_step;
 
     //$00f1
     bool iplrom_enabled;
