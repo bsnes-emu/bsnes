@@ -1,9 +1,0 @@
-//HDRTV GLSL shader
-//license: GPL
-//original version by SimoneT
-//ruby port by byuu
-
-void main(void) {
-  gl_Position = ftransform();
-  gl_TexCoord[0] = gl_MultiTexCoord0;
-}

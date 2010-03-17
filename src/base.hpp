@@ -1,6 +1,6 @@
-static const char bsnesVersion[] = "062.04";
+static const char bsnesVersion[] = "062.05";
 static const char bsnesTitle[] = "bsnes";
-static const unsigned bsnesSerializerVersion = 7;
+static const unsigned bsnesSerializerVersion = 8;
 
 //S-DSP can be encapsulated into a state machine using #define magic
 //this avoids ~2.048m co_switch() calls per second (~5% speedup)

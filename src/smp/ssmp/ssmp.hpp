@@ -10,8 +10,9 @@ public:
     uint8 opcode;
 
     //timing
-    uint32 clock_counter;
-    uint32 dsp_counter;
+    unsigned clock_counter;
+    unsigned dsp_counter;
+    unsigned timer_step;
 
     //$00f0
     uint8 clock_speed;
@@ -20,7 +21,6 @@ public:
     bool ram_disabled;
     bool ram_writable;
     bool timers_disabled;
-    double timer_step;
 
     //$00f1
     bool iplrom_enabled;

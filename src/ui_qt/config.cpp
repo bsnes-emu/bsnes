@@ -15,10 +15,10 @@ Configuration::Configuration() {
   //external
   //========
 
-  attach(SNES::config.controller_port1 = SNES::Input::Device::Joypad, "snes.controllerPort1");
-  attach(SNES::config.controller_port2 = SNES::Input::Device::Joypad, "snes.controllerPort2");
-  attach(SNES::config.expansion_port   = SNES::System::ExpansionPortDevice::BSX, "snes.expansionPort");
-  attach(SNES::config.region           = SNES::System::Region::Autodetect, "snes.region");
+  attach((unsigned&)(SNES::config.controller_port1 = SNES::Input::Device::Joypad), "snes.controllerPort1");
+  attach((unsigned&)(SNES::config.controller_port2 = SNES::Input::Device::Joypad), "snes.controllerPort2");
+  attach((unsigned&)(SNES::config.expansion_port   = SNES::System::ExpansionPortDevice::BSX), "snes.expansionPort");
+  attach((unsigned&)(SNES::config.region           = SNES::System::Region::Autodetect), "snes.region");
 
   attach(SNES::config.cpu.version         =        2, "cpu.version", "Valid version(s) are: 1, 2");
   attach(SNES::config.cpu.ntsc_clock_rate = 21477272, "cpu.ntscClockRate");

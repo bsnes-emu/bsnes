@@ -51,15 +51,15 @@ void sSMP::reset() {
 
   status.clock_counter = 0;
   status.dsp_counter   = 0;
+  status.timer_step    = 3;
 
   //$00f0
-  status.clock_speed     = 0;  //100%
-  status.timer_speed     = 0;  //100%
+  status.clock_speed     = 0;
+  status.timer_speed     = 0;
   status.timers_enabled  = true;
   status.ram_disabled    = false;
   status.ram_writable    = true;
   status.timers_disabled = false;
-  status.timer_step      = 1.0;
 
   //$00f1
   status.iplrom_enabled = true;

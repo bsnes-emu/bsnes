@@ -116,7 +116,7 @@ void sCPU::mmio_w4206(uint8 data) {
   status.wrdivb = data;
 
   alu.divctr = 16;  //perform division over the next sixteen cycles
-  alu.shift = status.wrdivb << 15;
+  alu.shift = status.wrdivb << 16;
 }
 
 //HTIMEL

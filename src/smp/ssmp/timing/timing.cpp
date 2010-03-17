@@ -33,7 +33,7 @@ void sSMP::sSMPTimer<frequency>::tick() {
   //stage 0 increment
   stage0_ticks += smp.status.timer_step;
   if(stage0_ticks < frequency) return;
-  stage0_ticks -= (double)frequency;
+  stage0_ticks -= frequency;
 
   //stage 1 increment
   stage1_ticks ^= 1;

@@ -204,15 +204,10 @@ bool Cartridge::loadCartridge(string &filename, string &xml, SNES::MappedRAM &me
   uint8_t *data;
   unsigned size;
   audio.clear();
-  if(reader.load(filename, xml, data, size) == false) return false;
-
-  string name;
-  name = string() << nall::basename(filename) << ".xml";
-  if(file::exists(name)) xml.readfile(name);
+  if(reader.load(filename, data, size) == false) return false;
 
   patchApplied = false;
-  name << filepath(nall::basename(filename), config().path.patch);
-  name << ".ups";
+  string name = sprint(filepath(nall::basename(filename), config().path.patch), ".ups");
 
   file fp;
   if(config().file.applyPatches && fp.open(name, file::mode_read)) {
@@ -241,6 +236,19 @@ bool Cartridge::loadCartridge(string &filename, string &xml, SNES::MappedRAM &me
       patchApplied = true;
     } else {
       delete[] outdata;
+    }
+  }
+
+  name = sprint(nall::basename(filename), ".xml");
+  if(file::exists(name)) {
+    //prefer manually created XML cartridge mapping
+    xml.readfile(name);
+  } else {
+    //attempt to generate XML mapping from data via heuristics
+    if(reader.map(xml, data, size) == false) {
+      //if this isn't possible, loading is not possible, so abort loading
+      delete[] data;
+      return false;
     }
   }
 

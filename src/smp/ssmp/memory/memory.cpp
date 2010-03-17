@@ -90,16 +90,14 @@ alwaysinline void sSMP::op_buswrite(uint16 addr, uint8 data) {
       case 0xf0: {  //TEST
         if(regs.p.p) break;  //writes only valid when P flag is clear
 
-        status.clock_speed     = (data >> 6) & 3;  //100%, 50%, 0%, 10%
-        status.timer_speed     = (data >> 4) & 3;  //100%, ...
+        status.clock_speed     = (data >> 6) & 3;
+        status.timer_speed     = (data >> 4) & 3;
         status.timers_enabled  = data & 0x08;
         status.ram_disabled    = data & 0x04;
         status.ram_writable    = data & 0x02;
         status.timers_disabled = data & 0x01;
 
-        unsigned base = 1 + (1 << status.clock_speed);
-        unsigned step = base + (15 >> (3 - status.timer_speed));
-        status.timer_step = 1.0 / (3.0 / step);
+        status.timer_step = (1 << status.clock_speed) + (2 << status.timer_speed);
 
         t0.sync_stage1();
         t1.sync_stage1();

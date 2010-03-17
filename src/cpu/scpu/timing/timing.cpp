@@ -63,11 +63,11 @@ void sCPU::alu_edge() {
   if(alu.divctr) {
     alu.divctr--;
     status.rddiv <<= 1;
+    alu.shift >>= 1;
     if(status.rdmpy >= alu.shift) {
       status.rdmpy -= alu.shift;
       status.rddiv |= 1;
     }
-    alu.shift >>= 1;
   }
 }
 
