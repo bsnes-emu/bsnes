@@ -48,7 +48,7 @@ struct MappedRAM : Memory {
 
   inline uint8 read(unsigned addr);
   inline void write(unsigned addr, uint8 n);
-  inline const uint8 operator[](unsigned addr) const;
+  inline const uint8& operator[](unsigned addr) const;
   inline MappedRAM();
 
 private:

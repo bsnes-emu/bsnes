@@ -1,8 +1,9 @@
 #ifndef NALL_SERIALIZER_HPP
 #define NALL_SERIALIZER_HPP
 
+#include <type_traits>
+#include <utility>
 #include <nall/stdint.hpp>
-#include <nall/traits.hpp>
 #include <nall/utility.hpp>
 
 namespace nall {
@@ -16,6 +17,10 @@ namespace nall {
   //caveats:
   //- only plain-old-data can be stored. complex classes must provide serialize(serializer&);
   //- floating-point usage is not portable across platforms
+
+  template<typename T> struct is_bool { enum { value = false }; };
+  template<> struct is_bool<bool> { enum { value = true }; };
+
   class serializer {
   public:
     enum mode_t { Load, Save, Size };
@@ -63,7 +68,7 @@ namespace nall {
     }
 
     template<typename T> void array(T &array) {
-      enum { size = sizeof(T) / sizeof(typename remove_extent<T>::type) };
+      enum { size = sizeof(T) / sizeof(typename std::remove_extent<T>::type) };
       for(unsigned n = 0; n < size; n++) integer(array[n]);
     }
 
@@ -102,7 +107,7 @@ namespace nall {
     }
 
     serializer(serializer &&s) {
-      operator=(move(s));
+      operator=(std::move(s));
     }
 
     //construction

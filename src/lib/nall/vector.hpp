@@ -3,10 +3,11 @@
 
 #include <initializer_list>
 #include <new>
+#include <type_traits>
+#include <utility>
 #include <nall/algorithm.hpp>
 #include <nall/bit.hpp>
 #include <nall/concept.hpp>
-#include <nall/traits.hpp>
 #include <nall/utility.hpp>
 
 namespace nall {
@@ -86,11 +87,12 @@ namespace nall {
     inline linear_vector<T>& operator=(const linear_vector<T> &source) {
       reset();
       reserve(source.capacity());
-      for(unsigned i = 0; i < source.size(); i++) add(source[i]);
+      resize(source.size());
+      for(unsigned i = 0; i < source.size(); i++) operator[](i) = source.operator[](i);
       return *this;
     }
 
-    linear_vector(const linear_vector<T> &source) {
+    linear_vector(const linear_vector<T> &source) : pool(0), poolsize(0), objectsize(0) {
       operator=(source);
     }
 
@@ -100,12 +102,12 @@ namespace nall {
       pool = source.pool;
       poolsize = source.poolsize;
       objectsize = source.objectsize;
-      source.pool = 0;
+      source.reset();
       return *this;
     }
 
-    linear_vector(linear_vector<T> &&source) {
-      operator=(move(source));
+    linear_vector(linear_vector<T> &&source) : pool(0), poolsize(0), objectsize(0) {
+      operator=(std::move(source));
     }
 
     //construction
@@ -193,11 +195,12 @@ namespace nall {
     inline pointer_vector<T>& operator=(const pointer_vector<T> &source) {
       reset();
       reserve(source.capacity());
-      for(unsigned i = 0; i < source.size(); i++) add(source[i]);
+      resize(source.size());
+      for(unsigned i = 0; i < source.size(); i++) operator[](i) = source.operator[](i);
       return *this;
     }
 
-    pointer_vector(const pointer_vector<T> &source) {
+    pointer_vector(const pointer_vector<T> &source) : pool(0), poolsize(0), objectsize(0) {
       operator=(source);
     }
 
@@ -207,12 +210,12 @@ namespace nall {
       pool = source.pool;
       poolsize = source.poolsize;
       objectsize = source.objectsize;
-      source.pool = 0;
+      source.reset();
       return *this;
     }
 
-    pointer_vector(pointer_vector<T> &&source) {
-      operator=(move(source));
+    pointer_vector(pointer_vector<T> &&source) : pool(0), poolsize(0), objectsize(0) {
+      operator=(std::move(source));
     }
 
     //construction

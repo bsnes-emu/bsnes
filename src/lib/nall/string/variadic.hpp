@@ -2,18 +2,18 @@
 #define NALL_STRING_VARIADIC_HPP
 
 namespace nall {
-  static void sprint(string &output) {
+  static void isprint(string &output) {
   }
 
   template<typename T, typename... Args>
-  static void sprint(string &output, T value, Args... args) {
+  static void isprint(string &output, T value, Args... args) {
     output << to_string<T>(value);
-    sprint(output, args...);
+    isprint(output, args...);
   }
 
   template<typename... Args> inline string sprint(Args... args) {
     string output;
-    sprint(output, args...);
+    isprint(output, args...);
     return output;
   }
 

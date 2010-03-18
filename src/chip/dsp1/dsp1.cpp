@@ -30,4 +30,4 @@ void DSP1DR::write(unsigned addr, uint8 data) { dsp1.dsp1.setDr(data); }
 uint8 DSP1SR::read(unsigned addr) { return dsp1.dsp1.getSr(); }
 void DSP1SR::write(unsigned addr, uint8 data) {}
 
-};
+}

@@ -1,4 +1,4 @@
-class DSP2 : public Memory {
+class DSP2 {
 public:
   struct {
     bool waiting_for_command;
@@ -42,4 +42,16 @@ protected:
   void op0d();
 };
 
+class DSP2DR : public Memory {
+  uint8 read(unsigned addr);
+  void write(unsigned addr, uint8 data);
+};
+
+class DSP2SR : public Memory {
+  uint8 read(unsigned addr);
+  void write(unsigned addr, uint8 data);
+};
+
 extern DSP2 dsp2;
+extern DSP2DR dsp2dr;
+extern DSP2SR dsp2sr;

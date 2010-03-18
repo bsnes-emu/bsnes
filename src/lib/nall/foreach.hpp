@@ -6,9 +6,9 @@
   for(unsigned foreach_counter = 0, foreach_limit = foreach_size(object), foreach_once = 0, foreach_broken = 0; foreach_counter < foreach_limit && foreach_broken == 0; foreach_counter++, foreach_once = 0) \
     for(auto &iter = object[foreach_counter]; foreach_once == 0 && (foreach_broken = 1); foreach_once++, foreach_broken = 0)
 
+#include <type_traits>
 #include <nall/concept.hpp>
 #include <nall/static.hpp>
-#include <nall/traits.hpp>
 
 namespace nall {
   template<typename T> unsigned foreach_size(const T& object, typename mp_enable_if<has_count<T>>::type = 0) {
@@ -23,8 +23,8 @@ namespace nall {
     return object.size();
   }
 
-  template<typename T> unsigned foreach_size(const T& object, typename mp_enable_if<is_array<T>>::type = 0) {
-    return sizeof(T) / sizeof(typename remove_extent<T>::type);
+  template<typename T> unsigned foreach_size(const T& object, typename mp_enable_if<std::is_array<T>>::type = 0) {
+    return sizeof(T) / sizeof(typename std::remove_extent<T>::type);
   }
 }
 

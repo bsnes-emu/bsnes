@@ -476,8 +476,8 @@ void Cartridge::xml_parse_necdsp(xml_element *root) {
     }
   }
 
-  Memory *dr[5] = { 0, &dsp1dr, &dsp2, &dsp3, &dsp4 };
-  Memory *sr[5] = { 0, &dsp1sr, &dsp2, &dsp3, &dsp4 };
+  Memory *dr[5] = { 0, &dsp1dr, &dsp2dr, &dsp3, &dsp4 };
+  Memory *sr[5] = { 0, &dsp1sr, &dsp2sr, &dsp3, &dsp4 };
 
   foreach(node, root->element) {
     if(node->name == "dr" && dr[program]) {

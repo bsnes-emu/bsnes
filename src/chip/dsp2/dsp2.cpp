@@ -4,6 +4,8 @@
 namespace SNES {
 
 DSP2 dsp2;
+DSP2DR dsp2dr;
+DSP2SR dsp2sr;
 
 #include "serialization.cpp"
 #include "opcodes.cpp"
@@ -141,5 +143,11 @@ void DSP2::write(unsigned addr, uint8 data) {
 
 DSP2::DSP2() {}
 DSP2::~DSP2() {}
-};
 
+uint8 DSP2DR::read(unsigned addr) { return dsp2.read(addr); }
+void DSP2DR::write(unsigned addr, uint8 data) { dsp2.write(addr, data); }
+
+uint8 DSP2SR::read(unsigned addr) { return 0x00; }
+void DSP2SR::write(unsigned addr, uint8 data) {}
+
+}

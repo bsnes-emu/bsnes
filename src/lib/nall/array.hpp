@@ -3,10 +3,11 @@
 
 #include <stdlib.h>
 #include <initializer_list>
+#include <type_traits>
+#include <utility>
 #include <nall/algorithm.hpp>
 #include <nall/bit.hpp>
 #include <nall/concept.hpp>
-#include <nall/traits.hpp>
 
 namespace nall {
   //dynamic vector array
@@ -81,7 +82,7 @@ namespace nall {
       return *this;
     }
 
-    array(const array &source) : pool(0) {
+    array(const array &source) : pool(0), poolsize(0), buffersize(0) {
       operator=(source);
     }
 
@@ -91,12 +92,12 @@ namespace nall {
       pool = source.pool;
       poolsize = source.poolsize;
       buffersize = source.buffersize;
-      source.pool = 0;
+      source.reset();
       return *this;
     }
 
-    array(array &&source) {
-      operator=(move(source));
+    array(array &&source) : pool(0), poolsize(0), buffersize(0) {
+      operator=(std::move(source));
     }
 
     //index

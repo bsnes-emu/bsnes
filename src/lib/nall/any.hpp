@@ -2,8 +2,8 @@
 #define NALL_ANY_HPP
 
 #include <typeinfo>
+#include <type_traits>
 #include <nall/static.hpp>
-#include <nall/traits.hpp>
 
 namespace nall {
   class any {
@@ -13,8 +13,8 @@ namespace nall {
 
     template<typename T> any& operator=(const T& value_) {
       typedef typename static_if<
-        is_array<T>::value,
-        typename remove_extent<typename add_const<T>::type>::type*,
+        std::is_array<T>::value,
+        typename std::remove_extent<typename std::add_const<T>::type>::type*,
         T
       >::type auto_t;
 
@@ -49,13 +49,13 @@ namespace nall {
   };
 
   template<typename T> T any_cast(any &value) {
-    typedef typename remove_reference<T>::type nonref;
+    typedef typename std::remove_reference<T>::type nonref;
     if(value.type() != typeid(nonref)) throw;
     return static_cast<any::holder<nonref>*>(value.container)->value;
   }
 
   template<typename T> T any_cast(const any &value) {
-    typedef const typename remove_reference<T>::type nonref;
+    typedef const typename std::remove_reference<T>::type nonref;
     if(value.type() != typeid(nonref)) throw;
     return static_cast<any::holder<nonref>*>(value.container)->value;
   }
