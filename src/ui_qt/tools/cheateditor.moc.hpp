@@ -51,7 +51,7 @@ public:
   QPushButton *okButton;
   QPushButton *cancelButton;
 
-  void refresh(xml_element*);
+  void refresh(xml_element&);
 
   CheatImportWindow();
 

@@ -250,10 +250,10 @@ void CheatEditorWindow::findCheatCodes() {
     const char *block = (const char*)data + position;
     position = strpos(block, "</cartridge>");
     if(position >= 0) {
-      xml_element *document = xml_parse(substr(block, 0, position + 12));
-      if(!document) return;
+      xml_element document = xml_parse(substr(block, 0, position + 12));
+      if(document.element.size() == 0) return;
 
-      cheatImportWindow->refresh(document->element[0]);
+      cheatImportWindow->refresh(document.element[0]);
       cheatImportWindow->show();
       return;
     }
@@ -284,22 +284,22 @@ void CheatEditorWindow::clearSelected() {
 //CheatImportWindow
 //=================
 
-void CheatImportWindow::refresh(xml_element *root) {
+void CheatImportWindow::refresh(xml_element &root) {
   list->clear();
 
-  foreach(node, root->element) {
-    if(node->name == "name") {
-      title->setText(string() << "<b>Name:</b> " << node->parse());
-    } else if(node->name == "cheat") {
+  foreach(node, root.element) {
+    if(node.name == "name") {
+      title->setText(string() << "<b>Name:</b> " << node.parse());
+    } else if(node.name == "cheat") {
       string description = "<undefined>";
       string code = "";
 
-      foreach(leaf, node->element) {
-        if(leaf->name == "description") {
-          description = leaf->parse();
-        } else if(leaf->name == "code") {
+      foreach(leaf, node.element) {
+        if(leaf.name == "description") {
+          description = leaf.parse();
+        } else if(leaf.name == "code") {
           if(code != "") code << "+";
-          code << leaf->content;
+          code << leaf.content;
         }
       }
 

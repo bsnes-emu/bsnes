@@ -79,22 +79,22 @@ private:
   void parse_xml_sufami_turbo(const char*, bool);
   void parse_xml_gameboy(const char*);
 
-  void xml_parse_rom(xml_element*);
-  void xml_parse_ram(xml_element*);
-  void xml_parse_superfx(xml_element*);
-  void xml_parse_sa1(xml_element*);
-  void xml_parse_bsx(xml_element*);
-  void xml_parse_sufamiturbo(xml_element*);
-  void xml_parse_supergameboy(xml_element*);
-  void xml_parse_srtc(xml_element*);
-  void xml_parse_sdd1(xml_element*);
-  void xml_parse_spc7110(xml_element*);
-  void xml_parse_cx4(xml_element*);
-  void xml_parse_necdsp(xml_element*);
-  void xml_parse_obc1(xml_element*);
-  void xml_parse_setadsp(xml_element*);
-  void xml_parse_setarisc(xml_element*);
-  void xml_parse_msu1(xml_element*);
+  void xml_parse_rom(xml_element&);
+  void xml_parse_ram(xml_element&);
+  void xml_parse_superfx(xml_element&);
+  void xml_parse_sa1(xml_element&);
+  void xml_parse_bsx(xml_element&);
+  void xml_parse_sufamiturbo(xml_element&);
+  void xml_parse_supergameboy(xml_element&);
+  void xml_parse_srtc(xml_element&);
+  void xml_parse_sdd1(xml_element&);
+  void xml_parse_spc7110(xml_element&);
+  void xml_parse_cx4(xml_element&);
+  void xml_parse_necdsp(xml_element&);
+  void xml_parse_obc1(xml_element&);
+  void xml_parse_setadsp(xml_element&);
+  void xml_parse_setarisc(xml_element&);
+  void xml_parse_msu1(xml_element&);
 
   void xml_parse_address(Mapping&, const string&);
   void xml_parse_mode(Mapping&, const string&);

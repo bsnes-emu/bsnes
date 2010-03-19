@@ -18,9 +18,6 @@ namespace nall {
   //- only plain-old-data can be stored. complex classes must provide serialize(serializer&);
   //- floating-point usage is not portable across platforms
 
-  template<typename T> struct is_bool { enum { value = false }; };
-  template<> struct is_bool<bool> { enum { value = true }; };
-
   class serializer {
   public:
     enum mode_t { Load, Save, Size };
@@ -56,7 +53,7 @@ namespace nall {
     }
 
     template<typename T> void integer(T &value) {
-      enum { size = is_bool<T>::value ? 1 : sizeof(T) };
+      enum { size = std::is_same<bool, T>::value ? 1 : sizeof(T) };
       if(imode == Save) {
         for(unsigned n = 0; n < size; n++) idata[isize++] = value >> (n << 3);
       } else if(imode == Load) {

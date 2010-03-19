@@ -2,9 +2,9 @@
 #define NALL_STRING_XML_HPP
 
 //XML subset parser
-//version 0.04
+//version 0.05
 
-#include <nall/array.hpp>
+#include <nall/vector.hpp>
 
 namespace nall {
 
@@ -16,15 +16,14 @@ struct xml_attribute {
 
 struct xml_element : xml_attribute {
   string parse() const;
-  array<xml_attribute*> attribute;
-  array<xml_element*> element;
-  ~xml_element();
+  linear_vector<xml_attribute> attribute;
+  linear_vector<xml_element> element;
 
 protected:
   void parse_doctype(const char *&data);
   bool parse_head(string data);
   bool parse_body(const char *&data);
-  friend xml_element *xml_parse(const char *data);
+  friend xml_element xml_parse(const char *data);
 };
 
 inline string xml_attribute::parse() const {
@@ -134,11 +133,11 @@ inline bool xml_element::parse_head(string data) {
     side.qsplit("=", part[i]);
     if(side.size() != 2) throw "...";
 
-    xml_attribute *attr = new xml_attribute;
-    attr->name = side[0];
-    attr->content = side[1];
-    if(strbegin(attr->content, "\"") && strend(attr->content, "\"")) trim_once(attr->content, "\"");
-    else if(strbegin(attr->content, "'") && strend(attr->content, "'")) trim_once(attr->content, "'");
+    xml_attribute attr;
+    attr.name = side[0];
+    attr.content = side[1];
+    if(strbegin(attr.content, "\"") && strend(attr.content, "\"")) trim_once(attr.content, "\"");
+    else if(strbegin(attr.content, "'") && strend(attr.content, "'")) trim_once(attr.content, "'");
     else throw "...";
     attribute.add(attr);
   }
@@ -191,10 +190,8 @@ inline bool xml_element::parse_body(const char *&data) {
 
     while(*data) {
       unsigned index = element.size();
-      xml_element *elem = new xml_element;
-      if(elem->parse_body(data) == false) {
-        delete elem;
-
+      xml_element node;
+      if(node.parse_body(data) == false) {
         if(*data == '/') {
           signed length = data - content_begin - 1;
           if(length > 0) content = substr(content_begin, 0, length);
@@ -216,23 +213,18 @@ inline bool xml_element::parse_body(const char *&data) {
           return true;
         }
       } else {
-        element.add(elem);
+        element.add(node);
       }
     }
   }
 }
 
-inline xml_element::~xml_element() {
-  for(unsigned i = 0; i < attribute.size(); i++) delete attribute[i];
-  for(unsigned i = 0; i < element.size(); i++) delete element[i];
-}
-
 //ensure there is only one root element
-inline bool xml_validate(xml_element *document) {
+inline bool xml_validate(xml_element &document) {
   unsigned root_counter = 0;
 
-  for(unsigned i = 0; i < document->element.size(); i++) {
-    string &name = document->element[i]->name;
+  for(unsigned i = 0; i < document.element.size(); i++) {
+    string &name = document.element[i].name;
     if(strbegin(name, "?")) continue;
     if(strbegin(name, "!")) continue;
     if(++root_counter > 1) return false;
@@ -241,25 +233,24 @@ inline bool xml_validate(xml_element *document) {
   return true;
 }
 
-inline xml_element* xml_parse(const char *data) {
-  xml_element *self = new xml_element;
+inline xml_element xml_parse(const char *data) {
+  xml_element self;
 
   try {
     while(*data) {
-      xml_element *elem = new xml_element;
-      if(elem->parse_body(data) == false) {
-        delete elem;
+      xml_element node;
+      if(node.parse_body(data) == false) {
         break;
       } else {
-        self->element.add(elem);
+        self.element.add(node);
       }
     }
 
     if(xml_validate(self) == false) throw "...";
     return self;
   } catch(const char*) {
-    delete self;
-    return 0;
+    xml_element empty;
+    return empty;
   }
 }
 
