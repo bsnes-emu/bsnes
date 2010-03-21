@@ -153,20 +153,6 @@ L op_io_irq();
   regs.s.w = regs.a.w;
 }
 
-void CPUcore::op_tsc_e() {
-L op_io_irq();
-  regs.a.w = regs.s.w;
-  regs.p.n = (regs.a.l & 0x80);
-  regs.p.z = (regs.a.l == 0);
-}
-
-void CPUcore::op_tsc_n() {
-L op_io_irq();
-  regs.a.w = regs.s.w;
-  regs.p.n = (regs.a.w & 0x8000);
-  regs.p.z = (regs.a.w == 0);
-}
-
 void CPUcore::op_tsx_b() {
 L op_io_irq();
   regs.x.l = regs.s.l;

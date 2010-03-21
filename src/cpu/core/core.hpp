@@ -174,8 +174,6 @@ public:
   template<int, int> void op_transfer_w();
   void op_tcs_e();
   void op_tcs_n();
-  void op_tsc_e();
-  void op_tsc_n();
   void op_tsx_b();
   void op_tsx_w();
   void op_txs_e();

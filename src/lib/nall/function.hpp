@@ -1,190 +1,88 @@
 #ifndef NALL_FUNCTION_HPP
 #define NALL_FUNCTION_HPP
 
-#include <assert.h>
-
-//prologue
-
-#define TN typename
-
 namespace nall {
   template<typename T> class function;
-}
 
-//parameters = 0
-
-#define cat(n)  n
-#define TL typename R
-#define PL
-#define CL
-
-#include "function.hpp"
-
-//parameters = 1
-
-#define cat(n)  , n
-#define TL TN R, TN P1
-#define PL P1 p1
-#define CL p1
-
-#include "function.hpp"
-
-//parameters = 2
-
-#define cat(n)  , n
-#define TL TN R, TN P1, TN P2
-#define PL P1 p1, P2 p2
-#define CL p1, p2
-
-#include "function.hpp"
-
-//parameters = 3
-
-#define cat(n)  , n
-#define TL TN R, TN P1, TN P2, TN P3
-#define PL P1 p1, P2 p2, P3 p3
-#define CL p1, p2, p3
-
-#include "function.hpp"
-
-//parameters = 4
-
-#define cat(n)  , n
-#define TL TN R, TN P1, TN P2, TN P3, TN P4
-#define PL P1 p1, P2 p2, P3 p3, P4 p4
-#define CL p1, p2, p3, p4
-
-#include "function.hpp"
-
-//parameters = 5
-
-#define cat(n)  , n
-#define TL TN R, TN P1, TN P2, TN P3, TN P4, TN P5
-#define PL P1 p1, P2 p2, P3 p3, P4 p4, P5 p5
-#define CL p1, p2, p3, p4, p5
-
-#include "function.hpp"
-
-//parameters = 6
-
-#define cat(n)  , n
-#define TL TN R, TN P1, TN P2, TN P3, TN P4, TN P5, TN P6
-#define PL P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6
-#define CL p1, p2, p3, p4, p5, p6
-
-#include "function.hpp"
-
-//parameters = 7
-
-#define cat(n)  , n
-#define TL TN R, TN P1, TN P2, TN P3, TN P4, TN P5, TN P6, TN P7
-#define PL P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7 p7
-#define CL p1, p2, p3, p4, p5, p6, p7
-
-#include "function.hpp"
-
-//parameters = 8
-
-#define cat(n)  , n
-#define TL TN R, TN P1, TN P2, TN P3, TN P4, TN P5, TN P6, TN P7, TN P8
-#define PL P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7 p7, P8 p8
-#define CL p1, p2, p3, p4, p5, p6, p7, p8
-
-#include "function.hpp"
-
-//epilogue
-
-#undef TN
-#define NALL_FUNCTION_T
-
-#elif !defined(NALL_FUNCTION_T)
-
-//function implementation template class
-
-namespace nall {
-  template<TL>
-  class function<R (PL)> {
+  template<typename R, typename... P>
+  class function<R (P...)> {
   private:
-    struct base1 { virtual void func1(PL) {} };
-    struct base2 { virtual void func2(PL) {} };
+    struct base1 { virtual void func1(P...) {} };
+    struct base2 { virtual void func2(P...) {} };
     struct derived : base1, virtual base2 {};
 
     struct data_t {
-      R (*fn_call)(const data_t& cat(PL));
+      R (*callback)(const data_t&, P...);
       union {
-        R (*fn_global)(PL);
+        R (*callback_global)(P...);
         struct {
-          R (derived::*fn_member)(PL);
+          R (derived::*callback_member)(P...);
           void *object;
         };
       };
     } data;
 
-    static R fn_call_global(const data_t &d cat(PL)) {
-      return d.fn_global(CL);
+    static R callback_global(const data_t &data, P... p) {
+      return data.callback_global(p...);
     }
 
     template<typename C>
-    static R fn_call_member(const data_t &d cat(PL)) {
-      return (((C*)d.object)->*((R (C::*&)(PL))d.fn_member))(CL);
+    static R callback_member(const data_t &data, P... p) {
+      return (((C*)data.object)->*((R (C::*&)(P...))data.callback_member))(p...);
     }
 
   public:
-    R operator()(PL) const { return data.fn_call(data cat(CL)); }
-    operator bool() const { return data.fn_call; }
+    R operator()(P... p) const { return data.callback(data, p...); }
+    operator bool() const { return data.callback; }
 
-    function() { data.fn_call = 0; }
-
-    function(void *fn) {
-      data.fn_call = fn ? &fn_call_global : 0;
-      data.fn_global = (R (*)(PL))fn;
-    }
-
-    function(R (*fn)(PL)) {
-      data.fn_call = &fn_call_global;
-      data.fn_global = fn;
-    }
-
-    template<typename C>
-    function(R (C::*fn)(PL), C *obj) {
-      data.fn_call = &fn_call_member<C>;
-      (R (C::*&)(PL))data.fn_member = fn;
-      assert(sizeof data.fn_member >= sizeof fn);
-      data.object = obj;
-    }
-
-    template<typename C>
-    function(R (C::*fn)(PL) const, C *obj) {
-      data.fn_call = &fn_call_member<C>;
-      (R (C::*&)(PL))data.fn_member = (R (C::*&)(PL))fn;
-      assert(sizeof data.fn_member >= sizeof fn);
-      data.object = obj;
-    }
-
-    function& operator=(void *fn) { return operator=(function(fn)); }
     function& operator=(const function &source) { memcpy(&data, &source.data, sizeof(data_t)); return *this; }
-    function(const function &source) { memcpy(&data, &source.data, sizeof(data_t)); }
+    function(const function &source) { operator=(source); }
+
+    function() {
+      data.callback = 0;
+    }
+
+    function(void *callback) {
+      data.callback = callback ? &callback_global : 0;
+      data.callback_global = (R (*)(P...))callback;
+    }
+
+    function(R (*callback)(P...)) {
+      data.callback = &callback_global;
+      data.callback_global = callback;
+    }
+
+    template<typename C>
+    function(R (C::*callback)(P...), C *object) {
+      static_assert(sizeof data.callback_member >= sizeof callback, "callback_member is too small");
+      data.callback = &callback_member<C>;
+      (R (C::*&)(P...))data.callback_member = callback;
+      data.object = object;
+    }
+
+    template<typename C>
+    function(R (C::*callback)(P...) const, C *object) {
+      static_assert(sizeof data.callback_member >= sizeof callback, "callback_member is too small");
+      data.callback = &callback_member<C>;
+      (R (C::*&)(P...))data.callback_member = (R (C::*&)(P...))callback;
+      data.object = object;
+    }
   };
 
-  template<TL>
-  function<R (PL)> bind(R (*fn)(PL)) {
-    return function<R (PL)>(fn);
+  template<typename R, typename... P>
+  function<R (P...)> bind(R (*callback)(P...)) {
+    return function<R (P...)>(callback);
   }
 
-  template<typename C, TL>
-  function<R (PL)> bind(R (C::*fn)(PL), C *obj) {
-    return function<R (PL)>(fn, obj);
+  template<typename C, typename R, typename... P>
+  function<R (P...)> bind(R (C::*callback)(P...), C *object) {
+    return function<R (P...)>(callback, object);
   }
 
-  template<typename C, TL>
-  function<R (PL)> bind(R (C::*fn)(PL) const, C *obj) {
-    return function<R (PL)>(fn, obj);
+  template<typename C, typename R, typename... P>
+  function<R (P...)> bind(R (C::*callback)(P...) const, C *object) {
+    return function<R (P...)>(callback, object);
   }
 }
-
-#undef cat
-#undef TL
-#undef PL
-#undef CL
 
 #endif

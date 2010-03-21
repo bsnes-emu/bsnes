@@ -76,7 +76,7 @@ void CPUcore::initialize_opcode_table() {
   opAII(0x38, flag, 0x01, 0x01)
   opMF (0x39, read_addry, and)
   opMII(0x3a, adjust_imm, A, -1)
-  opE  (0x3b, tsc)
+  opAII(0x3b, transfer_w, S, A)
   opMF (0x3c, read_addrx, bit)
   opMF (0x3d, read_addrx, and)
   opMF (0x3e, adjust_addrx, rol)
