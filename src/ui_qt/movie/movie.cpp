@@ -3,9 +3,9 @@
 Movie movie;
 
 void Movie::chooseFile() {
-  fileBrowser->onChange = (void*)0;
+  fileBrowser->onChange.reset();
   fileBrowser->onActivate = bind(&Movie::play, this);
-  fileBrowser->onChange = bind(&Movie::play, this);
+  fileBrowser->onAccept = bind(&Movie::play, this);
   fileBrowser->setWindowTitle("Select Movie");
   fileBrowser->setPath(config().path.current.movie);
   fileBrowser->setNameFilters("bsnes Movies (*.bsv)");

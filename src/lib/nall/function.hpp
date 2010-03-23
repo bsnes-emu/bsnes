@@ -35,6 +35,10 @@ namespace nall {
     R operator()(P... p) const { return data.callback(data, p...); }
     operator bool() const { return data.callback; }
 
+    void reset() {
+      data.callback = 0;
+    }
+
     function& operator=(const function &source) { memcpy(&data, &source.data, sizeof(data_t)); return *this; }
     function(const function &source) { operator=(source); }
 

@@ -1,6 +1,8 @@
 #ifndef NALL_STRING_CONVERT_HPP
 #define NALL_STRING_CONVERT_HPP
 
+namespace nall {
+
 char* strlower(char *str) {
   if(!str) return 0;
   int i = 0;
@@ -144,6 +146,8 @@ double strdouble(const char *str) {
   result += (double)result_integral;
 
   return !negate ? result : -result;
+}
+
 }
 
 #endif

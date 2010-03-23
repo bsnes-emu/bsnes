@@ -1,6 +1,8 @@
 #ifndef NALL_STRING_COMPARE_HPP
 #define NALL_STRING_COMPARE_HPP
 
+namespace nall {
+
 char chrlower(char c) {
   return (c >= 'A' && c <= 'Z') ? c + ('a' - 'A') : c;
 }
@@ -95,6 +97,8 @@ bool striend(const char *str, const char *key) {
     }
   }
   return true;
+}
+
 }
 
 #endif

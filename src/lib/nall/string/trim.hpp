@@ -1,6 +1,8 @@
 #ifndef NALL_STRING_TRIM_HPP
 #define NALL_STRING_TRIM_HPP
 
+namespace nall {
+
 char* ltrim(char *str, const char *key) {
   if(!key || !*key) return str;
   while(strbegin(str, key)) {
@@ -45,6 +47,8 @@ char* rtrim_once(char *str, const char *key) {
 
 char* trim_once(char *str, const char *key) {
   return ltrim_once(rtrim_once(str, key), key);
+}
+
 }
 
 #endif

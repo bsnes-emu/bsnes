@@ -1,6 +1,8 @@
 #ifndef NALL_STRING_MATCH_HPP
 #define NALL_STRING_MATCH_HPP
 
+namespace nall {
+
 bool match(const char *p, const char *s) {
   const char *p_ = 0, *s_ = 0;
 
@@ -67,6 +69,8 @@ bool match(const char *p, const char *s) {
 
     return false;
   }
+}
+
 }
 
 #endif

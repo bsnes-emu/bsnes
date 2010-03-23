@@ -1,6 +1,8 @@
 #ifndef NALL_STRING_MATH_HPP
 #define NALL_STRING_MATH_HPP
 
+namespace nall {
+
 static int eval_integer(const char *&s) {
   if(!*s) throw "unrecognized_integer";
   int value = 0, x = *s, y = *(s + 1);
@@ -155,6 +157,8 @@ bool strmath(const char *s, int &result) {
     result = 0;
     return false;
   }
+}
+
 }
 
 #endif

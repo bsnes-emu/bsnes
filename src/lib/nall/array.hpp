@@ -92,6 +92,7 @@ namespace nall {
       pool = source.pool;
       poolsize = source.poolsize;
       buffersize = source.buffersize;
+      source.pool = 0;
       source.reset();
       return *this;
     }

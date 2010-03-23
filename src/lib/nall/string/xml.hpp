@@ -4,8 +4,6 @@
 //XML subset parser
 //version 0.05
 
-#include <nall/vector.hpp>
-
 namespace nall {
 
 struct xml_attribute {

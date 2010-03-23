@@ -289,7 +289,7 @@ void VideoSettingsWindow::cropBottomAdjust(int state) {
 }
 
 void VideoSettingsWindow::selectFragmentShader() {
-  fileBrowser->onChange = (void*)0;
+  fileBrowser->onChange.reset();
   fileBrowser->onActivate = bind(&VideoSettingsWindow::assignFragmentShader, this);
   fileBrowser->onAccept = bind(&VideoSettingsWindow::assignFragmentShader, this);
   fileBrowser->setWindowTitle("Select Fragment Shader");
@@ -299,7 +299,7 @@ void VideoSettingsWindow::selectFragmentShader() {
 }
 
 void VideoSettingsWindow::selectVertexShader() {
-  fileBrowser->onChange = (void*)0;
+  fileBrowser->onChange.reset();
   fileBrowser->onActivate = bind(&VideoSettingsWindow::assignVertexShader, this);
   fileBrowser->onAccept = bind(&VideoSettingsWindow::assignVertexShader, this);
   fileBrowser->setWindowTitle("Select Vertex Shader");

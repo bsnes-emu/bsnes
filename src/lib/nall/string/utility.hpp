@@ -1,18 +1,20 @@
 #ifndef NALL_STRING_UTILITY_HPP
 #define NALL_STRING_UTILITY_HPP
 
-size_t strlcpy(nall::string &dest, const char *src, size_t length) {
+namespace nall {
+
+unsigned strlcpy(string &dest, const char *src, unsigned length) {
   dest.reserve(length);
   return strlcpy(dest(), src, length);
 }
 
-size_t strlcat(nall::string &dest, const char *src, size_t length) {
+unsigned strlcat(string &dest, const char *src, unsigned length) {
   dest.reserve(length);
   return strlcat(dest(), src, length);
 }
 
-nall::string substr(const char *src, size_t start, size_t length) {
-  nall::string dest;
+string substr(const char *src, unsigned start, unsigned length) {
+  string dest;
   if(length == 0) {
     //copy entire string
     dest = src + start;
@@ -23,22 +25,22 @@ nall::string substr(const char *src, size_t start, size_t length) {
   return dest;
 }
 
-/* very simplistic wrappers to return nall::string& instead of char* type */
+/* very simplistic wrappers to return string& instead of char* type */
 
-nall::string& strlower(nall::string &str) { strlower(str()); return str; }
-nall::string& strupper(nall::string &str) { strupper(str()); return str; }
-nall::string& strtr(nall::string &dest, const char *before, const char *after) { strtr(dest(), before, after); return dest; }
-nall::string& ltrim(nall::string &str, const char *key) { ltrim(str(), key); return str; }
-nall::string& rtrim(nall::string &str, const char *key) { rtrim(str(), key); return str; }
-nall::string& trim (nall::string &str, const char *key) { trim (str(), key); return str; }
-nall::string& ltrim_once(nall::string &str, const char *key) { ltrim_once(str(), key); return str; }
-nall::string& rtrim_once(nall::string &str, const char *key) { rtrim_once(str(), key); return str; }
-nall::string& trim_once (nall::string &str, const char *key) { trim_once (str(), key); return str; }
+string& strlower(string &str) { strlower(str()); return str; }
+string& strupper(string &str) { strupper(str()); return str; }
+string& strtr(string &dest, const char *before, const char *after) { strtr(dest(), before, after); return dest; }
+string& ltrim(string &str, const char *key) { ltrim(str(), key); return str; }
+string& rtrim(string &str, const char *key) { rtrim(str(), key); return str; }
+string& trim (string &str, const char *key) { trim (str(), key); return str; }
+string& ltrim_once(string &str, const char *key) { ltrim_once(str(), key); return str; }
+string& rtrim_once(string &str, const char *key) { rtrim_once(str(), key); return str; }
+string& trim_once (string &str, const char *key) { trim_once (str(), key); return str; }
 
 /* arithmetic <> string */
 
-template<unsigned length, char padding> nall::string strhex(uintmax_t value) {
-  nall::string output;
+template<unsigned length, char padding> string strhex(uintmax_t value) {
+  string output;
   unsigned offset = 0;
 
   //render string backwards, as we do not know its length yet
@@ -61,8 +63,8 @@ template<unsigned length, char padding> nall::string strhex(uintmax_t value) {
   return output;
 }
 
-template<unsigned length, char padding> nall::string strsigned(intmax_t value) {
-  nall::string output;
+template<unsigned length, char padding> string strsigned(intmax_t value) {
+  string output;
   unsigned offset = 0;
 
   bool negative = value < 0;
@@ -87,8 +89,8 @@ template<unsigned length, char padding> nall::string strsigned(intmax_t value) {
   return output;
 }
 
-template<unsigned length, char padding> nall::string strunsigned(uintmax_t value) {
-  nall::string output;
+template<unsigned length, char padding> string strunsigned(uintmax_t value) {
+  string output;
   unsigned offset = 0;
 
   do {
@@ -109,8 +111,8 @@ template<unsigned length, char padding> nall::string strunsigned(uintmax_t value
   return output;
 }
 
-template<unsigned length, char padding> nall::string strbin(uintmax_t value) {
-  nall::string output;
+template<unsigned length, char padding> string strbin(uintmax_t value) {
+  string output;
   unsigned offset = 0;
 
   do {
@@ -134,7 +136,7 @@ template<unsigned length, char padding> nall::string strbin(uintmax_t value) {
 //using sprintf is certainly not the most ideal method to convert
 //a double to a string ... but attempting to parse a double by
 //hand, digit-by-digit, results in subtle rounding errors.
-size_t strdouble(char *str, double value) {
+unsigned strdouble(char *str, double value) {
   char buffer[256];
   sprintf(buffer, "%f", value);
 
@@ -155,11 +157,13 @@ size_t strdouble(char *str, double value) {
   return length + 1;
 }
 
-nall::string strdouble(double value) {
-  nall::string temp;
+string strdouble(double value) {
+  string temp;
   temp.reserve(strdouble(0, value));
   strdouble(temp(), value);
   return temp;
+}
+
 }
 
 #endif

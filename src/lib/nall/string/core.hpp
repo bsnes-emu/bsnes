@@ -3,7 +3,7 @@
 
 namespace nall {
 
-void string::reserve(size_t size_) {
+void string::reserve(unsigned size_) {
   if(size_ > size) {
     size = size_;
     data = (char*)realloc(data, size + 1);
@@ -81,6 +81,7 @@ string& string::operator=(string &&source) {
   size = source.size;
   data = source.data;
   source.data = 0;
+  source.size = 0;
   return *this;
 }
 
@@ -94,12 +95,12 @@ bool string::readfile(const char *filename) {
   #if !defined(_WIN32)
   FILE *fp = fopen(filename, "rb");
   #else
-  FILE *fp = _wfopen(nall::utf16_t(filename), L"rb");
+  FILE *fp = _wfopen(utf16_t(filename), L"rb");
   #endif
   if(!fp) return false;
 
   fseek(fp, 0, SEEK_END);
-  size_t size = ftell(fp);
+  unsigned size = ftell(fp);
   rewind(fp);
   char *fdata = new char[size + 1];
   unsigned unused = fread(fdata, 1, size, fp);

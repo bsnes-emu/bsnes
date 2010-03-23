@@ -50,8 +50,8 @@ void PathSettingWidget::updatePath() {
 }
 
 void PathSettingWidget::selectPath() {
-  fileBrowser->onChange = (void*)0;
-  fileBrowser->onActivate = (void*)0;
+  fileBrowser->onChange.reset();
+  fileBrowser->onActivate.reset();
   fileBrowser->onAccept = bind(&PathSettingWidget::acceptPath, this);
   fileBrowser->setWindowTitle(pathBrowseLabel);
   fileBrowser->setPath(config().path.current.folder);

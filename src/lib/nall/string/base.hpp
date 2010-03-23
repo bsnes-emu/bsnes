@@ -10,42 +10,13 @@
 #include <nall/utf8.hpp>
 #include <nall/vector.hpp>
 
-inline char chrlower(char c);
-inline char chrupper(char c);
-inline int stricmp(const char *dest, const char *src);
-inline int strpos (const char *str, const char *key);
-inline int qstrpos(const char *str, const char *key);
-inline bool strbegin (const char *str, const char *key);
-inline bool stribegin(const char *str, const char *key);
-inline bool strend (const char *str, const char *key);
-inline bool striend(const char *str, const char *key);
-inline char* strlower(char *str);
-inline char* strupper(char *str);
-inline char* strtr(char *dest, const char *before, const char *after);
-inline uintmax_t strhex     (const char *str);
-inline intmax_t  strsigned  (const char *str);
-inline uintmax_t strunsigned(const char *str);
-inline uintmax_t strbin     (const char *str);
-inline double    strdouble  (const char *str);
-inline bool match(const char *pattern, const char *str);
-inline bool strint (const char *str, int &result);
-inline bool strmath(const char *str, int &result);
-inline size_t strlcpy(char *dest, const char *src, size_t length);
-inline size_t strlcat(char *dest, const char *src, size_t length);
-inline char* ltrim(char *str, const char *key = " ");
-inline char* rtrim(char *str, const char *key = " ");
-inline char* trim (char *str, const char *key = " ");
-inline char* ltrim_once(char *str, const char *key = " ");
-inline char* rtrim_once(char *str, const char *key = " ");
-inline char* trim_once (char *str, const char *key = " ");
-
 namespace nall {
   class string;
   template<typename T> inline string to_string(T);
 
   class string {
   public:
-    inline void reserve(size_t);
+    inline void reserve(unsigned);
     inline unsigned length() const;
 
     inline string& assign(const char*);
@@ -78,7 +49,7 @@ namespace nall {
 
   protected:
     char *data;
-    size_t size;
+    unsigned size;
 
   #if defined(QT_CORE_LIB)
   public:
@@ -98,29 +69,69 @@ namespace nall {
     lstring(std::initializer_list<string>);
   };
 
+  //compare.hpp
+  inline char chrlower(char c);
+  inline char chrupper(char c);
+  inline int stricmp(const char *dest, const char *src);
+  inline int strpos (const char *str, const char *key);
+  inline int qstrpos(const char *str, const char *key);
+  inline bool strbegin (const char *str, const char *key);
+  inline bool stribegin(const char *str, const char *key);
+  inline bool strend (const char *str, const char *key);
+  inline bool striend(const char *str, const char *key);
+
+  //convert.hpp
+  inline char* strlower(char *str);
+  inline char* strupper(char *str);
+  inline char* strtr(char *dest, const char *before, const char *after);
+  inline uintmax_t strhex     (const char *str);
+  inline intmax_t  strsigned  (const char *str);
+  inline uintmax_t strunsigned(const char *str);
+  inline uintmax_t strbin     (const char *str);
+  inline double    strdouble  (const char *str);
+
+  //match.hpp
+  inline bool match(const char *pattern, const char *str);
+
+  //math.hpp
+  inline bool strint (const char *str, int &result);
+  inline bool strmath(const char *str, int &result);
+
+  //strl.hpp
+  inline unsigned strlcpy(char *dest, const char *src, unsigned length);
+  inline unsigned strlcat(char *dest, const char *src, unsigned length);
+
+  //trim.hpp
+  inline char* ltrim(char *str, const char *key = " ");
+  inline char* rtrim(char *str, const char *key = " ");
+  inline char* trim (char *str, const char *key = " ");
+  inline char* ltrim_once(char *str, const char *key = " ");
+  inline char* rtrim_once(char *str, const char *key = " ");
+  inline char* trim_once (char *str, const char *key = " ");
+
+  //utility.hpp
+  inline unsigned strlcpy(string &dest, const char *src, unsigned length);
+  inline unsigned strlcat(string &dest, const char *src, unsigned length);
+  inline string substr(const char *src, unsigned start = 0, unsigned length = 0);
+  inline string& strlower(string &str);
+  inline string& strupper(string &str);
+  inline string& strtr(string &dest, const char *before, const char *after);
+  inline string& ltrim(string &str, const char *key = " ");
+  inline string& rtrim(string &str, const char *key = " ");
+  inline string& trim (string &str, const char *key = " ");
+  inline string& ltrim_once(string &str, const char *key = " ");
+  inline string& rtrim_once(string &str, const char *key = " ");
+  inline string& trim_once (string &str, const char *key = " ");
+  template<unsigned length = 0, char padding = '0'> inline string strhex(uintmax_t value);
+  template<unsigned length = 0, char padding = '0'> inline string strsigned(intmax_t value);
+  template<unsigned length = 0, char padding = '0'> inline string strunsigned(uintmax_t value);
+  template<unsigned length = 0, char padding = '0'> inline string strbin(uintmax_t value);
+  inline unsigned strdouble(char *str, double value);
+  inline string strdouble(double value);
+
+  //variadic.hpp
   template<typename... Args> inline string sprint(Args... args);
   template<typename... Args> inline void print(Args... args);
 };
-
-inline size_t strlcpy(nall::string &dest, const char *src, size_t length);
-inline size_t strlcat(nall::string &dest, const char *src, size_t length);
-
-inline nall::string& strlower(nall::string &str);
-inline nall::string& strupper(nall::string &str);
-inline nall::string& strtr(nall::string &dest, const char *before, const char *after);
-inline nall::string& ltrim(nall::string &str, const char *key = " ");
-inline nall::string& rtrim(nall::string &str, const char *key = " ");
-inline nall::string& trim (nall::string &str, const char *key = " ");
-inline nall::string& ltrim_once(nall::string &str, const char *key = " ");
-inline nall::string& rtrim_once(nall::string &str, const char *key = " ");
-inline nall::string& trim_once (nall::string &str, const char *key = " ");
-
-inline nall::string substr(const char *src, size_t start = 0, size_t length = 0);
-template<unsigned length = 0, char padding = '0'> inline nall::string strhex(uintmax_t value);
-template<unsigned length = 0, char padding = '0'> inline nall::string strsigned(intmax_t value);
-template<unsigned length = 0, char padding = '0'> inline nall::string strunsigned(uintmax_t value);
-template<unsigned length = 0, char padding = '0'> inline nall::string strbin(uintmax_t value);
-inline size_t strdouble(char *str, double value);
-inline nall::string strdouble(double value);
 
 #endif

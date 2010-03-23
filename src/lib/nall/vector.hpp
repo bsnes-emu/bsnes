@@ -102,6 +102,7 @@ namespace nall {
       pool = source.pool;
       poolsize = source.poolsize;
       objectsize = source.objectsize;
+      source.pool = 0;
       source.reset();
       return *this;
     }
@@ -210,6 +211,7 @@ namespace nall {
       pool = source.pool;
       poolsize = source.poolsize;
       objectsize = source.objectsize;
+      source.pool = 0;
       source.reset();
       return *this;
     }

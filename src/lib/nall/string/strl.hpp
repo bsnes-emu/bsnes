@@ -1,13 +1,15 @@
 #ifndef NALL_STRING_STRL_HPP
 #define NALL_STRING_STRL_HPP
 
+namespace nall {
+
 //strlcpy, strlcat based on OpenBSD implementation by Todd C. Miller
 
 //return = strlen(src)
-size_t strlcpy(char *dest, const char *src, size_t length) {
+unsigned strlcpy(char *dest, const char *src, unsigned length) {
   char *d = dest;
   const char *s = src;
-  size_t n = length;
+  unsigned n = length;
 
   if(n) {
     while(--n && (*d++ = *s++)); //copy as many bytes as possible, or until null terminator reached
@@ -22,13 +24,13 @@ size_t strlcpy(char *dest, const char *src, size_t length) {
 }
 
 //return = strlen(src) + min(length, strlen(dest))
-size_t strlcat(char *dest, const char *src, size_t length) {
+unsigned strlcat(char *dest, const char *src, unsigned length) {
   char *d = dest;
   const char *s = src;
-  size_t n = length;
+  unsigned n = length;
 
   while(n-- && *d) d++; //find end of dest
-  size_t dlength = d - dest;
+  unsigned dlength = d - dest;
   n = length - dlength; //subtract length of dest from maximum string length
 
   if(!n) return dlength + strlen(s);
@@ -43,6 +45,8 @@ size_t strlcat(char *dest, const char *src, size_t length) {
   *d = 0;
 
   return dlength + (s - src); //return length of resulting string, sans null terminator
+}
+
 }
 
 #endif
