@@ -42,7 +42,6 @@ else ifeq ($(platform),win)
   link += -mwindows -mthreads
 # link += -mconsole -mthreads
   link += -s -luuid -lkernel32 -luser32 -lgdi32 -lshell32
-  # statically link Qt for Windows build
   link += -enable-stdcall-fixup -Wl,-enable-auto-import -Wl,-enable-runtime-pseudo-reloc
 
   ruby := video.direct3d video.wgl video.directdraw video.gdi video.qtraster
@@ -206,6 +205,11 @@ install:
 	install -D -m 644 data/bsnes.png $(DESTDIR)$(prefix)/share/pixmaps/bsnes.png
 	install -D -m 644 data/bsnes.desktop $(DESTDIR)$(prefix)/share/applications/bsnes.desktop
 
+uninstall:
+	rm $(DESTDIR)$(prefix)/bin/bsnes
+	rm $(DESTDIR)$(prefix)/share/pixmaps/bsnes.png
+	rm $(DESTDIR)$(prefix)/share/applications/bsnes.desktop
+
 clean: ui_clean
 	-@$(call delete,obj/*.o)
 	-@$(call delete,*.res)
@@ -214,18 +218,3 @@ clean: ui_clean
 	-@$(call delete,*.ilk)
 	-@$(call delete,*.pdb)
 	-@$(call delete,*.manifest)
-
-help:
-	@echo "Usage: $(MAKE) platform=(os) compiler=(cc) [options]"
-	@echo ""
-	@echo "Supported platforms:"
-	@echo "  x   - Linux / BSD (x86, x86-64)"
-	@echo "  win - Windows (x86, x86-64)"
-	@echo ""
-	@echo "Supported compilers:"
-	@echo "  gcc              - GCC compiler"
-	@echo "  mingw32-gcc      - MinGW compiler"
-	@echo "  i586-mingw32-gcc - MinGW cross compiler"
-	@echo ""
-	@echo "Example: $(MAKE) platform=x compiler=gcc"
-	@echo ""
