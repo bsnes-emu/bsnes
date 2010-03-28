@@ -17,8 +17,8 @@ bool sCPU::dma_addr_valid(uint32 abus) {
 }
 
 uint8 sCPU::dma_read(uint32 abus) {
-  if(dma_addr_valid(abus) == false) return 0x00;  //does not return S-CPU MDR
-  return bus.read(abus);
+  if(dma_addr_valid(abus) == false) return regs.mdr = 0x00;
+  return regs.mdr = bus.read(abus);
 }
 
 void sCPU::dma_transfer(bool direction, uint8 bbus, uint32 abus) {

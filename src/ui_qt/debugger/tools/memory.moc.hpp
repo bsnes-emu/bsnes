@@ -17,8 +17,8 @@ public:
   void synchronize();
 
   SNES::Debugger::MemorySource memorySource;
-  uint8 reader(unsigned addr);
-  void writer(unsigned addr, uint8 data);
+  uint8_t reader(unsigned addr);
+  void writer(unsigned addr, uint8_t data);
 
   MemoryEditor();
 

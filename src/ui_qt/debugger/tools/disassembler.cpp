@@ -52,7 +52,7 @@ Disassembler::Disassembler() {
 }
 
 void Disassembler::refresh(Source source, unsigned addr) {
-  uint8 *usage;
+  uint8_t *usage;
   unsigned mask;
   if(source == CPU) { usage = SNES::cpu.usage; mask = (1 << 24) - 1; }
   if(source == SMP) { usage = SNES::smp.usage; mask = (1 << 16) - 1; }

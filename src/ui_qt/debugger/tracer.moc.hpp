@@ -19,8 +19,8 @@ private:
   bool traceSmp;
   bool traceMask;
 
-  uint8 *traceMaskCPU;
-  uint8 *traceMaskSMP;
+  uint8_t *traceMaskCPU;
+  uint8_t *traceMaskSMP;
 };
 
 extern Tracer *tracer;
