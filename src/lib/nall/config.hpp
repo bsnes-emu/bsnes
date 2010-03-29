@@ -78,9 +78,8 @@ namespace nall {
         line.split("\n", data);
 
         for(unsigned i = 0; i < line.size(); i++) {
-          int position = qstrpos(line[i], "#");
-          if(position >= 0) line[i][position] = 0;
-          if(qstrpos(line[i], " = ") < 0) continue;
+          if(auto position = qstrpos(line[i], "#")) line[i][position()] = 0;
+          if(!qstrpos(line[i], " = ")) continue;
 
           lstring part;
           part.qsplit(" = ", line[i]);

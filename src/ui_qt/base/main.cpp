@@ -608,6 +608,11 @@ void MainWindow::showAbout() {
   aboutWindow->show();
 }
 
+void MainWindow::resizeEvent(QResizeEvent *event) {
+  Window::resizeEvent(event);
+  QApplication::processEvents();
+}
+
 void MainWindow::closeEvent(QCloseEvent *event) {
   Window::closeEvent(event);
   quit();

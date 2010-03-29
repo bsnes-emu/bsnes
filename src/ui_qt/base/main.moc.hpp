@@ -96,6 +96,7 @@ public:
 
   void syncUi();
   bool isActive();
+  void resizeEvent(QResizeEvent*);
   void closeEvent(QCloseEvent*);
   MainWindow();
 

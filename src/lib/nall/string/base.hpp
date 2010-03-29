@@ -35,12 +35,13 @@ namespace nall {
     inline bool operator> (const char*) const;
     inline bool operator>=(const char*) const;
 
+    inline string& operator=(const string&);
+    inline string& operator=(string&&);
+
     inline string();
     inline string(const char*);
     inline string(const string&);
     inline string(string&&);
-    inline string& operator=(const string&);
-    inline string& operator=(string&&);
     inline ~string();
 
     inline bool readfile(const char*);
@@ -73,8 +74,6 @@ namespace nall {
   inline char chrlower(char c);
   inline char chrupper(char c);
   inline int stricmp(const char *dest, const char *src);
-  inline int strpos (const char *str, const char *key);
-  inline int qstrpos(const char *str, const char *key);
   inline bool strbegin (const char *str, const char *key);
   inline bool stribegin(const char *str, const char *key);
   inline bool strend (const char *str, const char *key);

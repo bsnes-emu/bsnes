@@ -8,6 +8,12 @@ VideoSettingsWindow::VideoSettingsWindow() {
   layout->setAlignment(Qt::AlignTop);
   setLayout(layout);
 
+  displayLabel = new QLabel("<b>Display</b>");
+  layout->addWidget(displayLabel);
+
+  autoHideFullscreenMenu = new QCheckBox("Auto-hide menus when entering fullscreen mode");
+  layout->addWidget(autoHideFullscreenMenu);
+
   colorLabel = new QLabel("<b>Color Adjustment</b>");
   layout->addWidget(colorLabel);
 
@@ -156,6 +162,7 @@ VideoSettingsWindow::VideoSettingsWindow() {
   vertexShaderDefault = new QPushButton("Default");
   pixelShaderLayout->addWidget(vertexShaderDefault, 1, 3);
 
+  connect(autoHideFullscreenMenu, SIGNAL(stateChanged(int)), this, SLOT(autoHideFullscreenMenuToggle()));
   connect(contrastSlider, SIGNAL(valueChanged(int)), this, SLOT(contrastAdjust(int)));
   connect(brightnessSlider, SIGNAL(valueChanged(int)), this, SLOT(brightnessAdjust(int)));
   connect(gammaSlider, SIGNAL(valueChanged(int)), this, SLOT(gammaAdjust(int)));
@@ -196,6 +203,8 @@ void VideoSettingsWindow::synchronizePixelShaderSettings() {
 void VideoSettingsWindow::syncUi() {
   int n;
 
+  autoHideFullscreenMenu->setChecked(config().video.autoHideFullscreenMenu);
+
   n = config().video.contrastAdjust;
   contrastValue->setText(string() << (n > 0 ? "+" : "") << n << "%");
   contrastSlider->setSliderPosition(n);
@@ -232,6 +241,10 @@ void VideoSettingsWindow::syncUi() {
 
   fragmentShaderValue->setText(config().path.fragmentShader);
   vertexShaderValue->setText(config().path.vertexShader);
+}
+
+void VideoSettingsWindow::autoHideFullscreenMenuToggle() {
+  config().video.autoHideFullscreenMenu = autoHideFullscreenMenu->isChecked();
 }
 
 void VideoSettingsWindow::contrastAdjust(int value) {

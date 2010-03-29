@@ -39,6 +39,9 @@ public:
   struct Video {
     bool isFullscreen;
     bool synchronize;
+
+    bool autoHideFullscreenMenu;
+
     signed contrastAdjust, brightnessAdjust, gammaAdjust, scanlineAdjust;
     bool enableGammaRamp;
     double ntscAspectRatio, palAspectRatio;

@@ -93,9 +93,9 @@ struct Keyboard {
     if(!strbegin(name, "KB")) return 0;
     ltrim(s, "KB");
     unsigned id = strunsigned(s);
-    int pos = strpos(s, "::");
-    if(pos < 0) return 0;
-    s = substr(s, pos + 2);
+    auto pos = strpos(s, "::");
+    if(!pos) return 0;
+    s = substr(s, pos() + 2);
     for(unsigned i = 0; i < Limit; i++) {
       if(s == KeyboardScancodeName[i]) return Base + Size * id + i;
     }
@@ -190,9 +190,9 @@ struct Mouse {
     if(!strbegin(name, "MS")) return 0;
     ltrim(s, "MS");
     unsigned id = strunsigned(s);
-    int pos = strpos(s, "::");
-    if(pos < 0) return 0;
-    s = substr(s, pos + 2);
+    auto pos = strpos(s, "::");
+    if(!pos) return 0;
+    s = substr(s, pos() + 2);
     for(unsigned i = 0; i < Limit; i++) {
       if(s == MouseScancodeName[i]) return Base + Size * id + i;
     }
@@ -314,9 +314,9 @@ struct Joypad {
     if(!strbegin(name, "JP")) return 0;
     ltrim(s, "JP");
     unsigned id = strunsigned(s);
-    int pos = strpos(s, "::");
-    if(pos < 0) return 0;
-    s = substr(s, pos + 2);
+    auto pos = strpos(s, "::");
+    if(!pos) return 0;
+    s = substr(s, pos() + 2);
     for(unsigned i = 0; i < Limit; i++) {
       if(s == JoypadScancodeName[i]) return Base + Size * id + i;
     }

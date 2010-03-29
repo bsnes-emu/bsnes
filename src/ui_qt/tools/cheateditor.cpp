@@ -245,12 +245,10 @@ void CheatEditorWindow::findCheatCodes() {
     file.close();
   }
 
-  signed position = strpos(data, SNES::cartridge.sha256()) - 19;
-  if(position >= 0) {
-    const char *block = (const char*)data + position;
-    position = strpos(block, "</cartridge>");
-    if(position >= 0) {
-      xml_element document = xml_parse(substr(block, 0, position + 12));
+  if(auto position = strpos(data, SNES::cartridge.sha256())) {
+    const char *block = (const char*)data + position() - 19;
+    if(position = strpos(block, "</cartridge>")) {
+      xml_element document = xml_parse(substr(block, 0, position() + 12));
       if(document.element.size() == 0) return;
 
       cheatImportWindow->refresh(document.element[0]);

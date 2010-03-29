@@ -211,7 +211,7 @@ inline void FileDialog::filterBoxChanged() {
   if(filters.length() == 0) {
     fileSystemModel->setNameFilters(QStringList() << "*");
   } else {
-    filters = substr(filters, strpos(filters, "("));
+    filters = substr(filters, strpos(filters, "(")());
     ltrim(filters, "(");
     rtrim(filters, ")");
     lstring part;

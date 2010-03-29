@@ -15,9 +15,8 @@ namespace nall {
 
       //no match, use input; remove input identifier, if one exists
       if(strbegin(input, "{{")) {
-        int pos = strpos(input, "}}");
-        if(pos >= 0) {
-          string temp = substr(input, pos + 2);
+        if(auto pos = strpos(input, "}}")) {
+          string temp = substr(input, pos() + 2);
           return temp;
         }
       }

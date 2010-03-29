@@ -9,8 +9,8 @@ void Utility::updateFullscreenState() {
   } else {
     config().video.context = &config().video.fullscreen;
     mainWindow->showFullScreen();
-    mainWindow->menuBar->setVisible(false);
-    mainWindow->statusBar->setVisible(false);
+    mainWindow->menuBar->setVisible(config().video.autoHideFullscreenMenu == false);
+    mainWindow->statusBar->setVisible(config().video.autoHideFullscreenMenu == false);
   }
 
   QApplication::processEvents();

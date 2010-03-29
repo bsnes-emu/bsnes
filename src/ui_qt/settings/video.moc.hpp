@@ -3,6 +3,8 @@ class VideoSettingsWindow : public QWidget {
 
 public:
   QVBoxLayout *layout;
+  QLabel *displayLabel;
+  QCheckBox *autoHideFullscreenMenu;
   QLabel *colorLabel;
   QGridLayout *colorLayout;
   QLabel *contrastLabel;
@@ -49,6 +51,7 @@ public:
   VideoSettingsWindow();
 
 private slots:
+  void autoHideFullscreenMenuToggle();
   void contrastAdjust(int);
   void brightnessAdjust(int);
   void gammaAdjust(int);

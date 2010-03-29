@@ -11,6 +11,7 @@
 #include <nall/string/match.hpp>
 #include <nall/string/math.hpp>
 #include <nall/string/strl.hpp>
+#include <nall/string/strpos.hpp>
 #include <nall/string/trim.hpp>
 #include <nall/string/replace.hpp>
 #include <nall/string/split.hpp>

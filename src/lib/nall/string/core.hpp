@@ -49,6 +49,20 @@ bool string::operator<=(const char *str) const { return strcmp(data, str) <= 0; 
 bool string::operator> (const char *str) const { return strcmp(data, str)  > 0; }
 bool string::operator>=(const char *str) const { return strcmp(data, str) >= 0; }
 
+string& string::operator=(const string &value) {
+  assign(value);
+  return *this;
+}
+
+string& string::operator=(string &&source) {
+  if(data) free(data);
+  size = source.size;
+  data = source.data;
+  source.data = 0;
+  source.size = 0;
+  return *this;
+}
+
 string::string() {
   size = 64;
   data = (char*)malloc(size + 1);
@@ -69,20 +83,6 @@ string::string(string &&source) {
   size = source.size;
   data = source.data;
   source.data = 0;
-}
-
-string& string::operator=(const string &value) {
-  assign(value);
-  return *this;
-}
-
-string& string::operator=(string &&source) {
-  if(data) free(data);
-  size = source.size;
-  data = source.data;
-  source.data = 0;
-  source.size = 0;
-  return *this;
 }
 
 string::~string() {

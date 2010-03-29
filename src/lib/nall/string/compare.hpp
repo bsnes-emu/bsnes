@@ -21,38 +21,6 @@ int stricmp(const char *dest, const char *src) {
   return (int)chrlower(*dest) - (int)chrlower(*src);
 }
 
-int strpos(const char *str, const char *key) {
-  int ssl = strlen(str), ksl = strlen(key);
-
-  if(ksl > ssl) return -1;
-  for(int i = 0; i <= ssl - ksl; i++) {
-    if(!memcmp(str + i, key, ksl)) {
-      return i;
-    }
-  }
-  return -1;
-}
-
-int qstrpos(const char *str, const char *key) {
-  int ssl = strlen(str), ksl = strlen(key);
-
-  if(ksl > ssl) return -1;
-  for(int i = 0; i <= ssl - ksl;) {
-  uint8_t x = str[i];
-    if(x == '\"' || x == '\'') {
-    uint8_t z = i++;
-      while(str[i] != x && i < ssl) i++;
-      if(i >= ssl) i = z;
-    }
-    if(!memcmp(str + i, key, ksl)) {
-      return i;
-    } else {
-      i++;
-    }
-  }
-  return -1;
-}
-
 bool strbegin(const char *str, const char *key) {
   int i, ssl = strlen(str), ksl = strlen(key);
 
