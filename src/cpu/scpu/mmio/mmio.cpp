@@ -304,10 +304,10 @@ uint8 sCPU::mmio_r43xb(uint8 i) {
 //DMAPx
 void sCPU::mmio_w43x0(uint8 i, uint8 data) {
   channel[i].dmap          = data;
-  channel[i].direction     = !!(data & 0x80);
-  channel[i].hdma_indirect = !!(data & 0x40);
-  channel[i].reversexfer   = !!(data & 0x10);
-  channel[i].fixedxfer     = !!(data & 0x08);
+  channel[i].direction     = data & 0x80;
+  channel[i].hdma_indirect = data & 0x40;
+  channel[i].reversexfer   = data & 0x10;
+  channel[i].fixedxfer     = data & 0x08;
   channel[i].xfermode      = data & 7;
 }
 

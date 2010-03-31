@@ -226,6 +226,8 @@ void Cartridge::xml_parse_sa1(xml_element &root) {
 }
 
 void Cartridge::xml_parse_bsx(xml_element &root) {
+  if(mode != Mode::BsxSlotted && mode != Mode::Bsx) return;
+
   foreach(node, root.element) {
     if(node.name == "slot") {
       foreach(leaf, node.element) {
@@ -255,6 +257,8 @@ void Cartridge::xml_parse_bsx(xml_element &root) {
 }
 
 void Cartridge::xml_parse_sufamiturbo(xml_element &root) {
+  if(mode != Mode::SufamiTurbo) return;
+
   foreach(node, root.element) {
     if(node.name == "slot") {
       bool slotid = 0;
@@ -299,6 +303,8 @@ void Cartridge::xml_parse_sufamiturbo(xml_element &root) {
 }
 
 void Cartridge::xml_parse_supergameboy(xml_element &root) {
+  if(mode != Mode::SuperGameBoy) return;
+
   foreach(attr, root.attribute) {
     if(attr.name == "revision") {
       if(attr.content == "1") supergameboy_version = SuperGameBoyVersion::Version1;

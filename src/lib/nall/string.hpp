@@ -2,6 +2,8 @@
 #define NALL_STRING_HPP
 
 #include <initializer_list>
+#include <nall/utility.hpp>
+
 #include <nall/string/base.hpp>
 #include <nall/string/core.hpp>
 #include <nall/string/cast.hpp>

@@ -72,6 +72,40 @@ void sCPU::alu_edge() {
 }
 
 void sCPU::dma_edge() {
+  //H/DMA pending && DMA inactive?
+  //.. Run one full CPU cycle
+  //.. HDMA pending && HDMA enabled ? DMA sync + HDMA run
+  //.. DMA pending && DMA enabled ? DMA sync + DMA run
+  //.... HDMA during DMA && HDMA enabled ? DMA sync + HDMA run
+  //.. Run one bus CPU cycle
+  //.. CPU sync
+
+  if(status.dma_active == true) {
+    if(status.hdma_pending) {
+      status.hdma_pending = false;
+      if(hdma_enabled_channels()) {
+        if(!dma_enabled_channels()) {
+          dma_add_clocks(8 - dma_counter());
+        }
+        status.hdma_mode == 0 ? hdma_init() : hdma_run();
+        if(!dma_enabled_channels()) {
+          add_clocks(status.clock_count - (status.dma_clocks % status.clock_count));
+          status.dma_active = false;
+        }
+      }
+    }
+
+    if(status.dma_pending) {
+      status.dma_pending = false;
+      if(dma_enabled_channels()) {
+        dma_add_clocks(8 - dma_counter());
+        dma_run();
+        add_clocks(status.clock_count - (status.dma_clocks % status.clock_count));
+        status.dma_active = false;
+      }
+    }
+  }
+
   while(cycle_edge_state) {
     switch(bit::lowest(cycle_edge_state)) {
       case EventFlagHdmaInit: {
@@ -91,38 +125,6 @@ void sCPU::dma_edge() {
     }
 
     cycle_edge_state = bit::clear_lowest(cycle_edge_state);
-  }
-
-  //H/DMA pending && DMA inactive?
-  //.. Run one full CPU cycle
-  //.. HDMA pending && HDMA enabled ? DMA sync + HDMA run
-  //.. DMA pending && DMA enabled ? DMA sync + DMA run
-  //.... HDMA during DMA && HDMA enabled ? DMA sync + HDMA run
-  //.. Run one bus CPU cycle
-  //.. CPU sync
-
-  if(status.dma_active == true) {
-    if(status.hdma_pending) {
-      status.hdma_pending = false;
-      if(hdma_enabled_channels()) {
-        dma_add_clocks(8 - dma_counter());
-        status.hdma_mode == 0 ? hdma_init() : hdma_run();
-        if(!dma_enabled_channels()) {
-          add_clocks(status.clock_count - (status.dma_clocks % status.clock_count));
-          status.dma_active = false;
-        }
-      }
-    }
-
-    if(status.dma_pending) {
-      status.dma_pending = false;
-      if(dma_enabled_channels()) {
-        dma_add_clocks(8 - dma_counter());
-        dma_run();
-        add_clocks(status.clock_count - (status.dma_clocks % status.clock_count));
-        status.dma_active = false;
-      }
-    }
   }
 
   if(status.dma_active == false) {

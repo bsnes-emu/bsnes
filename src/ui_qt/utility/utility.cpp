@@ -39,7 +39,7 @@ void Utility::updateSystemState() {
     return;
   }
 
-  mainWindow->systemState->setText(text);
+  mainWindow->systemState->setText(string() << "  " << text << "  ");
 }
 
 void Utility::acquireMouse() {

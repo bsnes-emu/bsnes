@@ -7,53 +7,34 @@
 
 namespace nall {
 
-class strpos {
-  bool found;
-  unsigned position;
-public:
-  inline operator bool() const { return found; }
-  inline unsigned operator()() const { return position; }
-  inline strpos(const char *str, const char *key) : found(false), position(0) {
-    unsigned ssl = strlen(str), ksl = strlen(key);
-    if(ksl > ssl) return;
+optional<unsigned> inline strpos(const char *str, const char *key) {
+  unsigned ssl = strlen(str), ksl = strlen(key);
+  if(ksl > ssl) return { false, 0 };
 
-    for(unsigned i = 0; i <= ssl - ksl; i++) {
-      if(!memcmp(str + i, key, ksl)) {
-        found = true;
-        position = i;
-        return;
-      }
-    }
+  for(unsigned i = 0; i <= ssl - ksl; i++) {
+    if(!memcmp(str + i, key, ksl)) return { true, i };
   }
-};
 
-class qstrpos {
-  bool found;
-  unsigned position;
-public:
-  inline operator bool() const { return found; }
-  inline unsigned operator()() const { return position; }
-  inline qstrpos(const char *str, const char *key) : found(false), position(0) {
-    unsigned ssl = strlen(str), ksl = strlen(key);
-    if(ksl > ssl) return;
+  return { false, 0 };
+}
 
-    for(unsigned i = 0; i <= ssl - ksl;) {
-      uint8_t x = str[i];
-      if(x == '\"' || x == '\'') {
-        uint8_t z = i++;
-        while(str[i] != x && i < ssl) i++;
-        if(i >= ssl) i = z;
-      }
-      if(!memcmp(str + i, key, ksl)) {
-        found = true;
-        position = i;
-        return;
-      } else {
-        i++;
-      }
+optional<unsigned> inline qstrpos(const char *str, const char *key) {
+  unsigned ssl = strlen(str), ksl = strlen(key);
+  if(ksl > ssl) return { false, 0 };
+
+  for(unsigned i = 0; i <= ssl - ksl;) {
+    uint8_t x = str[i];
+    if(x == '\"' || x == '\'') {
+      uint8_t z = i++;
+      while(str[i] != x && i < ssl) i++;
+      if(i >= ssl) i = z;
     }
+    if(!memcmp(str + i, key, ksl)) return { true, i };
+    i++;
   }
-};
+
+  return { false, 0 };
+}
 
 }
 

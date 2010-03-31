@@ -231,6 +231,7 @@ MainWindow::MainWindow() {
 
   //status bar
   statusBar = new QStatusBar;
+  statusBar->setSizeGripEnabled(false);
   statusBar->showMessage("");
   systemState = new QLabel;
   statusBar->addPermanentWidget(systemState);

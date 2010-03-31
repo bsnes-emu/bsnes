@@ -97,6 +97,10 @@ void sCPU::serialize(serializer &s) {
     s.integer(channel[i].hdma_do_transfer);
   }
 
+  s.integer(pipe.valid);
+  s.integer(pipe.addr);
+  s.integer(pipe.data);
+
   s.integer(apu_port[0]);
   s.integer(apu_port[1]);
   s.integer(apu_port[2]);

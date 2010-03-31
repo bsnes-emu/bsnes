@@ -109,8 +109,6 @@ void SuperGameBoy::enable() {
 }
 
 void SuperGameBoy::power() {
-  printf("version = %u\n", cartridge.supergameboy_version());
-
   audio.coprocessor_enable(true);
   audio.coprocessor_frequency(cartridge.supergameboy_version() == Cartridge::SuperGameBoyVersion::Version1 ? 2147727.0 : 2097152.0);
 

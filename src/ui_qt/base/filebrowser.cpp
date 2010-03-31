@@ -127,7 +127,7 @@ void FileBrowser::onChangeCartridge(const string &path) {
 
   if(info == "") info = "<small><font color='#808080'>No preview available</font></small>";
   previewInfo->setText(info);
-  previewImage->setStyleSheet(string() << "background: url(" << image << ") center left no-repeat;");
+  previewImage->setStyleSheet(string() << "background: url('" << image << "') center left no-repeat;");
   previewApplyPatch->setVisible(file::exists(patch));
 }
 

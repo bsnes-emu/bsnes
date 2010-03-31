@@ -19,7 +19,7 @@ namespace memory {
 Cartridge cartridge;
 
 void Cartridge::load(Mode cartridge_mode, const lstring &xml_list) {
-  mode = Mode::Normal;
+  mode = cartridge_mode;
   region = Region::NTSC;
   ram_size = 0;
   spc7110_data_rom_offset = 0x100000;
@@ -45,7 +45,6 @@ void Cartridge::load(Mode cartridge_mode, const lstring &xml_list) {
   has_st0018     = false;
   has_msu1       = false;
 
-  mode = cartridge_mode;
   parse_xml(xml_list);
 
   if(ram_size > 0) {
