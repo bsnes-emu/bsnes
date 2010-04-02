@@ -9,7 +9,7 @@
 //Q_IMPORT_PLUGIN(QJpegPlugin)
 //Q_IMPORT_PLUGIN(QMngPlugin)
 
-#include <../base.hpp>
+#include <snes/snes.hpp>
 
 #include <nall/base64.hpp>
 #include <nall/config.hpp>
