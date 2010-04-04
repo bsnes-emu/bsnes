@@ -1,5 +1,5 @@
 qtlibs := $(strip QtCore QtGui $(if $(findstring osx,$(platform)),QtOpenGL))
-include lib/nall/qt/Makefile
+include nall/qt/Makefile
 
 ui_objects := ui-main ui-base ui-cartridge ui-debugger ui-input ui-movie ui-settings ui-state ui-tools
 ui_objects += ruby
@@ -7,7 +7,7 @@ ui_objects += $(if $(call streq,$(platform),win),resource)
 link += $(qtlib)
 
 headers := $(call rwildcard,$(ui)/,%.hpp)
-moc_headers := $(call rwildcard,lib/nall/qt/,%.moc.hpp) $(call rwildcard,$(ui)/,%.moc.hpp)
+moc_headers := $(call rwildcard,nall/qt/,%.moc.hpp) $(call rwildcard,$(ui)/,%.moc.hpp)
 moc_objects := $(foreach f,$(moc_headers),obj/$(notdir $(patsubst %.moc.hpp,%.moc,$f)))
 qt_compile = $(call compile,-Iobj $(qtinc))
 
@@ -78,7 +78,7 @@ obj/ui-settings.o: $(ui)/settings/settings.cpp $(headers) $(wildcard $(ui)/setti
 obj/ui-state.o: $(ui)/state/state.cpp $(headers) $(wildcard $(ui)/state/*.cpp); $(qt_compile)
 obj/ui-tools.o: $(ui)/tools/tools.cpp $(headers) $(wildcard $(ui)/tools/*.cpp); $(qt_compile)
 
-obj/ruby.o: lib/ruby/ruby.cpp $(call rwildcard,lib/ruby/*)
+obj/ruby.o: ruby/ruby.cpp $(call rwildcard,ruby/*)
 	$(call compile,$(rubydef) $(rubyflags))
 
 obj/resource.rcc: $(ui)/resource/resource.qrc data/*

@@ -244,12 +244,8 @@ bool Cartridge::loadCartridge(string &filename, string &xml, SNES::MappedRAM &me
     //prefer manually created XML cartridge mapping
     xml.readfile(name);
   } else {
-    //attempt to generate XML mapping from data via heuristics
-    if(reader.map(xml, data, size) == false) {
-      //if this isn't possible, loading is not possible, so abort loading
-      delete[] data;
-      return false;
-    }
+    //generate XML mapping from data via heuristics
+    xml = snes_information(data, size).xml_memory_map;
   }
 
   memory.copy(data, size);

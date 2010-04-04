@@ -1,6 +1,12 @@
-static const char bsnesVersion[] = "063.03";
+static const char bsnesVersion[] = "063.07";
 static const char bsnesTitle[] = "bsnes";
 static const unsigned bsnesSerializerVersion = 9;
+
+#define CORE_SMEMORY
+#define CORE_SCPU
+#define CORE_SSMP
+#define CORE_SDSP
+#define CORE_BPPU
 
 //S-DSP can be encapsulated into a state machine using #define magic
 //this avoids ~2.048m co_switch() calls per second (~5% speedup)
@@ -56,22 +62,35 @@ namespace SNES {
   };
 
   #include <snes/memory/memory.hpp>
+  #if defined(CORE_SMEMORY)
   #include <snes/memory/smemory/smemory.hpp>
+  #endif
 
   #include <snes/ppu/ppu.hpp>
+  #if defined(CORE_SPPU)
+  #include <snes/ppu/sppu/sppu.hpp>
+  #elif defined(CORE_BPPU)
   #include <snes/ppu/bppu/bppu.hpp>
+  #endif
 
   #include <snes/cpu/cpu.hpp>
   #include <snes/cpu/core/core.hpp>
+  #if defined(CORE_SCPU)
   #include <snes/cpu/scpu/scpu.hpp>
+  #endif
 
   #include <snes/smp/smp.hpp>
   #include <snes/smp/core/core.hpp>
+  #if defined(CORE_SSMP)
   #include <snes/smp/ssmp/ssmp.hpp>
+  #endif
 
   #include <snes/dsp/dsp.hpp>
+  #if defined(CORE_SDSP)
   #include <snes/dsp/sdsp/sdsp.hpp>
+  #elif defined(CORE_ADSP)
   #include <snes/dsp/adsp/adsp.hpp>
+  #endif
 
   #include <snes/system/system.hpp>
   #include <snes/chip/chip.hpp>

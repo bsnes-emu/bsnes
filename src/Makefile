@@ -1,18 +1,18 @@
-include lib/nall/Makefile
+include nall/Makefile
 ui := ui_qt
 
 # compiler
 c       := $(compiler) --std=gnu99
 cpp     := $(subst cc,++,$(compiler)) -std=gnu++0x
-flags   := -O3 -fomit-frame-pointer -I. -Ilib
+flags   := -O3 -fomit-frame-pointer -I.
 link    :=
 objects :=
 
-# profile-guided instrumentation:
+# profile-guided instrumentation
 # flags += -fprofile-generate
 # link += -lgcov
 
-# profile-guided optimization:
+# profile-guided optimization
 # flags += -fprofile-use
 
 # platform

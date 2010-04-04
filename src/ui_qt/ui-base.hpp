@@ -15,6 +15,7 @@
 #include <nall/config.hpp>
 #include <nall/input.hpp>
 #include <nall/ups.hpp>
+#include <nall/info/snes.hpp>
 #include <nall/qt/concept.hpp>
 #include <nall/qt/check-action.moc.hpp>
 #include <nall/qt/file-dialog.moc.hpp>

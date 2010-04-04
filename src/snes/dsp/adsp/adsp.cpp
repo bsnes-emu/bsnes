@@ -3,7 +3,7 @@
 #define ADSP_CPP
 namespace SNES {
 
-//aDSP dsp;
+aDSP dsp;
 
 #include "tables.cpp"
 

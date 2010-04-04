@@ -44,9 +44,9 @@ int16_t input_state(bool port, unsigned device, unsigned index, unsigned id) {
     if(id ==  2) return state[SDLK_RSHIFT];
     if(id ==  3) return state[SDLK_RETURN];
     if(id ==  4) return state[SDLK_UP];
-    if(id ==  5) return state[SDLK_DOWN];
+    if(id ==  5) return state[SDLK_DOWN] & !state[SDLK_UP];
     if(id ==  6) return state[SDLK_LEFT];
-    if(id ==  7) return state[SDLK_RIGHT];
+    if(id ==  7) return state[SDLK_RIGHT] & !state[SDLK_LEFT];
     if(id ==  8) return state[SDLK_x];
     if(id ==  9) return state[SDLK_s];
     if(id == 10) return state[SDLK_d];
@@ -57,21 +57,7 @@ int16_t input_state(bool port, unsigned device, unsigned index, unsigned id) {
 }
 
 int main(int argc, char *argv[]) {
-  const char *filename = "/media/sdb1/root/snes_roms/zelda_us.sfc";
-  const char *xml =
-    "<?xml version='1.0' encoding='UTF-8'?>"
-    "<cartridge region='NTSC'>"
-    "  <title>The Legend of Zelda - A Link to the Past</title>"
-    "  <pcb>SHVC-1A3M-30</pcb>"
-    "  <rom>"
-    "    <map mode='linear' address='00-7f:8000-ffff'/>"
-    "    <map mode='linear' address='80-ff:8000-ffff'/>"
-    "  </rom>"
-    "  <ram size='2000'>"
-    "    <map mode='linear' address='70-7f:0000-7fff'/>"
-    "    <map mode='linear' address='f0-ff:0000-7fff'/>"
-    "  </ram>"
-    "</cartridge>";
+  if(argc != 2) return 0;
 
   atexit(SDL_Quit);
   SDL_Init(SDL_INIT_VIDEO);
@@ -85,18 +71,20 @@ int main(int argc, char *argv[]) {
   snes_set_input_state(input_state);
   snes_init();
 
-  FILE *fp = fopen(filename, "rb");
+  FILE *fp = fopen(argv[1], "rb");
   fseek(fp, 0, SEEK_END);
   unsigned rom_size = ftell(fp);
   rewind(fp);
+  if((rom_size & 0x7fff) == 512) {
+    rom_size -= 512;
+    fseek(fp, 512, SEEK_SET);
+  }
   uint8_t *rom_data = new uint8_t[rom_size];
   rom_size = fread(rom_data, 1, rom_size, fp);
   fclose(fp);
-  unsigned ram_size = 0x2000;
-  uint8_t *ram_data = new uint8_t[ram_size]();
 
-  snes_load_cartridge(xml, rom_data, rom_size, ram_data, ram_size, 0, 0);
-  snes_load();
+  snes_load_cartridge_normal(0, rom_data, rom_size);
+  delete[] rom_data;
 
   while(true) {
     SDL_Event event;
