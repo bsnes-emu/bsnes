@@ -1,6 +1,14 @@
 class sPPU : public PPU {
 public:
+  #include "background/background.hpp"
   #include "mmio/mmio.hpp"
+  #include "screen/screen.hpp"
+
+  Background bg1;
+  Background bg2;
+  Background bg3;
+  Background bg4;
+  Screen screen;
 
   void enter();
   void add_clocks(unsigned);
@@ -12,9 +20,6 @@ public:
   void frame();
 
   sPPU();
-
-private:
-  uint16 light_table[16][32768];
 };
 
 #if !defined(DEBUGGER)

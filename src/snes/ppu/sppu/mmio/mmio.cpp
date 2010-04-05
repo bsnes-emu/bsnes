@@ -1,8 +1,8 @@
 #ifdef SPPU_CPP
 
 void sPPU::latch_counters() {
-  regs.hcounter = cpu.hdot();
-  regs.vcounter = cpu.vcounter();
+  regs.hcounter = hdot();
+  regs.vcounter = vcounter();
   regs.counters_latched = true;
 }
 
@@ -96,52 +96,179 @@ void sPPU::mmio_w2104(uint8 data) {
   regs.oam_firstsprite = (regs.oam_priority == false ? 0 : (regs.oam_addr >> 2) & 127);
 }
 
+//BGMODE
 void sPPU::mmio_w2105(uint8 data) {
+  bg4.regs.tile_size = (data & 0x80);
+  bg3.regs.tile_size = (data & 0x40);
+  bg2.regs.tile_size = (data & 0x20);
+  bg1.regs.tile_size = (data & 0x10);
+  regs.bg3_priority = (data & 0x08);
+  regs.bgmode = (data & 0x07);
+
+  switch(regs.bgmode) {
+    case 0: {
+      bg1.regs.mode = Background::Mode::BPP2; bg1.regs.priority0 = 8; bg1.regs.priority1 = 11;
+      bg2.regs.mode = Background::Mode::BPP2; bg2.regs.priority0 = 7; bg2.regs.priority1 = 10;
+      bg3.regs.mode = Background::Mode::BPP2; bg3.regs.priority0 = 2; bg3.regs.priority1 =  5;
+      bg4.regs.mode = Background::Mode::BPP2; bg4.regs.priority0 = 1; bg4.regs.priority1 =  4;
+    } break;
+
+    case 1: {
+      bg1.regs.mode = Background::Mode::BPP4;
+      bg2.regs.mode = Background::Mode::BPP4;
+      bg3.regs.mode = Background::Mode::BPP2;
+      bg4.regs.mode = Background::Mode::Inactive;
+      if(regs.bg3_priority) {
+        bg1.regs.priority0 = 5; bg1.regs.priority1 =  8;
+        bg2.regs.priority0 = 4; bg2.regs.priority1 =  7;
+        bg3.regs.priority0 = 1; bg3.regs.priority1 = 10;
+      } else {
+        bg1.regs.priority0 = 6; bg1.regs.priority1 =  9;
+        bg2.regs.priority0 = 5; bg2.regs.priority1 =  8;
+        bg3.regs.priority0 = 1; bg3.regs.priority1 =  3;
+      }
+    } break;
+
+    case 2: {
+      bg1.regs.mode = Background::Mode::BPP4;
+      bg2.regs.mode = Background::Mode::BPP4;
+      bg3.regs.mode = Background::Mode::Inactive;
+      bg4.regs.mode = Background::Mode::Inactive;
+      bg1.regs.priority0 = 3; bg1.regs.priority1 = 7;
+      bg2.regs.priority0 = 1; bg2.regs.priority1 = 5;
+    } break;
+
+    case 3: {
+      bg1.regs.mode = Background::Mode::BPP8;
+      bg2.regs.mode = Background::Mode::BPP4;
+      bg3.regs.mode = Background::Mode::Inactive;
+      bg4.regs.mode = Background::Mode::Inactive;
+      bg1.regs.priority0 = 3; bg1.regs.priority1 = 7;
+      bg2.regs.priority0 = 1; bg2.regs.priority1 = 5;
+    } break;
+
+    case 4: {
+      bg1.regs.mode = Background::Mode::BPP8;
+      bg2.regs.mode = Background::Mode::BPP2;
+      bg3.regs.mode = Background::Mode::Inactive;
+      bg4.regs.mode = Background::Mode::Inactive;
+      bg1.regs.priority0 = 3; bg1.regs.priority1 = 7;
+      bg2.regs.priority0 = 1; bg2.regs.priority1 = 5;
+    } break;
+
+    case 5: {
+      bg1.regs.mode = Background::Mode::BPP4;
+      bg2.regs.mode = Background::Mode::BPP2;
+      bg3.regs.mode = Background::Mode::Inactive;
+      bg4.regs.mode = Background::Mode::Inactive;
+      bg1.regs.priority0 = 3; bg1.regs.priority1 = 7;
+      bg2.regs.priority0 = 1; bg2.regs.priority1 = 5;
+    } break;
+
+    case 6: {
+      bg1.regs.mode = Background::Mode::BPP4;
+      bg2.regs.mode = Background::Mode::Inactive;
+      bg3.regs.mode = Background::Mode::Inactive;
+      bg4.regs.mode = Background::Mode::Inactive;
+      bg1.regs.priority0 = 2; bg1.regs.priority1 = 5;
+    } break;
+
+    case 7: {
+    } break;
+  }
 }
 
+//MOSAIC
 void sPPU::mmio_w2106(uint8 data) {
+  regs.mosaic_size = (data >> 4) & 15;
+  bg4.regs.mosaic = (data & 0x08 ? regs.mosaic_size : 0);
+  bg3.regs.mosaic = (data & 0x04 ? regs.mosaic_size : 0);
+  bg2.regs.mosaic = (data & 0x02 ? regs.mosaic_size : 0);
+  bg1.regs.mosaic = (data & 0x01 ? regs.mosaic_size : 0);
 }
 
+//BG1SC
 void sPPU::mmio_w2107(uint8 data) {
+  bg1.regs.screen_addr = (data & 0x7c) << 9;
+  bg1.regs.screen_size = data & 3;
 }
 
+//BG2SC
 void sPPU::mmio_w2108(uint8 data) {
+  bg2.regs.screen_addr = (data & 0x7c) << 9;
+  bg2.regs.screen_size = data & 3;
 }
 
+//BG3SC
 void sPPU::mmio_w2109(uint8 data) {
+  bg3.regs.screen_addr = (data & 0x7c) << 9;
+  bg3.regs.screen_size = data & 3;
 }
 
+//BG4SC
 void sPPU::mmio_w210a(uint8 data) {
+  bg4.regs.screen_addr = (data & 0x7c) << 9;
+  bg4.regs.screen_size = data & 3;
 }
 
+//BG12NBA
 void sPPU::mmio_w210b(uint8 data) {
+  bg1.regs.tiledata_addr = (data & 0x07) << 13;
+  bg2.regs.tiledata_addr = (data & 0x70) <<  9;
 }
 
+//BG34NBA
 void sPPU::mmio_w210c(uint8 data) {
+  bg3.regs.tiledata_addr = (data & 0x07) << 13;
+  bg4.regs.tiledata_addr = (data & 0x70) <<  9;
 }
 
+//BG1HOFS
 void sPPU::mmio_w210d(uint8 data) {
+  bg1.regs.hoffset = (data << 8) | (regs.bgofs_latchdata & ~7) | ((bg1.regs.hoffset >> 8) & 7);
+  regs.bgofs_latchdata = data;
 }
 
+//BG1VOFS
 void sPPU::mmio_w210e(uint8 data) {
+  bg1.regs.voffset = (data << 8) | regs.bgofs_latchdata;
+  regs.bgofs_latchdata = data;
 }
 
+//BG2HOFS
 void sPPU::mmio_w210f(uint8 data) {
+  bg2.regs.hoffset = (data << 8) | (regs.bgofs_latchdata & ~7) | ((bg2.regs.hoffset >> 8) & 7);
+  regs.bgofs_latchdata = data;
 }
 
+//BG2VOFS
 void sPPU::mmio_w2110(uint8 data) {
+  bg2.regs.voffset = (data << 8) | regs.bgofs_latchdata;
+  regs.bgofs_latchdata = data;
 }
 
+//BG3HOFS
 void sPPU::mmio_w2111(uint8 data) {
+  bg3.regs.hoffset = (data << 8) | (regs.bgofs_latchdata & ~7) | ((bg3.regs.hoffset >> 8) & 7);
+  regs.bgofs_latchdata = data;
 }
 
+//BG3VOFS
 void sPPU::mmio_w2112(uint8 data) {
+  bg3.regs.voffset = (data << 8) | regs.bgofs_latchdata;
+  regs.bgofs_latchdata = data;
 }
 
+//BG4HOFS
 void sPPU::mmio_w2113(uint8 data) {
+  bg4.regs.hoffset = (data << 8) | (regs.bgofs_latchdata & ~7) | ((bg4.regs.hoffset >> 8) & 7);
+  regs.bgofs_latchdata = data;
 }
 
+//BG4VOFS
 void sPPU::mmio_w2114(uint8 data) {
+  bg4.regs.voffset = (data << 8) | regs.bgofs_latchdata;
+  regs.bgofs_latchdata = data;
 }
 
 //VMAIN
@@ -270,10 +397,20 @@ void sPPU::mmio_w212a(uint8 data) {
 void sPPU::mmio_w212b(uint8 data) {
 }
 
+//TM
 void sPPU::mmio_w212c(uint8 data) {
+  bg4.regs.main_enabled = data & 0x08;
+  bg3.regs.main_enabled = data & 0x04;
+  bg2.regs.main_enabled = data & 0x02;
+  bg1.regs.main_enabled = data & 0x01;
 }
 
+//TS
 void sPPU::mmio_w212d(uint8 data) {
+  bg4.regs.sub_enabled = data & 0x08;
+  bg3.regs.sub_enabled = data & 0x04;
+  bg2.regs.sub_enabled = data & 0x02;
+  bg1.regs.sub_enabled = data & 0x01;
 }
 
 void sPPU::mmio_w212e(uint8 data) {
@@ -405,7 +542,7 @@ uint8 sPPU::mmio_r213f() {
   regs.latch_vcounter = 0;
 
   regs.ppu2_mdr &= 0x20;
-  regs.ppu2_mdr |= cpu.field() << 7;
+  regs.ppu2_mdr |= field() << 7;
   if((cpu.pio() & 0x80) == 0) {
     regs.ppu2_mdr |= 0x40;
   } else if(regs.counters_latched) {
@@ -421,9 +558,11 @@ void sPPU::mmio_reset() {
   regs.ppu1_mdr = 0xff;
   regs.ppu2_mdr = 0xff;
 
+  regs.mosaic_countdown = 0;
   regs.vram_readbuffer = 0x0000;
   regs.oam_latchdata = 0x00;
   regs.cgram_latchdata = 0x00;
+  regs.bgofs_latchdata = 0x00;
   regs.m7_latchdata = 0x00;
   regs.counters_latched = false;
   regs.latch_hcounter = 0;
@@ -439,6 +578,13 @@ void sPPU::mmio_reset() {
   regs.oam_addr = 0x0000;
   regs.oam_priority = false;
   regs.oam_firstsprite = 0;
+
+  //$2105  BGMODE
+  regs.bg3_priority = false;
+  regs.bgmode = 0;
+
+  //$2106  MOSAIC
+  regs.mosaic_size = 0;
 
   //$2115  VMAIN
   regs.vram_incmode = 1;

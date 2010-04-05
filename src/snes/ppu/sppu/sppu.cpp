@@ -3,7 +3,9 @@
 #define SPPU_CPP
 namespace SNES {
 
+#include "background/background.cpp"
 #include "mmio/mmio.cpp"
+#include "screen/screen.cpp"
 
 #if !defined(DEBUGGER)
   sPPU ppu;
@@ -17,14 +19,29 @@ void sPPU::enter() {
 
     add_clocks(88);
 
+    //mosaic
+    if(vcounter() == 1) {
+      bg1.regs.mosaic_y = 1;
+      bg2.regs.mosaic_y = 1;
+      bg3.regs.mosaic_y = 1;
+      bg4.regs.mosaic_y = 1;
+    } else {
+      if(!bg1.regs.mosaic || !regs.mosaic_countdown) bg1.regs.mosaic_y = vcounter();
+      if(!bg2.regs.mosaic || !regs.mosaic_countdown) bg2.regs.mosaic_y = vcounter();
+      if(!bg3.regs.mosaic || !regs.mosaic_countdown) bg3.regs.mosaic_y = vcounter();
+      if(!bg4.regs.mosaic || !regs.mosaic_countdown) bg4.regs.mosaic_y = vcounter();
+      if(!regs.mosaic_countdown) regs.mosaic_countdown = regs.mosaic_size + 1;
+      regs.mosaic_countdown--;
+    }
+
     if(vcounter() >= 1 && vcounter() <= 224) {
-      uint16_t *buffer = output + vcounter() * 1024;
+      screen.scanline();
       for(unsigned n = 0; n < 256; n++) {
-        uint16 color = (memory::cgram[1] << 8) + (memory::cgram[0] << 0);
-        color = light_table[regs.display_brightness][color];
-        if(regs.display_disabled) color = 0;
-        *buffer++ = color;
-        *buffer++ = color;
+        bg1.run();
+        bg2.run();
+        bg3.run();
+        bg4.run();
+        screen.run();
         add_clocks(4);
       }
     } else {
@@ -36,20 +53,12 @@ void sPPU::enter() {
 }
 
 void sPPU::add_clocks(unsigned clocks) {
-  #if 0
-  //asynchronous execution
-  tick(clocks);
-  scheduler.addclocks_ppu(clocks);
-  scheduler.sync_ppucpu();
-  #else
-  //synchronous execution
   clocks >>= 1;
   while(clocks--) {
     tick(2);
     scheduler.addclocks_ppu(2);
     scheduler.sync_ppucpu();
   }
-  #endif
 }
 
 void sPPU::power() {
@@ -74,21 +83,12 @@ void sPPU::frame() {
   system.frame();
 }
 
-sPPU::sPPU() {
-  //generate light table for INIDISP::d3-d0
-  for(unsigned l = 0; l < 16; l++) {
-    for(unsigned r = 0; r < 32; r++) {
-      for(unsigned g = 0; g < 32; g++) {
-        for(unsigned b = 0; b < 32; b++) {
-          double luma = (double)l / 15.0;
-          unsigned ar = (luma * r + 0.5);
-          unsigned ag = (luma * g + 0.5);
-          unsigned ab = (luma * b + 0.5);
-          light_table[l][(b << 10) + (g << 5) + r] = (ab << 10) + (ag << 5) + ar;
-        }
-      }
-    }
-  }
+sPPU::sPPU() :
+bg1(*this, Background::ID::BG1),
+bg2(*this, Background::ID::BG2),
+bg3(*this, Background::ID::BG3),
+bg4(*this, Background::ID::BG4),
+screen(*this) {
 }
 
 }

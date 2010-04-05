@@ -2,9 +2,11 @@ struct {
   uint8 ppu1_mdr;
   uint8 ppu2_mdr;
 
+  unsigned mosaic_countdown;
   uint16 vram_readbuffer;
   uint8 oam_latchdata;
   uint8 cgram_latchdata;
+  uint8 bgofs_latchdata;
   uint8 m7_latchdata;
   bool counters_latched;
   bool latch_hcounter;
@@ -20,6 +22,13 @@ struct {
   uint16 oam_addr;
   bool oam_priority;
   uint8 oam_firstsprite;
+
+  //$2105  BGMODE
+  bool bg3_priority;
+  uint8 bgmode;
+
+  //$2106  MOSAIC
+  uint8 mosaic_size;
 
   //$2115  VMAIN
   bool vram_incmode;
