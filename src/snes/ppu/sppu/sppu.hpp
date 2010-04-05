@@ -3,11 +3,15 @@ public:
   #include "background/background.hpp"
   #include "mmio/mmio.hpp"
   #include "screen/screen.hpp"
+  #include "sprite/sprite.hpp"
+  #include "window/window.hpp"
 
   Background bg1;
   Background bg2;
   Background bg3;
   Background bg4;
+  Sprite oam;
+  Window window;
   Screen screen;
 
   void enter();

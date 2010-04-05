@@ -6,6 +6,8 @@ namespace SNES {
 #include "background/background.cpp"
 #include "mmio/mmio.cpp"
 #include "screen/screen.cpp"
+#include "sprite/sprite.cpp"
+#include "window/window.cpp"
 
 #if !defined(DEBUGGER)
   sPPU ppu;
@@ -19,28 +21,14 @@ void sPPU::enter() {
 
     add_clocks(88);
 
-    //mosaic
-    if(vcounter() == 1) {
-      bg1.regs.mosaic_y = 1;
-      bg2.regs.mosaic_y = 1;
-      bg3.regs.mosaic_y = 1;
-      bg4.regs.mosaic_y = 1;
-    } else {
-      if(!bg1.regs.mosaic || !regs.mosaic_countdown) bg1.regs.mosaic_y = vcounter();
-      if(!bg2.regs.mosaic || !regs.mosaic_countdown) bg2.regs.mosaic_y = vcounter();
-      if(!bg3.regs.mosaic || !regs.mosaic_countdown) bg3.regs.mosaic_y = vcounter();
-      if(!bg4.regs.mosaic || !regs.mosaic_countdown) bg4.regs.mosaic_y = vcounter();
-      if(!regs.mosaic_countdown) regs.mosaic_countdown = regs.mosaic_size + 1;
-      regs.mosaic_countdown--;
-    }
-
     if(vcounter() >= 1 && vcounter() <= 224) {
-      screen.scanline();
       for(unsigned n = 0; n < 256; n++) {
         bg1.run();
         bg2.run();
         bg3.run();
         bg4.run();
+        oam.run();
+        window.run();
         screen.run();
         add_clocks(4);
       }
@@ -76,11 +64,19 @@ void sPPU::reset() {
 
 void sPPU::scanline() {
   if(vcounter() == 0) frame();
+  bg1.scanline();
+  bg2.scanline();
+  bg3.scanline();
+  bg4.scanline();
+  oam.scanline();
+  window.scanline();
+  screen.scanline();
 }
 
 void sPPU::frame() {
   PPU::frame();
   system.frame();
+  oam.frame();
 }
 
 sPPU::sPPU() :
@@ -88,6 +84,8 @@ bg1(*this, Background::ID::BG1),
 bg2(*this, Background::ID::BG2),
 bg3(*this, Background::ID::BG3),
 bg4(*this, Background::ID::BG4),
+oam(*this),
+window(*this),
 screen(*this) {
 }
 

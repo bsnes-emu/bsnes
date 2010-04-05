@@ -14,6 +14,7 @@ public:
     unsigned screen_size;
     unsigned mosaic;
     unsigned mosaic_y;
+    unsigned mosaic_countdown;
     bool tile_size;
 
     unsigned mode;
@@ -35,6 +36,7 @@ public:
     } main, sub;
   } output;
 
+  void scanline();
   void run();
   unsigned get_color(unsigned x, unsigned y, uint16 offset);
 

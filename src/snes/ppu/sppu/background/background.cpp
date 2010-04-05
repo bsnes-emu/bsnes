@@ -1,5 +1,16 @@
 #ifdef SPPU_CPP
 
+void sPPU::Background::scanline() {
+  if(self.vcounter() == 1) {
+    regs.mosaic_y = 1;
+    regs.mosaic_countdown = 0;
+  } else {
+    if(!regs.mosaic || !regs.mosaic_countdown) regs.mosaic_y = self.vcounter();
+    if(!regs.mosaic_countdown) regs.mosaic_countdown = regs.mosaic + 1;
+    regs.mosaic_countdown--;
+  }
+}
+
 void sPPU::Background::run() {
   output.main.valid = false;
   output.sub.valid = false;

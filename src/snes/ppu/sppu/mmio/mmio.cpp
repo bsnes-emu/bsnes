@@ -57,19 +57,23 @@ bool sPPU::hires() const {
 
 //INIDISP
 void sPPU::mmio_w2100(uint8 data) {
+  if(regs.display_disabled && vcounter() == 225) oam.address_reset();
   regs.display_disabled = data & 0x80;
   regs.display_brightness = data & 0x0f;
 }
 
+//OBSEL
 void sPPU::mmio_w2101(uint8 data) {
+  oam.regs.base_size = (data >> 5) & 7;
+  oam.regs.nameselect = (data >> 3) & 3;
+  oam.regs.tiledata_addr = (data & 3) << 14;
 }
 
 //OAMADDL
 void sPPU::mmio_w2102(uint8 data) {
   regs.oam_baseaddr &= 0x0100;
   regs.oam_baseaddr |= (data << 0);
-  regs.oam_addr = regs.oam_baseaddr << 1;
-  regs.oam_firstsprite = (regs.oam_priority == false ? 0 : (regs.oam_addr >> 2) & 127);
+  oam.address_reset();
 }
 
 //OAMADDH
@@ -77,8 +81,7 @@ void sPPU::mmio_w2103(uint8 data) {
   regs.oam_priority = data & 0x80;
   regs.oam_baseaddr &= 0x00ff;
   regs.oam_baseaddr |= (data & 1) << 8;
-  regs.oam_addr = regs.oam_baseaddr << 1;
-  regs.oam_firstsprite = (regs.oam_priority == false ? 0 : (regs.oam_addr >> 2) & 127);
+  oam.address_reset();
 }
 
 //OAMDATA
@@ -93,7 +96,7 @@ void sPPU::mmio_w2104(uint8 data) {
   }
 
   regs.oam_addr = (regs.oam_addr + 1) & 0x03ff;
-  regs.oam_firstsprite = (regs.oam_priority == false ? 0 : (regs.oam_addr >> 2) & 127);
+  oam.regs.first_sprite = (regs.oam_priority == false ? 0 : (regs.oam_addr >> 2) & 127);
 }
 
 //BGMODE
@@ -111,6 +114,7 @@ void sPPU::mmio_w2105(uint8 data) {
       bg2.regs.mode = Background::Mode::BPP2; bg2.regs.priority0 = 7; bg2.regs.priority1 = 10;
       bg3.regs.mode = Background::Mode::BPP2; bg3.regs.priority0 = 2; bg3.regs.priority1 =  5;
       bg4.regs.mode = Background::Mode::BPP2; bg4.regs.priority0 = 1; bg4.regs.priority1 =  4;
+      oam.regs.priority0 = 3; oam.regs.priority1 = 6; oam.regs.priority2 = 9; oam.regs.priority3 = 12;
     } break;
 
     case 1: {
@@ -122,10 +126,12 @@ void sPPU::mmio_w2105(uint8 data) {
         bg1.regs.priority0 = 5; bg1.regs.priority1 =  8;
         bg2.regs.priority0 = 4; bg2.regs.priority1 =  7;
         bg3.regs.priority0 = 1; bg3.regs.priority1 = 10;
+        oam.regs.priority0 = 2; oam.regs.priority1 = 3; oam.regs.priority2 = 6; oam.regs.priority3 = 9;
       } else {
         bg1.regs.priority0 = 6; bg1.regs.priority1 =  9;
         bg2.regs.priority0 = 5; bg2.regs.priority1 =  8;
         bg3.regs.priority0 = 1; bg3.regs.priority1 =  3;
+        oam.regs.priority0 = 2; oam.regs.priority1 = 4; oam.regs.priority2 = 7; oam.regs.priority3 = 10;
       }
     } break;
 
@@ -136,6 +142,7 @@ void sPPU::mmio_w2105(uint8 data) {
       bg4.regs.mode = Background::Mode::Inactive;
       bg1.regs.priority0 = 3; bg1.regs.priority1 = 7;
       bg2.regs.priority0 = 1; bg2.regs.priority1 = 5;
+      oam.regs.priority0 = 2; oam.regs.priority1 = 4; oam.regs.priority2 = 6; oam.regs.priority3 = 8;
     } break;
 
     case 3: {
@@ -145,6 +152,7 @@ void sPPU::mmio_w2105(uint8 data) {
       bg4.regs.mode = Background::Mode::Inactive;
       bg1.regs.priority0 = 3; bg1.regs.priority1 = 7;
       bg2.regs.priority0 = 1; bg2.regs.priority1 = 5;
+      oam.regs.priority0 = 2; oam.regs.priority1 = 4; oam.regs.priority2 = 6; oam.regs.priority3 = 8;
     } break;
 
     case 4: {
@@ -154,6 +162,7 @@ void sPPU::mmio_w2105(uint8 data) {
       bg4.regs.mode = Background::Mode::Inactive;
       bg1.regs.priority0 = 3; bg1.regs.priority1 = 7;
       bg2.regs.priority0 = 1; bg2.regs.priority1 = 5;
+      oam.regs.priority0 = 2; oam.regs.priority1 = 4; oam.regs.priority2 = 6; oam.regs.priority3 = 8;
     } break;
 
     case 5: {
@@ -163,6 +172,7 @@ void sPPU::mmio_w2105(uint8 data) {
       bg4.regs.mode = Background::Mode::Inactive;
       bg1.regs.priority0 = 3; bg1.regs.priority1 = 7;
       bg2.regs.priority0 = 1; bg2.regs.priority1 = 5;
+      oam.regs.priority0 = 2; oam.regs.priority1 = 4; oam.regs.priority2 = 6; oam.regs.priority3 = 8;
     } break;
 
     case 6: {
@@ -171,6 +181,7 @@ void sPPU::mmio_w2105(uint8 data) {
       bg3.regs.mode = Background::Mode::Inactive;
       bg4.regs.mode = Background::Mode::Inactive;
       bg1.regs.priority0 = 2; bg1.regs.priority1 = 5;
+      oam.regs.priority0 = 1; oam.regs.priority1 = 3; oam.regs.priority2 = 4; oam.regs.priority3 = 6;
     } break;
 
     case 7: {
@@ -180,11 +191,11 @@ void sPPU::mmio_w2105(uint8 data) {
 
 //MOSAIC
 void sPPU::mmio_w2106(uint8 data) {
-  regs.mosaic_size = (data >> 4) & 15;
-  bg4.regs.mosaic = (data & 0x08 ? regs.mosaic_size : 0);
-  bg3.regs.mosaic = (data & 0x04 ? regs.mosaic_size : 0);
-  bg2.regs.mosaic = (data & 0x02 ? regs.mosaic_size : 0);
-  bg1.regs.mosaic = (data & 0x01 ? regs.mosaic_size : 0);
+  unsigned mosaic_size = (data >> 4) & 15;
+  bg4.regs.mosaic = (data & 0x08 ? mosaic_size : 0);
+  bg3.regs.mosaic = (data & 0x04 ? mosaic_size : 0);
+  bg2.regs.mosaic = (data & 0x02 ? mosaic_size : 0);
+  bg1.regs.mosaic = (data & 0x01 ? mosaic_size : 0);
 }
 
 //BG1SC
@@ -370,35 +381,79 @@ void sPPU::mmio_w2122(uint8 data) {
   regs.cgram_addr = (regs.cgram_addr + 1) & 0x01ff;
 }
 
+//W12SEL
 void sPPU::mmio_w2123(uint8 data) {
+  window.regs.bg2_two_enable = data & 0x80;
+  window.regs.bg2_two_invert = data & 0x40;
+  window.regs.bg2_one_enable = data & 0x20;
+  window.regs.bg2_one_invert = data & 0x10;
+  window.regs.bg1_two_enable = data & 0x08;
+  window.regs.bg1_two_invert = data & 0x04;
+  window.regs.bg1_one_enable = data & 0x02;
+  window.regs.bg1_one_invert = data & 0x01;
 }
 
+//W34SEL
 void sPPU::mmio_w2124(uint8 data) {
+  window.regs.bg4_two_enable = data & 0x80;
+  window.regs.bg4_two_invert = data & 0x40;
+  window.regs.bg4_one_enable = data & 0x20;
+  window.regs.bg4_one_invert = data & 0x10;
+  window.regs.bg3_two_enable = data & 0x08;
+  window.regs.bg3_two_invert = data & 0x04;
+  window.regs.bg3_one_enable = data & 0x02;
+  window.regs.bg3_one_invert = data & 0x01;
 }
 
+//WOBJSEL
 void sPPU::mmio_w2125(uint8 data) {
+  window.regs.col_two_enable = data & 0x80;
+  window.regs.col_two_invert = data & 0x40;
+  window.regs.col_one_enable = data & 0x20;
+  window.regs.col_one_invert = data & 0x10;
+  window.regs.oam_two_enable = data & 0x08;
+  window.regs.oam_two_invert = data & 0x04;
+  window.regs.oam_one_enable = data & 0x02;
+  window.regs.oam_one_invert = data & 0x01;
 }
 
+//WH0
 void sPPU::mmio_w2126(uint8 data) {
+  window.regs.one_left = data;
 }
 
+//WH1
 void sPPU::mmio_w2127(uint8 data) {
+  window.regs.one_right = data;
 }
 
+//WH2
 void sPPU::mmio_w2128(uint8 data) {
+  window.regs.two_left = data;
 }
 
+//WH3
 void sPPU::mmio_w2129(uint8 data) {
+  window.regs.two_right = data;
 }
 
+//WBGLOG
 void sPPU::mmio_w212a(uint8 data) {
+  window.regs.bg4_mask = (data >> 6) & 3;
+  window.regs.bg3_mask = (data >> 4) & 3;
+  window.regs.bg2_mask = (data >> 2) & 3;
+  window.regs.bg1_mask = (data >> 0) & 3;
 }
 
+//WOBJLOG
 void sPPU::mmio_w212b(uint8 data) {
+  window.regs.col_mask = (data >> 2) & 3;
+  window.regs.oam_mask = (data >> 0) & 3;
 }
 
 //TM
 void sPPU::mmio_w212c(uint8 data) {
+  oam.regs.main_enabled = data & 0x10;
   bg4.regs.main_enabled = data & 0x08;
   bg3.regs.main_enabled = data & 0x04;
   bg2.regs.main_enabled = data & 0x02;
@@ -407,28 +462,62 @@ void sPPU::mmio_w212c(uint8 data) {
 
 //TS
 void sPPU::mmio_w212d(uint8 data) {
+  oam.regs.sub_enabled = data & 0x10;
   bg4.regs.sub_enabled = data & 0x08;
   bg3.regs.sub_enabled = data & 0x04;
   bg2.regs.sub_enabled = data & 0x02;
   bg1.regs.sub_enabled = data & 0x01;
 }
 
+//TMW
 void sPPU::mmio_w212e(uint8 data) {
+  window.regs.oam_main_enable = data & 0x10;
+  window.regs.bg4_main_enable = data & 0x08;
+  window.regs.bg3_main_enable = data & 0x04;
+  window.regs.bg2_main_enable = data & 0x02;
+  window.regs.bg1_main_enable = data & 0x01;
 }
 
+//TSW
 void sPPU::mmio_w212f(uint8 data) {
+  window.regs.oam_sub_enable = data & 0x10;
+  window.regs.bg4_sub_enable = data & 0x08;
+  window.regs.bg3_sub_enable = data & 0x04;
+  window.regs.bg2_sub_enable = data & 0x02;
+  window.regs.bg1_sub_enable = data & 0x01;
 }
 
+//CGWSEL
 void sPPU::mmio_w2130(uint8 data) {
+  window.regs.col_main_mask = (data >> 6) & 3;
+  window.regs.col_sub_mask = (data >> 4) & 3;
+  screen.regs.addsub_mode = data & 0x02;
+  screen.regs.direct_color = data & 0x01;
 }
 
+//CGADDSUB
 void sPPU::mmio_w2131(uint8 data) {
+  screen.regs.color_mode = data & 0x80;
+  screen.regs.color_halve = data & 0x40;
+  screen.regs.back_color_enable = data & 0x20;
+  screen.regs.oam_color_enable = data & 0x10;
+  screen.regs.bg4_color_enable = data & 0x08;
+  screen.regs.bg3_color_enable = data & 0x04;
+  screen.regs.bg2_color_enable = data & 0x02;
+  screen.regs.bg1_color_enable = data & 0x01;
 }
 
+//COLDATA
 void sPPU::mmio_w2132(uint8 data) {
+  if(data & 0x80) screen.regs.color_b = data & 0x1f;
+  if(data & 0x40) screen.regs.color_g = data & 0x1f;
+  if(data & 0x20) screen.regs.color_r = data & 0x1f;
+  screen.regs.color_rgb = (screen.regs.color_b << 10) + (screen.regs.color_g << 5) + screen.regs.color_r;
 }
 
+//SETINI
 void sPPU::mmio_w2133(uint8 data) {
+  oam.regs.interlace = data & 0x02;
 }
 
 //MPYL
@@ -462,7 +551,7 @@ uint8 sPPU::mmio_r2137() {
 uint8 sPPU::mmio_r2138() {
   regs.ppu1_mdr = oam_read(regs.oam_addr);
   regs.oam_addr = (regs.oam_addr + 1) & 0x03ff;
-  regs.oam_firstsprite = (regs.oam_priority == false ? 0 : (regs.oam_addr >> 2) & 127);
+  oam.regs.first_sprite = (regs.oam_priority == false ? 0 : (regs.oam_addr >> 2) & 127);
   return regs.ppu1_mdr;
 }
 
@@ -531,7 +620,8 @@ uint8 sPPU::mmio_r213d() {
 //STAT77
 uint8 sPPU::mmio_r213e() {
   regs.ppu1_mdr &= 0x10;
-  //missing time over, range over flags
+  regs.ppu1_mdr |= oam.regs.time_over << 7;
+  regs.ppu1_mdr |= oam.regs.range_over << 6;
   regs.ppu1_mdr |= ppu1_version & 0x0f;
   return regs.ppu1_mdr;
 }
@@ -558,7 +648,6 @@ void sPPU::mmio_reset() {
   regs.ppu1_mdr = 0xff;
   regs.ppu2_mdr = 0xff;
 
-  regs.mosaic_countdown = 0;
   regs.vram_readbuffer = 0x0000;
   regs.oam_latchdata = 0x00;
   regs.cgram_latchdata = 0x00;
@@ -577,14 +666,10 @@ void sPPU::mmio_reset() {
   regs.oam_baseaddr = 0x0000;
   regs.oam_addr = 0x0000;
   regs.oam_priority = false;
-  regs.oam_firstsprite = 0;
 
   //$2105  BGMODE
   regs.bg3_priority = false;
   regs.bgmode = 0;
-
-  //$2106  MOSAIC
-  regs.mosaic_size = 0;
 
   //$2115  VMAIN
   regs.vram_incmode = 1;
