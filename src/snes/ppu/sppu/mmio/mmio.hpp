@@ -25,6 +25,12 @@ struct {
   bool bg3_priority;
   uint8 bgmode;
 
+  //$210d  BG1HOFS
+  uint16 m7hofs;
+
+  //$210e  BG1VOFS
+  uint16 m7vofs;
+
   //$2115  VMAIN
   bool vram_incmode;
   uint8 vram_mapping;
@@ -33,6 +39,11 @@ struct {
   //$2116  VMADDL
   //$2117  VMADDH
   uint16 vram_addr;
+
+  //$211a  M7SEL
+  uint8 mode7_repeat;
+  bool mode7_vflip;
+  bool mode7_hflip;
 
   //$211b  M7A
   uint16 m7a;
@@ -54,6 +65,12 @@ struct {
 
   //$2121  CGADD
   uint16 cgram_addr;
+
+  //$2133  SETINI
+  bool mode7_extbg;
+  bool pseudo_hires;
+  bool overscan;
+  bool interlace;
 
   //$213c  OPHCT
   uint16 hcounter;

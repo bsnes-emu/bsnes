@@ -14,6 +14,10 @@ public:
   Window window;
   Screen screen;
 
+  struct {
+    bool interlace;
+  } display;
+
   void enter();
   void add_clocks(unsigned);
 
@@ -26,19 +30,9 @@ public:
   sPPU();
 };
 
-#if !defined(DEBUGGER)
-  extern sPPU ppu;
+#if defined(DEBUGGER)
+  #include "debugger/debugger.hpp"
+  extern sPPUDebugger ppu;
 #else
-class sPPUDebugger : public sPPU, public PPUDebugger {
-public:
-  bool bg1_enabled[2];
-  bool bg2_enabled[2];
-  bool bg3_enabled[2];
-  bool bg4_enabled[2];
-  bool oam_enabled[4];
-
-  inline bool interlace() { return false; }
-  inline bool overscan() { return false; }
-};
-extern sPPUDebugger ppu;
+  extern sPPU ppu;
 #endif

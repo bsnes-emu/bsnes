@@ -18,20 +18,27 @@ uint16 sPPU::get_vram_address() {
 }
 
 uint8 sPPU::vram_read(unsigned addr) {
-  return memory::vram[addr];
+  if(regs.display_disabled || vcounter() >= (!regs.overscan ? 225 : 240)) {
+    return memory::vram[addr];
+  }
+  return 0x00;
 }
 
 void sPPU::vram_write(unsigned addr, uint8 data) {
-  memory::vram[addr] = data;
+  if(regs.display_disabled || vcounter() >= (!regs.overscan ? 225 : 240)) {
+    memory::vram[addr] = data;
+  }
 }
 
 uint8 sPPU::oam_read(unsigned addr) {
   if(addr & 0x0200) addr &= 0x021f;
+  if(!regs.display_disabled && vcounter() < (!regs.overscan ? 225 : 240)) addr = 0x0218;
   return memory::oam[addr];
 }
 
 void sPPU::oam_write(unsigned addr, uint8 data) {
   if(addr & 0x0200) addr &= 0x021f;
+  if(!regs.display_disabled && vcounter() < (!regs.overscan ? 225 : 240)) addr = 0x0218;
   memory::oam[addr] = data;
 }
 
@@ -44,11 +51,11 @@ void sPPU::cgram_write(unsigned addr, uint8 data) {
 }
 
 bool sPPU::interlace() const {
-  return false;
+  return display.interlace;
 }
 
 bool sPPU::overscan() const {
-  return false;
+  return regs.overscan;
 }
 
 bool sPPU::hires() const {
@@ -185,6 +192,22 @@ void sPPU::mmio_w2105(uint8 data) {
     } break;
 
     case 7: {
+      if(regs.mode7_extbg == false) {
+        bg1.regs.mode = Background::Mode::Mode7;
+        bg2.regs.mode = Background::Mode::Inactive;
+        bg3.regs.mode = Background::Mode::Inactive;
+        bg4.regs.mode = Background::Mode::Inactive;
+        bg1.regs.priority0 = 2; bg1.regs.priority1 = 2;
+        oam.regs.priority0 = 1; oam.regs.priority1 = 3; oam.regs.priority2 = 4; oam.regs.priority3 = 5;
+      } else {
+        bg1.regs.mode = Background::Mode::Mode7;
+        bg2.regs.mode = Background::Mode::Mode7;
+        bg3.regs.mode = Background::Mode::Inactive;
+        bg4.regs.mode = Background::Mode::Inactive;
+        bg1.regs.priority0 = 3; bg1.regs.priority1 = 3;
+        bg2.regs.priority0 = 1; bg2.regs.priority1 = 5;
+        oam.regs.priority0 = 2; oam.regs.priority1 = 4; oam.regs.priority2 = 6; oam.regs.priority3 = 7;
+      }
     } break;
   }
 }
@@ -236,12 +259,18 @@ void sPPU::mmio_w210c(uint8 data) {
 
 //BG1HOFS
 void sPPU::mmio_w210d(uint8 data) {
+  regs.m7hofs = (data << 8) | regs.m7_latchdata;
+  regs.m7_latchdata = data;
+
   bg1.regs.hoffset = (data << 8) | (regs.bgofs_latchdata & ~7) | ((bg1.regs.hoffset >> 8) & 7);
   regs.bgofs_latchdata = data;
 }
 
 //BG1VOFS
 void sPPU::mmio_w210e(uint8 data) {
+  regs.m7vofs = (data << 8) | regs.m7_latchdata;
+  regs.m7_latchdata = data;
+
   bg1.regs.voffset = (data << 8) | regs.bgofs_latchdata;
   regs.bgofs_latchdata = data;
 }
@@ -326,7 +355,11 @@ void sPPU::mmio_w2119(uint8 data) {
   if(regs.vram_incmode == 1) regs.vram_addr += regs.vram_incsize;
 }
 
+//M7SEL
 void sPPU::mmio_w211a(uint8 data) {
+  regs.mode7_repeat = (data >> 6) & 3;
+  regs.mode7_vflip = data & 0x02;
+  regs.mode7_hflip = data & 0x01;
 }
 
 //M7A
@@ -517,7 +550,11 @@ void sPPU::mmio_w2132(uint8 data) {
 
 //SETINI
 void sPPU::mmio_w2133(uint8 data) {
+  regs.mode7_extbg = data & 0x40;
+  regs.pseudo_hires = data & 0x08;
+  regs.overscan = data & 0x04;
   oam.regs.interlace = data & 0x02;
+  regs.interlace = data & 0x01;
 }
 
 //MPYL
@@ -671,6 +708,12 @@ void sPPU::mmio_reset() {
   regs.bg3_priority = false;
   regs.bgmode = 0;
 
+  //$210d  BG1HOFS
+  regs.m7hofs = 0x0000;
+
+  //$210e  BG1VOFS
+  regs.m7vofs = 0x0000;
+
   //$2115  VMAIN
   regs.vram_incmode = 1;
   regs.vram_mapping = 0;
@@ -679,6 +722,11 @@ void sPPU::mmio_reset() {
   //$2116  VMADDL
   //$2117  VMADDH
   regs.vram_addr = 0x0000;
+
+  //$211a  M7SEL
+  regs.mode7_repeat = 0;
+  regs.mode7_vflip = false;
+  regs.mode7_hflip = false;
 
   //$211b  M7A
   regs.m7a = 0x0000;
@@ -700,6 +748,12 @@ void sPPU::mmio_reset() {
 
   //$2121  CGADD
   regs.cgram_addr = 0x0000;
+
+  //$2133  SETINI
+  regs.mode7_extbg = false;
+  regs.pseudo_hires = false;
+  regs.overscan = false;
+  regs.interlace = false;
 
   //$213c  OPHCT
   regs.hcounter = 0;

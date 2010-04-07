@@ -24,10 +24,14 @@ public:
 
   void scanline();
   void run();
+  void reset();
 
   Screen(sPPU &self);
 
 private:
   uint16 light_table[16][32768];
-  uint16 addsub(unsigned x, unsigned y, bool allow_halve = true);
+  uint16 get_pixel(bool swap);
+  uint16 addsub(unsigned x, unsigned y, bool halve);
+  uint16 get_color(uint8 n);
+  uint16 get_direct_color(uint8 color, uint8 palette);
 };

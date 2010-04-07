@@ -72,6 +72,7 @@ public:
 
   void scanline();
   void run();
+  void reset();
 
   Window(sPPU &self);
 

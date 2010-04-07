@@ -9,6 +9,10 @@ public:
   struct TileSize { enum { Size8x8, Size16x16 }; };
 
   struct {
+    unsigned x;
+  } state;
+
+  struct {
     unsigned tiledata_addr;
     unsigned screen_addr;
     unsigned screen_size;
@@ -31,17 +35,22 @@ public:
   struct {
     struct {
       bool valid;
-      uint16 color;
-      unsigned priority;
+      uint8 palette;
+      uint8 palette_number;
+      uint8 priority;
     } main, sub;
   } output;
 
   void scanline();
   void run();
   unsigned get_color(unsigned x, unsigned y, uint16 offset);
-
+  void reset();
   Background(sPPU &self, unsigned id);
 
 private:
   static uint16 mosaic_table[16][4096];
+
+  //mode7.cpp
+  signed clip(signed n);
+  void run_mode7(unsigned x, unsigned y);
 };

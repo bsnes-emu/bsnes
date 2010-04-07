@@ -13,7 +13,7 @@ objects :=
 # link += -lgcov
 
 # profile-guided optimization
-# flags += -fprofile-use
+flags += -fprofile-use
 
 # platform
 ifeq ($(platform),x)

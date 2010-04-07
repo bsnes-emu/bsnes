@@ -9,10 +9,11 @@ namespace SNES {
 #include "sprite/sprite.cpp"
 #include "window/window.cpp"
 
-#if !defined(DEBUGGER)
-  sPPU ppu;
-#else
+#if defined(DEBUGGER)
+  #include "debugger/debugger.cpp"
   sPPUDebugger ppu;
+#else
+  sPPU ppu;
 #endif
 
 void sPPU::enter() {
@@ -21,8 +22,14 @@ void sPPU::enter() {
 
     add_clocks(88);
 
-    if(vcounter() >= 1 && vcounter() <= 224) {
+    if(vcounter() >= 1 && vcounter() <= (!regs.overscan ? 224 : 239)) {
       for(unsigned n = 0; n < 256; n++) {
+        bg1.run();
+        bg2.run();
+        bg3.run();
+        bg4.run();
+        add_clocks(2);
+
         bg1.run();
         bg2.run();
         bg3.run();
@@ -30,7 +37,7 @@ void sPPU::enter() {
         oam.run();
         window.run();
         screen.run();
-        add_clocks(4);
+        add_clocks(2);
       }
     } else {
       add_clocks(1024);
@@ -51,6 +58,10 @@ void sPPU::add_clocks(unsigned clocks) {
 
 void sPPU::power() {
   PPU::power();
+  memset(memory::vram.data(), 0x00, memory::vram.size());
+  memset(memory::oam.data(), 0x00, memory::oam.size());
+  memset(memory::cgram.data(), 0x00, memory::cgram.size());
+
   reset();
 }
 
@@ -60,6 +71,13 @@ void sPPU::reset() {
 
   memset(output, 0x00, 512 * 480 * sizeof(uint16));
   mmio_reset();
+  bg1.reset();
+  bg2.reset();
+  bg3.reset();
+  bg4.reset();
+  oam.reset();
+  window.reset();
+  screen.reset();
 }
 
 void sPPU::scanline() {
@@ -77,6 +95,8 @@ void sPPU::frame() {
   PPU::frame();
   system.frame();
   oam.frame();
+
+  display.interlace = regs.interlace;
 }
 
 sPPU::sPPU() :

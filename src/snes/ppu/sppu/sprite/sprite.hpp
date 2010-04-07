@@ -59,9 +59,8 @@ public:
   struct {
     struct {
       bool valid;
-      uint16 color;
-      unsigned palette;
-      unsigned priority;
+      uint8 palette;
+      uint8 priority;
     } main, sub;
   } output;
 
@@ -69,6 +68,7 @@ public:
   void frame();
   void scanline();
   void run();
+  void reset();
 
   Sprite(sPPU &self);
 

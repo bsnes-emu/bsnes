@@ -109,6 +109,58 @@ void sPPU::Window::test(
   sub = sub_enable ? output : false;
 }
 
+void sPPU::Window::reset() {
+  regs.bg1_one_enable = false;
+  regs.bg1_one_invert = false;
+  regs.bg1_two_enable = false;
+  regs.bg1_two_invert = false;
+  regs.bg2_one_enable = false;
+  regs.bg2_one_invert = false;
+  regs.bg2_two_enable = false;
+  regs.bg2_two_invert = false;
+  regs.bg3_one_enable = false;
+  regs.bg3_one_invert = false;
+  regs.bg3_two_enable = false;
+  regs.bg3_two_invert = false;
+  regs.bg4_one_enable = false;
+  regs.bg4_one_invert = false;
+  regs.bg4_two_enable = false;
+  regs.bg4_two_invert = false;
+  regs.oam_one_enable = false;
+  regs.oam_one_invert = false;
+  regs.oam_two_enable = false;
+  regs.oam_two_invert = false;
+  regs.col_one_enable = false;
+  regs.col_one_invert = false;
+  regs.col_two_enable = false;
+  regs.col_two_invert = false;
+  regs.one_left = 0;
+  regs.one_right = 0;
+  regs.two_left = 0;
+  regs.two_right = 0;
+  regs.bg1_mask = 0;
+  regs.bg2_mask = 0;
+  regs.bg3_mask = 0;
+  regs.bg4_mask = 0;
+  regs.oam_mask = 0;
+  regs.col_mask = 0;
+  regs.bg1_main_enable = 0;
+  regs.bg1_sub_enable = 0;
+  regs.bg2_main_enable = 0;
+  regs.bg2_sub_enable = 0;
+  regs.bg3_main_enable = 0;
+  regs.bg3_sub_enable = 0;
+  regs.bg4_main_enable = 0;
+  regs.bg4_sub_enable = 0;
+  regs.oam_main_enable = 0;
+  regs.oam_sub_enable = 0;
+  regs.col_main_mask = 0;
+  regs.col_sub_mask = 0;
+  state.x = 0;
+  output.main.color_enable = 0;
+  output.sub.color_enable = 0;
+}
+
 sPPU::Window::Window(sPPU &self) : self(self) {
 }
 
