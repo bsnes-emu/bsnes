@@ -2,6 +2,41 @@ class Sprite {
 public:
   sPPU &self;
 
+  struct TileItem {
+    uint16 x;
+    uint16 y;
+    uint16 priority;
+    uint16 palette;
+    uint16 tile;
+    bool hflip;
+  };
+
+  struct SpriteItem {
+    uint8 width;
+    uint8 height;
+    uint16 x;
+    uint16 y;
+    uint8 character;
+    bool nameselect;
+    bool vflip;
+    bool hflip;
+    uint8 palette;
+    uint8 priority;
+  } list[128];
+
+  struct State {
+    unsigned x;
+    unsigned y;
+
+    unsigned item_count;
+    unsigned tile_count;
+    uint8 output_palette[256];
+    uint8 output_priority[256];
+    uint8 item_list[32];
+    TileItem tile_list[34];
+    unsigned active_sprite;
+  } state;
+
   struct {
     bool main_enabled;
     bool sub_enabled;
@@ -21,46 +56,10 @@ public:
     bool range_over;
   } regs;
 
-  struct SpriteItem {
-    uint8 width;
-    uint8 height;
-    uint16 x;
-    uint16 y;
-    uint8 character;
-    bool nameselect;
-    bool vflip;
-    bool hflip;
-    uint8 palette;
-    uint8 priority;
-  } list[128];
-
-  struct TileItem {
-    uint16 x;
-    uint16 y;
-    uint16 priority;
-    uint16 palette;
-    uint16 tile;
-    bool hflip;
-  };
-
-  struct State {
-    unsigned x;
-    unsigned y;
-
-    unsigned item_count;
-    unsigned tile_count;
-    uint8 output_palette[256];
-    uint8 output_priority[256];
-    uint8 item_list[32];
-    TileItem tile_list[34];
-    unsigned active_sprite;
-  } state;
-
   struct {
     struct {
-      bool valid;
-      uint8 palette;
-      uint8 priority;
+      unsigned priority;  //0 = none (transparent)
+      unsigned palette;   //index
     } main, sub;
   } output;
 

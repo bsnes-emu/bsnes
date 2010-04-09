@@ -1,8 +1,13 @@
 #ifdef SPPU_CPP
 
 void sPPU::Screen::scanline() {
-  output = self.output + self.vcounter() * 1024;
-  if(self.display.interlace && self.field() == 1) output += 512;
+  if(self.display.interlace == false || self.field() == 0) {
+    output = self.output + self.vcounter() * 1024;
+    fade = output + 512;
+  } else {
+    output = self.output + self.vcounter() * 1024 + 512;
+    fade = output - 512;
+  }
 }
 
 void sPPU::Screen::run() {
@@ -17,6 +22,9 @@ void sPPU::Screen::run() {
     color = get_pixel(false);
     *output++ = color;
   }
+
+  *fade++ = light_table[10][*fade];
+  *fade++ = light_table[10][*fade];
 }
 
 uint16 sPPU::Screen::get_pixel(bool swap) {
@@ -31,31 +39,31 @@ uint16 sPPU::Screen::get_pixel(bool swap) {
   unsigned color_main;
   unsigned source_main;
 
-  if(self.bg1.output.main.valid) {
+  if(self.bg1.output.main.priority) {
     priority_main = self.bg1.output.main.priority;
     if(regs.direct_color && (self.regs.bgmode == 3 || self.regs.bgmode == 4 || self.regs.bgmode == 7)) {
-      color_main = get_direct_color(self.bg1.output.main.palette, self.bg1.output.main.palette_number);
+      color_main = get_direct_color(self.bg1.output.main.palette);
     } else {
       color_main = get_color(self.bg1.output.main.palette);
     }
     source_main = BG1;
   }
-  if(self.bg2.output.main.valid && self.bg2.output.main.priority > priority_main) {
+  if(self.bg2.output.main.priority > priority_main) {
     priority_main = self.bg2.output.main.priority;
     color_main = get_color(self.bg2.output.main.palette);
     source_main = BG2;
   }
-  if(self.bg3.output.main.valid && self.bg3.output.main.priority > priority_main) {
+  if(self.bg3.output.main.priority > priority_main) {
     priority_main = self.bg3.output.main.priority;
     color_main = get_color(self.bg3.output.main.palette);
     source_main = BG3;
   }
-  if(self.bg4.output.main.valid && self.bg4.output.main.priority > priority_main) {
+  if(self.bg4.output.main.priority > priority_main) {
     priority_main = self.bg4.output.main.priority;
     color_main = get_color(self.bg4.output.main.palette);
     source_main = BG4;
   }
-  if(self.oam.output.main.valid && self.oam.output.main.priority > priority_main) {
+  if(self.oam.output.main.priority > priority_main) {
     priority_main = self.oam.output.main.priority;
     color_main = get_color(self.oam.output.main.palette);
     source_main = OAM;
@@ -73,31 +81,31 @@ uint16 sPPU::Screen::get_pixel(bool swap) {
   unsigned color_sub;
   unsigned source_sub;
 
-  if(self.bg1.output.sub.valid) {
+  if(self.bg1.output.sub.priority) {
     priority_sub = self.bg1.output.sub.priority;
     if(regs.direct_color && (self.regs.bgmode == 3 || self.regs.bgmode == 4 || self.regs.bgmode == 7)) {
-      color_sub = get_direct_color(self.bg1.output.sub.palette, self.bg1.output.sub.palette_number);
+      color_sub = get_direct_color(self.bg1.output.sub.palette);
     } else {
       color_sub = get_color(self.bg1.output.sub.palette);
     }
     source_sub = BG1;
   }
-  if(self.bg2.output.sub.valid && self.bg2.output.sub.priority > priority_sub) {
+  if(self.bg2.output.sub.priority > priority_sub) {
     priority_sub = self.bg2.output.sub.priority;
     color_sub = get_color(self.bg2.output.sub.palette);
     source_sub = BG2;
   }
-  if(self.bg3.output.sub.valid && self.bg3.output.sub.priority > priority_sub) {
+  if(self.bg3.output.sub.priority > priority_sub) {
     priority_sub = self.bg3.output.sub.priority;
     color_sub = get_color(self.bg3.output.sub.palette);
     source_sub = BG3;
   }
-  if(self.bg4.output.sub.valid && self.bg4.output.sub.priority > priority_sub) {
+  if(self.bg4.output.sub.priority > priority_sub) {
     priority_sub = self.bg4.output.sub.priority;
     color_sub = get_color(self.bg4.output.sub.palette);
     source_sub = BG4;
   }
-  if(self.oam.output.sub.valid && self.oam.output.sub.priority > priority_sub) {
+  if(self.oam.output.sub.priority > priority_sub) {
     priority_sub = self.oam.output.sub.priority;
     color_sub = get_color(self.oam.output.sub.palette);
     source_sub = OAM;
@@ -106,7 +114,7 @@ uint16 sPPU::Screen::get_pixel(bool swap) {
     if(self.regs.bgmode == 5 || self.regs.bgmode == 6) {
       color_sub = get_color(0);
     } else {
-      color_sub = regs.color_rgb;
+      color_sub = (regs.color_b << 10) + (regs.color_g << 5) + (regs.color_r << 0);
     }
     source_sub = BACK;
   }
@@ -120,7 +128,7 @@ uint16 sPPU::Screen::get_pixel(bool swap) {
   uint16 output;
   if(!regs.addsub_mode) {
     source_sub = BACK;
-    color_sub = regs.color_rgb;
+    color_sub = (regs.color_b << 10) + (regs.color_g << 5) + (regs.color_r << 0);
   }
 
   if(self.window.output.main.color_enable == false) {
@@ -134,8 +142,7 @@ uint16 sPPU::Screen::get_pixel(bool swap) {
   if(!color_exempt && color_enable[source_main] && self.window.output.sub.color_enable) {
     bool halve = false;
     if(regs.color_halve && self.window.output.main.color_enable) {
-      if(regs.addsub_mode && source_sub == BACK);
-      else halve = true;
+      if(!regs.addsub_mode || source_sub != BACK) halve = true;
     }
     output = addsub(color_main, color_sub, halve);
   } else {
@@ -175,13 +182,12 @@ uint16 sPPU::Screen::get_color(uint8 n) {
   return memory::cgram[(n << 1) + 0] + (memory::cgram[(n << 1) + 1] << 8);
 }
 
-//color   = BBBGGGRR (from tiledata)
-//palette = 00000bgr (from tilemap)
-//result  = 0BBb00GGGg0RRRr0
-uint16 sPPU::Screen::get_direct_color(uint8 color, uint8 palette) {
-  return ((color & 7) << 2) | ((palette & 1) << 1)
-       | (((color >> 3) & 7) << 7) | (((palette >> 1) & 1) << 6)
-       | ((color >> 6) << 13) | ((palette >> 2) << 12);
+uint16 sPPU::Screen::get_direct_color(unsigned n) {
+  //input  = 00000bgrBBGGGRRR (BGR = palette index [tiledata], bgr = palette number [tilemap])
+  //output = 0BBb00GGGg0RRRr0
+  return ((n << 7) & 0x6000) + ((n << 2) & 0x1000)
+       + ((n << 4) & 0x0380) + ((n >> 3) & 0x0040)
+       + ((n << 2) & 0x001c) + ((n >> 7) & 0x0002);
 }
 
 void sPPU::Screen::reset() {
@@ -198,7 +204,6 @@ void sPPU::Screen::reset() {
   regs.color_r = 0;
   regs.color_g = 0;
   regs.color_b = 0;
-  regs.color_rgb = 0;
 }
 
 sPPU::Screen::Screen(sPPU &self) : self(self) {

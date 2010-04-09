@@ -2,6 +2,7 @@ class Screen {
 public:
   sPPU &self;
   uint16 *output;
+  uint16 *fade;
 
   struct {
     bool addsub_mode;
@@ -19,7 +20,6 @@ public:
     uint8 color_b;
     uint8 color_g;
     uint8 color_r;
-    uint16 color_rgb;
   } regs;
 
   void scanline();
@@ -33,5 +33,5 @@ private:
   uint16 get_pixel(bool swap);
   uint16 addsub(unsigned x, unsigned y, bool halve);
   uint16 get_color(uint8 n);
-  uint16 get_direct_color(uint8 color, uint8 palette);
+  uint16 get_direct_color(unsigned n);
 };

@@ -13,8 +13,8 @@ void sPPU::Background::run_mode7(unsigned x, unsigned y) {
 
   signed cx = sclip<13>(self.regs.m7x);
   signed cy = sclip<13>(self.regs.m7y);
-  signed hofs = sclip<13>(self.regs.m7hofs);
-  signed vofs = sclip<13>(self.regs.m7vofs);
+  signed hoffset = sclip<13>(self.regs.mode7_hoffset);
+  signed voffset = sclip<13>(self.regs.mode7_voffset);
 
   if(self.regs.mode7_hflip) x = 255 - x;
   if(self.regs.mode7_vflip) y = 255 - y;
@@ -29,8 +29,8 @@ void sPPU::Background::run_mode7(unsigned x, unsigned y) {
     mosaic_y = mosaic_table[self.bg1.regs.mosaic][y];  //BG2 vertical mosaic uses BG1 mosaic size
   }
 
-  signed psx = ((a * clip(hofs - cx)) & ~63) + ((b * clip(vofs - cy)) & ~63) + ((b * mosaic_y) & ~63) + (cx << 8);
-  signed psy = ((c * clip(hofs - cx)) & ~63) + ((d * clip(vofs - cy)) & ~63) + ((d * mosaic_y) & ~63) + (cy << 8);
+  signed psx = ((a * clip(hoffset - cx)) & ~63) + ((b * clip(voffset - cy)) & ~63) + ((b * mosaic_y) & ~63) + (cx << 8);
+  signed psy = ((c * clip(hoffset - cx)) & ~63) + ((d * clip(voffset - cy)) & ~63) + ((d * mosaic_y) & ~63) + (cy << 8);
 
   signed px = psx + (a * mosaic_x);
   signed py = psy + (c * mosaic_x);
@@ -87,16 +87,12 @@ void sPPU::Background::run_mode7(unsigned x, unsigned y) {
   if(palette == 0) return;
 
   if(regs.main_enabled) {
-    output.main.valid = true;
     output.main.palette = palette;
-    output.main.palette_number = 0;
     output.main.priority = priority;
   }
 
   if(regs.sub_enabled) {
-    output.sub.valid = true;
     output.sub.palette = palette;
-    output.sub.palette_number = 0;
     output.sub.priority = priority;
   }
 }

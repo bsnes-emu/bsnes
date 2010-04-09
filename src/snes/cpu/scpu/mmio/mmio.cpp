@@ -75,7 +75,6 @@ void sCPU::mmio_w4200(uint8 data) {
 
 //WRIO
 void sCPU::mmio_w4201(uint8 data) {
-  scheduler.sync_cpuppu();
   if((status.pio & 0x80) && !(data & 0x80)) {
     ppu.latch_counters();
   }

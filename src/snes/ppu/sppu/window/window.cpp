@@ -13,8 +13,8 @@ void sPPU::Window::run() {
     regs.bg1_two_enable, regs.bg1_two_invert,
     regs.bg1_mask, regs.bg1_main_enable, regs.bg1_sub_enable
   );
-  if(main) self.bg1.output.main.valid = false;
-  if(sub) self.bg1.output.sub.valid = false;
+  if(main) self.bg1.output.main.priority = 0;
+  if(sub) self.bg1.output.sub.priority = 0;
 
   test(
     main, sub,
@@ -22,8 +22,8 @@ void sPPU::Window::run() {
     regs.bg2_two_enable, regs.bg2_two_invert,
     regs.bg2_mask, regs.bg2_main_enable, regs.bg2_sub_enable
   );
-  if(main) self.bg2.output.main.valid = false;
-  if(sub) self.bg2.output.sub.valid = false;
+  if(main) self.bg2.output.main.priority = 0;
+  if(sub) self.bg2.output.sub.priority = 0;
 
   test(
     main, sub,
@@ -31,8 +31,8 @@ void sPPU::Window::run() {
     regs.bg3_two_enable, regs.bg3_two_invert,
     regs.bg3_mask, regs.bg3_main_enable, regs.bg3_sub_enable
   );
-  if(main) self.bg3.output.main.valid = false;
-  if(sub) self.bg3.output.sub.valid = false;
+  if(main) self.bg3.output.main.priority = 0;
+  if(sub) self.bg3.output.sub.priority = 0;
 
   test(
     main, sub,
@@ -40,8 +40,8 @@ void sPPU::Window::run() {
     regs.bg4_two_enable, regs.bg4_two_invert,
     regs.bg4_mask, regs.bg4_main_enable, regs.bg4_sub_enable
   );
-  if(main) self.bg4.output.main.valid = false;
-  if(sub) self.bg4.output.sub.valid = false;
+  if(main) self.bg4.output.main.priority = 0;
+  if(sub) self.bg4.output.sub.priority = 0;
 
   test(
     main, sub,
@@ -49,8 +49,8 @@ void sPPU::Window::run() {
     regs.oam_two_enable, regs.oam_two_invert,
     regs.oam_mask, regs.oam_main_enable, regs.oam_sub_enable
   );
-  if(main) self.oam.output.main.valid = false;
-  if(sub) self.oam.output.sub.valid = false;
+  if(main) self.oam.output.main.priority = 0;
+  if(sub) self.oam.output.sub.priority = 0;
 
   test(
     main, sub,

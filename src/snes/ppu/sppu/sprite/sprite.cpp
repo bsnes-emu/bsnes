@@ -15,7 +15,7 @@ void sPPU::Sprite::scanline() {
   state.y = self.vcounter();
 
   if(state.y == 225 && self.regs.display_disabled == false) address_reset();
-  if(state.y < 1 || state.y > 224) return;
+  if(state.y < 1 || state.y > (!self.regs.overscan ? 224 : 239)) return;
 
   const uint8 *tableA = memory::oam.data();
   const uint8 *tableB = memory::oam.data() + 512;
@@ -95,8 +95,8 @@ void sPPU::Sprite::scanline() {
 }
 
 void sPPU::Sprite::run() {
-  output.main.valid = false;
-  output.sub.valid = false;
+  output.main.priority = 0;
+  output.sub.priority = 0;
 
   unsigned x = state.x++;
 
@@ -104,13 +104,11 @@ void sPPU::Sprite::run() {
     unsigned priority_table[] = { regs.priority0, regs.priority1, regs.priority2, regs.priority3 };
 
     if(regs.main_enabled) {
-      output.main.valid = true;
       output.main.palette = state.output_palette[x];
       output.main.priority = priority_table[state.output_priority[x]];
     }
 
     if(regs.sub_enabled) {
-      output.sub.valid = true;
       output.sub.palette = state.output_palette[x];
       output.sub.priority = priority_table[state.output_priority[x]];
     }
@@ -251,10 +249,8 @@ void sPPU::Sprite::reset() {
     state.tile_list[i].hflip = 0;
   }
   state.active_sprite = 0;
-  output.main.valid = 0;
   output.main.palette = 0;
   output.main.priority = 0;
-  output.sub.valid = 0;
   output.sub.palette = 0;
   output.sub.priority = 0;
 }

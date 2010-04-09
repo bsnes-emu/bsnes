@@ -66,14 +66,7 @@ public:
     unsigned frames_executed;
   } status;
 
-  //PPU1 version number
-  //* 1 is known
-  //* reported by $213e
   uint8 ppu1_version;
-
-  //PPU2 version number
-  //* 1 and 3 are known
-  //* reported by $213f
   uint8 ppu2_version;
 
   virtual bool interlace() const = 0;

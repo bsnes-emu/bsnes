@@ -1,6 +1,7 @@
 #ifdef SPPU_CPP
 
 void sPPU::latch_counters() {
+  scheduler.sync_cpuppu();
   regs.hcounter = hdot();
   regs.vcounter = vcounter();
   regs.counters_latched = true;
@@ -51,6 +52,7 @@ void sPPU::cgram_write(unsigned addr, uint8 data) {
 }
 
 bool sPPU::interlace() const {
+//return true;
   return display.interlace;
 }
 
@@ -62,59 +64,7 @@ bool sPPU::hires() const {
   return true;
 }
 
-//INIDISP
-void sPPU::mmio_w2100(uint8 data) {
-  if(regs.display_disabled && vcounter() == 225) oam.address_reset();
-  regs.display_disabled = data & 0x80;
-  regs.display_brightness = data & 0x0f;
-}
-
-//OBSEL
-void sPPU::mmio_w2101(uint8 data) {
-  oam.regs.base_size = (data >> 5) & 7;
-  oam.regs.nameselect = (data >> 3) & 3;
-  oam.regs.tiledata_addr = (data & 3) << 14;
-}
-
-//OAMADDL
-void sPPU::mmio_w2102(uint8 data) {
-  regs.oam_baseaddr &= 0x0100;
-  regs.oam_baseaddr |= (data << 0);
-  oam.address_reset();
-}
-
-//OAMADDH
-void sPPU::mmio_w2103(uint8 data) {
-  regs.oam_priority = data & 0x80;
-  regs.oam_baseaddr &= 0x00ff;
-  regs.oam_baseaddr |= (data & 1) << 8;
-  oam.address_reset();
-}
-
-//OAMDATA
-void sPPU::mmio_w2104(uint8 data) {
-  if(regs.oam_addr & 0x0200) {
-    oam_write(regs.oam_addr, data);
-  } else if((regs.oam_addr & 1) == 0) {
-    regs.oam_latchdata = data;
-  } else {
-    oam_write((regs.oam_addr & ~1) + 0, regs.oam_latchdata);
-    oam_write((regs.oam_addr & ~1) + 1, data);
-  }
-
-  regs.oam_addr = (regs.oam_addr + 1) & 0x03ff;
-  oam.regs.first_sprite = (regs.oam_priority == false ? 0 : (regs.oam_addr >> 2) & 127);
-}
-
-//BGMODE
-void sPPU::mmio_w2105(uint8 data) {
-  bg4.regs.tile_size = (data & 0x80);
-  bg3.regs.tile_size = (data & 0x40);
-  bg2.regs.tile_size = (data & 0x20);
-  bg1.regs.tile_size = (data & 0x10);
-  regs.bg3_priority = (data & 0x08);
-  regs.bgmode = (data & 0x07);
-
+void sPPU::mmio_update_video_mode() {
   switch(regs.bgmode) {
     case 0: {
       bg1.regs.mode = Background::Mode::BPP2; bg1.regs.priority0 = 8; bg1.regs.priority1 = 11;
@@ -212,6 +162,61 @@ void sPPU::mmio_w2105(uint8 data) {
   }
 }
 
+//INIDISP
+void sPPU::mmio_w2100(uint8 data) {
+  if(regs.display_disabled && vcounter() == 225) oam.address_reset();
+  regs.display_disabled = data & 0x80;
+  regs.display_brightness = data & 0x0f;
+}
+
+//OBSEL
+void sPPU::mmio_w2101(uint8 data) {
+  oam.regs.base_size = (data >> 5) & 7;
+  oam.regs.nameselect = (data >> 3) & 3;
+  oam.regs.tiledata_addr = (data & 3) << 14;
+}
+
+//OAMADDL
+void sPPU::mmio_w2102(uint8 data) {
+  regs.oam_baseaddr &= 0x0100;
+  regs.oam_baseaddr |= (data << 0);
+  oam.address_reset();
+}
+
+//OAMADDH
+void sPPU::mmio_w2103(uint8 data) {
+  regs.oam_priority = data & 0x80;
+  regs.oam_baseaddr &= 0x00ff;
+  regs.oam_baseaddr |= (data & 1) << 8;
+  oam.address_reset();
+}
+
+//OAMDATA
+void sPPU::mmio_w2104(uint8 data) {
+  if(regs.oam_addr & 0x0200) {
+    oam_write(regs.oam_addr, data);
+  } else if((regs.oam_addr & 1) == 0) {
+    regs.oam_latchdata = data;
+  } else {
+    oam_write((regs.oam_addr & ~1) + 0, regs.oam_latchdata);
+    oam_write((regs.oam_addr & ~1) + 1, data);
+  }
+
+  regs.oam_addr = (regs.oam_addr + 1) & 0x03ff;
+  oam.regs.first_sprite = (regs.oam_priority == false ? 0 : (regs.oam_addr >> 2) & 127);
+}
+
+//BGMODE
+void sPPU::mmio_w2105(uint8 data) {
+  bg4.regs.tile_size = (data & 0x80);
+  bg3.regs.tile_size = (data & 0x40);
+  bg2.regs.tile_size = (data & 0x20);
+  bg1.regs.tile_size = (data & 0x10);
+  regs.bg3_priority = (data & 0x08);
+  regs.bgmode = (data & 0x07);
+  mmio_update_video_mode();
+}
+
 //MOSAIC
 void sPPU::mmio_w2106(uint8 data) {
   unsigned mosaic_size = (data >> 4) & 15;
@@ -259,8 +264,8 @@ void sPPU::mmio_w210c(uint8 data) {
 
 //BG1HOFS
 void sPPU::mmio_w210d(uint8 data) {
-  regs.m7hofs = (data << 8) | regs.m7_latchdata;
-  regs.m7_latchdata = data;
+  regs.mode7_hoffset = (data << 8) | regs.mode7_latchdata;
+  regs.mode7_latchdata = data;
 
   bg1.regs.hoffset = (data << 8) | (regs.bgofs_latchdata & ~7) | ((bg1.regs.hoffset >> 8) & 7);
   regs.bgofs_latchdata = data;
@@ -268,8 +273,8 @@ void sPPU::mmio_w210d(uint8 data) {
 
 //BG1VOFS
 void sPPU::mmio_w210e(uint8 data) {
-  regs.m7vofs = (data << 8) | regs.m7_latchdata;
-  regs.m7_latchdata = data;
+  regs.mode7_voffset = (data << 8) | regs.mode7_latchdata;
+  regs.mode7_latchdata = data;
 
   bg1.regs.voffset = (data << 8) | regs.bgofs_latchdata;
   regs.bgofs_latchdata = data;
@@ -364,38 +369,38 @@ void sPPU::mmio_w211a(uint8 data) {
 
 //M7A
 void sPPU::mmio_w211b(uint8 data) {
-  regs.m7a = (data << 8) | regs.m7_latchdata;
-  regs.m7_latchdata = data;
+  regs.m7a = (data << 8) | regs.mode7_latchdata;
+  regs.mode7_latchdata = data;
 }
 
 //M7B
 void sPPU::mmio_w211c(uint8 data) {
-  regs.m7b = (data << 8) | regs.m7_latchdata;
-  regs.m7_latchdata = data;
+  regs.m7b = (data << 8) | regs.mode7_latchdata;
+  regs.mode7_latchdata = data;
 }
 
 //M7C
 void sPPU::mmio_w211d(uint8 data) {
-  regs.m7c = (data << 8) | regs.m7_latchdata;
-  regs.m7_latchdata = data;
+  regs.m7c = (data << 8) | regs.mode7_latchdata;
+  regs.mode7_latchdata = data;
 }
 
 //M7D
 void sPPU::mmio_w211e(uint8 data) {
-  regs.m7d = (data << 8) | regs.m7_latchdata;
-  regs.m7_latchdata = data;
+  regs.m7d = (data << 8) | regs.mode7_latchdata;
+  regs.mode7_latchdata = data;
 }
 
 //M7X
 void sPPU::mmio_w211f(uint8 data) {
-  regs.m7x = (data << 8) | regs.m7_latchdata;
-  regs.m7_latchdata = data;
+  regs.m7x = (data << 8) | regs.mode7_latchdata;
+  regs.mode7_latchdata = data;
 }
 
 //M7Y
 void sPPU::mmio_w2120(uint8 data) {
-  regs.m7y = (data << 8) | regs.m7_latchdata;
-  regs.m7_latchdata = data;
+  regs.m7y = (data << 8) | regs.mode7_latchdata;
+  regs.mode7_latchdata = data;
 }
 
 //CGADD
@@ -545,7 +550,6 @@ void sPPU::mmio_w2132(uint8 data) {
   if(data & 0x80) screen.regs.color_b = data & 0x1f;
   if(data & 0x40) screen.regs.color_g = data & 0x1f;
   if(data & 0x20) screen.regs.color_r = data & 0x1f;
-  screen.regs.color_rgb = (screen.regs.color_b << 10) + (screen.regs.color_g << 5) + screen.regs.color_r;
 }
 
 //SETINI
@@ -555,6 +559,7 @@ void sPPU::mmio_w2133(uint8 data) {
   regs.overscan = data & 0x04;
   oam.regs.interlace = data & 0x02;
   regs.interlace = data & 0x01;
+  mmio_update_video_mode();
 }
 
 //MPYL
@@ -689,7 +694,7 @@ void sPPU::mmio_reset() {
   regs.oam_latchdata = 0x00;
   regs.cgram_latchdata = 0x00;
   regs.bgofs_latchdata = 0x00;
-  regs.m7_latchdata = 0x00;
+  regs.mode7_latchdata = 0x00;
   regs.counters_latched = false;
   regs.latch_hcounter = 0;
   regs.latch_vcounter = 0;
@@ -709,10 +714,10 @@ void sPPU::mmio_reset() {
   regs.bgmode = 0;
 
   //$210d  BG1HOFS
-  regs.m7hofs = 0x0000;
+  regs.mode7_hoffset = 0x0000;
 
   //$210e  BG1VOFS
-  regs.m7vofs = 0x0000;
+  regs.mode7_voffset = 0x0000;
 
   //$2115  VMAIN
   regs.vram_incmode = 1;

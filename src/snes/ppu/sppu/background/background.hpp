@@ -10,6 +10,8 @@ public:
 
   struct {
     unsigned x;
+    unsigned mosaic_y;
+    unsigned mosaic_countdown;
   } state;
 
   struct {
@@ -17,8 +19,6 @@ public:
     unsigned screen_addr;
     unsigned screen_size;
     unsigned mosaic;
-    unsigned mosaic_y;
-    unsigned mosaic_countdown;
     bool tile_size;
 
     unsigned mode;
@@ -34,10 +34,8 @@ public:
 
   struct {
     struct {
-      bool valid;
-      uint8 palette;
-      uint8 palette_number;
-      uint8 priority;
+      unsigned priority;  //0 = none (transparent)
+      unsigned palette;   //(direct_color_bits << 8) + index
     } main, sub;
   } output;
 
