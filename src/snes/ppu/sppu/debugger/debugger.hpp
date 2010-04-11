@@ -5,7 +5,4 @@ public:
   bool bg3_enabled[2];
   bool bg4_enabled[2];
   bool oam_enabled[4];
-
-  bool interlace();
-  bool overscan();
 };

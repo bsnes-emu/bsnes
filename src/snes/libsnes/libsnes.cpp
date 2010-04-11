@@ -54,6 +54,10 @@ void snes_run() {
   SNES::system.run();
 }
 
+void snes_set_controller_port_device(bool port, unsigned device) {
+  SNES::input.port_set_device(port, (SNES::Input::Device)device);
+}
+
 void snes_set_video_refresh(snes_video_refresh_t video_refresh) {
   interface.pvideo_refresh = video_refresh;
 }

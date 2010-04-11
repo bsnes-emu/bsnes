@@ -1,13 +1,8 @@
 #ifdef SPPU_CPP
 
 void sPPU::Screen::scanline() {
-  if(self.display.interlace == false || self.field() == 0) {
-    output = self.output + self.vcounter() * 1024;
-    fade = output + 512;
-  } else {
-    output = self.output + self.vcounter() * 1024 + 512;
-    fade = output - 512;
-  }
+  output = self.output + self.vcounter() * 1024;
+  if(self.display.interlace && self.field()) output += 512;
 }
 
 void sPPU::Screen::run() {
@@ -22,9 +17,6 @@ void sPPU::Screen::run() {
     color = get_pixel(false);
     *output++ = color;
   }
-
-  *fade++ = light_table[10][*fade];
-  *fade++ = light_table[10][*fade];
 }
 
 uint16 sPPU::Screen::get_pixel(bool swap) {
@@ -42,7 +34,7 @@ uint16 sPPU::Screen::get_pixel(bool swap) {
   if(self.bg1.output.main.priority) {
     priority_main = self.bg1.output.main.priority;
     if(regs.direct_color && (self.regs.bgmode == 3 || self.regs.bgmode == 4 || self.regs.bgmode == 7)) {
-      color_main = get_direct_color(self.bg1.output.main.palette);
+      color_main = get_direct_color(self.bg1.output.main.palette, self.bg1.output.main.tile);
     } else {
       color_main = get_color(self.bg1.output.main.palette);
     }
@@ -84,7 +76,7 @@ uint16 sPPU::Screen::get_pixel(bool swap) {
   if(self.bg1.output.sub.priority) {
     priority_sub = self.bg1.output.sub.priority;
     if(regs.direct_color && (self.regs.bgmode == 3 || self.regs.bgmode == 4 || self.regs.bgmode == 7)) {
-      color_sub = get_direct_color(self.bg1.output.sub.palette);
+      color_sub = get_direct_color(self.bg1.output.sub.palette, self.bg1.output.sub.tile);
     } else {
       color_sub = get_color(self.bg1.output.sub.palette);
     }
@@ -178,16 +170,18 @@ uint16 sPPU::Screen::addsub(unsigned x, unsigned y, bool halve) {
   }
 }
 
-uint16 sPPU::Screen::get_color(uint8 n) {
-  return memory::cgram[(n << 1) + 0] + (memory::cgram[(n << 1) + 1] << 8);
+uint16 sPPU::Screen::get_color(unsigned palette) {
+  palette <<= 1;
+  return memory::cgram[palette + 0] + (memory::cgram[palette + 1] << 8);
 }
 
-uint16 sPPU::Screen::get_direct_color(unsigned n) {
-  //input  = 00000bgrBBGGGRRR (BGR = palette index [tiledata], bgr = palette number [tilemap])
-  //output = 0BBb00GGGg0RRRr0
-  return ((n << 7) & 0x6000) + ((n << 2) & 0x1000)
-       + ((n << 4) & 0x0380) + ((n >> 3) & 0x0040)
-       + ((n << 2) & 0x001c) + ((n >> 7) & 0x0002);
+uint16 sPPU::Screen::get_direct_color(unsigned palette, unsigned tile) {
+  //palette = -------- BBGGGRRR
+  //tile    = ---bgr-- --------
+  //output  = 0BBb00GG Gg0RRRr0
+  return ((palette << 7) & 0x6000) + ((tile >> 0) & 0x1000)
+       + ((palette << 4) & 0x0380) + ((tile >> 5) & 0x0040)
+       + ((palette << 2) & 0x001c) + ((tile >> 9) & 0x0002);
 }
 
 void sPPU::Screen::reset() {
@@ -207,7 +201,6 @@ void sPPU::Screen::reset() {
 }
 
 sPPU::Screen::Screen(sPPU &self) : self(self) {
-  //generate light table
   for(unsigned l = 0; l < 16; l++) {
     for(unsigned r = 0; r < 32; r++) {
       for(unsigned g = 0; g < 32; g++) {

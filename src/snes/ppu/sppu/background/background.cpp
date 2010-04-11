@@ -4,15 +4,15 @@
 
 void sPPU::Background::scanline() {
   if(self.vcounter() == 1) {
-    state.mosaic_y = 1;
-    state.mosaic_countdown = 0;
+    t.mosaic_y = 1;
+    t.mosaic_countdown = 0;
   } else {
-    if(!regs.mosaic || !state.mosaic_countdown) state.mosaic_y = self.vcounter();
-    if(!state.mosaic_countdown) state.mosaic_countdown = regs.mosaic + 1;
-    state.mosaic_countdown--;
+    if(!regs.mosaic || !t.mosaic_countdown) t.mosaic_y = self.vcounter();
+    if(!t.mosaic_countdown) t.mosaic_countdown = regs.mosaic + 1;
+    t.mosaic_countdown--;
   }
 
-  state.x = 0;
+  t.x = 0;
 }
 
 void sPPU::Background::run() {
@@ -28,8 +28,8 @@ void sPPU::Background::run() {
   if(regs.mode == Mode::Inactive) return;
   if(regs.main_enabled == false && regs.sub_enabled == false) return;
 
-  unsigned x = state.x++;
-  unsigned y = state.mosaic_y;
+  unsigned x = t.x++;
+  unsigned y = t.mosaic_y;
   if(regs.mode == Mode::Mode7) return run_mode7(x, y);
 
   unsigned color_depth = (regs.mode == Mode::BPP2 ? 0 : regs.mode == Mode::BPP4 ? 1 : 2);
@@ -49,10 +49,6 @@ void sPPU::Background::run() {
   mask_x--;
   mask_y--;
 
-  unsigned screen_y = (regs.screen_size & 2 ? (32 << 5) : 0);
-  unsigned screen_x = (regs.screen_size & 1 ? (32 << 5) : 0);
-  if(regs.screen_size == 3) screen_y <<= 1;
-
   unsigned hscroll = regs.hoffset;
   unsigned vscroll = regs.voffset;
   if(hires) {
@@ -63,34 +59,12 @@ void sPPU::Background::run() {
   unsigned hoffset = hscroll + mosaic_table[regs.mosaic][x];
   unsigned voffset = vscroll + y;
 
-  bool offset_per_tile = (self.regs.bgmode == 2 || self.regs.bgmode == 4 || self.regs.bgmode == 6);
-  if(id != ID::BG1 && id != ID::BG2) offset_per_tile = false;
-
-  if(offset_per_tile) {
+  if(self.regs.bgmode == 2 || self.regs.bgmode == 4 || self.regs.bgmode == 6) {
     uint16 opt_x = (x + (hscroll & 7));
 
-    //tile 0 is unaffected by offset-per-tile mode
     if(opt_x >= 8) {
-      uint16 hval; {
-        unsigned px = (opt_x - 8) + (self.bg3.regs.hoffset & ~7);
-        unsigned py = self.bg3.regs.voffset;
-        unsigned tx = (px & (width - 1)) >> tile_width;
-        unsigned ty = (py & (width - 1)) >> tile_height;
-        uint16 pos = ((ty & 0x1f) << 5) + (tx & 0x1f);
-        uint16 addr = self.bg3.regs.screen_addr + (pos << 1);
-        hval = memory::vram[addr + 0] + (memory::vram[addr + 1] << 8);
-      }
-
-      uint16 vval; if(self.regs.bgmode != 4) {
-        unsigned px = (opt_x - 8) + (self.bg3.regs.hoffset & ~7);
-        unsigned py = self.bg3.regs.voffset + 8;
-        unsigned tx = (px & (width - 1)) >> tile_width;
-        unsigned ty = (py & (width - 1)) >> tile_height;
-        uint16 pos = ((ty & 0x1f) << 5) + (tx & 0x1f);
-        uint16 addr = self.bg3.regs.screen_addr + (pos << 1);
-        vval = memory::vram[addr + 0] + (memory::vram[addr + 1] << 8);
-      }
-
+      unsigned hval = self.bg3.get_tile((opt_x - 8) + (self.bg3.regs.hoffset & ~7), self.bg3.regs.voffset + 0);
+      unsigned vval = self.bg3.get_tile((opt_x - 8) + (self.bg3.regs.hoffset & ~7), self.bg3.regs.voffset + 8);
       unsigned opt_valid_bit = (id == ID::BG1 ? 0x2000 : 0x4000);
 
       if(self.regs.bgmode == 4) {
@@ -102,12 +76,8 @@ void sPPU::Background::run() {
           }
         }
       } else {
-        if(hval & opt_valid_bit) {
-          hoffset = opt_x + (hval & ~7);
-        }
-        if(vval & opt_valid_bit) {
-          voffset = y + vval;
-        }
+        if(hval & opt_valid_bit) hoffset = opt_x + (hval & ~7);
+        if(vval & opt_valid_bit) voffset = y + vval;
       }
     }
   }
@@ -115,16 +85,7 @@ void sPPU::Background::run() {
   hoffset &= mask_x;
   voffset &= mask_y;
 
-  unsigned tile_number; {
-    unsigned tx = hoffset >> tile_width;
-    unsigned ty = voffset >> tile_height;
-    uint16 pos = ((ty & 0x1f) << 5) + (tx & 0x1f);
-    if(ty & 0x20) pos += screen_y;
-    if(tx & 0x20) pos += screen_x;
-    uint16 addr = regs.screen_addr + (pos << 1);
-    tile_number = memory::vram[addr + 0] + (memory::vram[addr + 1] << 8);
-  }
-
+  unsigned tile_number = get_tile(hoffset, voffset);
   bool mirror_y = tile_number & 0x8000;
   bool mirror_x = tile_number & 0x4000;
   unsigned priority = (tile_number & 0x2000 ? regs.priority1 : regs.priority0);
@@ -137,8 +98,8 @@ void sPPU::Background::run() {
   tile_number += tiledata_index;
   tile_number &= tile_mask;
 
-  if(mirror_y) voffset ^= 7;
   if(mirror_x) hoffset ^= 7;
+  if(mirror_y) voffset ^= 7;
 
   uint8 color = get_color(hoffset, voffset, tile_number);
   if(color == 0) return;
@@ -147,27 +108,58 @@ void sPPU::Background::run() {
 
   if(hires == false) {
     if(regs.main_enabled) {
-      output.main.palette = color | (palette_number << 8);
       output.main.priority = priority;
+      output.main.palette = color;
+      output.main.tile = tile_number;
     }
 
     if(regs.sub_enabled) {
-      output.sub.palette = color | (palette_number << 8);
       output.sub.priority = priority;
+      output.sub.palette = color;
+      output.sub.tile = tile_number;
     }
   } else {
     if(x & 1) {
       if(regs.main_enabled) {
-        output.main.palette = color | (palette_number << 8);
         output.main.priority = priority;
+        output.main.palette = color;
+        output.main.tile = tile_number;
       }
     } else {
       if(regs.sub_enabled) {
-        output.sub.palette = color | (palette_number << 8);
         output.sub.priority = priority;
+        output.sub.palette = color;
+        output.sub.tile = tile_number;
       }
     }
   }
+}
+
+unsigned sPPU::Background::get_tile(unsigned x, unsigned y) {
+  bool hires = (self.regs.bgmode == 5 || self.regs.bgmode == 6);
+  unsigned tile_height = (regs.tile_size == TileSize::Size8x8 ? 3 : 4);
+  unsigned tile_width  = (!hires ? tile_height : 4);
+  unsigned width = (!hires ? 256 : 512);
+  unsigned mask_x = (tile_height == 3 ? width : (width << 1));
+  unsigned mask_y = mask_x;
+  if(regs.screen_size & 1) mask_x <<= 1;
+  if(regs.screen_size & 2) mask_y <<= 1;
+  mask_x--;
+  mask_y--;
+
+  unsigned screen_x = (regs.screen_size & 1 ? (32 << 5) : 0);
+  unsigned screen_y = (regs.screen_size & 2 ? (32 << 5) : 0);
+  if(regs.screen_size == 3) screen_y <<= 1;
+
+  x = (x & mask_x) >> tile_width;
+  y = (y & mask_y) >> tile_height;
+
+  uint16 pos = ((y & 0x1f) << 5) + (x & 0x1f);
+  if(x & 0x20) pos += screen_x;
+  if(y & 0x20) pos += screen_y;
+
+  uint16 addr = regs.screen_addr + (pos << 1);
+  return memory::vram[addr + 0] + (memory::vram[addr + 1] << 8);
 }
 
 unsigned sPPU::Background::get_color(unsigned x, unsigned y, uint16 offset) {
@@ -223,9 +215,9 @@ unsigned sPPU::Background::get_color(unsigned x, unsigned y, uint16 offset) {
 }
 
 void sPPU::Background::reset() {
-  state.x = 0;
-  state.mosaic_y = 0;
-  state.mosaic_countdown = 0;
+  t.x = 0;
+  t.mosaic_y = 0;
+  t.mosaic_countdown = 0;
   regs.tiledata_addr = 0;
   regs.screen_addr = 0;
   regs.screen_size = 0;
@@ -245,7 +237,6 @@ void sPPU::Background::reset() {
 }
 
 sPPU::Background::Background(sPPU &self, unsigned id) : self(self), id(id) {
-  //generate mosaic table
   for(unsigned m = 0; m < 16; m++) {
     for(unsigned x = 0; x < 4096; x++) {
       mosaic_table[m][x] = (x / (m + 1)) * (m + 1);

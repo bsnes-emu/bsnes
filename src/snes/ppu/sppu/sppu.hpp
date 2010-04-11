@@ -16,6 +16,7 @@ public:
 
   struct {
     bool interlace;
+    bool overscan;
   } display;
 
   void enter();

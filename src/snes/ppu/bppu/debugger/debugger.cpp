@@ -267,9 +267,9 @@ unsigned bPPUDebugger::color_constant_red() { return regs.color_r; }
 //$2133
 bool bPPUDebugger::mode7_extbg() { return regs.mode7_extbg; }
 bool bPPUDebugger::pseudo_hires() { return regs.pseudo_hires; }
-bool bPPUDebugger::overscan() { return regs.overscan; }
+bool bPPUDebugger::overscan_enable() { return regs.overscan; }
 bool bPPUDebugger::oam_interlace() { return regs.oam_interlace; }
-bool bPPUDebugger::interlace() { return regs.interlace; }
+bool bPPUDebugger::interlace_enable() { return regs.interlace; }
 
 //$213c
 unsigned bPPUDebugger::hcounter() { return bPPU::hcounter(); }

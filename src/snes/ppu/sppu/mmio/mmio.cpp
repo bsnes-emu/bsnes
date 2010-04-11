@@ -52,12 +52,11 @@ void sPPU::cgram_write(unsigned addr, uint8 data) {
 }
 
 bool sPPU::interlace() const {
-//return true;
   return display.interlace;
 }
 
 bool sPPU::overscan() const {
-  return regs.overscan;
+  return display.overscan;
 }
 
 bool sPPU::hires() const {
@@ -164,7 +163,7 @@ void sPPU::mmio_update_video_mode() {
 
 //INIDISP
 void sPPU::mmio_w2100(uint8 data) {
-  if(regs.display_disabled && vcounter() == 225) oam.address_reset();
+  if(regs.display_disabled && vcounter() == (!regs.overscan ? 225 : 240)) oam.address_reset();
   regs.display_disabled = data & 0x80;
   regs.display_brightness = data & 0x0f;
 }

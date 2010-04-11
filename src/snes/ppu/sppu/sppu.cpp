@@ -97,6 +97,7 @@ void sPPU::frame() {
   oam.frame();
 
   display.interlace = regs.interlace;
+  display.overscan = regs.overscan;
 }
 
 sPPU::sPPU() :

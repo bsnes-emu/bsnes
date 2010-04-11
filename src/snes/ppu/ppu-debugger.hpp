@@ -221,9 +221,9 @@ struct PPUDebugger : ChipDebugger {
   //$2133
   virtual bool mode7_extbg() { return 0; }
   virtual bool pseudo_hires() { return 0; }
-  virtual bool overscan() { return 0; }
+  virtual bool overscan_enable() { return 0; }
   virtual bool oam_interlace() { return 0; }
-  virtual bool interlace() { return 0; }
+  virtual bool interlace_enable() { return 0; }
 
   //$213c
   virtual unsigned hcounter() { return 0; }

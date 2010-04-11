@@ -1,7 +1,7 @@
 #ifdef SPPU_CPP
 
 void sPPU::Window::scanline() {
-  state.x = 0;
+  t.x = 0;
 }
 
 void sPPU::Window::run() {
@@ -76,7 +76,7 @@ void sPPU::Window::run() {
   output.main.color_enable = main;
   output.sub.color_enable = sub;
 
-  state.x++;
+  t.x++;
 }
 
 void sPPU::Window::test(
@@ -85,7 +85,7 @@ void sPPU::Window::test(
   bool two_enable, bool two_invert,
   uint8 mask, bool main_enable, bool sub_enable
 ) {
-  unsigned x = state.x;
+  unsigned x = t.x;
   bool output;
 
   if(one_enable == false && two_enable == false) {
@@ -110,6 +110,7 @@ void sPPU::Window::test(
 }
 
 void sPPU::Window::reset() {
+  t.x = 0;
   regs.bg1_one_enable = false;
   regs.bg1_one_invert = false;
   regs.bg1_two_enable = false;
@@ -156,7 +157,6 @@ void sPPU::Window::reset() {
   regs.oam_sub_enable = 0;
   regs.col_main_mask = 0;
   regs.col_sub_mask = 0;
-  state.x = 0;
   output.main.color_enable = 0;
   output.sub.color_enable = 0;
 }

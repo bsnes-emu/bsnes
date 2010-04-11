@@ -3,6 +3,10 @@ public:
   sPPU &self;
 
   struct {
+    unsigned x;
+  } t;
+
+  struct {
     bool bg1_one_enable;
     bool bg1_one_invert;
     bool bg1_two_enable;
@@ -59,10 +63,6 @@ public:
     uint8 col_main_mask;
     uint8 col_sub_mask;
   } regs;
-
-  struct {
-    unsigned x;
-  } state;
 
   struct {
     struct {

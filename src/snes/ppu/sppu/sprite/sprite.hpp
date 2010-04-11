@@ -35,7 +35,7 @@ public:
     uint8 item_list[32];
     TileItem tile_list[34];
     unsigned active_sprite;
-  } state;
+  } t;
 
   struct {
     bool main_enabled;

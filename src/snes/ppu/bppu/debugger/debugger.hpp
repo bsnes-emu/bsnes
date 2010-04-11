@@ -250,9 +250,9 @@ public:
   //$2133
   bool mode7_extbg();
   bool pseudo_hires();
-  bool overscan();
+  bool overscan_enable();
   bool oam_interlace();
-  bool interlace();
+  bool interlace_enable();
 
   //$213c
   unsigned hcounter();

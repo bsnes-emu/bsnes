@@ -9,6 +9,7 @@ void snes_init();
 void snes_term();
 void snes_unload();
 void snes_run();
+void snes_set_controller_port_device(bool port, unsigned device);
 
 typedef void (*snes_video_refresh_t)(uint16_t *data, unsigned pitch, unsigned *line, unsigned width, unsigned height);
 typedef void (*snes_audio_sample_t)(uint16_t left, uint16_t right);

@@ -2,7 +2,6 @@ class Screen {
 public:
   sPPU &self;
   uint16 *output;
-  uint16 *fade;
 
   struct {
     bool addsub_mode;
@@ -32,6 +31,6 @@ private:
   uint16 light_table[16][32768];
   uint16 get_pixel(bool swap);
   uint16 addsub(unsigned x, unsigned y, bool halve);
-  uint16 get_color(uint8 n);
-  uint16 get_direct_color(unsigned n);
+  uint16 get_color(unsigned palette);
+  uint16 get_direct_color(unsigned palette, unsigned tile);
 };

@@ -11,11 +11,11 @@ void sPPU::Sprite::frame() {
 }
 
 void sPPU::Sprite::scanline() {
-  state.x = 0;
-  state.y = self.vcounter();
+  t.x = 0;
+  t.y = self.vcounter();
 
-  if(state.y == 225 && self.regs.display_disabled == false) address_reset();
-  if(state.y < 1 || state.y > (!self.regs.overscan ? 224 : 239)) return;
+  if(t.y == (!self.regs.overscan ? 225 : 240) && self.regs.display_disabled == false) address_reset();
+  if(t.y < 1 || t.y > (!self.regs.overscan ? 224 : 239)) return;
 
   const uint8 *tableA = memory::oam.data();
   const uint8 *tableB = memory::oam.data() + 512;
@@ -66,30 +66,30 @@ void sPPU::Sprite::scanline() {
     if((i & 3) == 3) tableB++;
   }
 
-  state.item_count = 0;
-  state.tile_count = 0;
-  memset(state.output_priority, 0xff, 256);
-  memset(state.item_list, 0xff, 32);
-  for(unsigned i = 0; i < 34; i++) state.tile_list[i].tile = 0xffff;
+  t.item_count = 0;
+  t.tile_count = 0;
+  memset(t.output_priority, 0xff, 256);
+  memset(t.item_list, 0xff, 32);
+  for(unsigned i = 0; i < 34; i++) t.tile_list[i].tile = 0xffff;
 
   for(unsigned i = 0; i < 128; i++) {
-    state.active_sprite = (i + regs.first_sprite) & 127;
+    t.active_sprite = (i + regs.first_sprite) & 127;
     if(on_scanline() == false) continue;
-    if(state.item_count++ >= 32) break;
-    state.item_list[state.item_count - 1] = (i + regs.first_sprite) & 127;
+    if(t.item_count++ >= 32) break;
+    t.item_list[t.item_count - 1] = (i + regs.first_sprite) & 127;
   }
 
   for(signed i = 31; i >= 0; i--) {
-    if(state.item_list[i] == 0xff) continue;
-    state.active_sprite = state.item_list[i];
+    if(t.item_list[i] == 0xff) continue;
+    t.active_sprite = t.item_list[i];
     load_tiles();
   }
 
-  regs.time_over  |= (state.tile_count > 34);
-  regs.range_over |= (state.item_count > 32);
+  regs.time_over  |= (t.tile_count > 34);
+  regs.range_over |= (t.item_count > 32);
 
   for(unsigned i = 0; i < 34; i++) {
-    if(state.tile_list[i].tile == 0xffff) continue;
+    if(t.tile_list[i].tile == 0xffff) continue;
     render_tile(i);
   }
 }
@@ -98,38 +98,37 @@ void sPPU::Sprite::run() {
   output.main.priority = 0;
   output.sub.priority = 0;
 
-  unsigned x = state.x++;
-
-  if(state.output_priority[x] != 0xff) {
+  unsigned x = t.x++;
+  if(t.output_priority[x] != 0xff) {
     unsigned priority_table[] = { regs.priority0, regs.priority1, regs.priority2, regs.priority3 };
 
     if(regs.main_enabled) {
-      output.main.palette = state.output_palette[x];
-      output.main.priority = priority_table[state.output_priority[x]];
+      output.main.palette = t.output_palette[x];
+      output.main.priority = priority_table[t.output_priority[x]];
     }
 
     if(regs.sub_enabled) {
-      output.sub.palette = state.output_palette[x];
-      output.sub.priority = priority_table[state.output_priority[x]];
+      output.sub.palette = t.output_palette[x];
+      output.sub.priority = priority_table[t.output_priority[x]];
     }
   }
 }
 
 bool sPPU::Sprite::on_scanline() {
-  SpriteItem &sprite = list[state.active_sprite];
+  SpriteItem &sprite = list[t.active_sprite];
   if(sprite.x > 256 && (sprite.x + sprite.width - 1) < 512) return false;
 
   signed height = (regs.interlace == false ? sprite.height : (sprite.height >> 1));
-  if(state.y >= sprite.y && state.y < (sprite.y + height)) return true;
-  if((sprite.y + height) >= 256 && state.y < ((sprite.y + height) & 255)) return true;
+  if(t.y >= sprite.y && t.y < (sprite.y + height)) return true;
+  if((sprite.y + height) >= 256 && t.y < ((sprite.y + height) & 255)) return true;
   return false;
 }
 
 void sPPU::Sprite::load_tiles() {
-  SpriteItem &sprite = list[state.active_sprite];
+  SpriteItem &sprite = list[t.active_sprite];
   unsigned tile_width = sprite.width >> 3;
   signed x = sprite.x;
-  signed y = (state.y - sprite.y) & 0xff;
+  signed y = (t.y - sprite.y) & 0xff;
   if(regs.interlace) y <<= 1;
 
   if(sprite.vflip) {
@@ -161,22 +160,22 @@ void sPPU::Sprite::load_tiles() {
     unsigned sx = (x + (tx << 3)) & 511;
     if(x != 256 && sx >= 256 && (sx + 7) < 512) continue;
 
-    if(state.tile_count++ >= 34) break;
-    unsigned n = state.tile_count - 1;
-    state.tile_list[n].x = sx;
-    state.tile_list[n].y = y;
-    state.tile_list[n].priority = sprite.priority;
-    state.tile_list[n].palette = 128 + (sprite.palette << 4);
-    state.tile_list[n].hflip = sprite.hflip;
+    if(t.tile_count++ >= 34) break;
+    unsigned n = t.tile_count - 1;
+    t.tile_list[n].x = sx;
+    t.tile_list[n].y = y;
+    t.tile_list[n].priority = sprite.priority;
+    t.tile_list[n].palette = 128 + (sprite.palette << 4);
+    t.tile_list[n].hflip = sprite.hflip;
 
     unsigned mx = (sprite.hflip == false) ? tx : ((tile_width - 1) - tx);
     unsigned pos = tiledata_addr + ((chry + ((chrx + mx) & 15)) << 5);
-    state.tile_list[n].tile = (pos >> 5) & 0x07ff;
+    t.tile_list[n].tile = (pos >> 5) & 0x07ff;
   }
 }
 
 void sPPU::Sprite::render_tile(unsigned tile) {
-  TileItem &item = state.tile_list[tile];
+  TileItem &item = t.tile_list[tile];
 
   unsigned sx = item.x;
   uint16 addr = (item.tile << 5) + ((item.y & 7) * 2);
@@ -199,8 +198,8 @@ void sPPU::Sprite::render_tile(unsigned tile) {
 
       if(color) {
         color += item.palette;
-        state.output_palette[sx] = color;
-        state.output_priority[sx] = item.priority;
+        t.output_palette[sx] = color;
+        t.output_priority[sx] = item.priority;
       }
     }
     sx++;
@@ -208,6 +207,36 @@ void sPPU::Sprite::render_tile(unsigned tile) {
 }
 
 void sPPU::Sprite::reset() {
+  t.x = 0;
+  t.y = 0;
+  t.item_count = 0;
+  t.tile_count = 0;
+  memset(t.output_palette, 0, 256);
+  memset(t.output_priority, 0, 256);
+  memset(t.item_list, 0, 32);
+  for(unsigned i = 0; i < 34; i++) {
+    t.tile_list[i].x = 0;
+    t.tile_list[i].y = 0;
+    t.tile_list[i].priority = 0;
+    t.tile_list[i].palette = 0;
+    t.tile_list[i].tile = 0;
+    t.tile_list[i].hflip = 0;
+  }
+  t.active_sprite = 0;
+
+  for(unsigned i = 0; i < 128; i++) {
+    list[i].width = 0;
+    list[i].height = 0;
+    list[i].x = 0;
+    list[i].y = 0;
+    list[i].character = 0;
+    list[i].nameselect = 0;
+    list[i].vflip = 0;
+    list[i].hflip = 0;
+    list[i].palette = 0;
+    list[i].priority = 0;
+  }
+
   regs.main_enabled = 0;
   regs.sub_enabled = 0;
   regs.interlace = 0;
@@ -221,34 +250,7 @@ void sPPU::Sprite::reset() {
   regs.priority3 = 0;
   regs.time_over = 0;
   regs.range_over = 0;
-  for(unsigned i = 0; i < 128; i++) {
-    list[i].width = 0;
-    list[i].height = 0;
-    list[i].x = 0;
-    list[i].y = 0;
-    list[i].character = 0;
-    list[i].nameselect = 0;
-    list[i].vflip = 0;
-    list[i].hflip = 0;
-    list[i].palette = 0;
-    list[i].priority = 0;
-  }
-  state.x = 0;
-  state.y = 0;
-  state.item_count = 0;
-  state.tile_count = 0;
-  memset(state.output_palette, 0, 256);
-  memset(state.output_priority, 0, 256);
-  memset(state.item_list, 0, 32);
-  for(unsigned i = 0; i < 34; i++) {
-    state.tile_list[i].x = 0;
-    state.tile_list[i].y = 0;
-    state.tile_list[i].priority = 0;
-    state.tile_list[i].palette = 0;
-    state.tile_list[i].tile = 0;
-    state.tile_list[i].hflip = 0;
-  }
-  state.active_sprite = 0;
+
   output.main.palette = 0;
   output.main.priority = 0;
   output.sub.palette = 0;

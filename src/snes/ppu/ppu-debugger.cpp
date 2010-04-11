@@ -275,9 +275,9 @@ bool PPUDebugger::property(unsigned id, string &name, string &value) {
   if(id == n++) { name = "$2133"; value = ""; return true; }
   if(id == n++) { name = "Mode 7 EXTBG"; value = mode7_extbg(); return true; }
   if(id == n++) { name = "Pseudo Hires"; value = pseudo_hires(); return true; }
-  if(id == n++) { name = "Overscan"; value = overscan(); return true; }
+  if(id == n++) { name = "Overscan"; value = overscan_enable(); return true; }
   if(id == n++) { name = "OAM Interlace"; value = oam_interlace(); return true; }
-  if(id == n++) { name = "Interlace"; value = interlace(); return true; }
+  if(id == n++) { name = "Interlace"; value = interlace_enable(); return true; }
 
   //$213c
   if(id == n++) { name = "$213c"; value = ""; return true; }

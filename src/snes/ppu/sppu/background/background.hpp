@@ -12,7 +12,7 @@ public:
     unsigned x;
     unsigned mosaic_y;
     unsigned mosaic_countdown;
-  } state;
+  } t;
 
   struct {
     unsigned tiledata_addr;
@@ -36,11 +36,13 @@ public:
     struct {
       unsigned priority;  //0 = none (transparent)
       unsigned palette;   //(direct_color_bits << 8) + index
+      unsigned tile;
     } main, sub;
   } output;
 
   void scanline();
   void run();
+  unsigned get_tile(unsigned x, unsigned y);
   unsigned get_color(unsigned x, unsigned y, uint16 offset);
   void reset();
   Background(sPPU &self, unsigned id);
