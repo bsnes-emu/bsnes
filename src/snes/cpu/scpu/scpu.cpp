@@ -103,8 +103,8 @@ void sCPU::reset() {
   apu_port[3] = 0x00;
 }
 
-sCPU::sCPU() : event(512, bind(&sCPU::queue_event, this)) {
-  PPUcounter::scanline = bind(&sCPU::scanline, this);
+sCPU::sCPU() {
+  PPUCounter::scanline = { &sCPU::scanline, this };
 }
 
 sCPU::~sCPU() {

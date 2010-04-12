@@ -70,7 +70,6 @@ void sCPU::nmitimen_update(uint8 data) {
   }
 
   status.irq_lock = true;
-  event.enqueue(2, EventIrqLockRelease);
 }
 
 bool sCPU::rdnmi() {

@@ -37,8 +37,8 @@ void SuperFX::enter() {
 
 void SuperFX::init() {
   initialize_opcode_table();
-  regs.r[14].on_modify = bind(&SuperFX::r14_modify, this);
-  regs.r[15].on_modify = bind(&SuperFX::r15_modify, this);
+  regs.r[14].on_modify = { &SuperFX::r14_modify, this };
+  regs.r[15].on_modify = { &SuperFX::r15_modify, this };
 }
 
 void SuperFX::enable() {

@@ -3,12 +3,6 @@
 #define SPPU_CPP
 namespace SNES {
 
-#include "background/background.cpp"
-#include "mmio/mmio.cpp"
-#include "screen/screen.cpp"
-#include "sprite/sprite.cpp"
-#include "window/window.cpp"
-
 #if defined(DEBUGGER)
   #include "debugger/debugger.cpp"
   sPPUDebugger ppu;
@@ -16,10 +10,20 @@ namespace SNES {
   sPPU ppu;
 #endif
 
+#include "background/background.cpp"
+#include "mmio/mmio.cpp"
+#include "screen/screen.cpp"
+#include "sprite/sprite.cpp"
+#include "window/window.cpp"
+#include "serialization.cpp"
+
 void sPPU::enter() {
   while(true) {
-    scanline();
+    if(scheduler.sync == Scheduler::SynchronizeMode::All) {
+      scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
+    }
 
+    scanline();
     add_clocks(88);
 
     if(vcounter() >= 1 && vcounter() <= (!regs.overscan ? 224 : 239)) {

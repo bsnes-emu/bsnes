@@ -303,8 +303,8 @@ void VideoSettingsWindow::cropBottomAdjust(int state) {
 
 void VideoSettingsWindow::selectFragmentShader() {
   fileBrowser->onChange.reset();
-  fileBrowser->onActivate = bind(&VideoSettingsWindow::assignFragmentShader, this);
-  fileBrowser->onAccept = bind(&VideoSettingsWindow::assignFragmentShader, this);
+  fileBrowser->onActivate = { &VideoSettingsWindow::assignFragmentShader, this };
+  fileBrowser->onAccept = { &VideoSettingsWindow::assignFragmentShader, this };
   fileBrowser->setWindowTitle("Select Fragment Shader");
   fileBrowser->setPath(config().path.current.shader);
   fileBrowser->setNameFilters("All files (*)");
@@ -313,8 +313,8 @@ void VideoSettingsWindow::selectFragmentShader() {
 
 void VideoSettingsWindow::selectVertexShader() {
   fileBrowser->onChange.reset();
-  fileBrowser->onActivate = bind(&VideoSettingsWindow::assignVertexShader, this);
-  fileBrowser->onAccept = bind(&VideoSettingsWindow::assignVertexShader, this);
+  fileBrowser->onActivate = { &VideoSettingsWindow::assignVertexShader, this };
+  fileBrowser->onAccept = { &VideoSettingsWindow::assignVertexShader, this };
   fileBrowser->setWindowTitle("Select Vertex Shader");
   fileBrowser->setPath(config().path.current.shader);
   fileBrowser->setNameFilters("All files (*)");

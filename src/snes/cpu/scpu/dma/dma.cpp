@@ -161,7 +161,6 @@ void sCPU::dma_run() {
   }
 
   status.irq_lock = true;
-  event.enqueue(2, EventIrqLockRelease);
 }
 
 void sCPU::hdma_update(unsigned i) {
@@ -223,7 +222,6 @@ void sCPU::hdma_run() {
   }
 
   status.irq_lock = true;
-  event.enqueue(2, EventIrqLockRelease);
 }
 
 void sCPU::hdma_init_reset() {
@@ -247,7 +245,6 @@ void sCPU::hdma_init() {
   }
 
   status.irq_lock = true;
-  event.enqueue(2, EventIrqLockRelease);
 }
 
 //==============

@@ -27,8 +27,8 @@ Reader::Reader() {
   }
 
   if(!supported || !load) {
-    supported = bind(&Reader::direct_supported, this);
-    load = bind(&Reader::direct_load, this);
+    supported = { &Reader::direct_supported, this };
+    load = { &Reader::direct_load, this };
   }
 
   compressionList = supported();

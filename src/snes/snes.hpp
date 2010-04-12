@@ -1,12 +1,12 @@
-static const char bsnesVersion[] = "063.12";
+static const char bsnesVersion[] = "063.13";
 static const char bsnesTitle[] = "bsnes";
-static const unsigned bsnesSerializerVersion = 9;
+static const unsigned bsnesSerializerVersion = 10;
 
 #define CORE_SMEMORY
 #define CORE_SCPU
 #define CORE_SSMP
-#define CORE_SDSP
-#define CORE_SPPU
+#define CORE_ADSP
+#define CORE_BPPU
 
 //S-DSP can be encapsulated into a state machine using #define magic
 //this avoids ~2.048m co_switch() calls per second (~5% speedup)
@@ -23,7 +23,6 @@ static const unsigned bsnesSerializerVersion = 9;
 #include <nall/algorithm.hpp>
 #include <nall/any.hpp>
 #include <nall/array.hpp>
-#include <nall/bit.hpp>
 #include <nall/detect.hpp>
 #include <nall/dl.hpp>
 #include <nall/endian.hpp>
@@ -32,7 +31,6 @@ static const unsigned bsnesSerializerVersion = 9;
 #include <nall/function.hpp>
 #include <nall/moduloarray.hpp>
 #include <nall/platform.hpp>
-#include <nall/priorityqueue.hpp>
 #include <nall/property.hpp>
 #include <nall/serializer.hpp>
 #include <nall/stdint.hpp>

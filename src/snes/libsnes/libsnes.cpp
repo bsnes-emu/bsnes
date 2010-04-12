@@ -36,6 +36,22 @@ unsigned snes_library_revision() {
   return 1;
 }
 
+void snes_set_video_refresh(snes_video_refresh_t video_refresh) {
+  interface.pvideo_refresh = video_refresh;
+}
+
+void snes_set_audio_sample(snes_audio_sample_t audio_sample) {
+  interface.paudio_sample = audio_sample;
+}
+
+void snes_set_input_poll(snes_input_poll_t input_poll) {
+  interface.pinput_poll = input_poll;
+}
+
+void snes_set_input_state(snes_input_state_t input_state) {
+  interface.pinput_state = input_state;
+}
+
 void snes_init() {
   SNES::system.init(&interface);
   SNES::input.port_set_device(0, SNES::Input::Device::Joypad);
@@ -54,24 +70,39 @@ void snes_run() {
   SNES::system.run();
 }
 
+void snes_runtosave() {
+  SNES::system.runtosave();
+}
+
 void snes_set_controller_port_device(bool port, unsigned device) {
   SNES::input.port_set_device(port, (SNES::Input::Device)device);
 }
 
-void snes_set_video_refresh(snes_video_refresh_t video_refresh) {
-  interface.pvideo_refresh = video_refresh;
+unsigned snes_serialize_size() {
+  return SNES::system.serialize_size();
 }
 
-void snes_set_audio_sample(snes_audio_sample_t audio_sample) {
-  interface.paudio_sample = audio_sample;
+bool snes_serialize(uint8_t *data, unsigned size) {
+  serializer s = SNES::system.serialize();
+  if(s.size() > size) return false;
+  memcpy(data, s.data(), s.size());
+  return true;
 }
 
-void snes_set_input_poll(snes_input_poll_t input_poll) {
-  interface.pinput_poll = input_poll;
+bool snes_unserialize(const uint8_t *data, unsigned size) {
+  serializer s(data, size);
+  return SNES::system.unserialize(s);
 }
 
-void snes_set_input_state(snes_input_state_t input_state) {
-  interface.pinput_state = input_state;
+void snes_cheat_reset() {
+  SNES::cheat.reset();
+  SNES::cheat.synchronize();
+}
+
+void snes_cheat_set(unsigned index, bool enabled, const char *code) {
+  SNES::cheat[index] = code;
+  SNES::cheat[index].enabled = enabled;
+  SNES::cheat.synchronize();
 }
 
 void snes_load_cartridge_normal(

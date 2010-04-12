@@ -35,7 +35,7 @@ public:
   struct {
     struct {
       unsigned priority;  //0 = none (transparent)
-      unsigned palette;   //(direct_color_bits << 8) + index
+      unsigned palette;
       unsigned tile;
     } main, sub;
   } output;
@@ -45,6 +45,8 @@ public:
   unsigned get_tile(unsigned x, unsigned y);
   unsigned get_color(unsigned x, unsigned y, uint16 offset);
   void reset();
+
+  void serialize(serializer&);
   Background(sPPU &self, unsigned id);
 
 private:

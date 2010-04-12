@@ -2,7 +2,7 @@
   #include "cpu-debugger.hpp"
 #endif
 
-class CPU : public PPUcounter, public MMIO {
+class CPU : public PPUCounter, public MMIO {
 public:
   virtual void enter() = 0;
 

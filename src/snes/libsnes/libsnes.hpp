@@ -5,11 +5,6 @@ extern "C" {
 #endif
 
 unsigned snes_library_revision();
-void snes_init();
-void snes_term();
-void snes_unload();
-void snes_run();
-void snes_set_controller_port_device(bool port, unsigned device);
 
 typedef void (*snes_video_refresh_t)(uint16_t *data, unsigned pitch, unsigned *line, unsigned width, unsigned height);
 typedef void (*snes_audio_sample_t)(uint16_t left, uint16_t right);
@@ -20,6 +15,21 @@ void snes_set_video_refresh(snes_video_refresh_t);
 void snes_set_audio_sample(snes_audio_sample_t);
 void snes_set_input_poll(snes_input_poll_t);
 void snes_set_input_state(snes_input_state_t);
+
+void snes_init();
+void snes_term();
+void snes_unload();
+void snes_run();
+void snes_runtosave();
+
+void snes_set_controller_port_device(bool port, unsigned device);
+
+unsigned snes_serialize_size();
+bool snes_serialize(uint8_t *data, unsigned size);
+bool snes_unserialize(const uint8_t *data, unsigned size);
+
+void snes_cheat_reset();
+void snes_cheat_set(unsigned index, bool enabled, const char *code);
 
 void snes_load_cartridge_normal(
   const char *rom_xml, uint8_t *rom_data, unsigned rom_size

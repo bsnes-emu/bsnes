@@ -85,18 +85,6 @@ namespace nall {
       data.callback_global = (R (*)(P...))callback;
     }
   };
-
-  //bind functions to ease construction and assignment of function() with more than one argument
-
-  template<typename C, typename R, typename... P>
-  function<R (P...)> bind(R (C::*callback)(P...), C *object) {
-    return function<R (P...)>(callback, object);
-  }
-
-  template<typename C, typename R, typename... P>
-  function<R (P...)> bind(R (C::*callback)(P...) const, C *object) {
-    return function<R (P...)>(callback, object);
-  }
 }
 
 #endif

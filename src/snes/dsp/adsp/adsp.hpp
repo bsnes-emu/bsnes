@@ -100,8 +100,8 @@ private:
 
     int16  envx;
     uint16 env_ctr, env_rate, env_sustain;
-    enum   EnvelopeStates env_state;
-    enum   EnvelopeModes  env_mode;
+    uint32 env_state;
+    uint32 env_mode;
 
     int16  outx;
 
@@ -167,8 +167,16 @@ public:
   void power();
   void reset();
 
+  void serialize(serializer&);
   aDSP();
   ~aDSP();
+
+  friend class aDSPDebug;
 };
 
-extern aDSP dsp;
+#if defined(DEBUGGER)
+  #include "debugger/debugger.hpp"
+  extern aDSPDebugger dsp;
+#else
+  extern aDSP dsp;
+#endif

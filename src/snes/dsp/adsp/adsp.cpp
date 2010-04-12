@@ -3,15 +3,27 @@
 #define ADSP_CPP
 namespace SNES {
 
-aDSP dsp;
+#if defined(DEBUGGER)
+  #include "debugger/debugger.cpp"
+  aDSPDebugger dsp;
+#else
+  aDSP dsp;
+#endif
 
 #include "tables.cpp"
+#include "serialization.cpp"
 
 void aDSP::enter() {
   #if !defined(DSP_STATE_MACHINE)
-  while(true)
+  while(true) {
+    if(scheduler.sync == Scheduler::SynchronizeMode::All) {
+      scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
+    }
   #endif
-  run();
+    run();
+  #if !defined(DSP_STATE_MACHINE)
+  }
+  #endif
 }
 
 uint8 aDSP::readb(uint16 addr) {

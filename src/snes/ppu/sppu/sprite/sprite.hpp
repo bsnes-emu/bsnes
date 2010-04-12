@@ -20,8 +20,8 @@ public:
     bool nameselect;
     bool vflip;
     bool hflip;
-    uint8 palette;
     uint8 priority;
+    uint8 palette;
   } list[128];
 
   struct State {
@@ -59,7 +59,7 @@ public:
   struct {
     struct {
       unsigned priority;  //0 = none (transparent)
-      unsigned palette;   //index
+      unsigned palette;
     } main, sub;
   } output;
 
@@ -69,6 +69,7 @@ public:
   void run();
   void reset();
 
+  void serialize(serializer&);
   Sprite(sPPU &self);
 
 private:

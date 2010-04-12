@@ -86,13 +86,32 @@ int main(int argc, char *argv[]) {
   snes_load_cartridge_normal(0, rom_data, rom_size);
   delete[] rom_data;
 
+  unsigned serial_size = snes_serialize_size();
+  uint8_t *serial_data = new uint8_t[serial_size];
+  snes_runtosave();
+  snes_serialize(serial_data, serial_size);
+
+  snes_cheat_reset();
+//snes_cheat_set(0, true, "DD32-6DAD");
+
   while(true) {
     SDL_Event event;
     SDL_PollEvent(&event);
     if(event.type == SDL_QUIT) break;
+    if(event.type == SDL_KEYDOWN) {
+      if(event.key.keysym.sym == SDLK_ESCAPE) {
+        break;
+      } else if(event.key.keysym.sym == SDLK_F2) {
+        snes_runtosave();
+        snes_serialize(serial_data, serial_size);
+      } else if(event.key.keysym.sym == SDLK_F4) {
+        snes_unserialize(serial_data, serial_size);
+      }
+    }
     snes_run();
   }
 
+  delete[] serial_data;
   snes_unload();
   snes_term();
   return 0;

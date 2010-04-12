@@ -2,7 +2,7 @@ include nall/Makefile
 ui := ui_qt
 
 # compiler
-c       := $(compiler) --std=gnu99
+c       := $(compiler) -std=gnu99
 cpp     := $(subst cc,++,$(compiler)) -std=gnu++0x
 flags   := -O3 -fomit-frame-pointer -I.
 link    :=

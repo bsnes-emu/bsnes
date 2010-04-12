@@ -4,8 +4,6 @@ void sCPU::serialize(serializer &s) {
   CPU::serialize(s);
   CPUcore::core_serialize(s);
 
-  event.serialize(s);
-
   s.integer(status.interrupt_pending);
   s.integer(status.interrupt_vector);
 
@@ -13,7 +11,15 @@ void sCPU::serialize(serializer &s) {
   s.integer(status.line_clocks);
 
   s.integer(status.irq_lock);
+
   s.integer(status.dram_refresh_position);
+  s.integer(status.dram_refreshed);
+
+  s.integer(status.hdma_init_position);
+  s.integer(status.hdma_init_triggered);
+
+  s.integer(status.hdma_position);
+  s.integer(status.hdma_triggered);
 
   s.integer(status.nmi_valid);
   s.integer(status.nmi_line);
@@ -105,8 +111,6 @@ void sCPU::serialize(serializer &s) {
   s.integer(apu_port[1]);
   s.integer(apu_port[2]);
   s.integer(apu_port[3]);
-
-  s.integer(cycle_edge_state);
 }
 
 #endif

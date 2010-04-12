@@ -8,9 +8,9 @@ void FileBrowser::chooseFolder() {
 
 void FileBrowser::loadCartridge(CartridgeMode mode, signed filterIndex) {
   cartridgeMode = mode;
-  onChange = bind(&FileBrowser::onChangeCartridge, this);
-  onActivate = bind(&FileBrowser::onAcceptCartridge, this);
-  onAccept = bind(&FileBrowser::onAcceptCartridge, this);
+  onChange = { &FileBrowser::onChangeCartridge, this };
+  onActivate = { &FileBrowser::onAcceptCartridge, this };
+  onAccept = { &FileBrowser::onAcceptCartridge, this };
 
   setPath(config().path.rom == "" ? config().path.current.cartridge : config().path.rom);
   setNameFilters(string()

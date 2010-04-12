@@ -28,6 +28,7 @@ public:
   void scanline();
   void frame();
 
+  void serialize(serializer&);
   sPPU();
 };
 

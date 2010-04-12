@@ -25,6 +25,7 @@ public:
   void run();
   void reset();
 
+  void serialize(serializer&);
   Screen(sPPU &self);
 
 private:

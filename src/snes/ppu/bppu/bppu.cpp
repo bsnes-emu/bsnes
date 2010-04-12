@@ -89,11 +89,6 @@ void bPPU::scanline() {
 }
 
 void bPPU::render_scanline() {
-  #ifdef FAST_FRAMESKIP
-  //note: this bypasses RTO status flag calculations, which is observable by software
-  if(status.render_output == false) return;
-  #endif
-
   if(line >= 1 && line < (!overscan() ? 225 : 240)) {
     render_line_oam_rto();
     render_line();

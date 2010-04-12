@@ -10,8 +10,6 @@ public:
   #include "mmio/mmio.hpp"
   #include "timing/timing.hpp"
 
-  priority_queue<unsigned> event;
-
   struct Status {
     bool interrupt_pending;
     uint16 interrupt_vector;
@@ -24,7 +22,15 @@ public:
     //======
 
     bool irq_lock;
+
     unsigned dram_refresh_position;
+    bool dram_refreshed;
+
+    unsigned hdma_init_position;
+    bool hdma_init_triggered;
+
+    unsigned hdma_position;
+    bool hdma_triggered;
 
     bool nmi_valid;
     bool nmi_line;

@@ -74,6 +74,7 @@ public:
   void run();
   void reset();
 
+  void serialize(serializer&);
   Window(sPPU &self);
 
 private:
