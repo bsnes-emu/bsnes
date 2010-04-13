@@ -13,8 +13,8 @@ MemoryEditor::MemoryEditor() {
   setLayout(layout);
 
   editor = new HexEditor;
-  editor->reader = bind(&MemoryEditor::reader, this);
-  editor->writer = bind(&MemoryEditor::writer, this);
+  editor->reader = { &MemoryEditor::reader, this };
+  editor->writer = { &MemoryEditor::writer, this };
   editor->setFont(QFont(Style::Monospace));
   editor->setMinimumWidth((editor->lineWidth() + 3) * editor->fontMetrics().width(' '));
   editor->setMinimumHeight((16 + 1) * editor->fontMetrics().height());

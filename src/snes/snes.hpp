@@ -1,11 +1,11 @@
-static const char bsnesVersion[] = "063.13";
+static const char bsnesVersion[] = "063.14";
 static const char bsnesTitle[] = "bsnes";
 static const unsigned bsnesSerializerVersion = 10;
 
 #define CORE_SMEMORY
 #define CORE_SCPU
 #define CORE_SSMP
-#define CORE_ADSP
+#define CORE_SDSP
 #define CORE_BPPU
 
 //S-DSP can be encapsulated into a state machine using #define magic

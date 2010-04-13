@@ -1,4 +1,4 @@
-snes_core = sMemory sCPU sSMP aDSP bPPU
+snes_core = sMemory sCPU sSMP sDSP bPPU
 
 snes_objects := libco
 snes_objects += snes-system

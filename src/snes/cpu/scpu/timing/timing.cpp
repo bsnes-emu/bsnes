@@ -8,6 +8,7 @@ unsigned sCPU::dma_counter() {
 }
 
 void sCPU::add_clocks(unsigned clocks) {
+  status.irq_lock = false;
   unsigned ticks = clocks >> 1;
   while(ticks--) {
     tick();
@@ -142,12 +143,9 @@ void sCPU::dma_edge() {
 //status.irq_lock is used to simulate hardware delay before interrupts can
 //trigger during certain events (immediately after DMA, writes to $4200, etc)
 void sCPU::last_cycle() {
-  if(status.irq_lock) {
-    status.irq_lock = false;
-  } else {
+  if(status.irq_lock == false) {
     status.nmi_pending |= nmi_test();
     status.irq_pending |= irq_test();
-
     status.interrupt_pending = (status.nmi_pending || status.irq_pending);
   }
 }

@@ -63,8 +63,8 @@ Tracer::Tracer() {
   traceMaskCPU = new uint8_t[(1 << 24) >> 3]();
   traceMaskSMP = new uint8_t[(1 << 16) >> 3]();
 
-  SNES::cpu.step_event = bind(&Tracer::stepCpu, this);
-  SNES::smp.step_event = bind(&Tracer::stepSmp, this);
+  SNES::cpu.step_event = { &Tracer::stepCpu, this };
+  SNES::smp.step_event = { &Tracer::stepSmp, this };
 }
 
 Tracer::~Tracer() {

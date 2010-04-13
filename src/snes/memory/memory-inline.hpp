@@ -32,7 +32,7 @@ void MappedRAM::map(uint8 *source, unsigned length) {
   size_ = data_ && length > 0 ? length : -1U;
 }
 
-void MappedRAM::copy(uint8 *data, unsigned size) {
+void MappedRAM::copy(const uint8 *data, unsigned size) {
   if(!data_) {
     size_ = (size & ~255) + ((bool)(size & 255) << 8);
     data_ = new uint8[size_]();

@@ -3,7 +3,7 @@
 
 SDL_Surface *screen, *backbuffer;
 
-void video_refresh(uint16_t *data, unsigned pitch, unsigned *line, unsigned width, unsigned height) {
+void video_refresh(const uint16_t *data, unsigned pitch, const unsigned *line, unsigned width, unsigned height) {
   if(SDL_MUSTLOCK(screen)) SDL_LockSurface(screen);
   if(SDL_MUSTLOCK(backbuffer)) SDL_LockSurface(backbuffer);
 
@@ -38,19 +38,20 @@ int16_t input_state(bool port, unsigned device, unsigned index, unsigned id) {
   uint8_t *state = SDL_GetKeyState(0);
 
   if(port == 0) {
-    //B, Y, Select, Start, Up, Down, Left, Right, A, X, L, R
-    if(id ==  0) return state[SDLK_z];
-    if(id ==  1) return state[SDLK_a];
-    if(id ==  2) return state[SDLK_RSHIFT];
-    if(id ==  3) return state[SDLK_RETURN];
-    if(id ==  4) return state[SDLK_UP];
-    if(id ==  5) return state[SDLK_DOWN] & !state[SDLK_UP];
-    if(id ==  6) return state[SDLK_LEFT];
-    if(id ==  7) return state[SDLK_RIGHT] & !state[SDLK_LEFT];
-    if(id ==  8) return state[SDLK_x];
-    if(id ==  9) return state[SDLK_s];
-    if(id == 10) return state[SDLK_d];
-    if(id == 11) return state[SDLK_c];
+    if(device == SNES_DEVICE_JOYPAD) {
+      if(id == SNES_DEVICE_ID_JOYPAD_B) return state[SDLK_z];
+      if(id == SNES_DEVICE_ID_JOYPAD_Y) return state[SDLK_a];
+      if(id == SNES_DEVICE_ID_JOYPAD_SELECT) return state[SDLK_RSHIFT];
+      if(id == SNES_DEVICE_ID_JOYPAD_START) return state[SDLK_RETURN];
+      if(id == SNES_DEVICE_ID_JOYPAD_UP) return state[SDLK_UP];
+      if(id == SNES_DEVICE_ID_JOYPAD_DOWN) return state[SDLK_DOWN] & !state[SDLK_UP];
+      if(id == SNES_DEVICE_ID_JOYPAD_LEFT) return state[SDLK_LEFT];
+      if(id == SNES_DEVICE_ID_JOYPAD_RIGHT) return state[SDLK_RIGHT] & !state[SDLK_LEFT];
+      if(id == SNES_DEVICE_ID_JOYPAD_A) return state[SDLK_x];
+      if(id == SNES_DEVICE_ID_JOYPAD_X) return state[SDLK_s];
+      if(id == SNES_DEVICE_ID_JOYPAD_L) return state[SDLK_d];
+      if(id == SNES_DEVICE_ID_JOYPAD_R) return state[SDLK_c];
+    }
   }
 
   return 0;
@@ -88,10 +89,8 @@ int main(int argc, char *argv[]) {
 
   unsigned serial_size = snes_serialize_size();
   uint8_t *serial_data = new uint8_t[serial_size];
-  snes_runtosave();
   snes_serialize(serial_data, serial_size);
 
-  snes_cheat_reset();
 //snes_cheat_set(0, true, "DD32-6DAD");
 
   while(true) {
@@ -102,7 +101,6 @@ int main(int argc, char *argv[]) {
       if(event.key.keysym.sym == SDLK_ESCAPE) {
         break;
       } else if(event.key.keysym.sym == SDLK_F2) {
-        snes_runtosave();
         snes_serialize(serial_data, serial_size);
       } else if(event.key.keysym.sym == SDLK_F4) {
         snes_unserialize(serial_data, serial_size);
