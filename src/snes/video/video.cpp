@@ -25,7 +25,7 @@ void Video::draw_cursor(uint16_t color, int x, int y) {
     int vy = y + cy - 7;
     if(vy <= 0 || vy >= 240) continue;  //do not draw offscreen
 
-    bool hires = (pline_width[vy] == 512);
+    bool hires = (line_width[vy] == 512);
     for(int cx = 0; cx < 15; cx++) {
       int vx = x + cx - 7;
       if(vx < 0 || vx >= 256) continue;  //do not draw offscreen
@@ -47,32 +47,33 @@ void Video::draw_cursor(uint16_t color, int x, int y) {
 }
 
 void Video::update() {
-  uint16_t *data = (uint16_t*)ppu.output;
-  unsigned width, height;
-
   switch(input.port[1].device) {
     case Input::Device::SuperScope: draw_cursor(0x001f, input.port[1].superscope.x, input.port[1].superscope.y); break;
     case Input::Device::Justifiers: draw_cursor(0x02e0, input.port[1].justifier.x2, input.port[1].justifier.y2); //fallthrough
     case Input::Device::Justifier:  draw_cursor(0x001f, input.port[1].justifier.x1, input.port[1].justifier.y1); break;
   }
 
-  unsigned yoffset = 1;  //scanline 0 is always black, skip this line for video output
-  if(mode == Mode::NTSC && ppu.overscan()) yoffset += 8;  //NTSC overscan centers x240 height image
+  uint16_t *data = (uint16_t*)ppu.output;
+  unsigned width = 256;
+  unsigned height = !ppu.overscan() ? 224 : 239;
 
-  switch(mode) { default:
-    case Mode::NTSC: { width = 256; height = 224; } break;
-    case Mode::PAL:  { width = 256; height = 239; } break;
+  if(frame_hires) {
+    width <<= 1;
+    //normalize line widths
+    for(unsigned y = 0; y < 240; y++) {
+      if(line_width[y] == 512) continue;
+      uint16_t *buffer = data + y * 1024;
+      for(signed x = 255; x >= 0; x--) {
+        buffer[(x * 2) + 0] = buffer[(x * 2) + 1] = buffer[x];
+      }
+    }
   }
 
-  if(frame_hires) width <<= 1;
-  if(frame_interlace) height <<= 1;
+  if(frame_interlace) {
+    height <<= 1;
+  }
 
-  system.interface->video_refresh(
-    data + yoffset * 1024,
-    /* pitch  = */ height <= 240 ? 2048 : 1024,
-    /* line[] = */ height <= 240 ? (pline_width + yoffset) : (iline_width + yoffset * 2),
-    width, height
-  );
+  system.interface->video_refresh(data + 1024, width, height);
 
   frame_hires = false;
   frame_interlace = false;
@@ -82,24 +83,16 @@ void Video::scanline() {
   unsigned y = cpu.vcounter();
   if(y >= 240) return;
 
-  unsigned width = (ppu.hires() == false ? 256 : 512);
-  pline_width[y] = width;
-  iline_width[y * 2 + (int)cpu.field()] = width;
-
   frame_hires |= ppu.hires();
   frame_interlace |= ppu.interlace();
-}
-
-void Video::set_mode(Mode mode_) {
-  mode = mode_;
+  unsigned width = (ppu.hires() == false ? 256 : 512);
+  line_width[y] = width;
 }
 
 void Video::init() {
-  for(unsigned i = 0; i < 240; i++) pline_width[i] = 256;
-  for(unsigned i = 0; i < 480; i++) iline_width[i] = 256;
   frame_hires = false;
   frame_interlace = false;
-  set_mode(Mode::NTSC);
+  for(unsigned i = 0; i < 240; i++) line_width[i] = 256;
 }
 
 #endif

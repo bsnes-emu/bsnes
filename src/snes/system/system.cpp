@@ -225,7 +225,7 @@ void System::frame() {
 }
 
 System::System() : interface(0) {
-  region = Region::NTSC;
+  region = Region::Autodetect;
   expansion = ExpansionPortDevice::None;
 }
 

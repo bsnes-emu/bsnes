@@ -1,7 +1,7 @@
 #include "libsnes.hpp"
 #include <snes/snes.hpp>
 
-#include <nall/info/snes.hpp>
+#include <nall/snes/info.hpp>
 using namespace nall;
 
 struct Interface : public SNES::Interface {
@@ -10,20 +10,21 @@ struct Interface : public SNES::Interface {
   snes_input_poll_t pinput_poll;
   snes_input_state_t pinput_state;
 
-  void video_refresh(uint16_t *data, unsigned pitch, unsigned *line, unsigned width, unsigned height) {
-    return pvideo_refresh(data, pitch, line, width, height);
+  void video_refresh(const uint16_t *data, unsigned width, unsigned height) {
+    if(pvideo_refresh) return pvideo_refresh(data, width, height);
   }
 
   void audio_sample(uint16_t left, uint16_t right) {
-    return paudio_sample(left, right);
+    if(paudio_sample) return paudio_sample(left, right);
   }
 
   void input_poll() {
-    return pinput_poll();
+    if(pinput_poll) return pinput_poll();
   }
 
   int16_t input_poll(bool port, SNES::Input::Device device, unsigned index, unsigned id) {
-    return pinput_state(port, (unsigned)device, index, id);
+    if(pinput_state) return pinput_state(port, (unsigned)device, index, id);
+    return 0;
   }
 
   Interface() : pvideo_refresh(0), paudio_sample(0), pinput_poll(0), pinput_state(0) {
@@ -32,7 +33,7 @@ struct Interface : public SNES::Interface {
 
 static Interface interface;
 
-unsigned snes_library_revision() {
+unsigned snes_library_revision(void) {
   return 1;
 }
 
@@ -56,25 +57,33 @@ void snes_set_controller_port_device(bool port, unsigned device) {
   SNES::input.port_set_device(port, (SNES::Input::Device)device);
 }
 
-void snes_init() {
+void snes_init(void) {
   SNES::system.init(&interface);
   SNES::input.port_set_device(0, SNES::Input::Device::Joypad);
   SNES::input.port_set_device(1, SNES::Input::Device::Joypad);
 }
 
-void snes_term() {
+void snes_term(void) {
   SNES::system.term();
 }
 
-void snes_unload() {
-  SNES::cartridge.unload();
+void snes_power(void) {
+  SNES::system.power();
 }
 
-void snes_run() {
+void snes_reset(void) {
+  SNES::system.reset();
+}
+
+void snes_run(void) {
   SNES::system.run();
 }
 
-unsigned snes_serialize_size() {
+void snes_unload(void) {
+  SNES::cartridge.unload();
+}
+
+unsigned snes_serialize_size(void) {
   return SNES::system.serialize_size();
 }
 
@@ -91,7 +100,7 @@ bool snes_unserialize(const uint8_t *data, unsigned size) {
   return SNES::system.unserialize(s);
 }
 
-void snes_cheat_reset() {
+void snes_cheat_reset(void) {
   SNES::cheat.reset();
   SNES::cheat.synchronize();
 }
@@ -105,7 +114,7 @@ void snes_cheat_set(unsigned index, bool enabled, const char *code) {
 void snes_load_cartridge_normal(
   const char *rom_xml, const uint8_t *rom_data, unsigned rom_size
 ) {
-  SNES::cheat.reset();
+  snes_cheat_reset();
   SNES::memory::cartrom.copy(rom_data, rom_size);
   string xmlrom = rom_xml ? string(rom_xml) : snes_information(rom_data, rom_size).xml_memory_map;
   SNES::cartridge.load(SNES::Cartridge::Mode::Normal, { xmlrom });
@@ -116,7 +125,7 @@ void snes_load_cartridge_bsx_slotted(
   const char *rom_xml, const uint8_t *rom_data, unsigned rom_size,
   const char *bsx_xml, const uint8_t *bsx_data, unsigned bsx_size
 ) {
-  SNES::cheat.reset();
+  snes_cheat_reset();
   SNES::memory::cartrom.copy(rom_data, rom_size);
   string xmlrom = rom_xml ? string(rom_xml) : snes_information(rom_data, rom_size).xml_memory_map;
   SNES::memory::bsxflash.copy(bsx_data, bsx_size);
@@ -129,7 +138,7 @@ void snes_load_cartridge_bsx(
   const char *rom_xml, const uint8_t *rom_data, unsigned rom_size,
   const char *bsx_xml, const uint8_t *bsx_data, unsigned bsx_size
 ) {
-  SNES::cheat.reset();
+  snes_cheat_reset();
   SNES::memory::cartrom.copy(rom_data, rom_size);
   string xmlrom = rom_xml ? string(rom_xml) : snes_information(rom_data, rom_size).xml_memory_map;
   SNES::memory::bsxflash.copy(bsx_data, bsx_size);
@@ -143,7 +152,7 @@ void snes_load_cartridge_sufami_turbo(
   const char *sta_xml, const uint8_t *sta_data, unsigned sta_size,
   const char *stb_xml, const uint8_t *stb_data, unsigned stb_size
 ) {
-  SNES::cheat.reset();
+  snes_cheat_reset();
   SNES::memory::cartrom.copy(rom_data, rom_size);
   string xmlrom = rom_xml ? string(rom_xml) : snes_information(rom_data, rom_size).xml_memory_map;
   SNES::memory::stArom.copy(sta_data, sta_size);
@@ -158,7 +167,7 @@ void snes_load_cartridge_super_game_boy(
   const char *rom_xml, const uint8_t *rom_data, unsigned rom_size,
   const char *dmg_xml, const uint8_t *dmg_data, unsigned dmg_size
 ) {
-  SNES::cheat.reset();
+  snes_cheat_reset();
   SNES::memory::cartrom.copy(rom_data, rom_size);
   string xmlrom = rom_xml ? string(rom_xml) : snes_information(rom_data, rom_size).xml_memory_map;
   SNES::memory::gbrom.copy(dmg_data, dmg_size);

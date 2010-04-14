@@ -8,7 +8,6 @@ public:
   void unacquireMouse();
 
   void updateAvSync();
-  void updateVideoMode();
   void updateColorFilter();
   void updatePixelShader();
   void updateHardwareFilter();

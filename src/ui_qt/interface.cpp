@@ -1,6 +1,22 @@
 Interface interface;
 
-void Interface::video_refresh(uint16_t *data, unsigned pitch, unsigned *line, unsigned width, unsigned height) {
+void Interface::video_refresh(const uint16_t *data, unsigned width, unsigned height) {
+  bool interlace = (height >= 240);
+  bool overscan = (height == 239 || height == 478);
+  unsigned pitch = interlace ? 1024 : 2048;
+
+  //TV resolution and overscan simulation
+  if(config().video.context->region == 0) {
+    //NTSC
+    height = 224;
+    if(interlace) height <<= 1;
+    if(overscan) data += 8 * 1024;
+  } else {
+    //PAL
+    height = 239;
+    if(interlace) height <<= 1;
+  }
+
   //scale display.crop* values from percentage-based (0-100%) to exact pixel sizes (width, height)
   unsigned cropLeft = (double)display.cropLeft / 100.0 * width;
   unsigned cropTop = (double)display.cropTop / 100.0 * height;
@@ -16,7 +32,7 @@ void Interface::video_refresh(uint16_t *data, unsigned pitch, unsigned *line, un
 
   if(video.lock(output, outpitch, outwidth, outheight) == true) {
     data += cropTop * (pitch >> 1) + cropLeft;
-    filter.render(output, outpitch, data, pitch, line + cropTop, width, height);
+    filter.render(output, outpitch, data, pitch, width, height);
     video.unlock();
     video.refresh();
     if(saveScreenshot == true) captureScreenshot(output, outpitch, outwidth, outheight);

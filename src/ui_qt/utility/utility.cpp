@@ -62,14 +62,6 @@ void Utility::updateAvSync() {
   audio.set(Audio::Synchronize, config().audio.synchronize);
 }
 
-void Utility::updateVideoMode() {
-  if(config().video.context->region == 0) {
-    SNES::video.set_mode(SNES::Video::Mode::NTSC);
-  } else {
-    SNES::video.set_mode(SNES::Video::Mode::PAL);
-  }
-}
-
 void Utility::updateColorFilter() {
   filter.contrast = config().video.contrastAdjust;
   filter.brightness = config().video.brightnessAdjust;

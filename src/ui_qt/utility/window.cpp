@@ -21,7 +21,6 @@ void Utility::updateFullscreenState() {
   #endif
 
   //refresh options that are unique to each video context
-  updateVideoMode();
   updateHardwareFilter();
   updateSoftwareFilter();
   mainWindow->syncUi();
@@ -140,7 +139,6 @@ void Utility::toggleSynchronizeAudio() {
 
 void Utility::setNtscMode() {
   config().video.context->region = 0;
-  updateVideoMode();
   resizeMainWindow();
   mainWindow->shrink();
   mainWindow->syncUi();
@@ -148,7 +146,6 @@ void Utility::setNtscMode() {
 
 void Utility::setPalMode() {
   config().video.context->region = 1;
-  updateVideoMode();
   resizeMainWindow();
   mainWindow->shrink();
   mainWindow->syncUi();

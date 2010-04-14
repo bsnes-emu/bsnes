@@ -1,15 +1,7 @@
 class Video {
-public:
-  enum class Mode : unsigned { NTSC, PAL };
-  void set_mode(Mode);
-
-private:
-  Mode mode;
   bool frame_hires;
   bool frame_interlace;
-
-  unsigned pline_width[240];  //progressive
-  unsigned iline_width[480];  //interlace
+  unsigned line_width[240];
 
   void update();
   void scanline();

@@ -10,32 +10,27 @@ void ScanlineFilter::size(unsigned &width, unsigned &height) {
 
 void ScanlineFilter::render(
   const uint16_t *&input, unsigned &pitch,
-  const unsigned *&line, unsigned width, unsigned &height
+  unsigned width, unsigned &height
 ) {
   if(enabled && height <= 240) {
     pitch >>= 1;
 
     const uint16_t *sp = input;
     uint16_t *dp = buffer;
-    unsigned *lp = linewidth;
     for(unsigned y = 0; y < height; y++) {
-      for(unsigned x = 0; x < line[y]; x++) {
+      for(unsigned x = 0; x < width; x++) {
         uint16_t color = *sp++;
         *(dp +   0) = color;
         *(dp + 512) = adjust[color];
         dp++;
       }
 
-      sp += pitch - line[y];
-      dp += 1024 - line[y];
-
-      *lp++ = line[y];
-      *lp++ = line[y];
+      sp += pitch - width;
+      dp += 1024 - width;
     }
 
     input = buffer;
     pitch = 1024;
-    line = linewidth;
     height *= 2;
   }
 }
@@ -180,13 +175,12 @@ void Filter::size(unsigned &outwidth, unsigned &outheight, unsigned width, unsig
 
 void Filter::render(
   uint32_t *output, unsigned outpitch,
-  const uint16_t *input, unsigned pitch,
-  const unsigned *line, unsigned width, unsigned height
+  const uint16_t *input, unsigned pitch, unsigned width, unsigned height
 ) {
-  scanlineFilter.render(input, pitch, line, width, height);
+  scanlineFilter.render(input, pitch, width, height);
 
   if(opened() && renderer > 0) {
-    return dl_render(renderer, output, outpitch, input, pitch, line, width, height);
+    return dl_render(renderer, output, outpitch, input, pitch, width, height);
   }
 
   pitch >>= 1;
@@ -195,18 +189,8 @@ void Filter::render(
   for(unsigned y = 0; y < height; y++) {
     const uint16_t *in = input + y * pitch;
     uint32_t *out = output + y * outpitch;
-
-    if(width > 256 && line[y] <= 256) {
-      for(unsigned x = 0; x < line[y]; x++) {
-        uint16_t p = *in++;
-        *out++ = colortable[p];
-        *out++ = colortable[p];
-      }
-    } else {
-      for(unsigned x = 0; x < width; x++) {
-        uint16_t p = *in++;
-        *out++ = colortable[p];
-      }
+    for(unsigned x = 0; x < width; x++) {
+      *out++ = colortable[*in++];
     }
   }
 }

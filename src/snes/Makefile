@@ -18,7 +18,7 @@ obj/libco.o: libco/libco.c libco/*
 obj/libsnes.o: snes/libsnes/libsnes.cpp snes/libsnes/*
 
 # system
-obj/snes-system.o: snes/system/system.cpp $(call rwildcard,snes/system/)
+obj/snes-system.o: snes/system/system.cpp $(call rwildcard,snes/system/) $(call rwildcard,snes/video/)
 
 # memory
 obj/snes-memory.o : snes/memory/memory.cpp snes/memory/*

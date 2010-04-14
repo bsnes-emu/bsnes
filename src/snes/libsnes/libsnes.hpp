@@ -1,3 +1,6 @@
+#ifndef LIBSNES_HPP
+#define LIBSNES_HPP
+
 #include <stdint.h>
 
 #ifdef __cplusplus
@@ -51,29 +54,32 @@ extern "C" {
 #define SNES_DEVICE_ID_JUSTIFIER_TRIGGER  2
 #define SNES_DEVICE_ID_JUSTIFIER_START    3
 
-typedef void (*snes_video_refresh_t)(const uint16_t *data, unsigned pitch, const unsigned *line, unsigned width, unsigned height);
+typedef void (*snes_video_refresh_t)(const uint16_t *data, unsigned width, unsigned height);
 typedef void (*snes_audio_sample_t)(uint16_t left, uint16_t right);
-typedef void (*snes_input_poll_t)();
+typedef void (*snes_input_poll_t)(void);
 typedef int16_t (*snes_input_state_t)(bool port, unsigned device, unsigned index, unsigned id);
 
-unsigned snes_library_revision();
+unsigned snes_library_revision(void);
 
 void snes_set_video_refresh(snes_video_refresh_t);
 void snes_set_audio_sample(snes_audio_sample_t);
 void snes_set_input_poll(snes_input_poll_t);
 void snes_set_input_state(snes_input_state_t);
+
 void snes_set_controller_port_device(bool port, unsigned device);
 
-void snes_init();
-void snes_term();
-void snes_unload();
-void snes_run();
+void snes_init(void);
+void snes_term(void);
+void snes_power(void);
+void snes_reset(void);
+void snes_run(void);
+void snes_unload(void);
 
-unsigned snes_serialize_size();
+unsigned snes_serialize_size(void);
 bool snes_serialize(uint8_t *data, unsigned size);
 bool snes_unserialize(const uint8_t *data, unsigned size);
 
-void snes_cheat_reset();
+void snes_cheat_reset(void);
 void snes_cheat_set(unsigned index, bool enabled, const char *code);
 
 void snes_load_cartridge_normal(
@@ -106,4 +112,6 @@ unsigned snes_get_memory_size(unsigned id);
 
 #ifdef __cplusplus
 }
+#endif
+
 #endif

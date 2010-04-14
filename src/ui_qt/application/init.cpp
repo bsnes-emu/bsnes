@@ -98,7 +98,6 @@ void Application::init() {
 
   utility.resizeMainWindow();
   utility.updateAvSync();
-  utility.updateVideoMode();
   utility.updateColorFilter();
   utility.updatePixelShader();
   utility.updateHardwareFilter();

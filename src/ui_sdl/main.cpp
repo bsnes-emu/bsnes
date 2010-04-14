@@ -3,7 +3,7 @@
 
 SDL_Surface *screen, *backbuffer;
 
-void video_refresh(const uint16_t *data, unsigned pitch, const unsigned *line, unsigned width, unsigned height) {
+void video_refresh(const uint16_t *data, unsigned width, unsigned height) {
   if(SDL_MUSTLOCK(screen)) SDL_LockSurface(screen);
   if(SDL_MUSTLOCK(backbuffer)) SDL_LockSurface(backbuffer);
 
@@ -11,7 +11,7 @@ void video_refresh(const uint16_t *data, unsigned pitch, const unsigned *line, u
   uint16_t *outputData = (uint16_t*)backbuffer->pixels;
 
   for(unsigned y = 0; y < height; y++) {
-    uint16_t *src = (uint16_t*)((uint8_t*)data + y * pitch);
+    uint16_t *src = (uint16_t*)((uint8_t*)data + y * 2048);
     uint16_t *dst = (uint16_t*)((uint8_t*)outputData + y * outputPitch);
     memcpy(dst, src, width * sizeof(uint16_t));
   }
