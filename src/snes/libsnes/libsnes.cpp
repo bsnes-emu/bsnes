@@ -176,14 +176,9 @@ void snes_load_cartridge_super_game_boy(
   SNES::system.power();
 }
 
-#define SNES_MEMORY_CARTRIDGE_RAM       0
-#define SNES_MEMORY_CARTRIDGE_RTC       1
-#define SNES_MEMORY_BSX_RAM             2
-#define SNES_MEMORY_BSX_PRAM            3
-#define SNES_MEMORY_SUFAMI_TURBO_A_RAM  4
-#define SNES_MEMORY_SUFAMI_TURBO_B_RAM  5
-#define SNES_MEMORY_GAME_BOY_RAM        6
-#define SNES_MEMORY_GAME_BOY_RTC        7
+bool snes_get_region(void) {
+  return SNES::system.region() == SNES::System::Region::NTSC ? 0 : 1;
+}
 
 uint8_t* snes_get_memory_data(unsigned id) {
   switch(id) {
@@ -211,4 +206,34 @@ unsigned snes_get_memory_size(unsigned id) {
     case SNES_MEMORY_GAME_BOY_RTC: return SNES::memory::gbrtc.size();
   }
   return 0;
+}
+
+static uint32_t colortable[32768];
+
+void snes_blit_set_colortable(const uint32_t *new_colortable) {
+  memcpy(colortable, new_colortable, 32768 * sizeof(uint32_t));
+}
+
+void snes_blit(
+  uint32_t *output, unsigned output_pitch, unsigned output_width, unsigned output_height,
+  const uint16_t *input, unsigned input_pitch, unsigned input_width, unsigned input_height
+) {
+  output_pitch >>= 2;
+  input_pitch >>= 1;
+
+  double step_x = (double)input_width / (double)output_width;
+  double step_y = (double)input_height / (double)output_height;
+
+  double pos_y = 0;
+  for(unsigned y = 0; y < output_height; y++) {
+    uint32_t *o = output + y * output_pitch;
+    const uint16_t *i = input + (unsigned)(pos_y + 0.5) * input_pitch;
+    double pos_x = 0;
+    for(unsigned x = 0; x < output_width; x++) {
+      unsigned pixel = i[(unsigned)(pos_x + 0.5)];
+      *o++ = colortable[pixel];
+      pos_x += step_x;
+    }
+    pos_y += step_y;
+  }
 }

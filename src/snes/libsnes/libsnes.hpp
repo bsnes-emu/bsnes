@@ -107,8 +107,15 @@ void snes_load_cartridge_super_game_boy(
   const char *dmg_xml, const uint8_t *dmg_data, unsigned dmg_size
 );
 
+bool snes_get_region(void);
 uint8_t* snes_get_memory_data(unsigned id);
 unsigned snes_get_memory_size(unsigned id);
+
+void snes_blit_set_colortable(const uint32_t *colortable);
+void snes_blit(
+  uint32_t *output, unsigned output_pitch, unsigned output_width, unsigned output_height,
+  const uint16_t *input, unsigned input_pitch, unsigned input_width, unsigned input_height
+);
 
 #ifdef __cplusplus
 }
