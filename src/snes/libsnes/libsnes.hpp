@@ -7,14 +7,8 @@
 extern "C" {
 #endif
 
-#define SNES_MEMORY_CARTRIDGE_RAM       0
-#define SNES_MEMORY_CARTRIDGE_RTC       1
-#define SNES_MEMORY_BSX_RAM             2
-#define SNES_MEMORY_BSX_PRAM            3
-#define SNES_MEMORY_SUFAMI_TURBO_A_RAM  4
-#define SNES_MEMORY_SUFAMI_TURBO_B_RAM  5
-#define SNES_MEMORY_GAME_BOY_RAM        6
-#define SNES_MEMORY_GAME_BOY_RTC        7
+#define SNES_PORT_1  0
+#define SNES_PORT_2  1
 
 #define SNES_DEVICE_NONE         0
 #define SNES_DEVICE_JOYPAD       1
@@ -54,12 +48,22 @@ extern "C" {
 #define SNES_DEVICE_ID_JUSTIFIER_TRIGGER  2
 #define SNES_DEVICE_ID_JUSTIFIER_START    3
 
+#define SNES_MEMORY_CARTRIDGE_RAM       0
+#define SNES_MEMORY_CARTRIDGE_RTC       1
+#define SNES_MEMORY_BSX_RAM             2
+#define SNES_MEMORY_BSX_PRAM            3
+#define SNES_MEMORY_SUFAMI_TURBO_A_RAM  4
+#define SNES_MEMORY_SUFAMI_TURBO_B_RAM  5
+#define SNES_MEMORY_GAME_BOY_RAM        6
+#define SNES_MEMORY_GAME_BOY_RTC        7
+
 typedef void (*snes_video_refresh_t)(const uint16_t *data, unsigned width, unsigned height);
 typedef void (*snes_audio_sample_t)(uint16_t left, uint16_t right);
 typedef void (*snes_input_poll_t)(void);
 typedef int16_t (*snes_input_state_t)(bool port, unsigned device, unsigned index, unsigned id);
 
-unsigned snes_library_revision(void);
+unsigned snes_library_revision_major(void);
+unsigned snes_library_revision_minor(void);
 
 void snes_set_video_refresh(snes_video_refresh_t);
 void snes_set_audio_sample(snes_audio_sample_t);
@@ -73,7 +77,6 @@ void snes_term(void);
 void snes_power(void);
 void snes_reset(void);
 void snes_run(void);
-void snes_unload(void);
 
 unsigned snes_serialize_size(void);
 bool snes_serialize(uint8_t *data, unsigned size);
@@ -107,15 +110,11 @@ void snes_load_cartridge_super_game_boy(
   const char *dmg_xml, const uint8_t *dmg_data, unsigned dmg_size
 );
 
+void snes_unload_cartridge(void);
+
 bool snes_get_region(void);
 uint8_t* snes_get_memory_data(unsigned id);
 unsigned snes_get_memory_size(unsigned id);
-
-void snes_blit_set_colortable(const uint32_t *colortable);
-void snes_blit(
-  uint32_t *output, unsigned output_pitch, unsigned output_width, unsigned output_height,
-  const uint16_t *input, unsigned input_pitch, unsigned input_width, unsigned input_height
-);
 
 #ifdef __cplusplus
 }

@@ -33,8 +33,12 @@ struct Interface : public SNES::Interface {
 
 static Interface interface;
 
-unsigned snes_library_revision(void) {
+unsigned snes_library_revision_major(void) {
   return 1;
+}
+
+unsigned snes_library_revision_minor(void) {
+  return 0;
 }
 
 void snes_set_video_refresh(snes_video_refresh_t video_refresh) {
@@ -79,10 +83,6 @@ void snes_run(void) {
   SNES::system.run();
 }
 
-void snes_unload(void) {
-  SNES::cartridge.unload();
-}
-
 unsigned snes_serialize_size(void) {
   return SNES::system.serialize_size();
 }
@@ -116,7 +116,7 @@ void snes_load_cartridge_normal(
 ) {
   snes_cheat_reset();
   SNES::memory::cartrom.copy(rom_data, rom_size);
-  string xmlrom = rom_xml ? string(rom_xml) : snes_information(rom_data, rom_size).xml_memory_map;
+  string xmlrom = (rom_xml && *rom_xml) ? string(rom_xml) : snes_information(rom_data, rom_size).xml_memory_map;
   SNES::cartridge.load(SNES::Cartridge::Mode::Normal, { xmlrom });
   SNES::system.power();
 }
@@ -176,6 +176,10 @@ void snes_load_cartridge_super_game_boy(
   SNES::system.power();
 }
 
+void snes_unload_cartridge(void) {
+  SNES::cartridge.unload();
+}
+
 bool snes_get_region(void) {
   return SNES::system.region() == SNES::System::Region::NTSC ? 0 : 1;
 }
@@ -206,34 +210,4 @@ unsigned snes_get_memory_size(unsigned id) {
     case SNES_MEMORY_GAME_BOY_RTC: return SNES::memory::gbrtc.size();
   }
   return 0;
-}
-
-static uint32_t colortable[32768];
-
-void snes_blit_set_colortable(const uint32_t *new_colortable) {
-  memcpy(colortable, new_colortable, 32768 * sizeof(uint32_t));
-}
-
-void snes_blit(
-  uint32_t *output, unsigned output_pitch, unsigned output_width, unsigned output_height,
-  const uint16_t *input, unsigned input_pitch, unsigned input_width, unsigned input_height
-) {
-  output_pitch >>= 2;
-  input_pitch >>= 1;
-
-  double step_x = (double)input_width / (double)output_width;
-  double step_y = (double)input_height / (double)output_height;
-
-  double pos_y = 0;
-  for(unsigned y = 0; y < output_height; y++) {
-    uint32_t *o = output + y * output_pitch;
-    const uint16_t *i = input + (unsigned)(pos_y + 0.5) * input_pitch;
-    double pos_x = 0;
-    for(unsigned x = 0; x < output_width; x++) {
-      unsigned pixel = i[(unsigned)(pos_x + 0.5)];
-      *o++ = colortable[pixel];
-      pos_x += step_x;
-    }
-    pos_y += step_y;
-  }
 }
