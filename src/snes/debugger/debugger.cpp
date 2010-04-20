@@ -6,12 +6,11 @@ void Debugger::breakpoint_test(Debugger::Breakpoint::Source source, Debugger::Br
   for(unsigned i = 0; i < Breakpoints; i++) {
     if(breakpoint[i].enabled == false) continue;
 
-    //shadow S-CPU WRAM addresses ($00-3f|80-bf:0000-1fff mirrors $7e:0000-1fff)
-    if(source == Debugger::Breakpoint::Source::CPUBus && (
-        ((breakpoint[i].addr & 0x40e000) == 0x000000) ||  //$00-3f|80-bf:0000-1fff
-        ((breakpoint[i].addr & 0xffe000) == 0x7e0000)     //$7e:0000-1fff
-      )
-    ) {
+    bool source_wram = ((breakpoint[i].addr & 0x40e000) == 0x000000) || ((breakpoint[i].addr & 0xffe000) == 0x7e0000);
+    bool offset_wram = ((addr & 0x40e000) == 0x000000) || ((addr & 0xffe000) == 0x7e0000);
+
+    if(source == Debugger::Breakpoint::Source::CPUBus && source_wram && offset_wram) {
+      //shadow S-CPU WRAM addresses ($00-3f|80-bf:0000-1fff mirrors $7e:0000-1fff)
       if((breakpoint[i].addr & 0x1fff) != (addr & 0x1fff)) continue;
     } else {
       if(breakpoint[i].addr != addr) continue;

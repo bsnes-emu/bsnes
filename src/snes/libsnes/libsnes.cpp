@@ -195,19 +195,24 @@ uint8_t* snes_get_memory_data(unsigned id) {
     case SNES_MEMORY_GAME_BOY_RAM: return SNES::memory::gbram.data();
     case SNES_MEMORY_GAME_BOY_RTC: return SNES::memory::gbrtc.data();
   }
+
   return 0;
 }
 
 unsigned snes_get_memory_size(unsigned id) {
+  unsigned size = 0;
+
   switch(id) {
-    case SNES_MEMORY_CARTRIDGE_RAM: return SNES::memory::cartram.size();
-    case SNES_MEMORY_CARTRIDGE_RTC: return SNES::memory::cartrtc.size();
-    case SNES_MEMORY_BSX_RAM: return SNES::memory::bsxram.size();
-    case SNES_MEMORY_BSX_PRAM: return SNES::memory::bsxpram.size();
-    case SNES_MEMORY_SUFAMI_TURBO_A_RAM: return SNES::memory::stAram.size();
-    case SNES_MEMORY_SUFAMI_TURBO_B_RAM: return SNES::memory::stBram.size();
-    case SNES_MEMORY_GAME_BOY_RAM: return SNES::memory::gbram.size();
-    case SNES_MEMORY_GAME_BOY_RTC: return SNES::memory::gbrtc.size();
+    case SNES_MEMORY_CARTRIDGE_RAM: size = SNES::memory::cartram.size(); break;
+    case SNES_MEMORY_CARTRIDGE_RTC: size = SNES::memory::cartrtc.size(); break;
+    case SNES_MEMORY_BSX_RAM: size = SNES::memory::bsxram.size(); break;
+    case SNES_MEMORY_BSX_PRAM: size = SNES::memory::bsxpram.size(); break;
+    case SNES_MEMORY_SUFAMI_TURBO_A_RAM: size = SNES::memory::stAram.size(); break;
+    case SNES_MEMORY_SUFAMI_TURBO_B_RAM: size = SNES::memory::stBram.size(); break;
+    case SNES_MEMORY_GAME_BOY_RAM: size = SNES::memory::gbram.size(); break;
+    case SNES_MEMORY_GAME_BOY_RTC: size = SNES::memory::gbrtc.size(); break;
   }
-  return 0;
+
+  if(size == -1U) size = 0;
+  return size;
 }
