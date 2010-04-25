@@ -347,21 +347,23 @@ void bPPU::reset() {
 bPPU::bPPU() {
   alloc_tiledata_cache();
 
-  for(int l = 0; l < 16; l++) {
-    for(int i = 0; i < 4096; i++) {
+  for(unsigned l = 0; l < 16; l++) {
+    for(unsigned i = 0; i < 4096; i++) {
       mosaic_table[l][i] = (i / (l + 1)) * (l + 1);
     }
   }
 
-  for(int l = 0; l < 16; l++) {
-    double m = (double)l / 15.0;
-    for(int i = 0; i < 32 * 32; i++) {
-      int r = (int)((double)((i)      & 31) * m + 0.5);
-      int g = (int)((double)((i >> 5) & 31) * m + 0.5);
-      r = max(0, min(31, r));
-      g = max(0, min(31, g));
-      if(i < 32) light_table_b[l][i]  = (r << 10);
-      light_table_gr[l][i] = (g << 5) | (r);
+  for(unsigned l = 0; l < 16; l++) {
+    for(unsigned r = 0; r < 32; r++) {
+      for(unsigned g = 0; g < 32; g++) {
+        for(unsigned b = 0; b < 32; b++) {
+          double luma = (double)l / 15.0;
+          unsigned ar = (luma * r + 0.5);
+          unsigned ag = (luma * g + 0.5);
+          unsigned ab = (luma * b + 0.5);
+          light_table[l][(r << 10) + (g << 5) + b] = (ab << 10) + (ag << 5) + ar;
+        }
+      }
     }
   }
 }

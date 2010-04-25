@@ -85,47 +85,24 @@ inline uint16 bPPU::get_pixel_swap(uint32 x) {
 }
 
 inline void bPPU::render_line_output() {
-  uint16 *ptr  = (uint16*)output + (line * 1024) +
-                 ((interlace() && field()) ? 512 : 0);
-  uint16 *luma_b  = light_table_b [regs.display_brightness];
-  uint16 *luma_gr = light_table_gr[regs.display_brightness];
+  uint16 *ptr = (uint16*)output + (line * 1024) + ((interlace() && field()) ? 512 : 0);
+  uint16 *luma = light_table[regs.display_brightness];
   uint16 curr, prev;
 
   if(!regs.pseudo_hires && regs.bg_mode != 5 && regs.bg_mode != 6) {
-    if(regs.display_brightness == 15) {
-      for(unsigned x = 0; x < 256; x++) {
-        *ptr++ = get_pixel_normal(x);
-      }
-    } else {
-      for(unsigned x = 0; x < 256; x++) {
-        curr = get_pixel_normal(x);
-        *ptr++ = luma_b[curr >> 10] + luma_gr[curr & 0x3ff];
-      }
+    for(unsigned x = 0; x < 256; x++) {
+      curr = luma[get_pixel_normal(x)];
+      *ptr++ = curr;
     }
   } else {
-    if(regs.display_brightness == 15) {
-      for(unsigned x = 0, prev = 0; x < 256; x++) {
-        curr = get_pixel_swap(x);
-        *ptr++ = (prev + curr - ((prev ^ curr) & 0x0421)) >> 1;
-        prev = curr;
+    for(unsigned x = 0, prev = 0; x < 256; x++) {
+      curr = luma[get_pixel_swap(x)];
+      *ptr++ = (prev + curr - ((prev ^ curr) & 0x0421)) >> 1;
+      prev = curr;
 
-        curr = get_pixel_normal(x);
-        *ptr++ = (prev + curr - ((prev ^ curr) & 0x0421)) >> 1;
-        prev = curr;
-
-      }
-    } else {
-      for(unsigned x = 0, prev = 0; x < 256; x++) {
-        curr = get_pixel_swap(x);
-        curr = luma_b[curr >> 10] + luma_gr[curr & 0x3ff];
-        *ptr++ = (prev + curr - ((prev ^ curr) & 0x0421)) >> 1;
-        prev = curr;
-
-        curr = get_pixel_normal(x);
-        curr = luma_b[curr >> 10] + luma_gr[curr & 0x3ff];
-        *ptr++ = (prev + curr - ((prev ^ curr) & 0x0421)) >> 1;
-        prev = curr;
-      }
+      curr = luma[get_pixel_normal(x)];
+      *ptr++ = (prev + curr - ((prev ^ curr) & 0x0421)) >> 1;
+      prev = curr;
     }
   }
 }

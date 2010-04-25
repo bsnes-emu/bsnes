@@ -99,10 +99,10 @@ void Filter::colortable_update() {
   double kr = 0.2126, kb = 0.0722, kg = (1.0 - kr - kb);  //luminance weights
 
   for(unsigned i = 0; i < 32768; i++) {
-    unsigned color  //bgr555->rgb888 conversion
-    = ((i & 0x001f) << 19) | ((i & 0x001c) << 14)
-    | ((i & 0x03e0) <<  6) | ((i & 0x0380) <<  1)
-    | ((i & 0x7c00) >>  7) | ((i & 0x7000) >> 12);
+    unsigned color  //rgb555->rgb888 conversion
+    = ((i & 0x7c00) << 9) + ((i & 0x7000) << 4)
+    + ((i & 0x03e0) << 6) + ((i & 0x0380) << 1)
+    + ((i & 0x001f) << 3) + ((i & 0x001c) >> 2);
 
     signed l;
     signed r = (color >> 16) & 0xff;

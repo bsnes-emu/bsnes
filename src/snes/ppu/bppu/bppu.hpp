@@ -36,8 +36,7 @@ public:
   alwaysinline bool overscan()  const { return display.overscan;  }
   alwaysinline bool hires()     const { return (regs.pseudo_hires || regs.bg_mode == 5 || regs.bg_mode == 6); }
 
-  uint16 light_table_b[16][32];
-  uint16 light_table_gr[16][32 * 32];
+  uint16 light_table[16][32768];
   uint16 mosaic_table[16][4096];
   void render_line();
 

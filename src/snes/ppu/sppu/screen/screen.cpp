@@ -209,7 +209,7 @@ sPPU::Screen::Screen(sPPU &self) : self(self) {
           unsigned ar = (luma * r + 0.5);
           unsigned ag = (luma * g + 0.5);
           unsigned ab = (luma * b + 0.5);
-          light_table[l][(b << 10) + (g << 5) + r] = (ab << 10) + (ag << 5) + ar;
+          light_table[l][(r << 10) + (g << 5) + b] = (ab << 10) + (ag << 5) + ar;
         }
       }
     }
