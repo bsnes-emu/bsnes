@@ -17,6 +17,7 @@
   #include <X11/Xutil.h>
   #include <X11/Xatom.h>
 #elif defined(PLATFORM_OSX)
+  #define __INTEL_COMPILER
   #include <Carbon/Carbon.h>
 #elif defined(PLATFORM_WIN)
   #define _WIN32_WINNT 0x0501
