@@ -5,7 +5,7 @@ DebuggerOptions::DebuggerOptions() {
   setObjectName("debugger-options");
   setWindowTitle("Debugger Options");
   setGeometryString(&config().geometry.debuggerOptions);
-  application.windowList.add(this);
+  application.windowList.append(this);
 
   layout = new QVBoxLayout;
   layout->setSizeConstraint(QLayout::SetFixedSize);

@@ -3,7 +3,7 @@
 
 #if defined(PLATFORM_X)
   #include "platform/platform_x.cpp"
-  const char Style::Monospace[64] = "Monospace";
+  const char Style::Monospace[64] = "Liberation Mono";
 #elif defined(PLATFORM_OSX)
   #include "platform/platform_osx.cpp"
   const char Style::Monospace[64] = "Courier New";

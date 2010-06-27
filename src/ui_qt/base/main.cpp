@@ -6,7 +6,7 @@ MainWindow::MainWindow() {
   setWindowTitle(string() << bsnesTitle << " v" << bsnesVersion);
   setCloseOnEscape(false);
   setGeometryString(&config().geometry.mainWindow);
-  application.windowList.add(this);
+  application.windowList.append(this);
 
   //menu bar
   #if defined(PLATFORM_OSX)
@@ -110,14 +110,14 @@ MainWindow::MainWindow() {
     settings_videoFilter->addSeparator();
 
     settings_videoFilter->addAction(settings_videoFilter_none = new RadioAction("&None", 0));
-    settings_videoFilter_list.add(settings_videoFilter_none);
+    settings_videoFilter_list.append(settings_videoFilter_none);
 
     lstring filterlist;
     filterlist.split(";", filter.dl_supported());
     for(unsigned i = 0; i < filterlist.size(); i++) {
       RadioAction *action = new RadioAction(filterlist[i], 0);
       settings_videoFilter->addAction(action);
-      settings_videoFilter_list.add(action);
+      settings_videoFilter_list.append(action);
     }
   }
 

@@ -5,7 +5,7 @@ HtmlViewerWindow::HtmlViewerWindow() {
   setObjectName("html-window");
   resize(560, 480);
   setGeometryString(&config().geometry.htmlViewerWindow);
-  application.windowList.add(this);
+  application.windowList.append(this);
 
   layout = new QVBoxLayout;
   layout->setMargin(Style::WindowMargin);

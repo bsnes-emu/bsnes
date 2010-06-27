@@ -5,7 +5,7 @@ AboutWindow::AboutWindow() {
   setObjectName("about-window");
   setWindowTitle("About bsnes ...");
   setGeometryString(&config().geometry.aboutWindow);
-  application.windowList.add(this);
+  application.windowList.append(this);
 
   layout = new QVBoxLayout;
   layout->setSizeConstraint(QLayout::SetFixedSize);

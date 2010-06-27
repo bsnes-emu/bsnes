@@ -92,7 +92,7 @@ void Cartridge::xml_parse_rom(xml_element &root) {
         if(attr.name == "offset") m.offset = strhex(attr.content);
         if(attr.name == "size") m.size = strhex(attr.content);
       }
-      mapping.add(m);
+      mapping.append(m);
     }
   }
 }
@@ -111,7 +111,7 @@ void Cartridge::xml_parse_ram(xml_element &root) {
         if(attr.name == "offset") m.offset = strhex(attr.content);
         if(attr.name == "size") m.size = strhex(attr.content);
       }
-      mapping.add(m);
+      mapping.append(m);
     }
   }
 }
@@ -130,7 +130,7 @@ void Cartridge::xml_parse_superfx(xml_element &root) {
             if(attr.name == "offset") m.offset = strhex(attr.content);
             if(attr.name == "size") m.size = strhex(attr.content);
           }
-          mapping.add(m);
+          mapping.append(m);
         }
       }
     } else if(node.name == "ram") {
@@ -147,7 +147,7 @@ void Cartridge::xml_parse_superfx(xml_element &root) {
             if(attr.name == "offset") m.offset = strhex(attr.content);
             if(attr.name == "size") m.size = strhex(attr.content);
           }
-          mapping.add(m);
+          mapping.append(m);
         }
       }
     } else if(node.name == "mmio") {
@@ -157,7 +157,7 @@ void Cartridge::xml_parse_superfx(xml_element &root) {
           foreach(attr, leaf.attribute) {
             if(attr.name == "address") xml_parse_address(m, attr.content);
           }
-          mapping.add(m);
+          mapping.append(m);
         }
       }
     }
@@ -178,7 +178,7 @@ void Cartridge::xml_parse_sa1(xml_element &root) {
             if(attr.name == "offset") m.offset = strhex(attr.content);
             if(attr.name == "size") m.size = strhex(attr.content);
           }
-          mapping.add(m);
+          mapping.append(m);
         }
       }
     } else if(node.name == "iram") {
@@ -191,7 +191,7 @@ void Cartridge::xml_parse_sa1(xml_element &root) {
             if(attr.name == "offset") m.offset = strhex(attr.content);
             if(attr.name == "size") m.size = strhex(attr.content);
           }
-          mapping.add(m);
+          mapping.append(m);
         }
       }
     } else if(node.name == "bwram") {
@@ -208,7 +208,7 @@ void Cartridge::xml_parse_sa1(xml_element &root) {
             if(attr.name == "offset") m.offset = strhex(attr.content);
             if(attr.name == "size") m.size = strhex(attr.content);
           }
-          mapping.add(m);
+          mapping.append(m);
         }
       }
     } else if(node.name == "mmio") {
@@ -218,7 +218,7 @@ void Cartridge::xml_parse_sa1(xml_element &root) {
           foreach(attr, leaf.attribute) {
             if(attr.name == "address") xml_parse_address(m, attr.content);
           }
-          mapping.add(m);
+          mapping.append(m);
         }
       }
     }
@@ -239,7 +239,7 @@ void Cartridge::xml_parse_bsx(xml_element &root) {
             if(attr.name == "offset") m.offset = strhex(attr.content);
             if(attr.name == "size") m.size = strhex(attr.content);
           }
-          mapping.add(m);
+          mapping.append(m);
         }
       }
     } else if(node.name == "mmio") {
@@ -249,7 +249,7 @@ void Cartridge::xml_parse_bsx(xml_element &root) {
           foreach(attr, leaf.attribute) {
             if(attr.name == "address") xml_parse_address(m, attr.content);
           }
-          mapping.add(m);
+          mapping.append(m);
         }
       }
     }
@@ -280,7 +280,7 @@ void Cartridge::xml_parse_sufamiturbo(xml_element &root) {
                 if(attr.name == "offset") m.offset = strhex(attr.content);
                 if(attr.name == "size") m.size = strhex(attr.content);
               }
-              if(m.memory->size() > 0) mapping.add(m);
+              if(m.memory->size() > 0) mapping.append(m);
             }
           }
         } else if(slot.name == "ram") {
@@ -293,7 +293,7 @@ void Cartridge::xml_parse_sufamiturbo(xml_element &root) {
                 if(attr.name == "offset") m.offset = strhex(attr.content);
                 if(attr.name == "size") m.size = strhex(attr.content);
               }
-              if(m.memory->size() > 0) mapping.add(m);
+              if(m.memory->size() > 0) mapping.append(m);
             }
           }
         }
@@ -320,7 +320,7 @@ void Cartridge::xml_parse_supergameboy(xml_element &root) {
           foreach(attr, leaf.attribute) {
             if(attr.name == "address") xml_parse_address(m, attr.content);
           }
-          mapping.add(m);
+          mapping.append(m);
         }
       }
     }
@@ -338,7 +338,7 @@ void Cartridge::xml_parse_srtc(xml_element &root) {
           foreach(attr, leaf.attribute) {
             if(attr.name == "address") xml_parse_address(m, attr.content);
           }
-          mapping.add(m);
+          mapping.append(m);
         }
       }
     }
@@ -356,7 +356,7 @@ void Cartridge::xml_parse_sdd1(xml_element &root) {
           foreach(attr, leaf.attribute) {
             if(attr.name == "address") xml_parse_address(m, attr.content);
           }
-          mapping.add(m);
+          mapping.append(m);
         }
       }
     } else if(node.name == "mmio") {
@@ -366,7 +366,7 @@ void Cartridge::xml_parse_sdd1(xml_element &root) {
           foreach(attr, leaf.attribute) {
             if(attr.name == "address") xml_parse_address(m, attr.content);
           }
-          mapping.add(m);
+          mapping.append(m);
         }
       }
     }
@@ -384,7 +384,7 @@ void Cartridge::xml_parse_spc7110(xml_element &root) {
           foreach(attr, leaf.attribute) {
             if(attr.name == "address") xml_parse_address(m, attr.content);
           }
-          mapping.add(m);
+          mapping.append(m);
         }
       }
     } else if(node.name == "mcu") {
@@ -395,7 +395,7 @@ void Cartridge::xml_parse_spc7110(xml_element &root) {
             if(attr.name == "address") xml_parse_address(m, attr.content);
             if(attr.name == "offset") spc7110_data_rom_offset = strhex(attr.content);
           }
-          mapping.add(m);
+          mapping.append(m);
         }
       }
     } else if(node.name == "mmio") {
@@ -405,7 +405,7 @@ void Cartridge::xml_parse_spc7110(xml_element &root) {
           foreach(attr, leaf.attribute) {
             if(attr.name == "address") xml_parse_address(m, attr.content);
           }
-          mapping.add(m);
+          mapping.append(m);
         }
       }
     } else if(node.name == "ram") {
@@ -422,7 +422,7 @@ void Cartridge::xml_parse_spc7110(xml_element &root) {
             if(attr.name == "offset") m.offset = strhex(attr.content);
             if(attr.name == "size") m.size = strhex(attr.content);
           }
-          mapping.add(m);
+          mapping.append(m);
         }
       }
     } else if(node.name == "rtc") {
@@ -434,7 +434,7 @@ void Cartridge::xml_parse_spc7110(xml_element &root) {
           foreach(attr, leaf.attribute) {
             if(attr.name == "address") xml_parse_address(m, attr.content);
           }
-          mapping.add(m);
+          mapping.append(m);
         }
       }
     }
@@ -452,7 +452,7 @@ void Cartridge::xml_parse_cx4(xml_element &root) {
           foreach(attr, leaf.attribute) {
             if(attr.name == "address") xml_parse_address(m, attr.content);
           }
-          mapping.add(m);
+          mapping.append(m);
         }
       }
     }
@@ -491,7 +491,7 @@ void Cartridge::xml_parse_necdsp(xml_element &root) {
           foreach(attr, leaf.attribute) {
             if(attr.name == "address") xml_parse_address(m, attr.content);
           }
-          mapping.add(m);
+          mapping.append(m);
         }
       }
     } else if(node.name == "sr" && sr[program]) {
@@ -501,7 +501,7 @@ void Cartridge::xml_parse_necdsp(xml_element &root) {
           foreach(attr, leaf.attribute) {
             if(attr.name == "address") xml_parse_address(m, attr.content);
           }
-          mapping.add(m);
+          mapping.append(m);
         }
       }
     }
@@ -519,7 +519,7 @@ void Cartridge::xml_parse_obc1(xml_element &root) {
           foreach(attr, leaf.attribute) {
             if(attr.name == "address") xml_parse_address(m, attr.content);
           }
-          mapping.add(m);
+          mapping.append(m);
         }
       }
     }
@@ -551,7 +551,7 @@ void Cartridge::xml_parse_setadsp(xml_element &root) {
           foreach(attr, leaf.attribute) {
             if(attr.name == "address") xml_parse_address(m, attr.content);
           }
-          mapping.add(m);
+          mapping.append(m);
         }
       }
     }
@@ -580,7 +580,7 @@ void Cartridge::xml_parse_setarisc(xml_element &root) {
           foreach(attr, leaf.attribute) {
             if(attr.name == "address") xml_parse_address(m, attr.content);
           }
-          mapping.add(m);
+          mapping.append(m);
         }
       }
     }
@@ -598,7 +598,7 @@ void Cartridge::xml_parse_msu1(xml_element &root) {
           foreach(attr, leaf.attribute) {
             if(attr.name == "address") xml_parse_address(m, attr.content);
           }
-          mapping.add(m);
+          mapping.append(m);
         }
       }
     }

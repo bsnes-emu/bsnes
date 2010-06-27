@@ -66,7 +66,7 @@ OamViewer::OamViewer() {
   setObjectName("oam-viewer");
   setWindowTitle("Sprite Viewer");
   setGeometryString(&config().geometry.oamViewer);
-  application.windowList.add(this);
+  application.windowList.append(this);
 
   layout = new QHBoxLayout;
   layout->setAlignment(Qt::AlignLeft);

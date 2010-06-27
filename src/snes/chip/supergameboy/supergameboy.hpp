@@ -1,6 +1,7 @@
 class SuperGameBoy : public MMIO, public Memory, public library {
 public:
   void enter();
+  void save();
 
   MMIO *mmio[3];
   uint8 mmio_read(unsigned addr);

@@ -12,7 +12,7 @@ ToolsWindow::ToolsWindow() {
   setWindowTitle("Tools");
   resize(600, 360);
   setGeometryString(&config().geometry.toolsWindow);
-  application.windowList.add(this);
+  application.windowList.append(this);
 
   layout = new QVBoxLayout;
   layout->setMargin(Style::WindowMargin);

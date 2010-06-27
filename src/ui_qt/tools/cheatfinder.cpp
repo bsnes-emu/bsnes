@@ -150,8 +150,8 @@ void CheatFinderWindow::searchMemory() {
   if(addrList.size() == 0) {
     //search for the first time: enqueue all possible values so they are all searched
     for(unsigned addr = 0; addr < SNES::memory::wram.size(); addr++) {
-      addrList.add(addr);
-      dataList.add(read(addr, size));
+      addrList.append(addr);
+      dataList.append(read(addr, size));
     }
   }
 
@@ -166,9 +166,9 @@ void CheatFinderWindow::searchMemory() {
     || (compareLessThan->isChecked()    && thisData <  data)
     || (compareGreaterThan->isChecked() && thisData >  data)
     ) {
-      newAddrList.add(thisAddr);
-      newDataList.add(thisData);
-      oldDataList.add(dataList[i]);
+      newAddrList.append(thisAddr);
+      newDataList.append(thisData);
+      oldDataList.append(dataList[i]);
     }
   }
 

@@ -5,7 +5,7 @@ MemoryEditor::MemoryEditor() {
   setObjectName("memory-editor");
   setWindowTitle("Memory Editor");
   setGeometryString(&config().geometry.memoryEditor);
-  application.windowList.add(this);
+  application.windowList.append(this);
 
   layout = new QHBoxLayout;
   layout->setMargin(Style::WindowMargin);

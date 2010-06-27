@@ -88,7 +88,7 @@ InputSettingsWindow::InputSettingsWindow() {
     for(unsigned i = 0; i < group.size(); i++) {
       QTreeWidgetItem *child = new QTreeWidgetItem(parent);
       child->setData(0, Qt::UserRole, QVariant(inputTable.size()));
-      inputTable.add(group[i]);
+      inputTable.append(group[i]);
     }
   }
 

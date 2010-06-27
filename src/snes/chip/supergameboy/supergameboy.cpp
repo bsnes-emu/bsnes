@@ -39,6 +39,10 @@ void SuperGameBoy::enter() {
   }
 }
 
+void SuperGameBoy::save() {
+  if(sgb_save) sgb_save();
+}
+
 uint8 SuperGameBoy::mmio_read(unsigned addr) {
   addr &= 0xffff;
 

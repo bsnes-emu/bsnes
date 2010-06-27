@@ -64,7 +64,7 @@ PropertiesViewer::PropertiesViewer() {
   setObjectName("properties-viewer");
   setWindowTitle("Properties");
   setGeometryString(&config().geometry.propertiesViewer);
-  application.windowList.add(this);
+  application.windowList.append(this);
 
   layout = new QVBoxLayout;
   layout->setMargin(Style::WindowMargin);

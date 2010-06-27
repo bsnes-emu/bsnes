@@ -5,7 +5,7 @@ VramViewer::VramViewer() {
   setObjectName("vram-viewer");
   setWindowTitle("Video RAM Viewer");
   setGeometryString(&config().geometry.vramViewer);
-  application.windowList.add(this);
+  application.windowList.append(this);
 
   layout = new QVBoxLayout;
   layout->setSizeConstraint(QLayout::SetFixedSize);

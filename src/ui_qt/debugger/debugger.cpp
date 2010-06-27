@@ -23,7 +23,7 @@ Debugger::Debugger() {
   setObjectName("debugger");
   setWindowTitle("Debugger");
   setGeometryString(&config().geometry.debugger);
-  application.windowList.add(this);
+  application.windowList.append(this);
 
   layout = new QHBoxLayout;
   layout->setMargin(Style::WindowMargin);

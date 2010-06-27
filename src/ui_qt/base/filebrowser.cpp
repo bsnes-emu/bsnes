@@ -45,7 +45,7 @@ FileBrowser::FileBrowser() {
   setObjectName("file-browser");
   resize(800, 480);
   setGeometryString(&config().geometry.fileBrowser);
-  application.windowList.add(this);
+  application.windowList.append(this);
 
   previewLayout = new QVBoxLayout;
   previewLayout->setAlignment(Qt::AlignTop);

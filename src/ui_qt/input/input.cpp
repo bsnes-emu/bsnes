@@ -126,7 +126,7 @@ HotkeyInput::HotkeyInput(const char *label, const char *configName) : DigitalInp
 
 void InputGroup::attach(MappedInput *input) {
   input->parent = this;
-  add(input);
+  append(input);
 }
 
 void InputGroup::bind() {
@@ -155,7 +155,7 @@ void InputGroup::flushCache() {
 }
 
 InputGroup::InputGroup(unsigned category_, const char *label_) : category(category_), label(label_) {
-  mapper().add(this);
+  mapper().append(this);
 }
 
 //

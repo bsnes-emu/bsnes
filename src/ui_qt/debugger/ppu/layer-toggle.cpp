@@ -5,7 +5,7 @@ LayerToggle::LayerToggle() {
   setObjectName("layer-toggle");
   setWindowTitle("S-PPU Layer Toggle");
   setGeometryString(&config().geometry.layerToggle);
-  application.windowList.add(this);
+  application.windowList.append(this);
 
   layout = new QGridLayout;
   layout->setSizeConstraint(QLayout::SetFixedSize);

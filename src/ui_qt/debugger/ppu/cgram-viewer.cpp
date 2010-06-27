@@ -79,7 +79,7 @@ CgramViewer::CgramViewer() {
   setObjectName("cgram-viewer");
   setWindowTitle("Palette Viewer");
   setGeometryString(&config().geometry.cgramViewer);
-  application.windowList.add(this);
+  application.windowList.append(this);
 
   currentSelection = 0;
 

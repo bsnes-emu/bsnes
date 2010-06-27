@@ -180,8 +180,8 @@ bool CheatCode::operator=(string s) {
       return false;
     }
 
-    addr.add(addr_);
-    data.add(data_);
+    addr.append(addr_);
+    data.append(data_);
   }
 
   return true;

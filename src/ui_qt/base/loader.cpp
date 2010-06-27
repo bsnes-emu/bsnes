@@ -5,7 +5,7 @@ LoaderWindow::LoaderWindow() {
   setObjectName("loader-window");
   setMinimumWidth(520);
   setGeometryString(&config().geometry.loaderWindow);
-  application.windowList.add(this);
+  application.windowList.append(this);
 
   layout = new QVBoxLayout;
   layout->setMargin(Style::WindowMargin);

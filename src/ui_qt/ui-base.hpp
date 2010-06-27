@@ -1,7 +1,5 @@
 #define UNICODE
 #define QT_NO_DEBUG
-#define QT_CORE_LIB
-#define QT_GUI_LIB
 #define QT_THREAD_SUPPORT
 
 #include <QApplication>

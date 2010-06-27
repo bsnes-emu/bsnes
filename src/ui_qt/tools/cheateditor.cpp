@@ -316,7 +316,7 @@ CheatImportWindow::CheatImportWindow() {
   setObjectName("cheat-import-window");
   setWindowTitle("Cheat Code Importer");
   setGeometryString(&config().geometry.cheatImportWindow);
-  application.windowList.add(this);
+  application.windowList.append(this);
 
   layout = new QVBoxLayout;
   layout->setMargin(Style::WindowMargin);
