@@ -15,3 +15,4 @@
 #include <snes/chip/st0011/st0011.hpp>
 #include <snes/chip/st0018/st0018.hpp>
 #include <snes/chip/msu1/msu1.hpp>
+#include <snes/chip/serial/serial.hpp>

@@ -18,6 +18,7 @@ void sCPU::add_clocks(unsigned clocks) {
     }
   }
   scheduler.addclocks_cpu(clocks);
+  scheduler.sync_cpucop();
 
   if(status.dram_refreshed == false && hcounter() >= status.dram_refresh_position) {
     status.dram_refreshed = true;

@@ -3,6 +3,10 @@
 Input input;
 
 uint8 Input::port_read(bool portnumber) {
+  if(cartridge.has_serial() && portnumber == 1) {
+    return serial.latch();
+  }
+
   port_t &p = port[portnumber];
 
   switch(p.device) {

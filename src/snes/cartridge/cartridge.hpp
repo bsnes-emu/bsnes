@@ -29,6 +29,7 @@ public:
   readonly<SuperGameBoyVersion> supergameboy_version;
   readonly<unsigned> supergameboy_ram_size;
   readonly<unsigned> supergameboy_rtc_size;
+  readonly<unsigned> serial_baud_rate;
 
   readonly<bool> has_bsx_slot;
   readonly<bool> has_superfx;
@@ -47,6 +48,7 @@ public:
   readonly<bool> has_st0011;
   readonly<bool> has_st0018;
   readonly<bool> has_msu1;
+  readonly<bool> has_serial;
 
   struct Mapping {
     Memory *memory;
@@ -95,6 +97,7 @@ private:
   void xml_parse_setadsp(xml_element&);
   void xml_parse_setarisc(xml_element&);
   void xml_parse_msu1(xml_element&);
+  void xml_parse_serial(xml_element&);
 
   void xml_parse_address(Mapping&, const string&);
   void xml_parse_mode(Mapping&, const string&);

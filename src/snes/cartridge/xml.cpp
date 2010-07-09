@@ -46,6 +46,7 @@ void Cartridge::parse_xml_cartridge(const char *data) {
         if(node.name == "setadsp") xml_parse_setadsp(node);
         if(node.name == "setarisc") xml_parse_setarisc(node);
         if(node.name == "msu1") xml_parse_msu1(node);
+        if(node.name == "serial") xml_parse_serial(node);
       }
     }
   }
@@ -601,6 +602,16 @@ void Cartridge::xml_parse_msu1(xml_element &root) {
           mapping.append(m);
         }
       }
+    }
+  }
+}
+
+void Cartridge::xml_parse_serial(xml_element &root) {
+  has_serial = true;
+
+  foreach(attr, root.attribute) {
+    if(attr.name == "baud") {
+      serial_baud_rate = strunsigned(attr.content);
     }
   }
 }

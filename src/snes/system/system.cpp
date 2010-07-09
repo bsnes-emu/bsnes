@@ -20,7 +20,10 @@ void System::coprocessor_enter() {
   if(cartridge.has_superfx()) superfx.enter();
   if(cartridge.has_sa1()) sa1.enter();
   if(cartridge.has_msu1()) msu1.enter();
+  if(cartridge.has_serial()) serial.enter();
 
+  //coprocessor thread always runs, even if one is not present;
+  //below code implements an empty coprocessor that consumes minimal resources
   while(true) {
     if(scheduler.sync == Scheduler::SynchronizeMode::All) {
       scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
@@ -94,6 +97,7 @@ void System::init(Interface *interface_) {
   st0011.init();
   st0018.init();
   msu1.init();
+  serial.init();
 
   video.init();
   audio.init();
@@ -143,6 +147,7 @@ void System::power() {
   if(cartridge.has_st0011())  st0011.enable();
   if(cartridge.has_st0018())  st0018.enable();
   if(cartridge.has_msu1())    msu1.enable();
+  if(cartridge.has_serial())  serial.enable();
 
   if(expansion() == ExpansionPortDevice::BSX) bsxbase.power();
   if(memory::bsxflash.data()) bsxflash.power();
@@ -164,6 +169,7 @@ void System::power() {
   if(cartridge.has_st0011())  st0011.power();
   if(cartridge.has_st0018())  st0018.power();
   if(cartridge.has_msu1())    msu1.power();
+  if(cartridge.has_serial())  serial.power();
 
   cpu.power();
   smp.power();
@@ -205,6 +211,7 @@ void System::reset() {
   if(cartridge.has_st0011())  st0011.reset();
   if(cartridge.has_st0018())  st0018.reset();
   if(cartridge.has_msu1())    msu1.reset();
+  if(cartridge.has_serial())  serial.reset();
 
   input.port_set_device(0, config.controller_port1);
   input.port_set_device(1, config.controller_port2);

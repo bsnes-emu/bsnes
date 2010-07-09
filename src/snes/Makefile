@@ -8,7 +8,8 @@ snes_objects += $(foreach n,$(call strlower,$(snes_core)),snes-$n)
 snes_objects += snes-supergameboy snes-superfx snes-sa1
 snes_objects += snes-bsx snes-srtc snes-sdd1 snes-spc7110
 snes_objects += snes-cx4 snes-dsp1 snes-dsp2 snes-dsp3 snes-dsp4
-snes_objects += snes-obc1 snes-st0010 snes-st0011 snes-st0018 snes-msu1
+snes_objects += snes-obc1 snes-st0010 snes-st0011 snes-st0018
+snes_objects += snes-msu1 snes-serial
 objects += $(snes_objects)
 
 # libco
@@ -66,6 +67,7 @@ obj/snes-st0010.o      : snes/chip/st0010/st0010.cpp snes/chip/st0010/*
 obj/snes-st0011.o      : snes/chip/st0011/st0011.cpp snes/chip/st0011/*
 obj/snes-st0018.o      : snes/chip/st0018/st0018.cpp snes/chip/st0018/*
 obj/snes-msu1.o        : snes/chip/msu1/msu1.cpp snes/chip/msu1/*
+obj/snes-serial.o      : snes/chip/serial/serial.cpp snes/chip/serial/*
 
 # library
 snes_objects := $(patsubst %,obj/%.o,$(snes_objects))
