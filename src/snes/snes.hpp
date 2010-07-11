@@ -1,4 +1,4 @@
-static const char bsnesVersion[] = "065.01";
+static const char bsnesVersion[] = "065.02";
 static const char bsnesTitle[] = "bsnes";
 static const unsigned bsnesSerializerVersion = 10;
 
@@ -16,7 +16,7 @@ static const unsigned bsnesSerializerVersion = 10;
 #define CHEAT_SYSTEM
 
 //enable debugging extensions (~15% speed hit)
-//#define DEBUGGER
+#define DEBUGGER
 
 #include <libco/libco.h>
 

@@ -1,4 +1,4 @@
-class Serial : property<Serial> {
+class Serial : property<Serial>, public library {
 public:
   void enter();
 
@@ -9,8 +9,11 @@ public:
 
   readonly<bool> latch;
 
-private:
   void add_clocks(unsigned clocks);
+  uint8 read();
+  void write(uint8 data);
+
+  function<void (void (*)(unsigned), uint8_t (*)(), void (*)(uint8_t))> snesserial_main;
 };
 
 extern Serial serial;
