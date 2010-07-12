@@ -18,6 +18,10 @@ public:
     Version2,
   };
 
+  //assigned externally to point to file-system datafiles (msu1 and serial)
+  //example: "/path/to/filename.sfc" would set this to "/path/to/filename"
+  readwrite<string> basename;
+
   readonly<bool> loaded;
   readonly<unsigned> crc32;
   readonly<string> sha256;

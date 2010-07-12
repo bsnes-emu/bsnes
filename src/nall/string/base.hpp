@@ -21,6 +21,11 @@ namespace nall {
 
     inline string& assign(const char*);
     inline string& append(const char*);
+    inline string& append(bool);
+    inline string& append(signed int value);
+    inline string& append(unsigned int value);
+    inline string& append(double value);
+
     template<typename T> inline string& operator= (T value);
     template<typename T> inline string& operator<<(T value);
 
@@ -38,8 +43,7 @@ namespace nall {
     inline string& operator=(const string&);
     inline string& operator=(string&&);
 
-    inline string();
-    inline string(const char*);
+    template<typename... Args> inline string(Args... args);
     inline string(const string&);
     inline string(string&&);
     inline ~string();
@@ -129,7 +133,6 @@ namespace nall {
   inline string strdouble(double value);
 
   //variadic.hpp
-  template<typename... Args> inline string sprint(Args... args);
   template<typename... Args> inline void print(Args... args);
 };
 

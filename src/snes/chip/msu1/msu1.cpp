@@ -49,7 +49,7 @@ void MSU1::enable() {
   audio.coprocessor_frequency(44100.0);
 
   if(datafile.open()) datafile.close();
-  datafile.open(string() << basename << ".msu", file::mode_read);
+  datafile.open(string() << cartridge.basename() << ".msu", file::mode_read);
 }
 
 void MSU1::power() {
@@ -125,7 +125,7 @@ void MSU1::mmio_write(unsigned addr, uint8 data) {
     if(audiofile.open()) audiofile.close();
     char track[16];
     sprintf(track, "-%u", mmio.audio_track);
-    if(audiofile.open(string() << basename << track << ".wav", file::mode_read)) {
+    if(audiofile.open(string() << cartridge.basename() << track << ".wav", file::mode_read)) {
       audiofile.seek(mmio.audio_offset = 58);  //skip WAV header
     }
     mmio.audio_busy   = false;
@@ -141,10 +141,6 @@ void MSU1::mmio_write(unsigned addr, uint8 data) {
     mmio.audio_repeat = data & 2;
     mmio.audio_play   = data & 1;
   }
-}
-
-void MSU1::base(const string& name) {
-  basename = name;
 }
 
 }

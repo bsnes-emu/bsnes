@@ -2,7 +2,10 @@
 State state;
 
 bool State::save(unsigned slot) {
-  if(!allowed()) return false;
+  if(!allowed()) {
+    utility.showMessage("Cannot save state.");
+    return false;
+  }
 
   SNES::system.runtosave();
   serializer state = SNES::system.serialize();
@@ -24,7 +27,10 @@ bool State::save(unsigned slot) {
 }
 
 bool State::load(unsigned slot) {
-  if(!allowed()) return false;
+  if(!allowed()) {
+    utility.showMessage("Cannot load state.");
+    return false;
+  }
 
   file fp;
   bool result = false;

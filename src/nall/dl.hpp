@@ -3,9 +3,9 @@
 
 //dynamic linking support
 
-#include <string.h>
 #include <nall/detect.hpp>
 #include <nall/stdint.hpp>
+#include <nall/string.hpp>
 #include <nall/utility.hpp>
 
 #if defined(PLATFORM_X) || defined(PLATFORM_OSX)
@@ -18,7 +18,7 @@
 namespace nall {
   struct library {
     bool opened() const { return handle; }
-    bool open(const char*);
+    bool open(const char*, const char* = "");
     void* sym(const char*);
     void close();
 
@@ -33,20 +33,10 @@ namespace nall {
   };
 
   #if defined(PLATFORM_X)
-  inline bool library::open(const char *name) {
+  inline bool library::open(const char *name, const char *path) {
     if(handle) close();
-    char *t = new char[strlen(name) + 256];
-    strcpy(t, "lib");
-    strcat(t, name);
-    strcat(t, ".so");
-    handle = (uintptr_t)dlopen(t, RTLD_LAZY);
-    if(!handle) {
-      strcpy(t, "/usr/local/lib/lib");
-      strcat(t, name);
-      strcat(t, ".so");
-      handle = (uintptr_t)dlopen(t, RTLD_LAZY);
-    }
-    delete[] t;
+    handle = (uintptr_t)dlopen(string(path, *path && !strend(path, "/") ? "/" : "", "lib", name, ".so"), RTLD_LAZY);
+    if(!handle) handle = (uintptr_t)dlopen(string("/usr/local/lib/lib", name, ".so"), RTLD_LAZY);
     return handle;
   }
 
@@ -61,20 +51,10 @@ namespace nall {
     handle = 0;
   }
   #elif defined(PLATFORM_OSX)
-  inline bool library::open(const char *name) {
+  inline bool library::open(const char *name, const char *path) {
     if(handle) close();
-    char *t = new char[strlen(name) + 256];
-    strcpy(t, "lib");
-    strcat(t, name);
-    strcat(t, ".dylib");
-    handle = (uintptr_t)dlopen(t, RTLD_LAZY);
-    if(!handle) {
-      strcpy(t, "/usr/local/lib/lib");
-      strcat(t, name);
-      strcat(t, ".dylib");
-      handle = (uintptr_t)dlopen(t, RTLD_LAZY);
-    }
-    delete[] t;
+    handle = (uintptr_t)dlopen(string(path, *path && !strend(path, "/") ? "/" : "", "lib", name, ".dylib"), RTLD_LAZY);
+    if(!handle) handle = (uintptr_t)dlopen(string("/usr/local/lib/lib", name, ".dylib"), RTLD_LAZY);
     return handle;
   }
 
@@ -89,13 +69,10 @@ namespace nall {
     handle = 0;
   }
   #elif defined(PLATFORM_WIN)
-  inline bool library::open(const char *name) {
+  inline bool library::open(const char *name, const char *path) {
     if(handle) close();
-    char *t = new char[strlen(name) + 8];
-    strcpy(t, name);
-    strcat(t, ".dll");
-    handle = (uintptr_t)LoadLibraryW(utf16_t(t));
-    delete[] t;
+    string filepath(path, *path && !strend(path, "/") && !strend(path, "\\") ? "\\" : "", name, ".dll");
+    handle = (uintptr_t)LoadLibraryW(utf16_t(filepath));
     return handle;
   }
 
@@ -110,7 +87,7 @@ namespace nall {
     handle = 0;
   }
   #else
-  inline bool library::open(const char*) { return false; }
+  inline bool library::open(const char*, const char*) { return false; }
   inline void* library::sym(const char*) { return 0; }
   inline void library::close() {}
   #endif

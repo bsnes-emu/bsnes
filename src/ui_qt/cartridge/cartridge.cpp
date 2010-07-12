@@ -49,6 +49,7 @@ bool Cartridge::saveStatesSupported() {
   if(SNES::cartridge.has_dsp4())   return false;
   if(SNES::cartridge.has_st0011()) return false;
   if(SNES::cartridge.has_st0018()) return false;
+  if(SNES::cartridge.has_serial()) return false;
 
   return true;
 }
@@ -56,7 +57,7 @@ bool Cartridge::saveStatesSupported() {
 bool Cartridge::loadNormal(const char *base) {
   unload();
   if(loadCartridge(baseName = base, cartridge.baseXml, SNES::memory::cartrom) == false) return false;
-  SNES::msu1.base(nall::basename(baseName));
+  SNES::cartridge.basename = nall::basename(baseName);
 
   SNES::cartridge.load(SNES::Cartridge::Mode::Normal,
     lstring() << cartridge.baseXml);
@@ -75,6 +76,8 @@ bool Cartridge::loadBsxSlotted(const char *base, const char *slot) {
   unload();
   if(loadCartridge(baseName = base, cartridge.baseXml, SNES::memory::cartrom) == false) return false;
   loadCartridge(slotAName = slot, cartridge.slotAXml, SNES::memory::bsxflash);
+  SNES::cartridge.basename = nall::basename(baseName);
+
   SNES::cartridge.load(SNES::Cartridge::Mode::BsxSlotted,
     lstring() << cartridge.baseXml << cartridge.slotAXml);
 
@@ -93,6 +96,8 @@ bool Cartridge::loadBsx(const char *base, const char *slot) {
   unload();
   if(loadCartridge(baseName = base, cartridge.baseXml, SNES::memory::cartrom) == false) return false;
   loadCartridge(slotAName = slot, cartridge.slotAXml, SNES::memory::bsxflash);
+  SNES::cartridge.basename = nall::basename(baseName);
+
   SNES::cartridge.load(SNES::Cartridge::Mode::Bsx,
     lstring() << cartridge.baseXml << cartridge.slotAXml);
 
@@ -113,6 +118,8 @@ bool Cartridge::loadSufamiTurbo(const char *base, const char *slotA, const char 
   if(loadCartridge(baseName = base, cartridge.baseXml, SNES::memory::cartrom) == false) return false;
   loadCartridge(slotAName = slotA, cartridge.slotAXml, SNES::memory::stArom);
   loadCartridge(slotBName = slotB, cartridge.slotBXml, SNES::memory::stBrom);
+  SNES::cartridge.basename = nall::basename(baseName);
+
   SNES::cartridge.load(SNES::Cartridge::Mode::SufamiTurbo,
     lstring() << cartridge.baseXml << cartridge.slotAXml << cartridge.slotBXml);
 
@@ -133,6 +140,8 @@ bool Cartridge::loadSuperGameBoy(const char *base, const char *slot) {
   unload();
   if(loadCartridge(baseName = base, cartridge.baseXml, SNES::memory::cartrom) == false) return false;
   loadCartridge(slotAName = slot, cartridge.slotAXml, SNES::memory::gbrom);
+  SNES::cartridge.basename = nall::basename(baseName);
+
   SNES::cartridge.load(SNES::Cartridge::Mode::SuperGameBoy,
     lstring() << cartridge.baseXml << cartridge.slotAXml);
 
@@ -207,7 +216,7 @@ bool Cartridge::loadCartridge(string &filename, string &xml, SNES::MappedRAM &me
   if(reader.load(filename, data, size) == false) return false;
 
   patchApplied = false;
-  string name = sprint(filepath(nall::basename(filename), config().path.patch), ".ups");
+  string name(filepath(nall::basename(filename), config().path.patch), ".ups");
 
   file fp;
   if(config().file.applyPatches && fp.open(name, file::mode_read)) {
@@ -239,7 +248,7 @@ bool Cartridge::loadCartridge(string &filename, string &xml, SNES::MappedRAM &me
     }
   }
 
-  name = sprint(nall::basename(filename), ".xml");
+  name = string(nall::basename(filename), ".xml");
   if(file::exists(name)) {
     //prefer manually created XML cartridge mapping
     xml.readfile(name);

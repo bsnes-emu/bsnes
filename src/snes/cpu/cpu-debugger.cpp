@@ -4,11 +4,11 @@ bool CPUDebugger::property(unsigned id, string &name, string &value) {
   unsigned n = 0;
 
   //internal
-  if(id == n++) { name = "S-CPU MDR"; value = sprint("0x", strhex<2>(mdr())); return true; }
+  if(id == n++) { name = "S-CPU MDR"; value = string("0x", strhex<2>(mdr())); return true; }
 
   //$2181-2183
   if(id == n++) { name = "$2181-$2183"; value = ""; return true; }
-  if(id == n++) { name = "WRAM Address"; value = sprint("0x", strhex<6>(wram_address())); return true; }
+  if(id == n++) { name = "WRAM Address"; value = string("0x", strhex<6>(wram_address())); return true; }
 
   //$4016
   if(id == n++) { name = "$4016"; value = ""; return true; }
@@ -23,39 +23,39 @@ bool CPUDebugger::property(unsigned id, string &name, string &value) {
 
   //$4201
   if(id == n++) { name = "$4201"; value = ""; return true; }
-  if(id == n++) { name = "PIO"; value = sprint("0x", strhex<2>(pio_bits())); return true; }
+  if(id == n++) { name = "PIO"; value = string("0x", strhex<2>(pio_bits())); return true; }
 
   //$4202
   if(id == n++) { name = "$4202"; value = ""; return true; }
-  if(id == n++) { name = "Multiplicand"; value = sprint("0x", strhex<2>(multiplicand())); return true; }
+  if(id == n++) { name = "Multiplicand"; value = string("0x", strhex<2>(multiplicand())); return true; }
 
   //$4203
   if(id == n++) { name = "$4203"; value = ""; return true; }
-  if(id == n++) { name = "Multiplier"; value = sprint("0x", strhex<2>(multiplier())); return true; }
+  if(id == n++) { name = "Multiplier"; value = string("0x", strhex<2>(multiplier())); return true; }
 
   //$4204-$4205
   if(id == n++) { name = "$4204-$4205"; value = ""; return true; }
-  if(id == n++) { name = "Dividend"; value = sprint("0x", strhex<4>(dividend())); return true; }
+  if(id == n++) { name = "Dividend"; value = string("0x", strhex<4>(dividend())); return true; }
 
   //$4206
   if(id == n++) { name = "$4206"; value = ""; return true; }
-  if(id == n++) { name = "Divisor"; value = sprint("0x", strhex<2>(divisor())); return true; }
+  if(id == n++) { name = "Divisor"; value = string("0x", strhex<2>(divisor())); return true; }
 
   //$4207-$4208
   if(id == n++) { name = "$4207-$4208"; value = ""; return true; }
-  if(id == n++) { name = "H-Time"; value = sprint("0x", strhex<4>(htime())); return true; }
+  if(id == n++) { name = "H-Time"; value = string("0x", strhex<4>(htime())); return true; }
 
   //$4209-$420a
   if(id == n++) { name = "$4209-$420a"; value = ""; return true; }
-  if(id == n++) { name = "V-Time"; value = sprint("0x", strhex<4>(vtime())); return true; }
+  if(id == n++) { name = "V-Time"; value = string("0x", strhex<4>(vtime())); return true; }
 
   //$420b
   if(id == n++) { name = "$420b"; value = ""; return true; }
-  if(id == n++) { name = "DMA Enable"; value = sprint("0x", strhex<2>(dma_enable())); return true; }
+  if(id == n++) { name = "DMA Enable"; value = string("0x", strhex<2>(dma_enable())); return true; }
 
   //$420c
   if(id == n++) { name = "$420c"; value = ""; return true; }
-  if(id == n++) { name = "HDMA Enable"; value = sprint("0x", strhex<2>(hdma_enable())); return true; }
+  if(id == n++) { name = "HDMA Enable"; value = string("0x", strhex<2>(hdma_enable())); return true; }
 
   //$420d
   if(id == n++) { name = "$420d"; value = ""; return true; }
@@ -72,25 +72,25 @@ bool CPUDebugger::property(unsigned id, string &name, string &value) {
     if(id == n++) { name = "Transfer Mode"; value = dma_transfer_mode(i); return true; }
 
     //$43x1
-    if(id == n++) { name = "B-Bus Address"; value = sprint("0x", strhex<4>(dma_bbus_address(i))); return true; }
+    if(id == n++) { name = "B-Bus Address"; value = string("0x", strhex<4>(dma_bbus_address(i))); return true; }
 
     //$43x2-$43x3
-    if(id == n++) { name = "A-Bus Address"; value = sprint("0x", strhex<4>(dma_abus_address(i))); return true; }
+    if(id == n++) { name = "A-Bus Address"; value = string("0x", strhex<4>(dma_abus_address(i))); return true; }
 
     //$43x4
-    if(id == n++) { name = "A-Bus Bank"; value = sprint("0x", strhex<2>(dma_abus_bank(i))); return true; }
+    if(id == n++) { name = "A-Bus Bank"; value = string("0x", strhex<2>(dma_abus_bank(i))); return true; }
 
     //$43x5-$43x6
-    if(id == n++) { name = "Transfer Size / Indirect Address"; value = sprint("0x", strhex<4>(dma_transfer_size(i))); return true; }
+    if(id == n++) { name = "Transfer Size / Indirect Address"; value = string("0x", strhex<4>(dma_transfer_size(i))); return true; }
 
     //$43x7
-    if(id == n++) { name = "Indirect Bank"; value = sprint("0x", strhex<2>(dma_indirect_bank(i))); return true; }
+    if(id == n++) { name = "Indirect Bank"; value = string("0x", strhex<2>(dma_indirect_bank(i))); return true; }
 
     //$43x8-$43x9
-    if(id == n++) { name = "Table Address"; value = sprint("0x", strhex<4>(dma_table_address(i))); return true; }
+    if(id == n++) { name = "Table Address"; value = string("0x", strhex<4>(dma_table_address(i))); return true; }
 
     //$43xa
-    if(id == n++) { name = "Line Counter"; value = sprint("0x", strhex<2>(dma_line_counter(i))); return true; }
+    if(id == n++) { name = "Line Counter"; value = string("0x", strhex<2>(dma_line_counter(i))); return true; }
   }
 
   return false;

@@ -102,8 +102,8 @@ void FileBrowser::onChangeCartridge(const string &path) {
   else filename = path;
 
   string info;
-  string image = sprint(nall::basename(filename), ".png");
-  string patch = sprint(filepath(nall::basename(filename), config().path.patch), ".ups");
+  string image(nall::basename(filename), ".png");
+  string patch(filepath(nall::basename(filename), config().path.patch), ".ups");
 
   if(file::exists(filename)) {
     if(striend(filename, ".sfc")) {

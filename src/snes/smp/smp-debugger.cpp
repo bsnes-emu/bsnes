@@ -17,7 +17,7 @@ bool SMPDebugger::property(unsigned id, string &name, string &value) {
 
   //$00f2
   if(id == n++) { name = "$00f2"; value = ""; return true; }
-  if(id == n++) { name = "DSP Address"; value = sprint("0x", strhex<2>(dsp_address())); return true; }
+  if(id == n++) { name = "DSP Address"; value = string("0x", strhex<2>(dsp_address())); return true; }
 
   return false;
 }

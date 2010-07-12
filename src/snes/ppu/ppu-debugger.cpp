@@ -4,8 +4,8 @@ bool PPUDebugger::property(unsigned id, string &name, string &value) {
   unsigned n = 0;
 
   //internal
-  if(id == n++) { name = "S-PPU1 MDR"; value = sprint("0x", strhex<2>(ppu1_mdr())); return true; }
-  if(id == n++) { name = "S-PPU2 MDR"; value = sprint("0x", strhex<2>(ppu2_mdr())); return true; }
+  if(id == n++) { name = "S-PPU1 MDR"; value = string("0x", strhex<2>(ppu1_mdr())); return true; }
+  if(id == n++) { name = "S-PPU2 MDR"; value = string("0x", strhex<2>(ppu2_mdr())); return true; }
 
   //$2100
   if(id == n++) { name = "$2100"; value = ""; return true; }
@@ -16,11 +16,11 @@ bool PPUDebugger::property(unsigned id, string &name, string &value) {
   if(id == n++) { name = "$2101"; value = ""; return true; }
   if(id == n++) { name = "OAM Base Size"; value = oam_base_size(); return true; }
   if(id == n++) { name = "OAM Name Select"; value = oam_name_select(); return true; }
-  if(id == n++) { name = "OAM Name Base Address"; value = sprint("0x", strhex<4>(oam_name_base_address())); return true; }
+  if(id == n++) { name = "OAM Name Base Address"; value = string("0x", strhex<4>(oam_name_base_address())); return true; }
 
   //$2102-$2103
   if(id == n++) { name = "$2102-$2103"; value = ""; return true; }
-  if(id == n++) { name = "OAM Base Address"; value = sprint("0x", strhex<4>(oam_base_address())); return true; }
+  if(id == n++) { name = "OAM Base Address"; value = string("0x", strhex<4>(oam_base_address())); return true; }
   if(id == n++) { name = "OAM Priority"; value = oam_priority(); return true; }
 
   //$2105
@@ -44,33 +44,33 @@ bool PPUDebugger::property(unsigned id, string &name, string &value) {
 
   //$2107
   if(id == n++) { name = "$2107"; value = ""; return true; }
-  if(id == n++) { name = "BG1 Screen Address"; value = sprint("0x", strhex<4>(bg1_screen_address())); return true; }
+  if(id == n++) { name = "BG1 Screen Address"; value = string("0x", strhex<4>(bg1_screen_address())); return true; }
   if(id == n++) { name = "BG1 Screen Size"; value = screen_size[bg1_screen_size()]; return true; }
 
   //$2108
   if(id == n++) { name = "$2108"; value = ""; return true; }
-  if(id == n++) { name = "BG2 Screen Address"; value = sprint("0x", strhex<4>(bg2_screen_address())); return true; }
+  if(id == n++) { name = "BG2 Screen Address"; value = string("0x", strhex<4>(bg2_screen_address())); return true; }
   if(id == n++) { name = "BG2 Screen Size"; value = screen_size[bg2_screen_size()]; return true; }
 
   //$2109
   if(id == n++) { name = "$2109"; value = ""; return true; }
-  if(id == n++) { name = "BG3 Screen Address"; value = sprint("0x", strhex<4>(bg3_screen_address())); return true; }
+  if(id == n++) { name = "BG3 Screen Address"; value = string("0x", strhex<4>(bg3_screen_address())); return true; }
   if(id == n++) { name = "BG3 Screen Size"; value = screen_size[bg3_screen_size()]; return true; }
 
   //$210a
   if(id == n++) { name = "$210a"; value = ""; return true; }
-  if(id == n++) { name = "BG4 Screen Address"; value = sprint("0x", strhex<4>(bg4_screen_address())); return true; }
+  if(id == n++) { name = "BG4 Screen Address"; value = string("0x", strhex<4>(bg4_screen_address())); return true; }
   if(id == n++) { name = "BG4 Screen Size"; value = screen_size[bg4_screen_size()]; return true; }
 
   //$210b
   if(id == n++) { name = "$210b"; value = ""; return true; }
-  if(id == n++) { name = "BG1 Name Base Address"; value = sprint("0x", strhex<4>(bg1_name_base_address())); return true; }
-  if(id == n++) { name = "BG2 Name Base Address"; value = sprint("0x", strhex<4>(bg2_name_base_address())); return true; }
+  if(id == n++) { name = "BG1 Name Base Address"; value = string("0x", strhex<4>(bg1_name_base_address())); return true; }
+  if(id == n++) { name = "BG2 Name Base Address"; value = string("0x", strhex<4>(bg2_name_base_address())); return true; }
 
   //$210c
   if(id == n++) { name = "$210c"; value = ""; return true; }
-  if(id == n++) { name = "BG3 Name Base Address"; value = sprint("0x", strhex<4>(bg3_name_base_address())); return true; }
-  if(id == n++) { name = "BG4 Name Base Address"; value = sprint("0x", strhex<4>(bg4_name_base_address())); return true; }
+  if(id == n++) { name = "BG3 Name Base Address"; value = string("0x", strhex<4>(bg3_name_base_address())); return true; }
+  if(id == n++) { name = "BG4 Name Base Address"; value = string("0x", strhex<4>(bg4_name_base_address())); return true; }
 
   //$210d
   if(id == n++) { name = "$210d"; value = ""; return true; }
@@ -114,7 +114,7 @@ bool PPUDebugger::property(unsigned id, string &name, string &value) {
 
   //$2116-$2117
   if(id == n++) { name = "$2116-$2117"; value = ""; return true; }
-  if(id == n++) { name = "VRAM Address"; value = sprint("0x", strhex<4>(vram_address())); return true; }
+  if(id == n++) { name = "VRAM Address"; value = string("0x", strhex<4>(vram_address())); return true; }
 
   //$211a
   if(id == n++) { name = "$211a"; value = ""; return true; }
@@ -148,7 +148,7 @@ bool PPUDebugger::property(unsigned id, string &name, string &value) {
 
   //$2121
   if(id == n++) { name = "$2121"; value = ""; return true; }
-  if(id == n++) { name = "CGRAM Address"; value = sprint("0x", strhex<4>(cgram_address())); return true; }
+  if(id == n++) { name = "CGRAM Address"; value = string("0x", strhex<4>(cgram_address())); return true; }
 
   //$2123
   if(id == n++) { name = "$2123"; value = ""; return true; }

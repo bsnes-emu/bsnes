@@ -29,6 +29,11 @@ string& string::append(const char *s) {
   return *this;
 }
 
+string& string::append(bool value) { append(value ? "true" : "false"); return *this; }
+string& string::append(signed int value) { append(strsigned(value)); return *this; }
+string& string::append(unsigned int value) { append(strunsigned(value)); return *this; }
+string& string::append(double value) { append(strdouble(value)); return *this; }
+
 string::operator const char*() const {
   return data;
 }
@@ -63,15 +68,20 @@ string& string::operator=(string &&source) {
   return *this;
 }
 
-string::string() {
+static void istring(string &output) {
+}
+
+template<typename T, typename... Args>
+static void istring(string &output, T value, Args... args) {
+  output.append(value);
+  istring(output, args...);
+}
+
+template<typename... Args> string::string(Args... args) {
   size = 64;
   data = (char*)malloc(size + 1);
   *data = 0;
-}
-
-string::string(const char *value) {
-  size = strlen(value);
-  data = strdup(value);
+  istring(*this, args...);
 }
 
 string::string(const string &value) {
@@ -86,7 +96,7 @@ string::string(string &&source) {
 }
 
 string::~string() {
-  free(data);
+  if(data) free(data);
 }
 
 bool string::readfile(const char *filename) {
