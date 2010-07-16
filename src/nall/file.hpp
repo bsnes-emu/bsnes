@@ -11,6 +11,7 @@
 #endif
 
 #include <nall/stdint.hpp>
+#include <nall/string.hpp>
 #include <nall/utf8.hpp>
 #include <nall/utility.hpp>
 
@@ -83,9 +84,10 @@ namespace nall {
       while(length--) write(*buffer++);
     }
 
-    void print(const char *string) {
-      if(!string) return;
-      while(*string) write(*string++);
+    template<typename... Args> void print(Args... args) {
+      string data(args...);
+      const char *p = data;
+      while(*p) write(*p++);
     }
 
     void flush() {

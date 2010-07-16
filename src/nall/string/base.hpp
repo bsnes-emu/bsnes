@@ -52,6 +52,16 @@ namespace nall {
     inline string& replace (const char*, const char*);
     inline string& qreplace(const char*, const char*);
 
+    inline string& lower();
+    inline string& upper();
+    inline string& transform(const char *before, const char *after);
+    inline string& ltrim(const char *key = " ");
+    inline string& rtrim(const char *key = " ");
+    inline string& trim (const char *key = " ");
+    inline string& ltrim_once(const char *key = " ");
+    inline string& rtrim_once(const char *key = " ");
+    inline string& trim_once (const char *key = " ");
+
   protected:
     char *data;
     unsigned size;
@@ -66,7 +76,7 @@ namespace nall {
   public:
     template<typename T> inline lstring& operator<<(T value);
 
-    inline int find(const char*);
+    inline optional<unsigned> find(const char*);
     inline void split (const char*, const char*, unsigned = 0);
     inline void qsplit(const char*, const char*, unsigned = 0);
 
@@ -116,15 +126,7 @@ namespace nall {
   inline unsigned strlcpy(string &dest, const char *src, unsigned length);
   inline unsigned strlcat(string &dest, const char *src, unsigned length);
   inline string substr(const char *src, unsigned start = 0, unsigned length = 0);
-  inline string& strlower(string &str);
-  inline string& strupper(string &str);
   inline string& strtr(string &dest, const char *before, const char *after);
-  inline string& ltrim(string &str, const char *key = " ");
-  inline string& rtrim(string &str, const char *key = " ");
-  inline string& trim (string &str, const char *key = " ");
-  inline string& ltrim_once(string &str, const char *key = " ");
-  inline string& rtrim_once(string &str, const char *key = " ");
-  inline string& trim_once (string &str, const char *key = " ");
   template<unsigned length = 0, char padding = '0'> inline string strhex(uintmax_t value);
   template<unsigned length = 0, char padding = '0'> inline string strsigned(intmax_t value);
   template<unsigned length = 0, char padding = '0'> inline string strunsigned(uintmax_t value);

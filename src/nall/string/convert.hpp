@@ -40,6 +40,10 @@ char* strtr(char *dest, const char *before, const char *after) {
   return dest;
 }
 
+string& string::lower() { nall::strlower(data); return *this; }
+string& string::upper() { nall::strupper(data); return *this; }
+string& string::transform(const char *before, const char *after) { nall::strtr(data, before, after); return *this; }
+
 uintmax_t strhex(const char *str) {
   if(!str) return 0;
   uintmax_t result = 0;

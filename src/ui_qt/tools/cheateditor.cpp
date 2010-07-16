@@ -102,10 +102,10 @@ void CheatEditorWindow::load(const char *filename) {
   for(unsigned i = 0; i < 128; i++) {
     lstring part;
     if(line.size() > i) part.qsplit(",", line[i]);
-    for(unsigned n = 0; n <= 2; n++) trim(part[n], " ");
-    trim(part[0], "\"");
-    trim(part[1], "\"");
-    trim(part[2], "\"");
+    for(unsigned n = 0; n <= 2; n++) {
+      part[n].trim(" ");
+      part[n].trim("\"");
+    }
     part[2].replace("\\q", "\"");
 
     auto item = new QTreeWidgetItem(list);

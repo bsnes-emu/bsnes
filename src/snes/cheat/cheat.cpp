@@ -73,7 +73,7 @@ Cheat::Cheat() {
 
 bool Cheat::decode(const char *s, unsigned &addr, uint8 &data, Type &type) {
   string t = s;
-  strlower(t);
+  t.lower();
 
   #define ischr(n) ((n >= '0' && n <= '9') || (n >= 'a' && n <= 'f'))
 
@@ -95,7 +95,7 @@ bool Cheat::decode(const char *s, unsigned &addr, uint8 &data, Type &type) {
     for(unsigned i = 0; i < 8; i++) if(!ischr(t[i])) return false;
 
     type = Type::GameGenie;
-    strtr(t, "df4709156bc8a23e", "0123456789abcdef");
+    t.transform("df4709156bc8a23e", "0123456789abcdef");
     unsigned r = strhex((const char*)t);
     //8421 8421 8421 8421 8421 8421
     //abcd efgh ijkl mnop qrst uvwx
@@ -142,7 +142,7 @@ bool Cheat::encode(string &s, unsigned addr, uint8 data, Type type) {
          | (!!(r & 0x020000) <<  3) | (!!(r & 0x010000) <<  2)
          | (!!(r & 0x000800) <<  1) | (!!(r & 0x000400) <<  0);
     s = string(strhex<2>(data), strhex<2>(addr >> 16), "-", strhex<4>(addr & 0xffff));
-    strtr(s, "0123456789abcdef", "df4709156bc8a23e");
+    s.transform("0123456789abcdef", "df4709156bc8a23e");
     return true;
   } else {
     return false;

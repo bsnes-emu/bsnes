@@ -49,6 +49,13 @@ char* trim_once(char *str, const char *key) {
   return ltrim_once(rtrim_once(str, key), key);
 }
 
+string& string::ltrim(const char *key) { nall::ltrim(data, key); return *this; }
+string& string::rtrim(const char *key) { nall::rtrim(data, key); return *this; }
+string& string::trim (const char *key) { nall::trim (data, key); return *this; }
+string& string::ltrim_once(const char *key) { nall::ltrim_once(data, key); return *this; }
+string& string::rtrim_once(const char *key) { nall::rtrim_once(data, key); return *this; }
+string& string::trim_once (const char *key) { nall::trim_once (data, key); return *this; }
+
 }
 
 #endif

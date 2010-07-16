@@ -122,11 +122,11 @@ bool string::readfile(const char *filename) {
   return true;
 }
 
-int lstring::find(const char *key) {
+optional<unsigned> lstring::find(const char *key) {
   for(unsigned i = 0; i < size(); i++) {
-    if(operator[](i) == key) return i;
+    if(operator[](i) == key) return { true, i };
   }
-  return -1;
+  return { false, 0 };
 }
 
 inline lstring::lstring() {

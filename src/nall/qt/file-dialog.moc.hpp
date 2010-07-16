@@ -212,8 +212,8 @@ inline void FileDialog::filterBoxChanged() {
     fileSystemModel->setNameFilters(QStringList() << "*");
   } else {
     filters = substr(filters, strpos(filters, "(")());
-    ltrim(filters, "(");
-    rtrim(filters, ")");
+    filters.ltrim("(");
+    filters.rtrim(")");
     lstring part;
     part.split(" ", filters);
     QStringList list;
@@ -279,7 +279,7 @@ inline void FileDialog::setNameFilters(const string &filters) {
 inline void FileDialog::acceptAction() {
   string path = fileSystemModel->rootPath().toUtf8().constData();
   path << "/" << notdir(fileNameEdit->text().toUtf8().constData());
-  rtrim(path, "/");
+  path.rtrim("/");
   if(QDir(path).exists()) {
     emit accepted(path);
     setPath(path);

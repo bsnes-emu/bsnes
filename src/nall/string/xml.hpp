@@ -122,7 +122,7 @@ inline bool xml_element::parse_head(string data) {
   while(qstrpos(data, "  ")) data.qreplace("  ", " ");
   data.qreplace(" =", "=");
   data.qreplace("= ", "=");
-  rtrim(data);
+  data.rtrim();
 
   lstring part;
   part.qsplit(" ", data);
@@ -138,8 +138,8 @@ inline bool xml_element::parse_head(string data) {
     xml_attribute attr;
     attr.name = side[0];
     attr.content = side[1];
-    if(strbegin(attr.content, "\"") && strend(attr.content, "\"")) trim_once(attr.content, "\"");
-    else if(strbegin(attr.content, "'") && strend(attr.content, "'")) trim_once(attr.content, "'");
+    if(strbegin(attr.content, "\"") && strend(attr.content, "\"")) attr.content.trim_once("\"");
+    else if(strbegin(attr.content, "'") && strend(attr.content, "'")) attr.content.trim_once("'");
     else throw "...";
     attribute.append(attr);
   }
@@ -185,10 +185,10 @@ inline bool xml_element::parse_body(const char *&data) {
 
     if(strend(tag, "?") == true) {
       self_terminating = true;
-      rtrim_once(tag, "?");
+      tag.rtrim_once("?");
     } else if(strend(tag, "/") == true) {
       self_terminating = true;
-      rtrim_once(tag, "/");
+      tag.rtrim_once("/");
     }
 
     parse_head(tag);
@@ -213,7 +213,7 @@ inline bool xml_element::parse_body(const char *&data) {
           tag.replace("\r", " ");
           tag.replace("\n", " ");
           while(strpos(tag, "  ")) tag.replace("  ", " ");
-          rtrim(tag);
+          tag.rtrim();
 
           if(name != tag) throw "...";
           return true;

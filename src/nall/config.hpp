@@ -49,7 +49,7 @@ namespace nall {
           case signed_t:   *(signed*)data = strsigned(s);     break;
           case unsigned_t: *(unsigned*)data = strunsigned(s); break;
           case double_t:   *(double*)data = strdouble(s);     break;
-          case string_t:   trim(s, "\""); *(string*)data = s; break;
+          case string_t:   s.trim("\""); *(string*)data = s;  break;
         }
       }
     };
@@ -83,8 +83,8 @@ namespace nall {
 
           lstring part;
           part.qsplit(" = ", line[i]);
-          trim(part[0]);
-          trim(part[1]);
+          part[0].trim();
+          part[1].trim();
 
           for(unsigned n = 0; n < list.size(); n++) {
             if(part[0] == list[n].name) {

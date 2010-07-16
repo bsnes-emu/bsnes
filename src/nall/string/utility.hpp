@@ -25,18 +25,6 @@ string substr(const char *src, unsigned start, unsigned length) {
   return dest;
 }
 
-/* very simplistic wrappers to return string& instead of char* type */
-
-string& strlower(string &str) { strlower(str()); return str; }
-string& strupper(string &str) { strupper(str()); return str; }
-string& strtr(string &dest, const char *before, const char *after) { strtr(dest(), before, after); return dest; }
-string& ltrim(string &str, const char *key) { ltrim(str(), key); return str; }
-string& rtrim(string &str, const char *key) { rtrim(str(), key); return str; }
-string& trim (string &str, const char *key) { trim (str(), key); return str; }
-string& ltrim_once(string &str, const char *key) { ltrim_once(str(), key); return str; }
-string& rtrim_once(string &str, const char *key) { rtrim_once(str(), key); return str; }
-string& trim_once (string &str, const char *key) { trim_once (str(), key); return str; }
-
 /* arithmetic <> string */
 
 template<unsigned length, char padding> string strhex(uintmax_t value) {
