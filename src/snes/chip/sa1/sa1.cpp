@@ -20,7 +20,7 @@ void SA1::enter() {
     if(mmio.sa1_rdyb || mmio.sa1_resb) {
       //SA-1 co-processor is asleep
       tick();
-      scheduler.sync_copcpu();
+      synchronize_cpu();
       continue;
     }
 
@@ -78,8 +78,8 @@ bool SA1::interrupt_pending() {
 }
 
 void SA1::tick() {
-  scheduler.addclocks_cop(2);
-  if(++status.tick_counter == 0) scheduler.sync_copcpu();
+  step(2);
+  if(++status.tick_counter == 0) synchronize_cpu();
 
   //adjust counters:
   //note that internally, status counters are in clocks;
@@ -122,17 +122,18 @@ void SA1::enable() {
 void SA1::power() {
   regs.a = regs.x = regs.y = 0x0000;
   regs.s = 0x01ff;
-
+  vbrbus.init();
+  sa1bus.init();
   reset();
 }
 
 void SA1::reset() {
+  create();
+
   memory::cc1bwram.dma = false;
   for(unsigned addr = 0; addr < memory::iram.size(); addr++) {
     memory::iram.write(addr, 0x00);
   }
-  vbrbus.init();
-  sa1bus.init();
 
   regs.pc.d = 0x000000;
   regs.x.h  = 0x00;

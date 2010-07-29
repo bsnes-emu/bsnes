@@ -59,8 +59,8 @@ void bPPU::enter() {
 
 void bPPU::add_clocks(unsigned clocks) {
   tick(clocks);
-  scheduler.addclocks_ppu(clocks);
-  scheduler.sync_ppucpu();
+  step(clocks);
+  synchronize_cpu();
 }
 
 void bPPU::scanline() {

@@ -29,6 +29,8 @@ void sSMP::op_step() {
 }
 
 void sSMP::power() {
+  SMP::power();
+
   //targets not initialized/changed upon reset
   t0.target = 0;
   t1.target = 0;
@@ -38,6 +40,8 @@ void sSMP::power() {
 }
 
 void sSMP::reset() {
+  SMP::reset();
+
   regs.pc = 0xffc0;
   regs.a  = 0x00;
   regs.x  = 0x00;

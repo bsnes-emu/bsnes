@@ -1,11 +1,16 @@
-class Serial : property<Serial>, public library {
+class Serial : public Processor, public library, public property<Serial> {
 public:
-  void enter();
+  //synchronization
+  alwaysinline void create();
+  alwaysinline void step(unsigned clocks);
+  alwaysinline void synchronize_cpu();
 
+  void enter();
   void init();
   void enable();
   void power();
   void reset();
+  void serialize(serializer&);
 
   readonly<bool> latch;
 

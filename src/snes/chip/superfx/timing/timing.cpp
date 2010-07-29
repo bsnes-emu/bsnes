@@ -16,8 +16,8 @@ void SuperFX::add_clocks(unsigned clocks) {
     }
   }
 
-  scheduler.addclocks_cop(clocks);
-  scheduler.sync_copcpu();
+  step(clocks);
+  synchronize_cpu();
 }
 
 void SuperFX::rombuffer_sync() {

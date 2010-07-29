@@ -21,7 +21,7 @@ void SuperFX::enter() {
 
     if(regs.sfr.g == 0) {
       add_clocks(6);
-      scheduler.sync_copcpu();
+      synchronize_cpu();
       continue;
     }
 
@@ -30,7 +30,7 @@ void SuperFX::enter() {
 
     if(++instruction_counter >= 128) {
       instruction_counter = 0;
-      scheduler.sync_copcpu();
+      synchronize_cpu();
     }
   }
 }
@@ -50,6 +50,7 @@ void SuperFX::power() {
 }
 
 void SuperFX::reset() {
+  create();
   superfxbus.init();
   instruction_counter = 0;
 

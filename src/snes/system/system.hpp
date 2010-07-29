@@ -30,7 +30,6 @@ public:
 
 private:
   Interface *interface;
-  void coprocessor_enter();
   void runthreadtosave();
 
   void serialize(serializer&);

@@ -28,8 +28,8 @@ bool System::unserialize(serializer &s) {
   if(signature != 0x31545342) return false;
   if(version != bsnesSerializerVersion) return false;
 //if(crc32 != cartridge.crc32()) return false;
-  scheduler.init();
 
+  reset();
   serialize_all(s);
   return true;
 }
@@ -41,14 +41,6 @@ bool System::unserialize(serializer &s) {
 void System::serialize(serializer &s) {
   s.integer((unsigned&)region);
   s.integer((unsigned&)expansion);
-
-  s.integer(scheduler.clock.cpu_freq);
-  s.integer(scheduler.clock.smp_freq);
-
-  s.integer(scheduler.clock.cpucop);
-  s.integer(scheduler.clock.cpuppu);
-  s.integer(scheduler.clock.cpusmp);
-  s.integer(scheduler.clock.smpdsp);
 }
 
 void System::serialize_all(serializer &s) {
@@ -61,18 +53,18 @@ void System::serialize_all(serializer &s) {
   dsp.serialize(s);
 
   if(cartridge.mode() == Cartridge::Mode::SuperGameBoy) supergameboy.serialize(s);
-
   if(cartridge.has_superfx()) superfx.serialize(s);
-  if(cartridge.has_sa1())     sa1.serialize(s);
-  if(cartridge.has_srtc())    srtc.serialize(s);
-  if(cartridge.has_sdd1())    sdd1.serialize(s);
+  if(cartridge.has_sa1()) sa1.serialize(s);
+  if(cartridge.has_srtc()) srtc.serialize(s);
+  if(cartridge.has_sdd1()) sdd1.serialize(s);
   if(cartridge.has_spc7110()) spc7110.serialize(s);
-  if(cartridge.has_cx4())     cx4.serialize(s);
-  if(cartridge.has_dsp1())    dsp1.serialize(s);
-  if(cartridge.has_dsp2())    dsp2.serialize(s);
-  if(cartridge.has_obc1())    obc1.serialize(s);
-  if(cartridge.has_st0010())  st0010.serialize(s);
-  if(cartridge.has_msu1())    msu1.serialize(s);
+  if(cartridge.has_cx4()) cx4.serialize(s);
+  if(cartridge.has_dsp1()) dsp1.serialize(s);
+  if(cartridge.has_dsp2()) dsp2.serialize(s);
+  if(cartridge.has_obc1()) obc1.serialize(s);
+  if(cartridge.has_st0010()) st0010.serialize(s);
+  if(cartridge.has_msu1()) msu1.serialize(s);
+  if(cartridge.has_serial()) serial.serialize(s);
 }
 
 //called once upon cartridge load event: perform dry-run state save.

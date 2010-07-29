@@ -1,4 +1,4 @@
-template<unsigned frequency>
+template<unsigned timer_frequency>
 class sSMPTimer {
 public:
   uint8 stage0_ticks;

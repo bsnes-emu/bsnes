@@ -571,7 +571,7 @@ uint8 r = 0x00;
 }
 
 uint8 bPPU::mmio_read(unsigned addr) {
-  scheduler.sync_cpuppu();
+  synchronize_cpu();
 
   switch(addr & 0xffff) {
     case 0x2104:
@@ -610,7 +610,7 @@ uint8 bPPU::mmio_read(unsigned addr) {
 }
 
 void bPPU::mmio_write(unsigned addr, uint8 data) {
-  scheduler.sync_cpuppu();
+  synchronize_cpu();
 
   switch(addr & 0xffff) {
     case 0x2100: return mmio_w2100(data);  //INIDISP

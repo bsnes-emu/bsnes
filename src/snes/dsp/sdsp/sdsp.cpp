@@ -25,12 +25,12 @@ namespace SNES {
                             scheduler.exit(Scheduler::ExitReason::SynchronizeEvent); \
                           }
   #define phase(n)
-  #define tick()          scheduler.addclocks_dsp(3 * 8); scheduler.sync_dspsmp()
+  #define tick()          step(3 * 8); synchronize_smp()
   #define phase_end()   }
 #else
   #define phase_start() switch(phase_index) {
   #define phase(n)        case n:
-  #define tick()          scheduler.addclocks_dsp(3 * 8); break
+  #define tick()          step(3 * 8); break
   #define phase_end()   } phase_index = (phase_index + 1) & 31;
 #endif
 
@@ -258,6 +258,8 @@ void sDSP::write(uint8 addr, uint8 data) {
 /* initialization */
 
 void sDSP::power() {
+  DSP::power();
+
   memset(&state.regs, 0, sizeof state.regs);
   state.echo_hist_pos = 0;
   state.every_other_sample = false;
@@ -309,6 +311,8 @@ void sDSP::power() {
 }
 
 void sDSP::reset() {
+  DSP::reset();
+
   REG(flg) = 0xe0;
 
   state.noise              = 0x4000;

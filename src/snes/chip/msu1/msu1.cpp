@@ -8,8 +8,6 @@ MSU1 msu1;
 #include "serialization.cpp"
 
 void MSU1::enter() {
-  scheduler.clock.cop_freq = 44100;
-
   while(true) {
     if(scheduler.sync == Scheduler::SynchronizeMode::All) {
       scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
@@ -36,8 +34,8 @@ void MSU1::enter() {
     right = sclamp<16>((double)right * (double)mmio.audio_volume / 255.0);
 
     audio.coprocessor_sample(left, right);
-    scheduler.addclocks_cop(1);
-    scheduler.sync_copcpu();
+    step(1);
+    synchronize_cpu();
   }
 }
 
@@ -57,6 +55,7 @@ void MSU1::power() {
 }
 
 void MSU1::reset() {
+  create();
   mmio.data_offset  = 0;
   mmio.audio_offset = 0;
   mmio.audio_track  = 0;

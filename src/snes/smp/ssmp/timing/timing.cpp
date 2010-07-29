@@ -1,16 +1,16 @@
 #ifdef SSMP_CPP
 
 void sSMP::add_clocks(unsigned clocks) {
-  scheduler.addclocks_smp(clocks);
+  step(clocks);
   #if !defined(DSP_STATE_MACHINE)
-  scheduler.sync_smpdsp();
+  synchronize_dsp();
   #else
-  while(scheduler.clock.smpdsp < 0) dsp.enter();
+  while(dsp.clock < 0) dsp.enter();
   #endif
 
   //forcefully sync S-SMP to S-CPU in case chips are not communicating
   //sync if S-SMP is more than 24 samples ahead of S-CPU
-  if(scheduler.clock.cpusmp > +(768 * 24 * (int64)24000000)) scheduler.sync_smpcpu();
+  if(clock > +(768 * 24 * (int64)24000000)) synchronize_cpu();
 }
 
 void sSMP::cycle_edge() {
@@ -28,12 +28,12 @@ void sSMP::cycle_edge() {
   }
 }
 
-template<unsigned frequency>
-void sSMP::sSMPTimer<frequency>::tick() {
+template<unsigned timer_frequency>
+void sSMP::sSMPTimer<timer_frequency>::tick() {
   //stage 0 increment
   stage0_ticks += smp.status.timer_step;
-  if(stage0_ticks < frequency) return;
-  stage0_ticks -= frequency;
+  if(stage0_ticks < timer_frequency) return;
+  stage0_ticks -= timer_frequency;
 
   //stage 1 increment
   stage1_ticks ^= 1;

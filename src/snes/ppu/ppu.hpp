@@ -52,8 +52,13 @@ private:
   } history;
 };
 
-class PPU : public PPUCounter, public MMIO {
+class PPU : public Processor, public PPUCounter, public MMIO {
 public:
+  //synchronization
+  alwaysinline void create();
+  alwaysinline void step(unsigned clocks);
+  alwaysinline void synchronize_cpu();
+
   virtual void enter() = 0;
 
   uint16 *output;

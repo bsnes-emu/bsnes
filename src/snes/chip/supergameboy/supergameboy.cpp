@@ -8,16 +8,14 @@ SuperGameBoy supergameboy;
 #include "serialization.cpp"
 
 void SuperGameBoy::enter() {
-  scheduler.clock.cop_freq = (cartridge.supergameboy_version() == Cartridge::SuperGameBoyVersion::Version1 ? 2147727 : 2097152);
-
   if(!sgb_run) while(true) {
     if(scheduler.sync == Scheduler::SynchronizeMode::All) {
       scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
     }
 
     audio.coprocessor_sample(0, 0);
-    scheduler.addclocks_cop(1);
-    scheduler.sync_copcpu();
+    step(1);
+    synchronize_cpu();
   }
 
   while(true) {
@@ -34,8 +32,8 @@ void SuperGameBoy::enter() {
       audio.coprocessor_sample(left / 3, right / 3);
     }
 
-    scheduler.addclocks_cop(samples);
-    scheduler.sync_copcpu();
+    step(samples);
+    synchronize_cpu();
   }
 }
 
@@ -113,6 +111,7 @@ void SuperGameBoy::enable() {
 }
 
 void SuperGameBoy::power() {
+  create();
   audio.coprocessor_enable(true);
   audio.coprocessor_frequency(cartridge.supergameboy_version() == Cartridge::SuperGameBoyVersion::Version1 ? 2147727.0 : 2097152.0);
 
@@ -126,6 +125,7 @@ void SuperGameBoy::power() {
 }
 
 void SuperGameBoy::reset() {
+  create();
   if(sgb_reset) sgb_reset();
 }
 

@@ -44,7 +44,7 @@ alwaysinline uint8 sSMP::op_busread(uint16 addr) {
       case 0xf5:    //CPUIO1
       case 0xf6:    //CPUIO2
       case 0xf7: {  //CPUIO3
-        scheduler.sync_smpcpu();
+        synchronize_cpu();
         r = cpu.port_read(addr & 3);
       } break;
 
@@ -110,7 +110,7 @@ alwaysinline void sSMP::op_buswrite(uint16 addr, uint8 data) {
         if(data & 0x30) {
           //one-time clearing of APU port read registers,
           //emulated by simulating CPU writes of 0x00
-          scheduler.sync_smpcpu();
+          synchronize_cpu();
           if(data & 0x20) {
             cpu.port_write(2, 0x00);
             cpu.port_write(3, 0x00);
@@ -156,7 +156,7 @@ alwaysinline void sSMP::op_buswrite(uint16 addr, uint8 data) {
       case 0xf5:    //CPUIO1
       case 0xf6:    //CPUIO2
       case 0xf7: {  //CPUIO3
-        scheduler.sync_smpcpu();
+        synchronize_cpu();
         port_write(addr & 3, data);
       } break;
 

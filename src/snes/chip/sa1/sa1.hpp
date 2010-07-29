@@ -1,7 +1,12 @@
 #include "bus/bus.hpp"
 
-class SA1 : public CPUcore, public MMIO {
+class SA1 : public Processor, public CPUcore, public MMIO {
 public:
+  //synchronization
+  alwaysinline void create();
+  alwaysinline void step(unsigned clocks);
+  alwaysinline void synchronize_cpu();
+
   #include "dma/dma.hpp"
   #include "memory/memory.hpp"
   #include "mmio/mmio.hpp"

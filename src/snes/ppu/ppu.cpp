@@ -24,11 +24,13 @@ void PPU::frame() {
 }
 
 void PPU::power() {
+  create();
   ppu1_version = config.ppu1.version;
   ppu2_version = config.ppu2.version;
 }
 
 void PPU::reset() {
+  create();
   PPUCounter::reset();
   memset(output, 0, 512 * 480 * sizeof(uint16));
 }

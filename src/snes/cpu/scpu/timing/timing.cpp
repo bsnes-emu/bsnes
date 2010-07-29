@@ -17,8 +17,9 @@ void sCPU::add_clocks(unsigned clocks) {
       poll_interrupts();
     }
   }
-  scheduler.addclocks_cpu(clocks);
-  scheduler.sync_cpucop();
+
+  step(clocks);
+  synchronize_coprocessor();
 
   if(status.dram_refreshed == false && hcounter() >= status.dram_refresh_position) {
     status.dram_refreshed = true;
@@ -32,9 +33,9 @@ void sCPU::scanline() {
   status.line_clocks = lineclocks();
 
   //forcefully sync S-CPU to other processors, in case chips are not communicating
-  scheduler.sync_cpuppu();
-  scheduler.sync_cpucop();
-  scheduler.sync_cpusmp();
+  synchronize_ppu();
+  synchronize_smp();
+  synchronize_coprocessor();
   system.scanline();
 
   if(vcounter() == 0) {

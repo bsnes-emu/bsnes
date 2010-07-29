@@ -5,21 +5,22 @@ namespace SNES {
 
 Serial serial;
 
+#include "serialization.cpp"
+
 static void snesserial_tick(unsigned clocks) { serial.add_clocks(clocks * 8); }
 static uint8 snesserial_read() { return serial.read(); }
 static void snesserial_write(uint8 data) { serial.write(data); }
 
 void Serial::enter() {
-  scheduler.clock.cop_freq = cartridge.serial_baud_rate() * 8;  //over-sample for edge detection
   latch = 0;
   add_clocks(256 * 8);  //warm-up
   if(snesserial_main) snesserial_main(snesserial_tick, snesserial_read, snesserial_write);
-  while(true) add_clocks(scheduler.clock.cop_freq);  //snesserial_main() fallback
+  while(true) add_clocks(frequency);  //snesserial_main() fallback
 }
 
 void Serial::add_clocks(unsigned clocks) {
-  scheduler.addclocks_cop(clocks);
-  scheduler.sync_copcpu();
+  step(clocks);
+  synchronize_cpu();
 }
 
 uint8 Serial::read() {
@@ -63,9 +64,11 @@ void Serial::enable() {
 }
 
 void Serial::power() {
+  reset();
 }
 
 void Serial::reset() {
+  create();
 }
 
 }

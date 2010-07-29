@@ -201,6 +201,8 @@ int n = addr & 15;
 }
 
 void aDSP::power() {
+  DSP::power();
+
   spcram = memory::apuram.data();
   memset(dspram, 0x00, 128);
 
@@ -234,6 +236,8 @@ void aDSP::power() {
 }
 
 void aDSP::reset() {
+  DSP::reset();
+
   status.KON   = 0x00;
   status.KOFF  = 0x00;
   status.FLG  |= 0xe0;
@@ -599,8 +603,8 @@ int32 fir_samplel, fir_sampler;
   }
 
   audio.sample(msamplel, msampler);
-  scheduler.addclocks_dsp(32 * 3 * 8);
-  scheduler.sync_dspsmp();
+  step(32 * 3 * 8);
+  synchronize_smp();
 }
 
 aDSP::aDSP()  {}

@@ -13,6 +13,7 @@ void PPUCounter::serialize(serializer &s) {
 }
 
 void PPU::serialize(serializer &s) {
+  Processor::serialize(s);
   PPUCounter::serialize(s);
 
   s.integer(status.frames_updated);

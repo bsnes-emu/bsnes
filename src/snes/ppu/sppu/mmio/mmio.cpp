@@ -1,7 +1,7 @@
 #ifdef SPPU_CPP
 
 void sPPU::latch_counters() {
-  scheduler.sync_cpuppu();
+  cpu.synchronize_ppu();
   regs.hcounter = hdot();
   regs.vcounter = vcounter();
   regs.counters_latched = true;
@@ -767,7 +767,7 @@ void sPPU::mmio_reset() {
 }
 
 uint8 sPPU::mmio_read(unsigned addr) {
-  scheduler.sync_cpuppu();
+  cpu.synchronize_ppu();
 
   switch(addr & 0xffff) {
     case 0x2104:
@@ -806,7 +806,7 @@ uint8 sPPU::mmio_read(unsigned addr) {
 }
 
 void sPPU::mmio_write(unsigned addr, uint8 data) {
-  scheduler.sync_cpuppu();
+  cpu.synchronize_ppu();
 
   switch(addr & 0xffff) {
     case 0x2100: return mmio_w2100(data);  //INIDISP

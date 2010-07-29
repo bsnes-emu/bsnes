@@ -7,6 +7,18 @@ namespace SNES {
   #include "smp-debugger.cpp"
 #endif
 
+void SMP::power() {
+  create();
+}
+
+void SMP::reset() {
+  create();
+}
+
+void SMP::serialize(serializer &s) {
+  Processor::serialize(s);
+}
+
 //this is the IPLROM for the S-SMP coprocessor.
 //the S-SMP does not allow writing to the IPLROM.
 //all writes are instead mapped to the extended

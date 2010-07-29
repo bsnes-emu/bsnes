@@ -7,4 +7,16 @@ namespace SNES {
   #include "dsp-debugger.cpp"
 #endif
 
+void DSP::power() {
+  create();
+}
+
+void DSP::reset() {
+  create();
+}
+
+void DSP::serialize(serializer &s) {
+  Processor::serialize(s);
+}
+
 }

@@ -1,6 +1,8 @@
 #ifdef MSU1_CPP
 
 void MSU1::serialize(serializer &s) {
+  Processor::serialize(s);
+
   s.integer(mmio.data_offset);
   s.integer(mmio.audio_offset);
   s.integer(mmio.audio_track);

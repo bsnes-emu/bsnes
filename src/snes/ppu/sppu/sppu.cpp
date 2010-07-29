@@ -55,8 +55,8 @@ void sPPU::add_clocks(unsigned clocks) {
   clocks >>= 1;
   while(clocks--) {
     tick(2);
-    scheduler.addclocks_ppu(2);
-    scheduler.sync_ppucpu();
+    step(2);
+    synchronize_cpu();
   }
 }
 

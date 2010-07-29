@@ -1,6 +1,7 @@
 #ifdef SA1_CPP
 
 void SA1::serialize(serializer &s) {
+  Processor::serialize(s);
   CPUcore::core_serialize(s);
 
   //sa1.hpp

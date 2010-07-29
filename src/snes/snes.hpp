@@ -1,6 +1,6 @@
-static const char bsnesVersion[] = "065.04";
+static const char bsnesVersion[] = "065.05";
 static const char bsnesTitle[] = "bsnes";
-static const unsigned bsnesSerializerVersion = 10;
+static const unsigned bsnesSerializerVersion = 11;
 
 #define CORE_SMEMORY
 #define CORE_SCPU
@@ -16,7 +16,7 @@ static const unsigned bsnesSerializerVersion = 10;
 #define CHEAT_SYSTEM
 
 //enable debugging extensions (~15% speed hit)
-#define DEBUGGER
+//#define DEBUGGER
 
 #include <libco/libco.h>
 
@@ -54,6 +54,17 @@ namespace SNES {
   typedef uint16_t uint16;
   typedef uint32_t uint32;
   typedef uint64_t uint64;
+
+  struct Processor {
+    cothread_t thread;
+    unsigned frequency;
+    int64 clock;
+    inline void serialize(serializer &s) {
+      s.integer(frequency);
+      s.integer(clock);
+    }
+    inline Processor() : thread(0) {}
+  };
 
   struct ChipDebugger {
     virtual bool property(unsigned id, string &name, string &value) = 0;
@@ -94,6 +105,16 @@ namespace SNES {
   #include <snes/chip/chip.hpp>
   #include <snes/cartridge/cartridge.hpp>
   #include <snes/cheat/cheat.hpp>
+
+  #include <snes/cpu/synchronization.hpp>
+  #include <snes/smp/synchronization.hpp>
+  #include <snes/dsp/synchronization.hpp>
+  #include <snes/ppu/synchronization.hpp>
+  #include <snes/chip/supergameboy/synchronization.hpp>
+  #include <snes/chip/superfx/synchronization.hpp>
+  #include <snes/chip/sa1/synchronization.hpp>
+  #include <snes/chip/msu1/synchronization.hpp>
+  #include <snes/chip/serial/synchronization.hpp>
 
   #include <snes/memory/memory-inline.hpp>
   #include <snes/ppu/ppu-inline.hpp>

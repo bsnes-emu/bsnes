@@ -1,5 +1,10 @@
-class SuperGameBoy : public MMIO, public Memory, public library {
+class SuperGameBoy : public Processor, public MMIO, public Memory, public library {
 public:
+  //synchronization
+  alwaysinline void create();
+  alwaysinline void step(unsigned clocks);
+  alwaysinline void synchronize_cpu();
+
   void enter();
   void save();
 

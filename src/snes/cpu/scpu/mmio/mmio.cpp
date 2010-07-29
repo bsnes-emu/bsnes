@@ -429,7 +429,7 @@ uint8 sCPU::mmio_read(unsigned addr) {
 
   //APU
   if((addr & 0xffc0) == 0x2140) {  //$2140-$217f
-    scheduler.sync_cpusmp();
+    synchronize_smp();
     return smp.port_read(addr & 3);
   }
 
@@ -486,7 +486,7 @@ void sCPU::mmio_write(unsigned addr, uint8 data) {
 
   //APU
   if((addr & 0xffc0) == 0x2140) {  //$2140-$217f
-    scheduler.sync_cpusmp();
+    synchronize_smp();
     port_write(addr & 3, data);
     return;
   }

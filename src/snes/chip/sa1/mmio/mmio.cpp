@@ -521,7 +521,7 @@ uint8 SA1::mmio_r230e() {
 }
 
 uint8 SA1::mmio_read(unsigned addr) {
-  (co_active() == scheduler.thread_cpu ? scheduler.sync_cpucop() : scheduler.sync_copcpu());
+  (co_active() == cpu.thread ? cpu.synchronize_coprocessor() : synchronize_cpu());
   addr &= 0xffff;
 
   switch(addr) {
@@ -546,7 +546,7 @@ uint8 SA1::mmio_read(unsigned addr) {
 }
 
 void SA1::mmio_write(unsigned addr, uint8 data) {
-  (co_active() == scheduler.thread_cpu ? scheduler.sync_cpucop() : scheduler.sync_copcpu());
+  (co_active() == cpu.thread ? cpu.synchronize_coprocessor() : synchronize_cpu());
   addr &= 0xffff;
 
   switch(addr) {
