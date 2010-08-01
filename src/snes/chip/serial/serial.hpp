@@ -1,10 +1,6 @@
-class Serial : public Processor, public library, public property<Serial> {
+class Serial : public Coprocessor, public MMIO, public library, public property<Serial> {
 public:
-  //synchronization
-  alwaysinline void create();
-  alwaysinline void step(unsigned clocks);
-  alwaysinline void synchronize_cpu();
-
+  static void Enter();
   void enter();
   void init();
   void enable();
@@ -18,6 +14,11 @@ public:
   uint8 read();
   void write(uint8 data);
 
+  uint8 mmio_read(unsigned addr);
+  void mmio_write(unsigned addr, uint8 data);
+
+private:
+  MMIO *r4016, *r4017;
   function<void (void (*)(unsigned), uint8_t (*)(), void (*)(uint8_t))> snesserial_main;
 };
 

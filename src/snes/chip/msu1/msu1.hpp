@@ -1,10 +1,6 @@
-class MSU1 : public Processor, public MMIO {
+class MSU1 : public Coprocessor, public MMIO {
 public:
-  //synchronization
-  alwaysinline void create();
-  alwaysinline void step(unsigned clocks);
-  alwaysinline void synchronize_cpu();
-
+  static void Enter();
   void enter();
   void init();
   void enable();

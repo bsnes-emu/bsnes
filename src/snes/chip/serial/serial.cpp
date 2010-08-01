@@ -11,6 +11,8 @@ static void snesserial_tick(unsigned clocks) { serial.add_clocks(clocks * 8); }
 static uint8 snesserial_read() { return serial.read(); }
 static void snesserial_write(uint8 data) { serial.write(data); }
 
+void Serial::Enter() { serial.enter(); }
+
 void Serial::enter() {
   latch = 0;
   add_clocks(256 * 8);  //warm-up
@@ -51,10 +53,31 @@ void Serial::write(uint8 data) {
   add_clocks(8);
 }
 
+uint8 Serial::mmio_read(unsigned addr) {
+  cpu.synchronize_coprocessor();
+  switch(addr & 1) { default:
+    case 0: return r4016->mmio_read(addr);
+    case 1: return r4017->mmio_read(addr);
+  }
+}
+
+void Serial::mmio_write(unsigned addr, uint8 data) {
+  cpu.synchronize_coprocessor();
+  switch(addr & 1) { default:
+    case 0: r4016->mmio_write(addr, data); break;
+    case 1: r4017->mmio_write(addr, data); break;
+  }
+}
+
 void Serial::init() {
 }
 
 void Serial::enable() {
+  r4016 = memory::mmio.mmio[0x4016 - 0x2000];
+  r4017 = memory::mmio.mmio[0x4017 - 0x2000];
+  memory::mmio.mmio[0x4016 - 0x2000] = this;
+  memory::mmio.mmio[0x4017 - 0x2000] = this;
+
   if(opened()) close();
   string name = notdir(cartridge.basename());
   string path = dir(cartridge.basename());
@@ -68,7 +91,7 @@ void Serial::power() {
 }
 
 void Serial::reset() {
-  create();
+  create(Serial::Enter, cartridge.serial_baud_rate() * 8);
 }
 
 }

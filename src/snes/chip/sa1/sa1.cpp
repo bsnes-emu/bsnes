@@ -11,6 +11,8 @@ SA1 sa1;
 #include "memory/memory.cpp"
 #include "mmio/mmio.cpp"
 
+void SA1::Enter() { sa1.enter(); }
+
 void SA1::enter() {
   while(true) {
     if(scheduler.sync == Scheduler::SynchronizeMode::All) {
@@ -128,7 +130,7 @@ void SA1::power() {
 }
 
 void SA1::reset() {
-  create();
+  create(SA1::Enter, system.cpu_frequency());
 
   memory::cc1bwram.dma = false;
   for(unsigned addr = 0; addr < memory::iram.size(); addr++) {

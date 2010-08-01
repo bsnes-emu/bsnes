@@ -5,11 +5,11 @@
 class SMP : public Processor {
 public:
   //synchronization
-  alwaysinline void create();
   alwaysinline void step(unsigned clocks);
   alwaysinline void synchronize_cpu();
   alwaysinline void synchronize_dsp();
 
+  static void Enter();
   virtual void enter() = 0;
 
   static const uint8 iplrom[64];

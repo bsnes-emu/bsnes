@@ -15,7 +15,7 @@ void sSMPDebugger::op_step() {
 
   if(step_event) step_event();
   sSMP::op_step();
-  scheduler.sync_smpcpu();
+  synchronize_cpu();
 }
 
 uint8 sSMPDebugger::op_read(uint16 addr) {

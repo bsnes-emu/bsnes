@@ -6,12 +6,12 @@ class CPU : public Processor, public PPUCounter, public MMIO {
 public:
   //synchronization
   array<Processor*> coprocessors;
-  alwaysinline void create();
   alwaysinline void step(unsigned clocks);
   alwaysinline void synchronize_smp();
   alwaysinline void synchronize_ppu();
   alwaysinline void synchronize_coprocessor();
 
+  static void Enter();
   virtual void enter() = 0;
 
   //CPU version number

@@ -13,6 +13,8 @@ namespace SNES {
 
 SuperFX superfx;
 
+void SuperFX::Enter() { superfx.enter(); }
+
 void SuperFX::enter() {
   while(true) {
     if(scheduler.sync == Scheduler::SynchronizeMode::All) {
@@ -50,7 +52,7 @@ void SuperFX::power() {
 }
 
 void SuperFX::reset() {
-  create();
+  create(SuperFX::Enter, system.cpu_frequency());
   superfxbus.init();
   instruction_counter = 0;
 

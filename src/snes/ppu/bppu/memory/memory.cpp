@@ -79,19 +79,6 @@ void bPPU::vram_mmio_write(uint16 addr, uint8 data) {
   }
 }
 
-//NOTE: OAM accesses during active display are rerouted to 0x0218 ... this can be considered
-//a hack. The actual address varies during rendering, as the S-PPU reads in data itself for
-//processing. Unfortunately, we have yet to determine how this works. The algorithm cannot be
-//reverse engineered using a scanline renderer such as this, and at this time, there does not
-//exist a more accurate SNES PPU emulator to work from. The only known game to actually access
-//OAM during active display is Uniracers. It expects accesses to map to offset 0x0218.
-//It was decided by public consensus to map writes to this address to match Uniracers, primarily
-//because it is the only game observed to do this, but also because mapping to this address does
-//not contradict any of our findings, because we have no findings whatsoever on this behavior.
-//Think of this what you will, I openly admit that this is a hack. But it is more accurate than
-//writing to the 'expected' address set by $2102,$2103, and will catch problems in software that
-//accidentally accesses OAM during active display by virtue of not returning the expected data.
-
 uint8 bPPU::oam_mmio_read(uint16 addr) {
   addr &= 0x03ff;
   if(addr & 0x0200) addr &= 0x021f;
@@ -101,7 +88,7 @@ uint8 bPPU::oam_mmio_read(uint16 addr) {
     data = memory::oam[addr];
   } else {
     if(cpu.vcounter() < (!overscan() ? 225 : 240)) {
-      data = memory::oam[0x0218];
+      data = memory::oam[regs.ioamaddr];
     } else {
       data = memory::oam[addr];
     }
@@ -120,18 +107,12 @@ void bPPU::oam_mmio_write(uint16 addr, uint8 data) {
     memory::oam[addr] = data;
   } else {
     if(cpu.vcounter() < (!overscan() ? 225 : 240)) {
-      memory::oam[0x0218] = data;
+      memory::oam[regs.ioamaddr] = data;
     } else {
       memory::oam[addr] = data;
     }
   }
 }
-
-//NOTE: CGRAM writes during hblank are valid. During active display, the actual address the
-//data is written to varies, as the S-PPU itself changes the address. Like OAM, we do not know
-//the exact algorithm used, but we have zero known examples of any commercial software that
-//attempts to do this. Therefore, the addresses are mapped to 0x01ff. There is nothing special
-//about this address, it is simply more accurate to invalidate the 'expected' address than not.
 
 uint8 bPPU::cgram_mmio_read(uint16 addr) {
   addr &= 0x01ff;
@@ -143,7 +124,7 @@ uint8 bPPU::cgram_mmio_read(uint16 addr) {
     uint16 v = cpu.vcounter();
     uint16 h = cpu.hcounter();
     if(v < (!overscan() ? 225 : 240) && h >= 128 && h < 1096) {
-      data = memory::cgram[0x01ff] & 0x7f;
+      data = memory::cgram[regs.icgramaddr] & 0x7f;
     } else {
       data = memory::cgram[addr];
     }
@@ -163,7 +144,7 @@ void bPPU::cgram_mmio_write(uint16 addr, uint8 data) {
     uint16 v = cpu.vcounter();
     uint16 h = cpu.hcounter();
     if(v < (!overscan() ? 225 : 240) && h >= 128 && h < 1096) {
-      memory::cgram[0x01ff] = data & 0x7f;
+      memory::cgram[regs.icgramaddr] = data & 0x7f;
     } else {
       memory::cgram[addr] = data;
     }

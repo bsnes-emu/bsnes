@@ -15,6 +15,7 @@ void Interface::video_refresh(const uint16_t *data, unsigned width, unsigned hei
     //PAL
     height = 239;
     if(interlace) height <<= 1;
+    if(!overscan) data -= 8 * 1024;
   }
 
   //scale display.crop* values from percentage-based (0-100%) to exact pixel sizes (width, height)

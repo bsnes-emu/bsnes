@@ -5,6 +5,10 @@ struct {
   //bg line counters
   uint16 bg_y[4];
 
+  //internal state
+  uint16 ioamaddr;
+  uint16 icgramaddr;
+
   //$2100
   bool   display_disabled;
   uint8  display_brightness;

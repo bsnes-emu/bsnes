@@ -55,12 +55,13 @@ private:
 class PPU : public Processor, public PPUCounter, public MMIO {
 public:
   //synchronization
-  alwaysinline void create();
   alwaysinline void step(unsigned clocks);
   alwaysinline void synchronize_cpu();
 
+  static void Enter();
   virtual void enter() = 0;
 
+  uint16 *surface;
   uint16 *output;
 
   struct {

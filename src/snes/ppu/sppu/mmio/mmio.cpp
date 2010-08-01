@@ -32,14 +32,14 @@ void sPPU::vram_write(unsigned addr, uint8 data) {
 }
 
 uint8 sPPU::oam_read(unsigned addr) {
+  if(!regs.display_disabled && vcounter() < (!regs.overscan ? 225 : 240)) addr = regs.ioamaddr;
   if(addr & 0x0200) addr &= 0x021f;
-  if(!regs.display_disabled && vcounter() < (!regs.overscan ? 225 : 240)) addr = 0x0218;
   return memory::oam[addr];
 }
 
 void sPPU::oam_write(unsigned addr, uint8 data) {
+  if(!regs.display_disabled && vcounter() < (!regs.overscan ? 225 : 240)) addr = regs.ioamaddr;
   if(addr & 0x0200) addr &= 0x021f;
-  if(!regs.display_disabled && vcounter() < (!regs.overscan ? 225 : 240)) addr = 0x0218;
   memory::oam[addr] = data;
 }
 
@@ -697,6 +697,9 @@ void sPPU::mmio_reset() {
   regs.counters_latched = false;
   regs.latch_hcounter = 0;
   regs.latch_vcounter = 0;
+
+  regs.ioamaddr = 0;
+  regs.icgramaddr = 0;
 
   //$2100  INIDISP
   regs.display_disabled = true;

@@ -16,7 +16,7 @@ void sCPUDebugger::op_step() {
 
   if(step_event) step_event();
   sCPU::op_step();
-  scheduler.sync_cpusmp();
+  synchronize_smp();
 }
 
 uint8 sCPUDebugger::op_read(uint32 addr) {

@@ -5,9 +5,10 @@
 class DSP : public Processor {
 public:
   //synchronization
-  alwaysinline void create();
   alwaysinline void step(unsigned clocks);
   alwaysinline void synchronize_smp();
+
+  static void Enter();
   virtual void enter() = 0;
 
   virtual uint8 read(uint8 addr) = 0;

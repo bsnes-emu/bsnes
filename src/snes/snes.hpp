@@ -1,4 +1,4 @@
-static const char bsnesVersion[] = "065.05";
+static const char bsnesVersion[] = "066";
 static const char bsnesTitle[] = "bsnes";
 static const unsigned bsnesSerializerVersion = 11;
 
@@ -59,10 +59,19 @@ namespace SNES {
     cothread_t thread;
     unsigned frequency;
     int64 clock;
+
+    inline void create(void (*entrypoint_)(), unsigned frequency_) {
+      if(thread) co_delete(thread);
+      thread = co_create(65536 * sizeof(void*), entrypoint_);
+      frequency = frequency_;
+      clock = 0;
+    }
+
     inline void serialize(serializer &s) {
       s.integer(frequency);
       s.integer(clock);
     }
+
     inline Processor() : thread(0) {}
   };
 
@@ -110,11 +119,6 @@ namespace SNES {
   #include <snes/smp/synchronization.hpp>
   #include <snes/dsp/synchronization.hpp>
   #include <snes/ppu/synchronization.hpp>
-  #include <snes/chip/supergameboy/synchronization.hpp>
-  #include <snes/chip/superfx/synchronization.hpp>
-  #include <snes/chip/sa1/synchronization.hpp>
-  #include <snes/chip/msu1/synchronization.hpp>
-  #include <snes/chip/serial/synchronization.hpp>
 
   #include <snes/memory/memory-inline.hpp>
   #include <snes/ppu/ppu-inline.hpp>

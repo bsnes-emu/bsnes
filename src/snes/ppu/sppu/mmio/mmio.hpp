@@ -11,6 +11,9 @@ struct {
   bool latch_hcounter;
   bool latch_vcounter;
 
+  uint16 ioamaddr;
+  uint16 icgramaddr;
+
   //$2100  INIDISP
   bool display_disabled;
   unsigned display_brightness;

@@ -161,6 +161,10 @@ void bPPU::render_line_oam_rto() {
     oam_itemlist[regs.oam_itemcount - 1] = (s + regs.oam_firstsprite) & 127;
   }
 
+  if(regs.oam_itemcount > 0 && oam_itemlist[regs.oam_itemcount - 1] != 0xff) {
+    regs.ioamaddr = 0x0200 + (oam_itemlist[regs.oam_itemcount - 1] >> 2);
+  }
+
   for(int s = 31; s >= 0; s--) {
     if(oam_itemlist[s] == 0xff) continue;
     active_sprite = oam_itemlist[s];

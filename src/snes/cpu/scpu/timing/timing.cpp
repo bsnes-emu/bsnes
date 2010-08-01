@@ -19,7 +19,6 @@ void sCPU::add_clocks(unsigned clocks) {
   }
 
   step(clocks);
-  synchronize_coprocessor();
 
   if(status.dram_refreshed == false && hcounter() >= status.dram_refresh_position) {
     status.dram_refreshed = true;

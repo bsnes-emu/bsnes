@@ -1,13 +1,3 @@
-inline void cpu_enter() { cpu.enter(); }
-
-void CPU::create() {
-  if(thread) co_delete(thread);
-  thread = co_create(65536 * sizeof(void*), cpu_enter);
-  frequency = system.region() == System::Region::NTSC ? config.cpu.ntsc_clock_rate : config.cpu.pal_clock_rate;
-  clock = 0;
-  coprocessors.reset();
-}
-
 void CPU::step(unsigned clocks) {
   smp.clock -= clocks * (uint64)smp.frequency;
   ppu.clock -= clocks;

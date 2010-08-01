@@ -115,6 +115,9 @@ void bPPU::power() {
 
   region = (system.region() == System::Region::NTSC ? 0 : 1);  //0 = NTSC, 1 = PAL
 
+  regs.ioamaddr   = 0x0000;
+  regs.icgramaddr = 0x01ff;
+
   //$2100
   regs.display_disabled   = true;
   regs.display_brightness = 15;

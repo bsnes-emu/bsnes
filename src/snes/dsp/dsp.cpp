@@ -7,12 +7,14 @@ namespace SNES {
   #include "dsp-debugger.cpp"
 #endif
 
+void DSP::Enter() { dsp.enter(); }
+
 void DSP::power() {
-  create();
+  create(DSP::Enter, system.apu_frequency());
 }
 
 void DSP::reset() {
-  create();
+  create(DSP::Enter, system.apu_frequency());
 }
 
 void DSP::serialize(serializer &s) {

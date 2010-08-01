@@ -79,6 +79,10 @@ void sPPU::Sprite::scanline() {
     t.item_list[t.item_count - 1] = (i + regs.first_sprite) & 127;
   }
 
+  if(t.item_count > 0 && t.item_list[t.item_count - 1] != 0xff) {
+    ppu.regs.ioamaddr = 0x0200 + (t.item_list[t.item_count - 1] >> 2);
+  }
+
   for(signed i = 31; i >= 0; i--) {
     if(t.item_list[i] == 0xff) continue;
     t.active_sprite = t.item_list[i];

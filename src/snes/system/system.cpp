@@ -98,6 +98,9 @@ void System::power() {
     region = (cartridge.region() == Cartridge::Region::NTSC ? Region::NTSC : Region::PAL);
   }
 
+  cpu_frequency = region() == Region::NTSC ? config.cpu.ntsc_frequency : config.cpu.pal_frequency;
+  apu_frequency = region() == Region::NTSC ? config.smp.ntsc_frequency : config.smp.pal_frequency;
+
   bus.power();
   for(unsigned i = 0x2100; i <= 0x213f; i++) memory::mmio.map(i, ppu);
   for(unsigned i = 0x2140; i <= 0x217f; i++) memory::mmio.map(i, cpu);

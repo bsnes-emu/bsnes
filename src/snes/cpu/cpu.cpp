@@ -7,13 +7,19 @@ namespace SNES {
   #include "cpu-debugger.cpp"
 #endif
 
+void CPU::Enter() { cpu.enter(); }
+
 void CPU::power() {
-  create();
+  create(CPU::Enter, system.cpu_frequency());
+  coprocessors.reset();
+
   cpu_version = config.cpu.version;
 }
 
 void CPU::reset() {
-  create();
+  create(CPU::Enter, system.cpu_frequency());
+  coprocessors.reset();
+
   PPUCounter::reset();
 }
 

@@ -6,14 +6,14 @@ struct Configuration {
 
   struct CPU {
     unsigned version;
-    unsigned ntsc_clock_rate;
-    unsigned pal_clock_rate;
+    unsigned ntsc_frequency;
+    unsigned pal_frequency;
     unsigned wram_init_value;
   } cpu;
 
   struct SMP {
-    unsigned ntsc_clock_rate;
-    unsigned pal_clock_rate;
+    unsigned ntsc_frequency;
+    unsigned pal_frequency;
   } smp;
 
   struct PPU1 {

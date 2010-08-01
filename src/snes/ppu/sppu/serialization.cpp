@@ -18,6 +18,9 @@ void sPPU::serialize(serializer &s) {
   s.integer(regs.latch_hcounter);
   s.integer(regs.latch_vcounter);
 
+  s.integer(regs.ioamaddr);
+  s.integer(regs.icgramaddr);
+
   s.integer(regs.display_disabled);
   s.integer(regs.display_brightness);
 

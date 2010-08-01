@@ -17,6 +17,9 @@ void bPPU::serialize(serializer &s) {
   s.integer(regs.ppu2_mdr);
   for(unsigned n = 0; n < 4; n++) s.integer(regs.bg_y[n]);
 
+  s.integer(regs.ioamaddr);
+  s.integer(regs.icgramaddr);
+
   s.integer(regs.display_disabled);
   s.integer(regs.display_brightness);
 

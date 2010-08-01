@@ -14,12 +14,7 @@ void Audio::coprocessor_enable(bool state) {
 
 void Audio::coprocessor_frequency(double input_frequency) {
   double output_frequency;
-  if(system.region() == System::Region::NTSC) {
-    output_frequency = config.smp.ntsc_clock_rate / 768.0;
-  } else /* (system.region() == System::PAL) */ {
-    output_frequency = config.smp.pal_clock_rate  / 768.0;
-  }
-
+  output_frequency = system.apu_frequency() / 768.0;
   r_step = input_frequency / output_frequency;
   r_frac = 0;
 }

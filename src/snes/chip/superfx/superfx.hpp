@@ -1,18 +1,14 @@
 #include "bus/bus.hpp"
 
-class SuperFX : public Processor, public MMIO {
+class SuperFX : public Coprocessor, public MMIO {
 public:
-  //synchronization
-  alwaysinline void create();
-  alwaysinline void step(unsigned clocks);
-  alwaysinline void synchronize_cpu();
-
   #include "core/core.hpp"
   #include "memory/memory.hpp"
   #include "mmio/mmio.hpp"
   #include "timing/timing.hpp"
   #include "disasm/disasm.hpp"
 
+  static void Enter();
   void enter();
   void init();
   void enable();

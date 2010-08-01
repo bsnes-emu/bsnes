@@ -9,6 +9,8 @@ namespace SNES {
 
 #include "serialization.cpp"
 
+void PPU::Enter() { ppu.enter(); }
+
 void PPU::frame() {
   static signed framecount = 0;
   static time_t prev, curr;
@@ -24,26 +26,29 @@ void PPU::frame() {
 }
 
 void PPU::power() {
-  create();
+  create(PPU::Enter, system.cpu_frequency());
+
   ppu1_version = config.ppu1.version;
   ppu2_version = config.ppu2.version;
 }
 
 void PPU::reset() {
-  create();
+  create(PPU::Enter, system.cpu_frequency());
+
   PPUCounter::reset();
-  memset(output, 0, 512 * 480 * sizeof(uint16));
+  memset(surface, 0, 512 * 512 * sizeof(uint16));
 }
 
 PPU::PPU() {
-  output = new uint16[512 * 480];
+  surface = new uint16[512 * 512];
+  output = surface + 16 * 512;
 
   status.frames_updated = false;
   status.frames_executed = 0;
 }
 
 PPU::~PPU() {
-  delete[] output;
+  delete[] surface;
 }
 
 }

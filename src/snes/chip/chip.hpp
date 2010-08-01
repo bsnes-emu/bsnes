@@ -1,3 +1,8 @@
+struct Coprocessor : Processor {
+  alwaysinline void step(unsigned clocks);
+  alwaysinline void synchronize_cpu();
+};
+
 #include <snes/chip/supergameboy/supergameboy.hpp>
 #include <snes/chip/superfx/superfx.hpp>
 #include <snes/chip/sa1/sa1.hpp>
@@ -16,3 +21,11 @@
 #include <snes/chip/st0018/st0018.hpp>
 #include <snes/chip/msu1/msu1.hpp>
 #include <snes/chip/serial/serial.hpp>
+
+void Coprocessor::step(unsigned clocks) {
+  clock += clocks * (uint64)cpu.frequency;
+}
+
+void Coprocessor::synchronize_cpu() {
+  if(clock >= 0 && scheduler.sync != Scheduler::SynchronizeMode::All) co_switch(cpu.thread);
+}

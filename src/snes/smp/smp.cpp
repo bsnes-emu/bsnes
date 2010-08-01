@@ -7,12 +7,14 @@ namespace SNES {
   #include "smp-debugger.cpp"
 #endif
 
+void SMP::Enter() { smp.enter(); }
+
 void SMP::power() {
-  create();
+  create(SMP::Enter, system.apu_frequency());
 }
 
 void SMP::reset() {
-  create();
+  create(SMP::Enter, system.apu_frequency());
 }
 
 void SMP::serialize(serializer &s) {

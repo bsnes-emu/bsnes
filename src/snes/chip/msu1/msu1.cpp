@@ -7,6 +7,8 @@ MSU1 msu1;
 
 #include "serialization.cpp"
 
+void MSU1::Enter() { msu1.enter(); }
+
 void MSU1::enter() {
   while(true) {
     if(scheduler.sync == Scheduler::SynchronizeMode::All) {
@@ -55,7 +57,8 @@ void MSU1::power() {
 }
 
 void MSU1::reset() {
-  create();
+  create(MSU1::Enter, 44100);
+
   mmio.data_offset  = 0;
   mmio.audio_offset = 0;
   mmio.audio_track  = 0;
