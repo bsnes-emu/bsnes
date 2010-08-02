@@ -3422,6 +3422,61 @@
       <code>C235-5DA4</code>
     </cheat>
   </cartridge>
+  <cartridge sha256="d9127808fb02c47dd74fd22f39582c69f19936a794a8efc153cc0e51a0d4d782">	
+    <name>Asterix &amp; Obelix (Europe) (En,Fr,De,Es)</name>
+    <cheat>
+      <description>Infinite health</description>
+      <code>7E008C28</code>
+    </cheat>
+    <cheat>
+      <description>Infinite lives</description>
+      <code>7E101D09</code>
+    </cheat>
+    <cheat>
+      <description>Infinite time</description>
+      <code>7E107627</code>
+    </cheat>
+    <cheat>
+      <description>Moon jump (disable to drop back down)</description>
+      <code>7E007DC0</code>
+    </cheat>
+  </cartridge>
+  <cartridge sha256="d54d2703e474d7f469766d2d095ffcbbcab893e3fe58bbbcc57e24082a44bb40">	
+    <name>Asterix (Europe) (En,Fr,De,Es)</name>
+    <cheat>
+      <description>Invincibility</description>
+      <code>2D68-ADAD</code>
+      <code>A968-AF0D</code>
+    </cheat>
+    <cheat>
+      <description>Infinite health</description>
+      <code>82E9-6F64</code>
+    </cheat>
+    <cheat>
+      <description>Infinite health (alt)</description>
+      <code>7E05F003</code>
+    </cheat>
+    <cheat>
+      <description>Infinite lives</description>
+      <code>82E0-6D04</code>
+    </cheat>
+    <cheat>
+      <description>Infinite lives (alt)</description>
+      <code>7E05FC09</code>
+      <code>7E05FD09</code>
+    </cheat>
+    <cheat>
+      <description>Infinite time</description>
+      <code>7E05F709</code>
+      <code>7E05F809</code>
+      <code>7E05F909</code>
+    </cheat>
+    <cheat>
+      <description>Infinite coins</description>
+      <code>7E05EE09</code>
+      <code>7E05EF09</code>
+    </cheat>
+  </cartridge>
   <cartridge sha256="2431f8dc067ba27c6c3a846929f3deac6a45aa53a9a9ac20ede8ec5ca6854ea2">	
     <name>Axelay (USA)</name>
     <cheat>
@@ -5852,20 +5907,20 @@
   <cartridge sha256="130a74e76369b0ec4d6378a014550921433f1ae1ac1dddffb51f77c9f21a818f">	
     <name>Brandish (USA)</name>
     <cheat>
-      <description>Have over 10,000,000 gold </description>
+      <description>Have over 10,000,000 gold</description>
       <code>FD53-A3D7</code>
     </cheat>
     <cheat>
-      <description>Sell an item for max gold </description>
+      <description>Sell an item for max gold</description>
       <code>D484-1405</code>
       <code>6D84-14D5</code>
     </cheat>
     <cheat>
-      <description>Luck stays maxed out </description>
+      <description>Luck stays maxed out</description>
       <code>6D3B-4FD2</code>
     </cheat>
     <cheat>
-      <description>Map gets filled when entering a level </description>
+      <description>Map gets filled when entering a level</description>
       <code>6D02-770B</code>
       <code>3C02-776B</code>
     </cheat>
@@ -10415,7 +10470,7 @@
       <code>6D62-722F</code>
     </cheat>
   </cartridge>
-  <cartridge sha256="d45e26eb10c323ecd480e5f2326b223e29264c3adde67f48f0d2791128e519e8">	
+  <cartridge sha256="d45e26eb10c323ecd480e5f2326b223e29264c3adde67f48f0d2791128e519e8 73731a5a7932965de02a9e98055dcf88b4d17b8f710a6ecfde3e36a1f248773b">	
     <name>Doom (USA)</name>
     <cheat>
       <description>Infinite health</description>
@@ -23541,7 +23596,7 @@
       <code>DF3C-0D18</code>
     </cheat>
     <cheat>
-      <description>Immune to all petrifying effects (stone, poison, confused, etc.)</description>
+      <description>Immune to all petrifying effects (stone, poison, confused, etc)</description>
       <code>6D8F-0DC4</code>
     </cheat>
     <cheat>
@@ -30014,7 +30069,7 @@
       <code>0823-3944</code>
     </cheat>
   </cartridge>
-  <cartridge sha256="417874aa57856fe93eefdb24066fa1a9ca3f23c72c09d5247ae2b3ab4b3d09d1">	
+  <cartridge sha256="417874aa57856fe93eefdb24066fa1a9ca3f23c72c09d5247ae2b3ab4b3d09d1 cb2fdfce61858063bf4c9da4228381c3ec3abe423f4d378cddd174ae4adb261e">	
     <name>Mortal Kombat 3 (USA)</name>
     <cheat>
       <description>Invincibility (except throws and uppercuts) - P1</description>
@@ -34436,8 +34491,8 @@
       <code>7E187403</code>
     </cheat>
   </cartridge>
-  <cartridge sha256="8f387d083de1399bb79e5312c31a6f1757f2a536bfa25cecf1aea77bfd77058b">	
-    <name>Prehistorik Man (USA)</name>
+  <cartridge sha256="">	
+    <name>Prehistorik Man (USA) (En,Fr,Es)</name>
     <cheat>
       <description>Invincibility</description>
       <code>7E00B603</code>
@@ -40611,7 +40666,7 @@
       <code>C281-D467</code>
     </cheat>
   </cartridge>
-  <cartridge sha256="2b34161e96ef3f0f48cecd67e531a9bb94310652d8686f301bac426e4ab97e77">	
+  <cartridge sha256="2b34161e96ef3f0f48cecd67e531a9bb94310652d8686f301bac426e4ab97e77 d17cb5c73174060fcbd9cba6c705643f19c3b8be24d0f7ee43aee674ff1ea38e">	
     <name>Street Fighter II (USA)</name>
     <cheat>
       <description>Championship mode on</description>
@@ -44289,7 +44344,7 @@
       <code>7FF8250F</code>
     </cheat>
   </cartridge>
-  <cartridge sha256="0838e531fe22c077528febe14cb3ff7c492f1f5fa8de354192bdff7137c27f5b">	
+  <cartridge sha256="a8806bfe07cd3c9945d9fd3fcea932ae1cd671cab5cae12bb7a2ae726cbf9175 0838e531fe22c077528febe14cb3ff7c492f1f5fa8de354192bdff7137c27f5b">	
     <name>Super Mario World (USA)</name>
     <cheat>
       <description>Invincibility</description>
@@ -51356,6 +51411,17 @@
     <cheat>
       <description>Infinite lines</description>
       <code>C26D-0F09</code>
+    </cheat>
+  </cartridge>
+  <cartridge sha256="ecefb4117a6aae117e033c8cc07f0db2797d6be93dd5cdcefc23692a21fae02e">	
+    <name>Untouchables, The (USA)</name>
+    <cheat>
+      <description>Infinite lives</description>
+      <code>7E1B8609</code>
+    </cheat>
+    <cheat>
+      <description>Infinite ammo</description>
+      <code>7E1B8963</code>
     </cheat>
   </cartridge>
   <cartridge sha256="2500d6c846c78bcb729f15535bf2b852a120411891cabaaaa6fc407906d0214e">	
