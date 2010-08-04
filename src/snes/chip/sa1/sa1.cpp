@@ -63,8 +63,8 @@ void SA1::last_cycle() {
 }
 
 void SA1::interrupt(uint16 vector) {
-  op_read(regs.pc.d);
-  op_io();
+  SA1::op_read(regs.pc.d);
+  SA1::op_io();
   if(!regs.e) op_writestack(regs.pc.b);
   op_writestack(regs.pc.h);
   op_writestack(regs.pc.l);
