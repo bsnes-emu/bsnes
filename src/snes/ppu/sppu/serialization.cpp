@@ -104,8 +104,6 @@ void sPPU::Background::serialize(serializer &s) {
 
 void sPPU::Sprite::serialize(serializer &s) {
   for(unsigned i = 0; i < 128; i++) {
-    s.integer(list[i].width);
-    s.integer(list[i].height);
     s.integer(list[i].x);
     s.integer(list[i].y);
     s.integer(list[i].character);
@@ -114,24 +112,28 @@ void sPPU::Sprite::serialize(serializer &s) {
     s.integer(list[i].hflip);
     s.integer(list[i].priority);
     s.integer(list[i].palette);
+    s.integer(list[i].size);
   }
 
   s.integer(t.x);
   s.integer(t.y);
+
+  s.integer(t.active_sprite);
   s.integer(t.item_count);
   s.integer(t.tile_count);
-  s.array(t.output_palette);
-  s.array(t.output_priority);
-  s.array(t.item_list);
-  for(unsigned i = 0; i < 34; i++) {
-    s.integer(t.tile_list[i].x);
-    s.integer(t.tile_list[i].y);
-    s.integer(t.tile_list[i].priority);
-    s.integer(t.tile_list[i].palette);
-    s.integer(t.tile_list[i].tile);
-    s.integer(t.tile_list[i].hflip);
+
+  s.integer(t.active);
+  for(unsigned n = 0; n < 2; n++) {
+    s.array(t.item[n]);
+    for(unsigned i = 0; i < 34; i++) {
+      s.integer(t.tile[n][i].x);
+      s.integer(t.tile[n][i].y);
+      s.integer(t.tile[n][i].priority);
+      s.integer(t.tile[n][i].palette);
+      s.integer(t.tile[n][i].tile);
+      s.integer(t.tile[n][i].hflip);
+    }
   }
-  s.integer(t.active_sprite);
 
   s.integer(regs.main_enabled);
   s.integer(regs.sub_enabled);

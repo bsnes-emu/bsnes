@@ -2,6 +2,20 @@ class Sprite {
 public:
   sPPU &self;
 
+  struct SpriteItem {
+    uint16 x;
+    uint16 y;
+    uint8 character;
+    bool nameselect;
+    bool vflip;
+    bool hflip;
+    uint8 priority;
+    uint8 palette;
+    bool size;
+    unsigned width() const;
+    unsigned height() const;
+  } list[128];
+
   struct TileItem {
     uint16 x;
     uint16 y;
@@ -11,30 +25,17 @@ public:
     bool hflip;
   };
 
-  struct SpriteItem {
-    uint8 width;
-    uint8 height;
-    uint16 x;
-    uint16 y;
-    uint8 character;
-    bool nameselect;
-    bool vflip;
-    bool hflip;
-    uint8 priority;
-    uint8 palette;
-  } list[128];
-
   struct State {
     unsigned x;
     unsigned y;
 
+    unsigned active_sprite;
     unsigned item_count;
     unsigned tile_count;
-    uint8 output_palette[256];
-    uint8 output_priority[256];
-    uint8 item_list[32];
-    TileItem tile_list[34];
-    unsigned active_sprite;
+
+    bool active;
+    uint8 item[2][32];
+    TileItem tile[2][34];
   } t;
 
   struct {
@@ -63,6 +64,10 @@ public:
     } main, sub;
   } output;
 
+  //list.cpp
+  void update(unsigned addr, uint8 data);
+
+  //sprite.cpp
   void address_reset();
   void frame();
   void scanline();
@@ -75,5 +80,4 @@ public:
 private:
   bool on_scanline();
   void load_tiles();
-  void render_tile(unsigned tile);
 };

@@ -41,6 +41,7 @@ void sPPU::oam_write(unsigned addr, uint8 data) {
   if(!regs.display_disabled && vcounter() < (!regs.overscan ? 225 : 240)) addr = regs.ioamaddr;
   if(addr & 0x0200) addr &= 0x021f;
   memory::oam[addr] = data;
+  oam.update(addr, data);
 }
 
 uint8 sPPU::cgram_read(unsigned addr) {
