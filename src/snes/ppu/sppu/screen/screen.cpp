@@ -103,7 +103,7 @@ uint16 sPPU::Screen::get_pixel(bool swap) {
     source_sub = OAM;
   }
   if(priority_sub == 0) {
-    if(self.regs.bgmode == 5 || self.regs.bgmode == 6) {
+    if(self.regs.pseudo_hires == true || self.regs.bgmode == 5 || self.regs.bgmode == 6) {
       color_sub = get_color(0);
     } else {
       color_sub = (regs.color_b << 10) + (regs.color_g << 5) + (regs.color_r << 0);

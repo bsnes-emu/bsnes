@@ -26,7 +26,7 @@ void sPPU::enter() {
     scanline();
     add_clocks(88);
 
-    if(vcounter() >= 1 && vcounter() <= (!regs.overscan ? 224 : 239)) {
+    if(vcounter() <= (!regs.overscan ? 224 : 239)) {
       for(unsigned n = 0; n < 256; n++) {
         bg1.run();
         bg2.run();
@@ -43,11 +43,14 @@ void sPPU::enter() {
         screen.run();
         add_clocks(2);
       }
+
+      add_clocks(22);
+      oam.tilefetch();
     } else {
-      add_clocks(1024);
+      add_clocks(1024 + 22 + 136);
     }
 
-    add_clocks(lineclocks() - 88 - 1024);
+    add_clocks(lineclocks() - 88 - 1024 - 22 - 136);
   }
 }
 

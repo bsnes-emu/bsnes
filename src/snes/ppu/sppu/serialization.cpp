@@ -118,7 +118,6 @@ void sPPU::Sprite::serialize(serializer &s) {
   s.integer(t.x);
   s.integer(t.y);
 
-  s.integer(t.active_sprite);
   s.integer(t.item_count);
   s.integer(t.tile_count);
 
@@ -127,11 +126,13 @@ void sPPU::Sprite::serialize(serializer &s) {
     s.array(t.item[n]);
     for(unsigned i = 0; i < 34; i++) {
       s.integer(t.tile[n][i].x);
-      s.integer(t.tile[n][i].y);
       s.integer(t.tile[n][i].priority);
       s.integer(t.tile[n][i].palette);
-      s.integer(t.tile[n][i].tile);
       s.integer(t.tile[n][i].hflip);
+      s.integer(t.tile[n][i].d0);
+      s.integer(t.tile[n][i].d1);
+      s.integer(t.tile[n][i].d2);
+      s.integer(t.tile[n][i].d3);
     }
   }
 

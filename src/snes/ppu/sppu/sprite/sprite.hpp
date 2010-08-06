@@ -18,18 +18,16 @@ public:
 
   struct TileItem {
     uint16 x;
-    uint16 y;
     uint16 priority;
     uint16 palette;
-    uint16 tile;
     bool hflip;
+    uint8 d0, d1, d2, d3;
   };
 
   struct State {
     unsigned x;
     unsigned y;
 
-    unsigned active_sprite;
     unsigned item_count;
     unsigned tile_count;
 
@@ -72,12 +70,12 @@ public:
   void frame();
   void scanline();
   void run();
+  void tilefetch();
   void reset();
 
   void serialize(serializer&);
   Sprite(sPPU &self);
 
 private:
-  bool on_scanline();
-  void load_tiles();
+  bool on_scanline(SpriteItem&);
 };
