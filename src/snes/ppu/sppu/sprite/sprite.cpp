@@ -16,15 +16,15 @@ void sPPU::Sprite::scanline() {
   t.x = 0;
   t.y = self.vcounter();
 
-  if(t.y == (!self.regs.overscan ? 225 : 240) && self.regs.display_disabled == false) address_reset();
-  if(t.y > (!self.regs.overscan ? 224 : 239)) return;
-
   t.item_count = 0;
   t.tile_count = 0;
 
   t.active = !t.active;
   auto oam_item = t.item[t.active];
   auto oam_tile = t.tile[t.active];
+
+  if(t.y == (!self.regs.overscan ? 225 : 240) && self.regs.display_disabled == false) address_reset();
+  if(t.y >= (!self.regs.overscan ? 224 : 239)) return;
 
   memset(oam_item, 0xff, 32);  //default to invalid
   for(unsigned i = 0; i < 34; i++) oam_tile[i].x = 0xffff;  //default to invalid
