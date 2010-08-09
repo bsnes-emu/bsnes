@@ -1,6 +1,6 @@
 #ifdef PPU_CPP
 
-void PPUCounter::serialize(serializer &s) {
+void PPUcounter::serialize(serializer &s) {
   s.integer(status.interlace);
   s.integer(status.field);
   s.integer(status.vcounter);
@@ -14,10 +14,7 @@ void PPUCounter::serialize(serializer &s) {
 
 void PPU::serialize(serializer &s) {
   Processor::serialize(s);
-  PPUCounter::serialize(s);
-
-  s.integer(status.frames_updated);
-  s.integer(status.frames_executed);
+  PPUcounter::serialize(s);
 
   s.integer(ppu1_version);
   s.integer(ppu2_version);

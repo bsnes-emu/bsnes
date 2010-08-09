@@ -1,4 +1,4 @@
-//PPUCounter emulates the H/V latch counters of the S-PPU2.
+//PPUcounter emulates the H/V latch counters of the S-PPU2.
 //
 //real hardware has the S-CPU maintain its own copy of these counters that are
 //updated based on the state of the S-PPU Vblank and Hblank pins. emulating this
@@ -10,7 +10,7 @@
 //point before this in the frame, which is handled internally by this class at
 //V=128.
 
-class PPUCounter {
+class PPUcounter {
 public:
   alwaysinline void tick();
   alwaysinline void tick(unsigned clocks);

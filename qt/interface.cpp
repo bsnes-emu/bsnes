@@ -43,6 +43,19 @@ void Interface::video_refresh(const uint16_t *data, unsigned width, unsigned hei
   #if defined(DEBUGGER)
   debugger->frameTick();
   #endif
+
+  //frame counter
+  static signed frameCount = 0;
+  static time_t prev, curr;
+  frameCount++;
+
+  time(&curr);
+  if(curr != prev) {
+    framesUpdated = true;
+    framesExecuted = frameCount;
+    frameCount = 0;
+    prev = curr;
+  }
 }
 
 void Interface::audio_sample(uint16_t left, uint16_t right) {

@@ -106,7 +106,7 @@ void CPU::power() {
 void CPU::reset() {
   create(Enter, system.cpu_frequency());
   coprocessors.reset();
-  PPUCounter::reset();
+  PPUcounter::reset();
 
   //note: some registers are not fully reset by SNES
   regs.pc   = 0x000000;
@@ -132,7 +132,7 @@ void CPU::reset() {
 }
 
 CPU::CPU() {
-  PPUCounter::scanline = { &CPU::scanline, this };
+  PPUcounter::scanline = { &CPU::scanline, this };
 }
 
 CPU::~CPU() {

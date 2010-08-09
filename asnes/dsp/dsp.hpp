@@ -1,12 +1,7 @@
 class DSP : public Processor {
 public:
-  //synchronization
   alwaysinline void step(unsigned clocks);
   alwaysinline void synchronize_smp();
-
-  static void Enter();
-  void enter();
-  void tick();
 
   uint8 read(uint8 addr);
   void write(uint8 addr, uint8 data);
@@ -18,7 +13,7 @@ public:
   DSP();
   ~DSP();
 
-protected:
+private:
   //global registers
   enum global_reg_t {
     r_mvoll = 0x0c, r_mvolr = 0x1c,
@@ -167,6 +162,11 @@ protected:
   void echo_28();
   void echo_29();
   void echo_30();
+
+  //dsp
+  static void Enter();
+  void enter();
+  void tick();
 
   friend class DSPDebugger;
 };

@@ -1,10 +1,11 @@
 namespace SNES {
   namespace Info {
     static const char Name[] = "bsnes";
-    static const char Version[] = "067.07";
+    static const char Version[] = "067.08";
     static const unsigned SerializerVersion = 12;
   }
 }
 
-#define DSP_STATE_MACHINE
 //#define DEBUGGER
+#define DSP_STATE_MACHINE
+#define CHEAT_SYSTEM

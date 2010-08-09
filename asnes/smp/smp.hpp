@@ -1,22 +1,26 @@
 class SMP : public Processor, public SMPcore {
 public:
-  static const uint8 iplrom[64];
-
-  //synchronization
   alwaysinline void step(unsigned clocks);
   alwaysinline void synchronize_cpu();
   alwaysinline void synchronize_dsp();
 
-  static void Enter();
-  void enter();
-  debugvirtual void op_step();
+  uint8 port_read(uint8 port);
+  void port_write(uint8 port, uint8 data);
 
+  void power();
+  void reset();
+
+  void serialize(serializer&);
+  SMP();
+  ~SMP();
+
+private:
   #include "memory/memory.hpp"
   #include "timing/timing.hpp"
 
-  struct {
-    uint8 opcode;
+  static const uint8 iplrom[64];
 
+  struct {
     //timing
     unsigned clock_counter;
     unsigned dsp_counter;
@@ -40,14 +44,11 @@ public:
     uint8 smp_f8, smp_f9;
   } status;
 
-  //ssmp.cpp
-  void power();
-  void reset();
+  static void Enter();
+  void enter();
+  debugvirtual void op_step();
 
-  void serialize(serializer&);
-  SMP();
-  ~SMP();
-
+  friend class SMPcore;
   friend class SMPDebugger;
 };
 

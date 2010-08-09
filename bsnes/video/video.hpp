@@ -1,4 +1,5 @@
 class Video {
+private:
   bool frame_hires;
   bool frame_interlace;
   unsigned line_width[240];

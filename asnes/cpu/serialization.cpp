@@ -1,9 +1,9 @@
 #ifdef CPU_CPP
 
 void CPU::serialize(serializer &s) {
-  CPUcore::core_serialize(s);
   Processor::serialize(s);
-  PPUCounter::serialize(s);
+  CPUcore::core_serialize(s);
+  PPUcounter::serialize(s);
   s.integer(cpu_version);
 
   s.integer(status.interrupt_pending);

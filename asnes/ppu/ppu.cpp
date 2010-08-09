@@ -86,7 +86,7 @@ void PPU::power() {
 
 void PPU::reset() {
   create(Enter, system.cpu_frequency());
-  PPUCounter::reset();
+  PPUcounter::reset();
   memset(surface, 0, 512 * 512 * sizeof(uint16));
 
   mmio_reset();
@@ -118,19 +118,6 @@ void PPU::frame() {
 
   display.interlace = regs.interlace;
   display.overscan = regs.overscan;
-
-  //frame counter
-  static signed framecount = 0;
-  static time_t prev, curr;
-  framecount++;
-
-  time(&curr);
-  if(curr != prev) {
-    status.frames_updated = true;
-    status.frames_executed = framecount;
-    framecount = 0;
-    prev = curr;
-  }
 }
 
 PPU::PPU() :
@@ -143,9 +130,6 @@ window(*this),
 screen(*this) {
   surface = new uint16[512 * 512];
   output = surface + 16 * 512;
-
-  status.frames_updated = false;
-  status.frames_executed = 0;
 }
 
 PPU::~PPU() {

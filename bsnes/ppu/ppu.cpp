@@ -112,19 +112,6 @@ void PPU::frame() {
     display.interlace = regs.interlace;
     regs.scanlines = (regs.overscan == false) ? 224 : 239;
   }
-
-  //frame counter
-  static signed framecount = 0;
-  static time_t prev, curr;
-  framecount++;
-
-  time(&curr);
-  if(curr != prev) {
-    status.frames_updated = true;
-    status.frames_executed = framecount;
-    framecount = 0;
-    prev = curr;
-  }
 }
 
 void PPU::power() {
@@ -347,7 +334,7 @@ void PPU::power() {
 
 void PPU::reset() {
   create(Enter, system.cpu_frequency());
-  PPUCounter::reset();
+  PPUcounter::reset();
   memset(surface, 0, 512 * 512 * sizeof(uint16));
 
   frame();
@@ -376,9 +363,6 @@ void PPU::reset() {
 PPU::PPU() {
   surface = new uint16[512 * 512];
   output = surface + 16 * 512;
-
-  status.frames_updated = false;
-  status.frames_executed = 0;
 
   alloc_tiledata_cache();
 

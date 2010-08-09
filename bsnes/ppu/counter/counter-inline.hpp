@@ -1,6 +1,6 @@
 //this should only be called by CPU::PPUcounter::tick();
 //keeps track of previous counter positions in history table
-void PPUCounter::tick() {
+void PPUcounter::tick() {
   status.hcounter += 2;  //increment by smallest unit of time
   if(status.hcounter >= 1360 && status.hcounter == lineclocks()) {
     status.hcounter = 0;
@@ -15,7 +15,7 @@ void PPUCounter::tick() {
 
 //this should only be called by PPU::PPUcounter::tick(n);
 //allows stepping by more than the smallest unit of time
-void PPUCounter::tick(unsigned clocks) {
+void PPUcounter::tick(unsigned clocks) {
   status.hcounter += clocks;
   if(status.hcounter >= lineclocks()) {
     status.hcounter -= lineclocks();
@@ -24,7 +24,7 @@ void PPUCounter::tick(unsigned clocks) {
 }
 
 //internal
-void PPUCounter::vcounter_tick() {
+void PPUcounter::vcounter_tick() {
   if(++status.vcounter == 128) status.interlace = ppu.interlace();
 
   if((system.region() == System::Region::NTSC && status.interlace == false && status.vcounter == 262)
@@ -40,13 +40,13 @@ void PPUCounter::vcounter_tick() {
   if(scanline) scanline();
 }
 
-bool   PPUCounter::field   () const { return status.field; }
-uint16 PPUCounter::vcounter() const { return status.vcounter; }
-uint16 PPUCounter::hcounter() const { return status.hcounter; }
+bool   PPUcounter::field   () const { return status.field; }
+uint16 PPUcounter::vcounter() const { return status.vcounter; }
+uint16 PPUcounter::hcounter() const { return status.hcounter; }
 
-bool   PPUCounter::field   (unsigned offset) const { return history.field   [(history.index - (offset >> 1)) & 2047]; }
-uint16 PPUCounter::vcounter(unsigned offset) const { return history.vcounter[(history.index - (offset >> 1)) & 2047]; }
-uint16 PPUCounter::hcounter(unsigned offset) const { return history.hcounter[(history.index - (offset >> 1)) & 2047]; }
+bool   PPUcounter::field   (unsigned offset) const { return history.field   [(history.index - (offset >> 1)) & 2047]; }
+uint16 PPUcounter::vcounter(unsigned offset) const { return history.vcounter[(history.index - (offset >> 1)) & 2047]; }
+uint16 PPUcounter::hcounter(unsigned offset) const { return history.hcounter[(history.index - (offset >> 1)) & 2047]; }
 
 //one PPU dot = 4 CPU clocks
 //
@@ -57,7 +57,7 @@ uint16 PPUCounter::hcounter(unsigned offset) const { return history.hcounter[(hi
 //dot 323 range = { 1292, 1294, 1296 }
 //dot 327 range = { 1310, 1312, 1314 }
 
-uint16 PPUCounter::hdot() const {
+uint16 PPUcounter::hdot() const {
   if(system.region() == System::Region::NTSC && status.interlace == false && vcounter() == 240 && field() == 1) {
     return (hcounter() >> 2);
   } else {
@@ -65,12 +65,12 @@ uint16 PPUCounter::hdot() const {
   }
 }
 
-uint16 PPUCounter::lineclocks() const {
+uint16 PPUcounter::lineclocks() const {
   if(system.region() == System::Region::NTSC && status.interlace == false &&  vcounter() == 240 &&  field() == 1) return 1360;
   return 1364;
 }
 
-void PPUCounter::reset() {
+void PPUcounter::reset() {
   status.interlace = false;
   status.field     = 0;
   status.vcounter  = 0;

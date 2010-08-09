@@ -1,24 +1,31 @@
-class CPU : public Processor, public PPUCounter, public MMIO, public CPUcore {
+class CPU : public Processor, public CPUcore, public PPUcounter, public MMIO {
 public:
-  //synchronization
   array<Processor*> coprocessors;
   alwaysinline void step(unsigned clocks);
   alwaysinline void synchronize_smp();
   void synchronize_ppu();
   void synchronize_coprocessor();
 
-  static void Enter();
-  void enter();
-  debugvirtual void op_step();
-  void op_irq();
-  bool interrupt_pending() { return status.interrupt_pending; }
+  uint8 pio();
+  bool joylatch();
+  alwaysinline bool interrupt_pending() { return status.interrupt_pending; }
+  alwaysinline uint8 port_read(uint8 port) { return apu_port[port & 3]; }
+  alwaysinline void port_write(uint8 port, uint8 data) { apu_port[port & 3] = data; }
 
-  uint8 cpu_version;
+  void power();
+  void reset();
 
+  void serialize(serializer&);
+  CPU();
+  ~CPU();
+
+private:
   #include "dma/dma.hpp"
   #include "memory/memory.hpp"
   #include "mmio/mmio.hpp"
   #include "timing/timing.hpp"
+
+  uint8 cpu_version;
 
   struct Status {
     bool interrupt_pending;
@@ -27,10 +34,7 @@ public:
     unsigned clock_count;
     unsigned line_clocks;
 
-    //======
     //timing
-    //======
-
     bool irq_lock;
 
     unsigned dram_refresh_position;
@@ -56,10 +60,7 @@ public:
 
     bool reset_pending;
 
-    //===
     //DMA
-    //===
-
     bool dma_active;
     unsigned dma_counter;
     unsigned dma_clocks;
@@ -67,10 +68,7 @@ public:
     bool hdma_pending;
     bool hdma_mode;  //0 = init, 1 = run
 
-    //====
     //MMIO
-    //====
-
     //$2181-$2183
     uint32 wram_addr;
 
@@ -118,12 +116,10 @@ public:
     unsigned shift;
   } alu;
 
-  void power();
-  void reset();
-
-  void serialize(serializer&);
-  CPU();
-  ~CPU();
+  static void Enter();
+  void enter();
+  void op_irq();
+  debugvirtual void op_step();
 
   friend class CPUDebugger;
 };

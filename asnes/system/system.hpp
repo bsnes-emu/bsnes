@@ -28,7 +28,6 @@ public:
   bool unserialize(serializer&);
 
   System();
-  virtual ~System() {}
 
 private:
   Interface *interface;
@@ -42,8 +41,6 @@ private:
   friend class Video;
   friend class Audio;
   friend class Input;
-  friend class StateManager;
-  friend void threadentry_cop();
 };
 
 #include <video/video.hpp>

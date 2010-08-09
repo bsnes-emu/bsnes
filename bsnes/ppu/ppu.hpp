@@ -1,6 +1,6 @@
 #include "counter/counter.hpp"
 
-class PPU : public Processor, public PPUCounter, public MMIO {
+class PPU : public Processor, public PPUcounter, public MMIO {
 public:
   #include "memory/memory.hpp"
   #include "mmio/mmio.hpp"
@@ -8,11 +8,6 @@ public:
 
   uint16 *surface;
   uint16 *output;
-
-  struct {
-    bool frames_updated;
-    unsigned frames_executed;
-  } status;
 
   uint8 ppu1_version;
   uint8 ppu2_version;

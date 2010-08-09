@@ -82,7 +82,6 @@ struct {
   uint16 vcounter;
 } regs;
 
-void latch_counters();
 uint16 get_vram_address();
 
 uint8 vram_read(unsigned addr);
@@ -93,10 +92,6 @@ void oam_write(unsigned addr, uint8 data);
 
 uint8 cgram_read(unsigned addr);
 void cgram_write(unsigned addr, uint8 data);
-
-bool interlace() const;
-bool overscan() const;
-bool hires() const;
 
 void mmio_update_video_mode();
 

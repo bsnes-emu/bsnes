@@ -30,9 +30,9 @@ void Utility::updateSystemState() {
     text = "Power off";
   } else if(application.pause == true || application.autopause == true) {
     text = "Paused";
-  } else if(SNES::ppu.status.frames_updated == true) {
-    SNES::ppu.status.frames_updated = false;
-    text << SNES::ppu.status.frames_executed;
+  } else if(interface.framesUpdated == true) {
+    interface.framesUpdated = false;
+    text << interface.framesExecuted;
     text << " fps";
   } else {
     //nothing to update

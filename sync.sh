@@ -1,10 +1,13 @@
-rm -r libco
-rm -r nall
-rm -r ruby
+synchronize() {
+  if [ -d ../"$1" ]; then
+    test -d "$1" && rm -r "$1"
+    cp -r ../"$1" ./"$1"
+  fi
+}
 
-cp -r ../libco ./libco
-cp -r ../nall ./nall
-cp -r ../ruby ./ruby
+synchronize "libco"
+synchronize "nall"
+synchronize "ruby"
 
-rm -r libco/doc
-rm -r libco/test
+test -d libco/doc && rm -r libco/doc
+test -d libco/test && rm -r libco/test
