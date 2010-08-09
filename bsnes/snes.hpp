@@ -1,26 +1,4 @@
-namespace SNES {
-  namespace Info {
-    static const char Name[] = "bsnes";
-    static const char Version[] = "067.06";
-    static const unsigned SerializerVersion = 12;
-  }
-}
-
-#define CORE_SMEMORY
-#define CORE_SCPU
-#define CORE_SSMP
-#define CORE_SDSP
-#define CORE_BPPU
-
-//S-DSP can be encapsulated into a state machine using #define magic
-//this avoids ~2.048m co_switch() calls per second (~5% speedup)
-#define DSP_STATE_MACHINE
-
-//game genie + pro action replay code support (~2% speed hit)
-#define CHEAT_SYSTEM
-
-//enable debugging extensions (~15% speed hit)
-//#define DEBUGGER
+#include <info.hpp>
 
 #include <libco/libco.h>
 
@@ -84,48 +62,19 @@ namespace SNES {
   };
 
   #include <memory/memory.hpp>
-  #if defined(CORE_SMEMORY)
-  #include <memory/smemory/smemory.hpp>
-  #endif
-
   #include <ppu/ppu.hpp>
-  #if defined(CORE_SPPU)
-  #include <ppu/sppu/sppu.hpp>
-  #elif defined(CORE_BPPU)
-  #include <ppu/bppu/bppu.hpp>
-  #endif
-
-  #include <cpu/cpu.hpp>
   #include <cpu/core/core.hpp>
-  #if defined(CORE_SCPU)
-  #include <cpu/scpu/scpu.hpp>
-  #endif
-
-  #include <smp/smp.hpp>
+  #include <cpu/cpu.hpp>
   #include <smp/core/core.hpp>
-  #if defined(CORE_SSMP)
-  #include <smp/ssmp/ssmp.hpp>
-  #endif
-
+  #include <smp/smp.hpp>
   #include <dsp/dsp.hpp>
-  #if defined(CORE_SDSP)
-  #include <dsp/sdsp/sdsp.hpp>
-  #elif defined(CORE_ADSP)
-  #include <dsp/adsp/adsp.hpp>
-  #endif
-
   #include <system/system.hpp>
   #include <chip/chip.hpp>
   #include <cartridge/cartridge.hpp>
   #include <cheat/cheat.hpp>
 
-  #include <cpu/synchronization.hpp>
-  #include <smp/synchronization.hpp>
-  #include <dsp/synchronization.hpp>
-  #include <ppu/synchronization.hpp>
-
   #include <memory/memory-inline.hpp>
-  #include <ppu/ppu-inline.hpp>
+  #include <ppu/counter/counter-inline.hpp>
   #include <cheat/cheat-inline.hpp>
 }
 

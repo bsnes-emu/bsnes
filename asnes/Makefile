@@ -50,22 +50,22 @@ snes_objects := $(patsubst %,obj/%.o,$(snes_objects))
 
 library: $(snes_objects) obj/libsnes.o
 ifeq ($(platform),x)
-	ar rcs obj/libsnes.a $(snes_objects) obj/libsnes.o
-	$(cpp) -o obj/libsnes.so -shared -Wl,-soname,libsnes.so.1 $(snes_objects) obj/libsnes.o
+	ar rcs out/libsnes.a $(snes_objects) obj/libsnes.o
+	$(cpp) -o out/libsnes.so -shared -Wl,-soname,libsnes.so.1 $(snes_objects) obj/libsnes.o
 else ifeq ($(platform),osx)
-	ar rcs obj/libsnes.a $(snes_objects) obj/libsnes.o
-	$(cpp) -o obj/libsnes.dylib -install_name @executable_path/../Libraries/libsnes.dylib -shared -dynamiclib $(snes_objects) obj/libsnes.o
+	ar rcs out/libsnes.a $(snes_objects) obj/libsnes.o
+	$(cpp) -o out/libsnes.dylib -install_name @executable_path/../Libraries/libsnes.dylib -shared -dynamiclib $(snes_objects) obj/libsnes.o
 else ifeq ($(platform),win)
-	$(cpp) -o obj/snes.dll -shared -Wl,--out-implib,libsnes.a $(snes_objects) obj/libsnes.o
+	$(cpp) -o out/snes.dll -shared -Wl,--out-implib,libsnes.a $(snes_objects) obj/libsnes.o
 endif
 
 library-install:
 ifeq ($(platform),x)
-	install -D -m 755 obj/libsnes.a $(DESTDIR)$(prefix)/lib/libsnes.a
-	install -D -m 755 obj/libsnes.so $(DESTDIR)$(prefix)/lib/libsnes.so
+	install -D -m 755 out/libsnes.a $(DESTDIR)$(prefix)/lib/libsnes.a
+	install -D -m 755 out/libsnes.so $(DESTDIR)$(prefix)/lib/libsnes.so
 	ldconfig -n $(DESTDIR)$(prefix)/lib
 else ifeq ($(platform),osx)
-	cp obj/libsnes.dylib /usr/local/lib/libsnes.dylib
+	cp out/libsnes.dylib /usr/local/lib/libsnes.dylib
 endif
 
 library-uninstall:

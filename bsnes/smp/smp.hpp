@@ -1,30 +1,59 @@
-#if defined(DEBUGGER)
-  #include "smp-debugger.hpp"
-#endif
-
-class SMP : public Processor {
+class SMP : public Processor, public SMPcore {
 public:
+  static const uint8 iplrom[64];
+
   //synchronization
   alwaysinline void step(unsigned clocks);
   alwaysinline void synchronize_cpu();
   alwaysinline void synchronize_dsp();
 
   static void Enter();
-  virtual void enter() = 0;
+  void enter();
+  debugvirtual void op_step();
 
-  static const uint8 iplrom[64];
+  #include "memory/memory.hpp"
+  #include "timing/timing.hpp"
 
-  virtual uint8 ram_read(uint16 addr) = 0;
-  virtual void ram_write(uint16 addr, uint8 value) = 0;
+  struct {
+    uint8 opcode;
 
-  //$f4-$f7
-  virtual uint8 port_read(uint8 port) = 0;
-  virtual void port_write(uint8 port, uint8 value) = 0;
+    //timing
+    unsigned clock_counter;
+    unsigned dsp_counter;
+    unsigned timer_step;
 
-  virtual void power();
-  virtual void reset();
+    //$00f0
+    uint8 clock_speed;
+    uint8 timer_speed;
+    bool timers_enabled;
+    bool ram_disabled;
+    bool ram_writable;
+    bool timers_disabled;
 
-  virtual void serialize(serializer&);
-  SMP() {}
-  virtual ~SMP() {}
+    //$00f1
+    bool iplrom_enabled;
+
+    //$00f2
+    uint8 dsp_addr;
+
+    //$00f8,$00f9
+    uint8 smp_f8, smp_f9;
+  } status;
+
+  //ssmp.cpp
+  void power();
+  void reset();
+
+  void serialize(serializer&);
+  SMP();
+  ~SMP();
+
+  friend class SMPDebugger;
 };
+
+#if defined(DEBUGGER)
+  #include "debugger/debugger.hpp"
+  extern SMPDebugger smp;
+#else
+  extern SMP smp;
+#endif

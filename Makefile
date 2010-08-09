@@ -1,5 +1,5 @@
 include nall/Makefile
-snes := asnes
+snes := bsnes
 ui := qt
 
 # compiler

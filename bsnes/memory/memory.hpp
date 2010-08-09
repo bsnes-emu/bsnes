@@ -77,18 +77,23 @@ struct Bus {
   alwaysinline uint8 read(unsigned addr);
   alwaysinline void write(unsigned addr, uint8 data);
 
-  virtual inline bool load_cart();
-  virtual inline void unload_cart();
+  bool load_cart();
+  void unload_cart();
 
-  virtual inline void power();
-  virtual inline void reset();
+  void power();
+  void reset();
 
   struct Page {
     Memory *access;
     unsigned offset;
   } page[65536];
 
-  virtual void serialize(serializer&) {}
+  void serialize(serializer&);
+
+private:
+  void map_reset();
+  void map_xml();
+  void map_system();
 };
 
 namespace memory {
@@ -102,3 +107,5 @@ namespace memory {
   extern UnmappedMemory memory_unmapped;
   extern UnmappedMMIO   mmio_unmapped;
 };
+
+extern Bus bus;

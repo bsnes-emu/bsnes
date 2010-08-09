@@ -356,7 +356,7 @@ public:
     TextureProc textureProc = (TextureProc)GetProcAddress(d3dx, "D3DXCreateTextureFromFileA");
 
     LPD3DXBUFFER pBufferErrors = NULL;
-    effectProc(device, shaderSource, lstrlen(source), NULL, NULL, NULL, NULL, &effect, &pBufferErrors);
+    effectProc(device, shaderSource, lstrlen(source), NULL, NULL, 0, NULL, &effect, &pBufferErrors);
 
     D3DXHANDLE hTech;
     effect->FindNextValidTechnique(NULL, &hTech);

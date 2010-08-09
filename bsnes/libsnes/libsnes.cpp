@@ -1,5 +1,5 @@
 #include "libsnes.hpp"
-#include <snes/snes.hpp>
+#include <snes.hpp>
 
 #include <nall/snes/info.hpp>
 using namespace nall;

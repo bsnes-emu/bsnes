@@ -48,6 +48,9 @@ extern "C" {
 #define SNES_DEVICE_ID_JUSTIFIER_TRIGGER  2
 #define SNES_DEVICE_ID_JUSTIFIER_START    3
 
+#define SNES_REGION_NTSC  0
+#define SNES_REGION_PAL   1
+
 #define SNES_MEMORY_CARTRIDGE_RAM       0
 #define SNES_MEMORY_CARTRIDGE_RTC       1
 #define SNES_MEMORY_BSX_RAM             2

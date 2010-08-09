@@ -67,9 +67,3 @@ void Bus::write(unsigned addr, uint8 data) {
   Page &p = page[addr >> 8];
   return p.access->write(p.offset + addr, data);
 }
-
-bool Bus::load_cart() { return false; }
-void Bus::unload_cart() {}
-
-void Bus::power() {}
-void Bus::reset() {}
