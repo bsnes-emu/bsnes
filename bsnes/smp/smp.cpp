@@ -3,115 +3,65 @@
 #define SMP_CPP
 namespace SNES {
 
-#if defined(DEBUGGER)
-  #include "debugger/debugger.cpp"
-  SMPDebugger smp;
-#else
-  SMP smp;
-#endif
+SMP smp;
+
+#include "snes_spc/Snes_Spc.cpp"
+#include "snes_spc/Spc_Core.cpp"
+#include "snes_spc/Spc_Core_impl.cpp"
+#include "snes_spc/Spc_Dsp.cpp"
+#include "snes_spc/Spc_Dsp_State.cpp"
+#include "snes_spc/Spc_Filter.cpp"
+#include "snes_spc/Spc_State.cpp"
+#include "snes_spc/spc.cpp"
+#include "snes_spc/blargg_common.cpp"
+#include "snes_spc/blargg_errors.cpp"
 
 #include "serialization.cpp"
 #include "iplrom.cpp"
-#include "memory/memory.cpp"
-#include "timing/timing.cpp"
 
 void SMP::step(unsigned clocks) {
   clock += clocks * (uint64)cpu.frequency;
-  dsp.clock -= clocks;
 }
 
 void SMP::synchronize_cpu() {
-  if(clock >= 0 && scheduler.sync != Scheduler::SynchronizeMode::All) co_switch(cpu.thread);
 }
 
 void SMP::synchronize_dsp() {
-  if(dsp.clock < 0 && scheduler.sync != Scheduler::SynchronizeMode::All) co_switch(dsp.thread);
 }
 
-void SMP::Enter() { smp.enter(); }
+uint8 SMP::port_read(uint8 port) {
+  return snes_spc.read_port(snes_spc_time, port & 3);
+}
 
-void SMP::enter() {
-  while(true) {
-    if(scheduler.sync == Scheduler::SynchronizeMode::All) {
-      scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
+void SMP::port_write(uint8 port, uint8 data) {
+  snes_spc.write_port(snes_spc_time, port & 3, data);
+}
+
+void SMP::run() {
+  step(24);
+  if(++snes_spc_time >= snes_spc.clock_rate / 60) {
+    snes_spc.end_frame(snes_spc_time);
+    snes_spc_time = 0;
+    static int16 buffer[8192];
+    while(signed count = snes_spc.read_samples(buffer, 8192)) {
+      for(unsigned n = 0; n < count; n += 2) audio.sample(buffer[n + 0], buffer[n + 1]);
     }
-
-    op_step();
   }
 }
 
-void SMP::op_step() {
-  (this->*opcode_table[op_readpc()])();
-}
+static void Enter() {}
 
 void SMP::power() {
-  //targets not initialized/changed upon reset
-  t0.target = 0;
-  t1.target = 0;
-  t2.target = 0;
-
-  reset();
+  create(Enter, 24576000);  //system.apu_frequency()
+  snes_spc.init();
+  snes_spc.init_rom(iplrom);
+  snes_spc.reset();
+  snes_spc_time = 0;
 }
 
 void SMP::reset() {
-  create(Enter, system.apu_frequency());
-
-  regs.pc = 0xffc0;
-  regs.a  = 0x00;
-  regs.x  = 0x00;
-  regs.y  = 0x00;
-  regs.sp = 0xef;
-  regs.p  = 0x02;
-
-  for(unsigned i = 0; i < memory::apuram.size(); i++) {
-    memory::apuram.write(i, 0x00);
-  }
-
-  status.clock_counter = 0;
-  status.dsp_counter   = 0;
-  status.timer_step    = 3;
-
-  //$00f0
-  status.clock_speed     = 0;
-  status.timer_speed     = 0;
-  status.timers_enabled  = true;
-  status.ram_disabled    = false;
-  status.ram_writable    = true;
-  status.timers_disabled = false;
-
-  //$00f1
-  status.iplrom_enabled = true;
-
-  //$00f2
-  status.dsp_addr = 0x00;
-
-  //$00f8,$00f9
-  status.smp_f8 = 0x00;
-  status.smp_f9 = 0x00;
-
-  t0.stage0_ticks = 0;
-  t1.stage0_ticks = 0;
-  t2.stage0_ticks = 0;
-
-  t0.stage1_ticks = 0;
-  t1.stage1_ticks = 0;
-  t2.stage1_ticks = 0;
-
-  t0.stage2_ticks = 0;
-  t1.stage2_ticks = 0;
-  t2.stage2_ticks = 0;
-
-  t0.stage3_ticks = 0;
-  t1.stage3_ticks = 0;
-  t2.stage3_ticks = 0;
-
-  t0.current_line = 0;
-  t1.current_line = 0;
-  t2.current_line = 0;
-
-  t0.enabled = false;
-  t1.enabled = false;
-  t2.enabled = false;
+  snes_spc.soft_reset();
+  snes_spc_time = 0;
 }
 
 SMP::SMP() {

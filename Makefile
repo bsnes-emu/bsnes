@@ -60,14 +60,14 @@ endif
 
 install:
 ifeq ($(platform),x)
-	install -D -m 755 ../bsnes $(DESTDIR)$(prefix)/bin/bsnes
-	install -D -m 644 data/bsnes.png $(DESTDIR)$(prefix)/share/pixmaps/bsnes.png
-	install -D -m 644 data/bsnes.desktop $(DESTDIR)$(prefix)/share/applications/bsnes.desktop
+	install -D -m 755 out/$(snes) $(DESTDIR)$(prefix)/bin/$(snes)
+	install -D -m 644 qt/data/bsnes.png $(DESTDIR)$(prefix)/share/pixmaps/bsnes.png
+	install -D -m 644 qt/data/bsnes.desktop $(DESTDIR)$(prefix)/share/applications/bsnes.desktop
 endif
 
 uninstall:
 ifeq ($(platform),x)
-	rm $(DESTDIR)$(prefix)/bin/bsnes
+	rm $(DESTDIR)$(prefix)/bin/$(snes)
 	rm $(DESTDIR)$(prefix)/share/pixmaps/bsnes.png
 	rm $(DESTDIR)$(prefix)/share/applications/bsnes.desktop
 endif

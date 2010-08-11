@@ -64,6 +64,7 @@ void PPU::enter() {
     cache.oam_nameselect = regs.oam_nameselect;
     cache.oam_tdaddr = regs.oam_tdaddr;
     add_clocks(lineclocks() - 1152);  //seek to start of next scanline
+
   }
 }
 

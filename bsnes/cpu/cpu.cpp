@@ -3,18 +3,12 @@
 #define CPU_CPP
 namespace SNES {
 
-#if defined(DEBUGGER)
-  #include "debugger/debugger.cpp"
-  CPUDebugger cpu;
-#else
-  CPU cpu;
-#endif
+CPU cpu;
 
-#include "serialization.cpp"
-#include "dma/dma.cpp"
-#include "memory/memory.cpp"
-#include "mmio/mmio.cpp"
-#include "timing/timing.cpp"
+#include "dma.cpp"
+#include "memory.cpp"
+#include "mmio.cpp"
+#include "timing.cpp"
 
 void CPU::step(unsigned clocks) {
   smp.clock -= clocks * (uint64)smp.frequency;
@@ -26,7 +20,7 @@ void CPU::step(unsigned clocks) {
 }
 
 void CPU::synchronize_smp() {
-  if(smp.clock < 0) co_switch(smp.thread);
+  while(smp.clock < 0) smp.run();
 }
 
 void CPU::synchronize_ppu() {
@@ -49,56 +43,40 @@ void CPU::enter() {
       scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
     }
 
-    if(status.interrupt_pending) {
-      status.interrupt_pending = false;
-      if(status.nmi_pending) {
-        status.nmi_pending = false;
-        status.interrupt_vector = (regs.e == false ? 0xffea : 0xfffa);
-        op_irq();
-      } else if(status.irq_pending) {
-        status.irq_pending = false;
-        status.interrupt_vector = (regs.e == false ? 0xffee : 0xfffe);
-        op_irq();
-      } else if(status.reset_pending) {
-        status.reset_pending = false;
-        add_clocks(186);
-        regs.pc.l = bus.read(0xfffc);
-        regs.pc.h = bus.read(0xfffd);
-      }
+    if(status.nmi_pending) {
+      status.nmi_pending = false;
+      op_irq(regs.e == false ? 0xffea : 0xfffa);
     }
 
-    op_step();
+    if(status.irq_pending) {
+      status.irq_pending = false;
+      op_irq(regs.e == false ? 0xffee : 0xfffe);
+    }
+
+    (this->*opcode_table[op_readpc()])();
   }
 }
 
-void CPU::op_step() {
-  (this->*opcode_table[op_readpc()])();
-}
-
-void CPU::op_irq() {
+void CPU::op_irq(uint16 vector) {
   op_read(regs.pc.d);
   op_io();
   if(!regs.e) op_writestack(regs.pc.b);
   op_writestack(regs.pc.h);
   op_writestack(regs.pc.l);
   op_writestack(regs.e ? (regs.p & ~0x10) : regs.p);
-  rd.l = op_read(status.interrupt_vector + 0);
+  rd.l = op_read(vector + 0);
   regs.pc.b = 0x00;
-  regs.p.i  = 1;
-  regs.p.d  = 0;
-  rd.h = op_read(status.interrupt_vector + 1);
+  regs.p.i = 1;
+  regs.p.d = 0;
+  rd.h = op_read(vector + 1);
   regs.pc.w = rd.w;
 }
 
 void CPU::power() {
-  cpu_version = config.cpu.version;
-
-  regs.a = regs.x = regs.y = 0x0000;
+  regs.a = 0x0000;
+  regs.x = 0x0000;
+  regs.y = 0x0000;
   regs.s = 0x01ff;
-
-  mmio_power();
-  dma_power();
-  timing_power();
 
   reset();
 }
@@ -108,30 +86,62 @@ void CPU::reset() {
   coprocessors.reset();
   PPUcounter::reset();
 
-  //note: some registers are not fully reset by SNES
-  regs.pc   = 0x000000;
-  regs.x.h  = 0x00;
-  regs.y.h  = 0x00;
-  regs.s.h  = 0x01;
-  regs.d    = 0x0000;
-  regs.db   = 0x00;
-  regs.p    = 0x34;
-  regs.e    = 1;
-  regs.mdr  = 0x00;
-  regs.wai  = false;
+  regs.pc = 0x000000;
+  regs.x.h = 0x00;
+  regs.y.h = 0x00;
+  regs.s.h = 0x01;
+  regs.d = 0x0000;
+  regs.db = 0x00;
+  regs.p = 0x34;
+  regs.e = 1;
+  regs.mdr = 0x00;
+  regs.wai = false;
   update_table();
 
-  mmio_reset();
-  dma_reset();
-  timing_reset();
+  regs.pc.l = bus.read(0xfffc);
+  regs.pc.h = bus.read(0xfffd);
+  regs.pc.b = 0x00;
 
-  apu_port[0] = 0x00;
-  apu_port[1] = 0x00;
-  apu_port[2] = 0x00;
-  apu_port[3] = 0x00;
+  status.nmi_valid = false;
+  status.nmi_line = false;
+  status.nmi_transition = false;
+  status.nmi_pending = false;
+
+  status.irq_valid = false;
+  status.irq_line = false;
+  status.irq_transition = false;
+  status.irq_pending = false;
+
+  status.hdma_pending = false;
+
+  status.wram_addr = 0x000000;
+
+  status.joypad_strobe_latch = 0;
+
+  status.nmi_enabled = false;
+  status.virq_enabled = false;
+  status.hirq_enabled = false;
+  status.auto_joypad_poll_enabled = false;
+
+  status.pio = 0xff;
+
+  status.htime = 0x0000;
+  status.vtime = 0x0000;
+
+  status.rom_speed = 8;
+
+  status.joy1l = status.joy1h = 0x00;
+  status.joy2l = status.joy2h = 0x00;
+  status.joy3l = status.joy3h = 0x00;
+  status.joy4l = status.joy4h = 0x00;
+
+  dma_reset();
 }
 
-CPU::CPU() {
+void CPU::serialize(serializer &s) {
+}
+
+CPU::CPU() : queue(512, { &CPU::queue_event, this }) {
   PPUcounter::scanline = { &CPU::scanline, this };
 }
 

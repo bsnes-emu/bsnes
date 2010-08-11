@@ -6,36 +6,36 @@ struct {
   bool hdma_enabled;
 
   //$43x0
-  uint8 dmap;
   bool direction;
-  bool hdma_indirect;
-  bool reversexfer;
-  bool fixedxfer;
-  uint8 xfermode;
+  bool indirect;
+  bool unused;
+  bool reverse_transfer;
+  bool fixed_transfer;
+  uint8 transfer_mode;
 
   //$43x1
-  uint8 destaddr;
+  uint8 dest_addr;
 
   //$43x2-$43x3
-  uint16 srcaddr;
+  uint16 source_addr;
 
   //$43x4
-  uint8 srcbank;
+  uint8 source_bank;
 
   //$43x5-$43x6
   union {
-    uint16 xfersize;
-    uint16 hdma_iaddr;
+    uint16 transfer_size;
+    uint16 indirect_addr;
   };
 
   //$43x7
-  uint8 hdma_ibank;
+  uint8 indirect_bank;
 
   //$43x8-$43x9
   uint16 hdma_addr;
 
   //$43xa
-  uint8 hdma_line_counter;
+  uint8 line_counter;
 
   //$43xb/$43xf
   uint8 unknown;

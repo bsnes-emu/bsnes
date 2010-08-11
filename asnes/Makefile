@@ -1,7 +1,8 @@
 snes_objects := libco
 snes_objects += snes-system
 snes_objects += snes-cartridge snes-cheat
-snes_objects += snes-memory snes-cpucore snes-cpu snes-smpcore snes-smp snes-dsp snes-ppu
+snes_objects += snes-memory snes-cpucore snes-smpcore
+snes_objects += snes-cpu snes-smp snes-dsp snes-ppu
 snes_objects += snes-supergameboy snes-superfx snes-sa1
 snes_objects += snes-bsx snes-srtc snes-sdd1 snes-spc7110
 snes_objects += snes-cx4 snes-dsp1 snes-dsp2 snes-dsp3 snes-dsp4
@@ -13,15 +14,15 @@ obj/libco.o  : libco/libco.c libco/*
 obj/libsnes.o: $(snes)/libsnes/libsnes.cpp $(snes)/libsnes/*
 
 obj/snes-system.o   : $(snes)/system/system.cpp $(call rwildcard,$(snes)/system/) $(call rwildcard,$(snes)/video/)
-obj/snes-memory.o   : $(snes)/memory/memory.cpp $(snes)/memory/*
+obj/snes-memory.o   : $(snes)/memory/memory.cpp $(call rwildcard,$(snes)/memory/)
 obj/snes-cpucore.o  : $(snes)/cpu/core/core.cpp $(call rwildcard,$(snes)/cpu/core/)
-obj/snes-cpu.o      : $(snes)/cpu/cpu.cpp $(snes)/cpu/*
 obj/snes-smpcore.o  : $(snes)/smp/core/core.cpp $(call rwildcard,$(snes)/smp/core/)
-obj/snes-smp.o      : $(snes)/smp/smp.cpp $(snes)/smp/*
-obj/snes-dsp.o      : $(snes)/dsp/dsp.cpp $(snes)/dsp/*
-obj/snes-ppu.o      : $(snes)/ppu/ppu.cpp $(snes)/ppu/*
-obj/snes-cartridge.o: $(snes)/cartridge/cartridge.cpp $(snes)/cartridge/*
-obj/snes-cheat.o    : $(snes)/cheat/cheat.cpp $(snes)/cheat/*
+obj/snes-cpu.o      : $(snes)/cpu/cpu.cpp $(call rwildcard,$(snes)/cpu/)
+obj/snes-smp.o      : $(snes)/smp/smp.cpp $(call rwildcard,$(snes)/smp/)
+obj/snes-dsp.o      : $(snes)/dsp/dsp.cpp $(call rwildcard,$(snes)/dsp/)
+obj/snes-ppu.o      : $(snes)/ppu/ppu.cpp $(call rwildcard,$(snes)/ppu/)
+obj/snes-cartridge.o: $(snes)/cartridge/cartridge.cpp $(call rwilddcard,$(snes)/cartridge/)
+obj/snes-cheat.o    : $(snes)/cheat/cheat.cpp $(call rwildcard,$(snes)/cheat/)
 
 obj/snes-supergameboy.o: $(snes)/chip/supergameboy/supergameboy.cpp $(call rwildcard,$(snes)/chip/supergameboy/)
 obj/snes-superfx.o     : $(snes)/chip/superfx/superfx.cpp $(call rwildcard,$(snes)/chip/superfx/)

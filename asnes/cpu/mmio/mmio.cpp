@@ -241,44 +241,49 @@ uint8 CPU::mmio_r421f() { return status.joy4h; }  //JOY4H
 
 //DMAPx
 uint8 CPU::mmio_r43x0(uint8 i) {
-  return channel[i].dmap;
+  return (channel[i].direction << 7)
+       | (channel[i].indirect << 6)
+       | (channel[i].unused << 5)
+       | (channel[i].reverse_transfer << 4)
+       | (channel[i].fixed_transfer << 3)
+       | (channel[i].transfer_mode << 0);
 }
 
 //BBADx
 uint8 CPU::mmio_r43x1(uint8 i) {
-  return channel[i].destaddr;
+  return channel[i].dest_addr;
 }
 
 //A1TxL
 uint8 CPU::mmio_r43x2(uint8 i) {
-  return channel[i].srcaddr;
+  return channel[i].source_addr;
 }
 
 //A1TxH
 uint8 CPU::mmio_r43x3(uint8 i) {
-  return channel[i].srcaddr >> 8;
+  return channel[i].source_addr >> 8;
 }
 
 //A1Bx
 uint8 CPU::mmio_r43x4(uint8 i) {
-  return channel[i].srcbank;
+  return channel[i].source_bank;
 }
 
 //DASxL
-//union { uint16 xfersize; uint16 hdma_iaddr; };
+//union { uint16 transfer_size; uint16 indirect_addr; };
 uint8 CPU::mmio_r43x5(uint8 i) {
-  return channel[i].xfersize;
+  return channel[i].transfer_size;
 }
 
 //DASxH
-//union { uint16 xfersize; uint16 hdma_iaddr; };
+//union { uint16 transfer_size; uint16 indirect_addr; };
 uint8 CPU::mmio_r43x6(uint8 i) {
-  return channel[i].xfersize >> 8;
+  return channel[i].transfer_size >> 8;
 }
 
 //DASBx
 uint8 CPU::mmio_r43x7(uint8 i) {
-  return channel[i].hdma_ibank;
+  return channel[i].indirect_bank;
 }
 
 //A2AxL
@@ -293,7 +298,7 @@ uint8 CPU::mmio_r43x9(uint8 i) {
 
 //NTRLx
 uint8 CPU::mmio_r43xa(uint8 i) {
-  return channel[i].hdma_line_counter;
+  return channel[i].line_counter;
 }
 
 //???
@@ -303,49 +308,49 @@ uint8 CPU::mmio_r43xb(uint8 i) {
 
 //DMAPx
 void CPU::mmio_w43x0(uint8 i, uint8 data) {
-  channel[i].dmap          = data;
-  channel[i].direction     = data & 0x80;
-  channel[i].hdma_indirect = data & 0x40;
-  channel[i].reversexfer   = data & 0x10;
-  channel[i].fixedxfer     = data & 0x08;
-  channel[i].xfermode      = data & 7;
+  channel[i].direction = data & 0x80;
+  channel[i].indirect = data & 0x40;
+  channel[i].unused = data & 0x20;
+  channel[i].reverse_transfer = data & 0x10;
+  channel[i].fixed_transfer = data & 0x08;
+  channel[i].transfer_mode = data & 0x07;
 }
 
 //DDBADx
 void CPU::mmio_w43x1(uint8 i, uint8 data) {
-  channel[i].destaddr = data;
+  channel[i].dest_addr = data;
 }
 
 //A1TxL
 void CPU::mmio_w43x2(uint8 i, uint8 data) {
-  channel[i].srcaddr = (channel[i].srcaddr & 0xff00) | (data);
+  channel[i].source_addr = (channel[i].source_addr & 0xff00) | (data);
 }
 
 //A1TxH
 void CPU::mmio_w43x3(uint8 i, uint8 data) {
-  channel[i].srcaddr = (channel[i].srcaddr & 0x00ff) | (data << 8);
+  channel[i].source_addr = (channel[i].source_addr & 0x00ff) | (data << 8);
 }
 
 //A1Bx
 void CPU::mmio_w43x4(uint8 i, uint8 data) {
-  channel[i].srcbank = data;
+  channel[i].source_bank = data;
 }
 
 //DASxL
-//union { uint16 xfersize; uint16 hdma_iaddr; };
+//union { uint16 transfer_size; uint16 indirect_addr; };
 void CPU::mmio_w43x5(uint8 i, uint8 data) {
-  channel[i].xfersize = (channel[i].xfersize & 0xff00) | (data);
+  channel[i].transfer_size = (channel[i].transfer_size & 0xff00) | (data);
 }
 
 //DASxH
-//union { uint16 xfersize; uint16 hdma_iaddr; };
+//union { uint16 transfer_size; uint16 indirect_addr; };
 void CPU::mmio_w43x6(uint8 i, uint8 data) {
-  channel[i].xfersize = (channel[i].xfersize & 0x00ff) | (data << 8);
+  channel[i].transfer_size = (channel[i].transfer_size & 0x00ff) | (data << 8);
 }
 
 //DASBx
 void CPU::mmio_w43x7(uint8 i, uint8 data) {
-  channel[i].hdma_ibank = data;
+  channel[i].indirect_bank = data;
 }
 
 //A2AxL
@@ -360,7 +365,7 @@ void CPU::mmio_w43x9(uint8 i, uint8 data) {
 
 //NTRLx
 void CPU::mmio_w43xa(uint8 i, uint8 data) {
-  channel[i].hdma_line_counter = data;
+  channel[i].line_counter = data;
 }
 
 //???

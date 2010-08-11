@@ -55,7 +55,6 @@ public:
 
   void update_oam_status();
   //required functions
-  void run();
   void scanline();
   void render_scanline();
   void frame();

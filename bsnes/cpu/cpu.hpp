@@ -1,3 +1,5 @@
+#include <nall/priorityqueue.hpp>
+
 class CPU : public Processor, public CPUcore, public PPUcounter, public MMIO {
 public:
   array<Processor*> coprocessors;
@@ -8,9 +10,15 @@ public:
 
   uint8 pio();
   bool joylatch();
-  alwaysinline bool interrupt_pending() { return status.interrupt_pending; }
-  alwaysinline uint8 port_read(uint8 port) { return apu_port[port & 3]; }
-  alwaysinline void port_write(uint8 port, uint8 data) { apu_port[port & 3] = data; }
+  bool interrupt_pending();
+  uint8 port_read(uint8 port);
+  void port_write(uint8 port, uint8 data);
+  uint8 mmio_read(unsigned addr);
+  void mmio_write(unsigned addr, uint8 data);
+
+  void op_io();
+  uint8 op_read(unsigned addr);
+  void op_write(unsigned addr, uint8 data);
 
   void power();
   void reset();
@@ -20,113 +28,113 @@ public:
   ~CPU();
 
 private:
-  #include "dma/dma.hpp"
-  #include "memory/memory.hpp"
-  #include "mmio/mmio.hpp"
-  #include "timing/timing.hpp"
+  //cpu
+  static void Enter();
+  void enter();
+  void op_irq(uint16 vector);
 
-  uint8 cpu_version;
+  //timing
+  nall::priority_queue<unsigned> queue;
+  void queue_event(unsigned id);
+  void last_cycle();
+  void add_clocks(unsigned clocks);
+  void add_time(unsigned clocks);
+  void scanline();
+  void run_auto_joypad_poll();
+
+  //memory
+  unsigned speed(unsigned addr) const;
+
+  //dma
+  bool dma_transfer_valid(uint8 bbus, unsigned abus);
+  bool dma_addr_valid(unsigned abus);
+  uint8 dma_read(unsigned abus);
+  void dma_write(bool valid, unsigned addr, uint8 data);
+  void dma_transfer(bool direction, uint8 bbus, unsigned abus);
+  uint8 dma_bbus(unsigned i, unsigned index);
+  unsigned dma_addr(unsigned i);
+  unsigned hdma_addr(unsigned i);
+  unsigned hdma_iaddr(unsigned i);
+  void dma_run();
+  void hdma_update(unsigned i);
+  void hdma_run();
+  void hdma_init();
+  void dma_reset();
+
+  //registers
+  uint8 port_data[4];
+
+  struct Channel {
+    bool dma_enabled;
+    bool hdma_enabled;
+
+    bool direction;
+    bool indirect;
+    bool unused;
+    bool reverse_transfer;
+    bool fixed_transfer;
+    uint8 transfer_mode;
+
+    uint8 dest_addr;
+    uint16 source_addr;
+    uint8 source_bank;
+
+    union {
+      uint16 transfer_size;
+      uint16 indirect_addr;
+    };
+
+    uint8 indirect_bank;
+    uint16 hdma_addr;
+    uint8 line_counter;
+    uint8 unknown;
+
+    bool hdma_completed;
+    bool hdma_do_transfer;
+  } channel[8];
 
   struct Status {
-    bool interrupt_pending;
-    uint16 interrupt_vector;
-
-    unsigned clock_count;
-    unsigned line_clocks;
-
-    //timing
-    bool irq_lock;
-
-    unsigned dram_refresh_position;
-    bool dram_refreshed;
-
-    unsigned hdma_init_position;
-    bool hdma_init_triggered;
-
-    unsigned hdma_position;
-    bool hdma_triggered;
-
     bool nmi_valid;
     bool nmi_line;
     bool nmi_transition;
     bool nmi_pending;
-    bool nmi_hold;
 
     bool irq_valid;
     bool irq_line;
     bool irq_transition;
     bool irq_pending;
-    bool irq_hold;
 
-    bool reset_pending;
-
-    //DMA
-    bool dma_active;
-    unsigned dma_counter;
-    unsigned dma_clocks;
-    bool dma_pending;
     bool hdma_pending;
-    bool hdma_mode;  //0 = init, 1 = run
 
-    //MMIO
-    //$2181-$2183
-    uint32 wram_addr;
+    unsigned wram_addr;
 
-    //$4016-$4017
     bool joypad_strobe_latch;
-    uint32 joypad1_bits;
-    uint32 joypad2_bits;
 
-    //$4200
     bool nmi_enabled;
-    bool hirq_enabled, virq_enabled;
-    bool auto_joypad_poll;
+    bool virq_enabled;
+    bool hirq_enabled;
+    bool auto_joypad_poll_enabled;
 
-    //$4201
     uint8 pio;
 
-    //$4202-$4203
     uint8 wrmpya;
     uint8 wrmpyb;
-
-    //$4204-$4206
     uint16 wrdiva;
-    uint8  wrdivb;
+    uint8 wrdivb;
 
-    //$4207-$420a
-    uint16 hirq_pos, virq_pos;
+    uint16 htime;
+    uint16 vtime;
 
-    //$420d
     unsigned rom_speed;
 
-    //$4214-$4217
     uint16 rddiv;
     uint16 rdmpy;
 
-    //$4218-$421f
     uint8 joy1l, joy1h;
     uint8 joy2l, joy2h;
     uint8 joy3l, joy3h;
     uint8 joy4l, joy4h;
   } status;
-
-  struct ALU {
-    unsigned mpyctr;
-    unsigned divctr;
-    unsigned shift;
-  } alu;
-
-  static void Enter();
-  void enter();
-  void op_irq();
-  debugvirtual void op_step();
-
-  friend class CPUDebugger;
 };
 
-#if defined(DEBUGGER)
-  #include "debugger/debugger.hpp"
-  extern CPUDebugger cpu;
-#else
-  extern CPU cpu;
-#endif
+extern CPU cpu;
