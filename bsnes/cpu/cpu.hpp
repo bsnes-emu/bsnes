@@ -34,11 +34,16 @@ private:
   void op_irq(uint16 vector);
 
   //timing
+  struct QueueEvent {
+    enum : unsigned {
+      DramRefresh,
+      HdmaRun,
+    };
+  };
   nall::priority_queue<unsigned> queue;
   void queue_event(unsigned id);
   void last_cycle();
   void add_clocks(unsigned clocks);
-  void add_time(unsigned clocks);
   void scanline();
   void run_auto_joypad_poll();
 
@@ -56,6 +61,7 @@ private:
   unsigned hdma_addr(unsigned i);
   unsigned hdma_iaddr(unsigned i);
   void dma_run();
+  bool hdma_active_after(unsigned i);
   void hdma_update(unsigned i);
   void hdma_run();
   void hdma_init();
@@ -104,6 +110,7 @@ private:
     bool irq_transition;
     bool irq_pending;
 
+    bool irq_lock;
     bool hdma_pending;
 
     unsigned wram_addr;

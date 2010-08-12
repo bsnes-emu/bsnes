@@ -112,6 +112,7 @@ void CPU::reset() {
   status.irq_transition = false;
   status.irq_pending = false;
 
+  status.irq_lock = false;
   status.hdma_pending = false;
 
   status.wram_addr = 0x000000;

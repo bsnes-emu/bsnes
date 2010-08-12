@@ -83,6 +83,15 @@ void CPU::dma_run() {
       dma_transfer(channel[i].direction, dma_bbus(i, index++), dma_addr(i));
     } while(channel[i].dma_enabled && --channel[i].transfer_size);
   }
+
+  status.irq_lock = true;
+}
+
+bool CPU::hdma_active_after(unsigned i) {
+  for(unsigned n = i + 1; i < 8; i++) {
+    if(channel[i].hdma_enabled && !channel[i].hdma_completed) return true;
+  }
+  return false;
 }
 
 void CPU::hdma_update(unsigned i) {
@@ -93,10 +102,15 @@ void CPU::hdma_update(unsigned i) {
     add_clocks(8);
 
     if(channel[i].indirect) {
-      channel[i].indirect_addr  = dma_read(hdma_addr(i)) << 0;
+      channel[i].indirect_addr = dma_read(hdma_addr(i)) << 8;
       add_clocks(8);
-      channel[i].indirect_addr |= dma_read(hdma_addr(i)) << 8;
-      add_clocks(8);
+
+    //emulating this glitch causes a slight slowdown; only enable if needed
+    //if(!channel[i].hdma_completed || hdma_active_after(i)) {
+        channel[i].indirect_addr >>= 8;
+        channel[i].indirect_addr |= dma_read(hdma_addr(i)) << 8;
+        add_clocks(8);
+    //}
     }
   }
 }
@@ -108,7 +122,7 @@ void CPU::hdma_run() {
   }
   if(channels == 0) return;
 
-  add_clocks(16);
+  add_clocks(24);
   for(unsigned i = 0; i < 8; i++) {
     if(channel[i].hdma_enabled == false || channel[i].hdma_completed == true) continue;
     channel[i].dma_enabled = false;
@@ -130,6 +144,8 @@ void CPU::hdma_run() {
     channel[i].hdma_do_transfer = channel[i].line_counter & 0x80;
     hdma_update(i);
   }
+
+  status.irq_lock = true;
 }
 
 void CPU::hdma_init() {
@@ -150,6 +166,8 @@ void CPU::hdma_init() {
     channel[i].line_counter = 0;
     hdma_update(i);
   }
+
+  status.irq_lock = true;
 }
 
 void CPU::dma_reset() {

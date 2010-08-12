@@ -1,12 +1,5 @@
 #ifdef CPU_CPP
 
-struct QueueEvent {
-  enum : unsigned {
-    DramRefresh,
-    HdmaRun,
-  };
-};
-
 void CPU::queue_event(unsigned id) {
   switch(id) {
     case QueueEvent::DramRefresh: return add_clocks(40);
@@ -15,13 +8,18 @@ void CPU::queue_event(unsigned id) {
 }
 
 void CPU::last_cycle() {
+  if(status.irq_lock) {
+    status.irq_lock = false;
+    return;
+  }
+
   if(status.nmi_transition) {
     regs.wai = false;
     status.nmi_transition = false;
     status.nmi_pending = true;
   }
 
-  if(status.irq_transition) {
+  if(status.irq_transition || regs.irq) {
     regs.wai = false;
     status.irq_transition = false;
     status.irq_pending = !regs.p.i;
@@ -29,40 +27,32 @@ void CPU::last_cycle() {
 }
 
 void CPU::add_clocks(unsigned clocks) {
-  step(clocks);
-  queue.tick(clocks);
-  unsigned clocksleft = lineclocks() - hcounter();
-  if(clocks > clocksleft) {
-    add_time(clocksleft);
-    add_time(clocks - clocksleft);
-  } else {
-    add_time(clocks);
-  }
-}
-
-void CPU::add_time(unsigned clocks) {
-  if(status.irq_line && (status.virq_enabled || status.hirq_enabled)) {
-    status.irq_transition = true;
-  }
-
-  if(status.virq_enabled && !status.hirq_enabled) {
+  if(status.hirq_enabled) {
+    if(status.virq_enabled) {
+      unsigned cpu_time = vcounter() * 1364 + hcounter();
+      unsigned irq_time = status.vtime * 1364 + status.htime * 4;
+      if(cpu_time > irq_time) irq_time += 262 * 1364;
+      bool irq_valid = status.irq_valid;
+      status.irq_valid = cpu_time <= irq_time && cpu_time + clocks > irq_time;
+      if(!irq_valid && status.irq_valid) status.irq_line = true;
+    } else {
+      unsigned irq_time = status.htime * 4;
+      if(hcounter() > irq_time) irq_time += 1364;
+      bool irq_valid = status.irq_valid;
+      status.irq_valid = hcounter() <= irq_time && hcounter() + clocks > irq_time;
+      if(!irq_valid && status.irq_valid) status.irq_line = true;
+    }
+    if(status.irq_line) status.irq_transition = true;
+  } else if(status.virq_enabled) {
     bool irq_valid = status.irq_valid;
     status.irq_valid = vcounter() == status.vtime;
-    if(!irq_valid && status.irq_valid) {
-      status.irq_line = true;
-      status.irq_transition = true;
-    }
-  } else if(status.hirq_enabled) {
-    bool irq_valid = status.irq_valid;
-    status.irq_valid = hcounter() <= status.htime * 4 && hcounter() + clocks > status.htime * 4;
-    if(status.virq_enabled && vcounter() != status.vtime) status.irq_valid = false;
-    if(!irq_valid && status.irq_valid) {
-      status.irq_line = true;
-      status.irq_transition = true;
-    }
+    if(!irq_valid && status.irq_valid) status.irq_line = true;
+    if(status.irq_line) status.irq_transition = true;
   }
 
   tick(clocks);
+  queue.tick(clocks);
+  step(clocks);
 }
 
 void CPU::scanline() {
