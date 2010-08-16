@@ -1,6 +1,6 @@
 include nall/Makefile
 snes := snes
-profile := research
+profile := accuracy
 ui := qt
 
 # compiler
@@ -61,14 +61,14 @@ endif
 
 install:
 ifeq ($(platform),x)
-	install -D -m 755 out/bsnes $(DESTDIR)$(prefix)/bin/bsnes
+	install -D -m 755 out/bsnes-$(profile) $(DESTDIR)$(prefix)/bin/bsnes-$(profile)
 	install -D -m 644 qt/data/bsnes.png $(DESTDIR)$(prefix)/share/pixmaps/bsnes.png
 	install -D -m 644 qt/data/bsnes.desktop $(DESTDIR)$(prefix)/share/applications/bsnes.desktop
 endif
 
 uninstall:
 ifeq ($(platform),x)
-	rm $(DESTDIR)$(prefix)/bin/bsnes
+	rm $(DESTDIR)$(prefix)/bin/bsnes-$(profile)
 	rm $(DESTDIR)$(prefix)/share/pixmaps/bsnes.png
 	rm $(DESTDIR)$(prefix)/share/applications/bsnes.desktop
 endif

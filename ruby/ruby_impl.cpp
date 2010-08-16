@@ -133,6 +133,10 @@
   #include <ruby/audio/pulseaudiosimple.cpp>
 #endif
 
+#ifdef AUDIO_XAUDIO2
+  #include <ruby/audio/xaudio2.cpp>
+#endif
+
 /* Input */
 
 #define DeclareInput(Name) \

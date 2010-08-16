@@ -10,14 +10,14 @@ snes_objects += snes-obc1 snes-st0010 snes-st0011 snes-st0018
 snes_objects += snes-msu1 snes-serial
 objects += $(snes_objects)
 
-ifeq ($(profile),research)
-  flags += -DPROFILE_RESEARCH
+ifeq ($(profile),accuracy)
+  flags += -DPROFILE_ACCURACY
   snescpu := $(snes)/cpu
   snessmp := $(snes)/smp
   snesdsp := $(snes)/dsp
   snesppu := $(snes)/ppu
-else ifeq ($(profile),baseline)
-  flags += -DPROFILE_BASELINE
+else ifeq ($(profile),compatibility)
+  flags += -DPROFILE_COMPATIBILITY
   snescpu := $(snes)/cpu
   snessmp := $(snes)/smp
   snesdsp := $(snes)/fast/dsp

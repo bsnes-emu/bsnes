@@ -1,7 +1,7 @@
 namespace SNES {
   namespace Info {
     static const char Name[] = "bsnes";
-    static const char Version[] = "067.21";
+    static const char Version[] = "067.22";
     static const unsigned SerializerVersion = 12;
   }
 }
@@ -76,10 +76,10 @@ namespace SNES {
   #include <smp/core/core.hpp>
   #include <ppu/counter/counter.hpp>
 
-  #if defined(PROFILE_RESEARCH)
-  #include "profile-research.hpp"
-  #elif defined(PROFILE_BASELINE)
-  #include "profile-baseline.hpp"
+  #if defined(PROFILE_ACCURACY)
+  #include "profile-accuracy.hpp"
+  #elif defined(PROFILE_COMPATIBILITY)
+  #include "profile-compatibility.hpp"
   #elif defined(PROFILE_PERFORMANCE)
   #include "profile-performance.hpp"
   #endif

@@ -139,16 +139,16 @@ public:
       key(Keyboard::Period      ) = (bool)(state[0x34] & 0x80);
       key(Keyboard::Slash       ) = (bool)(state[0x35] & 0x80);
 
-      key(Keyboard::Keypad0) = (bool)(state[0x4f] & 0x80);
-      key(Keyboard::Keypad1) = (bool)(state[0x50] & 0x80);
-      key(Keyboard::Keypad2) = (bool)(state[0x51] & 0x80);
-      key(Keyboard::Keypad3) = (bool)(state[0x4b] & 0x80);
-      key(Keyboard::Keypad4) = (bool)(state[0x4c] & 0x80);
-      key(Keyboard::Keypad5) = (bool)(state[0x4d] & 0x80);
-      key(Keyboard::Keypad6) = (bool)(state[0x47] & 0x80);
-      key(Keyboard::Keypad7) = (bool)(state[0x48] & 0x80);
-      key(Keyboard::Keypad8) = (bool)(state[0x49] & 0x80);
-      key(Keyboard::Keypad9) = (bool)(state[0x52] & 0x80);
+      key(Keyboard::Keypad1) = (bool)(state[0x4f] & 0x80);
+      key(Keyboard::Keypad2) = (bool)(state[0x50] & 0x80);
+      key(Keyboard::Keypad3) = (bool)(state[0x51] & 0x80);
+      key(Keyboard::Keypad4) = (bool)(state[0x4b] & 0x80);
+      key(Keyboard::Keypad5) = (bool)(state[0x4c] & 0x80);
+      key(Keyboard::Keypad6) = (bool)(state[0x4d] & 0x80);
+      key(Keyboard::Keypad7) = (bool)(state[0x47] & 0x80);
+      key(Keyboard::Keypad8) = (bool)(state[0x48] & 0x80);
+      key(Keyboard::Keypad9) = (bool)(state[0x49] & 0x80);
+      key(Keyboard::Keypad0) = (bool)(state[0x52] & 0x80);
       key(Keyboard::Point  ) = (bool)(state[0x53] & 0x80);
 
       key(Keyboard::Add     ) = (bool)(state[0x4e] & 0x80);

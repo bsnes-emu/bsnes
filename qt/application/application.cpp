@@ -61,6 +61,8 @@ void Application::locateFile(string &filename, bool createDataDirectory) {
 }
 
 int Application::main(int &argc, char **argv) {
+  CoInitialize(0);
+
   app = new App(argc, argv);
   #if !defined(PLATFORM_WIN)
   //Windows port uses 256x256 icon from resource file

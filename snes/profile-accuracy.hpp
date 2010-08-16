@@ -1,6 +1,5 @@
 namespace Info {
-  static const char Profile[] = "Research";
-  static const char ProfileName[] = "Superfluous";
+  static const char Profile[] = "Accuracy";
 }
 
 #include <cpu/cpu.hpp>

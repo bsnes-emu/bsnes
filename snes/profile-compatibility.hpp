@@ -1,6 +1,5 @@
 namespace Info {
-  static const char Profile[] = "Baseline";
-  static const char ProfileName[] = "Supersedence";
+  static const char Profile[] = "Compatibility";
 }
 
 #include <cpu/cpu.hpp>

@@ -194,6 +194,10 @@ void AudioInterface::driver(const char *driver) {
   else if(!strcmp(driver, "PulseAudioSimple")) p = new AudioPulseAudioSimple();
   #endif
 
+  #ifdef AUDIO_XAUDIO2
+  else if(!strcmp(driver, "XAudio2")) p = new AudioXAudio2();
+  #endif
+
   else p = new Audio();
 }
 
@@ -201,6 +205,8 @@ void AudioInterface::driver(const char *driver) {
 const char* AudioInterface::default_driver() {
   #if defined(AUDIO_DIRECTSOUND)
   return "DirectSound";
+  #elif defined(AUDIO_XAUDIO2)
+  return "XAudio2";
   #elif defined(AUDIO_ALSA)
   return "ALSA";
   #elif defined(AUDIO_OPENAL)
@@ -226,6 +232,10 @@ const char* AudioInterface::driver_list() {
 
   #if defined(AUDIO_DIRECTSOUND)
   "DirectSound;"
+  #endif
+
+  #if defined(AUDIO_XAUDIO2)
+  "XAudio2;"
   #endif
 
   //Linux
@@ -298,10 +308,10 @@ void InputInterface::driver(const char *driver) {
 
 //select the *safest* available driver, not the fastest
 const char* InputInterface::default_driver() {
-  #if defined(INPUT_RAWINPUT)
-  return "RawInput";
-  #elif defined(INPUT_DIRECTINPUT)
+  #if defined(INPUT_DIRECTINPUT)
   return "DirectInput";
+  #elif defined(INPUT_RAWINPUT)
+  return "RawInput";
   #elif defined(INPUT_SDL)
   return "SDL";
   #elif defined(INPUT_X)

@@ -26,7 +26,7 @@ else ifeq ($(platform),osx)
   link += $(if $(findstring audio.openal,$(ruby)),-framework OpenAL)
 else ifeq ($(platform),win)
   ruby := video.direct3d video.wgl video.directdraw video.gdi video.qtraster
-  ruby += audio.directsound
+  ruby += audio.directsound audio.xaudio2
   ruby += input.rawinput input.directinput
 
   link += $(if $(findstring audio.openal,$(ruby)),-lopenal32)

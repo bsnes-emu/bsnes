@@ -4,18 +4,18 @@ class ProfileSettingsWindow : public QWidget {
 public:
   QVBoxLayout *layout;
   QLabel *profileInfo;
-  QRadioButton *profileResearch;
-  QLabel *profileResearchInfo;
-  QRadioButton *profileBaseline;
-  QLabel *profileBaselineInfo;
+  QRadioButton *profileAccuracy;
+  QLabel *profileAccuracyInfo;
+  QRadioButton *profileCompatibility;
+  QLabel *profileCompatibilityInfo;
   QRadioButton *profilePerformance;
   QLabel *profilePerformanceInfo;
 
   ProfileSettingsWindow();
 
 private slots:
-  void setResearchProfile();
-  void setBaselineProfile();
+  void setAccuracyProfile();
+  void setCompatibilityProfile();
   void setPerformanceProfile();
 };
 
