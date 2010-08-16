@@ -4,6 +4,7 @@ void CPU::queue_event(unsigned id) {
   switch(id) {
     case QueueEvent::DramRefresh: return add_clocks(40);
     case QueueEvent::HdmaRun: return hdma_run();
+    case QueueEvent::ControllerLatch: return ppu.latch_counters();
   }
 }
 
@@ -31,7 +32,8 @@ void CPU::add_clocks(unsigned clocks) {
     if(status.virq_enabled) {
       unsigned cpu_time = vcounter() * 1364 + hcounter();
       unsigned irq_time = status.vtime * 1364 + status.htime * 4;
-      if(cpu_time > irq_time) irq_time += 262 * 1364;
+      unsigned framelines = (system.region() == System::Region::NTSC ? 262 : 312) + field();
+      if(cpu_time > irq_time) irq_time += framelines * 1364;
       bool irq_valid = status.irq_valid;
       status.irq_valid = cpu_time <= irq_time && cpu_time + clocks > irq_time;
       if(!irq_valid && status.irq_valid) status.irq_line = true;
@@ -66,7 +68,11 @@ void CPU::scanline() {
   queue.enqueue(534, QueueEvent::DramRefresh);
 
   if(vcounter() <= (ppu.overscan() == false ? 224 : 239)) {
-    queue.enqueue(1104, QueueEvent::HdmaRun);
+    queue.enqueue(1104 + 8, QueueEvent::HdmaRun);
+  }
+
+  if(vcounter() == input.latchy) {
+    queue.enqueue(input.latchx, QueueEvent::ControllerLatch);
   }
 
   bool nmi_valid = status.nmi_valid;

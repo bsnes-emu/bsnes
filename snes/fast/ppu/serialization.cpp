@@ -180,6 +180,7 @@ void PPU::serialize(serializer &s) {
     s.integer(sprite_list[n].hflip);
     s.integer(sprite_list[n].palette);
     s.integer(sprite_list[n].priority);
+    s.integer(sprite_list[n].size);
   }
   s.integer(sprite_list_valid);
   s.integer(active_sprite);

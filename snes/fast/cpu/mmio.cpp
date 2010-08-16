@@ -158,6 +158,7 @@ void CPU::mmio_write(unsigned addr, uint8 data) {
       status.irq_transition = false;
     }
 
+    status.irq_lock = true;
     return;
   }
 

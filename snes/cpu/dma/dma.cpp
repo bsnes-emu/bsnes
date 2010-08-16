@@ -3,8 +3,6 @@
 void CPU::dma_add_clocks(unsigned clocks) {
   status.dma_clocks += clocks;
   add_clocks(clocks);
-  synchronize_ppu();
-  synchronize_coprocessor();
 }
 
 //=============

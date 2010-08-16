@@ -1,15 +1,37 @@
 #ifdef PPU_CPP
 
+void PPU::update_sprite_list(unsigned addr, uint8 data) {
+  if(addr < 0x0200) {
+    unsigned i = addr >> 2;
+    switch(addr & 3) {
+    case 0: sprite_list[i].x = (sprite_list[i].x & 0x0100) | data; break;
+    case 1: sprite_list[i].y = (data + 1) & 0xff; break;
+    case 2: sprite_list[i].character = data; break;
+    case 3: sprite_list[i].vflip = data & 0x80;
+            sprite_list[i].hflip = data & 0x40;
+            sprite_list[i].priority = (data >> 4) & 3;
+            sprite_list[i].palette = (data >> 1) & 7;
+            sprite_list[i].use_nameselect = data & 0x01;
+    }
+  } else {
+    unsigned i = (addr & 0x1f) << 2;
+    sprite_list[i + 0].x = ((data & 0x01) << 8) | (sprite_list[i + 0].x & 0xff);
+    sprite_list[i + 0].size = data & 0x02;
+    sprite_list[i + 1].x = ((data & 0x04) << 6) | (sprite_list[i + 1].x & 0xff);
+    sprite_list[i + 1].size = data & 0x08;
+    sprite_list[i + 2].x = ((data & 0x10) << 4) | (sprite_list[i + 2].x & 0xff);
+    sprite_list[i + 2].size = data & 0x20;
+    sprite_list[i + 3].x = ((data & 0x40) << 2) | (sprite_list[i + 3].x & 0xff);
+    sprite_list[i + 3].size = data & 0x80;
+  }
+}
+
 void PPU::build_sprite_list() {
   if(sprite_list_valid == true) return;
   sprite_list_valid = true;
 
-  const uint8 *tableA = memory::oam.data();
-  const uint8 *tableB = memory::oam.data() + 512;
-
   for(unsigned i = 0; i < 128; i++) {
-    const bool x    = *tableB & (1 << ((i & 3) << 1));  //0x01, 0x04, 0x10, 0x40
-    const bool size = *tableB & (2 << ((i & 3) << 1));  //0x02, 0x08, 0x20, 0x80
+    const bool size = sprite_list[i].size;
 
     switch(cache.oam_basesize) {
       case 0: sprite_list[i].width  = (!size) ?  8 : 16;
@@ -40,18 +62,6 @@ void PPU::build_sprite_list() {
               if(regs.oam_interlace && !size) sprite_list[i].height = 16;
               break;
     }
-
-    sprite_list[i].x              = (x << 8) + tableA[0];
-    sprite_list[i].y              = (tableA[1] + 1) & 0xff;
-    sprite_list[i].character      = tableA[2];
-    sprite_list[i].vflip          = tableA[3] & 0x80;
-    sprite_list[i].hflip          = tableA[3] & 0x40;
-    sprite_list[i].priority       = (tableA[3] >> 4) & 3;
-    sprite_list[i].palette        = (tableA[3] >> 1) & 7;
-    sprite_list[i].use_nameselect = tableA[3] & 1;
-
-    tableA += 4;
-    if((i & 3) == 3) tableB++;
   }
 }
 

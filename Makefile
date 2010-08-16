@@ -1,6 +1,6 @@
 include nall/Makefile
 snes := snes
-profile := accuracy
+profile := performance
 ui := qt
 
 # compiler
@@ -53,8 +53,8 @@ objects := $(patsubst %,obj/%.o,$(objects))
 # targets
 build: ui_build $(objects)
 ifeq ($(platform),osx)
-	test -d ../bsnes.app || mkdir -p ../bsnes.app/Contents/MacOS
-	$(strip $(cpp) -o ../bsnes.app/Contents/MacOS/bsnes $(objects) $(link))
+	test -d ../bsnes-$(profile).app || mkdir -p ../bsnes-$(profile).app/Contents/MacOS
+	$(strip $(cpp) -o ../bsnes-$(profile).app/Contents/MacOS/bsnes-$(profile) $(objects) $(link))
 else
 	$(strip $(cpp) -o out/bsnes-$(profile) $(objects) $(link))
 endif
@@ -87,6 +87,6 @@ clean: ui_clean
 	-@$(call delete,*.manifest)
 
 archive-all:
-	tar -cjf bsnes-`date +%Y%m%d`.tar.bz2 libco nall obj out qt ruby snes Makefile sync.sh
+	tar -cjf bsnes-`date +%Y%m%d`.tar.bz2 launcher libco nall obj out qt ruby snes Makefile sync.sh cc.bat clean.bat
 
 help:;

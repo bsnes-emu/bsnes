@@ -132,11 +132,6 @@ void CPU::reset() {
   mmio_reset();
   dma_reset();
   timing_reset();
-
-  apu_port[0] = 0x00;
-  apu_port[1] = 0x00;
-  apu_port[2] = 0x00;
-  apu_port[3] = 0x00;
 }
 
 CPU::CPU() {

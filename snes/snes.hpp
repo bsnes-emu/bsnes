@@ -1,7 +1,7 @@
 namespace SNES {
   namespace Info {
     static const char Name[] = "bsnes";
-    static const char Version[] = "067.22";
+    static const char Version[] = "067.23";
     static const unsigned SerializerVersion = 12;
   }
 }
@@ -28,6 +28,7 @@ namespace SNES {
 #include <nall/stdint.hpp>
 #include <nall/string.hpp>
 #include <nall/utility.hpp>
+#include <nall/varint.hpp>
 #include <nall/vector.hpp>
 using namespace nall;
 
@@ -38,14 +39,19 @@ using namespace nall;
 #endif
 
 namespace SNES {
-  typedef int8_t   int8;
-  typedef int16_t  int16;
-  typedef int32_t  int32;
-  typedef int64_t  int64;
-  typedef uint8_t  uint8;
+  typedef int8_t int8;
+  typedef int16_t int16;
+  typedef int32_t int32;
+  typedef int64_t int64;
+  typedef uint8_t uint8;
   typedef uint16_t uint16;
   typedef uint32_t uint32;
   typedef uint64_t uint64;
+
+  typedef uint_t<2> uint2;
+  typedef uint_t<10> uint10;
+  typedef uint_t<17> uint17;
+  typedef uint_t<24> uint24;
 
   struct Processor {
     cothread_t thread;

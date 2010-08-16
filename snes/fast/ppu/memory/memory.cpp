@@ -105,11 +105,14 @@ void PPU::oam_mmio_write(uint16 addr, uint8 data) {
 
   if(regs.display_disabled == true) {
     memory::oam[addr] = data;
+    update_sprite_list(addr, data);
   } else {
     if(cpu.vcounter() < (!overscan() ? 225 : 240)) {
       memory::oam[regs.ioamaddr] = data;
+      update_sprite_list(regs.ioamaddr, data);
     } else {
       memory::oam[addr] = data;
+      update_sprite_list(addr, data);
     }
   }
 }

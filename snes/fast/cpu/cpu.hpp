@@ -37,6 +37,7 @@ private:
     enum : unsigned {
       DramRefresh,
       HdmaRun,
+      ControllerLatch,
     };
   };
   nall::priority_queue<unsigned> queue;

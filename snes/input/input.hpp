@@ -82,6 +82,7 @@ private:
 
   friend class System;
   friend class Video;
+  friend class CPU;
 };
 
 extern Input input;

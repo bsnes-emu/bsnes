@@ -65,26 +65,26 @@ void SMP::reset() {
   create(Enter, system.apu_frequency());
 
   regs.pc = 0xffc0;
-  regs.a  = 0x00;
-  regs.x  = 0x00;
-  regs.y  = 0x00;
+  regs.a = 0x00;
+  regs.x = 0x00;
+  regs.y = 0x00;
   regs.sp = 0xef;
-  regs.p  = 0x02;
+  regs.p = 0x02;
 
   for(unsigned i = 0; i < memory::apuram.size(); i++) {
     memory::apuram.write(i, 0x00);
   }
 
   status.clock_counter = 0;
-  status.dsp_counter   = 0;
-  status.timer_step    = 3;
+  status.dsp_counter = 0;
+  status.timer_step = 3;
 
   //$00f0
-  status.clock_speed     = 0;
-  status.timer_speed     = 0;
-  status.timers_enabled  = true;
-  status.ram_disabled    = false;
-  status.ram_writable    = true;
+  status.clock_speed = 0;
+  status.timer_speed = 0;
+  status.timers_enabled = true;
+  status.ram_disabled = false;
+  status.ram_writable = true;
   status.timers_disabled = false;
 
   //$00f1
@@ -94,8 +94,8 @@ void SMP::reset() {
   status.dsp_addr = 0x00;
 
   //$00f8,$00f9
-  status.smp_f8 = 0x00;
-  status.smp_f9 = 0x00;
+  status.ram0 = 0x00;
+  status.ram1 = 0x00;
 
   t0.stage0_ticks = 0;
   t1.stage0_ticks = 0;

@@ -7,11 +7,12 @@ public:
   void synchronize_ppu();
   void synchronize_coprocessor();
 
+  uint8 port_read(uint2 port) const;
+  void port_write(uint2 port, uint8 data);
+
   uint8 pio();
   bool joylatch();
   alwaysinline bool interrupt_pending() { return status.interrupt_pending; }
-  alwaysinline uint8 port_read(uint8 port) { return apu_port[port & 3]; }
-  alwaysinline void port_write(uint8 port, uint8 data) { apu_port[port & 3] = data; }
 
   void enter();
   void power();
@@ -71,8 +72,11 @@ private:
     bool hdma_mode;  //0 = init, 1 = run
 
     //MMIO
+    //$2140-217f
+    uint8 port[4];
+
     //$2181-$2183
-    uint32 wram_addr;
+    uint17 wram_addr;
 
     //$4016-$4017
     bool joypad_strobe_latch;
@@ -93,10 +97,11 @@ private:
 
     //$4204-$4206
     uint16 wrdiva;
-    uint8  wrdivb;
+    uint8 wrdivb;
 
     //$4207-$420a
-    uint16 hirq_pos, virq_pos;
+    uint10 hirq_pos;
+    uint10 virq_pos;
 
     //$420d
     unsigned rom_speed;

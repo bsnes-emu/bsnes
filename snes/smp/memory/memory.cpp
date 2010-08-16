@@ -11,12 +11,12 @@ alwaysinline void SMP::ram_write(uint16 addr, uint8 data) {
   if(status.ram_writable && !status.ram_disabled) memory::apuram[addr] = data;
 }
 
-uint8 SMP::port_read(uint8 port) {
-  return memory::apuram[0xf4 + (port & 3)];
+uint8 SMP::port_read(uint2 port) const {
+  return memory::apuram[0xf4 + port];
 }
 
-void SMP::port_write(uint8 port, uint8 data) {
-  memory::apuram[0xf4 + (port & 3)] = data;
+void SMP::port_write(uint2 port, uint8 data) {
+  memory::apuram[0xf4 + port] = data;
 }
 
 alwaysinline uint8 SMP::op_busread(uint16 addr) {
@@ -45,15 +45,15 @@ alwaysinline uint8 SMP::op_busread(uint16 addr) {
       case 0xf6:    //CPUIO2
       case 0xf7: {  //CPUIO3
         synchronize_cpu();
-        r = cpu.port_read(addr & 3);
+        r = cpu.port_read(addr);
       } break;
 
       case 0xf8: {  //RAM0
-        r = status.smp_f8;
+        r = status.ram0;
       } break;
 
       case 0xf9: {  //RAM1
-        r = status.smp_f9;
+        r = status.ram1;
       } break;
 
       case 0xfa:    //T0TARGET
@@ -146,7 +146,7 @@ alwaysinline void SMP::op_buswrite(uint16 addr, uint8 data) {
       } break;
 
       case 0xf3: {  //DSPDATA
-        //0x80-0xff is a read-only mirror of 0x00-0x7f
+        //0x80-0xff are read-only mirrors of 0x00-0x7f
         if(!(status.dsp_addr & 0x80)) {
           dsp.write(status.dsp_addr & 0x7f, data);
         }
@@ -157,15 +157,15 @@ alwaysinline void SMP::op_buswrite(uint16 addr, uint8 data) {
       case 0xf6:    //CPUIO2
       case 0xf7: {  //CPUIO3
         synchronize_cpu();
-        port_write(addr & 3, data);
+        port_write(addr, data);
       } break;
 
       case 0xf8: {  //RAM0
-        status.smp_f8 = data;
+        status.ram0 = data;
       } break;
 
       case 0xf9: {  //RAM1
-        status.smp_f9 = data;
+        status.ram1 = data;
       } break;
 
       case 0xfa: {  //T0TARGET

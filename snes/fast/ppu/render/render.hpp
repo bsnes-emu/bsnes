@@ -62,6 +62,7 @@ struct sprite_item {
   bool   vflip, hflip;
   uint8  palette;
   uint8  priority;
+  bool   size;
 } sprite_list[128];
 bool sprite_list_valid;
 unsigned active_sprite;
@@ -75,6 +76,7 @@ struct oam_tileitem {
 enum { OAM_PRI_NONE = 4 };
 uint8 oam_line_pal[256], oam_line_pri[256];
 
+void update_sprite_list(unsigned addr, uint8 data);
 void build_sprite_list();
 bool is_sprite_on_scanline();
 void load_oam_tiles();

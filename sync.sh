@@ -11,3 +11,4 @@ synchronize "ruby"
 
 test -d libco/doc && rm -r libco/doc
 test -d libco/test && rm -r libco/test
+test -d ruby/_test && rm -r ruby/_test

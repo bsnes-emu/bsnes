@@ -5,8 +5,8 @@ public:
   alwaysinline void synchronize_cpu();
   alwaysinline void synchronize_dsp();
 
-  uint8 port_read(uint8 port);
-  void port_write(uint8 port, uint8 data);
+  uint8 port_read(uint2 port) const;
+  void port_write(uint2 port, uint8 data);
 
   void enter();
   void power();
@@ -43,7 +43,8 @@ private:
     uint8 dsp_addr;
 
     //$00f8,$00f9
-    uint8 smp_f8, smp_f9;
+    uint8 ram0;
+    uint8 ram1;
   } status;
 
   static void Enter();

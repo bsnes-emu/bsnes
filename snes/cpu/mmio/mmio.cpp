@@ -5,33 +5,27 @@ bool CPU::joylatch() { return status.joypad_strobe_latch; }
 
 //WMDATA
 uint8 CPU::mmio_r2180() {
-  uint8 r = bus.read(0x7e0000 | status.wram_addr);
-  status.wram_addr = (status.wram_addr + 1) & 0x01ffff;
-  return r;
+  return bus.read(0x7e0000 | status.wram_addr++);
 }
 
 //WMDATA
 void CPU::mmio_w2180(uint8 data) {
-  bus.write(0x7e0000 | status.wram_addr, data);
-  status.wram_addr = (status.wram_addr + 1) & 0x01ffff;
+  bus.write(0x7e0000 | status.wram_addr++, data);
 }
 
 //WMADDL
 void CPU::mmio_w2181(uint8 data) {
-  status.wram_addr  = (status.wram_addr & 0xffff00) | (data);
-  status.wram_addr &= 0x01ffff;
+  status.wram_addr = (status.wram_addr & 0x01ff00) | (data <<  0);
 }
 
 //WMADDM
 void CPU::mmio_w2182(uint8 data) {
-  status.wram_addr  = (status.wram_addr & 0xff00ff) | (data << 8);
-  status.wram_addr &= 0x01ffff;
+  status.wram_addr = (status.wram_addr & 0x0100ff) | (data <<  8);
 }
 
 //WMADDH
 void CPU::mmio_w2183(uint8 data) {
-  status.wram_addr  = (status.wram_addr & 0x00ffff) | (data << 16);
-  status.wram_addr &= 0x01ffff;
+  status.wram_addr = (status.wram_addr & 0x00ffff) | (data << 16);
 }
 
 //JOYSER0
@@ -42,10 +36,7 @@ void CPU::mmio_w4016(uint8 data) {
   bool old_latch = status.joypad_strobe_latch;
   bool new_latch = data & 1;
   status.joypad_strobe_latch = new_latch;
-
-  if(old_latch != new_latch) {
-    input.poll();
-  }
+  if(old_latch != new_latch) input.poll();
 }
 
 //JOYSER0
@@ -69,15 +60,13 @@ uint8 CPU::mmio_r4017() {
 
 //NMITIMEN
 void CPU::mmio_w4200(uint8 data) {
-  status.auto_joypad_poll = !!(data & 0x01);
+  status.auto_joypad_poll = data & 1;
   nmitimen_update(data);
 }
 
 //WRIO
 void CPU::mmio_w4201(uint8 data) {
-  if((status.pio & 0x80) && !(data & 0x80)) {
-    ppu.latch_counters();
-  }
+  if((status.pio & 0x80) && !(data & 0x80)) ppu.latch_counters();
   status.pio = data;
 }
 
@@ -100,7 +89,7 @@ void CPU::mmio_w4203(uint8 data) {
 
 //WRDIVL
 void CPU::mmio_w4204(uint8 data) {
-  status.wrdiva = (status.wrdiva & 0xff00) | (data);
+  status.wrdiva = (status.wrdiva & 0xff00) | (data << 0);
 }
 
 //WRDIVH
@@ -121,26 +110,22 @@ void CPU::mmio_w4206(uint8 data) {
 
 //HTIMEL
 void CPU::mmio_w4207(uint8 data) {
-  status.hirq_pos  = (status.hirq_pos & ~0xff) | (data);
-  status.hirq_pos &= 0x01ff;
+  status.hirq_pos = (status.hirq_pos & 0x0100) | (data << 0);
 }
 
 //HTIMEH
 void CPU::mmio_w4208(uint8 data) {
-  status.hirq_pos  = (status.hirq_pos &  0xff) | (data << 8);
-  status.hirq_pos &= 0x01ff;
+  status.hirq_pos = (status.hirq_pos & 0x00ff) | (data << 8);
 }
 
 //VTIMEL
 void CPU::mmio_w4209(uint8 data) {
-  status.virq_pos  = (status.virq_pos & ~0xff) | (data);
-  status.virq_pos &= 0x01ff;
+  status.virq_pos = (status.virq_pos & 0x0100) | (data << 0);
 }
 
 //VTIMEH
 void CPU::mmio_w420a(uint8 data) {
-  status.virq_pos  = (status.virq_pos &  0xff) | (data << 8);
-  status.virq_pos &= 0x01ff;
+  status.virq_pos = (status.virq_pos & 0x00ff) | (data << 8);
 }
 
 //DMAEN
@@ -191,16 +176,9 @@ uint8 CPU::mmio_r4211() {
 uint8 CPU::mmio_r4212() {
   uint8 r = (regs.mdr & 0x3e);
   uint16 vs = ppu.overscan() == false ? 225 : 240;
-
-  //auto joypad polling
-  if(vcounter() >= vs && vcounter() <= (vs + 2))r |= 0x01;
-
-  //hblank
-  if(hcounter() <= 2 || hcounter() >= 1096)r |= 0x40;
-
-  //vblank
-  if(vcounter() >= vs)r |= 0x80;
-
+  if(vcounter() >= vs && vcounter() <= (vs + 2)) r |= 0x01;  //auto joypad polling
+  if(hcounter() <= 2 || hcounter() >= 1096) r |= 0x40;  //hblank
+  if(vcounter() >= vs) r |= 0x80;  //vblank
   return r;
 }
 
@@ -211,7 +189,7 @@ uint8 CPU::mmio_r4213() {
 
 //RDDIVL
 uint8 CPU::mmio_r4214() {
-  return status.rddiv;
+  return status.rddiv >> 0;
 }
 
 //RDDIVH
@@ -221,7 +199,7 @@ uint8 CPU::mmio_r4215() {
 
 //RDMPYL
 uint8 CPU::mmio_r4216() {
-  return status.rdmpy;
+  return status.rdmpy >> 0;
 }
 
 //RDMPYH
@@ -256,7 +234,7 @@ uint8 CPU::mmio_r43x1(uint8 i) {
 
 //A1TxL
 uint8 CPU::mmio_r43x2(uint8 i) {
-  return channel[i].source_addr;
+  return channel[i].source_addr >> 0;
 }
 
 //A1TxH
@@ -272,7 +250,7 @@ uint8 CPU::mmio_r43x4(uint8 i) {
 //DASxL
 //union { uint16 transfer_size; uint16 indirect_addr; };
 uint8 CPU::mmio_r43x5(uint8 i) {
-  return channel[i].transfer_size;
+  return channel[i].transfer_size >> 0;
 }
 
 //DASxH
@@ -288,7 +266,7 @@ uint8 CPU::mmio_r43x7(uint8 i) {
 
 //A2AxL
 uint8 CPU::mmio_r43x8(uint8 i) {
-  return channel[i].hdma_addr;
+  return channel[i].hdma_addr >> 0;
 }
 
 //A2AxH
@@ -323,7 +301,7 @@ void CPU::mmio_w43x1(uint8 i, uint8 data) {
 
 //A1TxL
 void CPU::mmio_w43x2(uint8 i, uint8 data) {
-  channel[i].source_addr = (channel[i].source_addr & 0xff00) | (data);
+  channel[i].source_addr = (channel[i].source_addr & 0xff00) | (data << 0);
 }
 
 //A1TxH
@@ -339,7 +317,7 @@ void CPU::mmio_w43x4(uint8 i, uint8 data) {
 //DASxL
 //union { uint16 transfer_size; uint16 indirect_addr; };
 void CPU::mmio_w43x5(uint8 i, uint8 data) {
-  channel[i].transfer_size = (channel[i].transfer_size & 0xff00) | (data);
+  channel[i].transfer_size = (channel[i].transfer_size & 0xff00) | (data << 0);
 }
 
 //DASxH
@@ -355,7 +333,7 @@ void CPU::mmio_w43x7(uint8 i, uint8 data) {
 
 //A2AxL
 void CPU::mmio_w43x8(uint8 i, uint8 data) {
-  channel[i].hdma_addr = (channel[i].hdma_addr & 0xff00) | (data);
+  channel[i].hdma_addr = (channel[i].hdma_addr & 0xff00) | (data << 0);
 }
 
 //A2AxH
@@ -377,6 +355,9 @@ void CPU::mmio_power() {
 }
 
 void CPU::mmio_reset() {
+  //$2140-217f
+  foreach(port, status.port) port = 0x00;
+
   //$2181-$2183
   status.wram_addr = 0x000000;
 
@@ -386,9 +367,9 @@ void CPU::mmio_reset() {
   status.joypad2_bits = ~0;
 
   //$4200
-  status.nmi_enabled      = false;
-  status.hirq_enabled     = false;
-  status.virq_enabled     = false;
+  status.nmi_enabled = false;
+  status.hirq_enabled = false;
+  status.virq_enabled = false;
   status.auto_joypad_poll = false;
 
   //$4201
@@ -426,7 +407,7 @@ void CPU::mmio_reset() {
   //ALU
   alu.mpyctr = 0;
   alu.divctr = 0;
-  alu.shift  = 0;
+  alu.shift = 0;
 }
 
 uint8 CPU::mmio_read(unsigned addr) {
@@ -435,7 +416,7 @@ uint8 CPU::mmio_read(unsigned addr) {
   //APU
   if((addr & 0xffc0) == 0x2140) {  //$2140-$217f
     synchronize_smp();
-    return smp.port_read(addr & 3);
+    return smp.port_read(addr);
   }
 
   //DMA
@@ -492,7 +473,7 @@ void CPU::mmio_write(unsigned addr, uint8 data) {
   //APU
   if((addr & 0xffc0) == 0x2140) {  //$2140-$217f
     synchronize_smp();
-    port_write(addr & 3, data);
+    port_write(addr, data);
     return;
   }
 

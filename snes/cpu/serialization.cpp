@@ -44,6 +44,8 @@ void CPU::serialize(serializer &s) {
   s.integer(status.hdma_pending);
   s.integer(status.hdma_mode);
 
+  s.array(status.port);
+
   s.integer(status.wram_addr);
 
   s.integer(status.joypad_strobe_latch);
@@ -108,11 +110,6 @@ void CPU::serialize(serializer &s) {
   s.integer(pipe.valid);
   s.integer(pipe.addr);
   s.integer(pipe.data);
-
-  s.integer(apu_port[0]);
-  s.integer(apu_port[1]);
-  s.integer(apu_port[2]);
-  s.integer(apu_port[3]);
 }
 
 #endif

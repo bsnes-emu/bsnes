@@ -122,7 +122,7 @@ void CPU::hdma_run() {
   }
   if(channels == 0) return;
 
-  add_clocks(24);
+  add_clocks(16);
   for(unsigned i = 0; i < 8; i++) {
     if(channel[i].hdma_enabled == false || channel[i].hdma_completed == true) continue;
     channel[i].dma_enabled = false;

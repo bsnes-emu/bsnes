@@ -20,7 +20,9 @@ ProfileSettingsWindow::ProfileSettingsWindow() {
   profileAccuracy->setStyleSheet(
     "font-weight: bold;"
     "font-size: 12pt;"
+    #if !defined(PLATFORM_WIN)
     "background: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 0, stop: 0 rgba(255, 0, 0, 48), stop: 1 rgba(255, 0, 0, 0));"
+    #endif
   );
   layout->addWidget(profileAccuracy);
 
@@ -37,7 +39,9 @@ ProfileSettingsWindow::ProfileSettingsWindow() {
   profileCompatibility->setStyleSheet(
     "font-weight: bold;"
     "font-size: 12pt;"
+    #if !defined(PLATFORM_WIN)
     "background: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 0, stop: 0 rgba(0, 0, 255, 48), stop: 1 rgba(0, 0, 255, 0));"
+    #endif
   );
   layout->addWidget(profileCompatibility);
 
@@ -54,12 +58,14 @@ ProfileSettingsWindow::ProfileSettingsWindow() {
   profilePerformance->setStyleSheet(
     "font-weight: bold;"
     "font-size: 12pt;"
+    #if !defined(PLATFORM_WIN)
     "background: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 0, stop: 0 rgba(0, 255, 0, 48), stop: 1 rgba(0, 255, 0, 0));"
+    #endif
   );
   layout->addWidget(profilePerformance);
 
   profilePerformanceInfo = new QLabel(
-    "<b>System Requirements:</b> Intel Atom, Intel Pentium IV or AMD Athlon processor.<br>"
+    "<b>System Requirements:</b> Intel Pentium IV or AMD Athlon processor.<br>"
     "High accuracy with reasonable compromises for performance.<br>"
     "Sacrifices a small degree of compatibility to run full-speed on older hardware.<br>"
     "Use this mode for slower systems, or if you are running on battery power."

@@ -1,5 +1,8 @@
 #ifdef CPU_CPP
 
+uint8 CPU::port_read(uint2 port) const { return status.port[port]; }
+void CPU::port_write(uint2 port, uint8 data) { status.port[port] = data; }
+
 void CPU::op_io() {
   status.clock_count = 6;
   dma_edge();
