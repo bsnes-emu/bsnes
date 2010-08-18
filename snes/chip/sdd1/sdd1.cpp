@@ -14,7 +14,7 @@ void SDD1::enable() {
   //hook S-CPU DMA MMIO registers to gather information for struct dma[];
   //buffer address and transfer size information for use in SDD1::read()
   for(unsigned i = 0x4300; i <= 0x437f; i++) {
-    cpu_mmio[i & 0x7f] = memory::mmio.mmio[i - 0x2000];
+    cpu_mmio[i & 0x7f] = memory::mmio.handle(i);
     memory::mmio.map(i, *this);
   }
 }

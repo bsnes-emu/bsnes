@@ -58,10 +58,12 @@ private:
 };
 
 struct MMIOAccess : Memory {
+  MMIO* handle(unsigned addr);
   void map(unsigned addr, MMIO &access);
   uint8 read(unsigned addr);
   void write(unsigned addr, uint8 data);
 
+private:
   MMIO *mmio[0x4000];
 };
 
@@ -74,8 +76,8 @@ struct Bus {
     uint16 addr_lo, uint16 addr_hi,
     Memory &access, unsigned offset = 0, unsigned size = 0);
 
-  alwaysinline uint8 read(unsigned addr);
-  alwaysinline void write(unsigned addr, uint8 data);
+  alwaysinline uint8 read(uint24 addr);
+  alwaysinline void write(uint24 addr, uint8 data);
 
   bool load_cart();
   void unload_cart();
@@ -97,15 +99,15 @@ private:
 };
 
 namespace memory {
-  extern MMIOAccess mmio;    //S-CPU, S-PPU
-  extern StaticRAM  wram;    //S-CPU
-  extern StaticRAM  apuram;  //S-SMP, S-DSP
-  extern StaticRAM  vram;    //S-PPU
-  extern StaticRAM  oam;     //S-PPU
-  extern StaticRAM  cgram;   //S-PPU
+  extern MMIOAccess mmio;   //S-CPU, S-PPU
+  extern StaticRAM wram;    //S-CPU
+  extern StaticRAM apuram;  //S-SMP, S-DSP
+  extern StaticRAM vram;    //S-PPU
+  extern StaticRAM oam;     //S-PPU
+  extern StaticRAM cgram;   //S-PPU
 
   extern UnmappedMemory memory_unmapped;
-  extern UnmappedMMIO   mmio_unmapped;
+  extern UnmappedMMIO mmio_unmapped;
 };
 
 extern Bus bus;

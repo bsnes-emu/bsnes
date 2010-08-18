@@ -51,7 +51,7 @@ MappedRAM::MappedRAM() : data_(0), size_(-1U), write_protect_(false) {}
 
 //Bus
 
-uint8 Bus::read(unsigned addr) {
+uint8 Bus::read(uint24 addr) {
   #if defined(CHEAT_SYSTEM)
   if(cheat.active() && cheat.exists(addr)) {
     uint8 r;
@@ -63,7 +63,7 @@ uint8 Bus::read(unsigned addr) {
   return p.access->read(p.offset + addr);
 }
 
-void Bus::write(unsigned addr, uint8 data) {
+void Bus::write(uint24 addr, uint8 data) {
   Page &p = page[addr >> 8];
   return p.access->write(p.offset + addr, data);
 }

@@ -7,54 +7,42 @@
 #include <nall/string.hpp>
 using namespace nall;
 
-#if defined(PLATFORM_X) || defined(PLATFORM_OSX)
+#if !defined(PLATFORM_WIN)
   char* userpath(char *path) {
     *path = 0;
     struct passwd *userinfo = getpwuid(getuid());
     if(userinfo) strcpy(path, userinfo->pw_dir);
     return path;
   }
-
-  char *getcwd(char *path) {
-    return getcwd(path, PATH_MAX);
-  }
-#elif defined(PLATFORM_WIN)
+#else
   #include <nall/utf8.hpp>
   #include <process.h>
   #include <wchar.h>
   #include <windows.h>
 
   char* realpath(const char *filename, char *resolvedname) {
-    wchar_t fn[_MAX_PATH] = L"";
-    _wfullpath(fn, nall::utf16_t(filename), _MAX_PATH);
+    wchar_t fn[PATH_MAX] = L"";
+    _wfullpath(fn, nall::utf16_t(filename), PATH_MAX);
     strcpy(resolvedname, nall::utf8_t(fn));
     return resolvedname;
   }
 
   char* userpath(char *path) {
-    wchar_t fp[_MAX_PATH] = L"";
+    wchar_t fp[PATH_MAX] = L"";
     SHGetFolderPathW(0, CSIDL_APPDATA | CSIDL_FLAG_CREATE, 0, 0, fp);
     strcpy(path, nall::utf8_t(fp));
     return path;
-  }
-
-  char* getcwd(char *path) {
-    wchar_t fp[_MAX_PATH] = L"";
-    _wgetcwd(fp, _MAX_PATH);
-    strcpy(path, nall::utf8_t(fp));
-    return path;
-  }
-
-  intptr_t execv(const char *cmdname, const char *const *argv) {
-    int argc = __argc;
-    wchar_t **wargv = CommandLineToArgvW(GetCommandLineW(), &argc);
-    return _wexecv(nall::utf16_t(cmdname), wargv);
   }
 #endif
 
 int main(int argc, char **argv) {
   char path[PATH_MAX], *unused;
+  #if !defined(PLATFORM_WIN)
   unused = realpath(argv[0], path);
+  #else
+  wchar_t **argw = CommandLineToArgvW(GetCommandLineW(), &argc);
+  unused = realpath(nall::utf8_t(argw[0]), path);
+  #endif
   string realPath = dir(path);
   string basePath = string(dir(path), "bsnes.cfg");
   unused = userpath(path);
@@ -71,19 +59,24 @@ int main(int argc, char **argv) {
   #if defined(PLATFORM_WIN)
   binaryName << ".dll";
   #endif
+  string fileName = string(realPath, binaryName);
 
-  string fileName = string("/usr/local/bin/", binaryName);
-  if(!file::exists(fileName)) fileName = string("/usr/bin/", binaryName);
-  if(!file::exists(fileName)) fileName = string(realPath, binaryName);
-  if(!file::exists(fileName)) {
-    #if defined(PLATFORM_WIN)
-    MessageBox(0, string("Error: unable to locate binary file :", binaryName), "bsnes", MB_OK);
-    #else
-    print("[bsnes] Error: unable to locate binary file: ", binaryName, "\n");
-    #endif
-    return 0;
+  #if !defined(PLATFORM_WIN)
+  char **args = new char*[argc + 1];
+  args[0] = strdup(binaryName);
+  for(unsigned i = 1; i < argc; i++) args[i] = strdup(argv[i]);
+  args[argc] = 0;
+  execvp(args[0], args);
+  execv(fileName, args);
+  print("[bsnes] Error: unable to locate binary file: ", binaryName, "\n");
+  #else
+  STARTUPINFOW si;
+  PROCESS_INFORMATION pi;
+  memset(&si, 0, sizeof(STARTUPINFOW));
+  if(!CreateProcessW(nall::utf16_t(fileName), GetCommandLineW(), NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi)) {
+    MessageBox(0, string("Error: unable to locate binary file: ", binaryName), "bsnes", MB_OK);
   }
+  #endif
 
-  execv(fileName, argv);
   return 0;
 }

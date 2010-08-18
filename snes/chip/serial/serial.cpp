@@ -73,10 +73,10 @@ void Serial::init() {
 }
 
 void Serial::enable() {
-  r4016 = memory::mmio.mmio[0x4016 - 0x2000];
-  r4017 = memory::mmio.mmio[0x4017 - 0x2000];
-  memory::mmio.mmio[0x4016 - 0x2000] = this;
-  memory::mmio.mmio[0x4017 - 0x2000] = this;
+  r4016 = memory::mmio.handle(0x4016);
+  r4017 = memory::mmio.handle(0x4017);
+  memory::mmio.map(0x4016, *this);
+  memory::mmio.map(0x4017, *this);
 
   if(opened()) close();
   string name = notdir(cartridge.basename());

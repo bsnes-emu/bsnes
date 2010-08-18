@@ -1,6 +1,6 @@
 include nall/Makefile
 snes := snes
-profile := performance
+profile := accuracy
 ui := qt
 
 # compiler

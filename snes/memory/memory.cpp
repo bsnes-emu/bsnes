@@ -9,14 +9,14 @@ Bus bus;
 
 namespace memory {
   MMIOAccess mmio;
-  StaticRAM  wram(128 * 1024);
-  StaticRAM  apuram(64 * 1024);
-  StaticRAM  vram(64 * 1024);
-  StaticRAM  oam(544);
-  StaticRAM  cgram(512);
+  StaticRAM wram(128 * 1024);
+  StaticRAM apuram(64 * 1024);
+  StaticRAM vram(64 * 1024);
+  StaticRAM oam(544);
+  StaticRAM cgram(512);
 
   UnmappedMemory memory_unmapped;
-  UnmappedMMIO   mmio_unmapped;
+  UnmappedMMIO mmio_unmapped;
 };
 
 unsigned UnmappedMemory::size() const { return 16 * 1024 * 1024; }
@@ -25,6 +25,10 @@ void UnmappedMemory::write(unsigned, uint8) {}
 
 uint8 UnmappedMMIO::mmio_read(unsigned) { return cpu.regs.mdr; }
 void UnmappedMMIO::mmio_write(unsigned, uint8) {}
+
+MMIO* MMIOAccess::handle(unsigned addr) {
+  return mmio[(addr - 0x2000) & 0x3fff];
+}
 
 void MMIOAccess::map(unsigned addr, MMIO &access) {
   //MMIO: $[00-3f]:[2000-5fff]

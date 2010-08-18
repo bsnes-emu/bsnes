@@ -50,6 +50,8 @@ void CPU::add_clocks(unsigned clocks) {
     status.irq_valid = vcounter() == status.vtime;
     if(!irq_valid && status.irq_valid) status.irq_line = true;
     if(status.irq_line) status.irq_transition = true;
+  } else {
+    status.irq_valid = false;
   }
 
   tick(clocks);

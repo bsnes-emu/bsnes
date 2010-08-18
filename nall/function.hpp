@@ -1,6 +1,7 @@
 #ifndef NALL_FUNCTION_HPP
 #define NALL_FUNCTION_HPP
 
+#include <malloc.h>
 #include <functional>
 #include <type_traits>
 
