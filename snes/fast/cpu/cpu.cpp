@@ -3,7 +3,12 @@
 #define CPU_CPP
 namespace SNES {
 
-CPU cpu;
+#if defined(DEBUGGER)
+  #include "debugger/debugger.cpp"
+  CPUDebugger cpu;
+#else
+  CPU cpu;
+#endif
 
 #include "serialization.cpp"
 #include "dma.cpp"
@@ -62,8 +67,12 @@ void CPU::enter() {
       op_irq(regs.e == false ? 0xffee : 0xfffe);
     }
 
-    (this->*opcode_table[op_readpc()])();
+    op_step();
   }
+}
+
+alwaysinline void CPU::op_step() {
+  (this->*opcode_table[op_readpc()])();
 }
 
 void CPU::op_irq(uint16 vector) {

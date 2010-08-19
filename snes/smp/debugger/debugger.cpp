@@ -1,27 +1,5 @@
 #ifdef SMP_CPP
 
-bool SMPDebugger::property(unsigned id, string &name, string &value) {
-  unsigned n = 0;
-
-  //$00f0
-  if(id == n++) { name = "$00f0"; value = ""; return true; }
-  if(id == n++) { name = "Clock Speed"; value = clock_speed(); return true; }
-  if(id == n++) { name = "Timers Enable"; value = timers_enable(); return true; }
-  if(id == n++) { name = "RAM Disable"; value = ram_disable(); return true; }
-  if(id == n++) { name = "RAM Writable"; value = ram_writable(); return true; }
-  if(id == n++) { name = "Timers Disable"; value = timers_disable(); return true; }
-
-  //$00f1
-  if(id == n++) { name = "$00f1"; value = ""; return true; }
-  if(id == n++) { name = "IPLROM Enable"; value = iplrom_enable(); return true; }
-
-  //$00f2
-  if(id == n++) { name = "$00f2"; value = ""; return true; }
-  if(id == n++) { name = "DSP Address"; value = string("0x", strhex<2>(dsp_address())); return true; }
-
-  return false;
-}
-
 void SMPDebugger::op_step() {
   bool break_event = false;
 
@@ -63,21 +41,34 @@ SMPDebugger::~SMPDebugger() {
   delete[] usage;
 }
 
-//===========
-//SMPDebugger
-//===========
+bool SMPDebugger::property(unsigned id, string &name, string &value) {
+  unsigned n = 0;
 
-//$00f0
-unsigned SMPDebugger::clock_speed() { return status.clock_speed; }
-bool SMPDebugger::timers_enable() { return status.timers_enabled; }
-bool SMPDebugger::ram_disable() { return status.ram_disabled; }
-bool SMPDebugger::ram_writable() { return status.ram_writable; }
-bool SMPDebugger::timers_disable() { return status.timers_disabled; }
+  #define item(name_, value_) \
+  if(id == n++) { \
+    name = name_; \
+    value = value_; \
+    return true; \
+  }
 
-//$00f1
-bool SMPDebugger::iplrom_enable() { return status.iplrom_enabled; }
+  //$00f0
+  item("$00f0", "");
+  item("Clock Speed", (unsigned)status.clock_speed);
+  item("Timers Enable", status.timers_enabled);
+  item("RAM Disable", status.ram_disabled);
+  item("RAM Writable", status.ram_writable);
+  item("Timers Disable", status.timers_disabled);
 
-//$00f2
-unsigned SMPDebugger::dsp_address() { return status.dsp_addr; }
+  //$00f1
+  item("$00f1", "");
+  item("IPLROM Enable", status.iplrom_enabled);
+
+  //$00f2
+  item("$00f2", "");
+  item("DSP Address", string("0x", strhex<2>(status.dsp_addr)));
+
+  #undef item
+  return false;
+}
 
 #endif

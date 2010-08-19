@@ -22,8 +22,9 @@ void OamViewer::refresh() {
     bool x    = d4 & (1 << ((i & 3) << 1));
     bool size = d4 & (2 << ((i & 3) << 1));
 
+    //TODO: create method to expose ChipDebugger::property values by name
     unsigned width, height;
-    switch(SNES::ppu.oam_base_size()) { default:
+    switch(0 /*SNES::ppu.oam_base_size()*/) { default:
       case 0: width = !size ?  8 : 16; height = !size ?  8 : 16; break;
       case 1: width = !size ?  8 : 32; height = !size ?  8 : 32; break;
       case 2: width = !size ?  8 : 64; height = !size ?  8 : 64; break;

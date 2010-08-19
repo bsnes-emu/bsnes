@@ -1,6 +1,6 @@
 #ifdef PPU_CPP
 
-//render_line_modeN() taken from src/ppu/bppu/render/render.cpp
+//render_line_modeN():
 //modified to support layer disable; accomplished by setting priority to zero
 //a priority of zero won't override the back layer, effectively nullifying it
 //for speed, rendering loop is skipped entirely if all priorities are disabled

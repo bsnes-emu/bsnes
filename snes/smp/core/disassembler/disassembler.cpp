@@ -1,14 +1,7 @@
 #ifdef SMPCORE_CPP
 
 uint8 SMPcore::disassemble_read(uint16 addr) {
-  if(addr >= 0xffc0) {
-    #if defined(DEBUGGER)
-    if(smp.iplrom_enable()) return smp.iplrom[addr & 0x3f];
-    #else
-    //unable to determine if IPLROM is enabled, assume that it is
-    return smp.iplrom[addr & 0x3f];
-    #endif
-  }
+  if(addr >= 0xffc0) return smp.iplrom[addr & 0x3f];
   return memory::apuram[addr];
 }
 

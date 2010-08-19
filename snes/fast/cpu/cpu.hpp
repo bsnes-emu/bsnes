@@ -16,8 +16,8 @@ public:
   void mmio_write(unsigned addr, uint8 data);
 
   void op_io();
-  uint8 op_read(unsigned addr);
-  void op_write(unsigned addr, uint8 data);
+  debugvirtual uint8 op_read(unsigned addr);
+  debugvirtual void op_write(unsigned addr, uint8 data);
 
   void enter();
   void power();
@@ -30,6 +30,7 @@ public:
 private:
   //cpu
   static void Enter();
+  void op_step();
   void op_irq(uint16 vector);
 
   //timing
@@ -142,6 +143,13 @@ private:
     uint8 joy3l, joy3h;
     uint8 joy4l, joy4h;
   } status;
+
+  friend class CPUDebugger;
 };
 
-extern CPU cpu;
+#if defined(DEBUGGER)
+  #include "debugger/debugger.hpp"
+  extern CPUDebugger cpu;
+#else
+  extern CPU cpu;
+#endif

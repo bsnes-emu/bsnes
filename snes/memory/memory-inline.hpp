@@ -58,12 +58,11 @@ uint8 Bus::read(uint24 addr) {
     if(cheat.read(addr, r)) return r;
   }
   #endif
-
   Page &p = page[addr >> 8];
   return p.access->read(p.offset + addr);
 }
 
 void Bus::write(uint24 addr, uint8 data) {
   Page &p = page[addr >> 8];
-  return p.access->write(p.offset + addr, data);
+  p.access->write(p.offset + addr, data);
 }

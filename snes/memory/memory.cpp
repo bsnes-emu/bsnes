@@ -27,20 +27,19 @@ uint8 UnmappedMMIO::mmio_read(unsigned) { return cpu.regs.mdr; }
 void UnmappedMMIO::mmio_write(unsigned, uint8) {}
 
 MMIO* MMIOAccess::handle(unsigned addr) {
-  return mmio[(addr - 0x2000) & 0x3fff];
+  return mmio[addr & 0x7fff];
 }
 
 void MMIOAccess::map(unsigned addr, MMIO &access) {
-  //MMIO: $[00-3f]:[2000-5fff]
-  mmio[(addr - 0x2000) & 0x3fff] = &access;
+  mmio[addr & 0x7fff] = &access;
 }
 
 uint8 MMIOAccess::read(unsigned addr) {
-  return mmio[(addr - 0x2000) & 0x3fff]->mmio_read(addr);
+  return mmio[addr & 0x7fff]->mmio_read(addr);
 }
 
 void MMIOAccess::write(unsigned addr, uint8 data) {
-  mmio[(addr - 0x2000) & 0x3fff]->mmio_write(addr, data);
+  mmio[addr & 0x7fff]->mmio_write(addr, data);
 }
 
 unsigned Bus::mirror(unsigned addr, unsigned size) {
@@ -62,8 +61,9 @@ unsigned Bus::mirror(unsigned addr, unsigned size) {
 }
 
 void Bus::map(unsigned addr, Memory &access, unsigned offset) {
-  page[addr >> 8].access = &access;
-  page[addr >> 8].offset = offset - addr;
+  Page &p = page[addr >> 8];
+  p.access = &access;
+  p.offset = offset - addr;
 }
 
 void Bus::map(

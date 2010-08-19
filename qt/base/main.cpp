@@ -222,6 +222,7 @@ MainWindow::MainWindow() {
 
       QPalette palette;
       palette.setColor(QPalette::Window, QColor(0, 0, 0));
+
       canvas->setPalette(palette);
       canvas->setAutoFillBackground(true);
     }

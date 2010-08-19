@@ -64,7 +64,7 @@ struct MMIOAccess : Memory {
   void write(unsigned addr, uint8 data);
 
 private:
-  MMIO *mmio[0x4000];
+  MMIO *mmio[0x8000];
 };
 
 struct Bus {

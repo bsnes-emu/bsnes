@@ -7,6 +7,16 @@ AboutWindow::AboutWindow() {
   setGeometryString(&config().geometry.aboutWindow);
   application.windowList.append(this);
 
+  #if defined(DEBUGGER)
+  setStyleSheet("background: #e0e0a0");
+  #elif defined(PROFILE_ACCURACY)
+  setStyleSheet("background: #e0a0a0");
+  #elif defined(PROFILE_COMPATIBILITY)
+  setStyleSheet("background: #a0a0e0");
+  #elif defined(PROFILE_PERFORMANCE)
+  setStyleSheet("background: #a0e0a0");
+  #endif
+
   layout = new QVBoxLayout;
   layout->setSizeConstraint(QLayout::SetFixedSize);
   layout->setMargin(Style::WindowMargin);
