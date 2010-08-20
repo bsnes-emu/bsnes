@@ -82,6 +82,8 @@ void CPU::dma_run() {
     do {
       dma_transfer(channel[i].direction, dma_bbus(i, index++), dma_addr(i));
     } while(channel[i].dma_enabled && --channel[i].transfer_size);
+
+    channel[i].dma_enabled = false;
   }
 
   status.irq_lock = true;
@@ -175,24 +177,24 @@ void CPU::dma_reset() {
     channel[i].dma_enabled = false;
     channel[i].hdma_enabled = false;
 
-    channel[i].direction = 0;
-    channel[i].indirect = false;
-    channel[i].unused = false;
-    channel[i].reverse_transfer = false;
-    channel[i].fixed_transfer = false;
-    channel[i].transfer_mode = 0x00;
+    channel[i].direction = 1;
+    channel[i].indirect = true;
+    channel[i].unused = true;
+    channel[i].reverse_transfer = true;
+    channel[i].fixed_transfer = true;
+    channel[i].transfer_mode = 0x07;
 
-    channel[i].dest_addr = 0x0000;
-    channel[i].source_addr = 0x0000;
-    channel[i].source_bank = 0x00;
+    channel[i].dest_addr = 0xff;
+    channel[i].source_addr = 0xffff;
+    channel[i].source_bank = 0xff;
 
-    channel[i].transfer_size = 0x0000;
-    channel[i].indirect_addr = 0x0000;
+    channel[i].transfer_size = 0xffff;
+    channel[i].indirect_addr = 0xffff;
 
-    channel[i].indirect_bank = 0x00;
-    channel[i].hdma_addr = 0x00;
-    channel[i].line_counter = 0x00;
-    channel[i].unknown = 0x00;
+    channel[i].indirect_bank = 0xff;
+    channel[i].hdma_addr = 0xff;
+    channel[i].line_counter = 0xff;
+    channel[i].unknown = 0xff;
 
     channel[i].hdma_completed = false;
     channel[i].hdma_do_transfer = false;

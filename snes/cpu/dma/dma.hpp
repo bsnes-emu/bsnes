@@ -11,7 +11,7 @@ struct {
   bool unused;
   bool reverse_transfer;
   bool fixed_transfer;
-  uint8 transfer_mode;
+  uint3 transfer_mode;
 
   //$43x1
   uint8 dest_addr;

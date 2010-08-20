@@ -42,6 +42,10 @@ void MMIOAccess::write(unsigned addr, uint8 data) {
   mmio[addr & 0x7fff]->mmio_write(addr, data);
 }
 
+MMIOAccess::MMIOAccess() {
+  for(unsigned i = 0; i < 0x8000; i++) mmio[i] = &memory::mmio_unmapped;
+}
+
 unsigned Bus::mirror(unsigned addr, unsigned size) {
   unsigned base = 0;
   if(size) {

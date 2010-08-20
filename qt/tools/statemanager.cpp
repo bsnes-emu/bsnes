@@ -177,6 +177,10 @@ bool StateManagerWindow::isStateValid(unsigned slot) {
   if(signature == 0) { fp.close(); return false; }
   uint32_t version = fp.readl(4);
   if(version != SNES::Info::SerializerVersion) { fp.close(); return false; }
+  fp.readl(4);  //skip CRC32
+  char profile[16];
+  fp.read((uint8_t*)profile, 16);
+  if(strcmp(profile, SNES::Info::Profile)) { fp.close(); return false; }
   fp.close();
   return true;
 }
@@ -185,11 +189,11 @@ string StateManagerWindow::getStateDescription(unsigned slot) {
   if(isStateValid(slot) == false) return "";
   file fp;
   fp.open(filename(), file::mode_read);
-  char description[513];
-  fp.seek(slot * SNES::system.serialize_size() + 12);
+  char description[512];
+  fp.seek(slot * SNES::system.serialize_size() + 28);
   fp.read((uint8_t*)description, 512);
   fp.close();
-  description[512] = 0;
+  description[511] = 0;
   return description;
 }
 
@@ -200,7 +204,7 @@ void StateManagerWindow::setStateDescription(unsigned slot, const string &text) 
   char description[512];
   memset(&description, 0, sizeof description);
   strncpy(description, text, 512);
-  fp.seek(slot * SNES::system.serialize_size() + 12);
+  fp.seek(slot * SNES::system.serialize_size() + 28);
   fp.write((uint8_t*)description, 512);
   fp.close();
 }

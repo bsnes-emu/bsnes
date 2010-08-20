@@ -30,7 +30,7 @@ public:
 private:
   //cpu
   static void Enter();
-  void op_step();
+  debugvirtual void op_step();
   void op_irq(uint16 vector);
 
   //timing

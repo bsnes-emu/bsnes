@@ -8,13 +8,13 @@ AboutWindow::AboutWindow() {
   application.windowList.append(this);
 
   #if defined(DEBUGGER)
-  setStyleSheet("background: #e0e0a0");
+  setStyleSheet("background: #c0c080");
   #elif defined(PROFILE_ACCURACY)
-  setStyleSheet("background: #e0a0a0");
+  setStyleSheet("background: #c08080");
   #elif defined(PROFILE_COMPATIBILITY)
-  setStyleSheet("background: #a0a0e0");
+  setStyleSheet("background: #8080c0");
   #elif defined(PROFILE_PERFORMANCE)
-  setStyleSheet("background: #a0e0a0");
+  setStyleSheet("background: #80c080");
   #endif
 
   layout = new QVBoxLayout;

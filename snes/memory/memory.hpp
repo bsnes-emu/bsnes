@@ -62,6 +62,7 @@ struct MMIOAccess : Memory {
   void map(unsigned addr, MMIO &access);
   uint8 read(unsigned addr);
   void write(unsigned addr, uint8 data);
+  MMIOAccess();
 
 private:
   MMIO *mmio[0x8000];
