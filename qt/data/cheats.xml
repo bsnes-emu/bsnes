@@ -536,8 +536,29 @@
       <code>3CC2-A766</code>
     </cheat>
     <cheat>
-      <description>Infinite lives</description>
+      <description>Invincibility (alt)</description>
+      <code>7E042A30</code>
+    </cheat>
+    <cheat>
+      <description>Infinite lives </description>
       <code>82C2-64DB</code>
+    </cheat>
+    <cheat>
+      <description>Infinite lives (alt)</description>
+      <code>7E041204</code>
+    </cheat>
+    <cheat>
+      <description>Infinite lives (alt 2)</description>
+      <code>7E04120B</code>
+    </cheat>
+    <cheat>
+      <description>Most Powerful gun [00-10] (don't pick any weapon icons)</description>
+      <code>7E0424??</code>
+    </cheat>
+    <cheat>
+      <description>Score Modifier [00-99]</description>
+      <code>7E02B3??</code>
+      <code>7E02B4??</code>
     </cheat>
   </cartridge>
   <cartridge sha256="b8055844825653210d252d29a2229f9a3e7e512004e83940620173c57d8723f0">	
@@ -5830,6 +5851,13 @@
       <code>7E092C3E</code>
     </cheat>
   </cartridge>
+  <cartridge sha256="5f1912fdac09cd60d3a8962cad3875c6221b38347f0e98abc5800c73214678a9">	
+    <name>Brainies, The (Europe)</name>
+    <cheat>
+      <description>Timer disable cheat to get score then re-enable</description>
+      <code>7E091C17</code>
+    </cheat>
+  </cartridge>
   <cartridge sha256="9885ca148d32c4df6230642bcfa153f7e51b9559415042a831db14d07b3e6c3d">	
     <name>Brainies, The (USA)</name>
     <cheat>
@@ -5981,14 +6009,17 @@
       <code>7E09F00A</code>
     </cheat>
   </cartridge>
+  <cartridge sha256="aad8c9be1b7a9662256b0c3d76f5b7a273bcd497aa838232d307e9f2e80cf699">	
+    <name>BreakThru! (USA)</name>
+    <cheat>
+      <description>Infinite time</description>
+      <code>7E125BFF</code>
+    </cheat>
+  </cartridge>
   <cartridge sha256="cbc496a7879ba78f32c51c3df4ba1a1a42f17d78d48a39ea9c709d1ad18cb8df">	
     <name>Breath of Fire (USA)</name>
     <cheat>
-      <description>Invincibility</description>
-      <code>60AE-C46A</code>
-    </cheat>
-    <cheat>
-      <description>9999 EXP after every battle</description>
+      <description>9999 EXP gained per battle</description>
       <code>336F-172D</code>
     </cheat>
     <cheat>
@@ -5996,44 +6027,744 @@
       <code>DEEE-C0B4</code>
     </cheat>
     <cheat>
-      <description>Create a new character that starts at level 5</description>
+      <description>Infinite Gold</description>
+      <code>8EE1-C7F3</code>
+      <code>8EE5-CD23</code>
+      <code>8EEE-CF23</code>
+    </cheat>
+    <cheat>
+      <description>Create a new character at LEVEL 5</description>
       <code>D9BF-CD69</code>
     </cheat>
     <cheat>
-      <description>Create a new character that starts with 153 max HP</description>
+      <description>Create a new character with 153 max HP</description>
       <code>BBBF-CFD9</code>
     </cheat>
     <cheat>
-      <description>Create a new character that starts with 153 HP</description>
+      <description>Create a new character with 153 HP</description>
       <code>BBBF-CF69</code>
     </cheat>
     <cheat>
-      <description>Create a new character that starts with 20 max AP</description>
+      <description>Create a new character with 20 max AP</description>
       <code>F0BF-C4D9</code>
     </cheat>
     <cheat>
-      <description>Create a new character that starts with 20 AP</description>
+      <description>Create a new character with 20 AP</description>
       <code>F0BF-C469</code>
     </cheat>
     <cheat>
-      <description>Create a new character that starts with INT at 22</description>
+      <description>Create a new character with INT at 22</description>
       <code>F1B4-CD09</code>
     </cheat>
     <cheat>
-      <description>Create a new character that starts with Agility at 22</description>
+      <description>Create a new character with Agil at 22</description>
       <code>F1B4-CD69</code>
     </cheat>
     <cheat>
-      <description>Create a new character that starts with Fate at 40</description>
+      <description>Create a new character with FATE at 40</description>
       <code>46B4-CFD9</code>
     </cheat>
     <cheat>
-      <description>Create a new character that starts with strength at 50</description>
+      <description>Create a new character with str at 50</description>
       <code>74BF-C7A9</code>
     </cheat>
     <cheat>
-      <description>Create a new character that starts with Vigor at 50</description>
+      <description>Create a new character with Vigor at 50</description>
       <code>74B4-CDD9</code>
+    </cheat>
+    <cheat>
+      <description>Ryu starts with Tri-Rang</description>
+      <code>9EB7-CDD9</code>
+    </cheat>
+    <cheat>
+      <description>Ryu starts with EmporSD</description>
+      <code>D6B7-CDD9</code>
+    </cheat>
+    <cheat>
+      <description>Ryu starts with DragonSH</description>
+      <code>90B7-CD69</code>
+    </cheat>
+    <cheat>
+      <description>Ryu starts with LifeAR</description>
+      <code>F2B7-CFD9</code>
+    </cheat>
+    <cheat>
+      <description>Ryu starts with DragonHT</description>
+      <code>6CB7-CF69</code>
+    </cheat>
+    <cheat>
+      <description>Nina starts with PowerRP</description>
+      <code>F2BB-CDD9</code>
+    </cheat>
+    <cheat>
+      <description>Nina starts with MaskSH</description>
+      <code>97BB-CD69</code>
+      <code>4FBB-CDA9</code>
+    </cheat>
+    <cheat>
+      <description>Nina starts with ClearCL</description>
+      <code>43BB-CFD9</code>
+    </cheat>
+    <cheat>
+      <description>Nina starts with LoveHT</description>
+      <code>56BB-CF69</code>
+      <code>4FBB-CFA9</code>
+    </cheat>
+    <cheat>
+      <description>Bo starts with HeroBW</description>
+      <code>98B1-CDD9</code>
+    </cheat>
+    <cheat>
+      <description>Bo starts with IcyAR</description>
+      <code>FFB1-CD69</code>
+    </cheat>
+    <cheat>
+      <description>Bo starts with CursedHT</description>
+      <code>18B1-CFD9</code>
+    </cheat>
+    <cheat>
+      <description>Ox starts with Mallet</description>
+      <code>41BA-CDD9</code>
+    </cheat>
+    <cheat>
+      <description>Ox starts with StarSH</description>
+      <code>60BA-CD69</code>
+    </cheat>
+    <cheat>
+      <description>Ox starts with WorldAR</description>
+      <code>49BA-CFD9</code>
+    </cheat>
+    <cheat>
+      <description>Ox starts with CursedHT</description>
+      <code>18BA-CF69</code>
+    </cheat>
+    <cheat>
+      <description>Gobi starts with Sleeper</description>
+      <code>76BE-CDD9</code>
+    </cheat>
+    <cheat>
+      <description>Gobi starts with StarSH</description>
+      <code>60BE-CD69</code>
+      <code>4FBE-CDA9</code>
+    </cheat>
+    <cheat>
+      <description>Gobi starts with SpineCL</description>
+      <code>F0BE-CFD9</code>
+    </cheat>
+    <cheat>
+      <description>Gobi starts with CursedHT</description>
+      <code>18BE-CF69</code>
+    </cheat>
+    <cheat>
+      <description>Karn starts with DarkDR</description>
+      <code>0AB4-3DD9</code>
+    </cheat>
+    <cheat>
+      <description>Karn starts with StarSH</description>
+      <code>60B4-3D69</code>
+      <code>4FB4-3DA9</code>
+    </cheat>
+    <cheat>
+      <description>Karn starts with QuartzAR</description>
+      <code>FEB4-3FD9</code>
+    </cheat>
+    <cheat>
+      <description>Karn starts with CursedHT</description>
+      <code>18B4-3F69</code>
+    </cheat>
+    <cheat>
+      <description>Mogu starts with MystCW</description>
+      <code>7EB9-3DD9</code>
+    </cheat>
+    <cheat>
+      <description>Mogu starts with StarSH</description>
+      <code>60B9-3D69</code>
+      <code>4FB9-3DA9</code>
+    </cheat>
+    <cheat>
+      <description>Mogu starts with FlameAR</description>
+      <code>D3B9-3FD9</code>
+    </cheat>
+    <cheat>
+      <description>Mogu starts with CursedHT</description>
+      <code>18B9-3F69</code>
+      <code>4FB9-3FA9</code>
+    </cheat>
+    <cheat>
+      <description>Bleu starts with GlowCN</description>
+      <code>4EB6-3DD9</code>
+    </cheat>
+    <cheat>
+      <description>Bleu starts with MaskSH</description>
+      <code>97B6-3D69</code>
+    </cheat>
+    <cheat>
+      <description>Bleu starts with ClearCL</description>
+      <code>43B6-3FD9</code>
+    </cheat>
+    <cheat>
+      <description>Bleu starts with CursedHT</description>
+      <code>18B6-3F69</code>
+    </cheat>
+    <cheat>
+      <description>Character 1 - Max LEVEL</description>
+      <code>7E104AFF</code>
+    </cheat>
+    <cheat>
+      <description>Character 1 - Infinite HP</description>
+      <code>7E104EE7</code>
+      <code>7E104F03</code>
+    </cheat>
+    <cheat>
+      <description>Character 1 - Max HP</description>
+      <code>7E104CE7</code>
+      <code>7E104D03</code>
+    </cheat>
+    <cheat>
+      <description>Character 1 - Infinite AP</description>
+      <code>7E1052E7</code>
+      <code>7E105303</code>
+    </cheat>
+    <cheat>
+      <description>Character 1 - Max AP</description>
+      <code>7E1050E7</code>
+      <code>7E105103</code>
+    </cheat>
+    <cheat>
+      <description>Character 1 - Max Str</description>
+      <code>7E1057FF</code>
+    </cheat>
+    <cheat>
+      <description>Character 1 - Max Vigor</description>
+      <code>7E1058FF</code>
+    </cheat>
+    <cheat>
+      <description>Character 1 - Max Wisdom</description>
+      <code>7E1059FF</code>
+    </cheat>
+    <cheat>
+      <description>Character 1 - Max Agil</description>
+      <code>7E105AFF</code>
+    </cheat>
+    <cheat>
+      <description>Character 1 - Max MAG</description>
+      <code>7E105BFF</code>
+    </cheat>
+    <cheat>
+      <description>Character 1 - Max Luck</description>
+      <code>7E105CFF</code>
+    </cheat>
+    <cheat>
+      <description>Character 1 - Max ATK</description>
+      <code>7E105DE7</code>
+      <code>7E105E03</code>
+    </cheat>
+    <cheat>
+      <description>Character 1 - Max DEF</description>
+      <code>7E105FE7</code>
+      <code>7E106003</code>
+    </cheat>
+    <cheat>
+      <description>Character 1 - Max INT</description>
+      <code>7E1061FF</code>
+    </cheat>
+    <cheat>
+      <description>Character 1 - Max ACT</description>
+      <code>7E1062FF</code>
+    </cheat>
+    <cheat>
+      <description>Character 1 - Max FATE</description>
+      <code>7E1063FF</code>
+    </cheat>
+    <cheat>
+      <description>Character 2 - Max LEVEL</description>
+      <code>7E10EAFF</code>
+    </cheat>
+    <cheat>
+      <description>Character 2 - Infinite HP</description>
+      <code>7E10EEE7</code>
+      <code>7E10EF03</code>
+    </cheat>
+    <cheat>
+      <description>Character 2 - Max HP</description>
+      <code>7E10ECE7</code>
+      <code>7E10ED03</code>
+    </cheat>
+    <cheat>
+      <description>Character 2 - Infinite AP</description>
+      <code>7E10F2E7</code>
+      <code>7E10F303</code>
+    </cheat>
+    <cheat>
+      <description>Character 2 - Max AP</description>
+      <code>7E10F0E7</code>
+      <code>7E10F103</code>
+    </cheat>
+    <cheat>
+      <description>Character 2 - Max Str</description>
+      <code>7E10F7FF</code>
+    </cheat>
+    <cheat>
+      <description>Character 2 - Max Vigor</description>
+      <code>7E10F8FF</code>
+    </cheat>
+    <cheat>
+      <description>Character 2 - Max Wisdom</description>
+      <code>7E10F9FF</code>
+    </cheat>
+    <cheat>
+      <description>Character 2 - Max Agil</description>
+      <code>7E10FAFF</code>
+    </cheat>
+    <cheat>
+      <description>Character 2 - Max MAG</description>
+      <code>7E10FBFF</code>
+    </cheat>
+    <cheat>
+      <description>Character 2 - Max Luck</description>
+      <code>7E10FCFF</code>
+    </cheat>
+    <cheat>
+      <description>Character 2 - Max ATK</description>
+      <code>7E10FDE7</code>
+      <code>7E10FE03</code>
+    </cheat>
+    <cheat>
+      <description>Character 2 - Max DEF</description>
+      <code>7E10FFE7</code>
+      <code>7E110003</code>
+    </cheat>
+    <cheat>
+      <description>Character 2 - Max INT</description>
+      <code>7E1101FF</code>
+    </cheat>
+    <cheat>
+      <description>Character 2 - Max ACT</description>
+      <code>7E1102FF</code>
+    </cheat>
+    <cheat>
+      <description>Character 2 - Max FATE</description>
+      <code>7E1103FF</code>
+    </cheat>
+    <cheat>
+      <description>Character 3 - Max LEVEL</description>
+      <code>7E118AFF</code>
+    </cheat>
+    <cheat>
+      <description>Character 3 - Infinite HP</description>
+      <code>7E118EE7</code>
+      <code>7E118F03</code>
+    </cheat>
+    <cheat>
+      <description>Character 3 - Max HP</description>
+      <code>7E118CE7</code>
+      <code>7E118D03</code>
+    </cheat>
+    <cheat>
+      <description>Character 3 - Infinite AP</description>
+      <code>7E1192E7</code>
+      <code>7E119303</code>
+    </cheat>
+    <cheat>
+      <description>Character 3 - Max AP</description>
+      <code>7E1190E7</code>
+      <code>7E119103</code>
+    </cheat>
+    <cheat>
+      <description>Character 3 - Max Str</description>
+      <code>7E1197FF</code>
+    </cheat>
+    <cheat>
+      <description>Character 3 - Max Vigor</description>
+      <code>7E1198FF</code>
+    </cheat>
+    <cheat>
+      <description>Character 3 - Max Wisdom</description>
+      <code>7E1199FF</code>
+    </cheat>
+    <cheat>
+      <description>Character 3 - Max Agil</description>
+      <code>7E119AFF</code>
+    </cheat>
+    <cheat>
+      <description>Character 3 - Max MAG</description>
+      <code>7E119BFF</code>
+    </cheat>
+    <cheat>
+      <description>Character 3 - Max Luck</description>
+      <code>7E119CFF</code>
+    </cheat>
+    <cheat>
+      <description>Character 3 - Max ATK</description>
+      <code>7E119DE7</code>
+      <code>7E119E03</code>
+    </cheat>
+    <cheat>
+      <description>Character 3 - Max DEF</description>
+      <code>7E119FE7</code>
+      <code>7E11A003</code>
+    </cheat>
+    <cheat>
+      <description>Character 3 - Max INT</description>
+      <code>7E11A1FF</code>
+    </cheat>
+    <cheat>
+      <description>Character 3 - Max ACT</description>
+      <code>7E11A2FF</code>
+    </cheat>
+    <cheat>
+      <description>Character 3 - Max FATE</description>
+      <code>7E11A3FF</code>
+    </cheat>
+    <cheat>
+      <description>Character 4 - Max LEVEL</description>
+      <code>7E122AFF</code>
+    </cheat>
+    <cheat>
+      <description>Character 4 - Infinite HP</description>
+      <code>7E122EE7</code>
+      <code>7E122F03</code>
+    </cheat>
+    <cheat>
+      <description>Character 4 - Max HP</description>
+      <code>7E122CE7</code>
+      <code>7E122D03</code>
+    </cheat>
+    <cheat>
+      <description>Character 4 - Infinite AP</description>
+      <code>7E1232E7</code>
+      <code>7E123303</code>
+    </cheat>
+    <cheat>
+      <description>Character 4 - Max AP</description>
+      <code>7E1230E7</code>
+      <code>7E123103</code>
+    </cheat>
+    <cheat>
+      <description>Character 4 - Max Str</description>
+      <code>7E1237FF</code>
+    </cheat>
+    <cheat>
+      <description>Character 4 - Max Vigor</description>
+      <code>7E1238FF</code>
+    </cheat>
+    <cheat>
+      <description>Character 4 - Max Wisdom</description>
+      <code>7E1239FF</code>
+    </cheat>
+    <cheat>
+      <description>Character 4 - Max Agil</description>
+      <code>7E123AFF</code>
+    </cheat>
+    <cheat>
+      <description>Character 4 - Max MAG</description>
+      <code>7E123BFF</code>
+    </cheat>
+    <cheat>
+      <description>Character 4 - Max Luck</description>
+      <code>7E123CFF</code>
+    </cheat>
+    <cheat>
+      <description>Character 4 - Max ATK</description>
+      <code>7E123DE7</code>
+      <code>7E123E03</code>
+    </cheat>
+    <cheat>
+      <description>Character 4 - Max DEF</description>
+      <code>7E123FE7</code>
+      <code>7E124003</code>
+    </cheat>
+    <cheat>
+      <description>Character 4 - Max INT</description>
+      <code>7E1241FF</code>
+    </cheat>
+    <cheat>
+      <description>Character 4 - Max ACT</description>
+      <code>7E1242FF</code>
+    </cheat>
+    <cheat>
+      <description>Character 4 - Max FATE</description>
+      <code>7E1243FF</code>
+    </cheat>
+    <cheat>
+      <description>Character 5 - Max LEVEL</description>
+      <code>7E12CAFF</code>
+    </cheat>
+    <cheat>
+      <description>Character 5 - Infinite HP</description>
+      <code>7E12CEE7</code>
+      <code>7E12CF03</code>
+    </cheat>
+    <cheat>
+      <description>Character 5 - Max HP</description>
+      <code>7E12CCE7</code>
+      <code>7E12CD03</code>
+    </cheat>
+    <cheat>
+      <description>Character 5 - Infinite AP</description>
+      <code>7E12D2E7</code>
+      <code>7E12D303</code>
+    </cheat>
+    <cheat>
+      <description>Character 5 - Max AP</description>
+      <code>7E12D0E7</code>
+      <code>7E12D103</code>
+    </cheat>
+    <cheat>
+      <description>Character 5 - Max Str</description>
+      <code>7E12D7FF</code>
+    </cheat>
+    <cheat>
+      <description>Character 5 - Max Vigor</description>
+      <code>7E12D8FF</code>
+    </cheat>
+    <cheat>
+      <description>Character 5 - Max Wisdom</description>
+      <code>7E12D9FF</code>
+    </cheat>
+    <cheat>
+      <description>Character 5 - Max Agil</description>
+      <code>7E12DAFF</code>
+    </cheat>
+    <cheat>
+      <description>Character 5 - Max MAG</description>
+      <code>7E12DBFF</code>
+    </cheat>
+    <cheat>
+      <description>Character 5 - Max Luck</description>
+      <code>7E12DCFF</code>
+    </cheat>
+    <cheat>
+      <description>Character 5 - Max ATK</description>
+      <code>7E12DDE7</code>
+      <code>7E12DE03</code>
+    </cheat>
+    <cheat>
+      <description>Character 5 - Max DEF</description>
+      <code>7E12DFE7</code>
+      <code>7E12E003</code>
+    </cheat>
+    <cheat>
+      <description>Character 5 - Max INT</description>
+      <code>7E12E1FF</code>
+    </cheat>
+    <cheat>
+      <description>Character 5 - Max ACT</description>
+      <code>7E12E2FF</code>
+    </cheat>
+    <cheat>
+      <description>Character 5 - Max FATE</description>
+      <code>7E12E3FF</code>
+    </cheat>
+    <cheat>
+      <description>Character 6 - Max LEVEL</description>
+      <code>7E136AFF</code>
+    </cheat>
+    <cheat>
+      <description>Character 6 - Infinite HP</description>
+      <code>7E136EE7</code>
+      <code>7E136F03</code>
+    </cheat>
+    <cheat>
+      <description>Character 6 - Max HP</description>
+      <code>7E136CE7</code>
+      <code>7E136D03</code>
+    </cheat>
+    <cheat>
+      <description>Character 6 - Infinite AP</description>
+      <code>7E1372E7</code>
+      <code>7E137303</code>
+    </cheat>
+    <cheat>
+      <description>Character 6 - Max AP</description>
+      <code>7E1370E7</code>
+      <code>7E137103</code>
+    </cheat>
+    <cheat>
+      <description>Character 6 - Max Str</description>
+      <code>7E1377FF</code>
+    </cheat>
+    <cheat>
+      <description>Character 6 - Max Vigor</description>
+      <code>7E1378FF</code>
+    </cheat>
+    <cheat>
+      <description>Character 6 - Max Wisdom</description>
+      <code>7E1379FF</code>
+    </cheat>
+    <cheat>
+      <description>Character 6 - Max Agil</description>
+      <code>7E137AFF</code>
+    </cheat>
+    <cheat>
+      <description>Character 6 - Max MAG</description>
+      <code>7E137BFF</code>
+    </cheat>
+    <cheat>
+      <description>Character 6 - Max Luck</description>
+      <code>7E137CFF</code>
+    </cheat>
+    <cheat>
+      <description>Character 6 - Max ATK</description>
+      <code>7E137DE7</code>
+      <code>7E137E03</code>
+    </cheat>
+    <cheat>
+      <description>Character 6 - Max DEF</description>
+      <code>7E137FE7</code>
+      <code>7E138003</code>
+    </cheat>
+    <cheat>
+      <description>Character 6 - Max INT</description>
+      <code>7E1381FF</code>
+    </cheat>
+    <cheat>
+      <description>Character 6 - Max ACT</description>
+      <code>7E1382FF</code>
+    </cheat>
+    <cheat>
+      <description>Character 6 - Max FATE</description>
+      <code>7E1383FF</code>
+    </cheat>
+    <cheat>
+      <description>Character 7 - Max LEVEL</description>
+      <code>7E140AFF</code>
+    </cheat>
+    <cheat>
+      <description>Character 7 - Infinite HP</description>
+      <code>7E140EE7</code>
+      <code>7E140F03</code>
+    </cheat>
+    <cheat>
+      <description>Character 7 - Max HP</description>
+      <code>7E140CE7</code>
+      <code>7E140D03</code>
+    </cheat>
+    <cheat>
+      <description>Character 7 - Infinite AP</description>
+      <code>7E1412E7</code>
+      <code>7E141303</code>
+    </cheat>
+    <cheat>
+      <description>Character 7 - Max AP</description>
+      <code>7E1410E7</code>
+      <code>7E141103</code>
+    </cheat>
+    <cheat>
+      <description>Character 7 - Max Str</description>
+      <code>7E1417FF</code>
+    </cheat>
+    <cheat>
+      <description>Character 7 - Max Vigor</description>
+      <code>7E1418FF</code>
+    </cheat>
+    <cheat>
+      <description>Character 7 - Max Wisdom</description>
+      <code>7E1419FF</code>
+    </cheat>
+    <cheat>
+      <description>Character 7 - Max Agil</description>
+      <code>7E141AFF</code>
+    </cheat>
+    <cheat>
+      <description>Character 7 - Max MAG</description>
+      <code>7E141BFF</code>
+    </cheat>
+    <cheat>
+      <description>Character 7 - Max Luck</description>
+      <code>7E141CFF</code>
+    </cheat>
+    <cheat>
+      <description>Character 7 - Max ATK</description>
+      <code>7E141DE7</code>
+      <code>7E141E03</code>
+    </cheat>
+    <cheat>
+      <description>Character 7 - Max DEF</description>
+      <code>7E141FE7</code>
+      <code>7E142003</code>
+    </cheat>
+    <cheat>
+      <description>Character 7 - Max INT</description>
+      <code>7E1421FF</code>
+    </cheat>
+    <cheat>
+      <description>Character 7 - Max ACT</description>
+      <code>7E1422FF</code>
+    </cheat>
+    <cheat>
+      <description>Character 7 - Max FATE</description>
+      <code>7E1423FF</code>
+    </cheat>
+    <cheat>
+      <description>Character 8 - Max LEVEL</description>
+      <code>7E14AAFF</code>
+    </cheat>
+    <cheat>
+      <description>Character 8 - Infinite HP</description>
+      <code>7E14AEE7</code>
+      <code>7E14AF03</code>
+    </cheat>
+    <cheat>
+      <description>Character 8 - Max HP</description>
+      <code>7E14ACE7</code>
+      <code>7E14AD03</code>
+    </cheat>
+    <cheat>
+      <description>Character 8 - Infinite AP</description>
+      <code>7E14B2E7</code>
+      <code>7E14B303</code>
+    </cheat>
+    <cheat>
+      <description>Character 8 - Max AP</description>
+      <code>7E14B0E7</code>
+      <code>7E14B103</code>
+    </cheat>
+    <cheat>
+      <description>Character 8 - Max Str</description>
+      <code>7E14B7FF</code>
+    </cheat>
+    <cheat>
+      <description>Character 8 - Max Vigor</description>
+      <code>7E14B8FF</code>
+    </cheat>
+    <cheat>
+      <description>Character 8 - Max Wisdom</description>
+      <code>7E14B9FF</code>
+    </cheat>
+    <cheat>
+      <description>Character 8 - Max Agil</description>
+      <code>7E14BAFF</code>
+    </cheat>
+    <cheat>
+      <description>Character 8 - Max MAG</description>
+      <code>7E14BBFF</code>
+    </cheat>
+    <cheat>
+      <description>Character 8 - Max Luck</description>
+      <code>7E14BCFF</code>
+    </cheat>
+    <cheat>
+      <description>Character 8 - Max ATK</description>
+      <code>7E14BDE7</code>
+      <code>7E14BE03</code>
+    </cheat>
+    <cheat>
+      <description>Character 8 - Max DEF</description>
+      <code>7E14BFE7</code>
+      <code>7E14C003</code>
+    </cheat>
+    <cheat>
+      <description>Character 8 - Max INT</description>
+      <code>7E14C1FF</code>
+    </cheat>
+    <cheat>
+      <description>Character 8 - Max ACT</description>
+      <code>7E14C2FF</code>
+    </cheat>
+    <cheat>
+      <description>Character 8 - Max FATE</description>
+      <code>7E14C3FF</code>
     </cheat>
   </cartridge>
   <cartridge sha256="fede9d4aec8c35ed11e2868c3c517bce53ee3e6af724085c92500e99e43e63de">	
@@ -6159,8 +6890,383 @@
       <code>EED3-8404</code>
     </cheat>
     <cheat>
-      <description>Start with Mega experience points</description>
+      <description>Start with Mega EXP</description>
       <code>EED3-87D4</code>
+    </cheat>
+    <cheat>
+      <description>No random battles</description>
+      <code>7E12DC00</code>
+    </cheat>
+    <cheat>
+      <description>Infinite Fishing Rod power</description>
+      <code>7E128C60</code>
+    </cheat>
+    <cheat>
+      <description>Have all warp points</description>
+      <code>7E5670FF</code>
+      <code>7E5671FF</code>
+      <code>7E5672FF</code>
+      <code>7E5673FF</code>
+    </cheat>
+    <cheat>
+      <description>Have all Shamans</description>
+      <code>7E5695FF</code>
+    </cheat>
+    <cheat>
+      <description>Infinite Shaman use</description>
+      <code>7E569600</code>
+      <code>7E569700</code>
+      <code>7E569800</code>
+      <code>7E569900</code>
+      <code>7E569A00</code>
+      <code>7E569B00</code>
+    </cheat>
+    <cheat>
+      <description>Have all non-shop tenants</description>
+      <code>7E55EBDE</code>
+      <code>7E55EC7B</code>
+      <code>7E55ED77</code>
+      <code>7E55EE0B</code>
+    </cheat>
+    <cheat>
+      <description>Character 1 - No Status Effects</description>
+      <code>7E51E500</code>
+    </cheat>
+    <cheat>
+      <description>Character 1 - Level 99</description>
+      <code>7E51E763</code>
+    </cheat>
+    <cheat>
+      <description>Character 1 - Infinite HP</description>
+      <code>7E51E80F</code>
+      <code>7E51E927</code>
+    </cheat>
+    <cheat>
+      <description>Character 1 - Maximum HP</description>
+      <code>7E51EA0F</code>
+      <code>7E51EB27</code>
+    </cheat>
+    <cheat>
+      <description>Character 1 - Infinite AP</description>
+      <code>7E51EC0F</code>
+      <code>7E51ED27</code>
+    </cheat>
+    <cheat>
+      <description>Character 1 - Maximum AP</description>
+      <code>7E51EE0F</code>
+      <code>7E51EF27</code>
+    </cheat>
+    <cheat>
+      <description>Character 1 - 255 Str</description>
+      <code>7E51F1FF</code>
+    </cheat>
+    <cheat>
+      <description>Character 1 - 255 Stmna</description>
+      <code>7E51F2FF</code>
+    </cheat>
+    <cheat>
+      <description>Character 1 - 255 Agil</description>
+      <code>7E51F3FF</code>
+    </cheat>
+    <cheat>
+      <description>Character 1 - 9999 Off</description>
+      <code>7E52020F</code>
+      <code>7E520327</code>
+    </cheat>
+    <cheat>
+      <description>Character 1 - 9999 Def</description>
+      <code>7E52040F</code>
+      <code>7E520527</code>
+    </cheat>
+    <cheat>
+      <description>Character 1 - 9999 Vigor</description>
+      <code>7E52060F</code>
+      <code>7E520727</code>
+    </cheat>
+    <cheat>
+      <description>Character 1 - 255 Temporary Wisdom</description>
+      <code>7E5208FF</code>
+    </cheat>
+    <cheat>
+      <description>Character 1 - 255 Temporary Luck</description>
+      <code>7E5209FF</code>
+    </cheat>
+    <cheat>
+      <description>Character 1 - 255 Permanant Wisdom (next time you change equipment)</description>
+      <code>7E520CFF</code>
+    </cheat>
+    <cheat>
+      <description>Character 1 - 255 Permanant Luck (next time you change equipment)</description>
+      <code>7E520DFF</code>
+    </cheat>
+    <cheat>
+      <description>Character 1 - Maximum Guts</description>
+      <code>7E520BFF</code>
+    </cheat>
+    <cheat>
+      <description>Character 1 - 9999999 EXP</description>
+      <code>7E520E7F</code>
+      <code>7E520F96</code>
+      <code>7E521098</code>
+    </cheat>
+    <cheat>
+      <description>Character 1 - Maximum Jewel color</description>
+      <code>7E520AFF</code>
+    </cheat>
+    <cheat>
+      <description>Character 2 - No Status Effects</description>
+      <code>7E522500</code>
+    </cheat>
+    <cheat>
+      <description>Character 2 - Level 99</description>
+      <code>7E522763</code>
+    </cheat>
+    <cheat>
+      <description>Character 2 - Infinite HP</description>
+      <code>7E52280F</code>
+      <code>7E522927</code>
+    </cheat>
+    <cheat>
+      <description>Character 2 - Maximum HP</description>
+      <code>7E522A0F</code>
+      <code>7E522B27</code>
+    </cheat>
+    <cheat>
+      <description>Character 2 - Infinite AP</description>
+      <code>7E522C0F</code>
+      <code>7E522D27</code>
+    </cheat>
+    <cheat>
+      <description>Character 2 - Maximum AP</description>
+      <code>7E522E0F</code>
+      <code>7E522F27</code>
+    </cheat>
+    <cheat>
+      <description>Character 2 - 255 Str</description>
+      <code>7E5231FF</code>
+    </cheat>
+    <cheat>
+      <description>Character 2 - 255 Stmna</description>
+      <code>7E5232FF</code>
+    </cheat>
+    <cheat>
+      <description>Character 2 - 255 Agil</description>
+      <code>7E5233FF</code>
+    </cheat>
+    <cheat>
+      <description>Character 2 - 9999 Off</description>
+      <code>7E52420F</code>
+      <code>7E524327</code>
+    </cheat>
+    <cheat>
+      <description>Character 2 - 9999 Def</description>
+      <code>7E52440F</code>
+      <code>7E524527</code>
+    </cheat>
+    <cheat>
+      <description>Character 2 - 9999 Vigor</description>
+      <code>7E52460F</code>
+      <code>7E524727</code>
+    </cheat>
+    <cheat>
+      <description>Character 2 - 255 Temporary Wisdom</description>
+      <code>7E5248FF</code>
+    </cheat>
+    <cheat>
+      <description>Character 2 - 255 Temporary Luck</description>
+      <code>7E5249FF</code>
+    </cheat>
+    <cheat>
+      <description>Character 2 - 255 Permanant Wisdom (next time you change equipment)</description>
+      <code>7E524CFF</code>
+    </cheat>
+    <cheat>
+      <description>Character 2 - 255 Permanant Luck (next time you change equipment)</description>
+      <code>7E524DFF</code>
+    </cheat>
+    <cheat>
+      <description>Character 2 - Maximum Guts</description>
+      <code>7E524BFF</code>
+    </cheat>
+    <cheat>
+      <description>Character 2 - 9999999 EXP</description>
+      <code>7E524E7F</code>
+      <code>7E524F96</code>
+      <code>7E525098</code>
+    </cheat>
+    <cheat>
+      <description>Character 2 - Maximum Jewel color</description>
+      <code>7E524AFF</code>
+    </cheat>
+    <cheat>
+      <description>Character 3 - No Status Effects</description>
+      <code>7E526500</code>
+    </cheat>
+    <cheat>
+      <description>Character 3 - Level 99</description>
+      <code>7E526763</code>
+    </cheat>
+    <cheat>
+      <description>Character 3 - Infinite HP</description>
+      <code>7E52680F</code>
+      <code>7E526927</code>
+    </cheat>
+    <cheat>
+      <description>Character 3 - Maximum HP</description>
+      <code>7E526A0F</code>
+      <code>7E526B27</code>
+    </cheat>
+    <cheat>
+      <description>Character 3 - Infinite AP</description>
+      <code>7E526C0F</code>
+      <code>7E526D27</code>
+    </cheat>
+    <cheat>
+      <description>Character 3 - Maximum AP</description>
+      <code>7E526E0F</code>
+      <code>7E526F27</code>
+    </cheat>
+    <cheat>
+      <description>Character 3 - 255 Str</description>
+      <code>7E5271FF</code>
+    </cheat>
+    <cheat>
+      <description>Character 3 - 255 Stmna</description>
+      <code>7E5272FF</code>
+    </cheat>
+    <cheat>
+      <description>Character 3 - 255 Agil</description>
+      <code>7E5273FF</code>
+    </cheat>
+    <cheat>
+      <description>Character 3 - 9999 Off</description>
+      <code>7E52820F</code>
+      <code>7E528327</code>
+    </cheat>
+    <cheat>
+      <description>Character 3 - 9999 Def</description>
+      <code>7E52840F</code>
+      <code>7E528527</code>
+    </cheat>
+    <cheat>
+      <description>Character 3 - 9999 Vigor</description>
+      <code>7E52860F</code>
+      <code>7E528727</code>
+    </cheat>
+    <cheat>
+      <description>Character 3 - 255 Temporary Wisdom</description>
+      <code>7E5288FF</code>
+    </cheat>
+    <cheat>
+      <description>Character 3 - 255 Temporary Luck</description>
+      <code>7E5289FF</code>
+    </cheat>
+    <cheat>
+      <description>Character 3 - 255 Permanant Wisdom (next time you change equipment)</description>
+      <code>7E528CFF</code>
+    </cheat>
+    <cheat>
+      <description>Character 3 - 255 Permanant Luck (next time you change equipment)</description>
+      <code>7E528DFF</code>
+    </cheat>
+    <cheat>
+      <description>Character 3 - Maximum Guts</description>
+      <code>7E528BFF</code>
+    </cheat>
+    <cheat>
+      <description>Character 3 - 9999999 EXP</description>
+      <code>7E528E7F</code>
+      <code>7E528F96</code>
+      <code>7E529098</code>
+    </cheat>
+    <cheat>
+      <description>Character 3 - Maximum Jewel color</description>
+      <code>7E528AFF</code>
+    </cheat>
+    <cheat>
+      <description>Character 4 - No Status Effects</description>
+      <code>7E52A500</code>
+    </cheat>
+    <cheat>
+      <description>Character 4 - Level 99</description>
+      <code>7E52A763</code>
+    </cheat>
+    <cheat>
+      <description>Character 4 - Infinite HP</description>
+      <code>7E52A80F</code>
+      <code>7E52A927</code>
+    </cheat>
+    <cheat>
+      <description>Character 4 - Maximum HP</description>
+      <code>7E52AA0F</code>
+      <code>7E52AB27</code>
+    </cheat>
+    <cheat>
+      <description>Character 4 - Infinite AP</description>
+      <code>7E52AC0F</code>
+      <code>7E52AD27</code>
+    </cheat>
+    <cheat>
+      <description>Character 4 - Maximum AP</description>
+      <code>7E52AE0F</code>
+      <code>7E52AF27</code>
+    </cheat>
+    <cheat>
+      <description>Character 4 - 255 Str</description>
+      <code>7E52B1FF</code>
+    </cheat>
+    <cheat>
+      <description>Character 4 - 255 Stmna</description>
+      <code>7E52B2FF</code>
+    </cheat>
+    <cheat>
+      <description>Character 4 - 255 Agil</description>
+      <code>7E52B3FF</code>
+    </cheat>
+    <cheat>
+      <description>Character 4 - 9999 Off</description>
+      <code>7E52C20F</code>
+      <code>7E52C327</code>
+    </cheat>
+    <cheat>
+      <description>Character 4 - 9999 Def</description>
+      <code>7E52C40F</code>
+      <code>7E52C527</code>
+    </cheat>
+    <cheat>
+      <description>Character 4 - 9999 Vigor</description>
+      <code>7E52C60F</code>
+      <code>7E52C727</code>
+    </cheat>
+    <cheat>
+      <description>Character 4 - 255 Temporary Wisdom</description>
+      <code>7E52C8FF</code>
+    </cheat>
+    <cheat>
+      <description>Character 4 - 255 Temporary Luck</description>
+      <code>7E52C9FF</code>
+    </cheat>
+    <cheat>
+      <description>Character 4 - 255 Permanant Wisdom (next time you change equipment)</description>
+      <code>7E52CCFF</code>
+    </cheat>
+    <cheat>
+      <description>Character 4 - 255 Permanant Luck (next time you change equipment)</description>
+      <code>7E52CDFF</code>
+    </cheat>
+    <cheat>
+      <description>Character 4 - Maximum Guts</description>
+      <code>7E52CBFF</code>
+    </cheat>
+    <cheat>
+      <description>Character 4 - 9999999 EXP</description>
+      <code>7E52CE7F</code>
+      <code>7E52CF96</code>
+      <code>7E52D098</code>
+    </cheat>
+    <cheat>
+      <description>Character 4 - Maximum Jewel color</description>
+      <code>7E52CAFF</code>
     </cheat>
   </cartridge>
   <cartridge sha256="2357d344af77d25dda030520ce203045fd9060f83e3b9609a228dba859d9017b">	
@@ -7983,6 +9089,13 @@
       <code>DCB4-6761</code>
     </cheat>
   </cartridge>
+  <cartridge sha256="73533c37fcd3eddce4804eb4c016214d1741c348c349f00d8e6838d341a50df9">	
+    <name>Cosmo Gang - The Video (Japan)</name>
+    <cheat>
+      <description>Infinite lives</description>
+      <code>7E020005</code>
+    </cheat>
+  </cartridge>
   <cartridge sha256="7c722f9941957630467c1784d0eb3f92fbfc0a2a1da3c8f5c27f593eca2a5a04">	
     <name>Cutthroat Island (USA)</name>
     <cheat>
@@ -8143,6 +9256,21 @@
       <code>F7BD-176F</code>
     </cheat>
   </cartridge>
+  <cartridge sha256="71e77fdbd9c865ae07e907549b02549ebe87fa8d436401c485e588c61797754a">	
+    <name>Cyborg 009 (Japan)</name>
+    <cheat>
+      <description>Infinite health</description>
+      <code>7E0AE13C</code>
+    </cheat>
+    <cheat>
+      <description>Infinite lives</description>
+      <code>7E1A3102</code>
+    </cheat>
+    <cheat>
+      <description>Infinite Super Power</description>
+      <code>7E0AE33C</code>
+    </cheat>
+  </cartridge>
   <cartridge sha256="337e643d3e63915de06429992f306e8d2b73aed6849b795f9c855c2d03c18180">	
     <name>D-Force (USA)</name>
     <cheat>
@@ -8291,7 +9419,7 @@
       <code>7E1F0E0C</code>
     </cheat>
     <cheat>
-      <description>Infinite ammo (must have some ammo for the Gun to be selectable)</description>
+      <description>Infinite ammo (must have some ammo for the gun to be selectable)</description>
       <code>DD85-17DD</code>
     </cheat>
     <cheat>
@@ -8700,6 +9828,17 @@
       <code>F7B9-1D04</code>
     </cheat>
   </cartridge>
+  <cartridge sha256="f3527855afea87b29406700b9dab45ebbb48edcb5a01d59cc2b0986abd3b1dd7">	
+    <name>Darius Force (Japan)</name>
+    <cheat>
+      <description>Infinite lives</description>
+      <code>7E011103</code>
+    </cheat>
+    <cheat>
+      <description>Invincibility (can make the screen flash if you use both weapons)</description>
+      <code>7E100081</code>
+    </cheat>
+  </cartridge>
   <cartridge sha256="ceb470157576eac3b8b8c16e8ab6b59672409681ffb4232e4ec39dd0cb37ef91">	
     <name>Darius Twin (USA)</name>
     <cheat>
@@ -8911,6 +10050,24 @@
       <description>Even faster side-to-side movement</description>
       <code>EC8B-AFDD</code>
       <code>D185-A7DD</code>
+    </cheat>
+  </cartridge>
+  <cartridge sha256="6ce516e3d1a7068cc9732cd3517cfd1e92179f2340c63a244625a1ff49815085">	
+    <name>Daze Before Christmas (Europe)</name>
+    <cheat>
+      <description>Infinite health</description>
+      <code>7E06F905</code>
+    </cheat>
+    <cheat>
+      <description>Infinite lives</description>
+      <code>7E1E6804</code>
+    </cheat>
+  </cartridge>
+  <cartridge sha256="a33af57e62a46282e3755824cc5fc39870a8eab8a28aaeb1c3817ba2c8e8655e">	
+    <name>Death Brade (Japan)</name>
+    <cheat>
+      <description>Infinite heath - P1</description>
+      <code>7E0A1050</code>
     </cheat>
   </cartridge>
   <cartridge sha256="300c1937e4b68108302e9b0f49974d1ec6b6c45dd8da69dddc19443f9562ecf4">	
@@ -9733,6 +10890,25 @@
     <cheat>
       <description>Timmy and Jamie jump much higher</description>
       <code>E622-DF22</code>
+    </cheat>
+  </cartridge>
+  <cartridge sha256="10e07e9e094e77a2b71bab3bac1d79a62b7a7bfdb80111044b1f9c64645c622f">	
+    <name>Donald in Maui Mallard (Europe)</name>
+    <cheat>
+      <description>Infinite health</description>
+      <code>7E0DD364</code>
+    </cheat>
+    <cheat>
+      <description>Infinite lives</description>
+      <code>7E1F4A03</code>
+    </cheat>
+    <cheat>
+      <description>Infinite Zapps</description>
+      <code>7E0DDB0A</code>
+    </cheat>
+    <cheat>
+      <description>Infinite Homers</description>
+      <code>7E0DDD0A</code>
     </cheat>
   </cartridge>
   <cartridge sha256="df2644d435330192a13768cc1f79c5aa3084a64217a5250c6dd4ffdbe2175be4">	
@@ -12931,6 +14107,13 @@
       <code>7FF7030F</code>
     </cheat>
   </cartridge>
+  <cartridge sha256="b9594d588816ae570ea5fea14577ed47de4db9ac9a40a116c84e0ad7a2ce58f8">	
+    <name>Fighter's History (USA) (Rev 1)</name>
+    <cheat>
+      <description>Infinite health - P1</description>
+      <code>7E0A56C8</code>
+    </cheat>
+  </cartridge>
   <cartridge sha256="f71817f55febd32fd1dce617a326a77b6b062dd0d4058ecd289f64af1b7a1d05">	
     <name>Final Fantasy - Mystic Quest (USA) (Rev 1)</name>
     <cheat>
@@ -13134,197 +14317,197 @@
       <code>7E359EFF</code>
     </cheat>
     <cheat>
-      <description>Max HP - Character 1</description>
+      <description>Character 1 - Max HP</description>
       <code>7E10490F</code>
       <code>7E20890F</code>
       <code>7E104A27</code>
       <code>7E208A27</code>
     </cheat>
     <cheat>
-      <description>Max HP - Character 2</description>
-      <code>7E10C90F</code>
-      <code>7E21890F</code>
-      <code>7E10CA27</code>
-      <code>7E218A27</code>
-    </cheat>
-    <cheat>
-      <description>Max HP - Character 3</description>
-      <code>7E10090F</code>
-      <code>7E20090F</code>
-      <code>7E100A27</code>
-      <code>7E200A27</code>
-    </cheat>
-    <cheat>
-      <description>Max HP - Character 4</description>
-      <code>7E11090F</code>
-      <code>7E20890F</code>
-      <code>7E110A27</code>
-      <code>7E208A27</code>
-    </cheat>
-    <cheat>
-      <description>Max HP - Character 5</description>
-      <code>7E10890F</code>
-      <code>7E20890F</code>
-      <code>7E108A27</code>
-      <code>7E208A27</code>
-    </cheat>
-    <cheat>
-      <description>Max MP - Character 1</description>
+      <description>Character 1 - Max MP</description>
       <code>7E104DE7</code>
       <code>7E208DE7</code>
       <code>7E104E03</code>
       <code>7E208E03</code>
     </cheat>
     <cheat>
-      <description>Max MP - Character 2</description>
+      <description>Character 1 - Max Agility</description>
+      <code>7E105063</code>
+      <code>7E105563</code>
+    </cheat>
+    <cheat>
+      <description>Character 1 - Max Strength</description>
+      <code>7E104F63</code>
+      <code>7E105463</code>
+    </cheat>
+    <cheat>
+      <description>Character 1 - Max Vitality</description>
+      <code>7E105163</code>
+      <code>7E105663</code>
+    </cheat>
+    <cheat>
+      <description>Character 1 - Max Will</description>
+      <code>7E105363</code>
+      <code>7E105863</code>
+    </cheat>
+    <cheat>
+      <description>Character 1 - Max Wisdom</description>
+      <code>7E105263</code>
+      <code>7E105763</code>
+    </cheat>
+    <cheat>
+      <description>Character 2 - Max HP</description>
+      <code>7E10C90F</code>
+      <code>7E21890F</code>
+      <code>7E10CA27</code>
+      <code>7E218A27</code>
+    </cheat>
+    <cheat>
+      <description>Character 2 - Max MP</description>
       <code>7E10CDE7</code>
       <code>7E218DE7</code>
       <code>7E10CE03</code>
       <code>7E218E03</code>
     </cheat>
     <cheat>
-      <description>Max MP - Character 3</description>
+      <description>Character 2 - Max Agility</description>
+      <code>7E10D063</code>
+      <code>7E10D563</code>
+    </cheat>
+    <cheat>
+      <description>Character 2 - Max Strength</description>
+      <code>7E10CF63</code>
+      <code>7E10D463</code>
+    </cheat>
+    <cheat>
+      <description>Character 2 - Max Vitality</description>
+      <code>7E10D163</code>
+      <code>7E10D663</code>
+    </cheat>
+    <cheat>
+      <description>Character 2 - Max Will</description>
+      <code>7E10D363</code>
+      <code>7E10D863</code>
+    </cheat>
+    <cheat>
+      <description>Character 2 - Max Wisdom</description>
+      <code>7E10D263</code>
+      <code>7E10D763</code>
+    </cheat>
+    <cheat>
+      <description>Character 3 - Max HP</description>
+      <code>7E10090F</code>
+      <code>7E20090F</code>
+      <code>7E100A27</code>
+      <code>7E200A27</code>
+    </cheat>
+    <cheat>
+      <description>Character 3 - Max MP</description>
       <code>7E100DE7</code>
       <code>7E200DE7</code>
       <code>7E100E03</code>
       <code>7E200E03</code>
     </cheat>
     <cheat>
-      <description>Max MP - Character 4</description>
+      <description>Character 3 - Max Agility</description>
+      <code>7E101063</code>
+      <code>7E101563</code>
+    </cheat>
+    <cheat>
+      <description>Character 3 - Max Strength</description>
+      <code>7E100F63</code>
+      <code>7E101463</code>
+    </cheat>
+    <cheat>
+      <description>Character 3 - Max Vitality</description>
+      <code>7E101163</code>
+      <code>7E101663</code>
+    </cheat>
+    <cheat>
+      <description>Character 3 - Max Will</description>
+      <code>7E101363</code>
+      <code>7E101863</code>
+    </cheat>
+    <cheat>
+      <description>Character 3 - Max Wisdom</description>
+      <code>7E101263</code>
+      <code>7E101763</code>
+    </cheat>
+    <cheat>
+      <description>Character 4 - Max HP</description>
+      <code>7E11090F</code>
+      <code>7E20890F</code>
+      <code>7E110A27</code>
+      <code>7E208A27</code>
+    </cheat>
+    <cheat>
+      <description>Character 4 - Max MP</description>
       <code>7E110DE7</code>
       <code>7E208DE7</code>
       <code>7E110E03</code>
       <code>7E208D03</code>
     </cheat>
     <cheat>
-      <description>Max MP - Character 5</description>
+      <description>Character 4 - Max Agility</description>
+      <code>7E111063</code>
+      <code>7E111563</code>
+    </cheat>
+    <cheat>
+      <description>Character 4 - Max Strength</description>
+      <code>7E110F63</code>
+      <code>7E111463</code>
+    </cheat>
+    <cheat>
+      <description>Character 4 - Max Vitality</description>
+      <code>7E111163</code>
+      <code>7E111663</code>
+    </cheat>
+    <cheat>
+      <description>Character 4 - Max Will</description>
+      <code>7E111363</code>
+      <code>7E111863</code>
+    </cheat>
+    <cheat>
+      <description>Character 4 - Max Wisdom</description>
+      <code>7E111263</code>
+      <code>7E111763</code>
+    </cheat>
+    <cheat>
+      <description>Character 5 - Max HP</description>
+      <code>7E10890F</code>
+      <code>7E20890F</code>
+      <code>7E108A27</code>
+      <code>7E208A27</code>
+    </cheat>
+    <cheat>
+      <description>Character 5 - Max MP</description>
       <code>7E108DE7</code>
       <code>7E208DE7</code>
       <code>7E108E03</code>
       <code>7E208E03</code>
     </cheat>
     <cheat>
-      <description>Max Agility - Character 1</description>
-      <code>7E105063</code>
-      <code>7E105563</code>
-    </cheat>
-    <cheat>
-      <description>Max Agility - Character 2</description>
-      <code>7E10D063</code>
-      <code>7E10D563</code>
-    </cheat>
-    <cheat>
-      <description>Max Agility - Character 3</description>
-      <code>7E101063</code>
-      <code>7E101563</code>
-    </cheat>
-    <cheat>
-      <description>Max Agility - Character 4</description>
-      <code>7E111063</code>
-      <code>7E111563</code>
-    </cheat>
-    <cheat>
-      <description>Max Agility - Character 5</description>
+      <description>Character 5 - Max Agility</description>
       <code>7E109063</code>
       <code>7E109563</code>
     </cheat>
     <cheat>
-      <description>Max Strength - Character 1</description>
-      <code>7E104F63</code>
-      <code>7E105463</code>
-    </cheat>
-    <cheat>
-      <description>Max Strength - Character 2</description>
-      <code>7E10CF63</code>
-      <code>7E10D463</code>
-    </cheat>
-    <cheat>
-      <description>Max Strength - Character 3</description>
-      <code>7E100F63</code>
-      <code>7E101463</code>
-    </cheat>
-    <cheat>
-      <description>Max Strength - Character 4</description>
-      <code>7E110F63</code>
-      <code>7E111463</code>
-    </cheat>
-    <cheat>
-      <description>Max Strength - Character 5</description>
+      <description>Character 5 - Max Strength</description>
       <code>7E108F63</code>
       <code>7E109463</code>
     </cheat>
     <cheat>
-      <description>Max Vitality - Character 1</description>
-      <code>7E105163</code>
-      <code>7E105663</code>
-    </cheat>
-    <cheat>
-      <description>Max Vitality - Character 2</description>
-      <code>7E10D163</code>
-      <code>7E10D663</code>
-    </cheat>
-    <cheat>
-      <description>Max Vitality - Character 3</description>
-      <code>7E101163</code>
-      <code>7E101663</code>
-    </cheat>
-    <cheat>
-      <description>Max Vitality - Character 4</description>
-      <code>7E111163</code>
-      <code>7E111663</code>
-    </cheat>
-    <cheat>
-      <description>Max Vitality - Character 5</description>
+      <description>Character 5 - Max Vitality</description>
       <code>7E109163</code>
       <code>7E109663</code>
     </cheat>
     <cheat>
-      <description>Max Will - Character 1</description>
-      <code>7E105363</code>
-      <code>7E105863</code>
-    </cheat>
-    <cheat>
-      <description>Max Will - Character 2</description>
-      <code>7E10D363</code>
-      <code>7E10D863</code>
-    </cheat>
-    <cheat>
-      <description>Max Will - Character 3</description>
-      <code>7E101363</code>
-      <code>7E101863</code>
-    </cheat>
-    <cheat>
-      <description>Max Will - Character 4</description>
-      <code>7E111363</code>
-      <code>7E111863</code>
-    </cheat>
-    <cheat>
-      <description>Max Will - Character 5</description>
+      <description>Character 5 - Max Will</description>
       <code>7E109363</code>
       <code>7E109863</code>
     </cheat>
     <cheat>
-      <description>Max Wisdom - Character 1</description>
-      <code>7E105263</code>
-      <code>7E105763</code>
-    </cheat>
-    <cheat>
-      <description>Max Wisdom - Character 2</description>
-      <code>7E10D263</code>
-      <code>7E10D763</code>
-    </cheat>
-    <cheat>
-      <description>Max Wisdom - Character 3</description>
-      <code>7E101263</code>
-      <code>7E101763</code>
-    </cheat>
-    <cheat>
-      <description>Max Wisdom - Character 4</description>
-      <code>7E111263</code>
-      <code>7E111763</code>
-    </cheat>
-    <cheat>
-      <description>Max Wisdom - Character 5</description>
+      <description>Character 5 - Max Wisdom</description>
       <code>7E109263</code>
       <code>7E109763</code>
     </cheat>
@@ -13536,197 +14719,197 @@
       <code>7E359EFF</code>
     </cheat>
     <cheat>
-      <description>Max HP - Character 1</description>
+      <description>Character 1 - Max HP</description>
       <code>7E10490F</code>
       <code>7E20890F</code>
       <code>7E104A27</code>
       <code>7E208A27</code>
     </cheat>
     <cheat>
-      <description>Max HP - Character 2</description>
-      <code>7E10C90F</code>
-      <code>7E21890F</code>
-      <code>7E10CA27</code>
-      <code>7E218A27</code>
-    </cheat>
-    <cheat>
-      <description>Max HP - Character 3</description>
-      <code>7E10090F</code>
-      <code>7E20090F</code>
-      <code>7E100A27</code>
-      <code>7E200A27</code>
-    </cheat>
-    <cheat>
-      <description>Max HP - Character 4</description>
-      <code>7E11090F</code>
-      <code>7E20890F</code>
-      <code>7E110A27</code>
-      <code>7E208A27</code>
-    </cheat>
-    <cheat>
-      <description>Max HP - Character 5</description>
-      <code>7E10890F</code>
-      <code>7E20890F</code>
-      <code>7E108A27</code>
-      <code>7E208A27</code>
-    </cheat>
-    <cheat>
-      <description>Max MP - Character 1</description>
+      <description>Character 1 - Max MP</description>
       <code>7E104DE7</code>
       <code>7E208DE7</code>
       <code>7E104E03</code>
       <code>7E208E03</code>
     </cheat>
     <cheat>
-      <description>Max MP - Character 2</description>
+      <description>Character 1 - Max Agility</description>
+      <code>7E105063</code>
+      <code>7E105563</code>
+    </cheat>
+    <cheat>
+      <description>Character 1 - Max Strength</description>
+      <code>7E104F63</code>
+      <code>7E105463</code>
+    </cheat>
+    <cheat>
+      <description>Character 1 - Max Vitality</description>
+      <code>7E105163</code>
+      <code>7E105663</code>
+    </cheat>
+    <cheat>
+      <description>Character 1 - Max Will</description>
+      <code>7E105363</code>
+      <code>7E105863</code>
+    </cheat>
+    <cheat>
+      <description>Character 1 - Max Wisdom</description>
+      <code>7E105263</code>
+      <code>7E105763</code>
+    </cheat>
+    <cheat>
+      <description>Character 2 - Max HP</description>
+      <code>7E10C90F</code>
+      <code>7E21890F</code>
+      <code>7E10CA27</code>
+      <code>7E218A27</code>
+    </cheat>
+    <cheat>
+      <description>Character 2 - Max MP</description>
       <code>7E10CDE7</code>
       <code>7E218DE7</code>
       <code>7E10CE03</code>
       <code>7E218E03</code>
     </cheat>
     <cheat>
-      <description>Max MP - Character 3</description>
+      <description>Character 2 - Max Agility</description>
+      <code>7E10D063</code>
+      <code>7E10D563</code>
+    </cheat>
+    <cheat>
+      <description>Character 2 - Max Strength</description>
+      <code>7E10CF63</code>
+      <code>7E10D463</code>
+    </cheat>
+    <cheat>
+      <description>Character 2 - Max Vitality</description>
+      <code>7E10D163</code>
+      <code>7E10D663</code>
+    </cheat>
+    <cheat>
+      <description>Character 2 - Max Will</description>
+      <code>7E10D363</code>
+      <code>7E10D863</code>
+    </cheat>
+    <cheat>
+      <description>Character 2 - Max Wisdom</description>
+      <code>7E10D263</code>
+      <code>7E10D763</code>
+    </cheat>
+    <cheat>
+      <description>Character 3 - Max HP</description>
+      <code>7E10090F</code>
+      <code>7E20090F</code>
+      <code>7E100A27</code>
+      <code>7E200A27</code>
+    </cheat>
+    <cheat>
+      <description>Character 3 - Max MP</description>
       <code>7E100DE7</code>
       <code>7E200DE7</code>
       <code>7E100E03</code>
       <code>7E200E03</code>
     </cheat>
     <cheat>
-      <description>Max MP - Character 4</description>
+      <description>Character 3 - Max Agility</description>
+      <code>7E101063</code>
+      <code>7E101563</code>
+    </cheat>
+    <cheat>
+      <description>Character 3 - Max Strength</description>
+      <code>7E100F63</code>
+      <code>7E101463</code>
+    </cheat>
+    <cheat>
+      <description>Character 3 - Max Vitality</description>
+      <code>7E101163</code>
+      <code>7E101663</code>
+    </cheat>
+    <cheat>
+      <description>Character 3 - Max Will</description>
+      <code>7E101363</code>
+      <code>7E101863</code>
+    </cheat>
+    <cheat>
+      <description>Character 3 - Max Wisdom</description>
+      <code>7E101263</code>
+      <code>7E101763</code>
+    </cheat>
+    <cheat>
+      <description>Character 4 - Max HP</description>
+      <code>7E11090F</code>
+      <code>7E20890F</code>
+      <code>7E110A27</code>
+      <code>7E208A27</code>
+    </cheat>
+    <cheat>
+      <description>Character 4 - Max MP</description>
       <code>7E110DE7</code>
       <code>7E208DE7</code>
       <code>7E110E03</code>
       <code>7E208D03</code>
     </cheat>
     <cheat>
-      <description>Max MP - Character 5</description>
+      <description>Character 4 - Max Agility</description>
+      <code>7E111063</code>
+      <code>7E111563</code>
+    </cheat>
+    <cheat>
+      <description>Character 4 - Max Strength</description>
+      <code>7E110F63</code>
+      <code>7E111463</code>
+    </cheat>
+    <cheat>
+      <description>Character 4 - Max Vitality</description>
+      <code>7E111163</code>
+      <code>7E111663</code>
+    </cheat>
+    <cheat>
+      <description>Character 4 - Max Will</description>
+      <code>7E111363</code>
+      <code>7E111863</code>
+    </cheat>
+    <cheat>
+      <description>Character 4 - Max Wisdom</description>
+      <code>7E111263</code>
+      <code>7E111763</code>
+    </cheat>
+    <cheat>
+      <description>Character 5 - Max HP</description>
+      <code>7E10890F</code>
+      <code>7E20890F</code>
+      <code>7E108A27</code>
+      <code>7E208A27</code>
+    </cheat>
+    <cheat>
+      <description>Character 5 - Max MP</description>
       <code>7E108DE7</code>
       <code>7E208DE7</code>
       <code>7E108E03</code>
       <code>7E208E03</code>
     </cheat>
     <cheat>
-      <description>Max Agility - Character 1</description>
-      <code>7E105063</code>
-      <code>7E105563</code>
-    </cheat>
-    <cheat>
-      <description>Max Agility - Character 2</description>
-      <code>7E10D063</code>
-      <code>7E10D563</code>
-    </cheat>
-    <cheat>
-      <description>Max Agility - Character 3</description>
-      <code>7E101063</code>
-      <code>7E101563</code>
-    </cheat>
-    <cheat>
-      <description>Max Agility - Character 4</description>
-      <code>7E111063</code>
-      <code>7E111563</code>
-    </cheat>
-    <cheat>
-      <description>Max Agility - Character 5</description>
+      <description>Character 5 - Max Agility</description>
       <code>7E109063</code>
       <code>7E109563</code>
     </cheat>
     <cheat>
-      <description>Max Strength - Character 1</description>
-      <code>7E104F63</code>
-      <code>7E105463</code>
-    </cheat>
-    <cheat>
-      <description>Max Strength - Character 2</description>
-      <code>7E10CF63</code>
-      <code>7E10D463</code>
-    </cheat>
-    <cheat>
-      <description>Max Strength - Character 3</description>
-      <code>7E100F63</code>
-      <code>7E101463</code>
-    </cheat>
-    <cheat>
-      <description>Max Strength - Character 4</description>
-      <code>7E110F63</code>
-      <code>7E111463</code>
-    </cheat>
-    <cheat>
-      <description>Max Strength - Character 5</description>
+      <description>Character 5 - Max Strength</description>
       <code>7E108F63</code>
       <code>7E109463</code>
     </cheat>
     <cheat>
-      <description>Max Vitality - Character 1</description>
-      <code>7E105163</code>
-      <code>7E105663</code>
-    </cheat>
-    <cheat>
-      <description>Max Vitality - Character 2</description>
-      <code>7E10D163</code>
-      <code>7E10D663</code>
-    </cheat>
-    <cheat>
-      <description>Max Vitality - Character 3</description>
-      <code>7E101163</code>
-      <code>7E101663</code>
-    </cheat>
-    <cheat>
-      <description>Max Vitality - Character 4</description>
-      <code>7E111163</code>
-      <code>7E111663</code>
-    </cheat>
-    <cheat>
-      <description>Max Vitality - Character 5</description>
+      <description>Character 5 - Max Vitality</description>
       <code>7E109163</code>
       <code>7E109663</code>
     </cheat>
     <cheat>
-      <description>Max Will - Character 1</description>
-      <code>7E105363</code>
-      <code>7E105863</code>
-    </cheat>
-    <cheat>
-      <description>Max Will - Character 2</description>
-      <code>7E10D363</code>
-      <code>7E10D863</code>
-    </cheat>
-    <cheat>
-      <description>Max Will - Character 3</description>
-      <code>7E101363</code>
-      <code>7E101863</code>
-    </cheat>
-    <cheat>
-      <description>Max Will - Character 4</description>
-      <code>7E111363</code>
-      <code>7E111863</code>
-    </cheat>
-    <cheat>
-      <description>Max Will - Character 5</description>
+      <description>Character 5 - Max Will</description>
       <code>7E109363</code>
       <code>7E109863</code>
     </cheat>
     <cheat>
-      <description>Max Wisdom - Character 1</description>
-      <code>7E105263</code>
-      <code>7E105763</code>
-    </cheat>
-    <cheat>
-      <description>Max Wisdom - Character 2</description>
-      <code>7E10D263</code>
-      <code>7E10D763</code>
-    </cheat>
-    <cheat>
-      <description>Max Wisdom - Character 3</description>
-      <code>7E101263</code>
-      <code>7E101763</code>
-    </cheat>
-    <cheat>
-      <description>Max Wisdom - Character 4</description>
-      <code>7E111263</code>
-      <code>7E111763</code>
-    </cheat>
-    <cheat>
-      <description>Max Wisdom - Character 5</description>
+      <description>Character 5 - Max Wisdom</description>
       <code>7E109263</code>
       <code>7E109763</code>
     </cheat>
@@ -16147,6 +17330,36 @@
       <code>7EFFFE06</code>
     </cheat>
   </cartridge>
+  <cartridge sha256="6f32355bef68d4ad58822f50074b46bcc9a68357cd2c6a5470c96bf5344f84d8">	
+    <name>Fire Striker (USA)</name>
+    <cheat>
+      <description>Infinite health</description>
+      <code>7E133307</code>
+    </cheat>
+    <cheat>
+      <description>Infinite Power</description>
+      <code>7E133503</code>
+    </cheat>
+    <cheat>
+      <description>Infinite Rest</description>
+      <code>7E152D03</code>
+    </cheat>
+  </cartridge>
+  <cartridge sha256="a0106f9cff7abbf25e081e2531f6d4b4aedf6f0dc8d155a66506817bff267d12">	
+    <name>Firemen, The (Europe) (En,Fr,De)</name>
+    <cheat>
+      <description>Infinite life</description>
+      <code>7E15C731</code>
+    </cheat>
+    <cheat>
+      <description>Infinite time</description>
+      <code>7E198009</code>
+    </cheat>
+    <cheat>
+      <description>Infinite Water Bombs</description>
+      <code>7E091A03</code>
+    </cheat>
+  </cartridge>
   <cartridge sha256="003dba0193acc5336840307194643ca3b1f848dcfc77580b4e17c605105b27f5">	
     <name>Firepower 2000 (USA)</name>
     <cheat>
@@ -16519,6 +17732,41 @@
     <cheat>
       <description>Style mode - nude head</description>
       <code>7E0F5D05</code>
+    </cheat>
+  </cartridge>
+  <cartridge sha256="37fe99a0da8c2ca2296c35e6a08e48b9195074b2aa1955c1eed715d12196001b">	
+    <name>Fushigi no Dungeon 2 - Fuurai no Shiren (Japan)</name>
+    <cheat>
+      <description>Gain any EXP for maximum</description>
+      <code>DD79-5F0B</code>
+    </cheat>
+    <cheat>
+      <description>Enemies start with 1 HP (If enabled when starting a new game, die, or finish the game, you'll restart with 1 HP. When you gain a level it should correct itself.)</description>
+      <code>DD7D-770C</code>
+      <code>CE7D-776C</code>
+      <code>FF7D-77AC</code>
+    </cheat>
+    <cheat>
+      <description>Collect any Gitan for maximum</description>
+      <code>DD9F-7FA8</code>
+    </cheat>
+    <cheat>
+      <description>Never lose Satiation</description>
+      <code>DD72-ED66</code>
+    </cheat>
+    <cheat>
+      <description>One Arrow gains 99</description>
+      <code>DD75-EFD3</code>
+    </cheat>
+    <cheat>
+      <description>Smith a weapon to make it +99</description>
+      <code>CBD1-8FD2</code>
+      <code>14D1-8F02</code>
+    </cheat>
+    <cheat>
+      <description>Items from bartender get +99 Refinement</description>
+      <code>CBD8-840A</code>
+      <code>17D8-846A</code>
     </cheat>
   </cartridge>
   <cartridge sha256="ca3dd4620c692b2b8d3dd49b7dbdb1daa251ee0f7943050cc8a036e209cd7a07">	
@@ -17590,6 +18838,18 @@
     <cheat>
       <description>Start with 3 power leaves</description>
       <code>D066-0FDD</code>
+    </cheat>
+  </cartridge>
+  <cartridge sha256="ba6cb0d64cef410c5dd517ce0424fc0942a15b0df0274903939c043f3ac79d39">	
+    <name>Humans, The (Europe)</name>
+    <cheat>
+      <description>Infinite lives</description>
+      <code>7E010B0C</code>
+    </cheat>
+    <cheat>
+      <description>Infinite time (disable at end of level)</description>
+      <code>7E012278</code>
+      <code>7E012300</code>
     </cheat>
   </cartridge>
   <cartridge sha256="a03528344d40bf800cdbde2dd240b30442cec7aea6026fbbe312a7c36bf0f74a">	
@@ -20319,6 +21579,33 @@
       <code>6F25-04D7</code>
     </cheat>
   </cartridge>
+  <cartridge sha256="6f2dc2486d680fe557ed6e2e7082480aad6537c6a04845bb6a6b8ef5e3d698ef">	
+    <name>Kamen Rider (Japan)</name>
+    <cheat>
+      <description>Invincibility</description>
+      <code>C268-3DD4</code>
+    </cheat>
+    <cheat>
+      <description>Infinite health</description>
+      <code>0D68-34D4</code>
+      <code>6E68-3464</code>
+      <code>1C68-34A4</code>
+      <code>DA68-37D4</code>
+      <code>5368-3704</code>
+    </cheat>
+    <cheat>
+      <description>Infinite health (alt)</description>
+      <code>7E0C6A40</code>
+    </cheat>
+    <cheat>
+      <description>Infinite lives</description>
+      <code>A2EF-1FD5</code>
+    </cheat>
+    <cheat>
+      <description>Infinite lives (alt)</description>
+      <code>7E003802</code>
+    </cheat>
+  </cartridge>
   <cartridge sha256="7cc3693cc5e1e834d57795f04b048fab27864a898a9507e7ca383771e2035414">	
     <name>Kawasaki Caribbean Challenge (USA)</name>
     <cheat>
@@ -20443,6 +21730,50 @@
     <cheat>
       <description>Infinite continues</description>
       <code>C238-1F27</code>
+    </cheat>
+  </cartridge>
+  <cartridge sha256="2b27e9bceb646a300566248fcdcbd582435f50bd6132b0f0025cc146a9d62bd9">	
+    <name>Kikou Keisatsu Metal Jack (Japan)</name>
+    <cheat>
+      <description>Invincibility</description>
+      <code>ED88-A467</code>
+    </cheat>
+    <cheat>
+      <description>Infinite health</description>
+      <code>C983-A9CF</code>
+    </cheat>
+    <cheat>
+      <description>Infinite health (alt)</description>
+      <code>7E006031</code>
+    </cheat>
+    <cheat>
+      <description>Infinite lives</description>
+      <code>C9A7-A76D</code>
+    </cheat>
+    <cheat>
+      <description>Infinite lives (alt)</description>
+      <code>7E006109</code>
+    </cheat>
+    <cheat>
+      <description>Infinite time</description>
+      <code>7E003106</code>
+      <code>7E003200</code>
+    </cheat>
+    <cheat>
+      <description>Infinite ammo</description>
+      <code>7E006B63</code>
+    </cheat>
+    <cheat>
+      <description>Moon-jump</description>
+      <code>7E005F01</code>
+    </cheat>
+    <cheat>
+      <description>Moon-jump when attacking</description>
+      <code>7E007220</code>
+    </cheat>
+    <cheat>
+      <description>Can't walk</description>
+      <code>7E006C03</code>
     </cheat>
   </cartridge>
   <cartridge sha256="7a5261f1a5e84b67483c79fb002ce1539f2360f88333bda60f12e617d86e0def">	
@@ -21429,6 +22760,24 @@
       <code>3C81-4461</code>
       <code>CB81-44A1</code>
       <code>D981-47D1</code>
+    </cheat>
+  </cartridge>
+  <cartridge sha256="6a37a20a4880b9ec38b1b7e17e42ea93a1bf826630ccbe5f8257f0d928f13953">	
+    <name>Kouryuu no Mimi (Japan)</name>
+    <cheat>
+      <description>Infinite health</description>
+      <code>CB6D-1F24</code>
+      <code>0D6D-14F4</code>
+      <code>DD6D-1494</code>
+      <code>626D-17F4</code>
+    </cheat>
+    <cheat>
+      <description>Infinite health (alt)</description>
+      <code>7E09C040</code>
+    </cheat>
+    <cheat>
+      <description>Infinite Ring power</description>
+      <code>7E008C20</code>
     </cheat>
   </cartridge>
   <cartridge sha256="bed18c968aee0eb0c866c1964c28135364cd6d65fff7bcb5873342c04e63750d">	
@@ -27494,6 +28843,13 @@
       <code>8297-7F09</code>
     </cheat>
   </cartridge>
+  <cartridge sha256="c01fb8989d391d3e343003934937f02bd8ef9aacdad68c32c3d3f56feb72f5b0">	
+    <name>Magic Boy (USA)</name>
+    <cheat>
+      <description>Infinite lives</description>
+      <code>7E9BB603</code>
+    </cheat>
+  </cartridge>
   <cartridge sha256="1d3cceaa05e054b002caeb09fd5fb9e718ec446764f4169d97bc185da76fdf4d">	
     <name>Magic Sword (USA)</name>
     <cheat>
@@ -27637,6 +28993,21 @@
     <cheat>
       <description>Max power for Cleric's Magic Bullet</description>
       <code>7E041A07</code>
+    </cheat>
+  </cartridge>
+  <cartridge sha256="ed617ad12c865fc9c9c5c75de840d3afeded57d13ca3a3062bf8e30095629414">	
+    <name>Magical Pop'n (Japan)</name>
+    <cheat>
+      <description>Infinite health</description>
+      <code>7E051A06</code>
+    </cheat>
+    <cheat>
+      <description>Infinite lives</description>
+      <code>7E051602</code>
+    </cheat>
+    <cheat>
+      <description>Infinite stars</description>
+      <code>7E050809</code>
     </cheat>
   </cartridge>
   <cartridge sha256="f301bb8ea867e530ecb64e8eff504ed5b9697cf076c70e2036ecf2ffbe6c487a">	
@@ -28483,6 +29854,50 @@
       <code>7E1F8009</code>
     </cheat>
     <cheat>
+      <description>One hit kills (most enemies)</description>
+      <code>6DB5-CD97</code>
+    </cheat>
+    <cheat>
+      <description>Immune to drain attack</description>
+      <code>C2AD-4401</code>
+    </cheat>
+    <cheat>
+      <description>Have all equipment</description>
+      <code>7E1F99FF</code>
+    </cheat>
+    <cheat>
+      <description>Enable Hadoken</description>
+      <code>7E1F7E85</code>
+    </cheat>
+    <cheat>
+      <description>Have sub-tank 1 full</description>
+      <code>7E1F83FF</code>
+    </cheat>
+    <cheat>
+      <description>Have sub-tank 2 full</description>
+      <code>7E1F84FF</code>
+    </cheat>
+    <cheat>
+      <description>Have sub-tank 3 full</description>
+      <code>7E1F85FF</code>
+    </cheat>
+    <cheat>
+      <description>Have sub-tank 4 full</description>
+      <code>7E1F86FF</code>
+    </cheat>
+    <cheat>
+      <description>Infinite weapon usage once obtained</description>
+      <code>DDB3-4FA9</code>
+    </cheat>
+    <cheat>
+      <description>Bogus jump (may go back to normal jumps)</description>
+      <code>D08A-1FBC</code>
+    </cheat>
+    <cheat>
+      <description>Super-jump (may go back to normal jumps)</description>
+      <code>D58A-1FBC</code>
+    </cheat>
+    <cheat>
       <description>Start with 10 lives</description>
       <code>DBBE-446F</code>
     </cheat>
@@ -28505,42 +29920,6 @@
     <cheat>
       <description>Start with more health</description>
       <code>4DBE-47AF</code>
-    </cheat>
-    <cheat>
-      <description>One hit kills (most enemies)</description>
-      <code>6DB5-CD97</code>
-    </cheat>
-    <cheat>
-      <description>Have all equipment</description>
-      <code>7E1F99FF</code>
-    </cheat>
-    <cheat>
-      <description>Have sub-tank 1 full</description>
-      <code>7E1F83FF</code>
-    </cheat>
-    <cheat>
-      <description>Have sub-tank 2 full</description>
-      <code>7E1F84FF</code>
-    </cheat>
-    <cheat>
-      <description>Have sub-tank 3 full</description>
-      <code>7E1F85FF</code>
-    </cheat>
-    <cheat>
-      <description>Have sub-tank 4 full</description>
-      <code>7E1F86FF</code>
-    </cheat>
-    <cheat>
-      <description>Infinite weapons once you have them</description>
-      <code>C9B3-4769</code>
-    </cheat>
-    <cheat>
-      <description>Bogus jump (may go back to normal jumps)</description>
-      <code>D08A-1FBC</code>
-    </cheat>
-    <cheat>
-      <description>Super-jump (may go back to normal jumps)</description>
-      <code>D58A-1FBC</code>
     </cheat>
   </cartridge>
   <cartridge sha256="3e1209f473bff8cd4bcbf71d071e7f8df17a2d564e9a5c4c427ee8198cebb615">	
@@ -31930,6 +33309,13 @@
       <code>CB31-3F04</code>
     </cheat>
   </cartridge>
+  <cartridge sha256="d7ad6f67860da78fe25d9e79dd13af7ac7efaa0c8e0103898a4849ab4af9e438">	
+    <name>Nickelodeon GUTS (USA)</name>
+    <cheat>
+      <description>Gain lots of points in Slam Dunk / Attack levels</description>
+      <code>7E126DFF</code>
+    </cheat>
+  </cartridge>
   <cartridge sha256="ce9c819d6496e58901b39d9b04558a89e09ccc3aac33690b8d02bb0406682a57">	
     <name>Nigel Mansell's World Championship Racing (USA)</name>
     <cheat>
@@ -32875,6 +34261,17 @@
       <code>8194D8FF</code>
     </cheat>
   </cartridge>
+  <cartridge sha256="2ec71aca4efc3791b6b3e65956df3eafd2a46e223d5ea71aead07d30ca48b6c9">	
+    <name>Operation Starfi5h (Europe)</name>
+    <cheat>
+      <description>Infinite health</description>
+      <code>7EFB0503</code>
+    </cheat>
+    <cheat>
+      <description>Infinite lives</description>
+      <code>7EFB0303</code>
+    </cheat>
+  </cartridge>
   <cartridge sha256="5cbed0401734142184166917427d24f9e5f107a7adea665e2f4b4101491ad54b">	
     <name>Operation Thunderbolt (USA)</name>
     <cheat>
@@ -33146,6 +34543,21 @@
     <cheat>
       <description>Have Milk</description>
       <code>7E050901</code>
+    </cheat>
+  </cartridge>
+  <cartridge sha256="7fe4cb9c294d66589ff78e225774471ecb7db80df25f2b6199ca25671358072b">	
+    <name>Pac-in-Time (USA)</name>
+    <cheat>
+      <description>Infinite health</description>
+      <code>7E1533BF</code>
+    </cheat>
+    <cheat>
+      <description>Infinite lives</description>
+      <code>7E0AD502</code>
+    </cheat>
+    <cheat>
+      <description>Instant exit</description>
+      <code>7E0B0300</code>
     </cheat>
   </cartridge>
   <cartridge sha256="46286d0839a4397fc4c067b39783f98d2aefeca870a468bae601a1434f1dde90">	
@@ -34036,6 +35448,17 @@
       <code>7E01FF03</code>
     </cheat>
   </cartridge>
+  <cartridge sha256="fe7b861504886b40207d777cfc0dce76778b5fd8e679a67d04c9ded98cd1e59e">	
+    <name>Pinocchio (Europe)</name>
+    <cheat>
+      <description>Infinite health</description>
+      <code>7E03D828</code>
+    </cheat>
+    <cheat>
+      <description>Infinite lives</description>
+      <code>7E03DE03</code>
+    </cheat>
+  </cartridge>
   <cartridge sha256="447dfa710e69479159e9d407474fbf5f67d3a3330ab0c7627afd123ded3fdb3a">	
     <name>Pirates of Dark Water, The (USA)</name>
     <cheat>
@@ -34210,8 +35633,29 @@
   <cartridge sha256="72b2b3bead3fcd27a1610ad5d4d8be3235efeaff96df2e7858911992a5892d21">	
     <name>Pocky &amp; Rocky (USA)</name>
     <cheat>
+      <description>Invincibility</description>
+      <code>01B67FD0</code>
+      <code>01B67D85</code>
+    </cheat>
+    <cheat>
+      <description>Infinite health</description>
+      <code>7E006808</code>
+    </cheat>
+    <cheat>
+      <description>Infinite health - Pocky</description>
+      <code>C933-A794</code>
+    </cheat>
+    <cheat>
+      <description>Infinite health - Rocky</description>
+      <code>C93E-A797</code>
+    </cheat>
+    <cheat>
       <description>Infinite time</description>
       <code>CB2D-DFDF</code>
+    </cheat>
+    <cheat>
+      <description>Infinite time (alt)</description>
+      <code>7E0F129A</code>
     </cheat>
     <cheat>
       <description>Infinite lives - Pocky</description>
@@ -34220,6 +35664,26 @@
     <cheat>
       <description>Infinite lives - Rocky</description>
       <code>DD35-0761</code>
+    </cheat>
+    <cheat>
+      <description>Infinite lives</description>
+      <code>7E006A03</code>
+    </cheat>
+    <cheat>
+      <description>Infinite Special</description>
+      <code>7E006602</code>
+    </cheat>
+    <cheat>
+      <description>Infinite Shield</description>
+      <code>7E00E402</code>
+    </cheat>
+    <cheat>
+      <description>Weapons don't deplete when hit - Pocky</description>
+      <code>4032-A4F4</code>
+    </cheat>
+    <cheat>
+      <description>Weapons don't deplete when hit - Pocky</description>
+      <code>4033-AFF7</code>
     </cheat>
     <cheat>
       <description>1 life - Pocky</description>
@@ -34246,22 +35710,6 @@
       <code>DB62-A704</code>
     </cheat>
     <cheat>
-      <description>Infinite energy - Pocky</description>
-      <code>C933-A794</code>
-    </cheat>
-    <cheat>
-      <description>Infinite energy - Rocky</description>
-      <code>C93E-A797</code>
-    </cheat>
-    <cheat>
-      <description>Weapons don't deplete when hit - Pocky</description>
-      <code>4032-A4F4</code>
-    </cheat>
-    <cheat>
-      <description>Weapons don't deplete when hit - Pocky</description>
-      <code>4033-AFF7</code>
-    </cheat>
-    <cheat>
       <description>Blue ball acts as red ball - Pocky</description>
       <code>D43F-6FF4</code>
     </cheat>
@@ -34284,6 +35732,40 @@
     <cheat>
       <description>9 lives stolen from Pocky (must have one life remaining)</description>
       <code>DB3A-DD69</code>
+    </cheat>
+  </cartridge>
+  <cartridge sha256="cc33ae02114ea18a86592de327b2b4bcc80728b11a5e4c61666dca71480d4169">	
+    <name>Pocky &amp; Rocky 2 (USA)</name>
+    <cheat>
+      <description>Invincibility</description>
+      <code>03973160</code>
+      <code>06973960</code>
+    </cheat>
+    <cheat>
+      <description>Infinite time</description>
+      <code>7E706476</code>
+    </cheat>
+    <cheat>
+      <description>Infinite time (alt)</description>
+      <code>7E706479</code>
+      <code>7E706279</code>
+      <code>7E706079</code>
+    </cheat>
+    <cheat>
+      <description>Infinite lives</description>
+      <code>7E19F403</code>
+    </cheat>
+    <cheat>
+      <description>Infinite Keys</description>
+      <code>7E05B299</code>
+    </cheat>
+    <cheat>
+      <description>Max Card</description>
+      <code>7E19F602</code>
+    </cheat>
+    <cheat>
+      <description>Infinite hearts when riding Spirit Dog</description>
+      <code>7E19F205</code>
     </cheat>
   </cartridge>
   <cartridge sha256="5e580f220ed16281df8ee9a5f450b553f39f8c4078d3f3048d66bda15f98e19f">	
@@ -36417,6 +37899,61 @@
       <code>ECAB-DDA5</code>
     </cheat>
   </cartridge>
+  <cartridge sha256="82a9ee11b5640409c67772363f1148517b26127cef13aa2a8ffc2480b487d81f">	
+    <name>Rendering Ranger R2 (Japan)</name>
+    <cheat>
+      <description>Invincibility</description>
+      <code>7E06AE03</code>
+    </cheat>
+    <cheat>
+      <description>Infinite health</description>
+      <code>7E06BC05</code>
+    </cheat>
+    <cheat>
+      <description>Infinite lives</description>
+      <code>7E051509</code>
+    </cheat>
+    <cheat>
+      <description>Infinite Bombs</description>
+      <code>7E06C103</code>
+    </cheat>
+    <cheat>
+      <description>Deactivate shield</description>
+      <code>7E06B800</code>
+    </cheat>
+    <cheat>
+      <description>Have Pods (ship stages)</description>
+      <code>7E06B501</code>
+    </cheat>
+    <cheat>
+      <description>Have Blue weapon (press A to switch weapons)</description>
+      <code>7E0AA200</code>
+    </cheat>
+    <cheat>
+      <description>Have Green weapon (press A to switch weapons)</description>
+      <code>7E0AA300</code>
+    </cheat>
+    <cheat>
+      <description>Have Yellow weapon (press A to switch weapons)</description>
+      <code>7E0AA400</code>
+    </cheat>
+    <cheat>
+      <description>Best Red weapon</description>
+      <code>7E0A9D04</code>
+    </cheat>
+    <cheat>
+      <description>Best Blue weapon</description>
+      <code>7E0A9E04</code>
+    </cheat>
+    <cheat>
+      <description>Best Green weapon</description>
+      <code>7E0A9F04</code>
+    </cheat>
+    <cheat>
+      <description>Best Yellow weapon</description>
+      <code>7E0AA004</code>
+    </cheat>
+  </cartridge>
   <cartridge sha256="f44482e2cccd9fcfd5875d84ff700f6e783f3bd8abd1ac4d939074cd6ad3fe65">	
     <name>Rex Ronan - Experimental Surgeon (USA) (En,Es)</name>
     <cheat>
@@ -38287,6 +39824,156 @@
       <description>Blood</description>
       <code>DDB6-57AF</code>
       <code>DDB3-746F</code>
+    </cheat>
+  </cartridge>
+  <cartridge sha256="40e25763288521509b2201f5b4e53f3e3bcdfa92e37cf5eeee4f00d8935d534a">	
+    <name>Shin Nekketsu Kouha - Kunio-tachi no Banka (Japan)</name>
+    <cheat>
+      <description>Invincibility</description>
+      <code>C22B-1466</code>
+    </cheat>
+    <cheat>
+      <description>Invincibility (alt)</description>
+      <code>7E120202</code>
+    </cheat>
+    <cheat>
+      <description>Infinite health - Kunio</description>
+      <code>7E0094FF</code>
+    </cheat>
+    <cheat>
+      <description>Infinite health - Riki</description>
+      <code>7E0096FF</code>
+    </cheat>
+    <cheat>
+      <description>Infinite health - Misako</description>
+      <code>7E0098FF</code>
+    </cheat>
+    <cheat>
+      <description>Infinite health - Kyouko</description>
+      <code>7E009AFF</code>
+    </cheat>
+    <cheat>
+      <description>One hit kills</description>
+      <code>7E009C00</code>
+      <code>7E009E00</code>
+      <code>7E00A000</code>
+      <code>7E00A200</code>
+    </cheat>
+    <cheat>
+      <description>Play as Kunio - Jail Outfit (Safe To Use)</description>
+      <code>7E11DC00</code>
+    </cheat>
+    <cheat>
+      <description>Play as Riki - Jail Outfit (Safe To Use)</description>
+      <code>7E11DC01</code>
+    </cheat>
+    <cheat>
+      <description>Play as Takayama</description>
+      <code>7E11DC03</code>
+    </cheat>
+    <cheat>
+      <description>Play as Cop</description>
+      <code>7E11DC04</code>
+    </cheat>
+    <cheat>
+      <description>Play as Gouji</description>
+      <code>7E11DC05</code>
+    </cheat>
+    <cheat>
+      <description>Play as Tooru</description>
+      <code>7E11DC06</code>
+    </cheat>
+    <cheat>
+      <description>Play as Gouji Henchman</description>
+      <code>7E11DC07</code>
+    </cheat>
+    <cheat>
+      <description>Play as Kunio - School Outfit (Safe To Use)</description>
+      <code>7E11DC08</code>
+    </cheat>
+    <cheat>
+      <description>Play as Riki - School Outfit (Safe To Use)</description>
+      <code>7E11DC09</code>
+    </cheat>
+    <cheat>
+      <description>Play as Misako (Safe To Use)</description>
+      <code>7E11DC0A</code>
+    </cheat>
+    <cheat>
+      <description>Play as Kyouko (Safe To Use)</description>
+      <code>7E11DC0B</code>
+    </cheat>
+    <cheat>
+      <description>Play as Daiki Stage 2, Ryuuta Stage 3</description>
+      <code>7E11DC0C</code>
+    </cheat>
+    <cheat>
+      <description>Play as Henchman Stage 2+</description>
+      <code>7E11DC0E</code>
+    </cheat>
+    <cheat>
+      <description>Play as Henchman Stage 2+ (alt)</description>
+      <code>7E11DC11</code>
+    </cheat>
+    <cheat>
+      <description>Play as Henchman Stage 2+ (alt)</description>
+      <code>7E11DC14</code>
+    </cheat>
+    <cheat>
+      <description>Play as Shingi Henchman</description>
+      <code>7E11DC17</code>
+    </cheat>
+    <cheat>
+      <description>Play as Shingi </description>
+      <code>7E11DC1A</code>
+    </cheat>
+    <cheat>
+      <description>Play as Lisa</description>
+      <code>7E11DC1B</code>
+    </cheat>
+    <cheat>
+      <description>Play as Sabu</description>
+      <code>7E11DC1E</code>
+    </cheat>
+    <cheat>
+      <description>Play as Kinji</description>
+      <code>7E11DC1F</code>
+    </cheat>
+    <cheat>
+      <description>Play as Ken</description>
+      <code>7E11DC20</code>
+    </cheat>
+    <cheat>
+      <description>Play as Misuzu</description>
+      <code>7E11DC21</code>
+    </cheat>
+    <cheat>
+      <description>Play as Yakuza 1</description>
+      <code>7E11DC23</code>
+    </cheat>
+    <cheat>
+      <description>Play as Yakuza 2</description>
+      <code>7E11DC25</code>
+    </cheat>
+    <cheat>
+      <description>Play as Joe</description>
+      <code>7E11DC2C</code>
+    </cheat>
+    <cheat>
+      <description>Character color becomes White</description>
+      <code>7E008400</code>
+    </cheat>
+    <cheat>
+      <description>Character color becomes Blue</description>
+      <code>7E008401</code>
+    </cheat>
+    <cheat>
+      <description>Character color becomes Green</description>
+      <code>7E008402</code>
+    </cheat>
+    <cheat>
+      <description>Character color becomes Light Blue</description>
+      <code>7E008403</code>
     </cheat>
   </cartridge>
   <cartridge sha256="d09ca5adaee65cfd686742482bc55b1a3ce9bc5ebed61f24c5631555151a7fc7">	
@@ -40343,6 +42030,13 @@
       <code>4AEC-DDA4</code>
     </cheat>
   </cartridge>
+  <cartridge sha256="e0196201e432fa33d46a2681f84fe6a0b5f952ba43f8e4dc325f892bb4a0b39b">	
+    <name>Spirou (Europe) (En,Fr,De,Es)</name>
+    <cheat>
+      <description>Infinite lives</description>
+      <code>7E064C03</code>
+    </cheat>
+  </cartridge>
   <cartridge sha256="82e39dfbb3e4fe5c28044e80878392070c618b298dd5a267e5ea53c8f72cc548">	
     <name>Star Fox (USA) (Rev 2)</name>
     <cheat>
@@ -41910,6 +43604,17 @@
       <code>7E013501</code>
     </cheat>
   </cartridge>
+  <cartridge sha256="0deb7a91fbe5848f1733ce668daaa49b0dad3d821bacc0791837c1ba15e60d7c">	
+    <name>Super Alfred Chicken (USA)</name>
+    <cheat>
+      <description>Infinite lives</description>
+      <code>7E001204</code>
+    </cheat>
+    <cheat>
+      <description>Infinite time</description>
+      <code>7E001709</code>
+    </cheat>
+  </cartridge>
   <cartridge sha256="e57aa265b2fbfb7ee7f5488a3df06ae771db202d59ebbd13df8fc2db80a856f3">	
     <name>Super Back to the Future Part II (Japan)</name>
     <cheat>
@@ -43146,6 +44851,18 @@
       <code>C286-6F05</code>
     </cheat>
     <cheat>
+      <description>Infinite lives - P1</description>
+      <code>4A86-6F05</code>
+    </cheat>
+    <cheat>
+      <description>Dragon power increases faster</description>
+      <code>DDB3-A7F1</code>
+    </cheat>
+    <cheat>
+      <description>Prolonged maximum dragon power</description>
+      <code>D7B2-A7B5</code>
+    </cheat>
+    <cheat>
       <description>1 extra credit - 2P game A</description>
       <code>DF8C-070B</code>
     </cheat>
@@ -43173,17 +44890,16 @@
       <description>1 life - 2P game A</description>
       <code>DF88-0D6B</code>
     </cheat>
+  </cartridge>
+  <cartridge sha256="41084f83e269d46b9d589f11c802a15e84fede57d604c7986053f2858f757adc">	
+    <name>Super Dropzone (Europe)</name>
     <cheat>
-      <description>Infinite lives - P1</description>
-      <code>4A86-6F05</code>
+      <description>Infinite lives</description>
+      <code>7E002504</code>
     </cheat>
     <cheat>
-      <description>Dragon power increases faster</description>
-      <code>DDB3-A7F1</code>
-    </cheat>
-    <cheat>
-      <description>Prolonged maximum dragon power</description>
-      <code>D7B2-A7B5</code>
+      <description>Infinite bombs</description>
+      <code>7E002604</code>
     </cheat>
   </cartridge>
   <cartridge sha256="7468c271d7240cf4e0d08c16e9969a1b1b1caf5adc0e5adc568d93c92651a057">	
@@ -48839,6 +50555,21 @@
       <code>6DB1-346B</code>
     </cheat>
   </cartridge>
+  <cartridge sha256="4aee5b05ae11643fc6cb7ed32dfd4e82bbb52d03b12aabb080af35e2df6f562f">	
+    <name>Tetsuwan Atom (Japan)</name>
+    <cheat>
+      <description>Invincibility</description>
+      <code>2D65-C05D</code>
+    </cheat>
+    <cheat>
+      <description>Infinite health</description>
+      <code>C2CF-4D61</code>
+    </cheat>
+    <cheat>
+      <description>Infinite lives</description>
+      <code>C2C1-1409</code>
+    </cheat>
+  </cartridge>
   <cartridge sha256="d50aaa41e153ca356eee16a9deccb1a763ee56ebbe6c80cd28c5ad1db66a5316">	
     <name>Thunder Spirits (USA)</name>
     <cheat>
@@ -49237,6 +50968,25 @@
       <code>A285-37AC</code>
     </cheat>
   </cartridge>
+  <cartridge sha256="da8b8bccebf51b70213adecda37387d1bdb55aeb7bc0805bb1be1cd9b514daf6">	
+    <name>Tintin in Tibet (Europe) (En,Fr,De,Nl)</name>
+    <cheat>
+      <description>Invincibility (after first hit)</description>
+      <code>7E050F2C</code>
+    </cheat>
+    <cheat>
+      <description>Infinite health</description>
+      <code>7E05C904</code>
+    </cheat>
+    <cheat>
+      <description>Infinite lives</description>
+      <code>7E05CB03</code>
+    </cheat>
+    <cheat>
+      <description>Infinite time</description>
+      <code>7F59AE06</code>
+    </cheat>
+  </cartridge>
   <cartridge sha256="ba679a11264e9695895a6c17358a41e8459be06166d056811df9c2738fef3d0d">	
     <name>Tiny Toon Adventures - Buster Busts Loose! (USA)</name>
     <cheat>
@@ -49378,6 +51128,34 @@
     <cheat>
       <description>Passwords work on any difficulty level (not just Children level)</description>
       <code>7036-C001</code>
+    </cheat>
+  </cartridge>
+  <cartridge sha256="4f500da19dbb1557a7bc0ce14437098c1402478d573fb569303b81c011f86fbf">	
+    <name>Tom &amp; Jerry (USA)</name>
+    <cheat>
+      <description>Invincibility</description>
+      <code>7E14C833</code>
+    </cheat>
+    <cheat>
+      <description>Infinite Hearts</description>
+      <code>7E124204</code>
+    </cheat>
+    <cheat>
+      <description>Infinite lives</description>
+      <code>7E14FC09</code>
+    </cheat>
+    <cheat>
+      <description>Infinite time</description>
+      <code>7E157A63</code>
+    </cheat>
+    <cheat>
+      <description>Infinite Cheese Bits</description>
+      <code>7E155E63</code>
+    </cheat>
+    <cheat>
+      <description>x99 Cheese Bits</description>
+      <code>7E155863</code>
+      <code>7E155C63</code>
     </cheat>
   </cartridge>
   <cartridge sha256="ca9889f17f184b3d99a2eaaa82af73e366f03ed00313fdd369e5e023b208e788">	
@@ -50327,6 +52105,21 @@
       <code>7E05E5FF</code>
     </cheat>
   </cartridge>
+  <cartridge sha256="c8187417a27a2f14ce2be35eebd0f112bd413b57d3589ae6d40b333bc21ba694">	
+    <name>TwinBee - Rainbow Bell Adventure (Japan)</name>
+    <cheat>
+      <description>Invincibility</description>
+      <code>7E19940A</code>
+    </cheat>
+    <cheat>
+      <description>Infinite health</description>
+      <code>7E02EC03</code>
+    </cheat>
+    <cheat>
+      <description>Infinite time</description>
+      <code>7E02CE00</code>
+    </cheat>
+  </cartridge>
   <cartridge sha256="259c25d4613f97f5fa7992900fb583625d7fb912c7ae09fa9def2e682834dc9f">	
     <name>Twisted Tales of Spike McFang, The (USA)</name>
     <cheat>
@@ -50346,6 +52139,21 @@
       <description>Infinite money (alt)</description>
       <code>7E0A57E7</code>
       <code>7E0A5803</code>
+    </cheat>
+  </cartridge>
+  <cartridge sha256="0c169bbb4e6dcb3b23e7b3b05e3bddd590f45cecd803a4e5a7118fd606158b23">	
+    <name>U.F.O. Kamen Yakisoban - Kettler no Kuroi Inbou (Japan)</name>
+    <cheat>
+      <description>Infinite health</description>
+      <code>7E017528</code>
+    </cheat>
+    <cheat>
+      <description>Infinite lives</description>
+      <code>7E017607</code>
+    </cheat>
+    <cheat>
+      <description>Infinite time</description>
+      <code>7E0AF3B0</code>
     </cheat>
   </cartridge>
   <cartridge sha256="0b155a54b6134601fc0791252a63ca73efd522667c3d6fd7a44f5b3c500039d7">	
@@ -51391,6 +53199,22 @@
       <code>7E4269FF</code>
     </cheat>
   </cartridge>
+  <cartridge sha256="cb8073cf95eace56ba4324a2106164fa540900c2de083aff490c4afe91ae95f7">	
+    <name>Undercover Cops (Japan)</name>
+    <cheat>
+      <description>Infinite health</description>
+      <code>7E0C36E8</code>
+      <code>7E0D36E8</code>
+    </cheat>
+    <cheat>
+      <description>Infinite lives</description>
+      <code>7E01100A</code>
+    </cheat>
+    <cheat>
+      <description>Infinite time</description>
+      <code>7E016C64</code>
+    </cheat>
+  </cartridge>
   <cartridge sha256="859ec99fdc25dd9b239d9085bf656e4f49c93a32faa5bb248da83efd68ebd478">	
     <name>Uniracers (USA)</name>
     <cheat>
@@ -52265,16 +54089,16 @@
       <code>C2C8-14AD</code>
     </cheat>
     <cheat>
+      <description>Infinite missiles</description>
+      <code>3C66-C7A1</code>
+    </cheat>
+    <cheat>
       <description>Start on mission 8</description>
       <code>D668-C402</code>
     </cheat>
     <cheat>
       <description>Start on mission 4</description>
       <code>D068-C402</code>
-    </cheat>
-    <cheat>
-      <description>Infinite missiles</description>
-      <code>3C66-C7A1</code>
     </cheat>
   </cartridge>
   <cartridge sha256="c3bcd5c716f96e6359ebcfd85c3e9b07b46c5124bf4010d89ceef5b6f2f868f6">	
@@ -52977,6 +54801,23 @@
       <code>7E12C8FF</code>
     </cheat>
   </cartridge>
+  <cartridge sha256="10d94f1acd8108552eaefe9e26069e5d83e8fc3e847df7af318c2e25b53d39c3">	
+    <name>Ys IV - Mask of the Sun (Japan)</name>
+    <cheat>
+      <description>Infinite HP</description>
+      <code>7E0973FF</code>
+    </cheat>
+    <cheat>
+      <description>Infinite GP</description>
+      <code>7E0983FF</code>
+      <code>7E0984FF</code>
+    </cheat>
+    <cheat>
+      <description>Max EXP</description>
+      <code>7E097BFF</code>
+      <code>7E097CFF</code>
+    </cheat>
+  </cartridge>
   <cartridge sha256="7d414b7f5941f1eddc35259a22accbbbd7b47c517dfcf8bad86c4dcfa9e50b1e">	
     <name>Zero the Kamikaze Squirrel (USA)</name>
     <cheat>
@@ -53516,6 +55357,26 @@
     <cheat>
       <description>Invincibility (blinking)</description>
       <code>7E1D8B49</code>
+    </cheat>
+    <cheat>
+      <description>Invincibility (not blinking)</description>
+      <code>7E05DCFF</code>
+    </cheat>
+    <cheat>
+      <description>Infinite Energy</description>
+      <code>7E1CF1FA</code>
+    </cheat>
+    <cheat>
+      <description>Infinite Lives</description>
+      <code>7E020C63</code>
+    </cheat>
+    <cheat>
+      <description>Infinite Continues</description>
+      <code>7E020C63</code>
+    </cheat>
+    <cheat>
+      <description>Infinite Time</description>
+      <code>7E1CEF09</code>
     </cheat>
   </cartridge>
 </database>

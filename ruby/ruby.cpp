@@ -308,10 +308,10 @@ void InputInterface::driver(const char *driver) {
 
 //select the *safest* available driver, not the fastest
 const char* InputInterface::default_driver() {
-  #if defined(INPUT_DIRECTINPUT)
-  return "DirectInput";
-  #elif defined(INPUT_RAWINPUT)
+  #if defined(INPUT_RAWINPUT)
   return "RawInput";
+  #elif defined(INPUT_DIRECTINPUT)
+  return "DirectInput";
   #elif defined(INPUT_SDL)
   return "SDL";
   #elif defined(INPUT_X)

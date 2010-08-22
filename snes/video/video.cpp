@@ -21,6 +21,9 @@ const uint8_t Video::cursor[15 * 15] = {
 };
 
 void Video::draw_cursor(uint16_t color, int x, int y) {
+  uint16_t *data = (uint16_t*)ppu.output;
+  if(ppu.interlace() && ppu.field()) data += 512;
+
   for(int cy = 0; cy < 15; cy++) {
     int vy = y + cy - 7;
     if(vy <= 0 || vy >= 240) continue;  //do not draw offscreen
@@ -34,13 +37,10 @@ void Video::draw_cursor(uint16_t color, int x, int y) {
       uint16_t pixelcolor = (pixel == 1) ? 0 : color;
 
       if(hires == false) {
-        *((uint16_t*)ppu.output + vy * 1024 +   0 + vx) = pixelcolor;
-        *((uint16_t*)ppu.output + vy * 1024 + 512 + vx) = pixelcolor;
+        *((uint16_t*)data + vy * 1024 + vx) = pixelcolor;
       } else {
-        *((uint16_t*)ppu.output + vy * 1024 +   0 + vx * 2 + 0) = pixelcolor;
-        *((uint16_t*)ppu.output + vy * 1024 + 512 + vx * 2 + 0) = pixelcolor;
-        *((uint16_t*)ppu.output + vy * 1024 +   0 + vx * 2 + 1) = pixelcolor;
-        *((uint16_t*)ppu.output + vy * 1024 + 512 + vx * 2 + 1) = pixelcolor;
+        *((uint16_t*)data + vy * 1024 + vx * 2 + 0) = pixelcolor;
+        *((uint16_t*)data + vy * 1024 + vx * 2 + 1) = pixelcolor;
       }
     }
   }
@@ -54,6 +54,7 @@ void Video::update() {
   }
 
   uint16_t *data = (uint16_t*)ppu.output;
+  if(ppu.interlace() && ppu.field()) data += 512;
   unsigned width = 256;
   unsigned height = !ppu.overscan() ? 224 : 239;
 
@@ -73,7 +74,7 @@ void Video::update() {
     height <<= 1;
   }
 
-  system.interface->video_refresh(data + 1024, width, height);
+  system.interface->video_refresh(ppu.output + 1024, width, height);
 
   frame_hires = false;
   frame_interlace = false;
