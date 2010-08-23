@@ -1,12 +1,12 @@
 namespace SNES {
   namespace Info {
     static const char Name[] = "bsnes";
-    static const char Version[] = "068";
+    static const char Version[] = "068.01";
     static const unsigned SerializerVersion = 12;
   }
 }
 
-//#define DEBUGGER
+#define DEBUGGER
 #define CHEAT_SYSTEM
 
 #include <libco/libco.h>

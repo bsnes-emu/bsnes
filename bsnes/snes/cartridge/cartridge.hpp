@@ -33,7 +33,6 @@ public:
   readonly<SuperGameBoyVersion> supergameboy_version;
   readonly<unsigned> supergameboy_ram_size;
   readonly<unsigned> supergameboy_rtc_size;
-  readonly<unsigned> serial_baud_rate;
 
   readonly<bool> has_bsx_slot;
   readonly<bool> has_superfx;

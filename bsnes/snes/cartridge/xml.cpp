@@ -608,12 +608,6 @@ void Cartridge::xml_parse_msu1(xml_element &root) {
 
 void Cartridge::xml_parse_serial(xml_element &root) {
   has_serial = true;
-
-  foreach(attr, root.attribute) {
-    if(attr.name == "baud") {
-      serial_baud_rate = strunsigned(attr.content);
-    }
-  }
 }
 
 void Cartridge::xml_parse_address(Mapping &m, const string &data) {

@@ -8,7 +8,8 @@ public:
   void reset();
   void serialize(serializer&);
 
-  readonly<bool> latch;
+  readonly<bool> data1;
+  readonly<bool> data2;
 
   void add_clocks(unsigned clocks);
   uint8 read();
@@ -19,7 +20,9 @@ public:
 
 private:
   MMIO *r4016, *r4017;
-  function<void (void (*)(unsigned), uint8_t (*)(), void (*)(uint8_t))> snesserial_main;
+  function<unsigned ()> baudrate;
+  function<bool ()> flowcontrol;
+  function<void (void (*)(unsigned), uint8_t (*)(), void (*)(uint8_t))> main;
 };
 
 extern Serial serial;

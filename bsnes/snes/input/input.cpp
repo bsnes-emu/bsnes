@@ -4,7 +4,7 @@ Input input;
 
 uint8 Input::port_read(bool portnumber) {
   if(cartridge.has_serial() && portnumber == 1) {
-    return serial.latch();
+    return (serial.data2() << 1) | (serial.data1() << 0);
   }
 
   port_t &p = port[portnumber];

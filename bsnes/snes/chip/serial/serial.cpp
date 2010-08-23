@@ -14,9 +14,11 @@ static void snesserial_write(uint8 data) { serial.write(data); }
 void Serial::Enter() { serial.enter(); }
 
 void Serial::enter() {
-  latch = 0;
+  data1 = 0;
+  data2 = 0;
   add_clocks(256 * 8);  //warm-up
-  if(snesserial_main) snesserial_main(snesserial_tick, snesserial_read, snesserial_write);
+  if(flowcontrol()) data2 = 1;
+  if(main) main(snesserial_tick, snesserial_read, snesserial_write);
   while(true) add_clocks(frequency);  //snesserial_main() fallback
 }
 
@@ -40,16 +42,19 @@ uint8 Serial::read() {
 }
 
 void Serial::write(uint8 data) {
-  latch = 1;
+  if(flowcontrol()) while(cpu.pio() & 0x80) add_clocks(1);
+  add_clocks(8);
+
+  data1 = 1;
   add_clocks(8);
 
   for(unsigned i = 0; i < 8; i++) {
-    latch = (data & 1) ^ 1;
+    data1 = (data & 1) ^ 1;
     data >>= 1;
     add_clocks(8);
   }
 
-  latch = 0;
+  data1 = 0;
   add_clocks(8);
 }
 
@@ -82,7 +87,9 @@ void Serial::enable() {
   string name = notdir(cartridge.basename());
   string path = dir(cartridge.basename());
   if(open(name, path)) {
-    snesserial_main = sym("snesserial_main");
+    baudrate = sym("snesserial_baudrate");
+    flowcontrol = sym("snesserial_flowcontrol");
+    main = sym("snesserial_main");
   }
 }
 
@@ -91,7 +98,7 @@ void Serial::power() {
 }
 
 void Serial::reset() {
-  create(Serial::Enter, cartridge.serial_baud_rate() * 8);
+  create(Serial::Enter, baudrate() * 8);
 }
 
 }

@@ -27,7 +27,6 @@ void Cartridge::load(Mode cartridge_mode, const lstring &xml_list) {
   supergameboy_version = SuperGameBoyVersion::Version1;
   supergameboy_ram_size = 0;
   supergameboy_rtc_size = 0;
-  serial_baud_rate = 57600;
 
   has_bsx_slot   = false;
   has_superfx    = false;
