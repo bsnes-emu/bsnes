@@ -106,7 +106,14 @@ void PPU::reset() {
 }
 
 void PPU::scanline() {
-  if(vcounter() == 0) frame();
+  if(vcounter() == 0) {
+    frame();
+    bg1.frame();
+    bg2.frame();
+    bg3.frame();
+    bg4.frame();
+  }
+
   bg1.scanline();
   bg2.scanline();
   bg3.scanline();

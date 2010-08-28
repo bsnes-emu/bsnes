@@ -9,9 +9,10 @@ public:
   struct TileSize { enum { Size8x8, Size16x16 }; };
 
   struct {
-    unsigned x;
+    unsigned mosaic_x;
     unsigned mosaic_y;
-    unsigned mosaic_countdown;
+    unsigned mosaic_hcounter;
+    unsigned mosaic_vcounter;
   } t;
 
   struct {
@@ -40,6 +41,7 @@ public:
     } main, sub;
   } output;
 
+  void frame();
   void scanline();
   void run();
   unsigned get_tile(unsigned x, unsigned y);
@@ -50,9 +52,7 @@ public:
   Background(PPU &self, unsigned id);
 
 private:
-  static uint16 mosaic_table[16][4096];
-
   //mode7.cpp
   signed clip(signed n);
-  void run_mode7(unsigned x, unsigned y);
+  void run_mode7();
 };

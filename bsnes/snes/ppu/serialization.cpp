@@ -89,9 +89,10 @@ void PPU::serialize(serializer &s) {
 void PPU::Background::serialize(serializer &s) {
   s.integer(id);
 
-  s.integer(t.x);
+  s.integer(t.mosaic_x);
   s.integer(t.mosaic_y);
-  s.integer(t.mosaic_countdown);
+  s.integer(t.mosaic_hcounter);
+  s.integer(t.mosaic_vcounter);
 
   s.integer(regs.tiledata_addr);
   s.integer(regs.screen_addr);

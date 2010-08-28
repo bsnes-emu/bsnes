@@ -2,20 +2,26 @@
 
 #include "mode7.cpp"
 
+void PPU::Background::frame() {
+}
+
 void PPU::Background::scanline() {
   if(self.vcounter() == 1) {
-    t.mosaic_y = 1;
-    t.mosaic_countdown = 0;
-  } else {
-    if(!regs.mosaic || !t.mosaic_countdown) t.mosaic_y = self.vcounter();
-    if(!t.mosaic_countdown) t.mosaic_countdown = regs.mosaic + 1;
-    t.mosaic_countdown--;
+    t.mosaic_y = regs.mosaic ? 1 : 0;  //TODO: this is most likely incorrect
+    t.mosaic_vcounter = 0;
   }
 
-  t.x = 0;
+  if(t.mosaic_vcounter++ == regs.mosaic) {
+    t.mosaic_vcounter = 0;
+    t.mosaic_y += regs.mosaic + 1;
+  }
+
+  t.mosaic_x = 0;
+  t.mosaic_hcounter = 0;
 }
 
 void PPU::Background::run() {
+  if(self.vcounter() == 0) return;
   bool hires = (self.regs.bgmode == 5 || self.regs.bgmode == 6);
 
   if((self.hcounter() & 2) == 0) {
@@ -28,9 +34,13 @@ void PPU::Background::run() {
   if(regs.mode == Mode::Inactive) return;
   if(regs.main_enabled == false && regs.sub_enabled == false) return;
 
-  unsigned x = t.x++;
+  unsigned x = t.mosaic_x;
   unsigned y = t.mosaic_y;
-  if(regs.mode == Mode::Mode7) return run_mode7(x, y);
+  if(t.mosaic_hcounter++ == regs.mosaic) {
+    t.mosaic_hcounter = 0;
+    t.mosaic_x += regs.mosaic + 1;
+  }
+  if(regs.mode == Mode::Mode7) return run_mode7();
 
   unsigned color_depth = (regs.mode == Mode::BPP2 ? 0 : regs.mode == Mode::BPP4 ? 1 : 2);
   unsigned palette_offset = (self.regs.bgmode == 0 ? (id << 5) : 0);
@@ -56,7 +66,7 @@ void PPU::Background::run() {
     if(self.regs.interlace) y = (y << 1) + self.field();
   }
 
-  unsigned hoffset = hscroll + mosaic_table[regs.mosaic][x];
+  unsigned hoffset = hscroll + x;
   unsigned voffset = vscroll + y;
 
   if(self.regs.bgmode == 2 || self.regs.bgmode == 4 || self.regs.bgmode == 6) {
@@ -215,9 +225,11 @@ unsigned PPU::Background::get_color(unsigned x, unsigned y, uint16 offset) {
 }
 
 void PPU::Background::reset() {
-  t.x = 0;
+  t.mosaic_x = 0;
   t.mosaic_y = 0;
-  t.mosaic_countdown = 0;
+  t.mosaic_hcounter = 0;
+  t.mosaic_vcounter = 0;
+
   regs.tiledata_addr = 0;
   regs.screen_addr = 0;
   regs.screen_size = 0;
@@ -230,6 +242,7 @@ void PPU::Background::reset() {
   regs.sub_enabled = 0;
   regs.hoffset = 0;
   regs.voffset = 0;
+
   output.main.palette = 0;
   output.main.priority = 0;
   output.sub.palette = 0;
@@ -237,13 +250,6 @@ void PPU::Background::reset() {
 }
 
 PPU::Background::Background(PPU &self, unsigned id) : self(self), id(id) {
-  for(unsigned m = 0; m < 16; m++) {
-    for(unsigned x = 0; x < 4096; x++) {
-      mosaic_table[m][x] = (x / (m + 1)) * (m + 1);
-    }
-  }
 }
-
-uint16 PPU::Background::mosaic_table[16][4096];
 
 #endif
