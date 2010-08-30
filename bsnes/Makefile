@@ -87,6 +87,6 @@ clean: ui_clean
 	-@$(call delete,*.manifest)
 
 archive-all:
-	tar -cjf bsnes-`date +%Y%m%d`.tar.bz2 launcher libco nall obj out qt ruby snes Makefile sync.sh cc.bat clean.bat
+	tar -cjf bsnes.tar.bz2 launcher libco nall obj out qt ruby snes Makefile sync.sh cc.bat clean.bat
 
 help:;

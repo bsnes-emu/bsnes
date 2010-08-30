@@ -7,17 +7,15 @@ void PPU::Background::frame() {
 
 void PPU::Background::scanline() {
   if(self.vcounter() == 1) {
-    t.mosaic_y = regs.mosaic ? 1 : 0;  //TODO: this is most likely incorrect
-    t.mosaic_vcounter = 0;
-  }
-
-  if(t.mosaic_vcounter++ == regs.mosaic) {
-    t.mosaic_vcounter = 0;
+    t.mosaic_vcounter = regs.mosaic + 1;
+    t.mosaic_y = 1;
+  } else if(--t.mosaic_vcounter == 0) {
+    t.mosaic_vcounter = regs.mosaic + 1;
     t.mosaic_y += regs.mosaic + 1;
   }
 
   t.mosaic_x = 0;
-  t.mosaic_hcounter = 0;
+  t.mosaic_hcounter = regs.mosaic + 1;
 }
 
 void PPU::Background::run() {
@@ -36,8 +34,8 @@ void PPU::Background::run() {
 
   unsigned x = t.mosaic_x;
   unsigned y = t.mosaic_y;
-  if(t.mosaic_hcounter++ == regs.mosaic) {
-    t.mosaic_hcounter = 0;
+  if(--t.mosaic_hcounter == 0) {
+    t.mosaic_hcounter = regs.mosaic + 1;
     t.mosaic_x += regs.mosaic + 1;
   }
   if(regs.mode == Mode::Mode7) return run_mode7();
