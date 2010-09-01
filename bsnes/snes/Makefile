@@ -20,14 +20,14 @@ else ifeq ($(profile),compatibility)
   flags += -DPROFILE_COMPATIBILITY
   snescpu := $(snes)/cpu
   snessmp := $(snes)/smp
-  snesdsp := $(snes)/alternative/dsp
-  snesppu := $(snes)/alternative/ppu
+  snesdsp := $(snes)/alt/dsp
+  snesppu := $(snes)/alt/ppu
 else ifeq ($(profile),performance)
   flags += -DPROFILE_PERFORMANCE
-  snescpu := $(snes)/alternative/cpu
+  snescpu := $(snes)/alt/cpu
   snessmp := $(snes)/smp
-  snesdsp := $(snes)/alternative/dsp
-  snesppu := $(snes)/alternative/ppu-fast
+  snesdsp := $(snes)/alt/dsp
+  snesppu := $(snes)/alt/ppu-new
 endif
 
 obj/libco.o  : libco/libco.c libco/*

@@ -4,5 +4,5 @@ namespace Info {
 
 #include <cpu/cpu.hpp>
 #include <smp/smp.hpp>
-#include <alternative/dsp/dsp.hpp>
-#include <alternative/ppu/ppu.hpp>
+#include <alt/dsp/dsp.hpp>
+#include <alt/ppu/ppu.hpp>
