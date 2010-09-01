@@ -1,0 +1,33 @@
+class Background {
+  struct ID { enum { BG1, BG2, BG3, BG4 }; };
+  struct Mode { enum { BPP2, BPP4, BPP8, Mode7, Inactive }; };
+  struct ScreenSize { enum { Size32x32, Size32x64, Size64x32, Size64x64 }; };
+  struct TileSize { enum { Size8x8, Size16x16 }; };
+
+  struct Regs {
+    unsigned mode;
+    unsigned priority0;
+    unsigned priority1;
+
+    bool tile_size;
+    unsigned mosaic;
+
+    unsigned screen_addr;
+    unsigned screen_size;
+    unsigned tiledata_addr;
+
+    unsigned hoffset;
+    unsigned voffset;
+
+    bool main_enable;
+    bool sub_enable;
+  } regs;
+
+  void render();
+
+  const unsigned id;
+  Background(PPU &self, unsigned id);
+
+  PPU &self;
+  friend class PPU;
+};

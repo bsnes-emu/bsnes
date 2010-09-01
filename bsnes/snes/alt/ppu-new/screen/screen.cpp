@@ -1,5 +1,19 @@
 #ifdef PPU_CPP
 
+unsigned PPU::Screen::get_palette(unsigned color) {
+  color <<= 1;
+  return (memory::cgram[color + 0] << 0) + (memory::cgram[color + 1] << 8);
+}
+
+void PPU::Screen::scanline() {
+  for(unsigned x = 0; x < 256; x++) {
+    output.main[x].priority = 0;
+    output.main[x].color = 0;
+    output.sub[x].priority = 0;
+    output.sub[x].color = 0;
+  }
+}
+
 void PPU::Screen::render_black() {
   uint16 *data = self.output + self.vcounter() * 1024;
   memset(data, 0, self.display.width << 1);
@@ -7,11 +21,8 @@ void PPU::Screen::render_black() {
 
 void PPU::Screen::render() {
   uint16 *data = self.output + self.vcounter() * 1024;
-  uint16 color = memory::cgram[0];
-  color |= memory::cgram[1] << 8;
-  color = light_table[color];
   for(unsigned i = 0; i < 256; i++) {
-    data[i] = color;
+    data[i] = light_table[output.main[i].color];
   }
 }
 
@@ -36,6 +47,22 @@ PPU::Screen::Screen(PPU &self) : self(self) {
 PPU::Screen::~Screen() {
   for(unsigned l = 0; l < 16; l++) delete[] light_tables[l];
   delete[] light_tables;
+}
+
+void PPU::Screen::Output::plot_main(unsigned x, unsigned color, unsigned priority) {
+  if(x & 256) return;
+  if(priority > main[x].priority) {
+    main[x].priority = priority;
+    main[x].color = color;
+  }
+}
+
+void PPU::Screen::Output::plot_sub(unsigned x, unsigned color, unsigned priority) {
+  if(x & 256) return;
+  if(priority > sub[x].priority) {
+    sub[x].priority = priority;
+    sub[x].color = color;
+  }
 }
 
 #endif

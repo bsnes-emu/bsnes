@@ -6,7 +6,12 @@ struct Regs {
   uint16 vram_readbuffer;
   uint8 oam_latchdata;
   uint8 cgram_latchdata;
+  uint8 bgofs_latchdata;
   uint8 mode7_latchdata;
+
+  bool counters_latched;
+  bool latch_hcounter;
+  bool latch_vcounter;
 
   //$2100
   bool display_disable;
@@ -16,6 +21,16 @@ struct Regs {
   uint16 oam_baseaddr;
   uint16 oam_addr;
   bool oam_priority;
+
+  //$2105
+  bool bg3_priority;
+  unsigned bgmode;
+
+  //$210d
+  uint16 mode7_hoffset;
+
+  //$210e
+  uint16 mode7_voffset;
 
   //$2115
   bool vram_incmode;
@@ -40,6 +55,18 @@ struct Regs {
 
   //$2121
   uint16 cgram_addr;
+
+  //$2133
+  bool mode7_extbg;
+  bool pseudo_hires;
+  bool overscan;
+  bool interlace;
+
+  //$213c
+  uint16 hcounter;
+
+  //$213d
+  uint16 vcounter;
 } regs;
 
 uint16 get_vram_addr();
@@ -52,6 +79,7 @@ void oam_write(unsigned addr, uint8 data);
 uint8 cgram_read(unsigned addr);
 void cgram_write(unsigned addr, uint8 data);
 
+void mmio_update_video_mode();
 uint8 mmio_read(unsigned addr);
 void mmio_write(unsigned addr, uint8 data);
 void mmio_reset();

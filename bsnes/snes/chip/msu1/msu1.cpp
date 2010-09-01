@@ -20,8 +20,12 @@ void MSU1::enter() {
     if(mmio.audio_play) {
       if(audiofile.open()) {
         if(audiofile.end()) {
-          if(!mmio.audio_repeat) mmio.audio_play = false;
-          audiofile.seek(mmio.audio_offset = 58);
+          if(!mmio.audio_repeat) {
+            mmio.audio_play = false;
+            audiofile.seek(mmio.audio_offset = 8);
+          } else {
+            audiofile.seek(mmio.audio_offset = mmio.audio_loop_offset);
+          }
         } else {
           mmio.audio_offset += 4;
           left  = audiofile.readl(2);
@@ -49,7 +53,7 @@ void MSU1::enable() {
   audio.coprocessor_frequency(44100.0);
 
   if(datafile.open()) datafile.close();
-  datafile.open(string() << cartridge.basename() << ".msu", file::mode_read);
+  datafile.open(string(cartridge.basename(), ".msu"), file::mode_read);
 }
 
 void MSU1::power() {
@@ -125,10 +129,14 @@ void MSU1::mmio_write(unsigned addr, uint8 data) {
   if(addr == 0x2005) {
     mmio.audio_track = (mmio.audio_track & 0x00ff) | (data << 8);
     if(audiofile.open()) audiofile.close();
-    char track[16];
-    sprintf(track, "-%u", mmio.audio_track);
-    if(audiofile.open(string() << cartridge.basename() << track << ".wav", file::mode_read)) {
-      audiofile.seek(mmio.audio_offset = 58);  //skip WAV header
+    if(audiofile.open(string(cartridge.basename(), "-", mmio.audio_track, ".pcm"), file::mode_read)) {
+      uint32 header = audiofile.readm(4);
+      if(header != 0x4d535531) {  //verify 'MSU1' header
+        audiofile.close();
+      } else {
+        mmio.audio_offset = 8;
+        mmio.audio_loop_offset = 8 + audiofile.readl(4) * 4;
+      }
     }
     mmio.audio_busy   = false;
     mmio.audio_repeat = false;

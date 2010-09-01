@@ -27,8 +27,11 @@ private:
   struct MMIO {
     uint32 data_offset;
     uint32 audio_offset;
+    uint32 audio_loop_offset;
+
     uint16 audio_track;
     uint8 audio_volume;
+
     bool data_busy;
     bool audio_busy;
     bool audio_repeat;

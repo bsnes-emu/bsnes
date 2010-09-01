@@ -24,8 +24,19 @@ private:
   uint16 *output;
 
   #include "mmio/mmio.hpp"
+  #include "cache/cache.hpp"
+  #include "background/background.hpp"
+  #include "sprite/sprite.hpp"
+  #include "window/window.hpp"
   #include "screen/screen.hpp"
 
+  Cache cache;
+  Background bg1;
+  Background bg2;
+  Background bg3;
+  Background bg4;
+  Sprite oam;
+  Window window;
   Screen screen;
 
   struct Display {
@@ -37,6 +48,9 @@ private:
   void add_clocks(unsigned clocks);
   void render_scanline();
 
+  friend class PPU::Cache;
+  friend class PPU::Background;
+  friend class PPU::Sprite;
   friend class PPU::Screen;
   friend class Video;
 };
