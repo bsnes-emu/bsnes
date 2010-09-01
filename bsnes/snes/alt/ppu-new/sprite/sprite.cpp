@@ -1,5 +1,10 @@
 #ifdef PPU_CPP
 
+void PPU::Sprite::frame() {
+  regs.time_over = false;
+  regs.range_over = false;
+}
+
 void PPU::Sprite::update_list(unsigned addr, uint8 data) {
   if(addr < 0x0200) {
     unsigned i = addr >> 2;
@@ -18,12 +23,13 @@ void PPU::Sprite::update_list(unsigned addr, uint8 data) {
     unsigned i = (addr & 0x1f) << 2;
     list[i + 0].x = ((data & 0x01) << 8) | (list[i + 0].x & 0xff);
     list[i + 0].size = data & 0x02;
-    list[i + 1].x = ((data & 0x04) << 8) | (list[i + 1].x & 0xff);
+    list[i + 1].x = ((data & 0x04) << 6) | (list[i + 1].x & 0xff);
     list[i + 1].size = data & 0x08;
-    list[i + 2].x = ((data & 0x10) << 8) | (list[i + 2].x & 0xff);
+    list[i + 2].x = ((data & 0x10) << 4) | (list[i + 2].x & 0xff);
     list[i + 2].size = data & 0x20;
-    list[i + 3].x = ((data & 0x40) << 8) | (list[i + 3].x & 0xff);
+    list[i + 3].x = ((data & 0x40) << 2) | (list[i + 3].x & 0xff);
     list[i + 3].size = data & 0x80;
+    list_valid = false;
   }
 }
 
@@ -46,18 +52,21 @@ bool PPU::Sprite::on_scanline(unsigned sprite) {
 }
 
 void PPU::Sprite::render() {
-  for(unsigned i = 0; i < 128; i++) {
-    if(list[i].size == 0) {
-      static unsigned width[]  = { 8, 8, 8, 16, 16, 32, 16, 16 };
-      static unsigned height[] = { 8, 8, 8, 16, 16, 32, 32, 32 };
-      list[i].width = width[regs.base_size];
-      list[i].height = height[regs.base_size];
-    } else {
-      static unsigned width[]  = { 16, 32, 64, 32, 64, 64, 32, 32 };
-      static unsigned height[] = { 16, 32, 64, 32, 64, 64, 64, 32 };
-      list[i].width = width[regs.base_size];
-      list[i].height = height[regs.base_size];
-      if(regs.interlace && regs.base_size >= 6) list[i].height = 16;
+  if(list_valid == false) {
+    list_valid = true;
+    for(unsigned i = 0; i < 128; i++) {
+      if(list[i].size == 0) {
+        static unsigned width[]  = { 8, 8, 8, 16, 16, 32, 16, 16 };
+        static unsigned height[] = { 8, 8, 8, 16, 16, 32, 32, 32 };
+        list[i].width = width[regs.base_size];
+        list[i].height = height[regs.base_size];
+      } else {
+        static unsigned width[]  = { 16, 32, 64, 32, 64, 64, 32, 32 };
+        static unsigned height[] = { 16, 32, 64, 32, 64, 64, 64, 32 };
+        list[i].width = width[regs.base_size];
+        list[i].height = height[regs.base_size];
+        if(regs.interlace && regs.base_size >= 6) list[i].height = 16;
+      }
     }
   }
 
@@ -98,8 +107,8 @@ void PPU::Sprite::render() {
     y &= 255;
 
     uint16 tdaddr = regs.tiledata_addr;
-    uint16 chrx   = (s.character >> 0) & 15;
-    uint16 chry   = (s.character >> 4) & 15;
+    uint16 chrx = (s.character >> 0) & 15;
+    uint16 chry = (s.character >> 4) & 15;
     if(s.use_nameselect) {
       tdaddr += (256 * 32) + (regs.nameselect << 13);
     }
@@ -125,8 +134,43 @@ void PPU::Sprite::render() {
     }
   }
 
-  regs.time_over  |= (tilecount > 34);
+  regs.time_over |= (tilecount > 34);
   regs.range_over |= (itemcount > 32);
+
+  if(regs.main_enable == false && regs.sub_enable == false) return;
+
+  for(unsigned i = 0; i < 34; i++) {
+    if(tilelist[i].tile == 0xffff) continue;
+
+    auto &t = tilelist[i];
+    uint8 *tiledata = self.cache.tile_4bpp(t.tile);
+    tiledata += (t.y & 7) << 3;
+    unsigned sx = t.x;
+    for(unsigned x = 0; x < 8; x++) {
+      sx &= 511;
+      if(sx < 256) {
+        unsigned color = *(tiledata + (t.hflip == false ? x : 7 - x));
+        if(color) {
+          color += t.palette;
+          output.palette[sx] = color;
+          output.priority[sx] = t.priority;
+        }
+      }
+      sx++;
+    }
+  }
+
+  window.render(0);
+  window.render(1);
+
+  const unsigned priority_table[] = { regs.priority0, regs.priority1, regs.priority2, regs.priority3 };
+  for(unsigned x = 0; x < 256; x++) {
+    if(output.priority[x] == 0xff) continue;
+    unsigned priority = priority_table[output.priority[x]];
+    unsigned color = self.screen.get_palette(output.palette[x]);
+    if(regs.main_enable && !window.main[x]) self.screen.output.plot_main(x, color, priority, 4);
+    if(regs.sub_enable && !window.sub[x]) self.screen.output.plot_sub(x, color, priority, 4);
+  }
 }
 
 PPU::Sprite::Sprite(PPU &self) : self(self) {

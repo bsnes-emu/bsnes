@@ -47,6 +47,9 @@ void PPU::Background::render() {
   const bool is_opt_mode = (self.regs.bgmode == 2 || self.regs.bgmode == 4 || self.regs.bgmode == 6);
   const bool is_direct_color_mode = (self.screen.regs.direct_color == true && id == ID::BG1 && (self.regs.bgmode == 3 || self.regs.bgmode == 4));
 
+  window.render(0);
+  window.render(1);
+
   signed x = 0 - (hscroll & 7);
   while(x < width) {
     hoffset = x + hscroll;
@@ -90,9 +93,10 @@ void PPU::Background::render() {
 
     for(unsigned n = 0; n < 8; n++) {
       unsigned col = *tiledata++;
-      if(col) {
+      if(col && !(plot_x & 256)) {
         unsigned color = self.screen.get_palette(pal_index + col);
-        self.screen.output.plot_main(plot_x, color, tile_pri);
+        if(regs.main_enable && !window.main[plot_x]) self.screen.output.plot_main(plot_x, color, tile_pri, id);
+        if(regs.sub_enable && !window.sub[plot_x]) self.screen.output.plot_sub(plot_x, color, tile_pri, id);
       }
       plot_x += step;
     }

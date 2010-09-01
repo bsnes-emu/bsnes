@@ -56,6 +56,12 @@ struct Regs {
   //$2121
   uint16 cgram_addr;
 
+  //$2126-$212a
+  unsigned window_one_left;
+  unsigned window_one_right;
+  unsigned window_two_left;
+  unsigned window_two_right;
+
   //$2133
   bool mode7_extbg;
   bool pseudo_hires;

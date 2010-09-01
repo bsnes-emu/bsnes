@@ -6,10 +6,10 @@ namespace SNES {
 PPU ppu;
 
 #include "mmio/mmio.cpp"
+#include "window/window.cpp"
 #include "cache/cache.cpp"
 #include "background/background.cpp"
 #include "sprite/sprite.cpp"
-#include "window/window.cpp"
 #include "screen/screen.cpp"
 #include "serialization.cpp"
 
@@ -34,7 +34,7 @@ void PPU::enter() {
     }
 
     scanline();
-    if(vcounter() < display.height) {
+    if(vcounter() < display.height && vcounter()) {
       add_clocks(512);
       render_scanline();
       add_clocks(lineclocks() - 512);
@@ -62,12 +62,14 @@ void PPU::render_scanline() {
 }
 
 void PPU::scanline() {
-  if(vcounter() == 0) frame();
   display.width = !hires() ? 256 : 512;
   display.height = !overscan() ? 225 : 240;
+  if(vcounter() == 0) frame();
+  if(vcounter() == display.height && regs.display_disable == false) oam.address_reset();
 }
 
 void PPU::frame() {
+  oam.frame();
   system.frame();
 }
 
@@ -75,7 +77,6 @@ void PPU::power() {
   foreach(n, memory::vram) n = 0;
   foreach(n, memory::oam) n = 0;
   foreach(n, memory::cgram) n = 0;
-
   reset();
 }
 
@@ -83,7 +84,6 @@ void PPU::reset() {
   create(Enter, system.cpu_frequency());
   PPUcounter::reset();
   memset(surface, 0, 512 * 512 * sizeof(uint16));
-
   mmio_reset();
 }
 
@@ -94,7 +94,6 @@ bg2(*this, Background::ID::BG2),
 bg3(*this, Background::ID::BG3),
 bg4(*this, Background::ID::BG4),
 oam(*this),
-window(*this),
 screen(*this) {
   surface = new uint16[512 * 512];
   output = surface + 16 * 512;

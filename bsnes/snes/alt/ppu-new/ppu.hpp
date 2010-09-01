@@ -24,10 +24,10 @@ private:
   uint16 *output;
 
   #include "mmio/mmio.hpp"
+  #include "window/window.hpp"
   #include "cache/cache.hpp"
   #include "background/background.hpp"
   #include "sprite/sprite.hpp"
-  #include "window/window.hpp"
   #include "screen/screen.hpp"
 
   Cache cache;
@@ -36,7 +36,6 @@ private:
   Background bg3;
   Background bg4;
   Sprite oam;
-  Window window;
   Screen screen;
 
   struct Display {

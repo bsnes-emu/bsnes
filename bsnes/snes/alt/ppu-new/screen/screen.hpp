@@ -5,35 +5,33 @@ class Screen {
 
     bool color_mode;
     bool color_halve;
-    bool back_color_enable;
-    bool oam_color_enable;
-    bool bg4_color_enable;
-    bool bg3_color_enable;
-    bool bg2_color_enable;
-    bool bg1_color_enable;
+    bool color_enable[6];
 
     unsigned color_b;
     unsigned color_g;
     unsigned color_r;
+    unsigned color;
   } regs;
 
   struct Output {
-    struct {
+    struct Pixel {
       unsigned color;
       unsigned priority;
+      unsigned source;
     } main[256], sub[256];
 
-    void plot_main(unsigned x, unsigned color, unsigned priority);
-    void plot_sub(unsigned x, unsigned color, unsigned priority);
+    void plot_main(unsigned x, unsigned color, unsigned priority, unsigned source);
+    void plot_sub(unsigned x, unsigned color, unsigned priority, unsigned source);
   } output;
 
-  uint16 **light_tables;
-  uint16 *light_table;
+  ColorWindow window;
+  uint16 **light_table;
 
   unsigned get_palette(unsigned color);
-
+  uint16 addsub(unsigned x, unsigned y, bool halve);
   void scanline();
   void render_black();
+  uint16 get_pixel_main(unsigned x);
   void render();
   Screen(PPU &self);
   ~Screen();

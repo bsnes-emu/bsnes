@@ -23,6 +23,8 @@ class Background {
     bool sub_enable;
   } regs;
 
+  LayerWindow window;
+
   void render();
 
   const unsigned id;

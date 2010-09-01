@@ -32,6 +32,7 @@ class Sprite {
     unsigned priority;
     bool size;
   } list[128];
+  bool list_valid;
 
   uint8 itemlist[32];
   struct TileList {
@@ -48,6 +49,9 @@ class Sprite {
     uint8 priority[256];
   } output;
 
+  LayerWindow window;
+
+  void frame();
   void update_list(unsigned addr, uint8 data);
   void address_reset();
   void set_first();

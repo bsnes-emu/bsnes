@@ -1,66 +1,35 @@
-class Window {
-  struct Regs {
-    bool bg1_one_enable;
-    bool bg1_one_invert;
-    bool bg1_two_enable;
-    bool bg1_two_invert;
+class LayerWindow {
+public:
+  bool one_enable;
+  bool one_invert;
+  bool two_enable;
+  bool two_invert;
 
-    bool bg2_one_enable;
-    bool bg2_one_invert;
-    bool bg2_two_enable;
-    bool bg2_two_invert;
+  unsigned mask;
 
-    bool bg3_one_enable;
-    bool bg3_one_invert;
-    bool bg3_two_enable;
-    bool bg3_two_invert;
+  bool main_enable;
+  bool sub_enable;
 
-    bool bg4_one_enable;
-    bool bg4_one_invert;
-    bool bg4_two_enable;
-    bool bg4_two_invert;
+  uint8 main[256];
+  uint8 sub[256];
 
-    bool oam_one_enable;
-    bool oam_one_invert;
-    bool oam_two_enable;
-    bool oam_two_invert;
+  void render(bool screen);
+};
 
-    bool col_one_enable;
-    bool col_one_invert;
-    bool col_two_enable;
-    bool col_two_invert;
+class ColorWindow {
+public:
+  bool one_enable;
+  bool one_invert;
+  bool two_enable;
+  bool two_invert;
 
-    unsigned one_left;
-    unsigned one_right;
+  unsigned mask;
 
-    unsigned two_left;
-    unsigned two_right;
+  unsigned main_mask;
+  unsigned sub_mask;
 
-    unsigned bg1_mask;
-    unsigned bg2_mask;
-    unsigned bg3_mask;
-    unsigned bg4_mask;
-    unsigned oam_mask;
-    unsigned col_mask;
+  uint8 main[256];
+  uint8 sub[256];
 
-    bool bg1_main_enable;
-    bool bg2_main_enable;
-    bool bg3_main_enable;
-    bool bg4_main_enable;
-    bool oam_main_enable;
-
-    bool bg1_sub_enable;
-    bool bg2_sub_enable;
-    bool bg3_sub_enable;
-    bool bg4_sub_enable;
-    bool oam_sub_enable;
-
-    unsigned col_main_mask;
-    unsigned col_sub_mask;
-  } regs;
-
-  Window(PPU &self);
-
-  PPU &self;
-  friend class PPU;
+  void render(bool screen);
 };

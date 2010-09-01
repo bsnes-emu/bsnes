@@ -6,9 +6,9 @@ void PPU::latch_counters() {
   regs.counters_latched = true;
 }
 
-bool PPU::interlace() const { return false; }
-bool PPU::overscan() const { return false; }
-bool PPU::hires() const { return false; }
+bool PPU::interlace() const { return regs.interlace; }
+bool PPU::overscan() const { return regs.overscan; }
+bool PPU::hires() const { return regs.pseudo_hires || (regs.bgmode == 5 || regs.bgmode == 6); }
 
 uint16 PPU::get_vram_addr() {
   uint16 addr = regs.vram_addr;
@@ -286,7 +286,6 @@ void PPU::mmio_write(unsigned addr, uint8 data) {
       if(regs.display_disable && vcounter() == display.height) oam.address_reset();
       regs.display_disable = data & 0x80;
       regs.display_brightness = data & 0x0f;
-      screen.light_table = screen.light_tables[regs.display_brightness];
       return;
     }
 
@@ -294,6 +293,7 @@ void PPU::mmio_write(unsigned addr, uint8 data) {
       oam.regs.base_size = (data >> 5) & 7;
       oam.regs.nameselect = (data >> 3) & 3;
       oam.regs.tiledata_addr = (data & 3) << 14;
+      oam.list_valid = false;
       return;
     }
 
@@ -534,72 +534,72 @@ void PPU::mmio_write(unsigned addr, uint8 data) {
     }
 
     case 0x2123: {  //W12SEL
-      window.regs.bg2_two_enable = data & 0x80;
-      window.regs.bg2_two_invert = data & 0x40;
-      window.regs.bg2_one_enable = data & 0x20;
-      window.regs.bg2_one_invert = data & 0x10;
-      window.regs.bg1_two_enable = data & 0x08;
-      window.regs.bg1_two_invert = data & 0x04;
-      window.regs.bg1_one_enable = data & 0x02;
-      window.regs.bg1_one_invert = data & 0x01;
+      bg2.window.two_enable = data & 0x80;
+      bg2.window.two_invert = data & 0x40;
+      bg2.window.one_enable = data & 0x20;
+      bg2.window.one_invert = data & 0x10;
+      bg1.window.two_enable = data & 0x08;
+      bg1.window.two_invert = data & 0x04;
+      bg1.window.one_enable = data & 0x02;
+      bg1.window.one_invert = data & 0x01;
       return;
     }
 
     case 0x2124: {  //W34SEL
-      window.regs.bg4_two_enable = data & 0x80;
-      window.regs.bg4_two_invert = data & 0x40;
-      window.regs.bg4_one_enable = data & 0x20;
-      window.regs.bg4_one_invert = data & 0x10;
-      window.regs.bg3_two_enable = data & 0x08;
-      window.regs.bg3_two_invert = data & 0x04;
-      window.regs.bg3_one_enable = data & 0x02;
-      window.regs.bg3_one_invert = data & 0x01;
+      bg4.window.two_enable = data & 0x80;
+      bg4.window.two_invert = data & 0x40;
+      bg4.window.one_enable = data & 0x20;
+      bg4.window.one_invert = data & 0x10;
+      bg3.window.two_enable = data & 0x08;
+      bg3.window.two_invert = data & 0x04;
+      bg3.window.one_enable = data & 0x02;
+      bg3.window.one_invert = data & 0x01;
       return;
     }
 
     case 0x2125: {  //WOBJSEL
-      window.regs.col_two_enable = data & 0x80;
-      window.regs.col_two_invert = data & 0x40;
-      window.regs.col_one_enable = data & 0x20;
-      window.regs.col_one_invert = data & 0x10;
-      window.regs.oam_two_enable = data & 0x08;
-      window.regs.oam_two_invert = data & 0x04;
-      window.regs.oam_one_enable = data & 0x02;
-      window.regs.oam_one_invert = data & 0x01;
+      screen.window.two_enable = data & 0x80;
+      screen.window.two_invert = data & 0x40;
+      screen.window.one_enable = data & 0x20;
+      screen.window.one_invert = data & 0x10;
+      oam.window.two_enable = data & 0x08;
+      oam.window.two_invert = data & 0x04;
+      oam.window.one_enable = data & 0x02;
+      oam.window.one_invert = data & 0x01;
       return;
     }
 
     case 0x2126: {  //WH0
-      window.regs.one_left = data;
+      regs.window_one_left = data;
       return;
     }
 
     case 0x2127: {  //WH1
-      window.regs.one_right = data;
+      regs.window_one_right = data;
       return;
     }
 
     case 0x2128: {  //WH2
-      window.regs.two_left = data;
+      regs.window_two_left = data;
       return;
     }
 
     case 0x2129: {  //WH3
-      window.regs.two_right = data;
+      regs.window_two_right = data;
       return;
     }
 
     case 0x212a: {  //WBGLOG
-      window.regs.bg4_mask = (data >> 6) & 3;
-      window.regs.bg3_mask = (data >> 4) & 3;
-      window.regs.bg2_mask = (data >> 2) & 3;
-      window.regs.bg1_mask = (data >> 0) & 3;
+      bg4.window.mask = (data >> 6) & 3;
+      bg3.window.mask = (data >> 4) & 3;
+      bg2.window.mask = (data >> 2) & 3;
+      bg1.window.mask = (data >> 0) & 3;
       return;
     }
 
     case 0x212b: {  //WOBJLOG
-      window.regs.col_mask = (data >> 2) & 3;
-      window.regs.oam_mask = (data >> 0) & 3;
+      screen.window.mask = (data >> 2) & 3;
+      oam.window.mask = (data >> 0) & 3;
       return;
     }
 
@@ -622,26 +622,26 @@ void PPU::mmio_write(unsigned addr, uint8 data) {
     }
 
     case 0x212e: {  //TMW
-      window.regs.oam_main_enable = data & 0x10;
-      window.regs.bg4_main_enable = data & 0x08;
-      window.regs.bg3_main_enable = data & 0x04;
-      window.regs.bg2_main_enable = data & 0x02;
-      window.regs.bg1_main_enable = data & 0x01;
+      oam.window.main_enable = data & 0x10;
+      bg4.window.main_enable = data & 0x08;
+      bg3.window.main_enable = data & 0x04;
+      bg2.window.main_enable = data & 0x02;
+      bg1.window.main_enable = data & 0x01;
       return;
     }
 
     case 0x212f: {  //TSW
-      window.regs.oam_sub_enable = data & 0x10;
-      window.regs.bg4_sub_enable = data & 0x08;
-      window.regs.bg3_sub_enable = data & 0x04;
-      window.regs.bg2_sub_enable = data & 0x02;
-      window.regs.bg1_sub_enable = data & 0x01;
+      oam.window.sub_enable = data & 0x10;
+      bg4.window.sub_enable = data & 0x08;
+      bg3.window.sub_enable = data & 0x04;
+      bg2.window.sub_enable = data & 0x02;
+      bg1.window.sub_enable = data & 0x01;
       return;
     }
 
     case 0x2130: {  //CGWSEL
-      window.regs.col_main_mask = (data >> 6) & 3;
-      window.regs.col_sub_mask = (data >> 4) & 3;
+      screen.window.main_mask = (data >> 6) & 3;
+      screen.window.sub_mask = (data >> 4) & 3;
       screen.regs.addsub_mode = data & 0x02;
       screen.regs.direct_color = data & 0x01;
       return;
@@ -650,12 +650,12 @@ void PPU::mmio_write(unsigned addr, uint8 data) {
     case 0x2131: {  //CGADDSUB
       screen.regs.color_mode = data & 0x80;
       screen.regs.color_halve = data & 0x40;
-      screen.regs.back_color_enable = data & 0x20;
-      screen.regs.oam_color_enable = data & 0x10;
-      screen.regs.bg4_color_enable = data & 0x08;
-      screen.regs.bg3_color_enable = data & 0x04;
-      screen.regs.bg2_color_enable = data & 0x02;
-      screen.regs.bg1_color_enable = data & 0x01;
+      screen.regs.color_enable[5] = data & 0x20;
+      screen.regs.color_enable[4] = data & 0x10;
+      screen.regs.color_enable[3] = data & 0x08;
+      screen.regs.color_enable[2] = data & 0x04;
+      screen.regs.color_enable[1] = data & 0x02;
+      screen.regs.color_enable[0] = data & 0x01;
       return;
     }
 
@@ -663,6 +663,7 @@ void PPU::mmio_write(unsigned addr, uint8 data) {
       if(data & 0x80) screen.regs.color_b = data & 0x1f;
       if(data & 0x40) screen.regs.color_g = data & 0x1f;
       if(data & 0x20) screen.regs.color_r = data & 0x1f;
+      screen.regs.color = (screen.regs.color_b << 10) | (screen.regs.color_g << 5) | (screen.regs.color_r << 0);
       return;
     }
 
@@ -673,6 +674,7 @@ void PPU::mmio_write(unsigned addr, uint8 data) {
       oam.regs.interlace = data & 0x02;
       regs.interlace = data & 0x01;
       mmio_update_video_mode();
+      oam.list_valid = false;
       return;
     }
   }
@@ -694,11 +696,11 @@ void PPU::mmio_reset() {
   regs.latch_vcounter = 0;
 
   oam.regs.first_sprite = 0;
+  oam.list_valid = false;
 
   //$2100
   regs.display_disable = true;
   regs.display_brightness = 0;
-  screen.light_table = screen.light_tables[regs.display_brightness];
 
   //$2101
   oam.regs.base_size = 0;
@@ -777,49 +779,49 @@ void PPU::mmio_reset() {
   regs.cgram_addr = 0;
 
   //$2123-$2125
-  window.regs.bg1_one_enable = 0;
-  window.regs.bg1_one_invert = 0;
-  window.regs.bg1_two_enable = 0;
-  window.regs.bg1_two_invert = 0;
+  bg1.window.one_enable = 0;
+  bg1.window.one_invert = 0;
+  bg1.window.two_enable = 0;
+  bg1.window.two_invert = 0;
 
-  window.regs.bg2_one_enable = 0;
-  window.regs.bg2_one_invert = 0;
-  window.regs.bg2_two_enable = 0;
-  window.regs.bg2_two_invert = 0;
+  bg2.window.one_enable = 0;
+  bg2.window.one_invert = 0;
+  bg2.window.two_enable = 0;
+  bg2.window.two_invert = 0;
 
-  window.regs.bg3_one_enable = 0;
-  window.regs.bg3_one_invert = 0;
-  window.regs.bg3_two_enable = 0;
-  window.regs.bg3_two_invert = 0;
+  bg3.window.one_enable = 0;
+  bg3.window.one_invert = 0;
+  bg3.window.two_enable = 0;
+  bg3.window.two_invert = 0;
 
-  window.regs.bg4_one_enable = 0;
-  window.regs.bg4_one_invert = 0;
-  window.regs.bg4_two_enable = 0;
-  window.regs.bg4_two_invert = 0;
+  bg4.window.one_enable = 0;
+  bg4.window.one_invert = 0;
+  bg4.window.two_enable = 0;
+  bg4.window.two_invert = 0;
 
-  window.regs.oam_one_enable = 0;
-  window.regs.oam_one_invert = 0;
-  window.regs.oam_two_enable = 0;
-  window.regs.oam_two_invert = 0;
+  oam.window.one_enable = 0;
+  oam.window.one_invert = 0;
+  oam.window.two_enable = 0;
+  oam.window.two_invert = 0;
 
-  window.regs.col_one_enable = 0;
-  window.regs.col_one_invert = 0;
-  window.regs.col_two_enable = 0;
-  window.regs.col_two_invert = 0;
+  screen.window.one_enable = 0;
+  screen.window.one_invert = 0;
+  screen.window.two_enable = 0;
+  screen.window.two_invert = 0;
 
   //$2126-$2129
-  window.regs.one_left = 0;
-  window.regs.one_right = 0;
-  window.regs.two_left = 0;
-  window.regs.two_right = 0;
+  regs.window_one_left = 0;
+  regs.window_one_right = 0;
+  regs.window_two_left = 0;
+  regs.window_two_right = 0;
 
   //$212a-$212b
-  window.regs.bg1_mask = 0;
-  window.regs.bg2_mask = 0;
-  window.regs.bg3_mask = 0;
-  window.regs.bg4_mask = 0;
-  window.regs.oam_mask = 0;
-  window.regs.col_mask = 0;
+  bg1.window.mask = 0;
+  bg2.window.mask = 0;
+  bg3.window.mask = 0;
+  bg4.window.mask = 0;
+  oam.window.mask = 0;
+  screen.window.mask = 0;
 
   //$212c
   bg1.regs.main_enable = 0;
@@ -836,39 +838,40 @@ void PPU::mmio_reset() {
   oam.regs.sub_enable = 0;
 
   //$212e
-  window.regs.bg1_main_enable = 0;
-  window.regs.bg2_main_enable = 0;
-  window.regs.bg3_main_enable = 0;
-  window.regs.bg4_main_enable = 0;
-  window.regs.oam_main_enable = 0;
+  bg1.window.main_enable = 0;
+  bg2.window.main_enable = 0;
+  bg3.window.main_enable = 0;
+  bg4.window.main_enable = 0;
+  oam.window.main_enable = 0;
 
   //$212f
-  window.regs.bg1_sub_enable = 0;
-  window.regs.bg2_sub_enable = 0;
-  window.regs.bg3_sub_enable = 0;
-  window.regs.bg4_sub_enable = 0;
-  window.regs.oam_sub_enable = 0;
+  bg1.window.sub_enable = 0;
+  bg2.window.sub_enable = 0;
+  bg3.window.sub_enable = 0;
+  bg4.window.sub_enable = 0;
+  oam.window.sub_enable = 0;
 
   //$2130
-  window.regs.col_main_mask = 0;
-  window.regs.col_sub_mask = 0;
+  screen.window.main_mask = 0;
+  screen.window.sub_mask = 0;
   screen.regs.addsub_mode = 0;
   screen.regs.direct_color = 0;
 
   //$2131
   screen.regs.color_mode = 0;
   screen.regs.color_halve = 0;
-  screen.regs.back_color_enable = 0;
-  screen.regs.oam_color_enable = 0;
-  screen.regs.bg4_color_enable = 0;
-  screen.regs.bg3_color_enable = 0;
-  screen.regs.bg2_color_enable = 0;
-  screen.regs.bg1_color_enable = 0;
+  screen.regs.color_enable[5] = 0;
+  screen.regs.color_enable[4] = 0;
+  screen.regs.color_enable[3] = 0;
+  screen.regs.color_enable[2] = 0;
+  screen.regs.color_enable[1] = 0;
+  screen.regs.color_enable[0] = 0;
 
   //$2132
   screen.regs.color_b = 0;
   screen.regs.color_g = 0;
   screen.regs.color_r = 0;
+  screen.regs.color = 0;
 
   //$2133
   regs.mode7_extbg = 0;
