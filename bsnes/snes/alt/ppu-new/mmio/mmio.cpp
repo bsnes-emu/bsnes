@@ -8,7 +8,7 @@ void PPU::latch_counters() {
 
 bool PPU::interlace() const { return regs.interlace; }
 bool PPU::overscan() const { return regs.overscan; }
-bool PPU::hires() const { return regs.pseudo_hires || (regs.bgmode == 5 || regs.bgmode == 6); }
+bool PPU::hires() const { return regs.pseudo_hires || regs.bgmode == 5 || regs.bgmode == 6; }
 
 uint16 PPU::get_vram_addr() {
   uint16 addr = regs.vram_addr;
@@ -341,6 +341,10 @@ void PPU::mmio_write(unsigned addr, uint8 data) {
       bg3.regs.mosaic = (data & 0x04 ? mosaic_size : 0);
       bg2.regs.mosaic = (data & 0x02 ? mosaic_size : 0);
       bg1.regs.mosaic = (data & 0x01 ? mosaic_size : 0);
+      bg4.regs.mosaic_mask = ~(bg4.regs.mosaic >> 1);
+      bg3.regs.mosaic_mask = ~(bg3.regs.mosaic >> 1);
+      bg2.regs.mosaic_mask = ~(bg2.regs.mosaic >> 1);
+      bg1.regs.mosaic_mask = ~(bg1.regs.mosaic >> 1);
       return;
     }
 
@@ -527,7 +531,7 @@ void PPU::mmio_write(unsigned addr, uint8 data) {
         regs.cgram_latchdata = data;
       } else {
         cgram_write((regs.cgram_addr & ~1) + 0, regs.cgram_latchdata);
-        cgram_write((regs.cgram_addr & ~1) + 1, data);
+        cgram_write((regs.cgram_addr & ~1) + 1, data & 0x7f);
       }
       regs.cgram_addr = (regs.cgram_addr + 1) & 0x01ff;
       return;
@@ -650,7 +654,8 @@ void PPU::mmio_write(unsigned addr, uint8 data) {
     case 0x2131: {  //CGADDSUB
       screen.regs.color_mode = data & 0x80;
       screen.regs.color_halve = data & 0x40;
-      screen.regs.color_enable[5] = data & 0x20;
+      screen.regs.color_enable[6] = data & 0x20;
+      screen.regs.color_enable[5] = data & 0x10;
       screen.regs.color_enable[4] = data & 0x10;
       screen.regs.color_enable[3] = data & 0x08;
       screen.regs.color_enable[2] = data & 0x04;
@@ -860,6 +865,7 @@ void PPU::mmio_reset() {
   //$2131
   screen.regs.color_mode = 0;
   screen.regs.color_halve = 0;
+  screen.regs.color_enable[6] = 0;
   screen.regs.color_enable[5] = 0;
   screen.regs.color_enable[4] = 0;
   screen.regs.color_enable[3] = 0;

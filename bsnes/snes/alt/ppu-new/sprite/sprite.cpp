@@ -160,16 +160,17 @@ void PPU::Sprite::render() {
     }
   }
 
-  window.render(0);
-  window.render(1);
+  if(regs.main_enable) window.render(0);
+  if(regs.sub_enable) window.render(1);
 
   const unsigned priority_table[] = { regs.priority0, regs.priority1, regs.priority2, regs.priority3 };
   for(unsigned x = 0; x < 256; x++) {
     if(output.priority[x] == 0xff) continue;
     unsigned priority = priority_table[output.priority[x]];
+    unsigned palette = output.palette[x];
     unsigned color = self.screen.get_palette(output.palette[x]);
-    if(regs.main_enable && !window.main[x]) self.screen.output.plot_main(x, color, priority, 4);
-    if(regs.sub_enable && !window.sub[x]) self.screen.output.plot_sub(x, color, priority, 4);
+    if(regs.main_enable && !window.main[x]) self.screen.output.plot_main(x, color, priority, 4 + (palette < 192));
+    if(regs.sub_enable && !window.sub[x]) self.screen.output.plot_sub(x, color, priority, 4 + (palette < 192));
   }
 }
 

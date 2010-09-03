@@ -55,7 +55,7 @@ class Sprite {
   void update_list(unsigned addr, uint8 data);
   void address_reset();
   void set_first();
-  bool on_scanline(unsigned sprite);
+  alwaysinline bool on_scanline(unsigned sprite);
   void render();
   Sprite(PPU &self);
 

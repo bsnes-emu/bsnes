@@ -54,4 +54,9 @@ private:
   friend class Video;
 };
 
-extern PPU ppu;
+#if defined(DEBUGGER)
+  #include "debugger/debugger.hpp"
+  extern PPUDebugger ppu;
+#else
+  extern PPU ppu;
+#endif

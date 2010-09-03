@@ -11,6 +11,7 @@ class Background {
 
     bool tile_size;
     unsigned mosaic;
+    unsigned mosaic_mask;
 
     unsigned screen_addr;
     unsigned screen_size;
@@ -23,12 +24,37 @@ class Background {
     bool sub_enable;
   } regs;
 
-  LayerWindow window;
-
-  void render();
+  uint16 **mosaic_table;
 
   const unsigned id;
+  unsigned opt_valid_bit;
+
+  unsigned y;
+  bool hires;
+  signed width;
+
+  unsigned tile_width;
+  unsigned tile_height;
+
+  unsigned mask_x;
+  unsigned mask_y;
+
+  unsigned scx;
+  unsigned scy;
+
+  unsigned hscroll;
+  unsigned vscroll;
+
+  LayerWindow window;
+
+  alwaysinline unsigned get_tile(unsigned hoffset, unsigned voffset);
+  void offset_per_tile(unsigned x, unsigned &hoffset, unsigned &voffset);
+  void scanline();
+  void render();
+  void render_mode7();
+
   Background(PPU &self, unsigned id);
+  ~Background();
 
   PPU &self;
   friend class PPU;

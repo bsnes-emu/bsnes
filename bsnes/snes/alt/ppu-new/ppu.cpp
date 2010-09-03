@@ -3,7 +3,12 @@
 #define PPU_CPP
 namespace SNES {
 
-PPU ppu;
+#if defined(DEBUGGER)
+  #include "debugger/debugger.cpp"
+  PPUDebugger ppu;
+#else
+  PPU ppu;
+#endif
 
 #include "mmio/mmio.cpp"
 #include "window/window.cpp"
@@ -52,6 +57,10 @@ void PPU::add_clocks(unsigned clocks) {
 
 void PPU::render_scanline() {
   if(regs.display_disable) return screen.render_black();
+  bg1.scanline();
+  bg2.scanline();
+  bg3.scanline();
+  bg4.scanline();
   screen.scanline();
   bg1.render();
   bg2.render();
