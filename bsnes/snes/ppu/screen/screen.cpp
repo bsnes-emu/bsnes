@@ -12,9 +12,9 @@ void PPU::Screen::run() {
     *output++ = color;
     *output++ = color;
   } else {
-    color = get_pixel(true);
-    *output++ = color;
     color = get_pixel(false);
+    *output++ = color;
+    color = get_pixel(true);
     *output++ = color;
   }
 }
@@ -146,7 +146,7 @@ uint16 PPU::Screen::get_pixel(bool swap) {
   //========
 
   output = light_table[self.regs.display_brightness][output];
-  if(self.regs.display_disabled) output = 0x0000;
+  if(self.regs.display_disable) output = 0x0000;
   return output;
 }
 

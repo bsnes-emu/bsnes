@@ -38,10 +38,11 @@ void PPU::enter() {
     }
 
     scanline();
-    add_clocks(88);
+    add_clocks(56);
 
     if(vcounter() <= (!regs.overscan ? 224 : 239)) {
-      for(unsigned n = 0; n < 256; n++) {
+      add_clocks(4);
+      for(unsigned pixel = 1; pixel < 8 + 256; pixel++) {
         bg1.run();
         bg2.run();
         bg3.run();
@@ -52,19 +53,21 @@ void PPU::enter() {
         bg2.run();
         bg3.run();
         bg4.run();
-        oam.run();
-        window.run();
-        screen.run();
+        if(pixel >= 8) {
+          oam.run();
+          window.run();
+          screen.run();
+        }
         add_clocks(2);
       }
 
       add_clocks(22);
       oam.tilefetch();
     } else {
-      add_clocks(1024 + 22 + 136);
+      add_clocks(1056 + 22 + 136);
     }
 
-    add_clocks(lineclocks() - 88 - 1024 - 22 - 136);
+    add_clocks(lineclocks() - 56 - 1056 - 22 - 136);
   }
 }
 

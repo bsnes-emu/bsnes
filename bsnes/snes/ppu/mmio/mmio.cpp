@@ -19,26 +19,26 @@ uint16 PPU::get_vram_address() {
 }
 
 uint8 PPU::vram_read(unsigned addr) {
-  if(regs.display_disabled || vcounter() >= (!regs.overscan ? 225 : 240)) {
+  if(regs.display_disable || vcounter() >= (!regs.overscan ? 225 : 240)) {
     return memory::vram[addr];
   }
   return 0x00;
 }
 
 void PPU::vram_write(unsigned addr, uint8 data) {
-  if(regs.display_disabled || vcounter() >= (!regs.overscan ? 225 : 240)) {
+  if(regs.display_disable || vcounter() >= (!regs.overscan ? 225 : 240)) {
     memory::vram[addr] = data;
   }
 }
 
 uint8 PPU::oam_read(unsigned addr) {
-  if(!regs.display_disabled && vcounter() < (!regs.overscan ? 225 : 240)) addr = regs.ioamaddr;
+  if(!regs.display_disable && vcounter() < (!regs.overscan ? 225 : 240)) addr = regs.ioamaddr;
   if(addr & 0x0200) addr &= 0x021f;
   return memory::oam[addr];
 }
 
 void PPU::oam_write(unsigned addr, uint8 data) {
-  if(!regs.display_disabled && vcounter() < (!regs.overscan ? 225 : 240)) addr = regs.ioamaddr;
+  if(!regs.display_disable && vcounter() < (!regs.overscan ? 225 : 240)) addr = regs.ioamaddr;
   if(addr & 0x0200) addr &= 0x021f;
   memory::oam[addr] = data;
   oam.update(addr, data);
@@ -164,8 +164,8 @@ void PPU::mmio_update_video_mode() {
 
 //INIDISP
 void PPU::mmio_w2100(uint8 data) {
-  if(regs.display_disabled && vcounter() == (!regs.overscan ? 225 : 240)) oam.address_reset();
-  regs.display_disabled = data & 0x80;
+  if(regs.display_disable && vcounter() == (!regs.overscan ? 225 : 240)) oam.address_reset();
+  regs.display_disable = data & 0x80;
   regs.display_brightness = data & 0x0f;
 }
 
@@ -491,20 +491,20 @@ void PPU::mmio_w212b(uint8 data) {
 
 //TM
 void PPU::mmio_w212c(uint8 data) {
-  oam.regs.main_enabled = data & 0x10;
-  bg4.regs.main_enabled = data & 0x08;
-  bg3.regs.main_enabled = data & 0x04;
-  bg2.regs.main_enabled = data & 0x02;
-  bg1.regs.main_enabled = data & 0x01;
+  oam.regs.main_enable = data & 0x10;
+  bg4.regs.main_enable = data & 0x08;
+  bg3.regs.main_enable = data & 0x04;
+  bg2.regs.main_enable = data & 0x02;
+  bg1.regs.main_enable = data & 0x01;
 }
 
 //TS
 void PPU::mmio_w212d(uint8 data) {
-  oam.regs.sub_enabled = data & 0x10;
-  bg4.regs.sub_enabled = data & 0x08;
-  bg3.regs.sub_enabled = data & 0x04;
-  bg2.regs.sub_enabled = data & 0x02;
-  bg1.regs.sub_enabled = data & 0x01;
+  oam.regs.sub_enable = data & 0x10;
+  bg4.regs.sub_enable = data & 0x08;
+  bg3.regs.sub_enable = data & 0x04;
+  bg2.regs.sub_enable = data & 0x02;
+  bg1.regs.sub_enable = data & 0x01;
 }
 
 //TMW
@@ -703,7 +703,7 @@ void PPU::mmio_reset() {
   regs.icgramaddr = 0;
 
   //$2100  INIDISP
-  regs.display_disabled = true;
+  regs.display_disable = true;
   regs.display_brightness = 0;
 
   //$2102  OAMADDL

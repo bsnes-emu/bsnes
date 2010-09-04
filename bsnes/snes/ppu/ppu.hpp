@@ -18,6 +18,17 @@ public:
   ~PPU();
 
 private:
+  uint16 *surface;
+  uint16 *output;
+
+  uint8 ppu1_version;
+  uint8 ppu2_version;
+
+  struct {
+    bool interlace;
+    bool overscan;
+  } display;
+
   #include "background/background.hpp"
   #include "mmio/mmio.hpp"
   #include "screen/screen.hpp"
@@ -31,17 +42,6 @@ private:
   Sprite oam;
   Window window;
   Screen screen;
-
-  uint16 *surface;
-  uint16 *output;
-
-  uint8 ppu1_version;
-  uint8 ppu2_version;
-
-  struct {
-    bool interlace;
-    bool overscan;
-  } display;
 
   static void Enter();
   void add_clocks(unsigned);

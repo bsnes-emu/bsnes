@@ -1,11 +1,4 @@
 class Window {
-public:
-  PPU &self;
-
-  struct {
-    unsigned x;
-  } t;
-
   struct {
     bool bg1_one_enable;
     bool bg1_one_invert;
@@ -64,24 +57,32 @@ public:
     uint8 col_sub_mask;
   } regs;
 
-  struct {
-    struct {
+  struct Output {
+    struct Pixel {
       bool color_enable;
     } main, sub;
   } output;
+
+  struct {
+    unsigned x;
+    bool one;
+    bool two;
+  };
 
   void scanline();
   void run();
   void reset();
 
-  void serialize(serializer&);
-  Window(PPU &self);
-
-private:
   void test(
     bool &main, bool &sub,
     bool one_enable, bool one_invert,
     bool two_enable, bool two_invert,
     uint8 mask, bool main_enable, bool sub_enable
   );
+
+  void serialize(serializer&);
+  Window(PPU &self);
+
+  PPU &self;
+  friend class PPU;
 };

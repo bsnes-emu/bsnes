@@ -1,9 +1,7 @@
 class Screen {
-public:
-  PPU &self;
   uint16 *output;
 
-  struct {
+  struct Regs {
     bool addsub_mode;
     bool direct_color;
 
@@ -25,13 +23,15 @@ public:
   void run();
   void reset();
 
-  void serialize(serializer&);
-  Screen(PPU &self);
-
-private:
   uint16 light_table[16][32768];
   uint16 get_pixel(bool swap);
   uint16 addsub(unsigned x, unsigned y, bool halve);
   uint16 get_color(unsigned palette);
   uint16 get_direct_color(unsigned palette, unsigned tile);
+
+  void serialize(serializer&);
+  Screen(PPU &self);
+
+  PPU &self;
+  friend class PPU;
 };

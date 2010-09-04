@@ -15,7 +15,7 @@ struct {
   uint16 icgramaddr;
 
   //$2100  INIDISP
-  bool display_disabled;
+  bool display_disable;
   unsigned display_brightness;
 
   //$2102  OAMADDL

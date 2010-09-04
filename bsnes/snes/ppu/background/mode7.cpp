@@ -16,8 +16,15 @@ void PPU::Background::run_mode7() {
   signed hoffset = sclip<13>(self.regs.mode7_hoffset);
   signed voffset = sclip<13>(self.regs.mode7_voffset);
 
-  unsigned x = t.mosaic_x;
-  unsigned y = self.bg1.t.mosaic_y;  //BG2 vertical mosaic uses BG1 mosaic size
+  if(++Background::x & ~255) return;
+  unsigned x = mosaic_hoffset;
+  unsigned y = self.bg1.mosaic_voffset;  //BG2 vertical mosaic uses BG1 mosaic size
+
+  if(mosaic_hcounter++ == regs.mosaic) {
+    mosaic_hcounter = 0;
+    mosaic_hoffset += regs.mosaic + 1;
+  }
+
   if(self.regs.mode7_hflip) x = 255 - x;
   if(self.regs.mode7_vflip) y = 255 - y;
 
@@ -41,11 +48,12 @@ void PPU::Background::run_mode7() {
       py &= 1023;
       tile = memory::vram[((py >> 3) * 128 + (px >> 3)) << 1];
       palette = memory::vram[(((tile << 6) + ((py & 7) << 3) + (px & 7)) << 1) + 1];
-    } break;
+      break;
+    }
 
     //palette color 0 outside of screen area
     case 2: {
-      if(px < 0 || px > 1023 || py < 0 || py > 1023) {
+      if((px | py) & ~1023) {
         palette = 0;
       } else {
         px &= 1023;
@@ -53,11 +61,12 @@ void PPU::Background::run_mode7() {
         tile = memory::vram[((py >> 3) * 128 + (px >> 3)) << 1];
         palette = memory::vram[(((tile << 6) + ((py & 7) << 3) + (px & 7)) << 1) + 1];
       }
-    } break;
+      break;
+    }
 
     //character 0 repetition outside of screen area
     case 3: {
-      if(px < 0 || px > 1023 || py < 0 || py > 1023) {
+      if((px & py) & ~1023) {
         tile = 0;
       } else {
         px &= 1023;
@@ -65,7 +74,8 @@ void PPU::Background::run_mode7() {
         tile = memory::vram[((py >> 3) * 128 + (px >> 3)) << 1];
       }
       palette = memory::vram[(((tile << 6) + ((py & 7) << 3) + (px & 7)) << 1) + 1];
-    } break;
+      break;
+    }
   }
 
   unsigned priority;
@@ -78,14 +88,16 @@ void PPU::Background::run_mode7() {
 
   if(palette == 0) return;
 
-  if(regs.main_enabled) {
+  if(regs.main_enable) {
     output.main.palette = palette;
     output.main.priority = priority;
+    output.main.tile = 0;
   }
 
-  if(regs.sub_enabled) {
+  if(regs.sub_enable) {
     output.sub.palette = palette;
     output.sub.priority = priority;
+    output.sub.tile = 0;
   }
 }
 

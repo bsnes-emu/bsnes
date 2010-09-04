@@ -1,11 +1,14 @@
 #ifdef PPU_CPP
 
 void PPU::Window::scanline() {
-  t.x = 0;
+  x = 0;
 }
 
 void PPU::Window::run() {
   bool main, sub;
+  one = (x >= regs.one_left && x <= regs.one_right);
+  two = (x >= regs.two_left && x <= regs.two_right);
+  x++;
 
   test(
     main, sub,
@@ -75,8 +78,6 @@ void PPU::Window::run() {
 
   output.main.color_enable = main;
   output.sub.color_enable = sub;
-
-  t.x++;
 }
 
 void PPU::Window::test(
@@ -85,24 +86,21 @@ void PPU::Window::test(
   bool two_enable, bool two_invert,
   uint8 mask, bool main_enable, bool sub_enable
 ) {
-  unsigned x = t.x;
+  bool one = Window::one ^ one_invert;
+  bool two = Window::two ^ two_invert;
   bool output;
 
   if(one_enable == false && two_enable == false) {
     output = false;
   } else if(one_enable == true && two_enable == false) {
-    output = (x >= regs.one_left && x <= regs.one_right) ^ one_invert;
+    output = one;
   } else if(one_enable == false && two_enable == true) {
-    output = (x >= regs.two_left && x <= regs.two_right) ^ two_invert;
-  } else {
-    bool one = (x >= regs.one_left && x <= regs.one_right) ^ one_invert;
-    bool two = (x >= regs.two_left && x <= regs.two_right) ^ two_invert;
-    switch(mask) {
-      case 0: output = (one | two) == 1; break;
-      case 1: output = (one & two) == 1; break;
-      case 2: output = (one ^ two) == 1; break;
-      case 3: output = (one ^ two) == 0; break;
-    }
+    output = two;
+  } else switch(mask) {
+    case 0: output = (one | two) == 1; break;
+    case 1: output = (one & two) == 1; break;
+    case 2: output = (one ^ two) == 1; break;
+    case 3: output = (one ^ two) == 0; break;
   }
 
   main = main_enable ? output : false;
@@ -110,7 +108,6 @@ void PPU::Window::test(
 }
 
 void PPU::Window::reset() {
-  t.x = 0;
   regs.bg1_one_enable = false;
   regs.bg1_one_invert = false;
   regs.bg1_two_enable = false;
@@ -157,8 +154,13 @@ void PPU::Window::reset() {
   regs.oam_sub_enable = 0;
   regs.col_main_mask = 0;
   regs.col_sub_mask = 0;
+
   output.main.color_enable = 0;
   output.sub.color_enable = 0;
+
+  x = 0;
+  one = 0;
+  two = 0;
 }
 
 PPU::Window::Window(PPU &self) : self(self) {

@@ -23,7 +23,7 @@ void PPU::Sprite::scanline() {
   auto oam_item = t.item[t.active];
   auto oam_tile = t.tile[t.active];
 
-  if(t.y == (!self.regs.overscan ? 225 : 240) && self.regs.display_disabled == false) address_reset();
+  if(t.y == (!self.regs.overscan ? 225 : 240) && self.regs.display_disable == false) address_reset();
   if(t.y >= (!self.regs.overscan ? 224 : 239)) return;
 
   memset(oam_item, 0xff, 32);  //default to invalid
@@ -72,12 +72,12 @@ void PPU::Sprite::run() {
     color |= ((bool)(tile.d3 & mask)) << 3;
 
     if(color) {
-      if(regs.main_enabled) {
+      if(regs.main_enable) {
         output.main.palette = tile.palette + color;
         output.main.priority = priority_table[tile.priority];
       }
 
-      if(regs.sub_enabled) {
+      if(regs.sub_enable) {
         output.sub.palette = tile.palette + color;
         output.sub.priority = priority_table[tile.priority];
       }
@@ -189,8 +189,8 @@ void PPU::Sprite::reset() {
     }
   }
 
-  regs.main_enabled = 0;
-  regs.sub_enabled = 0;
+  regs.main_enable = 0;
+  regs.sub_enable = 0;
   regs.interlace = 0;
 
   regs.base_size = 0;

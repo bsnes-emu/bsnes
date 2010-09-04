@@ -37,7 +37,7 @@ void PPU::serialize(serializer &s) {
   s.integer(regs.ioamaddr);
   s.integer(regs.icgramaddr);
 
-  s.integer(regs.display_disabled);
+  s.integer(regs.display_disable);
   s.integer(regs.display_brightness);
 
   s.integer(regs.oam_baseaddr);
@@ -89,11 +89,6 @@ void PPU::serialize(serializer &s) {
 void PPU::Background::serialize(serializer &s) {
   s.integer(id);
 
-  s.integer(t.mosaic_x);
-  s.integer(t.mosaic_y);
-  s.integer(t.mosaic_hcounter);
-  s.integer(t.mosaic_vcounter);
-
   s.integer(regs.tiledata_addr);
   s.integer(regs.screen_addr);
   s.integer(regs.screen_size);
@@ -104,8 +99,8 @@ void PPU::Background::serialize(serializer &s) {
   s.integer(regs.priority0);
   s.integer(regs.priority1);
 
-  s.integer(regs.main_enabled);
-  s.integer(regs.sub_enabled);
+  s.integer(regs.main_enable);
+  s.integer(regs.sub_enable);
 
   s.integer(regs.hoffset);
   s.integer(regs.voffset);
@@ -117,6 +112,22 @@ void PPU::Background::serialize(serializer &s) {
   s.integer(output.sub.priority);
   s.integer(output.sub.palette);
   s.integer(output.sub.tile);
+
+  s.integer(x);
+  s.integer(y);
+  s.integer(edge);
+
+  s.integer(mosaic_vcounter);
+  s.integer(mosaic_voffset);
+  s.integer(mosaic_hcounter);
+  s.integer(mosaic_hoffset);
+  s.integer(mosaic_palette);
+
+  s.integer(tile);
+  s.integer(priority);
+  s.integer(palette_number);
+  s.integer(palette_index);
+  s.array(data);
 }
 
 void PPU::Sprite::serialize(serializer &s) {
@@ -153,8 +164,8 @@ void PPU::Sprite::serialize(serializer &s) {
     }
   }
 
-  s.integer(regs.main_enabled);
-  s.integer(regs.sub_enabled);
+  s.integer(regs.main_enable);
+  s.integer(regs.sub_enable);
   s.integer(regs.interlace);
 
   s.integer(regs.base_size);
@@ -178,8 +189,6 @@ void PPU::Sprite::serialize(serializer &s) {
 }
 
 void PPU::Window::serialize(serializer &s) {
-  s.integer(t.x);
-
   s.integer(regs.bg1_one_enable);
   s.integer(regs.bg1_one_invert);
   s.integer(regs.bg1_two_enable);
@@ -239,6 +248,9 @@ void PPU::Window::serialize(serializer &s) {
   s.integer(output.main.color_enable);
   s.integer(output.sub.color_enable);
 
+  s.integer(x);
+  s.integer(one);
+  s.integer(two);
 }
 
 void PPU::Screen::serialize(serializer &s) {

@@ -1,7 +1,4 @@
 class Sprite {
-public:
-  PPU &self;
-
   struct SpriteItem {
     uint16 x;
     uint16 y;
@@ -36,9 +33,9 @@ public:
     TileItem tile[2][34];
   } t;
 
-  struct {
-    bool main_enabled;
-    bool sub_enabled;
+  struct Regs {
+    bool main_enable;
+    bool sub_enable;
     bool interlace;
 
     uint8 base_size;
@@ -55,8 +52,8 @@ public:
     bool range_over;
   } regs;
 
-  struct {
-    struct {
+  struct Output {
+    struct Pixel {
       unsigned priority;  //0 = none (transparent)
       unsigned palette;
     } main, sub;
@@ -73,9 +70,11 @@ public:
   void tilefetch();
   void reset();
 
+  bool on_scanline(SpriteItem&);
+
   void serialize(serializer&);
   Sprite(PPU &self);
 
-private:
-  bool on_scanline(SpriteItem&);
+  PPU &self;
+  friend class PPU;
 };
