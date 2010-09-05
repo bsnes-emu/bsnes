@@ -56,11 +56,11 @@ void PPU::add_clocks(unsigned clocks) {
 }
 
 void PPU::render_scanline() {
-  if(regs.display_disable) return screen.render_black();
   bg1.scanline();
   bg2.scanline();
   bg3.scanline();
   bg4.scanline();
+  if(regs.display_disable) return screen.render_black();
   screen.scanline();
   bg1.render();
   bg2.render();

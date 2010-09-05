@@ -45,10 +45,16 @@ void PPU::oam_write(unsigned addr, uint8 data) {
 }
 
 uint8 PPU::cgram_read(unsigned addr) {
+  if(!regs.display_disable && vcounter() < (!regs.overscan ? 225 : 240)) {
+    if(hcounter() >= 128 && hcounter() < 1096) addr = 0x0000;
+  }
   return memory::cgram[addr];
 }
 
 void PPU::cgram_write(unsigned addr, uint8 data) {
+  if(!regs.display_disable && vcounter() < (!regs.overscan ? 225 : 240)) {
+    if(hcounter() >= 128 && hcounter() < 1096) addr = 0x0000;
+  }
   memory::cgram[addr] = data;
 }
 

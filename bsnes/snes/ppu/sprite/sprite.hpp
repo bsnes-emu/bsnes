@@ -55,7 +55,7 @@ class Sprite {
   struct Output {
     struct Pixel {
       unsigned priority;  //0 = none (transparent)
-      unsigned palette;
+      uint8 palette;
     } main, sub;
   } output;
 

@@ -341,10 +341,6 @@ void PPU::mmio_write(unsigned addr, uint8 data) {
       bg3.regs.mosaic = (data & 0x04 ? mosaic_size : 0);
       bg2.regs.mosaic = (data & 0x02 ? mosaic_size : 0);
       bg1.regs.mosaic = (data & 0x01 ? mosaic_size : 0);
-      bg4.regs.mosaic_mask = ~(bg4.regs.mosaic >> 1);
-      bg3.regs.mosaic_mask = ~(bg3.regs.mosaic >> 1);
-      bg2.regs.mosaic_mask = ~(bg2.regs.mosaic >> 1);
-      bg1.regs.mosaic_mask = ~(bg1.regs.mosaic >> 1);
       return;
     }
 

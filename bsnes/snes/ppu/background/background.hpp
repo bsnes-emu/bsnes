@@ -27,8 +27,8 @@ class Background {
   struct Output {
     struct Pixel {
       unsigned priority;  //0 = none (transparent)
-      unsigned palette;
-      unsigned tile;
+      uint8 palette;
+      uint16 tile;
     } main, sub;
   } output;
 

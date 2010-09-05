@@ -3,18 +3,18 @@
 #include "mode7.cpp"
 
 unsigned PPU::Background::get_tile(unsigned hoffset, unsigned voffset) {
-  unsigned tile_x = hoffset >> tile_width;
-  unsigned tile_y = voffset >> tile_height;
+  unsigned tile_x = (hoffset & mask_x) >> tile_width;
+  unsigned tile_y = (voffset & mask_y) >> tile_height;
 
   unsigned tile_pos = ((tile_y & 0x1f) << 5) + (tile_x & 0x1f);
   if(tile_y & 0x20) tile_pos += scy;
   if(tile_x & 0x20) tile_pos += scx;
 
-  const unsigned tiledata_addr = regs.screen_addr + (tile_pos << 1);
+  const uint16 tiledata_addr = regs.screen_addr + (tile_pos << 1);
   return (memory::vram[tiledata_addr + 0] << 0) + (memory::vram[tiledata_addr + 1] << 8);
 }
 
-void PPU::Background::offset_per_tile(unsigned x, unsigned &hoffset, unsigned &voffset) {
+void PPU::Background::offset_per_tile(unsigned x, unsigned y, unsigned &hoffset, unsigned &voffset) {
   unsigned opt_x = (x + (hscroll & 7)), hval, vval;
   if(opt_x >= 8) {
     hval = self.bg3.get_tile((opt_x - 8) + (self.bg3.regs.hoffset & ~7), self.bg3.regs.voffset + 0);
@@ -23,9 +23,11 @@ void PPU::Background::offset_per_tile(unsigned x, unsigned &hoffset, unsigned &v
 
     if(self.regs.bgmode == 4) {
       if(hval & opt_valid_bit) {
-        hoffset = opt_x + (hval & ~7);
-      } else {
-        voffset = y + hval;
+        if(!(hval & 0x8000)) {
+          hoffset = opt_x + (hval & ~7);
+        } else {
+          voffset = y + hval;
+        }
       }
     } else {
       if(hval & opt_valid_bit) {
@@ -39,7 +41,15 @@ void PPU::Background::offset_per_tile(unsigned x, unsigned &hoffset, unsigned &v
 }
 
 void PPU::Background::scanline() {
-  y = mosaic_table[regs.mosaic][self.vcounter()] + (regs.mosaic > 0);
+  if(self.vcounter() == 1) {
+    mosaic_vcounter = regs.mosaic + 1;
+    y = 1;
+  } else if(--mosaic_vcounter == 0) {
+    mosaic_vcounter = regs.mosaic + 1;
+    y += regs.mosaic + 1;
+  }
+  if(self.regs.display_disable) return;
+
   hires = (self.regs.bgmode == 5 || self.regs.bgmode == 6);
   width = !hires ? 256 : 512;
 
@@ -66,6 +76,11 @@ void PPU::Background::render() {
   if(regs.sub_enable) window.render(1);
   if(regs.mode == Mode::Mode7) return render_mode7();
 
+  unsigned mosaic_hcounter = 1;
+  unsigned mosaic_palette = 0;
+  unsigned mosaic_priority = 0;
+  unsigned mosaic_color = 0;
+
   const unsigned bgpal_index = (self.regs.bgmode == 0 ? id << 5 : 0);
   const unsigned pal_size = 2 << regs.mode;
   const unsigned tile_mask = 0x0fff >> regs.mode;
@@ -74,6 +89,7 @@ void PPU::Background::render() {
   hscroll = regs.hoffset;
   vscroll = regs.voffset;
 
+  unsigned y = Background::y;
   if(hires) {
     hscroll <<= 1;
     if(self.regs.interlace) y = (y << 1) + self.field();
@@ -91,7 +107,7 @@ void PPU::Background::render() {
   while(x < width) {
     hoffset = x + hscroll;
     voffset = y + vscroll;
-    if(is_opt_mode) offset_per_tile(x, hoffset, voffset);
+    if(is_opt_mode) offset_per_tile(x, y, hoffset, voffset);
     hoffset &= mask_x;
     voffset &= mask_y;
 
@@ -100,53 +116,44 @@ void PPU::Background::render() {
     mirror_x = tile_num & 0x4000;
     tile_pri = tile_num & 0x2000 ? regs.priority1 : regs.priority0;
     pal_num = (tile_num >> 10) & 7;
-    pal_index = bgpal_index + (pal_num << pal_size);
+    pal_index = (bgpal_index + (pal_num << pal_size)) & 0xff;
 
-    if(tile_width == 4) {
-      if((bool)(hoffset & 8) != mirror_x) tile_num++;
-    }
-
-    if(tile_height == 4) {
-      if((bool)(voffset & 8) != mirror_y) tile_num += 16;
-    }
-
-    tile_num &= 0x03ff;
-    tile_num += tiledata_index;
-    tile_num &= tile_mask;
+    if(tile_width  == 4 && (bool)(hoffset & 8) != mirror_x) tile_num +=  1;
+    if(tile_height == 4 && (bool)(voffset & 8) != mirror_y) tile_num += 16;
+    tile_num = ((tile_num & 0x03ff) + tiledata_index) & tile_mask;
 
     if(mirror_y) voffset ^= 7;
-    signed step = mirror_x ? -1 : +1;
-    unsigned plot_x = x + (mirror_x ? 7 : 0);
+    unsigned mirror_xmask = !mirror_x ? 0 : 7;
 
     uint8 *tiledata = self.cache.tile(regs.mode, tile_num);
     tiledata += ((voffset & 7) * 8);
 
-    for(unsigned n = 0; n < 8; n++) {
-      unsigned col = tiledata[n & regs.mosaic_mask];
-      if(col && !(plot_x & width)) {
-        unsigned color;
+    for(unsigned n = 0; n < 8; n++, x++) {
+      if(x & width) continue;
+      if(--mosaic_hcounter == 0) {
+        mosaic_hcounter = regs.mosaic + 1;
+        mosaic_palette = tiledata[n ^ mirror_xmask];
+        mosaic_priority = tile_pri;
         if(is_direct_color_mode) {
-          color = self.screen.get_direct_color(pal_num, col);
+          mosaic_color = self.screen.get_direct_color(pal_num, mosaic_palette);
         } else {
-          color = self.screen.get_palette(pal_index + col);
-        }
-
-        if(hires == false) {
-          if(regs.main_enable && !window.main[plot_x]) self.screen.output.plot_main(plot_x, color, tile_pri, id);
-          if(regs.sub_enable && !window.sub[plot_x]) self.screen.output.plot_sub(plot_x, color, tile_pri, id);
-        } else {
-          signed half_x = plot_x >> 1;
-          if(plot_x & 1) {
-            if(regs.main_enable && !window.main[half_x]) self.screen.output.plot_main(half_x, color, tile_pri, id);
-          } else {
-            if(regs.sub_enable && !window.sub[half_x]) self.screen.output.plot_sub(half_x, color, tile_pri, id);
-          }
+          mosaic_color = self.screen.get_palette(pal_index + mosaic_palette);
         }
       }
-      plot_x += step;
-    }
+      if(mosaic_palette == 0) continue;
 
-    x += 8;
+      if(hires == false) {
+        if(regs.main_enable && !window.main[x]) self.screen.output.plot_main(x, mosaic_color, mosaic_priority, id);
+        if(regs.sub_enable && !window.sub[x]) self.screen.output.plot_sub(x, mosaic_color, mosaic_priority, id);
+      } else {
+        signed half_x = x >> 1;
+        if(x & 1) {
+          if(regs.main_enable && !window.main[half_x]) self.screen.output.plot_main(half_x, mosaic_color, mosaic_priority, id);
+        } else {
+          if(regs.sub_enable && !window.sub[half_x]) self.screen.output.plot_sub(half_x, mosaic_color, mosaic_priority, id);
+        }
+      }
+    }
   }
 }
 

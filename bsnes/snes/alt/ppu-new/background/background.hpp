@@ -11,7 +11,6 @@ class Background {
 
     bool tile_size;
     unsigned mosaic;
-    unsigned mosaic_mask;
 
     unsigned screen_addr;
     unsigned screen_size;
@@ -45,10 +44,12 @@ class Background {
   unsigned hscroll;
   unsigned vscroll;
 
+  unsigned mosaic_vcounter;
+
   LayerWindow window;
 
   alwaysinline unsigned get_tile(unsigned hoffset, unsigned voffset);
-  void offset_per_tile(unsigned x, unsigned &hoffset, unsigned &voffset);
+  void offset_per_tile(unsigned x, unsigned y, unsigned &hoffset, unsigned &voffset);
   void scanline();
   void render();
   void render_mode7();
