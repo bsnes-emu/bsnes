@@ -115,7 +115,6 @@ void PPU::Background::serialize(serializer &s) {
 
   s.integer(x);
   s.integer(y);
-  s.integer(edge);
 
   s.integer(mosaic_vcounter);
   s.integer(mosaic_voffset);
@@ -123,6 +122,7 @@ void PPU::Background::serialize(serializer &s) {
   s.integer(mosaic_hoffset);
   s.integer(mosaic_palette);
 
+  s.integer(tile_counter);
   s.integer(tile);
   s.integer(priority);
   s.integer(palette_number);

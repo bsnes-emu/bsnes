@@ -7,9 +7,9 @@ void PPU::Background::frame() {
 
 void PPU::Background::scanline() {
   bool hires = (self.regs.bgmode == 5 || self.regs.bgmode == 6);
-  x = -8 << hires;
+  x = -7;
   y = self.vcounter();
-  edge = 7 - (regs.hoffset & 7);
+  tile_counter = (7 - (regs.hoffset & 7)) << hires;
   for(unsigned n = 0; n < 8; n++) data[n] = 0;
 
   if(self.vcounter() == 1) {
@@ -36,7 +36,7 @@ void PPU::Background::get_tile() {
   unsigned tile_height = (regs.tile_size == TileSize::Size8x8 ? 3 : 4);
   unsigned tile_width = (!hires ? tile_height : 4);
 
-  unsigned width = (!hires ? 256 : 512);
+  unsigned width = 256 << hires;
 
   unsigned mask_x = (tile_height == 3 ? width : (width << 1));
   unsigned mask_y = mask_x;
@@ -45,7 +45,7 @@ void PPU::Background::get_tile() {
   mask_x--;
   mask_y--;
 
-  unsigned px = x;
+  unsigned px = x << hires;
   unsigned py = mosaic_voffset;
 
   unsigned hscroll = regs.hoffset;
@@ -59,24 +59,24 @@ void PPU::Background::get_tile() {
   unsigned voffset = vscroll + py;
 
   if(self.regs.bgmode == 2 || self.regs.bgmode == 4 || self.regs.bgmode == 6) {
-    uint16 opt_x = (x + (hscroll & 7));
+    uint16 offset_x = (x + (hscroll & 7));
 
-    if(opt_x >= 8) {
-      unsigned hval = self.bg3.get_tile((opt_x - 8) + (self.bg3.regs.hoffset & ~7), self.bg3.regs.voffset + 0);
-      unsigned vval = self.bg3.get_tile((opt_x - 8) + (self.bg3.regs.hoffset & ~7), self.bg3.regs.voffset + 8);
-      unsigned opt_valid_bit = (id == ID::BG1 ? 0x2000 : 0x4000);
+    if(offset_x >= 8) {
+      unsigned hval = self.bg3.get_tile((offset_x - 8) + (self.bg3.regs.hoffset & ~7), self.bg3.regs.voffset + 0);
+      unsigned vval = self.bg3.get_tile((offset_x - 8) + (self.bg3.regs.hoffset & ~7), self.bg3.regs.voffset + 8);
+      unsigned valid_mask = (id == ID::BG1 ? 0x2000 : 0x4000);
 
       if(self.regs.bgmode == 4) {
-        if(hval & opt_valid_bit) {
-          if(!(hval & 0x8000)) {
-            hoffset = opt_x + (hval & ~7);
+        if(hval & valid_mask) {
+          if((hval & 0x8000) == 0) {
+            hoffset = offset_x + (hval & ~7);
           } else {
             voffset = y + hval;
           }
         }
       } else {
-        if(hval & opt_valid_bit) hoffset = opt_x + (hval & ~7);
-        if(vval & opt_valid_bit) voffset = y + vval;
+        if(hval & valid_mask) hoffset = offset_x + (hval & ~7);
+        if(vval & valid_mask) voffset = y + vval;
       }
     }
   }
@@ -84,8 +84,8 @@ void PPU::Background::get_tile() {
   hoffset &= mask_x;
   voffset &= mask_y;
 
-  unsigned screen_x = (regs.screen_size & 1 ? (32 << 5) : 0);
-  unsigned screen_y = (regs.screen_size & 2 ? (32 << 5) : 0);
+  unsigned screen_x = (regs.screen_size & 1 ? 32 << 5 : 0);
+  unsigned screen_y = (regs.screen_size & 2 ? 32 << 5 : 0);
   if(regs.screen_size == 3) screen_y <<= 1;
 
   unsigned tx = hoffset >> tile_width;
@@ -126,21 +126,21 @@ void PPU::Background::get_tile() {
   }
 
   if(mirror_x) for(unsigned n = 0; n < 8; n++) {
+    //reverse data bits in data[n]: 01234567 -> 76543210
     data[n] = ((data[n] >> 4) & 0x0f) | ((data[n] << 4) & 0xf0);
     data[n] = ((data[n] >> 2) & 0x33) | ((data[n] << 2) & 0xcc);
     data[n] = ((data[n] >> 1) & 0x55) | ((data[n] << 1) & 0xaa);
   }
 }
 
-void PPU::Background::run() {
+void PPU::Background::run(bool screen) {
   if(self.vcounter() == 0) return;
   bool hires = (self.regs.bgmode == 5 || self.regs.bgmode == 6);
 
-  if((self.hcounter() & 2) == 0) {
+  if(screen == Screen::Sub) {
     output.main.priority = 0;
     output.sub.priority = 0;
-  } else if(hires == false) {
-    return;
+    if(hires == false) return;
   }
 
   if(regs.mode == Mode::Inactive) return;
@@ -148,7 +148,11 @@ void PPU::Background::run() {
 
   if(regs.mode == Mode::Mode7) return run_mode7();
 
-  if((x++ & 7) == edge) get_tile();
+  if(tile_counter-- == 0) {
+    tile_counter = 7;
+    get_tile();
+  }
+  if(screen == Screen::Main) x++;
 
   uint8 palette = get_tile_color();
   if(x >= 0 && mosaic_hcounter++ >= regs.mosaic) {
@@ -169,19 +173,17 @@ void PPU::Background::run() {
       output.sub.palette = palette_index + mosaic_palette;
       output.sub.tile = tile;
     }
-  } else {
-    if(x & 1) {
-      if(regs.main_enable) {
-        output.main.priority = priority;
-        output.main.palette = palette_index + mosaic_palette;
-        output.main.tile = tile;
-      }
-    } else {
-      if(regs.sub_enable) {
-        output.sub.priority = priority;
-        output.sub.palette = palette_index + mosaic_palette;
-        output.sub.tile = tile;
-      }
+  } else if(screen == Screen::Main) {
+    if(regs.main_enable) {
+      output.main.priority = priority;
+      output.main.palette = palette_index + mosaic_palette;
+      output.main.tile = tile;
+    }
+  } else if(screen == Screen::Sub) {
+    if(regs.sub_enable) {
+      output.sub.priority = priority;
+      output.sub.palette = palette_index + mosaic_palette;
+      output.sub.tile = tile;
     }
   }
 }
@@ -226,7 +228,6 @@ void PPU::Background::reset() {
 
   x = 0;
   y = 0;
-  edge = 0;
 
   mosaic_vcounter = 0;
   mosaic_voffset = 0;
@@ -234,6 +235,7 @@ void PPU::Background::reset() {
   mosaic_hoffset = 0;
   mosaic_palette = 0;
 
+  tile_counter = 0;
   tile = 0;
   priority = 0;
   palette_number = 0;

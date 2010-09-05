@@ -43,16 +43,16 @@ void PPU::enter() {
     if(vcounter() <= (!regs.overscan ? 224 : 239)) {
       add_clocks(4);
       for(unsigned pixel = 1; pixel < 8 + 256; pixel++) {
-        bg1.run();
-        bg2.run();
-        bg3.run();
-        bg4.run();
+        bg1.run(1);
+        bg2.run(1);
+        bg3.run(1);
+        bg4.run(1);
         add_clocks(2);
 
-        bg1.run();
-        bg2.run();
-        bg3.run();
-        bg4.run();
+        bg1.run(0);
+        bg2.run(0);
+        bg3.run(0);
+        bg4.run(0);
         if(pixel >= 8) {
           oam.run();
           window.run();

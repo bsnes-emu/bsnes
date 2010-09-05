@@ -8,13 +8,13 @@ void PPU::Screen::scanline() {
 void PPU::Screen::run() {
   uint16 color;
   if(self.regs.pseudo_hires == false && self.regs.bgmode != 5 && self.regs.bgmode != 6) {
-    color = get_pixel(false);
+    color = get_pixel(0);
     *output++ = color;
     *output++ = color;
   } else {
-    color = get_pixel(false);
+    color = get_pixel(1);
     *output++ = color;
-    color = get_pixel(true);
+    color = get_pixel(0);
     *output++ = color;
   }
 }

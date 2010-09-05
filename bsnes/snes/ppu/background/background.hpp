@@ -5,6 +5,7 @@ class Background {
   struct Mode { enum  { BPP2, BPP4, BPP8, Mode7, Inactive }; };
   struct ScreenSize { enum { Size32x32, Size32x64, Size64x32, Size64x64 }; };
   struct TileSize { enum { Size8x8, Size16x16 }; };
+  struct Screen { enum { Main, Sub }; };
 
   struct Regs {
     unsigned tiledata_addr;
@@ -35,7 +36,6 @@ class Background {
   struct {
     signed x;
     signed y;
-    signed edge;
 
     unsigned mosaic_vcounter;
     unsigned mosaic_voffset;
@@ -43,6 +43,7 @@ class Background {
     unsigned mosaic_hoffset;
     unsigned mosaic_palette;
 
+    unsigned tile_counter;
     unsigned tile;
     unsigned priority;
     unsigned palette_number;
@@ -52,7 +53,7 @@ class Background {
 
   void frame();
   void scanline();
-  void run();
+  void run(bool screen);
   void reset();
 
   void get_tile();

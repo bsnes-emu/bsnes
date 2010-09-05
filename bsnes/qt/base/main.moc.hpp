@@ -80,6 +80,8 @@ public:
       QAction *tools_movies_recordFromPowerOn;
       QAction *tools_movies_recordFromHere;
     QAction *tools_captureScreenshot;
+    QMenu *tools_loadState;
+    QMenu *tools_saveState;
     QAction *tools_cheatEditor;
     QAction *tools_cheatFinder;
     QAction *tools_stateManager;
@@ -150,6 +152,8 @@ public slots:
   void recordMovieFromPowerOn();
   void recordMovieFromHere();
   void saveScreenshot();
+  void loadState();
+  void saveState();
   void showCheatEditor();
   void showCheatFinder();
   void showStateManager();

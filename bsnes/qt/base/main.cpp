@@ -174,6 +174,24 @@ MainWindow::MainWindow() {
 
   tools->addSeparator();
 
+  tools_loadState = tools->addMenu("Load Quick State");
+  for(unsigned i = 0; i < 10; i++) {
+    QAction *loadAction = new QAction(string("Slot ", i + 1), 0);
+    loadAction->setData(i);
+    connect(loadAction, SIGNAL(triggered()), this, SLOT(loadState()));
+    tools_loadState->addAction(loadAction);
+  }
+
+  tools_saveState = tools->addMenu("Save Quick State");
+  for(unsigned i = 0; i < 10; i++) {
+    QAction *saveAction = new QAction(string("Slot ", i + 1), 0);
+    saveAction->setData(i);
+    connect(saveAction, SIGNAL(triggered()), this, SLOT(saveState()));
+    tools_saveState->addAction(saveAction);
+  }
+
+  tools->addSeparator();
+
   tools_cheatEditor = tools->addAction("Cheat &Editor ...");
   tools_cheatEditor->setIcon(QIcon(":/16x16/accessories-text-editor.png"));
 
@@ -579,6 +597,20 @@ void MainWindow::recordMovieFromHere() {
 void MainWindow::saveScreenshot() {
   //tell SNES::Interface to save a screenshot at the next video_refresh() event
   interface.saveScreenshot = true;
+}
+
+void MainWindow::loadState() {
+  QAction *action = dynamic_cast<QAction*>(sender());
+  if(action == 0) return;
+  unsigned slot = action->data().toUInt();
+  state.load(slot);
+}
+
+void MainWindow::saveState() {
+  QAction *action = dynamic_cast<QAction*>(sender());
+  if(action == 0) return;
+  unsigned slot = action->data().toUInt();
+  state.save(slot);
 }
 
 void MainWindow::showCheatEditor()  { toolsWindow->tab->setCurrentIndex(0); toolsWindow->show(); }
