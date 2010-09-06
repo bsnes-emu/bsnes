@@ -1,12 +1,12 @@
 //render.cpp
-debugvirtual inline void render_line_mode0();
-debugvirtual inline void render_line_mode1();
-debugvirtual inline void render_line_mode2();
-debugvirtual inline void render_line_mode3();
-debugvirtual inline void render_line_mode4();
-debugvirtual inline void render_line_mode5();
-debugvirtual inline void render_line_mode6();
-debugvirtual inline void render_line_mode7();
+inline void render_line_mode0();
+inline void render_line_mode1();
+inline void render_line_mode2();
+inline void render_line_mode3();
+inline void render_line_mode4();
+inline void render_line_mode5();
+inline void render_line_mode6();
+inline void render_line_mode7();
 
 //cache.cpp
 enum { COLORDEPTH_4 = 0, COLORDEPTH_16 = 1, COLORDEPTH_256 = 2 };

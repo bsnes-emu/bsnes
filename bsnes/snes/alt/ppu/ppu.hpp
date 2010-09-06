@@ -59,6 +59,9 @@ public:
   void power();
   void reset();
 
+  bool layer_enabled[5][4];
+  void layer_enable(unsigned layer, unsigned priority, bool enable);
+
   void serialize(serializer&);
   PPU();
   ~PPU();

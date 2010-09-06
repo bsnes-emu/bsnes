@@ -15,6 +15,8 @@ public:
   void scanline();
   void frame();
 
+  void layer_enable(unsigned layer, unsigned priority, bool enable);
+
   void serialize(serializer&);
   PPU();
   ~PPU();

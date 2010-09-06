@@ -163,7 +163,13 @@ void PPU::Sprite::render() {
   if(regs.main_enable) window.render(0);
   if(regs.sub_enable) window.render(1);
 
-  const unsigned priority_table[] = { regs.priority0, regs.priority1, regs.priority2, regs.priority3 };
+  unsigned priority0 = (priority0_enable ? regs.priority0 : 0);
+  unsigned priority1 = (priority1_enable ? regs.priority1 : 0);
+  unsigned priority2 = (priority2_enable ? regs.priority2 : 0);
+  unsigned priority3 = (priority3_enable ? regs.priority3 : 0);
+  if(priority0 + priority1 + priority2 + priority3 == 0) return;
+  const unsigned priority_table[] = { priority0, priority1, priority2, priority3 };
+
   for(unsigned x = 0; x < 256; x++) {
     if(output.priority[x] == 0xff) continue;
     unsigned priority = priority_table[output.priority[x]];
@@ -175,6 +181,10 @@ void PPU::Sprite::render() {
 }
 
 PPU::Sprite::Sprite(PPU &self) : self(self) {
+  priority0_enable = true;
+  priority1_enable = true;
+  priority2_enable = true;
+  priority3_enable = true;
 }
 
 #endif

@@ -50,4 +50,17 @@ void DSP::reset() {
   spc_dsp.set_output(samplebuffer, 8192);
 }
 
+void DSP::channel_enable(unsigned channel, bool enable) {
+  channel_enabled[channel & 7] = enable;
+  unsigned mask = 0;
+  for(unsigned i = 0; i < 8; i++) {
+    if(channel_enabled[i] == false) mask |= 1 << i;
+  }
+  spc_dsp.mute_voices(mask);
+}
+
+DSP::DSP() {
+  for(unsigned i = 0; i < 8; i++) channel_enabled[i] = true;
+}
+
 }

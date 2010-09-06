@@ -365,6 +365,23 @@ void PPU::reset() {
   regs.bg_y[3] = 0;
 }
 
+void PPU::layer_enable(unsigned layer, unsigned priority, bool enable) {
+  switch(layer * 4 + priority) {
+    case  0: layer_enabled[BG1][0] = enable; break;
+    case  1: layer_enabled[BG1][1] = enable; break;
+    case  4: layer_enabled[BG2][0] = enable; break;
+    case  5: layer_enabled[BG2][1] = enable; break;
+    case  8: layer_enabled[BG3][0] = enable; break;
+    case  9: layer_enabled[BG3][1] = enable; break;
+    case 12: layer_enabled[BG4][0] = enable; break;
+    case 13: layer_enabled[BG4][1] = enable; break;
+    case 16: layer_enabled[OAM][0] = enable; break;
+    case 17: layer_enabled[OAM][1] = enable; break;
+    case 18: layer_enabled[OAM][2] = enable; break;
+    case 19: layer_enabled[OAM][3] = enable; break;
+  }
+}
+
 PPU::PPU() {
   surface = new uint16[512 * 512];
   output = surface + 16 * 512;
@@ -390,6 +407,19 @@ PPU::PPU() {
       }
     }
   }
+
+  layer_enabled[BG1][0] = true;
+  layer_enabled[BG1][1] = true;
+  layer_enabled[BG2][0] = true;
+  layer_enabled[BG2][1] = true;
+  layer_enabled[BG3][0] = true;
+  layer_enabled[BG3][1] = true;
+  layer_enabled[BG4][0] = true;
+  layer_enabled[BG4][1] = true;
+  layer_enabled[OAM][0] = true;
+  layer_enabled[OAM][1] = true;
+  layer_enabled[OAM][2] = true;
+  layer_enabled[OAM][3] = true;
 }
 
 PPU::~PPU() {

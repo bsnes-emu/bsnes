@@ -201,6 +201,12 @@ void PPU::render_line_oam_rto() {
   }
 
 void PPU::render_line_oam(uint8 pri0_pos, uint8 pri1_pos, uint8 pri2_pos, uint8 pri3_pos) {
+  if(layer_enabled[OAM][0] == false) pri0_pos = 0;
+  if(layer_enabled[OAM][1] == false) pri1_pos = 0;
+  if(layer_enabled[OAM][2] == false) pri2_pos = 0;
+  if(layer_enabled[OAM][3] == false) pri3_pos = 0;
+  if(pri0_pos + pri1_pos + pri2_pos + pri3_pos == 0) return;
+
   if(regs.bg_enabled[OAM] == false && regs.bgsub_enabled[OAM] == false) return;
 
   for(unsigned s = 0; s < 34; s++) {

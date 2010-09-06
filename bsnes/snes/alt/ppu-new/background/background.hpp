@@ -4,6 +4,9 @@ class Background {
   struct ScreenSize { enum { Size32x32, Size32x64, Size64x32, Size64x64 }; };
   struct TileSize { enum { Size8x8, Size16x16 }; };
 
+  bool priority0_enable;
+  bool priority1_enable;
+
   struct Regs {
     unsigned mode;
     unsigned priority0;

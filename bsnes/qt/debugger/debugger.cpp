@@ -12,7 +12,6 @@ Debugger *debugger;
 #include "tools/memory.cpp"
 #include "tools/properties.cpp"
 
-#include "ppu/layer-toggle.cpp"
 #include "ppu/vram-viewer.cpp"
 #include "ppu/oam-viewer.cpp"
 #include "ppu/cgram-viewer.cpp"
@@ -40,7 +39,6 @@ Debugger::Debugger() {
   menu_tools_propertiesViewer = menu_tools->addAction("Properties Viewer ...");
 
   menu_ppu = menu->addMenu("S-PPU");
-  menu_ppu_layerToggle = menu_ppu->addAction("Layer Toggle ...");
   menu_ppu_vramViewer = menu_ppu->addAction("Video RAM Viewer ...");
   menu_ppu_oamViewer = menu_ppu->addAction("Sprite Viewer ...");
   menu_ppu_cgramViewer = menu_ppu->addAction("Palette Viewer ...");
@@ -98,7 +96,6 @@ Debugger::Debugger() {
   breakpointEditor = new BreakpointEditor;
   memoryEditor = new MemoryEditor;
   propertiesViewer = new PropertiesViewer;
-  layerToggle = new LayerToggle;
   vramViewer = new VramViewer;
   oamViewer = new OamViewer;
   cgramViewer = new CgramViewer;
@@ -109,7 +106,6 @@ Debugger::Debugger() {
   connect(menu_tools_memory, SIGNAL(triggered()), memoryEditor, SLOT(show()));
   connect(menu_tools_propertiesViewer, SIGNAL(triggered()), propertiesViewer, SLOT(show()));
 
-  connect(menu_ppu_layerToggle, SIGNAL(triggered()), layerToggle, SLOT(show()));
   connect(menu_ppu_vramViewer, SIGNAL(triggered()), vramViewer, SLOT(show()));
   connect(menu_ppu_oamViewer, SIGNAL(triggered()), oamViewer, SLOT(show()));
   connect(menu_ppu_cgramViewer, SIGNAL(triggered()), cgramViewer, SLOT(show()));

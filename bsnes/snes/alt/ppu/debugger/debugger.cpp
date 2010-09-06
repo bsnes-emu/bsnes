@@ -1,7 +1,5 @@
 #ifdef PPU_CPP
 
-#include "render.cpp"
-
 uint8 PPUDebugger::vram_mmio_read(uint16 addr) {
   uint8 data = PPU::vram_mmio_read(addr);
   debugger.breakpoint_test(Debugger::Breakpoint::Source::VRAM, Debugger::Breakpoint::Mode::Read, addr, data);
@@ -36,11 +34,6 @@ void PPUDebugger::cgram_mmio_write(uint16 addr, uint8 data) {
 }
 
 PPUDebugger::PPUDebugger() {
-  bg1_enabled[0] = bg1_enabled[1] = true;
-  bg2_enabled[0] = bg2_enabled[1] = true;
-  bg3_enabled[0] = bg3_enabled[1] = true;
-  bg4_enabled[0] = bg4_enabled[1] = true;
-  oam_enabled[0] = oam_enabled[1] = oam_enabled[2] = oam_enabled[3] = true;
 }
 
 bool PPUDebugger::property(unsigned id, string &name, string &value) {

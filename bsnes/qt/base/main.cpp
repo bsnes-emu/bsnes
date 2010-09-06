@@ -18,34 +18,26 @@ MainWindow::MainWindow() {
   system = menuBar->addMenu("&System");
 
   system_load = system->addAction("Load &Cartridge ...");
-  system_load->setIcon(QIcon(":/16x16/document-open.png"));
 
   system_loadSpecial = system->addMenu("Load &Special");
-  system_loadSpecial->setIcon(QIcon(":/16x16/document-open.png"));
 
   system_loadSpecial_bsxSlotted = system_loadSpecial->addAction("Load BS-X &Slotted Cartridge ...");
-  system_loadSpecial_bsxSlotted->setIcon(QIcon(":/16x16/document-open.png"));
 
   system_loadSpecial_bsx = system_loadSpecial->addAction("Load &BS-X Cartridge ...");
-  system_loadSpecial_bsx->setIcon(QIcon(":/16x16/document-open.png"));
 
   system_loadSpecial_sufamiTurbo = system_loadSpecial->addAction("Load Sufami &Turbo Cartridge ...");
-  system_loadSpecial_sufamiTurbo->setIcon(QIcon(":/16x16/document-open.png"));
 
   system_loadSpecial_superGameBoy = system_loadSpecial->addAction("Load Super &Game Boy Cartridge ...");
-  system_loadSpecial_superGameBoy->setIcon(QIcon(":/16x16/document-open.png"));
 
   system->addSeparator();
 
   system->addAction(system_power = new CheckAction("&Power", 0));
 
   system_reset = system->addAction("&Reset");
-  system_reset->setIcon(QIcon(":/16x16/view-refresh.png"));
 
   system->addSeparator();
 
   system_port1 = system->addMenu("Controller Port &1");
-  system_port1->setIcon(QIcon(":/16x16/input-gaming.png"));
   system_port1->addAction(system_port1_none = new RadioAction("&None", 0));
   system_port1->addAction(system_port1_gamepad = new RadioAction("&Gamepad", 0));
   system_port1->addAction(system_port1_asciipad = new RadioAction("&asciiPad", 0));
@@ -53,7 +45,6 @@ MainWindow::MainWindow() {
   system_port1->addAction(system_port1_mouse = new RadioAction("&Mouse", 0));
 
   system_port2 = system->addMenu("Controller Port &2");
-  system_port2->setIcon(QIcon(":/16x16/input-gaming.png"));
   system_port2->addAction(system_port2_none = new RadioAction("&None", 0));
   system_port2->addAction(system_port2_gamepad = new RadioAction("&Gamepad", 0));
   system_port2->addAction(system_port2_asciipad = new RadioAction("&asciiPad", 0));
@@ -68,13 +59,11 @@ MainWindow::MainWindow() {
   #endif
 
   system_exit = system->addAction("E&xit");
-  system_exit->setIcon(QIcon(":/16x16/process-stop.png"));
   system_exit->setMenuRole(QAction::QuitRole);
 
   settings = menuBar->addMenu("S&ettings");
 
   settings_videoMode = settings->addMenu("Video &Mode");
-  settings_videoMode->setIcon(QIcon(":/16x16/video-display.png"));
 
   settings_videoMode->addAction(settings_videoMode_1x = new RadioAction("Scale &1x", 0));
 
@@ -103,10 +92,8 @@ MainWindow::MainWindow() {
 
   if(filter.opened()) {
     settings_videoFilter = settings->addMenu("Video &Filter");
-    settings_videoFilter->setIcon(QIcon(":/16x16/image-x-generic.png"));
 
     settings_videoFilter_configure = settings_videoFilter->addAction("&Configure Active Filter ...");
-    settings_videoFilter_configure->setIcon(QIcon(":/16x16/preferences-desktop.png"));
     settings_videoFilter->addSeparator();
 
     settings_videoFilter->addAction(settings_videoFilter_none = new RadioAction("&None", 0));
@@ -130,7 +117,6 @@ MainWindow::MainWindow() {
   settings->addSeparator();
 
   settings_emulationSpeed = settings->addMenu("Emulation &Speed");
-  settings_emulationSpeed->setIcon(QIcon(":/16x16/appointment-new.png"));
 
   settings_emulationSpeed->addAction(settings_emulationSpeed_slowest = new RadioAction("Slowest", 0));
 
@@ -149,28 +135,21 @@ MainWindow::MainWindow() {
   settings_emulationSpeed->addAction(settings_emulationSpeed_syncAudio = new CheckAction("Sync &Audio", 0));
 
   settings_configuration = settings->addAction("&Configuration ...");
-  settings_configuration->setIcon(QIcon(":/16x16/preferences-desktop.png"));
   settings_configuration->setMenuRole(QAction::PreferencesRole);
 
   tools = menuBar->addMenu("&Tools");
 
   tools_movies = tools->addMenu("&Movies");
-  tools_movies->setIcon(QIcon(":/16x16/applications-multimedia.png"));
 
   tools_movies_play = tools_movies->addAction("Play Movie ...");
-  tools_movies_play->setIcon(QIcon(":/16x16/media-playback-start.png"));
 
   tools_movies_stop = tools_movies->addAction("Stop");
-  tools_movies_stop->setIcon(QIcon(":/16x16/media-playback-stop.png"));
 
   tools_movies_recordFromPowerOn = tools_movies->addAction("Record Movie (and restart system)");
-  tools_movies_recordFromPowerOn->setIcon(QIcon(":/16x16/media-record.png"));
 
   tools_movies_recordFromHere = tools_movies->addAction("Record Movie (starting from here)");
-  tools_movies_recordFromHere->setIcon(QIcon(":/16x16/media-record.png"));
 
   tools_captureScreenshot = tools->addAction("&Capture Screenshot");
-  tools_captureScreenshot->setIcon(QIcon(":/16x16/image-x-generic.png"));
 
   tools->addSeparator();
 
@@ -193,16 +172,12 @@ MainWindow::MainWindow() {
   tools->addSeparator();
 
   tools_cheatEditor = tools->addAction("Cheat &Editor ...");
-  tools_cheatEditor->setIcon(QIcon(":/16x16/accessories-text-editor.png"));
 
   tools_cheatFinder = tools->addAction("Cheat &Finder ...");
-  tools_cheatFinder->setIcon(QIcon(":/16x16/system-search.png"));
 
   tools_stateManager = tools->addAction("&State Manager ...");
-  tools_stateManager->setIcon(QIcon(":/16x16/system-file-manager.png"));
 
   tools_debugger = tools->addAction("&Debugger ...");
-  tools_debugger->setIcon(QIcon(":/16x16/utilities-terminal.png"));
   #if !defined(DEBUGGER)
   tools_debugger->setVisible(false);
   #endif
@@ -210,17 +185,14 @@ MainWindow::MainWindow() {
   help = menuBar->addMenu("&Help");
 
   help_documentation = help->addAction("&Documentation ...");
-  help_documentation->setIcon(QIcon(":/16x16/text-x-generic.png"));
 
   help_license = help->addAction("&License ...");
-  help_license->setIcon(QIcon(":/16x16/text-x-generic.png"));
 
   #if !defined(PLATFORM_OSX)
   help->addSeparator();
   #endif
 
   help_about = help->addAction("&About ...");
-  help_about->setIcon(QIcon(":/16x16/help-browser.png"));
   help_about->setMenuRole(QAction::AboutRole);
 
   //canvas

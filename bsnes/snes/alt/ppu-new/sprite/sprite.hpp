@@ -1,4 +1,9 @@
 class Sprite {
+  bool priority0_enable;
+  bool priority1_enable;
+  bool priority2_enable;
+  bool priority3_enable;
+
   struct Regs {
     unsigned priority0;
     unsigned priority1;

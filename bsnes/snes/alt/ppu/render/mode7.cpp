@@ -14,6 +14,10 @@
 
 template<unsigned bg>
 void PPU::render_line_mode7(uint8 pri0_pos, uint8 pri1_pos) {
+  if(layer_enabled[bg][0] == false) pri0_pos = 0;
+  if(layer_enabled[bg][1] == false) pri1_pos = 0;
+  if(pri0_pos + pri1_pos == 0) return;
+
   if(regs.bg_enabled[bg] == false && regs.bgsub_enabled[bg] == false) return;
 
   int32 px, py;

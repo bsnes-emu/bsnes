@@ -17,13 +17,7 @@ ProfileSettingsWindow::ProfileSettingsWindow() {
   layout->addSpacing(Style::WidgetSpacing);
 
   profileAccuracy = new QRadioButton("Accuracy");
-  profileAccuracy->setStyleSheet(
-    "font-weight: bold;"
-    "font-size: 12pt;"
-    #if !defined(PLATFORM_WIN)
-    "background: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 0, stop: 0 rgba(255, 0, 0, 48), stop: 1 rgba(255, 0, 0, 0));"
-    #endif
-  );
+  profileAccuracy->setStyleSheet("font-weight: bold; font-size: 12pt;");
   layout->addWidget(profileAccuracy);
 
   profileAccuracyInfo = new QLabel(
@@ -36,13 +30,7 @@ ProfileSettingsWindow::ProfileSettingsWindow() {
   layout->addSpacing(Style::WidgetSpacing);
 
   profileCompatibility = new QRadioButton("Compatibility");
-  profileCompatibility->setStyleSheet(
-    "font-weight: bold;"
-    "font-size: 12pt;"
-    #if !defined(PLATFORM_WIN)
-    "background: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 0, stop: 0 rgba(0, 0, 255, 48), stop: 1 rgba(0, 0, 255, 0));"
-    #endif
-  );
+  profileCompatibility->setStyleSheet("font-weight: bold; font-size: 12pt;");
   layout->addWidget(profileCompatibility);
 
   profileCompatibilityInfo = new QLabel(
@@ -55,13 +43,7 @@ ProfileSettingsWindow::ProfileSettingsWindow() {
   layout->addSpacing(Style::WidgetSpacing);
 
   profilePerformance = new QRadioButton("Performance");
-  profilePerformance->setStyleSheet(
-    "font-weight: bold;"
-    "font-size: 12pt;"
-    #if !defined(PLATFORM_WIN)
-    "background: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 0, stop: 0 rgba(0, 255, 0, 48), stop: 1 rgba(0, 255, 0, 0));"
-    #endif
-  );
+  profilePerformance->setStyleSheet("font-weight: bold; font-size: 12pt;");
   layout->addWidget(profilePerformance);
 
   profilePerformanceInfo = new QLabel(

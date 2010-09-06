@@ -6,6 +6,7 @@ ToolsWindow *toolsWindow;
 #include "cheateditor.cpp"
 #include "cheatfinder.cpp"
 #include "statemanager.cpp"
+#include "effecttoggle.cpp"
 
 ToolsWindow::ToolsWindow() {
   setObjectName("tools-window");
@@ -22,6 +23,7 @@ ToolsWindow::ToolsWindow() {
   cheatEditorWindow = new CheatEditorWindow;
   cheatFinderWindow = new CheatFinderWindow;
   stateManagerWindow = new StateManagerWindow;
+  effectToggleWindow = new EffectToggleWindow;
 
   cheatEditorArea = new QScrollArea;
   cheatEditorArea->setWidget(cheatEditorWindow);
@@ -38,9 +40,17 @@ ToolsWindow::ToolsWindow() {
   stateManagerArea->setFrameStyle(0);
   stateManagerArea->setWidgetResizable(true);
 
+  effectToggleArea = new QScrollArea;
+  effectToggleArea->setWidget(effectToggleWindow);
+  effectToggleArea->setFrameStyle(0);
+  effectToggleArea->setWidgetResizable(true);
+
   tab = new QTabWidget;
-  tab->addTab(cheatEditorArea, QIcon(":/16x16/accessories-text-editor.png"), "Cheat Editor");
-  tab->addTab(cheatFinderArea, QIcon(":/16x16/system-search.png"), "Cheat Finder");
-  tab->addTab(stateManagerArea, QIcon(":/16x16/system-file-manager.png"), "State Manager");
+  tab->addTab(cheatEditorArea, "Cheat Editor");
+  tab->addTab(cheatFinderArea, "Cheat Finder");
+  tab->addTab(stateManagerArea, "State Manager");
+  #if defined(PROFILE_COMPATIBILITY) || defined(PROFILE_PERFORMANCE)
+  tab->addTab(effectToggleArea, "Effect Toggle");
+  #endif
   layout->addWidget(tab);
 }

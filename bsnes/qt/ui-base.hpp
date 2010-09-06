@@ -47,7 +47,6 @@ using namespace ruby;
   #include "debugger/tools/memory.moc.hpp"
   #include "debugger/tools/properties.moc.hpp"
 
-  #include "debugger/ppu/layer-toggle.moc.hpp"
   #include "debugger/ppu/vram-viewer.moc.hpp"
   #include "debugger/ppu/oam-viewer.moc.hpp"
   #include "debugger/ppu/cgram-viewer.moc.hpp"
@@ -76,6 +75,7 @@ using namespace ruby;
 #include "tools/cheateditor.moc.hpp"
 #include "tools/cheatfinder.moc.hpp"
 #include "tools/statemanager.moc.hpp"
+#include "tools/effecttoggle.moc.hpp"
 
 #include "utility/utility.hpp"
 

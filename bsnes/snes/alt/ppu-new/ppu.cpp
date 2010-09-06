@@ -96,6 +96,23 @@ void PPU::reset() {
   mmio_reset();
 }
 
+void PPU::layer_enable(unsigned layer, unsigned priority, bool enable) {
+  switch(layer * 4 + priority) {
+    case  0: bg1.priority0_enable = enable; break;
+    case  1: bg1.priority1_enable = enable; break;
+    case  4: bg2.priority0_enable = enable; break;
+    case  5: bg2.priority1_enable = enable; break;
+    case  8: bg3.priority0_enable = enable; break;
+    case  9: bg3.priority1_enable = enable; break;
+    case 12: bg4.priority0_enable = enable; break;
+    case 13: bg4.priority1_enable = enable; break;
+    case 16: oam.priority0_enable = enable; break;
+    case 17: oam.priority1_enable = enable; break;
+    case 18: oam.priority2_enable = enable; break;
+    case 19: oam.priority3_enable = enable; break;
+  }
+}
+
 PPU::PPU() :
 cache(*this),
 bg1(*this, Background::ID::BG1),

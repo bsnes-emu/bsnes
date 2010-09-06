@@ -60,11 +60,11 @@ SettingsWindow::SettingsWindow() {
   advancedArea->setWidgetResizable(true);
 
   tab = new QTabWidget;
-  tab->addTab(profileArea, QIcon(":/16x16/emblem-system.png"), "Profile");
-  tab->addTab(videoArea, QIcon(":/16x16/video-display.png"), "Video");
-  tab->addTab(audioArea, QIcon(":/16x16/audio-volume-high.png"), "Audio");
-  tab->addTab(inputArea, QIcon(":/16x16/input-gaming.png"), "Input");
-  tab->addTab(pathArea, QIcon(":/16x16/folder.png"), "Paths");
-  tab->addTab(advancedArea, QIcon(":/16x16/preferences-system.png"), "Advanced");
+  tab->addTab(profileArea, "Profile");
+  tab->addTab(videoArea, "Video");
+  tab->addTab(audioArea, "Audio");
+  tab->addTab(inputArea, "Input");
+  tab->addTab(pathArea, "Paths");
+  tab->addTab(advancedArea, "Advanced");
   layout->addWidget(tab);
 }

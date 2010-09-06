@@ -27,6 +27,10 @@ void PPU::Background::render_mode7() {
     mosaic_y = mosaic_table[self.bg1.regs.mosaic];
   }
 
+  unsigned priority0 = (priority0_enable ? regs.priority0 : 0);
+  unsigned priority1 = (priority1_enable ? regs.priority1 : 0);
+  if(priority0 + priority1 == 0) return;
+
   signed psx = ((a * Clip(hofs - cx)) & ~63) + ((b * Clip(vofs - cy)) & ~63) + ((b * mosaic_y[y]) & ~63) + (cx << 8);
   signed psy = ((c * Clip(hofs - cx)) & ~63) + ((d * Clip(vofs - cy)) & ~63) + ((d * mosaic_y[y]) & ~63) + (cy << 8);
   for(signed x = 0; x < 256; x++) {
@@ -75,9 +79,9 @@ void PPU::Background::render_mode7() {
 
     unsigned priority;
     if(id == ID::BG1) {
-      priority = regs.priority0;
+      priority = priority0;
     } else {
-      priority = (palette & 0x80 ? regs.priority1 : regs.priority0);
+      priority = (palette & 0x80 ? priority1 : priority0);
       palette &= 0x7f;
     }
 

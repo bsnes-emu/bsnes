@@ -7,6 +7,7 @@ public:
   QScrollArea *cheatEditorArea;
   QScrollArea *cheatFinderArea;
   QScrollArea *stateManagerArea;
+  QScrollArea *effectToggleArea;
 
   ToolsWindow();
 

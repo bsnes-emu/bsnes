@@ -76,6 +76,10 @@ void PPU::Background::render() {
   if(regs.sub_enable) window.render(1);
   if(regs.mode == Mode::Mode7) return render_mode7();
 
+  unsigned priority0 = (priority0_enable ? regs.priority0 : 0);
+  unsigned priority1 = (priority1_enable ? regs.priority1 : 0);
+  if(priority0 + priority1 == 0) return;
+
   unsigned mosaic_hcounter = 1;
   unsigned mosaic_palette = 0;
   unsigned mosaic_priority = 0;
@@ -114,7 +118,7 @@ void PPU::Background::render() {
     tile_num = get_tile(hoffset, voffset);
     mirror_y = tile_num & 0x8000;
     mirror_x = tile_num & 0x4000;
-    tile_pri = tile_num & 0x2000 ? regs.priority1 : regs.priority0;
+    tile_pri = tile_num & 0x2000 ? priority1 : priority0;
     pal_num = (tile_num >> 10) & 7;
     pal_index = (bgpal_index + (pal_num << pal_size)) & 0xff;
 
@@ -158,6 +162,9 @@ void PPU::Background::render() {
 }
 
 PPU::Background::Background(PPU &self, unsigned id) : self(self), id(id) {
+  priority0_enable = true;
+  priority1_enable = true;
+
   opt_valid_bit = (id == ID::BG1 ? 0x2000 : id == ID::BG2 ? 0x4000 : 0x0000);
 
   mosaic_table = new uint16*[16];
