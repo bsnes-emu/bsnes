@@ -106,11 +106,14 @@ AdvancedSettingsWindow::AdvancedSettingsWindow() {
   focusButtonGroup->addButton(focusAllow);
   focusLayout->addWidget(focusAllow);
 
-  rewindTitle = new QLabel("Rewind support:");
-  layout->addWidget(rewindTitle);
+  miscTitle = new QLabel("Miscellaneous:");
+  layout->addWidget(miscTitle);
 
-  rewindEnable = new QCheckBox("Enable");
+  rewindEnable = new QCheckBox("Enable Rewind Support");
   layout->addWidget(rewindEnable);
+
+  useCommonDialogs = new QCheckBox("Use Native OS File Dialogs");
+  layout->addWidget(useCommonDialogs);
 
   initializeUi();
 
@@ -126,6 +129,7 @@ AdvancedSettingsWindow::AdvancedSettingsWindow() {
   connect(focusIgnore, SIGNAL(pressed()), this, SLOT(ignoreInputWithoutFocus()));
   connect(focusAllow, SIGNAL(pressed()), this, SLOT(allowInputWithoutFocus()));
   connect(rewindEnable, SIGNAL(stateChanged(int)), this, SLOT(toggleRewindEnable()));
+  connect(useCommonDialogs, SIGNAL(stateChanged(int)), this, SLOT(toggleUseCommonDialogs()));
 }
 
 void AdvancedSettingsWindow::initializeUi() {
@@ -161,6 +165,7 @@ void AdvancedSettingsWindow::initializeUi() {
   focusAllow->setChecked (config().input.focusPolicy == Configuration::Input::FocusPolicyAllowInput);
 
   rewindEnable->setChecked(config().system.rewindEnabled);
+  useCommonDialogs->setChecked(config().diskBrowser.useCommonDialogs);
 }
 
 void AdvancedSettingsWindow::videoDriverChange(int index) {
@@ -189,4 +194,8 @@ void AdvancedSettingsWindow::allowInputWithoutFocus()  { config().input.focusPol
 void AdvancedSettingsWindow::toggleRewindEnable() {
   config().system.rewindEnabled = rewindEnable->isChecked();
   state.resetHistory();
+}
+
+void AdvancedSettingsWindow::toggleUseCommonDialogs() {
+  config().diskBrowser.useCommonDialogs = useCommonDialogs->isChecked();
 }

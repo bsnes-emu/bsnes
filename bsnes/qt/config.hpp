@@ -20,6 +20,7 @@ public:
   } file;
 
   struct DiskBrowser {
+    bool useCommonDialogs;
     bool showPanel;
   } diskBrowser;
 
@@ -81,6 +82,7 @@ public:
   struct Geometry {
     string mainWindow;
     string loaderWindow;
+    string stateSelectWindow;
     string htmlViewerWindow;
     string aboutWindow;
     string fileBrowser;

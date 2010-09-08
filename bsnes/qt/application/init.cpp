@@ -28,6 +28,7 @@ void Application::init() {
   htmlViewerWindow = new HtmlViewerWindow;
   aboutWindow = new AboutWindow;
   fileBrowser = new FileBrowser;
+  stateSelectWindow = new StateSelectWindow;
 
   //window must be onscreen and visible before initializing video interface
   utility.updateSystemState();

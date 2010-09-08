@@ -153,7 +153,7 @@ MainWindow::MainWindow() {
 
   tools->addSeparator();
 
-  tools_loadState = tools->addMenu("Load Quick State");
+  tools_loadState = tools->addMenu("&Load Quick State");
   for(unsigned i = 0; i < 10; i++) {
     QAction *loadAction = new QAction(string("Slot ", i + 1), 0);
     loadAction->setData(i);
@@ -161,7 +161,7 @@ MainWindow::MainWindow() {
     tools_loadState->addAction(loadAction);
   }
 
-  tools_saveState = tools->addMenu("Save Quick State");
+  tools_saveState = tools->addMenu("&Save Quick State");
   for(unsigned i = 0; i < 10; i++) {
     QAction *saveAction = new QAction(string("Slot ", i + 1), 0);
     saveAction->setData(i);
@@ -176,6 +176,8 @@ MainWindow::MainWindow() {
   tools_cheatFinder = tools->addAction("Cheat &Finder ...");
 
   tools_stateManager = tools->addAction("&State Manager ...");
+
+  tools_effectToggle = tools->addAction("Effect &Toggle ...");
 
   tools_debugger = tools->addAction("&Debugger ...");
   #if !defined(DEBUGGER)
@@ -295,6 +297,7 @@ MainWindow::MainWindow() {
   connect(tools_cheatEditor, SIGNAL(triggered()), this, SLOT(showCheatEditor()));
   connect(tools_cheatFinder, SIGNAL(triggered()), this, SLOT(showCheatFinder()));
   connect(tools_stateManager, SIGNAL(triggered()), this, SLOT(showStateManager()));
+  connect(tools_effectToggle, SIGNAL(triggered()), this, SLOT(showEffectToggle()));
   connect(tools_debugger, SIGNAL(triggered()), this, SLOT(showDebugger()));
   connect(help_documentation, SIGNAL(triggered()), this, SLOT(showDocumentation()));
   connect(help_license, SIGNAL(triggered()), this, SLOT(showLicense()));
@@ -588,6 +591,7 @@ void MainWindow::saveState() {
 void MainWindow::showCheatEditor()  { toolsWindow->tab->setCurrentIndex(0); toolsWindow->show(); }
 void MainWindow::showCheatFinder()  { toolsWindow->tab->setCurrentIndex(1); toolsWindow->show(); }
 void MainWindow::showStateManager() { toolsWindow->tab->setCurrentIndex(2); toolsWindow->show(); }
+void MainWindow::showEffectToggle() { toolsWindow->tab->setCurrentIndex(3); toolsWindow->show(); }
 
 void MainWindow::showDebugger() {
   #if defined(DEBUGGER)

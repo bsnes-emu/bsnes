@@ -6,6 +6,7 @@ public:
   function<void (const string&)> onActivate;
   function<void (const string&)> onAccept;
 
+  void chooseFile();
   void chooseFolder();
   enum CartridgeMode { LoadDirect, LoadBase, LoadSlot1, LoadSlot2 } cartridgeMode;
   void loadCartridge(CartridgeMode, signed = -1);

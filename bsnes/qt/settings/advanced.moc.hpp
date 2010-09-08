@@ -34,8 +34,9 @@ public:
   QRadioButton *focusIgnore;
   QRadioButton *focusAllow;
 
-  QLabel *rewindTitle;
+  QLabel *miscTitle;
   QCheckBox *rewindEnable;
+  QCheckBox *useCommonDialogs;
 
   void initializeUi();
   AdvancedSettingsWindow();
@@ -53,6 +54,7 @@ public slots:
   void ignoreInputWithoutFocus();
   void allowInputWithoutFocus();
   void toggleRewindEnable();
+  void toggleUseCommonDialogs();
 };
 
 extern AdvancedSettingsWindow *advancedSettingsWindow;

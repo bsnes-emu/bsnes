@@ -11,10 +11,7 @@ bool Configuration::load(const char *filename) {
 }
 
 Configuration::Configuration() {
-  //========
   //external
-  //========
-
   attach((unsigned&)(SNES::config.controller_port1 = SNES::Input::Device::Joypad), "snes.controllerPort1");
   attach((unsigned&)(SNES::config.controller_port2 = SNES::Input::Device::Joypad), "snes.controllerPort2");
   attach((unsigned&)(SNES::config.expansion_port   = SNES::System::ExpansionPortDevice::BSX), "snes.expansionPort");
@@ -33,10 +30,7 @@ Configuration::Configuration() {
 
   attach(SNES::config.superfx.speed = 0, "superfx.speed", "0 = Auto-select, 1 = Force 10.74MHz, 2 = Force 21.48MHz");
 
-  //========
   //internal
-  //========
-
   attach(system.profile = "", "system.profile");
   attach(system.video = "", "system.video");
   attach(system.audio = "", "system.audio");
@@ -51,6 +45,7 @@ Configuration::Configuration() {
   attach(system.autoSaveMemory = false, "system.autoSaveMemory", "Automatically save cartridge back-up RAM once every minute");
   attach(system.rewindEnabled  = false, "system.rewindEnabled", "Automatically save states periodically to allow auto-rewind support");
 
+  attach(diskBrowser.useCommonDialogs = false, "diskBrowser.useCommonDialogs");
   attach(diskBrowser.showPanel = true, "diskBrowser.showPanel");
 
   attach(file.applyPatches     = true,  "file.applyPatches");
@@ -126,6 +121,7 @@ Configuration::Configuration() {
 
   attach(geometry.mainWindow        = "", "geometry.mainWindow");
   attach(geometry.loaderWindow      = "", "geometry.loaderWindow");
+  attach(geometry.stateSelectWindow = "", "geometry.stateSelectWindow");
   attach(geometry.htmlViewerWindow  = "", "geometry.htmlViewerWindow");
   attach(geometry.aboutWindow       = "", "geometry.aboutWindow");
   attach(geometry.fileBrowser       = "", "geometry.fileBrowser");

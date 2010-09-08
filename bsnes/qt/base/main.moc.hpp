@@ -85,6 +85,7 @@ public:
     QAction *tools_cheatEditor;
     QAction *tools_cheatFinder;
     QAction *tools_stateManager;
+    QAction *tools_effectToggle;
     QAction *tools_debugger;
   QMenu *help;
     QAction *help_documentation;
@@ -157,6 +158,7 @@ public slots:
   void showCheatEditor();
   void showCheatFinder();
   void showStateManager();
+  void showEffectToggle();
   void showDebugger();
   void showDocumentation();
   void showLicense();

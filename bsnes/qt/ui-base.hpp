@@ -35,6 +35,7 @@ using namespace ruby;
 #include "base/htmlviewer.moc.hpp"
 #include "base/loader.moc.hpp"
 #include "base/main.moc.hpp"
+#include "base/stateselect.moc.hpp"
 
 #include "cartridge/cartridge.hpp"
 

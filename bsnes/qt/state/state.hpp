@@ -1,5 +1,6 @@
 class State {
 public:
+  unsigned active;
   bool save(unsigned);
   bool load(unsigned);
 

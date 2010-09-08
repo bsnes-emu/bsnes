@@ -9,7 +9,7 @@ void Movie::chooseFile() {
   fileBrowser->setWindowTitle("Select Movie");
   fileBrowser->setPath(config().path.current.movie);
   fileBrowser->setNameFilters("bsnes Movies (*.bsv)");
-  fileBrowser->showLoad();
+  fileBrowser->chooseFile();
 }
 
 void Movie::play(const string &filename) {

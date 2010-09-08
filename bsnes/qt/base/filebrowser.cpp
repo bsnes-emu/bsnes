@@ -1,7 +1,32 @@
 #include "filebrowser.moc"
 FileBrowser *fileBrowser;
 
+void FileBrowser::chooseFile() {
+  if(config().diskBrowser.useCommonDialogs == true) {
+    audio.clear();
+    QString qfilename = QFileDialog::getOpenFileName(0,
+      windowTitle(), fileSystemModel->rootPath(), "All Files (*)"
+    );
+    string filename = qfilename.toUtf8().constData();
+    if(filename != "") onAccept(filename);
+    return;
+  }
+
+  showLoad();
+}
+
 void FileBrowser::chooseFolder() {
+  if(config().diskBrowser.useCommonDialogs == true) {
+    audio.clear();
+    QString qfilename = QFileDialog::getExistingDirectory(0,
+      windowTitle(), config().path.current.folder,
+      QFileDialog::ShowDirsOnly
+    );
+    string filename = qfilename.toUtf8().constData();
+    if(filename != "") onAccept(filename);
+    return;
+  }
+
   previewFrame->hide();
   showFolder();
 }
@@ -12,7 +37,23 @@ void FileBrowser::loadCartridge(CartridgeMode mode, signed filterIndex) {
   onActivate = { &FileBrowser::onAcceptCartridge, this };
   onAccept = { &FileBrowser::onAcceptCartridge, this };
 
-  setPath(config().path.rom == "" ? config().path.current.cartridge : config().path.rom);
+  string defaultPath = config().path.rom == "" ? config().path.current.cartridge : config().path.rom;
+
+  if(config().diskBrowser.useCommonDialogs == true) {
+    audio.clear();
+    QString qfilename = QFileDialog::getOpenFileName(0,
+      windowTitle(), defaultPath, string(
+        "SNES cartridges (*.sfc *.bs *.st *.gb *.sgb *.gbc", reader.extensionList, reader.compressionList, ");;",
+        "All files (*)"
+      )
+    );
+    string filename = qfilename.toUtf8().constData();
+    if(filename != "") onAccept(filename);
+    config().path.current.cartridge = nall::dir(filename);
+    return;
+  }
+
+  setPath(defaultPath);
   setNameFilters(string()
   << "SNES cartridges (*.sfc" << reader.extensionList << reader.compressionList << ")\n"
   << "BS-X cartridges (*.bs" << reader.compressionList << ")\n"

@@ -2,9 +2,8 @@ class EffectToggleWindow : public QWidget {
   Q_OBJECT
 
 public:
-  QVBoxLayout *layout;
+  QGridLayout *layout;
   QLabel *ppuLabel;
-  QGridLayout *ppuLayout;
   QCheckBox *bg1pri0;
   QCheckBox *bg1pri1;
   QCheckBox *bg2pri0;
@@ -18,7 +17,6 @@ public:
   QCheckBox *oampri2;
   QCheckBox *oampri3;
   QLabel *dspLabel;
-  QGridLayout *dspLayout;
   QCheckBox *channel0;
   QCheckBox *channel1;
   QCheckBox *channel2;

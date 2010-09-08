@@ -308,7 +308,7 @@ void VideoSettingsWindow::selectFragmentShader() {
   fileBrowser->setWindowTitle("Select Fragment Shader");
   fileBrowser->setPath(config().path.current.shader);
   fileBrowser->setNameFilters("All files (*)");
-  fileBrowser->showLoad();
+  fileBrowser->chooseFile();
 }
 
 void VideoSettingsWindow::selectVertexShader() {
@@ -318,7 +318,7 @@ void VideoSettingsWindow::selectVertexShader() {
   fileBrowser->setWindowTitle("Select Vertex Shader");
   fileBrowser->setPath(config().path.current.shader);
   fileBrowser->setNameFilters("All files (*)");
-  fileBrowser->showLoad();
+  fileBrowser->chooseFile();
 }
 
 void VideoSettingsWindow::defaultFragmentShader() { assignFragmentShader(""); }

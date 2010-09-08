@@ -5,3 +5,4 @@
 #include "htmlviewer.cpp"
 #include "loader.cpp"
 #include "main.cpp"
+#include "stateselect.cpp"

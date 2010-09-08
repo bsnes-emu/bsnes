@@ -86,6 +86,7 @@ bool State::rewind() {
 }
 
 State::State() {
+  active = 0;
   historySize = 120;
   history = new serializer[historySize];
   for(unsigned i = 0; i < historySize; i++) history[i] = 0;
