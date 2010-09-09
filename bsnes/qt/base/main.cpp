@@ -178,6 +178,9 @@ MainWindow::MainWindow() {
   tools_stateManager = tools->addAction("&State Manager ...");
 
   tools_effectToggle = tools->addAction("Effect &Toggle ...");
+  #if !defined(PROFILE_COMPATIBILITY) && !defined(PROFILE_PERFORMANCE)
+  tools_effectToggle->setVisible(false);
+  #endif
 
   tools_debugger = tools->addAction("&Debugger ...");
   #if !defined(DEBUGGER)

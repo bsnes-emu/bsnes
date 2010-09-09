@@ -16,6 +16,7 @@ public:
   void frame();
 
   void layer_enable(unsigned layer, unsigned priority, bool enable);
+  void set_frameskip(unsigned frameskip);
 
   void serialize(serializer&);
   PPU();
@@ -43,6 +44,8 @@ private:
   struct Display {
     unsigned width;
     unsigned height;
+    unsigned frameskip;
+    unsigned framecounter;
   } display;
 
   static void Enter();

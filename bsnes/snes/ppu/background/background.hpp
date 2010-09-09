@@ -41,7 +41,10 @@ class Background {
     unsigned mosaic_voffset;
     unsigned mosaic_hcounter;
     unsigned mosaic_hoffset;
-    unsigned mosaic_palette;
+
+    unsigned mosaic_priority;
+    uint8 mosaic_palette;
+    uint16 mosaic_tile;
 
     unsigned tile_counter;
     unsigned tile;

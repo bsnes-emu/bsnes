@@ -120,7 +120,10 @@ void PPU::Background::serialize(serializer &s) {
   s.integer(mosaic_voffset);
   s.integer(mosaic_hcounter);
   s.integer(mosaic_hoffset);
+
+  s.integer(mosaic_priority);
   s.integer(mosaic_palette);
+  s.integer(mosaic_tile);
 
   s.integer(tile_counter);
   s.integer(tile);

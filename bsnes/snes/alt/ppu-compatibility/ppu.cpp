@@ -105,6 +105,7 @@ void PPU::scanline() {
 
 void PPU::render_scanline() {
   if(line >= 1 && line < (!overscan() ? 225 : 240)) {
+    if(framecounter) return;
     render_line_oam_rto();
     render_line();
   }
@@ -117,6 +118,8 @@ void PPU::frame() {
     display.interlace = regs.interlace;
     regs.scanlines = (regs.overscan == false) ? 224 : 239;
   }
+
+  framecounter = (frameskip == 0 ? 0 : (framecounter + 1) % frameskip);
 }
 
 void PPU::power() {
@@ -382,6 +385,11 @@ void PPU::layer_enable(unsigned layer, unsigned priority, bool enable) {
   }
 }
 
+void PPU::set_frameskip(unsigned frameskip_) {
+  frameskip = frameskip_;
+  framecounter = 0;
+}
+
 PPU::PPU() {
   surface = new uint16[512 * 512];
   output = surface + 16 * 512;
@@ -420,6 +428,8 @@ PPU::PPU() {
   layer_enabled[OAM][1] = true;
   layer_enabled[OAM][2] = true;
   layer_enabled[OAM][3] = true;
+  frameskip = 0;
+  framecounter = 0;
 }
 
 PPU::~PPU() {

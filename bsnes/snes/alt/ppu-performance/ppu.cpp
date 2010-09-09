@@ -56,6 +56,7 @@ void PPU::add_clocks(unsigned clocks) {
 }
 
 void PPU::render_scanline() {
+  if(display.framecounter) return;  //skip this frame?
   bg1.scanline();
   bg2.scanline();
   bg3.scanline();
@@ -80,6 +81,7 @@ void PPU::scanline() {
 void PPU::frame() {
   oam.frame();
   system.frame();
+  display.framecounter = display.frameskip == 0 ? 0 : (display.framecounter + 1) % display.frameskip;
 }
 
 void PPU::power() {
@@ -113,6 +115,11 @@ void PPU::layer_enable(unsigned layer, unsigned priority, bool enable) {
   }
 }
 
+void PPU::set_frameskip(unsigned frameskip) {
+  display.frameskip = frameskip;
+  display.framecounter = 0;
+}
+
 PPU::PPU() :
 cache(*this),
 bg1(*this, Background::ID::BG1),
@@ -123,6 +130,10 @@ oam(*this),
 screen(*this) {
   surface = new uint16[512 * 512];
   output = surface + 16 * 512;
+  display.width = 256;
+  display.height = 224;
+  display.frameskip = 0;
+  display.framecounter = 0;
 }
 
 PPU::~PPU() {

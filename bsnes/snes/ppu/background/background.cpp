@@ -20,7 +20,7 @@ void PPU::Background::scanline() {
     mosaic_voffset += regs.mosaic + 1;
   }
 
-  mosaic_hcounter = 0;
+  mosaic_hcounter = regs.mosaic + 1;
   mosaic_hoffset = 0;
 }
 
@@ -46,7 +46,7 @@ void PPU::Background::get_tile() {
   mask_y--;
 
   unsigned px = x << hires;
-  unsigned py = mosaic_voffset;
+  unsigned py = (regs.mosaic == 0 ? y : mosaic_voffset);
 
   unsigned hscroll = regs.hoffset;
   unsigned vscroll = regs.voffset;
@@ -152,38 +152,41 @@ void PPU::Background::run(bool screen) {
     tile_counter = 7;
     get_tile();
   }
-  if(screen == Screen::Main) x++;
 
   uint8 palette = get_tile_color();
-  if(x >= 0 && mosaic_hcounter++ >= regs.mosaic) {
-    mosaic_hcounter = 0;
-    mosaic_palette = palette;
+  if(x == 0) mosaic_hcounter = 1;
+  if(x >= 0 && --mosaic_hcounter == 0) {
+    mosaic_hcounter = regs.mosaic + 1;
+    mosaic_priority = priority;
+    mosaic_palette = palette ? palette_index + palette : 0;
+    mosaic_tile = tile;
   }
+  if(screen == Screen::Main) x++;
   if(mosaic_palette == 0) return;
 
   if(hires == false) {
     if(regs.main_enable) {
-      output.main.priority = priority;
-      output.main.palette = palette_index + mosaic_palette;
-      output.main.tile = tile;
+      output.main.priority = mosaic_priority;
+      output.main.palette = mosaic_palette;
+      output.main.tile = mosaic_tile;
     }
 
     if(regs.sub_enable) {
-      output.sub.priority = priority;
-      output.sub.palette = palette_index + mosaic_palette;
-      output.sub.tile = tile;
+      output.sub.priority = mosaic_priority;
+      output.sub.palette = mosaic_palette;
+      output.sub.tile = mosaic_tile;
     }
   } else if(screen == Screen::Main) {
     if(regs.main_enable) {
-      output.main.priority = priority;
-      output.main.palette = palette_index + mosaic_palette;
-      output.main.tile = tile;
+      output.main.priority = mosaic_priority;
+      output.main.palette = mosaic_palette;
+      output.main.tile = mosaic_tile;
     }
   } else if(screen == Screen::Sub) {
     if(regs.sub_enable) {
-      output.sub.priority = priority;
-      output.sub.palette = palette_index + mosaic_palette;
-      output.sub.tile = tile;
+      output.sub.priority = mosaic_priority;
+      output.sub.palette = mosaic_palette;
+      output.sub.tile = mosaic_tile;
     }
   }
 }
@@ -233,7 +236,10 @@ void PPU::Background::reset() {
   mosaic_voffset = 0;
   mosaic_hcounter = 0;
   mosaic_hoffset = 0;
+
+  mosaic_priority = 0;
   mosaic_palette = 0;
+  mosaic_tile = 0;
 
   tile_counter = 0;
   tile = 0;

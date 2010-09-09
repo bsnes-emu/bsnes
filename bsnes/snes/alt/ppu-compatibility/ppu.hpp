@@ -61,6 +61,9 @@ public:
 
   bool layer_enabled[5][4];
   void layer_enable(unsigned layer, unsigned priority, bool enable);
+  unsigned frameskip;
+  unsigned framecounter;
+  void set_frameskip(unsigned frameskip);
 
   void serialize(serializer&);
   PPU();

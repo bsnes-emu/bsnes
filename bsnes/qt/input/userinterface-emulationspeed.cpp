@@ -8,13 +8,19 @@ namespace UserInterfaceEmulationSpeed {
 
 struct Slowdown : HotkeyInput {
   bool syncVideo;
+  bool syncAudio;
 
   void pressed() {
     config().system.speed = 0;
     utility.updateEmulationSpeed();
     syncVideo = config().video.synchronize;
+    syncAudio = config().audio.synchronize;
     if(syncVideo) {
       config().video.synchronize = false;
+      utility.updateAvSync();
+    }
+    if(!syncAudio) {
+      config().audio.synchronize = true;
       utility.updateAvSync();
     }
     mainWindow->syncUi();
@@ -25,35 +31,56 @@ struct Slowdown : HotkeyInput {
     utility.updateEmulationSpeed();
     if(syncVideo) {
       config().video.synchronize = true;
+      utility.updateAvSync();
+    }
+    if(!syncAudio) {
+      config().audio.synchronize = false;
       utility.updateAvSync();
     }
     mainWindow->syncUi();
   }
 
   Slowdown() : HotkeyInput("Slowdown", "input.userInterface.emulationSpeed.slowdown") {
+    name = "Shift+KB0::Tilde";
     userInterfaceEmulationSpeed.attach(this);
   }
 } slowdown;
 
 struct Speedup : HotkeyInput {
   bool syncVideo;
+  bool syncAudio;
 
   void pressed() {
+    #if defined(PROFILE_COMPATIBILITY) || defined(PROFILE_PERFORMANCE)
+    SNES::ppu.set_frameskip(9);
+    #endif
     config().system.speed = 4;
     utility.updateEmulationSpeed();
     syncVideo = config().video.synchronize;
+    syncAudio = config().audio.synchronize;
     if(syncVideo) {
       config().video.synchronize = false;
+      utility.updateAvSync();
+    }
+    if(syncAudio) {
+      config().audio.synchronize = false;
       utility.updateAvSync();
     }
     mainWindow->syncUi();
   }
 
   void released() {
+    #if defined(PROFILE_COMPATIBILITY) || defined(PROFILE_PERFORMANCE)
+    SNES::ppu.set_frameskip(0);
+    #endif
     config().system.speed = 2;
     utility.updateEmulationSpeed();
     if(syncVideo) {
       config().video.synchronize = true;
+      utility.updateAvSync();
+    }
+    if(syncAudio) {
+      config().audio.synchronize = true;
       utility.updateAvSync();
     }
     mainWindow->syncUi();

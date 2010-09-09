@@ -20,8 +20,8 @@ void PPU::Background::run_mode7() {
   unsigned x = mosaic_hoffset;
   unsigned y = self.bg1.mosaic_voffset;  //BG2 vertical mosaic uses BG1 mosaic size
 
-  if(mosaic_hcounter++ == regs.mosaic) {
-    mosaic_hcounter = 0;
+  if(--mosaic_hcounter == 0) {
+    mosaic_hcounter = regs.mosaic + 1;
     mosaic_hoffset += regs.mosaic + 1;
   }
 
