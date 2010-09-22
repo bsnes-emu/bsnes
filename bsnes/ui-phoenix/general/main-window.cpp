@@ -11,7 +11,7 @@ void MainWindow::create() {
   systemLoadCartridge.create(system, "Load Cartridge ...");
   systemSeparator.create(system);
   systemQuit.create(system, "Quit");
-  setMenuVisible(true);
+
   settings.create(*this, "Settings");
   settingsSynchronizeVideo.create(settings, "Synchronize Video");
   settingsSynchronizeVideo.setChecked(config.video.synchronize);
@@ -22,11 +22,15 @@ void MainWindow::create() {
   settingsSeparator.create(settings);
   settingsVideo.create(settings, "Video Settings ...");
   settingsAdvanced.create(settings, "Advanced Settings ...");
+
   tools.create(*this, "Tools");
+  toolsCheatEditor.create(tools, "Cheat Editor ...");
+
   help.create(*this, "Help");
 
   viewport.create(*this, 0, 0, 595, 448);
   utility.setStatus("");
+  setMenuVisible(true);
   setStatusVisible(true);
 
   systemLoadCartridge.onTick = []() {
@@ -57,6 +61,10 @@ void MainWindow::create() {
 
   settingsAdvanced.onTick = []() {
     advancedSettingsWindow.setVisible();
+  };
+
+  toolsCheatEditor.onTick = []() {
+    cheatEditor.setVisible();
   };
 
   onClose = []() {

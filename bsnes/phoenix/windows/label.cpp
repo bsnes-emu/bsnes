@@ -46,8 +46,8 @@ LRESULT CALLBACK Label_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lpa
       }
       RECT rc;
       GetClientRect(hwnd, &rc);
-      unsigned length = GetWindowTextLength(hwnd) + 1;
-      wchar_t text[length];
+      unsigned length = GetWindowTextLength(hwnd);
+      wchar_t text[length + 1];
       GetWindowText(hwnd, text, length + 1);
       text[length] = 0;
       DrawText(ps.hdc, text, -1, &rc, DT_CALCRECT | DT_END_ELLIPSIS);

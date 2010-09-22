@@ -15,9 +15,20 @@ void AdvancedSettingsWindow::create() {
   audioDriverLabel.create(*this, x + 200, y,  45, Style::ComboBoxHeight, "Audio:");
   audioDriverBox.create  (*this, x + 245, y, 150, Style::ComboBoxHeight);
   inputDriverLabel.create(*this, x + 400, y,  45, Style::ComboBoxHeight, "Input:");
-  inputDriverBox.create  (*this, x + 445, y, 150, Style::ComboBoxHeight); y += Style::ComboBoxHeight;
+  inputDriverBox.create  (*this, x + 445, y, 150, Style::ComboBoxHeight); y += Style::ComboBoxHeight + 5;
 
-  setGeometry(0, 0, 605, y + 5);
+  focusPolicyLabel.create(*this, x, y, 595, Style::LabelHeight, "Focus Policy :."); y += Style::LabelHeight + 5;
+  focusPolicyLabel.setFont(application.proportionalFontBold);
+
+  focusPolicyPause.create(*this, x, y, 195, Style::CheckBoxHeight, "Pause emulator when inactive");
+  focusPolicyIgnore.create(focusPolicyPause, x + 200, y, 195, Style::CheckBoxHeight, "Ignore input when inactive");
+  focusPolicyAllow.create(focusPolicyPause, x + 400, y, 195, Style::CheckBoxHeight, "Always allow input"); y += Style::CheckBoxHeight + 5;
+
+  if(config.settings.focusPolicy == 0) focusPolicyPause.setChecked();
+  if(config.settings.focusPolicy == 1) focusPolicyIgnore.setChecked();
+  if(config.settings.focusPolicy == 2) focusPolicyAllow.setChecked();
+
+  setGeometry(0, 0, 605, y);
 
   lstring list;
 
@@ -57,8 +68,7 @@ void AdvancedSettingsWindow::create() {
     config.input.driver = list[advancedSettingsWindow.inputDriverBox.selection()];
   };
 
-  onClose = []() {
-    advancedSettingsWindow.setVisible(false);
-    return false;
-  };
+  focusPolicyPause.onTick = []() { config.settings.focusPolicy = 0; };
+  focusPolicyIgnore.onTick = []() { config.settings.focusPolicy = 1; };
+  focusPolicyAllow.onTick = []() { config.settings.focusPolicy = 2; };
 }

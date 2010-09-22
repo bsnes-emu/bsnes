@@ -1,5 +1,5 @@
 static void TextBox_change(TextBox *self) {
-  if(self->onChange) self->onChange();
+  if(self->object->locked == false && self->onChange) self->onChange();
 }
 
 void TextBox::create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const char *text) {
@@ -21,5 +21,7 @@ string TextBox::text() {
 }
 
 void TextBox::setText(const char *text) {
+  object->locked = true;
   gtk_entry_set_text(GTK_ENTRY(object->widget), text);
+  object->locked = false;
 }

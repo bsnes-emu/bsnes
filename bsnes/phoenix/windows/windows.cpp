@@ -201,7 +201,11 @@ static LRESULT CALLBACK OS_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM
 
   switch(msg) {
     case WM_CLOSE: {
-      if(window.onClose) return window.onClose();
+      if(window.onClose) {
+        if(window.onClose()) window.setVisible(false);
+      } else {
+        window.setVisible(false);
+      }
       return TRUE;
     }
 
@@ -268,7 +272,7 @@ static LRESULT CALLBACK OS_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM
           } else if(dynamic_cast<EditBox*>(object_ptr)) {
             EditBox &editBox = (EditBox&)*object_ptr;
             if(HIWORD(wparam) == EN_CHANGE) {
-              if(editBox.onChange) editBox.onChange();
+              if(editBox.object->locked == false && editBox.onChange) editBox.onChange();
             }
           } else if(dynamic_cast<RadioBox*>(object_ptr)) {
             RadioBox &radioBox = (RadioBox&)*object_ptr;
@@ -279,7 +283,7 @@ static LRESULT CALLBACK OS_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM
           } else if(dynamic_cast<TextBox*>(object_ptr)) {
             TextBox &textBox = (TextBox&)*object_ptr;
             if(HIWORD(wparam) == EN_CHANGE) {
-              if(textBox.onChange) textBox.onChange();
+              if(textBox.object->locked == false && textBox.onChange) textBox.onChange();
             }
           }
         }

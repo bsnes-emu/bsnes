@@ -21,4 +21,6 @@ void Configuration::create() {
   attach(audio.mute = false, "audio.mute");
 
   attach(input.driver = "", "input.driver");
+
+  attach(settings.focusPolicy = 0, "settings.focusPolicy");
 }

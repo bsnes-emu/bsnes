@@ -11,6 +11,7 @@ struct MainWindow : Window {
   MenuItem settingsVideo;
   MenuItem settingsAdvanced;
   Menu tools;
+  MenuItem toolsCheatEditor;
   Menu help;
   Viewport viewport;
 

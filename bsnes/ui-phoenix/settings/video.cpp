@@ -33,11 +33,6 @@ void VideoSettingsWindow::create() {
 
   contrastSlider.onChange = brightnessSlider.onChange = gammaSlider.onChange = gammaRampCheck.onTick =
   { &VideoSettingsWindow::adjust, this };
-
-  onClose = []() {
-    videoSettingsWindow.setVisible(false);
-    return false;
-  };
 }
 
 void VideoSettingsWindow::adjust() {

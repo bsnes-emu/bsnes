@@ -8,11 +8,13 @@ bool Cartridge::loadNormal(const char *filename) {
   loadMemory(SNES::memory::cartram, baseName, ".srm");
   loadMemory(SNES::memory::cartrtc, baseName, ".rtc");
   utility.setTitle(notdir(nall::basename(baseName)));
+  cheatEditor.load(nall::basename(baseName));
   return true;
 }
 
 void Cartridge::unload() {
   if(SNES::cartridge.loaded() == false) return;
+  cheatEditor.save(nall::basename(baseName));
   saveMemory(SNES::memory::cartram, baseName, ".srm");
   saveMemory(SNES::memory::cartrtc, baseName, ".rtc");
   SNES::cartridge.unload();

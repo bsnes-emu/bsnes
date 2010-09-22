@@ -34,6 +34,10 @@ void ListBox::setHeaderVisible(bool headerVisible) {
   );
 }
 
+void ListBox::reset() {
+  ListView_DeleteAllItems(widget->window);
+}
+
 void ListBox::resizeColumnsToContent() {
   for(unsigned i = 0; i < listBox->columns; i++) {
     ListView_SetColumnWidth(widget->window, i, LVSCW_AUTOSIZE_USEHEADER);

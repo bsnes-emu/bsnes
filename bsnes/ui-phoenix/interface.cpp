@@ -103,6 +103,9 @@ void Interface::input_poll() {
 }
 
 int16_t Interface::input_poll(bool port, SNES::Input::Device device, unsigned index, unsigned id) {
+  //ignore input when main window is not active?
+  if(config.settings.focusPolicy == 1 && mainWindow.focused() == false) return 0;
+
   if(port == 0) {
     if(device == SNES::Input::Device::Joypad) {
       switch(id) {

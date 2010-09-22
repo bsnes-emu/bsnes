@@ -6,6 +6,10 @@ struct AdvancedSettingsWindow : Window {
   ComboBox audioDriverBox;
   Label inputDriverLabel;
   ComboBox inputDriverBox;
+  Label focusPolicyLabel;
+  RadioBox focusPolicyPause;
+  RadioBox focusPolicyIgnore;
+  RadioBox focusPolicyAllow;
 
   void create();
 };

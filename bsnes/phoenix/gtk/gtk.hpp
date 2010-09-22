@@ -74,7 +74,7 @@ struct Widget : Object {
   void setVisible(bool visible = true);
   bool enabled();
   void setEnabled(bool enabled = true);
-  bool focused();
+  virtual bool focused();
   void setFocused();
 };
 
@@ -82,6 +82,7 @@ struct Window : Widget {
   static Window None;
   nall::function<bool ()> onClose;
   void create(unsigned x, unsigned y, unsigned width, unsigned height, const char *text = "");
+  bool focused();
   void setGeometry(unsigned x, unsigned y, unsigned width, unsigned height);
   void setDefaultFont(Font &font);
   void setFont(Font &font);

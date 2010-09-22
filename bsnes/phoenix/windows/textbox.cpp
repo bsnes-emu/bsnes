@@ -9,6 +9,20 @@ void TextBox::create(Window &parent, unsigned x, unsigned y, unsigned width, uns
   SendMessage(widget->window, WM_SETFONT, (WPARAM)(parent.window->defaultFont ? parent.window->defaultFont : os.os->proportionalFont), 0);
 }
 
+string TextBox::text() {
+  unsigned length = GetWindowTextLength(widget->window);
+  wchar_t text[length + 1];
+  GetWindowText(widget->window, text, length + 1);
+  text[length] = 0;
+  return utf8_t(text);
+}
+
+void TextBox::setText(const char *text) {
+  object->locked = true;
+  SetWindowText(widget->window, utf16_t(text));
+  object->locked = false;
+}
+
 void TextBox::setEditable(bool editable) {
-  SendMessage(widget->window, EM_SETREADONLY, editable == false, (LPARAM)0);
+  SendMessage(widget->window, EM_SETREADONLY, editable == false, 0);
 }

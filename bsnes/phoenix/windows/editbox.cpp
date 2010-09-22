@@ -12,7 +12,7 @@ void EditBox::create(Window &parent, unsigned x, unsigned y, unsigned width, uns
 }
 
 string EditBox::getText() {
-  unsigned length = SendMessage(widget->window, WM_GETTEXTLENGTH, 0, 0);
+  unsigned length = GetWindowTextLength(widget->window);
   wchar_t buffer[length + 1];
   GetWindowText(widget->window, buffer, length + 1);
   buffer[length] = 0;
@@ -25,7 +25,9 @@ void EditBox::setText(const char *text) {
   string output = text;
   output.replace("\r", "");
   output.replace("\n", "\r\n");
+  object->locked = true;
   SetWindowText(widget->window, utf16_t(output));
+  object->locked = false;
 }
 
 void EditBox::setEditable(bool editable) {

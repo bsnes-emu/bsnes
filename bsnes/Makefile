@@ -53,15 +53,15 @@ objects := $(patsubst %,obj/%.o,$(objects))
 # targets
 build: ui_build $(objects)
 ifeq ($(platform),osx)
-	test -d ../bsnes-$(profile).app || mkdir -p ../bsnes-$(profile).app/Contents/MacOS
-	$(strip $(cpp) -o ../bsnes-$(profile).app/Contents/MacOS/bsnes-$(profile) $(objects) $(link))
+	test -d ../bsnes.app || mkdir -p ../bsnes.app/Contents/MacOS
+	$(strip $(cpp) -o ../bsnes.app/Contents/MacOS/bsnes $(objects) $(link))
 else
-	$(strip $(cpp) -o out/bsnes-$(profile) $(objects) $(link))
+	$(strip $(cpp) -o out/bsnes $(objects) $(link))
 endif
 
 install:
 ifeq ($(platform),x)
-	install -D -m 755 out/bsnes-$(profile) $(DESTDIR)$(prefix)/bin/bsnes-$(profile)
+	install -D -m 755 out/bsnes $(DESTDIR)$(prefix)/bin/bsnes
 	install -D -m 644 qt/data/bsnes.png $(DESTDIR)$(prefix)/share/pixmaps/bsnes.png
 	install -D -m 644 qt/data/bsnes.desktop $(DESTDIR)$(prefix)/share/applications/bsnes.desktop
 	gconftool-2 --type bool --set /desktop/gnome/interface/menus_have_icons true
@@ -69,7 +69,7 @@ endif
 
 uninstall:
 ifeq ($(platform),x)
-	rm $(DESTDIR)$(prefix)/bin/bsnes-$(profile)
+	rm $(DESTDIR)$(prefix)/bin/bsnes
 	rm $(DESTDIR)$(prefix)/share/pixmaps/bsnes.png
 	rm $(DESTDIR)$(prefix)/share/applications/bsnes.desktop
 endif

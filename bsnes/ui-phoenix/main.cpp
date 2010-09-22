@@ -32,6 +32,7 @@ void Application::main(int argc, char **argv) {
   mainWindow.create();
   videoSettingsWindow.create();
   advancedSettingsWindow.create();
+  cheatEditor.create();
   mainWindow.setVisible();
   while(os.pending()) os.run();
 
@@ -76,6 +77,13 @@ void Application::main(int argc, char **argv) {
     while(os.pending()) os.run();
 
     if(SNES::cartridge.loaded()) {
+      //pause emulator when main window is inactive?
+      if(config.settings.focusPolicy == 0) {
+        if(mainWindow.focused() == false) {
+          usleep(20 * 1000);
+          continue;
+        }
+      }
       SNES::system.run();
     } else {
       usleep(20 * 1000);

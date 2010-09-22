@@ -1,6 +1,10 @@
 static gint Window_close(Window *window) {
-  if(window->onClose) return !window->onClose();
-  return false;
+  if(window->onClose) {
+    if(window->onClose()) window->setVisible(false);
+    return true;
+  }
+  window->setVisible(false);
+  return true;
 }
 
 void Window::create(unsigned x, unsigned y, unsigned width, unsigned height, const char *text) {
@@ -33,6 +37,10 @@ void Window::create(unsigned x, unsigned y, unsigned width, unsigned height, con
   gtk_widget_show(object->statusContainer);
 
   gtk_widget_realize(object->widget);
+}
+
+bool Window::focused() {
+  return gtk_window_is_active(GTK_WINDOW(object->widget));
 }
 
 void Window::setGeometry(unsigned x, unsigned y, unsigned width, unsigned height) {

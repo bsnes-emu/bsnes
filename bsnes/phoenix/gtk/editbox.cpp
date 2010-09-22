@@ -1,5 +1,5 @@
 static void EditBox_change(EditBox *self) {
-  if(self->onChange) self->onChange();
+  if(self->object->locked == false && self->onChange) self->onChange();
 }
 
 void EditBox::create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const char *text) {
@@ -38,5 +38,7 @@ string EditBox::text() {
 }
 
 void EditBox::setText(const char *text) {
+  object->locked = true;
   gtk_text_buffer_set_text(object->textBuffer, text, -1);
+  object->locked = false;
 }

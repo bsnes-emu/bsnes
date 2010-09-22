@@ -23,6 +23,10 @@ struct Configuration : public configuration {
     string driver;
   } input;
 
+  struct Settings {
+    unsigned focusPolicy;
+  } settings;
+
   void load();
   void save();
   void create();

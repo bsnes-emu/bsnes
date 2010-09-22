@@ -20,7 +20,7 @@ void Widget::setEnabled(bool enabled) {
 }
 
 bool Widget::focused() {
-  return GetDesktopWindow() == widget->window;
+  return (GetForegroundWindow() == widget->window);
 }
 
 void Widget::setFocused() {

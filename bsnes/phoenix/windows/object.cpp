@@ -1,5 +1,6 @@
 struct Object::Data {
   unsigned id;
+  bool locked;
 };
 
 struct Font::Data {
@@ -80,4 +81,5 @@ Object::Object() {
   static unsigned guid = 100;
   object = new Object::Data;
   object->id = guid++;
+  object->locked = false;
 }
