@@ -9,6 +9,11 @@ void Utility::setTitle(const char *text) {
   }
 }
 
+void Utility::setStatus(const char *text) {
+  static char profile[] = { '[', SNES::Info::Profile[0], ']', ' ', 0 };
+  mainWindow.setStatusText(string(profile, text));
+}
+
 void Utility::loadCartridgeNormal() {
   string filename = os.fileOpen(mainWindow, "SNES cartridges\t*.sfc\nAll files\t*", "/media/sdb1/root/snes_roms");
   if(filename != "") {

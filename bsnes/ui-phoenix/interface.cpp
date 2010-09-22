@@ -9,19 +9,19 @@ const uint8_t Palette::gammaRamp[32] = {
 };
 
 uint8_t Palette::contrastAdjust(uint8_t input) {
-  signed contrast = Palette::contrast - 100;
+  signed contrast = config.video.contrast - 100;
   signed result = input - contrast + (2 * contrast * input + 127) / 255;
   return max(0, min(255, result));
 }
 
 uint8_t Palette::brightnessAdjust(uint8_t input) {
-  signed brightness = Palette::brightness - 100;
+  signed brightness = config.video.brightness - 100;
   signed result = input + brightness;
   return max(0, min(255, result));
 }
 
 uint8_t Palette::gammaAdjust(uint8_t input) {
-  signed result = (signed)(pow(((double)input / 255.0), (double)gamma / 100.0) * 255.0 + 0.5);
+  signed result = (signed)(pow(((double)input / 255.0), (double)config.video.gamma / 100.0) * 255.0 + 0.5);
   return max(0, min(255, result));
 }
 
@@ -35,25 +35,25 @@ void Palette::update() {
     g = (g << 3) | (g >> 2);
     b = (b << 3) | (b >> 2);
 
-    if(useGammaRamp) {
+    if(config.video.useGammaRamp) {
       r = gammaRamp[r >> 3];
       g = gammaRamp[g >> 3];
       b = gammaRamp[b >> 3];
     }
 
-    if(contrast != 100) {
+    if(config.video.contrast != 100) {
       r = contrastAdjust(r);
       g = contrastAdjust(g);
       b = contrastAdjust(b);
     }
 
-    if(brightness != 100) {
+    if(config.video.brightness != 100) {
       r = brightnessAdjust(r);
       g = brightnessAdjust(g);
       b = brightnessAdjust(b);
     }
 
-    if(gamma != 100) {
+    if(config.video.gamma != 100) {
       r = gammaAdjust(r);
       g = gammaAdjust(g);
       b = gammaAdjust(b);
@@ -61,14 +61,6 @@ void Palette::update() {
 
     color[i] = (r << 16) | (g << 8) | (b << 0);
   }
-}
-
-Palette::Palette() {
-  contrast = 100;
-  brightness = 100;
-  gamma = 100;
-  useGammaRamp = true;
-  update();
 }
 
 void Interface::video_refresh(const uint16_t *data, unsigned width, unsigned height) {
@@ -95,13 +87,14 @@ void Interface::video_refresh(const uint16_t *data, unsigned width, unsigned hei
 
   time(&current);
   if(current != previous) {
-    mainWindow.setStatusText(string("FPS: ", frameCounter));
+    utility.setStatus(string("FPS: ", frameCounter));
     frameCounter = 0;
     previous = current;
   }
 }
 
 void Interface::audio_sample(uint16_t left, uint16_t right) {
+  if(config.audio.mute) left = right = 0;
   audio.sample(left, right);
 }
 

@@ -14,13 +14,18 @@ using namespace ruby;
 using namespace phoenix;
 
 #include "interface.hpp"
+#include "config.hpp"
 #include "general/general.hpp"
 #include "settings/settings.hpp"
 #include "utility/utility.hpp"
 #include "cartridge/cartridge.hpp"
 
 struct Application {
-  Font font;
+  array<Window*> windows;
+  Font proportionalFont;
+  Font proportionalFontBold;
+  Font monospaceFont;
+
   bool quit;
   void main(int argc, char **argv);
 };
@@ -30,10 +35,16 @@ extern Application application;
 struct Style {
   enum : unsigned {
   #if defined(PHOENIX_WINDOWS)
+    ComboBoxHeight = 22,
+    LabelHeight = 15,
     SliderHeight = 25,
   #elif defined(PHOENIX_GTK)
+    ComboBoxHeight = 22,
+    LabelHeight = 15,
     SliderHeight = 22,
   #elif defined(PHOENIX_QT)
+    ComboBoxHeight = 22,
+    LabelHeight = 15,
     SliderHeight = 22,
   #endif
   };

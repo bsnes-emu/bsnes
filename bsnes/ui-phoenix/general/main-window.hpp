@@ -1,11 +1,15 @@
 struct MainWindow : Window {
-  Font statusFont;
   Menu system;
   MenuItem systemLoadCartridge;
   MenuSeparator systemSeparator;
   MenuItem systemQuit;
   Menu settings;
+  MenuCheckItem settingsSynchronizeVideo;
+  MenuCheckItem settingsSynchronizeAudio;
+  MenuCheckItem settingsMuteAudio;
+  MenuSeparator settingsSeparator;
   MenuItem settingsVideo;
+  MenuItem settingsAdvanced;
   Menu tools;
   Menu help;
   Viewport viewport;

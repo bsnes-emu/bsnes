@@ -1,4 +1,5 @@
 struct VideoSettingsWindow : Window {
+  Label colorAdjustmentLabel;
   Label contrastLabel;
   Label contrastValue;
   HorizontalSlider contrastSlider;

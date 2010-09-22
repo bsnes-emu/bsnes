@@ -1,10 +1,14 @@
 VideoSettingsWindow videoSettingsWindow;
 
 void VideoSettingsWindow::create() {
+  application.windows.append(this);
   Window::create(0, 0, 256, 256, "Video Settings");
-  setDefaultFont(application.font);
+  setDefaultFont(application.proportionalFont);
 
   unsigned x = 5, y = 5;
+
+  colorAdjustmentLabel.create(*this, x, y, 430, Style::LabelHeight, "Color Adjustment :."); y += Style::LabelHeight + 5;
+  colorAdjustmentLabel.setFont(application.proportionalFontBold);
 
   contrastLabel.create   (*this, x,       y,  80, Style::SliderHeight, "Contrast:");
   contrastValue.create   (*this, x + 80,  y,  50, Style::SliderHeight, "100%");
@@ -22,10 +26,10 @@ void VideoSettingsWindow::create() {
 
   setGeometry(0, 0, 440, y + 5);
 
-  contrastSlider.setPosition(100);
-  brightnessSlider.setPosition(100);
-  gammaSlider.setPosition(100);
-  gammaRampCheck.setChecked();
+  contrastSlider.setPosition(config.video.contrast);
+  brightnessSlider.setPosition(config.video.brightness);
+  gammaSlider.setPosition(config.video.gamma);
+  gammaRampCheck.setChecked(config.video.useGammaRamp);
 
   contrastSlider.onChange = brightnessSlider.onChange = gammaSlider.onChange = gammaRampCheck.onTick =
   { &VideoSettingsWindow::adjust, this };
@@ -41,9 +45,9 @@ void VideoSettingsWindow::adjust() {
   brightnessValue.setText(string(brightnessSlider.position(), "%"));
   gammaValue.setText(string(gammaSlider.position(), "%"));
 
-  palette.contrast = contrastSlider.position();
-  palette.brightness = brightnessSlider.position();
-  palette.gamma = gammaSlider.position();
-  palette.useGammaRamp = gammaRampCheck.checked();
+  config.video.contrast = contrastSlider.position();
+  config.video.brightness = brightnessSlider.position();
+  config.video.gamma = gammaSlider.position();
+  config.video.useGammaRamp = gammaRampCheck.checked();
   palette.update();
 }

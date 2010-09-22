@@ -181,7 +181,7 @@ OS::OS() {
   gtk_rc_parse_string(
     "style \"phoenix-gtk\"\n"
     "{\n"
-    "  GtkComboBox::appears-as-list = 0\n"
+    "  GtkComboBox::appears-as-list = 1\n"
     "  GtkTreeView::vertical-separator = 0\n"
     "}\n"
     "class \"GtkComboBox\" style \"phoenix-gtk\"\n"
