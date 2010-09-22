@@ -23,7 +23,7 @@ void Window::setDefaultFont(Font &font) {
 }
 
 void Window::setFont(Font &font) {
-  SendMessage(window->status, WM_SETFONT, (WPARAM)window->defaultFont, 0);
+  SendMessage(window->status, WM_SETFONT, (WPARAM)font.font->font, 0);
 }
 
 void Window::setGeometry(unsigned x, unsigned y, unsigned width, unsigned height) {

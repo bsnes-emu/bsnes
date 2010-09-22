@@ -24,7 +24,7 @@ else ifeq ($(platform),osx)
 else ifeq ($(platform),win)
   link += -mwindows
 # link += -mconsole
-  link += -mthreads -s -luuid -lkernel32 -luser32 -lgdi32 -lshell32
+  link += -mthreads -s -luuid -lkernel32 -luser32 -lgdi32 -lcomctl32 -lcomdlg32 -lshell32 -lole32
   link += -enable-stdcall-fixup -Wl,-enable-auto-import -Wl,-enable-runtime-pseudo-reloc
 else
   unknown_platform: help;

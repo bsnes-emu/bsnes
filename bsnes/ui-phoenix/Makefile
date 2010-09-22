@@ -19,7 +19,6 @@ else ifeq ($(platform),osx)
 
   link += $(if $(findstring audio.openal,$(ruby)),-framework OpenAL)
 else ifeq ($(platform),win)
-  arch := -DARCH_X86
   flags += -DPHOENIX_WINDOWS
   link +=
 
@@ -65,7 +64,7 @@ obj/ruby.o: ruby/ruby.cpp $(call rwildcard,ruby/*)
 obj/phoenix.o: phoenix/phoenix.cpp $(call rwildcard,phoenix/*)
 
 obj/resource.o: $(ui)/resource.rc
-	windres $(ui)/resource.rc obj/resource.o $(arch)
+	windres $(ui)/resource.rc obj/resource.o
 
 # targets
 ui_build:;

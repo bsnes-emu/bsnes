@@ -72,16 +72,16 @@ static void istring(string &output) {
 }
 
 template<typename T, typename... Args>
-static void istring(string &output, T value, Args... args) {
+static void istring(string &output, const T &value, Args&&... args) {
   output.append(value);
-  istring(output, args...);
+  istring(output, std::forward<Args>(args)...);
 }
 
-template<typename... Args> string::string(Args... args) {
+template<typename... Args> string::string(Args&&... args) {
   size = 64;
   data = (char*)malloc(size + 1);
   *data = 0;
-  istring(*this, args...);
+  istring(*this, std::forward<Args>(args)...);
 }
 
 string::string(const string &value) {

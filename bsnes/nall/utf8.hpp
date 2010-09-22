@@ -62,6 +62,9 @@ namespace nall {
       delete[] buffer;
     }
 
+    utf8_t(const utf8_t&) = delete;
+    utf8_t& operator=(const utf8_t&) = delete;
+
   private:
     char *buffer;
   };

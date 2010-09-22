@@ -13,7 +13,7 @@ void Canvas::create(Window &parent, unsigned x, unsigned y, unsigned width, unsi
   canvas->bmi.bmiHeader.biSizeImage = canvas->pitch * canvas->height;
 
   widget->window = CreateWindow(
-    L"phoenix_window", L"",
+    L"phoenix_canvas", L"",
     WS_CHILD | WS_VISIBLE,
     x, y, width, height,
     parent.widget->window, (HMENU)object->id, GetModuleHandle(0), 0
@@ -41,4 +41,20 @@ Canvas::Canvas() {
 Canvas::~Canvas() {
   delete[] canvas->buffer;
   delete canvas;
+}
+
+static LRESULT CALLBACK Canvas_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
+  switch(msg) {
+    case WM_PAINT: {
+      Object *object_ptr = (Object*)GetWindowLongPtr(hwnd, GWLP_USERDATA);
+      if(object_ptr) {
+        if(dynamic_cast<Canvas*>(object_ptr)) {
+          Canvas &canvas = (Canvas&)*object_ptr;
+          canvas.redraw();
+        }
+      }
+    }
+  }
+
+  return DefWindowProc(hwnd, msg, wparam, lparam);
 }

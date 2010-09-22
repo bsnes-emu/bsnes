@@ -195,9 +195,9 @@ string OS::fileSave(Window &parent, const char *filter, const char *path) {
 }
 
 static LRESULT CALLBACK OS_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
-  Window *window_ptr = (Window*)GetWindowLongPtr(hwnd, GWLP_USERDATA);
-  if(!window_ptr) return DefWindowProc(hwnd, msg, wparam, lparam);
-  Window &window = *window_ptr;
+  Object *object_ptr = (Object*)GetWindowLongPtr(hwnd, GWLP_USERDATA);
+  if(!object_ptr || !dynamic_cast<Window*>(object_ptr)) return DefWindowProc(hwnd, msg, wparam, lparam);
+  Window &window = (Window&)*object_ptr;
 
   switch(msg) {
     case WM_CLOSE: {
@@ -223,16 +223,6 @@ static LRESULT CALLBACK OS_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM
         HDC hdc = (HDC)wparam;
         SetBkColor((HDC)wparam, window.window->brushColor);
         return (INT_PTR)window.window->brush;
-      }
-    }
-
-    case WM_PAINT: {
-      Object *object_ptr = (Object*)GetWindowLongPtr(hwnd, GWLP_USERDATA);
-      if(object_ptr) {
-        if(dynamic_cast<Canvas*>(object_ptr)) {
-          Canvas &canvas = (Canvas&)*object_ptr;
-          canvas.redraw();
-        }
       }
     }
 
@@ -369,6 +359,9 @@ Object* OS::findObject(unsigned id) {
 }
 
 OS::OS() {
+  InitCommonControls();
+  CoInitialize(0);
+
   os = new OS::Data;
   os->proportionalFont = Font_createFont("Tahoma", 8, false, false);
   os->monospaceFont = Font_createFont("Courier New", 8, false, false);
@@ -388,11 +381,23 @@ OS::OS() {
 
   wc.cbClsExtra = 0;
   wc.cbWndExtra = 0;
+  wc.hbrBackground = CreateSolidBrush(RGB(0, 0, 0));
+  wc.hCursor = LoadCursor(0, IDC_ARROW);
+  wc.hIcon = LoadIcon(0, IDI_APPLICATION);
+  wc.hInstance = GetModuleHandle(0);
+  wc.lpfnWndProc = Canvas_windowProc;
+  wc.lpszClassName = L"phoenix_canvas";
+  wc.lpszMenuName = 0;
+  wc.style = CS_HREDRAW | CS_VREDRAW;
+  RegisterClass(&wc);
+
+  wc.cbClsExtra = 0;
+  wc.cbWndExtra = 0;
   wc.hbrBackground = (HBRUSH)(COLOR_3DFACE + 1);
   wc.hCursor = LoadCursor(0, IDC_ARROW);
   wc.hIcon = LoadIcon(0, IDI_APPLICATION);
   wc.hInstance = GetModuleHandle(0);
-  wc.lpfnWndProc = Label_WindowProc;
+  wc.lpfnWndProc = Label_windowProc;
   wc.lpszClassName = L"phoenix_label";
   wc.lpszMenuName = 0;
   wc.style = CS_HREDRAW | CS_VREDRAW;

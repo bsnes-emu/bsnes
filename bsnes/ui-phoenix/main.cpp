@@ -4,7 +4,7 @@ Application application;
 
 #if defined(PLATFORM_WIN)
 static string VideoDriver = "Direct3D";
-static string AudioDriver = "XAudio2";
+static string AudioDriver = "DirectSound";
 static string InputDriver = "RawInput";
 #elif defined(PLATFORM_X)
 static string VideoDriver = "OpenGL";
@@ -73,7 +73,9 @@ void Application::main(int argc, char **argv) {
   while(os.pending()) os.run();
   SNES::system.term();
 
-  exit(0);
+  video.term();
+  audio.term();
+  input.term();
 }
 
 int main(int argc, char **argv) {

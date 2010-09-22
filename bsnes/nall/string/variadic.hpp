@@ -3,8 +3,8 @@
 
 namespace nall {
 
-template<typename... Args> inline void print(Args... args) {
-  printf("%s", (const char*)string(args...));
+template<typename... Args> inline void print(Args&&... args) {
+  printf("%s", (const char*)string(std::forward<Args>(args)...));
 }
 
 }

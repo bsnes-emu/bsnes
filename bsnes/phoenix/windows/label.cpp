@@ -15,7 +15,7 @@ void Label::setText(const char *text) {
 }
 
 //all of this for want of a STATIC SS_VCENTER flag ...
-LRESULT CALLBACK Label_WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
+LRESULT CALLBACK Label_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
   Window *window_ptr = (Window*)GetWindowLongPtr(GetParent(hwnd), GWLP_USERDATA);
   if(!window_ptr) return DefWindowProc(hwnd, msg, wparam, lparam);
   Label *label_ptr = (Label*)GetWindowLongPtr(hwnd, GWLP_USERDATA);

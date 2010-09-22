@@ -43,7 +43,7 @@ namespace nall {
     inline string& operator=(const string&);
     inline string& operator=(string&&);
 
-    template<typename... Args> inline string(Args... args);
+    template<typename... Args> inline string(Args&&... args);
     inline string(const string&);
     inline string(string&&);
     inline ~string();
@@ -135,7 +135,7 @@ namespace nall {
   inline string strdouble(double value);
 
   //variadic.hpp
-  template<typename... Args> inline void print(Args... args);
+  template<typename... Args> inline void print(Args&&... args);
 };
 
 #endif
