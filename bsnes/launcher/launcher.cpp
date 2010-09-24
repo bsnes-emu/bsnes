@@ -7,34 +7,6 @@
 #include <nall/string.hpp>
 using namespace nall;
 
-#if !defined(PLATFORM_WIN)
-  char* userpath(char *path) {
-    *path = 0;
-    struct passwd *userinfo = getpwuid(getuid());
-    if(userinfo) strcpy(path, userinfo->pw_dir);
-    return path;
-  }
-#else
-  #include <nall/utf8.hpp>
-  #include <process.h>
-  #include <wchar.h>
-  #include <windows.h>
-
-  char* realpath(const char *filename, char *resolvedname) {
-    wchar_t fn[PATH_MAX] = L"";
-    _wfullpath(fn, nall::utf16_t(filename), PATH_MAX);
-    strcpy(resolvedname, nall::utf8_t(fn));
-    return resolvedname;
-  }
-
-  char* userpath(char *path) {
-    wchar_t fp[PATH_MAX] = L"";
-    SHGetFolderPathW(0, CSIDL_APPDATA | CSIDL_FLAG_CREATE, 0, 0, fp);
-    strcpy(path, nall::utf8_t(fp));
-    return path;
-  }
-#endif
-
 int main(int argc, char **argv) {
   char path[PATH_MAX], *unused;
   #if !defined(PLATFORM_WIN)
