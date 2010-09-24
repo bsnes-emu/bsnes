@@ -3,7 +3,11 @@
 #include "list.cpp"
 
 void PPU::Sprite::address_reset() {
-  self.regs.oam_addr = self.regs.oam_baseaddr << 1;
+  self.regs.oam_addr = self.regs.oam_baseaddr;
+  set_first_sprite();
+}
+
+void PPU::Sprite::set_first_sprite() {
   regs.first_sprite = (self.regs.oam_priority == false ? 0 : (self.regs.oam_addr >> 2) & 127);
 }
 
@@ -37,7 +41,7 @@ void PPU::Sprite::scanline() {
   }
 
   if(t.item_count > 0 && oam_item[t.item_count - 1] != 0xff) {
-    ppu.regs.ioamaddr = 0x0200 + (oam_item[t.item_count - 1] >> 2);
+    ppu.regs.oam_iaddr = 0x0200 + (oam_item[t.item_count - 1] >> 2);
   }
 }
 

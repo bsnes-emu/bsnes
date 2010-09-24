@@ -34,8 +34,8 @@ void PPU::serialize(serializer &s) {
   s.integer(regs.latch_hcounter);
   s.integer(regs.latch_vcounter);
 
-  s.integer(regs.ioamaddr);
-  s.integer(regs.icgramaddr);
+  s.integer(regs.oam_iaddr);
+  s.integer(regs.cgram_iaddr);
 
   s.integer(regs.display_disable);
   s.integer(regs.display_brightness);

@@ -69,7 +69,7 @@ int Application::main(int &argc, char **argv) {
   CoInitialize(0);
   #endif
 
-  initargs(argc, argv);  //ensure argv[]s are in UTF-8 format
+  initialize_arguments(argc, argv);  //ensure argv[]s are in UTF-8 format
   initPaths(argv[0]);
   locateFile(configFilename = "bsnes.cfg", true);
   locateFile(styleSheetFilename = "style.qss", false);

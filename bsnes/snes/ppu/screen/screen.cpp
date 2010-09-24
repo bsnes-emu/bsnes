@@ -172,6 +172,7 @@ uint16 PPU::Screen::addsub(unsigned x, unsigned y, bool halve) {
 
 uint16 PPU::Screen::get_color(unsigned palette) {
   palette <<= 1;
+  self.regs.cgram_iaddr = palette;
   return memory::cgram[palette + 0] + (memory::cgram[palette + 1] << 8);
 }
 

@@ -1,7 +1,7 @@
 namespace SNES {
   namespace Info {
     static const char Name[] = "bsnes";
-    static const char Version[] = "068.22";
+    static const char Version[] = "068.24";
     static const unsigned SerializerVersion = 13;
   }
 }
@@ -50,6 +50,7 @@ namespace SNES {
 
   typedef uint_t<2> uint2;
   typedef uint_t<3> uint3;
+  typedef uint_t<9> uint9;
   typedef uint_t<10> uint10;
   typedef uint_t<17> uint17;
   typedef uint_t<24> uint24;

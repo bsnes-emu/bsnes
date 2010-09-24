@@ -311,11 +311,10 @@ void PPU::mmio_write(unsigned addr, uint8 data) {
     }
 
     case 0x2104: {  //OAMDATA
+      if((regs.oam_addr & 1) == 0) regs.oam_latchdata = data;
       if(regs.oam_addr & 0x0200) {
         oam_write(regs.oam_addr, data);
-      } else if((regs.oam_addr & 1) == 0) {
-        regs.oam_latchdata = data;
-      } else {
+      } else if((regs.oam_addr & 1) == 1) {
         oam_write((regs.oam_addr & ~1) + 0, regs.oam_latchdata);
         oam_write((regs.oam_addr & ~1) + 1, data);
       }

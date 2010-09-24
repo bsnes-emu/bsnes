@@ -11,8 +11,8 @@ struct {
   bool latch_hcounter;
   bool latch_vcounter;
 
-  uint16 ioamaddr;
-  uint16 icgramaddr;
+  uint10 oam_iaddr;
+  uint9 cgram_iaddr;
 
   //$2100  INIDISP
   bool display_disable;
@@ -20,8 +20,8 @@ struct {
 
   //$2102  OAMADDL
   //$2103  OAMADDH
-  uint16 oam_baseaddr;
-  uint16 oam_addr;
+  uint10 oam_baseaddr;
+  uint10 oam_addr;
   bool oam_priority;
 
   //$2105  BGMODE
@@ -67,7 +67,7 @@ struct {
   uint16 m7y;
 
   //$2121  CGADD
-  uint16 cgram_addr;
+  uint9 cgram_addr;
 
   //$2133  SETINI
   bool mode7_extbg;
@@ -83,15 +83,8 @@ struct {
 } regs;
 
 uint16 get_vram_address();
-
 uint8 vram_read(unsigned addr);
 void vram_write(unsigned addr, uint8 data);
-
-uint8 oam_read(unsigned addr);
-void oam_write(unsigned addr, uint8 data);
-
-uint8 cgram_read(unsigned addr);
-void cgram_write(unsigned addr, uint8 data);
 
 void mmio_update_video_mode();
 

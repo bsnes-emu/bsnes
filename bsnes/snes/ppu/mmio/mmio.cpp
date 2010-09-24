@@ -1,5 +1,17 @@
 #ifdef PPU_CPP
 
+bool PPU::interlace() const {
+  return display.interlace;
+}
+
+bool PPU::overscan() const {
+  return display.overscan;
+}
+
+bool PPU::hires() const {
+  return true;
+}
+
 void PPU::latch_counters() {
   cpu.synchronize_ppu();
   regs.hcounter = hdot();
@@ -29,45 +41,6 @@ void PPU::vram_write(unsigned addr, uint8 data) {
   if(regs.display_disable || vcounter() >= (!regs.overscan ? 225 : 240)) {
     memory::vram[addr] = data;
   }
-}
-
-uint8 PPU::oam_read(unsigned addr) {
-  if(!regs.display_disable && vcounter() < (!regs.overscan ? 225 : 240)) addr = regs.ioamaddr;
-  if(addr & 0x0200) addr &= 0x021f;
-  return memory::oam[addr];
-}
-
-void PPU::oam_write(unsigned addr, uint8 data) {
-  if(!regs.display_disable && vcounter() < (!regs.overscan ? 225 : 240)) addr = regs.ioamaddr;
-  if(addr & 0x0200) addr &= 0x021f;
-  memory::oam[addr] = data;
-  oam.update(addr, data);
-}
-
-uint8 PPU::cgram_read(unsigned addr) {
-  if(!regs.display_disable && vcounter() < (!regs.overscan ? 225 : 240)) {
-    if(hcounter() >= 128 && hcounter() < 1096) addr = 0x0000;
-  }
-  return memory::cgram[addr];
-}
-
-void PPU::cgram_write(unsigned addr, uint8 data) {
-  if(!regs.display_disable && vcounter() < (!regs.overscan ? 225 : 240)) {
-    if(hcounter() >= 128 && hcounter() < 1096) addr = 0x0000;
-  }
-  memory::cgram[addr] = data;
-}
-
-bool PPU::interlace() const {
-  return display.interlace;
-}
-
-bool PPU::overscan() const {
-  return display.overscan;
-}
-
-bool PPU::hires() const {
-  return true;
 }
 
 void PPU::mmio_update_video_mode() {
@@ -184,32 +157,32 @@ void PPU::mmio_w2101(uint8 data) {
 
 //OAMADDL
 void PPU::mmio_w2102(uint8 data) {
-  regs.oam_baseaddr &= 0x0100;
-  regs.oam_baseaddr |= (data << 0);
+  regs.oam_baseaddr = (regs.oam_baseaddr & 0x0200) | (data << 1);
   oam.address_reset();
 }
 
 //OAMADDH
 void PPU::mmio_w2103(uint8 data) {
   regs.oam_priority = data & 0x80;
-  regs.oam_baseaddr &= 0x00ff;
-  regs.oam_baseaddr |= (data & 1) << 8;
+  regs.oam_baseaddr = ((data & 0x01) << 9) | (regs.oam_baseaddr & 0x01fe);
   oam.address_reset();
 }
 
 //OAMDATA
 void PPU::mmio_w2104(uint8 data) {
-  if(regs.oam_addr & 0x0200) {
-    oam_write(regs.oam_addr, data);
-  } else if((regs.oam_addr & 1) == 0) {
-    regs.oam_latchdata = data;
-  } else {
-    oam_write((regs.oam_addr & ~1) + 0, regs.oam_latchdata);
-    oam_write((regs.oam_addr & ~1) + 1, data);
-  }
+  bool latch = regs.oam_addr & 1;
+  uint10 addr = regs.oam_addr++;
+  if(regs.display_disable == false && vcounter() < (!regs.overscan ? 225 : 240)) addr = regs.oam_iaddr;
+  if(addr & 0x0200) addr &= 0x021f;
 
-  regs.oam_addr = (regs.oam_addr + 1) & 0x03ff;
-  oam.regs.first_sprite = (regs.oam_priority == false ? 0 : (regs.oam_addr >> 2) & 127);
+  if(latch == 0) regs.oam_latchdata = data;
+  if(addr & 0x0200) {
+    oam.update(addr, data);
+  } else if(latch == 1) {
+    oam.update((addr & ~1) + 0, regs.oam_latchdata);
+    oam.update((addr & ~1) + 1, data);
+  }
+  oam.set_first_sprite();
 }
 
 //BGMODE
@@ -416,13 +389,19 @@ void PPU::mmio_w2121(uint8 data) {
 
 //CGDATA
 void PPU::mmio_w2122(uint8 data) {
-  if((regs.cgram_addr & 1) == 0) {
+  bool latch = regs.cgram_addr & 1;
+  uint9 addr = regs.cgram_addr++;
+  if(regs.display_disable == false
+  && vcounter() > 0 && vcounter() < (!regs.overscan ? 225 : 240)
+  && hcounter() >= 88 && hcounter() < 1096
+  ) addr = regs.cgram_iaddr;
+
+  if(latch == 0) {
     regs.cgram_latchdata = data;
   } else {
-    cgram_write((regs.cgram_addr & ~1) + 0, regs.cgram_latchdata);
-    cgram_write((regs.cgram_addr & ~1) + 1, data & 0x7f);
+    memory::cgram[(addr & ~1) + 0] = regs.cgram_latchdata;
+    memory::cgram[(addr & ~1) + 1] = data & 0x7f;
   }
-  regs.cgram_addr = (regs.cgram_addr + 1) & 0x01ff;
 }
 
 //W12SEL
@@ -597,9 +576,12 @@ uint8 PPU::mmio_r2137() {
 
 //OAMDATAREAD
 uint8 PPU::mmio_r2138() {
-  regs.ppu1_mdr = oam_read(regs.oam_addr);
-  regs.oam_addr = (regs.oam_addr + 1) & 0x03ff;
-  oam.regs.first_sprite = (regs.oam_priority == false ? 0 : (regs.oam_addr >> 2) & 127);
+  uint10 addr = regs.oam_addr++;
+  if(regs.display_disable == false && vcounter() < (!regs.overscan ? 225 : 240)) addr = regs.oam_iaddr;
+  if(addr & 0x0200) addr &= 0x021f;
+
+  regs.ppu1_mdr = memory::oam[addr];
+  oam.set_first_sprite();
   return regs.ppu1_mdr;
 }
 
@@ -631,20 +613,26 @@ uint8 PPU::mmio_r213a() {
 
 //CGDATAREAD
 uint8 PPU::mmio_r213b() {
-  if((regs.cgram_addr & 1) == 0) {
-    regs.ppu2_mdr  = cgram_read(regs.cgram_addr) & 0xff;
+  bool latch = regs.cgram_addr & 1;
+  uint9 addr = regs.cgram_addr++;
+  if(regs.display_disable == false
+  && vcounter() > 0 && vcounter() < (!regs.overscan ? 225 : 240)
+  && hcounter() >= 88 && hcounter() < 1096
+  ) addr = regs.cgram_iaddr;
+
+  if(latch == 0) {
+    regs.ppu2_mdr  = memory::cgram[addr];
   } else {
     regs.ppu2_mdr &= 0x80;
-    regs.ppu2_mdr |= cgram_read(regs.cgram_addr) & 0x7f;
+    regs.ppu2_mdr |= memory::cgram[addr];
   }
-  regs.cgram_addr = (regs.cgram_addr + 1) & 0x01ff;
   return regs.ppu2_mdr;
 }
 
 //OPHCT
 uint8 PPU::mmio_r213c() {
   if(regs.latch_hcounter == 0) {
-    regs.ppu2_mdr  = regs.hcounter & 0xff;
+    regs.ppu2_mdr  = (regs.hcounter >> 0);
   } else {
     regs.ppu2_mdr &= 0xfe;
     regs.ppu2_mdr |= (regs.hcounter >> 8) & 1;
@@ -656,7 +644,7 @@ uint8 PPU::mmio_r213c() {
 //OPVCT
 uint8 PPU::mmio_r213d() {
   if(regs.latch_vcounter == 0) {
-    regs.ppu2_mdr  = regs.vcounter & 0xff;
+    regs.ppu2_mdr  = (regs.vcounter >> 0);
   } else {
     regs.ppu2_mdr &= 0xfe;
     regs.ppu2_mdr |= (regs.vcounter >> 8) & 1;
@@ -705,8 +693,8 @@ void PPU::mmio_reset() {
   regs.latch_hcounter = 0;
   regs.latch_vcounter = 0;
 
-  regs.ioamaddr = 0;
-  regs.icgramaddr = 0;
+  regs.oam_iaddr = 0x0000;
+  regs.cgram_iaddr = 0x00;
 
   //$2100  INIDISP
   regs.display_disable = true;
