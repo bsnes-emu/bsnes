@@ -1,4 +1,4 @@
-struct AdvancedSettingsWindow : Window {
+struct AdvancedSettings : Window {
   Label driverSelectionLabel;
   Label videoDriverLabel;
   ComboBox videoDriverBox;
@@ -10,8 +10,10 @@ struct AdvancedSettingsWindow : Window {
   RadioBox focusPolicyPause;
   RadioBox focusPolicyIgnore;
   RadioBox focusPolicyAllow;
+  Label miscellaneousLabel;
+  CheckBox useNativeDialogs;
 
   void create();
 };
 
-extern AdvancedSettingsWindow advancedSettingsWindow;
+extern AdvancedSettings advancedSettings;

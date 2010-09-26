@@ -8,7 +8,6 @@ struct Palette {
 };
 
 struct Interface : public SNES::Interface {
-  int16_t state[Scancode::Limit];
   void video_refresh(const uint16_t *data, unsigned width, unsigned height);
   void audio_sample(uint16_t left, uint16_t right);
   void input_poll();

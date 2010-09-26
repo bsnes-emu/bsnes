@@ -5,10 +5,13 @@ void Configuration::load() {
 }
 
 void Configuration::save() {
+  mkdir(path.user, 0755);
   configuration::save(string(path.user, "bsnes-phoenix.cfg"));
 }
 
 void Configuration::create() {
+  attach(path.current = "", "path.current");
+
   attach(video.driver = "", "video.driver");
   attach(video.synchronize = false, "video.synchronize");
   attach(video.contrast = 100, "video.contrast");
@@ -23,4 +26,5 @@ void Configuration::create() {
   attach(input.driver = "", "input.driver");
 
   attach(settings.focusPolicy = 0, "settings.focusPolicy");
+  attach(settings.useNativeDialogs = false, "settings.useNativeDialogs");
 }

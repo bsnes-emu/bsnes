@@ -1,4 +1,4 @@
-ui_objects := ui-main ui-general ui-settings ui-tools ui-utility ui-cartridge
+ui_objects := ui-main ui-general ui-settings ui-tools ui-input ui-utility ui-cartridge
 ui_objects += ruby phoenix
 ui_objects += $(if $(call streq,$(platform),win),resource)
 
@@ -6,6 +6,8 @@ ui_objects += $(if $(call streq,$(platform),win),resource)
 ifeq ($(platform),x)
   flags += -DPHOENIX_GTK `pkg-config --cflags gtk+-2.0`
   link += `pkg-config --libs gtk+-2.0`
+# flags += -DPHOENIX_QT `pkg-config --cflags QtCore QtGui`
+# link += `pkg-config --libs QtCore QtGui`
 
   ruby := video.glx video.xv video.sdl
   ruby += audio.alsa audio.openal audio.oss audio.pulseaudio audio.pulseaudiosimple audio.ao
@@ -56,6 +58,7 @@ obj/ui-main.o: $(ui)/main.cpp $(call rwildcard,$(ui)/*.hpp) $(call rwildcard,$(u
 obj/ui-general.o: $(ui)/general/general.cpp $(call rwildcard,$(ui)/*.hpp) $(call rwildcard,$(ui)/general/*)
 obj/ui-tools.o: $(ui)/tools/tools.cpp $(call rwildcard,$(ui)/*.hpp) $(call rwildcard,$(ui)/tools/*)
 obj/ui-settings.o: $(ui)/settings/settings.cpp $(call rwildcard,$(ui)/*.hpp) $(call rwildcard,$(ui)/settings/*)
+obj/ui-input.o: $(ui)/input/input.cpp $(call rwildcard,$(ui)/*.hpp) $(call rwildcard,$(ui)/input/*)
 obj/ui-utility.o: $(ui)/utility/utility.cpp $(call rwildcard,$(ui)/*.hpp) $(call rwildcard,$(ui)/utility/*)
 obj/ui-cartridge.o: $(ui)/cartridge/cartridge.cpp $(call rwildcard,$(ui)/*.hpp) $(call rwildcard,$(ui)/cartridge/*)
 

@@ -99,30 +99,9 @@ void Interface::audio_sample(uint16_t left, uint16_t right) {
 }
 
 void Interface::input_poll() {
-  input.poll(state);
 }
 
 int16_t Interface::input_poll(bool port, SNES::Input::Device device, unsigned index, unsigned id) {
-  //ignore input when main window is not active?
   if(config.settings.focusPolicy == 1 && mainWindow.focused() == false) return 0;
-
-  if(port == 0) {
-    if(device == SNES::Input::Device::Joypad) {
-      switch(id) {
-        case SNES::Input::JoypadID::Up:     return state[keyboard(0)[Keyboard::Up]];
-        case SNES::Input::JoypadID::Down:   return state[keyboard(0)[Keyboard::Down]];
-        case SNES::Input::JoypadID::Left:   return state[keyboard(0)[Keyboard::Left]];
-        case SNES::Input::JoypadID::Right:  return state[keyboard(0)[Keyboard::Right]];
-        case SNES::Input::JoypadID::B:      return state[keyboard(0)[Keyboard::Z]];
-        case SNES::Input::JoypadID::A:      return state[keyboard(0)[Keyboard::X]];
-        case SNES::Input::JoypadID::Y:      return state[keyboard(0)[Keyboard::A]];
-        case SNES::Input::JoypadID::X:      return state[keyboard(0)[Keyboard::S]];
-        case SNES::Input::JoypadID::L:      return state[keyboard(0)[Keyboard::D]];
-        case SNES::Input::JoypadID::R:      return state[keyboard(0)[Keyboard::C]];
-        case SNES::Input::JoypadID::Select: return state[keyboard(0)[Keyboard::Apostrophe]];
-        case SNES::Input::JoypadID::Start:  return state[keyboard(0)[Keyboard::Return]];
-      }
-    }
-  }
-  return 0;
+  return inputMapper.poll(port, device, index, id);
 }

@@ -75,7 +75,7 @@ struct Widget : Object {
   bool enabled();
   void setEnabled(bool enabled = true);
   virtual bool focused();
-  void setFocused();
+  virtual void setFocused();
 };
 
 struct Window : Widget {
@@ -83,6 +83,7 @@ struct Window : Widget {
   nall::function<bool ()> onClose;
   void create(unsigned x, unsigned y, unsigned width, unsigned height, const char *text = "");
   bool focused();
+  void setFocused();
   void setGeometry(unsigned x, unsigned y, unsigned width, unsigned height);
   void setDefaultFont(Font &font);
   void setFont(Font &font);
@@ -135,6 +136,7 @@ private:
 struct EditBox : Widget {
   nall::function<void ()> onChange;
   void create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const char *text = "");
+  void setFocused();
   void setEditable(bool editable = true);
   void setWordWrap(bool wordWrap = true);
   nall::string text();
@@ -157,6 +159,7 @@ struct ListBox : Widget {
   nall::function<void ()> onActivate;
   nall::function<void ()> onChange;
   void create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const char *text = "");
+  void setFocused();
   void setHeaderVisible(bool headerVisible = true);
   void setFont(Font &font);
   void reset();
@@ -226,7 +229,7 @@ struct MessageWindow : Object {
 
 struct OS : Object {
   bool pending();
-  bool run();
+  void run();
   void main();
   void quit();
   unsigned desktopWidth();

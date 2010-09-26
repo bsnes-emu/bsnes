@@ -1,6 +1,6 @@
-VideoSettingsWindow videoSettingsWindow;
+VideoSettings videoSettings;
 
-void VideoSettingsWindow::create() {
+void VideoSettings::create() {
   application.windows.append(this);
   Window::create(0, 0, 256, 256, "Video Settings");
   setDefaultFont(application.proportionalFont);
@@ -24,7 +24,7 @@ void VideoSettingsWindow::create() {
 
   gammaRampCheck.create  (*this, x,       y, 430, 15, "Enable NTSC gamma ramp simulation"); y += 15;
 
-  setGeometry(0, 0, 440, y + 5);
+  setGeometry(160, 160, 440, y + 5);
 
   contrastSlider.setPosition(config.video.contrast);
   brightnessSlider.setPosition(config.video.brightness);
@@ -32,10 +32,10 @@ void VideoSettingsWindow::create() {
   gammaRampCheck.setChecked(config.video.useGammaRamp);
 
   contrastSlider.onChange = brightnessSlider.onChange = gammaSlider.onChange = gammaRampCheck.onTick =
-  { &VideoSettingsWindow::adjust, this };
+  { &VideoSettings::adjust, this };
 }
 
-void VideoSettingsWindow::adjust() {
+void VideoSettings::adjust() {
   contrastValue.setText(string(contrastSlider.position(), "%"));
   brightnessValue.setText(string(brightnessSlider.position(), "%"));
   gammaValue.setText(string(gammaSlider.position(), "%"));

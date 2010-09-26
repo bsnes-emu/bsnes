@@ -69,7 +69,7 @@ void CheatEditor::create() {
   descLabel.create(*this, x,      y,  80, Style::EditBoxHeight, "Description:");
   descEdit.create (*this, x + 80, y, 420, Style::EditBoxHeight); y+= Style::EditBoxHeight + 5;
 
-  setGeometry(0, 0, 510, y);
+  setGeometry(160, 160, 510, y);
   synchronize();
 
   cheatList.onActivate = { &CheatEditor::toggle, this };

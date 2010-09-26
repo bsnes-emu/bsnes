@@ -2,22 +2,24 @@ void Window::create(unsigned x, unsigned y, unsigned width, unsigned height, con
   window->setWindowTitle(text);
   window->move(x, y);
 
-  window->layout = new QVBoxLayout;
+  window->layout = new QVBoxLayout(window);
   window->layout->setMargin(0);
   window->layout->setSpacing(0);
   window->layout->setSizeConstraint(QLayout::SetFixedSize);
   window->setLayout(window->layout);
 
-  window->menuBar = new QMenuBar;
-  window->menuBar->hide();
+  window->menuBar = new QMenuBar(window);
+  window->menuBar->setVisible(false);
   window->layout->addWidget(window->menuBar);
 
-  window->container = new QWidget;
+  window->container = new QWidget(window);
   window->container->setFixedSize(width, height);
+  window->container->setVisible(true);
   window->layout->addWidget(window->container);
 
-  window->statusBar = new QStatusBar;
+  window->statusBar = new QStatusBar(window);
   window->statusBar->setSizeGripEnabled(false);
+  window->statusBar->setVisible(false);
   window->layout->addWidget(window->statusBar);
 }
 
@@ -26,9 +28,12 @@ void Window::setGeometry(unsigned x, unsigned y, unsigned width, unsigned height
   window->move(x, y);
 }
 
-void Window::setFont(Font &font) {
+void Window::setDefaultFont(Font &font) {
   window->defaultFont = font.font;
   window->menuBar->setFont(*font.font);
+}
+
+void Window::setFont(Font &font) {
   window->statusBar->setFont(*font.font);
 }
 

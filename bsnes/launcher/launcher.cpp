@@ -46,7 +46,7 @@ int main(int argc, char **argv) {
   PROCESS_INFORMATION pi;
   memset(&si, 0, sizeof(STARTUPINFOW));
   if(!CreateProcessW(nall::utf16_t(fileName), GetCommandLineW(), NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi)) {
-    MessageBox(0, string("Error: unable to locate binary file: ", binaryName), "bsnes", MB_OK);
+    MessageBoxA(0, string("Error: unable to locate binary file: ", binaryName), "bsnes", MB_OK);
   }
   #endif
 

@@ -1,4 +1,4 @@
-struct VideoSettingsWindow : Window {
+struct VideoSettings : Window {
   Label colorAdjustmentLabel;
   Label contrastLabel;
   Label contrastValue;
@@ -15,4 +15,4 @@ struct VideoSettingsWindow : Window {
   void adjust();
 };
 
-extern VideoSettingsWindow videoSettingsWindow;
+extern VideoSettings videoSettings;

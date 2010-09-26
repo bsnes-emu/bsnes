@@ -39,9 +39,8 @@ bool OS::pending() {
   return QApplication::hasPendingEvents();
 }
 
-bool OS::run() {
+void OS::run() {
   QApplication::processEvents();
-  return QApplication::hasPendingEvents();
 }
 
 void OS::main() {

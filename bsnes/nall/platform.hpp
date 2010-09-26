@@ -103,15 +103,6 @@
     strcpy(path, nall::utf8_t(fp));
     return path;
   }
-
-  inline void initialize_arguments(int &argc, char **&argv) {
-    wchar_t **wargv = CommandLineToArgvW(GetCommandLineW(), &argc);
-    argv = new char*[argc];
-    for(unsigned i = 0; i < argc; i++) {
-      argv[i] = new char[_MAX_PATH];
-      strcpy(argv[i], nall::utf8_t(wargv[i]));
-    }
-  }
 #else
   //realpath() already exists
 
@@ -124,9 +115,6 @@
 
   inline char *getcwd(char *path) {
     return getcwd(path, PATH_MAX);
-  }
-
-  inline void initialize_arguments(int &argc, char **&argv) {
   }
 #endif
 

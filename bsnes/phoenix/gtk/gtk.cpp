@@ -49,9 +49,8 @@ bool OS::pending() {
   return gtk_events_pending();
 }
 
-bool OS::run() {
-  gtk_main_iteration_do(false);
-  return gtk_events_pending();
+void OS::run() {
+  while(pending()) gtk_main_iteration_do(false);
 }
 
 void OS::main() {

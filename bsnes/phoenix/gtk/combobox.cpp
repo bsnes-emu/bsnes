@@ -1,5 +1,5 @@
 void ComboBox_change(ComboBox *self) {
-  if(self->onChange) self->onChange();
+  if(self->object->locked == false && self->onChange) self->onChange();
 }
 
 void ComboBox::create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const char *text) {
@@ -19,9 +19,11 @@ void ComboBox::create(Window &parent, unsigned x, unsigned y, unsigned width, un
 }
 
 void ComboBox::reset() {
+  object->locked = true;
   for(signed i = counter - 1; i >= 0; i--) {
     gtk_combo_box_remove_text(GTK_COMBO_BOX(object->widget), i);
   }
+  object->locked = false;
   counter = 0;
 }
 
@@ -35,7 +37,9 @@ unsigned ComboBox::selection() {
 }
 
 void ComboBox::setSelection(unsigned item) {
+  object->locked = true;
   gtk_combo_box_set_active(GTK_COMBO_BOX(object->widget), item);
+  object->locked = false;
 }
 
 ComboBox::ComboBox() {

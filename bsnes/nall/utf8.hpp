@@ -6,9 +6,11 @@
 
 #if defined(_WIN32)
 
+#undef UNICODE
 #undef _WIN32_WINNT
-#define _WIN32_WINNT 0x0501
 #undef  NOMINMAX
+#define UNICODE
+#define _WIN32_WINNT 0x0501
 #define NOMINMAX
 #include <windows.h>
 #undef interface
@@ -68,6 +70,15 @@ namespace nall {
   private:
     char *buffer;
   };
+
+  inline void utf8_args(int &argc, char **&argv) {
+    wchar_t **wargv = CommandLineToArgvW(GetCommandLineW(), &argc);
+    argv = new char*[argc];
+    for(unsigned i = 0; i < argc; i++) {
+      argv[i] = new char[_MAX_PATH];
+      strcpy(argv[i], nall::utf8_t(wargv[i]));
+    }
+  }
 }
 
 #endif  //if defined(_WIN32)

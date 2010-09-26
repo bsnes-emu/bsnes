@@ -81,6 +81,8 @@ void PPU::scanline() {
 void PPU::frame() {
   oam.frame();
   system.frame();
+  display.interlace = regs.interlace;
+  display.overscan = regs.overscan;
   display.framecounter = display.frameskip == 0 ? 0 : (display.framecounter + 1) % display.frameskip;
 }
 
@@ -96,6 +98,8 @@ void PPU::reset() {
   PPUcounter::reset();
   memset(surface, 0, 512 * 512 * sizeof(uint16));
   mmio_reset();
+  display.interlace = false;
+  display.overscan = false;
 }
 
 void PPU::layer_enable(unsigned layer, unsigned priority, bool enable) {

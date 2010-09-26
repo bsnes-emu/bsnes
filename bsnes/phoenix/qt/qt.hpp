@@ -125,6 +125,7 @@ struct Window : Widget {
   nall::function<bool ()> onClose;
   void create(unsigned x, unsigned y, unsigned width, unsigned height, const char *text = "");
   void setGeometry(unsigned x, unsigned y, unsigned width, unsigned height);
+  void setDefaultFont(Font &font);
   void setFont(Font &font);
   void setBackgroundColor(uint8_t red, uint8_t green, uint8_t blue);
   void setTitle(const char *text);
@@ -208,6 +209,7 @@ struct HorizontalSlider : Widget {
 
 struct Label : Widget {
   void create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const char *text = "");
+  void setText(const char *text);
   Label();
 //private:
   struct Data;
@@ -304,7 +306,7 @@ struct MessageWindow : Object {
 
 struct OS : Object {
   bool pending();
-  bool run();
+  void run();
   void main();
   void quit();
   unsigned desktopWidth();

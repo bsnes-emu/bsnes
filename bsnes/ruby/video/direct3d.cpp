@@ -346,17 +346,17 @@ public:
     for(unsigned i = 0; i < 256; i++) {
       char t[256];
       sprintf(t, "d3dx9_%u.dll", i);
-      d3dx = LoadLibrary(t);
+      d3dx = LoadLibraryW(utf16_t(t));
       if(d3dx) break;
     }
-    if(!d3dx) d3dx = LoadLibrary("d3dx9.dll");
+    if(!d3dx) d3dx = LoadLibrary(L"d3dx9.dll");
     if(!d3dx) return;
 
     EffectProc effectProc = (EffectProc)GetProcAddress(d3dx, "D3DXCreateEffect");
     TextureProc textureProc = (TextureProc)GetProcAddress(d3dx, "D3DXCreateTextureFromFileA");
 
     LPD3DXBUFFER pBufferErrors = NULL;
-    effectProc(device, shaderSource, lstrlen(source), NULL, NULL, 0, NULL, &effect, &pBufferErrors);
+    effectProc(device, utf16_t(shaderSource), lstrlen(utf16_t(source)), NULL, NULL, 0, NULL, &effect, &pBufferErrors);
 
     D3DXHANDLE hTech;
     effect->FindNextValidTechnique(NULL, &hTech);

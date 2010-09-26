@@ -19,6 +19,10 @@ void EditBox::create(Window &parent, unsigned x, unsigned y, unsigned width, uns
   gtk_widget_show(object->widget);
 }
 
+void EditBox::setFocused() {
+  gtk_widget_grab_focus(object->subWidget);
+}
+
 void EditBox::setEditable(bool editable) {
   gtk_text_view_set_editable(GTK_TEXT_VIEW(object->subWidget), editable);
 }

@@ -6,6 +6,10 @@ void Label::create(Window &parent, unsigned x, unsigned y, unsigned width, unsig
   label->show();
 }
 
+void Label::setText(const char *text) {
+  label->setText(text);
+}
+
 Label::Label() {
   label = new Label::Data(*this);
   widget->widget = label;

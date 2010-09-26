@@ -56,6 +56,10 @@ void ListBox::create(Window &parent, unsigned x, unsigned y, unsigned width, uns
   gtk_widget_show(object->widget);
 }
 
+void ListBox::setFocused() {
+  gtk_widget_grab_focus(object->subWidget);
+}
+
 void ListBox::setHeaderVisible(bool visible) {
   gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(object->subWidget), visible);
 }
@@ -76,6 +80,9 @@ void ListBox::reset() {
   listBox->selection = -1;
   gtk_list_store_clear(GTK_LIST_STORE(listBox->store));
   gtk_tree_view_set_model(GTK_TREE_VIEW(object->subWidget), GTK_TREE_MODEL(listBox->store));
+  //reset gtk_scrolled_window scrollbar position to 0,0 (top-left), as ListBox is now empty
+  gtk_scrolled_window_set_hadjustment(GTK_SCROLLED_WINDOW(object->widget), 0);
+  gtk_scrolled_window_set_vadjustment(GTK_SCROLLED_WINDOW(object->widget), 0);
 }
 
 void ListBox::resizeColumnsToContent() {

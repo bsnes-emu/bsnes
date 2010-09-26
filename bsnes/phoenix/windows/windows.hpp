@@ -254,7 +254,7 @@ struct MessageWindow : Object {
 
 struct OS : Object {
   bool pending();
-  bool run();
+  void run();
   void main();
   void quit();
   unsigned desktopWidth();

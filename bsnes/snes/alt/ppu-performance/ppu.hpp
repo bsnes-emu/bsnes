@@ -42,6 +42,8 @@ private:
   Screen screen;
 
   struct Display {
+    bool interlace;
+    bool overscan;
     unsigned width;
     unsigned height;
     unsigned frameskip;

@@ -24,6 +24,8 @@ void PPU::serialize(serializer &s) {
   oam.serialize(s);
   screen.serialize(s);
 
+  s.integer(display.interlace);
+  s.integer(display.overscan);
   s.integer(display.width);
   s.integer(display.height);
 

@@ -2,6 +2,7 @@
 
 #include <nall/base64.hpp>
 #include <nall/config.hpp>
+#include <nall/directory.hpp>
 #include <nall/input.hpp>
 #include <nall/ups.hpp>
 #include <nall/snes/info.hpp>
@@ -18,6 +19,7 @@ using namespace phoenix;
 #include "general/general.hpp"
 #include "settings/settings.hpp"
 #include "tools/tools.hpp"
+#include "input/input.hpp"
 #include "utility/utility.hpp"
 #include "cartridge/cartridge.hpp"
 

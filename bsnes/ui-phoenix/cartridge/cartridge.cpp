@@ -3,18 +3,21 @@ Cartridge cartridge;
 
 bool Cartridge::loadNormal(const char *filename) {
   unload();
-  if(loadCartridge(SNES::memory::cartrom, baseXML, baseName = filename) == false) return false;
+  if(loadCartridge(SNES::memory::cartrom, baseXML, filename) == false) return false;
+  baseName = nall::basename(filename);
   SNES::cartridge.load(SNES::Cartridge::Mode::Normal, lstring() << baseXML);
   loadMemory(SNES::memory::cartram, baseName, ".srm");
   loadMemory(SNES::memory::cartrtc, baseName, ".rtc");
-  utility.setTitle(notdir(nall::basename(baseName)));
-  cheatEditor.load(nall::basename(baseName));
+  cheatEditor.load(baseName);
+  utility.setTitle(notdir(baseName));
+  utility.showMessage(string("Loaded ", notdir(baseName)));
+  config.path.current = dir(baseName);
   return true;
 }
 
 void Cartridge::unload() {
   if(SNES::cartridge.loaded() == false) return;
-  cheatEditor.save(nall::basename(baseName));
+  cheatEditor.save(baseName);
   saveMemory(SNES::memory::cartram, baseName, ".srm");
   saveMemory(SNES::memory::cartrtc, baseName, ".rtc");
   SNES::cartridge.unload();
@@ -42,7 +45,7 @@ bool Cartridge::loadCartridge(SNES::MappedRAM &memory, string &XML, const char *
 
 bool Cartridge::loadMemory(SNES::MappedRAM &memory, string filename, const char *extension) {
   if(memory.size() == 0 || memory.size() == ~0) return true;
-  filename = string(nall::basename(filename), extension);
+  filename = string(filename, extension);
   if(file::exists(filename) == false) return false;
   file fp;
   if(fp.open(filename, file::mode_read)) {
@@ -54,7 +57,7 @@ bool Cartridge::loadMemory(SNES::MappedRAM &memory, string filename, const char 
 
 bool Cartridge::saveMemory(SNES::MappedRAM &memory, string filename, const char *extension) {
   if(memory.size() == 0 || memory.size() == ~0) return true;
-  filename = string(nall::basename(filename), extension);
+  filename = string(filename, extension);
   file fp;
   if(fp.open(filename, file::mode_write) == false) return false;
   fp.write(memory.data(), memory.size());

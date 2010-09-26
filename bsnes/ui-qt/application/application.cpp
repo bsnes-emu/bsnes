@@ -67,9 +67,9 @@ int Application::main(int &argc, char **argv) {
   #else
   //Windows port uses 256x256 icon from resource file
   CoInitialize(0);
+  utf8_args(argc, argv);
   #endif
 
-  initialize_arguments(argc, argv);  //ensure argv[]s are in UTF-8 format
   initPaths(argv[0]);
   locateFile(configFilename = "bsnes.cfg", true);
   locateFile(styleSheetFilename = "style.qss", false);

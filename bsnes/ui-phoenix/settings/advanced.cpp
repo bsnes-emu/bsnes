@@ -1,6 +1,6 @@
-AdvancedSettingsWindow advancedSettingsWindow;
+AdvancedSettings advancedSettings;
 
-void AdvancedSettingsWindow::create() {
+void AdvancedSettings::create() {
   application.windows.append(this);
   Window::create(0, 0, 256, 256, "Advanced Settings");
   setDefaultFont(application.proportionalFont);
@@ -23,12 +23,17 @@ void AdvancedSettingsWindow::create() {
   focusPolicyPause.create(*this, x, y, 195, Style::CheckBoxHeight, "Pause emulator when inactive");
   focusPolicyIgnore.create(focusPolicyPause, x + 200, y, 195, Style::CheckBoxHeight, "Ignore input when inactive");
   focusPolicyAllow.create(focusPolicyPause, x + 400, y, 195, Style::CheckBoxHeight, "Always allow input"); y += Style::CheckBoxHeight + 5;
-
   if(config.settings.focusPolicy == 0) focusPolicyPause.setChecked();
   if(config.settings.focusPolicy == 1) focusPolicyIgnore.setChecked();
   if(config.settings.focusPolicy == 2) focusPolicyAllow.setChecked();
 
-  setGeometry(0, 0, 605, y);
+  miscellaneousLabel.create(*this, x, y, 595, Style::LabelHeight, "Miscellaneous :."); y += Style::LabelHeight + 5;
+  miscellaneousLabel.setFont(application.proportionalFontBold);
+
+  useNativeDialogs.create(*this, x, y, 595, Style::CheckBoxHeight, "Use native OS dialogs"); y += Style::CheckBoxHeight + 5;
+  useNativeDialogs.setChecked(config.settings.useNativeDialogs);
+
+  setGeometry(160, 160, 605, y);
 
   lstring list;
 
@@ -53,22 +58,24 @@ void AdvancedSettingsWindow::create() {
   videoDriverBox.onChange = []() {
     lstring list;
     list.split(";", video.driver_list());
-    config.video.driver = list[advancedSettingsWindow.videoDriverBox.selection()];
+    config.video.driver = list[advancedSettings.videoDriverBox.selection()];
   };
 
   audioDriverBox.onChange = []() {
     lstring list;
     list.split(";", audio.driver_list());
-    config.audio.driver = list[advancedSettingsWindow.audioDriverBox.selection()];
+    config.audio.driver = list[advancedSettings.audioDriverBox.selection()];
   };
 
   inputDriverBox.onChange = []() {
     lstring list;
     list.split(";", input.driver_list());
-    config.input.driver = list[advancedSettingsWindow.inputDriverBox.selection()];
+    config.input.driver = list[advancedSettings.inputDriverBox.selection()];
   };
 
   focusPolicyPause.onTick = []() { config.settings.focusPolicy = 0; };
   focusPolicyIgnore.onTick = []() { config.settings.focusPolicy = 1; };
   focusPolicyAllow.onTick = []() { config.settings.focusPolicy = 2; };
+
+  useNativeDialogs.onTick = []() { config.settings.useNativeDialogs = advancedSettings.useNativeDialogs.checked(); };
 }

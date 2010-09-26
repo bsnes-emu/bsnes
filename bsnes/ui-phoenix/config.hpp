@@ -2,6 +2,7 @@ struct Configuration : public configuration {
   struct Path {
     string base;
     string user;
+    string current;
   } path;
 
   struct Video {
@@ -25,6 +26,7 @@ struct Configuration : public configuration {
 
   struct Settings {
     unsigned focusPolicy;
+    bool useNativeDialogs;
   } settings;
 
   void load();

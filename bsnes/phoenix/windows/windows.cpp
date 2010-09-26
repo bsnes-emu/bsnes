@@ -32,6 +32,8 @@ namespace phoenix {
 OS &os = OS::handle();
 Window Window::None;
 
+static void OS_keyboardProc(HWND, UINT, WPARAM, LPARAM);
+
 OS& OS::handle() {
   static OS os;
   return os;
@@ -42,20 +44,27 @@ bool OS::pending() {
   return PeekMessage(&msg, 0, 0, 0, PM_NOREMOVE);
 }
 
-bool OS::run() {
-  MSG msg;
-  if(PeekMessage(&msg, 0, 0, 0, PM_REMOVE)) {
-    if(!IsDialogMessage(GetParent(msg.hwnd) ? GetParent(msg.hwnd) : msg.hwnd, &msg)) {
-      TranslateMessage(&msg);
-      DispatchMessage(&msg);
+void OS::run() {
+  while(pending()) {
+    MSG msg;
+    if(PeekMessage(&msg, 0, 0, 0, PM_REMOVE)) {
+      if(msg.message == WM_KEYDOWN || msg.message == WM_KEYUP) {
+        OS_keyboardProc(msg.hwnd, msg.message, msg.wParam, msg.lParam);
+      }
+      if(!IsDialogMessage(GetParent(msg.hwnd) ? GetParent(msg.hwnd) : msg.hwnd, &msg)) {
+        TranslateMessage(&msg);
+        DispatchMessage(&msg);
+      }
     }
   }
-  return PeekMessage(&msg, 0, 0, 0, PM_NOREMOVE);
 }
 
 void OS::main() {
   MSG msg;
   while(GetMessage(&msg, 0, 0, 0)) {
+    if(msg.message == WM_KEYDOWN || msg.message == WM_KEYUP) {
+      OS_keyboardProc(msg.hwnd, msg.message, msg.wParam, msg.lParam);
+    }
     if(!IsDialogMessage(GetParent(msg.hwnd) ? GetParent(msg.hwnd) : msg.hwnd, &msg)) {
       TranslateMessage(&msg);
       DispatchMessage(&msg);
@@ -192,6 +201,24 @@ string OS::fileSave(Window &parent, const char *filter, const char *path) {
   bool result = GetSaveFileName(&ofn);
   if(result == false) return "";
   return utf8_t(wfilename);
+}
+
+static void OS_keyboardProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
+  switch(msg) {
+    case WM_KEYDOWN: {
+      GUITHREADINFO info;
+      memset(&info, 0, sizeof(GUITHREADINFO));
+      info.cbSize = sizeof(GUITHREADINFO);
+      GetGUIThreadInfo(GetCurrentThreadId(), &info);
+      Object *object_ptr = (Object*)GetWindowLongPtr(info.hwndFocus, GWLP_USERDATA);
+      if(object_ptr && dynamic_cast<ListBox*>(object_ptr)) {
+        ListBox &listBox = (ListBox&)*object_ptr;
+        if(wparam == VK_RETURN) {
+          if(listBox.onActivate) listBox.onActivate();
+        }
+      }
+    }
+  }
 }
 
 static LRESULT CALLBACK OS_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {

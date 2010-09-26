@@ -291,12 +291,12 @@ public:
     wc.hIcon = LoadIcon(0, IDI_APPLICATION);
     wc.hInstance = GetModuleHandle(0);
     wc.lpfnWndProc = RawInputWindowProc;
-    wc.lpszClassName = "RawInputClass";
+    wc.lpszClassName = L"RawInputClass";
     wc.lpszMenuName = 0;
     wc.style = CS_VREDRAW | CS_HREDRAW;
     RegisterClass(&wc);
 
-    hwnd = CreateWindow("RawInputClass", "RawInputClass", WS_POPUP,
+    hwnd = CreateWindow(L"RawInputClass", L"RawInputClass", WS_POPUP,
       0, 0, 64, 64, 0, 0, GetModuleHandle(0), 0);
 
     //enumerate all HID devices

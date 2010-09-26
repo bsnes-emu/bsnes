@@ -4,8 +4,11 @@
 Application application;
 
 void Application::main(int argc, char **argv) {
-  initialize_arguments(argc, argv);
+  #if defined(PLATFORM_WIN)
+  utf8_args(argc, argv);
+  #endif
   config.create();
+  inputMapper.create();
 
   char temp[PATH_MAX];
   config.path.base = realpath(argv[0], temp);
@@ -17,6 +20,8 @@ void Application::main(int argc, char **argv) {
   config.path.user.append(".bsnes/");
   config.load();
   config.save();
+  if(config.path.current == "") config.path.current = config.path.base;
+  inputMapper.bind();
 
   #if defined(PHOENIX_WINDOWS)
   proportionalFont.create("Tahoma", 8);
@@ -28,15 +33,20 @@ void Application::main(int argc, char **argv) {
   monospaceFont.create("Liberation Mono", 8);
   #endif
 
+  if(config.video.driver == "") config.video.driver = video.default_driver();
+  if(config.audio.driver == "") config.audio.driver = audio.default_driver();
+  if(config.input.driver == "") config.input.driver = video.default_driver();
+
   palette.update();
   mainWindow.create();
-  videoSettingsWindow.create();
-  advancedSettingsWindow.create();
+  fileBrowser.create();
+  videoSettings.create();
+  inputSettings.create();
+  advancedSettings.create();
   cheatEditor.create();
   mainWindow.setVisible();
-  while(os.pending()) os.run();
+  os.run();
 
-  if(config.video.driver == "") config.video.driver = video.default_driver();
   video.driver(config.video.driver);
   video.set(Video::Handle, mainWindow.viewport.handle());
   video.set(Video::Synchronize, config.video.synchronize);
@@ -47,7 +57,6 @@ void Application::main(int argc, char **argv) {
     video.init();
   }
 
-  if(config.audio.driver == "") config.audio.driver = audio.default_driver();
   audio.driver(config.audio.driver);
   audio.set(Audio::Handle, mainWindow.viewport.handle());
   audio.set(Audio::Synchronize, config.audio.synchronize);
@@ -58,7 +67,6 @@ void Application::main(int argc, char **argv) {
     audio.init();
   }
 
-  if(config.input.driver == "") config.input.driver = video.default_driver();
   input.driver(config.input.driver);
   input.set(Input::Handle, mainWindow.viewport.handle());
   if(input.init() == false) {
@@ -74,7 +82,9 @@ void Application::main(int argc, char **argv) {
   }
 
   while(quit == false) {
-    while(os.pending()) os.run();
+    os.run();
+    inputMapper.poll();
+    utility.updateStatus();
 
     if(SNES::cartridge.loaded()) {
       //pause emulator when main window is inactive?
@@ -92,7 +102,7 @@ void Application::main(int argc, char **argv) {
 
   cartridge.unload();
   foreach(window, windows) window->setVisible(false);
-  while(os.pending()) os.run();
+  os.run();
   SNES::system.term();
   config.save();
 
