@@ -71,7 +71,7 @@ int Application::main(int &argc, char **argv) {
   #endif
 
   initPaths(argv[0]);
-  locateFile(configFilename = "bsnes.cfg", true);
+  locateFile(configFilename = "bsnes-qt.cfg", true);
   locateFile(styleSheetFilename = "style.qss", false);
 
   string customStylesheet;

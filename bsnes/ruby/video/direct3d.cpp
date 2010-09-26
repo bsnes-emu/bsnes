@@ -349,14 +349,14 @@ public:
       d3dx = LoadLibraryW(utf16_t(t));
       if(d3dx) break;
     }
-    if(!d3dx) d3dx = LoadLibrary(L"d3dx9.dll");
+    if(!d3dx) d3dx = LoadLibraryW(L"d3dx9.dll");
     if(!d3dx) return;
 
     EffectProc effectProc = (EffectProc)GetProcAddress(d3dx, "D3DXCreateEffect");
     TextureProc textureProc = (TextureProc)GetProcAddress(d3dx, "D3DXCreateTextureFromFileA");
 
     LPD3DXBUFFER pBufferErrors = NULL;
-    effectProc(device, utf16_t(shaderSource), lstrlen(utf16_t(source)), NULL, NULL, 0, NULL, &effect, &pBufferErrors);
+    effectProc(device, shaderSource, lstrlenA(source), NULL, NULL, 0, NULL, &effect, &pBufferErrors);
 
     D3DXHANDLE hTech;
     effect->FindNextValidTechnique(NULL, &hTech);

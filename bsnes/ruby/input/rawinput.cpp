@@ -277,8 +277,8 @@ public:
   //this is used to sort device IDs
   struct DevicePool {
     HANDLE handle;
-    char name[4096];
-    bool operator<(const DevicePool &pool) const { return strcmp(name, pool.name) < 0; }
+    wchar_t name[4096];
+    bool operator<(const DevicePool &pool) const { return wcscmp(name, pool.name) < 0; }
   };
 
   int main() {
@@ -342,8 +342,12 @@ public:
 
           //per MSDN: XInput devices have "IG_" in their device strings,
           //which is how they should be identified.
-          const char *p = strstr(pool[i].name, "IG_");
-          lgamepad[n].isXInputDevice = (bool)p;
+          string p = utf8_t(pool[i].name);
+          if(auto position = strpos(p, "IG_")) {
+            lgamepad[n].isXInputDevice = true;
+          } else {
+            lgamepad[n].isXInputDevice = false;
+          }
         }
       }
     }
@@ -693,7 +697,9 @@ public:
     //=========
     for(unsigned i = 0; i < min(rawinput.lkeyboard.size(), (unsigned)Keyboard::Count); i++) {
       for(unsigned n = 0; n < nall::Keyboard::Size; n++) {
-        table[keyboard(i).key(n)] = rawinput.lkeyboard[i].state[n];
+        //using keyboard(0)|= instead of keyboard(i)= merges all keyboards to KB0
+        //this is done to favor ease of mapping over flexibility (eg share laptop+USB keyboard mapping)
+        table[keyboard(0).key(n)] |= rawinput.lkeyboard[i].state[n];
       }
     }
 
@@ -723,15 +729,17 @@ public:
     for(unsigned i = 0; i < xinput.lgamepad.size(); i++) {
       if(joy >= Joypad::Count) break;
 
-      table[joypad(i).hat(0)] = xinput.lgamepad[i].hat;
+      table[joypad(joy).hat(0)] = xinput.lgamepad[i].hat;
 
       for(unsigned axis = 0; axis < min(6U, (unsigned)Joypad::Axes); axis++) {
-        table[joypad(i).axis(axis)] = xinput.lgamepad[i].axis[axis];
+        table[joypad(joy).axis(axis)] = xinput.lgamepad[i].axis[axis];
       }
 
       for(unsigned button = 0; button < min(10U, (unsigned)Joypad::Buttons); button++) {
-        table[joypad(i).button(button)] = xinput.lgamepad[i].button[button];
+        table[joypad(joy).button(button)] = xinput.lgamepad[i].button[button];
       }
+
+      joy++;
     }
 
     //=======================
@@ -742,16 +750,18 @@ public:
       if(joy >= Joypad::Count) break;
 
       for(unsigned hat = 0; hat < min(4U, (unsigned)Joypad::Hats); hat++) {
-        table[joypad(i).hat(hat)] = dinput.lgamepad[i].hat[hat];
+        table[joypad(joy).hat(hat)] = dinput.lgamepad[i].hat[hat];
       }
 
       for(unsigned axis = 0; axis < min(6U, (unsigned)Joypad::Axes); axis++) {
-        table[joypad(i).axis(axis)] = dinput.lgamepad[i].axis[axis];
+        table[joypad(joy).axis(axis)] = dinput.lgamepad[i].axis[axis];
       }
 
       for(unsigned button = 0; button < min(128U, (unsigned)Joypad::Buttons); button++) {
-        table[joypad(i).button(button)] = dinput.lgamepad[i].button[button];
+        table[joypad(joy).button(button)] = dinput.lgamepad[i].button[button];
       }
+
+      joy++;
     }
 
     return true;

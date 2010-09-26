@@ -16,10 +16,10 @@ int main(int argc, char **argv) {
   unused = realpath(nall::utf8_t(argw[0]), path);
   #endif
   string realPath = dir(path);
-  string basePath = string(dir(path), "bsnes.cfg");
+  string basePath = string(dir(path), "bsnes-qt.cfg");
   unused = userpath(path);
   if(!strend(path, "/") && !strend(path, "\\")) strcat(path, "/");
-  string userPath = string(path, ".bsnes/bsnes.cfg");
+  string userPath = string(path, ".bsnes/bsnes-qt.cfg");
 
   configuration config;
   string profile;
