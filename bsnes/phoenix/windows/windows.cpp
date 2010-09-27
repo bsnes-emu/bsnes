@@ -211,10 +211,17 @@ static void OS_keyboardProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
       info.cbSize = sizeof(GUITHREADINFO);
       GetGUIThreadInfo(GetCurrentThreadId(), &info);
       Object *object_ptr = (Object*)GetWindowLongPtr(info.hwndFocus, GWLP_USERDATA);
-      if(object_ptr && dynamic_cast<ListBox*>(object_ptr)) {
-        ListBox &listBox = (ListBox&)*object_ptr;
-        if(wparam == VK_RETURN) {
-          if(listBox.onActivate) listBox.onActivate();
+      if(object_ptr) {
+        if(dynamic_cast<ListBox*>(object_ptr)) {
+          ListBox &listBox = (ListBox&)*object_ptr;
+          if(wparam == VK_RETURN) {
+            if(listBox.onActivate) listBox.onActivate();
+          }
+        } else if(dynamic_cast<TextBox*>(object_ptr)) {
+          TextBox &textBox = (TextBox&)*object_ptr;
+          if(wparam == VK_RETURN) {
+            if(textBox.onActivate) textBox.onActivate();
+          }
         }
       }
     }

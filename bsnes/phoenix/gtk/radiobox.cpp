@@ -6,6 +6,7 @@ void RadioBox::create(Window &parent, unsigned x, unsigned y, unsigned width, un
   first = this;
   object->parentWindow = &parent;
   object->widget = gtk_radio_button_new_with_label(0, text);
+  widget->parent = &parent;
   gtk_widget_set_size_request(object->widget, width, height);
   g_signal_connect_swapped(G_OBJECT(object->widget), "toggled", G_CALLBACK(RadioBox_tick), (gpointer)this);
   if(parent.window->defaultFont) setFont(*parent.window->defaultFont);

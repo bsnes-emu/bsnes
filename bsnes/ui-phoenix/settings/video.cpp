@@ -22,9 +22,9 @@ void VideoSettings::create() {
   gammaValue.create      (*this, x +  80, y,  50, Style::SliderHeight, "100%");
   gammaSlider.create     (*this, x + 130, y, 300, Style::SliderHeight, 201); y += Style::SliderHeight + 5;
 
-  gammaRampCheck.create  (*this, x,       y, 430, 15, "Enable NTSC gamma ramp simulation"); y += 15;
+  gammaRampCheck.create  (*this, x,       y, 430, Style::CheckBoxHeight, "Enable NTSC gamma ramp simulation"); y += Style::CheckBoxHeight + 5;
 
-  setGeometry(160, 160, 440, y + 5);
+  setGeometry(160, 160, 440, y);
 
   contrastSlider.setPosition(config.video.contrast);
   brightnessSlider.setPosition(config.video.brightness);

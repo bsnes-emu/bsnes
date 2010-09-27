@@ -34,3 +34,14 @@ void Widget::setFocused() {
   if(visible() == false) setVisible(true);
   gtk_widget_grab_focus(object->widget);
 }
+
+void Widget::setGeometry(unsigned x, unsigned y, unsigned width, unsigned height) {
+  if(widget->parent == 0) return;
+  gtk_fixed_move(GTK_FIXED(widget->parent->object->formContainer), object->widget, x, y);
+  gtk_widget_set_size_request(object->widget, width, height);
+}
+
+Widget::Widget() {
+  widget = new Widget::Data;
+  widget->parent = 0;
+}

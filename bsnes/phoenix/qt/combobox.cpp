@@ -27,7 +27,9 @@ unsigned ComboBox::selection() {
 }
 
 void ComboBox::setSelection(unsigned row) {
+  object->locked = true;
   comboBox->setCurrentIndex(row);
+  object->locked = false;
 }
 
 ComboBox::ComboBox() {

@@ -6,6 +6,8 @@ void InputMapper::AbstractInput::bind() {
   else if(strend(mapping, ".Down")) type = Type::HatDown;
   else if(strend(mapping, ".Left")) type = Type::HatLeft;
   else if(strend(mapping, ".Right")) type = Type::HatRight;
+  else if(strend(mapping, ".Lo")) type = Type::AxisLo;
+  else if(strend(mapping, ".Hi")) type = Type::AxisHi;
   else type = Type::Button;
 
   string mappingValue = mapping;
@@ -21,6 +23,8 @@ int16_t InputMapper::DigitalInput::poll() {
     case AbstractInput::Type::HatDown: return (bool)(value & Joypad::HatDown);
     case AbstractInput::Type::HatLeft: return (bool)(value & Joypad::HatLeft);
     case AbstractInput::Type::HatRight: return (bool)(value & Joypad::HatRight);
+    case AbstractInput::Type::AxisLo: return (bool)(value < -16384);
+    case AbstractInput::Type::AxisHi: return (bool)(value > +16384);
   }
 }
 
@@ -205,4 +209,8 @@ int16_t InputMapper::poll(bool port, SNES::Input::Device device, unsigned index,
     if(device == SNES::Input::Device::Joypad) return port1.gamepad.poll(id);
   }
   return 0;
+}
+
+int16_t InputMapper::value(unsigned scancode) {
+  return state[activeState][scancode];
 }

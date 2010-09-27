@@ -8,6 +8,9 @@ struct Configuration : public configuration {
   struct Video {
     string driver;
     bool synchronize;
+    bool smooth;
+    unsigned scale;
+    bool aspectRatioCorrection;
     unsigned contrast;
     unsigned brightness;
     unsigned gamma;
@@ -18,6 +21,10 @@ struct Configuration : public configuration {
     string driver;
     bool synchronize;
     bool mute;
+    unsigned volume;
+    unsigned latency;
+    unsigned inputFrequency;
+    unsigned outputFrequency;
   } audio;
 
   struct Input {

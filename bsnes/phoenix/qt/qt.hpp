@@ -255,6 +255,7 @@ struct RadioBox : Widget {
 };
 
 struct TextBox : Widget {
+  nall::function<void ()> onActivate;
   nall::function<void ()> onChange;
   void create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const char *text = "");
   void setEditable(bool editable = true);

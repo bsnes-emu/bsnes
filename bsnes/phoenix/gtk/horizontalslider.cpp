@@ -8,6 +8,7 @@ void HorizontalSlider::create(Window &parent, unsigned x, unsigned y, unsigned w
   object->position = 0;
   length += (length == 0);
   object->widget = gtk_hscale_new_with_range(0, length - 1, 1);
+  widget->parent = &parent;
   gtk_scale_set_draw_value(GTK_SCALE(object->widget), false);
   gtk_widget_set_size_request(object->widget, width, height);
   g_signal_connect_swapped(G_OBJECT(object->widget), "value-changed", G_CALLBACK(HorizontalSlider_change), (gpointer)this);

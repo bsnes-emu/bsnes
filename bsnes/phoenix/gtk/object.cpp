@@ -17,6 +17,10 @@ struct Font::Data {
   PangoFontDescription *font;
 };
 
+struct Widget::Data {
+  Window *parent;
+};
+
 struct Window::Data {
   Font *defaultFont;
 };

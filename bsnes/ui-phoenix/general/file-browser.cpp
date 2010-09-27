@@ -16,6 +16,7 @@ void FileBrowser::create() {
 
   setGeometry(160, 160, 640, y);
 
+  pathBox.onActivate = []() { fileBrowser.setFolder(fileBrowser.pathBox.text()); };
   browseButton.onTick = { &FileBrowser::folderBrowse, this };
   upButton.onTick = { &FileBrowser::folderUp, this };
   contentsBox.onActivate = { &FileBrowser::fileActivate, this };
@@ -29,6 +30,10 @@ void FileBrowser::fileOpen(const char *pathname) {
 }
 
 void FileBrowser::setFolder(const char *pathname) {
+  string path = pathname;
+  path.rtrim("/");
+  if(folder == path) return;
+
   contentsBox.reset();
   contents.reset();
 
@@ -42,6 +47,7 @@ void FileBrowser::setFolder(const char *pathname) {
   }
   foreach(item, contents) contentsBox.addItem(item);
   contentsBox.setSelection(0);
+  contentsBox.setFocused();
 }
 
 void FileBrowser::folderBrowse() {
@@ -61,7 +67,6 @@ void FileBrowser::fileActivate() {
     } else {
       filename = string(folder, "/", filename);
       cartridge.loadNormal(filename);
-      SNES::system.power();
       setVisible(false);
     }
   }

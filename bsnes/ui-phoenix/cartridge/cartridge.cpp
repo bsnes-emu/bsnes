@@ -8,19 +8,15 @@ bool Cartridge::loadNormal(const char *filename) {
   SNES::cartridge.load(SNES::Cartridge::Mode::Normal, lstring() << baseXML);
   loadMemory(SNES::memory::cartram, baseName, ".srm");
   loadMemory(SNES::memory::cartrtc, baseName, ".rtc");
-  cheatEditor.load(baseName);
-  utility.setTitle(notdir(baseName));
-  utility.showMessage(string("Loaded ", notdir(baseName)));
-  config.path.current = dir(baseName);
+  utility.cartridgeLoaded();
   return true;
 }
 
 void Cartridge::unload() {
   if(SNES::cartridge.loaded() == false) return;
-  cheatEditor.save(baseName);
   saveMemory(SNES::memory::cartram, baseName, ".srm");
   saveMemory(SNES::memory::cartrtc, baseName, ".rtc");
-  SNES::cartridge.unload();
+  utility.cartridgeUnloaded();
 }
 
 bool Cartridge::loadCartridge(SNES::MappedRAM &memory, string &XML, const char *filename) {

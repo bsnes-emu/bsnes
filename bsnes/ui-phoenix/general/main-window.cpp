@@ -9,18 +9,42 @@ void MainWindow::create() {
 
   system.create(*this, "System");
   systemLoadCartridge.create(system, "Load Cartridge ...");
-  systemSeparator.create(system);
-  systemQuit.create(system, "Quit");
+  systemSeparator1.create(system);
+  systemPower.create(system, "Power Cycle");
+  systemReset.create(system, "Reset");
+  systemSeparator2.create(system);
+  systemPort1.create(system, "Controller Port 1");
+  systemPort1.setEnabled(false);
+  systemPort2.create(system, "Controller Port 2");
+  systemPort2.setEnabled(false);
 
   settings.create(*this, "Settings");
+  settingsVideoMode.create(settings, "Video Mode");
+  settingsVideoMode1x.create(settingsVideoMode, "Scale 1x");
+  settingsVideoMode2x.create(settingsVideoMode1x, "Scale 2x");
+  settingsVideoMode3x.create(settingsVideoMode1x, "Scale 3x");
+  settingsVideoMode4x.create(settingsVideoMode1x, "Scale 4x");
+  settingsVideoMode5x.create(settingsVideoMode1x, "Scale 5x");
+  if(config.video.scale == 1) settingsVideoMode1x.setChecked();
+  if(config.video.scale == 2) settingsVideoMode2x.setChecked();
+  if(config.video.scale == 3) settingsVideoMode3x.setChecked();
+  if(config.video.scale == 4) settingsVideoMode4x.setChecked();
+  if(config.video.scale == 5) settingsVideoMode5x.setChecked();
+  settingsVideoModeSeparator.create(settingsVideoMode);
+  settingsVideoModeAspectRatioCorrection.create(settingsVideoMode, "Correct Aspect Ratio");
+  settingsVideoModeAspectRatioCorrection.setChecked(config.video.aspectRatioCorrection);
+  settingsSmoothVideo.create(settings, "Smooth Video");
+  settingsSmoothVideo.setChecked(config.video.smooth);
+  settingsSeparator1.create(settings);
   settingsSynchronizeVideo.create(settings, "Synchronize Video");
   settingsSynchronizeVideo.setChecked(config.video.synchronize);
   settingsSynchronizeAudio.create(settings, "Synchronize Audio");
   settingsSynchronizeAudio.setChecked(config.audio.synchronize);
   settingsMuteAudio.create(settings, "Mute Audio");
   settingsMuteAudio.setChecked(config.audio.mute);
-  settingsSeparator.create(settings);
+  settingsSeparator2.create(settings);
   settingsVideo.create(settings, "Video Settings ...");
+  settingsAudio.create(settings, "Audio Settings ...");
   settingsInput.create(settings, "Input Settings ...");
   settingsAdvanced.create(settings, "Advanced Settings ...");
 
@@ -52,7 +76,30 @@ void MainWindow::create() {
     utility.loadCartridgeNormal();
   };
 
-  systemQuit.onTick = []() { application.quit = true; };
+  systemPower.onTick = []() {
+    SNES::system.power();
+    utility.showMessage("System was power cycled");
+  };
+
+  systemReset.onTick = []() {
+    SNES::system.reset();
+    utility.showMessage("System was reset");
+  };
+
+  settingsVideoMode1x.onTick = []() { utility.setScale(1); };
+  settingsVideoMode2x.onTick = []() { utility.setScale(2); };
+  settingsVideoMode3x.onTick = []() { utility.setScale(3); };
+  settingsVideoMode4x.onTick = []() { utility.setScale(4); };
+  settingsVideoMode5x.onTick = []() { utility.setScale(5); };
+
+  settingsVideoModeAspectRatioCorrection.onTick = []() {
+    utility.setAspectRatioCorrection(mainWindow.settingsVideoModeAspectRatioCorrection.checked());
+  };
+
+  settingsSmoothVideo.onTick = []() {
+    config.video.smooth = mainWindow.settingsSmoothVideo.checked();
+    video.set(Video::Filter, (unsigned)config.video.smooth);
+  };
 
   settingsSynchronizeVideo.onTick = []() {
     config.video.synchronize = mainWindow.settingsSynchronizeVideo.checked();
@@ -67,6 +114,7 @@ void MainWindow::create() {
   settingsMuteAudio.onTick = []() { config.audio.mute = mainWindow.settingsMuteAudio.checked(); };
 
   settingsVideo.onTick = []() { videoSettings.setVisible(); };
+  settingsAudio.onTick = []() { audioSettings.setVisible(); };
   settingsInput.onTick = []() { inputSettings.setVisible(); };
   settingsAdvanced.onTick = []() { advancedSettings.setVisible(); };
 
@@ -98,4 +146,20 @@ void MainWindow::create() {
     application.quit = true;
     return false;
   };
+
+  synchronize();
+}
+
+void MainWindow::synchronize() {
+  if(SNES::cartridge.loaded() == false) {
+    systemPower.setEnabled(false);
+    systemReset.setEnabled(false);
+    toolsStateSave.setEnabled(false);
+    toolsStateLoad.setEnabled(false);
+  } else {
+    systemPower.setEnabled(true);
+    systemReset.setEnabled(true);
+    toolsStateSave.setEnabled(true);
+    toolsStateLoad.setEnabled(true);
+  }
 }

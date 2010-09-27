@@ -4,6 +4,7 @@ void TextBox::create(Window &parent, unsigned x, unsigned y, unsigned width, uns
   textBox->setText(text);
   if(parent.window->defaultFont) textBox->setFont(*parent.window->defaultFont);
   textBox->show();
+  textBox->connect(textBox, SIGNAL(returnPressed()), SLOT(onActivate()));
   textBox->connect(textBox, SIGNAL(textEdited(const QString&)), SLOT(onChange()));
 }
 

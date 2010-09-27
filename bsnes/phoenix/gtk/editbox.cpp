@@ -4,6 +4,7 @@ static void EditBox_change(EditBox *self) {
 
 void EditBox::create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const char *text) {
   object->widget = gtk_scrolled_window_new(0, 0);
+  widget->parent = &parent;
   gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(object->widget), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
   gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(object->widget), GTK_SHADOW_ETCHED_IN);
   gtk_widget_set_size_request(object->widget, width, height);

@@ -11,7 +11,14 @@ void Utility::setTitle(const char *text) {
 
 void Utility::updateStatus() {
   time_t currentTime = time(0);
-  string text = ((currentTime - statusTime) > 3) ? statusText : statusMessage;
+  string text;
+  if((currentTime - statusTime) <= 3) {
+    text = statusMessage;
+  } else if(SNES::cartridge.loaded() == false) {
+    text = "No cartridge loaded";
+  } else {
+    text = statusText;
+  }
   if(text != statusCurrentText) {
     mainWindow.setStatusText(statusCurrentText = text);
   }
@@ -25,6 +32,35 @@ void Utility::setStatus(const char *text) {
 void Utility::showMessage(const char *text) {
   statusMessage = text;
   statusTime = time(0);
+}
+
+void Utility::setScale(unsigned scale) {
+  config.video.scale = scale;
+  unsigned width = 256 * scale;
+  unsigned height = 224 * scale;
+  if(config.video.aspectRatioCorrection) width *= 54.0 / 47.0;  //PAL = 32.0 / 23.0
+  mainWindow.viewport.setGeometry(0, 0, width, height);
+  mainWindow.setGeometry(128, 128, width, height);
+}
+
+void Utility::setAspectRatioCorrection(bool aspectRatioCorrection) {
+  config.video.aspectRatioCorrection = aspectRatioCorrection;
+  setScale(config.video.scale);
+}
+
+void Utility::cartridgeLoaded() {
+  SNES::system.power();
+  cheatEditor.load(cartridge.baseName);
+  mainWindow.synchronize();
+  utility.setTitle(notdir(cartridge.baseName));
+  utility.showMessage(string("Loaded ", notdir(cartridge.baseName)));
+  config.path.current = dir(cartridge.baseName);
+}
+
+void Utility::cartridgeUnloaded() {
+  SNES::cartridge.unload();
+  cheatEditor.save(cartridge.baseName);
+  mainWindow.synchronize();
 }
 
 void Utility::loadCartridgeNormal() {

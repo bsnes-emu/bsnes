@@ -22,6 +22,7 @@ void Canvas::create(Window &parent, unsigned x, unsigned y, unsigned width, unsi
   canvas->pitch = width * sizeof(uint32_t);
 
   object->widget = gtk_drawing_area_new();
+  widget->parent = &parent;
   GdkColor color;
   color.pixel = color.red = color.green = color.blue = 0;
   gtk_widget_modify_bg(object->widget, GTK_STATE_NORMAL, &color);

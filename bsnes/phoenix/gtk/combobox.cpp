@@ -4,6 +4,7 @@ void ComboBox_change(ComboBox *self) {
 
 void ComboBox::create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const char *text) {
   object->widget = gtk_combo_box_new_text();
+  widget->parent = &parent;
   gtk_widget_set_size_request(object->widget, width, height);
   g_signal_connect_swapped(G_OBJECT(object->widget), "changed", G_CALLBACK(ComboBox_change), (gpointer)this);
 

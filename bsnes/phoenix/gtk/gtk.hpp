@@ -76,6 +76,11 @@ struct Widget : Object {
   void setEnabled(bool enabled = true);
   virtual bool focused();
   virtual void setFocused();
+  virtual void setGeometry(unsigned x, unsigned y, unsigned width, unsigned height);
+  Widget();
+//private:
+  struct Data;
+  Data *widget;
 };
 
 struct Window : Widget {
@@ -190,6 +195,7 @@ private:
 };
 
 struct TextBox : Widget {
+  nall::function<void ()> onActivate;
   nall::function<void ()> onChange;
   void create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const char *text = "");
   void setEditable(bool editable = true);

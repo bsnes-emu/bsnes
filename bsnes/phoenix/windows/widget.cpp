@@ -28,6 +28,10 @@ void Widget::setFocused() {
   SetFocus(widget->window);
 }
 
+void Widget::setGeometry(unsigned x, unsigned y, unsigned width, unsigned height) {
+  SetWindowPos(widget->window, NULL, x, y, width, height, SWP_NOZORDER);
+}
+
 Widget::Widget() {
   os.objects.append(this);
   widget = new Widget::Data;

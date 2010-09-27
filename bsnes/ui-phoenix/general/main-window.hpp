@@ -1,14 +1,29 @@
 struct MainWindow : Window {
   Menu system;
   MenuItem systemLoadCartridge;
-  MenuSeparator systemSeparator;
-  MenuItem systemQuit;
+  MenuSeparator systemSeparator1;
+  MenuItem systemPower;
+  MenuItem systemReset;
+  MenuSeparator systemSeparator2;
+  Menu systemPort1;
+  Menu systemPort2;
   Menu settings;
+  Menu settingsVideoMode;
+  MenuRadioItem settingsVideoMode1x;
+  MenuRadioItem settingsVideoMode2x;
+  MenuRadioItem settingsVideoMode3x;
+  MenuRadioItem settingsVideoMode4x;
+  MenuRadioItem settingsVideoMode5x;
+  MenuSeparator settingsVideoModeSeparator;
+  MenuCheckItem settingsVideoModeAspectRatioCorrection;
+  MenuCheckItem settingsSmoothVideo;
+  MenuSeparator settingsSeparator1;
   MenuCheckItem settingsSynchronizeVideo;
   MenuCheckItem settingsSynchronizeAudio;
   MenuCheckItem settingsMuteAudio;
-  MenuSeparator settingsSeparator;
+  MenuSeparator settingsSeparator2;
   MenuItem settingsVideo;
+  MenuItem settingsAudio;
   MenuItem settingsInput;
   MenuItem settingsAdvanced;
   Menu tools;
@@ -31,6 +46,7 @@ struct MainWindow : Window {
   Viewport viewport;
 
   void create();
+  void synchronize();
 };
 
 extern MainWindow mainWindow;

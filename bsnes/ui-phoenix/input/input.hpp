@@ -1,6 +1,6 @@
 struct InputMapper {
   struct AbstractInput {
-    enum class Type : unsigned { Button, HatUp, HatDown, HatLeft, HatRight } type;
+    enum class Type : unsigned { Button, HatUp, HatDown, HatLeft, HatRight, AxisLo, AxisHi } type;
     string name;
     string mapping;
     unsigned scancode;
@@ -76,6 +76,7 @@ struct InputMapper {
   void bind();
   void poll();
   int16_t poll(bool port, SNES::Input::Device device, unsigned index, unsigned id);
+  int16_t value(unsigned scancode);
 };
 
 extern InputMapper inputMapper;

@@ -84,6 +84,7 @@ struct Widget : Object {
   void setEnabled(bool enabled = true);
   bool focused();
   void setFocused();
+  virtual void setGeometry(unsigned x, unsigned y, unsigned width, unsigned height);
   Widget();
 //private:
   struct Data;
@@ -211,6 +212,7 @@ struct RadioBox : Widget {
 };
 
 struct TextBox : Widget {
+  nall::function<void ()> onActivate;
   nall::function<void ()> onChange;
   void create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const char *text = "");
   nall::string text();

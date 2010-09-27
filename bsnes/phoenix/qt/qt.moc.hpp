@@ -164,7 +164,7 @@ public:
 
 public slots:
   void onChange() {
-    if(self.onChange) self.onChange();
+    if(self.object->locked == false && self.onChange) self.onChange();
   }
 };
 
@@ -262,6 +262,10 @@ public:
   }
 
 public slots:
+  void onActivate() {
+    if(self.onActivate) self.onActivate();
+  }
+
   void onChange() {
     if(self.onChange) self.onChange();
   }

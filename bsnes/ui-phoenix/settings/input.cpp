@@ -17,7 +17,7 @@ void InputSettings::create() {
   deviceLabel.create(*this, x + 255, y, 50, Style::ComboBoxHeight, "Device:");
   deviceBox.create(*this, x + 305, y, 200, Style::ComboBoxHeight); y += Style::ComboBoxHeight + 5;
 
-  mappingList.create(*this, x, y, 505, 300, "Name\tMapping"); y += 300 + 5;
+  mappingList.create(*this, x, y, 505, 265, "Name\tMapping"); y += 265 + 5;
   mappingList.setHeaderVisible();
   mappingList.setFocused();
 
@@ -104,8 +104,41 @@ void InputSettings::inputEvent(uint16_t scancode, int16_t value) {
       else if(value == Joypad::HatDown) setMapping(string(mapping, ".Down"));
       else if(value == Joypad::HatLeft) setMapping(string(mapping, ".Left"));
       else if(value == Joypad::HatRight) setMapping(string(mapping, ".Right"));
+    } else if(Joypad::isAnyAxis(scancode)) {
+      if(joypadsCalibrated == false) return calibrateJoypads();
+      unsigned joypadNumber = Joypad::numberDecode(scancode);
+      unsigned axisNumber = Joypad::axisDecode(scancode);
+      int16_t calibration = joypadCalibration[joypadNumber][axisNumber];
+      if(calibration > -12288 && calibration < +12288 && value < -24576) setMapping(string(mapping, ".Lo"));
+      else if(calibration > -12288 && calibration < +12288 && value > +24576) setMapping(string(mapping, ".Hi"));
+      else if(calibration <= -12288 && value >= +12288) setMapping(string(mapping, ".Hi"));
+      else if(calibration >= +12288 && value <= -12288) setMapping(string(mapping, ".Lo"));
     } else if(Joypad::isAnyButton(scancode) && value) {
       setMapping(mapping);
     }
   }
+}
+
+void InputSettings::calibrateJoypads() {
+  if(joypadsCalibrating == true) return;
+  joypadsCalibrating = true;
+  MessageWindow::information(*this,
+    "Analog joypads must be calibrated prior to use.\n\n"
+    "Please move all analog axes, and press all analog buttons.\n"
+    "Please do this for every controller you wish to use.\n"
+    "Once finished, please let go of all axes and buttons, and press OK."
+  );
+  inputMapper.poll();
+  for(unsigned j = 0; j < Joypad::Count &&j<2; j++) {
+    for(unsigned a = 0; a < Joypad::Axes; a++) {
+      joypadCalibration[j][a] = inputMapper.value(joypad(j).axis(a));
+    }
+  }
+  joypadsCalibrating = false;
+  joypadsCalibrated = true;
+}
+
+InputSettings::InputSettings() {
+  joypadsCalibrated = false;
+  joypadsCalibrating = false;
 }

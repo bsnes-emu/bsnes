@@ -1,7 +1,7 @@
 include nall/Makefile
 snes := snes
-profile := compatibility
-ui := ui-qt
+profile := performance
+ui := ui-phoenix
 
 # compiler
 c       := $(compiler) -std=gnu99
