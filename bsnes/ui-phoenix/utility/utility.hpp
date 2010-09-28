@@ -4,8 +4,7 @@ struct Utility : property<Utility> {
   void setStatus(const char *text);
   void showMessage(const char *text);
 
-  void setScale(unsigned scale);
-  void setAspectRatioCorrection(bool aspectRatioCorrection);
+  void setScale(unsigned scale = 0);
 
   void cartridgeLoaded();
   void cartridgeUnloaded();

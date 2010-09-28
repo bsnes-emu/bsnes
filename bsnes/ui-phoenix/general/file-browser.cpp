@@ -5,9 +5,8 @@ void FileBrowser::create() {
   Window::create(0, 0, 256, 256, "Load Cartridge");
   setDefaultFont(application.proportionalFont);
 
-  unsigned x = 5, y = 5;
+  unsigned x = 5, y = 5, height = Style::TextBoxHeight;
 
-  unsigned height = Style::EditBoxHeight;
   pathBox.create(*this, x, y, 630 - height - height - 10, height);
   browseButton.create(*this, x + 630 - height - height - 5, y, height, height, "...");
   upButton.create(*this, x + 630 - height, y, height, height, ".."); y += height + 5;
@@ -22,18 +21,42 @@ void FileBrowser::create() {
   contentsBox.onActivate = { &FileBrowser::fileActivate, this };
 }
 
-void FileBrowser::fileOpen(const char *pathname) {
+void FileBrowser::fileOpen(FileBrowser::Mode requestedMode, function<void (string)> requestedCallback) {
+  callback = requestedCallback;
+  if(mode == requestedMode && string(folder, "/") == config.path.current) {
+    setVisible();
+    contentsBox.setFocused();
+    return;
+  }
+
+  filters.reset();
+  switch(mode = requestedMode) {
+    case Mode::Cartridge: {
+      filters.append(".sfc");
+      break;
+    }
+    case Mode::Satellaview: {
+      filters.append(".bs");
+      break;
+    }
+    case Mode::SufamiTurbo: {
+      filters.append(".st");
+      break;
+    }
+    case Mode::GameBoy: {
+      filters.append(".gb");
+      filters.append(".gbc");
+      filters.append(".sgb");
+    }
+  }
+
   setVisible(false);
-  setFolder(pathname);
+  setFolder(config.path.current);
   setVisible(true);
   contentsBox.setFocused();
 }
 
 void FileBrowser::setFolder(const char *pathname) {
-  string path = pathname;
-  path.rtrim("/");
-  if(folder == path) return;
-
   contentsBox.reset();
   contents.reset();
 
@@ -43,7 +66,14 @@ void FileBrowser::setFolder(const char *pathname) {
   pathBox.setText(folder);
   lstring contentsList = directory::contents(folder);
   foreach(item, contentsList) {
-    if(strend(item, "/") || strend(item, ".sfc")) contents.append(item);
+    if(strend(item, "/")) {
+      contents.append(item);
+    } else foreach(filter, filters) {
+      if(strend(item, filter)) {
+        contents.append(item);
+        break;
+      }
+    }
   }
   foreach(item, contents) contentsBox.addItem(item);
   contentsBox.setSelection(0);
@@ -65,9 +95,10 @@ void FileBrowser::fileActivate() {
     if(strend(filename, "/")) {
       setFolder(string(folder, "/", filename));
     } else {
-      filename = string(folder, "/", filename);
-      cartridge.loadNormal(filename);
       setVisible(false);
+      filename = string(folder, "/", filename);
+      config.path.current = dir(filename);
+      if(callback) callback(filename);
     }
   }
 }

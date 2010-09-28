@@ -38,23 +38,29 @@ extern Application application;
 struct Style {
   enum : unsigned {
   #if defined(PHOENIX_WINDOWS)
+    ButtonHeight = 25,
     CheckBoxHeight = 15,
     ComboBoxHeight = 22,
     EditBoxHeight = 22,
     LabelHeight = 15,
     SliderHeight = 25,
+    TextBoxHeight = 22,
   #elif defined(PHOENIX_GTK)
+    ButtonHeight = 25,
     CheckBoxHeight = 15,
     ComboBoxHeight = 22,
     EditBoxHeight = 22,
     LabelHeight = 15,
     SliderHeight = 22,
+    TextBoxHeight = 22,
   #elif defined(PHOENIX_QT)
+    ButtonHeight = 25,
     CheckBoxHeight = 15,
     ComboBoxHeight = 22,
     EditBoxHeight = 22,
     LabelHeight = 15,
     SliderHeight = 22,
+    TextBoxHeight = 22,
   #endif
   };
 };

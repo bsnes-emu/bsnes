@@ -33,6 +33,8 @@ void Application::main(int argc, char **argv) {
   monospaceFont.create("Liberation Mono", 8);
   #endif
 
+  SNES::system.init(&interface);
+
   if(config.video.driver == "") config.video.driver = video.default_driver();
   if(config.audio.driver == "") config.audio.driver = audio.default_driver();
   if(config.input.driver == "") config.input.driver = video.default_driver();
@@ -40,6 +42,8 @@ void Application::main(int argc, char **argv) {
   palette.update();
   mainWindow.create();
   fileBrowser.create();
+  singleSlotLoader.create();
+  doubleSlotLoader.create();
   videoSettings.create();
   audioSettings.create();
   inputSettings.create();
@@ -81,7 +85,6 @@ void Application::main(int argc, char **argv) {
     input.init();
   }
 
-  SNES::system.init(&interface);
   if(argc == 2) cartridge.loadNormal(argv[1]);
 
   while(quit == false) {

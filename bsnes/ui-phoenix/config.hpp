@@ -3,11 +3,15 @@ struct Configuration : public configuration {
     string base;
     string user;
     string current;
+    string satellaviewBios;
+    string sufamiTurboBios;
+    string superGameBoyBios;
   } path;
 
   struct Video {
     string driver;
     bool synchronize;
+    bool region;
     bool smooth;
     unsigned scale;
     bool aspectRatioCorrection;

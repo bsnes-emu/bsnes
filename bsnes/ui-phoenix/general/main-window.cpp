@@ -9,6 +9,12 @@ void MainWindow::create() {
 
   system.create(*this, "System");
   systemLoadCartridge.create(system, "Load Cartridge ...");
+  systemLoadCartridgeSpecial.create(system, "Load Special");
+  systemLoadCartridgeBsxSlotted.create(systemLoadCartridgeSpecial, "Load BS-X Slotted Cartridge ...");
+  systemLoadCartridgeBsx.create(systemLoadCartridgeSpecial, "Load BS-X Cartridge ...");
+  systemLoadCartridgeSufamiTurbo.create(systemLoadCartridgeSpecial, "Load Sufami Turbo Cartridge ...");
+  systemLoadCartridgeSuperGameBoy.create(systemLoadCartridgeSpecial, "Load Super Game Boy Cartridge ...");
+  systemLoadCartridgeSuperGameBoy.setEnabled(SNES::supergameboy.opened());
   systemSeparator1.create(system);
   systemPower.create(system, "Power Cycle");
   systemReset.create(system, "Reset");
@@ -30,9 +36,14 @@ void MainWindow::create() {
   if(config.video.scale == 3) settingsVideoMode3x.setChecked();
   if(config.video.scale == 4) settingsVideoMode4x.setChecked();
   if(config.video.scale == 5) settingsVideoMode5x.setChecked();
-  settingsVideoModeSeparator.create(settingsVideoMode);
+  settingsVideoModeSeparator1.create(settingsVideoMode);
   settingsVideoModeAspectRatioCorrection.create(settingsVideoMode, "Correct Aspect Ratio");
   settingsVideoModeAspectRatioCorrection.setChecked(config.video.aspectRatioCorrection);
+  settingsVideoModeSeparator2.create(settingsVideoMode);
+  settingsVideoModeNTSC.create(settingsVideoMode, "NTSC");
+  settingsVideoModePAL.create(settingsVideoModeNTSC, "PAL");
+  if(config.video.region == 0) settingsVideoModeNTSC.setChecked();
+  if(config.video.region == 1) settingsVideoModePAL.setChecked();
   settingsSmoothVideo.create(settings, "Smooth Video");
   settingsSmoothVideo.setChecked(config.video.smooth);
   settingsSeparator1.create(settings);
@@ -72,9 +83,11 @@ void MainWindow::create() {
   setMenuVisible(true);
   setStatusVisible(true);
 
-  systemLoadCartridge.onTick = []() {
-    utility.loadCartridgeNormal();
-  };
+  systemLoadCartridge.onTick = []() { utility.loadCartridgeNormal(); };
+  systemLoadCartridgeBsxSlotted.onTick = []() { singleSlotLoader.loadCartridgeBsxSlotted(); };
+  systemLoadCartridgeBsx.onTick = []() { singleSlotLoader.loadCartridgeBsx(); };
+  systemLoadCartridgeSufamiTurbo.onTick = []() { doubleSlotLoader.loadCartridgeSufamiTurbo(); };
+  systemLoadCartridgeSuperGameBoy.onTick = []() { singleSlotLoader.loadCartridgeSuperGameBoy(); };
 
   systemPower.onTick = []() {
     SNES::system.power();
@@ -93,8 +106,12 @@ void MainWindow::create() {
   settingsVideoMode5x.onTick = []() { utility.setScale(5); };
 
   settingsVideoModeAspectRatioCorrection.onTick = []() {
-    utility.setAspectRatioCorrection(mainWindow.settingsVideoModeAspectRatioCorrection.checked());
+    config.video.aspectRatioCorrection = mainWindow.settingsVideoModeAspectRatioCorrection.checked();
+    utility.setScale();
   };
+
+  settingsVideoModeNTSC.onTick = []() { config.video.region = 0; utility.setScale(); };
+  settingsVideoModePAL.onTick  = []() { config.video.region = 1; utility.setScale(); };
 
   settingsSmoothVideo.onTick = []() {
     config.video.smooth = mainWindow.settingsSmoothVideo.checked();

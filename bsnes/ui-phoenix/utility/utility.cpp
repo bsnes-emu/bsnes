@@ -35,17 +35,20 @@ void Utility::showMessage(const char *text) {
 }
 
 void Utility::setScale(unsigned scale) {
+  if(scale == 0) scale = config.video.scale;
   config.video.scale = scale;
-  unsigned width = 256 * scale;
-  unsigned height = 224 * scale;
-  if(config.video.aspectRatioCorrection) width *= 54.0 / 47.0;  //PAL = 32.0 / 23.0
+  unsigned width, height;
+  if(config.video.region == 0) {
+    width = 256 * scale;
+    height = 224 * scale;
+    if(config.video.aspectRatioCorrection) width *= 54.0 / 47.0;
+  } else {
+    width = 256 * scale;
+    height = 239 * scale;
+    if(config.video.aspectRatioCorrection) width *= 32.0 / 23.0;
+  }
   mainWindow.viewport.setGeometry(0, 0, width, height);
   mainWindow.setGeometry(128, 128, width, height);
-}
-
-void Utility::setAspectRatioCorrection(bool aspectRatioCorrection) {
-  config.video.aspectRatioCorrection = aspectRatioCorrection;
-  setScale(config.video.scale);
 }
 
 void Utility::cartridgeLoaded() {
@@ -54,7 +57,6 @@ void Utility::cartridgeLoaded() {
   mainWindow.synchronize();
   utility.setTitle(notdir(cartridge.baseName));
   utility.showMessage(string("Loaded ", notdir(cartridge.baseName)));
-  config.path.current = dir(cartridge.baseName);
 }
 
 void Utility::cartridgeUnloaded() {
@@ -65,7 +67,9 @@ void Utility::cartridgeUnloaded() {
 
 void Utility::loadCartridgeNormal() {
   if(config.settings.useNativeDialogs == false) {
-    fileBrowser.fileOpen(config.path.current);
+    fileBrowser.fileOpen(FileBrowser::Mode::Cartridge, [](string filename) {
+      cartridge.loadNormal(filename);
+    });
   } else {
     string filename = os.fileOpen(mainWindow, "SNES cartridges\t*.sfc\nAll files\t*", config.path.current);
     if(filename != "") {

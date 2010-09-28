@@ -1,6 +1,11 @@
 struct MainWindow : Window {
   Menu system;
   MenuItem systemLoadCartridge;
+  Menu systemLoadCartridgeSpecial;
+  MenuItem systemLoadCartridgeBsxSlotted;
+  MenuItem systemLoadCartridgeBsx;
+  MenuItem systemLoadCartridgeSufamiTurbo;
+  MenuItem systemLoadCartridgeSuperGameBoy;
   MenuSeparator systemSeparator1;
   MenuItem systemPower;
   MenuItem systemReset;
@@ -14,8 +19,11 @@ struct MainWindow : Window {
   MenuRadioItem settingsVideoMode3x;
   MenuRadioItem settingsVideoMode4x;
   MenuRadioItem settingsVideoMode5x;
-  MenuSeparator settingsVideoModeSeparator;
+  MenuSeparator settingsVideoModeSeparator1;
   MenuCheckItem settingsVideoModeAspectRatioCorrection;
+  MenuSeparator settingsVideoModeSeparator2;
+  MenuRadioItem settingsVideoModeNTSC;
+  MenuRadioItem settingsVideoModePAL;
   MenuCheckItem settingsSmoothVideo;
   MenuSeparator settingsSeparator1;
   MenuCheckItem settingsSynchronizeVideo;

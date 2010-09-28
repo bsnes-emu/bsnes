@@ -71,6 +71,20 @@ void Interface::video_refresh(const uint16_t *data, unsigned width, unsigned hei
   uint32_t *buffer;
   unsigned outpitch;
 
+  if(config.video.region == 0 && (height == 239 || height == 478)) {
+    //NTSC overscan compensation (center image, remove 15 lines)
+    data += 7 * 1024;
+    if(height == 239) height = 224;
+    if(height == 478) height = 448;
+  }
+
+  if(config.video.region == 1 && (height == 224 || height == 448)) {
+    //PAL underscan compensation (center image, add 15 lines)
+    data -= 7 * 1024;
+    if(height == 224) height = 239;
+    if(height == 448) height = 478;
+  }
+
   if(video.lock(buffer, outpitch, width, height)) {
     for(unsigned y = 0; y < height; y++) {
       uint32_t *output = buffer + y * (outpitch >> 2);

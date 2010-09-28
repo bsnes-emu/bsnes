@@ -4,11 +4,14 @@ struct FileBrowser : Window {
   Button upButton;
   ListBox contentsBox;
 
-  void fileOpen(const char *pathname);
+  enum class Mode : unsigned { Cartridge, Satellaview, SufamiTurbo, GameBoy } mode;
+  void fileOpen(Mode mode, function<void (string)> callback);
   void create();
 
 private:
+  function<void (string)> callback;
   string folder;
+  lstring filters;
   lstring contents;
 
   void folderBrowse();
