@@ -48,6 +48,9 @@ void FileBrowser::fileOpen(FileBrowser::Mode requestedMode, function<void (strin
       filters.append(".gbc");
       filters.append(".sgb");
     }
+    case Mode::Shader: {
+      filters.append(".shader");
+    }
   }
 
   setVisible(false);

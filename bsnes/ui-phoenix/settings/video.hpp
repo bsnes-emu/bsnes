@@ -10,6 +10,10 @@ struct VideoSettings : Window {
   Label gammaValue;
   HorizontalSlider gammaSlider;
   CheckBox gammaRampCheck;
+  Label shaderLabel;
+  TextBox shaderPath;
+  Button shaderClear;
+  Button shaderSelect;
 
   void create();
   void adjust();

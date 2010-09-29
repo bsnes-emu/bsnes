@@ -30,7 +30,7 @@ public:
     string startup;  //startup path
     string rom, save, state, patch, cheat, data;
     string bsx, st, sgb;
-    string fragmentShader, vertexShader;
+    string shader;
 
     struct Current {
       string folder, movie, shader, cartridge;

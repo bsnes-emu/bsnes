@@ -37,14 +37,9 @@ public:
   QSlider *cropBottomSlider;
   QLabel *pixelShaderLabel;
   QGridLayout *pixelShaderLayout;
-  QLabel *fragmentShaderLabel;
-  QLineEdit *fragmentShaderValue;
-  QPushButton *fragmentShaderSelect;
-  QPushButton *fragmentShaderDefault;
-  QLabel *vertexShaderLabel;
-  QLineEdit *vertexShaderValue;
-  QPushButton *vertexShaderSelect;
-  QPushButton *vertexShaderDefault;
+  QLineEdit *shaderValue;
+  QPushButton *shaderSelect;
+  QPushButton *shaderDefault;
 
   void synchronizePixelShaderSettings();
   void syncUi();
@@ -61,14 +56,11 @@ private slots:
   void cropTopAdjust(int);
   void cropRightAdjust(int);
   void cropBottomAdjust(int);
-  void selectFragmentShader();
-  void selectVertexShader();
-  void defaultFragmentShader();
-  void defaultVertexShader();
+  void selectShader();
+  void defaultShader();
 
 private:
-  void assignFragmentShader(const string &filename);
-  void assignVertexShader(const string &filename);
+  void assignShader(const string &filename);
 };
 
 extern VideoSettingsWindow *videoSettingsWindow;

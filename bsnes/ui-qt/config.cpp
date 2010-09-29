@@ -60,8 +60,7 @@ Configuration::Configuration() {
   attach(path.bsx   = "", "path.bsx");
   attach(path.st    = "", "path.st");
   attach(path.sgb   = "", "path.sgb");
-  attach(path.fragmentShader = "", "path.fragmentShader");
-  attach(path.vertexShader   = "", "path.vertexShader");
+  attach(path.shader = "", "path.shader");
 
   attach(path.current.folder    = "", "path.current.folder");
   attach(path.current.movie     = "", "path.current.movie");

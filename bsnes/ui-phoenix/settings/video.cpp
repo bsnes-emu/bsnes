@@ -5,7 +5,7 @@ void VideoSettings::create() {
   Window::create(0, 0, 256, 256, "Video Settings");
   setDefaultFont(application.proportionalFont);
 
-  unsigned x = 5, y = 5;
+  unsigned x = 5, y = 5, height = Style::TextBoxHeight;
 
   colorAdjustmentLabel.create(*this, x, y, 430, Style::LabelHeight, "Color Adjustment :."); y += Style::LabelHeight + 5;
   colorAdjustmentLabel.setFont(application.proportionalFontBold);
@@ -24,6 +24,15 @@ void VideoSettings::create() {
 
   gammaRampCheck.create  (*this, x,       y, 430, Style::CheckBoxHeight, "Enable NTSC gamma ramp simulation"); y += Style::CheckBoxHeight + 5;
 
+  shaderLabel.create(*this, x, y, 340, Style::LabelHeight, "Pixel Shader :."); y += Style::LabelHeight + 5;
+  shaderLabel.setFont(application.proportionalFontBold);
+
+  shaderPath.create(*this, x, y, 430 - height - height - 10, height);
+  shaderPath.setEditable(false);
+  shaderPath.setText(config.video.shader);
+  shaderClear.create(*this, x + 430 - height - height - 5, y, height, height, "");
+  shaderSelect.create(*this, x + 430 - height, y, height, height, "..."); y += height + 5;
+
   setGeometry(160, 160, 440, y);
 
   contrastSlider.setPosition(config.video.contrast);
@@ -33,6 +42,20 @@ void VideoSettings::create() {
 
   contrastSlider.onChange = brightnessSlider.onChange = gammaSlider.onChange = gammaRampCheck.onTick =
   { &VideoSettings::adjust, this };
+
+  shaderClear.onTick = []() {
+    config.video.shader = "";
+    videoSettings.shaderPath.setText(config.video.shader);
+    utility.setShader();
+  };
+
+  shaderSelect.onTick = []() {
+    fileBrowser.fileOpen(FileBrowser::Mode::Shader, [](string filename) {
+      config.video.shader = filename;
+      videoSettings.shaderPath.setText(config.video.shader);
+      utility.setShader();
+    });
+  };
 }
 
 void VideoSettings::adjust() {

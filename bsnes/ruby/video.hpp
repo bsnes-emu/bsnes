@@ -3,6 +3,7 @@ public:
   static const char *Handle;
   static const char *Synchronize;
   static const char *Filter;
+  static const char *Shader;
   static const char *FragmentShader;
   static const char *VertexShader;
 

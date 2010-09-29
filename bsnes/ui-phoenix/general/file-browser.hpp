@@ -4,7 +4,7 @@ struct FileBrowser : Window {
   Button upButton;
   ListBox contentsBox;
 
-  enum class Mode : unsigned { Cartridge, Satellaview, SufamiTurbo, GameBoy } mode;
+  enum class Mode : unsigned { Cartridge, Satellaview, SufamiTurbo, GameBoy, Shader } mode;
   void fileOpen(Mode mode, function<void (string)> callback);
   void create();
 

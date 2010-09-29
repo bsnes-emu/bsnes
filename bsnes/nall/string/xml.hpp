@@ -79,7 +79,7 @@ inline string xml_element::parse() const {
         data << cdata;
         offset += strlen(cdata);
 
-        source += offset + 3;
+        source += 9 + offset + 3;
         continue;
       } else {
         return "";

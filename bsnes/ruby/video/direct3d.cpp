@@ -24,7 +24,7 @@ public:
   LPDIRECT3DTEXTURE9      texture;
   LPDIRECT3DSURFACE9      surface;
   LPD3DXEFFECT            effect;
-  string                  shaderSource;
+  string                  shader_source_xml;
 
   bool lost;
   unsigned iwidth, iheight;
@@ -64,7 +64,7 @@ public:
     if(name == Video::Handle) return true;
     if(name == Video::Synchronize) return true;
     if(name == Video::Filter) return true;
-    if(name == Video::FragmentShader) return true;
+    if(name == Video::Shader) return true;
     return false;
   }
 
@@ -92,8 +92,8 @@ public:
       return true;
     }
 
-    if(name == Video::FragmentShader) {
-      set_fragment_shader(any_cast<const char*>(value));
+    if(name == Video::Shader) {
+      set_shader(any_cast<const char*>(value));
       return true;
     }
 
@@ -268,7 +268,7 @@ public:
     //failure to do so causes scaling issues on some video drivers.
     if(state.width != rd.right || state.height != rd.bottom) {
       init();
-      set_fragment_shader(shaderSource);
+      set_shader(shader_source_xml);
       return;
     }
 
@@ -327,7 +327,7 @@ public:
     if(device->Present(0, 0, 0, 0) == D3DERR_DEVICELOST) lost = true;
   }
 
-  void set_fragment_shader(const char *source) {
+  void set_shader(const char *source) {
     if(!caps.shader) return;
 
     if(effect) {
@@ -336,11 +336,27 @@ public:
     }
 
     if(!source || !*source) {
-      shaderSource = "";
+      shader_source_xml = "";
       return;
     }
+    shader_source_xml = source;
 
-    shaderSource = source;
+    bool is_hlsl = false;
+    string shader_source;
+    xml_element document = xml_parse(shader_source_xml);
+    foreach(head, document.element) {
+      if(head.name == "shader") {
+        foreach(attribute, head.attribute) {
+          if(attribute.name == "language" && attribute.content == "HLSL") is_hlsl = true;
+        }
+        foreach(element, head.element) {
+          if(element.name == "source") {
+            if(is_hlsl) shader_source = element.parse();
+          }
+        }
+      }
+    }
+    if(shader_source == "") return;
 
     HMODULE d3dx;
     for(unsigned i = 0; i < 256; i++) {
@@ -356,7 +372,7 @@ public:
     TextureProc textureProc = (TextureProc)GetProcAddress(d3dx, "D3DXCreateTextureFromFileA");
 
     LPD3DXBUFFER pBufferErrors = NULL;
-    effectProc(device, shaderSource, lstrlenA(source), NULL, NULL, 0, NULL, &effect, &pBufferErrors);
+    effectProc(device, shader_source, lstrlenA(shader_source), NULL, NULL, 0, NULL, &effect, &pBufferErrors);
 
     D3DXHANDLE hTech;
     effect->FindNextValidTechnique(NULL, &hTech);

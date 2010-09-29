@@ -51,6 +51,12 @@ void Utility::setScale(unsigned scale) {
   mainWindow.setGeometry(128, 128, width, height);
 }
 
+void Utility::setShader() {
+  string data;
+  data.readfile(config.video.shader);
+  video.set(Video::Shader, (const char*)data);
+}
+
 void Utility::cartridgeLoaded() {
   SNES::system.power();
   cheatEditor.load(cartridge.baseName);

@@ -29,8 +29,7 @@ public:
     if(name == Video::Handle) return true;
     if(name == Video::Synchronize) return true;
     if(name == Video::Filter) return true;
-    if(name == Video::FragmentShader) return true;
-    if(name == Video::VertexShader) return true;
+    if(name == Video::Shader) return true;
     return false;
   }
 
@@ -59,13 +58,8 @@ public:
       return true;
     }
 
-    if(name == Video::FragmentShader) {
-      OpenGL::set_fragment_shader(any_cast<const char*>(value));
-      return true;
-    }
-
-    if(name == Video::VertexShader) {
-      OpenGL::set_vertex_shader(any_cast<const char*>(value));
+    if(name == Video::Shader) {
+      OpenGL::set_shader(any_cast<const char*>(value));
       return true;
     }
 

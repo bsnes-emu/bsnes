@@ -62,6 +62,7 @@ void Application::main(int argc, char **argv) {
     video.driver("None");
     video.init();
   }
+  utility.setShader();
 
   audio.driver(config.audio.driver);
   audio.set(Audio::Handle, mainWindow.viewport.handle());

@@ -2,7 +2,7 @@
   video.glx
   author: byuu
   license: public domain
-  last updated: 2010-01-05
+  last updated: 2010-09-28
 
   Design notes:
   SGI's GLX is the X11/Xlib interface to OpenGL.
@@ -62,6 +62,7 @@ public:
     if(name == Video::Handle) return true;
     if(name == Video::Synchronize) return true;
     if(name == Video::Filter) return true;
+    if(name == Video::Shader) return true;
     if(name == Video::FragmentShader) return true;
     if(name == Video::VertexShader) return true;
     return false;
@@ -90,6 +91,11 @@ public:
 
     if(name == Video::Filter) {
       settings.filter = any_cast<unsigned>(value);
+      return true;
+    }
+
+    if(name == Video::Shader) {
+      OpenGL::set_shader(any_cast<const char*>(value));
       return true;
     }
 

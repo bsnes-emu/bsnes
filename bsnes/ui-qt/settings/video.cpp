@@ -138,29 +138,14 @@ VideoSettingsWindow::VideoSettingsWindow() {
   pixelShaderLayout = new QGridLayout;
   layout->addLayout(pixelShaderLayout);
 
-  fragmentShaderLabel = new QLabel("Fragment:");
-  pixelShaderLayout->addWidget(fragmentShaderLabel, 0, 0);
+  shaderValue = new QLineEdit;
+  pixelShaderLayout->addWidget(shaderValue, 0, 0);
 
-  fragmentShaderValue = new QLineEdit;
-  pixelShaderLayout->addWidget(fragmentShaderValue, 0, 1);
+  shaderSelect = new QPushButton("Select ...");
+  pixelShaderLayout->addWidget(shaderSelect, 0, 1);
 
-  fragmentShaderSelect = new QPushButton("Select ...");
-  pixelShaderLayout->addWidget(fragmentShaderSelect, 0, 2);
-
-  fragmentShaderDefault = new QPushButton("Default");
-  pixelShaderLayout->addWidget(fragmentShaderDefault, 0, 3);
-
-  vertexShaderLabel = new QLabel("Vertex:");
-  pixelShaderLayout->addWidget(vertexShaderLabel, 1, 0);
-
-  vertexShaderValue = new QLineEdit;
-  pixelShaderLayout->addWidget(vertexShaderValue, 1, 1);
-
-  vertexShaderSelect = new QPushButton("Select ...");
-  pixelShaderLayout->addWidget(vertexShaderSelect, 1, 2);
-
-  vertexShaderDefault = new QPushButton("Default");
-  pixelShaderLayout->addWidget(vertexShaderDefault, 1, 3);
+  shaderDefault = new QPushButton("Default");
+  pixelShaderLayout->addWidget(shaderDefault, 0, 2);
 
   connect(autoHideFullscreenMenu, SIGNAL(stateChanged(int)), this, SLOT(autoHideFullscreenMenuToggle()));
   connect(contrastSlider, SIGNAL(valueChanged(int)), this, SLOT(contrastAdjust(int)));
@@ -172,31 +157,18 @@ VideoSettingsWindow::VideoSettingsWindow() {
   connect(cropTopSlider, SIGNAL(valueChanged(int)), this, SLOT(cropTopAdjust(int)));
   connect(cropRightSlider, SIGNAL(valueChanged(int)), this, SLOT(cropRightAdjust(int)));
   connect(cropBottomSlider, SIGNAL(valueChanged(int)), this, SLOT(cropBottomAdjust(int)));
-  connect(fragmentShaderSelect, SIGNAL(released()), this, SLOT(selectFragmentShader()));
-  connect(fragmentShaderDefault, SIGNAL(released()), this, SLOT(defaultFragmentShader()));
-  connect(vertexShaderSelect, SIGNAL(released()), this, SLOT(selectVertexShader()));
-  connect(vertexShaderDefault, SIGNAL(released()), this, SLOT(defaultVertexShader()));
+  connect(shaderSelect, SIGNAL(released()), this, SLOT(selectShader()));
+  connect(shaderDefault, SIGNAL(released()), this, SLOT(defaultShader()));
 
   syncUi();
 }
 
 void VideoSettingsWindow::synchronizePixelShaderSettings() {
-  if(!video.cap(Video::FragmentShader) && !video.cap(Video::VertexShader)) {
+  if(video.cap(Video::Shader) == false) {
     pixelShaderLabel->hide();
-  }
-
-  if(!video.cap(Video::FragmentShader)) {
-    fragmentShaderLabel->hide();
-    fragmentShaderValue->hide();
-    fragmentShaderSelect->hide();
-    fragmentShaderDefault->hide();
-  }
-
-  if(!video.cap(Video::VertexShader)) {
-    vertexShaderLabel->hide();
-    vertexShaderValue->hide();
-    vertexShaderSelect->hide();
-    vertexShaderDefault->hide();
+    shaderValue->hide();
+    shaderSelect->hide();
+    shaderDefault->hide();
   }
 }
 
@@ -239,8 +211,7 @@ void VideoSettingsWindow::syncUi() {
   cropBottomValue->setText(string() << n << "%");
   cropBottomSlider->setSliderPosition(n);
 
-  fragmentShaderValue->setText(config().path.fragmentShader);
-  vertexShaderValue->setText(config().path.vertexShader);
+  shaderValue->setText(config().path.shader);
 }
 
 void VideoSettingsWindow::autoHideFullscreenMenuToggle() {
@@ -301,41 +272,21 @@ void VideoSettingsWindow::cropBottomAdjust(int state) {
   syncUi();
 }
 
-void VideoSettingsWindow::selectFragmentShader() {
+void VideoSettingsWindow::selectShader() {
   fileBrowser->onChange.reset();
-  fileBrowser->onActivate = { &VideoSettingsWindow::assignFragmentShader, this };
-  fileBrowser->onAccept = { &VideoSettingsWindow::assignFragmentShader, this };
-  fileBrowser->setWindowTitle("Select Fragment Shader");
+  fileBrowser->onActivate = { &VideoSettingsWindow::assignShader, this };
+  fileBrowser->onAccept = { &VideoSettingsWindow::assignShader, this };
+  fileBrowser->setWindowTitle("Select Pixel Shader");
   fileBrowser->setPath(config().path.current.shader);
-  fileBrowser->setNameFilters("All files (*)");
+  fileBrowser->setNameFilters("Shader files (*.shader)");
   fileBrowser->chooseFile();
 }
 
-void VideoSettingsWindow::selectVertexShader() {
-  fileBrowser->onChange.reset();
-  fileBrowser->onActivate = { &VideoSettingsWindow::assignVertexShader, this };
-  fileBrowser->onAccept = { &VideoSettingsWindow::assignVertexShader, this };
-  fileBrowser->setWindowTitle("Select Vertex Shader");
-  fileBrowser->setPath(config().path.current.shader);
-  fileBrowser->setNameFilters("All files (*)");
-  fileBrowser->chooseFile();
-}
+void VideoSettingsWindow::defaultShader() { assignShader(""); }
 
-void VideoSettingsWindow::defaultFragmentShader() { assignFragmentShader(""); }
-void VideoSettingsWindow::defaultVertexShader() { assignVertexShader(""); }
-
-void VideoSettingsWindow::assignFragmentShader(const string &filename) {
+void VideoSettingsWindow::assignShader(const string &filename) {
   if(filename == "" || QDir(filename).exists() == false) {
-    config().path.fragmentShader = filename;
-    if(filename != "") config().path.current.shader = dir(filename);
-    syncUi();
-    utility.updatePixelShader();
-  }
-}
-
-void VideoSettingsWindow::assignVertexShader(const string &filename) {
-  if(filename == "" || QDir(filename).exists() == false) {
-    config().path.vertexShader = filename;
+    config().path.shader = filename;
     if(filename != "") config().path.current.shader = dir(filename);
     syncUi();
     utility.updatePixelShader();

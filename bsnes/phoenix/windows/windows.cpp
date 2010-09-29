@@ -440,6 +440,18 @@ OS::OS() {
   wc.lpszMenuName = 0;
   wc.style = CS_HREDRAW | CS_VREDRAW;
   RegisterClass(&wc);
+
+  wc.cbClsExtra = 0;
+  wc.cbWndExtra = 0;
+  wc.hbrBackground = CreateSolidBrush(RGB(0, 0, 0));
+  wc.hCursor = LoadCursor(0, IDC_ARROW);
+  wc.hIcon = LoadIcon(0, IDI_APPLICATION);
+  wc.hInstance = GetModuleHandle(0);
+  wc.lpfnWndProc = Viewport_windowProc;
+  wc.lpszClassName = L"phoenix_viewport";
+  wc.lpszMenuName = 0;
+  wc.style = CS_HREDRAW | CS_VREDRAW;
+  RegisterClass(&wc);
 }
 
 }

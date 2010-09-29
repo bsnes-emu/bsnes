@@ -73,16 +73,10 @@ void Utility::updateColorFilter() {
 void Utility::updatePixelShader() {
   string filedata;
 
-  if(filedata.readfile(config().path.fragmentShader)) {
-    video.set(Video::FragmentShader, (const char*)filedata);
+  if(filedata.readfile(config().path.shader)) {
+    video.set(Video::Shader, (const char*)filedata);
   } else {
-    video.set(Video::FragmentShader, (const char*)0);
-  }
-
-  if(filedata.readfile(config().path.vertexShader)) {
-    video.set(Video::VertexShader, (const char*)filedata);
-  } else {
-    video.set(Video::VertexShader, (const char*)0);
+    video.set(Video::Shader, (const char*)0);
   }
 }
 

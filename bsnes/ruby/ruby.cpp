@@ -14,6 +14,7 @@ InputInterface input;
 const char *Video::Handle = "Handle";
 const char *Video::Synchronize = "Synchronize";
 const char *Video::Filter = "Filter";
+const char *Video::Shader = "Shader";
 const char *Video::FragmentShader = "FragmentShader";
 const char *Video::VertexShader = "VertexShader";
 

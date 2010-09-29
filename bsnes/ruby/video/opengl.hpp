@@ -122,7 +122,7 @@ public:
     }
   }
 
-  void set_fragment_shader(const char *source) {
+  void set_shader(const char *source) {
     if(!shader_support) return;
 
     if(fragmentshader) {
@@ -131,19 +131,6 @@ public:
       fragmentshader = 0;
     }
 
-    if(source) {
-      fragmentshader = glCreateShader(GL_FRAGMENT_SHADER);
-      glShaderSource(fragmentshader, 1, &source, 0);
-      glCompileShader(fragmentshader);
-      glAttachShader(glprogram, fragmentshader);
-    }
-
-    glLinkProgram(glprogram);
-  }
-
-  void set_vertex_shader(const char *source) {
-    if(!shader_support) return;
-
     if(vertexshader) {
       glDetachShader(glprogram, vertexshader);
       glDeleteShader(vertexshader);
@@ -151,13 +138,47 @@ public:
     }
 
     if(source) {
-      vertexshader = glCreateShader(GL_VERTEX_SHADER);
-      glShaderSource(vertexshader, 1, &source, 0);
-      glCompileShader(vertexshader);
-      glAttachShader(glprogram, vertexshader);
+      bool is_glsl = false;
+      string fragment_source;
+      string vertex_source;
+
+      xml_element document = xml_parse(source);
+      foreach(head, document.element) {
+        if(head.name == "shader") {
+          foreach(attribute, head.attribute) {
+            if(attribute.name == "language" && attribute.content == "GLSL") is_glsl = true;
+          }
+          foreach(element, head.element) {
+            if(element.name == "fragment") {
+              fragment_source = element.parse();
+            } else if(element.name == "vertex") {
+              vertex_source = element.parse();
+            }
+          }
+        }
+      }
+
+      if(is_glsl) {
+        if(fragment_source != "") set_fragment_shader(fragment_source);
+        if(vertex_source != "") set_vertex_shader(vertex_source);
+      }
     }
 
     glLinkProgram(glprogram);
+  }
+
+  void set_fragment_shader(const char *source) {
+    fragmentshader = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fragmentshader, 1, &source, 0);
+    glCompileShader(fragmentshader);
+    glAttachShader(glprogram, fragmentshader);
+  }
+
+  void set_vertex_shader(const char *source) {
+    vertexshader = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vertexshader, 1, &source, 0);
+    glCompileShader(vertexshader);
+    glAttachShader(glprogram, vertexshader);
   }
 
   void init() {

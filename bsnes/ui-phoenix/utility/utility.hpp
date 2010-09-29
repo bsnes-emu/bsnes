@@ -5,6 +5,7 @@ struct Utility : property<Utility> {
   void showMessage(const char *text);
 
   void setScale(unsigned scale = 0);
+  void setShader();
 
   void cartridgeLoaded();
   void cartridgeUnloaded();

@@ -11,8 +11,9 @@ struct Configuration : public configuration {
   struct Video {
     string driver;
     bool synchronize;
-    bool region;
     bool smooth;
+    string shader;
+    bool region;
     unsigned scale;
     bool aspectRatioCorrection;
     unsigned contrast;
