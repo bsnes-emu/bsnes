@@ -2,7 +2,7 @@ FileBrowser fileBrowser;
 
 void FileBrowser::create() {
   application.windows.append(this);
-  Window::create(0, 0, 256, 256, "Load Cartridge");
+  Window::create(0, 0, 256, 256);
   setDefaultFont(application.proportionalFont);
 
   unsigned x = 5, y = 5, height = Style::TextBoxHeight;
@@ -32,24 +32,31 @@ void FileBrowser::fileOpen(FileBrowser::Mode requestedMode, function<void (strin
   filters.reset();
   switch(mode = requestedMode) {
     case Mode::Cartridge: {
+      setTitle("Load Cartridge");
       filters.append(".sfc");
       break;
     }
     case Mode::Satellaview: {
+      setTitle("Load Satellaview Cartridge");
       filters.append(".bs");
       break;
     }
     case Mode::SufamiTurbo: {
+      setTitle("Load Sufami Turbo Cartridge");
       filters.append(".st");
       break;
     }
     case Mode::GameBoy: {
+      setTitle("Load Game Boy Cartridge");
       filters.append(".gb");
       filters.append(".gbc");
       filters.append(".sgb");
+      break;
     }
     case Mode::Shader: {
+      setTitle("Load Pixel Shader");
       filters.append(".shader");
+      break;
     }
   }
 

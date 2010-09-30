@@ -37,7 +37,7 @@ void Application::main(int argc, char **argv) {
 
   if(config.video.driver == "") config.video.driver = video.default_driver();
   if(config.audio.driver == "") config.audio.driver = audio.default_driver();
-  if(config.input.driver == "") config.input.driver = video.default_driver();
+  if(config.input.driver == "") config.input.driver = input.default_driver();
 
   palette.update();
   mainWindow.create();
@@ -49,6 +49,7 @@ void Application::main(int argc, char **argv) {
   inputSettings.create();
   advancedSettings.create();
   cheatEditor.create();
+  stateManager.create();
   utility.setScale(config.video.scale);
   mainWindow.setVisible();
   os.run();

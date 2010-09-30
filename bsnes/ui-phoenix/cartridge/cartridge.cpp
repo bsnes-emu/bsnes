@@ -76,8 +76,8 @@ void Cartridge::unload() {
   saveMemory(SNES::memory::stBram, slotBName, ".srm");
   saveMemory(SNES::memory::gbram, slotAName, ".sav");
   saveMemory(SNES::memory::gbrtc, slotAName, ".rtc");
-  baseName = slotAName = slotBName = "";
   utility.cartridgeUnloaded();
+  baseName = slotAName = slotBName = "";
 }
 
 bool Cartridge::loadCartridge(SNES::MappedRAM &memory, string &XML, const char *filename) {

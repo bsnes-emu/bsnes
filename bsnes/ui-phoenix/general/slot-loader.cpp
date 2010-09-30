@@ -16,7 +16,7 @@ void SingleSlotLoader::create() {
   slotPath.create(*this, x + 50, y, 300, height);
   slotBrowse.create(*this, x + 355, y, height, height, "..."); y += height + 5;
 
-  okButton.create(*this, x + width - 85, y, 80, Style::ButtonHeight, "Ok"); y += Style::ButtonHeight + 5;
+  okButton.create(*this, x + width - 90, y, 80, Style::ButtonHeight, "Ok"); y += Style::ButtonHeight + 5;
 
   setGeometry(160, 160, width, y);
 
@@ -106,7 +106,7 @@ void DoubleSlotLoader::create() {
   slotBPath.create(*this, x + 50, y, 300, height);
   slotBBrowse.create(*this, x + 355, y, height, height, "..."); y += height + 5;
 
-  okButton.create(*this, x + width - 85, y, 80, Style::ButtonHeight, "Ok"); y += Style::ButtonHeight + 5;
+  okButton.create(*this, x + width - 90, y, 80, Style::ButtonHeight, "Ok"); y += Style::ButtonHeight + 5;
 
   setGeometry(160, 160, width, y);
 

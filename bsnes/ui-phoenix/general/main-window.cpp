@@ -74,6 +74,7 @@ void MainWindow::create() {
   toolsStateLoad5.create(toolsStateLoad, "Slot 5");
   toolsSeparator.create(tools);
   toolsCheatEditor.create(tools, "Cheat Editor ...");
+  toolsStateManager.create(tools, "State Manager ...");
 
   help.create(*this, "Help");
   helpAbout.create(help, "About ...");
@@ -148,6 +149,7 @@ void MainWindow::create() {
   toolsStateLoad5.onTick = []() { utility.loadState(5); };
 
   toolsCheatEditor.onTick = []() { cheatEditor.setVisible(); };
+  toolsStateManager.onTick = []() { stateManager.setVisible(); };
 
   helpAbout.onTick = []() {
     MessageWindow::information(mainWindow, string(

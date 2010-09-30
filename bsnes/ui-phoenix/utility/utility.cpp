@@ -60,6 +60,7 @@ void Utility::setShader() {
 void Utility::cartridgeLoaded() {
   SNES::system.power();
   cheatEditor.load(cartridge.baseName);
+  stateManager.load();
   mainWindow.synchronize();
   utility.setTitle(notdir(cartridge.baseName));
   utility.showMessage(string("Loaded ", notdir(cartridge.baseName)));
@@ -68,6 +69,7 @@ void Utility::cartridgeLoaded() {
 void Utility::cartridgeUnloaded() {
   SNES::cartridge.unload();
   cheatEditor.save(cartridge.baseName);
+  stateManager.save();
   mainWindow.synchronize();
 }
 

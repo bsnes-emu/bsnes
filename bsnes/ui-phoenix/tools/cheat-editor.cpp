@@ -63,11 +63,11 @@ void CheatEditor::create() {
   cheatList.create(*this, x,      y, 500, 250, "Slot\tOn\tCode\tDescription"); y += 255;
   cheatList.setHeaderVisible();
 
-  codeLabel.create(*this, x,      y,  80, Style::EditBoxHeight, "Code(s):");
-  codeEdit.create (*this, x + 80, y, 420, Style::EditBoxHeight); y += Style::EditBoxHeight + 5;
+  codeLabel.create(*this, x,      y,  80, Style::TextBoxHeight, "Code(s):");
+  codeEdit.create (*this, x + 80, y, 420, Style::TextBoxHeight); y += Style::TextBoxHeight + 5;
 
-  descLabel.create(*this, x,      y,  80, Style::EditBoxHeight, "Description:");
-  descEdit.create (*this, x + 80, y, 420, Style::EditBoxHeight); y+= Style::EditBoxHeight + 5;
+  descLabel.create(*this, x,      y,  80, Style::TextBoxHeight, "Description:");
+  descEdit.create (*this, x + 80, y, 420, Style::TextBoxHeight); y+= Style::TextBoxHeight + 5;
 
   setGeometry(160, 160, 510, y);
   synchronize();

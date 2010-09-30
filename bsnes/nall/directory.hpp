@@ -46,7 +46,7 @@ struct directory {
       }
       FindClose(handle);
     }
-    sort(&list[0], list.size());
+    if(list.size() > 0) sort(&list[0], list.size());
     return list;
   }
 
@@ -70,7 +70,7 @@ struct directory {
       }
       FindClose(handle);
     }
-    sort(&list[0], list.size());
+    if(list.size() > 0) sort(&list[0], list.size());
     return list;
   }
 
@@ -94,7 +94,7 @@ struct directory {
       }
       closedir(dp);
     }
-    sort(&list[0], list.size());
+    if(list.size() > 0) sort(&list[0], list.size());
     return list;
 
   }
@@ -112,7 +112,7 @@ struct directory {
       }
       closedir(dp);
     }
-    sort(&list[0], list.size());
+    if(list.size() > 0) sort(&list[0], list.size());
     return list;
   }
 

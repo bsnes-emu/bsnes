@@ -49,6 +49,7 @@ struct MainWindow : Window {
   MenuItem toolsStateLoad5;
   MenuSeparator toolsSeparator;
   MenuItem toolsCheatEditor;
+  MenuItem toolsStateManager;
   Menu help;
   MenuItem helpAbout;
   Viewport viewport;
