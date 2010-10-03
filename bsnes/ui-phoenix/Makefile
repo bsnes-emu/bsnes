@@ -6,7 +6,7 @@ ui_objects += $(if $(call streq,$(platform),win),resource)
 ifeq ($(platform),x)
   phoenix_compile = $(call compile,-DPHOENIX_GTK `pkg-config --cflags gtk+-2.0`)
   link += `pkg-config --libs gtk+-2.0`
-# flags += -DPHOENIX_QT `pkg-config --cflags QtCore QtGui`
+# phoenix_compile = $(call compile,-DPHOENIX_QT `pkg-config --cflags QtCore QtGui`)
 # link += `pkg-config --libs QtCore QtGui`
 
   ruby := video.glx video.xv video.sdl

@@ -87,7 +87,6 @@ struct Widget : Object {
 };
 
 struct Window : Widget {
-  static Window None;
   nall::function<bool ()> onClose;
   void create(unsigned x, unsigned y, unsigned width, unsigned height, const char *text = "");
   bool focused();
@@ -104,6 +103,7 @@ struct Window : Widget {
 //private:
   struct Data;
   Data *window;
+  static Window None;
 };
 
 struct Button : Widget {
@@ -237,23 +237,17 @@ struct MessageWindow : Object {
 };
 
 struct OS : Object {
-  bool pending();
-  void run();
-  void main();
-  void quit();
-  unsigned desktopWidth();
-  unsigned desktopHeight();
-  nall::string folderSelect(Window &parent, const char *path = "");
-  nall::string fileOpen(Window &parent, const char *filter, const char *path = "");
-  nall::string fileSave(Window &parent, const char *filter, const char *path = "");
+  static bool pending();
+  static void run();
+  static void main();
+  static void quit();
+  static unsigned desktopWidth();
+  static unsigned desktopHeight();
+  static nall::string folderSelect(Window &parent, const char *path = "");
+  static nall::string fileOpen(Window &parent, const char *filter, const char *path = "");
+  static nall::string fileSave(Window &parent, const char *filter, const char *path = "");
 //private:
-  static OS& handle();
-  struct Data;
-  Data *os;
-private:
-  OS();
+  static void initialize();
 };
-
-extern OS &os;
 
 }

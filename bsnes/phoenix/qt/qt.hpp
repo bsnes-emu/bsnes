@@ -112,8 +112,8 @@ struct Widget : Object {
   void setVisible(bool visible = true);
   bool enabled();
   void setEnabled(bool enabled = true);
-  bool focused();
-  void setFocused();
+  virtual bool focused();
+  virtual void setFocused();
   Widget();
 //private:
   struct Data;
@@ -121,7 +121,6 @@ struct Widget : Object {
 };
 
 struct Window : Widget {
-  static Window None;
   nall::function<bool ()> onClose;
   void create(unsigned x, unsigned y, unsigned width, unsigned height, const char *text = "");
   void setGeometry(unsigned x, unsigned y, unsigned width, unsigned height);
@@ -132,10 +131,12 @@ struct Window : Widget {
   void setStatusText(const char *text);
   void setMenuVisible(bool visible = true);
   void setStatusVisible(bool visible = true);
+  bool focused();
   Window();
 //private:
   struct Data;
   Data *window;
+  static Window None;
 };
 
 struct Button : Widget {
@@ -306,23 +307,19 @@ struct MessageWindow : Object {
 };
 
 struct OS : Object {
-  bool pending();
-  void run();
-  void main();
-  void quit();
-  unsigned desktopWidth();
-  unsigned desktopHeight();
-  nall::string folderSelect(Window &parent, const char *path = "");
-  nall::string fileOpen(Window &parent, const char *filter, const char *path = "");
-  nall::string fileSave(Window &parent, const char *filter, const char *path = "");
+  static bool pending();
+  static void run();
+  static void main();
+  static void quit();
+  static unsigned desktopWidth();
+  static unsigned desktopHeight();
+  static nall::string folderSelect(Window &parent, const char *path = "");
+  static nall::string fileOpen(Window &parent, const char *filter, const char *path = "");
+  static nall::string fileSave(Window &parent, const char *filter, const char *path = "");
 //private:
-  static OS& handle();
   struct Data;
-  Data *os;
-private:
-  OS();
+  static Data *os;
+  static void initialize();
 };
-
-extern OS &os;
 
 }

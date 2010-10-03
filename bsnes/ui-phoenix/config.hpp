@@ -41,6 +41,11 @@ struct Configuration : public configuration {
     bool useNativeDialogs;
   } settings;
 
+  struct Controller {
+    unsigned port1;
+    unsigned port2;
+  } controller;
+
   void load();
   void save();
   void create();

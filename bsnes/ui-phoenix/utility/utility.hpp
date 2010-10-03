@@ -4,6 +4,7 @@ struct Utility : property<Utility> {
   void setStatus(const char *text);
   void showMessage(const char *text);
 
+  void setControllers();
   void setScale(unsigned scale = 0);
   void setShader();
 

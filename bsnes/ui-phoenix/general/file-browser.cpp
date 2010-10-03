@@ -91,7 +91,7 @@ void FileBrowser::setFolder(const char *pathname) {
 }
 
 void FileBrowser::folderBrowse() {
-  string pathname = os.folderSelect(*this, folder);
+  string pathname = OS::folderSelect(*this, folder);
   if(pathname != "") setFolder(pathname);
 }
 

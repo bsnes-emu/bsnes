@@ -39,4 +39,7 @@ void Configuration::create() {
 
   attach(settings.focusPolicy = 0, "settings.focusPolicy");
   attach(settings.useNativeDialogs = false, "settings.useNativeDialogs");
+
+  attach(controller.port1 = 1, "controller.port1");
+  attach(controller.port2 = 1, "controller.port2");
 }

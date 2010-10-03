@@ -92,7 +92,6 @@ struct Widget : Object {
 };
 
 struct Window : Widget {
-  static Window None;
   nall::function<bool ()> onClose;
   void create(unsigned x, unsigned y, unsigned width, unsigned height, const char *text = "");
   void setDefaultFont(Font &font);
@@ -107,7 +106,7 @@ struct Window : Widget {
 //private:
   struct Data;
   Data *window;
-//private:
+  static Window None;
   void resize(unsigned width, unsigned height);
 };
 

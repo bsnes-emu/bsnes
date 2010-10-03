@@ -34,6 +34,24 @@ void Utility::showMessage(const char *text) {
   statusTime = time(0);
 }
 
+void Utility::setControllers() {
+  switch(config.controller.port1) {
+    case 0: SNES::input.port_set_device(0, SNES::Input::Device::None); break;
+    case 1: SNES::input.port_set_device(0, SNES::Input::Device::Joypad); break;
+    case 2: SNES::input.port_set_device(0, SNES::Input::Device::Multitap); break;
+    case 3: SNES::input.port_set_device(0, SNES::Input::Device::Mouse); break;
+  }
+
+  switch(config.controller.port2) {
+    case 0: SNES::input.port_set_device(1, SNES::Input::Device::None); break;
+    case 1: SNES::input.port_set_device(1, SNES::Input::Device::Joypad); break;
+    case 2: SNES::input.port_set_device(1, SNES::Input::Device::Multitap); break;
+    case 3: SNES::input.port_set_device(1, SNES::Input::Device::Mouse); break;
+    case 4: SNES::input.port_set_device(1, SNES::Input::Device::SuperScope); break;
+    case 5: SNES::input.port_set_device(1, SNES::Input::Device::Justifiers); break;
+  }
+}
+
 void Utility::setScale(unsigned scale) {
   if(scale == 0) scale = config.video.scale;
   config.video.scale = scale;
@@ -79,7 +97,7 @@ void Utility::loadCartridgeNormal() {
       cartridge.loadNormal(filename);
     });
   } else {
-    string filename = os.fileOpen(mainWindow, "SNES cartridges\t*.sfc\nAll files\t*", config.path.current);
+    string filename = OS::fileOpen(mainWindow, "SNES cartridges\t*.sfc\nAll files\t*", config.path.current);
     if(filename != "") {
       cartridge.loadNormal(filename);
       SNES::system.power();

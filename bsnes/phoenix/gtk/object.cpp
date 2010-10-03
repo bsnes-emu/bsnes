@@ -46,13 +46,11 @@ struct ListBox::Data {
   signed selection;
 };
 
-struct OS::Data {
-};
-
 void Object::unused() {
 }
 
 Object::Object() {
+  OS::initialize();
   object = new Object::Data;
   object->locked = false;
 }

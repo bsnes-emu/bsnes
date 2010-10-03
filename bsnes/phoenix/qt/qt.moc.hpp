@@ -298,11 +298,7 @@ struct OS::Data : public QObject {
   Q_OBJECT
 
 public:
-  OS &self;
   QApplication *application;
-
-  Data(OS &self) : self(self) {
-  }
 
 public slots:
 };

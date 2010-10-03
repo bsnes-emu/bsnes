@@ -11,7 +11,18 @@ struct MainWindow : Window {
   MenuItem systemReset;
   MenuSeparator systemSeparator2;
   Menu systemPort1;
+  MenuRadioItem systemPort1None;
+  MenuRadioItem systemPort1Gamepad;
+  MenuRadioItem systemPort1Multitap;
+  MenuRadioItem systemPort1Mouse;
   Menu systemPort2;
+  MenuRadioItem systemPort2None;
+  MenuRadioItem systemPort2Gamepad;
+  MenuRadioItem systemPort2Multitap;
+  MenuRadioItem systemPort2Mouse;
+  MenuRadioItem systemPort2SuperScope;
+  MenuRadioItem systemPort2Justifiers;
+  MenuItem systemCaptureMouse;
   Menu settings;
   Menu settingsVideoMode;
   MenuRadioItem settingsVideoMode1x;

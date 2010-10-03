@@ -37,12 +37,30 @@ namespace phoenix {
 #include "viewport.cpp"
 #include "messagewindow.cpp"
 
-OS &os = OS::handle();
 Window Window::None;
 
-OS& OS::handle() {
-  static OS os;
-  return os;
+void OS::initialize() {
+  static bool initialized = false;
+  if(initialized == true) return;
+  initialized = true;
+
+  int argc = 1;
+  char *argv[2];
+  argv[0] = new char[8];
+  argv[1] = 0;
+  strcpy(argv[0], "phoenix");
+  char **argvp = argv;
+  gtk_init(&argc, &argvp);
+
+  gtk_rc_parse_string(
+    "style \"phoenix-gtk\"\n"
+    "{\n"
+    "  GtkComboBox::appears-as-list = 1\n"
+    "  GtkTreeView::vertical-separator = 0\n"
+    "}\n"
+    "class \"GtkComboBox\" style \"phoenix-gtk\"\n"
+    "class \"GtkTreeView\" style \"phoenix-gtk\"\n"
+  );
 }
 
 bool OS::pending() {
@@ -165,27 +183,6 @@ string OS::fileSave(Window &parent, const char *filter, const char *path) {
 
   gtk_widget_destroy(dialog);
   return name;
-}
-
-OS::OS() {
-  os = new OS::Data;
-  int argc = 1;
-  char *argv[2];
-  argv[0] = new char[8];
-  argv[1] = 0;
-  strcpy(argv[0], "phoenix");
-  char **argvp = argv;
-  gtk_init(&argc, &argvp);
-
-  gtk_rc_parse_string(
-    "style \"phoenix-gtk\"\n"
-    "{\n"
-    "  GtkComboBox::appears-as-list = 1\n"
-    "  GtkTreeView::vertical-separator = 0\n"
-    "}\n"
-    "class \"GtkComboBox\" style \"phoenix-gtk\"\n"
-    "class \"GtkTreeView\" style \"phoenix-gtk\"\n"
-  );
 }
 
 }

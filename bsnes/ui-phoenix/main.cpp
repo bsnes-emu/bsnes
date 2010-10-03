@@ -52,7 +52,7 @@ void Application::main(int argc, char **argv) {
   stateManager.create();
   utility.setScale(config.video.scale);
   mainWindow.setVisible();
-  os.run();
+  OS::run();
 
   video.driver(config.video.driver);
   video.set(Video::Handle, mainWindow.viewport.handle());
@@ -63,7 +63,6 @@ void Application::main(int argc, char **argv) {
     video.driver("None");
     video.init();
   }
-  utility.setShader();
 
   audio.driver(config.audio.driver);
   audio.set(Audio::Handle, mainWindow.viewport.handle());
@@ -87,10 +86,13 @@ void Application::main(int argc, char **argv) {
     input.init();
   }
 
+  utility.setControllers();
+  utility.setShader();
+
   if(argc == 2) cartridge.loadNormal(argv[1]);
 
   while(quit == false) {
-    os.run();
+    OS::run();
     inputMapper.poll();
     utility.updateStatus();
 
@@ -110,7 +112,7 @@ void Application::main(int argc, char **argv) {
 
   cartridge.unload();
   foreach(window, windows) window->setVisible(false);
-  os.run();
+  OS::run();
   SNES::system.term();
   config.save();
 

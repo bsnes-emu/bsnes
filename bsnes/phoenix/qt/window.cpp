@@ -62,6 +62,10 @@ void Window::setStatusVisible(bool visible) {
   else window->statusBar->hide();
 }
 
+bool Window::focused() {
+  return window->isActiveWindow() && !window->isMinimized();
+}
+
 Window::Window() {
   window = new Window::Data(*this);
   window->defaultFont = 0;

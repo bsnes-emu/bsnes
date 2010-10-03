@@ -8,7 +8,7 @@ void InputSettings::create() {
   setFont(application.proportionalFontBold);
   setStatusVisible();
 
-  unsigned x = 5, y = 5;
+  unsigned x = 5, y = 5, height = Style::ButtonHeight;
 
   portLabel.create(*this, x, y, 50, Style::ComboBoxHeight, "Port:");
   portBox.create(*this, x + 50, y, 200, Style::ComboBoxHeight);
@@ -21,12 +21,19 @@ void InputSettings::create() {
   mappingList.setHeaderVisible();
   mappingList.setFocused();
 
+  clearAllButton.create(*this, 515 - 85 - 85, y, 80, height, "Clear All");
+  clearButton.create(*this, 515 - 85, y, 80, height, "Clear");
+  y += height + 5;
+
   setGeometry(160, 160, 515, y);
 
   portChanged();
   portBox.onChange = { &InputSettings::portChanged, this };
   deviceBox.onChange = { &InputSettings::deviceChanged, this };
   mappingList.onActivate = { &InputSettings::assignInput, this };
+
+  clearAllButton.onTick = { &InputSettings::clearAll, this };
+  clearButton.onTick = { &InputSettings::clearSelected, this };
 }
 
 void InputSettings::portChanged() {
@@ -136,6 +143,36 @@ void InputSettings::calibrateJoypads() {
   }
   joypadsCalibrating = false;
   joypadsCalibrated = true;
+}
+
+void InputSettings::clearAll() {
+  if(MessageWindow::question(inputSettings, "Clear all input mappings?", MessageWindow::Buttons::YesNo) == MessageWindow::Response::Yes) {
+    InputMapper::ControllerPort &port = (
+      portBox.selection() == 0
+      ? (InputMapper::ControllerPort&)inputMapper.port1
+      : (InputMapper::ControllerPort&)inputMapper.port2
+    );
+    InputMapper::Controller &controller = (InputMapper::Controller&)*port[deviceBox.selection()];
+
+    for(unsigned i = 0; i < controller.size(); i++) controller[i]->mapping = "";
+    inputMapper.bind();
+    deviceChanged();
+  }
+}
+
+void InputSettings::clearSelected() {
+  if(auto position = mappingList.selection()) {
+    InputMapper::ControllerPort &port = (
+      portBox.selection() == 0
+      ? (InputMapper::ControllerPort&)inputMapper.port1
+      : (InputMapper::ControllerPort&)inputMapper.port2
+    );
+    InputMapper::Controller &controller = (InputMapper::Controller&)*port[deviceBox.selection()];
+
+    controller[position()]->mapping = "";
+    inputMapper.bind();
+    deviceChanged();
+  }
 }
 
 InputSettings::InputSettings() {

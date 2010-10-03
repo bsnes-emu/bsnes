@@ -27,12 +27,22 @@ namespace phoenix {
 #include "viewport.cpp"
 #include "messagewindow.cpp"
 
-OS &os = OS::handle();
+OS::Data *OS::os = 0;
 Window Window::None;
 
-OS& OS::handle() {
-  static OS os;
-  return os;
+void OS::initialize() {
+  static bool initialized = false;
+  if(initialized == true) return;
+  initialized = true;
+
+  os = new OS::Data;
+  static int argc = 1;
+  static char *argv[2];
+  argv[0] = new char[8];
+  argv[1] = 0;
+  strcpy(argv[0], "phoenix");
+  char **argvp = argv;
+  os->application = new QApplication(argc, argvp);
 }
 
 bool OS::pending() {
@@ -108,17 +118,6 @@ string OS::fileSave(Window &parent, const char *filter, const char *path) {
     &parent != &Window::None ? parent.window : 0, "Save File", path, (const char*)filters
   );
   return filename.toUtf8().constData();
-}
-
-OS::OS() {
-  os = new OS::Data(*this);
-  static int argc = 1;
-  static char *argv[2];
-  argv[0] = new char[8];
-  argv[1] = 0;
-  strcpy(argv[0], "phoenix");
-  char **argvp = argv;
-  os->application = new QApplication(argc, argvp);
 }
 
 }
