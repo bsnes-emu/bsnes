@@ -64,7 +64,7 @@ ifeq ($(platform),x)
 	install -D -m 755 out/bsnes $(DESTDIR)$(prefix)/bin/bsnes
 	install -D -m 644 ui-qt/data/bsnes.png $(DESTDIR)$(prefix)/share/pixmaps/bsnes.png
 	install -D -m 644 ui-qt/data/bsnes.desktop $(DESTDIR)$(prefix)/share/applications/bsnes.desktop
-	gconftool-2 --type bool --set /desktop/gnome/interface/menus_have_icons true
+#	gconftool-2 --type bool --set /desktop/gnome/interface/menus_have_icons true
 endif
 
 uninstall:

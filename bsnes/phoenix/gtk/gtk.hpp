@@ -30,11 +30,14 @@ inline Font::Style operator|(Font::Style a, Font::Style b) { return (Font::Style
 inline Font::Style operator&(Font::Style a, Font::Style b) { return (Font::Style)((unsigned)a & (unsigned)b); }
 
 struct Action : Object {
-  void setFont(Font &font);
   bool visible();
   void setVisible(bool visible = true);
   bool enabled();
   void setEnabled(bool enabled = true);
+  Action();
+//private:
+  struct Data;
+  Data *action;
 };
 
 struct Menu : Action {

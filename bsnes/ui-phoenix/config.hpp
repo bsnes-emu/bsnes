@@ -16,8 +16,8 @@ struct Configuration : public configuration {
     bool region;
     unsigned scale;
     bool aspectRatioCorrection;
-    unsigned contrast;
     unsigned brightness;
+    unsigned contrast;
     unsigned gamma;
     bool useGammaRamp;
   } video;

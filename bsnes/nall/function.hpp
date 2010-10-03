@@ -8,13 +8,14 @@ namespace nall {
     struct container {
       virtual R operator()(P... p) const = 0;
       virtual container* copy() const = 0;
+      virtual ~container() {}
     } *callback;
 
     struct global : container {
       R (*function)(P...);
       R operator()(P... p) const { return function(std::forward<P>(p)...); }
       container* copy() const { return new global(function); }
-      global(R (*function_)(P...)) : function(function_) {}
+      global(R (*function)(P...)) : function(function) {}
     };
 
     template<typename C> struct member : container {
@@ -22,15 +23,14 @@ namespace nall {
       C *object;
       R operator()(P... p) const { return (object->*function)(std::forward<P>(p)...); }
       container* copy() const { return new member(function, object); }
-      member(R (C::*function_)(P...), C *object_) : function(function_), object(object_) {}
+      member(R (C::*function)(P...), C *object) : function(function), object(object) {}
     };
 
     template<typename L> struct lambda : container {
-      L *object;
-      R operator()(P... p) const { return (*object)(std::forward<P>(p)...); }
-      container* copy() const { return new lambda(*object); }
-      lambda(const L& object_) { object = new L(object_); }
-      ~lambda() { delete object; }
+      L object;
+      R operator()(P... p) const { return object(std::forward<P>(p)...); }
+      container* copy() const { return new lambda(object); }
+      lambda(const L& object) : object(object) {}
     };
 
   public:
@@ -38,8 +38,10 @@ namespace nall {
     R operator()(P... p) const { return (*callback)(std::forward<P>(p)...); }
 
     function& operator=(const function &source) {
-      if(callback) { delete callback; callback = 0; }
-      if(source.callback) callback = source.callback->copy();
+      if(this != &source) {
+        if(callback) { delete callback; callback = 0; }
+        if(source.callback) callback = source.callback->copy();
+      }
       return *this;
     }
 

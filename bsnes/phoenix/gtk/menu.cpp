@@ -1,12 +1,10 @@
 static void Action_setFont(GtkWidget *widget, gpointer font) {
-  gtk_widget_modify_font(widget, (PangoFontDescription*)font);
-  if(GTK_IS_CONTAINER(widget)) {
-    gtk_container_foreach(GTK_CONTAINER(widget), (GtkCallback)Action_setFont, font);
+  if(font) {
+    gtk_widget_modify_font(widget, (PangoFontDescription*)font);
+    if(GTK_IS_CONTAINER(widget)) {
+      gtk_container_foreach(GTK_CONTAINER(widget), (GtkCallback)Action_setFont, (PangoFontDescription*)font);
+    }
   }
-}
-
-void Action::setFont(Font &font) {
-  Action_setFont(object->widget, font.font->font);
 }
 
 bool Action::visible() {
@@ -25,25 +23,35 @@ void Action::setEnabled(bool enabled) {
   gtk_widget_set_sensitive(object->widget, enabled);
 }
 
+Action::Action() {
+  action = new Action::Data;
+  action->font = 0;
+}
+
 void Menu::create(Window &parent, const char *text) {
+  action->font = parent.window->defaultFont;
   object->menu = gtk_menu_new();
   object->widget = gtk_menu_item_new_with_label(text);
   gtk_menu_item_set_submenu(GTK_MENU_ITEM(object->widget), object->menu);
-  if(parent.window->defaultFont) setFont(*parent.window->defaultFont);
+  if(action->font) Action_setFont(object->widget, action->font->font->font);
   gtk_menu_bar_append(parent.object->menu, object->widget);
   gtk_widget_show(object->widget);
 }
 
 void Menu::create(Menu &parent, const char *text) {
+  action->font = parent.action->font;
   object->menu = gtk_menu_new();
   object->widget = gtk_menu_item_new_with_label(text);
   gtk_menu_item_set_submenu(GTK_MENU_ITEM(object->widget), object->menu);
+  if(action->font) Action_setFont(object->widget, action->font->font->font);
   gtk_menu_shell_append(GTK_MENU_SHELL(parent.object->menu), object->widget);
   gtk_widget_show(object->widget);
 }
 
 void MenuSeparator::create(Menu &parent) {
+  action->font = parent.action->font;
   object->widget = gtk_separator_menu_item_new();
+  if(action->font) Action_setFont(object->widget, action->font->font->font);
   gtk_menu_shell_append(GTK_MENU_SHELL(parent.object->menu), object->widget);
   gtk_widget_show(object->widget);
 }
@@ -53,8 +61,10 @@ static void MenuItem_tick(MenuItem *self) {
 }
 
 void MenuItem::create(Menu &parent, const char *text) {
+  action->font = parent.action->font;
   object->widget = gtk_menu_item_new_with_label(text);
   g_signal_connect_swapped(G_OBJECT(object->widget), "activate", G_CALLBACK(MenuItem_tick), (gpointer)this);
+  if(action->font) Action_setFont(object->widget, action->font->font->font);
   gtk_menu_shell_append(GTK_MENU_SHELL(parent.object->menu), object->widget);
   gtk_widget_show(object->widget);
 }
@@ -64,8 +74,10 @@ static void MenuCheckItem_tick(MenuCheckItem *self) {
 }
 
 void MenuCheckItem::create(Menu &parent, const char *text) {
+  action->font = parent.action->font;
   object->widget = gtk_check_menu_item_new_with_label(text);
   g_signal_connect_swapped(G_OBJECT(object->widget), "toggled", G_CALLBACK(MenuCheckItem_tick), (gpointer)this);
+  if(action->font) Action_setFont(object->widget, action->font->font->font);
   gtk_menu_shell_append(GTK_MENU_SHELL(parent.object->menu), object->widget);
   gtk_widget_show(object->widget);
 }
@@ -86,18 +98,22 @@ static void MenuRadioItem_tick(MenuRadioItem *self) {
 
 void MenuRadioItem::create(Menu &parent, const char *text) {
   first = this;
+  action->font = parent.action->font;
   object->parentMenu = &parent;
   object->widget = gtk_radio_menu_item_new_with_label(0, text);
   g_signal_connect_swapped(G_OBJECT(object->widget), "toggled", G_CALLBACK(MenuRadioItem_tick), (gpointer)this);
+  if(action->font) Action_setFont(object->widget, action->font->font->font);
   gtk_menu_shell_append(GTK_MENU_SHELL(parent.object->menu), object->widget);
   gtk_widget_show(object->widget);
 }
 
 void MenuRadioItem::create(MenuRadioItem &parent, const char *text) {
   first = parent.first;
+  action->font = parent.action->font;
   object->parentMenu = parent.object->parentMenu;
   object->widget = gtk_radio_menu_item_new_with_label_from_widget(GTK_RADIO_MENU_ITEM(first->object->widget), text);
   g_signal_connect_swapped(G_OBJECT(object->widget), "toggled", G_CALLBACK(MenuRadioItem_tick), (gpointer)this);
+  if(action->font) Action_setFont(object->widget, action->font->font->font);
   gtk_menu_shell_append(GTK_MENU_SHELL(object->parentMenu->object->menu), object->widget);
   gtk_widget_show(object->widget);
 }

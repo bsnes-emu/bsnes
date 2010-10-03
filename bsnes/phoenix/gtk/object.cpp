@@ -17,6 +17,10 @@ struct Font::Data {
   PangoFontDescription *font;
 };
 
+struct Action::Data {
+  Font *font;
+};
+
 struct Widget::Data {
   Window *parent;
 };

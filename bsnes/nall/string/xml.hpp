@@ -75,10 +75,11 @@ inline string xml_element::parse() const {
 
     if(strbegin(source, "<![CDATA[")) {
       if(auto pos = strpos(source, "]]>")) {
-        string cdata = substr(source, 9, pos() - 9);
-        data << cdata;
-        offset += strlen(cdata);
-
+        if(pos() - 9 > 0) {
+          string cdata = substr(source, 9, pos() - 9);
+          data << cdata;
+          offset += strlen(cdata);
+        }
         source += 9 + offset + 3;
         continue;
       } else {

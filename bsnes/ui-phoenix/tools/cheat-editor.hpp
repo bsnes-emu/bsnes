@@ -4,6 +4,8 @@ struct CheatEditor : Window {
   TextBox codeEdit;
   Label descLabel;
   TextBox descEdit;
+  Button clearAllButton;
+  Button clearButton;
 
   void load(string filename);
   void save(string filename);
@@ -15,6 +17,8 @@ private:
   void refresh();
   void toggle();
   void bind();
+  void clearAll();
+  void clear();
 };
 
 extern CheatEditor cheatEditor;

@@ -22,8 +22,8 @@ void Configuration::create() {
   attach(video.region = 0, "video.region");
   attach(video.scale = 2, "video.scale");
   attach(video.aspectRatioCorrection = true, "video.aspectRatioCorrection");
-  attach(video.contrast = 100, "video.contrast");
   attach(video.brightness = 100, "video.brightness");
+  attach(video.contrast = 100, "video.contrast");
   attach(video.gamma = 100, "video.gamma");
   attach(video.useGammaRamp = true, "video.useGammaRamp");
 

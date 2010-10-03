@@ -10,13 +10,13 @@ void VideoSettings::create() {
   colorAdjustmentLabel.create(*this, x, y, 430, Style::LabelHeight, "Color Adjustment :."); y += Style::LabelHeight + 5;
   colorAdjustmentLabel.setFont(application.proportionalFontBold);
 
-  contrastLabel.create   (*this, x,       y,  80, Style::SliderHeight, "Contrast:");
-  contrastValue.create   (*this, x + 80,  y,  50, Style::SliderHeight, "100%");
-  contrastSlider.create  (*this, x + 130, y, 300, Style::SliderHeight, 201); y += Style::SliderHeight;
-
   brightnessLabel.create (*this, x,       y,  80, Style::SliderHeight, "Brightness:");
   brightnessValue.create (*this, x +  80, y,  40, Style::SliderHeight, "100%");
   brightnessSlider.create(*this, x + 130, y, 300, Style::SliderHeight, 201); y += Style::SliderHeight;
+
+  contrastLabel.create   (*this, x,       y,  80, Style::SliderHeight, "Contrast:");
+  contrastValue.create   (*this, x + 80,  y,  50, Style::SliderHeight, "100%");
+  contrastSlider.create  (*this, x + 130, y, 300, Style::SliderHeight, 201); y += Style::SliderHeight;
 
   gammaLabel.create      (*this, x,       y,  80, Style::SliderHeight, "Gamma:");
   gammaValue.create      (*this, x +  80, y,  50, Style::SliderHeight, "100%");
@@ -35,8 +35,8 @@ void VideoSettings::create() {
 
   setGeometry(160, 160, 440, y);
 
-  contrastSlider.setPosition(config.video.contrast);
   brightnessSlider.setPosition(config.video.brightness);
+  contrastSlider.setPosition(config.video.contrast);
   gammaSlider.setPosition(config.video.gamma);
   gammaRampCheck.setChecked(config.video.useGammaRamp);
 
@@ -59,12 +59,12 @@ void VideoSettings::create() {
 }
 
 void VideoSettings::adjust() {
-  contrastValue.setText(string(contrastSlider.position(), "%"));
   brightnessValue.setText(string(brightnessSlider.position(), "%"));
+  contrastValue.setText(string(contrastSlider.position(), "%"));
   gammaValue.setText(string(gammaSlider.position(), "%"));
 
-  config.video.contrast = contrastSlider.position();
   config.video.brightness = brightnessSlider.position();
+  config.video.contrast = contrastSlider.position();
   config.video.gamma = gammaSlider.position();
   config.video.useGammaRamp = gammaRampCheck.checked();
   palette.update();

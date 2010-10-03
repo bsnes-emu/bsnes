@@ -1,11 +1,11 @@
 struct VideoSettings : Window {
   Label colorAdjustmentLabel;
-  Label contrastLabel;
-  Label contrastValue;
-  HorizontalSlider contrastSlider;
   Label brightnessLabel;
   Label brightnessValue;
   HorizontalSlider brightnessSlider;
+  Label contrastLabel;
+  Label contrastValue;
+  HorizontalSlider contrastSlider;
   Label gammaLabel;
   Label gammaValue;
   HorizontalSlider gammaSlider;
