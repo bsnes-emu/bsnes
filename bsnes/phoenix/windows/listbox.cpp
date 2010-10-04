@@ -7,7 +7,7 @@ void ListBox::create(Window &parent, unsigned x, unsigned y, unsigned width, uns
     parent.widget->window, (HMENU)object->id, GetModuleHandle(0), 0
   );
   SetWindowLongPtr(widget->window, GWLP_USERDATA, (LONG_PTR)this);
-  SendMessage(widget->window, WM_SETFONT, (WPARAM)(parent.window->defaultFont ? parent.window->defaultFont : os.os->proportionalFont), 0);
+  SendMessage(widget->window, WM_SETFONT, (WPARAM)(parent.window->defaultFont ? parent.window->defaultFont : OS::os->proportionalFont), 0);
   ListView_SetExtendedListViewStyle(widget->window, LVS_EX_FULLROWSELECT);
 
   lstring list;
@@ -34,6 +34,10 @@ void ListBox::setHeaderVisible(bool headerVisible) {
   );
 }
 
+void ListBox::setCheckable(bool checkable) {
+  ListView_SetExtendedListViewStyle(widget->window, LVS_EX_FULLROWSELECT | (checkable ? LVS_EX_CHECKBOXES : 0));
+}
+
 void ListBox::reset() {
   ListView_DeleteAllItems(widget->window);
 }
@@ -54,7 +58,9 @@ void ListBox::addItem(const char *text) {
   item.iSubItem = 0;
   utf16_t wtext(list[0]);
   item.pszText = wtext;
+  object->locked = true;
   ListView_InsertItem(widget->window, &item);
+  object->locked = false;
   for(unsigned i = 1; i < list.size(); i++) {
     utf16_t wtext(list[i]);
     ListView_SetItemText(widget->window, row, i, wtext);
@@ -84,6 +90,16 @@ void ListBox::setSelection(unsigned row) {
     ListView_SetItemState(widget->window, i, LVIS_FOCUSED, (i == row ? LVIS_FOCUSED : 0));
     ListView_SetItemState(widget->window, i, LVIS_SELECTED, (i == row ? LVIS_SELECTED : 0));
   }
+}
+
+bool ListBox::checked(unsigned row) {
+  return ListView_GetCheckState(widget->window, row);
+}
+
+void ListBox::setChecked(unsigned row, bool checked) {
+  object->locked = true;
+  ListView_SetCheckState(widget->window, row, checked);
+  object->locked = false;
 }
 
 ListBox::ListBox() {

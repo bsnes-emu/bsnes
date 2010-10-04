@@ -7,7 +7,7 @@ void ComboBox::create(Window &parent, unsigned x, unsigned y, unsigned width, un
   );
 
   SetWindowLongPtr(widget->window, GWLP_USERDATA, (LONG_PTR)this);
-  SendMessage(widget->window, WM_SETFONT, (WPARAM)(parent.window->defaultFont ? parent.window->defaultFont : os.os->proportionalFont), 0);
+  SendMessage(widget->window, WM_SETFONT, (WPARAM)(parent.window->defaultFont ? parent.window->defaultFont : OS::os->proportionalFont), 0);
 
   //CreateWindow height parameter is the height of the expanded list box;
   //need additional code to override default ComboBox control height

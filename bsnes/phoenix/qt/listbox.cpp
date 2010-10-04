@@ -16,12 +16,21 @@ void ListBox::create(Window &parent, unsigned x, unsigned y, unsigned width, uns
   listBox->setAlternatingRowColors(list.size() >= 2);
   listBox->connect(listBox, SIGNAL(itemActivated(QTreeWidgetItem*, int)), SLOT(onActivate()));
   listBox->connect(listBox, SIGNAL(itemSelectionChanged()), SLOT(onChange()));
+  listBox->connect(listBox, SIGNAL(itemChanged(QTreeWidgetItem*, int)), SLOT(onTick(QTreeWidgetItem*)));
   if(parent.window->defaultFont) listBox->setFont(*parent.window->defaultFont);
   listBox->show();
 }
 
 void ListBox::setHeaderVisible(bool headerVisible) {
   listBox->setHeaderHidden(headerVisible == false);
+}
+
+void ListBox::setCheckable(bool checkable) {
+  listBox->checkable = checkable;
+  if(listBox->checkable) {
+    auto items = listBox->findItems("", Qt::MatchContains);
+    for(unsigned i = 0; i < items.size(); i++) items[i]->setCheckState(0, Qt::Unchecked);
+  }
 }
 
 void ListBox::reset() {
@@ -33,19 +42,36 @@ void ListBox::resizeColumnsToContent() {
 }
 
 void ListBox::addItem(const char *text) {
+  object->locked = true;
   auto items = listBox->findItems("", Qt::MatchContains);
   QTreeWidgetItem *item = new QTreeWidgetItem(listBox);
+  if(listBox->checkable) item->setCheckState(0, Qt::Unchecked);
   item->setData(0, Qt::UserRole, (unsigned)items.size());
   lstring list;
   list.split("\t", text);
   for(unsigned i = 0; i < list.size(); i++) item->setText(i, (const char*)list[i]);
+  object->locked = false;
 }
 
 void ListBox::setItem(unsigned row, const char *text) {
+  object->locked = true;
   QTreeWidgetItem *item = listBox->topLevelItem(row);
   lstring list;
   list.split("\t", text);
   for(unsigned i = 0; i < list.size(); i++) item->setText(i, (const char*)list[i]);
+  object->locked = false;
+}
+
+bool ListBox::checked(unsigned row) {
+  QTreeWidgetItem *item = listBox->topLevelItem(row);
+  return (item ? item->checkState(0) == Qt::Checked : false);
+}
+
+void ListBox::setChecked(unsigned row, bool checked) {
+  object->locked = true;
+  QTreeWidgetItem *item = listBox->topLevelItem(row);
+  if(item) item->setCheckState(0, checked ? Qt::Checked : Qt::Unchecked);
+  object->locked = false;
 }
 
 optional<unsigned> ListBox::selection() {

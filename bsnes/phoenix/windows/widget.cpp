@@ -33,8 +33,8 @@ void Widget::setGeometry(unsigned x, unsigned y, unsigned width, unsigned height
 }
 
 Widget::Widget() {
-  os.objects.append(this);
+  OS::os->objects.append(this);
   widget = new Widget::Data;
   widget->window = 0;
-  widget->font = os.os->proportionalFont;
+  widget->font = OS::os->proportionalFont;
 }

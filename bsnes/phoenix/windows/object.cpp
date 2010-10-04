@@ -70,6 +70,7 @@ struct VerticalSlider::Data {
 };
 
 struct OS::Data {
+  nall::array<Object*> objects;
   HFONT proportionalFont;
   HFONT monospaceFont;
 };
@@ -78,6 +79,7 @@ void Object::unused() {
 }
 
 Object::Object() {
+  OS::initialize();
   static unsigned guid = 100;
   object = new Object::Data;
   object->id = guid++;

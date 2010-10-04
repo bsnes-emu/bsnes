@@ -1,5 +1,5 @@
 Action::Action() {
-  os.objects.append(this);
+  OS::os->objects.append(this);
   action = new Action::Data;
 }
 

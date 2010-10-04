@@ -213,8 +213,10 @@ struct ListBox::Data : public QTreeWidget {
 
 public:
   ListBox &self;
+  bool checkable;
 
   Data(ListBox &self) : self(self) {
+    checkable = false;
   }
 
 public slots:
@@ -224,6 +226,10 @@ public slots:
 
   void onChange() {
     if(self.object->locked == false && self.onChange) self.onChange();
+  }
+
+  void onTick(QTreeWidgetItem *item) {
+    if(self.object->locked == false && self.onTick) self.onTick(item->data(0, Qt::UserRole).toUInt());
   }
 };
 

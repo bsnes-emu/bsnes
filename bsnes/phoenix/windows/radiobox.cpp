@@ -9,7 +9,7 @@ void RadioBox::create(Window &parent, unsigned x, unsigned y, unsigned width, un
     parent.widget->window, (HMENU)object->id, GetModuleHandle(0), 0
   );
   SetWindowLongPtr(widget->window, GWLP_USERDATA, (LONG_PTR)this);
-  SendMessage(widget->window, WM_SETFONT, (WPARAM)(parent.window->defaultFont ? parent.window->defaultFont : os.os->proportionalFont), 0);
+  SendMessage(widget->window, WM_SETFONT, (WPARAM)(parent.window->defaultFont ? parent.window->defaultFont : OS::os->proportionalFont), 0);
   setChecked();
 }
 
@@ -24,7 +24,7 @@ void RadioBox::create(RadioBox &parent, unsigned x, unsigned y, unsigned width, 
     GetParent(radioBox->parent->widget->window), (HMENU)object->id, GetModuleHandle(0), 0
   );
   SetWindowLongPtr(widget->window, GWLP_USERDATA, (LONG_PTR)this);
-  SendMessage(widget->window, WM_SETFONT, (WPARAM)(radioBox->parentWindow->window->defaultFont ? radioBox->parentWindow->window->defaultFont : os.os->proportionalFont), 0);
+  SendMessage(widget->window, WM_SETFONT, (WPARAM)(radioBox->parentWindow->window->defaultFont ? radioBox->parentWindow->window->defaultFont : OS::os->proportionalFont), 0);
 }
 
 bool RadioBox::checked() {

@@ -12,10 +12,11 @@ struct CheatEditor : Window {
   void create();
 
 private:
-  string cheatText[128][4];
+  enum : unsigned { CheatSlot, CheatCode, CheatDesc };
+  string cheatText[128][3];
   void synchronize();
   void refresh();
-  void toggle();
+  void toggle(unsigned row);
   void bind();
   void clearAll();
   void clear();

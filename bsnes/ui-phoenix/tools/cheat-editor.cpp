@@ -5,10 +5,9 @@ void CheatEditor::load(string filename) {
   cheatList.reset();
   for(unsigned i = 0; i < 128; i++) {
     cheatList.addItem("");
-    cheatText[i][0] = strunsigned<3, ' '>(i + 1);
-    cheatText[i][1] = " ";
-    cheatText[i][2] = "";
-    cheatText[i][3] = "";
+    cheatText[i][CheatSlot] = strunsigned<3, ' '>(i + 1);
+    cheatText[i][CheatCode] = "";
+    cheatText[i][CheatDesc] = "";
   }
 
   unsigned n = 0;
@@ -32,9 +31,8 @@ void CheatEditor::load(string filename) {
           code.rtrim("+");
           SNES::cheat[n].enabled = enabled;
           SNES::cheat[n] = code;
-          cheatText[n][1] = (enabled == false ? " " : "*");
-          cheatText[n][2] = code;
-          cheatText[n][3] = description;
+          cheatText[n][CheatCode] = code;
+          cheatText[n][CheatDesc] = description;
           if(++n >= 128) break;
         }
       }
@@ -48,7 +46,7 @@ void CheatEditor::load(string filename) {
 void CheatEditor::save(string filename) {
   signed lastSave = -1;
   for(signed i = 127; i >= 0; i--) {
-    if(cheatText[i][2] != "" || cheatText[i][3] != "") {
+    if(cheatText[i][CheatCode] != "" || cheatText[i][CheatDesc] != "") {
       lastSave = i;
       break;
     }
@@ -63,10 +61,10 @@ void CheatEditor::save(string filename) {
     fp.print("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
     fp.print(string("<cartridge sha256=\"", SNES::cartridge.sha256(), "\">\n"));
     for(unsigned i = 0; i <= lastSave; i++) {
-      fp.print(string("  <cheat enabled=\"", cheatText[i][1] == " " ? "false" : "true", "\">\n"));
-      fp.print(string("    <description><![CDATA[", cheatText[i][3], "]]></description>\n"));
+      fp.print(string("  <cheat enabled=\"", cheatList.checked(i), "\">\n"));
+      fp.print(string("    <description><![CDATA[", cheatText[i][CheatDesc], "]]></description>\n"));
       lstring list;
-      list.split("+", cheatText[i][2]);
+      list.split("+", cheatText[i][CheatCode]);
       foreach(code, list) {
         fp.print(string("    <code>", code, "</code>\n"));
       }
@@ -89,6 +87,7 @@ void CheatEditor::create() {
 
   cheatList.create(*this, x,      y, 500, 250, "Slot\tCode\tDescription"); y += 255;
   cheatList.setHeaderVisible();
+  cheatList.setCheckable();
 
   codeLabel.create(*this, x,      y,  80, Style::TextBoxHeight, "Code(s):");
   codeEdit.create (*this, x + 80, y, 420, Style::TextBoxHeight); y += Style::TextBoxHeight + 5;
@@ -102,8 +101,8 @@ void CheatEditor::create() {
   setGeometry(160, 160, 510, y);
   synchronize();
 
-  cheatList.onActivate = { &CheatEditor::toggle, this };
   cheatList.onChange = { &CheatEditor::synchronize, this };
+  cheatList.onTick = { &CheatEditor::toggle, this };
   codeEdit.onChange = descEdit.onChange = { &CheatEditor::bind, this };
   clearAllButton.onTick = { &CheatEditor::clearAll, this };
   clearButton.onTick = { &CheatEditor::clear, this };
@@ -112,8 +111,8 @@ void CheatEditor::create() {
 void CheatEditor::synchronize() {
   clearAllButton.setEnabled(SNES::cartridge.loaded());
   if(auto position = cheatList.selection()) {
-    codeEdit.setText(cheatText[position()][2]);
-    descEdit.setText(cheatText[position()][3]);
+    codeEdit.setText(cheatText[position()][1]);
+    descEdit.setText(cheatText[position()][2]);
     codeEdit.setEnabled(true);
     descEdit.setEnabled(true);
     clearButton.setEnabled(true);
@@ -130,35 +129,28 @@ void CheatEditor::refresh() {
   SNES::cheat.synchronize();
   for(unsigned i = 0; i < 128; i++) {
     lstring list;
-    list.split("+", cheatText[i][2]);
+    list.split("+", cheatText[i][CheatCode]);
     string cheatCode = list[0];
     if(list.size() > 1) cheatCode.append("...");
 
+    cheatList.setChecked(i, SNES::cheat[i].enabled);
     cheatList.setItem(i, string(
-      cheatText[i][0], cheatText[i][1], "\t", cheatCode, "\t", cheatText[i][3]
+      cheatText[i][CheatSlot], "\t", cheatCode, "\t", cheatText[i][CheatDesc]
     ));
   }
   cheatList.resizeColumnsToContent();
 }
 
-void CheatEditor::toggle() {
-  if(auto position = cheatList.selection()) {
-    if(cheatText[position()][1] == " ") {
-      cheatText[position()][1] = "*";
-      SNES::cheat[position()].enabled = true;
-    } else {
-      cheatText[position()][1] = " ";
-      SNES::cheat[position()].enabled = false;
-    }
-  }
+void CheatEditor::toggle(unsigned row) {
+  SNES::cheat[row].enabled = cheatList.checked(row);
   refresh();
 }
 
 void CheatEditor::bind() {
   if(auto position = cheatList.selection()) {
-    cheatText[position()][2] = codeEdit.text();
-    cheatText[position()][3] = descEdit.text();
-    SNES::cheat[position()] = cheatText[position()][2];
+    cheatText[position()][CheatCode] = codeEdit.text();
+    cheatText[position()][CheatDesc] = descEdit.text();
+    SNES::cheat[position()] = cheatText[position()][CheatCode];
     refresh();
   }
 }
@@ -168,9 +160,9 @@ void CheatEditor::clearAll() {
     for(unsigned i = 0; i < 128; i++) {
       SNES::cheat[i].enabled = false;
       SNES::cheat[i] = "";
-      cheatText[i][1] = " ";
-      cheatText[i][2] = "";
-      cheatText[i][3] = "";
+      cheatList.setChecked(i, false);
+      cheatText[i][CheatCode] = "";
+      cheatText[i][CheatDesc] = "";
     }
     SNES::cheat.synchronize();
     refresh();
@@ -183,9 +175,9 @@ void CheatEditor::clear() {
   if(auto position = cheatList.selection()) {
     SNES::cheat[position()].enabled = false;
     SNES::cheat[position()] = "";
-    cheatText[position()][1] = " ";
-    cheatText[position()][2] = "";
-    cheatText[position()][3] = "";
+    cheatList.setChecked(position(), false);
+    cheatText[position()][CheatCode] = "";
+    cheatText[position()][CheatDesc] = "";
     SNES::cheat.synchronize();
     refresh();
     codeEdit.setText("");

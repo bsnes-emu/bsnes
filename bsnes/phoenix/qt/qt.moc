@@ -1,7 +1,7 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'qt.moc.hpp'
 **
-** Created: Sat Oct 2 21:32:41 2010
+** Created: Mon Oct 4 00:53:54 2010
 **      by: The Qt Meta Object Compiler version 62 (Qt 4.6.2)
 **
 ** WARNING! All changes made in this file will be lost!
@@ -641,7 +641,7 @@ static const uint qt_meta_data_ListBox__Data[] = {
        4,       // revision
        0,       // classname
        0,    0, // classinfo
-       2,   14, // methods
+       3,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -651,12 +651,14 @@ static const uint qt_meta_data_ListBox__Data[] = {
  // slots: signature, parameters, type, tag, flags
       15,   14,   14,   14, 0x0a,
       28,   14,   14,   14, 0x0a,
+      44,   39,   14,   14, 0x0a,
 
        0        // eod
 };
 
 static const char qt_meta_stringdata_ListBox__Data[] = {
     "ListBox::Data\0\0onActivate()\0onChange()\0"
+    "item\0onTick(QTreeWidgetItem*)\0"
 };
 
 const QMetaObject ListBox::Data::staticMetaObject = {
@@ -690,9 +692,10 @@ int ListBox::Data::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
         switch (_id) {
         case 0: onActivate(); break;
         case 1: onChange(); break;
+        case 2: onTick((*reinterpret_cast< QTreeWidgetItem*(*)>(_a[1]))); break;
         default: ;
         }
-        _id -= 2;
+        _id -= 3;
     }
     return _id;
 }

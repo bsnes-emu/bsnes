@@ -29,14 +29,72 @@ namespace phoenix {
 #include "viewport.cpp"
 #include "messagewindow.cpp"
 
-OS &os = OS::handle();
+OS::Data *OS::os = 0;
 Window Window::None;
 
 static void OS_keyboardProc(HWND, UINT, WPARAM, LPARAM);
+static LRESULT CALLBACK OS_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam);
 
-OS& OS::handle() {
-  static OS os;
-  return os;
+void OS::initialize() {
+  static bool initialized = false;
+  if(initialized == true) return;
+  initialized = true;
+
+  InitCommonControls();
+  CoInitialize(0);
+
+  os = new OS::Data;
+  os->proportionalFont = Font_createFont("Tahoma", 8, false, false);
+  os->monospaceFont = Font_createFont("Courier New", 8, false, false);
+
+  WNDCLASS wc;
+  wc.cbClsExtra = 0;
+  wc.cbWndExtra = 0;
+  wc.hbrBackground = (HBRUSH)(COLOR_3DFACE + 1);
+  wc.hCursor = LoadCursor(0, IDC_ARROW);
+  wc.hIcon = LoadIcon(GetModuleHandle(0), MAKEINTRESOURCE(2));
+  wc.hInstance = GetModuleHandle(0);
+  wc.lpfnWndProc = OS_windowProc;
+  wc.lpszClassName = L"phoenix_window";
+  wc.lpszMenuName = 0;
+  wc.style = CS_HREDRAW | CS_VREDRAW;
+  RegisterClass(&wc);
+
+  wc.cbClsExtra = 0;
+  wc.cbWndExtra = 0;
+  wc.hbrBackground = CreateSolidBrush(RGB(0, 0, 0));
+  wc.hCursor = LoadCursor(0, IDC_ARROW);
+  wc.hIcon = LoadIcon(0, IDI_APPLICATION);
+  wc.hInstance = GetModuleHandle(0);
+  wc.lpfnWndProc = Canvas_windowProc;
+  wc.lpszClassName = L"phoenix_canvas";
+  wc.lpszMenuName = 0;
+  wc.style = CS_HREDRAW | CS_VREDRAW;
+  RegisterClass(&wc);
+
+  wc.cbClsExtra = 0;
+  wc.cbWndExtra = 0;
+  wc.hbrBackground = (HBRUSH)(COLOR_3DFACE + 1);
+  wc.hCursor = LoadCursor(0, IDC_ARROW);
+  wc.hIcon = LoadIcon(0, IDI_APPLICATION);
+  wc.hInstance = GetModuleHandle(0);
+  wc.lpfnWndProc = Label_windowProc;
+  wc.lpszClassName = L"phoenix_label";
+  wc.lpszMenuName = 0;
+  wc.style = CS_HREDRAW | CS_VREDRAW;
+  RegisterClass(&wc);
+
+  wc.cbClsExtra = 0;
+  wc.cbWndExtra = 0;
+  wc.hbrBackground = CreateSolidBrush(RGB(0, 0, 0));
+  wc.hCursor = LoadCursor(0, IDC_ARROW);
+  wc.hIcon = LoadIcon(0, IDI_APPLICATION);
+  wc.hInstance = GetModuleHandle(0);
+  wc.lpfnWndProc = Viewport_windowProc;
+  wc.lpszClassName = L"phoenix_viewport";
+  wc.lpszMenuName = 0;
+  wc.style = CS_HREDRAW | CS_VREDRAW;
+  RegisterClass(&wc);
 }
 
 bool OS::pending() {
@@ -268,7 +326,7 @@ static LRESULT CALLBACK OS_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM
       unsigned id = LOWORD(wparam);
       HWND control = GetDlgItem(window.widget->window, id);
       if(control == 0) {
-        Object *object_ptr = (Object*)os.findObject(id);
+        Object *object_ptr = (Object*)OS::findObject(id);
         if(object_ptr) {
           if(dynamic_cast<MenuItem*>(object_ptr)) {
             MenuItem &menuItem = (MenuItem&)*object_ptr;
@@ -334,8 +392,12 @@ static LRESULT CALLBACK OS_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM
             ListBox &listBox = (ListBox&)*object_ptr;
             LPNMHDR nmhdr = (LPNMHDR)lparam;
             LPNMLISTVIEW nmlistview = (LPNMLISTVIEW)lparam;
+
             if(nmhdr->code == LVN_ITEMCHANGED && (nmlistview->uChanged & LVIF_STATE)) {
-              if((nmlistview->uOldState & LVIS_FOCUSED) && !(nmlistview->uNewState & LVIS_FOCUSED)) {
+              unsigned imagemask = ((nmlistview->uNewState & LVIS_STATEIMAGEMASK) >> 12) - 1;
+              if(imagemask == 0 || imagemask == 1) {
+                if(listBox.object->locked == false && listBox.onTick) listBox.onTick(nmlistview->iItem);
+              } else if((nmlistview->uOldState & LVIS_FOCUSED) && !(nmlistview->uNewState & LVIS_FOCUSED)) {
                 listBox.listBox->lostFocus = true;
               } else {
                 if(!(nmlistview->uOldState & LVIS_SELECTED) && (nmlistview->uNewState & LVIS_SELECTED)) {
@@ -392,66 +454,8 @@ static LRESULT CALLBACK OS_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM
 }
 
 Object* OS::findObject(unsigned id) {
-  foreach(object, objects) { if(object->object->id == id) return object; }
+  foreach(object, os->objects) { if(object->object->id == id) return object; }
   return 0;
-}
-
-OS::OS() {
-  InitCommonControls();
-  CoInitialize(0);
-
-  os = new OS::Data;
-  os->proportionalFont = Font_createFont("Tahoma", 8, false, false);
-  os->monospaceFont = Font_createFont("Courier New", 8, false, false);
-
-  WNDCLASS wc;
-  wc.cbClsExtra = 0;
-  wc.cbWndExtra = 0;
-  wc.hbrBackground = (HBRUSH)(COLOR_3DFACE + 1);
-  wc.hCursor = LoadCursor(0, IDC_ARROW);
-  wc.hIcon = LoadIcon(GetModuleHandle(0), MAKEINTRESOURCE(2));
-  wc.hInstance = GetModuleHandle(0);
-  wc.lpfnWndProc = OS_windowProc;
-  wc.lpszClassName = L"phoenix_window";
-  wc.lpszMenuName = 0;
-  wc.style = CS_HREDRAW | CS_VREDRAW;
-  RegisterClass(&wc);
-
-  wc.cbClsExtra = 0;
-  wc.cbWndExtra = 0;
-  wc.hbrBackground = CreateSolidBrush(RGB(0, 0, 0));
-  wc.hCursor = LoadCursor(0, IDC_ARROW);
-  wc.hIcon = LoadIcon(0, IDI_APPLICATION);
-  wc.hInstance = GetModuleHandle(0);
-  wc.lpfnWndProc = Canvas_windowProc;
-  wc.lpszClassName = L"phoenix_canvas";
-  wc.lpszMenuName = 0;
-  wc.style = CS_HREDRAW | CS_VREDRAW;
-  RegisterClass(&wc);
-
-  wc.cbClsExtra = 0;
-  wc.cbWndExtra = 0;
-  wc.hbrBackground = (HBRUSH)(COLOR_3DFACE + 1);
-  wc.hCursor = LoadCursor(0, IDC_ARROW);
-  wc.hIcon = LoadIcon(0, IDI_APPLICATION);
-  wc.hInstance = GetModuleHandle(0);
-  wc.lpfnWndProc = Label_windowProc;
-  wc.lpszClassName = L"phoenix_label";
-  wc.lpszMenuName = 0;
-  wc.style = CS_HREDRAW | CS_VREDRAW;
-  RegisterClass(&wc);
-
-  wc.cbClsExtra = 0;
-  wc.cbWndExtra = 0;
-  wc.hbrBackground = CreateSolidBrush(RGB(0, 0, 0));
-  wc.hCursor = LoadCursor(0, IDC_ARROW);
-  wc.hIcon = LoadIcon(0, IDI_APPLICATION);
-  wc.hInstance = GetModuleHandle(0);
-  wc.lpfnWndProc = Viewport_windowProc;
-  wc.lpszClassName = L"phoenix_viewport";
-  wc.lpszMenuName = 0;
-  wc.style = CS_HREDRAW | CS_VREDRAW;
-  RegisterClass(&wc);
 }
 
 }

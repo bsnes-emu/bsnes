@@ -6,5 +6,5 @@ void Button::create(Window &parent, unsigned x, unsigned y, unsigned width, unsi
     parent.widget->window, (HMENU)object->id, GetModuleHandle(0), 0
   );
   SetWindowLongPtr(widget->window, GWLP_USERDATA, (LONG_PTR)this);
-  SendMessage(widget->window, WM_SETFONT, (WPARAM)(parent.window->defaultFont ? parent.window->defaultFont : os.os->proportionalFont), 0);
+  SendMessage(widget->window, WM_SETFONT, (WPARAM)(parent.window->defaultFont ? parent.window->defaultFont : OS::os->proportionalFont), 0);
 }

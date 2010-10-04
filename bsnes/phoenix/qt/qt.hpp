@@ -220,12 +220,16 @@ struct Label : Widget {
 struct ListBox : Widget {
   nall::function<void ()> onActivate;
   nall::function<void ()> onChange;
+  nall::function<void (unsigned)> onTick;
   void create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const char *text = "");
   void setHeaderVisible(bool headerVisible = true);
+  void setCheckable(bool checkable = true);
   void reset();
   void resizeColumnsToContent();
   void addItem(const char *text);
   void setItem(unsigned row, const char *text);
+  bool checked(unsigned row);
+  void setChecked(unsigned row, bool checked = true);
   nall::optional<unsigned> selection();
   void setSelection(unsigned row);
   ListBox();

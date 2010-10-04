@@ -43,6 +43,7 @@ struct ListBox::Data {
     GtkWidget *label;
   };
   linear_vector<GtkColumn> column;
+  bool checkable;
   signed selection;
 };
 

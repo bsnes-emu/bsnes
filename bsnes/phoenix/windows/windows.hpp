@@ -178,12 +178,16 @@ struct Label : Widget {
 struct ListBox : Widget {
   nall::function<void ()> onActivate;
   nall::function<void ()> onChange;
+  nall::function<void (unsigned)> onTick;
   void create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const char *text = "");
   void setHeaderVisible(bool headerVisible = true);
+  void setCheckable(bool checkable = true);
   void reset();
   void resizeColumnsToContent();
   void addItem(const char *text);
   void setItem(unsigned row, const char *text);
+  bool checked(unsigned row);
+  void setChecked(unsigned row, bool checked = true);
   nall::optional<unsigned> selection();
   void setSelection(unsigned row);
   ListBox();
@@ -254,26 +258,21 @@ struct MessageWindow : Object {
 };
 
 struct OS : Object {
-  bool pending();
-  void run();
-  void main();
-  void quit();
-  unsigned desktopWidth();
-  unsigned desktopHeight();
-  nall::string folderSelect(Window &parent, const char *path = "");
-  nall::string fileOpen(Window &parent, const char *filter, const char *path = "");
-  nall::string fileSave(Window &parent, const char *filter, const char *path = "");
+  static bool pending();
+  static void run();
+  static void main();
+  static void quit();
+  static unsigned desktopWidth();
+  static unsigned desktopHeight();
+  static nall::string folderSelect(Window &parent, const char *path = "");
+  static nall::string fileOpen(Window &parent, const char *filter, const char *path = "");
+  static nall::string fileSave(Window &parent, const char *filter, const char *path = "");
 //private:
-  static OS& handle();
+  static void initialize();
   struct Data;
-  Data *os;
-  Object* findObject(unsigned id);
-  nall::array<Object*> objects;
-private:
-  OS();
+  static Data *os;
+  static Object* findObject(unsigned id);
   friend class Object;
 };
-
-extern OS &os;
 
 };
