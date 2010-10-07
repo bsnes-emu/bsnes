@@ -12,6 +12,13 @@ struct Object {
   Data *object;
 };
 
+struct Geometry {
+  unsigned x, y;
+  unsigned width, height;
+  inline Geometry() : x(0), y(0), width(0), height(0) {}
+  inline Geometry(unsigned x, unsigned y, unsigned width, unsigned height) : x(x), y(y), width(width), height(height) {}
+};
+
 struct Font : Object {
   enum class Style : unsigned {
     None = 0,
@@ -91,6 +98,7 @@ struct Window : Widget {
   void create(unsigned x, unsigned y, unsigned width, unsigned height, const char *text = "");
   bool focused();
   void setFocused();
+  Geometry geometry();
   void setGeometry(unsigned x, unsigned y, unsigned width, unsigned height);
   void setDefaultFont(Font &font);
   void setFont(Font &font);
@@ -188,7 +196,7 @@ struct ListBox : Widget {
 
 struct ProgressBar : Widget {
   void create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height);
-  void setProgress(unsigned progress);
+  void setPosition(unsigned position);
 };
 
 struct RadioBox : Widget {

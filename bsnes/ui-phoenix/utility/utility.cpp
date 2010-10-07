@@ -66,7 +66,8 @@ void Utility::setScale(unsigned scale) {
     if(config.video.aspectRatioCorrection) width *= 32.0 / 23.0;
   }
   mainWindow.viewport.setGeometry(0, 0, width, height);
-  mainWindow.setGeometry(128, 128, width, height);
+  Geometry geom = mainWindow.geometry();
+  mainWindow.setGeometry(geom.x, geom.y, width, height);
 }
 
 void Utility::setShader() {

@@ -26,6 +26,18 @@ void Window::setFont(Font &font) {
   SendMessage(window->status, WM_SETFONT, (WPARAM)font.font->font, 0);
 }
 
+Geometry Window::geometry() {
+  RECT position, size;
+  GetWindowRect(widget->window, &position);
+  GetClientRect(widget->window, &size);
+  if(GetWindowLongPtr(window->status, GWL_STYLE) & WS_VISIBLE) {
+    RECT status;
+    GetClientRect(window->status, &status);
+    size.bottom -= status.bottom - status.top;
+  }
+  return Geometry(position.left, position.top, size.right, size.bottom);
+}
+
 void Window::setGeometry(unsigned x, unsigned y, unsigned width, unsigned height) {
   bool isVisible = visible();
   if(isVisible) setVisible(false);

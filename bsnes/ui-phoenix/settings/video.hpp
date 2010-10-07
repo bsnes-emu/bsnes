@@ -1,4 +1,4 @@
-struct VideoSettings : Window {
+struct VideoSettings : TopLevelWindow {
   Label colorAdjustmentLabel;
   Label brightnessLabel;
   Label brightnessValue;

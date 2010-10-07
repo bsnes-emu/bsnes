@@ -1,4 +1,4 @@
-struct MainWindow : Window {
+struct MainWindow : TopLevelWindow {
   Menu system;
   MenuItem systemLoadCartridge;
   Menu systemLoadCartridgeSpecial;

@@ -1,4 +1,4 @@
-struct CheatEditor : Window {
+struct CheatEditor : TopLevelWindow {
   ListBox cheatList;
   Label codeLabel;
   TextBox codeEdit;
@@ -8,7 +8,7 @@ struct CheatEditor : Window {
   Button clearAllButton;
   Button clearButton;
 
-  Window databaseWindow;
+  TopLevelWindow databaseWindow;
   ListBox databaseList;
   lstring databaseCode;
   Button databaseSelectAll;

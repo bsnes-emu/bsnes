@@ -1,4 +1,4 @@
-struct StateManager : Window {
+struct StateManager : TopLevelWindow {
   ListBox stateList;
   Label descLabel;
   TextBox descEdit;

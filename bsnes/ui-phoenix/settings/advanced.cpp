@@ -1,9 +1,8 @@
 AdvancedSettings advancedSettings;
 
 void AdvancedSettings::create() {
-  application.windows.append(this);
   Window::create(0, 0, 256, 256, "Advanced Settings");
-  setDefaultFont(application.proportionalFont);
+  application.addWindow(this, "AdvancedSettings", "160,160");
 
   unsigned x = 5, y = 5;
 
@@ -27,7 +26,7 @@ void AdvancedSettings::create() {
   if(config.settings.focusPolicy == 1) focusPolicyIgnore.setChecked();
   if(config.settings.focusPolicy == 2) focusPolicyAllow.setChecked();
 
-  setGeometry(160, 160, 605, y);
+  setGeometry(0, 0, 605, y);
 
   lstring list;
 

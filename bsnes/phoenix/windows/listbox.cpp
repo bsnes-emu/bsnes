@@ -65,6 +65,9 @@ void ListBox::addItem(const char *text) {
     utf16_t wtext(list[i]);
     ListView_SetItemText(widget->window, row, i, wtext);
   }
+
+  //workaround: when there is only one column, the horizontal scrollbar will always appear without this
+  if(listBox->columns == 1) ListView_SetColumnWidth(widget->window, 0, LVSCW_AUTOSIZE_USEHEADER);
 }
 
 void ListBox::setItem(unsigned row, const char *text) {
@@ -74,6 +77,9 @@ void ListBox::setItem(unsigned row, const char *text) {
     utf16_t wtext(list[i]);
     ListView_SetItemText(widget->window, row, i, wtext);
   }
+
+  //workaround: when there is only one column, the horizontal scrollbar will always appear without this
+  if(listBox->columns == 1) ListView_SetColumnWidth(widget->window, 0, LVSCW_AUTOSIZE_USEHEADER);
 }
 
 optional<unsigned> ListBox::selection() {

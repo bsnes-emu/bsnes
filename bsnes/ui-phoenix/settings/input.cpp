@@ -2,9 +2,8 @@ InputSettings inputSettings;
 static InputMapper::AbstractInput *activeInput = 0;
 
 void InputSettings::create() {
-  application.windows.append(this);
   Window::create(0, 0, 256, 256, "Input Settings");
-  setDefaultFont(application.proportionalFont);
+  application.addWindow(this, "InputSettings", "160,160");
   setFont(application.proportionalFontBold);
   setStatusVisible();
 
@@ -38,7 +37,7 @@ void InputSettings::create() {
   clearButton.create(*this, 515 - 85, y, 80, height, "Clear");
   y += height + 5;
 
-  setGeometry(160, 160, 515, y);
+  setGeometry(0, 0, 515, y);
 
   refreshDevices();
   portBox.onChange = { &InputSettings::refreshDevices, this };

@@ -79,9 +79,8 @@ void CheatEditor::save(string filename) {
 }
 
 void CheatEditor::create() {
-  application.windows.append(this);
   Window::create(0, 0, 256, 256, "Cheat Editor");
-  setDefaultFont(application.proportionalFont);
+  application.addWindow(this, "CheatEditor", "160,160");
 
   unsigned x = 5, y = 5, height = Style::ButtonHeight;
 
@@ -99,7 +98,7 @@ void CheatEditor::create() {
   clearAllButton.create(*this, x + 505 - 85 - 85, y, 80, height, "Clear All");
   clearButton.create(*this, x + 505 - 85, y, 80, height, "Clear"); y += height + 5;
 
-  setGeometry(160, 160, 510, y);
+  setGeometry(0, 0, 510, y);
   synchronize();
 
   cheatList.onChange = { &CheatEditor::synchronize, this };
@@ -115,9 +114,8 @@ void CheatEditor::create() {
   };
 
   //databaseWindow
-  application.windows.append(&databaseWindow);
   databaseWindow.create(0, 0, 256, 256);
-  databaseWindow.setDefaultFont(application.proportionalFont);
+  application.addWindow(&databaseWindow, "CheatDatabase", "192,192");
 
   x = 5, y = 5;
 
@@ -128,7 +126,7 @@ void CheatEditor::create() {
   databaseUnselectAll.create(databaseWindow, x + 105, y, 100, height, "Unselect All");
   databaseOk.create(databaseWindow, 605 - 80, y, 80, height, "Ok"); y += height + 5;
 
-  databaseWindow.setGeometry(192, 192, 610, y);
+  databaseWindow.setGeometry(0, 0, 610, y);
 
   databaseSelectAll.onTick = []() {
     for(unsigned i = 0; i < cheatEditor.databaseCode.size(); i++) {

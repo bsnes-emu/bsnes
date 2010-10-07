@@ -1,4 +1,4 @@
-struct FileBrowser : Window {
+struct FileBrowser : TopLevelWindow {
   TextBox pathBox;
   Button browseButton;
   Button upButton;

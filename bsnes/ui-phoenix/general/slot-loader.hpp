@@ -1,4 +1,4 @@
-struct SingleSlotLoader : Window {
+struct SingleSlotLoader : TopLevelWindow {
   Label baseLabel;
   TextBox basePath;
   Button baseBrowse;
@@ -16,7 +16,7 @@ struct SingleSlotLoader : Window {
   void load();
 };
 
-struct DoubleSlotLoader : Window {
+struct DoubleSlotLoader : TopLevelWindow {
   Label baseLabel;
   TextBox basePath;
   Button baseBrowse;

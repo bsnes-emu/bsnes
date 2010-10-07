@@ -2,9 +2,8 @@ SingleSlotLoader singleSlotLoader;
 DoubleSlotLoader doubleSlotLoader;
 
 void SingleSlotLoader::create() {
-  application.windows.append(this);
   Window::create(0, 0, 256, 256);
-  setDefaultFont(application.proportionalFont);
+  application.addWindow(this, "SingleSlotLoader", "160,160");
 
   unsigned x = 5, y = 5, height = Style::TextBoxHeight, width = 365 + height;
 
@@ -18,7 +17,7 @@ void SingleSlotLoader::create() {
 
   okButton.create(*this, x + width - 90, y, 80, Style::ButtonHeight, "Ok"); y += Style::ButtonHeight + 5;
 
-  setGeometry(160, 160, width, y);
+  setGeometry(0, 0, width, y);
 
   baseBrowse.onTick = []() {
     fileBrowser.fileOpen(FileBrowser::Mode::Cartridge, [](string filename) {
@@ -88,9 +87,8 @@ void SingleSlotLoader::load() {
 //
 
 void DoubleSlotLoader::create() {
-  application.windows.append(this);
   Window::create(0, 0, 256, 256);
-  setDefaultFont(application.proportionalFont);
+  application.addWindow(this, "DoubleSlotLoader", "160,160");
 
   unsigned x = 5, y = 5, height = Style::TextBoxHeight, width = 365 + height;
 
@@ -108,7 +106,7 @@ void DoubleSlotLoader::create() {
 
   okButton.create(*this, x + width - 90, y, 80, Style::ButtonHeight, "Ok"); y += Style::ButtonHeight + 5;
 
-  setGeometry(160, 160, width, y);
+  setGeometry(0, 0, width, y);
 
   baseBrowse.onTick = []() {
     fileBrowser.fileOpen(FileBrowser::Mode::Cartridge, [](string filename) {

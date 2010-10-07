@@ -9,10 +9,10 @@ void ProgressBar::create(Window &parent, unsigned x, unsigned y, unsigned width,
   SendMessage(widget->window, PBM_SETSTEP, MAKEWPARAM(1, 0), 0);
 }
 
-unsigned ProgressBar::progress() {
+unsigned ProgressBar::position() {
   return SendMessage(widget->window, PBM_GETPOS, 0, 0);
 }
 
-void ProgressBar::setProgress(unsigned progress) {
-  SendMessage(widget->window, PBM_SETPOS, (WPARAM)progress, 0);
+void ProgressBar::setPosition(unsigned position) {
+  SendMessage(widget->window, PBM_SETPOS, (WPARAM)position, 0);
 }

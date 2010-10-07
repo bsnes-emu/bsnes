@@ -1,9 +1,8 @@
 FileBrowser fileBrowser;
 
 void FileBrowser::create() {
-  application.windows.append(this);
   Window::create(0, 0, 256, 256);
-  setDefaultFont(application.proportionalFont);
+  application.addWindow(this, "FileBrowser", "160,160");
 
   unsigned x = 5, y = 5, height = Style::TextBoxHeight;
 
@@ -13,7 +12,7 @@ void FileBrowser::create() {
 
   contentsBox.create(*this, x, y, 630, 350); y += 350 + 5;
 
-  setGeometry(160, 160, 640, y);
+  setGeometry(0, 0, 640, y);
 
   pathBox.onActivate = []() { fileBrowser.setFolder(fileBrowser.pathBox.text()); };
   browseButton.onTick = { &FileBrowser::folderBrowse, this };

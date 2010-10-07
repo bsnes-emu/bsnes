@@ -47,6 +47,13 @@ void Window::setFocused() {
   gtk_window_present(GTK_WINDOW(object->widget));
 }
 
+Geometry Window::geometry() {
+  gint x, y, width, height;
+  gtk_window_get_position(GTK_WINDOW(object->widget), &x, &y);
+  gtk_widget_get_size_request(object->formContainer, &width, &height);
+  return Geometry(x, y, width, height);
+}
+
 void Window::setGeometry(unsigned x, unsigned y, unsigned width, unsigned height) {
   gtk_window_move(GTK_WINDOW(object->widget), x, y);
   gtk_widget_set_size_request(object->formContainer, width, height);

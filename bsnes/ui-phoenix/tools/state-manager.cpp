@@ -1,9 +1,8 @@
 StateManager stateManager;
 
 void StateManager::create() {
-  application.windows.append(this);
   Window::create(0, 0, 256, 256, "State Manager");
-  setDefaultFont(application.proportionalFont);
+  application.addWindow(this, "StateManager", "160,160");
 
   unsigned x = 5, y = 5;
 
@@ -17,7 +16,7 @@ void StateManager::create() {
   saveButton.create(*this, x + 505 - 85 - 85, y, 80, Style::ButtonHeight, "Save");
   eraseButton.create(*this, x + 505 - 85, y, 80, Style::ButtonHeight, "Erase"); y += Style::ButtonHeight + 5;
 
-  setGeometry(160, 160, 510, y);
+  setGeometry(0, 0, 510, y);
   synchronize();
 
   stateList.onActivate = { &StateManager::slotLoad, this };

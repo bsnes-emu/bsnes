@@ -1,9 +1,8 @@
 MainWindow mainWindow;
 
 void MainWindow::create() {
-  application.windows.append(this);
-  Window::create(128, 128, 595, 448, string(SNES::Info::Name, " v", SNES::Info::Version));
-  setDefaultFont(application.proportionalFont);
+  Window::create(0, 0, 595, 448, string(SNES::Info::Name, " v", SNES::Info::Version));
+  application.addWindow(this, "MainWindow", "128,128");
   setFont(application.proportionalFontBold);
   setBackgroundColor(0, 0, 0);
 

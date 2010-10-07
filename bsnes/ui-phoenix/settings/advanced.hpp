@@ -1,4 +1,4 @@
-struct AdvancedSettings : Window {
+struct AdvancedSettings : TopLevelWindow {
   Label driverSelectionLabel;
   Label videoDriverLabel;
   ComboBox videoDriverBox;

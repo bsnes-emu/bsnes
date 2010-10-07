@@ -6,8 +6,8 @@ void ProgressBar::create(Window &parent, unsigned x, unsigned y, unsigned width,
   progressBar->show();
 }
 
-void ProgressBar::setProgress(unsigned progress) {
-  progressBar->setValue(progress);
+void ProgressBar::setPosition(unsigned position) {
+  progressBar->setValue(position);
 }
 
 ProgressBar::ProgressBar() {

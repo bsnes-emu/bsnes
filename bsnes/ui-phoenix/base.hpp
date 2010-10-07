@@ -14,6 +14,11 @@ using namespace ruby;
 #include <phoenix/phoenix.hpp>
 using namespace phoenix;
 
+struct TopLevelWindow : Window {
+  string name;
+  string position;
+};
+
 #include "interface.hpp"
 #include "config.hpp"
 #include "general/general.hpp"
@@ -24,13 +29,20 @@ using namespace phoenix;
 #include "cartridge/cartridge.hpp"
 
 struct Application {
-  array<Window*> windows;
   Font proportionalFont;
   Font proportionalFontBold;
   Font monospaceFont;
 
   bool quit;
   void main(int argc, char **argv);
+
+  void addWindow(TopLevelWindow *window, const string &name, const string &position);
+
+private:
+  array<TopLevelWindow*> windows;
+  configuration geometryConfig;
+  void loadGeometry();
+  void saveGeometry();
 };
 
 extern Application application;

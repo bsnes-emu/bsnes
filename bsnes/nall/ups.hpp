@@ -1,190 +1,221 @@
 #ifndef NALL_UPS_HPP
 #define NALL_UPS_HPP
 
-#include <stdio.h>
-
-#include <nall/algorithm.hpp>
 #include <nall/crc32.hpp>
 #include <nall/file.hpp>
+#include <nall/function.hpp>
 #include <nall/stdint.hpp>
 
 namespace nall {
-  class ups {
-  public:
-    enum result {
-      ok,
-      patch_unreadable,
-      patch_unwritable,
-      patch_invalid,
-      input_invalid,
-      output_invalid,
-      patch_crc32_invalid,
-      input_crc32_invalid,
-      output_crc32_invalid,
-    };
 
-    ups::result create(const char *patch_fn, const uint8_t *x_data, unsigned x_size, const uint8_t *y_data, unsigned y_size) {
-      if(!fp.open(patch_fn, file::mode_write)) return patch_unwritable;
+struct ups {
+  enum class result_t : unsigned {
+    unknown,
+    success,
+    patch_unwritable,
+    patch_invalid,
+    source_invalid,
+    target_invalid,
+    target_too_small,
+    patch_checksum_invalid,
+    source_checksum_invalid,
+    target_checksum_invalid,
+  };
 
-      crc32 = ~0;
-      uint32_t x_crc32 = crc32_calculate(x_data, x_size);
-      uint32_t y_crc32 = crc32_calculate(y_data, y_size);
+  function<void (unsigned offset, unsigned length)> progress;
 
-      //header
-      write('U');
-      write('P');
-      write('S');
-      write('1');
-      encptr(x_size);
-      encptr(y_size);
+  result_t create(
+    const uint8_t *source_data_, unsigned source_length_,
+    const uint8_t *target_data_, unsigned target_length_,
+    const char *patch_filename
+  ) {
+    source_data = (uint8_t*)source_data_, target_data = (uint8_t*)target_data_;
+    source_length = source_length_, target_length = target_length_;
+    source_offset = target_offset = 0;
+    source_checksum = target_checksum = patch_checksum = ~0;
 
-      //body
-      unsigned max_size = max(x_size, y_size);
-      unsigned relative = 0;
-      for(unsigned i = 0; i < max_size;) {
-        uint8_t x = i < x_size ? x_data[i] : 0x00;
-        uint8_t y = i < y_size ? y_data[i] : 0x00;
+    if(patch_file.open(patch_filename, file::mode_write) == false) return result_t::patch_unwritable;
 
-        if(x == y) {
-          i++;
-          continue;
-        }
+    patch_write('U');
+    patch_write('P');
+    patch_write('S');
+    patch_write('1');
+    encode(source_length);
+    encode(target_length);
 
-        encptr(i++ - relative);
-        write(x ^ y);
+    unsigned output_length = source_length > target_length ? source_length : target_length;
+    unsigned relative = 0;
+    for(unsigned offset = 0; offset < output_length;) {
+      uint8_t x = source_read();
+      uint8_t y = target_read();
 
-        while(true) {
-          if(i >= max_size) {
-            write(0x00);
-            break;
-          }
-
-          x = i < x_size ? x_data[i] : 0x00;
-          y = i < y_size ? y_data[i] : 0x00;
-          i++;
-          write(x ^ y);
-          if(x == y) break;
-        }
-
-        relative = i;
+      if(x == y) {
+        offset++;
+        continue;
       }
 
-      //footer
-      for(unsigned i = 0; i < 4; i++) write(x_crc32 >> (i << 3));
-      for(unsigned i = 0; i < 4; i++) write(y_crc32 >> (i << 3));
-      uint32_t p_crc32 = ~crc32;
-      for(unsigned i = 0; i < 4; i++) write(p_crc32 >> (i << 3));
+      encode(offset++ - relative);
+      patch_write(x ^ y);
 
-      fp.close();
-      return ok;
-    }
-
-    ups::result apply(const uint8_t *p_data, unsigned p_size, const uint8_t *x_data, unsigned x_size, uint8_t *&y_data, unsigned &y_size) {
-      if(p_size < 18) return patch_invalid;
-      p_buffer = p_data;
-
-      crc32 = ~0;
-
-      //header
-      if(read() != 'U') return patch_invalid;
-      if(read() != 'P') return patch_invalid;
-      if(read() != 'S') return patch_invalid;
-      if(read() != '1') return patch_invalid;
-
-      unsigned px_size = decptr();
-      unsigned py_size = decptr();
-
-      //mirror
-      if(x_size != px_size && x_size != py_size) return input_invalid;
-      y_size = (x_size == px_size) ? py_size : px_size;
-      y_data = new uint8_t[y_size]();
-
-      for(unsigned i = 0; i < x_size && i < y_size; i++) y_data[i] = x_data[i];
-      for(unsigned i = x_size; i < y_size; i++) y_data[i] = 0x00;
-
-      //body
-      unsigned relative = 0;
-      while(p_buffer < p_data + p_size - 12) {
-        relative += decptr();
-
-        while(true) {
-          uint8_t x = read();
-          if(x && relative < y_size) {
-            uint8_t y = relative < x_size ? x_data[relative] : 0x00;
-            y_data[relative] = x ^ y;
-          }
-          relative++;
-          if(!x) break;
-        }
-      }
-
-      //footer
-      unsigned px_crc32 = 0, py_crc32 = 0, pp_crc32 = 0;
-      for(unsigned i = 0; i < 4; i++) px_crc32 |= read() << (i << 3);
-      for(unsigned i = 0; i < 4; i++) py_crc32 |= read() << (i << 3);
-      uint32_t p_crc32 = ~crc32;
-      for(unsigned i = 0; i < 4; i++) pp_crc32 |= read() << (i << 3);
-
-      uint32_t x_crc32 = crc32_calculate(x_data, x_size);
-      uint32_t y_crc32 = crc32_calculate(y_data, y_size);
-
-      if(px_size != py_size) {
-        if(x_size == px_size && x_crc32 != px_crc32) return input_crc32_invalid;
-        if(x_size == py_size && x_crc32 != py_crc32) return input_crc32_invalid;
-        if(y_size == px_size && y_crc32 != px_crc32) return output_crc32_invalid;
-        if(y_size == py_size && y_crc32 != py_crc32) return output_crc32_invalid;
-      } else {
-        if(x_crc32 != px_crc32 && x_crc32 != py_crc32) return input_crc32_invalid;
-        if(y_crc32 != px_crc32 && y_crc32 != py_crc32) return output_crc32_invalid;
-        if(x_crc32 == y_crc32 && px_crc32 != py_crc32) return output_crc32_invalid;
-        if(x_crc32 != y_crc32 && px_crc32 == py_crc32) return output_crc32_invalid;
-      }
-
-      if(p_crc32 != pp_crc32) return patch_crc32_invalid;
-      return ok;
-    }
-
-  private:
-    file fp;
-    uint32_t crc32;
-    const uint8_t *p_buffer;
-
-    uint8_t read() {
-      uint8_t n = *p_buffer++;
-      crc32 = crc32_adjust(crc32, n);
-      return n;
-    }
-
-    void write(uint8_t n) {
-      fp.write(n);
-      crc32 = crc32_adjust(crc32, n);
-    }
-
-    void encptr(uint64_t offset) {
       while(true) {
-        uint64_t x = offset & 0x7f;
-        offset >>= 7;
-        if(offset == 0) {
-          write(0x80 | x);
+        if(offset >= output_length) {
+          patch_write(0x00);
           break;
         }
-        write(x);
-        offset--;
+
+        x = source_read();
+        y = target_read();
+        offset++;
+        patch_write(x ^ y);
+        if(x == y) break;
+      }
+
+      relative = offset;
+    }
+
+    source_checksum = ~source_checksum;
+    target_checksum = ~target_checksum;
+    for(unsigned i = 0; i < 4; i++) patch_write(source_checksum >> (i * 8));
+    for(unsigned i = 0; i < 4; i++) patch_write(target_checksum >> (i * 8));
+    uint32_t patch_result_checksum = ~patch_checksum;
+    for(unsigned i = 0; i < 4; i++) patch_write(patch_result_checksum >> (i * 8));
+
+    patch_file.close();
+    return result_t::success;
+  }
+
+  result_t apply(
+    const uint8_t *patch_data_, unsigned patch_length_,
+    const uint8_t *source_data_, unsigned source_length_,
+    uint8_t *target_data_, unsigned &target_length_
+  ) {
+    patch_data = (uint8_t*)patch_data_, source_data = (uint8_t*)source_data_, target_data = target_data_;
+    patch_length = patch_length_, source_length = source_length_, target_length = target_length_;
+    patch_offset = source_offset = target_offset = 0;
+    patch_checksum = source_checksum = target_checksum = ~0;
+
+    if(patch_length < 18) return result_t::patch_invalid;
+    if(patch_read() != 'U') return result_t::patch_invalid;
+    if(patch_read() != 'P') return result_t::patch_invalid;
+    if(patch_read() != 'S') return result_t::patch_invalid;
+    if(patch_read() != '1') return result_t::patch_invalid;
+
+    unsigned source_read_length = decode();
+    unsigned target_read_length = decode();
+
+    if(source_length != source_read_length && source_length != target_read_length) return result_t::source_invalid;
+    target_length_ = (source_length == source_read_length ? target_read_length : source_read_length);
+    if(target_length < target_length_) return result_t::target_too_small;
+    target_length = target_length_;
+
+    while(patch_offset < patch_length - 12) {
+      unsigned length = decode();
+      while(length--) target_write(source_read());
+      while(true) {
+        uint8_t patch_xor = patch_read();
+        target_write(patch_xor ^ source_read());
+        if(patch_xor == 0) break;
       }
     }
 
-    uint64_t decptr() {
-      uint64_t offset = 0, shift = 1;
-      while(true) {
-        uint8_t x = read();
-        offset += (x & 0x7f) * shift;
-        if(x & 0x80) break;
-        shift <<= 7;
-        offset += shift;
-      }
-      return offset;
+    uint32_t patch_read_checksum = 0, source_read_checksum = 0, target_read_checksum = 0;
+    for(unsigned i = 0; i < 4; i++) source_read_checksum |= patch_read() << (i * 8);
+    for(unsigned i = 0; i < 4; i++) target_read_checksum |= patch_read() << (i * 8);
+    uint32_t patch_result_checksum = ~patch_checksum;
+    source_checksum = ~source_checksum;
+    target_checksum = ~target_checksum;
+    for(unsigned i = 0; i < 4; i++) patch_read_checksum  |= patch_read() << (i * 8);
+
+    if(patch_result_checksum != patch_read_checksum) return result_t::patch_invalid;
+    if(source_checksum == source_read_checksum && source_length == source_read_length) {
+      if(target_checksum == target_read_checksum && target_length == target_read_length) return result_t::success;
+      return result_t::target_invalid;
+    } else if(source_checksum == target_read_checksum && source_length == target_read_length) {
+      if(target_checksum == source_read_checksum && target_length == source_read_length) return result_t::success;
+      return result_t::target_invalid;
+    } else {
+      return result_t::source_invalid;
     }
-  };
+  }
+
+private:
+  uint8_t *patch_data, *source_data, *target_data;
+  unsigned patch_length, source_length, target_length;
+  unsigned patch_offset, source_offset, target_offset;
+  unsigned patch_checksum, source_checksum, target_checksum;
+  file patch_file;
+
+  uint8_t patch_read() {
+    if(patch_offset < patch_length) {
+      uint8_t n = patch_data[patch_offset++];
+      patch_checksum = crc32_adjust(patch_checksum, n);
+      return n;
+    }
+    return 0x00;
+  }
+
+  uint8_t source_read() {
+    if(source_offset < source_length) {
+      uint8_t n = source_data[source_offset++];
+      source_checksum = crc32_adjust(source_checksum, n);
+      return n;
+    }
+    return 0x00;
+  }
+
+  uint8_t target_read() {
+    uint8_t result = 0x00;
+    if(target_offset < target_length) {
+      result = target_data[target_offset];
+      target_checksum = crc32_adjust(target_checksum, result);
+    }
+    if(((target_offset++ & 255) == 0) && progress) {
+      progress(target_offset, source_length > target_length ? source_length : target_length);
+    }
+    return result;
+  }
+
+  void patch_write(uint8_t n) {
+    patch_file.write(n);
+    patch_checksum = crc32_adjust(patch_checksum, n);
+  }
+
+  void target_write(uint8_t n) {
+    if(target_offset < target_length) {
+      target_data[target_offset] = n;
+      target_checksum = crc32_adjust(target_checksum, n);
+    }
+    if(((target_offset++ & 255) == 0) && progress) {
+      progress(target_offset, source_length > target_length ? source_length : target_length);
+    }
+  }
+
+  void encode(uint64_t offset) {
+    while(true) {
+      uint64_t x = offset & 0x7f;
+      offset >>= 7;
+      if(offset == 0) {
+        patch_write(0x80 | x);
+        break;
+      }
+      patch_write(x);
+      offset--;
+    }
+  }
+
+  uint64_t decode() {
+    uint64_t offset = 0, shift = 1;
+    while(true) {
+      uint8_t x = patch_read();
+      offset += (x & 0x7f) * shift;
+      if(x & 0x80) break;
+      shift <<= 7;
+      offset += shift;
+    }
+    return offset;
+  }
+};
+
 }
 
 #endif

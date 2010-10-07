@@ -1,4 +1,4 @@
-struct InputSettings : Window {
+struct InputSettings : TopLevelWindow {
   Label portLabel;
   ComboBox portBox;
   Label deviceLabel;

@@ -40,6 +40,7 @@ void Application::main(int argc, char **argv) {
   if(config.input.driver == "") config.input.driver = input.default_driver();
 
   palette.update();
+
   mainWindow.create();
   fileBrowser.create();
   singleSlotLoader.create();
@@ -50,6 +51,9 @@ void Application::main(int argc, char **argv) {
   advancedSettings.create();
   cheatEditor.create();
   stateManager.create();
+  loadGeometry();
+  saveGeometry();
+
   utility.setScale(config.video.scale);
   mainWindow.setVisible();
   OS::run();
@@ -111,6 +115,7 @@ void Application::main(int argc, char **argv) {
   }
 
   cartridge.unload();
+  saveGeometry();
   foreach(window, windows) window->setVisible(false);
   OS::run();
   SNES::system.term();
@@ -121,7 +126,33 @@ void Application::main(int argc, char **argv) {
   input.term();
 }
 
+void Application::addWindow(TopLevelWindow *window, const string &name, const string &position) {
+  windows.append(window);
+  window->setDefaultFont(proportionalFont);
+  window->name = name;
+  window->position = position;
+  geometryConfig.attach(window->position, window->name);
+}
+
 int main(int argc, char **argv) {
   application.main(argc, argv);
   return 0;
+}
+
+void Application::loadGeometry() {
+  geometryConfig.load(string(config.path.user, "bsnes-phoenix-geometry.cfg"));
+  foreach(window, windows) {
+    lstring position;
+    position.split(",", window->position);
+    Geometry geom = window->geometry();
+    window->setGeometry(strunsigned(position[0]), strunsigned(position[1]), geom.width, geom.height);
+  }
+}
+
+void Application::saveGeometry() {
+  foreach(window, windows) {
+    Geometry geom = window->geometry();
+    window->position = string(geom.x, ",", geom.y);
+  }
+  geometryConfig.save(string(config.path.user, "bsnes-phoenix-geometry.cfg"));
 }

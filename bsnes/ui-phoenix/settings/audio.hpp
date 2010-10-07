@@ -1,4 +1,4 @@
-struct AudioSettings : Window {
+struct AudioSettings : TopLevelWindow {
   Label volumeLabel;
   Label volumeValue;
   HorizontalSlider volumeSlider;

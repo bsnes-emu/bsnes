@@ -1,9 +1,8 @@
 AudioSettings audioSettings;
 
 void AudioSettings::create() {
-  application.windows.append(this);
   Window::create(0, 0, 256, 256, "Audio Settings");
-  setDefaultFont(application.proportionalFont);
+  application.addWindow(this, "AudioSettings", "160,160");
 
   unsigned x = 5, y = 5;
 
@@ -29,5 +28,5 @@ void AudioSettings::create() {
     audioSettings.frequencyValue.setText(string(config.audio.inputFrequency, "hz"));
   };
 
-  setGeometry(160, 160, 440, y);
+  setGeometry(0, 0, 440, y);
 }

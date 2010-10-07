@@ -23,6 +23,10 @@ void Window::create(unsigned x, unsigned y, unsigned width, unsigned height, con
   window->layout->addWidget(window->statusBar);
 }
 
+Geometry Window::geometry() {
+  return Geometry(window->x(), window->y(), window->container->width(), window->container->height());
+}
+
 void Window::setGeometry(unsigned x, unsigned y, unsigned width, unsigned height) {
   window->container->setFixedSize(width, height);
   window->move(x, y);

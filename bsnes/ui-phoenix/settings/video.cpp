@@ -1,9 +1,8 @@
 VideoSettings videoSettings;
 
 void VideoSettings::create() {
-  application.windows.append(this);
   Window::create(0, 0, 256, 256, "Video Settings");
-  setDefaultFont(application.proportionalFont);
+  application.addWindow(this, "VideoSettings", "160,160");
 
   unsigned x = 5, y = 5, height = Style::TextBoxHeight;
 
@@ -33,7 +32,7 @@ void VideoSettings::create() {
   shaderClear.create(*this, x + 430 - height - height - 5, y, height, height, "");
   shaderSelect.create(*this, x + 430 - height, y, height, height, "..."); y += height + 5;
 
-  setGeometry(160, 160, 440, y);
+  setGeometry(0, 0, 440, y);
 
   brightnessSlider.setPosition(config.video.brightness);
   contrastSlider.setPosition(config.video.contrast);
