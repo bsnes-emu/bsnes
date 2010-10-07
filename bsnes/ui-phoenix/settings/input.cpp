@@ -8,6 +8,9 @@ void InputSettings::create() {
   setFont(application.proportionalFontBold);
   setStatusVisible();
 
+  activeInput = 0;
+  activeMouse = 0;
+
   unsigned x = 5, y = 5, height = Style::ButtonHeight;
 
   portLabel.create(*this, x, y, 50, Style::ComboBoxHeight, "Port:");
@@ -21,22 +24,40 @@ void InputSettings::create() {
   mappingList.setHeaderVisible();
   mappingList.setFocused();
 
+  mouseXaxis.create(*this, x, y, 100, height, "Mouse X-axis");
+  mouseXaxis.setVisible(false);
+  mouseYaxis.create(*this, x + 105, y, 100, height, "Mouse Y-axis");
+  mouseYaxis.setVisible(false);
+  mouseLeft.create(*this, x, y, 100, height, "Mouse Left");
+  mouseLeft.setVisible(false);
+  mouseMiddle.create(*this, x + 105, y, 100, height, "Mouse Middle");
+  mouseMiddle.setVisible(false);
+  mouseRight.create(*this, x + 105 + 105, y, 100, height, "Mouse Right");
+  mouseRight.setVisible(false);
   clearAllButton.create(*this, 515 - 85 - 85, y, 80, height, "Clear All");
   clearButton.create(*this, 515 - 85, y, 80, height, "Clear");
   y += height + 5;
 
   setGeometry(160, 160, 515, y);
 
-  portChanged();
-  portBox.onChange = { &InputSettings::portChanged, this };
-  deviceBox.onChange = { &InputSettings::deviceChanged, this };
+  refreshDevices();
+  portBox.onChange = { &InputSettings::refreshDevices, this };
+  deviceBox.onChange = { &InputSettings::refreshMappings, this };
   mappingList.onActivate = { &InputSettings::assignInput, this };
+
+  mouseXaxis.onTick = []() { inputSettings.setMapping(Scancode::encode(mouse(inputSettings.activeMouse)[Mouse::Xaxis])); };
+  mouseYaxis.onTick = []() { inputSettings.setMapping(Scancode::encode(mouse(inputSettings.activeMouse)[Mouse::Yaxis])); };
+  mouseLeft.onTick = []() { inputSettings.setMapping(Scancode::encode(mouse(inputSettings.activeMouse)[Mouse::Button0])); };
+  mouseMiddle.onTick = []() { inputSettings.setMapping(Scancode::encode(mouse(inputSettings.activeMouse)[Mouse::Button1])); };
+  mouseRight.onTick = []() { inputSettings.setMapping(Scancode::encode(mouse(inputSettings.activeMouse)[Mouse::Button2])); };
 
   clearAllButton.onTick = { &InputSettings::clearAll, this };
   clearButton.onTick = { &InputSettings::clearSelected, this };
+
+  onClose = []() { inputSettings.endAssignment(); return true; };
 }
 
-void InputSettings::portChanged() {
+void InputSettings::refreshDevices() {
   deviceBox.reset();
   InputMapper::ControllerPort &port = (
     portBox.selection() == 0
@@ -47,10 +68,10 @@ void InputSettings::portChanged() {
   for(unsigned i = 0; i < port.size(); i++) {
     deviceBox.addItem(port[i]->name);
   }
-  deviceChanged();
+  refreshMappings();
 }
 
-void InputSettings::deviceChanged() {
+void InputSettings::refreshMappings() {
   mappingList.reset();
   InputMapper::ControllerPort &port = (
     portBox.selection() == 0
@@ -82,18 +103,40 @@ void InputSettings::assignInput() {
     inputMapper.poll();  //flush any pending keypresses
     activeInput = controller[position()];
     setStatusText(string("Set assignment for [", activeInput->name, "] ..."));
+    if(dynamic_cast<InputMapper::AnalogInput*>(activeInput)) {
+      mouseLeft.setVisible(false);
+      mouseMiddle.setVisible(false);
+      mouseRight.setVisible(false);
+      mouseXaxis.setVisible(true);
+      mouseYaxis.setVisible(true);
+    } else {
+      mouseXaxis.setVisible(false);
+      mouseYaxis.setVisible(false);
+      mouseLeft.setVisible(true);
+      mouseMiddle.setVisible(true);
+      mouseRight.setVisible(true);
+    }
   }
 }
 
 void InputSettings::setMapping(const char *mapping) {
   activeInput->mapping = mapping;
-  activeInput = 0;
   inputMapper.bind();
-  setStatusText("");
+  endAssignment();
+}
+
+void InputSettings::endAssignment() {
+  activeInput = 0;
   portBox.setEnabled(true);
   deviceBox.setEnabled(true);
   mappingList.setEnabled(true);
-  deviceChanged();
+  setStatusText("");
+  mouseXaxis.setVisible(false);
+  mouseYaxis.setVisible(false);
+  mouseLeft.setVisible(false);
+  mouseMiddle.setVisible(false);
+  mouseRight.setVisible(false);
+  refreshMappings();
 }
 
 void InputSettings::inputEvent(uint16_t scancode, int16_t value) {
@@ -106,6 +149,8 @@ void InputSettings::inputEvent(uint16_t scancode, int16_t value) {
   } else if(dynamic_cast<InputMapper::DigitalInput*>(activeInput)) {
     if(Keyboard::isAnyKey(scancode) && value) {
       setMapping(mapping);
+    } else if(Mouse::isAnyButton(scancode) && value) {
+      activeMouse = Mouse::numberDecode(scancode);
     } else if(Joypad::isAnyHat(scancode) && value) {
       if(value == Joypad::HatUp) setMapping(string(mapping, ".Up"));
       else if(value == Joypad::HatDown) setMapping(string(mapping, ".Down"));
@@ -156,7 +201,8 @@ void InputSettings::clearAll() {
 
     for(unsigned i = 0; i < controller.size(); i++) controller[i]->mapping = "";
     inputMapper.bind();
-    deviceChanged();
+    refreshMappings();
+    endAssignment();
   }
 }
 
@@ -171,7 +217,8 @@ void InputSettings::clearSelected() {
 
     controller[position()]->mapping = "";
     inputMapper.bind();
-    deviceChanged();
+    refreshMappings();
+    endAssignment();
   }
 }
 

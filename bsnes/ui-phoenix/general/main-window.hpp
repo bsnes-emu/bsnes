@@ -22,7 +22,6 @@ struct MainWindow : Window {
   MenuRadioItem systemPort2Mouse;
   MenuRadioItem systemPort2SuperScope;
   MenuRadioItem systemPort2Justifiers;
-  MenuItem systemCaptureMouse;
   Menu settings;
   Menu settingsVideoMode;
   MenuRadioItem settingsVideoMode1x;
@@ -58,7 +57,9 @@ struct MainWindow : Window {
   MenuItem toolsStateLoad3;
   MenuItem toolsStateLoad4;
   MenuItem toolsStateLoad5;
-  MenuSeparator toolsSeparator;
+  MenuSeparator toolsSeparator1;
+  MenuItem toolsCaptureMouse;
+  MenuSeparator toolsSeparator2;
   MenuItem toolsCheatEditor;
   MenuItem toolsStateManager;
   Menu help;

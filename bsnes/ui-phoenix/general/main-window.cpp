@@ -41,8 +41,6 @@ void MainWindow::create() {
   if(config.controller.port2 == 3) systemPort2Mouse.setChecked();
   if(config.controller.port2 == 4) systemPort2SuperScope.setChecked();
   if(config.controller.port2 == 5) systemPort2Justifiers.setChecked();
-  systemCaptureMouse.create(system, "Capture Mouse");
-  systemCaptureMouse.setEnabled(false);
 
   settings.create(*this, "Settings");
   settingsVideoMode.create(settings, "Video Mode");
@@ -92,7 +90,9 @@ void MainWindow::create() {
   toolsStateLoad3.create(toolsStateLoad, "Slot 3");
   toolsStateLoad4.create(toolsStateLoad, "Slot 4");
   toolsStateLoad5.create(toolsStateLoad, "Slot 5");
-  toolsSeparator.create(tools);
+  toolsSeparator1.create(tools);
+  toolsCaptureMouse.create(tools, "Capture Mouse");
+  toolsSeparator2.create(tools);
   toolsCheatEditor.create(tools, "Cheat Editor ...");
   toolsStateManager.create(tools, "State Manager ...");
 
@@ -104,7 +104,12 @@ void MainWindow::create() {
   setMenuVisible(true);
   setStatusVisible(true);
 
-  systemLoadCartridge.onTick = []() { utility.loadCartridgeNormal(); };
+  systemLoadCartridge.onTick = []() {
+    fileBrowser.fileOpen(FileBrowser::Mode::Cartridge, [](string filename) {
+      cartridge.loadNormal(filename);
+    });
+  };
+
   systemLoadCartridgeBsxSlotted.onTick = []() { singleSlotLoader.loadCartridgeBsxSlotted(); };
   systemLoadCartridgeBsx.onTick = []() { singleSlotLoader.loadCartridgeBsx(); };
   systemLoadCartridgeSufamiTurbo.onTick = []() { doubleSlotLoader.loadCartridgeSufamiTurbo(); };
@@ -180,6 +185,8 @@ void MainWindow::create() {
   toolsStateLoad4.onTick = []() { utility.loadState(4); };
   toolsStateLoad5.onTick = []() { utility.loadState(5); };
 
+  toolsCaptureMouse.onTick = []() { input.acquire(); };
+
   toolsCheatEditor.onTick = []() { cheatEditor.setVisible(); };
   toolsStateManager.onTick = []() { stateManager.setVisible(); };
 
@@ -207,10 +214,12 @@ void MainWindow::synchronize() {
     systemReset.setEnabled(false);
     toolsStateSave.setEnabled(false);
     toolsStateLoad.setEnabled(false);
+    toolsCaptureMouse.setEnabled(false);
   } else {
     systemPower.setEnabled(true);
     systemReset.setEnabled(true);
     toolsStateSave.setEnabled(true);
     toolsStateLoad.setEnabled(true);
+    toolsCaptureMouse.setEnabled(true);
   }
 }

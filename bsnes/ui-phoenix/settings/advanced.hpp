@@ -10,8 +10,6 @@ struct AdvancedSettings : Window {
   RadioBox focusPolicyPause;
   RadioBox focusPolicyIgnore;
   RadioBox focusPolicyAllow;
-  Label miscellaneousLabel;
-  CheckBox useNativeDialogs;
 
   void create();
 };

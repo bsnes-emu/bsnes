@@ -95,6 +95,7 @@ void CheatEditor::create() {
   descLabel.create(*this, x,      y,  80, Style::TextBoxHeight, "Description:");
   descEdit.create (*this, x + 80, y, 420, Style::TextBoxHeight); y+= Style::TextBoxHeight + 5;
 
+  findButton.create(*this, x, y, 100, height, "Find Codes ...");
   clearAllButton.create(*this, x + 505 - 85 - 85, y, 80, height, "Clear All");
   clearButton.create(*this, x + 505 - 85, y, 80, height, "Clear"); y += height + 5;
 
@@ -104,11 +105,48 @@ void CheatEditor::create() {
   cheatList.onChange = { &CheatEditor::synchronize, this };
   cheatList.onTick = { &CheatEditor::toggle, this };
   codeEdit.onChange = descEdit.onChange = { &CheatEditor::bind, this };
+  findButton.onTick = { &CheatEditor::findCodes, this };
   clearAllButton.onTick = { &CheatEditor::clearAll, this };
   clearButton.onTick = { &CheatEditor::clear, this };
+
+  onClose = []() {
+    cheatEditor.databaseWindow.setVisible(false);
+    return true;
+  };
+
+  //databaseWindow
+  application.windows.append(&databaseWindow);
+  databaseWindow.create(0, 0, 256, 256);
+  databaseWindow.setDefaultFont(application.proportionalFont);
+
+  x = 5, y = 5;
+
+  databaseList.create(databaseWindow, x, y, 600, 360); y += 365;
+  databaseList.setCheckable(true);
+
+  databaseSelectAll.create(databaseWindow, x, y, 100, height, "Select All");
+  databaseUnselectAll.create(databaseWindow, x + 105, y, 100, height, "Unselect All");
+  databaseOk.create(databaseWindow, 605 - 80, y, 80, height, "Ok"); y += height + 5;
+
+  databaseWindow.setGeometry(192, 192, 610, y);
+
+  databaseSelectAll.onTick = []() {
+    for(unsigned i = 0; i < cheatEditor.databaseCode.size(); i++) {
+      cheatEditor.databaseList.setChecked(i, true);
+    }
+  };
+
+  databaseUnselectAll.onTick = []() {
+    for(unsigned i = 0; i < cheatEditor.databaseCode.size(); i++) {
+      cheatEditor.databaseList.setChecked(i, false);
+    }
+  };
+
+  databaseOk.onTick = { &CheatEditor::addDatabaseCodes, this };
 }
 
 void CheatEditor::synchronize() {
+  findButton.setEnabled(SNES::cartridge.loaded());
   clearAllButton.setEnabled(SNES::cartridge.loaded());
   if(auto position = cheatList.selection()) {
     codeEdit.setText(cheatText[position()][1]);
@@ -153,6 +191,77 @@ void CheatEditor::bind() {
     SNES::cheat[position()] = cheatText[position()][CheatCode];
     refresh();
   }
+}
+
+void CheatEditor::findCodes() {
+  string data;
+  data.readfile(string(config.path.user, "cheats.xml"));
+  if(data == "") data.readfile(string(config.path.base, "cheats.xml"));
+  if(auto position = strpos(data, SNES::cartridge.sha256())) {
+    auto startPosition = strpos((const char*)data + position(), ">");
+    auto endPosition = strpos((const char*)data + position(), "</cartridge>");
+    string xmlData = string(
+      "<cartridge>\n",
+      substr((const char*)data + position() + 1, startPosition(), endPosition() - startPosition() - 1),
+      "</cartridge>\n"
+    );
+
+    databaseWindow.setTitle("");
+    databaseList.reset();
+    databaseCode.reset();
+
+    xml_element document = xml_parse(xmlData);
+    foreach(root, document.element) {
+      if(root.name == "cartridge") foreach(node, root.element) {
+        if(node.name == "name") databaseWindow.setTitle(node.parse());
+        else if(node.name == "cheat") {
+          string description, code;
+          foreach(element, node.element) {
+            if(element.name == "description") description = element.parse();
+            else if(element.name == "code") code.append(string(element.parse(), "+"));
+          }
+          code.rtrim_once("+");
+          code.append("\t");
+          code.append(description);
+          databaseList.addItem(description);
+          databaseCode.append(code);
+        }
+      }
+    }
+
+    databaseWindow.setVisible(true);
+  } else {
+    MessageWindow::information(cheatEditor, "Sorry, no cheat codes found for this cartridge.");
+  }
+}
+
+optional<unsigned> CheatEditor::findUnusedSlot() {
+  for(unsigned i = 0; i < 128; i++) {
+    if(cheatText[i][CheatCode] == "" && cheatText[i][CheatDesc] == "") return { true, i };
+  }
+  return { false, 0 };
+}
+
+void CheatEditor::addDatabaseCodes() {
+  for(unsigned n = 0; n < databaseCode.size(); n++) {
+    if(databaseList.checked(n)) {
+      if(auto position = findUnusedSlot()) {
+        lstring part;
+        part.split("\t", databaseCode[n]);
+        SNES::cheat[position()].enabled = false;
+        SNES::cheat[position()] = part[0];
+        cheatList.setChecked(position(), false);
+        cheatText[position()][CheatCode] = part[0];
+        cheatText[position()][CheatDesc] = part[1];
+      } else {
+        MessageWindow::warning(databaseWindow, "Ran out of empty slots for cheat codes.\nNot all cheat codes were added.");
+        break;
+      }
+    }
+  }
+  databaseWindow.setVisible(false);
+  refresh();
+  synchronize();
 }
 
 void CheatEditor::clearAll() {

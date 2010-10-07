@@ -4,6 +4,11 @@ struct InputSettings : Window {
   Label deviceLabel;
   ComboBox deviceBox;
   ListBox mappingList;
+  Button mouseXaxis;
+  Button mouseYaxis;
+  Button mouseLeft;
+  Button mouseMiddle;
+  Button mouseRight;
   Button clearAllButton;
   Button clearButton;
 
@@ -16,11 +21,13 @@ private:
   bool joypadsCalibrated;
   bool joypadsCalibrating;
   int16_t joypadCalibration[Joypad::Count][Joypad::Axes];
+  unsigned activeMouse;
 
-  void portChanged();
-  void deviceChanged();
+  void refreshDevices();
+  void refreshMappings();
   void setMapping(const char *mapping);
   void assignInput();
+  void endAssignment();
 
   void clearAll();
   void clearSelected();

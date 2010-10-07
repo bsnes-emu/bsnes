@@ -27,12 +27,6 @@ void AdvancedSettings::create() {
   if(config.settings.focusPolicy == 1) focusPolicyIgnore.setChecked();
   if(config.settings.focusPolicy == 2) focusPolicyAllow.setChecked();
 
-  miscellaneousLabel.create(*this, x, y, 595, Style::LabelHeight, "Miscellaneous :."); y += Style::LabelHeight + 5;
-  miscellaneousLabel.setFont(application.proportionalFontBold);
-
-  useNativeDialogs.create(*this, x, y, 595, Style::CheckBoxHeight, "Use native OS dialogs"); y += Style::CheckBoxHeight + 5;
-  useNativeDialogs.setChecked(config.settings.useNativeDialogs);
-
   setGeometry(160, 160, 605, y);
 
   lstring list;
@@ -76,6 +70,4 @@ void AdvancedSettings::create() {
   focusPolicyPause.onTick = []() { config.settings.focusPolicy = 0; };
   focusPolicyIgnore.onTick = []() { config.settings.focusPolicy = 1; };
   focusPolicyAllow.onTick = []() { config.settings.focusPolicy = 2; };
-
-  useNativeDialogs.onTick = []() { config.settings.useNativeDialogs = advancedSettings.useNativeDialogs.checked(); };
 }

@@ -91,20 +91,6 @@ void Utility::cartridgeUnloaded() {
   mainWindow.synchronize();
 }
 
-void Utility::loadCartridgeNormal() {
-  if(config.settings.useNativeDialogs == false) {
-    fileBrowser.fileOpen(FileBrowser::Mode::Cartridge, [](string filename) {
-      cartridge.loadNormal(filename);
-    });
-  } else {
-    string filename = OS::fileOpen(mainWindow, "SNES cartridges\t*.sfc\nAll files\t*", config.path.current);
-    if(filename != "") {
-      cartridge.loadNormal(filename);
-      SNES::system.power();
-    }
-  }
-}
-
 void Utility::saveState(unsigned slot) {
   string filename = { cartridge.baseName, "-", slot, ".bst" };
   SNES::system.runtosave();

@@ -4,8 +4,16 @@ struct CheatEditor : Window {
   TextBox codeEdit;
   Label descLabel;
   TextBox descEdit;
+  Button findButton;
   Button clearAllButton;
   Button clearButton;
+
+  Window databaseWindow;
+  ListBox databaseList;
+  lstring databaseCode;
+  Button databaseSelectAll;
+  Button databaseUnselectAll;
+  Button databaseOk;
 
   void load(string filename);
   void save(string filename);
@@ -18,6 +26,9 @@ private:
   void refresh();
   void toggle(unsigned row);
   void bind();
+  void findCodes();
+  optional<unsigned> findUnusedSlot();
+  void addDatabaseCodes();
   void clearAll();
   void clear();
 };

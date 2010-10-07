@@ -1,4 +1,5 @@
 #include "../base.hpp"
+#include "hotkeys.cpp"
 InputMapper inputMapper;
 
 void InputMapper::AbstractInput::bind() {
@@ -8,6 +9,8 @@ void InputMapper::AbstractInput::bind() {
   else if(strend(mapping, ".Right")) type = Type::HatRight;
   else if(strend(mapping, ".Lo")) type = Type::AxisLo;
   else if(strend(mapping, ".Hi")) type = Type::AxisHi;
+  else if(strbegin(mapping, "MS") && strend(mapping, "axis")) type = Type::MouseAxis;
+  else if(strbegin(mapping, "MS")) type = Type::MouseButton;
   else type = Type::Button;
 
   string mappingValue = mapping;
@@ -15,10 +18,22 @@ void InputMapper::AbstractInput::bind() {
   scancode = Scancode::decode(mappingValue);
 }
 
+int16_t InputMapper::AnalogInput::poll() {
+  int16_t value = inputMapper.state[inputMapper.activeState][scancode];
+  switch(type) {
+    case AbstractInput::Type::MouseAxis: {
+      if(input.acquired() == false) return 0;
+      return value;
+    }
+  }
+  return 0;
+}
+
 int16_t InputMapper::DigitalInput::poll() {
   int16_t value = inputMapper.state[inputMapper.activeState][scancode];
   switch(type) {
     case AbstractInput::Type::Button: return (bool)value;
+    case AbstractInput::Type::MouseButton: return (bool)value & input.acquired();
     case AbstractInput::Type::HatUp: return (bool)(value & Joypad::HatUp);
     case AbstractInput::Type::HatDown: return (bool)(value & Joypad::HatDown);
     case AbstractInput::Type::HatLeft: return (bool)(value & Joypad::HatLeft);
@@ -102,6 +117,16 @@ void InputMapper::Mouse::create(const char *deviceName, const char *configName) 
   right.mapping = "MS0::Button2";
 }
 
+int16_t InputMapper::Mouse::poll(unsigned id) {
+  switch(id) {
+    case SNES::Input::MouseID::X: return x.poll();
+    case SNES::Input::MouseID::Y: return y.poll();
+    case SNES::Input::MouseID::Left: return left.poll();
+    case SNES::Input::MouseID::Right: return right.poll();
+  }
+  return 0;
+}
+
 void InputMapper::SuperScope::create(const char *deviceName, const char *configName) {
   name = deviceName;
   x.name = "X-axis"; y.name = "Y-axis";
@@ -124,6 +149,18 @@ void InputMapper::SuperScope::create(const char *deviceName, const char *configN
   pause.mapping = "KB0::P";
 }
 
+int16_t InputMapper::SuperScope::poll(unsigned id) {
+  switch(id) {
+    case SNES::Input::SuperScopeID::X: return x.poll();
+    case SNES::Input::SuperScopeID::Y: return y.poll();
+    case SNES::Input::SuperScopeID::Trigger: return trigger.poll();
+    case SNES::Input::SuperScopeID::Cursor: return cursor.poll();
+    case SNES::Input::SuperScopeID::Turbo: return turbo.poll();
+    case SNES::Input::SuperScopeID::Pause: return pause.poll();
+  }
+  return 0;
+}
+
 void InputMapper::Justifier::create(const char *deviceName, const char *configName) {
   name = deviceName;
   x.name = "X-axis"; y.name = "Y-axis";
@@ -142,6 +179,16 @@ void InputMapper::Justifier::create(const char *deviceName, const char *configNa
     trigger.mapping = "MS0::Button0";
     start.mapping = "MS0::Button2";
   }
+}
+
+int16_t InputMapper::Justifier::poll(unsigned id) {
+  switch(id) {
+    case SNES::Input::JustifierID::X: return x.poll();
+    case SNES::Input::JustifierID::Y: return y.poll();
+    case SNES::Input::JustifierID::Trigger: return trigger.poll();
+    case SNES::Input::JustifierID::Start: return start.poll();
+  }
+  return 0;
 }
 
 void InputMapper::create() {
@@ -199,6 +246,7 @@ void InputMapper::poll() {
 
   for(unsigned i = 0; i < Scancode::Limit; i++) {
     if(state[0][i] != state[1][i]) {
+      poll_hotkeys(i, state[activeState][i]);
       inputSettings.inputEvent(i, state[activeState][i]);
     }
   }
@@ -207,6 +255,28 @@ void InputMapper::poll() {
 int16_t InputMapper::poll(bool port, SNES::Input::Device device, unsigned index, unsigned id) {
   if(port == 0) {
     if(device == SNES::Input::Device::Joypad) return port1.gamepad.poll(id);
+    if(device == SNES::Input::Device::Multitap) switch(index) {
+      case 0: return port1.multitapA.poll(id);
+      case 1: return port1.multitapB.poll(id);
+      case 2: return port1.multitapC.poll(id);
+      case 3: return port1.multitapD.poll(id);
+    }
+    if(device == SNES::Input::Device::Mouse) return port1.mouse.poll(id);
+  } else {
+    if(device == SNES::Input::Device::Joypad) return port2.gamepad.poll(id);
+    if(device == SNES::Input::Device::Multitap) switch(index) {
+      case 0: return port2.multitapA.poll(id);
+      case 1: return port2.multitapB.poll(id);
+      case 2: return port2.multitapC.poll(id);
+      case 3: return port2.multitapD.poll(id);
+    }
+    if(device == SNES::Input::Device::Mouse) return port2.mouse.poll(id);
+    if(device == SNES::Input::Device::SuperScope) return port2.superScope.poll(id);
+    if(device == SNES::Input::Device::Justifier) return port2.justifierA.poll(id);
+    if(device == SNES::Input::Device::Justifiers) switch(index) {
+      case 0: return port2.justifierA.poll(id);
+      case 1: return port2.justifierB.poll(id);
+    }
   }
   return 0;
 }

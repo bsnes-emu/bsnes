@@ -1,6 +1,6 @@
 struct InputMapper {
   struct AbstractInput {
-    enum class Type : unsigned { Button, HatUp, HatDown, HatLeft, HatRight, AxisLo, AxisHi } type;
+    enum class Type : unsigned { Button, MouseAxis, MouseButton, HatUp, HatDown, HatLeft, HatRight, AxisLo, AxisHi } type;
     string name;
     string mapping;
     unsigned scancode;
@@ -8,6 +8,7 @@ struct InputMapper {
   };
 
   struct AnalogInput : AbstractInput {
+    int16_t poll();
   };
 
   struct DigitalInput : AbstractInput {
@@ -23,25 +24,28 @@ struct InputMapper {
     DigitalInput b, a, y, x;
     DigitalInput l, r, select, start;
     void create(const char *deviceName, const char *configName);
-    int16_t poll(unsigned index);
+    int16_t poll(unsigned id);
   };
 
   struct Mouse : Controller {
     AnalogInput x, y;
     DigitalInput left, right;
     void create(const char *deviceName, const char *configName);
+    int16_t poll(unsigned id);
   };
 
   struct SuperScope : Controller {
     AnalogInput x, y;
     DigitalInput trigger, cursor, turbo, pause;
     void create(const char *deviceName, const char *configName);
+    int16_t poll(unsigned id);
   };
 
   struct Justifier : Controller {
     AnalogInput x, y;
     DigitalInput trigger, start;
     void create(const char *deviceName, const char *configName);
+    int16_t poll(unsigned id);
   };
 
   struct ControllerPort : array<Controller*> {
@@ -76,6 +80,7 @@ struct InputMapper {
   void bind();
   void poll();
   int16_t poll(bool port, SNES::Input::Device device, unsigned index, unsigned id);
+  void poll_hotkeys(unsigned scancode, int16_t value);
   int16_t value(unsigned scancode);
 };
 

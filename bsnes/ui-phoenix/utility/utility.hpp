@@ -11,7 +11,6 @@ struct Utility : property<Utility> {
   void cartridgeLoaded();
   void cartridgeUnloaded();
 
-  void loadCartridgeNormal();
   void saveState(unsigned slot);
   void loadState(unsigned slot);
 

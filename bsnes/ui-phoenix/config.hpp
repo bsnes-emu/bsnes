@@ -38,7 +38,6 @@ struct Configuration : public configuration {
 
   struct Settings {
     unsigned focusPolicy;
-    bool useNativeDialogs;
   } settings;
 
   struct Controller {
