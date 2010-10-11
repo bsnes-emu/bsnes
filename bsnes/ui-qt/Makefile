@@ -1,5 +1,5 @@
 qtlibs := $(strip QtCore QtGui $(if $(findstring osx,$(platform)),QtOpenGL))
-include nall/qt/Makefile
+include $(ui)/template/Makefile
 
 ui_objects := ui-main ui-base ui-cartridge ui-debugger ui-input ui-movie ui-settings ui-state ui-tools
 ui_objects += ruby

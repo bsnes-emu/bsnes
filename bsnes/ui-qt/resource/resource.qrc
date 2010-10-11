@@ -1,11 +1,12 @@
 <!DOCTYPE RCC>
 <RCC version="1.0">
   <qresource>
-    <file alias="bsnes.png">../data/bsnes.png</file>
+    <file alias="bsnes.png">../../data/bsnes.png</file>
+    <file alias="cheats.xml">../../data/cheats.xml</file>
+
     <file alias="logo.png">../data/logo.png</file>
     <file alias="documentation.html">../data/documentation.html</file>
     <file alias="license.html">../data/license.html</file>
-    <file alias="cheats.xml">../data/cheats.xml</file>
 
     <file alias="16x16/item-check-on.png">../data/icons-16x16/item-check-on.png</file>
     <file alias="16x16/item-check-off.png">../data/icons-16x16/item-check-off.png</file>

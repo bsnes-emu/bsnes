@@ -101,7 +101,7 @@ void FileBrowser::folderBrowse() {
 
 void FileBrowser::folderUp() {
   string path = folder;
-  path.rtrim_once("/");
+  path.rtrim<1>("/");
   if(path != "") setFolder(dir(path));
 }
 

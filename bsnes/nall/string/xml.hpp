@@ -139,8 +139,8 @@ inline bool xml_element::parse_head(string data) {
     xml_attribute attr;
     attr.name = side[0];
     attr.content = side[1];
-    if(strbegin(attr.content, "\"") && strend(attr.content, "\"")) attr.content.trim_once("\"");
-    else if(strbegin(attr.content, "'") && strend(attr.content, "'")) attr.content.trim_once("'");
+    if(strbegin(attr.content, "\"") && strend(attr.content, "\"")) attr.content.trim<1>("\"");
+    else if(strbegin(attr.content, "'") && strend(attr.content, "'")) attr.content.trim<1>("'");
     else throw "...";
     attribute.append(attr);
   }
@@ -186,10 +186,10 @@ inline bool xml_element::parse_body(const char *&data) {
 
     if(strend(tag, "?") == true) {
       self_terminating = true;
-      tag.rtrim_once("?");
+      tag.rtrim<1>("?");
     } else if(strend(tag, "/") == true) {
       self_terminating = true;
-      tag.rtrim_once("/");
+      tag.rtrim<1>("/");
     }
 
     parse_head(tag);

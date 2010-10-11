@@ -3,7 +3,7 @@
 
 #include <nall/platform.hpp>
 #include <nall/string.hpp>
-#include <nall/qt/window.moc.hpp>
+#include "window.moc.hpp"
 
 namespace nall {
 

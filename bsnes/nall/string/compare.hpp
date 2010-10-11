@@ -21,6 +21,74 @@ int stricmp(const char *dest, const char *src) {
   return (int)chrlower(*dest) - (int)chrlower(*src);
 }
 
+int strwcmp(const char *str, const char *pattern, unsigned length) {
+  while(length && *str) {
+    if(*pattern != '?' && *str != *pattern) break;
+    pattern++, str++, length--;
+  }
+
+  if(length == 0 || *pattern == '?') return 0;
+  return (int)chrlower(*str) - (int)chrlower(*pattern);
+}
+
+int strwicmp(const char *str, const char *pattern, unsigned length) {
+  while(length && *str) {
+    if(*pattern != '?' && chrlower(*str) != chrlower(*pattern)) break;
+    pattern++, str++, length--;
+  }
+
+  if(length == 0 || *pattern == '?') return 0;
+  return (int)chrlower(*str) - (int)chrlower(*pattern);
+}
+
+bool wildcard(const char *str, const char *pattern) {
+  while(*pattern) {
+    char n = *pattern++;
+    if(n == '*') {
+      unsigned length = 0;
+      while(true) {
+        n = pattern[length];
+        if(n == 0 || n == '*') break;
+        length++;
+      }
+      if(length) while(true) {
+        if(*str == 0) return false;
+        if(!strwcmp(str, pattern, length)) break;
+        str++;
+      }
+    } else if(n == '?') {
+      str++;
+    } else {
+      if(*str++ != n) return false;
+    }
+  }
+  return true;
+}
+
+bool iwildcard(const char *str, const char *pattern) {
+  while(*pattern) {
+    char n = *pattern++;
+    if(n == '*') {
+      unsigned length = 0;
+      while(true) {
+        n = pattern[length];
+        if(n == 0 || n == '*') break;
+        length++;
+      }
+      if(length) while(true) {
+        if(*str == 0) return false;
+        if(!strwicmp(str, pattern, length)) break;
+        str++;
+      }
+    } else if(n == '?') {
+      str++;
+    } else {
+      if(chrlower(*str++) != chrlower(n)) return false;
+    }
+  }
+  return true;
+}
+
 bool strbegin(const char *str, const char *key) {
   int i, ssl = strlen(str), ksl = strlen(key);
 

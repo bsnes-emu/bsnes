@@ -27,7 +27,7 @@ namespace nall {
     bool import(const char *filename) {
       string data;
       if(data.readfile(filename) == false) return false;
-      data.ltrim_once("\xef\xbb\xbf"); //remove UTF-8 marker, if it exists
+      data.ltrim<1>("\xef\xbb\xbf"); //remove UTF-8 marker, if it exists
       data.replace("\r", "");
 
       lstring line;
@@ -43,8 +43,8 @@ namespace nall {
         part[1].trim();
 
         //remove quotes
-        part[0].trim_once("\"");
-        part[1].trim_once("\"");
+        part[0].trim<1>("\"");
+        part[1].trim<1>("\"");
 
         unsigned n = index_input.size();
         index_input[n]  = part[0];

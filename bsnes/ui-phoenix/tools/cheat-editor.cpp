@@ -218,7 +218,7 @@ void CheatEditor::findCodes() {
             if(element.name == "description") description = element.parse();
             else if(element.name == "code") code.append(string(element.parse(), "+"));
           }
-          code.rtrim_once("+");
+          code.rtrim<1>("+");
           code.append("\t");
           code.append(description);
           databaseList.addItem(description);

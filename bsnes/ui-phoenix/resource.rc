@@ -1,2 +1,2 @@
-1 24 "../phoenix/windows/phoenix.Manifest"
-2 ICON DISCARDABLE "data/bsnes.ico"
+1 24 "../data/bsnes.Manifest"
+2 ICON DISCARDABLE "../data/bsnes.ico"

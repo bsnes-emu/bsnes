@@ -55,12 +55,9 @@ namespace nall {
     inline string& lower();
     inline string& upper();
     inline string& transform(const char *before, const char *after);
-    inline string& ltrim(const char *key = " ");
-    inline string& rtrim(const char *key = " ");
-    inline string& trim (const char *key = " ");
-    inline string& ltrim_once(const char *key = " ");
-    inline string& rtrim_once(const char *key = " ");
-    inline string& trim_once (const char *key = " ");
+    template<unsigned limit = 0> inline string& ltrim(const char *key = " ");
+    template<unsigned limit = 0> inline string& rtrim(const char *key = " ");
+    template<unsigned limit = 0> inline string& trim (const char *key = " ");
 
   protected:
     char *data;
@@ -77,8 +74,8 @@ namespace nall {
     template<typename T> inline lstring& operator<<(T value);
 
     inline optional<unsigned> find(const char*);
-    inline void split (const char*, const char*, unsigned = 0);
-    inline void qsplit(const char*, const char*, unsigned = 0);
+    template<unsigned limit = 0> inline void split (const char*, const char*);
+    template<unsigned limit = 0> inline void qsplit(const char*, const char*);
 
     lstring();
     lstring(std::initializer_list<string>);
@@ -88,6 +85,10 @@ namespace nall {
   inline char chrlower(char c);
   inline char chrupper(char c);
   inline int stricmp(const char *dest, const char *src);
+  inline int strwcmp(const char *str, const char *pattern, unsigned length);
+  inline int strwicmp(const char *str, const char *pattern, unsigned length);
+  inline bool wildcard(const char *str, const char *pattern);
+  inline bool iwildcard(const char *str, const char *pattern);
   inline bool strbegin (const char *str, const char *key);
   inline bool stribegin(const char *str, const char *key);
   inline bool strend (const char *str, const char *key);
@@ -115,12 +116,9 @@ namespace nall {
   inline unsigned strlcat(char *dest, const char *src, unsigned length);
 
   //trim.hpp
-  inline char* ltrim(char *str, const char *key = " ");
-  inline char* rtrim(char *str, const char *key = " ");
-  inline char* trim (char *str, const char *key = " ");
-  inline char* ltrim_once(char *str, const char *key = " ");
-  inline char* rtrim_once(char *str, const char *key = " ");
-  inline char* trim_once (char *str, const char *key = " ");
+  template<unsigned limit = 0> inline char* ltrim(char *str, const char *key = " ");
+  template<unsigned limit = 0> inline char* rtrim(char *str, const char *key = " ");
+  template<unsigned limit = 0> inline char* trim (char *str, const char *key = " ");
 
   //utility.hpp
   inline unsigned strlcpy(string &dest, const char *src, unsigned length);

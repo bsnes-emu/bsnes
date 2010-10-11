@@ -62,9 +62,11 @@ endif
 install:
 ifeq ($(platform),x)
 	install -D -m 755 out/bsnes $(DESTDIR)$(prefix)/bin/bsnes
-	install -D -m 644 ui-qt/data/bsnes.png $(DESTDIR)$(prefix)/share/pixmaps/bsnes.png
-	install -D -m 644 ui-qt/data/bsnes.desktop $(DESTDIR)$(prefix)/share/applications/bsnes.desktop
-#	gconftool-2 --type bool --set /desktop/gnome/interface/menus_have_icons true
+	install -D -m 644 data/bsnes.png $(DESTDIR)$(prefix)/share/pixmaps/bsnes.png
+	install -D -m 644 data/bsnes.desktop $(DESTDIR)$(prefix)/share/applications/bsnes.desktop
+	test -d ~/.bsnes || mkdir ~/.bsnes
+	cp data/cheats.xml ~/.bsnes/cheats.xml
+	chmod 777 ~/.bsnes ~/.bsnes/cheats.xml
 endif
 
 uninstall:
@@ -88,6 +90,6 @@ clean: ui_clean
 	-@$(call delete,*.manifest)
 
 archive-all:
-	tar -cjf bsnes.tar.bz2 launcher libco nall obj out phoenix ruby snes ui-phoenix ui-qt Makefile cc.bat clean.bat sync.sh
+	tar -cjf bsnes.tar.bz2 data launcher libco nall obj out phoenix ruby snes ui-phoenix ui-qt Makefile cc.bat clean.bat sync.sh
 
 help:;
