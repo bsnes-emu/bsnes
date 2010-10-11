@@ -16,7 +16,6 @@ public:
 
   struct File {
     bool applyPatches;
-    bool bypassPatchCrc32;
   } file;
 
   struct DiskBrowser {

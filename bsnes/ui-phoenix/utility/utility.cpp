@@ -78,6 +78,7 @@ void Utility::setShader() {
 }
 
 void Utility::cartridgeLoaded() {
+  SNES::cartridge.basename = cartridge.baseName;
   SNES::system.power();
   cheatEditor.load(cartridge.baseName);
   stateManager.load();

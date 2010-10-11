@@ -12,6 +12,7 @@ void Label::create(Window &parent, unsigned x, unsigned y, unsigned width, unsig
 
 void Label::setText(const string &text) {
   SetWindowText(widget->window, utf16_t(text));
+  InvalidateRect(widget->window, 0, false);
 }
 
 //all of this for want of a STATIC SS_VCENTER flag ...
@@ -24,28 +25,14 @@ LRESULT CALLBACK Label_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lpa
   Label &label = *label_ptr;
 
   switch(msg) {
-    case WM_ERASEBKGND: {
-      if(window.window->brush == 0) break;
-      RECT rc;
-      GetClientRect(window.widget->window, &rc);
-      PAINTSTRUCT ps;
-      BeginPaint(window.widget->window, &ps);
-      FillRect(ps.hdc, &rc, window.window->brush);
-      EndPaint(window.widget->window, &ps);
-      return TRUE;
-    }
-
     case WM_PAINT: {
       PAINTSTRUCT ps;
-      BeginPaint(hwnd, &ps);
-      SelectObject(ps.hdc, label.widget->font);
-      if(window.window->brush) {
-        SetBkColor(ps.hdc, window.window->brushColor);
-      } else {
-        SetBkColor(ps.hdc, GetSysColor(COLOR_3DFACE));
-      }
       RECT rc;
+      BeginPaint(hwnd, &ps);
       GetClientRect(hwnd, &rc);
+      FillRect(ps.hdc, &rc, window.window->brush ? window.window->brush : GetSysColorBrush(COLOR_3DFACE));
+      SetBkColor(ps.hdc, window.window->brush ? window.window->brushColor : GetSysColor(COLOR_3DFACE));
+      SelectObject(ps.hdc, label.widget->font);
       unsigned length = GetWindowTextLength(hwnd);
       wchar_t text[length + 1];
       GetWindowText(hwnd, text, length + 1);
@@ -57,7 +44,6 @@ LRESULT CALLBACK Label_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lpa
       rc.bottom = rc.top + height;
       DrawText(ps.hdc, text, -1, &rc, DT_LEFT | DT_END_ELLIPSIS);
       EndPaint(hwnd, &ps);
-      InvalidateRect(hwnd, 0, false);
     }
   }
 

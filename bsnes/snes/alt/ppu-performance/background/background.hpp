@@ -31,7 +31,6 @@ class Background {
   const unsigned id;
   unsigned opt_valid_bit;
 
-  unsigned y;
   bool hires;
   signed width;
 
@@ -48,6 +47,7 @@ class Background {
   unsigned vscroll;
 
   unsigned mosaic_vcounter;
+  unsigned mosaic_voffset;
 
   LayerWindow window;
 

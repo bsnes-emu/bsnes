@@ -5,7 +5,7 @@ uint8 CPU::pio() {
 }
 
 bool CPU::joylatch() {
-  return 0;
+  return status.joypad_strobe_latch;
 }
 
 bool CPU::interrupt_pending() {

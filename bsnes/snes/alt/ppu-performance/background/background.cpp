@@ -43,10 +43,10 @@ void PPU::Background::offset_per_tile(unsigned x, unsigned y, unsigned &hoffset,
 void PPU::Background::scanline() {
   if(self.vcounter() == 1) {
     mosaic_vcounter = regs.mosaic + 1;
-    y = 1;
+    mosaic_voffset = 1;
   } else if(--mosaic_vcounter == 0) {
     mosaic_vcounter = regs.mosaic + 1;
-    y += regs.mosaic + 1;
+    mosaic_voffset += regs.mosaic + 1;
   }
   if(self.regs.display_disable) return;
 
@@ -93,7 +93,7 @@ void PPU::Background::render() {
   hscroll = regs.hoffset;
   vscroll = regs.voffset;
 
-  unsigned y = Background::y;
+  unsigned y = (regs.mosaic == 0 ? self.vcounter() : mosaic_voffset);
   if(hires) {
     hscroll <<= 1;
     if(self.regs.interlace) y = (y << 1) + self.field();

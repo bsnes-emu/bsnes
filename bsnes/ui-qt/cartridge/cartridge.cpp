@@ -228,28 +228,22 @@ bool Cartridge::loadCartridge(string &filename, string &xml, SNES::MappedRAM &me
     uint8_t *outdata = 0;
     unsigned outsize = 0;
     ups patcher;
-    ups::result result = patcher.apply(patchdata, patchsize, data, size, outdata, outsize);
+    if(patcher.apply(patchdata, patchsize, data, size, outdata, outsize) == ups::result_t::target_too_small) {
+      outdata = new uint8_t[outsize];
+      if(patcher.apply(patchdata, patchsize, data, size, outdata, outsize) == ups::result_t::success) {
+        delete[] data;
+        data = outdata;
+        size = outsize;
+        patchApplied = true;
+      } else {
+        delete[] outdata;
+      }
+    }
     delete[] patchdata;
-
-    bool apply = false;
-    if(result == ups::ok) apply = true;
-    if(config().file.bypassPatchCrc32) {
-      if(result == ups::input_crc32_invalid ) apply = true;
-      if(result == ups::output_crc32_invalid) apply = true;
-    }
-
-    if(apply == true) {
-      delete[] data;
-      data = outdata;
-      size = outsize;
-      patchApplied = true;
-    } else {
-      delete[] outdata;
-    }
   }
 
   name = string(nall::basename(filename), ".xml");
-  if(file::exists(name)) {
+  if(patchApplied == false && file::exists(name)) {
     //prefer manually created XML cartridge mapping
     xml.readfile(name);
   } else {

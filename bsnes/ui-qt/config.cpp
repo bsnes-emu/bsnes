@@ -48,8 +48,7 @@ Configuration::Configuration() {
   attach(diskBrowser.useCommonDialogs = false, "diskBrowser.useCommonDialogs");
   attach(diskBrowser.showPanel = true, "diskBrowser.showPanel");
 
-  attach(file.applyPatches     = true,  "file.applyPatches");
-  attach(file.bypassPatchCrc32 = false, "file.bypassPatchCrc32");
+  attach(file.applyPatches = true, "file.applyPatches");
 
   attach(path.rom   = "", "path.rom");
   attach(path.save  = "", "path.save");

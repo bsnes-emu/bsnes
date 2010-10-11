@@ -115,7 +115,6 @@ void PPU::Background::serialize(serializer &s) {
   s.integer(regs.main_enable);
   s.integer(regs.sub_enable);
 
-  s.integer(y);
   s.integer(hires);
   s.integer(width);
 
@@ -132,6 +131,7 @@ void PPU::Background::serialize(serializer &s) {
   s.integer(vscroll);
 
   s.integer(mosaic_vcounter);
+  s.integer(mosaic_voffset);
 
   window.serialize(s);
 }
