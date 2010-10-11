@@ -1,7 +1,7 @@
-void CheckBox::create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const char *text) {
+void CheckBox::create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const string &text) {
   checkBox->setParent(parent.window->container);
   checkBox->setGeometry(x, y, width, height);
-  checkBox->setText(text);
+  checkBox->setText(QString::fromUtf8(text));
   if(parent.window->defaultFont) checkBox->setFont(*parent.window->defaultFont);
   checkBox->show();
   checkBox->connect(checkBox, SIGNAL(stateChanged(int)), SLOT(onTick()));

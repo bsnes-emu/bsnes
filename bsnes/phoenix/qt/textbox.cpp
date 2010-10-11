@@ -1,7 +1,7 @@
-void TextBox::create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const char *text) {
+void TextBox::create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const string &text) {
   textBox->setParent(parent.window->container);
   textBox->setGeometry(x, y, width, height);
-  textBox->setText(text);
+  textBox->setText(QString::fromUtf8(text));
   if(parent.window->defaultFont) textBox->setFont(*parent.window->defaultFont);
   textBox->show();
   textBox->connect(textBox, SIGNAL(returnPressed()), SLOT(onActivate()));
@@ -16,8 +16,8 @@ string TextBox::text() {
   return textBox->text().toUtf8().constData();
 }
 
-void TextBox::setText(const char *text) {
-  textBox->setText(text);
+void TextBox::setText(const string &text) {
+  textBox->setText(QString::fromUtf8(text));
 }
 
 TextBox::TextBox() {

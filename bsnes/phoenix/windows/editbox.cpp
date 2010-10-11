@@ -1,4 +1,4 @@
-void EditBox::create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const char *text) {
+void EditBox::create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const string &text) {
   widget->window = CreateWindowEx(
     WS_EX_CLIENTEDGE, L"EDIT", L"",
     WS_CHILD | WS_VISIBLE | ES_AUTOVSCROLL | ES_MULTILINE | ES_WANTRETURN |
@@ -21,7 +21,7 @@ string EditBox::getText() {
   return text;
 }
 
-void EditBox::setText(const char *text) {
+void EditBox::setText(const string &text) {
   string output = text;
   output.replace("\r", "");
   output.replace("\n", "\r\n");

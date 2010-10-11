@@ -7,7 +7,7 @@ static gint Window_close(Window *window) {
   return true;
 }
 
-void Window::create(unsigned x, unsigned y, unsigned width, unsigned height, const char *text) {
+void Window::create(unsigned x, unsigned y, unsigned width, unsigned height, const string &text) {
   object->widget = gtk_window_new(GTK_WINDOW_TOPLEVEL);
   gtk_window_move(GTK_WINDOW(object->widget), x, y);
 
@@ -76,11 +76,11 @@ void Window::setBackgroundColor(uint8_t red, uint8_t green, uint8_t blue) {
   gtk_widget_modify_bg(object->widget, GTK_STATE_NORMAL, &color);
 }
 
-void Window::setTitle(const char *text) {
+void Window::setTitle(const string &text) {
   gtk_window_set_title(GTK_WINDOW(object->widget), text);
 }
 
-void Window::setStatusText(const char *text) {
+void Window::setStatusText(const string &text) {
   gtk_statusbar_pop(GTK_STATUSBAR(object->status), 1);
   gtk_statusbar_push(GTK_STATUSBAR(object->status), 1, text);
 }

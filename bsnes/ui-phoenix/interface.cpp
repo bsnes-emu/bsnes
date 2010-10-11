@@ -101,7 +101,7 @@ void Interface::video_refresh(const uint16_t *data, unsigned width, unsigned hei
 
   time(&current);
   if(current != previous) {
-    utility.setStatus(string("FPS: ", frameCounter));
+    utility.setStatus({ "FPS: ", frameCounter });
     frameCounter = 0;
     previous = current;
   }

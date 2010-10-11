@@ -1,4 +1,4 @@
-void Window::create(unsigned x, unsigned y, unsigned width, unsigned height, const char *text) {
+void Window::create(unsigned x, unsigned y, unsigned width, unsigned height, const string &text) {
   widget->window = CreateWindowEx(
     0, L"phoenix_window", utf16_t(text),
     WS_POPUP | WS_SYSMENU | WS_CAPTION | WS_MINIMIZEBOX,
@@ -52,11 +52,11 @@ void Window::setBackgroundColor(uint8_t red, uint8_t green, uint8_t blue) {
   window->brush = CreateSolidBrush(window->brushColor);
 }
 
-void Window::setTitle(const char *text) {
+void Window::setTitle(const string &text) {
   SetWindowText(widget->window, utf16_t(text));
 }
 
-void Window::setStatusText(const char *text) {
+void Window::setStatusText(const string &text) {
   SendMessage(window->status, SB_SETTEXT, 0, (LPARAM)(wchar_t*)utf16_t(text));
 }
 

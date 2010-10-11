@@ -2,7 +2,7 @@ static void CheckBox_tick(CheckBox *self) {
   if(self->onTick && self->object->locked == false) self->onTick();
 }
 
-void CheckBox::create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const char *text) {
+void CheckBox::create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const string &text) {
   object->widget = gtk_check_button_new_with_label(text);
   widget->parent = &parent;
   gtk_widget_set_size_request(object->widget, width, height);

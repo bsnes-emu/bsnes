@@ -1,11 +1,11 @@
 #include "../base.hpp"
 Utility utility;
 
-void Utility::setTitle(const char *text) {
+void Utility::setTitle(const string &text) {
   if(*text) {
-    mainWindow.setTitle(string(text, " - ", SNES::Info::Name, " v", SNES::Info::Version));
+    mainWindow.setTitle({ text, " - ", SNES::Info::Name, " v", SNES::Info::Version });
   } else {
-    mainWindow.setTitle(string(SNES::Info::Name, " v", SNES::Info::Version));
+    mainWindow.setTitle({ SNES::Info::Name, " v", SNES::Info::Version });
   }
 }
 
@@ -24,12 +24,12 @@ void Utility::updateStatus() {
   }
 }
 
-void Utility::setStatus(const char *text) {
+void Utility::setStatus(const string &text) {
   static char profile[] = { '[', SNES::Info::Profile[0], ']', ' ', 0 };
-  statusText = string(profile, text);
+  statusText = { profile, text };
 }
 
-void Utility::showMessage(const char *text) {
+void Utility::showMessage(const string &text) {
   statusMessage = text;
   statusTime = time(0);
 }
@@ -48,7 +48,8 @@ void Utility::setControllers() {
     case 2: SNES::input.port_set_device(1, SNES::Input::Device::Multitap); break;
     case 3: SNES::input.port_set_device(1, SNES::Input::Device::Mouse); break;
     case 4: SNES::input.port_set_device(1, SNES::Input::Device::SuperScope); break;
-    case 5: SNES::input.port_set_device(1, SNES::Input::Device::Justifiers); break;
+    case 5: SNES::input.port_set_device(1, SNES::Input::Device::Justifier); break;
+    case 6: SNES::input.port_set_device(1, SNES::Input::Device::Justifiers); break;
   }
 }
 
@@ -82,7 +83,10 @@ void Utility::cartridgeLoaded() {
   stateManager.load();
   mainWindow.synchronize();
   utility.setTitle(notdir(cartridge.baseName));
-  utility.showMessage(string("Loaded ", notdir(cartridge.baseName)));
+  utility.showMessage({
+    "Loaded ", notdir(cartridge.baseName),
+    cartridge.patchApplied ? ", and applied UPS patch" : ""
+  });
 }
 
 void Utility::cartridgeUnloaded() {
@@ -100,9 +104,9 @@ void Utility::saveState(unsigned slot) {
   if(fp.open(filename, file::mode_write)) {
     fp.write(s.data(), s.size());
     fp.close();
-    showMessage(string("Saved state ", slot));
+    showMessage({ "Saved state ", slot });
   } else {
-    showMessage(string("Failed to save state ", slot));
+    showMessage({ "Failed to save state ", slot });
   }
 }
 
@@ -117,9 +121,9 @@ void Utility::loadState(unsigned slot) {
     serializer s(data, size);
     delete[] data;
     if(SNES::system.unserialize(s) == true) {
-      showMessage(string("Loaded state ", slot));
+      showMessage({ "Loaded state ", slot });
     } else {
-      showMessage(string("Failed to load state ", slot));
+      showMessage({ "Failed to load state ", slot });
     }
   }
 }

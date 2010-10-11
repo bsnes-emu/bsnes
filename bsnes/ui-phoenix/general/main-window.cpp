@@ -33,13 +33,15 @@ void MainWindow::create() {
   systemPort2Multitap.create(systemPort2None, "Multitap");
   systemPort2Mouse.create(systemPort2None, "Mouse");
   systemPort2SuperScope.create(systemPort2None, "Super Scope");
+  systemPort2Justifier.create(systemPort2None, "Justifier");
   systemPort2Justifiers.create(systemPort2None, "Justifiers");
   if(config.controller.port2 == 0) systemPort2None.setChecked();
   if(config.controller.port2 == 1) systemPort2Gamepad.setChecked();
   if(config.controller.port2 == 2) systemPort2Multitap.setChecked();
   if(config.controller.port2 == 3) systemPort2Mouse.setChecked();
   if(config.controller.port2 == 4) systemPort2SuperScope.setChecked();
-  if(config.controller.port2 == 5) systemPort2Justifiers.setChecked();
+  if(config.controller.port2 == 5) systemPort2Justifier.setChecked();
+  if(config.controller.port2 == 6) systemPort2Justifiers.setChecked();
 
   settings.create(*this, "Settings");
   settingsVideoMode.create(settings, "Video Mode");
@@ -134,7 +136,8 @@ void MainWindow::create() {
   systemPort2Multitap.onTick   = []() { config.controller.port2 = 2; utility.setControllers(); };
   systemPort2Mouse.onTick      = []() { config.controller.port2 = 3; utility.setControllers(); };
   systemPort2SuperScope.onTick = []() { config.controller.port2 = 4; utility.setControllers(); };
-  systemPort2Justifiers.onTick = []() { config.controller.port2 = 5; utility.setControllers(); };
+  systemPort2Justifier.onTick  = []() { config.controller.port2 = 5; utility.setControllers(); };
+  systemPort2Justifiers.onTick = []() { config.controller.port2 = 6; utility.setControllers(); };
 
   settingsVideoMode1x.onTick = []() { utility.setScale(1); };
   settingsVideoMode2x.onTick = []() { utility.setScale(2); };

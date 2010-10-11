@@ -2,7 +2,7 @@ void ComboBox_change(ComboBox *self) {
   if(self->object->locked == false && self->onChange) self->onChange();
 }
 
-void ComboBox::create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const char *text) {
+void ComboBox::create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const string &text) {
   object->widget = gtk_combo_box_new_text();
   widget->parent = &parent;
   gtk_widget_set_size_request(object->widget, width, height);
@@ -28,7 +28,7 @@ void ComboBox::reset() {
   counter = 0;
 }
 
-void ComboBox::addItem(const char *text) {
+void ComboBox::addItem(const string &text) {
   gtk_combo_box_append_text(GTK_COMBO_BOX(object->widget), text);
   if(counter++ == 0) setSelection(0);
 }

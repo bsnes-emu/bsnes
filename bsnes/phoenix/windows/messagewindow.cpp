@@ -8,7 +8,7 @@ static MessageWindow::Response MessageWindow_response(MessageWindow::Buttons but
   return MessageWindow::Response::Ok;
 }
 
-MessageWindow::Response MessageWindow::information(Window &parent, const char *text, MessageWindow::Buttons buttons) {
+MessageWindow::Response MessageWindow::information(Window &parent, const string &text, MessageWindow::Buttons buttons) {
   UINT flags = MB_ICONINFORMATION;
   if(buttons == Buttons::Ok) flags |= MB_OK;
   if(buttons == Buttons::OkCancel) flags |= MB_OKCANCEL;
@@ -16,7 +16,7 @@ MessageWindow::Response MessageWindow::information(Window &parent, const char *t
   return MessageWindow_response(buttons, MessageBox(&parent != &Window::None ? parent.widget->window : 0, utf16_t(text), L"", flags));
 }
 
-MessageWindow::Response MessageWindow::question(Window &parent, const char *text, MessageWindow::Buttons buttons) {
+MessageWindow::Response MessageWindow::question(Window &parent, const string &text, MessageWindow::Buttons buttons) {
   UINT flags = MB_ICONQUESTION;
   if(buttons == Buttons::Ok) flags |= MB_OK;
   if(buttons == Buttons::OkCancel) flags |= MB_OKCANCEL;
@@ -24,7 +24,7 @@ MessageWindow::Response MessageWindow::question(Window &parent, const char *text
   return MessageWindow_response(buttons, MessageBox(&parent != &Window::None ? parent.widget->window : 0, utf16_t(text), L"", flags));
 }
 
-MessageWindow::Response MessageWindow::warning(Window &parent, const char *text, MessageWindow::Buttons buttons) {
+MessageWindow::Response MessageWindow::warning(Window &parent, const string &text, MessageWindow::Buttons buttons) {
   UINT flags = MB_ICONWARNING;
   if(buttons == Buttons::Ok) flags |= MB_OK;
   if(buttons == Buttons::OkCancel) flags |= MB_OKCANCEL;
@@ -32,7 +32,7 @@ MessageWindow::Response MessageWindow::warning(Window &parent, const char *text,
   return MessageWindow_response(buttons, MessageBox(&parent != &Window::None ? parent.widget->window : 0, utf16_t(text), L"", flags));
 }
 
-MessageWindow::Response MessageWindow::critical(Window &parent, const char *text, MessageWindow::Buttons buttons) {
+MessageWindow::Response MessageWindow::critical(Window &parent, const string &text, MessageWindow::Buttons buttons) {
   UINT flags = MB_ICONERROR;
   if(buttons == Buttons::Ok) flags |= MB_OK;
   if(buttons == Buttons::OkCancel) flags |= MB_OKCANCEL;

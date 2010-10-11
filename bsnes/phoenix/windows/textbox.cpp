@@ -1,4 +1,4 @@
-void TextBox::create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const char *text) {
+void TextBox::create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const string &text) {
   widget->window = CreateWindowEx(
     WS_EX_CLIENTEDGE, L"EDIT", utf16_t(text),
     WS_CHILD | WS_TABSTOP | WS_VISIBLE | ES_AUTOHSCROLL | ES_AUTOVSCROLL,
@@ -17,7 +17,7 @@ string TextBox::text() {
   return utf8_t(text);
 }
 
-void TextBox::setText(const char *text) {
+void TextBox::setText(const string &text) {
   object->locked = true;
   SetWindowText(widget->window, utf16_t(text));
   object->locked = false;

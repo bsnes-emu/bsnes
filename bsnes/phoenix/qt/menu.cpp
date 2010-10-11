@@ -1,10 +1,14 @@
-void Menu::create(Window &parent, const char *text) {
-  menu->setTitle(text);
+void Menu::create(Window &parent, const string &text) {
+  menu->parent = &parent;
+  if(menu->parent->window->defaultFont) menu->setFont(*menu->parent->window->defaultFont);
+  menu->setTitle(QString::fromUtf8(text));
   parent.window->menuBar->addMenu(menu);
 }
 
-void Menu::create(Menu &parent, const char *text) {
-  menu->setTitle(text);
+void Menu::create(Menu &parent, const string &text) {
+  menu->parent = parent.menu->parent;
+  if(menu->parent->window->defaultFont) menu->setFont(*menu->parent->window->defaultFont);
+  menu->setTitle(QString::fromUtf8(text));
   parent.menu->addMenu(menu);
 }
 
@@ -52,8 +56,8 @@ MenuSeparator::MenuSeparator() {
   menuSeparator = new MenuSeparator::Data(*this);
 }
 
-void MenuItem::create(Menu &parent, const char *text) {
-  menuItem->setText(text);
+void MenuItem::create(Menu &parent, const string &text) {
+  menuItem->setText(QString::fromUtf8(text));
   menuItem->connect(menuItem, SIGNAL(triggered()), SLOT(onTick()));
   parent.menu->addAction(menuItem);
 }
@@ -78,8 +82,8 @@ MenuItem::MenuItem() {
   menuItem = new MenuItem::Data(*this);
 }
 
-void MenuCheckItem::create(Menu &parent, const char *text) {
-  menuCheckItem->setText(text);
+void MenuCheckItem::create(Menu &parent, const string &text) {
+  menuCheckItem->setText(QString::fromUtf8(text));
   menuCheckItem->setCheckable(true);
   menuCheckItem->connect(menuCheckItem, SIGNAL(triggered()), SLOT(onTick()));
   parent.menu->addAction(menuCheckItem);
@@ -113,22 +117,22 @@ MenuCheckItem::MenuCheckItem() {
   menuCheckItem = new MenuCheckItem::Data(*this);
 }
 
-void MenuRadioItem::create(Menu &parent, const char *text) {
+void MenuRadioItem::create(Menu &parent, const string &text) {
   menuRadioItem->parent = &parent;
   menuRadioItem->actionGroup = new QActionGroup(0);
   menuRadioItem->actionGroup->addAction(menuRadioItem);
-  menuRadioItem->setText(text);
+  menuRadioItem->setText(QString::fromUtf8(text));
   menuRadioItem->setCheckable(true);
   menuRadioItem->setChecked(true);
   menuRadioItem->connect(menuRadioItem, SIGNAL(changed()), SLOT(onTick()));
   menuRadioItem->parent->menu->addAction(menuRadioItem);
 }
 
-void MenuRadioItem::create(MenuRadioItem &parent, const char *text) {
+void MenuRadioItem::create(MenuRadioItem &parent, const string &text) {
   menuRadioItem->parent = parent.menuRadioItem->parent;
   menuRadioItem->actionGroup = parent.menuRadioItem->actionGroup;
   menuRadioItem->actionGroup->addAction(menuRadioItem);
-  menuRadioItem->setText(text);
+  menuRadioItem->setText(QString::fromUtf8(text));
   menuRadioItem->setCheckable(true);
   menuRadioItem->connect(menuRadioItem, SIGNAL(changed()), SLOT(onTick()));
   menuRadioItem->parent->menu->addAction(menuRadioItem);

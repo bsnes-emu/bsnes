@@ -19,7 +19,7 @@ static void ListBox_tick(GtkCellRendererToggle *cell, gchar *path_string, ListBo
   if(self->onTick) self->onTick(index);
 }
 
-void ListBox::create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const char *text) {
+void ListBox::create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const string &text) {
   listBox->selection = -1;
   object->widget = gtk_scrolled_window_new(0, 0);
   widget->parent = &parent;
@@ -111,7 +111,7 @@ void ListBox::resizeColumnsToContent() {
   gtk_tree_view_columns_autosize(GTK_TREE_VIEW(object->subWidget));
 }
 
-void ListBox::addItem(const char *text) {
+void ListBox::addItem(const string &text) {
   lstring list;
   list.split("\t", text);
   GtkTreeIter iter;
@@ -120,7 +120,7 @@ void ListBox::addItem(const char *text) {
   foreach(item, list) gtk_list_store_set(listBox->store, &iter, index++, (const char*)item, -1);
 }
 
-void ListBox::setItem(unsigned row, const char *text) {
+void ListBox::setItem(unsigned row, const string &text) {
   GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(object->subWidget));
   GtkTreeIter iter;
   for(unsigned i = 0; i <= row; i++) {

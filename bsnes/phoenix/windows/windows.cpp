@@ -142,7 +142,7 @@ unsigned OS::desktopHeight() {
   return GetSystemMetrics(SM_CYSCREEN);
 }
 
-string OS::folderSelect(Window &parent, const char *path) {
+string OS::folderSelect(Window &parent, const string &path) {
   wchar_t wfilename[PATH_MAX + 1] = L"";
   BROWSEINFO bi;
   bi.hwndOwner = &parent != &Window::None ? parent.widget->window : 0;
@@ -169,7 +169,7 @@ string OS::folderSelect(Window &parent, const char *path) {
   return utf8_t(wfilename);
 }
 
-string OS::fileOpen(Window &parent, const char *filter, const char *path) {
+string OS::fileOpen(Window &parent, const string &filter, const string &path) {
   string dir = path;
   dir.replace("/", "\\");
 
@@ -215,7 +215,7 @@ string OS::fileOpen(Window &parent, const char *filter, const char *path) {
   return utf8_t(wfilename);
 }
 
-string OS::fileSave(Window &parent, const char *filter, const char *path) {
+string OS::fileSave(Window &parent, const string &filter, const string &path) {
   string dir = path;
   dir.replace("/", "\\");
 

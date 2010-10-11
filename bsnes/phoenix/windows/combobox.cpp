@@ -1,4 +1,4 @@
-void ComboBox::create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const char *text) {
+void ComboBox::create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const string &text) {
   widget->window = CreateWindowEx(
     0, L"COMBOBOX", L"",
     WS_CHILD | WS_TABSTOP | WS_VISIBLE | CBS_DROPDOWNLIST | CBS_HASSTRINGS,
@@ -27,7 +27,7 @@ void ComboBox::reset() {
   SendMessage(widget->window, CB_RESETCONTENT, 0, 0);
 }
 
-void ComboBox::addItem(const char *text) {
+void ComboBox::addItem(const string &text) {
   SendMessage(widget->window, CB_ADDSTRING, 0, (LPARAM)(wchar_t*)utf16_t(text));
   if(SendMessage(widget->window, CB_GETCOUNT, 0, 0) == 1) setSelection(0);
 }

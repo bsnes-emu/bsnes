@@ -69,14 +69,15 @@ unsigned OS::desktopHeight() {
   return QApplication::desktop()->screenGeometry().height();
 }
 
-string OS::folderSelect(Window &parent, const char *path) {
+string OS::folderSelect(Window &parent, const string &path) {
   QString directory = QFileDialog::getExistingDirectory(
-    &parent != &Window::None ? parent.window : 0, "Select Directory", path, QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks
+    &parent != &Window::None ? parent.window : 0, "Select Directory",
+    QString::fromUtf8(path), QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks
   );
   return directory.toUtf8().constData();
 }
 
-string OS::fileOpen(Window &parent, const char *filter, const char *path) {
+string OS::fileOpen(Window &parent, const string &filter, const string &path) {
   string filters;
   lstring list;
   list.split("\n", filter);
@@ -93,12 +94,13 @@ string OS::fileOpen(Window &parent, const char *filter, const char *path) {
   filters.rtrim(";;");
 
   QString filename = QFileDialog::getOpenFileName(
-    &parent != &Window::None ? parent.window : 0, "Open File", path, (const char*)filters
+    &parent != &Window::None ? parent.window : 0, "Open File",
+    QString::fromUtf8(path), QString::fromUtf8(filters)
   );
   return filename.toUtf8().constData();
 }
 
-string OS::fileSave(Window &parent, const char *filter, const char *path) {
+string OS::fileSave(Window &parent, const string &filter, const string &path) {
   string filters;
   lstring list;
   list.split("\n", filter);
@@ -115,7 +117,8 @@ string OS::fileSave(Window &parent, const char *filter, const char *path) {
   filters.rtrim(";;");
 
   QString filename = QFileDialog::getSaveFileName(
-    &parent != &Window::None ? parent.window : 0, "Save File", path, (const char*)filters
+    &parent != &Window::None ? parent.window : 0, "Save File",
+    QString::fromUtf8(path), QString::fromUtf8(filters)
   );
   return filename.toUtf8().constData();
 }

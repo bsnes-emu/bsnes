@@ -16,26 +16,30 @@ static MessageWindow::Response MessageWindow_response(MessageWindow::Buttons but
   return MessageWindow::Response::Ok;
 }
 
-MessageWindow::Response MessageWindow::information(Window &parent, const char *text, MessageWindow::Buttons buttons) {
+MessageWindow::Response MessageWindow::information(Window &parent, const string &text, MessageWindow::Buttons buttons) {
   return MessageWindow_response(
-    buttons, QMessageBox::information(&parent != &Window::None ? parent.window : 0, " ", text, MessageWindow_buttons(buttons))
+    buttons, QMessageBox::information(&parent != &Window::None ? parent.window : 0, " ",
+    QString::fromUtf8(text), MessageWindow_buttons(buttons))
   );
 }
 
-MessageWindow::Response MessageWindow::question(Window &parent, const char *text, MessageWindow::Buttons buttons) {
+MessageWindow::Response MessageWindow::question(Window &parent, const string &text, MessageWindow::Buttons buttons) {
   return MessageWindow_response(
-    buttons, QMessageBox::question(&parent != &Window::None ? parent.window : 0, " ", text, MessageWindow_buttons(buttons))
+    buttons, QMessageBox::question(&parent != &Window::None ? parent.window : 0, " ",
+    QString::fromUtf8(text), MessageWindow_buttons(buttons))
   );
 }
 
-MessageWindow::Response MessageWindow::warning(Window &parent, const char *text, MessageWindow::Buttons buttons) {
+MessageWindow::Response MessageWindow::warning(Window &parent, const string &text, MessageWindow::Buttons buttons) {
   return MessageWindow_response(
-    buttons, QMessageBox::warning(&parent != &Window::None ? parent.window : 0, " ", text, MessageWindow_buttons(buttons))
+    buttons, QMessageBox::warning(&parent != &Window::None ? parent.window : 0, " ",
+    QString::fromUtf8(text), MessageWindow_buttons(buttons))
   );
 }
 
-MessageWindow::Response MessageWindow::critical(Window &parent, const char *text, MessageWindow::Buttons buttons) {
+MessageWindow::Response MessageWindow::critical(Window &parent, const string &text, MessageWindow::Buttons buttons) {
   return MessageWindow_response(
-    buttons, QMessageBox::critical(&parent != &Window::None ? parent.window : 0, " ", text, MessageWindow_buttons(buttons))
+    buttons, QMessageBox::critical(&parent != &Window::None ? parent.window : 0, " ",
+    QString::fromUtf8(text), MessageWindow_buttons(buttons))
   );
 }

@@ -2,7 +2,7 @@ static void EditBox_change(EditBox *self) {
   if(self->object->locked == false && self->onChange) self->onChange();
 }
 
-void EditBox::create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const char *text) {
+void EditBox::create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const string &text) {
   object->widget = gtk_scrolled_window_new(0, 0);
   widget->parent = &parent;
   gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(object->widget), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
@@ -42,7 +42,7 @@ string EditBox::text() {
   return text;
 }
 
-void EditBox::setText(const char *text) {
+void EditBox::setText(const string &text) {
   object->locked = true;
   gtk_text_buffer_set_text(object->textBuffer, text, -1);
   object->locked = false;

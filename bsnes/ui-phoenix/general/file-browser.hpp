@@ -18,6 +18,8 @@ private:
   void folderUp();
   void fileActivate();
   void setFolder(const char *pathname);
+  string cartridgeFolder(const char *pathname);
+  void loadFile(const string &filename);
 };
 
 extern FileBrowser fileBrowser;

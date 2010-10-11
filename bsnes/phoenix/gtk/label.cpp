@@ -1,4 +1,4 @@
-void Label::create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const char *text) {
+void Label::create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const string &text) {
   object->widget = gtk_label_new(text);
   widget->parent = &parent;
   gtk_misc_set_alignment(GTK_MISC(object->widget), 0.0, 0.5);
@@ -8,6 +8,6 @@ void Label::create(Window &parent, unsigned x, unsigned y, unsigned width, unsig
   gtk_widget_show(object->widget);
 }
 
-void Label::setText(const char *text) {
+void Label::setText(const string &text) {
   gtk_label_set_text(GTK_LABEL(object->widget), text);
 }

@@ -6,7 +6,7 @@ static void TextBox_change(TextBox *self) {
   if(self->object->locked == false && self->onChange) self->onChange();
 }
 
-void TextBox::create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const char *text) {
+void TextBox::create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const string &text) {
   object->widget = gtk_entry_new();
   widget->parent = &parent;
   gtk_entry_set_text(GTK_ENTRY(object->widget), text);
@@ -26,7 +26,7 @@ string TextBox::text() {
   return gtk_entry_get_text(GTK_ENTRY(object->widget));
 }
 
-void TextBox::setText(const char *text) {
+void TextBox::setText(const string &text) {
   object->locked = true;
   gtk_entry_set_text(GTK_ENTRY(object->widget), text);
   object->locked = false;

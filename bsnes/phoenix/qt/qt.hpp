@@ -25,7 +25,7 @@ struct Font : Object {
     Bold = 1,
     Italic = 2,
   };
-  bool create(const char *name, unsigned size, Font::Style style = Style::None);
+  bool create(const nall::string &name, unsigned size, Font::Style style = Style::None);
   Font();
   ~Font();
 //private:
@@ -44,8 +44,8 @@ struct Action : Object {
 };
 
 struct Menu : Action {
-  void create(Window &parent, const char *text);
-  void create(Menu &parent, const char *text);
+  void create(Window &parent, const nall::string &text);
+  void create(Menu &parent, const nall::string &text);
   bool visible();
   void setVisible(bool visible = true);
   bool enabled();
@@ -70,7 +70,7 @@ struct MenuSeparator : Action {
 
 struct MenuItem : Action {
   nall::function<void ()> onTick;
-  void create(Menu &parent, const char *text);
+  void create(Menu &parent, const nall::string &text);
   bool visible();
   void setVisible(bool visible = true);
   bool enabled();
@@ -83,7 +83,7 @@ struct MenuItem : Action {
 
 struct MenuCheckItem : Action {
   nall::function<void ()> onTick;
-  void create(Menu &parent, const char *text);
+  void create(Menu &parent, const nall::string &text);
   bool visible();
   void setVisible(bool visible = true);
   bool enabled();
@@ -98,8 +98,8 @@ struct MenuCheckItem : Action {
 
 struct MenuRadioItem : Action {
   nall::function<void ()> onTick;
-  void create(Menu &parent, const char *text);
-  void create(MenuRadioItem &parent, const char *text);
+  void create(Menu &parent, const nall::string &text);
+  void create(MenuRadioItem &parent, const nall::string &text);
   bool visible();
   void setVisible(bool visible = true);
   bool enabled();
@@ -129,14 +129,14 @@ struct Widget : Object {
 
 struct Window : Widget {
   nall::function<bool ()> onClose;
-  void create(unsigned x, unsigned y, unsigned width, unsigned height, const char *text = "");
+  void create(unsigned x, unsigned y, unsigned width, unsigned height, const nall::string &text = "");
   Geometry geometry();
   void setGeometry(unsigned x, unsigned y, unsigned width, unsigned height);
   void setDefaultFont(Font &font);
   void setFont(Font &font);
   void setBackgroundColor(uint8_t red, uint8_t green, uint8_t blue);
-  void setTitle(const char *text);
-  void setStatusText(const char *text);
+  void setTitle(const nall::string &text);
+  void setStatusText(const nall::string &text);
   void setMenuVisible(bool visible = true);
   void setStatusVisible(bool visible = true);
   bool focused();
@@ -149,7 +149,7 @@ struct Window : Widget {
 
 struct Button : Widget {
   nall::function<void ()> onTick;
-  void create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const char *text = "");
+  void create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const nall::string &text = "");
   Button();
 //private:
   struct Data;
@@ -170,7 +170,7 @@ struct Canvas : Widget {
 
 struct CheckBox : Widget {
   nall::function<void ()> onTick;
-  void create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const char *text = "");
+  void create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const nall::string &text = "");
   bool checked();
   void setChecked(bool checked = true);
   CheckBox();
@@ -181,9 +181,9 @@ struct CheckBox : Widget {
 
 struct ComboBox : Widget {
   nall::function<void ()> onChange;
-  void create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const char *text = "");
+  void create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const nall::string &text = "");
   void reset();
-  void addItem(const char *text);
+  void addItem(const nall::string &text);
   unsigned selection();
   void setSelection(unsigned row);
   ComboBox();
@@ -194,11 +194,11 @@ struct ComboBox : Widget {
 
 struct EditBox : Widget {
   nall::function<void ()> onChange;
-  void create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const char *text = "");
+  void create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const nall::string &text = "");
   void setEditable(bool editable = true);
   void setWordWrap(bool wordWrap = true);
   nall::string text();
-  void setText(const char *text);
+  void setText(const nall::string &text);
   EditBox();
 //private:
   struct Data;
@@ -217,8 +217,8 @@ struct HorizontalSlider : Widget {
 };
 
 struct Label : Widget {
-  void create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const char *text = "");
-  void setText(const char *text);
+  void create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const nall::string &text = "");
+  void setText(const nall::string &text);
   Label();
 //private:
   struct Data;
@@ -229,13 +229,13 @@ struct ListBox : Widget {
   nall::function<void ()> onActivate;
   nall::function<void ()> onChange;
   nall::function<void (unsigned)> onTick;
-  void create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const char *text = "");
+  void create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const nall::string &text = "");
   void setHeaderVisible(bool headerVisible = true);
   void setCheckable(bool checkable = true);
   void reset();
   void resizeColumnsToContent();
-  void addItem(const char *text);
-  void setItem(unsigned row, const char *text);
+  void addItem(const nall::string &text);
+  void setItem(unsigned row, const nall::string &text);
   bool checked(unsigned row);
   void setChecked(unsigned row, bool checked = true);
   nall::optional<unsigned> selection();
@@ -257,8 +257,8 @@ struct ProgressBar : Widget {
 
 struct RadioBox : Widget {
   nall::function<void ()> onTick;
-  void create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const char *text = "");
-  void create(RadioBox &parent, unsigned x, unsigned y, unsigned width, unsigned height, const char *text = "");
+  void create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const nall::string &text = "");
+  void create(RadioBox &parent, unsigned x, unsigned y, unsigned width, unsigned height, const nall::string &text = "");
   bool checked();
   void setChecked();
   RadioBox();
@@ -270,10 +270,10 @@ struct RadioBox : Widget {
 struct TextBox : Widget {
   nall::function<void ()> onActivate;
   nall::function<void ()> onChange;
-  void create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const char *text = "");
+  void create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const nall::string &text = "");
   void setEditable(bool editable = true);
   nall::string text();
-  void setText(const char *text);
+  void setText(const nall::string &text);
   TextBox();
 //private:
   struct Data;
@@ -312,10 +312,10 @@ struct MessageWindow : Object {
     Yes,
     No,
   };
-  static Response information(Window &parent, const char *text, Buttons = Buttons::Ok);
-  static Response question(Window &parent, const char *text, Buttons = Buttons::YesNo);
-  static Response warning(Window &parent, const char *text, Buttons = Buttons::Ok);
-  static Response critical(Window &parent, const char *text, Buttons = Buttons::Ok);
+  static Response information(Window &parent, const nall::string &text, Buttons = Buttons::Ok);
+  static Response question(Window &parent, const nall::string &text, Buttons = Buttons::YesNo);
+  static Response warning(Window &parent, const nall::string &text, Buttons = Buttons::Ok);
+  static Response critical(Window &parent, const nall::string &text, Buttons = Buttons::Ok);
 };
 
 struct OS : Object {
@@ -325,9 +325,9 @@ struct OS : Object {
   static void quit();
   static unsigned desktopWidth();
   static unsigned desktopHeight();
-  static nall::string folderSelect(Window &parent, const char *path = "");
-  static nall::string fileOpen(Window &parent, const char *filter, const char *path = "");
-  static nall::string fileSave(Window &parent, const char *filter, const char *path = "");
+  static nall::string folderSelect(Window &parent, const nall::string &path = "");
+  static nall::string fileOpen(Window &parent, const nall::string &filter, const nall::string &path = "");
+  static nall::string fileSave(Window &parent, const nall::string &filter, const nall::string &path = "");
 //private:
   struct Data;
   static Data *os;

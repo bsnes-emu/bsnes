@@ -67,6 +67,7 @@ bool Cartridge::loadSuperGameBoy(const char *basename, const char *slotname) {
 }
 
 void Cartridge::unload() {
+  patchApplied = false;
   if(SNES::cartridge.loaded() == false) return;
   saveMemory(SNES::memory::cartram, baseName, ".srm");
   saveMemory(SNES::memory::cartrtc, baseName, ".rtc");
@@ -84,6 +85,7 @@ bool Cartridge::loadCartridge(SNES::MappedRAM &memory, string &XML, const char *
   if(file::exists(filename) == false) return false;
   file fp;
   if(fp.open(filename, file::mode_read) == false) return false;
+  if(XML.readfile(string(nall::basename(filename), ".xml")) == false) XML = "";
 
   unsigned size = fp.size();
   if((size & 0x7fff) == 512) {
@@ -94,8 +96,24 @@ bool Cartridge::loadCartridge(SNES::MappedRAM &memory, string &XML, const char *
   fp.read(data, size);
   fp.close();
 
+  filemap patchFile;
+  if(XML == "" && patchFile.open(string(nall::basename(filename), ".ups"), filemap::mode_read)) {
+    unsigned targetSize;
+    ups patcher;
+    if(patcher.apply(patchFile.handle(), patchFile.size(), data, size, (uint8_t*)0, targetSize) == ups::result_t::target_too_small) {
+      uint8_t *targetData = new uint8_t[targetSize];
+      if(patcher.apply(patchFile.handle(), patchFile.size(), data, size, targetData, targetSize) == ups::result_t::success) {
+        delete[] data;
+        data = targetData;
+        size = targetSize;
+        patchApplied = true;
+      }
+    }
+    patchFile.close();
+  }
+
+  if(XML == "") XML = snes_information(data, size).xml_memory_map;
   memory.copy(data, size);
-  XML = snes_information(data, size).xml_memory_map;
   delete[] data;
   return true;
 }

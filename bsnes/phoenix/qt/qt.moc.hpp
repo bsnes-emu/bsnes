@@ -19,8 +19,9 @@ public:
 struct Menu::Data : public QMenu {
 public:
   Menu &self;
+  Window *parent;
 
-  Data(Menu &self) : self(self) {
+  Data(Menu &self) : self(self), parent(0) {
   }
 };
 

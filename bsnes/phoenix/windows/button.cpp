@@ -1,4 +1,4 @@
-void Button::create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const char *text) {
+void Button::create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const string &text) {
   widget->window = CreateWindow(
     L"BUTTON", utf16_t(text),
     WS_CHILD | WS_TABSTOP | WS_VISIBLE,

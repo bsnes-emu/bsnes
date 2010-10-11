@@ -9,7 +9,6 @@ struct InputSettings : TopLevelWindow {
   Button mouseLeft;
   Button mouseMiddle;
   Button mouseRight;
-  Button clearAllButton;
   Button clearButton;
 
   void inputEvent(uint16_t scancode, int16_t value);
@@ -23,14 +22,13 @@ private:
   int16_t joypadCalibration[Joypad::Count][Joypad::Axes];
   unsigned activeMouse;
 
-  void refreshDevices();
-  void refreshMappings();
+  void portChanged();
+  void deviceChanged();
+  void mappingChanged();
   void setMapping(const char *mapping);
   void assignInput();
+  void clearInput();
   void endAssignment();
-
-  void clearAll();
-  void clearSelected();
 };
 
 extern InputSettings inputSettings;

@@ -14,7 +14,13 @@ void FileBrowser::create() {
 
   setGeometry(0, 0, 640, y);
 
-  pathBox.onActivate = []() { fileBrowser.setFolder(fileBrowser.pathBox.text()); };
+  pathBox.onActivate = []() {
+    string path = fileBrowser.pathBox.text();
+    path.transform("\\", "/");
+    if(strend(path, "/") == false) path.append("/");
+    fileBrowser.setFolder(path);
+  };
+
   browseButton.onTick = { &FileBrowser::folderBrowse, this };
   upButton.onTick = { &FileBrowser::folderUp, this };
   contentsBox.onActivate = { &FileBrowser::fileActivate, this };
@@ -22,7 +28,7 @@ void FileBrowser::create() {
 
 void FileBrowser::fileOpen(FileBrowser::Mode requestedMode, function<void (string)> requestedCallback) {
   callback = requestedCallback;
-  if(mode == requestedMode && string(folder, "/") == config.path.current) {
+  if(mode == requestedMode && folder == config.path.current) {
     setVisible();
     contentsBox.setFocused();
     return;
@@ -71,7 +77,6 @@ void FileBrowser::setFolder(const char *pathname) {
 
   folder = pathname;
   folder.transform("\\", "/");
-  folder.rtrim("/");
   pathBox.setText(folder);
   lstring contentsList = directory::contents(folder);
   foreach(item, contentsList) {
@@ -95,19 +100,44 @@ void FileBrowser::folderBrowse() {
 }
 
 void FileBrowser::folderUp() {
-  setFolder(dir(folder));
+  string path = folder;
+  path.rtrim_once("/");
+  if(path != "") setFolder(dir(path));
 }
 
 void FileBrowser::fileActivate() {
   if(auto position = contentsBox.selection()) {
     string filename = contents[position()];
     if(strend(filename, "/")) {
-      setFolder(string(folder, "/", filename));
+      string cartridgeName = cartridgeFolder(filename);
+      if(cartridgeName == "") {
+        setFolder(string(folder, filename));
+      } else {
+        loadFile({ folder, cartridgeName });
+      }
     } else {
-      setVisible(false);
-      filename = string(folder, "/", filename);
-      config.path.current = dir(filename);
-      if(callback) callback(filename);
+      loadFile({ folder, filename });
     }
   }
+}
+
+string FileBrowser::cartridgeFolder(const char *pathname) {
+  if(strend(pathname, ".sfc/") == false) return "";
+
+  lstring list = directory::files(string(folder, "/", pathname));
+  string filename;
+  foreach(item, list) {
+    if(strend(item, ".sfc")) {
+      if(filename != "") return "";  //more than one cartridge in this folder
+      filename = item;
+    }
+  }
+
+  return string(pathname, filename);
+}
+
+void FileBrowser::loadFile(const string &filename) {
+  setVisible(false);
+  config.path.current = folder;
+  if(callback) callback(filename);
 }

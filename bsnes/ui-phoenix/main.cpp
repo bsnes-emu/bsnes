@@ -152,7 +152,7 @@ void Application::loadGeometry() {
 void Application::saveGeometry() {
   foreach(window, windows) {
     Geometry geom = window->geometry();
-    window->position = string(geom.x, ",", geom.y);
+    window->position = { geom.x, ",", geom.y };
   }
   geometryConfig.save(string(config.path.user, "bsnes-phoenix-geometry.cfg"));
 }

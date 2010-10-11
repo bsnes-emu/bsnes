@@ -1,4 +1,4 @@
-void ListBox::create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const char *text) {
+void ListBox::create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const string &text) {
   listBox->setParent(parent.window->container);
   listBox->setGeometry(x, y, width, height);
   listBox->setAllColumnsShowFocus(true);
@@ -7,7 +7,7 @@ void ListBox::create(Window &parent, unsigned x, unsigned y, unsigned width, uns
   lstring list;
   list.split("\t", text);
   QStringList labels;
-  foreach(item, list) labels << (const char*)item;
+  foreach(item, list) labels << QString::fromUtf8(item);
   listBox->setColumnCount(list.size());
   listBox->setHeaderLabels(labels);
   for(unsigned i = 0; i < list.size(); i++) listBox->resizeColumnToContents(i);
@@ -41,7 +41,7 @@ void ListBox::resizeColumnsToContent() {
   for(unsigned i = 0; i < listBox->columnCount(); i++) listBox->resizeColumnToContents(i);
 }
 
-void ListBox::addItem(const char *text) {
+void ListBox::addItem(const string &text) {
   object->locked = true;
   auto items = listBox->findItems("", Qt::MatchContains);
   QTreeWidgetItem *item = new QTreeWidgetItem(listBox);
@@ -49,16 +49,16 @@ void ListBox::addItem(const char *text) {
   item->setData(0, Qt::UserRole, (unsigned)items.size());
   lstring list;
   list.split("\t", text);
-  for(unsigned i = 0; i < list.size(); i++) item->setText(i, (const char*)list[i]);
+  for(unsigned i = 0; i < list.size(); i++) item->setText(i, QString::fromUtf8(list[i]));
   object->locked = false;
 }
 
-void ListBox::setItem(unsigned row, const char *text) {
+void ListBox::setItem(unsigned row, const string &text) {
   object->locked = true;
   QTreeWidgetItem *item = listBox->topLevelItem(row);
   lstring list;
   list.split("\t", text);
-  for(unsigned i = 0; i < list.size(); i++) item->setText(i, (const char*)list[i]);
+  for(unsigned i = 0; i < list.size(); i++) item->setText(i, QString::fromUtf8(list[i]));
   object->locked = false;
 }
 

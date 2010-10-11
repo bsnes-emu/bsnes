@@ -2,7 +2,7 @@ static void RadioBox_tick(RadioBox *self) {
   if(self->onTick && self->checked() && self->object->locked == false) self->onTick();
 }
 
-void RadioBox::create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const char *text) {
+void RadioBox::create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const string &text) {
   first = this;
   object->parentWindow = &parent;
   object->widget = gtk_radio_button_new_with_label(0, text);
@@ -14,7 +14,7 @@ void RadioBox::create(Window &parent, unsigned x, unsigned y, unsigned width, un
   gtk_widget_show(object->widget);
 }
 
-void RadioBox::create(RadioBox &parent, unsigned x, unsigned y, unsigned width, unsigned height, const char *text) {
+void RadioBox::create(RadioBox &parent, unsigned x, unsigned y, unsigned width, unsigned height, const string &text) {
   first = parent.first;
   object->parentWindow = parent.object->parentWindow;
   object->widget = gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(parent.object->widget), text);

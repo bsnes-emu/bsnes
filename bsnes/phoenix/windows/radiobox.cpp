@@ -1,4 +1,4 @@
-void RadioBox::create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const char *text) {
+void RadioBox::create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const string &text) {
   radioBox->parentWindow = &parent;
   radioBox->parent = this;
   radioBox->parent->radioBox->items.append(this);
@@ -13,7 +13,7 @@ void RadioBox::create(Window &parent, unsigned x, unsigned y, unsigned width, un
   setChecked();
 }
 
-void RadioBox::create(RadioBox &parent, unsigned x, unsigned y, unsigned width, unsigned height, const char *text) {
+void RadioBox::create(RadioBox &parent, unsigned x, unsigned y, unsigned width, unsigned height, const string &text) {
   radioBox->parentWindow = parent.radioBox->parentWindow;
   radioBox->parent = parent.radioBox->parent;
   radioBox->parent->radioBox->items.append(this);

@@ -1,5 +1,5 @@
-bool Font::create(const char *name, unsigned size, Font::Style style) {
-  font->setFamily(name);
+bool Font::create(const string &name, unsigned size, Font::Style style) {
+  font->setFamily(QString::fromUtf8(name));
   font->setPointSize(size);
   font->setBold((style & Style::Bold) == Style::Bold);
   font->setItalic((style & Style::Italic) == Style::Italic);

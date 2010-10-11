@@ -1,4 +1,4 @@
-void Label::create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const char *text) {
+void Label::create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const string &text) {
   widget->window = CreateWindow(
     L"phoenix_label", L"",
     WS_CHILD | WS_VISIBLE,
@@ -10,7 +10,7 @@ void Label::create(Window &parent, unsigned x, unsigned y, unsigned width, unsig
   setText(text);
 }
 
-void Label::setText(const char *text) {
+void Label::setText(const string &text) {
   SetWindowText(widget->window, utf16_t(text));
 }
 

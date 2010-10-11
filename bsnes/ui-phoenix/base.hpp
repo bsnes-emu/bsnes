@@ -3,6 +3,7 @@
 #include <nall/base64.hpp>
 #include <nall/config.hpp>
 #include <nall/directory.hpp>
+#include <nall/filemap.hpp>
 #include <nall/input.hpp>
 #include <nall/ups.hpp>
 #include <nall/snes/info.hpp>

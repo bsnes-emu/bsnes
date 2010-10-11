@@ -1,11 +1,11 @@
-void ComboBox::create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const char *text) {
+void ComboBox::create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const string &text) {
   comboBox->setParent(parent.window->container);
   comboBox->setGeometry(x, y, width, height);
 
   if(*text) {
     lstring list;
     list.split("\n", text);
-    foreach(item, list) addItem((const char*)item);
+    foreach(item, list) addItem(item);
   }
 
   comboBox->connect(comboBox, SIGNAL(currentIndexChanged(int)), SLOT(onChange()));
@@ -17,8 +17,8 @@ void ComboBox::reset() {
   while(comboBox->count()) comboBox->removeItem(0);
 }
 
-void ComboBox::addItem(const char *text) {
-  comboBox->addItem(text);
+void ComboBox::addItem(const string &text) {
+  comboBox->addItem(QString::fromUtf8(text));
 }
 
 unsigned ComboBox::selection() {

@@ -21,6 +21,7 @@ struct MainWindow : TopLevelWindow {
   MenuRadioItem systemPort2Multitap;
   MenuRadioItem systemPort2Mouse;
   MenuRadioItem systemPort2SuperScope;
+  MenuRadioItem systemPort2Justifier;
   MenuRadioItem systemPort2Justifiers;
   Menu settings;
   Menu settingsVideoMode;

@@ -28,7 +28,7 @@ Action::Action() {
   action->font = 0;
 }
 
-void Menu::create(Window &parent, const char *text) {
+void Menu::create(Window &parent, const string &text) {
   action->font = parent.window->defaultFont;
   object->menu = gtk_menu_new();
   object->widget = gtk_menu_item_new_with_label(text);
@@ -38,7 +38,7 @@ void Menu::create(Window &parent, const char *text) {
   gtk_widget_show(object->widget);
 }
 
-void Menu::create(Menu &parent, const char *text) {
+void Menu::create(Menu &parent, const string &text) {
   action->font = parent.action->font;
   object->menu = gtk_menu_new();
   object->widget = gtk_menu_item_new_with_label(text);
@@ -60,7 +60,7 @@ static void MenuItem_tick(MenuItem *self) {
   if(self->onTick) self->onTick();
 }
 
-void MenuItem::create(Menu &parent, const char *text) {
+void MenuItem::create(Menu &parent, const string &text) {
   action->font = parent.action->font;
   object->widget = gtk_menu_item_new_with_label(text);
   g_signal_connect_swapped(G_OBJECT(object->widget), "activate", G_CALLBACK(MenuItem_tick), (gpointer)this);
@@ -73,7 +73,7 @@ static void MenuCheckItem_tick(MenuCheckItem *self) {
   if(self->onTick && self->object->locked == false) self->onTick();
 }
 
-void MenuCheckItem::create(Menu &parent, const char *text) {
+void MenuCheckItem::create(Menu &parent, const string &text) {
   action->font = parent.action->font;
   object->widget = gtk_check_menu_item_new_with_label(text);
   g_signal_connect_swapped(G_OBJECT(object->widget), "toggled", G_CALLBACK(MenuCheckItem_tick), (gpointer)this);
@@ -96,7 +96,7 @@ static void MenuRadioItem_tick(MenuRadioItem *self) {
   if(self->onTick && self->checked() && self->object->locked == false) self->onTick();
 }
 
-void MenuRadioItem::create(Menu &parent, const char *text) {
+void MenuRadioItem::create(Menu &parent, const string &text) {
   first = this;
   action->font = parent.action->font;
   object->parentMenu = &parent;
@@ -107,7 +107,7 @@ void MenuRadioItem::create(Menu &parent, const char *text) {
   gtk_widget_show(object->widget);
 }
 
-void MenuRadioItem::create(MenuRadioItem &parent, const char *text) {
+void MenuRadioItem::create(MenuRadioItem &parent, const string &text) {
   first = parent.first;
   action->font = parent.action->font;
   object->parentMenu = parent.object->parentMenu;

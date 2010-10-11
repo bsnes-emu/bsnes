@@ -1,5 +1,5 @@
-void Window::create(unsigned x, unsigned y, unsigned width, unsigned height, const char *text) {
-  window->setWindowTitle(text);
+void Window::create(unsigned x, unsigned y, unsigned width, unsigned height, const string &text) {
+  window->setWindowTitle(QString::fromUtf8(text));
   window->move(x, y);
 
   window->layout = new QVBoxLayout(window);
@@ -48,12 +48,12 @@ void Window::setBackgroundColor(uint8_t red, uint8_t green, uint8_t blue) {
   window->setAutoFillBackground(true);
 }
 
-void Window::setTitle(const char *text) {
-  window->setWindowTitle(text);
+void Window::setTitle(const string &text) {
+  window->setWindowTitle(QString::fromUtf8(text));
 }
 
-void Window::setStatusText(const char *text) {
-  window->statusBar->showMessage(text, 0);
+void Window::setStatusText(const string &text) {
+  window->statusBar->showMessage(QString::fromUtf8(text), 0);
 }
 
 void Window::setMenuVisible(bool visible) {

@@ -1,8 +1,8 @@
 struct Utility : property<Utility> {
-  void setTitle(const char *text);
+  void setTitle(const string &text);
   void updateStatus();
-  void setStatus(const char *text);
-  void showMessage(const char *text);
+  void setStatus(const string &text);
+  void showMessage(const string &text);
 
   void setControllers();
   void setScale(unsigned scale = 0);

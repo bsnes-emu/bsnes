@@ -1,4 +1,4 @@
-bool Font::create(const char *name, unsigned size, Font::Style style) {
+bool Font::create(const string &name, unsigned size, Font::Style style) {
   font->font = pango_font_description_new();
   pango_font_description_set_family(font->font, name);
   pango_font_description_set_size(font->font, size * PANGO_SCALE);
