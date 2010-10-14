@@ -11,10 +11,6 @@ void string::reserve(unsigned size_) {
   }
 }
 
-unsigned string::length() const {
-  return strlen(data);
-}
-
 string& string::assign(const char *s) {
   unsigned length = strlen(s);
   reserve(length);
@@ -122,7 +118,7 @@ bool string::readfile(const char *filename) {
   return true;
 }
 
-optional<unsigned> lstring::find(const char *key) {
+optional<unsigned> lstring::find(const char *key) const {
   for(unsigned i = 0; i < size(); i++) {
     if(operator[](i) == key) return { true, i };
   }

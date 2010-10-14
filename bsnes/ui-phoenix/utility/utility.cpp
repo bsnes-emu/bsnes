@@ -102,7 +102,7 @@ void Utility::saveState(unsigned slot) {
   SNES::system.runtosave();
   serializer s = SNES::system.serialize();
   file fp;
-  if(fp.open(filename, file::mode_write)) {
+  if(fp.open(filename, file::mode::write)) {
     fp.write(s.data(), s.size());
     fp.close();
     showMessage({ "Saved state ", slot });
@@ -114,7 +114,7 @@ void Utility::saveState(unsigned slot) {
 void Utility::loadState(unsigned slot) {
   string filename = { cartridge.baseName, "-", slot, ".bst" };
   file fp;
-  if(fp.open(filename, file::mode_read)) {
+  if(fp.open(filename, file::mode::read)) {
     unsigned size = fp.size();
     uint8_t *data = new uint8_t[size];
     fp.read(data, size);

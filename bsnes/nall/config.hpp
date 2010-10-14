@@ -102,7 +102,7 @@ namespace nall {
 
     virtual bool save(const char *filename) const {
       file fp;
-      if(fp.open(filename, file::mode_write)) {
+      if(fp.open(filename, file::mode::write)) {
         for(unsigned i = 0; i < list.size(); i++) {
           string output;
           output << list[i].name << " = " << list[i].get();

@@ -9,7 +9,7 @@
 namespace nall {
 
 struct ups {
-  enum class result_t : unsigned {
+  enum class result : unsigned {
     unknown,
     success,
     patch_unwritable,
@@ -24,17 +24,17 @@ struct ups {
 
   function<void (unsigned offset, unsigned length)> progress;
 
-  result_t create(
-    const uint8_t *source_data_, unsigned source_length_,
-    const uint8_t *target_data_, unsigned target_length_,
-    const char *patch_filename
+  result create(
+    const uint8_t *sourcedata, unsigned sourcelength,
+    const uint8_t *targetdata, unsigned targetlength,
+    const char *patchfilename
   ) {
-    source_data = (uint8_t*)source_data_, target_data = (uint8_t*)target_data_;
-    source_length = source_length_, target_length = target_length_;
+    source_data = (uint8_t*)sourcedata, target_data = (uint8_t*)targetdata;
+    source_length = sourcelength, target_length = targetlength;
     source_offset = target_offset = 0;
     source_checksum = target_checksum = patch_checksum = ~0;
 
-    if(patch_file.open(patch_filename, file::mode_write) == false) return result_t::patch_unwritable;
+    if(patch_file.open(patchfilename, file::mode::write) == false) return result::patch_unwritable;
 
     patch_write('U');
     patch_write('P');
@@ -81,32 +81,32 @@ struct ups {
     for(unsigned i = 0; i < 4; i++) patch_write(patch_result_checksum >> (i * 8));
 
     patch_file.close();
-    return result_t::success;
+    return result::success;
   }
 
-  result_t apply(
-    const uint8_t *patch_data_, unsigned patch_length_,
-    const uint8_t *source_data_, unsigned source_length_,
-    uint8_t *target_data_, unsigned &target_length_
+  result apply(
+    const uint8_t *patchdata, unsigned patchlength,
+    const uint8_t *sourcedata, unsigned sourcelength,
+    uint8_t *targetdata, unsigned &targetlength
   ) {
-    patch_data = (uint8_t*)patch_data_, source_data = (uint8_t*)source_data_, target_data = target_data_;
-    patch_length = patch_length_, source_length = source_length_, target_length = target_length_;
+    patch_data = (uint8_t*)patchdata, source_data = (uint8_t*)sourcedata, target_data = targetdata;
+    patch_length = patchlength, source_length = sourcelength, target_length = targetlength;
     patch_offset = source_offset = target_offset = 0;
     patch_checksum = source_checksum = target_checksum = ~0;
 
-    if(patch_length < 18) return result_t::patch_invalid;
-    if(patch_read() != 'U') return result_t::patch_invalid;
-    if(patch_read() != 'P') return result_t::patch_invalid;
-    if(patch_read() != 'S') return result_t::patch_invalid;
-    if(patch_read() != '1') return result_t::patch_invalid;
+    if(patch_length < 18) return result::patch_invalid;
+    if(patch_read() != 'U') return result::patch_invalid;
+    if(patch_read() != 'P') return result::patch_invalid;
+    if(patch_read() != 'S') return result::patch_invalid;
+    if(patch_read() != '1') return result::patch_invalid;
 
     unsigned source_read_length = decode();
     unsigned target_read_length = decode();
 
-    if(source_length != source_read_length && source_length != target_read_length) return result_t::source_invalid;
-    target_length_ = (source_length == source_read_length ? target_read_length : source_read_length);
-    if(target_length < target_length_) return result_t::target_too_small;
-    target_length = target_length_;
+    if(source_length != source_read_length && source_length != target_read_length) return result::source_invalid;
+    targetlength = (source_length == source_read_length ? target_read_length : source_read_length);
+    if(target_length < targetlength) return result::target_too_small;
+    target_length = targetlength;
 
     while(patch_offset < patch_length - 12) {
       unsigned length = decode();
@@ -126,15 +126,15 @@ struct ups {
     target_checksum = ~target_checksum;
     for(unsigned i = 0; i < 4; i++) patch_read_checksum  |= patch_read() << (i * 8);
 
-    if(patch_result_checksum != patch_read_checksum) return result_t::patch_invalid;
+    if(patch_result_checksum != patch_read_checksum) return result::patch_invalid;
     if(source_checksum == source_read_checksum && source_length == source_read_length) {
-      if(target_checksum == target_read_checksum && target_length == target_read_length) return result_t::success;
-      return result_t::target_invalid;
+      if(target_checksum == target_read_checksum && target_length == target_read_length) return result::success;
+      return result::target_invalid;
     } else if(source_checksum == target_read_checksum && source_length == target_read_length) {
-      if(target_checksum == source_read_checksum && target_length == source_read_length) return result_t::success;
-      return result_t::target_invalid;
+      if(target_checksum == source_read_checksum && target_length == source_read_length) return result::success;
+      return result::target_invalid;
     } else {
-      return result_t::source_invalid;
+      return result::source_invalid;
     }
   }
 

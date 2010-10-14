@@ -5,7 +5,7 @@ bool Cartridge::loadNormal(const char *basename) {
   unload();
   if(loadCartridge(SNES::memory::cartrom, baseXML, basename) == false) return false;
   baseName = nall::basename(basename);
-  SNES::cartridge.load(SNES::Cartridge::Mode::Normal, lstring() << baseXML);
+  SNES::cartridge.load(SNES::Cartridge::Mode::Normal, { baseXML });
   loadMemory(SNES::memory::cartram, baseName, ".srm");
   loadMemory(SNES::memory::cartrtc, baseName, ".rtc");
   utility.cartridgeLoaded();
@@ -18,7 +18,7 @@ bool Cartridge::loadBsxSlotted(const char *basename, const char *slotname) {
   loadCartridge(SNES::memory::bsxflash, slotAXML, slotname);
   baseName = nall::basename(basename);
   slotAName = nall::basename(slotname);
-  SNES::cartridge.load(SNES::Cartridge::Mode::BsxSlotted, lstring() << baseXML << slotAXML);
+  SNES::cartridge.load(SNES::Cartridge::Mode::BsxSlotted, { baseXML, slotAXML });
   loadMemory(SNES::memory::cartram, baseName, ".srm");
   loadMemory(SNES::memory::cartrtc, baseName, ".rtc");
   utility.cartridgeLoaded();
@@ -31,7 +31,7 @@ bool Cartridge::loadBsx(const char *basename, const char *slotname) {
   loadCartridge(SNES::memory::bsxflash, slotAXML, slotname);
   baseName = nall::basename(basename);
   slotAName = nall::basename(slotname);
-  SNES::cartridge.load(SNES::Cartridge::Mode::Bsx, lstring() << baseXML << slotAXML);
+  SNES::cartridge.load(SNES::Cartridge::Mode::Bsx, { baseXML, slotAXML });
   loadMemory(SNES::memory::bsxram, baseName, ".srm");
   loadMemory(SNES::memory::bsxpram, baseName, ".psr");
   utility.cartridgeLoaded();
@@ -46,7 +46,7 @@ bool Cartridge::loadSufamiTurbo(const char *basename, const char *slotAname, con
   baseName = nall::basename(basename);
   slotAName = nall::basename(slotAname);
   slotBName = nall::basename(slotBname);
-  SNES::cartridge.load(SNES::Cartridge::Mode::SufamiTurbo, lstring() << baseXML << slotAXML << slotBXML);
+  SNES::cartridge.load(SNES::Cartridge::Mode::SufamiTurbo, { baseXML, slotAXML, slotBXML });
   loadMemory(SNES::memory::stAram, slotAName, ".srm");
   loadMemory(SNES::memory::stBram, slotBName, ".srm");
   utility.cartridgeLoaded();
@@ -59,7 +59,7 @@ bool Cartridge::loadSuperGameBoy(const char *basename, const char *slotname) {
   loadCartridge(SNES::memory::gbrom, slotAXML, slotname);
   baseName = nall::basename(basename);
   slotAName = nall::basename(slotname);
-  SNES::cartridge.load(SNES::Cartridge::Mode::SuperGameBoy, lstring() << baseXML << slotAXML);
+  SNES::cartridge.load(SNES::Cartridge::Mode::SuperGameBoy, { baseXML, slotAXML });
   loadMemory(SNES::memory::gbram, slotAName, ".sav");
   loadMemory(SNES::memory::gbrtc, slotAName, ".rtc");
   utility.cartridgeLoaded();
@@ -84,7 +84,7 @@ void Cartridge::unload() {
 bool Cartridge::loadCartridge(SNES::MappedRAM &memory, string &XML, const char *filename) {
   if(file::exists(filename) == false) return false;
   file fp;
-  if(fp.open(filename, file::mode_read) == false) return false;
+  if(fp.open(filename, file::mode::read) == false) return false;
   if(XML.readfile(string(nall::basename(filename), ".xml")) == false) XML = "";
 
   unsigned size = fp.size();
@@ -92,20 +92,19 @@ bool Cartridge::loadCartridge(SNES::MappedRAM &memory, string &XML, const char *
   fp.read(data, size);
   fp.close();
 
-  filemap patchFile;
-  if(XML == "" && patchFile.open(string(nall::basename(filename), ".ups"), filemap::mode_read)) {
+  filemap patch(string(nall::basename(filename), ".ups"), filemap::mode::read);
+  if(patch.opened()) {
     unsigned targetSize;
     ups patcher;
-    if(patcher.apply(patchFile.handle(), patchFile.size(), data, size, (uint8_t*)0, targetSize) == ups::result_t::target_too_small) {
+    if(patcher.apply(patch.data(), patch.size(), data, size, (uint8_t*)0, targetSize) == ups::result::target_too_small) {
       uint8_t *targetData = new uint8_t[targetSize];
-      if(patcher.apply(patchFile.handle(), patchFile.size(), data, size, targetData, targetSize) == ups::result_t::success) {
+      if(patcher.apply(patch.data(), patch.size(), data, size, targetData, targetSize) == ups::result::success) {
         delete[] data;
         data = targetData;
         size = targetSize;
         patchApplied = true;
       }
     }
-    patchFile.close();
   }
 
   if(XML == "") XML = snes_information(data, size).xml_memory_map;
@@ -116,10 +115,10 @@ bool Cartridge::loadCartridge(SNES::MappedRAM &memory, string &XML, const char *
 
 bool Cartridge::loadMemory(SNES::MappedRAM &memory, string filename, const char *extension) {
   if(memory.size() == 0 || memory.size() == ~0) return true;
-  filename = string(filename, extension);
+  filename = { filename, extension };
   if(file::exists(filename) == false) return false;
   file fp;
-  if(fp.open(filename, file::mode_read)) {
+  if(fp.open(filename, file::mode::read)) {
     fp.read(memory.data(), min(memory.size(), fp.size()));
     fp.close();
   }
@@ -128,9 +127,9 @@ bool Cartridge::loadMemory(SNES::MappedRAM &memory, string filename, const char 
 
 bool Cartridge::saveMemory(SNES::MappedRAM &memory, string filename, const char *extension) {
   if(memory.size() == 0 || memory.size() == ~0) return true;
-  filename = string(filename, extension);
+  filename = { filename, extension };
   file fp;
-  if(fp.open(filename, file::mode_write) == false) return false;
+  if(fp.open(filename, file::mode::write) == false) return false;
   fp.write(memory.data(), memory.size());
   fp.close();
   return true;

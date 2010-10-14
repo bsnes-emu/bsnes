@@ -12,7 +12,7 @@ bool State::save(unsigned slot) {
 
   file fp;
   bool result = false;
-  if(fp.open(name(slot), file::mode_write)) {
+  if(fp.open(name(slot), file::mode::write)) {
     fp.write(state.data(), state.size());
     fp.close();
     result = true;
@@ -34,7 +34,7 @@ bool State::load(unsigned slot) {
 
   file fp;
   bool result = false;
-  if(fp.open(name(slot), file::mode_read)) {
+  if(fp.open(name(slot), file::mode::read)) {
     unsigned size = fp.size();
     uint8_t *data = new uint8_t[size];
     fp.read(data, size);

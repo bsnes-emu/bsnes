@@ -19,13 +19,13 @@ void AudioSettings::create() {
   volumeSlider.onChange = []() {
     config.audio.volume = audioSettings.volumeSlider.position();
     audio.set(Audio::Volume, config.audio.volume);
-    audioSettings.volumeValue.setText(string(config.audio.volume, "%"));
+    audioSettings.volumeValue.setText({ config.audio.volume, "%" });
   };
 
   frequencySlider.onChange = []() {
     config.audio.inputFrequency = audioSettings.frequencySlider.position() + 31000;
     audio.set(Audio::ResampleRatio, (double)config.audio.inputFrequency / (double)config.audio.outputFrequency);
-    audioSettings.frequencyValue.setText(string(config.audio.inputFrequency, "hz"));
+    audioSettings.frequencyValue.setText({ config.audio.inputFrequency, "hz" });
   };
 
   setGeometry(0, 0, 440, y);

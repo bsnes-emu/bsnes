@@ -53,7 +53,7 @@ void MSU1::enable() {
   audio.coprocessor_frequency(44100.0);
 
   if(datafile.open()) datafile.close();
-  datafile.open(string(cartridge.basename(), ".msu"), file::mode_read);
+  datafile.open(string(cartridge.basename(), ".msu"), file::mode::read);
 }
 
 void MSU1::power() {
@@ -129,7 +129,7 @@ void MSU1::mmio_write(unsigned addr, uint8 data) {
   if(addr == 0x2005) {
     mmio.audio_track = (mmio.audio_track & 0x00ff) | (data << 8);
     if(audiofile.open()) audiofile.close();
-    if(audiofile.open(string(cartridge.basename(), "-", mmio.audio_track, ".pcm"), file::mode_read)) {
+    if(audiofile.open(string(cartridge.basename(), "-", mmio.audio_track, ".pcm"), file::mode::read)) {
       uint32 header = audiofile.readm(4);
       if(header != 0x4d535531) {  //verify 'MSU1' header
         audiofile.close();

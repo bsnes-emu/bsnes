@@ -19,14 +19,16 @@
 namespace nall {
   class filemap {
   public:
-    enum filemode { mode_read, mode_write, mode_readwrite, mode_writeread };
+    enum class mode : unsigned { read, write, readwrite, writeread };
 
-    bool open(const char *filename, filemode mode) { return p_open(filename, mode); }
+    bool opened() const { return p_opened(); }
+    bool open(const char *filename, mode mode_) { return p_open(filename, mode_); }
     void close() { return p_close(); }
     unsigned size() const { return p_size; }
-    uint8_t* handle() { return p_handle; }
-    const uint8_t* handle() const { return p_handle; }
+    uint8_t* data() { return p_handle; }
+    const uint8_t* data() const { return p_handle; }
     filemap() : p_size(0), p_handle(0) { p_ctor(); }
+    filemap(const char *filename, mode mode_) : p_size(0), p_handle(0) { p_ctor(); p_open(filename, mode_); }
     ~filemap() { p_dtor(); }
 
   private:
@@ -40,31 +42,35 @@ namespace nall {
 
     HANDLE p_filehandle, p_maphandle;
 
-    bool p_open(const char *filename, filemode mode) {
+    bool p_opened() const {
+      return p_handle;
+    }
+
+    bool p_open(const char *filename, mode mode_) {
       int desired_access, creation_disposition, flprotect, map_access;
 
-      switch(mode) {
+      switch(mode_) {
         default: return false;
-        case mode_read:
+        case mode::read:
           desired_access = GENERIC_READ;
           creation_disposition = OPEN_EXISTING;
           flprotect = PAGE_READONLY;
           map_access = FILE_MAP_READ;
           break;
-        case mode_write:
+        case mode::write:
           //write access requires read access
           desired_access = GENERIC_WRITE;
           creation_disposition = CREATE_ALWAYS;
           flprotect = PAGE_READWRITE;
           map_access = FILE_MAP_ALL_ACCESS;
           break;
-        case mode_readwrite:
+        case mode::readwrite:
           desired_access = GENERIC_READ | GENERIC_WRITE;
           creation_disposition = OPEN_EXISTING;
           flprotect = PAGE_READWRITE;
           map_access = FILE_MAP_ALL_ACCESS;
           break;
-        case mode_writeread:
+        case mode::writeread:
           desired_access = GENERIC_READ | GENERIC_WRITE;
           creation_disposition = CREATE_NEW;
           flprotect = PAGE_READWRITE;
@@ -122,24 +128,28 @@ namespace nall {
 
     int p_fd;
 
-    bool p_open(const char *filename, filemode mode) {
+    bool p_opened() const {
+      return p_handle;
+    }
+
+    bool p_open(const char *filename, mode mode_) {
       int open_flags, mmap_flags;
 
-      switch(mode) {
+      switch(mode_) {
         default: return false;
-        case mode_read:
+        case mode::read:
           open_flags = O_RDONLY;
           mmap_flags = PROT_READ;
           break;
-        case mode_write:
+        case mode::write:
           open_flags = O_RDWR | O_CREAT;  //mmap() requires read access
           mmap_flags = PROT_WRITE;
           break;
-        case mode_readwrite:
+        case mode::readwrite:
           open_flags = O_RDWR;
           mmap_flags = PROT_READ | PROT_WRITE;
           break;
-        case mode_writeread:
+        case mode::writeread:
           open_flags = O_RDWR | O_CREAT;
           mmap_flags = PROT_READ | PROT_WRITE;
           break;

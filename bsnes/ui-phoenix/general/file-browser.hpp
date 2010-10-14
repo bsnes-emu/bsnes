@@ -17,8 +17,8 @@ private:
   void folderBrowse();
   void folderUp();
   void fileActivate();
-  void setFolder(const char *pathname);
-  string cartridgeFolder(const char *pathname);
+  void setFolder(const string &pathname);
+  string cartridgeFolder(const string &pathname);
   void loadFile(const string &filename);
 };
 

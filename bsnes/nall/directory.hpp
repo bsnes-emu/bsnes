@@ -81,7 +81,7 @@ struct directory {
   inline lstring directory::contents(const string &pathname, const string &pattern) {
     lstring folders = directory::folders(pathname);  //pattern search of contents() should only filter files
     lstring files = directory::files(pathname, pattern);
-    foreach(file, files) folders.append(file, pattern);
+    foreach(file, files) folders.append(file);
     return folders;
   }
 #else

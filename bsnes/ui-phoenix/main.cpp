@@ -10,14 +10,9 @@ void Application::main(int argc, char **argv) {
   config.create();
   inputMapper.create();
 
-  char temp[PATH_MAX];
-  if(realpath(argv[0], temp)) config.path.base = temp;
-  config.path.base.transform("\\", "/");
-  config.path.base = dir(config.path.base);
-  if(userpath(temp)) config.path.user = temp;
-  config.path.user.transform("\\", "/");
-  if(strend(config.path.user, "/") == false) config.path.user.append("/");
-  config.path.user.append(".bsnes/");
+  config.path.base = realpath(argv[0]);
+  config.path.user = { userpath(), ".bsnes/" };
+
   config.load();
   config.save();
   if(config.path.current == "") config.path.current = config.path.base;

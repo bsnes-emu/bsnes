@@ -57,7 +57,7 @@ void CheatEditor::save(string filename) {
   }
 
   file fp;
-  if(fp.open(string(filename, ".cht"), file::mode_write)) {
+  if(fp.open(string(filename, ".cht"), file::mode::write)) {
     fp.print("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
     fp.print(string("<cartridge sha256=\"", SNES::cartridge.sha256(), "\">\n"));
     for(unsigned i = 0; i <= lastSave; i++) {
@@ -170,9 +170,9 @@ void CheatEditor::refresh() {
     if(list.size() > 1) cheatCode.append("...");
 
     cheatList.setChecked(i, SNES::cheat[i].enabled);
-    cheatList.setItem(i, string(
+    cheatList.setItem(i, {
       cheatText[i][CheatSlot], "\t", cheatCode, "\t", cheatText[i][CheatDesc]
-    ));
+    });
   }
   cheatList.resizeColumnsToContent();
 }
@@ -198,11 +198,11 @@ void CheatEditor::findCodes() {
   if(auto position = strpos(data, SNES::cartridge.sha256())) {
     auto startPosition = strpos((const char*)data + position(), ">");
     auto endPosition = strpos((const char*)data + position(), "</cartridge>");
-    string xmlData = string(
+    string xmlData = {
       "<cartridge>\n",
       substr((const char*)data + position() + 1, startPosition(), endPosition() - startPosition() - 1),
       "</cartridge>\n"
-    );
+    };
 
     databaseWindow.setTitle("");
     databaseList.reset();

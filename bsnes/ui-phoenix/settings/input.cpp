@@ -78,7 +78,7 @@ void InputSettings::deviceChanged() {
   for(unsigned i = 0; i < controller.size(); i++) {
     string mapping = controller[i]->mapping;
     if(mapping == "") mapping = "None";
-    mappingList.addItem(string(controller[i]->name, "\t", mapping));
+    mappingList.addItem({ controller[i]->name, "\t", mapping });
   }
   mappingList.resizeColumnsToContent();
 }
@@ -94,7 +94,7 @@ void InputSettings::mappingChanged() {
   for(unsigned i = 0; i < controller.size(); i++) {
     string mapping = controller[i]->mapping;
     if(mapping == "") mapping = "None";
-    mappingList.setItem(i, string(controller[i]->name, "\t", mapping));
+    mappingList.setItem(i, { controller[i]->name, "\t", mapping });
   }
   mappingList.resizeColumnsToContent();
 }
@@ -113,7 +113,7 @@ void InputSettings::assignInput() {
     mappingList.setEnabled(false);
     inputMapper.poll();  //flush any pending keypresses
     activeInput = controller[position()];
-    setStatusText(string("Set assignment for [", activeInput->name, "] ..."));
+    setStatusText({ "Set assignment for [", activeInput->name, "] ..." });
     if(dynamic_cast<InputMapper::AnalogInput*>(activeInput)) {
       mouseLeft.setVisible(false);
       mouseMiddle.setVisible(false);
@@ -145,7 +145,7 @@ void InputSettings::clearInput() {
   }
 }
 
-void InputSettings::setMapping(const char *mapping) {
+void InputSettings::setMapping(const string &mapping) {
   activeInput->mapping = mapping;
   inputMapper.bind();
   endAssignment();
@@ -179,19 +179,19 @@ void InputSettings::inputEvent(uint16_t scancode, int16_t value) {
     } else if(Mouse::isAnyButton(scancode) && value) {
       activeMouse = Mouse::numberDecode(scancode);
     } else if(Joypad::isAnyHat(scancode) && value) {
-      if(value == Joypad::HatUp) setMapping(string(mapping, ".Up"));
-      else if(value == Joypad::HatDown) setMapping(string(mapping, ".Down"));
-      else if(value == Joypad::HatLeft) setMapping(string(mapping, ".Left"));
-      else if(value == Joypad::HatRight) setMapping(string(mapping, ".Right"));
+      if(value == Joypad::HatUp) setMapping({ mapping, ".Up" });
+      else if(value == Joypad::HatDown) setMapping({ mapping, ".Down" });
+      else if(value == Joypad::HatLeft) setMapping({ mapping, ".Left" });
+      else if(value == Joypad::HatRight) setMapping({ mapping, ".Right" });
     } else if(Joypad::isAnyAxis(scancode)) {
       if(joypadsCalibrated == false) return calibrateJoypads();
       unsigned joypadNumber = Joypad::numberDecode(scancode);
       unsigned axisNumber = Joypad::axisDecode(scancode);
       int16_t calibration = joypadCalibration[joypadNumber][axisNumber];
-      if(calibration > -12288 && calibration < +12288 && value < -24576) setMapping(string(mapping, ".Lo"));
-      else if(calibration > -12288 && calibration < +12288 && value > +24576) setMapping(string(mapping, ".Hi"));
-      else if(calibration <= -12288 && value >= +12288) setMapping(string(mapping, ".Hi"));
-      else if(calibration >= +12288 && value <= -12288) setMapping(string(mapping, ".Lo"));
+      if(calibration > -12288 && calibration < +12288 && value < -24576) setMapping({ mapping, ".Lo" });
+      else if(calibration > -12288 && calibration < +12288 && value > +24576) setMapping({ mapping, ".Hi" });
+      else if(calibration <= -12288 && value >= +12288) setMapping({ mapping, ".Hi" });
+      else if(calibration >= +12288 && value <= -12288) setMapping({ mapping, ".Lo" });
     } else if(Joypad::isAnyButton(scancode) && value) {
       setMapping(mapping);
     }

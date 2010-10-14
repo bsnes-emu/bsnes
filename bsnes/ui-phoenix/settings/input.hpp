@@ -25,7 +25,7 @@ private:
   void portChanged();
   void deviceChanged();
   void mappingChanged();
-  void setMapping(const char *mapping);
+  void setMapping(const string &mapping);
   void assignInput();
   void clearInput();
   void endAssignment();

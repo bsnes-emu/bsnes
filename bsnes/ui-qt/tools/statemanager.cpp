@@ -170,7 +170,7 @@ string StateManagerWindow::filename() const {
 bool StateManagerWindow::isStateValid(unsigned slot) {
   if(SNES::cartridge.loaded() == false) return false;
   file fp;
-  if(fp.open(filename(), file::mode_read) == false) return false;
+  if(fp.open(filename(), file::mode::read) == false) return false;
   if(fp.size() < (slot + 1) * SNES::system.serialize_size()) { fp.close(); return false; }
   fp.seek(slot * SNES::system.serialize_size());
   uint32_t signature = fp.readl(4);
@@ -188,7 +188,7 @@ bool StateManagerWindow::isStateValid(unsigned slot) {
 string StateManagerWindow::getStateDescription(unsigned slot) {
   if(isStateValid(slot) == false) return "";
   file fp;
-  fp.open(filename(), file::mode_read);
+  fp.open(filename(), file::mode::read);
   char description[512];
   fp.seek(slot * SNES::system.serialize_size() + 28);
   fp.read((uint8_t*)description, 512);
@@ -200,7 +200,7 @@ string StateManagerWindow::getStateDescription(unsigned slot) {
 void StateManagerWindow::setStateDescription(unsigned slot, const string &text) {
   if(isStateValid(slot) == false) return;
   file fp;
-  fp.open(filename(), file::mode_readwrite);
+  fp.open(filename(), file::mode::readwrite);
   char description[512];
   memset(&description, 0, sizeof description);
   strncpy(description, text, 512);
@@ -212,7 +212,7 @@ void StateManagerWindow::setStateDescription(unsigned slot, const string &text) 
 void StateManagerWindow::loadState(unsigned slot) {
   if(isStateValid(slot) == false) return;
   file fp;
-  fp.open(filename(), file::mode_read);
+  fp.open(filename(), file::mode::read);
   fp.seek(slot * SNES::system.serialize_size());
   unsigned size = SNES::system.serialize_size();
   uint8_t *data = new uint8_t[size];
@@ -231,14 +231,14 @@ void StateManagerWindow::saveState(unsigned slot) {
   file fp;
   if(file::exists(filename()) == false) {
     //try and create the file, bail out on failure (eg read-only device)
-    if(fp.open(filename(), file::mode_write) == false) return;
+    if(fp.open(filename(), file::mode::write) == false) return;
     fp.close();
   }
 
   SNES::system.runtosave();
   serializer state = SNES::system.serialize();
 
-  fp.open(filename(), file::mode_readwrite);
+  fp.open(filename(), file::mode::readwrite);
 
   //user may save to slot #2 when slot #1 is empty; pad file to current slot if needed
   unsigned stateOffset = SNES::system.serialize_size() * slot;
@@ -253,7 +253,7 @@ void StateManagerWindow::saveState(unsigned slot) {
 void StateManagerWindow::eraseState(unsigned slot) {
   if(isStateValid(slot) == false) return;
   file fp;
-  fp.open(filename(), file::mode_readwrite);
+  fp.open(filename(), file::mode::readwrite);
   unsigned size = SNES::system.serialize_size();
   fp.seek(slot * size);
   for(unsigned i = 0; i < size; i++) fp.write(0x00);
@@ -276,7 +276,7 @@ void StateManagerWindow::eraseState(unsigned slot) {
   } else {
     unsigned neededFileSize = (lastValidState + 1) * SNES::system.serialize_size();
     file fp;
-    if(fp.open(filename(), file::mode_readwrite)) {
+    if(fp.open(filename(), file::mode::readwrite)) {
       if(fp.size() > neededFileSize) fp.truncate(neededFileSize);
       fp.close();
     }

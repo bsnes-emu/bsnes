@@ -9,7 +9,7 @@ bool Cartridge::information(const char *filename, Cartridge::Information &info) 
   if(extension(filename) != "sfc") return false;  //do not parse compressed images
 
   file fp;
-  if(fp.open(filename, file::mode_read) == false) return false;
+  if(fp.open(filename, file::mode::read) == false) return false;
 
   unsigned offset = 0;
   if((fp.size() & 0x7fff) == 512) offset = 512;
@@ -219,7 +219,7 @@ bool Cartridge::loadCartridge(string &filename, string &xml, SNES::MappedRAM &me
   string name(filepath(nall::basename(filename), config().path.patch), ".ups");
 
   file fp;
-  if(config().file.applyPatches && fp.open(name, file::mode_read)) {
+  if(config().file.applyPatches && fp.open(name, file::mode::read)) {
     unsigned patchsize = fp.size();
     uint8_t *patchdata = new uint8_t[patchsize];
     fp.read(patchdata, patchsize);
@@ -228,9 +228,9 @@ bool Cartridge::loadCartridge(string &filename, string &xml, SNES::MappedRAM &me
     uint8_t *outdata = 0;
     unsigned outsize = 0;
     ups patcher;
-    if(patcher.apply(patchdata, patchsize, data, size, outdata, outsize) == ups::result_t::target_too_small) {
+    if(patcher.apply(patchdata, patchsize, data, size, 0, outsize) == ups::result::target_too_small) {
       outdata = new uint8_t[outsize];
-      if(patcher.apply(patchdata, patchsize, data, size, outdata, outsize) == ups::result_t::success) {
+      if(patcher.apply(patchdata, patchsize, data, size, outdata, outsize) == ups::result::success) {
         delete[] data;
         data = outdata;
         size = outsize;
@@ -264,7 +264,7 @@ bool Cartridge::loadMemory(const char *filename, const char *extension, SNES::Ma
   name << extension;
 
   file fp;
-  if(fp.open(name, file::mode_read) == false) return false;
+  if(fp.open(name, file::mode::read) == false) return false;
 
   unsigned size = fp.size();
   uint8_t *data = new uint8_t[size];
@@ -284,7 +284,7 @@ bool Cartridge::saveMemory(const char *filename, const char *extension, SNES::Ma
   name << extension;
 
   file fp;
-  if(fp.open(name, file::mode_write) == false) return false;
+  if(fp.open(name, file::mode::write) == false) return false;
 
   fp.write(memory.data(), memory.size());
   fp.close();

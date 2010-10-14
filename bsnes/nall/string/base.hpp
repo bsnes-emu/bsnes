@@ -17,7 +17,6 @@ namespace nall {
   class string {
   public:
     inline void reserve(unsigned);
-    inline unsigned length() const;
 
     inline string& assign(const char*);
     inline string& append(const char*);
@@ -25,6 +24,35 @@ namespace nall {
     inline string& append(signed int value);
     inline string& append(unsigned int value);
     inline string& append(double value);
+
+    inline bool readfile(const char*);
+
+    inline string& replace (const char*, const char*);
+    inline string& qreplace(const char*, const char*);
+
+    inline unsigned length() const;
+
+    inline bool equals(const char*) const;
+    inline bool iequals(const char*) const;
+
+    inline bool wildcard(const char*) const;
+    inline bool iwildcard(const char*) const;
+
+    inline bool beginswith(const char*) const;
+    inline bool ibeginswith(const char*) const;
+    inline bool endswith(const char*) const;
+    inline bool iendswith(const char*) const;
+
+    inline string& lower();
+    inline string& upper();
+    inline string& transform(const char *before, const char *after);
+
+    template<unsigned limit = 0> inline string& ltrim(const char *key = " ");
+    template<unsigned limit = 0> inline string& rtrim(const char *key = " ");
+    template<unsigned limit = 0> inline string& trim (const char *key = " ");
+
+    inline optional<unsigned> position(const char *key) const;
+    inline optional<unsigned> qposition(const char *key) const;
 
     template<typename T> inline string& operator= (T value);
     template<typename T> inline string& operator<<(T value);
@@ -48,17 +76,6 @@ namespace nall {
     inline string(string&&);
     inline ~string();
 
-    inline bool readfile(const char*);
-    inline string& replace (const char*, const char*);
-    inline string& qreplace(const char*, const char*);
-
-    inline string& lower();
-    inline string& upper();
-    inline string& transform(const char *before, const char *after);
-    template<unsigned limit = 0> inline string& ltrim(const char *key = " ");
-    template<unsigned limit = 0> inline string& rtrim(const char *key = " ");
-    template<unsigned limit = 0> inline string& trim (const char *key = " ");
-
   protected:
     char *data;
     unsigned size;
@@ -73,7 +90,7 @@ namespace nall {
   public:
     template<typename T> inline lstring& operator<<(T value);
 
-    inline optional<unsigned> find(const char*);
+    inline optional<unsigned> find(const char*) const;
     template<unsigned limit = 0> inline void split (const char*, const char*);
     template<unsigned limit = 0> inline void qsplit(const char*, const char*);
 
@@ -84,9 +101,7 @@ namespace nall {
   //compare.hpp
   inline char chrlower(char c);
   inline char chrupper(char c);
-  inline int stricmp(const char *dest, const char *src);
-  inline int strwcmp(const char *str, const char *pattern, unsigned length);
-  inline int strwicmp(const char *str, const char *pattern, unsigned length);
+  inline int stricmp(const char *str1, const char *str2);
   inline bool wildcard(const char *str, const char *pattern);
   inline bool iwildcard(const char *str, const char *pattern);
   inline bool strbegin (const char *str, const char *key);
@@ -111,9 +126,18 @@ namespace nall {
   inline bool strint (const char *str, int &result);
   inline bool strmath(const char *str, int &result);
 
+  //platform.hpp
+  inline string realpath(const char *name);
+  inline string userpath();
+  inline string currentpath();
+
   //strl.hpp
   inline unsigned strlcpy(char *dest, const char *src, unsigned length);
   inline unsigned strlcat(char *dest, const char *src, unsigned length);
+
+  //strpos.hpp
+  inline optional<unsigned> strpos(const char *str, const char *key);
+  inline optional<unsigned> qstrpos(const char *str, const char *key);
 
   //trim.hpp
   template<unsigned limit = 0> inline char* ltrim(char *str, const char *key = " ");
@@ -124,7 +148,6 @@ namespace nall {
   inline unsigned strlcpy(string &dest, const char *src, unsigned length);
   inline unsigned strlcat(string &dest, const char *src, unsigned length);
   inline string substr(const char *src, unsigned start = 0, unsigned length = 0);
-  inline string& strtr(string &dest, const char *before, const char *after);
   template<unsigned length = 0, char padding = '0'> inline string strhex(uintmax_t value);
   template<unsigned length = 0, char padding = '0'> inline string strsigned(intmax_t value);
   template<unsigned length = 0, char padding = '0'> inline string strunsigned(uintmax_t value);

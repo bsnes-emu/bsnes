@@ -1,7 +1,7 @@
 MainWindow mainWindow;
 
 void MainWindow::create() {
-  Window::create(0, 0, 595, 448, string(SNES::Info::Name, " v", SNES::Info::Version));
+  Window::create(0, 0, 595, 448, { SNES::Info::Name, " v", SNES::Info::Version });
   application.addWindow(this, "MainWindow", "128,128");
   setFont(application.proportionalFontBold);
   setBackgroundColor(0, 0, 0);
@@ -193,13 +193,13 @@ void MainWindow::create() {
   toolsStateManager.onTick = []() { stateManager.setVisible(); };
 
   helpAbout.onTick = []() {
-    MessageWindow::information(mainWindow, string(
+    MessageWindow::information(mainWindow, {
       "bsnes\n\n",
       "Version: ", SNES::Info::Version, "\n",
       "Profile: ", SNES::Info::Profile, "\n",
       "Author: byuu\n",
       "Homepage: http://byuu.org/"
-    ));
+    });
   };
 
   onClose = []() {

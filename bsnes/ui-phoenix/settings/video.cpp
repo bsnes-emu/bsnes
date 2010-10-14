@@ -58,9 +58,9 @@ void VideoSettings::create() {
 }
 
 void VideoSettings::adjust() {
-  brightnessValue.setText(string(brightnessSlider.position(), "%"));
-  contrastValue.setText(string(contrastSlider.position(), "%"));
-  gammaValue.setText(string(gammaSlider.position(), "%"));
+  brightnessValue.setText({ brightnessSlider.position(), "%" });
+  contrastValue.setText({ contrastSlider.position(), "%" });
+  gammaValue.setText({ gammaSlider.position(), "%" });
 
   config.video.brightness = brightnessSlider.position();
   config.video.contrast = contrastSlider.position();

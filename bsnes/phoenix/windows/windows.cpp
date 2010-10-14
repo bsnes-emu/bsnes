@@ -166,7 +166,10 @@ string OS::folderSelect(Window &parent, const string &path) {
     }
   }
   if(result == false) return "";
-  return utf8_t(wfilename);
+  string name = utf8_t(wfilename);
+  name.transform("\\", "/");
+  if(name.endswith("/") == false) name.append("/");
+  return name;
 }
 
 string OS::fileOpen(Window &parent, const string &filter, const string &path) {
@@ -212,7 +215,9 @@ string OS::fileOpen(Window &parent, const string &filter, const string &path) {
 
   bool result = GetOpenFileName(&ofn);
   if(result == false) return "";
-  return utf8_t(wfilename);
+  string name = utf8_t(wfilename);
+  name.transform("\\", "/");
+  return name;
 }
 
 string OS::fileSave(Window &parent, const string &filter, const string &path) {
@@ -258,7 +263,9 @@ string OS::fileSave(Window &parent, const string &filter, const string &path) {
 
   bool result = GetSaveFileName(&ofn);
   if(result == false) return "";
-  return utf8_t(wfilename);
+  string name = utf8_t(wfilename);
+  name.transform("\\", "/");
+  return name;
 }
 
 static void OS_keyboardProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {

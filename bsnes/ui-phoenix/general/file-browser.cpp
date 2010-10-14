@@ -71,7 +71,7 @@ void FileBrowser::fileOpen(FileBrowser::Mode requestedMode, function<void (strin
   contentsBox.setFocused();
 }
 
-void FileBrowser::setFolder(const char *pathname) {
+void FileBrowser::setFolder(const string &pathname) {
   contentsBox.reset();
   contents.reset();
 
@@ -111,7 +111,7 @@ void FileBrowser::fileActivate() {
     if(strend(filename, "/")) {
       string cartridgeName = cartridgeFolder(filename);
       if(cartridgeName == "") {
-        setFolder(string(folder, filename));
+        setFolder({ folder, filename });
       } else {
         loadFile({ folder, cartridgeName });
       }
@@ -121,7 +121,7 @@ void FileBrowser::fileActivate() {
   }
 }
 
-string FileBrowser::cartridgeFolder(const char *pathname) {
+string FileBrowser::cartridgeFolder(const string &pathname) {
   if(strend(pathname, ".sfc/") == false) return "";
 
   lstring list = directory::files(string(folder, "/", pathname));
@@ -133,7 +133,7 @@ string FileBrowser::cartridgeFolder(const char *pathname) {
     }
   }
 
-  return string(pathname, filename);
+  return { pathname, filename };
 }
 
 void FileBrowser::loadFile(const string &filename) {

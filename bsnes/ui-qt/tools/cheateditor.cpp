@@ -146,7 +146,7 @@ void CheatEditorWindow::save(const char *filename) {
     unlink(filename);
   } else {
     file fp;
-    if(fp.open(filename, file::mode_write)) {
+    if(fp.open(filename, file::mode::write)) {
       //determine how many rows from the bottom up are empty, and exclude them from the file
       //eg if only the first three slots are used, don't save the last 125 empty slots
       unsigned last = 127;

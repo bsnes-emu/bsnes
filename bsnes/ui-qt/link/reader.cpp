@@ -8,7 +8,7 @@ bool Reader::direct_load(string &filename, uint8_t *&data, unsigned &size) {
   if(file::exists(filename) == false) return false;
 
   file fp;
-  if(fp.open(filename, file::mode_read) == false) return false;
+  if(fp.open(filename, file::mode::read) == false) return false;
 
   data = new uint8_t[size = fp.size()];
   fp.read(data, size);

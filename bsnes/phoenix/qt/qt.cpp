@@ -74,7 +74,9 @@ string OS::folderSelect(Window &parent, const string &path) {
     &parent != &Window::None ? parent.window : 0, "Select Directory",
     QString::fromUtf8(path), QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks
   );
-  return directory.toUtf8().constData();
+  string name = directory.toUtf8().constData();
+  if(name.endswith("/") == false) name.append("/");
+  return name;
 }
 
 string OS::fileOpen(Window &parent, const string &filter, const string &path) {

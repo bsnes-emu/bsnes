@@ -16,12 +16,12 @@ void MSU1::serialize(serializer &s) {
   s.integer(mmio.audio_play);
 
   if(datafile.open()) datafile.close();
-  if(datafile.open(string(cartridge.basename(), ".msu"), file::mode_read)) {
+  if(datafile.open(string(cartridge.basename(), ".msu"), file::mode::read)) {
     datafile.seek(mmio.data_offset);
   }
 
   if(audiofile.open()) audiofile.close();
-  if(audiofile.open(string(cartridge.basename(), "-", mmio.audio_track, ".pcm"), file::mode_read)) {
+  if(audiofile.open(string(cartridge.basename(), "-", mmio.audio_track, ".pcm"), file::mode::read)) {
     audiofile.seek(mmio.audio_offset);
   }
 }

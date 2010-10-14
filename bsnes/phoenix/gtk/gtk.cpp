@@ -108,6 +108,7 @@ string OS::folderSelect(Window &parent, const string &path) {
   }
 
   gtk_widget_destroy(dialog);
+  if(name.endswith("/") == false) name.append("/");
   return name;
 }
 

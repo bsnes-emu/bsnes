@@ -33,10 +33,6 @@ template<unsigned limit> char* trim(char *str, const char *key) {
   return ltrim<limit>(rtrim<limit>(str, key), key);
 }
 
-template<unsigned limit> string& string::ltrim(const char *key) { nall::ltrim<limit>(data, key); return *this; }
-template<unsigned limit> string& string::rtrim(const char *key) { nall::rtrim<limit>(data, key); return *this; }
-template<unsigned limit> string& string::trim (const char *key) { nall::trim <limit>(data, key); return *this; }
-
 }
 
 #endif

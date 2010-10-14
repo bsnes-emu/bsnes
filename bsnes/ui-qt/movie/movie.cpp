@@ -18,7 +18,7 @@ void Movie::play(const string &filename) {
 
   if(Movie::state != Inactive) stop();
 
-  if(fp.open(filename, file::mode_read)) {
+  if(fp.open(filename, file::mode::read)) {
     if(fp.size() < 32) goto corrupt;
 
     unsigned signature = fp.readm(4);
@@ -59,7 +59,7 @@ void Movie::record() {
 
     Movie::state = Record;
     mainWindow->syncUi();
-    fp.open(makeFilename(), file::mode_write);
+    fp.open(makeFilename(), file::mode::write);
     fp.writem(0x42535631, 4);
     fp.writel(SNES::Info::SerializerVersion, 4);
     fp.writel(SNES::cartridge.crc32(), 4);
