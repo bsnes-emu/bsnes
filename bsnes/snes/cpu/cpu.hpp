@@ -100,8 +100,8 @@ private:
     uint8 wrdivb;
 
     //$4207-$420a
-    uint10 hirq_pos;
-    uint10 virq_pos;
+    uint9 hirq_pos;
+    uint9 virq_pos;
 
     //$420d
     unsigned rom_speed;

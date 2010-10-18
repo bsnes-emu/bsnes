@@ -141,7 +141,7 @@ void MemoryEditor::importMemory() {
 
 void MemoryEditor::exportMemory(SNES::Memory &memory, const string &filename) const {
   file fp;
-  if(fp.open(filename, file::mode_write)) {
+  if(fp.open(filename, file::mode::write)) {
     for(unsigned i = 0; i < memory.size(); i++) fp.write(memory.read(i));
     fp.close();
   }
@@ -149,7 +149,7 @@ void MemoryEditor::exportMemory(SNES::Memory &memory, const string &filename) co
 
 void MemoryEditor::importMemory(SNES::Memory &memory, const string &filename) const {
   file fp;
-  if(fp.open(filename, file::mode_read)) {
+  if(fp.open(filename, file::mode::read)) {
     unsigned filesize = fp.size();
     for(unsigned i = 0; i < memory.size() && i < filesize; i++) memory.write(i, fp.read());
     fp.close();

@@ -132,7 +132,7 @@ void Debugger::modifySystemState(unsigned state) {
   file fp;
 
   if(state == Utility::LoadCartridge) {
-    if(config().debugger.cacheUsageToDisk && fp.open(usagefile, file::mode_read)) {
+    if(config().debugger.cacheUsageToDisk && fp.open(usagefile, file::mode::read)) {
       fp.read(SNES::cpu.usage, 1 << 24);
       fp.read(SNES::smp.usage, 1 << 16);
       fp.close();
@@ -143,7 +143,7 @@ void Debugger::modifySystemState(unsigned state) {
   }
 
   if(state == Utility::UnloadCartridge) {
-    if(config().debugger.cacheUsageToDisk && fp.open(usagefile, file::mode_write)) {
+    if(config().debugger.cacheUsageToDisk && fp.open(usagefile, file::mode::write)) {
       fp.write(SNES::cpu.usage, 1 << 24);
       fp.write(SNES::smp.usage, 1 << 16);
       fp.close();

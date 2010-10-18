@@ -17,9 +17,11 @@ Dsp1::Dsp1()
 uint8 Dsp1::getSr()
 {
    mSrLowByteAccess = ~mSrLowByteAccess;
-   if (mSrLowByteAccess)
-      return 0;
-   else
+//Overload: only high 8-bits are accessible externally
+//this is required for "Ace wo Nerae!"
+//   if (mSrLowByteAccess)
+//      return 0;
+//   else
       return mSr;
 }
 

@@ -29,7 +29,7 @@ void Tracer::setCpuTraceState(int state) {
   traceCpu = (state == Qt::Checked);
 
   if(traceCpu && !tracefile.open()) {
-    tracefile.open(string() << config().path.data << "trace.log", file::mode_write);
+    tracefile.open(string() << config().path.data << "trace.log", file::mode::write);
   } else if(!traceCpu && !traceSmp && tracefile.open()) {
     tracefile.close();
   }
@@ -39,7 +39,7 @@ void Tracer::setSmpTraceState(int state) {
   traceSmp = (state == Qt::Checked);
 
   if(traceSmp && !tracefile.open()) {
-    tracefile.open(string() << config().path.data << "trace.log", file::mode_write);
+    tracefile.open(string() << config().path.data << "trace.log", file::mode::write);
   } else if(!traceCpu && !traceSmp && tracefile.open()) {
     tracefile.close();
   }
