@@ -37,6 +37,7 @@ Configuration::Configuration() {
   //internal
   //========
 
+  attach(system.profile = "", "system.profile");
   attach(system.video = "", "system.video");
   attach(system.audio = "", "system.audio");
   attach(system.input = "", "system.input");

@@ -1,5 +1,6 @@
 class SMP : public Processor, public SMPcore {
 public:
+  enum : bool { Threaded = true };
   alwaysinline void step(unsigned clocks);
   alwaysinline void synchronize_cpu();
   alwaysinline void synchronize_dsp();
@@ -7,6 +8,7 @@ public:
   uint8 port_read(uint8 port);
   void port_write(uint8 port, uint8 data);
 
+  void enter();
   void power();
   void reset();
 
@@ -45,7 +47,6 @@ private:
   } status;
 
   static void Enter();
-  void enter();
   debugvirtual void op_step();
 
   friend class SMPcore;

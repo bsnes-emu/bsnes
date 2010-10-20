@@ -1,3 +1,11 @@
+namespace SNES {
+  namespace Info {
+    static const char Name[] = "bsnes";
+    static const char Version[] = "067.21";
+    static const unsigned SerializerVersion = 12;
+  }
+}
+
 //#define DEBUGGER
 #define CHEAT_SYSTEM
 
@@ -14,6 +22,7 @@
 #include <nall/function.hpp>
 #include <nall/moduloarray.hpp>
 #include <nall/platform.hpp>
+#include <nall/priorityqueue.hpp>
 #include <nall/property.hpp>
 #include <nall/serializer.hpp>
 #include <nall/stdint.hpp>
@@ -67,12 +76,12 @@ namespace SNES {
   #include <smp/core/core.hpp>
   #include <ppu/counter/counter.hpp>
 
-  #if defined(PROFILE_ASNES)
-  #include "profile-asnes.hpp"
-  #elif defined(PROFILE_BSNES)
-  #include "profile-bsnes.hpp"
-  #elif defined(PROFILE_CSNES)
-  #include "profile-csnes.hpp"
+  #if defined(PROFILE_RESEARCH)
+  #include "profile-research.hpp"
+  #elif defined(PROFILE_BASELINE)
+  #include "profile-baseline.hpp"
+  #elif defined(PROFILE_PERFORMANCE)
+  #include "profile-performance.hpp"
   #endif
 
   #include <system/system.hpp>

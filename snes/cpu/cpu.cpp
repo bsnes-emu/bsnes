@@ -26,11 +26,19 @@ void CPU::step(unsigned clocks) {
 }
 
 void CPU::synchronize_smp() {
-  if(smp.clock < 0) co_switch(smp.thread);
+  if(SMP::Threaded == true) {
+    if(smp.clock < 0) co_switch(smp.thread);
+  } else {
+    while(smp.clock < 0) smp.enter();
+  }
 }
 
 void CPU::synchronize_ppu() {
-  if(ppu.clock < 0) co_switch(ppu.thread);
+  if(PPU::Threaded == true) {
+    if(ppu.clock < 0) co_switch(ppu.thread);
+  } else {
+    while(ppu.clock < 0) ppu.enter();
+  }
 }
 
 void CPU::synchronize_coprocessor() {

@@ -1,6 +1,6 @@
 include nall/Makefile
 snes := snes
-profile := asnes
+profile := research
 ui := qt
 
 # compiler
@@ -56,19 +56,19 @@ ifeq ($(platform),osx)
 	test -d ../bsnes.app || mkdir -p ../bsnes.app/Contents/MacOS
 	$(strip $(cpp) -o ../bsnes.app/Contents/MacOS/bsnes $(objects) $(link))
 else
-	$(strip $(cpp) -o out/$(profile) $(objects) $(link))
+	$(strip $(cpp) -o out/bsnes-$(profile) $(objects) $(link))
 endif
 
 install:
 ifeq ($(platform),x)
-	install -D -m 755 out/$(profile) $(DESTDIR)$(prefix)/bin/$(profile)
+	install -D -m 755 out/bsnes $(DESTDIR)$(prefix)/bin/bsnes
 	install -D -m 644 qt/data/bsnes.png $(DESTDIR)$(prefix)/share/pixmaps/bsnes.png
 	install -D -m 644 qt/data/bsnes.desktop $(DESTDIR)$(prefix)/share/applications/bsnes.desktop
 endif
 
 uninstall:
 ifeq ($(platform),x)
-	rm $(DESTDIR)$(prefix)/bin/$(profile)
+	rm $(DESTDIR)$(prefix)/bin/bsnes
 	rm $(DESTDIR)$(prefix)/share/pixmaps/bsnes.png
 	rm $(DESTDIR)$(prefix)/share/applications/bsnes.desktop
 endif

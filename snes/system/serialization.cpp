@@ -6,6 +6,7 @@ serializer System::serialize() {
   unsigned signature = 0x31545342, version = Info::SerializerVersion, crc32 = cartridge.crc32();
   char description[512];
   memset(&description, 0, sizeof description);
+  strcpy(description, Info::Profile);
 
   s.integer(signature);
   s.integer(version);
@@ -28,6 +29,7 @@ bool System::unserialize(serializer &s) {
   if(signature != 0x31545342) return false;
   if(version != Info::SerializerVersion) return false;
 //if(crc32 != cartridge.crc32()) return false;
+  if(strcmp(description, Info::Profile)) return false;
 
   reset();
   serialize_all(s);

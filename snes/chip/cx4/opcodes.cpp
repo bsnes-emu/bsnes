@@ -48,6 +48,7 @@ void Cx4::op10() {
 
   r4 = r0 & 0x1ff;
   if(r1 & 0x8000)r1 |= ~0x7fff;
+  else r1 &= 0x7fff;
 
   mul(cos(r4), r1, r5, r2);
   r5 = (r5 >> 16) & 0xff;

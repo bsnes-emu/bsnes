@@ -17,6 +17,7 @@
     <file alias="16x16/appointment-new.png">../data/icons-16x16/appointment-new.png</file>
     <file alias="16x16/audio-volume-high.png">../data/icons-16x16/audio-volume-high.png</file>
     <file alias="16x16/document-open.png">../data/icons-16x16/document-open.png</file>
+    <file alias="16x16/emblem-system.png">../data/icons-16x16/emblem-system.png</file>
     <file alias="16x16/folder.png">../data/icons-16x16/folder.png</file>
     <file alias="16x16/folder-new.png">../data/icons-16x16/folder-new.png</file>
     <file alias="16x16/go-up.png">../data/icons-16x16/go-up.png</file>

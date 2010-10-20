@@ -1,11 +1,13 @@
 class DSP : public Processor {
 public:
+  enum : bool { Threaded = true };
   alwaysinline void step(unsigned clocks);
   alwaysinline void synchronize_smp();
 
   uint8 read(uint8 addr);
   void write(uint8 addr, uint8 data);
 
+  void enter();
   void power();
   void reset();
 
@@ -165,7 +167,6 @@ private:
 
   //dsp
   static void Enter();
-  void enter();
   void tick();
 
   friend class DSPDebugger;

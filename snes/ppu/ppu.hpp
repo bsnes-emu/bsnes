@@ -1,5 +1,6 @@
 class PPU : public Processor, public PPUcounter, public MMIO {
 public:
+  enum : bool { Threaded = true };
   alwaysinline void step(unsigned clocks);
   alwaysinline void synchronize_cpu();
 
@@ -8,6 +9,7 @@ public:
   bool overscan() const;
   bool hires() const;
 
+  void enter();
   void power();
   void reset();
 
@@ -42,7 +44,6 @@ private:
   } display;
 
   static void Enter();
-  void enter();
   void add_clocks(unsigned);
 
   void scanline();

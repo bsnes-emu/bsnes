@@ -26,19 +26,25 @@ void System::run() {
 }
 
 void System::runtosave() {
-  scheduler.sync = Scheduler::SynchronizeMode::CPU;
-  runthreadtosave();
+  if(CPU::Threaded == true) {
+    scheduler.sync = Scheduler::SynchronizeMode::CPU;
+    runthreadtosave();
+  }
 
-  scheduler.thread = smp.thread;
-  runthreadtosave();
+  if(SMP::Threaded == true) {
+    scheduler.thread = smp.thread;
+    runthreadtosave();
+  }
 
-  scheduler.thread = ppu.thread;
-  runthreadtosave();
+  if(PPU::Threaded == true) {
+    scheduler.thread = ppu.thread;
+    runthreadtosave();
+  }
 
-  #if !defined(DSP_STATE_MACHINE)
-  scheduler.thread = dsp.thread;
-  runthreadtosave();
-  #endif
+  if(DSP::Threaded == true) {
+    scheduler.thread = dsp.thread;
+    runthreadtosave();
+  }
 
   for(unsigned i = 0; i < cpu.coprocessors.size(); i++) {
     Processor &chip = *cpu.coprocessors[i];

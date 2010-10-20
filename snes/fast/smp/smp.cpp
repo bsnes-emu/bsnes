@@ -21,9 +21,19 @@ void SMP::step(unsigned clocks) {
 }
 
 void SMP::synchronize_cpu() {
+  if(CPU::Threaded == true) {
+    if(clock >= 0 && scheduler.sync != Scheduler::SynchronizeMode::All) co_switch(cpu.thread);
+  } else {
+    while(clock >= 0) cpu.enter();
+  }
 }
 
 void SMP::synchronize_dsp() {
+  if(DSP::Threaded == true) {
+    if(dsp.clock < 0 && scheduler.sync != Scheduler::SynchronizeMode::All) co_switch(dsp.thread);
+  } else {
+    while(dsp.clock < 0) dsp.enter();
+  }
 }
 
 uint8 SMP::port_read(uint8 port) {
@@ -34,7 +44,7 @@ void SMP::port_write(uint8 port, uint8 data) {
   snes_spc.write_port(snes_spc_time, port & 3, data);
 }
 
-void SMP::run() {
+void SMP::enter() {
   step(24);
   if(++snes_spc_time >= snes_spc.clock_rate / 60) {
     snes_spc.end_frame(snes_spc_time);

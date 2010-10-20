@@ -5,6 +5,7 @@ namespace SNES {
 
 CPU cpu;
 
+#include "serialization.cpp"
 #include "dma.cpp"
 #include "memory.cpp"
 #include "mmio.cpp"
@@ -20,11 +21,19 @@ void CPU::step(unsigned clocks) {
 }
 
 void CPU::synchronize_smp() {
-  while(smp.clock < 0) smp.run();
+  if(SMP::Threaded == true) {
+    if(smp.clock < 0) co_switch(smp.thread);
+  } else {
+    while(smp.clock < 0) smp.enter();
+  }
 }
 
 void CPU::synchronize_ppu() {
-  if(ppu.clock < 0) co_switch(ppu.thread);
+  if(PPU::Threaded == true) {
+    if(ppu.clock < 0) co_switch(ppu.thread);
+  } else {
+    while(ppu.clock < 0) ppu.enter();
+  }
 }
 
 void CPU::synchronize_coprocessor() {
@@ -137,9 +146,6 @@ void CPU::reset() {
   status.joy4l = status.joy4h = 0x00;
 
   dma_reset();
-}
-
-void CPU::serialize(serializer &s) {
 }
 
 CPU::CPU() : queue(512, { &CPU::queue_event, this }) {

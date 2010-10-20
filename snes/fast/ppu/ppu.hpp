@@ -1,5 +1,9 @@
 class PPU : public Processor, public PPUcounter, public MMIO {
 public:
+  enum : bool { Threaded = true };
+  alwaysinline void step(unsigned clocks);
+  alwaysinline void synchronize_cpu();
+
   #include "memory/memory.hpp"
   #include "mmio/mmio.hpp"
   #include "render/render.hpp"
@@ -10,12 +14,7 @@ public:
   uint8 ppu1_version;
   uint8 ppu2_version;
 
-  //synchronization
-  alwaysinline void step(unsigned clocks);
-  alwaysinline void synchronize_cpu();
-
   static void Enter();
-  void enter();
   void add_clocks(unsigned clocks);
 
   uint8 region;
@@ -56,6 +55,7 @@ public:
   void scanline();
   void render_scanline();
   void frame();
+  void enter();
   void power();
   void reset();
 

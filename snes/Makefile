@@ -10,22 +10,22 @@ snes_objects += snes-obc1 snes-st0010 snes-st0011 snes-st0018
 snes_objects += snes-msu1 snes-serial
 objects += $(snes_objects)
 
-ifeq ($(profile),asnes)
-  flags += -DPROFILE_ASNES
+ifeq ($(profile),research)
+  flags += -DPROFILE_RESEARCH
   snescpu := $(snes)/cpu
   snessmp := $(snes)/smp
   snesdsp := $(snes)/dsp
   snesppu := $(snes)/ppu
-else ifeq ($(profile),bsnes)
-  flags += -DPROFILE_BSNES
+else ifeq ($(profile),baseline)
+  flags += -DPROFILE_BASELINE
   snescpu := $(snes)/cpu
   snessmp := $(snes)/smp
   snesdsp := $(snes)/fast/dsp
   snesppu := $(snes)/fast/ppu
-else ifeq ($(profile),csnes)
-  flags += -DPROFILE_CSNES
+else ifeq ($(profile),performance)
+  flags += -DPROFILE_PERFORMANCE
   snescpu := $(snes)/fast/cpu
-  snessmp := $(snes)/fast/smp
+  snessmp := $(snes)/smp
   snesdsp := $(snes)/fast/dsp
   snesppu := $(snes)/fast/ppu
 endif
@@ -37,10 +37,10 @@ obj/snes-system.o   : $(snes)/system/system.cpp $(call rwildcard,$(snes)/system/
 obj/snes-memory.o   : $(snes)/memory/memory.cpp $(call rwildcard,$(snes)/memory/)
 obj/snes-cpucore.o  : $(snes)/cpu/core/core.cpp $(call rwildcard,$(snes)/cpu/core/)
 obj/snes-smpcore.o  : $(snes)/smp/core/core.cpp $(call rwildcard,$(snes)/smp/core/)
-obj/snes-cpu.o      : $(snescpu)/cpu.cpp $(call rwildcard,$(snescpu)/cpu/)
-obj/snes-smp.o      : $(snessmp)/smp.cpp $(call rwildcard,$(snessmp)/smp/)
-obj/snes-dsp.o      : $(snesdsp)/dsp.cpp $(call rwildcard,$(snesdsp)/dsp/)
-obj/snes-ppu.o      : $(snesppu)/ppu.cpp $(call rwildcard,$(snesppu)/ppu/)
+obj/snes-cpu.o      : $(snescpu)/cpu.cpp $(call rwildcard,$(snescpu)/)
+obj/snes-smp.o      : $(snessmp)/smp.cpp $(call rwildcard,$(snessmp)/)
+obj/snes-dsp.o      : $(snesdsp)/dsp.cpp $(call rwildcard,$(snesdsp)/)
+obj/snes-ppu.o      : $(snesppu)/ppu.cpp $(call rwildcard,$(snesppu)/)
 obj/snes-cartridge.o: $(snes)/cartridge/cartridge.cpp $(call rwilddcard,$(snes)/cartridge/)
 obj/snes-cheat.o    : $(snes)/cheat/cheat.cpp $(call rwildcard,$(snes)/cheat/)
 

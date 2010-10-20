@@ -2,6 +2,7 @@
 
 class SMP : public Processor {
 public:
+  enum : bool { Threaded = false };
   alwaysinline void step(unsigned clocks);
   alwaysinline void synchronize_cpu();
   alwaysinline void synchronize_dsp();
@@ -9,7 +10,7 @@ public:
   uint8 port_read(uint8 port);
   void port_write(uint8 port, uint8 data);
 
-  void run();
+  void enter();
   void power();
   void reset();
 

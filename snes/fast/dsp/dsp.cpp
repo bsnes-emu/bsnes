@@ -5,9 +5,7 @@ namespace SNES {
 
 DSP dsp;
 
-#if !defined(PROFILE_CSNES)
-  #include "../snes_spc/SPC_DSP.cpp"
-#endif
+#include "../snes_spc/SPC_DSP.cpp"
 
 #include "serialization.cpp"
 
@@ -16,9 +14,14 @@ void DSP::step(unsigned clocks) {
 }
 
 void DSP::synchronize_smp() {
+  if(SMP::Threaded == true) {
+    if(clock >= 0 && scheduler.sync != Scheduler::SynchronizeMode::All) co_switch(smp.thread);
+  } else {
+    while(clock >= 0) smp.enter();
+  }
 }
 
-void DSP::run() {
+void DSP::enter() {
   spc_dsp.run(1);
   step(24);
 

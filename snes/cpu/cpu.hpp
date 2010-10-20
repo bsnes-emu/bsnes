@@ -1,5 +1,6 @@
 class CPU : public Processor, public CPUcore, public PPUcounter, public MMIO {
 public:
+  enum : bool { Threaded = true };
   array<Processor*> coprocessors;
   alwaysinline void step(unsigned clocks);
   alwaysinline void synchronize_smp();
@@ -12,6 +13,7 @@ public:
   alwaysinline uint8 port_read(uint8 port) { return apu_port[port & 3]; }
   alwaysinline void port_write(uint8 port, uint8 data) { apu_port[port & 3] = data; }
 
+  void enter();
   void power();
   void reset();
 
@@ -117,7 +119,6 @@ private:
   } alu;
 
   static void Enter();
-  void enter();
   void op_irq();
   debugvirtual void op_step();
 

@@ -1,16 +1,15 @@
-#if !defined(PROFILE_CSNES)
-  #include "../snes_spc/SPC_DSP.h"
-#endif
+#include "../snes_spc/SPC_DSP.h"
 
 class DSP : public Processor {
 public:
+  enum : bool { Threaded = false };
   alwaysinline void step(unsigned clocks);
   alwaysinline void synchronize_smp();
-  void run();
 
   uint8 read(uint8 addr);
   void write(uint8 addr, uint8 data);
 
+  void enter();
   void power();
   void reset();
 

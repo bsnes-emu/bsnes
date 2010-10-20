@@ -1,6 +1,7 @@
 class Configuration : public configuration {
 public:
   struct System {
+    string profile;
     string video, audio, input;
     bool crashedOnLastRun;
     unsigned speed;

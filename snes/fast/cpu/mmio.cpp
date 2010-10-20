@@ -102,7 +102,7 @@ void CPU::mmio_write(unsigned addr, uint8 data) {
 
   if((addr & 0xffc0) == 0x2140) {
     synchronize_smp();
-    smp.port_write(addr & 3, data);
+    port_write(addr & 3, data);
     return;
   }
 

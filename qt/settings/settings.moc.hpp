@@ -4,6 +4,7 @@ class SettingsWindow : public Window {
 public:
   QVBoxLayout *layout;
   QTabWidget *tab;
+  QScrollArea *profileArea;
   QScrollArea *videoArea;
   QScrollArea *audioArea;
   QScrollArea *inputArea;

@@ -1,7 +1,6 @@
-#include <nall/priorityqueue.hpp>
-
 class CPU : public Processor, public CPUcore, public PPUcounter, public MMIO {
 public:
+  enum : bool { Threaded = true };
   array<Processor*> coprocessors;
   alwaysinline void step(unsigned clocks);
   alwaysinline void synchronize_smp();
@@ -20,6 +19,7 @@ public:
   uint8 op_read(unsigned addr);
   void op_write(unsigned addr, uint8 data);
 
+  void enter();
   void power();
   void reset();
 
@@ -30,7 +30,6 @@ public:
 private:
   //cpu
   static void Enter();
-  void enter();
   void op_irq(uint16 vector);
 
   //timing
