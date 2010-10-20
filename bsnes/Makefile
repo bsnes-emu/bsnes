@@ -1,7 +1,7 @@
 include nall/Makefile
 snes := snes
 profile := performance
-ui := qt
+ui := ui-phoenix
 
 # compiler
 c       := $(compiler) -std=gnu99
@@ -88,6 +88,6 @@ clean: ui_clean
 	-@$(call delete,*.manifest)
 
 archive-all:
-	tar -cjf bsnes.tar.bz2 launcher libco nall obj out qt ruby snes Makefile sync.sh cc.bat clean.bat
+	tar -cjf bsnes.tar.bz2 launcher libco nall obj out phoenix ruby snes ui-phoenix ui-qt Makefile cc.bat clean.bat sync.sh
 
 help:;

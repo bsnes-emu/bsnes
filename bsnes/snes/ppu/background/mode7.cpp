@@ -66,7 +66,7 @@ void PPU::Background::run_mode7() {
 
     //character 0 repetition outside of screen area
     case 3: {
-      if((px & py) & ~1023) {
+      if((px | py) & ~1023) {
         tile = 0;
       } else {
         px &= 1023;

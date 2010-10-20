@@ -8,6 +8,10 @@
 #ifndef XAUDIO2_RUBY_H
 #define XAUDIO2_RUBY_H
 
+//64-bit GCC fix
+#define GUID_EXT EXTERN_C
+#define GUID_SECT
+
 #include <BaseTyps.h>
 
 #define DEFINE_GUID_X(n,l,w1,w2,b1,b2,b3,b4,b5,b6,b7,b8) GUID_EXT const GUID n GUID_SECT = {l,w1,w2,{b1,b2,b3,b4,b5,b6,b7,b8}}
