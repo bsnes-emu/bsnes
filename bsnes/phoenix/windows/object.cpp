@@ -16,6 +16,7 @@ struct Action::Data {
 
 struct Widget::Data {
   HWND window;
+  HFONT font;
 };
 
 struct Window::Data {

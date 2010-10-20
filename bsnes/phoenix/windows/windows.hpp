@@ -94,6 +94,7 @@ struct Window : Widget {
   static Window None;
   nall::function<bool ()> onClose;
   void create(unsigned x, unsigned y, unsigned width, unsigned height, const char *text = "");
+  void setDefaultFont(Font &font);
   void setFont(Font &font);
   void setGeometry(unsigned x, unsigned y, unsigned width, unsigned height);
   void setBackgroundColor(uint8_t red, uint8_t green, uint8_t blue);

@@ -15,11 +15,26 @@ using namespace phoenix;
 
 #include "interface.hpp"
 #include "general/general.hpp"
+#include "settings/settings.hpp"
+#include "utility/utility.hpp"
 #include "cartridge/cartridge.hpp"
 
 struct Application {
+  Font font;
   bool quit;
   void main(int argc, char **argv);
 };
 
 extern Application application;
+
+struct Style {
+  enum : unsigned {
+  #if defined(PHOENIX_WINDOWS)
+    SliderHeight = 25,
+  #elif defined(PHOENIX_GTK)
+    SliderHeight = 22,
+  #elif defined(PHOENIX_QT)
+    SliderHeight = 22,
+  #endif
+  };
+};

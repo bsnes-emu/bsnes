@@ -2,11 +2,29 @@
 #include "interface.cpp"
 Application application;
 
+#if defined(PLATFORM_WIN)
+static string VideoDriver = "Direct3D";
+static string AudioDriver = "XAudio2";
+static string InputDriver = "RawInput";
+#elif defined(PLATFORM_X)
+static string VideoDriver = "OpenGL";
+static string AudioDriver = "ALSA";
+static string InputDriver = "SDL";
+#endif
+
 void Application::main(int argc, char **argv) {
+  #if defined(PHOENIX_WINDOWS)
+  font.create("Tahoma", 8);
+  #else
+  font.create("Sans", 8);
+  #endif
+
   mainWindow.create();
+  videoSettingsWindow.create();
+  mainWindow.setVisible();
   while(os.pending()) os.run();
 
-  video.driver("OpenGL");
+  video.driver(VideoDriver);
   video.set(Video::Handle, mainWindow.viewport.handle());
   video.set(Video::Synchronize, false);
   video.set(Video::Filter, (unsigned)Video::FilterLinear);
@@ -16,7 +34,7 @@ void Application::main(int argc, char **argv) {
     video.init();
   }
 
-  audio.driver("ALSA");
+  audio.driver(AudioDriver);
   audio.set(Audio::Handle, mainWindow.viewport.handle());
   audio.set(Audio::Synchronize, false);
   audio.set(Audio::Frequency, (unsigned)32000);
@@ -26,7 +44,7 @@ void Application::main(int argc, char **argv) {
     audio.init();
   }
 
-  input.driver("SDL");
+  input.driver(InputDriver);
   input.set(Input::Handle, mainWindow.viewport.handle());
   if(input.init() == false) {
     MessageWindow::critical(mainWindow, "Failed to initialize input.");
@@ -41,7 +59,7 @@ void Application::main(int argc, char **argv) {
   }
 
   while(quit == false) {
-    if(os.pending()) os.run();
+    while(os.pending()) os.run();
 
     if(SNES::cartridge.loaded()) {
       SNES::system.run();
@@ -50,6 +68,7 @@ void Application::main(int argc, char **argv) {
     }
   }
 
+  cartridge.unload();
   mainWindow.setVisible(false);
   while(os.pending()) os.run();
   SNES::system.term();

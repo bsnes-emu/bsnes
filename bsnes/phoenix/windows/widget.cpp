@@ -1,4 +1,5 @@
 void Widget::setFont(Font &font) {
+  widget->font = font.font->font;
   SendMessage(widget->window, WM_SETFONT, (WPARAM)font.font->font, 0);
 }
 
@@ -31,4 +32,5 @@ Widget::Widget() {
   os.objects.append(this);
   widget = new Widget::Data;
   widget->window = 0;
+  widget->font = os.os->proportionalFont;
 }

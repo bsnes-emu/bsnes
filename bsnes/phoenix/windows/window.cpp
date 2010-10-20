@@ -18,8 +18,11 @@ void Window::create(unsigned x, unsigned y, unsigned width, unsigned height, con
   SetWindowLongPtr(widget->window, GWLP_USERDATA, (LONG_PTR)this);
 }
 
-void Window::setFont(Font &font) {
+void Window::setDefaultFont(Font &font) {
   window->defaultFont = font.font->font;
+}
+
+void Window::setFont(Font &font) {
   SendMessage(window->status, WM_SETFONT, (WPARAM)window->defaultFont, 0);
 }
 

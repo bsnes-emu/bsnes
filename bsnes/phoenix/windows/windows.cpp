@@ -214,7 +214,7 @@ static LRESULT CALLBACK OS_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM
       FillRect(ps.hdc, &rc, window.window->brush);
       EndPaint(window.widget->window, &ps);
       return TRUE;
-    };
+    }
 
     case WM_CTLCOLORBTN:
     case WM_CTLCOLORSTATIC: {
@@ -378,10 +378,22 @@ OS::OS() {
   wc.cbWndExtra = 0;
   wc.hbrBackground = (HBRUSH)(COLOR_3DFACE + 1);
   wc.hCursor = LoadCursor(0, IDC_ARROW);
-  wc.hIcon = LoadIcon(0, IDI_APPLICATION);
+  wc.hIcon = LoadIcon(GetModuleHandle(0), MAKEINTRESOURCE(2));
   wc.hInstance = GetModuleHandle(0);
   wc.lpfnWndProc = OS_windowProc;
   wc.lpszClassName = L"phoenix_window";
+  wc.lpszMenuName = 0;
+  wc.style = CS_HREDRAW | CS_VREDRAW;
+  RegisterClass(&wc);
+
+  wc.cbClsExtra = 0;
+  wc.cbWndExtra = 0;
+  wc.hbrBackground = (HBRUSH)(COLOR_3DFACE + 1);
+  wc.hCursor = LoadCursor(0, IDC_ARROW);
+  wc.hIcon = LoadIcon(0, IDI_APPLICATION);
+  wc.hInstance = GetModuleHandle(0);
+  wc.lpfnWndProc = Label_WindowProc;
+  wc.lpszClassName = L"phoenix_label";
   wc.lpszMenuName = 0;
   wc.style = CS_HREDRAW | CS_VREDRAW;
   RegisterClass(&wc);

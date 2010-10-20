@@ -40,9 +40,12 @@ void Window::setGeometry(unsigned x, unsigned y, unsigned width, unsigned height
   gtk_widget_set_size_request(object->formContainer, width, height);
 }
 
-void Window::setFont(Font &font) {
-  Widget::setFont(font);
+void Window::setDefaultFont(Font &font) {
   window->defaultFont = &font;
+}
+
+void Window::setFont(Font &font) {
+  Widget_setFont(object->status, font.font->font);
 }
 
 void Window::setBackgroundColor(uint8_t red, uint8_t green, uint8_t blue) {

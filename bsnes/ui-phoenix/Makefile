@@ -1,5 +1,6 @@
-ui_objects := ui-main ui-general ui-cartridge
+ui_objects := ui-main ui-general ui-settings ui-utility ui-cartridge
 ui_objects += ruby phoenix
+ui_objects += $(if $(call streq,$(platform),win),resource)
 
 # platform
 ifeq ($(platform),x)
@@ -18,6 +19,7 @@ else ifeq ($(platform),osx)
 
   link += $(if $(findstring audio.openal,$(ruby)),-framework OpenAL)
 else ifeq ($(platform),win)
+  arch := -DARCH_X86
   flags += -DPHOENIX_WINDOWS
   link +=
 
@@ -51,12 +53,19 @@ rubydef := $(foreach c,$(subst .,_,$(call strupper,$(ruby))),-D$c)
 # rules
 objects := $(ui_objects) $(objects)
 
-obj/ui-main.o: $(ui)/main.cpp $(call rwildcard,$(ui)/*)
-obj/ui-general.o: $(ui)/general/general.cpp $(call rwildcard,$(ui)/general/*)
-obj/ui-cartridge.o: $(ui)/cartridge/cartridge.cpp $(call rwildcard,$(ui)/cartridge/*)
+obj/ui-main.o: $(ui)/main.cpp $(call rwildcard,$(ui)/*.hpp) $(call rwildcard,$(ui)/*)
+obj/ui-general.o: $(ui)/general/general.cpp $(call rwildcard,$(ui)/*.hpp) $(call rwildcard,$(ui)/general/*)
+obj/ui-settings.o: $(ui)/settings/settings.cpp $(call rwildcard,$(ui)/*.hpp) $(call rwildcard,$(ui)/settings/*)
+obj/ui-utility.o: $(ui)/utility/utility.cpp $(call rwildcard,$(ui)/*.hpp) $(call rwildcard,$(ui)/utility/*)
+obj/ui-cartridge.o: $(ui)/cartridge/cartridge.cpp $(call rwildcard,$(ui)/*.hpp) $(call rwildcard,$(ui)/cartridge/*)
+
 obj/ruby.o: ruby/ruby.cpp $(call rwildcard,ruby/*)
 	$(call compile,$(rubydef) $(rubyflags))
+
 obj/phoenix.o: phoenix/phoenix.cpp $(call rwildcard,phoenix/*)
+
+obj/resource.o: $(ui)/resource.rc
+	windres $(ui)/resource.rc obj/resource.o $(arch)
 
 # targets
 ui_build:;

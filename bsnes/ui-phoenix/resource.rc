@@ -1,0 +1,9 @@
+#ifdef ARCH_X86
+1 24 "../phoenix/windows/phoenix-x86.Manifest"
+#endif
+
+#ifdef ARCH_AMD64
+1 24 "../phoenix/windows/phoenix-amd64.Manifest"
+#endif
+
+2 ICON DISCARDABLE "data/bsnes.ico"
