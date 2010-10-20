@@ -1,0 +1,56 @@
+#include <snes.hpp>
+
+#define DSP_CPP
+namespace SNES {
+
+DSP dsp;
+
+#if !defined(PROFILE_CSNES)
+  #include "../snes_spc/SPC_DSP.cpp"
+#endif
+
+#include "serialization.cpp"
+
+void DSP::step(unsigned clocks) {
+  clock += clocks;
+}
+
+void DSP::synchronize_smp() {
+}
+
+void DSP::run() {
+  spc_dsp.run(1);
+  step(24);
+
+  signed count = spc_dsp.sample_count();
+  if(count > 0) {
+    for(unsigned n = 0; n < count; n += 2) audio.sample(samplebuffer[n + 0], samplebuffer[n + 1]);
+    spc_dsp.set_output(samplebuffer, 8192);
+  }
+}
+
+uint8 DSP::read(uint8 addr) {
+  return spc_dsp.read(addr);
+}
+
+void DSP::write(uint8 addr, uint8 data) {
+  spc_dsp.write(addr, data);
+}
+
+void DSP::power() {
+  spc_dsp.init(memory::apuram.data());
+  spc_dsp.reset();
+}
+
+void DSP::reset() {
+  spc_dsp.soft_reset();
+  spc_dsp.set_output(samplebuffer, 8192);
+}
+
+DSP::DSP() {
+}
+
+DSP::~DSP() {
+}
+
+}

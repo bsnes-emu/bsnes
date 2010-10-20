@@ -1,5 +1,6 @@
 include nall/Makefile
-snes := bsnes
+snes := snes
+profile := asnes
 ui := qt
 
 # compiler
@@ -55,19 +56,19 @@ ifeq ($(platform),osx)
 	test -d ../bsnes.app || mkdir -p ../bsnes.app/Contents/MacOS
 	$(strip $(cpp) -o ../bsnes.app/Contents/MacOS/bsnes $(objects) $(link))
 else
-	$(strip $(cpp) -o out/$(snes) $(objects) $(link))
+	$(strip $(cpp) -o out/$(profile) $(objects) $(link))
 endif
 
 install:
 ifeq ($(platform),x)
-	install -D -m 755 out/$(snes) $(DESTDIR)$(prefix)/bin/$(snes)
+	install -D -m 755 out/$(profile) $(DESTDIR)$(prefix)/bin/$(profile)
 	install -D -m 644 qt/data/bsnes.png $(DESTDIR)$(prefix)/share/pixmaps/bsnes.png
 	install -D -m 644 qt/data/bsnes.desktop $(DESTDIR)$(prefix)/share/applications/bsnes.desktop
 endif
 
 uninstall:
 ifeq ($(platform),x)
-	rm $(DESTDIR)$(prefix)/bin/$(snes)
+	rm $(DESTDIR)$(prefix)/bin/$(profile)
 	rm $(DESTDIR)$(prefix)/share/pixmaps/bsnes.png
 	rm $(DESTDIR)$(prefix)/share/applications/bsnes.desktop
 endif
@@ -86,6 +87,6 @@ clean: ui_clean
 	-@$(call delete,*.manifest)
 
 archive-all:
-	tar -cjf snes-`date +%Y%m%d`.tar.bz2 asnes bsnes libco nall obj out qt ruby Makefile sync.sh
+	tar -cjf bsnes-`date +%Y%m%d`.tar.bz2 libco nall obj out qt ruby snes Makefile sync.sh
 
 help:;
