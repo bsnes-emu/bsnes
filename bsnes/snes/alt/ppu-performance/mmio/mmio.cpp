@@ -283,7 +283,7 @@ void PPU::mmio_write(unsigned addr, uint8 data) {
 
   switch(addr & 0xffff) {
     case 0x2100: {  //INIDISP
-      if(regs.display_disable && vcounter() == display.height) oam.address_reset();
+      if(regs.display_disable && cpu.vcounter() == display.height) oam.address_reset();
       regs.display_disable = data & 0x80;
       regs.display_brightness = data & 0x0f;
       return;

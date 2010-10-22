@@ -38,7 +38,7 @@ unsigned snes_library_revision_major(void) {
 }
 
 unsigned snes_library_revision_minor(void) {
-  return 0;
+  return 1;
 }
 
 void snes_set_video_refresh(snes_video_refresh_t video_refresh) {
@@ -59,6 +59,10 @@ void snes_set_input_state(snes_input_state_t input_state) {
 
 void snes_set_controller_port_device(bool port, unsigned device) {
   SNES::input.port_set_device(port, (SNES::Input::Device)device);
+}
+
+void snes_set_cartridge_basename(const char *basename) {
+  SNES::cartridge.basename = basename;
 }
 
 void snes_init(void) {

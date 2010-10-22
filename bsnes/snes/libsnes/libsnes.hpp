@@ -74,6 +74,7 @@ void snes_set_input_poll(snes_input_poll_t);
 void snes_set_input_state(snes_input_state_t);
 
 void snes_set_controller_port_device(bool port, unsigned device);
+void snes_set_cartridge_basename(const char *basename);
 
 void snes_init(void);
 void snes_term(void);

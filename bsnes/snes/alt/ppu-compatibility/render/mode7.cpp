@@ -75,7 +75,7 @@ void PPU::render_line_mode7(uint8 pri0_pos, uint8 pri1_pos) {
         palette = memory::vram[(((tile << 6) + ((py & 7) << 3) + (px & 7)) << 1) + 1];
       } break;
       case 2: {  //palette color 0 outside of screen area
-        if(px < 0 || px > 1023 || py < 0 || py > 1023) {
+        if((px | py) & ~1023) {
           palette = 0;
         } else {
           px &= 1023;
@@ -87,7 +87,7 @@ void PPU::render_line_mode7(uint8 pri0_pos, uint8 pri1_pos) {
         }
       } break;
       case 3: {  //character 0 repetition outside of screen area
-        if(px < 0 || px > 1023 || py < 0 || py > 1023) {
+        if((px | py) & ~1023) {
           tile = 0;
         } else {
           px &= 1023;

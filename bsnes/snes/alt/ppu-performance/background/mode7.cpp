@@ -49,7 +49,7 @@ void PPU::Background::render_mode7() {
       }
 
       case 2: {
-        if(px < 0 || px > 1023 || py < 0 || py > 1023) {
+        if((px | py) & ~1023) {
           palette = 0;
         } else {
           px &= 1023;
@@ -63,7 +63,7 @@ void PPU::Background::render_mode7() {
       }
 
       case 3: {
-        if(px < 0 || px > 1023 || py < 0 || py > 1023) {
+        if((px | py) & ~1023) {
           tile = 0;
         } else {
           px &= 1023;
