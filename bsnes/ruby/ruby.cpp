@@ -1,6 +1,8 @@
 #include <ruby/ruby.hpp>
 using namespace nall;
 
+#undef mkdir
+#undef usleep
 #include <ruby/ruby_impl.cpp>
 
 namespace ruby {

@@ -20,6 +20,7 @@ public:
     HWND handle;
     bool synchronize;
     unsigned filter;
+    string shader;
 
     unsigned width;
     unsigned height;
@@ -49,7 +50,10 @@ public:
     if(name == Video::Synchronize) {
       if(settings.synchronize != any_cast<bool>(value)) {
         settings.synchronize = any_cast<bool>(value);
-        if(wglcontext) init();
+        if(wglcontext) {
+          init();
+          OpenGL::set_shader(settings.shader);
+        }
       }
     }
 
@@ -59,7 +63,8 @@ public:
     }
 
     if(name == Video::Shader) {
-      OpenGL::set_shader(any_cast<const char*>(value));
+      settings.shader = any_cast<const char*>(value);
+      OpenGL::set_shader(settings.shader);
       return true;
     }
 

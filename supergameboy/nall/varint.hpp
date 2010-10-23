@@ -1,9 +1,9 @@
 #ifndef NALL_VARINT_HPP
 #define NALL_VARINT_HPP
 
+#include <type_traits>
 #include <nall/bit.hpp>
 #include <nall/static.hpp>
-#include <nall/traits.hpp>
 
 namespace nall {
   template<unsigned bits> class uint_t {
@@ -22,7 +22,7 @@ namespace nall {
         >::type
       >::type
     >::type T;
-    static_assert<!is_void<T>::value> uint_assert;
+    static_assert(!std::is_same<T, void>::value, "");
     T data;
 
   public:
@@ -63,7 +63,7 @@ namespace nall {
         >::type
       >::type
     >::type T;
-    static_assert<!is_void<T>::value> int_assert;
+    static_assert(!std::is_same<T, void>::value, "");
     T data;
 
   public:

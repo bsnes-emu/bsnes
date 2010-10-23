@@ -119,9 +119,6 @@ namespace nall {
   inline uintmax_t strbin     (const char *str);
   inline double    strdouble  (const char *str);
 
-  //match.hpp
-  inline bool match(const char *pattern, const char *str);
-
   //math.hpp
   inline bool strint (const char *str, int &result);
   inline bool strmath(const char *str, int &result);

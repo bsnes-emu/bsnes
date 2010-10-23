@@ -11,10 +11,6 @@ void string::reserve(unsigned size_) {
   }
 }
 
-unsigned string::length() const {
-  return strlen(data);
-}
-
 string& string::assign(const char *s) {
   unsigned length = strlen(s);
   reserve(length);
@@ -28,6 +24,11 @@ string& string::append(const char *s) {
   strcat(data, s);
   return *this;
 }
+
+string& string::append(bool value) { append(value ? "true" : "false"); return *this; }
+string& string::append(signed int value) { append(strsigned(value)); return *this; }
+string& string::append(unsigned int value) { append(strunsigned(value)); return *this; }
+string& string::append(double value) { append(strdouble(value)); return *this; }
 
 string::operator const char*() const {
   return data;
@@ -63,15 +64,20 @@ string& string::operator=(string &&source) {
   return *this;
 }
 
-string::string() {
+static void istring(string &output) {
+}
+
+template<typename T, typename... Args>
+static void istring(string &output, const T &value, Args&&... args) {
+  output.append(value);
+  istring(output, std::forward<Args>(args)...);
+}
+
+template<typename... Args> string::string(Args&&... args) {
   size = 64;
   data = (char*)malloc(size + 1);
   *data = 0;
-}
-
-string::string(const char *value) {
-  size = strlen(value);
-  data = strdup(value);
+  istring(*this, std::forward<Args>(args)...);
 }
 
 string::string(const string &value) {
@@ -86,7 +92,7 @@ string::string(string &&source) {
 }
 
 string::~string() {
-  free(data);
+  if(data) free(data);
 }
 
 bool string::readfile(const char *filename) {
@@ -112,11 +118,11 @@ bool string::readfile(const char *filename) {
   return true;
 }
 
-int lstring::find(const char *key) {
+optional<unsigned> lstring::find(const char *key) const {
   for(unsigned i = 0; i < size(); i++) {
-    if(operator[](i) == key) return i;
+    if(operator[](i) == key) return { true, i };
   }
-  return -1;
+  return { false, 0 };
 }
 
 inline lstring::lstring() {

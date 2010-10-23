@@ -3,7 +3,8 @@
 
 namespace nall {
 
-void lstring::split(const char *key, const char *src, unsigned limit) {
+template<unsigned Limit> void lstring::split(const char *key, const char *src) {
+  unsigned limit = Limit;
   reset();
 
   int ssl = strlen(src), ksl = strlen(key);
@@ -21,7 +22,8 @@ void lstring::split(const char *key, const char *src, unsigned limit) {
   operator[](split_count++) = src + lp;
 }
 
-void lstring::qsplit(const char *key, const char *src, unsigned limit) {
+template<unsigned Limit> void lstring::qsplit(const char *key, const char *src) {
+  unsigned limit = Limit;
   reset();
 
   int ssl = strlen(src), ksl = strlen(key);

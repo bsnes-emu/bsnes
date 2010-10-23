@@ -117,6 +117,8 @@ struct ups {
         if(patch_xor == 0) break;
       }
     }
+    while(source_offset < source_length) target_write(source_read());
+    while(target_offset < target_length) target_write(source_read());
 
     uint32_t patch_read_checksum = 0, source_read_checksum = 0, target_read_checksum = 0;
     for(unsigned i = 0; i < 4; i++) source_read_checksum |= patch_read() << (i * 8);

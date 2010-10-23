@@ -11,14 +11,52 @@ char chrupper(char c) {
   return (c >= 'a' && c <= 'z') ? c - ('a' - 'A') : c;
 }
 
-int stricmp(const char *dest, const char *src) {
-  while(*dest) {
-    if(chrlower(*dest) != chrlower(*src)) break;
-    dest++;
-    src++;
+int stricmp(const char *str1, const char *str2) {
+  while(*str1) {
+    if(chrlower(*str1) != chrlower(*str2)) break;
+    str1++, str2++;
   }
+  return (int)chrlower(*str1) - (int)chrlower(*str2);
+}
 
-  return (int)chrlower(*dest) - (int)chrlower(*src);
+bool wildcard(const char *s, const char *p) {
+  const char *cp = 0, *mp = 0;
+  while(*s && *p != '*') {
+    if(*p != '?' && *s != *p) return false;
+    p++, s++;
+  }
+  while(*s) {
+    if(*p == '*') {
+      if(!*++p) return true;
+      mp = p, cp = s + 1;
+    } else if(*p == '?' || *p == *s) {
+      p++, s++;
+    } else {
+      p = mp, s = cp++;
+    }
+  }
+  while(*p == '*') p++;
+  return !*p;
+}
+
+bool iwildcard(const char *s, const char *p) {
+  const char *cp = 0, *mp = 0;
+  while(*s && *p != '*') {
+    if(*p != '?' && chrlower(*s) != chrlower(*p)) return false;
+    p++, s++;
+  }
+  while(*s) {
+    if(*p == '*') {
+      if(!*++p) return true;
+      mp = p, cp = s + 1;
+    } else if(*p == '?' || chrlower(*p) == chrlower(*s)) {
+      p++, s++;
+    } else {
+      p = mp, s = cp++;
+    }
+  }
+  while(*p == '*') p++;
+  return !*p;
 }
 
 bool strbegin(const char *str, const char *key) {

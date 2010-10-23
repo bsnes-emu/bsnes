@@ -24,7 +24,7 @@ void Application::main(int argc, char **argv) {
   monospaceFont.create("Courier New", 8);
   #else
   proportionalFont.create("Sans", 8);
-  proportionalFontBold.create("Tahoma", 8, Font::Style::Bold);
+  proportionalFontBold.create("Sans", 8, Font::Style::Bold);
   monospaceFont.create("Liberation Mono", 8);
   #endif
 

@@ -190,6 +190,8 @@ static void filter(Gambatte::uint_least32_t *pOut, const unsigned dstPitch,
 				}
 			}
 
+//filters are unused by libsupergameboy
+#if 0
 			switch (pattern)
 			{
 				case 0:
@@ -2832,6 +2834,7 @@ static void filter(Gambatte::uint_least32_t *pOut, const unsigned dstPitch,
 				break;
 				}
 			}
+#endif
 			++pIn;
 			pOut += 2;
 		}

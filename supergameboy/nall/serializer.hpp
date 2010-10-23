@@ -112,6 +112,7 @@ namespace nall {
       imode = Size;
       idata = 0;
       isize = 0;
+      icapacity = 0;
     }
 
     serializer(unsigned capacity) {

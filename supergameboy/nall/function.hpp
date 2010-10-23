@@ -1,89 +1,59 @@
 #ifndef NALL_FUNCTION_HPP
 #define NALL_FUNCTION_HPP
 
-#include <functional>
-#include <type_traits>
-
 namespace nall {
   template<typename T> class function;
 
-  template<typename R, typename... P>
-  class function<R (P...)> {
-  private:
-    struct base1 { virtual void func1(P...) {} };
-    struct base2 { virtual void func2(P...) {} };
-    struct derived : base1, virtual base2 {};
+  template<typename R, typename... P> class function<R (P...)> {
+    struct container {
+      virtual R operator()(P... p) const = 0;
+      virtual container* copy() const = 0;
+      virtual ~container() {}
+    } *callback;
 
-    struct data_t {
-      R (*callback)(const data_t&, P...);
-      union {
-        R (*callback_global)(P...);
-        struct {
-          R (derived::*callback_member)(P...);
-          void *object;
-        };
-      };
-    } data;
+    struct global : container {
+      R (*function)(P...);
+      R operator()(P... p) const { return function(std::forward<P>(p)...); }
+      container* copy() const { return new global(function); }
+      global(R (*function)(P...)) : function(function) {}
+    };
 
-    static R callback_global(const data_t &data, P... p) {
-      return data.callback_global(p...);
-    }
+    template<typename C> struct member : container {
+      R (C::*function)(P...);
+      C *object;
+      R operator()(P... p) const { return (object->*function)(std::forward<P>(p)...); }
+      container* copy() const { return new member(function, object); }
+      member(R (C::*function)(P...), C *object) : function(function), object(object) {}
+    };
 
-    template<typename C>
-    static R callback_member(const data_t &data, P... p) {
-      return (((C*)data.object)->*((R (C::*&)(P...))data.callback_member))(p...);
-    }
+    template<typename L> struct lambda : container {
+      L object;
+      R operator()(P... p) const { return object(std::forward<P>(p)...); }
+      container* copy() const { return new lambda(object); }
+      lambda(const L& object) : object(object) {}
+    };
 
   public:
-    R operator()(P... p) const { return data.callback(data, p...); }
-    operator bool() const { return data.callback; }
-    void reset() { data.callback = 0; }
+    operator bool() const { return callback; }
+    R operator()(P... p) const { return (*callback)(std::forward<P>(p)...); }
+    void reset() { if(callback) { delete callback; callback = 0; } }
 
-    function& operator=(const function &source) { memcpy(&data, &source.data, sizeof(data_t)); return *this; }
+    function& operator=(const function &source) {
+      if(this != &source) {
+        if(callback) { delete callback; callback = 0; }
+        if(source.callback) callback = source.callback->copy();
+      }
+      return *this;
+    }
+
     function(const function &source) { operator=(source); }
-
-    //no pointer
-    function() {
-      data.callback = 0;
-    }
-
-    //symbolic link pointer (nall/dl.hpp::sym, etc)
-    function(void *callback) {
-      data.callback = callback ? &callback_global : 0;
-      data.callback_global = (R (*)(P...))callback;
-    }
-
-    //global function pointer
-    function(R (*callback)(P...)) {
-      data.callback = &callback_global;
-      data.callback_global = callback;
-    }
-
-    //member function pointer
-    template<typename C>
-    function(R (C::*callback)(P...), C *object) {
-      static_assert(sizeof data.callback_member >= sizeof callback, "callback_member is too small");
-      data.callback = &callback_member<C>;
-      (R (C::*&)(P...))data.callback_member = callback;
-      data.object = object;
-    }
-
-    //const member function pointer
-    template<typename C>
-    function(R (C::*callback)(P...) const, C *object) {
-      static_assert(sizeof data.callback_member >= sizeof callback, "callback_member is too small");
-      data.callback = &callback_member<C>;
-      (R (C::*&)(P...))data.callback_member = (R (C::*&)(P...))callback;
-      data.object = object;
-    }
-
-    //lambda function pointer
-    template<typename T>
-    function(T callback) {
-      static_assert(std::is_same<R, typename std::result_of<T(P...)>::type>::value, "lambda mismatch");
-      data.callback = &callback_global;
-      data.callback_global = (R (*)(P...))callback;
-    }
+    function() : callback(0) {}
+    function(void *function) : callback(0) { if(function) callback = new global((R (*)(P...))function); }
+    function(R (*function)(P...)) { callback = new global(function); }
+    template<typename C> function(R (C::*function)(P...), C *object) { callback = new member<C>(function, object); }
+    template<typename C> function(R (C::*function)(P...) const, C *object) { callback = new member<C>((R (C::*)(P...))function, object); }
+    template<typename L> function(const L& object) { callback = new lambda<L>(object); }
+    ~function() { if(callback) delete callback; }
   };
 }
 

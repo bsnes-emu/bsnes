@@ -164,7 +164,7 @@ void SuperGameBoy::serialize(nall::serializer &s) {
     s.array(savestate, 256 * 1024);
 
     file fp;
-    if(fp.open("supergameboy-state.tmp", file::mode_write)) {
+    if(fp.open("supergameboy-state.tmp", file::mode::write)) {
       fp.write(savestate, 256 * 1024);
       fp.close();
 
@@ -175,7 +175,7 @@ void SuperGameBoy::serialize(nall::serializer &s) {
     gambatte->saveState("supergameboy-state.tmp");
 
     file fp;
-    if(fp.open("supergameboy-state.tmp", file::mode_read)) {
+    if(fp.open("supergameboy-state.tmp", file::mode::read)) {
       fp.read(savestate, fp.size() < 256 * 1024 ? fp.size() : 256 * 1024);
       fp.close();
     }
