@@ -27,6 +27,7 @@ namespace phoenix {
 #include "checkbox.cpp"
 #include "combobox.cpp"
 #include "editbox.cpp"
+#include "hexeditor.cpp"
 #include "horizontalslider.cpp"
 #include "label.cpp"
 #include "listbox.cpp"

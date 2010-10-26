@@ -1,4 +1,4 @@
-ui_objects := ui-main ui-general ui-settings ui-tools ui-input ui-utility ui-cartridge
+ui_objects := ui-main ui-general ui-settings ui-tools ui-input ui-utility ui-cartridge ui-debugger
 ui_objects += ruby phoenix
 ui_objects += $(if $(call streq,$(platform),win),resource)
 
@@ -64,6 +64,7 @@ obj/ui-settings.o: $(ui)/settings/settings.cpp $(call rwildcard,$(ui)/*.hpp) $(c
 obj/ui-input.o: $(ui)/input/input.cpp $(call rwildcard,$(ui)/*.hpp) $(call rwildcard,$(ui)/input/*); $(phoenix_compile)
 obj/ui-utility.o: $(ui)/utility/utility.cpp $(call rwildcard,$(ui)/*.hpp) $(call rwildcard,$(ui)/utility/*); $(phoenix_compile)
 obj/ui-cartridge.o: $(ui)/cartridge/cartridge.cpp $(call rwildcard,$(ui)/*.hpp) $(call rwildcard,$(ui)/cartridge/*); $(phoenix_compile)
+obj/ui-debugger.o: $(ui)/debugger/debugger.cpp $(call rwildcard,$(ui)/*.hpp) $(call rwildcard,$(ui)/debugger/*); $(phoenix_compile)
 
 obj/ruby.o: ruby/ruby.cpp $(call rwildcard,ruby/*)
 	$(call compile,$(rubydef) $(rubyflags))

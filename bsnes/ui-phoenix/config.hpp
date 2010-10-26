@@ -12,6 +12,7 @@ struct Configuration : public configuration {
     string driver;
     bool synchronize;
     bool smooth;
+    string filter;
     string shader;
     bool region;
     unsigned scale;

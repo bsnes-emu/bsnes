@@ -58,6 +58,11 @@ void FileBrowser::fileOpen(FileBrowser::Mode requestedMode, function<void (strin
       filters.append(".sgb");
       break;
     }
+    case Mode::Filter: {
+      setTitle("Load Video Filter");
+      filters.append(".filter");
+      break;
+    }
     case Mode::Shader: {
       setTitle("Load Pixel Shader");
       filters.append(".shader");

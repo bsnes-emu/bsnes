@@ -9,7 +9,7 @@ public:
 
   inline snes_information(const uint8_t *data, unsigned size);
 
-private:
+//private:
   inline void read_header(const uint8_t *data, unsigned size);
   inline unsigned find_header(const uint8_t *data, unsigned size);
   inline unsigned score_header(const uint8_t *data, unsigned size, unsigned addr);
@@ -556,6 +556,11 @@ void snes_information::read_header(const uint8_t *data, unsigned size) {
       type = TypeGameBoy;
       return;
     }
+  }
+
+  if(size < 32768) {
+    type = TypeUnknown;
+    return;
   }
 
   const unsigned index = find_header(data, size);

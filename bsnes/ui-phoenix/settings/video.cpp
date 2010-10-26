@@ -23,6 +23,15 @@ void VideoSettings::create() {
 
   gammaRampCheck.create  (*this, x,       y, 430, Style::CheckBoxHeight, "Enable NTSC gamma ramp simulation"); y += Style::CheckBoxHeight + 5;
 
+  filterLabel.create(*this, x, y, 340, Style::LabelHeight, "Video Filter :."); y += Style::LabelHeight + 5;
+  filterLabel.setFont(application.proportionalFontBold);
+
+  filterPath.create(*this, x, y, 430 - height - height - 10, height);
+  filterPath.setEditable(false);
+  filterPath.setText(config.video.filter);
+  filterClear.create(*this, x + 430 - height - height - 5, y, height, height, "");
+  filterSelect.create(*this, x + 430 - height, y, height, height, "..."); y += height + 5;
+
   shaderLabel.create(*this, x, y, 340, Style::LabelHeight, "Pixel Shader :."); y += Style::LabelHeight + 5;
   shaderLabel.setFont(application.proportionalFontBold);
 
@@ -41,6 +50,20 @@ void VideoSettings::create() {
 
   contrastSlider.onChange = brightnessSlider.onChange = gammaSlider.onChange = gammaRampCheck.onTick =
   { &VideoSettings::adjust, this };
+
+  filterClear.onTick = []() {
+    config.video.filter = "";
+    videoSettings.filterPath.setText(config.video.filter);
+    utility.setFilter();
+  };
+
+  filterSelect.onTick = []() {
+    fileBrowser.fileOpen(FileBrowser::Mode::Filter, [](string filename) {
+      config.video.filter = filename;
+      videoSettings.filterPath.setText(config.video.filter);
+      utility.setFilter();
+    });
+  };
 
   shaderClear.onTick = []() {
     config.video.shader = "";

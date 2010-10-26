@@ -29,15 +29,21 @@ struct TopLevelWindow : Window {
 #include "utility/utility.hpp"
 #include "cartridge/cartridge.hpp"
 
+#if defined(DEBUGGER)
+  #include "debugger/debugger.hpp"
+#endif
+
 struct Application {
   Font proportionalFont;
   Font proportionalFontBold;
   Font monospaceFont;
 
+  bool pause;
   bool quit;
   void main(int argc, char **argv);
 
   void addWindow(TopLevelWindow *window, const string &name, const string &position);
+  Application();
 
 private:
   array<TopLevelWindow*> windows;

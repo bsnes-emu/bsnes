@@ -3,7 +3,9 @@
 
 namespace nall {
 
-// "foo/bar.c" -> "foo/", "bar.c" -> "./"
+// "foo/bar.c" -> "foo/"
+// "foo/" -> "foo/"
+// "bar.c" -> "./"
 inline string dir(char const *name) {
   string result = name;
   for(signed i = strlen(result); i >= 0; i--) {

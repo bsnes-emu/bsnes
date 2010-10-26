@@ -11,6 +11,7 @@
 #endif
 
 #include <nall/stdint.hpp>
+#include <nall/string.hpp>
 #include <nall/utf8.hpp>
 #include <nall/utility.hpp>
 
@@ -25,12 +26,12 @@ namespace nall {
 
   class file {
   public:
-    enum FileMode { mode_read, mode_write, mode_readwrite, mode_writeread };
-    enum SeekMode { seek_absolute, seek_relative };
+    enum class mode : unsigned { read, write, readwrite, writeread };
+    enum class index : unsigned { absolute, relative };
 
     uint8_t read() {
       if(!fp) return 0xff;                       //file not open
-      if(file_mode == mode_write) return 0xff;   //reads not permitted
+      if(file_mode == mode::write) return 0xff;  //reads not permitted
       if(file_offset >= file_size) return 0xff;  //cannot read past end of file
       buffer_sync();
       return buffer[(file_offset++) & buffer_mask];
@@ -58,8 +59,8 @@ namespace nall {
     }
 
     void write(uint8_t data) {
-      if(!fp) return;                     //file not open
-      if(file_mode == mode_read) return;  //writes not permitted
+      if(!fp) return;                      //file not open
+      if(file_mode == mode::read) return;  //writes not permitted
       buffer_sync();
       buffer[(file_offset++) & buffer_mask] = data;
       buffer_dirty = true;
@@ -83,9 +84,10 @@ namespace nall {
       while(length--) write(*buffer++);
     }
 
-    void print(const char *string) {
-      if(!string) return;
-      while(*string) write(*string++);
+    template<typename... Args> void print(Args... args) {
+      string data(args...);
+      const char *p = data;
+      while(*p) write(*p++);
     }
 
     void flush() {
@@ -93,19 +95,19 @@ namespace nall {
       fflush(fp);
     }
 
-    void seek(int offset, SeekMode mode = seek_absolute) {
+    void seek(int offset, index index_ = index::absolute) {
       if(!fp) return;  //file not open
       buffer_flush();
 
       uintmax_t req_offset = file_offset;
-      switch(mode) {
-        case seek_absolute: req_offset  = offset; break;
-        case seek_relative: req_offset += offset; break;
+      switch(index_) {
+        case index::absolute: req_offset  = offset; break;
+        case index::relative: req_offset += offset; break;
       }
 
       if(req_offset < 0) req_offset = 0;  //cannot seek before start of file
       if(req_offset > file_size) {
-        if(file_mode == mode_read) {      //cannot seek past end of file
+        if(file_mode == mode::read) {     //cannot seek past end of file
           req_offset = file_size;
         } else {                          //pad file to requested location
           file_offset = file_size;
@@ -172,20 +174,20 @@ namespace nall {
       return fp;
     }
 
-    bool open(const char *fn, FileMode mode) {
+    bool open(const char *fn, mode mode_) {
       if(fp) return false;
 
-      switch(file_mode = mode) {
+      switch(file_mode = mode_) {
         #if !defined(_WIN32)
-        case mode_read:      fp = fopen(fn, "rb");  break;
-        case mode_write:     fp = fopen(fn, "wb+"); break;  //need read permission for buffering
-        case mode_readwrite: fp = fopen(fn, "rb+"); break;
-        case mode_writeread: fp = fopen(fn, "wb+"); break;
+        case mode::read:      fp = fopen(fn, "rb");  break;
+        case mode::write:     fp = fopen(fn, "wb+"); break;  //need read permission for buffering
+        case mode::readwrite: fp = fopen(fn, "rb+"); break;
+        case mode::writeread: fp = fopen(fn, "wb+"); break;
         #else
-        case mode_read:      fp = _wfopen(utf16_t(fn), L"rb");  break;
-        case mode_write:     fp = _wfopen(utf16_t(fn), L"wb+"); break;
-        case mode_readwrite: fp = _wfopen(utf16_t(fn), L"rb+"); break;
-        case mode_writeread: fp = _wfopen(utf16_t(fn), L"wb+"); break;
+        case mode::read:      fp = _wfopen(utf16_t(fn), L"rb");  break;
+        case mode::write:     fp = _wfopen(utf16_t(fn), L"wb+"); break;
+        case mode::readwrite: fp = _wfopen(utf16_t(fn), L"rb+"); break;
+        case mode::writeread: fp = _wfopen(utf16_t(fn), L"wb+"); break;
         #endif
       }
       if(!fp) return false;
@@ -211,7 +213,7 @@ namespace nall {
       fp = 0;
       file_offset = 0;
       file_size = 0;
-      file_mode = mode_read;
+      file_mode = mode::read;
     }
 
     ~file() {
@@ -229,7 +231,7 @@ namespace nall {
     FILE *fp;
     unsigned file_offset;
     unsigned file_size;
-    FileMode file_mode;
+    mode file_mode;
 
     void buffer_sync() {
       if(!fp) return;  //file not open
@@ -243,14 +245,14 @@ namespace nall {
     }
 
     void buffer_flush() {
-      if(!fp) return;                     //file not open
-      if(file_mode == mode_read) return;  //buffer cannot be written to
-      if(buffer_offset < 0) return;       //buffer unused
-      if(buffer_dirty == false) return;   //buffer unmodified since read
+      if(!fp) return;                      //file not open
+      if(file_mode == mode::read) return;  //buffer cannot be written to
+      if(buffer_offset < 0) return;        //buffer unused
+      if(buffer_dirty == false) return;    //buffer unmodified since read
       fseek(fp, buffer_offset, SEEK_SET);
       unsigned length = (buffer_offset + buffer_size) <= file_size ? buffer_size : (file_size & buffer_mask);
       if(length) unsigned unused = fwrite(buffer, 1, length, fp);
-      buffer_offset = -1;                 //invalidate buffer
+      buffer_offset = -1;                  //invalidate buffer
       buffer_dirty = false;
     }
   };

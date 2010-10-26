@@ -1,12 +1,19 @@
-#include "pixellate2x.hpp"
+#include <nall/platform.hpp>
+#include <nall/stdint.hpp>
+using namespace nall;
 
-void Pixellate2xFilter::size(unsigned &outwidth, unsigned &outheight, unsigned width, unsigned height) {
-  outwidth  = (width  <= 256) ? width  * 2 : width;
-  outheight = (height <= 240) ? height * 2 : height;
+extern "C" {
+  void filter_size(unsigned&, unsigned&);
+  void filter_render(uint32_t*, uint32_t*, unsigned, const uint16_t*, unsigned, unsigned, unsigned);
+};
+
+dllexport void filter_size(unsigned &width, unsigned &height) {
+  width  = (width  <= 256) ? width  * 2 : width;
+  height = (height <= 240) ? height * 2 : height;
 }
 
-void Pixellate2xFilter::render(
-  uint32_t *output, unsigned outpitch,
+dllexport void filter_render(
+  uint32_t *colortable, uint32_t *output, unsigned outpitch,
   const uint16_t *input, unsigned pitch, unsigned width, unsigned height
 ) {
   pitch >>= 1;

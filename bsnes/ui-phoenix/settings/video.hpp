@@ -10,6 +10,12 @@ struct VideoSettings : TopLevelWindow {
   Label gammaValue;
   HorizontalSlider gammaSlider;
   CheckBox gammaRampCheck;
+
+  Label filterLabel;
+  TextBox filterPath;
+  Button filterClear;
+  Button filterSelect;
+
   Label shaderLabel;
   TextBox shaderPath;
   Button shaderClear;

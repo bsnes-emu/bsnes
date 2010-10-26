@@ -23,7 +23,7 @@ namespace nall {
       return ::write(port, (void*)data, length);
     }
 
-    bool open(const char *portname, unsigned rate) {
+    bool open(const char *portname, unsigned rate, bool flowcontrol) {
       close();
 
       port = ::open(portname, O_RDWR | O_NOCTTY | O_NDELAY | O_NONBLOCK);
@@ -41,8 +41,13 @@ namespace nall {
       attr.c_iflag &=~ (BRKINT | PARMRK | INPCK | ISTRIP | INLCR | IGNCR | ICRNL | IXON | IXOFF | IXANY);
       attr.c_iflag |=  (IGNBRK | IGNPAR);
       attr.c_oflag &=~ (OPOST);
-      attr.c_cflag &=~ (CSIZE | CSTOPB | PARENB);
-      attr.c_cflag |=  (CS8 | CREAD | CLOCAL);
+      attr.c_cflag &=~ (CSIZE | CSTOPB | PARENB | CLOCAL);
+      attr.c_cflag |=  (CS8 | CREAD);
+      if(flowcontrol == false) {
+        attr.c_cflag &= ~CRTSCTS;
+      } else {
+        attr.c_cflag |=  CRTSCTS;
+      }
       attr.c_cc[VTIME] = attr.c_cc[VMIN] = 0;
 
       if(tcsetattr(port, TCSANOW, &attr) == -1) { close(); return false; }

@@ -1,89 +1,51 @@
 include nall/Makefile
 
-qtlibs := QtCore QtGui
-include nall/qt/Makefile
+c       := $(compiler) -std=gnu99
+cpp     := $(subst cc,++,$(compiler)) -std=gnu++0x
+flags   := -O3 -I. -Iobj -fomit-frame-pointer -fPIC
+link    := -s
+objects :=
 
-c     := $(compiler) -std=gnu99
-cpp   := $(subst cc,++,$(compiler)) -std=gnu++0x
-flags := -O3 -I. -Iobj -fomit-frame-pointer $(qtinc)
-link  :=
+objects += out/pixellate2x.filter
+objects += out/scanline-00.filter
+objects += out/scanline-25.filter
+objects += out/scanline-50.filter
+objects += out/scanline-75.filter
+objects += out/scale2x.filter
+objects += out/2xsai.filter
+objects += out/super-2xsai.filter
+objects += out/super-eagle.filter
+objects += out/lq2x.filter
+objects += out/hq2x.filter
+objects += out/ntsc-rf.filter
+objects += out/ntsc-composite.filter
+objects += out/ntsc-svideo.filter
+objects += out/ntsc-rgb.filter
 
-ifeq ($(platform),x)
-  flags := -fPIC -fopenmp $(flags)
-  link += -s -fopenmp -lpthread -lgomp
-else ifeq ($(platform),osx)
-  flags := -fPIC -fopenmp $(flags)
-  link += -fopenmp -lpthread -lgomp
-else ifeq ($(platform),win)
-  flags := -fopenmp $(flags)
-  link += -fopenmp -lpthread
-endif
+compile = $(cpp) $(link) $(flags) -o $@ -shared $<
 
-objects := snesfilter
-
-compile = \
-  $(strip \
-    $(if $(filter %.c,$<), \
-      $(c) $(flags) $1 -c $< -o $@, \
-      $(if $(filter %.cpp,$<), \
-        $(cpp) $(flags) $1 -c $< -o $@ \
-      ) \
-    ) \
-  )
-
-%.o: $<; $(call compile)
+%.filter: $<; $(call compile)
 
 all: build;
 
-objects := $(patsubst %,obj/%.o,$(objects))
-moc_headers := $(call rwildcard,./,%.moc.hpp)
-moc_objects := $(foreach f,$(moc_headers),obj/$(notdir $(patsubst %.moc.hpp,%.moc,$f)))
+out/pixellate2x.filter: pixellate2x/pixellate2x.cpp pixellate2x/*
+out/scanline-00.filter: scanline/scanline-00.cpp scanline/*
+out/scanline-25.filter: scanline/scanline-25.cpp scanline/*
+out/scanline-50.filter: scanline/scanline-50.cpp scanline/*
+out/scanline-75.filter: scanline/scanline-75.cpp scanline/*
+out/scale2x.filter: scale2x/scale2x.cpp scale2x/*
+out/2xsai.filter: 2xsai/2xsai.cpp 2xsai/*
+out/super-2xsai.filter: 2xsai/super-2xsai.cpp 2xsai/*
+out/super-eagle.filter: 2xsai/super-eagle.cpp 2xsai/*
+out/lq2x.filter: lq2x/lq2x.cpp lq2x/*
+out/hq2x.filter: hq2x/hq2x.cpp hq2x/*
+out/ntsc-rf.filter: ntsc/ntsc-rf.cpp ntsc/*
+out/ntsc-composite.filter: ntsc/ntsc-composite.cpp ntsc/*
+out/ntsc-svideo.filter: ntsc/ntsc-svideo.cpp ntsc/*
+out/ntsc-rgb.filter: ntsc/ntsc-rgb.cpp ntsc/*
 
-# automatically run moc on all .moc.hpp (MOC header) files
-%.moc: $<; $(moc) -i $< -o $@
-
-# automatically generate %.moc build rules
-__list = $(moc_headers)
-$(foreach f,$(moc_objects), \
-  $(eval __file = $(word 1,$(__list))) \
-  $(eval __list = $(wordlist 2,$(words $(__list)),$(__list))) \
-  $(eval $f: $(__file)) \
-)
-
-##################
-### snesfilter ###
-##################
-
-obj/snesfilter.o: snesfilter.cpp *
-
-###############
-### targets ###
-###############
-
-build: $(moc_objects) $(objects)
-ifeq ($(platform),x)
-	ar rcs libsnesfilter.a $(objects)
-	$(cpp) $(link) -o libsnesfilter.so -shared -Wl,-soname,libsnesfilter.so.1 $(objects) $(qtlib)
-else ifeq ($(platform),osx)
-	ar rcs libsnesfilter.a $(objects)
-	$(cpp) $(link) -o libsnesfilter.dylib -shared -dynamiclib $(objects) $(qtlib)
-else ifeq ($(platform),win)
-	$(cpp) $(link) -o snesfilter.dll -shared -Wl,--out-implib,libsnesfilter.a $(objects) $(qtlib)
-endif
+build: $(objects)
 
 install:
-ifeq ($(platform),x)
-	install -D -m 755 libsnesfilter.a $(DESTDIR)$(prefix)/lib
-	install -D -m 755 libsnesfilter.so $(DESTDIR)$(prefix)/lib
-	ldconfig -n $(DESTDIR)$(prefix)/lib
-else ifeq ($(platform),osx)
-	cp libsnesfilter.dylib /usr/local/lib/libsnesfilter.dylib
-endif
 
 clean:
-	-@$(call delete,obj/*.o)
-	-@$(call delete,obj/*.moc)
-	-@$(call delete,libsnesfilter.a)
-	-@$(call delete,libsnesfilter.so)
-	-@$(call delete,libsnesfilter.dylib)
-	-@$(call delete,snesfilter.dll)

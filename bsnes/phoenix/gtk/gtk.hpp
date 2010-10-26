@@ -159,6 +159,24 @@ struct EditBox : Widget {
   void setText(const nall::string &text);
 };
 
+struct HexEditor : Widget {
+  nall::function<uint8_t (unsigned)> onRead;
+  nall::function<void (unsigned, uint8_t)> onWrite;
+  void create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height);
+  void setSize(unsigned size);
+  void setOffset(unsigned offset);
+  void setColumns(unsigned columns);
+  void setRows(unsigned rows);
+  void update();
+  HexEditor();
+//private:
+  struct Data;
+  Data *hexEditor;
+  bool keyPress(unsigned scancode);
+  unsigned cursorPosition();
+  void setCursorPosition(unsigned position);
+};
+
 struct HorizontalSlider : Widget {
   nall::function<void ()> onChange;
   void create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, unsigned length);

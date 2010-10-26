@@ -28,6 +28,11 @@ void InputMapper::poll_hotkeys(unsigned scancode, int16_t value) {
       utility.showMessage({ "Slot ", activeSlot, " selected" });
     }
 
+    //pause
+    if(scancode == keyboard(0)[Keyboard::P]) {
+      application.pause = !application.pause;
+    }
+
     //fast forward
     if(scancode == keyboard(0)[Keyboard::Tilde]) {
       videoSync = config.video.synchronize;

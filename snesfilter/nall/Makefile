@@ -29,10 +29,12 @@ ifeq ($(platform),)
 endif
 
 ifeq ($(compiler),)
-  ifeq ($(platform),osx)
-    compiler := gcc-mp-4.4
-  else
+  ifeq ($(platform),win)
     compiler := gcc
+  else ifeq ($(platform),osx)
+    compiler := gcc-mp-4.5
+  else
+    compiler := gcc-4.5
   endif
 endif
 

@@ -18,6 +18,7 @@ void Configuration::create() {
   attach(video.driver = "", "video.driver");
   attach(video.synchronize = false, "video.synchronize");
   attach(video.smooth = true, "video.smooth");
+  attach(video.filter = "", "video.filter");
   attach(video.shader = "", "video.shader");
   attach(video.region = 0, "video.region");
   attach(video.scale = 2, "video.scale");

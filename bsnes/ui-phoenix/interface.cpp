@@ -1,4 +1,5 @@
 Palette palette;
+Filter filter;
 Interface interface;
 
 const uint8_t Palette::gammaRamp[32] = {
@@ -63,6 +64,20 @@ void Palette::update() {
   }
 }
 
+void Filter::size(unsigned &width, unsigned &height) {
+  if(opened() && dl_size) return dl_size(width, height);
+}
+
+void Filter::render(uint32_t *output, unsigned outpitch, const uint16_t *input, unsigned pitch, unsigned width, unsigned height) {
+  if(opened() && dl_render) return dl_render(palette.color, output, outpitch, input, pitch, width, height);
+
+  for(unsigned y = 0; y < height; y++) {
+    uint32_t *outputLine = output + y * (outpitch >> 2);
+    const uint16_t *inputLine = input + y * (pitch >> 1);
+    for(unsigned x = 0; x < width; x++) *outputLine++ = palette.color[*inputLine++];
+  }
+}
+
 void Interface::video_refresh(const uint16_t *data, unsigned width, unsigned height) {
   bool interlace = (height >= 240);
   bool overscan = (height == 239 || height == 478);
@@ -85,12 +100,11 @@ void Interface::video_refresh(const uint16_t *data, unsigned width, unsigned hei
     if(height == 448) height = 478;
   }
 
-  if(video.lock(buffer, outpitch, width, height)) {
-    for(unsigned y = 0; y < height; y++) {
-      uint32_t *output = buffer + y * (outpitch >> 2);
-      const uint16_t *input = data + y * (inpitch >> 1);
-      for(unsigned x = 0; x < width; x++) *output++ = palette.color[*input++];
-    }
+  unsigned outwidth = width, outheight = height;
+  filter.size(outwidth, outheight);
+
+  if(video.lock(buffer, outpitch, outwidth, outheight)) {
+    filter.render(buffer, outpitch, data, inpitch, width, height);
     video.unlock();
     video.refresh();
   }

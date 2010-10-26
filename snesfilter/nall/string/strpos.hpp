@@ -7,7 +7,7 @@
 
 namespace nall {
 
-optional<unsigned> inline strpos(const char *str, const char *key) {
+optional<unsigned> strpos(const char *str, const char *key) {
   unsigned ssl = strlen(str), ksl = strlen(key);
   if(ksl > ssl) return { false, 0 };
 
@@ -18,7 +18,7 @@ optional<unsigned> inline strpos(const char *str, const char *key) {
   return { false, 0 };
 }
 
-optional<unsigned> inline qstrpos(const char *str, const char *key) {
+optional<unsigned> qstrpos(const char *str, const char *key) {
   unsigned ssl = strlen(str), ksl = strlen(key);
   if(ksl > ssl) return { false, 0 };
 

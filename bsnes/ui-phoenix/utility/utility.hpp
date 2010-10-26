@@ -6,6 +6,7 @@ struct Utility : property<Utility> {
 
   void setControllers();
   void setScale(unsigned scale = 0);
+  void setFilter();
   void setShader();
 
   void cartridgeLoaded();

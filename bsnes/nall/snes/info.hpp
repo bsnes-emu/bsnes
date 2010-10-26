@@ -558,6 +558,11 @@ void snes_information::read_header(const uint8_t *data, unsigned size) {
     }
   }
 
+  if(size < 32768) {
+    type = TypeUnknown;
+    return;
+  }
+
   const unsigned index = find_header(data, size);
   const uint8_t mapperid = data[index + Mapper];
   const uint8_t rom_type = data[index + RomType];

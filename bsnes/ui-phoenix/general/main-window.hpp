@@ -63,6 +63,8 @@ struct MainWindow : TopLevelWindow {
   MenuSeparator toolsSeparator2;
   MenuItem toolsCheatEditor;
   MenuItem toolsStateManager;
+  MenuSeparator toolsSeparator3;
+  MenuItem toolsDebugger;
   Menu help;
   MenuItem helpAbout;
   Viewport viewport;

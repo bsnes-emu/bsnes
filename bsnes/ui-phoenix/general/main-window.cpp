@@ -96,6 +96,10 @@ void MainWindow::create() {
   toolsSeparator2.create(tools);
   toolsCheatEditor.create(tools, "Cheat Editor ...");
   toolsStateManager.create(tools, "State Manager ...");
+  #if defined(DEBUGGER)
+  toolsSeparator3.create(tools);
+  toolsDebugger.create(tools, "Debugger ...");
+  #endif
 
   help.create(*this, "Help");
   helpAbout.create(help, "About ...");
@@ -191,6 +195,10 @@ void MainWindow::create() {
 
   toolsCheatEditor.onTick = []() { cheatEditor.setVisible(); };
   toolsStateManager.onTick = []() { stateManager.setVisible(); };
+
+  #if defined(DEBUGGER)
+  toolsDebugger.onTick = []() { debugger.setVisible(); };
+  #endif
 
   helpAbout.onTick = []() {
     MessageWindow::information(mainWindow, {
