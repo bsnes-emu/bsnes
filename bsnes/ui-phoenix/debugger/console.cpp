@@ -9,11 +9,11 @@ void Console::create() {
   output.setFont(application.monospaceFont);
   output.setEditable(false);
 
-  traceToConsole.create(*this, x, y, 120, Style::CheckBoxHeight, "Trace to console"); y += Style::CheckBoxHeight + 5;
+  traceToConsole.create(*this, x, y, 120, Style::CheckBoxHeight, "Trace to console"); y += Style::CheckBoxHeight;
   traceToConsole.setChecked(true);
-  traceToDisk.create(*this, x, y, 120, Style::CheckBoxHeight, "Trace to disk"); y += Style::CheckBoxHeight + 5;
+  traceToDisk.create(*this, x, y, 120, Style::CheckBoxHeight, "Trace to disk"); y += Style::CheckBoxHeight;
   traceToDisk.setEnabled(false);
-  traceCPU.create(*this, x, y, 120, Style::CheckBoxHeight, "Trace S-CPU"); y += Style::CheckBoxHeight + 5;
+  traceCPU.create(*this, x, y, 120, Style::CheckBoxHeight, "Trace S-CPU"); y += Style::CheckBoxHeight;
   traceCPU.setChecked(true);
 
   setGeometry(0, 0, 775, 338);

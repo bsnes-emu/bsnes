@@ -23,6 +23,7 @@ struct MainWindow : TopLevelWindow {
   MenuRadioItem systemPort2SuperScope;
   MenuRadioItem systemPort2Justifier;
   MenuRadioItem systemPort2Justifiers;
+
   Menu settings;
   Menu settingsVideoMode;
   MenuRadioItem settingsVideoMode1x;
@@ -45,6 +46,7 @@ struct MainWindow : TopLevelWindow {
   MenuItem settingsAudio;
   MenuItem settingsInput;
   MenuItem settingsAdvanced;
+
   Menu tools;
   Menu toolsStateSave;
   MenuItem toolsStateSave1;
@@ -63,10 +65,14 @@ struct MainWindow : TopLevelWindow {
   MenuSeparator toolsSeparator2;
   MenuItem toolsCheatEditor;
   MenuItem toolsStateManager;
+  #if defined(DEBUGGER)
   MenuSeparator toolsSeparator3;
   MenuItem toolsDebugger;
+  #endif
+
   Menu help;
   MenuItem helpAbout;
+
   Viewport viewport;
 
   void create();

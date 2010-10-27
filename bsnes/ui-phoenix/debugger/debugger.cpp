@@ -1,6 +1,8 @@
 #include "../base.hpp"
 #if defined(DEBUGGER)
 
+#include <nall/snes/cpu.hpp>
+
 #include "console.cpp"
 #include "cpu/debugger.cpp"
 Debugger debugger;
@@ -13,8 +15,8 @@ void Debugger::create() {
   application.addWindow(this, "Debugger", "160,160");
 
   unsigned x = 5, y = 5;
-  enableDebugger.create(*this, x, y, 390, Style::CheckBoxHeight, "Enable debugger"); y += Style::CheckBoxHeight + 5;
-  showMemoryEditor.create(*this, x, y, 390, Style::CheckBoxHeight, "Memory editor"); y += Style::CheckBoxHeight + 5;
+  enableDebugger.create(*this, x, y, 390, Style::CheckBoxHeight, "Enable debugger"); y += Style::CheckBoxHeight;
+  showMemoryEditor.create(*this, x, y, 390, Style::CheckBoxHeight, "Memory editor"); y += Style::CheckBoxHeight;
 
   setGeometry(0, 0, 400, y);
 
