@@ -3,11 +3,13 @@ struct Console : TopLevelWindow {
   CheckBox traceToConsole;
   CheckBox traceToDisk;
   CheckBox traceCPU;
+  CheckBox traceSMP;
 
   string buffer;
 
   void create();
   void eventTraceCPU();
+  void eventTraceSMP();
 };
 
 extern Console console;

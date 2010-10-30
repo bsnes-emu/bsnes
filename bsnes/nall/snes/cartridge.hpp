@@ -1,13 +1,12 @@
-#ifndef NALL_SNES_INFO_HPP
-#define NALL_SNES_INFO_HPP
+#ifndef NALL_SNES_CARTRIDGE_HPP
+#define NALL_SNES_CARTRIDGE_HPP
 
 namespace nall {
 
-class snes_information {
+class SNESCartridge {
 public:
-  string xml_memory_map;
-
-  inline snes_information(const uint8_t *data, unsigned size);
+  string xmlMemoryMap;
+  inline SNESCartridge(const uint8_t *data, unsigned size);
 
 //private:
   inline void read_header(const uint8_t *data, unsigned size);
@@ -106,20 +105,20 @@ public:
   bool has_st018;
 };
 
-snes_information::snes_information(const uint8_t *data, unsigned size) {
+SNESCartridge::SNESCartridge(const uint8_t *data, unsigned size) {
   read_header(data, size);
 
   string xml = "<?xml version='1.0' encoding='UTF-8'?>\n";
 
   if(type == TypeBsx) {
     xml << "<cartridge/>";
-    xml_memory_map = xml;
+    xmlMemoryMap = xml;
     return;
   }
 
   if(type == TypeSufamiTurbo) {
     xml << "<cartridge/>";
-    xml_memory_map = xml;
+    xmlMemoryMap = xml;
     return;
   }
 
@@ -129,7 +128,7 @@ snes_information::snes_information(const uint8_t *data, unsigned size) {
       xml << "  <ram size='" << strhex(gameboy_ram_size(data, size)) << "'/>\n";
     }
     xml << "</cartridge>\n";
-    xml_memory_map = xml;
+    xmlMemoryMap = xml;
     return;
   }
 
@@ -518,10 +517,10 @@ snes_information::snes_information(const uint8_t *data, unsigned size) {
   }
 
   xml << "</cartridge>\n";
-  xml_memory_map = xml;
+  xmlMemoryMap = xml;
 }
 
-void snes_information::read_header(const uint8_t *data, unsigned size) {
+void SNESCartridge::read_header(const uint8_t *data, unsigned size) {
   type        = TypeUnknown;
   mapper      = LoROM;
   dsp1_mapper = DSP1Unmapped;
@@ -749,7 +748,7 @@ void snes_information::read_header(const uint8_t *data, unsigned size) {
   }
 }
 
-unsigned snes_information::find_header(const uint8_t *data, unsigned size) {
+unsigned SNESCartridge::find_header(const uint8_t *data, unsigned size) {
   unsigned score_lo = score_header(data, size, 0x007fc0);
   unsigned score_hi = score_header(data, size, 0x00ffc0);
   unsigned score_ex = score_header(data, size, 0x40ffc0);
@@ -764,7 +763,7 @@ unsigned snes_information::find_header(const uint8_t *data, unsigned size) {
   }
 }
 
-unsigned snes_information::score_header(const uint8_t *data, unsigned size, unsigned addr) {
+unsigned SNESCartridge::score_header(const uint8_t *data, unsigned size, unsigned addr) {
   if(size < addr + 64) return 0;  //image too small to contain header at this location?
   int score = 0;
 
@@ -845,7 +844,7 @@ unsigned snes_information::score_header(const uint8_t *data, unsigned size, unsi
   return score;
 }
 
-unsigned snes_information::gameboy_ram_size(const uint8_t *data, unsigned size) {
+unsigned SNESCartridge::gameboy_ram_size(const uint8_t *data, unsigned size) {
   if(size < 512) return 0;
   switch(data[0x0149]) {
     case 0x00: return   0 * 1024;
@@ -858,7 +857,7 @@ unsigned snes_information::gameboy_ram_size(const uint8_t *data, unsigned size) 
   }
 }
 
-bool snes_information::gameboy_has_rtc(const uint8_t *data, unsigned size) {
+bool SNESCartridge::gameboy_has_rtc(const uint8_t *data, unsigned size) {
   if(size < 512) return false;
   if(data[0x0147] == 0x0f ||data[0x0147] == 0x10) return true;
   return false;

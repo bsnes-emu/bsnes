@@ -1,8 +1,8 @@
-CPUdebugger cpuDebugger;
+SMPDebugger smpDebugger;
 
-void CPUdebugger::create() {
-  Window::create(0, 0, 256, 256, "CPU Debugger");
-  application.addWindow(this, "Debugger.CPUdebugger", "192,192");
+void SMPDebugger::create() {
+  Window::create(0, 0, 256, 256, "SMP Debugger");
+  application.addWindow(this, "Debugger.SMPDebugger", "192,192");
 
   unsigned x = 5, y = 5;
   output.create(*this, x, y, 400, 200); x += 400 + 5;
@@ -17,21 +17,21 @@ void CPUdebugger::create() {
   setGeometry(0, 0, 490, 205);
 
   onClose = []() {
-    debugger.showCPUDebugger.setChecked(false);
+    debugger.showSMPDebugger.setChecked(false);
     return true;
   };
 
   stepInto.onTick = []() {
-    SNES::debugger.step_cpu = true;
-    debugger.debugMode = Debugger::DebugMode::StepIntoCPU;
+    SNES::debugger.step_smp = true;
+    debugger.debugMode = Debugger::DebugMode::StepIntoSMP;
   };
 
-  stepOver.onTick = { &CPUdebugger::eventStepOver, this };
+  stepOver.onTick = { &SMPDebugger::eventStepOver, this };
 }
 
-void CPUdebugger::refreshDisassembly() {
-  unsigned addr = SNES::cpu.regs.pc;
-  uint8_t *usage = SNES::cpu.usage;
+void SMPDebugger::refreshDisassembly() {
+  uint16_t addr = SNES::smp.regs.pc;
+  uint8_t *usage = SNES::smp.usage;
 
   signed offset[15];
   foreach(n, offset) n = -1;
@@ -43,8 +43,8 @@ void CPUdebugger::refreshDisassembly() {
     signed base = offset[n + 1];
     if(base == -1) break;
 
-    for(unsigned r = 1; r <= 4; r++) {
-      if(usage[(base - r) & 0xffffff] & 0x20) {
+    for(unsigned r = 1; r <= 3; r++) {
+      if(usage[(base - r) & 0xffff] & 0x20) {
         offset[n] = base - r;
         break;
       }
@@ -56,8 +56,8 @@ void CPUdebugger::refreshDisassembly() {
     signed base = offset[n - 1];
     if(base == -1) break;
 
-    for(unsigned r = 1; r <= 4; r++) {
-      if(usage[(base + r) & 0xffffff] & 0x20) {
+    for(unsigned r = 1; r <= 3; r++) {
+      if(usage[(base + r) & 0xffff] & 0x20) {
         offset[n] = base + r;
         break;
       }
@@ -70,12 +70,11 @@ void CPUdebugger::refreshDisassembly() {
     if(offset[n] == -1) {
       buffer.append("...\n");
     } else {
-      unsigned addr = offset[n];
-      buffer.append(strhex<6>(addr));
+      uint16_t addr = offset[n];
+      buffer.append(strhex<4>(addr));
       buffer.append(" ");
-      string text = SNESCPU::disassemble(
-        addr, usage[addr] & 2, usage[addr] & 1,
-        read(addr + 0), read(addr + 1), read(addr + 2), read(addr + 3)
+      string text = SNESSMP::disassemble(
+        addr, read(addr + 0), read(addr + 1), read(addr + 2)
       );
 
       buffer.append(text);
@@ -86,18 +85,18 @@ void CPUdebugger::refreshDisassembly() {
   output.setText(buffer);
 }
 
-void CPUdebugger::eventStepInto() {
-  SNES::debugger.step_cpu = false;
+void SMPDebugger::eventStepInto() {
+  SNES::debugger.step_smp = false;
   refreshDisassembly();
 }
 
-void CPUdebugger::eventStepOver() {
-  uint8_t opcode = read(SNES::cpu.regs.pc);
-  unsigned length = SNESCPU::getOpcodeLength(SNES::cpu.regs.p.m, SNES::cpu.regs.p.x, opcode);
-  SNES::cpu.regs.pc += length;
+void SMPDebugger::eventStepOver() {
+  uint8_t opcode = read(SNES::smp.regs.pc);
+  unsigned length = SNESSMP::getOpcodeLength(opcode);
+  SNES::smp.regs.pc += length;
   refreshDisassembly();
 }
 
-uint8_t CPUdebugger::read(unsigned addr) {
-  return SNES::debugger.read(SNES::Debugger::MemorySource::CPUBus, addr);
+uint8_t SMPDebugger::read(uint16_t addr) {
+  return SNES::debugger.read(SNES::Debugger::MemorySource::APUBus, addr);
 }

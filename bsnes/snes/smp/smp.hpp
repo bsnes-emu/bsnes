@@ -16,11 +16,11 @@ public:
   SMP();
   ~SMP();
 
+  static const uint8 iplrom[64];
+
 private:
   #include "memory/memory.hpp"
   #include "timing/timing.hpp"
-
-  static const uint8 iplrom[64];
 
   struct {
     //timing

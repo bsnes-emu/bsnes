@@ -107,7 +107,7 @@ bool Cartridge::loadCartridge(SNES::MappedRAM &memory, string &XML, const char *
     }
   }
 
-  if(XML == "") XML = snes_information(data, size).xml_memory_map;
+  if(XML == "") XML = SNESCartridge(data, size).xmlMemoryMap;
   memory.copy(data, size);
   delete[] data;
   return true;

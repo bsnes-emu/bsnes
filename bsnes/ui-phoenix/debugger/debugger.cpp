@@ -2,26 +2,55 @@
 #if defined(DEBUGGER)
 
 #include <nall/snes/cpu.hpp>
+#include <nall/snes/smp.hpp>
 
 #include "console.cpp"
 #include "cpu/debugger.cpp"
+#include "smp/debugger.cpp"
+#include "tools/memory-editor.cpp"
 Debugger debugger;
 
 void Debugger::create() {
   console.create();
   cpuDebugger.create();
+  smpDebugger.create();
+  memoryEditor.create();
 
   Window::create(0, 0, 256, 256, "Debugger");
   application.addWindow(this, "Debugger", "160,160");
 
   unsigned x = 5, y = 5;
-  enableDebugger.create(*this, x, y, 390, Style::CheckBoxHeight, "Enable debugger"); y += Style::CheckBoxHeight;
-  showMemoryEditor.create(*this, x, y, 390, Style::CheckBoxHeight, "Memory editor"); y += Style::CheckBoxHeight;
+  enableDebugger.create(*this, x, y, 240, Style::CheckBoxHeight, "Enable debugger"); y += Style::CheckBoxHeight;
+  showConsole.create(*this, x, y, 240, Style::CheckBoxHeight, "Console"); y += Style::CheckBoxHeight;
+  showCPUDebugger.create(*this, x, y, 240, Style::CheckBoxHeight, "CPU debugger"); y += Style::CheckBoxHeight;
+  showSMPDebugger.create(*this, x, y, 240, Style::CheckBoxHeight, "SMP debugger"); y += Style::CheckBoxHeight;
+  showMemoryEditor.create(*this, x, y, 240, Style::CheckBoxHeight, "Memory editor"); y += Style::CheckBoxHeight;
 
-  setGeometry(0, 0, 400, y);
+  //windows shown by default
+  showConsole.setChecked();
+  showCPUDebugger.setChecked();
+  showSMPDebugger.setChecked();
+
+  setGeometry(0, 0, 250, y);
 
   enableDebugger.onTick = []() {
     debugger.enable(debugger.enableDebugger.checked());
+  };
+
+  showConsole.onTick = []() {
+    console.setVisible(debugger.showConsole.checked());
+  };
+
+  showCPUDebugger.onTick = []() {
+    cpuDebugger.setVisible(debugger.showCPUDebugger.checked());
+  };
+
+  showSMPDebugger.onTick = []() {
+    smpDebugger.setVisible(debugger.showSMPDebugger.checked());
+  };
+
+  showMemoryEditor.onTick = []() {
+    memoryEditor.setVisible(debugger.showMemoryEditor.checked());
   };
 
   onClose = []() {
@@ -32,8 +61,10 @@ void Debugger::create() {
 
 void Debugger::setVisible(bool visible) {
   Window::setVisible(visible);
-  console.setVisible(visible);
-  cpuDebugger.setVisible(visible);
+  console.setVisible(showConsole.checked() & visible);
+  cpuDebugger.setVisible(showCPUDebugger.checked() & visible);
+  smpDebugger.setVisible(showSMPDebugger.checked() & visible);
+  memoryEditor.setVisible(showMemoryEditor.checked() & visible);
 }
 
 void Debugger::enable(bool state) {
@@ -56,8 +87,16 @@ void Debugger::run() {
   if(debugMode == DebugMode::StepIntoCPU) {
     if(SNES::debugger.break_event == SNES::Debugger::BreakEvent::CPUStep) {
       debugMode = DebugMode::None;
-      cpuDebugger.eventStepInto();
       console.eventTraceCPU();
+      cpuDebugger.eventStepInto();
+    }
+  }
+
+  if(debugMode == DebugMode::StepIntoSMP) {
+    if(SNES::debugger.break_event == SNES::Debugger::BreakEvent::SMPStep) {
+      debugMode = DebugMode::None;
+      console.eventTraceSMP();
+      smpDebugger.eventStepInto();
     }
   }
 

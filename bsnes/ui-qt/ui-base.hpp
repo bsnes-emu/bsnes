@@ -13,7 +13,7 @@
 #include <nall/config.hpp>
 #include <nall/input.hpp>
 #include <nall/ups.hpp>
-#include <nall/snes/info.hpp>
+#include <nall/snes/cartridge.hpp>
 #include "template/concept.hpp"
 #include "template/check-action.moc.hpp"
 #include "template/file-dialog.moc.hpp"

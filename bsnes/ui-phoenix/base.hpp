@@ -6,7 +6,7 @@
 #include <nall/filemap.hpp>
 #include <nall/input.hpp>
 #include <nall/ups.hpp>
-#include <nall/snes/info.hpp>
+#include <nall/snes/cartridge.hpp>
 using namespace nall;
 
 #include <ruby/ruby.hpp>

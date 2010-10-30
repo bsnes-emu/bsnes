@@ -15,8 +15,14 @@ void Console::create() {
   traceToDisk.setEnabled(false);
   traceCPU.create(*this, x, y, 120, Style::CheckBoxHeight, "Trace S-CPU"); y += Style::CheckBoxHeight;
   traceCPU.setChecked(true);
+  traceSMP.create(*this, x, y, 120, Style::CheckBoxHeight, "Trace S-SMP"); y += Style::CheckBoxHeight;
 
   setGeometry(0, 0, 775, 338);
+
+  onClose = []() {
+    debugger.showConsole.setChecked(false);
+    return true;
+  };
 }
 
 void Console::eventTraceCPU() {
@@ -25,6 +31,16 @@ void Console::eventTraceCPU() {
 
   char text[256];
   SNES::cpu.disassemble_opcode(text, SNES::cpu.regs.pc);
+  buffer.append(string(buffer == "" ? "" : "\n", text));
+  output.setText(buffer);
+}
+
+void Console::eventTraceSMP() {
+  if(traceSMP.checked() == false) return;
+  if(traceToConsole.checked() == false) return;
+
+  char text[256];
+  SNES::smp.disassemble_opcode(text, SNES::smp.regs.pc);
   buffer.append(string(buffer == "" ? "" : "\n", text));
   output.setText(buffer);
 }

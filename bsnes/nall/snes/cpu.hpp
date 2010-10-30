@@ -40,7 +40,7 @@ struct SNESCPU {
 
   static const OpcodeInfo opcodeInfo[256];
 
-  static unsigned getOpcodeLength(uint8_t status, uint8_t opcode);
+  static unsigned getOpcodeLength(bool accum, bool index, uint8_t opcode);
   static string disassemble(unsigned pc, bool accum, bool index, uint8_t opcode, uint8_t pl, uint8_t ph, uint8_t pb);
 };
 
@@ -382,12 +382,12 @@ const SNESCPU::OpcodeInfo SNESCPU::opcodeInfo[256] = {
   { "sbc", LongX },
 };
 
-inline unsigned SNESCPU::getOpcodeLength(uint8_t status, uint8_t opcode) {
+inline unsigned SNESCPU::getOpcodeLength(bool accum, bool index, uint8_t opcode) {
   switch(opcodeInfo[opcode].mode) { default:
     case Implied: return 1;
     case Constant: return 2;
-    case AccumConstant: return 3 - (bool)(status & 0x20);
-    case IndexConstant: return 3 - (bool)(status & 0x10);
+    case AccumConstant: return 3 - accum;
+    case IndexConstant: return 3 - index;
     case Direct: return 2;
     case DirectX: return 2;
     case DirectY: return 2;
