@@ -23,6 +23,13 @@ void EditBox::setText(const string &text) {
   editBox->setPlainText(QString::fromUtf8(text));
 }
 
+void EditBox::setCursorPosition(unsigned position) {
+  QTextCursor cursor = editBox->textCursor();
+  unsigned lastchar = strlen(editBox->toPlainText().toUtf8().constData());
+  cursor.setPosition(min(position, lastchar));
+  editBox->setTextCursor(cursor);
+}
+
 EditBox::EditBox() {
   editBox = new EditBox::Data(*this);
   widget->widget = editBox;

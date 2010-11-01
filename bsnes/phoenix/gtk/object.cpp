@@ -36,6 +36,10 @@ struct Canvas::Data {
 };
 
 struct HexEditor::Data {
+  GtkWidget *container;
+  GtkWidget *widget;
+  GtkWidget *scroll;
+
   GtkTextMark *cursor;
   unsigned size;
   unsigned offset;

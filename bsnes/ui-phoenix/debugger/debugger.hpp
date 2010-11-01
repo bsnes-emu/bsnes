@@ -1,11 +1,13 @@
 #include "console.hpp"
 #include "cpu/debugger.hpp"
 #include "smp/debugger.hpp"
+#include "tools/breakpoint-editor.hpp"
 #include "tools/memory-editor.hpp"
 
 struct Debugger : TopLevelWindow {
   enum class DebugMode : unsigned {
     None,
+    WaitForBreakpoint,
     StepIntoCPU,
     StepIntoSMP,
   } debugMode;
@@ -14,6 +16,7 @@ struct Debugger : TopLevelWindow {
   CheckBox showConsole;
   CheckBox showCPUDebugger;
   CheckBox showSMPDebugger;
+  CheckBox showBreakpointEditor;
   CheckBox showMemoryEditor;
 
   void create();

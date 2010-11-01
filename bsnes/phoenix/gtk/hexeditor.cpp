@@ -2,41 +2,71 @@ static bool HexEditor_keyPress(GtkWidget *widget, GdkEventKey *event, HexEditor 
   return self->keyPress(event->keyval);
 }
 
+static bool HexEditor_scroll(GtkRange *range, GtkScrollType scroll, gdouble value, HexEditor *self) {
+  self->scroll((unsigned)value);
+  return false;
+}
+
 void HexEditor::create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height) {
-  object->widget = gtk_scrolled_window_new(0, 0);
   widget->parent = &parent;
-  gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(object->widget), GTK_POLICY_NEVER, GTK_POLICY_NEVER);
-  gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(object->widget), GTK_SHADOW_ETCHED_IN);
+
+  hexEditor->size = 0;
+  hexEditor->offset = 0;
+  hexEditor->columns = 16;
+  hexEditor->rows = 16;
+
+  object->widget = gtk_hbox_new(false, 0);
   gtk_widget_set_size_request(object->widget, width, height);
-  object->subWidget = gtk_text_view_new();
-  gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(object->subWidget), GTK_WRAP_NONE);
-  gtk_container_add(GTK_CONTAINER(object->widget), object->subWidget);
-  object->textBuffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(object->subWidget));
+
+  hexEditor->container = gtk_scrolled_window_new(0, 0);
+  gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(hexEditor->container), GTK_POLICY_NEVER, GTK_POLICY_NEVER);
+  gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(hexEditor->container), GTK_SHADOW_ETCHED_IN);
+
+  hexEditor->widget = gtk_text_view_new();
+  gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(hexEditor->widget), GTK_WRAP_NONE);
+  gtk_container_add(GTK_CONTAINER(hexEditor->container), hexEditor->widget);
+  g_signal_connect(G_OBJECT(hexEditor->widget), "key-press-event", G_CALLBACK(HexEditor_keyPress), (gpointer)this);
+
+  hexEditor->scroll = gtk_vscrollbar_new((GtkAdjustment*)0);
+  gtk_range_set_range(GTK_RANGE(hexEditor->scroll), 0, 256);
+  gtk_range_set_increments(GTK_RANGE(hexEditor->scroll), 1, 16);
+  gtk_widget_set_sensitive(hexEditor->scroll, false);
+  g_signal_connect(G_OBJECT(hexEditor->scroll), "change-value", G_CALLBACK(HexEditor_scroll), (gpointer)this);
+
+  gtk_box_pack_start(GTK_BOX(object->widget), hexEditor->container, true, true, 0);
+  gtk_box_pack_start(GTK_BOX(object->widget), hexEditor->scroll, false, false, 1);
+
+  object->textBuffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(hexEditor->widget));
   hexEditor->cursor = gtk_text_buffer_get_mark(object->textBuffer, "insert");
 
-  gtk_text_view_set_editable(GTK_TEXT_VIEW(object->subWidget), false);
-  g_signal_connect(G_OBJECT(object->subWidget), "key-press-event", G_CALLBACK(HexEditor_keyPress), (gpointer)this);
-
-  if(parent.window->defaultFont) setFont(*parent.window->defaultFont);
   gtk_fixed_put(GTK_FIXED(parent.object->formContainer), object->widget, x, y);
-  gtk_widget_show(object->subWidget);
+  if(parent.window->defaultFont) setFont(*parent.window->defaultFont);
+
+  gtk_widget_show(hexEditor->scroll);
+  gtk_widget_show(hexEditor->widget);
+  gtk_widget_show(hexEditor->container);
   gtk_widget_show(object->widget);
 }
 
 void HexEditor::setSize(unsigned size) {
   hexEditor->size = size;
+  setScroll();
 }
 
 void HexEditor::setOffset(unsigned offset) {
   hexEditor->offset = offset;
+  setScroll();
+  updateScroll();
 }
 
 void HexEditor::setColumns(unsigned columns) {
   hexEditor->columns = columns;
+  setScroll();
 }
 
 void HexEditor::setRows(unsigned rows) {
   hexEditor->rows = rows;
+  setScroll();
 }
 
 void HexEditor::update() {
@@ -189,7 +219,30 @@ bool HexEditor::keyPress(unsigned scancode) {
     }
   }
 
-  return false;
+  return true;
+}
+
+void HexEditor::scroll(unsigned position) {
+  unsigned rows = hexEditor->size / hexEditor->columns;
+  if(position >= rows) position = rows - 1;
+  setOffset(position * hexEditor->columns);
+  update();
+}
+
+void HexEditor::setScroll() {
+  unsigned rows = hexEditor->size / hexEditor->columns;
+  if(rows) rows--;
+  if(rows) {
+    gtk_range_set_range(GTK_RANGE(hexEditor->scroll), 0, rows);
+    gtk_widget_set_sensitive(hexEditor->scroll, true);
+  } else {
+    gtk_widget_set_sensitive(hexEditor->scroll, false);
+  }
+}
+
+void HexEditor::updateScroll() {
+  unsigned row = hexEditor->offset / hexEditor->columns;
+  gtk_range_set_value(GTK_RANGE(hexEditor->scroll), row);
 }
 
 unsigned HexEditor::cursorPosition() {

@@ -7,6 +7,7 @@
 #include "console.cpp"
 #include "cpu/debugger.cpp"
 #include "smp/debugger.cpp"
+#include "tools/breakpoint-editor.cpp"
 #include "tools/memory-editor.cpp"
 Debugger debugger;
 
@@ -14,6 +15,7 @@ void Debugger::create() {
   console.create();
   cpuDebugger.create();
   smpDebugger.create();
+  breakpointEditor.create();
   memoryEditor.create();
 
   Window::create(0, 0, 256, 256, "Debugger");
@@ -24,12 +26,14 @@ void Debugger::create() {
   showConsole.create(*this, x, y, 240, Style::CheckBoxHeight, "Console"); y += Style::CheckBoxHeight;
   showCPUDebugger.create(*this, x, y, 240, Style::CheckBoxHeight, "CPU debugger"); y += Style::CheckBoxHeight;
   showSMPDebugger.create(*this, x, y, 240, Style::CheckBoxHeight, "SMP debugger"); y += Style::CheckBoxHeight;
+  showBreakpointEditor.create(*this, x, y, 240, Style::CheckBoxHeight, "Breakpoint editor"); y += Style::CheckBoxHeight;
   showMemoryEditor.create(*this, x, y, 240, Style::CheckBoxHeight, "Memory editor"); y += Style::CheckBoxHeight;
 
   //windows shown by default
   showConsole.setChecked();
   showCPUDebugger.setChecked();
   showSMPDebugger.setChecked();
+  showBreakpointEditor.setChecked();
 
   setGeometry(0, 0, 250, y);
 
@@ -49,6 +53,10 @@ void Debugger::create() {
     smpDebugger.setVisible(debugger.showSMPDebugger.checked());
   };
 
+  showBreakpointEditor.onTick = []() {
+    breakpointEditor.setVisible(debugger.showBreakpointEditor.checked());
+  };
+
   showMemoryEditor.onTick = []() {
     memoryEditor.setVisible(debugger.showMemoryEditor.checked());
   };
@@ -64,6 +72,7 @@ void Debugger::setVisible(bool visible) {
   console.setVisible(showConsole.checked() & visible);
   cpuDebugger.setVisible(showCPUDebugger.checked() & visible);
   smpDebugger.setVisible(showSMPDebugger.checked() & visible);
+  breakpointEditor.setVisible(showBreakpointEditor.checked() & visible);
   memoryEditor.setVisible(showMemoryEditor.checked() & visible);
 }
 
@@ -83,6 +92,14 @@ void Debugger::run() {
   }
 
   SNES::system.run();
+
+  if(debugMode == DebugMode::WaitForBreakpoint) {
+    if(SNES::debugger.break_event == SNES::Debugger::BreakEvent::BreakpointHit) {
+      debugMode = DebugMode::None;
+      console.eventBreakpoint();
+      breakpointEditor.eventBreakpoint();
+    }
+  }
 
   if(debugMode == DebugMode::StepIntoCPU) {
     if(SNES::debugger.break_event == SNES::Debugger::BreakEvent::CPUStep) {

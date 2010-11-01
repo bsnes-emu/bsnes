@@ -157,6 +157,7 @@ struct EditBox : Widget {
   void setWordWrap(bool wordWrap = true);
   nall::string text();
   void setText(const nall::string &text);
+  void setCursorPosition(unsigned position);
 };
 
 struct HexEditor : Widget {
@@ -173,6 +174,9 @@ struct HexEditor : Widget {
   struct Data;
   Data *hexEditor;
   bool keyPress(unsigned scancode);
+  void scroll(unsigned position);
+  void setScroll();
+  void updateScroll();
   unsigned cursorPosition();
   void setCursorPosition(unsigned position);
 };

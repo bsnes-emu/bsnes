@@ -199,6 +199,7 @@ struct EditBox : Widget {
   void setWordWrap(bool wordWrap = true);
   nall::string text();
   void setText(const nall::string &text);
+  void setCursorPosition(unsigned position);
   EditBox();
 //private:
   struct Data;

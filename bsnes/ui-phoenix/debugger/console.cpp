@@ -25,6 +25,22 @@ void Console::create() {
   };
 }
 
+void Console::eventBreakpoint() {
+  if(traceToConsole.checked() == false) return;
+
+  unsigned n = SNES::debugger.breakpoint_hit;
+  string text = { "Breakpoint ", n + 1, " hit." };
+  buffer.append(string(buffer == "" ? "" : "\n", text));
+  output.setText(buffer);
+  output.setCursorPosition(~0);
+
+  if(SNES::debugger.breakpoint[n].source == SNES::Debugger::Breakpoint::Source::CPUBus) {
+    eventTraceCPU();
+  } else if(SNES::debugger.breakpoint[n].source == SNES::Debugger::Breakpoint::Source::APURAM) {
+    eventTraceSMP();
+  }
+}
+
 void Console::eventTraceCPU() {
   if(traceCPU.checked() == false) return;
   if(traceToConsole.checked() == false) return;
@@ -33,6 +49,7 @@ void Console::eventTraceCPU() {
   SNES::cpu.disassemble_opcode(text, SNES::cpu.regs.pc);
   buffer.append(string(buffer == "" ? "" : "\n", text));
   output.setText(buffer);
+  output.setCursorPosition(~0);
 }
 
 void Console::eventTraceSMP() {
@@ -43,4 +60,5 @@ void Console::eventTraceSMP() {
   SNES::smp.disassemble_opcode(text, SNES::smp.regs.pc);
   buffer.append(string(buffer == "" ? "" : "\n", text));
   output.setText(buffer);
+  output.setCursorPosition(~0);
 }

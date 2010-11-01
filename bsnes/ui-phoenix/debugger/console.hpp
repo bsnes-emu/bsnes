@@ -8,6 +8,7 @@ struct Console : TopLevelWindow {
   string buffer;
 
   void create();
+  void eventBreakpoint();
   void eventTraceCPU();
   void eventTraceSMP();
 };

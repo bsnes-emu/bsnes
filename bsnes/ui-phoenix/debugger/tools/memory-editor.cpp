@@ -5,7 +5,7 @@ void MemoryEditor::create() {
   application.addWindow(this, "Debugger.MemoryEditor", "192,192");
 
   unsigned x = 5, y = 5;
-  editor.create(*this, x, y, 455, 210); x += 455 + 5;
+  editor.create(*this, x, y, 470, 210); x += 470 + 5;
   editor.setFont(application.monospaceFont);
   editor.setColumns(16);
   editor.setRows(16);
@@ -21,7 +21,7 @@ void MemoryEditor::create() {
 
   refreshButton.create(*this, x, y, 80, Style::ButtonHeight, "Refresh"); y += Style::ButtonHeight;
 
-  setGeometry(0, 0, 545, 220);
+  setGeometry(0, 0, 560, 220);
 
   onClose = []() {
     debugger.showMemoryEditor.setChecked(false);

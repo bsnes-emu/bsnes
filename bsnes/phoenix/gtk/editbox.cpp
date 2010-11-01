@@ -47,3 +47,12 @@ void EditBox::setText(const string &text) {
   gtk_text_buffer_set_text(object->textBuffer, text, -1);
   object->locked = false;
 }
+
+void EditBox::setCursorPosition(unsigned position) {
+  GtkTextMark *mark = gtk_text_buffer_get_mark(object->textBuffer, "insert");
+  GtkTextIter iter;
+  gtk_text_buffer_get_end_iter(object->textBuffer, &iter);
+  gtk_text_iter_set_offset(&iter, min(position, gtk_text_iter_get_offset(&iter)));
+  gtk_text_buffer_place_cursor(object->textBuffer, &iter);
+  gtk_text_view_scroll_mark_onscreen(GTK_TEXT_VIEW(object->subWidget), mark);
+}
