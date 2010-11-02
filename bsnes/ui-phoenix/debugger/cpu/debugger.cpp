@@ -1,6 +1,6 @@
-CPUdebugger cpuDebugger;
+CPUDebugger cpuDebugger;
 
-void CPUdebugger::create() {
+void CPUDebugger::create() {
   Window::create(0, 0, 256, 256, "CPU Debugger");
   application.addWindow(this, "Debugger.CPUdebugger", "192,192");
 
@@ -22,14 +22,18 @@ void CPUdebugger::create() {
   };
 
   stepInto.onTick = []() {
-    SNES::debugger.step_cpu = true;
     debugger.debugMode = Debugger::DebugMode::StepIntoCPU;
   };
 
-  stepOver.onTick = { &CPUdebugger::eventStepOver, this };
+  stepOver.onTick = { &CPUDebugger::eventStepOver, this };
 }
 
-void CPUdebugger::refreshDisassembly() {
+void CPUDebugger::synchronize() {
+  stepInto.setEnabled(SNES::cartridge.loaded() && debugger.enableDebugger.checked());
+  stepOver.setEnabled(stepInto.enabled() && SNES::cpu.opcode_edge);
+}
+
+void CPUDebugger::refreshDisassembly() {
   unsigned addr = SNES::cpu.regs.pc;
   uint8_t *usage = SNES::cpu.usage;
 
@@ -86,18 +90,18 @@ void CPUdebugger::refreshDisassembly() {
   output.setText(buffer);
 }
 
-void CPUdebugger::eventStepInto() {
-  SNES::debugger.step_cpu = false;
+void CPUDebugger::eventStepInto() {
   refreshDisassembly();
 }
 
-void CPUdebugger::eventStepOver() {
+void CPUDebugger::eventStepOver() {
   uint8_t opcode = read(SNES::cpu.regs.pc);
   unsigned length = SNESCPU::getOpcodeLength(SNES::cpu.regs.p.m, SNES::cpu.regs.p.x, opcode);
   SNES::cpu.regs.pc += length;
   refreshDisassembly();
+  console.eventTraceCPU();
 }
 
-uint8_t CPUdebugger::read(unsigned addr) {
+uint8_t CPUDebugger::read(unsigned addr) {
   return SNES::debugger.read(SNES::Debugger::MemorySource::CPUBus, addr);
 }

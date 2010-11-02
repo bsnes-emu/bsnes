@@ -20,6 +20,7 @@ struct Debugger : TopLevelWindow {
   CheckBox showMemoryEditor;
 
   void create();
+  void synchronize();
   void setVisible(bool visible = true);
   void enable(bool state);
   void run();

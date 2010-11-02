@@ -1,10 +1,11 @@
-struct CPUdebugger : TopLevelWindow {
+struct CPUDebugger : TopLevelWindow {
   EditBox output;
   Button stepInto;
   Button stepOver;
   Button proceed;
 
   void create();
+  void synchronize();
   void refreshDisassembly();
   void eventStepInto();
   void eventStepOver();
@@ -12,4 +13,4 @@ struct CPUdebugger : TopLevelWindow {
   uint8_t read(unsigned addr);
 };
 
-extern CPUdebugger cpuDebugger;
+extern CPUDebugger cpuDebugger;

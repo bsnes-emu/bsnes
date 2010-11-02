@@ -6,7 +6,7 @@ void BreakpointEditor::create() {
 
   unsigned x = 5, y = 5;
 
-  runToBreakpoint.create(*this, x, y, 295, Style::CheckBoxHeight, "Run To Breakpoint");
+  runToBreakpoint.create(*this, x, y, 295, Style::CheckBoxHeight, "Run to breakpoint");
   y += Style::CheckBoxHeight + 5;
 
   for(unsigned n = 0; n < Breakpoints; n++) {

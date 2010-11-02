@@ -7,14 +7,16 @@ void CPUDebugger::op_step() {
   usage[regs.pc] |= UsageExec | (regs.p.m << 1) | (regs.p.x << 0);
   opcode_pc = regs.pc;
 
+  opcode_edge = true;
   if(debugger.step_cpu) {
     debugger.break_event = Debugger::BreakEvent::CPUStep;
     scheduler.exit(Scheduler::ExitReason::DebuggerEvent);
   } else {
     debugger.breakpoint_test(Debugger::Breakpoint::Source::CPUBus, Debugger::Breakpoint::Mode::Exec, regs.pc, 0x00);
   }
-
   if(step_event) step_event();
+  opcode_edge = false;
+
   CPU::op_step();
   synchronize_smp();
 }
@@ -36,6 +38,7 @@ void CPUDebugger::op_write(uint32 addr, uint8 data) {
 CPUDebugger::CPUDebugger() {
   usage = new uint8[1 << 24]();
   opcode_pc = 0x8000;
+  opcode_edge = false;
 }
 
 CPUDebugger::~CPUDebugger() {

@@ -65,6 +65,13 @@ void Debugger::create() {
     debugger.enable(false);
     return true;
   };
+
+  synchronize();
+}
+
+void Debugger::synchronize() {
+  cpuDebugger.synchronize();
+  smpDebugger.synchronize();
 }
 
 void Debugger::setVisible(bool visible) {
@@ -78,9 +85,13 @@ void Debugger::setVisible(bool visible) {
 
 void Debugger::enable(bool state) {
   enableDebugger.setChecked(state);
+  SNES::debugger.step_cpu = state;
+  SNES::debugger.step_smp = state;
 }
 
 void Debugger::run() {
+  synchronize();
+
   if(enableDebugger.checked() == false) {
     SNES::system.run();
     return;
@@ -101,20 +112,20 @@ void Debugger::run() {
     }
   }
 
-  if(debugMode == DebugMode::StepIntoCPU) {
-    if(SNES::debugger.break_event == SNES::Debugger::BreakEvent::CPUStep) {
+  if(SNES::debugger.break_event == SNES::Debugger::BreakEvent::CPUStep) {
+    if(debugMode == DebugMode::StepIntoCPU) {
       debugMode = DebugMode::None;
-      console.eventTraceCPU();
       cpuDebugger.eventStepInto();
     }
+    console.eventTraceCPU();
   }
 
-  if(debugMode == DebugMode::StepIntoSMP) {
-    if(SNES::debugger.break_event == SNES::Debugger::BreakEvent::SMPStep) {
+  if(SNES::debugger.break_event == SNES::Debugger::BreakEvent::SMPStep) {
+    if(debugMode == DebugMode::StepIntoSMP) {
       debugMode = DebugMode::None;
-      console.eventTraceSMP();
       smpDebugger.eventStepInto();
     }
+    console.eventTraceSMP();
   }
 
   SNES::debugger.break_event = SNES::Debugger::BreakEvent::None;

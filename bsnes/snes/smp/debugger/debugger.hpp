@@ -11,6 +11,7 @@ public:
   };
   uint8 *usage;
   uint16 opcode_pc;
+  bool opcode_edge;
 
   void op_step();
   uint8 op_read(uint16 addr);

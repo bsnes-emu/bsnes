@@ -12,7 +12,8 @@ public:
     UsageFlagX = 0x01,
   };
   uint8 *usage;
-  uint32 opcode_pc;  //points to the current opcode, used to backtrace on read/write breakpoints
+  uint32 opcode_pc;
+  bool opcode_edge;
 
   void op_step();
   uint8 op_read(uint32 addr);

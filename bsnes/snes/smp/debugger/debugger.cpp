@@ -6,14 +6,16 @@ void SMPDebugger::op_step() {
   usage[regs.pc] |= UsageExec;
   opcode_pc = regs.pc;
 
+  opcode_edge = true;
   if(debugger.step_smp) {
     debugger.break_event = Debugger::BreakEvent::SMPStep;
     scheduler.exit(Scheduler::ExitReason::DebuggerEvent);
   } else {
     debugger.breakpoint_test(Debugger::Breakpoint::Source::APURAM, Debugger::Breakpoint::Mode::Exec, regs.pc, 0x00);
   }
-
   if(step_event) step_event();
+  opcode_edge = false;
+
   SMP::op_step();
   synchronize_cpu();
 }
@@ -35,6 +37,7 @@ void SMPDebugger::op_write(uint16 addr, uint8 data) {
 SMPDebugger::SMPDebugger() {
   usage = new uint8[1 << 16]();
   opcode_pc = 0xffc0;
+  opcode_edge = false;
 }
 
 SMPDebugger::~SMPDebugger() {

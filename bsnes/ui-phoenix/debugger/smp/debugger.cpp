@@ -22,11 +22,15 @@ void SMPDebugger::create() {
   };
 
   stepInto.onTick = []() {
-    SNES::debugger.step_smp = true;
     debugger.debugMode = Debugger::DebugMode::StepIntoSMP;
   };
 
   stepOver.onTick = { &SMPDebugger::eventStepOver, this };
+}
+
+void SMPDebugger::synchronize() {
+  stepInto.setEnabled(SNES::cartridge.loaded() && debugger.enableDebugger.checked());
+  stepOver.setEnabled(stepInto.enabled() && SNES::smp.opcode_edge);
 }
 
 void SMPDebugger::refreshDisassembly() {
@@ -86,7 +90,6 @@ void SMPDebugger::refreshDisassembly() {
 }
 
 void SMPDebugger::eventStepInto() {
-  SNES::debugger.step_smp = false;
   refreshDisassembly();
 }
 
@@ -95,6 +98,7 @@ void SMPDebugger::eventStepOver() {
   unsigned length = SNESSMP::getOpcodeLength(opcode);
   SNES::smp.regs.pc += length;
   refreshDisassembly();
+  console.eventTraceSMP();
 }
 
 uint8_t SMPDebugger::read(uint16_t addr) {
