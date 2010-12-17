@@ -6,6 +6,7 @@ struct Coprocessor : Processor {
 #include <chip/supergameboy/supergameboy.hpp>
 #include <chip/superfx/superfx.hpp>
 #include <chip/sa1/sa1.hpp>
+#include <chip/upd77c25/upd77c25.hpp>
 #include <chip/bsx/bsx.hpp>
 #include <chip/srtc/srtc.hpp>
 #include <chip/sdd1/sdd1.hpp>

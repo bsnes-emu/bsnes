@@ -34,6 +34,7 @@ void Cartridge::parse_xml_cartridge(const char *data) {
         if(node.name == "ram") xml_parse_ram(node);
         if(node.name == "superfx") xml_parse_superfx(node);
         if(node.name == "sa1") xml_parse_sa1(node);
+        if(node.name == "upd77c25") xml_parse_upd77c25(node);
         if(node.name == "bsx") xml_parse_bsx(node);
         if(node.name == "sufamiturbo") xml_parse_sufamiturbo(node);
         if(node.name == "supergameboy") xml_parse_supergameboy(node);
@@ -216,6 +217,42 @@ void Cartridge::xml_parse_sa1(xml_element &root) {
       foreach(leaf, node.element) {
         if(leaf.name == "map") {
           Mapping m(sa1);
+          foreach(attr, leaf.attribute) {
+            if(attr.name == "address") xml_parse_address(m, attr.content);
+          }
+          mapping.append(m);
+        }
+      }
+    }
+  }
+}
+
+void Cartridge::xml_parse_upd77c25(xml_element &root) {
+  has_upd77c25 = true;
+
+  foreach(attr, root.attribute) {
+    if(attr.name == "program") {
+      upd77c25.program = attr.content;
+    } else if(attr.name == "data") {
+      upd77c25.data = attr.content;
+    }
+  }
+
+  foreach(node, root.element) {
+    if(node.name == "dr") {
+      foreach(leaf, node.element) {
+        if(leaf.name == "map") {
+          Mapping m(upd77c25dr);
+          foreach(attr, leaf.attribute) {
+            if(attr.name == "address") xml_parse_address(m, attr.content);
+          }
+          mapping.append(m);
+        }
+      }
+    } else if(node.name == "sr") {
+      foreach(leaf, node.element) {
+        if(leaf.name == "map") {
+          Mapping m(upd77c25sr);
           foreach(attr, leaf.attribute) {
             if(attr.name == "address") xml_parse_address(m, attr.content);
           }
