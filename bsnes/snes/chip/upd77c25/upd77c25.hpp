@@ -7,16 +7,15 @@ public:
   void power();
   void reset();
 
-  string disassemble(uint11 ip);
+  void serialize(serializer &s);
 
-  string program;
-  string data;
-
-private:
   uint24 programROM[2048];
   uint16 dataROM[1024];
   uint16 dataRAM[256];
 
+  string disassemble(uint11 ip);
+
+private:
   struct Flag {
     bool s1, s0, c, z, ov1, ov0;
 
@@ -52,16 +51,16 @@ private:
     uint11 stack[4];  //LIFO
     uint10 rp;        //ROM pointer
     uint8  dp;        //data pointer
-    uint16 k;
-    uint16 l;
-    uint16 m;
-    uint16 n;
-    uint16 a;         //accumulator
-    uint16 b;         //accumulator
+    int16  k;
+    int16  l;
+    int16  m;
+    int16  n;
+    int16  a;         //accumulator
+    int16  b;         //accumulator
     Flag  flaga;
     Flag  flagb;
-    uint16 tr;        //temporary registers
-    uint16 trb;
+    uint16 tr;        //temporary register
+    uint16 trb;       //temporary register
     Status sr;        //status register
     uint16 dr;        //data register
     bool siack;
@@ -73,8 +72,10 @@ private:
   void exec_rt(uint24 opcode);
   void exec_jp(uint24 opcode);
   void exec_ld(uint24 opcode);
+
   void stack_push();
   void stack_pull();
+
   uint8 read(bool mode);
   void write(bool mode, uint8 data);
 

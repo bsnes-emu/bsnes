@@ -232,9 +232,16 @@ void Cartridge::xml_parse_upd77c25(xml_element &root) {
 
   foreach(attr, root.attribute) {
     if(attr.name == "program") {
-      upd77c25.program = attr.content;
-    } else if(attr.name == "data") {
-      upd77c25.data = attr.content;
+      file fp;
+      if(fp.open(string(dir(basename()), attr.content), file::mode::read)) {
+        for(unsigned n = 0; n < 2048; n++) {
+          upd77c25.programROM[n] = fp.readm(3);
+          fp.read();
+        }
+        for(unsigned n = 0; n < 1024; n++) {
+          upd77c25.dataROM[n] = fp.readm(2);
+        }
+      }
     }
   }
 
