@@ -75,7 +75,7 @@ void CPUDebugger::refreshDisassembly() {
       buffer.append("...\n");
     } else {
       unsigned addr = offset[n];
-      buffer.append(strhex<6>(addr));
+      buffer.append(hex<6>(addr));
       buffer.append(" ");
       string text = SNESCPU::disassemble(
         addr, usage[addr] & 2, usage[addr] & 1,

@@ -125,7 +125,7 @@ SNESCartridge::SNESCartridge(const uint8_t *data, unsigned size) {
   if(type == TypeGameBoy) {
     xml << "<cartridge rtc='" << gameboy_has_rtc(data, size) << "'>\n";
     if(gameboy_ram_size(data, size) > 0) {
-      xml << "  <ram size='" << strhex(gameboy_ram_size(data, size)) << "'/>\n";
+      xml << "  <ram size='" << hex(gameboy_ram_size(data, size)) << "'/>\n";
     }
     xml << "</cartridge>\n";
     xmlMemoryMap = xml;
@@ -171,9 +171,9 @@ SNESCartridge::SNESCartridge(const uint8_t *data, unsigned size) {
 
     xml << "  <spc7110>\n";
     xml << "    <mcu>\n";
-    xml << "      <map address='d0-ff:0000-ffff' offset='100000' size='" << strhex(size - 0x100000) << "'/>\n";
+    xml << "      <map address='d0-ff:0000-ffff' offset='100000' size='" << hex(size - 0x100000) << "'/>\n";
     xml << "    </mcu>\n";
-    xml << "    <ram size='" << strhex(ram_size) << "'>\n";
+    xml << "    <ram size='" << hex(ram_size) << "'>\n";
     xml << "      <map mode='linear' address='00:6000-7fff'/>\n";
     xml << "      <map mode='linear' address='30:6000-7fff'/>\n";
     xml << "    </ram>\n";
@@ -198,7 +198,7 @@ SNESCartridge::SNESCartridge(const uint8_t *data, unsigned size) {
     xml << "  </rom>\n";
 
     if(ram_size > 0) {
-      xml << "  <ram size='" << strhex(ram_size) << "'>\n";
+      xml << "  <ram size='" << hex(ram_size) << "'>\n";
       xml << "    <map mode='linear' address='20-3f:6000-7fff'/>\n";
       xml << "    <map mode='linear' address='a0-bf:6000-7fff'/>\n";
       if((rom_size > 0x200000) || (ram_size > 32 * 1024)) {
@@ -219,7 +219,7 @@ SNESCartridge::SNESCartridge(const uint8_t *data, unsigned size) {
     xml << "  </rom>\n";
 
     if(ram_size > 0) {
-      xml << "  <ram size='" << strhex(ram_size) << "'>\n";
+      xml << "  <ram size='" << hex(ram_size) << "'>\n";
       xml << "    <map mode='linear' address='20-3f:6000-7fff'/>\n";
       xml << "    <map mode='linear' address='a0-bf:6000-7fff'/>\n";
       if((rom_size > 0x200000) || (ram_size > 32 * 1024)) {
@@ -237,7 +237,7 @@ SNESCartridge::SNESCartridge(const uint8_t *data, unsigned size) {
     xml << "  </rom>\n";
 
     if(ram_size > 0) {
-      xml << "  <ram size='" << strhex(ram_size) << "'>\n";
+      xml << "  <ram size='" << hex(ram_size) << "'>\n";
       xml << "    <map mode='linear' address='20-3f:6000-7fff'/>\n";
       xml << "    <map mode='linear' address='a0-bf:6000-7fff'/>\n";
       xml << "    <map mode='linear' address='70-7f:0000-7fff'/>\n";
@@ -252,7 +252,7 @@ SNESCartridge::SNESCartridge(const uint8_t *data, unsigned size) {
     xml << "  </rom>\n";
 
     if(ram_size > 0) {
-      xml << "  <ram size='" << strhex(ram_size) << "'>\n";
+      xml << "  <ram size='" << hex(ram_size) << "'>\n";
       xml << "    <map mode='linear' address='20-3f:6000-7fff'/>\n";
       xml << "    <map mode='linear' address='a0-bf:6000-7fff'/>\n";
       if((rom_size > 0x200000) || (ram_size > 32 * 1024)) {
@@ -270,7 +270,7 @@ SNESCartridge::SNESCartridge(const uint8_t *data, unsigned size) {
     xml << "      <map mode='linear' address='80-bf:8000-ffff'/>\n";
     xml << "      <map mode='linear' address='c0-df:0000-ffff'/>\n";
     xml << "    </rom>\n";
-    xml << "    <ram size='" << strhex(ram_size) << "'>\n";
+    xml << "    <ram size='" << hex(ram_size) << "'>\n";
     xml << "      <map mode='linear' address='00-3f:6000-7fff' size='2000'/>\n";
     xml << "      <map mode='linear' address='60-7f:0000-ffff'/>\n";
     xml << "      <map mode='linear' address='80-bf:6000-7fff' size='2000'/>\n";
@@ -292,7 +292,7 @@ SNESCartridge::SNESCartridge(const uint8_t *data, unsigned size) {
     xml << "      <map mode='linear' address='00-3f:3000-37ff'/>\n";
     xml << "      <map mode='linear' address='80-bf:3000-37ff'/>\n";
     xml << "    </iram>\n";
-    xml << "    <bwram size='" << strhex(ram_size) << "'>\n";
+    xml << "    <bwram size='" << hex(ram_size) << "'>\n";
     xml << "      <map mode='linear' address='00-3f:6000-7fff'/>\n";
     xml << "      <map mode='linear' address='40-4f:0000-ffff'/>\n";
     xml << "      <map mode='linear' address='80-bf:6000-7fff'/>\n";
@@ -309,7 +309,7 @@ SNESCartridge::SNESCartridge(const uint8_t *data, unsigned size) {
     xml << "    <map mode='linear' address='80-9f:8000-ffff' offset='200000'/>\n";
     xml << "    <map mode='linear' address='a0-bf:8000-ffff' offset='100000'/>\n";
     xml << "  </rom>\n";
-    xml << "  <ram size='" << strhex(ram_size) << "'>\n";
+    xml << "  <ram size='" << hex(ram_size) << "'>\n";
     xml << "    <map mode='linear' address='70-7f:0000-7fff'/>\n";
     xml << "    <map mode='linear' address='f0-ff:0000-7fff'/>\n";
     xml << "  </ram>\n";
@@ -325,7 +325,7 @@ SNESCartridge::SNESCartridge(const uint8_t *data, unsigned size) {
     xml << "    <map mode='shadow' address='80-9f:8000-ffff'/>\n";
     xml << "    <map mode='linear' address='c0-df:0000-ffff'/>\n";
     xml << "  </rom>\n";
-    xml << "  <ram size='" << strhex(ram_size) << "'>\n";
+    xml << "  <ram size='" << hex(ram_size) << "'>\n";
     xml << "    <map mode='linear' address='20-3f:6000-7fff'/>\n";
     xml << "    <map mode='linear' address='a0-bf:6000-7fff'/>\n";
     xml << "  </ram>\n";
@@ -408,7 +408,7 @@ SNESCartridge::SNESCartridge(const uint8_t *data, unsigned size) {
   }
 
   if(has_dsp1) {
-    xml << "  <upd77c25 program='dsp1b.bin'>\n";
+    xml << "  <upd77c25 program='dsp1b.bin' sha256='d85ba8271a5b28a25e078d7f72722de1d6990a9f098a8d574c4338adcef883a6'>\n";
     if(dsp1_mapper == DSP1LoROM1MB) {
       xml << "    <dr>\n";
       xml << "      <map address='20-3f:8000-bfff'/>\n";
@@ -441,7 +441,7 @@ SNESCartridge::SNESCartridge(const uint8_t *data, unsigned size) {
   }
 
   if(has_dsp2) {
-    xml << "  <necdsp program='DSP-2'>\n";
+    xml << "  <upd77c25 program='dsp2.bin'>\n";
     xml << "    <dr>\n";
     xml << "      <map address='20-3f:8000-bfff'/>\n";
     xml << "      <map address='a0-bf:8000-bfff'/>\n";
@@ -450,11 +450,11 @@ SNESCartridge::SNESCartridge(const uint8_t *data, unsigned size) {
     xml << "      <map address='20-3f:c000-ffff'/>\n";
     xml << "      <map address='a0-bf:c000-ffff'/>\n";
     xml << "    </sr>\n";
-    xml << "  </necdsp>\n";
+    xml << "  </upd77c25>\n";
   }
 
   if(has_dsp3) {
-    xml << "  <necdsp program='DSP-3'>\n";
+    xml << "  <upd77c25 program='dsp3.bin' sha256='7044784484a0f9a869e5b03f685fa2bb5324d52a03716b9632c096206d51985b'>\n";
     xml << "    <dr>\n";
     xml << "      <map address='20-3f:8000-bfff'/>\n";
     xml << "      <map address='a0-bf:8000-bfff'/>\n";
@@ -463,11 +463,11 @@ SNESCartridge::SNESCartridge(const uint8_t *data, unsigned size) {
     xml << "      <map address='20-3f:c000-ffff'/>\n";
     xml << "      <map address='a0-bf:c000-ffff'/>\n";
     xml << "    </sr>\n";
-    xml << "  </necdsp>\n";
+    xml << "  </upd77c25>\n";
   }
 
   if(has_dsp4) {
-    xml << "  <necdsp program='DSP-4'>\n";
+    xml << "  <upd77c25 program='dsp4.bin'>\n";
     xml << "    <dr>\n";
     xml << "      <map address='30-3f:8000-bfff'/>\n";
     xml << "      <map address='b0-bf:8000-bfff'/>\n";
@@ -476,7 +476,7 @@ SNESCartridge::SNESCartridge(const uint8_t *data, unsigned size) {
     xml << "      <map address='30-3f:c000-ffff'/>\n";
     xml << "      <map address='b0-bf:c000-ffff'/>\n";
     xml << "    </sr>\n";
-    xml << "  </necdsp>\n";
+    xml << "  </upd77c25>\n";
   }
 
   if(has_obc1) {

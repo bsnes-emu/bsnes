@@ -143,9 +143,9 @@ void CheatFinderWindow::searchMemory() {
   string text = valueEdit->text().toUtf8().constData();
 
   //auto-detect input data type
-  if(strbegin(text, "0x")) data = strhex((const char*)text + 2);
-  else if(strbegin(text, "-")) data = strsigned(text);
-  else data = strunsigned(text);
+  if(strbegin(text, "0x")) data = hex((const char*)text + 2);
+  else if(strbegin(text, "-")) data = integer(text);
+  else data = decimal(text);
 
   if(addrList.size() == 0) {
     //search for the first time: enqueue all possible values so they are all searched

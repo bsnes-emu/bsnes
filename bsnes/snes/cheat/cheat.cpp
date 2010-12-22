@@ -84,7 +84,7 @@ bool Cheat::decode(const char *s, unsigned &addr, uint8 &data, Type &type) {
     for(unsigned i = 0; i < 8; i++) if(!ischr(t[i])) return false;
 
     type = Type::ProActionReplay;
-    unsigned r = strhex((const char*)t);
+    unsigned r = hex((const char*)t);
     addr = r >> 8;
     data = r & 0xff;
     return true;
@@ -96,7 +96,7 @@ bool Cheat::decode(const char *s, unsigned &addr, uint8 &data, Type &type) {
 
     type = Type::GameGenie;
     t.transform("df4709156bc8a23e", "0123456789abcdef");
-    unsigned r = strhex((const char*)t);
+    unsigned r = hex((const char*)t);
     //8421 8421 8421 8421 8421 8421
     //abcd efgh ijkl mnop qrst uvwx
     //ijkl qrst opab cduv wxef ghmn
@@ -125,7 +125,7 @@ bool Cheat::encode(string &s, unsigned addr, uint8 data, Type type) {
   char t[16];
 
   if(type == Type::ProActionReplay) {
-    s = string(strhex<6>(addr), strhex<2>(data));
+    s = string(hex<6>(addr), hex<2>(data));
     return true;
   } else if(type == Type::GameGenie) {
     unsigned r = addr;
@@ -141,7 +141,7 @@ bool Cheat::encode(string &s, unsigned addr, uint8 data, Type type) {
          | (!!(r & 0x080000) <<  5) | (!!(r & 0x040000) <<  4)
          | (!!(r & 0x020000) <<  3) | (!!(r & 0x010000) <<  2)
          | (!!(r & 0x000800) <<  1) | (!!(r & 0x000400) <<  0);
-    s = string(strhex<2>(data), strhex<2>(addr >> 16), "-", strhex<4>(addr & 0xffff));
+    s = string(hex<2>(data), hex<2>(addr >> 16), "-", hex<4>(addr & 0xffff));
     s.transform("0123456789abcdef", "df4709156bc8a23e");
     return true;
   } else {

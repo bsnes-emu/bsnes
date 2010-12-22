@@ -14,7 +14,7 @@ static void ListBox_change(ListBox *self) {
 }
 
 static void ListBox_tick(GtkCellRendererToggle *cell, gchar *path_string, ListBox *self) {
-  unsigned index = strunsigned(path_string);
+  unsigned index = decimal(path_string);
   self->setChecked(index, !self->checked(index));
   if(self->onTick) self->onTick(index);
 }

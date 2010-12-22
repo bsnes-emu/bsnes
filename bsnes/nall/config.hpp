@@ -45,11 +45,11 @@ namespace nall {
 
       void set(string s) {
         switch(type) {
-          case boolean_t:  *(bool*)data = (s == "true");      break;
-          case signed_t:   *(signed*)data = strsigned(s);     break;
-          case unsigned_t: *(unsigned*)data = strunsigned(s); break;
-          case double_t:   *(double*)data = strdouble(s);     break;
-          case string_t:   s.trim("\""); *(string*)data = s;  break;
+          case boolean_t:  *(bool*)data = (s == "true");     break;
+          case signed_t:   *(signed*)data = integer(s);      break;
+          case unsigned_t: *(unsigned*)data = decimal(s);    break;
+          case double_t:   *(double*)data = fp(s);           break;
+          case string_t:   s.trim("\""); *(string*)data = s; break;
         }
       }
     };

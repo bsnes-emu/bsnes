@@ -418,36 +418,36 @@ inline string SNESCPU::disassemble(unsigned pc, bool accum, bool index, uint8_t 
   unsigned mode = opcodeInfo[opcode].mode;
 
   if(mode == Implied) return name;
-  if(mode == Constant) return { name, " #$", strhex<2>(pl) };
-  if(mode == AccumConstant) return { name, " #$", accum ? "" : strhex<2>(ph), strhex<2>(pl) };
-  if(mode == IndexConstant) return { name, " #$", index ? "" : strhex<2>(ph), strhex<2>(pl) };
-  if(mode == Direct) return { name, " $", strhex<2>(pl) };
-  if(mode == DirectX) return { name, " $", strhex<2>(pl), ",x" };
-  if(mode == DirectY) return { name, " $", strhex<2>(pl), ",y" };
-  if(mode == IDirect) return { name, " ($", strhex<2>(pl), ")" };
-  if(mode == IDirectX) return { name, " ($", strhex<2>(pl), ",x)" };
-  if(mode == IDirectY) return { name, " ($", strhex<2>(pl), "),y" };
-  if(mode == ILDirect) return { name, " [$", strhex<2>(pl), "]" };
-  if(mode == ILDirectY) return { name, " [$", strhex<2>(pl), "],y" };
-  if(mode == Address) return { name, " $", strhex<2>(ph), strhex<2>(pl) };
-  if(mode == AddressX) return { name, " $", strhex<2>(ph), strhex<2>(pl), ",x" };
-  if(mode == AddressY) return { name, " $", strhex<2>(ph), strhex<2>(pl), ",y" };
-  if(mode == IAddressX) return { name, " ($", strhex<2>(ph), strhex<2>(pl), ",x)" };
-  if(mode == ILAddress) return { name, " [$", strhex<2>(ph), strhex<2>(pl), "]" };
-  if(mode == PAddress) return { name, " $", strhex<2>(ph), strhex<2>(pl) };
-  if(mode == PIAddress) return { name, " ($", strhex<2>(ph), strhex<2>(pl), ")" };
-  if(mode == Long) return { name, " $", strhex<2>(pb), strhex<2>(ph), strhex<2>(pl) };
-  if(mode == LongX) return { name, " $", strhex<2>(pb), strhex<2>(ph), strhex<2>(pl), ",x" };
-  if(mode == Stack) return { name, " $", strhex<2>(pl), ",s" };
-  if(mode == IStackY) return { name, " ($", strhex<2>(pl), ",s),y" };
-  if(mode == BlockMove) return { name, " $", strhex<2>(ph), ",$", strhex<2>(pl) };
+  if(mode == Constant) return { name, " #$", hex<2>(pl) };
+  if(mode == AccumConstant) return { name, " #$", accum ? "" : hex<2>(ph), hex<2>(pl) };
+  if(mode == IndexConstant) return { name, " #$", index ? "" : hex<2>(ph), hex<2>(pl) };
+  if(mode == Direct) return { name, " $", hex<2>(pl) };
+  if(mode == DirectX) return { name, " $", hex<2>(pl), ",x" };
+  if(mode == DirectY) return { name, " $", hex<2>(pl), ",y" };
+  if(mode == IDirect) return { name, " ($", hex<2>(pl), ")" };
+  if(mode == IDirectX) return { name, " ($", hex<2>(pl), ",x)" };
+  if(mode == IDirectY) return { name, " ($", hex<2>(pl), "),y" };
+  if(mode == ILDirect) return { name, " [$", hex<2>(pl), "]" };
+  if(mode == ILDirectY) return { name, " [$", hex<2>(pl), "],y" };
+  if(mode == Address) return { name, " $", hex<2>(ph), hex<2>(pl) };
+  if(mode == AddressX) return { name, " $", hex<2>(ph), hex<2>(pl), ",x" };
+  if(mode == AddressY) return { name, " $", hex<2>(ph), hex<2>(pl), ",y" };
+  if(mode == IAddressX) return { name, " ($", hex<2>(ph), hex<2>(pl), ",x)" };
+  if(mode == ILAddress) return { name, " [$", hex<2>(ph), hex<2>(pl), "]" };
+  if(mode == PAddress) return { name, " $", hex<2>(ph), hex<2>(pl) };
+  if(mode == PIAddress) return { name, " ($", hex<2>(ph), hex<2>(pl), ")" };
+  if(mode == Long) return { name, " $", hex<2>(pb), hex<2>(ph), hex<2>(pl) };
+  if(mode == LongX) return { name, " $", hex<2>(pb), hex<2>(ph), hex<2>(pl), ",x" };
+  if(mode == Stack) return { name, " $", hex<2>(pl), ",s" };
+  if(mode == IStackY) return { name, " ($", hex<2>(pl), ",s),y" };
+  if(mode == BlockMove) return { name, " $", hex<2>(ph), ",$", hex<2>(pl) };
   if(mode == RelativeShort) {
     unsigned addr = (pc + 2) + (int8_t)(pl << 0);
-    return { name, " $", strhex<4>(addr) };
+    return { name, " $", hex<4>(addr) };
   }
   if(mode == RelativeLong) {
     unsigned addr = (pc + 3) + (int16_t)((ph << 8) + (pl << 0));
-    return { name, " $", strhex<4>(addr) };
+    return { name, " $", hex<4>(addr) };
   }
 
   return "";

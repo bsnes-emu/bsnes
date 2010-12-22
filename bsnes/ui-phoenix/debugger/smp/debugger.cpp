@@ -75,7 +75,7 @@ void SMPDebugger::refreshDisassembly() {
       buffer.append("...\n");
     } else {
       uint16_t addr = offset[n];
-      buffer.append(strhex<4>(addr));
+      buffer.append(hex<4>(addr));
       buffer.append(" ");
       string text = SNESSMP::disassemble(
         addr, read(addr + 0), read(addr + 1), read(addr + 2)

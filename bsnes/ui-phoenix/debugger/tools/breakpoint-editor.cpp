@@ -37,8 +37,8 @@ void BreakpointEditor::toggleBreakpoint(unsigned n) {
     SNES::debugger.breakpoint[n].enabled = false;
   } else {
     SNES::debugger.breakpoint[n].enabled = true;
-    SNES::debugger.breakpoint[n].addr = strhex(addressBox[n].text());
-    SNES::debugger.breakpoint[n].data = strhex(valueBox[n].text());
+    SNES::debugger.breakpoint[n].addr = hex(addressBox[n].text());
+    SNES::debugger.breakpoint[n].data = hex(valueBox[n].text());
     if(valueBox[n].text() == "") SNES::debugger.breakpoint[n].data = -1;  //break on any value
     SNES::debugger.breakpoint[n].mode = (SNES::Debugger::Breakpoint::Mode)typeBox[n].selection();
     SNES::debugger.breakpoint[n].source = (SNES::Debugger::Breakpoint::Source)sourceBox[n].selection();

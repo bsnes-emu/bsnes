@@ -80,7 +80,7 @@ void HexEditor::update() {
   string output;
   unsigned offset = hexEditor->offset;
   for(unsigned row = 0; row < hexEditor->rows; row++) {
-    output.append(strhex<8>(offset));
+    output.append(hex<8>(offset));
     output.append("  ");
 
     string hexdata;
@@ -88,7 +88,7 @@ void HexEditor::update() {
     for(unsigned column = 0; column < hexEditor->columns; column++) {
       if(offset < hexEditor->size) {
         uint8_t data = onRead(offset++);
-        hexdata.append(strhex<2>(data));
+        hexdata.append(hex<2>(data));
         hexdata.append(" ");
         char buffer[2] = { data >= 0x20 && data <= 0x7e ? (char)data : '.', 0 };
         ansidata.append(buffer);

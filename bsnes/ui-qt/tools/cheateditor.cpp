@@ -110,7 +110,7 @@ void CheatEditorWindow::load(const char *filename) {
 
     auto item = new QTreeWidgetItem(list);
     item->setData(0, Qt::UserRole, QVariant(i));
-    item->setText(0, strunsigned<3, ' '>(i + 1));
+    item->setText(0, decimal<3, ' '>(i + 1));
     item->setCheckState(0, part[0] == "enabled" ? Qt::Checked : Qt::Unchecked);
     item->setText(1, part[1]);
     item->setText(2, part[2]);

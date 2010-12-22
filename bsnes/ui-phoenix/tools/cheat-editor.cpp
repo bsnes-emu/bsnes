@@ -5,7 +5,7 @@ void CheatEditor::load(string filename) {
   cheatList.reset();
   for(unsigned i = 0; i < 128; i++) {
     cheatList.addItem("");
-    cheatText[i][CheatSlot] = strunsigned<3, ' '>(i + 1);
+    cheatText[i][CheatSlot] = decimal<3, ' '>(i + 1);
     cheatText[i][CheatCode] = "";
     cheatText[i][CheatDesc] = "";
   }

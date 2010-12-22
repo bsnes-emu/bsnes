@@ -68,7 +68,7 @@ bool SMPDebugger::property(unsigned id, string &name, string &value) {
 
   //$00f2
   item("$00f2", "");
-  item("DSP Address", string("0x", strhex<2>(status.dsp_addr)));
+  item("DSP Address", string("0x", hex<2>(status.dsp_addr)));
 
   #undef item
   return false;

@@ -49,6 +49,7 @@ void Cartridge::load(Mode cartridge_mode, const lstring &xml_list) {
   has_serial     = false;
 
   parse_xml(xml_list);
+//print(xml_list[0], "\n");
 
   if(ram_size > 0) {
     memory::cartram.map(allocate<uint8_t>(ram_size, 0xff), ram_size);
@@ -104,7 +105,7 @@ void Cartridge::load(Mode cartridge_mode, const lstring &xml_list) {
   sha256_hash(&sha, shahash);
 
   string hash;
-  foreach(n, shahash) hash << strhex<2>(n);
+  foreach(n, shahash) hash << hex<2>(n);
   sha256 = hash;
 
   bus.load_cart();

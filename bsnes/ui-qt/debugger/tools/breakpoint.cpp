@@ -40,8 +40,8 @@ void BreakpointItem::toggle() {
 
   if(state) {
     SNES::debugger.breakpoint[id].enabled = true;
-    SNES::debugger.breakpoint[id].addr = strhex(addr->text().toUtf8().data()) & 0xffffff;
-    SNES::debugger.breakpoint[id].data = strhex(data->text().toUtf8().data()) & 0xff;
+    SNES::debugger.breakpoint[id].addr = hex(addr->text().toUtf8().data()) & 0xffffff;
+    SNES::debugger.breakpoint[id].data = hex(data->text().toUtf8().data()) & 0xff;
     if(data->text().length() == 0) SNES::debugger.breakpoint[id].data = -1;
     SNES::debugger.breakpoint[id].mode = (SNES::Debugger::Breakpoint::Mode)mode->currentIndex();
     SNES::debugger.breakpoint[id].source = (SNES::Debugger::Breakpoint::Source)source->currentIndex();

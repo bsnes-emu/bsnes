@@ -99,7 +99,7 @@ void MemoryEditor::sourceChanged(int index) {
     case 4: memorySource = SNES::Debugger::MemorySource::CGRAM;  editor->setSize(512);              break;
   }
 
-  editor->setOffset(strhex(addr->text().toUtf8().data()));
+  editor->setOffset(hex(addr->text().toUtf8().data()));
   editor->refresh();
 }
 
@@ -112,7 +112,7 @@ void MemoryEditor::refresh() {
 }
 
 void MemoryEditor::updateOffset() {
-  editor->setOffset(strhex(addr->text().toUtf8().data()));
+  editor->setOffset(hex(addr->text().toUtf8().data()));
   refresh();
 }
 

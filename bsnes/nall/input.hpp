@@ -92,7 +92,7 @@ struct Keyboard {
     string s(name);
     if(!strbegin(name, "KB")) return 0;
     s.ltrim("KB");
-    unsigned id = strunsigned(s);
+    unsigned id = decimal(s);
     auto pos = strpos(s, "::");
     if(!pos) return 0;
     s = substr(s, pos() + 2);
@@ -189,7 +189,7 @@ struct Mouse {
     string s(name);
     if(!strbegin(name, "MS")) return 0;
     s.ltrim("MS");
-    unsigned id = strunsigned(s);
+    unsigned id = decimal(s);
     auto pos = strpos(s, "::");
     if(!pos) return 0;
     s = substr(s, pos() + 2);
@@ -313,7 +313,7 @@ struct Joypad {
     string s(name);
     if(!strbegin(name, "JP")) return 0;
     s.ltrim("JP");
-    unsigned id = strunsigned(s);
+    unsigned id = decimal(s);
     auto pos = strpos(s, "::");
     if(!pos) return 0;
     s = substr(s, pos() + 2);

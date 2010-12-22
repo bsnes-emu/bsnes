@@ -75,7 +75,7 @@ void Cartridge::parse_xml_gameboy(const char *data) {
         if(leaf.name == "ram") {
           foreach(attr, leaf.attribute) {
             if(attr.name == "size") {
-              supergameboy_ram_size = strhex(attr.content);
+              supergameboy_ram_size = hex(attr.content);
             }
           }
         }
@@ -91,8 +91,8 @@ void Cartridge::xml_parse_rom(xml_element &root) {
       foreach(attr, leaf.attribute) {
         if(attr.name == "address") xml_parse_address(m, attr.content);
         if(attr.name == "mode") xml_parse_mode(m, attr.content);
-        if(attr.name == "offset") m.offset = strhex(attr.content);
-        if(attr.name == "size") m.size = strhex(attr.content);
+        if(attr.name == "offset") m.offset = hex(attr.content);
+        if(attr.name == "size") m.size = hex(attr.content);
       }
       mapping.append(m);
     }
@@ -101,7 +101,7 @@ void Cartridge::xml_parse_rom(xml_element &root) {
 
 void Cartridge::xml_parse_ram(xml_element &root) {
   foreach(attr, root.attribute) {
-    if(attr.name == "size") ram_size = strhex(attr.content);
+    if(attr.name == "size") ram_size = hex(attr.content);
   }
 
   foreach(leaf, root.element) {
@@ -110,8 +110,8 @@ void Cartridge::xml_parse_ram(xml_element &root) {
       foreach(attr, leaf.attribute) {
         if(attr.name == "address") xml_parse_address(m, attr.content);
         if(attr.name == "mode") xml_parse_mode(m, attr.content);
-        if(attr.name == "offset") m.offset = strhex(attr.content);
-        if(attr.name == "size") m.size = strhex(attr.content);
+        if(attr.name == "offset") m.offset = hex(attr.content);
+        if(attr.name == "size") m.size = hex(attr.content);
       }
       mapping.append(m);
     }
@@ -129,15 +129,15 @@ void Cartridge::xml_parse_superfx(xml_element &root) {
           foreach(attr, leaf.attribute) {
             if(attr.name == "address") xml_parse_address(m, attr.content);
             if(attr.name == "mode") xml_parse_mode(m, attr.content);
-            if(attr.name == "offset") m.offset = strhex(attr.content);
-            if(attr.name == "size") m.size = strhex(attr.content);
+            if(attr.name == "offset") m.offset = hex(attr.content);
+            if(attr.name == "size") m.size = hex(attr.content);
           }
           mapping.append(m);
         }
       }
     } else if(node.name == "ram") {
       foreach(attr, node.attribute) {
-        if(attr.name == "size") ram_size = strhex(attr.content);
+        if(attr.name == "size") ram_size = hex(attr.content);
       }
 
       foreach(leaf, node.element) {
@@ -146,8 +146,8 @@ void Cartridge::xml_parse_superfx(xml_element &root) {
           foreach(attr, leaf.attribute) {
             if(attr.name == "address") xml_parse_address(m, attr.content);
             if(attr.name == "mode") xml_parse_mode(m, attr.content);
-            if(attr.name == "offset") m.offset = strhex(attr.content);
-            if(attr.name == "size") m.size = strhex(attr.content);
+            if(attr.name == "offset") m.offset = hex(attr.content);
+            if(attr.name == "size") m.size = hex(attr.content);
           }
           mapping.append(m);
         }
@@ -177,8 +177,8 @@ void Cartridge::xml_parse_sa1(xml_element &root) {
           foreach(attr, leaf.attribute) {
             if(attr.name == "address") xml_parse_address(m, attr.content);
             if(attr.name == "mode") xml_parse_mode(m, attr.content);
-            if(attr.name == "offset") m.offset = strhex(attr.content);
-            if(attr.name == "size") m.size = strhex(attr.content);
+            if(attr.name == "offset") m.offset = hex(attr.content);
+            if(attr.name == "size") m.size = hex(attr.content);
           }
           mapping.append(m);
         }
@@ -190,15 +190,15 @@ void Cartridge::xml_parse_sa1(xml_element &root) {
           foreach(attr, leaf.attribute) {
             if(attr.name == "address") xml_parse_address(m, attr.content);
             if(attr.name == "mode") xml_parse_mode(m, attr.content);
-            if(attr.name == "offset") m.offset = strhex(attr.content);
-            if(attr.name == "size") m.size = strhex(attr.content);
+            if(attr.name == "offset") m.offset = hex(attr.content);
+            if(attr.name == "size") m.size = hex(attr.content);
           }
           mapping.append(m);
         }
       }
     } else if(node.name == "bwram") {
       foreach(attr, node.attribute) {
-        if(attr.name == "size") ram_size = strhex(attr.content);
+        if(attr.name == "size") ram_size = hex(attr.content);
       }
 
       foreach(leaf, node.element) {
@@ -207,8 +207,8 @@ void Cartridge::xml_parse_sa1(xml_element &root) {
           foreach(attr, leaf.attribute) {
             if(attr.name == "address") xml_parse_address(m, attr.content);
             if(attr.name == "mode") xml_parse_mode(m, attr.content);
-            if(attr.name == "offset") m.offset = strhex(attr.content);
-            if(attr.name == "size") m.size = strhex(attr.content);
+            if(attr.name == "offset") m.offset = hex(attr.content);
+            if(attr.name == "size") m.size = hex(attr.content);
           }
           mapping.append(m);
         }
@@ -281,8 +281,8 @@ void Cartridge::xml_parse_bsx(xml_element &root) {
           foreach(attr, leaf.attribute) {
             if(attr.name == "address") xml_parse_address(m, attr.content);
             if(attr.name == "mode") xml_parse_mode(m, attr.content);
-            if(attr.name == "offset") m.offset = strhex(attr.content);
-            if(attr.name == "size") m.size = strhex(attr.content);
+            if(attr.name == "offset") m.offset = hex(attr.content);
+            if(attr.name == "size") m.size = hex(attr.content);
           }
           mapping.append(m);
         }
@@ -322,8 +322,8 @@ void Cartridge::xml_parse_sufamiturbo(xml_element &root) {
               foreach(attr, leaf.attribute) {
                 if(attr.name == "address") xml_parse_address(m, attr.content);
                 if(attr.name == "mode") xml_parse_mode(m, attr.content);
-                if(attr.name == "offset") m.offset = strhex(attr.content);
-                if(attr.name == "size") m.size = strhex(attr.content);
+                if(attr.name == "offset") m.offset = hex(attr.content);
+                if(attr.name == "size") m.size = hex(attr.content);
               }
               if(m.memory->size() > 0) mapping.append(m);
             }
@@ -335,8 +335,8 @@ void Cartridge::xml_parse_sufamiturbo(xml_element &root) {
               foreach(attr, leaf.attribute) {
                 if(attr.name == "address") xml_parse_address(m, attr.content);
                 if(attr.name == "mode") xml_parse_mode(m, attr.content);
-                if(attr.name == "offset") m.offset = strhex(attr.content);
-                if(attr.name == "size") m.size = strhex(attr.content);
+                if(attr.name == "offset") m.offset = hex(attr.content);
+                if(attr.name == "size") m.size = hex(attr.content);
               }
               if(m.memory->size() > 0) mapping.append(m);
             }
@@ -438,7 +438,7 @@ void Cartridge::xml_parse_spc7110(xml_element &root) {
           Mapping m(spc7110mcu);
           foreach(attr, leaf.attribute) {
             if(attr.name == "address") xml_parse_address(m, attr.content);
-            if(attr.name == "offset") spc7110_data_rom_offset = strhex(attr.content);
+            if(attr.name == "offset") spc7110_data_rom_offset = hex(attr.content);
           }
           mapping.append(m);
         }
@@ -455,7 +455,7 @@ void Cartridge::xml_parse_spc7110(xml_element &root) {
       }
     } else if(node.name == "ram") {
       foreach(attr, node.attribute) {
-        if(attr.name == "size") ram_size = strhex(attr.content);
+        if(attr.name == "size") ram_size = hex(attr.content);
       }
 
       foreach(leaf, node.element) {
@@ -464,8 +464,8 @@ void Cartridge::xml_parse_spc7110(xml_element &root) {
           foreach(attr, leaf.attribute) {
             if(attr.name == "address") xml_parse_address(m, attr.content);
             if(attr.name == "mode") xml_parse_mode(m, attr.content);
-            if(attr.name == "offset") m.offset = strhex(attr.content);
-            if(attr.name == "size") m.size = strhex(attr.content);
+            if(attr.name == "offset") m.offset = hex(attr.content);
+            if(attr.name == "size") m.size = hex(attr.content);
           }
           mapping.append(m);
         }
@@ -662,20 +662,20 @@ void Cartridge::xml_parse_address(Mapping &m, const string &data) {
   lstring subpart;
   subpart.split("-", part[0]);
   if(subpart.size() == 1) {
-    m.banklo = strhex(subpart[0]);
+    m.banklo = hex(subpart[0]);
     m.bankhi = m.banklo;
   } else if(subpart.size() == 2) {
-    m.banklo = strhex(subpart[0]);
-    m.bankhi = strhex(subpart[1]);
+    m.banklo = hex(subpart[0]);
+    m.bankhi = hex(subpart[1]);
   }
 
   subpart.split("-", part[1]);
   if(subpart.size() == 1) {
-    m.addrlo = strhex(subpart[0]);
+    m.addrlo = hex(subpart[0]);
     m.addrhi = m.addrlo;
   } else if(subpart.size() == 2) {
-    m.addrlo = strhex(subpart[0]);
-    m.addrhi = strhex(subpart[1]);
+    m.addrlo = hex(subpart[0]);
+    m.addrhi = hex(subpart[1]);
   }
 }
 

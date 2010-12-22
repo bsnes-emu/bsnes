@@ -42,7 +42,7 @@ void MemoryEditor::create() {
   };
 
   gotoBox.onChange = []() {
-    unsigned addr = strhex(memoryEditor.gotoBox.text());
+    unsigned addr = hex(memoryEditor.gotoBox.text());
     memoryEditor.editor.setOffset(addr % memoryEditor.size);
     memoryEditor.editor.update();
   };

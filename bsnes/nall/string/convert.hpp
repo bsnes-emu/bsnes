@@ -40,7 +40,7 @@ char* strtr(char *dest, const char *before, const char *after) {
   return dest;
 }
 
-uintmax_t strhex(const char *str) {
+uintmax_t hex(const char *str) {
   if(!str) return 0;
   uintmax_t result = 0;
 
@@ -60,7 +60,7 @@ uintmax_t strhex(const char *str) {
   return result;
 }
 
-intmax_t strsigned(const char *str) {
+intmax_t integer(const char *str) {
   if(!str) return 0;
   intmax_t result = 0;
   bool negate = false;
@@ -81,7 +81,7 @@ intmax_t strsigned(const char *str) {
   return !negate ? result : -result;
 }
 
-uintmax_t strunsigned(const char *str) {
+uintmax_t decimal(const char *str) {
   if(!str) return 0;
   uintmax_t result = 0;
 
@@ -95,7 +95,7 @@ uintmax_t strunsigned(const char *str) {
   return result;
 }
 
-uintmax_t strbin(const char *str) {
+uintmax_t binary(const char *str) {
   if(!str) return 0;
   uintmax_t result = 0;
 
@@ -113,7 +113,7 @@ uintmax_t strbin(const char *str) {
   return result;
 }
 
-double strdouble(const char *str) {
+double fp(const char *str) {
   if(!str) return 0.0;
   bool negate = false;
 

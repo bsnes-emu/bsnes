@@ -1,5 +1,5 @@
 string UPD77C25::disassemble(uint11 ip) {
-  string output = { strhex<3>(ip), "  " };
+  string output = { hex<3>(ip), "  " };
   uint24 opcode = programROM[ip];
   uint2 type = opcode >> 22;
 
@@ -171,7 +171,7 @@ string UPD77C25::disassemble(uint11 ip) {
       default:    output << "??????  "; break;
     }
 
-    output << "$" << strhex<3>(na);
+    output << "$" << hex<3>(na);
   }
 
   if(type == 3) {  //LD
@@ -179,7 +179,7 @@ string UPD77C25::disassemble(uint11 ip) {
     uint16 id = opcode >> 6;
     uint4 dst = opcode >> 0;
 
-    output << "$" << strhex<4>(id) << ",";
+    output << "$" << hex<4>(id) << ",";
 
     switch(dst) {
       case  0: output << "non"; break;

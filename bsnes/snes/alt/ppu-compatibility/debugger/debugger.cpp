@@ -47,8 +47,8 @@ bool PPUDebugger::property(unsigned id, string &name, string &value) {
   }
 
   //internal
-  item("S-PPU1 MDR", string("0x", strhex<2>(regs.ppu1_mdr)));
-  item("S-PPU2 MDR", string("0x", strhex<2>(regs.ppu2_mdr)));
+  item("S-PPU1 MDR", string("0x", hex<2>(regs.ppu1_mdr)));
+  item("S-PPU2 MDR", string("0x", hex<2>(regs.ppu2_mdr)));
 
   //$2100
   item("$2100", "");
@@ -59,11 +59,11 @@ bool PPUDebugger::property(unsigned id, string &name, string &value) {
   item("$2101", "");
   item("OAM Base Size", (unsigned)regs.oam_basesize);
   item("OAM Name Select", (unsigned)regs.oam_nameselect);
-  item("OAM Name Base Address", string("0x", strhex<4>(regs.oam_tdaddr)));
+  item("OAM Name Base Address", string("0x", hex<4>(regs.oam_tdaddr)));
 
   //$2102-$2103
   item("$2102-$2103", "");
-  item("OAM Base Address", string("0x", strhex<4>(regs.oam_baseaddr)));
+  item("OAM Base Address", string("0x", hex<4>(regs.oam_baseaddr)));
   item("OAM Priority", regs.oam_priority);
 
   //$2105
@@ -87,33 +87,33 @@ bool PPUDebugger::property(unsigned id, string &name, string &value) {
 
   //$2107
   item("$2107", "");
-  item("BG1 Screen Address", string("0x", strhex<4>(regs.bg_scaddr[BG1])));
+  item("BG1 Screen Address", string("0x", hex<4>(regs.bg_scaddr[BG1])));
   item("BG1 Screen Size", screen_size[regs.bg_scsize[BG1]]);
 
   //$2108
   item("$2108", "");
-  item("BG2 Screen Address", string("0x", strhex<4>(regs.bg_scaddr[BG2])));
+  item("BG2 Screen Address", string("0x", hex<4>(regs.bg_scaddr[BG2])));
   item("BG2 Screen Size", screen_size[regs.bg_scsize[BG2]]);
 
   //$2109
   item("$2109", "");
-  item("BG3 Screen Address", string("0x", strhex<4>(regs.bg_scaddr[BG3])));
+  item("BG3 Screen Address", string("0x", hex<4>(regs.bg_scaddr[BG3])));
   item("BG3 Screen Size", screen_size[regs.bg_scsize[BG3]]);
 
   //$210a
   item("$210a", "");
-  item("BG4 Screen Address", string("0x", strhex<4>(regs.bg_scaddr[BG4])));
+  item("BG4 Screen Address", string("0x", hex<4>(regs.bg_scaddr[BG4])));
   item("BG4 Screen Size", screen_size[regs.bg_scsize[BG4]]);
 
   //$210b
   item("$210b", "");
-  item("BG1 Name Base Address", string("0x", strhex<4>(regs.bg_tdaddr[BG1])));
-  item("BG2 Name Base Address", string("0x", strhex<4>(regs.bg_tdaddr[BG2])));
+  item("BG1 Name Base Address", string("0x", hex<4>(regs.bg_tdaddr[BG1])));
+  item("BG2 Name Base Address", string("0x", hex<4>(regs.bg_tdaddr[BG2])));
 
   //$210c
   item("$210c", "");
-  item("BG3 Name Base Address", string("0x", strhex<4>(regs.bg_tdaddr[BG3])));
-  item("BG4 Name Base Address", string("0x", strhex<4>(regs.bg_tdaddr[BG4])));
+  item("BG3 Name Base Address", string("0x", hex<4>(regs.bg_tdaddr[BG3])));
+  item("BG4 Name Base Address", string("0x", hex<4>(regs.bg_tdaddr[BG4])));
 
   //$210d
   item("$210d", "");
@@ -157,7 +157,7 @@ bool PPUDebugger::property(unsigned id, string &name, string &value) {
 
   //$2116-$2117
   item("$2116-$2117", "");
-  item("VRAM Address", string("0x", strhex<4>(regs.vram_addr)));
+  item("VRAM Address", string("0x", hex<4>(regs.vram_addr)));
 
   //$211a
   item("$211a", "");
@@ -191,7 +191,7 @@ bool PPUDebugger::property(unsigned id, string &name, string &value) {
 
   //$2121
   item("$2121", "");
-  item("CGRAM Address", string("0x", strhex<4>(regs.cgram_addr)));
+  item("CGRAM Address", string("0x", hex<4>(regs.cgram_addr)));
 
   //$2123
   item("$2123", "");
