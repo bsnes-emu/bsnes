@@ -1,6 +1,6 @@
 /*
   libco
-  version: 0.15 (2009-10-12)
+  version: 0.16 (2010-12-24)
   license: public domain
 */
 
