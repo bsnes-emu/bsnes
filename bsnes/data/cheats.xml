@@ -3361,16 +3361,6 @@
   <cartridge sha256="aac9d6f2b8408e4bbdc83ebbba755428caf8021fefbfac7220fb4c772abd9944">	
     <name>Arcana (USA)</name>
     <cheat>
-      <description>Start with 60,000 gold pieces</description>
-      <code>1D69-AFD0</code>
-      <code>3C69-AF00</code>
-    </cheat>
-    <cheat>
-      <description>Start with 250 gold pieces</description>
-      <code>EC69-AFD0</code>
-      <code>DD69-AF00</code>
-    </cheat>
-    <cheat>
       <description>Infinite money for weapons</description>
       <code>C225-0F02</code>
     </cheat>
@@ -3387,12 +3377,33 @@
       <code>C22F-A7DE</code>
     </cheat>
     <cheat>
-      <description>Level and statistics for all characters in group are increased after each battle you win</description>
+      <description>Level and statistics for all characters in group are increased after each battle</description>
       <code>B387-DFF2</code>
     </cheat>
     <cheat>
       <description>Magic points don't decrease</description>
       <code>828B-AF2E</code>
+    </cheat>
+    <cheat>
+      <description>Start with 60,000 gold pieces</description>
+      <code>1D69-AFD0</code>
+      <code>3C69-AF00</code>
+    </cheat>
+    <cheat>
+      <description>Start with 250 gold pieces</description>
+      <code>EC69-AFD0</code>
+      <code>DD69-AF00</code>
+    </cheat>
+  </cartridge>
+  <cartridge sha256="">	
+    <name>Archer Maclean's Super Dropzone (Europe)</name>
+    <cheat>
+      <description>Infinite lives</description>
+      <code>7E002504</code>
+    </cheat>
+    <cheat>
+      <description>Infinite bombs</description>
+      <code>7E002604</code>
     </cheat>
   </cartridge>
   <cartridge sha256="0f474dafe5a26f3dea491d18073dd490d2f1f91313a7e91086565510d38d9a09">	
@@ -4291,10 +4302,6 @@
   <cartridge sha256="983022203546e031773db0d1af7552c489187954882843f13ff123f09064c1d3">	
     <name>Battle Blaze (USA)</name>
     <cheat>
-      <description>Infinite continues</description>
-      <code>C285-D4AB</code>
-    </cheat>
-    <cheat>
       <description>Infinite health (disable at end of round) - P1</description>
       <code>7E06DCC0</code>
     </cheat>
@@ -4305,6 +4312,14 @@
     <cheat>
       <description>No health - P1</description>
       <code>7E06DC00</code>
+    </cheat>
+    <cheat>
+      <description>No health - P2</description>
+      <code>7E070400</code>
+    </cheat>
+    <cheat>
+      <description>Infinite continues</description>
+      <code>C285-D4AB</code>
     </cheat>
   </cartridge>
   <cartridge sha256="32f42fda0667d9435a2de84c7ce7b067bcbab1164f8f6d837992ad6cfac4f8de">	
@@ -4593,6 +4608,83 @@
     <cheat>
       <description>Protection against most strength level 2 hazards</description>
       <code>8982-CFD1</code>
+    </cheat>
+  </cartridge>
+  <cartridge sha256="">	
+    <name>Battletoads-Double Dragon (USA)</name>
+    <cheat>
+      <description>Invincibility (blinking) - P1</description>
+      <code>7E11127F</code>
+    </cheat>
+    <cheat>
+      <description>Infinite health - P1</description>
+      <code>7E003A2F</code>
+    </cheat>
+    <cheat>
+      <description>Infinite lives - P1</description>
+      <code>7E002605</code>
+    </cheat>
+    <cheat>
+      <description>Infinite lives</description>
+      <code>40B8-04AF</code>
+    </cheat>
+    <cheat>
+      <description>Enemies have less health</description>
+      <code>DE6E-1466</code>
+    </cheat>
+    <cheat>
+      <description>Abobo has less health</description>
+      <code>4EB7-1DD6</code>
+    </cheat>
+    <cheat>
+      <description>Big Blag has less health</description>
+      <code>4EB3-C4DB</code>
+    </cheat>
+    <cheat>
+      <description>Roper has less health</description>
+      <code>D7BA-3FA8</code>
+    </cheat>
+    <cheat>
+      <description>Robo-Manus has less health</description>
+      <code>D7C5-3F66</code>
+    </cheat>
+    <cheat>
+      <description>Start with 2 lives</description>
+      <code>DF60-D76D</code>
+    </cheat>
+    <cheat>
+      <description>Start with 10 lives</description>
+      <code>DB60-D76D</code>
+    </cheat>
+    <cheat>
+      <description>Start on level 2 with 11 lives</description>
+      <code>DD65-DD0D</code>
+      <code>CB66-D46D</code>
+      <code>DF66-D4AD</code>
+    </cheat>
+    <cheat>
+      <description>Start on level 3 with 11 lives</description>
+      <code>DD65-DD0D</code>
+      <code>CB66-D46D</code>
+      <code>D466-D4AD</code>
+    </cheat>
+    <cheat>
+      <description>Start on level 4 with 11 lives</description>
+      <code>DD65-DD0D</code>
+      <code>CB66-D46D</code>
+      <code>D766-D4AD</code>
+    </cheat>
+    <cheat>
+      <description>Start on level 5 with 11 lives</description>
+      <code>DD65-DD0D</code>
+      <code>CB66-D46D</code>
+      <code>D066-D4AD</code>
+    </cheat>
+    <cheat>
+      <description>Start on level 6 with 11 lives</description>
+      <code>DD65-DD0D</code>
+      <code>CB66-D46D</code>
+      <code>D966-D4AD</code>
     </cheat>
   </cartridge>
   <cartridge sha256="0960f1de179f90e3d8488dacf09d5fe246fdb314913c370b3698dfdce58aa8ba">	
@@ -4983,6 +5075,21 @@
   </cartridge>
   <cartridge sha256="de1de85ad549a6aaf0431cceb47cbd07e1f6e81f9e16fd62575305e2c1f06240">	
     <name>Bio Metal (USA)</name>
+    <cheat>
+      <description>Infinite lives</description>
+      <code>C26E-6D02</code>
+    </cheat>
+    <cheat>
+      <description>Infinite lives (alt)</description>
+      <code>7E029D0A</code>
+    </cheat>
+    <cheat>
+      <description>Infinite charge</description>
+      <code>C262-0D62</code>
+    </cheat>
+  </cartridge>
+  <cartridge sha256="">	
+    <name>BioMetal (USA)</name>
     <cheat>
       <description>Infinite lives</description>
       <code>C26E-6D02</code>
@@ -7756,16 +7863,20 @@
   <cartridge sha256="367725a149a471411e4f72ad77603b61fb101c9cab4521be5647e13708cc97ba">	
     <name>Castlevania - Dracula X (USA)</name>
     <cheat>
-      <description>Invincibility (turn on after title screen, during game play)</description>
-      <code>10D2-FE86</code>
+      <description>Invincibility</description>
+      <code>2D69-CD9D</code>
     </cheat>
     <cheat>
       <description>Invincibility after one hit</description>
       <code>C969-CD2D</code>
     </cheat>
     <cheat>
-      <description>Infinite energy</description>
+      <description>Infinite health</description>
       <code>C96D-17FF</code>
+    </cheat>
+    <cheat>
+      <description>Infinite lives</description>
+      <code>C9AF-47A7</code>
     </cheat>
     <cheat>
       <description>All hearts worth 99</description>
@@ -7839,10 +7950,6 @@
     <cheat>
       <description>Start with 99 lives</description>
       <code>BB85-1D6F</code>
-    </cheat>
-    <cheat>
-      <description>Infinite lives</description>
-      <code>C9AF-47A7</code>
     </cheat>
     <cheat>
       <description>Start with 25 hearts after you die</description>
@@ -8991,26 +9098,6 @@
       <code>22B8-0766</code>
     </cheat>
     <cheat>
-      <description>Start with 5 bombs on each life (side-view levels)</description>
-      <code>D9BB-AFA1</code>
-      <code>D9CE-6D0D</code>
-    </cheat>
-    <cheat>
-      <description>Start with 9 bombs on each life (side-view levels)</description>
-      <code>DBBB-AFA1</code>
-      <code>DBCE-6D0D</code>
-    </cheat>
-    <cheat>
-      <description>Start with 5 bombs on each life (top-view levels)</description>
-      <code>D963-6708</code>
-      <code>D9CE-6D0F</code>
-    </cheat>
-    <cheat>
-      <description>Start with 9 bombs on each life (top-view levels)</description>
-      <code>DB63-6708</code>
-      <code>DBCE-6D0F</code>
-    </cheat>
-    <cheat>
       <description>Enable 30 and 99 lives in option menu (99 actually gives 35,081 lives)</description>
       <code>D987-AFA4</code>
     </cheat>
@@ -9061,6 +9148,26 @@
     <cheat>
       <description>Always have Laser for gun 2 (disable during bonus stages)</description>
       <code>7E1F8605</code>
+    </cheat>
+    <cheat>
+      <description>Start with 5 bombs on each life (side-view levels)</description>
+      <code>D9BB-AFA1</code>
+      <code>D9CE-6D0D</code>
+    </cheat>
+    <cheat>
+      <description>Start with 9 bombs on each life (side-view levels)</description>
+      <code>DBBB-AFA1</code>
+      <code>DBCE-6D0D</code>
+    </cheat>
+    <cheat>
+      <description>Start with 5 bombs on each life (top-view levels)</description>
+      <code>D963-6708</code>
+      <code>D9CE-6D0F</code>
+    </cheat>
+    <cheat>
+      <description>Start with 9 bombs on each life (top-view levels)</description>
+      <code>DB63-6708</code>
+      <code>DBCE-6D0F</code>
     </cheat>
     <cheat>
       <description>Start on stage 2</description>
@@ -9129,12 +9236,20 @@
   <cartridge sha256="9674cc269d89a52d1719a487b44acf004fb777cbd58d76b19a2cd25749728215">	
     <name>Cool World (USA)</name>
     <cheat>
+      <description>Invincibility (blinking)</description>
+      <code>7E02BFFF</code>
+    </cheat>
+    <cheat>
       <description>Infinite lives</description>
       <code>C2B6-D4DC</code>
     </cheat>
     <cheat>
       <description>Infinite continues</description>
       <code>C2B2-DF67</code>
+    </cheat>
+    <cheat>
+      <description>Infinite Nickels</description>
+      <code>7E00ED63</code>
     </cheat>
     <cheat>
       <description>Start with 1 life</description>
@@ -11066,10 +11181,6 @@
       <code>C2C1-4A2C</code>
     </cheat>
     <cheat>
-      <description>Start with 255 lives</description>
-      <code>EE68-C33D</code>
-    </cheat>
-    <cheat>
       <description>Easy level exit (press start and select)</description>
       <code>DDB0-34A4</code>
     </cheat>
@@ -11095,56 +11206,67 @@
       <code>166A-3ECD</code>
     </cheat>
     <cheat>
-      <description>High-jump Donkey Kong</description>
+      <description>Multi-jump</description>
+      <code>6D89-3A8A</code>
+      <code>4080-13E3</code>
+      <code>6D89-1A73</code>
+      <code>2D89-13E3</code>
+    </cheat>
+    <cheat>
+      <description>Multi-jump - Expresso (the Ostrich)</description>
+      <code>EE81-CEE3</code>
+    </cheat>
+    <cheat>
+      <description>High-jump - Donkey Kong</description>
       <code>A086-13E3</code>
     </cheat>
     <cheat>
-      <description>Super-jump Donkey Kong</description>
+      <description>Super-jump - Donkey Kong</description>
       <code>2D86-13E3</code>
     </cheat>
     <cheat>
-      <description>Mega-jump Donkey Kong</description>
+      <description>Mega-jump - Donkey Kong</description>
       <code>3D86-13E3</code>
     </cheat>
     <cheat>
-      <description>Moon-jump Donkey Kong</description>
+      <description>Moon-jump - Donkey Kong</description>
       <code>EE86-13E3</code>
     </cheat>
     <cheat>
-      <description>High-jump Diddy Kong</description>
+      <description>High-jump - Diddy Kong</description>
       <code>808B-1AE3</code>
     </cheat>
     <cheat>
-      <description>Super-jump Diddy Kong</description>
+      <description>Super-jump - Diddy Kong</description>
       <code>AD8B-1AE3</code>
     </cheat>
     <cheat>
-      <description>Mega-jump Diddy Kong</description>
+      <description>Mega-jump - Diddy Kong</description>
       <code>2D8B-1AE3</code>
     </cheat>
     <cheat>
-      <description>Moon-jump Diddy Kong</description>
+      <description>Moon-jump - Diddy Kong</description>
       <code>EE8B-1AE3</code>
     </cheat>
     <cheat>
-      <description>High-jump Animals</description>
+      <description>High-jump - Animals</description>
       <code>A087-C3E3</code>
     </cheat>
     <cheat>
-      <description>Super-jump Animals</description>
+      <description>Super-jump - Animals</description>
       <code>2D87-C3E3</code>
     </cheat>
     <cheat>
-      <description>Mega-jump Animals</description>
+      <description>Mega-jump - Animals</description>
       <code>3087-C3E3</code>
     </cheat>
     <cheat>
-      <description>Moon-jump Animals</description>
+      <description>Moon-jump - Animals</description>
       <code>EE87-C3E3</code>
     </cheat>
     <cheat>
-      <description>Expresso Multi-jump (jump in mid-air)</description>
-      <code>EE81-CEE3</code>
+      <description>Start with 255 lives</description>
+      <code>EE68-C33D</code>
     </cheat>
   </cartridge>
   <cartridge sha256="628147468c3539283197f58f03b94df49758a332831857481ea9cc31645f0527">	
@@ -11162,10 +11284,6 @@
     <cheat>
       <description>Infinite lives</description>
       <code>C2C5-4A2C</code>
-    </cheat>
-    <cheat>
-      <description>255 lives</description>
-      <code>EE63-333D</code>
     </cheat>
     <cheat>
       <description>Easy level exit (press start and select)</description>
@@ -11188,56 +11306,67 @@
       <code>7E057901</code>
     </cheat>
     <cheat>
-      <description>High-jump for Donkey Kong</description>
+      <description>Multi-jump</description>
+      <code>6D85-327A</code>
+      <code>4081-1E53</code>
+      <code>6D85-1A83</code>
+      <code>2D85-1E53</code>
+    </cheat>
+    <cheat>
+      <description>Multi-jump - Expresso (the Ostrich)</description>
+      <code>EE8B-CA53</code>
+    </cheat>
+    <cheat>
+      <description>High-jump - Donkey Kong</description>
       <code>A08C-1E53</code>
     </cheat>
     <cheat>
-      <description>Super-jump for Donkey Kong</description>
+      <description>Super-jump - Donkey Kong</description>
       <code>2D8C-1E53</code>
     </cheat>
     <cheat>
-      <description>Mega-jump for Donkey Kong</description>
+      <description>Mega-jump - Donkey Kong</description>
       <code>308C-1E53</code>
     </cheat>
     <cheat>
-      <description>Moon-jump for Donkey Kong</description>
+      <description>Moon-jump - Donkey Kong</description>
       <code>EE8C-1E53</code>
     </cheat>
     <cheat>
-      <description>High-jump for Diddy Kong</description>
+      <description>High-jump - Diddy Kong</description>
       <code>8088-1253</code>
     </cheat>
     <cheat>
-      <description>Super-jump for Diddy Kong</description>
+      <description>Super-jump - Diddy Kong</description>
       <code>AD88-1253</code>
     </cheat>
     <cheat>
-      <description>Mega-jump for Diddy Kong</description>
+      <description>Mega-jump - Diddy Kong</description>
       <code>2D88-1253</code>
     </cheat>
     <cheat>
-      <description>Moon-jump for Diddy Kong</description>
+      <description>Moon-jump - Diddy Kong</description>
       <code>EE88-1253</code>
     </cheat>
     <cheat>
-      <description>High-jump for Animals</description>
+      <description>High-jump - Animals</description>
       <code>A089-CE53</code>
     </cheat>
     <cheat>
-      <description>Super-jump for Animals</description>
+      <description>Super-jump - Animals</description>
       <code>2D89-CE53</code>
     </cheat>
     <cheat>
-      <description>Mega-jump for Animals</description>
+      <description>Mega-jump - Animals</description>
       <code>3089-CE53</code>
     </cheat>
     <cheat>
-      <description>Moon-jump for Animals</description>
+      <description>Moon-jump - Animals</description>
       <code>EE89-CE53</code>
     </cheat>
     <cheat>
-      <description>Multi-jump in mid-air</description>
-      <code>EE8B-CA53</code>
+      <description>Start with 255 lives</description>
+      <code>EE63-333D</code>
     </cheat>
   </cartridge>
   <cartridge sha256="fa8cacf5bbfc39ee6bbaa557adf89133d60d42f6cf9e1db30d5a36a469f74d15">	
@@ -11265,45 +11394,6 @@
       <description>Infinite lives (alt)</description>
       <code>C2C9-4E2C</code>
       <code>C2C1-4A9C</code>
-    </cheat>
-    <cheat>
-      <description>Start With 8 lives</description>
-      <code>D568-C34D</code>
-      <code>D568-C33D</code>
-    </cheat>
-    <cheat>
-      <description>Start With 11 lives</description>
-      <code>DC68-C34D</code>
-      <code>DC68-C33D</code>
-    </cheat>
-    <cheat>
-      <description>Start With 16 lives</description>
-      <code>DE68-C34D</code>
-      <code>DE68-C33D</code>
-    </cheat>
-    <cheat>
-      <description>Start With 26 lives</description>
-      <code>FB68-C34D</code>
-      <code>FB68-C33D</code>
-    </cheat>
-    <cheat>
-      <description>Start With 51 lives</description>
-      <code>7468-C34D</code>
-      <code>7468-C33D</code>
-    </cheat>
-    <cheat>
-      <description>Start With 76 lives</description>
-      <code>0868-C34D</code>
-      <code>0868-C33D</code>
-    </cheat>
-    <cheat>
-      <description>Start With 100 lives</description>
-      <code>1768-C34D</code>
-      <code>1768-C33D</code>
-    </cheat>
-    <cheat>
-      <description>Start with 255 lives</description>
-      <code>EE68-C34D</code>
     </cheat>
     <cheat>
       <description>10 Bananas needed for extra life</description>
@@ -11381,101 +11471,152 @@
       <code>166A-3ECD</code>
     </cheat>
     <cheat>
-      <description>High-jump for Donkey Kong</description>
+      <description>Multi-jump</description>
+      <code>6D84-33EA</code>
+      <code>4084-1273</code>
+      <code>6D84-1353</code>
+      <code>2D87-1273</code>
+    </cheat>
+    <cheat>
+      <description>Multi-jump - Expresso (the Ostrich)</description>
+      <code>EE80-C373</code>
+    </cheat>
+    <cheat>
+      <description>High-jump - Donkey Kong</description>
       <code>A081-1273</code>
     </cheat>
     <cheat>
-      <description>Super-jump for Donkey Kong</description>
+      <description>Super-jump - Donkey Kong</description>
       <code>2D81-1273</code>
     </cheat>
     <cheat>
-      <description>Mega-jump for Donkey Kong</description>
+      <description>Mega-jump - Donkey Kong</description>
       <code>3D81-1273</code>
     </cheat>
     <cheat>
-      <description>Moon-jump for Donkey Kong</description>
+      <description>Moon-jump - Donkey Kong</description>
       <code>EE81-1273</code>
     </cheat>
     <cheat>
-      <description>High-jump for Diddy Kong</description>
+      <description>High-jump - Diddy Kong</description>
       <code>8081-1E73</code>
     </cheat>
     <cheat>
-      <description>Super-jump for Diddy Kong</description>
+      <description>Super-jump - Diddy Kong</description>
       <code>AD81-1E73</code>
     </cheat>
     <cheat>
-      <description>Mega-jump for Diddy Kong</description>
+      <description>Mega-jump - Diddy Kong</description>
       <code>2D81-1E73</code>
     </cheat>
     <cheat>
-      <description>Moon-jump for Diddy Kong</description>
+      <description>Moon-jump - Diddy Kong</description>
       <code>EE81-1E73</code>
     </cheat>
     <cheat>
-      <description>High-jump for Animals</description>
+      <description>High-jump - Animals</description>
       <code>A08F-C273</code>
     </cheat>
     <cheat>
-      <description>Super-jump for Animals</description>
+      <description>Super-jump - Animals</description>
       <code>2D8F-C273</code>
     </cheat>
     <cheat>
-      <description>Mega-jump for Animals</description>
+      <description>Mega-jump - Animals</description>
       <code>3D8F-C273</code>
     </cheat>
     <cheat>
-      <description>Moon-jump for Animals</description>
+      <description>Moon-jump - Animals</description>
       <code>EE8F-C273</code>
     </cheat>
     <cheat>
-      <description>High-jump for Donkey Kong</description>
+      <description>High-jump - Donkey Kong</description>
       <code>A081-1273</code>
       <code>A086-13E3</code>
     </cheat>
     <cheat>
-      <description>Super-jump for Donkey Kong</description>
+      <description>Super-jump - Donkey Kong</description>
       <code>2D81-1273</code>
       <code>2D86-13E3</code>
     </cheat>
     <cheat>
-      <description>Mega-Jump for Donkey Kong</description>
+      <description>Mega-Jump - Donkey Kong</description>
       <code>3D81-1273</code>
       <code>3D86-13E3</code>
     </cheat>
     <cheat>
-      <description>High-jump for Diddy Kong</description>
+      <description>High-jump - Diddy Kong</description>
       <code>8081-1E73</code>
       <code>808B-1AE3</code>
     </cheat>
     <cheat>
-      <description>Super-jump for Diddy Kong</description>
+      <description>Super-jump - Diddy Kong</description>
       <code>AD81-1E73</code>
       <code>AD8B-1AE3</code>
     </cheat>
     <cheat>
-      <description>Mega-Jump for Diddy Kong</description>
+      <description>Mega-Jump - Diddy Kong</description>
       <code>2D81-1E73</code>
       <code>2D8B-1AE3</code>
     </cheat>
     <cheat>
-      <description>High-jump for all Animals</description>
+      <description>High-jump - all Animals</description>
       <code>A08F-C273</code>
       <code>A087-C3E3</code>
     </cheat>
     <cheat>
-      <description>Super-jump for all Animals</description>
+      <description>Super-jump - all Animals</description>
       <code>2D8F-C273</code>
       <code>2D87-C3E3</code>
     </cheat>
     <cheat>
-      <description>Mega-jump for all Animals</description>
+      <description>Mega-jump - all Animals</description>
       <code>3D8F-C273</code>
       <code>3087-C3E3</code>
     </cheat>
     <cheat>
-      <description>Expresso Multi-jump (jump in mid-air)</description>
-      <code>EE80-C373</code>
+      <description>Start With 8 lives</description>
+      <code>D568-C34D</code>
+      <code>D568-C33D</code>
+    </cheat>
+    <cheat>
+      <description>Start With 11 lives</description>
+      <code>DC68-C34D</code>
+      <code>DC68-C33D</code>
+    </cheat>
+    <cheat>
+      <description>Start With 16 lives</description>
+      <code>DE68-C34D</code>
+      <code>DE68-C33D</code>
+    </cheat>
+    <cheat>
+      <description>Start With 26 lives</description>
+      <code>FB68-C34D</code>
+      <code>FB68-C33D</code>
+    </cheat>
+    <cheat>
+      <description>Start With 51 lives</description>
+      <code>7468-C34D</code>
+      <code>7468-C33D</code>
+    </cheat>
+    <cheat>
+      <description>Start With 76 lives</description>
+      <code>0868-C34D</code>
+      <code>0868-C33D</code>
+    </cheat>
+    <cheat>
+      <description>Start With 100 lives</description>
+      <code>1768-C34D</code>
+      <code>1768-C33D</code>
+    </cheat>
+    <cheat>
+      <description>Start with 255 lives</description>
+      <code>EE68-C34D</code>
+    </cheat>
+    <cheat>
+      <description>Infinite time in bonus stages</description>
+      <code>7E137F99</code>
+      <code>7E13F399</code>
     </cheat>
   </cartridge>
   <cartridge sha256="b79c2bb86f6fc76e1fc61c62fc16d51c664c381e58bc2933be643bbc4d8b610c">	
@@ -11492,6 +11633,104 @@
       <code>C2A5-C37B</code>
     </cheat>
     <cheat>
+      <description>Get 2 lives per 100 bananas collected</description>
+      <code>D4A1-437C</code>
+      <code>D4A5-4AEC</code>
+    </cheat>
+    <cheat>
+      <description>Get 5 lives per 100 bananas collected</description>
+      <code>D9A1-437C</code>
+      <code>D9A5-4AEC</code>
+    </cheat>
+    <cheat>
+      <description>Get 255 lives per 100 bananas collected</description>
+      <code>EEA1-437C</code>
+    </cheat>
+    <cheat>
+      <description>When your last Kong is hit the other returns</description>
+      <code>EEC2-1A1D</code>
+      <code>EECC-CA4D</code>
+    </cheat>
+    <cheat>
+      <description>Easy level exit (press start and select)</description>
+      <code>DD6C-C7D4</code>
+      <code>DD62-C4A4</code>
+    </cheat>
+    <cheat>
+      <description>Kong family coins don't get used up</description>
+      <code>C2B9-13B7</code>
+      <code>C2B1-13F7</code>
+    </cheat>
+    <cheat>
+      <description>Kremcoins don't get used up</description>
+      <code>C2B9-1297</code>
+      <code>C2B1-1A27</code>
+    </cheat>
+    <cheat>
+      <description>Mega-jump - Diddy</description>
+      <code>EDD0-735A</code>
+    </cheat>
+    <cheat>
+      <description>Super-jump - Diddy</description>
+      <code>E7D0-735A</code>
+    </cheat>
+    <cheat>
+      <description>Jump higher - Diddy</description>
+      <code>E1D0-735A</code>
+    </cheat>
+    <cheat>
+      <description>Jump lower - Diddy</description>
+      <code>EBD0-735A</code>
+    </cheat>
+    <cheat>
+      <description>Jump much lower - Diddy</description>
+      <code>ECD0-735A</code>
+    </cheat>
+    <cheat>
+      <description>Mega-jump - Dixie</description>
+      <code>EDD7-5AEA</code>
+    </cheat>
+    <cheat>
+      <description>Super-jump - Dixie</description>
+      <code>E7D7-5AEA</code>
+    </cheat>
+    <cheat>
+      <description>Jump higher - Dixie</description>
+      <code>E5D7-5AEA</code>
+    </cheat>
+    <cheat>
+      <description>Jump lower - Dixie</description>
+      <code>EBD7-5AEA</code>
+    </cheat>
+    <cheat>
+      <description>Jump much lower - Dixie</description>
+      <code>ECD7-5AEA</code>
+    </cheat>
+    <cheat>
+      <description>Mega-jump - Rambi with Diddy riding</description>
+      <code>EFDD-535A</code>
+    </cheat>
+    <cheat>
+      <description>Super-jump - Rambi with Diddy riding</description>
+      <code>E7DD-535A</code>
+    </cheat>
+    <cheat>
+      <description>Rambi jumps higher with Diddy riding</description>
+      <code>E5DD-535A</code>
+    </cheat>
+    <cheat>
+      <description>Rambi doesn't jump as high with Diddy riding</description>
+      <code>ECDD-535A</code>
+    </cheat>
+    <cheat>
+      <description>Start with more kong family coins</description>
+      <code>626D-4EBD</code>
+    </cheat>
+    <cheat>
+      <description>Start with more Kremcoins</description>
+      <code>626D-432D</code>
+    </cheat>
+    <cheat>
       <description>Start with 3 lives</description>
       <code>D465-3D67</code>
       <code>D46C-3D07</code>
@@ -11519,104 +11758,6 @@
     <cheat>
       <description>Start with 255 lives</description>
       <code>EE65-3D67</code>
-    </cheat>
-    <cheat>
-      <description>Get 2 lives per 100 bananas collected</description>
-      <code>D4A1-437C</code>
-      <code>D4A5-4AEC</code>
-    </cheat>
-    <cheat>
-      <description>Get 5 lives per 100 bananas collected</description>
-      <code>D9A1-437C</code>
-      <code>D9A5-4AEC</code>
-    </cheat>
-    <cheat>
-      <description>Get 255 lives per 100 bananas collected</description>
-      <code>EEA1-437C</code>
-    </cheat>
-    <cheat>
-      <description>When your last Kong is hit the other returns</description>
-      <code>EEC2-1A1D</code>
-      <code>EECC-CA4D</code>
-    </cheat>
-    <cheat>
-      <description>Easy level exit (press start and select)</description>
-      <code>DD6C-C7D4</code>
-      <code>DD62-C4A4</code>
-    </cheat>
-    <cheat>
-      <description>Start with more kong family coins</description>
-      <code>626D-4EBD</code>
-    </cheat>
-    <cheat>
-      <description>Kong family coins don't get used up</description>
-      <code>C2B9-13B7</code>
-      <code>C2B1-13F7</code>
-    </cheat>
-    <cheat>
-      <description>Start a new game with more Kremcoins</description>
-      <code>626D-432D</code>
-    </cheat>
-    <cheat>
-      <description>Kremcoins don't get used up</description>
-      <code>C2B9-1297</code>
-      <code>C2B1-1A27</code>
-    </cheat>
-    <cheat>
-      <description>Mega-jump for Diddy</description>
-      <code>EDD0-735A</code>
-    </cheat>
-    <cheat>
-      <description>Super-jump for Diddy</description>
-      <code>E7D0-735A</code>
-    </cheat>
-    <cheat>
-      <description>Diddy jumps higher</description>
-      <code>E1D0-735A</code>
-    </cheat>
-    <cheat>
-      <description>Diddy doesn't jump as high</description>
-      <code>EBD0-735A</code>
-    </cheat>
-    <cheat>
-      <description>Diddy jumps much lower</description>
-      <code>ECD0-735A</code>
-    </cheat>
-    <cheat>
-      <description>Mega-jump for Dixie</description>
-      <code>EDD7-5AEA</code>
-    </cheat>
-    <cheat>
-      <description>Super-jump for Dixie</description>
-      <code>E7D7-5AEA</code>
-    </cheat>
-    <cheat>
-      <description>Dixie jumps higher</description>
-      <code>E5D7-5AEA</code>
-    </cheat>
-    <cheat>
-      <description>Dixie doesn't jump as high</description>
-      <code>EBD7-5AEA</code>
-    </cheat>
-    <cheat>
-      <description>Dixie jumps much lower</description>
-      <code>ECD7-5AEA</code>
-    </cheat>
-    <cheat>
-      <description>Mega-jump for Rambi with Diddy riding</description>
-      <code>EFDD-535A</code>
-    </cheat>
-    <cheat>
-      <description>Super-jump for Rambi with Diddy riding</description>
-      <code>E7DD-535A</code>
-    </cheat>
-    <cheat>
-      <description>Rambi jumps higher with Diddy riding</description>
-      <code>E5DD-535A</code>
-    </cheat>
-    <cheat>
-      <description>Rambi doesn't jump as high with Diddy riding</description>
-      <code>ECDD-535A</code>
     </cheat>
   </cartridge>
   <cartridge sha256="35421a9af9dd011b40b91f792192af9f99c93201d8d394026bdfb42cbf2d8633">	
@@ -11628,9 +11769,118 @@
       <code>6D8D-C33E</code>
     </cheat>
     <cheat>
+      <description>Invincibility</description>
+      <code>4028-434D</code>
+    </cheat>
+    <cheat>
       <description>Infinite lives</description>
       <code>C2A1-CE5B</code>
       <code>C2A5-C37B</code>
+    </cheat>
+    <cheat>
+      <description>Get 2 lives per 100 bananas collected</description>
+      <code>D4A1-437C</code>
+      <code>D4A5-4AEC</code>
+    </cheat>
+    <cheat>
+      <description>Get 5 lives per 100 bananas collected</description>
+      <code>D9A1-437C</code>
+      <code>D9A5-4AEC</code>
+    </cheat>
+    <cheat>
+      <description>Get 255 lives per 100 bananas collected</description>
+      <code>EEA1-437C</code>
+    </cheat>
+    <cheat>
+      <description>When your last Kong is hit the other returns</description>
+      <code>EEC2-1A1D</code>
+      <code>EECC-CA4D</code>
+    </cheat>
+    <cheat>
+      <description>Easy level exit (press start and select)</description>
+      <code>DD6C-C7D4</code>
+      <code>DD62-C4A4</code>
+    </cheat>
+    <cheat>
+      <description>Kong family coins don't get used up</description>
+      <code>C2B9-13B7</code>
+      <code>C2B1-13F7</code>
+    </cheat>
+    <cheat>
+      <description>Kremcoins don't get used up</description>
+      <code>C2B9-1297</code>
+      <code>C2B1-1A27</code>
+    </cheat>
+    <cheat>
+      <description>Multi-jump</description>
+      <code>4DAF-121F</code>
+      <code>54AF-12CF</code>
+      <code>A0AF-123F</code>
+      <code>1DAF-134F</code>
+    </cheat>
+    <cheat>
+      <description>Mega-jump - Diddy</description>
+      <code>EDD0-735A</code>
+    </cheat>
+    <cheat>
+      <description>Super-jump - Diddy</description>
+      <code>E7D0-735A</code>
+    </cheat>
+    <cheat>
+      <description>Jump higher - Diddy</description>
+      <code>E1D0-735A</code>
+    </cheat>
+    <cheat>
+      <description>Jump lower - Diddy</description>
+      <code>EBD0-735A</code>
+    </cheat>
+    <cheat>
+      <description>Jump much lower - Diddy</description>
+      <code>ECD0-735A</code>
+    </cheat>
+    <cheat>
+      <description>Mega-jump - Dixie</description>
+      <code>EDD7-5AEA</code>
+    </cheat>
+    <cheat>
+      <description>Super-jump - Dixie</description>
+      <code>E7D7-5AEA</code>
+    </cheat>
+    <cheat>
+      <description>Jump higher - Dixie</description>
+      <code>E5D7-5AEA</code>
+    </cheat>
+    <cheat>
+      <description>Jump lower - Dixie</description>
+      <code>EBD7-5AEA</code>
+    </cheat>
+    <cheat>
+      <description>Jump much lower - Dixie</description>
+      <code>ECD7-5AEA</code>
+    </cheat>
+    <cheat>
+      <description>Mega-jump - Rambi with Diddy riding</description>
+      <code>EFDD-535A</code>
+    </cheat>
+    <cheat>
+      <description>Super-jump - Rambi with Diddy riding</description>
+      <code>E7DD-535A</code>
+    </cheat>
+    <cheat>
+      <description>Rambi jumps higher with Diddy riding</description>
+      <code>E5DD-535A</code>
+    </cheat>
+    <cheat>
+      <description>Rambi doesn't jump as high with Diddy riding</description>
+      <code>ECDD-535A</code>
+    </cheat>
+    <cheat>
+      <description>Start with more kong family coins</description>
+      <code>626D-4EBD</code>
+    </cheat>
+    <cheat>
+      <description>Start with more Kremcoins</description>
+      <code>626D-432D</code>
     </cheat>
     <cheat>
       <description>Start with 3 lives</description>
@@ -11661,110 +11911,18 @@
       <description>Start with 255 lives</description>
       <code>EE65-3D67</code>
     </cheat>
-    <cheat>
-      <description>Get 2 lives per 100 bananas collected</description>
-      <code>D4A1-437C</code>
-      <code>D4A5-4AEC</code>
-    </cheat>
-    <cheat>
-      <description>Get 5 lives per 100 bananas collected</description>
-      <code>D9A1-437C</code>
-      <code>D9A5-4AEC</code>
-    </cheat>
-    <cheat>
-      <description>Get 255 lives per 100 bananas collected</description>
-      <code>EEA1-437C</code>
-    </cheat>
-    <cheat>
-      <description>When your last Kong is hit the other returns</description>
-      <code>EEC2-1A1D</code>
-      <code>EECC-CA4D</code>
-    </cheat>
-    <cheat>
-      <description>Easy level exit (press start and select)</description>
-      <code>DD6C-C7D4</code>
-      <code>DD62-C4A4</code>
-    </cheat>
-    <cheat>
-      <description>Start with more kong family coins</description>
-      <code>626D-4EBD</code>
-    </cheat>
-    <cheat>
-      <description>Kong family coins don't get used up</description>
-      <code>C2B9-13B7</code>
-      <code>C2B1-13F7</code>
-    </cheat>
-    <cheat>
-      <description>Start a new game with more Kremcoins</description>
-      <code>626D-432D</code>
-    </cheat>
-    <cheat>
-      <description>Kremcoins don't get used up</description>
-      <code>C2B9-1297</code>
-      <code>C2B1-1A27</code>
-    </cheat>
-    <cheat>
-      <description>Mega-jump for Diddy</description>
-      <code>EDD0-735A</code>
-    </cheat>
-    <cheat>
-      <description>Super-jump for Diddy</description>
-      <code>E7D0-735A</code>
-    </cheat>
-    <cheat>
-      <description>Diddy jumps higher</description>
-      <code>E1D0-735A</code>
-    </cheat>
-    <cheat>
-      <description>Diddy doesn't jump as high</description>
-      <code>EBD0-735A</code>
-    </cheat>
-    <cheat>
-      <description>Diddy jumps much lower</description>
-      <code>ECD0-735A</code>
-    </cheat>
-    <cheat>
-      <description>Mega-jump for Dixie</description>
-      <code>EDD7-5AEA</code>
-    </cheat>
-    <cheat>
-      <description>Super-jump for Dixie</description>
-      <code>E7D7-5AEA</code>
-    </cheat>
-    <cheat>
-      <description>Dixie jumps higher</description>
-      <code>E5D7-5AEA</code>
-    </cheat>
-    <cheat>
-      <description>Dixie doesn't jump as high</description>
-      <code>EBD7-5AEA</code>
-    </cheat>
-    <cheat>
-      <description>Dixie jumps much lower</description>
-      <code>ECD7-5AEA</code>
-    </cheat>
-    <cheat>
-      <description>Mega-jump for Rambi with Diddy riding</description>
-      <code>EFDD-535A</code>
-    </cheat>
-    <cheat>
-      <description>Super-jump for Rambi with Diddy riding</description>
-      <code>E7DD-535A</code>
-    </cheat>
-    <cheat>
-      <description>Rambi jumps higher with Diddy riding</description>
-      <code>E5DD-535A</code>
-    </cheat>
-    <cheat>
-      <description>Rambi doesn't jump as high with Diddy riding</description>
-      <code>ECDD-535A</code>
-    </cheat>
   </cartridge>
   <cartridge sha256="2277a2d8dddb01fe5cb0ae9a0fa225d42b3a11adccaeafa18e3c339b3794a32b">	
     <name>Donkey Kong Country 3 - Dixie Kong's Double Trouble! (USA) (En,Fr)</name>
     <cheat>
       <description>Invincibility</description>
       <code>B768-C34D</code>
+    </cheat>
+    <cheat>
+      <description>Invincibility (alt)</description>
+      <code>CBA0-CECF</code>
+      <code>DBA0-CE3F</code>
+      <code>DDA9-CA4F</code>
     </cheat>
     <cheat>
       <description>Infinite lives</description>
@@ -11778,6 +11936,13 @@
       <description>Get Funky's Gyrocopter with no need for DK coins</description>
       <code>6D6C-7EFF</code>
       <code>6D62-722F</code>
+    </cheat>
+    <cheat>
+      <description>Multi-jump</description>
+      <code>4D2B-3E1F</code>
+      <code>5F2B-3ECF</code>
+      <code>BD2B-3E3F</code>
+      <code>1D2C-3A4F</code>
     </cheat>
   </cartridge>
   <cartridge sha256="d45e26eb10c323ecd480e5f2326b223e29264c3adde67f48f0d2791128e519e8 73731a5a7932965de02a9e98055dcf88b4d17b8f710a6ecfde3e36a1f248773b">	
@@ -17945,6 +18110,28 @@
       <code>BA2B-3FC4</code>
     </cheat>
   </cartridge>
+  <cartridge sha256="b87874a2292fe045385a2888e33009d5d2eabf55e379059aa5ef6c73b0475ff2">	
+    <name>Gekitotsu Dangan Jidousha Kessen - Battle Mobile (Japan)</name>
+    <cheat>
+      <description>Invincibility</description>
+      <code>B989-04A9</code>
+      <code>898B-AFD5</code>
+      <code>8988-AFA5</code>
+    </cheat>
+    <cheat>
+      <description>Infinite health</description>
+      <code>898B-AFD5</code>
+      <code>8988-AFA5</code>
+    </cheat>
+    <cheat>
+      <description>Infinite lives</description>
+      <code>C282-AF65</code>
+    </cheat>
+    <cheat>
+      <description>Infinite Shields</description>
+      <code>8BBF-A7A5</code>
+    </cheat>
+  </cartridge>
   <cartridge sha256="fdafaa77f01a9a692411e27b3fb6045b247e5d625679b941d317a7b105f437d2">	
     <name>George Foreman's KO Boxing (USA) (Rev 1)</name>
     <cheat>
@@ -19519,44 +19706,62 @@
   <cartridge sha256="cf611b40f9570e8fcfdc21db623965da62561e8ca82ded59e432ba6fb0bfb562">	
     <name>Indiana Jones' Greatest Adventures (USA)</name>
     <cheat>
-      <description>Infinite energy</description>
-      <code>CB24-4D64</code>
+      <description>Invincibility</description>
+      <code>62A7-1764</code>
+      <code>2D80-CDDF</code>
     </cheat>
     <cheat>
-      <description>Start with very little energy</description>
-      <code>DFC1-3707</code>
+      <description>Infinite health</description>
+      <code>7E012006</code>
     </cheat>
     <cheat>
-      <description>Start with about 1/2 energy</description>
-      <code>D7C1-3707</code>
+      <description>Infinite lives</description>
+      <code>C2C2-37A4</code>
     </cheat>
     <cheat>
-      <description>Start with more energy (ignore energy meter)</description>
-      <code>DEC1-3701</code>
-    </cheat>
-    <cheat>
-      <description>Hearts don't restore energy</description>
-      <code>C2B6-440F</code>
-    </cheat>
-    <cheat>
-      <description>Infinite grenades</description>
+      <description>Infinite Bombs</description>
       <code>C2B6-370F</code>
     </cheat>
     <cheat>
-      <description>Start with 5 grenades</description>
+      <description>Infinite Grenades</description>
+      <code>C2B6-370F</code>
+    </cheat>
+    <cheat>
+      <description>Infinite continues</description>
+      <code>3CAB-CE82</code>
+      <code>F0BC-173B</code>
+    </cheat>
+    <cheat>
+      <description>Hearts don't restore health</description>
+      <code>C2B6-440F</code>
+    </cheat>
+    <cheat>
+      <description>Can't collect Grenades</description>
+      <code>C2B9-37DF</code>
+    </cheat>
+    <cheat>
+      <description>Start with very little health</description>
+      <code>DFC1-3707</code>
+    </cheat>
+    <cheat>
+      <description>Start with about 1/2 health</description>
+      <code>D7C1-3707</code>
+    </cheat>
+    <cheat>
+      <description>Start with more health (ignore health meter)</description>
+      <code>DEC1-3701</code>
+    </cheat>
+    <cheat>
+      <description>Start with 5 Grenades</description>
       <code>D9C7-CF0F</code>
     </cheat>
     <cheat>
-      <description>Start with 9 grenades</description>
+      <description>Start with 9 Grenades</description>
       <code>DBC7-CF0F</code>
     </cheat>
     <cheat>
-      <description>Start with 15 grenades</description>
+      <description>Start with 15 Grenades</description>
       <code>DEC7-CF0F</code>
-    </cheat>
-    <cheat>
-      <description>Can't collect any more grenades</description>
-      <code>C2B9-37DF</code>
     </cheat>
     <cheat>
       <description>Start with 2 lives</description>
@@ -19573,11 +19778,6 @@
     <cheat>
       <description>Start with no continues</description>
       <code>D1C8-13E3</code>
-    </cheat>
-    <cheat>
-      <description>Infinite continues</description>
-      <code>3CAB-CE82</code>
-      <code>F0BC-173B</code>
     </cheat>
   </cartridge>
   <cartridge sha256="5e5cac64fdcf09a52a9c0ab1ebc8bd309dcb1256faf1405284443569b5284fe5">	
@@ -24014,13 +24214,6 @@
     <cheat>
       <description>Have bottle 4 with infinite Good Bees</description>
       <code>7EF35F08</code>
-    </cheat>
-    <cheat>
-      <description>Walk through walls</description>
-      <code>07CB9AEA</code>
-      <code>07CB9BEA</code>
-      <code>07C1FAEA</code>
-      <code>07C1FBEA</code>
     </cheat>
   </cartridge>
   <cartridge sha256="c865fb17e8c59a21d32b9a605319241fa74ec732e3f0ee58f5d7fcbd8ee57c6b">	
@@ -30112,21 +30305,57 @@
       <code>7E0BA384</code>
     </cheat>
     <cheat>
+      <description>Infinite weapon energy</description>
+      <code>FEC2-E405</code>
+    </cheat>
+    <cheat>
       <description>Infinite Bolts</description>
       <code>7E0BA6E7</code>
       <code>7E0BA703</code>
     </cheat>
     <cheat>
-      <description>Infinite weapon energy</description>
-      <code>FEC2-E405</code>
+      <description>Infinite Danger Wrap</description>
+      <code>7E0B91FF</code>
+    </cheat>
+    <cheat>
+      <description>Infinite Feeze Cracker</description>
+      <code>7E0B85FF</code>
+    </cheat>
+    <cheat>
+      <description>Infinite Junk Shield</description>
+      <code>7E0B89FF</code>
+    </cheat>
+    <cheat>
+      <description>Infinite Noise Crush</description>
+      <code>7E0B8FFF</code>
+    </cheat>
+    <cheat>
+      <description>Infinite Scorch Wheel</description>
+      <code>7E0B8BFF</code>
+    </cheat>
+    <cheat>
+      <description>Infinite Slash Claw</description>
+      <code>7E0B8DFF</code>
     </cheat>
     <cheat>
       <description>Infinite slide</description>
       <code>7E0C61FF</code>
     </cheat>
     <cheat>
-      <description>Moon-jump</description>
-      <code>7E0C1AF4</code>
+      <description>Infinite Thunder Bolt</description>
+      <code>7E0B87FF</code>
+    </cheat>
+    <cheat>
+      <description>Infinite Rush Coil</description>
+      <code>7E0B9BFF</code>
+    </cheat>
+    <cheat>
+      <description>Infinite Rush Search</description>
+      <code>7E0B97FF</code>
+    </cheat>
+    <cheat>
+      <description>Infinite Wild Coil</description>
+      <code>7E0B93FF</code>
     </cheat>
     <cheat>
       <description>Have exit</description>
@@ -30145,44 +30374,18 @@
       <code>7E0B95FF</code>
     </cheat>
     <cheat>
-      <description>Infinite Feeze Cracker</description>
-      <code>7E0B85FF</code>
+      <description>Multi-jump</description>
+      <code>09FB-54A0</code>
+      <code>6DFB-5700</code>
+      <code>CBFC-5D60</code>
+      <code>D1FC-5DA0</code>
+      <code>DDFC-5FD0</code>
+      <code>69FC-5F00</code>
+      <code>D4FC-5F60</code>
     </cheat>
     <cheat>
-      <description>Infinite Junk Shield</description>
-      <code>7E0B89FF</code>
-    </cheat>
-    <cheat>
-      <description>Infinite Scorch Wheel</description>
-      <code>7E0B8BFF</code>
-    </cheat>
-    <cheat>
-      <description>Infinite Slash Claw</description>
-      <code>7E0B8DFF</code>
-    </cheat>
-    <cheat>
-      <description>Infinite Thunder Bolt</description>
-      <code>7E0B87FF</code>
-    </cheat>
-    <cheat>
-      <description>Infinite Noise Crush</description>
-      <code>7E0B8FFF</code>
-    </cheat>
-    <cheat>
-      <description>Infinite Danger Wrap</description>
-      <code>7E0B91FF</code>
-    </cheat>
-    <cheat>
-      <description>Infinite Wild Coil</description>
-      <code>7E0B93FF</code>
-    </cheat>
-    <cheat>
-      <description>Infinite Rush Coil</description>
-      <code>7E0B9BFF</code>
-    </cheat>
-    <cheat>
-      <description>Infinite Rush Search</description>
-      <code>7E0B97FF</code>
+      <description>Moon-jump</description>
+      <code>7E0C1AF4</code>
     </cheat>
   </cartridge>
   <cartridge sha256="cf4d603dc0a3759da571224c671a9bfd29f9e52ca8dbb61bcc8ac8be5481e9b2">	
@@ -30203,6 +30406,10 @@
     <cheat>
       <description>Infinite lives</description>
       <code>7E1F8009</code>
+    </cheat>
+    <cheat>
+      <description>Infinite weapons once obtained</description>
+      <code>DDB3-4FA9</code>
     </cheat>
     <cheat>
       <description>One hit kills (most enemies)</description>
@@ -30237,8 +30444,10 @@
       <code>7E1F86FF</code>
     </cheat>
     <cheat>
-      <description>Infinite weapon usage once obtained</description>
-      <code>DDB3-4FA9</code>
+      <description>Multi-jump</description>
+      <code>4065-17A9</code>
+      <code>EA66-1409</code>
+      <code>B966-1469</code>
     </cheat>
     <cheat>
       <description>Bogus jump (may go back to normal jumps)</description>
@@ -30247,6 +30456,14 @@
     <cheat>
       <description>Super-jump (may go back to normal jumps)</description>
       <code>D58A-1FBC</code>
+    </cheat>
+    <cheat>
+      <description>Start with less health</description>
+      <code>D6BE-47AF</code>
+    </cheat>
+    <cheat>
+      <description>Start with more health</description>
+      <code>4DBE-47AF</code>
     </cheat>
     <cheat>
       <description>Start with 10 lives</description>
@@ -30263,14 +30480,6 @@
     <cheat>
       <description>Start with 1 life</description>
       <code>DDBE-446F</code>
-    </cheat>
-    <cheat>
-      <description>Start with less health</description>
-      <code>D6BE-47AF</code>
-    </cheat>
-    <cheat>
-      <description>Start with more health</description>
-      <code>4DBE-47AF</code>
     </cheat>
   </cartridge>
   <cartridge sha256="3e1209f473bff8cd4bcbf71d071e7f8df17a2d564e9a5c4c427ee8198cebb615">	
@@ -30292,28 +30501,12 @@
       <code>7E1F8009</code>
     </cheat>
     <cheat>
-      <description>Start with 10 lives</description>
-      <code>DBBE-446F</code>
+      <description>Start with all weapons and all enemies defeated (except Sigma)</description>
+      <code>23BD-3F07</code>
     </cheat>
     <cheat>
-      <description>Start with 7 lives</description>
-      <code>D1BE-446F</code>
-    </cheat>
-    <cheat>
-      <description>Start with 5 lives</description>
-      <code>D0BE-446F</code>
-    </cheat>
-    <cheat>
-      <description>Start with 1 life</description>
-      <code>DDBE-446F</code>
-    </cheat>
-    <cheat>
-      <description>Start with less health</description>
-      <code>D6BE-47AF</code>
-    </cheat>
-    <cheat>
-      <description>Start with more health</description>
-      <code>4DBE-47AF</code>
+      <description>Infinite weapons once obtained</description>
+      <code>C9B3-4769</code>
     </cheat>
     <cheat>
       <description>One hit kills (most enemies)</description>
@@ -30340,12 +30533,10 @@
       <code>7E1F86FF</code>
     </cheat>
     <cheat>
-      <description>Start with all weapons and all enemies defeated (except Sigma)</description>
-      <code>23BD-3F07</code>
-    </cheat>
-    <cheat>
-      <description>Infinite weapons once you have them</description>
-      <code>C9B3-4769</code>
+      <description>Multi-jump</description>
+      <code>4065-1F09</code>
+      <code>E465-17A9</code>
+      <code>B966-1DD9</code>
     </cheat>
     <cheat>
       <description>Bogus jump (may go back to normal jumps)</description>
@@ -30362,6 +30553,30 @@
     <cheat>
       <description>Weapon charges to 1st power level faster</description>
       <code>DDB1-4F61</code>
+    </cheat>
+    <cheat>
+      <description>Start with less health</description>
+      <code>D6BE-47AF</code>
+    </cheat>
+    <cheat>
+      <description>Start with more health</description>
+      <code>4DBE-47AF</code>
+    </cheat>
+    <cheat>
+      <description>Start with 10 lives</description>
+      <code>DBBE-446F</code>
+    </cheat>
+    <cheat>
+      <description>Start with 7 lives</description>
+      <code>D1BE-446F</code>
+    </cheat>
+    <cheat>
+      <description>Start with 5 lives</description>
+      <code>D0BE-446F</code>
+    </cheat>
+    <cheat>
+      <description>Start with 1 life</description>
+      <code>DDBE-446F</code>
     </cheat>
   </cartridge>
   <cartridge sha256="f3246755f608a1e1dc9c848b61da3b824c7853b29b3be40df6fc7f2793a887ed">	
@@ -30389,10 +30604,6 @@
     <cheat>
       <description>Infinite lives</description>
       <code>7E1FB309</code>
-    </cheat>
-    <cheat>
-      <description>One hit kills</description>
-      <code>6D2D-AF14</code>
     </cheat>
     <cheat>
       <description>Have Shouryuken (F, D, DF + Fire) (must have max health and health containers)</description>
@@ -30462,16 +30673,22 @@
       <description>Have sub-tank 4 full</description>
       <code>7E1FB9FF</code>
     </cheat>
+    <cheat>
+      <description>One hit kills</description>
+      <code>6D2D-AF14</code>
+    </cheat>
+    <cheat>
+      <description>Multi-jump</description>
+      <code>40BE-DD44</code>
+      <code>26BE-D4C4</code>
+      <code>8BBE-D434</code>
+    </cheat>
   </cartridge>
   <cartridge sha256="65b03268afac296330e8ff8d60dd0825879e13ed658b37713c034a3bd074f1d7">	
     <name>Mega Man X3 (USA)</name>
     <cheat>
-      <description>Invincibility (enable)</description>
+      <description>Invincibility</description>
       <code>7E0A0808</code>
-    </cheat>
-    <cheat>
-      <description>Invincibility (disable)</description>
-      <code>7E0A0800</code>
     </cheat>
     <cheat>
       <description>Infinite health</description>
@@ -30524,6 +30741,12 @@
     <cheat>
       <description>Skip bosses at start of game and proceed to stage select</description>
       <code>B933-DF6C</code>
+    </cheat>
+    <cheat>
+      <description>Multi-jump</description>
+      <code>4064-042F</code>
+      <code>D367-0F9F</code>
+      <code>C567-0FBF</code>
     </cheat>
     <cheat>
       <description>Super-jump</description>
@@ -31822,6 +32045,23 @@
       <code>0823-3944</code>
     </cheat>
   </cartridge>
+  <cartridge sha256="6caa0ab221a3e690a104baa4935fc86dbc385d4272e88afb46b999bf6c6edb36">	
+    <name>Mortal Kombat - Shinken Kourin Densetsu (Japan)</name>
+    <cheat>
+      <description>Infinite health</description>
+      <code>CF31-4F64</code>
+      <code>6231-44D4</code>
+      <code>EB31-4404</code>
+      <code>D031-4464</code>
+    </cheat>
+    <cheat>
+      <description>One hit kill - P1</description>
+      <code>DD3C-44D4</code>
+      <code>623C-4464</code>
+      <code>E83C-44A4</code>
+      <code>D03C-47D4</code>
+    </cheat>
+  </cartridge>
   <cartridge sha256="417874aa57856fe93eefdb24066fa1a9ca3f23c72c09d5247ae2b3ab4b3d09d1 cb2fdfce61858063bf4c9da4228381c3ec3abe423f4d378cddd174ae4adb261e">	
     <name>Mortal Kombat 3 (USA)</name>
     <cheat>
@@ -32019,8 +32259,26 @@
       <code>C2B1-14F7</code>
     </cheat>
     <cheat>
+      <description>Invincibility - P1 (alt)</description>
+      <code>849C6880</code>
+      <code>849C6909</code>
+      <code>849C7B00</code>
+      <code>85AA5260</code>
+      <code>85AB1C60</code>
+      <code>85AC2A60</code>
+    </cheat>
+    <cheat>
       <description>Invincibility - P2/CPU</description>
       <code>C2B5-14F7</code>
+    </cheat>
+    <cheat>
+      <description>Invincibility - P2/CPU (alt)</description>
+      <code>849C6880</code>
+      <code>849C6906</code>
+      <code>849C7600</code>
+      <code>85AA5260</code>
+      <code>85AB1C60</code>
+      <code>85AC2A60</code>
     </cheat>
     <cheat>
       <description>Infinite health</description>
@@ -33897,8 +34155,20 @@
       <code>6DB5-3797</code>
     </cheat>
     <cheat>
+      <description>(NG) Invincibility after first hit</description>
+      <code>7E009301</code>
+    </cheat>
+    <cheat>
       <description>(NG) Infinite health</description>
       <code>C9C3-3F2D</code>
+    </cheat>
+    <cheat>
+      <description>(NG) Infinite Ninja Power</description>
+      <code>7E006463</code>
+    </cheat>
+    <cheat>
+      <description>(NG) Infinite lives</description>
+      <code>C9CF-CFBF</code>
     </cheat>
     <cheat>
       <description>(NG) Infinite time</description>
@@ -33933,16 +34203,29 @@
       <code>D6C5-4DF4</code>
     </cheat>
     <cheat>
-      <description>(NG) Infinite lives</description>
-      <code>C9CF-CFBF</code>
+      <description>(NG) Auto kill enemies that are close by</description>
+      <code>849F9280</code>
+      <code>849F9F80</code>
     </cheat>
     <cheat>
       <description>(NGII) Invincibility</description>
       <code>1DB4-CD4D</code>
     </cheat>
     <cheat>
+      <description>(NGII) Invincibility (alt)</description>
+      <code>7E006825</code>
+    </cheat>
+    <cheat>
       <description>(NGII) Infinite health</description>
       <code>C9BB-441F</code>
+    </cheat>
+    <cheat>
+      <description>(NGII) Infinite Ninja Power</description>
+      <code>7E00AE63</code>
+    </cheat>
+    <cheat>
+      <description>(NGII) Infinite lives</description>
+      <code>C961-3D37</code>
     </cheat>
     <cheat>
       <description>(NGII) Infinite time</description>
@@ -33957,20 +34240,20 @@
       <code>D6B3-144F</code>
     </cheat>
     <cheat>
-      <description>(NGII) Start every life with two shadow ninjas</description>
+      <description>(NGII) Start every life with two Shadow Ninjas</description>
       <code>DEB9-14C4</code>
     </cheat>
     <cheat>
-      <description>(NGII) Throwing stars doesn't use energy (ignore counter)</description>
+      <description>(NGII) Always have Fireball</description>
+      <code>7E007D02</code>
+    </cheat>
+    <cheat>
+      <description>(NGII) Throwing stars don't use Ninja Power (ignore counter)</description>
       <code>DFC4-1F47</code>
     </cheat>
     <cheat>
       <description>(NGII) Start with 1 life</description>
       <code>DDB3-C4CF</code>
-    </cheat>
-    <cheat>
-      <description>(NGII) Infinite lives</description>
-      <code>C961-3D37</code>
     </cheat>
     <cheat>
       <description>(NGIII) Invincibility</description>
@@ -33981,15 +34264,27 @@
       <code>C92A-CFED</code>
     </cheat>
     <cheat>
+      <description>(NGIII) Infinite lives</description>
+      <code>CB69-CD57</code>
+    </cheat>
+    <cheat>
+      <description>(NGIII) Infinite lives (alt)</description>
+      <code>7E00C403</code>
+    </cheat>
+    <cheat>
       <description>(NGIII) Infinite time</description>
       <code>C927-17EF</code>
     </cheat>
     <cheat>
-      <description>(NGIII) Almost infinite ninja power</description>
+      <description>(NGIII) Infinite Ninja Power</description>
+      <code>7E00CD63</code>
+    </cheat>
+    <cheat>
+      <description>(NGIII) Almost infinite Ninja Power</description>
       <code>C9A7-C757</code>
     </cheat>
     <cheat>
-      <description>(NGIII) Start with 99 weapon points (ignore counter)</description>
+      <description>(NGIII) Start with 99 Ninja Power (ignore counter)</description>
       <code>176C-CDE7</code>
     </cheat>
     <cheat>
@@ -34003,10 +34298,6 @@
     <cheat>
       <description>(NGIII) Start with 9 lives</description>
       <code>D66B-CF87</code>
-    </cheat>
-    <cheat>
-      <description>(NGIII) Infinite lives</description>
-      <code>CB69-CD57</code>
     </cheat>
     <cheat>
       <description>(NGIII) Start with very little health</description>
@@ -34907,7 +35198,7 @@
       <code>7E050603</code>
     </cheat>
     <cheat>
-      <description>Have All 3 Cartridges</description>
+      <description>Have all 3 Cartridges</description>
       <code>7E050707</code>
     </cheat>
     <cheat>
@@ -35270,7 +35561,7 @@
       <code>7E174F25</code>
     </cheat>
     <cheat>
-      <description>Chezni starts with 255 max. HP</description>
+      <description>Chezni starts with 255 max HP</description>
       <code>EEEB-6D1F</code>
     </cheat>
     <cheat>
@@ -35422,7 +35713,7 @@
       <code>FBEA-6F4D</code>
     </cheat>
     <cheat>
-      <description>Chezni starts with Rft shield </description>
+      <description>Chezni starts with Rft shield</description>
       <code>59EA-6F4D</code>
     </cheat>
   </cartridge>
@@ -36339,6 +36630,11 @@
   <cartridge sha256="0288ec049723cd0c7f1148cdc1aef0b6922b8a756affe373c99d5690e0dfceaa">	
     <name>Power Piggs of the Dark Age (USA)</name>
     <cheat>
+      <description>Invincibility</description>
+      <code>1DB7-C40F</code>
+      <code>6DB1-CF0D</code>
+    </cheat>
+    <cheat>
       <description>Partial invincibility</description>
       <code>7E06A43F</code>
     </cheat>
@@ -36353,6 +36649,11 @@
     <cheat>
       <description>Infinite Doughnuts</description>
       <code>7E150509</code>
+    </cheat>
+    <cheat>
+      <description>Multi-jump</description>
+      <code>4066-CFA7</code>
+      <code>D5EA-44DC</code>
     </cheat>
     <cheat>
       <description>Start on level Beautiful Downtown Pigg</description>
@@ -45179,15 +45480,24 @@
     <name>Super Castlevania IV (USA)</name>
     <cheat>
       <description>Invincibility</description>
+      <code>2D2B-6764</code>
+      <code>2DCD-D764</code>
+    </cheat>
+    <cheat>
+      <description>Invincibility (blinking)</description>
       <code>608E-D7FB</code>
       <code>C92C-6DD4</code>
     </cheat>
     <cheat>
-      <description>Invincibility (blinking)</description>
+      <description>Invincibility (blinking) (alt)</description>
       <code>7E00BC0A</code>
     </cheat>
     <cheat>
       <description>Infinite health</description>
+      <code>C22F-07D7</code>
+    </cheat>
+    <cheat>
+      <description>Infinite health (alt)</description>
       <code>7E13F410</code>
     </cheat>
     <cheat>
@@ -45205,6 +45515,10 @@
     <cheat>
       <description>Infinite time (alt)</description>
       <code>7E13F099</code>
+    </cheat>
+    <cheat>
+      <description>Infinite lives</description>
+      <code>C96C-DFD6</code>
     </cheat>
     <cheat>
       <description>Infinite shots for most weapons</description>
@@ -45344,6 +45658,13 @@
     <cheat>
       <description>Infinite time</description>
       <code>7E127B89</code>
+    </cheat>
+  </cartridge>
+  <cartridge sha256="48afb82875ed4309f871f6b14021aa82c026fb14dc8acdbcf35f71ee605771b5">	
+    <name>Super Donkey Kong 2 - Dixie &amp; Diddy (Japan)</name>
+    <cheat>
+      <description>Invincibility</description>
+      <code>4022-431D</code>
     </cheat>
   </cartridge>
   <cartridge sha256="bcced1be76ef920b562a555696bcb4583d1c8cea4d4b057cab6e0e09be8ef8c4">	
@@ -46023,7 +46344,7 @@
     </cheat>
     <cheat>
       <description>(SMB) Multi-jump</description>
-      <code>23C2BB02</code>
+      <code>2D8E-D7D2</code>
     </cheat>
     <cheat>
       <description>(SMB) Run without holding the dash button</description>
@@ -46168,21 +46489,11 @@
       <code>7E0DC101</code>
     </cheat>
     <cheat>
-      <description>(SMW) Yoshi is invincible</description>
-      <code>89E4-AFD9</code>
-      <code>89C6-D4DB</code>
-    </cheat>
-    <cheat>
       <description>(SMW) Infinite flying time for Yoshi</description>
       <code>C2EC-0700</code>
     </cheat>
     <cheat>
-      <description>(SMW) Collecting a Yoshi Coin gives you Yoshi's Wings</description>
-      <code>B9E5-A4AD</code>
-      <code>F8E5-A7DD</code>
-    </cheat>
-    <cheat>
-      <description>(SMW) Jump in mid air and float down (disable in water and to get on Yoshi)</description>
+      <description>(SMW) Multi-jump and float down (disable in water and to get on Yoshi)</description>
       <code>7E147101</code>
     </cheat>
     <cheat>
@@ -46283,6 +46594,24 @@
       <description>Infinite Flower Points (In Battle)</description>
       <code>7EFA0D63</code>
       <code>7EFA0C63</code>
+    </cheat>
+    <cheat>
+      <description>Infinite Coins</description>
+      <code>7FF8AFE7</code>
+      <code>7FF8B003</code>
+    </cheat>
+    <cheat>
+      <description>Infinite Frog Coins</description>
+      <code>7FF8B3E7</code>
+      <code>7FF8B403</code>
+    </cheat>
+    <cheat>
+      <description>255 EXP per battle (disable before going to the world map or using the menu button)</description>
+      <code>7EFA02FF</code>
+    </cheat>
+    <cheat>
+      <description>Always Mario's turn</description>
+      <code>7E070200</code>
     </cheat>
     <cheat>
       <description>Infinite tries in action sequences</description>
@@ -46654,7 +46983,7 @@
       <code>D2E5-A7AD</code>
     </cheat>
     <cheat>
-      <description>Jump in mid air and float down (disable in water and to get on Yoshi)</description>
+      <description>Multi-jump and float down (disable in water and to get on Yoshi)</description>
       <code>7E147101</code>
     </cheat>
     <cheat>
@@ -47199,6 +47528,11 @@
       <code>7E09A5FF</code>
     </cheat>
     <cheat>
+      <description>Automatically collect secret and/or special items in current room (Missiles, Energy Tanks, ect)</description>
+      <code>402B-3DB7</code>
+      <code>402E-3FF7</code>
+    </cheat>
+    <cheat>
       <description>Maximum 999 Missiles</description>
       <code>7E09C8E7</code>
       <code>7E09C903</code>
@@ -47725,12 +48059,51 @@
   <cartridge sha256="05c7f6461209020785fba33007e1830820aa44ada4b1a6f991d936bf2335b15b">	
     <name>Super R-Type (USA)</name>
     <cheat>
-      <description>Invincibility</description>
+      <description>Start with Invincibility (blinking)</description>
+      <code>82C2-DF61</code>
+    </cheat>
+    <cheat>
+      <description>Start with Invincibility (blinking) (alt)</description>
       <code>7E15BD00</code>
     </cheat>
     <cheat>
       <description>Infinite lives</description>
       <code>C2C7-6D0F</code>
+    </cheat>
+    <cheat>
+      <description>Spiral motion gun takes less time to power up</description>
+      <code>6D80-6DD1</code>
+      <code>DD80-6D01</code>
+    </cheat>
+    <cheat>
+      <description>Spiral motion gun takes much less time to power up</description>
+      <code>DD80-6DA1</code>
+    </cheat>
+    <cheat>
+      <description>Spiral motion gun can't get over-charged</description>
+      <code>6D84-6F01</code>
+    </cheat>
+    <cheat>
+      <description>All FORCE satellites have 1 unit of power (but can't exceed 1 unit)</description>
+      <code>DD68-6DDB</code>
+      <code>CB6C-67AB</code>
+      <code>7D68-6D6B</code>
+    </cheat>
+    <cheat>
+      <description>All FORCE satellites have 2 units of power (but can't exceed 2 units)</description>
+      <code>DF68-6DDB</code>
+      <code>CB6C-67AB</code>
+      <code>7D68-6D6B</code>
+    </cheat>
+    <cheat>
+      <description>All FORCE satellites have 3 units of power</description>
+      <code>D468-6DDB</code>
+      <code>CB6C-67AB</code>
+      <code>7D68-6D6B</code>
+    </cheat>
+    <cheat>
+      <description>Once FORCE has been obtained, keep it forever</description>
+      <code>C267-A4D9</code>
     </cheat>
     <cheat>
       <description>Start with 1 life instead of 3</description>
@@ -47803,41 +48176,6 @@
       <code>DB6C-A709</code>
       <code>CB6C-A7D9</code>
       <code>DD6C-A769</code>
-    </cheat>
-    <cheat>
-      <description>Spiral motion gun takes less time to power up</description>
-      <code>6D80-6DD1</code>
-      <code>DD80-6D01</code>
-    </cheat>
-    <cheat>
-      <description>Spiral motion gun takes much less time to power up</description>
-      <code>DD80-6DA1</code>
-    </cheat>
-    <cheat>
-      <description>Spiral motion gun can't get over-charged</description>
-      <code>6D84-6F01</code>
-    </cheat>
-    <cheat>
-      <description>All FORCE satellites have 1 unit of power (but can't exceed 1 unit)</description>
-      <code>DD68-6DDB</code>
-      <code>CB6C-67AB</code>
-      <code>7D68-6D6B</code>
-    </cheat>
-    <cheat>
-      <description>All FORCE satellites have 2 units of power (but can't exceed 2 units)</description>
-      <code>DF68-6DDB</code>
-      <code>CB6C-67AB</code>
-      <code>7D68-6D6B</code>
-    </cheat>
-    <cheat>
-      <description>All FORCE satellites have 3 units of power</description>
-      <code>D468-6DDB</code>
-      <code>CB6C-67AB</code>
-      <code>7D68-6D6B</code>
-    </cheat>
-    <cheat>
-      <description>Once FORCE has been obtained, keep it forever</description>
-      <code>C267-A4D9</code>
     </cheat>
   </cartridge>
   <cartridge sha256="7a8ffaf8bb549b400ec2f0bda9f3c0dbf5852c38618cdb21cd783c368383e2c7">	
@@ -50167,6 +50505,18 @@
   <cartridge sha256="08d808e9c5851e4301a38a56b350a20ea9e3adbef51546e87e1785d691d0f2d5">	
     <name>TKO Super Championship Boxing (USA)</name>
     <cheat>
+      <description>Infinite punch meters - both players</description>
+      <code>4088-AF00</code>
+    </cheat>
+    <cheat>
+      <description>Infinite punch meter - P1</description>
+      <code>40BF-04DD</code>
+    </cheat>
+    <cheat>
+      <description>Infinite punch meter - P2</description>
+      <code>40B0-076D</code>
+    </cheat>
+    <cheat>
       <description>9 minutes per round</description>
       <code>DB60-A7D4</code>
     </cheat>
@@ -50187,18 +50537,6 @@
       <description>P2 allowed only 3 punches in punch meter</description>
       <code>D7B9-04DD</code>
       <code>D765-A764</code>
-    </cheat>
-    <cheat>
-      <description>Infinite punch meters - both players</description>
-      <code>4088-AF00</code>
-    </cheat>
-    <cheat>
-      <description>Infinite punch meter - P1</description>
-      <code>40BF-04DD</code>
-    </cheat>
-    <cheat>
-      <description>Infinite punch meter - P2</description>
-      <code>40B0-076D</code>
     </cheat>
   </cartridge>
   <cartridge sha256="1711fe9010232b41ec406900e5b4ef528dd2beaa97b27d94ed7eef57d63904a0">	
@@ -51601,6 +51939,11 @@
   <cartridge sha256="fa7e2b40093f0cc7233cc77e95bbbea2144c8183dec10446590396fffd7cda37">	
     <name>Time Trax (USA)</name>
     <cheat>
+      <description>Invincibility</description>
+      <code>84E948FF</code>
+      <code>8187FFFF</code>
+    </cheat>
+    <cheat>
       <description>Infinite health</description>
       <code>C2E8-1F60</code>
     </cheat>
@@ -51742,6 +52085,22 @@
   <cartridge sha256="ba679a11264e9695895a6c17358a41e8459be06166d056811df9c2738fef3d0d">	
     <name>Tiny Toon Adventures - Buster Busts Loose! (USA)</name>
     <cheat>
+      <description>Infinite health (when hit, a fake empty heart appears)</description>
+      <code>3CE9-448A</code>
+    </cheat>
+    <cheat>
+      <description>Infinite dash meter</description>
+      <code>C927-47AD</code>
+    </cheat>
+    <cheat>
+      <description>Infinite lives (except football level)</description>
+      <code>DD34-37D7</code>
+    </cheat>
+    <cheat>
+      <description>Infinite lives (football level)</description>
+      <code>DDC0-3F07</code>
+    </cheat>
+    <cheat>
       <description>Start with 1 life</description>
       <code>DF6F-14DF</code>
     </cheat>
@@ -51790,14 +52149,6 @@
       <code>BBC0-CFAF</code>
     </cheat>
     <cheat>
-      <description>Infinite lives - except football level</description>
-      <code>DD34-37D7</code>
-    </cheat>
-    <cheat>
-      <description>Infinite lives - football level</description>
-      <code>DDC0-3F07</code>
-    </cheat>
-    <cheat>
       <description>Start with no continues on normal level - handicap</description>
       <code>DD6D-47D0</code>
     </cheat>
@@ -51838,16 +52189,8 @@
       <code>D9CD-4FAF</code>
     </cheat>
     <cheat>
-      <description>Infinite health (when hit, a fake empty heart appears)</description>
-      <code>3CE9-448A</code>
-    </cheat>
-    <cheat>
       <description>Five heart maximum on challenge level</description>
       <code>D184-C4A1</code>
-    </cheat>
-    <cheat>
-      <description>Dash meter doesn't go down</description>
-      <code>C927-47AD</code>
     </cheat>
     <cheat>
       <description>1-up gives 2-up (not on mystery weight challenge level, or by collecting stars)</description>
@@ -54693,16 +55036,20 @@
   <cartridge sha256="0b1ba31ae95b61d7d9a0f5509b5836fff84f60915802e3b3ba1170a5c50a4b71">	
     <name>WeaponLord (USA)</name>
     <cheat>
-      <description>Play as Zarak in story mode</description>
-      <code>D13C-561B</code>
-    </cheat>
-    <cheat>
       <description>Infinite health - P1</description>
       <code>5C1A-7B3B</code>
     </cheat>
     <cheat>
       <description>Infinite health - both players</description>
       <code>C21A-7BCB</code>
+    </cheat>
+    <cheat>
+      <description>Infinite time</description>
+      <code>C204-56C5</code>
+    </cheat>
+    <cheat>
+      <description>Play as Zarak in story mode</description>
+      <code>D13C-561B</code>
     </cheat>
   </cartridge>
   <cartridge sha256="12abf1ba063c120c1a98495a1c85e67a0007aff771ef92adcb94b4a0a2fd5adb">	
@@ -54881,6 +55228,18 @@
   </cartridge>
   <cartridge sha256="025dd3047c474d879e69b91a3918add9cdabedf4182e1c1e10e5f0c13a124bf9">	
     <name>Wizard of Oz, The (USA)</name>
+    <cheat>
+      <description>Invincibility</description>
+      <code>2D8D-07A5</code>
+    </cheat>
+    <cheat>
+      <description>Infinite health</description>
+      <code>823C-AD66</code>
+    </cheat>
+    <cheat>
+      <description>Infinite lives</description>
+      <code>223E-DDAF</code>
+    </cheat>
     <cheat>
       <description>Infinite health - Dorthy</description>
       <code>7E01E500</code>

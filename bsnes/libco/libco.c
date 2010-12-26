@@ -8,8 +8,8 @@
   #include "x86.c"
 #elif defined(__GNUC__) && defined(__amd64__)
   #include "amd64.c"
-#elif defined(__GNUC__) && defined(__powerpc__) && defined(__ELF__)
-  #include "ppc-elf.c"
+#elif defined(__GNUC__) && defined(_ARCH_PPC)
+  #include "ppc.c"
 #elif defined(__GNUC__)
   #include "sjlj.c"
 #elif defined(_MSC_VER) && defined(_M_IX86)

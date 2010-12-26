@@ -1,6 +1,6 @@
 include nall/Makefile
 snes := snes
-profile := compatibility
+profile := accuracy
 ui := ui-phoenix
 
 # compiler
