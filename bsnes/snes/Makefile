@@ -4,8 +4,7 @@ snes_objects += snes-cartridge snes-cheat
 snes_objects += snes-memory snes-cpucore snes-smpcore
 snes_objects += snes-cpu snes-smp snes-dsp snes-ppu
 snes_objects += snes-supergameboy snes-superfx snes-sa1 snes-upd77c25
-snes_objects += snes-bsx snes-srtc snes-sdd1 snes-spc7110
-snes_objects += snes-cx4 snes-dsp1 snes-dsp2 snes-dsp3 snes-dsp4
+snes_objects += snes-bsx snes-srtc snes-sdd1 snes-spc7110 snes-cx4
 snes_objects += snes-obc1 snes-st0010 snes-st0011 snes-st0018
 snes_objects += snes-msu1 snes-serial
 objects += $(snes_objects)
@@ -53,10 +52,6 @@ obj/snes-srtc.o        : $(snes)/chip/srtc/srtc.cpp $(snes)/chip/srtc/*
 obj/snes-sdd1.o        : $(snes)/chip/sdd1/sdd1.cpp $(snes)/chip/sdd1/*
 obj/snes-spc7110.o     : $(snes)/chip/spc7110/spc7110.cpp $(snes)/chip/spc7110/*
 obj/snes-cx4.o         : $(snes)/chip/cx4/cx4.cpp $(snes)/chip/cx4/*
-obj/snes-dsp1.o        : $(snes)/chip/dsp1/dsp1.cpp $(snes)/chip/dsp1/*
-obj/snes-dsp2.o        : $(snes)/chip/dsp2/dsp2.cpp $(snes)/chip/dsp2/*
-obj/snes-dsp3.o        : $(snes)/chip/dsp3/dsp3.cpp $(snes)/chip/dsp3/*
-obj/snes-dsp4.o        : $(snes)/chip/dsp4/dsp4.cpp $(snes)/chip/dsp4/*
 obj/snes-obc1.o        : $(snes)/chip/obc1/obc1.cpp $(snes)/chip/obc1/*
 obj/snes-st0010.o      : $(snes)/chip/st0010/st0010.cpp $(snes)/chip/st0010/*
 obj/snes-st0011.o      : $(snes)/chip/st0011/st0011.cpp $(snes)/chip/st0011/*

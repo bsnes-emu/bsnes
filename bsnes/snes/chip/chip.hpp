@@ -12,10 +12,6 @@ struct Coprocessor : Processor {
 #include <chip/sdd1/sdd1.hpp>
 #include <chip/spc7110/spc7110.hpp>
 #include <chip/cx4/cx4.hpp>
-#include <chip/dsp1/dsp1.hpp>
-#include <chip/dsp2/dsp2.hpp>
-#include <chip/dsp3/dsp3.hpp>
-#include <chip/dsp4/dsp4.hpp>
 #include <chip/obc1/obc1.hpp>
 #include <chip/st0010/st0010.hpp>
 #include <chip/st0011/st0011.hpp>

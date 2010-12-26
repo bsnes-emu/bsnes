@@ -2,6 +2,11 @@
 //author: byuu
 //license: public domain
 
+//unsupported components:
+//* serial input/output
+//* interrupts
+//* DMA
+
 #include <snes.hpp>
 
 #define UPD77C25_CPP
@@ -98,8 +103,8 @@ void UPD77C25::exec_op(uint24 opcode) {
       case 10: r = ~q; break;                       //CMP
       case 11: r = (q >> 1) | (q & 0x8000); break;  //SHR1 (ASR)
       case 12: r = (q << 1) | c; break;             //SHL1 (ROL)
-      case 13: r = (q << 2); break;                 //SHL2
-      case 14: r = (q << 4); break;                 //SHL4
+      case 13: r = (q << 2) |  3; break;            //SHL2
+      case 14: r = (q << 4) | 15; break;            //SHL4
       case 15: r = (q << 8) | (q >> 8); break;      //XCHG
     }
 
@@ -310,7 +315,7 @@ void UPD77C25::enable() {
 }
 
 void UPD77C25::power() {
-  for(unsigned i = 0; i <  256; i++) dataRAM[i] = 0x0000;
+  for(unsigned i = 0; i < 256; i++) dataRAM[i] = 0x0000;
   reset();
 }
 

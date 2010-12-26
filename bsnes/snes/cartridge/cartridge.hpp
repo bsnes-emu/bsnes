@@ -43,10 +43,6 @@ public:
   readonly<bool> has_spc7110;
   readonly<bool> has_spc7110rtc;
   readonly<bool> has_cx4;
-  readonly<bool> has_dsp1;
-  readonly<bool> has_dsp2;
-  readonly<bool> has_dsp3;
-  readonly<bool> has_dsp4;
   readonly<bool> has_obc1;
   readonly<bool> has_st0010;
   readonly<bool> has_st0011;

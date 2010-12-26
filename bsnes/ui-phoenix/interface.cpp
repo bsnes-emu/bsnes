@@ -133,3 +133,7 @@ int16_t Interface::input_poll(bool port, SNES::Input::Device device, unsigned in
   if(config.settings.focusPolicy == 1 && mainWindow.focused() == false) return 0;
   return inputMapper.poll(port, device, index, id);
 }
+
+void Interface::message(const string &text) {
+  MessageWindow::information(mainWindow, text);
+}

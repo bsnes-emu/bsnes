@@ -42,7 +42,6 @@ void Cartridge::parse_xml_cartridge(const char *data) {
         if(node.name == "sdd1") xml_parse_sdd1(node);
         if(node.name == "spc7110") xml_parse_spc7110(node);
         if(node.name == "cx4") xml_parse_cx4(node);
-        if(node.name == "necdsp") xml_parse_necdsp(node);
         if(node.name == "obc1") xml_parse_obc1(node);
         if(node.name == "setadsp") xml_parse_setadsp(node);
         if(node.name == "setarisc") xml_parse_setarisc(node);
@@ -230,10 +229,21 @@ void Cartridge::xml_parse_sa1(xml_element &root) {
 void Cartridge::xml_parse_upd77c25(xml_element &root) {
   has_upd77c25 = true;
 
+  bool program = false;
+  bool sha256 = false;
+  string xml_hash;
+  string rom_hash;
+
+  for(unsigned n = 0; n < 2048; n++) upd77c25.programROM[n] = 0;
+  for(unsigned n = 0; n < 1024; n++) upd77c25.dataROM[n] = 0;
+
   foreach(attr, root.attribute) {
     if(attr.name == "program") {
       file fp;
-      if(fp.open(string(dir(basename()), attr.content), file::mode::read)) {
+      fp.open(string(dir(basename()), attr.content), file::mode::read);
+      if(fp.open() && fp.size() == 8192) {
+        program = true;
+
         for(unsigned n = 0; n < 2048; n++) {
           upd77c25.programROM[n] = fp.readm(3);
         }
@@ -247,12 +257,16 @@ void Cartridge::xml_parse_upd77c25(xml_element &root) {
         fp.close();
 
         sha256_ctx sha;
-        uint8_t shahash[32];
+        uint8 shahash[32];
         sha256_init(&sha);
         sha256_chunk(&sha, data, 8192);
         sha256_final(&sha);
         sha256_hash(&sha, shahash);
+        foreach(n, shahash) rom_hash.append(hex<2>(n));
       }
+    } else if(attr.name == "sha256") {
+      sha256 = true;
+      xml_hash = attr.content;
     }
   }
 
@@ -278,6 +292,16 @@ void Cartridge::xml_parse_upd77c25(xml_element &root) {
         }
       }
     }
+  }
+
+  if(program == false) {
+    system.interface->message("Warning: uPD77C25 program is missing.");
+  } else if(sha256 == true && xml_hash != rom_hash) {
+    system.interface->message({
+      "Warning: uPD77C25 program SHA256 is incorrect.\n\n"
+      "Expected:\n", xml_hash, "\n\n"
+      "Actual:\n", rom_hash
+    });
   }
 }
 
@@ -505,55 +529,6 @@ void Cartridge::xml_parse_cx4(xml_element &root) {
       foreach(leaf, node.element) {
         if(leaf.name == "map") {
           Mapping m(cx4);
-          foreach(attr, leaf.attribute) {
-            if(attr.name == "address") xml_parse_address(m, attr.content);
-          }
-          mapping.append(m);
-        }
-      }
-    }
-  }
-}
-
-void Cartridge::xml_parse_necdsp(xml_element &root) {
-  unsigned program = 0;
-
-  foreach(attr, root.attribute) {
-    if(attr.name == "program") {
-      if(attr.content == "DSP-1" || attr.content == "DSP-1A" || attr.content == "DSP-1B") {
-        program = 1;
-        has_dsp1 = true;
-      } else if(attr.content == "DSP-2") {
-        program = 2;
-        has_dsp2 = true;
-      } else if(attr.content == "DSP-3") {
-        program = 3;
-        has_dsp3 = true;
-      } else if(attr.content == "DSP-4") {
-        program = 4;
-        has_dsp4 = true;
-      }
-    }
-  }
-
-  Memory *dr[5] = { 0, &dsp1dr, &dsp2dr, &dsp3, &dsp4 };
-  Memory *sr[5] = { 0, &dsp1sr, &dsp2sr, &dsp3, &dsp4 };
-
-  foreach(node, root.element) {
-    if(node.name == "dr" && dr[program]) {
-      foreach(leaf, node.element) {
-        if(leaf.name == "map") {
-          Mapping m(*dr[program]);
-          foreach(attr, leaf.attribute) {
-            if(attr.name == "address") xml_parse_address(m, attr.content);
-          }
-          mapping.append(m);
-        }
-      }
-    } else if(node.name == "sr" && sr[program]) {
-      foreach(leaf, node.element) {
-        if(leaf.name == "map") {
-          Mapping m(*sr[program]);
           foreach(attr, leaf.attribute) {
             if(attr.name == "address") xml_parse_address(m, attr.content);
           }

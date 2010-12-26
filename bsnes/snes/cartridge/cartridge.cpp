@@ -37,10 +37,6 @@ void Cartridge::load(Mode cartridge_mode, const lstring &xml_list) {
   has_spc7110    = false;
   has_spc7110rtc = false;
   has_cx4        = false;
-  has_dsp1       = false;
-  has_dsp2       = false;
-  has_dsp3       = false;
-  has_dsp4       = false;
   has_obc1       = false;
   has_st0010     = false;
   has_st0011     = false;

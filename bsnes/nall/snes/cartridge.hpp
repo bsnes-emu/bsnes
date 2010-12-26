@@ -408,7 +408,7 @@ SNESCartridge::SNESCartridge(const uint8_t *data, unsigned size) {
   }
 
   if(has_dsp1) {
-    xml << "  <upd77c25 program='dsp1.bin' sha256='5f2e5ed06b362be023b978b5978813ecb9a07c76592454b45c2a1ed17a0de349'>\n";
+    xml << "  <upd77c25 program='dsp1b.bin' sha256='4d42db0f36faef263d6b93f508e8c1c4ae8fc2605fd35e3390ecc02905cd420c'>\n";
     if(dsp1_mapper == DSP1LoROM1MB) {
       xml << "    <dr>\n";
       xml << "      <map address='20-3f:8000-bfff'/>\n";
