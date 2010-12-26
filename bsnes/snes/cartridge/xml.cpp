@@ -236,11 +236,22 @@ void Cartridge::xml_parse_upd77c25(xml_element &root) {
       if(fp.open(string(dir(basename()), attr.content), file::mode::read)) {
         for(unsigned n = 0; n < 2048; n++) {
           upd77c25.programROM[n] = fp.readm(3);
-          fp.read();
         }
         for(unsigned n = 0; n < 1024; n++) {
           upd77c25.dataROM[n] = fp.readm(2);
         }
+
+        fp.seek(0);
+        uint8 data[8192];
+        fp.read(data, 8192);
+        fp.close();
+
+        sha256_ctx sha;
+        uint8_t shahash[32];
+        sha256_init(&sha);
+        sha256_chunk(&sha, data, 8192);
+        sha256_final(&sha);
+        sha256_hash(&sha, shahash);
       }
     }
   }
