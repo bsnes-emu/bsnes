@@ -44,6 +44,10 @@ void CPU::serialize(serializer &s) {
   s.integer(status.hdma_pending);
   s.integer(status.hdma_mode);
 
+  s.integer(status.auto_joypad_active);
+  s.integer(status.auto_joypad_counter);
+  s.integer(status.auto_joypad_clock);
+
   s.array(status.port);
 
   s.integer(status.wram_addr);
@@ -73,14 +77,10 @@ void CPU::serialize(serializer &s) {
   s.integer(status.rddiv);
   s.integer(status.rdmpy);
 
-  s.integer(status.joy1l);
-  s.integer(status.joy1h);
-  s.integer(status.joy2l);
-  s.integer(status.joy2h);
-  s.integer(status.joy3l);
-  s.integer(status.joy3h);
-  s.integer(status.joy4l);
-  s.integer(status.joy4h);
+  s.integer(status.joy1);
+  s.integer(status.joy2);
+  s.integer(status.joy3);
+  s.integer(status.joy4);
 
   s.integer(alu.mpyctr);
   s.integer(alu.divctr);

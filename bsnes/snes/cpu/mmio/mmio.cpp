@@ -175,10 +175,9 @@ uint8 CPU::mmio_r4211() {
 //0   = JOYPAD acknowledge
 uint8 CPU::mmio_r4212() {
   uint8 r = (regs.mdr & 0x3e);
-  uint16 vs = ppu.overscan() == false ? 225 : 240;
-  if(vcounter() >= vs && vcounter() <= (vs + 2)) r |= 0x01;  //auto joypad polling
+  if(status.auto_joypad_active) r |= 0x01;
   if(hcounter() <= 2 || hcounter() >= 1096) r |= 0x40;  //hblank
-  if(vcounter() >= vs) r |= 0x80;  //vblank
+  if(vcounter() >= (ppu.overscan() == false ? 225 : 240)) r |= 0x80;  //vblank
   return r;
 }
 
@@ -207,15 +206,14 @@ uint8 CPU::mmio_r4217() {
   return status.rdmpy >> 8;
 }
 
-//TODO: handle reads during joypad polling (v=225-227)
-uint8 CPU::mmio_r4218() { return status.joy1l; }  //JOY1L
-uint8 CPU::mmio_r4219() { return status.joy1h; }  //JOY1H
-uint8 CPU::mmio_r421a() { return status.joy2l; }  //JOY2L
-uint8 CPU::mmio_r421b() { return status.joy2h; }  //JOY2H
-uint8 CPU::mmio_r421c() { return status.joy3l; }  //JOY3L
-uint8 CPU::mmio_r421d() { return status.joy3h; }  //JOY3H
-uint8 CPU::mmio_r421e() { return status.joy4l; }  //JOY4L
-uint8 CPU::mmio_r421f() { return status.joy4h; }  //JOY4H
+uint8 CPU::mmio_r4218() { return status.joy1 >> 0; }  //JOY1L
+uint8 CPU::mmio_r4219() { return status.joy1 >> 8; }  //JOY1H
+uint8 CPU::mmio_r421a() { return status.joy2 >> 0; }  //JOY2L
+uint8 CPU::mmio_r421b() { return status.joy2 >> 8; }  //JOY2H
+uint8 CPU::mmio_r421c() { return status.joy3 >> 0; }  //JOY3L
+uint8 CPU::mmio_r421d() { return status.joy3 >> 8; }  //JOY3H
+uint8 CPU::mmio_r421e() { return status.joy4 >> 0; }  //JOY4L
+uint8 CPU::mmio_r421f() { return status.joy4 >> 8; }  //JOY4H
 
 //DMAPx
 uint8 CPU::mmio_r43x0(uint8 i) {
@@ -395,14 +393,10 @@ void CPU::mmio_reset() {
   status.rdmpy = 0x0000;
 
   //$4218-$421f
-  status.joy1l = 0x00;
-  status.joy1h = 0x00;
-  status.joy2l = 0x00;
-  status.joy2h = 0x00;
-  status.joy3l = 0x00;
-  status.joy3h = 0x00;
-  status.joy4l = 0x00;
-  status.joy4h = 0x00;
+  status.joy1 = 0x0000;
+  status.joy2 = 0x0000;
+  status.joy3 = 0x0000;
+  status.joy4 = 0x0000;
 
   //ALU
   alu.mpyctr = 0;

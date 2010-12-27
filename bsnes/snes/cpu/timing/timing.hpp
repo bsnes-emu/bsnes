@@ -21,4 +21,4 @@ alwaysinline bool nmi_test();
 alwaysinline bool irq_test();
 
 //joypad.cpp
-void run_auto_joypad_poll();
+void step_auto_joypad_poll();

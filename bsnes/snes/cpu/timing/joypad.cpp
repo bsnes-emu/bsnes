@@ -1,28 +1,28 @@
 #ifdef CPU_CPP
 
-void CPU::run_auto_joypad_poll() {
-  uint16 joy1 = 0, joy2 = 0, joy3 = 0, joy4 = 0;
-  for(unsigned i = 0; i < 16; i++) {
-    uint8 port0 = input.port_read(0);
-    uint8 port1 = input.port_read(1);
+//called every 256 clocks; see CPU::add_clocks()
+void CPU::step_auto_joypad_poll() {
+  if(vcounter() >= (ppu.overscan() == false ? 225 : 240) && status.auto_joypad_counter <= 16) {
+    if(status.auto_joypad_counter == 0) {
+      status.auto_joypad_active = true;
+      input.poll();
+    } else if(status.auto_joypad_counter == 16) {
+      status.auto_joypad_active = false;
+      return;
+    }
 
-    joy1 |= (port0 & 1) ? (0x8000 >> i) : 0;
-    joy2 |= (port1 & 1) ? (0x8000 >> i) : 0;
-    joy3 |= (port0 & 2) ? (0x8000 >> i) : 0;
-    joy4 |= (port1 & 2) ? (0x8000 >> i) : 0;
+    status.auto_joypad_counter++;
+
+    if(status.auto_joypad_poll) {
+      uint8 port0 = input.port_read(0);
+      uint8 port1 = input.port_read(1);
+
+      status.joy1 = (status.joy1 << 1) | (bool)(port0 & 1);
+      status.joy2 = (status.joy2 << 1) | (bool)(port1 & 1);
+      status.joy3 = (status.joy3 << 1) | (bool)(port0 & 2);
+      status.joy4 = (status.joy4 << 1) | (bool)(port1 & 2);
+    }
   }
-
-  status.joy1l = joy1 >> 0;
-  status.joy1h = joy1 >> 8;
-
-  status.joy2l = joy2 >> 0;
-  status.joy2h = joy2 >> 8;
-
-  status.joy3l = joy3 >> 0;
-  status.joy3h = joy3 >> 8;
-
-  status.joy4l = joy4 >> 0;
-  status.joy4h = joy4 >> 8;
 }
 
 #endif

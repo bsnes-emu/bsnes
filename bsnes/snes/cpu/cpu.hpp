@@ -71,6 +71,11 @@ private:
     bool hdma_pending;
     bool hdma_mode;  //0 = init, 1 = run
 
+    //auto joypad polling
+    bool auto_joypad_active;
+    unsigned auto_joypad_counter;
+    unsigned auto_joypad_clock;
+
     //MMIO
     //$2140-217f
     uint8 port[4];
@@ -111,10 +116,10 @@ private:
     uint16 rdmpy;
 
     //$4218-$421f
-    uint8 joy1l, joy1h;
-    uint8 joy2l, joy2h;
-    uint8 joy3l, joy3h;
-    uint8 joy4l, joy4h;
+    uint16 joy1;
+    uint16 joy2;
+    uint16 joy3;
+    uint16 joy4;
   } status;
 
   struct ALU {

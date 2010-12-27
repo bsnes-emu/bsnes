@@ -20,6 +20,12 @@ void CPU::add_clocks(unsigned clocks) {
 
   step(clocks);
 
+  status.auto_joypad_clock += clocks;
+  if(status.auto_joypad_clock >= 256) {
+    status.auto_joypad_clock -= 256;
+    step_auto_joypad_poll();
+  }
+
   if(status.dram_refreshed == false && hcounter() >= status.dram_refresh_position) {
     status.dram_refreshed = true;
     add_clocks(40);
@@ -41,6 +47,8 @@ void CPU::scanline() {
     //HDMA init triggers once every frame
     status.hdma_init_position = (cpu_version == 1 ? 12 + 8 - dma_counter() : 12 + dma_counter());
     status.hdma_init_triggered = false;
+
+    status.auto_joypad_counter = 0;
   }
 
   //DRAM refresh occurs once every scanline
@@ -51,11 +59,6 @@ void CPU::scanline() {
   if(vcounter() <= (ppu.overscan() == false ? 224 : 239)) {
     status.hdma_position = 1104;
     status.hdma_triggered = false;
-  }
-
-  if(status.auto_joypad_poll == true && vcounter() == (ppu.overscan() == false ? 227 : 242)) {
-    input.poll();
-    run_auto_joypad_poll();
   }
 }
 
@@ -190,6 +193,10 @@ void CPU::timing_reset() {
   status.dma_pending  = false;
   status.hdma_pending = false;
   status.hdma_mode    = 0;
+
+  status.auto_joypad_active  = false;
+  status.auto_joypad_counter = 0;
+  status.auto_joypad_clock   = 0;
 }
 
 #endif
