@@ -1,0 +1,930 @@
+/****************************************************************************
+** Meta object code from reading C++ file 'qt.moc.hpp'
+**
+** Created: Mon Nov 1 06:26:59 2010
+**      by: The Qt Meta Object Compiler version 62 (Qt 4.6.2)
+**
+** WARNING! All changes made in this file will be lost!
+*****************************************************************************/
+
+#if !defined(Q_MOC_OUTPUT_REVISION)
+#error "The header file 'qt.moc.hpp' doesn't include <QObject>."
+#elif Q_MOC_OUTPUT_REVISION != 62
+#error "This file was generated using the moc from 4.6.2. It"
+#error "cannot be used with the include files from this version of Qt."
+#error "(The moc has changed too much.)"
+#endif
+
+QT_BEGIN_MOC_NAMESPACE
+static const uint qt_meta_data_MenuItem__Data[] = {
+
+ // content:
+       4,       // revision
+       0,       // classname
+       0,    0, // classinfo
+       1,   14, // methods
+       0,    0, // properties
+       0,    0, // enums/sets
+       0,    0, // constructors
+       0,       // flags
+       0,       // signalCount
+
+ // slots: signature, parameters, type, tag, flags
+      16,   15,   15,   15, 0x0a,
+
+       0        // eod
+};
+
+static const char qt_meta_stringdata_MenuItem__Data[] = {
+    "MenuItem::Data\0\0onTick()\0"
+};
+
+const QMetaObject MenuItem::Data::staticMetaObject = {
+    { &QAction::staticMetaObject, qt_meta_stringdata_MenuItem__Data,
+      qt_meta_data_MenuItem__Data, 0 }
+};
+
+#ifdef Q_NO_DATA_RELOCATION
+const QMetaObject &MenuItem::Data::getStaticMetaObject() { return staticMetaObject; }
+#endif //Q_NO_DATA_RELOCATION
+
+const QMetaObject *MenuItem::Data::metaObject() const
+{
+    return QObject::d_ptr->metaObject ? QObject::d_ptr->metaObject : &staticMetaObject;
+}
+
+void *MenuItem::Data::qt_metacast(const char *_clname)
+{
+    if (!_clname) return 0;
+    if (!strcmp(_clname, qt_meta_stringdata_MenuItem__Data))
+        return static_cast<void*>(const_cast< Data*>(this));
+    return QAction::qt_metacast(_clname);
+}
+
+int MenuItem::Data::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
+{
+    _id = QAction::qt_metacall(_c, _id, _a);
+    if (_id < 0)
+        return _id;
+    if (_c == QMetaObject::InvokeMetaMethod) {
+        switch (_id) {
+        case 0: onTick(); break;
+        default: ;
+        }
+        _id -= 1;
+    }
+    return _id;
+}
+static const uint qt_meta_data_MenuCheckItem__Data[] = {
+
+ // content:
+       4,       // revision
+       0,       // classname
+       0,    0, // classinfo
+       1,   14, // methods
+       0,    0, // properties
+       0,    0, // enums/sets
+       0,    0, // constructors
+       0,       // flags
+       0,       // signalCount
+
+ // slots: signature, parameters, type, tag, flags
+      21,   20,   20,   20, 0x0a,
+
+       0        // eod
+};
+
+static const char qt_meta_stringdata_MenuCheckItem__Data[] = {
+    "MenuCheckItem::Data\0\0onTick()\0"
+};
+
+const QMetaObject MenuCheckItem::Data::staticMetaObject = {
+    { &QAction::staticMetaObject, qt_meta_stringdata_MenuCheckItem__Data,
+      qt_meta_data_MenuCheckItem__Data, 0 }
+};
+
+#ifdef Q_NO_DATA_RELOCATION
+const QMetaObject &MenuCheckItem::Data::getStaticMetaObject() { return staticMetaObject; }
+#endif //Q_NO_DATA_RELOCATION
+
+const QMetaObject *MenuCheckItem::Data::metaObject() const
+{
+    return QObject::d_ptr->metaObject ? QObject::d_ptr->metaObject : &staticMetaObject;
+}
+
+void *MenuCheckItem::Data::qt_metacast(const char *_clname)
+{
+    if (!_clname) return 0;
+    if (!strcmp(_clname, qt_meta_stringdata_MenuCheckItem__Data))
+        return static_cast<void*>(const_cast< Data*>(this));
+    return QAction::qt_metacast(_clname);
+}
+
+int MenuCheckItem::Data::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
+{
+    _id = QAction::qt_metacall(_c, _id, _a);
+    if (_id < 0)
+        return _id;
+    if (_c == QMetaObject::InvokeMetaMethod) {
+        switch (_id) {
+        case 0: onTick(); break;
+        default: ;
+        }
+        _id -= 1;
+    }
+    return _id;
+}
+static const uint qt_meta_data_MenuRadioItem__Data[] = {
+
+ // content:
+       4,       // revision
+       0,       // classname
+       0,    0, // classinfo
+       1,   14, // methods
+       0,    0, // properties
+       0,    0, // enums/sets
+       0,    0, // constructors
+       0,       // flags
+       0,       // signalCount
+
+ // slots: signature, parameters, type, tag, flags
+      21,   20,   20,   20, 0x0a,
+
+       0        // eod
+};
+
+static const char qt_meta_stringdata_MenuRadioItem__Data[] = {
+    "MenuRadioItem::Data\0\0onTick()\0"
+};
+
+const QMetaObject MenuRadioItem::Data::staticMetaObject = {
+    { &QAction::staticMetaObject, qt_meta_stringdata_MenuRadioItem__Data,
+      qt_meta_data_MenuRadioItem__Data, 0 }
+};
+
+#ifdef Q_NO_DATA_RELOCATION
+const QMetaObject &MenuRadioItem::Data::getStaticMetaObject() { return staticMetaObject; }
+#endif //Q_NO_DATA_RELOCATION
+
+const QMetaObject *MenuRadioItem::Data::metaObject() const
+{
+    return QObject::d_ptr->metaObject ? QObject::d_ptr->metaObject : &staticMetaObject;
+}
+
+void *MenuRadioItem::Data::qt_metacast(const char *_clname)
+{
+    if (!_clname) return 0;
+    if (!strcmp(_clname, qt_meta_stringdata_MenuRadioItem__Data))
+        return static_cast<void*>(const_cast< Data*>(this));
+    return QAction::qt_metacast(_clname);
+}
+
+int MenuRadioItem::Data::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
+{
+    _id = QAction::qt_metacall(_c, _id, _a);
+    if (_id < 0)
+        return _id;
+    if (_c == QMetaObject::InvokeMetaMethod) {
+        switch (_id) {
+        case 0: onTick(); break;
+        default: ;
+        }
+        _id -= 1;
+    }
+    return _id;
+}
+static const uint qt_meta_data_Window__Data[] = {
+
+ // content:
+       4,       // revision
+       0,       // classname
+       0,    0, // classinfo
+       0,    0, // methods
+       0,    0, // properties
+       0,    0, // enums/sets
+       0,    0, // constructors
+       0,       // flags
+       0,       // signalCount
+
+       0        // eod
+};
+
+static const char qt_meta_stringdata_Window__Data[] = {
+    "Window::Data\0"
+};
+
+const QMetaObject Window::Data::staticMetaObject = {
+    { &QWidget::staticMetaObject, qt_meta_stringdata_Window__Data,
+      qt_meta_data_Window__Data, 0 }
+};
+
+#ifdef Q_NO_DATA_RELOCATION
+const QMetaObject &Window::Data::getStaticMetaObject() { return staticMetaObject; }
+#endif //Q_NO_DATA_RELOCATION
+
+const QMetaObject *Window::Data::metaObject() const
+{
+    return QObject::d_ptr->metaObject ? QObject::d_ptr->metaObject : &staticMetaObject;
+}
+
+void *Window::Data::qt_metacast(const char *_clname)
+{
+    if (!_clname) return 0;
+    if (!strcmp(_clname, qt_meta_stringdata_Window__Data))
+        return static_cast<void*>(const_cast< Data*>(this));
+    return QWidget::qt_metacast(_clname);
+}
+
+int Window::Data::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
+{
+    _id = QWidget::qt_metacall(_c, _id, _a);
+    if (_id < 0)
+        return _id;
+    return _id;
+}
+static const uint qt_meta_data_Button__Data[] = {
+
+ // content:
+       4,       // revision
+       0,       // classname
+       0,    0, // classinfo
+       1,   14, // methods
+       0,    0, // properties
+       0,    0, // enums/sets
+       0,    0, // constructors
+       0,       // flags
+       0,       // signalCount
+
+ // slots: signature, parameters, type, tag, flags
+      14,   13,   13,   13, 0x0a,
+
+       0        // eod
+};
+
+static const char qt_meta_stringdata_Button__Data[] = {
+    "Button::Data\0\0onTick()\0"
+};
+
+const QMetaObject Button::Data::staticMetaObject = {
+    { &QPushButton::staticMetaObject, qt_meta_stringdata_Button__Data,
+      qt_meta_data_Button__Data, 0 }
+};
+
+#ifdef Q_NO_DATA_RELOCATION
+const QMetaObject &Button::Data::getStaticMetaObject() { return staticMetaObject; }
+#endif //Q_NO_DATA_RELOCATION
+
+const QMetaObject *Button::Data::metaObject() const
+{
+    return QObject::d_ptr->metaObject ? QObject::d_ptr->metaObject : &staticMetaObject;
+}
+
+void *Button::Data::qt_metacast(const char *_clname)
+{
+    if (!_clname) return 0;
+    if (!strcmp(_clname, qt_meta_stringdata_Button__Data))
+        return static_cast<void*>(const_cast< Data*>(this));
+    return QPushButton::qt_metacast(_clname);
+}
+
+int Button::Data::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
+{
+    _id = QPushButton::qt_metacall(_c, _id, _a);
+    if (_id < 0)
+        return _id;
+    if (_c == QMetaObject::InvokeMetaMethod) {
+        switch (_id) {
+        case 0: onTick(); break;
+        default: ;
+        }
+        _id -= 1;
+    }
+    return _id;
+}
+static const uint qt_meta_data_Canvas__Data[] = {
+
+ // content:
+       4,       // revision
+       0,       // classname
+       0,    0, // classinfo
+       0,    0, // methods
+       0,    0, // properties
+       0,    0, // enums/sets
+       0,    0, // constructors
+       0,       // flags
+       0,       // signalCount
+
+       0        // eod
+};
+
+static const char qt_meta_stringdata_Canvas__Data[] = {
+    "Canvas::Data\0"
+};
+
+const QMetaObject Canvas::Data::staticMetaObject = {
+    { &QWidget::staticMetaObject, qt_meta_stringdata_Canvas__Data,
+      qt_meta_data_Canvas__Data, 0 }
+};
+
+#ifdef Q_NO_DATA_RELOCATION
+const QMetaObject &Canvas::Data::getStaticMetaObject() { return staticMetaObject; }
+#endif //Q_NO_DATA_RELOCATION
+
+const QMetaObject *Canvas::Data::metaObject() const
+{
+    return QObject::d_ptr->metaObject ? QObject::d_ptr->metaObject : &staticMetaObject;
+}
+
+void *Canvas::Data::qt_metacast(const char *_clname)
+{
+    if (!_clname) return 0;
+    if (!strcmp(_clname, qt_meta_stringdata_Canvas__Data))
+        return static_cast<void*>(const_cast< Data*>(this));
+    return QWidget::qt_metacast(_clname);
+}
+
+int Canvas::Data::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
+{
+    _id = QWidget::qt_metacall(_c, _id, _a);
+    if (_id < 0)
+        return _id;
+    return _id;
+}
+static const uint qt_meta_data_CheckBox__Data[] = {
+
+ // content:
+       4,       // revision
+       0,       // classname
+       0,    0, // classinfo
+       1,   14, // methods
+       0,    0, // properties
+       0,    0, // enums/sets
+       0,    0, // constructors
+       0,       // flags
+       0,       // signalCount
+
+ // slots: signature, parameters, type, tag, flags
+      16,   15,   15,   15, 0x0a,
+
+       0        // eod
+};
+
+static const char qt_meta_stringdata_CheckBox__Data[] = {
+    "CheckBox::Data\0\0onTick()\0"
+};
+
+const QMetaObject CheckBox::Data::staticMetaObject = {
+    { &QCheckBox::staticMetaObject, qt_meta_stringdata_CheckBox__Data,
+      qt_meta_data_CheckBox__Data, 0 }
+};
+
+#ifdef Q_NO_DATA_RELOCATION
+const QMetaObject &CheckBox::Data::getStaticMetaObject() { return staticMetaObject; }
+#endif //Q_NO_DATA_RELOCATION
+
+const QMetaObject *CheckBox::Data::metaObject() const
+{
+    return QObject::d_ptr->metaObject ? QObject::d_ptr->metaObject : &staticMetaObject;
+}
+
+void *CheckBox::Data::qt_metacast(const char *_clname)
+{
+    if (!_clname) return 0;
+    if (!strcmp(_clname, qt_meta_stringdata_CheckBox__Data))
+        return static_cast<void*>(const_cast< Data*>(this));
+    return QCheckBox::qt_metacast(_clname);
+}
+
+int CheckBox::Data::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
+{
+    _id = QCheckBox::qt_metacall(_c, _id, _a);
+    if (_id < 0)
+        return _id;
+    if (_c == QMetaObject::InvokeMetaMethod) {
+        switch (_id) {
+        case 0: onTick(); break;
+        default: ;
+        }
+        _id -= 1;
+    }
+    return _id;
+}
+static const uint qt_meta_data_ComboBox__Data[] = {
+
+ // content:
+       4,       // revision
+       0,       // classname
+       0,    0, // classinfo
+       1,   14, // methods
+       0,    0, // properties
+       0,    0, // enums/sets
+       0,    0, // constructors
+       0,       // flags
+       0,       // signalCount
+
+ // slots: signature, parameters, type, tag, flags
+      16,   15,   15,   15, 0x0a,
+
+       0        // eod
+};
+
+static const char qt_meta_stringdata_ComboBox__Data[] = {
+    "ComboBox::Data\0\0onChange()\0"
+};
+
+const QMetaObject ComboBox::Data::staticMetaObject = {
+    { &QComboBox::staticMetaObject, qt_meta_stringdata_ComboBox__Data,
+      qt_meta_data_ComboBox__Data, 0 }
+};
+
+#ifdef Q_NO_DATA_RELOCATION
+const QMetaObject &ComboBox::Data::getStaticMetaObject() { return staticMetaObject; }
+#endif //Q_NO_DATA_RELOCATION
+
+const QMetaObject *ComboBox::Data::metaObject() const
+{
+    return QObject::d_ptr->metaObject ? QObject::d_ptr->metaObject : &staticMetaObject;
+}
+
+void *ComboBox::Data::qt_metacast(const char *_clname)
+{
+    if (!_clname) return 0;
+    if (!strcmp(_clname, qt_meta_stringdata_ComboBox__Data))
+        return static_cast<void*>(const_cast< Data*>(this));
+    return QComboBox::qt_metacast(_clname);
+}
+
+int ComboBox::Data::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
+{
+    _id = QComboBox::qt_metacall(_c, _id, _a);
+    if (_id < 0)
+        return _id;
+    if (_c == QMetaObject::InvokeMetaMethod) {
+        switch (_id) {
+        case 0: onChange(); break;
+        default: ;
+        }
+        _id -= 1;
+    }
+    return _id;
+}
+static const uint qt_meta_data_EditBox__Data[] = {
+
+ // content:
+       4,       // revision
+       0,       // classname
+       0,    0, // classinfo
+       1,   14, // methods
+       0,    0, // properties
+       0,    0, // enums/sets
+       0,    0, // constructors
+       0,       // flags
+       0,       // signalCount
+
+ // slots: signature, parameters, type, tag, flags
+      15,   14,   14,   14, 0x0a,
+
+       0        // eod
+};
+
+static const char qt_meta_stringdata_EditBox__Data[] = {
+    "EditBox::Data\0\0onChange()\0"
+};
+
+const QMetaObject EditBox::Data::staticMetaObject = {
+    { &QTextEdit::staticMetaObject, qt_meta_stringdata_EditBox__Data,
+      qt_meta_data_EditBox__Data, 0 }
+};
+
+#ifdef Q_NO_DATA_RELOCATION
+const QMetaObject &EditBox::Data::getStaticMetaObject() { return staticMetaObject; }
+#endif //Q_NO_DATA_RELOCATION
+
+const QMetaObject *EditBox::Data::metaObject() const
+{
+    return QObject::d_ptr->metaObject ? QObject::d_ptr->metaObject : &staticMetaObject;
+}
+
+void *EditBox::Data::qt_metacast(const char *_clname)
+{
+    if (!_clname) return 0;
+    if (!strcmp(_clname, qt_meta_stringdata_EditBox__Data))
+        return static_cast<void*>(const_cast< Data*>(this));
+    return QTextEdit::qt_metacast(_clname);
+}
+
+int EditBox::Data::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
+{
+    _id = QTextEdit::qt_metacall(_c, _id, _a);
+    if (_id < 0)
+        return _id;
+    if (_c == QMetaObject::InvokeMetaMethod) {
+        switch (_id) {
+        case 0: onChange(); break;
+        default: ;
+        }
+        _id -= 1;
+    }
+    return _id;
+}
+static const uint qt_meta_data_HorizontalSlider__Data[] = {
+
+ // content:
+       4,       // revision
+       0,       // classname
+       0,    0, // classinfo
+       1,   14, // methods
+       0,    0, // properties
+       0,    0, // enums/sets
+       0,    0, // constructors
+       0,       // flags
+       0,       // signalCount
+
+ // slots: signature, parameters, type, tag, flags
+      24,   23,   23,   23, 0x0a,
+
+       0        // eod
+};
+
+static const char qt_meta_stringdata_HorizontalSlider__Data[] = {
+    "HorizontalSlider::Data\0\0onChange()\0"
+};
+
+const QMetaObject HorizontalSlider::Data::staticMetaObject = {
+    { &QSlider::staticMetaObject, qt_meta_stringdata_HorizontalSlider__Data,
+      qt_meta_data_HorizontalSlider__Data, 0 }
+};
+
+#ifdef Q_NO_DATA_RELOCATION
+const QMetaObject &HorizontalSlider::Data::getStaticMetaObject() { return staticMetaObject; }
+#endif //Q_NO_DATA_RELOCATION
+
+const QMetaObject *HorizontalSlider::Data::metaObject() const
+{
+    return QObject::d_ptr->metaObject ? QObject::d_ptr->metaObject : &staticMetaObject;
+}
+
+void *HorizontalSlider::Data::qt_metacast(const char *_clname)
+{
+    if (!_clname) return 0;
+    if (!strcmp(_clname, qt_meta_stringdata_HorizontalSlider__Data))
+        return static_cast<void*>(const_cast< Data*>(this));
+    return QSlider::qt_metacast(_clname);
+}
+
+int HorizontalSlider::Data::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
+{
+    _id = QSlider::qt_metacall(_c, _id, _a);
+    if (_id < 0)
+        return _id;
+    if (_c == QMetaObject::InvokeMetaMethod) {
+        switch (_id) {
+        case 0: onChange(); break;
+        default: ;
+        }
+        _id -= 1;
+    }
+    return _id;
+}
+static const uint qt_meta_data_Label__Data[] = {
+
+ // content:
+       4,       // revision
+       0,       // classname
+       0,    0, // classinfo
+       0,    0, // methods
+       0,    0, // properties
+       0,    0, // enums/sets
+       0,    0, // constructors
+       0,       // flags
+       0,       // signalCount
+
+       0        // eod
+};
+
+static const char qt_meta_stringdata_Label__Data[] = {
+    "Label::Data\0"
+};
+
+const QMetaObject Label::Data::staticMetaObject = {
+    { &QLabel::staticMetaObject, qt_meta_stringdata_Label__Data,
+      qt_meta_data_Label__Data, 0 }
+};
+
+#ifdef Q_NO_DATA_RELOCATION
+const QMetaObject &Label::Data::getStaticMetaObject() { return staticMetaObject; }
+#endif //Q_NO_DATA_RELOCATION
+
+const QMetaObject *Label::Data::metaObject() const
+{
+    return QObject::d_ptr->metaObject ? QObject::d_ptr->metaObject : &staticMetaObject;
+}
+
+void *Label::Data::qt_metacast(const char *_clname)
+{
+    if (!_clname) return 0;
+    if (!strcmp(_clname, qt_meta_stringdata_Label__Data))
+        return static_cast<void*>(const_cast< Data*>(this));
+    return QLabel::qt_metacast(_clname);
+}
+
+int Label::Data::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
+{
+    _id = QLabel::qt_metacall(_c, _id, _a);
+    if (_id < 0)
+        return _id;
+    return _id;
+}
+static const uint qt_meta_data_ListBox__Data[] = {
+
+ // content:
+       4,       // revision
+       0,       // classname
+       0,    0, // classinfo
+       3,   14, // methods
+       0,    0, // properties
+       0,    0, // enums/sets
+       0,    0, // constructors
+       0,       // flags
+       0,       // signalCount
+
+ // slots: signature, parameters, type, tag, flags
+      15,   14,   14,   14, 0x0a,
+      28,   14,   14,   14, 0x0a,
+      44,   39,   14,   14, 0x0a,
+
+       0        // eod
+};
+
+static const char qt_meta_stringdata_ListBox__Data[] = {
+    "ListBox::Data\0\0onActivate()\0onChange()\0"
+    "item\0onTick(QTreeWidgetItem*)\0"
+};
+
+const QMetaObject ListBox::Data::staticMetaObject = {
+    { &QTreeWidget::staticMetaObject, qt_meta_stringdata_ListBox__Data,
+      qt_meta_data_ListBox__Data, 0 }
+};
+
+#ifdef Q_NO_DATA_RELOCATION
+const QMetaObject &ListBox::Data::getStaticMetaObject() { return staticMetaObject; }
+#endif //Q_NO_DATA_RELOCATION
+
+const QMetaObject *ListBox::Data::metaObject() const
+{
+    return QObject::d_ptr->metaObject ? QObject::d_ptr->metaObject : &staticMetaObject;
+}
+
+void *ListBox::Data::qt_metacast(const char *_clname)
+{
+    if (!_clname) return 0;
+    if (!strcmp(_clname, qt_meta_stringdata_ListBox__Data))
+        return static_cast<void*>(const_cast< Data*>(this));
+    return QTreeWidget::qt_metacast(_clname);
+}
+
+int ListBox::Data::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
+{
+    _id = QTreeWidget::qt_metacall(_c, _id, _a);
+    if (_id < 0)
+        return _id;
+    if (_c == QMetaObject::InvokeMetaMethod) {
+        switch (_id) {
+        case 0: onActivate(); break;
+        case 1: onChange(); break;
+        case 2: onTick((*reinterpret_cast< QTreeWidgetItem*(*)>(_a[1]))); break;
+        default: ;
+        }
+        _id -= 3;
+    }
+    return _id;
+}
+static const uint qt_meta_data_RadioBox__Data[] = {
+
+ // content:
+       4,       // revision
+       0,       // classname
+       0,    0, // classinfo
+       1,   14, // methods
+       0,    0, // properties
+       0,    0, // enums/sets
+       0,    0, // constructors
+       0,       // flags
+       0,       // signalCount
+
+ // slots: signature, parameters, type, tag, flags
+      16,   15,   15,   15, 0x0a,
+
+       0        // eod
+};
+
+static const char qt_meta_stringdata_RadioBox__Data[] = {
+    "RadioBox::Data\0\0onTick()\0"
+};
+
+const QMetaObject RadioBox::Data::staticMetaObject = {
+    { &QRadioButton::staticMetaObject, qt_meta_stringdata_RadioBox__Data,
+      qt_meta_data_RadioBox__Data, 0 }
+};
+
+#ifdef Q_NO_DATA_RELOCATION
+const QMetaObject &RadioBox::Data::getStaticMetaObject() { return staticMetaObject; }
+#endif //Q_NO_DATA_RELOCATION
+
+const QMetaObject *RadioBox::Data::metaObject() const
+{
+    return QObject::d_ptr->metaObject ? QObject::d_ptr->metaObject : &staticMetaObject;
+}
+
+void *RadioBox::Data::qt_metacast(const char *_clname)
+{
+    if (!_clname) return 0;
+    if (!strcmp(_clname, qt_meta_stringdata_RadioBox__Data))
+        return static_cast<void*>(const_cast< Data*>(this));
+    return QRadioButton::qt_metacast(_clname);
+}
+
+int RadioBox::Data::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
+{
+    _id = QRadioButton::qt_metacall(_c, _id, _a);
+    if (_id < 0)
+        return _id;
+    if (_c == QMetaObject::InvokeMetaMethod) {
+        switch (_id) {
+        case 0: onTick(); break;
+        default: ;
+        }
+        _id -= 1;
+    }
+    return _id;
+}
+static const uint qt_meta_data_TextBox__Data[] = {
+
+ // content:
+       4,       // revision
+       0,       // classname
+       0,    0, // classinfo
+       2,   14, // methods
+       0,    0, // properties
+       0,    0, // enums/sets
+       0,    0, // constructors
+       0,       // flags
+       0,       // signalCount
+
+ // slots: signature, parameters, type, tag, flags
+      15,   14,   14,   14, 0x0a,
+      28,   14,   14,   14, 0x0a,
+
+       0        // eod
+};
+
+static const char qt_meta_stringdata_TextBox__Data[] = {
+    "TextBox::Data\0\0onActivate()\0onChange()\0"
+};
+
+const QMetaObject TextBox::Data::staticMetaObject = {
+    { &QLineEdit::staticMetaObject, qt_meta_stringdata_TextBox__Data,
+      qt_meta_data_TextBox__Data, 0 }
+};
+
+#ifdef Q_NO_DATA_RELOCATION
+const QMetaObject &TextBox::Data::getStaticMetaObject() { return staticMetaObject; }
+#endif //Q_NO_DATA_RELOCATION
+
+const QMetaObject *TextBox::Data::metaObject() const
+{
+    return QObject::d_ptr->metaObject ? QObject::d_ptr->metaObject : &staticMetaObject;
+}
+
+void *TextBox::Data::qt_metacast(const char *_clname)
+{
+    if (!_clname) return 0;
+    if (!strcmp(_clname, qt_meta_stringdata_TextBox__Data))
+        return static_cast<void*>(const_cast< Data*>(this));
+    return QLineEdit::qt_metacast(_clname);
+}
+
+int TextBox::Data::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
+{
+    _id = QLineEdit::qt_metacall(_c, _id, _a);
+    if (_id < 0)
+        return _id;
+    if (_c == QMetaObject::InvokeMetaMethod) {
+        switch (_id) {
+        case 0: onActivate(); break;
+        case 1: onChange(); break;
+        default: ;
+        }
+        _id -= 2;
+    }
+    return _id;
+}
+static const uint qt_meta_data_VerticalSlider__Data[] = {
+
+ // content:
+       4,       // revision
+       0,       // classname
+       0,    0, // classinfo
+       1,   14, // methods
+       0,    0, // properties
+       0,    0, // enums/sets
+       0,    0, // constructors
+       0,       // flags
+       0,       // signalCount
+
+ // slots: signature, parameters, type, tag, flags
+      22,   21,   21,   21, 0x0a,
+
+       0        // eod
+};
+
+static const char qt_meta_stringdata_VerticalSlider__Data[] = {
+    "VerticalSlider::Data\0\0onChange()\0"
+};
+
+const QMetaObject VerticalSlider::Data::staticMetaObject = {
+    { &QSlider::staticMetaObject, qt_meta_stringdata_VerticalSlider__Data,
+      qt_meta_data_VerticalSlider__Data, 0 }
+};
+
+#ifdef Q_NO_DATA_RELOCATION
+const QMetaObject &VerticalSlider::Data::getStaticMetaObject() { return staticMetaObject; }
+#endif //Q_NO_DATA_RELOCATION
+
+const QMetaObject *VerticalSlider::Data::metaObject() const
+{
+    return QObject::d_ptr->metaObject ? QObject::d_ptr->metaObject : &staticMetaObject;
+}
+
+void *VerticalSlider::Data::qt_metacast(const char *_clname)
+{
+    if (!_clname) return 0;
+    if (!strcmp(_clname, qt_meta_stringdata_VerticalSlider__Data))
+        return static_cast<void*>(const_cast< Data*>(this));
+    return QSlider::qt_metacast(_clname);
+}
+
+int VerticalSlider::Data::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
+{
+    _id = QSlider::qt_metacall(_c, _id, _a);
+    if (_id < 0)
+        return _id;
+    if (_c == QMetaObject::InvokeMetaMethod) {
+        switch (_id) {
+        case 0: onChange(); break;
+        default: ;
+        }
+        _id -= 1;
+    }
+    return _id;
+}
+static const uint qt_meta_data_OS__Data[] = {
+
+ // content:
+       4,       // revision
+       0,       // classname
+       0,    0, // classinfo
+       0,    0, // methods
+       0,    0, // properties
+       0,    0, // enums/sets
+       0,    0, // constructors
+       0,       // flags
+       0,       // signalCount
+
+       0        // eod
+};
+
+static const char qt_meta_stringdata_OS__Data[] = {
+    "OS::Data\0"
+};
+
+const QMetaObject OS::Data::staticMetaObject = {
+    { &QObject::staticMetaObject, qt_meta_stringdata_OS__Data,
+      qt_meta_data_OS__Data, 0 }
+};
+
+#ifdef Q_NO_DATA_RELOCATION
+const QMetaObject &OS::Data::getStaticMetaObject() { return staticMetaObject; }
+#endif //Q_NO_DATA_RELOCATION
+
+const QMetaObject *OS::Data::metaObject() const
+{
+    return QObject::d_ptr->metaObject ? QObject::d_ptr->metaObject : &staticMetaObject;
+}
+
+void *OS::Data::qt_metacast(const char *_clname)
+{
+    if (!_clname) return 0;
+    if (!strcmp(_clname, qt_meta_stringdata_OS__Data))
+        return static_cast<void*>(const_cast< Data*>(this));
+    return QObject::qt_metacast(_clname);
+}
+
+int OS::Data::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
+{
+    _id = QObject::qt_metacall(_c, _id, _a);
+    if (_id < 0)
+        return _id;
+    return _id;
+}
+QT_END_MOC_NAMESPACE
