@@ -5,7 +5,7 @@
 namespace GameBoy {
   namespace Info {
     static const char Name[] = "bgameboy";
-    static const char Version[] = "000";
+    static const char Version[] = "000.01";
   }
 }
 
@@ -28,7 +28,23 @@ namespace GameBoy {
   typedef uint32_t uint32;
   typedef uint64_t uint64;
 
+  struct Processor {
+    cothread_t thread;
+    unsigned frequency;
+    int64 clock;
+
+    inline void create(void (*entrypoint_)(), unsigned frequency_) {
+      if(thread) co_delete(thread);
+      thread = co_create(65536 * sizeof(void*), entrypoint_);
+      frequency = frequency_;
+      clock = 0;
+    }
+
+    inline Processor() : thread(0) {}
+  };
+
   #include <system/system.hpp>
+  #include <scheduler/scheduler.hpp>
   #include <cartridge/cartridge.hpp>
   #include <memory/memory.hpp>
   #include <cpu/cpu.hpp>

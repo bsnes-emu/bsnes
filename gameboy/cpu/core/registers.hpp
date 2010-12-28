@@ -1,3 +1,15 @@
+enum {
+  A, F, AF,
+  B, C, BC,
+  D, E, DE,
+  H, L, HL,
+  SP, PC,
+};
+
+enum {
+  ZF, NF, HF, CF,
+};
+
 //register base class
 //the idea here is to have all registers derive from a single base class.
 //this allows construction of opcodes that can take any register as input or output,
@@ -36,6 +48,10 @@ struct RegisterF : Register {
   bool z, n, h, c;
   operator unsigned() const { return (z << 7) | (n << 6) | (h << 5) | (c << 4); }
   unsigned operator=(unsigned x) { z = x & 0x80; n = x & 0x40; h = x & 0x20; c = x & 0x10; return *this; }
+  bool& operator[](unsigned r) {
+    static bool* table[] = { &z, &n, &h, &c };
+    return *table[r];
+  }
 };
 
 struct Register16 : Register {
@@ -74,6 +90,11 @@ struct Registers {
   RegisterW  hl;
   Register16 sp;
   Register16 pc;
+
+  Register& operator[](unsigned r) {
+    static Register* table[] = { &a, &f, &af, &b, &c, &bc, &d, &e, &de, &h, &l, &hl, &sp, &pc };
+    return *table[r];
+  }
 
   Registers() : af(a, f), bc(b, c), de(d, e), hl(h, l) {}
 } r;

@@ -11,10 +11,16 @@ void System::init(Interface *interface_) {
 
 void System::power() {
   cpu.power();
+  scheduler.init();
 }
 
 void System::reset() {
   cpu.reset();
+  scheduler.init();
+}
+
+void System::run() {
+  scheduler.enter();
 }
 
 }

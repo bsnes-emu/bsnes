@@ -16,6 +16,10 @@ void Application::main(int argc, char **argv) {
 
   while(quit == false) {
     OS::run();
+
+    if(GameBoy::cartridge.loaded()) {
+      GameBoy::system.run();
+    }
   }
 }
 

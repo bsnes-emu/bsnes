@@ -5,6 +5,7 @@ public:
   void init(Interface*);
   void power();
   void reset();
+  void run();
 
 //private:
   Interface *interface;

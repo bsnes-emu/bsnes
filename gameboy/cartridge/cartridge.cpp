@@ -41,7 +41,6 @@ void Cartridge::load(uint8_t *data, unsigned size) {
   }
 
   loaded = true;
-  system.interface->message({ "Loaded:\n", info.name });
 }
 
 void Cartridge::unload() {
