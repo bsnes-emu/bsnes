@@ -18,6 +18,7 @@ enum {
 struct Register {
   virtual operator unsigned() const = 0;
   virtual unsigned operator=(unsigned x) = 0;
+  Register& operator=(const Register &x) { operator=((unsigned)x); return *this; }
 
   unsigned operator++(int) { unsigned r = *this; operator=(*this + 1); return r; }
   unsigned operator--(int) { unsigned r = *this; operator=(*this - 1); return r; }

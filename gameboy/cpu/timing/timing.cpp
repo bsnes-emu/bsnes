@@ -16,12 +16,12 @@ void CPU::add_clocks(unsigned clocks) {
 void CPU::scanline() {
   clock -= 456;
 
-  status.lycounter++;
-  if(status.lycounter >= 154) frame();
+  lcd.status.ly++;
+  if(lcd.status.ly >= 154) frame();
 }
 
 void CPU::frame() {
-  status.lycounter -= 154;
+  lcd.status.ly -= 154;
   scheduler.exit();
 }
 

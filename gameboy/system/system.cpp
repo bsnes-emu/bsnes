@@ -10,12 +10,18 @@ void System::init(Interface *interface_) {
 }
 
 void System::power() {
+  bus.power();
+  cartridge.power();
   cpu.power();
+  lcd.power();
   scheduler.init();
 }
 
 void System::reset() {
+  bus.reset();
+  cartridge.power();
   cpu.reset();
+  lcd.reset();
   scheduler.init();
 }
 

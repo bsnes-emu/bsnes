@@ -5,7 +5,7 @@
 namespace GameBoy {
   namespace Info {
     static const char Name[] = "bgameboy";
-    static const char Version[] = "000.01";
+    static const char Version[] = "000.02";
   }
 }
 
@@ -45,7 +45,8 @@ namespace GameBoy {
 
   #include <system/system.hpp>
   #include <scheduler/scheduler.hpp>
-  #include <cartridge/cartridge.hpp>
   #include <memory/memory.hpp>
+  #include <cartridge/cartridge.hpp>
   #include <cpu/cpu.hpp>
+  #include <lcd/lcd.hpp>
 };

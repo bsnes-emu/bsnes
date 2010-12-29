@@ -1,5 +1,6 @@
-class Cartridge : property<Cartridge> {
-public:
+struct Cartridge : MMIO, property<Cartridge> {
+  #include "mmio/mmio.hpp"
+
   struct Information {
     string   name;
     uint8    cgbflag;
@@ -11,9 +12,20 @@ public:
 
   readonly<bool> loaded;
 
+  uint8_t *romdata;
+  unsigned romsize;
+
+  uint8_t *ramdata;
+  unsigned ramsize;
+
   void load(uint8_t *data, unsigned size);
   void unload();
+
+  void power();
+  void reset();
+
   Cartridge();
+  ~Cartridge();
 };
 
 extern Cartridge cartridge;
