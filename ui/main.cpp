@@ -14,11 +14,22 @@ void Application::main(int argc, char **argv) {
 
   GameBoy::system.init(&interface);
 
+  unsigned frameCounter = 0;
+  time_t timeCounter = time(0);
+
   while(quit == false) {
     OS::run();
 
     if(GameBoy::cartridge.loaded()) {
       GameBoy::system.run();
+
+      frameCounter++;
+      time_t currentTime = time(0);
+      if(currentTime != timeCounter) {
+        timeCounter = currentTime;
+        mainWindow.setStatusText({ "FPS: ", frameCounter });
+        frameCounter = 0;
+      }
     }
   }
 }

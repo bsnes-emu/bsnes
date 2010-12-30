@@ -14,12 +14,9 @@ void CPU::Main() {
 
 void CPU::main() {
   while(true) {
-    print(disassemble(r[PC]), "\n");
-
+  //print(disassemble(r[PC]), "\n");
     uint8 opcode = op_read(r[PC]++);
     (this->*opcode_table[opcode])();
-
-    opcode_counter++;
   }
 }
 
