@@ -1,6 +1,8 @@
 void add_clocks(unsigned clocks);
-void scanline();
-void frame();
+void timer_stage0();
+void timer_stage1();
+void timer_stage2();
+void timer_stage3();
 
 //opcode.cpp
 void op_io();

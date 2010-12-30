@@ -1,5 +1,9 @@
 class Interface;
 
+enum class Input : unsigned {
+  Up, Down, Left, Right, B, A, Select, Start,
+};
+
 class System {
 public:
   void init(Interface*);

@@ -8,34 +8,42 @@ Application application;
 void Application::main(int argc, char **argv) {
   quit = false;
 
-  mainWindow.create();
+  #if defined(PHOENIX_WINDOWS)
+  proportionalFont.create("Tahoma", 8);
+  proportionalFontBold.create("Tahoma", 8, Font::Style::Bold);
+  monospaceFont.create("Courier New", 8);
+  #else
+  proportionalFont.create("Sans", 8);
+  proportionalFontBold.create("Sans", 8, Font::Style::Bold);
+  monospaceFont.create("Liberation Mono", 8);
+  #endif
 
+  mainWindow.create();
   mainWindow.setVisible();
+  OS::run();
+
+  video.driver("OpenGL");
+  video.set(Video::Handle, (uintptr_t)mainWindow.viewport.handle());
+  video.set(Video::Synchronize, false);
+  video.set(Video::Filter, (unsigned)0);
+  video.init();
+
+  input.driver("SDL");
+  input.set(Input::Handle, (uintptr_t)mainWindow.viewport.handle());
+  input.init();
 
   GameBoy::system.init(&interface);
-
-  unsigned frameCounter = 0;
-  time_t timeCounter = time(0);
 
   while(quit == false) {
     OS::run();
 
     if(GameBoy::cartridge.loaded()) {
       GameBoy::system.run();
-
-      frameCounter++;
-      time_t currentTime = time(0);
-      if(currentTime != timeCounter) {
-        timeCounter = currentTime;
-        mainWindow.setStatusText({ "FPS: ", frameCounter });
-        frameCounter = 0;
-      }
     }
   }
 }
 
 int main(int argc, char **argv) {
   application.main(argc, argv);
-
   return 0;
 }

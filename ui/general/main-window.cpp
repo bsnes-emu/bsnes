@@ -1,7 +1,9 @@
 MainWindow mainWindow;
 
 void MainWindow::create() {
-  Window::create(128, 128, 160 * 3, 144 * 3, { GameBoy::Info::Name, " v", GameBoy::Info::Version });
+  Window::create(128, 128, 160 * 2, 144 * 2, { GameBoy::Info::Name, " v", GameBoy::Info::Version });
+  setDefaultFont(application.proportionalFont);
+  setFont(application.proportionalFontBold);
 
   system.create(*this, "System");
   systemLoadCartridge.create(system, "Load Cartridge ...");
@@ -12,15 +14,15 @@ void MainWindow::create() {
   systemReset.setEnabled(false);
 
   settings.create(*this, "Settings");
-  settings.setEnabled(false);
+//settings.setEnabled(false);
 
   tools.create(*this, "Tools");
-  tools.setEnabled(false);
+//tools.setEnabled(false);
 
   help.create(*this, "Help");
   helpAbout.create(help, "About ...");
 
-  viewport.create(*this, 0, 0, 160 * 3, 144 * 3);
+  viewport.create(*this, 0, 0, 160 * 2, 144 * 2);
 
   setMenuVisible(true);
   setStatusVisible(true);

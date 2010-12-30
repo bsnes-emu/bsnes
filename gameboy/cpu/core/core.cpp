@@ -324,7 +324,7 @@ void CPU::op_rlca() {
 
 void CPU::op_rla() {
   bool c = r[A] & 0x80;
-  r[A] = (r[A] << 1) | (c << 0);
+  r[A] = (r[A] << 1) | (r.f.c << 0);
   r.f.z = 0;
   r.f.n = 0;
   r.f.h = 0;
@@ -341,7 +341,7 @@ void CPU::op_rrca() {
 
 void CPU::op_rra() {
   bool c = r[A] & 0x01;
-  r[A] = (r[A] >> 1) | (c << 7);
+  r[A] = (r[A] >> 1) | (r.f.c << 7);
   r.f.z = 0;
   r.f.n = 0;
   r.f.h = 0;

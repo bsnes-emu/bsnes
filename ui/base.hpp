@@ -4,6 +4,9 @@
 #include <nall/string.hpp>
 using namespace nall;
 
+#include <ruby/ruby.hpp>
+using namespace ruby;
+
 #include <phoenix/phoenix.hpp>
 using namespace phoenix;
 
@@ -17,6 +20,10 @@ using namespace phoenix;
 
 struct Application {
   bool quit;
+
+  Font proportionalFont;
+  Font proportionalFontBold;
+  Font monospaceFont;
 
   void main(int argc, char **argv);
 };
