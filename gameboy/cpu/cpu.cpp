@@ -88,6 +88,7 @@ void CPU::reset() {
 
   status.p15 = 0;
   status.p14 = 0;
+  status.joyp = 0;
 
   status.div = 0;
 

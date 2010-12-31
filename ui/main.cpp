@@ -24,7 +24,7 @@ void Application::main(int argc, char **argv) {
 
   video.driver("OpenGL");
   video.set(Video::Handle, (uintptr_t)mainWindow.viewport.handle());
-  video.set(Video::Synchronize, false);
+  video.set(Video::Synchronize, true);
   video.set(Video::Filter, (unsigned)0);
   video.init();
 

@@ -1,30 +1,33 @@
 #ifdef CPU_CPP
 
+void CPU::mmio_joyp_poll() {
+  unsigned button = 0, dpad = 0;
+
+  button |= system.interface->input_poll((unsigned)Input::Start) << 3;
+  button |= system.interface->input_poll((unsigned)Input::Select) << 2;
+  button |= system.interface->input_poll((unsigned)Input::B) << 1;
+  button |= system.interface->input_poll((unsigned)Input::A) << 0;
+
+  dpad |= system.interface->input_poll((unsigned)Input::Down) << 3;
+  dpad |= system.interface->input_poll((unsigned)Input::Up) << 2;
+  dpad |= system.interface->input_poll((unsigned)Input::Left) << 1;
+  dpad |= system.interface->input_poll((unsigned)Input::Right) << 0;
+
+  status.joyp = 0x0f;
+  if(status.p15 == 0) status.joyp &= button ^ 0x0f;
+  if(status.p14 == 0) status.joyp &= dpad ^ 0x0f;
+  if(status.joyp != 0x0f) status.interrupt_request_joypad = 1;
+}
+
 uint8 CPU::mmio_read(uint16 addr) {
   if(addr >= 0xc000 && addr <= 0xdfff) return wram[addr & 0x1fff];
   if(addr >= 0xe000 && addr <= 0xfdff) return wram[addr & 0x1fff];
   if(addr >= 0xff80 && addr <= 0xfffe) return hram[addr & 0x7f];
 
   if(addr == 0xff00) {  //JOYP
-    unsigned keys = 0x0f;
-
-    if(status.p15 == 0 && status.p14 == 1) {
-      keys  = !system.interface->input_poll((unsigned)Input::Down)   << 3;
-      keys |= !system.interface->input_poll((unsigned)Input::Up)     << 2;
-      keys |= !system.interface->input_poll((unsigned)Input::Left)   << 1;
-      keys |= !system.interface->input_poll((unsigned)Input::Right)  << 0;
-    }
-
-    if(status.p15 == 1 && status.p14 == 0) {
-      keys  = !system.interface->input_poll((unsigned)Input::Start)  << 3;
-      keys |= !system.interface->input_poll((unsigned)Input::Select) << 2;
-      keys |= !system.interface->input_poll((unsigned)Input::B)      << 1;
-      keys |= !system.interface->input_poll((unsigned)Input::A)      << 0;
-    }
-
     return (status.p15 << 5)
          | (status.p14 << 4)
-         | (keys << 0);
+         | (status.joyp << 0);
   }
 
   if(addr == 0xff04) {  //DIV
@@ -71,6 +74,7 @@ void CPU::mmio_write(uint16 addr, uint8 data) {
   if(addr == 0xff00) {  //JOYP
     status.p15 = data & 0x20;
     status.p14 = data & 0x10;
+    mmio_joyp_poll();
     return;
   }
 

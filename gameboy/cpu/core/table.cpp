@@ -127,7 +127,7 @@ void CPU::initialize_opcode_table() {
   opcode_table[0x7b] = &CPU::op_ld_r_r<A, E>;
   opcode_table[0x7c] = &CPU::op_ld_r_r<A, H>;
   opcode_table[0x7d] = &CPU::op_ld_r_r<A, L>;
-  opcode_table[0x7e] = &CPU::op_ld_r_hl<E>;
+  opcode_table[0x7e] = &CPU::op_ld_r_hl<A>;
   opcode_table[0x7f] = &CPU::op_ld_r_r<A, A>;
   opcode_table[0x80] = &CPU::op_add_a_r<B>;
   opcode_table[0x81] = &CPU::op_add_a_r<C>;
@@ -243,7 +243,7 @@ void CPU::initialize_opcode_table() {
   opcode_table[0xef] = &CPU::op_rst_n<0x28>;
   opcode_table[0xf0] = &CPU::op_ld_a_ffn;
   opcode_table[0xf1] = &CPU::op_pop_rr<AF>;
-  opcode_table[0xf2] = &CPU::op_xx;
+  opcode_table[0xf2] = &CPU::op_ld_a_ffc;
   opcode_table[0xf3] = &CPU::op_di;
   opcode_table[0xf4] = &CPU::op_xx;
   opcode_table[0xf5] = &CPU::op_push_rr<AF>;

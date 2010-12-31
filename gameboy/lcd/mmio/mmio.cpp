@@ -48,17 +48,17 @@ uint8 LCD::mmio_read(uint16 addr) {
   }
 
   if(addr == 0xff48) {  //OBP0
-    return (status.obp0[3] << 6)
-         | (status.obp0[2] << 4)
-         | (status.obp0[1] << 2)
-         | (status.obp0[0] << 0);
+    return (status.obp[0][3] << 6)
+         | (status.obp[0][2] << 4)
+         | (status.obp[0][1] << 2)
+         | (status.obp[0][0] << 0);
   }
 
   if(addr == 0xff49) {  //OBP1
-    return (status.obp1[3] << 6)
-         | (status.obp1[2] << 4)
-         | (status.obp1[1] << 2)
-         | (status.obp1[0] << 0);
+    return (status.obp[1][3] << 6)
+         | (status.obp[1][2] << 4)
+         | (status.obp[1][1] << 2)
+         | (status.obp[1][0] << 0);
   }
 
   if(addr == 0xff4a) {  //WY
@@ -117,7 +117,7 @@ void LCD::mmio_write(uint16 addr, uint8 data) {
   }
 
   if(addr == 0xff46) {  //DMA
-    //TODO
+    for(unsigned n = 0x00; n <= 0x9f; n++) bus.write(0xfe00 + n, bus.read((data << 8) + n));
     return;
   }
 
@@ -130,18 +130,18 @@ void LCD::mmio_write(uint16 addr, uint8 data) {
   }
 
   if(addr == 0xff48) {  //OBP0
-    status.obp0[3] = (data >> 6) & 3;
-    status.obp0[2] = (data >> 4) & 3;
-    status.obp0[1] = (data >> 2) & 3;
-    status.obp0[0] = (data >> 0) & 3;
+    status.obp[0][3] = (data >> 6) & 3;
+    status.obp[0][2] = (data >> 4) & 3;
+    status.obp[0][1] = (data >> 2) & 3;
+    status.obp[0][0] = (data >> 0) & 3;
     return;
   }
 
   if(addr == 0xff49) {  //OBP1
-    status.obp1[3] = (data >> 6) & 3;
-    status.obp1[2] = (data >> 4) & 3;
-    status.obp1[1] = (data >> 2) & 3;
-    status.obp1[0] = (data >> 0) & 3;
+    status.obp[1][3] = (data >> 6) & 3;
+    status.obp[1][2] = (data >> 4) & 3;
+    status.obp[1][1] = (data >> 2) & 3;
+    status.obp[1][0] = (data >> 0) & 3;
     return;
   }
 

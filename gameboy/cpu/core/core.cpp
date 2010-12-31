@@ -61,6 +61,10 @@ void CPU::op_ld_ffn_a() {
   op_write(0xff00 + op_read(r[PC]++), r[A]);
 }
 
+void CPU::op_ld_a_ffc() {
+  r[A] = op_read(0xff00 + r[C]);
+}
+
 void CPU::op_ld_ffc_a() {
   op_write(0xff00 + r[C], r[A]);
 }
@@ -101,6 +105,7 @@ void CPU::op_ld_nn_sp() {
 
 void CPU::op_ld_sp_hl() {
   r[SP] = r[HL];
+  op_io();
 }
 
 template<unsigned x> void CPU::op_push_rr() {
@@ -137,7 +142,7 @@ void CPU::opi_adc_a(uint8 x) {
   r.f.z = (uint8)rh == 0;
   r.f.n = 0;
   r.f.h = rl > 0x0f;
-  r.f.c = rh > 0x0f;
+  r.f.c = rh > 0xff;
 }
 
 template<unsigned x> void CPU::op_adc_a_r() { opi_adc_a(r[x]); }
@@ -214,7 +219,7 @@ void CPU::opi_cp_a(uint8 x) {
   r.f.z = (uint8)rh == 0;
   r.f.n = 1;
   r.f.h = rl > 0x0f;
-  r.f.c = rh > 0x0f;
+  r.f.c = rh > 0xff;
 }
 
 template<unsigned x> void CPU::op_cp_a_r() { opi_cp_a(r[x]); }
@@ -252,10 +257,10 @@ void CPU::op_dec_hl() {
 }
 
 void CPU::op_daa() {
-  signed a = r[A];
+  uint16 a = r[A];
   if(r.f.n == 0) {
     if(r.f.h || (a & 0x0f) > 0x09) a += 0x06;
-    if(r.f.c || (a & 0xff) > 0x9f) a += 0x60;
+    if(r.f.c || (a       ) > 0x9f) a += 0x60;
   } else {
     if(r.f.h) {
       a -= 0x06;
@@ -266,7 +271,7 @@ void CPU::op_daa() {
   r[A] = a;
   r.f.z = r[A] == 0;
   r.f.h = 0;
-  r.f.c = a & 0x100;
+  r.f.c |= a & 0x100;
 }
 
 void CPU::op_cpl() {
@@ -278,6 +283,7 @@ void CPU::op_cpl() {
 //16-bit arithmetic commands
 
 template<unsigned x> void CPU::op_add_hl_rr() {
+  op_io();
   uint32 rb = (r[HL] + r[x]);
   uint32 rn = (r[HL] & 0xfff) + (r[x] & 0xfff);
   r[HL] = rb;
@@ -287,14 +293,18 @@ template<unsigned x> void CPU::op_add_hl_rr() {
 }
 
 template<unsigned x> void CPU::op_inc_rr() {
+  op_io();
   r[x]++;
 }
 
 template<unsigned x> void CPU::op_dec_rr() {
+  op_io();
   r[x]--;
 }
 
 void CPU::op_add_sp_n() {
+  op_io();
+  op_io();
   signed n = (int8)op_read(r[PC]++);
   r.f.z = 0;
   r.f.n = 0;
@@ -304,6 +314,7 @@ void CPU::op_add_sp_n() {
 }
 
 void CPU::op_ld_hl_sp_n() {
+  op_io();
   signed n = (int8)op_read(r[PC]++);
   r.f.z = 0;
   r.f.n = 0;

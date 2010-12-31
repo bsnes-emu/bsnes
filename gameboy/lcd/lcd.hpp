@@ -38,10 +38,8 @@ struct LCD : Processor, MMIO {
     uint8 bgp[4];
 
     //$ff48  OBP0
-    uint8 obp0[4];
-
     //$ff49  OBP1
-    uint8 obp1[4];
+    uint8 obp[2][4];
 
     //$ff4a  WY
     uint8 wy;

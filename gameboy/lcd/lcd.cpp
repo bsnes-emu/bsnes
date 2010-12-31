@@ -38,6 +38,7 @@ void LCD::scanline() {
 void LCD::frame() {
   system.interface->video_refresh(screen);
   system.interface->input_poll();
+  cpu.mmio_joyp_poll();
 
   status.ly = 0;
   scheduler.exit();
@@ -66,6 +67,32 @@ void LCD::render() {
       uint8 palette = ((d0 & 0x80) >> 7) + ((d1 & 0x80) >> 6);
       d0 <<= 1, d1 <<= 1;
       *output++ = (3 - status.bgp[palette]) * 0x55;
+    }
+  }
+
+  output = screen + status.ly * 160;
+  for(unsigned s = 0; s < 40; s++) {
+    unsigned sy = oam[(s << 2) + 0] - 9;
+    unsigned sx = oam[(s << 2) + 1] - 8;
+    unsigned tile = oam[(s << 2) + 2];
+    unsigned attribute = oam[(s << 2) + 3];
+
+    sy -= status.ly;
+    if(sy >= 8) continue;
+    if(attribute & 0x40||1) sy ^= 7;
+
+    unsigned addr = tile * 16 + sy * 2;
+
+    uint8 d0 = vram[addr + 0];
+    uint8 d1 = vram[addr + 1];
+    unsigned xflip = attribute & 0x20 ? -7 : 0;
+
+    for(unsigned x = 0; x < 8; x++) {
+      uint8 palette = ((d0 & 0x80) >> 7) + ((d1 & 0x80) >> 6);
+      d0 <<= 1, d1 <<= 1;
+      if(palette == 0) continue;
+      palette = status.obp[(bool)(attribute & 0x10)][palette];
+      output[sx + (x ^ xflip)] = (3 - palette) * 0x55;
     }
   }
 }
@@ -113,8 +140,8 @@ void LCD::reset() {
 
   for(unsigned n = 0; n < 4; n++) {
     status.bgp[n] = n;
-    status.obp0[n] = n;
-    status.obp1[n] = n;
+    status.obp[0][n] = n;
+    status.obp[1][n] = n;
   }
 
   status.wy = 0;

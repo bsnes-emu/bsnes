@@ -13,6 +13,7 @@ struct CPU : Processor, MMIO {
     //$ff00  JOYP
     bool p15;
     bool p14;
+    uint8 joyp;
 
     //$ff04  DIV
     uint8 div;

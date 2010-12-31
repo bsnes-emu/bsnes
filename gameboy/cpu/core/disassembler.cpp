@@ -270,7 +270,7 @@ string CPU::disassemble_opcode(uint16 pc) {
     case 0xef: return { "rst  $0028" };
     case 0xf0: return { "ld   a,($ff", hex<2>(p0), ")" };
     case 0xf1: return { "pop  af" };
-    case 0xf2: return { "xx" };
+    case 0xf2: return { "ld   a,($ff00+c)" };
     case 0xf3: return { "di" };
     case 0xf4: return { "xx" };
     case 0xf5: return { "push af" };

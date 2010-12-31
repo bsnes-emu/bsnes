@@ -18,6 +18,7 @@ template<unsigned x> void op_ld_rr_a();
 void op_ld_nn_a();
 void op_ld_a_ffn();
 void op_ld_ffn_a();
+void op_ld_a_ffc();
 void op_ld_ffc_a();
 void op_ldi_hl_a();
 void op_ldi_a_hl();
