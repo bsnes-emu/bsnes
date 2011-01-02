@@ -566,11 +566,13 @@ void CPU::op_nop() {
 }
 
 void CPU::op_halt() {
-  //TODO
+  status.halt = true;
+  while(status.halt == true) op_io();
 }
 
 void CPU::op_stop() {
-  //TODO
+  status.stop = true;
+  while(status.stop == true) op_io();
 }
 
 void CPU::op_di() {

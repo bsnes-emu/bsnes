@@ -3,7 +3,18 @@ struct CPU : Processor, MMIO {
   #include "mmio/mmio.hpp"
   #include "timing/timing.hpp"
 
+  enum class Interrupt : unsigned {
+    Vblank,
+    Stat,
+    Timer,
+    Serial,
+    Joypad,
+  };
+
   struct Status {
+    bool halt;
+    bool stop;
+
     bool ime;
     unsigned timer0;
     unsigned timer1;
@@ -48,6 +59,7 @@ struct CPU : Processor, MMIO {
 
   static void Main();
   void main();
+  void interrupt_raise(Interrupt id);
   void interrupt_test();
   void interrupt_exec(uint16 pc);
   void power();

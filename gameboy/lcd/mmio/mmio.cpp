@@ -12,16 +12,21 @@ uint8 LCD::mmio_read(uint16 addr) {
          | (status.bg_tilemap_select << 3)
          | (status.obj_size << 2)
          | (status.obj_enable << 1)
-         | (status.bg_display << 0);
+         | (status.bg_enable << 0);
   }
 
   if(addr == 0xff41) {  //STAT
+    unsigned mode;
+    if(status.ly >= 144) mode = 1;  //Vblank
+    else if(status.lx >= 320) mode = 0;  //Hblank
+    else mode = 3;  //LCD transfer
+
     return (status.interrupt_lyc << 6)
          | (status.interrupt_oam << 5)
          | (status.interrupt_vblank << 4)
          | (status.interrupt_hblank << 3)
-         | (status.coincidence << 2)
-         | (status.mode << 0);
+         | ((status.ly == status.lyc) << 2)
+         | (mode << 0);
   }
 
   if(addr == 0xff42) {  //SCY
@@ -84,7 +89,7 @@ void LCD::mmio_write(uint16 addr, uint8 data) {
     status.bg_tilemap_select = data & 0x08;
     status.obj_size = data & 0x04;
     status.obj_enable = data & 0x02;
-    status.bg_display = data & 0x01;
+    status.bg_enable = data & 0x01;
     return;
   }
 

@@ -33,7 +33,7 @@ void MainWindow::create() {
   };
 
   systemLoadCartridge.onTick = []() {
-    string filename = OS::fileOpen(mainWindow, "Game Boy cartridges\t*.gb", "/media/sdb1/root/gameboy_images/");
+    string filename = OS::fileOpen(mainWindow, "Game Boy cartridges\t*.gb,*.gbc", "/media/sdb1/root/gameboy_images/");
     if(filename != "") utility.loadCartridge(filename);
   };
 

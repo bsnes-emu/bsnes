@@ -21,6 +21,17 @@ void CPU::main() {
   }
 }
 
+void CPU::interrupt_raise(CPU::Interrupt id) {
+  switch(id) {
+    case Interrupt::Vblank: status.interrupt_request_vblank = 1; break;
+    case Interrupt::Stat  : status.interrupt_request_stat   = 1; break;
+    case Interrupt::Timer : status.interrupt_request_timer  = 1; break;
+    case Interrupt::Serial: status.interrupt_request_serial = 1; break;
+    case Interrupt::Joypad: status.interrupt_request_joypad = 1; break;
+  }
+  status.halt = false;
+}
+
 void CPU::interrupt_test() {
   if(status.ime) {
     if(status.interrupt_request_vblank && status.interrupt_enable_vblank) {
@@ -79,6 +90,9 @@ void CPU::reset() {
   r[BC] = 0x0000;
   r[DE] = 0x0000;
   r[HL] = 0x0000;
+
+  status.halt = false;
+  status.stop = false;
 
   status.ime = 0;
   status.timer0 = 0;

@@ -16,7 +16,7 @@ void CPU::mmio_joyp_poll() {
   status.joyp = 0x0f;
   if(status.p15 == 0) status.joyp &= button ^ 0x0f;
   if(status.p14 == 0) status.joyp &= dpad ^ 0x0f;
-  if(status.joyp != 0x0f) status.interrupt_request_joypad = 1;
+  if(status.joyp != 0x0f) interrupt_raise(Interrupt::Joypad);
 }
 
 uint8 CPU::mmio_read(uint16 addr) {

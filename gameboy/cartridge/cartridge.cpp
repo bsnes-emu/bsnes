@@ -3,7 +3,8 @@
 #define CARTRIDGE_CPP
 namespace GameBoy {
 
-#include "mmio/mmio.cpp"
+#include "mbc0/mbc0.cpp"
+#include "mbc1/mbc1.cpp"
 Cartridge cartridge;
 
 void Cartridge::load(uint8_t *data, unsigned size) {
@@ -18,7 +19,18 @@ void Cartridge::load(uint8_t *data, unsigned size) {
 
   info.cgbflag = romdata[0x0143];
   info.sgbflag = romdata[0x0146];
-  info.type    = romdata[0x0147];
+
+  info.mapper = Mapper::Unknown;
+  info.ram = false;
+  info.battery = false;
+  info.rtc = false;
+
+  switch(romdata[0x0147]) { default:
+    case 0x00: info.mapper = Mapper::MBC0; break;
+    case 0x01: info.mapper = Mapper::MBC1; break;
+    case 0x02: info.mapper = Mapper::MBC1; info.ram = true; break;
+    case 0x03: info.mapper = Mapper::MBC1; info.ram = true; info.battery = true; break;
+  }
 
   switch(romdata[0x0148]) { default:
     case 0x00: info.romsize =   2 * 16 * 1024; break;
@@ -42,6 +54,8 @@ void Cartridge::load(uint8_t *data, unsigned size) {
     case 0x03: info.ramsize = 32 * 1024; break;
   }
 
+  ramdata = new uint8_t[ramsize = info.ramsize]();
+
   loaded = true;
 }
 
@@ -53,13 +67,48 @@ void Cartridge::unload() {
   loaded = false;
 }
 
+uint8 Cartridge::rom_read(unsigned addr) {
+  if(addr >= romsize) addr %= romsize;
+  return romdata[addr];
+}
+
+void Cartridge::rom_write(unsigned addr, uint8 data) {
+  if(addr >= romsize) addr %= romsize;
+  romdata[addr] = data;
+}
+
+uint8 Cartridge::ram_read(unsigned addr) {
+  if(ramsize == 0) return 0x00;
+  if(addr >= ramsize) addr %= ramsize;
+  return ramdata[addr];
+}
+
+void Cartridge::ram_write(unsigned addr, uint8 data) {
+  if(ramsize == 0) return;
+  if(addr >= ramsize) addr %= ramsize;
+  ramdata[addr] = data;
+}
+
 void Cartridge::power() {
-  for(unsigned n = 0x0000; n <= 0x7fff; n++) bus.mmio[n] = this;
+  mbc0.power();
+  mbc1.power();
+
+  MMIO *mapper = 0;
+  switch(info.mapper) {
+    case Mapper::MBC0: mapper = &mbc0; break;
+    case Mapper::MBC1: mapper = &mbc1; break;
+  }
+  if(mapper) {
+    for(unsigned n = 0x0000; n <= 0x7fff; n++) bus.mmio[n] = mapper;
+    for(unsigned n = 0xa000; n <= 0xbfff; n++) bus.mmio[n] = mapper;
+  }
 
   reset();
 }
 
 void Cartridge::reset() {
+  mbc1.reset();
+  mbc1.reset();
 }
 
 Cartridge::Cartridge() {

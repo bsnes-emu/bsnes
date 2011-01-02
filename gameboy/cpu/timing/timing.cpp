@@ -21,10 +21,10 @@ void CPU::add_clocks(unsigned clocks) {
 }
 
 void CPU::timer_stage0() {  //262144hz
-  if(status.timer_clock == 1) {
+  if(status.timer_enable && status.timer_clock == 1) {
     if(++status.tima == 0) {
       status.tima = status.tma;
-      status.interrupt_request_timer = 1;
+      interrupt_raise(Interrupt::Timer);
     }
   }
 
@@ -33,10 +33,10 @@ void CPU::timer_stage0() {  //262144hz
 }
 
 void CPU::timer_stage1() {  // 65536hz
-  if(status.timer_clock == 2) {
+  if(status.timer_enable && status.timer_clock == 2) {
     if(++status.tima == 0) {
       status.tima = status.tma;
-      status.interrupt_request_timer = 1;
+      interrupt_raise(Interrupt::Timer);
     }
   }
 
@@ -45,10 +45,10 @@ void CPU::timer_stage1() {  // 65536hz
 }
 
 void CPU::timer_stage2() {  // 16384hz
-  if(status.timer_clock == 3) {
+  if(status.timer_enable && status.timer_clock == 3) {
     if(++status.tima == 0) {
       status.tima = status.tma;
-      status.interrupt_request_timer = 1;
+      interrupt_raise(Interrupt::Timer);
     }
   }
 
@@ -59,10 +59,10 @@ void CPU::timer_stage2() {  // 16384hz
 }
 
 void CPU::timer_stage3() {  //  4096hz
-  if(status.timer_clock == 0) {
+  if(status.timer_enable && status.timer_clock == 0) {
     if(++status.tima == 0) {
       status.tima = status.tma;
-      status.interrupt_request_timer = 1;
+      interrupt_raise(Interrupt::Timer);
     }
   }
 

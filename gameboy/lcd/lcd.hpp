@@ -12,15 +12,13 @@ struct LCD : Processor, MMIO {
     bool bg_tilemap_select;
     bool obj_size;
     bool obj_enable;
-    bool bg_display;
+    bool bg_enable;
 
     //$ff41  STAT
     bool interrupt_lyc;
     bool interrupt_oam;
     bool interrupt_vblank;
     bool interrupt_hblank;
-    bool coincidence;
-    unsigned mode;
 
     //$ff42  SCY
     uint8 scy;
@@ -52,12 +50,20 @@ struct LCD : Processor, MMIO {
   uint8 vram[8192];
   uint8 oam[160];
 
+  struct Line {
+    enum class Source : unsigned { None, BG, OBJ, Window } source;
+    uint8 output;
+  } line[160];
+
   static void Main();
   void main();
   void add_clocks(unsigned clocks);
   void scanline();
   void frame();
   void render();
+  void render_bg();
+  void render_window();
+  void render_obj();
 
   void power();
   void reset();
