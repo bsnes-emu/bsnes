@@ -1,10 +1,12 @@
-#include <gameboy.hpp>
+#include <gameboy/gameboy.hpp>
 
 #define CARTRIDGE_CPP
 namespace GameBoy {
 
 #include "mbc0/mbc0.cpp"
 #include "mbc1/mbc1.cpp"
+#include "mbc2/mbc2.cpp"
+#include "mbc5/mbc5.cpp"
 Cartridge cartridge;
 
 void Cartridge::load(uint8_t *data, unsigned size) {
@@ -25,11 +27,20 @@ void Cartridge::load(uint8_t *data, unsigned size) {
   info.battery = false;
   info.rtc = false;
 
-  switch(romdata[0x0147]) { default:
+  switch(romdata[0x0147]) {
     case 0x00: info.mapper = Mapper::MBC0; break;
     case 0x01: info.mapper = Mapper::MBC1; break;
     case 0x02: info.mapper = Mapper::MBC1; info.ram = true; break;
     case 0x03: info.mapper = Mapper::MBC1; info.ram = true; info.battery = true; break;
+    case 0x05: info.mapper = Mapper::MBC2; info.ram = true; break;
+    case 0x06: info.mapper = Mapper::MBC2; info.ram = true; info.battery = true; break;
+    case 0x19: info.mapper = Mapper::MBC5; break;
+    case 0x1a: info.mapper = Mapper::MBC5; info.ram = true; break;
+    case 0x1b: info.mapper = Mapper::MBC5; info.ram = true; info.battery = true; break;
+    case 0x1c: info.mapper = Mapper::MBC5; info.rumble = true; break;
+    case 0x1d: info.mapper = Mapper::MBC5; info.rumble = true; info.ram = true; break;
+    case 0x1e: info.mapper = Mapper::MBC5; info.rumble = true; info.ram = true; info.battery = true; break;
+    default: print("Unknown mapper: ", hex<2>(romdata[0x0147]), "\n"); break;
   }
 
   switch(romdata[0x0148]) { default:
@@ -46,13 +57,14 @@ void Cartridge::load(uint8_t *data, unsigned size) {
     case 0x54: info.romsize =  96 * 16 * 1024; break;
   }
 
-  //TODO: MBC2 always stores 0x00 here; yet it has 512x4-bits RAM
   switch(romdata[0x0149]) { default:
     case 0x00: info.ramsize =  0 * 1024; break;
     case 0x01: info.ramsize =  2 * 1024; break;
     case 0x02: info.ramsize =  8 * 1024; break;
     case 0x03: info.ramsize = 32 * 1024; break;
   }
+
+  if(info.mapper == Mapper::MBC2) info.ramsize = 256;  //512 x 4-bit
 
   ramdata = new uint8_t[ramsize = info.ramsize]();
 
@@ -92,23 +104,21 @@ void Cartridge::ram_write(unsigned addr, uint8 data) {
 void Cartridge::power() {
   mbc0.power();
   mbc1.power();
+  mbc2.power();
+  mbc5.power();
 
   MMIO *mapper = 0;
-  switch(info.mapper) {
+  switch(info.mapper) { default:
     case Mapper::MBC0: mapper = &mbc0; break;
     case Mapper::MBC1: mapper = &mbc1; break;
+    case Mapper::MBC2: mapper = &mbc2; break;
+    case Mapper::MBC5: mapper = &mbc5; break;
   }
+
   if(mapper) {
     for(unsigned n = 0x0000; n <= 0x7fff; n++) bus.mmio[n] = mapper;
     for(unsigned n = 0xa000; n <= 0xbfff; n++) bus.mmio[n] = mapper;
   }
-
-  reset();
-}
-
-void Cartridge::reset() {
-  mbc1.reset();
-  mbc1.reset();
 }
 
 Cartridge::Cartridge() {

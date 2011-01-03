@@ -49,11 +49,7 @@ struct LCD : Processor, MMIO {
   uint8 screen[160 * 144];
   uint8 vram[8192];
   uint8 oam[160];
-
-  struct Line {
-    enum class Source : unsigned { None, BG, OBJ, Window } source;
-    uint8 output;
-  } line[160];
+  uint8 line[160];
 
   static void Main();
   void main();
@@ -61,12 +57,12 @@ struct LCD : Processor, MMIO {
   void scanline();
   void frame();
   void render();
+  uint16 read_tile(bool select, unsigned x, unsigned y);
   void render_bg();
   void render_window();
   void render_obj();
 
   void power();
-  void reset();
 };
 
 extern LCD lcd;

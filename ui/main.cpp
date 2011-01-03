@@ -22,13 +22,21 @@ void Application::main(int argc, char **argv) {
   mainWindow.setVisible();
   OS::run();
 
+  #if defined(PHOENIX_WINDOWS)
+  video.driver("Direct3D");
+  #else
   video.driver("OpenGL");
+  #endif
   video.set(Video::Handle, (uintptr_t)mainWindow.viewport.handle());
   video.set(Video::Synchronize, true);
   video.set(Video::Filter, (unsigned)0);
   video.init();
 
+  #if defined(PHOENIX_WINDOWS)
+  input.driver("RawInput");
+  #else
   input.driver("SDL");
+  #endif
   input.set(Input::Handle, (uintptr_t)mainWindow.viewport.handle());
   input.init();
 

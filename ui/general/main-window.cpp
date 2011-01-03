@@ -9,12 +9,10 @@ void MainWindow::create() {
   systemLoadCartridge.create(system, "Load Cartridge ...");
   systemSeparator1.create(system);
   systemPower.create(system, "Power Cycle");
-  systemPower.setEnabled(false);
-  systemReset.create(system, "Reset");
-  systemReset.setEnabled(false);
 
   settings.create(*this, "Settings");
-//settings.setEnabled(false);
+  settingsVideoSync.create(settings, "Synchronize Video");
+  settingsVideoSync.setChecked(true);
 
   tools.create(*this, "Tools");
 //tools.setEnabled(false);
@@ -35,6 +33,14 @@ void MainWindow::create() {
   systemLoadCartridge.onTick = []() {
     string filename = OS::fileOpen(mainWindow, "Game Boy cartridges\t*.gb,*.gbc", "/media/sdb1/root/gameboy_images/");
     if(filename != "") utility.loadCartridge(filename);
+  };
+
+  systemPower.onTick = []() {
+    if(GameBoy::cartridge.loaded()) GameBoy::system.power();
+  };
+
+  settingsVideoSync.onTick = []() {
+    video.set(Video::Synchronize, mainWindow.settingsVideoSync.checked());
   };
 
   helpAbout.onTick = []() {

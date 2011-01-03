@@ -1,4 +1,4 @@
-#include <gameboy.hpp>
+#include <gameboy/gameboy.hpp>
 
 #define SCHEDULER_CPP
 namespace GameBoy {

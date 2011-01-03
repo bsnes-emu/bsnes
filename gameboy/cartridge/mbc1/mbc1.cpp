@@ -47,9 +47,6 @@ void Cartridge::MBC1::mmio_write(uint16 addr, uint8 data) {
 }
 
 void Cartridge::MBC1::power() {
-}
-
-void Cartridge::MBC1::reset() {
   ram_enable = false;
   rom_select = 0x01;
   ram_select = 0x00;

@@ -3,9 +3,9 @@ struct MainWindow : Window {
   MenuItem systemLoadCartridge;
   MenuSeparator systemSeparator1;
   MenuItem systemPower;
-  MenuItem systemReset;
 
   Menu settings;
+  MenuCheckItem settingsVideoSync;
 
   Menu tools;
 

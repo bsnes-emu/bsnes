@@ -1,22 +1,27 @@
 struct Cartridge : property<Cartridge> {
   #include "mbc0/mbc0.hpp"
   #include "mbc1/mbc1.hpp"
+  #include "mbc2/mbc2.hpp"
+  #include "mbc5/mbc5.hpp"
 
   enum Mapper : unsigned {
     MBC0,
     MBC1,
+    MBC2,
+    MBC5,
     Unknown,
   };
 
   struct Information {
-    string   name;
-    uint8    cgbflag;
-    uint8    sgbflag;
+    string name;
+    uint8 cgbflag;
+    uint8 sgbflag;
 
-    Mapper   mapper;
-    bool     ram;
-    bool     battery;
-    bool     rtc;
+    Mapper mapper;
+    bool ram;
+    bool battery;
+    bool rtc;
+    bool rumble;
 
     unsigned romsize;
     unsigned ramsize;
@@ -39,7 +44,6 @@ struct Cartridge : property<Cartridge> {
   void ram_write(unsigned addr, uint8 data);
 
   void power();
-  void reset();
 
   Cartridge();
   ~Cartridge();

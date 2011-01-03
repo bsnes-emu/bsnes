@@ -5,7 +5,7 @@
 namespace GameBoy {
   namespace Info {
     static const char Name[] = "bgameboy";
-    static const char Version[] = "000.06";
+    static const char Version[] = "000.07";
   }
 }
 
@@ -43,10 +43,10 @@ namespace GameBoy {
     inline Processor() : thread(0) {}
   };
 
-  #include <system/system.hpp>
-  #include <scheduler/scheduler.hpp>
-  #include <memory/memory.hpp>
-  #include <cartridge/cartridge.hpp>
-  #include <cpu/cpu.hpp>
-  #include <lcd/lcd.hpp>
+  #include <gameboy/system/system.hpp>
+  #include <gameboy/scheduler/scheduler.hpp>
+  #include <gameboy/memory/memory.hpp>
+  #include <gameboy/cartridge/cartridge.hpp>
+  #include <gameboy/cpu/cpu.hpp>
+  #include <gameboy/lcd/lcd.hpp>
 };

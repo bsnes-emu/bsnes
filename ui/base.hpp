@@ -10,7 +10,7 @@ using namespace ruby;
 #include <phoenix/phoenix.hpp>
 using namespace phoenix;
 
-#include <gameboy.hpp>
+#include <gameboy/gameboy.hpp>
 
 #include "interface.hpp"
 

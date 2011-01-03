@@ -1,4 +1,4 @@
-#include <gameboy.hpp>
+#include <gameboy/gameboy.hpp>
 
 #define LCD_CPP
 namespace GameBoy {
@@ -55,93 +55,66 @@ void LCD::frame() {
 }
 
 void LCD::render() {
-  for(unsigned n = 0; n < 160; n++) {
-    line[n].source = Line::Source::None;
-    line[n].output = 0;
-  }
+  for(unsigned n = 0; n < 160; n++) line[n] = 0x00;
 
   if(status.display_enable == true) {
     if(status.bg_enable == true) render_bg();
-    if(status.obj_enable == true) render_obj();
     if(status.window_display_enable == true) render_window();
+    if(status.obj_enable == true) render_obj();
   }
 
   uint8_t *output = screen + status.ly * 160;
-  for(unsigned n = 0; n < 160; n++) {
-    output[n] = (3 - line[n].output) * 0x55;
+  for(unsigned n = 0; n < 160; n++) output[n] = (3 - line[n]) * 0x55;
+}
+
+uint16 LCD::read_tile(bool select, unsigned x, unsigned y) {
+  unsigned tmaddr = 0x1800 + (select << 10), tdaddr;
+  tmaddr += (((y >> 3) << 5) + (x >> 3)) & 0x03ff;
+  if(status.bg_tiledata_select == 0) {
+    tdaddr = 0x1000 + ((int8)vram[tmaddr] << 4);
+  } else {
+    tdaddr = 0x0000 + (vram[tmaddr] << 4);
   }
+  tdaddr += (y & 7) << 1;
+  return (vram[tdaddr + 0] << 0) | (vram[tdaddr + 1] << 8);
 }
 
 void LCD::render_bg() {
   unsigned iy = (status.ly + status.scy) & 255;
-  unsigned ix = status.scx;
+  unsigned ix = status.scx, tx = ix & 7;
+  uint8 mask = 0x80 >> tx;
+  unsigned data = read_tile(status.bg_tilemap_select, ix, iy), palette;
 
-  unsigned tmaddr = (status.bg_tilemap_select == 0 ? 0x1800 : 0x1c00);
-
-  unsigned tx = (ix - 7) & 7;
-  uint8 d0 = 0, d1 = 0;
-  for(signed ox = -7; ox < 160; ox++) {
-    if(tx == 0) {
-      unsigned tile = (((iy >> 3) * 32) + (ix >> 3)) & 0x3fff;
-      unsigned tdaddr;
-      if(status.bg_tiledata_select == 0) {
-        tdaddr = 0x1000 + (int8)vram[tmaddr + tile] * 16;
-      } else {
-        tdaddr = 0x0000 + vram[tmaddr + tile] * 16;
-      }
-      tdaddr += (iy & 7) * 2;
-
-      d0 = vram[tdaddr + 0];
-      d1 = vram[tdaddr + 1];
-    }
-
-    uint8 palette = ((d0 & 0x80) >> 7) + ((d1 & 0x80) >> 6);
-    d0 <<= 1, d1 <<= 1;
-
-    if(ox >= 0) {
-      line[ox].source = Line::Source::BG;
-      line[ox].output = status.bgp[palette];
-    }
+  for(unsigned ox = 0; ox < 160; ox++) {
+    palette  = ((data & (mask << 0)) ? 1 : 0);
+    palette |= ((data & (mask << 8)) ? 2 : 0);
+    mask = (mask >> 1) | (mask << 7);
+    line[ox] = status.bgp[palette];
 
     ix = (ix + 1) & 255;
     tx = (tx + 1) & 7;
+
+    if(tx == 0) data = read_tile(status.bg_tilemap_select, ix, iy);
   }
 }
 
 void LCD::render_window() {
-  if(status.wy > status.ly) return;
-  unsigned iy = (status.ly + status.wy) & 255;
-  unsigned ix = (status.wx - 7) & 255;
+  if(status.ly - status.wy >= 144U) return;
+  unsigned iy = status.ly - status.wy;
+  unsigned ix = (status.wx - 7) & 255, tx = ix & 7;
+  uint8 mask = 0x80 >> tx;
+  unsigned data = read_tile(status.window_tilemap_select, ix, iy), palette;
 
-  unsigned tmaddr = (status.window_tilemap_select == 0 ? 0x1800 : 0x1c00);
-
-  unsigned tx = (ix - 7) & 7;
-  uint8 d0 = 0, d1 = 0;
-  for(signed ox = -7; ox < 160; ox++) {
-    if(tx == 0) {
-      unsigned tile = (((iy >> 3) * 32) + (ix >> 3)) & 0x3fff;
-      unsigned tdaddr;
-      if(status.bg_tiledata_select == 0) {
-        tdaddr = 0x1000 + (int8)vram[tmaddr + tile] * 16;
-      } else {
-        tdaddr = 0x0000 + vram[tmaddr + tile] * 16;
-      }
-      tdaddr += (iy & 7) * 2;
-
-      d0 = vram[tdaddr + 0];
-      d1 = vram[tdaddr + 1];
-    }
-
-    uint8 palette = ((d0 & 0x80) >> 7) + ((d1 & 0x80) >> 6);
-    d0 <<= 1, d1 <<= 1;
-
-    if(ox >= 7) {
-      line[ox].source = Line::Source::Window;
-      line[ox].output = status.bgp[palette];
-    }
+  for(unsigned ox = 0; ox < 160; ox++) {
+    palette  = ((data & (mask << 0)) ? 1 : 0);
+    palette |= ((data & (mask << 8)) ? 2 : 0);
+    mask = (mask >> 1) | (mask << 7);
+    if(ox - (status.wx - 7) < 160U) line[ox] = status.bgp[palette];
 
     ix = (ix + 1) & 255;
     tx = (tx + 1) & 7;
+
+    if(tx == 0) data = read_tile(status.window_tilemap_select, ix, iy);
   }
 }
 
@@ -173,17 +146,18 @@ void LCD::render_obj() {
       unsigned ox = sx + (tx ^ xflip);
 
       if(ox <= 159) {
-        if((attribute & 0x80) == 1) {
-          if(line[ox].source == Line::Source::BG && line[ox].output > 0) continue;
+        if(attribute & 0x80) {
+          if(line[ox] > 0) continue;
         }
-        line[ox].source = Line::Source::OBJ;
-        line[ox].output = palette;
+        line[ox] = palette;
       }
     }
   }
 }
 
 void LCD::power() {
+  create(Main, 4 * 1024 * 1024);
+
   for(unsigned n = 0x8000; n <= 0x9fff; n++) bus.mmio[n] = this;  //VRAM
   for(unsigned n = 0xff40; n <= 0xff4b; n++) bus.mmio[n] = this;  //MMIO
   for(unsigned n = 0xfe00; n <= 0xfe9f; n++) bus.mmio[n] = this;  //OAM
@@ -191,11 +165,6 @@ void LCD::power() {
   for(unsigned n = 0; n < 8192; n++) vram[n] = 0x00;
   for(unsigned n = 0; n <  160; n++) oam [n] = 0x00;
 
-  reset();
-}
-
-void LCD::reset() {
-  create(Main, 4 * 1024 * 1024);
   for(unsigned n = 0; n < 160 * 144; n++) screen[n] = 0x00;
 
   status.lx = 0;

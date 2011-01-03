@@ -11,7 +11,4 @@ void Cartridge::MBC0::mmio_write(uint16 addr, uint8 data) {
 void Cartridge::MBC0::power() {
 }
 
-void Cartridge::MBC0::reset() {
-}
-
 #endif

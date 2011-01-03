@@ -1,4 +1,4 @@
-#include <gameboy.hpp>
+#include <gameboy/gameboy.hpp>
 
 #define CPU_CPP
 namespace GameBoy {
@@ -67,9 +67,13 @@ void CPU::interrupt_exec(uint16 pc) {
   op_write(--r[SP], r[PC] >> 0);
   r[PC] = pc;
   op_io();
+  op_io();
+  op_io();
 }
 
 void CPU::power() {
+  create(Main, 4 * 1024 * 1024);
+
   for(unsigned n = 0xc000; n <= 0xdfff; n++) bus.mmio[n] = this;  //WRAM
   for(unsigned n = 0xe000; n <= 0xfdff; n++) bus.mmio[n] = this;  //WRAM (mirror)
   for(unsigned n = 0xff00; n <= 0xff0f; n++) bus.mmio[n] = this;  //MMIO
@@ -78,15 +82,9 @@ void CPU::power() {
   for(unsigned n = 0; n < 8192; n++) wram[n] = 0x00;
   for(unsigned n = 0; n <  128; n++) hram[n] = 0x00;
 
-  reset();
-}
-
-void CPU::reset() {
-  create(Main, 4 * 1024 * 1024);
-
   r[PC] = 0x0100;
   r[SP] = 0xfffe;
-  r[AF] = 0x0000;
+  r[AF] = 0x0100;
   r[BC] = 0x0000;
   r[DE] = 0x0000;
   r[HL] = 0x0000;
