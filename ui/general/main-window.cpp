@@ -15,7 +15,7 @@ void MainWindow::create() {
   settingsVideoSync.setChecked(true);
 
   tools.create(*this, "Tools");
-//tools.setEnabled(false);
+  toolsTraceCPU.create(tools, "Trace CPU");
 
   help.create(*this, "Help");
   helpAbout.create(help, "About ...");
@@ -41,6 +41,10 @@ void MainWindow::create() {
 
   settingsVideoSync.onTick = []() {
     video.set(Video::Synchronize, mainWindow.settingsVideoSync.checked());
+  };
+
+  toolsTraceCPU.onTick = []() {
+    GameBoy::cpu.trace = mainWindow.toolsTraceCPU.checked();
   };
 
   helpAbout.onTick = []() {

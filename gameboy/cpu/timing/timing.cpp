@@ -13,6 +13,12 @@
 #include "opcode.cpp"
 
 void CPU::add_clocks(unsigned clocks) {
+  status.clock += clocks;
+  if(status.clock >= 4 * 1024 * 1024) {
+    status.clock -= 4 * 1024 * 1024;
+    cartridge.mbc3.second();
+  }
+
   status.timer0 += clocks;
   if(status.timer0 >= 16) timer_stage0();
 

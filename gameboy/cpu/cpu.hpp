@@ -3,6 +3,8 @@ struct CPU : Processor, MMIO {
   #include "mmio/mmio.hpp"
   #include "timing/timing.hpp"
 
+  bool trace;
+
   enum class Interrupt : unsigned {
     Vblank,
     Stat,
@@ -12,6 +14,7 @@ struct CPU : Processor, MMIO {
   };
 
   struct Status {
+    unsigned clock;
     bool halt;
     bool stop;
 

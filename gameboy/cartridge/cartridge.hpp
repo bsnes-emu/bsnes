@@ -2,12 +2,14 @@ struct Cartridge : property<Cartridge> {
   #include "mbc0/mbc0.hpp"
   #include "mbc1/mbc1.hpp"
   #include "mbc2/mbc2.hpp"
+  #include "mbc3/mbc3.hpp"
   #include "mbc5/mbc5.hpp"
 
   enum Mapper : unsigned {
     MBC0,
     MBC1,
     MBC2,
+    MBC3,
     MBC5,
     Unknown,
   };

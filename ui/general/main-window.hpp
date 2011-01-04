@@ -8,6 +8,7 @@ struct MainWindow : Window {
   MenuCheckItem settingsVideoSync;
 
   Menu tools;
+  MenuCheckItem toolsTraceCPU;
 
   Menu help;
   MenuItem helpAbout;

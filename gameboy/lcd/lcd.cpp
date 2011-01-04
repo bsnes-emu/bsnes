@@ -82,13 +82,11 @@ uint16 LCD::read_tile(bool select, unsigned x, unsigned y) {
 void LCD::render_bg() {
   unsigned iy = (status.ly + status.scy) & 255;
   unsigned ix = status.scx, tx = ix & 7;
-  uint8 mask = 0x80 >> tx;
-  unsigned data = read_tile(status.bg_tilemap_select, ix, iy), palette;
+  unsigned data = read_tile(status.bg_tilemap_select, ix, iy);
 
   for(unsigned ox = 0; ox < 160; ox++) {
-    palette  = ((data & (mask << 0)) ? 1 : 0);
-    palette |= ((data & (mask << 8)) ? 2 : 0);
-    mask = (mask >> 1) | (mask << 7);
+    uint8 palette = ((data & (0x0080 >> tx)) ? 1 : 0)
+                  | ((data & (0x8000 >> tx)) ? 2 : 0);
     line[ox] = status.bgp[palette];
 
     ix = (ix + 1) & 255;
@@ -102,13 +100,11 @@ void LCD::render_window() {
   if(status.ly - status.wy >= 144U) return;
   unsigned iy = status.ly - status.wy;
   unsigned ix = (status.wx - 7) & 255, tx = ix & 7;
-  uint8 mask = 0x80 >> tx;
-  unsigned data = read_tile(status.window_tilemap_select, ix, iy), palette;
+  unsigned data = read_tile(status.window_tilemap_select, ix, iy);
 
   for(unsigned ox = 0; ox < 160; ox++) {
-    palette  = ((data & (mask << 0)) ? 1 : 0);
-    palette |= ((data & (mask << 8)) ? 2 : 0);
-    mask = (mask >> 1) | (mask << 7);
+    uint8 palette = ((data & (0x0080 >> tx)) ? 1 : 0)
+                  | ((data & (0x8000 >> tx)) ? 2 : 0);
     if(ox - (status.wx - 7) < 160U) line[ox] = status.bgp[palette];
 
     ix = (ix + 1) & 255;
@@ -121,25 +117,53 @@ void LCD::render_window() {
 void LCD::render_obj() {
   unsigned obj_size = (status.obj_size == 0 ? 8 : 16);
 
+  unsigned sprite[10], sprites = 0;
+
+  //find first ten sprites on this scanline
   for(unsigned s = 0; s < 40; s++) {
     unsigned sy = oam[(s << 2) + 0] - 16;
     unsigned sx = oam[(s << 2) + 1] -  8;
-    unsigned tile = oam[(s << 2) + 2];
-    unsigned attribute = oam[(s << 2) + 3];
+
+    sy = status.ly - sy;
+    if(sy >= obj_size) continue;
+
+    sprite[sprites++] = s;
+    if(sprites == 10) break;
+  }
+
+  //sort by X-coordinate, when equal, lower address comes first
+  for(unsigned x = 0; x < sprites; x++) {
+    for(unsigned y = x + 1; y < sprites; y++) {
+      signed sx = oam[(sprite[x] << 2) + 1] - 8;
+      signed sy = oam[(sprite[y] << 2) + 1] - 8;
+      if(sy < sx) {
+        sprite[x] ^= sprite[y];
+        sprite[y] ^= sprite[x];
+        sprite[x] ^= sprite[y];
+      }
+    }
+  }
+
+  //render backwards, so that first sprite has highest priority
+  for(signed s = sprites - 1; s >= 0; s--) {
+    unsigned n = sprite[s] << 2;
+    unsigned sy = oam[n + 0] - 16;
+    unsigned sx = oam[n + 1] -  8;
+    unsigned tile = oam[n + 2];
+    unsigned attribute = oam[n + 3];
 
     sy = status.ly - sy;
     if(sy >= obj_size) continue;
     if(attribute & 0x40) sy ^= (obj_size - 1);
 
-    unsigned tdaddr = tile * 16 + sy * 2;
-
+    unsigned tdaddr = (tile << 4) + (sy << 1);
     uint8 d0 = vram[tdaddr + 0];
     uint8 d1 = vram[tdaddr + 1];
     unsigned xflip = attribute & 0x20 ? 7 : 0;
 
     for(unsigned tx = 0; tx < 8; tx++) {
-      uint8 palette = ((d0 & 0x80) >> 7) + ((d1 & 0x80) >> 6);
-      d0 <<= 1, d1 <<= 1;
+      uint8 palette = ((d0 & (0x80 >> tx)) ? 1 : 0)
+                    | ((d1 & (0x80 >> tx)) ? 2 : 0);
       if(palette == 0) continue;
 
       palette = status.obp[(bool)(attribute & 0x10)][palette];

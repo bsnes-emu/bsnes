@@ -4,9 +4,6 @@ struct MBC1 : MMIO {
   uint8 ram_select;   //4000-5fff
   bool  mode_select;  //6000-7fff
 
-  unsigned rom_bank;
-  unsigned ram_bank;
-
   uint8 mmio_read(uint16 addr);
   void mmio_write(uint16 addr, uint8 data);
   void power();

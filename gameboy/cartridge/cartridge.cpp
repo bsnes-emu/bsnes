@@ -6,6 +6,7 @@ namespace GameBoy {
 #include "mbc0/mbc0.cpp"
 #include "mbc1/mbc1.cpp"
 #include "mbc2/mbc2.cpp"
+#include "mbc3/mbc3.cpp"
 #include "mbc5/mbc5.cpp"
 Cartridge cartridge;
 
@@ -34,6 +35,13 @@ void Cartridge::load(uint8_t *data, unsigned size) {
     case 0x03: info.mapper = Mapper::MBC1; info.ram = true; info.battery = true; break;
     case 0x05: info.mapper = Mapper::MBC2; info.ram = true; break;
     case 0x06: info.mapper = Mapper::MBC2; info.ram = true; info.battery = true; break;
+    case 0x08: info.mapper = Mapper::MBC0; info.ram = true; break;
+    case 0x09: info.mapper = Mapper::MBC0; info.ram = true; info.battery = true; break;
+    case 0x0f: info.mapper = Mapper::MBC3; info.rtc = true; info.battery = true; break;
+    case 0x10: info.mapper = Mapper::MBC3; info.rtc = true; info.ram = true; info.battery = true; break;
+    case 0x11: info.mapper = Mapper::MBC3; break;
+    case 0x12: info.mapper = Mapper::MBC3; info.ram = true; break;
+    case 0x13: info.mapper = Mapper::MBC3; info.ram = true; info.battery = true; break;
     case 0x19: info.mapper = Mapper::MBC5; break;
     case 0x1a: info.mapper = Mapper::MBC5; info.ram = true; break;
     case 0x1b: info.mapper = Mapper::MBC5; info.ram = true; info.battery = true; break;
@@ -64,7 +72,7 @@ void Cartridge::load(uint8_t *data, unsigned size) {
     case 0x03: info.ramsize = 32 * 1024; break;
   }
 
-  if(info.mapper == Mapper::MBC2) info.ramsize = 256;  //512 x 4-bit
+  if(info.mapper == Mapper::MBC2) info.ramsize = 512;  //512 x 4-bit
 
   ramdata = new uint8_t[ramsize = info.ramsize]();
 
@@ -105,6 +113,7 @@ void Cartridge::power() {
   mbc0.power();
   mbc1.power();
   mbc2.power();
+  mbc3.power();
   mbc5.power();
 
   MMIO *mapper = 0;
@@ -112,6 +121,7 @@ void Cartridge::power() {
     case Mapper::MBC0: mapper = &mbc0; break;
     case Mapper::MBC1: mapper = &mbc1; break;
     case Mapper::MBC2: mapper = &mbc2; break;
+    case Mapper::MBC3: mapper = &mbc3; break;
     case Mapper::MBC5: mapper = &mbc5; break;
   }
 

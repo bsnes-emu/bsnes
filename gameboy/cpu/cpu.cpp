@@ -14,7 +14,7 @@ void CPU::Main() {
 
 void CPU::main() {
   while(true) {
-  //print(disassemble(r[PC]), "\n");
+    if(trace) print(disassemble(r[PC]), "\n");
     interrupt_test();
     uint8 opcode = op_read(r[PC]++);
     (this->*opcode_table[opcode])();
@@ -27,7 +27,7 @@ void CPU::interrupt_raise(CPU::Interrupt id) {
     case Interrupt::Stat  : status.interrupt_request_stat   = 1; break;
     case Interrupt::Timer : status.interrupt_request_timer  = 1; break;
     case Interrupt::Serial: status.interrupt_request_serial = 1; break;
-    case Interrupt::Joypad: status.interrupt_request_joypad = 1; break;
+    case Interrupt::Joypad: status.interrupt_request_joypad = 1; status.stop = false; break;
   }
   status.halt = false;
 }
@@ -89,6 +89,7 @@ void CPU::power() {
   r[DE] = 0x0000;
   r[HL] = 0x0000;
 
+  status.clock = 0;
   status.halt = false;
   status.stop = false;
 
@@ -124,7 +125,7 @@ void CPU::power() {
   status.interrupt_enable_vblank = 0;
 }
 
-CPU::CPU() {
+CPU::CPU() : trace(false) {
   initialize_opcode_table();
 }
 
