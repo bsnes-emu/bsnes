@@ -4,6 +4,9 @@ struct Cartridge : property<Cartridge> {
   #include "mbc2/mbc2.hpp"
   #include "mbc3/mbc3.hpp"
   #include "mbc5/mbc5.hpp"
+  #include "mmm01/mmm01.hpp"
+  #include "huc1/huc1.hpp"
+  #include "huc3/huc3.hpp"
 
   enum Mapper : unsigned {
     MBC0,
@@ -11,6 +14,9 @@ struct Cartridge : property<Cartridge> {
     MBC2,
     MBC3,
     MBC5,
+    MMM01,
+    HuC1,
+    HuC3,
     Unknown,
   };
 

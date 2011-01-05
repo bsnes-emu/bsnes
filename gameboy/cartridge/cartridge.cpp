@@ -1,5 +1,7 @@
 #include <gameboy/gameboy.hpp>
 
+#include <nall/crc32.hpp>
+
 #define CARTRIDGE_CPP
 namespace GameBoy {
 
@@ -8,9 +10,15 @@ namespace GameBoy {
 #include "mbc2/mbc2.cpp"
 #include "mbc3/mbc3.cpp"
 #include "mbc5/mbc5.cpp"
+#include "mmm01/mmm01.cpp"
+#include "huc1/huc1.cpp"
+#include "huc3/huc3.cpp"
 Cartridge cartridge;
 
 void Cartridge::load(uint8_t *data, unsigned size) {
+//uint32_t crc = crc32_calculate(data, size);
+//print("CRC32 = ", hex<4>(crc), "\n");
+
   romdata = new uint8[romsize = size];
   memcpy(romdata, data, size);
 
@@ -37,6 +45,9 @@ void Cartridge::load(uint8_t *data, unsigned size) {
     case 0x06: info.mapper = Mapper::MBC2; info.ram = true; info.battery = true; break;
     case 0x08: info.mapper = Mapper::MBC0; info.ram = true; break;
     case 0x09: info.mapper = Mapper::MBC0; info.ram = true; info.battery = true; break;
+    case 0x0b: info.mapper = Mapper::MMM01; break;
+    case 0x0c: info.mapper = Mapper::MMM01; info.ram = true; break;
+    case 0x0d: info.mapper = Mapper::MMM01; info.ram = true; info.battery = true; break;
     case 0x0f: info.mapper = Mapper::MBC3; info.rtc = true; info.battery = true; break;
     case 0x10: info.mapper = Mapper::MBC3; info.rtc = true; info.ram = true; info.battery = true; break;
     case 0x11: info.mapper = Mapper::MBC3; break;
@@ -48,8 +59,12 @@ void Cartridge::load(uint8_t *data, unsigned size) {
     case 0x1c: info.mapper = Mapper::MBC5; info.rumble = true; break;
     case 0x1d: info.mapper = Mapper::MBC5; info.rumble = true; info.ram = true; break;
     case 0x1e: info.mapper = Mapper::MBC5; info.rumble = true; info.ram = true; info.battery = true; break;
-    default: print("Unknown mapper: ", hex<2>(romdata[0x0147]), "\n"); break;
+    case 0xfc: break;  //Pocket Camera
+    case 0xfd: break;  //Bandai TAMA5
+    case 0xfe: info.mapper = Mapper::HuC3; break;
+    case 0xff: info.mapper = Mapper::HuC1; info.ram = true; info.battery = true; break;
   }
+  print("Mapper: ", hex<2>(romdata[0x0147]), "\n");
 
   switch(romdata[0x0148]) { default:
     case 0x00: info.romsize =   2 * 16 * 1024; break;
@@ -88,6 +103,8 @@ void Cartridge::unload() {
 }
 
 uint8 Cartridge::rom_read(unsigned addr) {
+//if(addr >= 0x028000) print(hex<6>(addr), " - ", romsize, "\n");
+
   if(addr >= romsize) addr %= romsize;
   return romdata[addr];
 }
@@ -115,14 +132,20 @@ void Cartridge::power() {
   mbc2.power();
   mbc3.power();
   mbc5.power();
+  mmm01.power();
+  huc1.power();
+  huc3.power();
 
   MMIO *mapper = 0;
   switch(info.mapper) { default:
-    case Mapper::MBC0: mapper = &mbc0; break;
-    case Mapper::MBC1: mapper = &mbc1; break;
-    case Mapper::MBC2: mapper = &mbc2; break;
-    case Mapper::MBC3: mapper = &mbc3; break;
-    case Mapper::MBC5: mapper = &mbc5; break;
+    case Mapper::MBC0:  mapper = &mbc0;  break;
+    case Mapper::MBC1:  mapper = &mbc1;  break;
+    case Mapper::MBC2:  mapper = &mbc2;  break;
+    case Mapper::MBC3:  mapper = &mbc3;  break;
+    case Mapper::MBC5:  mapper = &mbc5;  break;
+    case Mapper::MMM01: mapper = &mmm01; break;
+    case Mapper::HuC1:  mapper = &huc1;  break;
+    case Mapper::HuC3:  mapper = &huc3;  break;
   }
 
   if(mapper) {
