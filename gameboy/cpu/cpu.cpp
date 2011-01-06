@@ -82,9 +82,9 @@ void CPU::power() {
   for(unsigned n = 0; n < 8192; n++) wram[n] = 0x00;
   for(unsigned n = 0; n <  128; n++) hram[n] = 0x00;
 
-  r[PC] = 0x0100;
-  r[SP] = 0xfffe;
-  r[AF] = 0x0100;
+  r[PC] = 0x0000;
+  r[SP] = 0x0000;
+  r[AF] = 0x0000;
   r[BC] = 0x0000;
   r[DE] = 0x0000;
   r[HL] = 0x0000;
@@ -102,6 +102,7 @@ void CPU::power() {
   status.p15 = 0;
   status.p14 = 0;
   status.joyp = 0;
+  status.mlt_req = 0;
 
   status.div = 0;
 

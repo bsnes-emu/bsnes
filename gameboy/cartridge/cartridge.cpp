@@ -64,7 +64,7 @@ void Cartridge::load(uint8_t *data, unsigned size) {
     case 0xfe: info.mapper = Mapper::HuC3; break;
     case 0xff: info.mapper = Mapper::HuC1; info.ram = true; info.battery = true; break;
   }
-  print("Mapper: ", hex<2>(romdata[0x0147]), "\n");
+//print("Mapper: ", hex<2>(romdata[0x0147]), "\n");
 
   switch(romdata[0x0148]) { default:
     case 0x00: info.romsize =   2 * 16 * 1024; break;
@@ -103,8 +103,6 @@ void Cartridge::unload() {
 }
 
 uint8 Cartridge::rom_read(unsigned addr) {
-//if(addr >= 0x028000) print(hex<6>(addr), " - ", romsize, "\n");
-
   if(addr >= romsize) addr %= romsize;
   return romdata[addr];
 }
@@ -135,7 +133,10 @@ void Cartridge::power() {
   mmm01.power();
   huc1.power();
   huc3.power();
+  map();
+}
 
+void Cartridge::map() {
   MMIO *mapper = 0;
   switch(info.mapper) { default:
     case Mapper::MBC0:  mapper = &mbc0;  break;

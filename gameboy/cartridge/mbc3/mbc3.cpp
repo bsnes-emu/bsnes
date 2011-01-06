@@ -24,7 +24,7 @@ uint8 Cartridge::MBC3::mmio_read(uint16 addr) {
   }
 
   if((addr & 0xc000) == 0x4000) {  //4000-7fff
-    return cartridge.rom_read((rom_select << 13) | (addr & 0x3fff));
+    return cartridge.rom_read((rom_select << 14) | (addr & 0x3fff));
   }
 
   if((addr & 0xe000) == 0xa000) {  //a000-bfff

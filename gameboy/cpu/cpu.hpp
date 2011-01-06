@@ -28,6 +28,7 @@ struct CPU : Processor, MMIO {
     bool p15;
     bool p14;
     uint8 joyp;
+    uint8 mlt_req;
 
     //$ff04  DIV
     uint8 div;

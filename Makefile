@@ -7,7 +7,7 @@ c       := $(compiler) -std=gnu99
 cpp     := $(subst cc,++,$(compiler)) -std=gnu++0x
 flags   := -O3 -fomit-frame-pointer -I.
 link    :=
-objects :=
+objects := libco
 
 # profile-guided instrumentation
 # flags += -fprofile-generate
@@ -43,6 +43,8 @@ compile = \
 %.o: $<; $(call compile)
 
 all: build;
+
+obj/libco.o: libco/libco.c libco/*
 
 include $(gameboy)/Makefile
 include $(ui)/Makefile

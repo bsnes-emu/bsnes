@@ -52,6 +52,7 @@ struct Cartridge : property<Cartridge> {
   void ram_write(unsigned addr, uint8 data);
 
   void power();
+  void map();
 
   Cartridge();
   ~Cartridge();

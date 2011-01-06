@@ -14,6 +14,7 @@ void CPU::mmio_joyp_poll() {
   dpad |= system.interface->input_poll((unsigned)Input::Right) << 0;
 
   status.joyp = 0x0f;
+  if(status.p15 == 1 && status.p14 == 1) status.joyp -= status.mlt_req;
   if(status.p15 == 0) status.joyp &= button ^ 0x0f;
   if(status.p14 == 0) status.joyp &= dpad ^ 0x0f;
   if(status.joyp != 0x0f) interrupt_raise(Interrupt::Joypad);
@@ -74,6 +75,7 @@ void CPU::mmio_write(uint16 addr, uint8 data) {
   if(addr == 0xff00) {  //JOYP
     status.p15 = data & 0x20;
     status.p14 = data & 0x10;
+    system.interface->joyp_write(status.p15, status.p14);
     mmio_joyp_poll();
     return;
   }

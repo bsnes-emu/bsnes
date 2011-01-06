@@ -1,10 +1,7 @@
-gameboy_objects := libco
-gameboy_objects += gameboy-system gameboy-scheduler
+gameboy_objects := gameboy-system gameboy-scheduler
 gameboy_objects += gameboy-memory gameboy-cartridge
 gameboy_objects += gameboy-cpu gameboy-lcd
 objects += $(gameboy_objects)
-
-obj/libco.o: libco/libco.c libco/*
 
 obj/gameboy-system.o: $(gameboy)/system/system.cpp $(call rwildcard,$(gameboy)/system/)
 obj/gameboy-scheduler.o: $(gameboy)/scheduler/scheduler.cpp $(call rwildcard,$(gameboy)/scheduler/)

@@ -13,6 +13,9 @@
 #include "opcode.cpp"
 
 void CPU::add_clocks(unsigned clocks) {
+  system.clocks_executed += clocks;
+  scheduler.exit();
+
   status.clock += clocks;
   if(status.clock >= 4 * 1024 * 1024) {
     status.clock -= 4 * 1024 * 1024;

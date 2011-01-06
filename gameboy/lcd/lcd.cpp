@@ -30,19 +30,18 @@ void LCD::add_clocks(unsigned clocks) {
 
 void LCD::scanline() {
   status.lx -= 456;
-  status.ly++;
+  if(++status.ly == 154) frame();
 
   if(status.interrupt_lyc == true) {
     if(status.ly == status.lyc) cpu.interrupt_raise(CPU::Interrupt::Stat);
   }
 
+  if(status.ly < 144) render();
+
   if(status.ly == 144) {
     cpu.interrupt_raise(CPU::Interrupt::Vblank);
     if(status.interrupt_vblank) cpu.interrupt_raise(CPU::Interrupt::Stat);
   }
-  if(status.ly == 154) frame();
-
-  if(status.ly < 144) render();
 }
 
 void LCD::frame() {
