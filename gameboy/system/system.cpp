@@ -5,7 +5,33 @@ namespace GameBoy {
 
 #include "bootrom-dmg.cpp"
 #include "bootrom-sgb.cpp"
+#include "serialization.cpp"
 System system;
+
+void System::run() {
+  scheduler.sync = Scheduler::SynchronizeMode::None;
+
+  scheduler.enter();
+  if(scheduler.exit_reason() == Scheduler::ExitReason::FrameEvent) {
+  }
+}
+
+void System::runtosave() {
+  scheduler.sync = Scheduler::SynchronizeMode::CPU;
+  runthreadtosave();
+
+  scheduler.active_thread = lcd.thread;
+  runthreadtosave();
+}
+
+void System::runthreadtosave() {
+  while(true) {
+    scheduler.enter();
+    if(scheduler.exit_reason() == Scheduler::ExitReason::SynchronizeEvent) break;
+    if(scheduler.exit_reason() == Scheduler::ExitReason::FrameEvent) {
+    }
+  }
+}
 
 uint8 System::mmio_read(uint16 addr) {
   if((addr & 0xff00) == 0x0000) {
@@ -34,11 +60,8 @@ void System::power() {
   for(unsigned n = 0x0000; n <= 0x00ff; n++) bus.mmio[n] = this;
   bus.mmio[0xff50] = this;
 
-  system.clocks_executed = 0;
-}
-
-void System::run() {
-  scheduler.enter();
+  clocks_executed = 0;
+  serialize_init();
 }
 
 }

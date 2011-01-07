@@ -5,14 +5,17 @@
 namespace GameBoy {
   namespace Info {
     static const char Name[] = "bgameboy";
-    static const char Version[] = "000.10";
+    static const char Version[] = "000.11";
+    static unsigned SerializerVersion = 1;
   }
 }
 
 #include <libco/libco.h>
 
 #include <nall/foreach.hpp>
+#include <nall/platform.hpp>
 #include <nall/property.hpp>
+#include <nall/serializer.hpp>
 #include <nall/stdint.hpp>
 #include <nall/string.hpp>
 using namespace nall;

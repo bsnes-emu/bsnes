@@ -6,6 +6,7 @@ namespace GameBoy {
 #include "core/core.cpp"
 #include "mmio/mmio.cpp"
 #include "timing/timing.cpp"
+#include "serialization.cpp"
 CPU cpu;
 
 void CPU::Main() {
@@ -14,6 +15,11 @@ void CPU::Main() {
 
 void CPU::main() {
   while(true) {
+    if(scheduler.sync == Scheduler::SynchronizeMode::CPU) {
+      scheduler.sync = Scheduler::SynchronizeMode::All;
+      scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
+    }
+
     if(trace) print(disassemble(r[PC]), "\n");
     interrupt_test();
     uint8 opcode = op_read(r[PC]++);

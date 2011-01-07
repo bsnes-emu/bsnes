@@ -46,7 +46,9 @@ void Application::main(int argc, char **argv) {
     OS::run();
 
     if(GameBoy::cartridge.loaded()) {
-      for(unsigned n = 0; n < 1024 * 1024; n++) GameBoy::system.run();
+      do {
+        GameBoy::system.run();
+      } while(GameBoy::scheduler.exit_reason() != GameBoy::Scheduler::ExitReason::FrameEvent);
     }
   }
 }

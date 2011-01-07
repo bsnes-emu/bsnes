@@ -14,7 +14,7 @@
 
 void CPU::add_clocks(unsigned clocks) {
   system.clocks_executed += clocks;
-  scheduler.exit();
+  scheduler.exit(Scheduler::ExitReason::StepEvent);
 
   status.clock += clocks;
   if(status.clock >= 4 * 1024 * 1024) {

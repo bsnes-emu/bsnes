@@ -21,15 +21,11 @@ struct Unmapped : MMIO {
 };
 
 struct Bus {
-  Memory cartrom;
-  Memory cartram;
-
   MMIO *mmio[65536];
   uint8 read(uint16 addr);
   void write(uint16 addr, uint8 data);
 
   void power();
-  void reset();
 };
 
 extern Unmapped unmapped;

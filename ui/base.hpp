@@ -2,6 +2,7 @@
 #include <nall/foreach.hpp>
 #include <nall/stdint.hpp>
 #include <nall/string.hpp>
+#include <nall/gameboy/cartridge.hpp>
 using namespace nall;
 
 #include <ruby/ruby.hpp>
