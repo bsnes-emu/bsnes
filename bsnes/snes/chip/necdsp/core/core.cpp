@@ -1,50 +1,27 @@
-//NEC uPD77C25 emulation core
-//author: byuu
-//license: public domain
-
-//unsupported components:
-//* serial input/output
-//* interrupts
-//* DMA
-
 #include <snes/snes.hpp>
 
-#define UPD77C25_CPP
+#define UPDCORE_CPP
 namespace SNES {
 
-#include "serialization.cpp"
 #include "disassembler.cpp"
+#include "serialization.cpp"
 
-UPD77C25 upd77c25;
-UPD77C25SR upd77c25sr;
-UPD77C25DR upd77c25dr;
-
-void UPD77C25::Enter() { upd77c25.enter(); }
-
-void UPD77C25::enter() {
-  while(true) {
-    if(scheduler.sync == Scheduler::SynchronizeMode::All) {
-      scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
-    }
-
-    uint24 opcode = programROM[regs.pc++];
-    switch(opcode >> 22) {
-      case 0: exec_op(opcode); break;
-      case 1: exec_rt(opcode); break;
-      case 2: exec_jp(opcode); break;
-      case 3: exec_ld(opcode); break;
-    }
-
-    int32 result = (int32)regs.k * regs.l;  //sign + 30-bit result
-    regs.m = result >> 15;  //store sign + top 15-bits
-    regs.n = result <<  1;  //store low 15-bits + zero
-
-    step(1);
-    synchronize_cpu();
+void uPDcore::exec() {
+  uint24 opcode = programROM[regs.pc];
+  regs.pc = regs.pc + 1;
+  switch(opcode >> 22) {
+    case 0: exec_op(opcode); break;
+    case 1: exec_rt(opcode); break;
+    case 2: exec_jp(opcode); break;
+    case 3: exec_ld(opcode); break;
   }
+
+  int32 result = (int32)regs.k * regs.l;  //sign + 30-bit result
+  regs.m = result >> 15;  //store sign + top 15-bits
+  regs.n = result <<  1;  //store low 15-bits + zero
 }
 
-void UPD77C25::exec_op(uint24 opcode) {
+void uPDcore::exec_op(uint24 opcode) {
   uint2 pselect = opcode >> 20;  //P select
   uint4 alu     = opcode >> 16;  //ALU operation mode
   uint1 asl     = opcode >> 15;  //accumulator select
@@ -162,17 +139,17 @@ void UPD77C25::exec_op(uint24 opcode) {
     case 3: regs.dp = (regs.dp & 0xf0); break;  //DPCLR
   }
 
-  regs.dp ^= dphm << 4;
+  regs.dp = regs.dp ^ (dphm << 4);
 
-  if(rpdcr) regs.rp--;
+  if(rpdcr) regs.rp = regs.rp - 1;
 }
 
-void UPD77C25::exec_rt(uint24 opcode) {
+void uPDcore::exec_rt(uint24 opcode) {
   exec_op(opcode);
   stack_pull();
 }
 
-void UPD77C25::exec_jp(uint24 opcode) {
+void uPDcore::exec_jp(uint24 opcode) {
   uint9 brch = opcode >> 13;  //branch
   uint11 na  = opcode >>  2;  //next address
 
@@ -225,7 +202,7 @@ void UPD77C25::exec_jp(uint24 opcode) {
   if(r) regs.pc = na;
 }
 
-void UPD77C25::exec_ld(uint24 opcode) {
+void uPDcore::exec_ld(uint24 opcode) {
   uint16 id = opcode >> 6;  //immediate data
   uint4 dst = opcode >> 0;  //destination
 
@@ -251,94 +228,47 @@ void UPD77C25::exec_ld(uint24 opcode) {
   }
 }
 
-void UPD77C25::stack_push() {
+void uPDcore::stack_push() {
+  regs.stack[7] = regs.stack[6];
+  regs.stack[6] = regs.stack[5];
+  regs.stack[5] = regs.stack[4];
+  regs.stack[4] = regs.stack[3];
   regs.stack[3] = regs.stack[2];
   regs.stack[2] = regs.stack[1];
   regs.stack[1] = regs.stack[0];
   regs.stack[0] = regs.pc;
 }
 
-void UPD77C25::stack_pull() {
+void uPDcore::stack_pull() {
   regs.pc = regs.stack[0];
   regs.stack[0] = regs.stack[1];
   regs.stack[1] = regs.stack[2];
   regs.stack[2] = regs.stack[3];
-  regs.stack[3] = 0x000;
+  regs.stack[3] = regs.stack[4];
+  regs.stack[4] = regs.stack[5];
+  regs.stack[5] = regs.stack[6];
+  regs.stack[6] = regs.stack[7];
+  regs.stack[7] = 0x0000;
 }
 
-uint8 UPD77C25::read(bool mode) {
-  cpu.synchronize_coprocessor();
-  if(mode == 0) return regs.sr >> 8;
+uPDcore::uPDcore(unsigned pcbits, unsigned rpbits, unsigned dpbits) {
+  programROMSize = 1 << pcbits;
+  dataROMSize = 1 << rpbits;
+  dataRAMSize = 1 << dpbits;
 
-  if(regs.sr.drc == 0) {
-    //16-bit
-    if(regs.sr.drs == 0) {
-      regs.sr.drs = 1;
-      return regs.dr >> 0;
-    } else {
-      regs.sr.rqm = 0;
-      regs.sr.drs = 0;
-      return regs.dr >> 8;
-    }
-  } else {
-    //8-bit
-    regs.sr.rqm = 0;
-    return regs.dr >> 0;
-  }
+  programROM = new uint24[programROMSize];
+  dataROM = new uint16[dataROMSize];
+  dataRAM = new uint16[dataRAMSize];
+
+  regs.pc.mask = programROMSize - 1;
+  regs.rp.mask = dataROMSize - 1;
+  regs.dp.mask = dataRAMSize - 1;
 }
 
-void UPD77C25::write(bool mode, uint8 data) {
-  cpu.synchronize_coprocessor();
-  if(mode == 0) return;
-
-  if(regs.sr.drc == 0) {
-    //16-bit
-    if(regs.sr.drs == 0) {
-      regs.sr.drs = 1;
-      regs.dr = (regs.dr & 0xff00) | (data << 0);
-    } else {
-      regs.sr.rqm = 0;
-      regs.sr.drs = 0;
-      regs.dr = (data << 8) | (regs.dr & 0x00ff);
-    }
-  } else {
-    //8-bit
-    regs.sr.rqm = 0;
-    regs.dr = (regs.dr & 0xff00) | (data << 0);
-  }
+uPDcore::~uPDcore() {
+  delete[] programROM;
+  delete[] dataROM;
+  delete[] dataRAM;
 }
-
-void UPD77C25::init() {
-}
-
-void UPD77C25::enable() {
-}
-
-void UPD77C25::power() {
-  for(unsigned i = 0; i < 256; i++) dataRAM[i] = 0x0000;
-  reset();
-}
-
-void UPD77C25::reset() {
-  create(UPD77C25::Enter, 8 * 1024 * 1024);  //8.192MHz
-
-  regs.pc = 0x000;
-  regs.stack[0] = 0x000;
-  regs.stack[1] = 0x000;
-  regs.stack[2] = 0x000;
-  regs.stack[3] = 0x000;
-  regs.flaga = 0x00;
-  regs.flagb = 0x00;
-  regs.sr = 0x0000;
-  regs.rp = 0x3ff;
-  regs.siack = 0;
-  regs.soack = 0;
-}
-
-uint8 UPD77C25SR::read(unsigned) { return upd77c25.read(0); }
-void UPD77C25SR::write(unsigned, uint8 data) { upd77c25.write(0, data); }
-
-uint8 UPD77C25DR::read(unsigned) { return upd77c25.read(1); }
-void UPD77C25DR::write(unsigned, uint8 data) { upd77c25.write(1, data); }
 
 }

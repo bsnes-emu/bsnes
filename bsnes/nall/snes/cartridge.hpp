@@ -408,7 +408,7 @@ SNESCartridge::SNESCartridge(const uint8_t *data, unsigned size) {
   }
 
   if(has_dsp1) {
-    xml << "  <upd77c25 program='dsp1b.bin' sha256='4d42db0f36faef263d6b93f508e8c1c4ae8fc2605fd35e3390ecc02905cd420c'>\n";
+    xml << "  <upd7725 program='dsp1b.bin' sha256='4d42db0f36faef263d6b93f508e8c1c4ae8fc2605fd35e3390ecc02905cd420c'>\n";
     if(dsp1_mapper == DSP1LoROM1MB) {
       xml << "    <dr>\n";
       xml << "      <map address='20-3f:8000-bfff'/>\n";
@@ -437,11 +437,11 @@ SNESCartridge::SNESCartridge(const uint8_t *data, unsigned size) {
       xml << "      <map address='80-9f:7000-7fff'/>\n";
       xml << "    </sr>\n";
     }
-    xml << "  </upd77c25>\n";
+    xml << "  </upd7725>\n";
   }
 
   if(has_dsp2) {
-    xml << "  <upd77c25 program='dsp2.bin' sha256='5efbdf96ed0652790855225964f3e90e6a4d466cfa64df25b110933c6cf94ea1'>\n";
+    xml << "  <upd7725 program='dsp2.bin' sha256='5efbdf96ed0652790855225964f3e90e6a4d466cfa64df25b110933c6cf94ea1'>\n";
     xml << "    <dr>\n";
     xml << "      <map address='20-3f:8000-bfff'/>\n";
     xml << "      <map address='a0-bf:8000-bfff'/>\n";
@@ -450,11 +450,11 @@ SNESCartridge::SNESCartridge(const uint8_t *data, unsigned size) {
     xml << "      <map address='20-3f:c000-ffff'/>\n";
     xml << "      <map address='a0-bf:c000-ffff'/>\n";
     xml << "    </sr>\n";
-    xml << "  </upd77c25>\n";
+    xml << "  </upd7725>\n";
   }
 
   if(has_dsp3) {
-    xml << "  <upd77c25 program='dsp3.bin' sha256='2e635f72e4d4681148bc35429421c9b946e4f407590e74e31b93b8987b63ba90'>\n";
+    xml << "  <upd7725 program='dsp3.bin' sha256='2e635f72e4d4681148bc35429421c9b946e4f407590e74e31b93b8987b63ba90'>\n";
     xml << "    <dr>\n";
     xml << "      <map address='20-3f:8000-bfff'/>\n";
     xml << "      <map address='a0-bf:8000-bfff'/>\n";
@@ -463,11 +463,11 @@ SNESCartridge::SNESCartridge(const uint8_t *data, unsigned size) {
     xml << "      <map address='20-3f:c000-ffff'/>\n";
     xml << "      <map address='a0-bf:c000-ffff'/>\n";
     xml << "    </sr>\n";
-    xml << "  </upd77c25>\n";
+    xml << "  </upd7725>\n";
   }
 
   if(has_dsp4) {
-    xml << "  <upd77c25 program='dsp4.bin' sha256='63ede17322541c191ed1fdf683872554a0a57306496afc43c59de7c01a6e764a'>\n";
+    xml << "  <upd7725 program='dsp4.bin' sha256='63ede17322541c191ed1fdf683872554a0a57306496afc43c59de7c01a6e764a'>\n";
     xml << "    <dr>\n";
     xml << "      <map address='30-3f:8000-bfff'/>\n";
     xml << "      <map address='b0-bf:8000-bfff'/>\n";
@@ -476,7 +476,7 @@ SNESCartridge::SNESCartridge(const uint8_t *data, unsigned size) {
     xml << "      <map address='30-3f:c000-ffff'/>\n";
     xml << "      <map address='b0-bf:c000-ffff'/>\n";
     xml << "    </sr>\n";
-    xml << "  </upd77c25>\n";
+    xml << "  </upd7725>\n";
   }
 
   if(has_obc1) {
@@ -489,12 +489,10 @@ SNESCartridge::SNESCartridge(const uint8_t *data, unsigned size) {
   }
 
   if(has_st010) {
-    xml << "  <setadsp program='ST-0010'>\n";
-    xml << "    <mmio>\n";
-    xml << "      <map address='68-6f:0000-0fff'/>\n";
-    xml << "      <map address='e8-ef:0000-0fff'/>\n";
-    xml << "    </mmio>\n";
-    xml << "  </setadsp>\n";
+    xml << "  <upd96050 program='st0010.bin' sha256='55c697e864562445621cdf8a7bf6e84ae91361e393d382a3704e9aa55559041e'>\n";
+    xml << "    <map address='68-6f:0000-0fff'/>\n";
+    xml << "    <map address='e8-ef:0000-0fff'/>\n";
+    xml << "  </upd96050>\n";
   }
 
   if(has_st011) {

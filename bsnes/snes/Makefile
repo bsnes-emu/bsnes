@@ -2,7 +2,8 @@ snes_objects := snes-system
 snes_objects += snes-cartridge snes-cheat
 snes_objects += snes-memory snes-cpucore snes-smpcore
 snes_objects += snes-cpu snes-smp snes-dsp snes-ppu
-snes_objects += snes-icd2 snes-superfx snes-sa1 snes-upd77c25
+snes_objects += snes-icd2 snes-superfx snes-sa1
+snes_objects += snes-necdsp snes-upd7725 snes-upd96050
 snes_objects += snes-bsx snes-srtc snes-sdd1 snes-spc7110 snes-cx4
 snes_objects += snes-obc1 snes-st0010 snes-st0011 snes-st0018
 snes_objects += snes-msu1 snes-serial
@@ -44,7 +45,9 @@ obj/snes-cheat.o    : $(snes)/cheat/cheat.cpp $(call rwildcard,$(snes)/cheat/)
 obj/snes-icd2.o    : $(snes)/chip/icd2/icd2.cpp $(call rwildcard,$(snes)/chip/icd2/)
 obj/snes-superfx.o : $(snes)/chip/superfx/superfx.cpp $(call rwildcard,$(snes)/chip/superfx/)
 obj/snes-sa1.o     : $(snes)/chip/sa1/sa1.cpp $(call rwildcard,$(snes)/chip/sa1/)
-obj/snes-upd77c25.o: $(snes)/chip/upd77c25/upd77c25.cpp $(call rwildcard,$(snes)/chip/upd77c25/)
+obj/snes-necdsp.o  : $(snes)/chip/necdsp/core/core.cpp $(call rwildcard,$(snes)/chip/necdsp/core/)
+obj/snes-upd7725.o : $(snes)/chip/necdsp/upd7725/upd7725.cpp $(call rwildcard,$(snes)/chip/necdsp/)
+obj/snes-upd96050.o: $(snes)/chip/necdsp/upd96050/upd96050.cpp $(call rwildcard,$(snes)/chip/necdsp/)
 obj/snes-bsx.o     : $(snes)/chip/bsx/bsx.cpp $(snes)/chip/bsx/*
 obj/snes-srtc.o    : $(snes)/chip/srtc/srtc.cpp $(snes)/chip/srtc/*
 obj/snes-sdd1.o    : $(snes)/chip/sdd1/sdd1.cpp $(snes)/chip/sdd1/*

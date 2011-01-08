@@ -6,7 +6,9 @@ struct Coprocessor : Processor {
 #include <snes/chip/icd2/icd2.hpp>
 #include <snes/chip/superfx/superfx.hpp>
 #include <snes/chip/sa1/sa1.hpp>
-#include <snes/chip/upd77c25/upd77c25.hpp>
+#include <snes/chip/necdsp/core/core.hpp>
+#include <snes/chip/necdsp/upd7725/upd7725.hpp>
+#include <snes/chip/necdsp/upd96050/upd96050.hpp>
 #include <snes/chip/bsx/bsx.hpp>
 #include <snes/chip/srtc/srtc.hpp>
 #include <snes/chip/sdd1/sdd1.hpp>

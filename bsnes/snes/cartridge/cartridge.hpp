@@ -35,7 +35,8 @@ public:
   readonly<bool> has_bsx_slot;
   readonly<bool> has_superfx;
   readonly<bool> has_sa1;
-  readonly<bool> has_upd77c25;
+  readonly<bool> has_upd7725;
+  readonly<bool> has_upd96050;
   readonly<bool> has_srtc;
   readonly<bool> has_sdd1;
   readonly<bool> has_spc7110;
@@ -84,7 +85,8 @@ private:
   void xml_parse_icd2(xml_element&);
   void xml_parse_superfx(xml_element&);
   void xml_parse_sa1(xml_element&);
-  void xml_parse_upd77c25(xml_element&);
+  void xml_parse_upd7725(xml_element&);
+  void xml_parse_upd96050(xml_element&);
   void xml_parse_bsx(xml_element&);
   void xml_parse_sufamiturbo(xml_element&);
   void xml_parse_supergameboy(xml_element&);
