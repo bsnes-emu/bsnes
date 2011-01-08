@@ -5,12 +5,17 @@ namespace SNES {
 
 #include "interface/interface.cpp"
 #include "mmio/mmio.cpp"
+#include "serialization.cpp"
 ICD2 icd2;
 
 void ICD2::Enter() { icd2.enter(); }
 
 void ICD2::enter() {
   while(true) {
+    if(scheduler.sync == Scheduler::SynchronizeMode::All) {
+      scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
+    }
+
     if(r6003 & 0x80) {
       GameBoy::system.run();
       step(GameBoy::system.clocks_executed);
@@ -63,7 +68,6 @@ void ICD2::reset() {
   pulselock = true;
 
   GameBoy::system.init(this);
-  GameBoy::cartridge.load(memory::gbrom.data(), memory::gbrom.size());
   GameBoy::system.power();
 }
 

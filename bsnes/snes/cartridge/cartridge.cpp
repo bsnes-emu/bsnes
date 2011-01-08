@@ -14,7 +14,6 @@ namespace memory {
   MappedRAM bsxflash, bsxram, bsxpram;
   MappedRAM stArom, stAram;
   MappedRAM stBrom, stBram;
-  MappedRAM gbrom, gbram, gbrtc;
 };
 
 Cartridge cartridge;
@@ -25,8 +24,6 @@ void Cartridge::load(Mode cartridge_mode, const lstring &xml_list) {
   ram_size = 0;
   spc7110_data_rom_offset = 0x100000;
   supergameboy_version = SuperGameBoyVersion::Version1;
-  supergameboy_ram_size = 0;
-  supergameboy_rtc_size = 0;
 
   has_bsx_slot   = false;
   has_superfx    = false;
@@ -45,7 +42,7 @@ void Cartridge::load(Mode cartridge_mode, const lstring &xml_list) {
   has_serial     = false;
 
   parse_xml(xml_list);
-//print(xml_list[0], "\n");
+//foreach(xml_item, xml_list) print(xml_item, "\n\n");
 
   if(ram_size > 0) {
     memory::cartram.map(allocate<uint8_t>(ram_size, 0xff), ram_size);
@@ -65,13 +62,6 @@ void Cartridge::load(Mode cartridge_mode, const lstring &xml_list) {
     if(memory::stBrom.data()) memory::stBram.map(allocate<uint8_t>(128 * 1024, 0xff), 128 * 1024);
   }
 
-  if(mode == Mode::SuperGameBoy) {
-    if(memory::gbrom.data()) {
-      if(supergameboy_ram_size) memory::gbram.map(allocate<uint8_t>(supergameboy_ram_size, 0xff), supergameboy_ram_size);
-      if(supergameboy_rtc_size) memory::gbrtc.map(allocate<uint8_t>(supergameboy_rtc_size, 0x00), supergameboy_rtc_size);
-    }
-  }
-
   memory::cartrom.write_protect(true);
   memory::cartram.write_protect(false);
   memory::cartrtc.write_protect(false);
@@ -82,15 +72,11 @@ void Cartridge::load(Mode cartridge_mode, const lstring &xml_list) {
   memory::stAram.write_protect(false);
   memory::stBrom.write_protect(true);
   memory::stBram.write_protect(false);
-  memory::gbrom.write_protect(true);
-  memory::gbram.write_protect(false);
-  memory::gbrtc.write_protect(false);
 
   unsigned checksum = ~0;                                           foreach(n, memory::cartrom ) checksum = crc32_adjust(checksum, n);
   if(memory::bsxflash.size() != 0 && memory::bsxflash.size() != ~0) foreach(n, memory::bsxflash) checksum = crc32_adjust(checksum, n);
   if(memory::stArom.size()   != 0 && memory::stArom.size()   != ~0) foreach(n, memory::stArom  ) checksum = crc32_adjust(checksum, n);
   if(memory::stBrom.size()   != 0 && memory::stBrom.size()   != ~0) foreach(n, memory::stBrom  ) checksum = crc32_adjust(checksum, n);
-  if(memory::gbrom.size()    != 0 && memory::gbrom.size()    != ~0) foreach(n, memory::gbrom   ) checksum = crc32_adjust(checksum, n);
   crc32 = ~checksum;
 
   sha256_ctx sha;
@@ -105,7 +91,6 @@ void Cartridge::load(Mode cartridge_mode, const lstring &xml_list) {
   sha256 = hash;
 
   bus.load_cart();
-  system.serialize_init();
   loaded = true;
 }
 
@@ -120,9 +105,6 @@ void Cartridge::unload() {
   memory::stAram.reset();
   memory::stBrom.reset();
   memory::stBram.reset();
-  memory::gbrom.reset();
-  memory::gbram.reset();
-  memory::gbrtc.reset();
 
   if(loaded == false) return;
   bus.unload_cart();

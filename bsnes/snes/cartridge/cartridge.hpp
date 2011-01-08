@@ -31,8 +31,6 @@ public:
   readonly<unsigned> ram_size;
   readonly<unsigned> spc7110_data_rom_offset;
   readonly<SuperGameBoyVersion> supergameboy_version;
-  readonly<unsigned> supergameboy_ram_size;
-  readonly<unsigned> supergameboy_rtc_size;
 
   readonly<bool> has_bsx_slot;
   readonly<bool> has_superfx;
@@ -83,6 +81,7 @@ private:
 
   void xml_parse_rom(xml_element&);
   void xml_parse_ram(xml_element&);
+  void xml_parse_icd2(xml_element&);
   void xml_parse_superfx(xml_element&);
   void xml_parse_sa1(xml_element&);
   void xml_parse_upd77c25(xml_element&);
@@ -109,7 +108,6 @@ namespace memory {
   extern MappedRAM bsxflash, bsxram, bsxpram;
   extern MappedRAM stArom, stAram;
   extern MappedRAM stBrom, stBram;
-  extern MappedRAM gbrom, gbram, gbrtc;
 };
 
 extern Cartridge cartridge;

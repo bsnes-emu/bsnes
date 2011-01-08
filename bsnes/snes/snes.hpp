@@ -1,7 +1,7 @@
 namespace SNES {
   namespace Info {
     static const char Name[] = "bsnes";
-    static const char Version[] = "073.02";
+    static const char Version[] = "073.03";
     static const unsigned SerializerVersion = 16;
   }
 }
@@ -30,6 +30,7 @@ namespace SNES {
 #include <nall/utility.hpp>
 #include <nall/varint.hpp>
 #include <nall/vector.hpp>
+#include <nall/gameboy/cartridge.hpp>
 using namespace nall;
 
 #include <gameboy/gameboy.hpp>

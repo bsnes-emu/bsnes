@@ -21,9 +21,7 @@ struct Cartridge : property<Cartridge> {
   };
 
   struct Information {
-    string name;
-    uint8 cgbflag;
-    uint8 sgbflag;
+    string xml;
 
     Mapper mapper;
     bool ram;
@@ -43,7 +41,7 @@ struct Cartridge : property<Cartridge> {
   uint8_t *ramdata;
   unsigned ramsize;
 
-  void load(uint8_t *data, unsigned size);
+  void load(const string &xml, uint8_t *data, unsigned size);
   void unload();
 
   uint8 rom_read(unsigned addr);
@@ -54,6 +52,7 @@ struct Cartridge : property<Cartridge> {
   void power();
   void map();
 
+  void serialize(serializer&);
   Cartridge();
   ~Cartridge();
 };

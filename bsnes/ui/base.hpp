@@ -7,6 +7,7 @@
 #include <nall/input.hpp>
 #include <nall/ups.hpp>
 #include <nall/snes/cartridge.hpp>
+#include <nall/gameboy/cartridge.hpp>
 using namespace nall;
 
 #include <ruby/ruby.hpp>

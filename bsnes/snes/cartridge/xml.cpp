@@ -32,12 +32,12 @@ void Cartridge::parse_xml_cartridge(const char *data) {
       foreach(node, head.element) {
         if(node.name == "rom") xml_parse_rom(node);
         if(node.name == "ram") xml_parse_ram(node);
+        if(node.name == "icd2") xml_parse_icd2(node);
         if(node.name == "superfx") xml_parse_superfx(node);
         if(node.name == "sa1") xml_parse_sa1(node);
         if(node.name == "upd77c25") xml_parse_upd77c25(node);
         if(node.name == "bsx") xml_parse_bsx(node);
         if(node.name == "sufamiturbo") xml_parse_sufamiturbo(node);
-        if(node.name == "supergameboy") xml_parse_supergameboy(node);
         if(node.name == "srtc") xml_parse_srtc(node);
         if(node.name == "sdd1") xml_parse_sdd1(node);
         if(node.name == "spc7110") xml_parse_spc7110(node);
@@ -59,28 +59,6 @@ void Cartridge::parse_xml_sufami_turbo(const char *data, bool slot) {
 }
 
 void Cartridge::parse_xml_gameboy(const char *data) {
-  xml_element document = xml_parse(data);
-  if(document.element.size() == 0) return;
-
-  foreach(head, document.element) {
-    if(head.name == "cartridge") {
-      foreach(attr, head.attribute) {
-        if(attr.name == "rtc") {
-          supergameboy_rtc_size = (attr.content == "true") ? 4 : 0;
-        }
-      }
-
-      foreach(leaf, head.element) {
-        if(leaf.name == "ram") {
-          foreach(attr, leaf.attribute) {
-            if(attr.name == "size") {
-              supergameboy_ram_size = hex(attr.content);
-            }
-          }
-        }
-      }
-    }
-  }
 }
 
 void Cartridge::xml_parse_rom(xml_element &root) {
@@ -113,6 +91,31 @@ void Cartridge::xml_parse_ram(xml_element &root) {
         if(attr.name == "size") m.size = hex(attr.content);
       }
       mapping.append(m);
+    }
+  }
+}
+
+void Cartridge::xml_parse_icd2(xml_element &root) {
+  if(mode != Mode::SuperGameBoy) return;
+
+  foreach(attr, root.attribute) {
+    if(attr.name == "revision") {
+      if(attr.content == "1") supergameboy_version = SuperGameBoyVersion::Version1;
+      if(attr.content == "2") supergameboy_version = SuperGameBoyVersion::Version2;
+    }
+  }
+
+  foreach(node, root.element) {
+    if(node.name == "mmio") {
+      foreach(leaf, node.element) {
+        if(leaf.name == "map") {
+          Mapping m((Memory&)icd2);
+          foreach(attr, leaf.attribute) {
+            if(attr.name == "address") xml_parse_address(m, attr.content);
+          }
+          mapping.append(m);
+        }
+      }
     }
   }
 }
@@ -376,31 +379,6 @@ void Cartridge::xml_parse_sufamiturbo(xml_element &root) {
               if(m.memory->size() > 0) mapping.append(m);
             }
           }
-        }
-      }
-    }
-  }
-}
-
-void Cartridge::xml_parse_supergameboy(xml_element &root) {
-  if(mode != Mode::SuperGameBoy) return;
-
-  foreach(attr, root.attribute) {
-    if(attr.name == "revision") {
-      if(attr.content == "1") supergameboy_version = SuperGameBoyVersion::Version1;
-      if(attr.content == "2") supergameboy_version = SuperGameBoyVersion::Version2;
-    }
-  }
-
-  foreach(node, root.element) {
-    if(node.name == "mmio") {
-      foreach(leaf, node.element) {
-        if(leaf.name == "map") {
-          Mapping m((Memory&)icd2);
-          foreach(attr, leaf.attribute) {
-            if(attr.name == "address") xml_parse_address(m, attr.content);
-          }
-          mapping.append(m);
         }
       }
     }

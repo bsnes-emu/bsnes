@@ -13,84 +13,63 @@ namespace GameBoy {
 #include "mmm01/mmm01.cpp"
 #include "huc1/huc1.cpp"
 #include "huc3/huc3.cpp"
+#include "serialization.cpp"
 Cartridge cartridge;
 
-void Cartridge::load(uint8_t *data, unsigned size) {
+void Cartridge::load(const string &xml, uint8_t *data, unsigned size) {
 //uint32_t crc = crc32_calculate(data, size);
 //print("CRC32 = ", hex<4>(crc), "\n");
 
   romdata = new uint8[romsize = size];
   memcpy(romdata, data, size);
 
-  char name[17];
-  memcpy(name, romdata + 0x0134, 16);
-  name[16] = 0;
-  info.name = name;
-  info.name.rtrim();
-
-  info.cgbflag = romdata[0x0143];
-  info.sgbflag = romdata[0x0146];
-
   info.mapper = Mapper::Unknown;
   info.ram = false;
   info.battery = false;
   info.rtc = false;
+  info.rumble = false;
 
-  switch(romdata[0x0147]) {
-    case 0x00: info.mapper = Mapper::MBC0; break;
-    case 0x01: info.mapper = Mapper::MBC1; break;
-    case 0x02: info.mapper = Mapper::MBC1; info.ram = true; break;
-    case 0x03: info.mapper = Mapper::MBC1; info.ram = true; info.battery = true; break;
-    case 0x05: info.mapper = Mapper::MBC2; info.ram = true; break;
-    case 0x06: info.mapper = Mapper::MBC2; info.ram = true; info.battery = true; break;
-    case 0x08: info.mapper = Mapper::MBC0; info.ram = true; break;
-    case 0x09: info.mapper = Mapper::MBC0; info.ram = true; info.battery = true; break;
-    case 0x0b: info.mapper = Mapper::MMM01; break;
-    case 0x0c: info.mapper = Mapper::MMM01; info.ram = true; break;
-    case 0x0d: info.mapper = Mapper::MMM01; info.ram = true; info.battery = true; break;
-    case 0x0f: info.mapper = Mapper::MBC3; info.rtc = true; info.battery = true; break;
-    case 0x10: info.mapper = Mapper::MBC3; info.rtc = true; info.ram = true; info.battery = true; break;
-    case 0x11: info.mapper = Mapper::MBC3; break;
-    case 0x12: info.mapper = Mapper::MBC3; info.ram = true; break;
-    case 0x13: info.mapper = Mapper::MBC3; info.ram = true; info.battery = true; break;
-    case 0x19: info.mapper = Mapper::MBC5; break;
-    case 0x1a: info.mapper = Mapper::MBC5; info.ram = true; break;
-    case 0x1b: info.mapper = Mapper::MBC5; info.ram = true; info.battery = true; break;
-    case 0x1c: info.mapper = Mapper::MBC5; info.rumble = true; break;
-    case 0x1d: info.mapper = Mapper::MBC5; info.rumble = true; info.ram = true; break;
-    case 0x1e: info.mapper = Mapper::MBC5; info.rumble = true; info.ram = true; info.battery = true; break;
-    case 0xfc: break;  //Pocket Camera
-    case 0xfd: break;  //Bandai TAMA5
-    case 0xfe: info.mapper = Mapper::HuC3; break;
-    case 0xff: info.mapper = Mapper::HuC1; info.ram = true; info.battery = true; break;
+  info.romsize = 0;
+  info.ramsize = 0;
+
+  xml_element document = xml_parse(xml);
+  foreach(head, document.element) {
+    if(head.name == "cartridge") {
+      foreach(attr, head.attribute) {
+        if(attr.name == "mapper") {
+          if(attr.content == "none")  info.mapper = Mapper::MBC0;
+          if(attr.content == "MBC1")  info.mapper = Mapper::MBC1;
+          if(attr.content == "MBC2")  info.mapper = Mapper::MBC2;
+          if(attr.content == "MBC3")  info.mapper = Mapper::MBC3;
+          if(attr.content == "MBC5")  info.mapper = Mapper::MBC5;
+          if(attr.content == "MMM01") info.mapper = Mapper::MMM01;
+          if(attr.content == "HuC1")  info.mapper = Mapper::HuC1;
+          if(attr.content == "HuC3")  info.mapper = Mapper::HuC3;
+        }
+
+        if(attr.name == "rtc") info.rtc = (attr.content == "true" ? true : false);
+        if(attr.name == "rumble") info.rumble = (attr.content == "true" ? true : false);
+      }
+
+      foreach(elem, head.element) {
+        if(elem.name == "rom") {
+          foreach(attr, elem.attribute) {
+            if(attr.name == "size") info.romsize = hex(attr.content);
+          }
+        }
+
+        if(elem.name == "ram") {
+          info.ram = true;
+          foreach(attr, elem.attribute) {
+            if(attr.name == "size") info.ramsize = hex(attr.content);
+            if(attr.name == "battery") info.battery = (attr.content == "true" ? true : false);
+          }
+        }
+      }
+    }
   }
-//print("Mapper: ", hex<2>(romdata[0x0147]), "\n");
-
-  switch(romdata[0x0148]) { default:
-    case 0x00: info.romsize =   2 * 16 * 1024; break;
-    case 0x01: info.romsize =   4 * 16 * 1024; break;
-    case 0x02: info.romsize =   8 * 16 * 1024; break;
-    case 0x03: info.romsize =  16 * 16 * 1024; break;
-    case 0x04: info.romsize =  32 * 16 * 1024; break;
-    case 0x05: info.romsize =  64 * 16 * 1024; break;
-    case 0x06: info.romsize = 128 * 16 * 1024; break;
-    case 0x07: info.romsize = 256 * 16 * 1024; break;
-    case 0x52: info.romsize =  72 * 16 * 1024; break;
-    case 0x53: info.romsize =  80 * 16 * 1024; break;
-    case 0x54: info.romsize =  96 * 16 * 1024; break;
-  }
-
-  switch(romdata[0x0149]) { default:
-    case 0x00: info.ramsize =  0 * 1024; break;
-    case 0x01: info.ramsize =  2 * 1024; break;
-    case 0x02: info.ramsize =  8 * 1024; break;
-    case 0x03: info.ramsize = 32 * 1024; break;
-  }
-
-  if(info.mapper == Mapper::MBC2) info.ramsize = 512;  //512 x 4-bit
 
   ramdata = new uint8_t[ramsize = info.ramsize]();
-
   loaded = true;
 }
 

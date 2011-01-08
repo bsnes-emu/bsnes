@@ -24,14 +24,6 @@ void Cartridge::serialize(serializer &s) {
   if(memory::stBram.size() != 0 && memory::stBram.size() != ~0) {
     s.array(memory::stBram.data(), memory::stBram.size());
   }
-
-  if(memory::gbram.size() != 0 && memory::gbram.size() != ~0) {
-    s.array(memory::gbram.data(), memory::gbram.size());
-  }
-
-  if(memory::gbrtc.size() != 0 && memory::gbrtc.size() != ~0) {
-    s.array(memory::gbrtc.data(), memory::gbrtc.size());
-  }
 }
 
 #endif

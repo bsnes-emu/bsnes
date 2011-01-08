@@ -4,6 +4,7 @@
 namespace GameBoy {
 
 #include "mmio/mmio.cpp"
+#include "serialization.cpp"
 LCD lcd;
 
 void LCD::Main() {
@@ -12,6 +13,10 @@ void LCD::Main() {
 
 void LCD::main() {
   while(true) {
+    if(scheduler.sync == Scheduler::SynchronizeMode::All) {
+      scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
+    }
+
     add_clocks(4);
 
     if(status.lx == 320) {
@@ -25,7 +30,9 @@ void LCD::add_clocks(unsigned clocks) {
   if(status.lx >= 456) scanline();
 
   cpu.clock -= clocks;
-  if(cpu.clock <= 0) co_switch(scheduler.active_thread = cpu.thread);
+  if(cpu.clock <= 0 && scheduler.sync != Scheduler::SynchronizeMode::All) {
+    co_switch(scheduler.active_thread = cpu.thread);
+  }
 }
 
 void LCD::scanline() {
@@ -50,7 +57,7 @@ void LCD::frame() {
   cpu.mmio_joyp_poll();
 
   status.ly = 0;
-  scheduler.exit();
+  scheduler.exit(Scheduler::ExitReason::FrameEvent);
 }
 
 void LCD::render() {
@@ -219,6 +226,9 @@ void LCD::power() {
 
   status.wy = 0;
   status.wx = 0;
+}
+
+LCD::LCD() {
 }
 
 }

@@ -145,23 +145,23 @@ SNESCartridge::SNESCartridge(const uint8_t *data, unsigned size) {
     xml << "    <map mode='linear' address='00-7f:8000-ffff'/>\n";
     xml << "    <map mode='linear' address='80-ff:8000-ffff'/>\n";
     xml << "  </rom>\n";
-    xml << "  <supergameboy revision='1'>\n";
+    xml << "  <icd2 revision='1'>\n";
     xml << "    <mmio>\n";
     xml << "      <map address='00-3f:6000-7fff'/>\n";
     xml << "      <map address='80-bf:6000-7fff'/>\n";
     xml << "    </mmio>\n";
-    xml << "  </supergameboy>\n";
+    xml << "  </icd2>\n";
   } else if(type == TypeSuperGameBoy2Bios) {
     xml << "  <rom>\n";
     xml << "    <map mode='linear' address='00-7f:8000-ffff'/>\n";
     xml << "    <map mode='linear' address='80-ff:8000-ffff'/>\n";
     xml << "  </rom>\n";
-    xml << "  <supergameboy revision='2'>\n";
+    xml << "  <icd2 revision='2'>\n";
     xml << "    <mmio>\n";
     xml << "      <map address='00-3f:6000-7fff'/>\n";
     xml << "      <map address='80-bf:6000-7fff'/>\n";
     xml << "    </mmio>\n";
-    xml << "  </supergameboy>\n";
+    xml << "  </icd2>\n";
   } else if(has_spc7110) {
     xml << "  <rom>\n";
     xml << "    <map mode='shadow' address='00-0f:8000-ffff'/>\n";

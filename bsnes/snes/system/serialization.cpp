@@ -57,7 +57,7 @@ void System::serialize_all(serializer &s) {
   ppu.serialize(s);
   dsp.serialize(s);
 
-//if(cartridge.mode() == Cartridge::Mode::SuperGameBoy) supergameboy.serialize(s);
+  if(cartridge.mode() == Cartridge::Mode::SuperGameBoy) icd2.serialize(s);
   if(cartridge.has_superfx()) superfx.serialize(s);
   if(cartridge.has_sa1()) sa1.serialize(s);
   if(cartridge.has_upd77c25()) upd77c25.serialize(s);
@@ -71,7 +71,7 @@ void System::serialize_all(serializer &s) {
   if(cartridge.has_serial()) serial.serialize(s);
 }
 
-//called once upon cartridge load event: perform dry-run state save.
+//perform dry-run state save:
 //determines exactly how many bytes are needed to save state for this cartridge,
 //as amount varies per game (eg different RAM sizes, special chips, etc.)
 void System::serialize_init() {

@@ -63,6 +63,9 @@ struct LCD : Processor, MMIO {
   void render_obj();
 
   void power();
+
+  void serialize(serializer&);
+  LCD();
 };
 
 extern LCD lcd;

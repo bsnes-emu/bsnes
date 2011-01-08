@@ -8,6 +8,8 @@ public:
   void power();
   void reset();
 
+  void serialize(serializer&);
+
 private:
   #include "interface/interface.hpp"
   #include "mmio/mmio.hpp"
