@@ -1,4 +1,4 @@
-#include <snes.hpp>
+#include <snes/snes.hpp>
 
 #define SPC7110_CPP
 namespace SNES {

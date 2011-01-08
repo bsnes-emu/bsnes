@@ -7,7 +7,7 @@
 //* interrupts
 //* DMA
 
-#include <snes.hpp>
+#include <snes/snes.hpp>
 
 #define UPD77C25_CPP
 namespace SNES {

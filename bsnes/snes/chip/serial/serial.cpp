@@ -1,4 +1,4 @@
-#include <snes.hpp>
+#include <snes/snes.hpp>
 
 #define SERIAL_CPP
 namespace SNES {

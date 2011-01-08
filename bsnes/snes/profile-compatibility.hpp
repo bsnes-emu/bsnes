@@ -2,7 +2,7 @@ namespace Info {
   static const char Profile[] = "Compatibility";
 }
 
-#include <cpu/cpu.hpp>
-#include <smp/smp.hpp>
-#include <alt/dsp/dsp.hpp>
-#include <alt/ppu-compatibility/ppu.hpp>
+#include <snes/cpu/cpu.hpp>
+#include <snes/smp/smp.hpp>
+#include <snes/alt/dsp/dsp.hpp>
+#include <snes/alt/ppu-compatibility/ppu.hpp>

@@ -13,7 +13,6 @@ void MainWindow::create() {
   systemLoadCartridgeBsx.create(systemLoadCartridgeSpecial, "Load BS-X Cartridge ...");
   systemLoadCartridgeSufamiTurbo.create(systemLoadCartridgeSpecial, "Load Sufami Turbo Cartridge ...");
   systemLoadCartridgeSuperGameBoy.create(systemLoadCartridgeSpecial, "Load Super Game Boy Cartridge ...");
-  systemLoadCartridgeSuperGameBoy.setEnabled(SNES::supergameboy.opened());
   systemSeparator1.create(system);
   systemPower.create(system, "Power Cycle");
   systemReset.create(system, "Reset");

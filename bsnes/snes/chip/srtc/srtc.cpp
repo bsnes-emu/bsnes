@@ -1,4 +1,4 @@
-#include <snes.hpp>
+#include <snes/snes.hpp>
 
 #define SRTC_CPP
 namespace SNES {

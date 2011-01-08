@@ -2,7 +2,7 @@ namespace Info {
   static const char Profile[] = "Accuracy";
 }
 
-#include <cpu/cpu.hpp>
-#include <smp/smp.hpp>
-#include <dsp/dsp.hpp>
-#include <ppu/ppu.hpp>
+#include <snes/cpu/cpu.hpp>
+#include <snes/smp/smp.hpp>
+#include <snes/dsp/dsp.hpp>
+#include <snes/ppu/ppu.hpp>

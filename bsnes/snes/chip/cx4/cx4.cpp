@@ -4,7 +4,7 @@
 //Used in Rockman X2/X3 (Megaman X2/X3)
 //Portions (c) anomie, Overload, zsKnight, Nach, byuu
 
-#include <snes.hpp>
+#include <snes/snes.hpp>
 
 #define CX4_CPP
 namespace SNES {

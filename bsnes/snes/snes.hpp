@@ -1,7 +1,7 @@
 namespace SNES {
   namespace Info {
     static const char Name[] = "bsnes";
-    static const char Version[] = "073.01";
+    static const char Version[] = "073.02";
     static const unsigned SerializerVersion = 16;
   }
 }
@@ -31,6 +31,8 @@ namespace SNES {
 #include <nall/varint.hpp>
 #include <nall/vector.hpp>
 using namespace nall;
+
+#include <gameboy/gameboy.hpp>
 
 #ifdef DEBUGGER
   #define debugvirtual virtual
@@ -109,10 +111,10 @@ namespace SNES {
     virtual bool property(unsigned id, string &name, string &value) = 0;
   };
 
-  #include <memory/memory.hpp>
-  #include <cpu/core/core.hpp>
-  #include <smp/core/core.hpp>
-  #include <ppu/counter/counter.hpp>
+  #include <snes/memory/memory.hpp>
+  #include <snes/cpu/core/core.hpp>
+  #include <snes/smp/core/core.hpp>
+  #include <snes/ppu/counter/counter.hpp>
 
   #if defined(PROFILE_ACCURACY)
   #include "profile-accuracy.hpp"
@@ -122,14 +124,14 @@ namespace SNES {
   #include "profile-performance.hpp"
   #endif
 
-  #include <system/system.hpp>
-  #include <chip/chip.hpp>
-  #include <cartridge/cartridge.hpp>
-  #include <cheat/cheat.hpp>
+  #include <snes/system/system.hpp>
+  #include <snes/chip/chip.hpp>
+  #include <snes/cartridge/cartridge.hpp>
+  #include <snes/cheat/cheat.hpp>
 
-  #include <memory/memory-inline.hpp>
-  #include <ppu/counter/counter-inline.hpp>
-  #include <cheat/cheat-inline.hpp>
+  #include <snes/memory/memory-inline.hpp>
+  #include <snes/ppu/counter/counter-inline.hpp>
+  #include <snes/cheat/cheat-inline.hpp>
 }
 
 namespace nall {

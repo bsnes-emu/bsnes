@@ -43,13 +43,13 @@ private:
   friend class Input;
 };
 
-#include <video/video.hpp>
-#include <audio/audio.hpp>
-#include <input/input.hpp>
+#include <snes/video/video.hpp>
+#include <snes/audio/audio.hpp>
+#include <snes/input/input.hpp>
 
-#include <config/config.hpp>
-#include <debugger/debugger.hpp>
-#include <interface/interface.hpp>
-#include <scheduler/scheduler.hpp>
+#include <snes/config/config.hpp>
+#include <snes/debugger/debugger.hpp>
+#include <snes/interface/interface.hpp>
+#include <snes/scheduler/scheduler.hpp>
 
 extern System system;

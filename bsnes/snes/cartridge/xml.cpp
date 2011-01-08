@@ -396,7 +396,7 @@ void Cartridge::xml_parse_supergameboy(xml_element &root) {
     if(node.name == "mmio") {
       foreach(leaf, node.element) {
         if(leaf.name == "map") {
-          Mapping m((Memory&)supergameboy);
+          Mapping m((Memory&)icd2);
           foreach(attr, leaf.attribute) {
             if(attr.name == "address") xml_parse_address(m, attr.content);
           }

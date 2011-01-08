@@ -18,3 +18,5 @@ rm -r phoenix/test*
 rm -r phoenix/*.sh
 rm -r phoenix/*.bat
 
+test -d gameboy && rm -r gameboy
+cp -r ../bgameboy/gameboy ./gameboy

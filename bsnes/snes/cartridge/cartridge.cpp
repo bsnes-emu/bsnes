@@ -1,4 +1,4 @@
-#include <snes.hpp>
+#include <snes/snes.hpp>
 
 #include <nall/crc32.hpp>
 #include <nall/sha256.hpp>

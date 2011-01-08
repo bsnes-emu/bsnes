@@ -1,17 +1,17 @@
-#include <snes.hpp>
+#include <snes/snes.hpp>
 
 #define SYSTEM_CPP
 namespace SNES {
 
 System system;
 
-#include <config/config.cpp>
-#include <debugger/debugger.cpp>
-#include <scheduler/scheduler.cpp>
+#include <snes/config/config.cpp>
+#include <snes/debugger/debugger.cpp>
+#include <snes/scheduler/scheduler.cpp>
 
-#include <video/video.cpp>
-#include <audio/audio.cpp>
-#include <input/input.cpp>
+#include <snes/video/video.cpp>
+#include <snes/audio/audio.cpp>
+#include <snes/input/input.cpp>
 
 #include "serialization.cpp"
 
@@ -68,7 +68,7 @@ void System::init(Interface *interface_) {
   interface = interface_;
   assert(interface != 0);
 
-  supergameboy.init();
+  icd2.init();
   superfx.init();
   sa1.init();
   upd77c25.init();
@@ -119,7 +119,7 @@ void System::power() {
   if(expansion() == ExpansionPortDevice::BSX) bsxbase.enable();
   if(memory::bsxflash.data()) bsxflash.enable();
   if(cartridge.mode() == Cartridge::Mode::Bsx) bsxcart.enable();
-  if(cartridge.mode() == Cartridge::Mode::SuperGameBoy) supergameboy.enable();
+  if(cartridge.mode() == Cartridge::Mode::SuperGameBoy) icd2.enable();
 
   if(cartridge.has_superfx()) superfx.enable();
   if(cartridge.has_sa1()) sa1.enable();
@@ -143,7 +143,7 @@ void System::power() {
   if(expansion() == ExpansionPortDevice::BSX) bsxbase.power();
   if(memory::bsxflash.data()) bsxflash.power();
   if(cartridge.mode() == Cartridge::Mode::Bsx) bsxcart.power();
-  if(cartridge.mode() == Cartridge::Mode::SuperGameBoy) supergameboy.power();
+  if(cartridge.mode() == Cartridge::Mode::SuperGameBoy) icd2.power();
 
   if(cartridge.has_superfx()) superfx.power();
   if(cartridge.has_sa1()) sa1.power();
@@ -159,7 +159,7 @@ void System::power() {
   if(cartridge.has_msu1()) msu1.power();
   if(cartridge.has_serial()) serial.power();
 
-  if(cartridge.mode() == Cartridge::Mode::SuperGameBoy) cpu.coprocessors.append(&supergameboy);
+  if(cartridge.mode() == Cartridge::Mode::SuperGameBoy) cpu.coprocessors.append(&icd2);
   if(cartridge.has_superfx()) cpu.coprocessors.append(&superfx);
   if(cartridge.has_sa1()) cpu.coprocessors.append(&sa1);
   if(cartridge.has_upd77c25()) cpu.coprocessors.append(&upd77c25);
@@ -182,7 +182,7 @@ void System::reset() {
   if(expansion() == ExpansionPortDevice::BSX) bsxbase.reset();
   if(memory::bsxflash.data()) bsxflash.reset();
   if(cartridge.mode() == Cartridge::Mode::Bsx) bsxcart.reset();
-  if(cartridge.mode() == Cartridge::Mode::SuperGameBoy) supergameboy.reset();
+  if(cartridge.mode() == Cartridge::Mode::SuperGameBoy) icd2.reset();
 
   if(cartridge.has_superfx()) superfx.reset();
   if(cartridge.has_sa1()) sa1.reset();
@@ -198,7 +198,7 @@ void System::reset() {
   if(cartridge.has_msu1()) msu1.reset();
   if(cartridge.has_serial()) serial.reset();
 
-  if(cartridge.mode() == Cartridge::Mode::SuperGameBoy) cpu.coprocessors.append(&supergameboy);
+  if(cartridge.mode() == Cartridge::Mode::SuperGameBoy) cpu.coprocessors.append(&icd2);
   if(cartridge.has_superfx()) cpu.coprocessors.append(&superfx);
   if(cartridge.has_sa1()) cpu.coprocessors.append(&sa1);
   if(cartridge.has_upd77c25()) cpu.coprocessors.append(&upd77c25);
@@ -214,7 +214,7 @@ void System::reset() {
 }
 
 void System::unload() {
-  if(cartridge.mode() == Cartridge::Mode::SuperGameBoy) supergameboy.unload();
+//if(cartridge.mode() == Cartridge::Mode::SuperGameBoy) supergameboy.unload();
 }
 
 void System::scanline() {

@@ -2,7 +2,7 @@ namespace Info {
   static const char Profile[] = "Performance";
 }
 
-#include <alt/cpu/cpu.hpp>
-#include <smp/smp.hpp>
-#include <alt/dsp/dsp.hpp>
-#include <alt/ppu-performance/ppu.hpp>
+#include <snes/alt/cpu/cpu.hpp>
+#include <snes/smp/smp.hpp>
+#include <snes/alt/dsp/dsp.hpp>
+#include <snes/alt/ppu-performance/ppu.hpp>
