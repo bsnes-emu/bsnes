@@ -41,26 +41,24 @@ struct Status {
   }
 };
 
-//11,11,10,8 and 14,14,11,11
-
 struct Regs {
-  Pointer pc;       //program counter
-  Pointer rp;       //ROM pointer
-  Pointer dp;       //data pointer
-  uint16 stack[8];  //LIFO
+  Pointer pc;        //program counter
+  Pointer rp;        //ROM pointer
+  Pointer dp;        //data pointer
+  uint16 stack[64];  //LIFO
   int16 k;
   int16 l;
   int16 m;
   int16 n;
-  int16 a;          //accumulator
-  int16 b;          //accumulator
+  int16 a;           //accumulator
+  int16 b;           //accumulator
   Flag flaga;
   Flag flagb;
-  uint16 tr;        //temporary register
-  uint16 trb;       //temporary register
-  Status sr;        //status register
-  uint16 dr;        //data register
-  bool siack;
-  bool soack;
+  uint16 tr;         //temporary register
+  uint16 trb;        //temporary register
+  Status sr;         //status register
+  uint16 dr;         //data register
+  uint16 si;
+  uint16 so;
   uint16 idb;
 } regs;

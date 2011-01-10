@@ -86,8 +86,6 @@ void uPD7725::reset() {
   regs.flagb = 0x00;
   regs.sr = 0x0000;
   regs.rp = 0x3ff;
-  regs.siack = 0;
-  regs.soack = 0;
 }
 
 void uPD7725::serialize(serializer &s) {
@@ -97,7 +95,6 @@ void uPD7725::serialize(serializer &s) {
 
 uPD7725::uPD7725() : uPDcore(11, 10, 8) {
   //NEC uPD7725:
-  //8.192 MIPS (8.192MHz / 1)
   //11-bit ProgramROM (2048 x 24-bit) w/4-level stack
   //10-bit DataROM    (1024 x 16-bit)
   // 8-bit DataRAM    ( 256 x 16-bit)

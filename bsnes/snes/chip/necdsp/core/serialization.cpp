@@ -51,8 +51,6 @@ void uPDcore::serialize(serializer &s) {
   s.integer(regs.sr.p0);
 
   s.integer(regs.dr);
-  s.integer(regs.siack);
-  s.integer(regs.soack);
   s.integer(regs.idb);
 }
 

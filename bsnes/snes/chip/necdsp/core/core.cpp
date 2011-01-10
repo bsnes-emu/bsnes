@@ -7,6 +7,12 @@ namespace SNES {
 #include "serialization.cpp"
 
 void uPDcore::exec() {
+//static uint16 lastpc = 0xffff;
+//if(lastpc != regs.pc) {
+//  print("A:", hex<4>((uint16)regs.a), " B:", hex<4>((uint16)regs.b), " DR:", hex<4>(regs.dr), " SR:", hex<4>(regs.sr), " FA:", hex<2>(regs.flaga), " FB:", hex<2>(regs.flagb), "\n");
+//  print(disassemble(lastpc = regs.pc), "\n");
+//}
+
   uint24 opcode = programROM[regs.pc];
   regs.pc = regs.pc + 1;
   switch(opcode >> 22) {
@@ -43,8 +49,8 @@ void uPDcore::exec_op(uint24 opcode) {
     case  8: regs.idb = regs.dr; regs.sr.rqm = 1; break;
     case  9: regs.idb = regs.dr; break;
     case 10: regs.idb = regs.sr; break;
-  //case 11: regs.idb = regs.sim; break;
-  //case 12: regs.idb = regs.sil; break;
+    case 11: regs.idb = regs.si; break;  //MSB
+    case 12: regs.idb = regs.si; break;  //LSB
     case 13: regs.idb = regs.k; break;
     case 14: regs.idb = regs.l; break;
     case 15: regs.idb = dataRAM[regs.dp]; break;
@@ -152,54 +158,113 @@ void uPDcore::exec_rt(uint24 opcode) {
 void uPDcore::exec_jp(uint24 opcode) {
   uint9 brch = opcode >> 13;  //branch
   uint11 na  = opcode >>  2;  //next address
+  uint2 bank = opcode >>  0;  //bank address
 
-  bool r = false;
+  uint16 jps = (regs.pc & 0x3800) | (na << 0);
+  uint16 jpl = (regs.pc & 0x2000) | (bank << 11) | (na << 0);
+
+  bool lj = false;
+  ljmp:
 
   switch(brch) {
-    case 0x080: r = (regs.flaga.c == 0);      break;  //JNCA
-    case 0x082: r = (regs.flaga.c == 1);      break;  //JCA
-    case 0x084: r = (regs.flagb.c == 0);      break;  //JNCB
-    case 0x086: r = (regs.flagb.c == 1);      break;  //JCB
-    case 0x088: r = (regs.flaga.z == 0);      break;  //JNZA
-    case 0x08a: r = (regs.flaga.z == 1);      break;  //JZA
-    case 0x08c: r = (regs.flagb.z == 0);      break;  //JNZB
-    case 0x08e: r = (regs.flagb.z == 1);      break;  //JZB
-    case 0x090: r = (regs.flaga.ov0 == 0);    break;  //JNOVA0
-    case 0x092: r = (regs.flaga.ov0 == 1);    break;  //JOVA0
-    case 0x094: r = (regs.flagb.ov0 == 0);    break;  //JNOVB0
-    case 0x096: r = (regs.flagb.ov0 == 1);    break;  //JOVB0
-    case 0x098: r = (regs.flaga.ov1 == 0);    break;  //JNOVA1
-    case 0x09a: r = (regs.flaga.ov1 == 1);    break;  //JOVA1
-    case 0x09c: r = (regs.flagb.ov1 == 0);    break;  //JNOVB1
-    case 0x09e: r = (regs.flagb.ov1 == 1);    break;  //JOVB1
-    case 0x0a0: r = (regs.flaga.s0 == 0);     break;  //JNSA0
-    case 0x0a2: r = (regs.flaga.s0 == 1);     break;  //JSA0
-    case 0x0a4: r = (regs.flagb.s0 == 0);     break;  //JNSB0
-    case 0x0a6: r = (regs.flagb.s0 == 1);     break;  //JSB0
-    case 0x0a8: r = (regs.flaga.s1 == 0);     break;  //JNSA1
-    case 0x0aa: r = (regs.flaga.s1 == 1);     break;  //JSA1
-    case 0x0ac: r = (regs.flagb.s1 == 0);     break;  //JNSB1
-    case 0x0ae: r = (regs.flagb.s1 == 1);     break;  //JSB1
+    case 0x080: if(regs.flaga.c == 0) regs.pc = jps; return;  //JNCA
+    case 0x082: if(regs.flaga.c == 1) regs.pc = jps; return;  //JCA
+    case 0x084: if(regs.flagb.c == 0) regs.pc = jps; return;  //JNCB
+    case 0x086: if(regs.flagb.c == 1) regs.pc = jps; return;  //JCB
 
-    case 0x0b0: r = (regs.dp & 0x0f) == 0x00; break;  //JDPL0
-    case 0x0b1: r = (regs.dp & 0x0f) != 0x00; break;  //JDPLN0
-    case 0x0b2: r = (regs.dp & 0x0f) == 0x0f; break;  //JDPLF
-    case 0x0b3: r = (regs.dp & 0x0f) != 0x0f; break;  //JDPLNF
+    case 0x088: if(regs.flaga.z == 0) regs.pc = jps; return;  //JNZA
+    case 0x08a: if(regs.flaga.z == 1) regs.pc = jps; return;  //JZA
+    case 0x08c: if(regs.flagb.z == 0) regs.pc = jps; return;  //JNZB
+    case 0x08e: if(regs.flagb.z == 1) regs.pc = jps; return;  //JZB
 
-    case 0x0b4: r = (regs.siack == 0);        break;  //JNSIAK
-    case 0x0b6: r = (regs.siack == 1);        break;  //JSIAK
+    case 0x090: if(regs.flaga.ov0 == 0) regs.pc = jps; return;  //JNOVA0
+    case 0x092: if(regs.flaga.ov0 == 1) regs.pc = jps; return;  //JOVA0
+    case 0x094: if(regs.flagb.ov0 == 0) regs.pc = jps; return;  //JNOVB0
+    case 0x096: if(regs.flagb.ov0 == 1) regs.pc = jps; return;  //JOVB0
 
-    case 0x0b8: r = (regs.soack == 0);        break;  //JNSOAK
-    case 0x0ba: r = (regs.soack == 1);        break;  //JSOAK
+    case 0x098: if(regs.flaga.ov1 == 0) regs.pc = jps; return;  //JNOVA1
+    case 0x09a: if(regs.flaga.ov1 == 1) regs.pc = jps; return;  //JOVA1
+    case 0x09c: if(regs.flagb.ov1 == 0) regs.pc = jps; return;  //JNOVB1
+    case 0x09e: if(regs.flagb.ov1 == 1) regs.pc = jps; return;  //JOVB1
 
-    case 0x0bc: r = (regs.sr.rqm == 0);       break;  //JNRQM
-    case 0x0be: r = (regs.sr.rqm == 1);       break;  //JRQM
+    case 0x0a0: if(regs.flaga.s0 == 0) regs.pc = jps; return;  //JNSA0
+    case 0x0a2: if(regs.flaga.s0 == 1) regs.pc = jps; return;  //JSA0
+    case 0x0a4: if(regs.flagb.s0 == 0) regs.pc = jps; return;  //JNSB0
+    case 0x0a6: if(regs.flagb.s0 == 1) regs.pc = jps; return;  //JSB0
 
-    case 0x100: r = true;                     break;  //JMP
-    case 0x140: r = true; stack_push();       break;  //CALL
+    case 0x0a8: if(regs.flaga.s1 == 0) regs.pc = jps; return;  //JNSA1
+    case 0x0aa: if(regs.flaga.s1 == 1) regs.pc = jps; return;  //JSA1
+    case 0x0ac: if(regs.flagb.s1 == 0) regs.pc = jps; return;  //JNSB1
+    case 0x0ae: if(regs.flagb.s1 == 1) regs.pc = jps; return;  //JSB1
+
+    case 0x0b0: if((regs.dp & 0x0f) == 0x00) regs.pc = jps; return;  //JDPL0
+    case 0x0b1: if((regs.dp & 0x0f) != 0x00) regs.pc = jps; return;  //JDPLN0
+    case 0x0b2: if((regs.dp & 0x0f) == 0x0f) regs.pc = jps; return;  //JDPLF
+    case 0x0b3: if((regs.dp & 0x0f) != 0x0f) regs.pc = jps; return;  //JDPLNF
+
+    case 0x0bc: if(regs.sr.rqm == 0) regs.pc = jps; return;  //JNRQM
+    case 0x0be: if(regs.sr.rqm == 1) regs.pc = jps; return;  //JRQM
+
+    case 0x100: regs.pc = jps; return;                //JMP
+    case 0x140: stack_push(); regs.pc = jps; return;  //CALL
   }
 
-  if(r) regs.pc = na;
+  if(brch == 0x000) {
+    regs.pc = regs.so;
+    return;
+  }
+
+  if(lj == false) {
+    lj = true;
+    brch &= ~1;
+    jps = jpl;
+    goto ljmp;
+  }
+
+/*switch(brch) {
+    case 0x081: if(regs.flaga.c == 0) regs.pc = jpl; return;  //LJNCA
+
+    case 0x0bf: if(regs.sr.rqm == 1) regs.pc = jpl; return;  //LJRQM
+  }*/
+
+  print(hex<4>(regs.pc - 1), ": unknown jump ", hex<3>(brch), "\n");
+
+/*bool r = false;
+switch(brch) {
+  case 0x080: r = (regs.flaga.c == 0);      break;  //JNCA
+  case 0x082: r = (regs.flaga.c == 1);      break;  //JCA
+  case 0x084: r = (regs.flagb.c == 0);      break;  //JNCB
+  case 0x086: r = (regs.flagb.c == 1);      break;  //JCB
+  case 0x088: r = (regs.flaga.z == 0);      break;  //JNZA
+  case 0x08a: r = (regs.flaga.z == 1);      break;  //JZA
+  case 0x08c: r = (regs.flagb.z == 0);      break;  //JNZB
+  case 0x08e: r = (regs.flagb.z == 1);      break;  //JZB
+  case 0x090: r = (regs.flaga.ov0 == 0);    break;  //JNOVA0
+  case 0x092: r = (regs.flaga.ov0 == 1);    break;  //JOVA0
+  case 0x094: r = (regs.flagb.ov0 == 0);    break;  //JNOVB0
+  case 0x096: r = (regs.flagb.ov0 == 1);    break;  //JOVB0
+  case 0x098: r = (regs.flaga.ov1 == 0);    break;  //JNOVA1
+  case 0x09a: r = (regs.flaga.ov1 == 1);    break;  //JOVA1
+  case 0x09c: r = (regs.flagb.ov1 == 0);    break;  //JNOVB1
+  case 0x09e: r = (regs.flagb.ov1 == 1);    break;  //JOVB1
+  case 0x0a0: r = (regs.flaga.s0 == 0);     break;  //JNSA0
+  case 0x0a2: r = (regs.flaga.s0 == 1);     break;  //JSA0
+  case 0x0a4: r = (regs.flagb.s0 == 0);     break;  //JNSB0
+  case 0x0a6: r = (regs.flagb.s0 == 1);     break;  //JSB0
+  case 0x0a8: r = (regs.flaga.s1 == 0);     break;  //JNSA1
+  case 0x0aa: r = (regs.flaga.s1 == 1);     break;  //JSA1
+  case 0x0ac: r = (regs.flagb.s1 == 0);     break;  //JNSB1
+  case 0x0ae: r = (regs.flagb.s1 == 1);     break;  //JSB1
+  case 0x0b0: r = (regs.dp & 0x0f) == 0x00; break;  //JDPL0
+  case 0x0b1: r = (regs.dp & 0x0f) != 0x00; break;  //JDPLN0
+  case 0x0b2: r = (regs.dp & 0x0f) == 0x0f; break;  //JDPLF
+  case 0x0b3: r = (regs.dp & 0x0f) != 0x0f; break;  //JDPLNF
+  case 0x0bc: r = (regs.sr.rqm == 0);       break;  //JNRQM
+  case 0x0be: r = (regs.sr.rqm == 1);       break;  //JRQM
+  case 0x100: r = true;                     break;  //JMP
+  case 0x140: r = true; stack_push();       break;  //CALL
+}
+if(r) regs.pc = na;*/
 }
 
 void uPDcore::exec_ld(uint24 opcode) {
@@ -217,8 +282,8 @@ void uPDcore::exec_ld(uint24 opcode) {
     case  5: regs.rp = id; break;
     case  6: regs.dr = id; regs.sr.rqm = 1; break;
     case  7: regs.sr = (regs.sr & 0x907c) | (id & ~0x907c); break;
-  //case  8: regs.sol = id; break;
-  //case  9: regs.som = id; break;
+    case  8: regs.so = id; break;  //LSB
+    case  9: regs.so = id; break;  //MSB
     case 10: regs.k = id; break;
     case 11: regs.k = id; regs.l = dataROM[regs.rp]; break;
     case 12: regs.l = id; regs.k = dataRAM[regs.dp | 0x40]; break;
@@ -229,26 +294,14 @@ void uPDcore::exec_ld(uint24 opcode) {
 }
 
 void uPDcore::stack_push() {
-  regs.stack[7] = regs.stack[6];
-  regs.stack[6] = regs.stack[5];
-  regs.stack[5] = regs.stack[4];
-  regs.stack[4] = regs.stack[3];
-  regs.stack[3] = regs.stack[2];
-  regs.stack[2] = regs.stack[1];
-  regs.stack[1] = regs.stack[0];
+  for(unsigned r = 63; r >= 1; r--) regs.stack[r] = regs.stack[r - 1];
   regs.stack[0] = regs.pc;
 }
 
 void uPDcore::stack_pull() {
   regs.pc = regs.stack[0];
-  regs.stack[0] = regs.stack[1];
-  regs.stack[1] = regs.stack[2];
-  regs.stack[2] = regs.stack[3];
-  regs.stack[3] = regs.stack[4];
-  regs.stack[4] = regs.stack[5];
-  regs.stack[5] = regs.stack[6];
-  regs.stack[6] = regs.stack[7];
-  regs.stack[7] = 0x0000;
+  for(unsigned r = 0; r <= 62; r++) regs.stack[r] = regs.stack[r + 1];
+  regs.stack[63] = 0x0000;
 }
 
 uPDcore::uPDcore(unsigned pcbits, unsigned rpbits, unsigned dpbits) {

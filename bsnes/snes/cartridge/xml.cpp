@@ -107,16 +107,12 @@ void Cartridge::xml_parse_icd2(xml_element &root) {
   }
 
   foreach(node, root.element) {
-    if(node.name == "mmio") {
-      foreach(leaf, node.element) {
-        if(leaf.name == "map") {
-          Mapping m((Memory&)icd2);
-          foreach(attr, leaf.attribute) {
-            if(attr.name == "address") xml_parse_address(m, attr.content);
-          }
-          mapping.append(m);
-        }
+    if(node.name == "map") {
+      Mapping m((Memory&)icd2);
+      foreach(attr, node.attribute) {
+        if(attr.name == "address") xml_parse_address(m, attr.content);
       }
+      mapping.append(m);
     }
   }
 }
@@ -330,7 +326,7 @@ void Cartridge::xml_parse_upd96050(xml_element &root) {
         for(unsigned n = 0; n < 16384; n++) {
           upd96050.programROM[n] = fp.readm(3);
         }
-        for(unsigned n = 0; n <  1024; n++) {
+        for(unsigned n = 0; n <  2048; n++) {
           upd96050.dataROM[n] = fp.readm(2);
         }
 
@@ -455,16 +451,12 @@ void Cartridge::xml_parse_srtc(xml_element &root) {
   has_srtc = true;
 
   foreach(node, root.element) {
-    if(node.name == "mmio") {
-      foreach(leaf, node.element) {
-        if(leaf.name == "map") {
-          Mapping m(srtc);
-          foreach(attr, leaf.attribute) {
-            if(attr.name == "address") xml_parse_address(m, attr.content);
-          }
-          mapping.append(m);
-        }
+    if(node.name == "map") {
+      Mapping m(srtc);
+      foreach(attr, node.attribute) {
+        if(attr.name == "address") xml_parse_address(m, attr.content);
       }
+      mapping.append(m);
     }
   }
 }
@@ -569,16 +561,12 @@ void Cartridge::xml_parse_cx4(xml_element &root) {
   has_cx4 = true;
 
   foreach(node, root.element) {
-    if(node.name == "mmio") {
-      foreach(leaf, node.element) {
-        if(leaf.name == "map") {
-          Mapping m(cx4);
-          foreach(attr, leaf.attribute) {
-            if(attr.name == "address") xml_parse_address(m, attr.content);
-          }
-          mapping.append(m);
-        }
+    if(node.name == "map") {
+      Mapping m(cx4);
+      foreach(attr, node.attribute) {
+        if(attr.name == "address") xml_parse_address(m, attr.content);
       }
+      mapping.append(m);
     }
   }
 }
@@ -587,16 +575,12 @@ void Cartridge::xml_parse_obc1(xml_element &root) {
   has_obc1 = true;
 
   foreach(node, root.element) {
-    if(node.name == "mmio") {
-      foreach(leaf, node.element) {
-        if(leaf.name == "map") {
-          Mapping m(obc1);
-          foreach(attr, leaf.attribute) {
-            if(attr.name == "address") xml_parse_address(m, attr.content);
-          }
-          mapping.append(m);
-        }
+    if(node.name == "map") {
+      Mapping m(obc1);
+      foreach(attr, node.attribute) {
+        if(attr.name == "address") xml_parse_address(m, attr.content);
       }
+      mapping.append(m);
     }
   }
 }
@@ -619,16 +603,12 @@ void Cartridge::xml_parse_setadsp(xml_element &root) {
   Memory *map[3] = { 0, &st0010, 0 };
 
   foreach(node, root.element) {
-    if(node.name == "mmio" && map[program]) {
-      foreach(leaf, node.element) {
-        if(leaf.name == "map") {
-          Mapping m(*map[program]);
-          foreach(attr, leaf.attribute) {
-            if(attr.name == "address") xml_parse_address(m, attr.content);
-          }
-          mapping.append(m);
-        }
+    if(node.name == "map" && map[program]) {
+      Mapping m(*map[program]);
+      foreach(attr, node.attribute) {
+        if(attr.name == "address") xml_parse_address(m, attr.content);
       }
+      mapping.append(m);
     }
   }
 }
@@ -648,16 +628,12 @@ void Cartridge::xml_parse_setarisc(xml_element &root) {
   MMIO *map[2] = { 0, &st0018 };
 
   foreach(node, root.element) {
-    if(node.name == "mmio" && map[program]) {
-      foreach(leaf, node.element) {
-        if(leaf.name == "map") {
-          Mapping m(*map[program]);
-          foreach(attr, leaf.attribute) {
-            if(attr.name == "address") xml_parse_address(m, attr.content);
-          }
-          mapping.append(m);
-        }
+    if(node.name == "map" && map[program]) {
+      Mapping m(*map[program]);
+      foreach(attr, node.attribute) {
+        if(attr.name == "address") xml_parse_address(m, attr.content);
       }
+      mapping.append(m);
     }
   }
 }

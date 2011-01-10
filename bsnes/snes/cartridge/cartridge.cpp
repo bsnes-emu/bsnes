@@ -43,7 +43,7 @@ void Cartridge::load(Mode cartridge_mode, const lstring &xml_list) {
   has_serial     = false;
 
   parse_xml(xml_list);
-//foreach(xml_item, xml_list) print(xml_item, "\n\n");
+//print(xml_list[0], "\n\n");
 
   if(ram_size > 0) {
     memory::cartram.map(allocate<uint8_t>(ram_size, 0xff), ram_size);

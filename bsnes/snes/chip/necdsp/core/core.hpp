@@ -18,7 +18,7 @@ public:
   void stack_push();
   void stack_pull();
 
-  string disassemble(uint11 ip);
+  string disassemble(uint14 ip);
 
   void serialize(serializer&);
   uPDcore(unsigned pcbits, unsigned rpbits, unsigned dpbits);

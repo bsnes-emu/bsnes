@@ -146,10 +146,8 @@ SNESCartridge::SNESCartridge(const uint8_t *data, unsigned size) {
     xml << "    <map mode='linear' address='80-ff:8000-ffff'/>\n";
     xml << "  </rom>\n";
     xml << "  <icd2 revision='1'>\n";
-    xml << "    <mmio>\n";
-    xml << "      <map address='00-3f:6000-7fff'/>\n";
-    xml << "      <map address='80-bf:6000-7fff'/>\n";
-    xml << "    </mmio>\n";
+    xml << "    <map address='00-3f:6000-7fff'/>\n";
+    xml << "    <map address='80-bf:6000-7fff'/>\n";
     xml << "  </icd2>\n";
   } else if(type == TypeSuperGameBoy2Bios) {
     xml << "  <rom>\n";
@@ -157,10 +155,8 @@ SNESCartridge::SNESCartridge(const uint8_t *data, unsigned size) {
     xml << "    <map mode='linear' address='80-ff:8000-ffff'/>\n";
     xml << "  </rom>\n";
     xml << "  <icd2 revision='2'>\n";
-    xml << "    <mmio>\n";
-    xml << "      <map address='00-3f:6000-7fff'/>\n";
-    xml << "      <map address='80-bf:6000-7fff'/>\n";
-    xml << "    </mmio>\n";
+    xml << "    <map address='00-3f:6000-7fff'/>\n";
+    xml << "    <map address='80-bf:6000-7fff'/>\n";
     xml << "  </icd2>\n";
   } else if(has_spc7110) {
     xml << "  <rom>\n";
@@ -379,10 +375,8 @@ SNESCartridge::SNESCartridge(const uint8_t *data, unsigned size) {
 
   if(has_srtc) {
     xml << "  <srtc>\n";
-    xml << "    <mmio>\n";
-    xml << "      <map address='00-3f:2800-2801'/>\n";
-    xml << "      <map address='80-bf:2800-2801'/>\n";
-    xml << "    </mmio>\n";
+    xml << "    <map address='00-3f:2800-2801'/>\n";
+    xml << "    <map address='80-bf:2800-2801'/>\n";
     xml << "  </srtc>\n";
   }
 
@@ -400,10 +394,8 @@ SNESCartridge::SNESCartridge(const uint8_t *data, unsigned size) {
 
   if(has_cx4) {
     xml << "  <cx4>\n";
-    xml << "    <mmio>\n";
-    xml << "      <map address='00-3f:6000-7fff'/>\n";
-    xml << "      <map address='80-bf:6000-7fff'/>\n";
-    xml << "    </mmio>\n";
+    xml << "    <map address='00-3f:6000-7fff'/>\n";
+    xml << "    <map address='80-bf:6000-7fff'/>\n";
     xml << "  </cx4>\n";
   }
 
@@ -481,36 +473,29 @@ SNESCartridge::SNESCartridge(const uint8_t *data, unsigned size) {
 
   if(has_obc1) {
     xml << "  <obc1>\n";
-    xml << "    <mmio>\n";
-    xml << "      <map address='00-3f:6000-7fff'/>\n";
-    xml << "      <map address='80-bf:6000-7fff'/>\n";
-    xml << "    </mmio>\n";
+    xml << "    <map address='00-3f:6000-7fff'/>\n";
+    xml << "    <map address='80-bf:6000-7fff'/>\n";
     xml << "  </obc1>\n";
   }
 
   if(has_st010) {
-    xml << "  <upd96050 program='st0010.bin' sha256='55c697e864562445621cdf8a7bf6e84ae91361e393d382a3704e9aa55559041e'>\n";
-    xml << "    <map address='68-6f:0000-0fff'/>\n";
-    xml << "    <map address='e8-ef:0000-0fff'/>\n";
+    xml << "  <upd96050 program='st0010.bin' frequency='10000000' sha256='55c697e864562445621cdf8a7bf6e84ae91361e393d382a3704e9aa55559041e'>\n";
+    xml << "    <map address='60-6f:0000-0fff'/>\n";
+    xml << "    <map address='e0-ef:0000-0fff'/>\n";
     xml << "  </upd96050>\n";
   }
 
   if(has_st011) {
-    //ST-0011 addresses not verified; chip is unsupported
-    xml << "  <setadsp program='ST-0011'>\n";
-    xml << "    <mmio>\n";
-    xml << "      <map address='68-6f:0000-0fff'/>\n";
-    xml << "      <map address='e8-ef:0000-0fff'/>\n";
-    xml << "    </mmio>\n";
-    xml << "  </setadsp>\n";
+    xml << "  <upd96050 program='st0011.bin' frequency='15000000' sha256='448e0deb0f580833ea878f4894a56124da18453d2d78e821388b6545909ba00a'>\n";
+    xml << "    <map address='60-6f:0000-0fff'/>\n";
+    xml << "    <map address='e0-ef:0000-0fff'/>\n";
+    xml << "  </upd96050>\n";
   }
 
   if(has_st018) {
     xml << "  <setarisc program='ST-0018'>\n";
-    xml << "    <mmio>\n";
-    xml << "      <map address='00-3f:3800-38ff'/>\n";
-    xml << "      <map address='80-bf:3800-38ff'/>\n";
-    xml << "    </mmio>\n";
+    xml << "    <map address='00-3f:3800-38ff'/>\n";
+    xml << "    <map address='80-bf:3800-38ff'/>\n";
     xml << "  </setarisc>\n";
   }
 

@@ -2,8 +2,6 @@
 
 void ICD2::serialize(serializer &s) {
   Processor::serialize(s);
-
-  GameBoy::system.runtosave();
   GameBoy::system.serialize_all(s);
 
   for(unsigned n = 0; n < 64; n++) s.array(packet[n].data);
