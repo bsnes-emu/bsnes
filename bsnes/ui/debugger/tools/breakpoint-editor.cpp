@@ -28,6 +28,7 @@ void BreakpointEditor::create() {
     } else {
       debugger.debugMode = Debugger::DebugMode::None;
     }
+    debugger.synchronize();
   };
 }
 

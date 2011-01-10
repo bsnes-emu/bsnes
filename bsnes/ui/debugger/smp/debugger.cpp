@@ -29,7 +29,7 @@ void SMPDebugger::create() {
 }
 
 void SMPDebugger::synchronize() {
-  stepInto.setEnabled(SNES::cartridge.loaded() && debugger.enableDebugger.checked());
+  stepInto.setEnabled(SNES::cartridge.loaded() && debugger.enableDebugger.checked() && breakpointEditor.runToBreakpoint.checked() == false);
   stepOver.setEnabled(stepInto.enabled() && SNES::smp.opcode_edge);
 }
 

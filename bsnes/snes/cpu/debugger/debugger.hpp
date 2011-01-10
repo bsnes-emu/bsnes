@@ -2,7 +2,7 @@ class CPUDebugger : public CPU, public ChipDebugger {
 public:
   bool property(unsigned id, string &name, string &value);
 
-  function<void ()> step_event;
+  function<bool ()> step_event;
 
   enum Usage {
     UsageRead  = 0x80,

@@ -24,6 +24,8 @@ struct Debugger : TopLevelWindow {
   void setVisible(bool visible = true);
   void enable(bool state);
   void run();
+  bool step_cpu();
+  bool step_smp();
 
   Debugger();
 };

@@ -7,13 +7,11 @@ void SMPDebugger::op_step() {
   opcode_pc = regs.pc;
 
   opcode_edge = true;
-  if(debugger.step_smp) {
+  debugger.breakpoint_test(Debugger::Breakpoint::Source::APURAM, Debugger::Breakpoint::Mode::Exec, regs.pc, 0x00);
+  if(step_event && step_event() == true) {
     debugger.break_event = Debugger::BreakEvent::SMPStep;
     scheduler.exit(Scheduler::ExitReason::DebuggerEvent);
-  } else {
-    debugger.breakpoint_test(Debugger::Breakpoint::Source::APURAM, Debugger::Breakpoint::Mode::Exec, regs.pc, 0x00);
   }
-  if(step_event) step_event();
   opcode_edge = false;
 
   SMP::op_step();

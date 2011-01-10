@@ -7,11 +7,21 @@ namespace SNES {
 #include "serialization.cpp"
 
 void uPDcore::exec() {
-//static uint16 lastpc = 0xffff;
-//if(lastpc != regs.pc) {
-//  print("A:", hex<4>((uint16)regs.a), " B:", hex<4>((uint16)regs.b), " DR:", hex<4>(regs.dr), " SR:", hex<4>(regs.sr), " FA:", hex<2>(regs.flaga), " FB:", hex<2>(regs.flagb), "\n");
-//  print(disassemble(lastpc = regs.pc), "\n");
-//}
+#if 0
+static uint16 lastpc = 0xffff;
+if(lastpc != regs.pc) {
+  print(
+    "A:", hex<4>((uint16)regs.a), " B:", hex<4>((uint16)regs.b),
+    " DR:", hex<4>(regs.dr), " SR:", hex<4>(regs.sr),
+    " FA:", hex<2>(regs.flaga), " FB:", hex<2>(regs.flagb),
+    " RP:", hex<4>(regs.rp), " DP:", hex<4>(regs.dp), " SO:", hex<4>(regs.so), "\n",
+    "K: ", hex<4>((uint16)regs.k), " L:", hex<4>((uint16)regs.l),
+    " M:", hex<4>((uint16)regs.m), " N:", hex<4>((uint16)regs.n),
+    " TR:", hex<4>(regs.tr), " TRB:", hex<4>(regs.trb), " [DP15]:", hex<4>(dataRAM[0x15]), "\n"
+  );
+  print(disassemble(lastpc = regs.pc), "\n");
+}
+#endif
 
   uint24 opcode = programROM[regs.pc];
   regs.pc = regs.pc + 1;
@@ -163,9 +173,6 @@ void uPDcore::exec_jp(uint24 opcode) {
   uint16 jps = (regs.pc & 0x3800) | (na << 0);
   uint16 jpl = (regs.pc & 0x2000) | (bank << 11) | (na << 0);
 
-  bool lj = false;
-  ljmp:
-
   switch(brch) {
     case 0x080: if(regs.flaga.c == 0) regs.pc = jps; return;  //JNCA
     case 0x082: if(regs.flaga.c == 1) regs.pc = jps; return;  //JCA
@@ -209,23 +216,13 @@ void uPDcore::exec_jp(uint24 opcode) {
     case 0x140: stack_push(); regs.pc = jps; return;  //CALL
   }
 
-  if(brch == 0x000) {
-    regs.pc = regs.so;
-    return;
+  switch(brch) {
+    case 0x000: regs.pc = regs.so; return;
+
+    case 0x081: if(regs.flaga.c == 1) regs.pc = jpl; return;
+
+    case 0x0bf: if(regs.sr.rqm == 1) regs.pc = jpl; return;
   }
-
-  if(lj == false) {
-    lj = true;
-    brch &= ~1;
-    jps = jpl;
-    goto ljmp;
-  }
-
-/*switch(brch) {
-    case 0x081: if(regs.flaga.c == 0) regs.pc = jpl; return;  //LJNCA
-
-    case 0x0bf: if(regs.sr.rqm == 1) regs.pc = jpl; return;  //LJRQM
-  }*/
 
   print(hex<4>(regs.pc - 1), ": unknown jump ", hex<3>(brch), "\n");
 

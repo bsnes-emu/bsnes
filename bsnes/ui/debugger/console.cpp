@@ -33,12 +33,13 @@ void Console::create() {
   };
 }
 
-void Console::write(const string &text) {
-  if(traceToConsole.checked()) {
+void Console::write(const string &text, bool echo) {
+  if(traceToConsole.checked() || echo) {
     if(buffer != "") buffer.append("\n");
     buffer.append(text);
     output.setText(buffer);
     output.setCursorPosition(~0);
+    OS::run();
   }
   if(traceToFile.checked() && logfile.open()) {
     logfile.print(string(text, "\n"));
@@ -55,20 +56,21 @@ void Console::tracerEnable(bool state) {
 }
 
 void Console::eventBreakpoint() {
-  if(traceToConsole.checked() == false) return;
-
   unsigned n = SNES::debugger.breakpoint_hit;
-  write({ "Breakpoint ", n + 1, " hit." });
+  write({ "Breakpoint ", n + 1, " hit." }, true);
 
   if(SNES::debugger.breakpoint[n].source == SNES::Debugger::Breakpoint::Source::CPUBus) {
     eventTraceCPU();
+    cpuDebugger.refreshDisassembly();
   } else if(SNES::debugger.breakpoint[n].source == SNES::Debugger::Breakpoint::Source::APURAM) {
     eventTraceSMP();
+    smpDebugger.refreshDisassembly();
   }
 }
 
 void Console::eventTraceCPU() {
   if(traceCPU.checked() == false) return;
+  if(traceToConsole.checked() == false && traceToFile.checked() == false) return;
 
   char text[256];
   SNES::cpu.disassemble_opcode(text, SNES::cpu.regs.pc);
@@ -77,6 +79,7 @@ void Console::eventTraceCPU() {
 
 void Console::eventTraceSMP() {
   if(traceSMP.checked() == false) return;
+  if(traceToConsole.checked() == false && traceToFile.checked() == false) return;
 
   char text[256];
   SNES::smp.disassemble_opcode(text, SNES::smp.regs.pc);

@@ -103,9 +103,6 @@ Debugger::Debugger() {
     breakpoint[n].counter = 0;
   }
   breakpoint_hit = 0;
-
-  step_cpu = false;
-  step_smp = false;
 }
 
 #endif

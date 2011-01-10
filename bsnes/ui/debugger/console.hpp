@@ -10,7 +10,7 @@ struct Console : TopLevelWindow {
   file logfile;
 
   void create();
-  void write(const string &text);
+  void write(const string &text, bool echo = false);
   void tracerEnable(bool state);
   void eventBreakpoint();
   void eventTraceCPU();
