@@ -71,8 +71,7 @@ void System::init(Interface *interface_) {
   icd2.init();
   superfx.init();
   sa1.init();
-  upd7725.init();
-  upd96050.init();
+  necdsp.init();
   bsxbase.init();
   bsxcart.init();
   bsxflash.init();
@@ -81,8 +80,6 @@ void System::init(Interface *interface_) {
   spc7110.init();
   cx4.init();
   obc1.init();
-  st0010.init();
-  st0011.init();
   st0018.init();
   msu1.init();
   serial.init();
@@ -124,15 +121,12 @@ void System::power() {
 
   if(cartridge.has_superfx()) superfx.enable();
   if(cartridge.has_sa1()) sa1.enable();
-  if(cartridge.has_upd7725()) upd7725.enable();
-  if(cartridge.has_upd96050()) upd96050.enable();
+  if(cartridge.has_necdsp()) necdsp.enable();
   if(cartridge.has_srtc()) srtc.enable();
   if(cartridge.has_sdd1()) sdd1.enable();
   if(cartridge.has_spc7110()) spc7110.enable();
   if(cartridge.has_cx4()) cx4.enable();
   if(cartridge.has_obc1()) obc1.enable();
-  if(cartridge.has_st0010()) st0010.enable();
-  if(cartridge.has_st0011()) st0011.enable();
   if(cartridge.has_st0018()) st0018.enable();
   if(cartridge.has_msu1()) msu1.enable();
   if(cartridge.has_serial()) serial.enable();
@@ -149,15 +143,12 @@ void System::power() {
 
   if(cartridge.has_superfx()) superfx.power();
   if(cartridge.has_sa1()) sa1.power();
-  if(cartridge.has_upd7725()) upd7725.power();
-  if(cartridge.has_upd96050()) upd96050.power();
+  if(cartridge.has_necdsp()) necdsp.power();
   if(cartridge.has_srtc()) srtc.power();
   if(cartridge.has_sdd1()) sdd1.power();
   if(cartridge.has_spc7110()) spc7110.power();
   if(cartridge.has_cx4()) cx4.power();
   if(cartridge.has_obc1()) obc1.power();
-  if(cartridge.has_st0010()) st0010.power();
-  if(cartridge.has_st0011()) st0011.power();
   if(cartridge.has_st0018()) st0018.power();
   if(cartridge.has_msu1()) msu1.power();
   if(cartridge.has_serial()) serial.power();
@@ -165,8 +156,7 @@ void System::power() {
   if(cartridge.mode() == Cartridge::Mode::SuperGameBoy) cpu.coprocessors.append(&icd2);
   if(cartridge.has_superfx()) cpu.coprocessors.append(&superfx);
   if(cartridge.has_sa1()) cpu.coprocessors.append(&sa1);
-  if(cartridge.has_upd7725()) cpu.coprocessors.append(&upd7725);
-  if(cartridge.has_upd96050()) cpu.coprocessors.append(&upd96050);
+  if(cartridge.has_necdsp()) cpu.coprocessors.append(&necdsp);
   if(cartridge.has_msu1()) cpu.coprocessors.append(&msu1);
   if(cartridge.has_serial()) cpu.coprocessors.append(&serial);
 
@@ -191,15 +181,12 @@ void System::reset() {
 
   if(cartridge.has_superfx()) superfx.reset();
   if(cartridge.has_sa1()) sa1.reset();
-  if(cartridge.has_upd7725()) upd7725.reset();
-  if(cartridge.has_upd96050()) upd96050.reset();
+  if(cartridge.has_necdsp()) necdsp.reset();
   if(cartridge.has_srtc()) srtc.reset();
   if(cartridge.has_sdd1()) sdd1.reset();
   if(cartridge.has_spc7110()) spc7110.reset();
   if(cartridge.has_cx4()) cx4.reset();
   if(cartridge.has_obc1()) obc1.reset();
-  if(cartridge.has_st0010()) st0010.reset();
-  if(cartridge.has_st0011()) st0011.reset();
   if(cartridge.has_st0018()) st0018.reset();
   if(cartridge.has_msu1()) msu1.reset();
   if(cartridge.has_serial()) serial.reset();
@@ -207,8 +194,7 @@ void System::reset() {
   if(cartridge.mode() == Cartridge::Mode::SuperGameBoy) cpu.coprocessors.append(&icd2);
   if(cartridge.has_superfx()) cpu.coprocessors.append(&superfx);
   if(cartridge.has_sa1()) cpu.coprocessors.append(&sa1);
-  if(cartridge.has_upd7725()) cpu.coprocessors.append(&upd7725);
-  if(cartridge.has_upd96050()) cpu.coprocessors.append(&upd96050);
+  if(cartridge.has_necdsp()) cpu.coprocessors.append(&necdsp);
   if(cartridge.has_msu1()) cpu.coprocessors.append(&msu1);
   if(cartridge.has_serial()) cpu.coprocessors.append(&serial);
 

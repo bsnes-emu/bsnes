@@ -84,9 +84,9 @@ void SPC7110::reset() {
 }
 
 unsigned SPC7110::datarom_addr(unsigned addr) {
-  unsigned size = memory::cartrom.size() - cartridge.spc7110_data_rom_offset();
+  unsigned size = memory::cartrom.size() - data_rom_offset;
   while(addr >= size) addr -= size;
-  return cartridge.spc7110_data_rom_offset() + addr;
+  return data_rom_offset + addr;
 }
 
 unsigned SPC7110::data_pointer()   { return r4811 + (r4812 << 8) + (r4813 << 16); }

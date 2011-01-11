@@ -19,6 +19,8 @@
 
 class SPC7110 : public MMIO {
 public:
+  unsigned data_rom_offset;
+
   void init();
   void enable();
   void power();

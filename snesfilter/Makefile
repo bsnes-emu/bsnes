@@ -2,7 +2,7 @@ include nall/Makefile
 
 c       := $(compiler) -std=gnu99
 cpp     := $(subst cc,++,$(compiler)) -std=gnu++0x
-flags   := -O3 -I. -Iobj -fomit-frame-pointer -fPIC
+flags   := -O3 -I. -Iobj -fomit-frame-pointer
 link    := -s
 objects :=
 

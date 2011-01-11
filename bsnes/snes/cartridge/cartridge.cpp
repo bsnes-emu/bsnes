@@ -22,22 +22,17 @@ void Cartridge::load(Mode cartridge_mode, const lstring &xml_list) {
   mode = cartridge_mode;
   region = Region::NTSC;
   ram_size = 0;
-  spc7110_data_rom_offset = 0x100000;
-  supergameboy_version = SuperGameBoyVersion::Version1;
 
   has_bsx_slot   = false;
   has_superfx    = false;
   has_sa1        = false;
-  has_upd7725    = false;
-  has_upd96050   = false;
+  has_necdsp     = false;
   has_srtc       = false;
   has_sdd1       = false;
   has_spc7110    = false;
   has_spc7110rtc = false;
   has_cx4        = false;
   has_obc1       = false;
-  has_st0010     = false;
-  has_st0011     = false;
   has_st0018     = false;
   has_msu1       = false;
   has_serial     = false;

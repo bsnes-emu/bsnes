@@ -60,14 +60,12 @@ void System::serialize_all(serializer &s) {
   if(cartridge.mode() == Cartridge::Mode::SuperGameBoy) icd2.serialize(s);
   if(cartridge.has_superfx()) superfx.serialize(s);
   if(cartridge.has_sa1()) sa1.serialize(s);
-  if(cartridge.has_upd7725()) upd7725.serialize(s);
-  if(cartridge.has_upd96050()) upd96050.serialize(s);
+  if(cartridge.has_necdsp()) necdsp.serialize(s);
   if(cartridge.has_srtc()) srtc.serialize(s);
   if(cartridge.has_sdd1()) sdd1.serialize(s);
   if(cartridge.has_spc7110()) spc7110.serialize(s);
   if(cartridge.has_cx4()) cx4.serialize(s);
   if(cartridge.has_obc1()) obc1.serialize(s);
-  if(cartridge.has_st0010()) st0010.serialize(s);
   if(cartridge.has_msu1()) msu1.serialize(s);
   if(cartridge.has_serial()) serial.serialize(s);
 }

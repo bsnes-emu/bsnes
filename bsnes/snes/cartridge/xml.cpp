@@ -35,8 +35,7 @@ void Cartridge::parse_xml_cartridge(const char *data) {
         if(node.name == "icd2") xml_parse_icd2(node);
         if(node.name == "superfx") xml_parse_superfx(node);
         if(node.name == "sa1") xml_parse_sa1(node);
-        if(node.name == "upd7725") xml_parse_upd7725(node);
-        if(node.name == "upd96050") xml_parse_upd96050(node);
+        if(node.name == "necdsp") xml_parse_necdsp(node);
         if(node.name == "bsx") xml_parse_bsx(node);
         if(node.name == "sufamiturbo") xml_parse_sufamiturbo(node);
         if(node.name == "srtc") xml_parse_srtc(node);
@@ -44,7 +43,6 @@ void Cartridge::parse_xml_cartridge(const char *data) {
         if(node.name == "spc7110") xml_parse_spc7110(node);
         if(node.name == "cx4") xml_parse_cx4(node);
         if(node.name == "obc1") xml_parse_obc1(node);
-        if(node.name == "setadsp") xml_parse_setadsp(node);
         if(node.name == "setarisc") xml_parse_setarisc(node);
         if(node.name == "msu1") xml_parse_msu1(node);
         if(node.name == "serial") xml_parse_serial(node);
@@ -98,11 +96,12 @@ void Cartridge::xml_parse_ram(xml_element &root) {
 
 void Cartridge::xml_parse_icd2(xml_element &root) {
   if(mode != Mode::SuperGameBoy) return;
+  icd2.revision = 1;
 
   foreach(attr, root.attribute) {
     if(attr.name == "revision") {
-      if(attr.content == "1") supergameboy_version = SuperGameBoyVersion::Version1;
-      if(attr.content == "2") supergameboy_version = SuperGameBoyVersion::Version2;
+      if(attr.content == "1") icd2.revision = 1;
+      if(attr.content == "2") icd2.revision = 2;
     }
   }
 
@@ -226,132 +225,79 @@ void Cartridge::xml_parse_sa1(xml_element &root) {
   }
 }
 
-void Cartridge::xml_parse_upd7725(xml_element &root) {
-  has_upd7725 = true;
+void Cartridge::xml_parse_necdsp(xml_element &root) {
+  has_necdsp = true;
+  necdsp.revision = NECDSP::Revision::uPD7725;
+  necdsp.frequency = 8000000;
 
-  bool program = false;
-  bool sha256 = false;
-  string xml_hash;
-  string rom_hash;
+  for(unsigned n = 0; n < 16384; n++) necdsp.programROM[n] = 0x000000;
+  for(unsigned n = 0; n <  2048; n++) necdsp.dataROM[n] = 0x0000;
 
-  for(unsigned n = 0; n < 2048; n++) upd7725.programROM[n] = 0;
-  for(unsigned n = 0; n < 1024; n++) upd7725.dataROM[n] = 0;
+  string program, programhash;
+  string sha256;
 
   foreach(attr, root.attribute) {
-    if(attr.name == "program") {
-      file fp;
-      fp.open(string(dir(basename()), attr.content), file::mode::read);
-      if(fp.open() && fp.size() == 8192) {
-        program = true;
-
-        for(unsigned n = 0; n < 2048; n++) {
-          upd7725.programROM[n] = fp.readm(3);
-        }
-        for(unsigned n = 0; n < 1024; n++) {
-          upd7725.dataROM[n] = fp.readm(2);
-        }
-
-        fp.seek(0);
-        uint8 data[8192];
-        fp.read(data, 8192);
-        fp.close();
-
-        sha256_ctx sha;
-        uint8 shahash[32];
-        sha256_init(&sha);
-        sha256_chunk(&sha, data, 8192);
-        sha256_final(&sha);
-        sha256_hash(&sha, shahash);
-        foreach(n, shahash) rom_hash.append(hex<2>(n));
-      }
+    if(attr.name == "revision") {
+      if(attr.content == "upd7725" ) necdsp.revision = NECDSP::Revision::uPD7725;
+      if(attr.content == "upd96050") necdsp.revision = NECDSP::Revision::uPD96050;
+    } else if(attr.name == "frequency") {
+      necdsp.frequency = decimal(attr.content);
+    } else if(attr.name == "program") {
+      program = attr.content;
     } else if(attr.name == "sha256") {
-      sha256 = true;
-      xml_hash = attr.content;
+      sha256 = attr.content;
     }
+  }
+
+  unsigned promsize = (necdsp.revision == NECDSP::Revision::uPD7725 ? 2048 : 16384);
+  unsigned dromsize = (necdsp.revision == NECDSP::Revision::uPD7725 ? 1024 :  2048);
+  unsigned filesize = promsize * 3 + dromsize * 2;
+
+  file fp;
+  if(fp.open(string(dir(basename()), program), file::mode::read)) {
+    if(fp.size() == filesize) {
+      for(unsigned n = 0; n < promsize; n++) necdsp.programROM[n] = fp.readm(3);
+      for(unsigned n = 0; n < dromsize; n++) necdsp.dataROM[n] = fp.readm(2);
+
+      fp.seek(0);
+      uint8_t data[filesize];
+      fp.read(data, filesize);
+
+      sha256_ctx sha;
+      uint8 shahash[32];
+      sha256_init(&sha);
+      sha256_chunk(&sha, data, filesize);
+      sha256_final(&sha);
+      sha256_hash(&sha, shahash);
+      foreach(n, shahash) programhash.append(hex<2>(n));
+    }
+    fp.close();
   }
 
   foreach(node, root.element) {
     if(node.name == "dr") {
-      foreach(leaf, node.element) {
-        if(leaf.name == "map") {
-          Mapping m(upd7725dr);
-          foreach(attr, leaf.attribute) {
-            if(attr.name == "address") xml_parse_address(m, attr.content);
-          }
-          mapping.append(m);
-        }
-      }
-    } else if(node.name == "sr") {
-      foreach(leaf, node.element) {
-        if(leaf.name == "map") {
-          Mapping m(upd7725sr);
-          foreach(attr, leaf.attribute) {
-            if(attr.name == "address") xml_parse_address(m, attr.content);
-          }
-          mapping.append(m);
-        }
+      foreach(attr, node.attribute) {
+        if(attr.name == "mask") necdsp.drmask = hex(attr.content);
+        if(attr.name == "test") necdsp.drtest = hex(attr.content);
       }
     }
-  }
 
-  if(program == false) {
-    system.interface->message("Warning: uPD7725 program is missing.");
-  } else if(sha256 == true && xml_hash != rom_hash) {
-    system.interface->message({
-      "Warning: uPD7725 program SHA256 is incorrect.\n\n"
-      "Expected:\n", xml_hash, "\n\n"
-      "Actual:\n", rom_hash
-    });
-  }
-}
-
-void Cartridge::xml_parse_upd96050(xml_element &root) {
-  has_upd96050 = true;
-
-  bool program = false;
-  bool sha256 = false;
-  string xml_hash;
-  string rom_hash;
-
-  for(unsigned n = 0; n < 16384; n++) upd96050.programROM[n] = 0;
-  for(unsigned n = 0; n <  2048; n++) upd96050.dataROM[n] = 0;
-
-  foreach(attr, root.attribute) {
-    if(attr.name == "program") {
-      file fp;
-      fp.open(string(dir(basename()), attr.content), file::mode::read);
-      if(fp.open() && fp.size() == 52 * 1024) {
-        program = true;
-
-        for(unsigned n = 0; n < 16384; n++) {
-          upd96050.programROM[n] = fp.readm(3);
-        }
-        for(unsigned n = 0; n <  2048; n++) {
-          upd96050.dataROM[n] = fp.readm(2);
-        }
-
-        fp.seek(0);
-        uint8 data[52 * 1024];
-        fp.read(data, 52 * 1024);
-        fp.close();
-
-        sha256_ctx sha;
-        uint8 shahash[32];
-        sha256_init(&sha);
-        sha256_chunk(&sha, data, 52 * 1024);
-        sha256_final(&sha);
-        sha256_hash(&sha, shahash);
-        foreach(n, shahash) rom_hash.append(hex<2>(n));
+    if(node.name == "sr") {
+      foreach(attr, node.attribute) {
+        if(attr.name == "mask") necdsp.srmask = hex(attr.content);
+        if(attr.name == "test") necdsp.srtest = hex(attr.content);
       }
-    } else if(attr.name == "sha256") {
-      sha256 = true;
-      xml_hash = attr.content;
     }
-  }
 
-  foreach(node, root.element) {
+    if(node.name == "dp") {
+      foreach(attr, node.attribute) {
+        if(attr.name == "mask") necdsp.dpmask = hex(attr.content);
+        if(attr.name == "test") necdsp.dptest = hex(attr.content);
+      }
+    }
+
     if(node.name == "map") {
-      Mapping m(upd96050);
+      Mapping m(necdsp);
       foreach(attr, node.attribute) {
         if(attr.name == "address") xml_parse_address(m, attr.content);
       }
@@ -359,13 +305,13 @@ void Cartridge::xml_parse_upd96050(xml_element &root) {
     }
   }
 
-  if(program == false) {
-    system.interface->message("Warning: uPD96050 program is missing.");
-  } else if(sha256 == true && xml_hash != rom_hash) {
+  if(program == "") {
+    system.interface->message({ "Warning: NEC DSP program ", program, " is missing." });
+  } else if(sha256 != "" && sha256 != programhash) {
     system.interface->message({
-      "Warning: uPD96050 program SHA256 is incorrect.\n\n"
-      "Expected:\n", xml_hash, "\n\n"
-      "Actual:\n", rom_hash
+      "Warning: NEC DSP program ", program, " SHA256 is incorrect.\n\n"
+      "Expected:\n", sha256, "\n\n"
+      "Actual:\n", programhash
     });
   }
 }
@@ -491,6 +437,7 @@ void Cartridge::xml_parse_sdd1(xml_element &root) {
 
 void Cartridge::xml_parse_spc7110(xml_element &root) {
   has_spc7110 = true;
+  spc7110.data_rom_offset = 0x100000;
 
   foreach(node, root.element) {
     if(node.name == "dcu") {
@@ -509,7 +456,7 @@ void Cartridge::xml_parse_spc7110(xml_element &root) {
           Mapping m(spc7110mcu);
           foreach(attr, leaf.attribute) {
             if(attr.name == "address") xml_parse_address(m, attr.content);
-            if(attr.name == "offset") spc7110_data_rom_offset = hex(attr.content);
+            if(attr.name == "offset") spc7110.data_rom_offset = hex(attr.content);
           }
           mapping.append(m);
         }
@@ -577,34 +524,6 @@ void Cartridge::xml_parse_obc1(xml_element &root) {
   foreach(node, root.element) {
     if(node.name == "map") {
       Mapping m(obc1);
-      foreach(attr, node.attribute) {
-        if(attr.name == "address") xml_parse_address(m, attr.content);
-      }
-      mapping.append(m);
-    }
-  }
-}
-
-void Cartridge::xml_parse_setadsp(xml_element &root) {
-  unsigned program = 0;
-
-  foreach(attr, root.attribute) {
-    if(attr.name == "program") {
-      if(attr.content == "ST-0010") {
-        program = 1;
-        has_st0010 = true;
-      } else if(attr.content == "ST-0011") {
-        program = 2;
-        has_st0011 = true;
-      }
-    }
-  }
-
-  Memory *map[3] = { 0, &st0010, 0 };
-
-  foreach(node, root.element) {
-    if(node.name == "map" && map[program]) {
-      Mapping m(*map[program]);
       foreach(attr, node.attribute) {
         if(attr.name == "address") xml_parse_address(m, attr.content);
       }

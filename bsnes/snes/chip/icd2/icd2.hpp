@@ -1,5 +1,7 @@
 class ICD2 : public GameBoy::Interface, public Coprocessor, public MMIO, public Memory {
 public:
+  unsigned revision;
+
   static void Enter();
   void enter();
 
