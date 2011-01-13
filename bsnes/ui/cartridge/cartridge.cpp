@@ -57,17 +57,20 @@ bool Cartridge::loadSuperGameBoy(const char *basename, const char *slotname) {
   unload();
   if(loadCartridge(SNES::memory::cartrom, baseXML, basename) == false) return false;
 
+  unsigned size = 0;
+  uint8_t *data = 0;
+
   file fp;
   if(fp.open(slotname, file::mode::read)) {
-    unsigned size = fp.size();
-    uint8_t *data = new uint8_t[size];
+    data = new uint8_t[size = fp.size()];
     fp.read(data, size);
     fp.close();
-
-    GameBoyCartridge info(data, size);
-    GameBoy::cartridge.load(info.xml, data, size);
-    delete[] data;
   }
+
+  //note: it is safe to pass below two functions null pointers
+  GameBoyCartridge info(data, size);
+  GameBoy::cartridge.load(info.xml, data, size);
+  if(data) delete[] data;
 
   SNES::cartridge.basename = baseName = nall::basename(basename);
   slotAName = nall::basename(slotname);

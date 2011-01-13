@@ -27,7 +27,7 @@ namespace nall {
     };
 
     template<typename L> struct lambda : container {
-      L object;
+      mutable L object;
       R operator()(P... p) const { return object(std::forward<P>(p)...); }
       container* copy() const { return new lambda(object); }
       lambda(const L& object) : object(object) {}
@@ -46,7 +46,7 @@ namespace nall {
       return *this;
     }
 
-    function(const function &source) { operator=(source); }
+    function(const function &source) : callback(0) { operator=(source); }
     function() : callback(0) {}
     function(void *function) : callback(0) { if(function) callback = new global((R (*)(P...))function); }
     function(R (*function)(P...)) { callback = new global(function); }

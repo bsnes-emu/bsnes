@@ -60,6 +60,12 @@ extern "C" {
 #define SNES_MEMORY_GAME_BOY_RAM        6
 #define SNES_MEMORY_GAME_BOY_RTC        7
 
+#define SNES_MEMORY_WRAM    100
+#define SNES_MEMORY_APURAM  101
+#define SNES_MEMORY_VRAM    102
+#define SNES_MEMORY_OAM     103
+#define SNES_MEMORY_CGRAM   104
+
 typedef void (*snes_video_refresh_t)(const uint16_t *data, unsigned width, unsigned height);
 typedef void (*snes_audio_sample_t)(uint16_t left, uint16_t right);
 typedef void (*snes_input_poll_t)(void);

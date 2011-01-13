@@ -48,46 +48,44 @@ string NECDSP::disassemble(uint14 ip) {
       case 1: output << "b"; break;
     }
 
-    if(1||dst) {
-      output << "\n      mov     ";
+    output << "\n      mov     ";
 
-      switch(src) {
-        case  0: output << "trb,"; break;
-        case  1: output << "a,"; break;
-        case  2: output << "b,"; break;
-        case  3: output << "tr,"; break;
-        case  4: output << "dp,"; break;
-        case  5: output << "rp,"; break;
-        case  6: output << "ro,"; break;
-        case  7: output << "sgn,"; break;
-        case  8: output << "dr,"; break;
-        case  9: output << "drnf,"; break;
-        case 10: output << "sr,"; break;
-        case 11: output << "sim,"; break;
-        case 12: output << "sil,"; break;
-        case 13: output << "k,"; break;
-        case 14: output << "l,"; break;
-        case 15: output << "mem,"; break;
-      }
+    switch(src) {
+      case  0: output << "trb,"; break;
+      case  1: output << "a,"; break;
+      case  2: output << "b,"; break;
+      case  3: output << "tr,"; break;
+      case  4: output << "dp,"; break;
+      case  5: output << "rp,"; break;
+      case  6: output << "ro,"; break;
+      case  7: output << "sgn,"; break;
+      case  8: output << "dr,"; break;
+      case  9: output << "drnf,"; break;
+      case 10: output << "sr,"; break;
+      case 11: output << "sim,"; break;
+      case 12: output << "sil,"; break;
+      case 13: output << "k,"; break;
+      case 14: output << "l,"; break;
+      case 15: output << "mem,"; break;
+    }
 
-      switch(dst) {
-        case  0: output << "non"; break;
-        case  1: output << "a"; break;
-        case  2: output << "b"; break;
-        case  3: output << "tr"; break;
-        case  4: output << "dp"; break;
-        case  5: output << "rp"; break;
-        case  6: output << "dr"; break;
-        case  7: output << "sr"; break;
-        case  8: output << "sol"; break;
-        case  9: output << "som"; break;
-        case 10: output << "k"; break;
-        case 11: output << "klr"; break;
-        case 12: output << "klm"; break;
-        case 13: output << "l"; break;
-        case 14: output << "trb"; break;
-        case 15: output << "mem"; break;
-      }
+    switch(dst) {
+      case  0: output << "non"; break;
+      case  1: output << "a"; break;
+      case  2: output << "b"; break;
+      case  3: output << "tr"; break;
+      case  4: output << "dp"; break;
+      case  5: output << "rp"; break;
+      case  6: output << "dr"; break;
+      case  7: output << "sr"; break;
+      case  8: output << "sol"; break;
+      case  9: output << "som"; break;
+      case 10: output << "k"; break;
+      case 11: output << "klr"; break;
+      case 12: output << "klm"; break;
+      case 13: output << "l"; break;
+      case 14: output << "trb"; break;
+      case 15: output << "mem"; break;
     }
 
     if(dpl) {
@@ -132,9 +130,12 @@ string NECDSP::disassemble(uint14 ip) {
   if(type == 2) {  //JP
     uint9 brch = opcode >> 13;
     uint11 na  = opcode >>  2;
+    uint8 bank = opcode >>  0;
+
+    uint14 jp = (regs.pc & 0x2000) | (bank << 11) | (na << 0);
 
     switch(brch) {
-      case 0x000: output << "jmpso   "; break;
+      case 0x000: output << "jmpso   "; jp = 0; break;
       case 0x080: output << "jnca    "; break;
       case 0x082: output << "jca     "; break;
       case 0x084: output << "jncb    "; break;
@@ -169,14 +170,14 @@ string NECDSP::disassemble(uint14 ip) {
       case 0x0ba: output << "jsoak   "; break;
       case 0x0bc: output << "jnrqm   "; break;
       case 0x0be: output << "jrqm    "; break;
-      case 0x100: output << "ljmp    "; break;
-      case 0x101: output << "hjmp    "; break;
-      case 0x140: output << "lcall   "; break;
-      case 0x141: output << "hcall   "; break;
+      case 0x100: output << "ljmp    "; jp &= ~0x2000; break;
+      case 0x101: output << "hjmp    "; jp |=  0x2000; break;
+      case 0x140: output << "lcall   "; jp &= ~0x2000; break;
+      case 0x141: output << "hcall   "; jp |=  0x2000; break;
       default:    output << "??????  "; break;
     }
 
-    output << "$" << hex<4>(na);
+    output << "$" << hex<4>(jp);
   }
 
   if(type == 3) {  //LD

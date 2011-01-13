@@ -19,7 +19,6 @@ public:
   static void Enter();
   void enter();
 
-  void exec();
   void exec_op(uint24 opcode);
   void exec_rt(uint24 opcode);
   void exec_jp(uint24 opcode);

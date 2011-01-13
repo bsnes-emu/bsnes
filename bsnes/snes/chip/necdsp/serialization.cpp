@@ -48,7 +48,6 @@ void NECDSP::serialize(serializer &s) {
   s.integer(regs.dr);
   s.integer(regs.si);
   s.integer(regs.so);
-  s.integer(regs.idb);
 }
 
 #endif

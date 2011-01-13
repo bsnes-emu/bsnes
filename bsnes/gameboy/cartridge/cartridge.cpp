@@ -16,12 +16,13 @@ namespace GameBoy {
 #include "serialization.cpp"
 Cartridge cartridge;
 
-void Cartridge::load(const string &xml, uint8_t *data, unsigned size) {
+void Cartridge::load(const string &xml, const uint8_t *data, unsigned size) {
+  if(size == 0) size = 32768;
+  romdata = new uint8[romsize = size]();
+  if(data) memcpy(romdata, data, size);
+
 //uint32_t crc = crc32_calculate(data, size);
 //print("CRC32 = ", hex<4>(crc), "\n");
-
-  romdata = new uint8[romsize = size];
-  memcpy(romdata, data, size);
 
   info.mapper = Mapper::Unknown;
   info.ram = false;

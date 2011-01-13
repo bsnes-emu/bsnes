@@ -16,24 +16,24 @@ void NECDSP::enter() {
       scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
     }
 
-    exec();
+static uint16 lastpc = 0xfff;
+if(lastpc != regs.pc) print(disassemble(lastpc = regs.pc), "\n");
+
+    uint24 opcode = programROM[regs.pc++];
+    switch(opcode >> 22) {
+      case 0: exec_op(opcode); break;
+      case 1: exec_rt(opcode); break;
+      case 2: exec_jp(opcode); break;
+      case 3: exec_ld(opcode); break;
+    }
+
+    int32 result = (int32)regs.k * regs.l;  //sign + 30-bit result
+    regs.m = result >> 15;  //store sign + top 15-bits
+    regs.n = result <<  1;  //store low 15-bits + zero
+
     step(1);
     synchronize_cpu();
   }
-}
-
-void NECDSP::exec() {
-  uint24 opcode = programROM[regs.pc++];
-  switch(opcode >> 22) {
-    case 0: exec_op(opcode); break;
-    case 1: exec_rt(opcode); break;
-    case 2: exec_jp(opcode); break;
-    case 3: exec_ld(opcode); break;
-  }
-
-  int32 result = (int32)regs.k * regs.l;  //sign + 30-bit result
-  regs.m = result >> 15;  //store sign + top 15-bits
-  regs.n = result <<  1;  //store low 15-bits + zero
 }
 
 void NECDSP::exec_op(uint24 opcode) {
@@ -46,23 +46,24 @@ void NECDSP::exec_op(uint24 opcode) {
   uint4 src     = opcode >>  4;  //move source
   uint4 dst     = opcode >>  0;  //move destination
 
+  uint16 idb;
   switch(src) {
-    case  0: regs.idb = regs.trb; break;
-    case  1: regs.idb = regs.a; break;
-    case  2: regs.idb = regs.b; break;
-    case  3: regs.idb = regs.tr; break;
-    case  4: regs.idb = regs.dp; break;
-    case  5: regs.idb = regs.rp; break;
-    case  6: regs.idb = dataROM[regs.rp]; break;
-    case  7: regs.idb = 0x8000 - regs.flaga.s1; break;
-    case  8: regs.idb = regs.dr; regs.sr.rqm = 1; break;
-    case  9: regs.idb = regs.dr; break;
-    case 10: regs.idb = regs.sr; break;
-    case 11: regs.idb = regs.si; break;  //MSB
-    case 12: regs.idb = regs.si; break;  //LSB
-    case 13: regs.idb = regs.k; break;
-    case 14: regs.idb = regs.l; break;
-    case 15: regs.idb = dataRAM[regs.dp]; break;
+    case  0: idb = regs.trb; break;
+    case  1: idb = regs.a; break;
+    case  2: idb = regs.b; break;
+    case  3: idb = regs.tr; break;
+    case  4: idb = regs.dp; break;
+    case  5: idb = regs.rp; break;
+    case  6: idb = dataROM[regs.rp]; break;
+    case  7: idb = 0x8000 - regs.flaga.s1; break;
+    case  8: idb = regs.dr; regs.sr.rqm = 1; break;
+    case  9: idb = regs.dr; break;
+    case 10: idb = regs.sr; break;
+    case 11: idb = regs.si; break;  //MSB
+    case 12: idb = regs.si; break;  //LSB
+    case 13: idb = regs.k; break;
+    case 14: idb = regs.l; break;
+    case 15: idb = dataRAM[regs.dp]; break;
   }
 
   if(alu) {
@@ -72,7 +73,7 @@ void NECDSP::exec_op(uint24 opcode) {
 
     switch(pselect) {
       case 0: p = dataRAM[regs.dp]; break;
-      case 1: p = regs.idb; break;
+      case 1: p = idb; break;
       case 2: p = regs.m; break;
       case 3: p = regs.n; break;
     }
@@ -146,7 +147,7 @@ void NECDSP::exec_op(uint24 opcode) {
     }
   }
 
-  exec_ld((regs.idb << 6) + dst);
+  exec_ld((idb << 6) + dst);
 
   switch(dpl) {
     case 1: regs.dp = (regs.dp & 0xf0) + ((regs.dp + 1) & 0x0f); break;  //DPINC
@@ -169,63 +170,60 @@ void NECDSP::exec_jp(uint24 opcode) {
   uint11 na  = opcode >>  2;  //next address
   uint2 bank = opcode >>  0;  //bank address
 
-  uint16 jps = (regs.pc & 0x2000) | (bank << 11) | (na << 0);
-  uint16 jpl = (bank << 11) | (na << 0);
+  uint14 jp = (regs.pc & 0x2000) | (bank << 11) | (na << 0);
 
   switch(brch) {
     case 0x000: regs.pc = regs.so; return;  //JMPSO
 
-    case 0x080: if(regs.flaga.c == 0) regs.pc = jps; return;  //JNCA
-    case 0x082: if(regs.flaga.c == 1) regs.pc = jps; return;  //JCA
-    case 0x084: if(regs.flagb.c == 0) regs.pc = jps; return;  //JNCB
-    case 0x086: if(regs.flagb.c == 1) regs.pc = jps; return;  //JCB
+    case 0x080: if(regs.flaga.c == 0) regs.pc = jp; return;  //JNCA
+    case 0x082: if(regs.flaga.c == 1) regs.pc = jp; return;  //JCA
+    case 0x084: if(regs.flagb.c == 0) regs.pc = jp; return;  //JNCB
+    case 0x086: if(regs.flagb.c == 1) regs.pc = jp; return;  //JCB
 
-    case 0x088: if(regs.flaga.z == 0) regs.pc = jps; return;  //JNZA
-    case 0x08a: if(regs.flaga.z == 1) regs.pc = jps; return;  //JZA
-    case 0x08c: if(regs.flagb.z == 0) regs.pc = jps; return;  //JNZB
-    case 0x08e: if(regs.flagb.z == 1) regs.pc = jps; return;  //JZB
+    case 0x088: if(regs.flaga.z == 0) regs.pc = jp; return;  //JNZA
+    case 0x08a: if(regs.flaga.z == 1) regs.pc = jp; return;  //JZA
+    case 0x08c: if(regs.flagb.z == 0) regs.pc = jp; return;  //JNZB
+    case 0x08e: if(regs.flagb.z == 1) regs.pc = jp; return;  //JZB
 
-    case 0x090: if(regs.flaga.ov0 == 0) regs.pc = jps; return;  //JNOVA0
-    case 0x092: if(regs.flaga.ov0 == 1) regs.pc = jps; return;  //JOVA0
-    case 0x094: if(regs.flagb.ov0 == 0) regs.pc = jps; return;  //JNOVB0
-    case 0x096: if(regs.flagb.ov0 == 1) regs.pc = jps; return;  //JOVB0
+    case 0x090: if(regs.flaga.ov0 == 0) regs.pc = jp; return;  //JNOVA0
+    case 0x092: if(regs.flaga.ov0 == 1) regs.pc = jp; return;  //JOVA0
+    case 0x094: if(regs.flagb.ov0 == 0) regs.pc = jp; return;  //JNOVB0
+    case 0x096: if(regs.flagb.ov0 == 1) regs.pc = jp; return;  //JOVB0
 
-    case 0x098: if(regs.flaga.ov1 == 0) regs.pc = jps; return;  //JNOVA1
-    case 0x09a: if(regs.flaga.ov1 == 1) regs.pc = jps; return;  //JOVA1
-    case 0x09c: if(regs.flagb.ov1 == 0) regs.pc = jps; return;  //JNOVB1
-    case 0x09e: if(regs.flagb.ov1 == 1) regs.pc = jps; return;  //JOVB1
+    case 0x098: if(regs.flaga.ov1 == 0) regs.pc = jp; return;  //JNOVA1
+    case 0x09a: if(regs.flaga.ov1 == 1) regs.pc = jp; return;  //JOVA1
+    case 0x09c: if(regs.flagb.ov1 == 0) regs.pc = jp; return;  //JNOVB1
+    case 0x09e: if(regs.flagb.ov1 == 1) regs.pc = jp; return;  //JOVB1
 
-    case 0x0a0: if(regs.flaga.s0 == 0) regs.pc = jps; return;  //JNSA0
-    case 0x0a2: if(regs.flaga.s0 == 1) regs.pc = jps; return;  //JSA0
-    case 0x0a4: if(regs.flagb.s0 == 0) regs.pc = jps; return;  //JNSB0
-    case 0x0a6: if(regs.flagb.s0 == 1) regs.pc = jps; return;  //JSB0
+    case 0x0a0: if(regs.flaga.s0 == 0) regs.pc = jp; return;  //JNSA0
+    case 0x0a2: if(regs.flaga.s0 == 1) regs.pc = jp; return;  //JSA0
+    case 0x0a4: if(regs.flagb.s0 == 0) regs.pc = jp; return;  //JNSB0
+    case 0x0a6: if(regs.flagb.s0 == 1) regs.pc = jp; return;  //JSB0
 
-    case 0x0a8: if(regs.flaga.s1 == 0) regs.pc = jps; return;  //JNSA1
-    case 0x0aa: if(regs.flaga.s1 == 1) regs.pc = jps; return;  //JSA1
-    case 0x0ac: if(regs.flagb.s1 == 0) regs.pc = jps; return;  //JNSB1
-    case 0x0ae: if(regs.flagb.s1 == 1) regs.pc = jps; return;  //JSB1
+    case 0x0a8: if(regs.flaga.s1 == 0) regs.pc = jp; return;  //JNSA1
+    case 0x0aa: if(regs.flaga.s1 == 1) regs.pc = jp; return;  //JSA1
+    case 0x0ac: if(regs.flagb.s1 == 0) regs.pc = jp; return;  //JNSB1
+    case 0x0ae: if(regs.flagb.s1 == 1) regs.pc = jp; return;  //JSB1
 
-    case 0x0b0: if((regs.dp & 0x0f) == 0x00) regs.pc = jps; return;  //JDPL0
-    case 0x0b1: if((regs.dp & 0x0f) != 0x00) regs.pc = jps; return;  //JDPLN0
-    case 0x0b2: if((regs.dp & 0x0f) == 0x0f) regs.pc = jps; return;  //JDPLF
-    case 0x0b3: if((regs.dp & 0x0f) != 0x0f) regs.pc = jps; return;  //JDPLNF
+    case 0x0b0: if((regs.dp & 0x0f) == 0x00) regs.pc = jp; return;  //JDPL0
+    case 0x0b1: if((regs.dp & 0x0f) != 0x00) regs.pc = jp; return;  //JDPLN0
+    case 0x0b2: if((regs.dp & 0x0f) == 0x0f) regs.pc = jp; return;  //JDPLF
+    case 0x0b3: if((regs.dp & 0x0f) != 0x0f) regs.pc = jp; return;  //JDPLNF
 
-    case 0x0bc: if(regs.sr.rqm == 0) regs.pc = jps; return;  //JNRQM
-    case 0x0be: if(regs.sr.rqm == 1) regs.pc = jps; return;  //JRQM
+    case 0x0bc: if(regs.sr.rqm == 0) regs.pc = jp; return;  //JNRQM
+    case 0x0be: if(regs.sr.rqm == 1) regs.pc = jp; return;  //JRQM
 
-    case 0x100: regs.pc = 0x0000 | jpl; return;  //LJMP
-    case 0x101: regs.pc = 0x2000 | jpl; return;  //HJMP
+    case 0x100: regs.pc = jp & ~0x2000; return;  //LJMP
+    case 0x101: regs.pc = jp |  0x2000; return;  //HJMP
 
-    case 0x140: regs.stack[regs.sp++] = regs.pc; regs.pc = 0x0000 | jpl; return;  //LCALL
-    case 0x141: regs.stack[regs.sp++] = regs.pc; regs.pc = 0x2000 | jpl; return;  //HCALL
+    case 0x140: regs.stack[regs.sp++] = regs.pc; regs.pc = jp & ~0x2000; return;  //LCALL
+    case 0x141: regs.stack[regs.sp++] = regs.pc; regs.pc = jp |  0x2000; return;  //HCALL
   }
 }
 
 void NECDSP::exec_ld(uint24 opcode) {
   uint16 id = opcode >> 6;  //immediate data
   uint4 dst = opcode >> 0;  //destination
-
-  regs.idb = id;
 
   switch(dst) {
     case  0: break;
@@ -292,7 +290,6 @@ void NECDSP::reset() {
   regs.dr = 0x0000;
   regs.si = 0x0000;
   regs.so = 0x0000;
-  regs.idb = 0x0000;
 }
 
 NECDSP::NECDSP() {

@@ -1,3 +1,6 @@
+output := bgameboy
+include $(gameboy)/Makefile
+
 ui_objects := ui-main ui-utility
 ui_objects += ruby phoenix
 

@@ -1,3 +1,7 @@
+output := bsnes
+include $(snes)/Makefile
+include $(gameboy)/Makefile
+
 ui_objects := ui-main ui-general ui-settings ui-tools ui-input ui-utility ui-cartridge ui-debugger
 ui_objects += ruby phoenix
 ui_objects += $(if $(call streq,$(platform),win),resource)

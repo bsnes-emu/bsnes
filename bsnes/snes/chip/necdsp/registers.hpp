@@ -48,5 +48,4 @@ struct Regs {
   uint16 dr;         //data register
   uint16 si;
   uint16 so;
-  uint16 idb;
 } regs;
