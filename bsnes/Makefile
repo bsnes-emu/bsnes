@@ -96,6 +96,6 @@ clean: ui_clean
 	-@$(call delete,*.manifest)
 
 archive-all:
-	tar -cjf bsnes.tar.bz2 data gameboy launcher libco nall obj out phoenix ruby snes ui ui-gameboy Makefile cc.bat clean.bat sync.sh
+	tar -cjf bsnes.tar.bz2 data gameboy libco nall obj out phoenix ruby snes ui ui-gameboy Makefile cc.bat clean.bat sync.sh
 
 help:;

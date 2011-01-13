@@ -465,7 +465,7 @@ SNESCartridge::SNESCartridge(const uint8_t *data, unsigned size) {
   }
 
   if(has_st011) {
-    xml << "  <necdsp revision='upd96050' frequency='15000000' program='st0011.bin' sha256='b71d71fa5f18ff39b2b3688e914a04d1286b613002ddde827529fdc54650a130'>\n";
+    xml << "  <necdsp revision='upd96050' frequency='15000000' program='st0011.bin' sha256='651b82a1e26c4fa8dd549e91e7f923012ed2ca54c1d9fd858655ab30679c2f0e'>\n";
     xml << "    <dr mask='080001' test='000000'/>\n";
     xml << "    <sr mask='080001' test='000001'/>\n";
     xml << "    <dp mask='080000' test='080000'/>\n";

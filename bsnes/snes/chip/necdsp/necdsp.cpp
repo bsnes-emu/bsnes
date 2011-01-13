@@ -16,9 +16,6 @@ void NECDSP::enter() {
       scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
     }
 
-static uint16 lastpc = 0xfff;
-if(lastpc != regs.pc) print(disassemble(lastpc = regs.pc), "\n");
-
     uint24 opcode = programROM[regs.pc++];
     switch(opcode >> 22) {
       case 0: exec_op(opcode); break;

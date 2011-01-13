@@ -1,7 +1,7 @@
 namespace SNES {
   namespace Info {
     static const char Name[] = "bsnes";
-    static const char Version[] = "074.01";
+    static const char Version[] = "074.02";
     static const unsigned SerializerVersion = 17;
   }
 }
