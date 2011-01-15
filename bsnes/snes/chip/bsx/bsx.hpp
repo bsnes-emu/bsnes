@@ -1,4 +1,4 @@
-class BSXBase : public MMIO {
+class BSXBase {
 public:
   void init();
   void enable();
@@ -22,7 +22,7 @@ private:
   } regs;
 };
 
-class BSXCart : public MMIO {
+class BSXCart {
 public:
   void init();
   void enable();
@@ -43,7 +43,7 @@ private:
   void update_memory_map();
 };
 
-class BSXFlash : public Memory {
+class BSXFlash {
 public:
   void init();
   void enable();

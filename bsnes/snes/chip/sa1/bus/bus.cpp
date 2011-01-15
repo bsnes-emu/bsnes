@@ -6,7 +6,6 @@ SA1Bus sa1bus;
 namespace memory {
   StaticRAM iram(2048);
                         //accessed by:
-  VSPROM vsprom;        //S-CPU + SA-1
   CPUIRAM cpuiram;      //S-CPU
   SA1IRAM sa1iram;      //SA-1
   SA1BWRAM sa1bwram;    //SA-1
@@ -15,73 +14,43 @@ namespace memory {
 }
 
 //$230c (VDPL), $230d (VDPH) use this bus to read variable-length data.
-//this is used both to avoid VBR-reads from accessing MMIO registers, and
+//this is used both to keep VBR-reads from accessing MMIO registers, and
 //to avoid syncing the S-CPU and SA-1*; as both chips are able to access
 //these ports.
 //(* eg, memory::cartram is used directly, as memory::sa1bwram syncs to the S-CPU)
 void VBRBus::init() {
-  map(MapMode::Direct, 0x00, 0xff, 0x0000, 0xffff, memory::memory_unmapped);
+  map(MapMode::Direct, 0x00, 0x3f, 0x8000, 0xffff, { &SA1::mmc_read, &sa1 }, { &SA1::mmc_write, &sa1 });
+  map(MapMode::Direct, 0x80, 0xbf, 0x8000, 0xffff, { &SA1::mmc_read, &sa1 }, { &SA1::mmc_write, &sa1 });
+  map(MapMode::Direct, 0xc0, 0xff, 0x0000, 0xffff, { &SA1::mmc_read, &sa1 }, { &SA1::mmc_write, &sa1 });
 
-  map(MapMode::Linear, 0x00, 0x3f, 0x0000, 0x07ff, memory::iram);
-  map(MapMode::Linear, 0x00, 0x3f, 0x3000, 0x37ff, memory::iram);
-  map(MapMode::Linear, 0x00, 0x3f, 0x6000, 0x7fff, memory::cartram);
-  map(MapMode::Linear, 0x00, 0x3f, 0x8000, 0xffff, memory::vsprom);
-  map(MapMode::Linear, 0x40, 0x4f, 0x0000, 0xffff, memory::cartram);
-  map(MapMode::Linear, 0x80, 0xbf, 0x0000, 0x07ff, memory::iram);
-  map(MapMode::Linear, 0x80, 0xbf, 0x3000, 0x37ff, memory::iram);
-  map(MapMode::Linear, 0x80, 0xbf, 0x6000, 0x7fff, memory::cartram);
-  map(MapMode::Linear, 0x80, 0xbf, 0x8000, 0xffff, memory::vsprom);
-  map(MapMode::Linear, 0xc0, 0xff, 0x0000, 0xffff, memory::vsprom);
+  map(MapMode::Linear, 0x00, 0x3f, 0x6000, 0x7fff, { &MappedRAM::read, &memory::cartram }, { &MappedRAM::write, &memory::cartram }, 0, memory::cartram.size());
+  map(MapMode::Linear, 0x80, 0xbf, 0x6000, 0x7fff, { &MappedRAM::read, &memory::cartram }, { &MappedRAM::write, &memory::cartram }, 0, memory::cartram.size());
+  map(MapMode::Linear, 0x40, 0x4f, 0x0000, 0xffff, { &MappedRAM::read, &memory::cartram }, { &MappedRAM::write, &memory::cartram }, 0, memory::cartram.size());
+
+  map(MapMode::Linear, 0x00, 0x3f, 0x0000, 0x07ff, { &StaticRAM::read, &memory::iram }, { &StaticRAM::write, &memory::iram }, 0, 2048);
+  map(MapMode::Linear, 0x00, 0x3f, 0x3000, 0x37ff, { &StaticRAM::read, &memory::iram }, { &StaticRAM::write, &memory::iram }, 0, 2048);
+  map(MapMode::Linear, 0x80, 0xbf, 0x0000, 0x07ff, { &StaticRAM::read, &memory::iram }, { &StaticRAM::write, &memory::iram }, 0, 2048);
+  map(MapMode::Linear, 0x80, 0xbf, 0x3000, 0x37ff, { &StaticRAM::read, &memory::iram }, { &StaticRAM::write, &memory::iram }, 0, 2048);
 }
 
 void SA1Bus::init() {
-  map(MapMode::Direct, 0x00, 0xff, 0x0000, 0xffff, memory::memory_unmapped);
+  map(MapMode::Direct, 0x00, 0x3f, 0x2200, 0x23ff, { &SA1::mmio_read, &sa1 }, { &SA1::mmio_write, &sa1 });
+  map(MapMode::Direct, 0x80, 0xbf, 0x2200, 0x23ff, { &SA1::mmio_read, &sa1 }, { &SA1::mmio_write, &sa1 });
 
-  map(MapMode::Linear, 0x00, 0x3f, 0x0000, 0x07ff, memory::sa1iram);
-  map(MapMode::Direct, 0x00, 0x3f, 0x2200, 0x23ff, memory::mmio);
-  map(MapMode::Linear, 0x00, 0x3f, 0x3000, 0x37ff, memory::sa1iram);
-  map(MapMode::Linear, 0x00, 0x3f, 0x6000, 0x7fff, memory::sa1bwram);
-  map(MapMode::Linear, 0x00, 0x3f, 0x8000, 0xffff, memory::vsprom);
-  map(MapMode::Linear, 0x40, 0x4f, 0x0000, 0xffff, memory::sa1bwram);
-  map(MapMode::Linear, 0x60, 0x6f, 0x0000, 0xffff, memory::bitmapram);
-  map(MapMode::Linear, 0x80, 0xbf, 0x0000, 0x07ff, memory::sa1iram);
-  map(MapMode::Direct, 0x80, 0xbf, 0x2200, 0x23ff, memory::mmio);
-  map(MapMode::Linear, 0x80, 0xbf, 0x3000, 0x37ff, memory::sa1iram);
-  map(MapMode::Linear, 0x80, 0xbf, 0x6000, 0x7fff, memory::sa1bwram);
-  map(MapMode::Linear, 0x80, 0xbf, 0x8000, 0xffff, memory::vsprom);
-  map(MapMode::Linear, 0xc0, 0xff, 0x0000, 0xffff, memory::vsprom);
-}
+  map(MapMode::Direct, 0x00, 0x3f, 0x8000, 0xffff, { &SA1::mmc_read, &sa1 }, { &SA1::mmc_write, &sa1 });
+  map(MapMode::Direct, 0x80, 0xbf, 0x8000, 0xffff, { &SA1::mmc_read, &sa1 }, { &SA1::mmc_write, &sa1 });
+  map(MapMode::Direct, 0xc0, 0xff, 0x0000, 0xffff, { &SA1::mmc_read, &sa1 }, { &SA1::mmc_write, &sa1 });
 
-//======
-//VSPROM
-//======
+  map(MapMode::Linear, 0x00, 0x3f, 0x6000, 0x7fff, { &SA1::mmc_sa1_read, &sa1 }, { &SA1::mmc_sa1_write, &sa1 });
+  map(MapMode::Linear, 0x80, 0xbf, 0x6000, 0x7fff, { &SA1::mmc_sa1_read, &sa1 }, { &SA1::mmc_sa1_write, &sa1 });
 
-//this class maps $00:[ff00-ffff] for the purpose of supporting:
-//$2209.d6 IVSW (S-CPU IRQ vector selection) (0 = cart, 1 = SA-1)
-//$2209.d4 NVSW (S-CPU NMI vector selection) (0 = cart, 1 = SA-1)
-//when set, vector addresses are over-ridden with SA-1 register settings:
-//SIV = S-CPU IRQ vector address override
-//SNV = S-CPU NMI vector address override
-//
-//$00:[ffea-ffeb|ffee-ffef] are special cased on read;
-//all other addresses return original mapped data.
+  map(MapMode::Linear, 0x00, 0x3f, 0x0000, 0x07ff, { &SA1IRAM::read, &memory::sa1iram }, { &SA1IRAM::write, &memory::sa1iram }, 0, 2048);
+  map(MapMode::Linear, 0x00, 0x3f, 0x3000, 0x37ff, { &SA1IRAM::read, &memory::sa1iram }, { &SA1IRAM::write, &memory::sa1iram }, 0, 2048);
+  map(MapMode::Linear, 0x80, 0xbf, 0x0000, 0x07ff, { &SA1IRAM::read, &memory::sa1iram }, { &SA1IRAM::write, &memory::sa1iram }, 0, 2048);
+  map(MapMode::Linear, 0x80, 0xbf, 0x3000, 0x37ff, { &SA1IRAM::read, &memory::sa1iram }, { &SA1IRAM::write, &memory::sa1iram }, 0, 2048);
 
-unsigned VSPROM::size() const {
-  return memory::cartrom.size();
-}
-
-uint8 VSPROM::read(unsigned addr) {
-  //use $7fex instead of $ffex due to linear mapping of 32k granularity ROM data
-  if((addr & 0xffffe0) == 0x007fe0) {
-    if(addr == 0x7fea && sa1.mmio.cpu_nvsw) return sa1.mmio.snv >> 0;
-    if(addr == 0x7feb && sa1.mmio.cpu_nvsw) return sa1.mmio.snv >> 8;
-    if(addr == 0x7fee && sa1.mmio.cpu_ivsw) return sa1.mmio.siv >> 0;
-    if(addr == 0x7fef && sa1.mmio.cpu_ivsw) return sa1.mmio.siv >> 8;
-  }
-  return memory::cartrom.read(addr);
-}
-
-void VSPROM::write(unsigned addr, uint8 data) {
+  map(MapMode::Linear, 0x40, 0x4f, 0x0000, 0xffff, { &SA1BWRAM::read, &memory::sa1bwram }, { &SA1BWRAM::write, &memory::sa1bwram }, 0, memory::sa1bwram.size());
+  map(MapMode::Linear, 0x60, 0x6f, 0x0000, 0xffff, { &BitmapRAM::read, &memory::bitmapram }, { &BitmapRAM::write, &memory::bitmapram }, 0, memory::bitmapram.size());
 }
 
 //=======

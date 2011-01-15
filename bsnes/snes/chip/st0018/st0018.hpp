@@ -1,4 +1,4 @@
-class ST0018 : public MMIO {
+class ST0018 {
 public:
   void init();
   void enable();

@@ -40,8 +40,8 @@ public:
   readonly<bool> has_serial;
 
   struct Mapping {
-    Memory *memory;
-    MMIO *mmio;
+    function<uint8 (unsigned)> read;
+    function<void (unsigned, uint8)> write;
     Bus::MapMode mode;
     unsigned banklo;
     unsigned bankhi;
@@ -51,10 +51,10 @@ public:
     unsigned size;
 
     Mapping();
+    Mapping(const function<uint8 (unsigned)>&, const function<void (unsigned, uint8)>&);
     Mapping(Memory&);
-    Mapping(MMIO&);
   };
-  array<Mapping> mapping;
+  linear_vector<Mapping> mapping;
 
   void load(Mode, const lstring&);
   void unload();

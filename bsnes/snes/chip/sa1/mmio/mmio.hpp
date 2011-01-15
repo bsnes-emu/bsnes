@@ -1,6 +1,5 @@
 uint8 mmio_read(unsigned addr);
 void mmio_write(unsigned addr, uint8 data);
-Memory& mmio_access(unsigned &addr);
 
 struct MMIO {
   //$2200 CCNT
@@ -64,19 +63,19 @@ struct MMIO {
 
   //$2220 CXB
   bool cbmode;
-  uint8 cb;
+  unsigned cb;
 
   //$2221 DXB
   bool dbmode;
-  uint8 db;
+  unsigned db;
 
   //$2222 EXB
   bool ebmode;
-  uint8 eb;
+  unsigned eb;
 
   //$2223 FXB
   bool fbmode;
-  uint8 fb;
+  unsigned fb;
 
   //$2224 BMAPS
   uint8 sbm;

@@ -1,9 +1,9 @@
 #ifdef ICD2_CPP
 
 uint8 ICD2::mmio_read(unsigned addr) {
-  if((uint16)addr == 0x2181) return mmio[0]->mmio_read(addr);
-  if((uint16)addr == 0x2182) return mmio[1]->mmio_read(addr);
-  if((uint16)addr == 0x420b) return mmio[2]->mmio_read(addr);
+  if((uint16)addr == 0x2181) return cpu.mmio_read(addr);
+  if((uint16)addr == 0x2182) return cpu.mmio_read(addr);
+  if((uint16)addr == 0x420b) return cpu.mmio_read(addr);
   return 0x00;
 }
 
@@ -30,9 +30,9 @@ void ICD2::mmio_write(unsigned addr, uint8 data) {
     }
   }
 
-  if((uint16)addr == 0x2181) return mmio[0]->mmio_write(addr, r2181 = data);
-  if((uint16)addr == 0x2182) return mmio[1]->mmio_write(addr, r2182 = data);
-  if((uint16)addr == 0x420b) return mmio[2]->mmio_write(addr, data);
+  if((uint16)addr == 0x2181) return cpu.mmio_write(addr, r2181 = data);
+  if((uint16)addr == 0x2182) return cpu.mmio_write(addr, r2182 = data);
+  if((uint16)addr == 0x420b) return cpu.mmio_write(addr, data);
 }
 
 uint8 ICD2::read(unsigned addr) {

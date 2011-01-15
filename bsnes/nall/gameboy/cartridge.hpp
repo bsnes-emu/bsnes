@@ -22,7 +22,7 @@ public:
 };
 
 GameBoyCartridge::GameBoyCartridge(const uint8_t *romdata, unsigned romsize) {
-  xml = "<?xml version='1.0' encoding='UTF-8'?>\n";
+  xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
   if(romsize < 0x4000) return;
 
   info.mapper = "unknown";
@@ -97,6 +97,7 @@ GameBoyCartridge::GameBoyCartridge(const uint8_t *romdata, unsigned romsize) {
   xml << "  <ram size='" << hex(info.ramsize) << "' battery='" << info.battery << "'/>\n";
 
   xml << "</cartridge>\n";
+  xml.transform("'", "\"");
 }
 
 }

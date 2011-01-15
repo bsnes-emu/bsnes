@@ -61,16 +61,16 @@ void Serial::write(uint8 data) {
 uint8 Serial::mmio_read(unsigned addr) {
   cpu.synchronize_coprocessor();
   switch(addr & 1) { default:
-    case 0: return r4016->mmio_read(addr);
-    case 1: return r4017->mmio_read(addr);
+    case 0: return cpu.mmio_read(addr);
+    case 1: return cpu.mmio_read(addr);
   }
 }
 
 void Serial::mmio_write(unsigned addr, uint8 data) {
   cpu.synchronize_coprocessor();
   switch(addr & 1) { default:
-    case 0: r4016->mmio_write(addr, data); break;
-    case 1: r4017->mmio_write(addr, data); break;
+    case 0: cpu.mmio_write(addr, data); break;
+    case 1: cpu.mmio_write(addr, data); break;
   }
 }
 
@@ -78,11 +78,6 @@ void Serial::init() {
 }
 
 void Serial::enable() {
-  r4016 = memory::mmio.handle(0x4016);
-  r4017 = memory::mmio.handle(0x4017);
-  memory::mmio.map(0x4016, *this);
-  memory::mmio.map(0x4017, *this);
-
   if(opened()) close();
   string name = notdir(cartridge.basename());
   string path = dir(cartridge.basename());
@@ -99,6 +94,9 @@ void Serial::power() {
 
 void Serial::reset() {
   create(Serial::Enter, baudrate() * 8);
+
+  bus.map(Bus::MapMode::Direct, 0x00, 0x3f, 0x4016, 0x4017, { &Serial::mmio_read, &serial }, { &Serial::mmio_write, &serial });
+  bus.map(Bus::MapMode::Direct, 0x80, 0xbf, 0x4016, 0x4017, { &Serial::mmio_read, &serial }, { &Serial::mmio_write, &serial });
 }
 
 }

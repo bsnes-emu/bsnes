@@ -11,12 +11,6 @@ SDD1 sdd1;
 void SDD1::init() {}
 
 void SDD1::enable() {
-  //hook S-CPU DMA MMIO registers to gather information for struct dma[];
-  //buffer address and transfer size information for use in SDD1::read()
-  for(unsigned i = 0x4300; i <= 0x437f; i++) {
-    cpu_mmio[i & 0x7f] = memory::mmio.handle(i);
-    memory::mmio.map(i, *this);
-  }
 }
 
 void SDD1::power() {
@@ -24,6 +18,11 @@ void SDD1::power() {
 }
 
 void SDD1::reset() {
+  //hook S-CPU DMA MMIO registers to gather information for struct dma[];
+  //buffer address and transfer size information for use in SDD1::mcu_read()
+  bus.map(Bus::MapMode::Direct, 0x00, 0x3f, 0x4300, 0x437f, { &SDD1::mmio_read, &sdd1 }, { &SDD1::mmio_write, &sdd1 });
+  bus.map(Bus::MapMode::Direct, 0x80, 0xbf, 0x4300, 0x437f, { &SDD1::mmio_read, &sdd1 }, { &SDD1::mmio_write, &sdd1 });
+
   sdd1_enable = 0x00;
   xfer_enable = 0x00;
 
@@ -44,7 +43,7 @@ uint8 SDD1::mmio_read(unsigned addr) {
   addr &= 0xffff;
 
   if((addr & 0x4380) == 0x4300) {
-    return cpu_mmio[addr & 0x7f]->mmio_read(addr);
+    return cpu.mmio_read(addr);
   }
 
   switch(addr) {
@@ -70,7 +69,7 @@ void SDD1::mmio_write(unsigned addr, uint8 data) {
       case 5: dma[channel].size = (dma[channel].size &   0xff00) + (data <<  0); break;
       case 6: dma[channel].size = (dma[channel].size &   0x00ff) + (data <<  8); break;
     }
-    return cpu_mmio[addr & 0x7f]->mmio_write(addr, data);
+    return cpu.mmio_write(addr, data);
   }
 
   switch(addr) {
@@ -84,7 +83,7 @@ void SDD1::mmio_write(unsigned addr, uint8 data) {
   }
 }
 
-//SDD1::read() is mapped to $[c0-ff]:[0000-ffff]
+//SDD1::mcu_read() is mapped to $c0-ff:0000-ffff
 //the design is meant to be as close to the hardware design as possible, thus this code
 //avoids adding S-DD1 hooks inside S-CPU::DMA emulation.
 //
@@ -102,7 +101,7 @@ void SDD1::mmio_write(unsigned addr, uint8 data) {
 //
 //the actual S-DD1 transfer can occur on any channel, but it is most likely limited to
 //one transfer per $420b write (for spooling purposes). however, this is not known for certain.
-uint8 SDD1::read(unsigned addr) {
+uint8 SDD1::mcu_read(unsigned addr) {
   if(sdd1_enable & xfer_enable) {
     //at least one channel has S-DD1 decompression enabled ...
     for(unsigned i = 0; i < 8; i++) {
@@ -142,7 +141,7 @@ uint8 SDD1::read(unsigned addr) {
   return memory::cartrom.read(mmc[(addr >> 20) & 3] + (addr & 0x0fffff));
 }
 
-void SDD1::write(unsigned addr, uint8 data) {
+void SDD1::mcu_write(unsigned addr, uint8 data) {
 }
 
 SDD1::SDD1() {

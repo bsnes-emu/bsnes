@@ -6,7 +6,6 @@ void BSXBase::init() {
 }
 
 void BSXBase::enable() {
-  for(uint16 i = 0x2188; i <= 0x219f; i++) memory::mmio.map(i, *this);
 }
 
 void BSXBase::power() {
@@ -14,6 +13,9 @@ void BSXBase::power() {
 }
 
 void BSXBase::reset() {
+  bus.map(Bus::MapMode::Direct, 0x00, 0x3f, 0x2188, 0x219f, { &BSXBase::mmio_read, &bsxbase }, { &BSXBase::mmio_write, &bsxbase });
+  bus.map(Bus::MapMode::Direct, 0x80, 0xbf, 0x2188, 0x219f, { &BSXBase::mmio_read, &bsxbase }, { &BSXBase::mmio_write, &bsxbase });
+
   memset(&regs, 0x00, sizeof regs);
 }
 

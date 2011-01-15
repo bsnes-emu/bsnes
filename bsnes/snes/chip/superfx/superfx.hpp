@@ -1,6 +1,6 @@
 #include "bus/bus.hpp"
 
-class SuperFX : public Coprocessor, public MMIO {
+class SuperFX : public Coprocessor {
 public:
   #include "core/core.hpp"
   #include "memory/memory.hpp"

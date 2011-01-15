@@ -1,4 +1,4 @@
-class ICD2 : public GameBoy::Interface, public Coprocessor, public MMIO, public Memory {
+class ICD2 : public GameBoy::Interface, public Coprocessor {
 public:
   unsigned revision;
 
@@ -9,6 +9,9 @@ public:
   void enable();
   void power();
   void reset();
+
+  uint8 read(unsigned addr);
+  void write(unsigned addr, uint8 data);
 
   void serialize(serializer&);
 

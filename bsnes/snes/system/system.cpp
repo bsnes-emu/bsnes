@@ -106,12 +106,6 @@ void System::power() {
   apu_frequency = region() == Region::NTSC ? config.smp.ntsc_frequency : config.smp.pal_frequency;
 
   bus.power();
-  for(unsigned i = 0x2100; i <= 0x213f; i++) memory::mmio.map(i, ppu);
-  for(unsigned i = 0x2140; i <= 0x217f; i++) memory::mmio.map(i, cpu);
-  for(unsigned i = 0x2180; i <= 0x2183; i++) memory::mmio.map(i, cpu);
-  for(unsigned i = 0x4016; i <= 0x4017; i++) memory::mmio.map(i, cpu);
-  for(unsigned i = 0x4200; i <= 0x421f; i++) memory::mmio.map(i, cpu);
-  for(unsigned i = 0x4300; i <= 0x437f; i++) memory::mmio.map(i, cpu);
 
   audio.coprocessor_enable(false);
   if(expansion() == ExpansionPortDevice::BSX) bsxbase.enable();

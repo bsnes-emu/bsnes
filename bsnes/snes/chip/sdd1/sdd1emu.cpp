@@ -31,7 +31,7 @@ understood.
 ************************************************************************/
 
 typedef uint8 bool8;
-#define SDD1_read(__addr) (sdd1.read(__addr))
+#define SDD1_read(__addr) (sdd1.mcu_read(__addr))
 
 ////////////////////////////////////////////////////
 

@@ -1,4 +1,4 @@
-class PPU : public Processor, public PPUcounter, public MMIO {
+class PPU : public Processor, public PPUcounter {
 public:
   enum : bool { Threaded = true };
   alwaysinline void step(unsigned clocks);

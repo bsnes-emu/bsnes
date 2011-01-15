@@ -1,13 +1,5 @@
 #ifdef SA1_CPP
 
-//BS-X flash carts, when present, are mapped to 0x400000+
-Memory& SA1::mmio_access(unsigned &addr) {
-  if(!memory::bsxflash.data()) return memory::vsprom;
-  if(addr < 0x400000) return memory::vsprom;
-  addr &= 0x3fffff;
-  return bsxflash;
-}
-
 //(CCNT) SA-1 control
 void SA1::mmio_w2200(uint8 data) {
   if(mmio.sa1_resb && !(data & 0x80)) {
@@ -151,104 +143,35 @@ void SA1::mmio_w2215(uint8 data) { mmio.vcnt = (mmio.vcnt & 0x00ff) | (data << 8
 void SA1::mmio_w2220(uint8 data) {
   mmio.cbmode = (data & 0x80);
   mmio.cb     = (data & 0x07);
-
-  unsigned addr = mmio.cb << 20;
-  Memory &access = mmio_access(addr);
-
-  if(mmio.cbmode == 0) {
-       bus.map(Bus::MapMode::Linear, 0x00, 0x1f, 0x8000, 0xffff, memory::vsprom, 0x000000);
-    sa1bus.map(Bus::MapMode::Linear, 0x00, 0x1f, 0x8000, 0xffff, memory::vsprom, 0x000000);
-  } else {
-       bus.map(Bus::MapMode::Linear, 0x00, 0x1f, 0x8000, 0xffff, access, addr);
-    sa1bus.map(Bus::MapMode::Linear, 0x00, 0x1f, 0x8000, 0xffff, access, addr);
-  }
-
-     bus.map(Bus::MapMode::Linear, 0xc0, 0xcf, 0x0000, 0xffff, access, addr);
-  sa1bus.map(Bus::MapMode::Linear, 0xc0, 0xcf, 0x0000, 0xffff, access, addr);
 }
 
 //(DXB) Super MMC bank D
 void SA1::mmio_w2221(uint8 data) {
   mmio.dbmode = (data & 0x80);
   mmio.db     = (data & 0x07);
-
-  unsigned addr = mmio.db << 20;
-  Memory &access = mmio_access(addr);
-
-  if(mmio.dbmode == 0) {
-       bus.map(Bus::MapMode::Linear, 0x20, 0x3f, 0x8000, 0xffff, memory::vsprom, 0x100000);
-    sa1bus.map(Bus::MapMode::Linear, 0x20, 0x3f, 0x8000, 0xffff, memory::vsprom, 0x100000);
-  } else {
-       bus.map(Bus::MapMode::Linear, 0x20, 0x3f, 0x8000, 0xffff, access, addr);
-    sa1bus.map(Bus::MapMode::Linear, 0x20, 0x3f, 0x8000, 0xffff, access, addr);
-  }
-
-     bus.map(Bus::MapMode::Linear, 0xd0, 0xdf, 0x0000, 0xffff, access, addr);
-  sa1bus.map(Bus::MapMode::Linear, 0xd0, 0xdf, 0x0000, 0xffff, access, addr);
 }
 
 //(EXB) Super MMC bank E
 void SA1::mmio_w2222(uint8 data) {
   mmio.ebmode = (data & 0x80);
   mmio.eb     = (data & 0x07);
-
-  unsigned addr = mmio.eb << 20;
-  Memory &access = mmio_access(addr);
-
-  if(mmio.ebmode == 0) {
-       bus.map(Bus::MapMode::Linear, 0x80, 0x9f, 0x8000, 0xffff, memory::vsprom, 0x200000);
-    sa1bus.map(Bus::MapMode::Linear, 0x80, 0x9f, 0x8000, 0xffff, memory::vsprom, 0x200000);
-  } else {
-       bus.map(Bus::MapMode::Linear, 0x80, 0x9f, 0x8000, 0xffff, access, addr);
-    sa1bus.map(Bus::MapMode::Linear, 0x80, 0x9f, 0x8000, 0xffff, access, addr);
-  }
-
-     bus.map(Bus::MapMode::Linear, 0xe0, 0xef, 0x0000, 0xffff, access, addr);
-  sa1bus.map(Bus::MapMode::Linear, 0xe0, 0xef, 0x0000, 0xffff, access, addr);
 }
 
 //(FXB) Super MMC bank F
 void SA1::mmio_w2223(uint8 data) {
   mmio.fbmode = (data & 0x80);
   mmio.fb     = (data & 0x07);
-
-  unsigned addr = mmio.fb << 20;
-  Memory &access = mmio_access(addr);
-
-  if(mmio.fbmode == 0) {
-       bus.map(Bus::MapMode::Linear, 0xa0, 0xbf, 0x8000, 0xffff, memory::vsprom, 0x300000);
-    sa1bus.map(Bus::MapMode::Linear, 0xa0, 0xbf, 0x8000, 0xffff, memory::vsprom, 0x300000);
-  } else {
-       bus.map(Bus::MapMode::Linear, 0xa0, 0xbf, 0x8000, 0xffff, access, addr);
-    sa1bus.map(Bus::MapMode::Linear, 0xa0, 0xbf, 0x8000, 0xffff, access, addr);
-  }
-
-     bus.map(Bus::MapMode::Linear, 0xf0, 0xff, 0x0000, 0xffff, access, addr);
-  sa1bus.map(Bus::MapMode::Linear, 0xf0, 0xff, 0x0000, 0xffff, access, addr);
 }
 
 //(BMAPS) S-CPU BW-RAM address mapping
 void SA1::mmio_w2224(uint8 data) {
   mmio.sbm = (data & 0x1f);
-
-  bus.map(Bus::MapMode::Linear, 0x00, 0x3f, 0x6000, 0x7fff, memory::cc1bwram, mmio.sbm * 0x2000, 0x2000);
-  bus.map(Bus::MapMode::Linear, 0x80, 0xbf, 0x6000, 0x7fff, memory::cc1bwram, mmio.sbm * 0x2000, 0x2000);
 }
 
 //(BMAP) SA-1 BW-RAM address mapping
 void SA1::mmio_w2225(uint8 data) {
   mmio.sw46 = (data & 0x80);
   mmio.cbm  = (data & 0x7f);
-
-  if(mmio.sw46 == 0) {
-    //$[40-43]:[0000-ffff] x  32 projection
-    sa1bus.map(Bus::MapMode::Linear, 0x00, 0x3f, 0x6000, 0x7fff, memory::sa1bwram, (mmio.cbm & 0x1f) * 0x2000, 0x2000);
-    sa1bus.map(Bus::MapMode::Linear, 0x80, 0xbf, 0x6000, 0x7fff, memory::sa1bwram, (mmio.cbm & 0x1f) * 0x2000, 0x2000);
-  } else {
-    //$[60-6f]:[0000-ffff] x 128 projection
-    sa1bus.map(Bus::MapMode::Linear, 0x00, 0x3f, 0x6000, 0x7fff, memory::bitmapram, mmio.cbm * 0x2000, 0x2000);
-    sa1bus.map(Bus::MapMode::Linear, 0x80, 0xbf, 0x6000, 0x7fff, memory::bitmapram, mmio.cbm * 0x2000, 0x2000);
-  }
 }
 
 //(SWBE) S-CPU BW-RAM write enable

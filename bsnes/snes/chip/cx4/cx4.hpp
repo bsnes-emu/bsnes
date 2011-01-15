@@ -1,4 +1,4 @@
-class Cx4 : public Memory {
+class Cx4 {
 public:
   void init();
   void enable();

@@ -1,4 +1,4 @@
-class CPU : public Processor, public CPUcore, public PPUcounter, public MMIO {
+class CPU : public Processor, public CPUcore, public PPUcounter {
 public:
   enum : bool { Threaded = true };
   array<Processor*> coprocessors;

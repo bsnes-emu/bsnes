@@ -253,7 +253,6 @@ void NECDSP::power() {
     regs.pc.bits(11);
     regs.rp.bits(10);
     regs.dp.bits( 8);
-    dpmask = 0x000000, dptest = 0xffffff;  //uPD7725 not mapped to SNES bus
   }
 
   if(revision == Revision::uPD96050) {

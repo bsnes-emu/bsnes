@@ -1,6 +1,6 @@
 #include "bus/bus.hpp"
 
-class SA1 : public Coprocessor, public CPUcore, public MMIO {
+class SA1 : public Coprocessor, public CPUcore {
 public:
   #include "dma/dma.hpp"
   #include "memory/memory.hpp"

@@ -10,12 +10,10 @@ namespace memory {
 }
 
 void SuperFXBus::init() {
-  map(MapMode::Direct, 0x00, 0xff, 0x0000, 0xffff, memory::memory_unmapped);
-
-  map(MapMode::Linear, 0x00, 0x3f, 0x0000, 0x7fff, memory::gsurom);
-  map(MapMode::Linear, 0x00, 0x3f, 0x8000, 0xffff, memory::gsurom);
-  map(MapMode::Linear, 0x40, 0x5f, 0x0000, 0xffff, memory::gsurom);
-  map(MapMode::Linear, 0x60, 0x7f, 0x0000, 0xffff, memory::gsuram);
+  map(MapMode::Linear, 0x00, 0x3f, 0x0000, 0x7fff, { &SuperFXGSUROM::read, &memory::gsurom }, { &SuperFXGSUROM::write, &memory::gsurom }, 0, memory::gsurom.size());
+  map(MapMode::Linear, 0x00, 0x3f, 0x8000, 0xffff, { &SuperFXGSUROM::read, &memory::gsurom }, { &SuperFXGSUROM::write, &memory::gsurom }, 0, memory::gsurom.size());
+  map(MapMode::Linear, 0x40, 0x5f, 0x0000, 0xffff, { &SuperFXGSUROM::read, &memory::gsurom }, { &SuperFXGSUROM::write, &memory::gsurom }, 0, memory::gsurom.size());
+  map(MapMode::Linear, 0x60, 0x7f, 0x0000, 0xffff, { &SuperFXGSURAM::read, &memory::gsuram }, { &SuperFXGSURAM::write, &memory::gsuram }, 0, memory::gsuram.size());
 }
 
 //ROM / RAM access from the SuperFX CPU

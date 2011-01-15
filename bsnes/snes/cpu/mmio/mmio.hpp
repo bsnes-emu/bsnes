@@ -1,7 +1,10 @@
-void mmio_power();
-void mmio_reset();
+public:
 uint8 mmio_read(unsigned addr);
 void mmio_write(unsigned addr, uint8 data);
+
+private:
+void mmio_power();
+void mmio_reset();
 
 uint8 mmio_r2180();
 uint8 mmio_r4016();

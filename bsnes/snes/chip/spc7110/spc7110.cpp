@@ -4,9 +4,6 @@
 namespace SNES {
 
 SPC7110 spc7110;
-SPC7110MCU spc7110mcu;
-SPC7110DCU spc7110dcu;
-SPC7110RAM spc7110ram;
 
 #include "serialization.cpp"
 #include "decomp.cpp"
@@ -634,49 +631,41 @@ void SPC7110::mmio_write(unsigned addr, uint8 data) {
 SPC7110::SPC7110() {
 }
 
-//==========
-//SPC7110MCU
-//==========
+//============
+//SPC7110::MCU
+//============
 
-unsigned SPC7110MCU::size() const {
-  return 0x300000;
-}
-
-uint8 SPC7110MCU::read(unsigned addr) {
-  if(addr <= 0xdfffff) return memory::cartrom.read(spc7110.dx_offset + (addr & 0x0fffff));
-  if(addr <= 0xefffff) return memory::cartrom.read(spc7110.ex_offset + (addr & 0x0fffff));
-  if(addr <= 0xffffff) return memory::cartrom.read(spc7110.fx_offset + (addr & 0x0fffff));
+uint8 SPC7110::mcu_read(unsigned addr) {
+  if(addr <= 0xdfffff) return memory::cartrom.read(dx_offset + (addr & 0x0fffff));
+  if(addr <= 0xefffff) return memory::cartrom.read(ex_offset + (addr & 0x0fffff));
+  if(addr <= 0xffffff) return memory::cartrom.read(fx_offset + (addr & 0x0fffff));
   return cpu.regs.mdr;
 }
 
-void SPC7110MCU::write(unsigned addr, uint8 data) {
+void SPC7110::mcu_write(unsigned addr, uint8 data) {
 }
 
-//==========
-//SPC7110DCU
-//==========
+//============
+//SPC7110::DCU
+//============
 
-uint8 SPC7110DCU::read(unsigned) {
-  return spc7110.mmio_read(0x4800);
+uint8 SPC7110::dcu_read(unsigned) {
+  return mmio_read(0x4800);
 }
 
-void SPC7110DCU::write(unsigned, uint8) {
+void SPC7110::dcu_write(unsigned, uint8) {
 }
 
-//==========
-//SPC7110RAM
-//==========
+//============
+//SPC7110::RAM
+//============
 
-unsigned SPC7110RAM::size() const {
-  return 0x2000;
-}
-
-uint8 SPC7110RAM::read(unsigned addr) {
+uint8 SPC7110::ram_read(unsigned addr) {
   return memory::cartram.read(addr & 0x1fff);
 }
 
-void SPC7110RAM::write(unsigned addr, uint8 data) {
-  if(spc7110.r4830 & 0x80) memory::cartram.write(addr & 0x1fff, data);
+void SPC7110::ram_write(unsigned addr, uint8 data) {
+  if(r4830 & 0x80) memory::cartram.write(addr & 0x1fff, data);
 }
 
 }

@@ -124,13 +124,13 @@ void SA1::enable() {
 void SA1::power() {
   regs.a = regs.x = regs.y = 0x0000;
   regs.s = 0x01ff;
-  vbrbus.init();
-  sa1bus.init();
   reset();
 }
 
 void SA1::reset() {
   create(SA1::Enter, system.cpu_frequency());
+  vbrbus.init();
+  sa1bus.init();
 
   memory::cc1bwram.dma = false;
   for(unsigned addr = 0; addr < memory::iram.size(); addr++) {
@@ -220,15 +220,15 @@ void SA1::reset() {
   mmio.vcnt = 0x0000;
 
   //$2220-2223 CXB, DXB, EXB, FXB
-  mmio.cbmode = 0;
-  mmio.dbmode = 0;
-  mmio.ebmode = 0;
-  mmio.fbmode = 0;
+  mmio.cbmode = 1;
+  mmio.dbmode = 1;
+  mmio.ebmode = 1;
+  mmio.fbmode = 1;
 
   mmio.cb = 0x00;
   mmio.db = 0x01;
-  mmio.eb = 0x02;
-  mmio.fb = 0x03;
+  mmio.eb = 0x00;
+  mmio.fb = 0x01;
 
   //$2224 BMAPS
   mmio.sbm = 0x00;

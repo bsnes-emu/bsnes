@@ -112,13 +112,13 @@ SNESCartridge::SNESCartridge(const uint8_t *data, unsigned size) {
 
   if(type == TypeBsx) {
     xml << "<cartridge/>";
-    xmlMemoryMap = xml;
+    xmlMemoryMap = xml.transform("'", "\"");
     return;
   }
 
   if(type == TypeSufamiTurbo) {
     xml << "<cartridge/>";
-    xmlMemoryMap = xml;
+    xmlMemoryMap = xml.transform("'", "\"");
     return;
   }
 
@@ -128,7 +128,7 @@ SNESCartridge::SNESCartridge(const uint8_t *data, unsigned size) {
       xml << "  <ram size='" << hex(gameboy_ram_size(data, size)) << "'/>\n";
     }
     xml << "</cartridge>\n";
-    xmlMemoryMap = xml;
+    xmlMemoryMap = xml.transform("'", "\"");
     return;
   }
 
@@ -279,19 +279,23 @@ SNESCartridge::SNESCartridge(const uint8_t *data, unsigned size) {
     xml << "  </superfx>\n";
   } else if(mapper == SA1ROM) {
     xml << "  <sa1>\n";
-    xml << "    <rom>\n";
-    xml << "      <map mode='linear' address='00-3f:8000-ffff'/>\n";
-    xml << "      <map mode='linear' address='80-bf:8000-ffff'/>\n";
-    xml << "      <map mode='linear' address='c0-ff:0000-ffff'/>\n";
-    xml << "    </rom>\n";
+    xml << "    <mcu>\n";
+    xml << "      <rom>\n";
+    xml << "        <map mode='direct' address='00-3f:8000-ffff'/>\n";
+    xml << "        <map mode='direct' address='80-bf:8000-ffff'/>\n";
+    xml << "        <map mode='direct' address='c0-ff:0000-ffff'/>\n";
+    xml << "      </rom>\n";
+    xml << "      <ram>\n";
+    xml << "        <map mode='direct' address='00-3f:6000-7fff'/>\n";
+    xml << "        <map mode='direct' address='80-bf:6000-7fff'/>\n";
+    xml << "      </ram>\n";
+    xml << "    </mcu>\n";
     xml << "    <iram size='800'>\n";
     xml << "      <map mode='linear' address='00-3f:3000-37ff'/>\n";
     xml << "      <map mode='linear' address='80-bf:3000-37ff'/>\n";
     xml << "    </iram>\n";
     xml << "    <bwram size='" << hex(ram_size) << "'>\n";
-    xml << "      <map mode='linear' address='00-3f:6000-7fff'/>\n";
     xml << "      <map mode='linear' address='40-4f:0000-ffff'/>\n";
-    xml << "      <map mode='linear' address='80-bf:6000-7fff'/>\n";
     xml << "    </bwram>\n";
     xml << "    <mmio>\n";
     xml << "      <map address='00-3f:2200-23ff'/>\n";
@@ -402,48 +406,72 @@ SNESCartridge::SNESCartridge(const uint8_t *data, unsigned size) {
   if(has_dsp1) {
     xml << "  <necdsp revision='upd7725' frequency='8000000' program='dsp1b.bin' sha256='4d42db0f36faef263d6b93f508e8c1c4ae8fc2605fd35e3390ecc02905cd420c'>\n";
     if(dsp1_mapper == DSP1LoROM1MB) {
-      xml << "    <dr mask='004000' test='000000'/>\n";
-      xml << "    <sr mask='004000' test='004000'/>\n";
-      xml << "    <map address='20-3f:8000-ffff'/>\n";
-      xml << "    <map address='a0-bf:8000-ffff'/>\n";
+      xml << "    <dr>\n";
+      xml << "      <map address='20-3f:8000-bfff'/>\n";
+      xml << "      <map address='a0-bf:8000-bfff'/>\n";
+      xml << "    </dr>\n";
+      xml << "    <sr>\n";
+      xml << "      <map address='20-3f:c000-ffff'/>\n";
+      xml << "      <map address='a0-bf:c000-ffff'/>\n";
+      xml << "    </sr>\n";
     } else if(dsp1_mapper == DSP1LoROM2MB) {
-      xml << "    <dr mask='004000' test='000000'/>\n";
-      xml << "    <sr mask='004000' test='004000'/>\n";
-      xml << "    <map address='60-6f:0000-7fff'/>\n";
-      xml << "    <map address='e0-ef:0000-7fff'/>\n";
+      xml << "    <dr>\n";
+      xml << "      <map address='60-6f:0000-3fff'/>\n";
+      xml << "      <map address='e0-ef:0000-3fff'/>\n";
+      xml << "    </dr>\n";
+      xml << "    <sr>\n";
+      xml << "      <map address='60-6f:4000-7fff'/>\n";
+      xml << "      <map address='e0-ef:4000-7fff'/>\n";
+      xml << "    </sr>\n";
     } else if(dsp1_mapper == DSP1HiROM) {
-      xml << "    <dr mask='001000' test='000000'/>\n";
-      xml << "    <sr mask='001000' test='001000'/>\n";
-      xml << "    <map address='00-1f:6000-7fff'/>\n";
-      xml << "    <map address='80-9f:6000-7fff'/>\n";
+      xml << "    <dr>\n";
+      xml << "      <map address='00-1f:6000-6fff'/>\n";
+      xml << "      <map address='80-9f:6000-6fff'/>\n";
+      xml << "    </dr>\n";
+      xml << "    <sr>\n";
+      xml << "      <map address='00-1f:7000-7fff'/>\n";
+      xml << "      <map address='80-9f:7000-7fff'/>\n";
+      xml << "    </sr>\n";
     }
     xml << "  </necdsp>\n";
   }
 
   if(has_dsp2) {
     xml << "  <necdsp revision='upd7725' frequency='8000000' program='dsp2.bin' sha256='5efbdf96ed0652790855225964f3e90e6a4d466cfa64df25b110933c6cf94ea1'>\n";
-    xml << "    <dr mask='004000' test='000000'/>\n";
-    xml << "    <sr mask='004000' test='004000'/>\n";
-    xml << "    <map address='20-3f:8000-ffff'/>\n";
-    xml << "    <map address='a0-bf:8000-ffff'/>\n";
+    xml << "    <dr>\n";
+    xml << "      <map address='20-3f:8000-bfff'/>\n";
+    xml << "      <map address='a0-bf:8000-bfff'/>\n";
+    xml << "    </dr>\n";
+    xml << "    <sr>\n";
+    xml << "      <map address='20-3f:c000-ffff'/>\n";
+    xml << "      <map address='a0-bf:c000-ffff'/>\n";
+    xml << "    </sr>\n";
     xml << "  </necdsp>\n";
   }
 
   if(has_dsp3) {
     xml << "  <necdsp revision='upd7725' frequency='8000000' program='dsp3.bin' sha256='2e635f72e4d4681148bc35429421c9b946e4f407590e74e31b93b8987b63ba90'>\n";
-    xml << "    <dr mask='004000' test='000000'/>\n";
-    xml << "    <sr mask='004000' test='004000'/>\n";
-    xml << "    <map address='20-3f:8000-ffff'/>\n";
-    xml << "    <map address='a0-bf:8000-ffff'/>\n";
+    xml << "    <dr>\n";
+    xml << "      <map address='20-3f:8000-bfff'/>\n";
+    xml << "      <map address='a0-bf:8000-bfff'/>\n";
+    xml << "    </dr>\n";
+    xml << "    <sr>\n";
+    xml << "      <map address='20-3f:c000-ffff'/>\n";
+    xml << "      <map address='a0-bf:c000-ffff'/>\n";
+    xml << "    </sr>\n";
     xml << "  </necdsp>\n";
   }
 
   if(has_dsp4) {
     xml << "  <necdsp revision='upd7725' frequency='8000000' program='dsp4.bin' sha256='63ede17322541c191ed1fdf683872554a0a57306496afc43c59de7c01a6e764a'>\n";
-    xml << "    <dr mask='004000' test='000000'/>\n";
-    xml << "    <sr mask='004000' test='004000'/>\n";
-    xml << "    <map address='30-3f:8000-ffff'/>\n";
-    xml << "    <map address='b0-bf:8000-ffff'/>\n";
+    xml << "    <dr>\n";
+    xml << "      <map address='30-3f:8000-bfff'/>\n";
+    xml << "      <map address='b0-bf:8000-bfff'/>\n";
+    xml << "    </dr>\n";
+    xml << "    <sr>\n";
+    xml << "      <map address='30-3f:c000-ffff'/>\n";
+    xml << "      <map address='b0-bf:c000-ffff'/>\n";
+    xml << "    </sr>\n";
     xml << "  </necdsp>\n";
   }
 
@@ -456,21 +484,35 @@ SNESCartridge::SNESCartridge(const uint8_t *data, unsigned size) {
 
   if(has_st010) {
     xml << "  <necdsp revision='upd96050' frequency='10000000' program='st0010.bin' sha256='55c697e864562445621cdf8a7bf6e84ae91361e393d382a3704e9aa55559041e'>\n";
-    xml << "    <dr mask='080001' test='000000'/>\n";
-    xml << "    <sr mask='080001' test='000001'/>\n";
-    xml << "    <dp mask='080000' test='080000'/>\n";
-    xml << "    <map address='60-6f:0000-0fff'/>\n";
-    xml << "    <map address='e0-ef:0000-0fff'/>\n";
+    xml << "    <dr>\n";
+    xml << "      <map address='60:0000'/>\n";
+    xml << "      <map address='e0:0000'/>\n";
+    xml << "    </dr>\n";
+    xml << "    <sr>\n";
+    xml << "      <map address='60:0001'/>\n";
+    xml << "      <map address='e0:0001'/>\n";
+    xml << "    </sr>\n";
+    xml << "    <dp>\n";
+    xml << "      <map address='68-6f:0000-0fff'/>\n";
+    xml << "      <map address='e8-ef:0000-0fff'/>\n";
+    xml << "    </dp>\n";
     xml << "  </necdsp>\n";
   }
 
   if(has_st011) {
     xml << "  <necdsp revision='upd96050' frequency='15000000' program='st0011.bin' sha256='651b82a1e26c4fa8dd549e91e7f923012ed2ca54c1d9fd858655ab30679c2f0e'>\n";
-    xml << "    <dr mask='080001' test='000000'/>\n";
-    xml << "    <sr mask='080001' test='000001'/>\n";
-    xml << "    <dp mask='080000' test='080000'/>\n";
-    xml << "    <map address='60-6f:0000-0fff'/>\n";
-    xml << "    <map address='e0-ef:0000-0fff'/>\n";
+    xml << "    <dr>\n";
+    xml << "      <map address='60:0000'/>\n";
+    xml << "      <map address='e0:0000'/>\n";
+    xml << "    </dr>\n";
+    xml << "    <sr>\n";
+    xml << "      <map address='60:0001'/>\n";
+    xml << "      <map address='e0:0001'/>\n";
+    xml << "    </sr>\n";
+    xml << "    <dp>\n";
+    xml << "      <map address='68-6f:0000-0fff'/>\n";
+    xml << "      <map address='e8-ef:0000-0fff'/>\n";
+    xml << "    </dp>\n";
     xml << "  </necdsp>\n";
   }
 
@@ -482,7 +524,7 @@ SNESCartridge::SNESCartridge(const uint8_t *data, unsigned size) {
   }
 
   xml << "</cartridge>\n";
-  xmlMemoryMap = xml;
+  xmlMemoryMap = xml.transform("'", "\"");
 }
 
 void SNESCartridge::read_header(const uint8_t *data, unsigned size) {

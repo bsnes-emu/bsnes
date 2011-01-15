@@ -1,10 +1,7 @@
-class NECDSP : public Coprocessor, public Memory {
+class NECDSP : public Coprocessor {
 public:
   enum class Revision : unsigned { uPD7725, uPD96050 } revision;
   unsigned frequency;
-  unsigned drmask, drtest;
-  unsigned srmask, srtest;
-  unsigned dpmask, dptest;
 
   #include "registers.hpp"
 
@@ -26,14 +23,11 @@ public:
 
   string disassemble(uint14 ip);
 
-  uint8 read(unsigned addr);
-  void write(unsigned addr, uint8 data);
+  uint8 sr_read(unsigned);
+  void sr_write(unsigned, uint8 data);
 
-  uint8 sr_read();
-  void sr_write(uint8 data);
-
-  uint8 dr_read();
-  void dr_write(uint8 data);
+  uint8 dr_read(unsigned);
+  void dr_write(unsigned, uint8 data);
 
   uint8 dp_read(unsigned addr);
   void dp_write(unsigned addr, uint8 data);

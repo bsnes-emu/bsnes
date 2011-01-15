@@ -1,6 +1,6 @@
 #include "sdd1emu.hpp"
 
-class SDD1 : public MMIO, public Memory {
+class SDD1 {
 public:
   void init();
   void enable();
@@ -10,16 +10,14 @@ public:
   uint8 mmio_read(unsigned addr);
   void mmio_write(unsigned addr, uint8 data);
 
-  uint8 read(unsigned addr);
-  void write(unsigned addr, uint8 data);
+  uint8 mcu_read(unsigned addr);
+  void mcu_write(unsigned addr, uint8 data);
 
   void serialize(serializer&);
   SDD1();
   ~SDD1();
 
 private:
-  MMIO *cpu_mmio[0x80];  //bus spying hooks to glean information for struct dma[]
-
   uint8 sdd1_enable;     //channel bit-mask
   uint8 xfer_enable;     //channel bit-mask
   unsigned mmc[4];       //memory map controller ROM indices

@@ -1,4 +1,4 @@
-class OBC1 : public Memory {
+class OBC1 {
 public:
   void init();
   void enable();

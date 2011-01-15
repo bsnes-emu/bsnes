@@ -17,7 +17,7 @@
 
 #include "decomp.hpp"
 
-class SPC7110 : public MMIO {
+class SPC7110 {
 public:
   unsigned data_rom_offset;
 
@@ -39,6 +39,15 @@ public:
 
   uint8 mmio_read(unsigned addr);
   void mmio_write(unsigned addr, uint8 data);
+
+  uint8 mcu_read(unsigned addr);
+  void mcu_write(unsigned addr, uint8 data);
+
+  uint8 dcu_read(unsigned);
+  void dcu_write(unsigned, uint8);
+
+  uint8 ram_read(unsigned addr);
+  void ram_write(unsigned addr, uint8 data);
 
   //spc7110decomp
   void decomp_init();
@@ -130,32 +139,6 @@ private:
   unsigned rtc_index;
 
   static const unsigned months[12];
-  friend class SPC7110MCU;
-  friend class SPC7110DCU;
-  friend class SPC7110RAM;
-};
-
-class SPC7110MCU : public Memory {
-public:
-  unsigned size() const;
-  uint8 read(unsigned addr);
-  void write(unsigned addr, uint8 data);
-};
-
-class SPC7110DCU : public Memory {
-public:
-  uint8 read(unsigned addr);
-  void write(unsigned addr, uint8 data);
-};
-
-class SPC7110RAM : public Memory {
-public:
-  unsigned size() const;
-  uint8 read(unsigned addr);
-  void write(unsigned addr, uint8 data);
 };
 
 extern SPC7110 spc7110;
-extern SPC7110MCU spc7110mcu;
-extern SPC7110DCU spc7110dcu;
-extern SPC7110RAM spc7110ram;
