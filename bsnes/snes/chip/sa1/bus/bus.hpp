@@ -1,11 +1,3 @@
-struct VBRBus : Bus {
-  void init();
-};
-
-struct SA1Bus : Bus {
-  void init();
-};
-
 struct CPUIRAM : Memory {
   unsigned size() const;
   alwaysinline uint8 read(unsigned);

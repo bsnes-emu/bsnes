@@ -129,8 +129,6 @@ void SA1::power() {
 
 void SA1::reset() {
   create(SA1::Enter, system.cpu_frequency());
-  vbrbus.init();
-  sa1bus.init();
 
   memory::cc1bwram.dma = false;
   for(unsigned addr = 0; addr < memory::iram.size(); addr++) {

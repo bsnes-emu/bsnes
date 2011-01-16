@@ -1,5 +1,96 @@
 #ifdef SA1_CPP
 
+uint8 SA1::bus_read(unsigned addr) {
+  if((addr & 0x40fe00) == 0x002200) {  //$00-3f|80-bf:2200-23ff
+    return mmio_read(addr);
+  }
+
+  if((addr & 0x408000) == 0x008000) {  //$00-3f|80-bf:8000-ffff
+    return mmc_read(addr);
+  }
+
+  if((addr & 0xc00000) == 0xc00000) {  //$c0-ff:0000-ffff
+    return mmc_read(addr);
+  }
+
+  if((addr & 0x40e000) == 0x006000) {  //$00-3f|80-bf:6000-7fff
+    return mmc_sa1_read(addr);
+  }
+
+  if((addr & 0x40f800) == 0x000000) {  //$00-3f|80-bf:0000-07ff
+    return memory::iram.read(addr & 2047);
+  }
+
+  if((addr & 0x40f800) == 0x003000) {  //$00-3f|80-bf:3000-37ff
+    return memory::iram.read(addr & 2047);
+  }
+
+  if((addr & 0xf00000) == 0x400000) {  //$40-4f:0000-ffff
+    return memory::sa1bwram.read(addr & (memory::sa1bwram.size() - 1));
+  }
+
+  if((addr & 0xf00000) == 0x600000) {  //$60-6f:0000-ffff
+    return memory::bitmapram.read(addr & (memory::bitmapram.size() - 1));
+  }
+}
+
+void SA1::bus_write(unsigned addr, uint8 data) {
+  if((addr & 0x40fe00) == 0x002200) {  //$00-3f|80-bf:2200-23ff
+    return mmio_write(addr, data);
+  }
+
+  if((addr & 0x40e000) == 0x006000) {  //$00-3f|80-bf:6000-7fff
+    return mmc_sa1_write(addr, data);
+  }
+
+  if((addr & 0x40f800) == 0x000000) {  //$00-3f|80-bf:0000-07ff
+    return memory::iram.write(addr & 2047, data);
+  }
+
+  if((addr & 0x40f800) == 0x003000) {  //$00-3f|80-bf:3000-37ff
+    return memory::iram.write(addr & 2047, data);
+  }
+
+  if((addr & 0xf00000) == 0x400000) {  //$40-4f:0000-ffff
+    return memory::sa1bwram.write(addr & (memory::sa1bwram.size() - 1), data);
+  }
+
+  if((addr & 0xf00000) == 0x600000) {  //$60-6f:0000-ffff
+    return memory::bitmapram.write(addr & (memory::bitmapram.size() - 1), data);
+  }
+}
+
+//$230c (VDPL), $230d (VDPH) use this bus to read variable-length data.
+//this is used both to keep VBR-reads from accessing MMIO registers, and
+//to avoid syncing the S-CPU and SA-1*; as both chips are able to access
+//these ports.
+//(* eg, memory::cartram is used directly, as memory::sa1bwram syncs to the S-CPU)
+uint8 SA1::vbr_read(unsigned addr) {
+  if((addr & 0x408000) == 0x008000) {  //$00-3f|80-bf:8000-ffff
+    return mmc_read(addr);
+  }
+
+  if((addr & 0xc00000) == 0xc00000) {  //$c0-ff:0000-ffff
+    return mmc_read(addr);
+  }
+
+  if((addr & 0x40e000) == 0x006000) {  //$00-3f|80-bf:6000-7fff
+    return memory::cartram.read(addr & (memory::cartram.size() - 1));
+  }
+
+  if((addr & 0xf00000) == 0x400000) {  //$40-4f:0000-ffff
+    return memory::cartram.read(addr & (memory::cartram.size() - 1));
+  }
+
+  if((addr & 0x40f800) == 0x000000) {  //$00-3f|80-bf:0000-07ff
+    return memory::iram.read(addr & 2047);
+  }
+
+  if((addr & 0x40f800) == 0x003000) {  //$00-3f|80-bf:3000-37ff
+    return memory::iram.read(addr & 0x2047);
+  }
+}
+
 //ROM, I-RAM and MMIO registers are accessed at ~10.74MHz (2 clock ticks)
 //BW-RAM is accessed at ~5.37MHz (4 clock ticks)
 //tick() == 2 clock ticks
@@ -12,13 +103,13 @@ void SA1::op_io() {
 uint8 SA1::op_read(unsigned addr) {
   tick();
   if(((addr & 0x40e000) == 0x006000) || ((addr & 0xd00000) == 0x400000)) tick();
-  return sa1bus.read(addr);
+  return bus_read(addr);
 }
 
 void SA1::op_write(unsigned addr, uint8 data) {
   tick();
   if(((addr & 0x40e000) == 0x006000) || ((addr & 0xd00000) == 0x400000)) tick();
-  sa1bus.write(addr, data);
+  bus_write(addr, data);
 }
 
 uint8 SA1::mmc_read(unsigned addr) {

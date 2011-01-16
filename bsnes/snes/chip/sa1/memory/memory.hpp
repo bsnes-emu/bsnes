@@ -1,3 +1,7 @@
+uint8 bus_read(unsigned addr);
+void bus_write(unsigned addr, uint8 data);
+uint8 vbr_read(unsigned addr);
+
 alwaysinline void op_io();
 alwaysinline uint8 op_read(unsigned addr);
 alwaysinline void op_write(unsigned addr, uint8 data);

@@ -414,18 +414,18 @@ uint8 SA1::mmio_r230b() { return mmio.overflow << 7; }
 
 //(VDPL) variable-length data read port low
 uint8 SA1::mmio_r230c() {
-  uint32 data = (vbrbus.read(mmio.va + 0) <<  0)
-              | (vbrbus.read(mmio.va + 1) <<  8)
-              | (vbrbus.read(mmio.va + 2) << 16);
+  uint32 data = (vbr_read(mmio.va + 0) <<  0)
+              | (vbr_read(mmio.va + 1) <<  8)
+              | (vbr_read(mmio.va + 2) << 16);
   data >>= mmio.vbit;
   return data >> 0;
 }
 
 //(VDPH) variable-length data read port high
 uint8 SA1::mmio_r230d() {
-  uint32 data = (vbrbus.read(mmio.va + 0) <<  0)
-              | (vbrbus.read(mmio.va + 1) <<  8)
-              | (vbrbus.read(mmio.va + 2) << 16);
+  uint32 data = (vbr_read(mmio.va + 0) <<  0)
+              | (vbr_read(mmio.va + 1) <<  8)
+              | (vbr_read(mmio.va + 2) << 16);
   data >>= mmio.vbit;
 
   if(mmio.hl == 1) {

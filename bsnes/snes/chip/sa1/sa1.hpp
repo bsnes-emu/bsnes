@@ -36,4 +36,3 @@ public:
 };
 
 extern SA1 sa1;
-extern SA1Bus sa1bus;
