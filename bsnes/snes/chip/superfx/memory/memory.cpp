@@ -1,5 +1,41 @@
 #ifdef SUPERFX_CPP
 
+uint8 SuperFX::bus_read(unsigned addr) {
+  if((addr & 0xc00000) == 0x000000) {  //$00-3f:0000-7fff, $00-3f:8000-ffff
+    while(!regs.scmr.ron && scheduler.sync != Scheduler::SynchronizeMode::All) {
+      add_clocks(6);
+      synchronize_cpu();
+    }
+    return memory::cartrom.read((((addr & 0x3f0000) >> 1) | (addr & 0x7fff)) & rom_mask);
+  }
+
+  if((addr & 0xe00000) == 0x400000) {  //$40-5f:0000-ffff
+    while(!regs.scmr.ron && scheduler.sync != Scheduler::SynchronizeMode::All) {
+      add_clocks(6);
+      synchronize_cpu();
+    }
+    return memory::cartrom.read(addr & rom_mask);
+  }
+
+  if((addr & 0xe00000) == 0x600000) {  //$60-7f:0000-ffff
+    while(!regs.scmr.ran && scheduler.sync != Scheduler::SynchronizeMode::All) {
+      add_clocks(6);
+      synchronize_cpu();
+    }
+    return memory::cartram.read(addr & ram_mask);
+  }
+}
+
+void SuperFX::bus_write(unsigned addr, uint8 data) {
+  if((addr & 0xe00000) == 0x600000) {  //$60-7f:0000-ffff
+    while(!regs.scmr.ran && scheduler.sync != Scheduler::SynchronizeMode::All) {
+      add_clocks(6);
+      synchronize_cpu();
+    }
+    return memory::cartram.write(addr & ram_mask, data);
+  }
+}
+
 uint8 SuperFX::op_read(uint16 addr) {
   uint16 offset = addr - regs.cbr;
   if(offset < 512) {
@@ -8,7 +44,7 @@ uint8 SuperFX::op_read(uint16 addr) {
       unsigned sp = (regs.pbr << 16) + ((regs.cbr + dp) & 0xfff0);
       for(unsigned n = 0; n < 16; n++) {
         add_clocks(memory_access_speed);
-        cache.buffer[dp++] = superfxbus.read(sp++);
+        cache.buffer[dp++] = bus_read(sp++);
       }
       cache.valid[offset >> 4] = true;
     } else {
@@ -21,12 +57,12 @@ uint8 SuperFX::op_read(uint16 addr) {
     //$[00-5f]:[0000-ffff] ROM
     rombuffer_sync();
     add_clocks(memory_access_speed);
-    return superfxbus.read((regs.pbr << 16) + addr);
+    return bus_read((regs.pbr << 16) + addr);
   } else {
     //$[60-7f]:[0000-ffff] RAM
     rambuffer_sync();
     add_clocks(memory_access_speed);
-    return superfxbus.read((regs.pbr << 16) + addr);
+    return bus_read((regs.pbr << 16) + addr);
   }
 }
 
@@ -60,6 +96,9 @@ void SuperFX::cache_mmio_write(uint16 addr, uint8 data) {
 }
 
 void SuperFX::memory_reset() {
+  rom_mask = memory::cartrom.size() - 1;
+  ram_mask = memory::cartram.size() - 1;
+
   for(unsigned n = 0; n < 512; n++) cache.buffer[n] = 0x00;
   for(unsigned n = 0; n < 32; n++) cache.valid[n] = false;
   for(unsigned n = 0; n < 2; n++) {

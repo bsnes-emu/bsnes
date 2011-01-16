@@ -22,4 +22,3 @@ private:
 };
 
 extern SuperFX superfx;
-extern SuperFXBus superfxbus;

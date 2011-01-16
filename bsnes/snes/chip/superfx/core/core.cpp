@@ -66,7 +66,7 @@ uint8 SuperFX::rpix(uint8 x, uint8 y) {
   for(unsigned n = 0; n < bpp; n++) {
     unsigned byte = ((n >> 1) << 4) + (n & 1);  // = [n]{ 0, 1, 16, 17, 32, 33, 48, 49 };
     add_clocks(memory_access_speed);
-    data |= ((superfxbus.read(addr + byte) >> x) & 1) << n;
+    data |= ((bus_read(addr + byte) >> x) & 1) << n;
   }
 
   return data;
@@ -95,10 +95,10 @@ void SuperFX::pixelcache_flush(pixelcache_t &cache) {
     if(cache.bitpend != 0xff) {
       add_clocks(memory_access_speed);
       data &= cache.bitpend;
-      data |= superfxbus.read(addr + byte) & ~cache.bitpend;
+      data |= bus_read(addr + byte) & ~cache.bitpend;
     }
     add_clocks(memory_access_speed);
-    superfxbus.write(addr + byte, data);
+    bus_write(addr + byte, data);
   }
 
   cache.bitpend = 0x00;

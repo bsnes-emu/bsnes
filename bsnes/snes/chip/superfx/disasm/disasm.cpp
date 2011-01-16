@@ -36,8 +36,8 @@ void SuperFX::disassemble_opcode(char *output) {
   case id+ 8: case id+ 9: case id+10: case id+11: case id+12: case id+13: case id+14: case id+15
 
 #define op0 regs.pipeline
-#define op1 superfxbus.read((regs.pbr << 16) + regs.r[15] + 0)
-#define op2 superfxbus.read((regs.pbr << 16) + regs.r[15] + 1)
+#define op1 bus_read((regs.pbr << 16) + regs.r[15] + 0)
+#define op2 bus_read((regs.pbr << 16) + regs.r[15] + 1)
 
 void SuperFX::disassemble_alt0(char *output) {
   char t[256] = "";
