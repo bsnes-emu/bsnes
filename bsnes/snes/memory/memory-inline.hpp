@@ -52,28 +52,9 @@ MappedRAM::MappedRAM() : data_(0), size_(-1U), write_protect_(false) {}
 //Bus
 
 uint8 Bus::read(unsigned addr) {
-  #if defined(CHEAT_SYSTEM)
-  if(cheat.active() && cheat.exists(addr)) {
-    uint8 r;
-    if(cheat.read(addr, r)) return r;
-  }
-  #endif
-
-  linear_vector<MappedRead> &map = rdpage[addr >> 13];
-  for(signed n = map.size() - 1; n >= 0; n--) {
-    if(addr - map[n].lo < map[n].hi) {
-      return map[n].read(addr + map[n].offset);
-    }
-  }
-
-  return cpu.regs.mdr;
+  return reader[lookup[addr]](target[addr]);
 }
 
 void Bus::write(unsigned addr, uint8 data) {
-  linear_vector<MappedWrite> &map = wrpage[addr >> 13];
-  for(signed n = map.size() - 1; n >= 0; n--) {
-    if(addr - map[n].lo < map[n].hi) {
-      return map[n].write(addr + map[n].offset, data);
-    }
-  }
+  return writer[lookup[addr]](target[addr], data);
 }

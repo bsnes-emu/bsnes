@@ -8,6 +8,11 @@ static gint Window_close(Window *window) {
 }
 
 void Window::create(unsigned x, unsigned y, unsigned width, unsigned height, const string &text) {
+  window->x = x;
+  window->y = y;
+  window->width = width;
+  window->height = height;
+
   object->widget = gtk_window_new(GTK_WINDOW_TOPLEVEL);
   gtk_window_move(GTK_WINDOW(object->widget), x, y);
 
@@ -55,8 +60,8 @@ Geometry Window::geometry() {
 }
 
 void Window::setGeometry(unsigned x, unsigned y, unsigned width, unsigned height) {
-  gtk_window_move(GTK_WINDOW(object->widget), x, y);
-  gtk_widget_set_size_request(object->formContainer, width, height);
+  gtk_window_move(GTK_WINDOW(object->widget), window->x = x, window->y = y);
+  gtk_widget_set_size_request(object->formContainer, window->width = width, window->height = height);
 }
 
 void Window::setDefaultFont(Font &font) {
@@ -93,7 +98,29 @@ void Window::setStatusVisible(bool visible) {
   gtk_widget_set_visible(object->status, visible);
 }
 
+bool Window::fullscreen() {
+  return window->isFullscreen;
+}
+
+void Window::setFullscreen(bool fullscreen) {
+  window->isFullscreen = fullscreen;
+  if(fullscreen == true) {
+    gtk_window_fullscreen(GTK_WINDOW(object->widget));
+    gtk_window_set_decorated(GTK_WINDOW(object->widget), false);
+    gtk_widget_set_size_request(object->widget, gdk_screen_width(), gdk_screen_height());
+  } else {
+    gtk_widget_set_size_request(object->widget, -1, -1);
+    gtk_window_set_decorated(GTK_WINDOW(object->widget), true);
+    gtk_window_unfullscreen(GTK_WINDOW(object->widget));
+  }
+}
+
 Window::Window() {
   window = new Window::Data;
   window->defaultFont = 0;
+  window->isFullscreen = false;
+  window->x = 0;
+  window->y = 0;
+  window->width = 0;
+  window->height = 0;
 }

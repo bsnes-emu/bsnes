@@ -43,35 +43,25 @@ void Bus::map(
 ) {
   assert(bank_lo <= bank_hi && bank_lo <= 0xff);
   assert(addr_lo <= addr_hi && addr_lo <= 0xffff);
+  unsigned id = idcount++;
+  assert(id < 255);
+  reader[id] = rd;
+  writer[id] = wr;
 
-  unsigned page_lo = addr_lo >> 13;
-  unsigned page_hi = addr_hi >> 13;
   if(length == 0) length = (bank_hi - bank_lo + 1) * (addr_hi - addr_lo + 1);
 
   unsigned offset = 0;
   for(unsigned bank = bank_lo; bank <= bank_hi; bank++) {
-    for(unsigned page = page_lo; page <= page_hi; page++) {
-      unsigned map_addr = (bank << 16) | (page << 13);
-      unsigned map_page = map_addr >> 13;
-      unsigned map_lo = map_addr | (page == page_lo ? addr_lo & 0x1fff : 0x0000);
-      unsigned map_hi = map_addr | (page == page_hi ? addr_hi & 0x1fff : 0x1fff);
-
-      unsigned out_adjust, out_length, out_offset;
-      if(mode == MapMode::Direct) {
-        out_offset = 0;
-        out_length = map_hi - map_lo + 1;
-      } else if(mode == MapMode::Linear) {
-        out_offset = base + mirror(offset, length) - map_lo;
-        out_length = min(map_hi - map_lo + 1, length - offset);
-        offset += map_hi - map_lo + 1;
-        offset %= length;
+    for(unsigned addr = addr_lo; addr <= addr_hi; addr++) {
+      unsigned destaddr = (bank << 16) | addr;
+      if(mode == MapMode::Linear) {
+        destaddr = base + mirror(offset, length);
+        offset = (offset + 1) % length;
       } else if(mode == MapMode::Shadow) {
-        out_offset = base + mirror(map_addr, length) - map_lo;
-        out_length = map_hi - map_lo + 1;
+        destaddr = base + mirror(destaddr, length);
       }
-
-      if(rd) rdpage[map_page].append({ rd, map_lo, out_length, out_offset });
-      if(wr) wrpage[map_page].append({ wr, map_lo, out_length, out_offset });
+      lookup[(bank << 16) | addr] = id;
+      target[(bank << 16) | addr] = destaddr;
     }
   }
 }
@@ -89,10 +79,11 @@ void Bus::unload_cart() {
 }
 
 void Bus::map_reset() {
-  for(unsigned n = 0; n < 2048; n++) {
-    rdpage[n].reset();
-    wrpage[n].reset();
-  }
+  function<uint8 (unsigned)> reader = [](unsigned) { return cpu.regs.mdr; };
+  function<void (unsigned, uint8)> writer = [](unsigned, uint8) {};
+
+  idcount = 0;
+  map(MapMode::Direct, 0x00, 0xff, 0x0000, 0xffff, reader, writer);
 }
 
 void Bus::map_xml() {
@@ -138,6 +129,16 @@ void Bus::reset() {
 
   map(MapMode::Direct, 0x00, 0x3f, 0x4300, 0x437f, { &CPU::mmio_read, &cpu }, { &CPU::mmio_write, &cpu });
   map(MapMode::Direct, 0x80, 0xbf, 0x4300, 0x437f, { &CPU::mmio_read, &cpu }, { &CPU::mmio_write, &cpu });
+}
+
+Bus::Bus() {
+  lookup = new uint8 [16 * 1024 * 1024];
+  target = new uint32[16 * 1024 * 1024];
+}
+
+Bus::~Bus() {
+  delete[] lookup;
+  delete[] target;
 }
 
 }

@@ -53,20 +53,12 @@ struct Bus {
   void power();
   void reset();
 
-  struct MappedRead {
-    function<uint8 (unsigned)> read;
-    unsigned lo, hi;
-    unsigned offset;
-  };
+  uint8 *lookup;
+  uint32 *target;
 
-  struct MappedWrite {
-    function<void (unsigned, uint8)> write;
-    unsigned lo, hi;
-    unsigned offset;
-  };
-
-  linear_vector<MappedRead>  rdpage[2048];
-  linear_vector<MappedWrite> wrpage[2048];
+  unsigned idcount;
+  function<uint8 (unsigned)> reader[256];
+  function<void (unsigned, uint8)> writer[256];
 
   enum class MapMode : unsigned { Direct, Linear, Shadow };
   void map(
@@ -79,6 +71,8 @@ struct Bus {
   );
 
   void serialize(serializer&);
+  Bus();
+  ~Bus();
 
 private:
   void map_reset();

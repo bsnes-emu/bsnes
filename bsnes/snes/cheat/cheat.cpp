@@ -15,7 +15,7 @@ void Cheat::enable(bool state) {
 }
 
 void Cheat::synchronize() {
-  memset(bitmask, 0x00, sizeof bitmask);
+  memcpy(bus.lookup, lookup, 16 * 1024 * 1024);
   code_enabled = false;
 
   for(unsigned i = 0; i < size(); i++) {
@@ -26,16 +26,16 @@ void Cheat::synchronize() {
       code_enabled = true;
 
       unsigned addr = mirror(code.addr[n]);
-      bitmask[addr >> 3] |= 1 << (addr & 7);
+      bus.lookup[addr] = 0xff;
       if((addr & 0xffe000) == 0x7e0000) {
         //mirror $7e:0000-1fff to $00-3f|80-bf:0000-1fff
         unsigned mirroraddr;
         for(unsigned x = 0; x <= 0x3f; x++) {
           mirroraddr = ((0x00 + x) << 16) + (addr & 0x1fff);
-          bitmask[mirroraddr >> 3] |= 1 << (mirroraddr & 7);
+          bus.lookup[mirroraddr] = 0xff;
 
           mirroraddr = ((0x80 + x) << 16) + (addr & 0x1fff);
-          bitmask[mirroraddr >> 3] |= 1 << (mirroraddr & 7);
+          bus.lookup[mirroraddr] = 0xff;
         }
       }
     }
@@ -44,7 +44,7 @@ void Cheat::synchronize() {
   cheat_enabled = system_enabled && code_enabled;
 }
 
-bool Cheat::read(unsigned addr, uint8 &data) const {
+uint8 Cheat::read(unsigned addr) const {
   addr = mirror(addr);
 
   for(unsigned i = 0; i < size(); i++) {
@@ -53,18 +53,35 @@ bool Cheat::read(unsigned addr, uint8 &data) const {
 
     for(unsigned n = 0; n < code.addr.size(); n++) {
       if(addr == mirror(code.addr[n])) {
-        data = code.data[n];
-        return true;
+        return code.data[n];
       }
     }
   }
 
-  return false;
+  return 0x00;
+}
+
+void Cheat::init() {
+  bus.reader[0xff] = [](unsigned addr) {
+    bus.reader[cheat.lookup[addr]](bus.target[addr]);
+    return cheat.read(addr);
+  };
+
+  bus.writer[0xff] = [](unsigned addr, uint8 data) {
+    return bus.writer[cheat.lookup[addr]](bus.target[addr], data);
+  };
+
+  memcpy(lookup, bus.lookup, 16 * 1024 * 1024);
 }
 
 Cheat::Cheat() {
+  lookup = new uint8[16 * 1024 * 1024];
   system_enabled = true;
   synchronize();
+}
+
+Cheat::~Cheat() {
+  delete[] lookup;
 }
 
 //===============

@@ -75,6 +75,10 @@ void Utility::setScale(unsigned scale) {
   mainWindow.setGeometry(geom.x, geom.y, width, height);
 }
 
+void Utility::setFullscreen(bool fullscreen) {
+  mainWindow.setFullscreen(fullscreen);
+}
+
 void Utility::setFilter() {
   if(filter.opened()) filter.close();
   if(config.video.filter == "") return;

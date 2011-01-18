@@ -2,7 +2,7 @@ void Window::create(unsigned x, unsigned y, unsigned width, unsigned height, con
   widget->window = CreateWindowEx(
     0, L"phoenix_window", utf16_t(text),
     WS_POPUP | WS_SYSMENU | WS_CAPTION | WS_MINIMIZEBOX,
-    x, y, width, height,
+    window->x = x, window->y = y, window->width = width, window->height = height,
     0, 0, GetModuleHandle(0), 0
   );
   window->menu = CreateMenu();
@@ -39,6 +39,13 @@ Geometry Window::geometry() {
 }
 
 void Window::setGeometry(unsigned x, unsigned y, unsigned width, unsigned height) {
+  if(window->isFullscreen == false) {
+    window->x = x;
+    window->y = y;
+    window->width = width;
+    window->height = height;
+  }
+
   bool isVisible = visible();
   if(isVisible) setVisible(false);
   SetWindowPos(widget->window, NULL, x, y, width, height, SWP_NOZORDER | SWP_FRAMECHANGED);
@@ -70,16 +77,33 @@ void Window::setStatusVisible(bool visible) {
   resize(window->width, window->height);
 }
 
+bool Window::fullscreen() {
+  return window->isFullscreen;
+}
+
+void Window::setFullscreen(bool fullscreen) {
+  window->isFullscreen = fullscreen;
+  if(fullscreen == false) {
+    SetWindowLong(widget->window, GWL_STYLE, WS_VISIBLE | WS_POPUP | WS_SYSMENU | WS_CAPTION | WS_MINIMIZEBOX);
+    setGeometry(window->x, window->y, window->width, window->height);
+  } else {
+    SetWindowLong(widget->window, GWL_STYLE, WS_VISIBLE | WS_POPUP);
+    setGeometry(0, 0, GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN));
+  }
+}
+
 Window::Window() {
   window = new Window::Data;
   window->defaultFont = 0;
   window->brush = 0;
+  window->isFullscreen = false;
+  window->x = 0;
+  window->y = 0;
+  window->width = 0;
+  window->height = 0;
 }
 
 void Window::resize(unsigned width, unsigned height) {
-  window->width = width;
-  window->height = height;
-
   SetWindowPos(widget->window, NULL, 0, 0, width, height, SWP_NOZORDER | SWP_NOMOVE | SWP_FRAMECHANGED);
   RECT rc;
   GetClientRect(widget->window, &rc);

@@ -112,6 +112,8 @@ struct Window : Widget {
   void setStatusText(const nall::string &text);
   void setMenuVisible(bool visible = true);
   void setStatusVisible(bool visible = true);
+  bool fullscreen();
+  void setFullscreen(bool fullscreen = true);
   Window();
 //private:
   struct Data;

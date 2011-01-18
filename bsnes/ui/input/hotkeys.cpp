@@ -28,6 +28,10 @@ void InputMapper::poll_hotkeys(unsigned scancode, int16_t value) {
       utility.showMessage({ "Slot ", activeSlot, " selected" });
     }
 
+    if(scancode == keyboard(0)[Keyboard::F11]) {
+      utility.setFullscreen(!mainWindow.fullscreen());
+    }
+
     //pause
     if(scancode == keyboard(0)[Keyboard::P]) {
       application.pause = !application.pause;

@@ -26,6 +26,9 @@ struct Window::Data {
   COLORREF brushColor;
   HMENU menu;
   HWND status;
+  bool isFullscreen;
+  unsigned x;
+  unsigned y;
   unsigned width;
   unsigned height;
 };

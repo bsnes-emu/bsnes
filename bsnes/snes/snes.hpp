@@ -1,13 +1,12 @@
 namespace SNES {
   namespace Info {
     static const char Name[] = "bsnes";
-    static const char Version[] = "074.05";
+    static const char Version[] = "074.06";
     static const unsigned SerializerVersion = 17;
   }
 }
 
 //#define DEBUGGER
-#define CHEAT_SYSTEM
 
 #include <libco/libco.h>
 
@@ -130,7 +129,6 @@ namespace SNES {
 
   #include <snes/memory/memory-inline.hpp>
   #include <snes/ppu/counter/counter-inline.hpp>
-  #include <snes/cheat/cheat-inline.hpp>
 }
 
 namespace nall {

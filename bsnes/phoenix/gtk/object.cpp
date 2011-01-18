@@ -27,6 +27,11 @@ struct Widget::Data {
 
 struct Window::Data {
   Font *defaultFont;
+  bool isFullscreen;
+  unsigned x;
+  unsigned y;
+  unsigned width;
+  unsigned height;
 };
 
 struct Canvas::Data {

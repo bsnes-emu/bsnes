@@ -6,6 +6,7 @@ struct Utility : property<Utility> {
 
   void setControllers();
   void setScale(unsigned scale = 0);
+  void setFullscreen(bool fullscreen = true);
   void setFilter();
   void setShader();
 

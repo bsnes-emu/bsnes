@@ -156,6 +156,7 @@ void System::power() {
 
   scheduler.init();
   serialize_init();
+  cheat.init();
 
   input.update();
 //video.update();
@@ -194,6 +195,7 @@ void System::reset() {
 
   scheduler.init();
   serialize_init();
+  cheat.init();
 
   input.port_set_device(0, config.controller_port1);
   input.port_set_device(1, config.controller_port2);

@@ -1,3 +1,9 @@
+public:
+  uint8 mmio_read(unsigned addr);
+  void mmio_write(unsigned addr, uint8 data);
+
+private:
+
 struct {
   uint8 ppu1_mdr;
   uint8 ppu2_mdr;
@@ -154,5 +160,3 @@ uint8 mmio_r213e();  //STAT77
 uint8 mmio_r213f();  //STAT78
 
 void mmio_reset();
-uint8 mmio_read(unsigned addr);
-void mmio_write(unsigned addr, uint8 data);

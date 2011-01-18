@@ -1,3 +1,9 @@
+public:
+  uint8 mmio_read(unsigned addr);
+  void mmio_write(unsigned addr, uint8 data);
+
+private:
+
 struct Regs {
   //internal
   uint8 ppu1_mdr;
@@ -86,6 +92,4 @@ uint8 cgram_read(unsigned addr);
 void cgram_write(unsigned addr, uint8 data);
 
 void mmio_update_video_mode();
-uint8 mmio_read(unsigned addr);
-void mmio_write(unsigned addr, uint8 data);
 void mmio_reset();
