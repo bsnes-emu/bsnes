@@ -3,6 +3,7 @@ void Window::create(unsigned x, unsigned y, unsigned width, unsigned height, con
   window->move(x, y);
 
   window->layout = new QVBoxLayout(window);
+  window->layout->setAlignment(Qt::AlignTop);
   window->layout->setMargin(0);
   window->layout->setSpacing(0);
   window->layout->setSizeConstraint(QLayout::SetFixedSize);
@@ -68,6 +69,28 @@ void Window::setStatusVisible(bool visible) {
 
 bool Window::focused() {
   return window->isActiveWindow() && !window->isMinimized();
+}
+
+bool Window::fullscreen() {
+  return window->isFullScreen();
+}
+
+void Window::setFullscreen(bool fullscreen) {
+  if(fullscreen == false) {
+    window->showNormal();
+  } else {
+    window->showFullScreen();
+  }
+
+  //Qt returns negative coordinates for x,y immediately after setFullscreen(false)
+  //wait for Qt to return sane values, or until timeout occurs
+  Geometry geom;
+  time_t startTime = time(0);
+  do {
+    OS::run();
+    geom = geometry();
+    if(startTime - time(0) > 3) break;
+  } while((signed)geom.x < 0 || (signed)geom.y < 0);
 }
 
 Window::Window() {

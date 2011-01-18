@@ -112,6 +112,17 @@ void Window::setFullscreen(bool fullscreen) {
     gtk_widget_set_size_request(object->widget, -1, -1);
     gtk_window_set_decorated(GTK_WINDOW(object->widget), true);
     gtk_window_unfullscreen(GTK_WINDOW(object->widget));
+
+    //at this point, GTK+ has not updated window geometry
+    //this causes Window::geometry() calls to return incorrect info
+    //thus, wait until the geometry has changed before continuing
+    Geometry geom;
+    time_t startTime = time(0);
+    do {
+      OS::run();
+      Geometry geom = geometry();
+      if(startTime - time(0) > 3) break;  //prevent application from freezing
+    } while(geom.x == 0 && geom.y == 0 && geom.width == gdk_screen_width() && geom.height == gdk_screen_height());
   }
 }
 

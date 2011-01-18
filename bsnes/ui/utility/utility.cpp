@@ -76,7 +76,22 @@ void Utility::setScale(unsigned scale) {
 }
 
 void Utility::setFullscreen(bool fullscreen) {
+  mainWindow.setMenuVisible(!fullscreen);
+  mainWindow.setStatusVisible(!fullscreen);
   mainWindow.setFullscreen(fullscreen);
+  if(fullscreen == false) {
+    setScale();
+  } else {
+    unsigned baseHeight = config.video.region == 0 ? 224 : 239;
+    unsigned heightScale = OS::desktopHeight() / baseHeight;
+    unsigned height = baseHeight * heightScale;
+    unsigned width = min(OS::desktopWidth(), (unsigned)(256.0 / baseHeight * height));
+    mainWindow.viewport.setGeometry(
+      (OS::desktopWidth() - width) / 2,
+      (OS::desktopHeight() - height) / 2,
+      width, height
+    );
+  }
 }
 
 void Utility::setFilter() {

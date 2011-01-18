@@ -140,6 +140,8 @@ struct Window : Widget {
   void setMenuVisible(bool visible = true);
   void setStatusVisible(bool visible = true);
   bool focused();
+  bool fullscreen();
+  void setFullscreen(bool fullscreen = true);
   Window();
 //private:
   struct Data;
