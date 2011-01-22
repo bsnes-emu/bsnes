@@ -2,7 +2,7 @@
 
 #define BSX_CPP
 namespace SNES {
-  #include "bsx_base.cpp"
-  #include "bsx_cart.cpp"
-  #include "bsx_flash.cpp"
+  #include "satellaview/satellaview.cpp"
+  #include "cartridge/cartridge.cpp"
+  #include "flash/flash.cpp"
 }

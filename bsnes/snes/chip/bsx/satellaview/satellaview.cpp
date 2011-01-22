@@ -139,4 +139,3 @@ void BSXBase::mmio_write(unsigned addr, uint8 data) {
 }
 
 #endif
-

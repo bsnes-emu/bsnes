@@ -45,7 +45,7 @@ obj/snes-icd2.o    : $(snes)/chip/icd2/icd2.cpp $(call rwildcard,$(snes)/chip/ic
 obj/snes-superfx.o : $(snes)/chip/superfx/superfx.cpp $(call rwildcard,$(snes)/chip/superfx/)
 obj/snes-sa1.o     : $(snes)/chip/sa1/sa1.cpp $(call rwildcard,$(snes)/chip/sa1/)
 obj/snes-necdsp.o  : $(snes)/chip/necdsp/necdsp.cpp $(call rwildcard,$(snes)/chip/necdsp/)
-obj/snes-bsx.o     : $(snes)/chip/bsx/bsx.cpp $(snes)/chip/bsx/*
+obj/snes-bsx.o     : $(snes)/chip/bsx/bsx.cpp $(call rwildcard,$(snes)/chip/bsx/)
 obj/snes-srtc.o    : $(snes)/chip/srtc/srtc.cpp $(snes)/chip/srtc/*
 obj/snes-sdd1.o    : $(snes)/chip/sdd1/sdd1.cpp $(snes)/chip/sdd1/*
 obj/snes-spc7110.o : $(snes)/chip/spc7110/spc7110.cpp $(snes)/chip/spc7110/*

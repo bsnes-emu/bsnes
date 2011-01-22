@@ -338,11 +338,14 @@ SNESCartridge::SNESCartridge(const uint8_t *data, unsigned size) {
     xml << "    </slot>\n";
     xml << "  </bsx>\n";
   } else if(mapper == BSXROM) {
-    xml << "  <rom>\n";
-    xml << "    <map mode='linear' address='00-3f:8000-ffff'/>\n";
-    xml << "    <map mode='linear' address='80-bf:8000-ffff'/>\n";
-    xml << "  </rom>\n";
     xml << "  <bsx>\n";
+    xml << "    <mcu>\n";
+    xml << "      <map address='00-3f:8000-ffff'/>\n";
+    xml << "      <map address='80-bf:8000-ffff'/>\n";
+    xml << "      <map address='40-7f:0000-ffff'/>\n";
+    xml << "      <map address='c0-ff:0000-ffff'/>\n";
+    xml << "      <map address='20-3f:6000-7fff'/>\n";
+    xml << "    </mcu>\n";
     xml << "    <mmio>\n";
     xml << "      <map address='00-3f:5000-5fff'/>\n";
     xml << "      <map address='80-bf:5000-5fff'/>\n";

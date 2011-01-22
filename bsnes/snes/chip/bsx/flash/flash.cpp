@@ -116,4 +116,3 @@ void BSXFlash::write(unsigned addr, uint8 data) {
 }
 
 #endif
-

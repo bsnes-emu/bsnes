@@ -355,6 +355,16 @@ void Cartridge::xml_parse_bsx(xml_element &root) {
           mapping.append(m);
         }
       }
+    } else if(node.name == "mcu") {
+      foreach(leaf, node.element) {
+        if(leaf.name == "map") {
+          Mapping m({ &BSXCart::mcu_read, &bsxcart }, { &BSXCart::mcu_write, &bsxcart });
+          foreach(attr, leaf.attribute) {
+            if(attr.name == "address") xml_parse_address(m, attr.content);
+          }
+          mapping.append(m);
+        }
+      }
     } else if(node.name == "mmio") {
       foreach(leaf, node.element) {
         if(leaf.name == "map") {
