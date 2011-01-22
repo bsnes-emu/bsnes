@@ -109,7 +109,7 @@ void Interface::video_refresh(const uint16_t *data, unsigned width, unsigned hei
     video.refresh();
   }
 
-  static signed frameCounter = 0;
+  static unsigned frameCounter = 0;
   static time_t previous, current;
   frameCounter++;
 

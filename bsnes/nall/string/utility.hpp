@@ -27,7 +27,151 @@ string substr(const char *src, unsigned start, unsigned length) {
 
 /* arithmetic <> string */
 
-template<unsigned length, char padding> string hex(uintmax_t value) {
+string integer(intmax_t value) {
+  bool negative = value < 0;
+  if(negative) value = abs(value);
+
+  char buffer[64];
+  unsigned size = 0;
+
+  do {
+    unsigned n = value % 10;
+    buffer[size++] = '0' + n;
+    value /= 10;
+  } while(value);
+  buffer[size++] = negative ? '-' : '+';
+  buffer[size] = 0;
+
+  char result[size + 1];
+  memset(result, '0', size);
+  result[size] = 0;
+
+  for(signed x = size - 1, y = 0; x >= 0 && y < size; x--, y++) {
+    result[x] = buffer[y];
+  }
+
+  return result;
+}
+
+template<unsigned length> string linteger(intmax_t value) {
+  bool negative = value < 0;
+  if(negative) value = abs(value);
+
+  char buffer[64];
+  unsigned size = 0;
+
+  do {
+    unsigned n = value % 10;
+    buffer[size++] = '0' + n;
+    value /= 10;
+  } while(value);
+  buffer[size++] = negative ? '-' : '+';
+  buffer[size] = 0;
+
+  char result[length + 1];
+  memset(result, ' ', length);
+  result[length] = 0;
+
+  for(signed x = 0, y = size - 1; x < length && y >= 0; x++, y--) {
+    result[x] = buffer[y];
+  }
+
+  return result;
+}
+
+template<unsigned length> string rinteger(intmax_t value) {
+  bool negative = value < 0;
+  if(negative) value = abs(value);
+
+  char buffer[64];
+  unsigned size = 0;
+
+  do {
+    unsigned n = value % 10;
+    buffer[size++] = '0' + n;
+    value /= 10;
+  } while(value);
+  buffer[size++] = negative ? '-' : '+';
+  buffer[size] = 0;
+
+  char result[length + 1];
+  memset(result, ' ', length);
+  result[length] = 0;
+
+  for(signed x = length - 1, y = 0; x >= 0 && y < size; x--, y++) {
+    result[x] = buffer[y];
+  }
+
+  return result;
+}
+
+string decimal(uintmax_t value) {
+  char buffer[64];
+  unsigned size = 0;
+
+  do {
+    unsigned n = value % 10;
+    buffer[size++] = '0' + n;
+    value /= 10;
+  } while(value);
+  buffer[size] = 0;
+
+  char result[size + 1];
+  memset(result, '0', size);
+  result[size] = 0;
+
+  for(signed x = size - 1, y = 0; x >= 0 && y < size; x--, y++) {
+    result[x] = buffer[y];
+  }
+
+  return result;
+}
+
+template<unsigned length> string ldecimal(uintmax_t value) {
+  char buffer[64];
+  unsigned size = 0;
+
+  do {
+    unsigned n = value % 10;
+    buffer[size++] = '0' + n;
+    value /= 10;
+  } while(value);
+  buffer[size] = 0;
+
+  char result[length + 1];
+  memset(result, ' ', length);
+  result[length] = 0;
+
+  for(signed x = 0, y = size - 1; x < length && y >= 0; x++, y--) {
+    result[x] = buffer[y];
+  }
+
+  return result;
+}
+
+template<unsigned length> string rdecimal(uintmax_t value) {
+  char buffer[64];
+  unsigned size = 0;
+
+  do {
+    unsigned n = value % 10;
+    buffer[size++] = '0' + n;
+    value /= 10;
+  } while(value);
+  buffer[size] = 0;
+
+  char result[length + 1];
+  memset(result, ' ', length);
+  result[length] = 0;
+
+  for(signed x = length - 1, y = 0; x >= 0 && y < size; x--, y++) {
+    result[x] = buffer[y];
+  }
+
+  return result;
+}
+
+template<unsigned length> string hex(uintmax_t value) {
   string output;
   unsigned offset = 0;
 
@@ -38,7 +182,7 @@ template<unsigned length, char padding> string hex(uintmax_t value) {
     value >>= 4;
   } while(value);
 
-  while(offset < length) output[offset++] = padding;
+  while(offset < length) output[offset++] = '0';
   output[offset--] = 0;
 
   //reverse the string in-place
@@ -51,55 +195,7 @@ template<unsigned length, char padding> string hex(uintmax_t value) {
   return output;
 }
 
-template<unsigned length, char padding> string integer(intmax_t value) {
-  string output;
-  unsigned offset = 0;
-
-  bool negative = value < 0;
-  if(negative) value = abs(value);
-
-  do {
-    unsigned n = value % 10;
-    output[offset++] = '0' + n;
-    value /= 10;
-  } while(value);
-
-  while(offset < length) output[offset++] = padding;
-  if(negative) output[offset++] = '-';
-  output[offset--] = 0;
-
-  for(unsigned i = 0; i < (offset + 1) >> 1; i++) {
-    char temp = output[i];
-    output[i] = output[offset - i];
-    output[offset - i] = temp;
-  }
-
-  return output;
-}
-
-template<unsigned length, char padding> string decimal(uintmax_t value) {
-  string output;
-  unsigned offset = 0;
-
-  do {
-    unsigned n = value % 10;
-    output[offset++] = '0' + n;
-    value /= 10;
-  } while(value);
-
-  while(offset < length) output[offset++] = padding;
-  output[offset--] = 0;
-
-  for(unsigned i = 0; i < (offset + 1) >> 1; i++) {
-    char temp = output[i];
-    output[i] = output[offset - i];
-    output[offset - i] = temp;
-  }
-
-  return output;
-}
-
-template<unsigned length, char padding> string binary(uintmax_t value) {
+template<unsigned length> string binary(uintmax_t value) {
   string output;
   unsigned offset = 0;
 
@@ -109,7 +205,7 @@ template<unsigned length, char padding> string binary(uintmax_t value) {
     value >>= 1;
   } while(value);
 
-  while(offset < length) output[offset++] = padding;
+  while(offset < length) output[offset++] = '0';
   output[offset--] = 0;
 
   for(unsigned i = 0; i < (offset + 1) >> 1; i++) {

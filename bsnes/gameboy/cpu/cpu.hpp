@@ -72,4 +72,4 @@ struct CPU : Processor, MMIO {
   CPU();
 };
 
-extern  CPU cpu;
+extern CPU cpu;

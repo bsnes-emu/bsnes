@@ -1,6 +1,6 @@
 gameboy_objects := gameboy-system gameboy-scheduler
 gameboy_objects += gameboy-memory gameboy-cartridge
-gameboy_objects += gameboy-cpu gameboy-lcd
+gameboy_objects += gameboy-cpu gameboy-apu gameboy-lcd
 objects += $(gameboy_objects)
 
 obj/gameboy-system.o: $(gameboy)/system/system.cpp $(call rwildcard,$(gameboy)/system/)
@@ -8,4 +8,5 @@ obj/gameboy-scheduler.o: $(gameboy)/scheduler/scheduler.cpp $(call rwildcard,$(g
 obj/gameboy-cartridge.o: $(gameboy)/cartridge/cartridge.cpp $(call rwildcard,$(gameboy)/cartridge/)
 obj/gameboy-memory.o: $(gameboy)/memory/memory.cpp $(call rwildcard,$(gameboy)/memory/)
 obj/gameboy-cpu.o: $(gameboy)/cpu/cpu.cpp $(call rwildcard,$(gameboy)/cpu/)
+obj/gameboy-apu.o: $(gameboy)/apu/apu.cpp $(call rwildcard,$(gameboy)/apu/)
 obj/gameboy-lcd.o: $(gameboy)/lcd/lcd.cpp $(call rwildcard,$(gameboy)/lcd/)

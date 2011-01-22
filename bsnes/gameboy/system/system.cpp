@@ -54,6 +54,7 @@ void System::power() {
   bus.power();
   cartridge.power();
   cpu.power();
+  apu.power();
   lcd.power();
   scheduler.init();
 

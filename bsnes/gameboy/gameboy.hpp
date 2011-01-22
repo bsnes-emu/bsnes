@@ -5,7 +5,7 @@
 namespace GameBoy {
   namespace Info {
     static const char Name[] = "bgameboy";
-    static const char Version[] = "000.11";
+    static const char Version[] = "000.12";
     static unsigned SerializerVersion = 1;
   }
 }
@@ -51,5 +51,6 @@ namespace GameBoy {
   #include <gameboy/scheduler/scheduler.hpp>
   #include <gameboy/cartridge/cartridge.hpp>
   #include <gameboy/cpu/cpu.hpp>
+  #include <gameboy/apu/apu.hpp>
   #include <gameboy/lcd/lcd.hpp>
 };

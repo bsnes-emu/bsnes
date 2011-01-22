@@ -41,7 +41,7 @@ void StateManager::synchronize() {
 void StateManager::refresh() {
   for(unsigned i = 0; i < 32; i++) {
     stateList.setItem(i, { 
-      decimal<2, ' '>(i + 1), "\t",
+      rdecimal<2>(i + 1), "\t",
       slotLoadDescription(i)
     });
   }
