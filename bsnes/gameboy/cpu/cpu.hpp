@@ -23,12 +23,21 @@ struct CPU : Processor, MMIO {
     unsigned timer1;
     unsigned timer2;
     unsigned timer3;
+    unsigned timer4;
 
     //$ff00  JOYP
     bool p15;
     bool p14;
     uint8 joyp;
     uint8 mlt_req;
+
+    //$ff01  SB
+    uint8 serial_data;
+    unsigned serial_bits;
+
+    //$ff02  SC
+    bool serial_transfer;
+    bool serial_clock;
 
     //$ff04  DIV
     uint8 div;

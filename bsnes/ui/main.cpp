@@ -146,7 +146,7 @@ int main(int argc, char **argv) {
 }
 
 void Application::loadGeometry() {
-  geometryConfig.load(string(config.path.user, "bsnes-phoenix-geometry.cfg"));
+  geometryConfig.load(string(config.path.user, "bsnes-geometry.cfg"));
   foreach(window, windows) {
     lstring position;
     position.split(",", window->position);
@@ -160,5 +160,5 @@ void Application::saveGeometry() {
     Geometry geom = window->geometry();
     window->position = { geom.x, ",", geom.y };
   }
-  geometryConfig.save(string(config.path.user, "bsnes-phoenix-geometry.cfg"));
+  geometryConfig.save(string(config.path.user, "bsnes-geometry.cfg"));
 }

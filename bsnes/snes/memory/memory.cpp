@@ -5,16 +5,6 @@ namespace SNES {
 
 Bus bus;
 
-#include "serialization.cpp"
-
-namespace memory {
-  StaticRAM wram(128 * 1024);
-  StaticRAM apuram(64 * 1024);
-  StaticRAM vram(64 * 1024);
-  StaticRAM oam(544);
-  StaticRAM cgram(512);
-};
-
 unsigned Bus::mirror(unsigned addr, unsigned size) {
   unsigned base = 0;
   if(size) {

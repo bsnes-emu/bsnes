@@ -49,7 +49,6 @@ void System::serialize(serializer &s) {
 }
 
 void System::serialize_all(serializer &s) {
-  bus.serialize(s);
   cartridge.serialize(s);
   system.serialize(s);
   cpu.serialize(s);

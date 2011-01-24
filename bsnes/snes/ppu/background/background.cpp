@@ -96,7 +96,7 @@ void PPU::Background::get_tile() {
   if(ty & 0x20) offset += screen_y;
 
   uint16 addr = regs.screen_addr + (offset << 1);
-  tile = (memory::vram[addr + 0] << 0) + (memory::vram[addr + 1] << 8);
+  tile = (ppu.vram[addr + 0] << 0) + (ppu.vram[addr + 1] << 8);
   bool mirror_y = tile & 0x8000;
   bool mirror_x = tile & 0x4000;
   priority = (tile & 0x2000 ? regs.priority1 : regs.priority0);
@@ -111,18 +111,18 @@ void PPU::Background::get_tile() {
   offset = (character << (4 + color_depth)) + ((voffset & 7) << 1);
 
   if(regs.mode >= Mode::BPP2) {
-    data[0] = memory::vram[offset +  0];
-    data[1] = memory::vram[offset +  1];
+    data[0] = ppu.vram[offset +  0];
+    data[1] = ppu.vram[offset +  1];
   }
   if(regs.mode >= Mode::BPP4) {
-    data[2] = memory::vram[offset + 16];
-    data[3] = memory::vram[offset + 17];
+    data[2] = ppu.vram[offset + 16];
+    data[3] = ppu.vram[offset + 17];
   }
   if(regs.mode >= Mode::BPP8) {
-    data[4] = memory::vram[offset + 32];
-    data[5] = memory::vram[offset + 33];
-    data[6] = memory::vram[offset + 48];
-    data[7] = memory::vram[offset + 49];
+    data[4] = ppu.vram[offset + 32];
+    data[5] = ppu.vram[offset + 33];
+    data[6] = ppu.vram[offset + 48];
+    data[7] = ppu.vram[offset + 49];
   }
 
   if(mirror_x) for(unsigned n = 0; n < 8; n++) {
@@ -273,7 +273,7 @@ unsigned PPU::Background::get_tile(unsigned x, unsigned y) {
   if(y & 0x20) offset += screen_y;
 
   uint16 addr = regs.screen_addr + (offset << 1);
-  return (memory::vram[addr + 0] << 0) + (memory::vram[addr + 1] << 8);
+  return (ppu.vram[addr + 0] << 0) + (ppu.vram[addr + 1] << 8);
 }
 
 PPU::Background::Background(PPU &self, unsigned id) : self(self), id(id) {

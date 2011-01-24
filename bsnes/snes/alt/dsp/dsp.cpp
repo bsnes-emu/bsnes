@@ -40,7 +40,7 @@ void DSP::write(uint8 addr, uint8 data) {
 }
 
 void DSP::power() {
-  spc_dsp.init(memory::apuram.data());
+  spc_dsp.init(smp.apuram);
   spc_dsp.reset();
   spc_dsp.set_output(samplebuffer, 8192);
 }

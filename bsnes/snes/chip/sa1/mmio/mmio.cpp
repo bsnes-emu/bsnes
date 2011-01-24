@@ -217,7 +217,7 @@ void SA1::mmio_w2231(uint8 data) {
   mmio.dmasize = (data >> 2) & 7;
   mmio.dmacb   = (data & 0x03);
 
-  if(mmio.chdend) memory::cc1bwram.dma = false;
+  if(mmio.chdend) cpubwram.dma = false;
   if(mmio.dmasize > 5) mmio.dmasize = 5;
   if(mmio.dmacb   > 2) mmio.dmacb   = 2;
 }

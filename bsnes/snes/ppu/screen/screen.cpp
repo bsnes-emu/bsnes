@@ -55,9 +55,9 @@ uint16 PPU::Screen::get_pixel(bool swap) {
     color_main = get_color(self.bg4.output.main.palette);
     source_main = BG4;
   }
-  if(self.oam.output.main.priority > priority_main) {
-    priority_main = self.oam.output.main.priority;
-    color_main = get_color(self.oam.output.main.palette);
+  if(self.sprite.output.main.priority > priority_main) {
+    priority_main = self.sprite.output.main.priority;
+    color_main = get_color(self.sprite.output.main.palette);
     source_main = OAM;
   }
   if(priority_main == 0) {
@@ -97,9 +97,9 @@ uint16 PPU::Screen::get_pixel(bool swap) {
     color_sub = get_color(self.bg4.output.sub.palette);
     source_sub = BG4;
   }
-  if(self.oam.output.sub.priority > priority_sub) {
-    priority_sub = self.oam.output.sub.priority;
-    color_sub = get_color(self.oam.output.sub.palette);
+  if(self.sprite.output.sub.priority > priority_sub) {
+    priority_sub = self.sprite.output.sub.priority;
+    color_sub = get_color(self.sprite.output.sub.palette);
     source_sub = OAM;
   }
   if(priority_sub == 0) {
@@ -130,7 +130,7 @@ uint16 PPU::Screen::get_pixel(bool swap) {
     color_main = 0x0000;
   }
 
-  bool color_exempt = (source_main == OAM && self.oam.output.main.palette < 192);
+  bool color_exempt = (source_main == OAM && self.sprite.output.main.palette < 192);
   if(!color_exempt && color_enable[source_main] && self.window.output.sub.color_enable) {
     bool halve = false;
     if(regs.color_halve && self.window.output.main.color_enable) {
@@ -173,7 +173,7 @@ uint16 PPU::Screen::addsub(unsigned x, unsigned y, bool halve) {
 uint16 PPU::Screen::get_color(unsigned palette) {
   palette <<= 1;
   self.regs.cgram_iaddr = palette;
-  return memory::cgram[palette + 0] + (memory::cgram[palette + 1] << 8);
+  return ppu.cgram[palette + 0] + (ppu.cgram[palette + 1] << 8);
 }
 
 uint16 PPU::Screen::get_direct_color(unsigned palette, unsigned tile) {

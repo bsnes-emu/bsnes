@@ -38,24 +38,24 @@ uint8 Debugger::read(Debugger::MemorySource source, unsigned addr) {
 
     case MemorySource::APUBus: {
       if((addr & 0xffc0) == 0xffc0) return smp.iplrom[addr & 0x3f];
-      return memory::apuram.read(addr & 0xffff);
+      return smp.apuram[addr & 0xffff];
     } break;
 
     case MemorySource::APURAM: {
-      return memory::apuram.read(addr & 0xffff);
+      return smp.apuram[addr & 0xffff];
     } break;
 
     case MemorySource::VRAM: {
-      return memory::vram.read(addr & 0xffff);
+      return ppu.vram[addr & 0xffff];
     } break;
 
     case MemorySource::OAM: {
-      if(addr & 0x0200) return memory::oam.read(0x0200 + (addr & 0x1f));
-      return memory::oam.read(addr & 0x01ff);
+      if(addr & 0x0200) return ppu.oam[0x0200 + (addr & 0x1f)];
+      return ppu.oam[addr & 0x01ff];
     } break;
 
     case MemorySource::CGRAM: {
-      return memory::cgram.read(addr & 0x01ff);
+      return ppu.cgram[addr & 0x01ff];
     } break;
   }
 
@@ -73,20 +73,20 @@ void Debugger::write(Debugger::MemorySource source, unsigned addr, uint8 data) {
     } break;
 
     case MemorySource::APURAM: {
-      memory::apuram.write(addr & 0xffff, data);
+      smp.apuram[addr & 0xffff] = data;
     } break;
 
     case MemorySource::VRAM: {
-      memory::vram.write(addr & 0xffff, data);
+      ppu.vram[addr & 0xffff] = data;
     } break;
 
     case MemorySource::OAM: {
-      if(addr & 0x0200) memory::oam.write(0x0200 + (addr & 0x1f), data);
-      else memory::oam.write(addr & 0x01ff, data);
+      if(addr & 0x0200) ppu.oam[0x0200 + (addr & 0x1f)] = data;
+      else ppu.oam[addr & 0x01ff] = data;
     } break;
 
     case MemorySource::CGRAM: {
-      memory::cgram.write(addr & 0x01ff, data);
+      ppu.cgram[addr & 0x01ff] = data;
     } break;
   }
 }

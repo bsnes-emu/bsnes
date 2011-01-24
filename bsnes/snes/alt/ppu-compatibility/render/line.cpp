@@ -2,7 +2,7 @@
 
 inline uint16 PPU::get_palette(uint8 index) {
   const unsigned addr = index << 1;
-  return memory::cgram[addr] + (memory::cgram[addr + 1] << 8);
+  return cgram[addr] + (cgram[addr + 1] << 8);
 }
 
 //p = 00000bgr <palette data>

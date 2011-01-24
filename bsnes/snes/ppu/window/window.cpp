@@ -52,8 +52,8 @@ void PPU::Window::run() {
     regs.oam_two_enable, regs.oam_two_invert,
     regs.oam_mask, regs.oam_main_enable, regs.oam_sub_enable
   );
-  if(main) self.oam.output.main.priority = 0;
-  if(sub) self.oam.output.sub.priority = 0;
+  if(main) self.sprite.output.main.priority = 0;
+  if(sub) self.sprite.output.sub.priority = 0;
 
   test(
     main, sub,

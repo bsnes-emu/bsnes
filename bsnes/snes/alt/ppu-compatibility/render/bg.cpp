@@ -32,7 +32,7 @@ uint16 PPU::bg_get_tile(uint16 x, uint16 y) {
   if(x & 0x20) pos += bg_info[bg].scx;
 
   const uint16 addr = regs.bg_scaddr[bg] + (pos << 1);
-  return memory::vram[addr] + (memory::vram[addr + 1] << 8);
+  return vram[addr] + (vram[addr + 1] << 8);
 }
 
 #define setpixel_main(x) \

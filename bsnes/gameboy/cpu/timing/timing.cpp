@@ -64,10 +64,22 @@ void CPU::timer_stage2() {  // 16384hz
   status.div++;
 
   status.timer2 -= 4;
-  if(++status.timer3 >= 4) timer_stage3();
+  if(++status.timer3 >= 2) timer_stage3();
 }
 
-void CPU::timer_stage3() {  //  4096hz
+void CPU::timer_stage3() {  //  8192hz
+  if(status.serial_transfer && status.serial_clock) {
+    if(--status.serial_bits == 0) {
+      status.serial_transfer = 0;
+      interrupt_raise(Interrupt::Serial);
+    }
+  }
+
+  status.timer3 -= 2;
+  if(++status.timer4 >= 2) timer_stage4();
+}
+
+void CPU::timer_stage4() {  //  4096hz
   if(status.timer_enable && status.timer_clock == 0) {
     if(++status.tima == 0) {
       status.tima = status.tma;
@@ -75,7 +87,7 @@ void CPU::timer_stage3() {  //  4096hz
     }
   }
 
-  status.timer3 -= 4;
+  status.timer4 -= 2;
 }
 
 #endif

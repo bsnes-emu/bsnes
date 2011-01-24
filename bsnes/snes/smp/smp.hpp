@@ -1,5 +1,8 @@
 class SMP : public Processor, public SMPcore {
 public:
+  static const uint8 iplrom[64];
+  uint8 apuram[64 * 1024];
+
   enum : bool { Threaded = true };
   alwaysinline void step(unsigned clocks);
   alwaysinline void synchronize_cpu();
@@ -15,8 +18,6 @@ public:
   void serialize(serializer&);
   SMP();
   ~SMP();
-
-  static const uint8 iplrom[64];
 
 private:
   #include "memory/memory.hpp"

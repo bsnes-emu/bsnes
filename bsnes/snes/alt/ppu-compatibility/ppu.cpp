@@ -123,17 +123,20 @@ void PPU::frame() {
 }
 
 void PPU::enable() {
-  bus.map(Bus::MapMode::Direct, 0x00, 0x3f, 0x2100, 0x213f, { &PPU::mmio_read, &ppu }, { &PPU::mmio_write, &ppu });
-  bus.map(Bus::MapMode::Direct, 0x80, 0xbf, 0x2100, 0x213f, { &PPU::mmio_read, &ppu }, { &PPU::mmio_write, &ppu });
+  function<uint8 (unsigned)> read = { &PPU::mmio_read, (PPU*)&ppu };
+  function<void (unsigned, uint8)> write = { &PPU::mmio_write, (PPU*)&ppu };
+
+  bus.map(Bus::MapMode::Direct, 0x00, 0x3f, 0x2100, 0x213f, read, write);
+  bus.map(Bus::MapMode::Direct, 0x80, 0xbf, 0x2100, 0x213f, read, write);
 }
 
 void PPU::power() {
   ppu1_version = config.ppu1.version;
   ppu2_version = config.ppu2.version;
 
-  for(unsigned i = 0; i < memory::vram.size();  i++) memory::vram[i]  = 0x00;
-  for(unsigned i = 0; i < memory::oam.size();   i++) memory::oam[i]   = 0x00;
-  for(unsigned i = 0; i < memory::cgram.size(); i++) memory::cgram[i] = 0x00;
+  foreach(n, vram) n = 0x00;
+  foreach(n, oam) n = 0x00;
+  foreach(n, cgram) n = 0x00;
   flush_tiledata_cache();
 
   region = (system.region() == System::Region::NTSC ? 0 : 1);  //0 = NTSC, 1 = PAL

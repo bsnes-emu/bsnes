@@ -1,5 +1,7 @@
 class CPU : public Processor, public CPUcore, public PPUcounter {
 public:
+  uint8 wram[128 * 1024];
+
   enum : bool { Threaded = true };
   array<Processor*> coprocessors;
   alwaysinline void step(unsigned clocks);

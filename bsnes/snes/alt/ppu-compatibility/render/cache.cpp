@@ -32,8 +32,8 @@ void PPU::render_bg_tile(uint16 tile_num) {
     unsigned pos = tile_num * 16;
     unsigned y = 8;
     while(y--) {
-      d0 = memory::vram[pos    ];
-      d1 = memory::vram[pos + 1];
+      d0 = vram[pos    ];
+      d1 = vram[pos + 1];
       render_bg_tile_line_2bpp(0x80);
       render_bg_tile_line_2bpp(0x40);
       render_bg_tile_line_2bpp(0x20);
@@ -52,10 +52,10 @@ void PPU::render_bg_tile(uint16 tile_num) {
     unsigned pos = tile_num * 32;
     unsigned y = 8;
     while(y--) {
-      d0 = memory::vram[pos     ];
-      d1 = memory::vram[pos +  1];
-      d2 = memory::vram[pos + 16];
-      d3 = memory::vram[pos + 17];
+      d0 = vram[pos     ];
+      d1 = vram[pos +  1];
+      d2 = vram[pos + 16];
+      d3 = vram[pos + 17];
       render_bg_tile_line_4bpp(0x80);
       render_bg_tile_line_4bpp(0x40);
       render_bg_tile_line_4bpp(0x20);
@@ -74,14 +74,14 @@ void PPU::render_bg_tile(uint16 tile_num) {
     unsigned pos = tile_num * 64;
     unsigned y = 8;
     while(y--) {
-      d0 = memory::vram[pos     ];
-      d1 = memory::vram[pos +  1];
-      d2 = memory::vram[pos + 16];
-      d3 = memory::vram[pos + 17];
-      d4 = memory::vram[pos + 32];
-      d5 = memory::vram[pos + 33];
-      d6 = memory::vram[pos + 48];
-      d7 = memory::vram[pos + 49];
+      d0 = vram[pos     ];
+      d1 = vram[pos +  1];
+      d2 = vram[pos + 16];
+      d3 = vram[pos + 17];
+      d4 = vram[pos + 32];
+      d5 = vram[pos + 33];
+      d6 = vram[pos + 48];
+      d7 = vram[pos + 49];
       render_bg_tile_line_8bpp(0x80);
       render_bg_tile_line_8bpp(0x40);
       render_bg_tile_line_8bpp(0x20);

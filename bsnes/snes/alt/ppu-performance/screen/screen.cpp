@@ -2,11 +2,10 @@
 
 unsigned PPU::Screen::get_palette(unsigned color) {
   #if defined(ARCH_LSB)
-  static uint16 *cgram = (uint16*)memory::cgram.data();
-  return cgram[color];
+  return ((uint16*)ppu.cgram)[color];
   #else
   color <<= 1;
-  return (memory::cgram[color + 0] << 0) + (memory::cgram[color + 1] << 8);
+  return (ppu.cgram[color + 0] << 0) + (ppu.cgram[color + 1] << 8);
   #endif
 }
 

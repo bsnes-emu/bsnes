@@ -8,8 +8,8 @@ uint8* PPU::Cache::tile_2bpp(unsigned tile) {
     unsigned y = 8;
     unsigned color, d0, d1;
     while(y--) {
-      d0 = memory::vram[offset +  0];
-      d1 = memory::vram[offset +  1];
+      d0 = ppu.vram[offset +  0];
+      d1 = ppu.vram[offset +  1];
       #define render_line(mask) \
         color  = !!(d0 & mask) << 0; \
         color |= !!(d1 & mask) << 1; \
@@ -37,10 +37,10 @@ uint8* PPU::Cache::tile_4bpp(unsigned tile) {
     unsigned y = 8;
     unsigned color, d0, d1, d2, d3;
     while(y--) {
-      d0 = memory::vram[offset +  0];
-      d1 = memory::vram[offset +  1];
-      d2 = memory::vram[offset + 16];
-      d3 = memory::vram[offset + 17];
+      d0 = ppu.vram[offset +  0];
+      d1 = ppu.vram[offset +  1];
+      d2 = ppu.vram[offset + 16];
+      d3 = ppu.vram[offset + 17];
       #define render_line(mask) \
         color  = !!(d0 & mask) << 0; \
         color |= !!(d1 & mask) << 1; \
@@ -70,14 +70,14 @@ uint8* PPU::Cache::tile_8bpp(unsigned tile) {
     unsigned y = 8;
     unsigned color, d0, d1, d2, d3, d4, d5, d6, d7;
     while(y--) {
-      d0 = memory::vram[offset +  0];
-      d1 = memory::vram[offset +  1];
-      d2 = memory::vram[offset + 16];
-      d3 = memory::vram[offset + 17];
-      d4 = memory::vram[offset + 32];
-      d5 = memory::vram[offset + 33];
-      d6 = memory::vram[offset + 48];
-      d7 = memory::vram[offset + 49];
+      d0 = ppu.vram[offset +  0];
+      d1 = ppu.vram[offset +  1];
+      d2 = ppu.vram[offset + 16];
+      d3 = ppu.vram[offset + 17];
+      d4 = ppu.vram[offset + 32];
+      d5 = ppu.vram[offset + 33];
+      d6 = ppu.vram[offset + 48];
+      d7 = ppu.vram[offset + 49];
       #define render_line(mask) \
         color  = !!(d0 & mask) << 0; \
         color |= !!(d1 & mask) << 1; \

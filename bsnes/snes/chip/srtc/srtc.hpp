@@ -1,5 +1,7 @@
 class SRTC {
 public:
+  uint8 rtc[20];
+
   void init();
   void enable();
   void power();
@@ -14,7 +16,6 @@ public:
 private:
   static const unsigned months[12];
   enum RtcMode { RtcReady, RtcCommand, RtcRead, RtcWrite };
-  uint8 rtc[20];
   unsigned rtc_mode;
   signed rtc_index;
 

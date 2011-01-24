@@ -2,7 +2,7 @@
 
 void DSP::brr_decode(voice_t &v) {
   //state.t_brr_byte = ram[v.brr_addr + v.brr_offset] cached from previous clock cycle
-  int nybbles = (state.t_brr_byte << 8) + memory::apuram[(uint16)(v.brr_addr + v.brr_offset + 1)];
+  int nybbles = (state.t_brr_byte << 8) + smp.apuram[(uint16)(v.brr_addr + v.brr_offset + 1)];
 
   const int filter = (state.t_brr_header >> 2) & 3;
   const int scale  = (state.t_brr_header >> 4);

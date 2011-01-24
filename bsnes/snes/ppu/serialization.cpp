@@ -16,6 +16,10 @@ void PPU::serialize(serializer &s) {
   Processor::serialize(s);
   PPUcounter::serialize(s);
 
+  s.array(vram);
+  s.array(oam);
+  s.array(cgram);
+
   s.integer(ppu1_version);
   s.integer(ppu2_version);
 
@@ -81,7 +85,7 @@ void PPU::serialize(serializer &s) {
   bg2.serialize(s);
   bg3.serialize(s);
   bg4.serialize(s);
-  oam.serialize(s);
+  sprite.serialize(s);
   window.serialize(s);
   screen.serialize(s);
 }

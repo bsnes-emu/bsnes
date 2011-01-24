@@ -17,9 +17,10 @@ uint8 LCD::mmio_read(uint16 addr) {
 
   if(addr == 0xff41) {  //STAT
     unsigned mode;
-    if(status.ly >= 144) mode = 1;  //Vblank
-    else if(status.lx >= 320) mode = 0;  //Hblank
-    else mode = 3;  //LCD transfer
+    if(status.ly >= 144) mode = 1;      //Vblank
+    else if(status.lx < 80) mode = 2;   //OAM
+    else if(status.lx < 252) mode = 3;  //LCD
+    else mode = 0;                      //Hblank
 
     return (status.interrupt_lyc << 6)
          | (status.interrupt_oam << 5)

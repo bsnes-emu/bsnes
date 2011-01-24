@@ -14,3 +14,6 @@ void mmc_cpu_write(unsigned addr, uint8 data);
 
 uint8 mmc_sa1_read(unsigned addr);
 void mmc_sa1_write(unsigned addr, uint8 data);
+
+uint8 bitmap_read(unsigned addr);
+void bitmap_write(unsigned addr, uint8 data);

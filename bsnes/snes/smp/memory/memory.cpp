@@ -3,20 +3,20 @@
 alwaysinline uint8 SMP::ram_read(uint16 addr) {
   if(addr >= 0xffc0 && status.iplrom_enabled) return iplrom[addr & 0x3f];
   if(status.ram_disabled) return 0x5a;  //0xff on mini-SNES
-  return memory::apuram[addr];
+  return apuram[addr];
 }
 
 alwaysinline void SMP::ram_write(uint16 addr, uint8 data) {
   //writes to $ffc0-$ffff always go to apuram, even if the iplrom is enabled
-  if(status.ram_writable && !status.ram_disabled) memory::apuram[addr] = data;
+  if(status.ram_writable && !status.ram_disabled) apuram[addr] = data;
 }
 
 uint8 SMP::port_read(uint2 port) const {
-  return memory::apuram[0xf4 + port];
+  return apuram[0xf4 + port];
 }
 
 void SMP::port_write(uint2 port, uint8 data) {
-  memory::apuram[0xf4 + port] = data;
+  apuram[0xf4 + port] = data;
 }
 
 alwaysinline uint8 SMP::op_busread(uint16 addr) {

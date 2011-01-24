@@ -11,7 +11,7 @@ unsigned PPU::Background::get_tile(unsigned hoffset, unsigned voffset) {
   if(tile_x & 0x20) tile_pos += scx;
 
   const uint16 tiledata_addr = regs.screen_addr + (tile_pos << 1);
-  return (memory::vram[tiledata_addr + 0] << 0) + (memory::vram[tiledata_addr + 1] << 8);
+  return (ppu.vram[tiledata_addr + 0] << 0) + (ppu.vram[tiledata_addr + 1] << 8);
 }
 
 void PPU::Background::offset_per_tile(unsigned x, unsigned y, unsigned &hoffset, unsigned &voffset) {

@@ -16,6 +16,10 @@ void PPU::serialize(serializer &s) {
   Processor::serialize(s);
   PPUcounter::serialize(s);
 
+  s.array(vram);
+  s.array(oam);
+  s.array(cgram);
+
   s.integer(ppu1_version);
   s.integer(ppu2_version);
 

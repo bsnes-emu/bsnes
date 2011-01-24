@@ -130,9 +130,9 @@ void SA1::power() {
 void SA1::reset() {
   create(SA1::Enter, system.cpu_frequency());
 
-  memory::cc1bwram.dma = false;
-  for(unsigned addr = 0; addr < memory::iram.size(); addr++) {
-    memory::iram.write(addr, 0x00);
+  cpubwram.dma = false;
+  for(unsigned addr = 0; addr < iram.size(); addr++) {
+    iram.write(addr, 0x00);
   }
 
   regs.pc.d = 0x000000;
@@ -321,7 +321,7 @@ void SA1::reset() {
   mmio.overflow = false;
 }
 
-SA1::SA1() {
+SA1::SA1() : iram(2048) {
 }
 
 }

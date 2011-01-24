@@ -22,14 +22,14 @@ uint16 PPU::get_vram_addr() {
 }
 
 uint8 PPU::vram_read(unsigned addr) {
-  if(regs.display_disable) return memory::vram[addr];
-  if(cpu.vcounter() >= display.height) return memory::vram[addr];
+  if(regs.display_disable) return vram[addr];
+  if(cpu.vcounter() >= display.height) return vram[addr];
   return 0x00;
 }
 
 void PPU::vram_write(unsigned addr, uint8 data) {
   if(regs.display_disable || cpu.vcounter() >= display.height) {
-    memory::vram[addr] = data;
+    vram[addr] = data;
     cache.tilevalid[0][addr >> 4] = false;
     cache.tilevalid[1][addr >> 5] = false;
     cache.tilevalid[2][addr >> 6] = false;
@@ -39,24 +39,24 @@ void PPU::vram_write(unsigned addr, uint8 data) {
 
 uint8 PPU::oam_read(unsigned addr) {
   if(addr & 0x0200) addr &= 0x021f;
-  if(regs.display_disable) return memory::oam[addr];
-  if(cpu.vcounter() >= display.height) return memory::oam[addr];
-  return memory::oam[0x0218];
+  if(regs.display_disable) return oam[addr];
+  if(cpu.vcounter() >= display.height) return oam[addr];
+  return oam[0x0218];
 }
 
 void PPU::oam_write(unsigned addr, uint8 data) {
   if(addr & 0x0200) addr &= 0x021f;
   if(!regs.display_disable && cpu.vcounter() < display.height) addr = 0x0218;
-  memory::oam[addr] = data;
-  oam.update_list(addr, data);
+  oam[addr] = data;
+  sprite.update_list(addr, data);
 }
 
 uint8 PPU::cgram_read(unsigned addr) {
-  return memory::cgram[addr];
+  return cgram[addr];
 }
 
 void PPU::cgram_write(unsigned addr, uint8 data) {
-  memory::cgram[addr] = data;
+  cgram[addr] = data;
 }
 
 void PPU::mmio_update_video_mode() {
@@ -66,7 +66,7 @@ void PPU::mmio_update_video_mode() {
       bg2.regs.mode = Background::Mode::BPP2; bg2.regs.priority0 = 7; bg2.regs.priority1 = 10;
       bg3.regs.mode = Background::Mode::BPP2; bg3.regs.priority0 = 2; bg3.regs.priority1 =  5;
       bg4.regs.mode = Background::Mode::BPP2; bg4.regs.priority0 = 1; bg4.regs.priority1 =  4;
-      oam.regs.priority0 = 3; oam.regs.priority1 = 6; oam.regs.priority2 = 9; oam.regs.priority3 = 12;
+      sprite.regs.priority0 = 3; sprite.regs.priority1 = 6; sprite.regs.priority2 = 9; sprite.regs.priority3 = 12;
     } break;
 
     case 1: {
@@ -78,12 +78,12 @@ void PPU::mmio_update_video_mode() {
         bg1.regs.priority0 = 5; bg1.regs.priority1 =  8;
         bg2.regs.priority0 = 4; bg2.regs.priority1 =  7;
         bg3.regs.priority0 = 1; bg3.regs.priority1 = 10;
-        oam.regs.priority0 = 2; oam.regs.priority1 = 3; oam.regs.priority2 = 6; oam.regs.priority3 = 9;
+        sprite.regs.priority0 = 2; sprite.regs.priority1 = 3; sprite.regs.priority2 = 6; sprite.regs.priority3 = 9;
       } else {
         bg1.regs.priority0 = 6; bg1.regs.priority1 =  9;
         bg2.regs.priority0 = 5; bg2.regs.priority1 =  8;
         bg3.regs.priority0 = 1; bg3.regs.priority1 =  3;
-        oam.regs.priority0 = 2; oam.regs.priority1 = 4; oam.regs.priority2 = 7; oam.regs.priority3 = 10;
+        sprite.regs.priority0 = 2; sprite.regs.priority1 = 4; sprite.regs.priority2 = 7; sprite.regs.priority3 = 10;
       }
     } break;
 
@@ -94,7 +94,7 @@ void PPU::mmio_update_video_mode() {
       bg4.regs.mode = Background::Mode::Inactive;
       bg1.regs.priority0 = 3; bg1.regs.priority1 = 7;
       bg2.regs.priority0 = 1; bg2.regs.priority1 = 5;
-      oam.regs.priority0 = 2; oam.regs.priority1 = 4; oam.regs.priority2 = 6; oam.regs.priority3 = 8;
+      sprite.regs.priority0 = 2; sprite.regs.priority1 = 4; sprite.regs.priority2 = 6; sprite.regs.priority3 = 8;
     } break;
 
     case 3: {
@@ -104,7 +104,7 @@ void PPU::mmio_update_video_mode() {
       bg4.regs.mode = Background::Mode::Inactive;
       bg1.regs.priority0 = 3; bg1.regs.priority1 = 7;
       bg2.regs.priority0 = 1; bg2.regs.priority1 = 5;
-      oam.regs.priority0 = 2; oam.regs.priority1 = 4; oam.regs.priority2 = 6; oam.regs.priority3 = 8;
+      sprite.regs.priority0 = 2; sprite.regs.priority1 = 4; sprite.regs.priority2 = 6; sprite.regs.priority3 = 8;
     } break;
 
     case 4: {
@@ -114,7 +114,7 @@ void PPU::mmio_update_video_mode() {
       bg4.regs.mode = Background::Mode::Inactive;
       bg1.regs.priority0 = 3; bg1.regs.priority1 = 7;
       bg2.regs.priority0 = 1; bg2.regs.priority1 = 5;
-      oam.regs.priority0 = 2; oam.regs.priority1 = 4; oam.regs.priority2 = 6; oam.regs.priority3 = 8;
+      sprite.regs.priority0 = 2; sprite.regs.priority1 = 4; sprite.regs.priority2 = 6; sprite.regs.priority3 = 8;
     } break;
 
     case 5: {
@@ -124,7 +124,7 @@ void PPU::mmio_update_video_mode() {
       bg4.regs.mode = Background::Mode::Inactive;
       bg1.regs.priority0 = 3; bg1.regs.priority1 = 7;
       bg2.regs.priority0 = 1; bg2.regs.priority1 = 5;
-      oam.regs.priority0 = 2; oam.regs.priority1 = 4; oam.regs.priority2 = 6; oam.regs.priority3 = 8;
+      sprite.regs.priority0 = 2; sprite.regs.priority1 = 4; sprite.regs.priority2 = 6; sprite.regs.priority3 = 8;
     } break;
 
     case 6: {
@@ -133,7 +133,7 @@ void PPU::mmio_update_video_mode() {
       bg3.regs.mode = Background::Mode::Inactive;
       bg4.regs.mode = Background::Mode::Inactive;
       bg1.regs.priority0 = 2; bg1.regs.priority1 = 5;
-      oam.regs.priority0 = 1; oam.regs.priority1 = 3; oam.regs.priority2 = 4; oam.regs.priority3 = 6;
+      sprite.regs.priority0 = 1; sprite.regs.priority1 = 3; sprite.regs.priority2 = 4; sprite.regs.priority3 = 6;
     } break;
 
     case 7: {
@@ -143,7 +143,7 @@ void PPU::mmio_update_video_mode() {
         bg3.regs.mode = Background::Mode::Inactive;
         bg4.regs.mode = Background::Mode::Inactive;
         bg1.regs.priority0 = 2; bg1.regs.priority1 = 2;
-        oam.regs.priority0 = 1; oam.regs.priority1 = 3; oam.regs.priority2 = 4; oam.regs.priority3 = 5;
+        sprite.regs.priority0 = 1; sprite.regs.priority1 = 3; sprite.regs.priority2 = 4; sprite.regs.priority3 = 5;
       } else {
         bg1.regs.mode = Background::Mode::Mode7;
         bg2.regs.mode = Background::Mode::Mode7;
@@ -151,7 +151,7 @@ void PPU::mmio_update_video_mode() {
         bg4.regs.mode = Background::Mode::Inactive;
         bg1.regs.priority0 = 3; bg1.regs.priority1 = 3;
         bg2.regs.priority0 = 1; bg2.regs.priority1 = 5;
-        oam.regs.priority0 = 2; oam.regs.priority1 = 4; oam.regs.priority2 = 6; oam.regs.priority3 = 7;
+        sprite.regs.priority0 = 2; sprite.regs.priority1 = 4; sprite.regs.priority2 = 6; sprite.regs.priority3 = 7;
       }
     } break;
   }
@@ -193,7 +193,7 @@ uint8 PPU::mmio_read(unsigned addr) {
     case 0x2138: {  //OAMDATAREAD
       regs.ppu1_mdr = oam_read(regs.oam_addr);
       regs.oam_addr = (regs.oam_addr + 1) & 0x03ff;
-      oam.set_first();
+      sprite.set_first();
       return regs.ppu1_mdr;
     }
 
@@ -251,8 +251,8 @@ uint8 PPU::mmio_read(unsigned addr) {
 
     case 0x213e: {  //STAT77
       regs.ppu1_mdr &= 0x10;
-      regs.ppu1_mdr |= oam.regs.time_over << 7;
-      regs.ppu1_mdr |= oam.regs.range_over << 6;
+      regs.ppu1_mdr |= sprite.regs.time_over << 7;
+      regs.ppu1_mdr |= sprite.regs.range_over << 6;
       regs.ppu1_mdr |= 0x01;  //version
       return regs.ppu1_mdr;
     }
@@ -283,30 +283,30 @@ void PPU::mmio_write(unsigned addr, uint8 data) {
 
   switch(addr & 0xffff) {
     case 0x2100: {  //INIDISP
-      if(regs.display_disable && cpu.vcounter() == display.height) oam.address_reset();
+      if(regs.display_disable && cpu.vcounter() == display.height) sprite.address_reset();
       regs.display_disable = data & 0x80;
       regs.display_brightness = data & 0x0f;
       return;
     }
 
     case 0x2101: {  //OBSEL
-      oam.regs.base_size = (data >> 5) & 7;
-      oam.regs.nameselect = (data >> 3) & 3;
-      oam.regs.tiledata_addr = (data & 3) << 14;
-      oam.list_valid = false;
+      sprite.regs.base_size = (data >> 5) & 7;
+      sprite.regs.nameselect = (data >> 3) & 3;
+      sprite.regs.tiledata_addr = (data & 3) << 14;
+      sprite.list_valid = false;
       return;
     }
 
     case 0x2102: {  //OAMADDL
       regs.oam_baseaddr = (regs.oam_baseaddr & 0x0100) | (data << 0);
-      oam.address_reset();
+      sprite.address_reset();
       return;
     }
 
     case 0x2103: {  //OAMADDH
       regs.oam_priority = data & 0x80;
       regs.oam_baseaddr = ((data & 1) << 8) | (regs.oam_baseaddr & 0x00ff);
-      oam.address_reset();
+      sprite.address_reset();
       return;
     }
 
@@ -319,7 +319,7 @@ void PPU::mmio_write(unsigned addr, uint8 data) {
         oam_write((regs.oam_addr & ~1) + 1, data);
       }
       regs.oam_addr = (regs.oam_addr + 1) & 0x03ff;
-      oam.set_first();
+      sprite.set_first();
       return;
     }
 
@@ -561,10 +561,10 @@ void PPU::mmio_write(unsigned addr, uint8 data) {
       screen.window.two_invert = data & 0x40;
       screen.window.one_enable = data & 0x20;
       screen.window.one_invert = data & 0x10;
-      oam.window.two_enable = data & 0x08;
-      oam.window.two_invert = data & 0x04;
-      oam.window.one_enable = data & 0x02;
-      oam.window.one_invert = data & 0x01;
+      sprite.window.two_enable = data & 0x08;
+      sprite.window.two_invert = data & 0x04;
+      sprite.window.one_enable = data & 0x02;
+      sprite.window.one_invert = data & 0x01;
       return;
     }
 
@@ -598,12 +598,12 @@ void PPU::mmio_write(unsigned addr, uint8 data) {
 
     case 0x212b: {  //WOBJLOG
       screen.window.mask = (data >> 2) & 3;
-      oam.window.mask = (data >> 0) & 3;
+      sprite.window.mask = (data >> 0) & 3;
       return;
     }
 
     case 0x212c: {  //TM
-      oam.regs.main_enable = data & 0x10;
+      sprite.regs.main_enable = data & 0x10;
       bg4.regs.main_enable = data & 0x08;
       bg3.regs.main_enable = data & 0x04;
       bg2.regs.main_enable = data & 0x02;
@@ -612,7 +612,7 @@ void PPU::mmio_write(unsigned addr, uint8 data) {
     }
 
     case 0x212d: {  //TS
-      oam.regs.sub_enable = data & 0x10;
+      sprite.regs.sub_enable = data & 0x10;
       bg4.regs.sub_enable = data & 0x08;
       bg3.regs.sub_enable = data & 0x04;
       bg2.regs.sub_enable = data & 0x02;
@@ -621,7 +621,7 @@ void PPU::mmio_write(unsigned addr, uint8 data) {
     }
 
     case 0x212e: {  //TMW
-      oam.window.main_enable = data & 0x10;
+      sprite.window.main_enable = data & 0x10;
       bg4.window.main_enable = data & 0x08;
       bg3.window.main_enable = data & 0x04;
       bg2.window.main_enable = data & 0x02;
@@ -630,7 +630,7 @@ void PPU::mmio_write(unsigned addr, uint8 data) {
     }
 
     case 0x212f: {  //TSW
-      oam.window.sub_enable = data & 0x10;
+      sprite.window.sub_enable = data & 0x10;
       bg4.window.sub_enable = data & 0x08;
       bg3.window.sub_enable = data & 0x04;
       bg2.window.sub_enable = data & 0x02;
@@ -671,10 +671,10 @@ void PPU::mmio_write(unsigned addr, uint8 data) {
       regs.mode7_extbg = data & 0x40;
       regs.pseudo_hires = data & 0x08;
       regs.overscan = data & 0x04;
-      oam.regs.interlace = data & 0x02;
+      sprite.regs.interlace = data & 0x02;
       regs.interlace = data & 0x01;
       mmio_update_video_mode();
-      oam.list_valid = false;
+      sprite.list_valid = false;
       return;
     }
   }
@@ -695,17 +695,17 @@ void PPU::mmio_reset() {
   regs.latch_hcounter = 0;
   regs.latch_vcounter = 0;
 
-  oam.regs.first_sprite = 0;
-  oam.list_valid = false;
+  sprite.regs.first_sprite = 0;
+  sprite.list_valid = false;
 
   //$2100
   regs.display_disable = true;
   regs.display_brightness = 0;
 
   //$2101
-  oam.regs.base_size = 0;
-  oam.regs.nameselect = 0;
-  oam.regs.tiledata_addr = 0;
+  sprite.regs.base_size = 0;
+  sprite.regs.nameselect = 0;
+  sprite.regs.tiledata_addr = 0;
 
   //$2102-$2103
   regs.oam_baseaddr = 0;
@@ -799,10 +799,10 @@ void PPU::mmio_reset() {
   bg4.window.two_enable = 0;
   bg4.window.two_invert = 0;
 
-  oam.window.one_enable = 0;
-  oam.window.one_invert = 0;
-  oam.window.two_enable = 0;
-  oam.window.two_invert = 0;
+  sprite.window.one_enable = 0;
+  sprite.window.one_invert = 0;
+  sprite.window.two_enable = 0;
+  sprite.window.two_invert = 0;
 
   screen.window.one_enable = 0;
   screen.window.one_invert = 0;
@@ -820,7 +820,7 @@ void PPU::mmio_reset() {
   bg2.window.mask = 0;
   bg3.window.mask = 0;
   bg4.window.mask = 0;
-  oam.window.mask = 0;
+  sprite.window.mask = 0;
   screen.window.mask = 0;
 
   //$212c
@@ -828,28 +828,28 @@ void PPU::mmio_reset() {
   bg2.regs.main_enable = 0;
   bg3.regs.main_enable = 0;
   bg4.regs.main_enable = 0;
-  oam.regs.main_enable = 0;
+  sprite.regs.main_enable = 0;
 
   //$212d
   bg1.regs.sub_enable = 0;
   bg2.regs.sub_enable = 0;
   bg3.regs.sub_enable = 0;
   bg4.regs.sub_enable = 0;
-  oam.regs.sub_enable = 0;
+  sprite.regs.sub_enable = 0;
 
   //$212e
   bg1.window.main_enable = 0;
   bg2.window.main_enable = 0;
   bg3.window.main_enable = 0;
   bg4.window.main_enable = 0;
-  oam.window.main_enable = 0;
+  sprite.window.main_enable = 0;
 
   //$212f
   bg1.window.sub_enable = 0;
   bg2.window.sub_enable = 0;
   bg3.window.sub_enable = 0;
   bg4.window.sub_enable = 0;
-  oam.window.sub_enable = 0;
+  sprite.window.sub_enable = 0;
 
   //$2130
   screen.window.main_mask = 0;
@@ -878,12 +878,12 @@ void PPU::mmio_reset() {
   regs.mode7_extbg = 0;
   regs.pseudo_hires = 0;
   regs.overscan = 0;
-  oam.regs.interlace = 0;
+  sprite.regs.interlace = 0;
   regs.interlace = 0;
 
   //$213e
-  oam.regs.time_over = 0;
-  oam.regs.range_over = 0;
+  sprite.regs.time_over = 0;
+  sprite.regs.range_over = 0;
 
   mmio_update_video_mode();
 }

@@ -28,7 +28,7 @@ void SA1::dma_normal() {
       } break;
 
       case DMA::SourceIRAM: {
-        data = memory::iram.read(dsa & 0x07ff);
+        data = iram.read(dsa & 0x07ff);
       } break;
     }
 
@@ -40,7 +40,7 @@ void SA1::dma_normal() {
       } break;
 
       case DMA::DestIRAM: {
-        memory::iram.write(dda & 0x07ff, data);
+        iram.write(dda & 0x07ff, data);
       } break;
     }
   }
@@ -59,7 +59,7 @@ void SA1::dma_normal() {
 //===========================
 
 void SA1::dma_cc1() {
-  memory::cc1bwram.dma = true;
+  cpubwram.dma = true;
   mmio.chdma_irqfl = true;
   if(mmio.chdma_irqen) {
     mmio.chdma_irqcl = 0;
@@ -104,12 +104,12 @@ uint8 SA1::dma_cc1_read(unsigned addr) {
 
       for(unsigned byte = 0; byte < bpp; byte++) {
         unsigned p = mmio.dda + (y << 1) + ((byte & 6) << 3) + (byte & 1);
-        memory::iram.write(p & 0x07ff, out[byte]);
+        iram.write(p & 0x07ff, out[byte]);
       }
     }
   }
 
-  return memory::iram.read((mmio.dda + (addr & charmask)) & 0x07ff);
+  return iram.read((mmio.dda + (addr & charmask)) & 0x07ff);
 }
 
 //===========================
@@ -130,7 +130,7 @@ void SA1::dma_cc2() {
     for(unsigned bit = 0; bit < 8; bit++) {
       output |= ((brf[bit] >> byte) & 1) << (7 - bit);
     }
-    memory::iram.write(addr + ((byte & 6) << 3) + (byte & 1), output);
+    iram.write(addr + ((byte & 6) << 3) + (byte & 1), output);
   }
 
   dma.line = (dma.line + 1) & 15;

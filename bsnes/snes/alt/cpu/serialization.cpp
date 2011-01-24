@@ -5,6 +5,8 @@ void CPU::serialize(serializer &s) {
   CPUcore::core_serialize(s);
   PPUcounter::serialize(s);
 
+  s.array(wram);
+
   queue.serialize(s);
   s.array(port_data);
 

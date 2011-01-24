@@ -4,6 +4,9 @@ void CPU::serialize(serializer &s) {
   Processor::serialize(s);
   CPUcore::core_serialize(s);
   PPUcounter::serialize(s);
+
+  s.array(wram);
+
   s.integer(cpu_version);
 
   s.integer(status.interrupt_pending);

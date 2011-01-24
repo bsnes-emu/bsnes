@@ -1,17 +1,12 @@
 #ifdef SUPERFX_CPP
 
-namespace memory {
-  SuperFXCPUROM fxrom;
-  SuperFXCPURAM fxram;
-}
-
 //ROM / RAM access from the S-CPU
 
-unsigned SuperFXCPUROM::size() const {
+unsigned SuperFX::ROM::size() const {
   return cartridge.rom.size();
 }
 
-uint8 SuperFXCPUROM::read(unsigned addr) {
+uint8 SuperFX::ROM::read(unsigned addr) {
   if(superfx.regs.sfr.g && superfx.regs.scmr.ron) {
     static const uint8_t data[16] = {
       0x00, 0x01, 0x00, 0x01, 0x04, 0x01, 0x00, 0x01,
@@ -22,20 +17,20 @@ uint8 SuperFXCPUROM::read(unsigned addr) {
   return cartridge.rom.read(addr);
 }
 
-void SuperFXCPUROM::write(unsigned addr, uint8 data) {
+void SuperFX::ROM::write(unsigned addr, uint8 data) {
   cartridge.rom.write(addr, data);
 }
 
-unsigned SuperFXCPURAM::size() const {
+unsigned SuperFX::RAM::size() const {
   return cartridge.ram.size();
 }
 
-uint8 SuperFXCPURAM::read(unsigned addr) {
+uint8 SuperFX::RAM::read(unsigned addr) {
   if(superfx.regs.sfr.g && superfx.regs.scmr.ran) return cpu.regs.mdr;
   return cartridge.ram.read(addr);
 }
 
-void SuperFXCPURAM::write(unsigned addr, uint8 data) {
+void SuperFX::RAM::write(unsigned addr, uint8 data) {
   cartridge.ram.write(addr, data);
 }
 

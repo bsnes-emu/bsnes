@@ -53,7 +53,7 @@ void PPU::enter() {
         bg3.run(0);
         bg4.run(0);
         if(pixel >= 0) {
-          oam.run();
+          sprite.run();
           window.run();
           screen.run();
         }
@@ -61,7 +61,7 @@ void PPU::enter() {
       }
 
       add_clocks(22);
-      oam.tilefetch();
+      sprite.tilefetch();
     } else {
       add_clocks(1052 + 22 + 136);
     }
@@ -80,17 +80,20 @@ void PPU::add_clocks(unsigned clocks) {
 }
 
 void PPU::enable() {
-  bus.map(Bus::MapMode::Direct, 0x00, 0x3f, 0x2100, 0x213f, { &PPU::mmio_read, &ppu }, { &PPU::mmio_write, &ppu });
-  bus.map(Bus::MapMode::Direct, 0x80, 0xbf, 0x2100, 0x213f, { &PPU::mmio_read, &ppu }, { &PPU::mmio_write, &ppu });
+  function<uint8 (unsigned)> read = { &PPU::mmio_read, (PPU*)&ppu };
+  function<void (unsigned, uint8)> write = { &PPU::mmio_write, (PPU*)&ppu };
+
+  bus.map(Bus::MapMode::Direct, 0x00, 0x3f, 0x2100, 0x213f, read, write);
+  bus.map(Bus::MapMode::Direct, 0x80, 0xbf, 0x2100, 0x213f, read, write);
 }
 
 void PPU::power() {
   ppu1_version = config.ppu1.version;
   ppu2_version = config.ppu2.version;
 
-  memset(memory::vram.data(), 0x00, memory::vram.size());
-  memset(memory::oam.data(), 0x00, memory::oam.size());
-  memset(memory::cgram.data(), 0x00, memory::cgram.size());
+  foreach(n, vram) n = 0x00;
+  foreach(n, oam) n = 0x00;
+  foreach(n, cgram) n = 0x00;
 
   reset();
 }
@@ -105,7 +108,7 @@ void PPU::reset() {
   bg2.reset();
   bg3.reset();
   bg4.reset();
-  oam.reset();
+  sprite.reset();
   window.reset();
   screen.reset();
 
@@ -125,14 +128,14 @@ void PPU::scanline() {
   bg2.scanline();
   bg3.scanline();
   bg4.scanline();
-  oam.scanline();
+  sprite.scanline();
   window.scanline();
   screen.scanline();
 }
 
 void PPU::frame() {
   system.frame();
-  oam.frame();
+  sprite.frame();
 
   display.interlace = regs.interlace;
   display.overscan = regs.overscan;
@@ -143,7 +146,7 @@ bg1(*this, Background::ID::BG1),
 bg2(*this, Background::ID::BG2),
 bg3(*this, Background::ID::BG3),
 bg4(*this, Background::ID::BG4),
-oam(*this),
+sprite(*this),
 window(*this),
 screen(*this) {
   surface = new uint16[512 * 512];

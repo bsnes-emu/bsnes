@@ -8,13 +8,11 @@ void CPUDebugger::op_step() {
   opcode_pc = regs.pc;
 
   opcode_edge = true;
-  if(debugger.step_cpu) {
+  debugger.breakpoint_test(Debugger::Breakpoint::Source::CPUBus, Debugger::Breakpoint::Mode::Exec, regs.pc, 0x00);
+  if(step_event && step_event()) {
     debugger.break_event = Debugger::BreakEvent::CPUStep;
     scheduler.exit(Scheduler::ExitReason::DebuggerEvent);
-  } else {
-    debugger.breakpoint_test(Debugger::Breakpoint::Source::CPUBus, Debugger::Breakpoint::Mode::Exec, regs.pc, 0x00);
   }
-  if(step_event) step_event();
   opcode_edge = false;
 
   CPU::op_step();

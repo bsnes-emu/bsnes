@@ -3,6 +3,7 @@ void timer_stage0();
 void timer_stage1();
 void timer_stage2();
 void timer_stage3();
+void timer_stage4();
 
 //opcode.cpp
 void op_io();

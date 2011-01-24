@@ -32,14 +32,14 @@ uint16 PPU::get_vram_address() {
 
 uint8 PPU::vram_read(unsigned addr) {
   if(regs.display_disable || vcounter() >= (!regs.overscan ? 225 : 240)) {
-    return memory::vram[addr];
+    return vram[addr];
   }
   return 0x00;
 }
 
 void PPU::vram_write(unsigned addr, uint8 data) {
   if(regs.display_disable || vcounter() >= (!regs.overscan ? 225 : 240)) {
-    memory::vram[addr] = data;
+    vram[addr] = data;
   }
 }
 
@@ -50,7 +50,7 @@ void PPU::mmio_update_video_mode() {
       bg2.regs.mode = Background::Mode::BPP2; bg2.regs.priority0 = 7; bg2.regs.priority1 = 10;
       bg3.regs.mode = Background::Mode::BPP2; bg3.regs.priority0 = 2; bg3.regs.priority1 =  5;
       bg4.regs.mode = Background::Mode::BPP2; bg4.regs.priority0 = 1; bg4.regs.priority1 =  4;
-      oam.regs.priority0 = 3; oam.regs.priority1 = 6; oam.regs.priority2 = 9; oam.regs.priority3 = 12;
+      sprite.regs.priority0 = 3; sprite.regs.priority1 = 6; sprite.regs.priority2 = 9; sprite.regs.priority3 = 12;
     } break;
 
     case 1: {
@@ -62,12 +62,12 @@ void PPU::mmio_update_video_mode() {
         bg1.regs.priority0 = 5; bg1.regs.priority1 =  8;
         bg2.regs.priority0 = 4; bg2.regs.priority1 =  7;
         bg3.regs.priority0 = 1; bg3.regs.priority1 = 10;
-        oam.regs.priority0 = 2; oam.regs.priority1 = 3; oam.regs.priority2 = 6; oam.regs.priority3 = 9;
+        sprite.regs.priority0 = 2; sprite.regs.priority1 = 3; sprite.regs.priority2 = 6; sprite.regs.priority3 = 9;
       } else {
         bg1.regs.priority0 = 6; bg1.regs.priority1 =  9;
         bg2.regs.priority0 = 5; bg2.regs.priority1 =  8;
         bg3.regs.priority0 = 1; bg3.regs.priority1 =  3;
-        oam.regs.priority0 = 2; oam.regs.priority1 = 4; oam.regs.priority2 = 7; oam.regs.priority3 = 10;
+        sprite.regs.priority0 = 2; sprite.regs.priority1 = 4; sprite.regs.priority2 = 7; sprite.regs.priority3 = 10;
       }
     } break;
 
@@ -78,7 +78,7 @@ void PPU::mmio_update_video_mode() {
       bg4.regs.mode = Background::Mode::Inactive;
       bg1.regs.priority0 = 3; bg1.regs.priority1 = 7;
       bg2.regs.priority0 = 1; bg2.regs.priority1 = 5;
-      oam.regs.priority0 = 2; oam.regs.priority1 = 4; oam.regs.priority2 = 6; oam.regs.priority3 = 8;
+      sprite.regs.priority0 = 2; sprite.regs.priority1 = 4; sprite.regs.priority2 = 6; sprite.regs.priority3 = 8;
     } break;
 
     case 3: {
@@ -88,7 +88,7 @@ void PPU::mmio_update_video_mode() {
       bg4.regs.mode = Background::Mode::Inactive;
       bg1.regs.priority0 = 3; bg1.regs.priority1 = 7;
       bg2.regs.priority0 = 1; bg2.regs.priority1 = 5;
-      oam.regs.priority0 = 2; oam.regs.priority1 = 4; oam.regs.priority2 = 6; oam.regs.priority3 = 8;
+      sprite.regs.priority0 = 2; sprite.regs.priority1 = 4; sprite.regs.priority2 = 6; sprite.regs.priority3 = 8;
     } break;
 
     case 4: {
@@ -98,7 +98,7 @@ void PPU::mmio_update_video_mode() {
       bg4.regs.mode = Background::Mode::Inactive;
       bg1.regs.priority0 = 3; bg1.regs.priority1 = 7;
       bg2.regs.priority0 = 1; bg2.regs.priority1 = 5;
-      oam.regs.priority0 = 2; oam.regs.priority1 = 4; oam.regs.priority2 = 6; oam.regs.priority3 = 8;
+      sprite.regs.priority0 = 2; sprite.regs.priority1 = 4; sprite.regs.priority2 = 6; sprite.regs.priority3 = 8;
     } break;
 
     case 5: {
@@ -108,7 +108,7 @@ void PPU::mmio_update_video_mode() {
       bg4.regs.mode = Background::Mode::Inactive;
       bg1.regs.priority0 = 3; bg1.regs.priority1 = 7;
       bg2.regs.priority0 = 1; bg2.regs.priority1 = 5;
-      oam.regs.priority0 = 2; oam.regs.priority1 = 4; oam.regs.priority2 = 6; oam.regs.priority3 = 8;
+      sprite.regs.priority0 = 2; sprite.regs.priority1 = 4; sprite.regs.priority2 = 6; sprite.regs.priority3 = 8;
     } break;
 
     case 6: {
@@ -117,7 +117,7 @@ void PPU::mmio_update_video_mode() {
       bg3.regs.mode = Background::Mode::Inactive;
       bg4.regs.mode = Background::Mode::Inactive;
       bg1.regs.priority0 = 2; bg1.regs.priority1 = 5;
-      oam.regs.priority0 = 1; oam.regs.priority1 = 3; oam.regs.priority2 = 4; oam.regs.priority3 = 6;
+      sprite.regs.priority0 = 1; sprite.regs.priority1 = 3; sprite.regs.priority2 = 4; sprite.regs.priority3 = 6;
     } break;
 
     case 7: {
@@ -127,7 +127,7 @@ void PPU::mmio_update_video_mode() {
         bg3.regs.mode = Background::Mode::Inactive;
         bg4.regs.mode = Background::Mode::Inactive;
         bg1.regs.priority0 = 2; bg1.regs.priority1 = 2;
-        oam.regs.priority0 = 1; oam.regs.priority1 = 3; oam.regs.priority2 = 4; oam.regs.priority3 = 5;
+        sprite.regs.priority0 = 1; sprite.regs.priority1 = 3; sprite.regs.priority2 = 4; sprite.regs.priority3 = 5;
       } else {
         bg1.regs.mode = Background::Mode::Mode7;
         bg2.regs.mode = Background::Mode::Mode7;
@@ -135,7 +135,7 @@ void PPU::mmio_update_video_mode() {
         bg4.regs.mode = Background::Mode::Inactive;
         bg1.regs.priority0 = 3; bg1.regs.priority1 = 3;
         bg2.regs.priority0 = 1; bg2.regs.priority1 = 5;
-        oam.regs.priority0 = 2; oam.regs.priority1 = 4; oam.regs.priority2 = 6; oam.regs.priority3 = 7;
+        sprite.regs.priority0 = 2; sprite.regs.priority1 = 4; sprite.regs.priority2 = 6; sprite.regs.priority3 = 7;
       }
     } break;
   }
@@ -143,29 +143,29 @@ void PPU::mmio_update_video_mode() {
 
 //INIDISP
 void PPU::mmio_w2100(uint8 data) {
-  if(regs.display_disable && vcounter() == (!regs.overscan ? 225 : 240)) oam.address_reset();
+  if(regs.display_disable && vcounter() == (!regs.overscan ? 225 : 240)) sprite.address_reset();
   regs.display_disable = data & 0x80;
   regs.display_brightness = data & 0x0f;
 }
 
 //OBSEL
 void PPU::mmio_w2101(uint8 data) {
-  oam.regs.base_size = (data >> 5) & 7;
-  oam.regs.nameselect = (data >> 3) & 3;
-  oam.regs.tiledata_addr = (data & 3) << 14;
+  sprite.regs.base_size = (data >> 5) & 7;
+  sprite.regs.nameselect = (data >> 3) & 3;
+  sprite.regs.tiledata_addr = (data & 3) << 14;
 }
 
 //OAMADDL
 void PPU::mmio_w2102(uint8 data) {
   regs.oam_baseaddr = (regs.oam_baseaddr & 0x0200) | (data << 1);
-  oam.address_reset();
+  sprite.address_reset();
 }
 
 //OAMADDH
 void PPU::mmio_w2103(uint8 data) {
   regs.oam_priority = data & 0x80;
   regs.oam_baseaddr = ((data & 0x01) << 9) | (regs.oam_baseaddr & 0x01fe);
-  oam.address_reset();
+  sprite.address_reset();
 }
 
 //OAMDATA
@@ -177,12 +177,12 @@ void PPU::mmio_w2104(uint8 data) {
 
   if(latch == 0) regs.oam_latchdata = data;
   if(addr & 0x0200) {
-    oam.update(addr, data);
+    sprite.update(addr, data);
   } else if(latch == 1) {
-    oam.update((addr & ~1) + 0, regs.oam_latchdata);
-    oam.update((addr & ~1) + 1, data);
+    sprite.update((addr & ~1) + 0, regs.oam_latchdata);
+    sprite.update((addr & ~1) + 1, data);
   }
-  oam.set_first_sprite();
+  sprite.set_first_sprite();
 }
 
 //BGMODE
@@ -399,8 +399,8 @@ void PPU::mmio_w2122(uint8 data) {
   if(latch == 0) {
     regs.cgram_latchdata = data;
   } else {
-    memory::cgram[(addr & ~1) + 0] = regs.cgram_latchdata;
-    memory::cgram[(addr & ~1) + 1] = data & 0x7f;
+    cgram[(addr & ~1) + 0] = regs.cgram_latchdata;
+    cgram[(addr & ~1) + 1] = data & 0x7f;
   }
 }
 
@@ -476,7 +476,7 @@ void PPU::mmio_w212b(uint8 data) {
 
 //TM
 void PPU::mmio_w212c(uint8 data) {
-  oam.regs.main_enable = data & 0x10;
+  sprite.regs.main_enable = data & 0x10;
   bg4.regs.main_enable = data & 0x08;
   bg3.regs.main_enable = data & 0x04;
   bg2.regs.main_enable = data & 0x02;
@@ -485,7 +485,7 @@ void PPU::mmio_w212c(uint8 data) {
 
 //TS
 void PPU::mmio_w212d(uint8 data) {
-  oam.regs.sub_enable = data & 0x10;
+  sprite.regs.sub_enable = data & 0x10;
   bg4.regs.sub_enable = data & 0x08;
   bg3.regs.sub_enable = data & 0x04;
   bg2.regs.sub_enable = data & 0x02;
@@ -542,7 +542,7 @@ void PPU::mmio_w2133(uint8 data) {
   regs.mode7_extbg = data & 0x40;
   regs.pseudo_hires = data & 0x08;
   regs.overscan = data & 0x04;
-  oam.regs.interlace = data & 0x02;
+  sprite.regs.interlace = data & 0x02;
   regs.interlace = data & 0x01;
   mmio_update_video_mode();
 }
@@ -580,8 +580,8 @@ uint8 PPU::mmio_r2138() {
   if(regs.display_disable == false && vcounter() < (!regs.overscan ? 225 : 240)) addr = regs.oam_iaddr;
   if(addr & 0x0200) addr &= 0x021f;
 
-  regs.ppu1_mdr = memory::oam[addr];
-  oam.set_first_sprite();
+  regs.ppu1_mdr = oam[addr];
+  sprite.set_first_sprite();
   return regs.ppu1_mdr;
 }
 
@@ -621,10 +621,10 @@ uint8 PPU::mmio_r213b() {
   ) addr = regs.cgram_iaddr;
 
   if(latch == 0) {
-    regs.ppu2_mdr  = memory::cgram[addr];
+    regs.ppu2_mdr  = cgram[addr];
   } else {
     regs.ppu2_mdr &= 0x80;
-    regs.ppu2_mdr |= memory::cgram[addr];
+    regs.ppu2_mdr |= cgram[addr];
   }
   return regs.ppu2_mdr;
 }
@@ -656,8 +656,8 @@ uint8 PPU::mmio_r213d() {
 //STAT77
 uint8 PPU::mmio_r213e() {
   regs.ppu1_mdr &= 0x10;
-  regs.ppu1_mdr |= oam.regs.time_over << 7;
-  regs.ppu1_mdr |= oam.regs.range_over << 6;
+  regs.ppu1_mdr |= sprite.regs.time_over << 7;
+  regs.ppu1_mdr |= sprite.regs.range_over << 6;
   regs.ppu1_mdr |= ppu1_version & 0x0f;
   return regs.ppu1_mdr;
 }

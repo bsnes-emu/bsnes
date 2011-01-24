@@ -1,5 +1,9 @@
 class PPU : public Processor, public PPUcounter {
 public:
+  uint8 vram[64 * 1024];
+  uint8 oam[544];
+  uint8 cgram[512];
+
   enum : bool { Threaded = true };
   alwaysinline void step(unsigned clocks);
   alwaysinline void synchronize_cpu();
@@ -39,7 +43,7 @@ private:
   Background bg2;
   Background bg3;
   Background bg4;
-  Sprite oam;
+  Sprite sprite;
   Screen screen;
 
   struct Display {

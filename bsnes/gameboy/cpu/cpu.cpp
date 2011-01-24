@@ -120,11 +120,18 @@ void CPU::power() {
   status.timer1 = 0;
   status.timer2 = 0;
   status.timer3 = 0;
+  status.timer4 = 0;
 
   status.p15 = 0;
   status.p14 = 0;
   status.joyp = 0;
   status.mlt_req = 0;
+
+  status.serial_data = 0;
+  status.serial_bits = 0;
+
+  status.serial_transfer = 0;
+  status.serial_clock = 0;
 
   status.div = 0;
 

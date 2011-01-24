@@ -19,7 +19,11 @@ void LCD::main() {
 
     add_clocks(4);
 
-    if(status.lx == 320) {
+    if(status.lx == 0) {
+      if(status.interrupt_oam) cpu.interrupt_raise(CPU::Interrupt::Stat);
+    }
+
+    if(status.lx == 252) {
       if(status.interrupt_hblank) cpu.interrupt_raise(CPU::Interrupt::Stat);
     }
   }

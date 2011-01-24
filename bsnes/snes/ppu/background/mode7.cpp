@@ -46,8 +46,8 @@ void PPU::Background::run_mode7() {
     case 1: {
       px &= 1023;
       py &= 1023;
-      tile = memory::vram[((py >> 3) * 128 + (px >> 3)) << 1];
-      palette = memory::vram[(((tile << 6) + ((py & 7) << 3) + (px & 7)) << 1) + 1];
+      tile = ppu.vram[((py >> 3) * 128 + (px >> 3)) << 1];
+      palette = ppu.vram[(((tile << 6) + ((py & 7) << 3) + (px & 7)) << 1) + 1];
       break;
     }
 
@@ -58,8 +58,8 @@ void PPU::Background::run_mode7() {
       } else {
         px &= 1023;
         py &= 1023;
-        tile = memory::vram[((py >> 3) * 128 + (px >> 3)) << 1];
-        palette = memory::vram[(((tile << 6) + ((py & 7) << 3) + (px & 7)) << 1) + 1];
+        tile = ppu.vram[((py >> 3) * 128 + (px >> 3)) << 1];
+        palette = ppu.vram[(((tile << 6) + ((py & 7) << 3) + (px & 7)) << 1) + 1];
       }
       break;
     }
@@ -71,9 +71,9 @@ void PPU::Background::run_mode7() {
       } else {
         px &= 1023;
         py &= 1023;
-        tile = memory::vram[((py >> 3) * 128 + (px >> 3)) << 1];
+        tile = ppu.vram[((py >> 3) * 128 + (px >> 3)) << 1];
       }
-      palette = memory::vram[(((tile << 6) + ((py & 7) << 3) + (px & 7)) << 1) + 1];
+      palette = ppu.vram[(((tile << 6) + ((py & 7) << 3) + (px & 7)) << 1) + 1];
       break;
     }
   }

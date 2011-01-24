@@ -26,7 +26,7 @@ uint8 PPU::vram_mmio_read(uint16 addr) {
   uint8 data;
 
   if(regs.display_disabled == true) {
-    data = memory::vram[addr];
+    data = vram[addr];
   } else {
     uint16 v = cpu.vcounter();
     uint16 h = cpu.hcounter();
@@ -39,12 +39,12 @@ uint8 PPU::vram_mmio_read(uint16 addr) {
       data = 0x00;
     } else if(v == (!overscan() ? 224 : 239)) {
       if(h == 1362) {
-        data = memory::vram[addr];
+        data = vram[addr];
       } else {
         data = 0x00;
       }
     } else {
-      data = memory::vram[addr];
+      data = vram[addr];
     }
   }
 
@@ -53,15 +53,15 @@ uint8 PPU::vram_mmio_read(uint16 addr) {
 
 void PPU::vram_mmio_write(uint16 addr, uint8 data) {
   if(regs.display_disabled == true) {
-    memory::vram[addr] = data;
+    vram[addr] = data;
   } else {
     uint16 v = cpu.vcounter();
     uint16 h = cpu.hcounter();
     if(v == 0) {
       if(h <= 4) {
-        memory::vram[addr] = data;
+        vram[addr] = data;
       } else if(h == 6) {
-        memory::vram[addr] = cpu.regs.mdr;
+        vram[addr] = cpu.regs.mdr;
       } else {
         //no write
       }
@@ -71,10 +71,10 @@ void PPU::vram_mmio_write(uint16 addr, uint8 data) {
       if(h <= 4) {
         //no write
       } else {
-        memory::vram[addr] = data;
+        vram[addr] = data;
       }
     } else {
-      memory::vram[addr] = data;
+      vram[addr] = data;
     }
   }
 }
@@ -85,12 +85,12 @@ uint8 PPU::oam_mmio_read(uint16 addr) {
   uint8 data;
 
   if(regs.display_disabled == true) {
-    data = memory::oam[addr];
+    data = oam[addr];
   } else {
     if(cpu.vcounter() < (!overscan() ? 225 : 240)) {
-      data = memory::oam[regs.ioamaddr];
+      data = oam[regs.ioamaddr];
     } else {
-      data = memory::oam[addr];
+      data = oam[addr];
     }
   }
 
@@ -104,14 +104,14 @@ void PPU::oam_mmio_write(uint16 addr, uint8 data) {
   sprite_list_valid = false;
 
   if(regs.display_disabled == true) {
-    memory::oam[addr] = data;
+    oam[addr] = data;
     update_sprite_list(addr, data);
   } else {
     if(cpu.vcounter() < (!overscan() ? 225 : 240)) {
-      memory::oam[regs.ioamaddr] = data;
+      oam[regs.ioamaddr] = data;
       update_sprite_list(regs.ioamaddr, data);
     } else {
-      memory::oam[addr] = data;
+      oam[addr] = data;
       update_sprite_list(addr, data);
     }
   }
@@ -122,14 +122,14 @@ uint8 PPU::cgram_mmio_read(uint16 addr) {
   uint8 data;
 
   if(1 || regs.display_disabled == true) {
-    data = memory::cgram[addr];
+    data = cgram[addr];
   } else {
     uint16 v = cpu.vcounter();
     uint16 h = cpu.hcounter();
     if(v < (!overscan() ? 225 : 240) && h >= 128 && h < 1096) {
-      data = memory::cgram[regs.icgramaddr] & 0x7f;
+      data = cgram[regs.icgramaddr] & 0x7f;
     } else {
-      data = memory::cgram[addr];
+      data = cgram[addr];
     }
   }
 
@@ -142,14 +142,14 @@ void PPU::cgram_mmio_write(uint16 addr, uint8 data) {
   if(addr & 1) data &= 0x7f;
 
   if(1 || regs.display_disabled == true) {
-    memory::cgram[addr] = data;
+    cgram[addr] = data;
   } else {
     uint16 v = cpu.vcounter();
     uint16 h = cpu.hcounter();
     if(v < (!overscan() ? 225 : 240) && h >= 128 && h < 1096) {
-      memory::cgram[regs.icgramaddr] = data & 0x7f;
+      cgram[regs.icgramaddr] = data & 0x7f;
     } else {
-      memory::cgram[addr] = data;
+      cgram[addr] = data;
     }
   }
 }

@@ -19,6 +19,7 @@
 
 class SPC7110 {
 public:
+  uint8 rtc[20];
   unsigned data_rom_offset;
 
   void init();
@@ -134,7 +135,6 @@ private:
 
   enum RTC_State { RTCS_Inactive, RTCS_ModeSelect, RTCS_IndexSelect, RTCS_Write };
   enum RTC_Mode  { RTCM_Linear = 0x03, RTCM_Indexed = 0x0c };
-  uint8 rtc[20];
   unsigned rtc_state;
   unsigned rtc_mode;
   unsigned rtc_index;

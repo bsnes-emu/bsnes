@@ -144,12 +144,12 @@ void PPU::Sprite::tilefetch() {
       unsigned pos = tiledata_addr + ((chry + ((chrx + mx) & 15)) << 5);
       uint16 addr = (pos & 0xffe0) + ((y & 7) * 2);
 
-      oam_tile[n].d0 = memory::vram[addr +  0];
-      oam_tile[n].d1 = memory::vram[addr +  1];
+      oam_tile[n].d0 = ppu.vram[addr +  0];
+      oam_tile[n].d1 = ppu.vram[addr +  1];
       self.add_clocks(2);
 
-      oam_tile[n].d2 = memory::vram[addr + 16];
-      oam_tile[n].d3 = memory::vram[addr + 17];
+      oam_tile[n].d2 = ppu.vram[addr + 16];
+      oam_tile[n].d3 = ppu.vram[addr + 17];
       self.add_clocks(2);
     }
   }

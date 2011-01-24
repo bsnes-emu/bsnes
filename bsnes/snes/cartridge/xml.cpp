@@ -125,7 +125,7 @@ void Cartridge::xml_parse_superfx(xml_element &root) {
     if(node.name == "rom") {
       foreach(leaf, node.element) {
         if(leaf.name == "map") {
-          Mapping m(memory::fxrom);
+          Mapping m(superfx.rom);
           foreach(attr, leaf.attribute) {
             if(attr.name == "address") xml_parse_address(m, attr.content);
             if(attr.name == "mode") xml_parse_mode(m, attr.content);
@@ -142,7 +142,7 @@ void Cartridge::xml_parse_superfx(xml_element &root) {
 
       foreach(leaf, node.element) {
         if(leaf.name == "map") {
-          Mapping m(memory::fxram);
+          Mapping m(superfx.ram);
           foreach(attr, leaf.attribute) {
             if(attr.name == "address") xml_parse_address(m, attr.content);
             if(attr.name == "mode") xml_parse_mode(m, attr.content);
@@ -201,7 +201,7 @@ void Cartridge::xml_parse_sa1(xml_element &root) {
     } else if(node.name == "iram") {
       foreach(leaf, node.element) {
         if(leaf.name == "map") {
-          Mapping m(memory::cpuiram);
+          Mapping m(sa1.cpuiram);
           foreach(attr, leaf.attribute) {
             if(attr.name == "address") xml_parse_address(m, attr.content);
             if(attr.name == "mode") xml_parse_mode(m, attr.content);
@@ -219,7 +219,7 @@ void Cartridge::xml_parse_sa1(xml_element &root) {
 
       foreach(leaf, node.element) {
         if(leaf.name == "map") {
-          Mapping m(memory::cc1bwram);
+          Mapping m(sa1.cpubwram);
           foreach(attr, leaf.attribute) {
             if(attr.name == "address") xml_parse_address(m, attr.content);
             if(attr.name == "mode") xml_parse_mode(m, attr.content);

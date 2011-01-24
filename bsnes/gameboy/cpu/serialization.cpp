@@ -27,11 +27,18 @@ void CPU::serialize(serializer &s) {
   s.integer(status.timer1);
   s.integer(status.timer2);
   s.integer(status.timer3);
+  s.integer(status.timer4);
 
   s.integer(status.p15);
   s.integer(status.p14);
   s.integer(status.joyp);
   s.integer(status.mlt_req);
+
+  s.integer(status.serial_data);
+  s.integer(status.serial_bits);
+
+  s.integer(status.serial_transfer);
+  s.integer(status.serial_clock);
 
   s.integer(status.div);
   s.integer(status.tima);

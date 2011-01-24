@@ -24,8 +24,8 @@ void DSP::voice_2(voice_t &v) {
   //read sample pointer (ignored if not needed)
   uint16 addr = state.t_dir_addr;
   if(!v.kon_delay) addr += 2;
-  uint8 lo = memory::apuram[(uint16)(addr + 0)];
-  uint8 hi = memory::apuram[(uint16)(addr + 1)];
+  uint8 lo = smp.apuram[(uint16)(addr + 0)];
+  uint8 hi = smp.apuram[(uint16)(addr + 1)];
   state.t_brr_next_addr = ((hi << 8) + lo);
 
   state.t_adsr0 = VREG(adsr0);
@@ -45,8 +45,8 @@ void DSP::voice_3a(voice_t &v) {
 }
 
 void DSP::voice_3b(voice_t &v) {
-  state.t_brr_byte   = memory::apuram[(uint16)(v.brr_addr + v.brr_offset)];
-  state.t_brr_header = memory::apuram[(uint16)(v.brr_addr)];
+  state.t_brr_byte   = smp.apuram[(uint16)(v.brr_addr + v.brr_offset)];
+  state.t_brr_header = smp.apuram[(uint16)(v.brr_addr)];
 }
 
 void DSP::voice_3c(voice_t &v) {

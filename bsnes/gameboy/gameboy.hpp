@@ -5,7 +5,7 @@
 namespace GameBoy {
   namespace Info {
     static const char Name[] = "bgameboy";
-    static const char Version[] = "000.12";
+    static const char Version[] = "000.13";
     static unsigned SerializerVersion = 1;
   }
 }

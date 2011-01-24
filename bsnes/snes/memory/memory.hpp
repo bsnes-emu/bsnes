@@ -67,17 +67,8 @@ struct Bus {
   void map_reset();
   void map_xml();
 
-  void serialize(serializer&);
   Bus();
   ~Bus();
-};
-
-namespace memory {
-  extern StaticRAM wram;    //S-CPU
-  extern StaticRAM apuram;  //S-SMP, S-DSP
-  extern StaticRAM vram;    //S-PPU
-  extern StaticRAM oam;     //S-PPU
-  extern StaticRAM cgram;   //S-PPU
 };
 
 extern Bus bus;

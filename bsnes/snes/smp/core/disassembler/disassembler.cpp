@@ -2,7 +2,7 @@
 
 uint8 SMPcore::disassemble_read(uint16 addr) {
   if(addr >= 0xffc0) return smp.iplrom[addr & 0x3f];
-  return memory::apuram[addr];
+  return smp.apuram[addr];
 }
 
 uint16 SMPcore::relb(int8 offset, int op_len) {

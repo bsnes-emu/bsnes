@@ -15,9 +15,9 @@ void SA1::serialize(serializer &s) {
   s.integer(status.hcounter);
 
   //bus/bus.hpp
-  s.array(memory::iram.data(), memory::iram.size());
+  s.array(iram.data(), iram.size());
 
-  s.integer(memory::cc1bwram.dma);
+  s.integer(cpubwram.dma);
 
   //dma/dma.hpp
   s.integer(dma.line);

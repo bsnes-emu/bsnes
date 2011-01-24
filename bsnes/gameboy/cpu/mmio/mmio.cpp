@@ -31,6 +31,15 @@ uint8 CPU::mmio_read(uint16 addr) {
          | (status.joyp << 0);
   }
 
+  if(addr == 0xff01) {  //SB
+    return 0xff;
+  }
+
+  if(addr == 0xff02) {  //SC
+    return (status.serial_transfer << 7)
+         | (status.serial_clock << 0);
+  }
+
   if(addr == 0xff04) {  //DIV
     return status.div;
   }
@@ -81,10 +90,14 @@ void CPU::mmio_write(uint16 addr, uint8 data) {
   }
 
   if(addr == 0xff01) {  //SB
+    status.serial_data = data;
     return;
   }
 
   if(addr == 0xff02) {  //SC
+    status.serial_transfer = data & 0x80;
+    status.serial_clock = data & 0x01;
+    if(status.serial_transfer) status.serial_bits = 8;
     return;
   }
 
