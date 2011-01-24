@@ -64,7 +64,7 @@ void SA1::bus_write(unsigned addr, uint8 data) {
 //this is used both to keep VBR-reads from accessing MMIO registers, and
 //to avoid syncing the S-CPU and SA-1*; as both chips are able to access
 //these ports.
-//(* eg, memory::cartram is used directly, as memory::sa1bwram syncs to the S-CPU)
+//(* eg, cartridge.ram is used directly, as memory::sa1bwram syncs to the S-CPU)
 uint8 SA1::vbr_read(unsigned addr) {
   if((addr & 0x408000) == 0x008000) {  //$00-3f|80-bf:8000-ffff
     return mmc_read(addr);
@@ -75,11 +75,11 @@ uint8 SA1::vbr_read(unsigned addr) {
   }
 
   if((addr & 0x40e000) == 0x006000) {  //$00-3f|80-bf:6000-7fff
-    return memory::cartram.read(addr & (memory::cartram.size() - 1));
+    return cartridge.ram.read(addr & (cartridge.ram.size() - 1));
   }
 
   if((addr & 0xf00000) == 0x400000) {  //$40-4f:0000-ffff
-    return memory::cartram.read(addr & (memory::cartram.size() - 1));
+    return cartridge.ram.read(addr & (cartridge.ram.size() - 1));
   }
 
   if((addr & 0x40f800) == 0x000000) {  //$00-3f|80-bf:0000-07ff
@@ -121,7 +121,7 @@ uint8 SA1::mmc_read(unsigned addr) {
   }
 
   static auto read = [](unsigned addr) {
-    return memory::cartrom.read(bus.mirror(addr, memory::cartrom.size()));
+    return cartridge.rom.read(bus.mirror(addr, cartridge.rom.size()));
   };
 
   if((addr & 0xe08000) == 0x008000) {  //$00-1f:8000-ffff

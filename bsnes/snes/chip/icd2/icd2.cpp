@@ -32,6 +32,10 @@ void ICD2::init() {
 }
 
 void ICD2::enable() {
+  bus.map(Bus::MapMode::Direct, 0x00, 0x3f, 0x2181, 0x2182, { &ICD2::mmio_read, &icd2 }, { &ICD2::mmio_write, &icd2 });
+  bus.map(Bus::MapMode::Direct, 0x00, 0x3f, 0x420b, 0x420b, { &ICD2::mmio_read, &icd2 }, { &ICD2::mmio_write, &icd2 });
+  bus.map(Bus::MapMode::Direct, 0x80, 0xbf, 0x2181, 0x2182, { &ICD2::mmio_read, &icd2 }, { &ICD2::mmio_write, &icd2 });
+  bus.map(Bus::MapMode::Direct, 0x80, 0xbf, 0x420b, 0x420b, { &ICD2::mmio_read, &icd2 }, { &ICD2::mmio_write, &icd2 });
 }
 
 void ICD2::power() {
@@ -40,11 +44,6 @@ void ICD2::power() {
 
 void ICD2::reset() {
   create(ICD2::Enter, cpu.frequency / 5);
-
-  bus.map(Bus::MapMode::Direct, 0x00, 0x3f, 0x2181, 0x2182, { &ICD2::mmio_read, &icd2 }, { &ICD2::mmio_write, &icd2 });
-  bus.map(Bus::MapMode::Direct, 0x00, 0x3f, 0x420b, 0x420b, { &ICD2::mmio_read, &icd2 }, { &ICD2::mmio_write, &icd2 });
-  bus.map(Bus::MapMode::Direct, 0x80, 0xbf, 0x2181, 0x2182, { &ICD2::mmio_read, &icd2 }, { &ICD2::mmio_write, &icd2 });
-  bus.map(Bus::MapMode::Direct, 0x80, 0xbf, 0x420b, 0x420b, { &ICD2::mmio_read, &icd2 }, { &ICD2::mmio_write, &icd2 });
 
   r2181 = 0x00;
   r2182 = 0x00;

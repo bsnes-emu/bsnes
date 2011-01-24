@@ -67,9 +67,9 @@ void Debugger::write(Debugger::MemorySource source, unsigned addr, uint8 data) {
     case MemorySource::CPUBus: {
       //do not write to memory-mapped registers that could affect program behavior
       if(((addr - 0x2000) & 0x40c000) == 0x000000) break;  //$00-3f:2000-5fff MMIO
-      memory::cartrom.write_protect(false);
+      cartridge.rom.write_protect(false);
       bus.write(addr & 0xffffff, data);
-      memory::cartrom.write_protect(true);
+      cartridge.rom.write_protect(true);
     } break;
 
     case MemorySource::APURAM: {

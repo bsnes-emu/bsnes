@@ -10,6 +10,7 @@ public:
 
   void init(Interface*);
   void term();
+  void load();
   void power();
   void reset();
   void unload();

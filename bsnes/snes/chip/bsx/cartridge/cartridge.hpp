@@ -1,5 +1,8 @@
-class BSXCart {
+class BSXCartridge {
 public:
+  MappedRAM sram;
+  MappedRAM psram;
+
   void init();
   void enable();
   void power();
@@ -17,9 +20,6 @@ public:
   void mmio_write(unsigned addr, uint8 data);
   void mmio_commit();
 
-  BSXCart();
-  ~BSXCart();
-
 private:
   uint8 r[16];
   bool r00, r01, r02, r03;
@@ -28,4 +28,4 @@ private:
   bool r0c, r0d, r0e, r0f;
 };
 
-extern BSXCart bsxcart;
+extern BSXCartridge bsxcartridge;

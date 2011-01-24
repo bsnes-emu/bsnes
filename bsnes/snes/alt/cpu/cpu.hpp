@@ -20,6 +20,7 @@ public:
   debugvirtual void op_write(unsigned addr, uint8 data);
 
   void enter();
+  void enable();
   void power();
   void reset();
 

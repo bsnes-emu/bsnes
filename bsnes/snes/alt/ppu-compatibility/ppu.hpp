@@ -56,6 +56,7 @@ public:
   void render_scanline();
   void frame();
   void enter();
+  void enable();
   void power();
   void reset();
 

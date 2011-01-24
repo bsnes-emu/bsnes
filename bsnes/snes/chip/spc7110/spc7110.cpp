@@ -10,8 +10,13 @@ SPC7110 spc7110;
 
 const unsigned SPC7110::months[12] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
 
-void SPC7110::init() {}
-void SPC7110::enable() {}
+void SPC7110::init() {
+}
+
+void SPC7110::enable() {
+  for(unsigned n = 0; n < 20; n++) rtc[n] = 0xff;
+  if(cartridge.has_spc7110rtc()) cartridge.nvram.append({ "rtc", rtc, 20 });
+}
 
 void SPC7110::power() {
   reset();
@@ -81,7 +86,7 @@ void SPC7110::reset() {
 }
 
 unsigned SPC7110::datarom_addr(unsigned addr) {
-  unsigned size = memory::cartrom.size() - data_rom_offset;
+  unsigned size = cartridge.rom.size() - data_rom_offset;
   while(addr >= size) addr -= size;
   return data_rom_offset + addr;
 }
@@ -93,17 +98,13 @@ void SPC7110::set_data_pointer(unsigned addr) { r4811 = addr; r4812 = addr >> 8;
 void SPC7110::set_data_adjust(unsigned addr)  { r4814 = addr; r4815 = addr >> 8; }
 
 void SPC7110::update_time(int offset) {
-  time_t rtc_time
-  = (memory::cartrtc.read(16) <<  0)
-  | (memory::cartrtc.read(17) <<  8)
-  | (memory::cartrtc.read(18) << 16)
-  | (memory::cartrtc.read(19) << 24);
+  time_t rtc_time = (rtc[16] << 0) | (rtc[17] << 8) | (rtc[18] << 16) | (rtc[19] << 24);
   time_t current_time = time(0) - offset;
 
-  //sizeof(time_t) is platform-dependent; though memory::cartrtc needs to be platform-agnostic.
+  //sizeof(time_t) is platform-dependent; though rtc[] needs to be platform-agnostic.
   //yet platforms with 32-bit signed time_t will overflow every ~68 years. handle this by
   //accounting for overflow at the cost of 1-bit precision (to catch underflow). this will allow
-  //memory::cartrtc timestamp to remain valid for up to ~34 years from the last update, even if
+  //rtc[] timestamp to remain valid for up to ~34 years from the last update, even if
   //time_t overflows. calculation should be valid regardless of number representation, time_t size,
   //or whether time_t is signed or unsigned.
   time_t diff
@@ -113,17 +114,17 @@ void SPC7110::update_time(int offset) {
   if(diff > std::numeric_limits<time_t>::max() / 2) diff = 0;            //compensate for underflow
 
   bool update = true;
-  if(memory::cartrtc.read(13) & 1) update = false;  //do not update if CR0 timer disable flag is set
-  if(memory::cartrtc.read(15) & 3) update = false;  //do not update if CR2 timer disable flags are set
+  if(rtc[13] & 1) update = false;  //do not update if CR0 timer disable flag is set
+  if(rtc[15] & 3) update = false;  //do not update if CR2 timer disable flags are set
 
   if(diff > 0 && update == true) {
-    unsigned second  = memory::cartrtc.read( 0) + memory::cartrtc.read( 1) * 10;
-    unsigned minute  = memory::cartrtc.read( 2) + memory::cartrtc.read( 3) * 10;
-    unsigned hour    = memory::cartrtc.read( 4) + memory::cartrtc.read( 5) * 10;
-    unsigned day     = memory::cartrtc.read( 6) + memory::cartrtc.read( 7) * 10;
-    unsigned month   = memory::cartrtc.read( 8) + memory::cartrtc.read( 9) * 10;
-    unsigned year    = memory::cartrtc.read(10) + memory::cartrtc.read(11) * 10;
-    unsigned weekday = memory::cartrtc.read(12);
+    unsigned second  = rtc[ 0] + rtc[ 1] * 10;
+    unsigned minute  = rtc[ 2] + rtc[ 3] * 10;
+    unsigned hour    = rtc[ 4] + rtc[ 5] * 10;
+    unsigned day     = rtc[ 6] + rtc[ 7] * 10;
+    unsigned month   = rtc[ 8] + rtc[ 9] * 10;
+    unsigned year    = rtc[10] + rtc[11] * 10;
+    unsigned weekday = rtc[12];
 
     day--;
     month--;
@@ -166,25 +167,25 @@ void SPC7110::update_time(int offset) {
     month++;
     year %= 100;
 
-    memory::cartrtc.write( 0, second % 10);
-    memory::cartrtc.write( 1, second / 10);
-    memory::cartrtc.write( 2, minute % 10);
-    memory::cartrtc.write( 3, minute / 10);
-    memory::cartrtc.write( 4, hour % 10);
-    memory::cartrtc.write( 5, hour / 10);
-    memory::cartrtc.write( 6, day % 10);
-    memory::cartrtc.write( 7, day / 10);
-    memory::cartrtc.write( 8, month % 10);
-    memory::cartrtc.write( 9, month / 10);
-    memory::cartrtc.write(10, year % 10);
-    memory::cartrtc.write(11, (year / 10) % 10);
-    memory::cartrtc.write(12, weekday % 7);
+    rtc[ 0] = second % 10;
+    rtc[ 1] = second / 10;
+    rtc[ 2] = minute % 10;
+    rtc[ 3] = minute / 10;
+    rtc[ 4] = hour % 10;
+    rtc[ 5] = hour / 10;
+    rtc[ 6] = day % 10;
+    rtc[ 7] = day / 10;
+    rtc[ 8] = month % 10;
+    rtc[ 9] = month / 10;
+    rtc[10] = year % 10;
+    rtc[11] = (year / 10) % 10;
+    rtc[12] = weekday % 7;
   }
 
-  memory::cartrtc.write(16, current_time >>  0);
-  memory::cartrtc.write(17, current_time >>  8);
-  memory::cartrtc.write(18, current_time >> 16);
-  memory::cartrtc.write(19, current_time >> 24);
+  rtc[16] = current_time >>  0;
+  rtc[17] = current_time >>  8;
+  rtc[18] = current_time >> 16;
+  rtc[19] = current_time >> 24;
 }
 
 uint8 SPC7110::mmio_read(unsigned addr) {
@@ -236,7 +237,7 @@ uint8 SPC7110::mmio_read(unsigned addr) {
         set_data_adjust(adjust + 1);
       }
 
-      uint8 data = memory::cartrom.read(datarom_addr(adjustaddr));
+      uint8 data = cartridge.rom.read(datarom_addr(adjustaddr));
       if(!(r4818 & 2)) {
         unsigned increment = (r4818 & 1) ? data_increment() : 1;
         if(r4818 & 4) increment = (int16)increment;  //16-bit sign extend
@@ -265,7 +266,7 @@ uint8 SPC7110::mmio_read(unsigned addr) {
       unsigned adjust = data_adjust();
       if(r4818 & 8) adjust = (int16)adjust;  //16-bit sign extend
 
-      uint8 data = memory::cartrom.read(datarom_addr(addr + adjust));
+      uint8 data = cartridge.rom.read(datarom_addr(addr + adjust));
       if((r4818 & 0x60) == 0x60) {
         if((r4818 & 16) == 0) {
           set_data_pointer(addr + adjust);
@@ -321,7 +322,7 @@ uint8 SPC7110::mmio_read(unsigned addr) {
       if(rtc_state == RTCS_Inactive || rtc_state == RTCS_ModeSelect) return 0x00;
 
       r4842 = 0x80;
-      uint8 data = memory::cartrtc.read(rtc_index);
+      uint8 data = rtc[rtc_index];
       rtc_index = (rtc_index + 1) & 15;
       return data;
     }
@@ -355,10 +356,10 @@ void SPC7110::mmio_write(unsigned addr, uint8 data) {
       unsigned index   = (r4804 << 2);
       unsigned length  = (r4809 + (r480a << 8));
       unsigned addr    = datarom_addr(table + index);
-      unsigned mode    = (memory::cartrom.read(addr + 0));
-      unsigned offset  = (memory::cartrom.read(addr + 1) << 16)
-                       + (memory::cartrom.read(addr + 2) <<  8)
-                       + (memory::cartrom.read(addr + 3) <<  0);
+      unsigned mode    = (cartridge.rom.read(addr + 0));
+      unsigned offset  = (cartridge.rom.read(addr + 1) << 16)
+                       + (cartridge.rom.read(addr + 2) <<  8)
+                       + (cartridge.rom.read(addr + 3) <<  0);
 
       decomp.init(mode, offset, (r4805 + (r4806 << 8)) << mode);
       r480c = 0x80;
@@ -594,10 +595,10 @@ void SPC7110::mmio_write(unsigned addr, uint8 data) {
             if(data & 8) {
               update_time();
 
-              unsigned second = memory::cartrtc.read( 0) + memory::cartrtc.read( 1) * 10;
+              unsigned second = rtc[ 0] + rtc[ 1] * 10;
               //clear seconds
-              memory::cartrtc.write(0, 0);
-              memory::cartrtc.write(1, 0);
+              rtc[0] = 0;
+              rtc[1] = 0;
 
               if(second >= 30) update_time(+60);
             }
@@ -606,21 +607,21 @@ void SPC7110::mmio_write(unsigned addr, uint8 data) {
           //control register 2
           if(rtc_index == 15) {
             //disable timer and clear second counter
-            if((data & 1) && !(memory::cartrtc.read(15) & 1)) {
+            if((data & 1) && !(rtc[15] & 1)) {
               update_time();
 
               //clear seconds
-              memory::cartrtc.write(0, 0);
-              memory::cartrtc.write(1, 0);
+              rtc[0] = 0;
+              rtc[1] = 0;
             }
 
             //disable timer
-            if((data & 2) && !(memory::cartrtc.read(15) & 2)) {
+            if((data & 2) && !(rtc[15] & 2)) {
               update_time();
             }
           }
 
-          memory::cartrtc.write(rtc_index, data & 15);
+          rtc[rtc_index] = data & 15;
           rtc_index = (rtc_index + 1) & 15;
         } break;
       } //switch(rtc_state)
@@ -636,9 +637,9 @@ SPC7110::SPC7110() {
 //============
 
 uint8 SPC7110::mcu_read(unsigned addr) {
-  if(addr <= 0xdfffff) return memory::cartrom.read(dx_offset + (addr & 0x0fffff));
-  if(addr <= 0xefffff) return memory::cartrom.read(ex_offset + (addr & 0x0fffff));
-  if(addr <= 0xffffff) return memory::cartrom.read(fx_offset + (addr & 0x0fffff));
+  if(addr <= 0xdfffff) return cartridge.rom.read(dx_offset + (addr & 0x0fffff));
+  if(addr <= 0xefffff) return cartridge.rom.read(ex_offset + (addr & 0x0fffff));
+  if(addr <= 0xffffff) return cartridge.rom.read(fx_offset + (addr & 0x0fffff));
   return cpu.regs.mdr;
 }
 
@@ -661,11 +662,11 @@ void SPC7110::dcu_write(unsigned, uint8) {
 //============
 
 uint8 SPC7110::ram_read(unsigned addr) {
-  return memory::cartram.read(addr & 0x1fff);
+  return cartridge.ram.read(addr & 0x1fff);
 }
 
 void SPC7110::ram_write(unsigned addr, uint8 data) {
-  if(r4830 & 0x80) memory::cartram.write(addr & 0x1fff, data);
+  if(r4830 & 0x80) cartridge.ram.write(addr & 0x1fff, data);
 }
 
 }

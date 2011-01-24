@@ -86,6 +86,9 @@ void Serial::enable() {
     flowcontrol = sym("snesserial_flowcontrol");
     main = sym("snesserial_main");
   }
+
+  bus.map(Bus::MapMode::Direct, 0x00, 0x3f, 0x4016, 0x4017, { &Serial::mmio_read, &serial }, { &Serial::mmio_write, &serial });
+  bus.map(Bus::MapMode::Direct, 0x80, 0xbf, 0x4016, 0x4017, { &Serial::mmio_read, &serial }, { &Serial::mmio_write, &serial });
 }
 
 void Serial::power() {
@@ -94,9 +97,6 @@ void Serial::power() {
 
 void Serial::reset() {
   create(Serial::Enter, baudrate() * 8);
-
-  bus.map(Bus::MapMode::Direct, 0x00, 0x3f, 0x4016, 0x4017, { &Serial::mmio_read, &serial }, { &Serial::mmio_write, &serial });
-  bus.map(Bus::MapMode::Direct, 0x80, 0xbf, 0x4016, 0x4017, { &Serial::mmio_read, &serial }, { &Serial::mmio_write, &serial });
 }
 
 }

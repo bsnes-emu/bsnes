@@ -86,6 +86,11 @@ void PPU::frame() {
   display.framecounter = display.frameskip == 0 ? 0 : (display.framecounter + 1) % display.frameskip;
 }
 
+void PPU::enable() {
+  bus.map(Bus::MapMode::Direct, 0x00, 0x3f, 0x2100, 0x213f, { &PPU::mmio_read, &ppu }, { &PPU::mmio_write, &ppu });
+  bus.map(Bus::MapMode::Direct, 0x80, 0xbf, 0x2100, 0x213f, { &PPU::mmio_read, &ppu }, { &PPU::mmio_write, &ppu });
+}
+
 void PPU::power() {
   foreach(n, memory::vram) n = 0;
   foreach(n, memory::oam) n = 0;

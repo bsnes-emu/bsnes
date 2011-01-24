@@ -13,6 +13,8 @@ void SRTC::init() {
 }
 
 void SRTC::enable() {
+  for(unsigned n = 0; n < 20; n++) rtc[n] = 0xff;
+  cartridge.nvram.append({ "rtc", rtc, 20 });
 }
 
 void SRTC::power() {
@@ -26,17 +28,13 @@ void SRTC::reset() {
 }
 
 void SRTC::update_time() {
-  time_t rtc_time
-  = (memory::cartrtc.read(16) <<  0)
-  | (memory::cartrtc.read(17) <<  8)
-  | (memory::cartrtc.read(18) << 16)
-  | (memory::cartrtc.read(19) << 24);
+  time_t rtc_time = (rtc[16] << 0) | (rtc[17] << 8) | (rtc[18] << 16) | (rtc[19] << 24);
   time_t current_time = time(0);
 
-  //sizeof(time_t) is platform-dependent; though memory::cartrtc needs to be platform-agnostic.
+  //sizeof(time_t) is platform-dependent; though rtc[] needs to be platform-agnostic.
   //yet platforms with 32-bit signed time_t will overflow every ~68 years. handle this by
   //accounting for overflow at the cost of 1-bit precision (to catch underflow). this will allow
-  //memory::cartrtc timestamp to remain valid for up to ~34 years from the last update, even if
+  //rtc[] timestamp to remain valid for up to ~34 years from the last update, even if
   //time_t overflows. calculation should be valid regardless of number representation, time_t size,
   //or whether time_t is signed or unsigned.
   time_t diff
@@ -46,13 +44,13 @@ void SRTC::update_time() {
   if(diff > std::numeric_limits<time_t>::max() / 2) diff = 0;            //compensate for underflow
 
   if(diff > 0) {
-    unsigned second  = memory::cartrtc.read( 0) + memory::cartrtc.read( 1) * 10;
-    unsigned minute  = memory::cartrtc.read( 2) + memory::cartrtc.read( 3) * 10;
-    unsigned hour    = memory::cartrtc.read( 4) + memory::cartrtc.read( 5) * 10;
-    unsigned day     = memory::cartrtc.read( 6) + memory::cartrtc.read( 7) * 10;
-    unsigned month   = memory::cartrtc.read( 8);
-    unsigned year    = memory::cartrtc.read( 9) + memory::cartrtc.read(10) * 10 + memory::cartrtc.read(11) * 100;
-    unsigned weekday = memory::cartrtc.read(12);
+    unsigned second  = rtc[ 0] + rtc[ 1] * 10;
+    unsigned minute  = rtc[ 2] + rtc[ 3] * 10;
+    unsigned hour    = rtc[ 4] + rtc[ 5] * 10;
+    unsigned day     = rtc[ 6] + rtc[ 7] * 10;
+    unsigned month   = rtc[ 8];
+    unsigned year    = rtc[ 9] + rtc[10] * 10 + rtc[11] * 100;
+    unsigned weekday = rtc[12];
 
     day--;
     month--;
@@ -95,25 +93,25 @@ void SRTC::update_time() {
     month++;
     year -= 1000;
 
-    memory::cartrtc.write( 0, second % 10);
-    memory::cartrtc.write( 1, second / 10);
-    memory::cartrtc.write( 2, minute % 10);
-    memory::cartrtc.write( 3, minute / 10);
-    memory::cartrtc.write( 4, hour % 10);
-    memory::cartrtc.write( 5, hour / 10);
-    memory::cartrtc.write( 6, day % 10);
-    memory::cartrtc.write( 7, day / 10);
-    memory::cartrtc.write( 8, month);
-    memory::cartrtc.write( 9, year % 10);
-    memory::cartrtc.write(10, (year / 10) % 10);
-    memory::cartrtc.write(11, year / 100);
-    memory::cartrtc.write(12, weekday % 7);
+    rtc[ 0] = second % 10;
+    rtc[ 1] = second / 10;
+    rtc[ 2] = minute % 10;
+    rtc[ 3] = minute / 10;
+    rtc[ 4] = hour % 10;
+    rtc[ 5] = hour / 10;
+    rtc[ 6] = day % 10;
+    rtc[ 7] = day / 10;
+    rtc[ 8] = month;
+    rtc[ 9] = year % 10;
+    rtc[10] = (year / 10) % 10;
+    rtc[11] = year / 100;
+    rtc[12] = weekday % 7;
   }
 
-  memory::cartrtc.write(16, current_time >>  0);
-  memory::cartrtc.write(17, current_time >>  8);
-  memory::cartrtc.write(18, current_time >> 16);
-  memory::cartrtc.write(19, current_time >> 24);
+  rtc[16] = current_time >>  0;
+  rtc[17] = current_time >>  8;
+  rtc[18] = current_time >> 16;
+  rtc[19] = current_time >> 24;
 }
 
 //returns day of week for specified date
@@ -169,7 +167,7 @@ uint8 SRTC::read(unsigned addr) {
       rtc_index = -1;
       return 0x0f;
     } else {
-      return memory::cartrtc.read(rtc_index++);
+      return rtc[rtc_index++];
     }
   }
 
@@ -197,16 +195,16 @@ void SRTC::write(unsigned addr, uint8 data) {
 
     if(rtc_mode == RtcWrite) {
       if(rtc_index >= 0 && rtc_index < 12) {
-        memory::cartrtc.write(rtc_index++, data);
+        rtc[rtc_index++] = data;
 
         if(rtc_index == 12) {
           //day of week is automatically calculated and written
-          unsigned day   = memory::cartrtc.read( 6) + memory::cartrtc.read( 7) * 10;
-          unsigned month = memory::cartrtc.read( 8);
-          unsigned year  = memory::cartrtc.read( 9) + memory::cartrtc.read(10) * 10 + memory::cartrtc.read(11) * 100;
+          unsigned day   = rtc[ 6] + rtc[ 7] * 10;
+          unsigned month = rtc[ 8];
+          unsigned year  = rtc[ 9] + rtc[10] * 10 + rtc[11] * 100;
           year += 1000;
 
-          memory::cartrtc.write(rtc_index++, weekday(year, month, day));
+          rtc[rtc_index++] = weekday(year, month, day);
         }
       }
     } else if(rtc_mode == RtcCommand) {
@@ -216,7 +214,7 @@ void SRTC::write(unsigned addr, uint8 data) {
       } else if(data == 4) {
         rtc_mode = RtcReady;
         rtc_index = -1;
-        for(unsigned i = 0; i < 13; i++) memory::cartrtc.write(i, 0);
+        for(unsigned i = 0; i < 13; i++) rtc[i] = 0;
       } else {
         //unknown behavior
         rtc_mode = RtcReady;

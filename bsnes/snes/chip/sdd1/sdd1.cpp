@@ -8,9 +8,14 @@ SDD1 sdd1;
 #include "serialization.cpp"
 #include "sdd1emu.cpp"
 
-void SDD1::init() {}
+void SDD1::init() {
+}
 
 void SDD1::enable() {
+  //hook S-CPU DMA MMIO registers to gather information for struct dma[];
+  //buffer address and transfer size information for use in SDD1::mcu_read()
+  bus.map(Bus::MapMode::Direct, 0x00, 0x3f, 0x4300, 0x437f, { &SDD1::mmio_read, &sdd1 }, { &SDD1::mmio_write, &sdd1 });
+  bus.map(Bus::MapMode::Direct, 0x80, 0xbf, 0x4300, 0x437f, { &SDD1::mmio_read, &sdd1 }, { &SDD1::mmio_write, &sdd1 });
 }
 
 void SDD1::power() {
@@ -18,11 +23,6 @@ void SDD1::power() {
 }
 
 void SDD1::reset() {
-  //hook S-CPU DMA MMIO registers to gather information for struct dma[];
-  //buffer address and transfer size information for use in SDD1::mcu_read()
-  bus.map(Bus::MapMode::Direct, 0x00, 0x3f, 0x4300, 0x437f, { &SDD1::mmio_read, &sdd1 }, { &SDD1::mmio_write, &sdd1 });
-  bus.map(Bus::MapMode::Direct, 0x80, 0xbf, 0x4300, 0x437f, { &SDD1::mmio_read, &sdd1 }, { &SDD1::mmio_write, &sdd1 });
-
   sdd1_enable = 0x00;
   xfer_enable = 0x00;
 
@@ -138,7 +138,7 @@ uint8 SDD1::mcu_read(unsigned addr) {
   }  //S-DD1 decompressor enabled
 
   //S-DD1 decompression mode inactive; return ROM data
-  return memory::cartrom.read(mmc[(addr >> 20) & 3] + (addr & 0x0fffff));
+  return cartridge.rom.read(mmc[(addr >> 20) & 3] + (addr & 0x0fffff));
 }
 
 void SDD1::mcu_write(unsigned addr, uint8 data) {

@@ -57,6 +57,7 @@ void System::serialize_all(serializer &s) {
   ppu.serialize(s);
   dsp.serialize(s);
 
+  if(cartridge.mode() == Cartridge::Mode::SufamiTurbo) sufamiturbo.serialize(s);
   if(cartridge.mode() == Cartridge::Mode::SuperGameBoy) icd2.serialize(s);
   if(cartridge.has_superfx()) superfx.serialize(s);
   if(cartridge.has_sa1()) sa1.serialize(s);

@@ -66,18 +66,6 @@ void Bus::map(
   }
 }
 
-bool Bus::load_cart() {
-  if(cartridge.loaded() == true) return false;
-
-  map_reset();
-  map_xml();
-  map_system();
-  return true;
-}
-
-void Bus::unload_cart() {
-}
-
 void Bus::map_reset() {
   function<uint8 (unsigned)> reader = [](unsigned) { return cpu.regs.mdr; };
   function<void (unsigned, uint8)> writer = [](unsigned, uint8) {};
@@ -90,45 +78,6 @@ void Bus::map_xml() {
   foreach(m, cartridge.mapping) {
     map(m.mode, m.banklo, m.bankhi, m.addrlo, m.addrhi, m.read, m.write, m.offset, m.size);
   }
-}
-
-void Bus::map_system() {
-  map(
-    MapMode::Linear, 0x00, 0x3f, 0x0000, 0x1fff,
-    { &StaticRAM::read, &memory::wram }, { &StaticRAM::write, &memory::wram },
-    0x000000, 0x002000
-  );
-  map(
-    MapMode::Linear, 0x80, 0xbf, 0x0000, 0x1fff,
-    { &StaticRAM::read, &memory::wram }, { &StaticRAM::write, &memory::wram },
-    0x000000, 0x002000
-  );
-  map(
-    MapMode::Linear, 0x7e, 0x7f, 0x0000, 0xffff,
-    { &StaticRAM::read, &memory::wram }, { &StaticRAM::write, &memory::wram }
-  );
-}
-
-void Bus::power() {
-  foreach(n, memory::wram) n = config.cpu.wram_init_value;
-  reset();
-}
-
-void Bus::reset() {
-  map(MapMode::Direct, 0x00, 0x3f, 0x2100, 0x213f, { &PPU::mmio_read, &ppu }, { &PPU::mmio_write, &ppu });
-  map(MapMode::Direct, 0x80, 0xbf, 0x2100, 0x213f, { &PPU::mmio_read, &ppu }, { &PPU::mmio_write, &ppu });
-
-  map(MapMode::Direct, 0x00, 0x3f, 0x2140, 0x2183, { &CPU::mmio_read, &cpu }, { &CPU::mmio_write, &cpu });
-  map(MapMode::Direct, 0x80, 0xbf, 0x2140, 0x2183, { &CPU::mmio_read, &cpu }, { &CPU::mmio_write, &cpu });
-
-  map(MapMode::Direct, 0x00, 0x3f, 0x4016, 0x4017, { &CPU::mmio_read, &cpu }, { &CPU::mmio_write, &cpu });
-  map(MapMode::Direct, 0x80, 0xbf, 0x4016, 0x4017, { &CPU::mmio_read, &cpu }, { &CPU::mmio_write, &cpu });
-
-  map(MapMode::Direct, 0x00, 0x3f, 0x4200, 0x421f, { &CPU::mmio_read, &cpu }, { &CPU::mmio_write, &cpu });
-  map(MapMode::Direct, 0x80, 0xbf, 0x4200, 0x421f, { &CPU::mmio_read, &cpu }, { &CPU::mmio_write, &cpu });
-
-  map(MapMode::Direct, 0x00, 0x3f, 0x4300, 0x437f, { &CPU::mmio_read, &cpu }, { &CPU::mmio_write, &cpu });
-  map(MapMode::Direct, 0x80, 0xbf, 0x4300, 0x437f, { &CPU::mmio_read, &cpu }, { &CPU::mmio_write, &cpu });
 }
 
 Bus::Bus() {

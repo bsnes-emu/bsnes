@@ -1,5 +1,7 @@
 class BSXFlash : public Memory {
 public:
+  MappedRAM memory;
+
   void init();
   void enable();
   void power();

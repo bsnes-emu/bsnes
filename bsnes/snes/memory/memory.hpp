@@ -47,12 +47,6 @@ struct Bus {
   alwaysinline uint8 read(unsigned addr);
   alwaysinline void write(unsigned addr, uint8 data);
 
-  bool load_cart();
-  void unload_cart();
-
-  void power();
-  void reset();
-
   uint8 *lookup;
   uint32 *target;
 
@@ -70,14 +64,12 @@ struct Bus {
     unsigned base = 0, unsigned length = 0
   );
 
+  void map_reset();
+  void map_xml();
+
   void serialize(serializer&);
   Bus();
   ~Bus();
-
-private:
-  void map_reset();
-  void map_xml();
-  void map_system();
 };
 
 namespace memory {

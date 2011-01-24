@@ -51,17 +51,17 @@ void CPUIRAM::write(unsigned addr, uint8 data) {
 //========
 
 unsigned SA1BWRAM::size() const {
-  return memory::cartram.size();
+  return cartridge.ram.size();
 }
 
 uint8 SA1BWRAM::read(unsigned addr) {
   sa1.synchronize_cpu();
-  return memory::cartram.read(addr);
+  return cartridge.ram.read(addr);
 }
 
 void SA1BWRAM::write(unsigned addr, uint8 data) {
   sa1.synchronize_cpu();
-  memory::cartram.write(addr, data);
+  cartridge.ram.write(addr, data);
 }
 
 //========
@@ -69,18 +69,18 @@ void SA1BWRAM::write(unsigned addr, uint8 data) {
 //========
 
 unsigned CC1BWRAM::size() const {
-  return memory::cartram.size();
+  return cartridge.ram.size();
 }
 
 uint8 CC1BWRAM::read(unsigned addr) {
   cpu.synchronize_coprocessor();
   if(dma) return sa1.dma_cc1_read(addr);
-  return memory::cartram.read(addr);
+  return cartridge.ram.read(addr);
 }
 
 void CC1BWRAM::write(unsigned addr, uint8 data) {
   cpu.synchronize_coprocessor();
-  memory::cartram.write(addr, data);
+  cartridge.ram.write(addr, data);
 }
 
 //=========
@@ -97,20 +97,20 @@ uint8 BitmapRAM::read(unsigned addr) {
   if(sa1.mmio.bbf == 0) {
     //4bpp
     unsigned shift = addr & 1;
-    addr = (addr >> 1) & (memory::cartram.size() - 1);
+    addr = (addr >> 1) & (cartridge.ram.size() - 1);
     switch(shift) { default:
-      case 0: return (memory::cartram.read(addr) >> 0) & 15;
-      case 1: return (memory::cartram.read(addr) >> 4) & 15;
+      case 0: return (cartridge.ram.read(addr) >> 0) & 15;
+      case 1: return (cartridge.ram.read(addr) >> 4) & 15;
     }
   } else {
     //2bpp
     unsigned shift = addr & 3;
-    addr = (addr >> 2) & (memory::cartram.size() - 1);
+    addr = (addr >> 2) & (cartridge.ram.size() - 1);
     switch(shift) { default:
-      case 0: return (memory::cartram.read(addr) >> 0) & 3;
-      case 1: return (memory::cartram.read(addr) >> 2) & 3;
-      case 2: return (memory::cartram.read(addr) >> 4) & 3;
-      case 3: return (memory::cartram.read(addr) >> 6) & 3;
+      case 0: return (cartridge.ram.read(addr) >> 0) & 3;
+      case 1: return (cartridge.ram.read(addr) >> 2) & 3;
+      case 2: return (cartridge.ram.read(addr) >> 4) & 3;
+      case 3: return (cartridge.ram.read(addr) >> 6) & 3;
     }
   }
 }
@@ -121,24 +121,24 @@ void BitmapRAM::write(unsigned addr, uint8 data) {
   if(sa1.mmio.bbf == 0) {
     //4bpp
     unsigned shift = addr & 1;
-    addr = (addr >> 1) & (memory::cartram.size() - 1);
+    addr = (addr >> 1) & (cartridge.ram.size() - 1);
     switch(shift) { default:
-      case 0: data = (memory::cartram.read(addr) & 0xf0) | ((data & 15) << 0); break;
-      case 1: data = (memory::cartram.read(addr) & 0x0f) | ((data & 15) << 4); break;
+      case 0: data = (cartridge.ram.read(addr) & 0xf0) | ((data & 15) << 0); break;
+      case 1: data = (cartridge.ram.read(addr) & 0x0f) | ((data & 15) << 4); break;
     }
   } else {
     //2bpp
     unsigned shift = addr & 3;
-    addr = (addr >> 2) & (memory::cartram.size() - 1);
+    addr = (addr >> 2) & (cartridge.ram.size() - 1);
     switch(shift) { default:
-      case 0: data = (memory::cartram.read(addr) & 0xfc) | ((data &  3) << 0); break;
-      case 1: data = (memory::cartram.read(addr) & 0xf3) | ((data &  3) << 2); break;
-      case 2: data = (memory::cartram.read(addr) & 0xcf) | ((data &  3) << 4); break;
-      case 3: data = (memory::cartram.read(addr) & 0x3f) | ((data &  3) << 6); break;
+      case 0: data = (cartridge.ram.read(addr) & 0xfc) | ((data &  3) << 0); break;
+      case 1: data = (cartridge.ram.read(addr) & 0xf3) | ((data &  3) << 2); break;
+      case 2: data = (cartridge.ram.read(addr) & 0xcf) | ((data &  3) << 4); break;
+      case 3: data = (cartridge.ram.read(addr) & 0x3f) | ((data &  3) << 6); break;
     }
   }
 
-  memory::cartram.write(addr, data);
+  cartridge.ram.write(addr, data);
 }
 
 #endif

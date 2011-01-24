@@ -13,6 +13,9 @@ public:
     PAL,
   };
 
+  MappedRAM rom;
+  MappedRAM ram;
+
   //assigned externally to point to file-system datafiles (msu1 and serial)
   //example: "/path/to/filename.sfc" would set this to "/path/to/filename"
   readwrite<string> basename;
@@ -38,6 +41,17 @@ public:
   readonly<bool> has_st0018;
   readonly<bool> has_msu1;
   readonly<bool> has_serial;
+
+  struct NonVolatileRAM {
+    const string id;
+    uint8_t *data;
+    unsigned size;
+    unsigned slot;
+    NonVolatileRAM() : id(""), data(0), size(0), slot(0) {}
+    NonVolatileRAM(const string id, uint8_t *data, unsigned size, unsigned slot = 0)
+    : id(id), data(data), size(size), slot(slot) {}
+  };
+  linear_vector<NonVolatileRAM> nvram;
 
   struct Mapping {
     function<uint8 (unsigned)> read;
@@ -90,13 +104,6 @@ private:
 
   void xml_parse_address(Mapping&, const string&);
   void xml_parse_mode(Mapping&, const string&);
-};
-
-namespace memory {
-  extern MappedRAM cartrom, cartram, cartrtc;
-  extern MappedRAM bsxflash, bsxram, bsxpram;
-  extern MappedRAM stArom, stAram;
-  extern MappedRAM stBrom, stBram;
 };
 
 extern Cartridge cartridge;

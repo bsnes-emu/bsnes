@@ -90,6 +90,35 @@ void CPU::op_irq(uint16 vector) {
   regs.pc.w = rd.w;
 }
 
+void CPU::enable() {
+  bus.map(Bus::MapMode::Direct, 0x00, 0x3f, 0x2140, 0x2183, { &CPU::mmio_read, &cpu }, { &CPU::mmio_write, &cpu });
+  bus.map(Bus::MapMode::Direct, 0x80, 0xbf, 0x2140, 0x2183, { &CPU::mmio_read, &cpu }, { &CPU::mmio_write, &cpu });
+
+  bus.map(Bus::MapMode::Direct, 0x00, 0x3f, 0x4016, 0x4017, { &CPU::mmio_read, &cpu }, { &CPU::mmio_write, &cpu });
+  bus.map(Bus::MapMode::Direct, 0x80, 0xbf, 0x4016, 0x4017, { &CPU::mmio_read, &cpu }, { &CPU::mmio_write, &cpu });
+
+  bus.map(Bus::MapMode::Direct, 0x00, 0x3f, 0x4200, 0x421f, { &CPU::mmio_read, &cpu }, { &CPU::mmio_write, &cpu });
+  bus.map(Bus::MapMode::Direct, 0x80, 0xbf, 0x4200, 0x421f, { &CPU::mmio_read, &cpu }, { &CPU::mmio_write, &cpu });
+
+  bus.map(Bus::MapMode::Direct, 0x00, 0x3f, 0x4300, 0x437f, { &CPU::mmio_read, &cpu }, { &CPU::mmio_write, &cpu });
+  bus.map(Bus::MapMode::Direct, 0x80, 0xbf, 0x4300, 0x437f, { &CPU::mmio_read, &cpu }, { &CPU::mmio_write, &cpu });
+
+  bus.map(
+    Bus::MapMode::Linear, 0x00, 0x3f, 0x0000, 0x1fff,
+    { &StaticRAM::read, &memory::wram }, { &StaticRAM::write, &memory::wram },
+    0x000000, 0x002000
+  );
+  bus.map(
+    Bus::MapMode::Linear, 0x80, 0xbf, 0x0000, 0x1fff,
+    { &StaticRAM::read, &memory::wram }, { &StaticRAM::write, &memory::wram },
+    0x000000, 0x002000
+  );
+  bus.map(
+    Bus::MapMode::Linear, 0x7e, 0x7f, 0x0000, 0xffff,
+    { &StaticRAM::read, &memory::wram }, { &StaticRAM::write, &memory::wram }
+  );
+}
+
 void CPU::power() {
   regs.a = 0x0000;
   regs.x = 0x0000;

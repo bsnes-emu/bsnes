@@ -8,7 +8,7 @@ namespace memory {
 //ROM / RAM access from the S-CPU
 
 unsigned SuperFXCPUROM::size() const {
-  return memory::cartrom.size();
+  return cartridge.rom.size();
 }
 
 uint8 SuperFXCPUROM::read(unsigned addr) {
@@ -19,24 +19,24 @@ uint8 SuperFXCPUROM::read(unsigned addr) {
     };
     return data[addr & 15];
   }
-  return memory::cartrom.read(addr);
+  return cartridge.rom.read(addr);
 }
 
 void SuperFXCPUROM::write(unsigned addr, uint8 data) {
-  memory::cartrom.write(addr, data);
+  cartridge.rom.write(addr, data);
 }
 
 unsigned SuperFXCPURAM::size() const {
-  return memory::cartram.size();
+  return cartridge.ram.size();
 }
 
 uint8 SuperFXCPURAM::read(unsigned addr) {
   if(superfx.regs.sfr.g && superfx.regs.scmr.ran) return cpu.regs.mdr;
-  return memory::cartram.read(addr);
+  return cartridge.ram.read(addr);
 }
 
 void SuperFXCPURAM::write(unsigned addr, uint8 data) {
-  memory::cartram.write(addr, data);
+  cartridge.ram.write(addr, data);
 }
 
 #endif

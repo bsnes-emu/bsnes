@@ -22,14 +22,14 @@ void MappedRAM::reset() {
     delete[] data_;
     data_ = 0;
   }
-  size_ = -1U;
+  size_ = 0;
   write_protect_ = false;
 }
 
 void MappedRAM::map(uint8 *source, unsigned length) {
   reset();
   data_ = source;
-  size_ = data_ && length > 0 ? length : -1U;
+  size_ = data_ ? length : 0;
 }
 
 void MappedRAM::copy(const uint8 *data, unsigned size) {
@@ -47,7 +47,7 @@ unsigned MappedRAM::size() const { return size_; }
 uint8 MappedRAM::read(unsigned addr) { return data_[addr]; }
 void MappedRAM::write(unsigned addr, uint8 n) { if(!write_protect_) data_[addr] = n; }
 const uint8& MappedRAM::operator[](unsigned addr) const { return data_[addr]; }
-MappedRAM::MappedRAM() : data_(0), size_(-1U), write_protect_(false) {}
+MappedRAM::MappedRAM() : data_(0), size_(0), write_protect_(false) {}
 
 //Bus
 

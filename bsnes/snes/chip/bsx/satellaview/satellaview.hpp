@@ -1,4 +1,4 @@
-class BSXBase {
+class BSXSatellaview {
 public:
   void init();
   void enable();
@@ -22,4 +22,4 @@ private:
   } regs;
 };
 
-extern BSXBase bsxbase;
+extern BSXSatellaview bsxsatellaview;

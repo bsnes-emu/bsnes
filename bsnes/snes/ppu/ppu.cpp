@@ -79,6 +79,11 @@ void PPU::add_clocks(unsigned clocks) {
   }
 }
 
+void PPU::enable() {
+  bus.map(Bus::MapMode::Direct, 0x00, 0x3f, 0x2100, 0x213f, { &PPU::mmio_read, &ppu }, { &PPU::mmio_write, &ppu });
+  bus.map(Bus::MapMode::Direct, 0x80, 0xbf, 0x2100, 0x213f, { &PPU::mmio_read, &ppu }, { &PPU::mmio_write, &ppu });
+}
+
 void PPU::power() {
   ppu1_version = config.ppu1.version;
   ppu2_version = config.ppu2.version;

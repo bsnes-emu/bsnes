@@ -3,59 +3,55 @@ Cartridge cartridge;
 
 bool Cartridge::loadNormal(const char *basename) {
   unload();
-  if(loadCartridge(SNES::memory::cartrom, baseXML, basename) == false) return false;
+  if(loadCartridge(SNES::cartridge.rom, baseXML, basename) == false) return false;
   SNES::cartridge.basename = baseName = nall::basename(basename);
   SNES::cartridge.load(SNES::Cartridge::Mode::Normal, { baseXML });
-  loadMemory(SNES::memory::cartram, baseName, ".srm");
-  loadMemory(SNES::memory::cartrtc, baseName, ".rtc");
+  foreach(memory, SNES::cartridge.nvram) loadMemory(memory);
   utility.cartridgeLoaded();
   return true;
 }
 
 bool Cartridge::loadBsxSlotted(const char *basename, const char *slotname) {
   unload();
-  if(loadCartridge(SNES::memory::cartrom, baseXML, basename) == false) return false;
-  loadCartridge(SNES::memory::bsxflash, slotAXML, slotname);
+  if(loadCartridge(SNES::cartridge.rom, baseXML, basename) == false) return false;
+  loadCartridge(SNES::bsxflash.memory, slotAXML, slotname);
   SNES::cartridge.basename = baseName = nall::basename(basename);
   slotAName = nall::basename(slotname);
   SNES::cartridge.load(SNES::Cartridge::Mode::BsxSlotted, { baseXML, slotAXML });
-  loadMemory(SNES::memory::cartram, baseName, ".srm");
-  loadMemory(SNES::memory::cartrtc, baseName, ".rtc");
+  foreach(memory, SNES::cartridge.nvram) loadMemory(memory);
   utility.cartridgeLoaded();
   return true;
 }
 
 bool Cartridge::loadBsx(const char *basename, const char *slotname) {
   unload();
-  if(loadCartridge(SNES::memory::cartrom, baseXML, basename) == false) return false;
-  loadCartridge(SNES::memory::bsxflash, slotAXML, slotname);
+  if(loadCartridge(SNES::cartridge.rom, baseXML, basename) == false) return false;
+  loadCartridge(SNES::bsxflash.memory, slotAXML, slotname);
   SNES::cartridge.basename = baseName = nall::basename(basename);
   slotAName = nall::basename(slotname);
   SNES::cartridge.load(SNES::Cartridge::Mode::Bsx, { baseXML, slotAXML });
-  loadMemory(SNES::memory::bsxram, baseName, ".srm");
-  loadMemory(SNES::memory::bsxpram, baseName, ".psr");
+  foreach(memory, SNES::cartridge.nvram) loadMemory(memory);
   utility.cartridgeLoaded();
   return true;
 }
 
 bool Cartridge::loadSufamiTurbo(const char *basename, const char *slotAname, const char *slotBname) {
   unload();
-  if(loadCartridge(SNES::memory::cartrom, baseXML, basename) == false) return false;
-  loadCartridge(SNES::memory::stArom, slotAXML, slotAname);
-  loadCartridge(SNES::memory::stBrom, slotBXML, slotBname);
+  if(loadCartridge(SNES::cartridge.rom, baseXML, basename) == false) return false;
+  loadCartridge(SNES::sufamiturbo.slotA.rom, slotAXML, slotAname);
+  loadCartridge(SNES::sufamiturbo.slotB.rom, slotBXML, slotBname);
   SNES::cartridge.basename = baseName = nall::basename(basename);
   slotAName = nall::basename(slotAname);
   slotBName = nall::basename(slotBname);
   SNES::cartridge.load(SNES::Cartridge::Mode::SufamiTurbo, { baseXML, slotAXML, slotBXML });
-  loadMemory(SNES::memory::stAram, slotAName, ".srm");
-  loadMemory(SNES::memory::stBram, slotBName, ".srm");
+  foreach(memory, SNES::cartridge.nvram) loadMemory(memory);
   utility.cartridgeLoaded();
   return true;
 }
 
 bool Cartridge::loadSuperGameBoy(const char *basename, const char *slotname) {
   unload();
-  if(loadCartridge(SNES::memory::cartrom, baseXML, basename) == false) return false;
+  if(loadCartridge(SNES::cartridge.rom, baseXML, basename) == false) return false;
 
   unsigned size = 0;
   uint8_t *data = 0;
@@ -76,6 +72,7 @@ bool Cartridge::loadSuperGameBoy(const char *basename, const char *slotname) {
   slotAName = nall::basename(slotname);
   SNES::cartridge.load(SNES::Cartridge::Mode::SuperGameBoy, { baseXML, "" });
 
+  foreach(memory, SNES::cartridge.nvram) loadMemory(memory);
   if(GameBoy::cartridge.info.battery && fp.open(string(slotAName, ".sav"), file::mode::read)) {
     fp.read(GameBoy::cartridge.ramdata, min(GameBoy::cartridge.ramsize, fp.size()));
     fp.close();
@@ -88,13 +85,8 @@ bool Cartridge::loadSuperGameBoy(const char *basename, const char *slotname) {
 void Cartridge::unload() {
   patchApplied = false;
   if(SNES::cartridge.loaded() == false) return;
-  saveMemory(SNES::memory::cartram, baseName, ".srm");
-  saveMemory(SNES::memory::cartrtc, baseName, ".rtc");
-  saveMemory(SNES::memory::bsxram, baseName, ".srm");
-  saveMemory(SNES::memory::bsxpram, baseName, ".psr");
-  saveMemory(SNES::memory::stAram, slotAName, ".srm");
-  saveMemory(SNES::memory::stBram, slotBName, ".srm");
 
+  foreach(memory, SNES::cartridge.nvram) saveMemory(memory);
   if(SNES::cartridge.mode() == SNES::Cartridge::Mode::SuperGameBoy) {
     file fp;
     if(GameBoy::cartridge.info.battery && fp.open(string(slotAName, ".sav"), file::mode::write)) {
@@ -139,24 +131,24 @@ bool Cartridge::loadCartridge(SNES::MappedRAM &memory, string &XML, const char *
   return true;
 }
 
-bool Cartridge::loadMemory(SNES::MappedRAM &memory, string filename, const char *extension) {
-  if(memory.size() == 0 || memory.size() == ~0) return true;
-  filename = { filename, extension };
-  if(file::exists(filename) == false) return false;
+bool Cartridge::loadMemory(SNES::Cartridge::NonVolatileRAM &memory) {
+  if(memory.size == 0) return true;
+  lstring filenames = { baseName, slotAName, slotBName };
+  string filename = string(filenames[memory.slot], ".", memory.id);
   file fp;
-  if(fp.open(filename, file::mode::read)) {
-    fp.read(memory.data(), min(memory.size(), fp.size()));
-    fp.close();
-  }
+  if(fp.open(filename, file::mode::read) == false) return false;
+  fp.read(memory.data, min(memory.size, fp.size()));
+  fp.close();
   return true;
 }
 
-bool Cartridge::saveMemory(SNES::MappedRAM &memory, string filename, const char *extension) {
-  if(memory.size() == 0 || memory.size() == ~0) return true;
-  filename = { filename, extension };
+bool Cartridge::saveMemory(SNES::Cartridge::NonVolatileRAM &memory) {
+  if(memory.size == 0) return true;
+  lstring filenames = { baseName, slotAName, slotBName };
+  string filename = string(filenames[memory.slot], ".", memory.id);
   file fp;
   if(fp.open(filename, file::mode::write) == false) return false;
-  fp.write(memory.data(), memory.size());
+  fp.write(memory.data, memory.size);
   fp.close();
   return true;
 }

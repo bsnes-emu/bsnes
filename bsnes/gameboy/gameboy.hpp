@@ -31,6 +31,12 @@ namespace GameBoy {
   typedef uint32_t uint32;
   typedef uint64_t uint64;
 
+  template<uint16 lo, uint16 hi>
+  alwaysinline bool within(uint16 addr) {
+    static const uint16 mask = ~(hi ^ lo);
+    return (addr & mask) == lo;
+  }
+
   struct Processor {
     cothread_t thread;
     unsigned frequency;

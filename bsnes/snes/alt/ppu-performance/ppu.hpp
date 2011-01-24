@@ -10,6 +10,7 @@ public:
   bool hires() const;
 
   void enter();
+  void enable();
   void power();
   void reset();
   void scanline();

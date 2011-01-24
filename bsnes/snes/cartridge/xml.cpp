@@ -63,14 +63,14 @@ void Cartridge::parse_xml_gameboy(const char *data) {
 void Cartridge::xml_parse_rom(xml_element &root) {
   foreach(leaf, root.element) {
     if(leaf.name == "map") {
-      Mapping m(memory::cartrom);
+      Mapping m(rom);
       foreach(attr, leaf.attribute) {
         if(attr.name == "address") xml_parse_address(m, attr.content);
         if(attr.name == "mode") xml_parse_mode(m, attr.content);
         if(attr.name == "offset") m.offset = hex(attr.content);
         if(attr.name == "size") m.size = hex(attr.content);
       }
-      if(m.size == 0) m.size = memory::cartrom.size() - m.offset;
+      if(m.size == 0) m.size = rom.size() - m.offset;
       mapping.append(m);
     }
   }
@@ -83,7 +83,7 @@ void Cartridge::xml_parse_ram(xml_element &root) {
 
   foreach(leaf, root.element) {
     if(leaf.name == "map") {
-      Mapping m(memory::cartram);
+      Mapping m(ram);
       foreach(attr, leaf.attribute) {
         if(attr.name == "address") xml_parse_address(m, attr.content);
         if(attr.name == "mode") xml_parse_mode(m, attr.content);
@@ -345,7 +345,7 @@ void Cartridge::xml_parse_bsx(xml_element &root) {
     if(node.name == "slot") {
       foreach(leaf, node.element) {
         if(leaf.name == "map") {
-          Mapping m(memory::bsxflash);
+          Mapping m(bsxflash.memory);
           foreach(attr, leaf.attribute) {
             if(attr.name == "address") xml_parse_address(m, attr.content);
             if(attr.name == "mode") xml_parse_mode(m, attr.content);
@@ -358,7 +358,7 @@ void Cartridge::xml_parse_bsx(xml_element &root) {
     } else if(node.name == "mcu") {
       foreach(leaf, node.element) {
         if(leaf.name == "map") {
-          Mapping m({ &BSXCart::mcu_read, &bsxcart }, { &BSXCart::mcu_write, &bsxcart });
+          Mapping m({ &BSXCartridge::mcu_read, &bsxcartridge }, { &BSXCartridge::mcu_write, &bsxcartridge });
           foreach(attr, leaf.attribute) {
             if(attr.name == "address") xml_parse_address(m, attr.content);
           }
@@ -368,7 +368,7 @@ void Cartridge::xml_parse_bsx(xml_element &root) {
     } else if(node.name == "mmio") {
       foreach(leaf, node.element) {
         if(leaf.name == "map") {
-          Mapping m({ &BSXCart::mmio_read, &bsxcart }, { &BSXCart::mmio_write, &bsxcart });
+          Mapping m({ &BSXCartridge::mmio_read, &bsxcartridge }, { &BSXCartridge::mmio_write, &bsxcartridge });
           foreach(attr, leaf.attribute) {
             if(attr.name == "address") xml_parse_address(m, attr.content);
           }
@@ -396,7 +396,7 @@ void Cartridge::xml_parse_sufamiturbo(xml_element &root) {
         if(slot.name == "rom") {
           foreach(leaf, slot.element) {
             if(leaf.name == "map") {
-              Memory &memory = slotid == 0 ? memory::stArom : memory::stBrom;
+              Memory &memory = slotid == 0 ? sufamiturbo.slotA.rom : sufamiturbo.slotB.rom;
               Mapping m(memory);
               foreach(attr, leaf.attribute) {
                 if(attr.name == "address") xml_parse_address(m, attr.content);
@@ -410,7 +410,7 @@ void Cartridge::xml_parse_sufamiturbo(xml_element &root) {
         } else if(slot.name == "ram") {
           foreach(leaf, slot.element) {
             if(leaf.name == "map") {
-              Memory &memory = slotid == 0 ? memory::stAram : memory::stBram;
+              Memory &memory = slotid == 0 ? sufamiturbo.slotA.ram : sufamiturbo.slotB.ram;
               Mapping m(memory);
               foreach(attr, leaf.attribute) {
                 if(attr.name == "address") xml_parse_address(m, attr.content);
@@ -584,16 +584,12 @@ void Cartridge::xml_parse_msu1(xml_element &root) {
   has_msu1 = true;
 
   foreach(node, root.element) {
-    if(node.name == "mmio") {
-      foreach(leaf, node.element) {
-        if(leaf.name == "map") {
-          Mapping m({ &MSU1::mmio_read, &msu1 }, { &MSU1::mmio_write, &msu1 });
-          foreach(attr, leaf.attribute) {
-            if(attr.name == "address") xml_parse_address(m, attr.content);
-          }
-          mapping.append(m);
-        }
+    if(node.name == "map") {
+      Mapping m({ &MSU1::mmio_read, &msu1 }, { &MSU1::mmio_write, &msu1 });
+      foreach(attr, node.attribute) {
+        if(attr.name == "address") xml_parse_address(m, attr.content);
       }
+      mapping.append(m);
     }
   }
 }

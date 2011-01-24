@@ -15,6 +15,7 @@ public:
   alwaysinline bool interrupt_pending() { return status.interrupt_pending; }
 
   void enter();
+  void enable();
   void power();
   void reset();
 
