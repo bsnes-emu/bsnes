@@ -45,10 +45,10 @@ void Bus::map(
     for(unsigned addr = addr_lo; addr <= addr_hi; addr++) {
       unsigned destaddr = (bank << 16) | addr;
       if(mode == MapMode::Linear) {
-        destaddr = base + mirror(offset, length);
+        destaddr = mirror(base + offset, length);
         offset = (offset + 1) % length;
       } else if(mode == MapMode::Shadow) {
-        destaddr = base + mirror(destaddr, length);
+        destaddr = mirror(base + destaddr, length);
       }
       lookup[(bank << 16) | addr] = id;
       target[(bank << 16) | addr] = destaddr;

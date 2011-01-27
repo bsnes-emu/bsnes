@@ -16,6 +16,7 @@ struct Configuration : public configuration {
     string shader;
     bool region;
     unsigned scale;
+    unsigned fullscreenScale;
     bool aspectRatioCorrection;
     unsigned brightness;
     unsigned contrast;

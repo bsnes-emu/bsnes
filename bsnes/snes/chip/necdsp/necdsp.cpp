@@ -245,10 +245,13 @@ void NECDSP::exec_ld(uint24 opcode) {
 void NECDSP::init() {
 }
 
-void NECDSP::enable() {
+void NECDSP::load() {
   if(revision == Revision::uPD96050) {
     cartridge.nvram.append({ "nec", (uint8_t*)dataRAM, 4096 });
   }
+}
+
+void NECDSP::unload() {
 }
 
 void NECDSP::power() {

@@ -82,10 +82,36 @@ void Utility::setFullscreen(bool fullscreen) {
   if(fullscreen == false) {
     setScale();
   } else {
-    unsigned baseHeight = config.video.region == 0 ? 224 : 239;
-    unsigned heightScale = OS::desktopHeight() / baseHeight;
-    unsigned height = baseHeight * heightScale;
-    unsigned width = min(OS::desktopWidth(), (unsigned)(256.0 / baseHeight * height));
+    unsigned width, height;
+    switch(config.video.fullscreenScale) { default:
+      case 0: {  //center (even multiple of base height)
+        unsigned baseHeight = config.video.region == 0 ? 224 : 239;
+        unsigned heightScale = OS::desktopHeight() / baseHeight;
+        height = baseHeight * heightScale;
+        width = 256 * heightScale;
+        if(config.video.region == 0 && config.video.aspectRatioCorrection) width *= 54.0 / 47.0;
+        if(config.video.region == 1 && config.video.aspectRatioCorrection) width *= 32.0 / 23.0;
+        width = min(width, OS::desktopWidth());
+        break;
+      }
+
+      case 1: {  //scale (100% screen height, aspect-corrected width)
+        unsigned baseHeight = config.video.region == 0 ? 224 : 239;
+        height = OS::desktopHeight();
+        width = 256.0 / baseHeight * height;
+        if(config.video.region == 0 && config.video.aspectRatioCorrection) width *= 54.0 / 47.0;
+        if(config.video.region == 1 && config.video.aspectRatioCorrection) width *= 32.0 / 23.0;
+        width = min(width, OS::desktopWidth());
+        break;
+      }
+
+      case 2: {  //stretch (100% screen width and 100% screen height)
+        width = OS::desktopWidth();
+        height = OS::desktopHeight();
+        break;
+      }
+    }
+
     mainWindow.viewport.setGeometry(
       (OS::desktopWidth() - width) / 2,
       (OS::desktopHeight() - height) / 2,

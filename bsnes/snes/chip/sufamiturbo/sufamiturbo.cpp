@@ -6,16 +6,28 @@ namespace SNES {
 #include "serialization.cpp"
 SufamiTurbo sufamiturbo;
 
-void SufamiTurbo::enable() {
+void SufamiTurbo::load() {
+  slotA.ram.map(allocate<uint8>(128 * 1024, 0xff), 128 * 1024);
+  slotB.ram.map(allocate<uint8>(128 * 1024, 0xff), 128 * 1024);
+
   if(slotA.rom.data()) {
-    slotA.ram.map(allocate<uint8>(128 * 1024, 0xff), 128 * 1024);
     cartridge.nvram.append({ "srm", slotA.ram.data(), slotA.ram.size(), 1 });
+  } else {
+    slotA.rom.map(allocate<uint8>(128 * 1024, 0xff), 128 * 1024);
   }
 
   if(slotB.rom.data()) {
-    slotB.ram.map(allocate<uint8>(128 * 1024, 0xff), 128 * 1024);
     cartridge.nvram.append({ "srm", slotB.ram.data(), slotB.ram.size(), 2 });
+  } else {
+    slotB.rom.map(allocate<uint8>(128 * 1024, 0xff), 128 * 1024);
   }
+}
+
+void SufamiTurbo::unload() {
+  slotA.rom.reset();
+  slotA.ram.reset();
+  slotB.rom.reset();
+  slotB.ram.reset();
 }
 
 }

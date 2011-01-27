@@ -118,7 +118,10 @@ void SA1::trigger_irq() {
 void SA1::init() {
 }
 
-void SA1::enable() {
+void SA1::load() {
+}
+
+void SA1::unload() {
 }
 
 void SA1::power() {

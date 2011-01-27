@@ -43,7 +43,10 @@ void SuperFX::init() {
   regs.r[15].on_modify = { &SuperFX::r15_modify, this };
 }
 
-void SuperFX::enable() {
+void SuperFX::load() {
+}
+
+void SuperFX::unload() {
 }
 
 void SuperFX::power() {

@@ -10,18 +10,25 @@ void VideoSettings::create() {
   colorAdjustmentLabel.setFont(application.proportionalFontBold);
 
   brightnessLabel.create (*this, x,       y,  80, Style::SliderHeight, "Brightness:");
-  brightnessValue.create (*this, x +  80, y,  40, Style::SliderHeight, "100%");
+  brightnessValue.create (*this, x +  80, y,  40, Style::SliderHeight);
   brightnessSlider.create(*this, x + 130, y, 300, Style::SliderHeight, 201); y += Style::SliderHeight;
 
   contrastLabel.create   (*this, x,       y,  80, Style::SliderHeight, "Contrast:");
-  contrastValue.create   (*this, x + 80,  y,  50, Style::SliderHeight, "100%");
+  contrastValue.create   (*this, x +  80, y,  50, Style::SliderHeight);
   contrastSlider.create  (*this, x + 130, y, 300, Style::SliderHeight, 201); y += Style::SliderHeight;
 
   gammaLabel.create      (*this, x,       y,  80, Style::SliderHeight, "Gamma:");
-  gammaValue.create      (*this, x +  80, y,  50, Style::SliderHeight, "100%");
+  gammaValue.create      (*this, x +  80, y,  50, Style::SliderHeight);
   gammaSlider.create     (*this, x + 130, y, 300, Style::SliderHeight, 201); y += Style::SliderHeight + 5;
 
   gammaRampCheck.create  (*this, x,       y, 430, Style::CheckBoxHeight, "Enable NTSC gamma ramp simulation"); y += Style::CheckBoxHeight + 5;
+
+  fullscreenLabel.create(*this, x, y, 340, Style::LabelHeight, "Fullscreen :."); y += Style::LabelHeight + 5;
+  fullscreenLabel.setFont(application.proportionalFontBold);
+
+  fullscreenCenter.create (*this,            x,       y, 135, Style::CheckBoxHeight, "Center");
+  fullscreenScale.create  (fullscreenCenter, x + 140, y, 135, Style::CheckBoxHeight, "Scale");
+  fullscreenStretch.create(fullscreenCenter, x + 280, y, 135, Style::CheckBoxHeight, "Stretch"); y += Style::CheckBoxHeight + 5;
 
   filterLabel.create(*this, x, y, 340, Style::LabelHeight, "Video Filter :."); y += Style::LabelHeight + 5;
   filterLabel.setFont(application.proportionalFontBold);
@@ -44,12 +51,28 @@ void VideoSettings::create() {
   setGeometry(0, 0, 440, y);
 
   brightnessSlider.setPosition(config.video.brightness);
+  brightnessValue.setText({ config.video.brightness, "%" });
+
   contrastSlider.setPosition(config.video.contrast);
+  contrastValue.setText({ config.video.contrast, "%" });
+
   gammaSlider.setPosition(config.video.gamma);
+  gammaValue.setText({ config.video.gamma, "%" });
+
   gammaRampCheck.setChecked(config.video.useGammaRamp);
+
+  switch(config.video.fullscreenScale) { default:
+    case 0: fullscreenCenter.setChecked(); break;
+    case 1: fullscreenScale.setChecked(); break;
+    case 2: fullscreenStretch.setChecked(); break;
+  }
 
   contrastSlider.onChange = brightnessSlider.onChange = gammaSlider.onChange = gammaRampCheck.onTick =
   { &VideoSettings::adjust, this };
+
+  fullscreenCenter.onTick = []() { config.video.fullscreenScale = 0; };
+  fullscreenScale.onTick = []() { config.video.fullscreenScale = 1; };
+  fullscreenStretch.onTick = []() { config.video.fullscreenScale = 2; };
 
   filterClear.onTick = []() {
     config.video.filter = "";

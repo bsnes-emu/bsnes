@@ -22,6 +22,7 @@ void Configuration::create() {
   attach(video.shader = "", "video.shader");
   attach(video.region = 0, "video.region");
   attach(video.scale = 2, "video.scale");
+  attach(video.fullscreenScale = 0, "video.fullscreenScale");
   attach(video.aspectRatioCorrection = true, "video.aspectRatioCorrection");
   attach(video.brightness = 100, "video.brightness");
   attach(video.contrast = 100, "video.contrast");

@@ -18,7 +18,7 @@ Cartridge cartridge;
 
 void Cartridge::load(const string &xml, const uint8_t *data, unsigned size) {
   if(size == 0) size = 32768;
-  romdata = new uint8[romsize = size]();
+  romdata = allocate<uint8>(romsize = size, 0xff);
   if(data) memcpy(romdata, data, size);
 
 //uint32_t crc = crc32_calculate(data, size);

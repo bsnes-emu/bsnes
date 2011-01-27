@@ -3,7 +3,8 @@ public:
   uint8 rtc[20];
 
   void init();
-  void enable();
+  void load();
+  void unload();
   void power();
   void reset();
 

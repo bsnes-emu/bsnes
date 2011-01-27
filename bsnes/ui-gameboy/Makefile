@@ -1,4 +1,3 @@
-output := bgameboy
 include $(gameboy)/Makefile
 
 ui_objects := ui-main ui-utility
@@ -58,6 +57,7 @@ rubydef := $(foreach c,$(subst .,_,$(call strupper,$(ruby))),-D$c)
 
 # rules
 objects := $(ui_objects) $(objects)
+objects := $(patsubst %,obj/%.o,$(objects))
 
 obj/ui-main.o: $(ui)/main.cpp $(call rwildcard,$(ui)/*.hpp) $(call rwildcard,$(ui)/*); $(phoenix_compile)
 obj/ui-utility.o: $(ui)/utility/utility.cpp $(call rwildcard,$(ui)/utility/*); $(phoenix_compile)
@@ -69,6 +69,20 @@ obj/phoenix.o: phoenix/phoenix.cpp $(call rwildcard,phoenix/*)
 	$(phoenix_compile)
 
 # targets
-ui_build:;
+build: $(objects)
+ifeq ($(platform),osx)
+	test -d ../bgameboy.app || mkdir -p ../bgameboy.app/Contents/MacOS
+	$(strip $(cpp) -o ../bgameboy.app/Contents/MacOS/bgameboy $(objects) $(link))
+else
+	$(strip $(cpp) -o out/bgameboy $(objects) $(link))
+endif
 
-ui_clean:;
+install:
+ifeq ($(platform),x)
+	install -D -m 755 out/bgameboy $(DESTDIR)$(prefix)/bin/bgameboy
+endif
+
+uninstall:
+ifeq ($(platform),x)
+	rm $(DESTDIR)$(prefix)/bin/bgameboy
+endif

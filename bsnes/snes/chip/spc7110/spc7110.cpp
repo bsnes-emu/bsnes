@@ -13,9 +13,12 @@ const unsigned SPC7110::months[12] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 3
 void SPC7110::init() {
 }
 
-void SPC7110::enable() {
+void SPC7110::load() {
   for(unsigned n = 0; n < 20; n++) rtc[n] = 0xff;
   if(cartridge.has_spc7110rtc()) cartridge.nvram.append({ "rtc", rtc, 20 });
+}
+
+void SPC7110::unload() {
 }
 
 void SPC7110::power() {

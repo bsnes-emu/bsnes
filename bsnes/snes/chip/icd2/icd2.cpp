@@ -31,11 +31,14 @@ void ICD2::enter() {
 void ICD2::init() {
 }
 
-void ICD2::enable() {
+void ICD2::load() {
   bus.map(Bus::MapMode::Direct, 0x00, 0x3f, 0x2181, 0x2182, { &ICD2::mmio_read, &icd2 }, { &ICD2::mmio_write, &icd2 });
   bus.map(Bus::MapMode::Direct, 0x00, 0x3f, 0x420b, 0x420b, { &ICD2::mmio_read, &icd2 }, { &ICD2::mmio_write, &icd2 });
   bus.map(Bus::MapMode::Direct, 0x80, 0xbf, 0x2181, 0x2182, { &ICD2::mmio_read, &icd2 }, { &ICD2::mmio_write, &icd2 });
   bus.map(Bus::MapMode::Direct, 0x80, 0xbf, 0x420b, 0x420b, { &ICD2::mmio_read, &icd2 }, { &ICD2::mmio_write, &icd2 });
+}
+
+void ICD2::unload() {
 }
 
 void ICD2::power() {

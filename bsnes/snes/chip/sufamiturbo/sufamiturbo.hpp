@@ -5,7 +5,8 @@ public:
     MappedRAM ram;
   } slotA, slotB;
 
-  void enable();
+  void load();
+  void unload();
   void serialize(serializer&);
 };
 

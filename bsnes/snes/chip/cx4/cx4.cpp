@@ -20,7 +20,10 @@ Cx4 cx4;
 void Cx4::init() {
 }
 
-void Cx4::enable() {
+void Cx4::load() {
+}
+
+void Cx4::unload() {
 }
 
 uint32 Cx4::ldr(uint8 r) {

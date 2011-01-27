@@ -1,7 +1,8 @@
 class OBC1 {
 public:
   void init();
-  void enable();
+  void load();
+  void unload();
   void power();
   void reset();
 

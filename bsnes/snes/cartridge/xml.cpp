@@ -52,6 +52,7 @@ void Cartridge::parse_xml_cartridge(const char *data) {
 }
 
 void Cartridge::parse_xml_bsx(const char *data) {
+  has_bsx_slot = true;
 }
 
 void Cartridge::parse_xml_sufami_turbo(const char *data, bool slot) {
@@ -70,7 +71,7 @@ void Cartridge::xml_parse_rom(xml_element &root) {
         if(attr.name == "offset") m.offset = hex(attr.content);
         if(attr.name == "size") m.size = hex(attr.content);
       }
-      if(m.size == 0) m.size = rom.size() - m.offset;
+      if(m.size == 0) m.size = rom.size();
       mapping.append(m);
     }
   }
@@ -90,7 +91,7 @@ void Cartridge::xml_parse_ram(xml_element &root) {
         if(attr.name == "offset") m.offset = hex(attr.content);
         if(attr.name == "size") m.size = hex(attr.content);
       }
-      if(m.size == 0) m.size = ram_size - m.offset;
+      if(m.size == 0) m.size = ram_size;
       mapping.append(m);
     }
   }

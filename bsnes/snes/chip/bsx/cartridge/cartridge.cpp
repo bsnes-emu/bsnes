@@ -5,7 +5,7 @@ BSXCartridge bsxcartridge;
 void BSXCartridge::init() {
 }
 
-void BSXCartridge::enable() {
+void BSXCartridge::load() {
   sram.map(allocate<uint8>(32 * 1024, 0xff), 32 * 1024);
   sram.write_protect(false);
   cartridge.nvram.append({ "bss", sram.data(), sram.size() });
@@ -13,6 +13,9 @@ void BSXCartridge::enable() {
   psram.map(allocate<uint8>(512 * 1024, 0xff), 512 * 1024);
   psram.write_protect(false);
   cartridge.nvram.append({ "bsp", psram.data(), psram.size() });
+}
+
+void BSXCartridge::unload() {
 }
 
 void BSXCartridge::power() {

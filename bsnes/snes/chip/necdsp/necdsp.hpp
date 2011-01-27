@@ -33,7 +33,8 @@ public:
   void dp_write(unsigned addr, uint8 data);
 
   void init();
-  void enable();
+  void load();
+  void unload();
   void power();
   void reset();
 

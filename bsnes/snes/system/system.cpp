@@ -104,23 +104,43 @@ void System::load() {
   cpu.enable();
   ppu.enable();
 
-  if(expansion() == ExpansionPortDevice::BSX) bsxsatellaview.enable();
-  if(cartridge.mode() == Cartridge::Mode::Bsx) bsxcartridge.enable();
-  if(cartridge.mode() == Cartridge::Mode::SufamiTurbo) sufamiturbo.enable();
-  if(cartridge.mode() == Cartridge::Mode::SuperGameBoy) icd2.enable();
+  if(expansion() == ExpansionPortDevice::BSX) bsxsatellaview.load();
+  if(cartridge.mode() == Cartridge::Mode::Bsx) bsxcartridge.load();
+  if(cartridge.mode() == Cartridge::Mode::SufamiTurbo) sufamiturbo.load();
+  if(cartridge.mode() == Cartridge::Mode::SuperGameBoy) icd2.load();
 
-  if(cartridge.has_bsx_slot()) bsxflash.enable();
-  if(cartridge.has_superfx()) superfx.enable();
-  if(cartridge.has_sa1()) sa1.enable();
-  if(cartridge.has_necdsp()) necdsp.enable();
-  if(cartridge.has_srtc()) srtc.enable();
-  if(cartridge.has_sdd1()) sdd1.enable();
-  if(cartridge.has_spc7110()) spc7110.enable();
-  if(cartridge.has_cx4()) cx4.enable();
-  if(cartridge.has_obc1()) obc1.enable();
-  if(cartridge.has_st0018()) st0018.enable();
-  if(cartridge.has_msu1()) msu1.enable();
-  if(cartridge.has_serial()) serial.enable();
+  if(cartridge.has_bsx_slot()) bsxflash.load();
+  if(cartridge.has_superfx()) superfx.load();
+  if(cartridge.has_sa1()) sa1.load();
+  if(cartridge.has_necdsp()) necdsp.load();
+  if(cartridge.has_srtc()) srtc.load();
+  if(cartridge.has_sdd1()) sdd1.load();
+  if(cartridge.has_spc7110()) spc7110.load();
+  if(cartridge.has_cx4()) cx4.load();
+  if(cartridge.has_obc1()) obc1.load();
+  if(cartridge.has_st0018()) st0018.load();
+  if(cartridge.has_msu1()) msu1.load();
+  if(cartridge.has_serial()) serial.load();
+}
+
+void System::unload() {
+  if(expansion() == ExpansionPortDevice::BSX) bsxsatellaview.unload();
+  if(cartridge.mode() == Cartridge::Mode::Bsx) bsxcartridge.unload();
+  if(cartridge.mode() == Cartridge::Mode::SufamiTurbo) sufamiturbo.unload();
+  if(cartridge.mode() == Cartridge::Mode::SuperGameBoy) icd2.unload();
+
+  if(cartridge.has_bsx_slot()) bsxflash.unload();
+  if(cartridge.has_superfx()) superfx.unload();
+  if(cartridge.has_sa1()) sa1.unload();
+  if(cartridge.has_necdsp()) necdsp.unload();
+  if(cartridge.has_srtc()) srtc.unload();
+  if(cartridge.has_sdd1()) sdd1.unload();
+  if(cartridge.has_spc7110()) spc7110.unload();
+  if(cartridge.has_cx4()) cx4.unload();
+  if(cartridge.has_obc1()) obc1.unload();
+  if(cartridge.has_st0018()) st0018.unload();
+  if(cartridge.has_msu1()) msu1.unload();
+  if(cartridge.has_serial()) serial.unload();
 }
 
 void System::power() {
@@ -207,9 +227,6 @@ void System::reset() {
   input.port_set_device(0, config.controller_port1);
   input.port_set_device(1, config.controller_port2);
   input.update();
-}
-
-void System::unload() {
 }
 
 void System::scanline() {

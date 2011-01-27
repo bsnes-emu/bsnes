@@ -11,6 +11,11 @@ struct VideoSettings : TopLevelWindow {
   HorizontalSlider gammaSlider;
   CheckBox gammaRampCheck;
 
+  Label fullscreenLabel;
+  RadioBox fullscreenCenter;
+  RadioBox fullscreenScale;
+  RadioBox fullscreenStretch;
+
   Label filterLabel;
   TextBox filterPath;
   Button filterClear;

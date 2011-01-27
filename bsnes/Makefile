@@ -1,7 +1,7 @@
 include nall/Makefile
 snes := snes
 gameboy := gameboy
-profile := compatibility
+profile := accuracy
 ui := ui
 
 # compiler
@@ -50,39 +50,8 @@ obj/libco.o: libco/libco.c libco/*
 
 include $(ui)/Makefile
 
-objects := $(patsubst %,obj/%.o,$(objects))
-
 # targets
-build: ui_build $(objects)
-ifeq ($(platform),osx)
-	test -d ../$(output).app || mkdir -p ../$(output).app/Contents/MacOS
-	$(strip $(cpp) -o ../$(output).app/Contents/MacOS/$(output) $(objects) $(link))
-else
-	$(strip $(cpp) -o out/$(output) $(objects) $(link))
-endif
-
-install:
-ifeq ($(platform),x)
-	install -D -m 755 out/$(output) $(DESTDIR)$(prefix)/bin/$(output)
-endif
-ifeq ($(output),bsnes)
-	install -D -m 644 data/bsnes.png $(DESTDIR)$(prefix)/share/pixmaps/bsnes.png
-	install -D -m 644 data/bsnes.desktop $(DESTDIR)$(prefix)/share/applications/bsnes.desktop
-	test -d ~/.bsnes || mkdir ~/.bsnes
-	cp data/cheats.xml ~/.bsnes/cheats.xml
-	chmod 777 ~/.bsnes ~/.bsnes/cheats.xml
-endif
-
-uninstall:
-ifeq ($(platform),x)
-	rm $(DESTDIR)$(prefix)/bin/$(output)
-endif
-ifeq ($(output),bsnes)
-	rm $(DESTDIR)$(prefix)/share/pixmaps/bsnes.png
-	rm $(DESTDIR)$(prefix)/share/applications/bsnes.desktop
-endif
-
-clean: ui_clean
+clean:
 	-@$(call delete,obj/*.o)
 	-@$(call delete,obj/*.a)
 	-@$(call delete,obj/*.so)

@@ -26,7 +26,8 @@ public:
   alwaysinline bool interrupt_pending();
 
   void init();
-  void enable();
+  void load();
+  void unload();
   void power();
   void reset();
 

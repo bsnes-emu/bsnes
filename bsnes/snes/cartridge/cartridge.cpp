@@ -61,10 +61,12 @@ void Cartridge::load(Mode cartridge_mode, const lstring &xml_list) {
 }
 
 void Cartridge::unload() {
+  if(loaded == false) return;
+
+  system.unload();
   rom.reset();
   ram.reset();
 
-  if(loaded == false) return;
   loaded = false;
 }
 

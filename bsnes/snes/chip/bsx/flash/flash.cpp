@@ -5,7 +5,14 @@ BSXFlash bsxflash;
 void BSXFlash::init() {
 }
 
-void BSXFlash::enable() {
+void BSXFlash::load() {
+  if(memory.size() == 0) {
+    memory.map(allocate<uint8>(1024 * 1024, 0xff), 1024 * 1024);
+  }
+}
+
+void BSXFlash::unload() {
+  memory.reset();
 }
 
 void BSXFlash::power() {

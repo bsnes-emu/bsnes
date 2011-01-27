@@ -77,7 +77,7 @@ void Serial::mmio_write(unsigned addr, uint8 data) {
 void Serial::init() {
 }
 
-void Serial::enable() {
+void Serial::load() {
   if(opened()) close();
   string name = notdir(cartridge.basename());
   string path = dir(cartridge.basename());
@@ -89,6 +89,10 @@ void Serial::enable() {
 
   bus.map(Bus::MapMode::Direct, 0x00, 0x3f, 0x4016, 0x4017, { &Serial::mmio_read, &serial }, { &Serial::mmio_write, &serial });
   bus.map(Bus::MapMode::Direct, 0x80, 0xbf, 0x4016, 0x4017, { &Serial::mmio_read, &serial }, { &Serial::mmio_write, &serial });
+}
+
+void Serial::unload() {
+  if(opened()) close();
 }
 
 void Serial::power() {

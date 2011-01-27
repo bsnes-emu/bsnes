@@ -48,7 +48,10 @@ void ST0018::mmio_write(unsigned addr, uint8 data) {
 void ST0018::init() {
 }
 
-void ST0018::enable() {
+void ST0018::load() {
+}
+
+void ST0018::unload() {
 }
 
 void ST0018::power() {

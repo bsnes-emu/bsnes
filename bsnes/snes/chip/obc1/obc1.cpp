@@ -10,7 +10,10 @@ OBC1 obc1;
 void OBC1::init() {
 }
 
-void OBC1::enable() {
+void OBC1::load() {
+}
+
+void OBC1::unload() {
 }
 
 void OBC1::power() {
