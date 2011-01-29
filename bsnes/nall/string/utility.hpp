@@ -53,7 +53,7 @@ string integer(intmax_t value) {
   return result;
 }
 
-template<unsigned length> string linteger(intmax_t value) {
+template<unsigned length_> string linteger(intmax_t value) {
   bool negative = value < 0;
   if(negative) value = abs(value);
 
@@ -68,6 +68,7 @@ template<unsigned length> string linteger(intmax_t value) {
   buffer[size++] = negative ? '-' : '+';
   buffer[size] = 0;
 
+  unsigned length = (length_ == 0 ? size : length_);
   char result[length + 1];
   memset(result, ' ', length);
   result[length] = 0;
@@ -79,7 +80,7 @@ template<unsigned length> string linteger(intmax_t value) {
   return result;
 }
 
-template<unsigned length> string rinteger(intmax_t value) {
+template<unsigned length_> string rinteger(intmax_t value) {
   bool negative = value < 0;
   if(negative) value = abs(value);
 
@@ -94,6 +95,7 @@ template<unsigned length> string rinteger(intmax_t value) {
   buffer[size++] = negative ? '-' : '+';
   buffer[size] = 0;
 
+  unsigned length = (length_ == 0 ? size : length_);
   char result[length + 1];
   memset(result, ' ', length);
   result[length] = 0;
@@ -127,7 +129,7 @@ string decimal(uintmax_t value) {
   return result;
 }
 
-template<unsigned length> string ldecimal(uintmax_t value) {
+template<unsigned length_> string ldecimal(uintmax_t value) {
   char buffer[64];
   unsigned size = 0;
 
@@ -138,6 +140,7 @@ template<unsigned length> string ldecimal(uintmax_t value) {
   } while(value);
   buffer[size] = 0;
 
+  unsigned length = (length_ == 0 ? size : length_);
   char result[length + 1];
   memset(result, ' ', length);
   result[length] = 0;
@@ -149,7 +152,7 @@ template<unsigned length> string ldecimal(uintmax_t value) {
   return result;
 }
 
-template<unsigned length> string rdecimal(uintmax_t value) {
+template<unsigned length_> string rdecimal(uintmax_t value) {
   char buffer[64];
   unsigned size = 0;
 
@@ -160,6 +163,7 @@ template<unsigned length> string rdecimal(uintmax_t value) {
   } while(value);
   buffer[size] = 0;
 
+  unsigned length = (length_ == 0 ? size : length_);
   char result[length + 1];
   memset(result, ' ', length);
   result[length] = 0;
@@ -171,50 +175,48 @@ template<unsigned length> string rdecimal(uintmax_t value) {
   return result;
 }
 
-template<unsigned length> string hex(uintmax_t value) {
-  string output;
-  unsigned offset = 0;
+template<unsigned length_> string hex(uintmax_t value) {
+  char buffer[64];
+  unsigned size = 0;
 
-  //render string backwards, as we do not know its length yet
   do {
     unsigned n = value & 15;
-    output[offset++] = n < 10 ? '0' + n : 'a' + n - 10;
+    buffer[size++] = n < 10 ? '0' + n : 'a' + n - 10;
     value >>= 4;
   } while(value);
 
-  while(offset < length) output[offset++] = '0';
-  output[offset--] = 0;
+  unsigned length = (length_ == 0 ? size : length_);
+  char result[length + 1];
+  memset(result, '0', length);
+  result[length] = 0;
 
-  //reverse the string in-place
-  for(unsigned i = 0; i < (offset + 1) >> 1; i++) {
-    char temp = output[i];
-    output[i] = output[offset - i];
-    output[offset - i] = temp;
+  for(signed x = length - 1, y = 0; x >= 0 && y < size; x--, y++) {
+    result[x] = buffer[y];
   }
 
-  return output;
+  return result;
 }
 
-template<unsigned length> string binary(uintmax_t value) {
-  string output;
-  unsigned offset = 0;
+template<unsigned length_> string binary(uintmax_t value) {
+  char buffer[256];
+  unsigned size = 0;
 
   do {
     unsigned n = value & 1;
-    output[offset++] = '0' + n;
+    buffer[size++] = '0' + n;
     value >>= 1;
   } while(value);
 
-  while(offset < length) output[offset++] = '0';
-  output[offset--] = 0;
+  unsigned length = (length_ == 0 ? size : length_);
+  char result[length + 1];
+  memset(result, '0', length);
+  result[length] = 0;
 
-  for(unsigned i = 0; i < (offset + 1) >> 1; i++) {
-    char temp = output[i];
-    output[i] = output[offset - i];
-    output[offset - i] = temp;
+  for(signed x = length - 1, y = 0; x >= 0 && y < size; x--, y++) {
+    result[x] = buffer[y];
   }
 
-  return output;
+  return result;
 }
 
 //using sprintf is certainly not the most ideal method to convert

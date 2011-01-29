@@ -25,7 +25,7 @@ namespace nall {
     inline string& append(unsigned int value);
     inline string& append(double value);
 
-    inline bool readfile(const char*);
+    inline bool readfile(const string&);
 
     inline string& replace (const char*, const char*);
     inline string& qreplace(const char*, const char*);

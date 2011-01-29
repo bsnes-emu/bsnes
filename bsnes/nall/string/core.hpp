@@ -95,7 +95,7 @@ string::~string() {
   if(data) free(data);
 }
 
-bool string::readfile(const char *filename) {
+bool string::readfile(const string &filename) {
   assign("");
 
   #if !defined(_WIN32)

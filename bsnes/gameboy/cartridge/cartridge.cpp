@@ -70,7 +70,19 @@ void Cartridge::load(const string &xml, const uint8_t *data, unsigned size) {
     }
   }
 
+  switch(info.mapper) { default:
+    case Mapper::MBC0:  mapper = &mbc0;  break;
+    case Mapper::MBC1:  mapper = &mbc1;  break;
+    case Mapper::MBC2:  mapper = &mbc2;  break;
+    case Mapper::MBC3:  mapper = &mbc3;  break;
+    case Mapper::MBC5:  mapper = &mbc5;  break;
+    case Mapper::MMM01: mapper = &mmm01; break;
+    case Mapper::HuC1:  mapper = &huc1;  break;
+    case Mapper::HuC3:  mapper = &huc3;  break;
+  }
+
   ramdata = new uint8_t[ramsize = info.ramsize]();
+  system.load();
   loaded = true;
 }
 
@@ -104,7 +116,19 @@ void Cartridge::ram_write(unsigned addr, uint8 data) {
   ramdata[addr] = data;
 }
 
+uint8 Cartridge::mmio_read(uint16 addr) {
+  if(bootrom_enable && within<0x0000, 0x00ff>(addr)) return System::BootROM::sgb[addr];
+  return mapper->mmio_read(addr);
+}
+
+void Cartridge::mmio_write(uint16 addr, uint8 data) {
+  if(bootrom_enable && addr == 0xff50) bootrom_enable = false;
+  mapper->mmio_write(addr, data);
+}
+
 void Cartridge::power() {
+  bootrom_enable = true;
+
   mbc0.power();
   mbc1.power();
   mbc2.power();
@@ -113,26 +137,10 @@ void Cartridge::power() {
   mmm01.power();
   huc1.power();
   huc3.power();
-  map();
-}
 
-void Cartridge::map() {
-  MMIO *mapper = 0;
-  switch(info.mapper) { default:
-    case Mapper::MBC0:  mapper = &mbc0;  break;
-    case Mapper::MBC1:  mapper = &mbc1;  break;
-    case Mapper::MBC2:  mapper = &mbc2;  break;
-    case Mapper::MBC3:  mapper = &mbc3;  break;
-    case Mapper::MBC5:  mapper = &mbc5;  break;
-    case Mapper::MMM01: mapper = &mmm01; break;
-    case Mapper::HuC1:  mapper = &huc1;  break;
-    case Mapper::HuC3:  mapper = &huc3;  break;
-  }
-
-  if(mapper) {
-    for(unsigned n = 0x0000; n <= 0x7fff; n++) bus.mmio[n] = mapper;
-    for(unsigned n = 0xa000; n <= 0xbfff; n++) bus.mmio[n] = mapper;
-  }
+  for(unsigned n = 0x0000; n <= 0x7fff; n++) bus.mmio[n] = this;
+  for(unsigned n = 0xa000; n <= 0xbfff; n++) bus.mmio[n] = this;
+  bus.mmio[0xff50] = this;
 }
 
 Cartridge::Cartridge() {

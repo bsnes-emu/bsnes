@@ -1,4 +1,4 @@
-struct Cartridge : property<Cartridge> {
+struct Cartridge : MMIO, property<Cartridge> {
   #include "mbc0/mbc0.hpp"
   #include "mbc1/mbc1.hpp"
   #include "mbc2/mbc2.hpp"
@@ -41,6 +41,9 @@ struct Cartridge : property<Cartridge> {
   uint8_t *ramdata;
   unsigned ramsize;
 
+  MMIO *mapper;
+  bool bootrom_enable;
+
   void load(const string &xml, const uint8_t *data, unsigned size);
   void unload();
 
@@ -49,8 +52,10 @@ struct Cartridge : property<Cartridge> {
   uint8 ram_read(unsigned addr);
   void ram_write(unsigned addr, uint8 data);
 
+  uint8 mmio_read(uint16 addr);
+  void mmio_write(uint16 addr, uint8 data);
+
   void power();
-  void map();
 
   void serialize(serializer&);
   Cartridge();

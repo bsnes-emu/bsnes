@@ -41,6 +41,7 @@ bool Utility::loadState(unsigned slot) {
     fp.read(data, size);
     fp.close();
     serializer s(data, size);
+    GameBoy::system.power();
     return GameBoy::system.unserialize(s);
   }
 

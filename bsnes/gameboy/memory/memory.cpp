@@ -50,7 +50,7 @@ void Bus::write(uint16 addr, uint8 data) {
 }
 
 void Bus::power() {
-  for(unsigned n = 0; n < 65536; n++) mmio[n] = &unmapped;
+  for(unsigned n = 0x0000; n <= 0xffff; n++) mmio[n] = &unmapped;
 }
 
 }

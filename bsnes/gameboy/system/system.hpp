@@ -4,7 +4,7 @@ enum class Input : unsigned {
   Up, Down, Left, Right, B, A, Select, Start,
 };
 
-struct System : MMIO {
+struct System {
   struct BootROM {
     static const uint8 dmg[256];
     static const uint8 sgb[256];
@@ -14,10 +14,8 @@ struct System : MMIO {
   void runtosave();
   void runthreadtosave();
 
-  uint8 mmio_read(uint16 addr);
-  void mmio_write(uint16 addr, uint8 data);
-
   void init(Interface*);
+  void load();
   void power();
 
   Interface *interface;
