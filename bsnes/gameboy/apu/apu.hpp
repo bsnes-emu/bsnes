@@ -1,12 +1,16 @@
 struct APU : Processor, MMIO {
-  #include "mmio/mmio.hpp"
-  #include "square/square.hpp"
+  #include "square1/square1.hpp"
+  #include "square2/square2.hpp"
   #include "wave/wave.hpp"
   #include "noise/noise.hpp"
   #include "master/master.hpp"
 
-  Square square1;
-  Square square2;
+  uint8 mmio_data[48];
+  unsigned counter;
+  unsigned sequencer;
+
+  Square1 square1;
+  Square2 square2;
   Wave wave;
   Noise noise;
   Master master;
@@ -14,6 +18,9 @@ struct APU : Processor, MMIO {
   static void Main();
   void main();
   void power();
+
+  uint8 mmio_read(uint16 addr);
+  void mmio_write(uint16 addr, uint8 data);
 
   void serialize(serializer&);
 };

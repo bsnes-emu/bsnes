@@ -114,13 +114,7 @@ void CPU::power() {
   status.clock = 0;
   status.halt = false;
   status.stop = false;
-
   status.ime = 0;
-  status.timer0 = 0;
-  status.timer1 = 0;
-  status.timer2 = 0;
-  status.timer3 = 0;
-  status.timer4 = 0;
 
   status.p15 = 0;
   status.p14 = 0;

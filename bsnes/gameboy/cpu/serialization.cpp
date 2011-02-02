@@ -21,13 +21,7 @@ void CPU::serialize(serializer &s) {
   s.integer(status.clock);
   s.integer(status.halt);
   s.integer(status.stop);
-
   s.integer(status.ime);
-  s.integer(status.timer0);
-  s.integer(status.timer1);
-  s.integer(status.timer2);
-  s.integer(status.timer3);
-  s.integer(status.timer4);
 
   s.integer(status.p15);
   s.integer(status.p14);

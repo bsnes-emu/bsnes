@@ -73,7 +73,7 @@ void ICD2::joyp_write(bool p15, bool p14) {
 void ICD2::video_refresh(const uint8_t *data) {
 }
 
-void ICD2::audio_sample(signed left, signed right) {
+void ICD2::audio_sample(int16_t center, int16_t left, int16_t right) {
   audio.coprocessor_sample(left, right);
 }
 

@@ -10,7 +10,6 @@ void Utility::loadCartridge(const char *filename) {
     fp.close();
 
     cartridge.basename = nall::basename(filename);
-    print(cartridge.basename, "\n");
 
     GameBoyCartridge info(data, size);
     GameBoy::cartridge.load(info.xml, data, size);

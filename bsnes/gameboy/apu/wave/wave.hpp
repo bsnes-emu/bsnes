@@ -1,15 +1,21 @@
 struct Wave {
-  bool off;
-  unsigned length;
+  bool dac_enable;
+  unsigned initial_length;
   unsigned volume;
   unsigned frequency;
   bool counter;
   uint8 pattern[32];
 
+  int16 output;
+  bool enable;
+  unsigned length;
+  unsigned period;
+  unsigned pattern_offset;
+  unsigned pattern_sample;
+
   void run();
-  uint8 read(unsigned r);
+  void clock_length();
   void write(unsigned r, uint8 data);
-  uint8 read_pattern(unsigned p);
   void write_pattern(unsigned p, uint8 data);
   void power();
   void serialize(serializer&);

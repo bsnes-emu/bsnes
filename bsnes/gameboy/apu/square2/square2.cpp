@@ -1,26 +1,28 @@
 #ifdef APU_CPP
 
-void APU::Noise::run() {
+void APU::Square2::run() {
   if(period && --period == 0) {
-    period = divisor << frequency;
-    if(frequency < 14) {
-      bool bit = (lfsr ^ (lfsr >> 1)) & 1;
-      lfsr = (lfsr >> 1) ^ (bit << 14);
-      if(narrow_lfsr) lfsr |= (bit << 6);
+    period = 4 * (2048 - frequency);
+    phase = (phase + 1) & 7;
+    switch(duty) {
+      case 0: duty_output = (phase == 6); break;  //______-_
+      case 1: duty_output = (phase >= 6); break;  //______--
+      case 2: duty_output = (phase >= 4); break;  //____----
+      case 3: duty_output = (phase <= 5); break;  //------__
     }
   }
 
-  uint4 sample = (lfsr & 1) ? -volume : volume;
+  uint4 sample = (duty_output ? volume : 0);
   if(counter && length == 0) sample = 0;
 
   output = (sample * 4369) - 32768;
 }
 
-void APU::Noise::clock_length() {
+void APU::Square2::clock_length() {
   if(counter && length) length--;
 }
 
-void APU::Noise::clock_envelope() {
+void APU::Square2::clock_envelope() {
   if(envelope_period && --envelope_period == 0) {
     envelope_period = envelope_frequency;
     if(envelope_direction == 0 && volume >  0) volume--;
@@ -28,11 +30,10 @@ void APU::Noise::clock_envelope() {
   }
 }
 
-void APU::Noise::write(unsigned r, uint8 data) {
+void APU::Square2::write(unsigned r, uint8 data) {
   if(r == 1) {
-    initial_length = 64 - (data & 0x3f);
-
-    length = initial_length;
+    duty = data >> 6;
+    length = data & 0x3f;
   }
 
   if(r == 2) {
@@ -42,61 +43,55 @@ void APU::Noise::write(unsigned r, uint8 data) {
   }
 
   if(r == 3) {
-    frequency = data >> 4;
-    narrow_lfsr = data & 0x08;
-    divisor = (data & 0x07) << 4;
-    if(divisor == 0) divisor = 8;
-
-    period = divisor << frequency;
+    frequency = (frequency & 0x0700) | data;
   }
 
   if(r == 4) {
     bool initialize = data & 0x80;
     counter = data & 0x40;
+    frequency = ((data & 7) << 8) | (frequency & 0x00ff);
 
     if(initialize) {
-      lfsr = ~0U;
-      length = initial_length;
       envelope_period = envelope_frequency;
       volume = envelope_volume;
     }
   }
+
+  period = 4 * (2048 - frequency);
 }
 
-void APU::Noise::power() {
-  initial_length = 0;
+void APU::Square2::power() {
+  duty = 0;
+  length = 0;
   envelope_volume = 0;
   envelope_direction = 0;
   envelope_frequency = 0;
   frequency = 0;
-  narrow_lfsr = 0;
-  divisor = 0;
   counter = 0;
 
   output = 0;
-  length = 0;
+  duty_output = 0;
+  phase = 0;
+  period = 0;
   envelope_period = 0;
   volume = 0;
-  period = 0;
-  lfsr = 0;
 }
 
-void APU::Noise::serialize(serializer &s) {
-  s.integer(initial_length);
+void APU::Square2::serialize(serializer &s) {
+  s.integer(duty);
+  s.integer(length);
   s.integer(envelope_volume);
   s.integer(envelope_direction);
   s.integer(envelope_frequency);
   s.integer(frequency);
-  s.integer(narrow_lfsr);
-  s.integer(divisor);
   s.integer(counter);
 
   s.integer(output);
-  s.integer(length);
+  s.integer(duty_output);
+  s.integer(phase);
+  s.integer(period);
   s.integer(envelope_period);
   s.integer(volume);
-  s.integer(period);
-  s.integer(lfsr);
 }
 
 #endif

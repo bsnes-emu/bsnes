@@ -1,19 +1,22 @@
-struct Square {
-  bool has_sweep;
-
-  unsigned sweep_period;
-  unsigned sweep_direction;
-  unsigned sweep_shift;
+struct Square2 {
   unsigned duty;
   unsigned length;
   unsigned envelope_volume;
   unsigned envelope_direction;
-  unsigned envelope_period;
+  unsigned envelope_frequency;
   unsigned frequency;
   unsigned counter;
 
+  int16 output;
+  bool duty_output;
+  unsigned phase;
+  unsigned period;
+  unsigned envelope_period;
+  unsigned volume;
+
   void run();
-  uint8 read(unsigned r);
+  void clock_length();
+  void clock_envelope();
   void write(unsigned r, uint8 data);
   void power();
   void serialize(serializer&);

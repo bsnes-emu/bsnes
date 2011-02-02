@@ -22,8 +22,12 @@ void CPU::add_clocks(unsigned clocks) {
     cartridge.mbc3.second();
   }
 
-  status.timer0 += clocks;
-  if(status.timer0 >= 16) timer_stage0();
+  //4194304 / N(hz) - 1 = mask
+  if((status.clock &   15) == 0) timer_262144hz();
+  if((status.clock &   63) == 0)  timer_65536hz();
+  if((status.clock &  255) == 0)  timer_16384hz();
+  if((status.clock &  511) == 0)   timer_8192hz();
+  if((status.clock & 1023) == 0)   timer_4096hz();
 
   lcd.clock -= clocks;
   if(lcd.clock <= 0) co_switch(scheduler.active_thread = lcd.thread);
@@ -32,31 +36,25 @@ void CPU::add_clocks(unsigned clocks) {
   if(apu.clock <= 0) co_switch(scheduler.active_thread = apu.thread);
 }
 
-void CPU::timer_stage0() {  //262144hz
+void CPU::timer_262144hz() {
   if(status.timer_enable && status.timer_clock == 1) {
     if(++status.tima == 0) {
       status.tima = status.tma;
       interrupt_raise(Interrupt::Timer);
     }
   }
-
-  status.timer0 -= 16;
-  if(++status.timer1 >= 4) timer_stage1();
 }
 
-void CPU::timer_stage1() {  // 65536hz
+void CPU::timer_65536hz() {
   if(status.timer_enable && status.timer_clock == 2) {
     if(++status.tima == 0) {
       status.tima = status.tma;
       interrupt_raise(Interrupt::Timer);
     }
   }
-
-  status.timer1 -= 4;
-  if(++status.timer2 >= 4) timer_stage2();
 }
 
-void CPU::timer_stage2() {  // 16384hz
+void CPU::timer_16384hz() {
   if(status.timer_enable && status.timer_clock == 3) {
     if(++status.tima == 0) {
       status.tima = status.tma;
@@ -65,32 +63,24 @@ void CPU::timer_stage2() {  // 16384hz
   }
 
   status.div++;
-
-  status.timer2 -= 4;
-  if(++status.timer3 >= 2) timer_stage3();
 }
 
-void CPU::timer_stage3() {  //  8192hz
+void CPU::timer_8192hz() {
   if(status.serial_transfer && status.serial_clock) {
     if(--status.serial_bits == 0) {
       status.serial_transfer = 0;
       interrupt_raise(Interrupt::Serial);
     }
   }
-
-  status.timer3 -= 2;
-  if(++status.timer4 >= 2) timer_stage4();
 }
 
-void CPU::timer_stage4() {  //  4096hz
+void CPU::timer_4096hz() {
   if(status.timer_enable && status.timer_clock == 0) {
     if(++status.tima == 0) {
       status.tima = status.tma;
       interrupt_raise(Interrupt::Timer);
     }
   }
-
-  status.timer4 -= 2;
 }
 
 #endif

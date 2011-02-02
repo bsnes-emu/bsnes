@@ -1,9 +1,9 @@
 void add_clocks(unsigned clocks);
-void timer_stage0();
-void timer_stage1();
-void timer_stage2();
-void timer_stage3();
-void timer_stage4();
+void timer_262144hz();
+void timer_65536hz();
+void timer_16384hz();
+void timer_8192hz();
+void timer_4096hz();
 
 //opcode.cpp
 void op_io();

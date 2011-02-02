@@ -28,7 +28,7 @@ void Interface::video_refresh(const uint8_t *data) {
   }
 }
 
-void Interface::audio_sample(signed left, signed right) {
+void Interface::audio_sample(int16_t center, int16_t left, int16_t right) {
   audio.sample(left, right);
 }
 

@@ -5,7 +5,7 @@
 namespace GameBoy {
   namespace Info {
     static const char Name[] = "bgameboy";
-    static const char Version[] = "000.15";
+    static const char Version[] = "000.16";
     static unsigned SerializerVersion = 1;
   }
 }
@@ -15,21 +15,29 @@ namespace GameBoy {
 #include <nall/foreach.hpp>
 #include <nall/platform.hpp>
 #include <nall/property.hpp>
+#include <nall/random.hpp>
 #include <nall/serializer.hpp>
 #include <nall/stdint.hpp>
 #include <nall/string.hpp>
+#include <nall/varint.hpp>
 using namespace nall;
 
 namespace GameBoy {
-  typedef int8_t   int8;
-  typedef int16_t  int16;
-  typedef int32_t  int32;
-  typedef int64_t  int64;
+  typedef int8_t  int8;
+  typedef int16_t int16;
+  typedef int32_t int32;
+  typedef int64_t int64;
 
   typedef uint8_t  uint8;
   typedef uint16_t uint16;
   typedef uint32_t uint32;
   typedef uint64_t uint64;
+
+  typedef int_t< 4> int4;
+  typedef int_t<15> int15;
+
+  typedef uint_t< 4> uint4;
+  typedef uint_t<15> uint15;
 
   template<uint16 lo, uint16 hi>
   alwaysinline bool within(uint16 addr) {
