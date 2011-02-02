@@ -45,8 +45,8 @@ void Window::setFont(Font &font) {
 void Window::setBackgroundColor(uint8_t red, uint8_t green, uint8_t blue) {
   QPalette palette;
   palette.setColor(QPalette::Window, QColor(red, green, blue));
-  window->setPalette(palette);
-  window->setAutoFillBackground(true);
+  window->container->setPalette(palette);
+  window->container->setAutoFillBackground(true);
 }
 
 void Window::setTitle(const string &text) {
@@ -77,8 +77,11 @@ bool Window::fullscreen() {
 
 void Window::setFullscreen(bool fullscreen) {
   if(fullscreen == false) {
+    window->layout->setSizeConstraint(QLayout::SetFixedSize);
     window->showNormal();
   } else {
+    window->layout->setSizeConstraint(QLayout::SetNoConstraint);
+    window->container->setFixedSize(OS::desktopWidth(), OS::desktopHeight());
     window->showFullScreen();
   }
 

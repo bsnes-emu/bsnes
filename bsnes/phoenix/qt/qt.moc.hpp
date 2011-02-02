@@ -184,6 +184,27 @@ public slots:
   }
 };
 
+struct HexEditor::Data : public QTextEdit {
+  Q_OBJECT
+
+public:
+  HexEditor &self;
+  QHBoxLayout *layout;
+  QScrollBar *scrollBar;
+  unsigned size;
+  unsigned offset;
+  unsigned columns;
+  unsigned rows;
+
+  void keyPressEvent(QKeyEvent*);
+
+  Data(HexEditor &self) : self(self) {
+  }
+
+public slots:
+  void scrollEvent();
+};
+
 struct HorizontalSlider::Data : public QSlider {
   Q_OBJECT
 

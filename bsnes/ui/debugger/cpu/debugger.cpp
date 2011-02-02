@@ -5,7 +5,7 @@ void CPUDebugger::create() {
   application.addWindow(this, "Debugger.CPUdebugger", "192,192");
 
   unsigned x = 5, y = 5;
-  output.create(*this, x, y, 400, 200); x += 400 + 5;
+  output.create(*this, x, y, 400, 210); x += 400 + 5;
   output.setFont(application.monospaceFont);
   output.setEditable(false);
 
@@ -14,7 +14,7 @@ void CPUDebugger::create() {
   proceed.create(*this, x, y, 80, Style::ButtonHeight, "Proceed"); y += Style::ButtonHeight;
   proceed.setEnabled(false);
 
-  setGeometry(0, 0, 490, 205);
+  setGeometry(0, 0, 495, 220);
 
   onClose = []() {
     debugger.showCPUDebugger.setChecked(false);

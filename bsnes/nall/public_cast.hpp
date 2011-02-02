@@ -22,7 +22,7 @@ namespace nall {
 
   template<typename T> typename T::type public_cast<T>::value;
 
-  template<typename T, typename T::type P> struct public_cast<T, P> : public_cast<T> {
+  template<typename T, typename T::type P> struct public_cast<T, P> {
     static typename T::type value;
   };
 

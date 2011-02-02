@@ -6,7 +6,6 @@ void InputMapper::poll_hotkeys(unsigned scancode, int16_t value) {
 
   if(value) {
     //key pressed
-    if(scancode == keyboard(0)[Keyboard::Escape]) input.unacquire();
     if(mainWindow.focused() == false) return;
 
     //save states
@@ -28,8 +27,18 @@ void InputMapper::poll_hotkeys(unsigned scancode, int16_t value) {
       utility.showMessage({ "Slot ", activeSlot, " selected" });
     }
 
+    //fullscreen
     if(scancode == keyboard(0)[Keyboard::F11]) {
       utility.setFullscreen(!mainWindow.fullscreen());
+    }
+
+    //mouse capture
+    if(scancode == keyboard(0)[Keyboard::F12]) {
+      if(input.acquired() == false) {
+        input.acquire();
+      } else {
+        input.unacquire();
+      }
     }
 
     //pause

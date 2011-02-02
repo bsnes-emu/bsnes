@@ -20,7 +20,7 @@ void BreakpointEditor::create() {
     enableBox[n].onTick = [n]() { breakpointEditor.toggleBreakpoint(n); };
   }
 
-  setGeometry(0, 0, 305, y);
+  setGeometry(0, 0, 310, y);
 
   runToBreakpoint.onTick = []() {
     if(breakpointEditor.runToBreakpoint.checked()) {

@@ -91,12 +91,10 @@ void MainWindow::create() {
   toolsStateLoad4.create(toolsStateLoad, "Slot 4");
   toolsStateLoad5.create(toolsStateLoad, "Slot 5");
   toolsSeparator1.create(tools);
-  toolsCaptureMouse.create(tools, "Capture Mouse");
-  toolsSeparator2.create(tools);
   toolsCheatEditor.create(tools, "Cheat Editor ...");
   toolsStateManager.create(tools, "State Manager ...");
   #if defined(DEBUGGER)
-  toolsSeparator3.create(tools);
+  toolsSeparator2.create(tools);
   toolsDebugger.create(tools, "Debugger ...");
   #endif
 
@@ -190,8 +188,6 @@ void MainWindow::create() {
   toolsStateLoad4.onTick = []() { utility.loadState(4); };
   toolsStateLoad5.onTick = []() { utility.loadState(5); };
 
-  toolsCaptureMouse.onTick = []() { input.acquire(); };
-
   toolsCheatEditor.onTick = []() { cheatEditor.setVisible(); };
   toolsStateManager.onTick = []() { stateManager.setVisible(); };
 
@@ -223,12 +219,10 @@ void MainWindow::synchronize() {
     systemReset.setEnabled(false);
     toolsStateSave.setEnabled(false);
     toolsStateLoad.setEnabled(false);
-    toolsCaptureMouse.setEnabled(false);
   } else {
     systemPower.setEnabled(true);
     systemReset.setEnabled(true);
     toolsStateSave.setEnabled(true);
     toolsStateLoad.setEnabled(true);
-    toolsCaptureMouse.setEnabled(true);
   }
 }

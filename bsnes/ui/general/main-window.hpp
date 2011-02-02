@@ -61,12 +61,10 @@ struct MainWindow : TopLevelWindow {
   MenuItem toolsStateLoad4;
   MenuItem toolsStateLoad5;
   MenuSeparator toolsSeparator1;
-  MenuItem toolsCaptureMouse;
-  MenuSeparator toolsSeparator2;
   MenuItem toolsCheatEditor;
   MenuItem toolsStateManager;
   #if defined(DEBUGGER)
-  MenuSeparator toolsSeparator3;
+  MenuSeparator toolsSeparator2;
   MenuItem toolsDebugger;
   #endif
 

@@ -80,8 +80,10 @@ void Utility::setFullscreen(bool fullscreen) {
   mainWindow.setStatusVisible(!fullscreen);
   mainWindow.setFullscreen(fullscreen);
   if(fullscreen == false) {
+    input.unacquire();
     setScale();
   } else {
+    input.acquire();
     unsigned width, height;
     switch(config.video.fullscreenScale) { default:
       case 0: {  //center (even multiple of base height)

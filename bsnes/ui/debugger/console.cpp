@@ -5,7 +5,7 @@ void Console::create() {
   application.addWindow(this, "Debugger.Console", "192,192");
 
   unsigned x = 5, y = 5;
-  output.create(*this, x, y, 580, 328); x += 580 + 5;
+  output.create(*this, x, y, 580, 338); x += 580 + 5;
   output.setFont(application.monospaceFont);
   output.setEditable(false);
 
@@ -16,9 +16,9 @@ void Console::create() {
   traceCPU.setChecked(true);
   traceSMP.create(*this, x, y, 120, Style::CheckBoxHeight, "Trace S-SMP"); y += Style::CheckBoxHeight;
 
-  clearConsole.create(*this, x, 338 - Style::ButtonHeight - 5, 120, Style::ButtonHeight, "Clear console");
+  clearConsole.create(*this, x, 348 - Style::ButtonHeight - 5, 120, Style::ButtonHeight, "Clear console");
 
-  setGeometry(0, 0, 710, 338);
+  setGeometry(0, 0, 715, 348);
 
   onClose = []() {
     debugger.showConsole.setChecked(false);
