@@ -12,7 +12,9 @@ void MainWindow::create() {
 
   settings.create(*this, "Settings");
   settingsVideoSync.create(settings, "Synchronize Video");
-  settingsVideoSync.setChecked(true);
+  settingsVideoSync.setChecked(false);
+  settingsAudioSync.create(settings, "Synchronize Audio");
+  settingsAudioSync.setChecked(true);
 
   tools.create(*this, "Tools");
   toolsSaveState.create(tools, "Save State");
@@ -54,6 +56,10 @@ void MainWindow::create() {
 
   settingsVideoSync.onTick = []() {
     video.set(Video::Synchronize, mainWindow.settingsVideoSync.checked());
+  };
+
+  settingsAudioSync.onTick = []() {
+    audio.set(Audio::Synchronize, mainWindow.settingsAudioSync.checked());
   };
 
   toolsSaveState1.onTick = []() { utility.saveState(1); };

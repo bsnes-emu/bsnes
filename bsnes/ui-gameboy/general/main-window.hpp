@@ -6,6 +6,7 @@ struct MainWindow : Window {
 
   Menu settings;
   MenuCheckItem settingsVideoSync;
+  MenuCheckItem settingsAudioSync;
 
   Menu tools;
   Menu toolsSaveState;

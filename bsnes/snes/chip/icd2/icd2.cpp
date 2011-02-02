@@ -22,7 +22,8 @@ void ICD2::enter() {
       step(GameBoy::system.clocks_executed);
       GameBoy::system.clocks_executed = 0;
     } else {  //DMG halted
-      step(4);
+      audio.coprocessor_sample(0x0000, 0x0000);
+      step(1);
     }
     synchronize_cpu();
   }
@@ -42,6 +43,9 @@ void ICD2::unload() {
 }
 
 void ICD2::power() {
+  audio.coprocessor_enable(true);
+  audio.coprocessor_frequency(4 * 1024 * 1024);
+
   reset();
 }
 

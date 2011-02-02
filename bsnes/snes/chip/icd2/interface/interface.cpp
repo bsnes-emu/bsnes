@@ -74,6 +74,7 @@ void ICD2::video_refresh(const uint8_t *data) {
 }
 
 void ICD2::audio_sample(signed left, signed right) {
+  audio.coprocessor_sample(left, right);
 }
 
 void ICD2::input_poll() {

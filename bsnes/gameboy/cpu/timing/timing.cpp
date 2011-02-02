@@ -25,8 +25,11 @@ void CPU::add_clocks(unsigned clocks) {
   status.timer0 += clocks;
   if(status.timer0 >= 16) timer_stage0();
 
-  cpu.clock += clocks;
-  if(cpu.clock >= 0) co_switch(scheduler.active_thread = lcd.thread);
+  lcd.clock -= clocks;
+  if(lcd.clock <= 0) co_switch(scheduler.active_thread = lcd.thread);
+
+  apu.clock -= clocks;
+  if(apu.clock <= 0) co_switch(scheduler.active_thread = apu.thread);
 }
 
 void CPU::timer_stage0() {  //262144hz

@@ -29,6 +29,7 @@ void Interface::video_refresh(const uint8_t *data) {
 }
 
 void Interface::audio_sample(signed left, signed right) {
+  audio.sample(left, right);
 }
 
 void Interface::input_poll() {

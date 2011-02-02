@@ -33,8 +33,8 @@ void LCD::add_clocks(unsigned clocks) {
   status.lx += clocks;
   if(status.lx >= 456) scanline();
 
-  cpu.clock -= clocks;
-  if(cpu.clock <= 0 && scheduler.sync != Scheduler::SynchronizeMode::All) {
+  clock += clocks;
+  if(clock >= 0 && scheduler.sync != Scheduler::SynchronizeMode::All) {
     co_switch(scheduler.active_thread = cpu.thread);
   }
 }
