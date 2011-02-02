@@ -1,4 +1,5 @@
 #include <windows.h>
+#include <windowsx.h>
 #include <commctrl.h>
 #include <io.h>
 #include <direct.h>
@@ -19,6 +20,7 @@ namespace phoenix {
 #include "checkbox.cpp"
 #include "combobox.cpp"
 #include "editbox.cpp"
+#include "hexeditor.cpp"
 #include "horizontalslider.cpp"
 #include "label.cpp"
 #include "listbox.cpp"
@@ -45,7 +47,7 @@ void OS::initialize() {
 
   os = new OS::Data;
   os->proportionalFont = Font_createFont("Tahoma", 8, false, false);
-  os->monospaceFont = Font_createFont("Courier New", 8, false, false);
+  os->monospaceFont = Font_createFont("Lucida Console", 8, false, false);
 
   WNDCLASS wc;
   wc.cbClsExtra = 0;

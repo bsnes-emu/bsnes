@@ -30,6 +30,10 @@ void EditBox::setText(const string &text) {
   object->locked = false;
 }
 
+void EditBox::setCursorPosition(unsigned position) {
+  Edit_SetSel(widget->window, position, position);
+}
+
 void EditBox::setEditable(bool editable) {
   SendMessage(widget->window, EM_SETREADONLY, editable == false, (LPARAM)0);
 }

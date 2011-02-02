@@ -116,7 +116,7 @@ HexEditor::HexEditor() {
 //internal
 
 bool HexEditor::keyPress(unsigned scancode) {
-  if(!onRead && !onWrite) return false;
+  if(!onRead || !onWrite) return false;
 
   unsigned position = cursorPosition();
   unsigned lineWidth = 10 + (hexEditor->columns * 3) + 1 + (hexEditor->columns) + 1;

@@ -53,6 +53,14 @@ struct EditBox::Data {
   unsigned height;
 };
 
+struct HexEditor::Data {
+  LRESULT CALLBACK (*windowProc)(HWND, UINT, LPARAM, WPARAM);
+  unsigned size;
+  unsigned offset;
+  unsigned columns;
+  unsigned rows;
+};
+
 struct HorizontalSlider::Data {
   unsigned position;
 };
