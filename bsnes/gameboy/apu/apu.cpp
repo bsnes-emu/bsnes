@@ -21,23 +21,24 @@ void APU::main() {
       scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
     }
 
-    if((counter & 8191) == 0) {  //512hz
-      if(sequencer == 0 || sequencer == 2 || sequencer == 4 || sequencer == 6) {  //256hz
+    if(sequencer_base == 0) {  //512hz
+      if(sequencer_step == 0 || sequencer_step == 2 || sequencer_step == 4 || sequencer_step == 6) {  //256hz
         square1.clock_length();
         square2.clock_length();
         wave.clock_length();
         noise.clock_length();
       }
-      if(sequencer == 2 || sequencer == 6) {  //128hz
+      if(sequencer_step == 2 || sequencer_step == 6) {  //128hz
         square1.clock_sweep();
       }
-      if(sequencer == 7) {  //64hz
+      if(sequencer_step == 7) {  //64hz
         square1.clock_envelope();
         square2.clock_envelope();
         noise.clock_envelope();
       }
-      sequencer = (sequencer + 1) & 7;
+      sequencer_step++;
     }
+    sequencer_base++;
 
     square1.run();
     square2.run();
@@ -46,9 +47,6 @@ void APU::main() {
     master.run();
 
     system.interface->audio_sample(master.center, master.left, master.right);
-
-    if(++counter == 4194304) counter = 0;
-
     if(++clock >= 0) co_switch(scheduler.active_thread = cpu.thread);
   }
 }
@@ -58,8 +56,8 @@ void APU::power() {
   for(unsigned n = 0xff10; n <= 0xff3f; n++) bus.mmio[n] = this;
 
   foreach(n, mmio_data) n = 0x00;
-  counter = 0;
-  sequencer = 0;
+  sequencer_base = 0;
+  sequencer_step = 0;
 
   square1.power();
   square2.power();

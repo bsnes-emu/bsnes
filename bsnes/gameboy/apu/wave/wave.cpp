@@ -12,12 +12,7 @@ void APU::Wave::run() {
   if(enable == false) sample = 0;
 
   output = (sample * 4369) - 32768;
-  switch(volume) {
-    case 0: output *= 0.00; break;
-    case 1: output *= 1.00; break;
-    case 2: output *= 0.50; break;
-    case 3: output *= 0.25; break;
-  }
+  output >>= volume;
 }
 
 void APU::Wave::clock_length() {
@@ -38,7 +33,12 @@ void APU::Wave::write(unsigned r, uint8 data) {
   }
 
   if(r == 2) {
-    volume = (data >> 5) & 3;
+    switch((data >> 5) & 3) {
+      case 0: volume = 16; break;  //  0%
+      case 1: volume =  0; break;  //100%
+      case 2: volume =  1; break;  // 50%
+      case 3: volume =  2; break;  // 25%
+    }
   }
 
   if(r == 3) {

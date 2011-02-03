@@ -190,7 +190,7 @@ void LCD::render_obj() {
 }
 
 void LCD::power() {
-  create(Main, 4 * 1024 * 1024);
+  create(Main, 4194304);
 
   for(unsigned n = 0x8000; n <= 0x9fff; n++) bus.mmio[n] = this;  //VRAM
   for(unsigned n = 0xff40; n <= 0xff4b; n++) bus.mmio[n] = this;  //MMIO

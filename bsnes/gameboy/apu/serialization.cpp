@@ -2,8 +2,8 @@
 
 void APU::serialize(serializer &s) {
   s.array(mmio_data);
-  s.integer(counter);
-  s.integer(sequencer);
+  s.integer(sequencer_base);
+  s.integer(sequencer_step);
 
   square1.serialize(s);
   square2.serialize(s);

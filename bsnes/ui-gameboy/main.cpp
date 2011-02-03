@@ -38,7 +38,7 @@ void Application::main(int argc, char **argv) {
   audio.driver("ALSA");
   #endif
   audio.set(Audio::Handle, (uintptr_t)mainWindow.viewport.handle());
-  audio.set(Audio::Synchronize, true);
+  audio.set(Audio::Synchronize, false);
   audio.set(Audio::Volume, 100U);
   audio.set(Audio::Latency, 80U);
   audio.set(Audio::Frequency, 44100U);

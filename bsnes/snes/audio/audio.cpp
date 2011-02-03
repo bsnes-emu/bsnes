@@ -24,8 +24,8 @@ void Audio::sample(int16 left, int16 right) {
     system.interface->audio_sample(left, right);
   } else {
     dsp_buffer[dsp_wroffset] = ((uint16)left << 0) + ((uint16)right << 16);
-    dsp_wroffset = (dsp_wroffset + 1) & 32767;
-    dsp_length = (dsp_length + 1) & 32767;
+    dsp_wroffset = (dsp_wroffset + 1) & buffer_mask;
+    dsp_length = (dsp_length + 1) & buffer_mask;
     flush();
   }
 }
@@ -50,8 +50,8 @@ void Audio::coprocessor_sample(int16 left, int16 right) {
   r_frac = r_step - first;
 
   cop_buffer[cop_wroffset] = (output_left << 0) + (output_right << 16);
-  cop_wroffset = (cop_wroffset + 1) & 32767;
-  cop_length = (cop_length + 1) & 32767;
+  cop_wroffset = (cop_wroffset + 1) & buffer_mask;
+  cop_length = (cop_length + 1) & buffer_mask;
   flush();
 }
 
@@ -63,8 +63,8 @@ void Audio::flush() {
     uint32 dsp_sample = dsp_buffer[dsp_rdoffset];
     uint32 cop_sample = cop_buffer[cop_rdoffset];
 
-    dsp_rdoffset = (dsp_rdoffset + 1) & 32767;
-    cop_rdoffset = (cop_rdoffset + 1) & 32767;
+    dsp_rdoffset = (dsp_rdoffset + 1) & buffer_mask;
+    cop_rdoffset = (cop_rdoffset + 1) & buffer_mask;
 
     dsp_length--;
     cop_length--;

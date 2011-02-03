@@ -1,12 +1,8 @@
 //4194304hz (4 * 1024 * 1024)
+
 //70224 clocks/frame
 //  456 clocks/scanline
 //  154 scanlines/frame
-
-//4194304 /   4096 = 1024
-//4194304 / 262144 =   16
-//4194304 /  65536 =   64
-//4394304 /  16384 =  256
 
 #ifdef CPU_CPP
 
@@ -17,8 +13,8 @@ void CPU::add_clocks(unsigned clocks) {
   scheduler.exit(Scheduler::ExitReason::StepEvent);
 
   status.clock += clocks;
-  if(status.clock >= 4 * 1024 * 1024) {
-    status.clock -= 4 * 1024 * 1024;
+  if(status.clock >= 4194304) {
+    status.clock -= 4194304;
     cartridge.mbc3.second();
   }
 

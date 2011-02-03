@@ -1,15 +1,26 @@
 #ifdef APU_CPP
 
 void APU::Master::run() {
-  signed sample = 0, channels = 4;
+  if(enable == false) {
+    center = 0;
+    left   = 0;
+    right  = 0;
+    return;
+  }
+
+  signed sample = 0, channels;
   sample += apu.square1.output;
   sample += apu.square2.output;
   sample +=    apu.wave.output;
   sample +=   apu.noise.output;
-  sample /= channels;
-  if(sample < -32768) sample = -32768;
-  if(sample > +32767) sample = +32767;
-  center = sample;
+  sample >>= 2;
+  center = sclamp<16>(sample);
+
+  if(left_enable == false && right_enable == false) {
+    left  = center;
+    right = center;
+    return;
+  }
 
   sample = 0;
   channels = 0;
@@ -18,17 +29,16 @@ void APU::Master::run() {
   if(channel3_left_enable) { sample +=    apu.wave.output; channels++; }
   if(channel4_left_enable) { sample +=   apu.noise.output; channels++; }
   if(channels) sample /= channels;
-  left = sample;
+  left = sclamp<16>(sample);
 
   switch(left_volume) {
-    case 0: left *= 0.125; break;
-    case 1: left *= 0.250; break;
-    case 2: left *= 0.375; break;
-    case 3: left *= 0.500; break;
-    case 4: left *= 0.625; break;
-    case 5: left *= 0.750; break;
-    case 6: left *= 0.875; break;
-    case 7: left *= 1.000; break;
+    case 0: left >>= 3;                       break;  // 12.5%
+    case 1: left >>= 2;                       break;  // 25.0%
+    case 2: left = (left >> 2) + (left >> 3); break;  // 37.5%
+    case 3: left >>= 1;                       break;  // 50.0%
+    case 4: left = (left >> 1) + (left >> 3); break;  // 62.5%
+    case 5: left -= (left >> 2);              break;  // 75.0%
+    case 6: left -= (left >> 3);              break;  // 87.5%
   }
   if(left_enable == false) left = 0;
 
@@ -39,30 +49,18 @@ void APU::Master::run() {
   if(channel3_right_enable) { sample +=    apu.wave.output; channels++; }
   if(channel4_right_enable) { sample +=   apu.noise.output; channels++; }
   if(channels) sample /= channels;
-  right = sample;
+  right = sclamp<16>(sample);
 
   switch(right_volume) {
-    case 0: right *= 0.125; break;
-    case 1: right *= 0.250; break;
-    case 2: right *= 0.375; break;
-    case 3: right *= 0.500; break;
-    case 4: right *= 0.625; break;
-    case 5: right *= 0.750; break;
-    case 6: right *= 0.875; break;
-    case 7: right *= 1.000; break;
+    case 0: right >>= 3;                         break;  // 12.5%
+    case 1: right >>= 2;                         break;  // 25.0%
+    case 2: right = (right >> 2) + (right >> 3); break;  // 37.5%
+    case 3: right >>= 1;                         break;  // 50.0%
+    case 4: right = (right >> 1) + (right >> 3); break;  // 62.5%
+    case 5: right -= (right >> 2);               break;  // 75.0%
+    case 6: right -= (right >> 3);               break;  // 87.5%
   }
   if(right_enable == false) right = 0;
-
-  if(left_enable == false && right_enable == false) {
-    left  = center;
-    right = center;
-  }
-
-  if(enable == false) {
-    center = 0;
-    left   = 0;
-    right  = 0;
-  }
 }
 
 void APU::Master::write(unsigned r, uint8 data) {

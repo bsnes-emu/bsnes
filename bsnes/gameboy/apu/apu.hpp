@@ -6,8 +6,8 @@ struct APU : Processor, MMIO {
   #include "master/master.hpp"
 
   uint8 mmio_data[48];
-  unsigned counter;
-  unsigned sequencer;
+  uint13 sequencer_base;
+  uint3 sequencer_step;
 
   Square1 square1;
   Square2 square2;
