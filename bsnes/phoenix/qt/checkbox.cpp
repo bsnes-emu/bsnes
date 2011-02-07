@@ -1,10 +1,10 @@
-void CheckBox::create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const string &text) {
-  checkBox->setParent(parent.window->container);
-  checkBox->setGeometry(x, y, width, height);
-  checkBox->setText(QString::fromUtf8(text));
-  if(parent.window->defaultFont) checkBox->setFont(*parent.window->defaultFont);
+void CheckBox::setParent(Layout &parent) {
+  checkBox->setParent(parent.widget->widget);
   checkBox->show();
-  checkBox->connect(checkBox, SIGNAL(stateChanged(int)), SLOT(onTick()));
+}
+
+void CheckBox::setText(const string &text) {
+  checkBox->setText(QString::fromUtf8(text));
 }
 
 bool CheckBox::checked() {
@@ -18,4 +18,5 @@ void CheckBox::setChecked(bool checked) {
 CheckBox::CheckBox() {
   checkBox = new CheckBox::Data(*this);
   widget->widget = checkBox;
+  checkBox->connect(checkBox, SIGNAL(stateChanged(int)), SLOT(onTick()));
 }

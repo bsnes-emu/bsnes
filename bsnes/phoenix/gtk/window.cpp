@@ -44,6 +44,10 @@ void Window::create(unsigned x, unsigned y, unsigned width, unsigned height, con
   gtk_widget_realize(object->widget);
 }
 
+void Window::setLayout(Layout &layout) {
+  layout.create(*this);
+}
+
 bool Window::focused() {
   return gtk_window_is_active(GTK_WINDOW(object->widget));
 }

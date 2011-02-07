@@ -1,8 +1,5 @@
-void Canvas::create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height) {
-  canvas->image = new QImage(width, height, QImage::Format_RGB32);
-  canvas->image->fill(0);
-  canvas->setParent(parent.window->container);
-  canvas->setGeometry(x, y, width, height);
+void Canvas::setParent(Layout &parent) {
+  canvas->setParent(parent.widget->widget);
   canvas->show();
 }
 
@@ -26,6 +23,8 @@ Canvas::Canvas() {
   canvas = new Canvas::Data(*this);
   canvas->image = 0;
   widget->widget = canvas;
+  canvas->image = new QImage(64, 64, QImage::Format_RGB32);
+  canvas->image->fill(0);
 }
 
 Canvas::~Canvas() {

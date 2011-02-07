@@ -2,26 +2,31 @@ void Window::create(unsigned x, unsigned y, unsigned width, unsigned height, con
   window->setWindowTitle(QString::fromUtf8(text));
   window->move(x, y);
 
-  window->layout = new QVBoxLayout(window);
-  window->layout->setAlignment(Qt::AlignTop);
-  window->layout->setMargin(0);
-  window->layout->setSpacing(0);
-  window->layout->setSizeConstraint(QLayout::SetFixedSize);
-  window->setLayout(window->layout);
+  window->vlayout = new QVBoxLayout(window);
+  window->vlayout->setAlignment(Qt::AlignTop);
+  window->vlayout->setMargin(0);
+  window->vlayout->setSpacing(0);
+  window->vlayout->setSizeConstraint(QLayout::SetFixedSize);
+  window->setLayout(window->vlayout);
 
   window->menuBar = new QMenuBar(window);
   window->menuBar->setVisible(false);
-  window->layout->addWidget(window->menuBar);
+  window->vlayout->addWidget(window->menuBar);
 
   window->container = new QWidget(window);
   window->container->setFixedSize(width, height);
   window->container->setVisible(true);
-  window->layout->addWidget(window->container);
+  window->vlayout->addWidget(window->container);
 
   window->statusBar = new QStatusBar(window);
   window->statusBar->setSizeGripEnabled(false);
   window->statusBar->setVisible(false);
-  window->layout->addWidget(window->statusBar);
+  window->vlayout->addWidget(window->statusBar);
+}
+
+void Window::setLayout(Layout &layout) {
+  window->layout = &layout;
+  layout.create(*this);
 }
 
 Geometry Window::geometry() {
@@ -77,10 +82,10 @@ bool Window::fullscreen() {
 
 void Window::setFullscreen(bool fullscreen) {
   if(fullscreen == false) {
-    window->layout->setSizeConstraint(QLayout::SetFixedSize);
+    window->vlayout->setSizeConstraint(QLayout::SetFixedSize);
     window->showNormal();
   } else {
-    window->layout->setSizeConstraint(QLayout::SetNoConstraint);
+    window->vlayout->setSizeConstraint(QLayout::SetNoConstraint);
     window->container->setFixedSize(OS::desktopWidth(), OS::desktopHeight());
     window->showFullScreen();
   }
@@ -94,6 +99,12 @@ void Window::setFullscreen(bool fullscreen) {
     geom = geometry();
     if(startTime - time(0) > 3) break;
   } while((signed)geom.x < 0 || (signed)geom.y < 0);
+
+  if(fullscreen == false) {
+    window->layout->setGeometry(0, 0, geometry().width, geometry().height);
+  } else {
+    window->layout->setGeometry(0, 0, OS::desktopWidth(), OS::desktopHeight());
+  }
 }
 
 Window::Window() {

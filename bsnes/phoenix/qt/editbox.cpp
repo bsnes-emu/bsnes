@@ -1,10 +1,6 @@
-void EditBox::create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const string &text) {
-  editBox->setParent(parent.window->container);
-  editBox->setGeometry(x, y, width, height);
-  editBox->setPlainText(QString::fromUtf8(text));
-  if(parent.window->defaultFont) editBox->setFont(*parent.window->defaultFont);
+void EditBox::setParent(Layout &parent) {
+  editBox->setParent(parent.widget->widget);
   editBox->show();
-  editBox->connect(editBox, SIGNAL(textChanged()), SLOT(onChange()));
 }
 
 void EditBox::setEditable(bool editable) {
@@ -33,4 +29,5 @@ void EditBox::setCursorPosition(unsigned position) {
 EditBox::EditBox() {
   editBox = new EditBox::Data(*this);
   widget->widget = editBox;
+  editBox->connect(editBox, SIGNAL(textChanged()), SLOT(onChange()));
 }

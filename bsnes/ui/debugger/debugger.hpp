@@ -12,6 +12,7 @@ struct Debugger : TopLevelWindow {
     StepIntoSMP,
   } debugMode;
 
+  FixedLayout layout;
   CheckBox enableDebugger;
   CheckBox showConsole;
   CheckBox showCPUDebugger;

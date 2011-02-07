@@ -4,19 +4,23 @@ void StateManager::create() {
   Window::create(0, 0, 256, 256, "State Manager");
   application.addWindow(this, "StateManager", "160,160");
 
-  unsigned x = 5, y = 5;
-
-  stateList.create(*this, x, y, 500, 250, "Slot\tDescription"); y += 255;
+  stateList.setHeaderText("Slot\tDescription");
   stateList.setHeaderVisible();
+  descLabel.setText("Description:");
+  loadButton.setText("Load");
+  saveButton.setText("Save");
+  eraseButton.setText("Erase");
 
-  descLabel.create(*this, x, y, 80, Style::TextBoxHeight, "Description:");
-  descEdit.create(*this, x + 80, y, 420, Style::TextBoxHeight); y += Style::TextBoxHeight + 5;
-
-  loadButton.create(*this, x + 505 - 85 - 85 - 85, y, 80, Style::ButtonHeight, "Load");
-  saveButton.create(*this, x + 505 - 85 - 85, y, 80, Style::ButtonHeight, "Save");
-  eraseButton.create(*this, x + 505 - 85, y, 80, Style::ButtonHeight, "Erase"); y += Style::ButtonHeight + 5;
-
+  unsigned x = 5, y = 5;
+  layout.append(stateList,   x,                      y, 500, 250);                  y += 255;
+  layout.append(descLabel,   x,                      y,  80, Style::TextBoxHeight);
+  layout.append(descEdit,    x + 80,                 y, 420, Style::TextBoxHeight); y += Style::TextBoxHeight + 5;
+  layout.append(loadButton,  x + 505 - 85 - 85 - 85, y,  80, Style::ButtonHeight);
+  layout.append(saveButton,  x + 505 - 85 - 85,      y,  80, Style::ButtonHeight);
+  layout.append(eraseButton, x + 505 - 85,           y,  80, Style::ButtonHeight);  y += Style::ButtonHeight + 5;
   setGeometry(0, 0, 510, y);
+  setLayout(layout);
+
   synchronize();
 
   stateList.onActivate = { &StateManager::slotLoad, this };

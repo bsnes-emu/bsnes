@@ -35,7 +35,8 @@ void MainWindow::create() {
   help.create(*this, "Help");
   helpAbout.create(help, "About ...");
 
-  viewport.create(*this, 0, 0, 160 * 2, 144 * 2);
+  layout.append(viewport, 0, 0, 160 * 2, 144 * 2);
+  setLayout(layout);
 
   setMenuVisible(true);
   setStatusVisible(true);

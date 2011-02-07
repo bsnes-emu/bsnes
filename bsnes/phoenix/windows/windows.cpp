@@ -15,6 +15,8 @@ namespace phoenix {
 #include "menu.cpp"
 #include "widget.cpp"
 #include "window.cpp"
+#include "layout.cpp"
+#include "fixed-layout.cpp"
 #include "button.cpp"
 #include "canvas.cpp"
 #include "checkbox.cpp"
@@ -97,6 +99,9 @@ void OS::initialize() {
   wc.lpszMenuName = 0;
   wc.style = CS_HREDRAW | CS_VREDRAW;
   RegisterClass(&wc);
+
+  //default window to attach all controls to during construction (prior to attaching to layout)
+  os->nullWindow = CreateWindow(L"phoenix_window", L"", WS_POPUP, 0, 0, 640, 480, 0, 0, GetModuleHandle(0), 0);
 }
 
 bool OS::pending() {

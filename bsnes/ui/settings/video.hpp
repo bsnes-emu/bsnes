@@ -1,4 +1,5 @@
 struct VideoSettings : TopLevelWindow {
+  FixedLayout layout;
   Label colorAdjustmentLabel;
   Label brightnessLabel;
   Label brightnessValue;

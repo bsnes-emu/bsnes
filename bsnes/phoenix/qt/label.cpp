@@ -1,8 +1,5 @@
-void Label::create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const string &text) {
-  label->setParent(parent.window->container);
-  label->setGeometry(x, y, width, height);
-  label->setText(QString::fromUtf8(text));
-  if(parent.window->defaultFont) label->setFont(*parent.window->defaultFont);
+void Label::setParent(Layout &parent) {
+  label->setParent(parent.widget->widget);
   label->show();
 }
 

@@ -1,4 +1,5 @@
 struct AdvancedSettings : TopLevelWindow {
+  FixedLayout layout;
   Label driverSelectionLabel;
   Label videoDriverLabel;
   ComboBox videoDriverBox;

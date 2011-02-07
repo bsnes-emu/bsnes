@@ -4,17 +4,20 @@ void SMPDebugger::create() {
   Window::create(0, 0, 256, 256, "SMP Debugger");
   application.addWindow(this, "Debugger.SMPDebugger", "192,192");
 
-  unsigned x = 5, y = 5;
-  output.create(*this, x, y, 400, 210); x += 400 + 5;
   output.setFont(application.monospaceFont);
   output.setEditable(false);
-
-  stepInto.create(*this, x, y, 80, Style::ButtonHeight, "Step Into"); y += Style::ButtonHeight;
-  stepOver.create(*this, x, y, 80, Style::ButtonHeight, "Step Over"); y += Style::ButtonHeight;
-  proceed.create(*this, x, y, 80, Style::ButtonHeight, "Proceed"); y += Style::ButtonHeight;
+  stepInto.setText("Step Into");
+  stepOver.setText("Step Over");
+  proceed.setText("Proceed");
   proceed.setEnabled(false);
 
+  unsigned x = 5, y = 5;
+  layout.append(output, x, y, 400, 210); x += 400 + 5;
+  layout.append(stepInto, x, y, 80, Style::ButtonHeight); y += Style::ButtonHeight;
+  layout.append(stepOver, x, y, 80, Style::ButtonHeight); y += Style::ButtonHeight;
+  layout.append(proceed, x, y, 80, Style::ButtonHeight); y += Style::ButtonHeight;
   setGeometry(0, 0, 495, 220);
+  setLayout(layout);
 
   onClose = []() {
     debugger.showSMPDebugger.setChecked(false);

@@ -1,11 +1,12 @@
-void HorizontalSlider::create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, unsigned length) {
-  length += (length == 0);
-  horizontalSlider->setParent(parent.window->container);
-  horizontalSlider->setGeometry(x, y, width, height);
+void HorizontalSlider::setParent(Layout &parent) {
+  horizontalSlider->setParent(parent.widget->widget);
+  horizontalSlider->show();
+}
+
+void HorizontalSlider::setLength(unsigned length) {
+  length = length + (length == 0);
   horizontalSlider->setRange(0, length - 1);
   horizontalSlider->setPageStep(length >> 3);
-  horizontalSlider->connect(horizontalSlider, SIGNAL(valueChanged(int)), SLOT(onChange()));
-  horizontalSlider->show();
 }
 
 unsigned HorizontalSlider::position() {
@@ -19,4 +20,5 @@ void HorizontalSlider::setPosition(unsigned position) {
 HorizontalSlider::HorizontalSlider() {
   horizontalSlider = new HorizontalSlider::Data(*this);
   widget->widget = horizontalSlider;
+  horizontalSlider->connect(horizontalSlider, SIGNAL(valueChanged(int)), SLOT(onChange()));
 }

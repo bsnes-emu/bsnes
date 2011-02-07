@@ -90,13 +90,41 @@ public:
   }
 };
 
+struct Layout::Data : public QWidget {
+  Q_OBJECT
+
+public:
+  Layout &self;
+
+  Data(Layout &self) : self(self) {
+  }
+};
+
+struct FixedLayout::Data : public QWidget {
+  Q_OBJECT
+
+public:
+  FixedLayout &self;
+  Window *parent;
+  struct Children {
+    Widget *widget;
+    unsigned x, y;
+    unsigned width, height;
+  };
+  linear_vector<Children> children;
+
+  Data(FixedLayout &self) : self(self) {
+  }
+};
+
 struct Window::Data : public QWidget {
   Q_OBJECT
 
 public:
   Window &self;
+  Layout *layout;
   QFont *defaultFont;
-  QVBoxLayout *layout;
+  QVBoxLayout *vlayout;
   QMenuBar *menuBar;
   QWidget *container;
   QStatusBar *statusBar;

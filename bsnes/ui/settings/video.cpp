@@ -6,49 +6,58 @@ void VideoSettings::create() {
 
   unsigned x = 5, y = 5, height = Style::TextBoxHeight;
 
-  colorAdjustmentLabel.create(*this, x, y, 430, Style::LabelHeight, "Color Adjustment :."); y += Style::LabelHeight + 5;
+  colorAdjustmentLabel.setText("Color Adjustment :.");
   colorAdjustmentLabel.setFont(application.proportionalFontBold);
-
-  brightnessLabel.create (*this, x,       y,  80, Style::SliderHeight, "Brightness:");
-  brightnessValue.create (*this, x +  80, y,  40, Style::SliderHeight);
-  brightnessSlider.create(*this, x + 130, y, 300, Style::SliderHeight, 201); y += Style::SliderHeight;
-
-  contrastLabel.create   (*this, x,       y,  80, Style::SliderHeight, "Contrast:");
-  contrastValue.create   (*this, x +  80, y,  50, Style::SliderHeight);
-  contrastSlider.create  (*this, x + 130, y, 300, Style::SliderHeight, 201); y += Style::SliderHeight;
-
-  gammaLabel.create      (*this, x,       y,  80, Style::SliderHeight, "Gamma:");
-  gammaValue.create      (*this, x +  80, y,  50, Style::SliderHeight);
-  gammaSlider.create     (*this, x + 130, y, 300, Style::SliderHeight, 201); y += Style::SliderHeight + 5;
-
-  gammaRampCheck.create  (*this, x,       y, 430, Style::CheckBoxHeight, "Enable NTSC gamma ramp simulation"); y += Style::CheckBoxHeight + 5;
-
-  fullscreenLabel.create(*this, x, y, 340, Style::LabelHeight, "Fullscreen :."); y += Style::LabelHeight + 5;
+  brightnessLabel.setText("Brightness:");
+  brightnessSlider.setLength(201);
+  contrastLabel.setText("Contrast:");
+  contrastSlider.setLength(201);
+  gammaLabel.setText("Gamma:");
+  gammaSlider.setLength(201);
+  gammaRampCheck.setText("Enable NTSC gamma ramp simulation");
+  fullscreenLabel.setText("Fullscreen :.");
   fullscreenLabel.setFont(application.proportionalFontBold);
-
-  fullscreenCenter.create (*this,            x,       y, 135, Style::CheckBoxHeight, "Center");
-  fullscreenScale.create  (fullscreenCenter, x + 140, y, 135, Style::CheckBoxHeight, "Scale");
-  fullscreenStretch.create(fullscreenCenter, x + 280, y, 135, Style::CheckBoxHeight, "Stretch"); y += Style::CheckBoxHeight + 5;
-
-  filterLabel.create(*this, x, y, 340, Style::LabelHeight, "Video Filter :."); y += Style::LabelHeight + 5;
+  fullscreenCenter.setText("Center");
+  fullscreenScale.setText("Scale");
+  fullscreenStretch.setText("Stretch");
+  fullscreenScale.setParent(fullscreenCenter);
+  fullscreenStretch.setParent(fullscreenCenter);
+  filterLabel.setText("Video Filter :.");
   filterLabel.setFont(application.proportionalFontBold);
-
-  filterPath.create(*this, x, y, 430 - height - height - 10, height);
   filterPath.setEditable(false);
   filterPath.setText(config.video.filter);
-  filterClear.create(*this, x + 430 - height - height - 5, y, height, height, "");
-  filterSelect.create(*this, x + 430 - height, y, height, height, "..."); y += height + 5;
-
-  shaderLabel.create(*this, x, y, 340, Style::LabelHeight, "Pixel Shader :."); y += Style::LabelHeight + 5;
+  filterSelect.setText("...");
+  shaderLabel.setText("Pixel Shader :.");
   shaderLabel.setFont(application.proportionalFontBold);
-
-  shaderPath.create(*this, x, y, 430 - height - height - 10, height);
   shaderPath.setEditable(false);
   shaderPath.setText(config.video.shader);
-  shaderClear.create(*this, x + 430 - height - height - 5, y, height, height, "");
-  shaderSelect.create(*this, x + 430 - height, y, height, height, "..."); y += height + 5;
+  shaderSelect.setText("...");
 
+  layout.append(colorAdjustmentLabel, x,                             y, 430,                        Style::LabelHeight);    y += Style::LabelHeight + 5;
+  layout.append(brightnessLabel,      x,                             y,  80,                        Style::SliderHeight);
+  layout.append(brightnessValue,      x +  80,                       y,  40,                        Style::SliderHeight);
+  layout.append(brightnessSlider,     x + 130,                       y, 300,                        Style::SliderHeight);   y += Style::SliderHeight;
+  layout.append(contrastLabel,        x,                             y,  80,                        Style::SliderHeight);
+  layout.append(contrastValue,        x +  80,                       y,  50,                        Style::SliderHeight);
+  layout.append(contrastSlider,       x + 130,                       y, 300,                        Style::SliderHeight);   y += Style::SliderHeight;
+  layout.append(gammaLabel,           x,                             y,  80,                        Style::SliderHeight);
+  layout.append(gammaValue,           x +  80,                       y,  50,                        Style::SliderHeight);
+  layout.append(gammaSlider,          x + 130,                       y, 300,                        Style::SliderHeight);   y += Style::SliderHeight + 5;
+  layout.append(gammaRampCheck,       x,                             y, 430,                        Style::CheckBoxHeight); y += Style::CheckBoxHeight + 5;
+  layout.append(fullscreenLabel,      x,                             y, 340,                        Style::LabelHeight);    y += Style::LabelHeight + 5;
+  layout.append(fullscreenCenter,     x,                             y, 135,                        Style::CheckBoxHeight);
+  layout.append(fullscreenScale,      x + 140,                       y, 135,                        Style::CheckBoxHeight);
+  layout.append(fullscreenStretch,    x + 280,                       y, 135,                        Style::CheckBoxHeight); y += Style::CheckBoxHeight + 5;
+  layout.append(filterLabel,          x,                             y, 340,                        Style::LabelHeight);    y += Style::LabelHeight + 5;
+  layout.append(filterPath,           x,                             y, 430 - height - height - 10, height);
+  layout.append(filterClear,          x + 430 - height - height - 5, y, height,                     height);
+  layout.append(filterSelect,         x + 430 - height,              y, height,                     height);                y += height + 5;
+  layout.append(shaderLabel,          x,                             y, 340,                        Style::LabelHeight);    y += Style::LabelHeight + 5;
+  layout.append(shaderPath,           x,                             y, 430 - height - height - 10, height);
+  layout.append(shaderClear,          x + 430 - height - height - 5, y, height,                     height);
+  layout.append(shaderSelect,         x + 430 - height,              y, height,                     height);                y += height + 5;
   setGeometry(0, 0, 440, y);
+  setLayout(layout);
 
   brightnessSlider.setPosition(config.video.brightness);
   brightnessValue.setText({ config.video.brightness, "%" });

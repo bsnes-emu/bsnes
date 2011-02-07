@@ -4,21 +4,25 @@ void Console::create() {
   Window::create(0, 0, 256, 256, "Console");
   application.addWindow(this, "Debugger.Console", "192,192");
 
-  unsigned x = 5, y = 5;
-  output.create(*this, x, y, 580, 338); x += 580 + 5;
   output.setFont(application.monospaceFont);
   output.setEditable(false);
-
-  traceToConsole.create(*this, x, y, 120, Style::CheckBoxHeight, "Trace to console"); y += Style::CheckBoxHeight;
+  traceToConsole.setText("Trace to console");
+  traceToFile.setText("Trace to file");
+  traceCPU.setText("Trace CPU");
+  traceSMP.setText("Trace SMP");
   traceToConsole.setChecked(true);
-  traceToFile.create(*this, x, y, 120, Style::CheckBoxHeight, "Trace to file"); y += Style::CheckBoxHeight;
-  traceCPU.create(*this, x, y, 120, Style::CheckBoxHeight, "Trace S-CPU"); y += Style::CheckBoxHeight;
   traceCPU.setChecked(true);
-  traceSMP.create(*this, x, y, 120, Style::CheckBoxHeight, "Trace S-SMP"); y += Style::CheckBoxHeight;
+  clearConsole.setText("Clear console");
 
-  clearConsole.create(*this, x, 348 - Style::ButtonHeight - 5, 120, Style::ButtonHeight, "Clear console");
-
+  unsigned x = 5, y = 5;
+  layout.append(output, x, y, 580, 338); x += 580 + 5;
+  layout.append(traceToConsole, x, y, 120, Style::CheckBoxHeight); y += Style::CheckBoxHeight;
+  layout.append(traceToFile, x, y, 120, Style::CheckBoxHeight); y += Style::CheckBoxHeight;
+  layout.append(traceCPU, x, y, 120, Style::CheckBoxHeight); y += Style::CheckBoxHeight;
+  layout.append(traceSMP, x, y, 120, Style::CheckBoxHeight); y += Style::CheckBoxHeight;
+  layout.append(clearConsole, x, 348 - Style::ButtonHeight - 5, 120, Style::ButtonHeight);
   setGeometry(0, 0, 715, 348);
+  setLayout(layout);
 
   onClose = []() {
     debugger.showConsole.setChecked(false);

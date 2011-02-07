@@ -7,17 +7,21 @@ void SingleSlotLoader::create() {
 
   unsigned x = 5, y = 5, height = Style::TextBoxHeight, width = 365 + height;
 
-  baseLabel.create(*this, x, y, 50, height, "Base:");
-  basePath.create(*this, x + 50, y, 300, height);
-  baseBrowse.create(*this, x + 355, y, height, height, "..."); y += height + 5;
+  baseLabel.setText("Base:");
+  baseBrowse.setText("...");
+  slotLabel.setText("Slot:");
+  slotBrowse.setText("...");
+  okButton.setText("Ok");
 
-  slotLabel.create(*this, x, y, 50, height, "Slot:");
-  slotPath.create(*this, x + 50, y, 300, height);
-  slotBrowse.create(*this, x + 355, y, height, height, "..."); y += height + 5;
-
-  okButton.create(*this, x + width - 90, y, 80, Style::ButtonHeight, "Ok"); y += Style::ButtonHeight + 5;
-
+  layout.append(baseLabel, x, y, 50, height);
+  layout.append(basePath, x + 50, y, 300, height);
+  layout.append(baseBrowse, x + 355, y, height, height); y += height + 5;
+  layout.append(slotLabel, x, y, 50, height);
+  layout.append(slotPath, x + 50, y, 300, height);
+  layout.append(slotBrowse, x + 355, y, height, height); y += height + 5;
+  layout.append(okButton, x + width - 90, y, 80, Style::ButtonHeight); y += Style::ButtonHeight + 5;
   setGeometry(0, 0, width, y);
+  setLayout(layout);
 
   baseBrowse.onTick = []() {
     fileBrowser.fileOpen(FileBrowser::Mode::Cartridge, [](string filename) {
@@ -92,21 +96,26 @@ void DoubleSlotLoader::create() {
 
   unsigned x = 5, y = 5, height = Style::TextBoxHeight, width = 365 + height;
 
-  baseLabel.create(*this, x, y, 50, height, "Base:");
-  basePath.create(*this, x + 50, y, 300, height);
-  baseBrowse.create(*this, x + 355, y, height, height, "..."); y += height + 5;
+  baseLabel.setText("Base:");
+  baseBrowse.setText("...");
+  slotALabel.setText("Slot A:");
+  slotABrowse.setText("...");
+  slotBLabel.setText("Slot B:");
+  slotBBrowse.setText("...");
+  okButton.setText("Ok");
 
-  slotALabel.create(*this, x, y, 50, height, "Slot A:");
-  slotAPath.create(*this, x + 50, y, 300, height);
-  slotABrowse.create(*this, x + 355, y, height, height, "..."); y += height + 5;
-
-  slotBLabel.create(*this, x, y, 50, height, "Slot B:");
-  slotBPath.create(*this, x + 50, y, 300, height);
-  slotBBrowse.create(*this, x + 355, y, height, height, "..."); y += height + 5;
-
-  okButton.create(*this, x + width - 90, y, 80, Style::ButtonHeight, "Ok"); y += Style::ButtonHeight + 5;
-
+  layout.append(baseLabel, x, y, 50, height);
+  layout.append(basePath, x + 50, y, 300, height);
+  layout.append(baseBrowse, x + 355, y, height, height); y += height + 5;
+  layout.append(slotALabel, x, y, 50, height);
+  layout.append(slotAPath, x + 50, y, 300, height);
+  layout.append(slotABrowse, x + 355, y, height, height); y += height + 5;
+  layout.append(slotBLabel, x, y, 50, height);
+  layout.append(slotBPath, x + 50, y, 300, height);
+  layout.append(slotBBrowse, x + 355, y, height, height); y += height + 5;
+  layout.append(okButton, x + width - 90, y, 80, Style::ButtonHeight); y += Style::ButtonHeight + 5;
   setGeometry(0, 0, width, y);
+  setLayout(layout);
 
   baseBrowse.onTick = []() {
     fileBrowser.fileOpen(FileBrowser::Mode::Cartridge, [](string filename) {

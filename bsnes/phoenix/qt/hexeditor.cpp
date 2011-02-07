@@ -1,24 +1,5 @@
-void HexEditor::create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height) {
-  hexEditor->setParent(parent.window->container);
-  hexEditor->setGeometry(x, y, width, height);
-  if(parent.window->defaultFont) hexEditor->setFont(*parent.window->defaultFont);
-
-  hexEditor->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-  hexEditor->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-
-  hexEditor->layout = new QHBoxLayout;
-  hexEditor->layout->setAlignment(Qt::AlignRight);
-  hexEditor->layout->setMargin(0);
-  hexEditor->layout->setSpacing(0);
-  hexEditor->setLayout(hexEditor->layout);
-
-  hexEditor->scrollBar = new QScrollBar(Qt::Vertical);
-  hexEditor->scrollBar->setSingleStep(1);
-  hexEditor->layout->addWidget(hexEditor->scrollBar);
-
-  hexEditor->scrollBar->connect(
-    hexEditor->scrollBar, SIGNAL(actionTriggered(int)), hexEditor, SLOT(scrollEvent())
-  );
+void HexEditor::setParent(Layout &parent) {
+  hexEditor->setParent(parent.widget->widget);
   hexEditor->show();
 }
 
@@ -172,4 +153,21 @@ HexEditor::HexEditor() {
   hexEditor->offset = 0;
   hexEditor->columns = 16;
   hexEditor->rows = 16;
+
+  hexEditor->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+  hexEditor->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+
+  hexEditor->layout = new QHBoxLayout;
+  hexEditor->layout->setAlignment(Qt::AlignRight);
+  hexEditor->layout->setMargin(0);
+  hexEditor->layout->setSpacing(0);
+  hexEditor->setLayout(hexEditor->layout);
+
+  hexEditor->scrollBar = new QScrollBar(Qt::Vertical);
+  hexEditor->scrollBar->setSingleStep(1);
+  hexEditor->layout->addWidget(hexEditor->scrollBar);
+
+  hexEditor->scrollBar->connect(
+    hexEditor->scrollBar, SIGNAL(actionTriggered(int)), hexEditor, SLOT(scrollEvent())
+  );
 }

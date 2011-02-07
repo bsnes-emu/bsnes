@@ -1,4 +1,5 @@
 struct MemoryEditor : TopLevelWindow {
+  FixedLayout layout;
   HexEditor editor;
   ComboBox sourceBox;
   TextBox gotoBox;

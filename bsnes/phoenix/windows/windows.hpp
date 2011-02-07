@@ -85,15 +85,20 @@ struct MenuRadioItem : Action {
   void setChecked();
 };
 
+struct Window;
+struct Layout;
+
 struct Widget : Object {
+  virtual void setParent(Layout &parent) {}
+
   virtual void setFont(Font &font);
+  virtual void setGeometry(unsigned x, unsigned y, unsigned width, unsigned height);
   bool visible();
   void setVisible(bool visible = true);
   bool enabled();
   void setEnabled(bool enabled = true);
   bool focused();
   void setFocused();
-  virtual void setGeometry(unsigned x, unsigned y, unsigned width, unsigned height);
   Widget();
 //private:
   struct Data;
@@ -103,6 +108,7 @@ struct Widget : Object {
 struct Window : Widget {
   nall::function<bool ()> onClose;
   void create(unsigned x, unsigned y, unsigned width, unsigned height, const nall::string &text = "");
+  void setLayout(Layout &layout);
   void setDefaultFont(Font &font);
   void setFont(Font &font);
   Geometry geometry();
@@ -122,9 +128,28 @@ struct Window : Widget {
   void resize(unsigned width, unsigned height);
 };
 
+struct Layout : Widget {
+  virtual void create(Window &parent) = 0;
+  Layout();
+//private:
+  struct Data;
+  Data *layout;
+};
+
+struct FixedLayout : Layout {
+  void append(Widget &widget, unsigned x, unsigned y, unsigned width, unsigned height);
+  void create(Window &parent);
+  FixedLayout();
+//private:
+  struct Data;
+  Data *fixedLayout;
+};
+
 struct Button : Widget {
   nall::function<void ()> onTick;
-  void create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const nall::string &text = "");
+  void setParent(Layout &parent);
+  void setText(const nall::string &text);
+  Button();
 };
 
 struct Canvas : Widget {

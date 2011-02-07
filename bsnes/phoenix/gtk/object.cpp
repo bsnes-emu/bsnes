@@ -21,10 +21,6 @@ struct Action::Data {
   Font *font;
 };
 
-struct Widget::Data {
-  Window *parent;
-};
-
 struct Window::Data {
   Font *defaultFont;
   bool isFullscreen;
@@ -32,6 +28,25 @@ struct Window::Data {
   unsigned y;
   unsigned width;
   unsigned height;
+};
+
+struct Widget::Data {
+  Window *parent;
+};
+
+struct Layout::Data {
+};
+
+struct FixedLayout::Data {
+  Window *parent;
+  GtkWidget *container;
+
+  struct Widgets {
+    Widget *widget;
+    unsigned x, y;
+    unsigned width, height;
+  };
+  linear_vector<Widgets> widgets;
 };
 
 struct Canvas::Data {

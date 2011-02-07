@@ -1,4 +1,5 @@
 struct AudioSettings : TopLevelWindow {
+  FixedLayout layout;
   Label volumeLabel;
   Label volumeValue;
   HorizontalSlider volumeSlider;

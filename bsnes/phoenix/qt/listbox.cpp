@@ -1,9 +1,9 @@
-void ListBox::create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const string &text) {
-  listBox->setParent(parent.window->container);
-  listBox->setGeometry(x, y, width, height);
-  listBox->setAllColumnsShowFocus(true);
-  listBox->setRootIsDecorated(false);
+void ListBox::setParent(Layout &parent) {
+  listBox->setParent(parent.widget->widget);
+  listBox->show();
+}
 
+void ListBox::setHeaderText(const string &text) {
   lstring list;
   list.split("\t", text);
   QStringList labels;
@@ -11,14 +11,7 @@ void ListBox::create(Window &parent, unsigned x, unsigned y, unsigned width, uns
   listBox->setColumnCount(list.size());
   listBox->setHeaderLabels(labels);
   for(unsigned i = 0; i < list.size(); i++) listBox->resizeColumnToContents(i);
-
-  listBox->setHeaderHidden(true);
   listBox->setAlternatingRowColors(list.size() >= 2);
-  listBox->connect(listBox, SIGNAL(itemActivated(QTreeWidgetItem*, int)), SLOT(onActivate()));
-  listBox->connect(listBox, SIGNAL(itemSelectionChanged()), SLOT(onChange()));
-  listBox->connect(listBox, SIGNAL(itemChanged(QTreeWidgetItem*, int)), SLOT(onTick(QTreeWidgetItem*)));
-  if(parent.window->defaultFont) listBox->setFont(*parent.window->defaultFont);
-  listBox->show();
 }
 
 void ListBox::setHeaderVisible(bool headerVisible) {
@@ -99,4 +92,11 @@ void ListBox::setSelection(unsigned row) {
 ListBox::ListBox() {
   listBox = new ListBox::Data(*this);
   widget->widget = listBox;
+
+  listBox->setAllColumnsShowFocus(true);
+  listBox->setRootIsDecorated(false);
+  listBox->setHeaderHidden(true);
+  listBox->connect(listBox, SIGNAL(itemActivated(QTreeWidgetItem*, int)), SLOT(onActivate()));
+  listBox->connect(listBox, SIGNAL(itemSelectionChanged()), SLOT(onChange()));
+  listBox->connect(listBox, SIGNAL(itemChanged(QTreeWidgetItem*, int)), SLOT(onTick(QTreeWidgetItem*)));
 }

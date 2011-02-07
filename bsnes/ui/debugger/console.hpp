@@ -1,4 +1,5 @@
 struct Console : TopLevelWindow {
+  FixedLayout layout;
   EditBox output;
   CheckBox traceToConsole;
   CheckBox traceToFile;

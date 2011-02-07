@@ -1,4 +1,5 @@
 struct CheatEditor : TopLevelWindow {
+  FixedLayout layout;
   ListBox cheatList;
   Label codeLabel;
   TextBox codeEdit;
@@ -9,6 +10,7 @@ struct CheatEditor : TopLevelWindow {
   Button clearButton;
 
   TopLevelWindow databaseWindow;
+  FixedLayout databaseLayout;
   ListBox databaseList;
   lstring databaseCode;
   Button databaseSelectAll;

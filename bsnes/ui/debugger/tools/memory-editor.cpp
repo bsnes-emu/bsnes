@@ -4,24 +4,24 @@ void MemoryEditor::create() {
   Window::create(0, 0, 256, 256, "Memory Editor");
   application.addWindow(this, "Debugger.MemoryEditor", "192,192");
 
-  unsigned x = 5, y = 5;
-  editor.create(*this, x, y, 475, 220); x += 475 + 5;
-  editor.setFont(application.monospaceFont);
   editor.setColumns(16);
   editor.setRows(16);
-
-  sourceBox.create(*this, x, y, 80, Style::ComboBoxHeight); y += Style::ComboBoxHeight;
   sourceBox.addItem("CPU");
   sourceBox.addItem("APU");
   sourceBox.addItem("VRAM");
   sourceBox.addItem("OAM");
   sourceBox.addItem("CGRAM");
+  refreshButton.setText("Refresh");
 
-  gotoBox.create(*this, x, y, 80, Style::TextBoxHeight); y += Style::TextBoxHeight;
-
-  refreshButton.create(*this, x, y, 80, Style::ButtonHeight, "Refresh"); y += Style::ButtonHeight;
-
+  unsigned x = 5, y = 5;
+  layout.append(editor, x, y, 475, 220); x += 475 + 5;
+  layout.append(sourceBox, x, y, 80, Style::ComboBoxHeight); y += Style::ComboBoxHeight;
+  layout.append(gotoBox, x, y, 80, Style::TextBoxHeight); y += Style::TextBoxHeight;
+  layout.append(refreshButton, x, y, 80, Style::ButtonHeight); y += Style::ButtonHeight;
   setGeometry(0, 0, 570, 230);
+  setLayout(layout);
+
+  editor.setFont(application.monospaceFont);
 
   onClose = []() {
     debugger.showMemoryEditor.setChecked(false);

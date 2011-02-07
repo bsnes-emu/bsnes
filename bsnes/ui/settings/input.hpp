@@ -1,4 +1,5 @@
 struct InputSettings : TopLevelWindow {
+  FixedLayout layout;
   Label portLabel;
   ComboBox portBox;
   Label deviceLabel;

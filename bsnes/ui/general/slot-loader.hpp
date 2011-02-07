@@ -1,4 +1,5 @@
 struct SingleSlotLoader : TopLevelWindow {
+  FixedLayout layout;
   Label baseLabel;
   TextBox basePath;
   Button baseBrowse;
@@ -17,6 +18,7 @@ struct SingleSlotLoader : TopLevelWindow {
 };
 
 struct DoubleSlotLoader : TopLevelWindow {
+  FixedLayout layout;
   Label baseLabel;
   TextBox basePath;
   Button baseBrowse;

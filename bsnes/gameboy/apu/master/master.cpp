@@ -39,6 +39,7 @@ void APU::Master::run() {
     case 4: left = (left >> 1) + (left >> 3); break;  // 62.5%
     case 5: left -= (left >> 2);              break;  // 75.0%
     case 6: left -= (left >> 3);              break;  // 87.5%
+  //case 7:                                   break;  //100.0%
   }
   if(left_enable == false) left = 0;
 
@@ -59,6 +60,7 @@ void APU::Master::run() {
     case 4: right = (right >> 1) + (right >> 3); break;  // 62.5%
     case 5: right -= (right >> 2);               break;  // 75.0%
     case 6: right -= (right >> 3);               break;  // 87.5%
+  //case 7:                                      break;  //100.0%
   }
   if(right_enable == false) right = 0;
 }

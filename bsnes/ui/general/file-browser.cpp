@@ -6,13 +6,15 @@ void FileBrowser::create() {
 
   unsigned x = 5, y = 5, height = Style::TextBoxHeight;
 
-  pathBox.create(*this, x, y, 630 - height - height - 10, height);
-  browseButton.create(*this, x + 630 - height - height - 5, y, height, height, "...");
-  upButton.create(*this, x + 630 - height, y, height, height, ".."); y += height + 5;
+  browseButton.setText("...");
+  upButton.setText("..");
 
-  contentsBox.create(*this, x, y, 630, 350); y += 350 + 5;
-
+  layout.append(pathBox, x, y, 630 - height - height - 10, height);
+  layout.append(browseButton, x + 630 - height - height - 5, y, height, height);
+  layout.append(upButton, x + 630 - height, y, height, height); y += height + 5;
+  layout.append(contentsBox, x, y, 630, 350); y += 350 + 5;
   setGeometry(0, 0, 640, y);
+  setLayout(layout);
 
   pathBox.onActivate = []() {
     string path = fileBrowser.pathBox.text();

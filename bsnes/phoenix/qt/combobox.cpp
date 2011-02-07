@@ -1,15 +1,5 @@
-void ComboBox::create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const string &text) {
-  comboBox->setParent(parent.window->container);
-  comboBox->setGeometry(x, y, width, height);
-
-  if(*text) {
-    lstring list;
-    list.split("\n", text);
-    foreach(item, list) addItem(item);
-  }
-
-  comboBox->connect(comboBox, SIGNAL(currentIndexChanged(int)), SLOT(onChange()));
-  if(parent.window->defaultFont) comboBox->setFont(*parent.window->defaultFont);
+void ComboBox::setParent(Layout &parent) {
+  comboBox->setParent(parent.widget->widget);
   comboBox->show();
 }
 
@@ -35,4 +25,5 @@ void ComboBox::setSelection(unsigned row) {
 ComboBox::ComboBox() {
   comboBox = new ComboBox::Data(*this);
   widget->widget = comboBox;
+  comboBox->connect(comboBox, SIGNAL(currentIndexChanged(int)), SLOT(onChange()));
 }

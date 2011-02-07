@@ -78,7 +78,13 @@ private:
   MenuRadioItem *first;
 };
 
+struct Window;
+struct Layout;
+
 struct Widget : Object {
+  virtual void setParent(Layout &parent) {}
+
+  virtual void setGeometry(unsigned x, unsigned y, unsigned width, unsigned height);
   virtual void setFont(Font &font);
   bool visible();
   void setVisible(bool visible = true);
@@ -86,7 +92,6 @@ struct Widget : Object {
   void setEnabled(bool enabled = true);
   virtual bool focused();
   virtual void setFocused();
-  virtual void setGeometry(unsigned x, unsigned y, unsigned width, unsigned height);
   Widget();
 //private:
   struct Data;
@@ -96,6 +101,7 @@ struct Widget : Object {
 struct Window : Widget {
   nall::function<bool ()> onClose;
   void create(unsigned x, unsigned y, unsigned width, unsigned height, const nall::string &text = "");
+  void setLayout(Layout &layout);
   bool focused();
   void setFocused();
   Geometry geometry();
@@ -116,9 +122,28 @@ struct Window : Widget {
   static Window None;
 };
 
+struct Layout : Widget {
+  virtual void create(Window &parent) = 0;
+  Layout();
+//private:
+  struct Data;
+  Data *layout;
+};
+
+struct FixedLayout : Layout {
+  void append(Widget &widget, unsigned x, unsigned y, unsigned width, unsigned height);
+  void create(Window &parent);
+  FixedLayout();
+//private:
+  struct Data;
+  Data *fixedLayout;
+};
+
 struct Button : Widget {
   nall::function<void ()> onTick;
-  void create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const nall::string &text = "");
+  void setParent(Layout &parent);
+  void setText(const nall::string &text);
+  Button();
 };
 
 struct Canvas : Widget {
@@ -134,9 +159,11 @@ struct Canvas : Widget {
 
 struct CheckBox : Widget {
   nall::function<void ()> onTick;
-  void create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const nall::string &text = "");
+  void setParent(Layout &parent);
+  void setText(const nall::string &text);
   bool checked();
   void setChecked(bool checked = true);
+  CheckBox();
 };
 
 struct ComboBox : Widget {
@@ -191,8 +218,9 @@ struct HorizontalSlider : Widget {
 };
 
 struct Label : Widget {
-  void create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const nall::string &text = "");
+  void setParent(Layout &parent);
   void setText(const nall::string &text);
+  Label();
 };
 
 struct ListBox : Widget {
@@ -225,10 +253,12 @@ struct ProgressBar : Widget {
 
 struct RadioBox : Widget {
   nall::function<void ()> onTick;
-  void create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const nall::string &text = "");
-  void create(RadioBox &parent, unsigned x, unsigned y, unsigned width, unsigned height, const nall::string &text = "");
+  void setParent(Layout &parent);
+  void setParent(RadioBox &parent);
+  void setText(const nall::string &text);
   bool checked();
   void setChecked();
+  RadioBox();
 private:
   RadioBox *first;
 };

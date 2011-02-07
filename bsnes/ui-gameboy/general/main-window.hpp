@@ -27,6 +27,7 @@ struct MainWindow : Window {
   Menu help;
   MenuItem helpAbout;
 
+  FixedLayout layout;
   Viewport viewport;
 
   void create();

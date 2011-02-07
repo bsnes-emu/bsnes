@@ -1,13 +1,12 @@
-void VerticalSlider::create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, unsigned length) {
-  length += (length == 0);
-  verticalSlider->setParent(parent.window->container);
-  verticalSlider->setGeometry(x, y, width, height);
-  verticalSlider->setInvertedAppearance(true);
-  verticalSlider->setInvertedControls(true);
+void VerticalSlider::setParent(Layout &parent) {
+  verticalSlider->setParent(parent.widget->widget);
+  verticalSlider->show();
+}
+
+void VerticalSlider::setLength(unsigned length) {
+  length = length + (length == 0);
   verticalSlider->setRange(0, length - 1);
   verticalSlider->setPageStep(length >> 3);
-  verticalSlider->connect(verticalSlider, SIGNAL(valueChanged(int)), SLOT(onChange()));
-  verticalSlider->show();
 }
 
 unsigned VerticalSlider::position() {
@@ -21,4 +20,7 @@ void VerticalSlider::setPosition(unsigned position) {
 VerticalSlider::VerticalSlider() {
   verticalSlider = new VerticalSlider::Data(*this);
   widget->widget = verticalSlider;
+  verticalSlider->setInvertedAppearance(true);
+  verticalSlider->setInvertedControls(true);
+  verticalSlider->connect(verticalSlider, SIGNAL(valueChanged(int)), SLOT(onChange()));
 }

@@ -1,8 +1,5 @@
-void Viewport::create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height) {
-  viewport->setParent(parent.window->container);
-  viewport->setGeometry(x, y, width, height);
-  viewport->setAttribute(Qt::WA_PaintOnScreen, true);
-  viewport->setStyleSheet("background: #000000");
+void Viewport::setParent(Layout &parent) {
+  viewport->setParent(parent.widget->widget);
   viewport->show();
 }
 
@@ -13,4 +10,6 @@ uintptr_t Viewport::handle() {
 Viewport::Viewport() {
   viewport = new Viewport::Data(*this);
   widget->widget = viewport;
+  viewport->setAttribute(Qt::WA_PaintOnScreen, true);
+  viewport->setStyleSheet("background: #000000");
 }

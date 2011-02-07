@@ -4,23 +4,31 @@ void BreakpointEditor::create() {
   Window::create(0, 0, 256, 256, "Breakpoint Editor");
   application.addWindow(this, "Debugger.BreakpointEditor", "192,192");
 
-  unsigned x = 5, y = 5;
-
-  runToBreakpoint.create(*this, x, y, 295, Style::CheckBoxHeight, "Run to breakpoint");
-  y += Style::CheckBoxHeight + 5;
-
+  runToBreakpoint.setText("Run to breakpoint");
   for(unsigned n = 0; n < Breakpoints; n++) {
-    enableBox[n].create(*this, x, y, 35, Style::EditBoxHeight, { n + 1 });
-    addressBox[n].create(*this, x + 35, y, 60, Style::EditBoxHeight);
-    valueBox[n].create(*this, x + 100, y, 30, Style::EditBoxHeight);
-    typeBox[n].create(*this, x + 135, y, 80, Style::EditBoxHeight, "Exec\nRead\nWrite");
-    sourceBox[n].create(*this, x + 220, y, 80, Style::EditBoxHeight, "CPU\nAPU\nVRAM\nOAM\nCGRAM");
-    y += Style::EditBoxHeight + 5;
-
+    enableBox[n].setText({ n + 1 });
+    typeBox[n].addItem("Exec");
+    typeBox[n].addItem("Read");
+    typeBox[n].addItem("Write");
+    sourceBox[n].addItem("CPU");
+    sourceBox[n].addItem("APU");
+    sourceBox[n].addItem("VRAM");
+    sourceBox[n].addItem("OAM");
+    sourceBox[n].addItem("CGRAM");
     enableBox[n].onTick = [n]() { breakpointEditor.toggleBreakpoint(n); };
   }
 
+  unsigned x = 5, y = 5;
+  layout.append(runToBreakpoint, x, y, 295, Style::CheckBoxHeight); y += Style::CheckBoxHeight + 5;
+  for(unsigned n = 0; n < Breakpoints; n++) {
+    layout.append(enableBox[n], x, y, 35, Style::EditBoxHeight);
+    layout.append(addressBox[n], x + 35, y, 60, Style::EditBoxHeight);
+    layout.append(valueBox[n], x + 100, y, 30, Style::EditBoxHeight);
+    layout.append(typeBox[n], x + 135, y, 80, Style::EditBoxHeight);
+    layout.append(sourceBox[n], x + 220, y, 80, Style::EditBoxHeight); y += Style::EditBoxHeight + 5;
+  }
   setGeometry(0, 0, 310, y);
+  setLayout(layout);
 
   runToBreakpoint.onTick = []() {
     if(breakpointEditor.runToBreakpoint.checked()) {

@@ -18,6 +18,10 @@ void Window::create(unsigned x, unsigned y, unsigned width, unsigned height, con
   SetWindowLongPtr(widget->window, GWLP_USERDATA, (LONG_PTR)this);
 }
 
+void Window::setLayout(Layout &layout) {
+  layout.create(*this);
+}
+
 void Window::setDefaultFont(Font &font) {
   window->defaultFont = font.font->font;
 }

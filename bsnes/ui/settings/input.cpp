@@ -10,33 +10,39 @@ void InputSettings::create() {
   activeInput = 0;
   activeMouse = 0;
 
-  unsigned x = 5, y = 5, height = Style::ButtonHeight;
-
-  portLabel.create(*this, x, y, 50, Style::ComboBoxHeight, "Port:");
-  portBox.create(*this, x + 50, y, 200, Style::ComboBoxHeight);
+  portLabel.setText("Port:");
   portBox.addItem(inputMapper.port1.name);
   portBox.addItem(inputMapper.port2.name);
-  deviceLabel.create(*this, x + 255, y, 50, Style::ComboBoxHeight, "Device:");
-  deviceBox.create(*this, x + 305, y, 200, Style::ComboBoxHeight); y += Style::ComboBoxHeight + 5;
+  deviceLabel.setText("Device:");
+  mappingList.setHeaderText("Name\tMapping");
+  mappingList.setHeaderVisible(true);
+  mouseXaxis.setText("Mouse X-axis");
+  mouseYaxis.setText("Mouse Y-axis");
+  mouseLeft.setText("Mouse Left");
+  mouseMiddle.setText("Mouse Middle");
+  mouseRight.setText("Mouse Right");
+  clearButton.setText("Clear");
 
-  mappingList.create(*this, x, y, 505, 265, "Name\tMapping"); y += 265 + 5;
-  mappingList.setHeaderVisible();
-  mappingList.setFocused();
-
-  mouseXaxis.create(*this, x, y, 100, height, "Mouse X-axis");
-  mouseXaxis.setVisible(false);
-  mouseYaxis.create(*this, x + 105, y, 100, height, "Mouse Y-axis");
-  mouseYaxis.setVisible(false);
-  mouseLeft.create(*this, x, y, 100, height, "Mouse Left");
-  mouseLeft.setVisible(false);
-  mouseMiddle.create(*this, x + 105, y, 100, height, "Mouse Middle");
-  mouseMiddle.setVisible(false);
-  mouseRight.create(*this, x + 105 + 105, y, 100, height, "Mouse Right");
-  mouseRight.setVisible(false);
-  clearButton.create(*this, 515 - 85, y, 80, height, "Clear");
-  y += height + 5;
-
+  unsigned x = 5, y = 5, height = Style::ButtonHeight;
+  layout.append(portLabel,   x,             y,  50, Style::ComboBoxHeight);
+  layout.append(portBox,     x + 50,        y, 200, Style::ComboBoxHeight);
+  layout.append(deviceLabel, x + 255,       y,  50, Style::ComboBoxHeight);
+  layout.append(deviceBox,   x + 305,       y, 200, Style::ComboBoxHeight); y += Style::ComboBoxHeight + 5;
+  layout.append(mappingList, x,             y, 505, 265);                   y += 265 + 5;
+  layout.append(mouseXaxis,  x,             y, 100, height);
+  layout.append(mouseYaxis,  x + 105,       y, 100, height);
+  layout.append(mouseLeft,   x,             y, 100, height);
+  layout.append(mouseMiddle, x + 105,       y, 100, height);
+  layout.append(mouseRight,  x + 105 + 105, y, 100, height);
+  layout.append(clearButton, 515 - 85,      y,  80, height);                y += height + 5;
   setGeometry(0, 0, 515, y);
+  setLayout(layout);
+
+  mouseXaxis.setVisible(false);
+  mouseYaxis.setVisible(false);
+  mouseLeft.setVisible(false);
+  mouseMiddle.setVisible(false);
+  mouseRight.setVisible(false);
 
   portChanged();
   portBox.onChange = { &InputSettings::portChanged, this };

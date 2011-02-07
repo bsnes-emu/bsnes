@@ -15,11 +15,6 @@ struct Action::Data {
   array<MenuRadioItem*> items;
 };
 
-struct Widget::Data {
-  HWND window;
-  HFONT font;
-};
-
 struct Window::Data {
   HFONT defaultFont;
   HBRUSH brush;
@@ -31,6 +26,25 @@ struct Window::Data {
   unsigned y;
   unsigned width;
   unsigned height;
+};
+
+struct Widget::Data {
+  HWND window;
+  HFONT font;
+};
+
+struct Layout::Data {
+};
+
+struct FixedLayout::Data {
+  Window *parent;
+
+  struct Widgets {
+    Widget *widget;
+    unsigned x, y;
+    unsigned width, height;
+  };
+  linear_vector<Widgets> widgets;
 };
 
 struct Canvas::Data {
@@ -82,6 +96,7 @@ struct VerticalSlider::Data {
 
 struct OS::Data {
   nall::array<Object*> objects;
+  HWND nullWindow;
   HFONT proportionalFont;
   HFONT monospaceFont;
 };
