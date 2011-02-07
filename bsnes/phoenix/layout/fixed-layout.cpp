@@ -1,7 +1,7 @@
 void FixedLayout::setParent(Window &parent) {
   Layout::setParent(parent);
   foreach(child, children) {
-    Layout::setParent(parent, *child.widget);
+    Layout::append(*child.widget);
     child.widget->setGeometry(child.x, child.y, child.width, child.height);
   }
 }

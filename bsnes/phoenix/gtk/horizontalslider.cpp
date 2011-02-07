@@ -19,7 +19,7 @@ void HorizontalSlider::setPosition(unsigned position) {
 
 HorizontalSlider::HorizontalSlider() {
   object->position = 0;
-  object->widget = gtk_hscale_new_with_range(0, 0, 1);
+  object->widget = gtk_hscale_new_with_range(0, 1, 1);
   gtk_scale_set_draw_value(GTK_SCALE(object->widget), false);
   g_signal_connect_swapped(G_OBJECT(object->widget), "value-changed", G_CALLBACK(HorizontalSlider_change), (gpointer)this);
 }

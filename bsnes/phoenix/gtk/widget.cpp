@@ -6,6 +6,7 @@ static void Widget_setFont(GtkWidget *widget, gpointer font) {
 }
 
 void Widget::setFont(Font &font) {
+  widget->font = &font;
   Widget_setFont(object->widget, font.font->font);
 }
 

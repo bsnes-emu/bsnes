@@ -2,7 +2,7 @@ void HorizontalLayout::setParent(Window &parent) {
   Layout::setParent(parent);
   foreach(child, children) {
     if(child.layout) child.layout->setParent(parent);
-    if(child.widget) Layout::setParent(parent, *child.widget);
+    if(child.widget) Layout::append(*child.widget);
   }
 }
 

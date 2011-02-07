@@ -1,4 +1,7 @@
 void ListBox::setHeaderText(const string &text) {
+  //delete all existing columns
+  while(ListView_DeleteColumn(widget->window, 0));
+
   lstring list;
   list.split("\t", text);
   listBox->columns = list.size();
@@ -110,4 +113,5 @@ ListBox::ListBox() {
   );
   SetWindowLongPtr(widget->window, GWLP_USERDATA, (LONG_PTR)this);
   ListView_SetExtendedListViewStyle(widget->window, LVS_EX_FULLROWSELECT);
+  setHeaderText("");
 }

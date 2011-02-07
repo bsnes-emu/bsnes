@@ -107,10 +107,14 @@ struct Widget : Object {
 
 struct Window : Widget {
   nall::function<bool ()> onClose;
+  nall::function<void ()> onMove;
+  nall::function<void ()> onResize;
   void create(unsigned x, unsigned y, unsigned width, unsigned height, const nall::string &text = "");
   void setLayout(Layout &layout);
+  void setResizable(bool resizable);
   void setDefaultFont(Font &font);
   void setFont(Font &font);
+  Geometry frameGeometry();
   Geometry geometry();
   void setGeometry(unsigned x, unsigned y, unsigned width, unsigned height);
   void setBackgroundColor(uint8_t red, uint8_t green, uint8_t blue);
@@ -125,12 +129,14 @@ struct Window : Widget {
   struct Data;
   Data *window;
   static Window None;
+//private:
+  Geometry frameMargin();
   void resize(unsigned width, unsigned height);
 };
 
 struct Layout : Widget {
   virtual void setParent(Window &parent);
-  virtual void setParent(Window &parent, Widget &child);
+  virtual void append(Widget &widget);
   virtual void update(Geometry &geometry) = 0;
   Layout();
 //private:

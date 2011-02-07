@@ -87,7 +87,7 @@ struct Window::Data : public QWidget {
 public:
   Window &self;
   unsigned x, y, width, height;
-  bool fullscreen, menuVisible, statusVisible;
+  bool resizable, fullscreen, menuVisible, statusVisible;
   Layout *layout;
   QFont *defaultFont;
   QVBoxLayout *vlayout;
@@ -110,18 +110,18 @@ public:
   }
 
   void moveEvent(QMoveEvent *event) {
-    if(fullscreen == false && isVisible() == true) {
-      x = frameGeometry().x();
-      y = frameGeometry().y();
+    if(self.object->locked == false && fullscreen == false && isVisible() == true) {
+      x += event->pos().x() - event->oldPos().x();
+      y += event->pos().y() - event->oldPos().y();
     }
 
-    if(self.onMove) {
+    if(self.object->locked == false && self.onMove) {
       self.onMove();
     }
   }
 
   void resizeEvent(QResizeEvent *event) {
-    if(fullscreen == false && isVisible() == true) {
+    if(self.object->locked == false && fullscreen == false && isVisible() == true) {
       width = container->geometry().width();
       height = container->geometry().height();
     }
@@ -132,12 +132,13 @@ public:
       layout->update(geom);
     }
 
-    if(self.onResize) {
+    if(self.object->locked == false && self.onResize) {
       self.onResize();
     }
   }
 
   Data(Window &self) : self(self) {
+    resizable = true;
     fullscreen = false;
     menuVisible = false;
     statusVisible = false;

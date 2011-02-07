@@ -121,6 +121,8 @@ struct Window : Object {
   nall::function<void ()> onResize;
   void create(unsigned x, unsigned y, unsigned width, unsigned height, const nall::string &text = "");
   void setLayout(Layout &layout);
+  void setResizable(bool resizable = true);
+  Geometry frameGeometry();
   Geometry geometry();
   void setGeometry(unsigned x, unsigned y, unsigned width, unsigned height);
   void setDefaultFont(Font &font);
@@ -143,7 +145,7 @@ struct Window : Object {
 
 struct Layout : Object {
   virtual void setParent(Window &parent);
-  virtual void setParent(Window &parent, Widget &child);
+  virtual void append(Widget &widget);
   virtual void update(Geometry &geometry) = 0;
   Layout();
 //private:

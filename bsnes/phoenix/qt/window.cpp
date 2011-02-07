@@ -32,20 +32,67 @@ void Window::setLayout(Layout &layout) {
   layout.update(geom);
 }
 
+void Window::setResizable(bool resizable) {
+  window->resizable = resizable;
+  if(window->resizable) {
+    window->vlayout->setSizeConstraint(QLayout::SetDefaultConstraint);
+    window->container->setMinimumSize(window->width, window->height);
+  } else {
+    window->vlayout->setSizeConstraint(QLayout::SetFixedSize);
+    window->container->setFixedSize(window->width, window->height);
+  }
+}
+
+Geometry Window::frameGeometry() {
+  if(window->fullscreen) return { 0, 0, OS::desktopWidth(), OS::desktopHeight() };
+
+  QRect rect = window->frameGeometry();
+  unsigned x = rect.x();
+  unsigned y = rect.y();
+  unsigned width = rect.width();
+  unsigned height = rect.height();
+  if(x > 65535) x = 0;
+  if(y > 65535) y = 0;
+
+  return { x, y, width, height };
+}
+
 Geometry Window::geometry() {
-  //QWidget::geometry() is not at all reliable
-  if(window->fullscreen == false) return { window->x, window->y, window->width, window->height };
-  return { 0, 0, OS::desktopWidth(), OS::desktopHeight() };
+  if(window->fullscreen) return { 0, 0, OS::desktopWidth(), OS::desktopHeight() };
+  return { window->x, window->y, window->width, window->height };
+
+  unsigned x = window->x;
+  unsigned y = window->y;
+
+  if(window->fullscreen == false) {
+    QRect border = window->frameGeometry();
+    QRect client = window->geometry();
+    x += client.x() - border.x();
+    y += client.y() - border.y();
+    if(window->menuVisible) y += window->menuBar->height();
+    if(x > 65535) x = 0;
+    if(y > 65535) y = 0;
+  }
+
+  return { x, y, window->width, window->height };
 }
 
 void Window::setGeometry(unsigned x, unsigned y, unsigned width, unsigned height) {
+  object->locked = true;
+
+  QRect border = window->frameGeometry();
+  QRect client = window->geometry();
+
   window->x = x;
   window->y = y;
   window->width = width;
   window->height = height;
 
-  window->move(x, y);
+  setResizable(window->resizable);
+  window->move(x - (client.x() - border.x()), y - (client.y() - border.y()));
   window->adjustSize();
+
+  object->locked = false;
 }
 
 void Window::setDefaultFont(Font &font) {
@@ -73,12 +120,23 @@ void Window::setStatusText(const string &text) {
 }
 
 void Window::setVisible(bool visible) {
+  object->locked = true;
+
   if(visible) {
     window->show();
-    window->adjustSize();
+    //an unfortunate hack: before window is visible, geometry() == frameGeometry();
+    //we must wait for frameGeometry() to correctly populate and then move window
+    if(window->fullscreen == false) for(unsigned n = 0; n < 100; n++) {
+      if(window->geometry().x() > window->frameGeometry().x()) break;
+      usleep(100);
+      QApplication::processEvents();
+    }
+    setGeometry(window->x, window->y, window->width, window->height);
   } else {
     window->hide();
   }
+
+  object->locked = false;
 }
 
 void Window::setMenuVisible(bool visible) {
@@ -105,9 +163,12 @@ void Window::setFullscreen(bool fullscreen) {
   window->fullscreen = fullscreen;
 
   if(fullscreen == false) {
+    setResizable(window->resizable);
     window->showNormal();
     window->adjustSize();
   } else {
+    window->vlayout->setSizeConstraint(QLayout::SetDefaultConstraint);
+    window->container->setFixedSize(OS::desktopWidth(), OS::desktopHeight());
     window->showFullScreen();
   }
 }

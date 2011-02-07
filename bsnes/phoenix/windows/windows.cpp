@@ -314,6 +314,41 @@ static LRESULT CALLBACK OS_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM
       return TRUE;
     }
 
+    case WM_MOVE: {
+      if(window.object->locked == true) break;
+
+      Geometry geometry = window.geometry();
+      window.window->x = geometry.x;
+      window.window->y = geometry.y;
+
+      if(window.onMove) window.onMove();
+      break;
+    }
+
+    case WM_SIZE: {
+      if(window.object->locked == true) break;
+      SetWindowPos(window.window->status, NULL, 0, 0, 0, 0, SWP_NOZORDER | SWP_FRAMECHANGED);
+
+      Geometry geometry = window.geometry();
+      window.window->width = geometry.width;
+      window.window->height = geometry.height;
+
+      if(window.window->layout) {
+        geometry.x = geometry.y = 0;
+        window.window->layout->update(geometry);
+      }
+
+      if(window.onResize) window.onResize();
+      break;
+    }
+
+    case WM_GETMINMAXINFO: {
+      MINMAXINFO *mmi = (MINMAXINFO*)lparam;
+    //mmi->ptMinTrackSize.x = window.window->width;
+    //mmi->ptMinTrackSize.y = window.window->height;
+    //return TRUE;
+    }
+
     case WM_ERASEBKGND: {
       if(window.window->brush == 0) break;
       RECT rc;

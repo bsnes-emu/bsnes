@@ -16,16 +16,31 @@ struct Action::Data {
 };
 
 struct Window::Data {
+  Layout *layout;
   HFONT defaultFont;
   HBRUSH brush;
   COLORREF brushColor;
   HMENU menu;
   HWND status;
-  bool isFullscreen;
+  bool resizable;
+  bool fullscreen;
   unsigned x;
   unsigned y;
   unsigned width;
   unsigned height;
+
+  Data() {
+    layout = 0;
+    defaultFont = 0;
+    brush = 0;
+    brushColor = 0;
+    menu = 0;
+    status = 0;
+    resizable = true;
+    fullscreen = false;
+    x = y = 0;
+    width = height = 0;
+  }
 };
 
 struct Widget::Data {
