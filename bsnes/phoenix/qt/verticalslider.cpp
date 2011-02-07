@@ -1,8 +1,3 @@
-void VerticalSlider::setParent(Layout &parent) {
-  verticalSlider->setParent(parent.widget->widget);
-  verticalSlider->show();
-}
-
 void VerticalSlider::setLength(unsigned length) {
   length = length + (length == 0);
   verticalSlider->setRange(0, length - 1);

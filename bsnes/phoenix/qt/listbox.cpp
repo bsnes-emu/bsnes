@@ -1,8 +1,3 @@
-void ListBox::setParent(Layout &parent) {
-  listBox->setParent(parent.widget->widget);
-  listBox->show();
-}
-
 void ListBox::setHeaderText(const string &text) {
   lstring list;
   list.split("\t", text);

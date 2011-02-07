@@ -1,8 +1,16 @@
+Geometry Widget::geometry() {
+  return {
+    widget->widget->x(), widget->widget->y(),
+    widget->widget->width(), widget->widget->height()
+  };
+}
+
 void Widget::setGeometry(unsigned x, unsigned y, unsigned width, unsigned height) {
   widget->widget->setGeometry(x, y, width, height);
 }
 
 void Widget::setFont(Font &font) {
+  widget->font = &font;
   widget->widget->setFont(*font.font);
 }
 

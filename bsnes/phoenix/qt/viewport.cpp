@@ -1,8 +1,3 @@
-void Viewport::setParent(Layout &parent) {
-  viewport->setParent(parent.widget->widget);
-  viewport->show();
-}
-
 uintptr_t Viewport::handle() {
   return (uintptr_t)viewport->winId();
 }

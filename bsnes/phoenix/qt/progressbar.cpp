@@ -1,8 +1,3 @@
-void ProgressBar::setParent(Layout &parent) {
-  progressBar->setParent(parent.widget->widget);
-  progressBar->show();
-}
-
 void ProgressBar::setPosition(unsigned position) {
   progressBar->setValue(position);
 }

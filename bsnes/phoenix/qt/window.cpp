@@ -1,12 +1,9 @@
 void Window::create(unsigned x, unsigned y, unsigned width, unsigned height, const string &text) {
   window->setWindowTitle(QString::fromUtf8(text));
-  window->move(x, y);
 
   window->vlayout = new QVBoxLayout(window);
-  window->vlayout->setAlignment(Qt::AlignTop);
   window->vlayout->setMargin(0);
   window->vlayout->setSpacing(0);
-  window->vlayout->setSizeConstraint(QLayout::SetFixedSize);
   window->setLayout(window->vlayout);
 
   window->menuBar = new QMenuBar(window);
@@ -14,7 +11,7 @@ void Window::create(unsigned x, unsigned y, unsigned width, unsigned height, con
   window->vlayout->addWidget(window->menuBar);
 
   window->container = new QWidget(window);
-  window->container->setFixedSize(width, height);
+  window->container->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
   window->container->setVisible(true);
   window->vlayout->addWidget(window->container);
 
@@ -22,20 +19,33 @@ void Window::create(unsigned x, unsigned y, unsigned width, unsigned height, con
   window->statusBar->setSizeGripEnabled(false);
   window->statusBar->setVisible(false);
   window->vlayout->addWidget(window->statusBar);
+
+  setGeometry(x, y, width, height);
 }
 
 void Window::setLayout(Layout &layout) {
   window->layout = &layout;
-  layout.create(*this);
+
+  Geometry geom = geometry();
+  geom.x = geom.y = 0;
+  layout.setParent(*this);
+  layout.update(geom);
 }
 
 Geometry Window::geometry() {
-  return Geometry(window->x(), window->y(), window->container->width(), window->container->height());
+  //QWidget::geometry() is not at all reliable
+  if(window->fullscreen == false) return { window->x, window->y, window->width, window->height };
+  return { 0, 0, OS::desktopWidth(), OS::desktopHeight() };
 }
 
 void Window::setGeometry(unsigned x, unsigned y, unsigned width, unsigned height) {
-  window->container->setFixedSize(width, height);
+  window->x = x;
+  window->y = y;
+  window->width = width;
+  window->height = height;
+
   window->move(x, y);
+  window->adjustSize();
 }
 
 void Window::setDefaultFont(Font &font) {
@@ -62,12 +72,23 @@ void Window::setStatusText(const string &text) {
   window->statusBar->showMessage(QString::fromUtf8(text), 0);
 }
 
+void Window::setVisible(bool visible) {
+  if(visible) {
+    window->show();
+    window->adjustSize();
+  } else {
+    window->hide();
+  }
+}
+
 void Window::setMenuVisible(bool visible) {
+  window->menuVisible = visible;
   if(visible) window->menuBar->show();
   else window->menuBar->hide();
 }
 
 void Window::setStatusVisible(bool visible) {
+  window->statusVisible = visible;
   if(visible) window->statusBar->show();
   else window->statusBar->hide();
 }
@@ -81,34 +102,17 @@ bool Window::fullscreen() {
 }
 
 void Window::setFullscreen(bool fullscreen) {
+  window->fullscreen = fullscreen;
+
   if(fullscreen == false) {
-    window->vlayout->setSizeConstraint(QLayout::SetFixedSize);
     window->showNormal();
+    window->adjustSize();
   } else {
-    window->vlayout->setSizeConstraint(QLayout::SetNoConstraint);
-    window->container->setFixedSize(OS::desktopWidth(), OS::desktopHeight());
     window->showFullScreen();
-  }
-
-  //Qt returns negative coordinates for x,y immediately after setFullscreen(false)
-  //wait for Qt to return sane values, or until timeout occurs
-  Geometry geom;
-  time_t startTime = time(0);
-  do {
-    OS::run();
-    geom = geometry();
-    if(startTime - time(0) > 3) break;
-  } while((signed)geom.x < 0 || (signed)geom.y < 0);
-
-  if(fullscreen == false) {
-    window->layout->setGeometry(0, 0, geometry().width, geometry().height);
-  } else {
-    window->layout->setGeometry(0, 0, OS::desktopWidth(), OS::desktopHeight());
   }
 }
 
 Window::Window() {
   window = new Window::Data(*this);
   window->defaultFont = 0;
-  widget->widget = window;
 }

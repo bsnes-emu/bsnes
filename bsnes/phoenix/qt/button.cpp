@@ -1,8 +1,3 @@
-void Button::setParent(Layout &parent) {
-  button->setParent(parent.widget->widget);
-  button->show();
-}
-
 void Button::setText(const string &text) {
   button->setText(QString::fromUtf8(text));
 }

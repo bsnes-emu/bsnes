@@ -1,8 +1,3 @@
-void CheckBox::setParent(Layout &parent) {
-  checkBox->setParent(parent.widget->widget);
-  checkBox->show();
-}
-
 void CheckBox::setText(const string &text) {
   checkBox->setText(QString::fromUtf8(text));
 }

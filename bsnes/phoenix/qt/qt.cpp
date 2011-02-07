@@ -14,6 +14,8 @@ namespace phoenix {
 #include "widget.cpp"
 #include "layout.cpp"
 #include "fixed-layout.cpp"
+#include "horizontal-layout.cpp"
+#include "vertical-layout.cpp"
 #include "button.cpp"
 #include "canvas.cpp"
 #include "checkbox.cpp"

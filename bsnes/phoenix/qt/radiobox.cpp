@@ -1,8 +1,3 @@
-void RadioBox::setParent(Layout &parent) {
-  radioBox->setParent(parent.widget->widget);
-  radioBox->show();
-}
-
 void RadioBox::setParent(RadioBox &parent) {
   parent.radioBox->buttonGroup->addButton(radioBox);
   parent.radioBox->setChecked(true);

@@ -45,7 +45,9 @@ void Window::create(unsigned x, unsigned y, unsigned width, unsigned height, con
 }
 
 void Window::setLayout(Layout &layout) {
-  layout.create(*this);
+  layout.setParent(*this);
+  Geometry geom = geometry();
+  layout.update(geom);
 }
 
 bool Window::focused() {
@@ -92,6 +94,10 @@ void Window::setTitle(const string &text) {
 void Window::setStatusText(const string &text) {
   gtk_statusbar_pop(GTK_STATUSBAR(object->status), 1);
   gtk_statusbar_push(GTK_STATUSBAR(object->status), 1, text);
+}
+
+void Window::setVisible(bool visible) {
+  gtk_widget_set_visible(object->widget, visible);
 }
 
 void Window::setMenuVisible(bool visible) {

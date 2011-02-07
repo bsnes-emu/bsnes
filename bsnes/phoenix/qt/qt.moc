@@ -1,7 +1,7 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'qt.moc.hpp'
 **
-** Created: Thu Feb 3 18:21:19 2011
+** Created: Fri Feb 4 22:10:00 2011
 **      by: The Qt Meta Object Compiler version 62 (Qt 4.6.2)
 **
 ** WARNING! All changes made in this file will be lost!
@@ -193,104 +193,6 @@ int MenuRadioItem::Data::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     }
     return _id;
 }
-static const uint qt_meta_data_Layout__Data[] = {
-
- // content:
-       4,       // revision
-       0,       // classname
-       0,    0, // classinfo
-       0,    0, // methods
-       0,    0, // properties
-       0,    0, // enums/sets
-       0,    0, // constructors
-       0,       // flags
-       0,       // signalCount
-
-       0        // eod
-};
-
-static const char qt_meta_stringdata_Layout__Data[] = {
-    "Layout::Data\0"
-};
-
-const QMetaObject Layout::Data::staticMetaObject = {
-    { &QWidget::staticMetaObject, qt_meta_stringdata_Layout__Data,
-      qt_meta_data_Layout__Data, 0 }
-};
-
-#ifdef Q_NO_DATA_RELOCATION
-const QMetaObject &Layout::Data::getStaticMetaObject() { return staticMetaObject; }
-#endif //Q_NO_DATA_RELOCATION
-
-const QMetaObject *Layout::Data::metaObject() const
-{
-    return QObject::d_ptr->metaObject ? QObject::d_ptr->metaObject : &staticMetaObject;
-}
-
-void *Layout::Data::qt_metacast(const char *_clname)
-{
-    if (!_clname) return 0;
-    if (!strcmp(_clname, qt_meta_stringdata_Layout__Data))
-        return static_cast<void*>(const_cast< Data*>(this));
-    return QWidget::qt_metacast(_clname);
-}
-
-int Layout::Data::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
-{
-    _id = QWidget::qt_metacall(_c, _id, _a);
-    if (_id < 0)
-        return _id;
-    return _id;
-}
-static const uint qt_meta_data_FixedLayout__Data[] = {
-
- // content:
-       4,       // revision
-       0,       // classname
-       0,    0, // classinfo
-       0,    0, // methods
-       0,    0, // properties
-       0,    0, // enums/sets
-       0,    0, // constructors
-       0,       // flags
-       0,       // signalCount
-
-       0        // eod
-};
-
-static const char qt_meta_stringdata_FixedLayout__Data[] = {
-    "FixedLayout::Data\0"
-};
-
-const QMetaObject FixedLayout::Data::staticMetaObject = {
-    { &QWidget::staticMetaObject, qt_meta_stringdata_FixedLayout__Data,
-      qt_meta_data_FixedLayout__Data, 0 }
-};
-
-#ifdef Q_NO_DATA_RELOCATION
-const QMetaObject &FixedLayout::Data::getStaticMetaObject() { return staticMetaObject; }
-#endif //Q_NO_DATA_RELOCATION
-
-const QMetaObject *FixedLayout::Data::metaObject() const
-{
-    return QObject::d_ptr->metaObject ? QObject::d_ptr->metaObject : &staticMetaObject;
-}
-
-void *FixedLayout::Data::qt_metacast(const char *_clname)
-{
-    if (!_clname) return 0;
-    if (!strcmp(_clname, qt_meta_stringdata_FixedLayout__Data))
-        return static_cast<void*>(const_cast< Data*>(this));
-    return QWidget::qt_metacast(_clname);
-}
-
-int FixedLayout::Data::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
-{
-    _id = QWidget::qt_metacall(_c, _id, _a);
-    if (_id < 0)
-        return _id;
-    return _id;
-}
 static const uint qt_meta_data_Window__Data[] = {
 
  // content:
@@ -336,6 +238,202 @@ void *Window::Data::qt_metacast(const char *_clname)
 int Window::Data::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
 {
     _id = QWidget::qt_metacall(_c, _id, _a);
+    if (_id < 0)
+        return _id;
+    return _id;
+}
+static const uint qt_meta_data_Layout__Data[] = {
+
+ // content:
+       4,       // revision
+       0,       // classname
+       0,    0, // classinfo
+       0,    0, // methods
+       0,    0, // properties
+       0,    0, // enums/sets
+       0,    0, // constructors
+       0,       // flags
+       0,       // signalCount
+
+       0        // eod
+};
+
+static const char qt_meta_stringdata_Layout__Data[] = {
+    "Layout::Data\0"
+};
+
+const QMetaObject Layout::Data::staticMetaObject = {
+    { &QObject::staticMetaObject, qt_meta_stringdata_Layout__Data,
+      qt_meta_data_Layout__Data, 0 }
+};
+
+#ifdef Q_NO_DATA_RELOCATION
+const QMetaObject &Layout::Data::getStaticMetaObject() { return staticMetaObject; }
+#endif //Q_NO_DATA_RELOCATION
+
+const QMetaObject *Layout::Data::metaObject() const
+{
+    return QObject::d_ptr->metaObject ? QObject::d_ptr->metaObject : &staticMetaObject;
+}
+
+void *Layout::Data::qt_metacast(const char *_clname)
+{
+    if (!_clname) return 0;
+    if (!strcmp(_clname, qt_meta_stringdata_Layout__Data))
+        return static_cast<void*>(const_cast< Data*>(this));
+    return QObject::qt_metacast(_clname);
+}
+
+int Layout::Data::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
+{
+    _id = QObject::qt_metacall(_c, _id, _a);
+    if (_id < 0)
+        return _id;
+    return _id;
+}
+static const uint qt_meta_data_FixedLayout__Data[] = {
+
+ // content:
+       4,       // revision
+       0,       // classname
+       0,    0, // classinfo
+       0,    0, // methods
+       0,    0, // properties
+       0,    0, // enums/sets
+       0,    0, // constructors
+       0,       // flags
+       0,       // signalCount
+
+       0        // eod
+};
+
+static const char qt_meta_stringdata_FixedLayout__Data[] = {
+    "FixedLayout::Data\0"
+};
+
+const QMetaObject FixedLayout::Data::staticMetaObject = {
+    { &QObject::staticMetaObject, qt_meta_stringdata_FixedLayout__Data,
+      qt_meta_data_FixedLayout__Data, 0 }
+};
+
+#ifdef Q_NO_DATA_RELOCATION
+const QMetaObject &FixedLayout::Data::getStaticMetaObject() { return staticMetaObject; }
+#endif //Q_NO_DATA_RELOCATION
+
+const QMetaObject *FixedLayout::Data::metaObject() const
+{
+    return QObject::d_ptr->metaObject ? QObject::d_ptr->metaObject : &staticMetaObject;
+}
+
+void *FixedLayout::Data::qt_metacast(const char *_clname)
+{
+    if (!_clname) return 0;
+    if (!strcmp(_clname, qt_meta_stringdata_FixedLayout__Data))
+        return static_cast<void*>(const_cast< Data*>(this));
+    return QObject::qt_metacast(_clname);
+}
+
+int FixedLayout::Data::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
+{
+    _id = QObject::qt_metacall(_c, _id, _a);
+    if (_id < 0)
+        return _id;
+    return _id;
+}
+static const uint qt_meta_data_HorizontalLayout__Data[] = {
+
+ // content:
+       4,       // revision
+       0,       // classname
+       0,    0, // classinfo
+       0,    0, // methods
+       0,    0, // properties
+       0,    0, // enums/sets
+       0,    0, // constructors
+       0,       // flags
+       0,       // signalCount
+
+       0        // eod
+};
+
+static const char qt_meta_stringdata_HorizontalLayout__Data[] = {
+    "HorizontalLayout::Data\0"
+};
+
+const QMetaObject HorizontalLayout::Data::staticMetaObject = {
+    { &QObject::staticMetaObject, qt_meta_stringdata_HorizontalLayout__Data,
+      qt_meta_data_HorizontalLayout__Data, 0 }
+};
+
+#ifdef Q_NO_DATA_RELOCATION
+const QMetaObject &HorizontalLayout::Data::getStaticMetaObject() { return staticMetaObject; }
+#endif //Q_NO_DATA_RELOCATION
+
+const QMetaObject *HorizontalLayout::Data::metaObject() const
+{
+    return QObject::d_ptr->metaObject ? QObject::d_ptr->metaObject : &staticMetaObject;
+}
+
+void *HorizontalLayout::Data::qt_metacast(const char *_clname)
+{
+    if (!_clname) return 0;
+    if (!strcmp(_clname, qt_meta_stringdata_HorizontalLayout__Data))
+        return static_cast<void*>(const_cast< Data*>(this));
+    return QObject::qt_metacast(_clname);
+}
+
+int HorizontalLayout::Data::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
+{
+    _id = QObject::qt_metacall(_c, _id, _a);
+    if (_id < 0)
+        return _id;
+    return _id;
+}
+static const uint qt_meta_data_VerticalLayout__Data[] = {
+
+ // content:
+       4,       // revision
+       0,       // classname
+       0,    0, // classinfo
+       0,    0, // methods
+       0,    0, // properties
+       0,    0, // enums/sets
+       0,    0, // constructors
+       0,       // flags
+       0,       // signalCount
+
+       0        // eod
+};
+
+static const char qt_meta_stringdata_VerticalLayout__Data[] = {
+    "VerticalLayout::Data\0"
+};
+
+const QMetaObject VerticalLayout::Data::staticMetaObject = {
+    { &QObject::staticMetaObject, qt_meta_stringdata_VerticalLayout__Data,
+      qt_meta_data_VerticalLayout__Data, 0 }
+};
+
+#ifdef Q_NO_DATA_RELOCATION
+const QMetaObject &VerticalLayout::Data::getStaticMetaObject() { return staticMetaObject; }
+#endif //Q_NO_DATA_RELOCATION
+
+const QMetaObject *VerticalLayout::Data::metaObject() const
+{
+    return QObject::d_ptr->metaObject ? QObject::d_ptr->metaObject : &staticMetaObject;
+}
+
+void *VerticalLayout::Data::qt_metacast(const char *_clname)
+{
+    if (!_clname) return 0;
+    if (!strcmp(_clname, qt_meta_stringdata_VerticalLayout__Data))
+        return static_cast<void*>(const_cast< Data*>(this));
+    return QObject::qt_metacast(_clname);
+}
+
+int VerticalLayout::Data::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
+{
+    _id = QObject::qt_metacall(_c, _id, _a);
     if (_id < 0)
         return _id;
     return _id;

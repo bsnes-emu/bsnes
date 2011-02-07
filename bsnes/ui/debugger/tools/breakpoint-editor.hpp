@@ -1,7 +1,8 @@
 struct BreakpointEditor : TopLevelWindow {
   enum : unsigned { Breakpoints = SNES::Debugger::Breakpoints };
-  FixedLayout layout;
+  VerticalLayout layout;
   CheckBox runToBreakpoint;
+  HorizontalLayout breakpointLayout[Breakpoints];
   CheckBox enableBox[Breakpoints];
   TextBox addressBox[Breakpoints];
   TextBox valueBox[Breakpoints];

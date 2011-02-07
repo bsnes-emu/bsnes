@@ -1,8 +1,10 @@
 struct AudioSettings : TopLevelWindow {
-  FixedLayout layout;
+  VerticalLayout layout;
+  HorizontalLayout volumeLayout;
   Label volumeLabel;
   Label volumeValue;
   HorizontalSlider volumeSlider;
+  HorizontalLayout frequencyLayout;
   Label frequencyLabel;
   Label frequencyValue;
   HorizontalSlider frequencySlider;

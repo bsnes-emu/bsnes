@@ -35,18 +35,18 @@ struct Widget::Data {
 };
 
 struct Layout::Data {
+  Window *parent;
+  unsigned margin;
 };
 
 struct FixedLayout::Data {
   Window *parent;
-  GtkWidget *container;
-
-  struct Widgets {
+  struct Children {
     Widget *widget;
     unsigned x, y;
     unsigned width, height;
   };
-  linear_vector<Widgets> widgets;
+  linear_vector<Children> children;
 };
 
 struct Canvas::Data {

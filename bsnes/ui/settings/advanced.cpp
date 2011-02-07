@@ -1,10 +1,8 @@
 AdvancedSettings advancedSettings;
 
 void AdvancedSettings::create() {
-  Window::create(0, 0, 256, 256, "Advanced Settings");
+  Window::create(0, 0, 640, 80, "Advanced Settings");
   application.addWindow(this, "AdvancedSettings", "160,160");
-
-  unsigned x = 5, y = 5;
 
   driverSelectionLabel.setText("Driver Selection :.");
   driverSelectionLabel.setFont(application.proportionalFontBold);
@@ -22,6 +20,23 @@ void AdvancedSettings::create() {
   if(config.settings.focusPolicy == 1) focusPolicyIgnore.setChecked();
   if(config.settings.focusPolicy == 2) focusPolicyAllow.setChecked();
 
+  layout.setMargin(5);
+  layout.append(driverSelectionLabel, 0, Style::LabelHeight);
+  driverLayout.append(videoDriverLabel, 40, Style::ComboBoxHeight, 5);
+  driverLayout.append(videoDriverBox, 0, Style::ComboBoxHeight, 5);
+  driverLayout.append(audioDriverLabel, 40, Style::ComboBoxHeight, 5);
+  driverLayout.append(audioDriverBox, 0, Style::ComboBoxHeight, 5);
+  driverLayout.append(inputDriverLabel, 40, Style::ComboBoxHeight, 5);
+  driverLayout.append(inputDriverBox, 0, Style::ComboBoxHeight);
+  layout.append(driverLayout, 0, Style::ComboBoxHeight, 5);
+  layout.append(focusPolicyLabel, 0, Style::LabelHeight);
+  focusPolicyLayout.append(focusPolicyPause, 0, Style::CheckBoxHeight, 5);
+  focusPolicyLayout.append(focusPolicyIgnore, 0, Style::CheckBoxHeight, 5);
+  focusPolicyLayout.append(focusPolicyAllow, 0, Style::CheckBoxHeight);
+  layout.append(focusPolicyLayout, 0, Style::CheckBoxHeight);
+  setLayout(layout);
+
+/*unsigned x = 5, y = 5;
   layout.append(driverSelectionLabel, x,       y, 595, Style::LabelHeight);    y += Style::LabelHeight + 5;
   layout.append(videoDriverLabel,     x,       y,  45, Style::ComboBoxHeight);
   layout.append(videoDriverBox,       x +  45, y, 150, Style::ComboBoxHeight);
@@ -34,7 +49,7 @@ void AdvancedSettings::create() {
   layout.append(focusPolicyIgnore,    x + 200, y, 195, Style::CheckBoxHeight);
   layout.append(focusPolicyAllow,     x + 400, y, 195, Style::CheckBoxHeight); y += Style::CheckBoxHeight + 5;
   setGeometry(0, 0, 605, y);
-  setLayout(layout);
+  setLayout(layout);*/
 
   lstring list;
 

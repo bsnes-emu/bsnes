@@ -1,8 +1,3 @@
-void HexEditor::setParent(Layout &parent) {
-  hexEditor->setParent(parent.widget->widget);
-  hexEditor->show();
-}
-
 void HexEditor::setSize(unsigned size) {
   hexEditor->size = size;
   bool indivisible = (hexEditor->size % hexEditor->columns) != 0;  //add one for incomplete row

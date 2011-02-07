@@ -18,6 +18,9 @@ struct Utility : property<Utility> {
 
   Utility();
 
+  unsigned viewportX, viewportY;
+  unsigned viewportWidth, viewportHeight;
+
 private:
   string statusCurrentText;
   string statusText;

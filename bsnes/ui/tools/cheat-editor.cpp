@@ -79,7 +79,7 @@ void CheatEditor::save(string filename) {
 }
 
 void CheatEditor::create() {
-  Window::create(0, 0, 256, 256, "Cheat Editor");
+  Window::create(0, 0, 480, 325, "Cheat Editor");
   application.addWindow(this, "CheatEditor", "160,160");
 
   cheatList.setHeaderText("Slot\tCode\tDescription");
@@ -91,16 +91,19 @@ void CheatEditor::create() {
   clearAllButton.setText("Clear All");
   clearButton.setText("Clear");
 
-  unsigned x = 5, y = 5, height = Style::ButtonHeight;
-  layout.append(cheatList,      x,                 y, 500, 250);                  y += 255;
-  layout.append(codeLabel,      x,                 y,  80, Style::TextBoxHeight);
-  layout.append(codeEdit,       x +  80,           y, 420, Style::TextBoxHeight); y += Style::TextBoxHeight + 5;
-  layout.append(descLabel,      x,                 y,  80, Style::TextBoxHeight);
-  layout.append(descEdit,       x +  80,           y, 420, Style::TextBoxHeight); y+= Style::TextBoxHeight + 5;
-  layout.append(findButton,     x,                 y, 100, height);
-  layout.append(clearAllButton, x + 505 - 85 - 85, y,  80, height);
-  layout.append(clearButton,    x + 505 - 85,      y,  80, height);               y += height + 5;
-  setGeometry(0, 0, 510, y);
+  layout.setMargin(5);
+  layout.append(cheatList, 0, 0, 5);
+  codeLayout.append(codeLabel, 80, Style::TextBoxHeight, 5);
+  codeLayout.append(codeEdit, 0, Style::TextBoxHeight);
+  layout.append(codeLayout, 0, Style::TextBoxHeight, 5);
+  descLayout.append(descLabel, 80, Style::TextBoxHeight, 5);
+  descLayout.append(descEdit, 0, Style::TextBoxHeight);
+  layout.append(descLayout, 0, Style::TextBoxHeight, 5);
+  controlLayout.append(findButton, 100, Style::ButtonHeight);
+  controlLayout.append(spacer, 0, Style::ButtonHeight);
+  controlLayout.append(clearAllButton, 80, Style::ButtonHeight, 5);
+  controlLayout.append(clearButton, 80, Style::ButtonHeight);
+  layout.append(controlLayout, 0, Style::ButtonHeight);
   setLayout(layout);
 
   synchronize();
@@ -118,7 +121,7 @@ void CheatEditor::create() {
   };
 
   //databaseWindow
-  databaseWindow.create(0, 0, 256, 256);
+  databaseWindow.create(0, 0, 600, 360);
   application.addWindow(&databaseWindow, "CheatDatabase", "192,192");
 
   databaseList.setCheckable(true);
@@ -126,12 +129,13 @@ void CheatEditor::create() {
   databaseUnselectAll.setText("Unselect All");
   databaseOk.setText("Ok");
 
-  x = 5, y = 5;
-  databaseLayout.append(databaseList,        x,        y, 600, 360);    y += 365;
-  databaseLayout.append(databaseSelectAll,   x,        y, 100, height);
-  databaseLayout.append(databaseUnselectAll, x + 105,  y, 100, height);
-  databaseLayout.append(databaseOk,          605 - 80, y,  80, height); y += height + 5;
-  databaseWindow.setGeometry(0, 0, 610, y);
+  databaseLayout.setMargin(5);
+  databaseLayout.append(databaseList, 0, 0, 5);
+  databaseControlLayout.append(databaseSelectAll, 100, Style::ButtonHeight, 5);
+  databaseControlLayout.append(databaseUnselectAll, 100, Style::ButtonHeight);
+  databaseControlLayout.append(databaseSpacer, 0, Style::ButtonHeight);
+  databaseControlLayout.append(databaseOk, 80, Style::ButtonHeight);
+  databaseLayout.append(databaseControlLayout, 0, Style::ButtonHeight);
   databaseWindow.setLayout(databaseLayout);
 
   databaseSelectAll.onTick = []() {

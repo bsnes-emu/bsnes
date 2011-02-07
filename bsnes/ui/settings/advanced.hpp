@@ -1,6 +1,7 @@
 struct AdvancedSettings : TopLevelWindow {
-  FixedLayout layout;
+  VerticalLayout layout;
   Label driverSelectionLabel;
+  HorizontalLayout driverLayout;
   Label videoDriverLabel;
   ComboBox videoDriverBox;
   Label audioDriverLabel;
@@ -8,6 +9,7 @@ struct AdvancedSettings : TopLevelWindow {
   Label inputDriverLabel;
   ComboBox inputDriverBox;
   Label focusPolicyLabel;
+  HorizontalLayout focusPolicyLayout;
   RadioBox focusPolicyPause;
   RadioBox focusPolicyIgnore;
   RadioBox focusPolicyAllow;

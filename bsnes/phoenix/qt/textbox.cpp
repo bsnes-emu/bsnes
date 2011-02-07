@@ -1,8 +1,3 @@
-void TextBox::setParent(Layout &parent) {
-  textBox->setParent(parent.widget->widget);
-  textBox->show();
-}
-
 void TextBox::setEditable(bool editable) {
   textBox->setReadOnly(editable == false);
 }

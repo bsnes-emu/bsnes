@@ -1,8 +1,3 @@
-void ComboBox::setParent(Layout &parent) {
-  comboBox->setParent(parent.widget->widget);
-  comboBox->show();
-}
-
 void ComboBox::reset() {
   while(comboBox->count()) comboBox->removeItem(0);
 }

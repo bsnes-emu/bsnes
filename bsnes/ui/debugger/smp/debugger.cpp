@@ -1,7 +1,7 @@
 SMPDebugger smpDebugger;
 
 void SMPDebugger::create() {
-  Window::create(0, 0, 256, 256, "SMP Debugger");
+  Window::create(0, 0, 495, 220, "SMP Debugger");
   application.addWindow(this, "Debugger.SMPDebugger", "192,192");
 
   output.setFont(application.monospaceFont);
@@ -11,12 +11,12 @@ void SMPDebugger::create() {
   proceed.setText("Proceed");
   proceed.setEnabled(false);
 
-  unsigned x = 5, y = 5;
-  layout.append(output, x, y, 400, 210); x += 400 + 5;
-  layout.append(stepInto, x, y, 80, Style::ButtonHeight); y += Style::ButtonHeight;
-  layout.append(stepOver, x, y, 80, Style::ButtonHeight); y += Style::ButtonHeight;
-  layout.append(proceed, x, y, 80, Style::ButtonHeight); y += Style::ButtonHeight;
-  setGeometry(0, 0, 495, 220);
+  layout.setMargin(5);
+  layout.append(output, 0, 0, 5);
+  controlLayout.append(stepInto, 80, Style::ButtonHeight);
+  controlLayout.append(stepOver, 80, Style::ButtonHeight);
+  controlLayout.append(proceed, 80, Style::ButtonHeight);
+  layout.append(controlLayout, 80, 0);
   setLayout(layout);
 
   onClose = []() {

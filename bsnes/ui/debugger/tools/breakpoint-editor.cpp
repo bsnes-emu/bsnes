@@ -1,7 +1,7 @@
 BreakpointEditor breakpointEditor;
 
 void BreakpointEditor::create() {
-  Window::create(0, 0, 256, 256, "Breakpoint Editor");
+  Window::create(0, 0, 310, 240, "Breakpoint Editor");
   application.addWindow(this, "Debugger.BreakpointEditor", "192,192");
 
   runToBreakpoint.setText("Run to breakpoint");
@@ -18,7 +18,19 @@ void BreakpointEditor::create() {
     enableBox[n].onTick = [n]() { breakpointEditor.toggleBreakpoint(n); };
   }
 
-  unsigned x = 5, y = 5;
+  layout.setMargin(5);
+  layout.append(runToBreakpoint, 0, Style::CheckBoxHeight, 5);
+  for(unsigned n = 0; n < Breakpoints; n++) {
+    breakpointLayout[n].append(enableBox[n], 35, Style::EditBoxHeight);
+    breakpointLayout[n].append(addressBox[n], 60, Style::EditBoxHeight, 5);
+    breakpointLayout[n].append(valueBox[n], 30, Style::EditBoxHeight, 5);
+    breakpointLayout[n].append(typeBox[n], 80, Style::EditBoxHeight, 5);
+    breakpointLayout[n].append(sourceBox[n], 80, Style::EditBoxHeight);
+    layout.append(breakpointLayout[n], 0, Style::EditBoxHeight, 5);
+  }
+  setLayout(layout);
+
+/*unsigned x = 5, y = 5;
   layout.append(runToBreakpoint, x, y, 295, Style::CheckBoxHeight); y += Style::CheckBoxHeight + 5;
   for(unsigned n = 0; n < Breakpoints; n++) {
     layout.append(enableBox[n], x, y, 35, Style::EditBoxHeight);
@@ -28,7 +40,7 @@ void BreakpointEditor::create() {
     layout.append(sourceBox[n], x + 220, y, 80, Style::EditBoxHeight); y += Style::EditBoxHeight + 5;
   }
   setGeometry(0, 0, 310, y);
-  setLayout(layout);
+  setLayout(layout);*/
 
   runToBreakpoint.onTick = []() {
     if(breakpointEditor.runToBreakpoint.checked()) {

@@ -2,9 +2,6 @@ static void CheckBox_tick(CheckBox *self) {
   if(self->onTick && self->object->locked == false) self->onTick();
 }
 
-void CheckBox::setParent(Layout &parent) {
-}
-
 void CheckBox::setText(const string &text) {
   gtk_button_set_label(GTK_BUTTON(object->widget), text);
 }

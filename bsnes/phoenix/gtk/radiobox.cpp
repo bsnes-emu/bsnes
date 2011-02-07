@@ -2,10 +2,6 @@ static void RadioBox_tick(RadioBox *self) {
   if(self->onTick && self->checked() && self->object->locked == false) self->onTick();
 }
 
-void RadioBox::setParent(Layout &parent) {
-  first = this;
-}
-
 void RadioBox::setParent(RadioBox &parent) {
   first = parent.first;
 }
@@ -25,6 +21,7 @@ void RadioBox::setChecked() {
 }
 
 RadioBox::RadioBox() {
+  first = this;
   object->widget = gtk_radio_button_new_with_label(0, "");
   g_signal_connect_swapped(G_OBJECT(object->widget), "toggled", G_CALLBACK(RadioBox_tick), (gpointer)this);
 }

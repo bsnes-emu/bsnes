@@ -1,8 +1,3 @@
-void HorizontalSlider::setParent(Layout &parent) {
-  horizontalSlider->setParent(parent.widget->widget);
-  horizontalSlider->show();
-}
-
 void HorizontalSlider::setLength(unsigned length) {
   length = length + (length == 0);
   horizontalSlider->setRange(0, length - 1);

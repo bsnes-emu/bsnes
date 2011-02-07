@@ -1,8 +1,3 @@
-void EditBox::setParent(Layout &parent) {
-  editBox->setParent(parent.widget->widget);
-  editBox->show();
-}
-
 void EditBox::setEditable(bool editable) {
   editBox->setReadOnly(editable == false);
 }

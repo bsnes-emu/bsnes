@@ -1,9 +1,10 @@
 MemoryEditor memoryEditor;
 
 void MemoryEditor::create() {
-  Window::create(0, 0, 256, 256, "Memory Editor");
+  Window::create(0, 0, 570, 230, "Memory Editor");
   application.addWindow(this, "Debugger.MemoryEditor", "192,192");
 
+  editor.setFont(application.monospaceFont);
   editor.setColumns(16);
   editor.setRows(16);
   sourceBox.addItem("CPU");
@@ -13,15 +14,13 @@ void MemoryEditor::create() {
   sourceBox.addItem("CGRAM");
   refreshButton.setText("Refresh");
 
-  unsigned x = 5, y = 5;
-  layout.append(editor, x, y, 475, 220); x += 475 + 5;
-  layout.append(sourceBox, x, y, 80, Style::ComboBoxHeight); y += Style::ComboBoxHeight;
-  layout.append(gotoBox, x, y, 80, Style::TextBoxHeight); y += Style::TextBoxHeight;
-  layout.append(refreshButton, x, y, 80, Style::ButtonHeight); y += Style::ButtonHeight;
-  setGeometry(0, 0, 570, 230);
+  layout.setMargin(5);
+  layout.append(editor, 0, 0, 5);
+  controlLayout.append(sourceBox, 80, Style::ComboBoxHeight);
+  controlLayout.append(gotoBox, 80, Style::ComboBoxHeight);
+  controlLayout.append(refreshButton, 80, Style::ComboBoxHeight);
+  layout.append(controlLayout, 80, 0);
   setLayout(layout);
-
-  editor.setFont(application.monospaceFont);
 
   onClose = []() {
     debugger.showMemoryEditor.setChecked(false);

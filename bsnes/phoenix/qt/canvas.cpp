@@ -1,8 +1,3 @@
-void Canvas::setParent(Layout &parent) {
-  canvas->setParent(parent.widget->widget);
-  canvas->show();
-}
-
 void Canvas::setGeometry(unsigned x, unsigned y, unsigned width, unsigned height) {
   delete canvas->image;
   canvas->image = new QImage(width, height, QImage::Format_RGB32);

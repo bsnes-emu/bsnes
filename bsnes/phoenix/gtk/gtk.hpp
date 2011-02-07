@@ -78,12 +78,55 @@ private:
   MenuRadioItem *first;
 };
 
-struct Window;
 struct Layout;
+struct Widget;
+
+struct Window : Object {
+  nall::function<bool ()> onClose;
+  void create(unsigned x, unsigned y, unsigned width, unsigned height, const nall::string &text = "");
+  void setLayout(Layout &layout);
+  bool focused();
+  void setFocused();
+  Geometry geometry();
+  void setGeometry(unsigned x, unsigned y, unsigned width, unsigned height);
+  void setDefaultFont(Font &font);
+  void setFont(Font &font);
+  void setBackgroundColor(uint8_t red, uint8_t green, uint8_t blue);
+  void setTitle(const nall::string &text);
+  void setStatusText(const nall::string &text);
+  void setVisible(bool visible = true);
+  void setMenuVisible(bool visible = true);
+  void setStatusVisible(bool visible = true);
+  bool fullscreen();
+  void setFullscreen(bool fullscreen = true);
+  Window();
+//private:
+  struct Data;
+  Data *window;
+  static Window None;
+};
+
+struct Layout : Object {
+  virtual void setParent(Window &parent);
+  virtual void update(Geometry &geometry);
+  void setMargin(unsigned margin);
+  Layout();
+//private:
+  struct Data;
+  Data *layout;
+};
+
+struct FixedLayout : Layout {
+  void setParent(Window &parent);
+  void append(Widget &widget, unsigned x, unsigned y, unsigned width, unsigned height);
+  void update(Geometry &geometry);
+  FixedLayout();
+//private:
+  struct Data;
+  Data *fixedLayout;
+};
 
 struct Widget : Object {
-  virtual void setParent(Layout &parent) {}
-
   virtual void setGeometry(unsigned x, unsigned y, unsigned width, unsigned height);
   virtual void setFont(Font &font);
   bool visible();
@@ -98,50 +141,8 @@ struct Widget : Object {
   Data *widget;
 };
 
-struct Window : Widget {
-  nall::function<bool ()> onClose;
-  void create(unsigned x, unsigned y, unsigned width, unsigned height, const nall::string &text = "");
-  void setLayout(Layout &layout);
-  bool focused();
-  void setFocused();
-  Geometry geometry();
-  void setGeometry(unsigned x, unsigned y, unsigned width, unsigned height);
-  void setDefaultFont(Font &font);
-  void setFont(Font &font);
-  void setBackgroundColor(uint8_t red, uint8_t green, uint8_t blue);
-  void setTitle(const nall::string &text);
-  void setStatusText(const nall::string &text);
-  void setMenuVisible(bool visible = true);
-  void setStatusVisible(bool visible = true);
-  bool fullscreen();
-  void setFullscreen(bool fullscreen = true);
-  Window();
-//private:
-  struct Data;
-  Data *window;
-  static Window None;
-};
-
-struct Layout : Widget {
-  virtual void create(Window &parent) = 0;
-  Layout();
-//private:
-  struct Data;
-  Data *layout;
-};
-
-struct FixedLayout : Layout {
-  void append(Widget &widget, unsigned x, unsigned y, unsigned width, unsigned height);
-  void create(Window &parent);
-  FixedLayout();
-//private:
-  struct Data;
-  Data *fixedLayout;
-};
-
 struct Button : Widget {
   nall::function<void ()> onTick;
-  void setParent(Layout &parent);
   void setText(const nall::string &text);
   Button();
 };
@@ -159,7 +160,6 @@ struct Canvas : Widget {
 
 struct CheckBox : Widget {
   nall::function<void ()> onTick;
-  void setParent(Layout &parent);
   void setText(const nall::string &text);
   bool checked();
   void setChecked(bool checked = true);
@@ -218,7 +218,6 @@ struct HorizontalSlider : Widget {
 };
 
 struct Label : Widget {
-  void setParent(Layout &parent);
   void setText(const nall::string &text);
   Label();
 };
@@ -253,7 +252,6 @@ struct ProgressBar : Widget {
 
 struct RadioBox : Widget {
   nall::function<void ()> onTick;
-  void setParent(Layout &parent);
   void setParent(RadioBox &parent);
   void setText(const nall::string &text);
   bool checked();

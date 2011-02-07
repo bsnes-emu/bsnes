@@ -70,6 +70,12 @@ void Utility::setScale(unsigned scale) {
     height = 239 * scale;
     if(config.video.aspectRatioCorrection) width *= 32.0 / 23.0;
   }
+
+  viewportX = 0;
+  viewportY = 0;
+  viewportWidth = width;
+  viewportHeight = height;
+
   mainWindow.viewport.setGeometry(0, 0, width, height);
   Geometry geom = mainWindow.geometry();
   mainWindow.setGeometry(geom.x, geom.y, width, height);
@@ -114,11 +120,12 @@ void Utility::setFullscreen(bool fullscreen) {
       }
     }
 
-    mainWindow.viewport.setGeometry(
-      (OS::desktopWidth() - width) / 2,
-      (OS::desktopHeight() - height) / 2,
-      width, height
-    );
+    viewportX = (OS::desktopWidth() - width) / 2;
+    viewportY = (OS::desktopHeight() - height) / 2;
+    viewportWidth = width;
+    viewportHeight = height;
+
+    mainWindow.viewport.setGeometry(viewportX, viewportY, viewportWidth, viewportHeight);
   }
 }
 

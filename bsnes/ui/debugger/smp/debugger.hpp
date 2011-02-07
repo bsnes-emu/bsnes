@@ -1,6 +1,7 @@
 struct SMPDebugger : TopLevelWindow {
-  FixedLayout layout;
+  HorizontalLayout layout;
   EditBox output;
+  VerticalLayout controlLayout;
   Button stepInto;
   Button stepOver;
   Button proceed;

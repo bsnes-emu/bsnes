@@ -1,7 +1,7 @@
 Console console;
 
 void Console::create() {
-  Window::create(0, 0, 256, 256, "Console");
+  Window::create(0, 0, 715, 350, "Console");
   application.addWindow(this, "Debugger.Console", "192,192");
 
   output.setFont(application.monospaceFont);
@@ -14,7 +14,18 @@ void Console::create() {
   traceCPU.setChecked(true);
   clearConsole.setText("Clear console");
 
-  unsigned x = 5, y = 5;
+  layout.setMargin(5);
+  layout.append(output, 0, 0, 5);
+  controlLayout.append(traceToConsole, 120, Style::CheckBoxHeight);
+  controlLayout.append(traceToFile, 120, Style::CheckBoxHeight);
+  controlLayout.append(traceCPU, 120, Style::CheckBoxHeight);
+  controlLayout.append(traceSMP, 120, Style::CheckBoxHeight);
+  controlLayout.append(spacer, 120, 0, Style::CheckBoxHeight);
+  controlLayout.append(clearConsole, 120, Style::ButtonHeight);
+  layout.append(controlLayout, 120, 0);
+  setLayout(layout);
+
+/*unsigned x = 5, y = 5;
   layout.append(output, x, y, 580, 338); x += 580 + 5;
   layout.append(traceToConsole, x, y, 120, Style::CheckBoxHeight); y += Style::CheckBoxHeight;
   layout.append(traceToFile, x, y, 120, Style::CheckBoxHeight); y += Style::CheckBoxHeight;
@@ -22,7 +33,7 @@ void Console::create() {
   layout.append(traceSMP, x, y, 120, Style::CheckBoxHeight); y += Style::CheckBoxHeight;
   layout.append(clearConsole, x, 348 - Style::ButtonHeight - 5, 120, Style::ButtonHeight);
   setGeometry(0, 0, 715, 348);
-  setLayout(layout);
+  setLayout(layout);*/
 
   onClose = []() {
     debugger.showConsole.setChecked(false);

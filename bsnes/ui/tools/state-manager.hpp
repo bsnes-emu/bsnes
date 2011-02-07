@@ -1,8 +1,11 @@
 struct StateManager : TopLevelWindow {
-  FixedLayout layout;
+  VerticalLayout layout;
   ListBox stateList;
+  HorizontalLayout descLayout;
   Label descLabel;
   TextBox descEdit;
+  HorizontalLayout controlLayout;
+  Label spacer;
   Button loadButton;
   Button saveButton;
   Button eraseButton;

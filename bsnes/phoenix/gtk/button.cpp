@@ -2,9 +2,6 @@ static void Button_tick(Button *self) {
   if(self->onTick) self->onTick();
 }
 
-void Button::setParent(Layout &parent) {
-}
-
 void Button::setText(const string &text) {
   gtk_button_set_label(GTK_BUTTON(object->widget), text);
 }

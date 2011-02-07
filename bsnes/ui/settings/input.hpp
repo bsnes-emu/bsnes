@@ -1,15 +1,18 @@
 struct InputSettings : TopLevelWindow {
-  FixedLayout layout;
+  VerticalLayout layout;
+  HorizontalLayout selectionLayout;
   Label portLabel;
   ComboBox portBox;
   Label deviceLabel;
   ComboBox deviceBox;
   ListBox mappingList;
+  HorizontalLayout mapLayout;
   Button mouseXaxis;
   Button mouseYaxis;
   Button mouseLeft;
   Button mouseMiddle;
   Button mouseRight;
+  Label spacer;
   Button clearButton;
 
   void inputEvent(uint16_t scancode, int16_t value);

@@ -81,26 +81,84 @@ public slots:
   }
 };
 
-struct Widget::Data {
-public:
-  Widget &self;
-  QWidget *widget;
+struct Window::Data : public QWidget {
+  Q_OBJECT
 
-  Data(Widget &self) : self(self) {
+public:
+  Window &self;
+  unsigned x, y, width, height;
+  bool fullscreen, menuVisible, statusVisible;
+  Layout *layout;
+  QFont *defaultFont;
+  QVBoxLayout *vlayout;
+  QMenuBar *menuBar;
+  QStatusBar *statusBar;
+  QWidget *container;
+
+  QSize sizeHint() const {
+    unsigned actualHeight = height;
+    if(menuVisible) actualHeight += menuBar->height();
+    if(statusVisible) actualHeight += statusBar->height();
+    return QSize(width, actualHeight);
+  }
+
+  void closeEvent(QCloseEvent *event) {
+    if(self.onClose) {
+      bool result = self.onClose();
+      if(result == false) event->ignore();
+    }
+  }
+
+  void moveEvent(QMoveEvent *event) {
+    if(fullscreen == false && isVisible() == true) {
+      x = frameGeometry().x();
+      y = frameGeometry().y();
+    }
+
+    if(self.onMove) {
+      self.onMove();
+    }
+  }
+
+  void resizeEvent(QResizeEvent *event) {
+    if(fullscreen == false && isVisible() == true) {
+      width = container->geometry().width();
+      height = container->geometry().height();
+    }
+
+    if(layout) {
+      Geometry geom = self.geometry();
+      geom.x = geom.y = 0;
+      layout->update(geom);
+    }
+
+    if(self.onResize) {
+      self.onResize();
+    }
+  }
+
+  Data(Window &self) : self(self) {
+    fullscreen = false;
+    menuVisible = false;
+    statusVisible = false;
   }
 };
 
-struct Layout::Data : public QWidget {
+struct Layout::Data : public QObject {
   Q_OBJECT
 
 public:
   Layout &self;
+  Window *parent;
+  unsigned margin;
 
   Data(Layout &self) : self(self) {
+    parent = 0;
+    margin = 0;
   }
 };
 
-struct FixedLayout::Data : public QWidget {
+struct FixedLayout::Data : public QObject {
   Q_OBJECT
 
 public:
@@ -117,26 +175,47 @@ public:
   }
 };
 
-struct Window::Data : public QWidget {
+struct HorizontalLayout::Data : public QObject {
   Q_OBJECT
 
 public:
-  Window &self;
-  Layout *layout;
-  QFont *defaultFont;
-  QVBoxLayout *vlayout;
-  QMenuBar *menuBar;
-  QWidget *container;
-  QStatusBar *statusBar;
+  HorizontalLayout &self;
+  struct Children {
+    VerticalLayout *layout;
+    Widget *widget;
+    unsigned width, height, spacing;
+  };
+  linear_vector<Children> children;
 
-  void closeEvent(QCloseEvent *event) {
-    if(self.onClose) {
-      bool result = self.onClose();
-      if(result == false) event->ignore();
-    }
+  Data(HorizontalLayout &self) : self(self) {
   }
+};
 
-  Data(Window &self) : self(self) {
+struct VerticalLayout::Data : public QObject {
+  Q_OBJECT
+
+public:
+  VerticalLayout &self;
+  struct Children {
+    HorizontalLayout *layout;
+    Widget *widget;
+    unsigned width, height, spacing;
+  };
+  linear_vector<Children> children;
+
+  Data(VerticalLayout &self) : self(self) {
+  }
+};
+
+struct Widget::Data {
+public:
+  Widget &self;
+  QWidget *widget;
+  Font *font;
+
+  Data(Widget &self) : self(self) {
+    widget = 0;
+    font = 0;
   }
 };
 

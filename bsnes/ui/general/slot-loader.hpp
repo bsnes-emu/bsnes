@@ -1,11 +1,15 @@
 struct SingleSlotLoader : TopLevelWindow {
-  FixedLayout layout;
+  VerticalLayout layout;
+  HorizontalLayout baseLayout;
   Label baseLabel;
   TextBox basePath;
   Button baseBrowse;
+  HorizontalLayout slotLayout;
   Label slotLabel;
   TextBox slotPath;
   Button slotBrowse;
+  HorizontalLayout controlLayout;
+  Label spacer;
   Button okButton;
 
   void create();
@@ -18,16 +22,21 @@ struct SingleSlotLoader : TopLevelWindow {
 };
 
 struct DoubleSlotLoader : TopLevelWindow {
-  FixedLayout layout;
+  VerticalLayout layout;
+  HorizontalLayout baseLayout;
   Label baseLabel;
   TextBox basePath;
   Button baseBrowse;
+  HorizontalLayout slotALayout;
   Label slotALabel;
   TextBox slotAPath;
   Button slotABrowse;
+  HorizontalLayout slotBLayout;
   Label slotBLabel;
   TextBox slotBPath;
   Button slotBBrowse;
+  HorizontalLayout controlLayout;
+  Label spacer;
   Button okButton;
 
   void create();
