@@ -1,18 +1,16 @@
-void Label::create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const string &text) {
-  widget->window = CreateWindow(
-    L"phoenix_label", L"",
-    WS_CHILD | WS_VISIBLE,
-    x, y, width, height,
-    parent.widget->window, (HMENU)object->id, GetModuleHandle(0), 0
-  );
-  SetWindowLongPtr(widget->window, GWLP_USERDATA, (LONG_PTR)this);
-  SendMessage(widget->window, WM_SETFONT, (WPARAM)(parent.window->defaultFont ? parent.window->defaultFont : OS::os->proportionalFont), 0);
-  setText(text);
-}
-
 void Label::setText(const string &text) {
   SetWindowText(widget->window, utf16_t(text));
   InvalidateRect(widget->window, 0, false);
+}
+
+Label::Label() {
+  widget->window = CreateWindow(
+    L"phoenix_label", L"",
+    WS_CHILD | WS_VISIBLE,
+    0, 0, 64, 64,
+    OS::os->nullWindow, (HMENU)object->id, GetModuleHandle(0), 0
+  );
+  SetWindowLongPtr(widget->window, GWLP_USERDATA, (LONG_PTR)this);
 }
 
 //all of this for want of a STATIC SS_VCENTER flag ...

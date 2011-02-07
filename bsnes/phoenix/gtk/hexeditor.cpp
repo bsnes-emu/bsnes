@@ -7,47 +7,6 @@ static bool HexEditor_scroll(GtkRange *range, GtkScrollType scroll, gdouble valu
   return false;
 }
 
-void HexEditor::create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height) {
-  widget->parent = &parent;
-
-  hexEditor->size = 0;
-  hexEditor->offset = 0;
-  hexEditor->columns = 16;
-  hexEditor->rows = 16;
-
-  object->widget = gtk_hbox_new(false, 0);
-  gtk_widget_set_size_request(object->widget, width, height);
-
-  hexEditor->container = gtk_scrolled_window_new(0, 0);
-  gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(hexEditor->container), GTK_POLICY_NEVER, GTK_POLICY_NEVER);
-  gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(hexEditor->container), GTK_SHADOW_ETCHED_IN);
-
-  hexEditor->widget = gtk_text_view_new();
-  gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(hexEditor->widget), GTK_WRAP_NONE);
-  gtk_container_add(GTK_CONTAINER(hexEditor->container), hexEditor->widget);
-  g_signal_connect(G_OBJECT(hexEditor->widget), "key-press-event", G_CALLBACK(HexEditor_keyPress), (gpointer)this);
-
-  hexEditor->scroll = gtk_vscrollbar_new((GtkAdjustment*)0);
-  gtk_range_set_range(GTK_RANGE(hexEditor->scroll), 0, 256);
-  gtk_range_set_increments(GTK_RANGE(hexEditor->scroll), 1, 16);
-  gtk_widget_set_sensitive(hexEditor->scroll, false);
-  g_signal_connect(G_OBJECT(hexEditor->scroll), "change-value", G_CALLBACK(HexEditor_scroll), (gpointer)this);
-
-  gtk_box_pack_start(GTK_BOX(object->widget), hexEditor->container, true, true, 0);
-  gtk_box_pack_start(GTK_BOX(object->widget), hexEditor->scroll, false, false, 1);
-
-  object->textBuffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(hexEditor->widget));
-  hexEditor->cursor = gtk_text_buffer_get_mark(object->textBuffer, "insert");
-
-  gtk_fixed_put(GTK_FIXED(parent.object->formContainer), object->widget, x, y);
-  if(parent.window->defaultFont) setFont(*parent.window->defaultFont);
-
-  gtk_widget_show(hexEditor->scroll);
-  gtk_widget_show(hexEditor->widget);
-  gtk_widget_show(hexEditor->container);
-  gtk_widget_show(object->widget);
-}
-
 void HexEditor::setSize(unsigned size) {
   hexEditor->size = size;
   setScroll();
@@ -111,6 +70,37 @@ void HexEditor::update() {
 
 HexEditor::HexEditor() {
   hexEditor = new HexEditor::Data;
+  hexEditor->size = 0;
+  hexEditor->offset = 0;
+  hexEditor->columns = 16;
+  hexEditor->rows = 16;
+
+  object->widget = gtk_hbox_new(false, 0);
+
+  hexEditor->container = gtk_scrolled_window_new(0, 0);
+  gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(hexEditor->container), GTK_POLICY_NEVER, GTK_POLICY_NEVER);
+  gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(hexEditor->container), GTK_SHADOW_ETCHED_IN);
+
+  hexEditor->widget = gtk_text_view_new();
+  gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(hexEditor->widget), GTK_WRAP_NONE);
+  gtk_container_add(GTK_CONTAINER(hexEditor->container), hexEditor->widget);
+  g_signal_connect(G_OBJECT(hexEditor->widget), "key-press-event", G_CALLBACK(HexEditor_keyPress), (gpointer)this);
+
+  hexEditor->scroll = gtk_vscrollbar_new((GtkAdjustment*)0);
+  gtk_range_set_range(GTK_RANGE(hexEditor->scroll), 0, 256);
+  gtk_range_set_increments(GTK_RANGE(hexEditor->scroll), 1, 16);
+  gtk_widget_set_sensitive(hexEditor->scroll, false);
+  g_signal_connect(G_OBJECT(hexEditor->scroll), "change-value", G_CALLBACK(HexEditor_scroll), (gpointer)this);
+
+  gtk_box_pack_start(GTK_BOX(object->widget), hexEditor->container, true, true, 0);
+  gtk_box_pack_start(GTK_BOX(object->widget), hexEditor->scroll, false, false, 1);
+
+  object->textBuffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(hexEditor->widget));
+  hexEditor->cursor = gtk_text_buffer_get_mark(object->textBuffer, "insert");
+
+  gtk_widget_show(hexEditor->scroll);
+  gtk_widget_show(hexEditor->widget);
+  gtk_widget_show(hexEditor->container);
 }
 
 //internal

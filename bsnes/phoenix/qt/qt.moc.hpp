@@ -144,71 +144,16 @@ public:
   }
 };
 
-struct Layout::Data : public QObject {
-  Q_OBJECT
-
-public:
+struct Layout::Data {
   Layout &self;
   Window *parent;
-  unsigned margin;
 
   Data(Layout &self) : self(self) {
     parent = 0;
-    margin = 0;
-  }
-};
-
-struct FixedLayout::Data : public QObject {
-  Q_OBJECT
-
-public:
-  FixedLayout &self;
-  Window *parent;
-  struct Children {
-    Widget *widget;
-    unsigned x, y;
-    unsigned width, height;
-  };
-  linear_vector<Children> children;
-
-  Data(FixedLayout &self) : self(self) {
-  }
-};
-
-struct HorizontalLayout::Data : public QObject {
-  Q_OBJECT
-
-public:
-  HorizontalLayout &self;
-  struct Children {
-    VerticalLayout *layout;
-    Widget *widget;
-    unsigned width, height, spacing;
-  };
-  linear_vector<Children> children;
-
-  Data(HorizontalLayout &self) : self(self) {
-  }
-};
-
-struct VerticalLayout::Data : public QObject {
-  Q_OBJECT
-
-public:
-  VerticalLayout &self;
-  struct Children {
-    HorizontalLayout *layout;
-    Widget *widget;
-    unsigned width, height, spacing;
-  };
-  linear_vector<Children> children;
-
-  Data(VerticalLayout &self) : self(self) {
   }
 };
 
 struct Widget::Data {
-public:
   Widget &self;
   QWidget *widget;
   Font *font;

@@ -7,6 +7,26 @@ static gint Window_close(Window *window) {
   return true;
 }
 
+static void Window_configure(GtkWindow *widget, GdkEvent *event, Window *window) {
+  if(window->window->x != event->configure.x || window->window->y != event->configure.y) {
+    window->window->x = event->configure.x;
+    window->window->y = event->configure.y;
+    if(window->onMove) window->onMove();
+  }
+
+  if(window->window->width != event->configure.width || window->window->height != event->configure.height) {
+    window->window->width = event->configure.width;
+    window->window->height = event->configure.height;
+    Geometry geom = window->geometry();
+    geom.x = geom.y = 0;
+    if(window->window->layout) window->window->layout->update(geom);
+    if(window->onResize) window->onResize();
+  }
+}
+
+static gboolean Window_expose(GtkWidget *widget, GdkEventExpose *event, Window *window) {
+}
+
 void Window::create(unsigned x, unsigned y, unsigned width, unsigned height, const string &text) {
   window->x = x;
   window->y = y;
@@ -17,10 +37,12 @@ void Window::create(unsigned x, unsigned y, unsigned width, unsigned height, con
   gtk_window_move(GTK_WINDOW(object->widget), x, y);
 
   gtk_window_set_title(GTK_WINDOW(object->widget), text);
-  gtk_window_set_resizable(GTK_WINDOW(object->widget), false);
+  gtk_window_set_resizable(GTK_WINDOW(object->widget), true);
   gtk_widget_set_app_paintable(object->widget, true);
 
   g_signal_connect_swapped(G_OBJECT(object->widget), "delete_event", G_CALLBACK(Window_close), (gpointer)this);
+  g_signal_connect(G_OBJECT(object->widget), "configure_event", G_CALLBACK(Window_configure), (gpointer)this);
+  g_signal_connect(G_OBJECT(object->widget), "expose_event", G_CALLBACK(Window_expose), (gpointer)this);
 
   object->menuContainer = gtk_vbox_new(false, 0);
   gtk_container_add(GTK_CONTAINER(object->widget), object->menuContainer);
@@ -45,8 +67,10 @@ void Window::create(unsigned x, unsigned y, unsigned width, unsigned height, con
 }
 
 void Window::setLayout(Layout &layout) {
+  window->layout = &layout;
   layout.setParent(*this);
   Geometry geom = geometry();
+  geom.x = geom.y = 0;
   layout.update(geom);
 }
 
@@ -59,10 +83,7 @@ void Window::setFocused() {
 }
 
 Geometry Window::geometry() {
-  gint x, y, width, height;
-  gtk_window_get_position(GTK_WINDOW(object->widget), &x, &y);
-  gtk_widget_get_size_request(object->formContainer, &width, &height);
-  return Geometry(x, y, width, height);
+  return { window->x, window->y, window->width, window->height };
 }
 
 void Window::setGeometry(unsigned x, unsigned y, unsigned width, unsigned height) {
@@ -138,6 +159,7 @@ void Window::setFullscreen(bool fullscreen) {
 
 Window::Window() {
   window = new Window::Data;
+  window->layout = 0;
   window->defaultFont = 0;
   window->isFullscreen = false;
   window->x = 0;

@@ -212,6 +212,10 @@ void MainWindow::create() {
     return false;
   };
 
+  onResize = []() {
+    utility.centerViewport();
+  };
+
   synchronize();
 }
 

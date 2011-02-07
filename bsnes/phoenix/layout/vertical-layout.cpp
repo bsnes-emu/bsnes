@@ -1,32 +1,27 @@
 void VerticalLayout::setParent(Window &parent) {
   Layout::setParent(parent);
-  foreach(child, verticalLayout->children) {
-    if(child.layout) {
-      child.layout->setParent(parent);
-    }
-
-    if(child.widget) {
-      child.widget->widget->widget->setParent(layout->parent->window->container);
-      if(!child.widget->widget->font && layout->parent->window->defaultFont) {
-        QWidget *control = child.widget->widget->widget;
-        control->setFont(*layout->parent->window->defaultFont);
-      }
-    }
+  foreach(child, children) {
+    if(child.layout) child.layout->setParent(parent);
+    if(child.widget) Layout::setParent(parent, *child.widget);
   }
 }
 
 void VerticalLayout::append(HorizontalLayout &layout, unsigned width, unsigned height, unsigned spacing) {
-  verticalLayout->children.append({ &layout, 0, width, height, spacing });
+  children.append({ &layout, 0, width, height, spacing });
 }
 
 void VerticalLayout::append(Widget &widget, unsigned width, unsigned height, unsigned spacing) {
-  verticalLayout->children.append({ 0, &widget, width, height, spacing });
+  children.append({ 0, &widget, width, height, spacing });
 }
 
 void VerticalLayout::update(Geometry &geometry) {
-  Layout::update(geometry);
+  geometry.x += margin;
+  geometry.y += margin;
+  geometry.width -= margin * 2;
+  geometry.height -= margin * 2;
+
   Geometry baseGeometry = geometry;
-  linear_vector<VerticalLayout::Data::Children> children = verticalLayout->children;
+  linear_vector<VerticalLayout::Children> children = this->children;
 
   unsigned minimumHeight = 0;
   foreach(child, children) minimumHeight += child.height + child.spacing;
@@ -65,6 +60,10 @@ void VerticalLayout::update(Geometry &geometry) {
   geometry.width -= maxWidth;
 }
 
+void VerticalLayout::setMargin(unsigned margin_) {
+  margin = margin_;
+}
+
 VerticalLayout::VerticalLayout() {
-  verticalLayout = new VerticalLayout::Data(*this);
+  margin = 0;
 }

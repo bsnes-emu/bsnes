@@ -1,32 +1,27 @@
 void HorizontalLayout::setParent(Window &parent) {
   Layout::setParent(parent);
-  foreach(child, horizontalLayout->children) {
-    if(child.layout) {
-      child.layout->setParent(parent);
-    }
-
-    if(child.widget) {
-      child.widget->widget->widget->setParent(layout->parent->window->container);
-      if(!child.widget->widget->font && layout->parent->window->defaultFont) {
-        QWidget *control = child.widget->widget->widget;
-        control->setFont(*layout->parent->window->defaultFont);
-      }
-    }
+  foreach(child, children) {
+    if(child.layout) child.layout->setParent(parent);
+    if(child.widget) Layout::setParent(parent, *child.widget);
   }
 }
 
 void HorizontalLayout::append(VerticalLayout &layout, unsigned width, unsigned height, unsigned spacing) {
-  horizontalLayout->children.append({ &layout, 0, width, height, spacing });
+  children.append({ &layout, 0, width, height, spacing });
 }
 
 void HorizontalLayout::append(Widget &widget, unsigned width, unsigned height, unsigned spacing) {
-  horizontalLayout->children.append({ 0, &widget, width, height, spacing });
+  children.append({ 0, &widget, width, height, spacing });
 }
 
 void HorizontalLayout::update(Geometry &geometry) {
-  Layout::update(geometry);
+  geometry.x += margin;
+  geometry.y += margin;
+  geometry.width -= margin * 2;
+  geometry.height -= margin * 2;
+
   Geometry baseGeometry = geometry;
-  linear_vector<HorizontalLayout::Data::Children> children = horizontalLayout->children;
+  linear_vector<HorizontalLayout::Children> children = this->children;
 
   unsigned minimumWidth = 0;
   foreach(child, children) minimumWidth += child.width + child.spacing;
@@ -65,6 +60,10 @@ void HorizontalLayout::update(Geometry &geometry) {
   geometry.height -= maxHeight;
 }
 
+void HorizontalLayout::setMargin(unsigned margin_) {
+  margin = margin_;
+}
+
 HorizontalLayout::HorizontalLayout() {
-  horizontalLayout = new HorizontalLayout::Data(*this);
+  margin = 0;
 }

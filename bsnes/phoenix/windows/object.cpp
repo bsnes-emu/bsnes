@@ -34,17 +34,7 @@ struct Widget::Data {
 };
 
 struct Layout::Data {
-};
-
-struct FixedLayout::Data {
   Window *parent;
-
-  struct Widgets {
-    Widget *widget;
-    unsigned x, y;
-    unsigned width, height;
-  };
-  linear_vector<Widgets> widgets;
 };
 
 struct Canvas::Data {

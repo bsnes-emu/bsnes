@@ -129,25 +129,17 @@ struct Window : Widget {
 };
 
 struct Layout : Widget {
-  virtual void create(Window &parent) = 0;
+  virtual void setParent(Window &parent);
+  virtual void setParent(Window &parent, Widget &child);
+  virtual void update(Geometry &geometry) = 0;
   Layout();
 //private:
   struct Data;
   Data *layout;
 };
 
-struct FixedLayout : Layout {
-  void append(Widget &widget, unsigned x, unsigned y, unsigned width, unsigned height);
-  void create(Window &parent);
-  FixedLayout();
-//private:
-  struct Data;
-  Data *fixedLayout;
-};
-
 struct Button : Widget {
   nall::function<void ()> onTick;
-  void setParent(Layout &parent);
   void setText(const nall::string &text);
   Button();
 };
@@ -165,14 +157,14 @@ struct Canvas : Widget {
 
 struct CheckBox : Widget {
   nall::function<void ()> onTick;
-  void create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const nall::string &text = "");
   bool checked();
   void setChecked(bool checked = true);
+  void setText(const nall::string &text);
+  CheckBox();
 };
 
 struct ComboBox : Widget {
   nall::function<void ()> onChange;
-  void create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const nall::string &text = "");
   void reset();
   void addItem(const nall::string &text);
   unsigned selection();
@@ -185,7 +177,6 @@ struct ComboBox : Widget {
 
 struct EditBox : Widget {
   nall::function<void ()> onChange;
-  void create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const nall::string &text = "");
   nall::string getText();
   void setText(const nall::string &text);
   void setCursorPosition(unsigned position);
@@ -200,7 +191,6 @@ struct EditBox : Widget {
 struct HexEditor : Widget {
   nall::function<uint8_t (unsigned)> onRead;
   nall::function<void (unsigned, uint8_t)> onWrite;
-  void create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height);
   void setSize(unsigned size);
   void setOffset(unsigned offset);
   void setColumns(unsigned columns);
@@ -216,8 +206,8 @@ struct HexEditor : Widget {
 
 struct HorizontalSlider : Widget {
   nall::function<void ()> onChange;
-  void create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, unsigned length);
   unsigned position();
+  void setLength(unsigned length);
   void setPosition(unsigned position);
   HorizontalSlider();
 //private:
@@ -226,15 +216,15 @@ struct HorizontalSlider : Widget {
 };
 
 struct Label : Widget {
-  void create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const nall::string &text = "");
   void setText(const nall::string &text);
+  Label();
 };
 
 struct ListBox : Widget {
   nall::function<void ()> onActivate;
   nall::function<void ()> onChange;
   nall::function<void (unsigned)> onTick;
-  void create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const nall::string &text = "");
+  void setHeaderText(const nall::string &text);
   void setHeaderVisible(bool headerVisible = true);
   void setCheckable(bool checkable = true);
   void reset();
@@ -252,15 +242,15 @@ struct ListBox : Widget {
 };
 
 struct ProgressBar : Widget {
-  void create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height);
   unsigned position();
   void setPosition(unsigned position);
+  ProgressBar();
 };
 
 struct RadioBox : Widget {
   nall::function<void ()> onTick;
-  void create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const nall::string &text = "");
-  void create(RadioBox &parent, unsigned x, unsigned y, unsigned width, unsigned height, const nall::string &text = "");
+  void setParent(RadioBox &parent);
+  void setText(const nall::string &text);
   bool checked();
   void setChecked();
   RadioBox();
@@ -272,16 +262,16 @@ struct RadioBox : Widget {
 struct TextBox : Widget {
   nall::function<void ()> onActivate;
   nall::function<void ()> onChange;
-  void create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const nall::string &text = "");
   nall::string text();
   void setText(const nall::string &text);
   void setEditable(bool editable = true);
+  TextBox();
 };
 
 struct VerticalSlider : Widget {
   nall::function<void ()> onChange;
-  void create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, unsigned length);
   unsigned position();
+  void setLength(unsigned length);
   void setPosition(unsigned position);
   VerticalSlider();
 //private:
@@ -290,8 +280,8 @@ struct VerticalSlider : Widget {
 };
 
 struct Viewport : Widget {
-  void create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height);
   uintptr_t handle();
+  Viewport();
 };
 
 struct MessageWindow : Object {

@@ -19,7 +19,10 @@ void Window::create(unsigned x, unsigned y, unsigned width, unsigned height, con
 }
 
 void Window::setLayout(Layout &layout) {
-  layout.create(*this);
+  Geometry geom = geometry();
+  geom.x = geom.y = 0;
+  layout.setParent(*this);
+  layout.update(geom);
 }
 
 void Window::setDefaultFont(Font &font) {

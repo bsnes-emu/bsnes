@@ -19,14 +19,11 @@ static void ListBox_tick(GtkCellRendererToggle *cell, gchar *path_string, ListBo
   if(self->onTick) self->onTick(index);
 }
 
-void ListBox::create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const string &text) {
-  listBox->selection = -1;
-  object->widget = gtk_scrolled_window_new(0, 0);
-  widget->parent = &parent;
-  gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(object->widget), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
-  gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(object->widget), GTK_SHADOW_ETCHED_IN);
-  gtk_widget_set_size_request(object->widget, width, height);
+void ListBox::setFocused() {
+  gtk_widget_grab_focus(object->subWidget);
+}
 
+void ListBox::setHeaderText(const string &text) {
   lstring list;
   list.split("\t", string("\t", text));
 
@@ -67,14 +64,7 @@ void ListBox::create(Window &parent, unsigned x, unsigned y, unsigned width, uns
   g_signal_connect_swapped(G_OBJECT(object->subWidget), "cursor-changed", G_CALLBACK(ListBox_change), (gpointer)this);
   g_signal_connect_swapped(G_OBJECT(object->subWidget), "row-activated", G_CALLBACK(ListBox_activate), (gpointer)this);
 
-  if(parent.window->defaultFont) setFont(*parent.window->defaultFont);
-  gtk_fixed_put(GTK_FIXED(parent.object->formContainer), object->widget, x, y);
   gtk_widget_show(object->subWidget);
-  gtk_widget_show(object->widget);
-}
-
-void ListBox::setFocused() {
-  gtk_widget_grab_focus(object->subWidget);
 }
 
 void ListBox::setHeaderVisible(bool visible) {
@@ -192,4 +182,9 @@ void ListBox::setSelection(unsigned row) {
 ListBox::ListBox() {
   listBox = new ListBox::Data;
   listBox->checkable = false;
+  listBox->selection = -1;
+
+  object->widget = gtk_scrolled_window_new(0, 0);
+  gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(object->widget), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
+  gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(object->widget), GTK_SHADOW_ETCHED_IN);
 }

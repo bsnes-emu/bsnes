@@ -15,3 +15,9 @@
 #elif defined(PHOENIX_QT)
   #include "qt/qt.cpp"
 #endif
+
+namespace phoenix {
+  #include "layout/fixed-layout.cpp"
+  #include "layout/horizontal-layout.cpp"
+  #include "layout/vertical-layout.cpp"
+}

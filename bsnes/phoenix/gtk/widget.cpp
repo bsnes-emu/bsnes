@@ -35,8 +35,18 @@ void Widget::setFocused() {
   gtk_widget_grab_focus(object->widget);
 }
 
+Geometry Widget::geometry() {
+  return { widget->x, widget->y, widget->width, widget->height };
+}
+
 void Widget::setGeometry(unsigned x, unsigned y, unsigned width, unsigned height) {
   if(widget->parent == 0) return;
+
+  widget->x = x;
+  widget->y = y;
+  widget->width = width;
+  widget->height = height;
+
   gtk_fixed_move(GTK_FIXED(widget->parent->object->formContainer), object->widget, x, y);
   gtk_widget_set_size_request(object->widget, width, height);
 }
@@ -44,4 +54,8 @@ void Widget::setGeometry(unsigned x, unsigned y, unsigned width, unsigned height
 Widget::Widget() {
   widget = new Widget::Data;
   widget->parent = 0;
+  widget->x = 0;
+  widget->y = 0;
+  widget->width = 0;
+  widget->height = 0;
 }

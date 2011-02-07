@@ -16,22 +16,15 @@ static void Canvas_expose(Canvas *self) {
   );
 }
 
-void Canvas::create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height) {
+void Canvas::setGeometry(unsigned x, unsigned y, unsigned width, unsigned height) {
+  if(canvas->bufferRGB) delete[] canvas->bufferRGB;
+  if(canvas->bufferBGR) delete[] canvas->bufferBGR;
+
   canvas->bufferRGB = new uint32_t[width * height]();
   canvas->bufferBGR = new uint32_t[width * height]();
   canvas->pitch = width * sizeof(uint32_t);
 
-  object->widget = gtk_drawing_area_new();
-  widget->parent = &parent;
-  GdkColor color;
-  color.pixel = color.red = color.green = color.blue = 0;
-  gtk_widget_modify_bg(object->widget, GTK_STATE_NORMAL, &color);
-  gtk_widget_set_double_buffered(object->widget, false);
-  gtk_widget_add_events(object->widget, GDK_EXPOSURE_MASK);
-  gtk_widget_set_size_request(object->widget, width, height);
-  g_signal_connect_swapped(G_OBJECT(object->widget), "expose_event", G_CALLBACK(Canvas_expose), (gpointer)this);
-  gtk_fixed_put(GTK_FIXED(parent.object->formContainer), object->widget, x, y);
-  gtk_widget_show(object->widget);
+  Widget::setGeometry(x, y, width, height);
 }
 
 uint32_t* Canvas::buffer() {
@@ -51,6 +44,15 @@ Canvas::Canvas() {
   canvas = new Canvas::Data;
   canvas->bufferRGB = 0;
   canvas->bufferBGR = 0;
+  canvas->pitch = 0;
+
+  object->widget = gtk_drawing_area_new();
+  GdkColor color;
+  color.pixel = color.red = color.green = color.blue = 0;
+  gtk_widget_modify_bg(object->widget, GTK_STATE_NORMAL, &color);
+  gtk_widget_set_double_buffered(object->widget, false);
+  gtk_widget_add_events(object->widget, GDK_EXPOSURE_MASK);
+  g_signal_connect_swapped(G_OBJECT(object->widget), "expose_event", G_CALLBACK(Canvas_expose), (gpointer)this);
 }
 
 Canvas::~Canvas() {

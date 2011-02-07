@@ -143,47 +143,12 @@ struct Window : Object {
 
 struct Layout : Object {
   virtual void setParent(Window &parent);
-  virtual void update(Geometry &geometry);
-  void setMargin(unsigned margin);
+  virtual void setParent(Window &parent, Widget &child);
+  virtual void update(Geometry &geometry) = 0;
   Layout();
 //private:
   struct Data;
   Data *layout;
-};
-
-struct FixedLayout : Layout {
-  void setParent(Window &parent);
-  void append(Widget &widget, unsigned x, unsigned y, unsigned width, unsigned height);
-  void update(Geometry &geometry);
-  FixedLayout();
-//private:
-  struct Data;
-  Data *fixedLayout;
-};
-
-struct HorizontalLayout;
-struct VerticalLayout;
-
-struct HorizontalLayout : Layout {
-  void setParent(Window &parent);
-  void append(VerticalLayout &layout, unsigned width, unsigned height, unsigned spacing = 0);
-  void append(Widget &widget, unsigned width, unsigned height, unsigned spacing = 0);
-  void update(Geometry &geometry);
-  HorizontalLayout();
-//private:
-  struct Data;
-  Data *horizontalLayout;
-};
-
-struct VerticalLayout : Layout {
-  void setParent(Window &parent);
-  void append(HorizontalLayout &layout, unsigned width, unsigned height, unsigned spacing = 0);
-  void append(Widget &widget, unsigned width, unsigned height, unsigned spacing = 0);
-  void update(Geometry &geometry);
-  VerticalLayout();
-//private:
-  struct Data;
-  Data *verticalLayout;
 };
 
 struct Widget : Object {

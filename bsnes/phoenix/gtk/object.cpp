@@ -22,31 +22,25 @@ struct Action::Data {
 };
 
 struct Window::Data {
+  Layout *layout;
   Font *defaultFont;
   bool isFullscreen;
-  unsigned x;
-  unsigned y;
-  unsigned width;
-  unsigned height;
+  unsigned x, y;
+  unsigned width, height;
 };
 
 struct Widget::Data {
   Window *parent;
+  unsigned x, y;
+  unsigned width, height;
 };
 
 struct Layout::Data {
   Window *parent;
-  unsigned margin;
 };
 
-struct FixedLayout::Data {
-  Window *parent;
-  struct Children {
-    Widget *widget;
-    unsigned x, y;
-    unsigned width, height;
-  };
-  linear_vector<Children> children;
+struct ComboBox::Data {
+  unsigned counter;
 };
 
 struct Canvas::Data {

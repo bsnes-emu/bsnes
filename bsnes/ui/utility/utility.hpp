@@ -5,8 +5,11 @@ struct Utility : property<Utility> {
   void showMessage(const string &text);
 
   void setControllers();
+
+  void centerViewport();
   void setScale(unsigned scale = 0);
   void setFullscreen(bool fullscreen = true);
+
   void setFilter();
   void setShader();
 

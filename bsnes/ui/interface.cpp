@@ -79,11 +79,6 @@ void Filter::render(uint32_t *output, unsigned outpitch, const uint16_t *input, 
 }
 
 void Interface::video_refresh(const uint16_t *data, unsigned width, unsigned height) {
-  //TODO: this should not be necessary ... somehow window is not updated otherwise
-  mainWindow.viewport.setGeometry(
-    utility.viewportX, utility.viewportY, utility.viewportWidth, utility.viewportHeight
-  );
-
   bool interlace = (height >= 240);
   bool overscan = (height == 239 || height == 478);
   unsigned inpitch = interlace ? 1024 : 2048;

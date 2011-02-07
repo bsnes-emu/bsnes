@@ -10,21 +10,6 @@ static LRESULT CALLBACK HexEditor_WindowProc(HWND hwnd, UINT msg, WPARAM wparam,
   return self.hexEditor->windowProc(hwnd, msg, wparam, lparam);
 }
 
-void HexEditor::create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height) {
-  widget->window = CreateWindowEx(
-    WS_EX_CLIENTEDGE,
-    L"EDIT", L"",
-    WS_CHILD | WS_TABSTOP | WS_VISIBLE | ES_READONLY | ES_MULTILINE | ES_WANTRETURN,
-    x, y, width, height,
-    parent.widget->window, (HMENU)object->id, GetModuleHandle(0), 0
-  );
-  SetWindowLongPtr(widget->window, GWLP_USERDATA, (LONG_PTR)this);
-  SendMessage(widget->window, WM_SETFONT, (WPARAM)(parent.window->defaultFont ? parent.window->defaultFont : OS::os->monospaceFont), 0);
-
-  hexEditor->windowProc = (LRESULT CALLBACK (*)(HWND, UINT, LPARAM, WPARAM))GetWindowLongPtr(widget->window, GWLP_WNDPROC);
-  SetWindowLongPtr(widget->window, GWLP_WNDPROC, (LONG_PTR)HexEditor_WindowProc);
-}
-
 void HexEditor::setSize(unsigned size) {
   hexEditor->size = size;
   update();
@@ -142,6 +127,18 @@ HexEditor::HexEditor() {
   hexEditor->offset = 0;
   hexEditor->columns = 16;
   hexEditor->rows = 16;
+
+  widget->window = CreateWindowEx(
+    WS_EX_CLIENTEDGE,
+    L"EDIT", L"",
+    WS_CHILD | WS_TABSTOP | WS_VISIBLE | ES_READONLY | ES_MULTILINE | ES_WANTRETURN,
+    0, 0, 64, 64,
+    OS::os->nullWindow, (HMENU)object->id, GetModuleHandle(0), 0
+  );
+  SetWindowLongPtr(widget->window, GWLP_USERDATA, (LONG_PTR)this);
+
+  hexEditor->windowProc = (LRESULT CALLBACK (*)(HWND, UINT, LPARAM, WPARAM))GetWindowLongPtr(widget->window, GWLP_WNDPROC);
+  SetWindowLongPtr(widget->window, GWLP_WNDPROC, (LONG_PTR)HexEditor_WindowProc);
 }
 
 HexEditor::~HexEditor() {

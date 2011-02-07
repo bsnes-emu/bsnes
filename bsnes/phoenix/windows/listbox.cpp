@@ -1,15 +1,4 @@
-void ListBox::create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const string &text) {
-  widget->window = CreateWindowEx(
-    WS_EX_CLIENTEDGE, WC_LISTVIEW, L"",
-    WS_CHILD | WS_TABSTOP | WS_VISIBLE |
-    LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_NOSORTHEADER | LVS_NOCOLUMNHEADER,
-    x, y, width, height,
-    parent.widget->window, (HMENU)object->id, GetModuleHandle(0), 0
-  );
-  SetWindowLongPtr(widget->window, GWLP_USERDATA, (LONG_PTR)this);
-  SendMessage(widget->window, WM_SETFONT, (WPARAM)(parent.window->defaultFont ? parent.window->defaultFont : OS::os->proportionalFont), 0);
-  ListView_SetExtendedListViewStyle(widget->window, LVS_EX_FULLROWSELECT);
-
+void ListBox::setHeaderText(const string &text) {
   lstring list;
   list.split("\t", text);
   listBox->columns = list.size();
@@ -111,4 +100,14 @@ void ListBox::setChecked(unsigned row, bool checked) {
 ListBox::ListBox() {
   listBox = new ListBox::Data;
   listBox->lostFocus = false;
+
+  widget->window = CreateWindowEx(
+    WS_EX_CLIENTEDGE, WC_LISTVIEW, L"",
+    WS_CHILD | WS_TABSTOP | WS_VISIBLE |
+    LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_NOSORTHEADER | LVS_NOCOLUMNHEADER,
+    0, 0, 64, 64,
+    OS::os->nullWindow, (HMENU)object->id, GetModuleHandle(0), 0
+  );
+  SetWindowLongPtr(widget->window, GWLP_USERDATA, (LONG_PTR)this);
+  ListView_SetExtendedListViewStyle(widget->window, LVS_EX_FULLROWSELECT);
 }

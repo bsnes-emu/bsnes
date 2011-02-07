@@ -10,7 +10,7 @@ void APU::Noise::run() {
     }
   }
 
-  uint4 sample = (lfsr & 1) ? -volume : volume;
+  uint4 sample = (lfsr & 1) ? 0 : volume;
   if(counter && length == 0) sample = 0;
 
   output = (sample * 4369) - 32768;
