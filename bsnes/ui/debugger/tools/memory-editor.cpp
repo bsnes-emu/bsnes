@@ -1,7 +1,7 @@
 MemoryEditor memoryEditor;
 
 void MemoryEditor::create() {
-  Window::create(0, 0, 570, 230, "Memory Editor");
+  setTitle("Memory Editor");
   application.addWindow(this, "Debugger.MemoryEditor", "192,192");
 
   editor.setFont(application.monospaceFont);
@@ -20,6 +20,8 @@ void MemoryEditor::create() {
   controlLayout.append(gotoBox, 80, Style::ComboBoxHeight);
   controlLayout.append(refreshButton, 80, Style::ComboBoxHeight);
   layout.append(controlLayout, 80, 0);
+
+  setGeometry(0, 0, layout.minimumWidth() + 475, 230);
   setLayout(layout);
 
   onClose = []() {

@@ -1,3 +1,6 @@
+static void Action_setFont(GtkWidget *widget, gpointer font);
+static void Widget_setFont(GtkWidget *widget, gpointer font);
+
 static gint Window_close(Window *window) {
   if(window->onClose) {
     if(window->onClose()) window->setVisible(false);
@@ -8,58 +11,33 @@ static gint Window_close(Window *window) {
 }
 
 static void Window_configure(GtkWindow *widget, GdkEvent *event, Window *window) {
+  if(gtk_widget_get_realized(window->object->widget) == false) return;
+  window->updateFrameGeometry();
+
   if(window->window->x != event->configure.x || window->window->y != event->configure.y) {
     window->window->x = event->configure.x;
     window->window->y = event->configure.y;
+
     if(window->onMove) window->onMove();
   }
 
   if(window->window->width != event->configure.width || window->window->height != event->configure.height) {
     window->window->width = event->configure.width;
     window->window->height = event->configure.height;
+
     Geometry geom = window->geometry();
     geom.x = geom.y = 0;
-    if(window->window->layout) window->window->layout->update(geom);
-    if(window->onResize) window->onResize();
+    if(window->window->layout) window->window->layout->setGeometry(geom);
+
+    if(window->onSize) window->onSize();
   }
 }
 
-void Window::create(unsigned x, unsigned y, unsigned width, unsigned height, const string &text) {
-  window->x = x;
-  window->y = y;
-  window->width = width;
-  window->height = height;
-
-  object->widget = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-  gtk_window_move(GTK_WINDOW(object->widget), x, y);
-
-  gtk_window_set_title(GTK_WINDOW(object->widget), text);
-  gtk_window_set_resizable(GTK_WINDOW(object->widget), true);
-  gtk_widget_set_app_paintable(object->widget, true);
-
-  g_signal_connect_swapped(G_OBJECT(object->widget), "delete_event", G_CALLBACK(Window_close), (gpointer)this);
-  g_signal_connect(G_OBJECT(object->widget), "configure_event", G_CALLBACK(Window_configure), (gpointer)this);
-
-  object->menuContainer = gtk_vbox_new(false, 0);
-  gtk_container_add(GTK_CONTAINER(object->widget), object->menuContainer);
-  gtk_widget_show(object->menuContainer);
-
-  object->menu = gtk_menu_bar_new();
-  gtk_box_pack_start(GTK_BOX(object->menuContainer), object->menu, false, false, 0);
-
-  object->formContainer = gtk_fixed_new();
-  gtk_widget_set_size_request(object->formContainer, width, height);
-  gtk_box_pack_start(GTK_BOX(object->menuContainer), object->formContainer, true, true, 0);
-  gtk_widget_show(object->formContainer);
-
-  object->statusContainer = gtk_event_box_new();
-  object->status = gtk_statusbar_new();
-  gtk_statusbar_set_has_resize_grip(GTK_STATUSBAR(object->status), false);
-  gtk_container_add(GTK_CONTAINER(object->statusContainer), object->status);
-  gtk_box_pack_start(GTK_BOX(object->menuContainer), object->statusContainer, false, false, 0);
-  gtk_widget_show(object->statusContainer);
-
-  gtk_widget_realize(object->widget);
+void Window::append(Menu &menu) {
+  menu.action->font = window->defaultFont;
+  if(window->defaultFont) Action_setFont(menu.object->widget, window->defaultFont->font->font);
+  gtk_menu_bar_append(object->menu, menu.object->widget);
+  gtk_widget_show(menu.object->widget);
 }
 
 void Window::setLayout(Layout &layout) {
@@ -67,7 +45,7 @@ void Window::setLayout(Layout &layout) {
   layout.setParent(*this);
   Geometry geom = geometry();
   geom.x = geom.y = 0;
-  layout.update(geom);
+  layout.setGeometry(geom);
 }
 
 void Window::setResizable(bool resizable) {
@@ -84,15 +62,31 @@ void Window::setFocused() {
 }
 
 Geometry Window::frameGeometry() {
+  return {
+    window->x - settings.frameGeometryX, window->y - settings.frameGeometryY,
+    window->width + settings.frameGeometryWidth, window->height + settings.frameGeometryHeight
+  };
 }
 
 Geometry Window::geometry() {
   return { window->x, window->y, window->width, window->height };
 }
 
-void Window::setGeometry(unsigned x, unsigned y, unsigned width, unsigned height) {
-  gtk_window_move(GTK_WINDOW(object->widget), window->x = x, window->y = y);
-  gtk_widget_set_size_request(object->formContainer, window->width = width, window->height = height);
+void Window::setFrameGeometry(signed x, signed y, unsigned width, unsigned height) {
+  setGeometry(
+    x + settings.frameGeometryX, y + settings.frameGeometryY,
+    width - settings.frameGeometryWidth, height - settings.frameGeometryHeight
+  );
+}
+
+void Window::setGeometry(signed x, signed y, unsigned width, unsigned height) {
+  window->x = x;
+  window->y = y;
+  window->width = width;
+  window->height = height;
+
+  gtk_window_move(GTK_WINDOW(object->widget), x - settings.frameGeometryX, y - settings.frameGeometryY);
+  gtk_widget_set_size_request(object->formContainer, width, height);
 }
 
 void Window::setDefaultFont(Font &font) {
@@ -156,10 +150,57 @@ Window::Window() {
   window = new Window::Data;
   window->layout = 0;
   window->defaultFont = 0;
-  window->resizable = false;
+  window->resizable = true;
   window->fullscreen = false;
-  window->x = 0;
-  window->y = 0;
-  window->width = 0;
-  window->height = 0;
+  window->x = 128;
+  window->y = 128;
+  window->width = 256;
+  window->height = 256;
+
+  object->widget = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+  gtk_window_move(GTK_WINDOW(object->widget), window->x, window->y);
+
+  gtk_window_set_resizable(GTK_WINDOW(object->widget), window->resizable);
+  gtk_widget_set_app_paintable(object->widget, true);
+
+  object->menuContainer = gtk_vbox_new(false, 0);
+  gtk_container_add(GTK_CONTAINER(object->widget), object->menuContainer);
+  gtk_widget_show(object->menuContainer);
+
+  object->menu = gtk_menu_bar_new();
+  gtk_box_pack_start(GTK_BOX(object->menuContainer), object->menu, false, false, 0);
+
+  object->formContainer = gtk_fixed_new();
+  gtk_widget_set_size_request(object->formContainer, window->width, window->height);
+  gtk_box_pack_start(GTK_BOX(object->menuContainer), object->formContainer, true, true, 0);
+  gtk_widget_show(object->formContainer);
+
+  object->statusContainer = gtk_event_box_new();
+  object->status = gtk_statusbar_new();
+  gtk_statusbar_set_has_resize_grip(GTK_STATUSBAR(object->status), false);
+  gtk_container_add(GTK_CONTAINER(object->statusContainer), object->status);
+  gtk_box_pack_start(GTK_BOX(object->menuContainer), object->statusContainer, false, false, 0);
+  gtk_widget_show(object->statusContainer);
+
+  g_signal_connect_swapped(G_OBJECT(object->widget), "delete_event", G_CALLBACK(Window_close), (gpointer)this);
+  g_signal_connect(G_OBJECT(object->widget), "configure_event", G_CALLBACK(Window_configure), (gpointer)this);
+}
+
+//internal
+
+void Window::updateFrameGeometry() {
+  Display *display = XOpenDisplay(0);
+  XWindowAttributes attributes, parentAttributes;
+  XGetWindowAttributes(display, GDK_WINDOW_XID(object->widget->window), &attributes);
+  X11Window rootWindow, parentWindow, *childWindow = 0;
+  unsigned int childCount;
+  XQueryTree(display, GDK_WINDOW_XID(object->widget->window), &rootWindow, &parentWindow, &childWindow, &childCount);
+  XGetWindowAttributes(display, parentWindow, &parentAttributes);
+  if(childWindow) XFree(childWindow);
+  XCloseDisplay(display);
+
+  settings.frameGeometryX = attributes.x;
+  settings.frameGeometryY = attributes.y;
+  settings.frameGeometryWidth = parentAttributes.width - attributes.width;
+  settings.frameGeometryHeight = parentAttributes.height - attributes.height;
 }

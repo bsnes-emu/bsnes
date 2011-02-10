@@ -1,3 +1,13 @@
+struct Settings : public configuration {
+  unsigned frameGeometryX;
+  unsigned frameGeometryY;
+  unsigned frameGeometryWidth;
+  unsigned frameGeometryHeight;
+
+  void load();
+  void save();
+};
+
 struct Object::Data {
 public:
   Object &self;
@@ -69,8 +79,6 @@ struct MenuRadioItem::Data : public QAction {
 
 public:
   MenuRadioItem &self;
-  Menu *parent;
-  QActionGroup *actionGroup;
 
   Data(MenuRadioItem &self) : self(self), QAction(0) {
   }
@@ -129,11 +137,11 @@ public:
     if(layout) {
       Geometry geom = self.geometry();
       geom.x = geom.y = 0;
-      layout->update(geom);
+      layout->setGeometry(geom);
     }
 
-    if(self.object->locked == false && self.onResize) {
-      self.onResize();
+    if(self.object->locked == false && self.onSize) {
+      self.onSize();
     }
   }
 

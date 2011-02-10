@@ -1,7 +1,7 @@
 struct FixedLayout : public Layout {
   void setParent(Window &parent);
+  void setGeometry(Geometry &geometry);
   void append(Widget &widget, unsigned x, unsigned y, unsigned width, unsigned height);
-  void update(Geometry &geometry);
   FixedLayout();
 
 //private:

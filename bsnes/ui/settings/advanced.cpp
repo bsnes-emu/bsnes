@@ -1,7 +1,7 @@
 AdvancedSettings advancedSettings;
 
 void AdvancedSettings::create() {
-  Window::create(0, 0, 640, 80, "Advanced Settings");
+  setTitle("Advanced Settings");
   application.addWindow(this, "AdvancedSettings", "160,160");
 
   driverSelectionLabel.setText("Driver Selection :.");
@@ -22,34 +22,21 @@ void AdvancedSettings::create() {
 
   layout.setMargin(5);
   layout.append(driverSelectionLabel, 0, Style::LabelHeight);
-  driverLayout.append(videoDriverLabel, 40, Style::ComboBoxHeight, 5);
-  driverLayout.append(videoDriverBox, 0, Style::ComboBoxHeight, 5);
-  driverLayout.append(audioDriverLabel, 40, Style::ComboBoxHeight, 5);
-  driverLayout.append(audioDriverBox, 0, Style::ComboBoxHeight, 5);
-  driverLayout.append(inputDriverLabel, 40, Style::ComboBoxHeight, 5);
-  driverLayout.append(inputDriverBox, 0, Style::ComboBoxHeight);
+  driverLayout.append(videoDriverLabel, 40, 0, 5);
+  driverLayout.append(videoDriverBox,    0, 0, 5);
+  driverLayout.append(audioDriverLabel, 40, 0, 5);
+  driverLayout.append(audioDriverBox,    0, 0, 5);
+  driverLayout.append(inputDriverLabel, 40, 0, 5);
+  driverLayout.append(inputDriverBox,    0, 0);
   layout.append(driverLayout, 0, Style::ComboBoxHeight, 5);
   layout.append(focusPolicyLabel, 0, Style::LabelHeight);
-  focusPolicyLayout.append(focusPolicyPause, 0, Style::CheckBoxHeight, 5);
-  focusPolicyLayout.append(focusPolicyIgnore, 0, Style::CheckBoxHeight, 5);
-  focusPolicyLayout.append(focusPolicyAllow, 0, Style::CheckBoxHeight);
+  focusPolicyLayout.append(focusPolicyPause,  0, 0, 5);
+  focusPolicyLayout.append(focusPolicyIgnore, 0, 0, 5);
+  focusPolicyLayout.append(focusPolicyAllow,  0, 0);
   layout.append(focusPolicyLayout, 0, Style::CheckBoxHeight);
-  setLayout(layout);
 
-/*unsigned x = 5, y = 5;
-  layout.append(driverSelectionLabel, x,       y, 595, Style::LabelHeight);    y += Style::LabelHeight + 5;
-  layout.append(videoDriverLabel,     x,       y,  45, Style::ComboBoxHeight);
-  layout.append(videoDriverBox,       x +  45, y, 150, Style::ComboBoxHeight);
-  layout.append(audioDriverLabel,     x + 200, y,  45, Style::ComboBoxHeight);
-  layout.append(audioDriverBox,       x + 245, y, 150, Style::ComboBoxHeight);
-  layout.append(inputDriverLabel,     x + 400, y,  45, Style::ComboBoxHeight);
-  layout.append(inputDriverBox,       x + 445, y, 150, Style::ComboBoxHeight); y += Style::ComboBoxHeight + 5;
-  layout.append(focusPolicyLabel,     x,       y, 595, Style::LabelHeight);    y += Style::LabelHeight + 5;
-  layout.append(focusPolicyPause,     x,       y, 195, Style::CheckBoxHeight);
-  layout.append(focusPolicyIgnore,    x + 200, y, 195, Style::CheckBoxHeight);
-  layout.append(focusPolicyAllow,     x + 400, y, 195, Style::CheckBoxHeight); y += Style::CheckBoxHeight + 5;
-  setGeometry(0, 0, 605, y);
-  setLayout(layout);*/
+  setGeometry(0, 0, 640, layout.minimumHeight());
+  setLayout(layout);
 
   lstring list;
 

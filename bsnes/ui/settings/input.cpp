@@ -2,7 +2,7 @@ InputSettings inputSettings;
 static InputMapper::AbstractInput *activeInput = 0;
 
 void InputSettings::create() {
-  Window::create(0, 0, 640, 300, "Input Settings");
+  setTitle("Input Settings");
   application.addWindow(this, "InputSettings", "160,160");
   setFont(application.proportionalFontBold);
   setStatusVisible();
@@ -24,20 +24,22 @@ void InputSettings::create() {
   clearButton.setText("Clear");
 
   layout.setMargin(5);
-  selectionLayout.append(portLabel, 50, Style::ComboBoxHeight, 5);
-  selectionLayout.append(portBox, 0, Style::ComboBoxHeight, 5);
-  selectionLayout.append(deviceLabel, 50, Style::ComboBoxHeight, 5);
-  selectionLayout.append(deviceBox, 0, Style::ComboBoxHeight);
+  selectionLayout.append(portLabel,   50, 0, 5);
+  selectionLayout.append(portBox,      0, 0, 5);
+  selectionLayout.append(deviceLabel, 50, 0, 5);
+  selectionLayout.append(deviceBox,    0, 0);
   layout.append(selectionLayout, 0, Style::ComboBoxHeight, 5);
   layout.append(mappingList, 0, 0, 5);
-  mapLayout.append(mouseXaxis, 100, Style::ButtonHeight, 5);
-  mapLayout.append(mouseYaxis, 100, Style::ButtonHeight, 5);
-  mapLayout.append(mouseLeft, 100, Style::ButtonHeight, 5);
-  mapLayout.append(mouseMiddle, 100, Style::ButtonHeight, 5);
-  mapLayout.append(mouseRight, 100, Style::ButtonHeight, 5);
-  mapLayout.append(spacer, 0, Style::ButtonHeight);
-  mapLayout.append(clearButton, 80, Style::ButtonHeight);
+  mapLayout.append(mouseXaxis,  100, 0, 5);
+  mapLayout.append(mouseYaxis,  100, 0, 5);
+  mapLayout.append(mouseLeft,   100, 0, 5);
+  mapLayout.append(mouseMiddle, 100, 0, 5);
+  mapLayout.append(mouseRight,  100, 0, 5);
+  mapLayout.append(spacer,        0, 0);
+  mapLayout.append(clearButton,  80, 0);
   layout.append(mapLayout, 0, Style::ButtonHeight);
+
+  setGeometry(0, 0, 640, layout.minimumHeight() + 250);
   setLayout(layout);
 
   mouseXaxis.setVisible(false);

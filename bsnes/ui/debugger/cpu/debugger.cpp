@@ -1,7 +1,7 @@
 CPUDebugger cpuDebugger;
 
 void CPUDebugger::create() {
-  Window::create(0, 0, 495, 220, "CPU Debugger");
+  setTitle("CPU Debugger");
   application.addWindow(this, "Debugger.CPUdebugger", "192,192");
 
   output.setFont(application.monospaceFont);
@@ -17,6 +17,8 @@ void CPUDebugger::create() {
   controlLayout.append(stepOver, 80, Style::ButtonHeight);
   controlLayout.append(proceed, 80, Style::ButtonHeight);
   layout.append(controlLayout, 80, 0);
+
+  setGeometry(0, 0, layout.minimumWidth() + 300, 220);
   setLayout(layout);
 
   onClose = []() {

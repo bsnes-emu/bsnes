@@ -13,7 +13,7 @@ MessageWindow::Response MessageWindow::information(Window &parent, const string 
   if(buttons == Buttons::Ok) flags |= MB_OK;
   if(buttons == Buttons::OkCancel) flags |= MB_OKCANCEL;
   if(buttons == Buttons::YesNo) flags |= MB_YESNO;
-  return MessageWindow_response(buttons, MessageBox(&parent != &Window::None ? parent.widget->window : 0, utf16_t(text), L"", flags));
+  return MessageWindow_response(buttons, MessageBox(&parent != &Window::None ? parent.window->window : 0, utf16_t(text), L"", flags));
 }
 
 MessageWindow::Response MessageWindow::question(Window &parent, const string &text, MessageWindow::Buttons buttons) {
@@ -21,7 +21,7 @@ MessageWindow::Response MessageWindow::question(Window &parent, const string &te
   if(buttons == Buttons::Ok) flags |= MB_OK;
   if(buttons == Buttons::OkCancel) flags |= MB_OKCANCEL;
   if(buttons == Buttons::YesNo) flags |= MB_YESNO;
-  return MessageWindow_response(buttons, MessageBox(&parent != &Window::None ? parent.widget->window : 0, utf16_t(text), L"", flags));
+  return MessageWindow_response(buttons, MessageBox(&parent != &Window::None ? parent.window->window : 0, utf16_t(text), L"", flags));
 }
 
 MessageWindow::Response MessageWindow::warning(Window &parent, const string &text, MessageWindow::Buttons buttons) {
@@ -29,7 +29,7 @@ MessageWindow::Response MessageWindow::warning(Window &parent, const string &tex
   if(buttons == Buttons::Ok) flags |= MB_OK;
   if(buttons == Buttons::OkCancel) flags |= MB_OKCANCEL;
   if(buttons == Buttons::YesNo) flags |= MB_YESNO;
-  return MessageWindow_response(buttons, MessageBox(&parent != &Window::None ? parent.widget->window : 0, utf16_t(text), L"", flags));
+  return MessageWindow_response(buttons, MessageBox(&parent != &Window::None ? parent.window->window : 0, utf16_t(text), L"", flags));
 }
 
 MessageWindow::Response MessageWindow::critical(Window &parent, const string &text, MessageWindow::Buttons buttons) {
@@ -37,5 +37,5 @@ MessageWindow::Response MessageWindow::critical(Window &parent, const string &te
   if(buttons == Buttons::Ok) flags |= MB_OK;
   if(buttons == Buttons::OkCancel) flags |= MB_OKCANCEL;
   if(buttons == Buttons::YesNo) flags |= MB_YESNO;
-  return MessageWindow_response(buttons, MessageBox(&parent != &Window::None ? parent.widget->window : 0, utf16_t(text), L"", flags));
+  return MessageWindow_response(buttons, MessageBox(&parent != &Window::None ? parent.window->window : 0, utf16_t(text), L"", flags));
 }

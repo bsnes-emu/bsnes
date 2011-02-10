@@ -12,25 +12,32 @@ namespace phoenix {
 
 #include "object.cpp"
 #include "font.cpp"
-#include "menu.cpp"
-#include "widget.cpp"
 #include "window.cpp"
 #include "layout.cpp"
-#include "button.cpp"
-#include "canvas.cpp"
-#include "checkbox.cpp"
-#include "combobox.cpp"
-#include "editbox.cpp"
-#include "hexeditor.cpp"
-#include "horizontalslider.cpp"
-#include "label.cpp"
-#include "listbox.cpp"
-#include "progressbar.cpp"
-#include "radiobox.cpp"
-#include "textbox.cpp"
-#include "verticalslider.cpp"
-#include "viewport.cpp"
-#include "messagewindow.cpp"
+#include "message-window.cpp"
+
+#include "action/action.cpp"
+#include "action/menu.cpp"
+#include "action/menu-separator.cpp"
+#include "action/menu-item.cpp"
+#include "action/menu-check-item.cpp"
+#include "action/menu-radio-item.cpp"
+
+#include "widget/widget.cpp"
+#include "widget/button.cpp"
+#include "widget/canvas.cpp"
+#include "widget/check-box.cpp"
+#include "widget/combo-box.cpp"
+#include "widget/edit-box.cpp"
+#include "widget/hex-editor.cpp"
+#include "widget/horizontal-slider.cpp"
+#include "widget/label.cpp"
+#include "widget/list-box.cpp"
+#include "widget/progress-bar.cpp"
+#include "widget/radio-box.cpp"
+#include "widget/text-box.cpp"
+#include "widget/vertical-slider.cpp"
+#include "widget/viewport.cpp"
 
 OS::Data *OS::os = 0;
 Window Window::None;
@@ -151,7 +158,7 @@ unsigned OS::desktopHeight() {
 string OS::folderSelect(Window &parent, const string &path) {
   wchar_t wfilename[PATH_MAX + 1] = L"";
   BROWSEINFO bi;
-  bi.hwndOwner = &parent != &Window::None ? parent.widget->window : 0;
+  bi.hwndOwner = &parent != &Window::None ? parent.window->window : 0;
   bi.pidlRoot = NULL;
   bi.pszDisplayName = wfilename;
   bi.lpszTitle = L"";
@@ -211,7 +218,7 @@ string OS::fileOpen(Window &parent, const string &filter, const string &path) {
   OPENFILENAME ofn;
   memset(&ofn, 0, sizeof(OPENFILENAME));
   ofn.lStructSize = sizeof(OPENFILENAME);
-  ofn.hwndOwner = &parent != &Window::None ? parent.widget->window : 0;
+  ofn.hwndOwner = &parent != &Window::None ? parent.window->window : 0;
   ofn.lpstrFilter = wfilter;
   ofn.lpstrInitialDir = wdir;
   ofn.lpstrFile = wfilename;
@@ -259,7 +266,7 @@ string OS::fileSave(Window &parent, const string &filter, const string &path) {
   OPENFILENAME ofn;
   memset(&ofn, 0, sizeof(OPENFILENAME));
   ofn.lStructSize = sizeof(OPENFILENAME);
-  ofn.hwndOwner = &parent != &Window::None ? parent.widget->window : 0;
+  ofn.hwndOwner = &parent != &Window::None ? parent.window->window : 0;
   ofn.lpstrFilter = wfilter;
   ofn.lpstrInitialDir = wdir;
   ofn.lpstrFile = wfilename;
@@ -335,10 +342,10 @@ static LRESULT CALLBACK OS_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM
 
       if(window.window->layout) {
         geometry.x = geometry.y = 0;
-        window.window->layout->update(geometry);
+        window.window->layout->setGeometry(geometry);
       }
 
-      if(window.onResize) window.onResize();
+      if(window.onSize) window.onSize();
       break;
     }
 
@@ -352,11 +359,11 @@ static LRESULT CALLBACK OS_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM
     case WM_ERASEBKGND: {
       if(window.window->brush == 0) break;
       RECT rc;
-      GetClientRect(window.widget->window, &rc);
+      GetClientRect(window.window->window, &rc);
       PAINTSTRUCT ps;
-      BeginPaint(window.widget->window, &ps);
+      BeginPaint(window.window->window, &ps);
       FillRect(ps.hdc, &rc, window.window->brush);
-      EndPaint(window.widget->window, &ps);
+      EndPaint(window.window->window, &ps);
       return TRUE;
     }
 
@@ -372,7 +379,7 @@ static LRESULT CALLBACK OS_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM
 
     case WM_COMMAND: {
       unsigned id = LOWORD(wparam);
-      HWND control = GetDlgItem(window.widget->window, id);
+      HWND control = GetDlgItem(window.window->window, id);
       if(control == 0) {
         Object *object_ptr = (Object*)OS::findObject(id);
         if(object_ptr) {
@@ -432,7 +439,7 @@ static LRESULT CALLBACK OS_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM
 
     case WM_NOTIFY: {
       unsigned id = LOWORD(wparam);
-      HWND control = GetDlgItem(window.widget->window, id);
+      HWND control = GetDlgItem(window.window->window, id);
       if(control) {
         Object *object_ptr = (Object*)GetWindowLongPtr(control, GWLP_USERDATA);
         if(object_ptr) {
@@ -465,7 +472,7 @@ static LRESULT CALLBACK OS_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM
 
     case WM_HSCROLL: {
       unsigned id = LOWORD(wparam);
-      HWND control = GetDlgItem(window.widget->window, id);
+      HWND control = GetDlgItem(window.window->window, id);
       if(control) {
         Object *object_ptr = (Object*)GetWindowLongPtr(control, GWLP_USERDATA);
         if(object_ptr) {
@@ -482,7 +489,7 @@ static LRESULT CALLBACK OS_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM
 
     case WM_VSCROLL: {
       unsigned id = LOWORD(wparam);
-      HWND control = GetDlgItem(window.widget->window, id);
+      HWND control = GetDlgItem(window.window->window, id);
       if(control) {
         Object *object_ptr = (Object*)GetWindowLongPtr(control, GWLP_USERDATA);
         if(object_ptr) {

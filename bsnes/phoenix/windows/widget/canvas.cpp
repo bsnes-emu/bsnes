@@ -16,7 +16,7 @@ void Canvas::create(Window &parent, unsigned x, unsigned y, unsigned width, unsi
     L"phoenix_canvas", L"",
     WS_CHILD | WS_VISIBLE,
     x, y, width, height,
-    parent.widget->window, (HMENU)object->id, GetModuleHandle(0), 0
+    parent.window->window, (HMENU)object->id, GetModuleHandle(0), 0
   );
   SetWindowLongPtr(widget->window, GWLP_USERDATA, (LONG_PTR)this);
 }

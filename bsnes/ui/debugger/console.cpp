@@ -1,7 +1,7 @@
 Console console;
 
 void Console::create() {
-  Window::create(0, 0, 715, 350, "Console");
+  setTitle("Console");
   application.addWindow(this, "Debugger.Console", "192,192");
 
   output.setFont(application.monospaceFont);
@@ -23,17 +23,9 @@ void Console::create() {
   controlLayout.append(spacer, 120, 0, Style::CheckBoxHeight);
   controlLayout.append(clearConsole, 120, Style::ButtonHeight);
   layout.append(controlLayout, 120, 0);
-  setLayout(layout);
 
-/*unsigned x = 5, y = 5;
-  layout.append(output, x, y, 580, 338); x += 580 + 5;
-  layout.append(traceToConsole, x, y, 120, Style::CheckBoxHeight); y += Style::CheckBoxHeight;
-  layout.append(traceToFile, x, y, 120, Style::CheckBoxHeight); y += Style::CheckBoxHeight;
-  layout.append(traceCPU, x, y, 120, Style::CheckBoxHeight); y += Style::CheckBoxHeight;
-  layout.append(traceSMP, x, y, 120, Style::CheckBoxHeight); y += Style::CheckBoxHeight;
-  layout.append(clearConsole, x, 348 - Style::ButtonHeight - 5, 120, Style::ButtonHeight);
-  setGeometry(0, 0, 715, 348);
-  setLayout(layout);*/
+  setGeometry(0, 0, layout.minimumWidth() + 565, 350);
+  setLayout(layout);
 
   onClose = []() {
     debugger.showConsole.setChecked(false);

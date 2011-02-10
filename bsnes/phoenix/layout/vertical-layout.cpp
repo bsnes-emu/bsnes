@@ -7,6 +7,8 @@ void VerticalLayout::setParent(Window &parent) {
 }
 
 void VerticalLayout::append(HorizontalLayout &layout, unsigned width, unsigned height, unsigned spacing) {
+  layout.width = width;
+  layout.height = height;
   children.append({ &layout, 0, width, height, spacing });
 }
 
@@ -14,11 +16,14 @@ void VerticalLayout::append(Widget &widget, unsigned width, unsigned height, uns
   children.append({ 0, &widget, width, height, spacing });
 }
 
-void VerticalLayout::update(Geometry &geometry) {
+void VerticalLayout::setGeometry(Geometry &geometry) {
   geometry.x += margin;
   geometry.y += margin;
   geometry.width -= margin * 2;
   geometry.height -= margin * 2;
+
+  unsigned geometryWidth = width ? width : geometry.width;
+  unsigned geometryHeight = height ? height : geometry.height;
 
   Geometry baseGeometry = geometry;
   linear_vector<VerticalLayout::Children> children = this->children;
@@ -31,8 +36,8 @@ void VerticalLayout::update(Geometry &geometry) {
     if(child.height == 0) autosizeWidgets++;
   }
   foreach(child, children) {
-    if(child.width == 0) child.width = geometry.width;
-    if(child.height == 0) child.height = (geometry.height - minimumHeight) / autosizeWidgets;
+    if(child.width == 0) child.width = geometryWidth;
+    if(child.height == 0) child.height = (geometryHeight - minimumHeight) / autosizeWidgets;
   }
 
   unsigned maxWidth = 0;
@@ -42,7 +47,7 @@ void VerticalLayout::update(Geometry &geometry) {
 
   foreach(child, children) {
     if(child.layout) {
-      child.layout->update(geometry);
+      child.layout->setGeometry(geometry);
       geometry.x = baseGeometry.x;
       geometry.width = baseGeometry.width;
       geometry.y += child.spacing;
@@ -64,6 +69,14 @@ void VerticalLayout::setMargin(unsigned margin_) {
   margin = margin_;
 }
 
+unsigned VerticalLayout::minimumHeight() {
+  unsigned height = margin * 2;
+  foreach(child, children) height += child.height + child.spacing;
+  return height;
+}
+
 VerticalLayout::VerticalLayout() {
   margin = 0;
+  width = 0;
+  height = 0;
 }

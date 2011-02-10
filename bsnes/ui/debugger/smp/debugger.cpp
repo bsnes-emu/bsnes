@@ -1,7 +1,7 @@
 SMPDebugger smpDebugger;
 
 void SMPDebugger::create() {
-  Window::create(0, 0, 495, 220, "SMP Debugger");
+  setTitle("SMP Debugger");
   application.addWindow(this, "Debugger.SMPDebugger", "192,192");
 
   output.setFont(application.monospaceFont);
@@ -17,6 +17,8 @@ void SMPDebugger::create() {
   controlLayout.append(stepOver, 80, Style::ButtonHeight);
   controlLayout.append(proceed, 80, Style::ButtonHeight);
   layout.append(controlLayout, 80, 0);
+
+  setGeometry(0, 0, layout.minimumWidth() + 300, 220);
   setLayout(layout);
 
   onClose = []() {

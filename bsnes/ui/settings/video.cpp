@@ -1,7 +1,7 @@
 VideoSettings videoSettings;
 
 void VideoSettings::create() {
-  Window::create(0, 0, 480, 225, "Video Settings");
+  setTitle("Video Settings");
   application.addWindow(this, "VideoSettings", "160,160");
 
   colorAdjustmentLabel.setText("Color Adjustment :.");
@@ -33,34 +33,36 @@ void VideoSettings::create() {
 
   layout.setMargin(5);
   layout.append(colorAdjustmentLabel, 0, Style::LabelHeight);
-  brightnessLayout.append(brightnessLabel, 80, Style::SliderHeight);
-  brightnessLayout.append(brightnessValue, 50, Style::SliderHeight);
-  brightnessLayout.append(brightnessSlider, 0, Style::SliderHeight);
+  brightnessLayout.append(brightnessLabel, 80, 0);
+  brightnessLayout.append(brightnessValue, 50, 0);
+  brightnessLayout.append(brightnessSlider, 0, 0);
   layout.append(brightnessLayout, 0, Style::SliderHeight);
-  contrastLayout.append(contrastLabel, 80, Style::SliderHeight);
-  contrastLayout.append(contrastValue, 50, Style::SliderHeight);
-  contrastLayout.append(contrastSlider, 0, Style::SliderHeight);
+  contrastLayout.append(contrastLabel, 80, 0);
+  contrastLayout.append(contrastValue, 50, 0);
+  contrastLayout.append(contrastSlider, 0, 0);
   layout.append(contrastLayout, 0, Style::SliderHeight);
-  gammaLayout.append(gammaLabel, 80, Style::SliderHeight);
-  gammaLayout.append(gammaValue, 50, Style::SliderHeight);
-  gammaLayout.append(gammaSlider, 0, Style::SliderHeight);
+  gammaLayout.append(gammaLabel, 80, 0);
+  gammaLayout.append(gammaValue, 50, 0);
+  gammaLayout.append(gammaSlider, 0, 0);
   layout.append(gammaLayout, 0, Style::SliderHeight);
   layout.append(gammaRampCheck, 0, Style::CheckBoxHeight, 5);
   layout.append(fullscreenLabel, 0, Style::LabelHeight);
-  fullscreenLayout.append(fullscreenCenter, 0, Style::CheckBoxHeight);
-  fullscreenLayout.append(fullscreenScale, 0, Style::CheckBoxHeight);
-  fullscreenLayout.append(fullscreenStretch, 0, Style::CheckBoxHeight);
+  fullscreenLayout.append(fullscreenCenter,  0, 0);
+  fullscreenLayout.append(fullscreenScale,   0, 0);
+  fullscreenLayout.append(fullscreenStretch, 0, 0);
   layout.append(fullscreenLayout, 0, Style::CheckBoxHeight, 5);
   layout.append(filterLabel, 0, Style::LabelHeight);
-  filterLayout.append(filterPath, 0, Style::TextBoxHeight, 5);
-  filterLayout.append(filterClear, Style::TextBoxHeight, Style::TextBoxHeight, 5);
-  filterLayout.append(filterSelect, Style::TextBoxHeight, Style::TextBoxHeight);
+  filterLayout.append(filterPath, 0, 0, 5);
+  filterLayout.append(filterClear, Style::TextBoxHeight, 0, 5);
+  filterLayout.append(filterSelect, Style::TextBoxHeight, 0);
   layout.append(filterLayout, 0, Style::TextBoxHeight, 5);
   layout.append(shaderLabel, 0, Style::LabelHeight);
-  shaderLayout.append(shaderPath, 0, Style::TextBoxHeight, 5);
-  shaderLayout.append(shaderClear, Style::TextBoxHeight, Style::TextBoxHeight, 5);
-  shaderLayout.append(shaderSelect, Style::TextBoxHeight, Style::TextBoxHeight);
+  shaderLayout.append(shaderPath, 0, 0, 5);
+  shaderLayout.append(shaderClear, Style::TextBoxHeight, 0, 5);
+  shaderLayout.append(shaderSelect, Style::TextBoxHeight, 0);
   layout.append(shaderLayout, 0, Style::TextBoxHeight);
+
+  setGeometry(0, 0, 480, layout.minimumHeight());
   setLayout(layout);
 
   brightnessSlider.setPosition(config.video.brightness);

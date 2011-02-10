@@ -3,7 +3,11 @@ static void RadioBox_tick(RadioBox *self) {
 }
 
 void RadioBox::setParent(RadioBox &parent) {
-  first = parent.first;
+  gtk_radio_button_set_group(
+    GTK_RADIO_BUTTON(object->widget),
+    gtk_radio_button_get_group(GTK_RADIO_BUTTON(parent.object->widget))
+  );
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(object->widget), false);
 }
 
 void RadioBox::setText(const string &text) {
@@ -21,7 +25,7 @@ void RadioBox::setChecked() {
 }
 
 RadioBox::RadioBox() {
-  first = this;
   object->widget = gtk_radio_button_new_with_label(0, "");
+//  setChecked();
   g_signal_connect_swapped(G_OBJECT(object->widget), "toggled", G_CALLBACK(RadioBox_tick), (gpointer)this);
 }

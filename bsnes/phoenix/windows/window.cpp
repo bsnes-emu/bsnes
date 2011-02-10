@@ -1,20 +1,10 @@
 static const unsigned FixedStyle = WS_SYSMENU | WS_CAPTION | WS_MINIMIZEBOX | WS_BORDER;
 static const unsigned ResizableStyle = WS_SYSMENU | WS_CAPTION | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_THICKFRAME;
 
-void Window::create(unsigned x, unsigned y, unsigned width, unsigned height, const string &text) {
-  widget->window = CreateWindowEx(
-    0, L"phoenix_window", utf16_t(text), ResizableStyle,
-    0, 0, 64, 64, 0, 0, GetModuleHandle(0), 0
-  );
-  window->menu = CreateMenu();
-  window->status = CreateWindowEx(
-    0, STATUSCLASSNAME, L"", WS_CHILD,
-    0, 0, 0, 0, widget->window, 0, GetModuleHandle(0), 0
-  );
-  //StatusBar will be capable of receiving tab focus if it is not disabled
-  SetWindowLongPtr(window->status, GWL_STYLE, GetWindowLong(window->status, GWL_STYLE) | WS_DISABLED);
-  SetWindowLongPtr(widget->window, GWLP_USERDATA, (LONG_PTR)this);
-  setGeometry(x, y, width, height);
+void Window::append(Menu &menu) {
+  menu.action->parentMenu = window->menu;
+  menu.create();
+  AppendMenu(window->menu, MF_STRING | MF_POPUP, (UINT_PTR)menu.action->menu, utf16_t(menu.action->text));
 }
 
 void Window::setLayout(Layout &layout) {
@@ -22,12 +12,12 @@ void Window::setLayout(Layout &layout) {
   Geometry geom = geometry();
   geom.x = geom.y = 0;
   layout.setParent(*this);
-  layout.update(geom);
+  layout.setGeometry(geom);
 }
 
 void Window::setResizable(bool resizable) {
   window->resizable = resizable;
-  SetWindowLongPtr(widget->window, GWL_STYLE, window->resizable ? ResizableStyle : FixedStyle);
+  SetWindowLongPtr(window->window, GWL_STYLE, window->resizable ? ResizableStyle : FixedStyle);
   setGeometry(window->x, window->y, window->width, window->height);
 }
 
@@ -41,14 +31,12 @@ void Window::setFont(Font &font) {
 
 Geometry Window::frameGeometry() {
   RECT rc;
-  GetWindowRect(widget->window, &rc);
+  GetWindowRect(window->window, &rc);
 
-  unsigned x = rc.left;
-  unsigned y = rc.top;
+  signed x = rc.left;
+  signed y = rc.top;
   unsigned width = (rc.right - rc.left);
   unsigned height = (rc.bottom - rc.top);
-  if((signed)x < 0) x = 0;
-  if((signed)y < 0) y = 0;
 
   return { x, y, width, height };
 }
@@ -56,19 +44,22 @@ Geometry Window::frameGeometry() {
 Geometry Window::geometry() {
   Geometry fm = frameMargin();
   RECT rc;
-  GetWindowRect(widget->window, &rc);
+  GetWindowRect(window->window, &rc);
 
-  unsigned x = rc.left + fm.x;
-  unsigned y = rc.top + fm.y;
+  signed x = rc.left + fm.x;
+  signed y = rc.top + fm.y;
   unsigned width = (rc.right - rc.left) - fm.width;
   unsigned height = (rc.bottom - rc.top) - fm.height;
-  if((signed)x < 0) x = 0;
-  if((signed)y < 0) y = 0;
 
   return { x, y, width, height };
 }
 
-void Window::setGeometry(unsigned x, unsigned y, unsigned width, unsigned height) {
+void Window::setFrameGeometry(signed x, signed y, unsigned width, unsigned height) {
+  Geometry fm = frameMargin();
+  setGeometry(x + fm.x, y + fm.y, width - fm.width, height - fm.height);
+}
+
+void Window::setGeometry(signed x, signed y, unsigned width, unsigned height) {
   object->locked = true;
   if(window->fullscreen == false) {
     window->x = x;
@@ -77,8 +68,11 @@ void Window::setGeometry(unsigned x, unsigned y, unsigned width, unsigned height
     window->height = height;
   }
   Geometry fm = frameMargin();
-  SetWindowPos(widget->window, NULL, x - fm.x, y - fm.y, width + fm.width, height + fm.height, SWP_NOZORDER | SWP_FRAMECHANGED);
+  SetWindowPos(window->window, NULL, x - fm.x, y - fm.y, width + fm.width, height + fm.height, SWP_NOZORDER | SWP_FRAMECHANGED);
   SetWindowPos(window->status, NULL, 0, 0, 0, 0, SWP_NOZORDER | SWP_FRAMECHANGED);
+  Geometry geom = geometry();
+  geom.x = geom.y = 0;
+  if(window->layout) window->layout->setGeometry(geom);
   object->locked = false;
 }
 
@@ -89,7 +83,7 @@ void Window::setBackgroundColor(uint8_t red, uint8_t green, uint8_t blue) {
 }
 
 void Window::setTitle(const string &text) {
-  SetWindowText(widget->window, utf16_t(text));
+  SetWindowText(window->window, utf16_t(text));
 }
 
 void Window::setStatusText(const string &text) {
@@ -98,7 +92,7 @@ void Window::setStatusText(const string &text) {
 
 void Window::setMenuVisible(bool visible) {
   object->locked = true;
-  SetMenu(widget->window, visible ? window->menu : 0);
+  SetMenu(window->window, visible ? window->menu : 0);
   setGeometry(window->x, window->y, window->width, window->height);
   object->locked = false;
 }
@@ -118,17 +112,48 @@ void Window::setFullscreen(bool fullscreen) {
   object->locked = true;
   window->fullscreen = fullscreen;
   if(window->fullscreen == false) {
-    SetWindowLong(widget->window, GWL_STYLE, WS_VISIBLE | (window->resizable ? ResizableStyle : FixedStyle));
+    SetWindowLong(window->window, GWL_STYLE, WS_VISIBLE | (window->resizable ? ResizableStyle : FixedStyle));
     setGeometry(window->x, window->y, window->width, window->height);
   } else {
-    SetWindowLong(widget->window, GWL_STYLE, WS_VISIBLE | WS_POPUP);
+    SetWindowLong(window->window, GWL_STYLE, WS_VISIBLE | WS_POPUP);
     setGeometry(0, 0, GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN));
   }
   object->locked = false;
 }
 
+bool Window::visible() {
+  return GetWindowLongPtr(window->window, GWL_STYLE) & WS_VISIBLE;
+}
+
+void Window::setVisible(bool visible) {
+  ShowWindow(window->window, visible ? SW_SHOWNORMAL : SW_HIDE);
+}
+
+bool Window::focused() {
+  return (GetForegroundWindow() == window->window);
+}
+
+void Window::setFocused() {
+  if(visible() == false) setVisible(true);
+  SetFocus(window->window);
+}
+
 Window::Window() {
   window = new Window::Data;
+
+  window->window = CreateWindowEx(
+    0, L"phoenix_window", L"", ResizableStyle,
+    0, 0, 64, 64, 0, 0, GetModuleHandle(0), 0
+  );
+  window->menu = CreateMenu();
+  window->status = CreateWindowEx(
+    0, STATUSCLASSNAME, L"", WS_CHILD,
+    0, 0, 0, 0, window->window, 0, GetModuleHandle(0), 0
+  );
+  //StatusBar will be capable of receiving tab focus if it is not disabled
+  SetWindowLongPtr(window->status, GWL_STYLE, GetWindowLong(window->status, GWL_STYLE) | WS_DISABLED);
+  SetWindowLongPtr(window->window, GWLP_USERDATA, (LONG_PTR)this);
+  setGeometry(128, 128, 256, 256);
 }
 
 //internal
@@ -139,7 +164,7 @@ Geometry Window::frameMargin() {
   //width,height: total pixels of window geometry that are not part of client area
   //width-x,height-y: pixels from the bottom-right of window to the client area
   RECT rc = { 0, 0, 640, 480 };
-  AdjustWindowRect(&rc, window->resizable ? ResizableStyle : FixedStyle, (bool)GetMenu(widget->window));
+  AdjustWindowRect(&rc, window->resizable ? ResizableStyle : FixedStyle, (bool)GetMenu(window->window));
   unsigned statusHeight = 0;
   if(GetWindowLongPtr(window->status, GWL_STYLE) & WS_VISIBLE) {
     RECT src;

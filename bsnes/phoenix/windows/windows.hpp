@@ -14,10 +14,10 @@ private:
 };
 
 struct Geometry {
-  unsigned x, y;
+  signed x, y;
   unsigned width, height;
   inline Geometry() : x(0), y(0), width(0), height(0) {}
-  inline Geometry(unsigned x, unsigned y, unsigned width, unsigned height) : x(x), y(y), width(width), height(height) {}
+  inline Geometry(signed x, signed y, unsigned width, unsigned height) : x(x), y(y), width(width), height(height) {}
 };
 
 struct Font : Object {
@@ -37,6 +37,42 @@ struct Font : Object {
 inline Font::Style operator|(Font::Style a, Font::Style b) { return (Font::Style)((unsigned)a | (unsigned)b); }
 inline Font::Style operator&(Font::Style a, Font::Style b) { return (Font::Style)((unsigned)a & (unsigned)b); }
 
+struct Menu;
+struct Layout;
+struct Widget;
+
+struct Window : Object {
+  nall::function<bool ()> onClose;
+  nall::function<void ()> onMove;
+  nall::function<void ()> onSize;
+  void append(Menu &menu);
+  void setLayout(Layout &layout);
+  void setResizable(bool resizable);
+  void setDefaultFont(Font &font);
+  void setFont(Font &font);
+  Geometry frameGeometry();
+  Geometry geometry();
+  void setFrameGeometry(signed x, signed y, unsigned width, unsigned height);
+  void setGeometry(signed x, signed y, unsigned width, unsigned height);
+  void setBackgroundColor(uint8_t red, uint8_t green, uint8_t blue);
+  void setTitle(const nall::string &text);
+  void setStatusText(const nall::string &text);
+  void setMenuVisible(bool visible = true);
+  void setStatusVisible(bool visible = true);
+  bool fullscreen();
+  void setFullscreen(bool fullscreen = true);
+  bool visible();
+  void setVisible(bool visible = true);
+  bool focused();
+  void setFocused();
+  Window();
+//private:
+  struct Data;
+  Data *window;
+  static Window None;
+  Geometry frameMargin();
+};
+
 struct Action : Object {
   virtual bool enabled() = 0;
   virtual void setEnabled(bool enabled = true) = 0;
@@ -47,28 +83,32 @@ struct Action : Object {
 };
 
 struct Menu : Action {
-  void create(Window &parent, const nall::string &text);
-  void create(Menu &parent, const nall::string &text);
+  void append(Action &action);
+  void setText(const nall::string &text);
   bool enabled();
   void setEnabled(bool enabled = true);
+  Menu();
+//private:
+  struct Data;
+  Data *menu;
+  void create();
 };
 
 struct MenuSeparator : Action {
-  void create(Menu &parent);
   bool enabled();
   void setEnabled(bool enabled = true);
 };
 
 struct MenuItem : Action {
   nall::function<void ()> onTick;
-  void create(Menu &parent, const nall::string &text);
+  void setText(const nall::string &text);
   bool enabled();
   void setEnabled(bool enabled = true);
 };
 
 struct MenuCheckItem : Action {
   nall::function<void ()> onTick;
-  void create(Menu &parent, const nall::string &text);
+  void setText(const nall::string &text);
   bool enabled();
   void setEnabled(bool enabled = true);
   bool checked();
@@ -77,16 +117,14 @@ struct MenuCheckItem : Action {
 
 struct MenuRadioItem : Action {
   nall::function<void ()> onTick;
-  void create(Menu &parent, const nall::string &text);
-  void create(MenuRadioItem &parent, const nall::string &text);
+  void setParent(MenuRadioItem &parent);
+  void setText(const nall::string &text);
   bool enabled();
   void setEnabled(bool enabled = true);
   bool checked();
   void setChecked();
+  MenuRadioItem();
 };
-
-struct Window;
-struct Layout;
 
 struct Widget : Object {
   virtual void setParent(Layout &parent) {}
@@ -105,39 +143,10 @@ struct Widget : Object {
   Data *widget;
 };
 
-struct Window : Widget {
-  nall::function<bool ()> onClose;
-  nall::function<void ()> onMove;
-  nall::function<void ()> onResize;
-  void create(unsigned x, unsigned y, unsigned width, unsigned height, const nall::string &text = "");
-  void setLayout(Layout &layout);
-  void setResizable(bool resizable);
-  void setDefaultFont(Font &font);
-  void setFont(Font &font);
-  Geometry frameGeometry();
-  Geometry geometry();
-  void setGeometry(unsigned x, unsigned y, unsigned width, unsigned height);
-  void setBackgroundColor(uint8_t red, uint8_t green, uint8_t blue);
-  void setTitle(const nall::string &text);
-  void setStatusText(const nall::string &text);
-  void setMenuVisible(bool visible = true);
-  void setStatusVisible(bool visible = true);
-  bool fullscreen();
-  void setFullscreen(bool fullscreen = true);
-  Window();
-//private:
-  struct Data;
-  Data *window;
-  static Window None;
-//private:
-  Geometry frameMargin();
-  void resize(unsigned width, unsigned height);
-};
-
 struct Layout : Widget {
   virtual void setParent(Window &parent);
+  virtual void setGeometry(Geometry &geometry) = 0;
   virtual void append(Widget &widget);
-  virtual void update(Geometry &geometry) = 0;
   Layout();
 //private:
   struct Data;

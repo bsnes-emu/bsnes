@@ -10,7 +10,7 @@ void FixedLayout::append(Widget &widget, unsigned x, unsigned y, unsigned width,
   children.append({ &widget, x, y, width, height });
 }
 
-void FixedLayout::update(Geometry &geometry) {
+void FixedLayout::setGeometry(Geometry &geometry) {
 }
 
 FixedLayout::FixedLayout() {

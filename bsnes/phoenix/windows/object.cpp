@@ -13,9 +13,24 @@ struct Action::Data {
   HMENU menu;
   MenuRadioItem *radioParent;
   array<MenuRadioItem*> items;
+  string text;
+  bool checked;
+
+  Data() {
+    parent = 0;
+    parentMenu = 0;
+    menu = 0;
+    radioParent = 0;
+    checked = false;
+  }
+};
+
+struct Menu::Data {
+  array<Action*> children;
 };
 
 struct Window::Data {
+  HWND window;
   Layout *layout;
   HFONT defaultFont;
   HBRUSH brush;
@@ -30,6 +45,7 @@ struct Window::Data {
   unsigned height;
 
   Data() {
+    window = 0;
     layout = 0;
     defaultFont = 0;
     brush = 0;

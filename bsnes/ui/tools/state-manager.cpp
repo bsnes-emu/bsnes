@@ -1,7 +1,7 @@
 StateManager stateManager;
 
 void StateManager::create() {
-  Window::create(0, 0, 480, 300, "State Manager");
+  setTitle("State Manager");
   application.addWindow(this, "StateManager", "160,160");
 
   stateList.setHeaderText("Slot\tDescription");
@@ -13,25 +13,17 @@ void StateManager::create() {
 
   layout.setMargin(5);
   layout.append(stateList, 0, 0, 5);
-  descLayout.append(descLabel, 80, Style::TextBoxHeight, 5);
-  descLayout.append(descEdit, 0, Style::TextBoxHeight);
+  descLayout.append(descLabel, 80, 0, 5);
+  descLayout.append(descEdit,   0, 0);
   layout.append(descLayout, 0, Style::TextBoxHeight, 5);
-  controlLayout.append(spacer, 0, Style::ButtonHeight);
-  controlLayout.append(loadButton, 80, Style::ButtonHeight, 5);
-  controlLayout.append(saveButton, 80, Style::ButtonHeight, 5);
-  controlLayout.append(eraseButton, 80, Style::ButtonHeight);
+  controlLayout.append(spacer,       0, 0);
+  controlLayout.append(loadButton,  80, 0, 5);
+  controlLayout.append(saveButton,  80, 0, 5);
+  controlLayout.append(eraseButton, 80, 0);
   layout.append(controlLayout, 0, Style::ButtonHeight);
-  setLayout(layout);
 
-/*unsigned x = 5, y = 5;
-  layout.append(stateList,   x,                      y, 500, 250);                  y += 255;
-  layout.append(descLabel,   x,                      y,  80, Style::TextBoxHeight);
-  layout.append(descEdit,    x + 80,                 y, 420, Style::TextBoxHeight); y += Style::TextBoxHeight + 5;
-  layout.append(loadButton,  x + 505 - 85 - 85 - 85, y,  80, Style::ButtonHeight);
-  layout.append(saveButton,  x + 505 - 85 - 85,      y,  80, Style::ButtonHeight);
-  layout.append(eraseButton, x + 505 - 85,           y,  80, Style::ButtonHeight);  y += Style::ButtonHeight + 5;
-  setGeometry(0, 0, 510, y);
-  setLayout(layout);*/
+  setGeometry(0, 0, 480, layout.minimumHeight() + 250);
+  setLayout(layout);
 
   synchronize();
 

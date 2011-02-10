@@ -1,3 +1,7 @@
+#include <nall/config.hpp>
+#include <nall/platform.hpp>
+using namespace nall;
+
 #include <unistd.h>
 #include <pwd.h>
 #include <sys/stat.h>
@@ -17,27 +21,35 @@ using namespace nall;
 
 namespace phoenix {
 
+#include "settings.cpp"
 #include "object.cpp"
 #include "font.cpp"
-#include "menu.cpp"
-#include "widget.cpp"
 #include "window.cpp"
 #include "layout.cpp"
-#include "button.cpp"
-#include "canvas.cpp"
-#include "checkbox.cpp"
-#include "combobox.cpp"
-#include "editbox.cpp"
-#include "hexeditor.cpp"
-#include "horizontalslider.cpp"
-#include "label.cpp"
-#include "listbox.cpp"
-#include "progressbar.cpp"
-#include "radiobox.cpp"
-#include "textbox.cpp"
-#include "verticalslider.cpp"
-#include "viewport.cpp"
-#include "messagewindow.cpp"
+#include "message-window.cpp"
+
+#include "action/action.cpp"
+#include "action/menu.cpp"
+#include "action/menu-separator.cpp"
+#include "action/menu-item.cpp"
+#include "action/menu-check-item.cpp"
+#include "action/menu-radio-item.cpp"
+
+#include "widget/widget.cpp"
+#include "widget/button.cpp"
+#include "widget/canvas.cpp"
+#include "widget/check-box.cpp"
+#include "widget/combo-box.cpp"
+#include "widget/edit-box.cpp"
+#include "widget/hex-editor.cpp"
+#include "widget/horizontal-slider.cpp"
+#include "widget/label.cpp"
+#include "widget/list-box.cpp"
+#include "widget/progress-bar.cpp"
+#include "widget/radio-box.cpp"
+#include "widget/text-box.cpp"
+#include "widget/vertical-slider.cpp"
+#include "widget/viewport.cpp"
 
 Window Window::None;
 
@@ -45,6 +57,8 @@ void OS::initialize() {
   static bool initialized = false;
   if(initialized == true) return;
   initialized = true;
+
+  settings.load();
 
   int argc = 1;
   char *argv[2];
@@ -78,6 +92,7 @@ void OS::main() {
 }
 
 void OS::quit() {
+  settings.save();
   gtk_main_quit();
 }
 

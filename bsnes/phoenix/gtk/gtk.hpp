@@ -13,10 +13,10 @@ struct Object {
 };
 
 struct Geometry {
-  unsigned x, y;
+  signed x, y;
   unsigned width, height;
   inline Geometry() : x(0), y(0), width(0), height(0) {}
-  inline Geometry(unsigned x, unsigned y, unsigned width, unsigned height) : x(x), y(y), width(width), height(height) {}
+  inline Geometry(signed x, signed y, unsigned width, unsigned height) : x(x), y(y), width(width), height(height) {}
 };
 
 struct Font : Object {
@@ -36,63 +36,24 @@ struct Font : Object {
 inline Font::Style operator|(Font::Style a, Font::Style b) { return (Font::Style)((unsigned)a | (unsigned)b); }
 inline Font::Style operator&(Font::Style a, Font::Style b) { return (Font::Style)((unsigned)a & (unsigned)b); }
 
-struct Action : Object {
-  bool visible();
-  void setVisible(bool visible = true);
-  bool enabled();
-  void setEnabled(bool enabled = true);
-  Action();
-//private:
-  struct Data;
-  Data *action;
-};
-
-struct Menu : Action {
-  void create(Window &parent, const nall::string &text);
-  void create(Menu &parent, const nall::string &text);
-};
-
-struct MenuSeparator : Action {
-  void create(Menu &parent);
-};
-
-struct MenuItem : Action {
-  nall::function<void ()> onTick;
-  void create(Menu &parent, const nall::string &text);
-};
-
-struct MenuCheckItem : Action {
-  nall::function<void ()> onTick;
-  void create(Menu &parent, const nall::string &text);
-  bool checked();
-  void setChecked(bool checked = true);
-};
-
-struct MenuRadioItem : Action {
-  nall::function<void ()> onTick;
-  void create(Menu &parent, const nall::string &text);
-  void create(MenuRadioItem &parent, const nall::string &text);
-  bool checked();
-  void setChecked();
-private:
-  MenuRadioItem *first;
-};
-
+struct Menu;
 struct Layout;
 struct Widget;
 
 struct Window : Object {
+  static Window None;
   nall::function<bool ()> onClose;
   nall::function<void ()> onMove;
-  nall::function<void ()> onResize;
-  void create(unsigned x, unsigned y, unsigned width, unsigned height, const nall::string &text = "");
+  nall::function<void ()> onSize;
+  void append(Menu &menu);
   void setLayout(Layout &layout);
   void setResizable(bool resizable = true);
   bool focused();
   void setFocused();
   Geometry frameGeometry();
   Geometry geometry();
-  void setGeometry(unsigned x, unsigned y, unsigned width, unsigned height);
+  void setFrameGeometry(signed x, signed y, unsigned width, unsigned height);
+  void setGeometry(signed x, signed y, unsigned width, unsigned height);
   void setDefaultFont(Font &font);
   void setFont(Font &font);
   void setBackgroundColor(uint8_t red, uint8_t green, uint8_t blue);
@@ -107,13 +68,57 @@ struct Window : Object {
 //private:
   struct Data;
   Data *window;
-  static Window None;
+  void updateFrameGeometry();
+};
+
+struct Action : Object {
+  bool visible();
+  void setVisible(bool visible = true);
+  bool enabled();
+  void setEnabled(bool enabled = true);
+  Action();
+//private:
+  struct Data;
+  Data *action;
+};
+
+struct Menu : Action {
+  void append(Action &action);
+  void setText(const nall::string &text);
+  Menu();
+};
+
+struct MenuSeparator : Action {
+  MenuSeparator();
+};
+
+struct MenuItem : Action {
+  nall::function<void ()> onTick;
+  void setText(const nall::string &text);
+  MenuItem();
+};
+
+struct MenuCheckItem : Action {
+  nall::function<void ()> onTick;
+  void setText(const nall::string &text);
+  bool checked();
+  void setChecked(bool checked = true);
+  MenuCheckItem();
+};
+
+struct MenuRadioItem : Action {
+  nall::function<void ()> onTick;
+  void setParent(MenuRadioItem &parent);
+  void setText(const nall::string &text);
+  bool checked();
+  void setChecked();
+  MenuRadioItem();
 };
 
 struct Layout : Object {
   virtual void setParent(Window &parent);
+  virtual void setGeometry(Geometry &geometry) = 0;
   virtual void append(Widget &widget);
-  virtual void update(Geometry &geometry) = 0;
   Layout();
 //private:
   struct Data;
@@ -255,8 +260,6 @@ struct RadioBox : Widget {
   bool checked();
   void setChecked();
   RadioBox();
-private:
-  RadioBox *first;
 };
 
 struct TextBox : Widget {

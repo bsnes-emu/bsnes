@@ -18,7 +18,7 @@ void Debugger::create() {
   breakpointEditor.create();
   memoryEditor.create();
 
-  Window::create(0, 0, 256, 80, "Debugger");
+  setTitle("Debugger");
   application.addWindow(this, "Debugger", "160,160");
 
   enableDebugger.setText("Enable debugger");
@@ -35,6 +35,8 @@ void Debugger::create() {
   layout.append(showSMPDebugger, 0, Style::CheckBoxHeight);
   layout.append(showBreakpointEditor, 0, Style::CheckBoxHeight);
   layout.append(showMemoryEditor, 0, Style::CheckBoxHeight);
+
+  setGeometry(0, 0, 256, layout.minimumHeight());
   setLayout(layout);
 
 /*unsigned x = 5, y = 5;

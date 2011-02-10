@@ -4,7 +4,7 @@ void Widget::setFont(Font &font) {
 }
 
 bool Widget::visible() {
-  return GetWindowLong(widget->window, GWL_STYLE) & WS_VISIBLE;
+  return GetWindowLongPtr(widget->window, GWL_STYLE) & WS_VISIBLE;
 }
 
 void Widget::setVisible(bool visible) {

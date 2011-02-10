@@ -1,39 +1,226 @@
 MainWindow mainWindow;
 
 void MainWindow::create() {
-  Window::create(0, 0, 595, 448, { SNES::Info::Name, " v", SNES::Info::Version });
+  setTitle({ SNES::Info::Name, " v", SNES::Info::Version });
+  setResizable(false);
+  setGeometry(0, 0, 595, 448);
   application.addWindow(this, "MainWindow", "128,128");
   setFont(application.proportionalFontBold);
   setBackgroundColor(0, 0, 0);
 
-  system.create(*this, "System");
-  systemLoadCartridge.create(system, "Load Cartridge ...");
-  systemLoadCartridgeSpecial.create(system, "Load Special");
-  systemLoadCartridgeBsxSlotted.create(systemLoadCartridgeSpecial, "Load BS-X Slotted Cartridge ...");
-  systemLoadCartridgeBsx.create(systemLoadCartridgeSpecial, "Load BS-X Cartridge ...");
-  systemLoadCartridgeSufamiTurbo.create(systemLoadCartridgeSpecial, "Load Sufami Turbo Cartridge ...");
-  systemLoadCartridgeSuperGameBoy.create(systemLoadCartridgeSpecial, "Load Super Game Boy Cartridge ...");
-  systemSeparator1.create(system);
-  systemPower.create(system, "Power Cycle");
-  systemReset.create(system, "Reset");
-  systemSeparator2.create(system);
-  systemPort1.create(system, "Controller Port 1");
-  systemPort1None.create(systemPort1, "None");
-  systemPort1Gamepad.create(systemPort1None, "Gamepad");
-  systemPort1Multitap.create(systemPort1None, "Multitap");
-  systemPort1Mouse.create(systemPort1None, "Mouse");
+  system.setText("System");
+
+  systemLoadCartridge.setText("Load Cartridge ...");
+  system.append(systemLoadCartridge);
+
+  systemLoadCartridgeSpecial.setText("Load Special");
+  system.append(systemLoadCartridgeSpecial);
+
+  systemLoadCartridgeBsxSlotted.setText("Load BS-X Slotted Cartridge ...");
+  systemLoadCartridgeSpecial.append(systemLoadCartridgeBsxSlotted);
+
+  systemLoadCartridgeBsx.setText("Load BS-X Cartridge ...");
+  systemLoadCartridgeSpecial.append(systemLoadCartridgeBsx);
+
+  systemLoadCartridgeSufamiTurbo.setText("Load Sufami Turbo Cartridge ...");
+  systemLoadCartridgeSpecial.append(systemLoadCartridgeSufamiTurbo);
+
+  systemLoadCartridgeSuperGameBoy.setText("Load Super Game Boy Cartridge ...");
+  systemLoadCartridgeSpecial.append(systemLoadCartridgeSuperGameBoy);
+
+  system.append(systemSeparator1);
+
+  systemPower.setText("Power Cycle");
+  system.append(systemPower);
+
+  systemReset.setText("Reset");
+  system.append(systemReset);
+
+  system.append(systemSeparator2);
+
+  systemPort1.setText("Controller Port 1");
+  system.append(systemPort1);
+
+  systemPort1None.setText("None");
+  systemPort1.append(systemPort1None);
+
+  systemPort1Gamepad.setText("Gamepad");
+  systemPort1Gamepad.setParent(systemPort1None);
+  systemPort1.append(systemPort1Gamepad);
+
+  systemPort1Multitap.setText("Multitap");
+  systemPort1Multitap.setParent(systemPort1None);
+  systemPort1.append(systemPort1Multitap);
+
+  systemPort1Mouse.setText("Mouse");
+  systemPort1Mouse.setParent(systemPort1None);
+  systemPort1.append(systemPort1Mouse);
+
+  systemPort2.setText("Controller Port 2");
+  system.append(systemPort2);
+
+  systemPort2None.setText("None");
+  systemPort2.append(systemPort2None);
+
+  systemPort2Gamepad.setText("Gamepad");
+  systemPort2Gamepad.setParent(systemPort2None);
+  systemPort2.append(systemPort2Gamepad);
+
+  systemPort2Multitap.setText("Multitap");
+  systemPort2Multitap.setParent(systemPort2None);
+  systemPort2.append(systemPort2Multitap);
+
+  systemPort2Mouse.setText("Mouse");
+  systemPort2Mouse.setParent(systemPort2None);
+  systemPort2.append(systemPort2Mouse);
+
+  systemPort2SuperScope.setText("Super Scope");
+  systemPort2SuperScope.setParent(systemPort2None);
+  systemPort2.append(systemPort2SuperScope);
+
+  systemPort2Justifier.setText("Justifier");
+  systemPort2Justifier.setParent(systemPort2None);
+  systemPort2.append(systemPort2Justifier);
+
+  systemPort2Justifiers.setText("Justifiers");
+  systemPort2Justifiers.setParent(systemPort2None);
+  systemPort2.append(systemPort2Justifiers);
+
+  append(system);
+
+  settings.setText("Settings");
+
+  settingsVideoMode.setText("Video Mode");
+  settings.append(settingsVideoMode);
+
+  settingsVideoMode1x.setText("Scale 1x");
+  settingsVideoMode.append(settingsVideoMode1x);
+
+  settingsVideoMode2x.setText("Scale 2x");
+  settingsVideoMode2x.setParent(settingsVideoMode1x);
+  settingsVideoMode.append(settingsVideoMode2x);
+
+  settingsVideoMode3x.setText("Scale 3x");
+  settingsVideoMode3x.setParent(settingsVideoMode1x);
+  settingsVideoMode.append(settingsVideoMode3x);
+
+  settingsVideoMode4x.setText("Scale 4x");
+  settingsVideoMode4x.setParent(settingsVideoMode1x);
+  settingsVideoMode.append(settingsVideoMode4x);
+
+  settingsVideoMode5x.setText("Scale 5x");
+  settingsVideoMode5x.setParent(settingsVideoMode1x);
+  settingsVideoMode.append(settingsVideoMode5x);
+
+  settingsVideoMode.append(settingsVideoModeSeparator1);
+
+  settingsVideoModeAspectRatioCorrection.setText("Correct Aspect Ratio");
+  settingsVideoMode.append(settingsVideoModeAspectRatioCorrection);
+
+  settingsVideoMode.append(settingsVideoModeSeparator2);
+
+  settingsVideoModeNTSC.setText("NTSC");
+  settingsVideoMode.append(settingsVideoModeNTSC);
+
+  settingsVideoModePAL.setText("PAL");
+  settingsVideoMode.append(settingsVideoModePAL);
+
+  settingsSmoothVideo.setText("Smooth Video");
+  settings.append(settingsSmoothVideo);
+
+  settings.append(settingsSeparator1);
+
+  settingsSynchronizeVideo.setText("Synchronize Video");
+  settings.append(settingsSynchronizeVideo);
+
+  settingsSynchronizeAudio.setText("Synchronize Audio");
+  settings.append(settingsSynchronizeAudio);
+
+  settingsMuteAudio.setText("Mute Audio");
+  settings.append(settingsMuteAudio);
+
+  settings.append(settingsSeparator2);
+
+  settingsVideo.setText("Video Settings ...");
+  settings.append(settingsVideo);
+
+  settingsAudio.setText("Audio Settings ...");
+  settings.append(settingsAudio);
+
+  settingsInput.setText("Input Settings ...");
+  settings.append(settingsInput);
+
+  settingsAdvanced.setText("Advanced Settings ...");
+  settings.append(settingsAdvanced);
+
+  append(settings);
+
+  tools.setText("Tools");
+
+  toolsStateSave.setText("Save State");
+  tools.append(toolsStateSave);
+
+  toolsStateSave1.setText("Slot 1");
+  toolsStateSave.append(toolsStateSave1);
+
+  toolsStateSave2.setText("Slot 2");
+  toolsStateSave.append(toolsStateSave2);
+
+  toolsStateSave3.setText("Slot 3");
+  toolsStateSave.append(toolsStateSave3);
+
+  toolsStateSave4.setText("Slot 4");
+  toolsStateSave.append(toolsStateSave4);
+
+  toolsStateSave5.setText("Slot 5");
+  toolsStateSave.append(toolsStateSave5);
+
+  toolsStateLoad.setText("Load State");
+  tools.append(toolsStateLoad);
+
+  toolsStateLoad1.setText("Slot 1");
+  toolsStateLoad.append(toolsStateLoad1);
+
+  toolsStateLoad2.setText("Slot 2");
+  toolsStateLoad.append(toolsStateLoad2);
+
+  toolsStateLoad3.setText("Slot 3");
+  toolsStateLoad.append(toolsStateLoad3);
+
+  toolsStateLoad4.setText("Slot 4");
+  toolsStateLoad.append(toolsStateLoad4);
+
+  toolsStateLoad5.setText("Slot 5");
+  toolsStateLoad.append(toolsStateLoad5);
+
+  tools.append(toolsSeparator1);
+
+  toolsCheatEditor.setText("Cheat Editor ...");
+  tools.append(toolsCheatEditor);
+
+  toolsStateManager.setText("State Manager ...");
+  tools.append(toolsStateManager);
+
+  #if defined(DEBUGGER)
+  tools.append(toolsSeparator2);
+
+  toolsDebugger.setText("Debugger ...");
+  tools.append(toolsDebugger);
+  #endif
+
+  append(tools);
+
+  help.setText("Help");
+
+  helpAbout.setText("About ...");
+  help.append(helpAbout);
+
+  append(help);
+
   if(config.controller.port1 == 0) systemPort1None.setChecked();
   if(config.controller.port1 == 1) systemPort1Gamepad.setChecked();
   if(config.controller.port1 == 2) systemPort1Multitap.setChecked();
   if(config.controller.port1 == 3) systemPort1Mouse.setChecked();
-  systemPort2.create(system, "Controller Port 2");
-  systemPort2None.create(systemPort2, "None");
-  systemPort2Gamepad.create(systemPort2None, "Gamepad");
-  systemPort2Multitap.create(systemPort2None, "Multitap");
-  systemPort2Mouse.create(systemPort2None, "Mouse");
-  systemPort2SuperScope.create(systemPort2None, "Super Scope");
-  systemPort2Justifier.create(systemPort2None, "Justifier");
-  systemPort2Justifiers.create(systemPort2None, "Justifiers");
   if(config.controller.port2 == 0) systemPort2None.setChecked();
   if(config.controller.port2 == 1) systemPort2Gamepad.setChecked();
   if(config.controller.port2 == 2) systemPort2Multitap.setChecked();
@@ -42,64 +229,18 @@ void MainWindow::create() {
   if(config.controller.port2 == 5) systemPort2Justifier.setChecked();
   if(config.controller.port2 == 6) systemPort2Justifiers.setChecked();
 
-  settings.create(*this, "Settings");
-  settingsVideoMode.create(settings, "Video Mode");
-  settingsVideoMode1x.create(settingsVideoMode, "Scale 1x");
-  settingsVideoMode2x.create(settingsVideoMode1x, "Scale 2x");
-  settingsVideoMode3x.create(settingsVideoMode1x, "Scale 3x");
-  settingsVideoMode4x.create(settingsVideoMode1x, "Scale 4x");
-  settingsVideoMode5x.create(settingsVideoMode1x, "Scale 5x");
   if(config.video.scale == 1) settingsVideoMode1x.setChecked();
   if(config.video.scale == 2) settingsVideoMode2x.setChecked();
   if(config.video.scale == 3) settingsVideoMode3x.setChecked();
   if(config.video.scale == 4) settingsVideoMode4x.setChecked();
   if(config.video.scale == 5) settingsVideoMode5x.setChecked();
-  settingsVideoModeSeparator1.create(settingsVideoMode);
-  settingsVideoModeAspectRatioCorrection.create(settingsVideoMode, "Correct Aspect Ratio");
   settingsVideoModeAspectRatioCorrection.setChecked(config.video.aspectRatioCorrection);
-  settingsVideoModeSeparator2.create(settingsVideoMode);
-  settingsVideoModeNTSC.create(settingsVideoMode, "NTSC");
-  settingsVideoModePAL.create(settingsVideoModeNTSC, "PAL");
   if(config.video.region == 0) settingsVideoModeNTSC.setChecked();
   if(config.video.region == 1) settingsVideoModePAL.setChecked();
-  settingsSmoothVideo.create(settings, "Smooth Video");
   settingsSmoothVideo.setChecked(config.video.smooth);
-  settingsSeparator1.create(settings);
-  settingsSynchronizeVideo.create(settings, "Synchronize Video");
   settingsSynchronizeVideo.setChecked(config.video.synchronize);
-  settingsSynchronizeAudio.create(settings, "Synchronize Audio");
   settingsSynchronizeAudio.setChecked(config.audio.synchronize);
-  settingsMuteAudio.create(settings, "Mute Audio");
   settingsMuteAudio.setChecked(config.audio.mute);
-  settingsSeparator2.create(settings);
-  settingsVideo.create(settings, "Video Settings ...");
-  settingsAudio.create(settings, "Audio Settings ...");
-  settingsInput.create(settings, "Input Settings ...");
-  settingsAdvanced.create(settings, "Advanced Settings ...");
-
-  tools.create(*this, "Tools");
-  toolsStateSave.create(tools, "Save State");
-  toolsStateSave1.create(toolsStateSave, "Slot 1");
-  toolsStateSave2.create(toolsStateSave, "Slot 2");
-  toolsStateSave3.create(toolsStateSave, "Slot 3");
-  toolsStateSave4.create(toolsStateSave, "Slot 4");
-  toolsStateSave5.create(toolsStateSave, "Slot 5");
-  toolsStateLoad.create(tools, "Load State");
-  toolsStateLoad1.create(toolsStateLoad, "Slot 1");
-  toolsStateLoad2.create(toolsStateLoad, "Slot 2");
-  toolsStateLoad3.create(toolsStateLoad, "Slot 3");
-  toolsStateLoad4.create(toolsStateLoad, "Slot 4");
-  toolsStateLoad5.create(toolsStateLoad, "Slot 5");
-  toolsSeparator1.create(tools);
-  toolsCheatEditor.create(tools, "Cheat Editor ...");
-  toolsStateManager.create(tools, "State Manager ...");
-  #if defined(DEBUGGER)
-  toolsSeparator2.create(tools);
-  toolsDebugger.create(tools, "Debugger ...");
-  #endif
-
-  help.create(*this, "Help");
-  helpAbout.create(help, "About ...");
 
   layout.append(viewport, 0, 0, 595, 448);
   setLayout(layout);
@@ -210,10 +351,6 @@ void MainWindow::create() {
   onClose = []() {
     application.quit = true;
     return false;
-  };
-
-  onResize = []() {
-    utility.centerViewport();
   };
 
   synchronize();

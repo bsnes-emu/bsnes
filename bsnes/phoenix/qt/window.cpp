@@ -1,26 +1,7 @@
-void Window::create(unsigned x, unsigned y, unsigned width, unsigned height, const string &text) {
-  window->setWindowTitle(QString::fromUtf8(text));
-
-  window->vlayout = new QVBoxLayout(window);
-  window->vlayout->setMargin(0);
-  window->vlayout->setSpacing(0);
-  window->setLayout(window->vlayout);
-
-  window->menuBar = new QMenuBar(window);
-  window->menuBar->setVisible(false);
-  window->vlayout->addWidget(window->menuBar);
-
-  window->container = new QWidget(window);
-  window->container->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-  window->container->setVisible(true);
-  window->vlayout->addWidget(window->container);
-
-  window->statusBar = new QStatusBar(window);
-  window->statusBar->setSizeGripEnabled(false);
-  window->statusBar->setVisible(false);
-  window->vlayout->addWidget(window->statusBar);
-
-  setGeometry(x, y, width, height);
+void Window::append(Menu &menu) {
+  menu.menu->parent = this;
+  if(window->defaultFont) menu.menu->setFont(*window->defaultFont);
+  window->menuBar->addMenu(menu.menu);
 }
 
 void Window::setLayout(Layout &layout) {
@@ -29,7 +10,7 @@ void Window::setLayout(Layout &layout) {
   Geometry geom = geometry();
   geom.x = geom.y = 0;
   layout.setParent(*this);
-  layout.update(geom);
+  layout.setGeometry(geom);
 }
 
 void Window::setResizable(bool resizable) {
@@ -45,43 +26,26 @@ void Window::setResizable(bool resizable) {
 
 Geometry Window::frameGeometry() {
   if(window->fullscreen) return { 0, 0, OS::desktopWidth(), OS::desktopHeight() };
-
-  QRect rect = window->frameGeometry();
-  unsigned x = rect.x();
-  unsigned y = rect.y();
-  unsigned width = rect.width();
-  unsigned height = rect.height();
-  if(x > 65535) x = 0;
-  if(y > 65535) y = 0;
-
-  return { x, y, width, height };
+  return {
+    window->x - settings.frameGeometryX, window->y - settings.frameGeometryY,
+    window->width + settings.frameGeometryWidth, window->height + settings.frameGeometryHeight
+  };
 }
 
 Geometry Window::geometry() {
   if(window->fullscreen) return { 0, 0, OS::desktopWidth(), OS::desktopHeight() };
   return { window->x, window->y, window->width, window->height };
-
-  unsigned x = window->x;
-  unsigned y = window->y;
-
-  if(window->fullscreen == false) {
-    QRect border = window->frameGeometry();
-    QRect client = window->geometry();
-    x += client.x() - border.x();
-    y += client.y() - border.y();
-    if(window->menuVisible) y += window->menuBar->height();
-    if(x > 65535) x = 0;
-    if(y > 65535) y = 0;
-  }
-
-  return { x, y, window->width, window->height };
 }
 
-void Window::setGeometry(unsigned x, unsigned y, unsigned width, unsigned height) {
-  object->locked = true;
+void Window::setFrameGeometry(signed x, signed y, unsigned width, unsigned height) {
+  setGeometry(
+    x + settings.frameGeometryX, y + settings.frameGeometryY,
+    width - settings.frameGeometryWidth, height - settings.frameGeometryHeight
+  );
+}
 
-  QRect border = window->frameGeometry();
-  QRect client = window->geometry();
+void Window::setGeometry(signed x, signed y, unsigned width, unsigned height) {
+  object->locked = true;
 
   window->x = x;
   window->y = y;
@@ -89,7 +53,7 @@ void Window::setGeometry(unsigned x, unsigned y, unsigned width, unsigned height
   window->height = height;
 
   setResizable(window->resizable);
-  window->move(x - (client.x() - border.x()), y - (client.y() - border.y()));
+  window->move(x - settings.frameGeometryX, y - settings.frameGeometryY);
   window->adjustSize();
 
   object->locked = false;
@@ -124,13 +88,7 @@ void Window::setVisible(bool visible) {
 
   if(visible) {
     window->show();
-    //an unfortunate hack: before window is visible, geometry() == frameGeometry();
-    //we must wait for frameGeometry() to correctly populate and then move window
-    if(window->fullscreen == false) for(unsigned n = 0; n < 100; n++) {
-      if(window->geometry().x() > window->frameGeometry().x()) break;
-      usleep(100);
-      QApplication::processEvents();
-    }
+    updateFrameGeometry();
     setGeometry(window->x, window->y, window->width, window->height);
   } else {
     window->hide();
@@ -176,4 +134,58 @@ void Window::setFullscreen(bool fullscreen) {
 Window::Window() {
   window = new Window::Data(*this);
   window->defaultFont = 0;
+
+  window->vlayout = new QVBoxLayout(window);
+  window->vlayout->setMargin(0);
+  window->vlayout->setSpacing(0);
+  window->setLayout(window->vlayout);
+
+  window->menuBar = new QMenuBar(window);
+  window->menuBar->setVisible(false);
+  window->vlayout->addWidget(window->menuBar);
+
+  window->container = new QWidget(window);
+  window->container->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+  window->container->setVisible(true);
+  window->vlayout->addWidget(window->container);
+
+  window->statusBar = new QStatusBar(window);
+  window->statusBar->setSizeGripEnabled(false);
+  window->statusBar->setVisible(false);
+  window->vlayout->addWidget(window->statusBar);
+
+  setGeometry(128, 128, 256, 256);
+}
+
+//
+
+void Window::updateFrameGeometry() {
+  //Qt does not even attempt to cache frameGeometry, so if this is called before
+  //a window is visible onscreen, it is equivalent to geometry(). Without proper
+  //frameGeometry, phoenix's set(Frame)Geometry functions will not work
+  //properly. Attempting to detect frame geometry after the window is visible
+  //would require moving a visible window, causing a slight jitter effect.
+
+  //This routine is called every time a new window is shown, and attempts to
+  //cache frame geometry for the next set(Frame)Geometry call. The information
+  //is stored to disk, so that hopefully a phoenix window will never jitter more
+  //than once.
+
+  //The information is constantly updated after each window show to detect theme
+  //changes that may adjust frame geometry.
+
+  if(window->fullscreen == false) {
+    for(unsigned n = 0; n < 100; n++) {
+      if(window->geometry().x() > window->frameGeometry().x()) break;
+      usleep(100);
+      QApplication::processEvents();
+    }
+  }
+  QRect border = window->frameGeometry();
+  QRect client = window->geometry();
+
+  settings.frameGeometryX = client.x() - border.x();
+  settings.frameGeometryY = client.y() - border.y();
+  settings.frameGeometryWidth = border.width() - client.width();
+  settings.frameGeometryHeight = border.height() - client.height();
 }

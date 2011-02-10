@@ -2,7 +2,6 @@ SingleSlotLoader singleSlotLoader;
 DoubleSlotLoader doubleSlotLoader;
 
 void SingleSlotLoader::create() {
-  Window::create(0, 0, 480, 80);
   application.addWindow(this, "SingleSlotLoader", "160,160");
 
   baseLabel.setText("Base:");
@@ -12,17 +11,19 @@ void SingleSlotLoader::create() {
   okButton.setText("Ok");
 
   layout.setMargin(5);
-  baseLayout.append(baseLabel, 40, Style::TextBoxHeight, 5);
-  baseLayout.append(basePath, 0, Style::TextBoxHeight, 5);
-  baseLayout.append(baseBrowse, Style::TextBoxHeight, Style::TextBoxHeight);
+  baseLayout.append(baseLabel, 40, 0, 5);
+  baseLayout.append(basePath, 0, 0, 5);
+  baseLayout.append(baseBrowse, Style::TextBoxHeight, 0);
   layout.append(baseLayout, 0, Style::TextBoxHeight, 5);
-  slotLayout.append(slotLabel, 40, Style::TextBoxHeight, 5);
-  slotLayout.append(slotPath, 0, Style::TextBoxHeight, 5);
-  slotLayout.append(slotBrowse, Style::TextBoxHeight, Style::TextBoxHeight);
+  slotLayout.append(slotLabel, 40, 0, 5);
+  slotLayout.append(slotPath, 0, 0, 5);
+  slotLayout.append(slotBrowse, Style::TextBoxHeight, 0);
   layout.append(slotLayout, 0, Style::TextBoxHeight, 5);
-  controlLayout.append(spacer, 0, Style::ButtonHeight);
-  controlLayout.append(okButton, 80, Style::ButtonHeight);
+  controlLayout.append(spacer, 0, 0);
+  controlLayout.append(okButton, 80, 0);
   layout.append(controlLayout, 0, Style::ButtonHeight);
+
+  setGeometry(0, 0, 480, layout.minimumHeight());
   setLayout(layout);
 
   baseBrowse.onTick = []() {
@@ -93,7 +94,6 @@ void SingleSlotLoader::load() {
 //
 
 void DoubleSlotLoader::create() {
-  Window::create(0, 0, 480, 115);
   application.addWindow(this, "DoubleSlotLoader", "160,160");
 
   baseLabel.setText("Base:");
@@ -105,21 +105,23 @@ void DoubleSlotLoader::create() {
   okButton.setText("Ok");
 
   layout.setMargin(5);
-  baseLayout.append(baseLabel, 40, Style::TextBoxHeight, 5);
-  baseLayout.append(basePath, 0, Style::TextBoxHeight, 5);
-  baseLayout.append(baseBrowse, Style::TextBoxHeight, Style::TextBoxHeight);
+  baseLayout.append(baseLabel, 40, 0, 5);
+  baseLayout.append(basePath, 0, 0, 5);
+  baseLayout.append(baseBrowse, Style::TextBoxHeight, 0);
   layout.append(baseLayout, 0, Style::TextBoxHeight, 5);
-  slotALayout.append(slotALabel, 40, Style::TextBoxHeight, 5);
-  slotALayout.append(slotAPath, 0, Style::TextBoxHeight, 5);
-  slotALayout.append(slotABrowse, Style::TextBoxHeight, Style::TextBoxHeight);
+  slotALayout.append(slotALabel, 40, 0, 5);
+  slotALayout.append(slotAPath, 0, 0, 5);
+  slotALayout.append(slotABrowse, Style::TextBoxHeight, 0);
   layout.append(slotALayout, 0, Style::TextBoxHeight, 5);
-  slotBLayout.append(slotBLabel, 40, Style::TextBoxHeight, 5);
-  slotBLayout.append(slotBPath, 0, Style::TextBoxHeight, 5);
-  slotBLayout.append(slotBBrowse, Style::TextBoxHeight, Style::TextBoxHeight);
+  slotBLayout.append(slotBLabel, 40, 0, 5);
+  slotBLayout.append(slotBPath, 0, 0, 5);
+  slotBLayout.append(slotBBrowse, Style::TextBoxHeight, 0);
   layout.append(slotBLayout, 0, Style::TextBoxHeight, 5);
-  controlLayout.append(spacer, 0, Style::ButtonHeight);
-  controlLayout.append(okButton, 80, Style::ButtonHeight);
+  controlLayout.append(spacer, 0, 0);
+  controlLayout.append(okButton, 80, 0);
   layout.append(controlLayout, 0, Style::ButtonHeight);
+
+  setGeometry(0, 0, 480, layout.minimumHeight());
   setLayout(layout);
 
   baseBrowse.onTick = []() {

@@ -79,7 +79,7 @@ void CheatEditor::save(string filename) {
 }
 
 void CheatEditor::create() {
-  Window::create(0, 0, 480, 325, "Cheat Editor");
+  setTitle("Cheat Editor");
   application.addWindow(this, "CheatEditor", "160,160");
 
   cheatList.setHeaderText("Slot\tCode\tDescription");
@@ -93,17 +93,19 @@ void CheatEditor::create() {
 
   layout.setMargin(5);
   layout.append(cheatList, 0, 0, 5);
-  codeLayout.append(codeLabel, 80, Style::TextBoxHeight, 5);
-  codeLayout.append(codeEdit, 0, Style::TextBoxHeight);
+  codeLayout.append(codeLabel, 80, 0, 5);
+  codeLayout.append(codeEdit,   0, 0);
   layout.append(codeLayout, 0, Style::TextBoxHeight, 5);
-  descLayout.append(descLabel, 80, Style::TextBoxHeight, 5);
-  descLayout.append(descEdit, 0, Style::TextBoxHeight);
+  descLayout.append(descLabel, 80, 0, 5);
+  descLayout.append(descEdit,   0, 0);
   layout.append(descLayout, 0, Style::TextBoxHeight, 5);
-  controlLayout.append(findButton, 100, Style::ButtonHeight);
-  controlLayout.append(spacer, 0, Style::ButtonHeight);
-  controlLayout.append(clearAllButton, 80, Style::ButtonHeight, 5);
-  controlLayout.append(clearButton, 80, Style::ButtonHeight);
+  controlLayout.append(findButton,    100, 0);
+  controlLayout.append(spacer,          0, 0);
+  controlLayout.append(clearAllButton, 80, 0, 5);
+  controlLayout.append(clearButton,    80, 0);
   layout.append(controlLayout, 0, Style::ButtonHeight);
+
+  setGeometry(0, 0, 480, layout.minimumHeight() + 250);
   setLayout(layout);
 
   synchronize();
@@ -121,7 +123,6 @@ void CheatEditor::create() {
   };
 
   //databaseWindow
-  databaseWindow.create(0, 0, 600, 360);
   application.addWindow(&databaseWindow, "CheatDatabase", "192,192");
 
   databaseList.setCheckable(true);
@@ -131,11 +132,13 @@ void CheatEditor::create() {
 
   databaseLayout.setMargin(5);
   databaseLayout.append(databaseList, 0, 0, 5);
-  databaseControlLayout.append(databaseSelectAll, 100, Style::ButtonHeight, 5);
-  databaseControlLayout.append(databaseUnselectAll, 100, Style::ButtonHeight);
-  databaseControlLayout.append(databaseSpacer, 0, Style::ButtonHeight);
-  databaseControlLayout.append(databaseOk, 80, Style::ButtonHeight);
+  databaseControlLayout.append(databaseSelectAll,   100, 0, 5);
+  databaseControlLayout.append(databaseUnselectAll, 100, 0);
+  databaseControlLayout.append(databaseSpacer,        0, 0);
+  databaseControlLayout.append(databaseOk,           80, 0);
   databaseLayout.append(databaseControlLayout, 0, Style::ButtonHeight);
+
+  databaseWindow.setGeometry(0, 0, 600, layout.minimumHeight() + 250);
   databaseWindow.setLayout(databaseLayout);
 
   databaseSelectAll.onTick = []() {

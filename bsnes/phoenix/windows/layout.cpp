@@ -3,7 +3,7 @@ void Layout::setParent(Window &parent) {
 }
 
 void Layout::append(Widget &child) {
-  SetParent(child.widget->window, layout->parent->widget->window);
+  SetParent(child.widget->window, layout->parent->window->window);
   SendMessage(
     child.widget->window, WM_SETFONT,
     (WPARAM)(layout->parent->window->defaultFont ? layout->parent->window->defaultFont : OS::os->proportionalFont), 0

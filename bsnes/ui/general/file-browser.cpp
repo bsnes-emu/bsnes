@@ -1,18 +1,19 @@
 FileBrowser fileBrowser;
 
 void FileBrowser::create() {
-  Window::create(0, 0, 640, 400);
   application.addWindow(this, "FileBrowser", "160,160");
 
   browseButton.setText("...");
   upButton.setText("..");
 
   layout.setMargin(5);
-  pathLayout.append(pathBox, 0, Style::TextBoxHeight, 5);
-  pathLayout.append(browseButton, Style::TextBoxHeight, Style::TextBoxHeight, 5);
-  pathLayout.append(upButton, Style::TextBoxHeight, Style::TextBoxHeight);
+  pathLayout.append(pathBox, 0, 0, 5);
+  pathLayout.append(browseButton, Style::TextBoxHeight, 0, 5);
+  pathLayout.append(upButton, Style::TextBoxHeight, 0);
   layout.append(pathLayout, 0, Style::TextBoxHeight, 5);
   layout.append(contentsBox, 0, 0);
+
+  setGeometry(0, 0, 640, layout.minimumHeight() + 400);
   setLayout(layout);
 
   pathBox.onActivate = []() {

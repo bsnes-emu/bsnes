@@ -57,16 +57,6 @@ void Utility::setControllers() {
   }
 }
 
-void Utility::centerViewport() {
-  Geometry geometry = mainWindow.geometry();
-  viewportX = viewportY = 0;
-  if(geometry.width >= viewportWidth) viewportX = (geometry.width - viewportWidth) / 2;
-  if(geometry.height >= viewportHeight) viewportY = (geometry.height - viewportHeight) / 2;
-  mainWindow.viewport.setGeometry(
-    viewportX, viewportY, min(geometry.width, viewportWidth), min(geometry.height, viewportHeight)
-  );
-}
-
 void Utility::setScale(unsigned scale) {
   if(scale == 0) scale = config.video.scale;
   config.video.scale = scale;

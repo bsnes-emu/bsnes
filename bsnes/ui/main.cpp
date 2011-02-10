@@ -151,7 +151,7 @@ void Application::loadGeometry() {
     lstring position;
     position.split(",", window->position);
     Geometry geom = window->geometry();
-    window->setGeometry(decimal(position[0]), decimal(position[1]), geom.width, geom.height);
+    window->setGeometry(integer(position[0]), integer(position[1]), geom.width, geom.height);
   }
 }
 

@@ -13,10 +13,10 @@ struct Object {
 };
 
 struct Geometry {
-  unsigned x, y;
+  signed x, y;
   unsigned width, height;
   inline Geometry() : x(0), y(0), width(0), height(0) {}
-  inline Geometry(unsigned x, unsigned y, unsigned width, unsigned height) : x(x), y(y), width(width), height(height) {}
+  inline Geometry(signed x, signed y, unsigned width, unsigned height) : x(x), y(y), width(width), height(height) {}
 };
 
 struct Font : Object {
@@ -36,95 +36,22 @@ struct Font : Object {
 inline Font::Style operator|(Font::Style a, Font::Style b) { return (Font::Style)((unsigned)a | (unsigned)b); }
 inline Font::Style operator&(Font::Style a, Font::Style b) { return (Font::Style)((unsigned)a & (unsigned)b); }
 
-struct Action : Object {
-  virtual bool visible() = 0;
-  virtual void setVisible(bool visible = true) = 0;
-  virtual bool enabled() = 0;
-  virtual void setEnabled(bool enabled = true) = 0;
-};
-
-struct Menu : Action {
-  void create(Window &parent, const nall::string &text);
-  void create(Menu &parent, const nall::string &text);
-  bool visible();
-  void setVisible(bool visible = true);
-  bool enabled();
-  void setEnabled(bool enabled = true);
-  Menu();
-//private:
-  struct Data;
-  Data *menu;
-};
-
-struct MenuSeparator : Action {
-  void create(Menu &parent);
-  bool visible();
-  void setVisible(bool visible = true);
-  bool enabled();
-  void setEnabled(bool enabled = true);
-  MenuSeparator();
-//private:
-  struct Data;
-  Data *menuSeparator;
-};
-
-struct MenuItem : Action {
-  nall::function<void ()> onTick;
-  void create(Menu &parent, const nall::string &text);
-  bool visible();
-  void setVisible(bool visible = true);
-  bool enabled();
-  void setEnabled(bool enabled = true);
-  MenuItem();
-//private:
-  struct Data;
-  Data *menuItem;
-};
-
-struct MenuCheckItem : Action {
-  nall::function<void ()> onTick;
-  void create(Menu &parent, const nall::string &text);
-  bool visible();
-  void setVisible(bool visible = true);
-  bool enabled();
-  void setEnabled(bool enabled = true);
-  bool checked();
-  void setChecked(bool checked = true);
-  MenuCheckItem();
-//private:
-  struct Data;
-  Data *menuCheckItem;
-};
-
-struct MenuRadioItem : Action {
-  nall::function<void ()> onTick;
-  void create(Menu &parent, const nall::string &text);
-  void create(MenuRadioItem &parent, const nall::string &text);
-  bool visible();
-  void setVisible(bool visible = true);
-  bool enabled();
-  void setEnabled(bool enabled = true);
-  bool checked();
-  void setChecked();
-  MenuRadioItem();
-//private:
-  struct Data;
-  Data *menuRadioItem;
-};
-
+struct Menu;
 struct Layout;
 struct Widget;
 
 struct Window : Object {
+  static Window None;
   nall::function<bool ()> onClose;
   nall::function<void ()> onMove;
-  nall::function<void ()> onResize;
-  void create(unsigned x, unsigned y, unsigned width, unsigned height, const nall::string &text = "");
+  nall::function<void ()> onSize;
+  void append(Menu &menu);
   void setLayout(Layout &layout);
   void setResizable(bool resizable = true);
   Geometry frameGeometry();
   Geometry geometry();
-  void setGeometry(unsigned x, unsigned y, unsigned width, unsigned height);
+  void setFrameGeometry(signed x, signed y, unsigned width, unsigned height);
+  void setGeometry(signed x, signed y, unsigned width, unsigned height);
   void setDefaultFont(Font &font);
   void setFont(Font &font);
   void setBackgroundColor(uint8_t red, uint8_t green, uint8_t blue);
@@ -140,13 +67,89 @@ struct Window : Object {
 //private:
   struct Data;
   Data *window;
-  static Window None;
+private:
+  void updateFrameGeometry();
+};
+
+struct Action : Object {
+  virtual bool visible() = 0;
+  virtual void setVisible(bool visible = true) = 0;
+  virtual bool enabled() = 0;
+  virtual void setEnabled(bool enabled = true) = 0;
+};
+
+struct Menu : Action {
+  void append(Action &action);
+  void setText(const nall::string &text);
+  bool visible();
+  void setVisible(bool visible = true);
+  bool enabled();
+  void setEnabled(bool enabled = true);
+  Menu();
+//private:
+  struct Data;
+  Data *menu;
+};
+
+struct MenuSeparator : Action {
+  bool visible();
+  void setVisible(bool visible = true);
+  bool enabled();
+  void setEnabled(bool enabled = true);
+  MenuSeparator();
+//private:
+  struct Data;
+  Data *menuSeparator;
+};
+
+struct MenuItem : Action {
+  nall::function<void ()> onTick;
+  void setText(const nall::string &text);
+  bool visible();
+  void setVisible(bool visible = true);
+  bool enabled();
+  void setEnabled(bool enabled = true);
+  MenuItem();
+//private:
+  struct Data;
+  Data *menuItem;
+};
+
+struct MenuCheckItem : Action {
+  nall::function<void ()> onTick;
+  void setText(const nall::string &text);
+  bool visible();
+  void setVisible(bool visible = true);
+  bool enabled();
+  void setEnabled(bool enabled = true);
+  bool checked();
+  void setChecked(bool checked = true);
+  MenuCheckItem();
+//private:
+  struct Data;
+  Data *menuCheckItem;
+};
+
+struct MenuRadioItem : Action {
+  nall::function<void ()> onTick;
+  void setParent(MenuRadioItem &parent);
+  void setText(const nall::string &text);
+  bool visible();
+  void setVisible(bool visible = true);
+  bool enabled();
+  void setEnabled(bool enabled = true);
+  bool checked();
+  void setChecked();
+  MenuRadioItem();
+//private:
+  struct Data;
+  Data *menuRadioItem;
 };
 
 struct Layout : Object {
   virtual void setParent(Window &parent);
+  virtual void setGeometry(Geometry &geometry) = 0;
   virtual void append(Widget &widget);
-  virtual void update(Geometry &geometry) = 0;
   Layout();
 //private:
   struct Data;
