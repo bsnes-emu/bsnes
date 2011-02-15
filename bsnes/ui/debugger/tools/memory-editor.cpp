@@ -7,11 +7,11 @@ void MemoryEditor::create() {
   editor.setFont(application.monospaceFont);
   editor.setColumns(16);
   editor.setRows(16);
-  sourceBox.addItem("CPU");
-  sourceBox.addItem("APU");
-  sourceBox.addItem("VRAM");
-  sourceBox.addItem("OAM");
-  sourceBox.addItem("CGRAM");
+  sourceBox.append("CPU");
+  sourceBox.append("APU");
+  sourceBox.append("VRAM");
+  sourceBox.append("OAM");
+  sourceBox.append("CGRAM");
   refreshButton.setText("Refresh");
 
   layout.setMargin(5);
@@ -21,12 +21,11 @@ void MemoryEditor::create() {
   controlLayout.append(refreshButton, 80, Style::ComboBoxHeight);
   layout.append(controlLayout, 80, 0);
 
-  setGeometry(0, 0, layout.minimumWidth() + 475, 230);
+  setGeometry({ 0, 0, layout.minimumWidth() + 475, 230 });
   setLayout(layout);
 
   onClose = []() {
     debugger.showMemoryEditor.setChecked(false);
-    return true;
   };
 
   editor.onRead = { &MemoryEditor::read, this };
@@ -63,7 +62,7 @@ void MemoryEditor::setSource(SNES::Debugger::MemorySource source_) {
     case SNES::Debugger::MemorySource::OAM:    size = 544; break;
     case SNES::Debugger::MemorySource::CGRAM:  size = 512; break;
   }
-  editor.setSize(size);
+  editor.setLength(size);
   editor.setOffset(0);
   editor.update();
 }

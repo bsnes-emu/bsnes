@@ -24,12 +24,11 @@ void Console::create() {
   controlLayout.append(clearConsole, 120, Style::ButtonHeight);
   layout.append(controlLayout, 120, 0);
 
-  setGeometry(0, 0, layout.minimumWidth() + 565, 350);
+  setGeometry({ 0, 0, layout.minimumWidth() + 580, 350 });
   setLayout(layout);
 
   onClose = []() {
     debugger.showConsole.setChecked(false);
-    return true;
   };
 
   traceToFile.onTick = []() { console.tracerEnable(console.traceToFile.checked()); };
@@ -46,7 +45,7 @@ void Console::write(const string &text, bool echo) {
     buffer.append(text);
     output.setText(buffer);
     output.setCursorPosition(~0);
-    OS::run();
+    OS::process();
   }
   if(traceToFile.checked() && logfile.open()) {
     logfile.print(string(text, "\n"));

@@ -1,17 +1,22 @@
-void CheckBox::setText(const string &text) {
-  checkBox->setText(QString::fromUtf8(text));
+bool pCheckBox::checked() {
+  return qtCheckBox->isChecked();
 }
 
-bool CheckBox::checked() {
-  return checkBox->isChecked();
+void pCheckBox::setChecked(bool checked) {
+  locked = true;
+  qtCheckBox->setChecked(checked);
+  locked = false;
 }
 
-void CheckBox::setChecked(bool checked) {
-  checkBox->setChecked(checked);
+void pCheckBox::setText(const string &text) {
+  qtCheckBox->setText(QString::fromUtf8(text));
 }
 
-CheckBox::CheckBox() {
-  checkBox = new CheckBox::Data(*this);
-  widget->widget = checkBox;
-  checkBox->connect(checkBox, SIGNAL(stateChanged(int)), SLOT(onTick()));
+pCheckBox::pCheckBox(CheckBox &checkBox) : checkBox(checkBox), pWidget(checkBox) {
+  qtWidget = qtCheckBox = new QCheckBox;
+  connect(qtCheckBox, SIGNAL(stateChanged(int)), SLOT(onTick()));
+}
+
+void pCheckBox::onTick() {
+  if(locked == false && checkBox.onTick) checkBox.onTick();
 }

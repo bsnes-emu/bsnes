@@ -1,21 +1,25 @@
-void VerticalSlider::setLength(unsigned length) {
-  length = length + (length == 0);
-  verticalSlider->setRange(0, length - 1);
-  verticalSlider->setPageStep(length >> 3);
+unsigned pVerticalSlider::position() {
+  return qtSlider->value();
 }
 
-unsigned VerticalSlider::position() {
-  return verticalSlider->value();
+void pVerticalSlider::setLength(unsigned length) {
+  length += length == 0;
+  qtSlider->setRange(0, length - 1);
+  qtSlider->setPageStep(length >> 3);
 }
 
-void VerticalSlider::setPosition(unsigned position) {
-  verticalSlider->setValue(position);
+void pVerticalSlider::setPosition(unsigned position) {
+  qtSlider->setValue(position);
 }
 
-VerticalSlider::VerticalSlider() {
-  verticalSlider = new VerticalSlider::Data(*this);
-  widget->widget = verticalSlider;
-  verticalSlider->setInvertedAppearance(true);
-  verticalSlider->setInvertedControls(true);
-  verticalSlider->connect(verticalSlider, SIGNAL(valueChanged(int)), SLOT(onChange()));
+pVerticalSlider::pVerticalSlider(VerticalSlider &verticalSlider) : verticalSlider(verticalSlider), pWidget(verticalSlider) {
+  qtWidget = qtSlider = new QSlider(Qt::Vertical);
+  qtSlider->setRange(0, 100);
+  qtSlider->setPageStep(101 >> 3);
+  connect(qtSlider, SIGNAL(valueChanged(int)), SLOT(onChange()));
+}
+
+void pVerticalSlider::onChange() {
+  verticalSlider.state.position = position();
+  if(verticalSlider.onChange) verticalSlider.onChange();
 }

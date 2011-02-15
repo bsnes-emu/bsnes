@@ -29,7 +29,7 @@ void InputMapper::poll_hotkeys(unsigned scancode, int16_t value) {
 
     //fullscreen
     if(scancode == keyboard(0)[Keyboard::F11]) {
-      utility.setFullscreen(!mainWindow.fullscreen());
+      utility.setFullscreen(!utility.fullscreen);
     }
 
     //mouse capture

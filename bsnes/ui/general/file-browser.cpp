@@ -13,7 +13,7 @@ void FileBrowser::create() {
   layout.append(pathLayout, 0, Style::TextBoxHeight, 5);
   layout.append(contentsBox, 0, 0);
 
-  setGeometry(0, 0, 640, layout.minimumHeight() + 400);
+  setGeometry({ 0, 0, 640, layout.minimumHeight() + 400 });
   setLayout(layout);
 
   pathBox.onActivate = []() {
@@ -96,7 +96,7 @@ void FileBrowser::setFolder(const string &pathname) {
       }
     }
   }
-  foreach(item, contents) contentsBox.addItem(item);
+  foreach(item, contents) contentsBox.append(item);
   contentsBox.setSelection(0);
   contentsBox.setFocused();
 }

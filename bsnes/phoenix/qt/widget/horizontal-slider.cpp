@@ -1,19 +1,25 @@
-void HorizontalSlider::setLength(unsigned length) {
-  length = length + (length == 0);
-  horizontalSlider->setRange(0, length - 1);
-  horizontalSlider->setPageStep(length >> 3);
+unsigned pHorizontalSlider::position() {
+  return qtSlider->value();
 }
 
-unsigned HorizontalSlider::position() {
-  return horizontalSlider->value();
+void pHorizontalSlider::setLength(unsigned length) {
+  length += length == 0;
+  qtSlider->setRange(0, length - 1);
+  qtSlider->setPageStep(length >> 3);
 }
 
-void HorizontalSlider::setPosition(unsigned position) {
-  horizontalSlider->setValue(position);
+void pHorizontalSlider::setPosition(unsigned position) {
+  qtSlider->setValue(position);
 }
 
-HorizontalSlider::HorizontalSlider() {
-  horizontalSlider = new HorizontalSlider::Data(*this);
-  widget->widget = horizontalSlider;
-  horizontalSlider->connect(horizontalSlider, SIGNAL(valueChanged(int)), SLOT(onChange()));
+pHorizontalSlider::pHorizontalSlider(HorizontalSlider &horizontalSlider) : horizontalSlider(horizontalSlider), pWidget(horizontalSlider) {
+  qtWidget = qtSlider = new QSlider(Qt::Horizontal);
+  qtSlider->setRange(0, 100);
+  qtSlider->setPageStep(101 >> 3);
+  connect(qtSlider, SIGNAL(valueChanged(int)), SLOT(onChange()));
+}
+
+void pHorizontalSlider::onChange() {
+  horizontalSlider.state.position = position();
+  if(horizontalSlider.onChange) horizontalSlider.onChange();
 }

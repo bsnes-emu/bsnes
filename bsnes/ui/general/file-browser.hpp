@@ -1,7 +1,7 @@
 struct FileBrowser : TopLevelWindow {
   VerticalLayout layout;
   HorizontalLayout pathLayout;
-  TextBox pathBox;
+  LineEdit pathBox;
   Button browseButton;
   Button upButton;
   ListBox contentsBox;

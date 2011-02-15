@@ -20,6 +20,7 @@ struct Utility : property<Utility> {
 
   Utility();
 
+  bool fullscreen;
   unsigned viewportX, viewportY;
   unsigned viewportWidth, viewportHeight;
 

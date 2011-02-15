@@ -4,17 +4,17 @@ static InputMapper::AbstractInput *activeInput = 0;
 void InputSettings::create() {
   setTitle("Input Settings");
   application.addWindow(this, "InputSettings", "160,160");
-  setFont(application.proportionalFontBold);
+  setStatusFont(application.proportionalFontBold);
   setStatusVisible();
 
   activeInput = 0;
   activeMouse = 0;
 
   portLabel.setText("Port:");
-  portBox.addItem(inputMapper.port1.name);
-  portBox.addItem(inputMapper.port2.name);
+  portBox.append(inputMapper.port1.name);
+  portBox.append(inputMapper.port2.name);
   deviceLabel.setText("Device:");
-  mappingList.setHeaderText("Name\tMapping");
+  mappingList.setHeaderText("Name", "Mapping");
   mappingList.setHeaderVisible(true);
   mouseXaxis.setText("Mouse X-axis");
   mouseYaxis.setText("Mouse Y-axis");
@@ -39,7 +39,7 @@ void InputSettings::create() {
   mapLayout.append(clearButton,  80, 0);
   layout.append(mapLayout, 0, Style::ButtonHeight);
 
-  setGeometry(0, 0, 640, layout.minimumHeight() + 250);
+  setGeometry({ 0, 0, 640, layout.minimumHeight() + 250 });
   setLayout(layout);
 
   mouseXaxis.setVisible(false);
@@ -61,7 +61,7 @@ void InputSettings::create() {
 
   clearButton.onTick = { &InputSettings::clearInput, this };
 
-  onClose = []() { inputSettings.endAssignment(); return true; };
+  onClose = []() { inputSettings.endAssignment(); };
 }
 
 void InputSettings::portChanged() {
@@ -72,7 +72,7 @@ void InputSettings::portChanged() {
     : (InputMapper::ControllerPort&)inputMapper.port2
   );
 
-  for(unsigned i = 0; i < port.size(); i++) deviceBox.addItem(port[i]->name);
+  for(unsigned i = 0; i < port.size(); i++) deviceBox.append(port[i]->name);
   deviceChanged();
 }
 
@@ -88,9 +88,9 @@ void InputSettings::deviceChanged() {
   for(unsigned i = 0; i < controller.size(); i++) {
     string mapping = controller[i]->mapping;
     if(mapping == "") mapping = "None";
-    mappingList.addItem({ controller[i]->name, "\t", mapping });
+    mappingList.append(controller[i]->name, mapping);
   }
-  mappingList.resizeColumnsToContent();
+  mappingList.autosizeColumns();
 }
 
 void InputSettings::mappingChanged() {
@@ -104,9 +104,9 @@ void InputSettings::mappingChanged() {
   for(unsigned i = 0; i < controller.size(); i++) {
     string mapping = controller[i]->mapping;
     if(mapping == "") mapping = "None";
-    mappingList.setItem(i, { controller[i]->name, "\t", mapping });
+    mappingList.modify(i, controller[i]->name, mapping);
   }
-  mappingList.resizeColumnsToContent();
+  mappingList.autosizeColumns();
 }
 
 void InputSettings::assignInput() {

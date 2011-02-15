@@ -36,18 +36,8 @@ void Debugger::create() {
   layout.append(showBreakpointEditor, 0, Style::CheckBoxHeight);
   layout.append(showMemoryEditor, 0, Style::CheckBoxHeight);
 
-  setGeometry(0, 0, 256, layout.minimumHeight());
+  setGeometry({ 0, 0, 256, layout.minimumHeight() });
   setLayout(layout);
-
-/*unsigned x = 5, y = 5;
-  layout.append(enableDebugger, x, y, 240, Style::CheckBoxHeight); y += Style::CheckBoxHeight;
-  layout.append(showConsole, x, y, 240, Style::CheckBoxHeight); y += Style::CheckBoxHeight;
-  layout.append(showCPUDebugger, x, y, 240, Style::CheckBoxHeight); y += Style::CheckBoxHeight;
-  layout.append(showSMPDebugger, x, y, 240, Style::CheckBoxHeight); y += Style::CheckBoxHeight;
-  layout.append(showBreakpointEditor, x, y, 240, Style::CheckBoxHeight); y += Style::CheckBoxHeight;
-  layout.append(showMemoryEditor, x, y, 240, Style::CheckBoxHeight); y += Style::CheckBoxHeight;
-  setGeometry(0, 0, 250, y);
-  setLayout(layout);*/
 
   //windows shown by default
   showConsole.setChecked();
@@ -81,7 +71,6 @@ void Debugger::create() {
 
   onClose = []() {
     debugger.enable(false);
-    return true;
   };
 
   synchronize();

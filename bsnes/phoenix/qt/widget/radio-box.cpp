@@ -1,25 +1,43 @@
-void RadioBox::setParent(RadioBox &parent) {
-  parent.radioBox->buttonGroup->addButton(radioBox);
-  parent.radioBox->setChecked(true);
+bool pRadioBox::checked() {
+  return qtRadioBox->isChecked();
 }
 
-void RadioBox::setText(const string &text) {
-  radioBox->setText(QString::fromUtf8(text));
+void pRadioBox::setChecked() {
+  locked = true;
+  foreach(item, radioBox.state.group) {
+    bool checkState = item->p.qtRadioBox == qtRadioBox;
+    item->state.checked = checkState;
+    item->p.qtRadioBox->setChecked(checkState);
+  }
+  locked = false;
 }
 
-bool RadioBox::checked() {
-  return radioBox->isChecked();
+void pRadioBox::setGroup(const array<RadioBox*> &group) {
+  locked = true;
+  if(qtGroup) {
+    delete qtGroup;
+    qtGroup = 0;
+  }
+  if(qtRadioBox == group[0]->p.qtRadioBox) {
+    qtGroup = new QButtonGroup;
+    foreach(item, group) qtGroup->addButton(item->p.qtRadioBox);
+    setChecked();
+  }
+  locked = false;
 }
 
-void RadioBox::setChecked() {
-  radioBox->setChecked(true);
+void pRadioBox::setText(const string &text) {
+  qtRadioBox->setText(QString::fromUtf8(text));
 }
 
-RadioBox::RadioBox() {
-  radioBox = new RadioBox::Data(*this);
-  widget->widget = radioBox;
-  radioBox->buttonGroup = new QButtonGroup;
-  radioBox->buttonGroup->addButton(radioBox);
-  radioBox->setChecked(true);
-  radioBox->connect(radioBox, SIGNAL(toggled(bool)), SLOT(onTick()));
+pRadioBox::pRadioBox(RadioBox &radioBox) : radioBox(radioBox), pWidget(radioBox) {
+  qtWidget = qtRadioBox = new QRadioButton;
+  qtGroup = new QButtonGroup;
+  qtGroup->addButton(qtRadioBox);
+  qtRadioBox->setChecked(true);
+  connect(qtRadioBox, SIGNAL(toggled(bool)), SLOT(onTick()));
+}
+
+void pRadioBox::onTick() {
+  if(locked == false && checked() && radioBox.onTick) radioBox.onTick();
 }

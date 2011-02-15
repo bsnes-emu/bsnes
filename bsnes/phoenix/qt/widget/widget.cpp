@@ -1,43 +1,26 @@
-Geometry Widget::geometry() {
-  return {
-    widget->widget->x(), widget->widget->y(),
-    widget->widget->width(), widget->widget->height()
-  };
+bool pWidget::enabled() {
+  return qtWidget->isEnabled();
 }
 
-void Widget::setGeometry(unsigned x, unsigned y, unsigned width, unsigned height) {
-  widget->widget->setGeometry(x, y, width, height);
+void pWidget::setEnabled(bool enabled) {
+  qtWidget->setEnabled(enabled);
 }
 
-void Widget::setFont(Font &font) {
-  widget->font = &font;
-  widget->widget->setFont(*font.font);
+void pWidget::setFocused() {
+  qtWidget->setFocus(Qt::OtherFocusReason);
 }
 
-bool Widget::visible() {
-  return widget->widget->isVisible();
+void pWidget::setFont(Font &font) {
+  qtWidget->setFont(*font.p.qtFont);
 }
 
-void Widget::setVisible(bool visible) {
-  widget->widget->setVisible(visible);
+void pWidget::setGeometry(const Geometry &geometry) {
+  qtWidget->setGeometry(geometry.x, geometry.y, geometry.width, geometry.height);
 }
 
-bool Widget::enabled() {
-  return widget->widget->isEnabled();
+void pWidget::setVisible(bool visible) {
+  qtWidget->setVisible(visible);
 }
 
-void Widget::setEnabled(bool enabled) {
-  widget->widget->setEnabled(enabled);
-}
-
-bool Widget::focused() {
-  return widget->widget->hasFocus();
-}
-
-void Widget::setFocused() {
-  widget->widget->setFocus(Qt::OtherFocusReason);
-}
-
-Widget::Widget() {
-  widget = new Widget::Data(*this);
+pWidget::pWidget(Widget &widget) : widget(widget) {
 }

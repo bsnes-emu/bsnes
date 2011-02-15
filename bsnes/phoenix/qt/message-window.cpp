@@ -11,35 +11,37 @@ static MessageWindow::Response MessageWindow_response(MessageWindow::Buttons but
   if(response == QMessageBox::Cancel) return MessageWindow::Response::Cancel;
   if(response == QMessageBox::Yes) return MessageWindow::Response::Yes;
   if(response == QMessageBox::No) return MessageWindow::Response::No;
+
+  //MessageWindow was closed via window manager, rather than by a button; assume a cancel/no response
   if(buttons == MessageWindow::Buttons::OkCancel) return MessageWindow::Response::Cancel;
   if(buttons == MessageWindow::Buttons::YesNo) return MessageWindow::Response::No;
   return MessageWindow::Response::Ok;
 }
 
-MessageWindow::Response MessageWindow::information(Window &parent, const string &text, MessageWindow::Buttons buttons) {
+MessageWindow::Response pMessageWindow::information(Window &parent, const string &text, MessageWindow::Buttons buttons) {
   return MessageWindow_response(
-    buttons, QMessageBox::information(&parent != &Window::None ? parent.window : 0, " ",
+    buttons, QMessageBox::information(&parent != &Window::None ? parent.p.qtWindow : 0, " ",
     QString::fromUtf8(text), MessageWindow_buttons(buttons))
   );
 }
 
-MessageWindow::Response MessageWindow::question(Window &parent, const string &text, MessageWindow::Buttons buttons) {
+MessageWindow::Response pMessageWindow::question(Window &parent, const string &text, MessageWindow::Buttons buttons) {
   return MessageWindow_response(
-    buttons, QMessageBox::question(&parent != &Window::None ? parent.window : 0, " ",
+    buttons, QMessageBox::question(&parent != &Window::None ? parent.p.qtWindow : 0, " ",
     QString::fromUtf8(text), MessageWindow_buttons(buttons))
   );
 }
 
-MessageWindow::Response MessageWindow::warning(Window &parent, const string &text, MessageWindow::Buttons buttons) {
+MessageWindow::Response pMessageWindow::warning(Window &parent, const string &text, MessageWindow::Buttons buttons) {
   return MessageWindow_response(
-    buttons, QMessageBox::warning(&parent != &Window::None ? parent.window : 0, " ",
+    buttons, QMessageBox::warning(&parent != &Window::None ? parent.p.qtWindow : 0, " ",
     QString::fromUtf8(text), MessageWindow_buttons(buttons))
   );
 }
 
-MessageWindow::Response MessageWindow::critical(Window &parent, const string &text, MessageWindow::Buttons buttons) {
+MessageWindow::Response pMessageWindow::critical(Window &parent, const string &text, MessageWindow::Buttons buttons) {
   return MessageWindow_response(
-    buttons, QMessageBox::critical(&parent != &Window::None ? parent.window : 0, " ",
+    buttons, QMessageBox::critical(&parent != &Window::None ? parent.p.qtWindow : 0, " ",
     QString::fromUtf8(text), MessageWindow_buttons(buttons))
   );
 }

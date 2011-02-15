@@ -1,41 +1,36 @@
-void MenuRadioItem::setParent(MenuRadioItem &parent) {
-  delete menuRadioItem->actionGroup();
-  menuRadioItem->setActionGroup(parent.menuRadioItem->actionGroup());
+bool pMenuRadioItem::checked() {
+  return qtAction->isChecked();
 }
 
-void MenuRadioItem::setText(const string &text) {
-  menuRadioItem->setText(QString::fromUtf8(text));
+void pMenuRadioItem::setChecked() {
+  locked = true;
+  foreach(item, menuRadioItem.state.group) {
+    bool checkState = item->p.qtAction == qtAction;
+    item->state.checked = checkState;
+    item->p.qtAction->setChecked(checkState);
+  }
+  locked = false;
 }
 
-bool MenuRadioItem::visible() {
-  return menuRadioItem->isVisible();
+void pMenuRadioItem::setGroup(const array<MenuRadioItem*> &group) {
 }
 
-void MenuRadioItem::setVisible(bool visible) {
-  menuRadioItem->setVisible(visible);
+void pMenuRadioItem::setText(const string &text) {
+  qtAction->setText(QString::fromUtf8(text));
 }
 
-bool MenuRadioItem::enabled() {
-  return menuRadioItem->isEnabled();
+pMenuRadioItem::pMenuRadioItem(MenuRadioItem &menuRadioItem) : menuRadioItem(menuRadioItem), pAction(menuRadioItem) {
+  qtAction = new QAction(0);
+  qtGroup = new QActionGroup(0);
+  qtAction->setCheckable(true);
+  qtAction->setActionGroup(qtGroup);
+  qtAction->setChecked(true);
+  connect(qtAction, SIGNAL(triggered()), SLOT(onTick()));
 }
 
-void MenuRadioItem::setEnabled(bool enabled) {
-  menuRadioItem->setEnabled(enabled);
-}
-
-bool MenuRadioItem::checked() {
-  return menuRadioItem->isChecked();
-}
-
-void MenuRadioItem::setChecked() {
-  object->locked = true;
-  menuRadioItem->setChecked(true);
-  object->locked = false;
-}
-
-MenuRadioItem::MenuRadioItem() {
-  menuRadioItem = new MenuRadioItem::Data(*this);
-  menuRadioItem->setCheckable(true);
-  menuRadioItem->setActionGroup(new QActionGroup(0));
-  menuRadioItem->connect(menuRadioItem, SIGNAL(changed()), SLOT(onTick()));
+void pMenuRadioItem::onTick() {
+  if(menuRadioItem.state.checked == false) {
+    setChecked();
+    if(locked == false && menuRadioItem.onTick) menuRadioItem.onTick();
+  }
 }

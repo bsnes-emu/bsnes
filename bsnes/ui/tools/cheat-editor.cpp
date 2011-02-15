@@ -4,7 +4,7 @@ void CheatEditor::load(string filename) {
   SNES::cheat.reset();
   cheatList.reset();
   for(unsigned i = 0; i < 128; i++) {
-    cheatList.addItem("");
+    cheatList.append("");
     cheatText[i][CheatSlot] = rdecimal<3>(i + 1);
     cheatText[i][CheatCode] = "";
     cheatText[i][CheatDesc] = "";
@@ -75,14 +75,14 @@ void CheatEditor::save(string filename) {
   }
 
   cheatList.reset();
-  cheatList.resizeColumnsToContent();
+  cheatList.autosizeColumns();
 }
 
 void CheatEditor::create() {
   setTitle("Cheat Editor");
   application.addWindow(this, "CheatEditor", "160,160");
 
-  cheatList.setHeaderText("Slot\tCode\tDescription");
+  cheatList.setHeaderText("Slot", "Code", "Description");
   cheatList.setHeaderVisible();
   cheatList.setCheckable();
   codeLabel.setText("Code(s):");
@@ -105,7 +105,7 @@ void CheatEditor::create() {
   controlLayout.append(clearButton,    80, 0);
   layout.append(controlLayout, 0, Style::ButtonHeight);
 
-  setGeometry(0, 0, 480, layout.minimumHeight() + 250);
+  setGeometry({ 0, 0, 480, layout.minimumHeight() + 250 });
   setLayout(layout);
 
   synchronize();
@@ -119,7 +119,6 @@ void CheatEditor::create() {
 
   onClose = []() {
     cheatEditor.databaseWindow.setVisible(false);
-    return true;
   };
 
   //databaseWindow
@@ -138,7 +137,7 @@ void CheatEditor::create() {
   databaseControlLayout.append(databaseOk,           80, 0);
   databaseLayout.append(databaseControlLayout, 0, Style::ButtonHeight);
 
-  databaseWindow.setGeometry(0, 0, 600, layout.minimumHeight() + 250);
+  databaseWindow.setGeometry({ 0, 0, 600, layout.minimumHeight() + 250 });
   databaseWindow.setLayout(databaseLayout);
 
   databaseSelectAll.onTick = []() {
@@ -183,11 +182,9 @@ void CheatEditor::refresh() {
     if(list.size() > 1) cheatCode.append("...");
 
     cheatList.setChecked(i, SNES::cheat[i].enabled);
-    cheatList.setItem(i, {
-      cheatText[i][CheatSlot], "\t", cheatCode, "\t", cheatText[i][CheatDesc]
-    });
+    cheatList.modify(i, cheatText[i][CheatSlot], cheatCode, cheatText[i][CheatDesc]);
   }
-  cheatList.resizeColumnsToContent();
+  cheatList.autosizeColumns();
 }
 
 void CheatEditor::toggle(unsigned row) {
@@ -234,7 +231,7 @@ void CheatEditor::findCodes() {
           code.rtrim<1>("+");
           code.append("\t");
           code.append(description);
-          databaseList.addItem(description);
+          databaseList.append(description);
           databaseCode.append(code);
         }
       }

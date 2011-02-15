@@ -27,13 +27,13 @@ struct VideoSettings : TopLevelWindow {
 
   Label filterLabel;
   HorizontalLayout filterLayout;
-  TextBox filterPath;
+  LineEdit filterPath;
   Button filterClear;
   Button filterSelect;
 
   Label shaderLabel;
   HorizontalLayout shaderLayout;
-  TextBox shaderPath;
+  LineEdit shaderPath;
   Button shaderClear;
   Button shaderSelect;
 

@@ -1,24 +1,12 @@
-void MenuItem::setText(const string &text) {
-  menuItem->setText(QString::fromUtf8(text));
+void pMenuItem::setText(const string &text) {
+  qtAction->setText(QString::fromUtf8(text));
 }
 
-bool MenuItem::visible() {
-  return menuItem->isVisible();
+pMenuItem::pMenuItem(MenuItem &menuItem) : menuItem(menuItem), pAction(menuItem) {
+  qtAction = new QAction(0);
+  connect(qtAction, SIGNAL(triggered()), SLOT(onTick()));
 }
 
-void MenuItem::setVisible(bool visible) {
-  menuItem->setVisible(visible);
-}
-
-bool MenuItem::enabled() {
-  return menuItem->isEnabled();
-}
-
-void MenuItem::setEnabled(bool enabled) {
-  menuItem->setEnabled(enabled);
-}
-
-MenuItem::MenuItem() {
-  menuItem = new MenuItem::Data(*this);
-  menuItem->connect(menuItem, SIGNAL(triggered()), SLOT(onTick()));
+void pMenuItem::onTick() {
+  if(menuItem.onTick) menuItem.onTick();
 }

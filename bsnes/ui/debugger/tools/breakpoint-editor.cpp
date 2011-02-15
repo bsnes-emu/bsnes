@@ -7,14 +7,14 @@ void BreakpointEditor::create() {
   runToBreakpoint.setText("Run to breakpoint");
   for(unsigned n = 0; n < Breakpoints; n++) {
     enableBox[n].setText({ n + 1 });
-    typeBox[n].addItem("Exec");
-    typeBox[n].addItem("Read");
-    typeBox[n].addItem("Write");
-    sourceBox[n].addItem("CPU");
-    sourceBox[n].addItem("APU");
-    sourceBox[n].addItem("VRAM");
-    sourceBox[n].addItem("OAM");
-    sourceBox[n].addItem("CGRAM");
+    typeBox[n].append("Exec");
+    typeBox[n].append("Read");
+    typeBox[n].append("Write");
+    sourceBox[n].append("CPU");
+    sourceBox[n].append("APU");
+    sourceBox[n].append("VRAM");
+    sourceBox[n].append("OAM");
+    sourceBox[n].append("CGRAM");
     enableBox[n].onTick = [n]() { breakpointEditor.toggleBreakpoint(n); };
   }
 
@@ -29,8 +29,12 @@ void BreakpointEditor::create() {
     layout.append(breakpointLayout[n], 0, Style::EditBoxHeight, 5);
   }
 
-  setGeometry(0, 0, 310, layout.minimumHeight());
+  setGeometry({ 0, 0, 310, layout.minimumHeight() });
   setLayout(layout);
+
+  onClose = []() {
+    debugger.showBreakpointEditor.setChecked(false);
+  };
 
   runToBreakpoint.onTick = []() {
     if(breakpointEditor.runToBreakpoint.checked()) {

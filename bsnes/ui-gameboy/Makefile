@@ -60,8 +60,8 @@ rubydef := $(foreach c,$(subst .,_,$(call strupper,$(ruby))),-D$c)
 objects := $(ui_objects) $(objects)
 objects := $(patsubst %,obj/%.o,$(objects))
 
-obj/ui-main.o: $(ui)/main.cpp $(call rwildcard,$(ui)/*.hpp) $(call rwildcard,$(ui)/*); $(phoenix_compile)
-obj/ui-utility.o: $(ui)/utility/utility.cpp $(call rwildcard,$(ui)/utility/*); $(phoenix_compile)
+obj/ui-main.o: $(ui)/main.cpp $(call rwildcard,$(ui)/*.hpp) $(call rwildcard,$(ui)/*)
+obj/ui-utility.o: $(ui)/utility/utility.cpp $(call rwildcard,$(ui)/utility/*)
 
 obj/ruby.o: ruby/ruby.cpp $(call rwildcard,ruby/*)
 	$(call compile,$(rubydef) $(rubyflags))

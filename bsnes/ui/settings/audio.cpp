@@ -19,7 +19,7 @@ void AudioSettings::create() {
   frequencyLayout.append(frequencySlider, 0, 0);
   layout.append(frequencyLayout, 0, Style::SliderHeight);
 
-  setGeometry(0, 0, 480, layout.minimumHeight());
+  setGeometry({ 0, 0, 480, layout.minimumHeight() });
   setLayout(layout);
 
   volumeSlider.onChange = []() {

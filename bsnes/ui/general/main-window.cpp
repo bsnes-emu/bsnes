@@ -3,9 +3,10 @@ MainWindow mainWindow;
 void MainWindow::create() {
   setTitle({ SNES::Info::Name, " v", SNES::Info::Version });
   setResizable(false);
-  setGeometry(0, 0, 595, 448);
+  setGeometry({ 0, 0, 595, 448 });
   application.addWindow(this, "MainWindow", "128,128");
-  setFont(application.proportionalFontBold);
+  setMenuFont(application.proportionalFont);
+  setStatusFont(application.proportionalFontBold);
   setBackgroundColor(0, 0, 0);
 
   system.setText("System");
@@ -45,16 +46,17 @@ void MainWindow::create() {
   systemPort1.append(systemPort1None);
 
   systemPort1Gamepad.setText("Gamepad");
-  systemPort1Gamepad.setParent(systemPort1None);
   systemPort1.append(systemPort1Gamepad);
 
   systemPort1Multitap.setText("Multitap");
-  systemPort1Multitap.setParent(systemPort1None);
   systemPort1.append(systemPort1Multitap);
 
   systemPort1Mouse.setText("Mouse");
-  systemPort1Mouse.setParent(systemPort1None);
   systemPort1.append(systemPort1Mouse);
+
+  MenuRadioItem::group(
+    systemPort1None, systemPort1Gamepad, systemPort1Multitap, systemPort1Mouse
+  );
 
   systemPort2.setText("Controller Port 2");
   system.append(systemPort2);
@@ -63,28 +65,27 @@ void MainWindow::create() {
   systemPort2.append(systemPort2None);
 
   systemPort2Gamepad.setText("Gamepad");
-  systemPort2Gamepad.setParent(systemPort2None);
   systemPort2.append(systemPort2Gamepad);
 
   systemPort2Multitap.setText("Multitap");
-  systemPort2Multitap.setParent(systemPort2None);
   systemPort2.append(systemPort2Multitap);
 
   systemPort2Mouse.setText("Mouse");
-  systemPort2Mouse.setParent(systemPort2None);
   systemPort2.append(systemPort2Mouse);
 
   systemPort2SuperScope.setText("Super Scope");
-  systemPort2SuperScope.setParent(systemPort2None);
   systemPort2.append(systemPort2SuperScope);
 
   systemPort2Justifier.setText("Justifier");
-  systemPort2Justifier.setParent(systemPort2None);
   systemPort2.append(systemPort2Justifier);
 
   systemPort2Justifiers.setText("Justifiers");
-  systemPort2Justifiers.setParent(systemPort2None);
   systemPort2.append(systemPort2Justifiers);
+
+  MenuRadioItem::group(
+    systemPort2None, systemPort2Gamepad, systemPort2Multitap, systemPort2Mouse,
+    systemPort2SuperScope, systemPort2Justifier, systemPort2Justifiers
+  );
 
   append(system);
 
@@ -97,20 +98,20 @@ void MainWindow::create() {
   settingsVideoMode.append(settingsVideoMode1x);
 
   settingsVideoMode2x.setText("Scale 2x");
-  settingsVideoMode2x.setParent(settingsVideoMode1x);
   settingsVideoMode.append(settingsVideoMode2x);
 
   settingsVideoMode3x.setText("Scale 3x");
-  settingsVideoMode3x.setParent(settingsVideoMode1x);
   settingsVideoMode.append(settingsVideoMode3x);
 
   settingsVideoMode4x.setText("Scale 4x");
-  settingsVideoMode4x.setParent(settingsVideoMode1x);
   settingsVideoMode.append(settingsVideoMode4x);
 
   settingsVideoMode5x.setText("Scale 5x");
-  settingsVideoMode5x.setParent(settingsVideoMode1x);
   settingsVideoMode.append(settingsVideoMode5x);
+
+  MenuRadioItem::group(
+    settingsVideoMode1x, settingsVideoMode2x, settingsVideoMode3x, settingsVideoMode4x, settingsVideoMode5x
+  );
 
   settingsVideoMode.append(settingsVideoModeSeparator1);
 
@@ -124,6 +125,10 @@ void MainWindow::create() {
 
   settingsVideoModePAL.setText("PAL");
   settingsVideoMode.append(settingsVideoModePAL);
+
+  MenuRadioItem::group(
+    settingsVideoModeNTSC, settingsVideoModePAL
+  );
 
   settingsSmoothVideo.setText("Smooth Video");
   settings.append(settingsSmoothVideo);
@@ -242,7 +247,7 @@ void MainWindow::create() {
   settingsSynchronizeAudio.setChecked(config.audio.synchronize);
   settingsMuteAudio.setChecked(config.audio.mute);
 
-  layout.append(viewport, 0, 0, 595, 448);
+  layout.append(viewport, { 0, 0, 595, 448 });
   setLayout(layout);
 
   utility.setStatus("");
@@ -350,7 +355,6 @@ void MainWindow::create() {
 
   onClose = []() {
     application.quit = true;
-    return false;
   };
 
   synchronize();

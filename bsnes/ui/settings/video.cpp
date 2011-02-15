@@ -18,8 +18,7 @@ void VideoSettings::create() {
   fullscreenCenter.setText("Center");
   fullscreenScale.setText("Scale");
   fullscreenStretch.setText("Stretch");
-  fullscreenScale.setParent(fullscreenCenter);
-  fullscreenStretch.setParent(fullscreenCenter);
+  RadioBox::group(fullscreenCenter, fullscreenScale, fullscreenStretch);
   filterLabel.setText("Video Filter :.");
   filterLabel.setFont(application.proportionalFontBold);
   filterPath.setEditable(false);
@@ -62,7 +61,7 @@ void VideoSettings::create() {
   shaderLayout.append(shaderSelect, Style::TextBoxHeight, 0);
   layout.append(shaderLayout, 0, Style::TextBoxHeight);
 
-  setGeometry(0, 0, 480, layout.minimumHeight());
+  setGeometry({ 0, 0, 480, layout.minimumHeight() });
   setLayout(layout);
 
   brightnessSlider.setPosition(config.video.brightness);

@@ -1,97 +1,120 @@
-void ListBox::setHeaderText(const string &text) {
-  lstring list;
-  list.split("\t", text);
-  QStringList labels;
-  foreach(item, list) labels << QString::fromUtf8(item);
-  listBox->setColumnCount(list.size());
-  listBox->setHeaderLabels(labels);
-  for(unsigned i = 0; i < list.size(); i++) listBox->resizeColumnToContents(i);
-  listBox->setAlternatingRowColors(list.size() >= 2);
+void pListBox::append(const lstring &text) {
+  locked = true;
+  auto items = qtListBox->findItems("", Qt::MatchContains);
+  QTreeWidgetItem *item = new QTreeWidgetItem(qtListBox);
+  item->setData(0, Qt::UserRole, (unsigned)items.size());
+  if(listBox.state.checkable) item->setCheckState(0, Qt::Unchecked);
+  for(unsigned n = 0; n < text.size(); n++) {
+    item->setText(n, QString::fromUtf8(text[n]));
+  }
+  locked = false;
 }
 
-void ListBox::setHeaderVisible(bool headerVisible) {
-  listBox->setHeaderHidden(headerVisible == false);
+void pListBox::autosizeColumns() {
+  for(unsigned n = 0; n < listBox.state.headerText.size(); n++) qtListBox->resizeColumnToContents(n);
 }
 
-void ListBox::setCheckable(bool checkable) {
-  listBox->checkable = checkable;
-  if(listBox->checkable) {
-    auto items = listBox->findItems("", Qt::MatchContains);
-    for(unsigned i = 0; i < items.size(); i++) items[i]->setCheckState(0, Qt::Unchecked);
+bool pListBox::checked(unsigned row) {
+  QTreeWidgetItem *item = qtListBox->topLevelItem(row);
+  return item ? item->checkState(0) == Qt::Checked : false;
+}
+
+void pListBox::modify(unsigned row, const lstring &text) {
+  QTreeWidgetItem *item = qtListBox->topLevelItem(row);
+  if(!item) return;
+  for(unsigned n = 0; n < text.size(); n++) {
+    item->setText(n, QString::fromUtf8(text[n]));
   }
 }
 
-void ListBox::reset() {
-  listBox->clear();
+void pListBox::modify(unsigned row, unsigned column, const string &text) {
+  QTreeWidgetItem *item = qtListBox->topLevelItem(row);
+  if(!item) return;
+  item->setText(column, QString::fromUtf8(text));
 }
 
-void ListBox::resizeColumnsToContent() {
-  for(unsigned i = 0; i < listBox->columnCount(); i++) listBox->resizeColumnToContents(i);
+void pListBox::reset() {
+  qtListBox->clear();
 }
 
-void ListBox::addItem(const string &text) {
-  object->locked = true;
-  auto items = listBox->findItems("", Qt::MatchContains);
-  QTreeWidgetItem *item = new QTreeWidgetItem(listBox);
-  if(listBox->checkable) item->setCheckState(0, Qt::Unchecked);
-  item->setData(0, Qt::UserRole, (unsigned)items.size());
-  lstring list;
-  list.split("\t", text);
-  for(unsigned i = 0; i < list.size(); i++) item->setText(i, QString::fromUtf8(list[i]));
-  object->locked = false;
-}
-
-void ListBox::setItem(unsigned row, const string &text) {
-  object->locked = true;
-  QTreeWidgetItem *item = listBox->topLevelItem(row);
-  lstring list;
-  list.split("\t", text);
-  for(unsigned i = 0; i < list.size(); i++) item->setText(i, QString::fromUtf8(list[i]));
-  object->locked = false;
-}
-
-bool ListBox::checked(unsigned row) {
-  QTreeWidgetItem *item = listBox->topLevelItem(row);
-  return (item ? item->checkState(0) == Qt::Checked : false);
-}
-
-void ListBox::setChecked(unsigned row, bool checked) {
-  object->locked = true;
-  QTreeWidgetItem *item = listBox->topLevelItem(row);
-  if(item) item->setCheckState(0, checked ? Qt::Checked : Qt::Unchecked);
-  object->locked = false;
-}
-
-optional<unsigned> ListBox::selection() {
-  QTreeWidgetItem *item = listBox->currentItem();
+optional<unsigned> pListBox::selection() {
+  QTreeWidgetItem *item = qtListBox->currentItem();
   if(item == 0) return { false, 0 };
   if(item->isSelected() == false) return { false, 0 };
-  unsigned row = item->data(0, Qt::UserRole).toUInt();
-  return { true, row };
+  return { true, item->data(0, Qt::UserRole).toUInt() };
 }
 
-void ListBox::setSelection(unsigned row) {
-  object->locked = true;
-  QTreeWidgetItem *item = listBox->currentItem();
+void pListBox::setCheckable(bool checkable) {
+  if(checkable) {
+    auto items = qtListBox->findItems("", Qt::MatchContains);
+    for(unsigned n = 0; n < items.size(); n++) items[n]->setCheckState(0, Qt::Unchecked);
+  }
+}
+
+void pListBox::setChecked(unsigned row, bool checked) {
+  locked = true;
+  QTreeWidgetItem *item = qtListBox->topLevelItem(row);
+  if(item) item->setCheckState(0, checked ? Qt::Checked : Qt::Unchecked);
+  locked = false;
+}
+
+void pListBox::setHeaderText(const lstring &text) {
+  QStringList labels;
+  foreach(column, text) labels << QString::fromUtf8(column);
+
+  qtListBox->setColumnCount(text.size());
+  qtListBox->setAlternatingRowColors(text.size() >= 2);
+  qtListBox->setHeaderLabels(labels);
+  autosizeColumns();
+}
+
+void pListBox::setHeaderVisible(bool visible) {
+  qtListBox->setHeaderHidden(!visible);
+  autosizeColumns();
+}
+
+void pListBox::setSelection(unsigned row) {
+  locked = true;
+  QTreeWidgetItem *item = qtListBox->currentItem();
   if(item) item->setSelected(false);
-  auto items = listBox->findItems("", Qt::MatchContains);
-  for(unsigned i = 0; i < items.size(); i++) {
-    if(items[i]->data(0, Qt::UserRole).toUInt() == row) {
-      listBox->setCurrentItem(items[i]);
+  auto items = qtListBox->findItems("", Qt::MatchContains);
+  for(unsigned n = 0; n < items.size(); n++) {
+    if(items[n]->data(0, Qt::UserRole).toUInt() == row) {
+      qtListBox->setCurrentItem(items[n]);
       break;
     }
   }
-  object->locked = false;
+  locked = false;
 }
 
-ListBox::ListBox() {
-  listBox = new ListBox::Data(*this);
-  widget->widget = listBox;
+pListBox::pListBox(ListBox &listBox) : listBox(listBox), pWidget(listBox) {
+  qtWidget = qtListBox = new QTreeWidget;
+  qtListBox->setHeaderLabels(QStringList() << "");
+  qtListBox->setHeaderHidden(true);
+  qtListBox->setAllColumnsShowFocus(true);
+  qtListBox->setRootIsDecorated(false);
 
-  listBox->setAllColumnsShowFocus(true);
-  listBox->setRootIsDecorated(false);
-  listBox->setHeaderHidden(true);
-  listBox->connect(listBox, SIGNAL(itemActivated(QTreeWidgetItem*, int)), SLOT(onActivate()));
-  listBox->connect(listBox, SIGNAL(itemSelectionChanged()), SLOT(onChange()));
-  listBox->connect(listBox, SIGNAL(itemChanged(QTreeWidgetItem*, int)), SLOT(onTick(QTreeWidgetItem*)));
+  connect(qtListBox, SIGNAL(itemActivated(QTreeWidgetItem*, int)), SLOT(onActivate()));
+  connect(qtListBox, SIGNAL(itemSelectionChanged()), SLOT(onChange()));
+  connect(qtListBox, SIGNAL(itemChanged(QTreeWidgetItem*, int)), SLOT(onTick(QTreeWidgetItem*)));
+}
+
+void pListBox::onActivate() {
+  if(locked == false && listBox.onActivate) listBox.onActivate();
+}
+
+void pListBox::onChange() {
+  if(auto position = selection()) {
+    listBox.state.selection = { true, position() };
+  } else {
+    listBox.state.selection = { false, 0 };
+  }
+  if(locked == false && listBox.onChange) listBox.onChange();
+}
+
+void pListBox::onTick(QTreeWidgetItem *item) {
+  unsigned row = item->data(0, Qt::UserRole).toUInt();
+  bool checkState = checked(row);
+  listBox.state.checked[row] = checkState;
+  if(locked == false && listBox.onTick) listBox.onTick(row);
 }

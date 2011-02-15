@@ -1,53 +1,96 @@
 MainWindow mainWindow;
 
 void MainWindow::create() {
-  Window::create(128, 128, 160 * 2, 144 * 2, { GameBoy::Info::Name, " v", GameBoy::Info::Version });
-  setDefaultFont(application.proportionalFont);
-  setFont(application.proportionalFontBold);
+  setTitle({ GameBoy::Info::Name, " v", GameBoy::Info::Version });
+  setResizable(false);
+  setMenuFont(application.proportionalFont);
+  setStatusFont(application.proportionalFontBold);
 
-  system.create(*this, "System");
-  systemLoadCartridge.create(system, "Load Cartridge ...");
-  systemSeparator1.create(system);
-  systemPower.create(system, "Power Cycle");
+  system.setText("System");
+  append(system);
 
-  settings.create(*this, "Settings");
-  settingsVideoSync.create(settings, "Synchronize Video");
+  systemLoadCartridge.setText("Load Cartridge ...");
+  system.append(systemLoadCartridge);
+
+  system.append(systemSeparator1);
+
+  systemPower.setText("Power Cycle");
+  system.append(systemPower);
+
+  settings.setText("Settings");
+  append(settings);
+
+  settingsVideoSync.setText("Synchronize Video");
   settingsVideoSync.setChecked(false);
-  settingsAudioSync.create(settings, "Synchronize Audio");
+  settings.append(settingsVideoSync);
+
+  settingsAudioSync.setText("Synchronize Audio");
   settingsAudioSync.setChecked(true);
+  settings.append(settingsAudioSync);
 
-  tools.create(*this, "Tools");
-  toolsSaveState.create(tools, "Save State");
-  toolsSaveState1.create(toolsSaveState, "Slot 1");
-  toolsSaveState2.create(toolsSaveState, "Slot 2");
-  toolsSaveState3.create(toolsSaveState, "Slot 3");
-  toolsSaveState4.create(toolsSaveState, "Slot 4");
-  toolsSaveState5.create(toolsSaveState, "Slot 5");
-  toolsLoadState.create(tools, "Load State");
-  toolsLoadState1.create(toolsLoadState, "Slot 1");
-  toolsLoadState2.create(toolsLoadState, "Slot 2");
-  toolsLoadState3.create(toolsLoadState, "Slot 3");
-  toolsLoadState4.create(toolsLoadState, "Slot 4");
-  toolsLoadState5.create(toolsLoadState, "Slot 5");
-  toolsSeparator1.create(tools);
-  toolsTraceCPU.create(tools, "Trace CPU");
+  tools.setText("Tools");
+  append(tools);
 
-  help.create(*this, "Help");
-  helpAbout.create(help, "About ...");
+  toolsSaveState.setText("Save State");
+  tools.append(toolsSaveState);
 
-  layout.append(viewport, 0, 0, 160 * 2, 144 * 2);
+  toolsSaveState1.setText("Slot 1");
+  toolsSaveState.append(toolsSaveState1);
+
+  toolsSaveState2.setText("Slot 2");
+  toolsSaveState.append(toolsSaveState2);
+
+  toolsSaveState3.setText("Slot 3");
+  toolsSaveState.append(toolsSaveState3);
+
+  toolsSaveState4.setText("Slot 4");
+  toolsSaveState.append(toolsSaveState4);
+
+  toolsSaveState5.setText("Slot 5");
+  toolsSaveState.append(toolsSaveState5);
+
+  toolsLoadState.setText("Load State");
+  tools.append(toolsLoadState);
+
+  toolsLoadState1.setText("Slot 1");
+  toolsLoadState.append(toolsLoadState1);
+
+  toolsLoadState2.setText("Slot 2");
+  toolsLoadState.append(toolsLoadState2);
+
+  toolsLoadState3.setText("Slot 3");
+  toolsLoadState.append(toolsLoadState3);
+
+  toolsLoadState4.setText("Slot 4");
+  toolsLoadState.append(toolsLoadState4);
+
+  toolsLoadState5.setText("Slot 5");
+  toolsLoadState.append(toolsLoadState5);
+
+  tools.append(toolsSeparator1);
+
+  toolsTraceCPU.setText("Trace CPU");
+  tools.append(toolsTraceCPU);
+
+  help.setText("Help");
+  append(help);
+
+  helpAbout.setText("About ...");
+  help.append(helpAbout);
+
+  layout.append(viewport, { 0, 0, 160 * 2, 144 * 2 });
   setLayout(layout);
+  setGeometry({ 128, 128, 160 * 2, 144 * 2 });
 
   setMenuVisible(true);
   setStatusVisible(true);
 
   onClose = []() {
     application.quit = true;
-    return false;
   };
 
   systemLoadCartridge.onTick = []() {
-    string filename = OS::fileOpen(mainWindow, "Game Boy cartridges\t*.gb,*.gbc", "/media/sdb1/root/gameboy_images/");
+    string filename = OS::fileLoad(mainWindow, "/media/sdb1/root/gameboy_images/", "Game Boy cartridges (*.gb,*.gbc)");
     if(filename != "") utility.loadCartridge(filename);
   };
 

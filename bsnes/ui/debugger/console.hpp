@@ -1,6 +1,6 @@
 struct Console : TopLevelWindow {
   HorizontalLayout layout;
-  EditBox output;
+  TextEdit output;
   VerticalLayout controlLayout;
   CheckBox traceToConsole;
   CheckBox traceToFile;

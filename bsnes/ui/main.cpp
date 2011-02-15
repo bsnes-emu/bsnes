@@ -18,15 +18,28 @@ void Application::main(int argc, char **argv) {
   if(config.path.current == "") config.path.current = config.path.base;
   inputMapper.bind();
 
-  #if defined(PHOENIX_WINDOWS)
-  proportionalFont.create("Tahoma", 8);
-  proportionalFontBold.create("Tahoma", 8, Font::Style::Bold);
-  monospaceFont.create("Courier New", 8);
+  #if defined(PLATFORM_WIN)
+  proportionalFont.setFamily("Tahoma");
+  proportionalFont.setSize(8);
+
+  proportionalFontBold.setFamily("Tahoma");
+  proportionalFontBold.setSize(8);
+  proportionalFontBold.setBold();
+
+  monospaceFont.setFamily("Courier New");
+  monospaceFont.setSize(8);
   #else
-  proportionalFont.create("Sans", 8);
-  proportionalFontBold.create("Sans", 8, Font::Style::Bold);
-  monospaceFont.create("Liberation Mono", 8);
+  proportionalFont.setFamily("Sans");
+  proportionalFont.setSize(8);
+
+  proportionalFontBold.setFamily("Sans");
+  proportionalFontBold.setSize(8);
+  proportionalFontBold.setBold();
+
+  monospaceFont.setFamily("Liberation Mono");
+  monospaceFont.setSize(8);
   #endif
+  OS::setDefaultFont(proportionalFont);
 
   SNES::system.init(&interface);
 
@@ -55,7 +68,7 @@ void Application::main(int argc, char **argv) {
 
   utility.setScale(config.video.scale);
   mainWindow.setVisible();
-  OS::run();
+  OS::process();
 
   video.driver(config.video.driver);
   video.set(Video::Handle, mainWindow.viewport.handle());
@@ -96,7 +109,7 @@ void Application::main(int argc, char **argv) {
   if(argc == 2) cartridge.loadNormal(argv[1]);
 
   while(quit == false) {
-    OS::run();
+    OS::process();
     inputMapper.poll();
     utility.updateStatus();
 
@@ -118,7 +131,7 @@ void Application::main(int argc, char **argv) {
   cartridge.unload();
   saveGeometry();
   foreach(window, windows) window->setVisible(false);
-  OS::run();
+  OS::process();
   SNES::system.term();
   config.save();
 
@@ -129,7 +142,6 @@ void Application::main(int argc, char **argv) {
 
 void Application::addWindow(TopLevelWindow *window, const string &name, const string &position) {
   windows.append(window);
-  window->setDefaultFont(proportionalFont);
   window->name = name;
   window->position = position;
   geometryConfig.attach(window->position, window->name);
@@ -151,7 +163,7 @@ void Application::loadGeometry() {
     lstring position;
     position.split(",", window->position);
     Geometry geom = window->geometry();
-    window->setGeometry(integer(position[0]), integer(position[1]), geom.width, geom.height);
+    window->setGeometry({ (signed)integer(position[0]), (signed)integer(position[1]), geom.width, geom.height });
   }
 }
 

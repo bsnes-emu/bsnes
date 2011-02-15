@@ -55,7 +55,7 @@ void HorizontalLayout::setGeometry(Geometry &geometry) {
     }
 
     if(child.widget) {
-      child.widget->setGeometry(geometry.x, geometry.y, child.width, child.height);
+      child.widget->setGeometry({ geometry.x, geometry.y, child.width, child.height });
       geometry.x += child.width + child.spacing;
       geometry.width -= child.width + child.spacing;
     }

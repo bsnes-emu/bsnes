@@ -6,388 +6,420 @@ struct Settings : public configuration {
 
   void load();
   void save();
+  Settings();
 };
 
-struct Object::Data {
-public:
-  Object &self;
+struct pFont;
+struct pWindow;
+struct pMenu;
+struct pLayout;
+struct pWidget;
+
+struct pObject {
   bool locked;
 
-  Data(Object &self) : self(self) {
+  pObject() {
     locked = false;
   }
 };
 
-struct Font::Data : public QFont {
-public:
-  Font &self;
-
-  Data(Font &self) : self(self) {
-  }
-};
-
-struct Menu::Data : public QMenu {
-public:
-  Menu &self;
-  Window *parent;
-
-  Data(Menu &self) : self(self), parent(0) {
-  }
-};
-
-struct MenuSeparator::Data {
-public:
-  MenuSeparator &self;
-  QAction *action;
-
-  Data(MenuSeparator &self) : self(self) {
-  }
-};
-
-struct MenuItem::Data : public QAction {
-  Q_OBJECT
-
-public:
-  MenuItem &self;
-
-  Data(MenuItem &self) : self(self), QAction(0) {
-  }
-
-public slots:
-  void onTick() {
-    if(self.onTick) self.onTick();
-  }
-};
-
-struct MenuCheckItem::Data : public QAction {
-  Q_OBJECT
-
-public:
-  MenuCheckItem &self;
-
-  Data(MenuCheckItem &self) : self(self), QAction(0) {
-  }
-
-public slots:
-  void onTick() {
-    if(self.onTick) self.onTick();
-  }
-};
-
-struct MenuRadioItem::Data : public QAction {
-  Q_OBJECT
-
-public:
-  MenuRadioItem &self;
-
-  Data(MenuRadioItem &self) : self(self), QAction(0) {
-  }
-
-public slots:
-  void onTick() {
-    if(self.object->locked == false && self.onTick && self.checked()) self.onTick();
-  }
-};
-
-struct Window::Data : public QWidget {
-  Q_OBJECT
-
-public:
-  Window &self;
-  unsigned x, y, width, height;
-  bool resizable, fullscreen, menuVisible, statusVisible;
-  Layout *layout;
-  QFont *defaultFont;
-  QVBoxLayout *vlayout;
-  QMenuBar *menuBar;
-  QStatusBar *statusBar;
-  QWidget *container;
-
-  QSize sizeHint() const {
-    unsigned actualHeight = height;
-    if(menuVisible) actualHeight += menuBar->height();
-    if(statusVisible) actualHeight += statusBar->height();
-    return QSize(width, actualHeight);
-  }
-
-  void closeEvent(QCloseEvent *event) {
-    if(self.onClose) {
-      bool result = self.onClose();
-      if(result == false) event->ignore();
-    }
-  }
-
-  void moveEvent(QMoveEvent *event) {
-    if(self.object->locked == false && fullscreen == false && isVisible() == true) {
-      x += event->pos().x() - event->oldPos().x();
-      y += event->pos().y() - event->oldPos().y();
-    }
-
-    if(self.object->locked == false && self.onMove) {
-      self.onMove();
-    }
-  }
-
-  void resizeEvent(QResizeEvent *event) {
-    if(self.object->locked == false && fullscreen == false && isVisible() == true) {
-      width = container->geometry().width();
-      height = container->geometry().height();
-    }
-
-    if(layout) {
-      Geometry geom = self.geometry();
-      geom.x = geom.y = 0;
-      layout->setGeometry(geom);
-    }
-
-    if(self.object->locked == false && self.onSize) {
-      self.onSize();
-    }
-  }
-
-  Data(Window &self) : self(self) {
-    resizable = true;
-    fullscreen = false;
-    menuVisible = false;
-    statusVisible = false;
-  }
-};
-
-struct Layout::Data {
-  Layout &self;
-  Window *parent;
-
-  Data(Layout &self) : self(self) {
-    parent = 0;
-  }
-};
-
-struct Widget::Data {
-  Widget &self;
-  QWidget *widget;
-  Font *font;
-
-  Data(Widget &self) : self(self) {
-    widget = 0;
-    font = 0;
-  }
-};
-
-struct Button::Data : public QPushButton {
-  Q_OBJECT
-
-public:
-  Button &self;
-
-  Data(Button &self) : self(self) {
-  }
-
-public slots:
-  void onTick() {
-    if(self.onTick) self.onTick();
-  }
-};
-
-struct Canvas::Data : public QWidget {
-  Q_OBJECT
-
-public:
-  Canvas &self;
-  QImage *image;
-  void paintEvent(QPaintEvent*);
-
-  Data(Canvas &self) : self(self) {
-  }
-};
-
-struct CheckBox::Data : public QCheckBox {
-  Q_OBJECT
-
-public:
-  CheckBox &self;
-
-  Data(CheckBox &self) : self(self) {
-  }
-
-public slots:
-  void onTick() {
-    if(self.onTick) self.onTick();
-  }
-};
-
-struct ComboBox::Data : public QComboBox {
-  Q_OBJECT
-
-public:
-  ComboBox &self;
-
-  Data(ComboBox &self) : self(self) {
-  }
-
-public slots:
-  void onChange() {
-    if(self.object->locked == false && self.onChange) self.onChange();
-  }
-};
-
-struct EditBox::Data : public QTextEdit {
-  Q_OBJECT
-
-public:
-  EditBox &self;
-
-  Data(EditBox &self) : self(self) {
-  }
-
-public slots:
-  void onChange() {
-    if(self.onChange) self.onChange();
-  }
-};
-
-struct HexEditor::Data : public QTextEdit {
-  Q_OBJECT
-
-public:
-  HexEditor &self;
-  QHBoxLayout *layout;
-  QScrollBar *scrollBar;
-  unsigned size;
-  unsigned offset;
-  unsigned columns;
-  unsigned rows;
-
-  void keyPressEvent(QKeyEvent*);
-
-  Data(HexEditor &self) : self(self) {
-  }
-
-public slots:
-  void scrollEvent();
-};
-
-struct HorizontalSlider::Data : public QSlider {
-  Q_OBJECT
-
-public:
-  HorizontalSlider &self;
-
-  Data(HorizontalSlider &self) : self(self), QSlider(Qt::Horizontal) {
-  }
-
-public slots:
-  void onChange() {
-    if(self.onChange) self.onChange();
-  }
-};
-
-struct Label::Data : public QLabel {
-  Q_OBJECT
-
-public:
-  Label &self;
-
-  Data(Label &self) : self(self) {
-  }
-};
-
-struct ListBox::Data : public QTreeWidget {
-  Q_OBJECT
-
-public:
-  ListBox &self;
-  bool checkable;
-
-  Data(ListBox &self) : self(self) {
-    checkable = false;
-  }
-
-public slots:
-  void onActivate() {
-    if(self.object->locked == false && self.onActivate) self.onActivate();
-  }
-
-  void onChange() {
-    if(self.object->locked == false && self.onChange) self.onChange();
-  }
-
-  void onTick(QTreeWidgetItem *item) {
-    if(self.object->locked == false && self.onTick) self.onTick(item->data(0, Qt::UserRole).toUInt());
-  }
-};
-
-struct ProgressBar::Data : public QProgressBar {
-public:
-  ProgressBar &self;
-
-  Data(ProgressBar &self) : self(self) {
-  }
-};
-
-struct RadioBox::Data : public QRadioButton {
-  Q_OBJECT
-
-public:
-  RadioBox &self;
-  Window *parent;
-  QButtonGroup *buttonGroup;
-
-  Data(RadioBox &self) : self(self) {
-  }
-
-public slots:
-  void onTick() {
-    if(self.onTick && self.checked()) self.onTick();
-  }
-};
-
-struct TextBox::Data : public QLineEdit {
-  Q_OBJECT
-
-public:
-  TextBox &self;
-
-  Data(TextBox &self) : self(self) {
-  }
-
-public slots:
-  void onActivate() {
-    if(self.onActivate) self.onActivate();
-  }
-
-  void onChange() {
-    if(self.onChange) self.onChange();
-  }
-};
-
-struct VerticalSlider::Data : public QSlider {
-  Q_OBJECT
-
-public:
-  VerticalSlider &self;
-
-  Data(VerticalSlider &self) : self(self), QSlider(Qt::Vertical) {
-  }
-
-public slots:
-  void onChange() {
-    if(self.onChange) self.onChange();
-  }
-};
-
-struct Viewport::Data : public QWidget {
-public:
-  Viewport &self;
-
-  Data(Viewport &self) : self(self) {
-  }
-};
-
-struct OS::Data : public QObject {
-  Q_OBJECT
-
-public:
+struct pOS : public pObject {
   QApplication *application;
 
+  unsigned desktopWidth();
+  unsigned desktopHeight();
+  string fileLoad(Window &parent, const string &path, const lstring &filter);
+  string fileSave(Window &parent, const string &path, const lstring &filter);
+  string folderSelect(Window &parent, const string &path);
+  void main();
+  bool pending();
+  void process();
+  void quit();
+  void setDefaultFont(Font &font);
+
+  pOS();
+};
+
+struct pFont : public pObject {
+  Font &font;
+  QFont *qtFont;
+
+  void setBold(bool bold);
+  void setFamily(const string &family);
+  void setItalic(bool italic);
+  void setSize(unsigned size);
+  void setUnderline(bool underline);
+
+  pFont(Font &font);
+  void update();
+};
+
+struct pMessageWindow : public pObject {
+  static MessageWindow::Response information(Window &parent, const string &text, MessageWindow::Buttons buttons);
+  static MessageWindow::Response question(Window &parent, const string &text, MessageWindow::Buttons buttons);
+  static MessageWindow::Response warning(Window &parent, const string &text, MessageWindow::Buttons buttons);
+  static MessageWindow::Response critical(Window &parent, const string &text, MessageWindow::Buttons buttons);
+};
+
+struct pWindow : public QObject, public pObject {
+  Q_OBJECT
+
+public:
+  Window &window;
+  struct QtWindow : public QWidget {
+    pWindow &self;
+    void closeEvent(QCloseEvent*);
+    void moveEvent(QMoveEvent*);
+    void resizeEvent(QResizeEvent*);
+    QSize sizeHint() const;
+    QtWindow(pWindow &self) : self(self) {}
+  } *qtWindow;
+  QVBoxLayout *qtLayout;
+  QMenuBar *qtMenu;
+  QStatusBar *qtStatus;
+  QWidget *qtContainer;
+  Layout *layout;
+
+  void append(Menu &menu);
+  Geometry frameGeometry();
+  bool focused();
+  Geometry geometry();
+  void setBackgroundColor(uint8_t red, uint8_t green, uint8_t blue);
+  void setFrameGeometry(const Geometry &geometry);
+  void setFocused();
+  void setFullScreen(bool fullScreen);
+  void setGeometry(const Geometry &geometry);
+  void setLayout(Layout &layout);
+  void setMenuFont(Font &font);
+  void setMenuVisible(bool visible);
+  void setResizable(bool resizable);
+  void setStatusFont(Font &font);
+  void setStatusText(const string &text);
+  void setStatusVisible(bool visible);
+  void setTitle(const string &text);
+  void setVisible(bool visible);
+
+  pWindow(Window &window);
+  void updateFrameGeometry();
+};
+
+struct pAction : public pObject {
+  Action &action;
+
+  void setEnabled(bool enabled);
+  void setVisible(bool visible);
+
+  pAction(Action &action);
+};
+
+struct pMenu : public pAction {
+  Menu &menu;
+  QMenu *qtMenu;
+
+  void append(Action &action);
+  void setText(const string &text);
+
+  pMenu(Menu &menu);
+};
+
+struct pMenuSeparator : public pAction {
+  MenuSeparator &menuSeparator;
+  QAction *qtAction;
+
+  pMenuSeparator(MenuSeparator &menuSeparator);
+};
+
+struct pMenuItem : public QObject, public pAction {
+  Q_OBJECT
+
+public:
+  MenuItem &menuItem;
+  QAction *qtAction;
+
+  void setText(const string &text);
+
+  pMenuItem(MenuItem &menuItem);
+
 public slots:
+  void onTick();
+};
+
+struct pMenuCheckItem : public QObject, public pAction {
+  Q_OBJECT
+
+public:
+  MenuCheckItem &menuCheckItem;
+  QAction *qtAction;
+
+  bool checked();
+  void setChecked(bool checked);
+  void setText(const string &text);
+
+  pMenuCheckItem(MenuCheckItem &menuCheckItem);
+
+public slots:
+  void onTick();
+};
+
+struct pMenuRadioItem : public QObject, public pAction {
+  Q_OBJECT
+
+public:
+  MenuRadioItem &menuRadioItem;
+  QAction *qtAction;
+  QActionGroup *qtGroup;
+
+  bool checked();
+  void setChecked();
+  void setGroup(const array<MenuRadioItem*> &group);
+  void setText(const string &text);
+
+  pMenuRadioItem(MenuRadioItem &menuRadioitem);
+
+public slots:
+  void onTick();
+};
+
+struct pLayout : public pObject {
+  Layout &layout;
+  pWindow *parent;
+
+  void append(Widget &widget);
+
+  pLayout(Layout &layout);
+};
+
+struct pWidget : public pObject {
+  Widget &widget;
+  QWidget *qtWidget;
+
+  bool enabled();
+  void setEnabled(bool enabled);
+  void setFocused();
+  void setFont(Font &font);
+  void setGeometry(const Geometry &geometry);
+  void setVisible(bool visible);
+
+  pWidget(Widget &widget);
+};
+
+struct pButton : public QObject, public pWidget {
+  Q_OBJECT
+
+public:
+  Button &button;
+  QPushButton *qtButton;
+
+  void setText(const string &text);
+
+  pButton(Button &button);
+
+public slots:
+  void onTick();
+};
+
+struct pCheckBox : public QObject, public pWidget {
+  Q_OBJECT
+
+public:
+  CheckBox &checkBox;
+  QCheckBox *qtCheckBox;
+
+  bool checked();
+  void setChecked(bool checked);
+  void setText(const string &text);
+
+  pCheckBox(CheckBox &checkBox);
+
+public slots:
+  void onTick();
+};
+
+struct pComboBox : public QObject, public pWidget {
+  Q_OBJECT
+
+public:
+  ComboBox &comboBox;
+  QComboBox *qtComboBox;
+
+  void append(const string &text);
+  void reset();
+  unsigned selection();
+  void setSelection(unsigned row);
+
+  pComboBox(ComboBox &comboBox);
+
+public slots:
+  void onChange();
+};
+
+struct pHexEdit : public QObject, public pWidget {
+  Q_OBJECT
+
+public:
+  HexEdit &hexEdit;
+  struct QtHexEdit : public QTextEdit {
+    pHexEdit &self;
+    void keyPressEvent(QKeyEvent*);
+    void keyPressEventAcknowledge(QKeyEvent*);
+    QtHexEdit(pHexEdit &self) : self(self) {}
+  } *qtHexEdit;
+  QHBoxLayout *qtLayout;
+  QScrollBar *qtScroll;
+
+  void setColumns(unsigned columns);
+  void setLength(unsigned length);
+  void setOffset(unsigned offset);
+  void setRows(unsigned rows);
+  void update();
+
+  void keyPressEvent(QKeyEvent*);
+  pHexEdit(HexEdit &hexEdit);
+
+public slots:
+  void onScroll();
+};
+
+struct pHorizontalSlider : public QObject, public pWidget {
+  Q_OBJECT
+
+public:
+  HorizontalSlider &horizontalSlider;
+  QSlider *qtSlider;
+
+  unsigned position();
+  void setLength(unsigned length);
+  void setPosition(unsigned position);
+
+  pHorizontalSlider(HorizontalSlider &horizontalSlider);
+
+public slots:
+  void onChange();
+};
+
+struct pLabel : public pWidget {
+  Label &label;
+  QLabel *qtLabel;
+
+  void setText(const string &text);
+
+  pLabel(Label &label);
+};
+
+struct pLineEdit : public QObject, public pWidget {
+  Q_OBJECT
+
+public:
+  LineEdit &lineEdit;
+  QLineEdit *qtLineEdit;
+
+  void setEditable(bool editable);
+  void setText(const string &text);
+  string text();
+
+  pLineEdit(LineEdit &lineEdit);
+
+public slots:
+  void onActivate();
+  void onChange();
+};
+
+struct pListBox : public QObject, public pWidget {
+  Q_OBJECT
+
+public:
+  ListBox &listBox;
+  QTreeWidget *qtListBox;
+
+  void append(const lstring &text);
+  void autosizeColumns();
+  bool checked(unsigned row);
+  void modify(unsigned row, const lstring &text);
+  void modify(unsigned row, unsigned column, const string &text);
+  void reset();
+  optional<unsigned> selection();
+  void setCheckable(bool checkable);
+  void setChecked(unsigned row, bool checked);
+  void setHeaderText(const lstring &text);
+  void setHeaderVisible(bool visible);
+  void setSelection(unsigned row);
+
+  pListBox(ListBox &listBox);
+
+public slots:
+  void onActivate();
+  void onChange();
+  void onTick(QTreeWidgetItem *item);
+};
+
+struct pProgressBar : public pWidget {
+  ProgressBar &progressBar;
+  QProgressBar *qtProgressBar;
+
+  void setPosition(unsigned position);
+
+  pProgressBar(ProgressBar &progressBar);
+};
+
+struct pRadioBox : public QObject, public pWidget {
+  Q_OBJECT
+
+public:
+  RadioBox &radioBox;
+  QRadioButton *qtRadioBox;
+  QButtonGroup *qtGroup;
+
+  bool checked();
+  void setChecked();
+  void setGroup(const array<RadioBox*> &group);
+  void setText(const string &text);
+
+  pRadioBox(RadioBox &radioBox);
+
+public slots:
+  void onTick();
+};
+
+struct pTextEdit : public QObject, public pWidget {
+  Q_OBJECT
+
+public:
+  TextEdit &textEdit;
+  QTextEdit *qtTextEdit;
+
+  void setCursorPosition(unsigned position);
+  void setEditable(bool editable);
+  void setText(const string &text);
+  void setWordWrap(bool wordWrap);
+  string text();
+
+  pTextEdit(TextEdit &textEdit);
+
+public slots:
+  void onChange();
+};
+
+struct pVerticalSlider : public QObject, public pWidget {
+  Q_OBJECT
+
+public:
+  VerticalSlider &verticalSlider;
+  QSlider *qtSlider;
+
+  unsigned position();
+  void setLength(unsigned length);
+  void setPosition(unsigned position);
+
+  pVerticalSlider(VerticalSlider &verticalSlider);
+
+public slots:
+  void onChange();
+};
+
+struct pViewport : public pWidget {
+  Viewport &viewport;
+
+  uintptr_t handle();
+
+  pViewport(Viewport &viewport);
 };

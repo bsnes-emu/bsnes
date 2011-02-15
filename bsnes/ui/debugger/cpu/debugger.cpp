@@ -18,12 +18,11 @@ void CPUDebugger::create() {
   controlLayout.append(proceed, 80, Style::ButtonHeight);
   layout.append(controlLayout, 80, 0);
 
-  setGeometry(0, 0, layout.minimumWidth() + 300, 220);
+  setGeometry({ 0, 0, layout.minimumWidth() + 300, 220 });
   setLayout(layout);
 
   onClose = []() {
     debugger.showCPUDebugger.setChecked(false);
-    return true;
   };
 
   stepInto.onTick = []() {

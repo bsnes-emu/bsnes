@@ -8,19 +8,32 @@ Application application;
 void Application::main(int argc, char **argv) {
   quit = false;
 
-  #if defined(PHOENIX_WINDOWS)
-  proportionalFont.create("Tahoma", 8);
-  proportionalFontBold.create("Tahoma", 8, Font::Style::Bold);
-  monospaceFont.create("Courier New", 8);
+  #if defined(PLATFORM_WIN)
+  proportionalFont.setFamily("Tahoma");
+  proportionalFont.setSize(8);
+
+  proportionalFontBold.setFamily("Tahoma");
+  proportionalFontBold.setSize(8);
+  proportionalFontBold.setBold();
+
+  monospaceFont.setFamily("Courier New");
+  monospaceFont.setSize(8);
   #else
-  proportionalFont.create("Sans", 8);
-  proportionalFontBold.create("Sans", 8, Font::Style::Bold);
-  monospaceFont.create("Liberation Mono", 8);
+  proportionalFont.setFamily("Sans");
+  proportionalFont.setSize(8);
+
+  proportionalFontBold.setFamily("Sans");
+  proportionalFontBold.setSize(8);
+  proportionalFontBold.setBold();
+
+  monospaceFont.setFamily("Liberation Mono");
+  monospaceFont.setSize(8);
   #endif
+  OS::setDefaultFont(proportionalFont);
 
   mainWindow.create();
   mainWindow.setVisible();
-  OS::run();
+  OS::process();
 
   #if defined(PHOENIX_WINDOWS)
   video.driver("Direct3D");
@@ -57,7 +70,7 @@ void Application::main(int argc, char **argv) {
   GameBoy::system.init(&interface);
 
   while(quit == false) {
-    OS::run();
+    OS::process();
 
     if(GameBoy::cartridge.loaded()) {
       do {

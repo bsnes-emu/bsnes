@@ -55,7 +55,7 @@ void VerticalLayout::setGeometry(Geometry &geometry) {
     }
 
     if(child.widget) {
-      child.widget->setGeometry(geometry.x, geometry.y, child.width, child.height);
+      child.widget->setGeometry({ geometry.x, geometry.y, child.width, child.height });
       geometry.y += child.height + child.spacing;
       geometry.height -= child.height + child.spacing;
     }

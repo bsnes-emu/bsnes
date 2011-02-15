@@ -23,7 +23,7 @@ void SingleSlotLoader::create() {
   controlLayout.append(okButton, 80, 0);
   layout.append(controlLayout, 0, Style::ButtonHeight);
 
-  setGeometry(0, 0, 480, layout.minimumHeight());
+  setGeometry({ 0, 0, 480, layout.minimumHeight() });
   setLayout(layout);
 
   baseBrowse.onTick = []() {
@@ -121,7 +121,7 @@ void DoubleSlotLoader::create() {
   controlLayout.append(okButton, 80, 0);
   layout.append(controlLayout, 0, Style::ButtonHeight);
 
-  setGeometry(0, 0, 480, layout.minimumHeight());
+  setGeometry({ 0, 0, 480, layout.minimumHeight() });
   setLayout(layout);
 
   baseBrowse.onTick = []() {

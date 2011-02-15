@@ -57,7 +57,7 @@ extern Application application;
 
 struct Style {
   enum : unsigned {
-  #if defined(PHOENIX_WINDOWS)
+  #if defined(PLATFORM_WIN)
     ButtonHeight = 25,
     CheckBoxHeight = 15,
     ComboBoxHeight = 22,
@@ -65,15 +65,7 @@ struct Style {
     LabelHeight = 15,
     SliderHeight = 25,
     TextBoxHeight = 22,
-  #elif defined(PHOENIX_GTK)
-    ButtonHeight = 25,
-    CheckBoxHeight = 15,
-    ComboBoxHeight = 22,
-    EditBoxHeight = 22,
-    LabelHeight = 15,
-    SliderHeight = 22,
-    TextBoxHeight = 22,
-  #elif defined(PHOENIX_QT)
+  #else
     ButtonHeight = 25,
     CheckBoxHeight = 15,
     ComboBoxHeight = 22,

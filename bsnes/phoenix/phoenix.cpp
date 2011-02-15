@@ -1,23 +1,11 @@
-#if defined(PHOENIX_WINDOWS)
-  #define UNICODE
-  #define WINVER 0x0501
-  #define _WIN32_WINNT 0x0501
-  #define _WIN32_IE 0x0600
-  #define NOMINMAX
-#endif
-
 #include "phoenix.hpp"
+using namespace nall;
 
-#if defined(PHOENIX_WINDOWS)
-  #include "windows/windows.cpp"
-#elif defined(PHOENIX_GTK)
-  #include "gtk/gtk.cpp"
-#elif defined(PHOENIX_QT)
-  #include "qt/qt.cpp"
+#if defined(PHOENIX_QT)
+  #include <QApplication>
+  #include <QtGui>
 #endif
 
 namespace phoenix {
-  #include "layout/fixed-layout.cpp"
-  #include "layout/horizontal-layout.cpp"
-  #include "layout/vertical-layout.cpp"
+  #include "core/core.cpp"
 }

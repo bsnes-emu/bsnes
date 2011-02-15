@@ -1,191 +1,222 @@
-void Window::append(Menu &menu) {
-  menu.menu->parent = this;
-  if(window->defaultFont) menu.menu->setFont(*window->defaultFont);
-  window->menuBar->addMenu(menu.menu);
+void pWindow::append(Menu &menu) {
+  qtMenu->addMenu(menu.p.qtMenu);
 }
 
-void Window::setLayout(Layout &layout) {
-  window->layout = &layout;
-
-  Geometry geom = geometry();
-  geom.x = geom.y = 0;
-  layout.setParent(*this);
-  layout.setGeometry(geom);
-}
-
-void Window::setResizable(bool resizable) {
-  window->resizable = resizable;
-  if(window->resizable) {
-    window->vlayout->setSizeConstraint(QLayout::SetDefaultConstraint);
-    window->container->setMinimumSize(window->width, window->height);
-  } else {
-    window->vlayout->setSizeConstraint(QLayout::SetFixedSize);
-    window->container->setFixedSize(window->width, window->height);
-  }
-}
-
-Geometry Window::frameGeometry() {
-  if(window->fullscreen) return { 0, 0, OS::desktopWidth(), OS::desktopHeight() };
+Geometry pWindow::frameGeometry() {
+  if(window.state.fullScreen) return { 0, 0, OS::desktopWidth(), OS::desktopHeight() };
   return {
-    window->x - settings.frameGeometryX, window->y - settings.frameGeometryY,
-    window->width + settings.frameGeometryWidth, window->height + settings.frameGeometryHeight
+    window.state.geometry.x - settings.frameGeometryX,
+    window.state.geometry.y - settings.frameGeometryY,
+    window.state.geometry.width + settings.frameGeometryWidth,
+    window.state.geometry.height + settings.frameGeometryHeight
   };
 }
 
-Geometry Window::geometry() {
-  if(window->fullscreen) return { 0, 0, OS::desktopWidth(), OS::desktopHeight() };
-  return { window->x, window->y, window->width, window->height };
+bool pWindow::focused() {
+  return qtWindow->isActiveWindow() && !qtWindow->isMinimized();
 }
 
-void Window::setFrameGeometry(signed x, signed y, unsigned width, unsigned height) {
-  setGeometry(
-    x + settings.frameGeometryX, y + settings.frameGeometryY,
-    width - settings.frameGeometryWidth, height - settings.frameGeometryHeight
-  );
+Geometry pWindow::geometry() {
+  if(window.state.fullScreen) {
+    unsigned width = OS::desktopWidth(), height = OS::desktopHeight();
+    if(window.state.menuVisible) height -= qtMenu->height();
+    if(window.state.statusVisible) height -= qtStatus->height();
+    return { 0, 0, width, height };
+  }
+  return window.state.geometry;
 }
 
-void Window::setGeometry(signed x, signed y, unsigned width, unsigned height) {
-  object->locked = true;
-
-  window->x = x;
-  window->y = y;
-  window->width = width;
-  window->height = height;
-
-  setResizable(window->resizable);
-  window->move(x - settings.frameGeometryX, y - settings.frameGeometryY);
-  window->adjustSize();
-
-  object->locked = false;
-}
-
-void Window::setDefaultFont(Font &font) {
-  window->defaultFont = font.font;
-  window->menuBar->setFont(*font.font);
-}
-
-void Window::setFont(Font &font) {
-  window->statusBar->setFont(*font.font);
-}
-
-void Window::setBackgroundColor(uint8_t red, uint8_t green, uint8_t blue) {
+void pWindow::setBackgroundColor(uint8_t red, uint8_t green, uint8_t blue) {
   QPalette palette;
   palette.setColor(QPalette::Window, QColor(red, green, blue));
-  window->container->setPalette(palette);
-  window->container->setAutoFillBackground(true);
+  qtContainer->setPalette(palette);
+  qtContainer->setAutoFillBackground(true);
 }
 
-void Window::setTitle(const string &text) {
-  window->setWindowTitle(QString::fromUtf8(text));
+void pWindow::setFrameGeometry(const Geometry &geometry) {
+  window.state.geometry = {
+    geometry.x + settings.frameGeometryX,
+    geometry.y + settings.frameGeometryY,
+    geometry.width - settings.frameGeometryWidth,
+    geometry.height - settings.frameGeometryHeight
+  };
+  if(window.state.menuVisible) window.state.geometry.height -= qtMenu->height();
+  if(window.state.statusVisible) window.state.geometry.height -= qtStatus->height();
+  setGeometry(window.state.geometry);
 }
 
-void Window::setStatusText(const string &text) {
-  window->statusBar->showMessage(QString::fromUtf8(text), 0);
+void pWindow::setFocused() {
+  qtWindow->raise();
+  qtWindow->activateWindow();
 }
 
-void Window::setVisible(bool visible) {
-  object->locked = true;
+void pWindow::setFullScreen(bool fullScreen) {
+  if(fullScreen == false) {
+    setResizable(window.state.resizable);
+    qtWindow->showNormal();
+    qtWindow->adjustSize();
+  } else {
+    qtLayout->setSizeConstraint(QLayout::SetDefaultConstraint);
+    qtContainer->setFixedSize(OS::desktopWidth(), OS::desktopHeight());
+    qtWindow->showFullScreen();
+    if(window.state.statusVisible) setStatusVisible(true);  //work around for Qt/Xlib bug
+  }
+}
 
+void pWindow::setGeometry(const Geometry &geometry_) {
+  locked = true;
+  Geometry geometry = geometry_;
+
+  setResizable(window.state.resizable);
+  qtWindow->move(geometry.x - settings.frameGeometryX, geometry.y - settings.frameGeometryY);
+  qtWindow->adjustSize();
+
+  geometry.x = geometry.y = 0;
+  if(layout) layout->setGeometry(geometry);
+  locked = false;
+}
+
+void pWindow::setLayout(Layout &layout) {
+  this->layout = &layout;
+
+  layout.p.parent = this;
+  layout.setParent(window);
+
+  Geometry geometry = window.state.geometry;
+  geometry.x = geometry.y = 0;
+  layout.setGeometry(geometry);
+}
+
+void pWindow::setMenuFont(Font &font) {
+  qtMenu->setFont(*font.p.qtFont);
+}
+
+void pWindow::setMenuVisible(bool visible) {
+  qtMenu->setVisible(visible);
+  setGeometry(window.state.geometry);
+}
+
+void pWindow::setResizable(bool resizable) {
+  if(resizable) {
+    qtLayout->setSizeConstraint(QLayout::SetDefaultConstraint);
+    qtContainer->setMinimumSize(window.state.geometry.width, window.state.geometry.height);
+  } else {
+    qtLayout->setSizeConstraint(QLayout::SetFixedSize);
+    qtContainer->setFixedSize(window.state.geometry.width, window.state.geometry.height);
+  }
+  qtStatus->setSizeGripEnabled(resizable);
+}
+
+void pWindow::setStatusFont(Font &font) {
+  qtStatus->setFont(*font.p.qtFont);
+}
+
+void pWindow::setStatusText(const string &text) {
+  qtStatus->showMessage(QString::fromUtf8(text), 0);
+}
+
+void pWindow::setStatusVisible(bool visible) {
+  qtStatus->setVisible(visible);
+  setGeometry(window.state.geometry);
+}
+
+void pWindow::setTitle(const string &text) {
+  qtWindow->setWindowTitle(QString::fromUtf8(text));
+}
+
+void pWindow::setVisible(bool visible) {
+  locked = true;
+  qtWindow->setVisible(visible);
   if(visible) {
-    window->show();
     updateFrameGeometry();
-    setGeometry(window->x, window->y, window->width, window->height);
-  } else {
-    window->hide();
+    setGeometry(window.state.geometry);
   }
-
-  object->locked = false;
+  locked = false;
 }
 
-void Window::setMenuVisible(bool visible) {
-  window->menuVisible = visible;
-  if(visible) window->menuBar->show();
-  else window->menuBar->hide();
+pWindow::pWindow(Window &window) : window(window) {
+  layout = 0;
+
+  qtWindow = new QtWindow(*this);
+  qtWindow->setWindowTitle(" ");
+
+  qtLayout = new QVBoxLayout(qtWindow);
+  qtLayout->setMargin(0);
+  qtLayout->setSpacing(0);
+  qtWindow->setLayout(qtLayout);
+
+  qtMenu = new QMenuBar(qtWindow);
+  if(OS::state->defaultFont) qtMenu->setFont(*OS::state->defaultFont->p.qtFont);
+  qtMenu->setVisible(false);
+  qtLayout->addWidget(qtMenu);
+
+  qtContainer = new QWidget(qtWindow);
+  qtContainer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+  qtContainer->setVisible(true);
+  qtLayout->addWidget(qtContainer);
+
+  qtStatus = new QStatusBar(qtWindow);
+  if(OS::state->defaultFont) qtStatus->setFont(*OS::state->defaultFont->p.qtFont);
+  qtStatus->setSizeGripEnabled(true);
+  qtStatus->setVisible(false);
+  qtLayout->addWidget(qtStatus);
+
+  setGeometry(window.state.geometry);
 }
 
-void Window::setStatusVisible(bool visible) {
-  window->statusVisible = visible;
-  if(visible) window->statusBar->show();
-  else window->statusBar->hide();
-}
-
-bool Window::focused() {
-  return window->isActiveWindow() && !window->isMinimized();
-}
-
-bool Window::fullscreen() {
-  return window->isFullScreen();
-}
-
-void Window::setFullscreen(bool fullscreen) {
-  window->fullscreen = fullscreen;
-
-  if(fullscreen == false) {
-    setResizable(window->resizable);
-    window->showNormal();
-    window->adjustSize();
-  } else {
-    window->vlayout->setSizeConstraint(QLayout::SetDefaultConstraint);
-    window->container->setFixedSize(OS::desktopWidth(), OS::desktopHeight());
-    window->showFullScreen();
+void pWindow::updateFrameGeometry() {
+  if(window.state.fullScreen == false) for(unsigned n = 0; n < 100; n++) {
+    if(qtWindow->geometry().x() > qtWindow->frameGeometry().x()) break;
+    usleep(100);
+    QApplication::processEvents();
   }
-}
-
-Window::Window() {
-  window = new Window::Data(*this);
-  window->defaultFont = 0;
-
-  window->vlayout = new QVBoxLayout(window);
-  window->vlayout->setMargin(0);
-  window->vlayout->setSpacing(0);
-  window->setLayout(window->vlayout);
-
-  window->menuBar = new QMenuBar(window);
-  window->menuBar->setVisible(false);
-  window->vlayout->addWidget(window->menuBar);
-
-  window->container = new QWidget(window);
-  window->container->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-  window->container->setVisible(true);
-  window->vlayout->addWidget(window->container);
-
-  window->statusBar = new QStatusBar(window);
-  window->statusBar->setSizeGripEnabled(false);
-  window->statusBar->setVisible(false);
-  window->vlayout->addWidget(window->statusBar);
-
-  setGeometry(128, 128, 256, 256);
-}
-
-//
-
-void Window::updateFrameGeometry() {
-  //Qt does not even attempt to cache frameGeometry, so if this is called before
-  //a window is visible onscreen, it is equivalent to geometry(). Without proper
-  //frameGeometry, phoenix's set(Frame)Geometry functions will not work
-  //properly. Attempting to detect frame geometry after the window is visible
-  //would require moving a visible window, causing a slight jitter effect.
-
-  //This routine is called every time a new window is shown, and attempts to
-  //cache frame geometry for the next set(Frame)Geometry call. The information
-  //is stored to disk, so that hopefully a phoenix window will never jitter more
-  //than once.
-
-  //The information is constantly updated after each window show to detect theme
-  //changes that may adjust frame geometry.
-
-  if(window->fullscreen == false) {
-    for(unsigned n = 0; n < 100; n++) {
-      if(window->geometry().x() > window->frameGeometry().x()) break;
-      usleep(100);
-      QApplication::processEvents();
-    }
-  }
-  QRect border = window->frameGeometry();
-  QRect client = window->geometry();
+  QRect border = qtWindow->frameGeometry();
+  QRect client = qtWindow->geometry();
 
   settings.frameGeometryX = client.x() - border.x();
   settings.frameGeometryY = client.y() - border.y();
   settings.frameGeometryWidth = border.width() - client.width();
   settings.frameGeometryHeight = border.height() - client.height();
+}
+
+void pWindow::QtWindow::closeEvent(QCloseEvent *event) {
+  event->ignore();
+  hide();
+  if(self.window.onClose) self.window.onClose();
+}
+
+void pWindow::QtWindow::moveEvent(QMoveEvent *event) {
+  if(self.locked == false && self.window.state.fullScreen == false && self.qtWindow->isVisible() == true) {
+    self.window.state.geometry.x += event->pos().x() - event->oldPos().x();
+    self.window.state.geometry.y += event->pos().y() - event->oldPos().y();
+  }
+
+  if(self.locked == false) {
+    if(self.window.onMove) self.window.onMove();
+  }
+}
+
+void pWindow::QtWindow::resizeEvent(QResizeEvent*) {
+  if(self.locked == false && self.window.state.fullScreen == false && self.qtWindow->isVisible() == true) {
+    self.window.state.geometry.width = self.qtContainer->geometry().width();
+    self.window.state.geometry.height = self.qtContainer->geometry().height();
+  }
+
+  if(self.layout) {
+    Geometry geometry = self.geometry();
+    geometry.x = geometry.y = 0;
+    self.layout->setGeometry(geometry);
+  }
+
+  if(self.locked == false) {
+    if(self.window.onSize) self.window.onSize();
+  }
+}
+
+QSize pWindow::QtWindow::sizeHint() const {
+  unsigned width = self.window.state.geometry.width;
+  unsigned height = self.window.state.geometry.height;
+  if(self.window.state.menuVisible) height += self.qtMenu->height();
+  if(self.window.state.statusVisible) height += self.qtStatus->height();
+  return QSize(width, height);
 }

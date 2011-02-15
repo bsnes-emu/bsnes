@@ -1,10 +1,9 @@
-void ProgressBar::setPosition(unsigned position) {
-  progressBar->setValue(position);
+void pProgressBar::setPosition(unsigned position) {
+  qtProgressBar->setValue(position);
 }
 
-ProgressBar::ProgressBar() {
-  progressBar = new ProgressBar::Data(*this);
-  widget->widget = progressBar;
-  progressBar->setRange(0, 100);
-  progressBar->setTextVisible(false);
+pProgressBar::pProgressBar(ProgressBar &progressBar) : progressBar(progressBar), pWidget(progressBar) {
+  qtWidget = qtProgressBar = new QProgressBar;
+  qtProgressBar->setRange(0, 100);
+  qtProgressBar->setTextVisible(false);
 }

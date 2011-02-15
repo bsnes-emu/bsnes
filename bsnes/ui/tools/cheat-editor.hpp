@@ -3,10 +3,10 @@ struct CheatEditor : TopLevelWindow {
   ListBox cheatList;
   HorizontalLayout codeLayout;
   Label codeLabel;
-  TextBox codeEdit;
+  LineEdit codeEdit;
   HorizontalLayout descLayout;
   Label descLabel;
-  TextBox descEdit;
+  LineEdit descEdit;
   HorizontalLayout controlLayout;
   Label spacer;
   Button findButton;

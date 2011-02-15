@@ -1,24 +1,28 @@
-void ComboBox::reset() {
-  while(comboBox->count()) comboBox->removeItem(0);
+void pComboBox::append(const string &text) {
+  qtComboBox->addItem(QString::fromUtf8(text));
 }
 
-void ComboBox::addItem(const string &text) {
-  comboBox->addItem(QString::fromUtf8(text));
+void pComboBox::reset() {
+  while(qtComboBox->count()) qtComboBox->removeItem(0);
 }
 
-unsigned ComboBox::selection() {
-  signed index = comboBox->currentIndex();
-  return (index >= 0 ? index : 0);
+unsigned pComboBox::selection() {
+  signed index = qtComboBox->currentIndex();
+  return index >= 0 ? index : 0;
 }
 
-void ComboBox::setSelection(unsigned row) {
-  object->locked = true;
-  comboBox->setCurrentIndex(row);
-  object->locked = false;
+void pComboBox::setSelection(unsigned row) {
+  locked = true;
+  qtComboBox->setCurrentIndex(row);
+  locked = false;
 }
 
-ComboBox::ComboBox() {
-  comboBox = new ComboBox::Data(*this);
-  widget->widget = comboBox;
-  comboBox->connect(comboBox, SIGNAL(currentIndexChanged(int)), SLOT(onChange()));
+pComboBox::pComboBox(ComboBox &comboBox) : comboBox(comboBox), pWidget(comboBox) {
+  qtWidget = qtComboBox = new QComboBox;
+  connect(qtComboBox, SIGNAL(currentIndexChanged(int)), SLOT(onChange()));
+}
+
+void pComboBox::onChange() {
+  comboBox.state.selection = selection();
+  if(locked == false && comboBox.onChange) comboBox.onChange();
 }

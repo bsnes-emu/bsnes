@@ -4,7 +4,7 @@ void StateManager::create() {
   setTitle("State Manager");
   application.addWindow(this, "StateManager", "160,160");
 
-  stateList.setHeaderText("Slot\tDescription");
+  stateList.setHeaderText("Slot", "Description");
   stateList.setHeaderVisible();
   descLabel.setText("Description:");
   loadButton.setText("Load");
@@ -22,7 +22,7 @@ void StateManager::create() {
   controlLayout.append(eraseButton, 80, 0);
   layout.append(controlLayout, 0, Style::ButtonHeight);
 
-  setGeometry(0, 0, 480, layout.minimumHeight() + 250);
+  setGeometry({ 0, 0, 480, layout.minimumHeight() + 250 });
   setLayout(layout);
 
   synchronize();
@@ -48,19 +48,16 @@ void StateManager::synchronize() {
 
 void StateManager::refresh() {
   for(unsigned i = 0; i < 32; i++) {
-    stateList.setItem(i, { 
-      rdecimal<2>(i + 1), "\t",
-      slotLoadDescription(i)
-    });
+    stateList.modify(i, rdecimal<2>(i + 1), slotLoadDescription(i));
   }
-  stateList.resizeColumnsToContent();
+  stateList.autosizeColumns();
 }
 
 void StateManager::load() {
   stateList.reset();
   for(unsigned i = 0; i < 32; i++) {
     slot[i] = serializer();
-    stateList.addItem("");
+    stateList.append("");
   }
 
   string filename = { cartridge.baseName, ".bsa" };

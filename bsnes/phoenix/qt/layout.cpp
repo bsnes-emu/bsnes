@@ -1,15 +1,8 @@
-void Layout::setParent(Window &parent) {
-  layout->parent = &parent;
+void pLayout::append(Widget &widget) {
+  if(!widget.state.font && OS::state->defaultFont) widget.p.qtWidget->setFont(*OS::state->defaultFont->p.qtFont);
+  widget.p.qtWidget->setParent(layout.state.parent->p.qtContainer);
+  widget.p.qtWidget->setVisible(true);
 }
 
-void Layout::append(Widget &child) {
-  child.widget->widget->setParent(layout->parent->window->container);
-  if(!child.widget->font && layout->parent->window->defaultFont) {
-    QWidget *control = child.widget->widget;
-    control->setFont(*layout->parent->window->defaultFont);
-  }
-}
-
-Layout::Layout() {
-  layout = new Layout::Data(*this);
+pLayout::pLayout(Layout &layout) : layout(layout) {
 }

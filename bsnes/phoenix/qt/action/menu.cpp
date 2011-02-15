@@ -1,39 +1,21 @@
-void Menu::setText(const string &text) {
-  menu->setTitle(QString::fromUtf8(text));
-}
-
-void Menu::append(Action &item) {
-  if(dynamic_cast<Menu*>(&item)) {
-    menu->addMenu(((Menu*)&item)->menu);
-  } else if(dynamic_cast<MenuSeparator*>(&item)) {
-    menu->addSeparator();
-  } else if(dynamic_cast<MenuItem*>(&item)) {
-    menu->addAction(((MenuItem*)&item)->menuItem);
-  } else if(dynamic_cast<MenuCheckItem*>(&item)) {
-    menu->addAction(((MenuCheckItem*)&item)->menuCheckItem);
-  } else if(dynamic_cast<MenuRadioItem*>(&item)) {
-    MenuRadioItem &radioItem = (MenuRadioItem&)item;
-    menu->addAction(radioItem.menuRadioItem);
-    if(radioItem.menuRadioItem->actionGroup()->checkedAction() == 0) radioItem.setChecked();
+void pMenu::append(Action &action) {
+  if(dynamic_cast<Menu*>(&action)) {
+    qtMenu->addMenu(((Menu&)action).p.qtMenu);
+  } else if(dynamic_cast<MenuSeparator*>(&action)) {
+    qtMenu->addAction(((MenuSeparator&)action).p.qtAction);
+  } else if(dynamic_cast<MenuItem*>(&action)) {
+    qtMenu->addAction(((MenuItem&)action).p.qtAction);
+  } else if(dynamic_cast<MenuCheckItem*>(&action)) {
+    qtMenu->addAction(((MenuCheckItem&)action).p.qtAction);
+  } else if(dynamic_cast<MenuRadioItem*>(&action)) {
+    qtMenu->addAction(((MenuRadioItem&)action).p.qtAction);
   }
 }
 
-bool Menu::visible() {
-  return menu->isVisible();
+void pMenu::setText(const string &text) {
+  qtMenu->setTitle(QString::fromUtf8(text));
 }
 
-void Menu::setVisible(bool visible) {
-  menu->setVisible(visible);
-}
-
-bool Menu::enabled() {
-  return menu->isEnabled();
-}
-
-void Menu::setEnabled(bool enabled) {
-  menu->setEnabled(enabled);
-}
-
-Menu::Menu() {
-  menu = new Menu::Data(*this);
+pMenu::pMenu(Menu &menu) : menu(menu), pAction(menu) {
+  qtMenu = new QMenu;
 }

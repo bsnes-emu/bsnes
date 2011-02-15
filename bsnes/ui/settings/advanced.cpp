@@ -14,8 +14,7 @@ void AdvancedSettings::create() {
   focusPolicyPause.setText("Pause emulator when inactive");
   focusPolicyIgnore.setText("Ignore input when inactive");
   focusPolicyAllow.setText("Always allow input");
-  focusPolicyIgnore.setParent(focusPolicyPause);
-  focusPolicyAllow.setParent(focusPolicyPause);
+  RadioBox::group(focusPolicyPause, focusPolicyIgnore, focusPolicyAllow);
   if(config.settings.focusPolicy == 0) focusPolicyPause.setChecked();
   if(config.settings.focusPolicy == 1) focusPolicyIgnore.setChecked();
   if(config.settings.focusPolicy == 2) focusPolicyAllow.setChecked();
@@ -35,26 +34,26 @@ void AdvancedSettings::create() {
   focusPolicyLayout.append(focusPolicyAllow,  0, 0);
   layout.append(focusPolicyLayout, 0, Style::CheckBoxHeight);
 
-  setGeometry(0, 0, 640, layout.minimumHeight());
+  setGeometry({ 0, 0, 640, layout.minimumHeight() });
   setLayout(layout);
 
   lstring list;
 
   list.split(";", video.driver_list());
   for(unsigned i = 0; i < list.size(); i++) {
-    videoDriverBox.addItem(list[i]);
+    videoDriverBox.append(list[i]);
     if(list[i] == config.video.driver) videoDriverBox.setSelection(i);
   }
 
   list.split(";", audio.driver_list());
   for(unsigned i = 0; i < list.size(); i++) {
-    audioDriverBox.addItem(list[i]);
+    audioDriverBox.append(list[i]);
     if(list[i] == config.audio.driver) audioDriverBox.setSelection(i);
   }
 
   list.split(";", input.driver_list());
   for(unsigned i = 0; i < list.size(); i++) {
-    inputDriverBox.addItem(list[i]);
+    inputDriverBox.append(list[i]);
     if(list[i] == config.input.driver) inputDriverBox.setSelection(i);
   }
 
