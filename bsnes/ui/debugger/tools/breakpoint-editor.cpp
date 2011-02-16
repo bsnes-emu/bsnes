@@ -21,12 +21,12 @@ void BreakpointEditor::create() {
   layout.setMargin(5);
   layout.append(runToBreakpoint, 0, Style::CheckBoxHeight, 5);
   for(unsigned n = 0; n < Breakpoints; n++) {
-    breakpointLayout[n].append(enableBox[n], 35, Style::EditBoxHeight);
-    breakpointLayout[n].append(addressBox[n], 60, Style::EditBoxHeight, 5);
-    breakpointLayout[n].append(valueBox[n], 30, Style::EditBoxHeight, 5);
-    breakpointLayout[n].append(typeBox[n], 80, Style::EditBoxHeight, 5);
-    breakpointLayout[n].append(sourceBox[n], 80, Style::EditBoxHeight);
-    layout.append(breakpointLayout[n], 0, Style::EditBoxHeight, 5);
+    breakpointLayout[n].append(enableBox[n], 35, Style::LineEditHeight);
+    breakpointLayout[n].append(addressBox[n], 60, Style::LineEditHeight, 5);
+    breakpointLayout[n].append(valueBox[n], 30, Style::LineEditHeight, 5);
+    breakpointLayout[n].append(typeBox[n], 80, Style::LineEditHeight, 5);
+    breakpointLayout[n].append(sourceBox[n], 80, Style::LineEditHeight);
+    layout.append(breakpointLayout[n], 0, Style::LineEditHeight, 5);
   }
 
   setGeometry({ 0, 0, 310, layout.minimumHeight() });

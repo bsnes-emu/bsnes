@@ -2,7 +2,7 @@ include nall/Makefile
 snes := snes
 gameboy := gameboy
 profile := compatibility
-ui := ui-gameboy
+ui := ui
 
 # compiler
 c       := $(compiler) -std=gnu99

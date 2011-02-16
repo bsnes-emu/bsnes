@@ -1,8 +1,8 @@
 struct OS::State {
-  Font *defaultFont;
+  bool initialized;
 
   State() {
-    defaultFont = 0;
+    initialized = false;
   }
 };
 
@@ -35,6 +35,7 @@ struct Window::State {
   bool statusVisible;
   string title;
   bool visible;
+  Font *widgetFont;
 
   State() {
     backgroundColor = false;
@@ -49,15 +50,18 @@ struct Window::State {
     resizable = true;
     statusVisible = false;
     visible = false;
+    widgetFont = 0;
   }
 };
 
 struct Action::State {
   bool enabled;
+  Window *parent;
   bool visible;
 
   State() {
     enabled = true;
+    parent = 0;
     visible = true;
   }
 };
@@ -170,7 +174,7 @@ struct LineEdit::State {
   }
 };
 
-struct ListBox::State {
+struct ListView::State {
   bool checkable;
   array<bool> checked;
   lstring headerText;
@@ -231,23 +235,23 @@ struct VerticalSlider::State {
 
 #if defined(PHOENIX_QT)
   #include "../qt/qt.cpp"
+#elif defined(PHOENIX_REFERENCE)
+  #include "../reference/reference.cpp"
 #endif
 
 Object::Object() { OS::initialize(); }
 
-OS::State* OS::state = 0;
-pOS* OS::p = 0;
-unsigned OS::desktopWidth() { return p->desktopWidth(); }
-unsigned OS::desktopHeight() { return p->desktopHeight(); }
-string OS::fileLoad_(Window &parent, const string &path, lstring &filter) { if(filter.size() == 0) filter.append("All files (*)"); return p->fileLoad(parent, path, filter); }
-string OS::fileSave_(Window &parent, const string &path, lstring &filter) { if(filter.size() == 0) filter.append("All files (*)"); return p->fileSave(parent, path, filter); }
-string OS::folderSelect(Window &parent, const string &path) { return p->folderSelect(parent, path); }
-void OS::main() { return p->main(); }
-bool OS::pending() { return p->pending(); }
-void OS::process() { return p->process(); }
-void OS::quit() { return p->quit(); }
-void OS::setDefaultFont(Font &font) { state->defaultFont = &font; return p->setDefaultFont(font); }
-void OS::initialize() { if(state == 0) state = new State; if(p == 0) p = new pOS; }
+OS::State OS::state;
+unsigned OS::desktopWidth() { return pOS::desktopWidth(); }
+unsigned OS::desktopHeight() { return pOS::desktopHeight(); }
+string OS::fileLoad_(Window &parent, const string &path, lstring &filter) { if(filter.size() == 0) filter.append("All files (*)"); return pOS::fileLoad(parent, path, filter); }
+string OS::fileSave_(Window &parent, const string &path, lstring &filter) { if(filter.size() == 0) filter.append("All files (*)"); return pOS::fileSave(parent, path, filter); }
+string OS::folderSelect(Window &parent, const string &path) { return pOS::folderSelect(parent, path); }
+void OS::main() { return pOS::main(); }
+bool OS::pending() { return pOS::pending(); }
+void OS::process() { return pOS::process(); }
+void OS::quit() { return pOS::quit(); }
+void OS::initialize() { if(state.initialized == false) { state.initialized = true; return pOS::initialize(); } }
 
 void Font::setBold(bool bold) { state.bold = bold; return p.setBold(bold); }
 void Font::setFamily(const string &family) { state.family = family; return p.setFamily(family); }
@@ -262,7 +266,7 @@ MessageWindow::Response MessageWindow::warning(Window &parent, const string &tex
 MessageWindow::Response MessageWindow::critical(Window &parent, const string &text, MessageWindow::Buttons buttons) { return pMessageWindow::critical(parent, text, buttons); }
 
 Window Window::None;
-void Window::append(Menu &menu) { return p.append(menu); }
+void Window::append(Menu &menu) { ((Action&)menu).state.parent = this; return p.append(menu); }
 Geometry Window::frameGeometry() { return p.frameGeometry(); }
 bool Window::focused() { return p.focused(); }
 Geometry Window::geometry() { return p.geometry(); }
@@ -271,7 +275,7 @@ void Window::setFrameGeometry(const Geometry &geometry) { return p.setFrameGeome
 void Window::setFocused() { return p.setFocused(); }
 void Window::setFullScreen(bool fullScreen) { state.fullScreen = fullScreen; return p.setFullScreen(fullScreen); }
 void Window::setGeometry(const Geometry &geometry) { state.geometry = geometry; return p.setGeometry(geometry); }
-void Window::setLayout(Layout &layout) { state.layout = &layout; return p.setLayout(layout); }
+void Window::setLayout(Layout &layout) { layout.state.parent = this; state.layout = &layout; return p.setLayout(layout); }
 void Window::setMenuFont(Font &font) { state.menuFont = &font; return p.setMenuFont(font); }
 void Window::setMenuVisible(bool visible) { state.menuVisible = visible; return p.setMenuVisible(visible); }
 void Window::setResizable(bool resizable) { state.resizable = resizable; return p.setResizable(resizable); }
@@ -280,6 +284,7 @@ void Window::setStatusText(const string &text) { state.statusText = text; return
 void Window::setStatusVisible(bool visible) { state.statusVisible = visible; return p.setStatusVisible(visible); }
 void Window::setTitle(const string &text) { state.title = text; return p.setTitle(text); }
 void Window::setVisible(bool visible) { state.visible = visible; return p.setVisible(visible); }
+void Window::setWidgetFont(Font &font) { state.widgetFont = &font; return p.setWidgetFont(font); }
 Window::Window() : state(*new State), p(*new pWindow(*this)) {}
 
 void Action::setEnabled(bool enabled) { state.enabled = enabled; return p.setEnabled(enabled); }
@@ -352,19 +357,19 @@ void LineEdit::setText(const string &text) { state.text = text; return p.setText
 string LineEdit::text() { return p.text(); }
 LineEdit::LineEdit() : state(*new State), base_from_member<pLineEdit&>(*new pLineEdit(*this)), Widget(base_from_member<pLineEdit&>::value), p(base_from_member<pLineEdit&>::value) {}
 
-void ListBox::append_(lstring &text) { state.text.append(text); return p.append(text); }
-void ListBox::autosizeColumns() { return p.autosizeColumns(); }
-bool ListBox::checked(unsigned row) { return p.checked(row); }
-void ListBox::modify_(unsigned row, lstring &text) { state.text[row] = text; return p.modify(row, text); }
-void ListBox::modify(unsigned row, unsigned column, const string &text) { state.text[row][column] = text; return p.modify(row, column, text); }
-void ListBox::reset() { state.checked.reset(); state.text.reset(); return p.reset(); }
-optional<unsigned> ListBox::selection() { return p.selection(); }
-void ListBox::setCheckable(bool checkable) { state.checkable = checkable; return p.setCheckable(checkable); }
-void ListBox::setChecked(unsigned row, bool checked) { state.checked[row] = checked; return p.setChecked(row, checked); }
-void ListBox::setHeaderText_(lstring &text) { state.headerText = text; return p.setHeaderText(text); }
-void ListBox::setHeaderVisible(bool visible) { state.headerVisible = visible; return p.setHeaderVisible(visible); }
-void ListBox::setSelection(unsigned row) { state.selection = { true, row }; return p.setSelection(row); }
-ListBox::ListBox() : state(*new State), base_from_member<pListBox&>(*new pListBox(*this)), Widget(base_from_member<pListBox&>::value), p(base_from_member<pListBox&>::value) {}
+void ListView::append_(lstring &text) { state.text.append(text); return p.append(text); }
+void ListView::autosizeColumns() { return p.autosizeColumns(); }
+bool ListView::checked(unsigned row) { return p.checked(row); }
+void ListView::modify_(unsigned row, lstring &text) { state.text[row] = text; return p.modify(row, text); }
+void ListView::modify(unsigned row, unsigned column, const string &text) { state.text[row][column] = text; return p.modify(row, column, text); }
+void ListView::reset() { state.checked.reset(); state.text.reset(); return p.reset(); }
+optional<unsigned> ListView::selection() { return p.selection(); }
+void ListView::setCheckable(bool checkable) { state.checkable = checkable; return p.setCheckable(checkable); }
+void ListView::setChecked(unsigned row, bool checked) { state.checked[row] = checked; return p.setChecked(row, checked); }
+void ListView::setHeaderText_(lstring &text) { state.headerText = text; return p.setHeaderText(text); }
+void ListView::setHeaderVisible(bool visible) { state.headerVisible = visible; return p.setHeaderVisible(visible); }
+void ListView::setSelection(unsigned row) { state.selection = { true, row }; return p.setSelection(row); }
+ListView::ListView() : state(*new State), base_from_member<pListView&>(*new pListView(*this)), Widget(base_from_member<pListView&>::value), p(base_from_member<pListView&>::value) {}
 
 void ProgressBar::setPosition(unsigned position) { state.position = position; return p.setPosition(position); }
 ProgressBar::ProgressBar() : state(*new State), base_from_member<pProgressBar&>(*new pProgressBar(*this)), Widget(base_from_member<pProgressBar&>::value), p(base_from_member<pProgressBar&>::value) {}

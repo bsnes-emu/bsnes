@@ -61,18 +61,16 @@ struct Style {
     ButtonHeight = 25,
     CheckBoxHeight = 15,
     ComboBoxHeight = 22,
-    EditBoxHeight = 22,
     LabelHeight = 15,
     SliderHeight = 25,
-    TextBoxHeight = 22,
+    LineEditHeight = 22,
   #else
     ButtonHeight = 25,
     CheckBoxHeight = 15,
     ComboBoxHeight = 22,
-    EditBoxHeight = 22,
     LabelHeight = 15,
     SliderHeight = 22,
-    TextBoxHeight = 22,
+    LineEditHeight = 22,
   #endif
   };
 };

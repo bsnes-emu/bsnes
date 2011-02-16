@@ -5,7 +5,7 @@ struct InputSettings : TopLevelWindow {
   ComboBox portBox;
   Label deviceLabel;
   ComboBox deviceBox;
-  ListBox mappingList;
+  ListView mappingList;
   HorizontalLayout mapLayout;
   Button mouseXaxis;
   Button mouseYaxis;

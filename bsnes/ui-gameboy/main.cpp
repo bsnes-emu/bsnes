@@ -29,7 +29,6 @@ void Application::main(int argc, char **argv) {
   monospaceFont.setFamily("Liberation Mono");
   monospaceFont.setSize(8);
   #endif
-  OS::setDefaultFont(proportionalFont);
 
   mainWindow.create();
   mainWindow.setVisible();

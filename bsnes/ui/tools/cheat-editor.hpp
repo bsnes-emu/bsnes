@@ -1,6 +1,6 @@
 struct CheatEditor : TopLevelWindow {
   VerticalLayout layout;
-  ListBox cheatList;
+  ListView cheatList;
   HorizontalLayout codeLayout;
   Label codeLabel;
   LineEdit codeEdit;
@@ -15,7 +15,7 @@ struct CheatEditor : TopLevelWindow {
 
   TopLevelWindow databaseWindow;
   VerticalLayout databaseLayout;
-  ListBox databaseList;
+  ListView databaseList;
   HorizontalLayout databaseControlLayout;
   Button databaseSelectAll;
   Button databaseUnselectAll;

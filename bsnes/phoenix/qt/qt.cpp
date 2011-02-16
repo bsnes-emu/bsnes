@@ -22,12 +22,14 @@
 #include "widget/horizontal-slider.cpp"
 #include "widget/label.cpp"
 #include "widget/line-edit.cpp"
-#include "widget/list-box.cpp"
+#include "widget/list-view.cpp"
 #include "widget/progress-bar.cpp"
 #include "widget/radio-box.cpp"
 #include "widget/text-edit.cpp"
 #include "widget/vertical-slider.cpp"
 #include "widget/viewport.cpp"
+
+QApplication *pOS::application = 0;
 
 unsigned pOS::desktopWidth() {
   return QApplication::desktop()->screenGeometry().width();
@@ -112,10 +114,7 @@ void pOS::quit() {
   QApplication::quit();
 }
 
-void pOS::setDefaultFont(Font &font) {
-}
-
-pOS::pOS() {
+void pOS::initialize() {
   settings.load();
 
   static int argc = 1;

@@ -4,6 +4,7 @@ void MainWindow::create() {
   setTitle({ GameBoy::Info::Name, " v", GameBoy::Info::Version });
   setResizable(false);
   setMenuFont(application.proportionalFont);
+  setWidgetFont(application.proportionalFont);
   setStatusFont(application.proportionalFontBold);
 
   system.setText("System");

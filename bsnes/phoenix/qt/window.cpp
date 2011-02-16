@@ -1,4 +1,5 @@
 void pWindow::append(Menu &menu) {
+  if(window.state.menuFont) menu.p.qtMenu->setFont(*window.state.menuFont->p.qtFont);
   qtMenu->addMenu(menu.p.qtMenu);
 }
 
@@ -134,6 +135,9 @@ void pWindow::setVisible(bool visible) {
   locked = false;
 }
 
+void pWindow::setWidgetFont(Font &font) {
+}
+
 pWindow::pWindow(Window &window) : window(window) {
   layout = 0;
 
@@ -146,7 +150,6 @@ pWindow::pWindow(Window &window) : window(window) {
   qtWindow->setLayout(qtLayout);
 
   qtMenu = new QMenuBar(qtWindow);
-  if(OS::state->defaultFont) qtMenu->setFont(*OS::state->defaultFont->p.qtFont);
   qtMenu->setVisible(false);
   qtLayout->addWidget(qtMenu);
 
@@ -156,7 +159,6 @@ pWindow::pWindow(Window &window) : window(window) {
   qtLayout->addWidget(qtContainer);
 
   qtStatus = new QStatusBar(qtWindow);
-  if(OS::state->defaultFont) qtStatus->setFont(*OS::state->defaultFont->p.qtFont);
   qtStatus->setSizeGripEnabled(true);
   qtStatus->setVisible(false);
   qtLayout->addWidget(qtStatus);

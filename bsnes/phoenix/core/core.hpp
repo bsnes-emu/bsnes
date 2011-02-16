@@ -22,7 +22,7 @@ struct pHexEdit;
 struct pHorizontalSlider;
 struct pLabel;
 struct pLineEdit;
-struct pListBox;
+struct pListView;
 struct pProgressBar;
 struct pRadioBox;
 struct pTextEdit;
@@ -53,12 +53,10 @@ struct OS : Object {
   static bool pending();
   static void process();
   static void quit();
-  static void setDefaultFont(Font &font);
 
   OS();
   struct State;
-  static State *state;
-  static pOS *p;
+  static State state;
   static void initialize();
 
 private:
@@ -132,6 +130,7 @@ struct Window : Object {
   void setStatusVisible(bool visible = true);
   void setTitle(const nall::string &text);
   void setVisible(bool visible = true);
+  void setWidgetFont(Font &font);
 
   Window();
   struct State;
@@ -331,7 +330,7 @@ struct LineEdit : private nall::base_from_member<pLineEdit&>, Widget {
   pLineEdit &p;
 };
 
-struct ListBox : private nall::base_from_member<pListBox&>, Widget {
+struct ListView : private nall::base_from_member<pListView&>, Widget {
   nall::function<void ()> onActivate;
   nall::function<void ()> onChange;
   nall::function<void (unsigned)> onTick;
@@ -349,10 +348,10 @@ struct ListBox : private nall::base_from_member<pListBox&>, Widget {
   void setHeaderVisible(bool visible = true);
   void setSelection(unsigned row);
 
-  ListBox();
+  ListView();
   struct State;
   State &state;
-  pListBox &p;
+  pListView &p;
 
 private:
   void modify_(unsigned row, nall::lstring &list);

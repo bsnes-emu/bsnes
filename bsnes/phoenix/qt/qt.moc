@@ -1,7 +1,7 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'qt.moc.hpp'
 **
-** Created: Mon Feb 14 22:32:33 2011
+** Created: Wed Feb 16 04:07:28 2011
 **      by: The Qt Meta Object Compiler version 62 (Qt 4.6.2)
 **
 ** WARNING! All changes made in this file will be lost!
@@ -618,7 +618,7 @@ int pLineEdit::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     }
     return _id;
 }
-static const uint qt_meta_data_pListBox[] = {
+static const uint qt_meta_data_pListView[] = {
 
  // content:
        4,       // revision
@@ -632,43 +632,43 @@ static const uint qt_meta_data_pListBox[] = {
        0,       // signalCount
 
  // slots: signature, parameters, type, tag, flags
-      10,    9,    9,    9, 0x0a,
-      23,    9,    9,    9, 0x0a,
-      39,   34,    9,    9, 0x0a,
+      11,   10,   10,   10, 0x0a,
+      24,   10,   10,   10, 0x0a,
+      40,   35,   10,   10, 0x0a,
 
        0        // eod
 };
 
-static const char qt_meta_stringdata_pListBox[] = {
-    "pListBox\0\0onActivate()\0onChange()\0"
+static const char qt_meta_stringdata_pListView[] = {
+    "pListView\0\0onActivate()\0onChange()\0"
     "item\0onTick(QTreeWidgetItem*)\0"
 };
 
-const QMetaObject pListBox::staticMetaObject = {
-    { &QObject::staticMetaObject, qt_meta_stringdata_pListBox,
-      qt_meta_data_pListBox, 0 }
+const QMetaObject pListView::staticMetaObject = {
+    { &QObject::staticMetaObject, qt_meta_stringdata_pListView,
+      qt_meta_data_pListView, 0 }
 };
 
 #ifdef Q_NO_DATA_RELOCATION
-const QMetaObject &pListBox::getStaticMetaObject() { return staticMetaObject; }
+const QMetaObject &pListView::getStaticMetaObject() { return staticMetaObject; }
 #endif //Q_NO_DATA_RELOCATION
 
-const QMetaObject *pListBox::metaObject() const
+const QMetaObject *pListView::metaObject() const
 {
     return QObject::d_ptr->metaObject ? QObject::d_ptr->metaObject : &staticMetaObject;
 }
 
-void *pListBox::qt_metacast(const char *_clname)
+void *pListView::qt_metacast(const char *_clname)
 {
     if (!_clname) return 0;
-    if (!strcmp(_clname, qt_meta_stringdata_pListBox))
-        return static_cast<void*>(const_cast< pListBox*>(this));
+    if (!strcmp(_clname, qt_meta_stringdata_pListView))
+        return static_cast<void*>(const_cast< pListView*>(this));
     if (!strcmp(_clname, "pWidget"))
-        return static_cast< pWidget*>(const_cast< pListBox*>(this));
+        return static_cast< pWidget*>(const_cast< pListView*>(this));
     return QObject::qt_metacast(_clname);
 }
 
-int pListBox::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
+int pListView::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
 {
     _id = QObject::qt_metacall(_c, _id, _a);
     if (_id < 0)

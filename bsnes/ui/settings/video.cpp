@@ -52,14 +52,14 @@ void VideoSettings::create() {
   layout.append(fullscreenLayout, 0, Style::CheckBoxHeight, 5);
   layout.append(filterLabel, 0, Style::LabelHeight);
   filterLayout.append(filterPath, 0, 0, 5);
-  filterLayout.append(filterClear, Style::TextBoxHeight, 0, 5);
-  filterLayout.append(filterSelect, Style::TextBoxHeight, 0);
-  layout.append(filterLayout, 0, Style::TextBoxHeight, 5);
+  filterLayout.append(filterClear, Style::LineEditHeight, 0, 5);
+  filterLayout.append(filterSelect, Style::LineEditHeight, 0);
+  layout.append(filterLayout, 0, Style::LineEditHeight, 5);
   layout.append(shaderLabel, 0, Style::LabelHeight);
   shaderLayout.append(shaderPath, 0, 0, 5);
-  shaderLayout.append(shaderClear, Style::TextBoxHeight, 0, 5);
-  shaderLayout.append(shaderSelect, Style::TextBoxHeight, 0);
-  layout.append(shaderLayout, 0, Style::TextBoxHeight);
+  shaderLayout.append(shaderClear, Style::LineEditHeight, 0, 5);
+  shaderLayout.append(shaderSelect, Style::LineEditHeight, 0);
+  layout.append(shaderLayout, 0, Style::LineEditHeight);
 
   setGeometry({ 0, 0, 480, layout.minimumHeight() });
   setLayout(layout);

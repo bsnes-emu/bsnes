@@ -95,10 +95,10 @@ void CheatEditor::create() {
   layout.append(cheatList, 0, 0, 5);
   codeLayout.append(codeLabel, 80, 0, 5);
   codeLayout.append(codeEdit,   0, 0);
-  layout.append(codeLayout, 0, Style::TextBoxHeight, 5);
+  layout.append(codeLayout, 0, Style::LineEditHeight, 5);
   descLayout.append(descLabel, 80, 0, 5);
   descLayout.append(descEdit,   0, 0);
-  layout.append(descLayout, 0, Style::TextBoxHeight, 5);
+  layout.append(descLayout, 0, Style::LineEditHeight, 5);
   controlLayout.append(findButton,    100, 0);
   controlLayout.append(spacer,          0, 0);
   controlLayout.append(clearAllButton, 80, 0, 5);

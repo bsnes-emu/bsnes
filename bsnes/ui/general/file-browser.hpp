@@ -4,7 +4,7 @@ struct FileBrowser : TopLevelWindow {
   LineEdit pathBox;
   Button browseButton;
   Button upButton;
-  ListBox contentsBox;
+  ListView contentsBox;
 
   enum class Mode : unsigned { Cartridge, Satellaview, SufamiTurbo, GameBoy, Filter, Shader } mode;
   void fileOpen(Mode mode, function<void (string)> callback);

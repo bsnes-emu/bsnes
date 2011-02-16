@@ -39,7 +39,6 @@ void Application::main(int argc, char **argv) {
   monospaceFont.setFamily("Liberation Mono");
   monospaceFont.setSize(8);
   #endif
-  OS::setDefaultFont(proportionalFont);
 
   SNES::system.init(&interface);
 
@@ -144,6 +143,7 @@ void Application::addWindow(TopLevelWindow *window, const string &name, const st
   windows.append(window);
   window->name = name;
   window->position = position;
+  window->setWidgetFont(proportionalFont);
   geometryConfig.attach(window->position, window->name);
 }
 

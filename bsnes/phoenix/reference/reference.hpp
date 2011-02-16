@@ -1,14 +1,3 @@
-struct Settings : public configuration {
-  unsigned frameGeometryX;
-  unsigned frameGeometryY;
-  unsigned frameGeometryWidth;
-  unsigned frameGeometryHeight;
-
-  void load();
-  void save();
-  Settings();
-};
-
 struct pFont;
 struct pWindow;
 struct pMenu;
@@ -24,8 +13,6 @@ struct pObject {
 };
 
 struct pOS : public pObject {
-  static QApplication *application;
-
   static unsigned desktopWidth();
   static unsigned desktopHeight();
   static string fileLoad(Window &parent, const string &path, const lstring &filter);
@@ -41,7 +28,6 @@ struct pOS : public pObject {
 
 struct pFont : public pObject {
   Font &font;
-  QFont *qtFont;
 
   void setBold(bool bold);
   void setFamily(const string &family);
@@ -50,7 +36,6 @@ struct pFont : public pObject {
   void setUnderline(bool underline);
 
   pFont(Font &font);
-  void update();
 };
 
 struct pMessageWindow : public pObject {
@@ -60,24 +45,8 @@ struct pMessageWindow : public pObject {
   static MessageWindow::Response critical(Window &parent, const string &text, MessageWindow::Buttons buttons);
 };
 
-struct pWindow : public QObject, public pObject {
-  Q_OBJECT
-
-public:
+struct pWindow : public pObject {
   Window &window;
-  struct QtWindow : public QWidget {
-    pWindow &self;
-    void closeEvent(QCloseEvent*);
-    void moveEvent(QMoveEvent*);
-    void resizeEvent(QResizeEvent*);
-    QSize sizeHint() const;
-    QtWindow(pWindow &self) : self(self) {}
-  } *qtWindow;
-  QVBoxLayout *qtLayout;
-  QMenuBar *qtMenu;
-  QStatusBar *qtStatus;
-  QWidget *qtContainer;
-  Layout *layout;
 
   void append(Menu &menu);
   Geometry frameGeometry();
@@ -100,7 +69,6 @@ public:
   void setWidgetFont(Font &font);
 
   pWindow(Window &window);
-  void updateFrameGeometry();
 };
 
 struct pAction : public pObject {
@@ -114,7 +82,6 @@ struct pAction : public pObject {
 
 struct pMenu : public pAction {
   Menu &menu;
-  QMenu *qtMenu;
 
   void append(Action &action);
   void setText(const string &text);
@@ -124,50 +91,30 @@ struct pMenu : public pAction {
 
 struct pMenuSeparator : public pAction {
   MenuSeparator &menuSeparator;
-  QAction *qtAction;
 
   pMenuSeparator(MenuSeparator &menuSeparator);
 };
 
-struct pMenuItem : public QObject, public pAction {
-  Q_OBJECT
-
-public:
+struct pMenuItem : public pAction {
   MenuItem &menuItem;
-  QAction *qtAction;
 
   void setText(const string &text);
 
   pMenuItem(MenuItem &menuItem);
-
-public slots:
-  void onTick();
 };
 
-struct pMenuCheckItem : public QObject, public pAction {
-  Q_OBJECT
-
-public:
+struct pMenuCheckItem : public pAction {
   MenuCheckItem &menuCheckItem;
-  QAction *qtAction;
 
   bool checked();
   void setChecked(bool checked);
   void setText(const string &text);
 
   pMenuCheckItem(MenuCheckItem &menuCheckItem);
-
-public slots:
-  void onTick();
 };
 
-struct pMenuRadioItem : public QObject, public pAction {
-  Q_OBJECT
-
-public:
+struct pMenuRadioItem : public pAction {
   MenuRadioItem &menuRadioItem;
-  QAction *qtAction;
-  QActionGroup *qtGroup;
 
   bool checked();
   void setChecked();
@@ -175,14 +122,10 @@ public:
   void setText(const string &text);
 
   pMenuRadioItem(MenuRadioItem &menuRadioItem);
-
-public slots:
-  void onTick();
 };
 
 struct pLayout : public pObject {
   Layout &layout;
-  pWindow *parent;
 
   void append(Widget &widget);
 
@@ -191,7 +134,6 @@ struct pLayout : public pObject {
 
 struct pWidget : public pObject {
   Widget &widget;
-  QWidget *qtWidget;
 
   bool enabled();
   void setEnabled(bool enabled);
@@ -203,44 +145,26 @@ struct pWidget : public pObject {
   pWidget(Widget &widget);
 };
 
-struct pButton : public QObject, public pWidget {
-  Q_OBJECT
-
-public:
+struct pButton : public pWidget {
   Button &button;
-  QPushButton *qtButton;
 
   void setText(const string &text);
 
   pButton(Button &button);
-
-public slots:
-  void onTick();
 };
 
-struct pCheckBox : public QObject, public pWidget {
-  Q_OBJECT
-
-public:
+struct pCheckBox : public pWidget {
   CheckBox &checkBox;
-  QCheckBox *qtCheckBox;
 
   bool checked();
   void setChecked(bool checked);
   void setText(const string &text);
 
   pCheckBox(CheckBox &checkBox);
-
-public slots:
-  void onTick();
 };
 
-struct pComboBox : public QObject, public pWidget {
-  Q_OBJECT
-
-public:
+struct pComboBox : public pWidget {
   ComboBox &comboBox;
-  QComboBox *qtComboBox;
 
   void append(const string &text);
   void reset();
@@ -248,24 +172,10 @@ public:
   void setSelection(unsigned row);
 
   pComboBox(ComboBox &comboBox);
-
-public slots:
-  void onChange();
 };
 
-struct pHexEdit : public QObject, public pWidget {
-  Q_OBJECT
-
-public:
+struct pHexEdit : public pWidget {
   HexEdit &hexEdit;
-  struct QtHexEdit : public QTextEdit {
-    pHexEdit &self;
-    void keyPressEvent(QKeyEvent*);
-    void keyPressEventAcknowledge(QKeyEvent*);
-    QtHexEdit(pHexEdit &self) : self(self) {}
-  } *qtHexEdit;
-  QHBoxLayout *qtLayout;
-  QScrollBar *qtScroll;
 
   void setColumns(unsigned columns);
   void setLength(unsigned length);
@@ -273,63 +183,39 @@ public:
   void setRows(unsigned rows);
   void update();
 
-  void keyPressEvent(QKeyEvent*);
   pHexEdit(HexEdit &hexEdit);
-
-public slots:
-  void onScroll();
 };
 
-struct pHorizontalSlider : public QObject, public pWidget {
-  Q_OBJECT
-
-public:
+struct pHorizontalSlider : public pWidget {
   HorizontalSlider &horizontalSlider;
-  QSlider *qtSlider;
 
   unsigned position();
   void setLength(unsigned length);
   void setPosition(unsigned position);
 
   pHorizontalSlider(HorizontalSlider &horizontalSlider);
-
-public slots:
-  void onChange();
 };
 
 struct pLabel : public pWidget {
   Label &label;
-  QLabel *qtLabel;
 
   void setText(const string &text);
 
   pLabel(Label &label);
 };
 
-struct pLineEdit : public QObject, public pWidget {
-  Q_OBJECT
-
-public:
+struct pLineEdit : public pWidget {
   LineEdit &lineEdit;
-  QLineEdit *qtLineEdit;
 
   void setEditable(bool editable);
   void setText(const string &text);
   string text();
 
   pLineEdit(LineEdit &lineEdit);
-
-public slots:
-  void onActivate();
-  void onChange();
 };
 
-struct pListView : public QObject, public pWidget {
-  Q_OBJECT
-
-public:
+struct pListView : public pWidget {
   ListView &listView;
-  QTreeWidget *qtListView;
 
   void append(const lstring &text);
   void autosizeColumns();
@@ -345,29 +231,18 @@ public:
   void setSelection(unsigned row);
 
   pListView(ListView &listView);
-
-public slots:
-  void onActivate();
-  void onChange();
-  void onTick(QTreeWidgetItem *item);
 };
 
 struct pProgressBar : public pWidget {
   ProgressBar &progressBar;
-  QProgressBar *qtProgressBar;
 
   void setPosition(unsigned position);
 
   pProgressBar(ProgressBar &progressBar);
 };
 
-struct pRadioBox : public QObject, public pWidget {
-  Q_OBJECT
-
-public:
+struct pRadioBox : public pWidget {
   RadioBox &radioBox;
-  QRadioButton *qtRadioBox;
-  QButtonGroup *qtGroup;
 
   bool checked();
   void setChecked();
@@ -375,17 +250,10 @@ public:
   void setText(const string &text);
 
   pRadioBox(RadioBox &radioBox);
-
-public slots:
-  void onTick();
 };
 
-struct pTextEdit : public QObject, public pWidget {
-  Q_OBJECT
-
-public:
+struct pTextEdit : public pWidget {
   TextEdit &textEdit;
-  QTextEdit *qtTextEdit;
 
   void setCursorPosition(unsigned position);
   void setEditable(bool editable);
@@ -394,26 +262,16 @@ public:
   string text();
 
   pTextEdit(TextEdit &textEdit);
-
-public slots:
-  void onChange();
 };
 
-struct pVerticalSlider : public QObject, public pWidget {
-  Q_OBJECT
-
-public:
+struct pVerticalSlider : public pWidget {
   VerticalSlider &verticalSlider;
-  QSlider *qtSlider;
 
   unsigned position();
   void setLength(unsigned length);
   void setPosition(unsigned position);
 
   pVerticalSlider(VerticalSlider &verticalSlider);
-
-public slots:
-  void onChange();
 };
 
 struct pViewport : public pWidget {

@@ -8,9 +8,9 @@ void FileBrowser::create() {
 
   layout.setMargin(5);
   pathLayout.append(pathBox, 0, 0, 5);
-  pathLayout.append(browseButton, Style::TextBoxHeight, 0, 5);
-  pathLayout.append(upButton, Style::TextBoxHeight, 0);
-  layout.append(pathLayout, 0, Style::TextBoxHeight, 5);
+  pathLayout.append(browseButton, Style::LineEditHeight, 0, 5);
+  pathLayout.append(upButton, Style::LineEditHeight, 0);
+  layout.append(pathLayout, 0, Style::LineEditHeight, 5);
   layout.append(contentsBox, 0, 0);
 
   setGeometry({ 0, 0, 640, layout.minimumHeight() + 400 });
