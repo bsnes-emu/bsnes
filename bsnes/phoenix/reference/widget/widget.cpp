@@ -17,5 +17,5 @@ void pWidget::setGeometry(const Geometry &geometry) {
 void pWidget::setVisible(bool visible) {
 }
 
-pWidget::pWidget(Widget &widget) : widget(widget) {
+void pWidget::constructor() {
 }

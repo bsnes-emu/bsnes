@@ -2,7 +2,7 @@ void pButton::setText(const string &text) {
   qtButton->setText(QString::fromUtf8(text));
 }
 
-pButton::pButton(Button &button) : button(button), pWidget(button) {
+void pButton::constructor() {
   qtWidget = qtButton = new QPushButton;
   connect(qtButton, SIGNAL(released()), SLOT(onTick()));
 }

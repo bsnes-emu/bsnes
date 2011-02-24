@@ -5,11 +5,11 @@ bool pMenuRadioItem::checked() {
 void pMenuRadioItem::setChecked() {
 }
 
-void pMenuRadioItem::setGroup(const array<MenuRadioItem*> &group) {
+void pMenuRadioItem::setGroup(const reference_array<MenuRadioItem&> &group) {
 }
 
 void pMenuRadioItem::setText(const string &text) {
 }
 
-pMenuRadioItem::pMenuRadioItem(MenuRadioItem &menuRadioItem) : pAction(menuRadioItem), menuRadioItem(menuRadioItem) {
+void pMenuRadioItem::constructor() {
 }

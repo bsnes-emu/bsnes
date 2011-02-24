@@ -13,5 +13,5 @@ void pTextEdit::setWordWrap(bool wordWrap) {
 string pTextEdit::text() {
 }
 
-pTextEdit::pTextEdit(TextEdit &textEdit) : pWidget(textEdit), textEdit(textEdit) {
+void pTextEdit::constructor() {
 }

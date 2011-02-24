@@ -23,7 +23,7 @@ void StateManager::create() {
   layout.append(controlLayout, 0, Style::ButtonHeight);
 
   setGeometry({ 0, 0, 480, layout.minimumHeight() + 250 });
-  setLayout(layout);
+  append(layout);
 
   synchronize();
 

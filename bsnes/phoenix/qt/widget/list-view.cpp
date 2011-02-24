@@ -91,7 +91,7 @@ void pListView::setSelection(unsigned row) {
   locked = false;
 }
 
-pListView::pListView(ListView &listView) : listView(listView), pWidget(listView) {
+void pListView::constructor() {
   qtWidget = qtListView = new QTreeWidget;
   qtListView->setHeaderLabels(QStringList() << "");
   qtListView->setHeaderHidden(true);

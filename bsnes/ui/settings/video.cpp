@@ -62,7 +62,7 @@ void VideoSettings::create() {
   layout.append(shaderLayout, 0, Style::LineEditHeight);
 
   setGeometry({ 0, 0, 480, layout.minimumHeight() });
-  setLayout(layout);
+  append(layout);
 
   brightnessSlider.setPosition(config.video.brightness);
   brightnessValue.setText({ config.video.brightness, "%" });

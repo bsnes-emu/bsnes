@@ -14,7 +14,7 @@ void FileBrowser::create() {
   layout.append(contentsBox, 0, 0);
 
   setGeometry({ 0, 0, 640, layout.minimumHeight() + 400 });
-  setLayout(layout);
+  append(layout);
 
   pathBox.onActivate = []() {
     string path = fileBrowser.pathBox.text();

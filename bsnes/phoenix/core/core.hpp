@@ -46,8 +46,8 @@ struct Object {
 struct OS : Object {
   static unsigned desktopWidth();
   static unsigned desktopHeight();
-  template<typename... Args> static nall::string fileLoad(Window &parent, const nall::string &path, const Args&... args) { nall::lstring filter; return fileLoad_(parent, path, filter, args...); }
-  template<typename... Args> static nall::string fileSave(Window &parent, const nall::string &path, const Args&... args) { nall::lstring filter; return fileSave_(parent, path, filter, args...); }
+  template<typename... Args> static nall::string fileLoad(Window &parent, const nall::string &path, const Args&... args) { return fileLoad_(parent, path, { args... }); }
+  template<typename... Args> static nall::string fileSave(Window &parent, const nall::string &path, const Args&... args) { return fileSave_(parent, path, { args... }); }
   static nall::string folderSelect(Window &parent, const nall::string &path);
   static void main();
   static bool pending();
@@ -55,22 +55,11 @@ struct OS : Object {
   static void quit();
 
   OS();
-  struct State;
-  static State state;
   static void initialize();
 
 private:
-  static nall::string fileLoad_(Window &parent, const nall::string &path, nall::lstring &filter);
-  template<typename... Args> static nall::string fileLoad_(Window &parent, const nall::string &path, nall::lstring &filter, const nall::string &item, const Args&... args) {
-    filter.append(item);
-    return fileLoad_(parent, path, filter, args...);
-  }
-
-  static nall::string fileSave_(Window &parent, const nall::string &path, nall::lstring &filter);
-  template<typename... Args> static nall::string fileSave_(Window &parent, const nall::string &path, nall::lstring &filter, const nall::string &item, const Args&... args) {
-    filter.append(item);
-    return fileSave_(parent, path, filter, args...);
-  }
+  static nall::string fileLoad_(Window &parent, const nall::string &path, const nall::lstring& filter);
+  static nall::string fileSave_(Window &parent, const nall::string &path, const nall::lstring& filter);
 };
 
 struct Font : Object {
@@ -112,7 +101,9 @@ struct Window : Object {
   nall::function<void ()> onMove;
   nall::function<void ()> onSize;
 
+  void append(Layout &layout);
   void append(Menu &menu);
+  void append(Widget &widget);
   Geometry frameGeometry();
   bool focused();
   Geometry geometry();
@@ -121,7 +112,6 @@ struct Window : Object {
   void setFocused();
   void setFullScreen(bool fullScreen = true);
   void setGeometry(const Geometry &geometry);
-  void setLayout(Layout &layout);
   void setMenuFont(Font &font);
   void setMenuVisible(bool visible = true);
   void setResizable(bool resizable = true);
@@ -188,12 +178,7 @@ struct MenuCheckItem : private nall::base_from_member<pMenuCheckItem&>, Action {
 };
 
 struct MenuRadioItem : private nall::base_from_member<pMenuRadioItem&>, Action {
-  template<typename... Args> static void group(Args&... args) {
-    nall::array<MenuRadioItem*> list;
-    group_(list, args...);
-    foreach(item, list) item->setGroup(list);
-    if(list.size()) list[0]->setChecked();
-  }
+  template<typename... Args> static void group(Args&... args) { group_({ args... }); }
 
   nall::function<void ()> onTick;
 
@@ -207,23 +192,13 @@ struct MenuRadioItem : private nall::base_from_member<pMenuRadioItem&>, Action {
   pMenuRadioItem &p;
 
 private:
-  void setGroup(const nall::array<MenuRadioItem*> &group);
-  static void group_(nall::array<MenuRadioItem*> &list) {}
-  template<typename... Args> static void group_(nall::array<MenuRadioItem*> &list, MenuRadioItem &item, Args&... args) {
-    list.append(&item);
-    group_(list, args...);
-  }
+  static void group_(const nall::reference_array<MenuRadioItem&> &list);
 };
 
 struct Layout : Object {
-  void append(Widget &widget);
   virtual void setGeometry(Geometry &geometry) = 0;
-  virtual void setParent(Window &parent);
-
-  Layout();
-  struct State;
-  State &state;
-  pLayout &p;
+  virtual void setParent(Window &parent) = 0;
+  virtual void setVisible(bool visible = true) = 0;
 };
 
 struct Widget : Object {
@@ -234,6 +209,7 @@ struct Widget : Object {
   void setGeometry(const Geometry &geometry);
   void setVisible(bool visible = true);
 
+  Widget();
   Widget(pWidget &p);
   struct State;
   State &state;
@@ -335,16 +311,16 @@ struct ListView : private nall::base_from_member<pListView&>, Widget {
   nall::function<void ()> onChange;
   nall::function<void (unsigned)> onTick;
 
-  template<typename... Args> void append(const Args&... args) { nall::lstring list; append_(list, args...); }
+  template<typename... Args> void append(const Args&... args) { append_({ args... }); }
   void autosizeColumns();
   bool checked(unsigned row);
-  template<typename... Args> void modify(unsigned row, const Args&... args) { nall::lstring list; modify_(row, list, args...); }
+  template<typename... Args> void modify(unsigned row, const Args&... args) { modify_(row, { args... }); }
   void modify(unsigned row, unsigned column, const nall::string &text);
   void reset();
   nall::optional<unsigned> selection();
   void setCheckable(bool checkable = true);
   void setChecked(unsigned row, bool checked = true);
-  template<typename... Args> void setHeaderText(const Args&... args) { nall::lstring list; setHeaderText_(list, args...); }
+  template<typename... Args> void setHeaderText(const Args&... args) { setHeaderText_({ args... }); }
   void setHeaderVisible(bool visible = true);
   void setSelection(unsigned row);
 
@@ -354,23 +330,9 @@ struct ListView : private nall::base_from_member<pListView&>, Widget {
   pListView &p;
 
 private:
-  void modify_(unsigned row, nall::lstring &list);
-  template<typename... Args> void modify_(unsigned row, nall::lstring &list, const nall::string &text, const Args&... args) {
-    list.append(text);
-    modify_(row, list, args...);
-  }
-
-  void append_(nall::lstring &list);
-  template<typename... Args> void append_(nall::lstring &list, const nall::string &text, const Args&... args) {
-    list.append(text);
-    append_(list, args...);
-  }
-
-  void setHeaderText_(nall::lstring &list);
-  template<typename... Args> void setHeaderText_(nall::lstring &list, const nall::string &text, const Args&... args) {
-    list.append(text);
-    setHeaderText_(list, args...);
-  }
+  void append_(const nall::lstring &list);
+  void modify_(unsigned row, const nall::lstring &list);
+  void setHeaderText_(const nall::lstring &list);
 };
 
 struct ProgressBar : private nall::base_from_member<pProgressBar&>, Widget {
@@ -383,12 +345,7 @@ struct ProgressBar : private nall::base_from_member<pProgressBar&>, Widget {
 };
 
 struct RadioBox : private nall::base_from_member<pRadioBox&>, Widget {
-  template<typename... Args> static void group(Args&... args) {
-    nall::array<RadioBox*> list;
-    group_(list, args...);
-    foreach(item, list) item->setGroup(list);
-    if(list.size()) list[0]->setChecked();
-  }
+  template<typename... Args> static void group(Args&... args) { group_({ args... }); }
 
   nall::function<void ()> onTick;
 
@@ -402,12 +359,7 @@ struct RadioBox : private nall::base_from_member<pRadioBox&>, Widget {
   pRadioBox &p;
 
 private:
-  void setGroup(const nall::array<RadioBox*> &group);
-  static void group_(nall::array<RadioBox*> &list) {}
-  template<typename... Args> static void group_(nall::array<RadioBox*> &list, RadioBox &item, Args&... args) {
-    list.append(&item);
-    group_(list, args...);
-  }
+  static void group_(const nall::reference_array<RadioBox&> &list);
 };
 
 struct TextEdit : private nall::base_from_member<pTextEdit&>, Widget {

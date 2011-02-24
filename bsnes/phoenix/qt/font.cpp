@@ -4,7 +4,7 @@ void pFont::setItalic(bool italic) { update(); }
 void pFont::setSize(unsigned size) { update(); }
 void pFont::setUnderline(bool underline) { update(); }
 
-pFont::pFont(Font &font) : font(font) {
+void pFont::constructor() {
   qtFont = new QFont;
 }
 

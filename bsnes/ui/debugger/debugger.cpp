@@ -37,7 +37,7 @@ void Debugger::create() {
   layout.append(showMemoryEditor, 0, Style::CheckBoxHeight);
 
   setGeometry({ 0, 0, 256, layout.minimumHeight() });
-  setLayout(layout);
+  append(layout);
 
   //windows shown by default
   showConsole.setChecked();

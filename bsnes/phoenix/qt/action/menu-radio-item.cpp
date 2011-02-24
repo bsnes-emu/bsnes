@@ -5,21 +5,21 @@ bool pMenuRadioItem::checked() {
 void pMenuRadioItem::setChecked() {
   locked = true;
   foreach(item, menuRadioItem.state.group) {
-    bool checkState = item->p.qtAction == qtAction;
-    item->state.checked = checkState;
-    item->p.qtAction->setChecked(checkState);
+    bool checkState = item.p.qtAction == qtAction;
+    item.state.checked = checkState;
+    item.p.qtAction->setChecked(checkState);
   }
   locked = false;
 }
 
-void pMenuRadioItem::setGroup(const array<MenuRadioItem*> &group) {
+void pMenuRadioItem::setGroup(const reference_array<MenuRadioItem&> &group) {
 }
 
 void pMenuRadioItem::setText(const string &text) {
   qtAction->setText(QString::fromUtf8(text));
 }
 
-pMenuRadioItem::pMenuRadioItem(MenuRadioItem &menuRadioItem) : menuRadioItem(menuRadioItem), pAction(menuRadioItem) {
+void pMenuRadioItem::constructor() {
   qtAction = new QAction(0);
   qtGroup = new QActionGroup(0);
   qtAction->setCheckable(true);

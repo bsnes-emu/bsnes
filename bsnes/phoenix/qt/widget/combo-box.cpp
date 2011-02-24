@@ -17,7 +17,7 @@ void pComboBox::setSelection(unsigned row) {
   locked = false;
 }
 
-pComboBox::pComboBox(ComboBox &comboBox) : comboBox(comboBox), pWidget(comboBox) {
+void pComboBox::constructor() {
   qtWidget = qtComboBox = new QComboBox;
   connect(qtComboBox, SIGNAL(currentIndexChanged(int)), SLOT(onChange()));
 }

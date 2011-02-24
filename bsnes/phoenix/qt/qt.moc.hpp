@@ -49,7 +49,8 @@ struct pFont : public pObject {
   void setSize(unsigned size);
   void setUnderline(bool underline);
 
-  pFont(Font &font);
+  pFont(Font &font) : font(font) {}
+  void constructor();
   void update();
 };
 
@@ -77,9 +78,10 @@ public:
   QMenuBar *qtMenu;
   QStatusBar *qtStatus;
   QWidget *qtContainer;
-  Layout *layout;
 
+  void append(Layout &layout);
   void append(Menu &menu);
+  void append(Widget &widget);
   Geometry frameGeometry();
   bool focused();
   Geometry geometry();
@@ -88,7 +90,6 @@ public:
   void setFocused();
   void setFullScreen(bool fullScreen);
   void setGeometry(const Geometry &geometry);
-  void setLayout(Layout &layout);
   void setMenuFont(Font &font);
   void setMenuVisible(bool visible);
   void setResizable(bool resizable);
@@ -99,7 +100,8 @@ public:
   void setVisible(bool visible);
   void setWidgetFont(Font &font);
 
-  pWindow(Window &window);
+  pWindow(Window &window) : window(window) {}
+  void constructor();
   void updateFrameGeometry();
 };
 
@@ -107,9 +109,11 @@ struct pAction : public pObject {
   Action &action;
 
   void setEnabled(bool enabled);
+  void setFont(Font &font);
   void setVisible(bool visible);
 
-  pAction(Action &action);
+  pAction(Action &action) : action(action) {}
+  void constructor();
 };
 
 struct pMenu : public pAction {
@@ -117,16 +121,19 @@ struct pMenu : public pAction {
   QMenu *qtMenu;
 
   void append(Action &action);
+  void setFont(Font &font);
   void setText(const string &text);
 
-  pMenu(Menu &menu);
+  pMenu(Menu &menu) : pAction(menu), menu(menu) {}
+  void constructor();
 };
 
 struct pMenuSeparator : public pAction {
   MenuSeparator &menuSeparator;
   QAction *qtAction;
 
-  pMenuSeparator(MenuSeparator &menuSeparator);
+  pMenuSeparator(MenuSeparator &menuSeparator) : pAction(menuSeparator), menuSeparator(menuSeparator) {}
+  void constructor();
 };
 
 struct pMenuItem : public QObject, public pAction {
@@ -138,7 +145,8 @@ public:
 
   void setText(const string &text);
 
-  pMenuItem(MenuItem &menuItem);
+  pMenuItem(MenuItem &menuItem) : pAction(menuItem), menuItem(menuItem) {}
+  void constructor();
 
 public slots:
   void onTick();
@@ -155,7 +163,8 @@ public:
   void setChecked(bool checked);
   void setText(const string &text);
 
-  pMenuCheckItem(MenuCheckItem &menuCheckItem);
+  pMenuCheckItem(MenuCheckItem &menuCheckItem) : pAction(menuCheckItem), menuCheckItem(menuCheckItem) {}
+  void constructor();
 
 public slots:
   void onTick();
@@ -171,22 +180,14 @@ public:
 
   bool checked();
   void setChecked();
-  void setGroup(const array<MenuRadioItem*> &group);
+  void setGroup(const reference_array<MenuRadioItem&> &group);
   void setText(const string &text);
 
-  pMenuRadioItem(MenuRadioItem &menuRadioItem);
+  pMenuRadioItem(MenuRadioItem &menuRadioItem) : pAction(menuRadioItem), menuRadioItem(menuRadioItem) {}
+  void constructor();
 
 public slots:
   void onTick();
-};
-
-struct pLayout : public pObject {
-  Layout &layout;
-  pWindow *parent;
-
-  void append(Widget &widget);
-
-  pLayout(Layout &layout);
 };
 
 struct pWidget : public pObject {
@@ -200,7 +201,8 @@ struct pWidget : public pObject {
   void setGeometry(const Geometry &geometry);
   void setVisible(bool visible);
 
-  pWidget(Widget &widget);
+  pWidget(Widget &widget) : widget(widget) {}
+  void constructor();
 };
 
 struct pButton : public QObject, public pWidget {
@@ -212,7 +214,8 @@ public:
 
   void setText(const string &text);
 
-  pButton(Button &button);
+  pButton(Button &button) : pWidget(button), button(button) {}
+  void constructor();
 
 public slots:
   void onTick();
@@ -229,7 +232,8 @@ public:
   void setChecked(bool checked);
   void setText(const string &text);
 
-  pCheckBox(CheckBox &checkBox);
+  pCheckBox(CheckBox &checkBox) : pWidget(checkBox), checkBox(checkBox) {}
+  void constructor();
 
 public slots:
   void onTick();
@@ -247,7 +251,8 @@ public:
   unsigned selection();
   void setSelection(unsigned row);
 
-  pComboBox(ComboBox &comboBox);
+  pComboBox(ComboBox &comboBox) : pWidget(comboBox), comboBox(comboBox) {}
+  void constructor();
 
 public slots:
   void onChange();
@@ -273,8 +278,9 @@ public:
   void setRows(unsigned rows);
   void update();
 
+  pHexEdit(HexEdit &hexEdit) : pWidget(hexEdit), hexEdit(hexEdit) {}
+  void constructor();
   void keyPressEvent(QKeyEvent*);
-  pHexEdit(HexEdit &hexEdit);
 
 public slots:
   void onScroll();
@@ -291,7 +297,8 @@ public:
   void setLength(unsigned length);
   void setPosition(unsigned position);
 
-  pHorizontalSlider(HorizontalSlider &horizontalSlider);
+  pHorizontalSlider(HorizontalSlider &horizontalSlider) : pWidget(horizontalSlider), horizontalSlider(horizontalSlider) {}
+  void constructor();
 
 public slots:
   void onChange();
@@ -303,7 +310,8 @@ struct pLabel : public pWidget {
 
   void setText(const string &text);
 
-  pLabel(Label &label);
+  pLabel(Label &label) : pWidget(label), label(label) {}
+  void constructor();
 };
 
 struct pLineEdit : public QObject, public pWidget {
@@ -317,7 +325,8 @@ public:
   void setText(const string &text);
   string text();
 
-  pLineEdit(LineEdit &lineEdit);
+  pLineEdit(LineEdit &lineEdit) : pWidget(lineEdit), lineEdit(lineEdit) {}
+  void constructor();
 
 public slots:
   void onActivate();
@@ -344,7 +353,8 @@ public:
   void setHeaderVisible(bool visible);
   void setSelection(unsigned row);
 
-  pListView(ListView &listView);
+  pListView(ListView &listView) : pWidget(listView), listView(listView) {}
+  void constructor();
 
 public slots:
   void onActivate();
@@ -358,7 +368,8 @@ struct pProgressBar : public pWidget {
 
   void setPosition(unsigned position);
 
-  pProgressBar(ProgressBar &progressBar);
+  pProgressBar(ProgressBar &progressBar) : pWidget(progressBar), progressBar(progressBar) {}
+  void constructor();
 };
 
 struct pRadioBox : public QObject, public pWidget {
@@ -371,10 +382,11 @@ public:
 
   bool checked();
   void setChecked();
-  void setGroup(const array<RadioBox*> &group);
+  void setGroup(const reference_array<RadioBox&> &group);
   void setText(const string &text);
 
-  pRadioBox(RadioBox &radioBox);
+  pRadioBox(RadioBox &radioBox) : pWidget(radioBox), radioBox(radioBox) {}
+  void constructor();
 
 public slots:
   void onTick();
@@ -393,7 +405,8 @@ public:
   void setWordWrap(bool wordWrap);
   string text();
 
-  pTextEdit(TextEdit &textEdit);
+  pTextEdit(TextEdit &textEdit) : pWidget(textEdit), textEdit(textEdit) {}
+  void constructor();
 
 public slots:
   void onChange();
@@ -410,7 +423,8 @@ public:
   void setLength(unsigned length);
   void setPosition(unsigned position);
 
-  pVerticalSlider(VerticalSlider &verticalSlider);
+  pVerticalSlider(VerticalSlider &verticalSlider) : pWidget(verticalSlider), verticalSlider(verticalSlider) {}
+  void constructor();
 
 public slots:
   void onChange();
@@ -421,5 +435,6 @@ struct pViewport : public pWidget {
 
   uintptr_t handle();
 
-  pViewport(Viewport &viewport);
+  pViewport(Viewport &viewport) : pWidget(viewport), viewport(viewport) {}
+  void constructor();
 };

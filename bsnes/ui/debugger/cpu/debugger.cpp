@@ -19,7 +19,7 @@ void CPUDebugger::create() {
   layout.append(controlLayout, 80, 0);
 
   setGeometry({ 0, 0, layout.minimumWidth() + 300, 220 });
-  setLayout(layout);
+  append(layout);
 
   onClose = []() {
     debugger.showCPUDebugger.setChecked(false);

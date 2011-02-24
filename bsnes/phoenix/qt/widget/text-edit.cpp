@@ -21,7 +21,7 @@ string pTextEdit::text() {
   return qtTextEdit->toPlainText().toUtf8().constData();
 }
 
-pTextEdit::pTextEdit(TextEdit &textEdit) : textEdit(textEdit), pWidget(textEdit) {
+void pTextEdit::constructor() {
   qtWidget = qtTextEdit = new QTextEdit;
   connect(qtTextEdit, SIGNAL(textChanged()), SLOT(onChange()));
 }

@@ -35,7 +35,8 @@ struct pFont : public pObject {
   void setSize(unsigned size);
   void setUnderline(bool underline);
 
-  pFont(Font &font);
+  pFont(Font &font) : font(font) {}
+  void constructor();
 };
 
 struct pMessageWindow : public pObject {
@@ -48,7 +49,9 @@ struct pMessageWindow : public pObject {
 struct pWindow : public pObject {
   Window &window;
 
+  void append(Layout &layout);
   void append(Menu &menu);
+  void append(Widget &widget);
   Geometry frameGeometry();
   bool focused();
   Geometry geometry();
@@ -57,7 +60,6 @@ struct pWindow : public pObject {
   void setFocused();
   void setFullScreen(bool fullScreen);
   void setGeometry(const Geometry &geometry);
-  void setLayout(Layout &layout);
   void setMenuFont(Font &font);
   void setMenuVisible(bool visible);
   void setResizable(bool resizable);
@@ -68,7 +70,8 @@ struct pWindow : public pObject {
   void setVisible(bool visible);
   void setWidgetFont(Font &font);
 
-  pWindow(Window &window);
+  pWindow(Window &window) : window(window) {}
+  void constructor();
 };
 
 struct pAction : public pObject {
@@ -77,7 +80,8 @@ struct pAction : public pObject {
   void setEnabled(bool enabled);
   void setVisible(bool visible);
 
-  pAction(Action &action);
+  pAction(Action &action) : action(action) {}
+  void constructor();
 };
 
 struct pMenu : public pAction {
@@ -86,13 +90,15 @@ struct pMenu : public pAction {
   void append(Action &action);
   void setText(const string &text);
 
-  pMenu(Menu &menu);
+  pMenu(Menu &menu) : pAction(menu), menu(menu) {}
+  void constructor();
 };
 
 struct pMenuSeparator : public pAction {
   MenuSeparator &menuSeparator;
 
-  pMenuSeparator(MenuSeparator &menuSeparator);
+  pMenuSeparator(MenuSeparator &menuSeparator) : pAction(menuSeparator), menuSeparator(menuSeparator) {}
+  void constructor();
 };
 
 struct pMenuItem : public pAction {
@@ -100,7 +106,8 @@ struct pMenuItem : public pAction {
 
   void setText(const string &text);
 
-  pMenuItem(MenuItem &menuItem);
+  pMenuItem(MenuItem &menuItem) : pAction(menuItem), menuItem(menuItem) {}
+  void constructor();
 };
 
 struct pMenuCheckItem : public pAction {
@@ -110,7 +117,8 @@ struct pMenuCheckItem : public pAction {
   void setChecked(bool checked);
   void setText(const string &text);
 
-  pMenuCheckItem(MenuCheckItem &menuCheckItem);
+  pMenuCheckItem(MenuCheckItem &menuCheckItem) : pAction(menuCheckItem), menuCheckItem(menuCheckItem) {}
+  void constructor();
 };
 
 struct pMenuRadioItem : public pAction {
@@ -118,18 +126,11 @@ struct pMenuRadioItem : public pAction {
 
   bool checked();
   void setChecked();
-  void setGroup(const array<MenuRadioItem*> &group);
+  void setGroup(const reference_array<MenuRadioItem&> &group);
   void setText(const string &text);
 
-  pMenuRadioItem(MenuRadioItem &menuRadioItem);
-};
-
-struct pLayout : public pObject {
-  Layout &layout;
-
-  void append(Widget &widget);
-
-  pLayout(Layout &layout);
+  pMenuRadioItem(MenuRadioItem &menuRadioItem) : pAction(menuRadioItem), menuRadioItem(menuRadioItem) {}
+  void constructor();
 };
 
 struct pWidget : public pObject {
@@ -142,7 +143,8 @@ struct pWidget : public pObject {
   void setGeometry(const Geometry &geometry);
   void setVisible(bool visible);
 
-  pWidget(Widget &widget);
+  pWidget(Widget &widget) : widget(widget) {}
+  void constructor();
 };
 
 struct pButton : public pWidget {
@@ -150,7 +152,8 @@ struct pButton : public pWidget {
 
   void setText(const string &text);
 
-  pButton(Button &button);
+  pButton(Button &button) : pWidget(button), button(button) {}
+  void constructor();
 };
 
 struct pCheckBox : public pWidget {
@@ -160,7 +163,8 @@ struct pCheckBox : public pWidget {
   void setChecked(bool checked);
   void setText(const string &text);
 
-  pCheckBox(CheckBox &checkBox);
+  pCheckBox(CheckBox &checkBox) : pWidget(checkBox), checkBox(checkBox) {}
+  void constructor();
 };
 
 struct pComboBox : public pWidget {
@@ -171,7 +175,8 @@ struct pComboBox : public pWidget {
   unsigned selection();
   void setSelection(unsigned row);
 
-  pComboBox(ComboBox &comboBox);
+  pComboBox(ComboBox &comboBox) : pWidget(comboBox), comboBox(comboBox) {}
+  void constructor();
 };
 
 struct pHexEdit : public pWidget {
@@ -183,7 +188,8 @@ struct pHexEdit : public pWidget {
   void setRows(unsigned rows);
   void update();
 
-  pHexEdit(HexEdit &hexEdit);
+  pHexEdit(HexEdit &hexEdit) : pWidget(hexEdit), hexEdit(hexEdit) {}
+  void constructor();
 };
 
 struct pHorizontalSlider : public pWidget {
@@ -193,7 +199,8 @@ struct pHorizontalSlider : public pWidget {
   void setLength(unsigned length);
   void setPosition(unsigned position);
 
-  pHorizontalSlider(HorizontalSlider &horizontalSlider);
+  pHorizontalSlider(HorizontalSlider &horizontalSlider) : pWidget(horizontalSlider), horizontalSlider(horizontalSlider) {}
+  void constructor();
 };
 
 struct pLabel : public pWidget {
@@ -201,7 +208,8 @@ struct pLabel : public pWidget {
 
   void setText(const string &text);
 
-  pLabel(Label &label);
+  pLabel(Label &label) : pWidget(label), label(label) {}
+  void constructor();
 };
 
 struct pLineEdit : public pWidget {
@@ -211,7 +219,8 @@ struct pLineEdit : public pWidget {
   void setText(const string &text);
   string text();
 
-  pLineEdit(LineEdit &lineEdit);
+  pLineEdit(LineEdit &lineEdit) : pWidget(lineEdit), lineEdit(lineEdit) {}
+  void constructor();
 };
 
 struct pListView : public pWidget {
@@ -230,7 +239,8 @@ struct pListView : public pWidget {
   void setHeaderVisible(bool visible);
   void setSelection(unsigned row);
 
-  pListView(ListView &listView);
+  pListView(ListView &listView) : pWidget(listView), listView(listView) {}
+  void constructor();
 };
 
 struct pProgressBar : public pWidget {
@@ -238,7 +248,8 @@ struct pProgressBar : public pWidget {
 
   void setPosition(unsigned position);
 
-  pProgressBar(ProgressBar &progressBar);
+  pProgressBar(ProgressBar &progressBar) : pWidget(progressBar), progressBar(progressBar) {}
+  void constructor();
 };
 
 struct pRadioBox : public pWidget {
@@ -246,10 +257,11 @@ struct pRadioBox : public pWidget {
 
   bool checked();
   void setChecked();
-  void setGroup(const array<RadioBox*> &group);
+  void setGroup(const reference_array<RadioBox&> &group);
   void setText(const string &text);
 
-  pRadioBox(RadioBox &radioBox);
+  pRadioBox(RadioBox &radioBox) : pWidget(radioBox), radioBox(radioBox) {}
+  void constructor();
 };
 
 struct pTextEdit : public pWidget {
@@ -261,7 +273,8 @@ struct pTextEdit : public pWidget {
   void setWordWrap(bool wordWrap);
   string text();
 
-  pTextEdit(TextEdit &textEdit);
+  pTextEdit(TextEdit &textEdit) : pWidget(textEdit), textEdit(textEdit) {}
+  void constructor();
 };
 
 struct pVerticalSlider : public pWidget {
@@ -271,7 +284,8 @@ struct pVerticalSlider : public pWidget {
   void setLength(unsigned length);
   void setPosition(unsigned position);
 
-  pVerticalSlider(VerticalSlider &verticalSlider);
+  pVerticalSlider(VerticalSlider &verticalSlider) : pWidget(verticalSlider), verticalSlider(verticalSlider) {}
+  void constructor();
 };
 
 struct pViewport : public pWidget {
@@ -279,5 +293,6 @@ struct pViewport : public pWidget {
 
   uintptr_t handle();
 
-  pViewport(Viewport &viewport);
+  pViewport(Viewport &viewport) : pWidget(viewport), viewport(viewport) {}
+  void constructor();
 };

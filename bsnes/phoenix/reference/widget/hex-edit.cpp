@@ -13,5 +13,5 @@ void pHexEdit::setRows(unsigned rows) {
 void pHexEdit::update() {
 }
 
-pHexEdit::pHexEdit(HexEdit &hexEdit) : pWidget(hexEdit), hexEdit(hexEdit) {
+void pHexEdit::constructor() {
 }

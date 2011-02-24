@@ -1,7 +1,6 @@
 void FixedLayout::setParent(Window &parent) {
-  Layout::setParent(parent);
   foreach(child, children) {
-    Layout::append(*child.widget);
+    parent.append(*child.widget);
     child.widget->setGeometry(child.geometry);
   }
 }
@@ -11,6 +10,10 @@ void FixedLayout::append(Widget &widget, const Geometry &geometry) {
 }
 
 void FixedLayout::setGeometry(Geometry &geometry) {
+}
+
+void FixedLayout::setVisible(bool visible) {
+  foreach(child, children) child.widget->setVisible(visible);
 }
 
 FixedLayout::FixedLayout() {

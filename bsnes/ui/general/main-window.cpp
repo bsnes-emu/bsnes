@@ -248,7 +248,7 @@ void MainWindow::create() {
   settingsMuteAudio.setChecked(config.audio.mute);
 
   layout.append(viewport, { 0, 0, 595, 448 });
-  setLayout(layout);
+  append(layout);
 
   utility.setStatus("");
   setMenuVisible(true);

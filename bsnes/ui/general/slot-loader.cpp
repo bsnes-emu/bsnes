@@ -24,7 +24,7 @@ void SingleSlotLoader::create() {
   layout.append(controlLayout, 0, Style::ButtonHeight);
 
   setGeometry({ 0, 0, 480, layout.minimumHeight() });
-  setLayout(layout);
+  append(layout);
 
   baseBrowse.onTick = []() {
     fileBrowser.fileOpen(FileBrowser::Mode::Cartridge, [](string filename) {
@@ -122,7 +122,7 @@ void DoubleSlotLoader::create() {
   layout.append(controlLayout, 0, Style::ButtonHeight);
 
   setGeometry({ 0, 0, 480, layout.minimumHeight() });
-  setLayout(layout);
+  append(layout);
 
   baseBrowse.onTick = []() {
     fileBrowser.fileOpen(FileBrowser::Mode::Cartridge, [](string filename) {

@@ -12,10 +12,15 @@ void pMenu::append(Action &action) {
   }
 }
 
+void pMenu::setFont(Font &font) {
+  qtMenu->setFont(*font.p.qtFont);
+  foreach(item, menu.state.action) item.p.setFont(font);
+}
+
 void pMenu::setText(const string &text) {
   qtMenu->setTitle(QString::fromUtf8(text));
 }
 
-pMenu::pMenu(Menu &menu) : menu(menu), pAction(menu) {
+void pMenu::constructor() {
   qtMenu = new QMenu;
 }

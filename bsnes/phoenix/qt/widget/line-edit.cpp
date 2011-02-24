@@ -10,7 +10,7 @@ string pLineEdit::text() {
   return qtLineEdit->text().toUtf8().constData();
 }
 
-pLineEdit::pLineEdit(LineEdit &lineEdit) : lineEdit(lineEdit), pWidget(lineEdit) {
+void pLineEdit::constructor() {
   qtWidget = qtLineEdit = new QLineEdit;
   connect(qtLineEdit, SIGNAL(returnPressed()), SLOT(onActivate()));
   connect(qtLineEdit, SIGNAL(textEdited(const QString&)), SLOT(onChange()));

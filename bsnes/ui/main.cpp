@@ -26,7 +26,7 @@ void Application::main(int argc, char **argv) {
   proportionalFontBold.setSize(8);
   proportionalFontBold.setBold();
 
-  monospaceFont.setFamily("Courier New");
+  monospaceFont.setFamily("Lucida Console");
   monospaceFont.setSize(8);
   #else
   proportionalFont.setFamily("Sans");

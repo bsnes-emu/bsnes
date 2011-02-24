@@ -40,7 +40,7 @@ void InputSettings::create() {
   layout.append(mapLayout, 0, Style::ButtonHeight);
 
   setGeometry({ 0, 0, 640, layout.minimumHeight() + 250 });
-  setLayout(layout);
+  append(layout);
 
   mouseXaxis.setVisible(false);
   mouseYaxis.setVisible(false);

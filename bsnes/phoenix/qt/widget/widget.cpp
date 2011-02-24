@@ -19,8 +19,10 @@ void pWidget::setGeometry(const Geometry &geometry) {
 }
 
 void pWidget::setVisible(bool visible) {
+  if(widget.state.abstract) visible = false;
   qtWidget->setVisible(visible);
 }
 
-pWidget::pWidget(Widget &widget) : widget(widget) {
+void pWidget::constructor() {
+  if(widget.state.abstract) qtWidget = new QWidget;
 }

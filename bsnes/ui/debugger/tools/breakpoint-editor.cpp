@@ -30,7 +30,7 @@ void BreakpointEditor::create() {
   }
 
   setGeometry({ 0, 0, 310, layout.minimumHeight() });
-  setLayout(layout);
+  append(layout);
 
   onClose = []() {
     debugger.showBreakpointEditor.setChecked(false);

@@ -1,4 +1,10 @@
+void pWindow::append(Layout &layout) {
+}
+
 void pWindow::append(Menu &menu) {
+}
+
+void pWindow::append(Widget &widget) {
 }
 
 Geometry pWindow::frameGeometry() {
@@ -28,9 +34,6 @@ void pWindow::setFullScreen(bool fullScreen) {
 void pWindow::setGeometry(const Geometry &geometry) {
 }
 
-void pWindow::setLayout(Layout &layout) {
-}
-
 void pWindow::setMenuFont(Font &font) {
 }
 
@@ -58,5 +61,5 @@ void pWindow::setVisible(bool visible) {
 void pWindow::setWidgetFont(Font &font) {
 }
 
-pWindow::pWindow(Window &window) : window(window) {
+void pWindow::constructor() {
 }

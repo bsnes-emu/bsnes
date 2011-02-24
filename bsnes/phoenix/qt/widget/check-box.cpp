@@ -12,7 +12,7 @@ void pCheckBox::setText(const string &text) {
   qtCheckBox->setText(QString::fromUtf8(text));
 }
 
-pCheckBox::pCheckBox(CheckBox &checkBox) : checkBox(checkBox), pWidget(checkBox) {
+void pCheckBox::constructor() {
   qtWidget = qtCheckBox = new QCheckBox;
   connect(qtCheckBox, SIGNAL(stateChanged(int)), SLOT(onTick()));
 }

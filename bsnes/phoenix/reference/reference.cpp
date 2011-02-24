@@ -3,7 +3,6 @@
 #include "font.cpp"
 #include "message-window.cpp"
 #include "window.cpp"
-#include "layout.cpp"
 
 #include "action/action.cpp"
 #include "action/menu.cpp"

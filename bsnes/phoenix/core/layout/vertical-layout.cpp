@@ -1,8 +1,7 @@
 void VerticalLayout::setParent(Window &parent) {
-  Layout::setParent(parent);
   foreach(child, children) {
     if(child.layout) child.layout->setParent(parent);
-    if(child.widget) Layout::append(*child.widget);
+    if(child.widget) parent.append(*child.widget);
   }
 }
 
@@ -73,6 +72,13 @@ unsigned VerticalLayout::minimumHeight() {
   unsigned height = margin * 2;
   foreach(child, children) height += child.height + child.spacing;
   return height;
+}
+
+void VerticalLayout::setVisible(bool visible) {
+  foreach(child, children) {
+    if(child.layout) child.layout->setVisible(visible);
+    if(child.widget) child.widget->setVisible(visible);
+  }
 }
 
 VerticalLayout::VerticalLayout() {

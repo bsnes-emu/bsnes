@@ -13,5 +13,5 @@ void pFont::setSize(unsigned size) {
 void pFont::setUnderline(bool underline) {
 }
 
-pFont::pFont(Font &font) : font(font) {
+void pFont::constructor() {
 }

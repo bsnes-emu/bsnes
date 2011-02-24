@@ -1,12 +1,13 @@
 struct HorizontalLayout;
 
 struct VerticalLayout : public Layout {
-  void setParent(Window &parent);
-  void setGeometry(Geometry &geometry);
   void append(HorizontalLayout &layout, unsigned width, unsigned height, unsigned spacing = 0);
   void append(Widget &widget, unsigned width, unsigned height, unsigned spacing = 0);
-  void setMargin(unsigned margin);
   unsigned minimumHeight();
+  void setGeometry(Geometry &geometry);
+  void setMargin(unsigned margin);
+  void setParent(Window &parent);
+  void setVisible(bool visible);
   VerticalLayout();
 
 //private:

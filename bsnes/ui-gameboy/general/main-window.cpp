@@ -80,7 +80,7 @@ void MainWindow::create() {
   help.append(helpAbout);
 
   layout.append(viewport, { 0, 0, 160 * 2, 144 * 2 });
-  setLayout(layout);
+  append(layout);
   setGeometry({ 128, 128, 160 * 2, 144 * 2 });
 
   setMenuVisible(true);

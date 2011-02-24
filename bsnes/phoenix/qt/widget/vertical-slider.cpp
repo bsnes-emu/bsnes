@@ -12,7 +12,7 @@ void pVerticalSlider::setPosition(unsigned position) {
   qtSlider->setValue(position);
 }
 
-pVerticalSlider::pVerticalSlider(VerticalSlider &verticalSlider) : verticalSlider(verticalSlider), pWidget(verticalSlider) {
+void pVerticalSlider::constructor() {
   qtWidget = qtSlider = new QSlider(Qt::Vertical);
   qtSlider->setRange(0, 100);
   qtSlider->setPageStep(101 >> 3);

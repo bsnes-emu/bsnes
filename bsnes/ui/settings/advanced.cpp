@@ -35,7 +35,7 @@ void AdvancedSettings::create() {
   layout.append(focusPolicyLayout, 0, Style::CheckBoxHeight);
 
   setGeometry({ 0, 0, 640, layout.minimumHeight() });
-  setLayout(layout);
+  append(layout);
 
   lstring list;
 

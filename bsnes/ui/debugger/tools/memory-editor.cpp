@@ -22,7 +22,7 @@ void MemoryEditor::create() {
   layout.append(controlLayout, 80, 0);
 
   setGeometry({ 0, 0, layout.minimumWidth() + 475, 230 });
-  setLayout(layout);
+  append(layout);
 
   onClose = []() {
     debugger.showMemoryEditor.setChecked(false);

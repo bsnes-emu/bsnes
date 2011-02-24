@@ -25,7 +25,7 @@ void Console::create() {
   layout.append(controlLayout, 120, 0);
 
   setGeometry({ 0, 0, layout.minimumWidth() + 580, 350 });
-  setLayout(layout);
+  append(layout);
 
   onClose = []() {
     debugger.showConsole.setChecked(false);

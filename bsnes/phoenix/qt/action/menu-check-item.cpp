@@ -10,7 +10,7 @@ void pMenuCheckItem::setText(const string &text) {
   qtAction->setText(QString::fromUtf8(text));
 }
 
-pMenuCheckItem::pMenuCheckItem(MenuCheckItem &menuCheckItem) : menuCheckItem(menuCheckItem), pAction(menuCheckItem) {
+void pMenuCheckItem::constructor() {
   qtAction = new QAction(0);
   qtAction->setCheckable(true);
   connect(qtAction, SIGNAL(triggered()), SLOT(onTick()));

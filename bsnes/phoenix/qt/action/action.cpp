@@ -12,6 +12,20 @@ void pAction::setEnabled(bool enabled) {
   }
 }
 
+void pAction::setFont(Font &font) {
+  if(dynamic_cast<Menu*>(&action)) {
+    ((Menu&)action).p.setFont(font);
+  } else if(dynamic_cast<MenuSeparator*>(&action)) {
+    ((MenuSeparator&)action).p.qtAction->setFont(*font.p.qtFont);
+  } else if(dynamic_cast<MenuItem*>(&action)) {
+    ((MenuItem&)action).p.qtAction->setFont(*font.p.qtFont);
+  } else if(dynamic_cast<MenuCheckItem*>(&action)) {
+    ((MenuCheckItem&)action).p.qtAction->setFont(*font.p.qtFont);
+  } else if(dynamic_cast<MenuRadioItem*>(&action)) {
+    ((MenuRadioItem&)action).p.qtAction->setFont(*font.p.qtFont);
+  }
+}
+
 void pAction::setVisible(bool visible) {
   if(dynamic_cast<Menu*>(&action)) {
     ((Menu&)action).p.qtMenu->setVisible(visible);
@@ -26,5 +40,5 @@ void pAction::setVisible(bool visible) {
   }
 }
 
-pAction::pAction(Action &action) : action(action) {
+void pAction::constructor() {
 }

@@ -35,5 +35,5 @@ void pListView::setHeaderVisible(bool visible) {
 void pListView::setSelection(unsigned row) {
 }
 
-pListView::pListView(ListView &listView) : pWidget(listView), listView(listView) {
+void pListView::constructor() {
 }

@@ -63,7 +63,7 @@ void pHexEdit::update() {
   qtHexEdit->setTextCursor(cursor);
 }
 
-pHexEdit::pHexEdit(HexEdit &hexEdit) : hexEdit(hexEdit), pWidget(hexEdit) {
+void pHexEdit::constructor() {
   qtWidget = qtHexEdit = new QtHexEdit(*this);
 
   qtHexEdit->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -80,13 +80,6 @@ pHexEdit::pHexEdit(HexEdit &hexEdit) : hexEdit(hexEdit), pWidget(hexEdit) {
   qtLayout->addWidget(qtScroll);
 
   connect(qtScroll, SIGNAL(actionTriggered(int)), SLOT(onScroll()));
-}
-
-void pHexEdit::onScroll() {
-  if(locked) return;
-  unsigned offset = qtScroll->sliderPosition();
-  hexEdit.state.offset = offset * hexEdit.state.columns;
-  update();
 }
 
 void pHexEdit::keyPressEvent(QKeyEvent *event) {
@@ -159,6 +152,13 @@ void pHexEdit::keyPressEvent(QKeyEvent *event) {
       }
     }
   }
+}
+
+void pHexEdit::onScroll() {
+  if(locked) return;
+  unsigned offset = qtScroll->sliderPosition();
+  hexEdit.state.offset = offset * hexEdit.state.columns;
+  update();
 }
 
 void pHexEdit::QtHexEdit::keyPressEvent(QKeyEvent *event) {

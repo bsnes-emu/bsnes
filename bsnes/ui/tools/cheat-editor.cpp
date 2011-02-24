@@ -106,7 +106,7 @@ void CheatEditor::create() {
   layout.append(controlLayout, 0, Style::ButtonHeight);
 
   setGeometry({ 0, 0, 480, layout.minimumHeight() + 250 });
-  setLayout(layout);
+  append(layout);
 
   synchronize();
 
@@ -138,7 +138,7 @@ void CheatEditor::create() {
   databaseLayout.append(databaseControlLayout, 0, Style::ButtonHeight);
 
   databaseWindow.setGeometry({ 0, 0, 600, layout.minimumHeight() + 250 });
-  databaseWindow.setLayout(databaseLayout);
+  databaseWindow.append(databaseLayout);
 
   databaseSelectAll.onTick = []() {
     for(unsigned i = 0; i < cheatEditor.databaseCode.size(); i++) {

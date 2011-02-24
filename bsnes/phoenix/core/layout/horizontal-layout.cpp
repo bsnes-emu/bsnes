@@ -1,8 +1,7 @@
 void HorizontalLayout::setParent(Window &parent) {
-  Layout::setParent(parent);
   foreach(child, children) {
     if(child.layout) child.layout->setParent(parent);
-    if(child.widget) Layout::append(*child.widget);
+    if(child.widget) parent.append(*child.widget);
   }
 }
 
@@ -73,6 +72,13 @@ unsigned HorizontalLayout::minimumWidth() {
   unsigned width = margin * 2;
   foreach(child, children) width += child.width + child.spacing;
   return width;
+}
+
+void HorizontalLayout::setVisible(bool visible) {
+  foreach(child, children) {
+    if(child.layout) child.layout->setVisible(visible);
+    if(child.widget) child.widget->setVisible(visible);
+  }
 }
 
 HorizontalLayout::HorizontalLayout() {

@@ -11,5 +11,5 @@ unsigned pComboBox::selection() {
 void pComboBox::setSelection(unsigned row) {
 }
 
-pComboBox::pComboBox(ComboBox &comboBox) : pWidget(comboBox), comboBox(comboBox) {
+void pComboBox::constructor() {
 }
