@@ -13,6 +13,17 @@
 #elif defined(PHOENIX_QT)
   #include <QApplication>
   #include <QtGui>
+#elif defined(PHOENIX_GTK)
+  #define None X11None
+  #define Window X11Window
+
+  #include <gtk/gtk.h>
+  #include <gdk/gdkx.h>
+  #include <cairo.h>
+  #include <gdk/gdkkeysyms.h>
+
+  #undef None
+  #undef Window
 #elif defined(PHOENIX_REFERENCE)
 #else
   #error "phoenix: unrecognized target"

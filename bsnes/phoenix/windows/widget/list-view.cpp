@@ -102,6 +102,11 @@ void pListView::constructor() {
   setParent(Window::None);
 }
 
+void pListView::setGeometry(const Geometry &geometry) {
+  pWidget::setGeometry(geometry);
+  autosizeColumns();
+}
+
 void pListView::setParent(Window &parent) {
   if(hwnd) DestroyWindow(hwnd);
   hwnd = CreateWindowEx(

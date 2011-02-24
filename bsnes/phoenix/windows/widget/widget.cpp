@@ -1,14 +1,17 @@
 bool pWidget::enabled() {
-  return false;
+  return IsWindowEnabled(hwnd);
 }
 
 void pWidget::setEnabled(bool enabled) {
+  EnableWindow(hwnd, enabled);
 }
 
 void pWidget::setFocused() {
+  SetFocus(hwnd);
 }
 
 void pWidget::setFont(Font &font) {
+  SendMessage(hwnd, WM_SETFONT, (WPARAM)font.p.hfont, 0);
 }
 
 void pWidget::setGeometry(const Geometry &geometry) {
@@ -16,10 +19,13 @@ void pWidget::setGeometry(const Geometry &geometry) {
 }
 
 void pWidget::setVisible(bool visible) {
+  if(widget.state.abstract) visible = false;
+  ShowWindow(hwnd, visible ? SW_SHOWNORMAL : SW_HIDE);
 }
 
 void pWidget::constructor() {
   hwnd = 0;
+  if(widget.state.abstract) setParent(Window::None);
 }
 
 void pWidget::setDefaultFont() {
@@ -31,4 +37,7 @@ void pWidget::setDefaultFont() {
 }
 
 void pWidget::setParent(Window &parent) {
+  if(hwnd) DestroyWindow(hwnd);
+  hwnd = CreateWindow(L"phoenix_label", L"", WS_CHILD, 0, 0, 0, 0, parent.p.hwnd, (HMENU)id, GetModuleHandle(0), 0);
+  SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&widget);
 }

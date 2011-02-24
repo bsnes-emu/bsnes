@@ -1,3 +1,14 @@
+struct Settings : public configuration {
+  unsigned frameGeometryX;
+  unsigned frameGeometryY;
+  unsigned frameGeometryWidth;
+  unsigned frameGeometryHeight;
+
+  void load();
+  void save();
+  Settings();
+};
+
 struct pFont;
 struct pWindow;
 struct pMenu;
@@ -5,21 +16,14 @@ struct pLayout;
 struct pWidget;
 
 struct pObject {
-  unsigned id;
   bool locked;
-  static array<pObject*> objects;
 
-  pObject();
-  static pObject* find(unsigned id);
-  virtual void unused() {}
+  pObject() {
+    locked = false;
+  }
 };
 
 struct pOS : public pObject {
-  struct State {
-    Font defaultFont;
-  };
-  static State *state;
-
   static unsigned desktopWidth();
   static unsigned desktopHeight();
   static string fileLoad(Window &parent, const string &path, const lstring &filter);
@@ -35,7 +39,7 @@ struct pOS : public pObject {
 
 struct pFont : public pObject {
   Font &font;
-  HFONT hfont;
+  PangoFontDescription *gtkFont;
 
   void setBold(bool bold);
   void setFamily(const string &family);
@@ -56,11 +60,12 @@ struct pMessageWindow : public pObject {
 
 struct pWindow : public pObject {
   Window &window;
-  HWND hwnd;
-  HMENU hmenu;
-  HWND hstatus;
-  HBRUSH brush;
-  COLORREF brushColor;
+  GtkWidget *widget;
+  GtkWidget *menuContainer;
+  GtkWidget *formContainer;
+  GtkWidget *statusContainer;
+  GtkWidget *menu;
+  GtkWidget *status;
 
   void append(Layout &layout);
   void append(Menu &menu);
@@ -85,32 +90,31 @@ struct pWindow : public pObject {
 
   pWindow(Window &window) : window(window) {}
   void constructor();
-  Geometry frameMargin();
-  void updateMenu();
+  void updateFrameGeometry();
 };
 
 struct pAction : public pObject {
   Action &action;
-  HMENU parentMenu;
-  Window *parentWindow;
+  GtkWidget *widget;
 
   void setEnabled(bool enabled);
   void setVisible(bool visible);
 
   pAction(Action &action) : action(action) {}
   void constructor();
+  virtual void setFont(Font &font);
 };
 
 struct pMenu : public pAction {
   Menu &menu;
-  HMENU hmenu;
+  GtkWidget *submenu;
 
   void append(Action &action);
   void setText(const string &text);
 
   pMenu(Menu &menu) : pAction(menu), menu(menu) {}
   void constructor();
-  void update(Window &parentWindow, HMENU parentMenu);
+  void setFont(Font &font);
 };
 
 struct pMenuSeparator : public pAction {
@@ -154,19 +158,18 @@ struct pMenuRadioItem : public pAction {
 
 struct pWidget : public pObject {
   Widget &widget;
-  HWND hwnd;
+  GtkWidget *gtkWidget;
+  pWindow *parentWindow;
 
   bool enabled();
   void setEnabled(bool enabled);
-  void setFocused();
-  void setFont(Font &font);
-  virtual void setGeometry(const Geometry &geometry);
+  virtual void setFocused();
+  virtual void setFont(Font &font);
+  void setGeometry(const Geometry &geometry);
   void setVisible(bool visible);
 
   pWidget(Widget &widget) : widget(widget) {}
   void constructor();
-  void setDefaultFont();
-  virtual void setParent(Window &parent);
 };
 
 struct pButton : public pWidget {
@@ -176,7 +179,6 @@ struct pButton : public pWidget {
 
   pButton(Button &button) : pWidget(button), button(button) {}
   void constructor();
-  void setParent(Window &parent);
 };
 
 struct pCheckBox : public pWidget {
@@ -188,11 +190,11 @@ struct pCheckBox : public pWidget {
 
   pCheckBox(CheckBox &checkBox) : pWidget(checkBox), checkBox(checkBox) {}
   void constructor();
-  void setParent(Window &parent);
 };
 
 struct pComboBox : public pWidget {
   ComboBox &comboBox;
+  unsigned itemCounter;
 
   void append(const string &text);
   void reset();
@@ -201,13 +203,15 @@ struct pComboBox : public pWidget {
 
   pComboBox(ComboBox &comboBox) : pWidget(comboBox), comboBox(comboBox) {}
   void constructor();
-  void setGeometry(const Geometry &geometry);
-  void setParent(Window &parent);
 };
 
 struct pHexEdit : public pWidget {
   HexEdit &hexEdit;
-  LRESULT CALLBACK (*windowProc)(HWND, UINT, LPARAM, WPARAM);
+  GtkWidget *container;
+  GtkWidget *subWidget;
+  GtkWidget *scrollBar;
+  GtkTextBuffer *textBuffer;
+  GtkTextMark *textCursor;
 
   void setColumns(unsigned columns);
   void setLength(unsigned length);
@@ -217,8 +221,12 @@ struct pHexEdit : public pWidget {
 
   pHexEdit(HexEdit &hexEdit) : pWidget(hexEdit), hexEdit(hexEdit) {}
   void constructor();
-  bool keyPress(unsigned key);
-  void setParent(Window &parent);
+  unsigned cursorPosition();
+  bool keyPress(unsigned scancode);
+  void scroll(unsigned position);
+  void setCursorPosition(unsigned position);
+  void setScroll();
+  void updateScroll();
 };
 
 struct pHorizontalSlider : public pWidget {
@@ -230,7 +238,6 @@ struct pHorizontalSlider : public pWidget {
 
   pHorizontalSlider(HorizontalSlider &horizontalSlider) : pWidget(horizontalSlider), horizontalSlider(horizontalSlider) {}
   void constructor();
-  void setParent(Window &parent);
 };
 
 struct pLabel : public pWidget {
@@ -240,7 +247,6 @@ struct pLabel : public pWidget {
 
   pLabel(Label &label) : pWidget(label), label(label) {}
   void constructor();
-  void setParent(Window &parent);
 };
 
 struct pLineEdit : public pWidget {
@@ -252,12 +258,18 @@ struct pLineEdit : public pWidget {
 
   pLineEdit(LineEdit &lineEdit) : pWidget(lineEdit), lineEdit(lineEdit) {}
   void constructor();
-  void setParent(Window &parent);
 };
 
 struct pListView : public pWidget {
   ListView &listView;
-  bool lostFocus;
+  GtkWidget *subWidget;
+  GtkListStore *store;
+  struct GtkColumn {
+    GtkCellRenderer *renderer;
+    GtkTreeViewColumn *column;
+    GtkWidget *label;
+  };
+  linear_vector<GtkColumn> column;
 
   void append(const lstring &text);
   void autosizeColumns();
@@ -274,8 +286,9 @@ struct pListView : public pWidget {
 
   pListView(ListView &listView) : pWidget(listView), listView(listView) {}
   void constructor();
-  void setGeometry(const Geometry &geometry);
-  void setParent(Window &parent);
+  void create();
+  void setFocused();
+  void setFont(Font &font);
 };
 
 struct pProgressBar : public pWidget {
@@ -285,7 +298,6 @@ struct pProgressBar : public pWidget {
 
   pProgressBar(ProgressBar &progressBar) : pWidget(progressBar), progressBar(progressBar) {}
   void constructor();
-  void setParent(Window &parent);
 };
 
 struct pRadioBox : public pWidget {
@@ -298,11 +310,12 @@ struct pRadioBox : public pWidget {
 
   pRadioBox(RadioBox &radioBox) : pWidget(radioBox), radioBox(radioBox) {}
   void constructor();
-  void setParent(Window &parent);
 };
 
 struct pTextEdit : public pWidget {
   TextEdit &textEdit;
+  GtkWidget *subWidget;
+  GtkTextBuffer *textBuffer;
 
   void setCursorPosition(unsigned position);
   void setEditable(bool editable);
@@ -312,7 +325,6 @@ struct pTextEdit : public pWidget {
 
   pTextEdit(TextEdit &textEdit) : pWidget(textEdit), textEdit(textEdit) {}
   void constructor();
-  void setParent(Window &parent);
 };
 
 struct pVerticalSlider : public pWidget {
@@ -324,7 +336,6 @@ struct pVerticalSlider : public pWidget {
 
   pVerticalSlider(VerticalSlider &verticalSlider) : pWidget(verticalSlider), verticalSlider(verticalSlider) {}
   void constructor();
-  void setParent(Window &parent);
 };
 
 struct pViewport : public pWidget {
@@ -334,5 +345,4 @@ struct pViewport : public pWidget {
 
   pViewport(Viewport &viewport) : pWidget(viewport), viewport(viewport) {}
   void constructor();
-  void setParent(Window &parent);
 };

@@ -59,6 +59,16 @@ void pWindow::setFocused() {
 }
 
 void pWindow::setFullScreen(bool fullScreen) {
+  locked = true;
+  if(fullScreen == false) {
+    SetWindowLongPtr(hwnd, GWL_STYLE, WS_VISIBLE | (window.state.resizable ? ResizableStyle : FixedStyle));
+    setGeometry(window.state.geometry);
+  } else {
+    SetWindowLongPtr(hwnd, GWL_STYLE, WS_VISIBLE | WS_POPUP);
+    Geometry margin = frameMargin();
+    setGeometry({ margin.x, margin.y, GetSystemMetrics(SM_CXSCREEN) - margin.width, GetSystemMetrics(SM_CYSCREEN) - margin.height });
+  }
+  locked = false;
 }
 
 void pWindow::setGeometry(const Geometry &geometry) {
@@ -95,7 +105,7 @@ void pWindow::setResizable(bool resizable) {
 }
 
 void pWindow::setStatusFont(Font &font) {
-  SendMessage(hwnd, WM_SETFONT, (WPARAM)font.p.hfont, 0);
+  SendMessage(hstatus, WM_SETFONT, (WPARAM)font.p.hfont, 0);
 }
 
 void pWindow::setStatusText(const string &text) {
@@ -138,8 +148,10 @@ void pWindow::constructor() {
 }
 
 Geometry pWindow::frameMargin() {
+  unsigned style = window.state.resizable ? ResizableStyle : FixedStyle;
+  if(window.state.fullScreen) style = 0;
   RECT rc = { 0, 0, 640, 480 };
-  AdjustWindowRect(&rc, window.state.resizable ? ResizableStyle : FixedStyle, window.state.menuVisible);
+  AdjustWindowRect(&rc, style, window.state.menuVisible);
   unsigned statusHeight = 0;
   if(window.state.statusVisible) {
     RECT src;

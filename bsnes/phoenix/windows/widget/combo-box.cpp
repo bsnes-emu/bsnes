@@ -19,6 +19,14 @@ void pComboBox::constructor() {
   setParent(Window::None);
 }
 
+void pComboBox::setGeometry(const Geometry &geometry) {
+  SetWindowPos(hwnd, NULL, geometry.x, geometry.y, geometry.width, 200, SWP_NOZORDER);
+  RECT rc;
+  GetWindowRect(hwnd, &rc);
+  unsigned adjustedHeight = geometry.height - ((rc.bottom - rc.top) - SendMessage(hwnd, CB_GETITEMHEIGHT, (WPARAM)-1, 0));
+  SendMessage(hwnd, CB_SETITEMHEIGHT, (WPARAM)-1, adjustedHeight);
+}
+
 void pComboBox::setParent(Window &parent) {
   if(hwnd) DestroyWindow(hwnd);
   hwnd = CreateWindow(
