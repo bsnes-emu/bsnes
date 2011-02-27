@@ -6,10 +6,10 @@
 
 #include "action/action.cpp"
 #include "action/menu.cpp"
-#include "action/menu-separator.cpp"
-#include "action/menu-item.cpp"
-#include "action/menu-check-item.cpp"
-#include "action/menu-radio-item.cpp"
+#include "action/separator.cpp"
+#include "action/item.cpp"
+#include "action/check-item.cpp"
+#include "action/radio-item.cpp"
 
 #include "widget/widget.cpp"
 #include "widget/button.cpp"
@@ -26,12 +26,12 @@
 #include "widget/vertical-slider.cpp"
 #include "widget/viewport.cpp"
 
-unsigned pOS::desktopWidth() {
-  return 0;
+Geometry pOS::availableGeometry() {
+  return { 0, 0, 0, 0 };
 }
 
-unsigned pOS::desktopHeight() {
-  return 0;
+Geometry pOS::desktopGeometry() {
+  return { 0, 0, 0, 0 };
 }
 
 string pOS::fileLoad(Window &parent, const string &path, const lstring &filter) {
@@ -49,11 +49,11 @@ string pOS::folderSelect(Window &parent, const string &path) {
 void pOS::main() {
 }
 
-bool pOS::pending() {
+bool pOS::pendingEvents() {
   return false;
 }
 
-void pOS::process() {
+void pOS::processEvents() {
 }
 
 void pOS::quit() {

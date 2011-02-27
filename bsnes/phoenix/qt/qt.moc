@@ -1,7 +1,7 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'qt.moc.hpp'
 **
-** Created: Tue Feb 22 04:37:04 2011
+** Created: Thu Feb 24 07:36:07 2011
 **      by: The Qt Meta Object Compiler version 62 (Qt 4.6.2)
 **
 ** WARNING! All changes made in this file will be lost!
@@ -67,7 +67,7 @@ int pWindow::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
         return _id;
     return _id;
 }
-static const uint qt_meta_data_pMenuItem[] = {
+static const uint qt_meta_data_pItem[] = {
 
  // content:
        4,       // revision
@@ -81,40 +81,40 @@ static const uint qt_meta_data_pMenuItem[] = {
        0,       // signalCount
 
  // slots: signature, parameters, type, tag, flags
-      11,   10,   10,   10, 0x0a,
+       7,    6,    6,    6, 0x0a,
 
        0        // eod
 };
 
-static const char qt_meta_stringdata_pMenuItem[] = {
-    "pMenuItem\0\0onTick()\0"
+static const char qt_meta_stringdata_pItem[] = {
+    "pItem\0\0onTick()\0"
 };
 
-const QMetaObject pMenuItem::staticMetaObject = {
-    { &QObject::staticMetaObject, qt_meta_stringdata_pMenuItem,
-      qt_meta_data_pMenuItem, 0 }
+const QMetaObject pItem::staticMetaObject = {
+    { &QObject::staticMetaObject, qt_meta_stringdata_pItem,
+      qt_meta_data_pItem, 0 }
 };
 
 #ifdef Q_NO_DATA_RELOCATION
-const QMetaObject &pMenuItem::getStaticMetaObject() { return staticMetaObject; }
+const QMetaObject &pItem::getStaticMetaObject() { return staticMetaObject; }
 #endif //Q_NO_DATA_RELOCATION
 
-const QMetaObject *pMenuItem::metaObject() const
+const QMetaObject *pItem::metaObject() const
 {
     return QObject::d_ptr->metaObject ? QObject::d_ptr->metaObject : &staticMetaObject;
 }
 
-void *pMenuItem::qt_metacast(const char *_clname)
+void *pItem::qt_metacast(const char *_clname)
 {
     if (!_clname) return 0;
-    if (!strcmp(_clname, qt_meta_stringdata_pMenuItem))
-        return static_cast<void*>(const_cast< pMenuItem*>(this));
+    if (!strcmp(_clname, qt_meta_stringdata_pItem))
+        return static_cast<void*>(const_cast< pItem*>(this));
     if (!strcmp(_clname, "pAction"))
-        return static_cast< pAction*>(const_cast< pMenuItem*>(this));
+        return static_cast< pAction*>(const_cast< pItem*>(this));
     return QObject::qt_metacast(_clname);
 }
 
-int pMenuItem::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
+int pItem::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
 {
     _id = QObject::qt_metacall(_c, _id, _a);
     if (_id < 0)
@@ -128,7 +128,7 @@ int pMenuItem::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     }
     return _id;
 }
-static const uint qt_meta_data_pMenuCheckItem[] = {
+static const uint qt_meta_data_pCheckItem[] = {
 
  // content:
        4,       // revision
@@ -142,40 +142,40 @@ static const uint qt_meta_data_pMenuCheckItem[] = {
        0,       // signalCount
 
  // slots: signature, parameters, type, tag, flags
-      16,   15,   15,   15, 0x0a,
+      12,   11,   11,   11, 0x0a,
 
        0        // eod
 };
 
-static const char qt_meta_stringdata_pMenuCheckItem[] = {
-    "pMenuCheckItem\0\0onTick()\0"
+static const char qt_meta_stringdata_pCheckItem[] = {
+    "pCheckItem\0\0onTick()\0"
 };
 
-const QMetaObject pMenuCheckItem::staticMetaObject = {
-    { &QObject::staticMetaObject, qt_meta_stringdata_pMenuCheckItem,
-      qt_meta_data_pMenuCheckItem, 0 }
+const QMetaObject pCheckItem::staticMetaObject = {
+    { &QObject::staticMetaObject, qt_meta_stringdata_pCheckItem,
+      qt_meta_data_pCheckItem, 0 }
 };
 
 #ifdef Q_NO_DATA_RELOCATION
-const QMetaObject &pMenuCheckItem::getStaticMetaObject() { return staticMetaObject; }
+const QMetaObject &pCheckItem::getStaticMetaObject() { return staticMetaObject; }
 #endif //Q_NO_DATA_RELOCATION
 
-const QMetaObject *pMenuCheckItem::metaObject() const
+const QMetaObject *pCheckItem::metaObject() const
 {
     return QObject::d_ptr->metaObject ? QObject::d_ptr->metaObject : &staticMetaObject;
 }
 
-void *pMenuCheckItem::qt_metacast(const char *_clname)
+void *pCheckItem::qt_metacast(const char *_clname)
 {
     if (!_clname) return 0;
-    if (!strcmp(_clname, qt_meta_stringdata_pMenuCheckItem))
-        return static_cast<void*>(const_cast< pMenuCheckItem*>(this));
+    if (!strcmp(_clname, qt_meta_stringdata_pCheckItem))
+        return static_cast<void*>(const_cast< pCheckItem*>(this));
     if (!strcmp(_clname, "pAction"))
-        return static_cast< pAction*>(const_cast< pMenuCheckItem*>(this));
+        return static_cast< pAction*>(const_cast< pCheckItem*>(this));
     return QObject::qt_metacast(_clname);
 }
 
-int pMenuCheckItem::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
+int pCheckItem::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
 {
     _id = QObject::qt_metacall(_c, _id, _a);
     if (_id < 0)
@@ -189,7 +189,7 @@ int pMenuCheckItem::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     }
     return _id;
 }
-static const uint qt_meta_data_pMenuRadioItem[] = {
+static const uint qt_meta_data_pRadioItem[] = {
 
  // content:
        4,       // revision
@@ -203,40 +203,40 @@ static const uint qt_meta_data_pMenuRadioItem[] = {
        0,       // signalCount
 
  // slots: signature, parameters, type, tag, flags
-      16,   15,   15,   15, 0x0a,
+      12,   11,   11,   11, 0x0a,
 
        0        // eod
 };
 
-static const char qt_meta_stringdata_pMenuRadioItem[] = {
-    "pMenuRadioItem\0\0onTick()\0"
+static const char qt_meta_stringdata_pRadioItem[] = {
+    "pRadioItem\0\0onTick()\0"
 };
 
-const QMetaObject pMenuRadioItem::staticMetaObject = {
-    { &QObject::staticMetaObject, qt_meta_stringdata_pMenuRadioItem,
-      qt_meta_data_pMenuRadioItem, 0 }
+const QMetaObject pRadioItem::staticMetaObject = {
+    { &QObject::staticMetaObject, qt_meta_stringdata_pRadioItem,
+      qt_meta_data_pRadioItem, 0 }
 };
 
 #ifdef Q_NO_DATA_RELOCATION
-const QMetaObject &pMenuRadioItem::getStaticMetaObject() { return staticMetaObject; }
+const QMetaObject &pRadioItem::getStaticMetaObject() { return staticMetaObject; }
 #endif //Q_NO_DATA_RELOCATION
 
-const QMetaObject *pMenuRadioItem::metaObject() const
+const QMetaObject *pRadioItem::metaObject() const
 {
     return QObject::d_ptr->metaObject ? QObject::d_ptr->metaObject : &staticMetaObject;
 }
 
-void *pMenuRadioItem::qt_metacast(const char *_clname)
+void *pRadioItem::qt_metacast(const char *_clname)
 {
     if (!_clname) return 0;
-    if (!strcmp(_clname, qt_meta_stringdata_pMenuRadioItem))
-        return static_cast<void*>(const_cast< pMenuRadioItem*>(this));
+    if (!strcmp(_clname, qt_meta_stringdata_pRadioItem))
+        return static_cast<void*>(const_cast< pRadioItem*>(this));
     if (!strcmp(_clname, "pAction"))
-        return static_cast< pAction*>(const_cast< pMenuRadioItem*>(this));
+        return static_cast< pAction*>(const_cast< pRadioItem*>(this));
     return QObject::qt_metacast(_clname);
 }
 
-int pMenuRadioItem::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
+int pRadioItem::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
 {
     _id = QObject::qt_metacall(_c, _id, _a);
     if (_id < 0)

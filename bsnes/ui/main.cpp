@@ -67,7 +67,7 @@ void Application::main(int argc, char **argv) {
 
   utility.setScale(config.video.scale);
   mainWindow.setVisible();
-  OS::process();
+  OS::processEvents();
 
   video.driver(config.video.driver);
   video.set(Video::Handle, mainWindow.viewport.handle());
@@ -108,7 +108,7 @@ void Application::main(int argc, char **argv) {
   if(argc == 2) cartridge.loadNormal(argv[1]);
 
   while(quit == false) {
-    OS::process();
+    OS::processEvents();
     inputMapper.poll();
     utility.updateStatus();
 
@@ -130,7 +130,7 @@ void Application::main(int argc, char **argv) {
   cartridge.unload();
   saveGeometry();
   foreach(window, windows) window->setVisible(false);
-  OS::process();
+  OS::processEvents();
   SNES::system.term();
   config.save();
 

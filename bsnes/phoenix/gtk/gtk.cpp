@@ -7,10 +7,10 @@
 
 #include "action/action.cpp"
 #include "action/menu.cpp"
-#include "action/menu-separator.cpp"
-#include "action/menu-item.cpp"
-#include "action/menu-check-item.cpp"
-#include "action/menu-radio-item.cpp"
+#include "action/separator.cpp"
+#include "action/item.cpp"
+#include "action/check-item.cpp"
+#include "action/radio-item.cpp"
 
 #include "widget/widget.cpp"
 #include "widget/button.cpp"
@@ -27,12 +27,18 @@
 #include "widget/vertical-slider.cpp"
 #include "widget/viewport.cpp"
 
-unsigned pOS::desktopWidth() {
-  return gdk_screen_get_width(gdk_screen_get_default());
+Geometry pOS::availableGeometry() {
+  //TODO: is there a GTK+ function for this?
+  //should return desktopGeometry() sans panels, toolbars, docks, etc.
+  return desktopGeometry();
 }
 
-unsigned pOS::desktopHeight() {
-  return gdk_screen_get_height(gdk_screen_get_default());
+Geometry pOS::desktopGeometry() {
+  return {
+    0, 0,
+    gdk_screen_get_width(gdk_screen_get_default()),
+    gdk_screen_get_height(gdk_screen_get_default())
+  };
 }
 
 static string pOS_fileDialog(bool save, Window &parent, const string &path, const lstring &filter) {
@@ -109,12 +115,12 @@ void pOS::main() {
   gtk_main();
 }
 
-bool pOS::pending() {
+bool pOS::pendingEvents() {
   return gtk_events_pending();
 }
 
-void pOS::process() {
-  while(pending()) gtk_main_iteration_do(false);
+void pOS::processEvents() {
+  while(pendingEvents()) gtk_main_iteration_do(false);
 }
 
 void pOS::quit() {

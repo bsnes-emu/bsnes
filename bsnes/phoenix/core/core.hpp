@@ -9,10 +9,10 @@ struct pFont;
 struct pWindow;
 struct pAction;
 struct pMenu;
-struct pMenuSeparator;
-struct pMenuItem;
-struct pMenuCheckItem;
-struct pMenuRadioItem;
+struct pSeparator;
+struct pItem;
+struct pCheckItem;
+struct pRadioItem;
 struct pLayout;
 struct pWidget;
 struct pButton;
@@ -44,14 +44,14 @@ struct Object {
 };
 
 struct OS : Object {
-  static unsigned desktopWidth();
-  static unsigned desktopHeight();
+  static Geometry availableGeometry();
+  static Geometry desktopGeometry();
   template<typename... Args> static nall::string fileLoad(Window &parent, const nall::string &path, const Args&... args) { return fileLoad_(parent, path, { args... }); }
   template<typename... Args> static nall::string fileSave(Window &parent, const nall::string &path, const Args&... args) { return fileSave_(parent, path, { args... }); }
   static nall::string folderSelect(Window &parent, const nall::string &path);
   static void main();
-  static bool pending();
-  static void process();
+  static bool pendingEvents();
+  static void processEvents();
   static void quit();
 
   OS();
@@ -105,6 +105,7 @@ struct Window : Object {
   void append(Menu &menu);
   void append(Widget &widget);
   Geometry frameGeometry();
+  Geometry frameMargin();
   bool focused();
   Geometry geometry();
   void setBackgroundColor(uint8_t red, uint8_t green, uint8_t blue);
@@ -148,36 +149,36 @@ struct Menu : private nall::base_from_member<pMenu&>, Action {
   pMenu &p;
 };
 
-struct MenuSeparator : private nall::base_from_member<pMenuSeparator&>, Action {
-  MenuSeparator();
-  pMenuSeparator &p;
+struct Separator : private nall::base_from_member<pSeparator&>, Action {
+  Separator();
+  pSeparator &p;
 };
 
-struct MenuItem : private nall::base_from_member<pMenuItem&>, Action {
+struct Item : private nall::base_from_member<pItem&>, Action {
   nall::function<void ()> onTick;
 
   void setText(const nall::string &text);
 
-  MenuItem();
+  Item();
   struct State;
   State &state;
-  pMenuItem &p;
+  pItem &p;
 };
 
-struct MenuCheckItem : private nall::base_from_member<pMenuCheckItem&>, Action {
+struct CheckItem : private nall::base_from_member<pCheckItem&>, Action {
   nall::function<void ()> onTick;
 
   bool checked();
   void setChecked(bool checked = true);
   void setText(const nall::string &text);
 
-  MenuCheckItem();
+  CheckItem();
   struct State;
   State &state;
-  pMenuCheckItem &p;
+  pCheckItem &p;
 };
 
-struct MenuRadioItem : private nall::base_from_member<pMenuRadioItem&>, Action {
+struct RadioItem : private nall::base_from_member<pRadioItem&>, Action {
   template<typename... Args> static void group(Args&... args) { group_({ args... }); }
 
   nall::function<void ()> onTick;
@@ -186,13 +187,13 @@ struct MenuRadioItem : private nall::base_from_member<pMenuRadioItem&>, Action {
   void setChecked();
   void setText(const nall::string &text);
 
-  MenuRadioItem();
+  RadioItem();
   struct State;
   State &state;
-  pMenuRadioItem &p;
+  pRadioItem &p;
 
 private:
-  static void group_(const nall::reference_array<MenuRadioItem&> &list);
+  static void group_(const nall::reference_array<RadioItem&> &list);
 };
 
 struct Layout : Object {
@@ -208,6 +209,7 @@ struct Widget : Object {
   void setFont(Font &font);
   void setGeometry(const Geometry &geometry);
   void setVisible(bool visible = true);
+  bool visible();
 
   Widget();
   Widget(pWidget &p);
@@ -312,16 +314,17 @@ struct ListView : private nall::base_from_member<pListView&>, Widget {
   nall::function<void (unsigned)> onTick;
 
   template<typename... Args> void append(const Args&... args) { append_({ args... }); }
-  void autosizeColumns();
+  void autoSizeColumns();
   bool checked(unsigned row);
   template<typename... Args> void modify(unsigned row, const Args&... args) { modify_(row, { args... }); }
-  void modify(unsigned row, unsigned column, const nall::string &text);
   void reset();
-  nall::optional<unsigned> selection();
+  bool selected();
+  unsigned selection();
   void setCheckable(bool checkable = true);
   void setChecked(unsigned row, bool checked = true);
   template<typename... Args> void setHeaderText(const Args&... args) { setHeaderText_({ args... }); }
   void setHeaderVisible(bool visible = true);
+  void setSelected(bool selected = true);
   void setSelection(unsigned row);
 
   ListView();

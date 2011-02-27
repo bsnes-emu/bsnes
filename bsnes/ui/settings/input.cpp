@@ -16,12 +16,12 @@ void InputSettings::create() {
   deviceLabel.setText("Device:");
   mappingList.setHeaderText("Name", "Mapping");
   mappingList.setHeaderVisible(true);
+  clearButton.setText("Clear");
   mouseXaxis.setText("Mouse X-axis");
   mouseYaxis.setText("Mouse Y-axis");
   mouseLeft.setText("Mouse Left");
   mouseMiddle.setText("Mouse Middle");
   mouseRight.setText("Mouse Right");
-  clearButton.setText("Clear");
 
   layout.setMargin(5);
   selectionLayout.append(portLabel,   50, 0, 5);
@@ -30,23 +30,30 @@ void InputSettings::create() {
   selectionLayout.append(deviceBox,    0, 0);
   layout.append(selectionLayout, 0, Style::ComboBoxHeight, 5);
   layout.append(mappingList, 0, 0, 5);
-  mapLayout.append(mouseXaxis,  100, 0, 5);
-  mapLayout.append(mouseYaxis,  100, 0, 5);
-  mapLayout.append(mouseLeft,   100, 0, 5);
-  mapLayout.append(mouseMiddle, 100, 0, 5);
-  mapLayout.append(mouseRight,  100, 0, 5);
-  mapLayout.append(spacer,        0, 0);
-  mapLayout.append(clearButton,  80, 0);
+  mapLayout.append(spacer,       0, 0);
+  mapLayout.append(clearButton, 80, 0);
   layout.append(mapLayout, 0, Style::ButtonHeight);
 
-  setGeometry({ 0, 0, 640, layout.minimumHeight() + 250 });
-  append(layout);
+  axisLayout.setMargin(5);
+  axisLayout.append(axisSpacer, 0, 0);
+  axisControlLayout.append(mouseXaxis, 100, 0, 5);
+  axisControlLayout.append(mouseYaxis, 100, 0, 5);
+  axisLayout.append(axisControlLayout, 0, Style::ButtonHeight);
 
-  mouseXaxis.setVisible(false);
-  mouseYaxis.setVisible(false);
-  mouseLeft.setVisible(false);
-  mouseMiddle.setVisible(false);
-  mouseRight.setVisible(false);
+  buttonLayout.setMargin(5);
+  buttonLayout.append(buttonSpacer, 0, 0);
+  buttonControlLayout.append(mouseLeft,   100, 0, 5);
+  buttonControlLayout.append(mouseMiddle, 100, 0, 5);
+  buttonControlLayout.append(mouseRight,  100, 0, 5);
+  buttonLayout.append(buttonControlLayout, 0, Style::ButtonHeight);
+
+  setGeometry({ 0, 0, 480, layout.minimumHeight() + 250 });
+  append(layout);
+  append(axisLayout);
+  append(buttonLayout);
+
+  axisLayout.setVisible(false);
+  buttonLayout.setVisible(false);
 
   portChanged();
   portBox.onChange = { &InputSettings::portChanged, this };
@@ -90,7 +97,7 @@ void InputSettings::deviceChanged() {
     if(mapping == "") mapping = "None";
     mappingList.append(controller[i]->name, mapping);
   }
-  mappingList.autosizeColumns();
+  mappingList.autoSizeColumns();
 }
 
 void InputSettings::mappingChanged() {
@@ -106,53 +113,45 @@ void InputSettings::mappingChanged() {
     if(mapping == "") mapping = "None";
     mappingList.modify(i, controller[i]->name, mapping);
   }
-  mappingList.autosizeColumns();
+  mappingList.autoSizeColumns();
 }
 
 void InputSettings::assignInput() {
-  if(auto position = mappingList.selection()) {
-    InputMapper::ControllerPort &port = (
-      portBox.selection() == 0
-      ? (InputMapper::ControllerPort&)inputMapper.port1
-      : (InputMapper::ControllerPort&)inputMapper.port2
-    );
-    InputMapper::Controller &controller = (InputMapper::Controller&)*port[deviceBox.selection()];
+  if(mappingList.selected() == false) return;
+  InputMapper::ControllerPort &port = (
+    portBox.selection() == 0
+    ? (InputMapper::ControllerPort&)inputMapper.port1
+    : (InputMapper::ControllerPort&)inputMapper.port2
+  );
+  InputMapper::Controller &controller = (InputMapper::Controller&)*port[deviceBox.selection()];
 
-    portBox.setEnabled(false);
-    deviceBox.setEnabled(false);
-    mappingList.setEnabled(false);
-    inputMapper.poll();  //flush any pending keypresses
-    activeInput = controller[position()];
-    setStatusText({ "Set assignment for [", activeInput->name, "] ..." });
-    if(dynamic_cast<InputMapper::AnalogInput*>(activeInput)) {
-      mouseLeft.setVisible(false);
-      mouseMiddle.setVisible(false);
-      mouseRight.setVisible(false);
-      mouseXaxis.setVisible(true);
-      mouseYaxis.setVisible(true);
-    } else {
-      mouseXaxis.setVisible(false);
-      mouseYaxis.setVisible(false);
-      mouseLeft.setVisible(true);
-      mouseMiddle.setVisible(true);
-      mouseRight.setVisible(true);
-    }
+  portBox.setEnabled(false);
+  deviceBox.setEnabled(false);
+  mappingList.setEnabled(false);
+  inputMapper.poll();  //flush any pending keypresses
+  activeInput = controller[mappingList.selection()];
+  setStatusText({ "Set assignment for [", activeInput->name, "] ..." });
+  if(dynamic_cast<InputMapper::AnalogInput*>(activeInput)) {
+    axisLayout.setVisible(true);
+    buttonLayout.setVisible(false);
+  } else {
+    axisLayout.setVisible(false);
+    buttonLayout.setVisible(true);
   }
 }
 
 void InputSettings::clearInput() {
-  if(auto position = mappingList.selection()) {
-    InputMapper::ControllerPort &port = (
-      portBox.selection() == 0
-      ? (InputMapper::ControllerPort&)inputMapper.port1
-      : (InputMapper::ControllerPort&)inputMapper.port2
-    );
-    InputMapper::Controller &controller = (InputMapper::Controller&)*port[deviceBox.selection()];
+  if(mappingList.selected() == false) return;
+  InputMapper::ControllerPort &port = (
+    portBox.selection() == 0
+    ? (InputMapper::ControllerPort&)inputMapper.port1
+    : (InputMapper::ControllerPort&)inputMapper.port2
+  );
+  InputMapper::Controller &controller = (InputMapper::Controller&)*port[deviceBox.selection()];
 
-    controller[position()]->mapping = "";
-    inputMapper.bind();
-    endAssignment();
-  }
+  controller[mappingList.selection()]->mapping = "";
+  inputMapper.bind();
+  endAssignment();
 }
 
 void InputSettings::setMapping(const string &mapping) {
@@ -167,11 +166,8 @@ void InputSettings::endAssignment() {
   deviceBox.setEnabled(true);
   mappingList.setEnabled(true);
   setStatusText("");
-  mouseXaxis.setVisible(false);
-  mouseYaxis.setVisible(false);
-  mouseLeft.setVisible(false);
-  mouseMiddle.setVisible(false);
-  mouseRight.setVisible(false);
+  axisLayout.setVisible(false);
+  buttonLayout.setVisible(false);
   mappingChanged();
   mappingList.setFocused();
 }

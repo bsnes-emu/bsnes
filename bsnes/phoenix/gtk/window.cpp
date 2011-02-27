@@ -65,13 +65,15 @@ void pWindow::append(Widget &widget) {
   widget.setVisible();
 }
 
-Geometry pWindow::frameGeometry() {
-  if(window.state.fullScreen == true) return { 0, 0, OS::desktopWidth(), OS::desktopHeight() };
+Geometry pWindow::frameMargin() {
+  unsigned menuHeight = window.state.menuVisible ? menu->allocation.height : 0;
+  unsigned statusHeight = window.state.statusVisible ? status->allocation.height : 0;
+  if(window.state.fullScreen) return { 0, menuHeight, 0, menuHeight + statusHeight };
   return {
-    window.state.geometry.x - settings.frameGeometryX,
-    window.state.geometry.y - settings.frameGeometryY,
-    window.state.geometry.width + settings.frameGeometryWidth,
-    window.state.geometry.height + settings.frameGeometryHeight
+    settings.frameGeometryX,
+    settings.frameGeometryY + menuHeight,
+    settings.frameGeometryWidth,
+    settings.frameGeometryHeight + menuHeight + statusHeight
   };
 }
 
@@ -81,11 +83,10 @@ bool pWindow::focused() {
 
 Geometry pWindow::geometry() {
   if(window.state.fullScreen == true) {
-    unsigned menuHeight = 0, statusHeight = 0;
-    if(window.state.menuVisible) menuHeight = menu->allocation.height;
-    if(window.state.statusVisible) statusHeight = menu->allocation.height;
-    return { 0, menuHeight, OS::desktopWidth(), OS::desktopHeight() - menuHeight - statusHeight };
-  }
+    unsigned menuHeight = window.state.menuVisible ? menu->allocation.height : 0;
+    unsigned statusHeight = window.state.statusVisible ? status->allocation.height : 0;
+    return { 0, menuHeight, OS::desktopGeometry().width, OS::desktopGeometry().height - menuHeight - statusHeight };
+  };
   return window.state.geometry;
 }
 
@@ -96,13 +97,6 @@ void pWindow::setBackgroundColor(uint8_t red, uint8_t green, uint8_t blue) {
   color.green = (green << 8) | (green << 0);
   color.blue = (blue << 8) | (blue << 0);
   gtk_widget_modify_bg(widget, GTK_STATE_NORMAL, &color);
-}
-
-void pWindow::setFrameGeometry(const Geometry &geometry) {
-  window.setGeometry({
-    geometry.x + settings.frameGeometryX, geometry.y + settings.frameGeometryY,
-    geometry.width - settings.frameGeometryWidth, geometry.height - settings.frameGeometryHeight
-  });
 }
 
 void pWindow::setFocused() {
@@ -118,20 +112,21 @@ void pWindow::setFullScreen(bool fullScreen) {
     for(unsigned n = 0; n < 4; n++) {
       setGeometry(window.state.geometry);
       gtk_widget_set_size_request(widget, -1, -1);
-      OS::process();
+      OS::processEvents();
       usleep(2000);
     }
     locked = false;
   } else {
     gtk_window_fullscreen(GTK_WINDOW(widget));
     gtk_window_set_decorated(GTK_WINDOW(widget), false);
-    gtk_widget_set_size_request(widget, OS::desktopWidth(), OS::desktopHeight());
+    gtk_widget_set_size_request(widget, OS::desktopGeometry().width, OS::desktopGeometry().height);
     gtk_window_set_resizable(GTK_WINDOW(widget), false);
   }
 }
 
 void pWindow::setGeometry(const Geometry &geometry) {
-  gtk_window_move(GTK_WINDOW(widget), geometry.x - settings.frameGeometryX, geometry.y - settings.frameGeometryY);
+  Geometry margin = frameMargin();
+  gtk_window_move(GTK_WINDOW(widget), geometry.x - margin.x, geometry.y - margin.y);
   gtk_window_resize(GTK_WINDOW(widget), 1, 1);
   gtk_widget_set_size_request(formContainer, geometry.width, geometry.height);
   foreach(layout, window.state.layout) {

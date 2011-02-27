@@ -1,14 +1,14 @@
 void pMenu::append(Action &action) {
   if(dynamic_cast<Menu*>(&action)) {
     qtMenu->addMenu(((Menu&)action).p.qtMenu);
-  } else if(dynamic_cast<MenuSeparator*>(&action)) {
-    qtMenu->addAction(((MenuSeparator&)action).p.qtAction);
-  } else if(dynamic_cast<MenuItem*>(&action)) {
-    qtMenu->addAction(((MenuItem&)action).p.qtAction);
-  } else if(dynamic_cast<MenuCheckItem*>(&action)) {
-    qtMenu->addAction(((MenuCheckItem&)action).p.qtAction);
-  } else if(dynamic_cast<MenuRadioItem*>(&action)) {
-    qtMenu->addAction(((MenuRadioItem&)action).p.qtAction);
+  } else if(dynamic_cast<Separator*>(&action)) {
+    qtMenu->addAction(((Separator&)action).p.qtAction);
+  } else if(dynamic_cast<Item*>(&action)) {
+    qtMenu->addAction(((Item&)action).p.qtAction);
+  } else if(dynamic_cast<CheckItem*>(&action)) {
+    qtMenu->addAction(((CheckItem&)action).p.qtAction);
+  } else if(dynamic_cast<RadioItem*>(&action)) {
+    qtMenu->addAction(((RadioItem&)action).p.qtAction);
   }
 }
 

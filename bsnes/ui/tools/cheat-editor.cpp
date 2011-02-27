@@ -75,7 +75,7 @@ void CheatEditor::save(string filename) {
   }
 
   cheatList.reset();
-  cheatList.autosizeColumns();
+  cheatList.autoSizeColumns();
 }
 
 void CheatEditor::create() {
@@ -158,9 +158,9 @@ void CheatEditor::create() {
 void CheatEditor::synchronize() {
   findButton.setEnabled(SNES::cartridge.loaded());
   clearAllButton.setEnabled(SNES::cartridge.loaded());
-  if(auto position = cheatList.selection()) {
-    codeEdit.setText(cheatText[position()][1]);
-    descEdit.setText(cheatText[position()][2]);
+  if(cheatList.selected()) {
+    codeEdit.setText(cheatText[cheatList.selection()][1]);
+    descEdit.setText(cheatText[cheatList.selection()][2]);
     codeEdit.setEnabled(true);
     descEdit.setEnabled(true);
     clearButton.setEnabled(true);
@@ -184,7 +184,7 @@ void CheatEditor::refresh() {
     cheatList.setChecked(i, SNES::cheat[i].enabled);
     cheatList.modify(i, cheatText[i][CheatSlot], cheatCode, cheatText[i][CheatDesc]);
   }
-  cheatList.autosizeColumns();
+  cheatList.autoSizeColumns();
 }
 
 void CheatEditor::toggle(unsigned row) {
@@ -193,12 +193,12 @@ void CheatEditor::toggle(unsigned row) {
 }
 
 void CheatEditor::bind() {
-  if(auto position = cheatList.selection()) {
-    cheatText[position()][CheatCode] = codeEdit.text();
-    cheatText[position()][CheatDesc] = descEdit.text();
-    SNES::cheat[position()] = cheatText[position()][CheatCode];
-    refresh();
-  }
+  if(cheatList.selected() == false) return;
+  unsigned selection = cheatList.selection();
+  cheatText[selection][CheatCode] = codeEdit.text();
+  cheatText[selection][CheatDesc] = descEdit.text();
+  SNES::cheat[selection] = cheatText[selection][CheatCode];
+  refresh();
 }
 
 void CheatEditor::findCodes() {
@@ -289,15 +289,15 @@ void CheatEditor::clearAll() {
 }
 
 void CheatEditor::clear() {
-  if(auto position = cheatList.selection()) {
-    SNES::cheat[position()].enabled = false;
-    SNES::cheat[position()] = "";
-    cheatList.setChecked(position(), false);
-    cheatText[position()][CheatCode] = "";
-    cheatText[position()][CheatDesc] = "";
-    SNES::cheat.synchronize();
-    refresh();
-    codeEdit.setText("");
-    descEdit.setText("");
-  }
+  if(cheatList.selected() == false) return;
+  unsigned selection = cheatList.selection();
+  SNES::cheat[selection].enabled = false;
+  SNES::cheat[selection] = "";
+  cheatList.setChecked(selection, false);
+  cheatText[selection][CheatCode] = "";
+  cheatText[selection][CheatDesc] = "";
+  SNES::cheat.synchronize();
+  refresh();
+  codeEdit.setText("");
+  descEdit.setText("");
 }

@@ -7,13 +7,21 @@ struct InputSettings : TopLevelWindow {
   ComboBox deviceBox;
   ListView mappingList;
   HorizontalLayout mapLayout;
+  Label spacer;
+  Button clearButton;
+
+  VerticalLayout axisLayout;
+  Widget axisSpacer;
+  HorizontalLayout axisControlLayout;
   Button mouseXaxis;
   Button mouseYaxis;
+
+  VerticalLayout buttonLayout;
+  Widget buttonSpacer;
+  HorizontalLayout buttonControlLayout;
   Button mouseLeft;
   Button mouseMiddle;
   Button mouseRight;
-  Label spacer;
-  Button clearButton;
 
   void inputEvent(uint16_t scancode, int16_t value);
   void calibrateJoypads();

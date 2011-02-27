@@ -18,13 +18,15 @@ void pWindow::append(Widget &widget) {
   widget.setVisible(widget.state.visible);
 }
 
-Geometry pWindow::frameGeometry() {
-  if(window.state.fullScreen) return { 0, 0, OS::desktopWidth(), OS::desktopHeight() };
+Geometry pWindow::frameMargin() {
+  unsigned menuHeight = window.state.menuVisible ? qtMenu->height() : 0;
+  unsigned statusHeight = window.state.statusVisible ? qtStatus->height() : 0;
+  if(window.state.fullScreen) return { 0, menuHeight, 0, menuHeight + statusHeight };
   return {
-    window.state.geometry.x - settings.frameGeometryX,
-    window.state.geometry.y - settings.frameGeometryY,
-    window.state.geometry.width + settings.frameGeometryWidth,
-    window.state.geometry.height + settings.frameGeometryHeight
+    settings.frameGeometryX,
+    settings.frameGeometryY + menuHeight,
+    settings.frameGeometryWidth,
+    settings.frameGeometryHeight + menuHeight + statusHeight
   };
 }
 
@@ -36,8 +38,7 @@ Geometry pWindow::geometry() {
   if(window.state.fullScreen) {
     unsigned menuHeight = window.state.menuVisible ? qtMenu->height() : 0;
     unsigned statusHeight = window.state.statusVisible ? qtStatus->height() : 0;
-    unsigned width = OS::desktopWidth(), height = OS::desktopHeight();
-    return { 0, menuHeight, width, height - menuHeight - statusHeight };
+    return { 0, menuHeight, OS::desktopGeometry().width, OS::desktopGeometry().height - menuHeight - statusHeight };
   }
   return window.state.geometry;
 }
@@ -47,18 +48,6 @@ void pWindow::setBackgroundColor(uint8_t red, uint8_t green, uint8_t blue) {
   palette.setColor(QPalette::Window, QColor(red, green, blue));
   qtContainer->setPalette(palette);
   qtContainer->setAutoFillBackground(true);
-}
-
-void pWindow::setFrameGeometry(const Geometry &geometry) {
-  window.state.geometry = {
-    geometry.x + settings.frameGeometryX,
-    geometry.y + settings.frameGeometryY,
-    geometry.width - settings.frameGeometryWidth,
-    geometry.height - settings.frameGeometryHeight
-  };
-  if(window.state.menuVisible) window.state.geometry.height -= qtMenu->height();
-  if(window.state.statusVisible) window.state.geometry.height -= qtStatus->height();
-  setGeometry(window.state.geometry);
 }
 
 void pWindow::setFocused() {
@@ -72,19 +61,19 @@ void pWindow::setFullScreen(bool fullScreen) {
     qtWindow->showNormal();
     qtWindow->adjustSize();
   } else {
+    Geometry geometry = OS::desktopGeometry(), margin = frameMargin();
     qtLayout->setSizeConstraint(QLayout::SetDefaultConstraint);
-    qtContainer->setFixedSize(OS::desktopWidth(), OS::desktopHeight());
+    qtContainer->setFixedSize(geometry.width - margin.width, geometry.height - margin.height);
     qtWindow->showFullScreen();
-    if(window.state.statusVisible) setStatusVisible(true);  //work around for Qt/Xlib bug
   }
 }
 
 void pWindow::setGeometry(const Geometry &geometry_) {
   locked = true;
-  Geometry geometry = geometry_;
+  Geometry geometry = geometry_, margin = frameMargin();
 
   setResizable(window.state.resizable);
-  qtWindow->move(geometry.x - settings.frameGeometryX, geometry.y - settings.frameGeometryY);
+  qtWindow->move(geometry.x - margin.x, geometry.y - margin.y);
   qtWindow->adjustSize();
 
   foreach(layout, window.state.layout) {

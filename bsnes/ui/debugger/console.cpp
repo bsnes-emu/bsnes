@@ -45,7 +45,7 @@ void Console::write(const string &text, bool echo) {
     buffer.append(text);
     output.setText(buffer);
     output.setCursorPosition(~0);
-    OS::process();
+    OS::processEvents();
   }
   if(traceToFile.checked() && logfile.open()) {
     logfile.print(string(text, "\n"));

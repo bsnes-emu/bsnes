@@ -1,10 +1,10 @@
-bool pMenuRadioItem::checked() {
+bool pRadioItem::checked() {
   return qtAction->isChecked();
 }
 
-void pMenuRadioItem::setChecked() {
+void pRadioItem::setChecked() {
   locked = true;
-  foreach(item, menuRadioItem.state.group) {
+  foreach(item, radioItem.state.group) {
     bool checkState = item.p.qtAction == qtAction;
     item.state.checked = checkState;
     item.p.qtAction->setChecked(checkState);
@@ -12,14 +12,14 @@ void pMenuRadioItem::setChecked() {
   locked = false;
 }
 
-void pMenuRadioItem::setGroup(const reference_array<MenuRadioItem&> &group) {
+void pRadioItem::setGroup(const reference_array<RadioItem&> &group) {
 }
 
-void pMenuRadioItem::setText(const string &text) {
+void pRadioItem::setText(const string &text) {
   qtAction->setText(QString::fromUtf8(text));
 }
 
-void pMenuRadioItem::constructor() {
+void pRadioItem::constructor() {
   qtAction = new QAction(0);
   qtGroup = new QActionGroup(0);
   qtAction->setCheckable(true);
@@ -28,9 +28,9 @@ void pMenuRadioItem::constructor() {
   connect(qtAction, SIGNAL(triggered()), SLOT(onTick()));
 }
 
-void pMenuRadioItem::onTick() {
-  if(menuRadioItem.state.checked == false) {
+void pRadioItem::onTick() {
+  if(radioItem.state.checked == false) {
     setChecked();
-    if(locked == false && menuRadioItem.onTick) menuRadioItem.onTick();
+    if(locked == false && radioItem.onTick) radioItem.onTick();
   }
 }

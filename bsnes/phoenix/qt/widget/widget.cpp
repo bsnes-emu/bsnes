@@ -1,7 +1,3 @@
-bool pWidget::enabled() {
-  return qtWidget->isEnabled();
-}
-
 void pWidget::setEnabled(bool enabled) {
   qtWidget->setEnabled(enabled);
 }

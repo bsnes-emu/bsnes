@@ -54,7 +54,7 @@ void MainWindow::create() {
   systemPort1Mouse.setText("Mouse");
   systemPort1.append(systemPort1Mouse);
 
-  MenuRadioItem::group(
+  RadioItem::group(
     systemPort1None, systemPort1Gamepad, systemPort1Multitap, systemPort1Mouse
   );
 
@@ -82,7 +82,7 @@ void MainWindow::create() {
   systemPort2Justifiers.setText("Justifiers");
   systemPort2.append(systemPort2Justifiers);
 
-  MenuRadioItem::group(
+  RadioItem::group(
     systemPort2None, systemPort2Gamepad, systemPort2Multitap, systemPort2Mouse,
     systemPort2SuperScope, systemPort2Justifier, systemPort2Justifiers
   );
@@ -109,7 +109,7 @@ void MainWindow::create() {
   settingsVideoMode5x.setText("Scale 5x");
   settingsVideoMode.append(settingsVideoMode5x);
 
-  MenuRadioItem::group(
+  RadioItem::group(
     settingsVideoMode1x, settingsVideoMode2x, settingsVideoMode3x, settingsVideoMode4x, settingsVideoMode5x
   );
 
@@ -126,7 +126,7 @@ void MainWindow::create() {
   settingsVideoModePAL.setText("PAL");
   settingsVideoMode.append(settingsVideoModePAL);
 
-  MenuRadioItem::group(
+  RadioItem::group(
     settingsVideoModeNTSC, settingsVideoModePAL
   );
 

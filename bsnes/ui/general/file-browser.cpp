@@ -113,18 +113,17 @@ void FileBrowser::folderUp() {
 }
 
 void FileBrowser::fileActivate() {
-  if(auto position = contentsBox.selection()) {
-    string filename = contents[position()];
-    if(strend(filename, "/")) {
-      string cartridgeName = cartridgeFolder(filename);
-      if(cartridgeName == "") {
-        setFolder({ folder, filename });
-      } else {
-        loadFile({ folder, cartridgeName });
-      }
+  if(contentsBox.selected() == false) return;
+  string filename = contents[contentsBox.selection()];
+  if(strend(filename, "/")) {
+    string cartridgeName = cartridgeFolder(filename);
+    if(cartridgeName == "") {
+      setFolder({ folder, filename });
     } else {
-      loadFile({ folder, filename });
+      loadFile({ folder, cartridgeName });
     }
+  } else {
+    loadFile({ folder, filename });
   }
 }
 

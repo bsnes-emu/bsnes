@@ -1,5 +1,5 @@
-static const unsigned FixedStyle = WS_SYSMENU | WS_CAPTION | WS_MINIMIZEBOX | WS_BORDER;
-static const unsigned ResizableStyle = WS_SYSMENU | WS_CAPTION | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_THICKFRAME;
+static const unsigned FixedStyle = WS_CLIPCHILDREN | WS_SYSMENU | WS_CAPTION | WS_MINIMIZEBOX | WS_BORDER;
+static const unsigned ResizableStyle = WS_CLIPCHILDREN | WS_SYSMENU | WS_CAPTION | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_THICKFRAME;
 
 void pWindow::append(Layout &layout) {
   layout.setParent(window);
@@ -16,14 +16,22 @@ void pWindow::append(Widget &widget) {
   widget.p.setParent(window);
 }
 
-Geometry pWindow::frameGeometry() {
-  RECT rc;
-  GetWindowRect(hwnd, &rc);
-  return { rc.left, rc.top, rc.right - rc.left, rc.bottom - rc.top };
-}
-
 bool pWindow::focused() {
   return (GetForegroundWindow() == hwnd);
+}
+
+Geometry pWindow::frameMargin() {
+  unsigned style = window.state.resizable ? ResizableStyle : FixedStyle;
+  if(window.state.fullScreen) style = 0;
+  RECT rc = { 0, 0, 640, 480 };
+  AdjustWindowRect(&rc, style, window.state.menuVisible);
+  unsigned statusHeight = 0;
+  if(window.state.statusVisible) {
+    RECT src;
+    GetClientRect(hstatus, &src);
+    statusHeight = src.bottom - src.top;
+  }
+  return { abs(rc.left), abs(rc.top), (rc.right - rc.left) - 640, (rc.bottom - rc.top) + statusHeight - 480 };
 }
 
 Geometry pWindow::geometry() {
@@ -43,14 +51,6 @@ void pWindow::setBackgroundColor(uint8_t red, uint8_t green, uint8_t blue) {
   if(brush) DeleteObject(brush);
   brushColor = RGB(red, green, blue);
   brush = CreateSolidBrush(brushColor);
-}
-
-void pWindow::setFrameGeometry(const Geometry &geometry) {
-  Geometry margin = frameMargin();
-  window.setGeometry({
-    geometry.x + margin.x, geometry.y + margin.y,
-    geometry.width - margin.width, geometry.height - margin.height
-  });
 }
 
 void pWindow::setFocused() {
@@ -145,20 +145,6 @@ void pWindow::constructor() {
 
   SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&window);
   setGeometry({ 128, 128, 256, 256 });
-}
-
-Geometry pWindow::frameMargin() {
-  unsigned style = window.state.resizable ? ResizableStyle : FixedStyle;
-  if(window.state.fullScreen) style = 0;
-  RECT rc = { 0, 0, 640, 480 };
-  AdjustWindowRect(&rc, style, window.state.menuVisible);
-  unsigned statusHeight = 0;
-  if(window.state.statusVisible) {
-    RECT src;
-    GetClientRect(hstatus, &src);
-    statusHeight = src.bottom - src.top;
-  }
-  return { abs(rc.left), abs(rc.top), (rc.right - rc.left) - 640, (rc.bottom - rc.top) + statusHeight - 480 };
 }
 
 void pWindow::updateMenu() {

@@ -24,14 +24,14 @@ struct pObject {
 };
 
 struct pOS : public pObject {
-  static unsigned desktopWidth();
-  static unsigned desktopHeight();
+  static Geometry availableGeometry();
+  static Geometry desktopGeometry();
   static string fileLoad(Window &parent, const string &path, const lstring &filter);
   static string fileSave(Window &parent, const string &path, const lstring &filter);
   static string folderSelect(Window &parent, const string &path);
   static void main();
-  static bool pending();
-  static void process();
+  static bool pendingEvents();
+  static void processEvents();
   static void quit();
 
   static void initialize();
@@ -70,11 +70,10 @@ struct pWindow : public pObject {
   void append(Layout &layout);
   void append(Menu &menu);
   void append(Widget &widget);
-  Geometry frameGeometry();
   bool focused();
+  Geometry frameMargin();
   Geometry geometry();
   void setBackgroundColor(uint8_t red, uint8_t green, uint8_t blue);
-  void setFrameGeometry(const Geometry &geometry);
   void setFocused();
   void setFullScreen(bool fullScreen);
   void setGeometry(const Geometry &geometry);
@@ -117,42 +116,42 @@ struct pMenu : public pAction {
   void setFont(Font &font);
 };
 
-struct pMenuSeparator : public pAction {
-  MenuSeparator &menuSeparator;
+struct pSeparator : public pAction {
+  Separator &separator;
 
-  pMenuSeparator(MenuSeparator &menuSeparator) : pAction(menuSeparator), menuSeparator(menuSeparator) {}
+  pSeparator(Separator &separator) : pAction(separator), separator(separator) {}
   void constructor();
 };
 
-struct pMenuItem : public pAction {
-  MenuItem &menuItem;
+struct pItem : public pAction {
+  Item &item;
 
   void setText(const string &text);
 
-  pMenuItem(MenuItem &menuItem) : pAction(menuItem), menuItem(menuItem) {}
+  pItem(Item &item) : pAction(item), item(item) {}
   void constructor();
 };
 
-struct pMenuCheckItem : public pAction {
-  MenuCheckItem &menuCheckItem;
+struct pCheckItem : public pAction {
+  CheckItem &checkItem;
 
   bool checked();
   void setChecked(bool checked);
   void setText(const string &text);
 
-  pMenuCheckItem(MenuCheckItem &menuCheckItem) : pAction(menuCheckItem), menuCheckItem(menuCheckItem) {}
+  pCheckItem(CheckItem &checkItem) : pAction(checkItem), checkItem(checkItem) {}
   void constructor();
 };
 
-struct pMenuRadioItem : public pAction {
-  MenuRadioItem &menuRadioItem;
+struct pRadioItem : public pAction {
+  RadioItem &radioItem;
 
   bool checked();
   void setChecked();
-  void setGroup(const reference_array<MenuRadioItem&> &group);
+  void setGroup(const reference_array<RadioItem&> &group);
   void setText(const string &text);
 
-  pMenuRadioItem(MenuRadioItem &menuRadioItem) : pAction(menuRadioItem), menuRadioItem(menuRadioItem) {}
+  pRadioItem(RadioItem &radioItem) : pAction(radioItem), radioItem(radioItem) {}
   void constructor();
 };
 
@@ -272,16 +271,17 @@ struct pListView : public pWidget {
   linear_vector<GtkColumn> column;
 
   void append(const lstring &text);
-  void autosizeColumns();
+  void autoSizeColumns();
   bool checked(unsigned row);
   void modify(unsigned row, const lstring &text);
-  void modify(unsigned row, unsigned column, const string &text);
   void reset();
-  optional<unsigned> selection();
+  bool selected();
+  unsigned selection();
   void setCheckable(bool checkable);
   void setChecked(unsigned row, bool checked);
   void setHeaderText(const lstring &text);
   void setHeaderVisible(bool visible);
+  void setSelected(bool selected);
   void setSelection(unsigned row);
 
   pListView(ListView &listView) : pWidget(listView), listView(listView) {}

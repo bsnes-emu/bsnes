@@ -17,7 +17,7 @@ void pListView::append(const lstring &list) {
   if(listView.state.headerText.size() <= 1) ListView_SetColumnWidth(hwnd, 0, LVSCW_AUTOSIZE_USEHEADER);
 }
 
-void pListView::autosizeColumns() {
+void pListView::autoSizeColumns() {
   for(unsigned n = 0; n < listView.state.headerText.size(); n++) {
     ListView_SetColumnWidth(hwnd, n, LVSCW_AUTOSIZE_USEHEADER);
   }
@@ -35,22 +35,24 @@ void pListView::modify(unsigned row, const lstring &list) {
   if(listView.state.headerText.size() <= 1) ListView_SetColumnWidth(hwnd, 0, LVSCW_AUTOSIZE_USEHEADER);
 }
 
-void pListView::modify(unsigned row, unsigned column, const string &text) {
-  utf16_t wtext(text);
-  ListView_SetItemText(hwnd, row, column, wtext);
-  if(listView.state.headerText.size() <= 1) ListView_SetColumnWidth(hwnd, 0, LVSCW_AUTOSIZE_USEHEADER);
-}
-
 void pListView::reset() {
   ListView_DeleteAllItems(hwnd);
 }
 
-optional<unsigned> pListView::selection() {
+bool pListView::selected() {
   unsigned count = ListView_GetItemCount(hwnd);
   for(unsigned n = 0; n < count; n++) {
-    if(ListView_GetItemState(hwnd, n, LVIS_SELECTED)) return { true, n };
+    if(ListView_GetItemState(hwnd, n, LVIS_SELECTED)) return true;
   }
-  return { false, 0 };
+  return false;
+}
+
+unsigned pListView::selection() {
+  unsigned count = ListView_GetItemCount(hwnd);
+  for(unsigned n = 0; n < count; n++) {
+    if(ListView_GetItemState(hwnd, n, LVIS_SELECTED)) return n;
+  }
+  return listView.state.selection;
 }
 
 void pListView::setCheckable(bool checkable) {
@@ -78,7 +80,7 @@ void pListView::setHeaderText(const lstring &list) {
     column.pszText = headerText;
     ListView_InsertColumn(hwnd, n, &column);
   }
-  autosizeColumns();
+  autoSizeColumns();
 }
 
 void pListView::setHeaderVisible(bool visible) {
@@ -89,12 +91,20 @@ void pListView::setHeaderVisible(bool visible) {
   );
 }
 
-void pListView::setSelection(unsigned row) {
-  unsigned count = ListView_GetItemCount(hwnd);
-  for(unsigned n = 0; n < count; n++) {
-    ListView_SetItemState(hwnd, n, LVIS_FOCUSED,  (n == row ? LVIS_FOCUSED  : 0));
-    ListView_SetItemState(hwnd, n, LVIS_SELECTED, (n == row ? LVIS_SELECTED : 0));
+void pListView::setSelected(bool selected) {
+  locked = true;
+  if(selected == false) {
+    ListView_SetItemState(hwnd, -1, 0, LVIS_FOCUSED | LVIS_SELECTED);
+  } else {
+    setSelection(listView.state.selection);
   }
+  locked = false;
+}
+
+void pListView::setSelection(unsigned row) {
+  locked = true;
+  ListView_SetItemState(hwnd, row, LVIS_FOCUSED | LVIS_SELECTED, LVIS_FOCUSED | LVIS_SELECTED);
+  locked = false;
 }
 
 void pListView::constructor() {
@@ -104,7 +114,7 @@ void pListView::constructor() {
 
 void pListView::setGeometry(const Geometry &geometry) {
   pWidget::setGeometry(geometry);
-  autosizeColumns();
+  autoSizeColumns();
 }
 
 void pListView::setParent(Window &parent) {
@@ -121,6 +131,6 @@ void pListView::setParent(Window &parent) {
   setCheckable(listView.state.checkable);
   foreach(text, listView.state.text) append(text);
   foreach(checked, listView.state.checked, n) setChecked(n, checked);
-  if(auto selection = listView.state.selection) setSelection(selection());
-  autosizeColumns();
+  if(listView.state.selected) setSelection(listView.state.selection);
+  autoSizeColumns();
 }

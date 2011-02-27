@@ -20,6 +20,11 @@ static LRESULT CALLBACK Label_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPA
   Label *label = (Label*)GetWindowLongPtr(hwnd, GWLP_USERDATA);
   if(!window || !label) return DefWindowProc(hwnd, msg, wparam, lparam);
 
+  if(msg == WM_ERASEBKGND) {
+    //background is erased during WM_PAINT to prevent flickering
+    return TRUE;
+  }
+
   if(msg == WM_PAINT) {
     PAINTSTRUCT ps;
     RECT rc;

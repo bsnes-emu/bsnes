@@ -32,7 +32,7 @@ void Application::main(int argc, char **argv) {
 
   mainWindow.create();
   mainWindow.setVisible();
-  OS::process();
+  OS::processEvents();
 
   #if defined(PHOENIX_WINDOWS)
   video.driver("Direct3D");
@@ -69,7 +69,7 @@ void Application::main(int argc, char **argv) {
   GameBoy::system.init(&interface);
 
   while(quit == false) {
-    OS::process();
+    OS::processEvents();
 
     if(GameBoy::cartridge.loaded()) {
       do {

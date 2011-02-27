@@ -15,14 +15,14 @@
 
 Object::Object() { OS::initialize(); }
 
-unsigned OS::desktopWidth() { return pOS::desktopWidth(); }
-unsigned OS::desktopHeight() { return pOS::desktopHeight(); }
+Geometry OS::availableGeometry() { return pOS::availableGeometry(); }
+Geometry OS::desktopGeometry() { return pOS::desktopGeometry(); }
 string OS::fileLoad_(Window &parent, const string &path, const lstring &filter_) { auto filter = filter_; if(filter.size() == 0) filter.append("All files (*)"); return pOS::fileLoad(parent, path, filter); }
 string OS::fileSave_(Window &parent, const string &path, const lstring &filter_) { auto filter = filter_; if(filter.size() == 0) filter.append("All files (*)"); return pOS::fileSave(parent, path, filter); }
 string OS::folderSelect(Window &parent, const string &path) { return pOS::folderSelect(parent, path); }
 void OS::main() { return pOS::main(); }
-bool OS::pending() { return pOS::pending(); }
-void OS::process() { return pOS::process(); }
+bool OS::pendingEvents() { return pOS::pendingEvents(); }
+void OS::processEvents() { return pOS::processEvents(); }
 void OS::quit() { return pOS::quit(); }
 void OS::initialize() { static bool initialized = false; if(initialized == false) { initialized = true; return pOS::initialize(); } }
 
@@ -42,11 +42,12 @@ Window Window::None;
 void Window::append(Layout &layout) { state.layout.append(layout); return p.append(layout); }
 void Window::append(Menu &menu) { state.menu.append(menu); ((Action&)menu).state.parent = this; return p.append(menu); }
 void Window::append(Widget &widget) { state.widget.append(widget); return p.append(widget); }
-Geometry Window::frameGeometry() { return p.frameGeometry(); }
+Geometry Window::frameGeometry() { Geometry geometry = p.geometry(), margin = p.frameMargin(); return { geometry.x - margin.x, geometry.y - margin.y, geometry.width + margin.width, geometry.height + margin.height }; }
+Geometry Window::frameMargin() { return p.frameMargin(); }
 bool Window::focused() { return p.focused(); }
 Geometry Window::geometry() { return p.geometry(); }
 void Window::setBackgroundColor(uint8_t red, uint8_t green, uint8_t blue) { state.backgroundColor = true; state.backgroundColorRed = red; state.backgroundColorGreen = green; state.backgroundColorBlue = blue; return p.setBackgroundColor(red, green, blue); }
-void Window::setFrameGeometry(const Geometry &geometry) { return p.setFrameGeometry(geometry); }
+void Window::setFrameGeometry(const Geometry &geometry) { Geometry margin = p.frameMargin(); return setGeometry({ geometry.x + margin.x, geometry.y + margin.y, geometry.width - margin.width, geometry.height - margin.height }); }
 void Window::setFocused() { return p.setFocused(); }
 void Window::setFullScreen(bool fullScreen) { state.fullScreen = fullScreen; return p.setFullScreen(fullScreen); }
 void Window::setGeometry(const Geometry &geometry) { state.geometry = geometry; return p.setGeometry(geometry); }
@@ -69,28 +70,29 @@ void Menu::append(Action &action) { state.action.append(action); return p.append
 void Menu::setText(const string &text) { state.text = text; return p.setText(text); }
 Menu::Menu() : state(*new State), base_from_member<pMenu&>(*new pMenu(*this)), Action(base_from_member<pMenu&>::value), p(base_from_member<pMenu&>::value) { p.constructor(); }
 
-MenuSeparator::MenuSeparator() : base_from_member<pMenuSeparator&>(*new pMenuSeparator(*this)), Action(base_from_member<pMenuSeparator&>::value), p(base_from_member<pMenuSeparator&>::value) { p.constructor(); }
+Separator::Separator() : base_from_member<pSeparator&>(*new pSeparator(*this)), Action(base_from_member<pSeparator&>::value), p(base_from_member<pSeparator&>::value) { p.constructor(); }
 
-void MenuItem::setText(const string &text) { state.text = text; return p.setText(text); }
-MenuItem::MenuItem() : state(*new State), base_from_member<pMenuItem&>(*new pMenuItem(*this)), Action(base_from_member<pMenuItem&>::value), p(base_from_member<pMenuItem&>::value) { p.constructor(); }
+void Item::setText(const string &text) { state.text = text; return p.setText(text); }
+Item::Item() : state(*new State), base_from_member<pItem&>(*new pItem(*this)), Action(base_from_member<pItem&>::value), p(base_from_member<pItem&>::value) { p.constructor(); }
 
-bool MenuCheckItem::checked() { return p.checked(); }
-void MenuCheckItem::setChecked(bool checked) { state.checked = checked; return p.setChecked(checked); }
-void MenuCheckItem::setText(const string &text) { state.text = text; return p.setText(text); }
-MenuCheckItem::MenuCheckItem() : state(*new State), base_from_member<pMenuCheckItem&>(*new pMenuCheckItem(*this)), Action(base_from_member<pMenuCheckItem&>::value), p(base_from_member<pMenuCheckItem&>::value) { p.constructor(); }
+bool CheckItem::checked() { return p.checked(); }
+void CheckItem::setChecked(bool checked) { state.checked = checked; return p.setChecked(checked); }
+void CheckItem::setText(const string &text) { state.text = text; return p.setText(text); }
+CheckItem::CheckItem() : state(*new State), base_from_member<pCheckItem&>(*new pCheckItem(*this)), Action(base_from_member<pCheckItem&>::value), p(base_from_member<pCheckItem&>::value) { p.constructor(); }
 
-void MenuRadioItem::group_(const reference_array<MenuRadioItem&> &list) { foreach(item, list) item.p.setGroup(item.state.group = list); if(list.size()) list[0].setChecked(); }
-bool MenuRadioItem::checked() { return p.checked(); }
-void MenuRadioItem::setChecked() { foreach(item, state.group) item.state.checked = false; state.checked = true; return p.setChecked(); }
-void MenuRadioItem::setText(const string &text) { state.text = text; return p.setText(text); }
-MenuRadioItem::MenuRadioItem() : state(*new State), base_from_member<pMenuRadioItem&>(*new pMenuRadioItem(*this)), Action(base_from_member<pMenuRadioItem&>::value), p(base_from_member<pMenuRadioItem&>::value) { p.constructor(); }
+void RadioItem::group_(const reference_array<RadioItem&> &list) { foreach(item, list) item.p.setGroup(item.state.group = list); if(list.size()) list[0].setChecked(); }
+bool RadioItem::checked() { return p.checked(); }
+void RadioItem::setChecked() { foreach(item, state.group) item.state.checked = false; state.checked = true; return p.setChecked(); }
+void RadioItem::setText(const string &text) { state.text = text; return p.setText(text); }
+RadioItem::RadioItem() : state(*new State), base_from_member<pRadioItem&>(*new pRadioItem(*this)), Action(base_from_member<pRadioItem&>::value), p(base_from_member<pRadioItem&>::value) { p.constructor(); }
 
-bool Widget::enabled() { return p.enabled(); }
+bool Widget::enabled() { return state.enabled; }
 void Widget::setEnabled(bool enabled) { state.enabled = enabled; return p.setEnabled(enabled); }
 void Widget::setFocused() { return p.setFocused(); }
 void Widget::setFont(Font &font) { state.font = &font; return p.setFont(font); }
 void Widget::setGeometry(const Geometry &geometry) { state.geometry = geometry; return p.setGeometry(geometry); }
 void Widget::setVisible(bool visible) { state.visible = visible; return p.setVisible(visible); }
+bool Widget::visible() { return state.visible; }
 Widget::Widget() : state(*new State), p(*new pWidget(*this)) { state.abstract = true; p.constructor(); }
 Widget::Widget(pWidget &p) : state(*new State), p(p) { p.constructor(); }
 
@@ -129,17 +131,18 @@ string LineEdit::text() { return p.text(); }
 LineEdit::LineEdit() : state(*new State), base_from_member<pLineEdit&>(*new pLineEdit(*this)), Widget(base_from_member<pLineEdit&>::value), p(base_from_member<pLineEdit&>::value) { p.constructor(); }
 
 void ListView::append_(const lstring &text) { state.checked.append(false); state.text.append(text); return p.append(text); }
-void ListView::autosizeColumns() { return p.autosizeColumns(); }
+void ListView::autoSizeColumns() { return p.autoSizeColumns(); }
 bool ListView::checked(unsigned row) { return p.checked(row); }
 void ListView::modify_(unsigned row, const lstring &text) { state.text[row] = text; return p.modify(row, text); }
-void ListView::modify(unsigned row, unsigned column, const string &text) { state.text[row][column] = text; return p.modify(row, column, text); }
 void ListView::reset() { state.checked.reset(); state.text.reset(); return p.reset(); }
-optional<unsigned> ListView::selection() { return p.selection(); }
+bool ListView::selected() { return p.selected(); }
+unsigned ListView::selection() { return p.selection(); }
 void ListView::setCheckable(bool checkable) { state.checkable = checkable; return p.setCheckable(checkable); }
 void ListView::setChecked(unsigned row, bool checked) { state.checked[row] = checked; return p.setChecked(row, checked); }
 void ListView::setHeaderText_(const lstring &text) { state.headerText = text; return p.setHeaderText(text); }
 void ListView::setHeaderVisible(bool visible) { state.headerVisible = visible; return p.setHeaderVisible(visible); }
-void ListView::setSelection(unsigned row) { state.selection = { true, row }; return p.setSelection(row); }
+void ListView::setSelected(bool selected) { state.selected = selected; return p.setSelected(selected); }
+void ListView::setSelection(unsigned row) { state.selected = true; state.selection = row; return p.setSelection(row); }
 ListView::ListView() : state(*new State), base_from_member<pListView&>(*new pListView(*this)), Widget(base_from_member<pListView&>::value), p(base_from_member<pListView&>::value) { p.constructor(); }
 
 void ProgressBar::setPosition(unsigned position) { state.position = position; return p.setPosition(position); }

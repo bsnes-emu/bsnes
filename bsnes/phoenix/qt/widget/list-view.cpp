@@ -10,7 +10,7 @@ void pListView::append(const lstring &text) {
   locked = false;
 }
 
-void pListView::autosizeColumns() {
+void pListView::autoSizeColumns() {
   for(unsigned n = 0; n < listView.state.headerText.size(); n++) qtListView->resizeColumnToContents(n);
 }
 
@@ -29,23 +29,19 @@ void pListView::modify(unsigned row, const lstring &text) {
   locked = false;
 }
 
-void pListView::modify(unsigned row, unsigned column, const string &text) {
-  locked = true;
-  QTreeWidgetItem *item = qtListView->topLevelItem(row);
-  if(!item) return;
-  item->setText(column, QString::fromUtf8(text));
-  locked = false;
-}
-
 void pListView::reset() {
   qtListView->clear();
 }
 
-optional<unsigned> pListView::selection() {
+bool pListView::selected() {
   QTreeWidgetItem *item = qtListView->currentItem();
-  if(item == 0) return { false, 0 };
-  if(item->isSelected() == false) return { false, 0 };
-  return { true, item->data(0, Qt::UserRole).toUInt() };
+  return (item && item->isSelected() == true);
+}
+
+unsigned pListView::selection() {
+  QTreeWidgetItem *item = qtListView->currentItem();
+  if(item == 0) return 0;
+  return item->data(0, Qt::UserRole).toUInt();
 }
 
 void pListView::setCheckable(bool checkable) {
@@ -69,12 +65,17 @@ void pListView::setHeaderText(const lstring &text) {
   qtListView->setColumnCount(text.size());
   qtListView->setAlternatingRowColors(text.size() >= 2);
   qtListView->setHeaderLabels(labels);
-  autosizeColumns();
+  autoSizeColumns();
 }
 
 void pListView::setHeaderVisible(bool visible) {
   qtListView->setHeaderHidden(!visible);
-  autosizeColumns();
+  autoSizeColumns();
+}
+
+void pListView::setSelected(bool selected) {
+  QTreeWidgetItem *item = qtListView->currentItem();
+  if(item) item->setSelected(selected);
 }
 
 void pListView::setSelection(unsigned row) {
@@ -108,11 +109,8 @@ void pListView::onActivate() {
 }
 
 void pListView::onChange() {
-  if(auto position = selection()) {
-    listView.state.selection = { true, position() };
-  } else {
-    listView.state.selection = { false, 0 };
-  }
+  listView.state.selected = selected();
+  if(listView.state.selected) listView.state.selection = selection();
   if(locked == false && listView.onChange) listView.onChange();
 }
 

@@ -38,11 +38,10 @@ void StateManager::create() {
 void StateManager::synchronize() {
   descEdit.setText("");
   descEdit.setEnabled(false);
-  if(auto position = stateList.selection()) {
-    if(slot[position()].capacity() > 0) {
-      descEdit.setText(slotLoadDescription(position()));
-      descEdit.setEnabled(true);
-    }
+  if(stateList.selected() == false) return;
+  if(slot[stateList.selection()].capacity() > 0) {
+    descEdit.setText(slotLoadDescription(stateList.selection()));
+    descEdit.setEnabled(true);
   }
 }
 
@@ -50,7 +49,7 @@ void StateManager::refresh() {
   for(unsigned i = 0; i < 32; i++) {
     stateList.modify(i, rdecimal<2>(i + 1), slotLoadDescription(i));
   }
-  stateList.autosizeColumns();
+  stateList.autoSizeColumns();
 }
 
 void StateManager::load() {
@@ -106,16 +105,15 @@ void StateManager::save() {
 }
 
 void StateManager::slotLoad() {
-  if(auto position = stateList.selection()) {
-    serializer s(slot[position()].data(), slot[position()].capacity());
-    SNES::system.unserialize(s);
-  }
+  if(stateList.selected() == false) return;
+  serializer s(slot[stateList.selection()].data(), slot[stateList.selection()].capacity());
+  SNES::system.unserialize(s);
 }
 
 void StateManager::slotSave() {
-  if(auto position = stateList.selection()) {
+  if(stateList.selected()) {
     SNES::system.runtosave();
-    slot[position()] = SNES::system.serialize();
+    slot[stateList.selection()] = SNES::system.serialize();
   }
   refresh();
   synchronize();
@@ -123,8 +121,8 @@ void StateManager::slotSave() {
 }
 
 void StateManager::slotErase() {
-  if(auto position = stateList.selection()) {
-    slot[position()] = serializer();
+  if(stateList.selected()) {
+    slot[stateList.selection()] = serializer();
   }
   refresh();
   synchronize();
@@ -138,11 +136,10 @@ string StateManager::slotLoadDescription(unsigned i) {
 }
 
 void StateManager::slotSaveDescription() {
-  if(auto position = stateList.selection()) {
-    string text = descEdit.text();
-    if(slot[position()].capacity() > 0) {
-      strlcpy((char*)slot[position()].data() + HeaderLength, (const char*)text, 512);
-    }
+  if(stateList.selected() == false) return;
+  string text = descEdit.text();
+  if(slot[stateList.selection()].capacity() > 0) {
+    strlcpy((char*)slot[stateList.selection()].data() + HeaderLength, (const char*)text, 512);
   }
   refresh();
 }

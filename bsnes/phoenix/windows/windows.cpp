@@ -7,10 +7,10 @@
 
 #include "action/action.cpp"
 #include "action/menu.cpp"
-#include "action/menu-separator.cpp"
-#include "action/menu-item.cpp"
-#include "action/menu-check-item.cpp"
-#include "action/menu-radio-item.cpp"
+#include "action/separator.cpp"
+#include "action/item.cpp"
+#include "action/check-item.cpp"
+#include "action/radio-item.cpp"
 
 #include "widget/widget.cpp"
 #include "widget/button.cpp"
@@ -32,12 +32,14 @@ static LRESULT CALLBACK OS_windowProc(HWND, UINT, WPARAM, LPARAM);
 
 pOS::State *pOS::state = 0;
 
-unsigned pOS::desktopWidth() {
-  return GetSystemMetrics(SM_CXSCREEN);
+Geometry pOS::availableGeometry() {
+  RECT rc;
+  SystemParametersInfo(SPI_GETWORKAREA, 0, &rc, 0);
+  return { rc.left, rc.top, rc.right - rc.left, rc.bottom - rc.top };
 }
 
-unsigned pOS::desktopHeight() {
-  return GetSystemMetrics(SM_CYSCREEN);
+Geometry pOS::desktopGeometry() {
+  return { 0, 0, GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN) };
 }
 
 static string pOS_fileDialog(bool save, Window &parent, const string &path, const lstring &filter) {
@@ -135,13 +137,13 @@ void pOS::main() {
   }
 }
 
-bool pOS::pending() {
+bool pOS::pendingEvents() {
   MSG msg;
   return PeekMessage(&msg, 0, 0, 0, PM_NOREMOVE);
 }
 
-void pOS::process() {
-  while(pending()) {
+void pOS::processEvents() {
+  while(pendingEvents()) {
     MSG msg;
     if(PeekMessage(&msg, 0, 0, 0, PM_REMOVE)) {
       if(msg.message == WM_KEYDOWN || msg.message == WM_KEYUP) {
@@ -178,7 +180,7 @@ void pOS::initialize() {
   wc.lpfnWndProc = OS_windowProc;
   wc.lpszClassName = L"phoenix_window";
   wc.lpszMenuName = 0;
-  wc.style = CS_HREDRAW | CS_VREDRAW;
+  wc.style = 0;
   RegisterClass(&wc);
 
   wc.cbClsExtra = 0;
@@ -303,18 +305,18 @@ static LRESULT CALLBACK OS_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM
       if(control == 0) {
         pObject *object = (pObject*)pObject::find(id);
         if(!object) break;
-        if(dynamic_cast<pMenuItem*>(object)) {
-          MenuItem &menuItem = ((pMenuItem*)object)->menuItem;
-          if(menuItem.onTick) menuItem.onTick();
-        } else if(dynamic_cast<pMenuCheckItem*>(object)) {
-          MenuCheckItem &menuCheckItem = ((pMenuCheckItem*)object)->menuCheckItem;
-          menuCheckItem.setChecked(!menuCheckItem.state.checked);
-          if(menuCheckItem.onTick) menuCheckItem.onTick();
-        } else if(dynamic_cast<pMenuRadioItem*>(object)) {
-          MenuRadioItem &menuRadioItem = ((pMenuRadioItem*)object)->menuRadioItem;
-          if(menuRadioItem.state.checked == false) {
-            menuRadioItem.setChecked();
-            if(menuRadioItem.onTick) menuRadioItem.onTick();
+        if(dynamic_cast<pItem*>(object)) {
+          Item &item = ((pItem*)object)->item;
+          if(item.onTick) item.onTick();
+        } else if(dynamic_cast<pCheckItem*>(object)) {
+          CheckItem &checkItem = ((pCheckItem*)object)->checkItem;
+          checkItem.setChecked(!checkItem.state.checked);
+          if(checkItem.onTick) checkItem.onTick();
+        } else if(dynamic_cast<pRadioItem*>(object)) {
+          RadioItem &radioItem = ((pRadioItem*)object)->radioItem;
+          if(radioItem.state.checked == false) {
+            radioItem.setChecked();
+            if(radioItem.onTick) radioItem.onTick();
           }
         }
       } else {
@@ -374,9 +376,13 @@ static LRESULT CALLBACK OS_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM
             listView.p.lostFocus = true;
           } else {
             if(!(nmlistview->uOldState & LVIS_SELECTED) && (nmlistview->uNewState & LVIS_SELECTED)) {
-              if(listView.onChange) listView.onChange();
-            } else if(listView.p.lostFocus == false && listView.selection() == false) {
-              if(listView.onChange) listView.onChange();
+              listView.state.selected = true;
+              listView.state.selection = listView.selection();
+              if(listView.p.locked == false && listView.onChange) listView.onChange();
+            } else if(listView.p.lostFocus == false && listView.selected() == false) {
+              listView.state.selected = true;
+              listView.state.selection = listView.selection();
+              if(listView.p.locked == false && listView.onChange) listView.onChange();
             }
             listView.p.lostFocus = false;
           }

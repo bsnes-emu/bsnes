@@ -1,6 +1,6 @@
 struct Font::State {
   bool bold;
-  nall::string family;
+  string family;
   bool italic;
   unsigned size;
   bool underline;
@@ -18,17 +18,17 @@ struct Window::State {
   unsigned backgroundColorRed, backgroundColorGreen, backgroundColorBlue;
   bool fullScreen;
   Geometry geometry;
-  nall::reference_array<Layout&> layout;
-  nall::reference_array<Menu&> menu;
+  reference_array<Layout&> layout;
+  reference_array<Menu&> menu;
   Font *menuFont;
   bool menuVisible;
   bool resizable;
   Font *statusFont;
-  nall::string statusText;
+  string statusText;
   bool statusVisible;
-  nall::string title;
+  string title;
   bool visible;
-  nall::reference_array<Widget&> widget;
+  reference_array<Widget&> widget;
   Font *widgetFont;
 
   State() {
@@ -60,27 +60,27 @@ struct Action::State {
 };
 
 struct Menu::State {
-  nall::reference_array<Action&> action;
-  nall::string text;
+  reference_array<Action&> action;
+  string text;
 };
 
-struct MenuItem::State {
-  nall::string text;
+struct Item::State {
+  string text;
 };
 
-struct MenuCheckItem::State {
+struct CheckItem::State {
   bool checked;
-  nall::string text;
+  string text;
 
   State() {
     checked = false;
   }
 };
 
-struct MenuRadioItem::State {
+struct RadioItem::State {
   bool checked;
-  nall::reference_array<MenuRadioItem&> group;
-  nall::string text;
+  reference_array<RadioItem&> group;
+  string text;
 
   State() {
     checked = true;
@@ -104,7 +104,7 @@ struct Widget::State {
 };
 
 struct Button::State {
-  nall::string text;
+  string text;
 
   State() {
   }
@@ -112,7 +112,7 @@ struct Button::State {
 
 struct CheckBox::State {
   bool checked;
-  nall::string text;
+  string text;
 
   State() {
     checked = false;
@@ -121,7 +121,7 @@ struct CheckBox::State {
 
 struct ComboBox::State {
   unsigned selection;
-  nall::linear_vector<nall::string> text;
+  linear_vector<string> text;
 
   State() {
     selection = 0;
@@ -153,12 +153,12 @@ struct HorizontalSlider::State {
 };
 
 struct Label::State {
-  nall::string text;
+  string text;
 };
 
 struct LineEdit::State {
   bool editable;
-  nall::string text;
+  string text;
 
   State() {
     editable = true;
@@ -167,15 +167,18 @@ struct LineEdit::State {
 
 struct ListView::State {
   bool checkable;
-  nall::array<bool> checked;
-  nall::lstring headerText;
+  array<bool> checked;
+  lstring headerText;
   bool headerVisible;
-  nall::optional<unsigned> selection;
-  nall::linear_vector<nall::lstring> text;
+  bool selected;
+  unsigned selection;
+  linear_vector<lstring> text;
 
-  State() : selection(false, 0) {
+  State() {
     checkable = false;
     headerVisible = false;
+    selected = false;
+    selection = 0;
   }
 };
 
@@ -189,8 +192,8 @@ struct ProgressBar::State {
 
 struct RadioBox::State {
   bool checked;
-  nall::reference_array<RadioBox&> group;
-  nall::string text;
+  reference_array<RadioBox&> group;
+  string text;
 
   State() {
     checked = true;
@@ -200,7 +203,7 @@ struct RadioBox::State {
 struct TextEdit::State {
   unsigned cursorPosition;
   bool editable;
-  nall::string text;
+  string text;
   bool wordWrap;
 
   State() {

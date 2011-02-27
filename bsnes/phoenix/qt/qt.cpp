@@ -8,10 +8,10 @@
 
 #include "action/action.cpp"
 #include "action/menu.cpp"
-#include "action/menu-separator.cpp"
-#include "action/menu-item.cpp"
-#include "action/menu-check-item.cpp"
-#include "action/menu-radio-item.cpp"
+#include "action/separator.cpp"
+#include "action/item.cpp"
+#include "action/check-item.cpp"
+#include "action/radio-item.cpp"
 
 #include "widget/widget.cpp"
 #include "widget/button.cpp"
@@ -30,12 +30,14 @@
 
 QApplication *pOS::application = 0;
 
-unsigned pOS::desktopWidth() {
-  return QApplication::desktop()->screenGeometry().width();
+Geometry pOS::availableGeometry() {
+  QRect rect = QApplication::desktop()->availableGeometry();
+  return { rect.x(), rect.y(), rect.width(), rect.height() };
 }
 
-unsigned pOS::desktopHeight() {
-  return QApplication::desktop()->screenGeometry().height();
+Geometry pOS::desktopGeometry() {
+  QRect rect = QApplication::desktop()->screenGeometry();
+  return { 0, 0, rect.width(), rect.height() };
 }
 
 string pOS::fileLoad(Window &parent, const string &path, const lstring &filter) {
@@ -100,12 +102,12 @@ void pOS::main() {
   QApplication::exec();
 }
 
-bool pOS::pending() {
+bool pOS::pendingEvents() {
   return QApplication::hasPendingEvents();
 }
 
-void pOS::process() {
-  while(pending()) QApplication::processEvents();
+void pOS::processEvents() {
+  while(pendingEvents()) QApplication::processEvents();
 }
 
 void pOS::quit() {

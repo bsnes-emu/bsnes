@@ -1,19 +1,19 @@
-static void MenuRadioItem_tick(MenuRadioItem *self) {
+static void RadioItem_tick(RadioItem *self) {
   if(self->p.locked == false && self->checked() && self->onTick) self->onTick();
 }
 
-bool pMenuRadioItem::checked() {
+bool pRadioItem::checked() {
   return gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget));
 }
 
-void pMenuRadioItem::setChecked() {
+void pRadioItem::setChecked() {
   locked = true;
-  foreach(item, menuRadioItem.state.group) gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(item.p.widget), false);
+  foreach(item, radioItem.state.group) gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(item.p.widget), false);
   gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(widget), true);
   locked = false;
 }
 
-void pMenuRadioItem::setGroup(const reference_array<MenuRadioItem&> &group) {
+void pRadioItem::setGroup(const reference_array<RadioItem&> &group) {
   foreach(item, group, n) {
     if(n == 0) continue;
     GSList *currentGroup = gtk_radio_menu_item_get_group(GTK_RADIO_MENU_ITEM(group[0].p.widget));
@@ -23,11 +23,11 @@ void pMenuRadioItem::setGroup(const reference_array<MenuRadioItem&> &group) {
   }
 }
 
-void pMenuRadioItem::setText(const string &text) {
+void pRadioItem::setText(const string &text) {
   gtk_menu_item_set_label(GTK_MENU_ITEM(widget), text);
 }
 
-void pMenuRadioItem::constructor() {
+void pRadioItem::constructor() {
   widget = gtk_radio_menu_item_new_with_label(0, "");
-  g_signal_connect_swapped(G_OBJECT(widget), "toggled", G_CALLBACK(MenuRadioItem_tick), (gpointer)&menuRadioItem);
+  g_signal_connect_swapped(G_OBJECT(widget), "toggled", G_CALLBACK(RadioItem_tick), (gpointer)&radioItem);
 }

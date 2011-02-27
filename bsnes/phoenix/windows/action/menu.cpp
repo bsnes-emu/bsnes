@@ -27,18 +27,18 @@ void pMenu::update(Window &parentWindow, HMENU parentMenu) {
       Menu &item = (Menu&)action;
       item.p.update(parentWindow, hmenu);
       AppendMenu(hmenu, MF_STRING | MF_POPUP | enabled, (UINT_PTR)item.p.hmenu, utf16_t(item.state.text));
-    } else if(dynamic_cast<MenuSeparator*>(&action)) {
-      MenuSeparator &item = (MenuSeparator&)action;
+    } else if(dynamic_cast<Separator*>(&action)) {
+      Separator &item = (Separator&)action;
       if(action.state.visible) AppendMenu(hmenu, MF_SEPARATOR | enabled, item.p.id, L"");
-    } else if(dynamic_cast<MenuItem*>(&action)) {
-      MenuItem &item = (MenuItem&)action;
+    } else if(dynamic_cast<Item*>(&action)) {
+      Item &item = (Item&)action;
       if(action.state.visible) AppendMenu(hmenu, MF_STRING | enabled, item.p.id, utf16_t(item.state.text));
-    } else if(dynamic_cast<MenuCheckItem*>(&action)) {
-      MenuCheckItem &item = (MenuCheckItem&)action;
+    } else if(dynamic_cast<CheckItem*>(&action)) {
+      CheckItem &item = (CheckItem&)action;
       if(action.state.visible) AppendMenu(hmenu, MF_STRING | enabled, item.p.id, utf16_t(item.state.text));
       if(item.state.checked) item.setChecked();
-    } else if(dynamic_cast<MenuRadioItem*>(&action)) {
-      MenuRadioItem &item = (MenuRadioItem&)action;
+    } else if(dynamic_cast<RadioItem*>(&action)) {
+      RadioItem &item = (RadioItem&)action;
       if(action.state.visible) AppendMenu(hmenu, MF_STRING | enabled, item.p.id, utf16_t(item.state.text));
       if(item.state.checked) item.setChecked();
     }

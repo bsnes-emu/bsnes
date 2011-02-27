@@ -1,9 +1,9 @@
-bool pMenuRadioItem::checked() {
-  return menuRadioItem.state.checked;
+bool pRadioItem::checked() {
+  return radioItem.state.checked;
 }
 
-void pMenuRadioItem::setChecked() {
-  foreach(item, menuRadioItem.state.group) {
+void pRadioItem::setChecked() {
+  foreach(item, radioItem.state.group) {
     //CheckMenuRadioItem takes: lo, hi, id; checking only id when lo <= id <= hi
     //phoenix does not force IDs to be linear, so to uncheck id, we use: lo == hi == id + 1 (out of range)
     //to check id, we use: lo == hi == id (only ID, but in range)
@@ -11,12 +11,12 @@ void pMenuRadioItem::setChecked() {
   }
 }
 
-void pMenuRadioItem::setGroup(const reference_array<MenuRadioItem&> &group) {
+void pRadioItem::setGroup(const reference_array<RadioItem&> &group) {
 }
 
-void pMenuRadioItem::setText(const string &text) {
+void pRadioItem::setText(const string &text) {
   if(parentWindow) parentWindow->p.updateMenu();
 }
 
-void pMenuRadioItem::constructor() {
+void pRadioItem::constructor() {
 }

@@ -1,31 +1,31 @@
 struct MainWindow : Window {
   Menu system;
-  MenuItem systemLoadCartridge;
-  MenuSeparator systemSeparator1;
-  MenuItem systemPower;
+  Item systemLoadCartridge;
+  Separator systemSeparator1;
+  Item systemPower;
 
   Menu settings;
-  MenuCheckItem settingsVideoSync;
-  MenuCheckItem settingsAudioSync;
+  CheckItem settingsVideoSync;
+  CheckItem settingsAudioSync;
 
   Menu tools;
   Menu toolsSaveState;
-  MenuItem toolsSaveState1;
-  MenuItem toolsSaveState2;
-  MenuItem toolsSaveState3;
-  MenuItem toolsSaveState4;
-  MenuItem toolsSaveState5;
+  Item toolsSaveState1;
+  Item toolsSaveState2;
+  Item toolsSaveState3;
+  Item toolsSaveState4;
+  Item toolsSaveState5;
   Menu toolsLoadState;
-  MenuItem toolsLoadState1;
-  MenuItem toolsLoadState2;
-  MenuItem toolsLoadState3;
-  MenuItem toolsLoadState4;
-  MenuItem toolsLoadState5;
-  MenuSeparator toolsSeparator1;
-  MenuCheckItem toolsTraceCPU;
+  Item toolsLoadState1;
+  Item toolsLoadState2;
+  Item toolsLoadState3;
+  Item toolsLoadState4;
+  Item toolsLoadState5;
+  Separator toolsSeparator1;
+  CheckItem toolsTraceCPU;
 
   Menu help;
-  MenuItem helpAbout;
+  Item helpAbout;
 
   FixedLayout layout;
   Viewport viewport;
