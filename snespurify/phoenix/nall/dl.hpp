@@ -19,6 +19,7 @@ namespace nall {
   struct library {
     bool opened() const { return handle; }
     bool open(const char*, const char* = "");
+    bool open_absolute(const char*);
     void* sym(const char*);
     void close();
 
@@ -40,6 +41,12 @@ namespace nall {
     return handle;
   }
 
+  inline bool library::open_absolute(const char *name) {
+    if(handle) close();
+    handle = (uintptr_t)dlopen(name, RTLD_LAZY);
+    return handle;
+  }
+
   inline void* library::sym(const char *name) {
     if(!handle) return 0;
     return dlsym((void*)handle, name);
@@ -58,6 +65,12 @@ namespace nall {
     return handle;
   }
 
+  inline bool library::open_absolute(const char *name) {
+    if(handle) close();
+    handle = (uintptr_t)dlopen(name, RTLD_LAZY);
+    return handle;
+  }
+
   inline void* library::sym(const char *name) {
     if(!handle) return 0;
     return dlsym((void*)handle, name);
@@ -73,6 +86,12 @@ namespace nall {
     if(handle) close();
     string filepath(path, *path && !strend(path, "/") && !strend(path, "\\") ? "\\" : "", name, ".dll");
     handle = (uintptr_t)LoadLibraryW(utf16_t(filepath));
+    return handle;
+  }
+
+  inline bool library::open_absolute(const char *name) {
+    if(handle) close();
+    handle = (uintptr_t)LoadLibraryW(utf16_t(name));
     return handle;
   }
 

@@ -1,26 +1,36 @@
-static HFONT Font_createFont(const string &name, unsigned size, bool bold, bool italic) {
+static HFONT Font_createFont(const string &family, unsigned size, bool bold, bool italic, bool underline) {
   return CreateFont(
     -(size * 96.0 / 72.0 + 0.5),
-    0, 0, 0, bold == false ? FW_NORMAL : FW_BOLD, italic, 0, 0, 0, 0, 0, 0, 0,
-    utf16_t(name)
+    0, 0, 0, bold == false ? FW_NORMAL : FW_BOLD, italic, underline, 0, 0, 0, 0, 0, 0,
+    utf16_t(family)
   );
 }
 
-bool Font::create(const string &name, unsigned size, Font::Style style) {
-  font->font = Font_createFont(
-    name, size,
-    (style & Font::Style::Bold) == Font::Style::Bold,
-    (style & Font::Style::Italic) == Font::Style::Italic
-  );
-  return font->font;
+void pFont::setBold(bool bold) {
+  if(hfont) { DeleteObject(hfont); hfont = 0; }
+  hfont = Font_createFont(font.state.family, font.state.size, font.state.bold, font.state.italic, font.state.underline);
 }
 
-Font::Font() {
-  font = new Font::Data;
-  font->font = 0;
+void pFont::setFamily(const string &family) {
+  if(hfont) { DeleteObject(hfont); hfont = 0; }
+  hfont = Font_createFont(font.state.family, font.state.size, font.state.bold, font.state.italic, font.state.underline);
 }
 
-Font::~Font() {
-  if(font->font) DeleteObject(font->font);
-  delete font;
+void pFont::setItalic(bool italic) {
+  if(hfont) { DeleteObject(hfont); hfont = 0; }
+  hfont = Font_createFont(font.state.family, font.state.size, font.state.bold, font.state.italic, font.state.underline);
+}
+
+void pFont::setSize(unsigned size) {
+  if(hfont) { DeleteObject(hfont); hfont = 0; }
+  hfont = Font_createFont(font.state.family, font.state.size, font.state.bold, font.state.italic, font.state.underline);
+}
+
+void pFont::setUnderline(bool underline) {
+  if(hfont) { DeleteObject(hfont); hfont = 0; }
+  hfont = Font_createFont(font.state.family, font.state.size, font.state.bold, font.state.italic, font.state.underline);
+}
+
+void pFont::constructor() {
+  hfont = 0;
 }

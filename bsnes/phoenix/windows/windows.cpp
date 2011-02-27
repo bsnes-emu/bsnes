@@ -180,7 +180,7 @@ void pOS::initialize() {
   wc.lpfnWndProc = OS_windowProc;
   wc.lpszClassName = L"phoenix_window";
   wc.lpszMenuName = 0;
-  wc.style = 0;
+  wc.style = CS_HREDRAW | CS_VREDRAW;
   RegisterClass(&wc);
 
   wc.cbClsExtra = 0;

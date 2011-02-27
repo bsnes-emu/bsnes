@@ -1,14 +1,17 @@
-bool Font::create(const string &name, unsigned size, Font::Style style) {
-  font->setFamily(QString::fromUtf8(name));
-  font->setPointSize(size);
-  font->setBold((style & Style::Bold) == Style::Bold);
-  font->setItalic((style & Style::Italic) == Style::Italic);
+void pFont::setBold(bool bold) { update(); }
+void pFont::setFamily(const string &family) { update(); }
+void pFont::setItalic(bool italic) { update(); }
+void pFont::setSize(unsigned size) { update(); }
+void pFont::setUnderline(bool underline) { update(); }
+
+void pFont::constructor() {
+  qtFont = new QFont;
 }
 
-Font::Font() {
-  font = new Font::Data(*this);
-}
-
-Font::~Font() {
-  delete font;
+void pFont::update() {
+  qtFont->setFamily(QString::fromUtf8(font.state.family));
+  qtFont->setPointSize(font.state.size);
+  qtFont->setBold(font.state.bold);
+  qtFont->setItalic(font.state.italic);
+  qtFont->setUnderline(font.state.underline);
 }

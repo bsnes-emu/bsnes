@@ -1,96 +1,160 @@
-void Window::create(unsigned x, unsigned y, unsigned width, unsigned height, const string &text) {
-  widget->window = CreateWindowEx(
-    0, L"phoenix_window", utf16_t(text),
-    WS_POPUP | WS_SYSMENU | WS_CAPTION | WS_MINIMIZEBOX,
-    x, y, width, height,
-    0, 0, GetModuleHandle(0), 0
-  );
-  window->menu = CreateMenu();
-  window->status = CreateWindowEx(
-    0, STATUSCLASSNAME, L"",
-    WS_CHILD,
-    0, 0, 0, 0,
-    widget->window, 0, GetModuleHandle(0), 0
-  );
-  //StatusBar will be capable of receiving tab focus if it is not disabled
-  SetWindowLongPtr(window->status, GWL_STYLE, GetWindowLong(window->status, GWL_STYLE) | WS_DISABLED);
-  resize(width, height);
-  SetWindowLongPtr(widget->window, GWLP_USERDATA, (LONG_PTR)this);
+static const unsigned FixedStyle = WS_SYSMENU | WS_CAPTION | WS_MINIMIZEBOX | WS_BORDER;
+static const unsigned ResizableStyle = WS_SYSMENU | WS_CAPTION | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_THICKFRAME;
+
+void pWindow::append(Layout &layout) {
+  layout.setParent(window);
+  Geometry geom = window.state.geometry;
+  geom.x = geom.y = 0;
+  layout.setGeometry(geom);
 }
 
-void Window::setDefaultFont(Font &font) {
-  window->defaultFont = font.font->font;
+void pWindow::append(Menu &menu) {
+  updateMenu();
 }
 
-void Window::setFont(Font &font) {
-  SendMessage(window->status, WM_SETFONT, (WPARAM)font.font->font, 0);
+void pWindow::append(Widget &widget) {
+  widget.p.setParent(window);
 }
 
-Geometry Window::geometry() {
-  RECT position, size;
-  GetWindowRect(widget->window, &position);
-  GetClientRect(widget->window, &size);
-  if(GetWindowLongPtr(window->status, GWL_STYLE) & WS_VISIBLE) {
-    RECT status;
-    GetClientRect(window->status, &status);
-    size.bottom -= status.bottom - status.top;
+bool pWindow::focused() {
+  return (GetForegroundWindow() == hwnd);
+}
+
+Geometry pWindow::frameMargin() {
+  unsigned style = window.state.resizable ? ResizableStyle : FixedStyle;
+  if(window.state.fullScreen) style = 0;
+  RECT rc = { 0, 0, 640, 480 };
+  AdjustWindowRect(&rc, style, window.state.menuVisible);
+  unsigned statusHeight = 0;
+  if(window.state.statusVisible) {
+    RECT src;
+    GetClientRect(hstatus, &src);
+    statusHeight = src.bottom - src.top;
   }
-  return Geometry(position.left, position.top, size.right, size.bottom);
+  return { abs(rc.left), abs(rc.top), (rc.right - rc.left) - 640, (rc.bottom - rc.top) + statusHeight - 480 };
 }
 
-void Window::setGeometry(unsigned x, unsigned y, unsigned width, unsigned height) {
-  bool isVisible = visible();
-  if(isVisible) setVisible(false);
-  SetWindowPos(widget->window, NULL, x, y, width, height, SWP_NOZORDER | SWP_FRAMECHANGED);
-  resize(width, height);
-  if(isVisible) setVisible(true);
-}
-
-void Window::setBackgroundColor(uint8_t red, uint8_t green, uint8_t blue) {
-  if(window->brush) DeleteObject(window->brush);
-  window->brushColor = RGB(red, green, blue);
-  window->brush = CreateSolidBrush(window->brushColor);
-}
-
-void Window::setTitle(const string &text) {
-  SetWindowText(widget->window, utf16_t(text));
-}
-
-void Window::setStatusText(const string &text) {
-  SendMessage(window->status, SB_SETTEXT, 0, (LPARAM)(wchar_t*)utf16_t(text));
-}
-
-void Window::setMenuVisible(bool visible) {
-  SetMenu(widget->window, visible ? window->menu : 0);
-  resize(window->width, window->height);
-}
-
-void Window::setStatusVisible(bool visible) {
-  ShowWindow(window->status, visible ? SW_SHOWNORMAL : SW_HIDE);
-  resize(window->width, window->height);
-}
-
-Window::Window() {
-  window = new Window::Data;
-  window->defaultFont = 0;
-  window->brush = 0;
-}
-
-void Window::resize(unsigned width, unsigned height) {
-  window->width = width;
-  window->height = height;
-
-  SetWindowPos(widget->window, NULL, 0, 0, width, height, SWP_NOZORDER | SWP_NOMOVE | SWP_FRAMECHANGED);
+Geometry pWindow::geometry() {
+  Geometry margin = frameMargin();
   RECT rc;
-  GetClientRect(widget->window, &rc);
-  width += width - (rc.right - rc.left);
-  height += height - (rc.bottom - rc.top);
+  GetWindowRect(hwnd, &rc);
 
-  if(GetWindowLongPtr(window->status, GWL_STYLE) & WS_VISIBLE) {
-    GetClientRect(window->status, &rc);
-    height += rc.bottom - rc.top;
+  signed x = rc.left + margin.x;
+  signed y = rc.top + margin.y;
+  unsigned width = (rc.right - rc.left) - margin.width;
+  unsigned height = (rc.bottom - rc.top) - margin.height;
+
+  return { x, y, width, height };
+}
+
+void pWindow::setBackgroundColor(uint8_t red, uint8_t green, uint8_t blue) {
+  if(brush) DeleteObject(brush);
+  brushColor = RGB(red, green, blue);
+  brush = CreateSolidBrush(brushColor);
+}
+
+void pWindow::setFocused() {
+  if(window.state.visible == false) setVisible(true);
+  SetFocus(hwnd);
+}
+
+void pWindow::setFullScreen(bool fullScreen) {
+  locked = true;
+  if(fullScreen == false) {
+    SetWindowLongPtr(hwnd, GWL_STYLE, WS_VISIBLE | (window.state.resizable ? ResizableStyle : FixedStyle));
+    setGeometry(window.state.geometry);
+  } else {
+    SetWindowLongPtr(hwnd, GWL_STYLE, WS_VISIBLE | WS_POPUP);
+    Geometry margin = frameMargin();
+    setGeometry({ margin.x, margin.y, GetSystemMetrics(SM_CXSCREEN) - margin.width, GetSystemMetrics(SM_CYSCREEN) - margin.height });
+  }
+  locked = false;
+}
+
+void pWindow::setGeometry(const Geometry &geometry) {
+  locked = true;
+  Geometry margin = frameMargin();
+  SetWindowPos(
+    hwnd, NULL,
+    geometry.x - margin.x, geometry.y - margin.y,
+    geometry.width + margin.width, geometry.height + margin.height,
+    SWP_NOZORDER | SWP_FRAMECHANGED
+  );
+  SetWindowPos(hstatus, NULL, 0, 0, 0, 0, SWP_NOZORDER | SWP_FRAMECHANGED);
+  foreach(layout, window.state.layout) {
+    Geometry geom = this->geometry();
+    geom.x = geom.y = 0;
+    layout.setGeometry(geom);
+  }
+  locked = false;
+}
+
+void pWindow::setMenuFont(Font &font) {
+}
+
+void pWindow::setMenuVisible(bool visible) {
+  locked = true;
+  SetMenu(hwnd, visible ? hmenu : 0);
+  setGeometry(window.state.geometry);
+  locked = false;
+}
+
+void pWindow::setResizable(bool resizable) {
+  SetWindowLongPtr(hwnd, GWL_STYLE, window.state.resizable ? ResizableStyle : FixedStyle);
+  setGeometry(window.state.geometry);
+}
+
+void pWindow::setStatusFont(Font &font) {
+  SendMessage(hstatus, WM_SETFONT, (WPARAM)font.p.hfont, 0);
+}
+
+void pWindow::setStatusText(const string &text) {
+  SendMessage(hstatus, SB_SETTEXT, 0, (LPARAM)(wchar_t*)utf16_t(text));
+}
+
+void pWindow::setStatusVisible(bool visible) {
+  locked = true;
+  ShowWindow(hstatus, visible ? SW_SHOWNORMAL : SW_HIDE);
+  setGeometry(window.state.geometry);
+  locked = false;
+}
+
+void pWindow::setTitle(const string &text) {
+  SetWindowText(hwnd, utf16_t(text));
+}
+
+void pWindow::setVisible(bool visible) {
+  ShowWindow(hwnd, visible ? SW_SHOWNORMAL : SW_HIDE);
+}
+
+void pWindow::setWidgetFont(Font &font) {
+  foreach(widget, window.state.widget) {
+    if(!widget.state.font) widget.setFont(font);
+  }
+}
+
+void pWindow::constructor() {
+  brush = 0;
+
+  hwnd = CreateWindow(L"phoenix_window", L"", ResizableStyle, 128, 128, 256, 256, 0, 0, GetModuleHandle(0), 0);
+  hmenu = CreateMenu();
+  hstatus = CreateWindow(STATUSCLASSNAME, L"", WS_CHILD, 0, 0, 0, 0, hwnd, 0, GetModuleHandle(0), 0);
+
+  //status bar will be capable of receiving tab focus if it is not disabled
+  SetWindowLongPtr(hstatus, GWL_STYLE, GetWindowLong(hstatus, GWL_STYLE) | WS_DISABLED);
+
+  SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&window);
+  setGeometry({ 128, 128, 256, 256 });
+}
+
+void pWindow::updateMenu() {
+  if(hmenu) DestroyMenu(hmenu);
+  hmenu = CreateMenu();
+
+  foreach(menu, window.state.menu) {
+    menu.p.update(window, hmenu);
+    AppendMenu(hmenu, MF_STRING | MF_POPUP, (UINT_PTR)menu.p.hmenu, utf16_t(menu.state.text));
   }
 
-  SetWindowPos(widget->window, NULL, 0, 0, width, height, SWP_NOZORDER | SWP_NOMOVE | SWP_FRAMECHANGED);
-  SetWindowPos(window->status, NULL, 0, 0, 0, 0, SWP_NOZORDER | SWP_FRAMECHANGED);
+  SetMenu(hwnd, window.state.menuVisible ? hmenu : 0);
 }

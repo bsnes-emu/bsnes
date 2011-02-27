@@ -1,288 +1,337 @@
-namespace phoenix {
+struct pFont;
+struct pWindow;
+struct pMenu;
+struct pLayout;
+struct pWidget;
 
-struct Window;
+struct pObject {
+  unsigned id;
+  bool locked;
+  static array<pObject*> objects;
 
-struct Object {
-  Object();
-  Object& operator=(const Object&) = delete;
-  Object(const Object&) = delete;
-//private:
-  struct Data;
-  Data *object;
-private:
-  virtual void unused();
+  pObject();
+  static pObject* find(unsigned id);
+  virtual void unused() {}
 };
 
-struct Geometry {
-  unsigned x, y;
-  unsigned width, height;
-  inline Geometry() : x(0), y(0), width(0), height(0) {}
-  inline Geometry(unsigned x, unsigned y, unsigned width, unsigned height) : x(x), y(y), width(width), height(height) {}
-};
-
-struct Font : Object {
-  enum class Style : unsigned {
-    None = 0,
-    Bold = 1,
-    Italic = 2,
+struct pOS : public pObject {
+  struct State {
+    Font defaultFont;
   };
-  bool create(const nall::string &name, unsigned size, Font::Style style = Style::None);
-  Font();
-  ~Font();
-//private:
-  struct Data;
-  Data *font;
-};
+  static State *state;
 
-inline Font::Style operator|(Font::Style a, Font::Style b) { return (Font::Style)((unsigned)a | (unsigned)b); }
-inline Font::Style operator&(Font::Style a, Font::Style b) { return (Font::Style)((unsigned)a & (unsigned)b); }
-
-struct Action : Object {
-  virtual bool enabled() = 0;
-  virtual void setEnabled(bool enabled = true) = 0;
-  Action();
-//private:
-  struct Data;
-  Data *action;
-};
-
-struct Menu : Action {
-  void create(Window &parent, const nall::string &text);
-  void create(Menu &parent, const nall::string &text);
-  bool enabled();
-  void setEnabled(bool enabled = true);
-};
-
-struct MenuSeparator : Action {
-  void create(Menu &parent);
-  bool enabled();
-  void setEnabled(bool enabled = true);
-};
-
-struct MenuItem : Action {
-  nall::function<void ()> onTick;
-  void create(Menu &parent, const nall::string &text);
-  bool enabled();
-  void setEnabled(bool enabled = true);
-};
-
-struct MenuCheckItem : Action {
-  nall::function<void ()> onTick;
-  void create(Menu &parent, const nall::string &text);
-  bool enabled();
-  void setEnabled(bool enabled = true);
-  bool checked();
-  void setChecked(bool checked = true);
-};
-
-struct MenuRadioItem : Action {
-  nall::function<void ()> onTick;
-  void create(Menu &parent, const nall::string &text);
-  void create(MenuRadioItem &parent, const nall::string &text);
-  bool enabled();
-  void setEnabled(bool enabled = true);
-  bool checked();
-  void setChecked();
-};
-
-struct Widget : Object {
-  virtual void setFont(Font &font);
-  bool visible();
-  void setVisible(bool visible = true);
-  bool enabled();
-  void setEnabled(bool enabled = true);
-  bool focused();
-  void setFocused();
-  virtual void setGeometry(unsigned x, unsigned y, unsigned width, unsigned height);
-  Widget();
-//private:
-  struct Data;
-  Data *widget;
-};
-
-struct Window : Widget {
-  nall::function<bool ()> onClose;
-  void create(unsigned x, unsigned y, unsigned width, unsigned height, const nall::string &text = "");
-  void setDefaultFont(Font &font);
-  void setFont(Font &font);
-  Geometry geometry();
-  void setGeometry(unsigned x, unsigned y, unsigned width, unsigned height);
-  void setBackgroundColor(uint8_t red, uint8_t green, uint8_t blue);
-  void setTitle(const nall::string &text);
-  void setStatusText(const nall::string &text);
-  void setMenuVisible(bool visible = true);
-  void setStatusVisible(bool visible = true);
-  Window();
-//private:
-  struct Data;
-  Data *window;
-  static Window None;
-  void resize(unsigned width, unsigned height);
-};
-
-struct Button : Widget {
-  nall::function<void ()> onTick;
-  void create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const nall::string &text = "");
-};
-
-struct Canvas : Widget {
-  void create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height);
-  uint32_t* buffer();
-  void redraw();
-  Canvas();
-  ~Canvas();
-//private:
-  struct Data;
-  Data *canvas;
-};
-
-struct CheckBox : Widget {
-  nall::function<void ()> onTick;
-  void create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const nall::string &text = "");
-  bool checked();
-  void setChecked(bool checked = true);
-};
-
-struct ComboBox : Widget {
-  nall::function<void ()> onChange;
-  void create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const nall::string &text = "");
-  void reset();
-  void addItem(const nall::string &text);
-  unsigned selection();
-  void setSelection(unsigned item);
-  ComboBox();
-//private:
-  struct Data;
-  Data *comboBox;
-};
-
-struct EditBox : Widget {
-  nall::function<void ()> onChange;
-  void create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const nall::string &text = "");
-  nall::string getText();
-  void setText(const nall::string &text);
-  void setEditable(bool editable = true);
-  void setWordWrap(bool wordWrap = true);
-  EditBox();
-//private:
-  struct Data;
-  Data *editBox;
-};
-
-struct HorizontalSlider : Widget {
-  nall::function<void ()> onChange;
-  void create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, unsigned length);
-  unsigned position();
-  void setPosition(unsigned position);
-  HorizontalSlider();
-//private:
-  struct Data;
-  Data *horizontalSlider;
-};
-
-struct Label : Widget {
-  void create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const nall::string &text = "");
-  void setText(const nall::string &text);
-};
-
-struct ListBox : Widget {
-  nall::function<void ()> onActivate;
-  nall::function<void ()> onChange;
-  nall::function<void (unsigned)> onTick;
-  void create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const nall::string &text = "");
-  void setHeaderVisible(bool headerVisible = true);
-  void setCheckable(bool checkable = true);
-  void reset();
-  void resizeColumnsToContent();
-  void addItem(const nall::string &text);
-  void setItem(unsigned row, const nall::string &text);
-  bool checked(unsigned row);
-  void setChecked(unsigned row, bool checked = true);
-  nall::optional<unsigned> selection();
-  void setSelection(unsigned row);
-  ListBox();
-//private:
-  struct Data;
-  Data *listBox;
-};
-
-struct ProgressBar : Widget {
-  void create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height);
-  unsigned position();
-  void setPosition(unsigned position);
-};
-
-struct RadioBox : Widget {
-  nall::function<void ()> onTick;
-  void create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const nall::string &text = "");
-  void create(RadioBox &parent, unsigned x, unsigned y, unsigned width, unsigned height, const nall::string &text = "");
-  bool checked();
-  void setChecked();
-  RadioBox();
-//private:
-  struct Data;
-  Data *radioBox;
-};
-
-struct TextBox : Widget {
-  nall::function<void ()> onActivate;
-  nall::function<void ()> onChange;
-  void create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, const nall::string &text = "");
-  nall::string text();
-  void setText(const nall::string &text);
-  void setEditable(bool editable = true);
-};
-
-struct VerticalSlider : Widget {
-  nall::function<void ()> onChange;
-  void create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height, unsigned length);
-  unsigned position();
-  void setPosition(unsigned position);
-  VerticalSlider();
-//private:
-  struct Data;
-  Data *verticalSlider;
-};
-
-struct Viewport : Widget {
-  void create(Window &parent, unsigned x, unsigned y, unsigned width, unsigned height);
-  uintptr_t handle();
-};
-
-struct MessageWindow : Object {
-  enum class Buttons : unsigned {
-    Ok,
-    OkCancel,
-    YesNo,
-  };
-  enum class Response : unsigned {
-    Ok,
-    Cancel,
-    Yes,
-    No,
-  };
-  static Response information(Window &parent, const nall::string &text, Buttons = Buttons::Ok);
-  static Response question(Window &parent, const nall::string &text, Buttons = Buttons::YesNo);
-  static Response warning(Window &parent, const nall::string &text, Buttons = Buttons::Ok);
-  static Response critical(Window &parent, const nall::string &text, Buttons = Buttons::Ok);
-};
-
-struct OS : Object {
-  static bool pending();
-  static void run();
+  static Geometry availableGeometry();
+  static Geometry desktopGeometry();
+  static string fileLoad(Window &parent, const string &path, const lstring &filter);
+  static string fileSave(Window &parent, const string &path, const lstring &filter);
+  static string folderSelect(Window &parent, const string &path);
   static void main();
+  static bool pendingEvents();
+  static void processEvents();
   static void quit();
-  static unsigned desktopWidth();
-  static unsigned desktopHeight();
-  static nall::string folderSelect(Window &parent, const nall::string &path = "");
-  static nall::string fileOpen(Window &parent, const nall::string &filter, const nall::string &path = "");
-  static nall::string fileSave(Window &parent, const nall::string &filter, const nall::string &path = "");
-//private:
+
   static void initialize();
-  struct Data;
-  static Data *os;
-  static Object* findObject(unsigned id);
-  friend class Object;
 };
 
+struct pFont : public pObject {
+  Font &font;
+  HFONT hfont;
+
+  void setBold(bool bold);
+  void setFamily(const string &family);
+  void setItalic(bool italic);
+  void setSize(unsigned size);
+  void setUnderline(bool underline);
+
+  pFont(Font &font) : font(font) {}
+  void constructor();
+};
+
+struct pMessageWindow : public pObject {
+  static MessageWindow::Response information(Window &parent, const string &text, MessageWindow::Buttons buttons);
+  static MessageWindow::Response question(Window &parent, const string &text, MessageWindow::Buttons buttons);
+  static MessageWindow::Response warning(Window &parent, const string &text, MessageWindow::Buttons buttons);
+  static MessageWindow::Response critical(Window &parent, const string &text, MessageWindow::Buttons buttons);
+};
+
+struct pWindow : public pObject {
+  Window &window;
+  HWND hwnd;
+  HMENU hmenu;
+  HWND hstatus;
+  HBRUSH brush;
+  COLORREF brushColor;
+
+  void append(Layout &layout);
+  void append(Menu &menu);
+  void append(Widget &widget);
+  bool focused();
+  Geometry frameMargin();
+  Geometry geometry();
+  void setBackgroundColor(uint8_t red, uint8_t green, uint8_t blue);
+  void setFocused();
+  void setFullScreen(bool fullScreen);
+  void setGeometry(const Geometry &geometry);
+  void setMenuFont(Font &font);
+  void setMenuVisible(bool visible);
+  void setResizable(bool resizable);
+  void setStatusFont(Font &font);
+  void setStatusText(const string &text);
+  void setStatusVisible(bool visible);
+  void setTitle(const string &text);
+  void setVisible(bool visible);
+  void setWidgetFont(Font &font);
+
+  pWindow(Window &window) : window(window) {}
+  void constructor();
+  void updateMenu();
+};
+
+struct pAction : public pObject {
+  Action &action;
+  HMENU parentMenu;
+  Window *parentWindow;
+
+  void setEnabled(bool enabled);
+  void setVisible(bool visible);
+
+  pAction(Action &action) : action(action) {}
+  void constructor();
+};
+
+struct pMenu : public pAction {
+  Menu &menu;
+  HMENU hmenu;
+
+  void append(Action &action);
+  void setText(const string &text);
+
+  pMenu(Menu &menu) : pAction(menu), menu(menu) {}
+  void constructor();
+  void update(Window &parentWindow, HMENU parentMenu);
+};
+
+struct pSeparator : public pAction {
+  Separator &separator;
+
+  pSeparator(Separator &separator) : pAction(separator), separator(separator) {}
+  void constructor();
+};
+
+struct pItem : public pAction {
+  Item &item;
+
+  void setText(const string &text);
+
+  pItem(Item &item) : pAction(item), item(item) {}
+  void constructor();
+};
+
+struct pCheckItem : public pAction {
+  CheckItem &checkItem;
+
+  bool checked();
+  void setChecked(bool checked);
+  void setText(const string &text);
+
+  pCheckItem(CheckItem &checkItem) : pAction(checkItem), checkItem(checkItem) {}
+  void constructor();
+};
+
+struct pRadioItem : public pAction {
+  RadioItem &radioItem;
+
+  bool checked();
+  void setChecked();
+  void setGroup(const reference_array<RadioItem&> &group);
+  void setText(const string &text);
+
+  pRadioItem(RadioItem &radioItem) : pAction(radioItem), radioItem(radioItem) {}
+  void constructor();
+};
+
+struct pWidget : public pObject {
+  Widget &widget;
+  HWND hwnd;
+
+  bool enabled();
+  void setEnabled(bool enabled);
+  void setFocused();
+  void setFont(Font &font);
+  virtual void setGeometry(const Geometry &geometry);
+  void setVisible(bool visible);
+
+  pWidget(Widget &widget) : widget(widget) {}
+  void constructor();
+  void setDefaultFont();
+  virtual void setParent(Window &parent);
+};
+
+struct pButton : public pWidget {
+  Button &button;
+
+  void setText(const string &text);
+
+  pButton(Button &button) : pWidget(button), button(button) {}
+  void constructor();
+  void setParent(Window &parent);
+};
+
+struct pCheckBox : public pWidget {
+  CheckBox &checkBox;
+
+  bool checked();
+  void setChecked(bool checked);
+  void setText(const string &text);
+
+  pCheckBox(CheckBox &checkBox) : pWidget(checkBox), checkBox(checkBox) {}
+  void constructor();
+  void setParent(Window &parent);
+};
+
+struct pComboBox : public pWidget {
+  ComboBox &comboBox;
+
+  void append(const string &text);
+  void reset();
+  unsigned selection();
+  void setSelection(unsigned row);
+
+  pComboBox(ComboBox &comboBox) : pWidget(comboBox), comboBox(comboBox) {}
+  void constructor();
+  void setGeometry(const Geometry &geometry);
+  void setParent(Window &parent);
+};
+
+struct pHexEdit : public pWidget {
+  HexEdit &hexEdit;
+  LRESULT CALLBACK (*windowProc)(HWND, UINT, LPARAM, WPARAM);
+
+  void setColumns(unsigned columns);
+  void setLength(unsigned length);
+  void setOffset(unsigned offset);
+  void setRows(unsigned rows);
+  void update();
+
+  pHexEdit(HexEdit &hexEdit) : pWidget(hexEdit), hexEdit(hexEdit) {}
+  void constructor();
+  bool keyPress(unsigned key);
+  void setParent(Window &parent);
+};
+
+struct pHorizontalSlider : public pWidget {
+  HorizontalSlider &horizontalSlider;
+
+  unsigned position();
+  void setLength(unsigned length);
+  void setPosition(unsigned position);
+
+  pHorizontalSlider(HorizontalSlider &horizontalSlider) : pWidget(horizontalSlider), horizontalSlider(horizontalSlider) {}
+  void constructor();
+  void setParent(Window &parent);
+};
+
+struct pLabel : public pWidget {
+  Label &label;
+
+  void setText(const string &text);
+
+  pLabel(Label &label) : pWidget(label), label(label) {}
+  void constructor();
+  void setParent(Window &parent);
+};
+
+struct pLineEdit : public pWidget {
+  LineEdit &lineEdit;
+
+  void setEditable(bool editable);
+  void setText(const string &text);
+  string text();
+
+  pLineEdit(LineEdit &lineEdit) : pWidget(lineEdit), lineEdit(lineEdit) {}
+  void constructor();
+  void setParent(Window &parent);
+};
+
+struct pListView : public pWidget {
+  ListView &listView;
+  bool lostFocus;
+
+  void append(const lstring &text);
+  void autoSizeColumns();
+  bool checked(unsigned row);
+  void modify(unsigned row, const lstring &text);
+  void reset();
+  bool selected();
+  unsigned selection();
+  void setCheckable(bool checkable);
+  void setChecked(unsigned row, bool checked);
+  void setHeaderText(const lstring &text);
+  void setHeaderVisible(bool visible);
+  void setSelected(bool selected);
+  void setSelection(unsigned row);
+
+  pListView(ListView &listView) : pWidget(listView), listView(listView) {}
+  void constructor();
+  void setGeometry(const Geometry &geometry);
+  void setParent(Window &parent);
+};
+
+struct pProgressBar : public pWidget {
+  ProgressBar &progressBar;
+
+  void setPosition(unsigned position);
+
+  pProgressBar(ProgressBar &progressBar) : pWidget(progressBar), progressBar(progressBar) {}
+  void constructor();
+  void setParent(Window &parent);
+};
+
+struct pRadioBox : public pWidget {
+  RadioBox &radioBox;
+
+  bool checked();
+  void setChecked();
+  void setGroup(const reference_array<RadioBox&> &group);
+  void setText(const string &text);
+
+  pRadioBox(RadioBox &radioBox) : pWidget(radioBox), radioBox(radioBox) {}
+  void constructor();
+  void setParent(Window &parent);
+};
+
+struct pTextEdit : public pWidget {
+  TextEdit &textEdit;
+
+  void setCursorPosition(unsigned position);
+  void setEditable(bool editable);
+  void setText(const string &text);
+  void setWordWrap(bool wordWrap);
+  string text();
+
+  pTextEdit(TextEdit &textEdit) : pWidget(textEdit), textEdit(textEdit) {}
+  void constructor();
+  void setParent(Window &parent);
+};
+
+struct pVerticalSlider : public pWidget {
+  VerticalSlider &verticalSlider;
+
+  unsigned position();
+  void setLength(unsigned length);
+  void setPosition(unsigned position);
+
+  pVerticalSlider(VerticalSlider &verticalSlider) : pWidget(verticalSlider), verticalSlider(verticalSlider) {}
+  void constructor();
+  void setParent(Window &parent);
+};
+
+struct pViewport : public pWidget {
+  Viewport &viewport;
+
+  uintptr_t handle();
+
+  pViewport(Viewport &viewport) : pWidget(viewport), viewport(viewport) {}
+  void constructor();
+  void setParent(Window &parent);
 };

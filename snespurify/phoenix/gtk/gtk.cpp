@@ -1,48 +1,136 @@
-#include <unistd.h>
-#include <pwd.h>
-#include <sys/stat.h>
+#include "gtk.hpp"
 
-#define None X11None
-#define Window X11Window
-
-#include <gtk/gtk.h>
-#include <gdk/gdkx.h>
-#include <cairo.h>
-#include <gdk/gdkkeysyms.h>
-
-#undef None
-#undef Window
-
-using namespace nall;
-
-namespace phoenix {
-
-#include "object.cpp"
+#include "settings.cpp"
 #include "font.cpp"
-#include "menu.cpp"
-#include "widget.cpp"
+#include "message-window.cpp"
 #include "window.cpp"
-#include "button.cpp"
-#include "canvas.cpp"
-#include "checkbox.cpp"
-#include "combobox.cpp"
-#include "editbox.cpp"
-#include "horizontalslider.cpp"
-#include "label.cpp"
-#include "listbox.cpp"
-#include "progressbar.cpp"
-#include "radiobox.cpp"
-#include "textbox.cpp"
-#include "verticalslider.cpp"
-#include "viewport.cpp"
-#include "messagewindow.cpp"
 
-Window Window::None;
+#include "action/action.cpp"
+#include "action/menu.cpp"
+#include "action/separator.cpp"
+#include "action/item.cpp"
+#include "action/check-item.cpp"
+#include "action/radio-item.cpp"
 
-void OS::initialize() {
-  static bool initialized = false;
-  if(initialized == true) return;
-  initialized = true;
+#include "widget/widget.cpp"
+#include "widget/button.cpp"
+#include "widget/check-box.cpp"
+#include "widget/combo-box.cpp"
+#include "widget/hex-edit.cpp"
+#include "widget/horizontal-slider.cpp"
+#include "widget/label.cpp"
+#include "widget/line-edit.cpp"
+#include "widget/list-view.cpp"
+#include "widget/progress-bar.cpp"
+#include "widget/radio-box.cpp"
+#include "widget/text-edit.cpp"
+#include "widget/vertical-slider.cpp"
+#include "widget/viewport.cpp"
+
+Geometry pOS::availableGeometry() {
+  //TODO: is there a GTK+ function for this?
+  //should return desktopGeometry() sans panels, toolbars, docks, etc.
+  Geometry geometry = desktopGeometry();
+  return { geometry.x + 64, geometry.y + 64, geometry.width - 128, geometry.height - 128 };
+}
+
+Geometry pOS::desktopGeometry() {
+  return {
+    0, 0,
+    gdk_screen_get_width(gdk_screen_get_default()),
+    gdk_screen_get_height(gdk_screen_get_default())
+  };
+}
+
+static string pOS_fileDialog(bool save, Window &parent, const string &path, const lstring &filter) {
+  string name;
+
+  GtkWidget *dialog = gtk_file_chooser_dialog_new(
+    save == 0 ? "Load File" : "Save File",
+    &parent != &Window::None ? GTK_WINDOW(parent.p.widget) : (GtkWindow*)0,
+    save == 0 ? GTK_FILE_CHOOSER_ACTION_OPEN : GTK_FILE_CHOOSER_ACTION_SAVE,
+    GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+    GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
+    (const gchar*)0
+  );
+
+  if(path) gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dialog), path);
+
+  foreach(filterItem, filter) {
+    GtkFileFilter *gtkFilter = gtk_file_filter_new();
+    gtk_file_filter_set_name(gtkFilter, filterItem);
+    lstring part;
+    part.split("(", filterItem);
+    part[1].rtrim<1>(")");
+    lstring list;
+    list.split(",", part[1]);
+    foreach(pattern, list) gtk_file_filter_add_pattern(gtkFilter, pattern);
+    gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog), gtkFilter);
+  }
+
+  if(gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT) {
+    char *temp = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
+    name = temp;
+    g_free(temp);
+  }
+
+  gtk_widget_destroy(dialog);
+  return name;
+}
+
+string pOS::fileLoad(Window &parent, const string &path, const lstring &filter) {
+  return pOS_fileDialog(0, parent, path, filter);
+}
+
+string pOS::fileSave(Window &parent, const string &path, const lstring &filter) {
+  return pOS_fileDialog(1, parent, path, filter);
+}
+
+string pOS::folderSelect(Window &parent, const string &path) {
+  string name;
+
+  GtkWidget *dialog = gtk_file_chooser_dialog_new(
+    "Select Folder",
+    &parent != &Window::None ? GTK_WINDOW(parent.p.widget) : (GtkWindow*)0,
+    GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
+    GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+    GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
+    (const gchar*)0
+  );
+
+  if(path) gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dialog), path);
+
+  if(gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT) {
+    char *temp = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
+    name = temp;
+    g_free(temp);
+  }
+
+  gtk_widget_destroy(dialog);
+  if(name == "") return "";
+  if(name.endswith("/") == false) name.append("/");
+  return name;
+}
+
+void pOS::main() {
+  gtk_main();
+}
+
+bool pOS::pendingEvents() {
+  return gtk_events_pending();
+}
+
+void pOS::processEvents() {
+  while(pendingEvents()) gtk_main_iteration_do(false);
+}
+
+void pOS::quit() {
+  settings.save();
+  gtk_main_quit();
+}
+
+void pOS::initialize() {
+  settings.load();
 
   int argc = 1;
   char *argv[2];
@@ -61,129 +149,4 @@ void OS::initialize() {
     "class \"GtkComboBox\" style \"phoenix-gtk\"\n"
     "class \"GtkTreeView\" style \"phoenix-gtk\"\n"
   );
-}
-
-bool OS::pending() {
-  return gtk_events_pending();
-}
-
-void OS::run() {
-  while(pending()) gtk_main_iteration_do(false);
-}
-
-void OS::main() {
-  gtk_main();
-}
-
-void OS::quit() {
-  gtk_main_quit();
-}
-
-unsigned OS::desktopWidth() {
-  return gdk_screen_get_width(gdk_screen_get_default());
-}
-
-unsigned OS::desktopHeight() {
-  return gdk_screen_get_height(gdk_screen_get_default());
-}
-
-string OS::folderSelect(Window &parent, const string &path) {
-  string name;
-
-  GtkWidget *dialog = gtk_file_chooser_dialog_new(
-    "Select Folder",
-    &parent != &Window::None ? GTK_WINDOW(parent.object->widget) : (GtkWindow*)0,
-    GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
-    GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-    GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
-    (const gchar*)0
-  );
-
-  if(path) gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dialog), path);
-
-  if(gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT) {
-    char *temp = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
-    name = temp;
-    g_free(temp);
-  }
-
-  gtk_widget_destroy(dialog);
-  if(name.endswith("/") == false) name.append("/");
-  return name;
-}
-
-string OS::fileOpen(Window &parent, const string &filter, const string &path) {
-  string name;
-
-  GtkWidget *dialog = gtk_file_chooser_dialog_new(
-    "Open File",
-    &parent != &Window::None ? GTK_WINDOW(parent.object->widget) : (GtkWindow*)0,
-    GTK_FILE_CHOOSER_ACTION_OPEN,
-    GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-    GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
-    (const gchar*)0
-  );
-
-  if(path) gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dialog), path);
-
-  lstring list;
-  list.split("\n", filter);
-  foreach(item, list) {
-    lstring part;
-    part.split("\t", item);
-    GtkFileFilter *filter = gtk_file_filter_new();
-    gtk_file_filter_set_name(filter, string(part[0], " (", part[1], ")"));
-    lstring patterns;
-    patterns.split(",", part[1]);
-    foreach(pattern, patterns) gtk_file_filter_add_pattern(filter, pattern);
-    gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog), filter);
-  }
-
-  if(gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT) {
-    char *temp = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
-    name = temp;
-    g_free(temp);
-  }
-
-  gtk_widget_destroy(dialog);
-  return name;
-}
-
-string OS::fileSave(Window &parent, const string &filter, const string &path) {
-  string name;
-
-  GtkWidget *dialog = gtk_file_chooser_dialog_new(
-    "Save File",
-    &parent != &Window::None ? GTK_WINDOW(parent.object->widget) : (GtkWindow*)0,
-    GTK_FILE_CHOOSER_ACTION_SAVE,
-    GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-    GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
-    (const gchar*)0
-  );
-
-  if(path) gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dialog), path);
-
-  lstring list;
-  list.split("\n", filter);
-  foreach(item, list) {
-    lstring part;
-    part.split("\t", item);
-    GtkFileFilter *filter = gtk_file_filter_new();
-    gtk_file_filter_set_name(filter, string(part[0], " (", part[1], ")"));
-    lstring patterns;
-    patterns.split(",", part[1]);
-    foreach(pattern, patterns) gtk_file_filter_add_pattern(filter, pattern);
-    gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog), filter);
-  }
-
-  if(gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT) {
-    char *temp = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
-    name = temp;
-    g_free(temp);
-  }
-
-  gtk_widget_destroy(dialog);
-  return name;
-}
-
 }

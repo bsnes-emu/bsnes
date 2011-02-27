@@ -30,7 +30,8 @@
 Geometry pOS::availableGeometry() {
   //TODO: is there a GTK+ function for this?
   //should return desktopGeometry() sans panels, toolbars, docks, etc.
-  return desktopGeometry();
+  Geometry geometry = desktopGeometry();
+  return { geometry.x + 64, geometry.y + 64, geometry.width - 128, geometry.height - 128 };
 }
 
 Geometry pOS::desktopGeometry() {

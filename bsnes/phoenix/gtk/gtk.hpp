@@ -3,6 +3,8 @@ struct Settings : public configuration {
   unsigned frameGeometryY;
   unsigned frameGeometryWidth;
   unsigned frameGeometryHeight;
+  unsigned menuGeometryHeight;
+  unsigned statusGeometryHeight;
 
   void load();
   void save();
@@ -89,7 +91,8 @@ struct pWindow : public pObject {
 
   pWindow(Window &window) : window(window) {}
   void constructor();
-  void updateFrameGeometry();
+  unsigned menuHeight();
+  unsigned statusHeight();
 };
 
 struct pAction : public pObject {

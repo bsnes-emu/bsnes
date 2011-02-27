@@ -1,128 +1,128 @@
-#include <QApplication>
-#include <QtGui>
-using namespace nall;
-
-namespace phoenix {
-
 #include "qt.moc.hpp"
 #include "qt.moc"
 
-#include "object.cpp"
+#include "settings.cpp"
 #include "font.cpp"
-#include "menu.cpp"
-#include "widget.cpp"
+#include "message-window.cpp"
 #include "window.cpp"
-#include "button.cpp"
-#include "canvas.cpp"
-#include "checkbox.cpp"
-#include "combobox.cpp"
-#include "editbox.cpp"
-#include "horizontalslider.cpp"
-#include "label.cpp"
-#include "listbox.cpp"
-#include "progressbar.cpp"
-#include "radiobox.cpp"
-#include "textbox.cpp"
-#include "verticalslider.cpp"
-#include "viewport.cpp"
-#include "messagewindow.cpp"
 
-OS::Data *OS::os = 0;
-Window Window::None;
+#include "action/action.cpp"
+#include "action/menu.cpp"
+#include "action/separator.cpp"
+#include "action/item.cpp"
+#include "action/check-item.cpp"
+#include "action/radio-item.cpp"
 
-void OS::initialize() {
-  static bool initialized = false;
-  if(initialized == true) return;
-  initialized = true;
+#include "widget/widget.cpp"
+#include "widget/button.cpp"
+#include "widget/check-box.cpp"
+#include "widget/combo-box.cpp"
+#include "widget/hex-edit.cpp"
+#include "widget/horizontal-slider.cpp"
+#include "widget/label.cpp"
+#include "widget/line-edit.cpp"
+#include "widget/list-view.cpp"
+#include "widget/progress-bar.cpp"
+#include "widget/radio-box.cpp"
+#include "widget/text-edit.cpp"
+#include "widget/vertical-slider.cpp"
+#include "widget/viewport.cpp"
 
-  os = new OS::Data;
+QApplication *pOS::application = 0;
+
+Geometry pOS::availableGeometry() {
+  QRect rect = QApplication::desktop()->availableGeometry();
+  return { rect.x(), rect.y(), rect.width(), rect.height() };
+}
+
+Geometry pOS::desktopGeometry() {
+  QRect rect = QApplication::desktop()->screenGeometry();
+  return { 0, 0, rect.width(), rect.height() };
+}
+
+string pOS::fileLoad(Window &parent, const string &path, const lstring &filter) {
+  string filterList;
+  foreach(item, filter) {
+    filterList.append(item);
+    filterList.append(";;");
+  }
+  filterList.rtrim<1>(";;");
+
+  //convert filter list from phoenix to Qt format, example:
+  //"Text, XML files (*.txt,*.xml)" -> "Text, XML files (*.txt *.xml)"
+  signed parenthesis = 0;
+  foreach(n, filterList) {
+    if(n == '(') parenthesis++;
+    if(n == ')') parenthesis--;
+    if(n == ',' && parenthesis) n = ' ';
+  }
+
+  QString filename = QFileDialog::getOpenFileName(
+    &parent != &Window::None ? parent.p.qtWindow : 0, "Load File",
+    QString::fromUtf8(path), QString::fromUtf8(filterList)
+  );
+  return filename.toUtf8().constData();
+}
+
+string pOS::fileSave(Window &parent, const string &path, const lstring &filter) {
+  string filterList;
+  foreach(item, filter) {
+    filterList.append(item);
+    filterList.append(";;");
+  }
+  filterList.rtrim<1>(";;");
+
+  //convert filter list from phoenix to Qt format, example:
+  //"Text, XML files (*.txt,*.xml)" -> "Text, XML files (*.txt *.xml)"
+  signed parenthesis = 0;
+  foreach(n, filterList) {
+    if(n == '(') parenthesis++;
+    if(n == ')') parenthesis--;
+    if(n == ',' && parenthesis) n = ' ';
+  }
+
+  QString filename = QFileDialog::getSaveFileName(
+    &parent != &Window::None ? parent.p.qtWindow : 0, "Save File",
+    QString::fromUtf8(path), QString::fromUtf8(filterList)
+  );
+  return filename.toUtf8().constData();
+}
+
+string pOS::folderSelect(Window &parent, const string &path) {
+  QString directory = QFileDialog::getExistingDirectory(
+    &parent != &Window::None ? parent.p.qtWindow : 0, "Select Directory",
+    QString::fromUtf8(path), QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks
+  );
+  string name = directory.toUtf8().constData();
+  if(name != "" && name.endswith("/") == false) name.append("/");
+  return name;
+}
+
+void pOS::main() {
+  QApplication::exec();
+}
+
+bool pOS::pendingEvents() {
+  return QApplication::hasPendingEvents();
+}
+
+void pOS::processEvents() {
+  while(pendingEvents()) QApplication::processEvents();
+}
+
+void pOS::quit() {
+  settings.save();
+  QApplication::quit();
+}
+
+void pOS::initialize() {
+  settings.load();
+
   static int argc = 1;
   static char *argv[2];
   argv[0] = new char[8];
   argv[1] = 0;
   strcpy(argv[0], "phoenix");
   char **argvp = argv;
-  os->application = new QApplication(argc, argvp);
-}
-
-bool OS::pending() {
-  return QApplication::hasPendingEvents();
-}
-
-void OS::run() {
-  QApplication::processEvents();
-}
-
-void OS::main() {
-  QApplication::exec();
-}
-
-void OS::quit() {
-  QApplication::quit();
-}
-
-unsigned OS::desktopWidth() {
-  return QApplication::desktop()->screenGeometry().width();
-}
-
-unsigned OS::desktopHeight() {
-  return QApplication::desktop()->screenGeometry().height();
-}
-
-string OS::folderSelect(Window &parent, const string &path) {
-  QString directory = QFileDialog::getExistingDirectory(
-    &parent != &Window::None ? parent.window : 0, "Select Directory",
-    QString::fromUtf8(path), QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks
-  );
-  string name = directory.toUtf8().constData();
-  if(name.endswith("/") == false) name.append("/");
-  return name;
-}
-
-string OS::fileOpen(Window &parent, const string &filter, const string &path) {
-  string filters;
-  lstring list;
-  list.split("\n", filter);
-  foreach(item, list) {
-    lstring part;
-    part.split("\t", item);
-    if(part.size() != 2) continue;
-    part[1].replace(",", " ");
-    filters.append(part[0]);
-    filters.append(" (");
-    filters.append(part[1]);
-    filters.append(");;");
-  }
-  filters.rtrim(";;");
-
-  QString filename = QFileDialog::getOpenFileName(
-    &parent != &Window::None ? parent.window : 0, "Open File",
-    QString::fromUtf8(path), QString::fromUtf8(filters)
-  );
-  return filename.toUtf8().constData();
-}
-
-string OS::fileSave(Window &parent, const string &filter, const string &path) {
-  string filters;
-  lstring list;
-  list.split("\n", filter);
-  foreach(item, list) {
-    lstring part;
-    part.split("\t", item);
-    if(part.size() != 2) continue;
-    part[1].replace(",", " ");
-    filters.append(part[0]);
-    filters.append(" (");
-    filters.append(part[1]);
-    filters.append(");;");
-  }
-  filters.rtrim(";;");
-
-  QString filename = QFileDialog::getSaveFileName(
-    &parent != &Window::None ? parent.window : 0, "Save File",
-    QString::fromUtf8(path), QString::fromUtf8(filters)
-  );
-  return filename.toUtf8().constData();
-}
-
+  application = new QApplication(argc, argvp);
 }

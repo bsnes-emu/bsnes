@@ -7,13 +7,39 @@ static gint Window_close(Window *window) {
   return true;
 }
 
-static gboolean Window_configure(GtkWindow *widget, GdkEvent *event, Window *window) {
+static gboolean Window_configure(Window *window) {
   if(gtk_widget_get_realized(window->p.widget) == false) return false;
-  window->p.updateFrameGeometry();
 
-  signed eventX = event->configure.x, eventY = event->configure.y;
-  unsigned eventWidth = event->configure.width, eventHeight = event->configure.height;
+  //update geometry settings
+  Display *display = XOpenDisplay(0);
+  XWindowAttributes attributes, parentAttributes;
+  XGetWindowAttributes(display, GDK_WINDOW_XID(window->p.widget->window), &attributes);
+  X11Window rootWindow, parentWindow, *childWindow = 0;
+  unsigned int childCount;
+  XQueryTree(display, GDK_WINDOW_XID(window->p.widget->window), &rootWindow, &parentWindow, &childWindow, &childCount);
+  XGetWindowAttributes(display, parentWindow, &parentAttributes);
+  if(childWindow) XFree(childWindow);
+  XCloseDisplay(display);
 
+  settings.frameGeometryX = attributes.x;
+  settings.frameGeometryY = attributes.y;
+  settings.frameGeometryWidth = parentAttributes.width - attributes.width;
+  settings.frameGeometryHeight = parentAttributes.height - attributes.height;
+
+  GtkAllocation menuAllocation, statusAllocation;
+  gtk_widget_get_allocation(window->p.menu, &menuAllocation);
+  gtk_widget_get_allocation(window->p.status, &statusAllocation);
+
+  if(menuAllocation.height > 1) settings.menuGeometryHeight = menuAllocation.height;
+  if(statusAllocation.height > 1) settings.statusGeometryHeight = statusAllocation.height;
+
+  //calculate current window position
+  signed eventX = parentAttributes.x + attributes.x;
+  signed eventY = parentAttributes.y + attributes.y + window->p.menuHeight();
+  unsigned eventWidth = attributes.width;
+  unsigned eventHeight = attributes.height - window->p.menuHeight() - window->p.statusHeight();
+
+  //move
   if(window->p.locked == false && window->state.fullScreen == false) {
     if(window->state.geometry.x != eventX || window->state.geometry.y != eventY) {
       window->state.geometry.x = eventX;
@@ -23,9 +49,7 @@ static gboolean Window_configure(GtkWindow *widget, GdkEvent *event, Window *win
 
   if(window->onMove) window->onMove();
 
-  eventHeight -= window->state.menuVisible ? window->p.menu->allocation.height : 0;
-  eventHeight -= window->state.statusVisible ? window->p.status->allocation.height : 0;
-
+  //size
   if(window->p.locked == false && window->state.fullScreen == false) {
     if(window->state.geometry.width != eventWidth || window->state.geometry.height != eventHeight) {
       window->state.geometry.width = eventWidth;
@@ -40,6 +64,7 @@ static gboolean Window_configure(GtkWindow *widget, GdkEvent *event, Window *win
   }
 
   if(window->onSize) window->onSize();
+
   return false;
 }
 
@@ -66,14 +91,12 @@ void pWindow::append(Widget &widget) {
 }
 
 Geometry pWindow::frameMargin() {
-  unsigned menuHeight = window.state.menuVisible ? menu->allocation.height : 0;
-  unsigned statusHeight = window.state.statusVisible ? status->allocation.height : 0;
-  if(window.state.fullScreen) return { 0, menuHeight, 0, menuHeight + statusHeight };
+  if(window.state.fullScreen) return { 0, menuHeight(), 0, menuHeight() + statusHeight() };
   return {
     settings.frameGeometryX,
-    settings.frameGeometryY + menuHeight,
+    settings.frameGeometryY + menuHeight(),
     settings.frameGeometryWidth,
-    settings.frameGeometryHeight + menuHeight + statusHeight
+    settings.frameGeometryHeight + menuHeight() + statusHeight()
   };
 }
 
@@ -83,9 +106,7 @@ bool pWindow::focused() {
 
 Geometry pWindow::geometry() {
   if(window.state.fullScreen == true) {
-    unsigned menuHeight = window.state.menuVisible ? menu->allocation.height : 0;
-    unsigned statusHeight = window.state.statusVisible ? status->allocation.height : 0;
-    return { 0, menuHeight, OS::desktopGeometry().width, OS::desktopGeometry().height - menuHeight - statusHeight };
+    return { 0, menuHeight(), OS::desktopGeometry().width, OS::desktopGeometry().height - menuHeight() - statusHeight() };
   };
   return window.state.geometry;
 }
@@ -204,24 +225,13 @@ void pWindow::constructor() {
   setGeometry(window.state.geometry);
 
   g_signal_connect_swapped(G_OBJECT(widget), "delete-event", G_CALLBACK(Window_close), (gpointer)&window);
-  g_signal_connect(G_OBJECT(widget), "configure-event", G_CALLBACK(Window_configure), (gpointer)&window);
+  g_signal_connect_swapped(G_OBJECT(widget), "configure-event", G_CALLBACK(Window_configure), (gpointer)&window);
 }
 
-void pWindow::updateFrameGeometry() {
-  #if defined(PLATFORM_X)
-  Display *display = XOpenDisplay(0);
-  XWindowAttributes attributes, parentAttributes;
-  XGetWindowAttributes(display, GDK_WINDOW_XID(widget->window), &attributes);
-  X11Window rootWindow, parentWindow, *childWindow = 0;
-  unsigned int childCount;
-  XQueryTree(display, GDK_WINDOW_XID(widget->window), &rootWindow, &parentWindow, &childWindow, &childCount);
-  XGetWindowAttributes(display, parentWindow, &parentAttributes);
-  if(childWindow) XFree(childWindow);
-  XCloseDIsplay(display);
+unsigned pWindow::menuHeight() {
+  return window.state.menuVisible ? settings.menuGeometryHeight : 0;
+}
 
-  settings.frameGeometryX = attributes.x;
-  settings.frameGeometryY = attributes.y;
-  settings.frameGeometryWidth = parentAttributes.width - attributes.width;
-  settings.frameGeometryHeight = parentAttributes.height - attributes.height;
-  #endif
+unsigned pWindow::statusHeight() {
+  return window.state.statusVisible ? settings.statusGeometryHeight : 0;
 }

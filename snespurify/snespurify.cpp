@@ -6,23 +6,27 @@
 #include <nall/string.hpp>
 #include <nall/ups.hpp>
 #include <nall/vector.hpp>
-#include <nall/snes/info.hpp>
+#include <nall/snes/cartridge.hpp>
 using namespace nall;
 
 #include <phoenix/phoenix.hpp>
 using namespace phoenix;
 
-static const char applicationTitle[] = "snespurify v05";
+static const char applicationTitle[] = "snespurify v07";
 
 struct Application : Window {
   Font font;
+  VerticalLayout layout;
+  HorizontalLayout pathLayout;
   Label pathLabel;
-  TextBox pathBox;
+  LineEdit pathBox;
   Button pathScan;
   Button pathBrowse;
-  ListBox fileList;
+  ListView fileList;
+  HorizontalLayout controlLayout;
   Button selectAll;
   Button unselectAll;
+  Widget spacer;
   Button fixSelected;
 
   struct FileInfo {
@@ -44,34 +48,57 @@ struct Application : Window {
 
 void Application::main() {
   #if defined(PLATFORM_WIN)
-  font.create("Tahoma", 8);
+  font.setFamily("Tahoma");
+  font.setSize(8);
   #else
-  font.create("Sans", 8);
+  font.setFamily("Sans");
+  font.setSize(8);
   #endif
-  create(128, 128, 600, 360, applicationTitle);
-  setDefaultFont(font);
+  setTitle(applicationTitle);
+  setGeometry({ 128, 128, 600, 360 });
+  setWidgetFont(font);
 
-  unsigned x = 5, y = 5, width = 600, height = 25;
-  pathLabel.create(*this, x, y, 80, height, "Path to scan:");
-  pathBox.create(*this, x + 85, y, 335, height);
-  pathScan.create(*this, x + 425, y, 80, height, "Scan");
-  pathBrowse.create(*this, x + 510, y, 80, height, "Browse ..."); y += height + 5;
-  fileList.create(*this, x, y, 590, 290, "Filename\tProblem\tSolution"); y += 290 + 5;
-  selectAll.create(*this, x, y, 80, height, "Select All");
-  unselectAll.create(*this, x + 85, y, 80, height, "Clear All");
-  fixSelected.create(*this, 595 - 80, y, 80, height, "Correct"); y += height + 5;
+  pathLabel.setText("Path to scan:");
+  pathScan.setText("Scan");
+  pathBrowse.setText("Browse ...");
+  fileList.setHeaderText("Filename", "Problem", "Solution");
   fileList.setHeaderVisible();
   fileList.setCheckable();
+  selectAll.setText("Select All");
+  unselectAll.setText("Clear All");
+  fixSelected.setText("Correct");
 
-  onClose = []() {
-    OS::quit();
-    return true;
-  };
+  layout.setMargin(5);
+  pathLayout.append(pathLabel, 80, 0, 5);
+  pathLayout.append(pathBox, 0, 0, 5);
+  pathLayout.append(pathScan, 80, 0, 5);
+  pathLayout.append(pathBrowse, 80, 0);
+  layout.append(pathLayout, 0, 25, 5);
+  layout.append(fileList, 0, 0, 5);
+  controlLayout.append(selectAll, 80, 0, 5);
+  controlLayout.append(unselectAll, 80, 0, 5);
+  controlLayout.append(spacer, 0, 0, 5);
+  controlLayout.append(fixSelected, 80, 0);
+  layout.append(controlLayout, 0, 25);
+  append(layout);
+
+//  unsigned x = 5, y = 5, width = 600, height = 25;
+//  layout.append(pathLabel, x, y, 80, height);
+//  layout.append(pathBox, x + 85, y, 335, height);
+//  layout.append(pathScan, x + 425, y, 80, height);
+//  layout.append(pathBrowse, x + 510, y, 80, height); y += height + 5;
+//  layout.append(fileList, x, y, 590, 290); y += 290 + 5;
+//  layout.append(selectAll, x, y, 80, height);
+//  layout.append(unselectAll, x + 85, y, 80, height);
+//  layout.append(fixSelected, 595 - 80, y, 80, height); y += height + 5;
+//  setLayout(layout);
+
+  onClose = []() { OS::quit(); };
 
   pathBox.onActivate = pathScan.onTick = { &Application::scan, this };
 
   pathBrowse.onTick = []() {
-    string pathname = OS::folderSelect(application);
+    string pathname = OS::folderSelect(application, "");
     if(pathname != "") application.pathBox.setText(pathname);
   };
 
@@ -134,16 +161,16 @@ void Application::scan() {
 
   unsigned counter = 0;
   foreach(info, fileInfo) {
-    fileList.addItem({ notdir(info.filename), "\t", info.problem, "\t", info.solution });
+    fileList.append(notdir(info.filename), info.problem, info.solution);
     fileList.setChecked(counter++, true);
   }
-  fileList.resizeColumnsToContent();
+  fileList.autoSizeColumns();
 }
 
 void Application::scan(const string &pathname) {
   lstring files = directory::files(pathname);
   foreach(file, files) {
-    OS::run();
+    OS::processEvents();
     analyze({ pathname, file });
   }
 
@@ -165,19 +192,19 @@ void Application::analyze(const string &filename) {
   ) {
     filemap map(filename, filemap::mode::read);
     unsigned filesize = map.size();
-    snes_information information(map.data(), filesize);
+    SNESCartridge information(map.data(), filesize);
 
     //the ordering of rules is very important:
     //patches need to be created prior to removal of headers
     //headers need to be removed prior to renaming files (so header removal has correct filename)
     //etc.
     switch(information.type) {
-      case snes_information::TypeNormal:
-      case snes_information::TypeBsxSlotted:
-      case snes_information::TypeBsxBios:
-      case snes_information::TypeSufamiTurboBios:
-      case snes_information::TypeSuperGameBoy1Bios:
-      case snes_information::TypeSuperGameBoy2Bios: {
+      case SNESCartridge::TypeNormal:
+      case SNESCartridge::TypeBsxSlotted:
+      case SNESCartridge::TypeBsxBios:
+      case SNESCartridge::TypeSufamiTurboBios:
+      case SNESCartridge::TypeSuperGameBoy1Bios:
+      case SNESCartridge::TypeSuperGameBoy2Bios: {
         string ipsName = { nall::basename(filename), ".ips" };
         string upsName = { nall::basename(filename), ".ups" };
         if(file::exists(ipsName) == true && file::exists(upsName) == false) {
@@ -207,7 +234,7 @@ void Application::analyze(const string &filename) {
         break;
       }
 
-      case snes_information::TypeBsx: {
+      case SNESCartridge::TypeBsx: {
         if((filesize & 0x7fff) == 512) {
           FileInfo info;
           info.filename = filename;
@@ -227,7 +254,7 @@ void Application::analyze(const string &filename) {
         break;
       }
 
-      case snes_information::TypeSufamiTurbo: {
+      case SNESCartridge::TypeSufamiTurbo: {
         if(filename.endswith(".st") == false) {
           FileInfo info;
           info.filename = filename;
@@ -239,7 +266,7 @@ void Application::analyze(const string &filename) {
         break;
       }
 
-      case snes_information::TypeGameBoy: {
+      case SNESCartridge::TypeGameBoy: {
         if(filename.endswith(".gb") == false && filename.endswith(".gbc") == false && filename.endswith(".sgb") == false) {
           FileInfo info;
           info.filename = filename;
@@ -260,7 +287,7 @@ void Application::repair() {
 
   for(unsigned n = 0; n < fileInfo.size(); n++) {
     if(fileList.checked(n) == false) continue;
-    OS::run();
+    OS::processEvents();
 
     FileInfo &info = fileInfo[n];
     if(info.solution == "Create UPS patch") {

@@ -1,51 +1,174 @@
-#include <windows.h>
-#include <commctrl.h>
-#include <io.h>
-#include <direct.h>
-#include <shlobj.h>
-#include <nall/platform.hpp>
-#include <nall/utf8.hpp>
-using namespace nall;
-
-namespace phoenix {
+#include "windows.hpp"
 
 #include "object.cpp"
 #include "font.cpp"
-#include "menu.cpp"
-#include "widget.cpp"
+#include "message-window.cpp"
 #include "window.cpp"
-#include "button.cpp"
-#include "canvas.cpp"
-#include "checkbox.cpp"
-#include "combobox.cpp"
-#include "editbox.cpp"
-#include "horizontalslider.cpp"
-#include "label.cpp"
-#include "listbox.cpp"
-#include "progressbar.cpp"
-#include "radiobox.cpp"
-#include "textbox.cpp"
-#include "verticalslider.cpp"
-#include "viewport.cpp"
-#include "messagewindow.cpp"
 
-OS::Data *OS::os = 0;
-Window Window::None;
+#include "action/action.cpp"
+#include "action/menu.cpp"
+#include "action/separator.cpp"
+#include "action/item.cpp"
+#include "action/check-item.cpp"
+#include "action/radio-item.cpp"
+
+#include "widget/widget.cpp"
+#include "widget/button.cpp"
+#include "widget/check-box.cpp"
+#include "widget/combo-box.cpp"
+#include "widget/hex-edit.cpp"
+#include "widget/horizontal-slider.cpp"
+#include "widget/label.cpp"
+#include "widget/line-edit.cpp"
+#include "widget/list-view.cpp"
+#include "widget/progress-bar.cpp"
+#include "widget/radio-box.cpp"
+#include "widget/text-edit.cpp"
+#include "widget/vertical-slider.cpp"
+#include "widget/viewport.cpp"
 
 static void OS_keyboardProc(HWND, UINT, WPARAM, LPARAM);
-static LRESULT CALLBACK OS_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam);
+static LRESULT CALLBACK OS_windowProc(HWND, UINT, WPARAM, LPARAM);
 
-void OS::initialize() {
-  static bool initialized = false;
-  if(initialized == true) return;
-  initialized = true;
+pOS::State *pOS::state = 0;
 
-  InitCommonControls();
+Geometry pOS::availableGeometry() {
+  RECT rc;
+  SystemParametersInfo(SPI_GETWORKAREA, 0, &rc, 0);
+  return { rc.left, rc.top, rc.right - rc.left, rc.bottom - rc.top };
+}
+
+Geometry pOS::desktopGeometry() {
+  return { 0, 0, GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN) };
+}
+
+static string pOS_fileDialog(bool save, Window &parent, const string &path, const lstring &filter) {
+  string dir = path;
+  dir.replace("/", "\\");
+
+  string filterList;
+  foreach(filterItem, filter) {
+    lstring part;
+    part.split("(", filterItem);
+    if(part.size() != 2) { print("--", filterItem, "\n"); continue; }
+    part[1].rtrim<1>(")");
+    part[1].replace(" ", "");
+    part[1].transform(",", ";");
+    filterList.append(string(filterItem, "\t", part[1], "\t"));
+  }
+
+  utf16_t wfilter(filterList);
+  utf16_t wdir(dir);
+  wchar_t wfilename[PATH_MAX + 1] = L"";
+
+  wchar_t *p = wfilter;
+  while(*p != L'\0') {
+    if(*p == L'\t') *p = L'\0';
+    p++;
+  }
+
+  OPENFILENAME ofn;
+  memset(&ofn, 0, sizeof(OPENFILENAME));
+  ofn.lStructSize = sizeof(OPENFILENAME);
+  ofn.hwndOwner = &parent != &Window::None ? parent.p.hwnd : 0;
+  ofn.lpstrFilter = wfilter;
+  ofn.lpstrInitialDir = wdir;
+  ofn.lpstrFile = wfilename;
+  ofn.nMaxFile = PATH_MAX;
+  ofn.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_HIDEREADONLY;
+  ofn.lpstrDefExt = L"";
+
+  bool result = (save == false ? GetOpenFileName(&ofn) : GetSaveFileName(&ofn));
+  if(result == false) return "";
+  string name = utf8_t(wfilename);
+  name.transform("\\", "/");
+  return name;
+}
+
+string pOS::fileLoad(Window &parent, const string &path, const lstring &filter) {
+  return pOS_fileDialog(false, parent, path, filter);
+}
+
+string pOS::fileSave(Window &parent, const string &path, const lstring &filter) {
+  return pOS_fileDialog(true, parent, path, filter);
+}
+
+string pOS::folderSelect(Window &parent, const string &path) {
+  wchar_t wfilename[PATH_MAX + 1] = L"";
+  BROWSEINFO bi;
+  bi.hwndOwner = &parent != &Window::None ? parent.p.hwnd : 0;
+  bi.pidlRoot = NULL;
+  bi.pszDisplayName = wfilename;
+  bi.lpszTitle = L"";
+  bi.ulFlags = BIF_NEWDIALOGSTYLE | BIF_RETURNONLYFSDIRS;
+  bi.lpfn = NULL;
+  bi.lParam = 0;
+  bi.iImage = 0;
+  bool result = false;
+  LPITEMIDLIST pidl = SHBrowseForFolder(&bi);
+  if(pidl) {
+    if(SHGetPathFromIDList(pidl, wfilename)) {
+      result = true;
+      IMalloc *imalloc = 0;
+      if(SUCCEEDED(SHGetMalloc(&imalloc))) {
+        imalloc->Free(pidl);
+        imalloc->Release();
+      }
+    }
+  }
+  if(result == false) return "";
+  string name = utf8_t(wfilename);
+  if(name == "") return "";
+  name.transform("\\", "/");
+  if(name.endswith("/") == false) name.append("/");
+  return name;
+}
+
+void pOS::main() {
+  MSG msg;
+  while(GetMessage(&msg, 0, 0, 0)) {
+    if(msg.message == WM_KEYDOWN || msg.message == WM_KEYUP) {
+      OS_keyboardProc(msg.hwnd, msg.message, msg.wParam, msg.lParam);
+    }
+    if(!IsDialogMessage(GetParent(msg.hwnd) ? GetParent(msg.hwnd) : msg.hwnd, &msg)) {
+      TranslateMessage(&msg);
+      DispatchMessage(&msg);
+    }
+  }
+}
+
+bool pOS::pendingEvents() {
+  MSG msg;
+  return PeekMessage(&msg, 0, 0, 0, PM_NOREMOVE);
+}
+
+void pOS::processEvents() {
+  while(pendingEvents()) {
+    MSG msg;
+    if(PeekMessage(&msg, 0, 0, 0, PM_REMOVE)) {
+      if(msg.message == WM_KEYDOWN || msg.message == WM_KEYUP) {
+        OS_keyboardProc(msg.hwnd, msg.message, msg.wParam, msg.lParam);
+      }
+      if(!IsDialogMessage(GetParent(msg.hwnd) ? GetParent(msg.hwnd) : msg.hwnd, &msg)) {
+        TranslateMessage(&msg);
+        DispatchMessage(&msg);
+      }
+    }
+  }
+}
+
+void pOS::quit() {
+  PostQuitMessage(0);
+}
+
+void pOS::initialize() {
   CoInitialize(0);
+  InitCommonControls();
 
-  os = new OS::Data;
-  os->proportionalFont = Font_createFont("Tahoma", 8, false, false);
-  os->monospaceFont = Font_createFont("Courier New", 8, false, false);
+  state = new State;
+
+  state->defaultFont.setFamily("Tahoma");
+  state->defaultFont.setSize(8);
 
   WNDCLASS wc;
   wc.cbClsExtra = 0;
@@ -56,18 +179,6 @@ void OS::initialize() {
   wc.hInstance = GetModuleHandle(0);
   wc.lpfnWndProc = OS_windowProc;
   wc.lpszClassName = L"phoenix_window";
-  wc.lpszMenuName = 0;
-  wc.style = CS_HREDRAW | CS_VREDRAW;
-  RegisterClass(&wc);
-
-  wc.cbClsExtra = 0;
-  wc.cbWndExtra = 0;
-  wc.hbrBackground = CreateSolidBrush(RGB(0, 0, 0));
-  wc.hCursor = LoadCursor(0, IDC_ARROW);
-  wc.hIcon = LoadIcon(0, IDI_APPLICATION);
-  wc.hInstance = GetModuleHandle(0);
-  wc.lpfnWndProc = Canvas_windowProc;
-  wc.lpszClassName = L"phoenix_canvas";
   wc.lpszMenuName = 0;
   wc.style = CS_HREDRAW | CS_VREDRAW;
   RegisterClass(&wc);
@@ -97,293 +208,150 @@ void OS::initialize() {
   RegisterClass(&wc);
 }
 
-bool OS::pending() {
-  MSG msg;
-  return PeekMessage(&msg, 0, 0, 0, PM_NOREMOVE);
-}
-
-void OS::run() {
-  while(pending()) {
-    MSG msg;
-    if(PeekMessage(&msg, 0, 0, 0, PM_REMOVE)) {
-      if(msg.message == WM_KEYDOWN || msg.message == WM_KEYUP) {
-        OS_keyboardProc(msg.hwnd, msg.message, msg.wParam, msg.lParam);
-      }
-      if(!IsDialogMessage(GetParent(msg.hwnd) ? GetParent(msg.hwnd) : msg.hwnd, &msg)) {
-        TranslateMessage(&msg);
-        DispatchMessage(&msg);
-      }
-    }
-  }
-}
-
-void OS::main() {
-  MSG msg;
-  while(GetMessage(&msg, 0, 0, 0)) {
-    if(msg.message == WM_KEYDOWN || msg.message == WM_KEYUP) {
-      OS_keyboardProc(msg.hwnd, msg.message, msg.wParam, msg.lParam);
-    }
-    if(!IsDialogMessage(GetParent(msg.hwnd) ? GetParent(msg.hwnd) : msg.hwnd, &msg)) {
-      TranslateMessage(&msg);
-      DispatchMessage(&msg);
-    }
-  }
-}
-
-void OS::quit() {
-  PostQuitMessage(0);
-}
-
-unsigned OS::desktopWidth() {
-  return GetSystemMetrics(SM_CXSCREEN);
-}
-
-unsigned OS::desktopHeight() {
-  return GetSystemMetrics(SM_CYSCREEN);
-}
-
-string OS::folderSelect(Window &parent, const string &path) {
-  wchar_t wfilename[PATH_MAX + 1] = L"";
-  BROWSEINFO bi;
-  bi.hwndOwner = &parent != &Window::None ? parent.widget->window : 0;
-  bi.pidlRoot = NULL;
-  bi.pszDisplayName = wfilename;
-  bi.lpszTitle = L"";
-  bi.ulFlags = BIF_NEWDIALOGSTYLE | BIF_RETURNONLYFSDIRS;
-  bi.lpfn = NULL;
-  bi.lParam = 0;
-  bi.iImage = 0;
-  bool result = false;
-  LPITEMIDLIST pidl = SHBrowseForFolder(&bi);
-  if(pidl) {
-    if(SHGetPathFromIDList(pidl, wfilename)) {
-      result = true;
-      IMalloc *imalloc = 0;
-      if(SUCCEEDED(SHGetMalloc(&imalloc))) {
-        imalloc->Free(pidl);
-        imalloc->Release();
-      }
-    }
-  }
-  if(result == false) return "";
-  string name = utf8_t(wfilename);
-  name.transform("\\", "/");
-  if(name.endswith("/") == false) name.append("/");
-  return name;
-}
-
-string OS::fileOpen(Window &parent, const string &filter, const string &path) {
-  string dir = path;
-  dir.replace("/", "\\");
-
-  string filterInfo;
-  lstring type;
-  type.split("\n", filter);
-  for(unsigned i = 0; i < type.size(); i++) {
-    lstring part;
-    part.split("\t", type[i]);
-    if(part.size() != 2) continue;
-    filterInfo.append(part[0]);
-    filterInfo.append(" (");
-    filterInfo.append(part[1]);
-    filterInfo.append(")\t");
-    part[1].replace(",", ";");
-    filterInfo.append(part[1]);
-    filterInfo.append("\t");
-  }
-
-  utf16_t wfilter(filterInfo);
-  utf16_t wdir(dir);
-  wchar_t wfilename[PATH_MAX] = L"";
-
-  wchar_t *p = wfilter;
-  while(*p != L'\0') {
-    if(*p == L'\t') *p = L'\0';
-    p++;
-  }
-
-  OPENFILENAME ofn;
-  memset(&ofn, 0, sizeof(OPENFILENAME));
-  ofn.lStructSize = sizeof(OPENFILENAME);
-  ofn.hwndOwner = &parent != &Window::None ? parent.widget->window : 0;
-  ofn.lpstrFilter = wfilter;
-  ofn.lpstrInitialDir = wdir;
-  ofn.lpstrFile = wfilename;
-  ofn.nMaxFile = PATH_MAX;
-  ofn.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_HIDEREADONLY;
-  ofn.lpstrDefExt = L"";
-
-  bool result = GetOpenFileName(&ofn);
-  if(result == false) return "";
-  string name = utf8_t(wfilename);
-  name.transform("\\", "/");
-  return name;
-}
-
-string OS::fileSave(Window &parent, const string &filter, const string &path) {
-  string dir = path;
-  dir.replace("/", "\\");
-
-  string filterInfo;
-  lstring type;
-  type.split("\n", filter);
-  for(unsigned i = 0; i < type.size(); i++) {
-    lstring part;
-    part.split("\t", type[i]);
-    if(part.size() != 2) continue;
-    filterInfo.append(part[0]);
-    filterInfo.append(" (");
-    filterInfo.append(part[1]);
-    filterInfo.append(")\t");
-    part[1].replace(",", ";");
-    filterInfo.append(part[1]);
-    filterInfo.append("\t");
-  }
-
-  utf16_t wfilter(filterInfo);
-  utf16_t wdir(dir);
-  wchar_t wfilename[PATH_MAX] = L"";
-
-  wchar_t *p = wfilter;
-  while(*p != L'\0') {
-    if(*p == L'\t') *p = L'\0';
-    p++;
-  }
-
-  OPENFILENAME ofn;
-  memset(&ofn, 0, sizeof(OPENFILENAME));
-  ofn.lStructSize = sizeof(OPENFILENAME);
-  ofn.hwndOwner = &parent != &Window::None ? parent.widget->window : 0;
-  ofn.lpstrFilter = wfilter;
-  ofn.lpstrInitialDir = wdir;
-  ofn.lpstrFile = wfilename;
-  ofn.nMaxFile = PATH_MAX;
-  ofn.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_HIDEREADONLY;
-  ofn.lpstrDefExt = L"";
-
-  bool result = GetSaveFileName(&ofn);
-  if(result == false) return "";
-  string name = utf8_t(wfilename);
-  name.transform("\\", "/");
-  return name;
-}
-
 static void OS_keyboardProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
-  switch(msg) {
-    case WM_KEYDOWN: {
-      GUITHREADINFO info;
-      memset(&info, 0, sizeof(GUITHREADINFO));
-      info.cbSize = sizeof(GUITHREADINFO);
-      GetGUIThreadInfo(GetCurrentThreadId(), &info);
-      Object *object_ptr = (Object*)GetWindowLongPtr(info.hwndFocus, GWLP_USERDATA);
-      if(object_ptr) {
-        if(dynamic_cast<ListBox*>(object_ptr)) {
-          ListBox &listBox = (ListBox&)*object_ptr;
-          if(wparam == VK_RETURN) {
-            if(listBox.onActivate) listBox.onActivate();
-          }
-        } else if(dynamic_cast<TextBox*>(object_ptr)) {
-          TextBox &textBox = (TextBox&)*object_ptr;
-          if(wparam == VK_RETURN) {
-            if(textBox.onActivate) textBox.onActivate();
-          }
-        }
+  if(msg == WM_KEYDOWN) {
+    GUITHREADINFO info;
+    memset(&info, 0, sizeof(GUITHREADINFO));
+    info.cbSize = sizeof(GUITHREADINFO);
+    GetGUIThreadInfo(GetCurrentThreadId(), &info);
+    Object *object = (Object*)GetWindowLongPtr(info.hwndFocus, GWLP_USERDATA);
+    if(object == 0) return;
+    if(dynamic_cast<ListView*>(object)) {
+      ListView &listView = (ListView&)*object;
+      if(wparam == VK_RETURN) {
+        if(listView.onActivate) listView.onActivate();
+      }
+    } else if(dynamic_cast<LineEdit*>(object)) {
+      LineEdit &lineEdit = (LineEdit&)*object;
+      if(wparam == VK_RETURN) {
+        if(lineEdit.onActivate) lineEdit.onActivate();
       }
     }
   }
 }
 
 static LRESULT CALLBACK OS_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
-  Object *object_ptr = (Object*)GetWindowLongPtr(hwnd, GWLP_USERDATA);
-  if(!object_ptr || !dynamic_cast<Window*>(object_ptr)) return DefWindowProc(hwnd, msg, wparam, lparam);
-  Window &window = (Window&)*object_ptr;
+  Object *object = (Object*)GetWindowLongPtr(hwnd, GWLP_USERDATA);
+  if(!object || !dynamic_cast<Window*>(object)) return DefWindowProc(hwnd, msg, wparam, lparam);
+  Window &window = (Window&)*object;
 
   switch(msg) {
     case WM_CLOSE: {
-      if(window.onClose) {
-        if(window.onClose()) window.setVisible(false);
-      } else {
-        window.setVisible(false);
-      }
+      if(window.onClose) window.onClose();
+      window.setVisible(false);
       return TRUE;
     }
 
+    case WM_MOVE: {
+      if(window.p.locked) break;
+
+      Geometry geometry = window.geometry();
+      window.state.geometry.x = geometry.x;
+      window.state.geometry.y = geometry.y;
+
+      if(window.onMove) window.onMove();
+      break;
+    }
+
+    case WM_SIZE: {
+      if(window.p.locked) break;
+      SetWindowPos(window.p.hstatus, NULL, 0, 0, 0, 0, SWP_NOZORDER | SWP_FRAMECHANGED);
+
+      Geometry geometry = window.geometry();
+      window.state.geometry.width = geometry.width;
+      window.state.geometry.height = geometry.height;
+
+      foreach(layout, window.state.layout) {
+        Geometry geom = window.geometry();
+        geom.x = geom.y = 0;
+        layout.setGeometry(geom);
+      }
+
+      if(window.onSize) window.onSize();
+      break;
+    }
+
+    case WM_GETMINMAXINFO: {
+      MINMAXINFO *mmi = (MINMAXINFO*)lparam;
+    //mmi->ptMinTrackSize.x = 256 + window.p.frameMargin().width;
+    //mmi->ptMinTrackSize.y = 256 + window.p.frameMargin().height;
+    //return TRUE;
+    }
+
     case WM_ERASEBKGND: {
-      if(window.window->brush == 0) break;
+      if(window.p.brush == 0) break;
       RECT rc;
-      GetClientRect(window.widget->window, &rc);
+      GetClientRect(window.p.hwnd, &rc);
       PAINTSTRUCT ps;
-      BeginPaint(window.widget->window, &ps);
-      FillRect(ps.hdc, &rc, window.window->brush);
-      EndPaint(window.widget->window, &ps);
+      BeginPaint(window.p.hwnd, &ps);
+      FillRect(ps.hdc, &rc, window.p.brush);
+      EndPaint(window.p.hwnd, &ps);
       return TRUE;
     }
 
     case WM_CTLCOLORBTN:
     case WM_CTLCOLORSTATIC: {
-      Object *object_ptr = (Object*)GetWindowLongPtr((HWND)lparam, GWLP_USERDATA);
-      if(object_ptr && window.window->brush) {
+      Object *object = (Object*)GetWindowLongPtr((HWND)lparam, GWLP_USERDATA);
+      if(object && window.p.brush) {
         HDC hdc = (HDC)wparam;
-        SetBkColor((HDC)wparam, window.window->brushColor);
-        return (INT_PTR)window.window->brush;
+        SetBkColor((HDC)wparam, window.p.brushColor);
+        return (INT_PTR)window.p.brush;
       }
     }
 
     case WM_COMMAND: {
       unsigned id = LOWORD(wparam);
-      HWND control = GetDlgItem(window.widget->window, id);
+      HWND control = GetDlgItem(window.p.hwnd, id);
       if(control == 0) {
-        Object *object_ptr = (Object*)OS::findObject(id);
-        if(object_ptr) {
-          if(dynamic_cast<MenuItem*>(object_ptr)) {
-            MenuItem &menuItem = (MenuItem&)*object_ptr;
-            if(menuItem.onTick) menuItem.onTick();
-          } else if(dynamic_cast<MenuCheckItem*>(object_ptr)) {
-            MenuCheckItem &menuCheckItem = (MenuCheckItem&)*object_ptr;
-            menuCheckItem.setChecked(!menuCheckItem.checked());
-            if(menuCheckItem.onTick) menuCheckItem.onTick();
-          } else if(dynamic_cast<MenuRadioItem*>(object_ptr)) {
-            MenuRadioItem &menuRadioItem = (MenuRadioItem&)*object_ptr;
-            if(menuRadioItem.checked() == false) {
-              menuRadioItem.setChecked();
-              if(menuRadioItem.onTick) menuRadioItem.onTick();
-            }
+        pObject *object = (pObject*)pObject::find(id);
+        if(!object) break;
+        if(dynamic_cast<pItem*>(object)) {
+          Item &item = ((pItem*)object)->item;
+          if(item.onTick) item.onTick();
+        } else if(dynamic_cast<pCheckItem*>(object)) {
+          CheckItem &checkItem = ((pCheckItem*)object)->checkItem;
+          checkItem.setChecked(!checkItem.state.checked);
+          if(checkItem.onTick) checkItem.onTick();
+        } else if(dynamic_cast<pRadioItem*>(object)) {
+          RadioItem &radioItem = ((pRadioItem*)object)->radioItem;
+          if(radioItem.state.checked == false) {
+            radioItem.setChecked();
+            if(radioItem.onTick) radioItem.onTick();
           }
         }
       } else {
-        Object *object_ptr = (Object*)GetWindowLongPtr(control, GWLP_USERDATA);
-        if(object_ptr) {
-          if(dynamic_cast<Button*>(object_ptr)) {
-            Button &button = (Button&)*object_ptr;
-            if(button.onTick) button.onTick();
-          } else if(dynamic_cast<CheckBox*>(object_ptr)) {
-            CheckBox &checkBox = (CheckBox&)*object_ptr;
-            checkBox.setChecked(!checkBox.checked());
-            if(checkBox.onTick) checkBox.onTick();
-          } else if(dynamic_cast<ComboBox*>(object_ptr)) {
-            ComboBox &comboBox = (ComboBox&)*object_ptr;
-            if(HIWORD(wparam) == CBN_SELCHANGE) {
-              if(comboBox.comboBox->selection != comboBox.selection()) {
-                comboBox.comboBox->selection = comboBox.selection();
-                if(comboBox.onChange) comboBox.onChange();
-              }
+        Object *object = (Object*)GetWindowLongPtr(control, GWLP_USERDATA);
+        if(!object) break;
+        if(dynamic_cast<Button*>(object)) {
+          Button &button = (Button&)*object;
+          if(button.onTick) button.onTick();
+        } else if(dynamic_cast<CheckBox*>(object)) {
+          CheckBox &checkBox = (CheckBox&)*object;
+          checkBox.setChecked(!checkBox.state.checked);
+          if(checkBox.onTick) checkBox.onTick();
+        } else if(dynamic_cast<ComboBox*>(object)) {
+          ComboBox &comboBox = (ComboBox&)*object;
+          if(HIWORD(wparam) == CBN_SELCHANGE) {
+            if(comboBox.state.selection != comboBox.selection()) {
+              comboBox.state.selection = comboBox.selection();
+              if(comboBox.onChange) comboBox.onChange();
             }
-          } else if(dynamic_cast<EditBox*>(object_ptr)) {
-            EditBox &editBox = (EditBox&)*object_ptr;
-            if(HIWORD(wparam) == EN_CHANGE) {
-              if(editBox.object->locked == false && editBox.onChange) editBox.onChange();
-            }
-          } else if(dynamic_cast<RadioBox*>(object_ptr)) {
-            RadioBox &radioBox = (RadioBox&)*object_ptr;
-            if(radioBox.checked() == false) {
-              radioBox.setChecked();
-              if(radioBox.onTick) radioBox.onTick();
-            }
-          } else if(dynamic_cast<TextBox*>(object_ptr)) {
-            TextBox &textBox = (TextBox&)*object_ptr;
-            if(HIWORD(wparam) == EN_CHANGE) {
-              if(textBox.object->locked == false && textBox.onChange) textBox.onChange();
-            }
+          }
+        } else if(dynamic_cast<LineEdit*>(object)) {
+          LineEdit &lineEdit = (LineEdit&)*object;
+          if(HIWORD(wparam) == EN_CHANGE) {
+            if(lineEdit.p.locked == false && lineEdit.onChange) lineEdit.onChange();
+          }
+        } else if(dynamic_cast<RadioBox*>(object)) {
+          RadioBox &radioBox = (RadioBox&)*object;
+          if(radioBox.state.checked == false) {
+            radioBox.setChecked();
+            if(radioBox.onTick) radioBox.onTick();
+          }
+        } else if(dynamic_cast<TextEdit*>(object)) {
+          TextEdit &textEdit = (TextEdit&)*object;
+          if(HIWORD(wparam) == EN_CHANGE) {
+            if(textEdit.p.locked == false && textEdit.onChange) textEdit.onChange();
           }
         }
       }
@@ -391,78 +359,61 @@ static LRESULT CALLBACK OS_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM
 
     case WM_NOTIFY: {
       unsigned id = LOWORD(wparam);
-      HWND control = GetDlgItem(window.widget->window, id);
-      if(control) {
-        Object *object_ptr = (Object*)GetWindowLongPtr(control, GWLP_USERDATA);
-        if(object_ptr) {
-          if(dynamic_cast<ListBox*>(object_ptr)) {
-            ListBox &listBox = (ListBox&)*object_ptr;
-            LPNMHDR nmhdr = (LPNMHDR)lparam;
-            LPNMLISTVIEW nmlistview = (LPNMLISTVIEW)lparam;
+      HWND control = GetDlgItem(window.p.hwnd, id);
+      if(control == 0) break;
+      Object *object = (Object*)GetWindowLongPtr(control, GWLP_USERDATA);
+      if(object == 0) break;
+      if(dynamic_cast<ListView*>(object)) {
+        ListView &listView = (ListView&)*object;
+        LPNMHDR nmhdr = (LPNMHDR)lparam;
+        LPNMLISTVIEW nmlistview = (LPNMLISTVIEW)lparam;
 
-            if(nmhdr->code == LVN_ITEMCHANGED && (nmlistview->uChanged & LVIF_STATE)) {
-              unsigned imagemask = ((nmlistview->uNewState & LVIS_STATEIMAGEMASK) >> 12) - 1;
-              if(imagemask == 0 || imagemask == 1) {
-                if(listBox.object->locked == false && listBox.onTick) listBox.onTick(nmlistview->iItem);
-              } else if((nmlistview->uOldState & LVIS_FOCUSED) && !(nmlistview->uNewState & LVIS_FOCUSED)) {
-                listBox.listBox->lostFocus = true;
-              } else {
-                if(!(nmlistview->uOldState & LVIS_SELECTED) && (nmlistview->uNewState & LVIS_SELECTED)) {
-                  if(listBox.onChange) listBox.onChange();
-                } else if(listBox.listBox->lostFocus == false && listBox.selection() == false) {
-                  if(listBox.onChange) listBox.onChange();
-                }
-                listBox.listBox->lostFocus = false;
-              }
-            } else if(nmhdr->code == LVN_ITEMACTIVATE) {
-              if(listBox.onActivate) listBox.onActivate();
+        if(nmhdr->code == LVN_ITEMCHANGED && (nmlistview->uChanged & LVIF_STATE)) {
+          unsigned imagemask = ((nmlistview->uNewState & LVIS_STATEIMAGEMASK) >> 12) - 1;
+          if(imagemask == 0 || imagemask == 1) {
+            if(listView.p.locked == false && listView.onTick) listView.onTick(nmlistview->iItem);
+          } else if((nmlistview->uOldState & LVIS_FOCUSED) && !(nmlistview->uNewState & LVIS_FOCUSED)) {
+            listView.p.lostFocus = true;
+          } else {
+            if(!(nmlistview->uOldState & LVIS_SELECTED) && (nmlistview->uNewState & LVIS_SELECTED)) {
+              listView.state.selected = true;
+              listView.state.selection = listView.selection();
+              if(listView.p.locked == false && listView.onChange) listView.onChange();
+            } else if(listView.p.lostFocus == false && listView.selected() == false) {
+              listView.state.selected = true;
+              listView.state.selection = listView.selection();
+              if(listView.p.locked == false && listView.onChange) listView.onChange();
             }
+            listView.p.lostFocus = false;
           }
+        } else if(nmhdr->code == LVN_ITEMACTIVATE) {
+          if(listView.onActivate) listView.onActivate();
         }
       }
     }
 
-    case WM_HSCROLL: {
-      unsigned id = LOWORD(wparam);
-      HWND control = GetDlgItem(window.widget->window, id);
-      if(control) {
-        Object *object_ptr = (Object*)GetWindowLongPtr(control, GWLP_USERDATA);
-        if(object_ptr) {
-          if(dynamic_cast<HorizontalSlider*>(object_ptr)) {
-            HorizontalSlider &horizontalSlider = (HorizontalSlider&)*object_ptr;
-            if(horizontalSlider.horizontalSlider->position != horizontalSlider.position()) {
-              horizontalSlider.horizontalSlider->position = horizontalSlider.position();
-              if(horizontalSlider.onChange) horizontalSlider.onChange();
-            }
-          }
-        }
-      }
-    }
-
+    case WM_HSCROLL:
     case WM_VSCROLL: {
       unsigned id = LOWORD(wparam);
-      HWND control = GetDlgItem(window.widget->window, id);
-      if(control) {
-        Object *object_ptr = (Object*)GetWindowLongPtr(control, GWLP_USERDATA);
-        if(object_ptr) {
-          if(dynamic_cast<VerticalSlider*>(object_ptr)) {
-            VerticalSlider &verticalSlider = (VerticalSlider&)*object_ptr;
-            if(verticalSlider.verticalSlider->position != verticalSlider.position()) {
-              verticalSlider.verticalSlider->position = verticalSlider.position();
-              if(verticalSlider.onChange) verticalSlider.onChange();
-            }
-          }
+      HWND control = GetDlgItem(window.p.hwnd, id);
+      if(control == 0) break;
+      Object *object = (Object*)GetWindowLongPtr(control, GWLP_USERDATA);
+      if(object == 0) break;
+      if(dynamic_cast<HorizontalSlider*>(object)) {
+        HorizontalSlider &horizontalSlider = (HorizontalSlider&)*object;
+        if(horizontalSlider.state.position != horizontalSlider.position()) {
+          horizontalSlider.state.position = horizontalSlider.position();
+          if(horizontalSlider.onChange) horizontalSlider.onChange();
+        }
+      } else if(dynamic_cast<VerticalSlider*>(object)) {
+        VerticalSlider &verticalSlider = (VerticalSlider&)*object;
+        if(verticalSlider.state.position != verticalSlider.position()) {
+          verticalSlider.state.position = verticalSlider.position();
+          if(verticalSlider.onChange) verticalSlider.onChange();
         }
       }
     }
   }
 
   return DefWindowProc(hwnd, msg, wparam, lparam);
-}
-
-Object* OS::findObject(unsigned id) {
-  foreach(object, os->objects) { if(object->object->id == id) return object; }
-  return 0;
-}
-
 }

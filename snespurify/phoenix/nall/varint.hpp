@@ -8,84 +8,110 @@
 namespace nall {
   template<unsigned bits> class uint_t {
   private:
-    enum { bytes = (bits + 7) >> 3 };  //minimum number of bytes needed to store value
-    typedef typename static_if<
-      sizeof(int) >= bytes,
-      unsigned int,
-      typename static_if<
-        sizeof(long) >= bytes,
-        unsigned long,
-        typename static_if<
-          sizeof(long long) >= bytes,
-          unsigned long long,
-          void
-        >::type
-      >::type
-    >::type T;
-    static_assert(!std::is_same<T, void>::value, "");
-    T data;
+    unsigned data;
 
   public:
-    inline operator T() const { return data; }
-    inline T operator ++(int) { T r = data; data = uclip<bits>(data + 1); return r; }
-    inline T operator --(int) { T r = data; data = uclip<bits>(data - 1); return r; }
-    inline T operator ++() { return data = uclip<bits>(data + 1); }
-    inline T operator --() { return data = uclip<bits>(data - 1); }
-    inline T operator  =(const T i) { return data = uclip<bits>(i); }
-    inline T operator |=(const T i) { return data = uclip<bits>(data  | i); }
-    inline T operator ^=(const T i) { return data = uclip<bits>(data  ^ i); }
-    inline T operator &=(const T i) { return data = uclip<bits>(data  & i); }
-    inline T operator<<=(const T i) { return data = uclip<bits>(data << i); }
-    inline T operator>>=(const T i) { return data = uclip<bits>(data >> i); }
-    inline T operator +=(const T i) { return data = uclip<bits>(data  + i); }
-    inline T operator -=(const T i) { return data = uclip<bits>(data  - i); }
-    inline T operator *=(const T i) { return data = uclip<bits>(data  * i); }
-    inline T operator /=(const T i) { return data = uclip<bits>(data  / i); }
-    inline T operator %=(const T i) { return data = uclip<bits>(data  % i); }
+    inline operator unsigned() const { return data; }
+    inline unsigned operator ++(int) { unsigned r = data; data = uclip<bits>(data + 1); return r; }
+    inline unsigned operator --(int) { unsigned r = data; data = uclip<bits>(data - 1); return r; }
+    inline unsigned operator ++() { return data = uclip<bits>(data + 1); }
+    inline unsigned operator --() { return data = uclip<bits>(data - 1); }
+    inline unsigned operator  =(const unsigned i) { return data = uclip<bits>(i); }
+    inline unsigned operator |=(const unsigned i) { return data = uclip<bits>(data  | i); }
+    inline unsigned operator ^=(const unsigned i) { return data = uclip<bits>(data  ^ i); }
+    inline unsigned operator &=(const unsigned i) { return data = uclip<bits>(data  & i); }
+    inline unsigned operator<<=(const unsigned i) { return data = uclip<bits>(data << i); }
+    inline unsigned operator>>=(const unsigned i) { return data = uclip<bits>(data >> i); }
+    inline unsigned operator +=(const unsigned i) { return data = uclip<bits>(data  + i); }
+    inline unsigned operator -=(const unsigned i) { return data = uclip<bits>(data  - i); }
+    inline unsigned operator *=(const unsigned i) { return data = uclip<bits>(data  * i); }
+    inline unsigned operator /=(const unsigned i) { return data = uclip<bits>(data  / i); }
+    inline unsigned operator %=(const unsigned i) { return data = uclip<bits>(data  % i); }
 
     inline uint_t() : data(0) {}
-    inline uint_t(const T i) : data(uclip<bits>(i)) {}
+    inline uint_t(const unsigned i) : data(uclip<bits>(i)) {}
   };
 
   template<unsigned bits> class int_t {
   private:
-    enum { bytes = (bits + 7) >> 3 };  //minimum number of bytes needed to store value
-    typedef typename static_if<
-      sizeof(int) >= bytes,
-      signed int,
-      typename static_if<
-        sizeof(long) >= bytes,
-        signed long,
-        typename static_if<
-          sizeof(long long) >= bytes,
-          signed long long,
-          void
-        >::type
-      >::type
-    >::type T;
-    static_assert(!std::is_same<T, void>::value, "");
-    T data;
+    signed data;
 
   public:
-    inline operator T() const { return data; }
-    inline T operator ++(int) { T r = data; data = sclip<bits>(data + 1); return r; }
-    inline T operator --(int) { T r = data; data = sclip<bits>(data - 1); return r; }
-    inline T operator ++() { return data = sclip<bits>(data + 1); }
-    inline T operator --() { return data = sclip<bits>(data - 1); }
-    inline T operator  =(const T i) { return data = sclip<bits>(i); }
-    inline T operator |=(const T i) { return data = sclip<bits>(data  | i); }
-    inline T operator ^=(const T i) { return data = sclip<bits>(data  ^ i); }
-    inline T operator &=(const T i) { return data = sclip<bits>(data  & i); }
-    inline T operator<<=(const T i) { return data = sclip<bits>(data << i); }
-    inline T operator>>=(const T i) { return data = sclip<bits>(data >> i); }
-    inline T operator +=(const T i) { return data = sclip<bits>(data  + i); }
-    inline T operator -=(const T i) { return data = sclip<bits>(data  - i); }
-    inline T operator *=(const T i) { return data = sclip<bits>(data  * i); }
-    inline T operator /=(const T i) { return data = sclip<bits>(data  / i); }
-    inline T operator %=(const T i) { return data = sclip<bits>(data  % i); }
+    inline operator signed() const { return data; }
+    inline signed operator ++(int) { signed r = data; data = sclip<bits>(data + 1); return r; }
+    inline signed operator --(int) { signed r = data; data = sclip<bits>(data - 1); return r; }
+    inline signed operator ++() { return data = sclip<bits>(data + 1); }
+    inline signed operator --() { return data = sclip<bits>(data - 1); }
+    inline signed operator  =(const signed i) { return data = sclip<bits>(i); }
+    inline signed operator |=(const signed i) { return data = sclip<bits>(data  | i); }
+    inline signed operator ^=(const signed i) { return data = sclip<bits>(data  ^ i); }
+    inline signed operator &=(const signed i) { return data = sclip<bits>(data  & i); }
+    inline signed operator<<=(const signed i) { return data = sclip<bits>(data << i); }
+    inline signed operator>>=(const signed i) { return data = sclip<bits>(data >> i); }
+    inline signed operator +=(const signed i) { return data = sclip<bits>(data  + i); }
+    inline signed operator -=(const signed i) { return data = sclip<bits>(data  - i); }
+    inline signed operator *=(const signed i) { return data = sclip<bits>(data  * i); }
+    inline signed operator /=(const signed i) { return data = sclip<bits>(data  / i); }
+    inline signed operator %=(const signed i) { return data = sclip<bits>(data  % i); }
 
     inline int_t() : data(0) {}
-    inline int_t(const T i) : data(sclip<bits>(i)) {}
+    inline int_t(const signed i) : data(sclip<bits>(i)) {}
+  };
+
+  class varuint_t {
+  private:
+    unsigned data;
+    unsigned mask;
+
+  public:
+    inline operator unsigned() const { return data; }
+    inline unsigned operator ++(int) { unsigned r = data; data = (data + 1) & mask; return r; }
+    inline unsigned operator --(int) { unsigned r = data; data = (data - 1) & mask; return r; }
+    inline unsigned operator ++() { return data = (data + 1) & mask; }
+    inline unsigned operator --() { return data = (data - 1) & mask; }
+    inline unsigned operator  =(const unsigned i) { return data = (i) & mask; }
+    inline unsigned operator |=(const unsigned i) { return data = (data  | i) & mask; }
+    inline unsigned operator ^=(const unsigned i) { return data = (data  ^ i) & mask; }
+    inline unsigned operator &=(const unsigned i) { return data = (data  & i) & mask; }
+    inline unsigned operator<<=(const unsigned i) { return data = (data << i) & mask; }
+    inline unsigned operator>>=(const unsigned i) { return data = (data >> i) & mask; }
+    inline unsigned operator +=(const unsigned i) { return data = (data  + i) & mask; }
+    inline unsigned operator -=(const unsigned i) { return data = (data  - i) & mask; }
+    inline unsigned operator *=(const unsigned i) { return data = (data  * i) & mask; }
+    inline unsigned operator /=(const unsigned i) { return data = (data  / i) & mask; }
+    inline unsigned operator %=(const unsigned i) { return data = (data  % i) & mask; }
+
+    inline void bits(unsigned bits) { mask = (1U << (bits - 1)) + ((1U << (bits - 1)) - 1); data &= mask; }
+    inline varuint_t() : data(0), mask(~0U) {}
+    inline varuint_t(const unsigned i) : data(i), mask(~0U) {}
+  };
+
+  class varuintmax_t {
+  private:
+    uintmax_t data;
+    uintmax_t mask;
+
+  public:
+    inline operator uintmax_t() const { return data; }
+    inline uintmax_t operator ++(int) { uintmax_t r = data; data = (data + 1) & mask; return r; }
+    inline uintmax_t operator --(int) { uintmax_t r = data; data = (data - 1) & mask; return r; }
+    inline uintmax_t operator ++() { return data = (data + 1) & mask; }
+    inline uintmax_t operator --() { return data = (data - 1) & mask; }
+    inline uintmax_t operator  =(const uintmax_t i) { return data = (i) & mask; }
+    inline uintmax_t operator |=(const uintmax_t i) { return data = (data  | i) & mask; }
+    inline uintmax_t operator ^=(const uintmax_t i) { return data = (data  ^ i) & mask; }
+    inline uintmax_t operator &=(const uintmax_t i) { return data = (data  & i) & mask; }
+    inline uintmax_t operator<<=(const uintmax_t i) { return data = (data << i) & mask; }
+    inline uintmax_t operator>>=(const uintmax_t i) { return data = (data >> i) & mask; }
+    inline uintmax_t operator +=(const uintmax_t i) { return data = (data  + i) & mask; }
+    inline uintmax_t operator -=(const uintmax_t i) { return data = (data  - i) & mask; }
+    inline uintmax_t operator *=(const uintmax_t i) { return data = (data  * i) & mask; }
+    inline uintmax_t operator /=(const uintmax_t i) { return data = (data  / i) & mask; }
+    inline uintmax_t operator %=(const uintmax_t i) { return data = (data  % i) & mask; }
+
+    inline void bits(unsigned bits) { mask = (1ULL << (bits - 1)) + ((1ULL << (bits - 1)) - 1); data &= mask; }
+    inline varuintmax_t() : data(0), mask(~0ULL) {}
+    inline varuintmax_t(const uintmax_t i) : data(i), mask(~0ULL) {}
   };
 }
 

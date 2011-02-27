@@ -3401,18 +3401,7 @@
       <code>DD69-AF00</code>
     </cheat>
   </cartridge>
-  <cartridge sha256="">	
-    <name>Archer Maclean's Super Dropzone (Europe)</name>
-    <cheat>
-      <description>Infinite lives</description>
-      <code>7E002504</code>
-    </cheat>
-    <cheat>
-      <description>Infinite bombs</description>
-      <code>7E002604</code>
-    </cheat>
-  </cartridge>
-  <cartridge sha256="0f474dafe5a26f3dea491d18073dd490d2f1f91313a7e91086565510d38d9a09">	
+    <cartridge sha256="0f474dafe5a26f3dea491d18073dd490d2f1f91313a7e91086565510d38d9a09">	
     <name>Ardy Lightfoot (USA)</name>
     <cheat>
       <description>Invincibility</description>
@@ -4078,8 +4067,12 @@
   <cartridge sha256="e36aaba64be016cabc33a2dcf88913341e2edacc722e2a1ebe04eccda2a5d6e7">	
     <name>Batman Forever (USA)</name>
     <cheat>
-      <description>Infinite health</description>
-      <code>7E132C57</code>
+      <description>Infinite health - P1</description>
+      <code>7E132CFF</code>
+    </cheat>
+    <cheat>
+      <description>Infinite health - P2</description>
+      <code>7E132EFF</code>
     </cheat>
     <cheat>
       <description>Infinite lives</description>
@@ -4154,6 +4147,22 @@
       <code>DD3A-CF06</code>
     </cheat>
     <cheat>
+      <description>Play as an Inmate</description>
+      <code>F43C-3B10</code>
+    </cheat>
+    <cheat>
+      <description>Play as a Clown</description>
+      <code>F03C-3B10</code>
+    </cheat>
+    <cheat>
+      <description>Play as Two-Face</description>
+      <code>F63C-3B10</code>
+    </cheat>
+    <cheat>
+      <description>Play as a Riddler Thug</description>
+      <code>FC3C-3B10</code>
+    </cheat>
+    <cheat>
       <description>Start with half energy after your first life</description>
       <code>4D2C-4D07</code>
       <code>4DCE-1465</code>
@@ -4169,22 +4178,6 @@
     <cheat>
       <description>Start with 10 lives</description>
       <code>DBB3-47D4</code>
-    </cheat>
-    <cheat>
-      <description>Play as an Inmate</description>
-      <code>F43C-3B10</code>
-    </cheat>
-    <cheat>
-      <description>Play as a Clown</description>
-      <code>F03C-3B10</code>
-    </cheat>
-    <cheat>
-      <description>Play as Two-Face</description>
-      <code>F63C-3B10</code>
-    </cheat>
-    <cheat>
-      <description>Play as a Riddler Thug</description>
-      <code>FC3C-3B10</code>
     </cheat>
   </cartridge>
   <cartridge sha256="f8d5c51f74df33edc827fbf8df7aab70160770ab0a896db6e59438ad9208cc6e">	
@@ -4470,84 +4463,7 @@
       <code>7EB24C06</code>
     </cheat>
   </cartridge>
-  <cartridge sha256="c7f0269498d190e4fd0f6f880a148fbe3713cd3a632083bac1e5bd18f8172371">	
-    <name>Battletoads &amp; Double Dragon - The Ultimate Team (USA)</name>
-    <cheat>
-      <description>Invincibility (blinking) - P1</description>
-      <code>7E11127F</code>
-    </cheat>
-    <cheat>
-      <description>Infinite health - P1</description>
-      <code>7E003A2F</code>
-    </cheat>
-    <cheat>
-      <description>Infinite lives - P1</description>
-      <code>7E002605</code>
-    </cheat>
-    <cheat>
-      <description>Infinite lives</description>
-      <code>40B8-04AF</code>
-    </cheat>
-    <cheat>
-      <description>Start with 2 lives</description>
-      <code>DF60-D76D</code>
-    </cheat>
-    <cheat>
-      <description>Start with 10 lives</description>
-      <code>DB60-D76D</code>
-    </cheat>
-    <cheat>
-      <description>Enemies have less health</description>
-      <code>DE6E-1466</code>
-    </cheat>
-    <cheat>
-      <description>Start on level 2 with 11 lives</description>
-      <code>DD65-DD0D</code>
-      <code>CB66-D46D</code>
-      <code>DF66-D4AD</code>
-    </cheat>
-    <cheat>
-      <description>Start on level 3 with 11 lives</description>
-      <code>DD65-DD0D</code>
-      <code>CB66-D46D</code>
-      <code>D466-D4AD</code>
-    </cheat>
-    <cheat>
-      <description>Start on level 4 with 11 lives</description>
-      <code>DD65-DD0D</code>
-      <code>CB66-D46D</code>
-      <code>D766-D4AD</code>
-    </cheat>
-    <cheat>
-      <description>Start on level 5 with 11 lives</description>
-      <code>DD65-DD0D</code>
-      <code>CB66-D46D</code>
-      <code>D066-D4AD</code>
-    </cheat>
-    <cheat>
-      <description>Start on level 6 with 11 lives</description>
-      <code>DD65-DD0D</code>
-      <code>CB66-D46D</code>
-      <code>D966-D4AD</code>
-    </cheat>
-    <cheat>
-      <description>Abobo has less health</description>
-      <code>4EB7-1DD6</code>
-    </cheat>
-    <cheat>
-      <description>Big Blag has less health</description>
-      <code>4EB3-C4DB</code>
-    </cheat>
-    <cheat>
-      <description>Roper has less health</description>
-      <code>D7BA-3FA8</code>
-    </cheat>
-    <cheat>
-      <description>Robo-Manus has less health</description>
-      <code>D7C5-3F66</code>
-    </cheat>
-  </cartridge>
-  <cartridge sha256="b0dbd4d7e5689c32234e80b0c5362ef67c425ab72d6ddb49d1cb1133ef630ef7">	
+    <cartridge sha256="b0dbd4d7e5689c32234e80b0c5362ef67c425ab72d6ddb49d1cb1133ef630ef7">	
     <name>Battletoads in Battlemaniacs (USA)</name>
     <cheat>
       <description>Invincibility</description>
@@ -4631,7 +4547,7 @@
       <code>DB6D-04AD</code>
     </cheat>
   </cartridge>
-  <cartridge sha256="">	
+  <cartridge sha256="c7f0269498d190e4fd0f6f880a148fbe3713cd3a632083bac1e5bd18f8172371">	
     <name>Battletoads-Double Dragon (USA)</name>
     <cheat>
       <description>Invincibility (blinking) - P1</description>
@@ -5094,22 +5010,7 @@
       <code>DDB7-67DF</code>
     </cheat>
   </cartridge>
-  <cartridge sha256="de1de85ad549a6aaf0431cceb47cbd07e1f6e81f9e16fd62575305e2c1f06240">	
-    <name>Bio Metal (USA)</name>
-    <cheat>
-      <description>Infinite lives</description>
-      <code>C26E-6D02</code>
-    </cheat>
-    <cheat>
-      <description>Infinite lives (alt)</description>
-      <code>7E029D0A</code>
-    </cheat>
-    <cheat>
-      <description>Infinite charge</description>
-      <code>C262-0D62</code>
-    </cheat>
-  </cartridge>
-  <cartridge sha256="">	
+    <cartridge sha256="de1de85ad549a6aaf0431cceb47cbd07e1f6e81f9e16fd62575305e2c1f06240">	
     <name>BioMetal (USA)</name>
     <cheat>
       <description>Infinite lives</description>
@@ -12013,7 +11914,7 @@
       <code>1D2C-3A4F</code>
     </cheat>
   </cartridge>
-  <cartridge sha256="d45e26eb10c323ecd480e5f2326b223e29264c3adde67f48f0d2791128e519e8 73731a5a7932965de02a9e98055dcf88b4d17b8f710a6ecfde3e36a1f248773b">	
+  <cartridge sha256="d45e26eb10c323ecd480e5f2326b223e29264c3adde67f48f0d2791128e519e8">	
     <name>Doom (USA)</name>
     <cheat>
       <description>Infinite health</description>
@@ -14559,12 +14460,71 @@
   <cartridge sha256="414bacc05a18a6137c0de060b4094ab6d1b75105342b0bb36a42e45d945a0e4d">	
     <name>Final Fantasy II (USA) (Rev 1)</name>
     <cheat>
-      <description>Almost infinite HP. Can make big and sometimes normal monsters invincible. Switch off to defeat them.</description>
+      <description>Almost infinite HP (can make big and sometimes normal monsters invincible, disable to defeat them)</description>
       <code>82AE-6F63</code>
     </cheat>
     <cheat>
       <description>Infinite MP during battles, doesn't work on twin attacks</description>
       <code>8267-0D62</code>
+    </cheat>
+    <cheat>
+      <description>Infinite use of items outside of battle except for the Whistle</description>
+      <code>C3CE-6F09</code>
+    </cheat>
+    <cheat>
+      <description>Infinite Whistles</description>
+      <code>C3C4-A4D0</code>
+    </cheat>
+    <cheat>
+      <description>Money doesn't decrease in shops</description>
+      <code>C2AD-AD69</code>
+      <code>C3AD-AFA9</code>
+    </cheat>
+    <cheat>
+      <description>Money doesn't decrease if you run away from a battle</description>
+      <code>C262-DF03</code>
+      <code>C262-D763</code>
+    </cheat>
+    <cheat>
+      <description>No random battles</description>
+      <code>DDD6-B28B</code>
+    </cheat>
+    <cheat>
+      <description>No random battles (alt)</description>
+      <code>1D60-0704</code>
+    </cheat>
+    <cheat>
+      <description>automatically win battles (no EXP or gold gained)</description>
+      <code>7E180102</code>
+      <code>7E180008</code>
+    </cheat>
+    <cheat>
+      <description>Always fight the rarest enemy in that area</description>
+      <code>DA6E-6FD4</code>
+    </cheat>
+    <cheat>
+      <description>Always get a treasure from each enemy defeated</description>
+      <code>6D3E-DD0E</code>
+    </cheat>
+    <cheat>
+      <description>Sumon the Big Chocobo anywhere by using a Carrot instead of the Whistle</description>
+      <code>38C4-AF00</code>
+    </cheat>
+    <cheat>
+      <description>The quantity of items don't decrease when selling them</description>
+      <code>82A9-6FD1</code>
+    </cheat>
+    <cheat>
+      <description>No music while traveling or in a town</description>
+      <code>1D67-A7A4</code>
+    </cheat>
+    <cheat>
+      <description>Gunslinger Code</description>
+      <code>00CE-6D69</code>
+    </cheat>
+    <cheat>
+      <description>Save anywhere</description>
+      <code>CBBA-07A4</code>
     </cheat>
     <cheat>
       <description>Get at least 150 GP after each battle</description>
@@ -14581,59 +14541,9 @@
       <code>3336-0FAE</code>
     </cheat>
     <cheat>
-      <description>Money doesn't decrease if you run away from a battle</description>
-      <code>C262-DF03</code>
-      <code>C262-D763</code>
-    </cheat>
-    <cheat>
-      <description>Money doesn't decrease in shops</description>
-      <code>C2AD-AD69</code>
-      <code>C3AD-AFA9</code>
-    </cheat>
-    <cheat>
-      <description>Gunslinger Code</description>
-      <code>00CE-6D69</code>
-    </cheat>
-    <cheat>
-      <description>No random battles</description>
-      <code>DDD6-B28B</code>
-    </cheat>
-    <cheat>
-      <description>No random battles (alt)</description>
-      <code>1D60-0704</code>
-    </cheat>
-    <cheat>
-      <description>automatically win battles (no EXP or gold gained)</description>
-      <code>7E180102</code>
-      <code>7E180008</code>
-    </cheat>
-    <cheat>
-      <description>Save anywhere in the game</description>
-      <code>CBBA-07A4</code>
-    </cheat>
-    <cheat>
-      <description>Always fight the rarest enemy in that area</description>
-      <code>DA6E-6FD4</code>
-    </cheat>
-    <cheat>
-      <description>Always get a treasure from each enemy defeated</description>
-      <code>6D3E-DD0E</code>
-    </cheat>
-    <cheat>
-      <description>Infinite use of items outside of battle except for the Whistle</description>
-      <code>C3CE-6F09</code>
-    </cheat>
-    <cheat>
-      <description>Sumon the Big Chocobo anywhere by using a Carrot instead of the Whistle</description>
-      <code>38C4-AF00</code>
-    </cheat>
-    <cheat>
-      <description>Infinite Whistles</description>
-      <code>C3C4-A4D0</code>
-    </cheat>
-    <cheat>
-      <description>The quantity of items don't decrease when selling them</description>
-      <code>82A9-6FD1</code>
+      <description>Get 65,000+ exp points after each battle</description>
+      <code>7E3592FF</code>
+      <code>7E359EFF</code>
     </cheat>
     <cheat>
       <description>Get 99 of items that you are given or find in a pot, treasure chest, ect</description>
@@ -14642,10 +14552,6 @@
     <cheat>
       <description>Get 99 arrows when you find them in a pot or treasure chest</description>
       <code>17B4-D4D4</code>
-    </cheat>
-    <cheat>
-      <description>No music while traveling or in a town</description>
-      <code>1D67-A7A4</code>
     </cheat>
     <cheat>
       <description>Item Cure2 is ultra strong</description>
@@ -14682,11 +14588,6 @@
     <cheat>
       <description>Lit1 spell hits every enemy</description>
       <code>AFB5-DD83</code>
-    </cheat>
-    <cheat>
-      <description>Get 65,000+ exp points after each battle</description>
-      <code>7E3592FF</code>
-      <code>7E359EFF</code>
     </cheat>
     <cheat>
       <description>Character 1 - Max HP</description>
@@ -14947,12 +14848,83 @@
   <cartridge sha256="680535dc1c4196c53b40dc9c2c9bc159a77802ab8d4b474bef5dc0281c15ad06">	
     <name>Final Fantasy II (USA)</name>
     <cheat>
-      <description>Almost infinite HP. Can make big and sometimes normal monsters invincible. Switch off to defeat them.</description>
+      <description>Almost infinite HP (can make big and sometimes normal monsters invincible, disable to defeat them)</description>
       <code>82A3-6F63</code>
     </cheat>
     <cheat>
       <description>Infinite MP during battles, doesn't work on twin attacks</description>
       <code>8267-0D62</code>
+    </cheat>
+    <cheat>
+      <description>Infinite use of items outside of battle except for the Whistle</description>
+      <code>C3CE-6F09</code>
+    </cheat>
+    <cheat>
+      <description>Infinite Whistles</description>
+      <code>C3C4-A4D0</code>
+    </cheat>
+    <cheat>
+      <description>Always get a treasure from each enemy defeated</description>
+      <code>6D32-D7DE</code>
+    </cheat>
+    <cheat>
+      <description>Money doesn't decrease if you run away from a battle</description>
+      <code>C262-DF03</code>
+      <code>C262-D763</code>
+    </cheat>
+    <cheat>
+      <description>Money doesn't decrease in shops</description>
+      <code>C2AD-AD69</code>
+      <code>C3AD-AFA9</code>
+    </cheat>
+    <cheat>
+      <description>No random battles</description>
+      <code>DDD6-B28B</code>
+    </cheat>
+    <cheat>
+      <description>No random battles (alt)</description>
+      <code>1D60-0704</code>
+    </cheat>
+    <cheat>
+      <description>automatically win battles (no EXP or gold gained)</description>
+      <code>7E180102</code>
+      <code>7E180008</code>
+    </cheat>
+    <cheat>
+      <description>Always fight the rarest enemy in that area</description>
+      <code>DA6E-6FD4</code>
+    </cheat>
+    <cheat>
+      <description>When treasures are awarded after battle, receive 5 instead of 1</description>
+      <code>D926-D4D9</code>
+    </cheat>
+    <cheat>
+      <description>When arrows are awarded after battle, receive 50 instead of 10</description>
+      <code>7425-D769</code>
+    </cheat>
+    <cheat>
+      <description>When treasures are awarded after battle, receive the rarest</description>
+      <code>D734-0DDE</code>
+    </cheat>
+    <cheat>
+      <description>Sumon the Big Chocobo anywhere by using a Carrot instead of the Whistle</description>
+      <code>38C4-AF00</code>
+    </cheat>
+    <cheat>
+      <description>The quantity of items don't decrease when selling them</description>
+      <code>82A9-6FD1</code>
+    </cheat>
+    <cheat>
+      <description>No music while traveling or in a town</description>
+      <code>1D67-A7A4</code>
+    </cheat>
+    <cheat>
+      <description>Gunslinger Code</description>
+      <code>00CE-6D69</code>
+    </cheat>
+    <cheat>
+      <description>Save anywhere</description>
+      <code>CBBA-07A4</code>
     </cheat>
     <cheat>
       <description>Get at least 150 GP after each battle</description>
@@ -14971,83 +14943,12 @@
       <code>3335-0D6E</code>
     </cheat>
     <cheat>
-      <description>Money doesn't decrease if you run away from a battle</description>
-      <code>C262-DF03</code>
-      <code>C262-D763</code>
-    </cheat>
-    <cheat>
-      <description>Money doesn't decrease in shops</description>
-      <code>C2AD-AD69</code>
-      <code>C3AD-AFA9</code>
-    </cheat>
-    <cheat>
-      <description>Gunslinger Code</description>
-      <code>00CE-6D69</code>
-    </cheat>
-    <cheat>
-      <description>No random battles</description>
-      <code>DDD6-B28B</code>
-    </cheat>
-    <cheat>
-      <description>No random battles (alt)</description>
-      <code>1D60-0704</code>
-    </cheat>
-    <cheat>
-      <description>automatically win battles (no EXP or gold gained)</description>
-      <code>7E180102</code>
-      <code>7E180008</code>
-    </cheat>
-    <cheat>
-      <description>Save anywhere in the game</description>
-      <code>CBBA-07A4</code>
-    </cheat>
-    <cheat>
-      <description>Always fight the rarest enemy in that area</description>
-      <code>DA6E-6FD4</code>
-    </cheat>
-    <cheat>
-      <description>Always get a treasure from each enemy defeated</description>
-      <code>6D32-D7DE</code>
-    </cheat>
-    <cheat>
-      <description>When treasures are awarded after battle, receive 5 instead of 1</description>
-      <code>D926-D4D9</code>
-    </cheat>
-    <cheat>
-      <description>When arrows are awarded after battle, receive 50 instead of 10</description>
-      <code>7425-D769</code>
-    </cheat>
-    <cheat>
-      <description>When treasures are awarded after battle, receive the rarest</description>
-      <code>D734-0DDE</code>
-    </cheat>
-    <cheat>
-      <description>Infinite use of items outside of battle except for the Whistle</description>
-      <code>C3CE-6F09</code>
-    </cheat>
-    <cheat>
-      <description>Sumon the Big Chocobo anywhere by using a Carrot instead of the Whistle</description>
-      <code>38C4-AF00</code>
-    </cheat>
-    <cheat>
-      <description>Infinite Whistles</description>
-      <code>C3C4-A4D0</code>
-    </cheat>
-    <cheat>
-      <description>The quantity of items don't decrease when selling them</description>
-      <code>82A9-6FD1</code>
-    </cheat>
-    <cheat>
       <description>Get 99 of items that you are given or find in a pot, treasure chest, ect</description>
       <code>17BF-D404</code>
     </cheat>
     <cheat>
       <description>Get 99 arrows when you find them in a pot or treasure chest</description>
       <code>17B4-D4D4</code>
-    </cheat>
-    <cheat>
-      <description>No music while traveling or in a town</description>
-      <code>1D67-A7A4</code>
     </cheat>
     <cheat>
       <description>Item Cure2 is ultra strong</description>
@@ -18097,6 +17998,21 @@
       <code>C2CF-17A4</code>
     </cheat>
   </cartridge>
+  <cartridge sha256="204ecb9b809408c23d5f5772026fc248c70612d9bf6952e6b952ed7a85640867">	
+    <name>Flying Hero - Bugyuru no Daibouken (Japan)</name>
+    <cheat>
+      <description>Invincibility</description>
+      <code>FCC4-D4D0</code>
+      <code>62C4-D400</code>
+      <code>7EC4-D460</code>
+      <code>FDC4-D4A0</code>
+    </cheat>
+    <cheat>
+      <description>One hit kills</description>
+      <code>6D61-64D9</code>
+      <code>DDE3-0FAC</code>
+    </cheat>
+  </cartridge>
   <cartridge sha256="dcceb5be536c9b91bf34f65e7fcec4b55a78af0192323cf86f3b9555072037ee">	
     <name>Fun 'n Games (USA)</name>
     <cheat>
@@ -18149,6 +18065,13 @@
       <description>Items from bartender get +99 Refinement</description>
       <code>CBD8-840A</code>
       <code>17D8-846A</code>
+    </cheat>
+  </cartridge>
+  <cartridge sha256="17b24fbda9103cd8cb6f31bd6beccb4a7dfff87c8aef5e79bcc9c7d3a27623fc">	
+    <name>Galaxy Wars (Japan)</name>
+    <cheat>
+      <description>Infinite lives</description>
+      <code>7E063005</code>
     </cheat>
   </cartridge>
   <cartridge sha256="ca3dd4620c692b2b8d3dd49b7dbdb1daa251ee0f7943050cc8a036e209cd7a07">	
@@ -18249,8 +18172,9 @@
   <cartridge sha256="a4ceb31b82ea532e6eb640fa2eda61625758e72251efa5f0ae9a984f4a98a8a0">	
     <name>Ghoul Patrol (USA)</name>
     <cheat>
-      <description>Super powered normal arrows</description>
-      <code>EE61-C4A3</code>
+      <description>Invincibility</description>
+      <code>1DC0-1461</code>
+      <code>1DCC-1401</code>
     </cheat>
     <cheat>
       <description>Infinite health</description>
@@ -18258,6 +18182,10 @@
     </cheat>
     <cheat>
       <description>Infinite lives</description>
+      <code>C2BD-3DD9</code>
+    </cheat>
+    <cheat>
+      <description>Infinite lives (alt)</description>
       <code>7E1DA163</code>
     </cheat>
     <cheat>
@@ -18311,6 +18239,10 @@
     <cheat>
       <description>All victims already rescued</description>
       <code>7E1E0500</code>
+    </cheat>
+    <cheat>
+      <description>Super powered normal arrows</description>
+      <code>EE61-C4A3</code>
     </cheat>
   </cartridge>
   <cartridge sha256="8796ca4de3aeffd3a494fe28e7d7e2aeb220ca652b43684f29e2cc94f02c20c4">	
@@ -19676,6 +19608,17 @@
       <code>7E083E63</code>
     </cheat>
   </cartridge>
+  <cartridge sha256="0415adfe80977485f84cdffaaa79f18c91c004c7dba202b4cf9a94eb11adeada">	
+    <name>Incredible Crash Dummies, The (USA)</name>
+    <cheat>
+      <description>Infinite lives</description>
+      <code>7E03B505</code>
+    </cheat>
+    <cheat>
+      <description>Infinite Spanners</description>
+      <code>7E04A00A</code>
+    </cheat>
+  </cartridge>
   <cartridge sha256="8d170628d2d2fdf142bb82ad80e908bba54c45fa33241c779b8eafaf1b21171f">	
     <name>Incredible Hulk, The (USA)</name>
     <cheat>
@@ -19949,16 +19892,32 @@
       <code>C2E1-402E</code>
     </cheat>
     <cheat>
+      <description>Infinite health - P1</description>
+      <code>7E022B46</code>
+    </cheat>
+    <cheat>
       <description>Infinite lives</description>
       <code>C2BB-CDD4</code>
+    </cheat>
+    <cheat>
+      <description>Infinite lives (alt)</description>
+      <code>7E023A03</code>
     </cheat>
     <cheat>
       <description>Infinite time</description>
       <code>C28A-CD55</code>
     </cheat>
     <cheat>
+      <description>Infinite Boss weapons</description>
+      <code>7E023C0F</code>
+    </cheat>
+    <cheat>
       <description>Infinite Bones</description>
       <code>C28A-3DDF</code>
+    </cheat>
+    <cheat>
+      <description>Infinite Cheese speed boost</description>
+      <code>7E023B03</code>
     </cheat>
   </cartridge>
   <cartridge sha256="183af7d642b55d52cd594786ec2f031d033cc6c8c1a2a84a834e4ada04301b26">	
@@ -20321,6 +20280,17 @@
       <code>C226-4FA7</code>
     </cheat>
   </cartridge>
+  <cartridge sha256="bc09f97cb988f6e445fc92e438fff4bf97aa56cb7bbecaa234ffe93bb285d915">	
+    <name>Jelly Boy 2 (Japan) (Proto)</name>
+    <cheat>
+      <description>Invincibility</description>
+      <code>7E026B03</code>
+    </cheat>
+    <cheat>
+      <description>Infinite lives</description>
+      <code>7E026903</code>
+    </cheat>
+  </cartridge>
   <cartridge sha256="ee7a29eb9c302ea2bb235ef990fd8344a6beb9817499941c40a8a94ad5f7c964">	
     <name>Jetsons, The - Invasion of the Planet Pirates (USA)</name>
     <cheat>
@@ -20338,6 +20308,13 @@
     <cheat>
       <description>Maximum vacuum power</description>
       <code>D0BB-146D</code>
+    </cheat>
+  </cartridge>
+  <cartridge sha256="6a2f280ed1ef5166d95e3b0eb1a6665564f7ddcfd3feaf53344a1268b54b85c6">	
+    <name>Jikkyou Oshaberi Parodius (Japan)</name>
+    <cheat>
+      <description>Infinite lives</description>
+      <code>7E00AC04</code>
     </cheat>
   </cartridge>
   <cartridge sha256="a314583b11d594b8245b5177aa64a4d3b7497d096edabbea7c1842c57aa2ad2b">	
@@ -20812,7 +20789,7 @@
       <code>7E1B0F99</code>
     </cheat>
     <cheat>
-      <description>Infinite Hover Board & Hover Boots</description>
+      <description>Infinite Hover Board and Hover Boots</description>
       <code>7E1AA5F9</code>
     </cheat>
   </cartridge>
@@ -20879,7 +20856,7 @@
       <code>7E1B0F99</code>
     </cheat>
     <cheat>
-      <description>Infinite Hover Board & Hover Boots</description>
+      <description>Infinite Hover Board and Hover Boots</description>
       <code>7E1AA5F9</code>
     </cheat>
     <cheat>
@@ -22313,6 +22290,21 @@
       <code>C283-34D7</code>
     </cheat>
   </cartridge>
+  <cartridge sha256="b16661d5151d73cea5ac46d7c899531c7b2cdee2558092c23a5460c8092b80b8">	
+    <name>Kendo Rage (USA)</name>
+    <cheat>
+      <description>Infinite HP</description>
+      <code>7E148E40</code>
+    </cheat>
+    <cheat>
+      <description>Infinite lives</description>
+      <code>7E0CE203</code>
+    </cheat>
+    <cheat>
+      <description>Infinite blast</description>
+      <code>7E148A40</code>
+    </cheat>
+  </cartridge>
   <cartridge sha256="914652f72d6ceb83b8b43414d6c42581ec12e9b3f45259b8b2768d26b8d4f073">	
     <name>Kid Klown in Crazy Chase (USA)</name>
     <cheat>
@@ -22322,6 +22314,13 @@
     <cheat>
       <description>Infinite continues</description>
       <code>C238-1F27</code>
+    </cheat>
+  </cartridge>
+  <cartridge sha256="317e25d731bbfec30bfdc5fbe4ed825cd08613a4d62d98247bae5ec85783074c">	
+    <name>Kidou Butouden G Gundam (Japan)</name>
+    <cheat>
+      <description>Infinite health</description>
+      <code>7E07D480</code>
     </cheat>
   </cartridge>
   <cartridge sha256="2b27e9bceb646a300566248fcdcbd582435f50bd6132b0f0025cc146a9d62bd9">	
@@ -23376,6 +23375,17 @@
       <code>7E008C20</code>
     </cheat>
   </cartridge>
+  <cartridge sha256="e36322697c48baae6492db91e6cbf3844a420f6e0cc8a75f3a73556026ddbbb8">	
+    <name>Krusty's Super Fun House (USA) (Rev 1)</name>
+    <cheat>
+      <description>Infinite lives</description>
+      <code>7E11A303</code>
+    </cheat>
+    <cheat>
+      <description>Infinite weapons</description>
+      <code>7E032C0A</code>
+    </cheat>
+  </cartridge>
   <cartridge sha256="bed18c968aee0eb0c866c1964c28135364cd6d65fff7bcb5873342c04e63750d">	
     <name>Krusty's Super Fun House (USA)</name>
     <cheat>
@@ -23718,6 +23728,23 @@
     <name>Lamborghini American Challenge (USA)</name>
     <cheat>
       <description>Always finish first</description>
+      <code>1DE6-C4C8</code>
+      <code>2DE6-CD38</code>
+      <code>4D60-C74C</code>
+      <code>53E6-C448</code>
+      <code>58E6-CF18</code>
+      <code>6D60-C71C</code>
+      <code>ADE6-CD48</code>
+      <code>BBE6-CF38</code>
+      <code>DDE6-CD18</code>
+      <code>DDE6-CDC8</code>
+      <code>D4E6-CF48</code>
+      <code>E360-C7CC</code>
+      <code>F1E6-C418</code>
+      <code>FCE6-CFC8</code>
+    </cheat>
+    <cheat>
+      <description>Always finish first (alt)</description>
       <code>7E167E01</code>
     </cheat>
     <cheat>
@@ -24412,14 +24439,6 @@
       <code>7E1B0003</code>
     </cheat>
     <cheat>
-      <description>Start with 6 lives</description>
-      <code>D927-A464</code>
-    </cheat>
-    <cheat>
-      <description>Start with 9 lives</description>
-      <code>D627-A464</code>
-    </cheat>
-    <cheat>
       <description>Don't lose most weapons when hit</description>
       <code>40C0-04F9</code>
     </cheat>
@@ -24512,6 +24531,14 @@
     <cheat>
       <description>Have Text</description>
       <code>7E1B2201</code>
+    </cheat>
+    <cheat>
+      <description>Start with 6 lives</description>
+      <code>D927-A464</code>
+    </cheat>
+    <cheat>
+      <description>Start with 9 lives</description>
+      <code>D627-A464</code>
     </cheat>
   </cartridge>
   <cartridge sha256="cd016c41c7ef9f4f243d57c2b1564b4ceb3b4c38cc165cd02ab6c8e35c93aa2e">	
@@ -31536,6 +31563,17 @@
       <code>DF6E-0D6D</code>
     </cheat>
   </cartridge>
+  <cartridge sha256="2828e4485357585714f16f5bf96910794e22e4dfd19f2a22ce20d0a599f25878">	
+    <name>Miracle Girls (Japan)</name>
+    <cheat>
+      <description>Invincibility</description>
+      <code>1D3F-E4AD</code>
+    </cheat>
+    <cheat>
+      <description>Infinite lives</description>
+      <code>C243-7707</code>
+    </cheat>
+  </cartridge>
   <cartridge sha256="6b0ac4d52d24536cdb7d9d0dc7d19ee30d08ac34363983290c5912ccc850fa0d">	
     <name>Monopoly (USA) (Rev 1)</name>
     <cheat>
@@ -31736,6 +31774,15 @@
   </cartridge>
   <cartridge sha256="3c6d3e4a9c9af160f1c1cf11ce4ead531d9500c1f58f1cbe682c90a5eaa3efb2">	
     <name>Mortal Kombat (USA)</name>
+    <cheat>
+      <description>Invincibility (except against throws)</description>
+      <code>40C2-4FDF</code>
+      <code>40C2-446F</code>
+      <code>3DC2-476F</code>
+      <code>55C2-47AF</code>
+      <code>F5C3-4DDF</code>
+      <code>1DB9-34AF</code>
+    </cheat>
     <cheat>
       <description>Infinite health</description>
       <code>CF30-CFAF</code>
@@ -33724,6 +33771,18 @@
   <cartridge sha256="6a7324734004d99206439430243b51a05fa8c25ffa314dafc7f127235d1a730f">	
     <name>NBA Showdown (USA)</name>
     <cheat>
+      <description>Infinite time</description>
+      <code>C224-4DA4</code>
+    </cheat>
+    <cheat>
+      <description>Infinite time-outs</description>
+      <code>C239-1F6D</code>
+    </cheat>
+    <cheat>
+      <description>Infinite shot clock - computer</description>
+      <code>C220-4FDF</code>
+    </cheat>
+    <cheat>
       <description>No personal fouls - both teams</description>
       <code>C23B-44A8</code>
     </cheat>
@@ -33740,14 +33799,6 @@
       <code>DA84-CDDB</code>
     </cheat>
     <cheat>
-      <description>Infinite shot clock - computer</description>
-      <code>C220-4FDF</code>
-    </cheat>
-    <cheat>
-      <description>Infinite time</description>
-      <code>C224-4DA4</code>
-    </cheat>
-    <cheat>
       <description>1-min. quarters</description>
       <code>DFED-342C</code>
     </cheat>
@@ -33755,13 +33806,21 @@
       <description>3 time-outs</description>
       <code>D7E1-1D6A</code>
     </cheat>
-    <cheat>
-      <description>Infinite time-outs</description>
-      <code>C239-1F6D</code>
-    </cheat>
   </cartridge>
   <cartridge sha256="8ef5d5c50ffeca1e62e88e4fe2909eaf191e28fbb5a9faf98b7b10bea72c9ed9">	
     <name>NCAA Basketball (USA) (Rev 1)</name>
+    <cheat>
+      <description>Infinite time to shoot</description>
+      <code>C2B5-DDA9</code>
+    </cheat>
+    <cheat>
+      <description>Infinite timeouts - P1</description>
+      <code>C224-6FDF</code>
+    </cheat>
+    <cheat>
+      <description>Infinite timeouts - P2</description>
+      <code>C224-676F</code>
+    </cheat>
     <cheat>
       <description>Shot timer starts at 10 sec. instead of 45</description>
       <code>FDBB-DDD9</code>
@@ -33781,18 +33840,6 @@
     <cheat>
       <description>Shot timer starts at 90 sec.</description>
       <code>BDBB-DDD9</code>
-    </cheat>
-    <cheat>
-      <description>Infinite time to shoot</description>
-      <code>C2B5-DDA9</code>
-    </cheat>
-    <cheat>
-      <description>Infinite timeouts - P1</description>
-      <code>C224-6FDF</code>
-    </cheat>
-    <cheat>
-      <description>Infinite timeouts - P2</description>
-      <code>C224-676F</code>
     </cheat>
     <cheat>
       <description>3-point shots worth 0 - both players</description>
@@ -34233,6 +34280,66 @@
       <code>D466-4FFA</code>
     </cheat>
     <cheat>
+      <description>Full season ends after South Africa</description>
+      <code>DF3E-015A</code>
+    </cheat>
+    <cheat>
+      <description>Full season ends after Mexico</description>
+      <code>D43E-015A</code>
+    </cheat>
+    <cheat>
+      <description>Full season ends after Brazil</description>
+      <code>D73E-015A</code>
+    </cheat>
+    <cheat>
+      <description>Full season ends after Spain</description>
+      <code>D03E-015A</code>
+    </cheat>
+    <cheat>
+      <description>Full season ends after San Marino</description>
+      <code>D93E-015A</code>
+    </cheat>
+    <cheat>
+      <description>Full season ends after Monaco</description>
+      <code>D13E-015A</code>
+    </cheat>
+    <cheat>
+      <description>Full season ends after Canada</description>
+      <code>D53E-015A</code>
+    </cheat>
+    <cheat>
+      <description>Full season ends after France</description>
+      <code>D63E-015A</code>
+    </cheat>
+    <cheat>
+      <description>Full season ends after Britain</description>
+      <code>DB3E-015A</code>
+    </cheat>
+    <cheat>
+      <description>Full season ends after Germany</description>
+      <code>DC3E-015A</code>
+    </cheat>
+    <cheat>
+      <description>Full season ends after Hungary</description>
+      <code>D83E-015A</code>
+    </cheat>
+    <cheat>
+      <description>Full season ends after Belgium</description>
+      <code>DA3E-015A</code>
+    </cheat>
+    <cheat>
+      <description>Full season ends after Italy</description>
+      <code>D23E-015A</code>
+    </cheat>
+    <cheat>
+      <description>Full season ends after Portugal</description>
+      <code>D33E-015A</code>
+    </cheat>
+    <cheat>
+      <description>Full season ends after Japan</description>
+      <code>DE3E-015A</code>
+    </cheat>
+    <cheat>
       <description>Start in Mexico in the Full Season</description>
       <code>DF62-0953</code>
     </cheat>
@@ -34295,66 +34402,6 @@
     <cheat>
       <description>Start on extra course (stats are for South Africa but the course is different)</description>
       <code>FD62-0953</code>
-    </cheat>
-    <cheat>
-      <description>Full season ends after South Africa</description>
-      <code>DF3E-015A</code>
-    </cheat>
-    <cheat>
-      <description>Full season ends after Mexico</description>
-      <code>D43E-015A</code>
-    </cheat>
-    <cheat>
-      <description>Full season ends after Brazil</description>
-      <code>D73E-015A</code>
-    </cheat>
-    <cheat>
-      <description>Full season ends after Spain</description>
-      <code>D03E-015A</code>
-    </cheat>
-    <cheat>
-      <description>Full season ends after San Marino</description>
-      <code>D93E-015A</code>
-    </cheat>
-    <cheat>
-      <description>Full season ends after Monaco</description>
-      <code>D13E-015A</code>
-    </cheat>
-    <cheat>
-      <description>Full season ends after Canada</description>
-      <code>D53E-015A</code>
-    </cheat>
-    <cheat>
-      <description>Full season ends after France</description>
-      <code>D63E-015A</code>
-    </cheat>
-    <cheat>
-      <description>Full season ends after Britain</description>
-      <code>DB3E-015A</code>
-    </cheat>
-    <cheat>
-      <description>Full season ends after Germany</description>
-      <code>DC3E-015A</code>
-    </cheat>
-    <cheat>
-      <description>Full season ends after Hungary</description>
-      <code>D83E-015A</code>
-    </cheat>
-    <cheat>
-      <description>Full season ends after Belgium</description>
-      <code>DA3E-015A</code>
-    </cheat>
-    <cheat>
-      <description>Full season ends after Italy</description>
-      <code>D23E-015A</code>
-    </cheat>
-    <cheat>
-      <description>Full season ends after Portugal</description>
-      <code>D33E-015A</code>
-    </cheat>
-    <cheat>
-      <description>Full season ends after Japan</description>
-      <code>DE3E-015A</code>
     </cheat>
   </cartridge>
   <cartridge sha256="fccc96af24a2463b1c53253e1c5c8ef63641355fae53c0fb410427f29743262b">	
@@ -40194,6 +40241,26 @@
       <code>DC83-AD84</code>
     </cheat>
   </cartridge>
+  <cartridge sha256="39c69dfbba31086cee0c6a034186148c46e1e6c86fcb8e990fb5364a8845fbcd">	
+    <name>SD Kidou Senshi Gundam - V Sakusen Shidou (Japan)</name>
+    <cheat>
+      <description>Invincibility</description>
+      <code>1D68-6FA0</code>
+      <code>1D6F-A7D0</code>
+    </cheat>
+  </cartridge>
+  <cartridge sha256="8cd9eea0f01e2442727e4624199afaa42dceeb05b9084a4358cadbe4e5a04577">	
+    <name>SD The Great Battle - Aratanaru Chousen (Japan)</name>
+    <cheat>
+      <description>Invincibility</description>
+      <code>1DC5-A7D7</code>
+      <code>C9C1-0FD4</code>
+    </cheat>
+    <cheat>
+      <description>Infinite lives</description>
+      <code>C968-67AF</code>
+    </cheat>
+  </cartridge>
   <cartridge sha256="d802715fb4f09d7e499b5b3e577af641598a723dae7cedeaa93943bb53c6edbb">	
     <name>SWAT Kats - The Radical Squadron (USA)</name>
     <cheat>
@@ -41409,6 +41476,10 @@
       <code>7E05140B</code>
     </cheat>
     <cheat>
+      <description>Infinite lives (Bartman and Itchy and Scratchy sub-games)</description>
+      <code>C2BE-60EA</code>
+    </cheat>
+    <cheat>
       <description>Infinite 99 Watermelon Seeds left</description>
       <code>7E013763</code>
     </cheat>
@@ -41419,6 +41490,11 @@
     <cheat>
       <description>Infinite Bubbles and Seeds</description>
       <code>89CB-D9B5</code>
+    </cheat>
+    <cheat>
+      <description>Infinite Z's (main game)</description>
+      <code>C2C3-6925</code>
+      <code>C2C3-61B5</code>
     </cheat>
     <cheat>
       <description>All Pages</description>
@@ -41435,15 +41511,6 @@
     <cheat>
       <description>Start with 9 bubbles</description>
       <code>DB6A-D521</code>
-    </cheat>
-    <cheat>
-      <description>Infinite lives (Bartman and Itchy and Scratchy sub-games)</description>
-      <code>C2BE-60EA</code>
-    </cheat>
-    <cheat>
-      <description>Infinite Z's (main game)</description>
-      <code>C2C3-6925</code>
-      <code>C2C3-61B5</code>
     </cheat>
   </cartridge>
   <cartridge sha256="70008efe51185eb0a2f8d8d8ac2bdbb99bd3dfcc169dcc474962f82692998051">	
@@ -42440,20 +42507,20 @@
   <cartridge sha256="24f3f22949f36ebf8ab4beaa8cba22db107efe7a7585f749343f2860bf041fe1">	
     <name>Space Football - One on One (USA)</name>
     <cheat>
-      <description>No pushback on firing</description>
-      <code>C2C9-D46F</code>
-    </cheat>
-    <cheat>
-      <description>Push forward on firing</description>
-      <code>1BC9-DFAF</code>
+      <description>Infinite energy</description>
+      <code>C2B9-D7AF</code>
     </cheat>
     <cheat>
       <description>Instant acceleration</description>
       <code>1B26-A7D7</code>
     </cheat>
     <cheat>
-      <description>Infinite energy</description>
-      <code>C2B9-D7AF</code>
+      <description>No pushback on firing</description>
+      <code>C2C9-D46F</code>
+    </cheat>
+    <cheat>
+      <description>Push forward on firing</description>
+      <code>1BC9-DFAF</code>
     </cheat>
   </cartridge>
   <cartridge sha256="dc5353ddc350816619230f25f8c51bddabf7438e6dfba21662eb1c4794856735">	
@@ -43713,6 +43780,13 @@
   <cartridge sha256="dad9c116283322d5a13fd659874c681582abdff3df182cc4c90511d33fb7110a">	
     <name>Stone Protectors (USA)</name>
     <cheat>
+      <description>Invincibility (blinking)</description>
+      <code>CBB6-0F07</code>
+      <code>D9B6-0F67</code>
+      <code>B2B6-0FA7</code>
+      <code>4022-D764</code>
+    </cheat>
+    <cheat>
       <description>Infinite health - P1</description>
       <code>7E13CCB2</code>
     </cheat>
@@ -43725,8 +43799,27 @@
       <code>C281-D467</code>
     </cheat>
   </cartridge>
+  <cartridge sha256="910a29f834199c63c22beddc749baba746da9922196a553255deade59f4fc127">	
+    <name>Street Fighter Alpha 2 (USA)</name>
+    <cheat>
+      <description>Invincibility (except throws & Akuma's special moves)</description>
+      <code>3CC6-5DDD</code>
+      <code>3DC6-5D0D</code>
+      <code>6DC6-5D6D</code>
+      <code>DBC6-5DAD</code>
+      <code>3D80-7F6D</code>
+      <code>DD80-7FAD</code>
+      <code>D580-74DD</code>
+    </cheat>
+  </cartridge>
   <cartridge sha256="2b34161e96ef3f0f48cecd67e531a9bb94310652d8686f301bac426e4ab97e77 d17cb5c73174060fcbd9cba6c705643f19c3b8be24d0f7ee43aee674ff1ea38e">	
     <name>Street Fighter II (USA)</name>
+    <cheat>
+      <description>Invincibility (except against throws) - P1</description>
+      <code>6D27-6704</code>
+      <code>DF27-6764</code>
+      <code>4039-670D</code>
+    </cheat>
     <cheat>
       <description>Win 1 bout to win the match instead of 2 out of 3 (disable before fighting M. Bison)</description>
       <code>DF80-AD64</code>
@@ -44081,6 +44174,16 @@
   </cartridge>
   <cartridge sha256="3e487f8ba48c0b5e31744e3281d6bce375089db6075c8eb3d9a929376b817381">	
     <name>Street Fighter II Turbo (USA)</name>
+    <cheat>
+      <description>Invincibility (except against throws) - P1</description>
+      <code>6D93-54DF</code>
+      <code>DF93-540F</code>
+      <code>CB99-5767</code>
+      <code>DD99-57A7</code>
+      <code>DB91-5DD7</code>
+      <code>4091-5D07</code>
+      <code>3C91-5DA7</code>
+    </cheat>
     <cheat>
       <description>Infinite health - P1</description>
       <code>7E053063</code>
@@ -44591,15 +44694,24 @@
   <cartridge sha256="c04d80b84514202ff319384ca20641eb0189e975eed5612915bd9c224b2ab30a">	
     <name>Stunt Race FX (USA) (Rev 1)</name>
     <cheat>
+      <description>Infinite boost - P1</description>
+      <code>7E0E0548</code>
+      <code>7E0E0648</code>
+    </cheat>
+    <cheat>
+      <description>Infinite time extended</description>
+      <code>7E19EE99</code>
+    </cheat>
+    <cheat>
       <description>Infinite lives</description>
       <code>7E0DF809</code>
     </cheat>
     <cheat>
-      <description>Stop lap time minutes</description>
+      <description>Infinite time - minutes</description>
       <code>7E0E6600</code>
     </cheat>
     <cheat>
-      <description>Stop lap time seconds</description>
+      <description>Infinite time - seconds</description>
       <code>7E0E6400</code>
     </cheat>
     <cheat>
@@ -44609,15 +44721,6 @@
     <cheat>
       <description>Choose any car</description>
       <code>2DAE-AD42</code>
-    </cheat>
-    <cheat>
-      <description>Infinite boost - P1</description>
-      <code>7E0E0548</code>
-      <code>7E0E0648</code>
-    </cheat>
-    <cheat>
-      <description>Infinite time extended</description>
-      <code>7E19EE99</code>
     </cheat>
     <cheat>
       <description>Have all stars collected</description>
@@ -44677,6 +44780,26 @@
     <cheat>
       <description>Mega-jump (don't use the game's super-jump feature)</description>
       <code>408C-DF0D</code>
+    </cheat>
+    <cheat>
+      <description>Multi-jump</description>
+      <code>4D8C-64DD</code>
+      <code>4D8C-640D</code>
+      <code>E28C-646D</code>
+      <code>C2E4-0DD7</code>
+      <code>E6E4-0D07</code>
+      <code>D8E4-0D67</code>
+      <code>06E4-0DA7</code>
+      <code>DCE4-0FD7</code>
+      <code>FDE4-0F07</code>
+      <code>D9E4-0F67</code>
+      <code>CBE4-0FA7</code>
+      <code>DDE4-04D7</code>
+      <code>ECE4-0407</code>
+      <code>B9E4-0467</code>
+      <code>FCE4-04A7</code>
+      <code>16E4-07D7</code>
+      <code>1DE4-0707</code>
     </cheat>
     <cheat>
       <description>Don't lose all weapon power when you die (may give you unusual weapons)</description>
@@ -47612,54 +47735,6 @@
       <code>C222-D4DD</code>
     </cheat>
     <cheat>
-      <description>Start with 1 life instead of 5</description>
-      <code>DDB4-6F07</code>
-    </cheat>
-    <cheat>
-      <description>Start with 9 lives</description>
-      <code>D6B4-6F07</code>
-    </cheat>
-    <cheat>
-      <description>Start with 15 lives</description>
-      <code>D3B4-6F07</code>
-    </cheat>
-    <cheat>
-      <description>Start with 25 lives</description>
-      <code>F6B4-6F07</code>
-    </cheat>
-    <cheat>
-      <description>Start with 50 lives</description>
-      <code>7FB4-6F07</code>
-    </cheat>
-    <cheat>
-      <description>Start with 99 lives</description>
-      <code>14B4-6F07</code>
-    </cheat>
-    <cheat>
-      <description>1-up at 5 coins instead of 100</description>
-      <code>D964-A7D7</code>
-      <code>D967-AFA7</code>
-    </cheat>
-    <cheat>
-      <description>1-up at 10 coins</description>
-      <code>DC64-A7D7</code>
-      <code>DC67-AFA7</code>
-    </cheat>
-    <cheat>
-      <description>1-up at 20 coins</description>
-      <code>F064-A7D7</code>
-      <code>F067-AFA7</code>
-    </cheat>
-    <cheat>
-      <description>1-up at 50 coins</description>
-      <code>7464-A7D7</code>
-      <code>7467-AFA7</code>
-    </cheat>
-    <cheat>
-      <description>1-up at 1 dragon coin instead of 5</description>
-      <code>D2E5-A7AD</code>
-    </cheat>
-    <cheat>
       <description>Multi-jump and float down (disable in water and to get on Yoshi)</description>
       <code>7E147101</code>
     </cheat>
@@ -47697,24 +47772,6 @@
       <code>7E001903</code>
     </cheat>
     <cheat>
-      <description>Start as Super Mario</description>
-      <code>31B7-6F07</code>
-    </cheat>
-    <cheat>
-      <description>Start as Cape Mario</description>
-      <code>CBB7-6D67</code>
-      <code>D4B7-6DA7</code>
-      <code>3CB7-6FD7</code>
-      <code>69B7-6F07</code>
-    </cheat>
-    <cheat>
-      <description>Start as Fire Mario</description>
-      <code>CBB7-6D67</code>
-      <code>D7B7-6DA7</code>
-      <code>3CB7-6FD7</code>
-      <code>69B7-6F07</code>
-    </cheat>
-    <cheat>
       <description>Always have Yoshi</description>
       <code>7E0DC101</code>
     </cheat>
@@ -47733,19 +47790,6 @@
     <cheat>
       <description>Little Yoshi grows after eating 4 enemies</description>
       <code>D0CE-64A0</code>
-    </cheat>
-    <cheat>
-      <description>Nintendo's Debug</description>
-      <code>DDC1-64DD</code>
-      <code>DDC5-6DAD</code>
-    </cheat>
-    <cheat>
-      <description>Nintendo's Debug 2</description>
-      <code>DDA6-DF07</code>
-    </cheat>
-    <cheat>
-      <description>Power-up select</description>
-      <code>EDA5-0F6F</code>
     </cheat>
     <cheat>
       <description>Shoot fireballs straight</description>
@@ -47774,6 +47818,85 @@
       <code>7E152101</code>
       <code>7E152201</code>
       <code>7E152301</code>
+    </cheat>
+    <cheat>
+      <description>Power-up select</description>
+      <code>EDA5-0F6F</code>
+    </cheat>
+    <cheat>
+      <description>1-up at 5 coins instead of 100</description>
+      <code>D964-A7D7</code>
+      <code>D967-AFA7</code>
+    </cheat>
+    <cheat>
+      <description>1-up at 10 coins</description>
+      <code>DC64-A7D7</code>
+      <code>DC67-AFA7</code>
+    </cheat>
+    <cheat>
+      <description>1-up at 20 coins</description>
+      <code>F064-A7D7</code>
+      <code>F067-AFA7</code>
+    </cheat>
+    <cheat>
+      <description>1-up at 50 coins</description>
+      <code>7464-A7D7</code>
+      <code>7467-AFA7</code>
+    </cheat>
+    <cheat>
+      <description>1-up at 1 dragon coin instead of 5</description>
+      <code>D2E5-A7AD</code>
+    </cheat>
+    <cheat>
+      <description>Start as Super Mario</description>
+      <code>31B7-6F07</code>
+    </cheat>
+    <cheat>
+      <description>Start as Cape Mario</description>
+      <code>CBB7-6D67</code>
+      <code>D4B7-6DA7</code>
+      <code>3CB7-6FD7</code>
+      <code>69B7-6F07</code>
+    </cheat>
+    <cheat>
+      <description>Start as Fire Mario</description>
+      <code>CBB7-6D67</code>
+      <code>D7B7-6DA7</code>
+      <code>3CB7-6FD7</code>
+      <code>69B7-6F07</code>
+    </cheat>
+    <cheat>
+      <description>Start with 1 life instead of 5</description>
+      <code>DDB4-6F07</code>
+    </cheat>
+    <cheat>
+      <description>Start with 9 lives</description>
+      <code>D6B4-6F07</code>
+    </cheat>
+    <cheat>
+      <description>Start with 15 lives</description>
+      <code>D3B4-6F07</code>
+    </cheat>
+    <cheat>
+      <description>Start with 25 lives</description>
+      <code>F6B4-6F07</code>
+    </cheat>
+    <cheat>
+      <description>Start with 50 lives</description>
+      <code>7FB4-6F07</code>
+    </cheat>
+    <cheat>
+      <description>Start with 99 lives</description>
+      <code>14B4-6F07</code>
+    </cheat>
+    <cheat>
+      <description>Nintendo's Debug</description>
+      <code>DDC1-64DD</code>
+      <code>DDC5-6DAD</code>
+    </cheat>
+    <cheat>
+      <description>Nintendo's Debug 2</description>
+      <code>DDA6-DF07</code>
     </cheat>
   </cartridge>
   <cartridge sha256="bd763c1a56365c244be92e6cffefd318780a2a19eda7d5baf1c6d5bd6c1b3e06">	
@@ -47841,6 +47964,29 @@
     <cheat>
       <description>Red switches stay on for over four times as long</description>
       <code>DB8A-AF7B</code>
+    </cheat>
+    <cheat>
+      <description>Disable autoscroll</description>
+      <code>C220-D4D3</code>
+    </cheat>
+    <cheat>
+      <description>Don't get crushed</description>
+      <code>18CB-D727</code>
+    </cheat>
+    <cheat>
+      <description>Multi-jump</description>
+      <code>5421-DD26</code>
+      <code>1D21-DFF6</code>
+      <code>4B21-DF96</code>
+      <code>DD21-DFB6</code>
+      <code>6D21-DF26</code>
+      <code>ED21-D4F6</code>
+      <code>D921-D496</code>
+      <code>C421-D4B6</code>
+      <code>E821-D426</code>
+      <code>6321-D7F6</code>
+      <code>C821-D796</code>
+      <code>1D21-D7B6</code>
     </cheat>
     <cheat>
       <description>Have Stars +10</description>
@@ -47922,6 +48068,10 @@
       <code>C2EE-649F</code>
     </cheat>
     <cheat>
+      <description>Infinite lives and start at middle ring when you die</description>
+      <code>C2EE-64BF</code>
+    </cheat>
+    <cheat>
       <description>Star timer doesn't decrease when hit</description>
       <code>7E039101</code>
       <code>7E039200</code>
@@ -47946,20 +48096,27 @@
       <code>7E094500</code>
     </cheat>
     <cheat>
+      <description>Multi-jump</description>
+      <code>5421-DD26</code>
+      <code>1D21-DFF6</code>
+      <code>4B21-DF96</code>
+      <code>DD21-DFB6</code>
+      <code>6D21-DF26</code>
+      <code>ED21-D4F6</code>
+      <code>D921-D496</code>
+      <code>C421-D4B6</code>
+      <code>E821-D426</code>
+      <code>6321-D7F6</code>
+      <code>C821-D796</code>
+      <code>1D21-D7B6</code>
+    </cheat>
+    <cheat>
       <description>Unlock items in boss fights</description>
       <code>7E0B4800</code>
     </cheat>
     <cheat>
-      <description>Mario's crying disabled</description>
-      <code>44A0-672B</code>
-    </cheat>
-    <cheat>
       <description>Horizontal one-way pinball doors open from both sides</description>
       <code>6DB6-6F55</code>
-    </cheat>
-    <cheat>
-      <description>Infinite lives/Start at Middle Ring (when you die)</description>
-      <code>C2EE-64BF</code>
     </cheat>
     <cheat>
       <description>After using the magnifying glass, red coins and hidden items are always revealed</description>
@@ -47978,13 +48135,20 @@
       <code>DB8A-AF7B</code>
     </cheat>
     <cheat>
-      <description>Star timer doesn't decrease when hit (alt)</description>
-      <code>7E039101</code>
-      <code>7E039200</code>
+      <description>Mario's crying disabled</description>
+      <code>44A0-672B</code>
     </cheat>
     <cheat>
       <description>Mario's crying disabled (alt)</description>
       <code>06C64F22</code>
+    </cheat>
+    <cheat>
+      <description>Disable autoscroll</description>
+      <code>C220-D4D3</code>
+    </cheat>
+    <cheat>
+      <description>Don't get crushed</description>
+      <code>18CB-D727</code>
     </cheat>
     <cheat>
       <description>Have Stars +10</description>
@@ -50054,6 +50218,15 @@
   <cartridge sha256="d17cb5c73174060fcbd9cba6c705643f19c3b8be24d0f7ee43aee674ff1ea38e">	
     <name>Super Street Fighter II (USA)</name>
     <cheat>
+      <description>Invincibility (except against throws, projectiles don't work) - P1</description>
+      <code>6D9C-8D67</code>
+      <code>DF9C-8DA7</code>
+      <code>6DA1-8FD5</code>
+      <code>D4A1-8F05</code>
+      <code>6DAF-7405</code>
+      <code>D4AF-7465</code>
+    </cheat>
+    <cheat>
       <description>Infinite health - P1</description>
       <code>CB96-7DDD</code>
       <code>8D96-7D0D</code>
@@ -50144,18 +50317,6 @@
     <cheat>
       <description>P2 starts right in front of P1</description>
       <code>F122-E760</code>
-    </cheat>
-    <cheat>
-      <description>Start with 1/4 health - both players</description>
-      <code>4A9C-7FDF</code>
-    </cheat>
-    <cheat>
-      <description>Start with 1/2 health - both players</description>
-      <code>969C-7FDF</code>
-    </cheat>
-    <cheat>
-      <description>Start with 3/4 health - both players</description>
-      <code>609C-7FDF</code>
     </cheat>
     <cheat>
       <description>Balrog - Fierce charging punch, does heavy damage</description>
@@ -50436,6 +50597,18 @@
     <cheat>
       <description>Zangief - Double spinning lariat (only certain hits), does heavy damage</description>
       <code>6E51-EF90</code>
+    </cheat>
+    <cheat>
+      <description>Start with 1/4 health - both players</description>
+      <code>4A9C-7FDF</code>
+    </cheat>
+    <cheat>
+      <description>Start with 1/2 health - both players</description>
+      <code>969C-7FDF</code>
+    </cheat>
+    <cheat>
+      <description>Start with 3/4 health - both players</description>
+      <code>609C-7FDF</code>
     </cheat>
   </cartridge>
   <cartridge sha256="830c900083cccc6ded74c167c4e257db34df4786ecd6e2f053de454db7d31fe5">	
@@ -54358,6 +54531,16 @@
   <cartridge sha256="cb2fdfce61858063bf4c9da4228381c3ec3abe423f4d378cddd174ae4adb261e">	
     <name>Ultimate Mortal Kombat 3 (USA)</name>
     <cheat>
+      <description>Invincibility (throws disable CPU)</description>
+      <code>C132-CDBF</code>
+      <code>1432-CD2F</code>
+      <code>2D32-CFFF</code>
+      <code>D032-CF9F</code>
+      <code>6D32-CFBF</code>
+      <code>0D32-CF2F</code>
+      <code>6D33-3DBF</code>
+    </cheat>
+    <cheat>
       <description>Infinite health - P1</description>
       <code>C172-B27B</code>
     </cheat>
@@ -57288,19 +57471,19 @@
       <code>7E05DCFF</code>
     </cheat>
     <cheat>
-      <description>Infinite Energy</description>
+      <description>Infinite health</description>
       <code>7E1CF1FA</code>
     </cheat>
     <cheat>
-      <description>Infinite Lives</description>
+      <description>Infinite lives</description>
       <code>7E020C63</code>
     </cheat>
     <cheat>
-      <description>Infinite Continues</description>
+      <description>Infinite continues</description>
       <code>7E020C63</code>
     </cheat>
     <cheat>
-      <description>Infinite Time</description>
+      <description>Infinite time</description>
       <code>7E1CEF09</code>
     </cheat>
   </cartridge>

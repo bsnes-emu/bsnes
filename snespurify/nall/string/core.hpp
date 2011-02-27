@@ -26,9 +26,9 @@ string& string::append(const char *s) {
 }
 
 string& string::append(bool value) { append(value ? "true" : "false"); return *this; }
-string& string::append(signed int value) { append(strsigned(value)); return *this; }
-string& string::append(unsigned int value) { append(strunsigned(value)); return *this; }
-string& string::append(double value) { append(strdouble(value)); return *this; }
+string& string::append(signed int value) { append(integer(value)); return *this; }
+string& string::append(unsigned int value) { append(decimal(value)); return *this; }
+string& string::append(double value) { append(fp(value)); return *this; }
 
 string::operator const char*() const {
   return data;
@@ -95,7 +95,7 @@ string::~string() {
   if(data) free(data);
 }
 
-bool string::readfile(const char *filename) {
+bool string::readfile(const string &filename) {
   assign("");
 
   #if !defined(_WIN32)
