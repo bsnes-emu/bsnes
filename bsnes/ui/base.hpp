@@ -28,6 +28,7 @@ struct TopLevelWindow : Window {
 #include "tools/tools.hpp"
 #include "input/input.hpp"
 #include "utility/utility.hpp"
+#include "path/path.hpp"
 #include "cartridge/cartridge.hpp"
 
 #if defined(DEBUGGER)

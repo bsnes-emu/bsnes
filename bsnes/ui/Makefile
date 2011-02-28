@@ -1,7 +1,7 @@
 include $(snes)/Makefile
 include $(gameboy)/Makefile
 
-ui_objects := ui-main ui-general ui-settings ui-tools ui-input ui-utility ui-cartridge ui-debugger
+ui_objects := ui-main ui-general ui-settings ui-tools ui-input ui-utility ui-path ui-cartridge ui-debugger
 ui_objects += ruby phoenix
 ui_objects += $(if $(call streq,$(platform),win),resource)
 
@@ -68,6 +68,7 @@ obj/ui-tools.o: $(ui)/tools/tools.cpp $(call rwildcard,$(ui)/*.hpp) $(call rwild
 obj/ui-settings.o: $(ui)/settings/settings.cpp $(call rwildcard,$(ui)/*.hpp) $(call rwildcard,$(ui)/settings/*)
 obj/ui-input.o: $(ui)/input/input.cpp $(call rwildcard,$(ui)/*.hpp) $(call rwildcard,$(ui)/input/*)
 obj/ui-utility.o: $(ui)/utility/utility.cpp $(call rwildcard,$(ui)/*.hpp) $(call rwildcard,$(ui)/utility/*)
+obj/ui-path.o: $(ui)/path/path.cpp $(call rwildcard,$(ui)/*.hpp) $(call rwildcard,$(ui)/path/*)
 obj/ui-cartridge.o: $(ui)/cartridge/cartridge.cpp $(call rwildcard,$(ui)/*.hpp) $(call rwildcard,$(ui)/cartridge/*)
 obj/ui-debugger.o: $(ui)/debugger/debugger.cpp $(call rwildcard,$(ui)/*.hpp) $(call rwildcard,$(ui)/debugger/*)
 

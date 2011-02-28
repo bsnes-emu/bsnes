@@ -10,8 +10,8 @@ void Application::main(int argc, char **argv) {
   config.create();
   inputMapper.create();
 
-  config.path.base = realpath(argv[0]);
-  config.path.user = { userpath(), ".bsnes/" };
+  config.path.base = dir(realpath(argv[0]));
+  config.path.user = userpath();
 
   config.load();
   config.save();
@@ -57,6 +57,7 @@ void Application::main(int argc, char **argv) {
   inputSettings.create();
   advancedSettings.create();
   cheatEditor.create();
+  cheatDatabase.create();
   stateManager.create();
   #if defined(DEBUGGER)
   debugger.create();
@@ -158,19 +159,23 @@ int main(int argc, char **argv) {
 }
 
 void Application::loadGeometry() {
-  geometryConfig.load(string(config.path.user, "bsnes-geometry.cfg"));
+  geometryConfig.load(path.home("geometry.cfg"));
   foreach(window, windows) {
     lstring position;
     position.split(",", window->position);
     Geometry geom = window->geometry();
-    window->setGeometry({ (signed)integer(position[0]), (signed)integer(position[1]), geom.width, geom.height });
+    window->setGeometry({
+      (signed)integer(position[0]), (signed)integer(position[1]),
+      geom.width, geom.height
+    //(unsigned)decimal(position[2]), (unsigned)decimal(position[3])
+    });
   }
 }
 
 void Application::saveGeometry() {
   foreach(window, windows) {
     Geometry geom = window->geometry();
-    window->position = { geom.x, ",", geom.y };
+    window->position = { geom.x, ",", geom.y, ",", geom.width, ",", geom.height };
   }
-  geometryConfig.save(string(config.path.user, "bsnes-geometry.cfg"));
+  geometryConfig.save(path.home("geometry.cfg"));
 }

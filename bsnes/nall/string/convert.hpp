@@ -117,38 +117,7 @@ uintmax_t binary(const char *str) {
 }
 
 double fp(const char *str) {
-  if(!str) return 0.0;
-  bool negate = false;
-
-  //check for negation
-  if(*str == '-') {
-    negate = true;
-    str++;
-  }
-
-  intmax_t result_integral = 0;
-  while(*str) {
-    uint8_t x = *str++;
-    if(x >= '0' && x <= '9') x -= '0';
-    else if(x == '.' || x == ',') break;  //break loop and read fractional part
-    else return (double)result_integral;  //invalid value, assume no fractional part
-    result_integral = result_integral * 10 + x;
-  }
-
-  intmax_t result_fractional = 0;
-  while(*str) {
-    uint8_t x = *str++;
-    if(x >= '0' && x <= '9') x -= '0';
-    else break;  //stop at first invalid character
-    result_fractional = result_fractional * 10 + x;
-  }
-
-  //calculate fractional portion
-  double result = (double)result_fractional;
-  while((uintmax_t)result > 0) result /= 10.0;
-  result += (double)result_integral;
-
-  return !negate ? result : -result;
+  return atof(str);
 }
 
 }

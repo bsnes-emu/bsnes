@@ -1,12 +1,11 @@
 Configuration config;
 
 void Configuration::load() {
-  configuration::load(string(path.user, "bsnes.cfg"));
+  configuration::load(::path.home("bsnes.cfg"));
 }
 
 void Configuration::save() {
-  mkdir(path.user, 0755);
-  configuration::save(string(path.user, "bsnes.cfg"));
+  configuration::save(::path.home("bsnes.cfg"));
 }
 
 void Configuration::create() {

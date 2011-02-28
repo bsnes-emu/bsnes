@@ -44,12 +44,8 @@ void Bus::map(
   for(unsigned bank = bank_lo; bank <= bank_hi; bank++) {
     for(unsigned addr = addr_lo; addr <= addr_hi; addr++) {
       unsigned destaddr = (bank << 16) | addr;
-      if(mode == MapMode::Linear) {
-        destaddr = mirror(base + offset, length);
-        offset = (offset + 1) % length;
-      } else if(mode == MapMode::Shadow) {
-        destaddr = mirror(base + destaddr, length);
-      }
+      if(mode == MapMode::Linear) destaddr = mirror(base + offset++, length);
+      if(mode == MapMode::Shadow) destaddr = mirror(base + destaddr, length);
       lookup[(bank << 16) | addr] = id;
       target[(bank << 16) | addr] = destaddr;
     }

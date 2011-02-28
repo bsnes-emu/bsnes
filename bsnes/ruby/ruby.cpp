@@ -1,5 +1,4 @@
 #include <ruby/ruby.hpp>
-using namespace nall;
 
 #undef mkdir
 #undef usleep

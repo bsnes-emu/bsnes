@@ -1,8 +1,11 @@
 include nall/Makefile
 snes := snes
 gameboy := gameboy
-profile := accuracy
+profile := compatibility
 ui := ui
+
+# debugger
+options :=
 
 # compiler
 c       := $(compiler) -std=gnu99
@@ -18,9 +21,11 @@ objects := libco
 # profile-guided optimization
 # flags += -fprofile-use
 
+flags := $(flags) $(foreach o,$(call strupper,$(options)),-D$o)
+
 # platform
 ifeq ($(platform),x)
-  link += -s -ldl -lX11 -lXext
+  link += -ldl -lX11 -lXext
 else ifeq ($(platform),osx)
 else ifeq ($(platform),win)
   link += -mwindows

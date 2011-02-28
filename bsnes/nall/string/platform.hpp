@@ -8,7 +8,6 @@ string realpath(const char *name) {
   if(::realpath(name, path)) {
     string result(path);
     result.transform("\\", "/");
-    if(result.endswith("/") == false) result.append("/");
     return result;
   }
   return "";

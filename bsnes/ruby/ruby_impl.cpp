@@ -24,6 +24,8 @@
   #include <windows.h>
 #endif
 
+using namespace nall;
+
 /* Video */
 
 #define DeclareVideo(Name) \

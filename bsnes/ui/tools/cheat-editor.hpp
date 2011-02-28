@@ -8,20 +8,10 @@ struct CheatEditor : TopLevelWindow {
   Label descLabel;
   LineEdit descEdit;
   HorizontalLayout controlLayout;
-  Label spacer;
+  Widget spacerWidget;
   Button findButton;
   Button clearAllButton;
   Button clearButton;
-
-  TopLevelWindow databaseWindow;
-  VerticalLayout databaseLayout;
-  ListView databaseList;
-  HorizontalLayout databaseControlLayout;
-  Button databaseSelectAll;
-  Button databaseUnselectAll;
-  Label databaseSpacer;
-  Button databaseOk;
-  lstring databaseCode;
 
   void load(string filename);
   void save(string filename);
@@ -34,11 +24,11 @@ private:
   void refresh();
   void toggle(unsigned row);
   void bind();
-  void findCodes();
   optional<unsigned> findUnusedSlot();
-  void addDatabaseCodes();
   void clearAll();
   void clear();
+
+  friend class CheatDatabase;
 };
 
 extern CheatEditor cheatEditor;
