@@ -15,6 +15,7 @@ private:
   string folder;
   lstring filters;
   lstring contents;
+  string folderPath;
 
   void folderBrowse();
   void folderUp();

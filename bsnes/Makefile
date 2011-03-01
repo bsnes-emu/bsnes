@@ -25,7 +25,7 @@ flags := $(flags) $(foreach o,$(call strupper,$(options)),-D$o)
 
 # platform
 ifeq ($(platform),x)
-  link += -ldl -lX11 -lXext
+  link += -s -ldl -lX11 -lXext
 else ifeq ($(platform),osx)
 else ifeq ($(platform),win)
   link += -mwindows

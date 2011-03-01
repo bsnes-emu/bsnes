@@ -55,7 +55,7 @@ void SingleSlotLoader::loadCartridgeBsxSlotted() {
 void SingleSlotLoader::loadCartridgeBsx() {
   mode = Mode::Bsx;
   setTitle("Load BS-X Cartridge");
-  basePath.setText(config.path.satellaviewBios);
+  basePath.setText(path.satellaviewBios);
   slotPath.setText("");
   setVisible();
   okButton.setFocused();
@@ -64,7 +64,7 @@ void SingleSlotLoader::loadCartridgeBsx() {
 void SingleSlotLoader::loadCartridgeSuperGameBoy() {
   mode = Mode::SuperGameBoy;
   setTitle("Load Super Game Boy cartridge");
-  basePath.setText(config.path.superGameBoyBios);
+  basePath.setText(path.superGameBoyBios);
   slotPath.setText("");
   setVisible();
   okButton.setFocused();
@@ -79,12 +79,12 @@ void SingleSlotLoader::load() {
       break;
     }
     case Mode::Bsx: {
-      config.path.satellaviewBios = basePath.text();
+      path.satellaviewBios = basePath.text();
       cartridge.loadBsx(basePath.text(), slotPath.text());
       break;
     }
     case Mode::SuperGameBoy: {
-      config.path.superGameBoyBios = basePath.text();
+      path.superGameBoyBios = basePath.text();
       cartridge.loadSuperGameBoy(basePath.text(), slotPath.text());
       break;
     }
@@ -147,7 +147,7 @@ void DoubleSlotLoader::create() {
 
 void DoubleSlotLoader::loadCartridgeSufamiTurbo() {
   setTitle("Load Sufami Turbo Cartridge");
-  basePath.setText(config.path.sufamiTurboBios);
+  basePath.setText(path.sufamiTurboBios);
   slotAPath.setText("");
   slotBPath.setText("");
   setVisible();
@@ -156,6 +156,6 @@ void DoubleSlotLoader::loadCartridgeSufamiTurbo() {
 
 void DoubleSlotLoader::load() {
   setVisible(false);
-  config.path.sufamiTurboBios = basePath.text();
+  path.sufamiTurboBios = basePath.text();
   cartridge.loadSufamiTurbo(basePath.text(), slotAPath.text(), slotBPath.text());
 }

@@ -1,13 +1,4 @@
 struct Configuration : public configuration {
-  struct Path {
-    string base;
-    string user;
-    string current;
-    string satellaviewBios;
-    string sufamiTurboBios;
-    string superGameBoyBios;
-  } path;
-
   struct Video {
     string driver;
     bool synchronize;

@@ -123,6 +123,7 @@ void System::load() {
   if(cartridge.has_serial()) serial.load();
 
   serialize_init();
+  cheat.init();
 }
 
 void System::unload() {
@@ -185,8 +186,6 @@ void System::power() {
   if(cartridge.has_serial()) cpu.coprocessors.append(&serial);
 
   scheduler.init();
-  cheat.init();
-
   input.update();
 }
 
@@ -222,8 +221,6 @@ void System::reset() {
   if(cartridge.has_serial()) cpu.coprocessors.append(&serial);
 
   scheduler.init();
-  cheat.init();
-
   input.port_set_device(0, config.controller_port1);
   input.port_set_device(1, config.controller_port2);
   input.update();

@@ -10,12 +10,14 @@ void Application::main(int argc, char **argv) {
   config.create();
   inputMapper.create();
 
-  config.path.base = dir(realpath(argv[0]));
-  config.path.user = userpath();
+  path.base = dir(realpath(argv[0]));
+  path.user = userpath();
+  path.load();
+  path.save();
 
   config.load();
   config.save();
-  if(config.path.current == "") config.path.current = config.path.base;
+
   inputMapper.bind();
 
   #if defined(PLATFORM_WIN)
@@ -133,6 +135,8 @@ void Application::main(int argc, char **argv) {
   foreach(window, windows) window->setVisible(false);
   OS::processEvents();
   SNES::system.term();
+
+  path.save();
   config.save();
 
   video.term();

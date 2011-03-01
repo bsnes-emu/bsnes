@@ -9,11 +9,6 @@ void Configuration::save() {
 }
 
 void Configuration::create() {
-  attach(path.current = "", "path.current");
-  attach(path.satellaviewBios = "", "path.satellaviewBios");
-  attach(path.sufamiTurboBios = "", "path.sufamiTurboBios");
-  attach(path.superGameBoyBios = "", "path.superGameBoyBios");
-
   attach(video.driver = "", "video.driver");
   attach(video.synchronize = false, "video.synchronize");
   attach(video.smooth = true, "video.smooth");

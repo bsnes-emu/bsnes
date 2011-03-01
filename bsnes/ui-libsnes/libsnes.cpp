@@ -181,7 +181,7 @@ bool snes_load_cartridge_super_game_boy(
   string xmlrom = (rom_xml && *rom_xml) ? string(rom_xml) : SNESCartridge(rom_data, rom_size).xmlMemoryMap;
   if(dmg_data) {
     string xmldmg = (dmg_xml && *dmg_xml) ? string(dmg_xml) : GameBoyCartridge(dmg_data, dmg_size).xml;
-    GameBoy::cartridge.load(dmg_xml, dmg_data, dmg_size);
+    GameBoy::cartridge.load(xmldmg, dmg_data, dmg_size);
   }
   SNES::cartridge.load(SNES::Cartridge::Mode::SuperGameBoy, { xmlrom, "" });
   SNES::system.power();
