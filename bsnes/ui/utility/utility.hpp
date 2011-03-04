@@ -15,6 +15,7 @@ struct Utility : property<Utility> {
   void cartridgeLoaded();
   void cartridgeUnloaded();
 
+  SNES::Cartridge::Slot stateSlot();
   void saveState(unsigned slot);
   void loadState(unsigned slot);
 

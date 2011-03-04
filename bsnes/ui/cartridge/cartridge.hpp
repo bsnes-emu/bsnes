@@ -6,8 +6,8 @@ struct Cartridge {
   bool loadSuperGameBoy(const char *basename, const char *slotname);
   void unload();
 
-  string baseName, slotAName, slotBName;
-  string baseXML, slotAXML, slotBXML;
+  string baseName, bsxName, sufamiTurboAName, sufamiTurboBName, gameBoyName;
+  string baseXML, bsxXML, sufamiTurboAXML, sufamiTurboBXML, gameBoyXML;
   bool patchApplied;
 
 private:

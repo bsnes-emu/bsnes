@@ -54,8 +54,7 @@ void Console::write(const string &text, bool echo) {
 
 void Console::tracerEnable(bool state) {
   if(state == true) {
-    string filename = { cartridge.baseName, ".log" };
-    logfile.open(filename, file::mode::write);
+    logfile.open(path.load(SNES::Cartridge::Slot::Cartridge, "log"), file::mode::write);
   } else {
     logfile.close();
   }

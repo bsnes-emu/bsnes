@@ -14,10 +14,10 @@ bool Cartridge::loadNormal(const char *basename) {
 bool Cartridge::loadBsxSlotted(const char *basename, const char *slotname) {
   unload();
   if(loadCartridge(SNES::cartridge.rom, baseXML, basename) == false) return false;
-  loadCartridge(SNES::bsxflash.memory, slotAXML, slotname);
+  loadCartridge(SNES::bsxflash.memory, bsxXML, slotname);
   SNES::cartridge.basename = baseName = nall::basename(basename);
-  slotAName = nall::basename(slotname);
-  SNES::cartridge.load(SNES::Cartridge::Mode::BsxSlotted, { baseXML, slotAXML });
+  bsxName = nall::basename(slotname);
+  SNES::cartridge.load(SNES::Cartridge::Mode::BsxSlotted, { baseXML, bsxXML });
   foreach(memory, SNES::cartridge.nvram) loadMemory(memory);
   utility.cartridgeLoaded();
   return true;
@@ -26,10 +26,10 @@ bool Cartridge::loadBsxSlotted(const char *basename, const char *slotname) {
 bool Cartridge::loadBsx(const char *basename, const char *slotname) {
   unload();
   if(loadCartridge(SNES::cartridge.rom, baseXML, basename) == false) return false;
-  loadCartridge(SNES::bsxflash.memory, slotAXML, slotname);
+  loadCartridge(SNES::bsxflash.memory, bsxXML, slotname);
   SNES::cartridge.basename = baseName = nall::basename(basename);
-  slotAName = nall::basename(slotname);
-  SNES::cartridge.load(SNES::Cartridge::Mode::Bsx, { baseXML, slotAXML });
+  bsxName = nall::basename(slotname);
+  SNES::cartridge.load(SNES::Cartridge::Mode::Bsx, { baseXML, bsxXML });
   foreach(memory, SNES::cartridge.nvram) loadMemory(memory);
   utility.cartridgeLoaded();
   return true;
@@ -38,12 +38,12 @@ bool Cartridge::loadBsx(const char *basename, const char *slotname) {
 bool Cartridge::loadSufamiTurbo(const char *basename, const char *slotAname, const char *slotBname) {
   unload();
   if(loadCartridge(SNES::cartridge.rom, baseXML, basename) == false) return false;
-  loadCartridge(SNES::sufamiturbo.slotA.rom, slotAXML, slotAname);
-  loadCartridge(SNES::sufamiturbo.slotB.rom, slotBXML, slotBname);
+  loadCartridge(SNES::sufamiturbo.slotA.rom, sufamiTurboAXML, slotAname);
+  loadCartridge(SNES::sufamiturbo.slotB.rom, sufamiTurboBXML, slotBname);
   SNES::cartridge.basename = baseName = nall::basename(basename);
-  slotAName = nall::basename(slotAname);
-  slotBName = nall::basename(slotBname);
-  SNES::cartridge.load(SNES::Cartridge::Mode::SufamiTurbo, { baseXML, slotAXML, slotBXML });
+  sufamiTurboAName = nall::basename(slotAname);
+  sufamiTurboBName = nall::basename(slotBname);
+  SNES::cartridge.load(SNES::Cartridge::Mode::SufamiTurbo, { baseXML, sufamiTurboAXML, sufamiTurboBXML });
   foreach(memory, SNES::cartridge.nvram) loadMemory(memory);
   utility.cartridgeLoaded();
   return true;
@@ -69,11 +69,11 @@ bool Cartridge::loadSuperGameBoy(const char *basename, const char *slotname) {
   if(data) delete[] data;
 
   SNES::cartridge.basename = baseName = nall::basename(basename);
-  slotAName = nall::basename(slotname);
+  gameBoyName = nall::basename(slotname);
   SNES::cartridge.load(SNES::Cartridge::Mode::SuperGameBoy, { baseXML, "" });
 
   foreach(memory, SNES::cartridge.nvram) loadMemory(memory);
-  if(GameBoy::cartridge.info.battery && fp.open(string(slotAName, ".sav"), file::mode::read)) {
+  if(GameBoy::cartridge.info.battery && fp.open(path.load(SNES::Cartridge::Slot::GameBoy, "sav"), file::mode::read)) {
     fp.read(GameBoy::cartridge.ramdata, min(GameBoy::cartridge.ramsize, fp.size()));
     fp.close();
   }
@@ -89,14 +89,14 @@ void Cartridge::unload() {
   foreach(memory, SNES::cartridge.nvram) saveMemory(memory);
   if(SNES::cartridge.mode() == SNES::Cartridge::Mode::SuperGameBoy) {
     file fp;
-    if(GameBoy::cartridge.info.battery && fp.open(string(slotAName, ".sav"), file::mode::write)) {
+    if(GameBoy::cartridge.info.battery && fp.open(path.load(SNES::Cartridge::Slot::GameBoy, "sav"), file::mode::write)) {
       fp.write(GameBoy::cartridge.ramdata, GameBoy::cartridge.ramsize);
       fp.close();
     }
   }
 
   utility.cartridgeUnloaded();
-  baseName = slotAName = slotBName = "";
+  baseName = bsxName = sufamiTurboAName = sufamiTurboBName = gameBoyName = "";
 }
 
 bool Cartridge::loadCartridge(SNES::MappedRAM &memory, string &XML, const char *filename) {
@@ -133,8 +133,7 @@ bool Cartridge::loadCartridge(SNES::MappedRAM &memory, string &XML, const char *
 
 bool Cartridge::loadMemory(SNES::Cartridge::NonVolatileRAM &memory) {
   if(memory.size == 0) return true;
-  lstring filenames = { baseName, slotAName, slotBName };
-  string filename = string(filenames[memory.slot], ".", memory.id);
+  string filename = path.load(memory.slot, memory.id);
   file fp;
   if(fp.open(filename, file::mode::read) == false) return false;
   fp.read(memory.data, min(memory.size, fp.size()));
@@ -144,8 +143,7 @@ bool Cartridge::loadMemory(SNES::Cartridge::NonVolatileRAM &memory) {
 
 bool Cartridge::saveMemory(SNES::Cartridge::NonVolatileRAM &memory) {
   if(memory.size == 0) return true;
-  lstring filenames = { baseName, slotAName, slotBName };
-  string filename = string(filenames[memory.slot], ".", memory.id);
+  string filename = path.load(memory.slot, memory.id);
   file fp;
   if(fp.open(filename, file::mode::write) == false) return false;
   fp.write(memory.data, memory.size);

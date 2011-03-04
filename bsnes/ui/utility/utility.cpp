@@ -150,7 +150,7 @@ void Utility::setShader() {
 
 void Utility::cartridgeLoaded() {
   SNES::system.power();
-  cheatEditor.load(cartridge.baseName);
+  cheatEditor.load();
   stateManager.load();
   mainWindow.synchronize();
   utility.setTitle(notdir(cartridge.baseName));
@@ -162,13 +162,21 @@ void Utility::cartridgeLoaded() {
 
 void Utility::cartridgeUnloaded() {
   SNES::cartridge.unload();
-  cheatEditor.save(cartridge.baseName);
+  cheatEditor.save();
   stateManager.save();
   mainWindow.synchronize();
 }
 
+SNES::Cartridge::Slot Utility::stateSlot() {
+  SNES::Cartridge::Slot slot = SNES::Cartridge::Slot::Base;
+  if(SNES::cartridge.mode() == SNES::Cartridge::Mode::Bsx) slot = SNES::Cartridge::Slot::Bsx;
+  if(SNES::cartridge.mode() == SNES::Cartridge::Mode::SufamiTurbo) slot = SNES::Cartridge::Slot::SufamiTurboA;
+  if(SNES::cartridge.mode() == SNES::Cartridge::Mode::SuperGameBoy) slot = SNES::Cartridge::Slot::GameBoy;
+  return slot;
+}
+
 void Utility::saveState(unsigned slot) {
-  string filename = { cartridge.baseName, "-", slot, ".bst" };
+  string filename = path.load(stateSlot(), "bst", { "-", slot });
   SNES::system.runtosave();
   serializer s = SNES::system.serialize();
   file fp;
@@ -182,7 +190,7 @@ void Utility::saveState(unsigned slot) {
 }
 
 void Utility::loadState(unsigned slot) {
-  string filename = { cartridge.baseName, "-", slot, ".bst" };
+  string filename = path.load(stateSlot(), "bst", { "-", slot });
   file fp;
   if(fp.open(filename, file::mode::read)) {
     unsigned size = fp.size();

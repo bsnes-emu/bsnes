@@ -13,6 +13,14 @@ public:
     PAL,
   };
 
+  enum class Slot : unsigned {
+    Base,
+    Bsx,
+    SufamiTurboA,
+    SufamiTurboB,
+    GameBoy,
+  };
+
   MappedRAM rom;
   MappedRAM ram;
 
@@ -46,9 +54,9 @@ public:
     const string id;
     uint8_t *data;
     unsigned size;
-    unsigned slot;
-    NonVolatileRAM() : id(""), data(0), size(0), slot(0) {}
-    NonVolatileRAM(const string id, uint8_t *data, unsigned size, unsigned slot = 0)
+    Slot slot;
+    NonVolatileRAM() : id(""), data(0), size(0), slot(Slot::Base) {}
+    NonVolatileRAM(const string id, uint8_t *data, unsigned size, Slot slot = Slot::Base)
     : id(id), data(data), size(size), slot(slot) {}
   };
   linear_vector<NonVolatileRAM> nvram;

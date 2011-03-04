@@ -13,8 +13,8 @@ struct CheatEditor : TopLevelWindow {
   Button clearAllButton;
   Button clearButton;
 
-  void load(string filename);
-  void save(string filename);
+  void load();
+  void save();
   void create();
 
 private:

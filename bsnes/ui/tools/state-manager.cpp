@@ -59,9 +59,8 @@ void StateManager::load() {
     stateList.append("");
   }
 
-  string filename = { cartridge.baseName, ".bsa" };
   file fp;
-  if(fp.open(string(cartridge.baseName, ".bsa"), file::mode::read)) {
+  if(fp.open(path.load(utility.stateSlot(), "bsa"), file::mode::read)) {
     if(fp.readl(4) == 0x31415342) {
       if(fp.readl(4) == SNES::Info::SerializerVersion) {
         for(unsigned i = 0; i < 32; i++) {
@@ -85,10 +84,10 @@ void StateManager::save() {
   }
 
   if(hasSave == false) {
-    unlink(string(cartridge.baseName, ".bsa"));
+    unlink(path.load(utility.stateSlot(), "bsa"));
   } else {
     file fp;
-    if(fp.open(string(cartridge.baseName, ".bsa"), file::mode::write)) {
+    if(fp.open(path.load(utility.stateSlot(), "bsa"), file::mode::write)) {
       fp.writel(0x31415342, 4);  //'BSA1'
       fp.writel(SNES::Info::SerializerVersion, 4);
 
