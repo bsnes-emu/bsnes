@@ -62,14 +62,24 @@ string Path::load(SNES::Cartridge::Slot slot, const string &type, const string &
     case SNES::Cartridge::Slot::SufamiTurboA: romPath = cartridge.sufamiTurboAName; break;
     case SNES::Cartridge::Slot::SufamiTurboB: romPath = cartridge.sufamiTurboBName; break;
     case SNES::Cartridge::Slot::GameBoy: romPath = cartridge.gameBoyName; break;
+
+    case SNES::Cartridge::Slot::NECDSP: romPath = cartridge.baseName; break;
+    case SNES::Cartridge::Slot::MSU1: romPath = cartridge.baseName; break;
+    case SNES::Cartridge::Slot::Serial: romPath = cartridge.baseName; break;
   }
 
   string path = romPath;
+  if(slot == SNES::Cartridge::Slot::NECDSP && necdsp != "") path = necdsp;
+  if(slot == SNES::Cartridge::Slot::MSU1 && msu1 != "") path = string(msu1, notdir(path));
+  if(slot == SNES::Cartridge::Slot::Serial && serial != "") path = string(serial, notdir(path));
+
   if(type == "srm" && srm != "") path = string(srm, notdir(path));
-  if(type == "bsp" && srm != "") path = string(srm, notdir(path));
-  if(type == "bss" && srm != "") path = string(srm, notdir(path));
-  if(type == "sav" && srm != "") path = string(srm, notdir(path));
+  if(type == "bsp" && bsp != "") path = string(bsp, notdir(path));
+  if(type == "bss" && bss != "") path = string(bss, notdir(path));
+  if(type == "sts" && sts != "") path = string(sts, notdir(path));
+  if(type == "sav" && sav != "") path = string(sav, notdir(path));
   if(type == "rtc" && rtc != "") path = string(rtc, notdir(path));
+
   if(type == "bsa" && bsa != "") path = string(bsa, notdir(path));
   if(type == "bst" && bst != "") path = string(bst, notdir(path));
   if(type == "cht" && cht != "") path = string(cht, notdir(path));
@@ -95,6 +105,10 @@ string Path::load(SNES::Cartridge::Slot slot, const string &type, const string &
     path = string(dir(base), path);
   }
 
+  if(slot == SNES::Cartridge::Slot::NECDSP) return { dir(path), type };
+  if(slot == SNES::Cartridge::Slot::MSU1) return { path, type };
+  if(slot == SNES::Cartridge::Slot::Serial) return { path, type };
+
   return { path, suffix, ".", type };
 }
 
@@ -119,8 +133,16 @@ Path::Path() {
   attach(sufamiTurboBios = "", "sufamiTurboBios");
   attach(superGameBoyBios = "", "superGameBoyBios");
 
+  attach(necdsp = "", "necdsp");
+  attach(msu1 = "", "msu1");
+  attach(serial = "", "serial");
+
   attach(srm = "", "srm");
   attach(rtc = "", "rtc");
+  attach(bss = "", "bss");
+  attach(bsp = "", "bsp");
+  attach(sts = "", "sts");
+  attach(sav = "", "sav");
 
   attach(bsa = "", "bsa");
   attach(bst = "", "bst");

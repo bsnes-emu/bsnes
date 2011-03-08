@@ -79,8 +79,9 @@ void Serial::init() {
 
 void Serial::load() {
   if(opened()) close();
-  string name = notdir(cartridge.basename());
-  string path = dir(cartridge.basename());
+  string basename = system.interface->path(Cartridge::Slot::Serial, "");
+  string name = notdir(basename);
+  string path = dir(basename);
   if(open(name, path)) {
     baudrate = sym("snesserial_baudrate");
     flowcontrol = sym("snesserial_flowcontrol");

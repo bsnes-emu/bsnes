@@ -2,6 +2,7 @@ class Interface;
 
 class System : property<System> {
 public:
+  Interface *interface;
   enum class Region : unsigned { NTSC = 0, PAL = 1, Autodetect = 2 };
   enum class ExpansionPortDevice : unsigned { None = 0, BSX = 1 };
 
@@ -31,7 +32,6 @@ public:
   System();
 
 private:
-  Interface *interface;
   void runthreadtosave();
 
   void serialize(serializer&);
@@ -50,7 +50,6 @@ private:
 
 #include <snes/config/config.hpp>
 #include <snes/debugger/debugger.hpp>
-#include <snes/interface/interface.hpp>
 #include <snes/scheduler/scheduler.hpp>
 
 extern System system;

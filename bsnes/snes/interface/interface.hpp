@@ -6,4 +6,5 @@ public:
   virtual int16_t input_poll(bool port, Input::Device device, unsigned index, unsigned id) { return 0; }
 
   virtual void message(const string &text) { print(text, "\n"); }
+  virtual string path(Cartridge::Slot slot, const string &path) { return path; };
 };

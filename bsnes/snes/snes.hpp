@@ -1,7 +1,7 @@
 namespace SNES {
   namespace Info {
     static const char Name[] = "bsnes";
-    static const char Version[] = "076.03";
+    static const char Version[] = "076.04";
     static const unsigned SerializerVersion = 18;
   }
 }
@@ -132,6 +132,7 @@ namespace SNES {
   #include <snes/chip/chip.hpp>
   #include <snes/cartridge/cartridge.hpp>
   #include <snes/cheat/cheat.hpp>
+  #include <snes/interface/interface.hpp>
 
   #include <snes/memory/memory-inline.hpp>
   #include <snes/ppu/counter/counter-inline.hpp>

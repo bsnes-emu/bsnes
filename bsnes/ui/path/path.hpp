@@ -14,8 +14,16 @@ struct Path : public configuration {
   string sufamiTurboBios;
   string superGameBoyBios;
 
+  string necdsp;
+  string msu1;
+  string serial;
+
   string srm;
   string rtc;
+  string bss;
+  string bsp;
+  string sts;
+  string sav;
 
   string bsa;
   string bst;

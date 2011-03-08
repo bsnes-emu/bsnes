@@ -137,3 +137,7 @@ int16_t Interface::input_poll(bool port, SNES::Input::Device device, unsigned in
 void Interface::message(const string &text) {
   MessageWindow::information(mainWindow, text);
 }
+
+string Interface::path(SNES::Cartridge::Slot slot, const string &pathname) {
+  return ::path.load(slot, pathname);
+}
