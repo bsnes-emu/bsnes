@@ -7,9 +7,6 @@ struct Path : public configuration {
   string st;
   string gb;
 
-  string filter;
-  string shader;
-
   string satellaviewBios;
   string sufamiTurboBios;
   string superGameBoyBios;
@@ -33,7 +30,7 @@ struct Path : public configuration {
   string home(const string &filename);
   string load(const string &path);
   void save(const string &path, const string &value);
-  string load(SNES::Cartridge::Slot slot, const string &type, const string &suffix = "");
+  string load(SNES::Cartridge::Path path, const string &hint);
 
   void load();
   void save();

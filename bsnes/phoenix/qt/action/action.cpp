@@ -28,7 +28,7 @@ void pAction::setFont(Font &font) {
 
 void pAction::setVisible(bool visible) {
   if(dynamic_cast<Menu*>(&action)) {
-    ((Menu&)action).p.qtMenu->setVisible(visible);
+    ((Menu&)action).p.qtMenu->menuAction()->setVisible(visible);
   } else if(dynamic_cast<Separator*>(&action)) {
     ((Separator&)action).p.qtAction->setVisible(visible);
   } else if(dynamic_cast<Item*>(&action)) {

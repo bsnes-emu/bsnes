@@ -54,7 +54,7 @@ void Console::write(const string &text, bool echo) {
 
 void Console::tracerEnable(bool state) {
   if(state == true) {
-    logfile.open(path.load(SNES::Cartridge::Slot::Base, "log"), file::mode::write);
+    logfile.open(path.load(SNES::Cartridge::Slot::Base, ".log"), file::mode::write);
   } else {
     logfile.close();
   }

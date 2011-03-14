@@ -25,18 +25,6 @@ struct VideoSettings : TopLevelWindow {
   RadioBox fullscreenScale;
   RadioBox fullscreenStretch;
 
-  Label filterLabel;
-  HorizontalLayout filterLayout;
-  LineEdit filterPath;
-  Button filterClear;
-  Button filterSelect;
-
-  Label shaderLabel;
-  HorizontalLayout shaderLayout;
-  LineEdit shaderPath;
-  Button shaderClear;
-  Button shaderSelect;
-
   void create();
   void adjust();
 };

@@ -27,9 +27,6 @@ string Path::load(const string &path) {
   if(path == "st") value = st;
   if(path == "gb") value = gb;
 
-  if(path == "filter") value = filter;
-  if(path == "shader") value = shader;
-
   if(value.beginswith("recent/")) value.ltrim<1>("recent/");
   if(value == "") value = base;
   return value;
@@ -43,9 +40,6 @@ void Path::save(const string &path, const string &value) {
   if(path == "st") output = &st;
   if(path == "gb") output = &gb;
 
-  if(path == "filter") output = &filter;
-  if(path == "shader") output = &shader;
-
   if(output) {
     string &s = *output;
     if(s.beginswith("recent/") == false && s != "") return;
@@ -54,36 +48,63 @@ void Path::save(const string &path, const string &value) {
   }
 }
 
-string Path::load(SNES::Cartridge::Slot slot, const string &type, const string &suffix) {
+string Path::load(SNES::Cartridge::Path pathHint, const string &hint) {
   string romPath;
-  switch(slot) {
-    case SNES::Cartridge::Slot::Base: romPath = cartridge.baseName; break;
-    case SNES::Cartridge::Slot::Bsx: romPath = cartridge.bsxName; break;
-    case SNES::Cartridge::Slot::SufamiTurboA: romPath = cartridge.sufamiTurboAName; break;
-    case SNES::Cartridge::Slot::SufamiTurboB: romPath = cartridge.sufamiTurboBName; break;
-    case SNES::Cartridge::Slot::GameBoy: romPath = cartridge.gameBoyName; break;
+  switch(pathHint) {
+    case SNES::Cartridge::Path::Base: {
+      romPath = cartridge.baseName;
+      break;
+    }
+    case SNES::Cartridge::Path::Bsx: {
+      romPath = cartridge.bsxName != "" ? cartridge.bsxName : cartridge.baseName;
+      break;
+    }
+    case SNES::Cartridge::Path::SufamiTurbo: {
+      if(cartridge.sufamiTurboAName == "" && cartridge.sufamiTurboBName == "") {
+        romPath = cartridge.baseName;
+      } else if(cartridge.sufamiTurboAName != "" && cartridge.sufamiTurboBName == "") {
+        romPath = cartridge.sufamiTurboAName;
+      } else if(cartridge.sufamiTurboAName == "" && cartridge.sufamiTurboBName != "") {
+        romPath = cartridge.sufamiTurboBName;
+      } else {
+        romPath = { cartridge.sufamiTurboAName, "+", notdir(cartridge.sufamiTurboBName) };
+      }
+      break;
+    }
+    case SNES::Cartridge::Path::SufamiTurboA: {
+      romPath = cartridge.sufamiTurboAName != "" ? cartridge.sufamiTurboAName : cartridge.baseName;
+      break;
+    }
+    case SNES::Cartridge::Path::SufamiTurboB: {
+      romPath = cartridge.sufamiTurboBName != "" ? cartridge.sufamiTurboBName : cartridge.baseName;
+      break;
+    }
+    case SNES::Cartridge::Path::GameBoy: {
+      romPath = cartridge.gameBoyName != "" ? cartridge.gameBoyName : cartridge.baseName;
+      break;
+    }
 
-    case SNES::Cartridge::Slot::NECDSP: romPath = cartridge.baseName; break;
-    case SNES::Cartridge::Slot::MSU1: romPath = cartridge.baseName; break;
-    case SNES::Cartridge::Slot::Serial: romPath = cartridge.baseName; break;
+    case SNES::Cartridge::Path::NECDSP: romPath = cartridge.baseName; break;
+    case SNES::Cartridge::Path::MSU1: romPath = cartridge.baseName; break;
+    case SNES::Cartridge::Path::Serial: romPath = cartridge.baseName; break;
   }
 
   string path = romPath;
-  if(slot == SNES::Cartridge::Slot::NECDSP && necdsp != "") path = necdsp;
-  if(slot == SNES::Cartridge::Slot::MSU1 && msu1 != "") path = string(msu1, notdir(path));
-  if(slot == SNES::Cartridge::Slot::Serial && serial != "") path = string(serial, notdir(path));
+  if(pathHint == SNES::Cartridge::Path::NECDSP && necdsp != "") path = necdsp;
+  if(pathHint == SNES::Cartridge::Path::MSU1 && msu1 != "") path = string(msu1, notdir(path));
+  if(pathHint == SNES::Cartridge::Path::Serial && serial != "") path = string(serial, notdir(path));
 
-  if(type == "srm" && srm != "") path = string(srm, notdir(path));
-  if(type == "bsp" && bsp != "") path = string(bsp, notdir(path));
-  if(type == "bss" && bss != "") path = string(bss, notdir(path));
-  if(type == "sts" && sts != "") path = string(sts, notdir(path));
-  if(type == "sav" && sav != "") path = string(sav, notdir(path));
-  if(type == "rtc" && rtc != "") path = string(rtc, notdir(path));
+  if(hint == ".srm" && srm != "") path = string(srm, notdir(path));
+  if(hint == ".bsp" && bsp != "") path = string(bsp, notdir(path));
+  if(hint == ".bss" && bss != "") path = string(bss, notdir(path));
+  if(hint == ".sts" && sts != "") path = string(sts, notdir(path));
+  if(hint == ".sav" && sav != "") path = string(sav, notdir(path));
+  if(hint == ".rtc" && rtc != "") path = string(rtc, notdir(path));
 
-  if(type == "bsa" && bsa != "") path = string(bsa, notdir(path));
-  if(type == "bst" && bst != "") path = string(bst, notdir(path));
-  if(type == "cht" && cht != "") path = string(cht, notdir(path));
-  if(type == "log" && log != "") path = string(log, notdir(path));
+  if(hint == ".bsa" && bsa != "") path = string(bsa, notdir(path));
+  if(hint.endswith(".bst") && bst != "") path = string(bst, notdir(path));
+  if(hint == ".cht" && cht != "") path = string(cht, notdir(path));
+  if(hint == ".log" && log != "") path = string(log, notdir(path));
 
   if(path.beginswith("user/")) {
     path.ltrim<1>("user/");
@@ -105,11 +126,11 @@ string Path::load(SNES::Cartridge::Slot slot, const string &type, const string &
     path = string(dir(base), path);
   }
 
-  if(slot == SNES::Cartridge::Slot::NECDSP) return { dir(path), type };
-  if(slot == SNES::Cartridge::Slot::MSU1) return { path, type };
-  if(slot == SNES::Cartridge::Slot::Serial) return { path, type };
+  if(pathHint == SNES::Cartridge::Path::NECDSP) return { dir(path), hint };
+  if(pathHint == SNES::Cartridge::Path::MSU1) return { path, hint };
+  if(pathHint == SNES::Cartridge::Path::Serial) return { path, hint };
 
-  return { path, suffix, ".", type };
+  return { path, hint };
 }
 
 void Path::load() {
@@ -125,9 +146,6 @@ Path::Path() {
   attach(bs = "", "bs");
   attach(st = "", "st");
   attach(gb = "", "gb");
-
-  attach(filter = "", "filter");
-  attach(shader = "", "shader");
 
   attach(satellaviewBios = "", "satellaviewBios");
   attach(sufamiTurboBios = "", "sufamiTurboBios");

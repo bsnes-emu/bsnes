@@ -167,16 +167,16 @@ void Utility::cartridgeUnloaded() {
   mainWindow.synchronize();
 }
 
-SNES::Cartridge::Slot Utility::stateSlot() {
-  SNES::Cartridge::Slot slot = SNES::Cartridge::Slot::Base;
-  if(SNES::cartridge.mode() == SNES::Cartridge::Mode::Bsx) slot = SNES::Cartridge::Slot::Bsx;
-  if(SNES::cartridge.mode() == SNES::Cartridge::Mode::SufamiTurbo) slot = SNES::Cartridge::Slot::SufamiTurboA;
-  if(SNES::cartridge.mode() == SNES::Cartridge::Mode::SuperGameBoy) slot = SNES::Cartridge::Slot::GameBoy;
-  return slot;
+SNES::Cartridge::Path Utility::slotPath() {
+  SNES::Cartridge::Path path = SNES::Cartridge::Path::Base;
+  if(SNES::cartridge.mode() == SNES::Cartridge::Mode::Bsx) path = SNES::Cartridge::Path::Bsx;
+  if(SNES::cartridge.mode() == SNES::Cartridge::Mode::SufamiTurbo) path = SNES::Cartridge::Path::SufamiTurbo;
+  if(SNES::cartridge.mode() == SNES::Cartridge::Mode::SuperGameBoy) path = SNES::Cartridge::Path::GameBoy;
+  return path;
 }
 
 void Utility::saveState(unsigned slot) {
-  string filename = path.load(stateSlot(), "bst", { "-", slot });
+  string filename = path.load(slotPath(), { "-", slot, ".bst" });
   SNES::system.runtosave();
   serializer s = SNES::system.serialize();
   file fp;
@@ -190,7 +190,7 @@ void Utility::saveState(unsigned slot) {
 }
 
 void Utility::loadState(unsigned slot) {
-  string filename = path.load(stateSlot(), "bst", { "-", slot });
+  string filename = path.load(slotPath(), { "-", slot, ".bst" });
   file fp;
   if(fp.open(filename, file::mode::read)) {
     unsigned size = fp.size();

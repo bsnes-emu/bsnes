@@ -13,9 +13,10 @@ public:
     PAL,
   };
 
-  enum class Slot : unsigned {
+  enum class Path : unsigned {
     Base,
     Bsx,
+    SufamiTurbo,
     SufamiTurboA,
     SufamiTurboB,
     GameBoy,
@@ -54,10 +55,10 @@ public:
     const string id;
     uint8_t *data;
     unsigned size;
-    Slot slot;
-    NonVolatileRAM() : id(""), data(0), size(0), slot(Slot::Base) {}
-    NonVolatileRAM(const string id, uint8_t *data, unsigned size, Slot slot = Slot::Base)
-    : id(id), data(data), size(size), slot(slot) {}
+    Path path;
+    NonVolatileRAM() : id(""), data(0), size(0), path(Path::Base) {}
+    NonVolatileRAM(const string id, uint8_t *data, unsigned size, Path path = Path::Base)
+    : id(id), data(data), size(size), path(path) {}
   };
   linear_vector<NonVolatileRAM> nvram;
 

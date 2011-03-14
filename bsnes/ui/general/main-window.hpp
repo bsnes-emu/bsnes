@@ -36,6 +36,19 @@ struct MainWindow : TopLevelWindow {
   Separator settingsVideoModeSeparator2;
   RadioItem settingsVideoModeNTSC;
   RadioItem settingsVideoModePAL;
+
+  Menu settingsVideoFilter;
+  Item settingsVideoFilterNone;
+  Separator settingsVideoFilterSeparator;
+  Item *settingsVideoFilterItem;
+  lstring settingsVideoFilterName;
+
+  Menu settingsVideoShader;
+  Item settingsVideoShaderNone;
+  Separator settingsVideoShaderSeparator;
+  Item *settingsVideoShaderItem;
+  lstring settingsVideoShaderName;
+
   CheckItem settingsSmoothVideo;
   Separator settingsSeparator1;
   CheckItem settingsSynchronizeVideo;
@@ -76,6 +89,7 @@ struct MainWindow : TopLevelWindow {
 
   void create();
   void synchronize();
+  void setupFiltersAndShaders();
 };
 
 extern MainWindow mainWindow;

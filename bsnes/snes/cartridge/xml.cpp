@@ -274,7 +274,7 @@ void Cartridge::xml_parse_necdsp(xml_element &root) {
   unsigned filesize = promsize * 3 + dromsize * 2;
 
   file fp;
-  if(fp.open(system.interface->path(Slot::NECDSP, program), file::mode::read)) {
+  if(fp.open(system.interface->path(Path::NECDSP, program), file::mode::read)) {
     if(fp.size() == filesize) {
       for(unsigned n = 0; n < promsize; n++) necdsp.programROM[n] = fp.readm(3);
       for(unsigned n = 0; n < dromsize; n++) necdsp.dataROM[n] = fp.readm(2);

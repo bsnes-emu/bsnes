@@ -19,16 +19,6 @@ void VideoSettings::create() {
   fullscreenScale.setText("Scale");
   fullscreenStretch.setText("Stretch");
   RadioBox::group(fullscreenCenter, fullscreenScale, fullscreenStretch);
-  filterLabel.setText("Video Filter :.");
-  filterLabel.setFont(application.proportionalFontBold);
-  filterPath.setEditable(false);
-  filterPath.setText(config.video.filter);
-  filterSelect.setText("...");
-  shaderLabel.setText("Pixel Shader :.");
-  shaderLabel.setFont(application.proportionalFontBold);
-  shaderPath.setEditable(false);
-  shaderPath.setText(config.video.shader);
-  shaderSelect.setText("...");
 
   layout.setMargin(5);
   layout.append(colorAdjustmentLabel, 0, Style::LabelHeight);
@@ -49,17 +39,7 @@ void VideoSettings::create() {
   fullscreenLayout.append(fullscreenCenter,  0, 0);
   fullscreenLayout.append(fullscreenScale,   0, 0);
   fullscreenLayout.append(fullscreenStretch, 0, 0);
-  layout.append(fullscreenLayout, 0, Style::CheckBoxHeight, 5);
-  layout.append(filterLabel, 0, Style::LabelHeight);
-  filterLayout.append(filterPath, 0, 0, 5);
-  filterLayout.append(filterClear, Style::LineEditHeight, 0, 5);
-  filterLayout.append(filterSelect, Style::LineEditHeight, 0);
-  layout.append(filterLayout, 0, Style::LineEditHeight, 5);
-  layout.append(shaderLabel, 0, Style::LabelHeight);
-  shaderLayout.append(shaderPath, 0, 0, 5);
-  shaderLayout.append(shaderClear, Style::LineEditHeight, 0, 5);
-  shaderLayout.append(shaderSelect, Style::LineEditHeight, 0);
-  layout.append(shaderLayout, 0, Style::LineEditHeight);
+  layout.append(fullscreenLayout, 0, Style::CheckBoxHeight);
 
   setGeometry({ 0, 0, 480, layout.minimumHeight() });
   append(layout);
@@ -87,34 +67,6 @@ void VideoSettings::create() {
   fullscreenCenter.onTick = []() { config.video.fullscreenScale = 0; };
   fullscreenScale.onTick = []() { config.video.fullscreenScale = 1; };
   fullscreenStretch.onTick = []() { config.video.fullscreenScale = 2; };
-
-  filterClear.onTick = []() {
-    config.video.filter = "";
-    videoSettings.filterPath.setText(config.video.filter);
-    utility.setFilter();
-  };
-
-  filterSelect.onTick = []() {
-    fileBrowser.fileOpen(FileBrowser::Mode::Filter, [](string filename) {
-      config.video.filter = filename;
-      videoSettings.filterPath.setText(config.video.filter);
-      utility.setFilter();
-    });
-  };
-
-  shaderClear.onTick = []() {
-    config.video.shader = "";
-    videoSettings.shaderPath.setText(config.video.shader);
-    utility.setShader();
-  };
-
-  shaderSelect.onTick = []() {
-    fileBrowser.fileOpen(FileBrowser::Mode::Shader, [](string filename) {
-      config.video.shader = filename;
-      videoSettings.shaderPath.setText(config.video.shader);
-      utility.setShader();
-    });
-  };
 }
 
 void VideoSettings::adjust() {

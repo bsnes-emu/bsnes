@@ -126,6 +126,24 @@ void MainWindow::create() {
   settingsVideoModePAL.setText("PAL");
   settingsVideoMode.append(settingsVideoModePAL);
 
+  settingsVideoFilter.setText("Video Filter");
+  settings.append(settingsVideoFilter);
+
+  settingsVideoFilterNone.setText("None");
+  settingsVideoFilter.append(settingsVideoFilterNone);
+
+  settingsVideoFilter.append(settingsVideoFilterSeparator);
+
+  settingsVideoShader.setText("Video Shader");
+  settings.append(settingsVideoShader);
+
+  settingsVideoShaderNone.setText("None");
+  settingsVideoShader.append(settingsVideoShaderNone);
+
+  settingsVideoShader.append(settingsVideoShaderSeparator);
+
+  setupFiltersAndShaders();
+
   RadioItem::group(
     settingsVideoModeNTSC, settingsVideoModePAL
   );
@@ -302,6 +320,16 @@ void MainWindow::create() {
   settingsVideoModeNTSC.onTick = []() { config.video.region = 0; utility.setScale(); };
   settingsVideoModePAL.onTick  = []() { config.video.region = 1; utility.setScale(); };
 
+  settingsVideoFilterNone.onTick = []() {
+    config.video.filter = "";
+    utility.setFilter();
+  };
+
+  settingsVideoShaderNone.onTick = []() {
+    config.video.shader = "";
+    utility.setShader();
+  };
+
   settingsSmoothVideo.onTick = []() {
     config.video.smooth = mainWindow.settingsSmoothVideo.checked();
     video.set(Video::Filter, (unsigned)config.video.smooth);
@@ -371,5 +399,62 @@ void MainWindow::synchronize() {
     systemReset.setEnabled(true);
     toolsStateSave.setEnabled(true);
     toolsStateLoad.setEnabled(true);
+  }
+}
+
+void MainWindow::setupFiltersAndShaders() {
+  string folderPath;
+  lstring files;
+
+  folderPath = { path.base, "filters/" };
+  files = directory::files(folderPath, "*.filter");
+  if(files.size() == 0) {
+    folderPath = { path.user, ".config/bsnes/filters/" };
+    files = directory::files(folderPath, "*.filter");
+  }
+  foreach(filename, files) {
+    settingsVideoFilterName.append({ folderPath, filename });
+  }
+
+  if(settingsVideoFilterName.size() == 0) {
+    settingsVideoFilter.setVisible(false);
+    config.video.filter = "";  //as the list (and thus the 'None' option) is invisible,
+    utility.setFilter();       //erase any previously saved filter name
+  } else {
+    settingsVideoFilterItem = new Item[settingsVideoFilterName.size()];
+    foreach(filename, settingsVideoFilterName, n) {
+      settingsVideoFilterItem[n].onTick = [n]() {
+        config.video.filter = mainWindow.settingsVideoFilterName[n];
+        utility.setFilter();
+      };
+      settingsVideoFilterItem[n].setText(nall::basename(notdir(filename)));
+      settingsVideoFilter.append(settingsVideoFilterItem[n]);
+    }
+  }
+
+  folderPath = { path.base, "shaders/" };
+  files = directory::files(folderPath, { "*.", config.video.driver, ".shader" });
+  if(files.size() == 0) {
+    folderPath = { path.user, ".config/bsnes/shaders/" };
+    files = directory::files(folderPath, { "*.", config.video.driver, ".shader" });
+  }
+  foreach(filename, files) {
+    settingsVideoShaderName.append({ folderPath, filename });
+  }
+
+  if(settingsVideoShaderName.size() == 0) {
+    settingsVideoShader.setVisible(false);
+    config.video.shader = "";
+    utility.setShader();
+  } else {
+    settingsVideoShaderItem = new Item[settingsVideoShaderName.size()];
+    foreach(filename, settingsVideoShaderName, n) {
+      settingsVideoShaderItem[n].onTick = [n]() {
+        config.video.shader = mainWindow.settingsVideoShaderName[n];
+        utility.setShader();
+      };
+      settingsVideoShaderItem[n].setText(nall::basename(nall::basename(notdir(filename))));
+      settingsVideoShader.append(settingsVideoShaderItem[n]);
+    }
   }
 }
