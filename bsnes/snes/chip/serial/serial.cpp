@@ -79,7 +79,7 @@ void Serial::init() {
 
 void Serial::load() {
   if(opened()) close();
-  string basename = system.interface->path(Cartridge::Path::Serial, "");
+  string basename = system.interface->path(Cartridge::Slot::Base, "");
   string name = notdir(basename);
   string path = dir(basename);
   if(open(name, path)) {

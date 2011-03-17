@@ -48,63 +48,69 @@ void Path::save(const string &path, const string &value) {
   }
 }
 
-string Path::load(SNES::Cartridge::Path pathHint, const string &hint) {
-  string romPath;
-  switch(pathHint) {
-    case SNES::Cartridge::Path::Base: {
-      romPath = cartridge.baseName;
-      break;
-    }
-    case SNES::Cartridge::Path::Bsx: {
-      romPath = cartridge.bsxName != "" ? cartridge.bsxName : cartridge.baseName;
-      break;
-    }
-    case SNES::Cartridge::Path::SufamiTurbo: {
-      if(cartridge.sufamiTurboAName == "" && cartridge.sufamiTurboBName == "") {
-        romPath = cartridge.baseName;
-      } else if(cartridge.sufamiTurboAName != "" && cartridge.sufamiTurboBName == "") {
-        romPath = cartridge.sufamiTurboAName;
-      } else if(cartridge.sufamiTurboAName == "" && cartridge.sufamiTurboBName != "") {
-        romPath = cartridge.sufamiTurboBName;
-      } else {
-        romPath = { cartridge.sufamiTurboAName, "+", notdir(cartridge.sufamiTurboBName) };
-      }
-      break;
-    }
-    case SNES::Cartridge::Path::SufamiTurboA: {
-      romPath = cartridge.sufamiTurboAName != "" ? cartridge.sufamiTurboAName : cartridge.baseName;
-      break;
-    }
-    case SNES::Cartridge::Path::SufamiTurboB: {
-      romPath = cartridge.sufamiTurboBName != "" ? cartridge.sufamiTurboBName : cartridge.baseName;
-      break;
-    }
-    case SNES::Cartridge::Path::GameBoy: {
-      romPath = cartridge.gameBoyName != "" ? cartridge.gameBoyName : cartridge.baseName;
-      break;
-    }
+string Path::load(SNES::Cartridge::Slot slot, const string &hint) {
+  string basePath = basepath(slot);
+  string baseName = notdir(basePath);
+  string filePath = dir(basePath);
 
-    case SNES::Cartridge::Path::NECDSP: romPath = cartridge.baseName; break;
-    case SNES::Cartridge::Path::MSU1: romPath = cartridge.baseName; break;
-    case SNES::Cartridge::Path::Serial: romPath = cartridge.baseName; break;
+  if(hint == ".srm" && srm != "") filePath = srm;
+  if(hint == ".bsp" && bsp != "") filePath = bsp;
+  if(hint == ".bss" && bss != "") filePath = bss;
+  if(hint == ".sts" && sts != "") filePath = sts;
+  if(hint == ".sav" && sav != "") filePath = sav;
+  if(hint == ".rtc" && rtc != "") filePath = rtc;
+
+  if(hint.endswith(".dsp") && necdsp != "") filePath = necdsp;
+  if(hint.endswith(".msu") && msu1   != "") filePath = msu1;
+  if(hint.endswith(".pcm") && msu1   != "") filePath = msu1;
+  if(hint.endswith(".so")  && serial != "") filePath = serial;
+
+  if(hint.endswith(".bsa") && bsa != "") filePath = bsa;
+  if(hint.endswith(".bst") && bst != "") filePath = bst;
+  if(hint.endswith(".cht") && cht != "") filePath = cht;
+  if(hint.endswith(".log") && log != "") filePath = log;
+
+  filePath = decode(filePath, basePath);
+  return { filePath, baseName, hint };
+}
+
+string Path::basepath(SNES::Cartridge::Slot slot) {
+  if(slot == SNES::Cartridge::Slot::Base) {
+    return cartridge.baseName;
   }
 
-  string path = romPath;
-  if(pathHint == SNES::Cartridge::Path::NECDSP && necdsp != "") path = necdsp;
-  if(pathHint == SNES::Cartridge::Path::MSU1 && msu1 != "") path = string(msu1, notdir(path));
-  if(pathHint == SNES::Cartridge::Path::Serial && serial != "") path = string(serial, notdir(path));
+  if(slot == SNES::Cartridge::Slot::Bsx) {
+    if(cartridge.bsxName == "") return cartridge.baseName;
+    return cartridge.bsxName;
+  }
 
-  if(hint == ".srm" && srm != "") path = string(srm, notdir(path));
-  if(hint == ".bsp" && bsp != "") path = string(bsp, notdir(path));
-  if(hint == ".bss" && bss != "") path = string(bss, notdir(path));
-  if(hint == ".sts" && sts != "") path = string(sts, notdir(path));
-  if(hint == ".sav" && sav != "") path = string(sav, notdir(path));
-  if(hint == ".rtc" && rtc != "") path = string(rtc, notdir(path));
+  if(slot == SNES::Cartridge::Slot::SufamiTurbo) {
+    if(cartridge.sufamiTurboAName == "" && cartridge.sufamiTurboBName == "") return cartridge.baseName;
+    if(cartridge.sufamiTurboAName != "" && cartridge.sufamiTurboBName == "") return cartridge.sufamiTurboAName;
+    if(cartridge.sufamiTurboAName == "" && cartridge.sufamiTurboBName != "") return cartridge.sufamiTurboBName;
+    return { cartridge.sufamiTurboAName, "+", notdir(cartridge.sufamiTurboBName) };
+  }
 
-  if(hint == ".bsa" && bsa != "") path = string(bsa, notdir(path));
-  if(hint.endswith(".bst") && bst != "") path = string(bst, notdir(path));
-  if(hint == ".cht" && cht != "") path = string(cht, notdir(path));
-  if(hint == ".log" && log != "") path = string(log, notdir(path));
+  if(slot == SNES::Cartridge::Slot::SufamiTurboA) {
+    if(cartridge.sufamiTurboAName == "") return cartridge.baseName;
+    return cartridge.sufamiTurboAName;
+  }
+
+  if(slot == SNES::Cartridge::Slot::SufamiTurboB) {
+    if(cartridge.sufamiTurboBName == "") return cartridge.baseName;
+    return cartridge.sufamiTurboBName;
+  }
+
+  if(slot == SNES::Cartridge::Slot::GameBoy) {
+    if(cartridge.gameBoyName == "") return cartridge.baseName;
+    return cartridge.gameBoyName;
+  }
+
+  throw "Path::basepath(): invalid slot ID.";
+}
+
+string Path::decode(const string &filePath, const string &basePath) {
+  string path = filePath;
 
   if(path.beginswith("user/")) {
     path.ltrim<1>("user/");
@@ -118,19 +124,15 @@ string Path::load(SNES::Cartridge::Path pathHint, const string &hint) {
     path = string(base, path);
   } else if(path.beginswith("./")) {
     path.ltrim<1>("./");
-    path = string(dir(romPath), path);
+    path = string(dir(basePath), path);
   } else if(path.beginswith("../")) {
-    string base = dir(romPath);
+    string base = dir(basePath);
     base.rtrim<1>("/");
     path.ltrim<1>("../");
     path = string(dir(base), path);
   }
 
-  if(pathHint == SNES::Cartridge::Path::NECDSP) return { dir(path), hint };
-  if(pathHint == SNES::Cartridge::Path::MSU1) return { path, hint };
-  if(pathHint == SNES::Cartridge::Path::Serial) return { path, hint };
-
-  return { path, hint };
+  return path;
 }
 
 void Path::load() {

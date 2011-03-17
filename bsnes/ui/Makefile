@@ -96,9 +96,9 @@ ifeq ($(platform),x)
 endif
 	install -D -m 644 data/bsnes.png $(DESTDIR)$(prefix)/share/pixmaps/bsnes.png
 	install -D -m 644 data/bsnes.desktop $(DESTDIR)$(prefix)/share/applications/bsnes.desktop
-	test -d ~/.bsnes || mkdir ~/.bsnes
-	cp data/cheats.xml ~/.bsnes/cheats.xml
-	chmod 777 ~/.bsnes ~/.bsnes/cheats.xml
+	mkdir -p ~/.config/bsnes
+	cp data/cheats.xml ~/.config/bsnes/cheats.xml
+	chmod 777 ~/.config/bsnes ~/.config/bsnes/cheats.xml
 
 uninstall:
 ifeq ($(platform),x)

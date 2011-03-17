@@ -80,7 +80,7 @@ void CheckItem::setChecked(bool checked) { state.checked = checked; return p.set
 void CheckItem::setText(const string &text) { state.text = text; return p.setText(text); }
 CheckItem::CheckItem() : state(*new State), base_from_member<pCheckItem&>(*new pCheckItem(*this)), Action(base_from_member<pCheckItem&>::value), p(base_from_member<pCheckItem&>::value) { p.constructor(); }
 
-void RadioItem::group_(const reference_array<RadioItem&> &list) { foreach(item, list) item.p.setGroup(item.state.group = list); if(list.size()) list[0].setChecked(); }
+void RadioItem::group(const reference_array<RadioItem&> &list) { foreach(item, list) item.p.setGroup(item.state.group = list); if(list.size()) list[0].setChecked(); }
 bool RadioItem::checked() { return p.checked(); }
 void RadioItem::setChecked() { foreach(item, state.group) item.state.checked = false; state.checked = true; return p.setChecked(); }
 void RadioItem::setText(const string &text) { state.text = text; return p.setText(text); }
@@ -148,7 +148,7 @@ ListView::ListView() : state(*new State), base_from_member<pListView&>(*new pLis
 void ProgressBar::setPosition(unsigned position) { state.position = position; return p.setPosition(position); }
 ProgressBar::ProgressBar() : state(*new State), base_from_member<pProgressBar&>(*new pProgressBar(*this)), Widget(base_from_member<pProgressBar&>::value), p(base_from_member<pProgressBar&>::value) { p.constructor(); }
 
-void RadioBox::group_(const reference_array<RadioBox&> &list) { foreach(item, list) item.p.setGroup(item.state.group = list); if(list.size()) list[0].setChecked(); }
+void RadioBox::group(const reference_array<RadioBox&> &list) { foreach(item, list) item.p.setGroup(item.state.group = list); if(list.size()) list[0].setChecked(); }
 bool RadioBox::checked() { return p.checked(); }
 void RadioBox::setChecked() { foreach(item, state.group) item.state.checked = false; state.checked = true; return p.setChecked(); }
 void RadioBox::setText(const string &text) { state.text = text; return p.setText(text); }

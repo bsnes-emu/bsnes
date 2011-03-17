@@ -73,7 +73,7 @@ bool Cartridge::loadSuperGameBoy(const char *basename, const char *slotname) {
   SNES::cartridge.load(SNES::Cartridge::Mode::SuperGameBoy, { baseXML, "" });
 
   foreach(memory, SNES::cartridge.nvram) loadMemory(memory);
-  if(GameBoy::cartridge.info.battery && fp.open(path.load(SNES::Cartridge::Path::GameBoy, ".sav"), file::mode::read)) {
+  if(GameBoy::cartridge.info.battery && fp.open(path.load(SNES::Cartridge::Slot::GameBoy, ".sav"), file::mode::read)) {
     fp.read(GameBoy::cartridge.ramdata, min(GameBoy::cartridge.ramsize, fp.size()));
     fp.close();
   }
@@ -89,7 +89,7 @@ void Cartridge::unload() {
   foreach(memory, SNES::cartridge.nvram) saveMemory(memory);
   if(SNES::cartridge.mode() == SNES::Cartridge::Mode::SuperGameBoy) {
     file fp;
-    if(GameBoy::cartridge.info.battery && fp.open(path.load(SNES::Cartridge::Path::GameBoy, ".sav"), file::mode::write)) {
+    if(GameBoy::cartridge.info.battery && fp.open(path.load(SNES::Cartridge::Slot::GameBoy, ".sav"), file::mode::write)) {
       fp.write(GameBoy::cartridge.ramdata, GameBoy::cartridge.ramsize);
       fp.close();
     }
@@ -133,7 +133,7 @@ bool Cartridge::loadCartridge(SNES::MappedRAM &memory, string &XML, const char *
 
 bool Cartridge::loadMemory(SNES::Cartridge::NonVolatileRAM &memory) {
   if(memory.size == 0) return true;
-  string filename = path.load(memory.path, memory.id);
+  string filename = path.load(memory.slot, memory.id);
   file fp;
   if(fp.open(filename, file::mode::read) == false) return false;
   fp.read(memory.data, min(memory.size, fp.size()));
@@ -143,7 +143,7 @@ bool Cartridge::loadMemory(SNES::Cartridge::NonVolatileRAM &memory) {
 
 bool Cartridge::saveMemory(SNES::Cartridge::NonVolatileRAM &memory) {
   if(memory.size == 0) return true;
-  string filename = path.load(memory.path, memory.id);
+  string filename = path.load(memory.slot, memory.id);
   file fp;
   if(fp.open(filename, file::mode::write) == false) return false;
   fp.write(memory.data, memory.size);

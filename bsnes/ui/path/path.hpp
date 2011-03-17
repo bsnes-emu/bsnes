@@ -30,7 +30,10 @@ struct Path : public configuration {
   string home(const string &filename);
   string load(const string &path);
   void save(const string &path, const string &value);
-  string load(SNES::Cartridge::Path path, const string &hint);
+  string load(SNES::Cartridge::Slot slot, const string &hint);
+
+  string basepath(SNES::Cartridge::Slot slot);
+  string decode(const string &filePath, const string &basePath);
 
   void load();
   void save();

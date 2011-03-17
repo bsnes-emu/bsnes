@@ -1,2 +1,2 @@
-@mingw32-make -j 2
+@mingw32-make -j 8
 @pause

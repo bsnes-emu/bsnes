@@ -21,7 +21,7 @@ struct Interface : public SNES::Interface {
   int16_t input_poll(bool port, SNES::Input::Device device, unsigned index, unsigned id);
 
   void message(const string &text);
-  string path(SNES::Cartridge::Path path, const string &hint);
+  string path(SNES::Cartridge::Slot slot, const string &hint);
 };
 
 extern Palette palette;

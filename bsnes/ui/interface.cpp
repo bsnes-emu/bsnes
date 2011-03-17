@@ -138,6 +138,6 @@ void Interface::message(const string &text) {
   MessageWindow::information(mainWindow, text);
 }
 
-string Interface::path(SNES::Cartridge::Path path, const string &hint) {
-  return ::path.load(path, hint);
+string Interface::path(SNES::Cartridge::Slot slot, const string &hint) {
+  return ::path.load(slot, hint);
 }

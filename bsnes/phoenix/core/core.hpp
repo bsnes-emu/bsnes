@@ -179,7 +179,8 @@ struct CheckItem : private nall::base_from_member<pCheckItem&>, Action {
 };
 
 struct RadioItem : private nall::base_from_member<pRadioItem&>, Action {
-  template<typename... Args> static void group(Args&... args) { group_({ args... }); }
+  template<typename... Args> static void group(Args&... args) { group({ args... }); }
+  static void group(const nall::reference_array<RadioItem&> &list);
 
   nall::function<void ()> onTick;
 
@@ -191,9 +192,6 @@ struct RadioItem : private nall::base_from_member<pRadioItem&>, Action {
   struct State;
   State &state;
   pRadioItem &p;
-
-private:
-  static void group_(const nall::reference_array<RadioItem&> &list);
 };
 
 struct Layout : Object {
@@ -348,7 +346,8 @@ struct ProgressBar : private nall::base_from_member<pProgressBar&>, Widget {
 };
 
 struct RadioBox : private nall::base_from_member<pRadioBox&>, Widget {
-  template<typename... Args> static void group(Args&... args) { group_({ args... }); }
+  template<typename... Args> static void group(Args&... args) { group({ args... }); }
+  static void group(const nall::reference_array<RadioBox&> &list);
 
   nall::function<void ()> onTick;
 
@@ -360,9 +359,6 @@ struct RadioBox : private nall::base_from_member<pRadioBox&>, Widget {
   struct State;
   State &state;
   pRadioBox &p;
-
-private:
-  static void group_(const nall::reference_array<RadioBox&> &list);
 };
 
 struct TextEdit : private nall::base_from_member<pTextEdit&>, Widget {

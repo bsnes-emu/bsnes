@@ -167,12 +167,12 @@ void Utility::cartridgeUnloaded() {
   mainWindow.synchronize();
 }
 
-SNES::Cartridge::Path Utility::slotPath() {
-  SNES::Cartridge::Path path = SNES::Cartridge::Path::Base;
-  if(SNES::cartridge.mode() == SNES::Cartridge::Mode::Bsx) path = SNES::Cartridge::Path::Bsx;
-  if(SNES::cartridge.mode() == SNES::Cartridge::Mode::SufamiTurbo) path = SNES::Cartridge::Path::SufamiTurbo;
-  if(SNES::cartridge.mode() == SNES::Cartridge::Mode::SuperGameBoy) path = SNES::Cartridge::Path::GameBoy;
-  return path;
+SNES::Cartridge::Slot Utility::slotPath() {
+  SNES::Cartridge::Slot slot = SNES::Cartridge::Slot::Base;
+  if(SNES::cartridge.mode() == SNES::Cartridge::Mode::Bsx) slot = SNES::Cartridge::Slot::Bsx;
+  if(SNES::cartridge.mode() == SNES::Cartridge::Mode::SufamiTurbo) slot = SNES::Cartridge::Slot::SufamiTurbo;
+  if(SNES::cartridge.mode() == SNES::Cartridge::Mode::SuperGameBoy) slot = SNES::Cartridge::Slot::GameBoy;
+  return slot;
 }
 
 void Utility::saveState(unsigned slot) {
