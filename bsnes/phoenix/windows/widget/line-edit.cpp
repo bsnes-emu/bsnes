@@ -13,7 +13,7 @@ string pLineEdit::text() {
   wchar_t text[length + 1];
   GetWindowText(hwnd, text, length + 1);
   text[length] = 0;
-  return utf8_t(text);
+  return (const char*)utf8_t(text);
 }
 
 void pLineEdit::constructor() {

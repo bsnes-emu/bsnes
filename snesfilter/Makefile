@@ -2,25 +2,24 @@ include nall/Makefile
 
 c       := $(compiler) -std=gnu99
 cpp     := $(subst cc,++,$(compiler)) -std=gnu++0x
-flags   := -O3 -I. -Iobj -fomit-frame-pointer
+flags   := -fPIC -O3 -I. -Iobj -fomit-frame-pointer
 link    := -s
 objects :=
 
-objects += out/pixellate2x.filter
-objects += out/scanline-00.filter
-objects += out/scanline-25.filter
-objects += out/scanline-50.filter
-objects += out/scanline-75.filter
-objects += out/scale2x.filter
-objects += out/2xsai.filter
-objects += out/super-2xsai.filter
-objects += out/super-eagle.filter
-objects += out/lq2x.filter
-objects += out/hq2x.filter
-objects += out/ntsc-rf.filter
-objects += out/ntsc-composite.filter
-objects += out/ntsc-svideo.filter
-objects += out/ntsc-rgb.filter
+objects += out/Pixellate2x.filter
+objects += out/Scanline-Black.filter
+objects += out/Scanline-Dark.filter
+objects += out/Scanline-Light.filter
+objects += out/Scale2x.filter
+objects += out/2xSaI.filter
+objects += out/Super-2xSaI.filter
+objects += out/Super-Eagle.filter
+objects += out/LQ2x.filter
+objects += out/HQ2x.filter
+objects += out/NTSC-RF.filter
+objects += out/NTSC-Composite.filter
+objects += out/NTSC-SVideo.filter
+objects += out/NTSC-RGB.filter
 
 compile = $(cpp) $(link) $(flags) -o $@ -shared $<
 
@@ -28,24 +27,27 @@ compile = $(cpp) $(link) $(flags) -o $@ -shared $<
 
 all: build;
 
-out/pixellate2x.filter: pixellate2x/pixellate2x.cpp pixellate2x/*
-out/scanline-00.filter: scanline/scanline-00.cpp scanline/*
-out/scanline-25.filter: scanline/scanline-25.cpp scanline/*
-out/scanline-50.filter: scanline/scanline-50.cpp scanline/*
-out/scanline-75.filter: scanline/scanline-75.cpp scanline/*
-out/scale2x.filter: scale2x/scale2x.cpp scale2x/*
-out/2xsai.filter: 2xsai/2xsai.cpp 2xsai/*
-out/super-2xsai.filter: 2xsai/super-2xsai.cpp 2xsai/*
-out/super-eagle.filter: 2xsai/super-eagle.cpp 2xsai/*
-out/lq2x.filter: lq2x/lq2x.cpp lq2x/*
-out/hq2x.filter: hq2x/hq2x.cpp hq2x/*
-out/ntsc-rf.filter: ntsc/ntsc-rf.cpp ntsc/*
-out/ntsc-composite.filter: ntsc/ntsc-composite.cpp ntsc/*
-out/ntsc-svideo.filter: ntsc/ntsc-svideo.cpp ntsc/*
-out/ntsc-rgb.filter: ntsc/ntsc-rgb.cpp ntsc/*
+out/Pixellate2x.filter: Pixellate2x/Pixellate2x.cpp Pixellate2x/*
+out/Scanline-Black.filter: Scanline/Scanline-Black.cpp Scanline/*
+out/Scanline-Dark.filter: Scanline/Scanline-Dark.cpp Scanline/*
+out/Scanline-Light.filter: Scanline/Scanline-Light.cpp Scanline/*
+out/Scale2x.filter: Scale2x/Scale2x.cpp Scale2x/*
+out/2xSaI.filter: 2xSaI/2xSaI.cpp 2xSaI/*
+out/Super-2xSaI.filter: 2xSaI/Super-2xSaI.cpp 2xSaI/*
+out/Super-Eagle.filter: 2xSaI/Super-Eagle.cpp 2xSaI/*
+out/LQ2x.filter: LQ2x/LQ2x.cpp LQ2x/*
+out/HQ2x.filter: HQ2x/HQ2x.cpp HQ2x/*
+out/NTSC-RF.filter: NTSC/NTSC-RF.cpp NTSC/*
+out/NTSC-Composite.filter: NTSC/NTSC-Composite.cpp NTSC/*
+out/NTSC-SVideo.filter: NTSC/NTSC-SVideo.cpp NTSC/*
+out/NTSC-RGB.filter: NTSC/NTSC-RGB.cpp NTSC/*
 
 build: $(objects)
 
 install:
+	mkdir -p ~/.config/bsnes/filters
+	chmod 777 ~/.config/bsnes/filters
+	cp out/*.filter ~/.config/bsnes/filters
 
 clean:
+	rm out/*.filter

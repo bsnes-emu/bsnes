@@ -80,7 +80,7 @@ static string pOS_fileDialog(bool save, Window &parent, const string &path, cons
 
   bool result = (save == false ? GetOpenFileName(&ofn) : GetSaveFileName(&ofn));
   if(result == false) return "";
-  string name = utf8_t(wfilename);
+  string name = (const char*)utf8_t(wfilename);
   name.transform("\\", "/");
   return name;
 }
@@ -117,7 +117,7 @@ string pOS::folderSelect(Window &parent, const string &path) {
     }
   }
   if(result == false) return "";
-  string name = utf8_t(wfilename);
+  string name = (const char*)utf8_t(wfilename);
   if(name == "") return "";
   name.transform("\\", "/");
   if(name.endswith("/") == false) name.append("/");

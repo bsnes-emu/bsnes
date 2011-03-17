@@ -21,12 +21,12 @@ dllexport void filter_render(
   const uint16_t *input, unsigned pitch, unsigned width, unsigned height
 ) {
   for(unsigned y = 0; y < height; y++) {
-    const uint16_t *line_in = (const uint16_t *) (((const uint8_t*)input) + pitch * y);
+    const uint16_t *line_in = (const uint16_t*)(((const uint8_t*)input) + pitch * y);
     uint32_t *line_out = temp + y * width;
     for(unsigned x = 0; x < width; x++) {
       line_out[x] = colortable[line_in[x]];
     }
   }
 
-  _2xSaI32( (unsigned char *) temp, 2048, 0, (unsigned char *) output, outpitch, width, height );
+  SuperEagle32((unsigned char*)temp, 1024, 0, (unsigned char*)output, outpitch, width, height);
 }

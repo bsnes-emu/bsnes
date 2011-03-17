@@ -342,7 +342,7 @@ public:
 
           //per MSDN: XInput devices have "IG_" in their device strings,
           //which is how they should be identified.
-          string p = utf8_t(pool[i].name);
+          string p = (const char*)utf8_t(pool[i].name);
           if(auto position = strpos(p, "IG_")) {
             lgamepad[n].isXInputDevice = true;
           } else {
