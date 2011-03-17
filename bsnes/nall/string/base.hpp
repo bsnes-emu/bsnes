@@ -12,18 +12,16 @@
 
 namespace nall {
   class string;
-  template<typename T> inline string to_string(T);
+  template<typename T> inline const char* to_string(T);
 
   class string {
   public:
     inline void reserve(unsigned);
 
-    inline string& assign(const char*);
-    inline string& append(const char*);
-    inline string& append(bool);
-    inline string& append(signed int value);
-    inline string& append(unsigned int value);
-    inline string& append(double value);
+    template<typename... Args> inline string& assign(Args&&... args);
+    template<typename... Args> inline string& append(Args&&... args);
+    inline string& assign_(const char*);
+    inline string& append_(const char*);
 
     inline bool readfile(const string&);
 
