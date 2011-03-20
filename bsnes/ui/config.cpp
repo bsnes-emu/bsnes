@@ -9,6 +9,16 @@ void Configuration::save() {
 }
 
 void Configuration::create() {
+  attach(SNES::config.random, "snes.random");
+  attach(SNES::config.cpu.version, "snes.cpu.version");
+  attach(SNES::config.cpu.ntsc_frequency, "snes.cpu.ntscFrequency");
+  attach(SNES::config.cpu.pal_frequency, "snes.cpu.palFrequency");
+  attach(SNES::config.smp.ntsc_frequency, "snes.smp.ntscFrequency");
+  attach(SNES::config.smp.pal_frequency, "snes.smp.palFrequency");
+  attach(SNES::config.ppu1.version, "snes.ppu1.version");
+  attach(SNES::config.ppu2.version, "snes.ppu2.version");
+  attach(SNES::config.superfx.speed, "snes.superfx.speed");
+
   attach(video.driver = "", "video.driver");
   attach(video.synchronize = false, "video.synchronize");
   attach(video.smooth = true, "video.smooth");

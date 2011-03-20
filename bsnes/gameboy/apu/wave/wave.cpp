@@ -73,7 +73,7 @@ void APU::Wave::power() {
   frequency = 0;
   counter = 0;
 
-  random_cyclic r;
+  random_lfsr r;
   foreach(n, pattern) n = r() & 15;
 
   output = 0;

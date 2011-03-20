@@ -51,6 +51,7 @@ void System::serialize(serializer &s) {
 void System::serialize_all(serializer &s) {
   cartridge.serialize(s);
   system.serialize(s);
+  random.serialize(s);
   cpu.serialize(s);
   smp.serialize(s);
   ppu.serialize(s);

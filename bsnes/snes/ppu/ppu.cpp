@@ -91,9 +91,9 @@ void PPU::power() {
   ppu1_version = config.ppu1.version;
   ppu2_version = config.ppu2.version;
 
-  foreach(n, vram) n = 0x00;
-  foreach(n, oam) n = 0x00;
-  foreach(n, cgram) n = 0x00;
+  foreach(n, vram) n = random(0x00);
+  foreach(n, oam) n = random(0x00);
+  foreach(n, cgram) n = random(0x00);
 
   reset();
 }

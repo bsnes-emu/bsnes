@@ -8,6 +8,7 @@ System system;
 #include <snes/config/config.cpp>
 #include <snes/debugger/debugger.cpp>
 #include <snes/scheduler/scheduler.cpp>
+#include <snes/random/random.cpp>
 
 #include <snes/video/video.cpp>
 #include <snes/audio/audio.cpp>
@@ -147,6 +148,8 @@ void System::unload() {
 }
 
 void System::power() {
+  random.seed(0x62797575);
+
   region = config.region;
   expansion = config.expansion_port;
   if(region == Region::Autodetect) {

@@ -51,5 +51,6 @@ private:
 #include <snes/config/config.hpp>
 #include <snes/debugger/debugger.hpp>
 #include <snes/scheduler/scheduler.hpp>
+#include <snes/random/random.hpp>
 
 extern System system;

@@ -71,7 +71,7 @@ void SMP::reset() {
   regs.sp = 0xef;
   regs.p = 0x02;
 
-  foreach(n, apuram) n = 0x00;
+  foreach(n, apuram) n = random(0x00);
 
   status.clock_counter = 0;
   status.dsp_counter = 0;

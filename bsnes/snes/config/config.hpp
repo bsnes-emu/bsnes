@@ -3,6 +3,7 @@ struct Configuration {
   Input::Device controller_port2;
   System::ExpansionPortDevice expansion_port;
   System::Region region;
+  bool random;
 
   struct CPU {
     unsigned version;
