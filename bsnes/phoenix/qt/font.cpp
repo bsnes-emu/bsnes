@@ -1,3 +1,17 @@
+Geometry pFont::geometry(const string &text) {
+  QFontMetrics metrics(*qtFont);
+
+  lstring lines;
+  lines.split("\n", text);
+
+  unsigned maxWidth = 0;
+  foreach(line, lines) {
+    maxWidth = max(maxWidth, metrics.width(line));
+  }
+
+  return { 0, 0, maxWidth, metrics.height() * lines.size() };
+}
+
 void pFont::setBold(bool bold) { update(); }
 void pFont::setFamily(const string &family) { update(); }
 void pFont::setItalic(bool italic) { update(); }

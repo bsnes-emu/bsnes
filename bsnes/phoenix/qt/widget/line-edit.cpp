@@ -1,3 +1,9 @@
+Geometry pLineEdit::minimumGeometry() {
+  Font &font = this->font();
+  Geometry geometry = font.geometry(lineEdit.state.text);
+  return { 0, 0, geometry.width + 12, geometry.height + 12 };
+}
+
 void pLineEdit::setEditable(bool editable) {
   qtLineEdit->setReadOnly(!editable);
 }

@@ -1,6 +1,6 @@
 struct FixedLayout : Layout {
   void append(Widget &widget, const Geometry &geometry);
-  void setGeometry(Geometry &geometry);
+  void setGeometry(const Geometry &geometry);
   void setParent(Window &parent);
   void setVisible(bool visible);
   FixedLayout();

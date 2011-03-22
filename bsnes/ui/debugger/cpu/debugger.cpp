@@ -12,13 +12,14 @@ void CPUDebugger::create() {
   proceed.setEnabled(false);
 
   layout.setMargin(5);
-  layout.append(output, 0, 0, 5);
-  controlLayout.append(stepInto, 80, Style::ButtonHeight);
-  controlLayout.append(stepOver, 80, Style::ButtonHeight);
-  controlLayout.append(proceed, 80, Style::ButtonHeight);
-  layout.append(controlLayout, 80, 0);
+  layout.append(output,          ~0, ~0, 5);
+  controlLayout.append(stepInto, 80,  0   );
+  controlLayout.append(stepOver, 80,  0   );
+  controlLayout.append(proceed,  80,  0   );
+  controlLayout.append(spacer,   80, ~0   );
+  layout.append(controlLayout             );
 
-  setGeometry({ 0, 0, layout.minimumWidth() + 300, 220 });
+  setGeometry({ 0, 0, layout.minimumGeometry().width + 300, 220 });
   append(layout);
 
   onClose = []() {

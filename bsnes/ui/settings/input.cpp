@@ -24,30 +24,30 @@ void InputSettings::create() {
   mouseRight.setText("Mouse Right");
 
   layout.setMargin(5);
-  selectionLayout.append(portLabel,   50, 0, 5);
-  selectionLayout.append(portBox,      0, 0, 5);
-  selectionLayout.append(deviceLabel, 50, 0, 5);
-  selectionLayout.append(deviceBox,    0, 0);
-  layout.append(selectionLayout, 0, Style::ComboBoxHeight, 5);
-  layout.append(mappingList, 0, 0, 5);
-  mapLayout.append(spacer,       0, 0);
-  mapLayout.append(clearButton, 80, 0);
-  layout.append(mapLayout, 0, Style::ButtonHeight);
+  selectionLayout.append(portLabel,    0,  0, 5);
+  selectionLayout.append(portBox,     ~0,  0, 5);
+  selectionLayout.append(deviceLabel,  0,  0, 5);
+  selectionLayout.append(deviceBox,   ~0,  0   );
+  layout.append(selectionLayout,              5);
+  layout.append(mappingList,          ~0, ~0, 5);
+  mapLayout.append(spacer,            ~0,  0   );
+  mapLayout.append(clearButton,       80,  0   );
+  layout.append(mapLayout);
 
   axisLayout.setMargin(5);
-  axisLayout.append(axisSpacer, 0, 0);
-  axisControlLayout.append(mouseXaxis, 100, 0, 5);
-  axisControlLayout.append(mouseYaxis, 100, 0, 5);
-  axisLayout.append(axisControlLayout, 0, Style::ButtonHeight);
+  axisLayout.append(axisSpacer,         ~0, ~0   );
+  axisControlLayout.append(mouseXaxis, 100,  0, 5);
+  axisControlLayout.append(mouseYaxis, 100,  0, 5);
+  axisLayout.append(axisControlLayout);
 
   buttonLayout.setMargin(5);
-  buttonLayout.append(buttonSpacer, 0, 0);
-  buttonControlLayout.append(mouseLeft,   100, 0, 5);
-  buttonControlLayout.append(mouseMiddle, 100, 0, 5);
-  buttonControlLayout.append(mouseRight,  100, 0, 5);
-  buttonLayout.append(buttonControlLayout, 0, Style::ButtonHeight);
+  buttonLayout.append(buttonSpacer,        ~0, ~0   );
+  buttonControlLayout.append(mouseLeft,   100,  0, 5);
+  buttonControlLayout.append(mouseMiddle, 100,  0, 5);
+  buttonControlLayout.append(mouseRight,  100,  0, 5);
+  buttonLayout.append(buttonControlLayout);
 
-  setGeometry({ 0, 0, 480, layout.minimumHeight() + 250 });
+  setGeometry({ 0, 0, 480, layout.minimumGeometry().height + 250 });
   append(layout);
   append(axisLayout);
   append(buttonLayout);

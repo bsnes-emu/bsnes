@@ -9,13 +9,13 @@ void CheatDatabase::create() {
   okButton.setText("Ok");
 
   layout.setMargin(5);
-  layout.append(listView, 0, 0, 5);
-  controlLayout.append(selectAllButton,   100, 0, 5);
-  controlLayout.append(unselectAllButton, 100, 0);
-  controlLayout.append(spacerWidget,        0, 0);
-  controlLayout.append(okButton,           80, 0);
-  layout.append(controlLayout, 0, Style::ButtonHeight);
-  setGeometry({ 0, 0, 600, layout.minimumHeight() + 350 });
+  layout.append(listView,                  ~0, ~0, 5);
+  controlLayout.append(selectAllButton,   100,  0, 5);
+  controlLayout.append(unselectAllButton, 100,  0   );
+  controlLayout.append(spacerWidget,       ~0,  0   );
+  controlLayout.append(okButton,           80,  0   );
+  layout.append(controlLayout                       );
+  setGeometry({ 0, 0, 600, layout.minimumGeometry().height + 350 });
   append(layout);
 
   selectAllButton.onTick = [this]() {

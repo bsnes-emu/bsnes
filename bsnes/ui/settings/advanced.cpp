@@ -20,21 +20,21 @@ void AdvancedSettings::create() {
   if(config.settings.focusPolicy == 2) focusPolicyAllow.setChecked();
 
   layout.setMargin(5);
-  layout.append(driverSelectionLabel, 0, Style::LabelHeight);
-  driverLayout.append(videoDriverLabel, 40, 0, 5);
-  driverLayout.append(videoDriverBox,    0, 0, 5);
-  driverLayout.append(audioDriverLabel, 40, 0, 5);
-  driverLayout.append(audioDriverBox,    0, 0, 5);
-  driverLayout.append(inputDriverLabel, 40, 0, 5);
-  driverLayout.append(inputDriverBox,    0, 0);
-  layout.append(driverLayout, 0, Style::ComboBoxHeight, 5);
-  layout.append(focusPolicyLabel, 0, Style::LabelHeight);
-  focusPolicyLayout.append(focusPolicyPause,  0, 0, 5);
-  focusPolicyLayout.append(focusPolicyIgnore, 0, 0, 5);
-  focusPolicyLayout.append(focusPolicyAllow,  0, 0);
-  layout.append(focusPolicyLayout, 0, Style::CheckBoxHeight);
+  layout.append(driverSelectionLabel,         ~0, 0   );
+  driverLayout.append(videoDriverLabel,        0, 0, 5);
+  driverLayout.append(videoDriverBox,         ~0, 0, 5);
+  driverLayout.append(audioDriverLabel,        0, 0, 5);
+  driverLayout.append(audioDriverBox,         ~0, 0, 5);
+  driverLayout.append(inputDriverLabel,        0, 0, 5);
+  driverLayout.append(inputDriverBox,         ~0, 0   );
+  layout.append(driverLayout,                        5);
+  layout.append(focusPolicyLabel,             ~0, 0   );
+  focusPolicyLayout.append(focusPolicyPause,  ~0, 0, 5);
+  focusPolicyLayout.append(focusPolicyIgnore, ~0, 0, 5);
+  focusPolicyLayout.append(focusPolicyAllow,  ~0, 0);
+  layout.append(focusPolicyLayout);
 
-  setGeometry({ 0, 0, 640, layout.minimumHeight() });
+  setGeometry({ 0, 0, 640, layout.minimumGeometry().height });
   append(layout);
 
   lstring list;

@@ -1,3 +1,7 @@
+Geometry pHorizontalSlider::minimumGeometry() {
+  return { 0, 0, 100, 20 };
+}
+
 unsigned pHorizontalSlider::position() {
   return qtSlider->value();
 }

@@ -15,16 +15,16 @@ void Console::create() {
   clearConsole.setText("Clear console");
 
   layout.setMargin(5);
-  layout.append(output, 0, 0, 5);
-  controlLayout.append(traceToConsole, 120, Style::CheckBoxHeight);
-  controlLayout.append(traceToFile, 120, Style::CheckBoxHeight);
-  controlLayout.append(traceCPU, 120, Style::CheckBoxHeight);
-  controlLayout.append(traceSMP, 120, Style::CheckBoxHeight);
-  controlLayout.append(spacer, 120, 0, Style::CheckBoxHeight);
-  controlLayout.append(clearConsole, 120, Style::ButtonHeight);
-  layout.append(controlLayout, 120, 0);
+  layout.append(output,                 ~0, ~0, 5);
+  controlLayout.append(traceToConsole, 120,  0   );
+  controlLayout.append(traceToFile,    120,  0   );
+  controlLayout.append(traceCPU,       120,  0   );
+  controlLayout.append(traceSMP,       120,  0   );
+  controlLayout.append(spacer,         120, ~0   );
+  controlLayout.append(clearConsole,   120,  0   );
+  layout.append(controlLayout                    );
 
-  setGeometry({ 0, 0, layout.minimumWidth() + 580, 350 });
+  setGeometry({ 0, 0, layout.minimumGeometry().width + 580, 350 });
   append(layout);
 
   onClose = []() {

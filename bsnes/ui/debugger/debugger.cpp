@@ -29,14 +29,14 @@ void Debugger::create() {
   showMemoryEditor.setText("Memory editor");
 
   layout.setMargin(5);
-  layout.append(enableDebugger, 0, Style::CheckBoxHeight);
-  layout.append(showConsole, 0, Style::CheckBoxHeight);
-  layout.append(showCPUDebugger, 0, Style::CheckBoxHeight);
-  layout.append(showSMPDebugger, 0, Style::CheckBoxHeight);
-  layout.append(showBreakpointEditor, 0, Style::CheckBoxHeight);
-  layout.append(showMemoryEditor, 0, Style::CheckBoxHeight);
+  layout.append(enableDebugger,       ~0, 0);
+  layout.append(showConsole,          ~0, 0);
+  layout.append(showCPUDebugger,      ~0, 0);
+  layout.append(showSMPDebugger,      ~0, 0);
+  layout.append(showBreakpointEditor, ~0, 0);
+  layout.append(showMemoryEditor,     ~0, 0);
 
-  setGeometry({ 0, 0, 256, layout.minimumHeight() });
+  setGeometry({ 0, 0, 256, layout.minimumGeometry().height });
   append(layout);
 
   //windows shown by default

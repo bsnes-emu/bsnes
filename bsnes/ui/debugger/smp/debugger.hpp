@@ -5,6 +5,7 @@ struct SMPDebugger : TopLevelWindow {
   Button stepInto;
   Button stepOver;
   Button proceed;
+  Widget spacer;
 
   void create();
   void synchronize();

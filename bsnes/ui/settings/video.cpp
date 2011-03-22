@@ -21,27 +21,27 @@ void VideoSettings::create() {
   RadioBox::group(fullscreenCenter, fullscreenScale, fullscreenStretch);
 
   layout.setMargin(5);
-  layout.append(colorAdjustmentLabel, 0, Style::LabelHeight);
-  brightnessLayout.append(brightnessLabel, 80, 0);
-  brightnessLayout.append(brightnessValue, 50, 0);
-  brightnessLayout.append(brightnessSlider, 0, 0);
-  layout.append(brightnessLayout, 0, Style::SliderHeight);
-  contrastLayout.append(contrastLabel, 80, 0);
-  contrastLayout.append(contrastValue, 50, 0);
-  contrastLayout.append(contrastSlider, 0, 0);
-  layout.append(contrastLayout, 0, Style::SliderHeight);
-  gammaLayout.append(gammaLabel, 80, 0);
-  gammaLayout.append(gammaValue, 50, 0);
-  gammaLayout.append(gammaSlider, 0, 0);
-  layout.append(gammaLayout, 0, Style::SliderHeight);
-  layout.append(gammaRampCheck, 0, Style::CheckBoxHeight, 5);
-  layout.append(fullscreenLabel, 0, Style::LabelHeight);
-  fullscreenLayout.append(fullscreenCenter,  0, 0);
-  fullscreenLayout.append(fullscreenScale,   0, 0);
-  fullscreenLayout.append(fullscreenStretch, 0, 0);
-  layout.append(fullscreenLayout, 0, Style::CheckBoxHeight);
+  layout.append(colorAdjustmentLabel,        ~0, 0   );
+  brightnessLayout.append(brightnessLabel,   80, 0   );
+  brightnessLayout.append(brightnessValue,   50, 0   );
+  brightnessLayout.append(brightnessSlider,  ~0, 0   );
+  layout.append(brightnessLayout                     );
+  contrastLayout.append(contrastLabel,       80, 0   );
+  contrastLayout.append(contrastValue,       50, 0   );
+  contrastLayout.append(contrastSlider,      ~0, 0   );
+  layout.append(contrastLayout                       );
+  gammaLayout.append(gammaLabel,             80, 0   );
+  gammaLayout.append(gammaValue,             50, 0   );
+  gammaLayout.append(gammaSlider,            ~0, 0   );
+  layout.append(gammaLayout                          );
+  layout.append(gammaRampCheck,              ~0, 0, 5);
+  layout.append(fullscreenLabel,             ~0, 0   );
+  fullscreenLayout.append(fullscreenCenter,  ~0, 0, 5);
+  fullscreenLayout.append(fullscreenScale,   ~0, 0, 5);
+  fullscreenLayout.append(fullscreenStretch, ~0, 0   );
+  layout.append(fullscreenLayout);
 
-  setGeometry({ 0, 0, 480, layout.minimumHeight() });
+  setGeometry({ 0, 0, 480, layout.minimumGeometry().height });
   append(layout);
 
   brightnessSlider.setPosition(config.video.brightness);

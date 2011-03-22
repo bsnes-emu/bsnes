@@ -7,6 +7,15 @@ void pComboBox::append(const string &text) {
   if(itemCounter++ == 0) setSelection(0);
 }
 
+Geometry pComboBox::minimumGeometry() {
+  Font &font = pWidget::font();
+  unsigned maximumWidth = 0;
+  foreach(item, comboBox.state.text) maximumWidth = max(maximumWidth, font.geometry(item).width);
+
+  Geometry geometry = font.geometry(" ");
+  return { 0, 0, maximumWidth + 44, geometry.height + 10 };
+}
+
 void pComboBox::reset() {
   locked = true;
   for(signed n = itemCounter - 1; n >= 0; n--) {

@@ -2,6 +2,12 @@ bool pCheckBox::checked() {
   return SendMessage(hwnd, BM_GETCHECK, 0, 0);
 }
 
+Geometry pCheckBox::minimumGeometry() {
+  Font &font = this->font();
+  Geometry geometry = font.geometry(checkBox.state.text);
+  return { 0, 0, geometry.width + 20, geometry.height + 4 };
+}
+
 void pCheckBox::setChecked(bool checked) {
   SendMessage(hwnd, BM_SETCHECK, (WPARAM)checked, 0);
 }

@@ -12,17 +12,17 @@ void StateManager::create() {
   eraseButton.setText("Erase");
 
   layout.setMargin(5);
-  layout.append(stateList, 0, 0, 5);
-  descLayout.append(descLabel, 80, 0, 5);
-  descLayout.append(descEdit,   0, 0);
-  layout.append(descLayout, 0, Style::LineEditHeight, 5);
-  controlLayout.append(spacer,       0, 0);
-  controlLayout.append(loadButton,  80, 0, 5);
-  controlLayout.append(saveButton,  80, 0, 5);
-  controlLayout.append(eraseButton, 80, 0);
-  layout.append(controlLayout, 0, Style::ButtonHeight);
+  layout.append(stateList,          ~0, ~0, 5);
+  descLayout.append(descLabel,      80,  0, 5);
+  descLayout.append(descEdit,       ~0,  0   );
+  layout.append(descLayout,                 5);
+  controlLayout.append(spacer,       0,  0   );
+  controlLayout.append(loadButton,  80,  0, 5);
+  controlLayout.append(saveButton,  80,  0, 5);
+  controlLayout.append(eraseButton, 80,  0   );
+  layout.append(controlLayout                );
 
-  setGeometry({ 0, 0, 480, layout.minimumHeight() + 250 });
+  setGeometry({ 0, 0, 480, layout.minimumGeometry().height + 250 });
   append(layout);
 
   synchronize();

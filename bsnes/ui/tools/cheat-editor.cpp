@@ -92,20 +92,20 @@ void CheatEditor::create() {
   clearButton.setText("Clear");
 
   layout.setMargin(5);
-  layout.append(cheatList, 0, 0, 5);
-  codeLayout.append(codeLabel, 80, 0, 5);
-  codeLayout.append(codeEdit,   0, 0);
-  layout.append(codeLayout, 0, Style::LineEditHeight, 5);
-  descLayout.append(descLabel, 80, 0, 5);
-  descLayout.append(descEdit,   0, 0);
-  layout.append(descLayout, 0, Style::LineEditHeight, 5);
-  controlLayout.append(findButton,    100, 0);
-  controlLayout.append(spacerWidget,    0, 0);
+  layout.append(cheatList,            ~0, ~0, 5);
+  codeLayout.append(codeLabel,        80,  0, 5);
+  codeLayout.append(codeEdit,         ~0,  0   );
+  layout.append(codeLayout,                   5);
+  descLayout.append(descLabel,        80,  0, 5);
+  descLayout.append(descEdit,         ~0,  0   );
+  layout.append(descLayout,                   5);
+  controlLayout.append(findButton,    100, 0   );
+  controlLayout.append(spacerWidget,   ~0, 0   );
   controlLayout.append(clearAllButton, 80, 0, 5);
-  controlLayout.append(clearButton,    80, 0);
-  layout.append(controlLayout, 0, Style::ButtonHeight);
+  controlLayout.append(clearButton,    80, 0   );
+  layout.append(controlLayout);
 
-  setGeometry({ 0, 0, 480, layout.minimumHeight() + 250 });
+  setGeometry({ 0, 0, 480, layout.minimumGeometry().height + 250 });
   append(layout);
 
   synchronize();

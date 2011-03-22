@@ -7,13 +7,13 @@ void FileBrowser::create() {
   upButton.setText("..");
 
   layout.setMargin(5);
-  pathLayout.append(pathBox, 0, 0, 5);
-  pathLayout.append(browseButton, Style::LineEditHeight, 0, 5);
-  pathLayout.append(upButton, Style::LineEditHeight, 0);
-  layout.append(pathLayout, 0, Style::LineEditHeight, 5);
-  layout.append(contentsBox, 0, 0);
+  pathLayout.append(pathBox,      ~0,  0, 5);
+  pathLayout.append(browseButton, 25, 25, 5);
+  pathLayout.append(upButton,     25, 25   );
+  layout.append(pathLayout,               5);
+  layout.append(contentsBox,      ~0, ~0   );
 
-  setGeometry({ 0, 0, 640, layout.minimumHeight() + 400 });
+  setGeometry({ 0, 0, 640, layout.minimumGeometry().height + 400 });
   append(layout);
 
   pathBox.onActivate = []() {

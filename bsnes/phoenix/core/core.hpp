@@ -29,6 +29,11 @@ struct pTextEdit;
 struct pVerticalSlider;
 struct pViewport;
 
+enum : unsigned {
+  MaximumSize = ~0u,
+  MinimumSize =  0u,
+};
+
 struct Geometry {
   signed x, y;
   unsigned width, height;
@@ -63,6 +68,7 @@ private:
 };
 
 struct Font : Object {
+  Geometry geometry(const nall::string &text);
   void setBold(bool bold = true);
   void setFamily(const nall::string &family);
   void setItalic(bool italic = true);
@@ -195,13 +201,15 @@ struct RadioItem : private nall::base_from_member<pRadioItem&>, Action {
 };
 
 struct Layout : Object {
-  virtual void setGeometry(Geometry &geometry) = 0;
+  virtual void setGeometry(const Geometry &geometry) = 0;
   virtual void setParent(Window &parent) = 0;
   virtual void setVisible(bool visible = true) = 0;
 };
 
 struct Widget : Object {
   bool enabled();
+  Font& font();
+  Geometry minimumGeometry();
   void setEnabled(bool enabled = true);
   void setFocused();
   void setFont(Font &font);

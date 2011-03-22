@@ -1,3 +1,7 @@
+Geometry pProgressBar::minimumGeometry() {
+  return { 0, 0, 100, 25 };
+}
+
 void pProgressBar::setPosition(unsigned position) {
   qtProgressBar->setValue(position);
 }

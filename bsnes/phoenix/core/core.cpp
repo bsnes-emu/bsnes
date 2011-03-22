@@ -26,6 +26,7 @@ void OS::processEvents() { return pOS::processEvents(); }
 void OS::quit() { return pOS::quit(); }
 void OS::initialize() { static bool initialized = false; if(initialized == false) { initialized = true; return pOS::initialize(); } }
 
+Geometry Font::geometry(const string &text) { return p.geometry(text); }
 void Font::setBold(bool bold) { state.bold = bold; return p.setBold(bold); }
 void Font::setFamily(const string &family) { state.family = family; return p.setFamily(family); }
 void Font::setItalic(bool italic) { state.italic = italic; return p.setItalic(italic); }
@@ -87,6 +88,8 @@ void RadioItem::setText(const string &text) { state.text = text; return p.setTex
 RadioItem::RadioItem() : state(*new State), base_from_member<pRadioItem&>(*new pRadioItem(*this)), Action(base_from_member<pRadioItem&>::value), p(base_from_member<pRadioItem&>::value) { p.constructor(); }
 
 bool Widget::enabled() { return state.enabled; }
+Font& Widget::font() { return p.font(); }
+Geometry Widget::minimumGeometry() { return p.minimumGeometry(); }
 void Widget::setEnabled(bool enabled) { state.enabled = enabled; return p.setEnabled(enabled); }
 void Widget::setFocused() { return p.setFocused(); }
 void Widget::setFont(Font &font) { state.font = &font; return p.setFont(font); }

@@ -27,6 +27,8 @@
 #include "widget/vertical-slider.cpp"
 #include "widget/viewport.cpp"
 
+Font pOS::defaultFont;
+
 Geometry pOS::availableGeometry() {
   //TODO: is there a GTK+ function for this?
   //should return desktopGeometry() sans panels, toolbars, docks, etc.

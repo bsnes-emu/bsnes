@@ -5,6 +5,7 @@ struct MemoryEditor : TopLevelWindow {
   ComboBox sourceBox;
   LineEdit gotoBox;
   Button refreshButton;
+  Widget spacer;
 
   SNES::Debugger::MemorySource source;
   unsigned size;

@@ -1,3 +1,12 @@
+Font& pWidget::font() {
+  if(widget.state.font) return *widget.state.font;
+  return pOS::defaultFont;
+}
+
+Geometry pWidget::minimumGeometry() {
+  return { 0, 0, 100, 25 };
+}
+
 void pWidget::setEnabled(bool enabled) {
   qtWidget->setEnabled(enabled);
 }

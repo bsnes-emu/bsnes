@@ -29,6 +29,7 @@
 #include "widget/viewport.cpp"
 
 QApplication *pOS::application = 0;
+Font pOS::defaultFont;
 
 Geometry pOS::availableGeometry() {
   QRect rect = QApplication::desktop()->availableGeometry();

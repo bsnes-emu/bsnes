@@ -25,6 +25,7 @@ struct pObject {
 
 struct pOS : public pObject {
   static QApplication *application;
+  static Font defaultFont;
 
   static Geometry availableGeometry();
   static Geometry desktopGeometry();
@@ -43,6 +44,7 @@ struct pFont : public pObject {
   Font &font;
   QFont *qtFont;
 
+  Geometry geometry(const string &text);
   void setBold(bool bold);
   void setFamily(const string &family);
   void setItalic(bool italic);
@@ -193,6 +195,8 @@ struct pWidget : public pObject {
   Widget &widget;
   QWidget *qtWidget;
 
+  Font& font();
+  virtual Geometry minimumGeometry();
   void setEnabled(bool enabled);
   void setFocused();
   void setFont(Font &font);
@@ -210,6 +214,7 @@ public:
   Button &button;
   QPushButton *qtButton;
 
+  Geometry minimumGeometry();
   void setText(const string &text);
 
   pButton(Button &button) : pWidget(button), button(button) {}
@@ -227,6 +232,7 @@ public:
   QCheckBox *qtCheckBox;
 
   bool checked();
+  Geometry minimumGeometry();
   void setChecked(bool checked);
   void setText(const string &text);
 
@@ -245,6 +251,7 @@ public:
   QComboBox *qtComboBox;
 
   void append(const string &text);
+  Geometry minimumGeometry();
   void reset();
   unsigned selection();
   void setSelection(unsigned row);
@@ -291,6 +298,7 @@ public:
   HorizontalSlider &horizontalSlider;
   QSlider *qtSlider;
 
+  Geometry minimumGeometry();
   unsigned position();
   void setLength(unsigned length);
   void setPosition(unsigned position);
@@ -306,6 +314,7 @@ struct pLabel : public pWidget {
   Label &label;
   QLabel *qtLabel;
 
+  Geometry minimumGeometry();
   void setText(const string &text);
 
   pLabel(Label &label) : pWidget(label), label(label) {}
@@ -319,6 +328,7 @@ public:
   LineEdit &lineEdit;
   QLineEdit *qtLineEdit;
 
+  Geometry minimumGeometry();
   void setEditable(bool editable);
   void setText(const string &text);
   string text();
@@ -365,6 +375,7 @@ struct pProgressBar : public pWidget {
   ProgressBar &progressBar;
   QProgressBar *qtProgressBar;
 
+  Geometry minimumGeometry();
   void setPosition(unsigned position);
 
   pProgressBar(ProgressBar &progressBar) : pWidget(progressBar), progressBar(progressBar) {}
@@ -380,6 +391,7 @@ public:
   QButtonGroup *qtGroup;
 
   bool checked();
+  Geometry minimumGeometry();
   void setChecked();
   void setGroup(const reference_array<RadioBox&> &group);
   void setText(const string &text);
@@ -418,6 +430,7 @@ public:
   VerticalSlider &verticalSlider;
   QSlider *qtSlider;
 
+  Geometry minimumGeometry();
   unsigned position();
   void setLength(unsigned length);
   void setPosition(unsigned position);
