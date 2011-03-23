@@ -7,8 +7,7 @@ Geometry pComboBox::minimumGeometry() {
   Font &font = this->font();
   unsigned maximumWidth = 0;
   foreach(text, comboBox.state.text) maximumWidth = max(maximumWidth, font.geometry(text).width);
-  Geometry geometry = font.geometry(" ");
-  return { 0, 0, maximumWidth + 24, geometry.height + 10 };
+  return { 0, 0, maximumWidth + 24, font.p.height() + 10 };
 }
 
 void pComboBox::reset() {

@@ -1,5 +1,5 @@
 void VerticalLayout::append(HorizontalLayout &layout, unsigned spacing) {
-  children.append({ &layout, 0, 0, 0, spacing });
+  children.append({ &layout, 0, MinimumSize, MinimumSize, spacing });
 }
 
 void VerticalLayout::append(Widget &widget, unsigned width, unsigned height, unsigned spacing) {
@@ -7,35 +7,87 @@ void VerticalLayout::append(Widget &widget, unsigned width, unsigned height, uns
 }
 
 Geometry VerticalLayout::minimumGeometry() {
+  unsigned width = 0, height = 0;
+
+  foreach(child, children) {
+    if(child.width == MinimumSize || child.width == MaximumSize) {
+      if(child.layout) width = max(width, child.layout->minimumGeometry().width);
+      if(child.widget) width = max(width, child.widget->minimumGeometry().width);
+      continue;
+    }
+    width = max(width, child.width);
+  }
+
+  foreach(child, children) {
+    height += child.spacing;
+    if(child.height == MinimumSize || child.height == MaximumSize) {
+      if(child.layout) height += child.layout->minimumGeometry().height;
+      if(child.widget) height += child.widget->minimumGeometry().height;
+      continue;
+    }
+    height += child.height;
+  }
+
+  return { 0, 0, margin * 2 + width, margin * 2 + height };
+}
+
+Geometry VerticalLayout::minimumLayoutGeometry() {
+  unsigned width = 0, height = 0;
   bool maximumWidth  = false;
   bool maximumHeight = false;
 
-  unsigned width  = margin * 2;
-  unsigned height = margin * 2;
-
   foreach(child, children) {
-    if(child.width  == MaximumSize) maximumWidth  = true;
-    if(child.height == MaximumSize) maximumHeight = true;
+    if(child.width == MaximumSize) {
+      maximumWidth = true;
+      break;
+    }
 
-    if(child.width  != MaximumSize) width = max(width, child.width);
-    if(child.height != MaximumSize) height += child.height;
+    if(child.width == MinimumSize) {
+      if(child.layout) width = max(width, child.layout->minimumGeometry().width);
+      if(child.widget) width = max(width, child.widget->minimumGeometry().width);
+      continue;
+    }
+
+    width = max(width, child.width);
   }
 
-  return { 0, 0, maximumWidth ? MaximumSize : width, maximumHeight ? MaximumSize : height };
+  foreach(child, children) {
+    if(child.height == MaximumSize) {
+      maximumHeight = true;
+      break;
+    }
+
+    if(child.height == MinimumSize) {
+      if(child.layout) height += child.layout->minimumGeometry().height;
+      if(child.widget) height += child.widget->minimumGeometry().height;
+      continue;
+    }
+
+    height += child.height;
+  }
+
+  return { 0, 0, maximumWidth ? MaximumSize : margin * 2 + width, maximumHeight ? MaximumSize : margin * 2 + height };
 }
 
 void VerticalLayout::setGeometry(const Geometry &containerGeometry) {
-  setMinimumGeometry();
-  setLayoutGeometry();
+  auto children = this->children;
+  foreach(child, children) {
+    if(child.layout) {
+      child.width  = child.layout->minimumLayoutGeometry().width;
+      child.height = child.layout->minimumLayoutGeometry().height;
+    }
+
+    if(child.widget) {
+      if(child.width  == MinimumSize) child.width  = child.widget->minimumGeometry().width;
+      if(child.height == MinimumSize) child.height = child.widget->minimumGeometry().height;
+    }
+  }
 
   Geometry geometry = containerGeometry;
   geometry.x      += margin;
   geometry.y      += margin;
   geometry.width  -= margin * 2;
   geometry.height -= margin * 2;
-
-  Geometry layoutGeometry = geometry;
-  auto children = this->children;
 
   unsigned minimumHeight = 0, maximumHeightCounter = 0;
   foreach(child, children) {
@@ -64,28 +116,8 @@ void VerticalLayout::setGeometry(const Geometry &containerGeometry) {
   }
 }
 
-void VerticalLayout::setLayoutGeometry() {
-  foreach(child, children) {
-    if(child.layout) {
-      child.width  = child.layout->minimumGeometry().width;
-      child.height = child.layout->minimumGeometry().height;
-    }
-  }
-}
-
 void VerticalLayout::setMargin(unsigned margin) {
   this->margin = margin;
-}
-
-void VerticalLayout::setMinimumGeometry() {
-  foreach(child, children) {
-    if(child.layout) child.layout->setMinimumGeometry();
-    if(child.widget) {
-      Geometry minimumGeometry = child.widget->minimumGeometry();
-      if(child.width  == MinimumSize) child.width  = minimumGeometry.width;
-      if(child.height == MinimumSize) child.height = minimumGeometry.height;
-    }
-  }
 }
 
 void VerticalLayout::setParent(Window &parent) {

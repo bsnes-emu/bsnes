@@ -5,7 +5,7 @@ bool pCheckBox::checked() {
 Geometry pCheckBox::minimumGeometry() {
   Font &font = this->font();
   Geometry geometry = font.geometry(checkBox.state.text);
-  return { 0, 0, geometry.width + 20, geometry.height + 4 };
+  return { 0, 0, geometry.width + 20, font.p.height() + 4 };
 }
 
 void pCheckBox::setChecked(bool checked) {

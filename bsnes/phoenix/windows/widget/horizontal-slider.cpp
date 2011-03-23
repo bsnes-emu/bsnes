@@ -1,5 +1,5 @@
 Geometry pHorizontalSlider::minimumGeometry() {
-  return { 0, 0, 100, 25 };
+  return { 0, 0, 0, 25 };
 }
 
 unsigned pHorizontalSlider::position() {

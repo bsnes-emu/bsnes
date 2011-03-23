@@ -15,6 +15,10 @@ Geometry pFont::geometry(const string &text) {
   return { 0, 0, rc.right, rc.bottom };
 }
 
+unsigned pFont::height() {
+  return geometry(" ").height;
+}
+
 void pFont::setBold(bool bold) {
   if(hfont) { DeleteObject(hfont); hfont = 0; }
   hfont = Font_createFont(font.state.family, font.state.size, font.state.bold, font.state.italic, font.state.underline);

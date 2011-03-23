@@ -24,7 +24,7 @@ void Console::create() {
   controlLayout.append(clearConsole,   120,  0   );
   layout.append(controlLayout                    );
 
-  setGeometry({ 0, 0, layout.minimumGeometry().width + 580, 350 });
+  setGeometry({ 0, 0, layout.minimumGeometry().width + 585, 350 });
   append(layout);
 
   onClose = []() {

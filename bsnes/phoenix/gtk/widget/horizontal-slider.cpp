@@ -5,7 +5,7 @@ static void HorizontalSlider_change(HorizontalSlider *self) {
 }
 
 Geometry pHorizontalSlider::minimumGeometry() {
-  return { 0, 0, 100, 20 };
+  return { 0, 0, 0, 20 };
 }
 
 unsigned pHorizontalSlider::position() {

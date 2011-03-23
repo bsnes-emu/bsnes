@@ -12,7 +12,7 @@ Font& pWidget::font() {
 }
 
 Geometry pWidget::minimumGeometry() {
-  return { 0, 0, 100, 25 };
+  return { 0, 0, 0, 0 };
 }
 
 bool pWidget::enabled() {

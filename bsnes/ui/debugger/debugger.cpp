@@ -36,7 +36,7 @@ void Debugger::create() {
   layout.append(showBreakpointEditor, ~0, 0);
   layout.append(showMemoryEditor,     ~0, 0);
 
-  setGeometry({ 0, 0, 256, layout.minimumGeometry().height });
+  setGeometry({ 0, 0, layout.minimumGeometry().width, layout.minimumGeometry().height });
   append(layout);
 
   //windows shown by default

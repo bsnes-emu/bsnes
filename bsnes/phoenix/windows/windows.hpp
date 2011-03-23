@@ -38,6 +38,7 @@ struct pFont : public pObject {
   HFONT hfont;
 
   Geometry geometry(const string &text);
+  unsigned height();
   void setBold(bool bold);
   void setFamily(const string &family);
   void setItalic(bool italic);

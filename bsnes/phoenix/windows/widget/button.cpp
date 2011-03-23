@@ -1,7 +1,7 @@
 Geometry pButton::minimumGeometry() {
   Font &font = this->font();
   Geometry geometry = font.geometry(button.state.text);
-  return { 0, 0, geometry.width + 20, geometry.height + 12 };
+  return { 0, 0, geometry.width + 20, font.p.height() + 12 };
 }
 
 void pButton::setText(const string &text) {

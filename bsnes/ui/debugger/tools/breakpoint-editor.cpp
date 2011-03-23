@@ -29,7 +29,7 @@ void BreakpointEditor::create() {
     layout.append(breakpointLayout[n],               5);
   }
 
-  setGeometry({ 0, 0, 310, layout.minimumGeometry().height });
+  setGeometry({ 0, 0, layout.minimumGeometry().width, layout.minimumGeometry().height });
   append(layout);
 
   onClose = []() {

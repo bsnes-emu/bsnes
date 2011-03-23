@@ -1,5 +1,5 @@
 Geometry pVerticalSlider::minimumGeometry() {
-  return { 0, 0, 25, 100 };
+  return { 0, 0, 25, 0 };
 }
 
 unsigned pVerticalSlider::position() {
