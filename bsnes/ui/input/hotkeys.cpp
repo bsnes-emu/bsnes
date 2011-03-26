@@ -9,31 +9,31 @@ void InputMapper::poll_hotkeys(unsigned scancode, int16_t value) {
     if(mainWindow.focused() == false) return;
 
     //save states
-    if(scancode == keyboard(0)[Keyboard::F5]) {
+    if(scancode == hotkeysGeneral.stateSave.scancode) {
       utility.saveState(activeSlot);
     }
 
-    if(scancode == keyboard(0)[Keyboard::F7]) {
+    if(scancode == hotkeysGeneral.stateLoad.scancode) {
       utility.loadState(activeSlot);
     }
 
-    if(scancode == keyboard(0)[Keyboard::F6]) {
+    if(scancode == hotkeysGeneral.stateDecrement.scancode) {
       activeSlot = (activeSlot == 1 ? 5 : activeSlot - 1);
       utility.showMessage({ "Slot ", activeSlot, " selected" });
     }
 
-    if(scancode == keyboard(0)[Keyboard::F8]) {
+    if(scancode == hotkeysGeneral.stateIncrement.scancode) {
       activeSlot = (activeSlot == 5 ? 1 : activeSlot + 1);
       utility.showMessage({ "Slot ", activeSlot, " selected" });
     }
 
     //fullscreen
-    if(scancode == keyboard(0)[Keyboard::F11]) {
+    if(scancode == hotkeysGeneral.fullscreenToggle.scancode) {
       utility.setFullscreen(!utility.fullscreen);
     }
 
     //mouse capture
-    if(scancode == keyboard(0)[Keyboard::F12]) {
+    if(scancode == hotkeysGeneral.mouseCaptureToggle.scancode) {
       if(input.acquired() == false) {
         input.acquire();
       } else {
@@ -42,12 +42,12 @@ void InputMapper::poll_hotkeys(unsigned scancode, int16_t value) {
     }
 
     //pause
-    if(scancode == keyboard(0)[Keyboard::P]) {
+    if(scancode == hotkeysGeneral.pauseToggle.scancode) {
       application.pause = !application.pause;
     }
 
     //fast forward
-    if(scancode == keyboard(0)[Keyboard::Tilde]) {
+    if(scancode == hotkeysGeneral.fastForward.scancode) {
       videoSync = config.video.synchronize;
       audioSync = config.audio.synchronize;
       video.set(Video::Synchronize, config.video.synchronize = false);
@@ -56,12 +56,22 @@ void InputMapper::poll_hotkeys(unsigned scancode, int16_t value) {
       SNES::ppu.set_frameskip(9);
       #endif
     }
+
+    //power cycle
+    if(scancode == hotkeysGeneral.power.scancode) {
+      mainWindow.systemPower.onTick();
+    }
+
+    //reset
+    if(scancode == hotkeysGeneral.reset.scancode) {
+      mainWindow.systemReset.onTick();
+    }
   } else {
     //key released
     if(mainWindow.focused() == false) return;
 
     //fast forward
-    if(scancode == keyboard(0)[Keyboard::Tilde]) {
+    if(scancode == hotkeysGeneral.fastForward.scancode) {
       video.set(Video::Synchronize, config.video.synchronize = videoSync);
       audio.set(Audio::Synchronize, config.audio.synchronize = audioSync);
       #if defined(PROFILE_COMPATIBILITY) || defined(PROFILE_PERFORMANCE)
@@ -69,4 +79,47 @@ void InputMapper::poll_hotkeys(unsigned scancode, int16_t value) {
       #endif
     }
   }
+}
+
+void InputMapper::HotkeysGeneral::create(const char *deviceName, const char *configName) {
+  name = deviceName;
+
+  stateSave.name = "Save State";
+  stateLoad.name = "Load State";
+  stateDecrement.name = "Decrement State";
+  stateIncrement.name = "Increment State";
+  fullscreenToggle.name = "Fullscreen";
+  mouseCaptureToggle.name = "Mouse Capture";
+  pauseToggle.name = "Pause Emulation";
+  fastForward.name = "Fast-Forward";
+  power.name = "Power Cycle";
+  reset.name = "Reset";
+
+  append(&stateSave);
+  append(&stateLoad);
+  append(&stateDecrement);
+  append(&stateIncrement);
+  append(&fullscreenToggle);
+  append(&mouseCaptureToggle);
+  append(&pauseToggle);
+  append(&fastForward);
+  append(&power);
+  append(&reset);
+
+  config.attach(stateSave.mapping = "KB0::F5", string("input.", configName, ".stateSave"));
+  config.attach(stateLoad.mapping = "KB0::F7", string("input.", configName, ".stateLoad"));
+  config.attach(stateDecrement.mapping = "KB0::F6", string("input.", configName, ".stateDecrement"));
+  config.attach(stateIncrement.mapping = "KB0::F8", string("input.", configName, ".stateIncrement"));
+  config.attach(fullscreenToggle.mapping = "KB0::F11", string("input.", configName, ".fullscreenToggle"));
+  config.attach(mouseCaptureToggle.mapping = "KB0::F12", string("input.", configName, ".mouseCaptureToggle"));
+  config.attach(pauseToggle.mapping = "KB0::P", string("input.", configName, ".pauseToggle"));
+  config.attach(fastForward.mapping = "KB0::Tilde", string("input.", configName, ".fastForward"));
+  config.attach(power.mapping = "", string("input.", configName, ".power"));
+  config.attach(reset.mapping = "", string("input.", configName, ".reset"));
+}
+
+void InputMapper::create_hotkeys() {
+  hotkeys.name = "Hotkeys";
+  hotkeysGeneral.create("General", "hotkeys.general");
+  hotkeys.append(&hotkeysGeneral);
 }

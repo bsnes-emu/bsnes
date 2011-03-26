@@ -21,9 +21,8 @@ void StateManager::create() {
   controlLayout.append(saveButton,  80,  0, 5);
   controlLayout.append(eraseButton, 80,  0   );
   layout.append(controlLayout                );
-
-  setGeometry({ 0, 0, 480, layout.minimumGeometry().height + 250 });
   append(layout);
+  setGeometry({ 0, 0, 480, layout.minimumGeometry().height + 250 });
 
   synchronize();
 

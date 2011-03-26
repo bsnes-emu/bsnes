@@ -55,23 +55,3 @@ private:
 };
 
 extern Application application;
-
-struct Style {
-  enum : unsigned {
-  #if defined(PLATFORM_WIN)
-    ButtonHeight = 25,
-    CheckBoxHeight = 15,
-    ComboBoxHeight = 22,
-    LabelHeight = 15,
-    SliderHeight = 25,
-    LineEditHeight = 22,
-  #else
-    ButtonHeight = 25,
-    CheckBoxHeight = 15,
-    ComboBoxHeight = 22,
-    LabelHeight = 15,
-    SliderHeight = 22,
-    LineEditHeight = 22,
-  #endif
-  };
-};

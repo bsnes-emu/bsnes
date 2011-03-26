@@ -22,9 +22,8 @@ void SingleSlotLoader::create() {
   controlLayout.append(spacer,   ~0,  0   );
   controlLayout.append(okButton, 80,  0   );
   layout.append(controlLayout);
-
-  setGeometry({ 0, 0, 480, layout.minimumGeometry().height });
   append(layout);
+  setGeometry({ 0, 0, 480, layout.minimumGeometry().height });
 
   baseBrowse.onTick = []() {
     fileBrowser.fileOpen(FileBrowser::Mode::Cartridge, [](string filename) {
@@ -120,9 +119,8 @@ void DoubleSlotLoader::create() {
   controlLayout.append(spacer,    ~0,  0   );
   controlLayout.append(okButton,  80,  0   );
   layout.append(controlLayout);
-
-  setGeometry({ 0, 0, 480, layout.minimumGeometry().height });
   append(layout);
+  setGeometry({ 0, 0, 480, layout.minimumGeometry().height });
 
   baseBrowse.onTick = []() {
     fileBrowser.fileOpen(FileBrowser::Mode::Cartridge, [](string filename) {

@@ -12,9 +12,8 @@ void FileBrowser::create() {
   pathLayout.append(upButton,     25, 25   );
   layout.append(pathLayout,               5);
   layout.append(contentsBox,      ~0, ~0   );
-
-  setGeometry({ 0, 0, 640, layout.minimumGeometry().height + 400 });
   append(layout);
+  setGeometry({ 0, 0, 640, layout.minimumGeometry().height + 400 });
 
   pathBox.onActivate = []() {
     string path = fileBrowser.pathBox.text();
@@ -31,11 +30,20 @@ void FileBrowser::create() {
 void FileBrowser::fileOpen(FileBrowser::Mode requestedMode, function<void (string)> requestedCallback) {
   callback = requestedCallback;
 
-//if(mode == requestedMode && folder == config.path.current) {
-//  setVisible();
-//  contentsBox.setFocused();
-//  return;
-//}
+  switch(requestedMode) {
+    case Mode::Cartridge:   folderPath = "sfc"; break;
+    case Mode::Satellaview: folderPath = "bs";  break;
+    case Mode::SufamiTurbo: folderPath = "st";  break;
+    case Mode::GameBoy:     folderPath = "gb";  break;
+  }
+  string activePath = path.load(folderPath);
+
+  //if path has not changed, do not reload list; this will preserve previously selected file
+  if(mode == requestedMode && folder == activePath) {
+    setVisible();
+    contentsBox.setFocused();
+    return;
+  }
 
   setVisible(false);
   filters.reset();
@@ -43,45 +51,32 @@ void FileBrowser::fileOpen(FileBrowser::Mode requestedMode, function<void (strin
   switch(mode = requestedMode) {
     case Mode::Cartridge: {
       setTitle("Load Cartridge");
-      folderPath = "sfc";
       filters.append(".sfc");
       break;
     }
+
     case Mode::Satellaview: {
       setTitle("Load Satellaview Cartridge");
-      folderPath = "bs";
       filters.append(".bs");
       break;
     }
+
     case Mode::SufamiTurbo: {
       setTitle("Load Sufami Turbo Cartridge");
-      folderPath = "st";
       filters.append(".st");
       break;
     }
+
     case Mode::GameBoy: {
       setTitle("Load Game Boy Cartridge");
-      folderPath = "gb";
       filters.append(".gb");
       filters.append(".gbc");
       filters.append(".sgb");
       break;
     }
-    case Mode::Filter: {
-      setTitle("Load Video Filter");
-      folderPath = "filter";
-      filters.append(".filter");
-      break;
-    }
-    case Mode::Shader: {
-      setTitle("Load Pixel Shader");
-      folderPath = "shader";
-      filters.append(".shader");
-      break;
-    }
   }
 
-  setFolder(path.load(folderPath));
+  setFolder(activePath);
   setVisible(true);
   contentsBox.setFocused();
 }
@@ -94,6 +89,7 @@ void FileBrowser::setFolder(const string &pathname) {
   folder.transform("\\", "/");
   pathBox.setText(folder);
   lstring contentsList = directory::contents(folder);
+
   foreach(item, contentsList) {
     if(strend(item, "/")) {
       contents.append(item);
@@ -104,6 +100,7 @@ void FileBrowser::setFolder(const string &pathname) {
       }
     }
   }
+
   foreach(item, contents) contentsBox.append(item);
   contentsBox.setSelection(0);
   contentsBox.setFocused();

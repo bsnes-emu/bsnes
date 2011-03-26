@@ -35,9 +35,8 @@ void Debugger::create() {
   layout.append(showSMPDebugger,      ~0, 0);
   layout.append(showBreakpointEditor, ~0, 0);
   layout.append(showMemoryEditor,     ~0, 0);
-
-  setGeometry({ 0, 0, layout.minimumGeometry().width, layout.minimumGeometry().height });
   append(layout);
+  setGeometry({ 0, 0, layout.minimumGeometry().width, layout.minimumGeometry().height });
 
   //windows shown by default
   showConsole.setChecked();

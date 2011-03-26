@@ -227,6 +227,8 @@ void InputMapper::create() {
   port2.append(&port2.superScope);
   port2.append(&port2.justifierA);
   port2.append(&port2.justifierB);
+
+  create_hotkeys();
 }
 
 void InputMapper::bind() {
@@ -236,6 +238,10 @@ void InputMapper::bind() {
   }
   for(unsigned i = 0; i < port2.size(); i++) {
     Controller &controller = *port2[i];
+    for(unsigned n = 0; n < controller.size(); n++) controller[n]->bind();
+  }
+  for(unsigned i = 0; i < hotkeys.size(); i++) {
+    Controller &controller = *hotkeys[i];
     for(unsigned n = 0; n < controller.size(); n++) controller[n]->bind();
   }
 }

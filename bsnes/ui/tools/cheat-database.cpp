@@ -15,8 +15,8 @@ void CheatDatabase::create() {
   controlLayout.append(spacerWidget,       ~0,  0   );
   controlLayout.append(okButton,           80,  0   );
   layout.append(controlLayout                       );
-  setGeometry({ 0, 0, 600, layout.minimumGeometry().height + 350 });
   append(layout);
+  setGeometry({ 0, 0, 600, layout.minimumGeometry().height + 350 });
 
   selectAllButton.onTick = [this]() {
     foreach(item, this->listData, n) this->listView.setChecked(n, true);

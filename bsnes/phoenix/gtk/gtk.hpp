@@ -173,7 +173,7 @@ struct pWidget : public pObject {
   void setEnabled(bool enabled);
   virtual void setFocused();
   virtual void setFont(Font &font);
-  void setGeometry(const Geometry &geometry);
+  virtual void setGeometry(const Geometry &geometry);
   void setVisible(bool visible);
 
   pWidget(Widget &widget) : widget(widget) {}
@@ -188,6 +188,20 @@ struct pButton : public pWidget {
 
   pButton(Button &button) : pWidget(button), button(button) {}
   void constructor();
+};
+
+struct pCanvas : public pWidget {
+  Canvas &canvas;
+  uint32_t *bufferRGB;
+  uint32_t *bufferBGR;
+
+  uint32_t* buffer();
+  void setGeometry(const Geometry &geometry);
+  void update();
+
+  pCanvas(Canvas &canvas) : pWidget(canvas), canvas(canvas) {}
+  void constructor();
+  void redraw();
 };
 
 struct pCheckBox : public pWidget {

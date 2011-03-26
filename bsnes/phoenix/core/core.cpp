@@ -102,6 +102,10 @@ Widget::Widget(pWidget &p) : state(*new State), p(p) { p.constructor(); }
 void Button::setText(const string &text) { state.text = text; return p.setText(text); }
 Button::Button() : state(*new State), base_from_member<pButton&>(*new pButton(*this)), Widget(base_from_member<pButton&>::value), p(base_from_member<pButton&>::value) { p.constructor(); }
 
+uint32_t* Canvas::buffer() { return p.buffer(); }
+void Canvas::update() { return p.update(); }
+Canvas::Canvas() : base_from_member<pCanvas&>(*new pCanvas(*this)), Widget(base_from_member<pCanvas&>::value), p(base_from_member<pCanvas&>::value) { p.constructor(); }
+
 bool CheckBox::checked() { return p.checked(); }
 void CheckBox::setChecked(bool checked) { state.checked = checked; return p.setChecked(checked); }
 void CheckBox::setText(const string &text) { state.text = text; return p.setText(text); }

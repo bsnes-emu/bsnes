@@ -15,6 +15,7 @@
 
 #include "widget/widget.cpp"
 #include "widget/button.cpp"
+#include "widget/canvas.cpp"
 #include "widget/check-box.cpp"
 #include "widget/combo-box.cpp"
 #include "widget/hex-edit.cpp"

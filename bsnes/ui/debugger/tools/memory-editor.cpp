@@ -21,9 +21,8 @@ void MemoryEditor::create() {
   controlLayout.append(refreshButton, 80,  0   );
   controlLayout.append(spacer,        80, ~0   );
   layout.append(controlLayout                  );
-
-  setGeometry({ 0, 0, layout.minimumGeometry().width + 475, 230 });
   append(layout);
+  setGeometry({ 0, 0, layout.minimumGeometry().width + 475, 230 });
 
   onClose = []() {
     debugger.showMemoryEditor.setChecked(false);

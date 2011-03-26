@@ -40,9 +40,8 @@ void VideoSettings::create() {
   fullscreenLayout.append(fullscreenScale,   ~0, 0, 5);
   fullscreenLayout.append(fullscreenStretch, ~0, 0   );
   layout.append(fullscreenLayout);
-
-  setGeometry({ 0, 0, 480, layout.minimumGeometry().height });
   append(layout);
+  setGeometry({ 0, 0, 480, layout.minimumGeometry().height });
 
   brightnessSlider.setPosition(config.video.brightness);
   brightnessValue.setText({ config.video.brightness, "%" });

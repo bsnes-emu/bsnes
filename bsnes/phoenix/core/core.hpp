@@ -16,6 +16,7 @@ struct pRadioItem;
 struct pLayout;
 struct pWidget;
 struct pButton;
+struct pCanvas;
 struct pCheckBox;
 struct pComboBox;
 struct pHexEdit;
@@ -233,6 +234,14 @@ struct Button : private nall::base_from_member<pButton&>, Widget {
   struct State;
   State &state;
   pButton &p;
+};
+
+struct Canvas : private nall::base_from_member<pCanvas&>, Widget {
+  uint32_t* buffer();
+  void update();
+
+  Canvas();
+  pCanvas &p;
 };
 
 struct CheckBox : private nall::base_from_member<pCheckBox&>, Widget {

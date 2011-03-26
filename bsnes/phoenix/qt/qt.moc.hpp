@@ -200,7 +200,7 @@ struct pWidget : public pObject {
   void setEnabled(bool enabled);
   void setFocused();
   void setFont(Font &font);
-  void setGeometry(const Geometry &geometry);
+  virtual void setGeometry(const Geometry &geometry);
   void setVisible(bool visible);
 
   pWidget(Widget &widget) : widget(widget) {}
@@ -222,6 +222,28 @@ public:
 
 public slots:
   void onTick();
+};
+
+struct pCanvas : public QObject, public pWidget {
+  Q_OBJECT
+
+public:
+  Canvas &canvas;
+  QImage *qtImage;
+  struct QtCanvas : public QWidget {
+    pCanvas &self;
+    void paintEvent(QPaintEvent*);
+    QtCanvas(pCanvas &self);
+  } *qtCanvas;
+
+  uint32_t* buffer();
+  void setGeometry(const Geometry &geometry);
+  void update();
+
+  pCanvas(Canvas &canvas) : pWidget(canvas), canvas(canvas) {}
+  void constructor();
+
+public slots:
 };
 
 struct pCheckBox : public QObject, public pWidget {

@@ -33,9 +33,8 @@ void AdvancedSettings::create() {
   focusPolicyLayout.append(focusPolicyIgnore, ~0, 0, 5);
   focusPolicyLayout.append(focusPolicyAllow,  ~0, 0);
   layout.append(focusPolicyLayout);
-
-  setGeometry({ 0, 0, 640, layout.minimumGeometry().height });
   append(layout);
+  setGeometry({ 0, 0, 640, layout.minimumGeometry().height });
 
   lstring list;
 

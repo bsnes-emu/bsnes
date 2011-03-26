@@ -1,4 +1,7 @@
 struct InputMapper {
+  int16_t state[2][Scancode::Limit];
+  bool activeState;
+
   struct AbstractInput {
     enum class Type : unsigned { Button, MouseAxis, MouseButton, HatUp, HatDown, HatLeft, HatRight, AxisLo, AxisHi } type;
     string name;
@@ -73,13 +76,13 @@ struct InputMapper {
     Justifier justifierB;
   } port2;
 
-  int16_t state[2][Scancode::Limit];
-  bool activeState;
+  #include "hotkeys.hpp"
 
   void create();
   void bind();
   void poll();
   int16_t poll(bool port, SNES::Input::Device device, unsigned index, unsigned id);
+  void create_hotkeys();
   void poll_hotkeys(unsigned scancode, int16_t value);
   int16_t value(unsigned scancode);
 };

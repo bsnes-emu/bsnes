@@ -182,6 +182,19 @@ struct pButton : public pWidget {
   void setParent(Window &parent);
 };
 
+struct pCanvas : public pWidget {
+  Canvas &canvas;
+  uint32_t *bufferRGB;
+
+  uint32_t* buffer();
+  void setGeometry(const Geometry &geometry);
+  void update();
+
+  pCanvas(Canvas &canvas) : pWidget(canvas), canvas(canvas) {}
+  void constructor();
+  void setParent(Window &parent);
+};
+
 struct pCheckBox : public pWidget {
   CheckBox &checkBox;
 
