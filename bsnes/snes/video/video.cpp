@@ -55,11 +55,8 @@ void Video::update() {
 
   uint16_t *data = (uint16_t*)ppu.output;
   if(ppu.interlace() && ppu.field()) data += 512;
-  unsigned width = 256;
-  unsigned height = !ppu.overscan() ? 224 : 239;
 
   if(frame_hires) {
-    width <<= 1;
     //normalize line widths
     for(unsigned y = 0; y < 240; y++) {
       if(line_width[y] == 512) continue;
@@ -70,11 +67,7 @@ void Video::update() {
     }
   }
 
-  if(frame_interlace) {
-    height <<= 1;
-  }
-
-  system.interface->video_refresh(ppu.output + 1024, width, height);
+  system.interface->video_refresh(ppu.output, 256 << frame_hires, 240 << frame_interlace);
 
   frame_hires = false;
   frame_interlace = false;

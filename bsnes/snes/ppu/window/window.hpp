@@ -35,12 +35,12 @@ class Window {
     uint8 two_left;
     uint8 two_right;
 
-    uint8 bg1_mask;
-    uint8 bg2_mask;
-    uint8 bg3_mask;
-    uint8 bg4_mask;
-    uint8 oam_mask;
-    uint8 col_mask;
+    uint2 bg1_mask;
+    uint2 bg2_mask;
+    uint2 bg3_mask;
+    uint2 bg4_mask;
+    uint2 oam_mask;
+    uint2 col_mask;
 
     bool bg1_main_enable;
     bool bg1_sub_enable;
@@ -53,8 +53,8 @@ class Window {
     bool oam_main_enable;
     bool oam_sub_enable;
 
-    uint8 col_main_mask;
-    uint8 col_sub_mask;
+    uint2 col_main_mask;
+    uint2 col_sub_mask;
   } regs;
 
   struct Output {

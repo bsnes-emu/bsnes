@@ -681,14 +681,14 @@ uint8 PPU::mmio_r213f() {
 }
 
 void PPU::mmio_reset() {
-  regs.ppu1_mdr = 0xff;
-  regs.ppu2_mdr = 0xff;
+  regs.ppu1_mdr = random(0xff);
+  regs.ppu2_mdr = random(0xff);
 
-  regs.vram_readbuffer = 0x0000;
-  regs.oam_latchdata = 0x00;
-  regs.cgram_latchdata = 0x00;
-  regs.bgofs_latchdata = 0x00;
-  regs.mode7_latchdata = 0x00;
+  regs.vram_readbuffer = random(0x0000);
+  regs.oam_latchdata = random(0x00);
+  regs.cgram_latchdata = random(0x00);
+  regs.bgofs_latchdata = random(0x00);
+  regs.mode7_latchdata = random(0x00);
   regs.counters_latched = false;
   regs.latch_hcounter = 0;
   regs.latch_vcounter = 0;
@@ -702,58 +702,58 @@ void PPU::mmio_reset() {
 
   //$2102  OAMADDL
   //$2103  OAMADDH
-  regs.oam_baseaddr = 0x0000;
-  regs.oam_addr = 0x0000;
-  regs.oam_priority = false;
+  regs.oam_baseaddr = random(0x0000);
+  regs.oam_addr = random(0x0000);
+  regs.oam_priority = random(false);
 
   //$2105  BGMODE
   regs.bg3_priority = false;
   regs.bgmode = 0;
 
   //$210d  BG1HOFS
-  regs.mode7_hoffset = 0x0000;
+  regs.mode7_hoffset = random(0x0000);
 
   //$210e  BG1VOFS
-  regs.mode7_voffset = 0x0000;
+  regs.mode7_voffset = random(0x0000);
 
   //$2115  VMAIN
-  regs.vram_incmode = 1;
-  regs.vram_mapping = 0;
+  regs.vram_incmode = random(1);
+  regs.vram_mapping = random(0);
   regs.vram_incsize = 1;
 
   //$2116  VMADDL
   //$2117  VMADDH
-  regs.vram_addr = 0x0000;
+  regs.vram_addr = random(0x0000);
 
   //$211a  M7SEL
-  regs.mode7_repeat = 0;
-  regs.mode7_vflip = false;
-  regs.mode7_hflip = false;
+  regs.mode7_repeat = random(0);
+  regs.mode7_vflip = random(false);
+  regs.mode7_hflip = random(false);
 
   //$211b  M7A
-  regs.m7a = 0x0000;
+  regs.m7a = random(0x0000);
 
   //$211c  M7B
-  regs.m7b = 0x0000;
+  regs.m7b = random(0x0000);
 
   //$211d  M7C
-  regs.m7c = 0x0000;
+  regs.m7c = random(0x0000);
 
   //$211e  M7D
-  regs.m7d = 0x0000;
+  regs.m7d = random(0x0000);
 
   //$211f  M7X
-  regs.m7x = 0x0000;
+  regs.m7x = random(0x0000);
 
   //$2120  M7Y
-  regs.m7y = 0x0000;
+  regs.m7y = random(0x0000);
 
   //$2121  CGADD
-  regs.cgram_addr = 0x0000;
+  regs.cgram_addr = random(0x0000);
 
   //$2133  SETINI
-  regs.mode7_extbg = false;
-  regs.pseudo_hires = false;
+  regs.mode7_extbg = random(false);
+  regs.pseudo_hires = random(false);
   regs.overscan = false;
   regs.interlace = false;
 

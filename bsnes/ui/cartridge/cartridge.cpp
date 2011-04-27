@@ -111,7 +111,7 @@ bool Cartridge::loadCartridge(SNES::MappedRAM &memory, string &XML, const char *
   fp.close();
 
   filemap patch(string(nall::basename(filename), ".ups"), filemap::mode::read);
-  if(patch.opened()) {
+  if(patch.open()) {
     unsigned targetSize;
     ups patcher;
     if(patcher.apply(patch.data(), patch.size(), data, size, (uint8_t*)0, targetSize) == ups::result::target_too_small) {

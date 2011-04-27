@@ -148,7 +148,7 @@ void System::unload() {
 }
 
 void System::power() {
-  random.seed(0x62797575);
+  random.seed((unsigned)time(0));
 
   region = config.region;
   expansion = config.expansion_port;

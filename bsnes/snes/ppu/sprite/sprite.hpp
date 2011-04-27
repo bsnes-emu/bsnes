@@ -38,8 +38,8 @@ class Sprite {
     bool sub_enable;
     bool interlace;
 
-    uint8 base_size;
-    uint8 nameselect;
+    uint3 base_size;
+    uint2 nameselect;
     uint16 tiledata_addr;
     uint8 first_sprite;
 
@@ -61,6 +61,7 @@ class Sprite {
 
   //list.cpp
   void update(unsigned addr, uint8 data);
+  void synchronize();
 
   //sprite.cpp
   void address_reset();

@@ -1,5 +1,5 @@
 Geometry pProgressBar::minimumGeometry() {
-  return { 0, 0, 0, 25 };
+  return { 0, 0, 0, 23 };
 }
 
 void pProgressBar::setPosition(unsigned position) {

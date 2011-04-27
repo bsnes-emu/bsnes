@@ -14,9 +14,9 @@ class Screen {
     bool oam_color_enable;
     bool back_color_enable;
 
-    uint8 color_b;
-    uint8 color_g;
-    uint8 color_r;
+    uint5 color_b;
+    uint5 color_g;
+    uint5 color_r;
   } regs;
 
   void scanline();

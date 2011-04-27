@@ -8,10 +8,10 @@ class Background {
   struct Screen { enum { Main, Sub }; };
 
   struct Regs {
-    unsigned tiledata_addr;
-    unsigned screen_addr;
-    unsigned screen_size;
-    unsigned mosaic;
+    uint16 tiledata_addr;
+    uint16 screen_addr;
+    uint2 screen_size;
+    uint4 mosaic;
     bool tile_size;
 
     unsigned mode;
@@ -21,8 +21,8 @@ class Background {
     bool main_enable;
     bool sub_enable;
 
-    unsigned hoffset;
-    unsigned voffset;
+    uint16 hoffset;
+    uint16 voffset;
   } regs;
 
   struct Output {

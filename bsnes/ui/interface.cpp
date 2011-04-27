@@ -79,30 +79,30 @@ void Filter::render(uint32_t *output, unsigned outpitch, const uint16_t *input, 
 }
 
 void Interface::video_refresh(const uint16_t *data, unsigned width, unsigned height) {
-  bool interlace = (height >= 240);
-  bool overscan = (height == 239 || height == 478);
+  bool interlace = SNES::ppu.interlace();
+  bool overscan = SNES::ppu.overscan();
   unsigned inpitch = interlace ? 1024 : 2048;
 
-  uint32_t *buffer;
-  unsigned outpitch;
+  //always ignore blank scanline 0
+  data += 1024;
+  height -= 1 << interlace;
 
-  if(config.video.region == 0 && (height == 239 || height == 478)) {
-    //NTSC overscan compensation (center image, remove 15 lines)
-    data += 7 * 1024;
-    if(height == 239) height = 224;
-    if(height == 478) height = 448;
+  if(config.video.region == 0) {
+    //NTSC overscan compensation
+    height -= 15 << interlace;
+    if(overscan == true ) data += 7 * 1024;
   }
 
-  if(config.video.region == 1 && (height == 224 || height == 448)) {
-    //PAL underscan compensation (center image, add 15 lines)
-    data -= 7 * 1024;
-    if(height == 224) height = 239;
-    if(height == 448) height = 478;
+  if(config.video.region == 1) {
+    //PAL underscan compensation
+    if(overscan == false) data -= 7 * 1024;
   }
 
   unsigned outwidth = width, outheight = height;
   filter.size(outwidth, outheight);
 
+  uint32_t *buffer;
+  unsigned outpitch;
   if(video.lock(buffer, outpitch, outwidth, outheight)) {
     filter.render(buffer, outpitch, data, inpitch, width, height);
     video.unlock();

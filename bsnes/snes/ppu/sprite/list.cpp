@@ -32,6 +32,10 @@ void PPU::Sprite::update(unsigned addr, uint8 data) {
   }
 }
 
+void PPU::Sprite::synchronize() {
+  for(unsigned n = 0; n < 544; n++) update(n, ppu.oam[n]);
+}
+
 unsigned PPU::Sprite::SpriteItem::width() const {
   if(size == 0) {
     static unsigned width[] = {  8,  8,  8, 16, 16, 32, 16, 16 };

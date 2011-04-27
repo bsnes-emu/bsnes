@@ -211,18 +211,18 @@ unsigned PPU::Background::get_tile_color() {
 }
 
 void PPU::Background::reset() {
-  regs.tiledata_addr = 0;
-  regs.screen_addr = 0;
-  regs.screen_size = 0;
-  regs.mosaic = 0;
-  regs.tile_size = 0;
+  regs.tiledata_addr = random(0x0000);
+  regs.screen_addr = random(0x0000);
+  regs.screen_size = random(0);
+  regs.mosaic = random(0);
+  regs.tile_size = random(0);
   regs.mode = 0;
   regs.priority0 = 0;
   regs.priority1 = 0;
-  regs.main_enable = 0;
-  regs.sub_enable = 0;
-  regs.hoffset = 0;
-  regs.voffset = 0;
+  regs.main_enable = random(0);
+  regs.sub_enable = random(0);
+  regs.hoffset = random(0x0000);
+  regs.voffset = random(0x0000);
 
   output.main.palette = 0;
   output.main.priority = 0;

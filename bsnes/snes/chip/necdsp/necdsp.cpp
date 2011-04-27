@@ -247,7 +247,7 @@ void NECDSP::init() {
 
 void NECDSP::load() {
   if(revision == Revision::uPD96050) {
-    cartridge.nvram.append({ "nec", (uint8_t*)dataRAM, 4096 });
+    cartridge.nvram.append({ ".nec", (uint8_t*)dataRAM, 4096 });
   }
 }
 

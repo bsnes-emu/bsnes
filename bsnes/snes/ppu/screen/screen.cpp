@@ -6,6 +6,8 @@ void PPU::Screen::scanline() {
 }
 
 void PPU::Screen::run() {
+  if(ppu.vcounter() == 0) return;
+
   uint16 color;
   if(self.regs.pseudo_hires == false && self.regs.bgmode != 5 && self.regs.bgmode != 6) {
     color = get_pixel(0);
@@ -186,19 +188,19 @@ uint16 PPU::Screen::get_direct_color(unsigned palette, unsigned tile) {
 }
 
 void PPU::Screen::reset() {
-  regs.addsub_mode = 0;
-  regs.direct_color = 0;
-  regs.color_mode = 0;
-  regs.color_halve = 0;
-  regs.bg1_color_enable = 0;
-  regs.bg2_color_enable = 0;
-  regs.bg3_color_enable = 0;
-  regs.bg4_color_enable = 0;
-  regs.oam_color_enable = 0;
-  regs.back_color_enable = 0;
-  regs.color_r = 0;
-  regs.color_g = 0;
-  regs.color_b = 0;
+  regs.addsub_mode = random(false);
+  regs.direct_color = random(false);
+  regs.color_mode = random(false);
+  regs.color_halve = random(false);
+  regs.bg1_color_enable = random(false);
+  regs.bg2_color_enable = random(false);
+  regs.bg3_color_enable = random(false);
+  regs.bg4_color_enable = random(false);
+  regs.oam_color_enable = random(false);
+  regs.back_color_enable = random(false);
+  regs.color_r = random(0);
+  regs.color_g = random(0);
+  regs.color_b = random(0);
 }
 
 PPU::Screen::Screen(PPU &self) : self(self) {
