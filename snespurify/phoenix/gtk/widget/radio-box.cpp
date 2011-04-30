@@ -6,6 +6,12 @@ bool pRadioBox::checked() {
   return gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(gtkWidget));
 }
 
+Geometry pRadioBox::minimumGeometry() {
+  Font &font = pWidget::font();
+  Geometry geometry = font.geometry(radioBox.state.text);
+  return { 0, 0, geometry.width + 28, geometry.height + 4 };
+}
+
 void pRadioBox::setChecked() {
   locked = true;
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(gtkWidget), true);

@@ -26,6 +26,8 @@ struct pObject {
 };
 
 struct pOS : public pObject {
+  static Font defaultFont;
+
   static Geometry availableGeometry();
   static Geometry desktopGeometry();
   static string fileLoad(Window &parent, const string &path, const lstring &filter);
@@ -42,7 +44,9 @@ struct pOS : public pObject {
 struct pFont : public pObject {
   Font &font;
   PangoFontDescription *gtkFont;
+  PangoLayout *gtkLayout;
 
+  Geometry geometry(const string &text);
   void setBold(bool bold);
   void setFamily(const string &family);
   void setItalic(bool italic);
@@ -164,10 +168,12 @@ struct pWidget : public pObject {
   pWindow *parentWindow;
 
   bool enabled();
+  Font& font();
+  virtual Geometry minimumGeometry();
   void setEnabled(bool enabled);
   virtual void setFocused();
   virtual void setFont(Font &font);
-  void setGeometry(const Geometry &geometry);
+  virtual void setGeometry(const Geometry &geometry);
   void setVisible(bool visible);
 
   pWidget(Widget &widget) : widget(widget) {}
@@ -177,16 +183,32 @@ struct pWidget : public pObject {
 struct pButton : public pWidget {
   Button &button;
 
+  Geometry minimumGeometry();
   void setText(const string &text);
 
   pButton(Button &button) : pWidget(button), button(button) {}
   void constructor();
 };
 
+struct pCanvas : public pWidget {
+  Canvas &canvas;
+  uint32_t *bufferRGB;
+  uint32_t *bufferBGR;
+
+  uint32_t* buffer();
+  void setGeometry(const Geometry &geometry);
+  void update();
+
+  pCanvas(Canvas &canvas) : pWidget(canvas), canvas(canvas) {}
+  void constructor();
+  void redraw();
+};
+
 struct pCheckBox : public pWidget {
   CheckBox &checkBox;
 
   bool checked();
+  Geometry minimumGeometry();
   void setChecked(bool checked);
   void setText(const string &text);
 
@@ -199,6 +221,7 @@ struct pComboBox : public pWidget {
   unsigned itemCounter;
 
   void append(const string &text);
+  Geometry minimumGeometry();
   void reset();
   unsigned selection();
   void setSelection(unsigned row);
@@ -234,6 +257,7 @@ struct pHexEdit : public pWidget {
 struct pHorizontalSlider : public pWidget {
   HorizontalSlider &horizontalSlider;
 
+  Geometry minimumGeometry();
   unsigned position();
   void setLength(unsigned length);
   void setPosition(unsigned position);
@@ -245,6 +269,7 @@ struct pHorizontalSlider : public pWidget {
 struct pLabel : public pWidget {
   Label &label;
 
+  Geometry minimumGeometry();
   void setText(const string &text);
 
   pLabel(Label &label) : pWidget(label), label(label) {}
@@ -254,6 +279,7 @@ struct pLabel : public pWidget {
 struct pLineEdit : public pWidget {
   LineEdit &lineEdit;
 
+  Geometry minimumGeometry();
   void setEditable(bool editable);
   void setText(const string &text);
   string text();
@@ -297,6 +323,7 @@ struct pListView : public pWidget {
 struct pProgressBar : public pWidget {
   ProgressBar &progressBar;
 
+  Geometry minimumGeometry();
   void setPosition(unsigned position);
 
   pProgressBar(ProgressBar &progressBar) : pWidget(progressBar), progressBar(progressBar) {}
@@ -307,6 +334,7 @@ struct pRadioBox : public pWidget {
   RadioBox &radioBox;
 
   bool checked();
+  Geometry minimumGeometry();
   void setChecked();
   void setGroup(const reference_array<RadioBox&> &group);
   void setText(const string &text);
@@ -333,6 +361,7 @@ struct pTextEdit : public pWidget {
 struct pVerticalSlider : public pWidget {
   VerticalSlider &verticalSlider;
 
+  Geometry minimumGeometry();
   unsigned position();
   void setLength(unsigned length);
   void setPosition(unsigned position);

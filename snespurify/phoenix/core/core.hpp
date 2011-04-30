@@ -16,6 +16,7 @@ struct pRadioItem;
 struct pLayout;
 struct pWidget;
 struct pButton;
+struct pCanvas;
 struct pCheckBox;
 struct pComboBox;
 struct pHexEdit;
@@ -28,6 +29,11 @@ struct pRadioBox;
 struct pTextEdit;
 struct pVerticalSlider;
 struct pViewport;
+
+enum : unsigned {
+  MaximumSize = ~0u,
+  MinimumSize =  0u,
+};
 
 struct Geometry {
   signed x, y;
@@ -63,6 +69,7 @@ private:
 };
 
 struct Font : Object {
+  Geometry geometry(const nall::string &text);
   void setBold(bool bold = true);
   void setFamily(const nall::string &family);
   void setItalic(bool italic = true);
@@ -179,7 +186,8 @@ struct CheckItem : private nall::base_from_member<pCheckItem&>, Action {
 };
 
 struct RadioItem : private nall::base_from_member<pRadioItem&>, Action {
-  template<typename... Args> static void group(Args&... args) { group_({ args... }); }
+  template<typename... Args> static void group(Args&... args) { group({ args... }); }
+  static void group(const nall::reference_array<RadioItem&> &list);
 
   nall::function<void ()> onTick;
 
@@ -191,19 +199,18 @@ struct RadioItem : private nall::base_from_member<pRadioItem&>, Action {
   struct State;
   State &state;
   pRadioItem &p;
-
-private:
-  static void group_(const nall::reference_array<RadioItem&> &list);
 };
 
 struct Layout : Object {
-  virtual void setGeometry(Geometry &geometry) = 0;
+  virtual void setGeometry(const Geometry &geometry) = 0;
   virtual void setParent(Window &parent) = 0;
   virtual void setVisible(bool visible = true) = 0;
 };
 
 struct Widget : Object {
   bool enabled();
+  Font& font();
+  Geometry minimumGeometry();
   void setEnabled(bool enabled = true);
   void setFocused();
   void setFont(Font &font);
@@ -227,6 +234,14 @@ struct Button : private nall::base_from_member<pButton&>, Widget {
   struct State;
   State &state;
   pButton &p;
+};
+
+struct Canvas : private nall::base_from_member<pCanvas&>, Widget {
+  uint32_t* buffer();
+  void update();
+
+  Canvas();
+  pCanvas &p;
 };
 
 struct CheckBox : private nall::base_from_member<pCheckBox&>, Widget {
@@ -348,7 +363,8 @@ struct ProgressBar : private nall::base_from_member<pProgressBar&>, Widget {
 };
 
 struct RadioBox : private nall::base_from_member<pRadioBox&>, Widget {
-  template<typename... Args> static void group(Args&... args) { group_({ args... }); }
+  template<typename... Args> static void group(Args&... args) { group({ args... }); }
+  static void group(const nall::reference_array<RadioBox&> &list);
 
   nall::function<void ()> onTick;
 
@@ -360,9 +376,6 @@ struct RadioBox : private nall::base_from_member<pRadioBox&>, Widget {
   struct State;
   State &state;
   pRadioBox &p;
-
-private:
-  static void group_(const nall::reference_array<RadioBox&> &list);
 };
 
 struct TextEdit : private nall::base_from_member<pTextEdit&>, Widget {

@@ -4,7 +4,6 @@
 #include <nall/foreach.hpp>
 #include <nall/platform.hpp>
 #include <nall/string.hpp>
-#include <nall/ups.hpp>
 #include <nall/vector.hpp>
 #include <nall/snes/cartridge.hpp>
 using namespace nall;
@@ -12,7 +11,7 @@ using namespace nall;
 #include <phoenix/phoenix.hpp>
 using namespace phoenix;
 
-static const char applicationTitle[] = "snespurify v07";
+static const char applicationTitle[] = "snespurify v10";
 
 struct Application : Window {
   Font font;
@@ -43,7 +42,6 @@ struct Application : Window {
   void scan(const string &pathname);
   void analyze(const string &filename);
   void repair();
-  void createPatch(const string &filename);
 } application;
 
 void Application::main() {
@@ -69,31 +67,20 @@ void Application::main() {
   fixSelected.setText("Correct");
 
   layout.setMargin(5);
-  pathLayout.append(pathLabel, 80, 0, 5);
-  pathLayout.append(pathBox, 0, 0, 5);
-  pathLayout.append(pathScan, 80, 0, 5);
-  pathLayout.append(pathBrowse, 80, 0);
-  layout.append(pathLayout, 0, 25, 5);
-  layout.append(fileList, 0, 0, 5);
-  controlLayout.append(selectAll, 80, 0, 5);
-  controlLayout.append(unselectAll, 80, 0, 5);
-  controlLayout.append(spacer, 0, 0, 5);
-  controlLayout.append(fixSelected, 80, 0);
-  layout.append(controlLayout, 0, 25);
+  pathLayout.append(pathLabel,       0,  0, 5);
+  pathLayout.append(pathBox,        ~0,  0, 5);
+  pathLayout.append(pathScan,       80,  0, 5);
+  pathLayout.append(pathBrowse,     80,  0   );
+  layout.append(pathLayout,                 5);
+  layout.append(fileList,           ~0, ~0, 5);
+  controlLayout.append(selectAll,   80,  0, 5);
+  controlLayout.append(unselectAll, 80,  0, 5);
+  controlLayout.append(spacer,      ~0,  0, 5);
+  controlLayout.append(fixSelected, 80,  0   );
+  layout.append(controlLayout                );
   append(layout);
 
-//  unsigned x = 5, y = 5, width = 600, height = 25;
-//  layout.append(pathLabel, x, y, 80, height);
-//  layout.append(pathBox, x + 85, y, 335, height);
-//  layout.append(pathScan, x + 425, y, 80, height);
-//  layout.append(pathBrowse, x + 510, y, 80, height); y += height + 5;
-//  layout.append(fileList, x, y, 590, 290); y += 290 + 5;
-//  layout.append(selectAll, x, y, 80, height);
-//  layout.append(unselectAll, x + 85, y, 80, height);
-//  layout.append(fixSelected, 595 - 80, y, 80, height); y += height + 5;
-//  setLayout(layout);
-
-  onClose = []() { OS::quit(); };
+  onClose = &OS::quit;
 
   pathBox.onActivate = pathScan.onTick = { &Application::scan, this };
 
@@ -194,10 +181,7 @@ void Application::analyze(const string &filename) {
     unsigned filesize = map.size();
     SNESCartridge information(map.data(), filesize);
 
-    //the ordering of rules is very important:
-    //patches need to be created prior to removal of headers
-    //headers need to be removed prior to renaming files (so header removal has correct filename)
-    //etc.
+    //note: the ordering of rules is very important
     switch(information.type) {
       case SNESCartridge::TypeNormal:
       case SNESCartridge::TypeBsxSlotted:
@@ -205,16 +189,6 @@ void Application::analyze(const string &filename) {
       case SNESCartridge::TypeSufamiTurboBios:
       case SNESCartridge::TypeSuperGameBoy1Bios:
       case SNESCartridge::TypeSuperGameBoy2Bios: {
-        string ipsName = { nall::basename(filename), ".ips" };
-        string upsName = { nall::basename(filename), ".ups" };
-        if(file::exists(ipsName) == true && file::exists(upsName) == false) {
-          FileInfo info;
-          info.filename = filename;
-          info.problem = "Unsupported patch format";
-          info.solution = "Create UPS patch";
-          fileInfo.append(info);
-        }
-
         if((filesize & 0x7fff) == 512) {
           FileInfo info;
           info.filename = filename;
@@ -255,6 +229,14 @@ void Application::analyze(const string &filename) {
       }
 
       case SNESCartridge::TypeSufamiTurbo: {
+        if((filesize & 0x7fff) == 512) {
+          FileInfo info;
+          info.filename = filename;
+          info.problem = "Copier header present";
+          info.solution = "Remove copier header";
+          fileInfo.append(info);
+        }
+
         if(filename.endswith(".st") == false) {
           FileInfo info;
           info.filename = filename;
@@ -290,9 +272,7 @@ void Application::repair() {
     OS::processEvents();
 
     FileInfo &info = fileInfo[n];
-    if(info.solution == "Create UPS patch") {
-      createPatch(info.filename);
-    } else if(info.solution == "Remove copier header") {
+    if(info.solution == "Remove copier header") {
       file fp;
       if(fp.open(info.filename, file::mode::read)) {
         unsigned size = fp.size();
@@ -330,94 +310,6 @@ void Application::repair() {
   fileInfo.reset();
   fileList.reset();
   enable(true);
-}
-
-void Application::createPatch(const string &filename) {
-  string ipsName = { nall::basename(filename), ".ips" };
-  string upsName = { nall::basename(filename), ".ups" };
-
-  file fp;
-  if(fp.open(filename, file::mode::read)) {
-    unsigned isize = fp.size();
-    uint8_t *idata = new uint8_t[isize];
-    fp.read(idata, isize);
-    fp.close();
-
-    fp.open(ipsName, file::mode::read);
-    unsigned psize = fp.size();
-    uint8_t *pdata = new uint8_t[psize];
-    fp.read(pdata, psize);
-    fp.close();
-
-    if(psize >= 8
-    && pdata[0] == 'P' && pdata[1] == 'A' && pdata[2] == 'T' && pdata[3] == 'C' && pdata[4] == 'H'
-    && pdata[psize - 3] == 'E' && pdata[psize - 2] == 'O' && pdata[psize - 1] == 'F') {
-      unsigned osize = 0;
-      //no way to determine how big IPS output will be, allocate max size IPS patches support -- 16MB
-      uint8_t *odata = new uint8_t[16 * 1024 * 1024]();
-      memcpy(odata, idata, isize);
-
-      unsigned offset = 5;
-      while(offset < psize - 3) {
-        unsigned addr;
-        addr  = pdata[offset++] << 16;
-        addr |= pdata[offset++] <<  8;
-        addr |= pdata[offset++] <<  0;
-
-        unsigned size;
-        size  = pdata[offset++] << 8;
-        size |= pdata[offset++] << 0;
-
-        if(size == 0) {
-          //RLE
-          size  = pdata[offset++] << 8;
-          size |= pdata[offset++] << 0;
-
-          for(unsigned n = addr; n < addr + size;) {
-            odata[n++] = pdata[offset];
-            if(n > osize) osize = n;
-          }
-          offset++;
-        } else {
-          for(unsigned n = addr; n < addr + size;) {
-            odata[n++] = pdata[offset++];
-            if(n > osize) osize = n;
-          }
-        }
-      }
-
-      osize = max(isize, osize);
-      bool hasHeader = ((isize & 0x7fff) == 512);
-
-      uint8_t *widata = idata;
-      unsigned wisize = isize;
-      if(hasHeader) {
-        //remove copier header for UPS patch creation
-        widata += 512;
-        wisize -= 512;
-      }
-
-      uint8_t *wodata = odata;
-      unsigned wosize = osize;
-      if(hasHeader) {
-        //remove copier header for UPS patch creation
-        wodata += 512;
-        wosize -= 512;
-      }
-
-      ups patcher;
-      if(patcher.create(widata, wisize, wodata, wosize, upsName) != ups::result::success) {
-        errors.append({ "Failed to create UPS patch: ", upsName, "\n" });
-      }
-
-      delete[] odata;
-    } else {
-      errors.append({ "IPS patch is invalid: ", ipsName, "\n" });
-    }
-
-    delete[] idata;
-    delete[] pdata;
-  }
 }
 
 int main() {

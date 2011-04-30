@@ -2,6 +2,12 @@ bool pCheckBox::checked() {
   return qtCheckBox->isChecked();
 }
 
+Geometry pCheckBox::minimumGeometry() {
+  Font &font = this->font();
+  Geometry geometry = font.geometry(checkBox.state.text);
+  return { 0, 0, geometry.width + 26, geometry.height + 6 };
+}
+
 void pCheckBox::setChecked(bool checked) {
   locked = true;
   qtCheckBox->setChecked(checked);

@@ -323,14 +323,14 @@
       <code>DFBD-87DD</code>
     </cheat>
     <cheat>
-      <description>Start with 62</description>
-      <code>E0BD-84AD</code>
-      <code>DFBD-87DD</code>
-    </cheat>
-    <cheat>
-      <description>Start with 2</description>
+      <description>Start with 2,000 gold</description>
       <code>2DBD-84AD</code>
       <code>D5BD-87DD</code>
+    </cheat>
+    <cheat>
+      <description>Start with 62,708 gold</description>
+      <code>E0BD-84AD</code>
+      <code>DFBD-87DD</code>
     </cheat>
   </cartridge>
   <cartridge sha256="69c5805ad0494703e7d636d3d40d615d33e79bebef9d2cdb4a23b73d44c7b6f9">
@@ -1676,7 +1676,7 @@
       <code>7E0064FF</code>
     </cheat>
     <cheat>
-      <description>Start with and keep Fezi-copter (disable after defeating a boss</description>
+      <description>Start with and keep Fezi-copter (disable after defeating a boss and land before password screen)</description>
       <code>3CAD-A46D</code>
       <code>60BA-6704</code>
     </cheat>
@@ -2163,355 +2163,355 @@
   <cartridge sha256="d5f0fbeed3774bbccbd769698fc4051487a0a5eb699790a8a094451595600f60">
     <name>Aerobiz (USA)</name>
     <cheat>
-      <description>In scenario 1</description>
+      <description>In scenario 1, Tokyo starts with $649,280,000</description>
       <code>DDA6-0DFD</code>
     </cheat>
     <cheat>
-      <description>In scenario 1</description>
+      <description>In scenario 1, Tokyo starts with $7,202,880,000</description>
       <code>D9A6-0DFD</code>
     </cheat>
     <cheat>
-      <description>In scenario 1</description>
+      <description>In scenario 1, Beijing starts with $420,160,000</description>
       <code>94A6-0D2D</code>
     </cheat>
     <cheat>
-      <description>In scenario 1</description>
+      <description>In scenario 1, Beijing starts with $7,393,600,000</description>
       <code>D9A6-0FFD</code>
     </cheat>
     <cheat>
-      <description>In scenario 1</description>
+      <description>In scenario 1, Hong Kong starts with $449,440,000</description>
       <code>95A6-0F2D</code>
     </cheat>
     <cheat>
-      <description>In scenario 1</description>
+      <description>In scenario 1, Hong Kong starts with $7,453,600,000</description>
       <code>D9A6-04FD</code>
     </cheat>
     <cheat>
-      <description>In scenario 1</description>
+      <description>In scenario 1, Singapore starts with $400,640,000</description>
       <code>03A6-042D</code>
     </cheat>
     <cheat>
-      <description>In scenario 1</description>
+      <description>In scenario 1, Singapore starts with $7,353,600,000</description>
       <code>D9A6-07FD</code>
     </cheat>
     <cheat>
-      <description>In scenario 1</description>
+      <description>In scenario 1, Sydney starts with $297,920,000</description>
       <code>7CA6-072D</code>
     </cheat>
     <cheat>
-      <description>In scenario 1</description>
+      <description>In scenario 1, Sydney starts with $7,153,600,000</description>
       <code>D9AB-0DFD</code>
     </cheat>
     <cheat>
-      <description>In scenario 1</description>
+      <description>In scenario 1, Delhi starts with $317,440,000</description>
       <code>73AB-0D2D</code>
     </cheat>
     <cheat>
-      <description>In scenario 1</description>
+      <description>In scenario 1, Delhi starts with $7,193,600,000</description>
       <code>D9AB-0FFD</code>
     </cheat>
     <cheat>
-      <description>In scenario 1</description>
+      <description>In scenario 1, Tehran starts with $239,360,000</description>
       <code>43AB-0F2D</code>
     </cheat>
     <cheat>
-      <description>In scenario 1</description>
+      <description>In scenario 1, Tehran starts with $7,033,600,000</description>
       <code>D9AB-04FD</code>
     </cheat>
     <cheat>
-      <description>In scenario 1</description>
+      <description>In scenario 1, Cairo starts with $249,120,000</description>
       <code>7DAB-042D</code>
     </cheat>
     <cheat>
-      <description>In scenario 1</description>
+      <description>In scenario 1, Cairo starts with $7,053,600,000</description>
       <code>D9AB-07FD</code>
     </cheat>
     <cheat>
-      <description>In scenario 1</description>
+      <description>In scenario 1, Nairobi starts with $200,320,000</description>
       <code>45AB-072D</code>
     </cheat>
     <cheat>
-      <description>In scenario 1</description>
+      <description>In scenario 1, Nairobi starts with $6,953,600,000</description>
       <code>D9AC-0DFD</code>
     </cheat>
     <cheat>
-      <description>In scenario 1</description>
+      <description>In scenario 1, Lagos starts with $229,600,000</description>
       <code>4AAC-0D2D</code>
     </cheat>
     <cheat>
-      <description>In scenario 1</description>
+      <description>In scenario 1, Lagos starts with $7,013,600,000</description>
       <code>D9AC-0FFD</code>
     </cheat>
     <cheat>
-      <description>In scenario 1</description>
+      <description>In scenario 1, Moscow starts with $289,280,000</description>
       <code>DDAC-04FD</code>
     </cheat>
     <cheat>
-      <description>In scenario 1</description>
+      <description>In scenario 1, Moscow starts with $6,842,880,000</description>
       <code>D9AC-04FD</code>
     </cheat>
     <cheat>
-      <description>In scenario 1</description>
+      <description>In scenario 1, London starts with $949,280,000</description>
       <code>DDAC-07FD</code>
     </cheat>
     <cheat>
-      <description>In scenario 1</description>
+      <description>In scenario 1, London starts with $7,502,880,000</description>
       <code>D9AC-07FD</code>
     </cheat>
     <cheat>
-      <description>In scenario 1</description>
+      <description>In scenario 1, Paris starts with $289,280,000</description>
       <code>DDA8-0DFD</code>
     </cheat>
     <cheat>
-      <description>In scenario 1</description>
+      <description>In scenario 1, Paris starts with $6,842,880,000</description>
       <code>D9A8-0DFD</code>
     </cheat>
     <cheat>
-      <description>In scenario 1</description>
+      <description>In scenario 1, Rome starts with $371,360,000</description>
       <code>06A8-0D2D</code>
     </cheat>
     <cheat>
-      <description>In scenario 1</description>
+      <description>In scenario 1, Rome starts with $7,293,600,000</description>
       <code>D9A8-0FFD</code>
     </cheat>
     <cheat>
-      <description>In scenario 1</description>
+      <description>In scenario 1, New York starts with $189,280,000</description>
       <code>DDA8-04FD</code>
     </cheat>
     <cheat>
-      <description>In scenario 1</description>
+      <description>In scenario 1, New York starts with $6,742,880,000</description>
       <code>D9A8-04FD</code>
     </cheat>
     <cheat>
-      <description>In scenario 1</description>
+      <description>In scenario 1, Vancouver starts with $258,880,000</description>
       <code>74A8-042D</code>
     </cheat>
     <cheat>
-      <description>In scenario 1</description>
+      <description>In scenario 1, Vancouver starts with $7,073,600,000</description>
       <code>D9A8-07FD</code>
     </cheat>
     <cheat>
-      <description>In scenario 1</description>
+      <description>In scenario 1, Los Angeles starts with $649,280,000</description>
       <code>DDAA-0DFD</code>
     </cheat>
     <cheat>
-      <description>In scenario 1</description>
+      <description>In scenario 1, Los Angeles starts with $7,202,880,000</description>
       <code>D9AA-0DFD</code>
     </cheat>
     <cheat>
-      <description>In scenario 1</description>
+      <description>In scenario 1, Honolulu starts with $268,640,000</description>
       <code>70AA-0D2D</code>
     </cheat>
     <cheat>
-      <description>In scenario 1</description>
+      <description>In scenario 1, Honolulu starts with $7,093,600,000</description>
       <code>D9AA-0FFD</code>
     </cheat>
     <cheat>
-      <description>In scenario 1</description>
+      <description>In scenario 1, Mexico City starts with $258,880,000</description>
       <code>74AA-0F2D</code>
     </cheat>
     <cheat>
-      <description>In scenario 1</description>
+      <description>In scenario 1, Mexico City starts with $7,073,600,000</description>
       <code>D9AA-04FD</code>
     </cheat>
     <cheat>
-      <description>In scenario 1</description>
+      <description>In scenario 1, Lima starts with $180,800,000</description>
       <code>47AA-042D</code>
     </cheat>
     <cheat>
-      <description>In scenario 1</description>
+      <description>In scenario 1, Lima starts with $6,913,600,000</description>
       <code>D9AA-07FD</code>
     </cheat>
     <cheat>
-      <description>In scenario 1</description>
+      <description>In scenario 1, Rio de Janeiro starts with $317,440,000</description>
       <code>73AA-072D</code>
     </cheat>
     <cheat>
-      <description>In scenario 1</description>
+      <description>In scenario 1, Rio de Janeiro starts with $7,193,600,000</description>
       <code>D9A2-0DFD</code>
     </cheat>
     <cheat>
-      <description>In scenario 1</description>
+      <description>In scenario 1, Buenos Aires starts with $210,080,000</description>
       <code>4BA2-0D2D</code>
     </cheat>
     <cheat>
-      <description>In scenario 1</description>
+      <description>In scenario 1, Buenos Aires starts with $6,973,600,000</description>
       <code>D9A2-0FFD</code>
     </cheat>
     <cheat>
-      <description>In scenario 2</description>
+      <description>In scenario 2, Tokyo starts with $1,149,280,000</description>
       <code>DDA2-04FD</code>
     </cheat>
     <cheat>
-      <description>In scenario 2</description>
+      <description>In scenario 2, Tokyo starts with $7,702,880,000</description>
       <code>D9A2-04FD</code>
     </cheat>
     <cheat>
-      <description>In scenario 2</description>
+      <description>In scenario 2, Beijing starts with $498,240,000</description>
       <code>1FA2-042D</code>
     </cheat>
     <cheat>
-      <description>In scenario 2</description>
+      <description>In scenario 2, Beijing starts with $7,553,600,000</description>
       <code>D9A2-07FD</code>
     </cheat>
     <cheat>
-      <description>In scenario 2</description>
+      <description>In scenario 2, Hong Kong starts with $649,760,000</description>
       <code>53A2-072D</code>
     </cheat>
     <cheat>
-      <description>In scenario 2</description>
+      <description>In scenario 2, Hong Kong starts with $7,853,600,000</description>
       <code>D9A3-0DFD</code>
     </cheat>
     <cheat>
-      <description>In scenario 2</description>
+      <description>In scenario 2, Singapore starts with $552,160,000</description>
       <code>18A3-0D2D</code>
     </cheat>
     <cheat>
-      <description>In scenario 2</description>
+      <description>In scenario 2, Singapore starts with $7,653,600,000</description>
       <code>D9A3-0FFD</code>
     </cheat>
     <cheat>
-      <description>In scenario 2</description>
+      <description>In scenario 2, Sydney starts with $581,440,000</description>
       <code>5FA3-0F2D</code>
     </cheat>
     <cheat>
-      <description>In scenario 2</description>
+      <description>In scenario 2, Sydney starts with $7,713,600,000</description>
       <code>D9A3-04FD</code>
     </cheat>
     <cheat>
-      <description>In scenario 2</description>
+      <description>In scenario 2, Delhi starts with $517,760,000</description>
       <code>19A3-042D</code>
     </cheat>
     <cheat>
-      <description>In scenario 2</description>
+      <description>In scenario 2, Delhi starts with $7,593,600,000</description>
       <code>D9A3-07FD</code>
     </cheat>
     <cheat>
-      <description>In scenario 2</description>
+      <description>In scenario 2, Tehran starts with $297,920,000</description>
       <code>7CA3-072D</code>
     </cheat>
     <cheat>
-      <description>In scenario 2</description>
+      <description>In scenario 2, Tehran starts with $7,153,600,000</description>
       <code>D9AE-0DFD</code>
     </cheat>
     <cheat>
-      <description>In scenario 2</description>
+      <description>In scenario 2, Cairo starts with $390,880,000</description>
       <code>0AAE-0D2D</code>
     </cheat>
     <cheat>
-      <description>In scenario 2</description>
+      <description>In scenario 2, Cairo starts with $7,333,600,000</description>
       <code>D9AE-0FFD</code>
     </cheat>
     <cheat>
-      <description>In scenario 2</description>
+      <description>In scenario 2, Nairobi starts with $249,120,000</description>
       <code>7DAE-0F2D</code>
     </cheat>
     <cheat>
-      <description>In scenario 2</description>
+      <description>In scenario 2, Nairobi starts with $7,053,600,000</description>
       <code>D9AE-04FD</code>
     </cheat>
     <cheat>
-      <description>In scenario 2</description>
+      <description>In scenario 2, Lagos starts with $299,040,000</description>
       <code>7CAE-042D</code>
     </cheat>
     <cheat>
-      <description>In scenario 2</description>
+      <description>In scenario 2, Lagos starts with $7,149,600,000</description>
       <code>D9AE-07FD</code>
     </cheat>
     <cheat>
-      <description>In scenario 2</description>
+      <description>In scenario 2, Moscow starts with $689,280,000</description>
       <code>DDAD-6DFD</code>
     </cheat>
     <cheat>
-      <description>In scenario 2</description>
+      <description>In scenario 2, Moscow starts with $7,242,880,000</description>
       <code>D9AD-6DFD</code>
     </cheat>
     <cheat>
-      <description>In scenario 2</description>
+      <description>In scenario 2, London starts with $38,560,000</description>
       <code>DDAD-6FFD</code>
     </cheat>
     <cheat>
-      <description>In scenario 2</description>
+      <description>In scenario 2, London starts with $6,592,160,000</description>
       <code>D9AD-6FFD</code>
     </cheat>
     <cheat>
-      <description>In scenario 2</description>
+      <description>In scenario 2, Paris starts with $909,280,000</description>
       <code>DDAD-64FD</code>
     </cheat>
     <cheat>
-      <description>In scenario 2</description>
+      <description>In scenario 2, Paris starts with $7,462,880,000</description>
       <code>D9AD-64FD</code>
     </cheat>
     <cheat>
-      <description>In scenario 2</description>
+      <description>In scenario 2, Rome starts with $571,680,000</description>
       <code>1EAD-642D</code>
     </cheat>
     <cheat>
-      <description>In scenario 2</description>
+      <description>In scenario 2, Rome starts with $7,693,600,000</description>
       <code>D9AD-67FD</code>
     </cheat>
     <cheat>
-      <description>In scenario 2</description>
+      <description>In scenario 2, New York starts with $829,280,000</description>
       <code>DDAF-6DFD</code>
     </cheat>
     <cheat>
-      <description>In scenario 2</description>
+      <description>In scenario 2, New York starts with $7,382,880,000</description>
       <code>D9AF-6DFD</code>
     </cheat>
     <cheat>
-      <description>In scenario 2</description>
+      <description>In scenario 2, Vancouver starts with $420,160,000</description>
       <code>94AF-6D2D</code>
     </cheat>
     <cheat>
-      <description>In scenario 2</description>
+      <description>In scenario 2, Vancouver starts with $7,393,600,000</description>
       <code>D9AF-6FFD</code>
     </cheat>
     <cheat>
-      <description>In scenario 2</description>
+      <description>In scenario 2, Los Angeles starts with $1,109,280,000</description>
       <code>DDAF-64FD</code>
     </cheat>
     <cheat>
-      <description>In scenario 2</description>
+      <description>In scenario 2, Los Angeles starts with $7,662,880,000</description>
       <code>D9AF-64FD</code>
     </cheat>
     <cheat>
-      <description>In scenario 2</description>
+      <description>In scenario 2, Honolulu starts with $381,120,000</description>
       <code>0CAF-642D</code>
     </cheat>
     <cheat>
-      <description>In scenario 2</description>
+      <description>In scenario 2, Honolulu starts with $7,313,600,000</description>
       <code>D9AF-67FD</code>
     </cheat>
     <cheat>
-      <description>In scenario 2</description>
+      <description>In scenario 2, Mexico City starts with $468,960,000</description>
       <code>98AF-672D</code>
     </cheat>
     <cheat>
-      <description>In scenario 2</description>
+      <description>In scenario 2, Mexico City starts with $7,493,600,000</description>
       <code>D9A4-6DFD</code>
     </cheat>
     <cheat>
-      <description>In scenario 2</description>
+      <description>In scenario 2, Lima starts with $258,880,000</description>
       <code>74A4-6D2D</code>
     </cheat>
     <cheat>
-      <description>In scenario 2</description>
+      <description>In scenario 2, Lima starts with $7,073,600,000</description>
       <code>D9A4-6FFD</code>
     </cheat>
     <cheat>
-      <description>In scenario 2</description>
+      <description>In scenario 2, Rio de Janeiro starts with $630,240,000</description>
       <code>58A4-6F2D</code>
     </cheat>
     <cheat>
-      <description>In scenario 2</description>
+      <description>In scenario 2, Rio de Janeiro starts with $7,813,600,000</description>
       <code>D9A4-64FD</code>
     </cheat>
     <cheat>
-      <description>In scenario 2</description>
+      <description>In scenario 2, Buenos Aires starts with $361,600,000</description>
       <code>01A4-642D</code>
     </cheat>
     <cheat>
-      <description>In scenario 2</description>
+      <description>In scenario 2, Buenos Aires starts with $7,273,600,000</description>
       <code>D9A4-67FD</code>
     </cheat>
     <cheat>
@@ -2519,195 +2519,195 @@
       <code>BDE3-D463</code>
     </cheat>
     <cheat>
-      <description>Set money to less than $655</description>
+      <description>Set money to less than $655,350,000 (must have Key) - P1, saved game 1</description>
       <code>DDDF-FEDD</code>
     </cheat>
     <cheat>
-      <description>Set money to over $327</description>
+      <description>Set money to over $327,680,000 (must have Key) - P1, saved game 1</description>
       <code>D9DF-FEDD</code>
     </cheat>
     <cheat>
-      <description>Set money to over $5</description>
+      <description>Set money to over $5,242,880,000 (must have Key) - P1, saved game 1</description>
       <code>D6DF-FEDD</code>
     </cheat>
     <cheat>
-      <description>Set money to over $10</description>
+      <description>Set money to over $10,485,760,000 (must have Key) - P1, saved game 1</description>
       <code>FDDF-FEDD</code>
     </cheat>
     <cheat>
-      <description>Set money to over $20</description>
+      <description>Set money to over $20,971,520,000 (must have Key) - P1, saved game 1</description>
       <code>4DDF-FEDD</code>
     </cheat>
     <cheat>
-      <description>Set money to over $41</description>
+      <description>Set money to over $41,943,040,000 (must have Key) - P1, saved game 1</description>
       <code>0DDF-FEDD</code>
     </cheat>
     <cheat>
-      <description>Set money to less than $655</description>
+      <description>Set money to less than $655,350,000 (must have Key) - P2, saved game 1</description>
       <code>DDD9-FEDD</code>
     </cheat>
     <cheat>
-      <description>Set money to over $327</description>
+      <description>Set money to over $327,680,000 (must have Key) - P2, saved game 1</description>
       <code>D9D9-FEDD</code>
     </cheat>
     <cheat>
-      <description>Set money to over $5</description>
+      <description>Set money to over $5,242,880,000 (must have Key) - P2, saved game 1</description>
       <code>D6D9-FEDD</code>
     </cheat>
     <cheat>
-      <description>Set money to over $10</description>
+      <description>Set money to over $10,485,760,000 (must have Key) - P2, saved game 1</description>
       <code>FDD9-FEDD</code>
     </cheat>
     <cheat>
-      <description>Set money to over $20</description>
+      <description>Set money to over $20,971,520,000 (must have Key) - P2, saved game 1</description>
       <code>4DD9-FEDD</code>
     </cheat>
     <cheat>
-      <description>Set money to over $41</description>
+      <description>Set money to over $41,943,040,000 (must have Key) - P2, saved game 1</description>
       <code>0DD9-FEDD</code>
     </cheat>
     <cheat>
-      <description>Set money to less than $655</description>
+      <description>Set money to less than $655,350,000 (must have Key) - P3, saved game 1</description>
       <code>DDDB-FEDD</code>
     </cheat>
     <cheat>
-      <description>Set money to over $327</description>
+      <description>Set money to over $327,680,000 (must have Key) - P3, saved game 1</description>
       <code>D9DB-FEDD</code>
     </cheat>
     <cheat>
-      <description>Set money to over $5</description>
+      <description>Set money to over $5,242,880,000 (must have Key) - P3, saved game 1</description>
       <code>D6DB-FEDD</code>
     </cheat>
     <cheat>
-      <description>Set money to over $10</description>
+      <description>Set money to over $10,485,760,000 (must have Key) - P3, saved game 1</description>
       <code>FDDB-FEDD</code>
     </cheat>
     <cheat>
-      <description>Set money to over $20</description>
+      <description>Set money to over $20,971,520,000 (must have Key) - P3, saved game 1</description>
       <code>4DDB-FEDD</code>
     </cheat>
     <cheat>
-      <description>Set money to over $41</description>
+      <description>Set money to over $41,943,040,000 (must have Key) - P3, saved game 1</description>
       <code>0DDB-FEDD</code>
     </cheat>
     <cheat>
-      <description>Set money to less than $655</description>
+      <description>Set money to less than $655,350,000 (must have Key) - P4, saved game 1</description>
       <code>DDD2-FEDD</code>
     </cheat>
     <cheat>
-      <description>Set money to over $327</description>
+      <description>Set money to over $327,680,000 (must have Key) - P4, saved game 1</description>
       <code>D9D2-FEDD</code>
     </cheat>
     <cheat>
-      <description>Set money to over $5</description>
+      <description>Set money to over $5,242,880,000 (must have Key) - P4, saved game 1</description>
       <code>D6D2-FEDD</code>
     </cheat>
     <cheat>
-      <description>Set money to over $10</description>
+      <description>Set money to over $10,485,760,000 (must have Key) - P4, saved game 1</description>
       <code>FDD2-FEDD</code>
     </cheat>
     <cheat>
-      <description>Set money to over $20</description>
+      <description>Set money to over $20,971,520,000 (must have Key) - P4, saved game 1</description>
       <code>4DD2-FEDD</code>
     </cheat>
     <cheat>
-      <description>Set money to over $41</description>
+      <description>Set money to over $41,943,040,000 (must have Key) - P4, saved game 1</description>
       <code>0DD2-FEDD</code>
     </cheat>
     <cheat>
-      <description>Set money to less than $655</description>
+      <description>Set money to less than $655,350,000 (must have Key) - P1, saved game 2</description>
       <code>DDFF-FEDD</code>
     </cheat>
     <cheat>
-      <description>Set money to over $327</description>
+      <description>Set money to over $327,680,000 (must have Key) - P1, saved game 2</description>
       <code>D9FF-FEDD</code>
     </cheat>
     <cheat>
-      <description>Set money to over $5</description>
+      <description>Set money to over $5,242,880,000 (must have Key) - P1, saved game 2</description>
       <code>D6FF-FEDD</code>
     </cheat>
     <cheat>
-      <description>Set money to over $10</description>
+      <description>Set money to over $10,485,760,000 (must have Key) - P1, saved game 2</description>
       <code>FDFF-FEDD</code>
     </cheat>
     <cheat>
-      <description>Set money to over $20</description>
+      <description>Set money to over $20,971,520,000 (must have Key) - P1, saved game 2</description>
       <code>4DFF-FEDD</code>
     </cheat>
     <cheat>
-      <description>Set money to over $41</description>
+      <description>Set money to over $41,943,040,000 (must have Key) - P1, saved game 2</description>
       <code>0DFF-FEDD</code>
     </cheat>
     <cheat>
-      <description>Set money to less than $655</description>
+      <description>Set money to less than $655,350,000 (must have Key) - P2, saved game 2</description>
       <code>DDF9-FEDD</code>
     </cheat>
     <cheat>
-      <description>Set money to over $327</description>
+      <description>Set money to over $327,680,000 (must have Key) - P2, saved game 2</description>
       <code>D9F9-FEDD</code>
     </cheat>
     <cheat>
-      <description>Set money to over $5</description>
+      <description>Set money to over $5,242,880,000 (must have Key) - P2, saved game 2</description>
       <code>D6F9-FEDD</code>
     </cheat>
     <cheat>
-      <description>Set money to over $10</description>
+      <description>Set money to over $10,485,760,000 (must have Key) - P2, saved game 2</description>
       <code>FDF9-FEDD</code>
     </cheat>
     <cheat>
-      <description>Set money to over $20</description>
+      <description>Set money to over $20,971,520,000 (must have Key) - P2, saved game 2</description>
       <code>4DF9-FEDD</code>
     </cheat>
     <cheat>
-      <description>Set money to over $41</description>
+      <description>Set money to over $41,943,040,000 (must have Key) - P2, saved game 2</description>
       <code>0DF9-FEDD</code>
     </cheat>
     <cheat>
-      <description>Set money to less than $655</description>
+      <description>Set money to less than $655,350,000 (must have Key) - P3, saved game 2</description>
       <code>DDFB-FEDD</code>
     </cheat>
     <cheat>
-      <description>Set money to over $327</description>
+      <description>Set money to over $327,680,000 (must have Key) - P3, saved game 2</description>
       <code>D9FB-FEDD</code>
     </cheat>
     <cheat>
-      <description>Set money to over $5</description>
+      <description>Set money to over $5,242,880,000 (must have Key) - P3, saved game 2</description>
       <code>D6FB-FEDD</code>
     </cheat>
     <cheat>
-      <description>Set money to over $10</description>
+      <description>Set money to over $10,485,760,000 (must have Key) - P3, saved game 2</description>
       <code>FDFB-FEDD</code>
     </cheat>
     <cheat>
-      <description>Set money to over $20</description>
+      <description>Set money to over $20,971,520,000 (must have Key) - P3, saved game 2</description>
       <code>4DFB-FEDD</code>
     </cheat>
     <cheat>
-      <description>Set money to over $41</description>
+      <description>Set money to over $41,943,040,000 (must have Key) - P3, saved game 2</description>
       <code>0DFB-FEDD</code>
     </cheat>
     <cheat>
-      <description>Set money to less than $655</description>
+      <description>Set money to less than $655,350,000 (must have Key) - P4, saved game 2</description>
       <code>DDF2-FEDD</code>
     </cheat>
     <cheat>
-      <description>Set money to over $327</description>
+      <description>Set money to over $327,680,000 (must have Key) - P4, saved game 2</description>
       <code>D9F2-FEDD</code>
     </cheat>
     <cheat>
-      <description>Set money to over $5</description>
+      <description>Set money to over $5,242,880,000 (must have Key) - P4, saved game 2</description>
       <code>D6F2-FEDD</code>
     </cheat>
     <cheat>
-      <description>Set money to over $10</description>
+      <description>Set money to over $10,485,760,000 (must have Key) - P4, saved game 2</description>
       <code>FDF2-FEDD</code>
     </cheat>
     <cheat>
-      <description>Set money to over $20</description>
+      <description>Set money to over $20,971,520,000 (must have Key) - P4, saved game 2</description>
       <code>4DF2-FEDD</code>
     </cheat>
     <cheat>
-      <description>Set money to over $41</description>
+      <description>Set money to over $41,943,040,000 (must have Key) - P4, saved game 2</description>
       <code>0DF2-FEDD</code>
     </cheat>
   </cartridge>
@@ -2759,7 +2759,7 @@
       <code>7E036999</code>
     </cheat>
     <cheat>
-      <description>Level select on main menu (use R + up/down to change level</description>
+      <description>Level select on main menu (use R + up/down to change level, R + left/right to change sub-level)</description>
       <code>DDB5-3467</code>
       <code>DDBA-3FA7</code>
     </cheat>
@@ -2927,19 +2927,19 @@
       <code>3C22-3D64</code>
     </cheat>
     <cheat>
-      <description>Less ammo in rifle clips (works with extra clips only</description>
+      <description>Less ammo in rifle clips (works with extra clips only, not the ones you start with)</description>
       <code>742A-44A4</code>
     </cheat>
     <cheat>
-      <description>More ammo in rifle clips (works with extra clips only</description>
+      <description>More ammo in rifle clips (works with extra clips only, not the ones you start with)</description>
       <code>CD2A-44A4</code>
     </cheat>
     <cheat>
-      <description>Less ammo in grenade clips (works with extra clips only</description>
+      <description>Less ammo in grenade clips (works with extra clips only, not the ones you start with)</description>
       <code>D923-3D64</code>
     </cheat>
     <cheat>
-      <description>More ammo in grenade clips (works with extra clips only</description>
+      <description>More ammo in grenade clips (works with extra clips only, not the ones you start with)</description>
       <code>F023-3D64</code>
     </cheat>
     <cheat>
@@ -3023,7 +3023,7 @@
       <code>C236-0DDD</code>
     </cheat>
     <cheat>
-      <description>No damage taken from jumping attacks</description>
+      <description>No damage taken from jumping attacks, tail attacks, rushes</description>
       <code>C238-0FDD</code>
     </cheat>
     <cheat>
@@ -3337,15 +3337,26 @@
       <code>839011FF</code>
     </cheat>
     <cheat>
-      <description>Moon-jump (enable to rise slowly</description>
+      <description>Moon-jump (enable to rise slowly, disable to fall back down)</description>
       <code>7E0415FF</code>
     </cheat>
   </cartridge>
   <cartridge sha256="31569bef662bc438194726967970bf19f504101060763cbd649350362fb6ef2f">
     <name>Arcade's Greatest Hits - The Atari Collection 1 (USA)</name>
     <cheat>
+      <description>Asteroids - Invincibility</description>
+      <code>1D63-34AE</code>
+    </cheat>
+    <cheat>
       <description>Asteroids - Infinite lives - both players</description>
       <code>896E-3D6E</code>
+    </cheat>
+    <cheat>
+      <description>Battlezone - Invincibility</description>
+      <code>ADB3-4FF9</code>
+      <code>DDB3-4F99</code>
+      <code>2DB3-4FB9</code>
+      <code>1DBF-4D95</code>
     </cheat>
     <cheat>
       <description>Battlezone - Infinite lives</description>
@@ -3391,7 +3402,7 @@
       <code>828B-AF2E</code>
     </cheat>
     <cheat>
-      <description>Start with 60</description>
+      <description>Start with 60,000 gold pieces</description>
       <code>1D69-AFD0</code>
       <code>3C69-AF00</code>
     </cheat>
@@ -4019,7 +4030,7 @@
   <cartridge sha256="db1ac03cc8b7daaa812da239029bcf999b30b2afe1c03d51f7ae849a796617ea">
     <name>BASS Masters Classic - Pro Edition (USA)</name>
     <cheat>
-      <description>Start with $65</description>
+      <description>Start with $65,380</description>
       <code>EE40-BA86</code>
     </cheat>
   </cartridge>
@@ -4363,7 +4374,7 @@
       <code>FDA9-1DA7</code>
     </cheat>
     <cheat>
-      <description>Once charged</description>
+      <description>Once charged, weapon always stays charged</description>
       <code>1DAA-3FAF</code>
     </cheat>
     <cheat>
@@ -4500,7 +4511,7 @@
       <code>8286-CF01</code>
     </cheat>
     <cheat>
-      <description>Infinite lives - both players (except level 2</description>
+      <description>Infinite lives - both players (except level 2, does not work on falling)</description>
       <code>8986-CF01</code>
     </cheat>
     <cheat>
@@ -4691,7 +4702,7 @@
   <cartridge sha256="d7271ca08400bbf5ae165b0aaa6e8a8a1b266f72e6e0ae10aae529732a472f7c">
     <name>Beauty and the Beast (USA)</name>
     <cheat>
-      <description>Invincibility (disable to pick up rocks</description>
+      <description>Invincibility (disable to pick up rocks, spikes still do damage)</description>
       <code>3CC0-376A</code>
       <code>3CC0-37AA</code>
     </cheat>
@@ -4957,7 +4968,7 @@
   <cartridge sha256="6fa6b8a8804ff6544bdedf94339a86ba64ce0b6dbf059605abb1cd6f102d3483">
     <name>Bill Laimbeer's Combat Basketball (USA)</name>
     <cheat>
-      <description>2-point shots worth 3</description>
+      <description>2-point shots worth 3, 3-point shots worth 4</description>
       <code>76BF-A4AF</code>
     </cheat>
     <cheat>
@@ -5002,15 +5013,15 @@
       <code>D0B4-67DF</code>
     </cheat>
     <cheat>
-      <description>Start with $65</description>
+      <description>Start with $65,296 instead of $10,000</description>
       <code>EEC5-6F16</code>
     </cheat>
     <cheat>
-      <description>Start with $8</description>
+      <description>Start with $8,398,608</description>
       <code>6DC5-64C6</code>
     </cheat>
     <cheat>
-      <description>Start with $16</description>
+      <description>Start with $16,721,680</description>
       <code>EEC5-64C6</code>
     </cheat>
     <cheat>
@@ -5118,7 +5129,7 @@
       <code>7E0FC518</code>
     </cheat>
     <cheat>
-      <description>Infinite items (enable after obtaining first item</description>
+      <description>Infinite items (enable after obtaining first item, disable before getting next item, repeat this process)</description>
       <code>89C6-1FD4</code>
     </cheat>
     <cheat>
@@ -5447,7 +5458,7 @@
       <code>7E08DD00</code>
     </cheat>
     <cheat>
-      <description>Move faster</description>
+      <description>Move faster, same effect as wearing the Cloak</description>
       <code>7E08D407</code>
     </cheat>
     <cheat>
@@ -6075,7 +6086,7 @@
       <code>3CC2-6F6D</code>
     </cheat>
     <cheat>
-      <description>One hit kills on enemies</description>
+      <description>One hit kills on enemies, except bosses</description>
       <code>6D68-DFFF</code>
     </cheat>
     <cheat>
@@ -6094,7 +6105,7 @@
   <cartridge sha256="130a74e76369b0ec4d6378a014550921433f1ae1ac1dddffb51f77c9f21a818f">
     <name>Brandish (USA)</name>
     <cheat>
-      <description>Have over 10</description>
+      <description>Have over 10,000,000 gold</description>
       <code>FD53-A3D7</code>
     </cheat>
     <cheat>
@@ -7793,6 +7804,18 @@
   <cartridge sha256="be2bdb03549665136cc91173ac538b41b3085e0f1f6b02d6567d174b5b78e435">
     <name>Caravan Shooting Collection (Japan)</name>
     <cheat>
+      <description>Hector 87 - Infinite health</description>
+      <code>7E00E510</code>
+    </cheat>
+    <cheat>
+      <description>Hector 87 - Infinite lives</description>
+      <code>7E00E402</code>
+    </cheat>
+    <cheat>
+      <description>Star Force - Invincibility</description>
+      <code>7E09CA01</code>
+    </cheat>
+    <cheat>
       <description>Star Force - Always have powered-up weapon</description>
       <code>7E099E01</code>
     </cheat>
@@ -7823,14 +7846,6 @@
     <cheat>
       <description>Star Soldier - No enemies except bosses</description>
       <code>7E062E00</code>
-    </cheat>
-    <cheat>
-      <description>Hector 87 - Infinite health</description>
-      <code>7E00E510</code>
-    </cheat>
-    <cheat>
-      <description>Hector 87 - Infinite lives</description>
-      <code>7E00E402</code>
     </cheat>
   </cartridge>
   <cartridge sha256="ee5fc27dd19a2ecb3c3c7c73d558a18ffd5ff365710c18b88150e277f08d587e">
@@ -8314,7 +8329,7 @@
       <code>C256-E536</code>
     </cheat>
     <cheat>
-      <description>Enable Blob's Bomb move (away</description>
+      <description>Enable Blob's Bomb move (away, away+down, down, towards+down, towards, punch)</description>
       <code>6280-DD6F</code>
     </cheat>
     <cheat>
@@ -9118,7 +9133,7 @@
       <code>22B8-0766</code>
     </cheat>
     <cheat>
-      <description>Enable 30 and 99 lives in option menu (99 actually gives 35</description>
+      <description>Enable 30 and 99 lives in option menu (99 actually gives 35,081 lives)</description>
       <code>D987-AFA4</code>
     </cheat>
     <cheat>
@@ -9183,6 +9198,14 @@
       <code>EE61-04A9</code>
       <code>B961-07D9</code>
       <code>F361-0709</code>
+    </cheat>
+    <cheat>
+      <description>Enable stage select</description>
+      <code>40CC-67DF</code>
+    </cheat>
+    <cheat>
+      <description>Enable stage select (alt)</description>
+      <code>7E1E6001</code>
     </cheat>
     <cheat>
       <description>Start with 5 bombs on each life (side-view levels)</description>
@@ -9787,7 +9810,7 @@
       <code>DDA8-4466</code>
     </cheat>
     <cheat>
-      <description>Extra lives cost $1</description>
+      <description>Extra lives cost $1,500</description>
       <code>DFA8-4466</code>
     </cheat>
     <cheat>
@@ -9891,19 +9914,19 @@
       <code>45B4-C404</code>
     </cheat>
     <cheat>
-      <description>Start with $2</description>
+      <description>Start with $2,500</description>
       <code>D4BD-C7D4</code>
     </cheat>
     <cheat>
-      <description>Start with $3</description>
+      <description>Start with $3,500</description>
       <code>D7BD-C7D4</code>
     </cheat>
     <cheat>
-      <description>Start with $9</description>
+      <description>Start with $9,500</description>
       <code>DBBD-C7D4</code>
     </cheat>
     <cheat>
-      <description>Start with $30</description>
+      <description>Start with $30,500</description>
       <code>7DBD-C7D4</code>
     </cheat>
     <cheat>
@@ -10354,7 +10377,7 @@
       <code>7E1E3914</code>
     </cheat>
     <cheat>
-      <description>Have all Powers</description>
+      <description>Have all Powers, Crests, Talismen, Jewels, can hold 5 Spells/Potions</description>
       <code>7E1E51FF</code>
       <code>7E1E52FF</code>
       <code>7E1E53FF</code>
@@ -10759,17 +10782,17 @@
       <code>D764-64D1</code>
     </cheat>
     <cheat>
-      <description>Armor starts at 1</description>
+      <description>Armor starts at 1,112</description>
       <code>D0BC-64A9</code>
       <code>D064-64D1</code>
     </cheat>
     <cheat>
-      <description>Armor starts at 2</description>
+      <description>Armor starts at 2,136</description>
       <code>D6BC-64A9</code>
       <code>D664-64D1</code>
     </cheat>
     <cheat>
-      <description>Armor starts at 5</description>
+      <description>Armor starts at 5,208</description>
       <code>F0BC-64A9</code>
       <code>F064-64D1</code>
     </cheat>
@@ -10806,15 +10829,15 @@
       <code> D438-6D0F</code>
     </cheat>
     <cheat>
-      <description>Guns start at 2</description>
+      <description>Guns start at 2,458 rounds remaining</description>
       <code>DB38-6D0F</code>
     </cheat>
     <cheat>
-      <description>Guns start at 5</description>
+      <description>Guns start at 5,018 rounds remaining</description>
       <code>F738-6D0F</code>
     </cheat>
     <cheat>
-      <description>Guns start at 9</description>
+      <description>Guns start at 9,882 rounds remaining</description>
       <code>4138-6D0F</code>
     </cheat>
     <cheat>
@@ -11224,15 +11247,15 @@
       <code>DDB0-34A4</code>
     </cheat>
     <cheat>
-      <description>Bad buddy code (In 2P team mode</description>
+      <description>Bad buddy code (In 2P team mode, the inactive player can press select to gain control)</description>
       <code>DD88-CE5A</code>
     </cheat>
     <cheat>
-      <description>Both Kongs return (get both Kongs back on map screen after dying</description>
+      <description>Both Kongs return (get both Kongs back on map screen after dying, doesn't work when you fall off the screen)</description>
       <code>D76C-327E</code>
     </cheat>
     <cheat>
-      <description>Return of Kong (when your last Kong gets hit</description>
+      <description>Return of Kong (when your last Kong gets hit, the other one returns (reset if you get stuck). Must have had both Kongs at some point).</description>
       <code>EE66-C27E</code>
     </cheat>
     <cheat>
@@ -11329,15 +11352,15 @@
       <code>DDB9-3764</code>
     </cheat>
     <cheat>
-      <description>Bad buddy code (In 2P team mode</description>
+      <description>Bad buddy code (In 2P team mode, the inactive player can press select to gain control)</description>
       <code>DD82-CEEA</code>
     </cheat>
     <cheat>
-      <description>Both Kongs return (get both Kongs back on map screen after dying</description>
+      <description>Both Kongs return (get both Kongs back on map screen after dying, doesn't work when you fall off the screen)</description>
       <code>D76C-337E</code>
     </cheat>
     <cheat>
-      <description>Return of Kong (when your last Kong gets hit</description>
+      <description>Return of Kong (when your last Kong gets hit, the other one returns (reset if you get stuck). Must have had both Kongs at some point).</description>
       <code>EE66-C37E</code>
     </cheat>
     <cheat>
@@ -11472,20 +11495,20 @@
       <code>DDB0-34A4</code>
     </cheat>
     <cheat>
-      <description>Bad buddy code (In 2P team mode</description>
+      <description>Bad buddy code (In 2P team mode, the inactive player can press select to gain control)</description>
       <code>DD8B-C28A</code>
     </cheat>
     <cheat>
-      <description>Bad buddy code (In 2P team mode</description>
+      <description>Bad buddy code (In 2P team mode, the inactive player can press select to gain control) (alt)</description>
       <code>DD8B-C28A</code>
       <code>DD88-CE5A</code>
     </cheat>
     <cheat>
-      <description>Both Kongs return (get both Kongs back on map screen after dying</description>
+      <description>Both Kongs return (get both Kongs back on map screen after dying, doesn't work when you fall off the screen)</description>
       <code>D76B-337E</code>
     </cheat>
     <cheat>
-      <description>Return of Kong (when your last Kong gets hit</description>
+      <description>Return of Kong (when your last Kong gets hit, the other one returns (reset if you get stuck). Must have had both Kongs at some point).</description>
       <code>EE65-C37E</code>
     </cheat>
     <cheat>
@@ -12083,7 +12106,7 @@
       <code>6DB2-A46D</code>
     </cheat>
     <cheat>
-      <description>On normal level</description>
+      <description>On normal level, start with all stats at 2 bars instead of 0</description>
       <code>D9B9-64DD</code>
     </cheat>
     <cheat>
@@ -12151,7 +12174,7 @@
       <code>DDB7-AFAD</code>
     </cheat>
     <cheat>
-      <description>You can heal completely</description>
+      <description>You can heal completely, not just to the top of each segment</description>
       <code>DD83-D4AF</code>
     </cheat>
     <cheat>
@@ -12562,7 +12585,7 @@
       <code>DDCE-C7DC</code>
     </cheat>
     <cheat>
-      <description>One-hit kills</description>
+      <description>One-hit kills, except skeletons</description>
       <code>8F23-3768</code>
     </cheat>
     <cheat>
@@ -12601,7 +12624,7 @@
   <cartridge sha256="c509e957873d6cff232bc360ae1795ea74e86bf4fa09c686f6cfc83bd8bac3d7">
     <name>Dual Orb II (Japan)</name>
     <cheat>
-      <description>Gain 65</description>
+      <description>Gain 65,535 EXP from each battle</description>
       <code>CEF7-8F9F</code>
       <code>A8F7-84FF</code>
     </cheat>
@@ -13159,7 +13182,7 @@
       <code>7E9A1C27</code>
     </cheat>
     <cheat>
-      <description>Fast money (buy a bread w/the code off</description>
+      <description>Fast money (buy a bread w/the code off, turn code on and sell it for $32,646)</description>
       <code>EE9A-E5F5</code>
     </cheat>
     <cheat>
@@ -13303,15 +13326,15 @@
       <code>7E512A07</code>
     </cheat>
     <cheat>
-      <description>Start on Buttville</description>
+      <description>Start on Buttville, Part 2</description>
       <code>7E512A08</code>
     </cheat>
     <cheat>
-      <description>Start on Buttville</description>
+      <description>Start on Buttville, Part 1</description>
       <code>7E512A09</code>
     </cheat>
     <cheat>
-      <description>Start on Level 5</description>
+      <description>Start on Level 5, Part 1</description>
       <code>7E512A0A</code>
     </cheat>
     <cheat>
@@ -13319,7 +13342,7 @@
       <code>7E512A0B</code>
     </cheat>
     <cheat>
-      <description>Start on Level 5</description>
+      <description>Start on Level 5, Part 2</description>
       <code>7E512A0C</code>
     </cheat>
     <cheat>
@@ -13331,47 +13354,47 @@
       <code>7E512A0E</code>
     </cheat>
     <cheat>
-      <description>Start on Andy Asteroids?</description>
+      <description>Start on Andy Asteroids?, Course 1</description>
       <code>7E512A0F</code>
     </cheat>
     <cheat>
-      <description>Start on Andy Asteroids?</description>
+      <description>Start on Andy Asteroids?, Course 2</description>
       <code>7E512A10</code>
     </cheat>
     <cheat>
-      <description>Start on Andy Asteroids?</description>
+      <description>Start on Andy Asteroids?, Course 3</description>
       <code>7E512A11</code>
     </cheat>
     <cheat>
-      <description>Start on Andy Asteroids?</description>
+      <description>Start on Andy Asteroids?, Course 4</description>
       <code>7E512A12</code>
     </cheat>
     <cheat>
-      <description>Start on Andy Asteroids?</description>
+      <description>Start on Andy Asteroids?, Course 5</description>
       <code>7E512A13</code>
     </cheat>
     <cheat>
-      <description>Start on Andy Asteroids?</description>
+      <description>Start on Andy Asteroids?, Course 6</description>
       <code>7E512A14</code>
     </cheat>
     <cheat>
-      <description>Start on Who Turned Out The Light?</description>
+      <description>Start on Who Turned Out The Light?, Part 1</description>
       <code>7E512A15</code>
     </cheat>
     <cheat>
-      <description>Start on Who Turned Out The Light?</description>
+      <description>Start on Who Turned Out The Light?, Part 2</description>
       <code>7E512A16</code>
     </cheat>
     <cheat>
-      <description>Start on Who Turned Out The Light?</description>
+      <description>Start on Who Turned Out The Light?, Part 3</description>
       <code>7E512A17</code>
     </cheat>
     <cheat>
-      <description>Start on Who Turned Out The Light?</description>
+      <description>Start on Who Turned Out The Light?, Part 4</description>
       <code>7E512A18</code>
     </cheat>
     <cheat>
-      <description>Start on Who Turned Out The Light?</description>
+      <description>Start on Who Turned Out The Light?, Part 5</description>
       <code>7E512A19</code>
     </cheat>
   </cartridge>
@@ -13648,15 +13671,15 @@
       <code>3CA2-AD96</code>
     </cheat>
     <cheat>
-      <description>Pick a lawful</description>
+      <description>Pick a lawful, human male fighter and he will be at level 6</description>
       <code>D18B-A474</code>
     </cheat>
     <cheat>
-      <description>Pick a lawful</description>
+      <description>Pick a lawful, human male fighter and he will be at Level 8</description>
       <code>D68B-A474</code>
     </cheat>
     <cheat>
-      <description>999</description>
+      <description>999,999 EXP 1st class</description>
       <code>7E05333F</code>
       <code>7E053442</code>
       <code>7E05350F</code>
@@ -13794,31 +13817,31 @@
       <code>BA26-A44F</code>
     </cheat>
     <cheat>
-      <description>Start with $5</description>
+      <description>Start with $5,240</description>
       <code>3C26-AF4F</code>
       <code>CB26-AF1F</code>
       <code>D426-AF3F</code>
     </cheat>
     <cheat>
-      <description>Start with $20</description>
+      <description>Start with $20,600</description>
       <code>3C26-AF4F</code>
       <code>CB26-AF1F</code>
       <code>D626-AF3F</code>
     </cheat>
     <cheat>
-      <description>Start with $163</description>
+      <description>Start with $163,960</description>
       <code>3C26-AF4F</code>
       <code>CB26-AF1F</code>
       <code>0D26-AF3F</code>
     </cheat>
     <cheat>
-      <description>Start with $327</description>
+      <description>Start with $327,800</description>
       <code>3C26-AF4F</code>
       <code>CB26-AF1F</code>
       <code>6D26-AF3F</code>
     </cheat>
     <cheat>
-      <description>Start with $652</description>
+      <description>Start with $652,920</description>
       <code>3C26-AF4F</code>
       <code>CB26-AF1F</code>
       <code>EE26-AF3F</code>
@@ -14336,7 +14359,7 @@
       <code>D77E-7FDD</code>
     </cheat>
     <cheat>
-      <description>Computer can't win a round</description>
+      <description>Computer can't win a round, except last round, game ends after 4 rounds</description>
       <code>C250-7FA7</code>
     </cheat>
     <cheat>
@@ -14433,7 +14456,7 @@
       <code>83AF-D40D</code>
     </cheat>
     <cheat>
-      <description>Use a cure</description>
+      <description>Use a cure, gain a cure</description>
       <code>E3AF-D40D</code>
     </cheat>
     <cheat>
@@ -14464,7 +14487,7 @@
   <cartridge sha256="6151389f33ce2e53db3cd99592440c0020f5f4668f581ce3bd615bc92077f255">
     <name>Final Fantasy - Mystic Quest (USA)</name>
     <cheat>
-      <description>Infinite life points (can make enemies invincible</description>
+      <description>Infinite life points (can make enemies invincible, disable to defeat them)</description>
       <code>C96B-64AB</code>
     </cheat>
     <cheat>
@@ -14480,7 +14503,7 @@
       <code>C9B0-D7A6</code>
     </cheat>
     <cheat>
-      <description>Use a cure</description>
+      <description>Use a cure, gain a cure</description>
       <code>E3AF-D40D</code>
     </cheat>
     <cheat>
@@ -14499,11 +14522,11 @@
   <cartridge sha256="414bacc05a18a6137c0de060b4094ab6d1b75105342b0bb36a42e45d945a0e4d">
     <name>Final Fantasy II (USA) (Rev 1)</name>
     <cheat>
-      <description>Almost infinite HP (can make big and sometimes normal monsters invincible</description>
+      <description>Almost infinite HP (can make big and sometimes normal monsters invincible, disable to defeat them)</description>
       <code>82AE-6F63</code>
     </cheat>
     <cheat>
-      <description>Infinite MP during battles</description>
+      <description>Infinite MP during battles, doesn't work on twin attacks</description>
       <code>8267-0D62</code>
     </cheat>
     <cheat>
@@ -14576,16 +14599,16 @@
       <code>3335-076E</code>
     </cheat>
     <cheat>
-      <description>Get at least 65</description>
+      <description>Get at least 65,536 GP after each battle</description>
       <code>3336-0FAE</code>
     </cheat>
     <cheat>
-      <description>Get 65</description>
+      <description>Get 65,000+ exp points after each battle</description>
       <code>7E3592FF</code>
       <code>7E359EFF</code>
     </cheat>
     <cheat>
-      <description>Get 99 of items that you are given or find in a pot</description>
+      <description>Get 99 of items that you are given or find in a pot, treasure chest, ect</description>
       <code>17BF-D404</code>
     </cheat>
     <cheat>
@@ -14887,11 +14910,11 @@
   <cartridge sha256="680535dc1c4196c53b40dc9c2c9bc159a77802ab8d4b474bef5dc0281c15ad06">
     <name>Final Fantasy II (USA)</name>
     <cheat>
-      <description>Almost infinite HP (can make big and sometimes normal monsters invincible</description>
+      <description>Almost infinite HP (can make big and sometimes normal monsters invincible, disable to defeat them)</description>
       <code>82A3-6F63</code>
     </cheat>
     <cheat>
-      <description>Infinite MP during battles</description>
+      <description>Infinite MP during battles, doesn't work on twin attacks</description>
       <code>8267-0D62</code>
     </cheat>
     <cheat>
@@ -14934,15 +14957,15 @@
       <code>DA6E-6FD4</code>
     </cheat>
     <cheat>
-      <description>When treasures are awarded after battle</description>
+      <description>When treasures are awarded after battle, receive 5 instead of 1</description>
       <code>D926-D4D9</code>
     </cheat>
     <cheat>
-      <description>When arrows are awarded after battle</description>
+      <description>When arrows are awarded after battle, receive 50 instead of 10</description>
       <code>7425-D769</code>
     </cheat>
     <cheat>
-      <description>When treasures are awarded after battle</description>
+      <description>When treasures are awarded after battle, receive the rarest</description>
       <code>D734-0DDE</code>
     </cheat>
     <cheat>
@@ -14978,11 +15001,11 @@
       <code>3C39-07AE</code>
     </cheat>
     <cheat>
-      <description>Get at least 65</description>
+      <description>Get at least 65,536 GP after each battle</description>
       <code>3335-0D6E</code>
     </cheat>
     <cheat>
-      <description>Get 99 of items that you are given or find in a pot</description>
+      <description>Get 99 of items that you are given or find in a pot, treasure chest, ect</description>
       <code>17BF-D404</code>
     </cheat>
     <cheat>
@@ -15026,7 +15049,7 @@
       <code>AFB5-DD83</code>
     </cheat>
     <cheat>
-      <description>Get 65</description>
+      <description>Get 65,000+ exp points after each battle</description>
       <code>7E3592FF</code>
       <code>7E359EFF</code>
     </cheat>
@@ -15319,7 +15342,7 @@
       <code>E613-5117</code>
     </cheat>
     <cheat>
-      <description>Auto cast Float</description>
+      <description>Auto cast Float, Regen, Haste, Shell, Safe and Rflect</description>
       <code>3813-51C7</code>
     </cheat>
     <cheat>
@@ -16312,7 +16335,7 @@
       <code>E613-5117</code>
     </cheat>
     <cheat>
-      <description>Auto Cast Float</description>
+      <description>Auto Cast Float, Regen, Haste, Shell, Safe and Rflect</description>
       <code>3813-51C7</code>
     </cheat>
     <cheat>
@@ -17316,7 +17339,7 @@
       <code>DDC9-AFD0</code>
     </cheat>
     <cheat>
-      <description>Enemies never get knocked down</description>
+      <description>Enemies never get knocked down, hit them until they die</description>
       <code>7E0D7000</code>
     </cheat>
     <cheat>
@@ -17588,7 +17611,7 @@
       <code>D433-0D6F</code>
     </cheat>
     <cheat>
-      <description>Enemies never get knocked down</description>
+      <description>Enemies never get knocked down, hit them until they die</description>
       <code>7E0D7000</code>
     </cheat>
     <cheat>
@@ -17882,12 +17905,12 @@
       <code>7E007209</code>
     </cheat>
     <cheat>
-      <description>Infinite Axe</description>
+      <description>Infinite Axe, Dagger, Grendade (slot 2 item)</description>
       <code>C9B6-6700</code>
       <code>C9BE-6D00</code>
     </cheat>
     <cheat>
-      <description>Infinite Axe</description>
+      <description>Infinite Axe, Dagger, Grendade (slot 2 item) (alt)</description>
       <code>7E007399</code>
     </cheat>
     <cheat>
@@ -18083,7 +18106,7 @@
       <code>DD79-5F0B</code>
     </cheat>
     <cheat>
-      <description>Enemies start with 1 HP (If enabled when starting a new game</description>
+      <description>Enemies start with 1 HP (If enabled when starting a new game, die, or finish the game, you'll restart with 1 HP. When you gain a level it should correct itself.)</description>
       <code>DD7D-770C</code>
       <code>CE7D-776C</code>
       <code>FF7D-77AC</code>
@@ -18196,12 +18219,12 @@
       <code>DD6D-1FB2</code>
     </cheat>
     <cheat>
-      <description>Always have Starmine Bombs (if you have none</description>
+      <description>Always have Starmine Bombs (if you have none, fire 3 off)</description>
       <code>DDB5-3FFD</code>
       <code>D42F-1F47</code>
     </cheat>
     <cheat>
-      <description>Always get Rank S for dungeons</description>
+      <description>Always get Rank S for dungeons, regardless of time taken</description>
       <code>BA2B-3FC4</code>
     </cheat>
   </cartridge>
@@ -18428,7 +18451,7 @@
       <code>7E035002</code>
     </cheat>
     <cheat>
-      <description>Infinite Konami code use (up</description>
+      <description>Infinite Konami code use (up, up, down, down, left, right, left, right, B, A)</description>
       <code>C2A9-0DDD</code>
     </cheat>
     <cheat>
@@ -18988,11 +19011,11 @@
       <code>3C68-3706</code>
     </cheat>
     <cheat>
-      <description>With 1 or more wood</description>
+      <description>With 1 or more wood, take some to get 999</description>
       <code>6D87-CFDA</code>
     </cheat>
     <cheat>
-      <description>With 0 wood</description>
+      <description>With 0 wood, take some to get 999</description>
       <code>F987-CDDA</code>
     </cheat>
     <cheat>
@@ -19021,7 +19044,7 @@
       <code>DD21-DFD4</code>
     </cheat>
     <cheat>
-      <description>Infinite Baseballs</description>
+      <description>Infinite Baseballs, Slingshot and Rifle ammo</description>
       <code>DD2A-A76F</code>
     </cheat>
     <cheat>
@@ -19657,7 +19680,7 @@
   <cartridge sha256="4dc2b5de98e9109583d9b61b38d26a8216af4dba246ef71350122213630562d0">
     <name>Imperium (USA)</name>
     <cheat>
-      <description>Invincibility against lesser robots</description>
+      <description>Invincibility against lesser robots, weapons and lasers</description>
       <code>1D34-D4A1</code>
       <code>1DC3-DDF7</code>
     </cheat>
@@ -19948,7 +19971,7 @@
       <code>7EF0C4FF</code>
     </cheat>
     <cheat>
-      <description>Start with 50</description>
+      <description>Start with 50,000 gold</description>
       <code>A0ED-D460</code>
     </cheat>
     <cheat>
@@ -20340,37 +20363,37 @@
       <code>D7AC-6D6D</code>
     </cheat>
     <cheat>
-      <description>Start on level 3</description>
+      <description>Start on level 3, part 2</description>
       <code>CBAB-67AD</code>
       <code>D0AC-6DDD</code>
       <code>6DAC-6D0D</code>
     </cheat>
     <cheat>
-      <description>Start on level 3</description>
+      <description>Start on level 3, part 3</description>
       <code>CBAB-67AD</code>
       <code>D5AC-6DDD</code>
       <code>6DAC-6D0D</code>
     </cheat>
     <cheat>
-      <description>Start on level 5</description>
+      <description>Start on level 5, part 2</description>
       <code>CBAB-67AD</code>
       <code>D9AC-6DDD</code>
       <code>6DAC-6D0D</code>
     </cheat>
     <cheat>
-      <description>Start on level 5</description>
+      <description>Start on level 5, part 3</description>
       <code>CBAB-67AD</code>
       <code>D6AC-6DDD</code>
       <code>6DAC-6D0D</code>
     </cheat>
     <cheat>
-      <description>Start on level 7</description>
+      <description>Start on level 7, part 2</description>
       <code>CBAB-67AD</code>
       <code>D1AC-6DDD</code>
       <code>6DAC-6D0D</code>
     </cheat>
     <cheat>
-      <description>Start on level 7</description>
+      <description>Start on level 7, part 3</description>
       <code>CBAB-67AD</code>
       <code>DBAC-6DDD</code>
       <code>6DAC-6D0D</code>
@@ -23806,47 +23829,47 @@
       <code>D42D-6D6C</code>
     </cheat>
     <cheat>
-      <description>Start with 1</description>
+      <description>Start with 1,380 gold</description>
       <code>D92D-6D6C</code>
     </cheat>
     <cheat>
-      <description>Start with 2</description>
+      <description>Start with 2,148 gold</description>
       <code>D62D-6D6C</code>
     </cheat>
     <cheat>
-      <description>Start with 8</description>
+      <description>Start with 8,292 gold</description>
       <code>4D2D-6D6C</code>
     </cheat>
     <cheat>
-      <description>Start with 22</description>
+      <description>Start with 22,116 gold</description>
       <code>912D-6D6C</code>
     </cheat>
     <cheat>
-      <description>Start with 65</description>
+      <description>Start with 65,380 gold</description>
       <code>EE2D-6D6C</code>
     </cheat>
     <cheat>
-      <description>Start on level 2</description>
+      <description>Start on level 2, MP = 8/8, HP = 17/17, EXP = 0/40</description>
       <code>D422-040C</code>
     </cheat>
     <cheat>
-      <description>Start on level 3</description>
+      <description>Start on level 3, MP = 10/10, HP = 23/23, EXP = 0/90</description>
       <code>D722-040C</code>
     </cheat>
     <cheat>
-      <description>Start on level 4</description>
+      <description>Start on level 4, MP = 12/12, HP = 28/28, EXP = 0/170</description>
       <code>D022-040C</code>
     </cheat>
     <cheat>
-      <description>Start on level 5</description>
+      <description>Start on level 5, MP = 19/19, HP =36/36, EXP = 0/280</description>
       <code>D922-040C</code>
     </cheat>
     <cheat>
-      <description>Start on level 241</description>
+      <description>Start on level 241, HP = 255, MP = 255, EXP = 22859, walk at a regular speed</description>
       <code>EF22-040C</code>
     </cheat>
     <cheat>
-      <description>Start on level 242</description>
+      <description>Start on level 242, HP = 220, MP = 221, EXP = 30560, walk at a medium speed</description>
       <code>E422-040C</code>
     </cheat>
   </cartridge>
@@ -23913,17 +23936,17 @@
       <code>D169-443B</code>
     </cheat>
     <cheat>
-      <description>Start with $128</description>
+      <description>Start with $128,000</description>
       <code>DD6E-440D</code>
       <code>D96E-446D</code>
     </cheat>
     <cheat>
-      <description>Start with $88</description>
+      <description>Start with $88,000</description>
       <code>5D6E-440D</code>
       <code>D76E-446D</code>
     </cheat>
     <cheat>
-      <description>Start with $12</description>
+      <description>Start with $12,800</description>
       <code>6D6E-440D</code>
     </cheat>
   </cartridge>
@@ -23997,7 +24020,7 @@
       <code>40BE-1DAD</code>
     </cheat>
     <cheat>
-      <description>After you die</description>
+      <description>After you die, your main weapon is fully powered up from then on</description>
       <code>D0B5-CDAD</code>
       <code>CBB5-CD6D</code>
     </cheat>
@@ -24339,7 +24362,7 @@
       <code>D7D9-F38B</code>
     </cheat>
     <cheat>
-      <description>Trigger doors are open (works with most dungeon doors</description>
+      <description>Trigger doors are open (works with most dungeon doors, some that even look closed)</description>
       <code>EED6-BE5B</code>
     </cheat>
     <cheat>
@@ -24535,7 +24558,7 @@
       <code>7EF365FF</code>
     </cheat>
     <cheat>
-      <description>Have all Maps</description>
+      <description>Have all Maps, Compasses and Big Keys</description>
       <code>EEE1-2276</code>
       <code>EEE1-2256</code>
       <code>EEE1-2286</code>
@@ -25555,7 +25578,7 @@
       <code>DAC2-848B</code>
     </cheat>
     <cheat>
-      <description>Lighter gravity effect (disable right after pressing start</description>
+      <description>Lighter gravity effect (disable right after pressing start, don't enable until first game play screen)</description>
       <code>0DCA-5D5B</code>
     </cheat>
     <cheat>
@@ -25841,7 +25864,7 @@
       <code>DF3C-0D18</code>
     </cheat>
     <cheat>
-      <description>Immune to all petrifying effects (stone</description>
+      <description>Immune to all petrifying effects (stone, poison, confused, etc)</description>
       <code>6D8F-0DC4</code>
     </cheat>
     <cheat>
@@ -28948,7 +28971,7 @@
       <code>EEEB-17A1</code>
     </cheat>
     <cheat>
-      <description>Gain 35</description>
+      <description>Gain 35,000 gold after a battle</description>
       <code>EEED-4F05</code>
     </cheat>
     <cheat>
@@ -29474,67 +29497,67 @@
       <code>DBAA-5D0F</code>
     </cheat>
     <cheat>
-      <description>TD</description>
+      <description>TD, FG, PAT, S worth 1 point - home team</description>
       <code>CBA2-8F6D</code>
       <code>DFA2-8FAD</code>
     </cheat>
     <cheat>
-      <description>TD</description>
+      <description>TD, FG, PAT, S worth 3 points - home team</description>
       <code>CBA2-8F6D</code>
       <code>D7A2-8FAD</code>
     </cheat>
     <cheat>
-      <description>TD</description>
+      <description>TD, FG, PAT, S worth 5 points - home team</description>
       <code>CBA2-8F6D</code>
       <code>D9A2-8FAD</code>
     </cheat>
     <cheat>
-      <description>TD</description>
+      <description>TD, FG, PAT, S worth 7 points - home team</description>
       <code>CBA2-8F6D</code>
       <code>D5A2-8FAD</code>
     </cheat>
     <cheat>
-      <description>TD</description>
+      <description>TD, FG, PAT, S worth 14 points - home team</description>
       <code>CBA2-8F6D</code>
       <code>D3A2-8FAD</code>
     </cheat>
     <cheat>
-      <description>TD</description>
+      <description>TD, FG, PAT, S worth 21 points - home team</description>
       <code>CBA2-8F6D</code>
       <code>F9A2-8FAD</code>
     </cheat>
     <cheat>
-      <description>TD</description>
+      <description>TD, FG, PAT, S worth 35 points - home team</description>
       <code>CBA2-8F6D</code>
       <code>47A2-8FAD</code>
     </cheat>
     <cheat>
-      <description>TD</description>
+      <description>TD, FG, PAT, S worth 3 points - visitor</description>
       <code>CBAD-ED0D</code>
       <code>DFAD-ED6D</code>
     </cheat>
     <cheat>
-      <description>TD</description>
+      <description>TD, FG, PAT, S worth 5 points - visitor</description>
       <code>CBAD-ED0D</code>
       <code>D9AD-ED6D</code>
     </cheat>
     <cheat>
-      <description>TD</description>
+      <description>TD, FG, PAT, S worth 7 points - visitor</description>
       <code>CBAD-ED0D</code>
       <code>D5AD-ED6D</code>
     </cheat>
     <cheat>
-      <description>TD</description>
+      <description>TD, FG, PAT, S worth 14 points - visitor</description>
       <code>CBAD-ED0D</code>
       <code>D3AD-ED6D</code>
     </cheat>
     <cheat>
-      <description>TD</description>
+      <description>TD, FG, PAT, S worth 21 points - visitor</description>
       <code>CBAD-ED0D</code>
       <code>F9AD-ED6D</code>
     </cheat>
     <cheat>
-      <description>TD</description>
+      <description>TD, FG, PAT, S worth 35 points - visitor</description>
       <code>CBAD-ED0D</code>
       <code>47AD-ED6D</code>
     </cheat>
@@ -29823,7 +29846,7 @@
       <code>7E042D09</code>
     </cheat>
     <cheat>
-      <description>Set score to 90</description>
+      <description>Set score to 90,000,000</description>
       <code>7E044809</code>
     </cheat>
     <cheat>
@@ -30230,7 +30253,7 @@
       <code>B354-E4D8</code>
     </cheat>
     <cheat>
-      <description>Infinite equipment</description>
+      <description>Infinite equipment, all Gems selectable on pick-up</description>
       <code>FA85-7464</code>
       <code>6D85-7704</code>
       <code>FE85-7764</code>
@@ -30460,27 +30483,27 @@
       <code>3CED-34B7</code>
     </cheat>
     <cheat>
-      <description>Start with 100</description>
+      <description>Start with 100,000 C-bills</description>
       <code>103E-C4AD</code>
     </cheat>
     <cheat>
-      <description>Start with 250</description>
+      <description>Start with 250,000 C-bills</description>
       <code>EC3E-C4AD</code>
     </cheat>
     <cheat>
-      <description>Start with 562</description>
+      <description>Start with 562,000 C-bills</description>
       <code>D43E-C7DD</code>
     </cheat>
     <cheat>
-      <description>Start with 1</description>
+      <description>Start with 1,074,000 C-bills</description>
       <code>D03E-C7DD</code>
     </cheat>
     <cheat>
-      <description>Start with 5</description>
+      <description>Start with 5,170,000 C-bills</description>
       <code>F03E-C7DD</code>
     </cheat>
     <cheat>
-      <description>Start with 10</description>
+      <description>Start with 10,290,000 C-bills</description>
       <code>463E-C7DD</code>
     </cheat>
   </cartridge>
@@ -30541,12 +30564,12 @@
       <code>1000-7998</code>
     </cheat>
     <cheat>
-      <description>Machine Gun starts at 1</description>
+      <description>Machine Gun starts at 1,000</description>
       <code>D700-79B8</code>
       <code>3600-7998</code>
     </cheat>
     <cheat>
-      <description>Machine Gun starts at 10</description>
+      <description>Machine Gun starts at 10,000</description>
       <code>4100-79B8</code>
       <code>FD00-7998</code>
     </cheat>
@@ -30568,12 +30591,12 @@
       <code>DD00-75F8</code>
     </cheat>
     <cheat>
-      <description>Large Laser starts at 1</description>
+      <description>Large Laser starts at 1,000</description>
       <code>3600-7128</code>
       <code>D700-75F8</code>
     </cheat>
     <cheat>
-      <description>Large Laser starts at 10</description>
+      <description>Large Laser starts at 10,000</description>
       <code>FD00-7128</code>
       <code>4100-75F8</code>
     </cheat>
@@ -30973,7 +30996,7 @@
       <code>7E1FB309</code>
     </cheat>
     <cheat>
-      <description>Have Shouryuken (F</description>
+      <description>Have Shouryuken (F, D, DF + Fire) (must have max health and health containers)</description>
       <code>7E1FB180</code>
     </cheat>
     <cheat>
@@ -31190,7 +31213,7 @@
       <code>C2AD-4D65</code>
     </cheat>
     <cheat>
-      <description>Infinite ammo for all weapons (to change weapons</description>
+      <description>Infinite ammo for all weapons (to change weapons, turn code off, pick up new weapon, turn back on)</description>
       <code>C926-C7A1</code>
     </cheat>
     <cheat>
@@ -31682,7 +31705,7 @@
       <code>D468-0DBF</code>
     </cheat>
     <cheat>
-      <description>Zach moves faster</description>
+      <description>Zach moves faster, but the wrong way</description>
       <code>EE62-04BF</code>
     </cheat>
     <cheat>
@@ -31716,29 +31739,29 @@
   <cartridge sha256="6b0ac4d52d24536cdb7d9d0dc7d19ee30d08ac34363983290c5912ccc850fa0d">
     <name>Monopoly (USA) (Rev 1)</name>
     <cheat>
-      <description>Land</description>
+      <description>Land, rent and some other things are free - all players</description>
       <code>1D85-6FDF</code>
     </cheat>
     <cheat>
-      <description>Land</description>
+      <description>Land, rent and some other things are $50 - all players</description>
       <code>3B85-6FDF</code>
       <code>7485-6F0F</code>
       <code>DD85-6F6F</code>
     </cheat>
     <cheat>
-      <description>Land</description>
+      <description>Land, rent and some other things are $100 - all players</description>
       <code>3B85-6FDF</code>
       <code>1085-6F0F</code>
       <code>DD85-6F6F</code>
     </cheat>
     <cheat>
-      <description>Land</description>
+      <description>Land, rent and some other things are $200 - all players</description>
       <code>3B85-6FDF</code>
       <code>A685-6F0F</code>
       <code>DD85-6F6F</code>
     </cheat>
     <cheat>
-      <description>Land</description>
+      <description>Land, rent and some other things are $500 - all players</description>
       <code>3B85-6FDF</code>
       <code>E085-6F0F</code>
       <code>DD85-6F6F</code>
@@ -31815,29 +31838,29 @@
   <cartridge sha256="480ae7186fd5b28200cd88e136b9cd3b6600d32508e280a0bc27ea0ed8d3c0bb">
     <name>Monopoly (USA)</name>
     <cheat>
-      <description>Land</description>
+      <description>Land, rent and some other things are free - all players</description>
       <code>1D85-6FDF</code>
     </cheat>
     <cheat>
-      <description>Land</description>
+      <description>Land, rent and some other things are $50 - all players</description>
       <code>3B85-6FDF</code>
       <code>7485-6F0F</code>
       <code>DD85-6F6F</code>
     </cheat>
     <cheat>
-      <description>Land</description>
+      <description>Land, rent and some other things are $100 - all players</description>
       <code>3B85-6FDF</code>
       <code>1085-6F0F</code>
       <code>DD85-6F6F</code>
     </cheat>
     <cheat>
-      <description>Land</description>
+      <description>Land, rent and some other things are $200 - all players</description>
       <code>3B85-6FDF</code>
       <code>A685-6F0F</code>
       <code>DD85-6F6F</code>
     </cheat>
     <cheat>
-      <description>Land</description>
+      <description>Land, rent and some other things are $500 - all players</description>
       <code>3B85-6FDF</code>
       <code>E085-6F0F</code>
       <code>DD85-6F6F</code>
@@ -32230,47 +32253,47 @@
       <code>0823-19C4</code>
     </cheat>
     <cheat>
-      <description>Scorpion's</description>
+      <description>Scorpion's, Sub-Zero's and Reptile's High Punch do more damage</description>
       <code>F328-3934</code>
     </cheat>
     <cheat>
-      <description>Scorpion's</description>
+      <description>Scorpion's, Sub-Zero's and Reptile's Low Punch do more damage</description>
       <code>F32A-3044</code>
     </cheat>
     <cheat>
-      <description>Scorpion's</description>
+      <description>Scorpion's, Sub-Zero's and Reptile's High Kick do more damage</description>
       <code>062E-39C4</code>
     </cheat>
     <cheat>
-      <description>Scorpion's</description>
+      <description>Scorpion's, Sub-Zero's and Reptile's Low Kick do more damage</description>
       <code>062E-3534</code>
     </cheat>
     <cheat>
-      <description>Scorpion's</description>
+      <description>Scorpion's, Sub-Zero's and Reptile's Head Blow do more damage</description>
       <code>7A22-30C4</code>
     </cheat>
     <cheat>
-      <description>Scorpion's</description>
+      <description>Scorpion's, Sub-Zero's and Reptile's Knee do more damage</description>
       <code>062A-3114</code>
     </cheat>
     <cheat>
-      <description>Scorpion's</description>
+      <description>Scorpion's, Sub-Zero's and Reptile's Crouched Kick do more damage</description>
       <code>F62F-41C7</code>
     </cheat>
     <cheat>
-      <description>Scorpion's</description>
+      <description>Scorpion's, Sub-Zero's and Reptile's Uppercut do more damage</description>
       <code>562C-35C4</code>
     </cheat>
     <cheat>
-      <description>Scorpion's</description>
+      <description>Scorpion's, Sub-Zero's and Reptile's Roundhouse Kick do more damage</description>
       <code>1D2F-4017</code>
     </cheat>
     <cheat>
-      <description>Scorpion's</description>
+      <description>Scorpion's, Sub-Zero's and Reptile's Foot Sweep do more damage</description>
       <code>7A2D-4147</code>
     </cheat>
     <cheat>
-      <description>Scorpion's</description>
+      <description>Scorpion's, Sub-Zero's and Reptile's Flying Punch do more damage</description>
       <code>0823-3944</code>
     </cheat>
     <cheat>
@@ -32343,32 +32366,32 @@
       <code>DD6A-47AF</code>
     </cheat>
     <cheat>
-      <description>After 1st match</description>
+      <description>After 1st match, almost always fight at the Palace Gates</description>
       <code>CB6A-44AF</code>
       <code>DF6A-47DF</code>
     </cheat>
     <cheat>
-      <description>After 1st match</description>
+      <description>After 1st match, almost always fight in the Warrior Shrine</description>
       <code>CB6A-44AF</code>
       <code>D46A-47DF</code>
     </cheat>
     <cheat>
-      <description>After 1st match</description>
+      <description>After 1st match, almost always fight in the Pit</description>
       <code>CB6A-44AF</code>
       <code>D76A-47DF</code>
     </cheat>
     <cheat>
-      <description>After 1st match</description>
+      <description>After 1st match, almost always fight in the Throne Room</description>
       <code>CB6A-44AF</code>
       <code>D06A-47DF</code>
     </cheat>
     <cheat>
-      <description>After 1st match</description>
+      <description>After 1st match, almost always fight in Goro's Lair</description>
       <code>CB6A-44AF</code>
       <code>D96A-47DF</code>
     </cheat>
     <cheat>
-      <description>After 1st match</description>
+      <description>After 1st match, almost always fight in the bottom of the pit (screen says Goro's Lair)</description>
       <code>CB6A-44AF</code>
       <code>D16A-47DF</code>
     </cheat>
@@ -32976,11 +32999,11 @@
   <cartridge sha256="c70b812a9d2df7f95b279e4050e03a4b8a68588a370816e645f378296b84e5d1">
     <name>NBA All-Star Challenge (USA)</name>
     <cheat>
-      <description>P1 can't score in the 1-on-1</description>
+      <description>P1 can't score in the 1-on-1, free throw or tournament stages</description>
       <code>123B-3F0D</code>
     </cheat>
     <cheat>
-      <description>P2 or computer can't score in the 1-on-1</description>
+      <description>P2 or computer can't score in the 1-on-1, free throw or tournament events</description>
       <code>A238-340D</code>
     </cheat>
     <cheat>
@@ -33090,35 +33113,35 @@
       <code>41E5-F47D</code>
     </cheat>
     <cheat>
-      <description>Have Power Push</description>
+      <description>Have Power Push, Powered Up 3pts, Infinite Turbo, Always On Fire, Super Dunks, Max Power, Powered Up Goal Tending and Quick Hands - P1</description>
       <code>EEEA-1FDC</code>
     </cheat>
     <cheat>
-      <description>Have Power Block</description>
+      <description>Have Power Block, Powered Up 3pts, Infinite Turbo, Always On Fire, Super Dunks, Max Power, Powered Up Goal Tending and Quick Hands - P2</description>
       <code>EEE1-C46C</code>
     </cheat>
     <cheat>
-      <description>Have Power Block</description>
+      <description>Have Power Block, Powered Up 3pts, Infinite Turbo, Always On Fire, Super Dunks, Max Power, Powered Up Goal Tending and Quick Hands - P3</description>
       <code>EEEF-3DDC</code>
     </cheat>
     <cheat>
-      <description>Have Power Block</description>
+      <description>Have Power Block, Powered Up 3pts, Infinite Turbo, Always On Fire, Super Dunks, Max Power, Powered Up Goal Tending and Quick Hands - P4</description>
       <code>EEE8-3F6C</code>
     </cheat>
     <cheat>
-      <description>Have Power-up offense</description>
+      <description>Have Power-up offense, Speed Up, block opponent to make both fall, Teleport Pass and High Shots - P1</description>
       <code>EEEA-1F0C</code>
     </cheat>
     <cheat>
-      <description>Have Power-up offense</description>
+      <description>Have Power-up offense, Speed Up, block opponent to make both fall, Teleport Pass and High Shots - P2</description>
       <code>EEE1-C4AC</code>
     </cheat>
     <cheat>
-      <description>Have Power-up offense</description>
+      <description>Have Power-up offense, Speed Up, block opponent to make both fall, Teleport Pass and High Shots - P3</description>
       <code>EEEF-3D0C</code>
     </cheat>
     <cheat>
-      <description>Have Power-up offense</description>
+      <description>Have Power-up offense, Speed Up, block opponent to make both fall, Teleport Pass and High Shots - P4</description>
       <code>EEE8-3FAC</code>
     </cheat>
     <cheat>
@@ -34017,12 +34040,12 @@
       <code>DB34-A767</code>
     </cheat>
     <cheat>
-      <description>P1 shots worth 1 extra point (2-pt. shots worth 3</description>
+      <description>P1 shots worth 1 extra point (2-pt. shots worth 3, 3-pt. shots worth 4)</description>
       <code>76BA-A404</code>
       <code>76B9-6FA7</code>
     </cheat>
     <cheat>
-      <description>P2 shots worth 1 extra point (2-pt. shots worth 3</description>
+      <description>P2 shots worth 1 extra point (2-pt. shots worth 3, 3-pt. shots worth 4)</description>
       <code>76B0-64A7</code>
       <code>76B8-A704</code>
     </cheat>
@@ -34102,7 +34125,7 @@
       <code>EC67-CF64</code>
     </cheat>
     <cheat>
-      <description>Visitor scores 1 point for goals</description>
+      <description>Visitor scores 1 point for goals, Home scores 3</description>
       <code>1BA1-4D01</code>
     </cheat>
     <cheat>
@@ -34949,7 +34972,7 @@
       <code>DD2F-AFF4</code>
     </cheat>
     <cheat>
-      <description>View 'Edit Units' screen to give everyone 2778 max HP (2000 of it won't be visible</description>
+      <description>View 'Edit Units' screen to give everyone 2778 max HP (2000 of it won't be visible, and you won't get your HP restored. It will go down to 999 max HP if it tries to update the amount)</description>
       <code>CBE7-A70C</code>
       <code>B2E0-AD6C</code>
       <code>2CE0-ADAC</code>
@@ -35873,19 +35896,19 @@
       <code>EEE6-673F</code>
     </cheat>
     <cheat>
-      <description>Chezni starts with 40 Power</description>
+      <description>Chezni starts with 40 Power, 42 Attack</description>
       <code>46EB-6D3F</code>
     </cheat>
     <cheat>
-      <description>Chezni starts with 60 Power</description>
+      <description>Chezni starts with 60 Power, 62 Attack</description>
       <code>7AEB-6D3F</code>
     </cheat>
     <cheat>
-      <description>Chezni starts with 42 Defense</description>
+      <description>Chezni starts with 42 Defense, 30 Endurance</description>
       <code>F3EB-6F3F</code>
     </cheat>
     <cheat>
-      <description>Chezni starts with 72 Defense</description>
+      <description>Chezni starts with 72 Defense, 60 Endurance</description>
       <code>7AEB-6F3F</code>
     </cheat>
     <cheat>
@@ -36177,6 +36200,10 @@
       <code>D131-4F0D</code>
       <code>5331-4F6D</code>
     </cheat>
+    <cheat>
+      <description>One hit kills</description>
+      <code>102C-C7D3</code>
+    </cheat>
   </cartridge>
   <cartridge sha256="5c0b5266a191852ca593235f07180e673cb79e3f0b0dd31f65808eef83bf6e90">
     <name>PGA Tour Golf (USA)</name>
@@ -36297,11 +36324,11 @@
       <code>DD63-DD04</code>
     </cheat>
     <cheat>
-      <description>After losing a life automatically finish level</description>
+      <description>After losing a life automatically finish level, gain 99 lives and retain all power-ups</description>
       <code>00D83AAD</code>
     </cheat>
     <cheat>
-      <description>Once power-up has been obtained</description>
+      <description>Once power-up has been obtained, it is not lost until you continue (doesn't work for weapon, only power-ups)</description>
       <code>C229-D7A4</code>
     </cheat>
     <cheat>
@@ -36556,6 +36583,13 @@
     <cheat>
       <description>Infinite lives</description>
       <code>C280-1F6F</code>
+    </cheat>
+    <cheat>
+      <description>One hit kills</description>
+      <code>3CAF-3DAF</code>
+      <code>3CAF-3FDF</code>
+      <code>CBAF-3F0F</code>
+      <code>5EAF-3F6F</code>
     </cheat>
     <cheat>
       <description>1/2 health after 1st hit (1st life only)</description>
@@ -38363,23 +38397,23 @@
       <code>DDB1-0F65</code>
     </cheat>
     <cheat>
-      <description>Sell sturdy tires for $4</description>
+      <description>Sell sturdy tires for $4,910</description>
       <code>0BBA-0FA5</code>
     </cheat>
     <cheat>
-      <description>Sell 4-liter high output engine for $9</description>
+      <description>Sell 4-liter high output engine for $9,925</description>
       <code>BBB5-0DA5</code>
     </cheat>
     <cheat>
-      <description>Start new game with $9</description>
+      <description>Start new game with $9,910</description>
       <code>BBCB-DF61</code>
     </cheat>
     <cheat>
-      <description>Start new game with $49</description>
+      <description>Start new game with $49,104,910</description>
       <code>62CB-D701</code>
     </cheat>
     <cheat>
-      <description>Start new game with $99</description>
+      <description>Start new game with $99,109,910</description>
       <code>BBCB-DF61</code>
       <code>62CB-D701</code>
     </cheat>
@@ -38808,7 +38842,7 @@
       <code>C98E-6FDF</code>
     </cheat>
     <cheat>
-      <description>Instant 255 mph speed (best to get into 6th gear before activating this code</description>
+      <description>Instant 255 mph speed (best to get into 6th gear before activating this code, then you can go 357 mph)</description>
       <code>CBC5-D70F</code>
       <code>EEC5-D7AF</code>
     </cheat>
@@ -39384,103 +39418,103 @@
       <code>DBB0-346F</code>
     </cheat>
     <cheat>
-      <description>Start on level 1</description>
+      <description>Start on level 1, sub-level 2</description>
       <code>F3BB-3FA4</code>
       <code>3FBB-3F64</code>
       <code>DFBB-3FD4</code>
     </cheat>
     <cheat>
-      <description>Start on level 1</description>
+      <description>Start on level 1, sub-level 3</description>
       <code>F3BB-3FA4</code>
       <code>3FBB-3F64</code>
       <code>D4BB-3FD4</code>
     </cheat>
     <cheat>
-      <description>Start on level 1</description>
+      <description>Start on level 1, sub-level 4</description>
       <code>F3BB-3FA4</code>
       <code>3FBB-3F64</code>
       <code>D7BB-3FD4</code>
     </cheat>
     <cheat>
-      <description>Start on level 2</description>
+      <description>Start on level 2, sub-level 1</description>
       <code>F3BB-3FA4</code>
       <code>3FBB-3F64</code>
       <code>D0BB-3FD4</code>
     </cheat>
     <cheat>
-      <description>Start on level 2</description>
+      <description>Start on level 2, sub-level 2</description>
       <code>F3BB-3FA4</code>
       <code>3FBB-3F64</code>
       <code>D9BB-3FD4</code>
     </cheat>
     <cheat>
-      <description>Start on level 2</description>
+      <description>Start on level 2, sub-level 3</description>
       <code>F3BB-3FA4</code>
       <code>3FBB-3F64</code>
       <code>D1BB-3FD4</code>
     </cheat>
     <cheat>
-      <description>Start on level 2</description>
+      <description>Start on level 2, sub-level 4</description>
       <code>F3BB-3FA4</code>
       <code>3FBB-3F64</code>
       <code>D5BB-3FD4</code>
     </cheat>
     <cheat>
-      <description>Start on level 3</description>
+      <description>Start on level 3, sub-level 1</description>
       <code>F3BB-3FA4</code>
       <code>3FBB-3F64</code>
       <code>D6BB-3FD4</code>
     </cheat>
     <cheat>
-      <description>Start on level 3</description>
+      <description>Start on level 3, sub-level 2</description>
       <code>F3BB-3FA4</code>
       <code>3FBB-3F64</code>
       <code>DBBB-3FD4</code>
     </cheat>
     <cheat>
-      <description>Start on level 3</description>
+      <description>Start on level 3, sub-level 3</description>
       <code>F3BB-3FA4</code>
       <code>3FBB-3F64</code>
       <code>DCBB-3FD4</code>
     </cheat>
     <cheat>
-      <description>Start on level 3</description>
+      <description>Start on level 3, sub-level 4</description>
       <code>F3BB-3FA4</code>
       <code>3FBB-3F64</code>
       <code>D8BB-3FD4</code>
     </cheat>
     <cheat>
-      <description>Start on level 4</description>
+      <description>Start on level 4, sub-level 1</description>
       <code>F3BB-3FA4</code>
       <code>3FBB-3F64</code>
       <code>DABB-3FD4</code>
     </cheat>
     <cheat>
-      <description>Start on level 4</description>
+      <description>Start on level 4, sub-level 3</description>
       <code>F3BB-3FA4</code>
       <code>3FBB-3F64</code>
       <code>D3BB-3FD4</code>
     </cheat>
     <cheat>
-      <description>Start on level 4</description>
+      <description>Start on level 4, sub-level 4</description>
       <code>F3BB-3FA4</code>
       <code>3FBB-3F64</code>
       <code>DEBB-3FD4</code>
     </cheat>
     <cheat>
-      <description>Start on level 5</description>
+      <description>Start on level 5, sub-level 1</description>
       <code>F3BB-3FA4</code>
       <code>3FBB-3F64</code>
       <code>FDBB-3FD4</code>
     </cheat>
     <cheat>
-      <description>Start on level 5</description>
+      <description>Start on level 5, sub-level 2</description>
       <code>F3BB-3FA4</code>
       <code>3FBB-3F64</code>
       <code>FFBB-3FD4</code>
     </cheat>
     <cheat>
-      <description>Start on level 5</description>
+      <description>Start on level 5, sub-level 3</description>
       <code>F3BB-3FA4</code>
       <code>3FBB-3F64</code>
       <code>F4BB-3FD4</code>
@@ -39743,23 +39777,23 @@
       <code>FD36-4F0D</code>
     </cheat>
     <cheat>
-      <description>Start with $50</description>
+      <description>Start with $50,000</description>
       <code>D9CF-CDD5</code>
     </cheat>
     <cheat>
-      <description>Start with $100</description>
+      <description>Start with $100,000</description>
       <code>FDCF-CDD5</code>
     </cheat>
     <cheat>
-      <description>Start with $500</description>
+      <description>Start with $500,000</description>
       <code>9DCF-CDD5</code>
     </cheat>
     <cheat>
-      <description>Start with $990</description>
+      <description>Start with $990,000</description>
       <code>BBCF-CDD5</code>
     </cheat>
     <cheat>
-      <description>Start with $5</description>
+      <description>Start with $5,020,000</description>
       <code>D9CF-CD05</code>
     </cheat>
   </cartridge>
@@ -40076,12 +40110,16 @@
       <code>7E0B79FF</code>
     </cheat>
     <cheat>
-      <description>Last area</description>
+      <description>Last area, last level</description>
       <code>7E0B7B03</code>
     </cheat>
   </cartridge>
   <cartridge sha256="7c0f915b581796e5b6dd384ecdc0dad8af4d956492fbcedec628c8845d911d7e">
     <name>Rocky Rodent (USA)</name>
+    <cheat>
+      <description>Invincibility</description>
+      <code>7E005472</code>
+    </cheat>
     <cheat>
       <description>Infinite lives</description>
       <code>3CAD-4DA7</code>
@@ -40178,92 +40216,92 @@
   <cartridge sha256="815bfcf4fd6eb23a20c2e50dde023c210b273ffb6cd86a93909d803c3643ce46">
     <name>Romance of the Three Kingdoms II (USA)</name>
     <cheat>
-      <description>Start with 30</description>
+      <description>Start with 30,000 gold pieces (scenario 1)</description>
       <code>7DE7-A465</code>
       <code>59E7-A4A5</code>
     </cheat>
     <cheat>
-      <description>Start with 30</description>
+      <description>Start with 30,000 rice (scenario 1)</description>
       <code>7DE7-A765</code>
       <code>59E7-A705</code>
     </cheat>
     <cheat>
-      <description>Start with 30</description>
+      <description>Start with 30,000 population (scenario 1)</description>
       <code>7DE7-A765</code>
       <code>59E7-A7A5</code>
     </cheat>
     <cheat>
-      <description>Start with 30</description>
+      <description>Start with 30,000 gold pieces (scenario 2)</description>
       <code>7D67-A406</code>
       <code>596D-A466</code>
     </cheat>
     <cheat>
-      <description>Start with 30</description>
+      <description>Start with 30,000 rice (scenario 2)</description>
       <code>7D67-A4A6</code>
       <code>596D-A7D6</code>
     </cheat>
     <cheat>
-      <description>Start with 30</description>
+      <description>Start with 30,000 population (scenario 2)</description>
       <code>7D67-A706</code>
       <code>596D-A766</code>
     </cheat>
     <cheat>
-      <description>Start with 30</description>
+      <description>Start with 30,000 gold pieces (scenario 3)</description>
       <code>7D67-A7DB</code>
       <code>5967-A70B</code>
     </cheat>
     <cheat>
-      <description>Start with 30</description>
+      <description>Start with 30,000 rice (scenario 3)</description>
       <code>7D67-A76B</code>
       <code>5967-A7AB</code>
     </cheat>
     <cheat>
-      <description>Start with 30</description>
+      <description>Start with 30,000 population (scenario 3)</description>
       <code>7D60-ADDB</code>
       <code>5960-AD0B</code>
     </cheat>
     <cheat>
-      <description>Start with 30</description>
+      <description>Start with 30,000 gold pieces (scenario 4)</description>
       <code>7D67-A70C</code>
       <code>5967-A76C</code>
     </cheat>
     <cheat>
-      <description>Start with 30</description>
+      <description>Start with 30,000 rice (scenario 4)</description>
       <code>7D67-A7AC</code>
       <code>5960-ADDC</code>
     </cheat>
     <cheat>
-      <description>Start with 30</description>
+      <description>Start with 30,000 population (scenario 4)</description>
       <code>7D60-AD0C</code>
       <code>5960-AD6C</code>
     </cheat>
     <cheat>
-      <description>Start with 30</description>
+      <description>Start with 30,000 gold pieces (scenario 5)</description>
       <code>7DBB-D7D6</code>
       <code>59BB-D706</code>
     </cheat>
     <cheat>
-      <description>Start with 30</description>
+      <description>Start with 30,000 rice (scenario 5)</description>
       <code>7DBB-D766</code>
       <code>59BB-D7A6</code>
     </cheat>
     <cheat>
-      <description>Start with 30</description>
+      <description>Start with 30,000 population (scenario 5)</description>
       <code>7DBC-DDD6</code>
       <code>59BC-DD06</code>
     </cheat>
     <cheat>
-      <description>Start with 30</description>
+      <description>Start with 30,000 gold pieces (scenario 6)</description>
       <code>7DB9-6766</code>
       <code>59B9-67A6</code>
     </cheat>
     <cheat>
-      <description>Start with 30</description>
+      <description>Start with 30,000 rice (scenario 6)</description>
       <code>7DB1-6DD6</code>
       <code>59B1-6D06</code>
     </cheat>
     <cheat>
-      <description>Start with 30</description>
+      <description>Start with 30,000 population (scenario 6)</description>
       <code>7DB1-6D66</code>
       <code>59B1-6DA6</code>
     </cheat>
@@ -40389,6 +40427,17 @@
       <code>DC83-AD84</code>
     </cheat>
   </cartridge>
+  <cartridge sha256="00e78318926e5cae79bce0535fddd3dccaa732f5c70e43acefc2769a9899eaed">
+    <name>Rushing Beat Shura (Japan)</name>
+    <cheat>
+      <description>Invincibility</description>
+      <code>C22A-1DD7</code>
+    </cheat>
+    <cheat>
+      <description>One hit kills</description>
+      <code>1028-CDD3</code>
+    </cheat>
+  </cartridge>
   <cartridge sha256="0aa16d6b588ba05ab00936201e68a694746fc5e1b2e4f2dbf7cda09265a81379">
     <name>Sailormoon (France)</name>
     <cheat>
@@ -40472,6 +40521,10 @@
   </cartridge>
   <cartridge sha256="34e1af0642c85148c5a3dc3c7ab4bcbda13a9fea190934b5526c555fff035651">
     <name>Saturday Night Slam Masters (USA)</name>
+    <cheat>
+      <description>Infinite time</description>
+      <code>7E1A7001</code>
+    </cheat>
     <cheat>
       <description>Able to pick the same characters</description>
       <code>1D79-EFD4</code>
@@ -40702,7 +40755,7 @@
       <code>7E22DBFF</code>
     </cheat>
     <cheat>
-      <description>Everyone is invincible</description>
+      <description>Everyone is invincible, including enemies</description>
       <code>C2A0-CD5A</code>
       <code>826B-41DF</code>
       <code>D261-400F</code>
@@ -40717,7 +40770,7 @@
       <code>DDA9-15D5</code>
     </cheat>
     <cheat>
-      <description>View Boy's stats to get 131</description>
+      <description>View Boy's stats to get 131,074 Talons (don't use if you already have more than that)</description>
       <code>CBC4-3DE0</code>
       <code>D4C4-3F70</code>
       <code>DDC4-3F50</code>
@@ -40805,7 +40858,7 @@
       <code>9C06-85AD</code>
     </cheat>
     <cheat>
-      <description>Chest in elder's basement in Potos gives you 65</description>
+      <description>Chest in elder's basement in Potos gives you 65,360 GP</description>
       <code>EE6B-8738</code>
     </cheat>
     <cheat>
@@ -40871,7 +40924,7 @@
       <code>8208-776D</code>
     </cheat>
     <cheat>
-      <description>Change screens to max out Strength</description>
+      <description>Change screens to max out Strength, Agility, Constitution, Intelligence and Wisdom</description>
       <code>DD03-ED04</code>
     </cheat>
     <cheat>
@@ -40879,11 +40932,11 @@
       <code>EE28-EDAF</code>
     </cheat>
     <cheat>
-      <description>Start with 32</description>
+      <description>Start with 32,768 GP</description>
       <code>6D28-EFDF</code>
     </cheat>
     <cheat>
-      <description>Start with 65</description>
+      <description>Start with 65,280 GP</description>
       <code>EE28-EFDF</code>
     </cheat>
     <cheat>
@@ -41037,7 +41090,7 @@
       <code>F3E1-1FDD</code>
     </cheat>
     <cheat>
-      <description>Add 65</description>
+      <description>Add 65,000 nuyen (if less than 65,000)</description>
       <code>DFBC-17AF</code>
       <code>DEB8-1D0F</code>
       <code>7AB8-1D6F</code>
@@ -41045,7 +41098,7 @@
       <code>53B8-1DAF</code>
     </cheat>
     <cheat>
-      <description>Add about 131</description>
+      <description>Add about 131,000 nuyen (if less than 65,000)</description>
       <code>D4BC-17AF</code>
       <code>DEB8-1D0F</code>
       <code>7AB8-1D6F</code>
@@ -41053,7 +41106,7 @@
       <code>53B8-1DAF</code>
     </cheat>
     <cheat>
-      <description>Add about 524</description>
+      <description>Add about 524,000 nuyen (if less than 65,000)</description>
       <code>D6BC-17AF</code>
       <code>DEB8-1D0F</code>
       <code>7AB8-1D6F</code>
@@ -41168,7 +41221,7 @@
       <code>53B8-1DAF</code>
     </cheat>
     <cheat>
-      <description>Learn powerball spell</description>
+      <description>Learn powerball spell, level 6</description>
       <code>D1BC-17AF</code>
       <code>D5B8-1D0F</code>
       <code>7AB8-1D6F</code>
@@ -41176,7 +41229,7 @@
       <code>53B8-1DAF</code>
     </cheat>
     <cheat>
-      <description>Learn heal spell</description>
+      <description>Learn heal spell, level 6</description>
       <code>D1BC-17AF</code>
       <code>D6B8-1D0F</code>
       <code>7AB8-1D6F</code>
@@ -41184,7 +41237,7 @@
       <code>53B8-1DAF</code>
     </cheat>
     <cheat>
-      <description>Learn invisibility spell</description>
+      <description>Learn invisibility spell, level 6</description>
       <code>D1BC-17AF</code>
       <code>DBB8-1D0F</code>
       <code>7AB8-1D6F</code>
@@ -41192,7 +41245,7 @@
       <code>53B8-1DAF</code>
     </cheat>
     <cheat>
-      <description>Learn armor spell</description>
+      <description>Learn armor spell, level 6</description>
       <code>D1BC-17AF</code>
       <code>DCB8-1D0F</code>
       <code>7AB8-1D6F</code>
@@ -41200,7 +41253,7 @@
       <code>53B8-1DAF</code>
     </cheat>
     <cheat>
-      <description>Learn summon spirit spell</description>
+      <description>Learn summon spirit spell, level 6</description>
       <code>D1BC-17AF</code>
       <code>D8B8-1D0F</code>
       <code>7AB8-1D6F</code>
@@ -41208,7 +41261,7 @@
       <code>53B8-1DAF</code>
     </cheat>
     <cheat>
-      <description>Learn freeze spell</description>
+      <description>Learn freeze spell, level 6</description>
       <code>D1BC-17AF</code>
       <code>DAB8-1D0F</code>
       <code>7AB8-1D6F</code>
@@ -41216,7 +41269,7 @@
       <code>53B8-1DAF</code>
     </cheat>
     <cheat>
-      <description>Learn firearms skill</description>
+      <description>Learn firearms skill, level 5</description>
       <code>D9BC-17AF</code>
       <code>DFB8-1D0F</code>
       <code>7AB8-1D6F</code>
@@ -41224,7 +41277,7 @@
       <code>53B8-1DAF</code>
     </cheat>
     <cheat>
-      <description>Learn firearms skill</description>
+      <description>Learn firearms skill, level 10</description>
       <code>DCBC-17AF</code>
       <code>DFB8-1D0F</code>
       <code>7AB8-1D6F</code>
@@ -41232,7 +41285,7 @@
       <code>53B8-1DAF</code>
     </cheat>
     <cheat>
-      <description>Learn firearms skill</description>
+      <description>Learn firearms skill, level 15</description>
       <code>DEBC-17AF</code>
       <code>DFB8-1D0F</code>
       <code>7AB8-1D6F</code>
@@ -41240,7 +41293,7 @@
       <code>53B8-1DAF</code>
     </cheat>
     <cheat>
-      <description>Learn computer skill</description>
+      <description>Learn computer skill, level 6</description>
       <code>D1BC-17AF</code>
       <code>D0B8-1D0F</code>
       <code>7AB8-1D6F</code>
@@ -41248,7 +41301,7 @@
       <code>53B8-1DAF</code>
     </cheat>
     <cheat>
-      <description>Learn leadership skill</description>
+      <description>Learn leadership skill, level 6</description>
       <code>D1BC-17AF</code>
       <code>D9B8-1D0F</code>
       <code>7AB8-1D6F</code>
@@ -41256,7 +41309,7 @@
       <code>53B8-1DAF</code>
     </cheat>
     <cheat>
-      <description>Learn armed combat skill</description>
+      <description>Learn armed combat skill, level 6</description>
       <code>D1BC-17AF</code>
       <code>D7B8-1D0F</code>
       <code>7AB8-1D6F</code>
@@ -41264,7 +41317,7 @@
       <code>53B8-1DAF</code>
     </cheat>
     <cheat>
-      <description>Learn unarmed combat skill</description>
+      <description>Learn unarmed combat skill, level 6</description>
       <code>D1BC-17AF</code>
       <code>D4B8-1D0F</code>
       <code>7AB8-1D6F</code>
@@ -41272,7 +41325,7 @@
       <code>53B8-1DAF</code>
     </cheat>
     <cheat>
-      <description>Learn negotiation skill</description>
+      <description>Learn negotiation skill, level 6</description>
       <code>D1BC-17AF</code>
       <code>D1B8-1D0F</code>
       <code>7AB8-1D6F</code>
@@ -41280,23 +41333,23 @@
       <code>53B8-1DAF</code>
     </cheat>
     <cheat>
-      <description>Start with computer</description>
+      <description>Start with computer, firearms skills at level 2</description>
       <code>D4BE-4DA4</code>
     </cheat>
     <cheat>
-      <description>Start with computer</description>
+      <description>Start with computer, firearms skills at level 3</description>
       <code>D7BE-4DA4</code>
     </cheat>
     <cheat>
-      <description>Start with computer</description>
+      <description>Start with computer, firearms skills at level 4</description>
       <code>D0BE-4DA4</code>
     </cheat>
     <cheat>
-      <description>Start with computer</description>
+      <description>Start with computer, firearms skills at level 5</description>
       <code>D9BE-4DA4</code>
     </cheat>
     <cheat>
-      <description>Start with computer</description>
+      <description>Start with computer, firearms skills at level 6</description>
       <code>D1BE-4DA4</code>
     </cheat>
     <cheat>
@@ -41434,7 +41487,7 @@
       <code>7E11DC0B</code>
     </cheat>
     <cheat>
-      <description>Play as Daiki Stage 2</description>
+      <description>Play as Daiki Stage 2, Ryuuta Stage 3</description>
       <code>7E11DC0C</code>
     </cheat>
     <cheat>
@@ -41546,17 +41599,17 @@
       <code>DE67-DFAA</code>
     </cheat>
     <cheat>
-      <description>Start easy game with $40</description>
+      <description>Start easy game with $40,000</description>
       <code>0DAB-6D02</code>
       <code>BAAB-6D62</code>
     </cheat>
     <cheat>
-      <description>Start easy game with $60</description>
+      <description>Start easy game with $60,000</description>
       <code>1DAB-6D02</code>
       <code>3CAB-6D62</code>
     </cheat>
     <cheat>
-      <description>Start easy game with $3</description>
+      <description>Start easy game with $3,000</description>
       <code>86AB-6D02</code>
       <code>D8AB-6D62</code>
     </cheat>
@@ -41570,14 +41623,14 @@
   <cartridge sha256="bf74c58e4190faca2f3a967dc190fe529d13887d1262b72e057b5353e43cf67f">
     <name>SimCity 2000 (USA)</name>
     <cheat>
-      <description>Start with $99</description>
+      <description>Start with $99,999,999 on all the maps except the Land Of Freedom</description>
       <code>EEF3-8700</code>
       <code>3DF3-8760</code>
       <code>E9FE-8D60</code>
       <code>D9FE-8DA0</code>
     </cheat>
     <cheat>
-      <description>Start with $99</description>
+      <description>Start with $99,999,999 on the Land Of Freedom</description>
       <code>EEF3-8D00</code>
       <code>3DF3-8D60</code>
       <code>E9F3-8F60</code>
@@ -41695,7 +41748,7 @@
       <code>6DCC-A4D4</code>
     </cheat>
     <cheat>
-      <description>No enemies or Jemeralds (good for exploring</description>
+      <description>No enemies or Jemeralds (good for exploring, disable to advance)</description>
       <code>8BAB-6DD9</code>
     </cheat>
     <cheat>
@@ -42541,7 +42594,7 @@
       <code>DDEB-649F</code>
     </cheat>
     <cheat>
-      <description>Gems set to 999</description>
+      <description>Gems set to 999,999 every time one is obtained</description>
       <code>DDE8-64BF</code>
     </cheat>
     <cheat>
@@ -42562,43 +42615,43 @@
       <code>D7EA-AFA1</code>
     </cheat>
     <cheat>
-      <description>600 EXP required instead of 1</description>
+      <description>600 EXP required instead of 1,000 for level 5</description>
       <code>D1EA-A4A1</code>
     </cheat>
     <cheat>
-      <description>1</description>
+      <description>1,200 EXP required instead of 2,000 for level 6</description>
       <code>F4EA-A7A1</code>
     </cheat>
     <cheat>
-      <description>2</description>
+      <description>2,400 EXP required instead of 3,200 for level 7</description>
       <code>40E2-ADA1</code>
     </cheat>
     <cheat>
-      <description>3</description>
+      <description>3,500 EXP required instead of 4,500 for level 8</description>
       <code>79E2-AFA1</code>
     </cheat>
     <cheat>
-      <description>4</description>
+      <description>4,800 EXP required instead of 5,800 for level 9</description>
       <code>06E2-A4A1</code>
     </cheat>
     <cheat>
-      <description>6</description>
+      <description>6,600 EXP required instead of 7,600 for level 10</description>
       <code>11E2-A7A1</code>
     </cheat>
     <cheat>
-      <description>8</description>
+      <description>8,600 EXP required instead of 9,600 for level 11</description>
       <code>61E3-ADA1</code>
     </cheat>
     <cheat>
-      <description>10</description>
+      <description>10,000 EXP required instead of 12,400 for level 12</description>
       <code>DDE3-AFA1</code>
     </cheat>
     <cheat>
-      <description>13</description>
+      <description>13,000 EXP required instead of 15,000 for level 13</description>
       <code>7DE3-A4A1</code>
     </cheat>
     <cheat>
-      <description>15</description>
+      <description>15,000 EXP required instead of 19,000 for level 14</description>
       <code>9DE3-A7A1</code>
     </cheat>
     <cheat>
@@ -42667,12 +42720,12 @@
   <cartridge sha256="f5b7418c00ccac44615cfc57c7e17d57533837056886f6d733e6b714c36dec1f">
     <name>Space Megaforce (USA)</name>
     <cheat>
-      <description>Protection against enemy hits</description>
+      <description>Protection against enemy hits, and weapon level goes to 2 when hit</description>
       <code>CB68-D4AC</code>
       <code>D168-D7DC</code>
     </cheat>
     <cheat>
-      <description>Protection against enemy hits</description>
+      <description>Protection against enemy hits, and weapon level goes to 6 when hit</description>
       <code>CB68-D4AC</code>
       <code>D168-D7DC</code>
       <code>D16A-D4DC</code>
@@ -43479,7 +43532,7 @@
       <code>7E10F8FF</code>
     </cheat>
     <cheat>
-      <description>Infinite health - Wolverine</description>
+      <description>Infinite health - Wolverine, Cyclops, Storm</description>
       <code>7E0B2964</code>
     </cheat>
     <cheat>
@@ -43499,7 +43552,7 @@
       <code>C26D-090A</code>
     </cheat>
     <cheat>
-      <description>Infinite lives - Wolverine</description>
+      <description>Infinite lives - Wolverine, Cyclops, Storm</description>
       <code>C2C2-D767</code>
     </cheat>
     <cheat>
@@ -43719,7 +43772,7 @@
       <code>DD1F-E465</code>
     </cheat>
     <cheat>
-      <description>View status screen for max strength</description>
+      <description>View status screen for max strength, constitution, agility and stamina (These affect the base stat, making it savable. Stamina won't appear updated until you turn the codes off and re-enter that character's status screen)</description>
       <code>DD48-54CF</code>
       <code>9843-774D</code>
       <code>1F47-5F3D</code>
@@ -43969,7 +44022,7 @@
       <code>EDBE-0F09</code>
     </cheat>
     <cheat>
-      <description>Dizziness lasts longer (on harder levels</description>
+      <description>Dizziness lasts longer (on harder levels, won't work on computer)</description>
       <code>C9BE-0DA9</code>
     </cheat>
     <cheat>
@@ -44028,7 +44081,7 @@
       <code>2AA5-DF60</code>
     </cheat>
     <cheat>
-      <description>Some special moves are easier to perform (E Honda's Sumo Head Butt</description>
+      <description>Some special moves are easier to perform (E Honda's Sumo Head Butt, Blanka's Rolling Attack, Guile's Flash Kick and Sonic Boom, Chun Li's Whirlwind Kick)</description>
       <code>DD84-DD01</code>
     </cheat>
     <cheat>
@@ -44054,43 +44107,43 @@
       <code>1DB8-ADF3</code>
     </cheat>
     <cheat>
-      <description>Fireballs</description>
+      <description>Fireballs, Sonic Booms and Yoga Fires always go to the right (thrown to the left, they go backwards)</description>
       <code>DDE3-DF01</code>
     </cheat>
     <cheat>
-      <description>Light Fireballs</description>
+      <description>Light Fireballs, Sonic Booms and Yoga Fires are slower</description>
       <code>EEB8-A793</code>
     </cheat>
     <cheat>
-      <description>Light Fireballs</description>
+      <description>Light Fireballs, Sonic Booms and Yoga Fires are faster</description>
       <code>EBB8-A793</code>
     </cheat>
     <cheat>
-      <description>Light Fireballs</description>
+      <description>Light Fireballs, Sonic Booms and Yoga Fires are super fast</description>
       <code>EDB8-A793</code>
     </cheat>
     <cheat>
-      <description>Medium Fireballs</description>
+      <description>Medium Fireballs, Sonic Booms and Yoga Fires are slower</description>
       <code>EEB8-A723</code>
     </cheat>
     <cheat>
-      <description>Medium Fireballs</description>
+      <description>Medium Fireballs, Sonic Booms and Yoga Fires are faster</description>
       <code>EBB8-A723</code>
     </cheat>
     <cheat>
-      <description>Medium Fireballs</description>
+      <description>Medium Fireballs, Sonic Booms and Yoga Fires are super fast</description>
       <code>EDB8-A723</code>
     </cheat>
     <cheat>
-      <description>Hard Fireballs</description>
+      <description>Hard Fireballs, Sonic Booms and Yoga Fires are slower</description>
       <code>EEBA-AD93</code>
     </cheat>
     <cheat>
-      <description>Hard Fireballs</description>
+      <description>Hard Fireballs, Sonic Booms and Yoga Fires are faster</description>
       <code>EBBA-AD93</code>
     </cheat>
     <cheat>
-      <description>Hard Fireballs</description>
+      <description>Hard Fireballs, Sonic Booms and Yoga Fires are super fast</description>
       <code>EDBA-AD93</code>
     </cheat>
     <cheat>
@@ -44139,15 +44192,15 @@
       <code>32B5-DDB3</code>
     </cheat>
     <cheat>
-      <description>Most special moves disabled (computer can still do them</description>
+      <description>Most special moves disabled (computer can still do them, Zangief can still do Spinning Clothesline)</description>
       <code>6DA4-6707</code>
     </cheat>
     <cheat>
-      <description>Invisible Fireballs</description>
+      <description>Invisible Fireballs, Sonic Booms, Yoga Fires and Yoga Flames</description>
       <code>CB61-07A4</code>
     </cheat>
     <cheat>
-      <description>No Fireballs</description>
+      <description>No Fireballs, Sonic Booms or Yoga Fires, makes Yoga Flame invisible</description>
       <code>1868-0D6C</code>
     </cheat>
     <cheat>
@@ -44369,7 +44422,7 @@
       <code>C734-7405</code>
     </cheat>
     <cheat>
-      <description>1st throws do more damage (if you have enough health)</description>
+      <description>1st throws do more damage (if you have enough health), others do less damage</description>
       <code>F034-7405</code>
     </cheat>
     <cheat>
@@ -44386,11 +44439,11 @@
     </cheat>
     <cheat>
       <description>Enable 10 star turbo mode</description>
-      <code>ADFC-E40D </code>
-      <code> F9FC-E46D</code>
+      <code>ADFC-E40D</code>
+      <code>F9FC-E46D</code>
     </cheat>
     <cheat>
-      <description>No charging required for special moves (except Balrog’s turn punch power)</description>
+      <description>No charging required for special moves (except Balrog's turn punch power)</description>
       <code>D071-E460</code>
     </cheat>
     <cheat>
@@ -44765,6 +44818,14 @@
   <cartridge sha256="05f14e6ed3394d9273e2397769a8acf1a9db646be6066e82269521e8eec53562">
     <name>Strike Gunner S.T.G (USA)</name>
     <cheat>
+      <description>Invincibility after first life - P1</description>
+      <code>7E024E05</code>
+    </cheat>
+    <cheat>
+      <description>Invincibility after first life - P2</description>
+      <code>7E024F05</code>
+    </cheat>
+    <cheat>
       <description>Infinite lives - P1</description>
       <code>C2B4-076F</code>
     </cheat>
@@ -44783,16 +44844,6 @@
     <cheat>
       <description>Infinite special weapon energy - P2</description>
       <code>C2E4-0DAD</code>
-    </cheat>
-    <cheat>
-      <description>Max shot power on pick-up - P1</description>
-      <code>CBAA-640A</code>
-      <code>DBAA-64AA</code>
-    </cheat>
-    <cheat>
-      <description>Max shot power on pick-up - P2</description>
-      <code>CBAA-640A</code>
-      <code>DBA2-64AA</code>
     </cheat>
     <cheat>
       <description>Start on stage 2</description>
@@ -44993,7 +45044,7 @@
       <code>D96A-67AF</code>
     </cheat>
     <cheat>
-      <description>Start in area 1</description>
+      <description>Start in area 1, stage 2</description>
       <code>D766-0FD7</code>
     </cheat>
     <cheat>
@@ -45001,15 +45052,15 @@
       <code>D966-0FD7</code>
     </cheat>
     <cheat>
-      <description>Start in area 1</description>
+      <description>Start in area 1, stage 3</description>
       <code>D566-0FD7</code>
     </cheat>
     <cheat>
-      <description>Start in area 2</description>
+      <description>Start in area 2, stage 1</description>
       <code>DC66-0FD7</code>
     </cheat>
     <cheat>
-      <description>Start in area 2</description>
+      <description>Start in area 2, stage 2</description>
       <code>DA66-0FD7</code>
     </cheat>
     <cheat>
@@ -45017,27 +45068,27 @@
       <code>D366-0FD7</code>
     </cheat>
     <cheat>
-      <description>Start in area 2</description>
+      <description>Start in area 2, stage 3</description>
       <code>FF66-0FD7</code>
     </cheat>
     <cheat>
-      <description>Start in area 3</description>
+      <description>Start in area 3, stage 1</description>
       <code>F066-0FD7</code>
     </cheat>
     <cheat>
-      <description>Start in area 3</description>
+      <description>Start in area 3, stage 2</description>
       <code>F666-0FD7</code>
     </cheat>
     <cheat>
-      <description>Start in area 3</description>
+      <description>Start in area 3, stage 3</description>
       <code>FC66-0FD7</code>
     </cheat>
     <cheat>
-      <description>Start in area 4</description>
+      <description>Start in area 4, stage 1</description>
       <code>F266-0FD7</code>
     </cheat>
     <cheat>
-      <description>Start in area 4</description>
+      <description>Start in area 4, stage 2</description>
       <code>FE66-0FD7</code>
     </cheat>
     <cheat>
@@ -45045,23 +45096,23 @@
       <code>4D66-0FD7</code>
     </cheat>
     <cheat>
-      <description>Start in area 4</description>
+      <description>Start in area 4, stage 3</description>
       <code>4066-0FD7</code>
     </cheat>
     <cheat>
-      <description>Start in area 5</description>
+      <description>Start in area 5, stage 1</description>
       <code>4566-0FD7</code>
     </cheat>
     <cheat>
-      <description>Start in area 5</description>
+      <description>Start in area 5, stage 2</description>
       <code>4B66-0FD7</code>
     </cheat>
     <cheat>
-      <description>Start in area 5</description>
+      <description>Start in area 5, stage 3</description>
       <code>4866-0FD7</code>
     </cheat>
     <cheat>
-      <description>Start in area 5</description>
+      <description>Start in area 5, bonus round</description>
       <code>4266-0FD7</code>
     </cheat>
     <cheat>
@@ -45766,19 +45817,19 @@
       <code>7E0E3980</code>
     </cheat>
     <cheat>
-      <description>Invincibility</description>
+      <description>Invincibility, Kick Bomb, Punch Glove, Bomb Walk, Brick Walk - P1</description>
       <code>7E0D79E3</code>
     </cheat>
     <cheat>
-      <description>Invincibility</description>
+      <description>Invincibility, Kick Bomb, Punch Glove, Bomb Walk, Brick Walk - P2</description>
       <code>7E0DB9E3</code>
     </cheat>
     <cheat>
-      <description>Invincibility</description>
+      <description>Invincibility, Kick Bomb, Punch Glove, Bomb Walk, Brick Walk - P3</description>
       <code>7E0DF9E3</code>
     </cheat>
     <cheat>
-      <description>Invincibility</description>
+      <description>Invincibility, Kick Bomb, Punch Glove, Bomb Walk, Brick Walk - P4</description>
       <code>7E0E39E3</code>
     </cheat>
     <cheat>
@@ -45874,11 +45925,11 @@
       <code>7E0E3809</code>
     </cheat>
     <cheat>
-      <description>Have 9</description>
+      <description>Have 9,000,000 points - P1</description>
       <code>7E0D5B09</code>
     </cheat>
     <cheat>
-      <description>Have 9</description>
+      <description>Have 9,000,000 points - P2</description>
       <code>7E0D9B09</code>
     </cheat>
   </cartridge>
@@ -46113,11 +46164,11 @@
       <code>7E83F501</code>
     </cheat>
     <cheat>
-      <description>Have 4</description>
+      <description>Have 4,000,000 points - P1</description>
       <code>7E5DEFA7</code>
     </cheat>
     <cheat>
-      <description>Have 9</description>
+      <description>Have 9,000,000 points - P2</description>
       <code>7E0D9B09</code>
     </cheat>
     <cheat>
@@ -46659,7 +46710,7 @@
   <cartridge sha256="7468c271d7240cf4e0d08c16e9969a1b1b1caf5adc0e5adc568d93c92651a057">
     <name>Super Ghouls'n Ghosts (USA)</name>
     <cheat>
-      <description>Invincibility (disable at end of first two stages of level 3</description>
+      <description>Invincibility (disable at end of first two stages of level 3, so you can trigger the hidden end of stage marker)</description>
       <code>D4D5-B286</code>
     </cheat>
     <cheat>
@@ -46730,7 +46781,7 @@
       <code>7E045302</code>
     </cheat>
     <cheat>
-      <description>900</description>
+      <description>900,000 points</description>
       <code>7E029509</code>
     </cheat>
     <cheat>
@@ -47162,7 +47213,7 @@
       <code>D5A8-6CAA</code>
     </cheat>
     <cheat>
-      <description>(SMB3) After getting star</description>
+      <description>(SMB3) After getting star, invincible until end of level (may have to disable to jump)</description>
       <code>C23B-680D</code>
     </cheat>
     <cheat>
@@ -47858,6 +47909,10 @@
       <code>C222-D4DD</code>
     </cheat>
     <cheat>
+      <description>Multi-jump</description>
+      <code>6D2E-0FDF</code>
+    </cheat>
+    <cheat>
       <description>Multi-jump and float down (disable in water and to get on Yoshi)</description>
       <code>7E147101</code>
     </cheat>
@@ -48073,7 +48128,7 @@
       <code>C2EE-64BF</code>
     </cheat>
     <cheat>
-      <description>After using the magnifying glass</description>
+      <description>After using the magnifying glass, red coins and hidden items are always revealed</description>
       <code>C2C8-A465</code>
     </cheat>
     <cheat>
@@ -48242,7 +48297,7 @@
       <code>6DB6-6F55</code>
     </cheat>
     <cheat>
-      <description>After using the magnifying glass</description>
+      <description>After using the magnifying glass, red coins and hidden items are always revealed</description>
       <code>C2C8-A465</code>
     </cheat>
     <cheat>
@@ -48480,7 +48535,7 @@
       <code>7E09A5FF</code>
     </cheat>
     <cheat>
-      <description>Automatically collect secret and/or special items in current room (Missiles</description>
+      <description>Automatically collect secret and/or special items in current room (Missiles, Energy Tanks, ect)</description>
       <code>402B-3DB7</code>
       <code>402E-3FF7</code>
     </cheat>
@@ -48527,6 +48582,11 @@
       <description>Moon-jump</description>
       <code>7E0B2D44</code>
       <code>7E0B2E01</code>
+    </cheat>
+    <cheat>
+      <description>Metroids can be killed without being frozen first</description>
+      <code>403F-38DE</code>
+      <code>6D34-3BAE</code>
     </cheat>
     <cheat>
       <description>Infinite time to escape ship</description>
@@ -48712,19 +48772,11 @@
       <code>822E-07B0</code>
     </cheat>
     <cheat>
-      <description>Start with 250 cash</description>
-      <code>EC81-AF69</code>
-    </cheat>
-    <cheat>
-      <description>Start with 40</description>
-      <code>6981-A4D9</code>
-    </cheat>
-    <cheat>
       <description>Don't subtract money (must have enough to buy)</description>
       <code>1DAF-D4D6</code>
     </cheat>
     <cheat>
-      <description>All stats are 20 (attack</description>
+      <description>All stats are 20 (attack, defense, energy, max HP, max NP)</description>
       <code>CB2F-A70C</code>
       <code>3C2F-A7AC</code>
       <code>F02F-A76C</code>
@@ -48803,6 +48855,14 @@
       <description>M power-ups set to 15</description>
       <code>F930-6720</code>
     </cheat>
+    <cheat>
+      <description>Start with 250 cash</description>
+      <code>EC81-AF69</code>
+    </cheat>
+    <cheat>
+      <description>Start with 40,960 cash</description>
+      <code>6981-A4D9</code>
+    </cheat>
   </cartridge>
   <cartridge sha256="a8acbbd6f8afbf289a6b837da6cd8bd109a00cd38625c956ab8ff739732d9e4f">
     <name>Super Nova (USA)</name>
@@ -48824,46 +48884,6 @@
       <code>3CA0-CD6F</code>
     </cheat>
     <cheat>
-      <description>$9</description>
-      <code>DBB6-1FDF</code>
-    </cheat>
-    <cheat>
-      <description>$2</description>
-      <code>D4B6-1FDF</code>
-    </cheat>
-    <cheat>
-      <description>$9</description>
-      <code>DBB6-1F6F</code>
-    </cheat>
-    <cheat>
-      <description>$2</description>
-      <code>D4B6-1F6F</code>
-    </cheat>
-    <cheat>
-      <description>$2</description>
-      <code>D4B6-14DF</code>
-    </cheat>
-    <cheat>
-      <description>$9</description>
-      <code>DBB6-14DF</code>
-    </cheat>
-    <cheat>
-      <description>$2</description>
-      <code>D4B6-146F</code>
-    </cheat>
-    <cheat>
-      <description>$9</description>
-      <code>DBB6-146F</code>
-    </cheat>
-    <cheat>
-      <description>$2</description>
-      <code>D4B6-17DF</code>
-    </cheat>
-    <cheat>
-      <description>$4</description>
-      <code>D0B6-17DF</code>
-    </cheat>
-    <cheat>
       <description>Indestructible engine</description>
       <code>C283-34D7</code>
     </cheat>
@@ -48883,6 +48903,46 @@
       <description>Vehicle can take only about 35% damage</description>
       <code>7D81-37D7</code>
     </cheat>
+    <cheat>
+      <description>$9,000 for brakes</description>
+      <code>DBB6-1FDF</code>
+    </cheat>
+    <cheat>
+      <description>$2,000 for brakes</description>
+      <code>D4B6-1FDF</code>
+    </cheat>
+    <cheat>
+      <description>$9,000 for tires</description>
+      <code>DBB6-1F6F</code>
+    </cheat>
+    <cheat>
+      <description>$2,000 for tires</description>
+      <code>D4B6-1F6F</code>
+    </cheat>
+    <cheat>
+      <description>$2,000 for shocks</description>
+      <code>D4B6-14DF</code>
+    </cheat>
+    <cheat>
+      <description>$9,000 for shocks</description>
+      <code>DBB6-14DF</code>
+    </cheat>
+    <cheat>
+      <description>$2,000 for lights</description>
+      <code>D4B6-146F</code>
+    </cheat>
+    <cheat>
+      <description>$9,000 for lights</description>
+      <code>DBB6-146F</code>
+    </cheat>
+    <cheat>
+      <description>$2,000 for engine</description>
+      <code>D4B6-17DF</code>
+    </cheat>
+    <cheat>
+      <description>$4,000 for engine</description>
+      <code>D0B6-17DF</code>
+    </cheat>
   </cartridge>
   <cartridge sha256="24b687f95bb9737d223738f13c00aeaa7d697fa9e2fd50597b81d0cfa2160daa">
     <name>Super Off Road (USA)</name>
@@ -48900,11 +48960,11 @@
       <code>2B84-DDDD</code>
     </cheat>
     <cheat>
-      <description>Start with $500</description>
+      <description>Start with $500,000</description>
       <code>D987-6D0F</code>
     </cheat>
     <cheat>
-      <description>Start with $900</description>
+      <description>Start with $900,000</description>
       <code>DB87-6D0F</code>
     </cheat>
   </cartridge>
@@ -49090,7 +49150,7 @@
       <code>7D68-6D6B</code>
     </cheat>
     <cheat>
-      <description>Once FORCE has been obtained</description>
+      <description>Once FORCE has been obtained, keep it forever</description>
       <code>C267-A4D9</code>
     </cheat>
     <cheat>
@@ -49209,43 +49269,43 @@
       <code>D0C9-056F</code>
     </cheat>
     <cheat>
-      <description>Select low mode to start on level 5 (Blastris B</description>
+      <description>Select low mode to start on level 5 (Blastris B, Type B)</description>
       <code>D968-D100</code>
     </cheat>
     <cheat>
-      <description>Select low mode to start on level 15 (Blastris B</description>
+      <description>Select low mode to start on level 15 (Blastris B, Type B)</description>
       <code>DE68-D100</code>
     </cheat>
     <cheat>
-      <description>Select low mode to start on level 25 (Blastris B</description>
+      <description>Select low mode to start on level 25 (Blastris B, Type B)</description>
       <code>FB68-D100</code>
     </cheat>
     <cheat>
-      <description>Select low mode to start on level 30 (Blastris B</description>
+      <description>Select low mode to start on level 30 (Blastris B, Type B)</description>
       <code>F368-D100</code>
     </cheat>
     <cheat>
-      <description>Select low mode to start on level 35 (Blastris B</description>
+      <description>Select low mode to start on level 35 (Blastris B, Type B)</description>
       <code>4768-D100</code>
     </cheat>
     <cheat>
-      <description>Select low mode to start on level 40 (Blastris B</description>
+      <description>Select low mode to start on level 40 (Blastris B, Type B)</description>
       <code>4668-D100</code>
     </cheat>
     <cheat>
-      <description>Clear stage after 1 Molian is hit (Mole Patrol</description>
+      <description>Clear stage after 1 Molian is hit (Mole Patrol, Stage Mode)</description>
       <code>BAA6-01DD</code>
     </cheat>
     <cheat>
-      <description>Take no damage (LazerBlazer</description>
+      <description>Take no damage (LazerBlazer, Type A)</description>
       <code>8262-64A1</code>
     </cheat>
     <cheat>
-      <description>Take no damage (LazerBlazer Game</description>
+      <description>Take no damage (LazerBlazer Game, Type B)</description>
       <code>3CB0-670B</code>
     </cheat>
     <cheat>
-      <description>Take no damage (LazerBlazer Game</description>
+      <description>Take no damage (LazerBlazer Game, Type C)</description>
       <code>C269-67DE</code>
     </cheat>
   </cartridge>
@@ -49316,7 +49376,7 @@
       <code>7E189A06</code>
     </cheat>
     <cheat>
-      <description>Infinite credits (if continue timer runs out and player starts</description>
+      <description>Infinite credits (if continue timer runs out and player starts, a credit gets used)</description>
       <code>C223-D78B</code>
     </cheat>
     <cheat>
@@ -49790,7 +49850,7 @@
       <code>DDCC-1DDA</code>
     </cheat>
     <cheat>
-      <description>Mind control</description>
+      <description>Mind control, Slow, Deflect and Invisible don't drain force bar</description>
       <code>C22F-C7F9</code>
     </cheat>
     <cheat>
@@ -50341,7 +50401,7 @@
   <cartridge sha256="d17cb5c73174060fcbd9cba6c705643f19c3b8be24d0f7ee43aee674ff1ea38e">
     <name>Super Street Fighter II (USA)</name>
     <cheat>
-      <description>Invincibility (except against throws</description>
+      <description>Invincibility (except against throws, projectiles don't work) - P1</description>
       <code>6D9C-8D67</code>
       <code>DF9C-8DA7</code>
       <code>6DA1-8FD5</code>
@@ -50442,15 +50502,15 @@
       <code>F122-E760</code>
     </cheat>
     <cheat>
-      <description>Balrog - Fierce charging punch</description>
+      <description>Balrog - Fierce charging punch, does heavy damage</description>
       <code>6E6A-EF90</code>
     </cheat>
     <cheat>
-      <description>Balrog - Roundhouse charging uppercut</description>
+      <description>Balrog - Roundhouse charging uppercut, does heavy damage</description>
       <code>6E62-E790</code>
     </cheat>
     <cheat>
-      <description>Balrog - Fierce shoulder butt</description>
+      <description>Balrog - Fierce shoulder butt, does heavy damage</description>
       <code>6E69-5799</code>
     </cheat>
     <cheat>
@@ -50462,27 +50522,27 @@
       <code>DB8C-74D5</code>
     </cheat>
     <cheat>
-      <description>Blanka - Fierce forward ball</description>
+      <description>Blanka - Fierce forward ball, does heavy damage</description>
       <code>6E1C-E720</code>
     </cheat>
     <cheat>
-      <description>Blanka - Beast leap</description>
+      <description>Blanka - Beast leap, does heavy damage</description>
       <code>6E1B-7D29</code>
     </cheat>
     <cheat>
-      <description>Blanka - Jab zap</description>
+      <description>Blanka - Jab zap, does heavy damage</description>
       <code>6E15-ED20</code>
     </cheat>
     <cheat>
-      <description>Cammy - Fierce spin knuckle</description>
+      <description>Cammy - Fierce spin knuckle, does heavy damage</description>
       <code>6EB3-5F20</code>
     </cheat>
     <cheat>
-      <description>Cammy - Roundhouse front kick</description>
+      <description>Cammy - Roundhouse front kick, does heavy damage</description>
       <code>6EBB-5720</code>
     </cheat>
     <cheat>
-      <description>Cammy - Roundhouse cannon drill</description>
+      <description>Cammy - Roundhouse cannon drill, does heavy damage from far away</description>
       <code>6EBF-5420</code>
     </cheat>
     <cheat>
@@ -50506,15 +50566,15 @@
       <code>D620-14FA</code>
     </cheat>
     <cheat>
-      <description>Chun-Li - Fierce fireball</description>
+      <description>Chun-Li - Fierce fireball, does heavy damage</description>
       <code>6E5D-7D20</code>
     </cheat>
     <cheat>
-      <description>Chun-Li - Down step</description>
+      <description>Chun-Li - Down step, does heavy damage</description>
       <code>DE10-5425</code>
     </cheat>
     <cheat>
-      <description>Chun-Li - Short lightning kick</description>
+      <description>Chun-Li - Short lightning kick, does heavy damage</description>
       <code>6E11-8425</code>
     </cheat>
     <cheat>
@@ -50526,11 +50586,11 @@
       <code>DB5E-8F60</code>
     </cheat>
     <cheat>
-      <description>Dee Jay - Fierce hyper fist (1st hit)</description>
+      <description>Dee Jay - Fierce hyper fist (1st hit), does heavy damage</description>
       <code>6EC5-EF99</code>
     </cheat>
     <cheat>
-      <description>Dee Jay - Fierce Max Out</description>
+      <description>Dee Jay - Fierce Max Out, does heavy damage</description>
       <code>6ECF-7D91</code>
     </cheat>
     <cheat>
@@ -50546,43 +50606,43 @@
       <code>DB23-1F9A</code>
     </cheat>
     <cheat>
-      <description>Dhalsim - Yoga spear</description>
+      <description>Dhalsim - Yoga spear, does heavy damage</description>
       <code>DE5E-8729</code>
     </cheat>
     <cheat>
-      <description>Dhalsim - Strong yoga flame (solid hit)</description>
+      <description>Dhalsim - Strong yoga flame (solid hit), does heavy damage</description>
       <code>6E5E-E429</code>
     </cheat>
     <cheat>
-      <description>Dhalsim - Fierce yoga fire</description>
+      <description>Dhalsim - Fierce yoga fire, does heavy damage</description>
       <code>6E58-E729</code>
     </cheat>
     <cheat>
-      <description>E. Honda - Jab hundred-hand slap</description>
+      <description>E. Honda - Jab hundred-hand slap, does heavy damage</description>
       <code>6E99-8795</code>
     </cheat>
     <cheat>
-      <description>E. Honda - Fierce torpedo</description>
+      <description>E. Honda - Fierce torpedo, does heavy damage</description>
       <code>6E96-E495</code>
     </cheat>
     <cheat>
-      <description>E. Honda - Fierce sumo splash</description>
+      <description>E. Honda - Fierce sumo splash, does heavy damage</description>
       <code>6E92-E795</code>
     </cheat>
     <cheat>
-      <description>Fei Long - Fierce slide punch (1st hit)</description>
+      <description>Fei Long - Fierce slide punch (1st hit), does heavy damage</description>
       <code>6EC7-5F20</code>
     </cheat>
     <cheat>
-      <description>Fei Long - Fierce slide punch (2nd hit)</description>
+      <description>Fei Long - Fierce slide punch (2nd hit), does heavy damage</description>
       <code>6EC0-5D20</code>
     </cheat>
     <cheat>
-      <description>Fei Long - Fierce slide punch (3rd hit)</description>
+      <description>Fei Long - Fierce slide punch (3rd hit), does heavy damage</description>
       <code>6EC0-5720</code>
     </cheat>
     <cheat>
-      <description>Fei Long - Roundhouse dragon kick</description>
+      <description>Fei Long - Roundhouse dragon kick, does heavy damage</description>
       <code>6ECE-7420</code>
     </cheat>
     <cheat>
@@ -50594,27 +50654,27 @@
       <code>D627-1F2A</code>
     </cheat>
     <cheat>
-      <description>Guile - Fierce sonic boom</description>
+      <description>Guile - Fierce sonic boom, does heavy damage</description>
       <code>6E16-5491</code>
     </cheat>
     <cheat>
-      <description>Guile - Roundhouse sonic kick</description>
+      <description>Guile - Roundhouse sonic kick, extremely close range, does heavy damage</description>
       <code>6E1E-7491</code>
     </cheat>
     <cheat>
-      <description>Hawk - The Hawk</description>
+      <description>Hawk - The Hawk, does heavy damage</description>
       <code>6EB3-5F91</code>
     </cheat>
     <cheat>
-      <description>Ken - Fierce dragon punch</description>
+      <description>Ken - Fierce dragon punch, close to opponent, does heavy damage</description>
       <code>6E96-8721</code>
     </cheat>
     <cheat>
-      <description>Ken - Fierce fireballs</description>
+      <description>Ken - Fierce fireballs, close to opponent, does heavy damage</description>
       <code>6E92-8F21</code>
     </cheat>
     <cheat>
-      <description>Ken - Roundhouse hurricane kick while on the ground</description>
+      <description>Ken - Roundhouse hurricane kick while on the ground, does heavy damage</description>
       <code>6E9A-5721</code>
     </cheat>
     <cheat>
@@ -50642,11 +50702,11 @@
       <code>1086-5D00</code>
     </cheat>
     <cheat>
-      <description>Ryu - Jab dragon punch</description>
+      <description>Ryu - Jab dragon punch, close to opponent, does heavy damage</description>
       <code>6E9D-8729</code>
     </cheat>
     <cheat>
-      <description>Ryu - Fierce red fireballs from far away</description>
+      <description>Ryu - Fierce red fireballs from far away, does heavy damage</description>
       <code>6E9B-E429</code>
     </cheat>
     <cheat>
@@ -50670,43 +50730,43 @@
       <code>3169-57A5</code>
     </cheat>
     <cheat>
-      <description>Sagat - Roundhouse low tiger</description>
+      <description>Sagat - Roundhouse low tiger, from far away, does heavy damage</description>
       <code>6E64-5F20</code>
     </cheat>
     <cheat>
-      <description>Sagat - Fierce high tiger</description>
+      <description>Sagat - Fierce high tiger, from far away, does heavy damage</description>
       <code>6E62-7720</code>
     </cheat>
     <cheat>
-      <description>Sagat - Short tiger knee</description>
+      <description>Sagat - Short tiger knee, does heavy damage</description>
       <code>6E53-ED25</code>
     </cheat>
     <cheat>
-      <description>Sagat - Jab projectiles move slower for everyone but Sagat</description>
+      <description>Sagat - Jab projectiles move slower for everyone but Sagat, does heavy damage</description>
       <code>EE27-479E</code>
     </cheat>
     <cheat>
-      <description>Sagat - Jab projectiles move slower for Sagat</description>
+      <description>Sagat - Jab projectiles move slower for Sagat, does heavy damage</description>
       <code>EE20-4D2E</code>
     </cheat>
     <cheat>
-      <description>Sagat - Fierce projectiles move faster for everyone but Sagat</description>
+      <description>Sagat - Fierce projectiles move faster for everyone but Sagat, does heavy damage</description>
       <code>EC20-4D9E</code>
     </cheat>
     <cheat>
-      <description>Sagat - Fierce projectiles move faster for Sagat</description>
+      <description>Sagat - Fierce projectiles move faster for Sagat, does heavy damage</description>
       <code>E520-4F2E</code>
     </cheat>
     <cheat>
-      <description>Vega - Fierce claw dive</description>
+      <description>Vega - Fierce claw dive, does heavy damage</description>
       <code>AE6A-8491</code>
     </cheat>
     <cheat>
-      <description>Vega - Rolling claw attack</description>
+      <description>Vega - Rolling claw attack, does heavy damage</description>
       <code>6E62-8F91</code>
     </cheat>
     <cheat>
-      <description>Vega - Claw thrust</description>
+      <description>Vega - Claw thrust, does heavy damage</description>
       <code>6E6E-EF91</code>
     </cheat>
     <cheat>
@@ -50718,7 +50778,7 @@
       <code>1053-5760</code>
     </cheat>
     <cheat>
-      <description>Zangief - Double spinning lariat (only certain hits)</description>
+      <description>Zangief - Double spinning lariat (only certain hits), does heavy damage</description>
       <code>6E51-EF90</code>
     </cheat>
     <cheat>
@@ -51555,11 +51615,11 @@
       <code>D035-C540</code>
     </cheat>
     <cheat>
-      <description>You have 1 minute to complete act 1</description>
+      <description>You have 1 minute to complete act 1, level 1</description>
       <code>DF64-41C0</code>
     </cheat>
     <cheat>
-      <description>You have 5 minutes to complete act 1</description>
+      <description>You have 5 minutes to complete act 1, level 1</description>
       <code>D964-41C0</code>
     </cheat>
     <cheat>
@@ -51635,13 +51695,13 @@
       <code>173F-15C0</code>
     </cheat>
     <cheat>
-      <description>Start on act 1</description>
+      <description>Start on act 1, level 2</description>
       <code>4A36-1140</code>
       <code>7D36-1110</code>
       <code>DF3F-15C0</code>
     </cheat>
     <cheat>
-      <description>Start on act 1</description>
+      <description>Start on act 1, level 3</description>
       <code>4A36-1140</code>
       <code>7D36-1110</code>
       <code>D43F-15C0</code>
@@ -51652,19 +51712,19 @@
       <code>7D36-1110</code>
     </cheat>
     <cheat>
-      <description>Start on act 2</description>
+      <description>Start on act 2, level 1</description>
       <code>4A36-1140</code>
       <code>7D36-1110</code>
       <code>D03F-15C0</code>
     </cheat>
     <cheat>
-      <description>Start on act 2</description>
+      <description>Start on act 2, level 2</description>
       <code>4A36-1140</code>
       <code>7D36-1110</code>
       <code>D93F-15C0</code>
     </cheat>
     <cheat>
-      <description>Start on act 2</description>
+      <description>Start on act 2, level 3</description>
       <code>4A36-1140</code>
       <code>7D36-1110</code>
       <code>D13F-15C0</code>
@@ -51676,19 +51736,19 @@
       <code>D53F-15C0</code>
     </cheat>
     <cheat>
-      <description>Start on act 3</description>
+      <description>Start on act 3, level 1</description>
       <code>4A36-1140</code>
       <code>7D36-1110</code>
       <code>D63F-15C0</code>
     </cheat>
     <cheat>
-      <description>Start on act 3</description>
+      <description>Start on act 3, level 2</description>
       <code>4A36-1140</code>
       <code>7D36-1110</code>
       <code>DB3F-15C0</code>
     </cheat>
     <cheat>
-      <description>Start on act 3</description>
+      <description>Start on act 3, level 3</description>
       <code>4A36-1140</code>
       <code>7D36-1110</code>
       <code>DC3F-15C0</code>
@@ -51700,19 +51760,19 @@
       <code>D83F-15C0</code>
     </cheat>
     <cheat>
-      <description>Start on act 4</description>
+      <description>Start on act 4, level 1</description>
       <code>4A36-1140</code>
       <code>7D36-1110</code>
       <code>DA3F-15C0</code>
     </cheat>
     <cheat>
-      <description>Start on act 4</description>
+      <description>Start on act 4, level 2</description>
       <code>4A36-1140</code>
       <code>7D36-1110</code>
       <code>D23F-15C0</code>
     </cheat>
     <cheat>
-      <description>Start on act 4</description>
+      <description>Start on act 4, level 3</description>
       <code>4A36-1140</code>
       <code>7D36-1110</code>
       <code>D33F-15C0</code>
@@ -51724,19 +51784,19 @@
       <code>DE3F-15C0</code>
     </cheat>
     <cheat>
-      <description>Start on act 5</description>
+      <description>Start on act 5, level 1</description>
       <code>4A36-1140</code>
       <code>7D36-1110</code>
       <code>FD3F-15C0</code>
     </cheat>
     <cheat>
-      <description>Start on act 5</description>
+      <description>Start on act 5, level 2</description>
       <code>4A36-1140</code>
       <code>7D36-1110</code>
       <code>FF3F-15C0</code>
     </cheat>
     <cheat>
-      <description>Start on act 5</description>
+      <description>Start on act 5, level 3</description>
       <code>4A36-1140</code>
       <code>7D36-1110</code>
       <code>F43F-15C0</code>
@@ -51773,11 +51833,11 @@
       <code>D035-C540</code>
     </cheat>
     <cheat>
-      <description>You have 1 minute to complete act 1</description>
+      <description>You have 1 minute to complete act 1, level 1</description>
       <code>DF64-41C0</code>
     </cheat>
     <cheat>
-      <description>You have 5 minutes to complete act 1</description>
+      <description>You have 5 minutes to complete act 1, level 1</description>
       <code>D964-41C0</code>
     </cheat>
     <cheat>
@@ -51853,13 +51913,13 @@
       <code>173F-15C0</code>
     </cheat>
     <cheat>
-      <description>Start on act 1</description>
+      <description>Start on act 1, level 2</description>
       <code>4A36-1140</code>
       <code>7D36-1110</code>
       <code>DF3F-15C0</code>
     </cheat>
     <cheat>
-      <description>Start on act 1</description>
+      <description>Start on act 1, level 3</description>
       <code>4A36-1140</code>
       <code>7D36-1110</code>
       <code>D43F-15C0</code>
@@ -51870,19 +51930,19 @@
       <code>7D36-1110</code>
     </cheat>
     <cheat>
-      <description>Start on act 2</description>
+      <description>Start on act 2, level 1</description>
       <code>4A36-1140</code>
       <code>7D36-1110</code>
       <code>D03F-15C0</code>
     </cheat>
     <cheat>
-      <description>Start on act 2</description>
+      <description>Start on act 2, level 2</description>
       <code>4A36-1140</code>
       <code>7D36-1110</code>
       <code>D93F-15C0</code>
     </cheat>
     <cheat>
-      <description>Start on act 2</description>
+      <description>Start on act 2, level 3</description>
       <code>4A36-1140</code>
       <code>7D36-1110</code>
       <code>D13F-15C0</code>
@@ -51894,19 +51954,19 @@
       <code>D53F-15C0</code>
     </cheat>
     <cheat>
-      <description>Start on act 3</description>
+      <description>Start on act 3, level 1</description>
       <code>4A36-1140</code>
       <code>7D36-1110</code>
       <code>D63F-15C0</code>
     </cheat>
     <cheat>
-      <description>Start on act 3</description>
+      <description>Start on act 3, level 2</description>
       <code>4A36-1140</code>
       <code>7D36-1110</code>
       <code>DB3F-15C0</code>
     </cheat>
     <cheat>
-      <description>Start on act 3</description>
+      <description>Start on act 3, level 3</description>
       <code>4A36-1140</code>
       <code>7D36-1110</code>
       <code>DC3F-15C0</code>
@@ -51918,19 +51978,19 @@
       <code>D83F-15C0</code>
     </cheat>
     <cheat>
-      <description>Start on act 4</description>
+      <description>Start on act 4, level 1</description>
       <code>4A36-1140</code>
       <code>7D36-1110</code>
       <code>DA3F-15C0</code>
     </cheat>
     <cheat>
-      <description>Start on act 4</description>
+      <description>Start on act 4, level 2</description>
       <code>4A36-1140</code>
       <code>7D36-1110</code>
       <code>D23F-15C0</code>
     </cheat>
     <cheat>
-      <description>Start on act 4</description>
+      <description>Start on act 4, level 3</description>
       <code>4A36-1140</code>
       <code>7D36-1110</code>
       <code>D33F-15C0</code>
@@ -51942,19 +52002,19 @@
       <code>DE3F-15C0</code>
     </cheat>
     <cheat>
-      <description>Start on act 5</description>
+      <description>Start on act 5, level 1</description>
       <code>4A36-1140</code>
       <code>7D36-1110</code>
       <code>FD3F-15C0</code>
     </cheat>
     <cheat>
-      <description>Start on act 5</description>
+      <description>Start on act 5, level 2</description>
       <code>4A36-1140</code>
       <code>7D36-1110</code>
       <code>FF3F-15C0</code>
     </cheat>
     <cheat>
-      <description>Start on act 5</description>
+      <description>Start on act 5, level 3</description>
       <code>4A36-1140</code>
       <code>7D36-1110</code>
       <code>F43F-15C0</code>
@@ -52258,15 +52318,15 @@
       <code>D4C1-1D03</code>
     </cheat>
     <cheat>
-      <description>After doing an ultimate attack</description>
+      <description>After doing an ultimate attack, health bar goes to about 1/4</description>
       <code>F0C3-4463</code>
     </cheat>
     <cheat>
-      <description>After doing an ultimate attack</description>
+      <description>After doing an ultimate attack, health bar goes to about 1/2</description>
       <code>46C3-4463</code>
     </cheat>
     <cheat>
-      <description>After doing an ultimate attack</description>
+      <description>After doing an ultimate attack, health bar goes to about 3/4</description>
       <code>7AC3-4463</code>
     </cheat>
     <cheat>
@@ -52549,7 +52609,7 @@
       <code>7E1E1B03</code>
     </cheat>
     <cheat>
-      <description>Tetris 2 - Select any round - 1P (at round select meter</description>
+      <description>Tetris 2 - Select any round - 1P (at round select meter, keep pressing right)</description>
       <code>9DBD-3DF4</code>
     </cheat>
     <cheat>
@@ -52565,7 +52625,7 @@
       <code>DDC5-4F6C</code>
     </cheat>
     <cheat>
-      <description>Tetris 2 - More time to place the blocks where you want them</description>
+      <description>Tetris 2 - More time to place the blocks where you want them, even after they hit the ground (left and right only)</description>
       <code>6DB1-346B</code>
     </cheat>
     <cheat>
@@ -53018,7 +53078,7 @@
       <code>7E07D809</code>
     </cheat>
     <cheat>
-      <description>Have $9</description>
+      <description>Have $9,000,000</description>
       <code>7E07D809</code>
     </cheat>
   </cartridge>
@@ -53087,7 +53147,7 @@
   <cartridge sha256="ba679a11264e9695895a6c17358a41e8459be06166d056811df9c2738fef3d0d">
     <name>Tiny Toon Adventures - Buster Busts Loose! (USA)</name>
     <cheat>
-      <description>Infinite health (when hit</description>
+      <description>Infinite health (when hit, a fake empty heart appears)</description>
       <code>3CE9-448A</code>
     </cheat>
     <cheat>
@@ -53107,7 +53167,7 @@
       <code>D184-C4A1</code>
     </cheat>
     <cheat>
-      <description>1-up gives 2-up (not on mystery weight challenge level</description>
+      <description>1-up gives 2-up (not on mystery weight challenge level, or by collecting stars)</description>
       <code>D46B-CFAF</code>
     </cheat>
     <cheat>
@@ -53219,11 +53279,11 @@
       <code>DFCD-4FAF</code>
     </cheat>
     <cheat>
-      <description>Start with 4 hearts on Children or Normal difficulty levels</description>
+      <description>Start with 4 hearts on Children or Normal difficulty levels, 2 on Challenge</description>
       <code>D0CD-4FAF</code>
     </cheat>
     <cheat>
-      <description>Start with 5 hearts on Children or Normal difficulty levels</description>
+      <description>Start with 5 hearts on Children or Normal difficulty levels, 3 on Challenge</description>
       <code>D9CD-4FAF</code>
     </cheat>
   </cartridge>
@@ -53386,43 +53446,43 @@
       <code>C9BD-1F04</code>
     </cheat>
     <cheat>
-      <description>1st place gives $50</description>
+      <description>1st place gives $50,000 instead of $10,000</description>
       <code>7430-398E</code>
     </cheat>
     <cheat>
-      <description>2nd place gives $50</description>
+      <description>2nd place gives $50,000 instead of $6,000</description>
       <code>7430-317E</code>
     </cheat>
     <cheat>
-      <description>3rd place gives $50</description>
+      <description>3rd place gives $50,000 instead of $4,000</description>
       <code>7430-318E</code>
     </cheat>
     <cheat>
-      <description>4th place gives $50</description>
+      <description>4th place gives $50,000 instead of $3,000</description>
       <code>7430-357E</code>
     </cheat>
     <cheat>
-      <description>5th place gives $50</description>
+      <description>5th place gives $50,000 instead of $2,000</description>
       <code>7430-358E</code>
     </cheat>
     <cheat>
-      <description>6th place gives $50</description>
+      <description>6th place gives $50,000 instead of $1,000</description>
       <code>7439-307E</code>
     </cheat>
     <cheat>
-      <description>7th place gives $50</description>
+      <description>7th place gives $50,000 instead of $0</description>
       <code>7439-308E</code>
     </cheat>
     <cheat>
-      <description>8th place gives $50</description>
+      <description>8th place gives $50,000 instead of $0</description>
       <code>7439-397E</code>
     </cheat>
     <cheat>
-      <description>9th place gives $50</description>
+      <description>9th place gives $50,000 instead of $0</description>
       <code>7439-398E</code>
     </cheat>
     <cheat>
-      <description>10th place gives $50</description>
+      <description>10th place gives $50,000 instead of $0</description>
       <code>7439-317E</code>
     </cheat>
     <cheat>
@@ -54211,6 +54271,17 @@
       <code>F066-446F</code>
     </cheat>
   </cartridge>
+  <cartridge sha256="dbf11d4c77b9aa3416f687201d57d71a23bb8fb0b8fe5e9e8212db3fac036631">
+    <name>Turbo Toons (Europe)</name>
+    <cheat>
+      <description>Start at Final Tournament (press Select at title screen, then in the topmost menu select the trophy)</description>
+      <code>7E1E4404</code>
+    </cheat>
+    <cheat>
+      <description>Infinite Turbo - Hong Kong Phooey</description>
+      <code>7E0C9EE0</code>
+    </cheat>
+  </cartridge>
   <cartridge sha256="e4343c0fadc00ffdc3dc31345068d751eea5d639f826731f08cb81673d508c40">
     <name>Turn and Burn - No-Fly Zone (USA)</name>
     <cheat>
@@ -54261,13 +54332,13 @@
       <code>CEA5-34DF</code>
     </cheat>
     <cheat>
-      <description>Infinite money</description>
-      <code>C260-3766</code>
-    </cheat>
-    <cheat>
       <description>Infinite HP</description>
       <code>7E4CE0FF</code>
       <code>7E4CE14F</code>
+    </cheat>
+    <cheat>
+      <description>Infinite money</description>
+      <code>C260-3766</code>
     </cheat>
     <cheat>
       <description>Infinite money (alt)</description>
@@ -54372,7 +54443,7 @@
       <code>DD80-0DAD</code>
     </cheat>
     <cheat>
-      <description>Start with $9</description>
+      <description>Start with $9,000</description>
       <code>BD80-0DAD</code>
     </cheat>
     <cheat>
@@ -54662,12 +54733,12 @@
       <code>7E1CFC63</code>
     </cheat>
     <cheat>
-      <description>65</description>
+      <description>65,000 Exp</description>
       <code>7E1D00E8</code>
       <code>7E1D01FD</code>
     </cheat>
     <cheat>
-      <description>65</description>
+      <description>65,000 Gold</description>
       <code>7E1CE6E8</code>
       <code>7E1CE7FD</code>
     </cheat>
@@ -54683,7 +54754,7 @@
       <code>7E09C963</code>
     </cheat>
     <cheat>
-      <description>Start with 60</description>
+      <description>Start with 60,000 score</description>
       <code>7E09B960</code>
       <code>7E09BAEA</code>
     </cheat>
@@ -54811,7 +54882,7 @@
       <code>7E201B80</code>
     </cheat>
     <cheat>
-      <description>1 D.a.s.</description>
+      <description>1 D.a.s., No Scurvy</description>
       <code>7E415E00</code>
     </cheat>
     <cheat>
@@ -55320,19 +55391,19 @@
       <code>EC63-543D</code>
     </cheat>
     <cheat>
-      <description>Start a new game with $1</description>
+      <description>Start a new game with $1,024 Gold</description>
       <code>D063-574D</code>
     </cheat>
     <cheat>
-      <description>Start a new game with $9</description>
+      <description>Start a new game with $9,984 Gold</description>
       <code>4563-574D</code>
     </cheat>
     <cheat>
-      <description>Start a new game with $64</description>
+      <description>Start a new game with $64,000 Gold</description>
       <code>EC63-574D</code>
     </cheat>
     <cheat>
-      <description>Start a new game with $196</description>
+      <description>Start a new game with $196,608 Gold</description>
       <code>D763-571D</code>
     </cheat>
     <cheat>
@@ -55343,7 +55414,7 @@
   <cartridge sha256="794152fc6f55cb15a0b203fa645ac9fa314a293da999d8ec8b3dda080434d175">
     <name>Uncharted Waters (USA)</name>
     <cheat>
-      <description>Start with 65</description>
+      <description>Start with 65,000 Gold</description>
       <code>E2EF-D7D5</code>
     </cheat>
   </cartridge>
@@ -55406,15 +55477,15 @@
   <cartridge sha256="78bf9d79fb2ff3f9d03ecc1176d070e53ddaca2c6b0cda69e74c19a4e50b195b">
     <name>Vegas Stakes (USA)</name>
     <cheat>
-      <description>Only $34</description>
+      <description>Only $34,464 needed for highroller status (glitchy)</description>
       <code>DDA0-A4AD</code>
     </cheat>
     <cheat>
-      <description>Only $38</description>
+      <description>Only $38,527 needed to win the game instead of $10 million</description>
       <code>DDA8-640D</code>
     </cheat>
     <cheat>
-      <description>Only $5</description>
+      <description>Only $5,019,263 needed to win the game</description>
       <code>0AA8-640D</code>
     </cheat>
     <cheat>
@@ -55474,19 +55545,19 @@
       <code>4183-A7A7</code>
     </cheat>
     <cheat>
-      <description>Start with $132</description>
+      <description>Start with $132,072 (highroller status) - P1</description>
       <code>D481-A707</code>
     </cheat>
     <cheat>
-      <description>Start with $132</description>
+      <description>Start with $132,072 - P2</description>
       <code>D48B-A467</code>
     </cheat>
     <cheat>
-      <description>Start with $132</description>
+      <description>Start with $132,072 - P3</description>
       <code>D48A-AFA7</code>
     </cheat>
     <cheat>
-      <description>Start with $132</description>
+      <description>Start with $132,072 - P4</description>
       <code>D48E-AFD7</code>
     </cheat>
   </cartridge>
@@ -56688,7 +56759,7 @@
   <cartridge sha256="90ad69a489194aca7ef7b7fd1d30e0105da4934a81ac8b0333ea20f9248df92d">
     <name>Yoshi's Cookie (USA)</name>
     <cheat>
-      <description>In Action mode</description>
+      <description>In Action mode, passing a stage advances to the next round</description>
       <code>6D8F-DF3B</code>
     </cheat>
     <cheat>
@@ -56700,20 +56771,20 @@
       <code>14C6-0436</code>
     </cheat>
     <cheat>
-      <description>In VS mode</description>
+      <description>In VS mode, only 1 win is required instead of 3. P2 always wins the set (2P only)</description>
       <code>DF86-A71C</code>
     </cheat>
     <cheat>
-      <description>In VS mode</description>
+      <description>In VS mode, the fuses don't count down</description>
       <code>C2A0-DF48</code>
     </cheat>
     <cheat>
-      <description>In VS mode</description>
+      <description>In VS mode, play against tougher opponents without the secret code</description>
       <code>D685-A766</code>
       <code>DD86-AF66</code>
     </cheat>
     <cheat>
-      <description>In Puzzle mode</description>
+      <description>In Puzzle mode, passing a stage advances to the next round</description>
       <code>DD3C-6738</code>
     </cheat>
     <cheat>
@@ -56957,27 +57028,27 @@
       <code>A682-012E</code>
     </cheat>
     <cheat>
-      <description>Start with 488 Gold instead of 1</description>
+      <description>Start with 488 Gold instead of 1,000</description>
       <code>DF8E-00BE</code>
     </cheat>
     <cheat>
-      <description>Start with 2</description>
+      <description>Start with 2,024 Gold</description>
       <code>D58E-00BE</code>
     </cheat>
     <cheat>
-      <description>Start with 9</description>
+      <description>Start with 9,704 Gold</description>
       <code>498E-00BE</code>
     </cheat>
     <cheat>
-      <description>Start with 20</description>
+      <description>Start with 20,200 Gold</description>
       <code>038E-00BE</code>
     </cheat>
     <cheat>
-      <description>Start with 40</description>
+      <description>Start with 40,168 Gold</description>
       <code>BA8E-00BE</code>
     </cheat>
     <cheat>
-      <description>Start with 65</description>
+      <description>Start with 65,512 Gold</description>
       <code>EE8E-00BE</code>
     </cheat>
   </cartridge>
@@ -57264,11 +57335,11 @@
       <code>DBED-1FA4</code>
     </cheat>
     <cheat>
-      <description>Only 1 victim to rescue per level (no bonus for rescuing all victims</description>
+      <description>Only 1 victim to rescue per level (no bonus for rescuing all victims, game is over if Zombie eats a victim)</description>
       <code>DF63-14DF</code>
     </cheat>
     <cheat>
-      <description>Can advance to next level after getting 1 victim (no bonus for rescuing all victims</description>
+      <description>Can advance to next level after getting 1 victim (no bonus for rescuing all victims, game is over if Zombie eats a victim)</description>
       <code>BAA1-44A4</code>
     </cheat>
     <cheat>

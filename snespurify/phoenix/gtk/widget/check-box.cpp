@@ -6,6 +6,12 @@ bool pCheckBox::checked() {
   return gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(gtkWidget));
 }
 
+Geometry pCheckBox::minimumGeometry() {
+  Font &font = pWidget::font();
+  Geometry geometry = font.geometry(checkBox.state.text);
+  return { 0, 0, geometry.width + 28, geometry.height + 4 };
+}
+
 void pCheckBox::setChecked(bool checked) {
   locked = true;
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(gtkWidget), checked);

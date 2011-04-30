@@ -3,15 +3,15 @@
 
 namespace nall {
 
-string realpath(const char *name) {
+string currentpath() {
   char path[PATH_MAX];
-  if(::realpath(name, path)) {
+  if(::getcwd(path)) {
     string result(path);
     result.transform("\\", "/");
     if(result.endswith("/") == false) result.append("/");
     return result;
   }
-  return "";
+  return "./";
 }
 
 string userpath() {
@@ -22,18 +22,17 @@ string userpath() {
     if(result.endswith("/") == false) result.append("/");
     return result;
   }
-  return "";
+  return currentpath();
 }
 
-string currentpath() {
+string realpath(const char *name) {
   char path[PATH_MAX];
-  if(::getcwd(path)) {
+  if(::realpath(name, path)) {
     string result(path);
     result.transform("\\", "/");
-    if(result.endswith("/") == false) result.append("/");
     return result;
   }
-  return "";
+  return userpath();
 }
 
 }

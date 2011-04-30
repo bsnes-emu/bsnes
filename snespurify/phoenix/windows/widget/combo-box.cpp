@@ -3,6 +3,13 @@ void pComboBox::append(const string &text) {
   if(SendMessage(hwnd, CB_GETCOUNT, 0, 0) == 1) setSelection(0);
 }
 
+Geometry pComboBox::minimumGeometry() {
+  Font &font = this->font();
+  unsigned maximumWidth = 0;
+  foreach(text, comboBox.state.text) maximumWidth = max(maximumWidth, font.geometry(text).width);
+  return { 0, 0, maximumWidth + 24, font.p.height() + 10 };
+}
+
 void pComboBox::reset() {
   SendMessage(hwnd, CB_RESETCONTENT, 0, 0);
 }

@@ -1,3 +1,7 @@
+Geometry pHorizontalSlider::minimumGeometry() {
+  return { 0, 0, 0, 25 };
+}
+
 unsigned pHorizontalSlider::position() {
   return SendMessage(hwnd, TBM_GETPOS, 0, 0);
 }

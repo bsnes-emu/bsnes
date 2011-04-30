@@ -29,7 +29,7 @@ string pTextEdit::text() {
   wchar_t buffer[length + 1];
   GetWindowText(hwnd, buffer, length + 1);
   buffer[length] = 0;
-  string text = utf8_t(buffer);
+  string text = (const char*)utf8_t(buffer);
   text.replace("\r", "");
   return text;
 }

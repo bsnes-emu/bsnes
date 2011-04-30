@@ -1,3 +1,7 @@
+Geometry pVerticalSlider::minimumGeometry() {
+  return { 0, 0, 20, 0 };
+}
+
 unsigned pVerticalSlider::position() {
   return qtSlider->value();
 }

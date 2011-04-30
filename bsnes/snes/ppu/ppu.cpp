@@ -40,7 +40,7 @@ void PPU::enter() {
     scanline();
     add_clocks(60);
 
-    if(vcounter() <= (!regs.overscan ? 224 : 239)) {
+    if(vcounter() <= 239) {
       for(signed pixel = -7; pixel <= 255; pixel++) {
         bg1.run(1);
         bg2.run(1);

@@ -9,7 +9,7 @@ void FixedLayout::append(Widget &widget, const Geometry &geometry) {
   children.append({ &widget, geometry });
 }
 
-void FixedLayout::setGeometry(Geometry &geometry) {
+void FixedLayout::setGeometry(const Geometry &geometry) {
 }
 
 void FixedLayout::setVisible(bool visible) {

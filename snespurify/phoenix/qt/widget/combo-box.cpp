@@ -2,6 +2,14 @@ void pComboBox::append(const string &text) {
   qtComboBox->addItem(QString::fromUtf8(text));
 }
 
+Geometry pComboBox::minimumGeometry() {
+  Font &font = this->font();
+  unsigned maximumWidth = 0;
+  foreach(text, comboBox.state.text) maximumWidth = max(maximumWidth, font.geometry(text).width);
+  Geometry geometry = font.geometry(" ");
+  return { 0, 0, maximumWidth + 32, geometry.height + 12 };
+}
+
 void pComboBox::reset() {
   while(qtComboBox->count()) qtComboBox->removeItem(0);
 }

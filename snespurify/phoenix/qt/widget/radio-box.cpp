@@ -2,6 +2,12 @@ bool pRadioBox::checked() {
   return qtRadioBox->isChecked();
 }
 
+Geometry pRadioBox::minimumGeometry() {
+  Font &font = this->font();
+  Geometry geometry = font.geometry(radioBox.state.text);
+  return { 0, 0, geometry.width + 26, geometry.height + 6 };
+}
+
 void pRadioBox::setChecked() {
   locked = true;
   foreach(item, radioBox.state.group) {

@@ -3,6 +3,15 @@
 
 namespace nall {
 
+static void istring(string &output) {
+}
+
+template<typename T, typename... Args>
+static void istring(string &output, const T &value, Args&&... args) {
+  output.append_(to_string(value));
+  istring(output, std::forward<Args>(args)...);
+}
+
 void string::reserve(unsigned size_) {
   if(size_ > size) {
     size = size_;
@@ -11,24 +20,30 @@ void string::reserve(unsigned size_) {
   }
 }
 
-string& string::assign(const char *s) {
+template<typename... Args> string& string::assign(Args&&... args) {
+  *data = 0;
+  istring(*this, std::forward<Args>(args)...);
+  return *this;
+}
+
+template<typename... Args> string& string::append(Args&&... args) {
+  istring(*this, std::forward<Args>(args)...);
+  return *this;
+}
+
+string& string::assign_(const char *s) {
   unsigned length = strlen(s);
   reserve(length);
   strcpy(data, s);
   return *this;
 }
 
-string& string::append(const char *s) {
+string& string::append_(const char *s) {
   unsigned length = strlen(data) + strlen(s);
   reserve(length);
   strcat(data, s);
   return *this;
 }
-
-string& string::append(bool value) { append(value ? "true" : "false"); return *this; }
-string& string::append(signed int value) { append(strsigned(value)); return *this; }
-string& string::append(unsigned int value) { append(strunsigned(value)); return *this; }
-string& string::append(double value) { append(strdouble(value)); return *this; }
 
 string::operator const char*() const {
   return data;
@@ -64,15 +79,6 @@ string& string::operator=(string &&source) {
   return *this;
 }
 
-static void istring(string &output) {
-}
-
-template<typename T, typename... Args>
-static void istring(string &output, const T &value, Args&&... args) {
-  output.append(value);
-  istring(output, std::forward<Args>(args)...);
-}
-
 template<typename... Args> string::string(Args&&... args) {
   size = 64;
   data = (char*)malloc(size + 1);
@@ -95,7 +101,7 @@ string::~string() {
   if(data) free(data);
 }
 
-bool string::readfile(const char *filename) {
+bool string::readfile(const string &filename) {
   assign("");
 
   #if !defined(_WIN32)

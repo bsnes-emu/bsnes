@@ -2,6 +2,12 @@ bool pRadioBox::checked() {
   return SendMessage(hwnd, BM_GETCHECK, 0, 0);
 }
 
+Geometry pRadioBox::minimumGeometry() {
+  Font &font = this->font();
+  Geometry geometry = font.geometry(radioBox.state.text);
+  return { 0, 0, geometry.width + 20, font.p.height() + 4 };
+}
+
 void pRadioBox::setChecked() {
   foreach(item, radioBox.state.group) {
     SendMessage(item.p.hwnd, BM_SETCHECK, (WPARAM)(&item == &radioBox), 0);

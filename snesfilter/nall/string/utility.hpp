@@ -27,104 +27,202 @@ string substr(const char *src, unsigned start, unsigned length) {
 
 /* arithmetic <> string */
 
-template<unsigned length, char padding> string strhex(uintmax_t value) {
-  string output;
-  unsigned offset = 0;
-
-  //render string backwards, as we do not know its length yet
-  do {
-    unsigned n = value & 15;
-    output[offset++] = n < 10 ? '0' + n : 'a' + n - 10;
-    value >>= 4;
-  } while(value);
-
-  while(offset < length) output[offset++] = padding;
-  output[offset--] = 0;
-
-  //reverse the string in-place
-  for(unsigned i = 0; i < (offset + 1) >> 1; i++) {
-    char temp = output[i];
-    output[i] = output[offset - i];
-    output[offset - i] = temp;
-  }
-
-  return output;
-}
-
-template<unsigned length, char padding> string strsigned(intmax_t value) {
-  string output;
-  unsigned offset = 0;
-
+string integer(intmax_t value) {
   bool negative = value < 0;
   if(negative) value = abs(value);
 
-  do {
-    unsigned n = value % 10;
-    output[offset++] = '0' + n;
-    value /= 10;
-  } while(value);
-
-  while(offset < length) output[offset++] = padding;
-  if(negative) output[offset++] = '-';
-  output[offset--] = 0;
-
-  for(unsigned i = 0; i < (offset + 1) >> 1; i++) {
-    char temp = output[i];
-    output[i] = output[offset - i];
-    output[offset - i] = temp;
-  }
-
-  return output;
-}
-
-template<unsigned length, char padding> string strunsigned(uintmax_t value) {
-  string output;
-  unsigned offset = 0;
+  char buffer[64];
+  unsigned size = 0;
 
   do {
     unsigned n = value % 10;
-    output[offset++] = '0' + n;
+    buffer[size++] = '0' + n;
     value /= 10;
   } while(value);
+  buffer[size++] = negative ? '-' : '+';
+  buffer[size] = 0;
 
-  while(offset < length) output[offset++] = padding;
-  output[offset--] = 0;
+  char result[size + 1];
+  memset(result, '0', size);
+  result[size] = 0;
 
-  for(unsigned i = 0; i < (offset + 1) >> 1; i++) {
-    char temp = output[i];
-    output[i] = output[offset - i];
-    output[offset - i] = temp;
+  for(signed x = size - 1, y = 0; x >= 0 && y < size; x--, y++) {
+    result[x] = buffer[y];
   }
 
-  return output;
+  return (const char*)result;
 }
 
-template<unsigned length, char padding> string strbin(uintmax_t value) {
-  string output;
-  unsigned offset = 0;
+template<unsigned length_> string linteger(intmax_t value) {
+  bool negative = value < 0;
+  if(negative) value = abs(value);
+
+  char buffer[64];
+  unsigned size = 0;
+
+  do {
+    unsigned n = value % 10;
+    buffer[size++] = '0' + n;
+    value /= 10;
+  } while(value);
+  buffer[size++] = negative ? '-' : '+';
+  buffer[size] = 0;
+
+  unsigned length = (length_ == 0 ? size : length_);
+  char result[length + 1];
+  memset(result, ' ', length);
+  result[length] = 0;
+
+  for(signed x = 0, y = size - 1; x < length && y >= 0; x++, y--) {
+    result[x] = buffer[y];
+  }
+
+  return (const char*)result;
+}
+
+template<unsigned length_> string rinteger(intmax_t value) {
+  bool negative = value < 0;
+  if(negative) value = abs(value);
+
+  char buffer[64];
+  unsigned size = 0;
+
+  do {
+    unsigned n = value % 10;
+    buffer[size++] = '0' + n;
+    value /= 10;
+  } while(value);
+  buffer[size++] = negative ? '-' : '+';
+  buffer[size] = 0;
+
+  unsigned length = (length_ == 0 ? size : length_);
+  char result[length + 1];
+  memset(result, ' ', length);
+  result[length] = 0;
+
+  for(signed x = length - 1, y = 0; x >= 0 && y < size; x--, y++) {
+    result[x] = buffer[y];
+  }
+
+  return (const char*)result;
+}
+
+string decimal(uintmax_t value) {
+  char buffer[64];
+  unsigned size = 0;
+
+  do {
+    unsigned n = value % 10;
+    buffer[size++] = '0' + n;
+    value /= 10;
+  } while(value);
+  buffer[size] = 0;
+
+  char result[size + 1];
+  memset(result, '0', size);
+  result[size] = 0;
+
+  for(signed x = size - 1, y = 0; x >= 0 && y < size; x--, y++) {
+    result[x] = buffer[y];
+  }
+
+  return (const char*)result;
+}
+
+template<unsigned length_> string ldecimal(uintmax_t value) {
+  char buffer[64];
+  unsigned size = 0;
+
+  do {
+    unsigned n = value % 10;
+    buffer[size++] = '0' + n;
+    value /= 10;
+  } while(value);
+  buffer[size] = 0;
+
+  unsigned length = (length_ == 0 ? size : length_);
+  char result[length + 1];
+  memset(result, ' ', length);
+  result[length] = 0;
+
+  for(signed x = 0, y = size - 1; x < length && y >= 0; x++, y--) {
+    result[x] = buffer[y];
+  }
+
+  return (const char*)result;
+}
+
+template<unsigned length_> string rdecimal(uintmax_t value) {
+  char buffer[64];
+  unsigned size = 0;
+
+  do {
+    unsigned n = value % 10;
+    buffer[size++] = '0' + n;
+    value /= 10;
+  } while(value);
+  buffer[size] = 0;
+
+  unsigned length = (length_ == 0 ? size : length_);
+  char result[length + 1];
+  memset(result, ' ', length);
+  result[length] = 0;
+
+  for(signed x = length - 1, y = 0; x >= 0 && y < size; x--, y++) {
+    result[x] = buffer[y];
+  }
+
+  return (const char*)result;
+}
+
+template<unsigned length_> string hex(uintmax_t value) {
+  char buffer[64];
+  unsigned size = 0;
+
+  do {
+    unsigned n = value & 15;
+    buffer[size++] = n < 10 ? '0' + n : 'a' + n - 10;
+    value >>= 4;
+  } while(value);
+
+  unsigned length = (length_ == 0 ? size : length_);
+  char result[length + 1];
+  memset(result, '0', length);
+  result[length] = 0;
+
+  for(signed x = length - 1, y = 0; x >= 0 && y < size; x--, y++) {
+    result[x] = buffer[y];
+  }
+
+  return (const char*)result;
+}
+
+template<unsigned length_> string binary(uintmax_t value) {
+  char buffer[256];
+  unsigned size = 0;
 
   do {
     unsigned n = value & 1;
-    output[offset++] = '0' + n;
+    buffer[size++] = '0' + n;
     value >>= 1;
   } while(value);
 
-  while(offset < length) output[offset++] = padding;
-  output[offset--] = 0;
+  unsigned length = (length_ == 0 ? size : length_);
+  char result[length + 1];
+  memset(result, '0', length);
+  result[length] = 0;
 
-  for(unsigned i = 0; i < (offset + 1) >> 1; i++) {
-    char temp = output[i];
-    output[i] = output[offset - i];
-    output[offset - i] = temp;
+  for(signed x = length - 1, y = 0; x >= 0 && y < size; x--, y++) {
+    result[x] = buffer[y];
   }
 
-  return output;
+  return (const char*)result;
 }
 
 //using sprintf is certainly not the most ideal method to convert
 //a double to a string ... but attempting to parse a double by
 //hand, digit-by-digit, results in subtle rounding errors.
-unsigned strdouble(char *str, double value) {
+unsigned fp(char *str, double value) {
   char buffer[256];
   sprintf(buffer, "%f", value);
 
@@ -145,10 +243,10 @@ unsigned strdouble(char *str, double value) {
   return length + 1;
 }
 
-string strdouble(double value) {
+string fp(double value) {
   string temp;
-  temp.reserve(strdouble(0, value));
-  strdouble(temp(), value);
+  temp.reserve(fp(0, value));
+  fp(temp(), value);
   return temp;
 }
 

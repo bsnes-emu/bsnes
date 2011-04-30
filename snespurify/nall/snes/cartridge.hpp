@@ -362,7 +362,7 @@ SNESCartridge::SNESCartridge(const uint8_t *data, unsigned size) {
     xml << "        <map mode='linear' address='20-3f:8000-ffff'/>\n";
     xml << "        <map mode='linear' address='a0-bf:8000-ffff'/>\n";
     xml << "      </rom>\n";
-    xml << "      <ram>\n";
+    xml << "      <ram size='20000'>\n";
     xml << "        <map mode='linear' address='60-63:8000-ffff'/>\n";
     xml << "        <map mode='linear' address='e0-e3:8000-ffff'/>\n";
     xml << "      </ram>\n";
@@ -372,7 +372,7 @@ SNESCartridge::SNESCartridge(const uint8_t *data, unsigned size) {
     xml << "        <map mode='linear' address='40-5f:8000-ffff'/>\n";
     xml << "        <map mode='linear' address='c0-df:8000-ffff'/>\n";
     xml << "      </rom>\n";
-    xml << "      <ram>\n";
+    xml << "      <ram size='20000'>\n";
     xml << "        <map mode='linear' address='70-73:8000-ffff'/>\n";
     xml << "        <map mode='linear' address='f0-f3:8000-ffff'/>\n";
     xml << "      </ram>\n";

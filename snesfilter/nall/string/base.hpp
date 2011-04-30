@@ -12,20 +12,18 @@
 
 namespace nall {
   class string;
-  template<typename T> inline string to_string(T);
+  template<typename T> inline const char* to_string(T);
 
   class string {
   public:
     inline void reserve(unsigned);
 
-    inline string& assign(const char*);
-    inline string& append(const char*);
-    inline string& append(bool);
-    inline string& append(signed int value);
-    inline string& append(unsigned int value);
-    inline string& append(double value);
+    template<typename... Args> inline string& assign(Args&&... args);
+    template<typename... Args> inline string& append(Args&&... args);
+    inline string& assign_(const char*);
+    inline string& append_(const char*);
 
-    inline bool readfile(const char*);
+    inline bool readfile(const string&);
 
     inline string& replace (const char*, const char*);
     inline string& qreplace(const char*, const char*);
@@ -113,11 +111,11 @@ namespace nall {
   inline char* strlower(char *str);
   inline char* strupper(char *str);
   inline char* strtr(char *dest, const char *before, const char *after);
-  inline uintmax_t strhex     (const char *str);
-  inline intmax_t  strsigned  (const char *str);
-  inline uintmax_t strunsigned(const char *str);
-  inline uintmax_t strbin     (const char *str);
-  inline double    strdouble  (const char *str);
+  inline uintmax_t hex    (const char *str);
+  inline intmax_t  integer(const char *str);
+  inline uintmax_t decimal(const char *str);
+  inline uintmax_t binary (const char *str);
+  inline double    fp     (const char *str);
 
   //math.hpp
   inline bool strint (const char *str, int &result);
@@ -145,12 +143,17 @@ namespace nall {
   inline unsigned strlcpy(string &dest, const char *src, unsigned length);
   inline unsigned strlcat(string &dest, const char *src, unsigned length);
   inline string substr(const char *src, unsigned start = 0, unsigned length = 0);
-  template<unsigned length = 0, char padding = '0'> inline string strhex(uintmax_t value);
-  template<unsigned length = 0, char padding = '0'> inline string strsigned(intmax_t value);
-  template<unsigned length = 0, char padding = '0'> inline string strunsigned(uintmax_t value);
-  template<unsigned length = 0, char padding = '0'> inline string strbin(uintmax_t value);
-  inline unsigned strdouble(char *str, double value);
-  inline string strdouble(double value);
+
+  inline string integer(intmax_t value);
+  template<unsigned length = 0> inline string linteger(intmax_t value);
+  template<unsigned length = 0> inline string rinteger(intmax_t value);
+  inline string decimal(uintmax_t value);
+  template<unsigned length = 0> inline string ldecimal(uintmax_t value);
+  template<unsigned length = 0> inline string rdecimal(uintmax_t value);
+  template<unsigned length = 0> inline string hex(uintmax_t value);
+  template<unsigned length = 0> inline string binary(uintmax_t value);
+  inline unsigned fp(char *str, double value);
+  inline string fp(double value);
 
   //variadic.hpp
   template<typename... Args> inline void print(Args&&... args);

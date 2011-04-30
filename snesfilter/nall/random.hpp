@@ -8,12 +8,20 @@ namespace nall {
     return n = (n >> 1) ^ (((n & 1) - 1) & 0xedb88320);
   }
 
-  struct random_cyclic {
-    unsigned seed;
-    inline unsigned operator()() {
-      return seed = (seed >> 1) ^ (((seed & 1) - 1) & 0xedb88320);
+  struct random_lfsr {
+    inline void seed(unsigned seed__) {
+      seed_ = seed__;
     }
-    random_cyclic() : seed(0) {}
+
+    inline unsigned operator()() {
+      return seed_ = (seed_ >> 1) ^ (((seed_ & 1) - 1) & 0xedb88320);
+    }
+
+    random_lfsr() : seed_(0) {
+    }
+
+  private:
+    unsigned seed_;
   };
 }
 

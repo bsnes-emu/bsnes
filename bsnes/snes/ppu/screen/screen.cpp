@@ -22,6 +22,8 @@ void PPU::Screen::run() {
 }
 
 uint16 PPU::Screen::get_pixel(bool swap) {
+  if(ppu.regs.overscan == false && ppu.vcounter() >= 225) return 0x0000;
+
   enum source_t { BG1, BG2, BG3, BG4, OAM, BACK };
   bool color_enable[] = { regs.bg1_color_enable, regs.bg2_color_enable, regs.bg3_color_enable, regs.bg4_color_enable, regs.oam_color_enable, regs.back_color_enable };
 

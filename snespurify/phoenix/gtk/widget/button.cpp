@@ -2,6 +2,12 @@ static void Button_tick(Button *self) {
   if(self->onTick) self->onTick();
 }
 
+Geometry pButton::minimumGeometry() {
+  Font &font = pWidget::font();
+  Geometry geometry = font.geometry(button.state.text);
+  return { 0, 0, geometry.width + 24, geometry.height + 14 };
+}
+
 void pButton::setText(const string &text) {
   gtk_button_set_label(GTK_BUTTON(gtkWidget), text);
 }

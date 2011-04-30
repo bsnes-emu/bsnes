@@ -4,6 +4,10 @@ static void VerticalSlider_change(VerticalSlider *self) {
   if(self->onChange) self->onChange();
 }
 
+Geometry pVerticalSlider::minimumGeometry() {
+  return { 0, 0, 20, 0 };
+}
+
 unsigned pVerticalSlider::position() {
   return (unsigned)gtk_range_get_value(GTK_RANGE(gtkWidget));
 }

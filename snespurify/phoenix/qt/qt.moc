@@ -1,8 +1,8 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'qt.moc.hpp'
 **
-** Created: Fri Feb 25 04:49:31 2011
-**      by: The Qt Meta Object Compiler version 62 (Qt 4.6.2)
+** Created: Tue Mar 29 11:11:59 2011
+**      by: The Qt Meta Object Compiler version 62 (Qt 4.7.0)
 **
 ** WARNING! All changes made in this file will be lost!
 *****************************************************************************/
@@ -10,7 +10,7 @@
 #if !defined(Q_MOC_OUTPUT_REVISION)
 #error "The header file 'qt.moc.hpp' doesn't include <QObject>."
 #elif Q_MOC_OUTPUT_REVISION != 62
-#error "This file was generated using the moc from 4.6.2. It"
+#error "This file was generated using the moc from 4.7.0. It"
 #error "cannot be used with the include files from this version of Qt."
 #error "(The moc has changed too much.)"
 #endif
@@ -19,7 +19,7 @@ QT_BEGIN_MOC_NAMESPACE
 static const uint qt_meta_data_pWindow[] = {
 
  // content:
-       4,       // revision
+       5,       // revision
        0,       // classname
        0,    0, // classinfo
        0,    0, // methods
@@ -70,7 +70,7 @@ int pWindow::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
 static const uint qt_meta_data_pItem[] = {
 
  // content:
-       4,       // revision
+       5,       // revision
        0,       // classname
        0,    0, // classinfo
        1,   14, // methods
@@ -131,7 +131,7 @@ int pItem::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
 static const uint qt_meta_data_pCheckItem[] = {
 
  // content:
-       4,       // revision
+       5,       // revision
        0,       // classname
        0,    0, // classinfo
        1,   14, // methods
@@ -192,7 +192,7 @@ int pCheckItem::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
 static const uint qt_meta_data_pRadioItem[] = {
 
  // content:
-       4,       // revision
+       5,       // revision
        0,       // classname
        0,    0, // classinfo
        1,   14, // methods
@@ -253,7 +253,7 @@ int pRadioItem::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
 static const uint qt_meta_data_pButton[] = {
 
  // content:
-       4,       // revision
+       5,       // revision
        0,       // classname
        0,    0, // classinfo
        1,   14, // methods
@@ -311,10 +311,61 @@ int pButton::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     }
     return _id;
 }
+static const uint qt_meta_data_pCanvas[] = {
+
+ // content:
+       5,       // revision
+       0,       // classname
+       0,    0, // classinfo
+       0,    0, // methods
+       0,    0, // properties
+       0,    0, // enums/sets
+       0,    0, // constructors
+       0,       // flags
+       0,       // signalCount
+
+       0        // eod
+};
+
+static const char qt_meta_stringdata_pCanvas[] = {
+    "pCanvas\0"
+};
+
+const QMetaObject pCanvas::staticMetaObject = {
+    { &QObject::staticMetaObject, qt_meta_stringdata_pCanvas,
+      qt_meta_data_pCanvas, 0 }
+};
+
+#ifdef Q_NO_DATA_RELOCATION
+const QMetaObject &pCanvas::getStaticMetaObject() { return staticMetaObject; }
+#endif //Q_NO_DATA_RELOCATION
+
+const QMetaObject *pCanvas::metaObject() const
+{
+    return QObject::d_ptr->metaObject ? QObject::d_ptr->metaObject : &staticMetaObject;
+}
+
+void *pCanvas::qt_metacast(const char *_clname)
+{
+    if (!_clname) return 0;
+    if (!strcmp(_clname, qt_meta_stringdata_pCanvas))
+        return static_cast<void*>(const_cast< pCanvas*>(this));
+    if (!strcmp(_clname, "pWidget"))
+        return static_cast< pWidget*>(const_cast< pCanvas*>(this));
+    return QObject::qt_metacast(_clname);
+}
+
+int pCanvas::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
+{
+    _id = QObject::qt_metacall(_c, _id, _a);
+    if (_id < 0)
+        return _id;
+    return _id;
+}
 static const uint qt_meta_data_pCheckBox[] = {
 
  // content:
-       4,       // revision
+       5,       // revision
        0,       // classname
        0,    0, // classinfo
        1,   14, // methods
@@ -375,7 +426,7 @@ int pCheckBox::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
 static const uint qt_meta_data_pComboBox[] = {
 
  // content:
-       4,       // revision
+       5,       // revision
        0,       // classname
        0,    0, // classinfo
        1,   14, // methods
@@ -436,7 +487,7 @@ int pComboBox::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
 static const uint qt_meta_data_pHexEdit[] = {
 
  // content:
-       4,       // revision
+       5,       // revision
        0,       // classname
        0,    0, // classinfo
        1,   14, // methods
@@ -497,7 +548,7 @@ int pHexEdit::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
 static const uint qt_meta_data_pHorizontalSlider[] = {
 
  // content:
-       4,       // revision
+       5,       // revision
        0,       // classname
        0,    0, // classinfo
        1,   14, // methods
@@ -558,7 +609,7 @@ int pHorizontalSlider::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
 static const uint qt_meta_data_pLineEdit[] = {
 
  // content:
-       4,       // revision
+       5,       // revision
        0,       // classname
        0,    0, // classinfo
        2,   14, // methods
@@ -621,7 +672,7 @@ int pLineEdit::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
 static const uint qt_meta_data_pListView[] = {
 
  // content:
-       4,       // revision
+       5,       // revision
        0,       // classname
        0,    0, // classinfo
        3,   14, // methods
@@ -687,7 +738,7 @@ int pListView::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
 static const uint qt_meta_data_pRadioBox[] = {
 
  // content:
-       4,       // revision
+       5,       // revision
        0,       // classname
        0,    0, // classinfo
        1,   14, // methods
@@ -748,7 +799,7 @@ int pRadioBox::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
 static const uint qt_meta_data_pTextEdit[] = {
 
  // content:
-       4,       // revision
+       5,       // revision
        0,       // classname
        0,    0, // classinfo
        1,   14, // methods
@@ -809,7 +860,7 @@ int pTextEdit::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
 static const uint qt_meta_data_pVerticalSlider[] = {
 
  // content:
-       4,       // revision
+       5,       // revision
        0,       // classname
        0,    0, // classinfo
        1,   14, // methods

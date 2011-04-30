@@ -21,7 +21,7 @@ namespace nall {
   public:
     enum class mode : unsigned { read, write, readwrite, writeread };
 
-    bool opened() const { return p_opened(); }
+    bool open() const { return p_open(); }
     bool open(const char *filename, mode mode_) { return p_open(filename, mode_); }
     void close() { return p_close(); }
     unsigned size() const { return p_size; }
@@ -42,7 +42,7 @@ namespace nall {
 
     HANDLE p_filehandle, p_maphandle;
 
-    bool p_opened() const {
+    bool p_open() const {
       return p_handle;
     }
 
@@ -128,7 +128,7 @@ namespace nall {
 
     int p_fd;
 
-    bool p_opened() const {
+    bool p_open() const {
       return p_handle;
     }
 

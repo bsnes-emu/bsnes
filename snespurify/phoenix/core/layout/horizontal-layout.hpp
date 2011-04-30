@@ -1,10 +1,11 @@
 struct VerticalLayout;
 
 struct HorizontalLayout : public Layout {
-  void append(VerticalLayout &layout, unsigned width, unsigned height, unsigned spacing = 0);
+  void append(VerticalLayout &layout, unsigned spacing = 0);
   void append(Widget &widget, unsigned width, unsigned height, unsigned spacing = 0);
-  unsigned minimumWidth();
-  void setGeometry(Geometry &geometry);
+  Geometry minimumLayoutGeometry();
+  Geometry minimumGeometry();
+  void setGeometry(const Geometry &geometry);
   void setMargin(unsigned margin);
   void setParent(Window &parent);
   void setVisible(bool visible);
@@ -12,8 +13,6 @@ struct HorizontalLayout : public Layout {
 
 //private:
   unsigned margin;
-  unsigned width;
-  unsigned height;
   struct Children {
     VerticalLayout *layout;
     Widget *widget;

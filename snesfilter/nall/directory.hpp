@@ -41,14 +41,14 @@ struct directory {
     if(handle != INVALID_HANDLE_VALUE) {
       if(wcscmp(data.cFileName, L".") && wcscmp(data.cFileName, L"..")) {
         if(data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
-          string name = utf8_t(data.cFileName);
+          string name = (const char*)utf8_t(data.cFileName);
           if(wildcard(name, pattern)) list.append(string(name, "/"));
         }
       }
       while(FindNextFile(handle, &data) != false) {
         if(wcscmp(data.cFileName, L".") && wcscmp(data.cFileName, L"..")) {
           if(data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
-            string name = utf8_t(data.cFileName);
+            string name = (const char*)utf8_t(data.cFileName);
             if(wildcard(name, pattern)) list.append(string(name, "/"));
           }
         }
@@ -70,12 +70,12 @@ struct directory {
     handle = FindFirstFile(utf16_t(path), &data);
     if(handle != INVALID_HANDLE_VALUE) {
       if((data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0) {
-        string name = utf8_t(data.cFileName);
+        string name = (const char*)utf8_t(data.cFileName);
         if(wildcard(name, pattern)) list.append(name);
       }
       while(FindNextFile(handle, &data) != false) {
         if((data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0) {
-          string name = utf8_t(data.cFileName);
+          string name = (const char*)utf8_t(data.cFileName);
           if(wildcard(name, pattern)) list.append(name);
         }
       }

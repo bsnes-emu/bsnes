@@ -6,6 +6,15 @@ static void Widget_setFont(GtkWidget *widget, gpointer font) {
   }
 }
 
+Font& pWidget::font() {
+  if(widget.state.font) return *widget.state.font;
+  return pOS::defaultFont;
+}
+
+Geometry pWidget::minimumGeometry() {
+  return { 0, 0, 0, 0 };
+}
+
 bool pWidget::enabled() {
   return gtk_widget_get_sensitive(gtkWidget);
 }

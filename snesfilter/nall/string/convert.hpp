@@ -40,7 +40,7 @@ char* strtr(char *dest, const char *before, const char *after) {
   return dest;
 }
 
-uintmax_t strhex(const char *str) {
+uintmax_t hex(const char *str) {
   if(!str) return 0;
   uintmax_t result = 0;
 
@@ -60,13 +60,16 @@ uintmax_t strhex(const char *str) {
   return result;
 }
 
-intmax_t strsigned(const char *str) {
+intmax_t integer(const char *str) {
   if(!str) return 0;
   intmax_t result = 0;
   bool negate = false;
 
-  //check for negation
-  if(*str == '-') {
+  //check for sign
+  if(*str == '+') {
+    negate = false;
+    str++;
+  } else if(*str == '-') {
     negate = true;
     str++;
   }
@@ -81,7 +84,7 @@ intmax_t strsigned(const char *str) {
   return !negate ? result : -result;
 }
 
-uintmax_t strunsigned(const char *str) {
+uintmax_t decimal(const char *str) {
   if(!str) return 0;
   uintmax_t result = 0;
 
@@ -95,7 +98,7 @@ uintmax_t strunsigned(const char *str) {
   return result;
 }
 
-uintmax_t strbin(const char *str) {
+uintmax_t binary(const char *str) {
   if(!str) return 0;
   uintmax_t result = 0;
 
@@ -113,39 +116,8 @@ uintmax_t strbin(const char *str) {
   return result;
 }
 
-double strdouble(const char *str) {
-  if(!str) return 0.0;
-  bool negate = false;
-
-  //check for negation
-  if(*str == '-') {
-    negate = true;
-    str++;
-  }
-
-  intmax_t result_integral = 0;
-  while(*str) {
-    uint8_t x = *str++;
-    if(x >= '0' && x <= '9') x -= '0';
-    else if(x == '.' || x == ',') break;  //break loop and read fractional part
-    else return (double)result_integral;  //invalid value, assume no fractional part
-    result_integral = result_integral * 10 + x;
-  }
-
-  intmax_t result_fractional = 0;
-  while(*str) {
-    uint8_t x = *str++;
-    if(x >= '0' && x <= '9') x -= '0';
-    else break;  //stop at first invalid character
-    result_fractional = result_fractional * 10 + x;
-  }
-
-  //calculate fractional portion
-  double result = (double)result_fractional;
-  while((uintmax_t)result > 0) result /= 10.0;
-  result += (double)result_integral;
-
-  return !negate ? result : -result;
+double fp(const char *str) {
+  return atof(str);
 }
 
 }

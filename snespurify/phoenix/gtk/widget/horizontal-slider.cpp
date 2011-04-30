@@ -4,6 +4,10 @@ static void HorizontalSlider_change(HorizontalSlider *self) {
   if(self->onChange) self->onChange();
 }
 
+Geometry pHorizontalSlider::minimumGeometry() {
+  return { 0, 0, 0, 20 };
+}
+
 unsigned pHorizontalSlider::position() {
   return (unsigned)gtk_range_get_value(GTK_RANGE(gtkWidget));
 }

@@ -46,7 +46,7 @@ namespace nall {
     void reserve(unsigned newsize) {
       newsize = bit::round(newsize);  //round to nearest power of two (for amortized growth)
 
-      T *poolcopy = (T*)malloc(newsize * sizeof(T));
+      T *poolcopy = (T*)calloc(newsize, sizeof(T));
       for(unsigned i = 0; i < min(objectsize, newsize); i++) new(poolcopy + i) T(pool[i]);
       for(unsigned i = 0; i < objectsize; i++) pool[i].~T();
       free(pool);

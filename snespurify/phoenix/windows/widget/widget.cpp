@@ -2,6 +2,15 @@ bool pWidget::enabled() {
   return IsWindowEnabled(hwnd);
 }
 
+Font& pWidget::font() {
+  if(widget.state.font) return *widget.state.font;
+  return pOS::state->defaultFont;
+}
+
+Geometry pWidget::minimumGeometry() {
+  return { 0, 0, 0, 0 };
+}
+
 void pWidget::setEnabled(bool enabled) {
   EnableWindow(hwnd, enabled);
 }

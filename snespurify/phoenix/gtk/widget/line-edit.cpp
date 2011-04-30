@@ -6,6 +6,12 @@ static void LineEdit_change(LineEdit *self) {
   if(self->p.locked == false && self->onChange) self->onChange();
 }
 
+Geometry pLineEdit::minimumGeometry() {
+  Font &font = pWidget::font();
+  Geometry geometry = font.geometry(lineEdit.state.text);
+  return { 0, 0, geometry.width + 10, geometry.height + 10 };
+}
+
 void pLineEdit::setEditable(bool editable) {
   gtk_entry_set_editable(GTK_ENTRY(gtkWidget), editable);
 }

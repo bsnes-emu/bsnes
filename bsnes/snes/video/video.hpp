@@ -1,7 +1,6 @@
 class Video {
 private:
-  bool frame_hires;
-  bool frame_interlace;
+  bool hires;
   unsigned line_width[240];
 
   void update();
