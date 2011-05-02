@@ -10,21 +10,24 @@ namespace SNES {
   SMP smp;
 #endif
 
-#include "serialization.cpp"
+#include "algorithms.cpp"
+#include "core.cpp"
+#include "disassembler.cpp"
 #include "iplrom.cpp"
-#include "memory/memory.cpp"
-#include "timing/timing.cpp"
+#include "memory.cpp"
+#include "timing.cpp"
 
 void SMP::step(unsigned clocks) {
   clock += clocks * (uint64)cpu.frequency;
   dsp.clock -= clocks;
+  synchronize_dsp();
 }
 
 void SMP::synchronize_cpu() {
   if(CPU::Threaded == true) {
     if(clock >= 0 && scheduler.sync != Scheduler::SynchronizeMode::All) co_switch(cpu.thread);
   } else {
-    while(clock >= 0) cpu.enter();
+  //while(clock >= 0) cpu.enter();
   }
 }
 
@@ -36,43 +39,32 @@ void SMP::synchronize_dsp() {
   }
 }
 
-void SMP::Enter() { smp.enter(); }
-
 void SMP::enter() {
-  while(true) {
-    if(scheduler.sync == Scheduler::SynchronizeMode::All) {
-      scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
-    }
-
-    op_step();
-  }
-}
-
-void SMP::op_step() {
-  (this->*opcode_table[op_readpc()])();
+  op_step();
 }
 
 void SMP::power() {
-  //targets not initialized/changed upon reset
-  t0.target = 0;
-  t1.target = 0;
-  t2.target = 0;
+  Processor::frequency = system.apu_frequency() / 24;
+  Processor::clock = 0;
+
+  timer0.target = 0;
+  timer1.target = 0;
+  timer2.target = 0;
 
   reset();
 }
 
 void SMP::reset() {
-  create(Enter, system.apu_frequency());
+  for(unsigned n = 0x0000; n <= 0xffff; n++) apuram[n] = 0x00;
 
   regs.pc = 0xffc0;
+  regs.sp = 0x00ef;
   regs.a = 0x00;
   regs.x = 0x00;
   regs.y = 0x00;
-  regs.sp = 0xef;
   regs.p = 0x02;
 
-  foreach(n, apuram) n = random(0x00);
-
+  //timing
   status.clock_counter = 0;
   status.dsp_counter = 0;
   status.timer_step = 3;
@@ -94,30 +86,9 @@ void SMP::reset() {
   //$00f8,$00f9
   status.ram00f8 = 0x00;
   status.ram00f9 = 0x00;
+}
 
-  t0.stage0_ticks = 0;
-  t1.stage0_ticks = 0;
-  t2.stage0_ticks = 0;
-
-  t0.stage1_ticks = 0;
-  t1.stage1_ticks = 0;
-  t2.stage1_ticks = 0;
-
-  t0.stage2_ticks = 0;
-  t1.stage2_ticks = 0;
-  t2.stage2_ticks = 0;
-
-  t0.stage3_ticks = 0;
-  t1.stage3_ticks = 0;
-  t2.stage3_ticks = 0;
-
-  t0.current_line = 0;
-  t1.current_line = 0;
-  t2.current_line = 0;
-
-  t0.enabled = false;
-  t1.enabled = false;
-  t2.enabled = false;
+void SMP::serialize(serializer &s) {
 }
 
 SMP::SMP() {

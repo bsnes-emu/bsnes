@@ -39,8 +39,8 @@ void SMP::sSMPTimer<timer_frequency>::tick() {
 template<unsigned frequency>
 void SMP::sSMPTimer<frequency>::sync_stage1() {
   bool new_line = stage1_ticks;
-  if(smp.status.timers_enabled == false) new_line = false;
-  if(smp.status.timers_disabled == true) new_line = false;
+  if(smp.status.timers_enable == false) new_line = false;
+  if(smp.status.timers_disable == true) new_line = false;
 
   bool old_line = current_line;
   current_line = new_line;

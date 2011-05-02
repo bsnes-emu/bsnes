@@ -1,14 +1,14 @@
 #ifdef SMP_CPP
 
 alwaysinline uint8 SMP::ram_read(uint16 addr) {
-  if(addr >= 0xffc0 && status.iplrom_enabled) return iplrom[addr & 0x3f];
-  if(status.ram_disabled) return 0x5a;  //0xff on mini-SNES
+  if(addr >= 0xffc0 && status.iplrom_enable) return iplrom[addr & 0x3f];
+  if(status.ram_disable) return 0x5a;  //0xff on mini-SNES
   return apuram[addr];
 }
 
 alwaysinline void SMP::ram_write(uint16 addr, uint8 data) {
   //writes to $ffc0-$ffff always go to apuram, even if the iplrom is enabled
-  if(status.ram_writable && !status.ram_disabled) apuram[addr] = data;
+  if(status.ram_writable && !status.ram_disable) apuram[addr] = data;
 }
 
 uint8 SMP::port_read(uint2 port) const {
@@ -49,11 +49,11 @@ alwaysinline uint8 SMP::op_busread(uint16 addr) {
       } break;
 
       case 0xf8: {  //RAM0
-        r = status.ram0;
+        r = status.ram00f8;
       } break;
 
       case 0xf9: {  //RAM1
-        r = status.ram1;
+        r = status.ram00f9;
       } break;
 
       case 0xfa:    //T0TARGET
@@ -90,12 +90,12 @@ alwaysinline void SMP::op_buswrite(uint16 addr, uint8 data) {
       case 0xf0: {  //TEST
         if(regs.p.p) break;  //writes only valid when P flag is clear
 
-        status.clock_speed     = (data >> 6) & 3;
-        status.timer_speed     = (data >> 4) & 3;
-        status.timers_enabled  = data & 0x08;
-        status.ram_disabled    = data & 0x04;
-        status.ram_writable    = data & 0x02;
-        status.timers_disabled = data & 0x01;
+        status.clock_speed    = (data >> 6) & 3;
+        status.timer_speed    = (data >> 4) & 3;
+        status.timers_enable  = data & 0x08;
+        status.ram_disable    = data & 0x04;
+        status.ram_writable   = data & 0x02;
+        status.timers_disable = data & 0x01;
 
         status.timer_step = (1 << status.clock_speed) + (2 << status.timer_speed);
 
@@ -105,7 +105,7 @@ alwaysinline void SMP::op_buswrite(uint16 addr, uint8 data) {
       } break;
 
       case 0xf1: {  //CONTROL
-        status.iplrom_enabled = data & 0x80;
+        status.iplrom_enable = data & 0x80;
 
         if(data & 0x30) {
           //one-time clearing of APU port read registers,
@@ -161,11 +161,11 @@ alwaysinline void SMP::op_buswrite(uint16 addr, uint8 data) {
       } break;
 
       case 0xf8: {  //RAM0
-        status.ram0 = data;
+        status.ram00f8 = data;
       } break;
 
       case 0xf9: {  //RAM1
-        status.ram1 = data;
+        status.ram00f9 = data;
       } break;
 
       case 0xfa: {  //T0TARGET

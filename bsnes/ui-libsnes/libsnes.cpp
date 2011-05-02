@@ -14,7 +14,7 @@ struct Interface : public SNES::Interface {
 
   void video_refresh(const uint16_t *data, bool hires, bool interlace, bool overscan) {
     unsigned width = hires ? 512 : 256;
-    unsigned height = overscan ? 224 : 239;
+    unsigned height = overscan ? 239 : 224;
     if(interlace) height <<= 1;
     data += 9 * 1024;  //skip front porch
     if(pvideo_refresh) return pvideo_refresh(data, width, height);

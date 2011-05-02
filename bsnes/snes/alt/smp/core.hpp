@@ -1,0 +1,21 @@
+alwaysinline void op_io();
+debugvirtual alwaysinline uint8 op_read(uint16 addr);
+debugvirtual alwaysinline void op_write(uint16 addr, uint8 data);
+debugvirtual alwaysinline void op_step();
+static const unsigned cycle_table[256];
+
+uint8  fn_adc (uint8  x, uint8  y);
+uint16 fn_addw(uint16 x, uint16 y);
+uint8  fn_and (uint8  x, uint8  y);
+uint8  fn_cmp (uint8  x, uint8  y);
+uint16 fn_cmpw(uint16 x, uint16 y);
+uint8  fn_eor (uint8  x, uint8  y);
+uint8  fn_inc (uint8  x);
+uint8  fn_dec (uint8  x);
+uint8  fn_or  (uint8  x, uint8  y);
+uint8  fn_sbc (uint8  x, uint8  y);
+uint16 fn_subw(uint16 x, uint16 y);
+uint8  fn_asl (uint8  x);
+uint8  fn_lsr (uint8  x);
+uint8  fn_rol (uint8  x);
+uint8  fn_ror (uint8  x);

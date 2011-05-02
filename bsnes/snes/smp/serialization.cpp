@@ -12,17 +12,17 @@ void SMP::serialize(serializer &s) {
 
   s.integer(status.clock_speed);
   s.integer(status.timer_speed);
-  s.integer(status.timers_enabled);
-  s.integer(status.ram_disabled);
+  s.integer(status.timers_enable);
+  s.integer(status.ram_disable);
   s.integer(status.ram_writable);
-  s.integer(status.timers_disabled);
+  s.integer(status.timers_disable);
 
-  s.integer(status.iplrom_enabled);
+  s.integer(status.iplrom_enable);
 
   s.integer(status.dsp_addr);
 
-  s.integer(status.ram0);
-  s.integer(status.ram1);
+  s.integer(status.ram00f8);
+  s.integer(status.ram00f9);
 
   s.integer(t0.stage0_ticks);
   s.integer(t0.stage1_ticks);

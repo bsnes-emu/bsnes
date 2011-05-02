@@ -23,7 +23,7 @@ else ifeq ($(profile),compatibility)
 else ifeq ($(profile),performance)
   flags += -DPROFILE_PERFORMANCE
   snescpu := $(snes)/alt/cpu
-  snessmp := $(snes)/smp
+  snessmp := $(snes)/alt/smp
   snesdsp := $(snes)/alt/dsp
   snesppu := $(snes)/alt/ppu-performance
 endif
