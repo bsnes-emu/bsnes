@@ -2,7 +2,9 @@ alwaysinline void op_io();
 debugvirtual alwaysinline uint8 op_read(uint16 addr);
 debugvirtual alwaysinline void op_write(uint16 addr, uint8 data);
 debugvirtual alwaysinline void op_step();
-static const unsigned cycle_table[256];
+static const unsigned cycle_count_table[256];
+uint64 cycle_table_cpu[256];
+unsigned cycle_table_dsp[256];
 
 uint8  fn_adc (uint8  x, uint8  y);
 uint16 fn_addw(uint16 x, uint16 y);

@@ -1,15 +1,18 @@
 class SMP : public Processor {
 public:
   static const uint8 iplrom[64];
-  uint8 apuram[64 * 1024];
+  uint8 *apuram;
+  uint8 *stackram;
 
   enum : bool { Threaded = false };
-  alwaysinline void step(unsigned clocks);
   alwaysinline void synchronize_cpu();
   alwaysinline void synchronize_dsp();
 
   unsigned port_read(unsigned port);
   void port_write(unsigned port, unsigned data);
+
+  unsigned mmio_read(unsigned addr);
+  void mmio_write(unsigned addr, unsigned data);
 
   void enter();
   void power();
@@ -41,7 +44,7 @@ public:
 
   struct Regs {
     uint16 pc;
-    uint16 sp;
+    uint8 sp;
     union {
       uint16 ya;
       struct { uint8 order_lsb2(a, y); };
@@ -55,14 +58,6 @@ public:
     unsigned clock_counter;
     unsigned dsp_counter;
     unsigned timer_step;
-
-    //$00f0
-    unsigned clock_speed;
-    unsigned timer_speed;
-    bool timers_enable;
-    bool ram_disable;
-    bool ram_writable;
-    bool timers_disable;
 
     //$00f1
     bool iplrom_enable;
@@ -85,21 +80,13 @@ public:
     bool enable;
     unsigned target;
 
-    void tick();
+    void tick(unsigned clocks);
     void synchronize();
   };
 
-  Timer<192> timer0;
-  Timer<192> timer1;
-  Timer< 24> timer2;
-
-  unsigned mmio_read(unsigned addr);
-  void mmio_write(unsigned addr, unsigned data);
-
-  //disassembler
-  void disassemble_opcode(char *output, uint16 addr);
-  inline uint8 disassemble_read(uint16 addr);
-  inline uint16 relb(int8 offset, int op_len);
+  Timer<64> timer0;
+  Timer<64> timer1;
+  Timer< 8> timer2;
 };
 
 #if defined(DEBUGGER)

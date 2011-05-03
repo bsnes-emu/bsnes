@@ -1,7 +1,7 @@
 template<unsigned timer_frequency>
-void SMP::Timer<timer_frequency>::tick() {
+void SMP::Timer<timer_frequency>::tick(unsigned clocks) {
   //stage 0 increment
-  stage0_ticks += smp.status.timer_step;
+  stage0_ticks += clocks;
   if(stage0_ticks < timer_frequency) return;
   stage0_ticks -= timer_frequency;
 
