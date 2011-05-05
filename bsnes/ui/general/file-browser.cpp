@@ -6,10 +6,12 @@ void FileBrowser::create() {
   browseButton.setText("...");
   upButton.setText("..");
 
+  const unsigned sq = browseButton.minimumGeometry().height;
+
   layout.setMargin(5);
   pathLayout.append(pathBox,      ~0,  0, 5);
-  pathLayout.append(browseButton, 25, 25, 5);
-  pathLayout.append(upButton,     25, 25   );
+  pathLayout.append(browseButton, sq, sq, 5);
+  pathLayout.append(upButton,     sq, sq   );
   layout.append(pathLayout,               5);
   layout.append(contentsBox,      ~0, ~0   );
   append(layout);

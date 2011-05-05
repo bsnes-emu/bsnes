@@ -1,21 +1,21 @@
 template<unsigned timer_frequency>
-class sSMPTimer {
+class Timer {
 public:
   uint8 stage0_ticks;
   uint8 stage1_ticks;
   uint8 stage2_ticks;
-  uint8 stage3_ticks;
+  uint4 stage3_ticks;
   bool current_line;
   bool enable;
   uint8 target;
 
   void tick();
-  void sync_stage1();
+  void synchronize_stage1();
 };
 
-sSMPTimer<192> timer0;
-sSMPTimer<192> timer1;
-sSMPTimer< 24> timer2;
+Timer<192> timer0;
+Timer<192> timer1;
+Timer< 24> timer2;
 
 alwaysinline void add_clocks(unsigned clocks);
 alwaysinline void cycle_edge();

@@ -32,7 +32,7 @@ template<uint8 (SMPcore::*op)(uint8, uint8), int n>
 void SMPcore::op_read_reg_addr() {
   dp  = op_readpc() << 0;
   dp |= op_readpc() << 8;
-  rd  = op_readaddr(dp);
+  rd  = op_read(dp);
   regs.r[n] = (this->*op)(regs.r[n], rd);
 }
 
@@ -41,7 +41,7 @@ void SMPcore::op_read_a_addrr() {
   dp  = op_readpc() << 0;
   dp |= op_readpc() << 8;
   op_io();
-  rd = op_readaddr(dp + regs.r[i]);
+  rd = op_read(dp + regs.r[i]);
   regs.a = (this->*op)(regs.a, rd);
 }
 
@@ -51,7 +51,7 @@ void SMPcore::op_read_a_idpx() {
   op_io();
   sp  = op_readdp(dp + 0) << 0;
   sp |= op_readdp(dp + 1) << 8;
-  rd  = op_readaddr(sp);
+  rd  = op_read(sp);
   regs.a = (this->*op)(regs.a, rd);
 }
 
@@ -61,7 +61,7 @@ void SMPcore::op_read_a_idpy() {
   op_io();
   sp  = op_readdp(dp + 0) << 0;
   sp |= op_readdp(dp + 1) << 8;
-  rd  = op_readaddr(sp + regs.y);
+  rd  = op_read(sp + regs.y);
   regs.a = (this->*op)(regs.a, rd);
 }
 
@@ -117,7 +117,7 @@ template<int op> void SMPcore::op_and1_bit() {
   dp |= op_readpc() << 8;
   bit = dp >> 13;
   dp &= 0x1fff;
-  rd  = op_readaddr(dp);
+  rd  = op_read(dp);
   regs.p.c = regs.p.c & ((bool)(rd & (1 << bit)) ^ op);
 }
 
@@ -126,7 +126,7 @@ void SMPcore::op_eor1_bit() {
   dp |= op_readpc() << 8;
   bit = dp >> 13;
   dp &= 0x1fff;
-  rd  = op_readaddr(dp);
+  rd  = op_read(dp);
   op_io();
   regs.p.c = regs.p.c ^ (bool)(rd & (1 << bit));
 }
@@ -136,9 +136,9 @@ void SMPcore::op_not1_bit() {
   dp |= op_readpc() << 8;
   bit = dp >> 13;
   dp &= 0x1fff;
-  rd  = op_readaddr(dp);
+  rd  = op_read(dp);
   rd ^= 1 << bit;
-  op_writeaddr(dp, rd);
+  op_write(dp, rd);
 }
 
 template<int op> void SMPcore::op_or1_bit() {
@@ -146,7 +146,7 @@ template<int op> void SMPcore::op_or1_bit() {
   dp |= op_readpc() << 8;
   bit = dp >> 13;
   dp &= 0x1fff;
-  rd  = op_readaddr(dp);
+  rd  = op_read(dp);
   op_io();
   regs.p.c = regs.p.c | ((bool)(rd & (1 << bit)) ^ op);
 }

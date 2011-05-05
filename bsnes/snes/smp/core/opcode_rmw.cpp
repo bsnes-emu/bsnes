@@ -27,20 +27,20 @@ template<uint8 (SMPcore::*op)(uint8)>
 void SMPcore::op_adjust_addr() {
   dp  = op_readpc() << 0;
   dp |= op_readpc() << 8;
-  rd  = op_readaddr(dp);
+  rd  = op_read(dp);
   rd  = (this->*op)(rd);
-  op_writeaddr(dp, rd);
+  op_write(dp, rd);
 }
 
 template<int op>
 void SMPcore::op_adjust_addr_a() {
   dp  = op_readpc() << 0;
   dp |= op_readpc() << 8;
-  rd  = op_readaddr(dp);
+  rd  = op_read(dp);
   regs.p.n = ((regs.a - rd) & 0x80);
   regs.p.z = ((regs.a - rd) == 0);
-  op_readaddr(dp);
-  op_writeaddr(dp, (op ? rd | regs.a : rd & ~regs.a));
+  op_read(dp);
+  op_write(dp, (op ? rd | regs.a : rd & ~regs.a));
 }
 
 template<int adjust>

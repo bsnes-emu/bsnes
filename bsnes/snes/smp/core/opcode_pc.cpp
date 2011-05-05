@@ -82,8 +82,8 @@ void SMPcore::op_jmp_iaddrx() {
   dp |= op_readpc() << 8;
   op_io();
   dp += regs.x;
-  rd  = op_readaddr(dp + 0) << 0;
-  rd |= op_readaddr(dp + 1) << 8;
+  rd  = op_read(dp + 0) << 0;
+  rd |= op_read(dp + 1) << 8;
   regs.pc = rd;
 }
 
@@ -93,8 +93,8 @@ void SMPcore::op_call() {
   op_io();
   op_io();
   op_io();
-  op_writestack(regs.pc >> 8);
-  op_writestack(regs.pc >> 0);
+  op_writesp(regs.pc >> 8);
+  op_writesp(regs.pc >> 0);
   regs.pc = rd;
 }
 
@@ -102,48 +102,48 @@ void SMPcore::op_pcall() {
   rd = op_readpc();
   op_io();
   op_io();
-  op_writestack(regs.pc >> 8);
-  op_writestack(regs.pc >> 0);
+  op_writesp(regs.pc >> 8);
+  op_writesp(regs.pc >> 0);
   regs.pc = 0xff00 | rd;
 }
 
 template<int n> void SMPcore::op_tcall() {
   dp  = 0xffde - (n << 1);
-  rd  = op_readaddr(dp + 0) << 0;
-  rd |= op_readaddr(dp + 1) << 8;
+  rd  = op_read(dp + 0) << 0;
+  rd |= op_read(dp + 1) << 8;
   op_io();
   op_io();
   op_io();
-  op_writestack(regs.pc >> 8);
-  op_writestack(regs.pc >> 0);
+  op_writesp(regs.pc >> 8);
+  op_writesp(regs.pc >> 0);
   regs.pc = rd;
 }
 
 void SMPcore::op_brk() {
-  rd  = op_readaddr(0xffde) << 0;
-  rd |= op_readaddr(0xffdf) << 8;
+  rd  = op_read(0xffde) << 0;
+  rd |= op_read(0xffdf) << 8;
   op_io();
   op_io();
-  op_writestack(regs.pc >> 8);
-  op_writestack(regs.pc >> 0);
-  op_writestack(regs.p);
+  op_writesp(regs.pc >> 8);
+  op_writesp(regs.pc >> 0);
+  op_writesp(regs.p);
   regs.pc = rd;
   regs.p.b = 1;
   regs.p.i = 0;
 }
 
 void SMPcore::op_ret() {
-  rd  = op_readstack() << 0;
-  rd |= op_readstack() << 8;
+  rd  = op_readsp() << 0;
+  rd |= op_readsp() << 8;
   op_io();
   op_io();
   regs.pc = rd;
 }
 
 void SMPcore::op_reti() {
-  regs.p = op_readstack();
-  rd  = op_readstack() << 0;
-  rd |= op_readstack() << 8;
+  regs.p = op_readsp();
+  rd  = op_readsp() << 0;
+  rd |= op_readsp() << 8;
   op_io();
   op_io();
   regs.pc = rd;

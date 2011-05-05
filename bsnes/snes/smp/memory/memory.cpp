@@ -20,175 +20,162 @@ void SMP::port_write(uint2 port, uint8 data) {
 }
 
 alwaysinline uint8 SMP::op_busread(uint16 addr) {
-  uint8 r;
-  if((addr & 0xfff0) == 0x00f0) {  //00f0-00ff
-    switch(addr) {
-      case 0xf0: {  //TEST -- write-only register
-        r = 0x00;
-      } break;
+  if((addr & 0xfff0) != 0x00f0) return ram_read(addr);
 
-      case 0xf1: {  //CONTROL -- write-only register
-        r = 0x00;
-      } break;
+  unsigned result;
 
-      case 0xf2: {  //DSPADDR
-        r = status.dsp_addr;
-      } break;
+  switch(addr) {
+  case 0xf0:  //TEST -- write-only register
+    return 0x00;
 
-      case 0xf3: {  //DSPDATA
-        //0x80-0xff are read-only mirrors of 0x00-0x7f
-        r = dsp.read(status.dsp_addr & 0x7f);
-      } break;
+  case 0xf1:  //CONTROL -- write-only register
+    return 0x00;
 
-      case 0xf4:    //CPUIO0
-      case 0xf5:    //CPUIO1
-      case 0xf6:    //CPUIO2
-      case 0xf7: {  //CPUIO3
-        synchronize_cpu();
-        r = cpu.port_read(addr);
-      } break;
+  case 0xf2:  //DSPADDR
+    return status.dsp_addr;
 
-      case 0xf8: {  //RAM0
-        r = status.ram00f8;
-      } break;
+  case 0xf3:  //DSPDATA
+    //0x80-0xff are read-only mirrors of 0x00-0x7f
+    return dsp.read(status.dsp_addr & 0x7f);
 
-      case 0xf9: {  //RAM1
-        r = status.ram00f9;
-      } break;
+  case 0xf4:  //CPUIO0
+  case 0xf5:  //CPUIO1
+  case 0xf6:  //CPUIO2
+  case 0xf7:  //CPUIO3
+    synchronize_cpu();
+    return cpu.port_read(addr);
 
-      case 0xfa:    //T0TARGET
-      case 0xfb:    //T1TARGET
-      case 0xfc: {  //T2TARGET -- write-only registers
-        r = 0x00;
-      } break;
+  case 0xf8:  //RAM0
+    return status.ram00f8;
 
-      case 0xfd: {  //T0OUT -- 4-bit counter value
-        r = timer0.stage3_ticks & 15;
-        timer0.stage3_ticks = 0;
-      } break;
+  case 0xf9:  //RAM1
+    return status.ram00f9;
 
-      case 0xfe: {  //T1OUT -- 4-bit counter value
-        r = timer1.stage3_ticks & 15;
-        timer1.stage3_ticks = 0;
-      } break;
+  case 0xfa:  //T0TARGET
+  case 0xfb:  //T1TARGET
+  case 0xfc:  //T2TARGET -- write-only registers
+    return 0x00;
 
-      case 0xff: {  //T2OUT -- 4-bit counter value
-        r = timer2.stage3_ticks & 15;
-        timer2.stage3_ticks = 0;
-      } break;
-    }
-  } else {
-    r = ram_read(addr);
+  case 0xfd:  //T0OUT -- 4-bit counter value
+    result = timer0.stage3_ticks & 15;
+    timer0.stage3_ticks = 0;
+    return result;
+
+  case 0xfe:  //T1OUT -- 4-bit counter value
+    result = timer1.stage3_ticks & 15;
+    timer1.stage3_ticks = 0;
+    return result;
+
+  case 0xff:  //T2OUT -- 4-bit counter value
+    result = timer2.stage3_ticks & 15;
+    timer2.stage3_ticks = 0;
+    return result;
   }
 
-  return r;
+  return 0x00;  //never used, avoids compiler warning
 }
 
 alwaysinline void SMP::op_buswrite(uint16 addr, uint8 data) {
-  if((addr & 0xfff0) == 0x00f0) {  //$00f0-00ff
-    switch(addr) {
-      case 0xf0: {  //TEST
-        if(regs.p.p) break;  //writes only valid when P flag is clear
+  ram_write(addr, data);  //all writes, even to MMIO registers, appear on bus
+  if((addr & 0xfff0) != 0x00f0) return;
 
-        status.clock_speed    = (data >> 6) & 3;
-        status.timer_speed    = (data >> 4) & 3;
-        status.timers_enable  = data & 0x08;
-        status.ram_disable    = data & 0x04;
-        status.ram_writable   = data & 0x02;
-        status.timers_disable = data & 0x01;
+  switch(addr) {
+  case 0xf0:  //TEST
+    if(regs.p.p) break;  //writes only valid when P flag is clear
 
-        status.timer_step = (1 << status.clock_speed) + (2 << status.timer_speed);
+    status.clock_speed    = (data >> 6) & 3;
+    status.timer_speed    = (data >> 4) & 3;
+    status.timers_enable  = data & 0x08;
+    status.ram_disable    = data & 0x04;
+    status.ram_writable   = data & 0x02;
+    status.timers_disable = data & 0x01;
 
-        timer0.sync_stage1();
-        timer1.sync_stage1();
-        timer2.sync_stage1();
-      } break;
+    status.timer_step = (1 << status.clock_speed) + (2 << status.timer_speed);
 
-      case 0xf1: {  //CONTROL
-        status.iplrom_enable = data & 0x80;
+    timer0.synchronize_stage1();
+    timer1.synchronize_stage1();
+    timer2.synchronize_stage1();
+    break;
 
-        if(data & 0x30) {
-          //one-time clearing of APU port read registers,
-          //emulated by simulating CPU writes of 0x00
-          synchronize_cpu();
-          if(data & 0x20) {
-            cpu.port_write(2, 0x00);
-            cpu.port_write(3, 0x00);
-          }
-          if(data & 0x10) {
-            cpu.port_write(0, 0x00);
-            cpu.port_write(1, 0x00);
-          }
-        }
+  case 0xf1:  //CONTROL
+    status.iplrom_enable = data & 0x80;
 
-        //0->1 transistion resets timers
-        if(timer2.enable == false && (data & 0x04)) {
-          timer2.stage2_ticks = 0;
-          timer2.stage3_ticks = 0;
-        }
-        timer2.enable = data & 0x04;
-
-        if(timer1.enable == false && (data & 0x02)) {
-          timer1.stage2_ticks = 0;
-          timer1.stage3_ticks = 0;
-        }
-        timer1.enable = data & 0x02;
-
-        if(timer0.enable == false && (data & 0x01)) {
-          timer0.stage2_ticks = 0;
-          timer0.stage3_ticks = 0;
-        }
-        timer0.enable = data & 0x01;
-      } break;
-
-      case 0xf2: {  //DSPADDR
-        status.dsp_addr = data;
-      } break;
-
-      case 0xf3: {  //DSPDATA
-        //0x80-0xff are read-only mirrors of 0x00-0x7f
-        if(!(status.dsp_addr & 0x80)) {
-          dsp.write(status.dsp_addr & 0x7f, data);
-        }
-      } break;
-
-      case 0xf4:    //CPUIO0
-      case 0xf5:    //CPUIO1
-      case 0xf6:    //CPUIO2
-      case 0xf7: {  //CPUIO3
-        synchronize_cpu();
-        port_write(addr, data);
-      } break;
-
-      case 0xf8: {  //RAM0
-        status.ram00f8 = data;
-      } break;
-
-      case 0xf9: {  //RAM1
-        status.ram00f9 = data;
-      } break;
-
-      case 0xfa: {  //T0TARGET
-        timer0.target = data;
-      } break;
-
-      case 0xfb: {  //T1TARGET
-        timer1.target = data;
-      } break;
-
-      case 0xfc: {  //T2TARGET
-        timer2.target = data;
-      } break;
-
-      case 0xfd:    //T0OUT
-      case 0xfe:    //T1OUT
-      case 0xff: {  //T2OUT -- read-only registers
-      } break;
+    if(data & 0x30) {
+      //one-time clearing of APU port read registers,
+      //emulated by simulating CPU writes of 0x00
+      synchronize_cpu();
+      if(data & 0x20) {
+        cpu.port_write(2, 0x00);
+        cpu.port_write(3, 0x00);
+      }
+      if(data & 0x10) {
+        cpu.port_write(0, 0x00);
+        cpu.port_write(1, 0x00);
+      }
     }
-  }
 
-  //all writes, even to MMIO registers, appear on bus
-  ram_write(addr, data);
+    //0->1 transistion resets timers
+    if(timer2.enable == false && (data & 0x04)) {
+      timer2.stage2_ticks = 0;
+      timer2.stage3_ticks = 0;
+    }
+    timer2.enable = data & 0x04;
+
+    if(timer1.enable == false && (data & 0x02)) {
+      timer1.stage2_ticks = 0;
+      timer1.stage3_ticks = 0;
+    }
+    timer1.enable = data & 0x02;
+
+    if(timer0.enable == false && (data & 0x01)) {
+      timer0.stage2_ticks = 0;
+      timer0.stage3_ticks = 0;
+    }
+    timer0.enable = data & 0x01;
+    break;
+
+  case 0xf2:  //DSPADDR
+    status.dsp_addr = data;
+    break;
+
+  case 0xf3:  //DSPDATA
+    if(status.dsp_addr & 0x80) break;  //0x80-0xff are read-only mirrors of 0x00-0x7f
+    dsp.write(status.dsp_addr & 0x7f, data);
+    break;
+
+  case 0xf4:  //CPUIO0
+  case 0xf5:  //CPUIO1
+  case 0xf6:  //CPUIO2
+  case 0xf7:  //CPUIO3
+    synchronize_cpu();
+    port_write(addr, data);
+    break;
+
+  case 0xf8:  //RAM0
+    status.ram00f8 = data;
+    break;
+
+  case 0xf9:  //RAM1
+    status.ram00f9 = data;
+    break;
+
+  case 0xfa:  //T0TARGET
+    timer0.target = data;
+    break;
+
+  case 0xfb:  //T1TARGET
+    timer1.target = data;
+    break;
+
+  case 0xfc:  //T2TARGET
+    timer2.target = data;
+    break;
+
+  case 0xfd:  //T0OUT
+  case 0xfe:  //T1OUT
+  case 0xff:  //T2OUT -- read-only registers
+    break;
+  }
 }
 
 void SMP::op_io() {

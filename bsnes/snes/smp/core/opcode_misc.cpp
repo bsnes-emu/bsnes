@@ -31,7 +31,7 @@ void SMPcore::op_daa() {
   if(regs.p.h || (regs.a & 15) > 0x09) {
     regs.a += 0x06;
   }
-  regs.p.n = !!(regs.a & 0x80);
+  regs.p.n = (regs.a & 0x80);
   regs.p.z = (regs.a == 0);
 }
 
@@ -45,7 +45,7 @@ void SMPcore::op_das() {
   if(!regs.p.h || (regs.a & 15) > 0x09) {
     regs.a -= 0x06;
   }
-  regs.p.n = !!(regs.a & 0x80);
+  regs.p.n = (regs.a & 0x80);
   regs.p.z = (regs.a == 0);
 }
 
@@ -76,25 +76,25 @@ template<int op, int value> void SMPcore::op_setbit_dp() {
 template<int n> void SMPcore::op_push_reg() {
   op_io();
   op_io();
-  op_writestack(regs.r[n]);
+  op_writesp(regs.r[n]);
 }
 
 void SMPcore::op_push_p() {
   op_io();
   op_io();
-  op_writestack(regs.p);
+  op_writesp(regs.p);
 }
 
 template<int n> void SMPcore::op_pop_reg() {
   op_io();
   op_io();
-  regs.r[n] = op_readstack();
+  regs.r[n] = op_readsp();
 }
 
 void SMPcore::op_pop_p() {
   op_io();
   op_io();
-  regs.p = op_readstack();
+  regs.p = op_readsp();
 }
 
 void SMPcore::op_mul_ya() {
@@ -110,7 +110,7 @@ void SMPcore::op_mul_ya() {
   regs.a = ya;
   regs.y = ya >> 8;
   //result is set based on y (high-byte) only
-  regs.p.n = !!(regs.y & 0x80);
+  regs.p.n = (regs.y & 0x80);
   regs.p.z = (regs.y == 0);
 }
 
@@ -128,8 +128,8 @@ void SMPcore::op_div_ya_x() {
   op_io();
   ya = regs.ya;
   //overflow set if quotient >= 256
-  regs.p.v = !!(regs.y >= regs.x);
-  regs.p.h = !!((regs.y & 15) >= (regs.x & 15));
+  regs.p.v = (regs.y >= regs.x);
+  regs.p.h = ((regs.y & 15) >= (regs.x & 15));
   if(regs.y < (regs.x << 1)) {
     //if quotient is <= 511 (will fit into 9-bit result)
     regs.a = ya / regs.x;
@@ -141,7 +141,7 @@ void SMPcore::op_div_ya_x() {
     regs.y = regs.x + (ya - (regs.x << 9)) % (256 - regs.x);
   }
   //result is set based on a (quotient) only
-  regs.p.n = !!(regs.a & 0x80);
+  regs.p.n = (regs.a & 0x80);
   regs.p.z = (regs.a == 0);
 }
 

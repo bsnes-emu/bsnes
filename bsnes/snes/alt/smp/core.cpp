@@ -1,7 +1,7 @@
 void SMP::tick() {
-  timer0.tick(1);
-  timer1.tick(1);
-  timer2.tick(1);
+  timer0.tick();
+  timer1.tick();
+  timer2.tick();
 
   clock += cycle_step_cpu;
   dsp.clock -= 24;
@@ -19,7 +19,7 @@ uint8 SMP::op_read(uint16 addr) {
   tick();
   #endif
   if((addr & 0xfff0) == 0x00f0) return mmio_read(addr);
-  if((addr & 0xffc0) == 0xffc0 && status.iplrom_enable) return iplrom[addr & 0x3f];
+  if(addr >= 0xffc0 && status.iplrom_enable) return iplrom[addr & 0x3f];
   return apuram[addr];
 }
 
@@ -30,9 +30,6 @@ void SMP::op_write(uint16 addr, uint8 data) {
   if((addr & 0xfff0) == 0x00f0) mmio_write(addr, data);
   apuram[addr] = data;  //all writes go to RAM, even MMIO writes
 }
-
-//TODO:
-//* non-cycle accurate untaken conditional branches should subtract from opcode's cycle overhead
 
 void SMP::op_step() {
   #define op_readpc() op_read(regs.pc++)
@@ -67,6 +64,8 @@ void SMP::op_step() {
     #include "core/op_read.cpp"
     #include "core/op_rmw.cpp"
   }
+
+  //TODO: untaken branches should consume less cycles
 
   timer0.tick(cycle_count_table[opcode]);
   timer1.tick(cycle_count_table[opcode]);

@@ -2,20 +2,12 @@ alwaysinline uint8_t op_readpc() {
   return op_read(regs.pc++);
 }
 
-alwaysinline uint8_t op_readstack() {
+alwaysinline uint8_t op_readsp() {
   return op_read(0x0100 | ++regs.sp);
 }
 
-alwaysinline void op_writestack(uint8_t data) {
+alwaysinline void op_writesp(uint8_t data) {
   op_write(0x0100 | regs.sp--, data);
-}
-
-alwaysinline uint8_t op_readaddr(uint16_t addr) {
-  return op_read(addr);
-}
-
-alwaysinline void op_writeaddr(uint16_t addr, uint8_t data) {
-  op_write(addr, data);
 }
 
 alwaysinline uint8_t op_readdp(uint8_t addr) {
