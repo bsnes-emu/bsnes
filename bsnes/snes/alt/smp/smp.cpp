@@ -1,3 +1,5 @@
+#define CYCLE_ACCURATE
+
 #include <snes/snes.hpp>
 
 #define SMP_CPP
@@ -19,7 +21,7 @@ namespace SNES {
 
 void SMP::synchronize_cpu() {
   if(CPU::Threaded == true) {
-    if(clock >= 0 && scheduler.sync != Scheduler::SynchronizeMode::All) co_switch(cpu.thread);
+  //if(clock >= 0 && scheduler.sync != Scheduler::SynchronizeMode::All) co_switch(cpu.thread);
   } else {
     while(clock >= 0) cpu.enter();
   }
@@ -27,7 +29,7 @@ void SMP::synchronize_cpu() {
 
 void SMP::synchronize_dsp() {
   if(DSP::Threaded == true) {
-    if(dsp.clock < 0 && scheduler.sync != Scheduler::SynchronizeMode::All) co_switch(dsp.thread);
+  //if(dsp.clock < 0 && scheduler.sync != Scheduler::SynchronizeMode::All) co_switch(dsp.thread);
   } else {
     while(dsp.clock < 0) dsp.enter();
   }
@@ -50,11 +52,16 @@ void SMP::power() {
     cycle_table_cpu[n] = (cycle_count_table[n] * 24) * cpu.frequency;
   }
 
+  cycle_step_cpu = 24 * cpu.frequency;
+
   reset();
 }
 
 void SMP::reset() {
   for(unsigned n = 0x0000; n <= 0xffff; n++) apuram[n] = 0x00;
+
+  opcode_number = 0;
+  opcode_cycle = 0;
 
   regs.pc = 0xffc0;
   regs.sp = 0xef;
@@ -62,11 +69,6 @@ void SMP::reset() {
   regs.x = 0x00;
   regs.y = 0x00;
   regs.p = 0x02;
-
-  //timing
-  status.clock_counter = 0;
-  status.dsp_counter = 0;
-  status.timer_step = 3;
 
   //$00f1
   status.iplrom_enable = true;
@@ -77,12 +79,21 @@ void SMP::reset() {
   //$00f8,$00f9
   status.ram00f8 = 0x00;
   status.ram00f9 = 0x00;
+
+  //timers
+  timer0.enable = timer1.enable = timer2.enable = false;
+  timer0.stage1_ticks = timer1.stage1_ticks = timer2.stage1_ticks = 0;
+  timer0.stage2_ticks = timer1.stage2_ticks = timer2.stage2_ticks = 0;
+  timer0.stage3_ticks = timer1.stage3_ticks = timer2.stage3_ticks = 0;
 }
 
 void SMP::serialize(serializer &s) {
   Processor::serialize(s);
 
   s.array(apuram, 64 * 1024);
+
+  s.integer(opcode_number);
+  s.integer(opcode_cycle);
 
   s.integer(regs.pc);
   s.integer(regs.sp);
@@ -99,21 +110,35 @@ void SMP::serialize(serializer &s) {
   s.integer(regs.p.z);
   s.integer(regs.p.c);
 
-  s.integer(status.clock_counter);
-  s.integer(status.dsp_counter);
-  s.integer(status.timer_step);
-
   s.integer(status.iplrom_enable);
 
   s.integer(status.dsp_addr);
 
   s.integer(status.ram00f8);
   s.integer(status.ram00f9);
+
+  s.integer(timer0.enable);
+  s.integer(timer0.target);
+  s.integer(timer0.stage1_ticks);
+  s.integer(timer0.stage2_ticks);
+  s.integer(timer0.stage3_ticks);
+
+  s.integer(timer1.enable);
+  s.integer(timer1.target);
+  s.integer(timer1.stage1_ticks);
+  s.integer(timer1.stage2_ticks);
+  s.integer(timer1.stage3_ticks);
+
+  s.integer(timer2.enable);
+  s.integer(timer2.target);
+
+  s.integer(timer2.stage1_ticks);
+  s.integer(timer2.stage2_ticks);
+  s.integer(timer2.stage3_ticks);
 }
 
 SMP::SMP() {
   apuram = new uint8[64 * 1024];
-  stackram = apuram + 0x0100;
 }
 
 SMP::~SMP() {

@@ -24,29 +24,29 @@ void SMP::serialize(serializer &s) {
   s.integer(status.ram00f8);
   s.integer(status.ram00f9);
 
-  s.integer(t0.stage0_ticks);
-  s.integer(t0.stage1_ticks);
-  s.integer(t0.stage2_ticks);
-  s.integer(t0.stage3_ticks);
-  s.integer(t0.current_line);
-  s.integer(t0.enabled);
-  s.integer(t0.target);
+  s.integer(timer0.stage0_ticks);
+  s.integer(timer0.stage1_ticks);
+  s.integer(timer0.stage2_ticks);
+  s.integer(timer0.stage3_ticks);
+  s.integer(timer0.current_line);
+  s.integer(timer0.enable);
+  s.integer(timer0.target);
 
-  s.integer(t1.stage0_ticks);
-  s.integer(t1.stage1_ticks);
-  s.integer(t1.stage2_ticks);
-  s.integer(t1.stage3_ticks);
-  s.integer(t1.current_line);
-  s.integer(t1.enabled);
-  s.integer(t1.target);
+  s.integer(timer1.stage0_ticks);
+  s.integer(timer1.stage1_ticks);
+  s.integer(timer1.stage2_ticks);
+  s.integer(timer1.stage3_ticks);
+  s.integer(timer1.current_line);
+  s.integer(timer1.enable);
+  s.integer(timer1.target);
 
-  s.integer(t2.stage0_ticks);
-  s.integer(t2.stage1_ticks);
-  s.integer(t2.stage2_ticks);
-  s.integer(t2.stage3_ticks);
-  s.integer(t2.current_line);
-  s.integer(t2.enabled);
-  s.integer(t2.target);
+  s.integer(timer2.stage0_ticks);
+  s.integer(timer2.stage1_ticks);
+  s.integer(timer2.stage2_ticks);
+  s.integer(timer2.stage3_ticks);
+  s.integer(timer2.current_line);
+  s.integer(timer2.enable);
+  s.integer(timer2.target);
 }
 
 #endif

@@ -63,18 +63,18 @@ alwaysinline uint8 SMP::op_busread(uint16 addr) {
       } break;
 
       case 0xfd: {  //T0OUT -- 4-bit counter value
-        r = t0.stage3_ticks & 15;
-        t0.stage3_ticks = 0;
+        r = timer0.stage3_ticks & 15;
+        timer0.stage3_ticks = 0;
       } break;
 
       case 0xfe: {  //T1OUT -- 4-bit counter value
-        r = t1.stage3_ticks & 15;
-        t1.stage3_ticks = 0;
+        r = timer1.stage3_ticks & 15;
+        timer1.stage3_ticks = 0;
       } break;
 
       case 0xff: {  //T2OUT -- 4-bit counter value
-        r = t2.stage3_ticks & 15;
-        t2.stage3_ticks = 0;
+        r = timer2.stage3_ticks & 15;
+        timer2.stage3_ticks = 0;
       } break;
     }
   } else {
@@ -99,9 +99,9 @@ alwaysinline void SMP::op_buswrite(uint16 addr, uint8 data) {
 
         status.timer_step = (1 << status.clock_speed) + (2 << status.timer_speed);
 
-        t0.sync_stage1();
-        t1.sync_stage1();
-        t2.sync_stage1();
+        timer0.sync_stage1();
+        timer1.sync_stage1();
+        timer2.sync_stage1();
       } break;
 
       case 0xf1: {  //CONTROL
@@ -122,23 +122,23 @@ alwaysinline void SMP::op_buswrite(uint16 addr, uint8 data) {
         }
 
         //0->1 transistion resets timers
-        if(t2.enabled == false && (data & 0x04)) {
-          t2.stage2_ticks = 0;
-          t2.stage3_ticks = 0;
+        if(timer2.enable == false && (data & 0x04)) {
+          timer2.stage2_ticks = 0;
+          timer2.stage3_ticks = 0;
         }
-        t2.enabled = data & 0x04;
+        timer2.enable = data & 0x04;
 
-        if(t1.enabled == false && (data & 0x02)) {
-          t1.stage2_ticks = 0;
-          t1.stage3_ticks = 0;
+        if(timer1.enable == false && (data & 0x02)) {
+          timer1.stage2_ticks = 0;
+          timer1.stage3_ticks = 0;
         }
-        t1.enabled = data & 0x02;
+        timer1.enable = data & 0x02;
 
-        if(t0.enabled == false && (data & 0x01)) {
-          t0.stage2_ticks = 0;
-          t0.stage3_ticks = 0;
+        if(timer0.enable == false && (data & 0x01)) {
+          timer0.stage2_ticks = 0;
+          timer0.stage3_ticks = 0;
         }
-        t0.enabled = data & 0x01;
+        timer0.enable = data & 0x01;
       } break;
 
       case 0xf2: {  //DSPADDR
@@ -169,15 +169,15 @@ alwaysinline void SMP::op_buswrite(uint16 addr, uint8 data) {
       } break;
 
       case 0xfa: {  //T0TARGET
-        t0.target = data;
+        timer0.target = data;
       } break;
 
       case 0xfb: {  //T1TARGET
-        t1.target = data;
+        timer1.target = data;
       } break;
 
       case 0xfc: {  //T2TARGET
-        t2.target = data;
+        timer2.target = data;
       } break;
 
       case 0xfd:    //T0OUT

@@ -54,9 +54,9 @@ void SMP::op_step() {
 
 void SMP::power() {
   //targets not initialized/changed upon reset
-  t0.target = 0;
-  t1.target = 0;
-  t2.target = 0;
+  timer0.target = 0;
+  timer1.target = 0;
+  timer2.target = 0;
 
   reset();
 }
@@ -72,6 +72,10 @@ void SMP::reset() {
   regs.p = 0x02;
 
   foreach(n, apuram) n = random(0x00);
+  apuram[0x00f4] = 0x00;
+  apuram[0x00f5] = 0x00;
+  apuram[0x00f6] = 0x00;
+  apuram[0x00f7] = 0x00;
 
   status.clock_counter = 0;
   status.dsp_counter = 0;
@@ -95,29 +99,29 @@ void SMP::reset() {
   status.ram00f8 = 0x00;
   status.ram00f9 = 0x00;
 
-  t0.stage0_ticks = 0;
-  t1.stage0_ticks = 0;
-  t2.stage0_ticks = 0;
+  timer0.stage0_ticks = 0;
+  timer1.stage0_ticks = 0;
+  timer2.stage0_ticks = 0;
 
-  t0.stage1_ticks = 0;
-  t1.stage1_ticks = 0;
-  t2.stage1_ticks = 0;
+  timer0.stage1_ticks = 0;
+  timer1.stage1_ticks = 0;
+  timer2.stage1_ticks = 0;
 
-  t0.stage2_ticks = 0;
-  t1.stage2_ticks = 0;
-  t2.stage2_ticks = 0;
+  timer0.stage2_ticks = 0;
+  timer1.stage2_ticks = 0;
+  timer2.stage2_ticks = 0;
 
-  t0.stage3_ticks = 0;
-  t1.stage3_ticks = 0;
-  t2.stage3_ticks = 0;
+  timer0.stage3_ticks = 0;
+  timer1.stage3_ticks = 0;
+  timer2.stage3_ticks = 0;
 
-  t0.current_line = 0;
-  t1.current_line = 0;
-  t2.current_line = 0;
+  timer0.current_line = 0;
+  timer1.current_line = 0;
+  timer2.current_line = 0;
 
-  t0.enabled = false;
-  t1.enabled = false;
-  t2.enabled = false;
+  timer0.enable = false;
+  timer1.enable = false;
+  timer2.enable = false;
 }
 
 SMP::SMP() {

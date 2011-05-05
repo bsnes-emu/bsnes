@@ -2,7 +2,6 @@ class SMP : public Processor {
 public:
   static const uint8 iplrom[64];
   uint8 *apuram;
-  uint8 *stackram;
 
   enum : bool { Threaded = false };
   alwaysinline void synchronize_cpu();
@@ -42,6 +41,9 @@ public:
     alwaysinline unsigned operator&=(unsigned data) { return operator=(operator unsigned() & data); }
   };
 
+  unsigned opcode_number;
+  unsigned opcode_cycle;
+
   struct Regs {
     uint16 pc;
     uint8 sp;
@@ -54,11 +56,6 @@ public:
   } regs;
 
   struct Status {
-    //timing
-    unsigned clock_counter;
-    unsigned dsp_counter;
-    unsigned timer_step;
-
     //$00f1
     bool iplrom_enable;
 
@@ -72,21 +69,18 @@ public:
 
   template<unsigned frequency>
   struct Timer {
-    unsigned stage0_ticks;
-    unsigned stage1_ticks;
-    unsigned stage2_ticks;
-    unsigned stage3_ticks;
-    bool current_line;
     bool enable;
-    unsigned target;
+    uint8 target;
+    uint8 stage1_ticks;
+    uint8 stage2_ticks;
+    uint8 stage3_ticks;
 
     void tick(unsigned clocks);
-    void synchronize();
   };
 
-  Timer<64> timer0;
-  Timer<64> timer1;
-  Timer< 8> timer2;
+  Timer<128> timer0;
+  Timer<128> timer1;
+  Timer< 16> timer2;
 };
 
 #if defined(DEBUGGER)

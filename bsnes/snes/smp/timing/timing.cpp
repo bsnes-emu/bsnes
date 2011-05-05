@@ -10,9 +10,9 @@ void SMP::add_clocks(unsigned clocks) {
 }
 
 void SMP::cycle_edge() {
-  t0.tick();
-  t1.tick();
-  t2.tick();
+  timer0.tick();
+  timer1.tick();
+  timer2.tick();
 
   //TEST register S-SMP speed control
   //24 clocks have already been added for this cycle at this point
@@ -47,7 +47,7 @@ void SMP::sSMPTimer<frequency>::sync_stage1() {
   if(old_line != 1 || new_line != 0) return;  //only pulse on 1->0 transition
 
   //stage 2 increment
-  if(enabled == false) return;
+  if(enable == false) return;
   stage2_ticks++;
   if(stage2_ticks != target) return;
 
