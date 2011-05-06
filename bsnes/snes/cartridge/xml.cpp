@@ -17,6 +17,9 @@ void Cartridge::parse_xml(const lstring &list) {
 }
 
 void Cartridge::parse_xml_cartridge(const char *data) {
+  //reset cartridge information
+  information.nss.setting.reset();
+
   xml_element document = xml_parse(data);
   if(document.element.size() == 0) return;
 
@@ -32,6 +35,7 @@ void Cartridge::parse_xml_cartridge(const char *data) {
       foreach(node, head.element) {
         if(node.name == "rom") xml_parse_rom(node);
         if(node.name == "ram") xml_parse_ram(node);
+        if(node.name == "nss") xml_parse_nss(node);
         if(node.name == "icd2") xml_parse_icd2(node);
         if(node.name == "superfx") xml_parse_superfx(node);
         if(node.name == "sa1") xml_parse_sa1(node);
@@ -93,6 +97,33 @@ void Cartridge::xml_parse_ram(xml_element &root) {
       }
       if(m.size == 0) m.size = ram_size;
       mapping.append(m);
+    }
+  }
+}
+
+void Cartridge::xml_parse_nss(xml_element &root) {
+  has_nss_dip = true;
+
+  foreach(node, root.element) {
+    if(node.name == "setting") {
+      unsigned number = information.nss.setting.size();
+      if(number >= 16) break;  //more than 16 DIP switches is not possible
+
+      information.nss.option[number].reset();
+      foreach(attr, node.attribute) {
+        if(attr.name == "name") {
+          information.nss.setting[number] = attr.parse();
+        }
+      }
+      foreach(leaf, node.element) {
+        string name;
+        unsigned value = 0x0000;
+        foreach(attr, leaf.attribute) {
+          if(attr.name == "name") name = attr.parse();
+          if(attr.name == "value") value = (uint16)hex(attr.content);
+        }
+        information.nss.option[number].append({ hex<4>(value), ":", name });
+      }
     }
   }
 }

@@ -54,6 +54,7 @@ void Application::main(int argc, char **argv) {
   fileBrowser.create();
   singleSlotLoader.create();
   doubleSlotLoader.create();
+  nssDipWindow.create();
   videoSettings.create();
   audioSettings.create();
   inputSettings.create();

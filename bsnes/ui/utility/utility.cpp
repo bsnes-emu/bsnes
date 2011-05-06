@@ -158,6 +158,12 @@ void Utility::cartridgeLoaded() {
     "Loaded ", notdir(cartridge.baseName),
     cartridge.patchApplied ? ", and applied UPS patch" : ""
   });
+
+  //NSS
+  if(SNES::cartridge.has_nss_dip()) {
+    nssDipWindow.select();
+    application.pause = true;
+  }
 }
 
 void Utility::cartridgeUnloaded() {

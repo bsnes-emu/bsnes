@@ -17,6 +17,7 @@ void Cartridge::load(Mode cartridge_mode, const lstring &xml_list) {
   ram_size = 0;
 
   has_bsx_slot   = false;
+  has_nss_dip    = false;
   has_superfx    = false;
   has_sa1        = false;
   has_necdsp     = false;

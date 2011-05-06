@@ -34,6 +34,7 @@ public:
   readonly<unsigned> ram_size;
 
   readonly<bool> has_bsx_slot;
+  readonly<bool> has_nss_dip;
   readonly<bool> has_superfx;
   readonly<bool> has_sa1;
   readonly<bool> has_necdsp;
@@ -75,6 +76,13 @@ public:
   };
   linear_vector<Mapping> mapping;
 
+  struct Information {
+    struct NSS {
+      lstring setting;
+      lstring option[16];
+    } nss;
+  } information;
+
   void load(Mode, const lstring&);
   void unload();
 
@@ -91,6 +99,7 @@ private:
 
   void xml_parse_rom(xml_element&);
   void xml_parse_ram(xml_element&);
+  void xml_parse_nss(xml_element&);
   void xml_parse_icd2(xml_element&);
   void xml_parse_superfx(xml_element&);
   void xml_parse_sa1(xml_element&);

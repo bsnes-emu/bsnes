@@ -70,6 +70,7 @@ void System::init(Interface *interface_) {
   assert(interface != 0);
 
   icd2.init();
+  nss.init();
   superfx.init();
   sa1.init();
   necdsp.init();
@@ -111,6 +112,7 @@ void System::load() {
   if(cartridge.mode() == Cartridge::Mode::SuperGameBoy) icd2.load();
 
   if(cartridge.has_bsx_slot()) bsxflash.load();
+  if(cartridge.has_nss_dip()) nss.load();
   if(cartridge.has_superfx()) superfx.load();
   if(cartridge.has_sa1()) sa1.load();
   if(cartridge.has_necdsp()) necdsp.load();
@@ -134,6 +136,7 @@ void System::unload() {
   if(cartridge.mode() == Cartridge::Mode::SuperGameBoy) icd2.unload();
 
   if(cartridge.has_bsx_slot()) bsxflash.unload();
+  if(cartridge.has_nss_dip()) nss.unload();
   if(cartridge.has_superfx()) superfx.unload();
   if(cartridge.has_sa1()) sa1.unload();
   if(cartridge.has_necdsp()) necdsp.unload();
@@ -169,6 +172,7 @@ void System::power() {
   if(cartridge.mode() == Cartridge::Mode::SuperGameBoy) icd2.power();
 
   if(cartridge.has_bsx_slot()) bsxflash.power();
+  if(cartridge.has_nss_dip()) nss.power();
   if(cartridge.has_superfx()) superfx.power();
   if(cartridge.has_sa1()) sa1.power();
   if(cartridge.has_necdsp()) necdsp.power();
@@ -204,6 +208,7 @@ void System::reset() {
   if(cartridge.mode() == Cartridge::Mode::SuperGameBoy) icd2.reset();
 
   if(cartridge.has_bsx_slot()) bsxflash.reset();
+  if(cartridge.has_nss_dip()) nss.reset();
   if(cartridge.has_superfx()) superfx.reset();
   if(cartridge.has_sa1()) sa1.reset();
   if(cartridge.has_necdsp()) necdsp.reset();

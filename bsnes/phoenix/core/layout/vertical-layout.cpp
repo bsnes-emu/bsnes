@@ -69,6 +69,10 @@ Geometry VerticalLayout::minimumLayoutGeometry() {
   return { 0, 0, maximumWidth ? MaximumSize : margin * 2 + width, maximumHeight ? MaximumSize : margin * 2 + height };
 }
 
+void VerticalLayout::reset() {
+  children.reset();
+}
+
 void VerticalLayout::setGeometry(const Geometry &containerGeometry) {
   auto children = this->children;
   foreach(child, children) {
