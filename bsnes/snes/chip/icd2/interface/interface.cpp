@@ -1,5 +1,15 @@
 #ifdef ICD2_CPP
 
+//called on rendered lines 0-143 (not on Vblank lines 144-153)
+void ICD2::lcd_scanline() {
+  if((GameBoy::lcd.status.ly & 7) == 0) {
+    lcd.row = (lcd.row + 1) & 3;
+  }
+
+  unsigned offset = (lcd.row * 160 * 8) + ((GameBoy::lcd.status.ly & 7) * 160);
+  memcpy(lcd.buffer + offset, GameBoy::lcd.screen + GameBoy::lcd.status.ly * 160, 160);
+}
+
 void ICD2::joyp_write(bool p15, bool p14) {
   //joypad handling
   if(p15 == 1 && p14 == 1) {

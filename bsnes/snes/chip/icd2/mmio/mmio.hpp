@@ -1,16 +1,19 @@
-uint8 r2181;
-uint8 r2182;
-uint8 mmio_read(unsigned addr);
-void mmio_write(unsigned addr, uint8 data);
+void render(const uint8 *source);
 
-uint8 r6000;
-uint8 r6003;
-uint8 r6004;
-uint8 r6005;
-uint8 r6006;
-uint8 r6007;
-uint8 r7000[16];
-unsigned r7800;
-uint8 mlt_req;
+uint8 r6000_ly;   //SGB BIOS' cache of LY
+uint8 r6000_row;  //SGB BIOS' cache of ROW
+uint8 r6001;      //VRAM conversion
+uint8 r6003;      //control port
+uint8 r6004;      //joypad 1
+uint8 r6005;      //joypad 2
+uint8 r6006;      //joypad 3
+uint8 r6007;      //joypad 4
+uint8 r7000[16];  //JOYP packet data
+unsigned r7800;   //VRAM offset
+uint8 mlt_req;    //number of active joypads
 
-uint8 vram[320];
+struct LCD {
+  uint8 buffer[4 * 160 * 8];  //four tile rows of linear video data
+  uint8 output[320];          //one tile row of 2bpp video data
+  unsigned row;               //active ICD2 rendering tile row
+} lcd;

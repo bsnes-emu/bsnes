@@ -1,3 +1,4 @@
+void lcd_scanline();
 void joyp_write(bool p15, bool p14);
 void video_refresh(const uint8_t *data);
 void audio_sample(int16_t center, int16_t left, int16_t right);

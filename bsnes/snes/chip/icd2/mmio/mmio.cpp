@@ -1,38 +1,19 @@
 #ifdef ICD2_CPP
 
-uint8 ICD2::mmio_read(unsigned addr) {
-  if((uint16)addr == 0x2181) return cpu.mmio_read(addr);
-  if((uint16)addr == 0x2182) return cpu.mmio_read(addr);
-  if((uint16)addr == 0x420b) return cpu.mmio_read(addr);
-  return 0x00;
-}
+//convert linear pixel data { 0x00, 0x55, 0xaa, 0xff } to 2bpp planar tiledata
+void ICD2::render(const uint8 *source) {
+  memset(lcd.output, 0x00, 320);
 
-void ICD2::mmio_write(unsigned addr, uint8 data) {
-  if((uint16)addr == 0x420b && data == 0x10) {
-    unsigned offset = (r2182 << 8) | (r2181 << 0);
-    r7800 = 0;
-    unsigned row = 0;
-    if(offset >= 0x5000 && offset <= 0x6540) row = (offset - 0x5000) / 320;
-    if(offset >= 0x6800 && offset <= 0x7d40) row = (offset - 0x6800) / 320;
+  for(unsigned y = 0; y < 8; y++) {
+    for(unsigned x = 0; x < 160; x++) {
+      unsigned pixel = *source++ / 0x55;
+      pixel ^= 3;
 
-    uint8 *source = GameBoy::lcd.screen + row * 160 * 8;
-    memset(vram, 0x00, 320);
-
-    for(unsigned y = row * 8; y < row * 8 + 8; y++) {
-      for(unsigned x = 0; x < 160; x++) {
-        unsigned pixel = *source++ / 0x55;
-        pixel ^= 3;
-
-        unsigned addr = (x / 8 * 16) + ((y & 7) * 2);
-        vram[addr + 0] |= ((pixel & 1) >> 0) << (7 - (x & 7));
-        vram[addr + 1] |= ((pixel & 2) >> 1) << (7 - (x & 7));
-      }
+      unsigned addr = y * 2 + (x / 8 * 16);
+      lcd.output[addr + 0] |= ((pixel & 1) >> 0) << (7 - (x & 7));
+      lcd.output[addr + 1] |= ((pixel & 2) >> 1) << (7 - (x & 7));
     }
   }
-
-  if((uint16)addr == 0x2181) return cpu.mmio_write(addr, r2181 = data);
-  if((uint16)addr == 0x2182) return cpu.mmio_write(addr, r2182 = data);
-  if((uint16)addr == 0x420b) return cpu.mmio_write(addr, data);
 }
 
 uint8 ICD2::read(unsigned addr) {
@@ -40,7 +21,9 @@ uint8 ICD2::read(unsigned addr) {
 
   //LY counter
   if(addr == 0x6000) {
-    return GameBoy::lcd.status.ly;
+    r6000_ly = GameBoy::lcd.status.ly;
+    r6000_row = lcd.row;
+    return r6000_ly;
   }
 
   //command ready port
@@ -66,7 +49,7 @@ uint8 ICD2::read(unsigned addr) {
 
   //VRAM port
   if(addr == 0x7800) {
-    uint8 data = vram[r7800];
+    uint8 data = lcd.output[r7800];
     r7800 = (r7800 + 1) % 320;
     return data;
   }
@@ -76,6 +59,17 @@ uint8 ICD2::read(unsigned addr) {
 
 void ICD2::write(unsigned addr, uint8 data) {
   addr &= 0xffff;
+
+  //VRAM port
+  if(addr == 0x6001) {
+    r6001 = data;
+    r7800 = 0;
+
+    unsigned offset = (r6000_row - (4 - (r6001 - (r6000_ly & 3)))) & 3;
+    render(lcd.buffer + offset * 160 * 8);
+
+    return;
+  }
 
   //control port
   //d7: 0 = halt, 1 = reset

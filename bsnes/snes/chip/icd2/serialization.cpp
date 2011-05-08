@@ -18,10 +18,9 @@ void ICD2::serialize(serializer &s) {
   s.integer(bitdata);
   s.integer(bitoffset);
 
-  s.integer(r2181);
-  s.integer(r2182);
-
-  s.integer(r6000);
+  s.integer(r6000_ly);
+  s.integer(r6000_row);
+  s.integer(r6001);
   s.integer(r6003);
   s.integer(r6004);
   s.integer(r6005);
@@ -31,7 +30,9 @@ void ICD2::serialize(serializer &s) {
   s.integer(r7800);
   s.integer(mlt_req);
 
-  s.array(vram);
+  s.array(lcd.buffer);
+  s.array(lcd.output);
+  s.integer(lcd.row);
 }
 
 #endif

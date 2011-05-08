@@ -1,5 +1,6 @@
 class Interface {
 public:
+  virtual void lcd_scanline() {}
   virtual void joyp_write(bool p15, bool p14) {}
 
   virtual void video_refresh(const uint8_t *data) {}
