@@ -17,12 +17,12 @@ void PPU::Background::run_mode7() {
   signed voffset = sclip<13>(self.regs.mode7_voffset);
 
   if(Background::x++ & ~255) return;
-  unsigned x = mosaic_hoffset;
-  unsigned y = self.bg1.mosaic_voffset;  //BG2 vertical mosaic uses BG1 mosaic size
+  unsigned x = mosaic.hoffset;
+  unsigned y = self.bg1.mosaic.voffset;  //BG2 vertical mosaic uses BG1 mosaic size
 
-  if(--mosaic_hcounter == 0) {
-    mosaic_hcounter = regs.mosaic + 1;
-    mosaic_hoffset += regs.mosaic + 1;
+  if(--mosaic.hcounter == 0) {
+    mosaic.hcounter = regs.mosaic + 1;
+    mosaic.hoffset += regs.mosaic + 1;
   }
 
   if(self.regs.mode7_hflip) x = 255 - x;

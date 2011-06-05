@@ -33,18 +33,18 @@ class Background {
     } main, sub;
   } output;
 
+  struct Mosaic : Output::Pixel {
+    unsigned vcounter;
+    unsigned voffset;
+    unsigned vscroll;
+    unsigned hcounter;
+    unsigned hoffset;
+    unsigned hscroll;
+  } mosaic;
+
   struct {
     signed x;
     signed y;
-
-    unsigned mosaic_vcounter;
-    unsigned mosaic_voffset;
-    unsigned mosaic_hcounter;
-    unsigned mosaic_hoffset;
-
-    unsigned mosaic_priority;
-    uint8 mosaic_palette;
-    uint16 mosaic_tile;
 
     unsigned tile_counter;
     unsigned tile;
