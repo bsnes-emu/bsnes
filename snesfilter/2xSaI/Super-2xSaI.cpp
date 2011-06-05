@@ -28,5 +28,5 @@ dllexport void filter_render(
     }
   }
 
-  Super2xSaI32((unsigned char*)temp, 1024, 0, (unsigned char*)output, outpitch, width, height);
+  Super2xSaI32((unsigned char*)temp, width * sizeof(uint32_t), 0, (unsigned char*)output, outpitch, width, height);
 }

@@ -5,7 +5,6 @@ struct VerticalLayout : public Layout {
   void append(Widget &widget, unsigned width, unsigned height, unsigned spacing = 0);
   Geometry minimumGeometry();
   Geometry minimumLayoutGeometry();
-  void reset();
   void setGeometry(const Geometry &geometry);
   void setMargin(unsigned margin);
   void setParent(Window &parent);

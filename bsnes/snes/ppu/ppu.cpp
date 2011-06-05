@@ -39,6 +39,10 @@ void PPU::enter() {
 
     scanline();
     add_clocks(60);
+    bg1.begin();
+    bg2.begin();
+    bg3.begin();
+    bg4.begin();
 
     if(vcounter() <= 239) {
       for(signed pixel = -7; pixel <= 255; pixel++) {

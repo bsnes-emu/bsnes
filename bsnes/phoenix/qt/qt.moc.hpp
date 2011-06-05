@@ -56,6 +56,23 @@ struct pFont : public pObject {
   void update();
 };
 
+struct pTimer : public QObject, public pObject {
+  Q_OBJECT
+
+public:
+  Timer &timer;
+  QTimer *qtTimer;
+
+  void setEnabled(bool enabled);
+  void setInterval(unsigned milliseconds);
+
+  pTimer(Timer &timer) : timer(timer) {}
+  void constructor();
+
+public slots:
+  void onTimeout();
+};
+
 struct pMessageWindow : public pObject {
   static MessageWindow::Response information(Window &parent, const string &text, MessageWindow::Buttons buttons);
   static MessageWindow::Response question(Window &parent, const string &text, MessageWindow::Buttons buttons);

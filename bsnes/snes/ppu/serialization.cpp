@@ -109,6 +109,9 @@ void PPU::Background::serialize(serializer &s) {
   s.integer(regs.hoffset);
   s.integer(regs.voffset);
 
+  s.integer(cache.hoffset);
+  s.integer(cache.voffset);
+
   s.integer(output.main.priority);
   s.integer(output.main.palette);
   s.integer(output.main.tile);
@@ -126,10 +129,8 @@ void PPU::Background::serialize(serializer &s) {
 
   s.integer(mosaic.vcounter);
   s.integer(mosaic.voffset);
-  s.integer(mosaic.vscroll);
   s.integer(mosaic.hcounter);
   s.integer(mosaic.hoffset);
-  s.integer(mosaic.hscroll);
 
   s.integer(tile_counter);
   s.integer(tile);

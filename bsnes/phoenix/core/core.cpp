@@ -34,6 +34,10 @@ void Font::setSize(unsigned size) { state.size = size; return p.setSize(size); }
 void Font::setUnderline(bool underline) { state.underline = underline; return p.setUnderline(underline); }
 Font::Font() : state(*new State), p(*new pFont(*this)) { p.constructor(); }
 
+void Timer::setEnabled(bool enabled) { state.enabled = enabled; return p.setEnabled(enabled); }
+void Timer::setInterval(unsigned milliseconds) { state.milliseconds = milliseconds; return p.setInterval(milliseconds); }
+Timer::Timer() : state(*new State), p(*new pTimer(*this)) { p.constructor(); }
+
 MessageWindow::Response MessageWindow::information(Window &parent, const string &text, MessageWindow::Buttons buttons) { return pMessageWindow::information(parent, text, buttons); }
 MessageWindow::Response MessageWindow::question(Window &parent, const string &text, MessageWindow::Buttons buttons) { return pMessageWindow::question(parent, text, buttons); }
 MessageWindow::Response MessageWindow::warning(Window &parent, const string &text, MessageWindow::Buttons buttons) { return pMessageWindow::warning(parent, text, buttons); }

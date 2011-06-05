@@ -2,10 +2,16 @@
 
 #include "mode7.cpp"
 
+//V = 0, H = 0
 void PPU::Background::frame() {
 }
 
+//H = 0
 void PPU::Background::scanline() {
+}
+
+//H = 60
+void PPU::Background::begin() {
   bool hires = (self.regs.bgmode == 5 || self.regs.bgmode == 6);
   x = -7;
   y = self.vcounter();
@@ -13,20 +19,26 @@ void PPU::Background::scanline() {
   if(y == 1) {
     mosaic.vcounter = regs.mosaic + 1;
     mosaic.voffset = 1;
-    mosaic.vscroll = regs.voffset;
-    mosaic.hscroll = regs.hoffset;
+    cache.hoffset = regs.hoffset;
+    cache.voffset = regs.voffset;
   } else if(--mosaic.vcounter == 0) {
     mosaic.vcounter = regs.mosaic + 1;
     mosaic.voffset += regs.mosaic + 1;
-    mosaic.vscroll = regs.voffset;
-    mosaic.hscroll = regs.hoffset;
+    cache.hoffset = regs.hoffset;
+    cache.voffset = regs.voffset;
   }
 
-  tile_counter = (7 - (mosaic.hscroll & 7)) << hires;
+  tile_counter = (7 - (cache.hoffset & 7)) << hires;
   for(unsigned n = 0; n < 8; n++) data[n] = 0;
 
   mosaic.hcounter = regs.mosaic + 1;
   mosaic.hoffset = 0;
+
+  if(regs.mode == Mode::Mode7) return begin_mode7();
+  if(regs.mosaic == 0) {
+    cache.hoffset = regs.hoffset;
+    cache.voffset = regs.voffset;
+  }
 }
 
 void PPU::Background::get_tile() {
@@ -53,8 +65,8 @@ void PPU::Background::get_tile() {
   unsigned px = x << hires;
   unsigned py = (regs.mosaic == 0 ? y : mosaic.voffset);
 
-  unsigned hscroll = mosaic.hscroll;
-  unsigned vscroll = mosaic.vscroll;
+  unsigned hscroll = cache.hoffset;
+  unsigned vscroll = cache.voffset;
   if(hires) {
     hscroll <<= 1;
     if(self.regs.interlace) py = (py << 1) + self.field();
@@ -67,8 +79,8 @@ void PPU::Background::get_tile() {
     uint16 offset_x = (x + (hscroll & 7));
 
     if(offset_x >= 8) {
-      unsigned hval = self.bg3.get_tile((offset_x - 8) + (self.bg3.regs.hoffset & ~7), self.bg3.regs.voffset + 0);
-      unsigned vval = self.bg3.get_tile((offset_x - 8) + (self.bg3.regs.hoffset & ~7), self.bg3.regs.voffset + 8);
+      unsigned hval = self.bg3.get_tile((offset_x - 8) + (self.bg3.cache.hoffset & ~7), self.bg3.cache.voffset + 0);
+      unsigned vval = self.bg3.get_tile((offset_x - 8) + (self.bg3.cache.hoffset & ~7), self.bg3.cache.voffset + 8);
       unsigned valid_mask = (id == ID::BG1 ? 0x2000 : 0x4000);
 
       if(self.regs.bgmode == 4) {
@@ -205,6 +217,9 @@ void PPU::Background::reset() {
   regs.hoffset = random(0x0000);
   regs.voffset = random(0x0000);
 
+  cache.hoffset = 0;
+  cache.voffset = 0;
+
   output.main.palette = 0;
   output.main.priority = 0;
   output.sub.palette = 0;
@@ -216,10 +231,8 @@ void PPU::Background::reset() {
 
   mosaic.vcounter = 0;
   mosaic.voffset = 0;
-  mosaic.vscroll = 0;
   mosaic.hcounter = 0;
   mosaic.hoffset = 0;
-  mosaic.hscroll = 0;
 
   x = 0;
   y = 0;

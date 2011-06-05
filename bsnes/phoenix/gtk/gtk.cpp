@@ -2,6 +2,7 @@
 
 #include "settings.cpp"
 #include "font.cpp"
+#include "timer.cpp"
 #include "message-window.cpp"
 #include "window.cpp"
 
@@ -31,10 +32,29 @@
 Font pOS::defaultFont;
 
 Geometry pOS::availableGeometry() {
-  //TODO: is there a GTK+ function for this?
-  //should return desktopGeometry() sans panels, toolbars, docks, etc.
-  Geometry geometry = desktopGeometry();
-  return { geometry.x + 64, geometry.y + 64, geometry.width - 128, geometry.height - 128 };
+  Display *display = XOpenDisplay(0);
+  int screen = DefaultScreen(display);
+
+  static Atom atom = X11None;
+  if(atom == X11None) atom = XInternAtom(display, "_NET_WORKAREA", True);
+
+  int format;
+  unsigned char *data = 0;
+  unsigned long items, after;
+  Atom returnAtom;
+
+  int result = XGetWindowProperty(
+    display, RootWindow(display, screen), atom, 0, 4, False, XA_CARDINAL, &returnAtom, &format, &items, &after, &data
+  );
+
+  XCloseDisplay(display);
+
+  if(result == Success && returnAtom == XA_CARDINAL && format == 32 && items == 4) {
+    unsigned long *workarea = (unsigned long*)data;
+    return { (signed)workarea[0], (signed)workarea[1], (unsigned)workarea[2], (unsigned)workarea[3] };
+  }
+
+  return desktopGeometry();
 }
 
 Geometry pOS::desktopGeometry() {

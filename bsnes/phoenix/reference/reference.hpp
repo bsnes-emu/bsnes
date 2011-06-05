@@ -29,6 +29,7 @@ struct pOS : public pObject {
 struct pFont : public pObject {
   Font &font;
 
+  Geometry geometry(const string &text);
   void setBold(bool bold);
   void setFamily(const string &family);
   void setItalic(bool italic);
@@ -36,6 +37,16 @@ struct pFont : public pObject {
   void setUnderline(bool underline);
 
   pFont(Font &font) : font(font) {}
+  void constructor();
+};
+
+struct pTimer : public pObject {
+  Timer &timer;
+
+  void setEnabled(bool enabled);
+  void setInterval(unsigned milliseconds);
+
+  pTimer(Timer &timer) : timer(timer) {}
   void constructor();
 };
 
@@ -136,6 +147,8 @@ struct pWidget : public pObject {
   Widget &widget;
 
   bool enabled();
+  Font& font();
+  Geometry minimumGeometry();
   void setEnabled(bool enabled);
   void setFocused();
   void setFont(Font &font);
@@ -152,6 +165,16 @@ struct pButton : public pWidget {
   void setText(const string &text);
 
   pButton(Button &button) : pWidget(button), button(button) {}
+  void constructor();
+};
+
+struct pCanvas : public pWidget {
+  Canvas &canvas;
+
+  uint32_t* buffer();
+  void update();
+
+  pCanvas(Canvas &canvas) : pWidget(canvas), canvas(canvas) {}
   void constructor();
 };
 

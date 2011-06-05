@@ -49,6 +49,17 @@ struct pFont : public pObject {
   void constructor();
 };
 
+struct pTimer : public pObject {
+  Timer &timer;
+  UINT_PTR htimer;
+
+  void setEnabled(bool enabled);
+  void setInterval(unsigned milliseconds);
+
+  pTimer(Timer &timer) : timer(timer) {}
+  void constructor();
+};
+
 struct pMessageWindow : public pObject {
   static MessageWindow::Response information(Window &parent, const string &text, MessageWindow::Buttons buttons);
   static MessageWindow::Response question(Window &parent, const string &text, MessageWindow::Buttons buttons);

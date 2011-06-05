@@ -1,6 +1,12 @@
 #ifndef NALL_PLATFORM_HPP
 #define NALL_PLATFORM_HPP
 
+#if defined(_WIN32)
+  //minimum version needed for _wstat64, etc
+  #undef  __MSVCRT_VERSION__
+  #define __MSVCRT_VERSION__ 0x0601
+#endif
+
 #include <nall/utf8.hpp>
 
 //=========================
@@ -18,16 +24,19 @@
 #include <string.h>
 #include <time.h>
 
+#include <sys/types.h>
+#include <sys/stat.h>
+
 #if defined(_WIN32)
   #include <io.h>
   #include <direct.h>
   #include <shlobj.h>
+  #include <wchar.h>
   #undef interface
   #define dllexport __declspec(dllexport)
 #else
   #include <unistd.h>
   #include <pwd.h>
-  #include <sys/stat.h>
   #define dllexport
 #endif
 
@@ -53,11 +62,11 @@
 #if defined(_WIN32)
   #define getcwd      _getcwd
   #define ftruncate   _chsize
-  #define putenv      _putenv
   #define mkdir(n, m) _wmkdir(nall::utf16_t(n))
+  #define putenv      _putenv
   #define rmdir       _rmdir
-  #define vsnprintf   _vsnprintf
   #define usleep(n)   Sleep(n / 1000)
+  #define vsnprintf   _vsnprintf
 #endif
 
 //================

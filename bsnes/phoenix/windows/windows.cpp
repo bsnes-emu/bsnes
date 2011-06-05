@@ -2,6 +2,7 @@
 
 #include "object.cpp"
 #include "font.cpp"
+#include "timer.cpp"
 #include "message-window.cpp"
 #include "window.cpp"
 

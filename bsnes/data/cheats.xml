@@ -1673,6 +1673,10 @@
     </cheat>
     <cheat>
       <description>Have Fezi-copter</description>
+      <code>6DAC-6FDD</code>
+    </cheat>
+    <cheat>
+      <description>Have Fezi-copter (alt)</description>
       <code>7E0064FF</code>
     </cheat>
     <cheat>
@@ -3535,7 +3539,6 @@
     <cheat>
       <description>Invincibility</description>
       <code>2D87-AD04</code>
-      <code>EDA6-AFDD</code>
     </cheat>
     <cheat>
       <description>Infinite lives</description>
@@ -5042,6 +5045,10 @@
   </cartridge>
   <cartridge sha256="de1de85ad549a6aaf0431cceb47cbd07e1f6e81f9e16fd62575305e2c1f06240">
     <name>BioMetal (USA)</name>
+    <cheat>
+      <description>Invincibility (blinking)</description>
+      <code>406D-DDD2</code>
+    </cheat>
     <cheat>
       <description>Infinite lives</description>
       <code>C26E-6D02</code>
@@ -9409,6 +9416,14 @@
   </cartridge>
   <cartridge sha256="7c722f9941957630467c1784d0eb3f92fbfc0a2a1da3c8f5c27f593eca2a5a04">
     <name>Cutthroat Island (USA)</name>
+    <cheat>
+      <description>Stage select menu after character select screen</description>
+      <code>3C6B-479E</code>
+    </cheat>
+    <cheat>
+      <description>Stage select menu after character select screen (alt)</description>
+      <code>878C9DEA</code>
+    </cheat>
     <cheat>
       <description>Infinite health - P1</description>
       <code>7E09F428</code>
@@ -17331,16 +17346,24 @@
       <code>A2C0-A7D0</code>
     </cheat>
     <cheat>
+      <description>Hit anywhere</description>
+      <code>3CA4-0FD0</code>
+      <code>40AD-04A0</code>
+      <code>7DA4-0F00</code>
+      <code>89A4-0D60</code>
+      <code>F9A4-0DA0</code>
+    </cheat>
+    <cheat>
+      <description>Enemies never get knocked down, attack until they die</description>
+      <code>7E0D7000</code>
+    </cheat>
+    <cheat>
       <description>Slower timer</description>
       <code>D4C9-AFD0</code>
     </cheat>
     <cheat>
       <description>Faster timer</description>
       <code>DDC9-AFD0</code>
-    </cheat>
-    <cheat>
-      <description>Enemies never get knocked down, hit them until they die</description>
-      <code>7E0D7000</code>
     </cheat>
     <cheat>
       <description>Enemy 1 has no health</description>
@@ -24316,6 +24339,19 @@
       <code>17E5-22E6</code>
     </cheat>
     <cheat>
+      <description>Hit anywhere (disable before fighting Ganon, use the Boomerang instead of Sword to hit switches)</description>
+      <code>40E2-6D96</code>
+      <code>6D3E-A7FC</code>
+      <code>403F-DD28</code>
+      <code>40EC-AF26</code>
+      <code>6D34-D7F8</code>
+      <code>4068-A0E6</code>
+    </cheat>
+    <cheat>
+      <description>Get items from anywhere</description>
+      <code>402F-07B6</code>
+    </cheat>
+    <cheat>
       <description>Always get Faerie at the Pond Of Happiness (as if you threw in 100 rupees)</description>
       <code>7EF36A64</code>
     </cheat>
@@ -24336,7 +24372,7 @@
       <code>DDB5-049E</code>
     </cheat>
     <cheat>
-      <description>Enemies that normally drop items will drop them 100% of the time</description>
+      <description>100% enemy drop rate (from enemies that normally drop items)</description>
       <code>DDE8-142C</code>
     </cheat>
     <cheat>
@@ -30757,6 +30793,10 @@
       <code>40DE-7FD2</code>
     </cheat>
     <cheat>
+      <description>Hit anywhere</description>
+      <code>6DD8-7DD2</code>
+    </cheat>
+    <cheat>
       <description>Multi-jump</description>
       <code>1DFC-E400</code>
       <code>5EFC-E460</code>
@@ -30804,6 +30844,10 @@
     <cheat>
       <description>One hit kills (most enemies)</description>
       <code>6DB5-CD97</code>
+    </cheat>
+    <cheat>
+      <description>Hit anywhere</description>
+      <code>40B1-34F4</code>
     </cheat>
     <cheat>
       <description>Immune to drain attack</description>
@@ -30891,16 +30935,16 @@
       <code>7E1F8009</code>
     </cheat>
     <cheat>
-      <description>Start with all weapons and all enemies defeated (except Sigma)</description>
-      <code>23BD-3F07</code>
-    </cheat>
-    <cheat>
       <description>Infinite weapons once obtained</description>
       <code>C9B3-4769</code>
     </cheat>
     <cheat>
       <description>One hit kills (most enemies)</description>
       <code>6DB5-CD97</code>
+    </cheat>
+    <cheat>
+      <description>Hit anywhere</description>
+      <code>40B1-34F4</code>
     </cheat>
     <cheat>
       <description>Have all equipment</description>
@@ -30943,6 +30987,10 @@
     <cheat>
       <description>Weapon charges to 1st power level faster</description>
       <code>DDB1-4F61</code>
+    </cheat>
+    <cheat>
+      <description>Start with all weapons and all enemies defeated (except Sigma)</description>
+      <code>23BD-3F07</code>
     </cheat>
     <cheat>
       <description>Start with less health</description>
@@ -31064,6 +31112,12 @@
       <code>7E1FB9FF</code>
     </cheat>
     <cheat>
+      <description>Hit anywhere</description>
+      <code>4028-A73F</code>
+      <code>C222-6734</code>
+      <code>D4E7-DDFB</code>
+    </cheat>
+    <cheat>
       <description>One hit kills</description>
       <code>6D2D-AF14</code>
     </cheat>
@@ -31083,10 +31137,6 @@
     <cheat>
       <description>Infinite health</description>
       <code>C2AD-6FF7</code>
-    </cheat>
-    <cheat>
-      <description>Start with max health bar</description>
-      <code>F02A-ADF4</code>
     </cheat>
     <cheat>
       <description>Infinite lives</description>
@@ -31109,12 +31159,12 @@
       <code>82CA-0F2F</code>
     </cheat>
     <cheat>
-      <description>Always Super Shot</description>
-      <code>7E0A6702</code>
-    </cheat>
-    <cheat>
       <description>Infinite Air Dash</description>
       <code>7E0A3478</code>
+    </cheat>
+    <cheat>
+      <description>Always have Super Shot</description>
+      <code>7E0A6702</code>
     </cheat>
     <cheat>
       <description>Have Zero-Saber</description>
@@ -31129,8 +31179,10 @@
       <code>7E0CF801</code>
     </cheat>
     <cheat>
-      <description>Skip bosses at start of game and proceed to stage select</description>
-      <code>B933-DF6C</code>
+      <description>Hit anywhere</description>
+      <code>40AC-A7B4</code>
+      <code>6DA0-ADF7</code>
+      <code>6DAF-AD97</code>
     </cheat>
     <cheat>
       <description>Multi-jump</description>
@@ -31149,6 +31201,14 @@
     <cheat>
       <description>Ultra mega-jump</description>
       <code>D886-6F26</code>
+    </cheat>
+    <cheat>
+      <description>Skip bosses at start of game and proceed to stage select</description>
+      <code>B933-DF6C</code>
+    </cheat>
+    <cheat>
+      <description>Start with max health bar</description>
+      <code>F02A-ADF4</code>
     </cheat>
   </cartridge>
   <cartridge sha256="d4f2cb6b209db29f7aec62e5a23846681c14665fb007e94d7bcfc7b5611e938b">
@@ -31985,6 +32045,13 @@
       <code>DDBC-370F</code>
     </cheat>
     <cheat>
+      <description>Hit anywhere - P1</description>
+      <code>3DBF-3D0F</code>
+      <code>27BF-3D6F</code>
+      <code>F6BF-3DAF</code>
+      <code>74BF-3F0F</code>
+    </cheat>
+    <cheat>
       <description>All throws do more damage</description>
       <code>56B9-4DAD</code>
     </cheat>
@@ -32507,12 +32574,36 @@
       <code>C239-CD62</code>
     </cheat>
     <cheat>
-      <description>First round / one button fatalities</description>
+      <description>First round and one button fatalities</description>
       <code>7E3AF001</code>
     </cheat>
     <cheat>
       <description>Infinite continues</description>
       <code>A220-3FB6</code>
+    </cheat>
+    <cheat>
+      <description>P1 takes all damage</description>
+      <code>DD37-CF62</code>
+    </cheat>
+    <cheat>
+      <description>P2 takes all damage</description>
+      <code>6D37-CF02</code>
+    </cheat>
+    <cheat>
+      <description>Hit anywhere - P1</description>
+      <code>0AE6-3F0E</code>
+      <code>0AE6-340E</code>
+      <code>0AE6-34DE</code>
+      <code>39E6-346E</code>
+      <code>39E6-3FAE</code>
+      <code>3DE6-3DDE</code>
+      <code>6D30-1462</code>
+      <code>C4E6-3F6E</code>
+      <code>D4E6-3D0E</code>
+      <code>DDE6-3D6E</code>
+      <code>EDE6-3DAE</code>
+      <code>D7E6-3FDE</code>
+      <code>EE30-14A2</code>
     </cheat>
     <cheat>
       <description>Press A on main menu for Sound Test</description>
@@ -32529,14 +32620,6 @@
     <cheat>
       <description>Press X on main menu for Scott's Menu</description>
       <code>D42B-1FD8</code>
-    </cheat>
-    <cheat>
-      <description>P1 takes all damage</description>
-      <code>DD37-CF62</code>
-    </cheat>
-    <cheat>
-      <description>P2 takes all damage</description>
-      <code>6D37-CF02</code>
     </cheat>
     <cheat>
       <description>Always fight Kano</description>
@@ -32711,6 +32794,10 @@
       <code>6DC7-1DAA</code>
     </cheat>
     <cheat>
+      <description>Infinite continues</description>
+      <code>C2C4-47AA</code>
+    </cheat>
+    <cheat>
       <description>No health - P1</description>
       <code>DDB1-1FF7</code>
     </cheat>
@@ -32719,12 +32806,15 @@
       <code>DDB5-1FF7</code>
     </cheat>
     <cheat>
-      <description>Have 127x more fatality time</description>
-      <code>5EC2-CF02</code>
+      <description>Hit anywhere - P1</description>
+      <code>0DB0-4F97</code>
+      <code>2DB0-4FF7</code>
+      <code>3DB0-4D97</code>
+      <code>DDB0-4DB7</code>
     </cheat>
     <cheat>
-      <description>Infinite continues</description>
-      <code>C2C4-47AA</code>
+      <description>Have 127x more fatality time</description>
+      <code>5EC2-CF02</code>
     </cheat>
     <cheat>
       <description>Disable throws - 2P mode</description>
@@ -44004,6 +44094,13 @@
       <code>DD80-7FAD</code>
       <code>D580-74DD</code>
     </cheat>
+    <cheat>
+      <description>Hit anywhere (except projectiles) - P1</description>
+      <code>3DC7-8D0D</code>
+      <code>6DC7-8D6D</code>
+      <code>BDC7-8FDD</code>
+      <code>DBC7-8DAD</code>
+    </cheat>
   </cartridge>
   <cartridge sha256="2b34161e96ef3f0f48cecd67e531a9bb94310652d8686f301bac426e4ab97e77">
     <name>Street Fighter II (USA)</name>
@@ -44016,6 +44113,13 @@
     <cheat>
       <description>Win 1 bout to win the match instead of 2 out of 3 (disable before fighting M. Bison)</description>
       <code>DF80-AD64</code>
+    </cheat>
+    <cheat>
+      <description>Hit anywhere (except projectiles) - P1</description>
+      <code>3D29-A4A7</code>
+      <code>8D29-A767</code>
+      <code>DD29-A7D7</code>
+      <code>D329-A707</code>
     </cheat>
     <cheat>
       <description>Dizziness wears off very quickly</description>
@@ -44388,6 +44492,13 @@
     <cheat>
       <description>Infinite time (alt)</description>
       <code>7E18F399</code>
+    </cheat>
+    <cheat>
+      <description>Hit anywhere (except projectiles) - P1</description>
+      <code>3D98-8704</code>
+      <code>8D9A-8DD4</code>
+      <code>DD98-8764</code>
+      <code>D598-87A4</code>
     </cheat>
     <cheat>
       <description>Select same character - both players</description>
@@ -46655,19 +46766,19 @@
   <cartridge sha256="bcced1be76ef920b562a555696bcb4583d1c8cea4d4b057cab6e0e09be8ef8c4">
     <name>Super Double Dragon (USA)</name>
     <cheat>
-      <description>Invincibility</description>
-      <code>C267-0DD6</code>
-    </cheat>
-    <cheat>
-      <description>Infinite health</description>
+      <description>Invincibility - both players</description>
       <code>1D6F-0766</code>
     </cheat>
     <cheat>
-      <description>Infinite lives</description>
-      <code>C286-6F05</code>
+      <description>Invincibility - P1</description>
+      <code>C267-0DD6</code>
     </cheat>
     <cheat>
       <description>Infinite lives - P1</description>
+      <code>C286-6F05</code>
+    </cheat>
+    <cheat>
+      <description>Infinite lives - P1 (alt)</description>
       <code>4A86-6F05</code>
     </cheat>
     <cheat>
@@ -46705,6 +46816,30 @@
     <cheat>
       <description>1 life - 2P game A</description>
       <code>DF88-0D6B</code>
+    </cheat>
+    <cheat>
+      <description>Start on Mission 2 (enable on Mode Seclect screen, then disable)</description>
+      <code>7E001C14</code>
+    </cheat>
+    <cheat>
+      <description>Start on Mission 3 (enable on Mode Seclect screen, then disable)</description>
+      <code>7E001C17</code>
+    </cheat>
+    <cheat>
+      <description>Start on Mission 4 (enable on Mode Seclect screen, then disable)</description>
+      <code>7E001C1C</code>
+    </cheat>
+    <cheat>
+      <description>Start on Mission 5 (enable on Mode Seclect screen, then disable)</description>
+      <code>7E001C1D</code>
+    </cheat>
+    <cheat>
+      <description>Start on Mission 6 (enable on Mode Seclect screen, then disable)</description>
+      <code>7E001C1F</code>
+    </cheat>
+    <cheat>
+      <description>Start on Mission 7 (enable on Mode Seclect screen, then disable)</description>
+      <code>7E001C20</code>
     </cheat>
   </cartridge>
   <cartridge sha256="7468c271d7240cf4e0d08c16e9969a1b1b1caf5adc0e5adc568d93c92651a057">
@@ -46896,6 +47031,11 @@
     <name>Super Mario All-Stars (USA)</name>
     <cheat>
       <description>(SMB) Invincibility</description>
+      <code>62E7-A7D2</code>
+      <code>2DE7-A7A2</code>
+    </cheat>
+    <cheat>
+      <description>(SMB) Invincibility (Starman effect)</description>
       <code>292B-67DE</code>
     </cheat>
     <cheat>
@@ -46923,16 +47063,27 @@
       <code>6D84-DF03</code>
     </cheat>
     <cheat>
-      <description>(SMB) Play as Big Mario</description>
-      <code>7E07AE05</code>
-    </cheat>
-    <cheat>
-      <description>(SMB) Play as Fire Mario</description>
-      <code>23C2BB03</code>
+      <description>(SMB) Always Fiery Mario after first hit</description>
+      <code>CB29-AF0E</code>
+      <code>D429-AF6E</code>
+      <code>CB8B-676A</code>
+      <code>DD8B-67AA</code>
     </cheat>
     <cheat>
       <description>(SMB) Multi-jump</description>
-      <code>23C2BB02</code>
+      <code>2D8E-D7D2</code>
+    </cheat>
+    <cheat>
+      <description>(SMB) Fireballs hit anywhere</description>
+      <code>4028-D4DE</code>
+    </cheat>
+    <cheat>
+      <description>(SMB) Fireballs can kill Bullet Bill</description>
+      <code>4025-07AE</code>
+    </cheat>
+    <cheat>
+      <description>(SMB) Fireballs can kill Buzzy Beetle</description>
+      <code>6D2E-DD6E</code>
     </cheat>
     <cheat>
       <description>(SMB) Run without holding the dash button</description>
@@ -47022,12 +47173,20 @@
       <code>7E00853B</code>
     </cheat>
     <cheat>
-      <description>(SMB2) Always big</description>
+      <description>(SMB2) Infinite hearts</description>
+      <code>DD32-6966</code>
+    </cheat>
+    <cheat>
+      <description>(SMB2) Always big Mario</description>
       <code>7E04C31F</code>
     </cheat>
     <cheat>
-      <description>(SMB2) Always small</description>
+      <description>(SMB2) Always small Mario</description>
       <code>7E04C30F</code>
+    </cheat>
+    <cheat>
+      <description>(SMB2) Infinite lives</description>
+      <code>C26E-D5A6</code>
     </cheat>
     <cheat>
       <description>(SMB2) Multi-jump - all characters</description>
@@ -47062,20 +47221,12 @@
       <code>1761-05D0</code>
     </cheat>
     <cheat>
-      <description>(SMB2) Infinite lives</description>
-      <code>C26E-D5A6</code>
-    </cheat>
-    <cheat>
       <description>(SMB2) Continue with 3 hearts instead of 2</description>
       <code>DF6B-A9A1</code>
     </cheat>
     <cheat>
       <description>(SMB2) Continue with 4 hearts</description>
       <code>D46B-A9A1</code>
-    </cheat>
-    <cheat>
-      <description>(SMB2) Never lose hearts</description>
-      <code>DD32-6966</code>
     </cheat>
     <cheat>
       <description>(SMB2) Jumping in place charges super jump</description>
@@ -47098,36 +47249,53 @@
       <code>7E0553FF</code>
     </cheat>
     <cheat>
+      <description>(SMB3) Infinite lives</description>
+      <code>82BB-0C6D</code>
+    </cheat>
+    <cheat>
       <description>(SMB3) Infinite time</description>
       <code>6D3D-6619</code>
     </cheat>
     <cheat>
-      <description>(SMB3) Play as Small Mario</description>
+      <description>(SMB3) Always Small Mario</description>
       <code>7E00BB00</code>
     </cheat>
     <cheat>
-      <description>(SMB3) Play as Big Mario</description>
+      <description>(SMB3) Always Big Mario</description>
       <code>7E00BB01</code>
     </cheat>
     <cheat>
-      <description>(SMB3) Play as Fire Mario</description>
+      <description>(SMB3) Always Fire Mario</description>
       <code>7E00BB02</code>
     </cheat>
     <cheat>
-      <description>(SMB3) Play as Raccoon Mario</description>
+      <description>(SMB3) Always Raccoon Mario</description>
       <code>7E00BB03</code>
     </cheat>
     <cheat>
-      <description>(SMB3) Play as Frog Mario</description>
+      <description>(SMB3) Always Frog Mario</description>
       <code>7E00BB04</code>
     </cheat>
     <cheat>
-      <description>(SMB3) Play as Tanooki Mario</description>
+      <description>(SMB3) Always Tanooki Mario</description>
       <code>7E00BB05</code>
     </cheat>
     <cheat>
-      <description>(SMB3) Play as Hammer Bros. Mario</description>
+      <description>(SMB3) Always Hammer Bros. Mario</description>
       <code>7E00BB06</code>
+    </cheat>
+    <cheat>
+      <description>(SMB3) Fireballs hit anywhere</description>
+      <code>4083-D8F3</code>
+      <code>408D-08F3</code>
+    </cheat>
+    <cheat>
+      <description>(SMB3) Tail hits anywhere</description>
+      <code>40C4-6C22</code>
+    </cheat>
+    <cheat>
+      <description>(SMB3) Fireballs can kill most enemies</description>
+      <code>4084-0BB3</code>
     </cheat>
     <cheat>
       <description>(SMB3) Have Magic Whistle</description>
@@ -47146,7 +47314,7 @@
       <code>DDAF-A8A3</code>
     </cheat>
     <cheat>
-      <description>(SMB3) Fly for an unlimited amount of time</description>
+      <description>(SMB3) Infinite flying time</description>
       <code>EEA4-AB63</code>
     </cheat>
     <cheat>
@@ -47217,10 +47385,6 @@
       <code>C23B-680D</code>
     </cheat>
     <cheat>
-      <description>(SMB3) Infinite lives</description>
-      <code>82BB-0C6D</code>
-    </cheat>
-    <cheat>
       <description>(SMB3) 1 life after continue</description>
       <code>DFBB-DBAF</code>
     </cheat>
@@ -47289,12 +47453,12 @@
     <name>Super Mario All-Stars + Super Mario World (USA)</name>
     <cheat>
       <description>(SMB) Invincibility</description>
-      <code>292B-67DE</code>
-    </cheat>
-    <cheat>
-      <description>(SMB) Invincibility (alt)</description>
       <code>62E7-A7D2</code>
       <code>2DE7-A7A2</code>
+    </cheat>
+    <cheat>
+      <description>(SMB) Invincibility (Starman effect)</description>
+      <code>292B-67DE</code>
     </cheat>
     <cheat>
       <description>(SMB) Invincibility (Starman)</description>
@@ -47305,20 +47469,27 @@
       <code>7E075A05</code>
     </cheat>
     <cheat>
-      <description>(SMB) Play as Big Mario</description>
-      <code>7E07AE05</code>
-    </cheat>
-    <cheat>
-      <description>(SMB) Play as Big Mario (alt)</description>
-      <code>23C2BB02</code>
-    </cheat>
-    <cheat>
-      <description>(SMB) Play as Fire Mario</description>
-      <code>23C2BB03</code>
+      <description>(SMB) Always Fiery Mario after first hit</description>
+      <code>CB29-AF0E</code>
+      <code>D429-AF6E</code>
+      <code>CB8B-676A</code>
+      <code>DD8B-67AA</code>
     </cheat>
     <cheat>
       <description>(SMB) Multi-jump</description>
       <code>2D8E-D7D2</code>
+    </cheat>
+    <cheat>
+      <description>(SMB) Fireballs hit anywhere</description>
+      <code>4028-D4DE</code>
+    </cheat>
+    <cheat>
+      <description>(SMB) Fireballs can kill Bullet Bill</description>
+      <code>4025-07AE</code>
+    </cheat>
+    <cheat>
+      <description>(SMB) Fireballs can kill Buzzy Beetle</description>
+      <code>6D2E-DD6E</code>
     </cheat>
     <cheat>
       <description>(SMB) Run without holding the dash button</description>
@@ -47341,16 +47512,8 @@
       <code>C26E-D5A6</code>
     </cheat>
     <cheat>
-      <description>(SMB2) Never lose hearts</description>
+      <description>(SMB2) Infinite hearts</description>
       <code>DD32-6966</code>
-    </cheat>
-    <cheat>
-      <description>(SMB2) Always Big</description>
-      <code>7E04C31F</code>
-    </cheat>
-    <cheat>
-      <description>(SMB2) Always Small</description>
-      <code>7E04C30F</code>
     </cheat>
     <cheat>
       <description>(SMB2) Multi-jump - all characters</description>
@@ -47381,32 +47544,36 @@
       <code>7E0553FF</code>
     </cheat>
     <cheat>
-      <description>(SMB3) Play as Small Mario</description>
+      <description>(SMB3) Always Small Mario</description>
       <code>7E00BB00</code>
     </cheat>
     <cheat>
-      <description>(SMB3) Play as Big Mario</description>
+      <description>(SMB3) Always Big Mario</description>
       <code>7E00BB01</code>
     </cheat>
     <cheat>
-      <description>(SMB3) Play as Fire Mario</description>
+      <description>(SMB3) Always Fiery Mario</description>
       <code>7E00BB02</code>
     </cheat>
     <cheat>
-      <description>(SMB3) Play as Raccoon Mario</description>
+      <description>(SMB3) Always Raccoon Mario</description>
       <code>7E00BB03</code>
     </cheat>
     <cheat>
-      <description>(SMB3) Play as Frog Mario</description>
+      <description>(SMB3) Always Frog Mario</description>
       <code>7E00BB04</code>
     </cheat>
     <cheat>
-      <description>(SMB3) Play as Tanooki Mario</description>
+      <description>(SMB3) Always Tanooki Mario</description>
       <code>7E00BB05</code>
     </cheat>
     <cheat>
-      <description>(SMB3) Play as Hammer Bros Mario</description>
+      <description>(SMB3) Always Hammer Bros Mario</description>
       <code>7E00BB06</code>
+    </cheat>
+    <cheat>
+      <description>(SMB3) Infinite flying time</description>
+      <code>23CB26FF</code>
     </cheat>
     <cheat>
       <description>(SMB3) Have Magic Whistle</description>
@@ -47417,12 +47584,17 @@
       <code>7E056EFF</code>
     </cheat>
     <cheat>
-      <description>(SMB3) Fly at anytime (run meter always full)</description>
-      <code>23CB1F00</code>
+      <description>(SMB3) Fireballs hit anywhere</description>
+      <code>4083-D8F3</code>
+      <code>408D-08F3</code>
     </cheat>
     <cheat>
-      <description>(SMB3) Fly for an unlimited amount of time</description>
-      <code>23CB26FF</code>
+      <description>(SMB3) Tail hits anywhere</description>
+      <code>40C4-6C22</code>
+    </cheat>
+    <cheat>
+      <description>(SMB3) Fireballs can kill most enemies</description>
+      <code>4084-0BB3</code>
     </cheat>
     <cheat>
       <description>(SMW) Invincibility</description>
@@ -47445,8 +47617,12 @@
       <code>7E001902</code>
     </cheat>
     <cheat>
-      <description>(SMW) Always Fire Mario</description>
+      <description>(SMW) Always Fiery Mario</description>
       <code>7E001903</code>
+    </cheat>
+    <cheat>
+      <description>(SMW) Always have Yoshi</description>
+      <code>7E0DC101</code>
     </cheat>
     <cheat>
       <description>(SMW) Infinite time</description>
@@ -47457,10 +47633,6 @@
     <cheat>
       <description>(SMW) Infinite P-Balloon time</description>
       <code>7E1891FF</code>
-    </cheat>
-    <cheat>
-      <description>(SMW) Always have Yoshi</description>
-      <code>7E0DC101</code>
     </cheat>
     <cheat>
       <description>(SMW) Infinite flying time for Yoshi</description>
@@ -47893,6 +48065,10 @@
       <code>89C6-D4DB</code>
     </cheat>
     <cheat>
+      <description>Infinite lives</description>
+      <code>C222-D4DD</code>
+    </cheat>
+    <cheat>
       <description>Infinite flying time for Yoshi</description>
       <code>C2EC-0700</code>
     </cheat>
@@ -47905,8 +48081,24 @@
       <code>7E1891FF</code>
     </cheat>
     <cheat>
-      <description>Infinite lives</description>
-      <code>C222-D4DD</code>
+      <description>Always Small Mario</description>
+      <code>7E001900</code>
+    </cheat>
+    <cheat>
+      <description>Always Big Mario</description>
+      <code>7E001901</code>
+    </cheat>
+    <cheat>
+      <description>Always Cape Mario</description>
+      <code>7E001902</code>
+    </cheat>
+    <cheat>
+      <description>Always Fiery Mario</description>
+      <code>7E001903</code>
+    </cheat>
+    <cheat>
+      <description>Always have Yoshi</description>
+      <code>7E0DC101</code>
     </cheat>
     <cheat>
       <description>Multi-jump</description>
@@ -47922,6 +48114,31 @@
       <code>DD3F-67A7</code>
     </cheat>
     <cheat>
+      <description>Cape hit anywhere</description>
+      <code>40BE-AD66</code>
+    </cheat>
+    <cheat>
+      <description>Fireballs hits anywhere</description>
+      <code>40C2-D7A6</code>
+    </cheat>
+    <cheat>
+      <description>Fireballs shoot straight</description>
+      <code>DDEA-6F07</code>
+      <code>DDB2-AFD8</code>
+    </cheat>
+    <cheat>
+      <description>Fireballs turn most enemies into Flowers</description>
+      <code>59C4-0466</code>
+    </cheat>
+    <cheat>
+      <description>Fireballs turn most enemies into 1-Up Mushrooms</description>
+      <code>56C4-0466</code>
+    </cheat>
+    <cheat>
+      <description>Fireballs turn most enemies into Starmen</description>
+      <code>51C4-0466</code>
+    </cheat>
+    <cheat>
       <description>Low-jump</description>
       <code>D02C-AF6F</code>
     </cheat>
@@ -47932,26 +48149,6 @@
     <cheat>
       <description>Mega-jump</description>
       <code>DF2C-AF6F</code>
-    </cheat>
-    <cheat>
-      <description>Always Small Mario</description>
-      <code>7E001900</code>
-    </cheat>
-    <cheat>
-      <description>Always Big Mario</description>
-      <code>7E001901</code>
-    </cheat>
-    <cheat>
-      <description>Always Cape Mario</description>
-      <code>7E001902</code>
-    </cheat>
-    <cheat>
-      <description>Always Fire Mario</description>
-      <code>7E001903</code>
-    </cheat>
-    <cheat>
-      <description>Always have Yoshi</description>
-      <code>7E0DC101</code>
     </cheat>
     <cheat>
       <description>Little Yoshi grows after eating 1 enemy instead of 5</description>
@@ -47968,11 +48165,6 @@
     <cheat>
       <description>Little Yoshi grows after eating 4 enemies</description>
       <code>D0CE-64A0</code>
-    </cheat>
-    <cheat>
-      <description>Shoot fireballs straight</description>
-      <code>DDEA-6F07</code>
-      <code>DDB2-AFD8</code>
     </cheat>
     <cheat>
       <description>Activate green blocks (disable before entering the Green Switch Palace)</description>
@@ -48476,6 +48668,11 @@
     <cheat>
       <description>Super-jumps don't drain energy</description>
       <code>C22A-456D</code>
+    </cheat>
+    <cheat>
+      <description>Enemies die on contact (Speed Booster effect)</description>
+      <code>6DC8-4CDF</code>
+      <code>6DCC-4BDF</code>
     </cheat>
     <cheat>
       <description>Kill most enemies on contact (prevents bomb-bouncing)</description>
@@ -50433,6 +50630,13 @@
     <cheat>
       <description>Instant win - P1</description>
       <code>7E0771FF</code>
+    </cheat>
+    <cheat>
+      <description>Hit anywhere (except projectiles) - P1</description>
+      <code>3D1D-5DDF</code>
+      <code>8D1D-5DAF</code>
+      <code>0D1D-5D0F</code>
+      <code>D51D-5D6F</code>
     </cheat>
     <cheat>
       <description>No charging required for some special moves</description>
@@ -54788,12 +54992,28 @@
       <code>7D7B-FE7C</code>
     </cheat>
     <cheat>
-      <description>First round / one button fatalities</description>
+      <description>First round and one button fatalities</description>
       <code>7E3BE301</code>
     </cheat>
     <cheat>
       <description>Max fatality time</description>
       <code>DF73-2A7C</code>
+    </cheat>
+    <cheat>
+      <description>Hit anywhere - P1</description>
+      <code>0AEB-3F97</code>
+      <code>0AEB-34F7</code>
+      <code>31EB-34B7</code>
+      <code>35EB-3F27</code>
+      <code>3DEB-3DF7</code>
+      <code>46EB-3FB7</code>
+      <code>84EB-3497</code>
+      <code>BD3C-C49F</code>
+      <code>D4EB-3D97</code>
+      <code>DDEB-3DB7</code>
+      <code>D7EB-3FF7</code>
+      <code>EDEB-3D27</code>
+      <code>EE3C-C4BF</code>
     </cheat>
     <cheat>
       <description>Blank versus screen</description>
@@ -55465,6 +55685,21 @@
     <cheat>
       <description>Infinite ammo</description>
       <code>7E1B8963</code>
+    </cheat>
+  </cartridge>
+  <cartridge sha256="8b3ff3a0ca1c85facb71f42886291dfa916ca74245702c79ca8ae635f28bc864">
+    <name>Ushio to Tora (Japan)</name>
+    <cheat>
+      <description>Invincibility</description>
+      <code>7E022226</code>
+    </cheat>
+    <cheat>
+      <description>Infinite health</description>
+      <code>7E021E40</code>
+    </cheat>
+    <cheat>
+      <description>Infinite lives</description>
+      <code>7E060863</code>
     </cheat>
   </cartridge>
   <cartridge sha256="2500d6c846c78bcb729f15535bf2b852a120411891cabaaaa6fc407906d0214e">
@@ -57692,14 +57927,14 @@
     </cheat>
   </cartridge>
   <cartridge sha256="25414de02c6805ca62574cfb39c23bf292b3d8c4ff33eb8f212ccdbcd61c5ae3">
-    <name>Zool - Ninja of the Nth Dimension (USA)</name>
+    <name>Zool - Ninja of the 'Nth' Dimension (USA)</name>
+    <cheat>
+      <description>Invincibility</description>
+      <code>7E05DCFF</code>
+    </cheat>
     <cheat>
       <description>Invincibility (blinking)</description>
       <code>7E1D8B49</code>
-    </cheat>
-    <cheat>
-      <description>Invincibility (not blinking)</description>
-      <code>7E05DCFF</code>
     </cheat>
     <cheat>
       <description>Infinite health</description>

@@ -5,6 +5,12 @@ signed PPU::Background::clip(signed n) {
   return n & 0x2000 ? (n | ~1023) : (n & 1023);
 }
 
+//H = 60
+void PPU::Background::begin_mode7() {
+  cache.hoffset = self.regs.mode7_hoffset;
+  cache.voffset = self.regs.mode7_voffset;
+}
+
 void PPU::Background::run_mode7() {
   signed a = sclip<16>(self.regs.m7a);
   signed b = sclip<16>(self.regs.m7b);
@@ -13,8 +19,8 @@ void PPU::Background::run_mode7() {
 
   signed cx = sclip<13>(self.regs.m7x);
   signed cy = sclip<13>(self.regs.m7y);
-  signed hoffset = sclip<13>(self.regs.mode7_hoffset);
-  signed voffset = sclip<13>(self.regs.mode7_voffset);
+  signed hoffset = sclip<13>(cache.hoffset);
+  signed voffset = sclip<13>(cache.voffset);
 
   if(Background::x++ & ~255) return;
   unsigned x = mosaic.hoffset;

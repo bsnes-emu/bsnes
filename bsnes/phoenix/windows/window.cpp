@@ -36,8 +36,11 @@ Geometry pWindow::frameMargin() {
 
 Geometry pWindow::geometry() {
   Geometry margin = frameMargin();
-  RECT rc;
-  GetWindowRect(hwnd, &rc);
+
+  //note: GetWindowRect returns -32000(x),-32000(y) when window is minimized
+  WINDOWPLACEMENT wp;
+  GetWindowPlacement(hwnd, &wp);
+  RECT rc = wp.rcNormalPosition;
 
   signed x = rc.left + margin.x;
   signed y = rc.top + margin.y;

@@ -6,6 +6,7 @@ struct Widget;
 
 struct pOS;
 struct pFont;
+struct pTimer;
 struct pWindow;
 struct pAction;
 struct pMenu;
@@ -80,6 +81,18 @@ struct Font : Object {
   struct State;
   State &state;
   pFont &p;
+};
+
+struct Timer : Object {
+  nall::function<void ()> onTimeout;
+
+  void setEnabled(bool enabled = true);
+  void setInterval(unsigned milliseconds);
+
+  Timer();
+  struct State;
+  State &state;
+  pTimer &p;
 };
 
 struct MessageWindow : Object {

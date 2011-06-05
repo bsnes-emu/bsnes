@@ -2,6 +2,14 @@ bool pWidget::enabled() {
   return false;
 }
 
+Font& pWidget::font() {
+  throw;
+}
+
+Geometry pWidget::minimumGeometry() {
+  return { 0, 0, 0, 0 };
+}
+
 void pWidget::setEnabled(bool enabled) {
 }
 

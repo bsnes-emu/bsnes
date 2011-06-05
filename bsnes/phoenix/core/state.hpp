@@ -13,6 +13,16 @@ struct Font::State {
   }
 };
 
+struct Timer::State {
+  bool enabled;
+  unsigned milliseconds;
+
+  State() {
+    enabled = false;
+    milliseconds = 0;
+  }
+};
+
 struct Window::State {
   bool backgroundColor;
   unsigned backgroundColorRed, backgroundColorGreen, backgroundColorBlue;
