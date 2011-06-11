@@ -20,8 +20,6 @@ void SMP::port_write(uint2 port, uint8 data) {
 }
 
 alwaysinline uint8 SMP::op_busread(uint16 addr) {
-  if((addr & 0xfff0) != 0x00f0) return ram_read(addr);
-
   unsigned result;
 
   switch(addr) {
@@ -57,28 +55,25 @@ alwaysinline uint8 SMP::op_busread(uint16 addr) {
     return 0x00;
 
   case 0xfd:  //T0OUT -- 4-bit counter value
-    result = timer0.stage3_ticks & 15;
+    result = timer0.stage3_ticks;
     timer0.stage3_ticks = 0;
     return result;
 
   case 0xfe:  //T1OUT -- 4-bit counter value
-    result = timer1.stage3_ticks & 15;
+    result = timer1.stage3_ticks;
     timer1.stage3_ticks = 0;
     return result;
 
   case 0xff:  //T2OUT -- 4-bit counter value
-    result = timer2.stage3_ticks & 15;
+    result = timer2.stage3_ticks;
     timer2.stage3_ticks = 0;
     return result;
   }
 
-  return 0x00;  //never used, avoids compiler warning
+  return ram_read(addr);
 }
 
 alwaysinline void SMP::op_buswrite(uint16 addr, uint8 data) {
-  ram_write(addr, data);  //all writes, even to MMIO registers, appear on bus
-  if((addr & 0xfff0) != 0x00f0) return;
-
   switch(addr) {
   case 0xf0:  //TEST
     if(regs.p.p) break;  //writes only valid when P flag is clear
@@ -176,6 +171,8 @@ alwaysinline void SMP::op_buswrite(uint16 addr, uint8 data) {
   case 0xff:  //T2OUT -- read-only registers
     break;
   }
+
+  ram_write(addr, data);  //all writes, even to MMIO registers, appear on bus
 }
 
 void SMP::op_io() {
