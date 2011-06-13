@@ -5,6 +5,18 @@ namespace SNES {
 
 Link link;
 
+void Link::Enter() { link.enter(); }
+
+void Link::enter() {
+  while(true) {
+    cpu.synchronize_coprocessor();
+    unsigned clocks = 1;
+    if(link_run) clocks = link_run();
+    step(clocks);
+    synchronize_cpu();
+  }
+}
+
 void Link::init() {
 }
 
@@ -16,6 +28,7 @@ void Link::load() {
   if(open(name, path)) {
     link_power = sym("link_power");
     link_reset = sym("link_reset");
+    link_run   = sym("link_run"  );
     link_read  = sym("link_read" );
     link_write = sym("link_write");
   }
@@ -27,10 +40,12 @@ void Link::unload() {
 
 void Link::power() {
   if(link_power) link_power();
+  create(Link::Enter, frequency);
 }
 
 void Link::reset() {
   if(link_reset) link_reset();
+  create(Link::Enter, frequency);
 }
 
 uint8 Link::read(unsigned addr) {

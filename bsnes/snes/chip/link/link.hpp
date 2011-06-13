@@ -2,6 +2,8 @@ class Link : public Coprocessor, public library {
 public:
   string program;
 
+  static void Enter();
+  void enter();
   void init();
   void load();
   void unload();
@@ -14,6 +16,7 @@ public:
 private:
   function<void ()> link_power;
   function<void ()> link_reset;
+  function<unsigned ()> link_run;
   function<uint8 (unsigned)> link_read;
   function<void (unsigned, uint8)> link_write;
 };

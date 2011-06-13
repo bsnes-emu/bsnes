@@ -642,9 +642,11 @@ void Cartridge::xml_parse_serial(xml_element &root) {
 
 void Cartridge::xml_parse_link(xml_element &root) {
   has_link = true;
+  link.frequency = 1;
   link.program = "";
 
   foreach(attr, root.attribute) {
+    if(attr.name == "frequency") link.frequency = decimal(attr.content);
     if(attr.name == "program") link.program = attr.content;
   }
 

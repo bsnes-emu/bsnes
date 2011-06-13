@@ -195,6 +195,7 @@ void System::power() {
   if(cartridge.has_necdsp()) cpu.coprocessors.append(&necdsp);
   if(cartridge.has_msu1()) cpu.coprocessors.append(&msu1);
   if(cartridge.has_serial()) cpu.coprocessors.append(&serial);
+  if(cartridge.has_link()) cpu.coprocessors.append(&link);
 
   scheduler.init();
   input.update();
@@ -232,6 +233,7 @@ void System::reset() {
   if(cartridge.has_necdsp()) cpu.coprocessors.append(&necdsp);
   if(cartridge.has_msu1()) cpu.coprocessors.append(&msu1);
   if(cartridge.has_serial()) cpu.coprocessors.append(&serial);
+  if(cartridge.has_link()) cpu.coprocessors.append(&link);
 
   scheduler.init();
   input.port_set_device(0, config.controller_port1);
