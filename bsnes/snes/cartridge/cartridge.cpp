@@ -30,11 +30,12 @@ void Cartridge::load(Mode cartridge_mode, const lstring &xml_list) {
   has_st0018     = false;
   has_msu1       = false;
   has_serial     = false;
+  has_link       = false;
 
   nvram.reset();
 
   parse_xml(xml_list);
-//print(xml_list[0], "\n\n");
+  print(xml_list[0], "\n\n");
 
   if(ram_size > 0) {
     ram.map(allocate<uint8>(ram_size, 0xff), ram_size);

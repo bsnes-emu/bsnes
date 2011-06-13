@@ -50,6 +50,7 @@ void Cartridge::parse_xml_cartridge(const char *data) {
         if(node.name == "setarisc") xml_parse_setarisc(node);
         if(node.name == "msu1") xml_parse_msu1(node);
         if(node.name == "serial") xml_parse_serial(node);
+        if(node.name == "link") xml_parse_link(node);
       }
     }
   }
@@ -637,6 +638,25 @@ void Cartridge::xml_parse_msu1(xml_element &root) {
 
 void Cartridge::xml_parse_serial(xml_element &root) {
   has_serial = true;
+}
+
+void Cartridge::xml_parse_link(xml_element &root) {
+  has_link = true;
+  link.program = "";
+
+  foreach(attr, root.attribute) {
+    if(attr.name == "program") link.program = attr.content;
+  }
+
+  foreach(node, root.element) {
+    if(node.name == "map") {
+      Mapping m({ &Link::read, &link }, { &Link::write, &link });
+      foreach(attr, node.attribute) {
+        if(attr.name == "address") xml_parse_address(m, attr.content);
+      }
+      mapping.append(m);
+    }
+  }
 }
 
 void Cartridge::xml_parse_address(Mapping &m, const string &data) {

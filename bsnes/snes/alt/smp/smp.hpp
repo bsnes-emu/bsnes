@@ -33,6 +33,7 @@ public:
     alwaysinline unsigned operator=(unsigned data) {
       n = data & 0x80; v = data & 0x40; p = data & 0x20; b = data & 0x10;
       h = data & 0x08; i = data & 0x04; z = data & 0x02; c = data & 0x01;
+      return data;
     }
 
     alwaysinline unsigned operator|=(unsigned data) { return operator=(operator unsigned() | data); }
