@@ -158,6 +158,17 @@ SNESCartridge::SNESCartridge(const uint8_t *data, unsigned size) {
     xml << "    <map address='00-3f:6000-7fff'/>\n";
     xml << "    <map address='80-bf:6000-7fff'/>\n";
     xml << "  </icd2>\n";
+  } else if(has_cx4) {
+    xml << "  <hitachidsp model='HG51B169' frequency='20000000' program='cx4.bin' sha256='ae8d4d1961b93421ff00b3caa1d0f0ce7783e749772a3369c36b3dbf0d37ef18'>\n";
+    xml << "    <rom>\n";
+    xml << "      <map mode='linear' address='00-7f:8000-ffff'/>\n";
+    xml << "      <map mode='linear' address='80-ff:8000-ffff'/>\n";
+    xml << "    </rom>\n";
+    xml << "    <mmio>\n";
+    xml << "      <map address='00-3f:6000-7fff'/>\n";
+    xml << "      <map address='80-bf:6000-7fff'/>\n";
+    xml << "    </mmio>\n";
+    xml << "  </hitachidsp>\n";
   } else if(has_spc7110) {
     xml << "  <rom>\n";
     xml << "    <map mode='shadow' address='00-0f:8000-ffff'/>\n";
@@ -397,13 +408,6 @@ SNESCartridge::SNESCartridge(const uint8_t *data, unsigned size) {
     xml << "      <map address='80-bf:4800-4807'/>\n";
     xml << "    </mmio>\n";
     xml << "  </sdd1>\n";
-  }
-
-  if(has_cx4) {
-    xml << "  <cx4>\n";
-    xml << "    <map address='00-3f:6000-7fff'/>\n";
-    xml << "    <map address='80-bf:6000-7fff'/>\n";
-    xml << "  </cx4>\n";
   }
 
   if(has_dsp1) {

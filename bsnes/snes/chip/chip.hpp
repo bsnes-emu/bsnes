@@ -8,11 +8,11 @@ struct Coprocessor : Processor {
 #include <snes/chip/superfx/superfx.hpp>
 #include <snes/chip/sa1/sa1.hpp>
 #include <snes/chip/necdsp/necdsp.hpp>
+#include <snes/chip/hitachidsp/hitachidsp.hpp>
 #include <snes/chip/bsx/bsx.hpp>
 #include <snes/chip/srtc/srtc.hpp>
 #include <snes/chip/sdd1/sdd1.hpp>
 #include <snes/chip/spc7110/spc7110.hpp>
-#include <snes/chip/cx4/cx4.hpp>
 #include <snes/chip/obc1/obc1.hpp>
 #include <snes/chip/st0018/st0018.hpp>
 #include <snes/chip/sufamiturbo/sufamiturbo.hpp>

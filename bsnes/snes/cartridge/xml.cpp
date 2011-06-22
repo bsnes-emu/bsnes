@@ -40,12 +40,12 @@ void Cartridge::parse_xml_cartridge(const char *data) {
         if(node.name == "superfx") xml_parse_superfx(node);
         if(node.name == "sa1") xml_parse_sa1(node);
         if(node.name == "necdsp") xml_parse_necdsp(node);
+        if(node.name == "hitachidsp") xml_parse_hitachidsp(node);
         if(node.name == "bsx") xml_parse_bsx(node);
         if(node.name == "sufamiturbo") xml_parse_sufamiturbo(node);
         if(node.name == "srtc") xml_parse_srtc(node);
         if(node.name == "sdd1") xml_parse_sdd1(node);
         if(node.name == "spc7110") xml_parse_spc7110(node);
-        if(node.name == "cx4") xml_parse_cx4(node);
         if(node.name == "obc1") xml_parse_obc1(node);
         if(node.name == "setarisc") xml_parse_setarisc(node);
         if(node.name == "msu1") xml_parse_msu1(node);
@@ -372,6 +372,81 @@ void Cartridge::xml_parse_necdsp(xml_element &root) {
   }
 }
 
+void Cartridge::xml_parse_hitachidsp(xml_element &root) {
+  has_hitachidsp = true;
+  hitachidsp.frequency = 20000000;
+
+  for(unsigned n = 0; n < 1024; n++) hitachidsp.dataROM[n] = 0x000000;
+
+  string program, sha256;
+
+  foreach(attr, root.attribute) {
+    if(attr.name == "frequency") {
+      hitachidsp.frequency = decimal(attr.content);
+    } else if(attr.name == "program") {
+      program = attr.content;
+    } else if(attr.name == "sha256") {
+      sha256 = attr.content;
+    }
+  }
+
+  string path = { dir(system.interface->path(Slot::Base, ".dsp")), program };
+  file fp;
+  if(fp.open(path, file::mode::read) == false) {
+    system.interface->message({ "Warning: Hitachi DSP program ", program, " is missing." });
+  } else if(fp.size() != 1024 * 3) {
+    system.interface->message({ "Warning: Hitachi DSP program ", program, " is of the wrong file size." });
+    fp.close();
+  } else {
+    for(unsigned n = 0; n < 1024; n++) hitachidsp.dataROM[n] = fp.readl(3);
+
+    if(sha256 != "") {
+      //XML file specified SHA256 sum for program. Verify file matches the hash.
+      fp.seek(0);
+      uint8 data[3072];
+      fp.read(data, 3072);
+
+      sha256_ctx sha;
+      uint8 hash[32];
+      sha256_init(&sha);
+      sha256_chunk(&sha, data, 3072);
+      sha256_final(&sha);
+      sha256_hash(&sha, hash);
+
+      string filehash;
+      foreach(n, hash) filehash.append(hex<2>(n));
+
+      if(sha256 != filehash) {
+        system.interface->message({ "Warning: Hitachi DSP program ", program, " SHA256 sum is incorrect." });
+      }
+    }
+
+    fp.close();
+  }
+
+  foreach(node, root.element) {
+    if(node.name == "rom") foreach(leaf, node.element) {
+      if(leaf.name == "map") {
+        Mapping m({ &HitachiDSP::rom_read, &hitachidsp }, { &HitachiDSP::rom_write, &hitachidsp });
+        foreach(attr, leaf.attribute) {
+          if(attr.name == "address") xml_parse_address(m, attr.content);
+          if(attr.name == "mode") xml_parse_mode(m, attr.content);
+          if(attr.name == "offset") m.offset = hex(attr.content);
+          if(attr.name == "size") m.size = hex(attr.content);
+        }
+        mapping.append(m);
+      }
+    }
+    if(node.name == "mmio") foreach(leaf, node.element) {
+      Mapping m({ &HitachiDSP::dsp_read, &hitachidsp }, { &HitachiDSP::dsp_write, &hitachidsp });
+      foreach(attr, leaf.attribute) {
+        if(attr.name == "address") xml_parse_address(m, attr.content);
+      }
+      mapping.append(m);
+    }
+  }
+}
+
 void Cartridge::xml_parse_bsx(xml_element &root) {
   if(mode != Mode::BsxSlotted && mode != Mode::Bsx) return;
 
@@ -576,20 +651,6 @@ void Cartridge::xml_parse_spc7110(xml_element &root) {
           mapping.append(m);
         }
       }
-    }
-  }
-}
-
-void Cartridge::xml_parse_cx4(xml_element &root) {
-  has_cx4 = true;
-
-  foreach(node, root.element) {
-    if(node.name == "map") {
-      Mapping m({ &Cx4::read, &cx4 }, { &Cx4::write, &cx4 });
-      foreach(attr, node.attribute) {
-        if(attr.name == "address") xml_parse_address(m, attr.content);
-      }
-      mapping.append(m);
     }
   }
 }

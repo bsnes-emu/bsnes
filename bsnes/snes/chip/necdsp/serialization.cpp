@@ -1,6 +1,8 @@
 #ifdef NECDSP_CPP
 
 void NECDSP::serialize(serializer &s) {
+  Processor::serialize(s);
+
   s.array(dataRAM);
 
   s.array(regs.stack);

@@ -1,3 +1,6 @@
+//NEC uPD7725
+//NEC uPD96050
+
 class NECDSP : public Coprocessor {
 public:
   enum class Revision : unsigned { uPD7725, uPD96050 } revision;
