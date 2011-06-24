@@ -33,10 +33,13 @@ void CPU::mmio_w2183(uint8 data) {
 //strobing $4016.d0 affects both controller port latches.
 //$4017 bit 0 writes are ignored.
 void CPU::mmio_w4016(uint8 data) {
-  bool old_latch = status.joypad_strobe_latch;
-  bool new_latch = data & 1;
-  status.joypad_strobe_latch = new_latch;
-  if(old_latch != new_latch) input.poll();
+//bool old_latch = status.joypad_strobe_latch;
+//bool new_latch = data & 1;
+//status.joypad_strobe_latch = new_latch;
+//if(old_latch != new_latch) input.poll();
+
+  controllers.port1->latch(data & 1);
+  controllers.port2->latch(data & 1);
 }
 
 //JOYSER0
@@ -44,7 +47,8 @@ void CPU::mmio_w4016(uint8 data) {
 //1-0 = Joypad serial data
 uint8 CPU::mmio_r4016() {
   uint8 r = regs.mdr & 0xfc;
-  r |= input.port_read(0) & 3;
+//r |= input.port_read(0) & 3;
+  r |= controllers.port1->data();
   return r;
 }
 
@@ -54,7 +58,8 @@ uint8 CPU::mmio_r4016() {
 //1-0 = Joypad serial data
 uint8 CPU::mmio_r4017() {
   uint8 r = (regs.mdr & 0xe0) | 0x1c;
-  r |= input.port_read(1) & 3;
+//r |= input.port_read(1) & 3;
+  r |= controllers.port2->data();
   return r;
 }
 

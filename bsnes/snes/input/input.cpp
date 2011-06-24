@@ -1,6 +1,6 @@
 #ifdef SYSTEM_CPP
 
-Input input;
+Input input1;
 
 uint8 Input::port_read(bool portnumber) {
   if(cartridge.has_serial() && portnumber == 1) {
@@ -277,7 +277,7 @@ void Input::update() {
   }
 }
 
-void Input::port_set_device(bool portnumber, Device device) {
+void Input::port_set_device_(bool portnumber, Device device) {
   port_t &p = port[portnumber];
 
   p.device = device;

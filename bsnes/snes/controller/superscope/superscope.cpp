@@ -1,0 +1,96 @@
+#ifdef CONTROLLER_CPP
+
+//The Super Scope is a light-gun: it detects the CRT beam cannon position,
+//and latches the counters by toggling iobit. This only works on controller
+//port 2, as iobit there is connected to the PPU H/V counter latch.
+//(PIO $4201.d7)
+
+//A Super Scope can still technically be used in port 1, however it would
+//require manual polling of PIO ($4201.d6) to determine when iobit was written.
+//Note that no commercial game ever utilizes a Super Scope in port 1.
+
+uint2 SuperScope::data() {
+  if(counter >= 8) return 1;
+
+  if(counter == 0) {
+    //turbo is a switch; toggle is edge sensitive
+    bool newturbo = system.interface->input_poll(port, Input::Device::SuperScope, 0, (unsigned)Input::SuperScopeID::Turbo);
+    if(newturbo && !turbo) {
+      turbo = !turbo;  //toggle state
+      turbolock = true;
+    } else {
+      turbolock = false;
+    }
+
+    //trigger is a button
+    //if turbo is active, trigger is level sensitive; otherwise, it is edge sensitive
+    trigger = false;
+    bool newtrigger = system.interface->input_poll(port, Input::Device::SuperScope, 0, (unsigned)Input::SuperScopeID::Trigger);
+    if(newtrigger && (turbo || !triggerlock)) {
+      trigger = true;
+      triggerlock = true;
+    } else if(!newtrigger) {
+      triggerlock = false;
+    }
+
+    //cursor is a button; it is always level sensitive
+    cursor = system.interface->input_poll(port, Input::Device::SuperScope, 0, (unsigned)Input::SuperScopeID::Cursor);
+
+    //pause is a button; it is always edge sensitive
+    pause = false;
+    bool newpause = system.interface->input_poll(port, Input::Device::SuperScope, 0, (unsigned)Input::SuperScopeID::Pause);
+    if(newpause && !pauselock) {
+      pause = true;
+      pauselock = true;
+    } else if(!newpause) {
+      pauselock = false;
+    }
+
+    offscreen = (x < 0 || y < 0 || x >= 256 || y >= (ppu.overscan() ? 240 : 225));
+  }
+
+  switch(counter++) {
+  case 0: return trigger;
+  case 1: return cursor;
+  case 2: return turbo;
+  case 3: return pause;
+  case 4: return 0;
+  case 5: return 0;
+  case 6: return offscreen;
+  case 7: return 0;  //noise (1 = yes)
+  }
+}
+
+void SuperScope::latch(bool data) {
+  if(latched == data) return;
+  latched = data;
+  counter = 0;
+
+  int nx = system.interface->input_poll(port, Input::Device::SuperScope, 0, (unsigned)Input::SuperScopeID::X);
+  int ny = system.interface->input_poll(port, Input::Device::SuperScope, 0, (unsigned)Input::SuperScopeID::Y);
+  nx += x;
+  ny += y;
+  x = max(-16, min(256 + 16, nx));
+  y = max(-16, min(240 + 16, ny));
+}
+
+SuperScope::SuperScope(bool port) : Controller(port) {
+  latched = 0;
+  counter = 0;
+
+  //center cursor onscreen
+  x = 256 / 2;
+  y = 240 / 2;
+
+  trigger   = false;
+  cursor    = false;
+  turbo     = false;
+  pause     = false;
+  offscreen = false;
+
+  turbolock   = false;
+  triggerlock = false;
+  pauselock   = false;
+}
+
+#endif

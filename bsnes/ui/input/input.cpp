@@ -82,7 +82,7 @@ void InputMapper::Gamepad::create(const char *deviceName, const char *configName
 }
 
 int16_t InputMapper::Gamepad::poll(unsigned id) {
-  switch(id) {
+  switch((SNES::Input::JoypadID)id) {
     case SNES::Input::JoypadID::Up:     return up.poll();
     case SNES::Input::JoypadID::Down:   return down.poll() & !up.poll();
     case SNES::Input::JoypadID::Left:   return left.poll();
@@ -118,7 +118,7 @@ void InputMapper::Mouse::create(const char *deviceName, const char *configName) 
 }
 
 int16_t InputMapper::Mouse::poll(unsigned id) {
-  switch(id) {
+  switch((SNES::Input::MouseID)id) {
     case SNES::Input::MouseID::X: return x.poll();
     case SNES::Input::MouseID::Y: return y.poll();
     case SNES::Input::MouseID::Left: return left.poll();
@@ -150,7 +150,7 @@ void InputMapper::SuperScope::create(const char *deviceName, const char *configN
 }
 
 int16_t InputMapper::SuperScope::poll(unsigned id) {
-  switch(id) {
+  switch((SNES::Input::SuperScopeID)id) {
     case SNES::Input::SuperScopeID::X: return x.poll();
     case SNES::Input::SuperScopeID::Y: return y.poll();
     case SNES::Input::SuperScopeID::Trigger: return trigger.poll();
@@ -182,7 +182,7 @@ void InputMapper::Justifier::create(const char *deviceName, const char *configNa
 }
 
 int16_t InputMapper::Justifier::poll(unsigned id) {
-  switch(id) {
+  switch((SNES::Input::JustifierID)id) {
     case SNES::Input::JustifierID::X: return x.poll();
     case SNES::Input::JustifierID::Y: return y.poll();
     case SNES::Input::JustifierID::Trigger: return trigger.poll();

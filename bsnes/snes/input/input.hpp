@@ -29,7 +29,7 @@ public:
   };
 
   uint8 port_read(bool port);
-  void port_set_device(bool port, Device device);
+  void port_set_device_(bool port, Device device);
   void init();
   void poll();
   void update();
@@ -85,4 +85,4 @@ private:
   friend class CPU;
 };
 
-extern Input input;
+extern Input input1;

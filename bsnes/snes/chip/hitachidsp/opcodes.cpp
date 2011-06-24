@@ -78,7 +78,7 @@ void HitachiDSP::exec() {
 
   else if((opcode & 0xdd00) == 0x1400) {
     //00.1 01.0 .... ....
-    //jumpmi
+    //jumpmi i
     if(regs.n) {
       if(opcode & 0x2000) push();
       regs.pc = np();
@@ -87,7 +87,7 @@ void HitachiDSP::exec() {
 
   else if((opcode & 0xffff) == 0x1c00) {
     //0001 1100 0000 0000
-    //loop/wait?
+    //loop?
   }
 
   else if((opcode & 0xfffe) == 0x2500) {
@@ -110,6 +110,7 @@ void HitachiDSP::exec() {
 
   else if((opcode & 0xffff) == 0x3c00) {
     //0011 1100 0000 0000
+    //ret
     pull();
   }
 
@@ -121,7 +122,7 @@ void HitachiDSP::exec() {
 
   else if((opcode & 0xf800) == 0x4800) {
     //0100 1... .... ....
-    //rcmp a<<n,ri
+    //cmpr a<<n,ri
     int result = ri() - sa();
     regs.n = result & 0x800000;
     regs.z = (uint24)result == 0;
@@ -195,11 +196,13 @@ void HitachiDSP::exec() {
 
   else if((opcode & 0xff00) == 0x7c00) {
     //0111 1100 .... ....
+    //ld pl,i
     regs.p = (regs.p & 0xff00) | ((opcode & 0xff) << 0);
   }
 
   else if((opcode & 0xff00) == 0x7d00) {
     //0111 1101 .... ....
+    //ld ph,i
     regs.p = (regs.p & 0x00ff) | ((opcode & 0xff) << 8);
   }
 
@@ -215,7 +218,7 @@ void HitachiDSP::exec() {
 
   else if((opcode & 0xf800) == 0x8800) {
     //1000 1... .... ....
-    //rsb a<<n,ri
+    //subr a<<n,ri
     int result = ri() - sa();
     regs.a = result;
     regs.n = regs.a & 0x800000;
@@ -247,7 +250,7 @@ void HitachiDSP::exec() {
 
   else if((opcode & 0xf800) == 0xa800) {
     //1010 1... .... ....
-    //xor a,ri
+    //xor a<<n,ri
     regs.a = sa() ^ ri();
     regs.n = regs.a & 0x800000;
     regs.z = regs.a == 0;

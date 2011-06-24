@@ -40,20 +40,20 @@ void Utility::showMessage(const string &text) {
 
 void Utility::setControllers() {
   switch(config.controller.port1) {
-    case 0: SNES::input.port_set_device(0, SNES::Input::Device::None); break;
-    case 1: SNES::input.port_set_device(0, SNES::Input::Device::Joypad); break;
-    case 2: SNES::input.port_set_device(0, SNES::Input::Device::Multitap); break;
-    case 3: SNES::input.port_set_device(0, SNES::Input::Device::Mouse); break;
+    case 0: SNES::controllers.connect(0, SNES::Input::Device::None); break;
+    case 1: SNES::controllers.connect(0, SNES::Input::Device::Joypad); break;
+    case 2: SNES::controllers.connect(0, SNES::Input::Device::Multitap); break;
+    case 3: SNES::controllers.connect(0, SNES::Input::Device::Mouse); break;
   }
 
   switch(config.controller.port2) {
-    case 0: SNES::input.port_set_device(1, SNES::Input::Device::None); break;
-    case 1: SNES::input.port_set_device(1, SNES::Input::Device::Joypad); break;
-    case 2: SNES::input.port_set_device(1, SNES::Input::Device::Multitap); break;
-    case 3: SNES::input.port_set_device(1, SNES::Input::Device::Mouse); break;
-    case 4: SNES::input.port_set_device(1, SNES::Input::Device::SuperScope); break;
-    case 5: SNES::input.port_set_device(1, SNES::Input::Device::Justifier); break;
-    case 6: SNES::input.port_set_device(1, SNES::Input::Device::Justifiers); break;
+    case 0: SNES::controllers.connect(1, SNES::Input::Device::None); break;
+    case 1: SNES::controllers.connect(1, SNES::Input::Device::Joypad); break;
+    case 2: SNES::controllers.connect(1, SNES::Input::Device::Multitap); break;
+    case 3: SNES::controllers.connect(1, SNES::Input::Device::Mouse); break;
+    case 4: SNES::controllers.connect(1, SNES::Input::Device::SuperScope); break;
+    case 5: SNES::controllers.connect(1, SNES::Input::Device::Justifier); break;
+    case 6: SNES::controllers.connect(1, SNES::Input::Device::Justifiers); break;
   }
 }
 

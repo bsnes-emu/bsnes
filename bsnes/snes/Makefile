@@ -1,4 +1,4 @@
-snes_objects := snes-system
+snes_objects := snes-system snes-controller
 snes_objects += snes-cartridge snes-cheat
 snes_objects += snes-memory snes-cpucore snes-smpcore
 snes_objects += snes-cpu snes-smp snes-dsp snes-ppu
@@ -28,16 +28,17 @@ else ifeq ($(profile),performance)
   snesppu := $(snes)/alt/ppu-performance
 endif
 
-obj/snes-system.o   : $(snes)/system/system.cpp $(call rwildcard,$(snes)/system/) $(call rwildcard,$(snes)/video/)
-obj/snes-memory.o   : $(snes)/memory/memory.cpp $(call rwildcard,$(snes)/memory/)
-obj/snes-cpucore.o  : $(snes)/cpu/core/core.cpp $(call rwildcard,$(snes)/cpu/core/)
-obj/snes-smpcore.o  : $(snes)/smp/core/core.cpp $(call rwildcard,$(snes)/smp/core/)
-obj/snes-cpu.o      : $(snescpu)/cpu.cpp $(call rwildcard,$(snescpu)/)
-obj/snes-smp.o      : $(snessmp)/smp.cpp $(call rwildcard,$(snessmp)/)
-obj/snes-dsp.o      : $(snesdsp)/dsp.cpp $(call rwildcard,$(snesdsp)/)
-obj/snes-ppu.o      : $(snesppu)/ppu.cpp $(call rwildcard,$(snesppu)/)
-obj/snes-cartridge.o: $(snes)/cartridge/cartridge.cpp $(snes)/cartridge/*
-obj/snes-cheat.o    : $(snes)/cheat/cheat.cpp $(snes)/cheat/*
+obj/snes-system.o    : $(snes)/system/system.cpp $(call rwildcard,$(snes)/system/) $(call rwildcard,$(snes)/video/) $(call rwildcard,$(snes)/audio/) $(call rwildcard,$(snes)/input/)
+obj/snes-controller.o: $(snes)/controller/controller.cpp $(call rwildcard,$(snes)/controller/)
+obj/snes-memory.o    : $(snes)/memory/memory.cpp $(call rwildcard,$(snes)/memory/)
+obj/snes-cpucore.o   : $(snes)/cpu/core/core.cpp $(call rwildcard,$(snes)/cpu/core/)
+obj/snes-smpcore.o   : $(snes)/smp/core/core.cpp $(call rwildcard,$(snes)/smp/core/)
+obj/snes-cpu.o       : $(snescpu)/cpu.cpp $(call rwildcard,$(snescpu)/)
+obj/snes-smp.o       : $(snessmp)/smp.cpp $(call rwildcard,$(snessmp)/)
+obj/snes-dsp.o       : $(snesdsp)/dsp.cpp $(call rwildcard,$(snesdsp)/)
+obj/snes-ppu.o       : $(snesppu)/ppu.cpp $(call rwildcard,$(snesppu)/)
+obj/snes-cartridge.o : $(snes)/cartridge/cartridge.cpp $(snes)/cartridge/*
+obj/snes-cheat.o     : $(snes)/cheat/cheat.cpp $(snes)/cheat/*
 
 obj/snes-nss.o        : $(snes)/chip/nss/nss.cpp $(call rwildcard,$(snes)/chip/nss/)
 obj/snes-icd2.o       : $(snes)/chip/icd2/icd2.cpp $(call rwildcard,$(snes)/chip/icd2/)

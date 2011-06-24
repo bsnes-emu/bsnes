@@ -21,7 +21,7 @@ void System::run() {
 
   scheduler.enter();
   if(scheduler.exit_reason() == Scheduler::ExitReason::FrameEvent) {
-    input.update();
+  //input.update();
     video.update();
   }
 }
@@ -59,7 +59,7 @@ void System::runthreadtosave() {
     scheduler.enter();
     if(scheduler.exit_reason() == Scheduler::ExitReason::SynchronizeEvent) break;
     if(scheduler.exit_reason() == Scheduler::ExitReason::FrameEvent) {
-      input.update();
+    //input.update();
       video.update();
     }
   }
@@ -89,10 +89,10 @@ void System::init(Interface *interface_) {
 
   video.init();
   audio.init();
-  input.init();
+//input.init();
 
-  input.port_set_device(0, config.controller_port1);
-  input.port_set_device(1, config.controller_port2);
+  controllers.connect(0, config.controller_port1);
+  controllers.connect(1, config.controller_port2);
 }
 
 void System::term() {
@@ -199,7 +199,9 @@ void System::power() {
   if(cartridge.has_link()) cpu.coprocessors.append(&link);
 
   scheduler.init();
-  input.update();
+  controllers.connect(0, config.controller_port1);
+  controllers.connect(1, config.controller_port2);
+//input.update();
 }
 
 void System::reset() {
@@ -238,9 +240,9 @@ void System::reset() {
   if(cartridge.has_link()) cpu.coprocessors.append(&link);
 
   scheduler.init();
-  input.port_set_device(0, config.controller_port1);
-  input.port_set_device(1, config.controller_port2);
-  input.update();
+  controllers.connect(0, config.controller_port1);
+  controllers.connect(1, config.controller_port2);
+//input.update();
 }
 
 void System::scanline() {
