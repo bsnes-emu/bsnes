@@ -1,7 +1,7 @@
 namespace SNES {
   namespace Info {
     static const char Name[] = "bsnes";
-    static const char Version[] = "079.05";
+    static const char Version[] = "079.06";
     static const unsigned SerializerVersion = 21;
   }
 }
@@ -130,8 +130,8 @@ namespace SNES {
   #include "profile-performance.hpp"
   #endif
 
-  #include <snes/system/system.hpp>
   #include <snes/controller/controller.hpp>
+  #include <snes/system/system.hpp>
   #include <snes/chip/chip.hpp>
   #include <snes/cartridge/cartridge.hpp>
   #include <snes/cheat/cheat.hpp>

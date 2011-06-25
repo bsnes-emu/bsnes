@@ -7,7 +7,8 @@ public:
   alwaysinline void step(unsigned clocks);
   alwaysinline void synchronize_smp();
   void synchronize_ppu();
-  void synchronize_coprocessor();
+  void synchronize_coprocessors();
+  void synchronize_controllers();
 
   uint8 port_read(uint2 port) const;
   void port_write(uint2 port, uint8 data);

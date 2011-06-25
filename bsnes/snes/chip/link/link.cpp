@@ -9,7 +9,7 @@ void Link::Enter() { link.enter(); }
 
 void Link::enter() {
   while(true) {
-    cpu.synchronize_coprocessor();
+    cpu.synchronize_coprocessors();
     unsigned clocks = 1;
     if(link_run) clocks = link_run();
     step(clocks);

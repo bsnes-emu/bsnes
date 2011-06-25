@@ -59,7 +59,7 @@ void Serial::write(uint8 data) {
 }
 
 uint8 Serial::mmio_read(unsigned addr) {
-  cpu.synchronize_coprocessor();
+  cpu.synchronize_coprocessors();
   switch(addr & 1) { default:
     case 0: return cpu.mmio_read(addr);
     case 1: return cpu.mmio_read(addr);
@@ -67,7 +67,7 @@ uint8 Serial::mmio_read(unsigned addr) {
 }
 
 void Serial::mmio_write(unsigned addr, uint8 data) {
-  cpu.synchronize_coprocessor();
+  cpu.synchronize_coprocessors();
   switch(addr & 1) { default:
     case 0: cpu.mmio_write(addr, data); break;
     case 1: cpu.mmio_write(addr, data); break;

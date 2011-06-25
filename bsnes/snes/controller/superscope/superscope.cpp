@@ -9,6 +9,32 @@
 //require manual polling of PIO ($4201.d6) to determine when iobit was written.
 //Note that no commercial game ever utilizes a Super Scope in port 1.
 
+void SuperScope::enter() {
+  while(true) {
+    static unsigned prev = 0;
+    unsigned next = cpu.vcounter() * 1364 + cpu.hcounter();
+    if(next >= target && prev < target) {
+      iobit(0);
+      iobit(1);
+    }
+
+    if(next < prev) {
+      //Vcounter wrapped back to zero; update cursor coordinates for start of new frame
+      int nx = system.interface->input_poll(port, Input::Device::SuperScope, 0, (unsigned)Input::SuperScopeID::X);
+      int ny = system.interface->input_poll(port, Input::Device::SuperScope, 0, (unsigned)Input::SuperScopeID::Y);
+      nx += x;
+      ny += y;
+      x = max(-16, min(256 + 16, nx));
+      y = max(-16, min(240 + 16, ny));
+      offscreen = (x < 0 || y < 0 || x >= 256 || y >= (ppu.overscan() ? 240 : 225));
+      target = offscreen ? -1 : y * 1364 + (x + 24) * 4;
+    }
+
+    prev = next;
+    step(4);
+  }
+}
+
 uint2 SuperScope::data() {
   if(counter >= 8) return 1;
 
@@ -50,7 +76,7 @@ uint2 SuperScope::data() {
   }
 
   switch(counter++) {
-  case 0: return trigger;
+  case 0: return offscreen ? 0 : trigger;
   case 1: return cursor;
   case 2: return turbo;
   case 3: return pause;
@@ -65,22 +91,17 @@ void SuperScope::latch(bool data) {
   if(latched == data) return;
   latched = data;
   counter = 0;
-
-  int nx = system.interface->input_poll(port, Input::Device::SuperScope, 0, (unsigned)Input::SuperScopeID::X);
-  int ny = system.interface->input_poll(port, Input::Device::SuperScope, 0, (unsigned)Input::SuperScopeID::Y);
-  nx += x;
-  ny += y;
-  x = max(-16, min(256 + 16, nx));
-  y = max(-16, min(240 + 16, ny));
 }
 
 SuperScope::SuperScope(bool port) : Controller(port) {
+  create(Controller::Enter, 21477272);
   latched = 0;
   counter = 0;
 
   //center cursor onscreen
   x = 256 / 2;
   y = 240 / 2;
+  target = -1;
 
   trigger   = false;
   cursor    = false;

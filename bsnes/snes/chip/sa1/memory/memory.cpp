@@ -178,13 +178,13 @@ void SA1::mmc_write(unsigned addr, uint8 data) {
 }
 
 uint8 SA1::mmc_cpu_read(unsigned addr) {
-  cpu.synchronize_coprocessor();
+  cpu.synchronize_coprocessors();
   addr = bus.mirror(mmio.sbm * 0x2000 + (addr & 0x1fff), cpubwram.size());
   return cpubwram.read(addr);
 }
 
 void SA1::mmc_cpu_write(unsigned addr, uint8 data) {
-  cpu.synchronize_coprocessor();
+  cpu.synchronize_coprocessors();
   addr = bus.mirror(mmio.sbm * 0x2000 + (addr & 0x1fff), cpubwram.size());
   cpubwram.write(addr, data);
 }

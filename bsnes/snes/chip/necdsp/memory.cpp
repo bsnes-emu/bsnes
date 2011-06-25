@@ -1,16 +1,16 @@
 #ifdef NECDSP_CPP
 
 uint8 NECDSP::sr_read(unsigned) {
-  cpu.synchronize_coprocessor();
+  cpu.synchronize_coprocessors();
   return regs.sr >> 8;
 }
 
 void NECDSP::sr_write(unsigned, uint8 data) {
-  cpu.synchronize_coprocessor();
+  cpu.synchronize_coprocessors();
 }
 
 uint8 NECDSP::dr_read(unsigned) {
-  cpu.synchronize_coprocessor();
+  cpu.synchronize_coprocessors();
   if(regs.sr.drc == 0) {
     //16-bit
     if(regs.sr.drs == 0) {
@@ -29,7 +29,7 @@ uint8 NECDSP::dr_read(unsigned) {
 }
 
 void NECDSP::dr_write(unsigned, uint8 data) {
-  cpu.synchronize_coprocessor();
+  cpu.synchronize_coprocessors();
   if(regs.sr.drc == 0) {
     //16-bit
     if(regs.sr.drs == 0) {
@@ -48,7 +48,7 @@ void NECDSP::dr_write(unsigned, uint8 data) {
 }
 
 uint8 NECDSP::dp_read(unsigned addr) {
-  cpu.synchronize_coprocessor();
+  cpu.synchronize_coprocessors();
   bool hi = addr & 1;
   addr = (addr >> 1) & 2047;
 
@@ -60,7 +60,7 @@ uint8 NECDSP::dp_read(unsigned addr) {
 }
 
 void NECDSP::dp_write(unsigned addr, uint8 data) {
-  cpu.synchronize_coprocessor();
+  cpu.synchronize_coprocessors();
   bool hi = addr & 1;
   addr = (addr >> 1) & 2047;
 

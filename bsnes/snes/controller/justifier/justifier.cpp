@@ -1,5 +1,45 @@
 #ifdef CONTROLLER_CPP
 
+void Justifier::enter() {
+  while(true) {
+    static unsigned prev = 0;
+    unsigned next = cpu.vcounter() * 1364 + cpu.hcounter();
+    if(next >= target && prev < target) {
+      iobit(0);
+      iobit(1);
+    }
+
+    if(next < prev) {
+      int nx1 = system.interface->input_poll(port, Input::Device::Justifier, 0, (unsigned)Input::JustifierID::X);
+      int ny1 = system.interface->input_poll(port, Input::Device::Justifier, 0, (unsigned)Input::JustifierID::Y);
+      nx1 += x1;
+      ny1 += y1;
+      x1 = max(-16, min(256 + 16, nx1));
+      y1 = max(-16, min(240 + 16, ny1));
+
+      if(chained == true) {
+        int nx2 = system.interface->input_poll(port, Input::Device::Justifiers, 1, (unsigned)Input::JustifierID::X);
+        int ny2 = system.interface->input_poll(port, Input::Device::Justifiers, 1, (unsigned)Input::JustifierID::Y);
+        nx2 += x2;
+        ny2 += y2;
+        x2 = max(-16, min(256 + 16, nx2));
+        y2 = max(-16, min(240 + 16, ny2));
+      }
+
+      if(active == 0) {
+        bool offscreen = (x1 < 0 || y1 < 0 || x1 >= 256 || y1 >= (ppu.overscan() ? 240 : 225));
+        target = offscreen ? -1 : y1 * 1364 + (x1 + 24) * 4;
+      } else {
+        bool offscreen = (x2 < 0 || y2 < 0 || x2 >= 256 || y2 >= (ppu.overscan() ? 240 : 225));
+        target = offscreen ? -1 : y2 * 1364 + (x2 + 24) * 4;
+      }
+    }
+
+    prev = next;
+    step(4);
+  }
+}
+
 uint2 Justifier::data() {
   if(counter >= 32) return 1;
 
@@ -56,25 +96,11 @@ void Justifier::latch(bool data) {
   if(latched == data) return;
   latched = data;
   counter = 0;
-  if(chained) active = !active;  //toggle between both controllers when chained
-
-  int nx1 = system.interface->input_poll(port, Input::Device::Justifier, 0, (unsigned)Input::JustifierID::X);
-  int ny1 = system.interface->input_poll(port, Input::Device::Justifier, 0, (unsigned)Input::JustifierID::Y);
-  nx1 += x1;
-  ny1 += y1;
-  x1 = max(-16, min(256 + 16, nx1));
-  y1 = max(-16, min(240 + 16, ny1));
-
-  if(chained == false) return;
-  int nx2 = system.interface->input_poll(port, Input::Device::Justifiers, 1, (unsigned)Input::JustifierID::X);
-  int ny2 = system.interface->input_poll(port, Input::Device::Justifiers, 1, (unsigned)Input::JustifierID::Y);
-  nx2 += x2;
-  ny2 += y2;
-  x2 = max(-16, min(256 + 16, nx2));
-  y2 = max(-16, min(240 + 16, ny2));
+  if(latched == 0) active = !active;  //toggle between both controllers, even when unchained
 }
 
 Justifier::Justifier(bool port, bool chained) : Controller(port), chained(chained) {
+  create(Controller::Enter, 21477272);
   latched = 0;
   counter = 0;
   active = 0;
@@ -90,6 +116,8 @@ Justifier::Justifier(bool port, bool chained) : Controller(port), chained(chaine
     x2 = 256 / 2 + 16;
     y2 = 240 / 2;
   }
+
+  target = -1;
 
   trigger1 = false;
   trigger2 = false;

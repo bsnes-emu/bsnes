@@ -8,7 +8,28 @@ namespace SNES {
 #include "mouse/mouse.cpp"
 #include "superscope/superscope.cpp"
 #include "justifier/justifier.cpp"
-Controllers controllers;
+
+void Controller::Enter() {
+  if(co_active() == input.port1->thread) input.port1->enter();
+  if(co_active() == input.port2->thread) input.port2->enter();
+}
+
+void Controller::enter() {
+  while(true) step(1);
+}
+
+void Controller::step(unsigned clocks) {
+  clock += clocks * (uint64)cpu.frequency;
+  synchronize_cpu();
+}
+
+void Controller::synchronize_cpu() {
+  if(CPU::Threaded == true) {
+    if(clock >= 0 && scheduler.sync != Scheduler::SynchronizeMode::All) co_switch(cpu.thread);
+  } else {
+    while(clock >= 0) cpu.enter();
+  }
+}
 
 bool Controller::iobit() {
   switch(port) {
@@ -19,45 +40,13 @@ bool Controller::iobit() {
 
 void Controller::iobit(bool data) {
   switch(port) {
-  case Controller::Port1: break;
-  case Controller::Port2: break;
+  case Controller::Port1: bus.write(0x4201, (cpu.pio() & ~0x40) | (data << 6)); break;
+  case Controller::Port2: bus.write(0x4201, (cpu.pio() & ~0x80) | (data << 7)); break;
   }
 }
 
 Controller::Controller(bool port) : port(port) {
-}
-
-void Controllers::connect(bool port, Input::Device id) {
-  Controller *&controller = (port == Controller::Port1 ? port1 : port2);
-  if(controller) {
-    delete controller;
-    controller = 0;
-  }
-
-  switch(id) { default:
-  case Input::Device::None: controller = new Controller(port); break;
-  case Input::Device::Joypad: controller = new Gamepad(port); break;
-  case Input::Device::Multitap: controller = new Multitap(port); break;
-  case Input::Device::Mouse: controller = new Mouse(port); break;
-  case Input::Device::SuperScope: controller = new SuperScope(port); break;
-  case Input::Device::Justifier: controller = new Justifier(port, false); break;
-  case Input::Device::Justifiers: controller = new Justifier(port, true); break;
-  }
-
-  switch(port) {
-  case Controller::Port1: config.controller_port1 = id; break;
-  case Controller::Port2: config.controller_port2 = id; break;
-  }
-}
-
-Controllers::Controllers() {
-  connect(Controller::Port1, Input::Device::Joypad);
-  connect(Controller::Port2, Input::Device::Joypad);
-}
-
-Controllers::~Controllers() {
-  if(port1) delete port1;
-  if(port2) delete port2;
+  if(!thread) create(Controller::Enter, 1);
 }
 
 }

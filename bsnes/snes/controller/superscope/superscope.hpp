@@ -1,4 +1,5 @@
 struct SuperScope : Controller {
+  void enter();
   uint2 data();
   void latch(bool data);
   SuperScope(bool port);
@@ -7,7 +8,7 @@ struct SuperScope : Controller {
   bool latched;
   unsigned counter;
 
-  int x, y;
+  signed x, y, target;
 
   bool trigger;
   bool cursor;

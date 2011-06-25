@@ -1,4 +1,5 @@
 struct Justifier : Controller {
+  void enter();
   uint2 data();
   void latch(bool data);
   Justifier(bool port, bool chained);
@@ -9,8 +10,9 @@ struct Justifier : Controller {
   unsigned counter;
 
   bool active;
-  int x1, x2;
-  int y1, y2;
+  signed x1, x2;
+  signed y1, y2;
+  signed target;
   bool trigger1, trigger2;
   bool start1, start2;
 };

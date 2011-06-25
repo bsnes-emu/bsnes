@@ -15,23 +15,17 @@ struct Controller : Processor {
   enum : bool { Port1 = 0, Port2 = 1 };
   const bool port;
 
+  static void Enter();
+  virtual void enter();
+  void step(unsigned clocks);
+  void synchronize_cpu();
+
   bool iobit();
   void iobit(bool data);
   virtual uint2 data() { return 0; }
   virtual void latch(bool data) {}
   Controller(bool port);
 };
-
-struct Controllers {
-  Controller *port1;
-  Controller *port2;
-
-  void connect(bool port, Input::Device id);
-  Controllers();
-  ~Controllers();
-};
-
-extern Controllers controllers;
 
 #include "gamepad/gamepad.hpp"
 #include "multitap/multitap.hpp"

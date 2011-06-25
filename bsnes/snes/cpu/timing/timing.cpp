@@ -40,7 +40,7 @@ void CPU::scanline() {
   //forcefully sync S-CPU to other processors, in case chips are not communicating
   synchronize_ppu();
   synchronize_smp();
-  synchronize_coprocessor();
+  synchronize_coprocessors();
   system.scanline();
 
   if(vcounter() == 0) {
