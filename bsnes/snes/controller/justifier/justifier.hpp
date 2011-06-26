@@ -12,7 +12,6 @@ struct Justifier : Controller {
   bool active;
   signed x1, x2;
   signed y1, y2;
-  signed target;
   bool trigger1, trigger2;
   bool start1, start2;
 };

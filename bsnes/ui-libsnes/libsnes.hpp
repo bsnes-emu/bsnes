@@ -10,13 +10,14 @@ extern "C" {
 #define SNES_PORT_1  0
 #define SNES_PORT_2  1
 
-#define SNES_DEVICE_NONE         0
-#define SNES_DEVICE_JOYPAD       1
-#define SNES_DEVICE_MULTITAP     2
-#define SNES_DEVICE_MOUSE        3
-#define SNES_DEVICE_SUPER_SCOPE  4
-#define SNES_DEVICE_JUSTIFIER    5
-#define SNES_DEVICE_JUSTIFIERS   6
+#define SNES_DEVICE_NONE          0
+#define SNES_DEVICE_JOYPAD        1
+#define SNES_DEVICE_MULTITAP      2
+#define SNES_DEVICE_MOUSE         3
+#define SNES_DEVICE_SUPER_SCOPE   4
+#define SNES_DEVICE_JUSTIFIER     5
+#define SNES_DEVICE_JUSTIFIERS    6
+#define SNES_DEVICE_SERIAL_CABLE  7
 
 #define SNES_DEVICE_ID_JOYPAD_B        0
 #define SNES_DEVICE_ID_JOYPAD_Y        1

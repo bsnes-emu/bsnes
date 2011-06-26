@@ -17,7 +17,6 @@ struct Coprocessor : Processor {
 #include <snes/chip/st0018/st0018.hpp>
 #include <snes/chip/sufamiturbo/sufamiturbo.hpp>
 #include <snes/chip/msu1/msu1.hpp>
-#include <snes/chip/serial/serial.hpp>
 #include <snes/chip/link/link.hpp>
 
 void Coprocessor::step(unsigned clocks) {

@@ -1,12 +1,20 @@
 #ifdef CONTROLLER_CPP
 
 void Justifier::enter() {
+  unsigned prev = 0;
   while(true) {
-    static unsigned prev = 0;
     unsigned next = cpu.vcounter() * 1364 + cpu.hcounter();
-    if(next >= target && prev < target) {
-      iobit(0);
-      iobit(1);
+
+    signed x = (active == 0 ? x1 : x2), y = (active == 0 ? y1 : y2);
+    bool offscreen = (x < 0 || y < 0 || x >= 256 || y >= (ppu.overscan() ? 240 : 225));
+
+    if(offscreen == false) {
+      unsigned target = y * 1364 + (x + 24) * 4;
+      if(next >= target && prev < target) {
+        //CRT raster detected, toggle iobit to latch counters
+        iobit(0);
+        iobit(1);
+      }
     }
 
     if(next < prev) {
@@ -25,18 +33,14 @@ void Justifier::enter() {
         x2 = max(-16, min(256 + 16, nx2));
         y2 = max(-16, min(240 + 16, ny2));
       }
-
-      if(active == 0) {
-        bool offscreen = (x1 < 0 || y1 < 0 || x1 >= 256 || y1 >= (ppu.overscan() ? 240 : 225));
-        target = offscreen ? -1 : y1 * 1364 + (x1 + 24) * 4;
-      } else {
-        bool offscreen = (x2 < 0 || y2 < 0 || x2 >= 256 || y2 >= (ppu.overscan() ? 240 : 225));
-        target = offscreen ? -1 : y2 * 1364 + (x2 + 24) * 4;
-      }
+    } else {
+      //sleep until PPU counters are close to latch position
+      unsigned diff = abs((signed)y - cpu.vcounter());
+      if(diff >= 2) step((diff - 2) * 1364);
     }
 
     prev = next;
-    step(4);
+    step(2);
   }
 }
 
@@ -116,8 +120,6 @@ Justifier::Justifier(bool port, bool chained) : Controller(port), chained(chaine
     x2 = 256 / 2 + 16;
     y2 = 240 / 2;
   }
-
-  target = -1;
 
   trigger1 = false;
   trigger2 = false;

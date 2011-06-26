@@ -15,7 +15,7 @@ void Cheat::enable(bool state) {
 }
 
 void Cheat::synchronize() {
-  memcpy(bus.lookup, lookup, 16 * 1024 * 1024);
+  memset(override, 0x00, 16 * 1024 * 1024);
   code_enabled = false;
 
   for(unsigned i = 0; i < size(); i++) {
@@ -26,16 +26,16 @@ void Cheat::synchronize() {
       code_enabled = true;
 
       unsigned addr = mirror(code.addr[n]);
-      bus.lookup[addr] = 0xff;
+      override[addr] = true;
       if((addr & 0xffe000) == 0x7e0000) {
         //mirror $7e:0000-1fff to $00-3f|80-bf:0000-1fff
         unsigned mirroraddr;
         for(unsigned x = 0; x <= 0x3f; x++) {
           mirroraddr = ((0x00 + x) << 16) + (addr & 0x1fff);
-          bus.lookup[mirroraddr] = 0xff;
+          override[mirroraddr] = true;
 
           mirroraddr = ((0x80 + x) << 16) + (addr & 0x1fff);
-          bus.lookup[mirroraddr] = 0xff;
+          override[mirroraddr] = true;
         }
       }
     }
@@ -62,25 +62,16 @@ uint8 Cheat::read(unsigned addr) const {
 }
 
 void Cheat::init() {
-  bus.reader[0xff] = [](unsigned addr) {
-    bus.reader[cheat.lookup[addr]](bus.target[addr]);
-    return cheat.read(addr);
-  };
-
-  bus.writer[0xff] = [](unsigned addr, uint8 data) {
-    return bus.writer[cheat.lookup[addr]](bus.target[addr], data);
-  };
-
-  memcpy(lookup, bus.lookup, 16 * 1024 * 1024);
+  memset(override, 0x00, 16 * 1024 * 1024);
 }
 
 Cheat::Cheat() {
-  lookup = new uint8[16 * 1024 * 1024];
+  override = new uint8[16 * 1024 * 1024];
   system_enabled = true;
 }
 
 Cheat::~Cheat() {
-  delete[] lookup;
+  delete[] override;
 }
 
 //===============

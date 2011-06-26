@@ -54,6 +54,7 @@ void Utility::setControllers() {
     case 4: SNES::input.connect(SNES::Controller::Port2, SNES::Input::Device::SuperScope); break;
     case 5: SNES::input.connect(SNES::Controller::Port2, SNES::Input::Device::Justifier); break;
     case 6: SNES::input.connect(SNES::Controller::Port2, SNES::Input::Device::Justifiers); break;
+    case 7: SNES::input.connect(SNES::Controller::Port2, SNES::Input::Device::Serial); break;
   }
 }
 

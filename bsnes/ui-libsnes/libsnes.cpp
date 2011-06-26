@@ -77,7 +77,7 @@ void snes_set_input_state(snes_input_state_t input_state) {
 }
 
 void snes_set_controller_port_device(bool port, unsigned device) {
-  SNES::input.port_set_device(port, (SNES::Input::Device)device);
+  SNES::input.connect(port, (SNES::Input::Device)device);
 }
 
 void snes_set_cartridge_basename(const char *basename) {
@@ -86,8 +86,8 @@ void snes_set_cartridge_basename(const char *basename) {
 
 void snes_init(void) {
   SNES::system.init(&interface);
-  SNES::input.port_set_device(0, SNES::Input::Device::Joypad);
-  SNES::input.port_set_device(1, SNES::Input::Device::Joypad);
+  SNES::input.connect(SNES::Controller::Port1, SNES::Input::Device::Joypad);
+  SNES::input.connect(SNES::Controller::Port2, SNES::Input::Device::Joypad);
 }
 
 void snes_term(void) {

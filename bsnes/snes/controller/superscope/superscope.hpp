@@ -8,7 +8,7 @@ struct SuperScope : Controller {
   bool latched;
   unsigned counter;
 
-  signed x, y, target;
+  signed x, y;
 
   bool trigger;
   bool cursor;

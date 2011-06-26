@@ -3014,6 +3014,11 @@
   <cartridge sha256="05eb897d7696555790591c431c9d55a43ff9a1c12162443c17c5fcddfa5eb3c5">
     <name>Alien vs. Predator (USA)</name>
     <cheat>
+      <description>Invincibility</description>
+      <code>1D3B-0FAD</code>
+      <code>6D22-D4D7</code>
+    </cheat>
+    <cheat>
       <description>Infinite health</description>
       <code>C238-0FDD</code>
       <code>C236-0DDD</code>
@@ -3043,10 +3048,18 @@
       <code>3CEA-67D8</code>
     </cheat>
     <cheat>
-      <description>One hit kills most enemies</description>
-      <code>DFB5-AD67</code>
-      <code>7E1125FF</code>
-      <code>7E1AA5FF</code>
+      <description>One hit kills</description>
+      <code>6D2D-AFA7</code>
+      <code>6D37-64DD</code>
+      <code>6DB8-A765</code>
+      <code>6D39-DD6F</code>
+    </cheat>
+    <cheat>
+      <description>Hit anywhere</description>
+      <code>402B-6FD7</code>
+      <code>D12B-0D07</code>
+      <code>D12D-0D67</code>
+      <code>D13A-A4DD</code>
     </cheat>
     <cheat>
       <description>Disc power-ups give 1 disc instead of 6 (handicap)</description>
@@ -9024,19 +9037,19 @@
   <cartridge sha256="c88a882ad72dfa07a9b1eb8a2183aa10057d60877a02edf90cf2cd8c78abe65e">
     <name>Combatribes, The (USA)</name>
     <cheat>
-      <description>Invincibility</description>
+      <description>Invincibility - both players</description>
       <code>2DB1-A7D4</code>
     </cheat>
     <cheat>
-      <description>Infinite health</description>
+      <description>Invincibility - P1</description>
+      <code>7E193401</code>
+    </cheat>
+    <cheat>
+      <description>Infinite health - both players</description>
       <code>3CB5-6F64</code>
       <code>CBB5-6FA4</code>
       <code>A6B5-64D4</code>
       <code>62B5-6464</code>
-    </cheat>
-    <cheat>
-      <description>Infinite credits</description>
-      <code>A2B3-A404</code>
     </cheat>
     <cheat>
       <description>Infinite health - P1</description>
@@ -9047,11 +9060,23 @@
       <code>7E1796C8</code>
     </cheat>
     <cheat>
+      <description>Infinite credits</description>
+      <code>A2B3-A404</code>
+    </cheat>
+    <cheat>
       <description>Infinite credits (alt)</description>
       <code>7E156409</code>
     </cheat>
     <cheat>
-      <description>One hit kills</description>
+      <description>Hit anywhere - P1</description>
+      <code>3DBB-076D</code>
+      <code>70BC-0D6D</code>
+      <code>DDBB-07AD</code>
+      <code>DDBC-0DDD</code>
+      <code>EDBC-0D0D</code>
+    </cheat>
+    <cheat>
+      <description>One hit kills - both players</description>
       <code>3DA3-64AF</code>
       <code>DDA3-67DF</code>
       <code>DDA3-670F</code>
@@ -12230,7 +12255,7 @@
       <code>BAC9-3FBF</code>
     </cheat>
     <cheat>
-      <description>Pick up to 9 points of any attribute instead of 5</description>
+      <description>9 points of any attribute instead of 5</description>
       <code>DBBC-1F27</code>
     </cheat>
     <cheat>
@@ -17468,6 +17493,12 @@
       <code>EEEA-4DDF</code>
     </cheat>
     <cheat>
+      <description>Hit anywhere - both players</description>
+      <code>4062-1DA6</code>
+      <code>4062-14D6</code>
+      <code>406C-1DA6</code>
+    </cheat>
+    <cheat>
       <description>Both players can select same character</description>
       <code>33C5-1404</code>
     </cheat>
@@ -17555,13 +17586,6 @@
       <code>C2F9-84DF</code>
     </cheat>
     <cheat>
-      <description>Instant super energy</description>
-      <code>CBB5-5D07</code>
-      <code>46B5-5D67</code>
-      <code>DDB5-5DA7</code>
-      <code>4BB5-5F07</code>
-    </cheat>
-    <cheat>
       <description>Infinite super energy - P1</description>
       <code>7E051663</code>
     </cheat>
@@ -17576,6 +17600,19 @@
     <cheat>
       <description>Infinite throw time - P2</description>
       <code>7E068010</code>
+    </cheat>
+    <cheat>
+      <description>Hit anywhere - both players</description>
+      <code>3DA7-E76D</code>
+      <code>D5A0-EDDD</code>
+      <code>DDA7-E7AD</code>
+    </cheat>
+    <cheat>
+      <description>Instant super energy</description>
+      <code>CBB5-5D07</code>
+      <code>46B5-5D67</code>
+      <code>DDB5-5DA7</code>
+      <code>4BB5-5F07</code>
     </cheat>
     <cheat>
       <description>Have the Pipe - P1</description>
@@ -18101,6 +18138,16 @@
       <description>One hit kills</description>
       <code>6D61-64D9</code>
       <code>DDE3-0FAC</code>
+    </cheat>
+  </cartridge>
+  <cartridge sha256="bc6b0344a434644c391ac69a53c7720c51e2d3c5c082b8d78598ae4df100c464">
+    <name>Foreman For Real (USA)</name>
+    <cheat>
+      <description>Infinite stamina - P1</description>
+      <code>7E11AE64</code>
+      <code>7E107227</code>
+      <code>7E043A78</code>
+      <code>7E045A64</code>
     </cheat>
   </cartridge>
   <cartridge sha256="dcceb5be536c9b91bf34f65e7fcec4b55a78af0192323cf86f3b9555072037ee">
@@ -36726,6 +36773,14 @@
       <code>DDA5-3700</code>
     </cheat>
     <cheat>
+      <description>Walk through walls</description>
+      <code>6D64-CDAF</code>
+    </cheat>
+    <cheat>
+      <description>Jump through ceilings</description>
+      <code>6D68-1FD4</code>
+    </cheat>
+    <cheat>
       <description>Get 2x energy from sacred hearts</description>
       <code>746B-4D6A</code>
     </cheat>
@@ -37444,6 +37499,32 @@
     <cheat>
       <description>Start on level 20</description>
       <code>F7B7-D46E</code>
+    </cheat>
+  </cartridge>
+  <cartridge sha256="65f7123ab4fc9bad24b1976da8e84976cc6977861626a05d4e2cce132ef3fd42">
+    <name>Psycho Dream (Japan)</name>
+    <cheat>
+      <description>Invincibility (blinking)</description>
+      <code>DDB7-8D6D</code>
+    </cheat>
+    <cheat>
+      <description>Infinite time</description>
+      <code>DD7F-7407</code>
+    </cheat>
+    <cheat>
+      <description>Infinite magic</description>
+      <code>69BE-77DF</code>
+    </cheat>
+    <cheat>
+      <description>Hit anywhere</description>
+      <code>6DDD-E71F</code>
+      <code>6DD4-EDCF</code>
+      <code>6DD7-EF3F</code>
+      <code>6DD0-E74F</code>
+    </cheat>
+    <cheat>
+      <description>Best weapon on pick-up</description>
+      <code>CBC7-74AD</code>
     </cheat>
   </cartridge>
   <cartridge sha256="475c9baa1c2b76a6b3119e47d32814dc1c08e84e23250ae015bb0bccea915637">
@@ -40928,6 +41009,49 @@
   <cartridge sha256="4c15013131351e694e05f22e38bb1b3e4031dedac77ec75abecebe8520d82d5f">
     <name>Secret of Mana (USA)</name>
     <cheat>
+      <description>Protection from most hits (disable to kill enemies)</description>
+      <code>8208-776D</code>
+    </cheat>
+    <cheat>
+      <description>Enemies die instantly</description>
+      <code>CD7E-7D67</code>
+      <code>DD7E-7DA7</code>
+      <code>DD7E-7FD7</code>
+    </cheat>
+    <cheat>
+      <description>Hit anywhere</description>
+      <code>40A7-6765</code>
+      <code>402C-0F60</code>
+    </cheat>
+    <cheat>
+      <description>Level 99 after first enemy</description>
+      <code>B606-7F6F</code>
+      <code>DD78-5F64</code>
+    </cheat>
+    <cheat>
+      <description>Max weapon damage</description>
+      <code>BA0A-5404</code>
+      <code>CB0A-54D4</code>
+    </cheat>
+    <cheat>
+      <description>Change screens to max out Strength, Agility, Constitution, Intelligence and Wisdom</description>
+      <code>DD03-ED04</code>
+    </cheat>
+    <cheat>
+      <description>Weapon bar never decreases</description>
+      <code>82A0-6466</code>
+      <code>82E0-0FD4</code>
+    </cheat>
+    <cheat>
+      <description>Walk through walls</description>
+      <code>DD85-A7D1</code>
+      <code>DD85-64A1</code>
+    </cheat>
+    <cheat>
+      <description>Everything is free</description>
+      <code>6D06-7F6F</code>
+    </cheat>
+    <cheat>
       <description>Strength for level 16 is 90</description>
       <code>9C06-81AD</code>
     </cheat>
@@ -40973,11 +41097,11 @@
       <code>DDE8-E9C4</code>
     </cheat>
     <cheat>
-      <description>Cup of wishes costs nothing</description>
+      <description>Cup Of Wishes costs nothing</description>
       <code>DDEC-E9C4</code>
     </cheat>
     <cheat>
-      <description>Medical herb costs nothing</description>
+      <description>Medical Herb costs nothing</description>
       <code>DDEC-E944</code>
     </cheat>
     <cheat>
@@ -40985,20 +41109,20 @@
       <code>DDE7-7047</code>
     </cheat>
     <cheat>
-      <description>Hair ribbon costs nothing</description>
+      <description>Hair Ribbon costs nothing</description>
       <code>DDE8-E144</code>
     </cheat>
     <cheat>
-      <description>Rabite cap costs nothing</description>
+      <description>Rabite Cap costs nothing</description>
       <code>DDE8-E1C4</code>
     </cheat>
     <cheat>
-      <description>Faerie walnut costs nothing</description>
+      <description>Faerie Walnut costs nothing</description>
       <code>DDEC-E0C4</code>
       <code>DDEC-E034</code>
     </cheat>
     <cheat>
-      <description>Royal jam costs nothing</description>
+      <description>Royal Jam costs nothing</description>
       <code>DDEC-E044</code>
     </cheat>
     <cheat>
@@ -41008,14 +41132,6 @@
     <cheat>
       <description>Staying at Neko's costs nothing instead of 30</description>
       <code>DDAB-E715</code>
-    </cheat>
-    <cheat>
-      <description>Protection from most hits (Switch off to kill enemies)</description>
-      <code>8208-776D</code>
-    </cheat>
-    <cheat>
-      <description>Change screens to max out Strength, Agility, Constitution, Intelligence and Wisdom</description>
-      <code>DD03-ED04</code>
     </cheat>
     <cheat>
       <description>Start with 255 GP</description>
@@ -46606,6 +46722,14 @@
       <code>A689-0FD7</code>
     </cheat>
     <cheat>
+      <description>Hit anywhere (cannot use whip to grab onto things, press Y to moon jump instead)</description>
+      <code>B428-AFA4</code>
+      <code>C728-A4D4</code>
+      <code>DD2C-A764</code>
+      <code>6D20-A7A4</code>
+      <code>6D21-AF64</code>
+    </cheat>
+    <cheat>
       <description>Fully powered whip with first power-up</description>
       <code>DD24-AFD7</code>
     </cheat>
@@ -46620,7 +46744,7 @@
       <code>EE26-6767</code>
     </cheat>
     <cheat>
-      <description>Have maxed out hearts with each heart pick-up</description>
+      <description>Max hearts on pick-up</description>
       <code>DD2B-6D07</code>
     </cheat>
     <cheat>
@@ -52462,6 +52586,14 @@
       <code>82A6-4FA4</code>
     </cheat>
     <cheat>
+      <description>Hit anywhere - P1</description>
+      <code>6D69-149F</code>
+    </cheat>
+    <cheat>
+      <description>Hit anywhere - P2</description>
+      <code>6D6f-1F9F</code>
+    </cheat>
+    <cheat>
       <description>Leonardo is replaced by Rat King</description>
       <code>DCCA-1405</code>
     </cheat>
@@ -52591,6 +52723,14 @@
     <cheat>
       <description>One hit kills (disable when you reach Shredder's first fight)</description>
       <code>6D6C-0F2F</code>
+    </cheat>
+    <cheat>
+      <description>Hit anywhere - P1</description>
+      <code>EA66-67AA</code>
+    </cheat>
+    <cheat>
+      <description>Hit anywhere - P2</description>
+      <code>EA6B-67AA</code>
     </cheat>
     <cheat>
       <description>Start with 1 life instead of 3</description>
@@ -54966,14 +55106,12 @@
   <cartridge sha256="cb2fdfce61858063bf4c9da4228381c3ec3abe423f4d378cddd174ae4adb261e">
     <name>Ultimate Mortal Kombat 3 (USA)</name>
     <cheat>
-      <description>Invincibility (throws disable CPU)</description>
-      <code>C132-CDBF</code>
-      <code>1432-CD2F</code>
-      <code>2D32-CFFF</code>
-      <code>D032-CF9F</code>
-      <code>6D32-CFBF</code>
-      <code>0D32-CF2F</code>
+      <description>Invincibility (throws damage CPU)</description>
+      <code>3D3C-C79F</code>
       <code>6D33-3DBF</code>
+      <code>7D38-CDFF</code>
+      <code>DF3C-C7BF</code>
+      <code>E138-CD9F</code>
     </cheat>
     <cheat>
       <description>Infinite health - P1</description>
@@ -56586,6 +56724,13 @@
       <code>7B86-84A4</code>
     </cheat>
     <cheat>
+      <description>Hit anywhere - P1</description>
+      <code>7DFE-776D</code>
+      <code>ADFE-746D</code>
+      <code>DDFE-74AD</code>
+      <code>FDFE-77DD</code>
+    </cheat>
+    <cheat>
       <description>Win a draw - P1</description>
       <code>D409-8F04</code>
     </cheat>
@@ -56640,6 +56785,16 @@
   <cartridge sha256="159d5341d13d6801324e8271f7191c0223617c9d30984676319b2df7937c78c0">
     <name>World Heroes 2 (USA)</name>
     <cheat>
+      <description>Invincibility - P1</description>
+      <code>1D82-AF6D</code>
+      <code>1D83-0F64</code>
+    </cheat>
+    <cheat>
+      <description>Invincibility - P2</description>
+      <code>1D82-0D0D</code>
+      <code>1D84-DD04</code>
+    </cheat>
+    <cheat>
       <description>Infinite health - P1</description>
       <code>7E057480</code>
     </cheat>
@@ -56650,6 +56805,16 @@
     <cheat>
       <description>Infinite time</description>
       <code>7E052C99</code>
+    </cheat>
+    <cheat>
+      <description>Hit anywhere - P1</description>
+      <code>6D8A-07DD</code>
+      <code>6D8F-D7D4</code>
+    </cheat>
+    <cheat>
+      <description>Hit anywhere - P2</description>
+      <code>6D82-AD0D</code>
+      <code>6D83-0D04</code>
     </cheat>
     <cheat>
       <description>One win wins the match - P1</description>

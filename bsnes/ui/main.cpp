@@ -118,6 +118,7 @@ void Application::main(int argc, char **argv) {
 
     if(SNES::cartridge.loaded()) {
       if(application.pause == true || (config.settings.focusPolicy == 0 && mainWindow.focused() == false)) {
+        audio.clear();
         usleep(20 * 1000);
         continue;
       }

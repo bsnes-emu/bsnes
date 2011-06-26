@@ -5,17 +5,25 @@
 //port 2, as iobit there is connected to the PPU H/V counter latch.
 //(PIO $4201.d7)
 
+//It is obviously not possible to perfectly simulate an IR light detecting
+//a CRT beam cannon, hence this class will read the PPU raster counters.
+
 //A Super Scope can still technically be used in port 1, however it would
 //require manual polling of PIO ($4201.d6) to determine when iobit was written.
 //Note that no commercial game ever utilizes a Super Scope in port 1.
 
 void SuperScope::enter() {
+  unsigned prev = 0;
   while(true) {
-    static unsigned prev = 0;
     unsigned next = cpu.vcounter() * 1364 + cpu.hcounter();
-    if(next >= target && prev < target) {
-      iobit(0);
-      iobit(1);
+
+    if(offscreen == false) {
+      unsigned target = y * 1364 + (x + 24) * 4;
+      if(next >= target && prev < target) {
+        //CRT raster detected, toggle iobit to latch counters
+        iobit(0);
+        iobit(1);
+      }
     }
 
     if(next < prev) {
@@ -27,11 +35,14 @@ void SuperScope::enter() {
       x = max(-16, min(256 + 16, nx));
       y = max(-16, min(240 + 16, ny));
       offscreen = (x < 0 || y < 0 || x >= 256 || y >= (ppu.overscan() ? 240 : 225));
-      target = offscreen ? -1 : y * 1364 + (x + 24) * 4;
+    } else {
+      //sleep until PPU counters are close to latch position
+      unsigned diff = abs((signed)y - cpu.vcounter());
+      if(diff >= 2) step((diff - 2) * 1364);
     }
 
     prev = next;
-    step(4);
+    step(2);
   }
 }
 
@@ -101,7 +112,6 @@ SuperScope::SuperScope(bool port) : Controller(port) {
   //center cursor onscreen
   x = 256 / 2;
   y = 240 / 2;
-  target = -1;
 
   trigger   = false;
   cursor    = false;

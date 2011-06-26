@@ -23,6 +23,7 @@ struct MainWindow : TopLevelWindow {
   RadioItem systemPort2SuperScope;
   RadioItem systemPort2Justifier;
   RadioItem systemPort2Justifiers;
+  RadioItem systemPort2Serial;
 
   Menu settings;
   Menu settingsVideoMode;

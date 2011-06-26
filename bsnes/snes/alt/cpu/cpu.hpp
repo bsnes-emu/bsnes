@@ -7,7 +7,8 @@ public:
   alwaysinline void step(unsigned clocks);
   alwaysinline void synchronize_smp();
   void synchronize_ppu();
-  void synchronize_coprocessor();
+  void synchronize_coprocessors();
+  void synchronize_controllers();
 
   uint8 pio();
   bool joylatch();
@@ -41,7 +42,6 @@ private:
     enum : unsigned {
       DramRefresh,
       HdmaRun,
-      ControllerLatch,
     };
   };
   nall::priority_queue<unsigned> queue;

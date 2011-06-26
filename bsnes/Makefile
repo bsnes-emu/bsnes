@@ -1,7 +1,7 @@
 include nall/Makefile
 snes := snes
 gameboy := gameboy
-profile := accuracy
+profile := compatibility
 ui := ui
 
 # debugger

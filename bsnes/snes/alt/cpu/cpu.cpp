@@ -23,6 +23,9 @@ void CPU::step(unsigned clocks) {
     Processor &chip = *coprocessors[i];
     chip.clock -= clocks * (uint64)chip.frequency;
   }
+  input.port1->clock -= clocks * (uint64)input.port1->frequency;
+  input.port2->clock -= clocks * (uint64)input.port2->frequency;
+  synchronize_controllers();
 }
 
 void CPU::synchronize_smp() {
@@ -41,11 +44,16 @@ void CPU::synchronize_ppu() {
   }
 }
 
-void CPU::synchronize_coprocessor() {
+void CPU::synchronize_coprocessors() {
   for(unsigned i = 0; i < coprocessors.size(); i++) {
     Processor &chip = *coprocessors[i];
     if(chip.clock < 0) co_switch(chip.thread);
   }
+}
+
+void CPU::synchronize_controllers() {
+  if(input.port1->clock < 0) co_switch(input.port1->thread);
+  if(input.port2->clock < 0) co_switch(input.port2->thread);
 }
 
 void CPU::Enter() { cpu.enter(); }

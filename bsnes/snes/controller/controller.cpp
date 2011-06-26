@@ -8,6 +8,7 @@ namespace SNES {
 #include "mouse/mouse.cpp"
 #include "superscope/superscope.cpp"
 #include "justifier/justifier.cpp"
+#include "serial/serial.cpp"
 
 void Controller::Enter() {
   if(co_active() == input.port1->thread) input.port1->enter();

@@ -5,7 +5,7 @@ snes_objects += snes-cpu snes-smp snes-dsp snes-ppu
 snes_objects += snes-nss snes-icd2 snes-superfx snes-sa1 snes-necdsp snes-hitachidsp
 snes_objects += snes-bsx snes-srtc snes-sdd1 snes-spc7110
 snes_objects += snes-obc1 snes-st0018 snes-sufamiturbo
-snes_objects += snes-msu1 snes-serial snes-link
+snes_objects += snes-msu1 snes-link
 objects += $(snes_objects)
 
 ifeq ($(profile),accuracy)
@@ -54,5 +54,4 @@ obj/snes-obc1.o       : $(snes)/chip/obc1/obc1.cpp $(snes)/chip/obc1/*
 obj/snes-st0018.o     : $(snes)/chip/st0018/st0018.cpp $(snes)/chip/st0018/*
 obj/snes-sufamiturbo.o: $(snes)/chip/sufamiturbo/sufamiturbo.cpp $(snes)/chip/sufamiturbo/*
 obj/snes-msu1.o       : $(snes)/chip/msu1/msu1.cpp $(snes)/chip/msu1/*
-obj/snes-serial.o     : $(snes)/chip/serial/serial.cpp $(snes)/chip/serial/*
 obj/snes-link.o       : $(snes)/chip/link/link.cpp $(snes)/chip/link/*

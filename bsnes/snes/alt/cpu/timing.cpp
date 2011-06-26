@@ -4,7 +4,6 @@ void CPU::queue_event(unsigned id) {
   switch(id) {
     case QueueEvent::DramRefresh: return add_clocks(40);
     case QueueEvent::HdmaRun: return hdma_run();
-    case QueueEvent::ControllerLatch: return ppu.latch_counters();
   }
 }
 
@@ -62,7 +61,7 @@ void CPU::add_clocks(unsigned clocks) {
 void CPU::scanline() {
   synchronize_smp();
   synchronize_ppu();
-  synchronize_coprocessor();
+  synchronize_coprocessors();
   system.scanline();
 
   if(vcounter() == 0) hdma_init();
@@ -71,10 +70,6 @@ void CPU::scanline() {
 
   if(vcounter() <= (ppu.overscan() == false ? 224 : 239)) {
     queue.enqueue(1104 + 8, QueueEvent::HdmaRun);
-  }
-
-  if(vcounter() == input.latchy) {
-    queue.enqueue(input.latchx, QueueEvent::ControllerLatch);
   }
 
   bool nmi_valid = status.nmi_valid;
@@ -87,16 +82,20 @@ void CPU::scanline() {
   }
 
   if(status.auto_joypad_poll_enabled && vcounter() == (ppu.overscan() == false ? 227 : 242)) {
-    input.poll();
     run_auto_joypad_poll();
   }
 }
 
 void CPU::run_auto_joypad_poll() {
+  input.port1->latch(1);
+  input.port2->latch(1);
+  input.port1->latch(0);
+  input.port2->latch(0);
+
   uint16 joy1 = 0, joy2 = 0, joy3 = 0, joy4 = 0;
   for(unsigned i = 0; i < 16; i++) {
-    uint8 port0 = input.port_read(0);
-    uint8 port1 = input.port_read(1);
+    uint8 port0 = input.port1->data();
+    uint8 port1 = input.port2->data();
 
     joy1 |= (port0 & 1) ? (0x8000 >> i) : 0;
     joy2 |= (port1 & 1) ? (0x8000 >> i) : 0;

@@ -17,6 +17,7 @@ void Input::connect(bool port, Input::Device id) {
   case Device::SuperScope: controller = new SuperScope(port); break;
   case Device::Justifier: controller = new Justifier(port, false); break;
   case Device::Justifiers: controller = new Justifier(port, true); break;
+  case Device::Serial: controller = new Serial(port); break;
   }
 
   switch(port) {

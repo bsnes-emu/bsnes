@@ -12,10 +12,7 @@ void CPU::add_clocks(unsigned clocks) {
   unsigned ticks = clocks >> 1;
   while(ticks--) {
     tick();
-    if(hcounter() & 2) {
-    //input.tick();
-      poll_interrupts();
-    }
+    if(hcounter() & 2) poll_interrupts();
   }
 
   step(clocks);

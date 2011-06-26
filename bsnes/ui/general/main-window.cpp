@@ -82,9 +82,13 @@ void MainWindow::create() {
   systemPort2Justifiers.setText("Justifiers");
   systemPort2.append(systemPort2Justifiers);
 
+  systemPort2Serial.setText("Serial Cable");
+  systemPort2.append(systemPort2Serial);
+
   RadioItem::group(
     systemPort2None, systemPort2Gamepad, systemPort2Multitap, systemPort2Mouse,
-    systemPort2SuperScope, systemPort2Justifier, systemPort2Justifiers
+    systemPort2SuperScope, systemPort2Justifier, systemPort2Justifiers,
+    systemPort2Serial
   );
 
   append(system);
@@ -235,6 +239,7 @@ void MainWindow::create() {
   if(config.controller.port2 == 4) systemPort2SuperScope.setChecked();
   if(config.controller.port2 == 5) systemPort2Justifier.setChecked();
   if(config.controller.port2 == 6) systemPort2Justifiers.setChecked();
+  if(config.controller.port2 == 7) systemPort2Serial.setChecked();
 
   if(config.video.scale == 1) settingsVideoMode1x.setChecked();
   if(config.video.scale == 2) settingsVideoMode2x.setChecked();
@@ -289,6 +294,7 @@ void MainWindow::create() {
   systemPort2SuperScope.onTick = []() { config.controller.port2 = 4; utility.setControllers(); };
   systemPort2Justifier.onTick  = []() { config.controller.port2 = 5; utility.setControllers(); };
   systemPort2Justifiers.onTick = []() { config.controller.port2 = 6; utility.setControllers(); };
+  systemPort2Serial.onTick     = []() { config.controller.port2 = 7; utility.setControllers(); };
 
   settingsVideoMode1x.onTick = []() { utility.setScale(1); };
   settingsVideoMode2x.onTick = []() { utility.setScale(2); };

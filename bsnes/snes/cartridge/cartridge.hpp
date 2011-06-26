@@ -46,7 +46,6 @@ public:
   readonly<bool> has_obc1;
   readonly<bool> has_st0018;
   readonly<bool> has_msu1;
-  readonly<bool> has_serial;
   readonly<bool> has_link;
 
   struct NonVolatileRAM {
@@ -115,9 +114,10 @@ private:
   void xml_parse_obc1(xml_element&);
   void xml_parse_setarisc(xml_element&);
   void xml_parse_msu1(xml_element&);
-  void xml_parse_serial(xml_element&);
   void xml_parse_link(xml_element&);
 
+  unsigned xml_parse_hex(const string&);
+  unsigned xml_parse_unsigned(const string&);
   void xml_parse_address(Mapping&, const string&);
   void xml_parse_mode(Mapping&, const string&);
 };

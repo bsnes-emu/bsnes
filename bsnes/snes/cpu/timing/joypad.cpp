@@ -6,8 +6,6 @@ void CPU::step_auto_joypad_poll() {
     status.auto_joypad_active = status.auto_joypad_counter <= 15;
 
     if(status.auto_joypad_active && status.auto_joypad_poll) {
-      synchronize_controllers();
-
       if(status.auto_joypad_counter == 0) {
         input.port1->latch(1);
         input.port2->latch(1);

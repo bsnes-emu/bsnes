@@ -15,13 +15,13 @@ uint8 CPU::mmio_read(unsigned addr) {
 
     case 0x4016: {
       uint8 result = regs.mdr & 0xfc;
-      result |= input.port_read(0) & 3;
+      result |= input.port1->data() & 3;
       return result;
     }
 
     case 0x4017: {
       uint8 result = (regs.mdr & 0xe0) | 0x1c;
-      result |= input.port_read(1) & 3;
+      result |= input.port2->data() & 3;
       return result;
     }
 
@@ -127,10 +127,8 @@ void CPU::mmio_write(unsigned addr, uint8 data) {
     }
 
     case 0x4016: {
-      bool old_latch = status.joypad_strobe_latch;
-      bool new_latch = data & 1;
-      status.joypad_strobe_latch = new_latch;
-      if(old_latch != new_latch) input.poll();
+      input.port1->latch(data & 1);
+      input.port2->latch(data & 1);
       return;
     }
 
