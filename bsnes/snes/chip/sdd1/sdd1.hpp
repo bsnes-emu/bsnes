@@ -1,5 +1,3 @@
-#include "sdd1emu.hpp"
-
 class SDD1 {
 public:
   void init();
@@ -11,6 +9,7 @@ public:
   uint8 mmio_read(unsigned addr);
   void mmio_write(unsigned addr, uint8 data);
 
+  uint8 rom_read(unsigned addr);
   uint8 mcu_read(unsigned addr);
   void mcu_write(unsigned addr, uint8 data);
 
@@ -19,22 +18,19 @@ public:
   ~SDD1();
 
 private:
-  uint8 sdd1_enable;     //channel bit-mask
-  uint8 xfer_enable;     //channel bit-mask
-  unsigned mmc[4];       //memory map controller ROM indices
+  uint8 sdd1_enable;  //channel bit-mask
+  uint8 xfer_enable;  //channel bit-mask
+  bool dma_ready;     //used to initialize decompression module
+  unsigned mmc[4];    //memory map controller ROM indices
 
   struct {
-    unsigned addr;       //$43x2-$43x4 -- DMA transfer address
-    uint16 size;         //$43x5-$43x6 -- DMA transfer size
+    unsigned addr;    //$43x2-$43x4 -- DMA transfer address
+    uint16 size;      //$43x5-$43x6 -- DMA transfer size
   } dma[8];
 
-  SDD1emu sdd1emu;
-  struct {
-    uint8 data[65536];   //pointer to decompressed S-DD1 data
-    uint16 offset;       //read index into S-DD1 decompression buffer
-    unsigned size;       //length of data buffer; reads decrement counter, set ready to false at 0
-    bool ready;          //true when data[] is valid; false to invoke sdd1emu.decompress()
-  } buffer;
+public:
+  #include "decomp.hpp"
+  Decomp decomp;
 };
 
 extern SDD1 sdd1;

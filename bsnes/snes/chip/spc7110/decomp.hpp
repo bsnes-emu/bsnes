@@ -1,12 +1,12 @@
-class SPC7110Decomp {
+class Decomp {
 public:
   uint8 read();
   void init(unsigned mode, unsigned offset, unsigned index);
   void reset();
 
   void serialize(serializer&);
-  SPC7110Decomp();
-  ~SPC7110Decomp();
+  Decomp();
+  ~Decomp();
 
 private:
   unsigned decomp_mode;
@@ -39,8 +39,6 @@ private:
   uint8 next_mps(unsigned n);
   bool toggle_invert(unsigned n);
 
-  unsigned morton16[2][256];
-  unsigned morton32[4][256];
-  unsigned morton_2x8(unsigned data);
-  unsigned morton_4x8(unsigned data);
+  unsigned deinterleave_2x8(unsigned data);
+  unsigned deinterleave_4x8(unsigned data);
 };

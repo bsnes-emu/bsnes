@@ -1,21 +1,5 @@
-/*****
- * SPC7110 emulator - version 0.04 (2010-02-14)
- * Copyright (c) 2008-2010, byuu and neviksti
- *
- * Permission to use, copy, modify, and/or distribute this software for any
- * purpose with or without fee is hereby granted, provided that the above
- * copyright notice and this permission notice appear in all copies.
- *
- * The software is provided "as is" and the author disclaims all warranties
- * with regard to this software including all implied warranties of
- * merchantibility and fitness, in no event shall the author be liable for
- * any special, direct, indirect, or consequential damages or any damages
- * whatsoever resulting from loss of use, data or profits, whether in an
- * action of contract, negligence or other tortious action, arising out of
- * or in connection with the use or performance of this software.
- *****/
-
-#include "decomp.hpp"
+//SPC7110 emulator - version 0.05 (2011-06-27)
+//Copyright (c) 2008-2011, byuu and neviksti
 
 class SPC7110 {
 public:
@@ -75,7 +59,8 @@ private:
   uint8 r480b;  //decompression control register
   uint8 r480c;  //decompression status
 
-  SPC7110Decomp decomp;
+  #include "decomp.hpp"
+  Decomp decomp;
 
   //==============
   //data port unit

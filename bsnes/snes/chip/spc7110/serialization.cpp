@@ -1,6 +1,6 @@
 #ifdef SPC7110_CPP
 
-void SPC7110Decomp::serialize(serializer &s) {
+void SPC7110::Decomp::serialize(serializer &s) {
   s.integer(decomp_mode);
   s.integer(decomp_offset);
 

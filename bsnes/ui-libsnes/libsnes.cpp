@@ -17,7 +17,8 @@ struct Interface : public SNES::Interface {
     unsigned height = overscan ? 239 : 224;
     if(interlace) height <<= 1;
     data += 9 * 1024;  //skip front porch
-    if(pvideo_refresh) return pvideo_refresh(data, width, height);
+    if(pvideo_refresh) pvideo_refresh(data, width, height);
+    if(pinput_poll) pinput_poll();
   }
 
   void audio_sample(uint16_t left, uint16_t right) {

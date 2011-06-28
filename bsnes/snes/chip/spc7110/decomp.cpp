@@ -1,6 +1,6 @@
 #ifdef SPC7110_CPP
 
-uint8 SPC7110Decomp::read() {
+uint8 SPC7110::Decomp::read() {
   if(decomp_buffer_length == 0) {
     //decompress at least (decomp_buffer_size / 2) bytes to the buffer
     switch(decomp_mode) {
@@ -17,19 +17,19 @@ uint8 SPC7110Decomp::read() {
   return data;
 }
 
-void SPC7110Decomp::write(uint8 data) {
+void SPC7110::Decomp::write(uint8 data) {
   decomp_buffer[decomp_buffer_wroffset++] = data;
   decomp_buffer_wroffset &= decomp_buffer_size - 1;
   decomp_buffer_length++;
 }
 
-uint8 SPC7110Decomp::dataread() {
+uint8 SPC7110::Decomp::dataread() {
   unsigned size = cartridge.rom.size() - spc7110.data_rom_offset;
   while(decomp_offset >= size) decomp_offset -= size;
   return cartridge.rom.read(spc7110.data_rom_offset + decomp_offset++);
 }
 
-void SPC7110Decomp::init(unsigned mode, unsigned offset, unsigned index) {
+void SPC7110::Decomp::init(unsigned mode, unsigned offset, unsigned index) {
   decomp_mode = mode;
   decomp_offset = offset;
 
@@ -55,7 +55,7 @@ void SPC7110Decomp::init(unsigned mode, unsigned offset, unsigned index) {
 
 //
 
-void SPC7110Decomp::mode0(bool init) {
+void SPC7110::Decomp::mode0(bool init) {
   static uint8 val, in, span;
   static int out, inverts, lps, in_count;
 
@@ -122,7 +122,7 @@ void SPC7110Decomp::mode0(bool init) {
   }
 }
 
-void SPC7110Decomp::mode1(bool init) {
+void SPC7110::Decomp::mode1(bool init) {
   static int pixelorder[4], realorder[4];
   static uint8 in, val, span;
   static int out, inverts, lps, in_count;
@@ -219,13 +219,13 @@ void SPC7110Decomp::mode1(bool init) {
     }
 
     //turn pixel data into bitplanes
-    unsigned data = morton_2x8(out);
+    unsigned data = deinterleave_2x8(out);
     write(data >> 8);
     write(data >> 0);
   }
 }
 
-void SPC7110Decomp::mode2(bool init) {
+void SPC7110::Decomp::mode2(bool init) {
   static int pixelorder[16], realorder[16];
   static uint8 bitplanebuffer[16], buffer_index;
   static uint8 in, val, span;
@@ -327,7 +327,7 @@ void SPC7110Decomp::mode2(bool init) {
     }
 
     //convert pixel data into bitplanes
-    unsigned data = morton_4x8(out0);
+    unsigned data = deinterleave_4x8(out0);
     write(data >> 24);
     write(data >> 16);
     bitplanebuffer[buffer_index++] = data >> 8;
@@ -342,7 +342,7 @@ void SPC7110Decomp::mode2(bool init) {
 
 //
 
-const uint8 SPC7110Decomp::evolution_table[53][4] = {
+const uint8 SPC7110::Decomp::evolution_table[53][4] = {
 //{ prob, nextlps, nextmps, toggle invert },
 
   { 0x5a,  1,  1, 1 },
@@ -404,7 +404,7 @@ const uint8 SPC7110Decomp::evolution_table[53][4] = {
   { 0x37, 51, 43, 0 },
 };
 
-const uint8 SPC7110Decomp::mode2_context_table[32][2] = {
+const uint8 SPC7110::Decomp::mode2_context_table[32][2] = {
 //{ next 0, next 1 },
 
   {  1,  2 },
@@ -445,31 +445,38 @@ const uint8 SPC7110Decomp::mode2_context_table[32][2] = {
   { 31, 31 },
 };
 
-uint8 SPC7110Decomp::probability  (unsigned n) { return evolution_table[context[n].index][0]; }
-uint8 SPC7110Decomp::next_lps     (unsigned n) { return evolution_table[context[n].index][1]; }
-uint8 SPC7110Decomp::next_mps     (unsigned n) { return evolution_table[context[n].index][2]; }
-bool  SPC7110Decomp::toggle_invert(unsigned n) { return evolution_table[context[n].index][3]; }
+uint8 SPC7110::Decomp::probability  (unsigned n) { return evolution_table[context[n].index][0]; }
+uint8 SPC7110::Decomp::next_lps     (unsigned n) { return evolution_table[context[n].index][1]; }
+uint8 SPC7110::Decomp::next_mps     (unsigned n) { return evolution_table[context[n].index][2]; }
+bool  SPC7110::Decomp::toggle_invert(unsigned n) { return evolution_table[context[n].index][3]; }
 
-unsigned SPC7110Decomp::morton_2x8(unsigned data) {
+unsigned SPC7110::Decomp::deinterleave_2x8(unsigned data) {
   //reverse morton lookup: de-interleave two 8-bit values
   //15, 13, 11,  9,  7,  5,  3,  1 -> 15- 8
   //14, 12, 10,  8,  6,  4,  2,  0 ->  7- 0
-  return morton16[0][(data >>  0) & 255] + morton16[1][(data >>  8) & 255];
+  unsigned result = 0;
+  for(unsigned mask = 1u << 15; mask; mask >>= 2) result = (result << 1) | (bool)(data & mask);
+  for(unsigned mask = 1u << 14; mask; mask >>= 2) result = (result << 1) | (bool)(data & mask);
+  return result;
 }
 
-unsigned SPC7110Decomp::morton_4x8(unsigned data) {
+unsigned SPC7110::Decomp::deinterleave_4x8(unsigned data) {
   //reverse morton lookup: de-interleave four 8-bit values
   //31, 27, 23, 19, 15, 11,  7,  3 -> 31-24
   //30, 26, 22, 18, 14, 10,  6,  2 -> 23-16
   //29, 25, 21, 17, 13,  9,  5,  1 -> 15- 8
   //28, 24, 20, 16, 12,  8,  4,  0 ->  7- 0
-  return morton32[0][(data >>  0) & 255] + morton32[1][(data >>  8) & 255]
-       + morton32[2][(data >> 16) & 255] + morton32[3][(data >> 24) & 255];
+  unsigned result = 0;
+  for(unsigned mask = 1u << 31; mask; mask >>= 4) result = (result << 1) | (bool)(data & mask);
+  for(unsigned mask = 1u << 30; mask; mask >>= 4) result = (result << 1) | (bool)(data & mask);
+  for(unsigned mask = 1u << 29; mask; mask >>= 4) result = (result << 1) | (bool)(data & mask);
+  for(unsigned mask = 1u << 28; mask; mask >>= 4) result = (result << 1) | (bool)(data & mask);
+  return result;
 }
 
 //
 
-void SPC7110Decomp::reset() {
+void SPC7110::Decomp::reset() {
   //mode 3 is invalid; this is treated as a special case to always return 0x00
   //set to mode 3 so that reading decomp port before starting first decomp will return 0x00
   decomp_mode = 3;
@@ -479,32 +486,12 @@ void SPC7110Decomp::reset() {
   decomp_buffer_length   = 0;
 }
 
-SPC7110Decomp::SPC7110Decomp() {
+SPC7110::Decomp::Decomp() {
   decomp_buffer = new uint8_t[decomp_buffer_size];
   reset();
-
-  //initialize reverse morton lookup tables
-  for(unsigned i = 0; i < 256; i++) {
-    #define map(x, y) (((i >> x) & 1) << y)
-    //2x8-bit
-    morton16[1][i] = map(7, 15) + map(6,  7) + map(5, 14) + map(4,  6)
-                   + map(3, 13) + map(2,  5) + map(1, 12) + map(0,  4);
-    morton16[0][i] = map(7, 11) + map(6,  3) + map(5, 10) + map(4,  2)
-                   + map(3,  9) + map(2,  1) + map(1,  8) + map(0,  0);
-    //4x8-bit
-    morton32[3][i] = map(7, 31) + map(6, 23) + map(5, 15) + map(4,  7)
-                   + map(3, 30) + map(2, 22) + map(1, 14) + map(0,  6);
-    morton32[2][i] = map(7, 29) + map(6, 21) + map(5, 13) + map(4,  5)
-                   + map(3, 28) + map(2, 20) + map(1, 12) + map(0,  4);
-    morton32[1][i] = map(7, 27) + map(6, 19) + map(5, 11) + map(4,  3)
-                   + map(3, 26) + map(2, 18) + map(1, 10) + map(0,  2);
-    morton32[0][i] = map(7, 25) + map(6, 17) + map(5,  9) + map(4,  1)
-                   + map(3, 24) + map(2, 16) + map(1,  8) + map(0,  0);
-    #undef map
-  }
 }
 
-SPC7110Decomp::~SPC7110Decomp() {
+SPC7110::Decomp::~Decomp() {
   delete[] decomp_buffer;
 }
 

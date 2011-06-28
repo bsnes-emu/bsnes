@@ -5,8 +5,8 @@ namespace SNES {
 
 SDD1 sdd1;
 
+#include "decomp.cpp"
 #include "serialization.cpp"
-#include "sdd1emu.cpp"
 
 void SDD1::init() {
 }
@@ -28,6 +28,7 @@ void SDD1::power() {
 void SDD1::reset() {
   sdd1_enable = 0x00;
   xfer_enable = 0x00;
+  dma_ready = false;
 
   mmc[0] = 0 << 20;
   mmc[1] = 1 << 20;
@@ -38,8 +39,6 @@ void SDD1::reset() {
     dma[i].addr = 0;
     dma[i].size = 0;
   }
-
-  buffer.ready = false;
 }
 
 uint8 SDD1::mmio_read(unsigned addr) {
@@ -86,6 +85,10 @@ void SDD1::mmio_write(unsigned addr, uint8 data) {
   }
 }
 
+uint8 SDD1::rom_read(unsigned addr) {
+  return cartridge.rom.read(mmc[(addr >> 20) & 3] + (addr & 0x0fffff));
+}
+
 //SDD1::mcu_read() is mapped to $c0-ff:0000-ffff
 //the design is meant to be as close to the hardware design as possible, thus this code
 //avoids adding S-DD1 hooks inside S-CPU::DMA emulation.
@@ -111,26 +114,16 @@ uint8 SDD1::mcu_read(unsigned addr) {
       if(sdd1_enable & xfer_enable & (1 << i)) {
         //S-DD1 always uses fixed transfer mode, so address will not change during transfer
         if(addr == dma[i].addr) {
-          if(!buffer.ready) {
-            //first byte read for channel performs full decompression.
-            //this really should stream byte-by-byte, but it's not necessary since the size is known
-            buffer.offset = 0;
-            buffer.size = dma[i].size ? dma[i].size : 65536;
-
-            //sdd1emu calls this function; it needs to access uncompressed data;
-            //so temporarily disable decompression mode for decompress() call.
-            uint8 temp = sdd1_enable;
-            sdd1_enable = false;
-            sdd1emu.decompress(addr, buffer.size, buffer.data);
-            sdd1_enable = temp;
-
-            buffer.ready = true;
+          if(!dma_ready) {
+            //prepare streaming decompression
+            decomp.init(addr);
+            dma_ready = true;
           }
 
-          //fetch a decompressed byte; once buffer is depleted, disable channel and invalidate buffer
-          uint8 data = buffer.data[(uint16)buffer.offset++];
-          if(buffer.offset >= buffer.size) {
-            buffer.ready = false;
+          //fetch a decompressed byte; once finished, disable channel and invalidate buffer
+          uint8 data = decomp.read();
+          if(--dma[i].size == 0) {
+            dma_ready = false;
             xfer_enable &= ~(1 << i);
           }
 
