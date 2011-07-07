@@ -101,7 +101,7 @@ bool ICD2::input_poll(unsigned id) {
     case 3: data = ~r6007; break;
   }
 
-  switch(id) {
+  switch((GameBoy::Input)id) {
     case GameBoy::Input::Start:  return data & 0x80;
     case GameBoy::Input::Select: return data & 0x40;
     case GameBoy::Input::B:      return data & 0x20;

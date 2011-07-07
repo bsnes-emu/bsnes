@@ -15,7 +15,7 @@ unsigned strlcat(string &dest, const char *src, unsigned length) {
 
 string substr(const char *src, unsigned start, unsigned length) {
   string dest;
-  if(length == 0) {
+  if(length == ~0u) {
     //copy entire string
     dest = src + start;
   } else {
@@ -23,6 +23,18 @@ string substr(const char *src, unsigned start, unsigned length) {
     strlcpy(dest, src + start, length + 1);
   }
   return dest;
+}
+
+string sha256(const uint8_t *data, unsigned size) {
+  sha256_ctx sha;
+  uint8_t hash[32];
+  sha256_init(&sha);
+  sha256_chunk(&sha, data, size);
+  sha256_final(&sha);
+  sha256_hash(&sha, hash);
+  string result;
+  foreach(byte, hash) result.append(hex<2>(byte));
+  return result;
 }
 
 /* arithmetic <> string */

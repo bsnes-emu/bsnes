@@ -11,7 +11,7 @@ struct Path : public configuration {
   string sufamiTurboBios;
   string superGameBoyBios;
 
-  string necdsp;
+  string firmware;
   string msu1;
   string serial;
 

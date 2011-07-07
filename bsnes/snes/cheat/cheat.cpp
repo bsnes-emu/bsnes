@@ -86,7 +86,7 @@ bool Cheat::decode(const char *s, unsigned &addr, uint8 &data, Type &type) {
 
   if(strlen(t) == 8 || (strlen(t) == 9 && t[6] == ':')) {
     //strip ':'
-    if(strlen(t) == 9 && t[6] == ':') t = string() << substr(t, 0, 6) << substr(t, 7);
+    if(strlen(t) == 9 && t[6] == ':') t = { substr(t, 0, 6), substr(t, 7) };
     //validate input
     for(unsigned i = 0; i < 8; i++) if(!ischr(t[i])) return false;
 
@@ -97,7 +97,7 @@ bool Cheat::decode(const char *s, unsigned &addr, uint8 &data, Type &type) {
     return true;
   } else if(strlen(t) == 9 && t[4] == '-') {
     //strip '-'
-    t = string() << substr(t, 0, 4) << substr(t, 5);
+    t = { substr(t, 0, 4), substr(t, 5) };
     //validate input
     for(unsigned i = 0; i < 8; i++) if(!ischr(t[i])) return false;
 

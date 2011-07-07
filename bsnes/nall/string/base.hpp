@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <nall/concept.hpp>
+#include <nall/function.hpp>
 #include <nall/stdint.hpp>
 #include <nall/utf8.hpp>
 #include <nall/vector.hpp>
@@ -43,6 +44,8 @@ namespace nall {
 
     inline string& lower();
     inline string& upper();
+    inline string& qlower();
+    inline string& qupper();
     inline string& transform(const char *before, const char *after);
 
     template<unsigned limit = 0> inline string& ltrim(const char *key = " ");
@@ -51,9 +54,6 @@ namespace nall {
 
     inline optional<unsigned> position(const char *key) const;
     inline optional<unsigned> qposition(const char *key) const;
-
-    template<typename T> inline string& operator= (T value);
-    template<typename T> inline string& operator<<(T value);
 
     inline operator const char*() const;
     inline char* operator()();
@@ -110,6 +110,8 @@ namespace nall {
   //convert.hpp
   inline char* strlower(char *str);
   inline char* strupper(char *str);
+  inline char* qstrlower(char *str);
+  inline char* qstrupper(char *str);
   inline char* strtr(char *dest, const char *before, const char *after);
   inline uintmax_t hex    (const char *str);
   inline intmax_t  integer(const char *str);
@@ -142,7 +144,8 @@ namespace nall {
   //utility.hpp
   inline unsigned strlcpy(string &dest, const char *src, unsigned length);
   inline unsigned strlcat(string &dest, const char *src, unsigned length);
-  inline string substr(const char *src, unsigned start = 0, unsigned length = 0);
+  inline string substr(const char *src, unsigned start = 0, unsigned length = ~0u);
+  inline string sha256(const uint8_t *data, unsigned size);
 
   inline string integer(intmax_t value);
   template<unsigned length = 0> inline string linteger(intmax_t value);

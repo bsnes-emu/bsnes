@@ -86,17 +86,17 @@ GameBoyCartridge::GameBoyCartridge(const uint8_t *romdata, unsigned romsize) {
 
   if(info.mapper == "MBC2") info.ramsize = 512;  //512 x 4-bit
 
-  xml << "<cartridge mapper='" << info.mapper << "'";
-  if(info.rtc) xml << " rtc='true'";
-  if(info.rumble) xml << " rumble='true'";
-  xml << ">\n";
+  xml.append("<cartridge mapper='", info.mapper, "'");
+  if(info.rtc) xml.append(" rtc='true'");
+  if(info.rumble) xml.append(" rumble='true'");
+  xml.append(">\n");
 
-  xml << "  <rom size='" << hex(romsize) << "'/>\n";  //TODO: trust/check info.romsize?
+  xml.append("  <rom size='", hex(romsize), "'/>\n");  //TODO: trust/check info.romsize?
 
   if(info.ramsize > 0)
-  xml << "  <ram size='" << hex(info.ramsize) << "' battery='" << info.battery << "'/>\n";
+  xml.append("  <ram size='", hex(info.ramsize), "' battery='", info.battery, "'/>\n");
 
-  xml << "</cartridge>\n";
+  xml.append("</cartridge>\n");
   xml.transform("'", "\"");
 }
 

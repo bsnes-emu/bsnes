@@ -3,6 +3,7 @@
 
 #include <initializer_list>
 #include <nall/platform.hpp>
+#include <nall/sha256.hpp>
 #include <nall/utility.hpp>
 
 #include <nall/string/base.hpp>

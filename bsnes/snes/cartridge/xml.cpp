@@ -284,8 +284,7 @@ void Cartridge::xml_parse_necdsp(xml_element &root) {
   for(unsigned n = 0; n < 16384; n++) necdsp.programROM[n] = 0x000000;
   for(unsigned n = 0; n <  2048; n++) necdsp.dataROM[n] = 0x0000;
 
-  string program, programhash;
-  string sha256;
+  string firmware, sha256;
 
   foreach(attr, root.attribute) {
     if(attr.name == "model") {
@@ -293,36 +292,39 @@ void Cartridge::xml_parse_necdsp(xml_element &root) {
       if(attr.content == "uPD96050") necdsp.revision = NECDSP::Revision::uPD96050;
     } else if(attr.name == "frequency") {
       necdsp.frequency = xml_parse_unsigned(attr.content);
-    } else if(attr.name == "program") {
-      program = attr.content;
+    } else if(attr.name == "firmware") {
+      firmware = attr.content;
     } else if(attr.name == "sha256") {
       sha256 = attr.content;
     }
   }
 
-  string path = { dir(system.interface->path(Slot::Base, ".dsp")), program };
+  string path = { dir(system.interface->path(Slot::Base, ".dsp")), firmware };
   unsigned promsize = (necdsp.revision == NECDSP::Revision::uPD7725 ? 2048 : 16384);
   unsigned dromsize = (necdsp.revision == NECDSP::Revision::uPD7725 ? 1024 :  2048);
   unsigned filesize = promsize * 3 + dromsize * 2;
 
   file fp;
-  if(fp.open(path, file::mode::read)) {
-    if(fp.size() == filesize) {
-      for(unsigned n = 0; n < promsize; n++) necdsp.programROM[n] = fp.readm(3);
-      for(unsigned n = 0; n < dromsize; n++) necdsp.dataROM[n] = fp.readm(2);
+  if(fp.open(path, file::mode::read) == false) {
+    system.interface->message({ "Warning: NEC DSP firmware ", firmware, " is missing." });
+  } else if(fp.size() != filesize) {
+    system.interface->message({ "Warning: NEC DSP firmware ", firmware, " is of the wrong file size." });
+    fp.close();
+  } else {
+    for(unsigned n = 0; n < promsize; n++) necdsp.programROM[n] = fp.readm(3);
+    for(unsigned n = 0; n < dromsize; n++) necdsp.dataROM[n] = fp.readm(2);
 
+    if(sha256 != "") {
+      //XML file specified SHA256 sum for program. Verify file matches the hash.
       fp.seek(0);
       uint8_t data[filesize];
       fp.read(data, filesize);
 
-      sha256_ctx sha;
-      uint8 shahash[32];
-      sha256_init(&sha);
-      sha256_chunk(&sha, data, filesize);
-      sha256_final(&sha);
-      sha256_hash(&sha, shahash);
-      foreach(n, shahash) programhash.append(hex<2>(n));
+      if(sha256 != nall::sha256(data, filesize)) {
+        system.interface->message({ "Warning: Hitachi DSP firmware ", firmware, " SHA256 sum is incorrect." });
+      }
     }
+
     fp.close();
   }
 
@@ -359,16 +361,6 @@ void Cartridge::xml_parse_necdsp(xml_element &root) {
       }
     }
   }
-
-  if(programhash == "") {
-    system.interface->message({ "Warning: NEC DSP program ", program, " is missing." });
-  } else if(sha256 != "" && sha256 != programhash) {
-    system.interface->message({
-      "Warning: NEC DSP program ", program, " SHA256 is incorrect.\n\n"
-      "Expected:\n", sha256, "\n\n"
-      "Actual:\n", programhash
-    });
-  }
 }
 
 void Cartridge::xml_parse_hitachidsp(xml_element &root) {
@@ -377,24 +369,24 @@ void Cartridge::xml_parse_hitachidsp(xml_element &root) {
 
   for(unsigned n = 0; n < 1024; n++) hitachidsp.dataROM[n] = 0x000000;
 
-  string dataROM, sha256;
+  string firmware, sha256;
 
   foreach(attr, root.attribute) {
     if(attr.name == "frequency") {
       hitachidsp.frequency = xml_parse_unsigned(attr.content);
-    } else if(attr.name == "data") {
-      dataROM = attr.content;
+    } else if(attr.name == "firmware") {
+      firmware = attr.content;
     } else if(attr.name == "sha256") {
       sha256 = attr.content;
     }
   }
 
-  string path = { dir(system.interface->path(Slot::Base, ".dsp")), dataROM };
+  string path = { dir(system.interface->path(Slot::Base, ".dsp")), firmware };
   file fp;
   if(fp.open(path, file::mode::read) == false) {
-    system.interface->message({ "Warning: Hitachi DSP data ", dataROM, " is missing." });
+    system.interface->message({ "Warning: Hitachi DSP firmware ", firmware, " is missing." });
   } else if(fp.size() != 1024 * 3) {
-    system.interface->message({ "Warning: Hitachi DSP data ", dataROM, " is of the wrong file size." });
+    system.interface->message({ "Warning: Hitachi DSP firmware ", firmware, " is of the wrong file size." });
     fp.close();
   } else {
     for(unsigned n = 0; n < 1024; n++) hitachidsp.dataROM[n] = fp.readl(3);
@@ -405,18 +397,8 @@ void Cartridge::xml_parse_hitachidsp(xml_element &root) {
       uint8 data[3072];
       fp.read(data, 3072);
 
-      sha256_ctx sha;
-      uint8 hash[32];
-      sha256_init(&sha);
-      sha256_chunk(&sha, data, 3072);
-      sha256_final(&sha);
-      sha256_hash(&sha, hash);
-
-      string filehash;
-      foreach(n, hash) filehash.append(hex<2>(n));
-
-      if(sha256 != filehash) {
-        system.interface->message({ "Warning: Hitachi DSP data ", dataROM, " SHA256 sum is incorrect." });
+      if(sha256 != nall::sha256(data, 3072)) {
+        system.interface->message({ "Warning: Hitachi DSP firmware ", firmware, " SHA256 sum is incorrect." });
       }
     }
 

@@ -26,7 +26,7 @@ void CheatEditor::load() {
           }
           foreach(element, node.element) {
             if(element.name == "description") description = element.parse();
-            else if(element.name == "code") code.append(string(element.parse(), "+"));
+            else if(element.name == "code") code.append(element.parse(), "+");
           }
           code.rtrim("+");
           SNES::cheat[n].enabled = enabled;
@@ -59,16 +59,16 @@ void CheatEditor::save() {
   file fp;
   if(fp.open(path.load(utility.slotPath(), ".cht"), file::mode::write)) {
     fp.print("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-    fp.print(string("<cartridge sha256=\"", SNES::cartridge.sha256(), "\">\n"));
+    fp.print("<cartridge sha256=\"", SNES::cartridge.sha256(), "\">\n");
     for(unsigned i = 0; i <= lastSave; i++) {
-      fp.print(string("  <cheat enabled=\"", cheatList.checked(i), "\">\n"));
-      fp.print(string("    <description><![CDATA[", cheatText[i][CheatDesc], "]]></description>\n"));
+      fp.print("  <cheat enabled=\"", cheatList.checked(i), "\">\n");
+      fp.print("    <description><![CDATA[", cheatText[i][CheatDesc], "]]></description>\n");
       lstring list;
       list.split("+", cheatText[i][CheatCode]);
       foreach(code, list) {
-        fp.print(string("    <code>", code, "</code>\n"));
+        fp.print("    <code>", code, "</code>\n");
       }
-      fp.print(string("  </cheat>\n"));
+      fp.print("  </cheat>\n");
     }
     fp.print("</cartridge>\n");
     fp.close();

@@ -53,7 +53,7 @@ void CheatDatabase::findCodes() {
           string description, code;
           foreach(element, node.element) {
             if(element.name == "description") description = element.parse();
-            else if(element.name == "code") code.append(string(element.parse(), "+"));
+            else if(element.name == "code") code.append(element.parse(), "+");
           }
           code.rtrim<1>("+");
           code.append("\t");

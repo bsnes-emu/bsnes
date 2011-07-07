@@ -103,7 +103,7 @@ bool Cartridge::loadCartridge(SNES::MappedRAM &memory, string &XML, const char *
   if(file::exists(filename) == false) return false;
   file fp;
   if(fp.open(filename, file::mode::read) == false) return false;
-  if(XML.readfile(string(nall::basename(filename), ".xml")) == false) XML = "";
+  if(XML.readfile({ nall::basename(filename), ".xml" }) == false) XML = "";
 
   unsigned size = fp.size();
   uint8_t *data = new uint8_t[size];

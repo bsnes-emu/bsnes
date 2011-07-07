@@ -60,10 +60,10 @@ string Path::load(SNES::Cartridge::Slot slot, const string &hint) {
   if(hint == ".sav" && sav != "") filePath = sav;
   if(hint == ".rtc" && rtc != "") filePath = rtc;
 
-  if(hint.endswith(".dsp") && necdsp != "") filePath = necdsp;
-  if(hint.endswith(".msu") && msu1   != "") filePath = msu1;
-  if(hint.endswith(".pcm") && msu1   != "") filePath = msu1;
-  if(hint.endswith(".so")  && serial != "") filePath = serial;
+  if(hint.endswith(".dsp") && firmware != "") filePath = firmware;
+  if(hint.endswith(".msu") && msu1     != "") filePath = msu1;
+  if(hint.endswith(".pcm") && msu1     != "") filePath = msu1;
+  if(hint.endswith(".so")  && serial   != "") filePath = serial;
 
   if(hint.endswith(".bsa") && bsa != "") filePath = bsa;
   if(hint.endswith(".bst") && bst != "") filePath = bst;
@@ -115,21 +115,21 @@ string Path::decode(const string &filePath, const string &basePath) {
   if(path.beginswith("user/")) {
     path.ltrim<1>("user/");
     #if defined(PLATFORM_X) || defined(PLATFORM_OSX)
-    path = string(user, ".config/bsnes/", path);
+    path = { user, ".config/bsnes/", path };
     #else
-    path = string(user, "bsnes/", path);
+    path = { user, "bsnes/", path };
     #endif
   } else if(path.beginswith("base/")) {
     path.ltrim<1>("base/");
-    path = string(base, path);
+    path = { base, path };
   } else if(path.beginswith("./")) {
     path.ltrim<1>("./");
-    path = string(dir(basePath), path);
+    path = { dir(basePath), path };
   } else if(path.beginswith("../")) {
     string base = dir(basePath);
     base.rtrim<1>("/");
     path.ltrim<1>("../");
-    path = string(dir(base), path);
+    path = { dir(base), path };
   }
 
   return path;
@@ -153,7 +153,7 @@ Path::Path() {
   attach(sufamiTurboBios = "", "sufamiTurboBios");
   attach(superGameBoyBios = "", "superGameBoyBios");
 
-  attach(necdsp = "", "necdsp");
+  attach(firmware = "", "firmware");
   attach(msu1 = "", "msu1");
   attach(serial = "", "serial");
 

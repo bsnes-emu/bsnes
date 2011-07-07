@@ -137,7 +137,7 @@ void FileBrowser::fileActivate() {
 string FileBrowser::cartridgeFolder(const string &pathname) {
   if(strend(pathname, ".sfc/") == false) return "";
 
-  lstring list = directory::files(string(folder, "/", pathname));
+  lstring list = directory::files({ folder, "/", pathname });
   string filename;
   foreach(item, list) {
     if(strend(item, ".sfc")) {

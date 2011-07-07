@@ -129,9 +129,6 @@ void Interface::audio_sample(uint16_t left, uint16_t right) {
   audio.sample(left, right);
 }
 
-void Interface::input_poll() {
-}
-
 int16_t Interface::input_poll(bool port, SNES::Input::Device device, unsigned index, unsigned id) {
   if(config.settings.focusPolicy == 1 && mainWindow.focused() == false) return 0;
   return inputMapper.poll(port, device, index, id);

@@ -19,6 +19,8 @@ bool string::iendswith(const char *str) const { return striend(data, str); }
 
 string& string::lower() { nall::strlower(data); return *this; }
 string& string::upper() { nall::strupper(data); return *this; }
+string& string::qlower() { nall::qstrlower(data); return *this; }
+string& string::qupper() { nall::qstrupper(data); return *this; }
 string& string::transform(const char *before, const char *after) { nall::strtr(data, before, after); return *this; }
 
 template<unsigned limit> string& string::ltrim(const char *key) { nall::ltrim<limit>(data, key); return *this; }

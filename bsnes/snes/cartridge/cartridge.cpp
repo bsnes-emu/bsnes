@@ -54,7 +54,7 @@ void Cartridge::load(Mode cartridge_mode, const lstring &xml_list) {
   sha256_hash(&sha, shahash);
 
   string hash;
-  foreach(n, shahash) hash << hex<2>(n);
+  foreach(n, shahash) hash.append(hex<2>(n));
   sha256 = hash;
 
   system.load();

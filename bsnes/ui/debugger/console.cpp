@@ -47,7 +47,7 @@ void Console::write(const string &text, bool echo) {
     OS::processEvents();
   }
   if(traceToFile.checked() && logfile.open()) {
-    logfile.print(string(text, "\n"));
+    logfile.print(text, "\n");
   }
 }
 

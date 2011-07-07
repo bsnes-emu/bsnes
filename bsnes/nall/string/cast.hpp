@@ -15,9 +15,6 @@ template<> inline const char* to_string<const char*>  (const char *v)   { return
 template<> inline const char* to_string<string>       (string v)        { return v; }
 template<> inline const char* to_string<const string&>(const string &v) { return v; }
 
-template<typename T> string& string::operator= (T value) { return assign(to_string<T>(value)); }
-template<typename T> string& string::operator<<(T value) { return append(to_string<T>(value)); }
-
 template<typename T> lstring& lstring::operator<<(T value) {
   operator[](size()).assign(to_string<T>(value));
   return *this;

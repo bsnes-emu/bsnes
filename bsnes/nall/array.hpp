@@ -54,6 +54,10 @@ namespace nall {
       operator[](buffersize) = data;
     }
 
+    void remove() {
+      if(size > 0) resize(size - 1);  //remove last element only
+    }
+
     template<typename U> void insert(unsigned index, const U list) {
       unsigned listsize = container_size(list);
       resize(buffersize + listsize);
