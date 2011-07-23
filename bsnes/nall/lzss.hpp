@@ -2,14 +2,13 @@
 #define NALL_LZSS_HPP
 
 #include <nall/array.hpp>
-#include <nall/new.hpp>
 #include <nall/stdint.hpp>
 
 namespace nall {
   class lzss {
   public:
     static bool encode(uint8_t *&output, unsigned &outlength, const uint8_t *input, unsigned inlength) {
-      output = new(zeromemory) uint8_t[inlength * 9 / 8 + 9];
+      output = new uint8_t[inlength * 9 / 8 + 9]();
 
       unsigned i = 0, o = 0;
       while(i < inlength) {
@@ -52,7 +51,7 @@ namespace nall {
     }
 
     static bool decode(uint8_t *&output, const uint8_t *input, unsigned length) {
-      output = new(zeromemory) uint8_t[length];
+      output = new uint8_t[length]();
 
       unsigned i = 0, o = 0;
       while(o < length) {

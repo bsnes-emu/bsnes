@@ -27,7 +27,7 @@ char* qstrlower(char *s) {
   if(!s) return 0;
   bool quoted = false;
   while(*s) {
-    if(*s == '\"') quoted ^= 1;
+    if(*s == '\"' || *s == '\'') quoted ^= 1;
     if(quoted == false && *s >= 'A' && *s <= 'Z') *s += 0x20;
     s++;
   }
@@ -37,7 +37,7 @@ char* qstrupper(char *s) {
   if(!s) return 0;
   bool quoted = false;
   while(*s) {
-    if(*s == '\"') quoted ^= 1;
+    if(*s == '\"' || *s == '\'') quoted ^= 1;
     if(quoted == false && *s >= 'a' && *s <= 'z') *s -= 0x20;
     s++;
   }

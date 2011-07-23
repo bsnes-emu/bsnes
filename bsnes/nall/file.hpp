@@ -8,7 +8,7 @@
 #include <nall/utility.hpp>
 
 namespace nall {
-  inline FILE* fopen_utf8(const char *utf8_filename, const char *mode) {
+  inline FILE* fopen_utf8(const string &utf8_filename, const char *mode) {
     #if !defined(_WIN32)
     return fopen(utf8_filename, mode);
     #else
@@ -135,7 +135,7 @@ namespace nall {
       return file_offset >= file_size;
     }
 
-    static bool exists(const char *filename) {
+    static bool exists(const string &filename) {
       #if !defined(_WIN32)
       struct stat64 data;
       return stat64(filename, &data) == 0;
@@ -145,7 +145,7 @@ namespace nall {
       #endif
     }
 
-    static uintmax_t size(const char *filename) {
+    static uintmax_t size(const string &filename) {
       #if !defined(_WIN32)
       struct stat64 data;
       stat64(filename, &data);
@@ -156,7 +156,7 @@ namespace nall {
       return S_ISREG(data.st_mode) ? data.st_size : 0u;
     }
 
-    static time_t timestamp(const char *filename, file::time mode = file::time::create) {
+    static time_t timestamp(const string &filename, file::time mode = file::time::create) {
       #if !defined(_WIN32)
       struct stat64 data;
       stat64(filename, &data);
@@ -175,7 +175,7 @@ namespace nall {
       return fp;
     }
 
-    bool open(const char *filename, mode mode_) {
+    bool open(const string &filename, mode mode_) {
       if(fp) return false;
 
       switch(file_mode = mode_) {

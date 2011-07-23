@@ -13,6 +13,7 @@
 
 namespace nall {
   class string;
+  class lstring;
   template<typename T> inline const char* to_string(T);
 
   class string {
@@ -36,6 +37,7 @@ namespace nall {
 
     inline bool wildcard(const char*) const;
     inline bool iwildcard(const char*) const;
+    inline lstring lwildcard(const char*) const;
 
     inline bool beginswith(const char*) const;
     inline bool ibeginswith(const char*) const;
@@ -102,6 +104,7 @@ namespace nall {
   inline int stricmp(const char *str1, const char *str2);
   inline bool wildcard(const char *str, const char *pattern);
   inline bool iwildcard(const char *str, const char *pattern);
+  inline lstring lwildcard(const char *str, const char *pattern);
   inline bool strbegin (const char *str, const char *key);
   inline bool stribegin(const char *str, const char *key);
   inline bool strend (const char *str, const char *key);

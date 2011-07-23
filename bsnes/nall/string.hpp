@@ -2,6 +2,7 @@
 #define NALL_STRING_HPP
 
 #include <initializer_list>
+#include <nall/array.hpp>
 #include <nall/platform.hpp>
 #include <nall/sha256.hpp>
 #include <nall/utility.hpp>

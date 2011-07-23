@@ -362,13 +362,7 @@ void MainWindow::create() {
   #endif
 
   helpAbout.onTick = []() {
-    MessageWindow::information(mainWindow, {
-      "bsnes\n\n",
-      "Version: ", SNES::Info::Version, "\n",
-      "Profile: ", SNES::Info::Profile, "\n",
-      "Author: byuu\n",
-      "Homepage: http://byuu.org/"
-    });
+    aboutWindow.show();
   };
 
   onClose = []() {

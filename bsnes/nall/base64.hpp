@@ -72,6 +72,7 @@ namespace nall {
 
   private:
     static char enc(uint8_t n) {
+      //base64 for URL encodings
       static char lookup_table[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
       return lookup_table[n & 63];
     }

@@ -3,6 +3,8 @@
 
 //author: vladitx
 
+#include <nall/stdint.hpp>
+
 namespace nall {
   #define PTR(t, a) ((t*)(a))
 

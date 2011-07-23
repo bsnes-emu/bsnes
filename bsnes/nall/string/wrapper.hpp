@@ -10,6 +10,7 @@ bool string::iequals(const char *str) const { return !stricmp(data, str); }
 
 bool string::wildcard(const char *str) const { return nall::wildcard(data, str); }
 bool string::iwildcard(const char *str) const { return nall::iwildcard(data, str); }
+lstring string::lwildcard(const char *str) const { return nall::lwildcard(data, str); }
 
 bool string::beginswith(const char *str) const { return strbegin(data, str); }
 bool string::ibeginswith(const char *str) const { return stribegin(data, str); }

@@ -5,6 +5,7 @@
 #include <nall/directory.hpp>
 #include <nall/filemap.hpp>
 #include <nall/input.hpp>
+#include <nall/resource.hpp>
 #include <nall/ups.hpp>
 #include <nall/snes/cartridge.hpp>
 #include <nall/gameboy/cartridge.hpp>

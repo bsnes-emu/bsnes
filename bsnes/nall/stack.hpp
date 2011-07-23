@@ -1,66 +1,29 @@
 #ifndef NALL_STACK_HPP
 #define NALL_STACK_HPP
 
+#include <nall/concept.hpp>
 #include <nall/vector.hpp>
 
 namespace nall {
-  template<typename T> struct stack_fifo {
-    T& operator()() {
-      if(list.size() == 0) throw;
-      return list[0];
-    }
-
-    void reset() {
-      list.reset();
-    }
-
-    unsigned size() const {
-      return list.size();
-    }
-
+  template<typename T> struct stack : public linear_vector<T> {
     void push(const T &value) {
-      list.append(value);
+      linear_vector<T>::append(value);
     }
 
     T pull() {
-      if(list.size() == 0) throw;
-      T value = list[0];
-      list.remove(0);
+      if(linear_vector<T>::size() == 0) throw;
+      T value = linear_vector<T>::operator[](linear_vector<T>::size() - 1);
+      linear_vector<T>::remove(linear_vector<T>::size() - 1);
       return value;
     }
 
-  private:
-    linear_vector<T> list;
-  };
-
-  template<typename T> struct stack_filo {
     T& operator()() {
-      if(list.size() == 0) throw;
-      return list[list.size() - 1];
+      if(linear_vector<T>::size() == 0) throw;
+      return linear_vector<T>::operator[](linear_vector<T>::size() - 1);
     }
-
-    void reset() {
-      list.reset();
-    }
-
-    unsigned size() const {
-      return list.size();
-    }
-
-    void push(const T &value) {
-      list.append(value);
-    }
-
-    T pull() {
-      if(list.size() == 0) throw;
-      T value = list[list.size() - 1];
-      list.remove(list.size() - 1);
-      return value;
-    }
-
-  private:
-    linear_vector<T> list;
   };
+
+  template<typename T> struct has_size<stack<T>> { enum { value = true }; };
 }
 
 #endif

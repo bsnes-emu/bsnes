@@ -59,6 +59,39 @@ bool iwildcard(const char *s, const char *p) {
   return !*p;
 }
 
+lstring lwildcard(const char *s, const char *p) {
+  lstring output;
+  array<const char*> sp, ep;
+  const char *cp = 0, *mp = 0;
+  while(*s && *p != '*') {
+    if(*p != '?' && *s != *p) return output;
+    p++, s++;
+  }
+  while(*s) {
+    if(*p == '*') {
+      sp.append(s), ep.append(s);
+      if(!*++p) {
+        while(*s) s++;
+        ep[ep.size() - 1] = s;
+        break;
+      }
+      mp = p, cp = s + 1;
+    } else if(*p == '?' || *p == *s) {
+      p++, s++;
+    } else {
+      ep[ep.size() - 1] = cp;
+      p = mp, s = cp++;
+    }
+  }
+  while(*p == '*') p++;
+  if(*p) return output;
+
+  for(unsigned n = 0; n < sp.size(); n++) {
+    output.append(substr(sp[n], 0, ep[n] - sp[n]));
+  }
+  return output;
+}
+
 bool strbegin(const char *str, const char *key) {
   int i, ssl = strlen(str), ksl = strlen(key);
 
