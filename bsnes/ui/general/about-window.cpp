@@ -23,7 +23,7 @@ void AboutWindow::create() {
 }
 
 void AboutWindow::show() {
-  logo.decode(bsnesLogoData, bsnesLogoSize);
+  logo.decode(bsnesLogoData, sizeof bsnesLogoData);
   setVisible();
   uint32_t *buffer = canvas.buffer();
   for(unsigned y = 0; y < 180; y++) {

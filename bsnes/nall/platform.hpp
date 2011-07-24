@@ -67,6 +67,7 @@
   #define rmdir       _rmdir
   #define usleep(n)   Sleep(n / 1000)
   #define vsnprintf   _vsnprintf
+  static int close(int sock) { return closesocket(sock); }
 #endif
 
 //================
