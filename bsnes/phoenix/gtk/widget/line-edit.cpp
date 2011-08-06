@@ -13,7 +13,7 @@ Geometry pLineEdit::minimumGeometry() {
 }
 
 void pLineEdit::setEditable(bool editable) {
-  gtk_entry_set_editable(GTK_ENTRY(gtkWidget), editable);
+  gtk_editable_set_editable(GTK_EDITABLE(gtkWidget), editable);
 }
 
 void pLineEdit::setText(const string &text) {

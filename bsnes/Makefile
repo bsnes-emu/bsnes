@@ -3,9 +3,10 @@ snes := snes
 gameboy := gameboy
 profile := accuracy
 ui := ui
+# phoenix := gtk
 
-# debugger
 options :=
+# debugger
 
 # compiler
 c       := $(compiler) -std=gnu99

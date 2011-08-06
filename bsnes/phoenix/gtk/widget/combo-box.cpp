@@ -18,9 +18,7 @@ Geometry pComboBox::minimumGeometry() {
 
 void pComboBox::reset() {
   locked = true;
-  for(signed n = itemCounter - 1; n >= 0; n--) {
-    gtk_combo_box_remove_text(GTK_COMBO_BOX(gtkWidget), n);
-  }
+  gtk_list_store_clear(GTK_LIST_STORE(gtk_combo_box_get_model(GTK_COMBO_BOX(gtkWidget))));
   itemCounter = 0;
   locked = false;
 }

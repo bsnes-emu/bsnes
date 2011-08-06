@@ -7,7 +7,7 @@ void MainWindow::create() {
   application.addWindow(this, "MainWindow", "128,128");
   setMenuFont(application.proportionalFont);
   setStatusFont(application.proportionalFontBold);
-  setBackgroundColor(0, 0, 0);
+  setBackgroundColor({ 0, 0, 0 });
 
   system.setText("System");
 

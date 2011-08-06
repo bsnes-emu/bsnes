@@ -4,8 +4,8 @@
 #include <nall/platform.hpp>
 #include <nall/stdint.hpp>
 #include <nall/string.hpp>
-#include <nall/utf8.hpp>
 #include <nall/utility.hpp>
+#include <nall/windows/utf8.hpp>
 
 namespace nall {
   inline FILE* fopen_utf8(const string &utf8_filename, const char *mode) {
@@ -21,6 +21,24 @@ namespace nall {
     enum class mode : unsigned { read, write, readwrite, writeread };
     enum class index : unsigned { absolute, relative };
     enum class time : unsigned { create, modify, access };
+
+    static bool read(const string &filename, uint8_t *&data, unsigned &size) {
+      file fp;
+      if(fp.open(filename, mode::read) == false) return false;
+      size = fp.size();
+      data = new uint8_t[size];
+      fp.read(data, size);
+      fp.close();
+      return true;
+    }
+
+    static bool write(const string &filename, const uint8_t *data, unsigned size) {
+      file fp;
+      if(fp.open(filename, mode::write) == false) return false;
+      fp.write(data, size);
+      fp.close();
+      return true;
+    }
 
     uint8_t read() {
       if(!fp) return 0xff;                       //file not open

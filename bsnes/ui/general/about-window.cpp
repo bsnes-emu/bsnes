@@ -6,7 +6,7 @@ void AboutWindow::create() {
   application.addWindow(this, "AboutWindow", "160,160");
   setTitle("About bsnes ...");
   setResizable(false);
-  setBackgroundColor(255, 255, 255);
+  setBackgroundColor({ 255, 255, 255 });
 
   information.setText({
     "bsnes v", SNES::Info::Version, " ~ Profile: ", SNES::Info::Profile,

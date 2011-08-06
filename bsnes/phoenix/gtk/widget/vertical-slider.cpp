@@ -15,6 +15,7 @@ unsigned pVerticalSlider::position() {
 void pVerticalSlider::setLength(unsigned length) {
   length += length == 0;
   gtk_range_set_range(GTK_RANGE(gtkWidget), 0, length - 1);
+  gtk_range_set_increments(GTK_RANGE(gtkWidget), 1, length >> 3);
 }
 
 void pVerticalSlider::setPosition(unsigned position) {
@@ -24,5 +25,6 @@ void pVerticalSlider::setPosition(unsigned position) {
 void pVerticalSlider::constructor() {
   gtkWidget = gtk_vscale_new_with_range(0, 100, 1);
   gtk_scale_set_draw_value(GTK_SCALE(gtkWidget), false);
+  setLength(101);
   g_signal_connect_swapped(G_OBJECT(gtkWidget), "value-changed", G_CALLBACK(VerticalSlider_change), (gpointer)&verticalSlider);
 }

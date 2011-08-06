@@ -82,13 +82,13 @@ void Utility::setScale(unsigned scale) {
   mainWindow.setGeometry({ geom.x, geom.y, width, height });
 }
 
-void Utility::setFullscreen(bool fullscreen) {
-  this->fullscreen = fullscreen;
+void Utility::setFullScreen(bool fullScreen) {
+  this->fullScreen = fullScreen;
 
-  mainWindow.setMenuVisible(!fullscreen);
-  mainWindow.setStatusVisible(!fullscreen);
-  mainWindow.setFullScreen(fullscreen);
-  if(fullscreen == false) {
+  mainWindow.setMenuVisible(!fullScreen);
+  mainWindow.setStatusVisible(!fullScreen);
+  mainWindow.setFullScreen(fullScreen);
+  if(fullScreen == false) {
     input.unacquire();
     setScale();
   } else {
@@ -215,6 +215,6 @@ void Utility::loadState(unsigned slot) {
 }
 
 Utility::Utility() {
-  fullscreen = false;
+  fullScreen = false;
   statusTime = 0;
 }

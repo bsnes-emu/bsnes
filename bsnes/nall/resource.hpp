@@ -2,7 +2,7 @@
 #define NALL_RESOURCE_HPP
 
 #include <nall/file.hpp>
-#include <nall/unzip.hpp>
+#include <nall/zip.hpp>
 
 namespace nall {
 
@@ -39,7 +39,7 @@ struct resource {
   bool decode(const uint8_t *cdata, unsigned csize) {
     if(data) delete[] data;
 
-    unzip archive;
+    zip archive;
     if(archive.open(cdata, csize) == false) return false;
     if(archive.file.size() == 0) return false;
     bool result = archive.extract(archive.file[0], data, size);

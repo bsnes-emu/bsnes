@@ -8,7 +8,7 @@
 
 namespace nall {
 
-struct unzip {
+struct zip {
   struct File {
     string name;
     const uint8_t *data;
@@ -18,7 +18,7 @@ struct unzip {
     unsigned crc32;
   };
 
-  inline bool open(const char *filename) {
+  inline bool open(const string &filename) {
     close();
     if(fm.open(filename, filemap::mode::read) == false) return false;
     if(open(fm.data(), fm.size()) == false) {
@@ -100,7 +100,7 @@ struct unzip {
     if(fm.open()) fm.close();
   }
 
-  ~unzip() {
+  ~zip() {
     close();
   }
 

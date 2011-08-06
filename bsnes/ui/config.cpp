@@ -43,6 +43,7 @@ void Configuration::create() {
 
   attach(input.driver = "", "input.driver");
 
+  attach(settings.startFullScreen = false, "settings.startFullScreen", "Start in full screen mode for front-end use");
   attach(settings.focusPolicy = 0, "settings.focusPolicy");
 
   attach(controller.port1 = 1, "controller.port1");

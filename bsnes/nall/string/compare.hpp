@@ -11,7 +11,7 @@ char chrupper(char c) {
   return (c >= 'a' && c <= 'z') ? c - ('a' - 'A') : c;
 }
 
-int stricmp(const char *str1, const char *str2) {
+int istrcmp(const char *str1, const char *str2) {
   while(*str1) {
     if(chrlower(*str1) != chrlower(*str2)) break;
     str1++, str2++;
@@ -59,39 +59,6 @@ bool iwildcard(const char *s, const char *p) {
   return !*p;
 }
 
-lstring lwildcard(const char *s, const char *p) {
-  lstring output;
-  array<const char*> sp, ep;
-  const char *cp = 0, *mp = 0;
-  while(*s && *p != '*') {
-    if(*p != '?' && *s != *p) return output;
-    p++, s++;
-  }
-  while(*s) {
-    if(*p == '*') {
-      sp.append(s), ep.append(s);
-      if(!*++p) {
-        while(*s) s++;
-        ep[ep.size() - 1] = s;
-        break;
-      }
-      mp = p, cp = s + 1;
-    } else if(*p == '?' || *p == *s) {
-      p++, s++;
-    } else {
-      ep[ep.size() - 1] = cp;
-      p = mp, s = cp++;
-    }
-  }
-  while(*p == '*') p++;
-  if(*p) return output;
-
-  for(unsigned n = 0; n < sp.size(); n++) {
-    output.append(substr(sp[n], 0, ep[n] - sp[n]));
-  }
-  return output;
-}
-
 bool strbegin(const char *str, const char *key) {
   int i, ssl = strlen(str), ksl = strlen(key);
 
@@ -99,7 +66,7 @@ bool strbegin(const char *str, const char *key) {
   return (!memcmp(str, key, ksl));
 }
 
-bool stribegin(const char *str, const char *key) {
+bool istrbegin(const char *str, const char *key) {
   int ssl = strlen(str), ksl = strlen(key);
 
   if(ksl > ssl) return false;
@@ -122,7 +89,7 @@ bool strend(const char *str, const char *key) {
   return (!memcmp(str + ssl - ksl, key, ksl));
 }
 
-bool striend(const char *str, const char *key) {
+bool istrend(const char *str, const char *key) {
   int ssl = strlen(str), ksl = strlen(key);
 
   if(ksl > ssl) return false;

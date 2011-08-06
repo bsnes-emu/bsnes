@@ -109,6 +109,7 @@ void Application::main(int argc, char **argv) {
   utility.setControllers();
   utility.setFilter();
   utility.setShader();
+  if(config.settings.startFullScreen) utility.setFullScreen();
 
   if(argc == 2) cartridge.loadNormal(argv[1]);
 

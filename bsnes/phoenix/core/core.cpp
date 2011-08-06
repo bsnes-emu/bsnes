@@ -47,11 +47,12 @@ Window Window::None;
 void Window::append(Layout &layout) { state.layout.append(layout); return p.append(layout); }
 void Window::append(Menu &menu) { state.menu.append(menu); ((Action&)menu).state.parent = this; return p.append(menu); }
 void Window::append(Widget &widget) { state.widget.append(widget); return p.append(widget); }
+Color Window::backgroundColor() { return p.backgroundColor(); }
 Geometry Window::frameGeometry() { Geometry geometry = p.geometry(), margin = p.frameMargin(); return { geometry.x - margin.x, geometry.y - margin.y, geometry.width + margin.width, geometry.height + margin.height }; }
 Geometry Window::frameMargin() { return p.frameMargin(); }
 bool Window::focused() { return p.focused(); }
 Geometry Window::geometry() { return p.geometry(); }
-void Window::setBackgroundColor(uint8_t red, uint8_t green, uint8_t blue) { state.backgroundColor = true; state.backgroundColorRed = red; state.backgroundColorGreen = green; state.backgroundColorBlue = blue; return p.setBackgroundColor(red, green, blue); }
+void Window::setBackgroundColor(const Color &color) { state.backgroundColorOverride = true; state.backgroundColor = color; return p.setBackgroundColor(color); }
 void Window::setFrameGeometry(const Geometry &geometry) { Geometry margin = p.frameMargin(); return setGeometry({ geometry.x + margin.x, geometry.y + margin.y, geometry.width - margin.width, geometry.height - margin.height }); }
 void Window::setFocused() { return p.setFocused(); }
 void Window::setFullScreen(bool fullScreen) { state.fullScreen = fullScreen; return p.setFullScreen(fullScreen); }
@@ -93,6 +94,7 @@ RadioItem::RadioItem() : state(*new State), base_from_member<pRadioItem&>(*new p
 
 bool Widget::enabled() { return state.enabled; }
 Font& Widget::font() { return p.font(); }
+Geometry Widget::geometry() { return state.geometry; }
 Geometry Widget::minimumGeometry() { return p.minimumGeometry(); }
 void Widget::setEnabled(bool enabled) { state.enabled = enabled; return p.setEnabled(enabled); }
 void Widget::setFocused() { return p.setFocused(); }
@@ -127,6 +129,11 @@ void HexEdit::setOffset(unsigned offset) { state.offset = offset; return p.setOf
 void HexEdit::setRows(unsigned rows) { state.rows = rows; return p.setRows(rows); }
 void HexEdit::update() { return p.update(); }
 HexEdit::HexEdit() : state(*new State), base_from_member<pHexEdit&>(*new pHexEdit(*this)), Widget(base_from_member<pHexEdit&>::value), p(base_from_member<pHexEdit&>::value) { p.constructor(); }
+
+unsigned HorizontalScrollBar::position() { return p.position(); }
+void HorizontalScrollBar::setLength(unsigned length) { state.length = length; return p.setLength(length); }
+void HorizontalScrollBar::setPosition(unsigned position) { state.position = position; return p.setPosition(position); }
+HorizontalScrollBar::HorizontalScrollBar() : state(*new State), base_from_member<pHorizontalScrollBar&>(*new pHorizontalScrollBar(*this)), Widget(base_from_member<pHorizontalScrollBar&>::value), p(base_from_member<pHorizontalScrollBar&>::value) { p.constructor(); }
 
 unsigned HorizontalSlider::position() { return p.position(); }
 void HorizontalSlider::setLength(unsigned length) { state.length = length; return p.setLength(length); }
@@ -171,6 +178,11 @@ void TextEdit::setText(const string &text) { state.text = text; return p.setText
 void TextEdit::setWordWrap(bool wordWrap) { state.wordWrap = wordWrap; return p.setWordWrap(wordWrap); }
 string TextEdit::text() { return p.text(); }
 TextEdit::TextEdit() : state(*new State), base_from_member<pTextEdit&>(*new pTextEdit(*this)), Widget(base_from_member<pTextEdit&>::value), p(base_from_member<pTextEdit&>::value) { p.constructor(); }
+
+unsigned VerticalScrollBar::position() { return p.position(); }
+void VerticalScrollBar::setLength(unsigned length) { state.length = length; return p.setLength(length); }
+void VerticalScrollBar::setPosition(unsigned position) { state.position = position; return p.setPosition(position); }
+VerticalScrollBar::VerticalScrollBar() : state(*new State), base_from_member<pVerticalScrollBar&>(*new pVerticalScrollBar(*this)), Widget(base_from_member<pVerticalScrollBar&>::value), p(base_from_member<pVerticalScrollBar&>::value) { p.constructor(); }
 
 unsigned VerticalSlider::position() { return p.position(); }
 void VerticalSlider::setLength(unsigned length) { state.length = length; return p.setLength(length); }

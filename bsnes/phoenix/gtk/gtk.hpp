@@ -82,14 +82,16 @@ struct pWindow : public pObject {
   GtkWidget *statusContainer;
   GtkWidget *menu;
   GtkWidget *status;
+  GdkEventConfigure lastConfigure;
 
   void append(Layout &layout);
   void append(Menu &menu);
   void append(Widget &widget);
+  Color backgroundColor();
   bool focused();
   Geometry frameMargin();
   Geometry geometry();
-  void setBackgroundColor(uint8_t red, uint8_t green, uint8_t blue);
+  void setBackgroundColor(const Color &color);
   void setFocused();
   void setFullScreen(bool fullScreen);
   void setGeometry(const Geometry &geometry);
@@ -202,8 +204,7 @@ struct pButton : public pWidget {
 
 struct pCanvas : public pWidget {
   Canvas &canvas;
-  uint32_t *bufferRGB;
-  uint32_t *bufferBGR;
+  cairo_surface_t *surface;
 
   uint32_t* buffer();
   void setGeometry(const Geometry &geometry);
@@ -211,7 +212,6 @@ struct pCanvas : public pWidget {
 
   pCanvas(Canvas &canvas) : pWidget(canvas), canvas(canvas) {}
   void constructor();
-  void redraw();
 };
 
 struct pCheckBox : public pWidget {
@@ -262,6 +262,18 @@ struct pHexEdit : public pWidget {
   void setCursorPosition(unsigned position);
   void setScroll();
   void updateScroll();
+};
+
+struct pHorizontalScrollBar : public pWidget {
+  HorizontalScrollBar &horizontalScrollBar;
+
+  Geometry minimumGeometry();
+  unsigned position();
+  void setLength(unsigned length);
+  void setPosition(unsigned position);
+
+  pHorizontalScrollBar(HorizontalScrollBar &horizontalScrollBar) : pWidget(horizontalScrollBar), horizontalScrollBar(horizontalScrollBar) {}
+  void constructor();
 };
 
 struct pHorizontalSlider : public pWidget {
@@ -365,6 +377,18 @@ struct pTextEdit : public pWidget {
   string text();
 
   pTextEdit(TextEdit &textEdit) : pWidget(textEdit), textEdit(textEdit) {}
+  void constructor();
+};
+
+struct pVerticalScrollBar : public pWidget {
+  VerticalScrollBar &verticalScrollBar;
+
+  Geometry minimumGeometry();
+  unsigned position();
+  void setLength(unsigned length);
+  void setPosition(unsigned position);
+
+  pVerticalScrollBar(VerticalScrollBar &verticalScrollBar) : pWidget(verticalScrollBar), verticalScrollBar(verticalScrollBar) {}
   void constructor();
 };
 

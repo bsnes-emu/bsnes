@@ -46,7 +46,7 @@ void StateManager::synchronize() {
 
 void StateManager::refresh() {
   for(unsigned i = 0; i < 32; i++) {
-    stateList.modify(i, rdecimal<2>(i + 1), slotLoadDescription(i));
+    stateList.modify(i, decimal<2>(i + 1), slotLoadDescription(i));
   }
   stateList.autoSizeColumns();
 }

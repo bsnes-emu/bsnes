@@ -6,7 +6,7 @@
 #include <nall/string.hpp>
 
 #if defined(_WIN32)
-  #include <nall/utf8.hpp>
+  #include <nall/windows/utf8.hpp>
 #else
   #include <dirent.h>
   #include <stdio.h>

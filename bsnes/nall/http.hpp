@@ -28,9 +28,10 @@ struct http {
     size = 0;
 
     send({
-      "GET ", path, " HTTP/1.1\n"
-      "Host: ", hostname, "\n"
-      "\n"
+      "GET ", path, " HTTP/1.1\r\n"
+      "Host: ", hostname, "\r\n"
+      "Connection: close\r\n"
+      "\r\n"
     });
 
     header = downloadHeader();
@@ -99,7 +100,7 @@ struct http {
   inline void downloadContent(uint8_t *&data, unsigned &size) {
     unsigned capacity = 0;
 
-    if(header.position("Transfer-Encoding: chunked")) {
+    if(header.iposition("\r\nTransfer-Encoding: chunked\r\n")) {
       while(true) {
         unsigned length = hex(downloadChunkLength());
         if(length == 0) break;
@@ -115,7 +116,7 @@ struct http {
           length -= packetlength;
         }
       }
-    } else if(auto position = header.position("Content-Length: ")) {
+    } else if(auto position = header.iposition("\r\nContent-Length: ")) {
       unsigned length = decimal((const char*)header + position() + 16);
       while(length) {
         char buffer[256];
@@ -150,8 +151,12 @@ struct http {
     serversocket = -1;
   }
 
+  #ifdef _WIN32
+  inline int close(int sock) {
+    return closesocket(sock);
+  }
+
   inline http() {
-    #ifdef _WIN32
     int sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if(sock == INVALID_SOCKET && WSAGetLastError() == WSANOTINITIALISED) {
       WSADATA wsaData;
@@ -159,9 +164,11 @@ struct http {
         WSACleanup();
         return;
       }
-    } else close(sock);
-    #endif
+    } else {
+      close(sock);
+    }
   }
+  #endif
 };
 
 }

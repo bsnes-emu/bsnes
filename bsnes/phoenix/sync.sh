@@ -6,3 +6,4 @@ synchronize() {
 }
 
 synchronize "nall"
+rm -r nall/test

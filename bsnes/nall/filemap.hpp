@@ -2,7 +2,7 @@
 #define NALL_FILEMAP_HPP
 
 #include <nall/stdint.hpp>
-#include <nall/utf8.hpp>
+#include <nall/windows/utf8.hpp>
 
 #include <stdio.h>
 #include <stdlib.h>

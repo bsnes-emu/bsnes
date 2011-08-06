@@ -5,11 +5,13 @@ ui_objects += ruby phoenix
 
 # platform
 ifeq ($(platform),x)
-# phoenix_compile = $(call compile,-DPHOENIX_GTK `pkg-config --cflags gtk+-2.0`)
-# link += `pkg-config --libs gtk+-2.0`
-
-  phoenix_compile = $(call compile,-DPHOENIX_QT `pkg-config --cflags QtCore QtGui`)
-  link += `pkg-config --libs QtCore QtGui`
+  ifeq ($(phoenix),gtk)
+    phoenix_compile = $(call compile,-DPHOENIX_GTK `pkg-config --cflags gtk+-2.0`)
+    link += `pkg-config --libs gtk+-2.0`
+  else
+    phoenix_compile = $(call compile,-DPHOENIX_QT `pkg-config --cflags QtCore QtGui`)
+    link += `pkg-config --libs QtCore QtGui`
+  endif
 
   ruby := video.glx video.xv video.sdl
   ruby += audio.alsa audio.openal audio.oss audio.pulseaudio audio.pulseaudiosimple audio.ao

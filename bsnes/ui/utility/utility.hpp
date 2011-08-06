@@ -7,7 +7,7 @@ struct Utility : property<Utility> {
   void setControllers();
 
   void setScale(unsigned scale = 0);
-  void setFullscreen(bool fullscreen = true);
+  void setFullScreen(bool fullScreen = true);
 
   void setFilter();
   void setShader();
@@ -21,7 +21,7 @@ struct Utility : property<Utility> {
 
   Utility();
 
-  bool fullscreen;
+  bool fullScreen;
   unsigned viewportX, viewportY;
   unsigned viewportWidth, viewportHeight;
 

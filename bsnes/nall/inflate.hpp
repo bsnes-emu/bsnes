@@ -17,7 +17,8 @@ inline bool inflate(
   const uint8_t *source, unsigned sourceLength
 ) {
   unsigned long tl = targetLength, sl = sourceLength;
-  return puff::puff((unsigned char*)target, &tl, (unsigned char*)source, &sl) == 0;
+  int result = puff::puff((unsigned char*)target, &tl, (unsigned char*)source, &sl);
+  return result == 0;
 }
 
 namespace puff {
