@@ -27,6 +27,7 @@ void pVerticalScrollBar::setParent(Window &parent) {
     0, 0, 0, 0, parent.p.hwnd, (HMENU)id, GetModuleHandle(0), 0
   );
   SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&verticalScrollBar);
+  unsigned position = verticalScrollBar.state.position;
   setLength(verticalScrollBar.state.length);
-  setPosition(verticalScrollBar.state.position);
+  setPosition(position);
 }

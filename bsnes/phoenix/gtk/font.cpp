@@ -29,4 +29,6 @@ void pFont::constructor() {
   gtkFont = pango_font_description_new();
   PangoContext *context = gdk_pango_context_get_for_screen(gdk_screen_get_default());
   gtkLayout = pango_layout_new(context);
+  font.setFamily("Sans");
+  font.setSize(8);
 }

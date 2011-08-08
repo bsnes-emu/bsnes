@@ -5,10 +5,8 @@ void SingleSlotLoader::create() {
   application.addWindow(this, "SingleSlotLoader", "160,160");
 
   baseLabel.setText("Base:");
-  baseBrowse.setFont(application.proportionalFont);
   baseBrowse.setText("...");
   slotLabel.setText("Slot:");
-  slotBrowse.setFont(application.proportionalFont);
   slotBrowse.setText("...");
   okButton.setText("Ok");
 
@@ -100,13 +98,10 @@ void DoubleSlotLoader::create() {
   application.addWindow(this, "DoubleSlotLoader", "160,160");
 
   baseLabel.setText("Base:");
-  baseBrowse.setFont(application.proportionalFont);
   baseBrowse.setText("...");
   slotALabel.setText("Slot A:");
-  slotABrowse.setFont(application.proportionalFont);
   slotABrowse.setText("...");
   slotBLabel.setText("Slot B:");
-  slotBBrowse.setFont(application.proportionalFont);
   slotBBrowse.setText("...");
   okButton.setText("Ok");
 

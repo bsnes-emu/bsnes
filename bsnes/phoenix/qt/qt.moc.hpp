@@ -426,7 +426,7 @@ public:
 
 public slots:
   void onActivate();
-  void onChange();
+  void onChange(QTreeWidgetItem *item);
   void onTick(QTreeWidgetItem *item);
 };
 

@@ -171,7 +171,7 @@ void pOS::initialize() {
     "  GtkComboBox::appears-as-list = 1\n"
     "  GtkTreeView::vertical-separator = 0\n"
     "}\n"
-    "class \"GtkComboBox\" style \"phoenix-gtk\"\n"
+  //"class \"GtkComboBox\" style \"phoenix-gtk\"\n"
     "class \"GtkTreeView\" style \"phoenix-gtk\"\n"
   );
 }

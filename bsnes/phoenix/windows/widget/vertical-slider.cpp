@@ -28,6 +28,7 @@ void pVerticalSlider::setParent(Window &parent) {
     0, 0, 0, 0, parent.p.hwnd, (HMENU)id, GetModuleHandle(0), 0
   );
   SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&verticalSlider);
+  unsigned position = verticalSlider.state.position;
   setLength(verticalSlider.state.length);
-  setPosition(verticalSlider.state.position);
+  setPosition(position);
 }

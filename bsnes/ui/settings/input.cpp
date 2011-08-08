@@ -39,15 +39,19 @@ void InputSettings::create() {
   controlLayout.append(customButton2, 100, 0, 5);
   controlLayout.append(customButton3, 100, 0, 5);
   controlLayout.append(spacer, ~0, 0);
-  controlLayout.append(clearButton, 100, 0);
+  controlLayout.append(clearButton, 80, 0);
   layout.append(controlLayout);
 
   settingsWindow.append(panelLayout);
+  clearButton.setEnabled(false);
 
   portBox.onChange = { &InputSettings::portChanged, this };
   deviceBox.onChange = { &InputSettings::deviceChanged, this };
 
   mappingList.onActivate = { &InputSettings::assignInput, this };
+  mappingList.onChange = [this] {
+    clearButton.setEnabled(mappingList.selected());
+  };
 
   customButton1.onTick = [this]() { manualInput(1); };
   customButton2.onTick = [this]() { manualInput(2); };
@@ -95,6 +99,7 @@ void InputSettings::deviceChanged() {
     mappingList.append(controller[i]->name, mapping);
   }
   mappingList.autoSizeColumns();
+  clearButton.setEnabled(mappingList.selected());
   locked = false;
 }
 

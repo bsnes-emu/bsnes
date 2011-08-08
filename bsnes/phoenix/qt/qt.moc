@@ -1,7 +1,7 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'qt.moc.hpp'
 **
-** Created: Mon Aug 8 00:07:23 2011
+** Created: Mon Aug 8 04:51:19 2011
 **      by: The Qt Meta Object Compiler version 62 (Qt 4.7.0)
 **
 ** WARNING! All changes made in this file will be lost!
@@ -806,15 +806,16 @@ static const uint qt_meta_data_pListView[] = {
 
  // slots: signature, parameters, type, tag, flags
       11,   10,   10,   10, 0x0a,
-      24,   10,   10,   10, 0x0a,
-      40,   35,   10,   10, 0x0a,
+      29,   24,   10,   10, 0x0a,
+      56,   24,   10,   10, 0x0a,
 
        0        // eod
 };
 
 static const char qt_meta_stringdata_pListView[] = {
-    "pListView\0\0onActivate()\0onChange()\0"
-    "item\0onTick(QTreeWidgetItem*)\0"
+    "pListView\0\0onActivate()\0item\0"
+    "onChange(QTreeWidgetItem*)\0"
+    "onTick(QTreeWidgetItem*)\0"
 };
 
 const QMetaObject pListView::staticMetaObject = {
@@ -849,7 +850,7 @@ int pListView::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_c == QMetaObject::InvokeMetaMethod) {
         switch (_id) {
         case 0: onActivate(); break;
-        case 1: onChange(); break;
+        case 1: onChange((*reinterpret_cast< QTreeWidgetItem*(*)>(_a[1]))); break;
         case 2: onTick((*reinterpret_cast< QTreeWidgetItem*(*)>(_a[1]))); break;
         default: ;
         }

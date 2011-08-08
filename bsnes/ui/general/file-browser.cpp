@@ -3,9 +3,7 @@ FileBrowser fileBrowser;
 void FileBrowser::create() {
   application.addWindow(this, "FileBrowser", "160,160");
 
-  browseButton.setFont(application.proportionalFont);
   browseButton.setText("...");
-  upButton.setFont(application.proportionalFont);
   upButton.setText("..");
 
   const unsigned sq = browseButton.minimumGeometry().height;

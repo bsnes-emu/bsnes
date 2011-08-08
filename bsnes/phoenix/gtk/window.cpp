@@ -211,6 +211,7 @@ void pWindow::setWidgetFont(Font &font) {
 }
 
 void pWindow::constructor() {
+  memset(&lastConfigure, 0, sizeof(GdkEventConfigure));
   widget = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 
   if(gdk_screen_is_composited(gdk_screen_get_default())) {

@@ -27,6 +27,7 @@ void pHorizontalScrollBar::setParent(Window &parent) {
     0, 0, 0, 0, parent.p.hwnd, (HMENU)id, GetModuleHandle(0), 0
   );
   SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&horizontalScrollBar);
+  unsigned position = horizontalScrollBar.state.position;
   setLength(horizontalScrollBar.state.length);
-  setPosition(horizontalScrollBar.state.position);
+  setPosition(position);
 }

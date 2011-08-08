@@ -13,8 +13,6 @@ void pListView::append(const lstring &list) {
     utf16_t wtext(text);
     ListView_SetItemText(hwnd, row, n, wtext);
   }
-  //workaround: when there is only one column, the horizontal scrollbar will always appear without this
-  if(listView.state.headerText.size() <= 1) ListView_SetColumnWidth(hwnd, 0, LVSCW_AUTOSIZE_USEHEADER);
 }
 
 void pListView::autoSizeColumns() {
@@ -32,7 +30,6 @@ void pListView::modify(unsigned row, const lstring &list) {
     utf16_t wtext(text);
     ListView_SetItemText(hwnd, row, n, wtext);
   }
-  if(listView.state.headerText.size() <= 1) ListView_SetColumnWidth(hwnd, 0, LVSCW_AUTOSIZE_USEHEADER);
 }
 
 void pListView::reset() {
@@ -110,6 +107,7 @@ void pListView::setSelection(unsigned row) {
 void pListView::constructor() {
   lostFocus = false;
   setParent(Window::None);
+  listView.setHeaderText("");
 }
 
 void pListView::setGeometry(const Geometry &geometry) {
