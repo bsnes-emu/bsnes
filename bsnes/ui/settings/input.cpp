@@ -5,6 +5,7 @@ void InputSettings::create() {
   title.setText("Input Settings");
   title.setFont(application.titleFont);
 
+  locked = false;
   activeInput = 0;
   activeMouse = 0;
   joypadsCalibrated = false;
@@ -41,6 +42,8 @@ void InputSettings::create() {
   controlLayout.append(clearButton, 100, 0);
   layout.append(controlLayout);
 
+  settingsWindow.append(panelLayout);
+
   portBox.onChange = { &InputSettings::portChanged, this };
   deviceBox.onChange = { &InputSettings::deviceChanged, this };
 
@@ -54,7 +57,15 @@ void InputSettings::create() {
   portChanged();
 }
 
+void InputSettings::focus() {
+  mappingList.autoSizeColumns();
+  customButton1.setVisible(false);
+  customButton2.setVisible(false);
+  customButton3.setVisible(false);
+}
+
 void InputSettings::portChanged() {
+  locked = true;
   deviceBox.reset();
   InputMapper::ControllerPort &port = (
     portBox.selection() == 0 ? (InputMapper::ControllerPort&)inputMapper.port1 :
@@ -63,10 +74,13 @@ void InputSettings::portChanged() {
   );
 
   for(unsigned i = 0; i < port.size(); i++) deviceBox.append(port[i]->name);
+  locked = false;
   deviceChanged();
 }
 
 void InputSettings::deviceChanged() {
+  if(locked) return;
+  locked = true;
   mappingList.reset();
   InputMapper::ControllerPort &port = (
     portBox.selection() == 0 ? (InputMapper::ControllerPort&)inputMapper.port1 :
@@ -81,9 +95,12 @@ void InputSettings::deviceChanged() {
     mappingList.append(controller[i]->name, mapping);
   }
   mappingList.autoSizeColumns();
+  locked = false;
 }
 
 void InputSettings::mappingChanged() {
+  if(locked) return;
+  locked = true;
   InputMapper::ControllerPort &port = (
     portBox.selection() == 0 ? (InputMapper::ControllerPort&)inputMapper.port1 :
     portBox.selection() == 1 ? (InputMapper::ControllerPort&)inputMapper.port2 :
@@ -97,6 +114,7 @@ void InputSettings::mappingChanged() {
     mappingList.modify(i, controller[i]->name, mapping);
   }
   mappingList.autoSizeColumns();
+  locked = false;
 }
 
 void InputSettings::assignInput() {

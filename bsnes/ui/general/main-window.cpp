@@ -252,108 +252,111 @@ void MainWindow::create() {
   setMenuVisible(true);
   setStatusVisible(true);
 
-  systemLoadCartridge.onTick = []() {
+  systemLoadCartridge.onTick = [] {
     fileBrowser.fileOpen(FileBrowser::Mode::Cartridge, [](string filename) {
       cartridge.loadNormal(filename);
     });
   };
 
-  systemLoadCartridgeBsxSlotted.onTick = []() { singleSlotLoader.loadCartridgeBsxSlotted(); };
-  systemLoadCartridgeBsx.onTick = []() { singleSlotLoader.loadCartridgeBsx(); };
-  systemLoadCartridgeSufamiTurbo.onTick = []() { doubleSlotLoader.loadCartridgeSufamiTurbo(); };
-  systemLoadCartridgeSuperGameBoy.onTick = []() { singleSlotLoader.loadCartridgeSuperGameBoy(); };
+  systemLoadCartridgeBsxSlotted.onTick = [] { singleSlotLoader.loadCartridgeBsxSlotted(); };
+  systemLoadCartridgeBsx.onTick = [] { singleSlotLoader.loadCartridgeBsx(); };
+  systemLoadCartridgeSufamiTurbo.onTick = [] { doubleSlotLoader.loadCartridgeSufamiTurbo(); };
+  systemLoadCartridgeSuperGameBoy.onTick = [] { singleSlotLoader.loadCartridgeSuperGameBoy(); };
 
-  systemPower.onTick = []() {
+  systemPower.onTick = [] {
     SNES::system.power();
     utility.showMessage("System was power cycled");
   };
 
-  systemReset.onTick = []() {
+  systemReset.onTick = [] {
     SNES::system.reset();
     utility.showMessage("System was reset");
   };
 
-  systemPort1None.onTick       = []() { config.controller.port1 = 0; utility.setControllers(); };
-  systemPort1Gamepad.onTick    = []() { config.controller.port1 = 1; utility.setControllers(); };
-  systemPort1Multitap.onTick   = []() { config.controller.port1 = 2; utility.setControllers(); };
-  systemPort1Mouse.onTick      = []() { config.controller.port1 = 3; utility.setControllers(); };
+  systemPort1None.onTick       = [] { config.controller.port1 = 0; utility.setControllers(); };
+  systemPort1Gamepad.onTick    = [] { config.controller.port1 = 1; utility.setControllers(); };
+  systemPort1Multitap.onTick   = [] { config.controller.port1 = 2; utility.setControllers(); };
+  systemPort1Mouse.onTick      = [] { config.controller.port1 = 3; utility.setControllers(); };
 
-  systemPort2None.onTick       = []() { config.controller.port2 = 0; utility.setControllers(); };
-  systemPort2Gamepad.onTick    = []() { config.controller.port2 = 1; utility.setControllers(); };
-  systemPort2Multitap.onTick   = []() { config.controller.port2 = 2; utility.setControllers(); };
-  systemPort2Mouse.onTick      = []() { config.controller.port2 = 3; utility.setControllers(); };
-  systemPort2SuperScope.onTick = []() { config.controller.port2 = 4; utility.setControllers(); };
-  systemPort2Justifier.onTick  = []() { config.controller.port2 = 5; utility.setControllers(); };
-  systemPort2Justifiers.onTick = []() { config.controller.port2 = 6; utility.setControllers(); };
-  systemPort2Serial.onTick     = []() { config.controller.port2 = 7; utility.setControllers(); };
+  systemPort2None.onTick       = [] { config.controller.port2 = 0; utility.setControllers(); };
+  systemPort2Gamepad.onTick    = [] { config.controller.port2 = 1; utility.setControllers(); };
+  systemPort2Multitap.onTick   = [] { config.controller.port2 = 2; utility.setControllers(); };
+  systemPort2Mouse.onTick      = [] { config.controller.port2 = 3; utility.setControllers(); };
+  systemPort2SuperScope.onTick = [] { config.controller.port2 = 4; utility.setControllers(); };
+  systemPort2Justifier.onTick  = [] { config.controller.port2 = 5; utility.setControllers(); };
+  systemPort2Justifiers.onTick = [] { config.controller.port2 = 6; utility.setControllers(); };
+  systemPort2Serial.onTick     = [] { config.controller.port2 = 7; utility.setControllers(); };
 
-  settingsVideoMode1x.onTick = []() { utility.setScale(1); };
-  settingsVideoMode2x.onTick = []() { utility.setScale(2); };
-  settingsVideoMode3x.onTick = []() { utility.setScale(3); };
-  settingsVideoMode4x.onTick = []() { utility.setScale(4); };
-  settingsVideoMode5x.onTick = []() { utility.setScale(5); };
+  settingsVideoMode1x.onTick = [] { utility.setScale(1); };
+  settingsVideoMode2x.onTick = [] { utility.setScale(2); };
+  settingsVideoMode3x.onTick = [] { utility.setScale(3); };
+  settingsVideoMode4x.onTick = [] { utility.setScale(4); };
+  settingsVideoMode5x.onTick = [] { utility.setScale(5); };
 
-  settingsVideoModeAspectRatioCorrection.onTick = []() {
+  settingsVideoModeAspectRatioCorrection.onTick = [] {
     config.video.aspectRatioCorrection = mainWindow.settingsVideoModeAspectRatioCorrection.checked();
     utility.setScale();
   };
 
-  settingsVideoModeSmoothVideo.onTick = []() {
+  settingsVideoModeSmoothVideo.onTick = [] {
     config.video.smooth = mainWindow.settingsVideoModeSmoothVideo.checked();
     video.set(Video::Filter, (unsigned)config.video.smooth);
   };
 
-  settingsVideoModeNTSC.onTick = []() { config.video.region = 0; utility.setScale(); };
-  settingsVideoModePAL.onTick  = []() { config.video.region = 1; utility.setScale(); };
+  settingsVideoModeNTSC.onTick = [] { config.video.region = 0; utility.setScale(); };
+  settingsVideoModePAL.onTick  = [] { config.video.region = 1; utility.setScale(); };
 
-  settingsVideoFilterNone.onTick = []() {
+  settingsVideoFilterNone.onTick = [] {
     config.video.filter = "";
     utility.setFilter();
   };
 
-  settingsVideoShaderNone.onTick = []() {
+  settingsVideoShaderNone.onTick = [] {
     config.video.shader = "";
     utility.setShader();
   };
 
-  settingsSynchronizeVideo.onTick = []() {
+  settingsSynchronizeVideo.onTick = [] {
     config.video.synchronize = mainWindow.settingsSynchronizeVideo.checked();
     video.set(Video::Synchronize, config.video.synchronize);
   };
 
-  settingsSynchronizeAudio.onTick = []() {
+  settingsSynchronizeAudio.onTick = [] {
     config.audio.synchronize = mainWindow.settingsSynchronizeAudio.checked();
     audio.set(Audio::Synchronize, config.audio.synchronize);
   };
 
-  settingsMuteAudio.onTick = []() { config.audio.mute = mainWindow.settingsMuteAudio.checked(); };
+  settingsMuteAudio.onTick = [] { config.audio.mute = mainWindow.settingsMuteAudio.checked(); };
 
-  settingsConfiguration.onTick = []() { settingsWindow.setVisible(); };
+  settingsConfiguration.onTick = [] {
+    settingsWindow.setVisible();
+    settingsWindow.panel.setFocused();
+  };
 
-  toolsStateSave1.onTick = []() { utility.saveState(1); };
-  toolsStateSave2.onTick = []() { utility.saveState(2); };
-  toolsStateSave3.onTick = []() { utility.saveState(3); };
-  toolsStateSave4.onTick = []() { utility.saveState(4); };
-  toolsStateSave5.onTick = []() { utility.saveState(5); };
+  toolsStateSave1.onTick = [] { utility.saveState(1); };
+  toolsStateSave2.onTick = [] { utility.saveState(2); };
+  toolsStateSave3.onTick = [] { utility.saveState(3); };
+  toolsStateSave4.onTick = [] { utility.saveState(4); };
+  toolsStateSave5.onTick = [] { utility.saveState(5); };
 
-  toolsStateLoad1.onTick = []() { utility.loadState(1); };
-  toolsStateLoad2.onTick = []() { utility.loadState(2); };
-  toolsStateLoad3.onTick = []() { utility.loadState(3); };
-  toolsStateLoad4.onTick = []() { utility.loadState(4); };
-  toolsStateLoad5.onTick = []() { utility.loadState(5); };
+  toolsStateLoad1.onTick = [] { utility.loadState(1); };
+  toolsStateLoad2.onTick = [] { utility.loadState(2); };
+  toolsStateLoad3.onTick = [] { utility.loadState(3); };
+  toolsStateLoad4.onTick = [] { utility.loadState(4); };
+  toolsStateLoad5.onTick = [] { utility.loadState(5); };
 
-  toolsCheatEditor.onTick = []() { cheatEditor.setVisible(); };
-  toolsStateManager.onTick = []() { stateManager.setVisible(); };
+  toolsCheatEditor.onTick = [] { cheatEditor.setVisible(); };
+  toolsStateManager.onTick = [] { stateManager.setVisible(); };
 
   #if defined(DEBUGGER)
-  toolsDebugger.onTick = []() { debugger.setVisible(); };
+  toolsDebugger.onTick = [] { debugger.setVisible(); };
   #endif
 
-  helpAbout.onTick = []() {
+  helpAbout.onTick = [] {
     aboutWindow.show();
   };
 
-  onClose = []() {
+  onClose = [] {
     application.quit = true;
   };
 

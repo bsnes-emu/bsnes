@@ -10,8 +10,8 @@
 namespace nall {
 
 struct bmp {
-  static bool read(const string &filename, uint32_t *&data, unsigned &width, unsigned &height);
-  static bool write(const string &filename, const uint32_t *data, unsigned width, unsigned height, bool alpha = false);
+  inline static bool read(const string &filename, uint32_t *&data, unsigned &width, unsigned &height);
+  inline static bool write(const string &filename, const uint32_t *data, unsigned width, unsigned height, bool alpha = false);
 };
 
 bool bmp::read(const string &filename, uint32_t *&data, unsigned &width, unsigned &height) {

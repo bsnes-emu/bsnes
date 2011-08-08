@@ -132,10 +132,11 @@ void Utility::setFullScreen(bool fullScreen) {
     mainWindow.viewport.setGeometry({ viewportX, viewportY, viewportWidth, viewportHeight });
   }
 
-  #if defined(PLATFORM_WINDOWS)
-  //compositor interferes with Vsync; disable in fullscreen mode where it is not needed
-  compositor::enable(fullscreen == false);
-  #endif
+  if(application.compositorActive) {
+    if(advancedSettings.compositorPolicyFullScreen.checked()) {
+      compositor::enable(fullScreen == false);
+    }
+  }
 }
 
 void Utility::setFilter() {

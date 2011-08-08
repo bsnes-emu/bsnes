@@ -45,6 +45,7 @@ void Configuration::create() {
 
   attach(settings.startFullScreen = false, "settings.startFullScreen", "Start in full screen mode for front-end use");
   attach(settings.focusPolicy = 0, "settings.focusPolicy");
+  attach(settings.compositorPolicy = 1, "settings.compositorPolicy");
 
   attach(controller.port1 = 1, "controller.port1");
   attach(controller.port2 = 1, "controller.port2");

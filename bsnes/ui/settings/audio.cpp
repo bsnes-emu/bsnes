@@ -26,14 +26,15 @@ void AudioSettings::create() {
   layout.append(frequencyLayout);
 
   layout.append(spacer, ~0, ~0);
+  settingsWindow.append(panelLayout);
 
-  volumeSlider.onChange = [this]() {
+  volumeSlider.onChange = [this] {
     config.audio.volume = volumeSlider.position();
     audio.set(Audio::Volume, config.audio.volume);
     volumeValue.setText({ config.audio.volume, "%" });
   };
 
-  frequencySlider.onChange = [this]() {
+  frequencySlider.onChange = [this] {
     config.audio.inputFrequency = frequencySlider.position() + 31000;
     audio.set(Audio::ResampleRatio, (double)config.audio.inputFrequency / (double)config.audio.outputFrequency);
     frequencyValue.setText({ config.audio.inputFrequency, "hz" });

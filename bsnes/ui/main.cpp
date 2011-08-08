@@ -7,6 +7,9 @@ void Application::main(int argc, char **argv) {
   #if defined(PLATFORM_WIN)
   utf8_args(argc, argv);
   #endif
+
+  compositorActive = compositor::enabled();
+
   config.create();
   inputMapper.create();
 
@@ -31,8 +34,8 @@ void Application::main(int argc, char **argv) {
   monospaceFont.setFamily("Lucida Console");
   monospaceFont.setSize(8);
 
-  titleFont.setFamily("Tahoma");
-  titleFont.setSize(14);
+  titleFont.setFamily("Segoe Print");
+  titleFont.setSize(16);
   titleFont.setBold();
   #else
   proportionalFont.setFamily("Sans");
@@ -46,8 +49,9 @@ void Application::main(int argc, char **argv) {
   monospaceFont.setSize(8);
 
   titleFont.setFamily("Sans");
-  titleFont.setSize(14);
+  titleFont.setSize(16);
   titleFont.setBold();
+  titleFont.setItalic();
   #endif
 
   SNES::system.init(&interface);
@@ -151,6 +155,8 @@ void Application::main(int argc, char **argv) {
   video.term();
   audio.term();
   input.term();
+
+  if(compositorActive) compositor::enable(true);
 }
 
 void Application::addWindow(TopLevelWindow *window, const string &name, const string &position) {

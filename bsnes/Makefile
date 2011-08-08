@@ -5,8 +5,7 @@ profile := accuracy
 ui := ui
 # phoenix := gtk
 
-options :=
-# debugger
+# options += debugger
 
 # compiler
 c       := $(compiler) -std=gnu99

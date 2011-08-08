@@ -20,8 +20,11 @@ struct InputSettings {
   Button clearButton;
 
   void create();
+  void focus();
 
 //
+
+  bool locked;
 
   bool joypadsCalibrated;
   bool joypadsCalibrating;

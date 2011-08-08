@@ -16,10 +16,15 @@ struct AdvancedSettings {
 
   Label focusPolicyLabel;
   HorizontalLayout focusPolicyLayout;
-
   RadioBox focusPolicyPause;
   RadioBox focusPolicyIgnore;
   RadioBox focusPolicyAllow;
+
+  Label compositorPolicyLabel;
+  HorizontalLayout compositorPolicyLayout;
+  RadioBox compositorPolicyNever;
+  RadioBox compositorPolicyFullScreen;
+  RadioBox compositorPolicyAlways;
 
   Widget spacer;
 

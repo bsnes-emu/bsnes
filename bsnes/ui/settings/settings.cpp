@@ -26,14 +26,11 @@ void SettingsWindow::create() {
   inputSettings.create();
   advancedSettings.create();
 
-  append(videoSettings.panelLayout);
-  append(audioSettings.panelLayout);
-  append(inputSettings.panelLayout);
-  append(advancedSettings.panelLayout);
-
   panel.onChange = { &SettingsWindow::change, this };
-  panel.setSelection(0);
+  panel.setSelection(2);
   change();
+
+  onClose = [] { inputSettings.endAssignment(); };
 }
 
 void SettingsWindow::change() {
@@ -42,4 +39,5 @@ void SettingsWindow::change() {
   audioSettings.panelLayout.setVisible(selection == 1);
   inputSettings.panelLayout.setVisible(selection == 2);
   advancedSettings.panelLayout.setVisible(selection == 3);
+  if(selection == 2) inputSettings.focus();
 }

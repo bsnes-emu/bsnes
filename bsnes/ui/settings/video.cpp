@@ -47,6 +47,7 @@ void VideoSettings::create() {
   layout.append(fullscreenLayout);
 
   layout.append(spacer, ~0, ~0);
+  settingsWindow.append(panelLayout);
 
   brightnessSlider.setPosition(config.video.brightness);
   brightnessValue.setText({ config.video.brightness, "%" });
@@ -68,10 +69,11 @@ void VideoSettings::create() {
   contrastSlider.onChange = brightnessSlider.onChange = gammaSlider.onChange = gammaRampCheck.onTick =
   { &VideoSettings::adjust, this };
 
-  fullscreenCenter.onTick = []() { config.video.fullscreenScale = 0; };
-  fullscreenScale.onTick = []() { config.video.fullscreenScale = 1; };
-  fullscreenStretch.onTick = []() { config.video.fullscreenScale = 2; };
+  fullscreenCenter.onTick = [] { config.video.fullscreenScale = 0; };
+  fullscreenScale.onTick = [] { config.video.fullscreenScale = 1; };
+  fullscreenStretch.onTick = [] { config.video.fullscreenScale = 2; };
 
+  adjust();
 }
 
 void VideoSettings::adjust() {

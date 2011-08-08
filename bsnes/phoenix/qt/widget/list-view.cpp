@@ -100,7 +100,7 @@ void pListView::constructor() {
   qtListView->setRootIsDecorated(false);
 
   connect(qtListView, SIGNAL(itemActivated(QTreeWidgetItem*, int)), SLOT(onActivate()));
-  connect(qtListView, SIGNAL(itemSelectionChanged()), SLOT(onChange()));
+  connect(qtListView, SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)), SLOT(onChange()));
   connect(qtListView, SIGNAL(itemChanged(QTreeWidgetItem*, int)), SLOT(onTick(QTreeWidgetItem*)));
 }
 
