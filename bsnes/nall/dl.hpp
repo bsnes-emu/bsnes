@@ -12,7 +12,7 @@
   #include <dlfcn.h>
 #elif defined(PLATFORM_WIN)
   #include <windows.h>
-  #include <nall/utf8.hpp>
+  #include <nall/windows/utf8.hpp>
 #endif
 
 namespace nall {

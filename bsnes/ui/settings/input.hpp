@@ -1,34 +1,28 @@
-struct InputSettings : TopLevelWindow {
+struct InputSettings {
+  HorizontalLayout panelLayout;
+  Widget panel;
   VerticalLayout layout;
+  Label title;
+
   HorizontalLayout selectionLayout;
   Label portLabel;
   ComboBox portBox;
   Label deviceLabel;
   ComboBox deviceBox;
+
   ListView mappingList;
-  HorizontalLayout mapLayout;
-  Label spacer;
+
+  HorizontalLayout controlLayout;
+  Button customButton1;
+  Button customButton2;
+  Button customButton3;
+  Widget spacer;
   Button clearButton;
 
-  VerticalLayout axisLayout;
-  Widget axisSpacer;
-  HorizontalLayout axisControlLayout;
-  Button mouseXaxis;
-  Button mouseYaxis;
-
-  VerticalLayout buttonLayout;
-  Widget buttonSpacer;
-  HorizontalLayout buttonControlLayout;
-  Button mouseLeft;
-  Button mouseMiddle;
-  Button mouseRight;
-
-  void inputEvent(uint16_t scancode, int16_t value);
-  void calibrateJoypads();
   void create();
-  InputSettings();
 
-private:
+//
+
   bool joypadsCalibrated;
   bool joypadsCalibrating;
   int16_t joypadCalibration[Joypad::Count][Joypad::Axes];
@@ -37,10 +31,13 @@ private:
   void portChanged();
   void deviceChanged();
   void mappingChanged();
-  void setMapping(const string &mapping);
   void assignInput();
+  void manualInput(unsigned button);
   void clearInput();
+  void setMapping(const string &mapping);
   void endAssignment();
+  void inputEvent(uint16_t scancode, int16_t value);
+  void calibrateJoypads();
 };
 
 extern InputSettings inputSettings;

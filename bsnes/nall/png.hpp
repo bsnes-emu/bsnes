@@ -35,8 +35,8 @@ struct png {
   inline bool decode(const uint8_t *sourceData, unsigned sourceSize);
   inline void transform();
   inline void alphaTransform(uint32_t rgb = 0xffffff);
-  png();
-  ~png();
+  inline png();
+  inline ~png();
 
 protected:
   enum class FourCC : unsigned {

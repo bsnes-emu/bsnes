@@ -30,6 +30,10 @@ void Application::main(int argc, char **argv) {
 
   monospaceFont.setFamily("Lucida Console");
   monospaceFont.setSize(8);
+
+  titleFont.setFamily("Tahoma");
+  titleFont.setSize(14);
+  titleFont.setBold();
   #else
   proportionalFont.setFamily("Sans");
   proportionalFont.setSize(8);
@@ -40,6 +44,10 @@ void Application::main(int argc, char **argv) {
 
   monospaceFont.setFamily("Liberation Mono");
   monospaceFont.setSize(8);
+
+  titleFont.setFamily("Sans");
+  titleFont.setSize(14);
+  titleFont.setBold();
   #endif
 
   SNES::system.init(&interface);
@@ -56,10 +64,7 @@ void Application::main(int argc, char **argv) {
   doubleSlotLoader.create();
   nssDipWindow.create();
   aboutWindow.create();
-  videoSettings.create();
-  audioSettings.create();
-  inputSettings.create();
-  advancedSettings.create();
+  settingsWindow.create();
   cheatEditor.create();
   cheatDatabase.create();
   stateManager.create();

@@ -7,6 +7,28 @@ static gint Window_close(GtkWidget *widget, GdkEvent *event, Window *window) {
   return true;
 }
 
+static gboolean Window_expose(GtkWidget *widget, GdkEvent *event, Window *window) {
+  cairo_t *context = gdk_cairo_create(widget->window);
+
+  Color color = window->backgroundColor();
+  double red   = (double)color.red   / 255.0;
+  double green = (double)color.green / 255.0;
+  double blue  = (double)color.blue  / 255.0;
+  double alpha = (double)color.alpha / 255.0;
+
+  if(gdk_screen_is_composited(gdk_screen_get_default())) {
+    cairo_set_source_rgba(context, red, green, blue, alpha);
+  } else {
+    cairo_set_source_rgb(context, red, green, blue);
+  }
+
+  cairo_set_operator(context, CAIRO_OPERATOR_SOURCE);
+  cairo_paint(context);
+  cairo_destroy(context);
+
+  return false;
+}
+
 static gboolean Window_configure(GtkWidget *widget, GdkEvent *event, Window *window) {
   if(gtk_widget_get_realized(window->p.widget) == false) return false;
   GdkWindow *gdkWindow = gtk_widget_get_window(widget);
@@ -106,10 +128,10 @@ Geometry pWindow::geometry() {
 
 void pWindow::setBackgroundColor(const Color &color) {
   GdkColor gdkColor;
-  gdkColor.pixel = (color.red << 16) | (color.green << 8) | (color.blue << 0);
-  gdkColor.red = (color.red << 8) | (color.red << 0);
-  gdkColor.green = (color.green << 8) | (color.green << 0);
-  gdkColor.blue = (color.blue << 8) | (color.blue << 0);
+  gdkColor.pixel = (color.red   << 16) | (color.green << 8) | (color.blue << 0);
+  gdkColor.red   = (color.red   <<  8) | (color.red   << 0);
+  gdkColor.green = (color.green <<  8) | (color.green << 0);
+  gdkColor.blue  = (color.blue  <<  8) | (color.blue  << 0);
   gtk_widget_modify_bg(widget, GTK_STATE_NORMAL, &gdkColor);
 }
 
@@ -190,6 +212,13 @@ void pWindow::setWidgetFont(Font &font) {
 
 void pWindow::constructor() {
   widget = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+
+  if(gdk_screen_is_composited(gdk_screen_get_default())) {
+    gtk_widget_set_colormap(widget, gdk_screen_get_rgba_colormap(gdk_screen_get_default()));
+  } else {
+    gtk_widget_set_colormap(widget, gdk_screen_get_rgb_colormap(gdk_screen_get_default()));
+  }
+
   gtk_window_set_resizable(GTK_WINDOW(widget), true);
   gtk_widget_set_app_paintable(widget, true);
   gtk_widget_add_events(widget, GDK_CONFIGURE);
@@ -216,6 +245,7 @@ void pWindow::constructor() {
   setGeometry(window.state.geometry);
 
   g_signal_connect(G_OBJECT(widget), "delete-event", G_CALLBACK(Window_close), (gpointer)&window);
+  g_signal_connect(G_OBJECT(widget), "expose-event", G_CALLBACK(Window_expose), (gpointer)&window);
   g_signal_connect(G_OBJECT(widget), "configure-event", G_CALLBACK(Window_configure), (gpointer)&window);
 }
 

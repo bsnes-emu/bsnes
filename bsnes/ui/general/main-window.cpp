@@ -152,17 +152,8 @@ void MainWindow::create() {
 
   settings.append(settingsSeparator2);
 
-  settingsVideo.setText("Video Settings ...");
-  settings.append(settingsVideo);
-
-  settingsAudio.setText("Audio Settings ...");
-  settings.append(settingsAudio);
-
-  settingsInput.setText("Input Settings ...");
-  settings.append(settingsInput);
-
-  settingsAdvanced.setText("Advanced Settings ...");
-  settings.append(settingsAdvanced);
+  settingsConfiguration.setText("Configuration Settings ...");
+  settings.append(settingsConfiguration);
 
   append(settings);
 
@@ -337,10 +328,7 @@ void MainWindow::create() {
 
   settingsMuteAudio.onTick = []() { config.audio.mute = mainWindow.settingsMuteAudio.checked(); };
 
-  settingsVideo.onTick = []() { videoSettings.setVisible(); };
-  settingsAudio.onTick = []() { audioSettings.setVisible(); };
-  settingsInput.onTick = []() { inputSettings.setVisible(); };
-  settingsAdvanced.onTick = []() { advancedSettings.setVisible(); };
+  settingsConfiguration.onTick = []() { settingsWindow.setVisible(); };
 
   toolsStateSave1.onTick = []() { utility.saveState(1); };
   toolsStateSave2.onTick = []() { utility.saveState(2); };

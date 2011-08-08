@@ -1,5 +1,9 @@
-struct VideoSettings : TopLevelWindow {
+struct VideoSettings {
+  HorizontalLayout panelLayout;
+  Widget panel;
   VerticalLayout layout;
+  Label title;
+
   Label colorAdjustmentLabel;
 
   Label brightnessLabel;
@@ -24,6 +28,8 @@ struct VideoSettings : TopLevelWindow {
   RadioBox fullscreenCenter;
   RadioBox fullscreenScale;
   RadioBox fullscreenStretch;
+
+  Widget spacer;
 
   void create();
   void adjust();

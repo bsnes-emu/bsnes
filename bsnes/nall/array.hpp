@@ -137,6 +137,12 @@ namespace nall {
       if(index >= buffersize) throw "array[] out of bounds";
       return pool[index];
     }
+
+    //iteration
+    T* begin() { return &pool[0]; }
+    T* end() { return &pool[buffersize]; }
+    const T* begin() const { return &pool[0]; }
+    const T* end() const { return &pool[buffersize]; }
   };
 
   template<typename T> struct has_size<array<T>> { enum { value = true }; };

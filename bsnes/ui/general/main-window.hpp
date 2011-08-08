@@ -56,10 +56,7 @@ struct MainWindow : TopLevelWindow {
   CheckItem settingsSynchronizeAudio;
   CheckItem settingsMuteAudio;
   Separator settingsSeparator2;
-  Item settingsVideo;
-  Item settingsAudio;
-  Item settingsInput;
-  Item settingsAdvanced;
+  Item settingsConfiguration;
 
   Menu tools;
   Menu toolsStateSave;

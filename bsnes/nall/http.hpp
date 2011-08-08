@@ -65,7 +65,7 @@ struct http {
 
   inline bool send(const uint8_t *data, unsigned size) {
     while(size) {
-      int length = ::send(serversocket, data, size, 0);
+      int length = ::send(serversocket, (const char*)data, size, 0);
       if(length == -1) return false;
       data += length;
       size -= length;

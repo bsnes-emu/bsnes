@@ -40,6 +40,7 @@ struct Application {
   Font proportionalFont;
   Font proportionalFontBold;
   Font monospaceFont;
+  Font titleFont;
 
   bool pause;
   bool quit;
