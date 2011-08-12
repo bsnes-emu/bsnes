@@ -4,7 +4,7 @@ void VideoSettings::create() {
   title.setText("Video Settings");
   title.setFont(application.titleFont);
 
-  colorAdjustmentLabel.setText("Color Adjustment:");
+  colorAdjustmentLabel.setText("Color adjustment:");
   colorAdjustmentLabel.setFont(application.proportionalFontBold);
   brightnessLabel.setText("Brightness:");
   brightnessSlider.setLength(201);

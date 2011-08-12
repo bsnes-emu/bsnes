@@ -11,7 +11,7 @@ namespace nall {
 
 struct bmp {
   inline static bool read(const string &filename, uint32_t *&data, unsigned &width, unsigned &height);
-  inline static bool write(const string &filename, const uint32_t *data, unsigned width, unsigned height, bool alpha = false);
+  inline static bool write(const string &filename, const uint32_t *data, unsigned width, unsigned height, unsigned pitch, bool alpha = false);
 };
 
 bool bmp::read(const string &filename, uint32_t *&data, unsigned &width, unsigned &height) {
@@ -56,7 +56,7 @@ bool bmp::read(const string &filename, uint32_t *&data, unsigned &width, unsigne
   return true;
 }
 
-bool bmp::write(const string &filename, const uint32_t *data, unsigned width, unsigned height, bool alpha) {
+bool bmp::write(const string &filename, const uint32_t *data, unsigned width, unsigned height, unsigned pitch, bool alpha) {
   file fp;
   if(fp.open(filename, file::mode::write) == false) return false;
 
@@ -87,7 +87,7 @@ bool bmp::write(const string &filename, const uint32_t *data, unsigned width, un
   fp.writel(0, 4);             //important color count
 
   for(unsigned y = 0; y < height; y++) {
-    const uint32_t *p = data + y * width;
+    const uint32_t *p = (const uint32_t*)((const uint8_t*)data + y * pitch);
     for(unsigned x = 0; x < width; x++) fp.writel(*p++, bytesPerPixel);
     if(paddingLength) fp.writel(0, paddingLength);
   }

@@ -27,6 +27,11 @@ void InputMapper::poll_hotkeys(unsigned scancode, int16_t value) {
       utility.showMessage({ "Slot ", activeSlot, " selected" });
     }
 
+    //capture screenshot
+    if(scancode == hotkeysGeneral.captureScreenshot.scancode) {
+      interface.captureScreenshot = true;
+    }
+
     //fullscreen
     if(scancode == hotkeysGeneral.fullscreenToggle.scancode) {
       utility.setFullScreen(!utility.fullScreen);
@@ -66,6 +71,11 @@ void InputMapper::poll_hotkeys(unsigned scancode, int16_t value) {
     if(scancode == hotkeysGeneral.reset.scancode) {
       mainWindow.systemReset.onTick();
     }
+
+    //exit emulator
+    if(scancode == hotkeysGeneral.exitEmulator.scancode) {
+      application.quit = true;
+    }
   } else {
     //key released
     if(mainWindow.focused() == false) return;
@@ -88,34 +98,40 @@ void InputMapper::HotkeysGeneral::create(const char *deviceName, const char *con
   stateLoad.name = "Load State";
   stateDecrement.name = "Decrement State";
   stateIncrement.name = "Increment State";
+  captureScreenshot.name = "Capture Screenshot";
   fullscreenToggle.name = "Fullscreen";
   mouseCaptureToggle.name = "Mouse Capture";
   pauseToggle.name = "Pause Emulation";
   fastForward.name = "Fast-Forward";
   power.name = "Power Cycle";
   reset.name = "Reset";
+  exitEmulator.name = "Exit Emulator";
 
   append(&stateSave);
   append(&stateLoad);
   append(&stateDecrement);
   append(&stateIncrement);
+  append(&captureScreenshot);
   append(&fullscreenToggle);
   append(&mouseCaptureToggle);
   append(&pauseToggle);
   append(&fastForward);
   append(&power);
   append(&reset);
+  append(&exitEmulator);
 
   config.attach(stateSave.mapping = "KB0::F5", string("input.", configName, ".stateSave"));
   config.attach(stateLoad.mapping = "KB0::F7", string("input.", configName, ".stateLoad"));
   config.attach(stateDecrement.mapping = "KB0::F6", string("input.", configName, ".stateDecrement"));
   config.attach(stateIncrement.mapping = "KB0::F8", string("input.", configName, ".stateIncrement"));
+  config.attach(captureScreenshot.mapping = "", string("input.", configName, ".captureScreenshot"));
   config.attach(fullscreenToggle.mapping = "KB0::F11", string("input.", configName, ".fullscreenToggle"));
   config.attach(mouseCaptureToggle.mapping = "KB0::F12", string("input.", configName, ".mouseCaptureToggle"));
   config.attach(pauseToggle.mapping = "KB0::P", string("input.", configName, ".pauseToggle"));
   config.attach(fastForward.mapping = "KB0::Tilde", string("input.", configName, ".fastForward"));
   config.attach(power.mapping = "", string("input.", configName, ".power"));
   config.attach(reset.mapping = "", string("input.", configName, ".reset"));
+  config.attach(exitEmulator.mapping = "", string("input.", configName, ".exitEmulator"));
 }
 
 void InputMapper::create_hotkeys() {

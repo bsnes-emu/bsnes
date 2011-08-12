@@ -72,6 +72,7 @@ struct MainWindow : TopLevelWindow {
   Item toolsStateLoad4;
   Item toolsStateLoad5;
   Separator toolsSeparator1;
+  Item toolsCaptureScreenshot;
   Item toolsCheatEditor;
   Item toolsStateManager;
   #if defined(DEBUGGER)

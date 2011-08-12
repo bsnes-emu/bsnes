@@ -197,6 +197,9 @@ void MainWindow::create() {
 
   tools.append(toolsSeparator1);
 
+  toolsCaptureScreenshot.setText("Capture Screenshot");
+  tools.append(toolsCaptureScreenshot);
+
   toolsCheatEditor.setText("Cheat Editor ...");
   tools.append(toolsCheatEditor);
 
@@ -345,6 +348,7 @@ void MainWindow::create() {
   toolsStateLoad4.onTick = [] { utility.loadState(4); };
   toolsStateLoad5.onTick = [] { utility.loadState(5); };
 
+  toolsCaptureScreenshot.onTick = [] { interface.captureScreenshot = true; };
   toolsCheatEditor.onTick = [] { cheatEditor.setVisible(); };
   toolsStateManager.onTick = [] { stateManager.setVisible(); };
 
@@ -364,17 +368,12 @@ void MainWindow::create() {
 }
 
 void MainWindow::synchronize() {
-  if(SNES::cartridge.loaded() == false) {
-    systemPower.setEnabled(false);
-    systemReset.setEnabled(false);
-    toolsStateSave.setEnabled(false);
-    toolsStateLoad.setEnabled(false);
-  } else {
-    systemPower.setEnabled(true);
-    systemReset.setEnabled(true);
-    toolsStateSave.setEnabled(true);
-    toolsStateLoad.setEnabled(true);
-  }
+  bool loaded = SNES::cartridge.loaded();
+  systemPower.setEnabled(loaded);
+  systemReset.setEnabled(loaded);
+  toolsStateSave.setEnabled(loaded);
+  toolsStateLoad.setEnabled(loaded);
+  toolsCaptureScreenshot.setEnabled(loaded);
 }
 
 void MainWindow::setupFiltersAndShaders() {

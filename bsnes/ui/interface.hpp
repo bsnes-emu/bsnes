@@ -21,6 +21,9 @@ struct Interface : public SNES::Interface {
 
   void message(const string &text);
   string path(SNES::Cartridge::Slot slot, const string &hint);
+  Interface();
+
+  bool captureScreenshot;
 };
 
 extern Palette palette;

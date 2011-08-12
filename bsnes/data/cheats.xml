@@ -6199,6 +6199,14 @@
       <code>406E-1FB1</code>
     </cheat>
     <cheat>
+      <description>Hit anywhere - both players</description>
+      <code>40C2-44B9</code>
+      <code>40C2-4729</code>
+      <code>40CC-4D99</code>
+      <code>40CD-1DF9</code>
+      <code>40CE-4429</code>
+    </cheat>
+    <cheat>
       <description>Have Lots of Kills - P1</description>
       <code>7E0C34FF</code>
     </cheat>
@@ -7788,6 +7796,13 @@
       <code>7E089332</code>
     </cheat>
     <cheat>
+      <description>Hit anywhere (throws are disabled)</description>
+      <code>6DF1-846D</code>
+      <code>6DF9-74DF</code>
+      <code>6DFA-7D0F</code>
+      <code>95F9-740F</code>
+    </cheat>
+    <cheat>
       <description>One hit kills - Both players</description>
       <code>76F4-57DF</code>
       <code>3BF4-570F</code>
@@ -8942,6 +8957,10 @@
       <code>3C8B-1D69</code>
     </cheat>
     <cheat>
+      <description>Hit anywhere</description>
+      <code>DD8F-CF60</code>
+    </cheat>
+    <cheat>
       <description>One hit kills on normal enemies</description>
       <code>CBBC-3F6B</code>
       <code>DFBC-3FAB</code>
@@ -9081,6 +9100,10 @@
       <code>DDA3-67DF</code>
       <code>DDA3-670F</code>
       <code>40AE-6FAF</code>
+    </cheat>
+    <cheat>
+      <description>Unlock all characters in vs mode</description>
+      <code>7E1EE710</code>
     </cheat>
   </cartridge>
   <cartridge sha256="26e09f5bc2bde28d57aeca0bf5be7f7fb8e3b3887af975bcbf2e6f29b07df56f">
@@ -9437,6 +9460,12 @@
     <cheat>
       <description>One hit kills</description>
       <code>B33A-67A4</code>
+    </cheat>
+    <cheat>
+      <description>Hit anywhere</description>
+      <code>403D-64D4</code>
+      <code>6D33-0464</code>
+      <code>6D3D-6FA4</code>
     </cheat>
   </cartridge>
   <cartridge sha256="7c722f9941957630467c1784d0eb3f92fbfc0a2a1da3c8f5c27f593eca2a5a04">
@@ -14570,11 +14599,8 @@
       <code>8267-0D62</code>
     </cheat>
     <cheat>
-      <description>Infinite use of items outside of battle except for the Whistle</description>
+      <description>Infinite items outside of battle</description>
       <code>C3CE-6F09</code>
-    </cheat>
-    <cheat>
-      <description>Infinite Whistles</description>
       <code>C3C4-A4D0</code>
     </cheat>
     <cheat>
@@ -14588,15 +14614,24 @@
       <code>C262-D763</code>
     </cheat>
     <cheat>
-      <description>No random battles</description>
-      <code>DDD6-B28B</code>
+      <description>65,536+ GP after each battle</description>
+      <code>3336-0FAE</code>
     </cheat>
     <cheat>
-      <description>No random battles (alt)</description>
-      <code>1D60-0704</code>
+      <description>65,000+ exp points after each battle</description>
+      <code>7E3592FF</code>
+      <code>7E359EFF</code>
     </cheat>
     <cheat>
-      <description>automatically win battles (no EXP or gold gained)</description>
+      <description>Get 99 of items that you are given or find in a pot, treasure chest, ect</description>
+      <code>17BF-D404</code>
+    </cheat>
+    <cheat>
+      <description>Get 99 arrows when you find them in a pot or treasure chest</description>
+      <code>17B4-D4D4</code>
+    </cheat>
+    <cheat>
+      <description>Automatically win battles (no EXP or gold gained)</description>
       <code>7E180102</code>
       <code>7E180008</code>
     </cheat>
@@ -14625,46 +14660,27 @@
       <code>00CE-6D69</code>
     </cheat>
     <cheat>
+      <description>No random battles</description>
+      <code>DDD6-B28B</code>
+    </cheat>
+    <cheat>
+      <description>No random battles (alt)</description>
+      <code>1D60-0704</code>
+    </cheat>
+    <cheat>
       <description>Save anywhere</description>
       <code>CBBA-07A4</code>
     </cheat>
     <cheat>
-      <description>Get at least 150 GP after each battle</description>
-      <code>1B35-0D6E</code>
-      <code>B135-0DAE</code>
-      <code>3C35-0FDE</code>
-    </cheat>
-    <cheat>
-      <description>Get at least 255 GP after each battle</description>
-      <code>3335-076E</code>
-    </cheat>
-    <cheat>
-      <description>Get at least 65,536 GP after each battle</description>
-      <code>3336-0FAE</code>
-    </cheat>
-    <cheat>
-      <description>Get 65,000+ exp points after each battle</description>
-      <code>7E3592FF</code>
-      <code>7E359EFF</code>
-    </cheat>
-    <cheat>
-      <description>Get 99 of items that you are given or find in a pot, treasure chest, ect</description>
-      <code>17BF-D404</code>
-    </cheat>
-    <cheat>
-      <description>Get 99 arrows when you find them in a pot or treasure chest</description>
-      <code>17B4-D4D4</code>
-    </cheat>
-    <cheat>
-      <description>Item Cure2 is ultra strong</description>
+      <description>Cure2 is ultra strong</description>
       <code>A6B7-A4E2</code>
     </cheat>
     <cheat>
-      <description>Item Cure2 restores HP to all members in the party during battle</description>
+      <description>Cure2 restores HP to all members in the party during battle</description>
       <code>0DB7-A482</code>
     </cheat>
     <cheat>
-      <description>Item Cure2 restores all HP/MP during battle</description>
+      <description>Cure2 restores all HP/MP during battle</description>
       <code>F1B7-A752</code>
     </cheat>
     <cheat>
@@ -14693,17 +14709,17 @@
     </cheat>
     <cheat>
       <description>Character 1 - Max HP</description>
+      <code>7E10470F</code>
+      <code>7E104827</code>
       <code>7E10490F</code>
-      <code>7E20890F</code>
       <code>7E104A27</code>
-      <code>7E208A27</code>
     </cheat>
     <cheat>
       <description>Character 1 - Max MP</description>
-      <code>7E104DE7</code>
-      <code>7E208DE7</code>
-      <code>7E104E03</code>
-      <code>7E208E03</code>
+      <code>7E104B0F</code>
+      <code>7E104C27</code>
+      <code>7E104D0F</code>
+      <code>7E104E27</code>
     </cheat>
     <cheat>
       <description>Character 1 - Max Agility</description>
@@ -14732,17 +14748,17 @@
     </cheat>
     <cheat>
       <description>Character 2 - Max HP</description>
+      <code>7E10C70F</code>
+      <code>7E10C827</code>
       <code>7E10C90F</code>
-      <code>7E21890F</code>
       <code>7E10CA27</code>
-      <code>7E218A27</code>
     </cheat>
     <cheat>
       <description>Character 2 - Max MP</description>
-      <code>7E10CDE7</code>
-      <code>7E218DE7</code>
-      <code>7E10CE03</code>
-      <code>7E218E03</code>
+      <code>7E10CB0F</code>
+      <code>7E10CC27</code>
+      <code>7E10CD0F</code>
+      <code>7E10CE27</code>
     </cheat>
     <cheat>
       <description>Character 2 - Max Agility</description>
@@ -14771,17 +14787,17 @@
     </cheat>
     <cheat>
       <description>Character 3 - Max HP</description>
+      <code>7E10070F</code>
+      <code>7E100827</code>
       <code>7E10090F</code>
-      <code>7E20090F</code>
       <code>7E100A27</code>
-      <code>7E200A27</code>
     </cheat>
     <cheat>
       <description>Character 3 - Max MP</description>
-      <code>7E100DE7</code>
-      <code>7E200DE7</code>
-      <code>7E100E03</code>
-      <code>7E200E03</code>
+      <code>7E100B0F</code>
+      <code>7E100C27</code>
+      <code>7E100D0F</code>
+      <code>7E100E27</code>
     </cheat>
     <cheat>
       <description>Character 3 - Max Agility</description>
@@ -14810,17 +14826,17 @@
     </cheat>
     <cheat>
       <description>Character 4 - Max HP</description>
+      <code>7E11070F</code>
+      <code>7E110827</code>
       <code>7E11090F</code>
-      <code>7E20890F</code>
       <code>7E110A27</code>
-      <code>7E208A27</code>
     </cheat>
     <cheat>
       <description>Character 4 - Max MP</description>
-      <code>7E110DE7</code>
-      <code>7E208DE7</code>
-      <code>7E110E03</code>
-      <code>7E208D03</code>
+      <code>7E110B0F</code>
+      <code>7E110C27</code>
+      <code>7E110D0F</code>
+      <code>7E110E27</code>
     </cheat>
     <cheat>
       <description>Character 4 - Max Agility</description>
@@ -14849,17 +14865,17 @@
     </cheat>
     <cheat>
       <description>Character 5 - Max HP</description>
+      <code>7E10870F</code>
+      <code>7E108827</code>
       <code>7E10890F</code>
-      <code>7E20890F</code>
       <code>7E108A27</code>
-      <code>7E208A27</code>
     </cheat>
     <cheat>
       <description>Character 5 - Max MP</description>
-      <code>7E108DE7</code>
-      <code>7E208DE7</code>
-      <code>7E108E03</code>
-      <code>7E208E03</code>
+      <code>7E108B0F</code>
+      <code>7E108C27</code>
+      <code>7E108D0F</code>
+      <code>7E108E27</code>
     </cheat>
     <cheat>
       <description>Character 5 - Max Agility</description>
@@ -14919,6 +14935,14 @@
       <code>7E144F63</code>
     </cheat>
     <cheat>
+      <description>Have 99 of slot 9</description>
+      <code>7E145163</code>
+    </cheat>
+    <cheat>
+      <description>Have 99 of slot 10</description>
+      <code>7E145363</code>
+    </cheat>
+    <cheat>
       <description>Have Cure3 in slot 1</description>
       <code>7E1440D0</code>
     </cheat>
@@ -14946,23 +14970,20 @@
       <description>Have Spoon in slot 7</description>
       <code>7E144C3E</code>
     </cheat>
+    <cheat>
+      <description>Have Adamant Armor in slot 8</description>
+      <code>7E144E9A</code>
+    </cheat>
   </cartridge>
   <cartridge sha256="680535dc1c4196c53b40dc9c2c9bc159a77802ab8d4b474bef5dc0281c15ad06">
     <name>Final Fantasy II (USA)</name>
     <cheat>
-      <description>Almost infinite HP (can make big and sometimes normal monsters invincible, disable to defeat them)</description>
-      <code>82A3-6F63</code>
+      <description>Infinite HP</description>
+      <code>03CAE6BD</code>
     </cheat>
     <cheat>
-      <description>Infinite MP during battles, doesn't work on twin attacks</description>
-      <code>8267-0D62</code>
-    </cheat>
-    <cheat>
-      <description>Infinite use of items outside of battle except for the Whistle</description>
+      <description>Infinite items outside of battle</description>
       <code>C3CE-6F09</code>
-    </cheat>
-    <cheat>
-      <description>Infinite Whistles</description>
       <code>C3C4-A4D0</code>
     </cheat>
     <cheat>
@@ -14980,15 +15001,24 @@
       <code>C3AD-AFA9</code>
     </cheat>
     <cheat>
-      <description>No random battles</description>
-      <code>DDD6-B28B</code>
+      <description>65,536+ GP after each battle</description>
+      <code>3335-0D6E</code>
     </cheat>
     <cheat>
-      <description>No random battles (alt)</description>
-      <code>1D60-0704</code>
+      <description>65,000+ exp points after each battle</description>
+      <code>7E3592FF</code>
+      <code>7E359EFF</code>
     </cheat>
     <cheat>
-      <description>automatically win battles (no EXP or gold gained)</description>
+      <description>Get 99 of items that you are given or find in a pot, treasure chest, ect</description>
+      <code>17BF-D404</code>
+    </cheat>
+    <cheat>
+      <description>Get 99 arrows when you find them in a pot or treasure chest</description>
+      <code>17B4-D4D4</code>
+    </cheat>
+    <cheat>
+      <description>Automatically win battles (no EXP or gold gained)</description>
       <code>7E180102</code>
       <code>7E180008</code>
     </cheat>
@@ -15025,43 +15055,27 @@
       <code>00CE-6D69</code>
     </cheat>
     <cheat>
+      <description>No random battles</description>
+      <code>DDD6-B28B</code>
+    </cheat>
+    <cheat>
+      <description>No random battles (alt)</description>
+      <code>1D60-0704</code>
+    </cheat>
+    <cheat>
       <description>Save anywhere</description>
       <code>CBBA-07A4</code>
     </cheat>
     <cheat>
-      <description>Get at least 150 GP after each battle</description>
-      <code>1B39-070E</code>
-      <code>B139-076E</code>
-      <code>3C39-07AE</code>
-    </cheat>
-    <cheat>
-      <description>Get at least 255 GP after each battle</description>
-      <code>1B39-070E</code>
-      <code>EE39-076E</code>
-      <code>3C39-07AE</code>
-    </cheat>
-    <cheat>
-      <description>Get at least 65,536 GP after each battle</description>
-      <code>3335-0D6E</code>
-    </cheat>
-    <cheat>
-      <description>Get 99 of items that you are given or find in a pot, treasure chest, ect</description>
-      <code>17BF-D404</code>
-    </cheat>
-    <cheat>
-      <description>Get 99 arrows when you find them in a pot or treasure chest</description>
-      <code>17B4-D4D4</code>
-    </cheat>
-    <cheat>
-      <description>Item Cure2 is ultra strong</description>
+      <description>Cure2 is ultra strong</description>
       <code>A6B7-A4E2</code>
     </cheat>
     <cheat>
-      <description>Item Cure2 restores HP to all members in the party during battle</description>
+      <description>Cure2 restores HP to all members in the party during battle</description>
       <code>0DB7-A482</code>
     </cheat>
     <cheat>
-      <description>Item Cure2 restores all HP/MP during battle</description>
+      <description>Cure2 restores all HP/MP during battle</description>
       <code>F1B7-A752</code>
     </cheat>
     <cheat>
@@ -15089,23 +15103,18 @@
       <code>AFB5-DD83</code>
     </cheat>
     <cheat>
-      <description>Get 65,000+ exp points after each battle</description>
-      <code>7E3592FF</code>
-      <code>7E359EFF</code>
-    </cheat>
-    <cheat>
       <description>Character 1 - Max HP</description>
+      <code>7E10470F</code>
+      <code>7E104827</code>
       <code>7E10490F</code>
-      <code>7E20890F</code>
       <code>7E104A27</code>
-      <code>7E208A27</code>
     </cheat>
     <cheat>
       <description>Character 1 - Max MP</description>
-      <code>7E104DE7</code>
-      <code>7E208DE7</code>
-      <code>7E104E03</code>
-      <code>7E208E03</code>
+      <code>7E104B0F</code>
+      <code>7E104C27</code>
+      <code>7E104D0F</code>
+      <code>7E104E27</code>
     </cheat>
     <cheat>
       <description>Character 1 - Max Agility</description>
@@ -15134,17 +15143,17 @@
     </cheat>
     <cheat>
       <description>Character 2 - Max HP</description>
+      <code>7E10C70F</code>
+      <code>7E10C827</code>
       <code>7E10C90F</code>
-      <code>7E21890F</code>
       <code>7E10CA27</code>
-      <code>7E218A27</code>
     </cheat>
     <cheat>
       <description>Character 2 - Max MP</description>
-      <code>7E10CDE7</code>
-      <code>7E218DE7</code>
-      <code>7E10CE03</code>
-      <code>7E218E03</code>
+      <code>7E10CB0F</code>
+      <code>7E10CC27</code>
+      <code>7E10CD0F</code>
+      <code>7E10CE27</code>
     </cheat>
     <cheat>
       <description>Character 2 - Max Agility</description>
@@ -15173,17 +15182,17 @@
     </cheat>
     <cheat>
       <description>Character 3 - Max HP</description>
+      <code>7E10070F</code>
+      <code>7E100827</code>
       <code>7E10090F</code>
-      <code>7E20090F</code>
       <code>7E100A27</code>
-      <code>7E200A27</code>
     </cheat>
     <cheat>
       <description>Character 3 - Max MP</description>
-      <code>7E100DE7</code>
-      <code>7E200DE7</code>
-      <code>7E100E03</code>
-      <code>7E200E03</code>
+      <code>7E100B0F</code>
+      <code>7E100C27</code>
+      <code>7E100D0F</code>
+      <code>7E100E27</code>
     </cheat>
     <cheat>
       <description>Character 3 - Max Agility</description>
@@ -15212,17 +15221,17 @@
     </cheat>
     <cheat>
       <description>Character 4 - Max HP</description>
+      <code>7E11070F</code>
+      <code>7E110827</code>
       <code>7E11090F</code>
-      <code>7E20890F</code>
       <code>7E110A27</code>
-      <code>7E208A27</code>
     </cheat>
     <cheat>
       <description>Character 4 - Max MP</description>
-      <code>7E110DE7</code>
-      <code>7E208DE7</code>
-      <code>7E110E03</code>
-      <code>7E208D03</code>
+      <code>7E110B0F</code>
+      <code>7E110C27</code>
+      <code>7E110D0F</code>
+      <code>7E110E27</code>
     </cheat>
     <cheat>
       <description>Character 4 - Max Agility</description>
@@ -15251,17 +15260,17 @@
     </cheat>
     <cheat>
       <description>Character 5 - Max HP</description>
+      <code>7E10870F</code>
+      <code>7E108827</code>
       <code>7E10890F</code>
-      <code>7E20890F</code>
       <code>7E108A27</code>
-      <code>7E208A27</code>
     </cheat>
     <cheat>
       <description>Character 5 - Max MP</description>
-      <code>7E108DE7</code>
-      <code>7E208DE7</code>
-      <code>7E108E03</code>
-      <code>7E208E03</code>
+      <code>7E108B0F</code>
+      <code>7E108C27</code>
+      <code>7E108D0F</code>
+      <code>7E108E27</code>
     </cheat>
     <cheat>
       <description>Character 5 - Max Agility</description>
@@ -15321,6 +15330,14 @@
       <code>7E144F63</code>
     </cheat>
     <cheat>
+      <description>Have 99 of slot 9</description>
+      <code>7E145163</code>
+    </cheat>
+    <cheat>
+      <description>Have 99 of slot 10</description>
+      <code>7E145363</code>
+    </cheat>
+    <cheat>
       <description>Have Cure3 in slot 1</description>
       <code>7E1440D0</code>
     </cheat>
@@ -15348,9 +15365,17 @@
       <description>Have Spoon in slot 7</description>
       <code>7E144C3E</code>
     </cheat>
+    <cheat>
+      <description>Have Adamant Armor in slot 8</description>
+      <code>7E144E9A</code>
+    </cheat>
   </cartridge>
   <cartridge sha256="10eccc5d2fab81346dd759f6be478dcb682eef981e8d3d662da176e1f9a996bc">
     <name>Final Fantasy III (USA) (Rev 1)</name>
+    <cheat>
+      <description>Almost max HP and MP</description>
+      <code>EEDB-EDA8</code>
+    </cheat>
     <cheat>
       <description>Activate Terra's Morph command</description>
       <code>DAF2-9A58</code>
@@ -15373,41 +15398,29 @@
       <code>3CB8-5DAE</code>
     </cheat>
     <cheat>
-      <description>Infinite item use (alt)</description>
-      <code>3CBC-576E</code>
-    </cheat>
-    <cheat>
       <description>Protect from all status ailments</description>
       <code>3513-5147</code>
       <code>E613-5117</code>
+    </cheat>
+    <cheat>
+      <description>Learn all spells after one battle</description>
+      <code>8D17-54A6</code>
+    </cheat>
+    <cheat>
+      <description>Earn 65,000+ exp points after each battle</description>
+      <code>0793-54D8</code>
+    </cheat>
+    <cheat>
+      <description>Earn tons of EXP after a battle (level 99 takes two battles)</description>
+      <code>0493-54D8</code>
     </cheat>
     <cheat>
       <description>Auto cast Float, Regen, Haste, Shell, Safe and Rflect</description>
       <code>3813-51C7</code>
     </cheat>
     <cheat>
-      <description>Remove curse from Cursed Shield after only 1 battle</description>
-      <code>DD1D-7D66</code>
-    </cheat>
-    <cheat>
-      <description>Steal command always gets the more rare item an enemy has</description>
-      <code>DD72-57AC</code>
-    </cheat>
-    <cheat>
-      <description>Mog never stumbles when he dances</description>
-      <code>DDFC-ED0B</code>
-    </cheat>
-    <cheat>
       <description>Party has Sprint Shoes and Moogle Charm effect</description>
       <code>AADC-EF08</code>
-    </cheat>
-    <cheat>
-      <description>Party has Sprint Shoes and Moogle Charm effect (alt)</description>
-      <code>AADC-EDA8</code>
-    </cheat>
-    <cheat>
-      <description>Party has Sprint Shoes and Moogle Charm effect (alt 2)</description>
-      <code>7E11DF22</code>
     </cheat>
     <cheat>
       <description>Party has Offering effect</description>
@@ -15424,12 +15437,12 @@
       <code>DD90-EFDB</code>
     </cheat>
     <cheat>
-      <description>Party has almost max HP and MP</description>
-      <code>EEDB-EDA8</code>
-    </cheat>
-    <cheat>
       <description>Offering gives character instant kill attacks</description>
       <code>7EF4-8F0B</code>
+    </cheat>
+    <cheat>
+      <description>Remove curse from Cursed Shield after only 1 battle</description>
+      <code>DD1D-7D66</code>
     </cheat>
     <cheat>
       <description>Enable all characters (once you are able to switch)</description>
@@ -15437,12 +15450,12 @@
       <code>EEF2-BEE8</code>
     </cheat>
     <cheat>
-      <description>Learn all spells after one battle</description>
-      <code>8D17-54A6</code>
+      <description>Mog never stumbles when he dances</description>
+      <code>DDFC-ED0B</code>
     </cheat>
     <cheat>
-      <description>Earn tons of EXP after a battle (level 99)</description>
-      <code>0493-54D8</code>
+      <description>Steal command always gets the more rare item an enemy has</description>
+      <code>DD72-57AC</code>
     </cheat>
     <cheat>
       <description>Faster up/down movement on world map</description>
@@ -15459,75 +15472,16 @@
       <code>6DDD-BA56</code>
     </cheat>
     <cheat>
-      <description>Save anywhere (alt)</description>
-      <code>7E020180</code>
-    </cheat>
-    <cheat>
-      <description>Enemy 1 has 0 HP</description>
-      <code>DD7E-2E7C</code>
-      <code>DD7E-2E5C</code>
-    </cheat>
-    <cheat>
-      <description>Enemy 2 has 0 HP</description>
-      <code>DD7E-2E8C</code>
-      <code>DD7E-2EEC</code>
-    </cheat>
-    <cheat>
-      <description>Enemy 3 has 0 HP</description>
-      <code>DD7D-FA78</code>
-      <code>DD7D-FA58</code>
-    </cheat>
-    <cheat>
-      <description>Enemy 4 has 0 HP</description>
-      <code>DD7D-FA88</code>
-      <code>DD7D-FAE8</code>
-    </cheat>
-    <cheat>
-      <description>Enemy 5 has 0 HP</description>
-      <code>DD7D-F278</code>
-      <code>DD7D-F258</code>
-    </cheat>
-    <cheat>
-      <description>Enemy 6 has 0 HP</description>
-      <code>DD7D-F288</code>
-      <code>DD7D-F2E8</code>
-    </cheat>
-    <cheat>
-      <description>Enemy 1 has 0 HP (alt)</description>
-      <code>7E3BFC00</code>
-      <code>7E3BFD00</code>
-    </cheat>
-    <cheat>
-      <description>Enemy 2 has 0 HP (alt)</description>
-      <code>7E3BFE00</code>
-      <code>7E3BFF00</code>
-    </cheat>
-    <cheat>
-      <description>Enemy 3 has 0 HP (alt)</description>
-      <code>7E3C0000</code>
-      <code>7E3C0100</code>
-    </cheat>
-    <cheat>
-      <description>Enemy 4 has 0 HP (alt)</description>
-      <code>7E3C0200</code>
-      <code>7E3C0300</code>
-    </cheat>
-    <cheat>
-      <description>Enemy 5 has 0 HP (alt)</description>
-      <code>7E3C0400</code>
-      <code>7E3C0500</code>
-    </cheat>
-    <cheat>
-      <description>Enemy 6 has 0 HP (alt)</description>
-      <code>7E3C0600</code>
-      <code>7E3C0700</code>
-    </cheat>
-    <cheat>
       <description>Have 94 of all items when arrange is used</description>
       <code>CB48-8462</code>
       <code>6C48-87D2</code>
       <code>CE44-E7A2</code>
       <code>2347-ED62</code>
+    </cheat>
+    <cheat>
+      <description>Have 99 Sprint Shoes in slot 10</description>
+      <code>7E1872E6</code>
+      <code>7E197263</code>
     </cheat>
     <cheat>
       <description>Have all Blitz's</description>
@@ -15588,6 +15542,36 @@
       <code>EEF1-B38C</code>
       <code>EEF1-B3EC</code>
       <code>EEF1-BE7C</code>
+    </cheat>
+    <cheat>
+      <description>Enemy 1 has 0 HP</description>
+      <code>DD7E-2E7C</code>
+      <code>DD7E-2E5C</code>
+    </cheat>
+    <cheat>
+      <description>Enemy 2 has 0 HP</description>
+      <code>DD7E-2E8C</code>
+      <code>DD7E-2EEC</code>
+    </cheat>
+    <cheat>
+      <description>Enemy 3 has 0 HP</description>
+      <code>DD7D-FA78</code>
+      <code>DD7D-FA58</code>
+    </cheat>
+    <cheat>
+      <description>Enemy 4 has 0 HP</description>
+      <code>DD7D-FA88</code>
+      <code>DD7D-FAE8</code>
+    </cheat>
+    <cheat>
+      <description>Enemy 5 has 0 HP</description>
+      <code>DD7D-F278</code>
+      <code>DD7D-F258</code>
+    </cheat>
+    <cheat>
+      <description>Enemy 6 has 0 HP</description>
+      <code>DD7D-F288</code>
+      <code>DD7D-F2E8</code>
     </cheat>
     <cheat>
       <description>Celes - Level 99</description>
@@ -16349,6 +16333,10 @@
   <cartridge sha256="0f51b4fca41b7fd509e4b8f9d543151f68efa5e97b08493e4b2a0c06f5d8d5e2">
     <name>Final Fantasy III (USA)</name>
     <cheat>
+      <description>Almost max HP and MP</description>
+      <code>EEDB-EDA8</code>
+    </cheat>
+    <cheat>
       <description>Activate Terra's Morph command</description>
       <code>DAF2-9A58</code>
     </cheat>
@@ -16375,28 +16363,28 @@
       <code>E613-5117</code>
     </cheat>
     <cheat>
+      <description>Learn all spells after one battle</description>
+      <code>8D17-54A6</code>
+    </cheat>
+    <cheat>
+      <description>Earn 65,000+ exp points after each battle</description>
+      <code>0793-54D8</code>
+    </cheat>
+    <cheat>
+      <description>Earn tons of EXP after a battle (level 99 takes two battles)</description>
+      <code>0493-54D8</code>
+    </cheat>
+    <cheat>
       <description>Auto Cast Float, Regen, Haste, Shell, Safe and Rflect</description>
       <code>3813-51C7</code>
     </cheat>
     <cheat>
-      <description>Remove curse from Cursed Shield after only 1 battle</description>
-      <code>DD1D-7D66</code>
-    </cheat>
-    <cheat>
-      <description>Steal command always gets the more rare item an enemy has</description>
-      <code>DD72-57AC</code>
-    </cheat>
-    <cheat>
-      <description>Mog never stumbles when he dances</description>
-      <code>DDFC-ED0B</code>
+      <description>Vigor/Speed/Stamina/MagPwr becomes 255</description>
+      <code>D762-EF68</code>
     </cheat>
     <cheat>
       <description>Party has Sprint Shoes and Moogle Charm effect</description>
       <code>44F2-9EE6</code>
-    </cheat>
-    <cheat>
-      <description>Party has Sprint Shoes and Moogle Charm effect (alt)</description>
-      <code>7E11DF22</code>
     </cheat>
     <cheat>
       <description>Party has Offering effect</description>
@@ -16413,29 +16401,20 @@
       <code>DD90-EFDB</code>
     </cheat>
     <cheat>
-      <description>Party has almost max HP and MP</description>
-      <code>EEDB-EDA8</code>
-    </cheat>
-    <cheat>
       <description>Offering gives character instant kill attacks</description>
       <code>7EF4-8F0B</code>
     </cheat>
     <cheat>
-      <description>Enable all characters (once you are able to switch)</description>
-      <code>EEF2-BE88</code>
-      <code>EEF2-BEE8</code>
+      <description>Mog never stumbles when he dances</description>
+      <code>DDFC-ED0B</code>
     </cheat>
     <cheat>
-      <description>Vigor/Speed/Stamina/MagPwr becomes 255</description>
-      <code>D762-EF68</code>
+      <description>Steal command always gets the more rare item an enemy has</description>
+      <code>DD72-57AC</code>
     </cheat>
     <cheat>
-      <description>Learn all spells after one battle</description>
-      <code>8D17-54A6</code>
-    </cheat>
-    <cheat>
-      <description>Earn tons of EXP after a battle (level 99)</description>
-      <code>D493-54D8</code>
+      <description>Remove curse from Cursed Shield after only 1 battle</description>
+      <code>DD1D-7D66</code>
     </cheat>
     <cheat>
       <description>Faster up/down movement on world map</description>
@@ -16448,68 +16427,13 @@
       <code>3DF0-EC78</code>
     </cheat>
     <cheat>
-      <description>Save anywhere</description>
+      <description>Enable all characters (once you are able to switch)</description>
+      <code>EEF2-BE88</code>
+      <code>EEF2-BEE8</code>
+    </cheat>
+    <cheat>
+      <description>Save anywhere (disable if shops sell the wrong items)</description>
       <code>6DDD-BA56</code>
-    </cheat>
-    <cheat>
-      <description>Enemy 1 has 0 HP</description>
-      <code>DD7E-2E7C</code>
-      <code>DD7E-2E5C</code>
-    </cheat>
-    <cheat>
-      <description>Enemy 2 has 0 HP</description>
-      <code>DD7E-2E8C</code>
-      <code>DD7E-2EEC</code>
-    </cheat>
-    <cheat>
-      <description>Enemy 3 has 0 HP</description>
-      <code>DD7D-FA78</code>
-      <code>DD7D-FA58</code>
-    </cheat>
-    <cheat>
-      <description>Enemy 4 has 0 HP</description>
-      <code>DD7D-FA88</code>
-      <code>DD7D-FAE8</code>
-    </cheat>
-    <cheat>
-      <description>Enemy 5 has 0 HP</description>
-      <code>DD7D-F278</code>
-      <code>DD7D-F258</code>
-    </cheat>
-    <cheat>
-      <description>Enemy 6 has 0 HP</description>
-      <code>DD7D-F288</code>
-      <code>DD7D-F2E8</code>
-    </cheat>
-    <cheat>
-      <description>Enemy 1 has 0 HP (alt)</description>
-      <code>7E3BFC00</code>
-      <code>7E3BFD00</code>
-    </cheat>
-    <cheat>
-      <description>Enemy 2 has 0 HP (alt)</description>
-      <code>7E3BFE00</code>
-      <code>7E3BFF00</code>
-    </cheat>
-    <cheat>
-      <description>Enemy 3 has 0 HP (alt)</description>
-      <code>7E3C0000</code>
-      <code>7E3C0100</code>
-    </cheat>
-    <cheat>
-      <description>Enemy 4 has 0 HP (alt)</description>
-      <code>7E3C0200</code>
-      <code>7E3C0300</code>
-    </cheat>
-    <cheat>
-      <description>Enemy 5 has 0 HP (alt)</description>
-      <code>7E3C0400</code>
-      <code>7E3C0500</code>
-    </cheat>
-    <cheat>
-      <description>Enemy 6 has 0 HP (alt)</description>
-      <code>7E3C0600</code>
-      <code>7E3C0700</code>
     </cheat>
     <cheat>
       <description>Have 94 of all items when arrange is used</description>
@@ -16517,6 +16441,11 @@
       <code>6C48-87D2</code>
       <code>CE44-E7A2</code>
       <code>2347-ED62</code>
+    </cheat>
+    <cheat>
+      <description>Have 99 Sprint Shoes in slot 10</description>
+      <code>7E1872E6</code>
+      <code>7E197263</code>
     </cheat>
     <cheat>
       <description>Have all Blitz's</description>
@@ -16577,6 +16506,36 @@
       <code>EEF1-B38C</code>
       <code>EEF1-B3EC</code>
       <code>EEF1-BE7C</code>
+    </cheat>
+    <cheat>
+      <description>Enemy 1 has 0 HP</description>
+      <code>DD7E-2E7C</code>
+      <code>DD7E-2E5C</code>
+    </cheat>
+    <cheat>
+      <description>Enemy 2 has 0 HP</description>
+      <code>DD7E-2E8C</code>
+      <code>DD7E-2EEC</code>
+    </cheat>
+    <cheat>
+      <description>Enemy 3 has 0 HP</description>
+      <code>DD7D-FA78</code>
+      <code>DD7D-FA58</code>
+    </cheat>
+    <cheat>
+      <description>Enemy 4 has 0 HP</description>
+      <code>DD7D-FA88</code>
+      <code>DD7D-FAE8</code>
+    </cheat>
+    <cheat>
+      <description>Enemy 5 has 0 HP</description>
+      <code>DD7D-F278</code>
+      <code>DD7D-F258</code>
+    </cheat>
+    <cheat>
+      <description>Enemy 6 has 0 HP</description>
+      <code>DD7D-F288</code>
+      <code>DD7D-F2E8</code>
     </cheat>
     <cheat>
       <description>Celes - Level 99</description>
@@ -18351,6 +18310,28 @@
       <code>4D6C-D70D</code>
     </cheat>
   </cartridge>
+  <cartridge sha256="b248b2122a0caf99298ebd9a4f66ad8047dbfce1e4bbac8219ba3ea9fb7488b5">
+    <name>Ghost Chaser Densei (Japan)</name>
+    <cheat>
+      <description>Invincibility</description>
+      <code>2D83-14AD</code>
+    </cheat>
+    <cheat>
+      <description>Infinite health</description>
+      <code>82A9-3D6F</code>
+    </cheat>
+    <cheat>
+      <description>Infinite time</description>
+      <code>C2A4-47D1</code>
+    </cheat>
+    <cheat>
+      <description>Hit anywhere</description>
+      <code>3D87-CFA4</code>
+      <code>7D87-C464</code>
+      <code>7D87-C4A4</code>
+      <code>D487-C404</code>
+    </cheat>
+  </cartridge>
   <cartridge sha256="a4ceb31b82ea532e6eb640fa2eda61625758e72251efa5f0ae9a984f4a98a8a0">
     <name>Ghoul Patrol (USA)</name>
     <cheat>
@@ -18552,6 +18533,10 @@
     <cheat>
       <description>Infinite credits (alt)</description>
       <code>00D230AD</code>
+    </cheat>
+    <cheat>
+      <description>Hit anywhere - both players</description>
+      <code>4034-A704</code>
     </cheat>
     <cheat>
       <description>Makes Earwig Scorpion (Stage 1 mayor) much easier to defeat</description>
@@ -19358,6 +19343,11 @@
   </cartridge>
   <cartridge sha256="48a3ac52e2c9128abc2dc60e07817a51898e8a93be0d51d6f541a8635263a089">
     <name>Home Improvement (USA)</name>
+    <cheat>
+      <description>Invincibility</description>
+      <code>6D62-4B82</code>
+      <code>6D69-1CEA</code>
+    </cheat>
     <cheat>
       <description>Infinite lives</description>
       <code>CB69-1FDE</code>
@@ -22574,6 +22564,13 @@
   <cartridge sha256="7a5261f1a5e84b67483c79fb002ce1539f2360f88333bda60f12e617d86e0def">
     <name>Killer Instinct (USA) (Rev 1)</name>
     <cheat>
+      <description>Invincibility - P1</description>
+      <code>3DBB-3F07</code>
+      <code>A7BB-3407</code>
+      <code>DDBB-3F67</code>
+      <code>EDBB-34D7</code>
+    </cheat>
+    <cheat>
       <description>Infinite health - P1</description>
       <code>7E0D2478</code>
       <code>7E0D2678</code>
@@ -22592,6 +22589,14 @@
       <description>No health - P2</description>
       <code>7E0D2800</code>
       <code>7E0D2A00</code>
+    </cheat>
+    <cheat>
+      <description>Hit anywhere - P1</description>
+      <code>0AB6-3D67</code>
+      <code>CAB6-3DA7</code>
+      <code>CFB6-3FD7</code>
+      <code>D2B6-3D07</code>
+      <code>EDB6-3DD7</code>
     </cheat>
     <cheat>
       <description>CPU cannot move from starting position</description>
@@ -22609,6 +22614,13 @@
       <code>3C61-D4DF</code>
     </cheat>
     <cheat>
+      <description>Invincibility - P1</description>
+      <code>3DB6-3467</code>
+      <code>A7B6-3767</code>
+      <code>DDB6-34A7</code>
+      <code>EDB6-3707</code>
+    </cheat>
+    <cheat>
       <description>Infinite health - P1</description>
       <code>7E0D2478</code>
       <code>7E0D2678</code>
@@ -22627,6 +22639,14 @@
       <description>No health - P2</description>
       <code>7E0D2800</code>
       <code>7E0D2A00</code>
+    </cheat>
+    <cheat>
+      <description>Hit anywhere - P1</description>
+      <code>0AB5-3FA7</code>
+      <code>CFB5-3407</code>
+      <code>CFB5-34D7</code>
+      <code>D2B5-3F67</code>
+      <code>EDB5-3F07</code>
     </cheat>
     <cheat>
       <description>CPU cannot move from starting position</description>
@@ -22839,7 +22859,7 @@
   <cartridge sha256="6638b5541059814d4c34574e5e277ef613aebf81c91d3def557a7642fb5840e1">
     <name>King of Dragons, The (USA)</name>
     <cheat>
-      <description>Invincibility</description>
+      <description>Invincibility - both players</description>
       <code>ED76-E4AF</code>
     </cheat>
     <cheat>
@@ -22851,7 +22871,7 @@
       <code>7E0CB4FF</code>
     </cheat>
     <cheat>
-      <description>Infinite health</description>
+      <description>Infinite health - both players</description>
       <code>C9B5-7FDD</code>
     </cheat>
     <cheat>
@@ -22906,6 +22926,14 @@
       <description>One hit kills</description>
       <code>4069-EF64</code>
       <code>4069-E4D4</code>
+    </cheat>
+    <cheat>
+      <description>Hit anywhere</description>
+      <code>6D61-8DA4</code>
+      <code>6D64-87A4</code>
+      <code>6D66-87A4</code>
+      <code>6D6E-54D4</code>
+      <code>6D6E-5D04</code>
     </cheat>
     <cheat>
       <description>Start with level 6 Sword</description>
@@ -24397,6 +24425,14 @@
     <cheat>
       <description>Get items from anywhere</description>
       <code>402F-07B6</code>
+    </cheat>
+    <cheat>
+      <description>Sword can destroy solid objects in Overworld</description>
+      <code>6D87-611E</code>
+    </cheat>
+    <cheat>
+      <description>Objects that you can pick up and throw never break away</description>
+      <code>FD37-6FF6</code>
     </cheat>
     <cheat>
       <description>Always get Faerie at the Pond Of Happiness (as if you threw in 100 rupees)</description>
@@ -29863,9 +29899,8 @@
       <code>7E043209</code>
     </cheat>
     <cheat>
-      <description>No health loss on collision with enemies</description>
-      <code>C2BC-D7A5</code>
-      <code>C280-D7DD</code>
+      <description>Infinite continues</description>
+      <code>7E042D09</code>
     </cheat>
     <cheat>
       <description>Infinite support health</description>
@@ -29881,20 +29916,13 @@
       <code>C2B4-6FD9</code>
     </cheat>
     <cheat>
+      <description>No health loss on collision with enemies</description>
+      <code>C2BC-D7A5</code>
+      <code>C280-D7DD</code>
+    </cheat>
+    <cheat>
       <description>No magic counter countdown</description>
       <code>C2CC-0F67</code>
-    </cheat>
-    <cheat>
-      <description>Slower magic counter countdown</description>
-      <code>5ECC-0D67</code>
-    </cheat>
-    <cheat>
-      <description>Faster magic counter countdown</description>
-      <code>EECC-0D67</code>
-    </cheat>
-    <cheat>
-      <description>Have powered-up attack</description>
-      <code>7E068A06</code>
     </cheat>
     <cheat>
       <description>Infinite Silver Keys</description>
@@ -29909,6 +29937,10 @@
       <code>7E041109</code>
     </cheat>
     <cheat>
+      <description>Have powered-up attack</description>
+      <code>7E068A06</code>
+    </cheat>
+    <cheat>
       <description>Have optimum sword</description>
       <code>7E040A06</code>
     </cheat>
@@ -29921,12 +29953,28 @@
       <code>7E043502</code>
     </cheat>
     <cheat>
+      <description>Hit anywhere</description>
+      <code>3C67-046A</code>
+      <code>C267-0FAA</code>
+      <code>D667-04DA</code>
+      <code>ED67-04AA</code>
+      <code>F167-040A</code>
+    </cheat>
+    <cheat>
+      <description>One hit kills</description>
+      <code>6D63-D40A</code>
+    </cheat>
+    <cheat>
       <description>Barrier Invincibility</description>
       <code>7E06D6FF</code>
     </cheat>
     <cheat>
-      <description>Infinite continues</description>
-      <code>7E042D09</code>
+      <description>Slower magic counter countdown</description>
+      <code>5ECC-0D67</code>
+    </cheat>
+    <cheat>
+      <description>Faster magic counter countdown</description>
+      <code>EECC-0D67</code>
     </cheat>
     <cheat>
       <description>Set score to 90,000,000</description>
@@ -30124,6 +30172,17 @@
     <cheat>
       <description>Start with 10 lives</description>
       <code>DB69-07A0</code>
+    </cheat>
+  </cartridge>
+  <cartridge sha256="78d0f6dd9ce0813e0532c7b25c7fa0b6b945d12a4ace21aa940e98babf4dacb1">
+    <name>Majuu Ou (Japan)</name>
+    <cheat>
+      <description>Infinite health</description>
+      <code>7E009F50</code>
+    </cheat>
+    <cheat>
+      <description>Infinite lives</description>
+      <code>7E00A301</code>
     </cheat>
   </cartridge>
   <cartridge sha256="8267e2f092c86d5a29c9a826db82c7473638e28e2507cdaf5c86981f07cd0bef">
@@ -30718,6 +30777,13 @@
     <cheat>
       <description>Thunder Time-Delay Mines start at 250</description>
       <code>EC00-7598</code>
+    </cheat>
+  </cartridge>
+  <cartridge sha256="ee1a030f30f3ab06361921447b3fcf84c987dd13d76e62964e44720e0ec82c56">
+    <name>Mega lo Mania (Europe) (En,Fr,De)</name>
+    <cheat>
+      <description>Infinite number of people to use</description>
+      <code>7EE8D964</code>
     </cheat>
   </cartridge>
   <cartridge sha256="a255fec32453739903a1954149f19bc9658f4a415600b44badf1d4e5e13a16f9">
@@ -31841,6 +31907,17 @@
     <cheat>
       <description>Infinite lives</description>
       <code>C243-7707</code>
+    </cheat>
+  </cartridge>
+  <cartridge sha256="8715a641f2e4dd8b6066be7f2683d9129fff3fcccaf0a09cc8bdd2aa56460764">
+    <name>Mohawk &amp; Headphone Jack (USA)</name>
+    <cheat>
+      <description>Infinite health</description>
+      <code>7E030803</code>
+    </cheat>
+    <cheat>
+      <description>Infinite lives</description>
+      <code>7E030605</code>
     </cheat>
   </cartridge>
   <cartridge sha256="6b0ac4d52d24536cdb7d9d0dc7d19ee30d08ac34363983290c5912ccc850fa0d">
@@ -36324,6 +36401,13 @@
       <code>17B5-ADD7</code>
     </cheat>
   </cartridge>
+  <cartridge sha256="14ad9d2fb8e6bb0f49bc9e53f3c472177653d1c24102169ade308a2fab8a8888">
+    <name>Parodius da! - Shinwa kara Owarai e (Japan)</name>
+    <cheat>
+      <description>Infinite lives</description>
+      <code>7E009803</code>
+    </cheat>
+  </cartridge>
   <cartridge sha256="c414a4084b3d03aba19496d2efdd68fcf826194d8f1308f5c98e3a7af2fcc063">
     <name>Peace Keepers, The (USA)</name>
     <cheat>
@@ -36664,6 +36748,13 @@
       <code>BECC-CD0F</code>
     </cheat>
   </cartridge>
+  <cartridge sha256="0888d20ab2f834c77b0a2dc2162c43890a1640adc78c6b0bb5892ca8d5008ad3">
+    <name>Pinball Fantasies (USA)</name>
+    <cheat>
+      <description>Infinite balls</description>
+      <code>7E00B803</code>
+    </cheat>
+  </cartridge>
   <cartridge sha256="d0f4a5040ecf96dc49aa0084160e291a38f2ee75319750db4d6687ab36828da9">
     <name>Pink Goes to Hollywood (USA)</name>
     <cheat>
@@ -36690,6 +36781,17 @@
     <cheat>
       <description>Infinite lives</description>
       <code>7E03DE03</code>
+    </cheat>
+  </cartridge>
+  <cartridge sha256="98c51c3bb577600fe79577c323333a791baa30904f37c695890e6e380b75e3c8">
+    <name>Pinocchio (USA)</name>
+    <cheat>
+      <description>Infinite health</description>
+      <code>7E03D850</code>
+    </cheat>
+    <cheat>
+      <description>Infinite lives</description>
+      <code>7E03DE05</code>
     </cheat>
   </cartridge>
   <cartridge sha256="447dfa710e69479159e9d407474fbf5f67d3a3330ab0c7627afd123ded3fdb3a">
@@ -37026,6 +37128,13 @@
     <cheat>
       <description>Infinite hearts when riding Spirit Dog</description>
       <code>7E19F205</code>
+    </cheat>
+  </cartridge>
+  <cartridge sha256="000f4534a0376958edcc7ae3e6c5a7ea0dd6a775646207f60ad3923e27f110f3">
+    <name>Pop'n TwinBee - Rainbow Bell Adventures (Europe)</name>
+    <cheat>
+      <description>Infinite health</description>
+      <code>7E02EC64</code>
     </cheat>
   </cartridge>
   <cartridge sha256="5e580f220ed16281df8ee9a5f450b553f39f8c4078d3f3048d66bda15f98e19f">
@@ -37499,6 +37608,17 @@
     <cheat>
       <description>Start on level 20</description>
       <code>F7B7-D46E</code>
+    </cheat>
+  </cartridge>
+  <cartridge sha256="04ca1a481093c4a7e12f18b33697d6e05e50e30e0f5b1655aa265abd14719bba">
+    <name>Prince of Persia 2 - The Shadow &amp; The Flame (USA)</name>
+    <cheat>
+      <description>Infinite health</description>
+      <code>7E095703</code>
+    </cheat>
+    <cheat>
+      <description>Infinite time</description>
+      <code>7E0B9869</code>
     </cheat>
   </cartridge>
   <cartridge sha256="65f7123ab4fc9bad24b1976da8e84976cc6977861626a05d4e2cce132ef3fd42">
@@ -43604,6 +43724,13 @@
       <code>33CF-4707</code>
     </cheat>
     <cheat>
+      <description>Hit anywhere</description>
+      <code>6D39-4FA7</code>
+      <code>6D3D-4767</code>
+      <code>DD30-47A7</code>
+      <code>DD30-4F67</code>
+    </cheat>
+    <cheat>
       <description>Increase diagnol webbing with R button</description>
       <code>33CA-1F6F</code>
     </cheat>
@@ -47814,12 +47941,16 @@
       <code>9980-44DD</code>
     </cheat>
     <cheat>
-      <description>Allows you to drive anywhere</description>
+      <description>Drive anywhere</description>
       <code>80FA9320</code>
     </cheat>
     <cheat>
       <description>Drive through walls</description>
       <code>4FEB-CDA4</code>
+    </cheat>
+    <cheat>
+      <description>Drive through opponents</description>
+      <code>97A6-CDAD</code>
     </cheat>
     <cheat>
       <description>Mud and other land doesn't effect driving</description>
@@ -54417,6 +54548,25 @@
       <description>All holes are par 4</description>
       <code>CE6A-64A9</code>
       <code>1A6A-67D9</code>
+    </cheat>
+  </cartridge>
+  <cartridge sha256="47dd8ea2d12a6bb2a9774de1d492259fc4fb9f8ec7976383bbfd922532671f6b">
+    <name>True Lies (USA)</name>
+    <cheat>
+      <description>Infinite hand gun shells</description>
+      <code>7E00A50F</code>
+    </cheat>
+    <cheat>
+      <description>Infinite big gun shells</description>
+      <code>7E00A973</code>
+    </cheat>
+    <cheat>
+      <description>Infinite Grenades on pick-up</description>
+      <code>7E00AB03</code>
+    </cheat>
+    <cheat>
+      <description>Infinite lives</description>
+      <code>7E1A5705</code>
     </cheat>
   </cartridge>
   <cartridge sha256="8f62d014f513a7dcbca5aa76cbe476c3e4526100f34913af831bc05dab029bd1">

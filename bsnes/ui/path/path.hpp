@@ -26,6 +26,7 @@ struct Path : public configuration {
   string bst;
   string cht;
   string log;
+  string bmp;
 
   string home(const string &filename);
   string load(const string &path);

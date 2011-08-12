@@ -20,8 +20,6 @@ void OBC1::power() {
 }
 
 void OBC1::reset() {
-  for(unsigned i = 0x0000; i <= 0x1fff; i++) ram_write(i, 0xff);
-
   status.baseptr = (ram_read(0x1ff5) & 1) ? 0x1800 : 0x1c00;
   status.address = (ram_read(0x1ff6) & 0x7f);
   status.shift   = (ram_read(0x1ff6) & 3) << 1;

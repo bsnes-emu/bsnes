@@ -34,7 +34,7 @@ void Application::main(int argc, char **argv) {
   mainWindow.setVisible();
   OS::processEvents();
 
-  #if defined(PHOENIX_WINDOWS)
+  #if defined(PLATFORM_WIN)
   video.driver("Direct3D");
   #else
   video.driver("OpenGL");
@@ -44,7 +44,7 @@ void Application::main(int argc, char **argv) {
   video.set(Video::Filter, (unsigned)0);
   video.init();
 
-  #if defined(PHOENIX_WINDOWS)
+  #if defined(PLATFORM_WIN)
   audio.driver("XAudio2");
   #else
   audio.driver("ALSA");
@@ -58,7 +58,7 @@ void Application::main(int argc, char **argv) {
   audio.set(Audio::ResampleRatio, 4194304.0 / 44100.0);
   audio.init();
 
-  #if defined(PHOENIX_WINDOWS)
+  #if defined(PLATFORM_WIN)
   input.driver("RawInput");
   #else
   input.driver("SDL");

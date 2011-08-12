@@ -69,6 +69,7 @@ string Path::load(SNES::Cartridge::Slot slot, const string &hint) {
   if(hint.endswith(".bst") && bst != "") filePath = bst;
   if(hint.endswith(".cht") && cht != "") filePath = cht;
   if(hint.endswith(".log") && log != "") filePath = log;
+  if(hint.endswith(".bmp") && bmp != "") filePath = bmp;
 
   filePath = decode(filePath, basePath);
   return { filePath, baseName, hint };
@@ -168,4 +169,5 @@ Path::Path() {
   attach(bst = "", "bst");
   attach(cht = "", "cht");
   attach(log = "", "log");
+  attach(bmp = "", "bmp");
 }

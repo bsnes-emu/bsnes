@@ -1,6 +1,7 @@
 #include <snes/snes.hpp>
 
 #include <nall/base64.hpp>
+#include <nall/bmp.hpp>
 #include <nall/compositor.hpp>
 #include <nall/config.hpp>
 #include <nall/directory.hpp>

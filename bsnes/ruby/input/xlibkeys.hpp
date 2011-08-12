@@ -16,11 +16,11 @@ enum XScancode {
   LeftShift, RightShift, LeftControl, RightControl, LeftAlt, RightAlt, LeftSuper, RightSuper,
 };
 
-void x_poll(int16_t *table) {
+void x_poll(Display *display, int16_t *table) {
+  if(!display) return;
+
   char state[32];
-  Display *display = XOpenDisplay(0);
   XQueryKeymap(display, state);
-  XCloseDisplay(display);
 
   #define key(id) table[keyboard(0)[id]]
   #define pressed(id) (bool)(state[scancode[id] >> 3] & (1 << (scancode[id] & 7)))
@@ -139,8 +139,9 @@ void x_poll(int16_t *table) {
   #undef pressed
 }
 
-void x_init() {
-  Display *display = XOpenDisplay(0);
+void x_init(Display *display) {
+  if(!display) return;
+
   memset(&scancode, 0, sizeof scancode);
 
   #define assign(x, y) scancode[x] = XKeysymToKeycode(display, y)
@@ -259,6 +260,4 @@ void x_init() {
   assign(Menu, XK_Menu);
 
   #undef assign
-
-  XCloseDisplay(display);
 }

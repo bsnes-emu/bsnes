@@ -97,7 +97,7 @@ struct pInputSDL {
     //Keyboard
     //========
 
-    x_poll(table);
+    x_poll(device.display, table);
 
     //=====
     //Mouse
@@ -172,7 +172,6 @@ struct pInputSDL {
   }
 
   bool init() {
-    x_init();
     SDL_InitSubSystem(SDL_INIT_JOYSTICK);
     SDL_JoystickEventState(SDL_IGNORE);
 
@@ -182,6 +181,7 @@ struct pInputSDL {
     XGetWindowAttributes(device.display, device.rootwindow, &attributes);
     device.screenwidth  = attributes.width;
     device.screenheight = attributes.height;
+    x_init(device.display);
 
     //Xlib: "because XShowCursor(false) would be too easy."
     //create a fully transparent cursor named InvisibleCursor,

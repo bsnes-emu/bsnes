@@ -30,13 +30,13 @@ public:
 
   bool poll(int16_t *table) {
     memset(table, 0, Scancode::Limit * sizeof(int16_t));
-    x_poll(table);
+    x_poll(display, table);
     return true;
   }
 
   bool init() {
-    x_init();
     display = XOpenDisplay(0);
+    x_init(display);
     return true;
   }
 

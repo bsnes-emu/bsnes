@@ -7,4 +7,5 @@ synchronize() {
 
 synchronize "nall"
 synchronize "phoenix"
+rm -r nall/test
 rm -r phoenix/test*

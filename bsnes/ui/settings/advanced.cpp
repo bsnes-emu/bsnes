@@ -4,7 +4,7 @@ void AdvancedSettings::create() {
   title.setText("Advanced Settings");
   title.setFont(application.titleFont);
 
-  driverSelectionLabel.setText("Driver Selection:");
+  driverSelectionLabel.setText("Driver selection:");
   driverSelectionLabel.setFont(application.proportionalFontBold);
   videoDriverLabel.setText("Video:");
   audioDriverLabel.setText("Audio:");
@@ -18,7 +18,7 @@ void AdvancedSettings::create() {
   if(config.settings.focusPolicy == 0) focusPolicyPause.setChecked();
   if(config.settings.focusPolicy == 1) focusPolicyIgnore.setChecked();
   if(config.settings.focusPolicy == 2) focusPolicyAllow.setChecked();
-  compositorPolicyLabel.setText("Disable Compositor:");
+  compositorPolicyLabel.setText("Disable window compositor:");
   compositorPolicyLabel.setFont(application.proportionalFontBold);
   compositorPolicyNever.setText("Never");
   compositorPolicyFullScreen.setText("Fullscreen");
