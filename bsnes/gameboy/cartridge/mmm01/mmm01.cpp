@@ -55,7 +55,7 @@ void Cartridge::MMM01::mmio_write(uint16 addr, uint8 data) {
 
 void Cartridge::MMM01::power() {
   rom_mode = 0;
-  rom_base = 0x00;
+  rom_base = 0;
 
   ram_enable = false;
   rom_select = 0x01;

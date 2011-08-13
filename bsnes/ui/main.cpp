@@ -144,6 +144,7 @@ void Application::main(int argc, char **argv) {
   }
 
   cartridge.unload();
+  utility.setFullScreen(false);
   saveGeometry();
   foreach(window, windows) window->setVisible(false);
   OS::processEvents();

@@ -580,7 +580,8 @@ void CPU::op_di() {
 }
 
 void CPU::op_ei() {
-  status.ime = 1;
+  status.ei = true;
+//status.ime = 1;
 }
 
 //jump commands
