@@ -32,6 +32,10 @@ namespace nall {
       return true;
     }
 
+    static bool read(const string &filename, const uint8_t *&data, unsigned &size) {
+      return file::read(filename, (uint8_t*&)data, size);
+    }
+
     static bool write(const string &filename, const uint8_t *data, unsigned size) {
       file fp;
       if(fp.open(filename, mode::write) == false) return false;

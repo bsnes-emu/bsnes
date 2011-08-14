@@ -5,6 +5,7 @@
 #include <nall/compositor.hpp>
 #include <nall/config.hpp>
 #include <nall/directory.hpp>
+#include <nall/dsp.hpp>
 #include <nall/filemap.hpp>
 #include <nall/input.hpp>
 #include <nall/resource.hpp>
@@ -59,4 +60,5 @@ private:
   void saveGeometry();
 };
 
+extern nall::dsp dspaudio;
 extern Application application;

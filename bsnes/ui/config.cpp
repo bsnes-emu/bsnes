@@ -37,6 +37,7 @@ void Configuration::create() {
   attach(audio.synchronize = true, "audio.synchronize");
   attach(audio.mute = false, "audio.mute");
   attach(audio.volume = 100, "audio.volume");
+  attach(audio.balance = 0, "audio.balance");
   attach(audio.latency = 60, "audio.latency");
   attach(audio.inputFrequency = 32000, "audio.inputFrequency");
   attach(audio.outputFrequency = 44100, "audio.outputFrequency");

@@ -161,6 +161,11 @@ VideoInterface::~VideoInterface() { term(); }
 
 /* AudioInterface */
 
+const char *Audio::Handle = "Handle";
+const char *Audio::Synchronize = "Synchronize";
+const char *Audio::Frequency = "Frequency";
+const char *Audio::Latency = "Latency";
+
 void AudioInterface::driver(const char *driver) {
   if(p) term();
 
@@ -269,7 +274,25 @@ const char* AudioInterface::driver_list() {
   "None";
 }
 
-#include "ruby_audio.cpp"
+bool AudioInterface::init() {
+  if(!p) driver();
+  return p->init();
+}
+
+void AudioInterface::term() {
+  if(p) {
+    delete p;
+    p = 0;
+  }
+}
+
+bool AudioInterface::cap(const string& name) { return p ? p->cap(name) : false; }
+any AudioInterface::get(const string& name) { return p ? p->get(name) : false; }
+bool AudioInterface::set(const string& name, const any& value) { return p ? p->set(name, value) : false; }
+void AudioInterface::sample(uint16_t left, uint16_t right) { if(p) p->sample(left, right); }
+void AudioInterface::clear() { if(p) p->clear(); }
+AudioInterface::AudioInterface() : p(0) {}
+AudioInterface::~AudioInterface() { term(); }
 
 /* InputInterface */
 

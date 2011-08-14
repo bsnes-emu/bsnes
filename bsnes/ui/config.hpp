@@ -20,6 +20,7 @@ struct Configuration : public configuration {
     bool synchronize;
     bool mute;
     unsigned volume;
+    unsigned balance;
     unsigned latency;
     unsigned inputFrequency;
     unsigned outputFrequency;

@@ -16,7 +16,7 @@ struct Filter : public library {
 
 struct Interface : public SNES::Interface {
   void video_refresh(const uint16_t *data, bool hires, bool interlace, bool overscan);
-  void audio_sample(uint16_t left, uint16_t right);
+  void audio_sample(int16_t left, int16_t right);
   int16_t input_poll(bool port, SNES::Input::Device device, unsigned index, unsigned id);
 
   void message(const string &text);

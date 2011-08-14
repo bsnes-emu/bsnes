@@ -1,6 +1,7 @@
 #include "base.hpp"
 #include "interface.cpp"
 #include "config.cpp"
+nall::dsp dspaudio;
 Application application;
 
 void Application::main(int argc, char **argv) {
@@ -96,16 +97,19 @@ void Application::main(int argc, char **argv) {
   audio.driver(config.audio.driver);
   audio.set(Audio::Handle, mainWindow.viewport.handle());
   audio.set(Audio::Synchronize, config.audio.synchronize);
-  audio.set(Audio::Volume, config.audio.volume);
   audio.set(Audio::Latency, config.audio.latency);
   audio.set(Audio::Frequency, config.audio.outputFrequency);
-  audio.set(Audio::Resample, true);
-  audio.set(Audio::ResampleRatio, (double)config.audio.inputFrequency / (double)config.audio.outputFrequency);
   if(audio.init() == false) {
     MessageWindow::critical(mainWindow, "Failed to initialize audio.");
     audio.driver("None");
     audio.init();
   }
+
+  dspaudio.set_precision(16);  //16-bit signed audio
+  dspaudio.set_volume((double)config.audio.volume / 100.0);
+  dspaudio.set_balance((double)((signed)config.audio.balance - 100) / 100.0);
+  dspaudio.set_frequency(config.audio.inputFrequency);
+  dspaudio.set_resampler_frequency(config.audio.outputFrequency);
 
   input.driver(config.input.driver);
   input.set(Input::Handle, mainWindow.viewport.handle());

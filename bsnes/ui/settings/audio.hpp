@@ -4,15 +4,20 @@ struct AudioSettings {
   VerticalLayout layout;
   Label title;
 
+  HorizontalLayout frequencyLayout;
+  Label frequencyLabel;
+  Label frequencyValue;
+  HorizontalSlider frequencySlider;
+
   HorizontalLayout volumeLayout;
   Label volumeLabel;
   Label volumeValue;
   HorizontalSlider volumeSlider;
 
-  HorizontalLayout frequencyLayout;
-  Label frequencyLabel;
-  Label frequencyValue;
-  HorizontalSlider frequencySlider;
+  HorizontalLayout balanceLayout;
+  Label balanceLabel;
+  Label balanceValue;
+  HorizontalSlider balanceSlider;
 
   Widget spacer;
 

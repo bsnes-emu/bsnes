@@ -1,6 +1,6 @@
 /*
   ruby
-  version: 0.06a (2011-02-27)
+  version: 0.07 (2011-08-14)
   license: public domain
 */
 
@@ -66,14 +66,6 @@ public:
 
 private:
   Audio *p;
-
-  unsigned volume;
-
-  //resample unit
-  double hermite(double mu, double a, double b, double c, double d);
-  bool   resample_enabled;
-  double r_step, r_frac;
-  int    r_left[4], r_right[4];
 };
 
 class InputInterface {

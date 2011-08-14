@@ -21,7 +21,7 @@ struct Interface : public SNES::Interface {
     if(pinput_poll) pinput_poll();
   }
 
-  void audio_sample(uint16_t left, uint16_t right) {
+  void audio_sample(int16_t left, int16_t right) {
     if(paudio_sample) return paudio_sample(left, right);
   }
 

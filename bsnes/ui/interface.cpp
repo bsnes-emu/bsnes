@@ -137,9 +137,14 @@ void Interface::video_refresh(const uint16_t *data, bool hires, bool interlace, 
   }
 }
 
-void Interface::audio_sample(uint16_t left, uint16_t right) {
-  if(config.audio.mute) left = right = 0;
-  audio.sample(left, right);
+void Interface::audio_sample(int16_t lchannel, int16_t rchannel) {
+  if(config.audio.mute) lchannel = 0, rchannel = 0;
+  dspaudio.sample(lchannel, rchannel);
+  while(dspaudio.pending()) {
+    signed lsample, rsample;
+    dspaudio.read(lsample, rsample);
+    audio.sample(lsample, rsample);
+  }
 }
 
 int16_t Interface::input_poll(bool port, SNES::Input::Device device, unsigned index, unsigned id) {

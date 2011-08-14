@@ -1,9 +1,5 @@
 class Audio {
 public:
-  static const char *Volume;
-  static const char *Resample;
-  static const char *ResampleRatio;
-
   static const char *Handle;
   static const char *Synchronize;
   static const char *Frequency;
