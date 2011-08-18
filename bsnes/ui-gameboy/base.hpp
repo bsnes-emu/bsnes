@@ -1,3 +1,4 @@
+#include <nall/dsp.hpp>
 #include <nall/file.hpp>
 #include <nall/foreach.hpp>
 #include <nall/stdint.hpp>
@@ -29,4 +30,5 @@ struct Application {
   void main(int argc, char **argv);
 };
 
+extern nall::dsp dspaudio;
 extern Application application;

@@ -12,7 +12,7 @@ void CheatEditor::load() {
 
   unsigned n = 0;
   string data;
-  data.readfile(path.load(utility.slotPath(), ".cht"));
+  data.readfile(path.load(utility.activeSlot(), ".cht"));
   xml_element document = xml_parse(data);
   foreach(head, document.element) {
     if(head.name == "cartridge") {
@@ -52,12 +52,12 @@ void CheatEditor::save() {
     }
   }
   if(lastSave == -1) {
-    unlink(path.load(utility.slotPath(), ".cht"));
+    unlink(path.load(utility.activeSlot(), ".cht"));
     return;
   }
 
   file fp;
-  if(fp.open(path.load(utility.slotPath(), ".cht"), file::mode::write)) {
+  if(fp.open(path.load(utility.activeSlot(), ".cht"), file::mode::write)) {
     fp.print("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
     fp.print("<cartridge sha256=\"", SNES::cartridge.sha256(), "\">\n");
     for(unsigned i = 0; i <= lastSave; i++) {

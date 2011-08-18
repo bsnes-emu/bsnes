@@ -49,9 +49,9 @@ void Path::save(const string &path, const string &value) {
 }
 
 string Path::load(SNES::Cartridge::Slot slot, const string &hint) {
-  string basePath = basepath(slot);
-  string baseName = notdir(basePath);
-  string filePath = dir(basePath);
+  string baseName = utility.baseName(slot);
+  string fileName = notdir(baseName);
+  string filePath = dir(baseName);
 
   if(hint == ".srm" && srm != "") filePath = srm;
   if(hint == ".bsp" && bsp != "") filePath = bsp;
@@ -71,43 +71,8 @@ string Path::load(SNES::Cartridge::Slot slot, const string &hint) {
   if(hint.endswith(".log") && log != "") filePath = log;
   if(hint.endswith(".bmp") && bmp != "") filePath = bmp;
 
-  filePath = decode(filePath, basePath);
-  return { filePath, baseName, hint };
-}
-
-string Path::basepath(SNES::Cartridge::Slot slot) {
-  if(slot == SNES::Cartridge::Slot::Base) {
-    return cartridge.baseName;
-  }
-
-  if(slot == SNES::Cartridge::Slot::Bsx) {
-    if(cartridge.bsxName == "") return cartridge.baseName;
-    return cartridge.bsxName;
-  }
-
-  if(slot == SNES::Cartridge::Slot::SufamiTurbo) {
-    if(cartridge.sufamiTurboAName == "" && cartridge.sufamiTurboBName == "") return cartridge.baseName;
-    if(cartridge.sufamiTurboAName != "" && cartridge.sufamiTurboBName == "") return cartridge.sufamiTurboAName;
-    if(cartridge.sufamiTurboAName == "" && cartridge.sufamiTurboBName != "") return cartridge.sufamiTurboBName;
-    return { cartridge.sufamiTurboAName, "+", notdir(cartridge.sufamiTurboBName) };
-  }
-
-  if(slot == SNES::Cartridge::Slot::SufamiTurboA) {
-    if(cartridge.sufamiTurboAName == "") return cartridge.baseName;
-    return cartridge.sufamiTurboAName;
-  }
-
-  if(slot == SNES::Cartridge::Slot::SufamiTurboB) {
-    if(cartridge.sufamiTurboBName == "") return cartridge.baseName;
-    return cartridge.sufamiTurboBName;
-  }
-
-  if(slot == SNES::Cartridge::Slot::GameBoy) {
-    if(cartridge.gameBoyName == "") return cartridge.baseName;
-    return cartridge.gameBoyName;
-  }
-
-  throw "Path::basepath(): invalid slot ID.";
+  filePath = decode(filePath, baseName);
+  return { filePath, fileName, hint };
 }
 
 string Path::decode(const string &filePath, const string &basePath) {

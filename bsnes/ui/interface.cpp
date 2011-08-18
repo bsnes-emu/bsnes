@@ -131,7 +131,7 @@ void Interface::video_refresh(const uint16_t *data, bool hires, bool interlace, 
       decimal<4, '0'>(info->tm_year + 1900), "-", decimal<2, '0'>(info->tm_mon + 1), "-", decimal<2, '0'>(info->tm_mday), " ",
       decimal<2, '0'>(info->tm_hour), ".", decimal<2, '0'>(info->tm_min), ".", decimal<2, '0'>(info->tm_sec), ".bmp"
     };
-    if(bmp::write(path(utility.slotPath(), filename), buffer, outwidth, outheight, outpitch, false)) {
+    if(bmp::write(path(utility.activeSlot(), filename), buffer, outwidth, outheight, outpitch, false)) {
       utility.showMessage("Screenshot captured");
     }
   }

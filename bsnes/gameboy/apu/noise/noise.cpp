@@ -5,8 +5,7 @@ void APU::Noise::run() {
     period = divisor << frequency;
     if(frequency < 14) {
       bool bit = (lfsr ^ (lfsr >> 1)) & 1;
-      lfsr = (lfsr >> 1) ^ (bit << 14);
-      if(narrow_lfsr) lfsr |= (bit << 6);
+      lfsr = (lfsr >> 1) ^ (bit << (narrow_lfsr ? 6 : 14));
     }
   }
 

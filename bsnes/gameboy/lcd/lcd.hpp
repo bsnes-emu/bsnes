@@ -51,6 +51,9 @@ struct LCD : Processor, MMIO {
   uint8 oam[160];
   uint8 line[160];
 
+  struct Origin { enum : unsigned { None, BG, Window, OBJ }; };
+  uint8 origin[160];
+
   static void Main();
   void main();
   void add_clocks(unsigned clocks);

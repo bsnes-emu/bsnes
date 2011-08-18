@@ -18,6 +18,10 @@ void LCD::main() {
     }
 
     add_clocks(4);
+    if(status.display_enable == false) continue;
+
+    status.lx += 4;
+    if(status.lx >= 456) scanline();
 
     if(status.lx == 0) {
       if(status.interrupt_oam) cpu.interrupt_raise(CPU::Interrupt::Stat);
@@ -30,9 +34,6 @@ void LCD::main() {
 }
 
 void LCD::add_clocks(unsigned clocks) {
-  status.lx += clocks;
-  if(status.lx >= 456) scanline();
-
   clock += clocks;
   if(clock >= 0 && scheduler.sync != Scheduler::SynchronizeMode::All) {
     co_switch(scheduler.active_thread = cpu.thread);
@@ -65,7 +66,10 @@ void LCD::frame() {
 }
 
 void LCD::render() {
-  for(unsigned n = 0; n < 160; n++) line[n] = 0x00;
+  for(unsigned n = 0; n < 160; n++) {
+    line[n] = 0x00;
+    origin[n] = Origin::None;
+  }
 
   if(status.display_enable == true) {
     if(status.bg_enable == true) render_bg();
@@ -98,7 +102,9 @@ void LCD::render_bg() {
   for(unsigned ox = 0; ox < 160; ox++) {
     uint8 palette = ((data & (0x0080 >> tx)) ? 1 : 0)
                   | ((data & (0x8000 >> tx)) ? 2 : 0);
+
     line[ox] = status.bgp[palette];
+    origin[ox] = Origin::BG;
 
     ix = (ix + 1) & 255;
     tx = (tx + 1) & 7;
@@ -110,13 +116,16 @@ void LCD::render_bg() {
 void LCD::render_window() {
   if(status.ly - status.wy >= 144U) return;
   unsigned iy = status.ly - status.wy;
-  unsigned ix = (status.wx - 7) & 255, tx = ix & 7;
+  unsigned ix = (7 - status.wx) & 255, tx = ix & 7;
   unsigned data = read_tile(status.window_tilemap_select, ix, iy);
 
   for(unsigned ox = 0; ox < 160; ox++) {
     uint8 palette = ((data & (0x0080 >> tx)) ? 1 : 0)
                   | ((data & (0x8000 >> tx)) ? 2 : 0);
-    if(ox - (status.wx - 7) < 160U) line[ox] = status.bgp[palette];
+    if(ox - (status.wx - 7) < 160U) {
+      line[ox] = status.bgp[palette];
+      origin[ox] = Origin::Window;
+    }
 
     ix = (ix + 1) & 255;
     tx = (tx + 1) & 7;
@@ -126,6 +135,8 @@ void LCD::render_window() {
 }
 
 void LCD::render_obj() {
+  enum : unsigned { Priority = 0x80, YFlip = 0x40, XFlip = 0x20, Palette = 0x10 };
+
   unsigned obj_size = (status.obj_size == 0 ? 8 : 16);
 
   unsigned sprite[10], sprites = 0;
@@ -165,26 +176,29 @@ void LCD::render_obj() {
 
     sy = status.ly - sy;
     if(sy >= obj_size) continue;
-    if(attribute & 0x40) sy ^= (obj_size - 1);
+    if(attribute & YFlip) sy ^= (obj_size - 1);
 
     unsigned tdaddr = (tile << 4) + (sy << 1);
     uint8 d0 = vram[tdaddr + 0];
     uint8 d1 = vram[tdaddr + 1];
-    unsigned xflip = attribute & 0x20 ? 7 : 0;
+    unsigned xflip = attribute & XFlip ? 7 : 0;
 
     for(unsigned tx = 0; tx < 8; tx++) {
       uint8 palette = ((d0 & (0x80 >> tx)) ? 1 : 0)
                     | ((d1 & (0x80 >> tx)) ? 2 : 0);
       if(palette == 0) continue;
 
-      palette = status.obp[(bool)(attribute & 0x10)][palette];
+      palette = status.obp[(bool)(attribute & Palette)][palette];
       unsigned ox = sx + (tx ^ xflip);
 
       if(ox <= 159) {
-        if(attribute & 0x80) {
-          if(line[ox] > 0) continue;
+        if(attribute & Priority) {
+          if(origin[ox] == Origin::BG || origin[ox] == Origin::Window) {
+            if(line[ox] > 0) continue;
+          }
         }
         line[ox] = palette;
+        origin[ox] = Origin::OBJ;
       }
     }
   }

@@ -1,9 +1,15 @@
 include nall/Makefile
+
 snes := snes
 gameboy := gameboy
-profile := accuracy
-ui := ui
-# phoenix := gtk
+
+ifeq ($(profile),)
+  profile := accuracy
+endif
+
+ifeq ($(ui),)
+  ui := ui
+endif
 
 # options += debugger
 
@@ -14,12 +20,15 @@ flags   := -O3 -fomit-frame-pointer -I.
 link    :=
 objects := libco
 
-# profile-guided instrumentation
-# flags += -fprofile-generate
-# link += -lgcov
-
-# profile-guided optimization
-# flags += -fprofile-use
+# profile-guided optimization mode
+# pgo := instrument
+# pgo := optimize
+ifeq ($(pgo),instrument)
+  flags += -fprofile-generate
+  link += -lgcov
+else ifeq ($(pgo),optimize)
+  flags += -fprofile-use
+endif
 
 flags := $(flags) $(foreach o,$(call strupper,$(options)),-D$o)
 

@@ -110,18 +110,24 @@ bool Cartridge::loadCartridge(SNES::MappedRAM &memory, string &XML, const char *
   fp.read(data, size);
   fp.close();
 
-  filemap patch(string(nall::basename(filename), ".ups"), filemap::mode::read);
-  if(patch.open()) {
-    unsigned targetSize;
-    ups patcher;
-    if(patcher.apply(patch.data(), patch.size(), data, size, (uint8_t*)0, targetSize) == ups::result::target_too_small) {
-      uint8_t *targetData = new uint8_t[targetSize];
-      if(patcher.apply(patch.data(), patch.size(), data, size, targetData, targetSize) == ups::result::success) {
-        delete[] data;
-        data = targetData;
-        size = targetSize;
-        patchApplied = true;
-      }
+  string patchName = { nall::basename(filename), ".bps" };
+  if(file::exists(patchName)) {
+    bpspatch patch;
+    patch.modify(patchName);
+
+    unsigned targetSize = patch.size();
+    uint8_t *targetData = new uint8_t[targetSize];
+
+    patch.source(data, size);
+    patch.target(targetData, targetSize);
+
+    if(patch.apply() == bpspatch::result::success) {
+      delete[] data;
+      data = targetData;
+      size = targetSize;
+      patchApplied = true;
+    } else {
+      delete[] targetData;
     }
   }
 

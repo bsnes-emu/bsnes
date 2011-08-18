@@ -28,8 +28,13 @@ void Interface::video_refresh(const uint8_t *data) {
   }
 }
 
-void Interface::audio_sample(int16_t center, int16_t left, int16_t right) {
-  audio.sample(left, right);
+void Interface::audio_sample(int16_t center, int16_t lchannel, int16_t rchannel) {
+  dspaudio.sample(lchannel, rchannel);
+  while(dspaudio.pending()) {
+    signed lsample, rsample;
+    dspaudio.read(lsample, rsample);
+    audio.sample(lsample, rsample);
+  }
 }
 
 void Interface::input_poll() {

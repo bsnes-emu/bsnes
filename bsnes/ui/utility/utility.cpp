@@ -160,10 +160,12 @@ void Utility::cartridgeLoaded() {
   cheatEditor.load();
   stateManager.load();
   mainWindow.synchronize();
-  utility.setTitle(notdir(cartridge.baseName));
+
+  string name = baseName(activeSlot());
+  utility.setTitle(notdir(name));
   utility.showMessage({
-    "Loaded ", notdir(cartridge.baseName),
-    cartridge.patchApplied ? ", and applied UPS patch" : ""
+    "Loaded ", notdir(name),
+    cartridge.patchApplied ? ", and applied BPS patch" : ""
   });
 
   //NSS
@@ -180,7 +182,7 @@ void Utility::cartridgeUnloaded() {
   mainWindow.synchronize();
 }
 
-SNES::Cartridge::Slot Utility::slotPath() {
+SNES::Cartridge::Slot Utility::activeSlot() {
   SNES::Cartridge::Slot slot = SNES::Cartridge::Slot::Base;
   if(SNES::cartridge.mode() == SNES::Cartridge::Mode::Bsx) slot = SNES::Cartridge::Slot::Bsx;
   if(SNES::cartridge.mode() == SNES::Cartridge::Mode::SufamiTurbo) slot = SNES::Cartridge::Slot::SufamiTurbo;
@@ -188,8 +190,26 @@ SNES::Cartridge::Slot Utility::slotPath() {
   return slot;
 }
 
+string Utility::baseName(SNES::Cartridge::Slot slot) {
+  switch(slot) {
+  default:
+    return cartridge.baseName;
+  case SNES::Cartridge::Slot::Bsx:
+    if(cartridge.bsxName == "") return cartridge.baseName;
+    return cartridge.bsxName;
+  case SNES::Cartridge::Slot::SufamiTurbo:
+    if(cartridge.sufamiTurboAName == "" && cartridge.sufamiTurboBName == "") return cartridge.baseName;
+    if(cartridge.sufamiTurboBName == "") return cartridge.sufamiTurboAName;
+    if(cartridge.sufamiTurboAName == "") return cartridge.sufamiTurboBName;
+    return { cartridge.sufamiTurboAName, "+", cartridge.sufamiTurboBName };
+  case SNES::Cartridge::Slot::GameBoy:
+    if(cartridge.gameBoyName == "") return cartridge.baseName;
+    return cartridge.gameBoyName;
+  }
+}
+
 void Utility::saveState(unsigned slot) {
-  string filename = path.load(slotPath(), { "-", slot, ".bst" });
+  string filename = path.load(activeSlot(), { "-", slot, ".bst" });
   SNES::system.runtosave();
   serializer s = SNES::system.serialize();
   file fp;
@@ -203,7 +223,7 @@ void Utility::saveState(unsigned slot) {
 }
 
 void Utility::loadState(unsigned slot) {
-  string filename = path.load(slotPath(), { "-", slot, ".bst" });
+  string filename = path.load(activeSlot(), { "-", slot, ".bst" });
   file fp;
   if(fp.open(filename, file::mode::read)) {
     unsigned size = fp.size();

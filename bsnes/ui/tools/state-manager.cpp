@@ -64,7 +64,7 @@ void StateManager::load() {
   }
 
   file fp;
-  if(fp.open(path.load(utility.slotPath(), ".bsa"), file::mode::read)) {
+  if(fp.open(path.load(utility.activeSlot(), ".bsa"), file::mode::read)) {
     if(fp.readl(4) == 0x31415342) {
       if(fp.readl(4) == SNES::Info::SerializerVersion) {
         for(unsigned i = 0; i < 32; i++) {
@@ -89,10 +89,10 @@ void StateManager::save() {
   }
 
   if(hasSave == false) {
-    unlink(path.load(utility.slotPath(), ".bsa"));
+    unlink(path.load(utility.activeSlot(), ".bsa"));
   } else {
     file fp;
-    if(fp.open(path.load(utility.slotPath(), ".bsa"), file::mode::write)) {
+    if(fp.open(path.load(utility.activeSlot(), ".bsa"), file::mode::write)) {
       fp.writel(0x31415342, 4);  //'BSA1'
       fp.writel(SNES::Info::SerializerVersion, 4);
 

@@ -33,6 +33,7 @@ void LCD::serialize(serializer &s) {
   s.array(vram);
   s.array(oam);
   s.array(line);
+  s.array(origin);
 }
 
 #endif
