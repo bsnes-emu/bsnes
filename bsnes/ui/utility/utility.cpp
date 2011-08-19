@@ -165,7 +165,7 @@ void Utility::cartridgeLoaded() {
   utility.setTitle(notdir(name));
   utility.showMessage({
     "Loaded ", notdir(name),
-    cartridge.patchApplied ? ", and applied BPS patch" : ""
+    cartridge.patch.applied ? ", and applied BPS patch" : ""
   });
 
   //NSS

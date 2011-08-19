@@ -8,7 +8,11 @@ struct Cartridge {
 
   string baseName, bsxName, sufamiTurboAName, sufamiTurboBName, gameBoyName;
   string baseXML, bsxXML, sufamiTurboAXML, sufamiTurboBXML, gameBoyXML;
-  bool patchApplied;
+
+  struct Patch {
+    bool applied;
+    string information;
+  } patch;
 
 private:
   bool loadCartridge(SNES::MappedRAM &memory, string &XML, const char *filename);

@@ -1,5 +1,4 @@
 struct Noise {
-  unsigned initial_length;
   unsigned envelope_volume;
   bool envelope_direction;
   unsigned envelope_frequency;
@@ -9,6 +8,7 @@ struct Noise {
   bool counter;
 
   int16 output;
+  unsigned initial_length;
   unsigned length;
   unsigned envelope_period;
   unsigned volume;

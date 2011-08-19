@@ -3,6 +3,7 @@ struct Square1 {
   unsigned sweep_direction;
   unsigned sweep_shift;
   unsigned duty;
+  unsigned initial_length;
   unsigned length;
   unsigned envelope_volume;
   unsigned envelope_direction;

@@ -28,7 +28,6 @@ void APU::Wave::write(unsigned r, uint8 data) {
 
   if(r == 1) {
     initial_length = 256 - data;
-
     length = initial_length;
   }
 
@@ -68,7 +67,6 @@ void APU::Wave::write_pattern(unsigned p, uint8 data) {
 
 void APU::Wave::power() {
   dac_enable = 0;
-  initial_length = 0;
   volume = 0;
   frequency = 0;
   counter = 0;
@@ -78,6 +76,7 @@ void APU::Wave::power() {
 
   output = 0;
   enable = 0;
+  initial_length = 0;
   length = 0;
   period = 0;
   pattern_offset = 0;
@@ -86,7 +85,6 @@ void APU::Wave::power() {
 
 void APU::Wave::serialize(serializer &s) {
   s.integer(dac_enable);
-  s.integer(initial_length);
   s.integer(volume);
   s.integer(frequency);
   s.integer(counter);
@@ -94,6 +92,7 @@ void APU::Wave::serialize(serializer &s) {
 
   s.integer(output);
   s.integer(enable);
+  s.integer(initial_length);
   s.integer(length);
   s.integer(period);
   s.integer(pattern_offset);

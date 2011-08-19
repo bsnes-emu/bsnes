@@ -33,7 +33,8 @@ void APU::Square2::clock_envelope() {
 void APU::Square2::write(unsigned r, uint8 data) {
   if(r == 1) {
     duty = data >> 6;
-    length = data & 0x3f;
+    initial_length = 64 - (data & 0x3f);
+    length = initial_length;
   }
 
   if(r == 2) {
@@ -52,6 +53,7 @@ void APU::Square2::write(unsigned r, uint8 data) {
     frequency = ((data & 7) << 8) | (frequency & 0x00ff);
 
     if(initialize) {
+      length = initial_length;
       envelope_period = envelope_frequency;
       volume = envelope_volume;
     }
@@ -62,6 +64,7 @@ void APU::Square2::write(unsigned r, uint8 data) {
 
 void APU::Square2::power() {
   duty = 0;
+  initial_length = 0;
   length = 0;
   envelope_volume = 0;
   envelope_direction = 0;
@@ -79,6 +82,7 @@ void APU::Square2::power() {
 
 void APU::Square2::serialize(serializer &s) {
   s.integer(duty);
+  s.integer(initial_length);
   s.integer(length);
   s.integer(envelope_volume);
   s.integer(envelope_direction);

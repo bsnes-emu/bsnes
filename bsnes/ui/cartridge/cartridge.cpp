@@ -83,7 +83,8 @@ bool Cartridge::loadSuperGameBoy(const char *basename, const char *slotname) {
 }
 
 void Cartridge::unload() {
-  patchApplied = false;
+  patch.applied = false;
+  patch.information = "";
   if(SNES::cartridge.loaded() == false) return;
 
   foreach(memory, SNES::cartridge.nvram) saveMemory(memory);
@@ -112,20 +113,36 @@ bool Cartridge::loadCartridge(SNES::MappedRAM &memory, string &XML, const char *
 
   string patchName = { nall::basename(filename), ".bps" };
   if(file::exists(patchName)) {
-    bpspatch patch;
-    patch.modify(patchName);
+    bpspatch bps;
+    bps.modify(patchName);
 
-    unsigned targetSize = patch.size();
+    unsigned targetSize = bps.size();
     uint8_t *targetData = new uint8_t[targetSize];
 
-    patch.source(data, size);
-    patch.target(targetData, targetSize);
+    bps.source(data, size);
+    bps.target(targetData, targetSize);
 
-    if(patch.apply() == bpspatch::result::success) {
+    if(bps.apply() == bpspatch::result::success) {
       delete[] data;
       data = targetData;
       size = targetSize;
-      patchApplied = true;
+      patch.applied = true;
+
+      xml_element document = xml_parse(bps.metadata());
+      foreach(root, document.element) {
+        if(root.name == "metadata") {
+          if(auto x = root.content.position("<information>")) {
+            if(auto y = root.content.position("</information>")) {
+              patch.information = substr(root.content, x(), y() - x() + 14);
+            }
+          }
+          if(auto x = root.content.position("<cartridge ")) {
+            if(auto y = root.content.position("</cartridge>")) {
+              XML = substr(root.content, x(), y() - x() + 12);
+            }
+          }
+        }
+      }
     } else {
       delete[] targetData;
     }

@@ -17,8 +17,7 @@ uint8 LCD::mmio_read(uint16 addr) {
 
   if(addr == 0xff41) {  //STAT
     unsigned mode;
-    if(status.display_enable == false) mode = 1;  //force blank
-    else if(status.ly >= 144) mode = 1;  //Vblank
+    if(status.ly >= 144) mode = 1;  //Vblank
     else if(status.lx < 80) mode = 2;  //OAM
     else if(status.lx < 252) mode = 3;  //LCD
     else mode = 0;  //Hblank
@@ -84,6 +83,10 @@ void LCD::mmio_write(uint16 addr, uint8 data) {
   if(addr >= 0xfe00 && addr <= 0xfe9f) { oam[addr & 0xff] = data; return; }
 
   if(addr == 0xff40) {  //LCDC
+    if(status.display_enable == false && (data & 0x80)) {
+      status.lx = 0;  //unverified behavior; fixes Super Mario Land 2 - Tree Zone
+    }
+
     status.display_enable = data & 0x80;
     status.window_tilemap_select = data & 0x40;
     status.window_display_enable = data & 0x20;

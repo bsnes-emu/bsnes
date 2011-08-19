@@ -2,14 +2,8 @@ include nall/Makefile
 
 snes := snes
 gameboy := gameboy
-
-ifeq ($(profile),)
-  profile := accuracy
-endif
-
-ifeq ($(ui),)
-  ui := ui
-endif
+profile := accuracy
+ui := ui
 
 # options += debugger
 

@@ -1,6 +1,5 @@
 struct Wave {
   bool dac_enable;
-  unsigned initial_length;
   unsigned volume;
   unsigned frequency;
   bool counter;
@@ -8,6 +7,7 @@ struct Wave {
 
   int16 output;
   bool enable;
+  unsigned initial_length;
   unsigned length;
   unsigned period;
   unsigned pattern_offset;

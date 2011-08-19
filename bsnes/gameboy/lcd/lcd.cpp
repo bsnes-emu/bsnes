@@ -18,16 +18,14 @@ void LCD::main() {
     }
 
     add_clocks(4);
-    if(status.display_enable == false) continue;
-
     status.lx += 4;
     if(status.lx >= 456) scanline();
 
-    if(status.lx == 0) {
+    if(status.display_enable && status.lx == 0) {
       if(status.interrupt_oam) cpu.interrupt_raise(CPU::Interrupt::Stat);
     }
 
-    if(status.lx == 252) {
+    if(status.display_enable && status.lx == 252) {
       if(status.interrupt_hblank) cpu.interrupt_raise(CPU::Interrupt::Stat);
     }
   }
@@ -44,13 +42,13 @@ void LCD::scanline() {
   status.lx -= 456;
   if(++status.ly == 154) frame();
 
-  if(status.interrupt_lyc == true) {
+  if(status.display_enable && status.interrupt_lyc == true) {
     if(status.ly == status.lyc) cpu.interrupt_raise(CPU::Interrupt::Stat);
   }
 
   if(status.ly < 144) render();
 
-  if(status.ly == 144) {
+  if(status.display_enable && status.ly == 144) {
     cpu.interrupt_raise(CPU::Interrupt::Vblank);
     if(status.interrupt_vblank) cpu.interrupt_raise(CPU::Interrupt::Stat);
   }

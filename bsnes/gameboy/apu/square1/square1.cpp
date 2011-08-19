@@ -66,7 +66,8 @@ void APU::Square1::write(unsigned r, uint8 data) {
 
   if(r == 1) {
     duty = data >> 6;
-    length = data & 0x3f;
+    initial_length = 64 - (data & 0x3f);
+    length = initial_length;
   }
 
   if(r == 2) {
@@ -85,6 +86,7 @@ void APU::Square1::write(unsigned r, uint8 data) {
     frequency = ((data & 7) << 8) | (frequency & 0x00ff);
 
     if(initialize) {
+      length = initial_length;
       envelope_period = envelope_frequency;
       volume = envelope_volume;
       frequency_shadow = frequency;
@@ -102,6 +104,7 @@ void APU::Square1::power() {
   sweep_direction = 0;
   sweep_shift = 0;
   duty = 0;
+  initial_length = 0;
   length = 0;
   envelope_volume = 0;
   envelope_direction = 0;
@@ -125,6 +128,7 @@ void APU::Square1::serialize(serializer &s) {
   s.integer(sweep_direction);
   s.integer(sweep_shift);
   s.integer(duty);
+  s.integer(initial_length);
   s.integer(length);
   s.integer(envelope_volume);
   s.integer(envelope_direction);

@@ -30,7 +30,6 @@ void APU::Noise::clock_envelope() {
 void APU::Noise::write(unsigned r, uint8 data) {
   if(r == 1) {
     initial_length = 64 - (data & 0x3f);
-
     length = initial_length;
   }
 
@@ -45,7 +44,6 @@ void APU::Noise::write(unsigned r, uint8 data) {
     narrow_lfsr = data & 0x08;
     divisor = (data & 0x07) << 4;
     if(divisor == 0) divisor = 8;
-
     period = divisor << frequency;
   }
 
@@ -63,7 +61,6 @@ void APU::Noise::write(unsigned r, uint8 data) {
 }
 
 void APU::Noise::power() {
-  initial_length = 0;
   envelope_volume = 0;
   envelope_direction = 0;
   envelope_frequency = 0;
@@ -73,6 +70,7 @@ void APU::Noise::power() {
   counter = 0;
 
   output = 0;
+  initial_length = 0;
   length = 0;
   envelope_period = 0;
   volume = 0;
@@ -81,7 +79,6 @@ void APU::Noise::power() {
 }
 
 void APU::Noise::serialize(serializer &s) {
-  s.integer(initial_length);
   s.integer(envelope_volume);
   s.integer(envelope_direction);
   s.integer(envelope_frequency);
@@ -91,6 +88,7 @@ void APU::Noise::serialize(serializer &s) {
   s.integer(counter);
 
   s.integer(output);
+  s.integer(initial_length);
   s.integer(length);
   s.integer(envelope_period);
   s.integer(volume);
