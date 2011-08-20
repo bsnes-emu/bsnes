@@ -28,6 +28,7 @@ void pHorizontalSlider::setParent(Window &parent) {
     0, 0, 0, 0, parent.p.hwnd, (HMENU)id, GetModuleHandle(0), 0
   );
   SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&horizontalSlider);
+  unsigned position = horizontalSlider.state.position;
   setLength(horizontalSlider.state.length);
-  setPosition(horizontalSlider.state.position);
+  setPosition(position);
 }

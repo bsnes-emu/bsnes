@@ -5,7 +5,7 @@ static void Button_tick(Button *self) {
 Geometry pButton::minimumGeometry() {
   Font &font = pWidget::font();
   Geometry geometry = font.geometry(button.state.text);
-  return { 0, 0, geometry.width + 24, geometry.height + 14 };
+  return { 0, 0, geometry.width + 24, geometry.height + 12 };
 }
 
 void pButton::setText(const string &text) {

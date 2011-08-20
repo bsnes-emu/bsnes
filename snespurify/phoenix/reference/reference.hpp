@@ -29,6 +29,7 @@ struct pOS : public pObject {
 struct pFont : public pObject {
   Font &font;
 
+  Geometry geometry(const string &text);
   void setBold(bool bold);
   void setFamily(const string &family);
   void setItalic(bool italic);
@@ -36,6 +37,16 @@ struct pFont : public pObject {
   void setUnderline(bool underline);
 
   pFont(Font &font) : font(font) {}
+  void constructor();
+};
+
+struct pTimer : public pObject {
+  Timer &timer;
+
+  void setEnabled(bool enabled);
+  void setInterval(unsigned milliseconds);
+
+  pTimer(Timer &timer) : timer(timer) {}
   void constructor();
 };
 
@@ -52,10 +63,11 @@ struct pWindow : public pObject {
   void append(Layout &layout);
   void append(Menu &menu);
   void append(Widget &widget);
+  Color backgroundColor();
   bool focused();
   Geometry frameMargin();
   Geometry geometry();
-  void setBackgroundColor(uint8_t red, uint8_t green, uint8_t blue);
+  void setBackgroundColor(const Color &color);
   void setFocused();
   void setFullScreen(bool fullScreen);
   void setGeometry(const Geometry &geometry);
@@ -136,6 +148,8 @@ struct pWidget : public pObject {
   Widget &widget;
 
   bool enabled();
+  Font& font();
+  Geometry minimumGeometry();
   void setEnabled(bool enabled);
   void setFocused();
   void setFont(Font &font);
@@ -152,6 +166,16 @@ struct pButton : public pWidget {
   void setText(const string &text);
 
   pButton(Button &button) : pWidget(button), button(button) {}
+  void constructor();
+};
+
+struct pCanvas : public pWidget {
+  Canvas &canvas;
+
+  uint32_t* buffer();
+  void update();
+
+  pCanvas(Canvas &canvas) : pWidget(canvas), canvas(canvas) {}
   void constructor();
 };
 
@@ -188,6 +212,17 @@ struct pHexEdit : public pWidget {
   void update();
 
   pHexEdit(HexEdit &hexEdit) : pWidget(hexEdit), hexEdit(hexEdit) {}
+  void constructor();
+};
+
+struct pHorizontalScrollBar : public pWidget {
+  HorizontalScrollBar &horizontalScrollBar;
+
+  unsigned position();
+  void setLength(unsigned length);
+  void setPosition(unsigned position);
+
+  pHorizontalScrollBar(HorizontalScrollBar &horizontalScrollBar) : pWidget(horizontalScrollBar), horizontalScrollBar(horizontalScrollBar) {}
   void constructor();
 };
 
@@ -274,6 +309,17 @@ struct pTextEdit : public pWidget {
   string text();
 
   pTextEdit(TextEdit &textEdit) : pWidget(textEdit), textEdit(textEdit) {}
+  void constructor();
+};
+
+struct pVerticalScrollBar : public pWidget {
+  VerticalScrollBar &verticalScrollBar;
+
+  unsigned position();
+  void setLength(unsigned length);
+  void setPosition(unsigned position);
+
+  pVerticalScrollBar(VerticalScrollBar &verticalScrollBar) : pWidget(verticalScrollBar), verticalScrollBar(verticalScrollBar) {}
   void constructor();
 };
 

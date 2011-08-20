@@ -1,7 +1,7 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'qt.moc.hpp'
 **
-** Created: Tue Mar 29 11:11:59 2011
+** Created: Mon Aug 8 04:51:19 2011
 **      by: The Qt Meta Object Compiler version 62 (Qt 4.7.0)
 **
 ** WARNING! All changes made in this file will be lost!
@@ -16,6 +16,67 @@
 #endif
 
 QT_BEGIN_MOC_NAMESPACE
+static const uint qt_meta_data_pTimer[] = {
+
+ // content:
+       5,       // revision
+       0,       // classname
+       0,    0, // classinfo
+       1,   14, // methods
+       0,    0, // properties
+       0,    0, // enums/sets
+       0,    0, // constructors
+       0,       // flags
+       0,       // signalCount
+
+ // slots: signature, parameters, type, tag, flags
+       8,    7,    7,    7, 0x0a,
+
+       0        // eod
+};
+
+static const char qt_meta_stringdata_pTimer[] = {
+    "pTimer\0\0onTimeout()\0"
+};
+
+const QMetaObject pTimer::staticMetaObject = {
+    { &QObject::staticMetaObject, qt_meta_stringdata_pTimer,
+      qt_meta_data_pTimer, 0 }
+};
+
+#ifdef Q_NO_DATA_RELOCATION
+const QMetaObject &pTimer::getStaticMetaObject() { return staticMetaObject; }
+#endif //Q_NO_DATA_RELOCATION
+
+const QMetaObject *pTimer::metaObject() const
+{
+    return QObject::d_ptr->metaObject ? QObject::d_ptr->metaObject : &staticMetaObject;
+}
+
+void *pTimer::qt_metacast(const char *_clname)
+{
+    if (!_clname) return 0;
+    if (!strcmp(_clname, qt_meta_stringdata_pTimer))
+        return static_cast<void*>(const_cast< pTimer*>(this));
+    if (!strcmp(_clname, "pObject"))
+        return static_cast< pObject*>(const_cast< pTimer*>(this));
+    return QObject::qt_metacast(_clname);
+}
+
+int pTimer::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
+{
+    _id = QObject::qt_metacall(_c, _id, _a);
+    if (_id < 0)
+        return _id;
+    if (_c == QMetaObject::InvokeMetaMethod) {
+        switch (_id) {
+        case 0: onTimeout(); break;
+        default: ;
+        }
+        _id -= 1;
+    }
+    return _id;
+}
 static const uint qt_meta_data_pWindow[] = {
 
  // content:
@@ -545,6 +606,67 @@ int pHexEdit::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     }
     return _id;
 }
+static const uint qt_meta_data_pHorizontalScrollBar[] = {
+
+ // content:
+       5,       // revision
+       0,       // classname
+       0,    0, // classinfo
+       1,   14, // methods
+       0,    0, // properties
+       0,    0, // enums/sets
+       0,    0, // constructors
+       0,       // flags
+       0,       // signalCount
+
+ // slots: signature, parameters, type, tag, flags
+      22,   21,   21,   21, 0x0a,
+
+       0        // eod
+};
+
+static const char qt_meta_stringdata_pHorizontalScrollBar[] = {
+    "pHorizontalScrollBar\0\0onChange()\0"
+};
+
+const QMetaObject pHorizontalScrollBar::staticMetaObject = {
+    { &QObject::staticMetaObject, qt_meta_stringdata_pHorizontalScrollBar,
+      qt_meta_data_pHorizontalScrollBar, 0 }
+};
+
+#ifdef Q_NO_DATA_RELOCATION
+const QMetaObject &pHorizontalScrollBar::getStaticMetaObject() { return staticMetaObject; }
+#endif //Q_NO_DATA_RELOCATION
+
+const QMetaObject *pHorizontalScrollBar::metaObject() const
+{
+    return QObject::d_ptr->metaObject ? QObject::d_ptr->metaObject : &staticMetaObject;
+}
+
+void *pHorizontalScrollBar::qt_metacast(const char *_clname)
+{
+    if (!_clname) return 0;
+    if (!strcmp(_clname, qt_meta_stringdata_pHorizontalScrollBar))
+        return static_cast<void*>(const_cast< pHorizontalScrollBar*>(this));
+    if (!strcmp(_clname, "pWidget"))
+        return static_cast< pWidget*>(const_cast< pHorizontalScrollBar*>(this));
+    return QObject::qt_metacast(_clname);
+}
+
+int pHorizontalScrollBar::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
+{
+    _id = QObject::qt_metacall(_c, _id, _a);
+    if (_id < 0)
+        return _id;
+    if (_c == QMetaObject::InvokeMetaMethod) {
+        switch (_id) {
+        case 0: onChange(); break;
+        default: ;
+        }
+        _id -= 1;
+    }
+    return _id;
+}
 static const uint qt_meta_data_pHorizontalSlider[] = {
 
  // content:
@@ -684,15 +806,16 @@ static const uint qt_meta_data_pListView[] = {
 
  // slots: signature, parameters, type, tag, flags
       11,   10,   10,   10, 0x0a,
-      24,   10,   10,   10, 0x0a,
-      40,   35,   10,   10, 0x0a,
+      29,   24,   10,   10, 0x0a,
+      56,   24,   10,   10, 0x0a,
 
        0        // eod
 };
 
 static const char qt_meta_stringdata_pListView[] = {
-    "pListView\0\0onActivate()\0onChange()\0"
-    "item\0onTick(QTreeWidgetItem*)\0"
+    "pListView\0\0onActivate()\0item\0"
+    "onChange(QTreeWidgetItem*)\0"
+    "onTick(QTreeWidgetItem*)\0"
 };
 
 const QMetaObject pListView::staticMetaObject = {
@@ -727,7 +850,7 @@ int pListView::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_c == QMetaObject::InvokeMetaMethod) {
         switch (_id) {
         case 0: onActivate(); break;
-        case 1: onChange(); break;
+        case 1: onChange((*reinterpret_cast< QTreeWidgetItem*(*)>(_a[1]))); break;
         case 2: onTick((*reinterpret_cast< QTreeWidgetItem*(*)>(_a[1]))); break;
         default: ;
         }
@@ -844,6 +967,67 @@ void *pTextEdit::qt_metacast(const char *_clname)
 }
 
 int pTextEdit::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
+{
+    _id = QObject::qt_metacall(_c, _id, _a);
+    if (_id < 0)
+        return _id;
+    if (_c == QMetaObject::InvokeMetaMethod) {
+        switch (_id) {
+        case 0: onChange(); break;
+        default: ;
+        }
+        _id -= 1;
+    }
+    return _id;
+}
+static const uint qt_meta_data_pVerticalScrollBar[] = {
+
+ // content:
+       5,       // revision
+       0,       // classname
+       0,    0, // classinfo
+       1,   14, // methods
+       0,    0, // properties
+       0,    0, // enums/sets
+       0,    0, // constructors
+       0,       // flags
+       0,       // signalCount
+
+ // slots: signature, parameters, type, tag, flags
+      20,   19,   19,   19, 0x0a,
+
+       0        // eod
+};
+
+static const char qt_meta_stringdata_pVerticalScrollBar[] = {
+    "pVerticalScrollBar\0\0onChange()\0"
+};
+
+const QMetaObject pVerticalScrollBar::staticMetaObject = {
+    { &QObject::staticMetaObject, qt_meta_stringdata_pVerticalScrollBar,
+      qt_meta_data_pVerticalScrollBar, 0 }
+};
+
+#ifdef Q_NO_DATA_RELOCATION
+const QMetaObject &pVerticalScrollBar::getStaticMetaObject() { return staticMetaObject; }
+#endif //Q_NO_DATA_RELOCATION
+
+const QMetaObject *pVerticalScrollBar::metaObject() const
+{
+    return QObject::d_ptr->metaObject ? QObject::d_ptr->metaObject : &staticMetaObject;
+}
+
+void *pVerticalScrollBar::qt_metacast(const char *_clname)
+{
+    if (!_clname) return 0;
+    if (!strcmp(_clname, qt_meta_stringdata_pVerticalScrollBar))
+        return static_cast<void*>(const_cast< pVerticalScrollBar*>(this));
+    if (!strcmp(_clname, "pWidget"))
+        return static_cast< pWidget*>(const_cast< pVerticalScrollBar*>(this));
+    return QObject::qt_metacast(_clname);
+}
+
+int pVerticalScrollBar::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
 {
     _id = QObject::qt_metacall(_c, _id, _a);
     if (_id < 0)

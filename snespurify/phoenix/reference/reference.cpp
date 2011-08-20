@@ -1,6 +1,7 @@
 #include "reference.hpp"
 
 #include "font.cpp"
+#include "timer.cpp"
 #include "message-window.cpp"
 #include "window.cpp"
 
@@ -13,9 +14,11 @@
 
 #include "widget/widget.cpp"
 #include "widget/button.cpp"
+#include "widget/canvas.cpp"
 #include "widget/check-box.cpp"
 #include "widget/combo-box.cpp"
 #include "widget/hex-edit.cpp"
+#include "widget/horizontal-scroll-bar.cpp"
 #include "widget/horizontal-slider.cpp"
 #include "widget/label.cpp"
 #include "widget/line-edit.cpp"
@@ -23,6 +26,7 @@
 #include "widget/progress-bar.cpp"
 #include "widget/radio-box.cpp"
 #include "widget/text-edit.cpp"
+#include "widget/vertical-scroll-bar.cpp"
 #include "widget/vertical-slider.cpp"
 #include "widget/viewport.cpp"
 

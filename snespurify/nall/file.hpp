@@ -1,22 +1,14 @@
 #ifndef NALL_FILE_HPP
 #define NALL_FILE_HPP
 
-#include <stdio.h>
-#include <string.h>
-
-#if !defined(_WIN32)
-  #include <unistd.h>
-#else
-  #include <io.h>
-#endif
-
+#include <nall/platform.hpp>
 #include <nall/stdint.hpp>
 #include <nall/string.hpp>
-#include <nall/utf8.hpp>
 #include <nall/utility.hpp>
+#include <nall/windows/utf8.hpp>
 
 namespace nall {
-  inline FILE* fopen_utf8(const char *utf8_filename, const char *mode) {
+  inline FILE* fopen_utf8(const string &utf8_filename, const char *mode) {
     #if !defined(_WIN32)
     return fopen(utf8_filename, mode);
     #else
@@ -28,6 +20,29 @@ namespace nall {
   public:
     enum class mode : unsigned { read, write, readwrite, writeread };
     enum class index : unsigned { absolute, relative };
+    enum class time : unsigned { create, modify, access };
+
+    static bool read(const string &filename, uint8_t *&data, unsigned &size) {
+      file fp;
+      if(fp.open(filename, mode::read) == false) return false;
+      size = fp.size();
+      data = new uint8_t[size];
+      fp.read(data, size);
+      fp.close();
+      return true;
+    }
+
+    static bool read(const string &filename, const uint8_t *&data, unsigned &size) {
+      return file::read(filename, (uint8_t*&)data, size);
+    }
+
+    static bool write(const string &filename, const uint8_t *data, unsigned size) {
+      file fp;
+      if(fp.open(filename, mode::write) == false) return false;
+      fp.write(data, size);
+      fp.close();
+      return true;
+    }
 
     uint8_t read() {
       if(!fp) return 0xff;                       //file not open
@@ -142,52 +157,60 @@ namespace nall {
       return file_offset >= file_size;
     }
 
-    static bool exists(const char *fn) {
+    static bool exists(const string &filename) {
       #if !defined(_WIN32)
-      FILE *fp = fopen(fn, "rb");
+      struct stat64 data;
+      return stat64(filename, &data) == 0;
       #else
-      FILE *fp = _wfopen(utf16_t(fn), L"rb");
+      struct __stat64 data;
+      return _wstat64(utf16_t(filename), &data) == 0;
       #endif
-      if(fp) {
-        fclose(fp);
-        return true;
-      }
-      return false;
     }
 
-    static unsigned size(const char *fn) {
+    static uintmax_t size(const string &filename) {
       #if !defined(_WIN32)
-      FILE *fp = fopen(fn, "rb");
+      struct stat64 data;
+      stat64(filename, &data);
       #else
-      FILE *fp = _wfopen(utf16_t(fn), L"rb");
+      struct __stat64 data;
+      _wstat64(utf16_t(filename), &data);
       #endif
-      unsigned filesize = 0;
-      if(fp) {
-        fseek(fp, 0, SEEK_END);
-        filesize = ftell(fp);
-        fclose(fp);
+      return S_ISREG(data.st_mode) ? data.st_size : 0u;
+    }
+
+    static time_t timestamp(const string &filename, file::time mode = file::time::create) {
+      #if !defined(_WIN32)
+      struct stat64 data;
+      stat64(filename, &data);
+      #else
+      struct __stat64 data;
+      _wstat64(utf16_t(filename), &data);
+      #endif
+      switch(mode) { default:
+        case file::time::create: return data.st_ctime;
+        case file::time::modify: return data.st_mtime;
+        case file::time::access: return data.st_atime;
       }
-      return filesize;
     }
 
     bool open() {
       return fp;
     }
 
-    bool open(const char *fn, mode mode_) {
+    bool open(const string &filename, mode mode_) {
       if(fp) return false;
 
       switch(file_mode = mode_) {
         #if !defined(_WIN32)
-        case mode::read:      fp = fopen(fn, "rb");  break;
-        case mode::write:     fp = fopen(fn, "wb+"); break;  //need read permission for buffering
-        case mode::readwrite: fp = fopen(fn, "rb+"); break;
-        case mode::writeread: fp = fopen(fn, "wb+"); break;
+        case mode::read:      fp = fopen(filename, "rb" ); break;
+        case mode::write:     fp = fopen(filename, "wb+"); break;  //need read permission for buffering
+        case mode::readwrite: fp = fopen(filename, "rb+"); break;
+        case mode::writeread: fp = fopen(filename, "wb+"); break;
         #else
-        case mode::read:      fp = _wfopen(utf16_t(fn), L"rb");  break;
-        case mode::write:     fp = _wfopen(utf16_t(fn), L"wb+"); break;
-        case mode::readwrite: fp = _wfopen(utf16_t(fn), L"rb+"); break;
-        case mode::writeread: fp = _wfopen(utf16_t(fn), L"wb+"); break;
+        case mode::read:      fp = _wfopen(utf16_t(filename), L"rb" ); break;
+        case mode::write:     fp = _wfopen(utf16_t(filename), L"wb+"); break;
+        case mode::readwrite: fp = _wfopen(utf16_t(filename), L"rb+"); break;
+        case mode::writeread: fp = _wfopen(utf16_t(filename), L"wb+"); break;
         #endif
       }
       if(!fp) return false;

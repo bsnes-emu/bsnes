@@ -20,6 +20,8 @@ void pFont::setUnderline(bool underline) { update(); }
 
 void pFont::constructor() {
   qtFont = new QFont;
+  font.setFamily("Sans");
+  font.setSize(8);
 }
 
 void pFont::update() {

@@ -94,14 +94,15 @@ namespace nall {
       else resize(objectsize - count);
     }
 
-    inline T& operator[](unsigned index) {
-      if(index >= objectsize) resize(index + 1);
-      return pool[index];
+    linear_vector() : pool(0), poolsize(0), objectsize(0) {
     }
 
-    inline const T& operator[](unsigned index) const {
-      if(index >= objectsize) throw "vector[] out of bounds";
-      return pool[index];
+    linear_vector(std::initializer_list<T> list) : pool(0), poolsize(0), objectsize(0) {
+      for(const T *p = list.begin(); p != list.end(); ++p) append(*p);
+    }
+
+    ~linear_vector() {
+      reset();
     }
 
     //copy
@@ -132,17 +133,22 @@ namespace nall {
       operator=(std::move(source));
     }
 
-    //construction
-    linear_vector() : pool(0), poolsize(0), objectsize(0) {
+    //index
+    inline T& operator[](unsigned index) {
+      if(index >= objectsize) resize(index + 1);
+      return pool[index];
     }
 
-    linear_vector(std::initializer_list<T> list) : pool(0), poolsize(0), objectsize(0) {
-      for(const T *p = list.begin(); p != list.end(); ++p) append(*p);
+    inline const T& operator[](unsigned index) const {
+      if(index >= objectsize) throw "vector[] out of bounds";
+      return pool[index];
     }
 
-    ~linear_vector() {
-      reset();
-    }
+    //iteration
+    T* begin() { return &pool[0]; }
+    T* end() { return &pool[objectsize]; }
+    const T* begin() const { return &pool[0]; }
+    const T* end() const { return &pool[objectsize]; }
   };
 
   //pointer_vector
@@ -222,15 +228,15 @@ namespace nall {
       else resize(objectsize - count);
     }
 
-    inline T& operator[](unsigned index) {
-      if(index >= objectsize) resize(index + 1);
-      if(!pool[index]) pool[index] = new T;
-      return *pool[index];
+    pointer_vector() : pool(0), poolsize(0), objectsize(0) {
     }
 
-    inline const T& operator[](unsigned index) const {
-      if(index >= objectsize || !pool[index]) throw "vector[] out of bounds";
-      return *pool[index];
+    pointer_vector(std::initializer_list<T> list) : pool(0), poolsize(0), objectsize(0) {
+      for(const T *p = list.begin(); p != list.end(); ++p) append(*p);
+    }
+
+    ~pointer_vector() {
+      reset();
     }
 
     //copy
@@ -261,17 +267,31 @@ namespace nall {
       operator=(std::move(source));
     }
 
-    //construction
-    pointer_vector() : pool(0), poolsize(0), objectsize(0) {
+    //index
+    inline T& operator[](unsigned index) {
+      if(index >= objectsize) resize(index + 1);
+      if(!pool[index]) pool[index] = new T;
+      return *pool[index];
     }
 
-    pointer_vector(std::initializer_list<T> list) : pool(0), poolsize(0), objectsize(0) {
-      for(const T *p = list.begin(); p != list.end(); ++p) append(*p);
+    inline const T& operator[](unsigned index) const {
+      if(index >= objectsize || !pool[index]) throw "vector[] out of bounds";
+      return *pool[index];
     }
 
-    ~pointer_vector() {
-      reset();
-    }
+    //iteration
+    struct iterator {
+      bool operator!=(const iterator &source) const { return index != source.index; }
+      T& operator*() { return vector.operator[](index); }
+      iterator& operator++() { index++; return *this; }
+      iterator(pointer_vector &vector, unsigned index) : vector(vector), index(index) {}
+    private:
+      pointer_vector &vector;
+      unsigned index;
+    };
+
+    iterator begin() { return iterator(*this, 0); }
+    iterator end() { return iterator(*this, objectsize); }
   };
 
   template<typename T> struct has_size<linear_vector<T>> { enum { value = true }; };

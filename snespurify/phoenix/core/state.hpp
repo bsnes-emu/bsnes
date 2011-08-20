@@ -13,9 +13,19 @@ struct Font::State {
   }
 };
 
+struct Timer::State {
+  bool enabled;
+  unsigned milliseconds;
+
+  State() {
+    enabled = false;
+    milliseconds = 0;
+  }
+};
+
 struct Window::State {
-  bool backgroundColor;
-  unsigned backgroundColorRed, backgroundColorGreen, backgroundColorBlue;
+  bool backgroundColorOverride;
+  Color backgroundColor;
   bool fullScreen;
   Geometry geometry;
   reference_array<Layout&> layout;
@@ -32,10 +42,8 @@ struct Window::State {
   Font *widgetFont;
 
   State() {
-    backgroundColor = false;
-    backgroundColorRed = 0;
-    backgroundColorGreen = 0;
-    backgroundColorBlue = 0;
+    backgroundColorOverride = false;
+    backgroundColor = { 0, 0, 0, 255 };
     fullScreen = false;
     geometry = { 128, 128, 256, 256 };
     menuFont = 0;
@@ -142,6 +150,16 @@ struct HexEdit::State {
   }
 };
 
+struct HorizontalScrollBar::State {
+  unsigned length;
+  unsigned position;
+
+  State() {
+    length = 101;
+    position = 0;
+  }
+};
+
 struct HorizontalSlider::State {
   unsigned length;
   unsigned position;
@@ -210,6 +228,16 @@ struct TextEdit::State {
     cursorPosition = 0;
     editable = true;
     wordWrap = false;
+  }
+};
+
+struct VerticalScrollBar::State {
+  unsigned length;
+  unsigned position;
+
+  State() {
+    length = 101;
+    position = 0;
   }
 };
 

@@ -30,5 +30,5 @@ struct Application {
   void main(int argc, char **argv);
 };
 
-extern nall::dsp dspaudio;
+extern nall::DSP dspaudio;
 extern Application application;

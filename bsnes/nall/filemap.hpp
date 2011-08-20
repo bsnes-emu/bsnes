@@ -47,6 +47,12 @@ namespace nall {
     }
 
     bool p_open(const char *filename, mode mode_) {
+      if(file::exists(filename) && file::size(filename) == 0) {
+        p_handle = 0;
+        p_size = 0;
+        return true;
+      }
+
       int desired_access, creation_disposition, flprotect, map_access;
 
       switch(mode_) {
@@ -133,6 +139,12 @@ namespace nall {
     }
 
     bool p_open(const char *filename, mode mode_) {
+      if(file::exists(filename) && file::size(filename) == 0) {
+        p_handle = 0;
+        p_size = 0;
+        return true;
+      }
+
       int open_flags, mmap_flags;
 
       switch(mode_) {

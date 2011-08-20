@@ -82,6 +82,7 @@ void pListView::setSelection(unsigned row) {
   locked = true;
   QTreeWidgetItem *item = qtListView->currentItem();
   if(item) item->setSelected(false);
+  qtListView->setCurrentItem(0);
   auto items = qtListView->findItems("", Qt::MatchContains);
   for(unsigned n = 0; n < items.size(); n++) {
     if(items[n]->data(0, Qt::UserRole).toUInt() == row) {
@@ -100,7 +101,7 @@ void pListView::constructor() {
   qtListView->setRootIsDecorated(false);
 
   connect(qtListView, SIGNAL(itemActivated(QTreeWidgetItem*, int)), SLOT(onActivate()));
-  connect(qtListView, SIGNAL(itemSelectionChanged()), SLOT(onChange()));
+  connect(qtListView, SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)), SLOT(onChange(QTreeWidgetItem*)));
   connect(qtListView, SIGNAL(itemChanged(QTreeWidgetItem*, int)), SLOT(onTick(QTreeWidgetItem*)));
 }
 
@@ -108,7 +109,9 @@ void pListView::onActivate() {
   if(locked == false && listView.onActivate) listView.onActivate();
 }
 
-void pListView::onChange() {
+void pListView::onChange(QTreeWidgetItem *item) {
+  //Qt bug workaround: clicking items with mouse does not mark items as selected
+  if(item) item->setSelected(true);
   listView.state.selected = selected();
   if(listView.state.selected) listView.state.selection = selection();
   if(locked == false && listView.onChange) listView.onChange();

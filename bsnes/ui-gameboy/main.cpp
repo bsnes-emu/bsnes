@@ -1,5 +1,5 @@
 #include "base.hpp"
-nall::dsp dspaudio;
+nall::DSP dspaudio;
 Application application;
 
 #include "interface.cpp"
@@ -56,11 +56,12 @@ void Application::main(int argc, char **argv) {
   audio.set(Audio::Frequency, 44100u);
   audio.init();
 
-  dspaudio.set_precision(16);
-  dspaudio.set_volume(1.0);
-  dspaudio.set_balance(0.0);
-  dspaudio.set_frequency(4194304.0);
-  dspaudio.set_resampler_frequency(44100.0);
+  dspaudio.setPrecision(16);
+  dspaudio.setVolume(1.0);
+  dspaudio.setBalance(0.0);
+  dspaudio.setFrequency(4194304.0);
+  dspaudio.setResampler(DSP::Resampler::Average);
+  dspaudio.setResamplerFrequency(44100.0);
 
   #if defined(PLATFORM_WIN)
   input.driver("RawInput");

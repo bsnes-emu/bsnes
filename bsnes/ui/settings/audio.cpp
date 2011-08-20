@@ -37,19 +37,19 @@ void AudioSettings::create() {
 
   frequencySlider.onChange = [this] {
     config.audio.inputFrequency = frequencySlider.position() + 31000;
-    dspaudio.set_frequency(config.audio.inputFrequency);
+    dspaudio.setFrequency(config.audio.inputFrequency);
     frequencyValue.setText({ config.audio.inputFrequency, "hz" });
   };
 
   volumeSlider.onChange = [this] {
     config.audio.volume = volumeSlider.position();
-    dspaudio.set_volume((double)config.audio.volume / 100.0);
+    dspaudio.setVolume((double)config.audio.volume / 100.0);
     volumeValue.setText({ config.audio.volume, "%" });
   };
 
   balanceSlider.onChange = [this] {
     config.audio.balance = balanceSlider.position();
-    dspaudio.set_balance((double)((signed)config.audio.balance - 100) / 100.0);
+    dspaudio.setBalance((double)((signed)config.audio.balance - 100) / 100.0);
     balanceValue.setText({ (signed)config.audio.balance - 100 });
   };
 

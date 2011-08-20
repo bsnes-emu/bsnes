@@ -61,5 +61,5 @@ private:
   void saveGeometry();
 };
 
-extern nall::dsp dspaudio;
+extern nall::DSP dspaudio;
 extern Application application;

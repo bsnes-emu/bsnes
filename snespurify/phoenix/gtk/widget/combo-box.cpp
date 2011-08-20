@@ -13,14 +13,12 @@ Geometry pComboBox::minimumGeometry() {
   foreach(item, comboBox.state.text) maximumWidth = max(maximumWidth, font.geometry(item).width);
 
   Geometry geometry = font.geometry(" ");
-  return { 0, 0, maximumWidth + 44, geometry.height + 10 };
+  return { 0, 0, maximumWidth + 44, geometry.height + 12 };
 }
 
 void pComboBox::reset() {
   locked = true;
-  for(signed n = itemCounter - 1; n >= 0; n--) {
-    gtk_combo_box_remove_text(GTK_COMBO_BOX(gtkWidget), n);
-  }
+  gtk_list_store_clear(GTK_LIST_STORE(gtk_combo_box_get_model(GTK_COMBO_BOX(gtkWidget))));
   itemCounter = 0;
   locked = false;
 }

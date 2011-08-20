@@ -7778,7 +7778,7 @@
   <cartridge sha256="d9b7f9356be0780f0037093a86ef8450f15e569cbd3680073d1cd345dfadb709">
     <name>Captain Commando (USA)</name>
     <cheat>
-      <description>Invincibility - p1</description>
+      <description>Invincibility - P1</description>
       <code>CB4E-7FD4</code>
       <code>D04E-7F04</code>
       <code>B24E-7F64</code>
@@ -8193,6 +8193,32 @@
       <description>Chopper can carry 30 hostages</description>
       <code>F3C7-3D53</code>
       <code>F3C1-1F5E</code>
+    </cheat>
+  </cartridge>
+  <cartridge sha256="224572832b988f31a81c907f751f0292f5702a3acea5866ce6742387c7c6239d">
+    <name>Choujikuu Yousai Macross - Scrambled Valkyrie (Japan)</name>
+    <cheat>
+      <description>Invincibility</description>
+      <code>7E0A90FF</code>
+    </cheat>
+    <cheat>
+      <description>Infinite health</description>
+      <code>C268-4F64</code>
+      <code>C269-47A4</code>
+    </cheat>
+    <cheat>
+      <description>Infinite absorb charge</description>
+      <code>C2B2-C4D1</code>
+    </cheat>
+    <cheat>
+      <description>Infinite continues</description>
+      <code>7E02AA09</code>
+    </cheat>
+    <cheat>
+      <description>Hit anywhere</description>
+      <code>DD6B-3FD7</code>
+      <code>DD65-3467</code>
+      <code>DD66-34D7</code>
     </cheat>
   </cartridge>
   <cartridge sha256="06d1c2b06b716052c5596aaa0c2e5632a027fee1a9a28439e509f813c30829a9">
@@ -10113,10 +10139,6 @@
       <code>DD3B-6FA5</code>
     </cheat>
     <cheat>
-      <description>Start with 99 lives - both players</description>
-      <code>7E106799</code>
-    </cheat>
-    <cheat>
       <description>Infinite Shield - P1</description>
       <code>7E177BFF</code>
     </cheat>
@@ -10137,8 +10159,23 @@
       <code>7E17EB08</code>
     </cheat>
     <cheat>
-      <description>Max 2ndGun - P2</description>
+      <description>Max 2nd Gun - P2</description>
       <code>7E177C08</code>
+    </cheat>
+    <cheat>
+      <description>Hit anywhere - both players</description>
+      <code>6D23-6FA4</code>
+      <code>C22D-A764</code>
+      <code>DD28-67A4</code>
+      <code>DD2E-6D04</code>
+    </cheat>
+    <cheat>
+      <description>Start with the strongest main weapon and 8 lives - both players</description>
+      <code>3CC3-6DA7</code>
+      <code>62C3-6467</code>
+      <code>62C3-6707</code>
+      <code>CBC3-6D07</code>
+      <code>D6C3-6D67</code>
     </cheat>
     <cheat>
       <description>Start with 1 Green Power Cube - P1</description>
@@ -10183,6 +10220,10 @@
       <code>49C3-6D67</code>
       <code>CBC3-6D07</code>
       <code>3CC3-6DA7</code>
+    </cheat>
+    <cheat>
+      <description>Start with 99 lives - both players</description>
+      <code>7E106799</code>
     </cheat>
     <cheat>
       <description>Start on planet B</description>
@@ -25884,12 +25925,12 @@
   <cartridge sha256="457abe634e0a8be03e29513a3dca8f3e9d0ddc6bf97d8931f2316094260f3712">
     <name>Lion King, The (USA)</name>
     <cheat>
-      <description>Infinite lives</description>
-      <code>CE6E-8464</code>
+      <description>Almost infinite health</description>
+      <code>C298-7DDE</code>
     </cheat>
     <cheat>
-      <description>Almost infinite energy</description>
-      <code>C298-7DDE</code>
+      <description>Infinite lives</description>
+      <code>CE6E-8464</code>
     </cheat>
     <cheat>
       <description>Roaring doesn't decrease your roar meter</description>
@@ -30420,9 +30461,17 @@
   <cartridge sha256="2731f0bd1c87e75121f41d1ed5cc9fbf177f414b8bf831c76fd9c4b58c86ed08">
     <name>Mary Shelley's Frankenstein (USA)</name>
     <cheat>
+      <description>Invincibility (blinking)</description>
+      <code>7E200D09</code>
+    </cheat>
+    <cheat>
       <description>Infinite health</description>
       <code>C2B9-1DA4</code>
       <code>8533-3F0D</code>
+    </cheat>
+    <cheat>
+      <description>Infinite health (alt)</description>
+      <code>7E20431D</code>
     </cheat>
     <cheat>
       <description>Energy balls don't deplete health</description>
@@ -30939,6 +30988,11 @@
       <code>F0CA-3FA0</code>
       <code>DDCA-34D0</code>
     </cheat>
+    <cheat>
+      <description>View ending (select Capcom Championship)</description>
+      <code>81829BEE</code>
+      <code>81829CE0</code>
+    </cheat>
   </cartridge>
   <cartridge sha256="b8f70a6e7fb93819f79693578887e2c11e196bdf1ac6ddc7cb924b1ad0be2d32">
     <name>Mega Man X (USA) (Rev 1)</name>
@@ -31378,20 +31432,24 @@
   <cartridge sha256="057484558ebd18165f98e556b994080535e31cefdd98b5edb190516f7040fc9d">
     <name>Metal Morph (USA)</name>
     <cheat>
-      <description>Start with 255 continues</description>
-      <code>EE6C-1FDD</code>
+      <description>Invincibility</description>
+      <code>7E038703</code>
     </cheat>
     <cheat>
-      <description>Freeze timer on continue screen</description>
-      <code>C2AD-4D65</code>
-    </cheat>
-    <cheat>
-      <description>Infinite ammo for all weapons (to change weapons, turn code off, pick up new weapon, turn back on)</description>
+      <description>Infinite ammo for all weapons (disable to change weapons)</description>
       <code>C926-C7A1</code>
     </cheat>
     <cheat>
       <description>Infinite continues</description>
       <code>C9A9-4F65</code>
+    </cheat>
+    <cheat>
+      <description>Infinite time on continue screen</description>
+      <code>C2AD-4D65</code>
+    </cheat>
+    <cheat>
+      <description>Start with 255 continues</description>
+      <code>EE6C-1FDD</code>
     </cheat>
   </cartridge>
   <cartridge sha256="0d7f875877fe856066cfb39b4ecdbbe7d48393a75770720876c94419f809bb1c">
@@ -49328,6 +49386,20 @@
       <description>Infinite lives</description>
       <code>A268-4716</code>
     </cheat>
+    <cheat>
+      <description>Hit anywhere</description>
+      <code>6DA9-1DA7</code>
+      <code>DD87-1D41</code>
+      <code>DDA5-4FD7</code>
+    </cheat>
+    <cheat>
+      <description>Keep main weapon after dying</description>
+      <code>C26C-4446</code>
+    </cheat>
+    <cheat>
+      <description>Start with strongest main weapon</description>
+      <code>62C4-1F46</code>
+    </cheat>
   </cartridge>
   <cartridge sha256="16f9c90d75bd23d0620be00ecf818fcb25c5935d4ee26b1fe17b926f8987aa65">
     <name>Super Off Road - The Baja (USA)</name>
@@ -49559,16 +49631,17 @@
   <cartridge sha256="05c7f6461209020785fba33007e1830820aa44ada4b1a6f991d936bf2335b15b">
     <name>Super R-Type (USA)</name>
     <cheat>
-      <description>Start with Invincibility (blinking)</description>
-      <code>82C2-DF61</code>
-    </cheat>
-    <cheat>
-      <description>Start with Invincibility (blinking) (alt)</description>
-      <code>7E15BD00</code>
-    </cheat>
-    <cheat>
       <description>Infinite lives</description>
       <code>C2C7-6D0F</code>
+    </cheat>
+    <cheat>
+      <description>Infinite FORCE once obtained</description>
+      <code>C267-A4D9</code>
+    </cheat>
+    <cheat>
+      <description>Always fire charged shots (hold B)</description>
+      <code>7287-0FD1</code>
+      <code>DD87-0D61</code>
     </cheat>
     <cheat>
       <description>Spiral motion gun takes less time to power up</description>
@@ -49602,8 +49675,12 @@
       <code>7D68-6D6B</code>
     </cheat>
     <cheat>
-      <description>Once FORCE has been obtained, keep it forever</description>
-      <code>C267-A4D9</code>
+      <description>Start with Invincibility (blinking)</description>
+      <code>82C2-DF61</code>
+    </cheat>
+    <cheat>
+      <description>Start with Invincibility (blinking) (alt)</description>
+      <code>7E15BD00</code>
     </cheat>
     <cheat>
       <description>Start with 1 life instead of 3</description>
@@ -57641,7 +57718,18 @@
   <cartridge sha256="b27e2e957fa760f4f483e2af30e03062034a6c0066984f2e284cc2cb430b2059">
     <name>Zombies Ate My Neighbors (USA)</name>
     <cheat>
-      <description>Infinite health</description>
+      <description>Invincibility, hit anywhere, get items from anywhere (do not use martian gun) - both players</description>
+      <code>6DEC-14D4</code>
+      <code>DD2F-476D</code>
+      <code>DD8D-37D7</code>
+      <code>DD8E-C767</code>
+    </cheat>
+    <cheat>
+      <description>Invincibility - both players</description>
+      <code>DD2F-476D</code>
+    </cheat>
+    <cheat>
+      <description>Infinite health - both players</description>
       <code>3C20-4D0D</code>
     </cheat>
     <cheat>
@@ -57653,7 +57741,7 @@
       <code>7E1CBA0A</code>
     </cheat>
     <cheat>
-      <description>Infinite weapons</description>
+      <description>Infinite weapons - both players</description>
       <code>DD30-1FA7</code>
     </cheat>
     <cheat>
@@ -57665,7 +57753,7 @@
       <code>DD39-34D4</code>
     </cheat>
     <cheat>
-      <description>Infinite lives</description>
+      <description>Infinite lives - both players</description>
       <code>82AA-CF07</code>
     </cheat>
     <cheat>
@@ -57859,6 +57947,10 @@
     <cheat>
       <description>Infinite Weed Wacker - P2</description>
       <code>7E1CF250</code>
+    </cheat>
+    <cheat>
+      <description>Victims are invincible</description>
+      <code>18CC-37DA</code>
     </cheat>
     <cheat>
       <description>Package of 99 Squirtgun shots worth 999</description>

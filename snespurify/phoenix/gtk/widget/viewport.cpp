@@ -1,5 +1,5 @@
 uintptr_t pViewport::handle() {
-  return GDK_WINDOW_XID(gtkWidget->window);
+  return GDK_WINDOW_XID(gtk_widget_get_window(gtkWidget));
 }
 
 void pViewport::constructor() {

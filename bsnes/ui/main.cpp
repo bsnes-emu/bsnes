@@ -1,7 +1,7 @@
 #include "base.hpp"
 #include "interface.cpp"
 #include "config.cpp"
-nall::dsp dspaudio;
+nall::DSP dspaudio;
 Application application;
 
 void Application::main(int argc, char **argv) {
@@ -105,11 +105,12 @@ void Application::main(int argc, char **argv) {
     audio.init();
   }
 
-  dspaudio.set_precision(16);  //16-bit signed audio
-  dspaudio.set_volume((double)config.audio.volume / 100.0);
-  dspaudio.set_balance((double)((signed)config.audio.balance - 100) / 100.0);
-  dspaudio.set_frequency(config.audio.inputFrequency);
-  dspaudio.set_resampler_frequency(config.audio.outputFrequency);
+  dspaudio.setPrecision(16);  //16-bit signed audio
+  dspaudio.setVolume((double)config.audio.volume / 100.0);
+  dspaudio.setBalance((double)((signed)config.audio.balance - 100) / 100.0);
+  dspaudio.setFrequency(config.audio.inputFrequency);
+  dspaudio.setResampler(DSP::Resampler::Hermite);
+  dspaudio.setResamplerFrequency(config.audio.outputFrequency);
 
   input.driver(config.input.driver);
   input.set(Input::Handle, mainWindow.viewport.handle());

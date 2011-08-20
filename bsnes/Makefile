@@ -17,6 +17,7 @@ objects := libco
 # profile-guided optimization mode
 # pgo := instrument
 # pgo := optimize
+
 ifeq ($(pgo),instrument)
   flags += -fprofile-generate
   link += -lgcov

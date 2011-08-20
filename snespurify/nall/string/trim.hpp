@@ -29,7 +29,8 @@ template<unsigned Limit> char* rtrim(char *str, const char *key) {
   return str;
 }
 
-template<unsigned limit> char* trim(char *str, const char *key) {
+template<unsigned limit> char* trim(char *str, const char *key, const char *rkey) {
+  if(rkey) return ltrim<limit>(rtrim<limit>(str, rkey), key);
   return ltrim<limit>(rtrim<limit>(str, key), key);
 }
 

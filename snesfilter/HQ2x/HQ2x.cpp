@@ -51,7 +51,7 @@ static void initialize() {
     double g = (G << 3) | (G >> 2);
     double b = (B << 3) | (B >> 2);
 
-    //bgr888->yuv888
+    //bgr888->yuv
     double y = (r + g + b) * (0.25f * (63.5f / 48.0f));
     double u = ((r - b) * 0.25f + 128.0f) * (7.5f / 7.0f);
     double v = ((g * 2.0f - r - b) * 0.125f + 128.0f) * (7.5f / 6.0f);
@@ -59,6 +59,10 @@ static void initialize() {
     yuvTable[i] = ((unsigned)y << 21) + ((unsigned)u << 11) + ((unsigned)v);
   }
 
+  //counter-clockwise rotation table; one revolution:
+  //123    369  12346789
+  //4.6 -> 2.8  =
+  //789    147  36928147
   for(unsigned n = 0; n < 256; n++) {
     rotate[n] = ((n >> 2) & 0x11) | ((n << 2) & 0x88)
               | ((n & 0x01) << 5) | ((n & 0x08) << 3)
@@ -83,8 +87,7 @@ static uint16_t pack(uint32_t n) { n &= 0x03e07c1f; return n | (n >> 16); }
 
 static uint16_t blend1(uint32_t A, uint32_t B) {
   grow(A); grow(B);
-  A = (A * 3 + B) >> 2;
-  return pack(A);
+  return pack((A * 3 + B) >> 2);
 }
 
 static uint16_t blend2(uint32_t A, uint32_t B, uint32_t C) {

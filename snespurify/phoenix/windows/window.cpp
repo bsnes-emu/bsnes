@@ -16,6 +16,12 @@ void pWindow::append(Widget &widget) {
   widget.p.setParent(window);
 }
 
+Color pWindow::backgroundColor() {
+  if(window.state.backgroundColorOverride) return window.state.backgroundColor;
+  DWORD color = GetSysColor(COLOR_3DFACE);
+  return { (uint8_t)(color >> 16), (uint8_t)(color >> 8), (uint8_t)(color >> 0), 255 };
+}
+
 bool pWindow::focused() {
   return (GetForegroundWindow() == hwnd);
 }
@@ -36,8 +42,16 @@ Geometry pWindow::frameMargin() {
 
 Geometry pWindow::geometry() {
   Geometry margin = frameMargin();
+
   RECT rc;
-  GetWindowRect(hwnd, &rc);
+  if(IsIconic(hwnd)) {
+    //GetWindowRect returns -32000(x),-32000(y) when window is minimized
+    WINDOWPLACEMENT wp;
+    GetWindowPlacement(hwnd, &wp);
+    rc = wp.rcNormalPosition;
+  } else {
+    GetWindowRect(hwnd, &rc);
+  }
 
   signed x = rc.left + margin.x;
   signed y = rc.top + margin.y;
@@ -47,9 +61,9 @@ Geometry pWindow::geometry() {
   return { x, y, width, height };
 }
 
-void pWindow::setBackgroundColor(uint8_t red, uint8_t green, uint8_t blue) {
+void pWindow::setBackgroundColor(const Color &color) {
   if(brush) DeleteObject(brush);
-  brushColor = RGB(red, green, blue);
+  brushColor = RGB(color.red, color.green, color.blue);
   brush = CreateSolidBrush(brushColor);
 }
 

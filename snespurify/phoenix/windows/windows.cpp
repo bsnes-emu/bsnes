@@ -2,6 +2,7 @@
 
 #include "object.cpp"
 #include "font.cpp"
+#include "timer.cpp"
 #include "message-window.cpp"
 #include "window.cpp"
 
@@ -18,6 +19,7 @@
 #include "widget/check-box.cpp"
 #include "widget/combo-box.cpp"
 #include "widget/hex-edit.cpp"
+#include "widget/horizontal-scroll-bar.cpp"
 #include "widget/horizontal-slider.cpp"
 #include "widget/label.cpp"
 #include "widget/line-edit.cpp"
@@ -25,6 +27,7 @@
 #include "widget/progress-bar.cpp"
 #include "widget/radio-box.cpp"
 #include "widget/text-edit.cpp"
+#include "widget/vertical-scroll-bar.cpp"
 #include "widget/vertical-slider.cpp"
 #include "widget/viewport.cpp"
 
@@ -174,7 +177,7 @@ void pOS::initialize() {
   WNDCLASS wc;
   wc.cbClsExtra = 0;
   wc.cbWndExtra = 0;
-  wc.hbrBackground = (HBRUSH)(COLOR_3DFACE + 1);
+  wc.hbrBackground = GetSysColorBrush(COLOR_3DFACE);
   wc.hCursor = LoadCursor(0, IDC_ARROW);
   wc.hIcon = LoadIcon(GetModuleHandle(0), MAKEINTRESOURCE(2));
   wc.hInstance = GetModuleHandle(0);
@@ -198,7 +201,7 @@ void pOS::initialize() {
 
   wc.cbClsExtra = 0;
   wc.cbWndExtra = 0;
-  wc.hbrBackground = (HBRUSH)(COLOR_3DFACE + 1);
+  wc.hbrBackground = GetSysColorBrush(COLOR_3DFACE);
   wc.hCursor = LoadCursor(0, IDC_ARROW);
   wc.hIcon = LoadIcon(0, IDI_APPLICATION);
   wc.hInstance = GetModuleHandle(0);
@@ -407,11 +410,58 @@ static LRESULT CALLBACK OS_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM
 
     case WM_HSCROLL:
     case WM_VSCROLL: {
-      unsigned id = LOWORD(wparam);
-      HWND control = GetDlgItem(window.p.hwnd, id);
-      if(control == 0) break;
-      Object *object = (Object*)GetWindowLongPtr(control, GWLP_USERDATA);
+      Object *object = 0;
+      if(lparam) {
+        object = (Object*)GetWindowLongPtr((HWND)lparam, GWLP_USERDATA);
+      } else {
+        unsigned id = LOWORD(wparam);
+        HWND control = GetDlgItem(window.p.hwnd, id);
+        if(control == 0) break;
+        object = (Object*)GetWindowLongPtr(control, GWLP_USERDATA);
+      }
       if(object == 0) break;
+
+      if(dynamic_cast<HorizontalScrollBar*>(object)
+      || dynamic_cast<VerticalScrollBar*>(object)) {
+        SCROLLINFO info;
+        memset(&info, 0, sizeof(SCROLLINFO));
+        info.cbSize = sizeof(SCROLLINFO);
+        info.fMask = SIF_ALL;
+        GetScrollInfo((HWND)lparam, SB_CTL, &info);
+
+        switch(LOWORD(wparam)) {
+        case SB_LEFT: info.nPos = info.nMin; break;
+        case SB_RIGHT: info.nPos = info.nMax; break;
+        case SB_LINELEFT: info.nPos--; break;
+        case SB_LINERIGHT: info.nPos++; break;
+        case SB_PAGELEFT: info.nPos -= info.nMax >> 3; break;
+        case SB_PAGERIGHT: info.nPos += info.nMax >> 3; break;
+        case SB_THUMBTRACK: info.nPos = info.nTrackPos; break;
+        }
+
+        info.fMask = SIF_POS;
+        SetScrollInfo((HWND)lparam, SB_CTL, &info, TRUE);
+
+        //Windows may clamp position to scrollbar range
+        GetScrollInfo((HWND)lparam, SB_CTL, &info);
+
+        if(dynamic_cast<HorizontalScrollBar*>(object)) {
+          HorizontalScrollBar &horizontalScrollBar = (HorizontalScrollBar&)*object;
+          if(horizontalScrollBar.state.position != info.nPos) {
+            horizontalScrollBar.state.position = info.nPos;
+            horizontalScrollBar.onChange();
+          }
+        } else {
+          VerticalScrollBar &verticalScrollBar = (VerticalScrollBar&)*object;
+          if(verticalScrollBar.state.position != info.nPos) {
+            verticalScrollBar.state.position = info.nPos;
+            verticalScrollBar.onChange();
+          }
+        }
+
+        return TRUE;
+      }
+
       if(dynamic_cast<HorizontalSlider*>(object)) {
         HorizontalSlider &horizontalSlider = (HorizontalSlider&)*object;
         if(horizontalSlider.state.position != horizontalSlider.position()) {

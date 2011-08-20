@@ -7,6 +7,10 @@ void pWindow::append(Menu &menu) {
 void pWindow::append(Widget &widget) {
 }
 
+Color pWindow::backgroundColor() {
+  return { 0, 0, 0, 255 };
+}
+
 bool pWindow::focused() {
   return false;
 }
@@ -19,7 +23,7 @@ Geometry pWindow::geometry() {
   return { 0, 0, 0, 0 };
 }
 
-void pWindow::setBackgroundColor(uint8_t red, uint8_t green, uint8_t blue) {
+void pWindow::setBackgroundColor(const Color &color) {
 }
 
 void pWindow::setFocused() {

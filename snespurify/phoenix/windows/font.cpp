@@ -46,4 +46,6 @@ void pFont::setUnderline(bool underline) {
 
 void pFont::constructor() {
   hfont = Font_createFont("Tahoma", 8, false, false, false);
+  font.setFamily("Tahoma");
+  font.setSize(8);
 }

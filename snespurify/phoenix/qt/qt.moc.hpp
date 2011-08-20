@@ -56,6 +56,23 @@ struct pFont : public pObject {
   void update();
 };
 
+struct pTimer : public QObject, public pObject {
+  Q_OBJECT
+
+public:
+  Timer &timer;
+  QTimer *qtTimer;
+
+  void setEnabled(bool enabled);
+  void setInterval(unsigned milliseconds);
+
+  pTimer(Timer &timer) : timer(timer) {}
+  void constructor();
+
+public slots:
+  void onTimeout();
+};
+
 struct pMessageWindow : public pObject {
   static MessageWindow::Response information(Window &parent, const string &text, MessageWindow::Buttons buttons);
   static MessageWindow::Response question(Window &parent, const string &text, MessageWindow::Buttons buttons);
@@ -84,10 +101,11 @@ public:
   void append(Layout &layout);
   void append(Menu &menu);
   void append(Widget &widget);
+  Color backgroundColor();
   Geometry frameMargin();
   bool focused();
   Geometry geometry();
-  void setBackgroundColor(uint8_t red, uint8_t green, uint8_t blue);
+  void setBackgroundColor(const Color &color);
   void setFocused();
   void setFullScreen(bool fullScreen);
   void setGeometry(const Geometry &geometry);
@@ -313,6 +331,25 @@ public slots:
   void onScroll();
 };
 
+struct pHorizontalScrollBar : public QObject, public pWidget {
+  Q_OBJECT
+
+public:
+  HorizontalScrollBar &horizontalScrollBar;
+  QScrollBar *qtScrollBar;
+
+  Geometry minimumGeometry();
+  unsigned position();
+  void setLength(unsigned length);
+  void setPosition(unsigned position);
+
+  pHorizontalScrollBar(HorizontalScrollBar &horizontalScrollBar) : pWidget(horizontalScrollBar), horizontalScrollBar(horizontalScrollBar) {}
+  void constructor();
+
+public slots:
+  void onChange();
+};
+
 struct pHorizontalSlider : public QObject, public pWidget {
   Q_OBJECT
 
@@ -389,7 +426,7 @@ public:
 
 public slots:
   void onActivate();
-  void onChange();
+  void onChange(QTreeWidgetItem *item);
   void onTick(QTreeWidgetItem *item);
 };
 
@@ -439,6 +476,25 @@ public:
   string text();
 
   pTextEdit(TextEdit &textEdit) : pWidget(textEdit), textEdit(textEdit) {}
+  void constructor();
+
+public slots:
+  void onChange();
+};
+
+struct pVerticalScrollBar : public QObject, public pWidget {
+  Q_OBJECT
+
+public:
+  VerticalScrollBar &verticalScrollBar;
+  QScrollBar *qtScrollBar;
+
+  Geometry minimumGeometry();
+  unsigned position();
+  void setLength(unsigned length);
+  void setPosition(unsigned position);
+
+  pVerticalScrollBar(VerticalScrollBar &verticalScrollBar) : pWidget(verticalScrollBar), verticalScrollBar(verticalScrollBar) {}
   void constructor();
 
 public slots:

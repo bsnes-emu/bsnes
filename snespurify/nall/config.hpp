@@ -34,11 +34,11 @@ namespace nall {
 
       string get() const {
         switch(type) {
-          case boolean_t:  return string() << *(bool*)data;
-          case signed_t:   return string() << *(signed*)data;
-          case unsigned_t: return string() << *(unsigned*)data;
-          case double_t:   return string() << *(double*)data;
-          case string_t:   return string() << "\"" << *(string*)data << "\"";
+          case boolean_t:  return { *(bool*)data };
+          case signed_t:   return { *(signed*)data };
+          case unsigned_t: return { *(unsigned*)data };
+          case double_t:   return { *(double*)data };
+          case string_t:   return { "\"", *(string*)data, "\"" };
         }
         return "???";
       }
@@ -105,9 +105,9 @@ namespace nall {
       if(fp.open(filename, file::mode::write)) {
         for(unsigned i = 0; i < list.size(); i++) {
           string output;
-          output << list[i].name << " = " << list[i].get();
-          if(list[i].desc != "") output << " # " << list[i].desc;
-          output << "\r\n";
+          output.append(list[i].name, " = ", list[i].get());
+          if(list[i].desc != "") output.append(" # ", list[i].desc);
+          output.append("\r\n");
           fp.print(output);
         }
 
