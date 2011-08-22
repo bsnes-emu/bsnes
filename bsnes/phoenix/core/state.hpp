@@ -100,6 +100,8 @@ struct Widget::State {
   bool enabled;
   Font *font;
   Geometry geometry;
+  Layout *layout;
+  Window *parent;
   bool visible;
 
   State() {
@@ -107,6 +109,8 @@ struct Widget::State {
     enabled = true;
     font = 0;
     geometry = { 0, 0, 0, 0 };
+    layout = 0;
+    parent = 0;
     visible = true;
   }
 };

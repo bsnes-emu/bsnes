@@ -51,4 +51,5 @@ void pCanvas::setParent(Window &parent) {
   if(hwnd) DestroyWindow(hwnd);
   hwnd = CreateWindow(L"phoenix_canvas", L"", WS_CHILD | WS_VISIBLE, 0, 0, 0, 0, parent.p.hwnd, (HMENU)id, GetModuleHandle(0), 0);
   SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&canvas);
+  widget.setVisible(widget.visible());
 }

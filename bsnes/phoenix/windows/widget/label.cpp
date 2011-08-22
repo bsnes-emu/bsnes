@@ -19,6 +19,7 @@ void pLabel::setParent(Window &parent) {
   SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&label);
   setDefaultFont();
   setText(label.state.text);
+  widget.setVisible(widget.visible());
 }
 
 static LRESULT CALLBACK Label_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {

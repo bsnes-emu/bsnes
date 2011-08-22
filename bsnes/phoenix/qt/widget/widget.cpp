@@ -23,8 +23,17 @@ void pWidget::setGeometry(const Geometry &geometry) {
   qtWidget->setGeometry(geometry.x, geometry.y, geometry.width, geometry.height);
 }
 
+void pWidget::setParent(Window &parent) {
+  if(!widget.state.font && parent.state.widgetFont) {
+    setFont(*parent.state.widgetFont);
+  }
+  qtWidget->setParent(parent.p.qtContainer);
+  widget.setVisible(widget.visible());
+}
+
 void pWidget::setVisible(bool visible) {
   if(widget.state.abstract) visible = false;
+  if(widget.state.layout && widget.state.layout->visible() == false) visible = false;
   qtWidget->setVisible(visible);
 }
 

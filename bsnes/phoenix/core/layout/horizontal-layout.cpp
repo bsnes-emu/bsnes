@@ -1,9 +1,6 @@
-void HorizontalLayout::append(VerticalLayout &layout, unsigned spacing) {
-  children.append({ &layout, 0, MinimumSize, MinimumSize, spacing });
-}
-
-void HorizontalLayout::append(Widget &widget, unsigned width, unsigned height, unsigned spacing) {
-  children.append({ 0, &widget, width, height, spacing });
+void HorizontalLayout::append(Sizable &sizable, unsigned width, unsigned height, unsigned spacing) {
+  sizable.setLayout(*this);
+  children.append({ &sizable, width, height, spacing });
 }
 
 Geometry HorizontalLayout::minimumGeometry() {
@@ -12,8 +9,7 @@ Geometry HorizontalLayout::minimumGeometry() {
   foreach(child, children) {
     width += child.spacing;
     if(child.width == MinimumSize || child.width == MaximumSize) {
-      if(child.layout) width += child.layout->minimumGeometry().width;
-      if(child.widget) width += child.widget->minimumGeometry().width;
+      width += child.sizable->minimumGeometry().width;
       continue;
     }
     width += child.width;
@@ -21,8 +17,7 @@ Geometry HorizontalLayout::minimumGeometry() {
 
   foreach(child, children) {
     if(child.height == MinimumSize || child.height == MaximumSize) {
-      if(child.layout) height = max(height, child.layout->minimumGeometry().height);
-      if(child.widget) height = max(height, child.widget->minimumGeometry().height);
+      height = max(height, child.sizable->minimumGeometry().height);
       continue;
     }
     height = max(height, child.height);
@@ -43,8 +38,7 @@ Geometry HorizontalLayout::minimumLayoutGeometry() {
     }
 
     if(child.width == MinimumSize) {
-      if(child.layout) width += child.layout->minimumGeometry().width;
-      if(child.widget) width += child.widget->minimumGeometry().width;
+      width += child.sizable->minimumGeometry().width;
       continue;
     }
 
@@ -58,8 +52,7 @@ Geometry HorizontalLayout::minimumLayoutGeometry() {
     }
 
     if(child.height == MinimumSize) {
-      if(child.layout) height = max(height, child.layout->minimumGeometry().height);
-      if(child.widget) height = max(height, child.widget->minimumGeometry().height);
+      height = max(height, child.sizable->minimumGeometry().height);
       continue;
     }
 
@@ -69,18 +62,15 @@ Geometry HorizontalLayout::minimumLayoutGeometry() {
   return { 0, 0, maximumWidth ? MaximumSize : margin * 2 + width, maximumHeight ? MaximumSize : margin * 2 + height };
 }
 
+void HorizontalLayout::setAlignment(double alignment) {
+  this->alignment = max(0.0, min(1.0, alignment));
+}
+
 void HorizontalLayout::setGeometry(const Geometry &containerGeometry) {
   auto children = this->children;
   foreach(child, children) {
-    if(child.layout) {
-      child.width  = child.layout->minimumLayoutGeometry().width;
-      child.height = child.layout->minimumLayoutGeometry().height;
-    }
-
-    if(child.widget) {
-      if(child.width  == MinimumSize) child.width  = child.widget->minimumGeometry().width;
-      if(child.height == MinimumSize) child.height = child.widget->minimumGeometry().height;
-    }
+    if(child.width  == MinimumSize) child.width  = child.sizable->minimumGeometry().width;
+    if(child.height == MinimumSize) child.height = child.sizable->minimumGeometry().height;
   }
 
   Geometry geometry = containerGeometry;
@@ -105,15 +95,17 @@ void HorizontalLayout::setGeometry(const Geometry &containerGeometry) {
   foreach(child, children) maximumHeight = max(maximumHeight, child.height);
 
   foreach(child, children) {
-    unsigned pivot = (maximumHeight - child.height) / 2;
+    unsigned pivot = (maximumHeight - child.height) * alignment;
     Geometry childGeometry = { geometry.x, geometry.y + pivot, child.width, child.height };
-
-    if(child.layout) child.layout->setGeometry(childGeometry);
-    if(child.widget) child.widget->setGeometry(childGeometry);
+    child.sizable->setGeometry(childGeometry);
 
     geometry.x += child.width + child.spacing;
     geometry.width -= child.width + child.spacing;
   }
+}
+
+void HorizontalLayout::setLayout(Layout &layout) {
+  this->layout = &layout;
 }
 
 void HorizontalLayout::setMargin(unsigned margin) {
@@ -122,18 +114,25 @@ void HorizontalLayout::setMargin(unsigned margin) {
 
 void HorizontalLayout::setParent(Window &parent) {
   foreach(child, children) {
-    if(child.layout) child.layout->setParent(parent);
-    if(child.widget) parent.append(*child.widget);
+    child.sizable->setParent(parent);
   }
 }
 
 void HorizontalLayout::setVisible(bool visible) {
+  visible_ = visible;
   foreach(child, children) {
-    if(child.layout) child.layout->setVisible(visible);
-    if(child.widget) child.widget->setVisible(visible);
+    child.sizable->setVisible(dynamic_cast<Widget*>(child.sizable) ? child.sizable->visible() : visible);
   }
 }
 
+bool HorizontalLayout::visible() {
+  if(layout) return visible_ && layout->visible();
+  return visible_;
+}
+
 HorizontalLayout::HorizontalLayout() {
+  alignment = 0.5;
+  layout = 0;
   margin = 0;
+  visible_ = true;
 }

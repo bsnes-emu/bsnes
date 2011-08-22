@@ -31,4 +31,5 @@ void pVerticalSlider::setParent(Window &parent) {
   unsigned position = verticalSlider.state.position;
   setLength(verticalSlider.state.length);
   setPosition(position);
+  widget.setVisible(widget.visible());
 }

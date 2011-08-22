@@ -1,9 +1,6 @@
-void VerticalLayout::append(HorizontalLayout &layout, unsigned spacing) {
-  children.append({ &layout, 0, MinimumSize, MinimumSize, spacing });
-}
-
-void VerticalLayout::append(Widget &widget, unsigned width, unsigned height, unsigned spacing) {
-  children.append({ 0, &widget, width, height, spacing });
+void VerticalLayout::append(Sizable &sizable, unsigned width, unsigned height, unsigned spacing) {
+  sizable.setLayout(*this);
+  children.append({ &sizable, width, height, spacing });
 }
 
 Geometry VerticalLayout::minimumGeometry() {
@@ -11,8 +8,7 @@ Geometry VerticalLayout::minimumGeometry() {
 
   foreach(child, children) {
     if(child.width == MinimumSize || child.width == MaximumSize) {
-      if(child.layout) width = max(width, child.layout->minimumGeometry().width);
-      if(child.widget) width = max(width, child.widget->minimumGeometry().width);
+      width = max(width, child.sizable->minimumGeometry().width);
       continue;
     }
     width = max(width, child.width);
@@ -21,8 +17,7 @@ Geometry VerticalLayout::minimumGeometry() {
   foreach(child, children) {
     height += child.spacing;
     if(child.height == MinimumSize || child.height == MaximumSize) {
-      if(child.layout) height += child.layout->minimumGeometry().height;
-      if(child.widget) height += child.widget->minimumGeometry().height;
+      height += child.sizable->minimumGeometry().height;
       continue;
     }
     height += child.height;
@@ -43,8 +38,7 @@ Geometry VerticalLayout::minimumLayoutGeometry() {
     }
 
     if(child.width == MinimumSize) {
-      if(child.layout) width = max(width, child.layout->minimumGeometry().width);
-      if(child.widget) width = max(width, child.widget->minimumGeometry().width);
+      width = max(width, child.sizable->minimumGeometry().width);
       continue;
     }
 
@@ -58,8 +52,7 @@ Geometry VerticalLayout::minimumLayoutGeometry() {
     }
 
     if(child.height == MinimumSize) {
-      if(child.layout) height += child.layout->minimumGeometry().height;
-      if(child.widget) height += child.widget->minimumGeometry().height;
+      height += child.sizable->minimumGeometry().height;
       continue;
     }
 
@@ -69,18 +62,15 @@ Geometry VerticalLayout::minimumLayoutGeometry() {
   return { 0, 0, maximumWidth ? MaximumSize : margin * 2 + width, maximumHeight ? MaximumSize : margin * 2 + height };
 }
 
+void VerticalLayout::setAlignment(double alignment) {
+  this->alignment = max(0.0, min(1.0, alignment));
+}
+
 void VerticalLayout::setGeometry(const Geometry &containerGeometry) {
   auto children = this->children;
   foreach(child, children) {
-    if(child.layout) {
-      child.width  = child.layout->minimumLayoutGeometry().width;
-      child.height = child.layout->minimumLayoutGeometry().height;
-    }
-
-    if(child.widget) {
-      if(child.width  == MinimumSize) child.width  = child.widget->minimumGeometry().width;
-      if(child.height == MinimumSize) child.height = child.widget->minimumGeometry().height;
-    }
+     if(child.width  == MinimumSize) child.width  = child.sizable->minimumGeometry().width;
+     if(child.height == MinimumSize) child.height = child.sizable->minimumGeometry().height;
   }
 
   Geometry geometry = containerGeometry;
@@ -105,15 +95,17 @@ void VerticalLayout::setGeometry(const Geometry &containerGeometry) {
   foreach(child, children) maximumWidth = max(maximumWidth, child.width);
 
   foreach(child, children) {
-    unsigned pivot = 0;  //(maximumWidth - child.width) / 2;
+    unsigned pivot = (maximumWidth - child.width) * alignment;
     Geometry childGeometry = { geometry.x + pivot, geometry.y, child.width, child.height };
-
-    if(child.layout) child.layout->setGeometry(childGeometry);
-    if(child.widget) child.widget->setGeometry(childGeometry);
+    child.sizable->setGeometry(childGeometry);
 
     geometry.y += child.height + child.spacing;
     geometry.height -= child.height + child.spacing;
   }
+}
+
+void VerticalLayout::setLayout(Layout &layout) {
+  this->layout = &layout;
 }
 
 void VerticalLayout::setMargin(unsigned margin) {
@@ -122,18 +114,25 @@ void VerticalLayout::setMargin(unsigned margin) {
 
 void VerticalLayout::setParent(Window &parent) {
   foreach(child, children) {
-    if(child.layout) child.layout->setParent(parent);
-    if(child.widget) parent.append(*child.widget);
+    child.sizable->setParent(parent);
   }
 }
 
 void VerticalLayout::setVisible(bool visible) {
+  visible_ = visible;
   foreach(child, children) {
-    if(child.layout) child.layout->setVisible(visible);
-    if(child.widget) child.widget->setVisible(visible);
+    child.sizable->setVisible(dynamic_cast<Widget*>(child.sizable) ? child.sizable->visible() : visible);
   }
 }
 
+bool VerticalLayout::visible() {
+  if(layout) return visible_ && layout->visible();
+  return visible_;
+}
+
 VerticalLayout::VerticalLayout() {
+  alignment = 0.0;
+  layout = 0;
   margin = 0;
+  visible_ = true;
 }

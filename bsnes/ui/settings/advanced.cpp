@@ -31,7 +31,7 @@ void AdvancedSettings::create() {
 
   panelLayout.setMargin(5);
   panelLayout.append(panel, SettingsWindow::PanelWidth, ~0, 5);
-  panelLayout.append(layout);
+  panelLayout.append(layout, ~0, ~0);
 
   layout.append(title, ~0, 0, 5);
 
@@ -41,18 +41,18 @@ void AdvancedSettings::create() {
   driverLayout.append(audioDriverLabel, 0, 0, 5);
   driverLayout.append(audioDriverBox, ~0, 0, 5);
   driverLayout.append(inputDriverLabel, 0, 0, 5);
-  driverLayout.append(inputDriverBox, ~0, 0   );
-  layout.append(driverLayout, 5);
-  layout.append(focusPolicyLabel, ~0, 0   );
+  driverLayout.append(inputDriverBox, ~0, 0);
+  layout.append(driverLayout, ~0, 0, 5);
+  layout.append(focusPolicyLabel, ~0, 0);
   focusPolicyLayout.append(focusPolicyPause, ~0, 0, 5);
   focusPolicyLayout.append(focusPolicyIgnore, ~0, 0, 5);
   focusPolicyLayout.append(focusPolicyAllow, ~0, 0);
-  layout.append(focusPolicyLayout, 5);
+  layout.append(focusPolicyLayout, ~0, 0, 5);
   layout.append(compositorPolicyLabel, ~0, 0);
   compositorPolicyLayout.append(compositorPolicyNever, ~0, 0, 5);
   compositorPolicyLayout.append(compositorPolicyFullScreen, ~0, 0, 5);
   compositorPolicyLayout.append(compositorPolicyAlways, ~0, 0);
-  layout.append(compositorPolicyLayout);
+  layout.append(compositorPolicyLayout, ~0, 0);
 
   layout.append(spacer, ~0, ~0);
   settingsWindow.append(panelLayout);

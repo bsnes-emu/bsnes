@@ -46,4 +46,5 @@ void pComboBox::setParent(Window &parent) {
   setDefaultFont();
   foreach(text, comboBox.state.text) append(text);
   setSelection(comboBox.state.selection);
+  widget.setVisible(widget.visible());
 }

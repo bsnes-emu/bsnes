@@ -30,4 +30,5 @@ void pCheckBox::setParent(Window &parent) {
   setDefaultFont();
   if(checkBox.state.checked) setChecked(true);
   setText(checkBox.state.text);
+  widget.setVisible(widget.visible());
 }

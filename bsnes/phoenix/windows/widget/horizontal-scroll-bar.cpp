@@ -30,4 +30,5 @@ void pHorizontalScrollBar::setParent(Window &parent) {
   unsigned position = horizontalScrollBar.state.position;
   setLength(horizontalScrollBar.state.length);
   setPosition(position);
+  widget.setVisible(widget.visible());
 }

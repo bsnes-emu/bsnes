@@ -15,12 +15,12 @@ void StateManager::create() {
   layout.append(stateList,          ~0, ~0, 5);
   descLayout.append(descLabel,      80,  0, 5);
   descLayout.append(descEdit,       ~0,  0   );
-  layout.append(descLayout,                 5);
+  layout.append(descLayout,         ~0,  0, 5);
   controlLayout.append(spacer,       0,  0   );
   controlLayout.append(loadButton,  80,  0, 5);
   controlLayout.append(saveButton,  80,  0, 5);
   controlLayout.append(eraseButton, 80,  0   );
-  layout.append(controlLayout                );
+  layout.append(controlLayout,      ~0,  0   );
   append(layout);
   setGeometry({ 0, 0, 480, layout.minimumGeometry().height + 250 });
 

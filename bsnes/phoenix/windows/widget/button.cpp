@@ -18,4 +18,5 @@ void pButton::setParent(Window &parent) {
   SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&button);
   setDefaultFont();
   setText(button.state.text);
+  widget.setVisible(widget.visible());
 }

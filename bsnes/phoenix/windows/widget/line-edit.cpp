@@ -37,4 +37,5 @@ void pLineEdit::setParent(Window &parent) {
   setDefaultFont();
   setEditable(lineEdit.state.editable);
   setText(lineEdit.state.text);
+  widget.setVisible(widget.visible());
 }

@@ -1,5 +1,48 @@
 CheatEditor cheatEditor;
 
+void CheatEditor::create() {
+  setTitle("Cheat Editor");
+  application.addWindow(this, "CheatEditor", "160,160");
+
+  cheatList.setHeaderText("Slot", "Code", "Description");
+  cheatList.setHeaderVisible();
+  cheatList.setCheckable();
+  codeLabel.setText("Code(s):");
+  descLabel.setText("Description:");
+  findButton.setText("Find Codes ...");
+  clearAllButton.setText("Clear All");
+  clearButton.setText("Clear");
+
+  layout.setMargin(5);
+  layout.append(cheatList,             ~0, ~0, 5);
+  codeLayout.append(codeLabel,         80,  0, 5);
+  codeLayout.append(codeEdit,          ~0,  0   );
+  layout.append(codeLayout,            ~0,  0, 5);
+  descLayout.append(descLabel,         80,  0, 5);
+  descLayout.append(descEdit,          ~0,  0   );
+  layout.append(descLayout,            ~0,  0, 5);
+  controlLayout.append(findButton,    100,  0   );
+  controlLayout.append(spacerWidget,   ~0,  0   );
+  controlLayout.append(clearAllButton, 80,  0, 5);
+  controlLayout.append(clearButton,    80,  0   );
+  layout.append(controlLayout,         ~0,  0   );
+  append(layout);
+  setGeometry({ 0, 0, 480, layout.minimumGeometry().height + 250 });
+
+  synchronize();
+
+  cheatList.onChange = { &CheatEditor::synchronize, this };
+  cheatList.onTick = { &CheatEditor::toggle, this };
+  codeEdit.onChange = descEdit.onChange = { &CheatEditor::bind, this };
+  findButton.onTick = { &CheatDatabase::findCodes, &cheatDatabase };
+  clearAllButton.onTick = { &CheatEditor::clearAll, this };
+  clearButton.onTick = { &CheatEditor::clear, this };
+
+  onClose = []() {
+    cheatDatabase.setVisible(false);
+  };
+}
+
 void CheatEditor::load() {
   SNES::cheat.reset();
   cheatList.reset();
@@ -76,49 +119,6 @@ void CheatEditor::save() {
 
   cheatList.reset();
   cheatList.autoSizeColumns();
-}
-
-void CheatEditor::create() {
-  setTitle("Cheat Editor");
-  application.addWindow(this, "CheatEditor", "160,160");
-
-  cheatList.setHeaderText("Slot", "Code", "Description");
-  cheatList.setHeaderVisible();
-  cheatList.setCheckable();
-  codeLabel.setText("Code(s):");
-  descLabel.setText("Description:");
-  findButton.setText("Find Codes ...");
-  clearAllButton.setText("Clear All");
-  clearButton.setText("Clear");
-
-  layout.setMargin(5);
-  layout.append(cheatList,            ~0, ~0, 5);
-  codeLayout.append(codeLabel,        80,  0, 5);
-  codeLayout.append(codeEdit,         ~0,  0   );
-  layout.append(codeLayout,                   5);
-  descLayout.append(descLabel,        80,  0, 5);
-  descLayout.append(descEdit,         ~0,  0   );
-  layout.append(descLayout,                   5);
-  controlLayout.append(findButton,    100, 0   );
-  controlLayout.append(spacerWidget,   ~0, 0   );
-  controlLayout.append(clearAllButton, 80, 0, 5);
-  controlLayout.append(clearButton,    80, 0   );
-  layout.append(controlLayout);
-  append(layout);
-  setGeometry({ 0, 0, 480, layout.minimumGeometry().height + 250 });
-
-  synchronize();
-
-  cheatList.onChange = { &CheatEditor::synchronize, this };
-  cheatList.onTick = { &CheatEditor::toggle, this };
-  codeEdit.onChange = descEdit.onChange = { &CheatEditor::bind, this };
-  findButton.onTick = { &CheatDatabase::findCodes, &cheatDatabase };
-  clearAllButton.onTick = { &CheatEditor::clearAll, this };
-  clearButton.onTick = { &CheatEditor::clear, this };
-
-  onClose = []() {
-    cheatDatabase.setVisible(false);
-  };
 }
 
 void CheatEditor::synchronize() {

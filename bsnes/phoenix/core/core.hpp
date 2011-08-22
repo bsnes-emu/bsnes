@@ -223,13 +223,21 @@ struct RadioItem : private nall::base_from_member<pRadioItem&>, Action {
   pRadioItem &p;
 };
 
-struct Layout : Object {
+struct Layout;
+
+struct Sizable : Object {
+  virtual Geometry minimumGeometry() = 0;
   virtual void setGeometry(const Geometry &geometry) = 0;
+  virtual void setLayout(Layout &layout) = 0;
   virtual void setParent(Window &parent) = 0;
   virtual void setVisible(bool visible = true) = 0;
+  virtual bool visible() = 0;
 };
 
-struct Widget : Object {
+struct Layout : Sizable {
+};
+
+struct Widget : Sizable {
   bool enabled();
   Font& font();
   Geometry geometry();
@@ -238,6 +246,8 @@ struct Widget : Object {
   void setFocused();
   void setFont(Font &font);
   void setGeometry(const Geometry &geometry);
+  void setLayout(Layout &layout);
+  void setParent(Window &parent);
   void setVisible(bool visible = true);
   bool visible();
 

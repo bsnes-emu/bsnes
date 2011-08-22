@@ -38,8 +38,20 @@ void pWidget::setGeometry(const Geometry &geometry) {
   gtk_widget_set_size_request(gtkWidget, width, height);
 }
 
+void pWidget::setParent(Window &parent) {
+  parentWindow = &parent.p;
+
+  if(!widget.state.font && parent.state.widgetFont) {
+    setFont(*parent.state.widgetFont);
+  }
+
+  gtk_fixed_put(GTK_FIXED(parent.p.formContainer), gtkWidget, 0, 0);
+  widget.setVisible(widget.visible());
+}
+
 void pWidget::setVisible(bool visible) {
   if(widget.state.abstract) visible = false;
+  if(widget.state.layout && widget.state.layout->visible() == false) visible = false;
   gtk_widget_set_visible(gtkWidget, visible);
 }
 

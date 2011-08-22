@@ -22,7 +22,7 @@ void Console::create() {
   controlLayout.append(traceSMP,       120,  0   );
   controlLayout.append(spacer,         120, ~0   );
   controlLayout.append(clearConsole,   120,  0   );
-  layout.append(controlLayout                    );
+  layout.append(controlLayout,           0, ~0   );
   append(layout);
   setGeometry({ 0, 0, layout.minimumGeometry().width + 585, 350 });
 

@@ -199,8 +199,12 @@ bool snes_load_cartridge_super_game_boy(
   if(rom_data) SNES::cartridge.rom.copy(rom_data, rom_size);
   string xmlrom = (rom_xml && *rom_xml) ? string(rom_xml) : SNESCartridge(rom_data, rom_size).xmlMemoryMap;
   if(dmg_data) {
-    string xmldmg = (dmg_xml && *dmg_xml) ? string(dmg_xml) : GameBoyCartridge(dmg_data, dmg_size).xml;
-    GameBoy::cartridge.load(xmldmg, dmg_data, dmg_size);
+    //GameBoyCartridge needs to modify dmg_data (for MMM01 emulation); so copy data
+    uint8_t *data = new uint8_t[dmg_size];
+    memcpy(data, dmg_data, dmg_size);
+    string xmldmg = (dmg_xml && *dmg_xml) ? string(dmg_xml) : GameBoyCartridge(data, dmg_size).xml;
+    GameBoy::cartridge.load(xmldmg, data, dmg_size);
+    delete[] data;
   }
   SNES::cartridge.load(SNES::Cartridge::Mode::SuperGameBoy, { xmlrom, "" });
   SNES::system.power();

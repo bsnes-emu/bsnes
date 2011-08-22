@@ -20,7 +20,7 @@ void MemoryEditor::create() {
   controlLayout.append(gotoBox,       80,  0   );
   controlLayout.append(refreshButton, 80,  0   );
   controlLayout.append(spacer,        80, ~0   );
-  layout.append(controlLayout                  );
+  layout.append(controlLayout,         0, ~0   );
   append(layout);
   setGeometry({ 0, 0, layout.minimumGeometry().width + 475, 230 });
 

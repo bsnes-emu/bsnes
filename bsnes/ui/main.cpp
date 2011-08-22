@@ -188,11 +188,21 @@ void Application::loadGeometry() {
   foreach(window, windows) {
     lstring position;
     position.split(",", window->position);
-    Geometry geom = window->geometry();
-    window->setGeometry({
+    Geometry configGeometry = {
       (signed)integer(position[0]), (signed)integer(position[1]),
-      geom.width, geom.height
-    //(unsigned)decimal(position[2]), (unsigned)decimal(position[3])
+      (unsigned)decimal(position[2]), (unsigned)decimal(position[3])
+    };
+    Geometry windowGeometry = window->geometry();
+
+    //Windows places minimized windows offscreen at 32000,32000
+    //this is a fix for older releases that did not compensate for this
+    if(configGeometry.x >= 30000) configGeometry.x = 128;
+    if(configGeometry.y >= 30000) configGeometry.y = 128;
+
+    window->setGeometry({
+      configGeometry.x, configGeometry.y,
+      windowGeometry.width, windowGeometry.height
+    //configGeometry.width, configGeometry.height
     });
   }
 }

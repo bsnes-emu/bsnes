@@ -26,7 +26,7 @@ void BreakpointEditor::create() {
     breakpointLayout[n].append(valueBox[n],   30, 0, 5);
     breakpointLayout[n].append(typeBox[n],     0, 0, 5);
     breakpointLayout[n].append(sourceBox[n],   0, 0   );
-    layout.append(breakpointLayout[n], n < Breakpoints - 1 ? 5 : 0);
+    layout.append(breakpointLayout[n], ~0, 0, n < Breakpoints - 1 ? 5 : 0);
   }
 
   append(layout);

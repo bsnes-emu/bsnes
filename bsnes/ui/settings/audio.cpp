@@ -13,24 +13,24 @@ void AudioSettings::create() {
 
   panelLayout.setMargin(5);
   panelLayout.append(panel, SettingsWindow::PanelWidth, ~0, 5);
-  panelLayout.append(layout);
+  panelLayout.append(layout, ~0, ~0);
 
   layout.append(title, ~0, 0, 5);
 
   frequencyLayout.append(frequencyLabel, 70, 0);
   frequencyLayout.append(frequencyValue, 60, 0);
   frequencyLayout.append(frequencySlider, ~0, 0);
-  layout.append(frequencyLayout);
+  layout.append(frequencyLayout, ~0, 0);
 
   volumeLayout.append(volumeLabel, 70, 0);
   volumeLayout.append(volumeValue, 60, 0);
   volumeLayout.append(volumeSlider, ~0, 0);
-  layout.append(volumeLayout);
+  layout.append(volumeLayout, ~0, 0);
 
   balanceLayout.append(balanceLabel, 70, 0);
   balanceLayout.append(balanceValue, 60, 0);
   balanceLayout.append(balanceSlider, ~0, 0);
-  layout.append(balanceLayout);
+  layout.append(balanceLayout, ~0, 0);
 
   layout.append(spacer, ~0, ~0);
   settingsWindow.append(panelLayout);

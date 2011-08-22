@@ -23,7 +23,7 @@ void InputSettings::create() {
 
   panelLayout.setMargin(5);
   panelLayout.append(panel, SettingsWindow::PanelWidth, ~0, 5);
-  panelLayout.append(layout);
+  panelLayout.append(layout, ~0, ~0);
 
   layout.append(title, ~0, 0, 5);
 
@@ -31,7 +31,7 @@ void InputSettings::create() {
   selectionLayout.append(portBox, ~0, 0, 5);
   selectionLayout.append(deviceLabel, 0, 0, 5);
   selectionLayout.append(deviceBox, ~0, 0);
-  layout.append(selectionLayout, 5);
+  layout.append(selectionLayout, ~0, 0, 5);
 
   layout.append(mappingList, ~0, ~0, 5);
 
@@ -40,7 +40,7 @@ void InputSettings::create() {
   controlLayout.append(customButton3, 100, 0, 5);
   controlLayout.append(spacer, ~0, 0);
   controlLayout.append(clearButton, 80, 0);
-  layout.append(controlLayout);
+  layout.append(controlLayout, ~0, 0);
 
   settingsWindow.append(panelLayout);
   clearButton.setEnabled(false);

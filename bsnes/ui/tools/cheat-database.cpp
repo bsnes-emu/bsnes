@@ -14,7 +14,7 @@ void CheatDatabase::create() {
   controlLayout.append(unselectAllButton, 100,  0   );
   controlLayout.append(spacerWidget,       ~0,  0   );
   controlLayout.append(okButton,           80,  0   );
-  layout.append(controlLayout                       );
+  layout.append(controlLayout,             ~0,  0   );
   append(layout);
   setGeometry({ 0, 0, 600, layout.minimumGeometry().height + 350 });
 

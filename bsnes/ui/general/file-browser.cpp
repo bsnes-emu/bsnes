@@ -12,7 +12,7 @@ void FileBrowser::create() {
   pathLayout.append(pathBox,      ~0,  0, 5);
   pathLayout.append(browseButton, sq, sq, 5);
   pathLayout.append(upButton,     sq, sq   );
-  layout.append(pathLayout,               5);
+  layout.append(pathLayout,       ~0,  0, 5);
   layout.append(contentsBox,      ~0, ~0   );
   append(layout);
   setGeometry({ 0, 0, 640, layout.minimumGeometry().height + 400 });

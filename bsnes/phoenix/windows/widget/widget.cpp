@@ -29,6 +29,7 @@ void pWidget::setGeometry(const Geometry &geometry) {
 
 void pWidget::setVisible(bool visible) {
   if(widget.state.abstract) visible = false;
+  if(widget.state.layout && widget.state.layout->visible() == false) visible = false;
   ShowWindow(hwnd, visible ? SW_SHOWNORMAL : SW_HIDE);
 }
 
@@ -49,4 +50,5 @@ void pWidget::setParent(Window &parent) {
   if(hwnd) DestroyWindow(hwnd);
   hwnd = CreateWindow(L"phoenix_label", L"", WS_CHILD, 0, 0, 0, 0, parent.p.hwnd, (HMENU)id, GetModuleHandle(0), 0);
   SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&widget);
+  widget.setVisible(false);
 }

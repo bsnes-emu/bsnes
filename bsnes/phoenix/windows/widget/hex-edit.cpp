@@ -128,4 +128,5 @@ void pHexEdit::setParent(Window &parent) {
 
   windowProc = (LRESULT CALLBACK (*)(HWND, UINT, LPARAM, WPARAM))GetWindowLongPtr(hwnd, GWLP_WNDPROC);
   SetWindowLongPtr(hwnd, GWLP_WNDPROC, (LONG_PTR)HexEdit_windowProc);
+  widget.setVisible(widget.visible());
 }

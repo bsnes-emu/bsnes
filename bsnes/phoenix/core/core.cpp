@@ -100,6 +100,8 @@ void Widget::setEnabled(bool enabled) { state.enabled = enabled; return p.setEna
 void Widget::setFocused() { return p.setFocused(); }
 void Widget::setFont(Font &font) { state.font = &font; return p.setFont(font); }
 void Widget::setGeometry(const Geometry &geometry) { state.geometry = geometry; return p.setGeometry(geometry); }
+void Widget::setLayout(Layout &layout) { state.layout = &layout; }
+void Widget::setParent(Window &parent) { state.parent = &parent; return p.setParent(parent); }
 void Widget::setVisible(bool visible) { state.visible = visible; return p.setVisible(visible); }
 bool Widget::visible() { return state.visible; }
 Widget::Widget() : state(*new State), p(*new pWidget(*this)) { state.abstract = true; p.constructor(); }

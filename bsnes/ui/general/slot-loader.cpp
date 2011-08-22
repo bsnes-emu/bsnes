@@ -16,14 +16,14 @@ void SingleSlotLoader::create() {
   baseLayout.append(baseLabel,   40,  0, 5);
   baseLayout.append(basePath,    ~0,  0, 5);
   baseLayout.append(baseBrowse,  sq, sq   );
-  layout.append(baseLayout,              5);
+  layout.append(baseLayout,      ~0,  0, 5);
   slotLayout.append(slotLabel,   40,  0, 5);
   slotLayout.append(slotPath,    ~0,  0, 5);
   slotLayout.append(slotBrowse,  sq, sq   );
-  layout.append(slotLayout,              5);
+  layout.append(slotLayout,      ~0,  0, 5);
   controlLayout.append(spacer,   ~0,  0   );
   controlLayout.append(okButton, 80,  0   );
-  layout.append(controlLayout);
+  layout.append(controlLayout,   ~0,  0   );
   append(layout);
   setGeometry({ 0, 0, 480, layout.minimumGeometry().height });
 
@@ -111,18 +111,18 @@ void DoubleSlotLoader::create() {
   baseLayout.append(baseLabel,    40,  0, 5);
   baseLayout.append(basePath,     ~0,  0, 5);
   baseLayout.append(baseBrowse,   sq, sq   );
-  layout.append(baseLayout,               5);
+  layout.append(baseLayout,       ~0,  0, 5);
   slotALayout.append(slotALabel,  40,  0, 5);
   slotALayout.append(slotAPath,   ~0,  0, 5);
   slotALayout.append(slotABrowse, sq, sq   );
-  layout.append(slotALayout,              5);
+  layout.append(slotALayout,      ~0,  0, 5);
   slotBLayout.append(slotBLabel,  40,  0, 5);
   slotBLayout.append(slotBPath,   ~0,  0, 5);
   slotBLayout.append(slotBBrowse, sq, sq   );
-  layout.append(slotBLayout,              5);
+  layout.append(slotBLayout,      ~0,  0, 5);
   controlLayout.append(spacer,    ~0,  0   );
   controlLayout.append(okButton,  80,  0   );
-  layout.append(controlLayout);
+  layout.append(controlLayout,    ~0,  0   );
   append(layout);
   setGeometry({ 0, 0, 480, layout.minimumGeometry().height });
 

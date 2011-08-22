@@ -5,6 +5,7 @@ gameboy := gameboy
 profile := accuracy
 ui := ui
 
+# options += console
 # options += debugger
 
 # compiler
@@ -25,20 +26,19 @@ else ifeq ($(pgo),optimize)
   flags += -fprofile-use
 endif
 
-flags := $(flags) $(foreach o,$(call strupper,$(options)),-D$o)
-
 # platform
 ifeq ($(platform),x)
   link += -s -ldl -lX11 -lXext
 else ifeq ($(platform),osx)
 else ifeq ($(platform),win)
-  link += -mwindows
-# link += -mconsole
+  link += $(if $(findstring console,$(options)),-mconsole,-mwindows)
   link += -mthreads -s -luuid -lkernel32 -luser32 -lgdi32 -lcomctl32 -lcomdlg32 -lshell32 -lole32
   link += -enable-stdcall-fixup -Wl,-enable-auto-import -Wl,-enable-runtime-pseudo-reloc
 else
   unknown_platform: help;
 endif
+
+flags := $(flags) $(foreach o,$(call strupper,$(options)),-D$o)
 
 # implicit rules
 compile = \

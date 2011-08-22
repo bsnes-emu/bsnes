@@ -17,7 +17,7 @@ void AboutWindow::create() {
   layout.append(canvas, 720, 180);
   informationLayout.append(spacer, ~0, 0);
   informationLayout.append(information, 0, 0);
-  layout.append(informationLayout);
+  layout.append(informationLayout, ~0, 0);
   append(layout);
   setGeometry({ 0, 0, layout.minimumGeometry().width, layout.minimumGeometry().height });
 }

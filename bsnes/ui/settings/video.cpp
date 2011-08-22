@@ -22,7 +22,7 @@ void VideoSettings::create() {
 
   panelLayout.setMargin(5);
   panelLayout.append(panel, SettingsWindow::PanelWidth, ~0, 5);
-  panelLayout.append(layout);
+  panelLayout.append(layout, ~0, ~0);
 
   layout.append(title, ~0, 0, 5);
 
@@ -30,21 +30,21 @@ void VideoSettings::create() {
   brightnessLayout.append(brightnessLabel,   80, 0   );
   brightnessLayout.append(brightnessValue,   50, 0   );
   brightnessLayout.append(brightnessSlider,  ~0, 0   );
-  layout.append(brightnessLayout                     );
+  layout.append(brightnessLayout,            ~0, 0   );
   contrastLayout.append(contrastLabel,       80, 0   );
   contrastLayout.append(contrastValue,       50, 0   );
   contrastLayout.append(contrastSlider,      ~0, 0   );
-  layout.append(contrastLayout                       );
+  layout.append(contrastLayout,              ~0, 0   );
   gammaLayout.append(gammaLabel,             80, 0   );
   gammaLayout.append(gammaValue,             50, 0   );
   gammaLayout.append(gammaSlider,            ~0, 0   );
-  layout.append(gammaLayout                          );
+  layout.append(gammaLayout,                 ~0, 0   );
   layout.append(gammaRampCheck,              ~0, 0, 5);
   layout.append(fullscreenLabel,             ~0, 0   );
   fullscreenLayout.append(fullscreenCenter,  ~0, 0, 5);
   fullscreenLayout.append(fullscreenScale,   ~0, 0, 5);
   fullscreenLayout.append(fullscreenStretch, ~0, 0   );
-  layout.append(fullscreenLayout);
+  layout.append(fullscreenLayout,            ~0, 0   );
 
   layout.append(spacer, ~0, ~0);
   settingsWindow.append(panelLayout);

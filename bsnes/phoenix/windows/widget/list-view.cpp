@@ -131,4 +131,5 @@ void pListView::setParent(Window &parent) {
   foreach(checked, listView.state.checked, n) setChecked(n, checked);
   if(listView.state.selected) setSelection(listView.state.selection);
   autoSizeColumns();
+  widget.setVisible(widget.visible());
 }

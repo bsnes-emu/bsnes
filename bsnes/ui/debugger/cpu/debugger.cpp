@@ -17,7 +17,7 @@ void CPUDebugger::create() {
   controlLayout.append(stepOver, 80,  0   );
   controlLayout.append(proceed,  80,  0   );
   controlLayout.append(spacer,   80, ~0   );
-  layout.append(controlLayout             );
+  layout.append(controlLayout,    0, ~0   );
   append(layout);
   setGeometry({ 0, 0, layout.minimumGeometry().width + 300, 220 });
 

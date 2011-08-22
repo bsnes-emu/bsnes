@@ -17,4 +17,5 @@ void pProgressBar::setParent(Window &parent) {
   SendMessage(hwnd, PBM_SETRANGE, 0, MAKELPARAM(0, 100));
   SendMessage(hwnd, PBM_SETSTEP, MAKEWPARAM(1, 0), 0);
   setPosition(progressBar.state.position);
+  widget.setVisible(widget.visible());
 }

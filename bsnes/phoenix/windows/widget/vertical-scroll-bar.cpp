@@ -30,4 +30,5 @@ void pVerticalScrollBar::setParent(Window &parent) {
   unsigned position = verticalScrollBar.state.position;
   setLength(verticalScrollBar.state.length);
   setPosition(position);
+  widget.setVisible(widget.visible());
 }

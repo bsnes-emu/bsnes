@@ -35,4 +35,5 @@ void pRadioBox::setParent(Window &parent) {
   setDefaultFont();
   if(radioBox.state.checked) setChecked();
   setText(radioBox.state.text);
+  widget.setVisible(widget.visible());
 }

@@ -31,4 +31,5 @@ void pHorizontalSlider::setParent(Window &parent) {
   unsigned position = horizontalSlider.state.position;
   setLength(horizontalSlider.state.length);
   setPosition(position);
+  widget.setVisible(widget.visible());
 }

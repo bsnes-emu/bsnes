@@ -50,4 +50,5 @@ void pTextEdit::setParent(Window &parent) {
   setCursorPosition(textEdit.state.cursorPosition);
   setEditable(textEdit.state.editable);
   setText(textEdit.state.text);
+  widget.setVisible(widget.visible());
 }
