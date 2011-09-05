@@ -18,18 +18,22 @@ void pVerticalSlider::setPosition(unsigned position) {
 }
 
 void pVerticalSlider::constructor() {
-  setParent(Window::None);
-}
-
-void pVerticalSlider::setParent(Window &parent) {
-  if(hwnd) DestroyWindow(hwnd);
   hwnd = CreateWindow(
-    TRACKBAR_CLASS, L"", WS_CHILD | WS_VISIBLE | WS_TABSTOP | TBS_NOTICKS | TBS_BOTH | TBS_HORZ,
-    0, 0, 0, 0, parent.p.hwnd, (HMENU)id, GetModuleHandle(0), 0
+    TRACKBAR_CLASS, L"", WS_CHILD | WS_TABSTOP | TBS_NOTICKS | TBS_BOTH | TBS_VERT,
+    0, 0, 0, 0, parentWindow->p.hwnd, (HMENU)id, GetModuleHandle(0), 0
   );
   SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&verticalSlider);
   unsigned position = verticalSlider.state.position;
   setLength(verticalSlider.state.length);
-  setPosition(position);
-  widget.setVisible(widget.visible());
+  verticalSlider.setPosition(position);
+  synchronize();
+}
+
+void pVerticalSlider::destructor() {
+  DestroyWindow(hwnd);
+}
+
+void pVerticalSlider::orphan() {
+  destructor();
+  constructor();
 }

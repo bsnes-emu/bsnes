@@ -28,6 +28,11 @@ void pRadioItem::constructor() {
   connect(qtAction, SIGNAL(triggered()), SLOT(onTick()));
 }
 
+void pRadioItem::destructor() {
+  if(action.state.menu) action.state.menu->remove(radioItem);
+  delete qtAction;
+}
+
 void pRadioItem::onTick() {
   if(radioItem.state.checked == false) {
     setChecked();

@@ -1,5 +1,9 @@
 #ifdef APU_CPP
 
+bool APU::Square2::dac_enable() {
+  return (envelope_volume || envelope_direction);
+}
+
 void APU::Square2::run() {
   if(period && --period == 0) {
     period = 4 * (2048 - frequency);
@@ -13,49 +17,53 @@ void APU::Square2::run() {
   }
 
   uint4 sample = (duty_output ? volume : 0);
-  if(counter && length == 0) sample = 0;
+  if(enable == false) sample = 0;
 
   output = (sample * 4369) - 32768;
 }
 
 void APU::Square2::clock_length() {
-  if(counter && length) length--;
+  if(counter && length) {
+    if(--length == 0) enable = false;
+  }
 }
 
 void APU::Square2::clock_envelope() {
   if(envelope_period && --envelope_period == 0) {
     envelope_period = envelope_frequency;
+    if(envelope_period == 0) envelope_period = 8;
     if(envelope_direction == 0 && volume >  0) volume--;
     if(envelope_direction == 1 && volume < 15) volume++;
   }
 }
 
 void APU::Square2::write(unsigned r, uint8 data) {
-  if(r == 1) {
+  if(r == 1) {  //$ff16  NR21
     duty = data >> 6;
-    initial_length = 64 - (data & 0x3f);
-    length = initial_length;
+    length = 64 - (data & 0x3f);
   }
 
-  if(r == 2) {
+  if(r == 2) {  //$ff17  NR22
     envelope_volume = data >> 4;
     envelope_direction = data & 0x08;
     envelope_frequency = data & 0x07;
+    if(dac_enable() == false) enable = false;
   }
 
-  if(r == 3) {
+  if(r == 3) {  //$ff18  NR23
     frequency = (frequency & 0x0700) | data;
   }
 
-  if(r == 4) {
+  if(r == 4) {  //$ff19  NR24
     bool initialize = data & 0x80;
     counter = data & 0x40;
     frequency = ((data & 7) << 8) | (frequency & 0x00ff);
 
     if(initialize) {
-      length = initial_length;
+      enable = dac_enable();
       envelope_period = envelope_frequency;
       volume = envelope_volume;
+      if(length == 0) length = 64;
     }
   }
 
@@ -63,8 +71,9 @@ void APU::Square2::write(unsigned r, uint8 data) {
 }
 
 void APU::Square2::power() {
+  enable = 0;
+
   duty = 0;
-  initial_length = 0;
   length = 0;
   envelope_volume = 0;
   envelope_direction = 0;
@@ -81,8 +90,9 @@ void APU::Square2::power() {
 }
 
 void APU::Square2::serialize(serializer &s) {
+  s.integer(enable);
+
   s.integer(duty);
-  s.integer(initial_length);
   s.integer(length);
   s.integer(envelope_volume);
   s.integer(envelope_direction);

@@ -96,6 +96,24 @@ void pHexEdit::constructor() {
   gtk_widget_show(scrollBar);
   gtk_widget_show(subWidget);
   gtk_widget_show(container);
+
+  setColumns(hexEdit.state.columns);
+  setRows(hexEdit.state.rows);
+  setLength(hexEdit.state.length);
+  setOffset(hexEdit.state.offset);
+  update();
+}
+
+void pHexEdit::destructor() {
+  gtk_widget_destroy(scrollBar);
+  gtk_widget_destroy(subWidget);
+  gtk_widget_destroy(container);
+  gtk_widget_destroy(gtkWidget);
+}
+
+void pHexEdit::orphan() {
+  destructor();
+  constructor();
 }
 
 unsigned pHexEdit::cursorPosition() {

@@ -13,3 +13,12 @@ void pViewport::constructor() {
   color.blue = 0;
   gtk_widget_modify_bg(gtkWidget, GTK_STATE_NORMAL, &color);
 }
+
+void pViewport::destructor() {
+  gtk_widget_destroy(gtkWidget);
+}
+
+void pViewport::orphan() {
+  destructor();
+  constructor();
+}

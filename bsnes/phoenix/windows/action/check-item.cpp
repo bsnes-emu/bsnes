@@ -3,7 +3,7 @@ bool pCheckItem::checked() {
 }
 
 void pCheckItem::setChecked(bool checked) {
-  if(parentMenu) CheckMenuItem(parentMenu, id, checked ? MF_CHECKED : MF_UNCHECKED);
+  if(parentMenu) CheckMenuItem(parentMenu->p.hmenu, id, checked ? MF_CHECKED : MF_UNCHECKED);
 }
 
 void pCheckItem::setText(const string &text) {
@@ -11,4 +11,8 @@ void pCheckItem::setText(const string &text) {
 }
 
 void pCheckItem::constructor() {
+}
+
+void pCheckItem::destructor() {
+  if(parentMenu) parentMenu->remove(checkItem);
 }

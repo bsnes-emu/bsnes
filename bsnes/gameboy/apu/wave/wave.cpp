@@ -8,7 +8,6 @@ void APU::Wave::run() {
   }
 
   uint4 sample = pattern_sample;
-  if(counter && length == 0) sample = 0;
   if(enable == false) sample = 0;
 
   output = (sample * 4369) - 32768;
@@ -16,22 +15,22 @@ void APU::Wave::run() {
 }
 
 void APU::Wave::clock_length() {
-  if(counter && length) length--;
+  if(counter && length) {
+    if(--length == 0) enable = false;
+  }
 }
 
 void APU::Wave::write(unsigned r, uint8 data) {
-  if(r == 0) {
+  if(r == 0) {  //$ff1a  NR30
     dac_enable = data & 0x80;
-
     if(dac_enable == false) enable = false;
   }
 
-  if(r == 1) {
-    initial_length = 256 - data;
-    length = initial_length;
+  if(r == 1) {  //$ff1b  NR31
+    length = 256 - data;
   }
 
-  if(r == 2) {
+  if(r == 2) {  //$ff1c  NR32
     switch((data >> 5) & 3) {
       case 0: volume = 16; break;  //  0%
       case 1: volume =  0; break;  //100%
@@ -40,19 +39,19 @@ void APU::Wave::write(unsigned r, uint8 data) {
     }
   }
 
-  if(r == 3) {
+  if(r == 3) {  //$ff1d  NR33
     frequency = (frequency & 0x0700) | data;
   }
 
-  if(r == 4) {
+  if(r == 4) {  //$ff1e  NR34
     bool initialize = data & 0x80;
     counter = data & 0x40;
     frequency = ((data & 7) << 8) | (frequency & 0x00ff);
 
-    if(initialize && dac_enable) {
-      enable = true;
+    if(initialize) {
+      enable = dac_enable;
       pattern_offset = 0;
-      length = initial_length;
+      if(length == 0) length = 256;
     }
   }
 
@@ -66,6 +65,8 @@ void APU::Wave::write_pattern(unsigned p, uint8 data) {
 }
 
 void APU::Wave::power() {
+  enable = 0;
+
   dac_enable = 0;
   volume = 0;
   frequency = 0;
@@ -75,8 +76,6 @@ void APU::Wave::power() {
   foreach(n, pattern) n = r() & 15;
 
   output = 0;
-  enable = 0;
-  initial_length = 0;
   length = 0;
   period = 0;
   pattern_offset = 0;
@@ -84,6 +83,8 @@ void APU::Wave::power() {
 }
 
 void APU::Wave::serialize(serializer &s) {
+  s.integer(enable);
+
   s.integer(dac_enable);
   s.integer(volume);
   s.integer(frequency);
@@ -91,8 +92,6 @@ void APU::Wave::serialize(serializer &s) {
   s.array(pattern);
 
   s.integer(output);
-  s.integer(enable);
-  s.integer(initial_length);
   s.integer(length);
   s.integer(period);
   s.integer(pattern_offset);

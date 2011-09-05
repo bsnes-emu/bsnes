@@ -23,9 +23,9 @@ using namespace phoenix;
 struct Application {
   bool quit;
 
-  Font proportionalFont;
-  Font proportionalFontBold;
-  Font monospaceFont;
+  string proportionalFont;
+  string proportionalFontBold;
+  string monospaceFont;
 
   void main(int argc, char **argv);
 };

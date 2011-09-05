@@ -17,6 +17,16 @@ void pCheckItem::setText(const string &text) {
 }
 
 void pCheckItem::constructor() {
-  widget = gtk_check_menu_item_new_with_label("");
+  widget = gtk_check_menu_item_new_with_label(checkItem.state.text);
+  setChecked(checkItem.state.checked);
   g_signal_connect_swapped(G_OBJECT(widget), "toggled", G_CALLBACK(CheckItem_tick), (gpointer)&checkItem);
+}
+
+void pCheckItem::destructor() {
+  gtk_widget_destroy(widget);
+}
+
+void pCheckItem::orphan() {
+  destructor();
+  constructor();
 }

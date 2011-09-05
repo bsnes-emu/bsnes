@@ -2,7 +2,6 @@ static const unsigned FixedStyle = WS_SYSMENU | WS_CAPTION | WS_MINIMIZEBOX | WS
 static const unsigned ResizableStyle = WS_SYSMENU | WS_CAPTION | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_THICKFRAME;
 
 void pWindow::append(Layout &layout) {
-  layout.setParent(window);
   Geometry geom = window.state.geometry;
   geom.x = geom.y = 0;
   layout.setGeometry(geom);
@@ -13,7 +12,11 @@ void pWindow::append(Menu &menu) {
 }
 
 void pWindow::append(Widget &widget) {
-  widget.p.setParent(window);
+  widget.p.parentWindow = &window;
+  widget.p.orphan();
+  if(widget.state.font != "") widget.p.setFont(widget.state.font);
+  else if(window.state.widgetFont != "") widget.p.setFont(window.state.widgetFont);
+  else widget.p.setFont("Tahoma, 8");
 }
 
 Color pWindow::backgroundColor() {
@@ -61,6 +64,17 @@ Geometry pWindow::geometry() {
   return { x, y, width, height };
 }
 
+void pWindow::remove(Layout &layout) {
+}
+
+void pWindow::remove(Menu &menu) {
+  updateMenu();
+}
+
+void pWindow::remove(Widget &widget) {
+  widget.p.orphan();
+}
+
 void pWindow::setBackgroundColor(const Color &color) {
   if(brush) DeleteObject(brush);
   brushColor = RGB(color.red, color.green, color.blue);
@@ -103,7 +117,7 @@ void pWindow::setGeometry(const Geometry &geometry) {
   locked = false;
 }
 
-void pWindow::setMenuFont(Font &font) {
+void pWindow::setMenuFont(const string &font) {
 }
 
 void pWindow::setMenuVisible(bool visible) {
@@ -118,8 +132,10 @@ void pWindow::setResizable(bool resizable) {
   setGeometry(window.state.geometry);
 }
 
-void pWindow::setStatusFont(Font &font) {
-  SendMessage(hstatus, WM_SETFONT, (WPARAM)font.p.hfont, 0);
+void pWindow::setStatusFont(const string &font) {
+  if(hstatusfont) DeleteObject(hstatusfont);
+  hstatusfont = pFont::create(font);
+  SendMessage(hstatus, WM_SETFONT, (WPARAM)hstatusfont, 0);
 }
 
 void pWindow::setStatusText(const string &text) {
@@ -141,9 +157,9 @@ void pWindow::setVisible(bool visible) {
   ShowWindow(hwnd, visible ? SW_SHOWNORMAL : SW_HIDE);
 }
 
-void pWindow::setWidgetFont(Font &font) {
+void pWindow::setWidgetFont(const string &font) {
   foreach(widget, window.state.widget) {
-    if(!widget.state.font) widget.setFont(font);
+    if(widget.state.font == "") widget.setFont(font);
   }
 }
 
@@ -153,6 +169,8 @@ void pWindow::constructor() {
   hwnd = CreateWindow(L"phoenix_window", L"", ResizableStyle, 128, 128, 256, 256, 0, 0, GetModuleHandle(0), 0);
   hmenu = CreateMenu();
   hstatus = CreateWindow(STATUSCLASSNAME, L"", WS_CHILD, 0, 0, 0, 0, hwnd, 0, GetModuleHandle(0), 0);
+  hstatusfont = 0;
+  setStatusFont("Tahoma, 8");
 
   //status bar will be capable of receiving tab focus if it is not disabled
   SetWindowLongPtr(hstatus, GWL_STYLE, GetWindowLong(hstatus, GWL_STYLE) | WS_DISABLED);
@@ -161,12 +179,19 @@ void pWindow::constructor() {
   setGeometry({ 128, 128, 256, 256 });
 }
 
+void pWindow::destructor() {
+  DeleteObject(hstatusfont);
+  DestroyWindow(hstatus);
+  DestroyMenu(hmenu);
+  DestroyWindow(hwnd);
+}
+
 void pWindow::updateMenu() {
   if(hmenu) DestroyMenu(hmenu);
   hmenu = CreateMenu();
 
   foreach(menu, window.state.menu) {
-    menu.p.update(window, hmenu);
+    menu.p.update(window);
     AppendMenu(hmenu, MF_STRING | MF_POPUP, (UINT_PTR)menu.p.hmenu, utf16_t(menu.state.text));
   }
 

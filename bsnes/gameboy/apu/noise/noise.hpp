@@ -1,4 +1,6 @@
 struct Noise {
+  bool enable;
+
   unsigned envelope_volume;
   bool envelope_direction;
   unsigned envelope_frequency;
@@ -8,12 +10,13 @@ struct Noise {
   bool counter;
 
   int16 output;
-  unsigned initial_length;
   unsigned length;
   unsigned envelope_period;
   unsigned volume;
   unsigned period;
   uint15 lfsr;
+
+  bool dac_enable();
 
   void run();
   void clock_length();

@@ -7,6 +7,11 @@ void pItem::constructor() {
   connect(qtAction, SIGNAL(triggered()), SLOT(onTick()));
 }
 
+void pItem::destructor() {
+  if(action.state.menu) action.state.menu->remove(item);
+  delete qtAction;
+}
+
 void pItem::onTick() {
   if(item.onTick) item.onTick();
 }

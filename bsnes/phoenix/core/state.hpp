@@ -1,18 +1,3 @@
-struct Font::State {
-  bool bold;
-  string family;
-  bool italic;
-  unsigned size;
-  bool underline;
-
-  State() {
-    bold = false;
-    italic = false;
-    size = 8;
-    underline = false;
-  }
-};
-
 struct Timer::State {
   bool enabled;
   unsigned milliseconds;
@@ -28,42 +13,44 @@ struct Window::State {
   Color backgroundColor;
   bool fullScreen;
   Geometry geometry;
+  bool ignore;
   reference_array<Layout&> layout;
   reference_array<Menu&> menu;
-  Font *menuFont;
+  string menuFont;
   bool menuVisible;
   bool resizable;
-  Font *statusFont;
+  string statusFont;
   string statusText;
   bool statusVisible;
   string title;
   bool visible;
   reference_array<Widget&> widget;
-  Font *widgetFont;
+  string widgetFont;
 
   State() {
     backgroundColorOverride = false;
     backgroundColor = { 0, 0, 0, 255 };
     fullScreen = false;
     geometry = { 128, 128, 256, 256 };
-    menuFont = 0;
+    ignore = false;
     menuVisible = false;
     resizable = true;
     statusVisible = false;
     visible = false;
-    widgetFont = 0;
   }
 };
 
 struct Action::State {
   bool enabled;
-  Window *parent;
+  Menu *menu;
   bool visible;
+  Window *window;
 
   State() {
     enabled = true;
-    parent = 0;
+    menu = 0;
     visible = true;
+    window = 0;
   }
 };
 
@@ -95,22 +82,32 @@ struct RadioItem::State {
   }
 };
 
+struct Sizable::State {
+  Layout *layout;
+  Window *window;
+
+  State() {
+    layout = 0;
+    window = 0;
+  }
+};
+
+struct Layout::State {
+  State() {
+  }
+};
+
 struct Widget::State {
   bool abstract;
   bool enabled;
-  Font *font;
+  string font;
   Geometry geometry;
-  Layout *layout;
-  Window *parent;
   bool visible;
 
   State() {
     abstract = false;
     enabled = true;
-    font = 0;
     geometry = { 0, 0, 0, 0 };
-    layout = 0;
-    parent = 0;
     visible = true;
   }
 };

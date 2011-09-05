@@ -1,5 +1,8 @@
 static void ComboBox_change(ComboBox *self) {
-  if(self->p.locked == false && self->onChange) self->onChange();
+  if(self->p.locked == false) {
+    self->state.selection = self->selection();
+    if(self->onChange) self->onChange();
+  }
 }
 
 void pComboBox::append(const string &text) {
@@ -8,11 +11,10 @@ void pComboBox::append(const string &text) {
 }
 
 Geometry pComboBox::minimumGeometry() {
-  Font &font = pWidget::font();
   unsigned maximumWidth = 0;
-  foreach(item, comboBox.state.text) maximumWidth = max(maximumWidth, font.geometry(item).width);
+  foreach(item, comboBox.state.text) maximumWidth = max(maximumWidth, pFont::geometry(widget.state.font, item).width);
 
-  Geometry geometry = font.geometry(" ");
+  Geometry geometry = pFont::geometry(widget.state.font, " ");
   return { 0, 0, maximumWidth + 44, geometry.height + 12 };
 }
 
@@ -37,4 +39,18 @@ void pComboBox::constructor() {
   itemCounter = 0;
   gtkWidget = gtk_combo_box_new_text();
   g_signal_connect_swapped(G_OBJECT(gtkWidget), "changed", G_CALLBACK(ComboBox_change), (gpointer)&comboBox);
+
+  locked = true;
+  foreach(text, comboBox.state.text) append(text);
+  locked = false;
+  setSelection(comboBox.state.selection);
+}
+
+void pComboBox::destructor() {
+  gtk_widget_destroy(gtkWidget);
+}
+
+void pComboBox::orphan() {
+  destructor();
+  constructor();
 }

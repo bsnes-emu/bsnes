@@ -24,6 +24,17 @@ void pHorizontalScrollBar::setPosition(unsigned position) {
 
 void pHorizontalScrollBar::constructor() {
   gtkWidget = gtk_hscrollbar_new(0);
-  setLength(101);
   g_signal_connect_swapped(G_OBJECT(gtkWidget), "value-changed", G_CALLBACK(HorizontalScrollBar_change), (gpointer)&horizontalScrollBar);
+
+  setLength(horizontalScrollBar.state.length);
+  setPosition(horizontalScrollBar.state.position);
+}
+
+void pHorizontalScrollBar::destructor() {
+  gtk_widget_destroy(gtkWidget);
+}
+
+void pHorizontalScrollBar::orphan() {
+  destructor();
+  constructor();
 }

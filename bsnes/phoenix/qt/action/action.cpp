@@ -12,17 +12,19 @@ void pAction::setEnabled(bool enabled) {
   }
 }
 
-void pAction::setFont(Font &font) {
+void pAction::setFont(const string &font) {
+  QFont qtFont = pFont::create(font);
+
   if(dynamic_cast<Menu*>(&action)) {
     ((Menu&)action).p.setFont(font);
   } else if(dynamic_cast<Separator*>(&action)) {
-    ((Separator&)action).p.qtAction->setFont(*font.p.qtFont);
+    ((Separator&)action).p.qtAction->setFont(qtFont);
   } else if(dynamic_cast<Item*>(&action)) {
-    ((Item&)action).p.qtAction->setFont(*font.p.qtFont);
+    ((Item&)action).p.qtAction->setFont(qtFont);
   } else if(dynamic_cast<CheckItem*>(&action)) {
-    ((CheckItem&)action).p.qtAction->setFont(*font.p.qtFont);
+    ((CheckItem&)action).p.qtAction->setFont(qtFont);
   } else if(dynamic_cast<RadioItem*>(&action)) {
-    ((RadioItem&)action).p.qtAction->setFont(*font.p.qtFont);
+    ((RadioItem&)action).p.qtAction->setFont(qtFont);
   }
 }
 
@@ -41,4 +43,7 @@ void pAction::setVisible(bool visible) {
 }
 
 void pAction::constructor() {
+}
+
+void pAction::destructor() {
 }

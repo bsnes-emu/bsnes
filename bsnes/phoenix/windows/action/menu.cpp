@@ -1,5 +1,11 @@
 void pMenu::append(Action &action) {
+  action.p.parentMenu = &menu;
   if(parentWindow) parentWindow->p.updateMenu();
+}
+
+void pMenu::remove(Action &action) {
+  if(parentWindow) parentWindow->p.updateMenu();
+  action.p.parentMenu = 0;
 }
 
 void pMenu::setText(const string &text) {
@@ -12,20 +18,21 @@ void pMenu::constructor() {
 
 //Windows actions lack the ability to toggle visibility.
 //To support this, menus must be destroyed and recreated when toggling any action's visibility.
-void pMenu::update(Window &parentWindow, HMENU parentMenu) {
-  this->parentWindow = &parentWindow;
+void pMenu::update(Window &parentWindow, Menu *parentMenu) {
   this->parentMenu = parentMenu;
+  this->parentWindow = &parentWindow;
+
   if(hmenu) DestroyMenu(hmenu);
   hmenu = CreatePopupMenu();
 
   foreach(action, menu.state.action) {
+    action.p.parentMenu = &menu;
     action.p.parentWindow = &parentWindow;
-    action.p.parentMenu = hmenu;
 
     unsigned enabled = action.state.enabled ? 0 : MF_GRAYED;
     if(dynamic_cast<Menu*>(&action)) {
       Menu &item = (Menu&)action;
-      item.p.update(parentWindow, hmenu);
+      item.p.update(parentWindow, &menu);
       AppendMenu(hmenu, MF_STRING | MF_POPUP | enabled, (UINT_PTR)item.p.hmenu, utf16_t(item.state.text));
     } else if(dynamic_cast<Separator*>(&action)) {
       Separator &item = (Separator&)action;
@@ -42,5 +49,14 @@ void pMenu::update(Window &parentWindow, HMENU parentMenu) {
       if(action.state.visible) AppendMenu(hmenu, MF_STRING | enabled, item.p.id, utf16_t(item.state.text));
       if(item.state.checked) item.setChecked();
     }
+  }
+}
+
+void pMenu::destructor() {
+  if(parentMenu) {
+    parentMenu->remove(menu);
+  } else if(parentWindow) {
+    //belongs to window's main menubar
+    parentWindow->remove(menu);
   }
 }

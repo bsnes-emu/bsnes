@@ -41,10 +41,10 @@ struct TopLevelWindow : Window {
 #endif
 
 struct Application {
-  Font proportionalFont;
-  Font proportionalFontBold;
-  Font monospaceFont;
-  Font titleFont;
+  string proportionalFont;
+  string proportionalFontBold;
+  string monospaceFont;
+  string titleFont;
   bool compositorActive;
 
   bool pause;

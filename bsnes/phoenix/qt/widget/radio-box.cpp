@@ -3,8 +3,7 @@ bool pRadioBox::checked() {
 }
 
 Geometry pRadioBox::minimumGeometry() {
-  Font &font = this->font();
-  Geometry geometry = font.geometry(radioBox.state.text);
+  Geometry geometry = pFont::geometry(qtWidget->font(), radioBox.state.text);
   return { 0, 0, geometry.width + 26, geometry.height + 6 };
 }
 
@@ -42,6 +41,20 @@ void pRadioBox::constructor() {
   qtGroup->addButton(qtRadioBox);
   qtRadioBox->setChecked(true);
   connect(qtRadioBox, SIGNAL(toggled(bool)), SLOT(onTick()));
+
+  setText(radioBox.state.text);
+}
+
+void pRadioBox::destructor() {
+  delete qtGroup;
+  delete qtRadioBox;
+  qtWidget = qtRadioBox = 0;
+  qtGroup = 0;
+}
+
+void pRadioBox::orphan() {
+  destructor();
+  constructor();
 }
 
 void pRadioBox::onTick() {

@@ -3,9 +3,8 @@ bool pCheckBox::checked() {
 }
 
 Geometry pCheckBox::minimumGeometry() {
-  Font &font = this->font();
-  Geometry geometry = font.geometry(checkBox.state.text);
-  return { 0, 0, geometry.width + 20, font.p.height() + 4 };
+  Geometry geometry = pFont::geometry(hfont, checkBox.state.text);
+  return { 0, 0, geometry.width + 20, geometry.height + 4 };
 }
 
 void pCheckBox::setChecked(bool checked) {
@@ -17,18 +16,24 @@ void pCheckBox::setText(const string &text) {
 }
 
 void pCheckBox::constructor() {
-  setParent(Window::None);
-}
-
-void pCheckBox::setParent(Window &parent) {
   hwnd = CreateWindow(
     L"BUTTON", L"",
-    WS_CHILD | WS_TABSTOP | WS_VISIBLE | BS_CHECKBOX,
-    0, 0, 0, 0, parent.p.hwnd, (HMENU)id, GetModuleHandle(0), 0
+    WS_CHILD | WS_TABSTOP | BS_CHECKBOX,
+    0, 0, 0, 0, parentWindow->p.hwnd, (HMENU)id, GetModuleHandle(0), 0
   );
   SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&checkBox);
   setDefaultFont();
   if(checkBox.state.checked) setChecked(true);
   setText(checkBox.state.text);
-  widget.setVisible(widget.visible());
+  synchronize();
+
+}
+
+void pCheckBox::destructor() {
+  DestroyWindow(hwnd);
+}
+
+void pCheckBox::orphan() {
+  destructor();
+  constructor();
 }

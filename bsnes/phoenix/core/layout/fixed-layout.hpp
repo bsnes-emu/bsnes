@@ -1,17 +1,24 @@
 struct FixedLayout : Layout {
   void append(Sizable &sizable, const Geometry &geometry);
+  void append(Sizable &sizable);
+  bool enabled();
   Geometry minimumGeometry();
+  void remove(Sizable &sizable);
+  void reset();
+  void setEnabled(bool enabled = true);
   void setGeometry(const Geometry &geometry);
-  void setLayout(Layout &layout);
-  void setParent(Window &parent);
-  void setVisible(bool visible);
+  void setVisible(bool visible = true);
+  void synchronize();
   bool visible();
   FixedLayout();
+  ~FixedLayout();
 
 //private:
-  Layout *layout;
-  Window *parent;
-  bool visible_;
+  struct State {
+    bool enabled;
+    bool visible;
+  } state;
+
   struct Children {
     Sizable *sizable;
     Geometry geometry;

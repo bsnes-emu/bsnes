@@ -1,24 +1,44 @@
-struct pFont;
+struct Settings : public configuration {
+  unsigned frameGeometryX;
+  unsigned frameGeometryY;
+  unsigned frameGeometryWidth;
+  unsigned frameGeometryHeight;
+  unsigned menuGeometryHeight;
+  unsigned statusGeometryHeight;
+
+  void load();
+  void save();
+  Settings();
+};
+
 struct pWindow;
 struct pMenu;
 struct pLayout;
 struct pWidget;
 
-struct pObject {
-  unsigned id;
-  bool locked;
-  static array<pObject*> objects;
+struct pFont {
+  static Geometry geometry(const string &description, const string &text);
 
-  pObject();
-  static pObject* find(unsigned id);
-  virtual void unused() {}
+  static PangoFontDescription* create(const string &description);
+  static void free(PangoFontDescription *font);
+  static Geometry geometry(PangoFontDescription *font, const string &text);
+  static void setFont(GtkWidget *widget, const string &font);
+  static void setFont(GtkWidget *widget, gpointer font);
+};
+
+struct pObject {
+  Object &object;
+  bool locked;
+
+  pObject(Object &object) : object(object), locked(false) {}
+  virtual ~pObject() {}
+
+  void constructor() {}
+  void destructor() {}
 };
 
 struct pOS : public pObject {
-  struct State {
-    Font defaultFont;
-  };
-  static State *state;
+  static Font defaultFont;
 
   static Geometry availableGeometry();
   static Geometry desktopGeometry();
@@ -33,30 +53,13 @@ struct pOS : public pObject {
   static void initialize();
 };
 
-struct pFont : public pObject {
-  Font &font;
-  HFONT hfont;
-
-  Geometry geometry(const string &text);
-  unsigned height();
-  void setBold(bool bold);
-  void setFamily(const string &family);
-  void setItalic(bool italic);
-  void setSize(unsigned size);
-  void setUnderline(bool underline);
-
-  pFont(Font &font) : font(font) {}
-  void constructor();
-};
-
 struct pTimer : public pObject {
   Timer &timer;
-  UINT_PTR htimer;
 
   void setEnabled(bool enabled);
   void setInterval(unsigned milliseconds);
 
-  pTimer(Timer &timer) : timer(timer) {}
+  pTimer(Timer &timer) : pObject(timer), timer(timer) {}
   void constructor();
 };
 
@@ -69,11 +72,13 @@ struct pMessageWindow : public pObject {
 
 struct pWindow : public pObject {
   Window &window;
-  HWND hwnd;
-  HMENU hmenu;
-  HWND hstatus;
-  HBRUSH brush;
-  COLORREF brushColor;
+  GtkWidget *widget;
+  GtkWidget *menuContainer;
+  GtkWidget *formContainer;
+  GtkWidget *statusContainer;
+  GtkWidget *menu;
+  GtkWidget *status;
+  GdkEventConfigure lastConfigure;
 
   void append(Layout &layout);
   void append(Menu &menu);
@@ -82,47 +87,55 @@ struct pWindow : public pObject {
   bool focused();
   Geometry frameMargin();
   Geometry geometry();
+  void remove(Layout &layout);
+  void remove(Menu &menu);
+  void remove(Widget &widget);
   void setBackgroundColor(const Color &color);
   void setFocused();
   void setFullScreen(bool fullScreen);
   void setGeometry(const Geometry &geometry);
-  void setMenuFont(Font &font);
+  void setMenuFont(const string &font);
   void setMenuVisible(bool visible);
   void setResizable(bool resizable);
-  void setStatusFont(Font &font);
+  void setStatusFont(const string &font);
   void setStatusText(const string &text);
   void setStatusVisible(bool visible);
   void setTitle(const string &text);
   void setVisible(bool visible);
-  void setWidgetFont(Font &font);
+  void setWidgetFont(const string &font);
 
-  pWindow(Window &window) : window(window) {}
+  pWindow(Window &window) : pObject(window), window(window) {}
   void constructor();
-  void updateMenu();
+  unsigned menuHeight();
+  unsigned statusHeight();
 };
 
 struct pAction : public pObject {
   Action &action;
-  HMENU parentMenu;
-  Window *parentWindow;
+  GtkWidget *widget;
 
   void setEnabled(bool enabled);
   void setVisible(bool visible);
 
-  pAction(Action &action) : action(action) {}
+  pAction(Action &action) : pObject(action), action(action) {}
   void constructor();
+  virtual void orphan();
+  virtual void setFont(const string &font);
 };
 
 struct pMenu : public pAction {
   Menu &menu;
-  HMENU hmenu;
+  GtkWidget *gtkMenu;
 
   void append(Action &action);
+  void remove(Action &action);
   void setText(const string &text);
 
   pMenu(Menu &menu) : pAction(menu), menu(menu) {}
   void constructor();
-  void update(Window &parentWindow, HMENU parentMenu);
+  void destructor();
+  void orphan();
+  void setFont(const string &font);
 };
 
 struct pSeparator : public pAction {
@@ -130,6 +143,8 @@ struct pSeparator : public pAction {
 
   pSeparator(Separator &separator) : pAction(separator), separator(separator) {}
   void constructor();
+  void destructor();
+  void orphan();
 };
 
 struct pItem : public pAction {
@@ -139,6 +154,8 @@ struct pItem : public pAction {
 
   pItem(Item &item) : pAction(item), item(item) {}
   void constructor();
+  void destructor();
+  void orphan();
 };
 
 struct pCheckItem : public pAction {
@@ -150,6 +167,8 @@ struct pCheckItem : public pAction {
 
   pCheckItem(CheckItem &checkItem) : pAction(checkItem), checkItem(checkItem) {}
   void constructor();
+  void destructor();
+  void orphan();
 };
 
 struct pRadioItem : public pAction {
@@ -162,25 +181,38 @@ struct pRadioItem : public pAction {
 
   pRadioItem(RadioItem &radioItem) : pAction(radioItem), radioItem(radioItem) {}
   void constructor();
+  void destructor();
+  void orphan();
 };
 
-struct pWidget : public pObject {
+struct pSizable : public pObject {
+  Sizable &sizable;
+
+  pSizable(Sizable &sizable) : pObject(sizable), sizable(sizable) {}
+};
+
+struct pLayout : public pSizable {
+  Layout &layout;
+
+  pLayout(Layout &layout) : pSizable(layout), layout(layout) {}
+};
+
+struct pWidget : public pSizable {
   Widget &widget;
-  HWND hwnd;
+  GtkWidget *gtkWidget;
 
   bool enabled();
-  Font& font();
   virtual Geometry minimumGeometry();
   void setEnabled(bool enabled);
-  void setFocused();
-  void setFont(Font &font);
+  virtual void setFocused();
+  virtual void setFont(const string &font);
   virtual void setGeometry(const Geometry &geometry);
   void setVisible(bool visible);
 
-  pWidget(Widget &widget) : widget(widget) {}
+  pWidget(Widget &widget) : pSizable(widget), widget(widget) {}
   void constructor();
-  void setDefaultFont();
-  virtual void setParent(Window &parent);
+  void destructor();
+  virtual void orphan();
 };
 
 struct pButton : public pWidget {
@@ -191,12 +223,13 @@ struct pButton : public pWidget {
 
   pButton(Button &button) : pWidget(button), button(button) {}
   void constructor();
-  void setParent(Window &parent);
+  void destructor();
+  void orphan();
 };
 
 struct pCanvas : public pWidget {
   Canvas &canvas;
-  uint32_t *bufferRGB;
+  cairo_surface_t *surface;
 
   uint32_t* buffer();
   void setGeometry(const Geometry &geometry);
@@ -204,7 +237,8 @@ struct pCanvas : public pWidget {
 
   pCanvas(Canvas &canvas) : pWidget(canvas), canvas(canvas) {}
   void constructor();
-  void setParent(Window &parent);
+  void destructor();
+  void orphan();
 };
 
 struct pCheckBox : public pWidget {
@@ -217,11 +251,13 @@ struct pCheckBox : public pWidget {
 
   pCheckBox(CheckBox &checkBox) : pWidget(checkBox), checkBox(checkBox) {}
   void constructor();
-  void setParent(Window &parent);
+  void destructor();
+  void orphan();
 };
 
 struct pComboBox : public pWidget {
   ComboBox &comboBox;
+  unsigned itemCounter;
 
   void append(const string &text);
   Geometry minimumGeometry();
@@ -231,13 +267,17 @@ struct pComboBox : public pWidget {
 
   pComboBox(ComboBox &comboBox) : pWidget(comboBox), comboBox(comboBox) {}
   void constructor();
-  void setGeometry(const Geometry &geometry);
-  void setParent(Window &parent);
+  void destructor();
+  void orphan();
 };
 
 struct pHexEdit : public pWidget {
   HexEdit &hexEdit;
-  LRESULT CALLBACK (*windowProc)(HWND, UINT, LPARAM, WPARAM);
+  GtkWidget *container;
+  GtkWidget *subWidget;
+  GtkWidget *scrollBar;
+  GtkTextBuffer *textBuffer;
+  GtkTextMark *textCursor;
 
   void setColumns(unsigned columns);
   void setLength(unsigned length);
@@ -247,8 +287,14 @@ struct pHexEdit : public pWidget {
 
   pHexEdit(HexEdit &hexEdit) : pWidget(hexEdit), hexEdit(hexEdit) {}
   void constructor();
-  bool keyPress(unsigned key);
-  void setParent(Window &parent);
+  void destructor();
+  void orphan();
+  unsigned cursorPosition();
+  bool keyPress(unsigned scancode);
+  void scroll(unsigned position);
+  void setCursorPosition(unsigned position);
+  void setScroll();
+  void updateScroll();
 };
 
 struct pHorizontalScrollBar : public pWidget {
@@ -261,7 +307,8 @@ struct pHorizontalScrollBar : public pWidget {
 
   pHorizontalScrollBar(HorizontalScrollBar &horizontalScrollBar) : pWidget(horizontalScrollBar), horizontalScrollBar(horizontalScrollBar) {}
   void constructor();
-  void setParent(Window &parent);
+  void destructor();
+  void orphan();
 };
 
 struct pHorizontalSlider : public pWidget {
@@ -274,7 +321,8 @@ struct pHorizontalSlider : public pWidget {
 
   pHorizontalSlider(HorizontalSlider &horizontalSlider) : pWidget(horizontalSlider), horizontalSlider(horizontalSlider) {}
   void constructor();
-  void setParent(Window &parent);
+  void destructor();
+  void orphan();
 };
 
 struct pLabel : public pWidget {
@@ -285,7 +333,8 @@ struct pLabel : public pWidget {
 
   pLabel(Label &label) : pWidget(label), label(label) {}
   void constructor();
-  void setParent(Window &parent);
+  void destructor();
+  void orphan();
 };
 
 struct pLineEdit : public pWidget {
@@ -298,12 +347,20 @@ struct pLineEdit : public pWidget {
 
   pLineEdit(LineEdit &lineEdit) : pWidget(lineEdit), lineEdit(lineEdit) {}
   void constructor();
-  void setParent(Window &parent);
+  void destructor();
+  void orphan();
 };
 
 struct pListView : public pWidget {
   ListView &listView;
-  bool lostFocus;
+  GtkWidget *subWidget;
+  GtkListStore *store;
+  struct GtkColumn {
+    GtkCellRenderer *renderer;
+    GtkTreeViewColumn *column;
+    GtkWidget *label;
+  };
+  linear_vector<GtkColumn> column;
 
   void append(const lstring &text);
   void autoSizeColumns();
@@ -321,8 +378,10 @@ struct pListView : public pWidget {
 
   pListView(ListView &listView) : pWidget(listView), listView(listView) {}
   void constructor();
-  void setGeometry(const Geometry &geometry);
-  void setParent(Window &parent);
+  void destructor();
+  void orphan();
+  void setFocused();
+  void setFont(const string &font);
 };
 
 struct pProgressBar : public pWidget {
@@ -333,7 +392,8 @@ struct pProgressBar : public pWidget {
 
   pProgressBar(ProgressBar &progressBar) : pWidget(progressBar), progressBar(progressBar) {}
   void constructor();
-  void setParent(Window &parent);
+  void destructor();
+  void orphan();
 };
 
 struct pRadioBox : public pWidget {
@@ -347,11 +407,14 @@ struct pRadioBox : public pWidget {
 
   pRadioBox(RadioBox &radioBox) : pWidget(radioBox), radioBox(radioBox) {}
   void constructor();
-  void setParent(Window &parent);
+  void destructor();
+  void orphan();
 };
 
 struct pTextEdit : public pWidget {
   TextEdit &textEdit;
+  GtkWidget *subWidget;
+  GtkTextBuffer *textBuffer;
 
   void setCursorPosition(unsigned position);
   void setEditable(bool editable);
@@ -361,7 +424,8 @@ struct pTextEdit : public pWidget {
 
   pTextEdit(TextEdit &textEdit) : pWidget(textEdit), textEdit(textEdit) {}
   void constructor();
-  void setParent(Window &parent);
+  void destructor();
+  void orphan();
 };
 
 struct pVerticalScrollBar : public pWidget {
@@ -374,7 +438,8 @@ struct pVerticalScrollBar : public pWidget {
 
   pVerticalScrollBar(VerticalScrollBar &verticalScrollBar) : pWidget(verticalScrollBar), verticalScrollBar(verticalScrollBar) {}
   void constructor();
-  void setParent(Window &parent);
+  void destructor();
+  void orphan();
 };
 
 struct pVerticalSlider : public pWidget {
@@ -387,7 +452,8 @@ struct pVerticalSlider : public pWidget {
 
   pVerticalSlider(VerticalSlider &verticalSlider) : pWidget(verticalSlider), verticalSlider(verticalSlider) {}
   void constructor();
-  void setParent(Window &parent);
+  void destructor();
+  void orphan();
 };
 
 struct pViewport : public pWidget {
@@ -397,5 +463,6 @@ struct pViewport : public pWidget {
 
   pViewport(Viewport &viewport) : pWidget(viewport), viewport(viewport) {}
   void constructor();
-  void setParent(Window &parent);
+  void destructor();
+  void orphan();
 };

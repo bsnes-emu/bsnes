@@ -25,6 +25,17 @@ void pHorizontalSlider::setPosition(unsigned position) {
 void pHorizontalSlider::constructor() {
   gtkWidget = gtk_hscale_new_with_range(0, 100, 1);
   gtk_scale_set_draw_value(GTK_SCALE(gtkWidget), false);
-  setLength(101);
   g_signal_connect_swapped(G_OBJECT(gtkWidget), "value-changed", G_CALLBACK(HorizontalSlider_change), (gpointer)&horizontalSlider);
+
+  setLength(horizontalSlider.state.length);
+  setPosition(horizontalSlider.state.position);
+}
+
+void pHorizontalSlider::destructor() {
+  gtk_widget_destroy(gtkWidget);
+}
+
+void pHorizontalSlider::orphan() {
+  destructor();
+  constructor();
 }

@@ -16,6 +16,11 @@ void pCheckItem::constructor() {
   connect(qtAction, SIGNAL(triggered()), SLOT(onTick()));
 }
 
+void pCheckItem::destructor() {
+  if(action.state.menu) action.state.menu->remove(checkItem);
+  delete qtAction;
+}
+
 void pCheckItem::onTick() {
   checkItem.state.checked = checked();
   if(checkItem.onTick) checkItem.onTick();

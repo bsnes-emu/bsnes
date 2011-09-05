@@ -4,12 +4,19 @@ struct pMenu;
 struct pLayout;
 struct pWidget;
 
+struct pFont {
+  static Geometry geometry(const string &description, const string &text);
+};
+
 struct pObject {
+  Object &object;
   bool locked;
 
-  pObject() {
-    locked = false;
-  }
+  pObject(Object &object) : object(object), locked(locked) {}
+  virtual ~pObject() {}
+
+  void constructor() {}
+  void destructor() {}
 };
 
 struct pOS : public pObject {
@@ -26,27 +33,13 @@ struct pOS : public pObject {
   static void initialize();
 };
 
-struct pFont : public pObject {
-  Font &font;
-
-  Geometry geometry(const string &text);
-  void setBold(bool bold);
-  void setFamily(const string &family);
-  void setItalic(bool italic);
-  void setSize(unsigned size);
-  void setUnderline(bool underline);
-
-  pFont(Font &font) : font(font) {}
-  void constructor();
-};
-
 struct pTimer : public pObject {
   Timer &timer;
 
   void setEnabled(bool enabled);
   void setInterval(unsigned milliseconds);
 
-  pTimer(Timer &timer) : timer(timer) {}
+  pTimer(Timer &timer) : pObject(timer), timer(timer) {}
   void constructor();
 };
 
@@ -67,21 +60,24 @@ struct pWindow : public pObject {
   bool focused();
   Geometry frameMargin();
   Geometry geometry();
+  void remove(Layout &layout);
+  void remove(Menu &menu);
+  void remove(Widget &widget);
   void setBackgroundColor(const Color &color);
   void setFocused();
   void setFullScreen(bool fullScreen);
   void setGeometry(const Geometry &geometry);
-  void setMenuFont(Font &font);
+  void setMenuFont(const string &font);
   void setMenuVisible(bool visible);
   void setResizable(bool resizable);
-  void setStatusFont(Font &font);
+  void setStatusFont(const string &font);
   void setStatusText(const string &text);
   void setStatusVisible(bool visible);
   void setTitle(const string &text);
   void setVisible(bool visible);
-  void setWidgetFont(Font &font);
+  void setWidgetFont(const string &font);
 
-  pWindow(Window &window) : window(window) {}
+  pWindow(Window &window) : pObject(window), window(window) {}
   void constructor();
 };
 
@@ -91,7 +87,7 @@ struct pAction : public pObject {
   void setEnabled(bool enabled);
   void setVisible(bool visible);
 
-  pAction(Action &action) : action(action) {}
+  pAction(Action &action) : pObject(action), action(action) {}
   void constructor();
 };
 
@@ -99,10 +95,12 @@ struct pMenu : public pAction {
   Menu &menu;
 
   void append(Action &action);
+  void remove(Action &action);
   void setText(const string &text);
 
   pMenu(Menu &menu) : pAction(menu), menu(menu) {}
   void constructor();
+  void destructor();
 };
 
 struct pSeparator : public pAction {
@@ -110,6 +108,7 @@ struct pSeparator : public pAction {
 
   pSeparator(Separator &separator) : pAction(separator), separator(separator) {}
   void constructor();
+  void destructor();
 };
 
 struct pItem : public pAction {
@@ -119,6 +118,7 @@ struct pItem : public pAction {
 
   pItem(Item &item) : pAction(item), item(item) {}
   void constructor();
+  void destructor();
 };
 
 struct pCheckItem : public pAction {
@@ -130,6 +130,7 @@ struct pCheckItem : public pAction {
 
   pCheckItem(CheckItem &checkItem) : pAction(checkItem), checkItem(checkItem) {}
   void constructor();
+  void destructor();
 };
 
 struct pRadioItem : public pAction {
@@ -142,21 +143,33 @@ struct pRadioItem : public pAction {
 
   pRadioItem(RadioItem &radioItem) : pAction(radioItem), radioItem(radioItem) {}
   void constructor();
+  void destructor();
 };
 
-struct pWidget : public pObject {
+struct pSizable : public pObject {
+  Sizable &sizable;
+
+  pSizable(Sizable &sizable) : pObject(sizable), sizable(sizable) {}
+};
+
+struct pLayout : public pSizable {
+  Layout &layout;
+
+  pLayout(Layout &layout) : pSizable(layout), layout(layout) {}
+};
+
+struct pWidget : public pSizable {
   Widget &widget;
 
   bool enabled();
-  Font& font();
   Geometry minimumGeometry();
   void setEnabled(bool enabled);
   void setFocused();
-  void setFont(Font &font);
+  void setFont(const string &font);
   void setGeometry(const Geometry &geometry);
   void setVisible(bool visible);
 
-  pWidget(Widget &widget) : widget(widget) {}
+  pWidget(Widget &widget) : pSizable(widget), widget(widget) {}
   void constructor();
 };
 

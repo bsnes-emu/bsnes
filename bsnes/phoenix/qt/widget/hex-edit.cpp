@@ -80,6 +80,26 @@ void pHexEdit::constructor() {
   qtLayout->addWidget(qtScroll);
 
   connect(qtScroll, SIGNAL(actionTriggered(int)), SLOT(onScroll()));
+
+  setColumns(hexEdit.state.columns);
+  setRows(hexEdit.state.rows);
+  setLength(hexEdit.state.length);
+  setOffset(hexEdit.state.offset);
+  update();
+}
+
+void pHexEdit::destructor() {
+  delete qtScroll;
+  delete qtLayout;
+  delete qtHexEdit;
+  qtWidget = qtHexEdit = 0;
+  qtLayout = 0;
+  qtScroll = 0;
+}
+
+void pHexEdit::orphan() {
+  destructor();
+  constructor();
 }
 
 void pHexEdit::keyPressEvent(QKeyEvent *event) {

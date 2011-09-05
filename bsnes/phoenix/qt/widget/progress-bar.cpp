@@ -10,4 +10,16 @@ void pProgressBar::constructor() {
   qtWidget = qtProgressBar = new QProgressBar;
   qtProgressBar->setRange(0, 100);
   qtProgressBar->setTextVisible(false);
+
+  setPosition(progressBar.state.position);
+}
+
+void pProgressBar::destructor() {
+  delete qtProgressBar;
+  qtWidget = qtProgressBar = 0;
+}
+
+void pProgressBar::orphan() {
+  destructor();
+  constructor();
 }

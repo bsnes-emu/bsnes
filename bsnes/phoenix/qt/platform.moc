@@ -1,14 +1,14 @@
 /****************************************************************************
-** Meta object code from reading C++ file 'qt.moc.hpp'
+** Meta object code from reading C++ file 'platform.moc.hpp'
 **
-** Created: Mon Aug 22 04:02:58 2011
+** Created: Tue Aug 30 09:38:15 2011
 **      by: The Qt Meta Object Compiler version 62 (Qt 4.7.0)
 **
 ** WARNING! All changes made in this file will be lost!
 *****************************************************************************/
 
 #if !defined(Q_MOC_OUTPUT_REVISION)
-#error "The header file 'qt.moc.hpp' doesn't include <QObject>."
+#error "The header file 'platform.moc.hpp' doesn't include <QObject>."
 #elif Q_MOC_OUTPUT_REVISION != 62
 #error "This file was generated using the moc from 4.7.0. It"
 #error "cannot be used with the include files from this version of Qt."

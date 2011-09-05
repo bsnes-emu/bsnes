@@ -46,9 +46,9 @@ protected:
     IEND = 0x49454e44,
   };
 
-  static const unsigned interlace[7][4];
   unsigned bitpos;
 
+  inline unsigned interlace(unsigned pass, unsigned index);
   inline unsigned inflateSize();
   inline bool deinterlace(const uint8_t *&inputData, unsigned pass);
   inline bool filter(uint8_t *outputData, const uint8_t *inputData, unsigned width, unsigned height);
@@ -172,16 +172,19 @@ bool png::decode(const uint8_t *sourceData, unsigned sourceSize) {
   return true;
 }
 
-const unsigned png::interlace[7][4] = {
-  //x-distance, y-distance, x-origin, y-origin
-  { 8, 8, 0, 0 },
-  { 8, 8, 4, 0 },
-  { 4, 8, 0, 4 },
-  { 4, 4, 2, 0 },
-  { 2, 4, 0, 2 },
-  { 2, 2, 1, 0 },
-  { 1, 2, 0, 1 },
-};
+unsigned png::interlace(unsigned pass, unsigned index) {
+  static const unsigned data[7][4] = {
+    //x-distance, y-distance, x-origin, y-origin
+    { 8, 8, 0, 0 },
+    { 8, 8, 4, 0 },
+    { 4, 8, 0, 4 },
+    { 4, 4, 2, 0 },
+    { 2, 4, 0, 2 },
+    { 2, 2, 1, 0 },
+    { 1, 2, 0, 1 },
+  };
+  return data[pass][index];
+}
 
 unsigned png::inflateSize() {
   if(info.interlaceMethod == 0) {
@@ -190,8 +193,8 @@ unsigned png::inflateSize() {
 
   unsigned size = 0;
   for(unsigned pass = 0; pass < 7; pass++) {
-    unsigned xd = interlace[pass][0], yd = interlace[pass][1];
-    unsigned xo = interlace[pass][2], yo = interlace[pass][3];
+    unsigned xd = interlace(pass, 0), yd = interlace(pass, 1);
+    unsigned xo = interlace(pass, 2), yo = interlace(pass, 3);
     unsigned width  = (info.width  + (xd - xo - 1)) / xd;
     unsigned height = (info.height + (yd - yo - 1)) / yd;
     if(width == 0 || height == 0) continue;
@@ -201,8 +204,8 @@ unsigned png::inflateSize() {
 }
 
 bool png::deinterlace(const uint8_t *&inputData, unsigned pass) {
-  unsigned xd = interlace[pass][0], yd = interlace[pass][1];
-  unsigned xo = interlace[pass][2], yo = interlace[pass][3];
+  unsigned xd = interlace(pass, 0), yd = interlace(pass, 1);
+  unsigned xo = interlace(pass, 2), yo = interlace(pass, 3);
   unsigned width  = (info.width  + (xd - xo - 1)) / xd;
   unsigned height = (info.height + (yd - yo - 1)) / yd;
   if(width == 0 || height == 0) return true;

@@ -10,25 +10,13 @@ void Application::main(int argc, char **argv) {
   quit = false;
 
   #if defined(PLATFORM_WIN)
-  proportionalFont.setFamily("Tahoma");
-  proportionalFont.setSize(8);
-
-  proportionalFontBold.setFamily("Tahoma");
-  proportionalFontBold.setSize(8);
-  proportionalFontBold.setBold();
-
-  monospaceFont.setFamily("Lucida Console");
-  monospaceFont.setSize(8);
+  proportionalFont = "Tahoma, 8";
+  proportionalFontBold = "Tahoma, 8, Bold";
+  monospaceFont = "Lucida Console, 8";
   #else
-  proportionalFont.setFamily("Sans");
-  proportionalFont.setSize(8);
-
-  proportionalFontBold.setFamily("Sans");
-  proportionalFontBold.setSize(8);
-  proportionalFontBold.setBold();
-
-  monospaceFont.setFamily("Liberation Mono");
-  monospaceFont.setSize(8);
+  proportionalFont = "Sans, 8";
+  proportionalFontBold = "Sans, 8, Bold";
+  monospaceFont = "Liberation Mono, 8";
   #endif
 
   mainWindow.create();

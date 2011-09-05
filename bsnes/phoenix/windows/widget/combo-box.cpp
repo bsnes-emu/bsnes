@@ -4,10 +4,9 @@ void pComboBox::append(const string &text) {
 }
 
 Geometry pComboBox::minimumGeometry() {
-  Font &font = this->font();
   unsigned maximumWidth = 0;
-  foreach(text, comboBox.state.text) maximumWidth = max(maximumWidth, font.geometry(text).width);
-  return { 0, 0, maximumWidth + 24, font.p.height() + 10 };
+  foreach(text, comboBox.state.text) maximumWidth = max(maximumWidth, pFont::geometry(hfont, text).width);
+  return { 0, 0, maximumWidth + 24, pFont::geometry(hfont, " ").height + 10 };
 }
 
 void pComboBox::reset() {
@@ -23,7 +22,26 @@ void pComboBox::setSelection(unsigned row) {
 }
 
 void pComboBox::constructor() {
-  setParent(Window::None);
+  hwnd = CreateWindow(
+    L"COMBOBOX", L"",
+    WS_CHILD | WS_TABSTOP | CBS_DROPDOWNLIST | CBS_HASSTRINGS,
+    0, 0, 0, 0,
+    parentWindow->p.hwnd, (HMENU)id, GetModuleHandle(0), 0
+  );
+  SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&comboBox);
+  setDefaultFont();
+  foreach(text, comboBox.state.text) append(text);
+  setSelection(comboBox.state.selection);
+  synchronize();
+}
+
+void pComboBox::destructor() {
+  DestroyWindow(hwnd);
+}
+
+void pComboBox::orphan() {
+  destructor();
+  constructor();
 }
 
 void pComboBox::setGeometry(const Geometry &geometry) {
@@ -32,19 +50,4 @@ void pComboBox::setGeometry(const Geometry &geometry) {
   GetWindowRect(hwnd, &rc);
   unsigned adjustedHeight = geometry.height - ((rc.bottom - rc.top) - SendMessage(hwnd, CB_GETITEMHEIGHT, (WPARAM)-1, 0));
   SendMessage(hwnd, CB_SETITEMHEIGHT, (WPARAM)-1, adjustedHeight);
-}
-
-void pComboBox::setParent(Window &parent) {
-  if(hwnd) DestroyWindow(hwnd);
-  hwnd = CreateWindow(
-    L"COMBOBOX", L"",
-    WS_CHILD | WS_TABSTOP | WS_VISIBLE | CBS_DROPDOWNLIST | CBS_HASSTRINGS,
-    0, 0, 0, 0,
-    parent.p.hwnd, (HMENU)id, GetModuleHandle(0), 0
-  );
-  SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&comboBox);
-  setDefaultFont();
-  foreach(text, comboBox.state.text) append(text);
-  setSelection(comboBox.state.selection);
-  widget.setVisible(widget.visible());
 }

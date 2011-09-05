@@ -1,7 +1,7 @@
 struct Master {
-  bool left_enable;
+  bool left_in_enable;
   unsigned left_volume;
-  bool right_enable;
+  bool right_in_enable;
   unsigned right_volume;
   bool channel4_left_enable;
   bool channel3_left_enable;

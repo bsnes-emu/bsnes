@@ -21,6 +21,19 @@ void pHorizontalSlider::constructor() {
   qtSlider->setRange(0, 100);
   qtSlider->setPageStep(101 >> 3);
   connect(qtSlider, SIGNAL(valueChanged(int)), SLOT(onChange()));
+
+  setLength(horizontalSlider.state.length);
+  setPosition(horizontalSlider.state.position);
+}
+
+void pHorizontalSlider::destructor() {
+  delete qtSlider;
+  qtWidget = qtSlider = 0;
+}
+
+void pHorizontalSlider::orphan() {
+  destructor();
+  constructor();
 }
 
 void pHorizontalSlider::onChange() {

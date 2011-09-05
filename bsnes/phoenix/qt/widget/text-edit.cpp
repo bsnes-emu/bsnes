@@ -24,6 +24,20 @@ string pTextEdit::text() {
 void pTextEdit::constructor() {
   qtWidget = qtTextEdit = new QTextEdit;
   connect(qtTextEdit, SIGNAL(textChanged()), SLOT(onChange()));
+  setEditable(textEdit.state.editable);
+  setText(textEdit.state.text);
+  setWordWrap(textEdit.state.wordWrap);
+}
+
+void pTextEdit::destructor() {
+  if(sizable.state.layout) sizable.state.layout->remove(textEdit);
+  delete qtTextEdit;
+  qtWidget = qtTextEdit = 0;
+}
+
+void pTextEdit::orphan() {
+  destructor();
+  constructor();
 }
 
 void pTextEdit::onChange() {

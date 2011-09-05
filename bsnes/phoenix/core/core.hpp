@@ -1,11 +1,13 @@
 struct Font;
 struct Window;
 struct Menu;
+struct Sizable;
 struct Layout;
 struct Widget;
 
-struct pOS;
 struct pFont;
+struct pObject;
+struct pOS;
 struct pTimer;
 struct pWindow;
 struct pAction;
@@ -14,6 +16,7 @@ struct pSeparator;
 struct pItem;
 struct pCheckItem;
 struct pRadioItem;
+struct pSizable;
 struct pLayout;
 struct pWidget;
 struct pButton;
@@ -45,6 +48,12 @@ struct Geometry {
   inline Geometry(signed x, signed y, unsigned width, unsigned height) : x(x), y(y), width(width), height(height) {}
 };
 
+struct Font {
+  nall::string description;
+  Geometry geometry(const nall::string &text);
+  Font(const nall::string &description = "");
+};
+
 struct Color {
   uint8_t red, green, blue, alpha;
   inline Color() : red(0), green(0), blue(0), alpha(255) {}
@@ -52,10 +61,11 @@ struct Color {
 };
 
 struct Object {
-  Object();
+  Object(pObject &p);
   Object& operator=(const Object&) = delete;
   Object(const Object&) = delete;
-  virtual void unused() {}  //allows dynamic_cast<> on Object
+  virtual ~Object();
+  pObject &p;
 };
 
 struct OS : Object {
@@ -77,27 +87,14 @@ private:
   static nall::string fileSave_(Window &parent, const nall::string &path, const nall::lstring& filter);
 };
 
-struct Font : Object {
-  Geometry geometry(const nall::string &text);
-  void setBold(bool bold = true);
-  void setFamily(const nall::string &family);
-  void setItalic(bool italic = true);
-  void setSize(unsigned size);
-  void setUnderline(bool underline = true);
-
-  Font();
-  struct State;
-  State &state;
-  pFont &p;
-};
-
-struct Timer : Object {
+struct Timer : private nall::base_from_member<pTimer&>, Object {
   nall::function<void ()> onTimeout;
 
   void setEnabled(bool enabled = true);
   void setInterval(unsigned milliseconds);
 
   Timer();
+  ~Timer();
   struct State;
   State &state;
   pTimer &p;
@@ -123,7 +120,7 @@ struct MessageWindow : Object {
   static Response critical(Window &parent, const nall::string &text, Buttons = Buttons::Ok);
 };
 
-struct Window : Object {
+struct Window : private nall::base_from_member<pWindow&>, Object {
   static Window None;
   nall::function<void ()> onClose;
   nall::function<void ()> onMove;
@@ -137,22 +134,28 @@ struct Window : Object {
   Geometry frameMargin();
   bool focused();
   Geometry geometry();
+  void ignore();
+  void remove(Layout &layout);
+  void remove(Menu &menu);
+  void remove(Widget &widget);
   void setBackgroundColor(const Color &color);
   void setFrameGeometry(const Geometry &geometry);
   void setFocused();
   void setFullScreen(bool fullScreen = true);
   void setGeometry(const Geometry &geometry);
-  void setMenuFont(Font &font);
+  void setMenuFont(const nall::string &font);
   void setMenuVisible(bool visible = true);
   void setResizable(bool resizable = true);
-  void setStatusFont(Font &font);
+  void setStatusFont(const nall::string &font);
   void setStatusText(const nall::string &text);
   void setStatusVisible(bool visible = true);
   void setTitle(const nall::string &text);
   void setVisible(bool visible = true);
-  void setWidgetFont(Font &font);
+  void setWidgetFont(const nall::string &font);
+  void synchronize();
 
   Window();
+  ~Window();
   struct State;
   State &state;
   pWindow &p;
@@ -163,6 +166,7 @@ struct Action : Object {
   void setVisible(bool visible = true);
 
   Action(pAction &p);
+  ~Action();
   struct State;
   State &state;
   pAction &p;
@@ -170,9 +174,11 @@ struct Action : Object {
 
 struct Menu : private nall::base_from_member<pMenu&>, Action {
   void append(Action &action);
+  void remove(Action &action);
   void setText(const nall::string &text);
 
   Menu();
+  ~Menu();
   struct State;
   State &state;
   pMenu &p;
@@ -180,6 +186,7 @@ struct Menu : private nall::base_from_member<pMenu&>, Action {
 
 struct Separator : private nall::base_from_member<pSeparator&>, Action {
   Separator();
+  ~Separator();
   pSeparator &p;
 };
 
@@ -189,6 +196,7 @@ struct Item : private nall::base_from_member<pItem&>, Action {
   void setText(const nall::string &text);
 
   Item();
+  ~Item();
   struct State;
   State &state;
   pItem &p;
@@ -202,6 +210,7 @@ struct CheckItem : private nall::base_from_member<pCheckItem&>, Action {
   void setText(const nall::string &text);
 
   CheckItem();
+  ~CheckItem();
   struct State;
   State &state;
   pCheckItem &p;
@@ -218,41 +227,58 @@ struct RadioItem : private nall::base_from_member<pRadioItem&>, Action {
   void setText(const nall::string &text);
 
   RadioItem();
+  ~RadioItem();
   struct State;
   State &state;
   pRadioItem &p;
 };
 
-struct Layout;
-
 struct Sizable : Object {
+  virtual bool enabled() = 0;
+  Layout* layout();
   virtual Geometry minimumGeometry() = 0;
+  virtual void setEnabled(bool enabled = true) = 0;
   virtual void setGeometry(const Geometry &geometry) = 0;
-  virtual void setLayout(Layout &layout) = 0;
-  virtual void setParent(Window &parent) = 0;
   virtual void setVisible(bool visible = true) = 0;
   virtual bool visible() = 0;
+  Window* window();
+
+  Sizable(pSizable &p);
+  ~Sizable();
+  struct State;
+  State &state;
+  pSizable &p;
 };
 
-struct Layout : Sizable {
+struct Layout : private nall::base_from_member<pLayout&>, Sizable {
+  virtual void append(Sizable &sizable);
+  virtual void remove(Sizable &sizable);
+  virtual void reset() {}
+  virtual void synchronize() = 0;
+
+  Layout();
+  Layout(pLayout &p);
+  ~Layout();
+  struct State;
+  State &state;
+  pLayout &p;
 };
 
-struct Widget : Sizable {
+struct Widget : private nall::base_from_member<pWidget&>, Sizable {
   bool enabled();
-  Font& font();
+  nall::string font();
   Geometry geometry();
   Geometry minimumGeometry();
   void setEnabled(bool enabled = true);
   void setFocused();
-  void setFont(Font &font);
+  void setFont(const nall::string &font);
   void setGeometry(const Geometry &geometry);
-  void setLayout(Layout &layout);
-  void setParent(Window &parent);
   void setVisible(bool visible = true);
   bool visible();
 
   Widget();
   Widget(pWidget &p);
+  ~Widget();
   struct State;
   State &state;
   pWidget &p;
@@ -264,6 +290,7 @@ struct Button : private nall::base_from_member<pButton&>, Widget {
   void setText(const nall::string &text);
 
   Button();
+  ~Button();
   struct State;
   State &state;
   pButton &p;
@@ -274,6 +301,7 @@ struct Canvas : private nall::base_from_member<pCanvas&>, Widget {
   void update();
 
   Canvas();
+  ~Canvas();
   pCanvas &p;
 };
 
@@ -285,6 +313,7 @@ struct CheckBox : private nall::base_from_member<pCheckBox&>, Widget {
   void setText(const nall::string &text);
 
   CheckBox();
+  ~CheckBox();
   struct State;
   State &state;
   pCheckBox &p;
@@ -299,6 +328,7 @@ struct ComboBox : private nall::base_from_member<pComboBox&>, Widget {
   void setSelection(unsigned row);
 
   ComboBox();
+  ~ComboBox();
   struct State;
   State &state;
   pComboBox &p;
@@ -315,6 +345,7 @@ struct HexEdit : private nall::base_from_member<pHexEdit&>, Widget {
   void update();
 
   HexEdit();
+  ~HexEdit();
   struct State;
   State &state;
   pHexEdit &p;
@@ -328,6 +359,7 @@ struct HorizontalScrollBar : private nall::base_from_member<pHorizontalScrollBar
   void setPosition(unsigned position);
 
   HorizontalScrollBar();
+  ~HorizontalScrollBar();
   struct State;
   State &state;
   pHorizontalScrollBar &p;
@@ -341,6 +373,7 @@ struct HorizontalSlider : private nall::base_from_member<pHorizontalSlider&>, Wi
   void setPosition(unsigned position);
 
   HorizontalSlider();
+  ~HorizontalSlider();
   struct State;
   State &state;
   pHorizontalSlider &p;
@@ -350,6 +383,7 @@ struct Label : private nall::base_from_member<pLabel&>, Widget {
   void setText(const nall::string &text);
 
   Label();
+  ~Label();
   struct State;
   State &state;
   pLabel &p;
@@ -364,6 +398,7 @@ struct LineEdit : private nall::base_from_member<pLineEdit&>, Widget {
   nall::string text();
 
   LineEdit();
+  ~LineEdit();
   struct State;
   State &state;
   pLineEdit &p;
@@ -389,6 +424,7 @@ struct ListView : private nall::base_from_member<pListView&>, Widget {
   void setSelection(unsigned row);
 
   ListView();
+  ~ListView();
   struct State;
   State &state;
   pListView &p;
@@ -403,6 +439,7 @@ struct ProgressBar : private nall::base_from_member<pProgressBar&>, Widget {
   void setPosition(unsigned position);
 
   ProgressBar();
+  ~ProgressBar();
   struct State;
   State &state;
   pProgressBar &p;
@@ -419,6 +456,7 @@ struct RadioBox : private nall::base_from_member<pRadioBox&>, Widget {
   void setText(const nall::string &text);
 
   RadioBox();
+  ~RadioBox();
   struct State;
   State &state;
   pRadioBox &p;
@@ -434,6 +472,7 @@ struct TextEdit : private nall::base_from_member<pTextEdit&>, Widget {
   nall::string text();
 
   TextEdit();
+  ~TextEdit();
   struct State;
   State &state;
   pTextEdit &p;
@@ -447,6 +486,7 @@ struct VerticalScrollBar : private nall::base_from_member<pVerticalScrollBar&>, 
   void setPosition(unsigned position);
 
   VerticalScrollBar();
+  ~VerticalScrollBar();
   struct State;
   State &state;
   pVerticalScrollBar &p;
@@ -460,6 +500,7 @@ struct VerticalSlider : private nall::base_from_member<pVerticalSlider&>, Widget
   void setPosition(unsigned position);
 
   VerticalSlider();
+  ~VerticalSlider();
   struct State;
   State &state;
   pVerticalSlider &p;
@@ -469,6 +510,7 @@ struct Viewport : private nall::base_from_member<pViewport&>, Widget {
   uintptr_t handle();
 
   Viewport();
+  ~Viewport();
   pViewport &p;
 };
 

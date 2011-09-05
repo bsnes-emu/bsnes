@@ -36,3 +36,13 @@ void pCanvas::constructor() {
   gtk_widget_add_events(gtkWidget, GDK_EXPOSURE_MASK);
   g_signal_connect(G_OBJECT(gtkWidget), "expose_event", G_CALLBACK(Canvas_expose), (gpointer)this);
 }
+
+void pCanvas::destructor() {
+  gtk_widget_destroy(gtkWidget);
+  cairo_surface_destroy(surface);
+}
+
+void pCanvas::orphan() {
+  destructor();
+  constructor();
+}

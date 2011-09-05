@@ -13,3 +13,6 @@ void pRadioItem::setText(const string &text) {
 
 void pRadioItem::constructor() {
 }
+
+void pRadioItem::destructor() {
+}

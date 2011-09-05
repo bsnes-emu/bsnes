@@ -18,10 +18,7 @@ void pTextEdit::setText(const string &text) {
 void pTextEdit::setWordWrap(bool wordWrap) {
   //ES_AUTOHSCROLL cannot be changed after widget creation.
   //As a result, we must destroy and re-create widget to change this setting.
-  HWND hwndParent = GetParent(hwnd);
-  Object *object = (Object*)GetWindowLongPtr(hwndParent, GWLP_USERDATA);
-  if(object == 0) return;
-  if(dynamic_cast<Window*>(object)) setParent(((Window&)*object));
+  orphan();
 }
 
 string pTextEdit::text() {
@@ -35,20 +32,25 @@ string pTextEdit::text() {
 }
 
 void pTextEdit::constructor() {
-  setParent(Window::None);
-}
-
-void pTextEdit::setParent(Window &parent) {
-  if(hwnd) DestroyWindow(hwnd);
   hwnd = CreateWindowEx(
     WS_EX_CLIENTEDGE, L"EDIT", L"",
-    WS_CHILD | WS_VISIBLE | ES_AUTOVSCROLL | ES_MULTILINE | ES_WANTRETURN | (textEdit.state.wordWrap == false ? ES_AUTOHSCROLL : 0),
-    0, 0, 0, 0, parent.p.hwnd, (HMENU)id, GetModuleHandle(0), 0
+    WS_CHILD | ES_AUTOVSCROLL | ES_MULTILINE | ES_WANTRETURN | (textEdit.state.wordWrap == false ? ES_AUTOHSCROLL : 0),
+    0, 0, 0, 0, parentWindow->p.hwnd, (HMENU)id, GetModuleHandle(0), 0
   );
   SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&textEdit);
   setDefaultFont();
   setCursorPosition(textEdit.state.cursorPosition);
   setEditable(textEdit.state.editable);
   setText(textEdit.state.text);
-  widget.setVisible(widget.visible());
+  synchronize();
+}
+
+void pTextEdit::destructor() {
+  textEdit.state.text = text();
+  DestroyWindow(hwnd);
+}
+
+void pTextEdit::orphan() {
+  destructor();
+  constructor();
 }

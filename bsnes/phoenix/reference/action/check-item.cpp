@@ -10,3 +10,6 @@ void pCheckItem::setText(const string &text) {
 
 void pCheckItem::constructor() {
 }
+
+void pCheckItem::destructor() {
+}

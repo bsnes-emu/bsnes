@@ -24,6 +24,17 @@ void pVerticalScrollBar::setPosition(unsigned position) {
 
 void pVerticalScrollBar::constructor() {
   gtkWidget = gtk_vscrollbar_new(0);
-  setLength(101);
   g_signal_connect_swapped(G_OBJECT(gtkWidget), "value-changed", G_CALLBACK(VerticalScrollBar_change), (gpointer)&verticalScrollBar);
+
+  setLength(verticalScrollBar.state.length);
+  setPosition(verticalScrollBar.state.position);
+}
+
+void pVerticalScrollBar::destructor() {
+  gtk_widget_destroy(gtkWidget);
+}
+
+void pVerticalScrollBar::orphan() {
+  destructor();
+  constructor();
 }

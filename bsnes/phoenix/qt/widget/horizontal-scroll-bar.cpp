@@ -21,6 +21,19 @@ void pHorizontalScrollBar::constructor() {
   qtScrollBar->setRange(0, 100);
   qtScrollBar->setPageStep(101 >> 3);
   connect(qtScrollBar, SIGNAL(valueChanged(int)), SLOT(onChange()));
+
+  setLength(horizontalScrollBar.state.length);
+  setPosition(horizontalScrollBar.state.position);
+}
+
+void pHorizontalScrollBar::destructor() {
+  delete qtScrollBar;
+  qtWidget = qtScrollBar = 0;
+}
+
+void pHorizontalScrollBar::orphan() {
+  destructor();
+  constructor();
 }
 
 void pHorizontalScrollBar::onChange() {

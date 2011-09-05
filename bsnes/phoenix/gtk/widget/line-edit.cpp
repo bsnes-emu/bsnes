@@ -3,12 +3,12 @@ static void LineEdit_activate(LineEdit *self) {
 }
 
 static void LineEdit_change(LineEdit *self) {
+  self->state.text = self->text();
   if(self->p.locked == false && self->onChange) self->onChange();
 }
 
 Geometry pLineEdit::minimumGeometry() {
-  Font &font = pWidget::font();
-  Geometry geometry = font.geometry(lineEdit.state.text);
+  Geometry geometry = pFont::geometry(widget.state.font, lineEdit.state.text);
   return { 0, 0, geometry.width + 10, geometry.height + 10 };
 }
 
@@ -30,4 +30,16 @@ void pLineEdit::constructor() {
   gtkWidget = gtk_entry_new();
   g_signal_connect_swapped(G_OBJECT(gtkWidget), "activate", G_CALLBACK(LineEdit_activate), (gpointer)&lineEdit);
   g_signal_connect_swapped(G_OBJECT(gtkWidget), "changed", G_CALLBACK(LineEdit_change), (gpointer)&lineEdit);
+
+  setEditable(lineEdit.state.editable);
+  setText(lineEdit.state.text);
+}
+
+void pLineEdit::destructor() {
+  gtk_widget_destroy(gtkWidget);
+}
+
+void pLineEdit::orphan() {
+  destructor();
+  constructor();
 }

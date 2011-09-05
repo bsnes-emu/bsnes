@@ -80,10 +80,10 @@ uint8 APU::mmio_read(uint16 addr) {
 
   if(addr == 0xff26) {
     uint8 data = master.enable << 7;
-    if(square1.counter && square1.length) data |= 0x01;
-    if(square2.counter && square2.length) data |= 0x02;
-    if(   wave.counter &&    wave.length) data |= 0x04;
-    if(  noise.counter &&   noise.length) data |= 0x08;
+    if(square1.enable) data |= 0x01;
+    if(square2.enable) data |= 0x02;
+    if(   wave.enable) data |= 0x04;
+    if(  noise.enable) data |= 0x08;
     return data | table[addr - 0xff10];
   }
 

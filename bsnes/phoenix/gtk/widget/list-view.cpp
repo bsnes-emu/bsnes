@@ -99,7 +99,8 @@ void pListView::setChecked(unsigned row, bool checked) {
 }
 
 void pListView::setHeaderText(const lstring &text) {
-  create();
+  destructor();
+  constructor();
 }
 
 void pListView::setHeaderVisible(bool visible) {
@@ -140,12 +141,6 @@ void pListView::setSelection(unsigned row) {
 void pListView::constructor() {
   gtkWidget = 0;
   subWidget = 0;
-  create();
-}
-
-void pListView::create() {
-  if(subWidget) gtk_widget_destroy(subWidget);
-  if(gtkWidget) gtk_widget_destroy(gtkWidget);
 
   gtkWidget = gtk_scrolled_window_new(0, 0);
   gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(gtkWidget), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
@@ -189,23 +184,33 @@ void pListView::create() {
   g_signal_connect_swapped(G_OBJECT(subWidget), "cursor-changed", G_CALLBACK(ListView_change), (gpointer)&listView);
   g_signal_connect_swapped(G_OBJECT(subWidget), "row-activated", G_CALLBACK(ListView_activate), (gpointer)&listView);
 
+  gtk_widget_show(subWidget);
+
   setHeaderVisible(listView.state.headerVisible);
   setCheckable(listView.state.checkable);
   foreach(text, listView.state.text) append(text);
   foreach(checked, listView.state.checked, n) setChecked(n, checked);
   if(listView.state.selected) setSelection(listView.state.selection);
   autoSizeColumns();
+}
 
-  gtk_widget_show(subWidget);
+void pListView::destructor() {
+  gtk_widget_destroy(subWidget);
+  gtk_widget_destroy(gtkWidget);
+}
+
+void pListView::orphan() {
+  destructor();
+  constructor();
 }
 
 void pListView::setFocused() {
   gtk_widget_grab_focus(subWidget);
 }
 
-void pListView::setFont(Font &font) {
-  pWidget::setFont(font);
+void pListView::setFont(const string &font) {
+  pFont::setFont(gtkWidget, font);
   for(unsigned n = 0; n < 1 + listView.state.headerText.size(); n++) {
-    gtk_widget_modify_font(column[n].label, font.p.gtkFont);
+    pFont::setFont(column[n].label, font);
   }
 }

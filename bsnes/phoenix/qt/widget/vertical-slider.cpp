@@ -21,6 +21,19 @@ void pVerticalSlider::constructor() {
   qtSlider->setRange(0, 100);
   qtSlider->setPageStep(101 >> 3);
   connect(qtSlider, SIGNAL(valueChanged(int)), SLOT(onChange()));
+
+  setLength(verticalSlider.state.length);
+  setPosition(verticalSlider.state.position);
+}
+
+void pVerticalSlider::destructor() {
+  delete qtSlider;
+  qtWidget = qtSlider = 0;
+}
+
+void pVerticalSlider::orphan() {
+  destructor();
+  constructor();
 }
 
 void pVerticalSlider::onChange() {

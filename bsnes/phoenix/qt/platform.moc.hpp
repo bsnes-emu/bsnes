@@ -1,33 +1,39 @@
+static QApplication *qtApplication = 0;
+
 struct Settings : public configuration {
   unsigned frameGeometryX;
   unsigned frameGeometryY;
   unsigned frameGeometryWidth;
   unsigned frameGeometryHeight;
-  unsigned menuGeometryHeight;
-  unsigned statusGeometryHeight;
 
   void load();
   void save();
   Settings();
 };
 
-struct pFont;
 struct pWindow;
 struct pMenu;
 struct pLayout;
 struct pWidget;
 
+struct pFont {
+  static Geometry geometry(const string &description, const string &text);
+
+  static QFont create(const string &description);
+  static Geometry geometry(const QFont &qtFont, const string &text);
+};
+
 struct pObject {
+  Object &object;
   bool locked;
 
-  pObject() {
-    locked = false;
-  }
+  pObject(Object &object) : object(object), locked(false) {}
+  virtual ~pObject() {}
+  void constructor() {}
+  void destructor() {}
 };
 
 struct pOS : public pObject {
-  static Font defaultFont;
-
   static Geometry availableGeometry();
   static Geometry desktopGeometry();
   static string fileLoad(Window &parent, const string &path, const lstring &filter);
@@ -41,30 +47,22 @@ struct pOS : public pObject {
   static void initialize();
 };
 
-struct pFont : public pObject {
-  Font &font;
-  PangoFontDescription *gtkFont;
-  PangoLayout *gtkLayout;
+struct pTimer : public QObject, public pObject {
+  Q_OBJECT
 
-  Geometry geometry(const string &text);
-  void setBold(bool bold);
-  void setFamily(const string &family);
-  void setItalic(bool italic);
-  void setSize(unsigned size);
-  void setUnderline(bool underline);
-
-  pFont(Font &font) : font(font) {}
-  void constructor();
-};
-
-struct pTimer : public pObject {
+public:
   Timer &timer;
+  QTimer *qtTimer;
 
   void setEnabled(bool enabled);
   void setInterval(unsigned milliseconds);
 
-  pTimer(Timer &timer) : timer(timer) {}
+  pTimer(Timer &timer) : pObject(timer), timer(timer) {}
   void constructor();
+  void destructor();
+
+public slots:
+  void onTimeout();
 };
 
 struct pMessageWindow : public pObject {
@@ -74,85 +72,112 @@ struct pMessageWindow : public pObject {
   static MessageWindow::Response critical(Window &parent, const string &text, MessageWindow::Buttons buttons);
 };
 
-struct pWindow : public pObject {
+struct pWindow : public QObject, public pObject {
+  Q_OBJECT
+
+public:
   Window &window;
-  GtkWidget *widget;
-  GtkWidget *menuContainer;
-  GtkWidget *formContainer;
-  GtkWidget *statusContainer;
-  GtkWidget *menu;
-  GtkWidget *status;
-  GdkEventConfigure lastConfigure;
+  struct QtWindow : public QWidget {
+    pWindow &self;
+    void closeEvent(QCloseEvent*);
+    void moveEvent(QMoveEvent*);
+    void resizeEvent(QResizeEvent*);
+    QSize sizeHint() const;
+    QtWindow(pWindow &self) : self(self) {}
+  } *qtWindow;
+  QVBoxLayout *qtLayout;
+  QMenuBar *qtMenu;
+  QStatusBar *qtStatus;
+  QWidget *qtContainer;
 
   void append(Layout &layout);
   void append(Menu &menu);
   void append(Widget &widget);
   Color backgroundColor();
-  bool focused();
   Geometry frameMargin();
+  bool focused();
   Geometry geometry();
+  void remove(Layout &layout);
+  void remove(Menu &menu);
+  void remove(Widget &widget);
   void setBackgroundColor(const Color &color);
   void setFocused();
   void setFullScreen(bool fullScreen);
   void setGeometry(const Geometry &geometry);
-  void setMenuFont(Font &font);
+  void setMenuFont(const string &font);
   void setMenuVisible(bool visible);
   void setResizable(bool resizable);
-  void setStatusFont(Font &font);
+  void setStatusFont(const string &font);
   void setStatusText(const string &text);
   void setStatusVisible(bool visible);
   void setTitle(const string &text);
   void setVisible(bool visible);
-  void setWidgetFont(Font &font);
+  void setWidgetFont(const string &font);
 
-  pWindow(Window &window) : window(window) {}
+  pWindow(Window &window) : pObject(window), window(window) {}
   void constructor();
-  unsigned menuHeight();
-  unsigned statusHeight();
+  void destructor();
+  void updateFrameGeometry();
 };
 
 struct pAction : public pObject {
   Action &action;
-  GtkWidget *widget;
 
   void setEnabled(bool enabled);
+  void setFont(const string &font);
   void setVisible(bool visible);
 
-  pAction(Action &action) : action(action) {}
+  pAction(Action &action) : pObject(action), action(action) {}
   void constructor();
-  virtual void setFont(Font &font);
+  void destructor();
 };
 
 struct pMenu : public pAction {
   Menu &menu;
-  GtkWidget *submenu;
+  QMenu *qtMenu;
 
   void append(Action &action);
+  void remove(Action &action);
+  void setFont(const string &font);
   void setText(const string &text);
 
   pMenu(Menu &menu) : pAction(menu), menu(menu) {}
   void constructor();
-  void setFont(Font &font);
+  void destructor();
 };
 
 struct pSeparator : public pAction {
   Separator &separator;
+  QAction *qtAction;
 
   pSeparator(Separator &separator) : pAction(separator), separator(separator) {}
   void constructor();
+  void destructor();
 };
 
-struct pItem : public pAction {
+struct pItem : public QObject, public pAction {
+  Q_OBJECT
+
+public:
   Item &item;
+  QAction *qtAction;
 
   void setText(const string &text);
 
   pItem(Item &item) : pAction(item), item(item) {}
   void constructor();
+  void destructor();
+
+public slots:
+  void onTick();
 };
 
-struct pCheckItem : public pAction {
+struct pCheckItem : public QObject, public pAction {
+  Q_OBJECT
+
+public:
   CheckItem &checkItem;
+  QAction *qtAction;
 
   bool checked();
   void setChecked(bool checked);
@@ -160,10 +185,19 @@ struct pCheckItem : public pAction {
 
   pCheckItem(CheckItem &checkItem) : pAction(checkItem), checkItem(checkItem) {}
   void constructor();
+  void destructor();
+
+public slots:
+  void onTick();
 };
 
-struct pRadioItem : public pAction {
+struct pRadioItem : public QObject, public pAction {
+  Q_OBJECT
+
+public:
   RadioItem &radioItem;
+  QAction *qtAction;
+  QActionGroup *qtGroup;
 
   bool checked();
   void setChecked();
@@ -172,40 +206,77 @@ struct pRadioItem : public pAction {
 
   pRadioItem(RadioItem &radioItem) : pAction(radioItem), radioItem(radioItem) {}
   void constructor();
+  void destructor();
+
+public slots:
+  void onTick();
 };
 
-struct pWidget : public pObject {
-  Widget &widget;
-  GtkWidget *gtkWidget;
-  pWindow *parentWindow;
+struct pSizable : public pObject {
+  Sizable &sizable;
 
-  bool enabled();
-  Font& font();
+  pSizable(Sizable &sizable) : pObject(sizable), sizable(sizable) {}
+
+  void constructor() {}
+  void destructor() {}
+};
+
+struct pLayout : public pSizable {
+  Layout &layout;
+
+  pLayout(Layout &layout) : pSizable(layout), layout(layout) {}
+
+  void constructor() {}
+  void destructor() {}
+};
+
+struct pWidget : public pSizable {
+  Widget &widget;
+  QWidget *qtWidget;
+
   virtual Geometry minimumGeometry();
   void setEnabled(bool enabled);
-  virtual void setFocused();
-  virtual void setFont(Font &font);
+  void setFocused();
+  void setFont(const string &font);
   virtual void setGeometry(const Geometry &geometry);
-  void setParent(Window &parent);
   void setVisible(bool visible);
 
-  pWidget(Widget &widget) : widget(widget) {}
+  pWidget(Widget &widget) : pSizable(widget), widget(widget) {}
   void constructor();
+  void destructor();
+  virtual void orphan();
 };
 
-struct pButton : public pWidget {
+struct pButton : public QObject, public pWidget {
+  Q_OBJECT
+
+public:
   Button &button;
+  QPushButton *qtButton;
 
   Geometry minimumGeometry();
   void setText(const string &text);
 
   pButton(Button &button) : pWidget(button), button(button) {}
   void constructor();
+  void destructor();
+  void orphan();
+
+public slots:
+  void onTick();
 };
 
-struct pCanvas : public pWidget {
+struct pCanvas : public QObject, public pWidget {
+  Q_OBJECT
+
+public:
   Canvas &canvas;
-  cairo_surface_t *surface;
+  QImage *qtImage;
+  struct QtCanvas : public QWidget {
+    pCanvas &self;
+    void paintEvent(QPaintEvent*);
+    QtCanvas(pCanvas &self);
+  } *qtCanvas;
 
   uint32_t* buffer();
   void setGeometry(const Geometry &geometry);
@@ -213,10 +284,18 @@ struct pCanvas : public pWidget {
 
   pCanvas(Canvas &canvas) : pWidget(canvas), canvas(canvas) {}
   void constructor();
+  void destructor();
+  void orphan();
+
+public slots:
 };
 
-struct pCheckBox : public pWidget {
+struct pCheckBox : public QObject, public pWidget {
+  Q_OBJECT
+
+public:
   CheckBox &checkBox;
+  QCheckBox *qtCheckBox;
 
   bool checked();
   Geometry minimumGeometry();
@@ -225,11 +304,19 @@ struct pCheckBox : public pWidget {
 
   pCheckBox(CheckBox &checkBox) : pWidget(checkBox), checkBox(checkBox) {}
   void constructor();
+  void destructor();
+  void orphan();
+
+public slots:
+  void onTick();
 };
 
-struct pComboBox : public pWidget {
+struct pComboBox : public QObject, public pWidget {
+  Q_OBJECT
+
+public:
   ComboBox &comboBox;
-  unsigned itemCounter;
+  QComboBox *qtComboBox;
 
   void append(const string &text);
   Geometry minimumGeometry();
@@ -239,15 +326,26 @@ struct pComboBox : public pWidget {
 
   pComboBox(ComboBox &comboBox) : pWidget(comboBox), comboBox(comboBox) {}
   void constructor();
+  void destructor();
+  void orphan();
+
+public slots:
+  void onChange();
 };
 
-struct pHexEdit : public pWidget {
+struct pHexEdit : public QObject, public pWidget {
+  Q_OBJECT
+
+public:
   HexEdit &hexEdit;
-  GtkWidget *container;
-  GtkWidget *subWidget;
-  GtkWidget *scrollBar;
-  GtkTextBuffer *textBuffer;
-  GtkTextMark *textCursor;
+  struct QtHexEdit : public QTextEdit {
+    pHexEdit &self;
+    void keyPressEvent(QKeyEvent*);
+    void keyPressEventAcknowledge(QKeyEvent*);
+    QtHexEdit(pHexEdit &self) : self(self) {}
+  } *qtHexEdit;
+  QHBoxLayout *qtLayout;
+  QScrollBar *qtScroll;
 
   void setColumns(unsigned columns);
   void setLength(unsigned length);
@@ -257,16 +355,20 @@ struct pHexEdit : public pWidget {
 
   pHexEdit(HexEdit &hexEdit) : pWidget(hexEdit), hexEdit(hexEdit) {}
   void constructor();
-  unsigned cursorPosition();
-  bool keyPress(unsigned scancode);
-  void scroll(unsigned position);
-  void setCursorPosition(unsigned position);
-  void setScroll();
-  void updateScroll();
+  void destructor();
+  void orphan();
+  void keyPressEvent(QKeyEvent*);
+
+public slots:
+  void onScroll();
 };
 
-struct pHorizontalScrollBar : public pWidget {
+struct pHorizontalScrollBar : public QObject, public pWidget {
+  Q_OBJECT
+
+public:
   HorizontalScrollBar &horizontalScrollBar;
+  QScrollBar *qtScrollBar;
 
   Geometry minimumGeometry();
   unsigned position();
@@ -275,10 +377,19 @@ struct pHorizontalScrollBar : public pWidget {
 
   pHorizontalScrollBar(HorizontalScrollBar &horizontalScrollBar) : pWidget(horizontalScrollBar), horizontalScrollBar(horizontalScrollBar) {}
   void constructor();
+  void destructor();
+  void orphan();
+
+public slots:
+  void onChange();
 };
 
-struct pHorizontalSlider : public pWidget {
+struct pHorizontalSlider : public QObject, public pWidget {
+  Q_OBJECT
+
+public:
   HorizontalSlider &horizontalSlider;
+  QSlider *qtSlider;
 
   Geometry minimumGeometry();
   unsigned position();
@@ -287,20 +398,32 @@ struct pHorizontalSlider : public pWidget {
 
   pHorizontalSlider(HorizontalSlider &horizontalSlider) : pWidget(horizontalSlider), horizontalSlider(horizontalSlider) {}
   void constructor();
+  void destructor();
+  void orphan();
+
+public slots:
+  void onChange();
 };
 
 struct pLabel : public pWidget {
   Label &label;
+  QLabel *qtLabel;
 
   Geometry minimumGeometry();
   void setText(const string &text);
 
   pLabel(Label &label) : pWidget(label), label(label) {}
   void constructor();
+  void destructor();
+  void orphan();
 };
 
-struct pLineEdit : public pWidget {
+struct pLineEdit : public QObject, public pWidget {
+  Q_OBJECT
+
+public:
   LineEdit &lineEdit;
+  QLineEdit *qtLineEdit;
 
   Geometry minimumGeometry();
   void setEditable(bool editable);
@@ -309,18 +432,20 @@ struct pLineEdit : public pWidget {
 
   pLineEdit(LineEdit &lineEdit) : pWidget(lineEdit), lineEdit(lineEdit) {}
   void constructor();
+  void destructor();
+  void orphan();
+
+public slots:
+  void onActivate();
+  void onChange();
 };
 
-struct pListView : public pWidget {
+struct pListView : public QObject, public pWidget {
+  Q_OBJECT
+
+public:
   ListView &listView;
-  GtkWidget *subWidget;
-  GtkListStore *store;
-  struct GtkColumn {
-    GtkCellRenderer *renderer;
-    GtkTreeViewColumn *column;
-    GtkWidget *label;
-  };
-  linear_vector<GtkColumn> column;
+  QTreeWidget *qtListView;
 
   void append(const lstring &text);
   void autoSizeColumns();
@@ -338,23 +463,35 @@ struct pListView : public pWidget {
 
   pListView(ListView &listView) : pWidget(listView), listView(listView) {}
   void constructor();
-  void create();
-  void setFocused();
-  void setFont(Font &font);
+  void destructor();
+  void orphan();
+
+public slots:
+  void onActivate();
+  void onChange(QTreeWidgetItem *item);
+  void onTick(QTreeWidgetItem *item);
 };
 
 struct pProgressBar : public pWidget {
   ProgressBar &progressBar;
+  QProgressBar *qtProgressBar;
 
   Geometry minimumGeometry();
   void setPosition(unsigned position);
 
   pProgressBar(ProgressBar &progressBar) : pWidget(progressBar), progressBar(progressBar) {}
   void constructor();
+  void destructor();
+  void orphan();
 };
 
-struct pRadioBox : public pWidget {
+struct pRadioBox : public QObject, public pWidget {
+  Q_OBJECT
+
+public:
   RadioBox &radioBox;
+  QRadioButton *qtRadioBox;
+  QButtonGroup *qtGroup;
 
   bool checked();
   Geometry minimumGeometry();
@@ -364,12 +501,19 @@ struct pRadioBox : public pWidget {
 
   pRadioBox(RadioBox &radioBox) : pWidget(radioBox), radioBox(radioBox) {}
   void constructor();
+  void destructor();
+  void orphan();
+
+public slots:
+  void onTick();
 };
 
-struct pTextEdit : public pWidget {
+struct pTextEdit : public QObject, public pWidget {
+  Q_OBJECT
+
+public:
   TextEdit &textEdit;
-  GtkWidget *subWidget;
-  GtkTextBuffer *textBuffer;
+  QTextEdit *qtTextEdit;
 
   void setCursorPosition(unsigned position);
   void setEditable(bool editable);
@@ -379,10 +523,19 @@ struct pTextEdit : public pWidget {
 
   pTextEdit(TextEdit &textEdit) : pWidget(textEdit), textEdit(textEdit) {}
   void constructor();
+  void destructor();
+  void orphan();
+
+public slots:
+  void onChange();
 };
 
-struct pVerticalScrollBar : public pWidget {
+struct pVerticalScrollBar : public QObject, public pWidget {
+  Q_OBJECT
+
+public:
   VerticalScrollBar &verticalScrollBar;
+  QScrollBar *qtScrollBar;
 
   Geometry minimumGeometry();
   unsigned position();
@@ -391,10 +544,19 @@ struct pVerticalScrollBar : public pWidget {
 
   pVerticalScrollBar(VerticalScrollBar &verticalScrollBar) : pWidget(verticalScrollBar), verticalScrollBar(verticalScrollBar) {}
   void constructor();
+  void destructor();
+  void orphan();
+
+public slots:
+  void onChange();
 };
 
-struct pVerticalSlider : public pWidget {
+struct pVerticalSlider : public QObject, public pWidget {
+  Q_OBJECT
+
+public:
   VerticalSlider &verticalSlider;
+  QSlider *qtSlider;
 
   Geometry minimumGeometry();
   unsigned position();
@@ -403,6 +565,11 @@ struct pVerticalSlider : public pWidget {
 
   pVerticalSlider(VerticalSlider &verticalSlider) : pWidget(verticalSlider), verticalSlider(verticalSlider) {}
   void constructor();
+  void destructor();
+  void orphan();
+
+public slots:
+  void onChange();
 };
 
 struct pViewport : public pWidget {
@@ -412,4 +579,6 @@ struct pViewport : public pWidget {
 
   pViewport(Viewport &viewport) : pWidget(viewport), viewport(viewport) {}
   void constructor();
+  void destructor();
+  void orphan();
 };

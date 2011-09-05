@@ -1,6 +1,5 @@
 Geometry pLabel::minimumGeometry() {
-  Font &font = this->font();
-  Geometry geometry = font.geometry(label.state.text);
+  Geometry geometry = pFont::geometry(hfont, label.state.text);
   return { 0, 0, geometry.width, geometry.height };
 }
 
@@ -10,16 +9,20 @@ void pLabel::setText(const string &text) {
 }
 
 void pLabel::constructor() {
-  setParent(Window::None);
-}
-
-void pLabel::setParent(Window &parent) {
-  if(hwnd) DestroyWindow(hwnd);
-  hwnd = CreateWindow(L"phoenix_label", L"", WS_CHILD | WS_VISIBLE, 0, 0, 0, 0, parent.p.hwnd, (HMENU)id, GetModuleHandle(0), 0);
+  hwnd = CreateWindow(L"phoenix_label", L"", WS_CHILD, 0, 0, 0, 0, parentWindow->p.hwnd, (HMENU)id, GetModuleHandle(0), 0);
   SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&label);
   setDefaultFont();
   setText(label.state.text);
-  widget.setVisible(widget.visible());
+  synchronize();
+}
+
+void pLabel::destructor() {
+  DestroyWindow(hwnd);
+}
+
+void pLabel::orphan() {
+  destructor();
+  constructor();
 }
 
 static LRESULT CALLBACK Label_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
@@ -39,7 +42,7 @@ static LRESULT CALLBACK Label_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPA
     GetClientRect(hwnd, &rc);
     FillRect(ps.hdc, &rc, window->p.brush ? window->p.brush : GetSysColorBrush(COLOR_3DFACE));
     SetBkColor(ps.hdc, window->p.brush ? window->p.brushColor : GetSysColor(COLOR_3DFACE));
-    SelectObject(ps.hdc, ((Widget*)label)->state.font ? ((Widget*)label)->state.font->p.hfont : pOS::state->defaultFont.p.hfont);
+    SelectObject(ps.hdc, ((Widget*)label)->p.hfont);
     unsigned length = GetWindowTextLength(hwnd);
     wchar_t text[length + 1];
     GetWindowText(hwnd, text, length + 1);

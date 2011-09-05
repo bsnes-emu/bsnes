@@ -12,8 +12,24 @@ void pMenu::append(Action &action) {
   }
 }
 
-void pMenu::setFont(Font &font) {
-  qtMenu->setFont(*font.p.qtFont);
+void pMenu::remove(Action &action) {
+  if(dynamic_cast<Menu*>(&action)) {
+    //QMenu::removeMenu() does not exist
+    qtMenu->clear();
+    foreach(action, menu.state.action) append(action);
+  } else if(dynamic_cast<Separator*>(&action)) {
+    qtMenu->removeAction(((Separator&)action).p.qtAction);
+  } else if(dynamic_cast<Item*>(&action)) {
+    qtMenu->removeAction(((Item&)action).p.qtAction);
+  } else if(dynamic_cast<CheckItem*>(&action)) {
+    qtMenu->removeAction(((CheckItem&)action).p.qtAction);
+  } else if(dynamic_cast<RadioItem*>(&action)) {
+    qtMenu->removeAction(((CheckItem&)action).p.qtAction);
+  }
+}
+
+void pMenu::setFont(const string &font) {
+  qtMenu->setFont(pFont::create(font));
   foreach(item, menu.state.action) item.p.setFont(font);
 }
 
@@ -23,4 +39,9 @@ void pMenu::setText(const string &text) {
 
 void pMenu::constructor() {
   qtMenu = new QMenu;
+}
+
+void pMenu::destructor() {
+  if(action.state.menu) action.state.menu->remove(menu);
+  delete qtMenu;
 }

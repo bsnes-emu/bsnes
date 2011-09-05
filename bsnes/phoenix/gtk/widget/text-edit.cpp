@@ -1,4 +1,5 @@
 static void TextEdit_change(TextEdit *self) {
+  self->state.text = self->text();
   if(self->p.locked == false && self->onChange) self->onChange();
 }
 
@@ -45,4 +46,18 @@ void pTextEdit::constructor() {
   textBuffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(subWidget));
   g_signal_connect_swapped(G_OBJECT(textBuffer), "changed", G_CALLBACK(TextEdit_change), (gpointer)&textEdit);
   gtk_widget_show(subWidget);
+
+  setEditable(textEdit.state.editable);
+  setText(textEdit.state.text);
+  setWordWrap(textEdit.state.wordWrap);
+}
+
+void pTextEdit::destructor() {
+  gtk_widget_destroy(subWidget);
+  gtk_widget_destroy(gtkWidget);
+}
+
+void pTextEdit::orphan() {
+  destructor();
+  constructor();
 }

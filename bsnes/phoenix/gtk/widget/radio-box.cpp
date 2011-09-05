@@ -7,8 +7,9 @@ bool pRadioBox::checked() {
 }
 
 Geometry pRadioBox::minimumGeometry() {
-  Font &font = pWidget::font();
-  Geometry geometry = font.geometry(radioBox.state.text);
+  Geometry geometry = pFont::geometry(widget.state.font, radioBox.state.text);
+//Font &font = pWidget::font();
+//Geometry geometry = font.geometry(radioBox.state.text);
   return { 0, 0, geometry.width + 28, geometry.height + 4 };
 }
 
@@ -35,4 +36,15 @@ void pRadioBox::setText(const string &text) {
 void pRadioBox::constructor() {
   gtkWidget = gtk_radio_button_new_with_label(0, "");
   g_signal_connect_swapped(G_OBJECT(gtkWidget), "toggled", G_CALLBACK(RadioBox_tick), (gpointer)&radioBox);
+
+  setText(radioBox.state.text);
+}
+
+void pRadioBox::destructor() {
+  gtk_widget_destroy(gtkWidget);
+}
+
+void pRadioBox::orphan() {
+  destructor();
+  constructor();
 }

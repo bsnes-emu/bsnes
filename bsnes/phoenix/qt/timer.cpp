@@ -16,6 +16,10 @@ void pTimer::constructor() {
   connect(qtTimer, SIGNAL(timeout()), SLOT(onTimeout()));
 }
 
+void pTimer::destructor() {
+  delete qtTimer;
+}
+
 void pTimer::onTimeout() {
   if(timer.onTimeout) timer.onTimeout();
 }

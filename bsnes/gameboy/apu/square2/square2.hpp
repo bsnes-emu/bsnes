@@ -1,6 +1,7 @@
 struct Square2 {
+  bool enable;
+
   unsigned duty;
-  unsigned initial_length;
   unsigned length;
   unsigned envelope_volume;
   unsigned envelope_direction;
@@ -14,6 +15,8 @@ struct Square2 {
   unsigned period;
   unsigned envelope_period;
   unsigned volume;
+
+  bool dac_enable();
 
   void run();
   void clock_length();

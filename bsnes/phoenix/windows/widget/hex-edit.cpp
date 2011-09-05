@@ -62,7 +62,27 @@ void pHexEdit::update() {
 }
 
 void pHexEdit::constructor() {
-  setParent(Window::None);
+  hwnd = CreateWindowEx(
+    WS_EX_CLIENTEDGE, L"EDIT", L"",
+    WS_CHILD | WS_TABSTOP | ES_READONLY | ES_MULTILINE | ES_WANTRETURN,
+    0, 0, 0, 0, parentWindow->p.hwnd, (HMENU)id, GetModuleHandle(0), 0
+  );
+  SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&hexEdit);
+  setDefaultFont();
+  update();
+
+  windowProc = (LRESULT CALLBACK (*)(HWND, UINT, LPARAM, WPARAM))GetWindowLongPtr(hwnd, GWLP_WNDPROC);
+  SetWindowLongPtr(hwnd, GWLP_WNDPROC, (LONG_PTR)HexEdit_windowProc);
+  synchronize();
+}
+
+void pHexEdit::destructor() {
+  DestroyWindow(hwnd);
+}
+
+void pHexEdit::orphan() {
+  destructor();
+  constructor();
 }
 
 bool pHexEdit::keyPress(unsigned scancode) {
@@ -113,20 +133,4 @@ bool pHexEdit::keyPress(unsigned scancode) {
   }
 
   return true;
-}
-
-void pHexEdit::setParent(Window &parent) {
-  if(hwnd) DestroyWindow(hwnd);
-  hwnd = CreateWindowEx(
-    WS_EX_CLIENTEDGE, L"EDIT", L"",
-    WS_CHILD | WS_TABSTOP | WS_VISIBLE | ES_READONLY | ES_MULTILINE | ES_WANTRETURN,
-    0, 0, 0, 0, parent.p.hwnd, (HMENU)id, GetModuleHandle(0), 0
-  );
-  SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&hexEdit);
-  setDefaultFont();
-  update();
-
-  windowProc = (LRESULT CALLBACK (*)(HWND, UINT, LPARAM, WPARAM))GetWindowLongPtr(hwnd, GWLP_WNDPROC);
-  SetWindowLongPtr(hwnd, GWLP_WNDPROC, (LONG_PTR)HexEdit_windowProc);
-  widget.setVisible(widget.visible());
 }

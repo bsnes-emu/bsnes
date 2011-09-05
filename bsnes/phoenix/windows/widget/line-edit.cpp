@@ -1,7 +1,6 @@
 Geometry pLineEdit::minimumGeometry() {
-  Font &font = this->font();
-  Geometry geometry = font.geometry(lineEdit.state.text);
-  return { 0, 0, geometry.width + 12, font.p.height() + 10 };
+  Geometry geometry = pFont::geometry(hfont, lineEdit.state.text);
+  return { 0, 0, geometry.width + 12, geometry.height + 10 };
 }
 
 void pLineEdit::setEditable(bool editable) {
@@ -23,19 +22,24 @@ string pLineEdit::text() {
 }
 
 void pLineEdit::constructor() {
-  setParent(Window::None);
-}
-
-void pLineEdit::setParent(Window &parent) {
-  if(hwnd) DestroyWindow(hwnd);
   hwnd = CreateWindowEx(
     WS_EX_CLIENTEDGE, L"EDIT", L"",
-    WS_CHILD | WS_TABSTOP | WS_VISIBLE | ES_AUTOHSCROLL | ES_AUTOVSCROLL,
-    0, 0, 0, 0, parent.p.hwnd, (HMENU)id, GetModuleHandle(0), 0
+    WS_CHILD | WS_TABSTOP | ES_AUTOHSCROLL | ES_AUTOVSCROLL,
+    0, 0, 0, 0, parentWindow->p.hwnd, (HMENU)id, GetModuleHandle(0), 0
   );
   SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&lineEdit);
   setDefaultFont();
   setEditable(lineEdit.state.editable);
   setText(lineEdit.state.text);
-  widget.setVisible(widget.visible());
+  synchronize();
+}
+
+void pLineEdit::destructor() {
+  lineEdit.state.text = text();
+  DestroyWindow(hwnd);
+}
+
+void pLineEdit::orphan() {
+  destructor();
+  constructor();
 }

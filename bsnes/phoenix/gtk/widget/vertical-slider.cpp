@@ -25,6 +25,17 @@ void pVerticalSlider::setPosition(unsigned position) {
 void pVerticalSlider::constructor() {
   gtkWidget = gtk_vscale_new_with_range(0, 100, 1);
   gtk_scale_set_draw_value(GTK_SCALE(gtkWidget), false);
-  setLength(101);
   g_signal_connect_swapped(G_OBJECT(gtkWidget), "value-changed", G_CALLBACK(VerticalSlider_change), (gpointer)&verticalSlider);
+
+  setLength(verticalSlider.state.length);
+  setPosition(verticalSlider.state.position);
+}
+
+void pVerticalSlider::destructor() {
+  gtk_widget_destroy(gtkWidget);
+}
+
+void pVerticalSlider::orphan() {
+  destructor();
+  constructor();
 }

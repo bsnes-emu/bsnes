@@ -16,12 +16,6 @@ void APU::Master::run() {
   sample >>= 2;
   center = sclamp<16>(sample);
 
-  if(left_enable == false && right_enable == false) {
-    left  = center;
-    right = center;
-    return;
-  }
-
   sample = 0;
   channels = 0;
   if(channel1_left_enable) { sample += apu.square1.output; channels++; }
@@ -41,7 +35,6 @@ void APU::Master::run() {
     case 6: left -= (left >> 3);              break;  // 87.5%
   //case 7:                                   break;  //100.0%
   }
-  if(left_enable == false) left = 0;
 
   sample = 0;
   channels = 0;
@@ -62,18 +55,17 @@ void APU::Master::run() {
     case 6: right -= (right >> 3);               break;  // 87.5%
   //case 7:                                      break;  //100.0%
   }
-  if(right_enable == false) right = 0;
 }
 
 void APU::Master::write(unsigned r, uint8 data) {
-  if(r == 0) {
-    left_enable  = data & 0x80;
-    left_volume  = (data >> 4) & 7;
-    right_enable = data & 0x08;
-    right_volume = (data >> 0) & 7;
+  if(r == 0) {  //$ff24  NR50
+    left_in_enable  = data & 0x80;
+    left_volume     = (data >> 4) & 7;
+    right_in_enable = data & 0x08;
+    right_volume    = (data >> 0) & 7;
   }
 
-  if(r == 1) {
+  if(r == 1) {  //$ff25  NR51
     channel4_left_enable  = data & 0x80;
     channel3_left_enable  = data & 0x40;
     channel2_left_enable  = data & 0x20;
@@ -84,15 +76,15 @@ void APU::Master::write(unsigned r, uint8 data) {
     channel1_right_enable = data & 0x01;
   }
 
-  if(r == 2) {
+  if(r == 2) {  //$ff26  NR52
     enable = data & 0x80;
   }
 }
 
 void APU::Master::power() {
-  left_enable = 0;
+  left_in_enable = 0;
   left_volume = 0;
-  right_enable = 0;
+  right_in_enable = 0;
   right_volume = 0;
   channel4_left_enable  = 0;
   channel3_left_enable  = 0;
@@ -110,9 +102,9 @@ void APU::Master::power() {
 }
 
 void APU::Master::serialize(serializer &s) {
-  s.integer(left_enable);
+  s.integer(left_in_enable);
   s.integer(left_volume);
-  s.integer(right_enable);
+  s.integer(right_in_enable);
   s.integer(right_volume);
   s.integer(channel4_left_enable);
   s.integer(channel3_left_enable);

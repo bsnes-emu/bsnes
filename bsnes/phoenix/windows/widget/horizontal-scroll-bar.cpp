@@ -12,23 +12,27 @@ void pHorizontalScrollBar::setLength(unsigned length) {
   horizontalScrollBar.setPosition(0);
 }
 
-void pHorizontalScrollBar::setPosition(unsigned position) { return;
+void pHorizontalScrollBar::setPosition(unsigned position) {
   SetScrollPos(hwnd, SB_CTL, position, TRUE);
 }
 
 void pHorizontalScrollBar::constructor() {
-  setParent(Window::None);
-}
-
-void pHorizontalScrollBar::setParent(Window &parent) {
-  if(hwnd) DestroyWindow(hwnd);
   hwnd = CreateWindow(
-    L"SCROLLBAR", L"", WS_CHILD | WS_VISIBLE | WS_TABSTOP | SBS_HORZ,
-    0, 0, 0, 0, parent.p.hwnd, (HMENU)id, GetModuleHandle(0), 0
+    L"SCROLLBAR", L"", WS_CHILD | WS_TABSTOP | SBS_HORZ,
+    0, 0, 0, 0, parentWindow->p.hwnd, (HMENU)id, GetModuleHandle(0), 0
   );
   SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&horizontalScrollBar);
   unsigned position = horizontalScrollBar.state.position;
   setLength(horizontalScrollBar.state.length);
-  setPosition(position);
-  widget.setVisible(widget.visible());
+  horizontalScrollBar.setPosition(position);
+  synchronize();
+}
+
+void pHorizontalScrollBar::destructor() {
+  DestroyWindow(hwnd);
+}
+
+void pHorizontalScrollBar::orphan() {
+  destructor();
+  constructor();
 }

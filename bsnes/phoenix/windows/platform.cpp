@@ -1,4 +1,4 @@
-#include "windows.hpp"
+#include "platform.hpp"
 
 #include "object.cpp"
 #include "font.cpp"
@@ -33,8 +33,6 @@
 
 static void OS_keyboardProc(HWND, UINT, WPARAM, LPARAM);
 static LRESULT CALLBACK OS_windowProc(HWND, UINT, WPARAM, LPARAM);
-
-pOS::State *pOS::state = 0;
 
 Geometry pOS::availableGeometry() {
   RECT rc;
@@ -169,11 +167,6 @@ void pOS::initialize() {
   CoInitialize(0);
   InitCommonControls();
 
-  state = new State;
-
-  state->defaultFont.setFamily("Tahoma");
-  state->defaultFont.setSize(8);
-
   WNDCLASS wc;
   wc.cbClsExtra = 0;
   wc.cbWndExtra = 0;
@@ -253,8 +246,9 @@ static LRESULT CALLBACK OS_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM
 
   switch(msg) {
     case WM_CLOSE: {
+      window.state.ignore = false;
       if(window.onClose) window.onClose();
-      window.setVisible(false);
+      if(window.state.ignore == false) window.setVisible(false);
       return TRUE;
     }
 
@@ -449,13 +443,13 @@ static LRESULT CALLBACK OS_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM
           HorizontalScrollBar &horizontalScrollBar = (HorizontalScrollBar&)*object;
           if(horizontalScrollBar.state.position != info.nPos) {
             horizontalScrollBar.state.position = info.nPos;
-            horizontalScrollBar.onChange();
+            if(horizontalScrollBar.onChange) horizontalScrollBar.onChange();
           }
         } else {
           VerticalScrollBar &verticalScrollBar = (VerticalScrollBar&)*object;
           if(verticalScrollBar.state.position != info.nPos) {
             verticalScrollBar.state.position = info.nPos;
-            verticalScrollBar.onChange();
+            if(verticalScrollBar.onChange) verticalScrollBar.onChange();
           }
         }
 

@@ -9,4 +9,15 @@ void pProgressBar::setPosition(unsigned position) {
 
 void pProgressBar::constructor() {
   gtkWidget = gtk_progress_bar_new();
+
+  setPosition(progressBar.state.position);
+}
+
+void pProgressBar::destructor() {
+  gtk_widget_destroy(gtkWidget);
+}
+
+void pProgressBar::orphan() {
+  destructor();
+  constructor();
 }

@@ -1,4 +1,4 @@
-#include "gtk.hpp"
+#include "platform.hpp"
 
 #include "settings.cpp"
 #include "font.cpp"

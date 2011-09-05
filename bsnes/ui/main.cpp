@@ -25,34 +25,15 @@ void Application::main(int argc, char **argv) {
   inputMapper.bind();
 
   #if defined(PLATFORM_WIN)
-  proportionalFont.setFamily("Tahoma");
-  proportionalFont.setSize(8);
-
-  proportionalFontBold.setFamily("Tahoma");
-  proportionalFontBold.setSize(8);
-  proportionalFontBold.setBold();
-
-  monospaceFont.setFamily("Lucida Console");
-  monospaceFont.setSize(8);
-
-  titleFont.setFamily("Segoe Print");
-  titleFont.setSize(16);
-  titleFont.setBold();
+  proportionalFont = "Tahoma, 8";
+  proportionalFontBold = "Tahoma, 8, Bold";
+  monospaceFont = "Lucida Console, 8";
+  titleFont = "Segoe Print, 16, Bold";
   #else
-  proportionalFont.setFamily("Sans");
-  proportionalFont.setSize(8);
-
-  proportionalFontBold.setFamily("Sans");
-  proportionalFontBold.setSize(8);
-  proportionalFontBold.setBold();
-
-  monospaceFont.setFamily("Liberation Mono");
-  monospaceFont.setSize(8);
-
-  titleFont.setFamily("Sans");
-  titleFont.setSize(16);
-  titleFont.setBold();
-  titleFont.setItalic();
+  proportionalFont = "Sans, 8";
+  proportionalFontBold = "Sans, 8, Bold";
+  monospaceFont = "Liberation Mono, 8";
+  titleFont = "Sans, 16, Bold Italic";
   #endif
 
   SNES::system.init(&interface);

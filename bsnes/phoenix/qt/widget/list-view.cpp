@@ -95,14 +95,34 @@ void pListView::setSelection(unsigned row) {
 
 void pListView::constructor() {
   qtWidget = qtListView = new QTreeWidget;
-  qtListView->setHeaderLabels(QStringList() << "");
-  qtListView->setHeaderHidden(true);
   qtListView->setAllColumnsShowFocus(true);
   qtListView->setRootIsDecorated(false);
 
   connect(qtListView, SIGNAL(itemActivated(QTreeWidgetItem*, int)), SLOT(onActivate()));
   connect(qtListView, SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)), SLOT(onChange(QTreeWidgetItem*)));
   connect(qtListView, SIGNAL(itemChanged(QTreeWidgetItem*, int)), SLOT(onTick(QTreeWidgetItem*)));
+
+  setCheckable(listView.state.checkable);
+  setHeaderText(listView.state.headerText.size() ? listView.state.headerText : lstring{ " " });
+  setHeaderVisible(listView.state.headerVisible);
+  foreach(row, listView.state.text) append(row);
+  if(listView.state.checkable) {
+    for(unsigned n = 0; n < listView.state.checked.size(); n++) {
+      setChecked(n, listView.state.checked[n]);
+    }
+  }
+  setSelected(listView.state.selected);
+  if(listView.state.selected) setSelection(listView.state.selection);
+}
+
+void pListView::destructor() {
+  delete qtListView;
+  qtWidget = qtListView = 0;
+}
+
+void pListView::orphan() {
+  destructor();
+  constructor();
 }
 
 void pListView::onActivate() {

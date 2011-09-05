@@ -1,7 +1,6 @@
 Geometry pButton::minimumGeometry() {
-  Font &font = this->font();
-  Geometry geometry = font.geometry(button.state.text);
-  return { 0, 0, geometry.width + 20, font.p.height() + 10 };
+  Geometry geometry = pFont::geometry(hfont, button.state.text);
+  return { 0, 0, geometry.width + 20, geometry.height + 10 };
 }
 
 void pButton::setText(const string &text) {
@@ -9,14 +8,18 @@ void pButton::setText(const string &text) {
 }
 
 void pButton::constructor() {
-  setParent(Window::None);
-}
-
-void pButton::setParent(Window &parent) {
-  if(hwnd) DestroyWindow(hwnd);
-  hwnd = CreateWindow(L"BUTTON", L"", WS_CHILD | WS_TABSTOP | WS_VISIBLE, 0, 0, 0, 0, parent.p.hwnd, (HMENU)id, GetModuleHandle(0), 0);
+  hwnd = CreateWindow(L"BUTTON", L"", WS_CHILD | WS_TABSTOP, 0, 0, 0, 0, parentWindow->p.hwnd, (HMENU)id, GetModuleHandle(0), 0);
   SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&button);
   setDefaultFont();
   setText(button.state.text);
-  widget.setVisible(widget.visible());
+  synchronize();
+}
+
+void pButton::destructor() {
+  DestroyWindow(hwnd);
+}
+
+void pButton::orphan() {
+  destructor();
+  constructor();
 }
