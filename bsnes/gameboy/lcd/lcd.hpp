@@ -3,6 +3,7 @@ struct LCD : Processor, MMIO {
 
   struct Status {
     unsigned lx;
+    unsigned wyc;
 
     //$ff40  LCDC
     bool display_enable;

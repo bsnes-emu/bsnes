@@ -1,20 +1,20 @@
 struct Square2 {
   bool enable;
 
-  unsigned duty;
+  uint2 duty;
   unsigned length;
-  unsigned envelope_volume;
-  unsigned envelope_direction;
-  unsigned envelope_frequency;
-  unsigned frequency;
-  unsigned counter;
+  uint4 envelope_volume;
+  bool envelope_direction;
+  uint3 envelope_frequency;
+  uint11 frequency;
+  bool counter;
 
   int16 output;
   bool duty_output;
-  unsigned phase;
+  uint3 phase;
   unsigned period;
-  unsigned envelope_period;
-  unsigned volume;
+  uint3 envelope_period;
+  uint4 volume;
 
   bool dac_enable();
 

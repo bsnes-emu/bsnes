@@ -13,7 +13,7 @@ void APU::Noise::run() {
     }
   }
 
-  uint4 sample = (lfsr & 1) ? 0 : volume;
+  uint4 sample = (lfsr & 1) ? (uint4)0 : volume;
   if(enable == false) sample = 0;
 
   output = (sample * 4369) - 32768;
@@ -26,9 +26,8 @@ void APU::Noise::clock_length() {
 }
 
 void APU::Noise::clock_envelope() {
-  if(envelope_period && --envelope_period == 0) {
+  if(enable && envelope_frequency && --envelope_period == 0) {
     envelope_period = envelope_frequency;
-    if(envelope_period == 0) envelope_period = 8;
     if(envelope_direction == 0 && volume >  0) volume--;
     if(envelope_direction == 1 && volume < 15) volume++;
   }

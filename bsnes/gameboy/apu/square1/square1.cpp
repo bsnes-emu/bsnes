@@ -7,7 +7,7 @@ bool APU::Square1::dac_enable() {
 void APU::Square1::run() {
   if(period && --period == 0) {
     period = 4 * (2048 - frequency);
-    phase = (phase + 1) & 7;
+    phase++;
     switch(duty) {
       case 0: duty_output = (phase == 6); break;  //______-_
       case 1: duty_output = (phase >= 6); break;  //______--
@@ -16,7 +16,7 @@ void APU::Square1::run() {
     }
   }
 
-  uint4 sample = (duty_output ? volume : 0);
+  uint4 sample = (duty_output ? volume : (uint4)0);
   if(enable == false) sample = 0;
 
   output = (sample * 4369) - 32768;
@@ -45,20 +45,16 @@ void APU::Square1::clock_length() {
 }
 
 void APU::Square1::clock_sweep() {
-  if(enable && --sweep_period == 0) {
+  if(enable && sweep_frequency && --sweep_period == 0) {
     sweep_period = sweep_frequency;
-    if(sweep_period == 0) sweep_period = 8;
-    if(sweep_frequency) {
-      sweep(1);
-      sweep(0);
-    }
+    sweep(1);
+    sweep(0);
   }
 }
 
 void APU::Square1::clock_envelope() {
-  if(envelope_period && --envelope_period == 0) {
+  if(enable && envelope_frequency && --envelope_period == 0) {
     envelope_period = envelope_frequency;
-    if(envelope_period == 0) envelope_period = 8;
     if(envelope_direction == 0 && volume >  0) volume--;
     if(envelope_direction == 1 && volume < 15) volume++;
   }

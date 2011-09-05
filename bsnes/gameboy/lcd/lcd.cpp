@@ -7,6 +7,8 @@ namespace GameBoy {
 #include "serialization.cpp"
 LCD lcd;
 
+static unsigned linectr;
+
 void LCD::Main() {
   lcd.main();
 }
@@ -60,6 +62,7 @@ void LCD::frame() {
   cpu.mmio_joyp_poll();
 
   status.ly = 0;
+  status.wyc = 0;
   scheduler.exit(Scheduler::ExitReason::FrameEvent);
 }
 
@@ -112,8 +115,9 @@ void LCD::render_bg() {
 }
 
 void LCD::render_window() {
-  if(status.ly - status.wy >= 144U) return;
-  unsigned iy = status.ly - status.wy;
+  if(status.ly - status.wy >= 144u) return;
+  if(status.wx >= 167u) return;
+  unsigned iy = status.wyc++;
   unsigned ix = (7 - status.wx) & 255, tx = ix & 7;
   unsigned data = read_tile(status.window_tilemap_select, ix, iy);
 
@@ -215,6 +219,7 @@ void LCD::power() {
   for(unsigned n = 0; n < 160 * 144; n++) screen[n] = 0x00;
 
   status.lx = 0;
+  status.wyc = 0;
 
   status.display_enable = 0;
   status.window_tilemap_select = 0;

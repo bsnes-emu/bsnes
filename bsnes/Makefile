@@ -3,7 +3,7 @@ include nall/Makefile
 snes := snes
 gameboy := gameboy
 profile := accuracy
-ui := ui
+ui := ui-gameboy
 
 # options += console
 # options += debugger

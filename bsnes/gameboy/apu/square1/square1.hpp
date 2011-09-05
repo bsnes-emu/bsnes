@@ -1,27 +1,27 @@
 struct Square1 {
   bool enable;
 
-  unsigned sweep_frequency;
-  unsigned sweep_direction;
-  unsigned sweep_shift;
+  uint3 sweep_frequency;
+  bool sweep_direction;
+  uint3 sweep_shift;
   bool sweep_negate;
-  unsigned duty;
+  uint2 duty;
   unsigned length;
-  unsigned envelope_volume;
-  unsigned envelope_direction;
-  unsigned envelope_frequency;
-  unsigned frequency;
-  unsigned counter;
+  uint4 envelope_volume;
+  bool envelope_direction;
+  uint3 envelope_frequency;
+  uint11 frequency;
+  bool counter;
 
   int16 output;
   bool duty_output;
-  unsigned phase;
+  uint3 phase;
   unsigned period;
-  unsigned envelope_period;
-  unsigned sweep_period;
+  uint3 envelope_period;
+  uint3 sweep_period;
   signed frequency_shadow;
   bool sweep_enable;
-  unsigned volume;
+  uint4 volume;
 
   bool dac_enable();
 

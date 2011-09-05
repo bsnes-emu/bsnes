@@ -2,6 +2,7 @@
 
 void LCD::serialize(serializer &s) {
   s.integer(status.lx);
+  s.integer(status.wyc);
 
   s.integer(status.display_enable);
   s.integer(status.window_tilemap_select);

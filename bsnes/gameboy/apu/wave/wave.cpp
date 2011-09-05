@@ -3,15 +3,14 @@
 void APU::Wave::run() {
   if(period && --period == 0) {
     period = 2 * (2048 - frequency);
-    pattern_offset = (pattern_offset + 1) & 31;
-    pattern_sample = pattern[pattern_offset];
+    pattern_sample = pattern[++pattern_offset];
   }
 
   uint4 sample = pattern_sample;
   if(enable == false) sample = 0;
 
   output = (sample * 4369) - 32768;
-  output >>= volume;
+  output >>= volume_shift;
 }
 
 void APU::Wave::clock_length() {
@@ -32,10 +31,10 @@ void APU::Wave::write(unsigned r, uint8 data) {
 
   if(r == 2) {  //$ff1c  NR32
     switch((data >> 5) & 3) {
-      case 0: volume = 16; break;  //  0%
-      case 1: volume =  0; break;  //100%
-      case 2: volume =  1; break;  // 50%
-      case 3: volume =  2; break;  // 25%
+      case 0: volume_shift = 16; break;  //  0%
+      case 1: volume_shift =  0; break;  //100%
+      case 2: volume_shift =  1; break;  // 50%
+      case 3: volume_shift =  2; break;  // 25%
     }
   }
 
@@ -68,7 +67,7 @@ void APU::Wave::power() {
   enable = 0;
 
   dac_enable = 0;
-  volume = 0;
+  volume_shift = 0;
   frequency = 0;
   counter = 0;
 
@@ -86,7 +85,7 @@ void APU::Wave::serialize(serializer &s) {
   s.integer(enable);
 
   s.integer(dac_enable);
-  s.integer(volume);
+  s.integer(volume_shift);
   s.integer(frequency);
   s.integer(counter);
   s.array(pattern);
