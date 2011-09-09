@@ -1,10 +1,8 @@
-include $(nes)/Makefile
 include $(snes)/Makefile
 include $(gameboy)/Makefile
-name := batch
 
-ui_objects := ui-main ui-interface ui-utility ui-general
-ui_objects += phoenix ruby
+ui_objects := ui-main ui-general ui-settings ui-tools ui-input ui-utility ui-path ui-cartridge ui-debugger
+ui_objects += ruby phoenix
 ui_objects += $(if $(call streq,$(platform),win),resource)
 
 # platform
@@ -67,9 +65,14 @@ objects := $(ui_objects) $(objects)
 objects := $(patsubst %,obj/%.o,$(objects))
 
 obj/ui-main.o: $(ui)/main.cpp $(call rwildcard,$(ui)/*.hpp) $(call rwildcard,$(ui)/*)
-obj/ui-interface.o: $(ui)/interface/interface.cpp $(call rwildcard,$(ui)/*.hpp) $(call rwildcard,$(ui)/interface/*)
-obj/ui-utility.o: $(ui)/utility/utility.cpp $(call rwildcard,$(ui)/*.hpp) $(call rwildcard,$(ui)/utility/*)
 obj/ui-general.o: $(ui)/general/general.cpp $(call rwildcard,$(ui)/*.hpp) $(call rwildcard,$(ui)/general/*)
+obj/ui-tools.o: $(ui)/tools/tools.cpp $(call rwildcard,$(ui)/*.hpp) $(call rwildcard,$(ui)/tools/*)
+obj/ui-settings.o: $(ui)/settings/settings.cpp $(call rwildcard,$(ui)/*.hpp) $(call rwildcard,$(ui)/settings/*)
+obj/ui-input.o: $(ui)/input/input.cpp $(call rwildcard,$(ui)/*.hpp) $(call rwildcard,$(ui)/input/*)
+obj/ui-utility.o: $(ui)/utility/utility.cpp $(call rwildcard,$(ui)/*.hpp) $(call rwildcard,$(ui)/utility/*)
+obj/ui-path.o: $(ui)/path/path.cpp $(call rwildcard,$(ui)/*.hpp) $(call rwildcard,$(ui)/path/*)
+obj/ui-cartridge.o: $(ui)/cartridge/cartridge.cpp $(call rwildcard,$(ui)/*.hpp) $(call rwildcard,$(ui)/cartridge/*)
+obj/ui-debugger.o: $(ui)/debugger/debugger.cpp $(call rwildcard,$(ui)/*.hpp) $(call rwildcard,$(ui)/debugger/*)
 
 obj/ruby.o: ruby/ruby.cpp $(call rwildcard,ruby/*)
 	$(call compile,$(rubydef) $(rubyflags))
@@ -83,27 +86,25 @@ obj/resource.o: $(ui)/resource.rc
 # targets
 build: $(objects)
 ifeq ($(platform),osx)
-	test -d ../$(name).app || mkdir -p ../$(name).app/Contents/MacOS
-	$(strip $(cpp) -o ../$(name).app/Contents/MacOS/$(name) $(objects) $(link))
+	test -d ../bsnes.app || mkdir -p ../bsnes.app/Contents/MacOS
+	$(strip $(cpp) -o ../bsnes.app/Contents/MacOS/bsnes $(objects) $(link))
 else
-	$(strip $(cpp) -o out/$(name) $(objects) $(link))
+	$(strip $(cpp) -o out/bsnes $(objects) $(link))
 endif
 
 install:
 ifeq ($(platform),x)
-	install -D -m 755 out/$(name) $(DESTDIR)$(prefix)/bin/$(name)
-	mkdir -p ~/.config/$(name)
+	install -D -m 755 out/bsnes $(DESTDIR)$(prefix)/bin/bsnes
 endif
+	install -D -m 644 data/bsnes.png $(DESTDIR)$(prefix)/share/pixmaps/bsnes.png
+	install -D -m 644 data/bsnes.desktop $(DESTDIR)$(prefix)/share/applications/bsnes.desktop
+	mkdir -p ~/.config/bsnes
+	cp data/cheats.xml ~/.config/bsnes/cheats.xml
+	chmod 777 ~/.config/bsnes ~/.config/bsnes/cheats.xml
 
 uninstall:
 ifeq ($(platform),x)
-	rm $(DESTDIR)$(prefix)/bin/$(name)
+	rm $(DESTDIR)$(prefix)/bin/bsnes
 endif
-
-#	install -D -m 644 data/$(name).png $(DESTDIR)$(prefix)/share/pixmaps/$(name).png
-#	install -D -m 644 data/$(name).desktop $(DESTDIR)$(prefix)/share/applications/$(name).desktop
-#	cp data/cheats.xml ~/.config/$(name)/cheats.xml
-#	chmod 777 ~/.config/$(name) ~/.config/$(name)/cheats.xml
-
-#	rm $(DESTDIR)$(prefix)/share/pixmaps/$(name).png
-#	rm $(DESTDIR)$(prefix)/share/applications/$(name).desktop
+	rm $(DESTDIR)$(prefix)/share/pixmaps/bsnes.png
+	rm $(DESTDIR)$(prefix)/share/applications/bsnes.desktop

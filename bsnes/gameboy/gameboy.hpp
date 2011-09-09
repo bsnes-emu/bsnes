@@ -1,6 +1,5 @@
-//bgameboy
-//author: byuu
-//project started: 2010-12-27
+#ifndef GAMEBOY_HPP
+#define GAMEBOY_HPP
 
 namespace GameBoy {
   namespace Info {
@@ -9,6 +8,13 @@ namespace GameBoy {
     static unsigned SerializerVersion = 2;
   }
 }
+
+/*
+  bgameboy - Game Boy emulator
+  author: byuu
+  license: GPLv2
+  project started: 2010-12-27
+*/
 
 #include <libco/libco.h>
 
@@ -94,3 +100,5 @@ namespace GameBoy {
   #include <gameboy/apu/apu.hpp>
   #include <gameboy/lcd/lcd.hpp>
 };
+
+#endif

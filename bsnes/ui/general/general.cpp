@@ -1,6 +1,2 @@
 #include "../base.hpp"
 #include "main-window.cpp"
-#include "file-browser.cpp"
-#include "slot-loader.cpp"
-#include "nss-dip-window.cpp"
-#include "about-window.cpp"

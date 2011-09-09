@@ -55,6 +55,8 @@ public:
     Flags p;
   } regs;
 
+  unsigned rd, wr, dp, sp, ya, bit;
+
   struct Status {
     //$00f1
     bool iplrom_enable;

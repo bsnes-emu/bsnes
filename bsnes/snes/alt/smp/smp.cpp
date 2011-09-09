@@ -110,6 +110,13 @@ void SMP::serialize(serializer &s) {
   s.integer(regs.p.z);
   s.integer(regs.p.c);
 
+  s.integer(rd);
+  s.integer(wr);
+  s.integer(dp);
+  s.integer(sp);
+  s.integer(ya);
+  s.integer(bit);
+
   s.integer(status.iplrom_enable);
 
   s.integer(status.dsp_addr);

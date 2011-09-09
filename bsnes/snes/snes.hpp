@@ -1,7 +1,10 @@
+#ifndef SNES_HPP
+#define SNES_HPP
+
 namespace SNES {
   namespace Info {
     static const char Name[] = "bsnes";
-    static const char Version[] = "082.03";
+    static const char Version[] = "082.04";
     static const unsigned SerializerVersion = 21;
   }
 }
@@ -10,6 +13,7 @@ namespace SNES {
   bsnes - SNES emulator
   author: byuu
   license: GPLv2
+  project started: 2004-10-14
 */
 
 #include <libco/libco.h>
@@ -154,3 +158,5 @@ namespace nall {
 }
 
 #undef debugvirtual
+
+#endif

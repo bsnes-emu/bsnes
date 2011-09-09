@@ -1,94 +1,38 @@
-struct MainWindow : TopLevelWindow {
-  Menu system;
-  Item systemLoadCartridge;
-  Menu systemLoadCartridgeSpecial;
-  Item systemLoadCartridgeBsxSlotted;
-  Item systemLoadCartridgeBsx;
-  Item systemLoadCartridgeSufamiTurbo;
-  Item systemLoadCartridgeSuperGameBoy;
-  Separator systemSeparator1;
-  Item systemPower;
-  Item systemReset;
-  Separator systemSeparator2;
-  Menu systemPort1;
-  RadioItem systemPort1None;
-  RadioItem systemPort1Gamepad;
-  RadioItem systemPort1Multitap;
-  RadioItem systemPort1Mouse;
-  Menu systemPort2;
-  RadioItem systemPort2None;
-  RadioItem systemPort2Gamepad;
-  RadioItem systemPort2Multitap;
-  RadioItem systemPort2Mouse;
-  RadioItem systemPort2SuperScope;
-  RadioItem systemPort2Justifier;
-  RadioItem systemPort2Justifiers;
-  RadioItem systemPort2Serial;
-
-  Menu settings;
-  Menu settingsVideoMode;
-  RadioItem settingsVideoMode1x;
-  RadioItem settingsVideoMode2x;
-  RadioItem settingsVideoMode3x;
-  RadioItem settingsVideoMode4x;
-  RadioItem settingsVideoMode5x;
-  Separator settingsVideoModeSeparator1;
-  CheckItem settingsVideoModeAspectRatioCorrection;
-  CheckItem settingsVideoModeSmoothVideo;
-  Separator settingsVideoModeSeparator2;
-  RadioItem settingsVideoModeNTSC;
-  RadioItem settingsVideoModePAL;
-
-  Menu settingsVideoFilter;
-  RadioItem settingsVideoFilterNone;
-  Separator settingsVideoFilterSeparator;
-  RadioItem *settingsVideoFilterItem;
-  lstring settingsVideoFilterName;
-
-  Menu settingsVideoShader;
-  RadioItem settingsVideoShaderNone;
-  Separator settingsVideoShaderSeparator;
-  RadioItem *settingsVideoShaderItem;
-  lstring settingsVideoShaderName;
-
-  Separator settingsSeparator1;
-  CheckItem settingsSynchronizeVideo;
-  CheckItem settingsSynchronizeAudio;
-  CheckItem settingsMuteAudio;
-  Separator settingsSeparator2;
-  Item settingsConfiguration;
-
-  Menu tools;
-  Menu toolsStateSave;
-  Item toolsStateSave1;
-  Item toolsStateSave2;
-  Item toolsStateSave3;
-  Item toolsStateSave4;
-  Item toolsStateSave5;
-  Menu toolsStateLoad;
-  Item toolsStateLoad1;
-  Item toolsStateLoad2;
-  Item toolsStateLoad3;
-  Item toolsStateLoad4;
-  Item toolsStateLoad5;
-  Separator toolsSeparator1;
-  Item toolsCaptureScreenshot;
-  Item toolsCheatEditor;
-  Item toolsStateManager;
-  #if defined(DEBUGGER)
-  Separator toolsSeparator2;
-  Item toolsDebugger;
-  #endif
-
-  Menu help;
-  Item helpAbout;
-
+struct MainWindow : Window {
   FixedLayout layout;
   Viewport viewport;
 
-  void create();
-  void synchronize();
-  void setupFiltersAndShaders();
+  Menu cartridgeMenu;
+    Item cartridgeLoadSNES;
+    Item cartridgeLoadNES;
+    Item cartridgeLoadGameBoy;
+
+  Menu nesMenu;
+    Item nesPower;
+    Item nesReset;
+    Separator nesSeparator;
+    Item nesCartridgeUnload;
+
+  Menu snesMenu;
+    Item snesPower;
+    Item snesReset;
+    Separator snesSeparator;
+    Item snesCartridgeUnload;
+
+  Menu gameBoyMenu;
+    Item gameBoyPower;
+    Separator gameBoySeparator;
+    Item gameBoyCartridgeUnload;
+
+  Menu settingsMenu;
+    CheckItem settingsSynchronizeVideo;
+    CheckItem settingsSynchronizeAudio;
+    CheckItem settingsMuteAudio;
+
+  Menu helpMenu;
+    Item helpAbout;
+
+  MainWindow();
 };
 
-extern MainWindow mainWindow;
+extern MainWindow *mainWindow;
