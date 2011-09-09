@@ -31,16 +31,18 @@ static gboolean Window_configure(GtkWidget *widget, GdkEvent *event, Window *win
   if(gtk_widget_get_realized(window->p.widget) == false) return false;
   GdkWindow *gdkWindow = gtk_widget_get_window(widget);
 
-  //update geometry settings
   GdkRectangle border, client;
   gdk_window_get_frame_extents(gdkWindow, &border);
   gdk_window_get_geometry(gdkWindow, 0, 0, &client.width, &client.height, 0);
   gdk_window_get_origin(gdkWindow, &client.x, &client.y);
 
-  settings.frameGeometryX = client.x - border.x;
-  settings.frameGeometryY = client.y - border.y;
-  settings.frameGeometryWidth = border.width - client.width;
-  settings.frameGeometryHeight = border.height - client.height;
+  if(window->state.fullScreen == false) {
+    //update geometry settings
+    settings.frameGeometryX = client.x - border.x;
+    settings.frameGeometryY = client.y - border.y;
+    settings.frameGeometryWidth = border.width - client.width;
+    settings.frameGeometryHeight = border.height - client.height;
+  }
 
   //move
   if(event->configure.x != window->p.lastConfigure.x
@@ -167,10 +169,20 @@ void pWindow::setFullScreen(bool fullScreen) {
 }
 
 void pWindow::setGeometry(const Geometry &geometry) {
+  OS::processEvents();
+
   Geometry margin = frameMargin();
   gtk_window_move(GTK_WINDOW(widget), geometry.x - margin.x, geometry.y - margin.y);
-  gtk_window_resize(GTK_WINDOW(widget), 1, 1);
+
+//GdkGeometry geom;
+//geom.min_width = 1;
+//geom.min_height = 1;
+//gtk_window_set_geometry_hints(GTK_WINDOW(widget), GTK_WIDGET(widget), &geom, GDK_HINT_MIN_SIZE);
+
+  gtk_window_set_policy(GTK_WINDOW(widget), true, true, false);
   gtk_widget_set_size_request(formContainer, geometry.width, geometry.height);
+  gtk_window_resize(GTK_WINDOW(widget), geometry.width + margin.width, geometry.height + margin.height);
+
   foreach(layout, window.state.layout) {
     Geometry geometry = this->geometry();
     geometry.x = geometry.y = 0;

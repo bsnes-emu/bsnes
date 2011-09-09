@@ -162,8 +162,10 @@ struct Window : private nall::base_from_member<pWindow&>, Object {
 };
 
 struct Action : Object {
+  bool enabled();
   void setEnabled(bool enabled = true);
   void setVisible(bool visible = true);
+  bool visible();
 
   Action(pAction &p);
   ~Action();

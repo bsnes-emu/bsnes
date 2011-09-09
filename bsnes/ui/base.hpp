@@ -24,11 +24,11 @@ using namespace ruby;
 #include "general/general.hpp"
 
 struct Application {
+  bool quit;
+
   string title;
   string normalFont;
   string boldFont;
-
-  Timer timer;
 
   void run();
   Application(int argc, char **argv);

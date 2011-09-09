@@ -306,6 +306,10 @@ Window::~Window() {
 //Action
 //======
 
+bool Action::enabled() {
+  return state.enabled;
+}
+
 void Action::setEnabled(bool enabled) {
   state.enabled = enabled;
   return p.setEnabled(enabled);
@@ -314,6 +318,10 @@ void Action::setEnabled(bool enabled) {
 void Action::setVisible(bool visible) {
   state.visible = visible;
   return p.setVisible(visible);
+}
+
+bool Action::visible() {
+  return state.visible;
 }
 
 Action::Action(pAction &p):

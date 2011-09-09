@@ -97,6 +97,8 @@ void pWindow::setGeometry(const Geometry &geometry_) {
   setResizable(window.state.resizable);
   qtWindow->move(geometry.x - margin.x, geometry.y - margin.y);
   qtWindow->adjustSize();
+  qtWindow->setMinimumSize(1u, 1u);
+  qtContainer->setMinimumSize(1u, 1u);
 
   foreach(layout, window.state.layout) {
     geometry = geometry_;

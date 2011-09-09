@@ -1,6 +1,7 @@
 struct Utility {
   void setMode(Interface::Mode mode);
-  void resizeMainWindow();
+  void resizeMainWindow(bool shrink = false);
+  void shrinkMainWindow();
   void toggleFullScreen();
 };
 

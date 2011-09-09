@@ -29,6 +29,9 @@ struct MainWindow : Window {
     CheckItem settingsSynchronizeAudio;
     CheckItem settingsMuteAudio;
 
+  Menu toolsMenu;
+    Item toolsShrinkWindow;
+
   Menu helpMenu;
     Item helpAbout;
 

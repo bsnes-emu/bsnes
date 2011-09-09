@@ -8,6 +8,7 @@ void pWindow::append(Layout &layout) {
 }
 
 void pWindow::append(Menu &menu) {
+  menu.p.parentWindow = &window;
   updateMenu();
 }
 
@@ -192,7 +193,9 @@ void pWindow::updateMenu() {
 
   foreach(menu, window.state.menu) {
     menu.p.update(window);
-    AppendMenu(hmenu, MF_STRING | MF_POPUP, (UINT_PTR)menu.p.hmenu, utf16_t(menu.state.text));
+    if(menu.visible()) {
+      AppendMenu(hmenu, MF_STRING | MF_POPUP, (UINT_PTR)menu.p.hmenu, utf16_t(menu.state.text));
+    }
   }
 
   SetMenu(hwnd, window.state.menuVisible ? hmenu : 0);

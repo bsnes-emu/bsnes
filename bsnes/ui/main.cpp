@@ -3,12 +3,23 @@
 Application *application = 0;
 nall::DSP dspaudio;
 
-Application::Application(int argc, char **argv) {
+void Application::run() {
+  interface->input_poll();
+
+  if(interface->loaded() == false) {
+    usleep(20 * 1000);
+    return;
+  }
+
+  interface->run();
+}
+
+Application::Application(int argc, char **argv) : quit(false) {
   application = this;
   interface = new Interface;
   utility = new Utility;
 
-  title = "batch v000";
+  title = "batch";
 
   #if defined(PLATFORM_WIN)
   string videoDriver = "Direct3D", audioDriver = "XAudio2", inputDriver = "RawInput";
@@ -21,6 +32,7 @@ Application::Application(int argc, char **argv) {
   #endif
 
   mainWindow = new MainWindow;
+  fileBrowser = new FileBrowser;
   utility->setMode(Interface::Mode::None);
   mainWindow->setVisible();
 
@@ -47,28 +59,17 @@ Application::Application(int argc, char **argv) {
   input.set(Input::Handle, mainWindow->viewport.handle());
   input.init();
 
-  timer.onTimeout = { &Application::run, this };
-  timer.setInterval(0);
-  timer.setEnabled();
-
-  OS::main();
+  while(quit == false) {
+    OS::processEvents();
+    Application::run();
+  }
 }
 
 Application::~Application() {
+  delete fileBrowser;
   delete mainWindow;
   delete utility;
   delete interface;
-}
-
-void Application::run() {
-  interface->input_poll();
-
-  if(interface->loaded() == false) {
-    usleep(20 * 1000);
-    return;
-  }
-
-  interface->run();
 }
 
 int main(int argc, char **argv) {

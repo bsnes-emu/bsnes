@@ -125,7 +125,10 @@
   }
 
   inline char *getcwd(char *path) {
-    return getcwd(path, PATH_MAX);
+    auto unused = getcwd(path, PATH_MAX);
+    unsigned length = strlen(path);
+    if(path[length] != '/') strcpy(path + length, "/");
+    return path;
   }
 #endif
 

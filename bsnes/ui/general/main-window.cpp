@@ -31,6 +31,9 @@ MainWindow::MainWindow() {
     settingsSynchronizeAudio.setChecked();
     settingsMuteAudio.setText("Mute Audio");
 
+  toolsMenu.setText("Tools");
+    toolsShrinkWindow.setText("Shrink Window");
+
   helpMenu.setText("Help");
     helpAbout.setText("About ...");
 
@@ -61,6 +64,9 @@ MainWindow::MainWindow() {
     settingsMenu.append(settingsSynchronizeAudio);
     settingsMenu.append(settingsMuteAudio);
 
+  append(toolsMenu);
+    toolsMenu.append(toolsShrinkWindow);
+
   append(helpMenu);
     helpMenu.append(helpAbout);
 
@@ -74,25 +80,25 @@ MainWindow::MainWindow() {
   layout.append(viewport, { 0, 0, 512, 480 });
   append(layout);
 
-  onClose = &OS::quit;
-  onSize = { &Utility::resizeMainWindow, utility };
-
-  cartridgeLoadSNES.onTick = [&] {
-    string filename = OS::fileLoad(*this, "/media/sdb1/root/snes_roms/", "SNES images (*.sfc)");
-    if(filename == "") return;
-    interface->loadCartridgeSNES(filename);
-  };
+  onClose = [&] { application->quit = true; };
+  onSize = [&] { utility->resizeMainWindow(); };
 
   cartridgeLoadNES.onTick = [&] {
-    string filename = OS::fileLoad(*this, "/media/sdb1/root/nes_images/", "NES images (*.nes)");
-    if(filename == "") return;
-    interface->loadCartridgeNES(filename);
+    fileBrowser->open("Load NES Cartridge", { "*.nes" }, [](string filename) {
+      interface->loadCartridgeNES(filename);
+    });
+  };
+
+  cartridgeLoadSNES.onTick = [&] {
+    fileBrowser->open("Load SNES Cartridge", { "*.sfc" }, [](string filename) {
+      interface->loadCartridgeSNES(filename);
+    });
   };
 
   cartridgeLoadGameBoy.onTick = [&] {
-    string filename = OS::fileLoad(*this, "/media/sdb1/root/gameboy_images/", "Game Boy images (*.gb, *.gbc)");
-    if(filename == "") return;
-    interface->loadCartridgeGameBoy(filename);
+    fileBrowser->open("Load Game Boy Cartridge", { "*.gb", "*.gbc" }, [](string filename) {
+      interface->loadCartridgeGameBoy(filename);
+    });
   };
 
   nesPower.onTick = { &Interface::power, interface };
@@ -117,6 +123,8 @@ MainWindow::MainWindow() {
   settingsMuteAudio.onTick = [&] {
     dspaudio.setVolume(settingsMuteAudio.checked() ? 0.0 : 1.0);
   };
+
+  toolsShrinkWindow.onTick = [&] { utility->resizeMainWindow(true); };
 
   helpAbout.onTick = [&] {
     MessageWindow::information(*this, {

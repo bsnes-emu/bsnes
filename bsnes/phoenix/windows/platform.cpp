@@ -32,6 +32,7 @@
 #include "widget/viewport.cpp"
 
 static void OS_keyboardProc(HWND, UINT, WPARAM, LPARAM);
+static void OS_processDialogMessage(MSG&);
 static LRESULT CALLBACK OS_windowProc(HWND, UINT, WPARAM, LPARAM);
 
 Geometry pOS::availableGeometry() {
@@ -129,13 +130,7 @@ string pOS::folderSelect(Window &parent, const string &path) {
 void pOS::main() {
   MSG msg;
   while(GetMessage(&msg, 0, 0, 0)) {
-    if(msg.message == WM_KEYDOWN || msg.message == WM_KEYUP) {
-      OS_keyboardProc(msg.hwnd, msg.message, msg.wParam, msg.lParam);
-    }
-    if(!IsDialogMessage(GetParent(msg.hwnd) ? GetParent(msg.hwnd) : msg.hwnd, &msg)) {
-      TranslateMessage(&msg);
-      DispatchMessage(&msg);
-    }
+    OS_processDialogMessage(msg);
   }
 }
 
@@ -148,15 +143,33 @@ void pOS::processEvents() {
   while(pendingEvents()) {
     MSG msg;
     if(PeekMessage(&msg, 0, 0, 0, PM_REMOVE)) {
-      if(msg.message == WM_KEYDOWN || msg.message == WM_KEYUP) {
-        OS_keyboardProc(msg.hwnd, msg.message, msg.wParam, msg.lParam);
-      }
-      if(!IsDialogMessage(GetParent(msg.hwnd) ? GetParent(msg.hwnd) : msg.hwnd, &msg)) {
-        TranslateMessage(&msg);
-        DispatchMessage(&msg);
-      }
+      OS_processDialogMessage(msg);
     }
   }
+}
+
+void OS_processDialogMessage(MSG &msg) {
+  if(msg.message == WM_KEYDOWN || msg.message == WM_KEYUP) {
+    OS_keyboardProc(msg.hwnd, msg.message, msg.wParam, msg.lParam);
+  }
+
+  wchar_t className[256];
+  GetClassName(msg.hwnd, className, 255);
+
+  //if this HWND accepts tabs to move between controls ...
+  if(!wcscmp(className, L"BUTTON")       //Button, CheckBox, RadioBox
+  || !wcscmp(className, L"COMBOBOX")     //ComboBox
+  || !wcscmp(className, L"EDIT")         //HexEdit, LineEdit, TextEdit
+  || !wcscmp(className, L"SCROLLBAR")    //HorizontalScrollBar, VerticalScrollBar
+  || !wcscmp(className, TRACKBAR_CLASS)  //HorizontalSlider, VerticalSlider
+  || !wcscmp(className, WC_LISTVIEW)     //ListView
+  ) {
+    //... return if the message is a dialog command
+    if(IsDialogMessage(msg.hwnd, &msg)) return;
+  }
+
+  TranslateMessage(&msg);
+  DispatchMessage(&msg);
 }
 
 void pOS::quit() {

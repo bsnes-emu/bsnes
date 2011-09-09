@@ -37,7 +37,7 @@ void Utility::setMode(Interface::Mode mode) {
   resizeMainWindow();
 }
 
-void Utility::resizeMainWindow() {
+void Utility::resizeMainWindow(bool shrink) {
   Geometry geometry = mainWindow->geometry();
   unsigned width = geometry.width, height = geometry.height;
 
@@ -54,10 +54,18 @@ void Utility::resizeMainWindow() {
   width = width * maxM;
   height = height * maxM;
 
-  mainWindow->viewport.setGeometry({
-    (geometry.width - width) / 2, (geometry.height - height) / 2,
-    width, height
-  });
+  if(shrink == false) {
+    mainWindow->viewport.setGeometry({
+      (geometry.width - width) / 2, (geometry.height - height) / 2,
+      width, height
+    });
+  } else {
+    mainWindow->setGeometry({ geometry.x, geometry.y, width, height });
+    mainWindow->viewport.setGeometry({ 0, 0, width, height });
+  }
+}
+
+void Utility::shrinkMainWindow() {
 }
 
 void Utility::toggleFullScreen() {
