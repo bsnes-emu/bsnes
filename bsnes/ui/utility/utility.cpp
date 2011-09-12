@@ -49,10 +49,13 @@ void Utility::resizeMainWindow(bool shrink) {
   unsigned maxH = geometry.height / height;
   unsigned maxM = max(1u, min(maxW, maxH));
 
-  width = width * maxM;
+  width  = width  * maxM;
   height = height * maxM;
 
   if(shrink == false) {
+    if(geometry.width  < width ) width  = geometry.width;
+    if(geometry.height < height) height = geometry.height;
+
     mainWindow->viewport.setGeometry({
       (geometry.width - width) / 2, (geometry.height - height) / 2,
       width, height

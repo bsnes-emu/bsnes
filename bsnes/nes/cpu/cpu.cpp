@@ -124,7 +124,7 @@ void CPU::write(uint16 addr, uint8 data) {
 void CPU::oam_dma(uint16 addr) {
   op_readpc();
   for(unsigned n = 0; n < 256; n++) {
-    uint8 data = bus.read(addr + n);
+    uint8 data = op_read(addr + n);
     op_write(0x2004, data);
   }
 }

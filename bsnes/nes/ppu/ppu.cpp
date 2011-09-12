@@ -9,53 +9,42 @@ void PPU::Main() {
 }
 
 void PPU::main() {
-  unsigned x = 0, y = 0;
   while(true) {
-    add_clocks(4);
-
-    status.lx++;
-
-    if(status.ly >= 0 && status.ly <= 239) {
-      if(status.lx == 257) {
-        if(raster_enable()) {
-          status.vaddr = (status.vaddr & 0x7be0) | (status.taddr & 0x041f);
-        }
-      }
-    }
-
-    if(status.ly == 261 && status.lx == 304) {
-      if(raster_enable()) {
-        status.vaddr = status.taddr;
-      }
-    }
-
-    if(status.lx == 341) {
-      status.lx = 0;
-      status.ly++;
-
-      if(status.ly == 262) {
-        status.ly = 0;
-        status.nmi = 0;
-        status.sprite_zero_hit = 0;
-        system.interface->video_refresh(buffer);
-        scheduler.exit();
-      }
-
-      if(status.ly >= 0 && status.ly <= 239) {
-        render_scanline();
-      }
-
-      if(status.ly == 240) {
-        status.nmi = 1;
-        if(status.nmi_enable) cpu.status.nmi_line = true;
-      }
-    }
+    raster_scanline();
   }
 }
 
-void PPU::add_clocks(unsigned clocks) {
-  clock += clocks;
+void PPU::tick() {
+  if(++status.lx == 341) {
+    status.lx = 0;
+    scanline_edge();
+    if(++status.ly == 262) {
+      status.ly = 0;
+      frame_edge();
+    }
+  }
+
+  clock += 4;
   if(clock >= 0) co_switch(cpu.thread);
+}
+
+void PPU::tick(unsigned cycles) {
+  while(cycles--) tick();
+}
+
+void PPU::scanline_edge() {
+  if(status.ly == 241) {
+    status.nmi = 1;
+    if(status.nmi_enable) cpu.status.nmi_line = true;
+  }
+}
+
+void PPU::frame_edge() {
+  status.field ^= 1;
+  status.nmi = 0;
+  status.sprite_zero_hit = 0;
+  system.interface->video_refresh(buffer);
+  scheduler.exit();
 }
 
 void PPU::power() {
@@ -85,6 +74,7 @@ void PPU::reset() {
   create(PPU::Main, 21477272);
 
   status.mdr = 0x00;
+  status.field = 0;
   status.ly = 0;
   status.lx = 0;
   status.bus_data = 0x00;
@@ -140,7 +130,8 @@ uint8 PPU::read(uint16 addr) {
     status.address_latch = 0;
     break;
   case 4:  //OAMDATA
-    result = oam[status.oam_addr++];
+    result = oam[status.oam_addr];
+    if((status.oam_addr & 3) == 3) result &= 0xe3;
     break;
   case 7:  //PPUDATA
     if(addr >= 0x3f00) {
@@ -230,6 +221,21 @@ void PPU::cgram_write(uint16 addr, uint8 data) {
   cgram[addr & 0x1f] = data;
 }
 
+uint8 PPU::bus_read(uint16 addr) {
+  uint8 data = cartridge.chr_read(addr);
+  tick(2);
+  return data;
+}
+
+//
+
+//vaddr = 0yyy VHYY  YYYX XXXX
+//yyy = fine Yscroll (y:d0-d2)
+//V = V nametable (y:d8)
+//H = H nametable (x:d8)
+//YYYYY = Y nametable (y:d3-d7)
+//XXXXX = X nametable (x:d3-d7)
+
 bool PPU::raster_enable() const {
   return status.bg_enable || status.sprite_enable;
 }
@@ -246,7 +252,181 @@ unsigned PPU::scrolly() const {
   return (((status.vaddr >> 5) & 0x1f) << 3) | ((status.vaddr >> 12) & 7);
 }
 
-void PPU::render_scanline() {
+//
+
+void PPU::scrollx_increment() {
+  status.vaddr = (status.vaddr & 0x7fe0) | ((status.vaddr + 0x0001) & 0x001f);
+  if((status.vaddr & 0x001f) == 0x0000) {
+    status.vaddr ^= 0x0400;
+  }
+}
+
+void PPU::scrolly_increment() {
+  status.vaddr = (status.vaddr & 0x0fff) | ((status.vaddr + 0x1000) & 0x7000);
+  if((status.vaddr & 0x7000) == 0x0000) {
+    status.vaddr = (status.vaddr & 0x7c1f) | ((status.vaddr + 0x0020) & 0x03e0);
+    if((status.vaddr & 0x03e0) == 0x03c0) {  //0x03c0 == 30 << 5; 30 * 8 = 240
+      status.vaddr &= 0x7c1f;
+      status.vaddr ^= 0x0800;
+    }
+  }
+}
+
+#if 1
+
+void PPU::raster_scanline() {
+  if((status.ly >= 240 && status.ly <= 260)) {
+    return tick(341);
+  }
+
+  uint32 *output = buffer + status.ly * 256;
+  signed lx = 0, ly = (status.ly == 261 ? -1 : status.ly);
+
+  if(raster_enable() == false) {
+    while(lx < 256) output[lx++] = paletteRGB[cgram[0]];
+    tick(341);
+    return;
+  }
+
+  for(unsigned tile = 0; tile < 32; tile++) {  //  0-255
+    unsigned mask = 0x8000 >> status.xaddr;
+    for(unsigned n = 0; n < 8; n++) {
+      uint8 palette = 0;
+      palette |= (raster.tiledatalo & mask) ? 1 : 0;
+      palette |= (raster.tiledatahi & mask) ? 2 : 0;
+      if(palette) {
+        unsigned attr = raster.attribute;
+        if(mask >= 256) attr >>= 2;
+        palette |= (attr & 3) << 2;
+      }
+      mask >>= 1;
+
+      if(status.bg_edge_enable == false && lx < 8) palette = 0;
+
+      for(unsigned sprite = 0; sprite < 8; sprite++) {
+        if(status.sprite_edge_enable == false && lx < 8) continue;
+        if(raster.oam[sprite].id == 64) continue;
+
+        unsigned spritex = lx - raster.oam[sprite].x;
+        if(spritex >= 8) continue;
+
+        if(raster.oam[sprite].attr & 0x40) spritex ^= 7;
+        unsigned mask = 0x80 >> spritex;
+        unsigned sprite_palette = 0;
+        sprite_palette |= (raster.oam[sprite].tiledatalo & mask) ? 1 : 0;
+        sprite_palette |= (raster.oam[sprite].tiledatahi & mask) ? 2 : 0;
+        if(sprite_palette == 0) continue;
+
+        if(raster.oam[sprite].id == 0) status.sprite_zero_hit = 1;
+        sprite_palette |= (raster.oam[sprite].attr & 3) << 2;
+
+        if((raster.oam[sprite].attr & 0x20) == 0 || palette == 0) {
+          palette = 16 + sprite_palette;
+          break;
+        }
+      }
+
+      output[lx++] = paletteRGB[cgram[palette]];
+    }
+
+    unsigned nametable = bus_read(0x2000 | (status.vaddr & 0x1fff));
+
+    unsigned attribute = bus_read(0x23c0 | (status.vaddr & 0x0fc0) | ((scrolly() >> 5) << 3) | (scrollx() >> 5));
+    if(scrolly() & 16) attribute >>= 4;
+    if(scrollx() & 16) attribute >>= 2;
+
+    unsigned addr = status.bg_addr + (nametable << 4) + (scrolly() & 7);
+    scrollx_increment();
+    if(tile == 31) scrolly_increment();
+
+    unsigned tiledatalo = bus_read(addr + 0);
+    unsigned tiledatahi = bus_read(addr + 8);
+
+    raster.nametable = (raster.nametable << 8) | nametable;
+    raster.attribute = (raster.attribute << 2) | (attribute & 3);
+    raster.tiledatalo = (raster.tiledatalo << 8) | tiledatalo;
+    raster.tiledatahi = (raster.tiledatahi << 8) | tiledatahi;
+  }
+
+  for(unsigned n = 0; n < 8; n++) {
+    raster.oam[n].id = 64;
+    raster.oam[n].tiledatalo = 0;
+    raster.oam[n].tiledatahi = 0;
+  }
+
+  //should occur every 4 cycles during main screen rendering
+  unsigned counter = 0;
+  unsigned sprite_height = status.sprite_size ? 16 : 8;
+  if(status.sprite_enable) for(unsigned n = 0; n < 64; n++) {
+    unsigned y = ly - oam[(n * 4) + 0];
+    if(y >= sprite_height) continue;
+    if(counter == 8) {
+      status.sprite_overflow = 1;
+      break;
+    }
+
+    raster.oam[counter].id = n;
+    raster.oam[counter].y = y;
+    raster.oam[counter].tile = oam[(n * 4) + 1];
+    raster.oam[counter].attr = oam[(n * 4) + 2];
+    raster.oam[counter].x = oam[(n * 4) + 3];
+    counter++;
+  }
+
+  for(unsigned sprite = 0; sprite < 8; sprite++) {  //256-319
+    unsigned nametable = bus_read(0x2000 | (status.vaddr & 0x1fff));
+
+    if(sprite == 0) status.vaddr = (status.vaddr & 0x7be0) | (status.taddr & 0x041f);  //257
+    unsigned attribute = bus_read(0x23c0 | (status.vaddr & 0x0fc0) | ((scrolly() >> 5) << 3) | (scrollx() >> 5));
+
+    unsigned addr = (sprite_height == 8)
+    ? status.sprite_addr + raster.oam[sprite].tile * 16
+    : ((raster.oam[sprite].tile & ~1) * 16) + ((raster.oam[sprite].tile & 1) * 0x1000);
+
+    unsigned spritey = raster.oam[sprite].y;
+    if(raster.oam[sprite].attr & 0x80) spritey ^= (sprite_height - 1);
+    if(spritey & 8) spritey += 8;
+
+    raster.oam[sprite].tiledatalo = bus_read(addr + spritey + 0);
+    raster.oam[sprite].tiledatahi = bus_read(addr + spritey + 8);
+
+    if(sprite == 6 && status.ly == 261) status.vaddr = status.taddr;  //304
+  }
+
+  for(unsigned tile = 0; tile < 2; tile++) {  //320-335
+    unsigned nametable = bus_read(0x2000 | (status.vaddr & 0x1fff));
+
+    unsigned attribute = bus_read(0x23c0 | (status.vaddr & 0x0fc0) | ((scrolly() >> 5) << 3) | (scrollx() >> 5));
+    if(scrolly() & 16) attribute >>= 4;
+    if(scrollx() & 16) attribute >>= 2;
+
+    unsigned addr = status.bg_addr + (nametable << 4) + (scrolly() & 7);
+    scrollx_increment();
+
+    unsigned tiledatalo = bus_read(addr + 0);
+    unsigned tiledatahi = bus_read(addr + 8);
+
+    raster.nametable = (raster.nametable << 8) | nametable;
+    raster.attribute = (raster.attribute << 2) | (attribute & 3);
+    raster.tiledatalo = (raster.tiledatalo << 8) | tiledatalo;
+    raster.tiledatahi = (raster.tiledatahi << 8) | tiledatahi;
+  }
+
+  //336-339
+  unsigned nametable = bus_read(0x2000 | (status.vaddr & 0x1fff));
+  unsigned attribute = bus_read(0x23c0 | (status.vaddr & 0x0fc0) | ((scrolly() >> 5) << 3) | (scrollx() >> 5));
+
+  //340
+  tick();
+}
+
+#else
+
+void PPU::raster_scanline() {
+  if(raster_enable() == false || (status.ly >= 240 && status.ly <= 260)) {
+    return tick(341);
+  }
+
   uint32 *line = buffer + status.ly * 256;
 
   uint8 ioam[8][5];
@@ -265,30 +445,18 @@ void PPU::render_scanline() {
   }
 
   for(unsigned x = 0; x < 256; x++) {
-    unsigned offsetx = x + scrollx();
-    unsigned offsety = status.ly + (scrolly() < 240 ? scrolly() : 240 - scrolly());
+    uint8 tile = cartridge.chr_read(0x2000 | (status.vaddr & 0x1fff));
+    uint8 attr = cartridge.chr_read(0x23c0 | (status.vaddr & 0x0fc0) | ((scrolly() >> 5) << 3) | (scrollx() >> 5));
 
-  //if(x==0&&status.ly==64) print("Y=", offsety, "\n");
+    if(scrollx() & 16) attr >>= 2;
+    if(scrolly() & 16) attr >>= 4;
 
-    bool screenx = offsetx & 256;
-    bool screeny = offsety & 256;
+    unsigned tilex = (scrollx() + x) & 7;
 
-    offsetx &= 255;
-    offsety &= 255;
+    uint8 tdlo = cartridge.chr_read(status.bg_addr + (tile << 4) + 0 + (scrolly() & 7));
+    uint8 tdhi = cartridge.chr_read(status.bg_addr + (tile << 4) + 8 + (scrolly() & 7));
 
-    unsigned base = nametable_addr() + (screenx * 0x0400) + (screeny * 0x0800);
-
-    uint8 tile = cartridge.chr_read(base + (offsety / 8) * 32 + (offsetx / 8));
-    uint8 attr = cartridge.chr_read(base + 0x03c0 + (offsety / 32) * 8 + (offsetx / 32));
-
-    if((offsety / 16) & 1) attr >>= 4;
-    if((offsetx / 16) & 1) attr >>= 2;
-
-    unsigned tilex = offsetx & 7;
-    unsigned tiley = offsety & 7;
-
-    uint8 tdlo = cartridge.chr_read(status.bg_addr + tile * 16 + 0 + tiley);
-    uint8 tdhi = cartridge.chr_read(status.bg_addr + tile * 16 + 8 + tiley);
+    if(tilex == 7) scrollx_increment();
 
     unsigned mask = 0x80 >> tilex;
     unsigned palette = 0;
@@ -335,6 +503,21 @@ void PPU::render_scanline() {
 
     *line++ = paletteRGB[cgram[palette]];
   }
+
+  if(status.ly != 261) scrolly_increment();
+
+  tick(257);  //257
+
+  if(raster_enable()) {
+    status.vaddr = (status.vaddr & 0x7be0) | (status.taddr & 0x041f);
+  }
+
+  tick(47);  //304
+
+  if(status.ly == 261) status.vaddr = status.taddr;
+
+  tick(37);  //341
 }
+#endif
 
 }

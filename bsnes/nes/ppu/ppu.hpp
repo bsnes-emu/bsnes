@@ -1,7 +1,11 @@
 struct PPU : Processor {
   static void Main();
   void main();
-  void add_clocks(unsigned clocks);
+  void tick();
+  void tick(unsigned cycles);
+
+  void scanline_edge();
+  void frame_edge();
 
   void power();
   void reset();
@@ -15,16 +19,22 @@ struct PPU : Processor {
   uint8 cgram_read(uint16 addr);
   void cgram_write(uint16 addr, uint8 data);
 
-  void render_scanline();
+  uint8 bus_read(uint16 addr);
 
   bool raster_enable() const;
   unsigned nametable_addr() const;
   unsigned scrollx() const;
   unsigned scrolly() const;
 
+  void scrollx_increment();
+  void scrolly_increment();
+
+  void raster_scanline();
+
   struct Status {
     uint8 mdr;
 
+    bool field;
     unsigned ly;
     unsigned lx;
 
@@ -63,7 +73,25 @@ struct PPU : Processor {
     uint8 oam_addr;
   } status;
 
-  uint32 buffer[256 * 240];
+  struct Raster {
+    uint16 nametable;
+    uint16 attribute;
+    uint16 tiledatalo;
+    uint16 tiledatahi;
+
+    struct OAM {
+      uint8 id;
+      uint8 y;
+      uint8 tile;
+      uint8 attr;
+      uint8 x;
+
+      uint8 tiledatalo;
+      uint8 tiledatahi;
+    } oam[8];
+  } raster;
+
+  uint32 buffer[256 * 262];
   uint32 paletteRGB[64];
   uint8 ciram[2048];
   uint8 cgram[32];
