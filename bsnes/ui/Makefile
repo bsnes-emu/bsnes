@@ -3,7 +3,7 @@ include $(snes)/Makefile
 include $(gameboy)/Makefile
 name := batch
 
-ui_objects := ui-main ui-interface ui-utility ui-general
+ui_objects := ui-main ui-config ui-interface ui-utility ui-general
 ui_objects += phoenix ruby
 ui_objects += $(if $(call streq,$(platform),win),resource)
 
@@ -66,10 +66,11 @@ rubydef := $(foreach c,$(subst .,_,$(call strupper,$(ruby))),-D$c)
 objects := $(ui_objects) $(objects)
 objects := $(patsubst %,obj/%.o,$(objects))
 
-obj/ui-main.o: $(ui)/main.cpp $(call rwildcard,$(ui)/*.hpp) $(call rwildcard,$(ui)/*)
-obj/ui-interface.o: $(ui)/interface/interface.cpp $(call rwildcard,$(ui)/*.hpp) $(call rwildcard,$(ui)/interface/*)
-obj/ui-utility.o: $(ui)/utility/utility.cpp $(call rwildcard,$(ui)/*.hpp) $(call rwildcard,$(ui)/utility/*)
-obj/ui-general.o: $(ui)/general/general.cpp $(call rwildcard,$(ui)/*.hpp) $(call rwildcard,$(ui)/general/*)
+obj/ui-main.o: $(ui)/main.cpp $(call rwildcard,$(ui)/)
+obj/ui-config.o: $(ui)/config/config.cpp $(call rwildcard,$(ui)/)
+obj/ui-interface.o: $(ui)/interface/interface.cpp $(call rwildcard,$(ui)/)
+obj/ui-utility.o: $(ui)/utility/utility.cpp $(call rwildcard,$(ui)/)
+obj/ui-general.o: $(ui)/general/general.cpp $(call rwildcard,$(ui)/)
 
 obj/ruby.o: ruby/ruby.cpp $(call rwildcard,ruby/*)
 	$(call compile,$(rubydef) $(rubyflags))

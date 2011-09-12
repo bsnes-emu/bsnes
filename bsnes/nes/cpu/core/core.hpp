@@ -13,6 +13,7 @@ struct Flags {
 };
 
 struct Registers {
+  uint8  mdr;
   uint16 pc;
   uint8  a, x, y, s;
   Flags  p;
@@ -28,6 +29,12 @@ struct Register16 {
 uint8 rd;
 uint8 zp;
 uint16 aa;
+
+//interrupt.cpp
+void interrupt();
+void interrupt_test();
+void set_nmi_line(bool);
+void set_irq_line(bool);
 
 //opcodes.cpp
 void opf_asl();
@@ -94,6 +101,7 @@ void op_plp();
 void op_rti();
 void op_rts();
 
+void opill_arr_immediate();
 void opill_nop_absolute();
 void opill_nop_absolute_x();
 void opill_nop_immediate();

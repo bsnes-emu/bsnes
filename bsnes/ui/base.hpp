@@ -19,12 +19,16 @@ using namespace phoenix;
 #include <ruby/ruby.hpp>
 using namespace ruby;
 
+#include "config/config.hpp"
 #include "interface/interface.hpp"
 #include "utility/utility.hpp"
 #include "general/general.hpp"
 
 struct Application {
   bool quit;
+
+  string realpath;
+  string userpath;
 
   string title;
   string normalFont;

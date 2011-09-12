@@ -11,6 +11,7 @@ void System::run() {
 void System::power() {
   cartridge.power();
   cpu.power();
+  apu.power();
   ppu.power();
   scheduler.power();
 }
@@ -18,6 +19,7 @@ void System::power() {
 void System::reset() {
   cartridge.reset();
   cpu.reset();
+  apu.reset();
   ppu.reset();
   scheduler.reset();
 }

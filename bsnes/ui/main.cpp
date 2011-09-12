@@ -16,6 +16,14 @@ void Application::run() {
 
 Application::Application(int argc, char **argv) : quit(false) {
   application = this;
+  {
+    char path[PATH_MAX];
+    auto unused = ::realpath(argv[0], path);
+    realpath = path;
+    unused = ::userpath(path);
+    userpath = path;
+  }
+  config = new Config;
   interface = new Interface;
   utility = new Utility;
 
@@ -59,6 +67,8 @@ Application::Application(int argc, char **argv) : quit(false) {
   input.set(Input::Handle, mainWindow->viewport.handle());
   input.init();
 
+  if(argc == 2) interface->loadCartridge(argv[1]);
+
   while(quit == false) {
     OS::processEvents();
     Application::run();
@@ -70,6 +80,7 @@ Application::~Application() {
   delete mainWindow;
   delete utility;
   delete interface;
+  delete config;
 }
 
 int main(int argc, char **argv) {

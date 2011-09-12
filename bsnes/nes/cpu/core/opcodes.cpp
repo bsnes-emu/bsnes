@@ -1,6 +1,3 @@
-#define call(op) (this->*op)()
-#define L
-
 //opcode functions
 //================
 
@@ -280,7 +277,7 @@ void CPU::opi_rmw_absolute() {
   abs.l = op_readpci();
   abs.h = op_readpci();
   rd = op_read(abs.w);
-  op_readpc();
+  op_write(abs.w, rd);
   call(op);
 L op_write(abs.w, rd);
 }
@@ -291,7 +288,7 @@ void CPU::opi_rmw_absolute_x() {
   abs.h = op_readpci();
   op_readpc();
   rd = op_read(abs.w + regs.x);
-  op_readpc();
+  op_write(abs.w + regs.x, rd);
   call(op);
 L op_write(abs.w + regs.x, rd);
 }
@@ -300,8 +297,8 @@ template<void (CPU::*op)()>
 void CPU::opi_rmw_zero_page() {
   zp = op_readpci();
   rd = op_read(zp);
+  op_write(zp, rd);
   call(op);
-  op_readpc();
 L op_write(zp, rd);
 }
 
@@ -310,8 +307,8 @@ void CPU::opi_rmw_zero_page_x() {
   zp = op_readpci();
   op_readpc();
   rd = op_readdp(zp + regs.x);
+  op_writedp(zp + regs.x, rd);
   call(op);
-  op_readpc();
 L op_writedp(zp + regs.x, rd);
 }
 
@@ -398,7 +395,7 @@ void CPU::op_brk() {
   abs.l = op_read(0xfffe);
   regs.p.i = 1;
   regs.p.d = 0;
-  abs.h = op_read(0xffff);
+L abs.h = op_read(0xffff);
   regs.pc = abs.w;
 }
 
@@ -462,6 +459,16 @@ L op_readpc();
 //illegal opcodes
 //===============
 
+void CPU::opill_arr_immediate() {
+L rd = op_readpci();
+  regs.a &= rd;
+  regs.a = (regs.p.c << 7) | (regs.a >> 1);
+  regs.p.n = (regs.a & 0x80);
+  regs.p.z = (regs.a == 0);
+  regs.p.c = (regs.a & 0x40);
+  regs.p.v = regs.p.c ^ ((regs.a >> 5) & 1);
+}
+
 void CPU::opill_nop_absolute() {
   abs.l = op_readpci();
   abs.h = op_readpci();
@@ -493,6 +500,3 @@ void CPU::opill_nop_zero_page_x() {
   op_readpc();
 L op_readpc();
 }
-
-#undef call
-#undef L

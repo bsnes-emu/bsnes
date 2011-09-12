@@ -12,17 +12,18 @@ Bus bus;
 //$4018-ffff = Cartridge
 
 uint8 Bus::read(uint16 addr) {
+  uint8 data = cartridge.prg_read(addr);
   if(addr <= 0x1fff) return cpu.ram_read(addr);
   if(addr <= 0x3fff) return ppu.read(addr);
   if(addr <= 0x4017) return cpu.read(addr);
-  return cartridge.prg_read(addr);
+  return data;
 }
 
 void Bus::write(uint16 addr, uint8 data) {
+  cartridge.prg_write(addr, data);
   if(addr <= 0x1fff) return cpu.ram_write(addr, data);
   if(addr <= 0x3fff) return ppu.write(addr, data);
   if(addr <= 0x4017) return cpu.write(addr, data);
-  return cartridge.prg_write(addr, data);
 }
 
 }

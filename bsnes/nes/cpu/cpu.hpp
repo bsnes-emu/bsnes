@@ -4,6 +4,8 @@ struct CPU : Processor {
   uint8 ram[0x0800];
 
   struct Status {
+    bool interrupt_pending;
+    bool nmi_pending;
     bool nmi_line;
     bool irq_line;
 
@@ -15,10 +17,11 @@ struct CPU : Processor {
   static void Main();
   void main();
   void add_clocks(unsigned clocks);
-  void interrupt(uint16 vector);
 
   void power();
   void reset();
+
+  uint8 mdr() const;
 
   uint8 ram_read(uint16 addr);
   void ram_write(uint16 addr, uint8 data);

@@ -3,6 +3,6 @@ struct InterfaceNES : NES::Interface {
   void unloadCartridge();
 
   void video_refresh(const uint32_t *data);
-  void audio_sample(int16_t lsample, int16_t rsample);
+  void audio_sample(int16_t sample);
   int16_t input_poll(bool port, unsigned device, unsigned id);
 };

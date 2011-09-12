@@ -78,6 +78,7 @@ void CPU::op_exec() {
     case 0x68: return opi_pull(regs.a);
     case 0x69: return opi_read_immediate<&CPU::opf_adc>();
     case 0x6a: return opi_shift<&CPU::opf_rra>();
+  I case 0x6b: return opill_arr_immediate();
     case 0x6c: return op_jmp_indirect_absolute();
     case 0x6d: return opi_read_absolute<&CPU::opf_adc>();
     case 0x6e: return opi_rmw_absolute<&CPU::opf_ror>();
@@ -168,6 +169,7 @@ void CPU::op_exec() {
     case 0xe8: return opi_increment(regs.x);
     case 0xe9: return opi_read_immediate<&CPU::opf_sbc>();
     case 0xea: return op_nop();
+  I case 0xeb: return opi_read_immediate<&CPU::opf_sbc>();
     case 0xec: return opi_read_absolute<&CPU::opf_cpx>();
     case 0xed: return opi_read_absolute<&CPU::opf_sbc>();
     case 0xee: return opi_rmw_absolute<&CPU::opf_inc>();

@@ -2,29 +2,6 @@
 
 namespace NES {
 
-namespace Mapper {
-  unsigned Mapper::mirror(unsigned addr, unsigned size) const {
-    unsigned base = 0;
-    if(size) {
-      unsigned mask = 1 << 23;
-      while(addr >= size) {
-        while(!(addr & mask)) mask >>= 1;
-        addr -= mask;
-        if(size > mask) {
-          size -= mask;
-          base += mask;
-        }
-        mask >>= 1;
-      }
-      base += addr;
-    }
-    return base;
-  }
-
-  #include "none/none.cpp"
-  #include "mmc1/mmc1.cpp"
-}
-
 Cartridge cartridge;
 
 void Cartridge::load(const string &xml, const uint8_t *data, unsigned size) {
@@ -52,8 +29,10 @@ void Cartridge::load(const string &xml, const uint8_t *data, unsigned size) {
 
   uint8 mapperNumber = ((data[7] >> 4) << 4) | (data[6] >> 4);
   switch(mapperNumber) {
-  default:   mapper = &mapperNone; break;
-  case 0x01: mapper = &mapperMMC1; break;
+  default : mapper = &Mapper::none; break;
+  case   1: mapper = &Mapper::mmc1; break;
+  case   7: mapper = &Mapper::sn74hc161n; break;
+  case  16: mapper = &Mapper::lz93d50; break;
   }
 
   loaded = true;
@@ -95,6 +74,14 @@ uint8 Cartridge::chr_read(uint16 addr) {
 
 void Cartridge::chr_write(uint16 addr, uint8 data) {
   return mapper->chr_write(addr, data);
+}
+
+uint8 Cartridge::ciram_read(uint13 addr) {
+  return mapper->ciram_read(addr);
+}
+
+void Cartridge::ciram_write(uint13 addr, uint8 data) {
+  return mapper->ciram_write(addr, data);
 }
 
 }

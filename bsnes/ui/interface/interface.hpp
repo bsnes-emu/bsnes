@@ -8,6 +8,7 @@ struct Interface : property<Interface> {
 
   bool loaded();
 
+  bool loadCartridge(const string &filename);
   bool loadCartridgeNES(const string &filename);
   bool loadCartridgeSNES(const string &filename);
   bool loadCartridgeGameBoy(const string &filename);

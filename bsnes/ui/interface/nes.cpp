@@ -36,7 +36,13 @@ void InterfaceNES::video_refresh(const uint32_t *data) {
   }
 }
 
-void InterfaceNES::audio_sample(int16_t lsample, int16_t rsample) {
+void InterfaceNES::audio_sample(int16_t sample) {
+  dspaudio.sample(sample, sample);
+  while(dspaudio.pending()) {
+    signed lsample, rsample;
+    dspaudio.read(lsample, rsample);
+    audio.sample(lsample, rsample);
+  }
 }
 
 int16_t InterfaceNES::input_poll(bool port, unsigned device, unsigned id) {

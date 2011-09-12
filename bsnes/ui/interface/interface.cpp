@@ -13,6 +13,14 @@ bool Interface::loaded() {
   }
 }
 
+bool Interface::loadCartridge(const string &filename) {
+  if(filename.endswith(".nes")) return loadCartridgeNES(filename);
+  if(filename.endswith(".sfc")) return loadCartridgeSNES(filename);
+  if(filename.endswith(".gb" )) return loadCartridgeGameBoy(filename);
+  if(filename.endswith(".gbc")) return loadCartridgeGameBoy(filename);
+  return true;
+}
+
 bool Interface::loadCartridgeNES(const string &filename) {
   if(nes.loadCartridge(filename) == false) return false;
   utility->setMode(mode = Mode::NES);

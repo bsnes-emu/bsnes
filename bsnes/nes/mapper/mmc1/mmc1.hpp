@@ -5,18 +5,23 @@ struct MMC1 : Mapper {
   uint8 chr_read(uint16 addr);
   void chr_write(uint16 addr, uint8 data);
 
+  uint8 ciram_read(uint13 addr);
+  void ciram_write(uint13 addr, uint8 data);
+
   void power();
   void reset();
 
 private:
   uint8 prg_ram[8192];
   uint8 r[4];
+  bool prg_ex_select;
   unsigned shiftaddr;
   unsigned shiftdata;
 
   unsigned ciram_addr(unsigned addr) const;
   bool prg_mode() const;
-  unsigned prg_addr() const;
+  bool prg_size() const;
+  unsigned prg_addr(bool region) const;
   bool chr_mode() const;
   unsigned chr_banklo() const;
   unsigned chr_bankhi() const;
@@ -26,3 +31,5 @@ private:
   uint8& prg_data(unsigned addr);
   uint8& chr_data(unsigned addr);
 };
+
+extern MMC1 mmc1;

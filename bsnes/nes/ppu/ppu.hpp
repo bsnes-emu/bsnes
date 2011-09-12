@@ -2,7 +2,6 @@ struct PPU : Processor {
   static void Main();
   void main();
   void tick();
-  void tick(unsigned cycles);
 
   void scanline_edge();
   void frame_edge();
@@ -19,13 +18,12 @@ struct PPU : Processor {
   uint8 cgram_read(uint16 addr);
   void cgram_write(uint16 addr, uint8 data);
 
-  uint8 bus_read(uint16 addr);
-
   bool raster_enable() const;
   unsigned nametable_addr() const;
   unsigned scrollx() const;
   unsigned scrolly() const;
 
+  void ly_increment();
   void scrollx_increment();
   void scrolly_increment();
 
@@ -36,7 +34,6 @@ struct PPU : Processor {
 
     bool field;
     unsigned ly;
-    unsigned lx;
 
     uint8 bus_data;
 

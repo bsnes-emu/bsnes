@@ -30,6 +30,9 @@ namespace nall {
 
     inline uint_t() : data(0) {}
     inline uint_t(const unsigned i) : data(uclip<bits>(i)) {}
+
+    template<int s> inline unsigned operator=(const uint_t<s> &i) { return data = uclip<bits>((unsigned)i); }
+    template<int s> inline uint_t(const uint_t<s> &i) : data(uclip<bits>(i)) {}
   };
 
   template<unsigned bits> class int_t {
