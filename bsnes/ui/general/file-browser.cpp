@@ -40,6 +40,7 @@ FileBrowser::FileBrowser() {
 
   char path[PATH_MAX];
   auto unused = getcwd(path);
+  strcpy(path, "/media/sdb1/root/nes_images/");
   setPath(path);
 }
 

@@ -31,6 +31,7 @@ struct MainWindow : Window {
 
   Menu toolsMenu;
     Item toolsShrinkWindow;
+    CheckItem toolsTest;
 
   Menu helpMenu;
     Item helpAbout;

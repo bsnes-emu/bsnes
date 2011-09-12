@@ -185,8 +185,8 @@ string CPU::disassemble() {
 
   output.append(
     "A:", hex<2>(regs.a), " X:", hex<2>(regs.x), " Y:", hex<2>(regs.y), " S:", hex<2>(regs.s), " ",
-    regs.p.n ? "N" : "n", regs.p.v ? "V" : "v", regs.p.p ? "P" : "p", regs.p.b ? "B" : "b",
-    regs.p.d ? "D" : "d", regs.p.i ? "I" : "i", regs.p.z ? "Z" : "z", regs.p.c ? "C" : "c"
+    regs.p.n ? "N" : "n", regs.p.v ? "V" : "v", regs.p.d ? "D" : "d",
+    regs.p.i ? "I" : "i", regs.p.z ? "Z" : "z", regs.p.c ? "C" : "c"
   );
 
   return output;

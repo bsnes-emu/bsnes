@@ -188,12 +188,15 @@ L op_readpc();
 }
 
 void CPU::opi_pull(uint8 &r) {
+  op_readpc();
+  op_readpc();
 L r = op_readsp();
   regs.p.n = (r & 0x80);
   regs.p.z = (r == 0);
 }
 
 void CPU::opi_push(uint8 &r) {
+  op_readpc();
 L op_writesp(r);
 }
 
@@ -277,6 +280,7 @@ void CPU::opi_rmw_absolute() {
   abs.l = op_readpci();
   abs.h = op_readpci();
   rd = op_read(abs.w);
+  op_readpc();
   call(op);
 L op_write(abs.w, rd);
 }
@@ -285,8 +289,9 @@ template<void (CPU::*op)()>
 void CPU::opi_rmw_absolute_x() {
   abs.l = op_readpci();
   abs.h = op_readpci();
-  op_page(abs.w, abs.w + regs.x);
+  op_readpc();
   rd = op_read(abs.w + regs.x);
+  op_readpc();
   call(op);
 L op_write(abs.w + regs.x, rd);
 }
@@ -387,7 +392,14 @@ L op_readpc();
 
 void CPU::op_brk() {
   op_readpci();
-  interrupt(0xfffe);
+  op_writesp(regs.pc >> 8);
+  op_writesp(regs.pc >> 0);
+  op_writesp(regs.p | 0x30);
+  abs.l = op_read(0xfffe);
+  regs.p.i = 1;
+  regs.p.d = 0;
+  abs.h = op_read(0xffff);
+  regs.pc = abs.w;
 }
 
 void CPU::op_jmp_absolute() {
@@ -407,6 +419,7 @@ L iabs.h = op_read(abs.w); abs.l++;
 void CPU::op_jsr_absolute() {
   abs.l = op_readpci();
   abs.h = op_readpci();
+  op_readpc();
   regs.pc--;
   op_writesp(regs.pc >> 8);
 L op_writesp(regs.pc >> 0);
@@ -418,17 +431,20 @@ L op_readpc();
 }
 
 void CPU::op_php() {
-L op_writesp(regs.p);
+  op_readpc();
+L op_writesp(regs.p | 0x30);
 }
 
 void CPU::op_plp() {
-L regs.p = op_readsp() | 0x30;
+  op_readpc();
+  op_readpc();
+L regs.p = op_readsp();
 }
 
 void CPU::op_rti() {
   op_readpc();
   op_readpc();
-  regs.p = op_readsp() | 0x30;
+  regs.p = op_readsp();
   abs.l = op_readsp();
 L abs.h = op_readsp();
   regs.pc = abs.w;
@@ -441,6 +457,41 @@ void CPU::op_rts() {
   abs.h = op_readsp();
 L op_readpc();
   regs.pc = ++abs.w;
+}
+
+//illegal opcodes
+//===============
+
+void CPU::opill_nop_absolute() {
+  abs.l = op_readpci();
+  abs.h = op_readpci();
+L op_readpc();
+}
+
+void CPU::opill_nop_absolute_x() {
+  abs.l = op_readpci();
+  abs.h = op_readpci();
+  op_page(abs.w, abs.w + regs.x);
+L op_readpc();
+}
+
+void CPU::opill_nop_immediate() {
+L rd = op_readpc();
+}
+
+void CPU::opill_nop_implied() {
+L op_readpc();
+}
+
+void CPU::opill_nop_zero_page() {
+  zp = op_readpci();
+L op_readpc();
+}
+
+void CPU::opill_nop_zero_page_x() {
+  zp = op_readpci();
+  op_readpc();
+L op_readpc();
 }
 
 #undef call

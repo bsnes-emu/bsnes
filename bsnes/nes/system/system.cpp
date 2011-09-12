@@ -9,12 +9,14 @@ void System::run() {
 }
 
 void System::power() {
+  cartridge.power();
   cpu.power();
   ppu.power();
   scheduler.power();
 }
 
 void System::reset() {
+  cartridge.reset();
   cpu.reset();
   ppu.reset();
   scheduler.reset();

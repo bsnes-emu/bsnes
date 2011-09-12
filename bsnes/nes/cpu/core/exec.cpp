@@ -1,21 +1,29 @@
+//I = illegal instruction (only used as a visual indicator)
+#define I
+
 void CPU::op_exec() {
   uint8 opcode = op_readpci();
   switch(opcode) {
     case 0x00: return op_brk();
     case 0x01: return opi_read_indirect_zero_page_x<&CPU::opf_ora>();
+  I case 0x04: return opill_nop_zero_page();
     case 0x05: return opi_read_zero_page<&CPU::opf_ora>();
     case 0x06: return opi_rmw_zero_page<&CPU::opf_asl>();
     case 0x08: return op_php();
     case 0x09: return opi_read_immediate<&CPU::opf_ora>();
     case 0x0a: return opi_shift<&CPU::opf_sla>();
+  I case 0x0c: return opill_nop_absolute();
     case 0x0d: return opi_read_absolute<&CPU::opf_ora>();
     case 0x0e: return opi_rmw_absolute<&CPU::opf_asl>();
     case 0x10: return opi_branch(regs.p.n == 0);
     case 0x11: return opi_read_indirect_zero_page_y<&CPU::opf_ora>();
+  I case 0x14: return opill_nop_zero_page_x();
     case 0x15: return opi_read_zero_page_x<&CPU::opf_ora>();
     case 0x16: return opi_rmw_zero_page_x<&CPU::opf_asl>();
     case 0x18: return opi_clear_flag(regs.p.c);
     case 0x19: return opi_read_absolute_y<&CPU::opf_ora>();
+  I case 0x1a: return opill_nop_implied();
+  I case 0x1c: return opill_nop_absolute_x();
     case 0x1d: return opi_read_absolute_x<&CPU::opf_ora>();
     case 0x1e: return opi_rmw_absolute_x<&CPU::opf_asl>();
     case 0x20: return op_jsr_absolute();
@@ -31,14 +39,18 @@ void CPU::op_exec() {
     case 0x2e: return opi_rmw_absolute<&CPU::opf_rol>();
     case 0x30: return opi_branch(regs.p.n == 1);
     case 0x31: return opi_read_indirect_zero_page_y<&CPU::opf_and>();
+  I case 0x34: return opill_nop_zero_page_x();
     case 0x35: return opi_read_zero_page_x<&CPU::opf_and>();
     case 0x36: return opi_rmw_zero_page_x<&CPU::opf_rol>();
     case 0x38: return opi_set_flag(regs.p.c);
     case 0x39: return opi_read_absolute_y<&CPU::opf_and>();
+  I case 0x3a: return opill_nop_implied();
+  I case 0x3c: return opill_nop_absolute_x();
     case 0x3d: return opi_read_absolute_x<&CPU::opf_and>();
     case 0x3e: return opi_rmw_absolute_x<&CPU::opf_rol>();
     case 0x40: return op_rti();
     case 0x41: return opi_read_indirect_zero_page_x<&CPU::opf_eor>();
+  I case 0x44: return opill_nop_zero_page();
     case 0x45: return opi_read_zero_page<&CPU::opf_eor>();
     case 0x46: return opi_rmw_zero_page<&CPU::opf_lsr>();
     case 0x48: return opi_push(regs.a);
@@ -49,15 +61,18 @@ void CPU::op_exec() {
     case 0x4e: return opi_rmw_absolute<&CPU::opf_lsr>();
     case 0x50: return opi_branch(regs.p.v == 0);
     case 0x51: return opi_read_indirect_zero_page_y<&CPU::opf_eor>();
+  I case 0x54: return opill_nop_zero_page_x();
     case 0x55: return opi_read_zero_page_x<&CPU::opf_eor>();
     case 0x56: return opi_rmw_zero_page_x<&CPU::opf_lsr>();
     case 0x58: return opi_clear_flag(regs.p.i);
     case 0x59: return opi_read_absolute_y<&CPU::opf_eor>();
-    case 0x5a: return opi_push(regs.y);
+  I case 0x5a: return opill_nop_implied();
+  I case 0x5c: return opill_nop_absolute_x();
     case 0x5d: return opi_read_absolute_x<&CPU::opf_eor>();
     case 0x5e: return opi_rmw_absolute_x<&CPU::opf_lsr>();
     case 0x60: return op_rts();
     case 0x61: return opi_read_indirect_zero_page_x<&CPU::opf_adc>();
+  I case 0x64: return opill_nop_zero_page();
     case 0x65: return opi_read_zero_page<&CPU::opf_adc>();
     case 0x66: return opi_rmw_zero_page<&CPU::opf_ror>();
     case 0x68: return opi_pull(regs.a);
@@ -67,19 +82,24 @@ void CPU::op_exec() {
     case 0x6d: return opi_read_absolute<&CPU::opf_adc>();
     case 0x6e: return opi_rmw_absolute<&CPU::opf_ror>();
     case 0x70: return opi_branch(regs.p.v == 1);
+  I case 0x74: return opill_nop_zero_page_x();
     case 0x71: return opi_read_indirect_zero_page_y<&CPU::opf_adc>();
     case 0x75: return opi_read_zero_page_x<&CPU::opf_adc>();
     case 0x76: return opi_rmw_zero_page_x<&CPU::opf_ror>();
     case 0x78: return opi_set_flag(regs.p.i);
     case 0x79: return opi_read_absolute_y<&CPU::opf_adc>();
-    case 0x7a: return opi_pull(regs.y);
+  I case 0x7a: return opill_nop_implied();
+  I case 0x7c: return opill_nop_absolute_x();
     case 0x7d: return opi_read_absolute_x<&CPU::opf_adc>();
     case 0x7e: return opi_rmw_absolute_x<&CPU::opf_ror>();
+  I case 0x80: return opill_nop_absolute();
     case 0x81: return opi_store_indirect_zero_page_x(regs.a);
+  I case 0x82: return opill_nop_immediate();
     case 0x84: return opi_store_zero_page(regs.y);
     case 0x85: return opi_store_zero_page(regs.a);
     case 0x86: return opi_store_zero_page(regs.x);
     case 0x88: return opi_decrement(regs.y);
+  I case 0x89: return opill_nop_immediate();
     case 0x8a: return opi_transfer(regs.x, regs.a, 1);
     case 0x8c: return opi_store_absolute(regs.y);
     case 0x8d: return opi_store_absolute(regs.a);
@@ -118,6 +138,7 @@ void CPU::op_exec() {
     case 0xbe: return opi_read_absolute_y<&CPU::opf_ldx>();
     case 0xc0: return opi_read_immediate<&CPU::opf_cpy>();
     case 0xc1: return opi_read_indirect_zero_page_x<&CPU::opf_cmp>();
+  I case 0xc2: return opill_nop_immediate();
     case 0xc4: return opi_read_zero_page<&CPU::opf_cpy>();
     case 0xc5: return opi_read_zero_page<&CPU::opf_cmp>();
     case 0xc6: return opi_rmw_zero_page<&CPU::opf_dec>();
@@ -129,15 +150,18 @@ void CPU::op_exec() {
     case 0xce: return opi_rmw_absolute<&CPU::opf_dec>();
     case 0xd0: return opi_branch(regs.p.z == 0);
     case 0xd1: return opi_read_indirect_zero_page_y<&CPU::opf_cmp>();
+  I case 0xd4: return opill_nop_zero_page_x();
     case 0xd5: return opi_read_zero_page_x<&CPU::opf_cmp>();
     case 0xd6: return opi_rmw_zero_page_x<&CPU::opf_dec>();
     case 0xd8: return opi_clear_flag(regs.p.d);
     case 0xd9: return opi_read_absolute_y<&CPU::opf_cmp>();
-    case 0xda: return opi_push(regs.x);
+  I case 0xda: return opill_nop_implied();
+  I case 0xdc: return opill_nop_absolute_x();
     case 0xdd: return opi_read_absolute_x<&CPU::opf_cmp>();
     case 0xde: return opi_rmw_absolute_x<&CPU::opf_dec>();
     case 0xe0: return opi_read_immediate<&CPU::opf_cpx>();
     case 0xe1: return opi_read_indirect_zero_page_x<&CPU::opf_sbc>();
+  I case 0xe2: return opill_nop_immediate();
     case 0xe4: return opi_read_zero_page<&CPU::opf_cpx>();
     case 0xe5: return opi_read_zero_page<&CPU::opf_sbc>();
     case 0xe6: return opi_rmw_zero_page<&CPU::opf_inc>();
@@ -149,19 +173,23 @@ void CPU::op_exec() {
     case 0xee: return opi_rmw_absolute<&CPU::opf_inc>();
     case 0xf0: return opi_branch(regs.p.z == 1);
     case 0xf1: return opi_read_indirect_zero_page_y<&CPU::opf_sbc>();
+  I case 0xf4: return opill_nop_zero_page_x();
     case 0xf5: return opi_read_zero_page_x<&CPU::opf_sbc>();
     case 0xf6: return opi_rmw_zero_page_x<&CPU::opf_inc>();
     case 0xf8: return opi_set_flag(regs.p.d);
     case 0xf9: return opi_read_absolute_y<&CPU::opf_sbc>();
-    case 0xfa: return opi_pull(regs.x);
+  I case 0xfa: return opill_nop_implied();
+  I case 0xfc: return opill_nop_absolute_x();
     case 0xfd: return opi_read_absolute_x<&CPU::opf_sbc>();
     case 0xfe: return opi_rmw_absolute_x<&CPU::opf_inc>();
   }
 
-  return op_nop();
+//return op_nop();
 
   regs.pc--;
   print("Unimplemented opcode: ", hex<4>(regs.pc), " = ", hex<2>(bus.read(regs.pc)), "\n");
   print("Counter = ", opcodeCounter, "\n");
   while(true) scheduler.exit();
 }
+
+#undef I

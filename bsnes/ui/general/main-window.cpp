@@ -33,6 +33,7 @@ MainWindow::MainWindow() {
 
   toolsMenu.setText("Tools");
     toolsShrinkWindow.setText("Shrink Window");
+    toolsTest.setText("Test");
 
   helpMenu.setText("Help");
     helpAbout.setText("About ...");
@@ -66,6 +67,7 @@ MainWindow::MainWindow() {
 
   append(toolsMenu);
     toolsMenu.append(toolsShrinkWindow);
+    toolsMenu.append(toolsTest);
 
   append(helpMenu);
     helpMenu.append(helpAbout);
@@ -125,6 +127,10 @@ MainWindow::MainWindow() {
   };
 
   toolsShrinkWindow.onTick = [&] { utility->resizeMainWindow(true); };
+
+  toolsTest.onTick = [&] {
+    NES::cpu.trace = toolsTest.checked();
+  };
 
   helpAbout.onTick = [&] {
     MessageWindow::information(*this, {

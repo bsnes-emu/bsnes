@@ -9,8 +9,11 @@ struct PPU : Processor {
   uint8 read(uint16 addr);
   void write(uint16 addr, uint8 data);
 
-  uint8 bus_read(uint16 addr);
-  void bus_write(uint16 addr, uint8 data);
+  uint8 ciram_read(uint16 addr);
+  void ciram_write(uint16 addr, uint8 data);
+
+  uint8 cgram_read(uint16 addr);
+  void cgram_write(uint16 addr, uint8 data);
 
   void render_scanline();
 
@@ -62,9 +65,9 @@ struct PPU : Processor {
 
   uint32 buffer[256 * 240];
   uint32 paletteRGB[64];
-  uint8 nram[2048];
-  uint8 pram[32];
-  uint8 sram[256];
+  uint8 ciram[2048];
+  uint8 cgram[32];
+  uint8 oam[256];
 };
 
 extern PPU ppu;

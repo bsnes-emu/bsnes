@@ -5,14 +5,12 @@ void Utility::setMode(Interface::Mode mode) {
   video.clear();
   audio.clear();
 
-  mainWindow->cartridgeMenu.setVisible(false);
   mainWindow->nesMenu.setVisible(false);
   mainWindow->snesMenu.setVisible(false);
   mainWindow->gameBoyMenu.setVisible(false);
 
   if(mode == Interface::Mode::None) {
     mainWindow->setTitle(application->title);
-    mainWindow->cartridgeMenu.setVisible(true);
     mainWindow->setStatusText("No cartridge loaded");
   }
 

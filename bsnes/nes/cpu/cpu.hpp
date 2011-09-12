@@ -27,6 +27,8 @@ struct CPU : Processor {
   void write(uint16 addr, uint8 data);
 
   void oam_dma(uint16 addr);
+
+bool trace;
 };
 
 extern CPU cpu;

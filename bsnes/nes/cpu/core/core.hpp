@@ -1,13 +1,12 @@
 struct Flags {
-  bool n, v, p, b, d, i, z, c;
+  bool n, v, d, i, z, c;
 
   inline operator unsigned() {
-    return (n << 7) | (v << 6) | (p << 5) | (b << 4)
-         | (d << 3) | (i << 2) | (z << 1) | (c << 0);
+    return (n << 7) | (v << 6) | (d << 3) | (i << 2) | (z << 1) | (c << 0);
   }
 
   inline Flags& operator=(uint8 data) {
-    n = data & 0x80; v = data & 0x40; p = data & 0x20; b = data & 0x10;
+    n = data & 0x80; v = data & 0x40;
     d = data & 0x08; i = data & 0x04; z = data & 0x02; c = data & 0x01;
     return *this;
   }
@@ -94,6 +93,13 @@ void op_php();
 void op_plp();
 void op_rti();
 void op_rts();
+
+void opill_nop_absolute();
+void opill_nop_absolute_x();
+void opill_nop_immediate();
+void opill_nop_implied();
+void opill_nop_zero_page();
+void opill_nop_zero_page_x();
 
 //exec.cpp
 void op_exec();

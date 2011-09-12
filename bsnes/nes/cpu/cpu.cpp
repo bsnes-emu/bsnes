@@ -29,8 +29,10 @@ void CPU::main() {
       continue;
     }
 
-//  if(lpc != regs.pc) { print(disassemble(), "\n"); } lpc = regs.pc;
-//  if(lpc != regs.pc) { fprintf(fp, "%s\n", (const char*)disassemble()); fflush(fp); } lpc = regs.pc;
+  if(trace) {
+    if(lpc != regs.pc) { print(disassemble(), "\n"); } lpc = regs.pc;
+  //if(lpc != regs.pc) { fprintf(fp, "%s\n", (const char*)disassemble()); fflush(fp); } lpc = regs.pc;
+  }
 
     op_exec();
     opcodeCounter++;
@@ -45,7 +47,7 @@ void CPU::add_clocks(unsigned clocks) {
 void CPU::interrupt(uint16 vector) {
   op_writesp(regs.pc >> 8);
   op_writesp(regs.pc >> 0);
-  op_writesp(regs.p);
+  op_writesp(regs.p | 0x20);
   abs.l = op_read(vector + 0);
   regs.p.i = 1;
   regs.p.d = 0;
@@ -58,7 +60,7 @@ void CPU::power() {
   regs.x = 0x00;
   regs.y = 0x00;
   regs.s = 0x00;
-  regs.p = 0x34;
+  regs.p = 0x04;
 
   for(unsigned addr = 0; addr < 0x0800; addr++) ram[addr] = 0xff;
   ram[0x0008] = 0xf7;
@@ -120,7 +122,7 @@ void CPU::write(uint16 addr, uint8 data) {
 }
 
 void CPU::oam_dma(uint16 addr) {
-//  op_readpc();
+  op_readpc();
   for(unsigned n = 0; n < 256; n++) {
     uint8 data = bus.read(addr + n);
     op_write(0x2004, data);

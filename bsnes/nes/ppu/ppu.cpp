@@ -122,9 +122,9 @@ void PPU::reset() {
 
   memset(buffer, 0, sizeof buffer);
 
-  memset(nram, 0, sizeof nram);
-  memset(pram, 0, sizeof pram);
-  memset(sram, 0, sizeof sram);
+  memset(ciram, 0, sizeof ciram);
+  memset(cgram, 0, sizeof cgram);
+  memset(oam, 0, sizeof oam);
 }
 
 uint8 PPU::read(uint16 addr) {
@@ -140,14 +140,14 @@ uint8 PPU::read(uint16 addr) {
     status.address_latch = 0;
     break;
   case 4:  //OAMDATA
-    result = sram[status.oam_addr++];
+    result = oam[status.oam_addr++];
     break;
   case 7:  //PPUDATA
     if(addr >= 0x3f00) {
-      result = bus_read(status.vaddr);
+      result = cartridge.chr_read(status.vaddr);
     } else {
       result = status.bus_data;
-      status.bus_data = bus_read(status.vaddr);
+      status.bus_data = cartridge.chr_read(status.vaddr);
     }
     status.vaddr += status.vram_increment;
     break;
@@ -185,7 +185,7 @@ void PPU::write(uint16 addr, uint8 data) {
     status.oam_addr = data;
     return;
   case 4:  //OAMDATA
-    sram[status.oam_addr++] = data;
+    oam[status.oam_addr++] = data;
     return;
   case 5:  //PPUSCROLL
     if(status.address_latch == 0) {
@@ -206,37 +206,28 @@ void PPU::write(uint16 addr, uint8 data) {
     status.address_latch ^= 1;
     return;
   case 7:  //PPUDATA
-    bus_write(status.vaddr, data);
+    cartridge.chr_write(status.vaddr, data);
     status.vaddr += status.vram_increment;
     return;
   }
 }
 
-uint8 PPU::bus_read(uint16 addr) {
-  if(addr <= 0x1fff) return cartridge.chr_read(addr);
-  if(addr <= 0x3eff) return nram[addr & 0x07ff];
-  if(addr <= 0x3fff) return pram[addr & 0x001f];
+uint8 PPU::ciram_read(uint16 addr) {
+  return ciram[addr & 0x07ff];
 }
 
-void PPU::bus_write(uint16 addr, uint8 data) {
-  if(addr <= 0x1fff) {
-    return cartridge.chr_write(addr, data);
-  }
+void PPU::ciram_write(uint16 addr, uint8 data) {
+  ciram[addr & 0x07ff] = data;
+}
 
-  if(addr <= 0x3eff) {
-    nram[addr & 0x07ff] = data;
-    return;
-  }
+uint8 PPU::cgram_read(uint16 addr) {
+  if((addr & 0x13) == 0x10) addr &= ~0x10;
+  return cgram[addr & 0x1f];
+}
 
-  if(addr <= 0x3fff) {
-    addr &= 0x1f;
-    if(addr == 0x10) addr = 0x00;
-    if(addr == 0x14) addr = 0x04;
-    if(addr == 0x18) addr = 0x08;
-    if(addr == 0x1c) addr = 0x0c;
-    pram[addr] = data;
-    return;
-  }
+void PPU::cgram_write(uint16 addr, uint8 data) {
+  if((addr & 0x13) == 0x10) addr &= ~0x10;
+  cgram[addr & 0x1f] = data;
 }
 
 bool PPU::raster_enable() const {
@@ -258,24 +249,26 @@ unsigned PPU::scrolly() const {
 void PPU::render_scanline() {
   uint32 *line = buffer + status.ly * 256;
 
-  uint8 oam[8][5];
+  uint8 ioam[8][5];
   unsigned oamc = 0;
 
   unsigned sprite_height = status.sprite_size ? 16 : 8;
   for(unsigned n = 0; n < 64; n++) {
-    unsigned y = sram[(n * 4) + 0] + 1;
+    unsigned y = oam[(n * 4) + 0] + 1;
     if(status.ly < y || status.ly >= y + sprite_height) continue;
-    oam[oamc][0] = y;
-    oam[oamc][1] = sram[(n * 4) + 1];
-    oam[oamc][2] = sram[(n * 4) + 2];
-    oam[oamc][3] = sram[(n * 4) + 3];
-    oam[oamc][4] = n;
+    ioam[oamc][0] = y;
+    ioam[oamc][1] = oam[(n * 4) + 1];
+    ioam[oamc][2] = oam[(n * 4) + 2];
+    ioam[oamc][3] = oam[(n * 4) + 3];
+    ioam[oamc][4] = n;
     if(++oamc >= 8) break;
   }
 
   for(unsigned x = 0; x < 256; x++) {
     unsigned offsetx = x + scrollx();
-    unsigned offsety = status.ly + scrolly();
+    unsigned offsety = status.ly + (scrolly() < 240 ? scrolly() : 240 - scrolly());
+
+  //if(x==0&&status.ly==64) print("Y=", offsety, "\n");
 
     bool screenx = offsetx & 256;
     bool screeny = offsety & 256;
@@ -285,8 +278,8 @@ void PPU::render_scanline() {
 
     unsigned base = nametable_addr() + (screenx * 0x0400) + (screeny * 0x0800);
 
-    uint8 tile = bus_read(base + (offsety / 8) * 32 + (offsetx / 8));
-    uint8 attr = bus_read(base + 0x03c0 + (offsety / 32) * 8 + (offsetx / 32));
+    uint8 tile = cartridge.chr_read(base + (offsety / 8) * 32 + (offsetx / 8));
+    uint8 attr = cartridge.chr_read(base + 0x03c0 + (offsety / 32) * 8 + (offsetx / 32));
 
     if((offsety / 16) & 1) attr >>= 4;
     if((offsetx / 16) & 1) attr >>= 2;
@@ -294,8 +287,8 @@ void PPU::render_scanline() {
     unsigned tilex = offsetx & 7;
     unsigned tiley = offsety & 7;
 
-    uint8 tdlo = bus_read(status.bg_addr + tile * 16 + 0 + tiley);
-    uint8 tdhi = bus_read(status.bg_addr + tile * 16 + 8 + tiley);
+    uint8 tdlo = cartridge.chr_read(status.bg_addr + tile * 16 + 0 + tiley);
+    uint8 tdhi = cartridge.chr_read(status.bg_addr + tile * 16 + 8 + tiley);
 
     unsigned mask = 0x80 >> tilex;
     unsigned palette = 0;
@@ -308,40 +301,39 @@ void PPU::render_scanline() {
     }
 
     for(unsigned n = 0; n < oamc; n++) {
-      if(x < oam[n][3] || x >= oam[n][3] + 8) continue;
+      if(x < ioam[n][3] || x >= ioam[n][3] + 8) continue;
       if(status.sprite_enable == false) continue;
       if(status.sprite_edge_enable == false && x < 8) continue;
 
-      unsigned spritex = x - oam[n][3];
-      unsigned spritey = status.ly - oam[n][0];
+      unsigned spritex = x - ioam[n][3];
+      unsigned spritey = status.ly - ioam[n][0];
 
       unsigned addr = (sprite_height == 8)
-      ? status.sprite_addr + oam[n][1] * 16
-      : ((oam[n][1] & ~1) * 16) + ((oam[n][1] & 1) * 0x1000);
+      ? status.sprite_addr + ioam[n][1] * 16
+      : ((ioam[n][1] & ~1) * 16) + ((ioam[n][1] & 1) * 0x1000);
 
-      if(oam[n][2] & 0x80) spritey ^= (sprite_height - 1);
-      if(oam[n][2] & 0x40) spritex ^= 7;
+      if(ioam[n][2] & 0x80) spritey ^= (sprite_height - 1);
+      if(ioam[n][2] & 0x40) spritex ^= 7;
       if(spritey & 8) spritey += 8;
 
-      tdlo = bus_read(addr + 0 + spritey);
-      tdhi = bus_read(addr + 8 + spritey);
+      tdlo = cartridge.chr_read(addr + 0 + spritey);
+      tdhi = cartridge.chr_read(addr + 8 + spritey);
 
       mask = 0x80 >> spritex;
       unsigned sprite_palette = 0;
       sprite_palette |= (tdlo & mask) ? 1 : 0;
       sprite_palette |= (tdhi & mask) ? 2 : 0;
       if(sprite_palette == 0) continue;
-      sprite_palette |= (oam[n][2] & 3) << 2;
 
-      bool priority = oam[n][2] & 0x20;
-      if(priority == 0 || palette == 0) {
-        if(oam[n][4] == 0) status.sprite_zero_hit = 1;
-        palette = 16 + sprite_palette;
-      }
+      if(ioam[n][4] == 0) status.sprite_zero_hit = 1;
+      sprite_palette |= (ioam[n][2] & 3) << 2;
+
+      bool priority = ioam[n][2] & 0x20;
+      if(priority == 0 || palette == 0) palette = 16 + sprite_palette;
       break;
     }
 
-    *line++ = paletteRGB[pram[palette]];
+    *line++ = paletteRGB[cgram[palette]];
   }
 }
 
