@@ -12,6 +12,7 @@ void Utility::setMode(Interface::Mode mode) {
   if(mode == Interface::Mode::None) {
     mainWindow->setTitle(application->title);
     mainWindow->setStatusText("No cartridge loaded");
+    cheatEditor->reset();
   }
 
   else if(mode == Interface::Mode::NES) {
@@ -32,6 +33,7 @@ void Utility::setMode(Interface::Mode mode) {
     dspaudio.setFrequency(4194304.0);
   }
 
+  mainWindow->synchronize();
   resizeMainWindow();
 }
 

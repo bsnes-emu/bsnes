@@ -16,7 +16,8 @@ namespace Mapper {
   };
 
   #include "none/none.hpp"
-  #include "lz93d50/lz93d50.hpp"
+  #include "aorom/aorom.hpp"
+  #include "bandai-fcg/bandai-fcg.hpp"
+  #include "cnrom/cnrom.hpp"
   #include "mmc1/mmc1.hpp"
-  #include "sn74hc161n/sn74hc161n.hpp"
 }

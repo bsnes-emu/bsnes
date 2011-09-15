@@ -15,6 +15,15 @@ void InterfaceNES::unloadCartridge() {
   interface->baseName = "";
 }
 
+void InterfaceNES::setCheatCodes(const lstring &list) {
+  NES::cheat.reset();
+  for(unsigned n = 0; n < list.size(); n++) {
+    NES::cheat[n] = list[n];
+    NES::cheat[n].enable = true;
+  }
+  NES::cheat.synchronize();
+}
+
 //
 
 void InterfaceNES::video_refresh(const uint32_t *data) {

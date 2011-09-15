@@ -14,6 +14,11 @@ void System::power() {
   apu.power();
   ppu.power();
   scheduler.power();
+
+//  cheat.reset();
+//  cheat.append(CheatCode("GXXZZLVI"));
+//  cheat[0].enable = true;
+//  cheat.synchronize();
 }
 
 void System::reset() {

@@ -14,17 +14,33 @@ bool Interface::loaded() {
 }
 
 bool Interface::loadCartridge(const string &filename) {
-  if(filename.endswith(".nes")) return loadCartridgeNES(filename);
-  if(filename.endswith(".sfc")) return loadCartridgeSNES(filename);
-  if(filename.endswith(".gb" )) return loadCartridgeGameBoy(filename);
-  if(filename.endswith(".gbc")) return loadCartridgeGameBoy(filename);
-  return true;
+  bool result = false;
+  unloadCartridge();
+  if(filename.endswith(".nes")) result = loadCartridgeNES(filename);
+  if(filename.endswith(".sfc")) result = loadCartridgeSNES(filename);
+  if(filename.endswith(".gb" )) result = loadCartridgeGameBoy(filename);
+  if(filename.endswith(".gbc")) result = loadCartridgeGameBoy(filename);
+  if(result == true) cheatEditor->load({ baseName, ".cht" });
+  return result;
 }
 
 bool Interface::loadCartridgeNES(const string &filename) {
   if(nes.loadCartridge(filename) == false) return false;
   utility->setMode(mode = Mode::NES);
   return true;
+}
+
+void Interface::unloadCartridge() {
+  if(loaded() == false) return;
+  cheatEditor->save({ baseName, ".cht" });
+
+  switch(mode()) {
+  case Mode::NES: nes.unloadCartridge(); break;
+  case Mode::SNES: snes.unloadCartridge(); break;
+  case Mode::GameBoy: gameBoy.unloadCartridge(); break;
+  }
+
+  utility->setMode(mode = Mode::None);
 }
 
 void Interface::unloadCartridgeNES() {
@@ -83,6 +99,30 @@ void Interface::run() {
       GameBoy::system.run();
     } while(GameBoy::scheduler.exit_reason() != GameBoy::Scheduler::ExitReason::FrameEvent);
     return;
+  }
+}
+
+bool Interface::saveState(const string &filename) {
+  switch(mode()) {
+  case Mode::SNES:    return snes.saveState(filename);
+  case Mode::GameBoy: return gameBoy.saveState(filename);
+  }
+  return false;
+}
+
+bool Interface::loadState(const string &filename) {
+  switch(mode()) {
+  case Mode::SNES:    return snes.loadState(filename);
+  case Mode::GameBoy: return gameBoy.loadState(filename);
+  }
+  return false;
+}
+
+void Interface::setCheatCodes(const lstring &list) {
+  switch(mode()) {
+  case Mode::NES:     return nes.setCheatCodes(list);
+  case Mode::SNES:    return snes.setCheatCodes(list);
+  case Mode::GameBoy: return gameBoy.setCheatCodes(list);
   }
 }
 

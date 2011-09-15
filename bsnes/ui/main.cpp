@@ -41,6 +41,7 @@ Application::Application(int argc, char **argv) : quit(false) {
 
   mainWindow = new MainWindow;
   fileBrowser = new FileBrowser;
+  cheatEditor = new CheatEditor;
   utility->setMode(Interface::Mode::None);
   mainWindow->setVisible();
 
@@ -73,9 +74,12 @@ Application::Application(int argc, char **argv) : quit(false) {
     OS::processEvents();
     Application::run();
   }
+
+  interface->unloadCartridge();
 }
 
 Application::~Application() {
+  delete cheatEditor;
   delete fileBrowser;
   delete mainWindow;
   delete utility;

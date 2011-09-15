@@ -17,6 +17,30 @@ void InterfaceGameBoy::unloadCartridge() {
   interface->baseName = "";
 }
 
+bool InterfaceGameBoy::saveState(const string &filename) {
+  GameBoy::system.runtosave();
+  serializer s = GameBoy::system.serialize();
+  return file::write(filename, s.data(), s.size());
+}
+
+bool InterfaceGameBoy::loadState(const string &filename) {
+  uint8_t *data;
+  unsigned size;
+  if(file::read(filename, data, size) == false) return false;
+  serializer s(data, size);
+  delete[] data;
+  return GameBoy::system.unserialize(s);
+}
+
+void InterfaceGameBoy::setCheatCodes(const lstring &list) {
+  GameBoy::cheat.reset();
+  for(unsigned n = 0; n < list.size(); n++) {
+    GameBoy::cheat[n] = list[n];
+    GameBoy::cheat[n].enable = true;
+  }
+  GameBoy::cheat.synchronize();
+}
+
 //
 
 void InterfaceGameBoy::video_refresh(const uint8_t *data) {

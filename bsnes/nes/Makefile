@@ -1,6 +1,7 @@
 nes_objects := nes-system nes-scheduler
 nes_objects += nes-mapper nes-cartridge nes-memory
 nes_objects += nes-cpu nes-apu nes-ppu
+nes_objects += nes-cheat
 objects += $(nes_objects)
 
 obj/nes-system.o: $(nes)/system/system.cpp $(call rwildcard,$(nes)/system/)
@@ -11,3 +12,4 @@ obj/nes-memory.o: $(nes)/memory/memory.cpp $(call rwildcard,$(nes)/memory/)
 obj/nes-cpu.o: $(nes)/cpu/cpu.cpp $(call rwildcard,$(nes)/cpu/)
 obj/nes-apu.o: $(nes)/apu/apu.cpp $(call rwildcard,$(nes)/apu/)
 obj/nes-ppu.o: $(nes)/ppu/ppu.cpp $(call rwildcard,$(nes)/ppu/)
+obj/nes-cheat.o: $(nes)/cheat/cheat.cpp $(call rwildcard,$(nes)/cheat/)

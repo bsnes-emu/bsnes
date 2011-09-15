@@ -22,9 +22,10 @@ namespace Mapper {
   }
 
   #include "none/none.cpp"
-  #include "lz93d50/lz93d50.cpp"
+  #include "aorom/aorom.cpp"
+  #include "bandai-fcg/bandai-fcg.cpp"
+  #include "cnrom/cnrom.cpp"
   #include "mmc1/mmc1.cpp"
-  #include "sn74hc161n/sn74hc161n.cpp"
 }
 
 }

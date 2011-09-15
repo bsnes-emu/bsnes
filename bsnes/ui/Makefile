@@ -3,7 +3,8 @@ include $(snes)/Makefile
 include $(gameboy)/Makefile
 name := batch
 
-ui_objects := ui-main ui-config ui-interface ui-utility ui-general
+ui_objects := ui-main ui-config ui-interface ui-utility
+ui_objects += ui-general ui-tools
 ui_objects += phoenix ruby
 ui_objects += $(if $(call streq,$(platform),win),resource)
 
@@ -71,6 +72,7 @@ obj/ui-config.o: $(ui)/config/config.cpp $(call rwildcard,$(ui)/)
 obj/ui-interface.o: $(ui)/interface/interface.cpp $(call rwildcard,$(ui)/)
 obj/ui-utility.o: $(ui)/utility/utility.cpp $(call rwildcard,$(ui)/)
 obj/ui-general.o: $(ui)/general/general.cpp $(call rwildcard,$(ui)/)
+obj/ui-tools.o: $(ui)/tools/tools.cpp $(call rwildcard,$(ui)/)
 
 obj/ruby.o: ruby/ruby.cpp $(call rwildcard,ruby/*)
 	$(call compile,$(rubydef) $(rubyflags))

@@ -30,12 +30,27 @@ struct MainWindow : Window {
     CheckItem settingsMuteAudio;
 
   Menu toolsMenu;
+    Menu toolsStateSave;
+      Item toolsStateSave1;
+      Item toolsStateSave2;
+      Item toolsStateSave3;
+      Item toolsStateSave4;
+      Item toolsStateSave5;
+    Menu toolsStateLoad;
+      Item toolsStateLoad1;
+      Item toolsStateLoad2;
+      Item toolsStateLoad3;
+      Item toolsStateLoad4;
+      Item toolsStateLoad5;
+    Separator toolsSeparator;
     Item toolsShrinkWindow;
+    Item toolsCheatEditor;
     CheckItem toolsTest;
 
   Menu helpMenu;
     Item helpAbout;
 
+  void synchronize();
   MainWindow();
 };
 

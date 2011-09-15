@@ -32,7 +32,20 @@ MainWindow::MainWindow() {
     settingsMuteAudio.setText("Mute Audio");
 
   toolsMenu.setText("Tools");
+    toolsStateSave.setText("Save State");
+      toolsStateSave1.setText("Slot 1");
+      toolsStateSave2.setText("Slot 2");
+      toolsStateSave3.setText("Slot 3");
+      toolsStateSave4.setText("Slot 4");
+      toolsStateSave5.setText("Slot 5");
+    toolsStateLoad.setText("Load State");
+      toolsStateLoad1.setText("Slot 1");
+      toolsStateLoad2.setText("Slot 2");
+      toolsStateLoad3.setText("Slot 3");
+      toolsStateLoad4.setText("Slot 4");
+      toolsStateLoad5.setText("Slot 5");
     toolsShrinkWindow.setText("Shrink Window");
+    toolsCheatEditor.setText("Cheat Editor ...");
     toolsTest.setText("Test");
 
   helpMenu.setText("Help");
@@ -66,7 +79,21 @@ MainWindow::MainWindow() {
     settingsMenu.append(settingsMuteAudio);
 
   append(toolsMenu);
+    toolsMenu.append(toolsStateSave);
+      toolsStateSave.append(toolsStateSave1);
+      toolsStateSave.append(toolsStateSave2);
+      toolsStateSave.append(toolsStateSave3);
+      toolsStateSave.append(toolsStateSave4);
+      toolsStateSave.append(toolsStateSave5);
+    toolsMenu.append(toolsStateLoad);
+      toolsStateLoad.append(toolsStateLoad1);
+      toolsStateLoad.append(toolsStateLoad2);
+      toolsStateLoad.append(toolsStateLoad3);
+      toolsStateLoad.append(toolsStateLoad4);
+      toolsStateLoad.append(toolsStateLoad5);
+    toolsMenu.append(toolsSeparator);
     toolsMenu.append(toolsShrinkWindow);
+    toolsMenu.append(toolsCheatEditor);
     toolsMenu.append(toolsTest);
 
   append(helpMenu);
@@ -87,32 +114,32 @@ MainWindow::MainWindow() {
 
   cartridgeLoadNES.onTick = [&] {
     fileBrowser->open("Load NES Cartridge", { "*.nes" }, [](string filename) {
-      interface->loadCartridgeNES(filename);
+      interface->loadCartridge(filename);
     });
   };
 
   cartridgeLoadSNES.onTick = [&] {
     fileBrowser->open("Load SNES Cartridge", { "*.sfc" }, [](string filename) {
-      interface->loadCartridgeSNES(filename);
+      interface->loadCartridge(filename);
     });
   };
 
   cartridgeLoadGameBoy.onTick = [&] {
     fileBrowser->open("Load Game Boy Cartridge", { "*.gb", "*.gbc" }, [](string filename) {
-      interface->loadCartridgeGameBoy(filename);
+      interface->loadCartridge(filename);
     });
   };
 
   nesPower.onTick = { &Interface::power, interface };
   nesReset.onTick = { &Interface::reset, interface };
-  nesCartridgeUnload.onTick = { &Interface::unloadCartridgeNES, interface };
+  nesCartridgeUnload.onTick = { &Interface::unloadCartridge, interface };
 
   snesPower.onTick = { &Interface::power, interface };
   snesReset.onTick = { &Interface::reset, interface };
-  snesCartridgeUnload.onTick = { &Interface::unloadCartridgeSNES, interface };
+  snesCartridgeUnload.onTick = { &Interface::unloadCartridge, interface };
 
   gameBoyPower.onTick = { &Interface::power, interface };
-  gameBoyCartridgeUnload.onTick = { &Interface::unloadCartridgeGameBoy, interface };
+  gameBoyCartridgeUnload.onTick = { &Interface::unloadCartridge, interface };
 
   settingsSynchronizeVideo.onTick = [&] {
     video.set(Video::Synchronize, settingsSynchronizeVideo.checked());
@@ -126,7 +153,21 @@ MainWindow::MainWindow() {
     dspaudio.setVolume(settingsMuteAudio.checked() ? 0.0 : 1.0);
   };
 
+  toolsStateSave1.onTick = [&] { interface->saveState({ interface->baseName, "-1.bst" }); };
+  toolsStateSave2.onTick = [&] { interface->saveState({ interface->baseName, "-2.bst" }); };
+  toolsStateSave3.onTick = [&] { interface->saveState({ interface->baseName, "-3.bst" }); };
+  toolsStateSave4.onTick = [&] { interface->saveState({ interface->baseName, "-4.bst" }); };
+  toolsStateSave5.onTick = [&] { interface->saveState({ interface->baseName, "-5.bst" }); };
+
+  toolsStateLoad1.onTick = [&] { interface->loadState({ interface->baseName, "-1.bst" }); };
+  toolsStateLoad2.onTick = [&] { interface->loadState({ interface->baseName, "-2.bst" }); };
+  toolsStateLoad3.onTick = [&] { interface->loadState({ interface->baseName, "-3.bst" }); };
+  toolsStateLoad4.onTick = [&] { interface->loadState({ interface->baseName, "-4.bst" }); };
+  toolsStateLoad5.onTick = [&] { interface->loadState({ interface->baseName, "-5.bst" }); };
+
   toolsShrinkWindow.onTick = [&] { utility->resizeMainWindow(true); };
+
+  toolsCheatEditor.onTick = [&] { cheatEditor->setVisible(); };
 
   toolsTest.onTick = [&] {
     NES::cpu.trace = toolsTest.checked();
@@ -139,4 +180,16 @@ MainWindow::MainWindow() {
       "Website: http://byuu.org/"
     });
   };
+
+  synchronize();
+}
+
+void MainWindow::synchronize() {
+  if(interface->loaded()) {
+    toolsStateSave.setEnabled(true);
+    toolsStateLoad.setEnabled(true);
+  } else {
+    toolsStateSave.setEnabled(false);
+    toolsStateLoad.setEnabled(false);
+  }
 }

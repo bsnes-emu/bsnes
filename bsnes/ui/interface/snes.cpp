@@ -18,6 +18,30 @@ void InterfaceSNES::unloadCartridge() {
   interface->baseName = "";
 }
 
+bool InterfaceSNES::saveState(const string &filename) {
+  SNES::system.runtosave();
+  serializer s = SNES::system.serialize();
+  return file::write(filename, s.data(), s.size());
+}
+
+bool InterfaceSNES::loadState(const string &filename) {
+  uint8_t *data;
+  unsigned size;
+  if(file::read(filename, data, size) == false) return false;
+  serializer s(data, size);
+  delete[] data;
+  return SNES::system.unserialize(s);
+}
+
+void InterfaceSNES::setCheatCodes(const lstring &list) {
+  SNES::cheat.reset();
+  for(unsigned n = 0; n < list.size(); n++) {
+    SNES::cheat[n] = list[n];
+    SNES::cheat[n].enabled = true;
+  }
+  SNES::cheat.synchronize();
+}
+
 //
 
 void InterfaceSNES::video_refresh(const uint16_t *data, bool hires, bool interlace, bool overscan) {
@@ -87,5 +111,5 @@ int16_t InterfaceSNES::input_poll(bool port, SNES::Input::Device device, unsigne
 }
 
 string InterfaceSNES::path(SNES::Cartridge::Slot slot, const string &hint) {
-  return "/home/byuu/Desktop/test";
+  return dir(interface->baseName);
 }

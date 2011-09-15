@@ -23,6 +23,7 @@ using namespace ruby;
 #include "interface/interface.hpp"
 #include "utility/utility.hpp"
 #include "general/general.hpp"
+#include "tools/tools.hpp"
 
 struct Application {
   bool quit;

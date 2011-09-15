@@ -49,6 +49,11 @@ void System::power() {
   lcd.power();
   scheduler.init();
 
+//  cheat.reset();
+//  cheat.append(CheatCode("3EB-81B-4CA"));
+//  cheat[0].enable = true;
+//  cheat.synchronize();
+
   clocks_executed = 0;
 }
 

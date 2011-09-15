@@ -13,6 +13,7 @@ struct Interface : property<Interface> {
   bool loadCartridgeSNES(const string &filename);
   bool loadCartridgeGameBoy(const string &filename);
 
+  void unloadCartridge();
   void unloadCartridgeNES();
   void unloadCartridgeSNES();
   void unloadCartridgeGameBoy();
@@ -20,6 +21,10 @@ struct Interface : property<Interface> {
   void power();
   void reset();
   void run();
+
+  bool saveState(const string &filename);
+  bool loadState(const string &filename);
+  void setCheatCodes(const lstring &list);
 
   Interface();
 

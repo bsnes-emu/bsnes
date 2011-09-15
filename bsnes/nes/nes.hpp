@@ -4,7 +4,7 @@
 namespace NES {
   namespace Info {
     static const char Name[] = "bnes";
-    static const char Version[] = "000.05";
+    static const char Version[] = "000.06";
   }
 }
 
@@ -107,6 +107,7 @@ namespace NES {
   #include <nes/cpu/cpu.hpp>
   #include <nes/apu/apu.hpp>
   #include <nes/ppu/ppu.hpp>
+  #include <nes/cheat/cheat.hpp>
 }
 
 #endif

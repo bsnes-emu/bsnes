@@ -1,6 +1,6 @@
-LZ93D50 lz93d50;
+BandaiFCG bandaiFCG;
 
-uint8 LZ93D50::prg_read(uint16 addr) {
+uint8 BandaiFCG::prg_read(uint16 addr) {
   clock();
 
   if(addr >= 0x8000 && addr <= 0xbfff) {
@@ -16,7 +16,7 @@ uint8 LZ93D50::prg_read(uint16 addr) {
   return cpu.mdr();
 }
 
-void LZ93D50::prg_write(uint16 addr, uint8 data) {
+void BandaiFCG::prg_write(uint16 addr, uint8 data) {
   clock();
 
   if(addr >= 0x6000) {
@@ -49,32 +49,32 @@ void LZ93D50::prg_write(uint16 addr, uint8 data) {
   }
 }
 
-uint8 LZ93D50::chr_read(uint16 addr) {
+uint8 BandaiFCG::chr_read(uint16 addr) {
   unsigned rom_addr = (chr_bank[addr >> 10] << 10) | (addr & 0x03ff);
   return cartridge.chr_data[mirror(rom_addr, cartridge.chr_size)];
 }
 
-void LZ93D50::chr_write(uint16 addr, uint8 data) {
+void BandaiFCG::chr_write(uint16 addr, uint8 data) {
   if(cartridge.chr_ram == false) return;
   unsigned rom_addr = (chr_bank[addr >> 10] << 10) | (addr & 0x03ff);
   cartridge.chr_data[mirror(rom_addr, cartridge.chr_size)] = data;
 }
 
-uint8 LZ93D50::ciram_read(uint13 addr) {
+uint8 BandaiFCG::ciram_read(uint13 addr) {
   addr = ciram_addr(addr);
   return ppu.ciram_read(addr);
 }
 
-void LZ93D50::ciram_write(uint13 addr, uint8 data) {
+void BandaiFCG::ciram_write(uint13 addr, uint8 data) {
   addr = ciram_addr(addr);
   return ppu.ciram_write(addr, data);
 }
 
-void LZ93D50::power() {
+void BandaiFCG::power() {
   reset();
 }
 
-void LZ93D50::reset() {
+void BandaiFCG::reset() {
   for(unsigned n = 0; n < 8; n++) chr_bank[n] = 0x00;
   prg_bank = 0x00;
   mirror_select = 0;
@@ -85,7 +85,7 @@ void LZ93D50::reset() {
 
 //
 
-unsigned LZ93D50::ciram_addr(unsigned addr) const {
+unsigned BandaiFCG::ciram_addr(unsigned addr) const {
   switch(mirror_select & 0x03) {
   case 0: return ((addr & 0x0400) >> 0) | (addr & 0x03ff);  //vertical mirroring
   case 1: return ((addr & 0x0800) >> 1) | (addr & 0x03ff);  //horizontal mirroring
@@ -95,7 +95,7 @@ unsigned LZ93D50::ciram_addr(unsigned addr) const {
   throw;
 }
 
-void LZ93D50::clock() {
+void BandaiFCG::clock() {
   if(irq_counter_enable) {
     if(--irq_counter == 0xffff) {
       cpu.set_irq_line(1);
