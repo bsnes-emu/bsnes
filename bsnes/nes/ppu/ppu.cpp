@@ -278,6 +278,48 @@ void PPU::scrolly_increment() {
 
 //
 
+void PPU::raster_pixel(unsigned x) {
+  uint32 *output = buffer + status.ly * 256;
+
+  unsigned mask = 0x8000 >> (status.xaddr + x);
+  unsigned palette = 0;
+  palette |= (raster.tiledatalo & mask) ? 1 : 0;
+  palette |= (raster.tiledatahi & mask) ? 2 : 0;
+  if(palette) {
+    unsigned attr = raster.attribute;
+    if(mask >= 256) attr >>= 2;
+    palette |= (attr & 3) << 2;
+  }
+
+  if(status.bg_edge_enable == false && status.lx < 8) palette = 0;
+
+  for(unsigned sprite = 0; sprite < 8; sprite++) {
+    if(status.sprite_edge_enable == false && status.lx < 8) continue;
+    if(raster.oam[sprite].id == 64) continue;
+
+    unsigned spritex = status.lx - raster.oam[sprite].x;
+    if(spritex >= 8) continue;
+
+    if(raster.oam[sprite].attr & 0x40) spritex ^= 7;
+    unsigned mask = 0x80 >> spritex;
+    unsigned sprite_palette = 0;
+    sprite_palette |= (raster.oam[sprite].tiledatalo & mask) ? 1 : 0;
+    sprite_palette |= (raster.oam[sprite].tiledatahi & mask) ? 2 : 0;
+    if(sprite_palette == 0) continue;
+
+    if(raster.oam[sprite].id == 0 && palette) status.sprite_zero_hit = 1;
+    sprite_palette |= (raster.oam[sprite].attr & 3) << 2;
+
+    if((raster.oam[sprite].attr & 0x20) == 0 || palette == 0) {
+      palette = 16 + sprite_palette;
+      break;
+    }
+  }
+
+  if(raster_enable() == false) palette = 0;
+  output[status.lx++] = paletteRGB[cgram[palette]];
+}
+
 void PPU::raster_scanline() {
   if((status.ly >= 240 && status.ly <= 260)) {
     for(unsigned x = 0; x < 340; x++) tick();
@@ -287,71 +329,42 @@ void PPU::raster_scanline() {
 
   uint32 *output = buffer + status.ly * 256;
   signed lx = 0, ly = (status.ly == 261 ? -1 : status.ly);
+  status.lx = 0;
 
   for(unsigned tile = 0; tile < 32; tile++) {  //  0-255
-    unsigned mask = 0x8000 >> status.xaddr;
-    for(unsigned n = 0; n < 8; n++) {
-      uint8 palette = 0;
-      palette |= (raster.tiledatalo & mask) ? 1 : 0;
-      palette |= (raster.tiledatahi & mask) ? 2 : 0;
-      if(palette) {
-        unsigned attr = raster.attribute;
-        if(mask >= 256) attr >>= 2;
-        palette |= (attr & 3) << 2;
-      }
-      mask >>= 1;
-
-      if(status.bg_edge_enable == false && lx < 8) palette = 0;
-
-      for(unsigned sprite = 0; sprite < 8; sprite++) {
-        if(status.sprite_edge_enable == false && lx < 8) continue;
-        if(raster.oam[sprite].id == 64) continue;
-
-        unsigned spritex = lx - raster.oam[sprite].x;
-        if(spritex >= 8) continue;
-
-        if(raster.oam[sprite].attr & 0x40) spritex ^= 7;
-        unsigned mask = 0x80 >> spritex;
-        unsigned sprite_palette = 0;
-        sprite_palette |= (raster.oam[sprite].tiledatalo & mask) ? 1 : 0;
-        sprite_palette |= (raster.oam[sprite].tiledatahi & mask) ? 2 : 0;
-        if(sprite_palette == 0) continue;
-
-        if(raster.oam[sprite].id == 0) status.sprite_zero_hit = 1;
-        sprite_palette |= (raster.oam[sprite].attr & 3) << 2;
-
-        if((raster.oam[sprite].attr & 0x20) == 0 || palette == 0) {
-          palette = 16 + sprite_palette;
-          break;
-        }
-      }
-
-      if(raster_enable() == false) palette = 0;
-      output[lx++] = paletteRGB[cgram[palette]];
-    }
-
     unsigned nametable = cartridge.ciram_read((uint13)status.vaddr);
     unsigned tileaddr = status.bg_addr + (nametable << 4) + (scrolly() & 7);
+    raster_pixel(0);
     tick();
+
+    raster_pixel(1);
     tick();
 
     unsigned attribute = cartridge.ciram_read(0x03c0 | (status.vaddr & 0x0fc0) | ((scrolly() >> 5) << 3) | (scrollx() >> 5));
     if(scrolly() & 16) attribute >>= 4;
     if(scrollx() & 16) attribute >>= 2;
+    raster_pixel(2);
     tick();
 
     if(raster_enable()) {
       scrollx_increment();
       if(tile == 31) scrolly_increment();
     }
+    raster_pixel(3);
     tick();
 
     unsigned tiledatalo = cartridge.chr_read(tileaddr + 0);
+    raster_pixel(4);
     tick();
+
+    raster_pixel(5);
     tick();
 
     unsigned tiledatahi = cartridge.chr_read(tileaddr + 8);
+    raster_pixel(6);
     tick();
+
+    raster_pixel(7);
     tick();
 
     raster.nametable = (raster.nametable << 8) | nametable;

@@ -27,12 +27,14 @@ struct PPU : Processor {
   void scrollx_increment();
   void scrolly_increment();
 
+  void raster_pixel(unsigned x);
   void raster_scanline();
 
   struct Status {
     uint8 mdr;
 
     bool field;
+    unsigned lx;
     unsigned ly;
 
     uint8 bus_data;

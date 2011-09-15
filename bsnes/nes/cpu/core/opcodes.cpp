@@ -232,9 +232,9 @@ L rd = op_readpci();
 template<void (CPU::*op)()>
 void CPU::opi_read_indirect_zero_page_x() {
   zp = op_readpci();
-  op_readpc();
-  abs.l = op_readdp(zp++ + regs.x);
-  abs.h = op_readdp(zp++ + regs.x);
+  op_readzp(zp);
+  abs.l = op_readzp(zp++ + regs.x);
+  abs.h = op_readzp(zp++ + regs.x);
 L rd = op_read(abs.w);
   call(op);
 }
@@ -242,8 +242,8 @@ L rd = op_read(abs.w);
 template<void (CPU::*op)()>
 void CPU::opi_read_indirect_zero_page_y() {
   rd = op_readpci();
-  abs.l = op_read(rd++);
-  abs.h = op_read(rd++);
+  abs.l = op_readzp(rd++);
+  abs.h = op_readzp(rd++);
   op_page(abs.w, abs.w + regs.y);
 L rd = op_read(abs.w + regs.y);
   call(op);
@@ -252,23 +252,23 @@ L rd = op_read(abs.w + regs.y);
 template<void (CPU::*op)()>
 void CPU::opi_read_zero_page() {
   zp = op_readpci();
-L rd = op_read(zp);
+L rd = op_readzp(zp);
   call(op);
 }
 
 template<void (CPU::*op)()>
 void CPU::opi_read_zero_page_x() {
   zp = op_readpci();
-  op_readpc();
-L rd = op_readdp(zp + regs.x);
+  op_readzp(zp);
+L rd = op_readzp(zp + regs.x);
   call(op);
 }
 
 template<void (CPU::*op)()>
 void CPU::opi_read_zero_page_y() {
   zp = op_readpci();
-  op_readpc();
-L rd = op_readdp(zp + regs.y);
+  op_readzp(zp);
+L rd = op_readzp(zp + regs.y);
   call(op);
 }
 
@@ -286,7 +286,7 @@ template<void (CPU::*op)()>
 void CPU::opi_rmw_absolute_x() {
   abs.l = op_readpci();
   abs.h = op_readpci();
-  op_readpc();
+  op_page_always(abs.w, abs.w + regs.x);
   rd = op_read(abs.w + regs.x);
   op_write(abs.w + regs.x, rd);
   call(op);
@@ -296,20 +296,20 @@ L op_write(abs.w + regs.x, rd);
 template<void (CPU::*op)()>
 void CPU::opi_rmw_zero_page() {
   zp = op_readpci();
-  rd = op_read(zp);
-  op_write(zp, rd);
+  rd = op_readzp(zp);
+  op_writezp(zp, rd);
   call(op);
-L op_write(zp, rd);
+L op_writezp(zp, rd);
 }
 
 template<void (CPU::*op)()>
 void CPU::opi_rmw_zero_page_x() {
   zp = op_readpci();
-  op_readpc();
-  rd = op_readdp(zp + regs.x);
-  op_writedp(zp + regs.x, rd);
+  op_readzp(zp);
+  rd = op_readzp(zp + regs.x);
+  op_writezp(zp + regs.x, rd);
   call(op);
-L op_writedp(zp + regs.x, rd);
+L op_writezp(zp + regs.x, rd);
 }
 
 void CPU::opi_set_flag(bool &flag) {
@@ -332,48 +332,48 @@ L op_write(abs.w, r);
 void CPU::opi_store_absolute_x(uint8 &r) {
   abs.l = op_readpci();
   abs.h = op_readpci();
-  op_page(abs.w, abs.w + regs.x);
+  op_page_always(abs.w, abs.w + regs.x);
 L op_write(abs.w + regs.x, r);
 }
 
 void CPU::opi_store_absolute_y(uint8 &r) {
   abs.l = op_readpci();
   abs.h = op_readpci();
-  op_page(abs.w, abs.w + regs.y);
+  op_page_always(abs.w, abs.w + regs.y);
 L op_write(abs.w + regs.y, r);
 }
 
 void CPU::opi_store_indirect_zero_page_x(uint8 &r) {
   zp = op_readpci();
-  op_readpc();
-  abs.l = op_readdp(zp++ + regs.x);
-  abs.h = op_readdp(zp++ + regs.x);
+  op_readzp(zp);
+  abs.l = op_readzp(zp++ + regs.x);
+  abs.h = op_readzp(zp++ + regs.x);
 L op_write(abs.w, r);
 }
 
 void CPU::opi_store_indirect_zero_page_y(uint8 &r) {
   rd = op_readpci();
-  abs.l = op_read(rd++);
-  abs.h = op_read(rd++);
-  op_page(abs.w, abs.w + regs.y);
+  abs.l = op_readzp(rd++);
+  abs.h = op_readzp(rd++);
+  op_page_always(abs.w, abs.w + regs.y);
 L op_write(abs.w + regs.y, r);
 }
 
 void CPU::opi_store_zero_page(uint8 &r) {
-  rd = op_readpci();
-L op_write(rd, r);
+  zp = op_readpci();
+L op_writezp(zp, r);
 }
 
 void CPU::opi_store_zero_page_x(uint8 &r) {
   zp = op_readpci();
-  op_readpc();
-L op_writedp(zp + regs.x, r);
+  op_readzp(zp);
+L op_writezp(zp + regs.x, r);
 }
 
 void CPU::opi_store_zero_page_y(uint8 &r) {
   zp = op_readpci();
-  op_readpc();
-L op_writedp(zp + regs.y, r);
+  op_readzp(zp);
+L op_writezp(zp + regs.y, r);
 }
 
 void CPU::opi_transfer(uint8 &s, uint8 &d, bool flag) {
@@ -492,11 +492,11 @@ L op_readpc();
 
 void CPU::opill_nop_zero_page() {
   zp = op_readpci();
-L op_readpc();
+L op_readzp(zp);
 }
 
 void CPU::opill_nop_zero_page_x() {
   zp = op_readpci();
-  op_readpc();
-L op_readpc();
+  op_readzp(zp);
+L op_readzp(zp + regs.x);
 }
