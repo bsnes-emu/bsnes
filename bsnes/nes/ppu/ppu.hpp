@@ -22,12 +22,17 @@ struct PPU : Processor {
   unsigned nametable_addr() const;
   unsigned scrollx() const;
   unsigned scrolly() const;
+  unsigned sprite_height() const;
+
+  uint8 chr_load(uint16 addr);
+  uint8 ciram_load(uint16 addr);
 
   void ly_increment();
   void scrollx_increment();
   void scrolly_increment();
 
   void raster_pixel(unsigned x);
+  void raster_sprite();
   void raster_scanline();
 
   struct Status {
@@ -43,7 +48,7 @@ struct PPU : Processor {
 
     uint15 vaddr;
     uint15 taddr;
-    uint8  xaddr;
+    uint8 xaddr;
 
     //$2000
     bool nmi_enable;
@@ -54,9 +59,7 @@ struct PPU : Processor {
     unsigned vram_increment;
 
     //$2001
-    bool intensify_blue;
-    bool intensify_green;
-    bool intensify_red;
+    uint3 emphasis;
     bool sprite_enable;
     bool bg_enable;
     bool sprite_edge_enable;
@@ -78,6 +81,9 @@ struct PPU : Processor {
     uint16 tiledatalo;
     uint16 tiledatahi;
 
+    unsigned oam_iterator;
+    unsigned oam_counter;
+
     struct OAM {
       uint8 id;
       uint8 y;
@@ -87,11 +93,10 @@ struct PPU : Processor {
 
       uint8 tiledatalo;
       uint8 tiledatahi;
-    } oam[8];
+    } oam[8], soam[8];
   } raster;
 
-  uint32 buffer[256 * 262];
-  uint32 paletteRGB[64];
+  uint16 buffer[256 * 262];
   uint8 ciram[2048];
   uint8 cgram[32];
   uint8 oam[256];
