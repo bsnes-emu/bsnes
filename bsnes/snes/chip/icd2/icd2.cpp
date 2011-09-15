@@ -69,8 +69,8 @@ void ICD2::reset() {
   joyp14lock = 0;
   pulselock = true;
 
-  GameBoy::system.init(this);
-  GameBoy::system.power();
+  GameBoy::Interface::initialize(this);
+  GameBoy::Interface::power();
 }
 
 }

@@ -14,11 +14,10 @@ struct System {
   void runtosave();
   void runthreadtosave();
 
-  void init(Interface*);
+  void init();
   void load();
   void power();
 
-  Interface *interface;
   unsigned clocks_executed;
 
   //serialization.cpp

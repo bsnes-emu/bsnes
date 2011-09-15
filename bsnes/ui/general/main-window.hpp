@@ -45,6 +45,7 @@ struct MainWindow : Window {
     Separator toolsSeparator;
     Item toolsShrinkWindow;
     Item toolsCheatEditor;
+    Item toolsStateManager;
     CheckItem toolsTest;
 
   Menu helpMenu;

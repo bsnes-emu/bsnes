@@ -3,15 +3,15 @@
 void CPU::mmio_joyp_poll() {
   unsigned button = 0, dpad = 0;
 
-  button |= system.interface->input_poll((unsigned)Input::Start) << 3;
-  button |= system.interface->input_poll((unsigned)Input::Select) << 2;
-  button |= system.interface->input_poll((unsigned)Input::B) << 1;
-  button |= system.interface->input_poll((unsigned)Input::A) << 0;
+  button |= interface->inputPoll((unsigned)Input::Start) << 3;
+  button |= interface->inputPoll((unsigned)Input::Select) << 2;
+  button |= interface->inputPoll((unsigned)Input::B) << 1;
+  button |= interface->inputPoll((unsigned)Input::A) << 0;
 
-  dpad |= system.interface->input_poll((unsigned)Input::Down) << 3;
-  dpad |= system.interface->input_poll((unsigned)Input::Up) << 2;
-  dpad |= system.interface->input_poll((unsigned)Input::Left) << 1;
-  dpad |= system.interface->input_poll((unsigned)Input::Right) << 0;
+  dpad |= interface->inputPoll((unsigned)Input::Down) << 3;
+  dpad |= interface->inputPoll((unsigned)Input::Up) << 2;
+  dpad |= interface->inputPoll((unsigned)Input::Left) << 1;
+  dpad |= interface->inputPoll((unsigned)Input::Right) << 0;
 
   status.joyp = 0x0f;
   if(status.p15 == 1 && status.p14 == 1) status.joyp -= status.mlt_req;
@@ -84,7 +84,7 @@ void CPU::mmio_write(uint16 addr, uint8 data) {
   if(addr == 0xff00) {  //JOYP
     status.p15 = data & 0x20;
     status.p14 = data & 0x10;
-    system.interface->joyp_write(status.p15, status.p14);
+    interface->joypWrite(status.p15, status.p14);
     mmio_joyp_poll();
     return;
   }

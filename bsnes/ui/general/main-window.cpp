@@ -26,7 +26,7 @@ MainWindow::MainWindow() {
 
   settingsMenu.setText("Settings");
     settingsSynchronizeVideo.setText("Synchronize Video");
-    settingsSynchronizeVideo.setChecked();
+    settingsSynchronizeVideo.setChecked(false);
     settingsSynchronizeAudio.setText("Synchronize Audio");
     settingsSynchronizeAudio.setChecked();
     settingsMuteAudio.setText("Mute Audio");
@@ -46,6 +46,7 @@ MainWindow::MainWindow() {
       toolsStateLoad5.setText("Slot 5");
     toolsShrinkWindow.setText("Shrink Window");
     toolsCheatEditor.setText("Cheat Editor ...");
+    toolsStateManager.setText("State Manager ...");
     toolsTest.setText("Test");
 
   helpMenu.setText("Help");
@@ -94,6 +95,7 @@ MainWindow::MainWindow() {
     toolsMenu.append(toolsSeparator);
     toolsMenu.append(toolsShrinkWindow);
     toolsMenu.append(toolsCheatEditor);
+    toolsMenu.append(toolsStateManager);
     toolsMenu.append(toolsTest);
 
   append(helpMenu);
@@ -168,6 +170,7 @@ MainWindow::MainWindow() {
   toolsShrinkWindow.onTick = [&] { utility->resizeMainWindow(true); };
 
   toolsCheatEditor.onTick = [&] { cheatEditor->setVisible(); };
+  toolsStateManager.onTick = [&] { stateManager->setVisible(); };
 
   toolsTest.onTick = [&] {
     NES::cpu.trace = toolsTest.checked();

@@ -14,11 +14,6 @@ void System::power() {
   apu.power();
   ppu.power();
   scheduler.power();
-
-//  cheat.reset();
-//  cheat.append(CheatCode("GXXZZLVI"));
-//  cheat[0].enable = true;
-//  cheat.synchronize();
 }
 
 void System::reset() {
@@ -29,8 +24,8 @@ void System::reset() {
   scheduler.reset();
 }
 
-void System::init(Interface *interface) {
-  this->interface = interface;
+void System::init() {
+  assert(interface != 0);
 }
 
 void System::term() {

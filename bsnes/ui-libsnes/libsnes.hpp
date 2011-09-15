@@ -95,7 +95,7 @@ bool snes_serialize(uint8_t *data, unsigned size);
 bool snes_unserialize(const uint8_t *data, unsigned size);
 
 void snes_cheat_reset(void);
-void snes_cheat_set(unsigned index, bool enabled, const char *code);
+void snes_cheat_set(unsigned index, bool enable, const char *code);
 
 bool snes_load_cartridge_normal(
   const char *rom_xml, const uint8_t *rom_data, unsigned rom_size

@@ -33,7 +33,7 @@ void PPU::scanline_edge() {
 
 void PPU::frame_edge() {
   status.field ^= 1;
-  system.interface->video_refresh(buffer);
+  interface->videoRefresh(buffer);
   scheduler.exit();
 }
 

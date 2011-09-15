@@ -4,16 +4,16 @@ serializer System::serialize() {
   serializer s(serialize_size);
 
   unsigned signature = 0x31545342, version = Info::SerializerVersion, crc32 = cartridge.crc32();
-  char profile[16], description[512];
-  memset(&profile, 0, sizeof profile);
+  char description[512], profile[16];
   memset(&description, 0, sizeof description);
+  memset(&profile, 0, sizeof profile);
   strlcpy(profile, Info::Profile, sizeof profile);
 
   s.integer(signature);
   s.integer(version);
   s.integer(crc32);
-  s.array(profile);
   s.array(description);
+  s.array(profile);
 
   serialize_all(s);
   return s;
@@ -21,13 +21,13 @@ serializer System::serialize() {
 
 bool System::unserialize(serializer &s) {
   unsigned signature, version, crc32;
-  char profile[16], description[512];
+  char description[512], profile[16];
 
   s.integer(signature);
   s.integer(version);
   s.integer(crc32);
-  s.array(profile);
   s.array(description);
+  s.array(profile);
 
   if(signature != 0x31545342) return false;
   if(version != Info::SerializerVersion) return false;

@@ -22,9 +22,12 @@ struct Interface : property<Interface> {
   void reset();
   void run();
 
+  serializer serialize();
+  bool unserialize(serializer&);
+
   bool saveState(const string &filename);
   bool loadState(const string &filename);
-  void setCheatCodes(const lstring &list);
+  void setCheatCodes(const lstring &list = lstring{});
 
   Interface();
 

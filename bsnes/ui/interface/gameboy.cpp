@@ -5,21 +5,19 @@ bool InterfaceGameBoy::loadCartridge(const string &filename) {
 
   interface->baseName = nall::basename(filename);
   GameBoyCartridge info(data, size);
-  GameBoy::cartridge.load(info.xml, data, size);
-  GameBoy::system.power();
+  GameBoy::Interface::loadCartridge(info.xml, data, size);
 
   delete[] data;
   return true;
 }
 
 void InterfaceGameBoy::unloadCartridge() {
-  GameBoy::cartridge.unload();
+  GameBoy::Interface::unloadCartridge();
   interface->baseName = "";
 }
 
 bool InterfaceGameBoy::saveState(const string &filename) {
-  GameBoy::system.runtosave();
-  serializer s = GameBoy::system.serialize();
+  serializer s = serialize();
   return file::write(filename, s.data(), s.size());
 }
 
@@ -29,21 +27,12 @@ bool InterfaceGameBoy::loadState(const string &filename) {
   if(file::read(filename, data, size) == false) return false;
   serializer s(data, size);
   delete[] data;
-  return GameBoy::system.unserialize(s);
-}
-
-void InterfaceGameBoy::setCheatCodes(const lstring &list) {
-  GameBoy::cheat.reset();
-  for(unsigned n = 0; n < list.size(); n++) {
-    GameBoy::cheat[n] = list[n];
-    GameBoy::cheat[n].enable = true;
-  }
-  GameBoy::cheat.synchronize();
+  return unserialize(s);
 }
 
 //
 
-void InterfaceGameBoy::video_refresh(const uint8_t *data) {
+void InterfaceGameBoy::videoRefresh(const uint8_t *data) {
   interface->video_refresh();
 
   uint32_t *output;
@@ -63,7 +52,7 @@ void InterfaceGameBoy::video_refresh(const uint8_t *data) {
   }
 }
 
-void InterfaceGameBoy::audio_sample(int16_t csample, int16_t lsample, int16_t rsample) {
+void InterfaceGameBoy::audioSample(int16_t csample, int16_t lsample, int16_t rsample) {
   dspaudio.sample(lsample, rsample);
   while(dspaudio.pending()) {
     signed lsample, rsample;
@@ -72,7 +61,7 @@ void InterfaceGameBoy::audio_sample(int16_t csample, int16_t lsample, int16_t rs
   }
 }
 
-bool InterfaceGameBoy::input_poll(unsigned id) {
+bool InterfaceGameBoy::inputPoll(unsigned id) {
   switch((GameBoy::Input)id) {
   case GameBoy::Input::Up:     return interface->inputState[keyboard(0)[Keyboard::Up]];
   case GameBoy::Input::Down:   return interface->inputState[keyboard(0)[Keyboard::Down]];

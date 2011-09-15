@@ -5,22 +5,19 @@ bool InterfaceSNES::loadCartridge(const string &filename) {
 
   interface->baseName = nall::basename(filename);
   string xml = SNESCartridge(data, size).xmlMemoryMap;
-  SNES::cartridge.rom.copy(data, size);
-  SNES::cartridge.load(SNES::Cartridge::Mode::Normal, { xml });
-  SNES::system.power();
+  SNES::Interface::loadCartridge(xml, data, size);
 
   delete[] data;
   return true;
 }
 
 void InterfaceSNES::unloadCartridge() {
-  SNES::cartridge.unload();
+  SNES::Interface::unloadCartridge();
   interface->baseName = "";
 }
 
 bool InterfaceSNES::saveState(const string &filename) {
-  SNES::system.runtosave();
-  serializer s = SNES::system.serialize();
+  serializer s = serialize();
   return file::write(filename, s.data(), s.size());
 }
 
@@ -30,21 +27,12 @@ bool InterfaceSNES::loadState(const string &filename) {
   if(file::read(filename, data, size) == false) return false;
   serializer s(data, size);
   delete[] data;
-  return SNES::system.unserialize(s);
-}
-
-void InterfaceSNES::setCheatCodes(const lstring &list) {
-  SNES::cheat.reset();
-  for(unsigned n = 0; n < list.size(); n++) {
-    SNES::cheat[n] = list[n];
-    SNES::cheat[n].enabled = true;
-  }
-  SNES::cheat.synchronize();
+  return unserialize(s);
 }
 
 //
 
-void InterfaceSNES::video_refresh(const uint16_t *data, bool hires, bool interlace, bool overscan) {
+void InterfaceSNES::videoRefresh(const uint16_t *data, bool hires, bool interlace, bool overscan) {
   interface->video_refresh();
 
   unsigned width = hires ? 512 : 256;
@@ -80,7 +68,7 @@ void InterfaceSNES::video_refresh(const uint16_t *data, bool hires, bool interla
   }
 }
 
-void InterfaceSNES::audio_sample(int16_t lsample, int16_t rsample) {
+void InterfaceSNES::audioSample(int16_t lsample, int16_t rsample) {
   dspaudio.sample(lsample, rsample);
   while(dspaudio.pending()) {
     signed lsample, rsample;
@@ -89,7 +77,7 @@ void InterfaceSNES::audio_sample(int16_t lsample, int16_t rsample) {
   }
 }
 
-int16_t InterfaceSNES::input_poll(bool port, SNES::Input::Device device, unsigned index, unsigned id) {
+int16_t InterfaceSNES::inputPoll(bool port, SNES::Input::Device device, unsigned index, unsigned id) {
   if(port == 0 && device == SNES::Input::Device::Joypad) {
     switch((SNES::Input::JoypadID)id) {
     case SNES::Input::JoypadID::Up:     return interface->inputState[keyboard(0)[Keyboard::Up]];

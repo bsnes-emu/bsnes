@@ -46,7 +46,7 @@ void APU::main() {
     noise.run();
     master.run();
 
-    system.interface->audio_sample(master.center, master.left, master.right);
+    interface->audioSample(master.center, master.left, master.right);
     if(++clock >= 0) co_switch(scheduler.active_thread = cpu.thread);
   }
 }

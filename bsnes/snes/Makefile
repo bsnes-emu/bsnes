@@ -1,4 +1,4 @@
-snes_objects := snes-system snes-controller
+snes_objects := snes-interface snes-system snes-controller
 snes_objects += snes-cartridge snes-cheat
 snes_objects += snes-memory snes-cpucore snes-smpcore
 snes_objects += snes-cpu snes-smp snes-dsp snes-ppu
@@ -28,6 +28,7 @@ else ifeq ($(profile),performance)
   snesppu := $(snes)/alt/ppu-performance
 endif
 
+obj/snes-interface.o : $(snes)/interface/interface.cpp $(call rwildcard,$(snes)/interface)
 obj/snes-system.o    : $(snes)/system/system.cpp $(call rwildcard,$(snes)/system/) $(call rwildcard,$(snes)/video/) $(call rwildcard,$(snes)/audio/) $(call rwildcard,$(snes)/input/)
 obj/snes-controller.o: $(snes)/controller/controller.cpp $(call rwildcard,$(snes)/controller/)
 obj/snes-memory.o    : $(snes)/memory/memory.cpp $(call rwildcard,$(snes)/memory/)

@@ -42,7 +42,7 @@ void APU::main() {
     clock_frame_counter_divider();
 
     signed output = rectangle_dac[rectangle_output] + dmc_triangle_noise_dac[dmc_output][triangle_output][noise_output];
-    system.interface->audio_sample(output);
+    interface->audioSample(output);
 
     tick();
   }
@@ -257,8 +257,8 @@ void APU::Sweep::clock() {
       signed delta = rectangle_period >> shift;
 
       if(decrement) {
-        rectangle_period -= delta;
-      //decrement first square wave by one extra
+        //first rectangle decrements by one extra
+        rectangle_period -= delta + (channel == 0);
       } else if((rectangle_period + delta) < 0x800) {
         rectangle_period += delta;
       }
@@ -328,7 +328,7 @@ void APU::Triangle::clock_length() {
   }
 }
 
-void APU::Triangle::clock_length_counter() {
+void APU::Triangle::clock_linear_length() {
   if(reload_linear) {
     linear_length_counter = linear_length;
   } else if(linear_length_counter) {
@@ -339,7 +339,8 @@ void APU::Triangle::clock_length_counter() {
 }
 
 uint8 APU::Triangle::clock() {
-  uint8 result = (step_counter & 0x0f) ^ ((step_counter & 0x10) ? 0x0f : 0x00);
+  uint8 result = step_counter & 0x0f;
+  if(step_counter & 0x10) result ^= 0x0f;
   if(length_counter == 0 || linear_length_counter == 0) return result;
 
   if(--period_counter == 0) {
@@ -397,7 +398,7 @@ void APU::clock_frame_counter() {
 
   rectangle[0].envelope.clock();
   rectangle[1].envelope.clock();
-  triangle.clock_length_counter();
+  triangle.clock_linear_length();
   noise.envelope.clock();
 
   if(frame.counter == 0) {
@@ -414,6 +415,9 @@ void APU::clock_frame_counter_divider() {
 }
 
 APU::APU() {
+  rectangle[0].sweep.channel = 0;
+  rectangle[1].sweep.channel = 1;
+
   for(unsigned amp = 0; amp < 32; amp++) {
     if(amp == 0) {
       rectangle_dac[amp] = 0;

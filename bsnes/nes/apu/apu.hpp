@@ -25,6 +25,8 @@ struct APU : Processor {
   };
 
   struct Sweep {
+    bool channel;
+
     uint8 shift;
     bool decrement;
     uint3 period;
@@ -67,7 +69,7 @@ struct APU : Processor {
     bool reload_linear;
 
     void clock_length();
-    void clock_length_counter();
+    void clock_linear_length();
     uint8 clock();
   } triangle;
 
@@ -113,10 +115,10 @@ struct APU : Processor {
   int16 dmc_triangle_noise_dac[128][16][16];
 
   static const uint8 length_counter_table[32];
-  static const uint16 ntsc_noise_period_table[16];
-  static const uint16 pal_noise_period_table[16];
   static const uint16 ntsc_dmc_period_table[16];
   static const uint16 pal_dmc_period_table[16];
+  static const uint16 ntsc_noise_period_table[16];
+  static const uint16 pal_noise_period_table[16];
 };
 
 extern APU apu;

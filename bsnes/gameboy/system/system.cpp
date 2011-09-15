@@ -33,8 +33,8 @@ void System::runthreadtosave() {
   }
 }
 
-void System::init(Interface *interface_) {
-  interface = interface_;
+void System::init() {
+  assert(interface != 0);
 }
 
 void System::load() {
@@ -48,11 +48,6 @@ void System::power() {
   apu.power();
   lcd.power();
   scheduler.init();
-
-//  cheat.reset();
-//  cheat.append(CheatCode("3EB-81B-4CA"));
-//  cheat[0].enable = true;
-//  cheat.synchronize();
 
   clocks_executed = 0;
 }

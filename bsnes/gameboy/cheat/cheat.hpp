@@ -1,12 +1,7 @@
 struct CheatCode {
-  bool enable;
-  array<unsigned> addr;
-  array<unsigned> data;
-  array<unsigned> comp;
-
-  bool operator=(const string&);
-  CheatCode(const string&);
-  CheatCode();
+  unsigned addr;
+  unsigned data;
+  unsigned comp;
 };
 
 struct Cheat : public linear_vector<CheatCode> {

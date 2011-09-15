@@ -1,10 +1,6 @@
 struct CheatCode {
-  bool enabled;
-  array<unsigned> addr;
-  array<uint8> data;
-
-  bool operator=(string);
-  CheatCode();
+  unsigned addr;
+  unsigned data;
 };
 
 class Cheat : public linear_vector<CheatCode> {
@@ -21,8 +17,8 @@ public:
   Cheat();
   ~Cheat();
 
-  static bool decode(const char*, unsigned&, uint8&, Type&);
-  static bool encode(string&, unsigned, uint8, Type);
+  static bool decode(const char*, unsigned&, unsigned&, Type&);
+  static bool encode(string&, unsigned, unsigned, Type);
 
 private:
   bool system_enabled;

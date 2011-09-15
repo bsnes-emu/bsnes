@@ -91,12 +91,12 @@ void CPU::ram_write(uint16 addr, uint8 data) {
 uint8 CPU::read(uint16 addr) {
   if(addr == 0x4016) {
     if(status.controller_port0 >= 8) return (mdr() & 0xc0) | 1;
-    return system.interface->input_poll(0, 0u, status.controller_port0++);
+    return interface->inputPoll(0, 0u, status.controller_port0++);
   }
 
   if(addr == 0x4017) {
     if(status.controller_port1 >= 8) return (mdr() & 0xc0) | 1;
-    return system.interface->input_poll(1, 0u, status.controller_port1++);
+    return interface->inputPoll(1, 0u, status.controller_port1++);
   }
 
   return apu.read(addr);

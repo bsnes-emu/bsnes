@@ -18,16 +18,16 @@ void Justifier::enter() {
     }
 
     if(next < prev) {
-      int nx1 = system.interface->input_poll(port, Input::Device::Justifier, 0, (unsigned)Input::JustifierID::X);
-      int ny1 = system.interface->input_poll(port, Input::Device::Justifier, 0, (unsigned)Input::JustifierID::Y);
+      int nx1 = interface->inputPoll(port, Input::Device::Justifier, 0, (unsigned)Input::JustifierID::X);
+      int ny1 = interface->inputPoll(port, Input::Device::Justifier, 0, (unsigned)Input::JustifierID::Y);
       nx1 += x1;
       ny1 += y1;
       x1 = max(-16, min(256 + 16, nx1));
       y1 = max(-16, min(240 + 16, ny1));
 
       if(chained == true) {
-        int nx2 = system.interface->input_poll(port, Input::Device::Justifiers, 1, (unsigned)Input::JustifierID::X);
-        int ny2 = system.interface->input_poll(port, Input::Device::Justifiers, 1, (unsigned)Input::JustifierID::Y);
+        int nx2 = interface->inputPoll(port, Input::Device::Justifiers, 1, (unsigned)Input::JustifierID::X);
+        int ny2 = interface->inputPoll(port, Input::Device::Justifiers, 1, (unsigned)Input::JustifierID::Y);
         nx2 += x2;
         ny2 += y2;
         x2 = max(-16, min(256 + 16, nx2));
@@ -48,11 +48,11 @@ uint2 Justifier::data() {
   if(counter >= 32) return 1;
 
   if(counter == 0) {
-    trigger1 = system.interface->input_poll(port, Input::Device::Justifier, 0, (unsigned)Input::JustifierID::Trigger);
-    start1   = system.interface->input_poll(port, Input::Device::Justifier, 0, (unsigned)Input::JustifierID::Start);
+    trigger1 = interface->inputPoll(port, Input::Device::Justifier, 0, (unsigned)Input::JustifierID::Trigger);
+    start1   = interface->inputPoll(port, Input::Device::Justifier, 0, (unsigned)Input::JustifierID::Start);
     if(chained) {
-      trigger2 = system.interface->input_poll(port, Input::Device::Justifiers, 1, (unsigned)Input::JustifierID::Trigger);
-      start2   = system.interface->input_poll(port, Input::Device::Justifiers, 1, (unsigned)Input::JustifierID::Start);
+      trigger2 = interface->inputPoll(port, Input::Device::Justifiers, 1, (unsigned)Input::JustifierID::Trigger);
+      start2   = interface->inputPoll(port, Input::Device::Justifiers, 1, (unsigned)Input::JustifierID::Start);
     }
   }
 

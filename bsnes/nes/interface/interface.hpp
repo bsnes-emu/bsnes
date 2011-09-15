@@ -1,7 +1,21 @@
 struct Interface {
-  virtual void video_refresh(const uint16_t *data) {}
-  virtual void audio_sample(int16_t sample) {}
-  virtual int16_t input_poll(bool port, unsigned device, unsigned id) { return 0; }
+  virtual void videoRefresh(const uint16_t *data);
+  virtual void audioSample(int16_t sample);
+  virtual int16_t inputPoll(bool port, unsigned device, unsigned id);
 
-  virtual void message(const string &text) { print(text, "\n"); }
+  virtual void initialize(Interface*);
+
+  virtual bool cartridgeLoaded();
+  virtual void loadCartridge(const string &xml, const uint8_t *data, unsigned size);
+  virtual void unloadCartridge();
+
+  virtual void power();
+  virtual void reset();
+  virtual void run();
+
+  virtual void setCheats(const lstring &list = lstring{});
+
+  virtual void message(const string &text);
 };
+
+extern Interface *interface;

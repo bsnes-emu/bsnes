@@ -79,7 +79,7 @@ void Serial::latch(bool data) {
 
 Serial::Serial(bool port) : Controller(port) {
   enable = false;
-  string basename = system.interface->path(Cartridge::Slot::Base, "");
+  string basename = interface->path(Cartridge::Slot::Base, "");
   string name = notdir(basename);
   string path = dir(basename);
   if(open(name, path)) {

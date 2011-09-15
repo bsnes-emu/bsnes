@@ -42,12 +42,13 @@ Application::Application(int argc, char **argv) : quit(false) {
   mainWindow = new MainWindow;
   fileBrowser = new FileBrowser;
   cheatEditor = new CheatEditor;
+  stateManager = new StateManager;
   utility->setMode(Interface::Mode::None);
   mainWindow->setVisible();
 
   video.driver(videoDriver);
   video.set(Video::Handle, mainWindow->viewport.handle());
-  video.set(Video::Synchronize, true);
+  video.set(Video::Synchronize, false);
   video.set(Video::Filter, 0u);
   video.init();
 
@@ -79,6 +80,7 @@ Application::Application(int argc, char **argv) : quit(false) {
 }
 
 Application::~Application() {
+  delete stateManager;
   delete cheatEditor;
   delete fileBrowser;
   delete mainWindow;

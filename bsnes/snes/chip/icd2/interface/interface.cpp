@@ -1,7 +1,7 @@
 #ifdef ICD2_CPP
 
 //called on rendered lines 0-143 (not on Vblank lines 144-153)
-void ICD2::lcd_scanline() {
+void ICD2::lcdScanline() {
   if((GameBoy::lcd.status.ly & 7) == 0) {
     lcd.row = (lcd.row + 1) & 3;
   }
@@ -10,7 +10,7 @@ void ICD2::lcd_scanline() {
   memcpy(lcd.buffer + offset, GameBoy::lcd.screen + GameBoy::lcd.status.ly * 160, 160);
 }
 
-void ICD2::joyp_write(bool p15, bool p14) {
+void ICD2::joypWrite(bool p15, bool p14) {
   //joypad handling
   if(p15 == 1 && p14 == 1) {
     if(joyp15lock == 0 && joyp14lock == 0) {
@@ -80,17 +80,14 @@ void ICD2::joyp_write(bool p15, bool p14) {
   packetlock = true;
 }
 
-void ICD2::video_refresh(const uint8_t *data) {
+void ICD2::videoRefresh(const uint8_t *data) {
 }
 
-void ICD2::audio_sample(int16_t center, int16_t left, int16_t right) {
+void ICD2::audioSample(int16_t center, int16_t left, int16_t right) {
   audio.coprocessor_sample(left, right);
 }
 
-void ICD2::input_poll() {
-}
-
-bool ICD2::input_poll(unsigned id) {
+bool ICD2::inputPoll(unsigned id) {
   GameBoy::cpu.status.mlt_req = joyp_id & mlt_req;
 
   unsigned data = 0x00;

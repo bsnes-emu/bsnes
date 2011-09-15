@@ -54,38 +54,8 @@ void Cheat::synchronize() {
   foreach(n, override) n = false;
 
   for(unsigned n = 0; n < size(); n++) {
-    const CheatCode &code = operator[](n);
-
-    for(unsigned n = 0; n < code.addr.size(); n++) {
-      override[code.addr[n]] = true;
-    }
+    override[operator[](n).addr] = true;
   }
-}
-
-bool CheatCode::operator=(const string &s) {
-  addr.reset(), data.reset(), comp.reset();
-
-  lstring list;
-  list.split("+", s);
-
-  for(unsigned n = 0; n < list.size(); n++) {
-    unsigned codeaddr, codedata, codecomp;
-    if(Cheat::decode(list[n], codeaddr, codedata, codecomp) == false) {
-      addr.reset(), data.reset(), comp.reset();
-      return false;
-    }
-    addr.append(codeaddr), data.append(codedata), comp.append(codecomp);
-  }
-
-  return true;
-}
-
-CheatCode::CheatCode(const string &s) {
-  operator=(s);
-}
-
-CheatCode::CheatCode() {
-  enable = false;
 }
 
 }

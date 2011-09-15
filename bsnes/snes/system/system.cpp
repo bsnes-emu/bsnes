@@ -63,8 +63,7 @@ void System::runthreadtosave() {
   }
 }
 
-void System::init(Interface *interface_) {
-  interface = interface_;
+void System::init() {
   assert(interface != 0);
 
   icd2.init();
@@ -241,7 +240,7 @@ void System::scanline() {
 void System::frame() {
 }
 
-System::System() : interface(0) {
+System::System() {
   region = Region::Autodetect;
   expansion = ExpansionPortDevice::BSX;
 }

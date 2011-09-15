@@ -19,7 +19,7 @@ void Audio::coprocessor_frequency(double input_frequency) {
 
 void Audio::sample(int16 left, int16 right) {
   if(coprocessor == false) {
-    system.interface->audio_sample(left, right);
+    interface->audioSample(left, right);
   } else {
     dsp_buffer[dsp_wroffset] = ((uint16)left << 0) + ((uint16)right << 16);
     dsp_wroffset = (dsp_wroffset + 1) & buffer_mask;
@@ -61,7 +61,7 @@ void Audio::flush() {
     int cop_left  = (int16)(cop_sample >>  0);
     int cop_right = (int16)(cop_sample >> 16);
 
-    system.interface->audio_sample(
+    interface->audioSample(
       sclamp<16>((dsp_left  + cop_left ) / 2),
       sclamp<16>((dsp_right + cop_right) / 2)
     );

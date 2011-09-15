@@ -45,13 +45,10 @@ uint8 Bus::read(uint16 addr) {
   uint8 data = mmio[addr]->mmio_read(addr);
 
   if(cheat.override[addr]) {
-    for(unsigned x = 0; x < cheat.size(); x++) {
-      const CheatCode &code = cheat[x];
-      for(unsigned y = 0; y < code.addr.size(); y++) {
-        if(code.addr[y] == addr) {
-          if(code.comp[y] > 255 || code.comp[y] == data) {
-            return code.data[y];
-          }
+    for(unsigned n = 0; n < cheat.size(); n++) {
+      if(cheat[n].addr == addr) {
+        if(cheat[n].comp > 255 || cheat[n].comp == data) {
+          return cheat[n].data;
         }
       }
     }

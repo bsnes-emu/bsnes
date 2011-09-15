@@ -12,7 +12,7 @@ struct Interface : public SNES::Interface {
   snes_input_state_t pinput_state;
   string basename;
 
-  void video_refresh(const uint16_t *data, bool hires, bool interlace, bool overscan) {
+  void videoRefresh(const uint16_t *data, bool hires, bool interlace, bool overscan) {
     unsigned width = hires ? 512 : 256;
     unsigned height = overscan ? 239 : 224;
     if(interlace) height <<= 1;
@@ -21,15 +21,11 @@ struct Interface : public SNES::Interface {
     if(pinput_poll) pinput_poll();
   }
 
-  void audio_sample(int16_t left, int16_t right) {
+  void audioSample(int16_t left, int16_t right) {
     if(paudio_sample) return paudio_sample(left, right);
   }
 
-  void input_poll() {
-    if(pinput_poll) return pinput_poll();
-  }
-
-  int16_t input_poll(bool port, SNES::Input::Device device, unsigned index, unsigned id) {
+  int16_t inputPoll(bool port, SNES::Input::Device device, unsigned index, unsigned id) {
     if(pinput_state) return pinput_state(port, (unsigned)device, index, id);
     return 0;
   }
@@ -86,7 +82,7 @@ void snes_set_cartridge_basename(const char *basename) {
 }
 
 void snes_init(void) {
-  SNES::system.init(&interface);
+  interface.initialize(&interface);
   SNES::input.connect(SNES::Controller::Port1, SNES::Input::Device::Joypad);
   SNES::input.connect(SNES::Controller::Port2, SNES::Input::Device::Joypad);
 }
@@ -124,15 +120,27 @@ bool snes_unserialize(const uint8_t *data, unsigned size) {
   return SNES::system.unserialize(s);
 }
 
+struct CheatList {
+  bool enable;
+  string code;
+  CheatList() : enable(false) {}
+};
+
+static linear_vector<CheatList> cheatList;
+
 void snes_cheat_reset(void) {
-  SNES::cheat.reset();
-  SNES::cheat.synchronize();
+  cheatList.reset();
+  interface.setCheats();
 }
 
-void snes_cheat_set(unsigned index, bool enabled, const char *code) {
-  SNES::cheat[index] = code;
-  SNES::cheat[index].enabled = enabled;
-  SNES::cheat.synchronize();
+void snes_cheat_set(unsigned index, bool enable, const char *code) {
+  cheatList[index].enable = enable;
+  cheatList[index].code = code;
+  lstring list;
+  for(unsigned n = 0; n < cheatList.size(); n++) {
+    if(cheatList[n].enable) list.append(cheatList[n].code);
+  }
+  interface.setCheats(list);
 }
 
 bool snes_load_cartridge_normal(

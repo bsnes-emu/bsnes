@@ -3,30 +3,20 @@ bool InterfaceNES::loadCartridge(const string &filename) {
   if(fp.open(filename, filemap::mode::read) == false) return false;
 
   interface->baseName = nall::basename(filename);
-  NES::cartridge.load("", fp.data(), fp.size());
-  NES::system.power();
+  NES::Interface::loadCartridge("", fp.data(), fp.size());
 
   fp.close();
   return true;
 }
 
 void InterfaceNES::unloadCartridge() {
-  NES::cartridge.unload();
+  NES::Interface::unloadCartridge();
   interface->baseName = "";
-}
-
-void InterfaceNES::setCheatCodes(const lstring &list) {
-  NES::cheat.reset();
-  for(unsigned n = 0; n < list.size(); n++) {
-    NES::cheat[n] = list[n];
-    NES::cheat[n].enable = true;
-  }
-  NES::cheat.synchronize();
 }
 
 //
 
-void InterfaceNES::video_refresh(const uint16_t *data) {
+void InterfaceNES::videoRefresh(const uint16_t *data) {
   interface->video_refresh();
 
   uint32_t *output;
@@ -45,7 +35,7 @@ void InterfaceNES::video_refresh(const uint16_t *data) {
   }
 }
 
-void InterfaceNES::audio_sample(int16_t sample) {
+void InterfaceNES::audioSample(int16_t sample) {
   dspaudio.sample(sample, sample);
   while(dspaudio.pending()) {
     signed lsample, rsample;
@@ -54,7 +44,7 @@ void InterfaceNES::audio_sample(int16_t sample) {
   }
 }
 
-int16_t InterfaceNES::input_poll(bool port, unsigned device, unsigned id) {
+int16_t InterfaceNES::inputPoll(bool port, unsigned device, unsigned id) {
   if(port == 0 && device == 0) {
     switch(id) {
     case 0: return interface->inputState[keyboard(0)[Keyboard::X]];

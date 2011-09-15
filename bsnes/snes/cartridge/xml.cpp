@@ -299,16 +299,16 @@ void Cartridge::xml_parse_necdsp(xml_element &root) {
     }
   }
 
-  string path = { dir(system.interface->path(Slot::Base, ".dsp")), firmware };
+  string path = { dir(interface->path(Slot::Base, ".dsp")), firmware };
   unsigned promsize = (necdsp.revision == NECDSP::Revision::uPD7725 ? 2048 : 16384);
   unsigned dromsize = (necdsp.revision == NECDSP::Revision::uPD7725 ? 1024 :  2048);
   unsigned filesize = promsize * 3 + dromsize * 2;
 
   file fp;
   if(fp.open(path, file::mode::read) == false) {
-    system.interface->message({ "Warning: NEC DSP firmware ", firmware, " is missing." });
+    interface->message({ "Warning: NEC DSP firmware ", firmware, " is missing." });
   } else if(fp.size() != filesize) {
-    system.interface->message({ "Warning: NEC DSP firmware ", firmware, " is of the wrong file size." });
+    interface->message({ "Warning: NEC DSP firmware ", firmware, " is of the wrong file size." });
     fp.close();
   } else {
     for(unsigned n = 0; n < promsize; n++) necdsp.programROM[n] = fp.readm(3);
@@ -321,7 +321,7 @@ void Cartridge::xml_parse_necdsp(xml_element &root) {
       fp.read(data, filesize);
 
       if(sha256 != nall::sha256(data, filesize)) {
-        system.interface->message({ "Warning: Hitachi DSP firmware ", firmware, " SHA256 sum is incorrect." });
+        interface->message({ "Warning: Hitachi DSP firmware ", firmware, " SHA256 sum is incorrect." });
       }
     }
 
@@ -381,12 +381,12 @@ void Cartridge::xml_parse_hitachidsp(xml_element &root) {
     }
   }
 
-  string path = { dir(system.interface->path(Slot::Base, ".dsp")), firmware };
+  string path = { dir(interface->path(Slot::Base, ".dsp")), firmware };
   file fp;
   if(fp.open(path, file::mode::read) == false) {
-    system.interface->message({ "Warning: Hitachi DSP firmware ", firmware, " is missing." });
+    interface->message({ "Warning: Hitachi DSP firmware ", firmware, " is missing." });
   } else if(fp.size() != 1024 * 3) {
-    system.interface->message({ "Warning: Hitachi DSP firmware ", firmware, " is of the wrong file size." });
+    interface->message({ "Warning: Hitachi DSP firmware ", firmware, " is of the wrong file size." });
     fp.close();
   } else {
     for(unsigned n = 0; n < 1024; n++) hitachidsp.dataROM[n] = fp.readl(3);
@@ -398,7 +398,7 @@ void Cartridge::xml_parse_hitachidsp(xml_element &root) {
       fp.read(data, 3072);
 
       if(sha256 != nall::sha256(data, 3072)) {
-        system.interface->message({ "Warning: Hitachi DSP firmware ", firmware, " SHA256 sum is incorrect." });
+        interface->message({ "Warning: Hitachi DSP firmware ", firmware, " SHA256 sum is incorrect." });
       }
     }
 

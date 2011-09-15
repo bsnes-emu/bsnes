@@ -6,21 +6,25 @@ Interface *interface = 0;
 
 bool Interface::loaded() {
   switch(mode()) {
-  case Mode::NES:     return NES::cartridge.loaded();
-  case Mode::SNES:    return SNES::cartridge.loaded();
-  case Mode::GameBoy: return GameBoy::cartridge.loaded();
-  default:            return false;
+  case Mode::NES:     return nes.cartridgeLoaded();
+  case Mode::SNES:    return snes.cartridgeLoaded();
+  case Mode::GameBoy: return gameBoy.cartridgeLoaded();
   }
+  return false;
 }
 
 bool Interface::loadCartridge(const string &filename) {
   bool result = false;
+  setCheatCodes();
   unloadCartridge();
   if(filename.endswith(".nes")) result = loadCartridgeNES(filename);
   if(filename.endswith(".sfc")) result = loadCartridgeSNES(filename);
   if(filename.endswith(".gb" )) result = loadCartridgeGameBoy(filename);
   if(filename.endswith(".gbc")) result = loadCartridgeGameBoy(filename);
-  if(result == true) cheatEditor->load({ baseName, ".cht" });
+  if(result == true) {
+    cheatEditor->load({ baseName, ".cht" });
+    stateManager->load({ baseName, ".bsa" }, 0u);
+  }
   return result;
 }
 
@@ -33,10 +37,11 @@ bool Interface::loadCartridgeNES(const string &filename) {
 void Interface::unloadCartridge() {
   if(loaded() == false) return;
   cheatEditor->save({ baseName, ".cht" });
+  stateManager->save({ baseName, ".bsa" }, 0u);
 
   switch(mode()) {
-  case Mode::NES: nes.unloadCartridge(); break;
-  case Mode::SNES: snes.unloadCartridge(); break;
+  case Mode::NES:     nes.unloadCartridge(); break;
+  case Mode::SNES:    snes.unloadCartridge(); break;
   case Mode::GameBoy: gameBoy.unloadCartridge(); break;
   }
 
@@ -72,34 +77,42 @@ void Interface::unloadCartridgeGameBoy() {
 
 void Interface::power() {
   switch(mode()) {
-  case Mode::NES:     return NES::system.power();
-  case Mode::SNES:    return SNES::system.power();
-  case Mode::GameBoy: return GameBoy::system.power();
+  case Mode::NES:     return nes.power();
+  case Mode::SNES:    return snes.power();
+  case Mode::GameBoy: return gameBoy.power();
   }
 }
 
 void Interface::reset() {
   switch(mode()) {
-  case Mode::NES:     return NES::system.reset();
-  case Mode::SNES:    return SNES::system.reset();
-  case Mode::GameBoy: return GameBoy::system.power();  //Game Boy lacks reset button
+  case Mode::NES:     return nes.reset();
+  case Mode::SNES:    return snes.reset();
+  case Mode::GameBoy: return gameBoy.power();  //Game Boy lacks reset button
   }
 }
 
 void Interface::run() {
   switch(mode()) {
-  case Mode::NES:
-    return NES::system.run();
-
-  case Mode::SNES:
-    return SNES::system.run();
-
-  case Mode::GameBoy:
-    do {
-      GameBoy::system.run();
-    } while(GameBoy::scheduler.exit_reason() != GameBoy::Scheduler::ExitReason::FrameEvent);
-    return;
+  case Mode::NES:     return nes.run();
+  case Mode::SNES:    return snes.run();
+  case Mode::GameBoy: return gameBoy.run();
   }
+}
+
+serializer Interface::serialize() {
+  switch(mode()) {
+  case Mode::SNES:    return snes.serialize();
+  case Mode::GameBoy: return gameBoy.serialize();
+  }
+  return serializer();
+}
+
+bool Interface::unserialize(serializer &s) {
+  switch(mode()) {
+  case Mode::SNES:    return snes.unserialize(s);
+  case Mode::GameBoy: return gameBoy.unserialize(s);
+  }
+  return false;
 }
 
 bool Interface::saveState(const string &filename) {
@@ -120,17 +133,17 @@ bool Interface::loadState(const string &filename) {
 
 void Interface::setCheatCodes(const lstring &list) {
   switch(mode()) {
-  case Mode::NES:     return nes.setCheatCodes(list);
-  case Mode::SNES:    return snes.setCheatCodes(list);
-  case Mode::GameBoy: return gameBoy.setCheatCodes(list);
+  case Mode::NES:     return nes.setCheats(list);
+  case Mode::SNES:    return snes.setCheats(list);
+  case Mode::GameBoy: return gameBoy.setCheats(list);
   }
 }
 
 Interface::Interface() {
   mode = Mode::None;
-  NES::system.init(&nes);
-  SNES::system.init(&snes);
-  GameBoy::system.init(&gameBoy);
+  nes.initialize(&nes);
+  snes.initialize(&snes);
+  gameBoy.initialize(&gameBoy);
 }
 
 //internal

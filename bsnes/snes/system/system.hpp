@@ -2,14 +2,13 @@ class Interface;
 
 class System : property<System> {
 public:
-  Interface *interface;
   enum class Region : unsigned { NTSC = 0, PAL = 1, Autodetect = 2 };
   enum class ExpansionPortDevice : unsigned { None = 0, BSX = 1 };
 
   void run();
   void runtosave();
 
-  void init(Interface*);
+  void init();
   void term();
   void load();
   void unload();

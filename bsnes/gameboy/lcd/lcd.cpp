@@ -57,8 +57,7 @@ void LCD::scanline() {
 }
 
 void LCD::frame() {
-  system.interface->video_refresh(screen);
-  system.interface->input_poll();
+  interface->videoRefresh(screen);
   cpu.mmio_joyp_poll();
 
   status.ly = 0;
@@ -80,7 +79,7 @@ void LCD::render() {
 
   uint8_t *output = screen + status.ly * 160;
   for(unsigned n = 0; n < 160; n++) output[n] = (3 - line[n]) * 0x55;
-  system.interface->lcd_scanline();
+  interface->lcdScanline();
 }
 
 uint16 LCD::read_tile(bool select, unsigned x, unsigned y) {

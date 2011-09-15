@@ -79,7 +79,7 @@ void Video::update() {
     }
   }
 
-  system.interface->video_refresh(ppu.surface, hires, ppu.interlace(), ppu.overscan());
+  interface->videoRefresh(ppu.surface, hires, ppu.interlace(), ppu.overscan());
 
   hires = false;
 }
