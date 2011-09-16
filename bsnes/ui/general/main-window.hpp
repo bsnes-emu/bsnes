@@ -28,6 +28,8 @@ struct MainWindow : Window {
     CheckItem settingsSynchronizeVideo;
     CheckItem settingsSynchronizeAudio;
     CheckItem settingsMuteAudio;
+    Separator settingsSeparator;
+    Item settingsConfiguration;
 
   Menu toolsMenu;
     Menu toolsStateSave;

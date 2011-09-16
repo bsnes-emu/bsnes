@@ -2,9 +2,9 @@
 
 void DSP::resampleLinear() {
   while(resampler.fraction <= 1.0) {
-    double channel[2];
+    double channel[settings.channels];
 
-    for(unsigned n = 0; n < 2; n++) {
+    for(unsigned n = 0; n < settings.channels; n++) {
       double a = buffer.read(n, -1);
       double b = buffer.read(n, -0);
 
@@ -13,7 +13,7 @@ void DSP::resampleLinear() {
       channel[n] = a * (1.0 - mu) + b * mu;
     }
 
-    resamplerWrite(channel[0], channel[1]);
+    resamplerWrite(channel);
     resampler.fraction += resampler.step;
   }
 

@@ -2,6 +2,7 @@ struct APU : Processor {
   static void Main();
   void main();
   void tick();
+  void set_irq_line();
 
   void power();
   void reset();
@@ -25,8 +26,6 @@ struct APU : Processor {
   };
 
   struct Sweep {
-    bool channel;
-
     uint8 shift;
     bool decrement;
     uint3 period;
@@ -35,7 +34,8 @@ struct APU : Processor {
     bool reload;
     unsigned rectangle_period;
 
-    void clock();
+    bool check_period();
+    void clock(unsigned channel);
   };
 
   struct Rectangle {
@@ -64,7 +64,7 @@ struct APU : Processor {
     uint11 period;
     unsigned period_counter;
 
-    uint8 step_counter;
+    uint5 step_counter;
     uint8 linear_length_counter;
     bool reload_linear;
 
@@ -89,18 +89,38 @@ struct APU : Processor {
   } noise;
 
   struct DMC {
-    bool irq;
-    bool loop;
-    unsigned period;
+    unsigned length_counter;
+    bool irq_pending;
 
-    uint8 counter;
-    uint16 addr;
-    uint16 length;
+    uint4 period;
+    unsigned period_counter;
 
+    bool irq_enable;
+    bool loop_mode;
+
+    uint8 dac_latch;
+    uint8 addr_latch;
+    uint8 length_latch;
+
+    uint15 read_addr;
+    unsigned dma_delay_counter;
+
+    uint3 bit_counter;
+    bool have_dma_buffer;
+    uint8 dma_buffer;
+
+    bool have_sample;
+    uint8 sample;
+
+    void start();
     uint8 clock();
   } dmc;
 
   struct FrameCounter {
+    enum : unsigned { NtscPeriod = 14915 };  //~(21.477MHz / 6 / 240hz)
+
+    bool irq_pending;
+
     uint2 mode;
     uint2 counter;
     signed divider;

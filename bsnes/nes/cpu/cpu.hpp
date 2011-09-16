@@ -8,6 +8,13 @@ struct CPU : Processor {
     bool nmi_pending;
     bool nmi_line;
     bool irq_line;
+    bool irq_apu_line;
+
+    bool rdy_line;
+    optional<uint16> rdy_addr;
+
+    bool oam_dma_pending;
+    uint8 oam_dma_page;
 
     bool controller_latch;
     unsigned controller_port0;
@@ -22,6 +29,8 @@ struct CPU : Processor {
   void reset();
 
   uint8 mdr() const;
+  void set_rdy_line(bool);
+  void set_rdy_addr(optional<uint16>);
 
   uint8 ram_read(uint16 addr);
   void ram_write(uint16 addr, uint8 data);
@@ -29,7 +38,7 @@ struct CPU : Processor {
   uint8 read(uint16 addr);
   void write(uint16 addr, uint8 data);
 
-  void oam_dma(uint16 addr);
+  void oam_dma();
 
 bool trace;
 };

@@ -36,11 +36,11 @@ void InterfaceNES::videoRefresh(const uint16_t *data) {
 }
 
 void InterfaceNES::audioSample(int16_t sample) {
-  dspaudio.sample(sample, sample);
+  signed samples[] = { sample };
+  dspaudio.sample(samples);
   while(dspaudio.pending()) {
-    signed lsample, rsample;
-    dspaudio.read(lsample, rsample);
-    audio.sample(lsample, rsample);
+    dspaudio.read(samples);
+    audio.sample(samples[0], samples[0]);  //NES audio output is monaural; ruby only takes stereo audio
   }
 }
 

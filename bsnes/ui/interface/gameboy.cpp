@@ -53,11 +53,11 @@ void InterfaceGameBoy::videoRefresh(const uint8_t *data) {
 }
 
 void InterfaceGameBoy::audioSample(int16_t csample, int16_t lsample, int16_t rsample) {
-  dspaudio.sample(lsample, rsample);
+  signed samples[] = { lsample, rsample };
+  dspaudio.sample(samples);
   while(dspaudio.pending()) {
-    signed lsample, rsample;
-    dspaudio.read(lsample, rsample);
-    audio.sample(lsample, rsample);
+    dspaudio.read(samples);
+    audio.sample(samples[0], samples[1]);
   }
 }
 

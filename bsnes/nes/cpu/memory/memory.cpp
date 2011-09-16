@@ -1,4 +1,15 @@
 uint8 CPU::op_read(uint16 addr) {
+  if(status.oam_dma_pending) {
+    status.oam_dma_pending = false;
+    op_read(addr);
+    oam_dma();
+  }
+
+  while(status.rdy_line == 0) {
+    regs.mdr = bus.read(status.rdy_addr ? status.rdy_addr() : addr);
+    add_clocks(12);
+  }
+
   regs.mdr = bus.read(addr);
   add_clocks(12);
   return regs.mdr;

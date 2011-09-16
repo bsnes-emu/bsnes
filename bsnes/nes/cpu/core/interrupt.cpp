@@ -17,7 +17,7 @@ L abs.h = op_read(vector++);
 }
 
 void CPU::interrupt_test() {
-  status.interrupt_pending = (status.irq_line & ~regs.p.i) | status.nmi_pending;
+  status.interrupt_pending = ((status.irq_line | status.irq_apu_line) & ~regs.p.i) | status.nmi_pending;
 }
 
 void CPU::set_nmi_line(bool line) {
@@ -29,4 +29,9 @@ void CPU::set_nmi_line(bool line) {
 void CPU::set_irq_line(bool line) {
   //level-sensitive
   status.irq_line = line;
+}
+
+void CPU::set_irq_apu_line(bool line) {
+  //level-sensitive
+  status.irq_apu_line = line;
 }

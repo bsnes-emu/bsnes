@@ -41,6 +41,7 @@ Application::Application(int argc, char **argv) : quit(false) {
 
   mainWindow = new MainWindow;
   fileBrowser = new FileBrowser;
+  settingsWindow = new SettingsWindow;
   cheatEditor = new CheatEditor;
   stateManager = new StateManager;
   utility->setMode(Interface::Mode::None);
@@ -82,6 +83,7 @@ Application::Application(int argc, char **argv) : quit(false) {
 Application::~Application() {
   delete stateManager;
   delete cheatEditor;
+  delete settingsWindow;
   delete fileBrowser;
   delete mainWindow;
   delete utility;

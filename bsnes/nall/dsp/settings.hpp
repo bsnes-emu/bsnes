@@ -1,5 +1,12 @@
 #ifdef NALL_DSP_INTERNAL_HPP
 
+void DSP::setChannels(unsigned channels) {
+  assert(channels > 0);
+  buffer.setChannels(channels);
+  output.setChannels(channels);
+  settings.channels = channels;
+}
+
 void DSP::setPrecision(unsigned precision) {
   settings.precision = precision;
   settings.intensity = 1 << (settings.precision - 1);

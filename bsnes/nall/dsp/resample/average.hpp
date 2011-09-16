@@ -9,17 +9,20 @@ void DSP::resampleAverage() {
   double scalar = 1.0;
   if(resampler.fraction > resampler.step) scalar = 1.0 - (resampler.fraction - resampler.step);
 
-  output.write(0) += buffer.read(0) * scalar;
-  output.write(1) += buffer.read(1) * scalar;
+  for(unsigned c = 0; c < settings.channels; c++) {
+    output.write(c) += buffer.read(c) * scalar;
+  }
 
   if(resampler.fraction >= resampler.step) {
-    output.write(0) /= resampler.step;
-    output.write(1) /= resampler.step;
+    for(unsigned c = 0; c < settings.channels; c++) {
+      output.write(c) /= resampler.step;
+    }
     output.wroffset++;
 
     resampler.fraction -= resampler.step;
-    output.write(0) = buffer.read(0) * resampler.fraction;
-    output.write(1) = buffer.read(1) * resampler.fraction;
+    for(unsigned c = 0; c < settings.channels; c++) {
+      output.write(c) = buffer.read(c) * resampler.fraction;
+    }
   }
 
   buffer.rdoffset++;

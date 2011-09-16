@@ -23,6 +23,7 @@ using namespace ruby;
 #include "interface/interface.hpp"
 #include "utility/utility.hpp"
 #include "general/general.hpp"
+#include "settings/settings.hpp"
 #include "tools/tools.hpp"
 
 struct Application {

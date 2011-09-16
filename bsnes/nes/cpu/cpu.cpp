@@ -70,6 +70,13 @@ void CPU::reset() {
   status.nmi_pending = false;
   status.nmi_line = 0;
   status.irq_line = 0;
+  status.irq_apu_line = 0;
+
+  status.rdy_line = 1;
+  status.rdy_addr = { false, 0x0000 };
+
+  status.oam_dma_pending = false;
+  status.oam_dma_page = 0x00;
 
   status.controller_latch = false;
   status.controller_port0 = 0;
@@ -78,6 +85,14 @@ void CPU::reset() {
 
 uint8 CPU::mdr() const {
   return regs.mdr;
+}
+
+void CPU::set_rdy_line(bool line) {
+  status.rdy_line = line;
+}
+
+void CPU::set_rdy_addr(optional<uint16> addr) {
+  status.rdy_addr = addr;
 }
 
 uint8 CPU::ram_read(uint16 addr) {
@@ -104,7 +119,8 @@ uint8 CPU::read(uint16 addr) {
 
 void CPU::write(uint16 addr, uint8 data) {
   if(addr == 0x4014) {
-    return oam_dma(data << 8);
+    status.oam_dma_page = data;
+    status.oam_dma_pending = true;
   }
 
   if(addr == 0x4016) {
@@ -118,10 +134,9 @@ void CPU::write(uint16 addr, uint8 data) {
   return apu.write(addr, data);
 }
 
-void CPU::oam_dma(uint16 addr) {
-  op_readpc();
+void CPU::oam_dma() {
   for(unsigned n = 0; n < 256; n++) {
-    uint8 data = op_read(addr + n);
+    uint8 data = op_read((status.oam_dma_page << 8) + n);
     op_write(0x2004, data);
   }
 }

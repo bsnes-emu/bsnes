@@ -5,7 +5,6 @@ struct CheatCode {
 
 class Cheat : public linear_vector<CheatCode> {
 public:
-  enum class Type : unsigned { ProActionReplay, GameGenie };
   uint8 *override;
 
   bool enabled() const;
@@ -17,8 +16,7 @@ public:
   Cheat();
   ~Cheat();
 
-  static bool decode(const char*, unsigned&, unsigned&, Type&);
-  static bool encode(string&, unsigned, unsigned, Type);
+  static bool decode(const string&, unsigned&, unsigned&);
 
 private:
   bool system_enabled;

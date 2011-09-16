@@ -28,13 +28,13 @@ void Audio::sample(int16 left, int16 right) {
   }
 }
 
-void Audio::coprocessor_sample(int16 left, int16 right) {
-  dspaudio.sample(left, right);
+void Audio::coprocessor_sample(int16 lsample, int16 rsample) {
+  signed samples[] = { lsample, rsample };
+  dspaudio.sample(samples);
   while(dspaudio.pending()) {
-    signed left, right;
-    dspaudio.read(left, right);
+    dspaudio.read(samples);
 
-    cop_buffer[cop_wroffset] = ((uint16)left << 0) + ((uint16)right << 16);
+    cop_buffer[cop_wroffset] = ((uint16)samples[0] << 0) + ((uint16)samples[1] << 16);
     cop_wroffset = (cop_wroffset + 1) & buffer_mask;
     cop_length = (cop_length + 1) & buffer_mask;
     flush();

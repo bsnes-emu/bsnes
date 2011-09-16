@@ -35,6 +35,7 @@ void interrupt();
 void interrupt_test();
 void set_nmi_line(bool);
 void set_irq_line(bool);
+void set_irq_apu_line(bool);
 
 //opcodes.cpp
 void opf_asl();

@@ -53,7 +53,21 @@ void APU::tick() {
   if(clock >= 0) co_switch(cpu.thread);
 }
 
+void APU::set_irq_line() {
+  cpu.set_irq_apu_line(frame.irq_pending || dmc.irq_pending);
+}
+
 void APU::power() {
+  for(unsigned n = 0; n < 2; n++) {
+    rectangle[n].sweep.shift = 0;
+    rectangle[n].sweep.decrement = 0;
+    rectangle[n].sweep.period = 0;
+    rectangle[n].sweep.counter = 1;
+    rectangle[n].sweep.enable = 0;
+    rectangle[n].sweep.reload = 0;
+    rectangle[n].sweep.rectangle_period = 0;
+  }
+
   reset();
 }
 
@@ -69,14 +83,6 @@ void APU::reset() {
     rectangle[n].envelope.reload_decay = 0;
     rectangle[n].envelope.decay_counter = 0;
     rectangle[n].envelope.decay_volume = 0;
-
-    rectangle[n].sweep.shift = 0;
-    rectangle[n].sweep.decrement = 0;
-    rectangle[n].sweep.period = 0;
-    rectangle[n].sweep.counter = 0;
-    rectangle[n].sweep.enable = 0;
-    rectangle[n].sweep.reload = 0;
-    rectangle[n].sweep.rectangle_period = 0;
 
     rectangle[n].duty = 0;
     rectangle[n].duty_counter = 0;
@@ -108,27 +114,44 @@ void APU::reset() {
   noise.short_mode = 0;
   noise.lfsr = 1;
 
-  dmc.irq = 0;
-  dmc.loop = 0;
+  dmc.length_counter = 0;
+  dmc.irq_pending = 0;
+
   dmc.period = 0;
-  dmc.counter = 0;
-  dmc.addr = 0xc000;
-  dmc.length = 1;
+  dmc.period_counter = ntsc_dmc_period_table[0];
+  dmc.irq_enable = 0;
+  dmc.loop_mode = 0;
+  dmc.dac_latch = 0;
+  dmc.addr_latch = 0;
+  dmc.length_latch = 0;
+  dmc.read_addr = 0;
+  dmc.dma_delay_counter = 0;
+  dmc.bit_counter = 0;
+  dmc.have_dma_buffer = 0;
+  dmc.dma_buffer = 0;
+  dmc.have_sample = 0;
+  dmc.sample = 0;
+
+  frame.irq_pending = 0;
 
   frame.mode = 0;
   frame.counter = 0;
   frame.divider = 1;
 
   enabled_channels = 0;
+//cpu.set_alu_irq_line(frame.irq_pending || dmc.irq_pending);
 }
 
 uint8 APU::read(uint16 addr) {
   if(addr == 0x4015) {
     uint8 result = 0x00;
-    result |= rectangle[0].length_counter ? 1 : 0;
-    result |= rectangle[1].length_counter ? 2 : 0;
-    result |=     triangle.length_counter ? 4 : 0;
-    result |=        noise.length_counter ? 8 : 0;
+    result |= rectangle[0].length_counter ? 0x01 : 0;
+    result |= rectangle[1].length_counter ? 0x02 : 0;
+    result |=     triangle.length_counter ? 0x04 : 0;
+    result |=        noise.length_counter ? 0x08 : 0;
+    result |=          dmc.length_counter ? 0x10 : 0;
+    result |=           frame.irq_pending ? 0x40 : 0;
+    result |=             dmc.irq_pending ? 0x80 : 0;
     return result;
   }
 
@@ -148,7 +171,7 @@ void APU::write(uint16 addr, uint8 data) {
 
   case 0x4001: case 0x4005:
     rectangle[r].sweep.enable = data & 0x80;
-    rectangle[r].sweep.period = (data >> 4) & 7;
+    rectangle[r].sweep.period = (data & 0x70) >> 4;
     rectangle[r].sweep.decrement = data & 0x08;
     rectangle[r].sweep.shift = data & 0x07;
     rectangle[r].sweep.reload = true;
@@ -216,20 +239,24 @@ void APU::write(uint16 addr, uint8 data) {
     break;
 
   case 0x4010:
-    dmc.irq = data & 0x80;
-    dmc.loop = data & 0x40;
-    dmc.period = ntsc_dmc_period_table[data & 0x0f];
+    dmc.irq_enable = data & 0x80;
+    dmc.loop_mode = data & 0x40;
+    dmc.period = data & 0x0f;
+
+    dmc.irq_pending = dmc.irq_pending && dmc.irq_enable && !dmc.loop_mode;
+    set_irq_line();
+    break;
 
   case 0x4011:
-    dmc.counter = data & 0x7f;
+    dmc.dac_latch = data & 0x7f;
     break;
 
   case 0x4012:
-    dmc.addr = 0xc000 | (data << 6);
+    dmc.addr_latch = data;
     break;
 
   case 0x4013:
-    dmc.length = (data << 4) | 1;
+    dmc.length_latch = data;
     break;
 
   case 0x4015:
@@ -237,6 +264,12 @@ void APU::write(uint16 addr, uint8 data) {
     if((data & 0x02) == 0) rectangle[1].length_counter = 0;
     if((data & 0x04) == 0)     triangle.length_counter = 0;
     if((data & 0x08) == 0)        noise.length_counter = 0;
+    if((data & 0x10) == 0)          dmc.length_counter = 0;
+
+    if((data & 0x10) && dmc.length_counter == 0) dmc.start();
+    dmc.irq_pending = false;
+    set_irq_line();
+
     enabled_channels = data & 0x1f;
     break;
 
@@ -245,20 +278,34 @@ void APU::write(uint16 addr, uint8 data) {
 
     frame.counter = 0;
     if(frame.mode & 2) clock_frame_counter();
-    frame.divider = 14915;
+    if(frame.mode & 1) {
+      frame.irq_pending = false;
+      set_irq_line();
+    }
+    frame.divider = FrameCounter::NtscPeriod;
     break;
   }
 }
 
-void APU::Sweep::clock() {
+bool APU::Sweep::check_period() {
+  if(rectangle_period > 0x7ff) return false;
+
+  if(decrement == 0) {
+    if((rectangle_period + (rectangle_period >> shift)) & 0x800) return false;
+  }
+
+  return true;
+}
+
+void APU::Sweep::clock(unsigned channel) {
   if(--counter == 0) {
     counter = period + 1;
-    if(enable & shift && rectangle_period > 8) {
+    if(enable && shift && rectangle_period > 8) {
       signed delta = rectangle_period >> shift;
 
       if(decrement) {
-        //first rectangle decrements by one extra
-        rectangle_period -= delta + (channel == 0);
+        rectangle_period -= delta;
+        if(channel == 0) rectangle_period--;
       } else if((rectangle_period + delta) < 0x800) {
         rectangle_period += delta;
       }
@@ -272,7 +319,7 @@ void APU::Sweep::clock() {
 }
 
 unsigned APU::Envelope::volume() const {
-  return use_speed_as_volume ? speed :decay_volume;
+  return use_speed_as_volume ? speed : decay_volume;
 }
 
 void APU::Envelope::clock() {
@@ -295,24 +342,13 @@ void APU::Rectangle::clock_length() {
   }
 }
 
-bool APU::Rectangle::check_period() {
-  const unsigned raw_period = sweep.rectangle_period;
-
-  if(raw_period < 0x008 || raw_period > 0x7ff) return false;
-
-  if(sweep.decrement == 0) {
-    if((raw_period + (raw_period >> sweep.shift)) & 0x800) return false;
-  }
-
-  return true;
-}
-
 uint8 APU::Rectangle::clock() {
-  if(check_period() == false) return 0;
+  if(sweep.check_period() == false) return 0;
   if(length_counter == 0) return 0;
 
   static const unsigned duty_table[] = { 1, 2, 4, 6 };
   uint8 result = (duty_counter < duty_table[duty]) ? envelope.volume() : 0;
+  if(sweep.rectangle_period < 0x008) result = 0;
 
   if(--period_counter == 0) {
     period_counter = (sweep.rectangle_period + 1) * 2;
@@ -340,11 +376,11 @@ void APU::Triangle::clock_linear_length() {
 
 uint8 APU::Triangle::clock() {
   uint8 result = step_counter & 0x0f;
-  if(step_counter & 0x10) result ^= 0x0f;
+  if((step_counter & 0x10) == 0) result ^= 0x0f;
   if(length_counter == 0 || linear_length_counter == 0) return result;
 
   if(--period_counter == 0) {
-    step_counter = (step_counter + 1) & 0x1f;
+    step_counter++;
     period_counter = period + 1;
   }
 
@@ -378,8 +414,63 @@ uint8 APU::Noise::clock() {
   return result;
 }
 
+void APU::DMC::start() {
+  read_addr = 0x4000 + (addr_latch << 6);
+  length_counter = (length_latch << 4) + 1;
+}
+
 uint8 APU::DMC::clock() {
-  uint8 result = counter;
+  uint8 result = dac_latch;
+
+  if(dma_delay_counter > 0) {
+    dma_delay_counter--;
+
+    if(dma_delay_counter == 1) {
+      cpu.set_rdy_addr({ true, uint16(0x8000 | read_addr) });
+    } else if(dma_delay_counter == 0) {
+      cpu.set_rdy_line(1);
+      cpu.set_rdy_addr({ false, 0u });
+
+      dma_buffer = cpu.mdr();
+      have_dma_buffer = true;
+      length_counter--;
+      read_addr++;
+
+      if(length_counter == 0) {
+        if(loop_mode) {
+          start();
+        } else if(irq_enable) {
+          irq_pending = true;
+          apu.set_irq_line();
+        }
+      }
+    }
+  }
+
+  if(--period_counter == 0) {
+    if(have_sample) {
+      signed delta = (((sample >> bit_counter) & 1) << 2) - 2;
+      unsigned data = dac_latch + delta;
+      if((data & 0x80) == 0) dac_latch = data;
+    }
+
+    if(++bit_counter == 0) {
+      if(have_dma_buffer) {
+        have_sample = true;
+        sample = dma_buffer;
+        have_dma_buffer = false;
+      } else {
+        have_sample = false;
+      }
+    }
+
+    period_counter = ntsc_dmc_period_table[period];
+  }
+
+  if(length_counter > 0 && have_dma_buffer == false && dma_delay_counter == 0) {
+    cpu.set_rdy_line(0);
+    dma_delay_counter = 4;
+  }
 
   return result;
 }
@@ -389,9 +480,9 @@ void APU::clock_frame_counter() {
 
   if(frame.counter & 1) {
     rectangle[0].clock_length();
-    rectangle[0].sweep.clock();
+    rectangle[0].sweep.clock(0);
     rectangle[1].clock_length();
-    rectangle[1].sweep.clock();
+    rectangle[1].sweep.clock(1);
     triangle.clock_length();
     noise.clock_length();
   }
@@ -402,7 +493,11 @@ void APU::clock_frame_counter() {
   noise.envelope.clock();
 
   if(frame.counter == 0) {
-    if(frame.mode & 2) frame.divider += 14195;
+    if(frame.mode & 2) frame.divider += FrameCounter::NtscPeriod;
+    if(frame.mode == 0) {
+      frame.irq_pending = true;
+      set_irq_line();
+    }
   }
 }
 
@@ -410,14 +505,11 @@ void APU::clock_frame_counter_divider() {
   frame.divider -= 2;
   if(frame.divider <= 0) {
     clock_frame_counter();
-    frame.divider += 14195;
+    frame.divider += FrameCounter::NtscPeriod;
   }
 }
 
 APU::APU() {
-  rectangle[0].sweep.channel = 0;
-  rectangle[1].sweep.channel = 1;
-
   for(unsigned amp = 0; amp < 32; amp++) {
     if(amp == 0) {
       rectangle_dac[amp] = 0;

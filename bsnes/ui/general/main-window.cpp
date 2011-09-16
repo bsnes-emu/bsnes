@@ -30,6 +30,7 @@ MainWindow::MainWindow() {
     settingsSynchronizeAudio.setText("Synchronize Audio");
     settingsSynchronizeAudio.setChecked();
     settingsMuteAudio.setText("Mute Audio");
+    settingsConfiguration.setText("Configuration ...");
 
   toolsMenu.setText("Tools");
     toolsStateSave.setText("Save State");
@@ -78,6 +79,8 @@ MainWindow::MainWindow() {
     settingsMenu.append(settingsSynchronizeVideo);
     settingsMenu.append(settingsSynchronizeAudio);
     settingsMenu.append(settingsMuteAudio);
+    settingsMenu.append(settingsSeparator);
+    settingsMenu.append(settingsConfiguration);
 
   append(toolsMenu);
     toolsMenu.append(toolsStateSave);
@@ -154,6 +157,8 @@ MainWindow::MainWindow() {
   settingsMuteAudio.onTick = [&] {
     dspaudio.setVolume(settingsMuteAudio.checked() ? 0.0 : 1.0);
   };
+
+  settingsConfiguration.onTick = [&] { settingsWindow->setVisible(); };
 
   toolsStateSave1.onTick = [&] { interface->saveState({ interface->baseName, "-1.bst" }); };
   toolsStateSave2.onTick = [&] { interface->saveState({ interface->baseName, "-2.bst" }); };

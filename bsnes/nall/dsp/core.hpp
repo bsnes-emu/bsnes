@@ -15,6 +15,7 @@ struct DSP {
     Average,
   };
 
+  inline void setChannels(unsigned channels);
   inline void setPrecision(unsigned precision);
   inline void setFrequency(double frequency);  //inputFrequency
   inline void setVolume(double volume);
@@ -23,9 +24,9 @@ struct DSP {
   inline void setResampler(Resampler resampler);
   inline void setResamplerFrequency(double frequency);  //outputFrequency
 
-  inline void sample(signed lchannel, signed rchannel);
+  inline void sample(signed channel[]);
   inline bool pending();
-  inline void read(signed &lchannel, signed &rchannel);
+  inline void read(signed channel[]);
 
   inline void clear();
   inline DSP();
@@ -33,6 +34,7 @@ struct DSP {
 
 protected:
   struct Settings {
+    unsigned channels;
     unsigned precision;
     double frequency;
     double volume;
@@ -50,7 +52,7 @@ protected:
   } resampler;
 
   inline void resamplerRun();
-  inline void resamplerWrite(double lchannel, double rchannel);
+  inline void resamplerWrite(double channel[]);
 
   inline void resamplePoint();
   inline void resampleLinear();
@@ -70,9 +72,10 @@ protected:
 
 #include "settings.hpp"
 
-void DSP::sample(signed lchannel, signed rchannel) {
-  buffer.write(0) = (double)lchannel / settings.intensity;
-  buffer.write(1) = (double)rchannel / settings.intensity;
+void DSP::sample(signed channel[]) {
+  for(unsigned c = 0; c < settings.channels; c++) {
+    buffer.write(c) = (double)channel[c] / settings.intensity;
+  }
   buffer.wroffset++;
   resamplerRun();
 }
@@ -81,12 +84,13 @@ bool DSP::pending() {
   return output.rdoffset != output.wroffset;
 }
 
-void DSP::read(signed &lchannel, signed &rchannel) {
+void DSP::read(signed channel[]) {
   adjustVolume();
   adjustBalance();
 
-  lchannel = clamp(settings.precision, output.read(0) * settings.intensity);
-  rchannel = clamp(settings.precision, output.read(1) * settings.intensity);
+  for(unsigned c = 0; c < settings.channels; c++) {
+    channel[c] = clamp(settings.precision, output.read(0) * settings.intensity);
+  }
   output.rdoffset++;
 }
 
@@ -101,9 +105,10 @@ void DSP::resamplerRun() {
   }
 }
 
-void DSP::resamplerWrite(double lchannel, double rchannel) {
-  output.write(0) = lchannel;
-  output.write(1) = rchannel;
+void DSP::resamplerWrite(double channel[]) {
+  for(unsigned c = 0; c < settings.channels; c++) {
+    output.write(c) = channel[c];
+  }
   output.wroffset++;
 }
 
@@ -115,11 +120,13 @@ void DSP::resamplerWrite(double lchannel, double rchannel) {
 #include "resample/average.hpp"
 
 void DSP::adjustVolume() {
-  output.read(0) *= settings.volume;
-  output.read(1) *= settings.volume;
+  for(unsigned c = 0; c < settings.channels; c++) {
+    output.read(c) *= settings.volume;
+  }
 }
 
 void DSP::adjustBalance() {
+  if(settings.channels != 2) return;  //TODO: support > 2 channels
   if(settings.balance < 0.0) output.read(1) *= 1.0 + settings.balance;
   if(settings.balance > 0.0) output.read(0) *= 1.0 - settings.balance;
 }
@@ -137,6 +144,7 @@ void DSP::clear() {
 }
 
 DSP::DSP() {
+  setChannels(2);
   setPrecision(16);
   setFrequency(44100.0);
   setVolume(1.0);

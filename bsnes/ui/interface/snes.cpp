@@ -69,11 +69,11 @@ void InterfaceSNES::videoRefresh(const uint16_t *data, bool hires, bool interlac
 }
 
 void InterfaceSNES::audioSample(int16_t lsample, int16_t rsample) {
-  dspaudio.sample(lsample, rsample);
+  signed samples[] = { lsample, rsample };
+  dspaudio.sample(samples);
   while(dspaudio.pending()) {
-    signed lsample, rsample;
-    dspaudio.read(lsample, rsample);
-    audio.sample(lsample, rsample);
+    dspaudio.read(samples);
+    audio.sample(samples[0], samples[1]);
   }
 }
 

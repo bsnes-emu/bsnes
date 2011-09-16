@@ -2,9 +2,9 @@
 
 void DSP::resampleCubic() {
   while(resampler.fraction <= 1.0) {
-    double channel[2];
+    double channel[settings.channels];
 
-    for(unsigned n = 0; n < 2; n++) {
+    for(unsigned n = 0; n < settings.channels; n++) {
       double a = buffer.read(n, -3);
       double b = buffer.read(n, -2);
       double c = buffer.read(n, -1);
@@ -20,7 +20,7 @@ void DSP::resampleCubic() {
       channel[n] = A * (mu * 3) + B * (mu * 2) + C * mu + D;
     }
 
-    resamplerWrite(channel[0], channel[1]);
+    resamplerWrite(channel);
     resampler.fraction += resampler.step;
   }
 

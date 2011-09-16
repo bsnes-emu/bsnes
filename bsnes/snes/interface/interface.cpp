@@ -61,8 +61,7 @@ void Interface::setCheats(const lstring &list) {
     codelist.split("+", code);
     foreach(part, codelist) {
       unsigned addr, data;
-      Cheat::Type type;
-      if(Cheat::decode(part, addr, data, type)) {
+      if(Cheat::decode(part, addr, data)) {
         cheat.append({ addr, data });
       }
     }

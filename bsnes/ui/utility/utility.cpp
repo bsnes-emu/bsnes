@@ -18,18 +18,21 @@ void Utility::setMode(Interface::Mode mode) {
   else if(mode == Interface::Mode::NES) {
     mainWindow->setTitle({ notdir(interface->baseName), " - ", NES::Info::Name, " v", NES::Info::Version });
     mainWindow->nesMenu.setVisible(true);
+    dspaudio.setChannels(1);
     dspaudio.setFrequency(315.0 / 88.8 * 6000000.0 / 12.0);
   }
 
   else if(mode == Interface::Mode::SNES) {
     mainWindow->setTitle({ notdir(interface->baseName), " - ", SNES::Info::Name, " v", SNES::Info::Version });
     mainWindow->snesMenu.setVisible(true);
+    dspaudio.setChannels(2);
     dspaudio.setFrequency(32040.0);
   }
 
   else if(mode == Interface::Mode::GameBoy) {
     mainWindow->setTitle({ notdir(interface->baseName), " - ", GameBoy::Info::Name, " v", GameBoy::Info::Version });
     mainWindow->gameBoyMenu.setVisible(true);
+    dspaudio.setChannels(2);
     dspaudio.setFrequency(4194304.0);
   }
 
