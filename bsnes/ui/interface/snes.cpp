@@ -78,23 +78,7 @@ void InterfaceSNES::audioSample(int16_t lsample, int16_t rsample) {
 }
 
 int16_t InterfaceSNES::inputPoll(bool port, SNES::Input::Device device, unsigned index, unsigned id) {
-  if(port == 0 && device == SNES::Input::Device::Joypad) {
-    switch((SNES::Input::JoypadID)id) {
-    case SNES::Input::JoypadID::Up:     return interface->inputState[keyboard(0)[Keyboard::Up]];
-    case SNES::Input::JoypadID::Down:   return interface->inputState[keyboard(0)[Keyboard::Down]];
-    case SNES::Input::JoypadID::Left:   return interface->inputState[keyboard(0)[Keyboard::Left]];
-    case SNES::Input::JoypadID::Right:  return interface->inputState[keyboard(0)[Keyboard::Right]];
-    case SNES::Input::JoypadID::B:      return interface->inputState[keyboard(0)[Keyboard::Z]];
-    case SNES::Input::JoypadID::A:      return interface->inputState[keyboard(0)[Keyboard::X]];
-    case SNES::Input::JoypadID::Y:      return interface->inputState[keyboard(0)[Keyboard::A]];
-    case SNES::Input::JoypadID::X:      return interface->inputState[keyboard(0)[Keyboard::S]];
-    case SNES::Input::JoypadID::L:      return interface->inputState[keyboard(0)[Keyboard::D]];
-    case SNES::Input::JoypadID::R:      return interface->inputState[keyboard(0)[Keyboard::C]];
-    case SNES::Input::JoypadID::Select: return interface->inputState[keyboard(0)[Keyboard::Apostrophe]];
-    case SNES::Input::JoypadID::Start:  return interface->inputState[keyboard(0)[Keyboard::Return]];
-    }
-  }
-
+  if(port == 0 && device == SNES::Input::Device::Joypad) return inputManager->snes.port1.gamepad.poll(id);
   return 0;
 }
 

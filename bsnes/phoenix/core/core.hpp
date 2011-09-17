@@ -152,7 +152,7 @@ struct Window : private nall::base_from_member<pWindow&>, Object {
   void setTitle(const nall::string &text);
   void setVisible(bool visible = true);
   void setWidgetFont(const nall::string &font);
-  void synchronize();
+  void synchronizeLayout();
 
   Window();
   ~Window();
@@ -256,7 +256,7 @@ struct Layout : private nall::base_from_member<pLayout&>, Sizable {
   virtual void append(Sizable &sizable);
   virtual void remove(Sizable &sizable);
   virtual void reset() {}
-  virtual void synchronize() = 0;
+  virtual void synchronizeLayout() = 0;
 
   Layout();
   Layout(pLayout &p);

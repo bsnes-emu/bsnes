@@ -1,13 +1,13 @@
 void HorizontalLayout::append(Sizable &sizable, unsigned width, unsigned height, unsigned spacing) {
   foreach(child, children) if(child.sizable == &sizable) return;
   children.append({ &sizable, width, height, spacing });
-  synchronize();
+  synchronizeLayout();
 }
 
 void HorizontalLayout::append(Sizable &sizable) {
   foreach(child, children) if(child.sizable == &sizable) return;
   Layout::append(sizable);
-  if(window()) window()->synchronize();
+  if(window()) window()->synchronizeLayout();
 }
 
 bool HorizontalLayout::enabled() {
@@ -114,7 +114,7 @@ void HorizontalLayout::setVisible(bool visible) {
   }
 }
 
-void HorizontalLayout::synchronize() {
+void HorizontalLayout::synchronizeLayout() {
   foreach(child, children) Layout::append(*child.sizable);
 }
 

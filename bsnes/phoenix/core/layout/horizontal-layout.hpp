@@ -10,7 +10,7 @@ struct HorizontalLayout : public Layout {
   void setGeometry(const Geometry &geometry);
   void setMargin(unsigned margin);
   void setVisible(bool visible = true);
-  void synchronize();
+  void synchronizeLayout();
   bool visible();
   HorizontalLayout();
   ~HorizontalLayout();

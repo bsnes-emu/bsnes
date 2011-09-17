@@ -144,7 +144,7 @@ void Window::append(Layout &layout) {
     ((Sizable&)layout).state.window = this;
     ((Sizable&)layout).state.layout = 0;
     p.append(layout);
-    layout.synchronize();
+    layout.synchronizeLayout();
   }
 }
 
@@ -159,7 +159,7 @@ void Window::append(Widget &widget) {
   if(state.widget.append(widget)) {
     ((Sizable&)widget).state.window = this;
     p.append(widget);
-    synchronize();
+    synchronizeLayout();
   }
 }
 
@@ -286,7 +286,7 @@ void Window::setWidgetFont(const string &font) {
   return p.setWidgetFont(font);
 }
 
-void Window::synchronize() {
+void Window::synchronizeLayout() {
   setGeometry(geometry());
 }
 
@@ -509,7 +509,7 @@ void Layout::append(Sizable &sizable) {
 
   if(dynamic_cast<Layout*>(&sizable)) {
     Layout &layout = (Layout&)sizable;
-    layout.synchronize();
+    layout.synchronizeLayout();
   }
 
   if(dynamic_cast<Widget*>(&sizable)) {
@@ -517,7 +517,7 @@ void Layout::append(Sizable &sizable) {
     if(sizable.window()) sizable.window()->append(widget);
   }
 
-  if(window()) window()->synchronize();
+  if(window()) window()->synchronizeLayout();
 }
 
 void Layout::remove(Sizable &sizable) {
@@ -529,7 +529,7 @@ void Layout::remove(Sizable &sizable) {
   sizable.state.layout = 0;
   sizable.state.window = 0;
 
-  if(window()) window()->synchronize();
+  if(window()) window()->synchronizeLayout();
 }
 
 Layout::Layout():

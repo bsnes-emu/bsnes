@@ -4,7 +4,7 @@ Application *application = 0;
 nall::DSP dspaudio;
 
 void Application::run() {
-  interface->input_poll();
+  inputManager->scan();
 
   if(interface->loaded() == false) {
     usleep(20 * 1000);
@@ -22,9 +22,16 @@ Application::Application(int argc, char **argv) : quit(false) {
     realpath = path;
     unused = ::userpath(path);
     userpath = path;
+    #if defined(PLATFORM_WIN)
+    userpath.append("batch/");
+    #else
+    userpath.append(".config/batch/");
+    #endif
+    mkdir(userpath, 0755);
   }
   config = new Config;
   interface = new Interface;
+  inputManager = new InputManager;
   utility = new Utility;
 
   title = "batch";
@@ -33,10 +40,12 @@ Application::Application(int argc, char **argv) : quit(false) {
   string videoDriver = "Direct3D", audioDriver = "XAudio2", inputDriver = "RawInput";
   normalFont = "Tahoma, 8";
   boldFont = "Tahoma, 8, Bold";
+  titleFont = "Tahoma, 16, Bold";
   #else
   string videoDriver = "OpenGL", audioDriver = "PulseAudio", inputDriver = "SDL";
   normalFont = "Sans, 8";
   boldFont = "Sans, 8, Bold";
+  titleFont = "Sans, 16, Bold";
   #endif
 
   mainWindow = new MainWindow;
@@ -49,7 +58,7 @@ Application::Application(int argc, char **argv) : quit(false) {
 
   video.driver(videoDriver);
   video.set(Video::Handle, mainWindow->viewport.handle());
-  video.set(Video::Synchronize, false);
+  video.set(Video::Synchronize, true);
   video.set(Video::Filter, 0u);
   video.init();
 
@@ -87,6 +96,7 @@ Application::~Application() {
   delete fileBrowser;
   delete mainWindow;
   delete utility;
+  delete inputManager;
   delete interface;
   delete config;
 }

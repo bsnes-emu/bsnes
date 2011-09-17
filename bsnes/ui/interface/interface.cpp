@@ -149,13 +149,6 @@ Interface::Interface() {
 //internal
 
 void Interface::input_poll() {
-  bool fullScreen = inputState[keyboard(0)[Keyboard::F11]];
-
-  input.poll(inputState);
-
-  if(!fullScreen && inputState[keyboard(0)[Keyboard::F11]]) {
-    utility->toggleFullScreen();
-  }
 }
 
 void Interface::video_refresh() {

@@ -8,7 +8,7 @@ struct FixedLayout : Layout {
   void setEnabled(bool enabled = true);
   void setGeometry(const Geometry &geometry);
   void setVisible(bool visible = true);
-  void synchronize();
+  void synchronizeLayout();
   bool visible();
   FixedLayout();
   ~FixedLayout();

@@ -121,6 +121,8 @@
     *path = 0;
     struct passwd *userinfo = getpwuid(getuid());
     if(userinfo) strcpy(path, userinfo->pw_dir);
+    unsigned length = strlen(path);
+    if(path[length] != '/') strcpy(path + length, "/");
     return path;
   }
 

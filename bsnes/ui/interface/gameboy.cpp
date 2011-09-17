@@ -62,16 +62,5 @@ void InterfaceGameBoy::audioSample(int16_t csample, int16_t lsample, int16_t rsa
 }
 
 bool InterfaceGameBoy::inputPoll(unsigned id) {
-  switch((GameBoy::Input)id) {
-  case GameBoy::Input::Up:     return interface->inputState[keyboard(0)[Keyboard::Up]];
-  case GameBoy::Input::Down:   return interface->inputState[keyboard(0)[Keyboard::Down]];
-  case GameBoy::Input::Left:   return interface->inputState[keyboard(0)[Keyboard::Left]];
-  case GameBoy::Input::Right:  return interface->inputState[keyboard(0)[Keyboard::Right]];
-  case GameBoy::Input::B:      return interface->inputState[keyboard(0)[Keyboard::Z]];
-  case GameBoy::Input::A:      return interface->inputState[keyboard(0)[Keyboard::X]];
-  case GameBoy::Input::Select: return interface->inputState[keyboard(0)[Keyboard::Apostrophe]];
-  case GameBoy::Input::Start:  return interface->inputState[keyboard(0)[Keyboard::Return]];
-  }
-
-  return false;
+  return inputManager->gameBoy.device.controller.poll(id);
 }

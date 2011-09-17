@@ -48,7 +48,8 @@ uint8 Bus::read(uint16 addr) {
     for(unsigned n = 0; n < cheat.size(); n++) {
       if(cheat[n].addr == addr) {
         if(cheat[n].comp > 255 || cheat[n].comp == data) {
-          return cheat[n].data;
+          data = cheat[n].data;
+          break;
         }
       }
     }

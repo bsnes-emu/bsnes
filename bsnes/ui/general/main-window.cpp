@@ -19,6 +19,8 @@ MainWindow::MainWindow() {
     snesPower.setText("Power Cycle");
     snesReset.setText("Reset");
     snesCartridgeUnload.setText("Unload Cartridge");
+    snesPort1.setText("Controller Port 1");
+    snesPort2.setText("Controller Port 2");
 
   gameBoyMenu.setText("Game Boy");
     gameBoyPower.setText("Power Cycle");
@@ -26,7 +28,7 @@ MainWindow::MainWindow() {
 
   settingsMenu.setText("Settings");
     settingsSynchronizeVideo.setText("Synchronize Video");
-    settingsSynchronizeVideo.setChecked(false);
+    settingsSynchronizeVideo.setChecked();
     settingsSynchronizeAudio.setText("Synchronize Audio");
     settingsSynchronizeAudio.setChecked();
     settingsMuteAudio.setText("Mute Audio");
@@ -67,8 +69,11 @@ MainWindow::MainWindow() {
   append(snesMenu);
     snesMenu.append(snesPower);
     snesMenu.append(snesReset);
-    snesMenu.append(snesSeparator);
+    snesMenu.append(snesSeparator1);
     snesMenu.append(snesCartridgeUnload);
+    snesMenu.append(snesSeparator2);
+    snesMenu.append(snesPort1);
+    snesMenu.append(snesPort2);
 
   append(gameBoyMenu);
     gameBoyMenu.append(gameBoyPower);

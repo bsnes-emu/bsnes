@@ -19,7 +19,7 @@ void Utility::setMode(Interface::Mode mode) {
     mainWindow->setTitle({ notdir(interface->baseName), " - ", NES::Info::Name, " v", NES::Info::Version });
     mainWindow->nesMenu.setVisible(true);
     dspaudio.setChannels(1);
-    dspaudio.setFrequency(315.0 / 88.8 * 6000000.0 / 12.0);
+    dspaudio.setFrequency(315.0 / 88.0 * 6000000.0 / 12.0);
   }
 
   else if(mode == Interface::Mode::SNES) {

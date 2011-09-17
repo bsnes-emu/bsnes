@@ -4,7 +4,7 @@
 namespace NES {
   namespace Info {
     static const char Name[] = "bnes";
-    static const char Version[] = "000.10";
+    static const char Version[] = "000.11";
   }
 }
 

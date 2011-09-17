@@ -1,5 +1,7 @@
 void pComboBox::append(const string &text) {
+  locked = true;
   qtComboBox->addItem(QString::fromUtf8(text));
+  locked = false;
 }
 
 Geometry pComboBox::minimumGeometry() {
@@ -10,7 +12,9 @@ Geometry pComboBox::minimumGeometry() {
 }
 
 void pComboBox::reset() {
+  locked = true;
   while(qtComboBox->count()) qtComboBox->removeItem(0);
+  locked = false;
 }
 
 unsigned pComboBox::selection() {
@@ -45,7 +49,6 @@ void pComboBox::orphan() {
 }
 
 void pComboBox::onChange() {
-  if(locked == true) return;
   comboBox.state.selection = selection();
-  if(comboBox.onChange) comboBox.onChange();
+  if(locked == false && comboBox.onChange) comboBox.onChange();
 }

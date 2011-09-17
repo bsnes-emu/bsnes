@@ -1,6 +1,6 @@
 void FixedLayout::append(Sizable &sizable, const Geometry &geometry) {
   children.append({ &sizable, geometry });
-  synchronize();
+  synchronizeLayout();
 }
 
 void FixedLayout::append(Sizable &sizable) {
@@ -55,7 +55,7 @@ void FixedLayout::setVisible(bool visible) {
   }
 }
 
-void FixedLayout::synchronize() {
+void FixedLayout::synchronizeLayout() {
   foreach(child, children) {
     Layout::append(*child.sizable);
     child.sizable->setGeometry(child.geometry);

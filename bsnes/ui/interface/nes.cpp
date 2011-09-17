@@ -45,19 +45,7 @@ void InterfaceNES::audioSample(int16_t sample) {
 }
 
 int16_t InterfaceNES::inputPoll(bool port, unsigned device, unsigned id) {
-  if(port == 0 && device == 0) {
-    switch(id) {
-    case 0: return interface->inputState[keyboard(0)[Keyboard::X]];
-    case 1: return interface->inputState[keyboard(0)[Keyboard::Z]];
-    case 2: return interface->inputState[keyboard(0)[Keyboard::Apostrophe]];
-    case 3: return interface->inputState[keyboard(0)[Keyboard::Return]];
-    case 4: return interface->inputState[keyboard(0)[Keyboard::Up]];
-    case 5: return interface->inputState[keyboard(0)[Keyboard::Down]];
-    case 6: return interface->inputState[keyboard(0)[Keyboard::Left]];
-    case 7: return interface->inputState[keyboard(0)[Keyboard::Right]];
-    }
-  }
-
+  if(port == 0 && device == 0) return inputManager->nes.port1.gamepad.poll(id);
   return 0;
 }
 

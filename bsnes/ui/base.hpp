@@ -21,6 +21,7 @@ using namespace ruby;
 
 #include "config/config.hpp"
 #include "interface/interface.hpp"
+#include "input/input.hpp"
 #include "utility/utility.hpp"
 #include "general/general.hpp"
 #include "settings/settings.hpp"
@@ -35,6 +36,7 @@ struct Application {
   string title;
   string normalFont;
   string boldFont;
+  string titleFont;
 
   void run();
   Application(int argc, char **argv);

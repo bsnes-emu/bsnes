@@ -71,19 +71,21 @@ bool Cheat::decode(const string &code, unsigned &addr, unsigned &data) {
 
   #define ischr(n) ((n >= '0' && n <= '9') || (n >= 'a' && n <= 'f'))
 
-  if(strlen(t) == 8 || (strlen(t) == 9 && t[6] == ':')) {
+  if(t.wildcard("??????:??")) {
     //Pro Action Replay
-    if(strlen(t) == 9 && t[6] == ':') t = { substr(t, 0, 6), substr(t, 7) };  //strip ':'
-    for(unsigned i = 0; i < 8; i++) if(!ischr(t[i])) return false;  //validate input
+    t = { substr(t, 0, 6), substr(t, 7, 2) };
+    for(unsigned n = 0; n < 8; n++) if(!ischr(t[n])) return false;  //validate input
     unsigned r = hex(t);
 
     addr = r >> 8;
     data = r & 0xff;
     return true;
-  } else if(strlen(t) == 9 && t[4] == '-') {
+  }
+
+  if(t.wildcard("????" "-" "????")) {
     //Game Genie
-    t = { substr(t, 0, 4), substr(t, 5) };  //strip '-'
-    for(unsigned i = 0; i < 8; i++) if(!ischr(t[i])) return false;  //validate input
+    t = { substr(t, 0, 4), substr(t, 5, 4) };
+    for(unsigned n = 0; n < 8; n++) if(!ischr(t[n])) return false;  //validate input
     t.transform("df4709156bc8a23e", "0123456789abcdef");
     unsigned r = hex(t);
     static unsigned bits[] = { 13, 12, 11, 10, 5, 4, 3, 2, 23, 22, 21, 20, 1, 0, 15, 14, 19, 18, 17, 16, 9, 8, 7, 6 };

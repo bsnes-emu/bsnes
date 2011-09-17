@@ -31,7 +31,6 @@ struct Interface : property<Interface> {
 
   Interface();
 
-  int16_t inputState[Scancode::Limit];
   void input_poll();
   void video_refresh();
 

@@ -16,8 +16,11 @@ struct MainWindow : Window {
   Menu snesMenu;
     Item snesPower;
     Item snesReset;
-    Separator snesSeparator;
+    Separator snesSeparator1;
     Item snesCartridgeUnload;
+    Separator snesSeparator2;
+    Menu snesPort1;
+    Menu snesPort2;
 
   Menu gameBoyMenu;
     Item gameBoyPower;

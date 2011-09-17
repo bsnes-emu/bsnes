@@ -1,13 +1,13 @@
 void VerticalLayout::append(Sizable &sizable, unsigned width, unsigned height, unsigned spacing) {
   foreach(child, children) if(child.sizable == &sizable) return;
   children.append({ &sizable, width, height, spacing });
-  synchronize();
+  synchronizeLayout();
 }
 
 void VerticalLayout::append(Sizable &sizable) {
   foreach(child, children) if(child.sizable == &sizable) return;
   Layout::append(sizable);
-  if(window()) window()->synchronize();
+  if(window()) window()->synchronizeLayout();
 }
 
 bool VerticalLayout::enabled() {
@@ -118,7 +118,7 @@ void VerticalLayout::setVisible(bool visible) {
   }
 }
 
-void VerticalLayout::synchronize() {
+void VerticalLayout::synchronizeLayout() {
   foreach(child, children) Layout::append(*child.sizable);
 }
 
