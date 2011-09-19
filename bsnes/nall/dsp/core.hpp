@@ -89,7 +89,7 @@ void DSP::read(signed channel[]) {
   adjustBalance();
 
   for(unsigned c = 0; c < settings.channels; c++) {
-    channel[c] = clamp(settings.precision, output.read(0) * settings.intensity);
+    channel[c] = clamp(settings.precision, output.read(c) * settings.intensity);
   }
   output.rdoffset++;
 }

@@ -3,6 +3,8 @@ struct Interface {
   virtual void audioSample(int16_t sample);
   virtual int16_t inputPoll(bool port, unsigned device, unsigned id);
 
+  virtual void connect(bool port, Input::Device device);
+
   virtual void initialize(Interface*);
 
   virtual bool cartridgeLoaded();

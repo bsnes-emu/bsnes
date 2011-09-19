@@ -105,13 +105,15 @@ void CPU::ram_write(uint16 addr, uint8 data) {
 
 uint8 CPU::read(uint16 addr) {
   if(addr == 0x4016) {
-    if(status.controller_port0 >= 8) return (mdr() & 0xc0) | 1;
-    return interface->inputPoll(0, 0u, status.controller_port0++);
+    return (mdr() & 0xc0) | input.data(0);
+//    if(status.controller_port0 >= 8) return (mdr() & 0xc0) | 1;
+//    return interface->inputPoll(0, 0u, status.controller_port0++);
   }
 
   if(addr == 0x4017) {
-    if(status.controller_port1 >= 8) return (mdr() & 0xc0) | 1;
-    return interface->inputPoll(1, 0u, status.controller_port1++);
+    return (mdr() & 0xc0) | input.data(1);
+//    if(status.controller_port1 >= 8) return (mdr() & 0xc0) | 1;
+//    return interface->inputPoll(1, 0u, status.controller_port1++);
   }
 
   return apu.read(addr);
@@ -124,11 +126,12 @@ void CPU::write(uint16 addr, uint8 data) {
   }
 
   if(addr == 0x4016) {
-    status.controller_latch = data & 0x01;
-    if(status.controller_latch) {
-      status.controller_port0 = 0;
-      status.controller_port1 = 0;
-    }
+    input.latch(data & 0x01);
+//    status.controller_latch = data & 0x01;
+//    if(status.controller_latch) {
+//      status.controller_port0 = 0;
+//      status.controller_port1 = 0;
+//    }
   }
 
   return apu.write(addr, data);

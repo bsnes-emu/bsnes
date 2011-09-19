@@ -1,3 +1,18 @@
+void InterfaceNES::setController(bool port, unsigned device) {
+  if(port == 0) config->nes.controllerPort1Device = device;
+  if(port == 1) config->nes.controllerPort2Device = device;
+
+  if(port == 0) switch(device) {
+  case 0: return connect(0, NES::Input::Device::None);
+  case 1: return connect(0, NES::Input::Device::Joypad);
+  }
+
+  if(port == 1) switch(device) {
+  case 0: return connect(1, NES::Input::Device::None);
+  case 1: return connect(1, NES::Input::Device::Joypad);
+  }
+}
+
 bool InterfaceNES::loadCartridge(const string &filename) {
   filemap fp;
   if(fp.open(filename, filemap::mode::read) == false) return false;
@@ -17,7 +32,7 @@ void InterfaceNES::unloadCartridge() {
 //
 
 void InterfaceNES::videoRefresh(const uint16_t *data) {
-  interface->video_refresh();
+  interface->videoRefresh();
 
   uint32_t *output;
   unsigned outpitch;

@@ -6,7 +6,10 @@ nall::DSP dspaudio;
 void Application::run() {
   inputManager->scan();
 
-  if(interface->loaded() == false) {
+  autopause = (mainWindow->focused() == false && config->input.focusPolicy == 2);
+
+  if(interface->loaded() == false || autopause) {
+    audio.clear();
     usleep(20 * 1000);
     return;
   }
@@ -34,48 +37,50 @@ Application::Application(int argc, char **argv) : quit(false) {
   inputManager = new InputManager;
   utility = new Utility;
 
-  title = "batch";
+  title = "bsnes";
 
   #if defined(PLATFORM_WIN)
-  string videoDriver = "Direct3D", audioDriver = "XAudio2", inputDriver = "RawInput";
   normalFont = "Tahoma, 8";
   boldFont = "Tahoma, 8, Bold";
   titleFont = "Tahoma, 16, Bold";
   #else
-  string videoDriver = "OpenGL", audioDriver = "PulseAudio", inputDriver = "SDL";
   normalFont = "Sans, 8";
   boldFont = "Sans, 8, Bold";
   titleFont = "Sans, 16, Bold";
   #endif
 
+  windowManager = new WindowManager;
   mainWindow = new MainWindow;
   fileBrowser = new FileBrowser;
   settingsWindow = new SettingsWindow;
   cheatEditor = new CheatEditor;
   stateManager = new StateManager;
+  windowManager->loadGeometry();
+
   utility->setMode(Interface::Mode::None);
   mainWindow->setVisible();
 
-  video.driver(videoDriver);
+  video.driver(config->video.driver);
   video.set(Video::Handle, mainWindow->viewport.handle());
-  video.set(Video::Synchronize, true);
-  video.set(Video::Filter, 0u);
+  video.set(Video::Synchronize, config->video.synchronize);
+  video.set(Video::Filter, config->video.smooth == false ? 0u : 1u);
   video.init();
+  utility->bindVideoShader();
 
-  audio.driver(audioDriver);
+  audio.driver(config->audio.driver);
   audio.set(Audio::Handle, mainWindow->viewport.handle());
-  audio.set(Audio::Synchronize, true);
+  audio.set(Audio::Synchronize, config->audio.synchronize);
   audio.set(Audio::Latency, 60u);
   audio.set(Audio::Frequency, 48000u);
   audio.init();
 
   dspaudio.setPrecision(16);
-  dspaudio.setVolume(1.0);
+  dspaudio.setVolume(config->audio.mute == false ? 1.0 : 0.0);
   dspaudio.setBalance(0.0);
   dspaudio.setResampler(DSP::Resampler::Average);
   dspaudio.setResamplerFrequency(48000.0);
 
-  input.driver(inputDriver);
+  input.driver(config->input.driver);
   input.set(Input::Handle, mainWindow->viewport.handle());
   input.init();
 
@@ -87,6 +92,7 @@ Application::Application(int argc, char **argv) : quit(false) {
   }
 
   interface->unloadCartridge();
+  windowManager->saveGeometry();
 }
 
 Application::~Application() {
@@ -95,6 +101,7 @@ Application::~Application() {
   delete settingsWindow;
   delete fileBrowser;
   delete mainWindow;
+  delete windowManager;
   delete utility;
   delete inputManager;
   delete interface;

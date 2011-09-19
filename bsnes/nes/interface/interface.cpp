@@ -19,6 +19,10 @@ void Interface::initialize(Interface *derived_interface) {
   system.init();
 }
 
+void Interface::connect(bool port, Input::Device device) {
+  input.connect(port, device);
+}
+
 bool Interface::cartridgeLoaded() {
   return cartridge.loaded();
 }

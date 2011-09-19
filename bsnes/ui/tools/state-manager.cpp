@@ -3,6 +3,7 @@ StateManager *stateManager = 0;
 StateManager::StateManager() {
   setTitle("State Manager");
   setGeometry({ 128, 128, 600, 360 });
+  windowManager->append(this, "StateManager");
 
   stateList.setHeaderText("Slot", "Description");
   stateList.setHeaderVisible();

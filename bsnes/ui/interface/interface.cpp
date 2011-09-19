@@ -4,6 +4,27 @@
 #include "gameboy.cpp"
 Interface *interface = 0;
 
+void Interface::bindControllers() {
+  switch(mode()) {
+  case Mode::NES:
+    nes.setController(0, config->nes.controllerPort1Device);
+    nes.setController(1, config->nes.controllerPort2Device);
+    break;
+
+  case Mode::SNES:
+    snes.setController(0, config->snes.controllerPort1Device);
+    snes.setController(1, config->snes.controllerPort2Device);
+    break;
+  }
+}
+
+void Interface::setController(unsigned port, unsigned device) {
+  switch(mode()) {
+  case Mode::NES: return nes.setController(port, device);
+  case Mode::SNES: return snes.setController(port, device);
+  }
+}
+
 bool Interface::loaded() {
   switch(mode()) {
   case Mode::NES:     return nes.cartridgeLoaded();
@@ -22,6 +43,7 @@ bool Interface::loadCartridge(const string &filename) {
   if(filename.endswith(".gb" )) result = loadCartridgeGameBoy(filename);
   if(filename.endswith(".gbc")) result = loadCartridgeGameBoy(filename);
   if(result == true) {
+    bindControllers();
     cheatEditor->load({ baseName, ".cht" });
     stateManager->load({ baseName, ".bsa" }, 0u);
   }
@@ -148,10 +170,7 @@ Interface::Interface() {
 
 //internal
 
-void Interface::input_poll() {
-}
-
-void Interface::video_refresh() {
+void Interface::videoRefresh() {
   static unsigned frameCounter = 0;
   static time_t previous, current;
   frameCounter++;

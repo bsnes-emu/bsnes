@@ -2,19 +2,22 @@ FileBrowser *fileBrowser = 0;
 
 FileBrowser::FileBrowser() {
   setGeometry({ 128, 128, 640, 400 });
-  setWidgetFont(application->normalFont);
-
-  pathBrowse.setText("Browse ...");
-  pathUp.setText("..");
+  windowManager->append(this, "FileBrowser");
 
   layout.setMargin(5);
+  pathBrowse.setText("Browse ...");
+  pathUp.setText("..");
+  openButton.setText("Open");
 
   append(layout);
     layout.append(pathLayout, ~0, 0, 5);
       pathLayout.append(pathEdit, ~0, 0, 5);
       pathLayout.append(pathBrowse, 0, 0, 5);
       pathLayout.append(pathUp, 0, 0);
-    layout.append(fileList, ~0, ~0);
+    layout.append(fileList, ~0, ~0, 5);
+    layout.append(controlLayout, ~0, 0);
+      controlLayout.append(filterLabel, ~0, 0, 5);
+      controlLayout.append(openButton, 80, 0);
 
   pathEdit.onActivate = [&] {
     string path = pathEdit.text();
@@ -36,12 +39,9 @@ FileBrowser::FileBrowser() {
     setPath(path);
   };
 
-  fileList.onActivate = { &FileBrowser::fileListActivate, this };
+  fileList.onActivate = openButton.onTick = { &FileBrowser::fileListActivate, this };
 
-  char path[PATH_MAX];
-  auto unused = getcwd(path);
-  strcpy(path, "/media/sdb1/root/nes_images/");
-  setPath(path);
+  setPath(config->path.last);
 }
 
 void FileBrowser::open(const string &title, const lstring &filterList, function<void (string)> callback) {
@@ -50,10 +50,17 @@ void FileBrowser::open(const string &title, const lstring &filterList, function<
 
   setTitle(title);
   setPath(activePath);
+
+  string filterText = "Files of type: ";
+  foreach(filter, filterList) filterText.append(filter, ", ");
+  filterText.trim<1>(", ");
+  filterLabel.setText(filterText);
+
   setVisible();
 }
 
 void FileBrowser::setPath(const string &path) {
+  config->path.last = path;
   activePath = path;
   pathEdit.setText(activePath);
 

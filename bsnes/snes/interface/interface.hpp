@@ -6,6 +6,8 @@ public:
 
   virtual void initialize(Interface*);
 
+  virtual void connect(bool port, Input::Device device);
+
   virtual bool cartridgeLoaded();
   virtual void loadCartridge(const string &xml, const uint8_t *data, unsigned size);
   virtual void unloadCartridge();

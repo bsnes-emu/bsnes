@@ -10,17 +10,24 @@ struct MainWindow : Window {
   Menu nesMenu;
     Item nesPower;
     Item nesReset;
-    Separator nesSeparator;
+    Separator nesSeparator1;
+    Menu nesPort1;
+      RadioItem nesPort1Device[2];
+    Menu nesPort2;
+      RadioItem nesPort2Device[2];
+    Separator nesSeparator2;
     Item nesCartridgeUnload;
 
   Menu snesMenu;
     Item snesPower;
     Item snesReset;
     Separator snesSeparator1;
-    Item snesCartridgeUnload;
-    Separator snesSeparator2;
     Menu snesPort1;
+      RadioItem snesPort1Device[4];
     Menu snesPort2;
+      RadioItem snesPort2Device[8];
+    Separator snesSeparator2;
+    Item snesCartridgeUnload;
 
   Menu gameBoyMenu;
     Item gameBoyPower;
@@ -28,10 +35,14 @@ struct MainWindow : Window {
     Item gameBoyCartridgeUnload;
 
   Menu settingsMenu;
+    Menu settingsVideoShaders;
+      RadioItem *settingsVideoShader;
+    Separator settingsSeparator1;
     CheckItem settingsSynchronizeVideo;
     CheckItem settingsSynchronizeAudio;
+    CheckItem settingsSmoothVideo;
     CheckItem settingsMuteAudio;
-    Separator settingsSeparator;
+    Separator settingsSeparator2;
     Item settingsConfiguration;
 
   Menu toolsMenu;
@@ -47,10 +58,13 @@ struct MainWindow : Window {
       Item toolsStateLoad3;
       Item toolsStateLoad4;
       Item toolsStateLoad5;
-    Separator toolsSeparator;
+    Separator toolsSeparator1;
+    Item toolsCaptureMouse;
     Item toolsShrinkWindow;
+    Separator toolsSeparator2;
     Item toolsCheatEditor;
     Item toolsStateManager;
+    Separator toolsSeparator3;
     CheckItem toolsTest;
 
   Menu helpMenu;
@@ -58,6 +72,12 @@ struct MainWindow : Window {
 
   void synchronize();
   MainWindow();
+
+private:
+  unsigned videoShaderCount;
+  lstring videoShaderName;
+
+  void setupVideoShaders();
 };
 
 extern MainWindow *mainWindow;

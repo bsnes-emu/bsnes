@@ -1,5 +1,5 @@
 struct AbstractInput {
-  enum class Type : unsigned { Button, Axis, HatUp, HatDown, HatLeft, HatRight, AxisLo, AxisHi } type;
+  enum class Type : unsigned { Button, MouseButton, MouseAxis, HatUp, HatDown, HatLeft, HatRight, Axis, AxisLo, AxisHi } type;
   string name;
   string mapping;
   unsigned scancode;
@@ -12,6 +12,7 @@ struct AbstractInput {
 
 struct AnalogInput : AbstractInput {
   bool bind(int16_t scancode, int16_t value);
+  int16_t poll();
 };
 
 struct DigitalInput : AbstractInput {

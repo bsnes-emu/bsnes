@@ -95,3 +95,9 @@ void Utility::toggleFullScreen() {
   fullScreen ^= 1;
   resizeMainWindow();
 }
+
+void Utility::bindVideoShader() {
+  string data;
+  data.readfile(config->video.shader);
+  video.set(Video::Shader, (const char*)data);
+}

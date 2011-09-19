@@ -133,6 +133,7 @@ struct Window : private nall::base_from_member<pWindow&>, Object {
   Geometry frameGeometry();
   Geometry frameMargin();
   bool focused();
+  bool fullScreen();
   Geometry geometry();
   void ignore();
   void remove(Layout &layout);

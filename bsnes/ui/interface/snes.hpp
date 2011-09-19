@@ -1,4 +1,6 @@
 struct InterfaceSNES : SNES::Interface {
+  void setController(bool port, unsigned device);
+
   bool loadCartridge(const string &filename);
   void unloadCartridge();
 

@@ -184,6 +184,10 @@ bool Window::focused() {
   return p.focused();
 }
 
+bool Window::fullScreen() {
+  return state.fullScreen;
+}
+
 Geometry Window::geometry() {
   return p.geometry();
 }

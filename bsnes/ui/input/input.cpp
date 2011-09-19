@@ -12,6 +12,8 @@ void AbstractInput::attach(const string &primaryName, const string &secondaryNam
 }
 
 void AbstractInput::bind() {
+  if(mapping == "") type = Type::Button, mapping = "None";
+
        if(mapping.endswith(".Up")) type = Type::HatUp;
   else if(mapping.endswith(".Down")) type = Type::HatDown;
   else if(mapping.endswith(".Left")) type = Type::HatLeft;
@@ -19,7 +21,8 @@ void AbstractInput::bind() {
   else if(mapping.endswith(".Lo")) type = Type::AxisLo;
   else if(mapping.endswith(".Hi")) type = Type::AxisHi;
   else if(mapping.beginswith("JP") && mapping.position("Axis")) type = Type::Axis;
-  else if(mapping.beginswith("MS") && mapping.endswith("axis")) type = Type::Axis;
+  else if(mapping.beginswith("MS") && mapping.endswith("axis")) type = Type::MouseAxis;
+  else if(mapping.beginswith("MS")) type = Type::MouseButton;
   else type = Type::Button;
 
   string decode = mapping;
@@ -28,6 +31,7 @@ void AbstractInput::bind() {
 }
 
 int16_t AbstractInput::poll() {
+  if(config->input.focusPolicy == 1 && mainWindow->focused() == false) return 0;
   return inputManager->scancode[inputManager->activeScancode][scancode];
 }
 
@@ -35,18 +39,11 @@ int16_t AbstractInput::poll() {
 
 bool AnalogInput::bind(int16_t scancode, int16_t value) {
   string encode = Scancode::encode(scancode);
+  Type type = Type::Button;
 
-  if(Mouse::isAnyAxis(scancode)) {
-    for(unsigned n = 0; n < Mouse::Count; n++) {
-      if(scancode == mouse(n)[Mouse::Xaxis]) { encode.append(".Xaxis"); goto bind; }
-      if(scancode == mouse(n)[Mouse::Yaxis]) { encode.append(".Yaxis"); goto bind; }
-      if(scancode == mouse(n)[Mouse::Zaxis]) { encode.append(".Zaxis"); goto bind; }
-    }
-  }
-
-  if(Joypad::isAnyAxis(scancode)) {
-    goto bind;
-  }
+  if(scancode == Scancode::None) goto bind;
+  if(Mouse::isAnyAxis(scancode)) { type = Type::MouseAxis; goto bind; }
+  if(Joypad::isAnyAxis(scancode)) { type = Type::Axis; goto bind; }
 
   return false;
 
@@ -54,18 +51,36 @@ bind:
   mapping = encode;
   this->scancode = scancode;
   this->type = Type::Axis;
+  return true;
+}
+
+int16_t AnalogInput::poll() {
+  int16_t value = AbstractInput::poll();
+  switch(type) {
+  case Type::MouseAxis: return input.acquired() ? value : 0;
+  case Type::Axis:      return value;
+  }
+  return 0;
 }
 
 //
 
 bool DigitalInput::bind(int16_t scancode, int16_t value) {
   string encode = Scancode::encode(scancode);
-  Type type;
+  Type type = Type::Button;
+
+  if(scancode == Scancode::None) goto bind;
 
   if(Keyboard::isAnyKey(scancode) || Keyboard::isAnyModifier(scancode) || Joypad::isAnyButton(scancode)) {
     if(value == 0) return false;
     type = Type::Button;
-    goto bind;    
+    goto bind;
+  }
+
+  if(Mouse::isAnyButton(scancode)) {
+    if(value == 0) return false;
+    type = Type::MouseButton;
+    goto bind;
   }
 
   if(Joypad::isAnyHat(scancode)) {
@@ -92,13 +107,14 @@ bind:
 int16_t DigitalInput::poll() {
   int16_t value = AbstractInput::poll();
   switch(type) {
-  case Type::Button: return (bool)(value);
-  case Type::HatUp: return (bool)(value & Joypad::HatUp);
-  case Type::HatDown: return (bool)(value & Joypad::HatDown);
-  case Type::HatLeft: return (bool)(value & Joypad::HatLeft);
-  case Type::HatRight: return (bool)(value & Joypad::HatRight);
-  case Type::AxisLo: return (bool)(value < -16384);
-  case Type::AxisHi: return (bool)(value > +16384);
+  case Type::Button:      return (bool)(value);
+  case Type::MouseButton: return (bool)(value & input.acquired());
+  case Type::HatUp:       return (bool)(value & Joypad::HatUp);
+  case Type::HatDown:     return (bool)(value & Joypad::HatDown);
+  case Type::HatLeft:     return (bool)(value & Joypad::HatLeft);
+  case Type::HatRight:    return (bool)(value & Joypad::HatRight);
+  case Type::AxisLo:      return (bool)(value < -16384);
+  case Type::AxisHi:      return (bool)(value > +16384);
   }
   return 0;
 }
@@ -157,9 +173,13 @@ void InputManager::scan() {
 
   for(unsigned n = 0; n < Scancode::Limit; n++) {
     if(scancode[!activeScancode][n] != scancode[activeScancode][n]) {
-      inputSettings->inputEvent(n, scancode[activeScancode][n]);
-      userInterface.inputEvent(n, scancode[activeScancode][n]);
+      if(settingsWindow->focused()) inputSettings->inputEvent(n, scancode[activeScancode][n]);
+      if(mainWindow->focused()) userInterface.inputEvent(n, scancode[activeScancode][n]);
     }
+  }
+
+  if(scancode[activeScancode][keyboard(0)[Keyboard::Escape]]) {
+    if(mainWindow->fullScreen() == false && input.acquired()) input.unacquire();
   }
 }
 

@@ -139,7 +139,7 @@ void APU::reset() {
   frame.divider = 1;
 
   enabled_channels = 0;
-//cpu.set_alu_irq_line(frame.irq_pending || dmc.irq_pending);
+  set_irq_line();
 }
 
 uint8 APU::read(uint16 addr) {
@@ -152,6 +152,10 @@ uint8 APU::read(uint16 addr) {
     result |=          dmc.length_counter ? 0x10 : 0;
     result |=           frame.irq_pending ? 0x40 : 0;
     result |=             dmc.irq_pending ? 0x80 : 0;
+
+    frame.irq_pending = false;
+    set_irq_line();
+
     return result;
   }
 

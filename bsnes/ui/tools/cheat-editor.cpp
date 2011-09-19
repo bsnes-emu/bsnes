@@ -3,6 +3,7 @@ CheatEditor *cheatEditor = 0;
 CheatEditor::CheatEditor() {
   setTitle("Cheat Editor");
   setGeometry({ 128, 128, 600, 360 });
+  windowManager->append(this, "CheatEditor");
 
   cheatList.setHeaderText("Slot", "Code", "Description");
   cheatList.setHeaderVisible();

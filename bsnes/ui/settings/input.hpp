@@ -1,13 +1,16 @@
 struct InputSettings : VerticalLayout {
   Label title;
   HorizontalLayout selectionLayout;
-  ComboBox primary;
-  ComboBox secondary;
-  ComboBox tertiary;
+    ComboBox primary;
+    ComboBox secondary;
+    ComboBox tertiary;
   ListView inputList;
   HorizontalLayout controlLayout;
-  Widget spacer;
-  Button clearButton;
+    Button assignPrimary;
+    Button assignSecondary;
+    Button assignTertiary;
+    Widget spacer;
+    Button clearButton;
 
   InputSettings();
 
@@ -15,8 +18,10 @@ struct InputSettings : VerticalLayout {
   void primaryChange();
   void secondaryChange();
   void tertiaryChange();
-  void assignInputBegin();
-  void inputEvent(int16_t scancode, int16_t value);
+  void assignInput();
+  void assignMouseInput(unsigned);
+  void clearInput();
+  void inputEvent(int16_t scancode, int16_t value, bool allowMouseInput = false);
 
 private:
   AbstractInput *activeInput;

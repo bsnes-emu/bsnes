@@ -23,12 +23,14 @@ using namespace ruby;
 #include "interface/interface.hpp"
 #include "input/input.hpp"
 #include "utility/utility.hpp"
+#include "window/window.hpp"
 #include "general/general.hpp"
 #include "settings/settings.hpp"
 #include "tools/tools.hpp"
 
 struct Application {
   bool quit;
+  bool autopause;
 
   string realpath;
   string userpath;

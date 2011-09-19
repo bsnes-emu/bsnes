@@ -33,7 +33,7 @@ bool InterfaceGameBoy::loadState(const string &filename) {
 //
 
 void InterfaceGameBoy::videoRefresh(const uint8_t *data) {
-  interface->video_refresh();
+  interface->videoRefresh();
 
   uint32_t *output;
   unsigned outpitch;

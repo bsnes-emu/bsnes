@@ -6,6 +6,9 @@ struct Interface : property<Interface> {
   enum class Mode : unsigned { None, SNES, NES, GameBoy };
   readonly<Mode> mode;
 
+  void bindControllers();
+  void setController(unsigned port, unsigned device);
+
   bool loaded();
 
   bool loadCartridge(const string &filename);
@@ -31,8 +34,7 @@ struct Interface : property<Interface> {
 
   Interface();
 
-  void input_poll();
-  void video_refresh();
+  void videoRefresh();
 
   string baseName;  // = "/path/to/cartridge" (no extension)
 

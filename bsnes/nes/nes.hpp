@@ -4,7 +4,7 @@
 namespace NES {
   namespace Info {
     static const char Name[] = "bnes";
-    static const char Version[] = "000.11";
+    static const char Version[] = "000.12";
   }
 }
 
@@ -98,9 +98,9 @@ namespace NES {
     inline Processor() : thread(0) {}
   };
 
-  #include <nes/interface/interface.hpp>
   #include <nes/system/system.hpp>
   #include <nes/scheduler/scheduler.hpp>
+  #include <nes/input/input.hpp>
   #include <nes/mapper/mapper.hpp>
   #include <nes/cartridge/cartridge.hpp>
   #include <nes/memory/memory.hpp>
@@ -108,6 +108,7 @@ namespace NES {
   #include <nes/apu/apu.hpp>
   #include <nes/ppu/ppu.hpp>
   #include <nes/cheat/cheat.hpp>
+  #include <nes/interface/interface.hpp>
 }
 
 #endif
