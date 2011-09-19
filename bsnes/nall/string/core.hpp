@@ -135,6 +135,19 @@ optional<unsigned> lstring::find(const char *key) const {
   return { false, 0 };
 }
 
+bool lstring::operator==(const lstring &source) const {
+  if(this == &source) return true;
+  if(size() != source.size()) return false;
+  for(unsigned n = 0; n < size(); n++) {
+    if(operator[](n) != source[n]) return false;
+  }
+  return true;
+}
+
+bool lstring::operator!=(const lstring &source) const {
+  return !operator==(source);
+}
+
 inline lstring::lstring() {
 }
 

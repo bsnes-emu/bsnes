@@ -27,13 +27,13 @@ FileBrowser::FileBrowser() {
   };
 
   pathBrowse.onTick = [&] {
-    string path = OS::folderSelect(*this, activePath);
+    string path = OS::folderSelect(*this, mode->path);
     if(path != "") setPath(path);
   };
 
   pathUp.onTick = [&] {
-    if(activePath == "/") return;
-    string path = activePath;
+    if(mode->path == "/") return;
+    string path = mode->path;
     path.rtrim<1>("/");
     path = dir(path);
     setPath(path);
@@ -41,18 +41,36 @@ FileBrowser::FileBrowser() {
 
   fileList.onActivate = openButton.onTick = { &FileBrowser::fileListActivate, this };
 
-  setPath(config->path.last);
+  filterModes[Mode::Default    ] = { "Default",     "", { "*" } };
+  filterModes[Mode::NES        ] = { "NES",         "", { "*.nes" } };
+  filterModes[Mode::SNES       ] = { "SNES",        "", { "*.sfc" } };
+  filterModes[Mode::GameBoy    ] = { "GameBoy",     "", { "*.gb", "*.gbc" } };
+  filterModes[Mode::Satellaview] = { "Satellaview", "", { "*.bs" } };
+  filterModes[Mode::SufamiTurbo] = { "SufamiTurbo", "", { "*.st" } };
+  mode = &filterModes[Mode::Default];
+
+  foreach(mode, filterModes) config.attach(mode.path, mode.name);
+  config.load(string{ application->userpath, "paths.cfg" });
+  config.save(string{ application->userpath, "paths.cfg" });
 }
 
-void FileBrowser::open(const string &title, const lstring &filterList, function<void (string)> callback) {
-  this->callback = callback;
-  this->filterList = filterList;
+FileBrowser::~FileBrowser() {
+  config.save(string{ application->userpath, "paths.cfg" });
+}
+
+void FileBrowser::open(const string &title, unsigned requestedMode, function<void (string)> requestedCallback) {
+  callback = requestedCallback;
+  if(mode == &filterModes[requestedMode]) {
+    setVisible();
+    return;
+  }
+  mode = &filterModes[requestedMode];
 
   setTitle(title);
-  setPath(activePath);
+  setPath(mode->path);
 
   string filterText = "Files of type: ";
-  foreach(filter, filterList) filterText.append(filter, ", ");
+  foreach(filter, mode->filter) filterText.append(filter, ", ");
   filterText.trim<1>(", ");
   filterLabel.setText(filterText);
 
@@ -60,9 +78,9 @@ void FileBrowser::open(const string &title, const lstring &filterList, function<
 }
 
 void FileBrowser::setPath(const string &path) {
-  config->path.last = path;
-  activePath = path;
-  pathEdit.setText(activePath);
+  mode->path = path;
+  if(mode->path == "") mode->path = application->basepath;
+  pathEdit.setText(mode->path);
 
   fileList.reset();
   fileNameList.reset();
@@ -71,8 +89,11 @@ void FileBrowser::setPath(const string &path) {
   foreach(fileName, contentsList) {
     if(fileName.endswith("/")) {
       fileNameList.append(fileName);
-    } else foreach(filter, filterList) {
-      if(fileName.wildcard(filter)) fileNameList.append(fileName);
+    } else foreach(filter, mode->filter) {
+      if(fileName.wildcard(filter)) {
+        fileNameList.append(fileName);
+        break;
+      }
     }
   }
 
@@ -84,8 +105,39 @@ void FileBrowser::setPath(const string &path) {
 void FileBrowser::fileListActivate() {
   unsigned selection = fileList.selection();
   string fileName = fileNameList[selection];
-  if(fileName.endswith("/")) return setPath({ activePath, fileName });
+  if(fileName.endswith("/")) {
+    if(loadFolder({ mode->path, fileName })) return;
+    return setPath({ mode->path, fileName });
+  }
+  loadFile({ mode->path, fileName });
+}
 
-  if(callback) callback({ activePath, fileName });
+bool FileBrowser::loadFolder(const string &requestedPath) {
+  bool accept = false;
+  string path = requestedPath;
+  path.rtrim<1>("/");
+  foreach(filter, mode->filter) {
+    if(path.wildcard(filter)) accept = true;
+  }
+  if(accept == false) return false;
+
+  lstring contentsList = directory::contents(requestedPath);
+  lstring fileNameList;
+  foreach(fileName, contentsList) {
+    foreach(filter, mode->filter) {
+      if(fileName.wildcard(filter)) {
+        fileNameList.append(fileName);
+        break;
+      }
+    }
+  }
+
+  if(fileNameList.size() != 1) return false;
+  loadFile({ requestedPath, fileNameList[0] });
+  return true;
+}
+
+void FileBrowser::loadFile(const string &filename) {
+  if(callback) callback(filename);
   setVisible(false);
 }

@@ -3,6 +3,10 @@ void HotkeyGeneral::inputEvent(int16_t scancode, int16_t value) {
     utility->toggleFullScreen();
   }
 
+  if(scancode == pause.scancode && value) {
+    application->pause = !application->pause;
+  }
+
   if(scancode == turboMode.scancode) {
     static bool Vsync, Async;
     if(value) {
@@ -20,13 +24,16 @@ void HotkeyGeneral::inputEvent(int16_t scancode, int16_t value) {
 HotkeyGeneral::HotkeyGeneral() {
   name = "General";
 
-  toggleFullScreen.name = "Toggle Fullscreen";
-  turboMode.name = "Turbo Mode";
+  toggleFullScreen.name = "Toggle fullscreen";
+  pause.name = "Pause emulation";
+  turboMode.name = "Turbo mode";
 
   toggleFullScreen.mapping = "KB0::F11";
+  pause.mapping = "KB0::P";
   turboMode.mapping = "KB0::Tilde";
 
   append(toggleFullScreen);
+  append(pause);
   append(turboMode);
 }
 

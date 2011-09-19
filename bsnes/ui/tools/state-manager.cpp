@@ -38,7 +38,7 @@ StateManager::StateManager() {
 }
 
 void StateManager::synchronize() {
-  layout.setEnabled(interface->loaded());
+  layout.setEnabled(interface->cartridgeLoaded());
 
   descEdit.setText("");
   descEdit.setEnabled(false);

@@ -18,7 +18,11 @@ struct Config : public configuration {
   } input;
 
   struct Path {
-    string last;
+    struct BIOS {
+      string satellaview;
+      string sufamiTurbo;
+      string superGameBoy;
+    } bios;
   } path;
 
   struct NES {

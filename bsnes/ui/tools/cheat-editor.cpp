@@ -43,7 +43,7 @@ CheatEditor::CheatEditor() {
 }
 
 void CheatEditor::synchronize() {
-  layout.setEnabled(interface->loaded());
+  layout.setEnabled(interface->cartridgeLoaded());
 
   if(cheatList.selected()) {
     unsigned n = cheatList.selection();

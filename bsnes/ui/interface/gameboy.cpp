@@ -3,11 +3,14 @@ bool InterfaceGameBoy::loadCartridge(const string &filename) {
   unsigned size;
   if(file::read(filename, data, size) == false) return false;
 
+  interface->unloadCartridge();
   interface->baseName = nall::basename(filename);
+
   GameBoyCartridge info(data, size);
   GameBoy::Interface::loadCartridge(info.xml, data, size);
-
   delete[] data;
+
+  interface->loadCartridge(::Interface::Mode::GameBoy);
   return true;
 }
 

@@ -10,6 +10,10 @@ MainWindow::MainWindow() {
     cartridgeLoadSNES.setText("Load SNES Cartridge ...");
     cartridgeLoadNES.setText("Load NES Cartridge ...");
     cartridgeLoadGameBoy.setText("Load Game Boy Cartridge ...");
+    cartridgeLoadSatellaviewSlotted.setText("Load Satellaview-Slotted Cartridge ...");
+    cartridgeLoadSatellaview.setText("Load Satellaview Cartridge ...");
+    cartridgeLoadSufamiTurbo.setText("Load Sufami Turbo Cartridge ...");
+    cartridgeLoadSuperGameBoy.setText("Load Super Game Boy Cartridge ...");
 
   nesMenu.setText("NES");
     nesPower.setText("Power Cycle");
@@ -86,13 +90,15 @@ MainWindow::MainWindow() {
     toolsStateManager.setText("State Manager ...");
     toolsTest.setText("Test");
 
-  helpMenu.setText("Help");
-    helpAbout.setText("About ...");
-
   append(cartridgeMenu);
     cartridgeMenu.append(cartridgeLoadNES);
     cartridgeMenu.append(cartridgeLoadSNES);
     cartridgeMenu.append(cartridgeLoadGameBoy);
+    cartridgeMenu.append(cartridgeSeparator);
+    cartridgeMenu.append(cartridgeLoadSatellaviewSlotted);
+    cartridgeMenu.append(cartridgeLoadSatellaview);
+    cartridgeMenu.append(cartridgeLoadSufamiTurbo);
+    cartridgeMenu.append(cartridgeLoadSuperGameBoy);
 
   append(nesMenu);
     nesMenu.append(nesPower);
@@ -167,9 +173,6 @@ MainWindow::MainWindow() {
     toolsMenu.append(toolsSeparator3);
     toolsMenu.append(toolsTest);
 
-  append(helpMenu);
-    helpMenu.append(helpAbout);
-
   setMenuVisible();
 
   setStatusText("No cartridge loaded");
@@ -182,22 +185,27 @@ MainWindow::MainWindow() {
   onSize = [&] { utility->resizeMainWindow(); };
 
   cartridgeLoadNES.onTick = [&] {
-    fileBrowser->open("Load NES Cartridge", { "*.nes" }, [](string filename) {
-      interface->loadCartridge(filename);
+    fileBrowser->open("Load Cartridge - NES", FileBrowser::Mode::NES, [](string filename) {
+      interface->nes.loadCartridge(filename);
     });
   };
 
   cartridgeLoadSNES.onTick = [&] {
-    fileBrowser->open("Load SNES Cartridge", { "*.sfc" }, [](string filename) {
-      interface->loadCartridge(filename);
+    fileBrowser->open("Load Cartridge - SNES", FileBrowser::Mode::SNES, [](string filename) {
+      interface->snes.loadCartridge(filename);
     });
   };
 
   cartridgeLoadGameBoy.onTick = [&] {
-    fileBrowser->open("Load Game Boy Cartridge", { "*.gb", "*.gbc" }, [](string filename) {
-      interface->loadCartridge(filename);
+    fileBrowser->open("Load Cartridge - Game Boy", FileBrowser::Mode::GameBoy, [](string filename) {
+      interface->gameBoy.loadCartridge(filename);
     });
   };
+
+  cartridgeLoadSatellaviewSlotted.onTick = [&] { slotLoader->loadSatellaviewSlotted(); };
+  cartridgeLoadSatellaview.onTick        = [&] { slotLoader->loadSatellaview(); };
+  cartridgeLoadSufamiTurbo.onTick        = [&] { slotLoader->loadSufamiTurbo(); };
+  cartridgeLoadSuperGameBoy.onTick       = [&] { slotLoader->loadSuperGameBoy(); };
 
   nesPower.onTick = { &Interface::power, interface };
   nesReset.onTick = { &Interface::reset, interface };
@@ -276,19 +284,11 @@ MainWindow::MainWindow() {
     NES::cpu.trace = toolsTest.checked();
   };
 
-  helpAbout.onTick = [&] {
-    MessageWindow::information(*this, {
-      application->title, "\n\n",
-      "Author: byuu\n",
-      "Website: http://byuu.org/"
-    });
-  };
-
   synchronize();
 }
 
 void MainWindow::synchronize() {
-  if(interface->loaded()) {
+  if(interface->cartridgeLoaded()) {
     toolsStateSave.setEnabled(true);
     toolsStateLoad.setEnabled(true);
   } else {

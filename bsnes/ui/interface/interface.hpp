@@ -9,17 +9,10 @@ struct Interface : property<Interface> {
   void bindControllers();
   void setController(unsigned port, unsigned device);
 
-  bool loaded();
-
-  bool loadCartridge(const string &filename);
-  bool loadCartridgeNES(const string &filename);
-  bool loadCartridgeSNES(const string &filename);
-  bool loadCartridgeGameBoy(const string &filename);
-
+  bool cartridgeLoaded();
+  void loadCartridge(Mode mode);
+  bool loadCartridge(const string &filename);  //auto-detect system-type based on file extension
   void unloadCartridge();
-  void unloadCartridgeNES();
-  void unloadCartridgeSNES();
-  void unloadCartridgeGameBoy();
 
   void power();
   void reset();
@@ -38,7 +31,6 @@ struct Interface : property<Interface> {
 
   string baseName;  // = "/path/to/cartridge" (no extension)
 
-private:
   InterfaceNES nes;
   InterfaceSNES snes;
   InterfaceGameBoy gameBoy;

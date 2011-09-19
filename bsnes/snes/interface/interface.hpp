@@ -8,8 +8,18 @@ public:
 
   virtual void connect(bool port, Input::Device device);
 
+  struct CartridgeData {
+    string xml;
+    const uint8_t *data;
+    unsigned size;
+  };
+
   virtual bool cartridgeLoaded();
-  virtual void loadCartridge(const string &xml, const uint8_t *data, unsigned size);
+  virtual void loadCartridge(const CartridgeData &base);
+  virtual void loadSatellaviewSlottedCartridge(const CartridgeData &base, const CartridgeData &slot);
+  virtual void loadSatellaviewCartridge(const CartridgeData &base, const CartridgeData &slot);
+  virtual void loadSufamiTurboCartridge(const CartridgeData &base, const CartridgeData &slotA, const CartridgeData &slotB);
+  virtual void loadSuperGameBoyCartridge(const CartridgeData &base, const CartridgeData &slot);
   virtual void unloadCartridge();
 
   virtual void power();

@@ -9,18 +9,28 @@ struct FileBrowser : Window {
   Label filterLabel;
   Button openButton;
 
-  void open(const string &title, const lstring &filterList, function<void (string)> callback);
+  struct Mode { enum : unsigned { Default, NES, SNES, GameBoy, Satellaview, SufamiTurbo }; };
+  void open(const string &title, unsigned mode, function<void (string)> callback);
 
   FileBrowser();
+  ~FileBrowser();
 
 private:
-  string activePath;
-  lstring filterList;
+  configuration config;
+  struct FilterMode {
+    string name;
+    string path;
+    lstring filter;
+  } *mode;
+  linear_vector<FilterMode> filterModes;
+
   lstring fileNameList;
   function<void (string)> callback;
 
   void setPath(const string &path);
   void fileListActivate();
+  bool loadFolder(const string &path);
+  void loadFile(const string &filename);
 };
 
 extern FileBrowser *fileBrowser;

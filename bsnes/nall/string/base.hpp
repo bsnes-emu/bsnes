@@ -103,6 +103,9 @@ namespace nall {
     template<unsigned Limit = 0> inline lstring& qsplit(const char*, const char*);
     template<unsigned Limit = 0> inline lstring& iqsplit(const char*, const char*);
 
+    inline bool operator==(const lstring&) const;
+    inline bool operator!=(const lstring&) const;
+
     lstring();
     lstring(std::initializer_list<string>);
 

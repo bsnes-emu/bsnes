@@ -30,9 +30,10 @@ using namespace ruby;
 
 struct Application {
   bool quit;
+  bool pause;
   bool autopause;
 
-  string realpath;
+  string basepath;
   string userpath;
 
   string title;

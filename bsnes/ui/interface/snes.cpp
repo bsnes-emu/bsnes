@@ -26,11 +26,95 @@ bool InterfaceSNES::loadCartridge(const string &filename) {
   unsigned size;
   if(file::read(filename, data, size) == false) return false;
 
+  interface->unloadCartridge();
   interface->baseName = nall::basename(filename);
-  string xml = SNESCartridge(data, size).xmlMemoryMap;
-  SNES::Interface::loadCartridge(xml, data, size);
 
+  string xml = SNESCartridge(data, size).xmlMemoryMap;
+  SNES::Interface::loadCartridge({ xml, data, size });
   delete[] data;
+
+  interface->loadCartridge(::Interface::Mode::SNES);
+  return true;
+}
+
+bool InterfaceSNES::loadSatellaviewSlottedCartridge(const string &basename, const string &slotname) {
+  uint8_t *data[2];
+  unsigned size[2];
+  if(file::read(basename, data[0], size[0]) == false) return false;
+  file::read(slotname, data[1], size[1]);
+
+  interface->unloadCartridge();
+  interface->baseName = nall::basename(basename);
+  if(data[1]) interface->baseName.append("+", nall::basename(notdir(slotname)));
+
+  string xml = SNESCartridge(data[0], size[0]).xmlMemoryMap;
+  SNES::Interface::loadSatellaviewSlottedCartridge({ xml, data[0], size[0] }, { "", data[1], size[1] });
+  delete[] data[0];
+  if(data[1]) delete[] data[1];
+
+  interface->loadCartridge(::Interface::Mode::SNES);
+  return true;
+}
+
+bool InterfaceSNES::loadSatellaviewCartridge(const string &basename, const string &slotname) {
+  uint8_t *data[2];
+  unsigned size[2];
+  if(file::read(basename, data[0], size[0]) == false) return false;
+  file::read(slotname, data[1], size[1]);
+
+  interface->unloadCartridge();
+  interface->baseName = nall::basename(basename);
+  if(data[1]) interface->baseName.append("+", nall::basename(notdir(slotname)));
+
+  string xml = SNESCartridge(data[0], size[0]).xmlMemoryMap;
+  SNES::Interface::loadSatellaviewCartridge({ xml, data[0], size[0] }, { "", data[1], size[1] });
+  delete[] data[0];
+  if(data[1]) delete[] data[1];
+
+  interface->loadCartridge(::Interface::Mode::SNES);
+  return true;
+}
+
+bool InterfaceSNES::loadSufamiTurboCartridge(const string &basename, const string &slotAname, const string &slotBname) {
+  uint8_t *data[3];
+  unsigned size[3];
+  if(file::read(basename, data[0], size[0]) == false) return false;
+  file::read(slotAname, data[1], size[1]);
+  file::read(slotBname, data[2], size[2]);
+
+  interface->unloadCartridge();
+  interface->baseName = nall::basename(basename);
+  if(data[1] && data[2]) interface->baseName = { nall::basename(slotAname), "+", nall::basename(notdir(slotBname)) };
+  else if(data[1]) interface->baseName = nall::basename(slotAname);
+  else if(data[2]) interface->baseName = nall::basename(slotBname);
+
+  string xml = SNESCartridge(data[0], size[0]).xmlMemoryMap;
+  SNES::Interface::loadSufamiTurboCartridge({ xml, data[0], size[0] }, { "", data[1], size[1] }, { "", data[2], size[2] });
+  delete[] data[0];
+  if(data[1]) delete[] data[1];
+  if(data[2]) delete[] data[2];
+
+  interface->loadCartridge(::Interface::Mode::SNES);
+  return true;
+}
+
+bool InterfaceSNES::loadSuperGameBoyCartridge(const string &basename, const string &slotname) {
+  uint8_t *data[2];
+  unsigned size[2];
+  if(file::read(basename, data[0], size[0]) == false) return false;
+  file::read(slotname, data[1], size[1]);
+
+  interface->unloadCartridge();
+  interface->baseName = nall::basename(basename);
+  if(data[1]) interface->baseName = nall::basename(slotname);
+
+  string xml = SNESCartridge(data[0], size[0]).xmlMemoryMap;
+  string gbXml = GameBoyCartridge(data[1], size[1]).xml;
+  SNES::Interface::loadSuperGameBoyCartridge({ xml, data[0], size[0] }, { gbXml, data[1], size[1] });
+  delete[] data[0];
+  if(data[1]) delete[] data[1];
+
+  interface->loadCartridge(::Interface::Mode::SNES);
   return true;
 }
 

@@ -23,6 +23,7 @@ namespace nall {
     enum class time : unsigned { create, modify, access };
 
     static bool read(const string &filename, uint8_t *&data, unsigned &size) {
+      data = 0;
       file fp;
       if(fp.open(filename, mode::read) == false) return false;
       size = fp.size();

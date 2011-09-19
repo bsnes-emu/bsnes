@@ -290,6 +290,10 @@ void Window::setWidgetFont(const string &font) {
   return p.setWidgetFont(font);
 }
 
+string Window::statusText() {
+  return state.statusText;
+}
+
 void Window::synchronizeLayout() {
   setGeometry(geometry());
 }

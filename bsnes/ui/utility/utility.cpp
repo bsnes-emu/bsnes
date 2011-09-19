@@ -71,14 +71,10 @@ void Utility::resizeMainWindow(bool shrink) {
   }
 }
 
-void Utility::shrinkMainWindow() {
-}
-
 void Utility::toggleFullScreen() {
-  static bool fullScreen = false;
   static Geometry geometry;
 
-  if(fullScreen == false) {
+  if(mainWindow->fullScreen() == false) {
     geometry = mainWindow->geometry();
     mainWindow->setMenuVisible(false);
     mainWindow->setStatusVisible(false);
@@ -92,7 +88,6 @@ void Utility::toggleFullScreen() {
     mainWindow->setGeometry(geometry);
   }
 
-  fullScreen ^= 1;
   resizeMainWindow();
 }
 
@@ -100,4 +95,34 @@ void Utility::bindVideoShader() {
   string data;
   data.readfile(config->video.shader);
   video.set(Video::Shader, (const char*)data);
+}
+
+void Utility::updateStatus() {
+  time_t currentTime = time(0);
+  string text;
+  if((currentTime - statusTime) <= 2) {
+    text = statusMessage;
+  } else if(interface->cartridgeLoaded() == false) {
+    text = "No cartridge loaded";
+  } else if(application->pause || application->autopause) {
+    text = "Paused";
+  } else {
+    text = statusText;
+  }
+  if(text != mainWindow->statusText()) {
+    mainWindow->setStatusText(text);
+  }
+}
+
+void Utility::setStatusText(const string &text) {
+  statusText = text;
+}
+
+void Utility::showMessage(const string &message) {
+  statusTime = time(0);
+  statusMessage = message;
+}
+
+Utility::Utility() {
+  statusTime = 0;
 }

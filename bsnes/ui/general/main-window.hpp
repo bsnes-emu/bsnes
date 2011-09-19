@@ -6,6 +6,11 @@ struct MainWindow : Window {
     Item cartridgeLoadSNES;
     Item cartridgeLoadNES;
     Item cartridgeLoadGameBoy;
+    Separator cartridgeSeparator;
+    Item cartridgeLoadSatellaviewSlotted;
+    Item cartridgeLoadSatellaview;
+    Item cartridgeLoadSufamiTurbo;
+    Item cartridgeLoadSuperGameBoy;
 
   Menu nesMenu;
     Item nesPower;
@@ -66,9 +71,6 @@ struct MainWindow : Window {
     Item toolsStateManager;
     Separator toolsSeparator3;
     CheckItem toolsTest;
-
-  Menu helpMenu;
-    Item helpAbout;
 
   void synchronize();
   MainWindow();

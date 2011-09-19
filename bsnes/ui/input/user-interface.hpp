@@ -1,5 +1,6 @@
 struct HotkeyGeneral : TertiaryInput {
   DigitalInput toggleFullScreen;
+  DigitalInput pause;
   DigitalInput turboMode;
 
   void inputEvent(int16_t scancode, int16_t value);

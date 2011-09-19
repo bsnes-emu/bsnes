@@ -7,8 +7,9 @@ void Application::run() {
   inputManager->scan();
 
   autopause = (mainWindow->focused() == false && config->input.focusPolicy == 2);
+  utility->updateStatus();
 
-  if(interface->loaded() == false || autopause) {
+  if(interface->cartridgeLoaded() == false || pause || autopause) {
     audio.clear();
     usleep(20 * 1000);
     return;
@@ -17,12 +18,15 @@ void Application::run() {
   interface->run();
 }
 
-Application::Application(int argc, char **argv) : quit(false) {
+Application::Application(int argc, char **argv) {
   application = this;
+  quit = false;
+  pause = false;
+  autopause = false;
   {
     char path[PATH_MAX];
     auto unused = ::realpath(argv[0], path);
-    realpath = path;
+    basepath = path;
     unused = ::userpath(path);
     userpath = path;
     #if defined(PLATFORM_WIN)
@@ -52,6 +56,7 @@ Application::Application(int argc, char **argv) : quit(false) {
   windowManager = new WindowManager;
   mainWindow = new MainWindow;
   fileBrowser = new FileBrowser;
+  slotLoader = new SlotLoader;
   settingsWindow = new SettingsWindow;
   cheatEditor = new CheatEditor;
   stateManager = new StateManager;
@@ -99,6 +104,7 @@ Application::~Application() {
   delete stateManager;
   delete cheatEditor;
   delete settingsWindow;
+  delete slotLoader;
   delete fileBrowser;
   delete mainWindow;
   delete windowManager;

@@ -27,9 +27,38 @@ bool Interface::cartridgeLoaded() {
   return cartridge.loaded();
 }
 
-void Interface::loadCartridge(const string &xml, const uint8_t *data, unsigned size) {
-  cartridge.rom.copy(data, size);
-  cartridge.load(Cartridge::Mode::Normal, { xml });
+void Interface::loadCartridge(const CartridgeData &base) {
+  cartridge.rom.copy(base.data, base.size);
+  cartridge.load(Cartridge::Mode::Normal, { base.xml });
+  system.power();
+}
+
+void Interface::loadSatellaviewSlottedCartridge(const CartridgeData &base, const CartridgeData &slot) {
+  cartridge.rom.copy(base.data, base.size);
+  if(slot.data) bsxflash.memory.copy(slot.data, slot.size);
+  cartridge.load(Cartridge::Mode::BsxSlotted, { base.xml, slot.xml });
+  system.power();
+}
+
+void Interface::loadSatellaviewCartridge(const CartridgeData &base, const CartridgeData &slot) {
+  cartridge.rom.copy(base.data, base.size);
+  if(slot.data) bsxflash.memory.copy(slot.data, slot.size);
+  cartridge.load(Cartridge::Mode::Bsx, { base.xml, slot.xml });
+  system.power();
+}
+
+void Interface::loadSufamiTurboCartridge(const CartridgeData &base, const CartridgeData &slotA, const CartridgeData &slotB) {
+  cartridge.rom.copy(base.data, base.size);
+  if(slotA.data) sufamiturbo.slotA.rom.copy(slotA.data, slotA.size);
+  if(slotB.data) sufamiturbo.slotB.rom.copy(slotB.data, slotB.size);
+  cartridge.load(Cartridge::Mode::SufamiTurbo, { base.xml, slotA.xml, slotB.xml });
+  system.power();
+}
+
+void Interface::loadSuperGameBoyCartridge(const CartridgeData &base, const CartridgeData &slot) {
+  cartridge.rom.copy(base.data, base.size);
+  GameBoy::cartridge.load(slot.xml, slot.data, slot.size);
+  cartridge.load(Cartridge::Mode::SuperGameBoy, { base.xml, "" });
   system.power();
 }
 
@@ -59,6 +88,10 @@ bool Interface::unserialize(serializer &s) {
 }
 
 void Interface::setCheats(const lstring &list) {
+  if(cartridge.mode() == Cartridge::Mode::SuperGameBoy) {
+    return icd2.setCheats(list);
+  }
+
   cheat.reset();
   foreach(code, list) {
     lstring codelist;

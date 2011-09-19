@@ -17,10 +17,13 @@ bool InterfaceNES::loadCartridge(const string &filename) {
   filemap fp;
   if(fp.open(filename, filemap::mode::read) == false) return false;
 
+  interface->unloadCartridge();
   interface->baseName = nall::basename(filename);
-  NES::Interface::loadCartridge("", fp.data(), fp.size());
 
+  NES::Interface::loadCartridge("", fp.data(), fp.size());
   fp.close();
+
+  interface->loadCartridge(::Interface::Mode::NES);
   return true;
 }
 

@@ -25,7 +25,7 @@ void Interface::setController(unsigned port, unsigned device) {
   }
 }
 
-bool Interface::loaded() {
+bool Interface::cartridgeLoaded() {
   switch(mode()) {
   case Mode::NES:     return nes.cartridgeLoaded();
   case Mode::SNES:    return snes.cartridgeLoaded();
@@ -34,32 +34,28 @@ bool Interface::loaded() {
   return false;
 }
 
+void Interface::loadCartridge(Mode mode) {
+  utility->setMode(this->mode = mode);
+  bindControllers();
+  cheatEditor->load({ baseName, ".cht" });
+  stateManager->load({ baseName, ".bsa" }, 0u);
+  utility->showMessage({ "Loaded ", notdir(baseName) });
+}
+
 bool Interface::loadCartridge(const string &filename) {
   bool result = false;
-  setCheatCodes();
-  unloadCartridge();
-  if(filename.endswith(".nes")) result = loadCartridgeNES(filename);
-  if(filename.endswith(".sfc")) result = loadCartridgeSNES(filename);
-  if(filename.endswith(".gb" )) result = loadCartridgeGameBoy(filename);
-  if(filename.endswith(".gbc")) result = loadCartridgeGameBoy(filename);
-  if(result == true) {
-    bindControllers();
-    cheatEditor->load({ baseName, ".cht" });
-    stateManager->load({ baseName, ".bsa" }, 0u);
-  }
+  if(filename.endswith(".nes")) result = nes.loadCartridge(filename);
+  if(filename.endswith(".sfc")) result = snes.loadCartridge(filename);
+  if(filename.endswith(".gb" )) result = gameBoy.loadCartridge(filename);
+  if(filename.endswith(".gbc")) result = gameBoy.loadCartridge(filename);
   return result;
 }
 
-bool Interface::loadCartridgeNES(const string &filename) {
-  if(nes.loadCartridge(filename) == false) return false;
-  utility->setMode(mode = Mode::NES);
-  return true;
-}
-
 void Interface::unloadCartridge() {
-  if(loaded() == false) return;
+  if(cartridgeLoaded() == false) return;
   cheatEditor->save({ baseName, ".cht" });
   stateManager->save({ baseName, ".bsa" }, 0u);
+  setCheatCodes();
 
   switch(mode()) {
   case Mode::NES:     nes.unloadCartridge(); break;
@@ -67,33 +63,6 @@ void Interface::unloadCartridge() {
   case Mode::GameBoy: gameBoy.unloadCartridge(); break;
   }
 
-  utility->setMode(mode = Mode::None);
-}
-
-void Interface::unloadCartridgeNES() {
-  nes.unloadCartridge();
-  utility->setMode(mode = Mode::None);
-}
-
-bool Interface::loadCartridgeSNES(const string &filename) {
-  if(snes.loadCartridge(filename) == false) return false;
-  utility->setMode(mode = Mode::SNES);
-  return true;
-}
-
-void Interface::unloadCartridgeSNES() {
-  snes.unloadCartridge();
-  utility->setMode(mode = Mode::None);
-}
-
-bool Interface::loadCartridgeGameBoy(const string &filename) {
-  if(gameBoy.loadCartridge(filename) == false) return false;
-  utility->setMode(mode = Mode::GameBoy);
-  return true;
-}
-
-void Interface::unloadCartridgeGameBoy() {
-  gameBoy.unloadCartridge();
   utility->setMode(mode = Mode::None);
 }
 
@@ -138,19 +107,23 @@ bool Interface::unserialize(serializer &s) {
 }
 
 bool Interface::saveState(const string &filename) {
+  bool result = false;
   switch(mode()) {
-  case Mode::SNES:    return snes.saveState(filename);
-  case Mode::GameBoy: return gameBoy.saveState(filename);
+  case Mode::SNES:    result = snes.saveState(filename); break;
+  case Mode::GameBoy: result = gameBoy.saveState(filename); break;
   }
-  return false;
+  utility->showMessage(result == true ? "Saved state" : "Failed to save state");
+  return result;
 }
 
 bool Interface::loadState(const string &filename) {
+  bool result = false;
   switch(mode()) {
-  case Mode::SNES:    return snes.loadState(filename);
-  case Mode::GameBoy: return gameBoy.loadState(filename);
+  case Mode::SNES:    result = snes.loadState(filename); break;
+  case Mode::GameBoy: result = gameBoy.loadState(filename); break;
   }
-  return false;
+  utility->showMessage(result == true ? "Loaded state" : "Failed to load state");
+  return result;
 }
 
 void Interface::setCheatCodes(const lstring &list) {
@@ -178,7 +151,7 @@ void Interface::videoRefresh() {
   time(&current);
   if(current != previous) {
     previous = current;
-    mainWindow->setStatusText({ "FPS: ", frameCounter });
+    utility->setStatusText({ "FPS: ", frameCounter });
     frameCounter = 0;
   }
 }
