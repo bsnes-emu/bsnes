@@ -11,11 +11,12 @@ uint32_t* pCanvas::buffer() {
 }
 
 void pCanvas::setGeometry(const Geometry &geometry) {
-  if(geometry.width  == cairo_image_surface_get_width(surface)
-  && geometry.height == cairo_image_surface_get_height(surface)) return;
-
-  cairo_surface_destroy(surface);
-  surface = cairo_image_surface_create(CAIRO_FORMAT_RGB24, geometry.width, geometry.height);
+  if(geometry.width  != cairo_image_surface_get_width (surface)
+  || geometry.height != cairo_image_surface_get_height(surface)
+  ) {
+    cairo_surface_destroy(surface);
+    surface = cairo_image_surface_create(CAIRO_FORMAT_RGB24, geometry.width, geometry.height);
+  }
 
   pWidget::setGeometry(geometry);
   update();

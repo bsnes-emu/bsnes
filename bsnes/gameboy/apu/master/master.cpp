@@ -1,6 +1,11 @@
 #ifdef APU_CPP
 
 void APU::Master::run() {
+  static int16_t volume[] = {
+    -16384, -14336, -12288, -10240,  -8192,  -6144,  -4096,  -2048,
+     +2048,  +4096,  +6144,  +8192, +10240, +12288, +14336, +16384,
+  };
+
   if(enable == false) {
     center = 0;
     left   = 0;
@@ -14,7 +19,7 @@ void APU::Master::run() {
   sample +=    apu.wave.output;
   sample +=   apu.noise.output;
   sample >>= 2;
-  center = sclamp<16>(sample);
+  center = volume[sample];
 
   sample = 0;
   channels = 0;
@@ -23,7 +28,7 @@ void APU::Master::run() {
   if(channel3_left_enable) { sample +=    apu.wave.output; channels++; }
   if(channel4_left_enable) { sample +=   apu.noise.output; channels++; }
   if(channels) sample /= channels;
-  left = sclamp<16>(sample);
+  left = volume[sample];
 
   switch(left_volume) {
     case 0: left >>= 3;                       break;  // 12.5%
@@ -43,7 +48,7 @@ void APU::Master::run() {
   if(channel3_right_enable) { sample +=    apu.wave.output; channels++; }
   if(channel4_right_enable) { sample +=   apu.noise.output; channels++; }
   if(channels) sample /= channels;
-  right = sclamp<16>(sample);
+  right = volume[sample];
 
   switch(right_volume) {
     case 0: right >>= 3;                         break;  // 12.5%

@@ -22,6 +22,9 @@ public:
   virtual void loadSuperGameBoyCartridge(const CartridgeData &base, const CartridgeData &slot);
   virtual void unloadCartridge();
 
+  Cartridge::Information& information();
+  linear_vector<Cartridge::NonVolatileRAM>& memory();
+
   virtual void power();
   virtual void reset();
   virtual void run();

@@ -358,6 +358,7 @@ struct HexEdit : private nall::base_from_member<pHexEdit&>, Widget {
 struct HorizontalScrollBar : private nall::base_from_member<pHorizontalScrollBar&>, Widget {
   nall::function<void ()> onChange;
 
+  unsigned length();
   unsigned position();
   void setLength(unsigned length);
   void setPosition(unsigned position);
@@ -372,6 +373,7 @@ struct HorizontalScrollBar : private nall::base_from_member<pHorizontalScrollBar
 struct HorizontalSlider : private nall::base_from_member<pHorizontalSlider&>, Widget {
   nall::function<void ()> onChange;
 
+  unsigned length();
   unsigned position();
   void setLength(unsigned length);
   void setPosition(unsigned position);
@@ -485,6 +487,7 @@ struct TextEdit : private nall::base_from_member<pTextEdit&>, Widget {
 struct VerticalScrollBar : private nall::base_from_member<pVerticalScrollBar&>, Widget {
   nall::function<void ()> onChange;
 
+  unsigned length();
   unsigned position();
   void setLength(unsigned length);
   void setPosition(unsigned position);
@@ -499,6 +502,7 @@ struct VerticalScrollBar : private nall::base_from_member<pVerticalScrollBar&>, 
 struct VerticalSlider : private nall::base_from_member<pVerticalSlider&>, Widget {
   nall::function<void ()> onChange;
 
+  unsigned length();
   unsigned position();
   void setLength(unsigned length);
   void setPosition(unsigned position);

@@ -21,6 +21,14 @@ namespace Mapper {
     return base;
   }
 
+  unsigned Mapper::ram_size() {
+    return 0u;
+  }
+
+  uint8* Mapper::ram_data() {
+    return 0;
+  }
+
   #include "none/none.cpp"
   #include "aorom/aorom.cpp"
   #include "bandai-fcg/bandai-fcg.cpp"

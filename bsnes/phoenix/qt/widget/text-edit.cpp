@@ -24,6 +24,8 @@ string pTextEdit::text() {
 void pTextEdit::constructor() {
   qtWidget = qtTextEdit = new QTextEdit;
   connect(qtTextEdit, SIGNAL(textChanged()), SLOT(onChange()));
+
+  pWidget::synchronizeState();
   setEditable(textEdit.state.editable);
   setText(textEdit.state.text);
   setWordWrap(textEdit.state.wordWrap);

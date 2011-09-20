@@ -1,3 +1,5 @@
+#include "palette.hpp"
+
 #include "nes.hpp"
 #include "snes.hpp"
 #include "gameboy.hpp"
@@ -8,6 +10,7 @@ struct Interface : property<Interface> {
 
   void bindControllers();
   void setController(unsigned port, unsigned device);
+  void updateDSP();
 
   bool cartridgeLoaded();
   void loadCartridge(Mode mode);
@@ -21,15 +24,16 @@ struct Interface : property<Interface> {
   serializer serialize();
   bool unserialize(serializer&);
 
-  bool saveState(const string &filename);
-  bool loadState(const string &filename);
+  bool saveState(unsigned slot);
+  bool loadState(unsigned slot);
   void setCheatCodes(const lstring &list = lstring{});
 
   Interface();
 
-  void videoRefresh();
+  void videoRefresh(const uint16_t *input, unsigned inputPitch, unsigned width, unsigned height);
 
   string baseName;  // = "/path/to/cartridge" (no extension)
+  lstring slotName;
 
   InterfaceNES nes;
   InterfaceSNES snes;

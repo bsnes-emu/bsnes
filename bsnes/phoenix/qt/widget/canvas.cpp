@@ -17,6 +17,7 @@ void pCanvas::constructor() {
   qtWidget = qtCanvas = new QtCanvas(*this);
   qtImage = new QImage(256, 256, QImage::Format_RGB32);
 
+  pWidget::synchronizeState();
   update();
 }
 

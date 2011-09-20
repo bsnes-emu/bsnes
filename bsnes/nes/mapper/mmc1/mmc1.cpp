@@ -170,6 +170,16 @@ void MMC1::ciram_write(uint13 addr, uint8 data) {
 
 //
 
+unsigned MMC1::ram_size() {
+  return 8192u;
+}
+
+uint8* MMC1::ram_data() {
+  return prg_ram;
+}
+
+//
+
 void MMC1::power() {
   reset();
 }

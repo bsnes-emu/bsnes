@@ -1,4 +1,5 @@
 #include "../base.hpp"
+#include "palette.cpp"
 #include "nes.cpp"
 #include "snes.cpp"
 #include "gameboy.cpp"
@@ -25,6 +26,15 @@ void Interface::setController(unsigned port, unsigned device) {
   }
 }
 
+void Interface::updateDSP() {
+  dspaudio.setVolume((double)config->audio.volume / 100.0);
+  switch(mode()) {
+  case Mode::NES:     return dspaudio.setFrequency(config->audio.frequencyNES);
+  case Mode::SNES:    return dspaudio.setFrequency(config->audio.frequencySNES);
+  case Mode::GameBoy: return dspaudio.setFrequency(config->audio.frequencyGameBoy);
+  }
+}
+
 bool Interface::cartridgeLoaded() {
   switch(mode()) {
   case Mode::NES:     return nes.cartridgeLoaded();
@@ -39,6 +49,7 @@ void Interface::loadCartridge(Mode mode) {
   bindControllers();
   cheatEditor->load({ baseName, ".cht" });
   stateManager->load({ baseName, ".bsa" }, 0u);
+  dipSwitches->load();
   utility->showMessage({ "Loaded ", notdir(baseName) });
 }
 
@@ -63,23 +74,27 @@ void Interface::unloadCartridge() {
   case Mode::GameBoy: gameBoy.unloadCartridge(); break;
   }
 
+  interface->baseName = "";
+  interface->slotName.reset();
   utility->setMode(mode = Mode::None);
 }
 
 void Interface::power() {
   switch(mode()) {
-  case Mode::NES:     return nes.power();
-  case Mode::SNES:    return snes.power();
-  case Mode::GameBoy: return gameBoy.power();
+  case Mode::NES:     nes.power(); break;
+  case Mode::SNES:    snes.power(); break;
+  case Mode::GameBoy: gameBoy.power(); break;
   }
+  utility->showMessage("System power was cycled");
 }
 
 void Interface::reset() {
   switch(mode()) {
-  case Mode::NES:     return nes.reset();
-  case Mode::SNES:    return snes.reset();
-  case Mode::GameBoy: return gameBoy.power();  //Game Boy lacks reset button
+  case Mode::NES:     nes.reset(); break;
+  case Mode::SNES:    snes.reset(); break;
+  case Mode::GameBoy: gameBoy.power(); break;  //Game Boy lacks reset button
   }
+  utility->showMessage("System was reset");
 }
 
 void Interface::run() {
@@ -106,23 +121,25 @@ bool Interface::unserialize(serializer &s) {
   return false;
 }
 
-bool Interface::saveState(const string &filename) {
+bool Interface::saveState(unsigned slot) {
+  string filename = { baseName, "-", slot, ".bst" };
   bool result = false;
   switch(mode()) {
   case Mode::SNES:    result = snes.saveState(filename); break;
   case Mode::GameBoy: result = gameBoy.saveState(filename); break;
   }
-  utility->showMessage(result == true ? "Saved state" : "Failed to save state");
+  utility->showMessage(result == true ? string{ "Saved state ", slot } : "Failed to save state");
   return result;
 }
 
-bool Interface::loadState(const string &filename) {
+bool Interface::loadState(unsigned slot) {
+  string filename = { baseName, "-", slot, ".bst" };
   bool result = false;
   switch(mode()) {
   case Mode::SNES:    result = snes.loadState(filename); break;
   case Mode::GameBoy: result = gameBoy.loadState(filename); break;
   }
-  utility->showMessage(result == true ? "Loaded state" : "Failed to load state");
+  utility->showMessage(result == true ? string{ "Loaded state ", slot } : "Failed to load state");
   return result;
 }
 
@@ -136,6 +153,7 @@ void Interface::setCheatCodes(const lstring &list) {
 
 Interface::Interface() {
   mode = Mode::None;
+  palette.update();
   nes.initialize(&nes);
   snes.initialize(&snes);
   gameBoy.initialize(&gameBoy);
@@ -143,7 +161,26 @@ Interface::Interface() {
 
 //internal
 
-void Interface::videoRefresh() {
+//RGB555 input
+void Interface::videoRefresh(const uint16_t *input, unsigned inputPitch, unsigned width, unsigned height) {
+  uint32_t *output;
+  unsigned outputPitch;
+
+  if(video.lock(output, outputPitch, width, height)) {
+    inputPitch >>= 1, outputPitch >>= 2;
+
+    for(unsigned y = 0; y < height; y++) {
+      const uint16_t *sp = input + y * inputPitch;
+      uint32_t *dp = output + y * outputPitch;
+      for(unsigned x = 0; x < width; x++) {
+        *dp++ = palette[*sp++];
+      }
+    }
+
+    video.unlock();
+    video.refresh();
+  }
+
   static unsigned frameCounter = 0;
   static time_t previous, current;
   frameCounter++;

@@ -2,7 +2,7 @@ MainWindow *mainWindow = 0;
 
 MainWindow::MainWindow() {
   setTitle(application->title);
-  setGeometry({ 256, 256, 512, 480 });
+  setGeometry({ 256, 256, 640, 480 });
   setBackgroundColor({ 0, 0, 0 });
   windowManager->append(this, "MainWindow");
 
@@ -65,6 +65,10 @@ MainWindow::MainWindow() {
     settingsSynchronizeVideo.setChecked(config->video.synchronize);
     settingsSynchronizeAudio.setText("Synchronize Audio");
     settingsSynchronizeAudio.setChecked(config->audio.synchronize);
+    settingsEnableOverscan.setText("Enable Overscan");
+    settingsEnableOverscan.setChecked(config->video.enableOverscan);
+    settingsCorrectAspectRatio.setText("Correct Aspect Ratio");
+    settingsCorrectAspectRatio.setChecked(config->video.correctAspectRatio);
     settingsSmoothVideo.setText("Smooth Video Output");
     settingsSmoothVideo.setChecked(config->video.smooth);
     settingsMuteAudio.setText("Mute Audio");
@@ -146,9 +150,12 @@ MainWindow::MainWindow() {
     settingsMenu.append(settingsSeparator1);
     settingsMenu.append(settingsSynchronizeVideo);
     settingsMenu.append(settingsSynchronizeAudio);
+    settingsMenu.append(settingsSeparator2);
+    settingsMenu.append(settingsEnableOverscan);
+    settingsMenu.append(settingsCorrectAspectRatio);
     settingsMenu.append(settingsSmoothVideo);
     settingsMenu.append(settingsMuteAudio);
-    settingsMenu.append(settingsSeparator2);
+    settingsMenu.append(settingsSeparator3);
     settingsMenu.append(settingsConfiguration);
 
   append(toolsMenu);
@@ -250,6 +257,16 @@ MainWindow::MainWindow() {
     audio.set(Audio::Synchronize, config->audio.synchronize);
   };
 
+  settingsEnableOverscan.onTick = [&] {
+    config->video.enableOverscan = settingsEnableOverscan.checked();
+    utility->resizeMainWindow();
+  };
+
+  settingsCorrectAspectRatio.onTick = [&] {
+    config->video.correctAspectRatio = settingsCorrectAspectRatio.checked();
+    utility->resizeMainWindow();
+  };
+
   settingsSmoothVideo.onTick = [&] {
     config->video.smooth = settingsSmoothVideo.checked();
     video.set(Video::Filter, config->video.smooth == false ? 0u : 1u);
@@ -262,17 +279,17 @@ MainWindow::MainWindow() {
 
   settingsConfiguration.onTick = [&] { settingsWindow->setVisible(); };
 
-  toolsStateSave1.onTick = [&] { interface->saveState({ interface->baseName, "-1.bst" }); };
-  toolsStateSave2.onTick = [&] { interface->saveState({ interface->baseName, "-2.bst" }); };
-  toolsStateSave3.onTick = [&] { interface->saveState({ interface->baseName, "-3.bst" }); };
-  toolsStateSave4.onTick = [&] { interface->saveState({ interface->baseName, "-4.bst" }); };
-  toolsStateSave5.onTick = [&] { interface->saveState({ interface->baseName, "-5.bst" }); };
+  toolsStateSave1.onTick = [&] { interface->saveState(1); };
+  toolsStateSave2.onTick = [&] { interface->saveState(2); };
+  toolsStateSave3.onTick = [&] { interface->saveState(3); };
+  toolsStateSave4.onTick = [&] { interface->saveState(4); };
+  toolsStateSave5.onTick = [&] { interface->saveState(5); };
 
-  toolsStateLoad1.onTick = [&] { interface->loadState({ interface->baseName, "-1.bst" }); };
-  toolsStateLoad2.onTick = [&] { interface->loadState({ interface->baseName, "-2.bst" }); };
-  toolsStateLoad3.onTick = [&] { interface->loadState({ interface->baseName, "-3.bst" }); };
-  toolsStateLoad4.onTick = [&] { interface->loadState({ interface->baseName, "-4.bst" }); };
-  toolsStateLoad5.onTick = [&] { interface->loadState({ interface->baseName, "-5.bst" }); };
+  toolsStateLoad1.onTick = [&] { interface->loadState(1); };
+  toolsStateLoad2.onTick = [&] { interface->loadState(2); };
+  toolsStateLoad3.onTick = [&] { interface->loadState(3); };
+  toolsStateLoad4.onTick = [&] { interface->loadState(4); };
+  toolsStateLoad5.onTick = [&] { interface->loadState(5); };
 
   toolsCaptureMouse.onTick = [&] { input.acquire(); };
   toolsShrinkWindow.onTick = [&] { utility->resizeMainWindow(true); };

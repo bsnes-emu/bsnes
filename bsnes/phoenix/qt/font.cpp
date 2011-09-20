@@ -13,8 +13,8 @@ QFont pFont::create(const string &description) {
   bool italic = part[2].position("Italic");
 
   QFont qtFont;
-  qtFont.setFamily(part[0]);
-  qtFont.setPointSize(decimal(part[1]));
+  qtFont.setFamily(name);
+  qtFont.setPointSize(size);
   if(bold) qtFont.setBold(true);
   if(italic) qtFont.setItalic(true);
   return qtFont;

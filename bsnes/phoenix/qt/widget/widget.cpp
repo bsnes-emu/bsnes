@@ -31,6 +31,14 @@ void pWidget::constructor() {
   if(widget.state.abstract) qtWidget = new QWidget;
 }
 
+//pWidget::constructor() called before p{Derived}::constructor(); ergo qtWidget is not yet valid
+//pWidget::synchronizeState() is called to finish construction of p{Derived}::constructor()
+void pWidget::synchronizeState() {
+  setEnabled(widget.state.enabled);
+  setFont(widget.state.font);
+//setVisible(widget.state.visible);
+}
+
 void pWidget::destructor() {
   if(widget.state.abstract) {
     delete qtWidget;

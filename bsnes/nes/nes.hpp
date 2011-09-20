@@ -4,14 +4,14 @@
 namespace NES {
   namespace Info {
     static const char Name[] = "bnes";
-    static const char Version[] = "000.13";
+    static const char Version[] = "000.14";
   }
 }
 
 /*
   bnes - NES emulator
   authors: byuu, Ryphecha
-  license: GPLv2
+  license: GPLv3
   project started: 2011-09-05
 */
 

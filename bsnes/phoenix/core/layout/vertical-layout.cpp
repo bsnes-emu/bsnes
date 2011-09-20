@@ -54,6 +54,7 @@ void VerticalLayout::remove(Sizable &sizable) {
 
 void VerticalLayout::reset() {
   foreach(child, children) {
+    if(window() && dynamic_cast<Layout*>(child.sizable)) ((Layout*)child.sizable)->reset();
     if(window() && dynamic_cast<Widget*>(child.sizable)) window()->remove((Widget&)*child.sizable);
   }
 }

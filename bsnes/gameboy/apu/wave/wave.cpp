@@ -6,11 +6,10 @@ void APU::Wave::run() {
     pattern_sample = pattern[++pattern_offset];
   }
 
-  uint4 sample = pattern_sample;
+  uint4 sample = pattern_sample >> volume_shift;
   if(enable == false) sample = 0;
 
-  output = (sample * 4369) - 32768;
-  output >>= volume_shift;
+  output = sample;
 }
 
 void APU::Wave::clock_length() {
@@ -31,10 +30,10 @@ void APU::Wave::write(unsigned r, uint8 data) {
 
   if(r == 2) {  //$ff1c  NR32
     switch((data >> 5) & 3) {
-      case 0: volume_shift = 16; break;  //  0%
-      case 1: volume_shift =  0; break;  //100%
-      case 2: volume_shift =  1; break;  // 50%
-      case 3: volume_shift =  2; break;  // 25%
+      case 0: volume_shift = 4; break;  //  0%
+      case 1: volume_shift = 0; break;  //100%
+      case 2: volume_shift = 1; break;  // 50%
+      case 3: volume_shift = 2; break;  // 25%
     }
   }
 

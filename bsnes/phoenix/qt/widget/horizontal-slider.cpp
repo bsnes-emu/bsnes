@@ -22,6 +22,7 @@ void pHorizontalSlider::constructor() {
   qtSlider->setPageStep(101 >> 3);
   connect(qtSlider, SIGNAL(valueChanged(int)), SLOT(onChange()));
 
+  pWidget::synchronizeState();
   setLength(horizontalSlider.state.length);
   setPosition(horizontalSlider.state.position);
 }

@@ -41,6 +41,10 @@ Geometry HorizontalLayout::minimumGeometry() {
 void HorizontalLayout::remove(Sizable &sizable) {
   for(unsigned n = 0; n < children.size(); n++) {
     if(children[n].sizable == &sizable) {
+      if(dynamic_cast<Layout*>(children[n].sizable)) {
+        Layout *layout = (Layout*)children[n].sizable;
+        layout->reset();
+      }
       children.remove(n);
       Layout::remove(sizable);
       break;
@@ -50,6 +54,7 @@ void HorizontalLayout::remove(Sizable &sizable) {
 
 void HorizontalLayout::reset() {
   foreach(child, children) {
+    if(window() && dynamic_cast<Layout*>(child.sizable)) ((Layout*)child.sizable)->reset();
     if(window() && dynamic_cast<Widget*>(child.sizable)) window()->remove((Widget&)*child.sizable);
   }
 }

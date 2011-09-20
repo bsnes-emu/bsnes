@@ -57,6 +57,7 @@ Application::Application(int argc, char **argv) {
   mainWindow = new MainWindow;
   fileBrowser = new FileBrowser;
   slotLoader = new SlotLoader;
+  dipSwitches = new DipSwitches;
   settingsWindow = new SettingsWindow;
   cheatEditor = new CheatEditor;
   stateManager = new StateManager;
@@ -104,6 +105,7 @@ Application::~Application() {
   delete stateManager;
   delete cheatEditor;
   delete settingsWindow;
+  delete dipSwitches;
   delete slotLoader;
   delete fileBrowser;
   delete mainWindow;

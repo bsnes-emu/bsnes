@@ -78,7 +78,7 @@ void LCD::render() {
   }
 
   uint8_t *output = screen + status.ly * 160;
-  for(unsigned n = 0; n < 160; n++) output[n] = (3 - line[n]) * 0x55;
+  for(unsigned n = 0; n < 160; n++) output[n] = line[n];
   interface->lcdScanline();
 }
 

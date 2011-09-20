@@ -16,7 +16,7 @@ void APU::Noise::run() {
   uint4 sample = (lfsr & 1) ? (uint4)0 : volume;
   if(enable == false) sample = 0;
 
-  output = (sample * 4369) - 32768;
+  output = sample;
 }
 
 void APU::Noise::clock_length() {

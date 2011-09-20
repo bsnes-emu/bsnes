@@ -1,4 +1,4 @@
-struct AdvancedSettings : VerticalLayout {
+struct AdvancedSettings : SettingsLayout {
   Label title;
   Label driverLabel;
   HorizontalLayout driverLayout;

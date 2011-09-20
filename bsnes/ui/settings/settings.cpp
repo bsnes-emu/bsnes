@@ -1,7 +1,19 @@
 #include "../base.hpp"
+#include "video.cpp"
+#include "audio.cpp"
 #include "input.cpp"
 #include "advanced.cpp"
 SettingsWindow *settingsWindow = 0;
+
+void SettingsLayout::append(Sizable &sizable, unsigned width, unsigned height, unsigned spacing) {
+  layout.append(sizable, width, height, spacing);
+}
+
+SettingsLayout::SettingsLayout() {
+  setMargin(5);
+  HorizontalLayout::append(spacer, 120, ~0, 5);
+  HorizontalLayout::append(layout, ~0, ~0);
+}
 
 SettingsWindow::SettingsWindow() {
   setTitle("Configuration Settings");
@@ -9,43 +21,49 @@ SettingsWindow::SettingsWindow() {
   setStatusVisible();
   windowManager->append(this, "SettingsWindow");
 
+  layout.setMargin(5);
+  panelList.setFont(application->boldFont);
+  panelList.append("Video");
+  panelList.append("Audio");
   panelList.append("Input");
   panelList.append("Advanced");
 
+  videoSettings = new VideoSettings;
+  audioSettings = new AudioSettings;
   inputSettings = new InputSettings;
   advancedSettings = new AdvancedSettings;
 
   append(layout);
-  layout.setMargin(5);
-  layout.append(panelList, 120, ~0, 5);
+    layout.append(panelList, 120, ~0, 5);
+  append(*videoSettings);
+  append(*audioSettings);
+  append(*inputSettings);
+  append(*advancedSettings);
 
   panelList.onChange = [&] { setPanel(panelList.selection()); };
 
-  setPanel(0);
+  setPanel(2);
 }
 
 SettingsWindow::~SettingsWindow() {
   delete advancedSettings;
   delete inputSettings;
+  delete audioSettings;
+  delete videoSettings;
 }
 
 void SettingsWindow::setPanel(unsigned n) {
-  //TODO: removing layouts isn't working right, so for now we are hiding them on toggle
+  panelList.setSelection(n);
 
-  layout.remove(*inputSettings);
-  layout.remove(*advancedSettings);
-
+  videoSettings->setVisible(false);
+  audioSettings->setVisible(false);
   inputSettings->setVisible(false);
   advancedSettings->setVisible(false);
 
   switch(n) {
-  case 0:
-    layout.append(*inputSettings, ~0, ~0);
-    inputSettings->setVisible();
-    break;
-  case 1:
-    layout.append(*advancedSettings, ~0, ~0);
-    advancedSettings->setVisible();
-    break;
+  case 0: return videoSettings->setVisible();
+  case 1: return audioSettings->setVisible();
+  case 2: return inputSettings->setVisible();
+  case 3: return advancedSettings->setVisible();
   }
 }

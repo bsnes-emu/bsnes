@@ -11,6 +11,9 @@ namespace Mapper {
     virtual uint8 ciram_read(uint13 addr) = 0;
     virtual void ciram_write(uint13 addr, uint8 data) = 0;
 
+    virtual unsigned ram_size();
+    virtual uint8* ram_data();
+
     virtual void power() = 0;
     virtual void reset() = 0;
   };

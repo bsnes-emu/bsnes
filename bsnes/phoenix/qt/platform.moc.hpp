@@ -243,6 +243,7 @@ struct pWidget : public pSizable {
 
   pWidget(Widget &widget) : pSizable(widget), widget(widget) {}
   void constructor();
+  void synchronizeState();
   void destructor();
   virtual void orphan();
 };

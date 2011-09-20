@@ -22,6 +22,7 @@ void pHorizontalScrollBar::constructor() {
   qtScrollBar->setPageStep(101 >> 3);
   connect(qtScrollBar, SIGNAL(valueChanged(int)), SLOT(onChange()));
 
+  pWidget::synchronizeState();
   setLength(horizontalScrollBar.state.length);
   setPosition(horizontalScrollBar.state.position);
 }

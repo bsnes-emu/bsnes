@@ -22,6 +22,7 @@ void pVerticalScrollBar::constructor() {
   qtScrollBar->setPageStep(101 >> 3);
   connect(qtScrollBar, SIGNAL(valueChanged(int)), SLOT(onChange()));
 
+  pWidget::synchronizeState();
   setLength(verticalScrollBar.state.length);
   setPosition(verticalScrollBar.state.position);
 }

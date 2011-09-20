@@ -66,6 +66,14 @@ void Interface::unloadCartridge() {
   cartridge.unload();
 }
 
+Cartridge::Information& Interface::information() {
+  return cartridge.information;
+}
+
+linear_vector<Cartridge::NonVolatileRAM>& Interface::memory() {
+  return cartridge.nvram;
+}
+
 void Interface::power() {
   system.power();
 }

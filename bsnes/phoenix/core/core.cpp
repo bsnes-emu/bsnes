@@ -782,6 +782,10 @@ HexEdit::~HexEdit() {
 //HorizontalScrollBar
 //===================
 
+unsigned HorizontalScrollBar::length() {
+  return state.length;
+}
+
 unsigned HorizontalScrollBar::position() {
   return p.position();
 }
@@ -811,6 +815,10 @@ HorizontalScrollBar::~HorizontalScrollBar() {
 
 //HorizontalSlider
 //================
+
+unsigned HorizontalSlider::length() {
+  return state.length;
+}
 
 unsigned HorizontalSlider::position() {
   return p.position();
@@ -1073,6 +1081,10 @@ TextEdit::~TextEdit() {
 //VerticalScrollBar
 //=================
 
+unsigned VerticalScrollBar::length() {
+  return state.length;
+}
+
 unsigned VerticalScrollBar::position() {
   return p.position();
 }
@@ -1102,6 +1114,10 @@ VerticalScrollBar::~VerticalScrollBar() {
 
 //VerticalSlider
 //==============
+
+unsigned VerticalSlider::length() {
+  return state.length;
+}
 
 unsigned VerticalSlider::position() {
   return p.position();

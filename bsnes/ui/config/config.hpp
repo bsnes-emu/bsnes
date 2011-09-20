@@ -3,13 +3,26 @@ struct Config : public configuration {
     string driver;
     string shader;
     bool synchronize;
+    bool enableOverscan;
+    bool correctAspectRatio;
     bool smooth;
+
+    unsigned brightness;
+    unsigned contrast;
+    unsigned gamma;
+    bool gammaRamp;
+    unsigned fullScreenMode;
   } video;
 
   struct Audio {
     string driver;
     bool synchronize;
     bool mute;
+    unsigned volume;
+
+    unsigned frequencyNES;
+    unsigned frequencySNES;
+    unsigned frequencyGameBoy;
   } audio;
 
   struct Input {

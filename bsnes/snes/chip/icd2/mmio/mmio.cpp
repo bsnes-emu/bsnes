@@ -6,9 +6,7 @@ void ICD2::render(const uint8 *source) {
 
   for(unsigned y = 0; y < 8; y++) {
     for(unsigned x = 0; x < 160; x++) {
-      unsigned pixel = *source++ / 0x55;
-      pixel ^= 3;
-
+      unsigned pixel = *source++;
       unsigned addr = y * 2 + (x / 8 * 16);
       lcd.output[addr + 0] |= ((pixel & 1) >> 0) << (7 - (x & 7));
       lcd.output[addr + 1] |= ((pixel & 2) >> 1) << (7 - (x & 7));

@@ -32,10 +32,12 @@ void pComboBox::constructor() {
   qtWidget = qtComboBox = new QComboBox;
   connect(qtComboBox, SIGNAL(currentIndexChanged(int)), SLOT(onChange()));
 
+  pWidget::synchronizeState();
+  unsigned selection = comboBox.state.selection;
   locked = true;
   foreach(text, comboBox.state.text) append(text);
   locked = false;
-  setSelection(comboBox.state.selection);
+  setSelection(selection);
 }
 
 void pComboBox::destructor() {

@@ -102,6 +102,7 @@ void pListView::constructor() {
   connect(qtListView, SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)), SLOT(onChange(QTreeWidgetItem*)));
   connect(qtListView, SIGNAL(itemChanged(QTreeWidgetItem*, int)), SLOT(onTick(QTreeWidgetItem*)));
 
+  pWidget::synchronizeState();
   setCheckable(listView.state.checkable);
   setHeaderText(listView.state.headerText.size() ? listView.state.headerText : lstring{ " " });
   setHeaderVisible(listView.state.headerVisible);
@@ -113,6 +114,7 @@ void pListView::constructor() {
   }
   setSelected(listView.state.selected);
   if(listView.state.selected) setSelection(listView.state.selection);
+  autoSizeColumns();
 }
 
 void pListView::destructor() {

@@ -49,6 +49,14 @@ void Cartridge::unload() {
   loaded = false;
 }
 
+unsigned Cartridge::ram_size() {
+  return mapper->ram_size();
+}
+
+uint8* Cartridge::ram_data() {
+  return mapper->ram_data();
+}
+
 void Cartridge::power() {
   mapper->power();
 }

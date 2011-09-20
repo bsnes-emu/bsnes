@@ -52,6 +52,7 @@ void InputSettings::primaryChange() {
   for(unsigned n = 0; n < input.size(); n++) {
     secondary.append(input[n].name);
   }
+  secondary.setEnabled(input.size() > 1);
   secondaryChange();
 }
 
@@ -62,6 +63,7 @@ void InputSettings::secondaryChange() {
   for(unsigned n = 0; n < input.size(); n++) {
     tertiary.append(input[n].name);
   }
+  tertiary.setEnabled(input.size() > 1);
   tertiaryChange();
 }
 

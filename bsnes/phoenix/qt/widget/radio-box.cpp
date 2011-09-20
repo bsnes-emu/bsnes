@@ -23,7 +23,7 @@ void pRadioBox::setGroup(const reference_array<RadioBox&> &group) {
     delete qtGroup;
     qtGroup = 0;
   }
-  if(qtRadioBox == group[0].p.qtRadioBox) {
+  if(group.size() > 0 && qtRadioBox == group[0].p.qtRadioBox) {
     qtGroup = new QButtonGroup;
     foreach(item, group) qtGroup->addButton(item.p.qtRadioBox);
     setChecked();
@@ -42,6 +42,8 @@ void pRadioBox::constructor() {
   qtRadioBox->setChecked(true);
   connect(qtRadioBox, SIGNAL(toggled(bool)), SLOT(onTick()));
 
+  pWidget::synchronizeState();
+  setGroup(radioBox.state.group);
   setText(radioBox.state.text);
 }
 

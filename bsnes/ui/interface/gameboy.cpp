@@ -10,11 +10,27 @@ bool InterfaceGameBoy::loadCartridge(const string &filename) {
   GameBoy::Interface::loadCartridge(info.xml, data, size);
   delete[] data;
 
+  if(GameBoy::Interface::memorySize(GameBoy::Interface::Memory::RAM) > 0) {
+    filemap fp;
+    if(fp.open(string{ interface->baseName, ".sav" }, filemap::mode::read)) {
+      memcpy(GameBoy::Interface::memoryData(GameBoy::Interface::Memory::RAM), fp.data(),
+        min(GameBoy::Interface::memorySize(GameBoy::Interface::Memory::RAM), fp.size())
+      );
+    }
+  }
+
   interface->loadCartridge(::Interface::Mode::GameBoy);
   return true;
 }
 
 void InterfaceGameBoy::unloadCartridge() {
+  if(GameBoy::Interface::memorySize(GameBoy::Interface::Memory::RAM) > 0) {
+    file::write({ interface->baseName, ".sav" },
+      GameBoy::Interface::memoryData(GameBoy::Interface::Memory::RAM),
+      GameBoy::Interface::memorySize(GameBoy::Interface::Memory::RAM)
+    );
+  }
+
   GameBoy::Interface::unloadCartridge();
   interface->baseName = "";
 }
@@ -36,23 +52,21 @@ bool InterfaceGameBoy::loadState(const string &filename) {
 //
 
 void InterfaceGameBoy::videoRefresh(const uint8_t *data) {
-  interface->videoRefresh();
+  static uint16_t output[160 * 144];
+  static uint32_t palette[] = {
+    0x9bbc0f, 0x8bac0f, 0x306230, 0x0f380f
+  };
 
-  uint32_t *output;
-  unsigned outpitch;
-  if(video.lock(output, outpitch, 160, 144)) {
-    for(unsigned y = 0; y < 144; y++) {
-      const uint8_t *sp = data + y * 160;
-      uint32_t *dp = output + y * (outpitch >> 2);
-      for(unsigned x = 0; x < 160; x++) {
-        uint32_t color = *sp++;
-        *dp++ = (color << 16) | (color << 8) | (color << 0);
-      }
+  for(unsigned y = 0; y < 144; y++) {
+    const uint8_t *sp = data + y * 160;
+    uint16_t *dp = output + y * 160;
+    for(unsigned x = 0; x < 160; x++) {
+      uint32_t color = palette[*sp++];
+      *dp++ = ((color & 0xf80000) >> 9) | ((color & 0x00f800) >> 6) | ((color & 0x0000f8) >> 3);
     }
-
-    video.unlock();
-    video.refresh();
   }
+
+  interface->videoRefresh(output, 160 * 2, 160, 144);
 }
 
 void InterfaceGameBoy::audioSample(int16_t csample, int16_t lsample, int16_t rsample) {

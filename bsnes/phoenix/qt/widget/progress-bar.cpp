@@ -11,6 +11,7 @@ void pProgressBar::constructor() {
   qtProgressBar->setRange(0, 100);
   qtProgressBar->setTextVisible(false);
 
+  pWidget::synchronizeState();
   setPosition(progressBar.state.position);
 }
 

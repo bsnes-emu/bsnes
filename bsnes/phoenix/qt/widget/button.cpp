@@ -10,6 +10,8 @@ void pButton::setText(const string &text) {
 void pButton::constructor() {
   qtWidget = qtButton = new QPushButton;
   connect(qtButton, SIGNAL(released()), SLOT(onTick()));
+
+  pWidget::synchronizeState();
   setText(button.state.text);
 }
 

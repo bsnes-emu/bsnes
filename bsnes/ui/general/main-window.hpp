@@ -45,9 +45,12 @@ struct MainWindow : Window {
     Separator settingsSeparator1;
     CheckItem settingsSynchronizeVideo;
     CheckItem settingsSynchronizeAudio;
+    Separator settingsSeparator2;
+    CheckItem settingsEnableOverscan;
+    CheckItem settingsCorrectAspectRatio;
     CheckItem settingsSmoothVideo;
     CheckItem settingsMuteAudio;
-    Separator settingsSeparator2;
+    Separator settingsSeparator3;
     Item settingsConfiguration;
 
   Menu toolsMenu;

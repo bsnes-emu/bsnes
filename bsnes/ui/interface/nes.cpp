@@ -23,11 +23,26 @@ bool InterfaceNES::loadCartridge(const string &filename) {
   NES::Interface::loadCartridge("", fp.data(), fp.size());
   fp.close();
 
+  if(NES::Interface::memorySize(NES::Interface::Memory::RAM) > 0) {
+    if(fp.open(string{ interface->baseName, ".sav" }, filemap::mode::read)) {
+      memcpy(NES::Interface::memoryData(NES::Interface::Memory::RAM), fp.data(),
+        min(NES::Interface::memorySize(NES::Interface::Memory::RAM), fp.size())
+      );
+    }
+  }
+
   interface->loadCartridge(::Interface::Mode::NES);
   return true;
 }
 
 void InterfaceNES::unloadCartridge() {
+  if(NES::Interface::memorySize(NES::Interface::Memory::RAM) > 0) {
+    file::write({ interface->baseName, ".sav" },
+      NES::Interface::memoryData(NES::Interface::Memory::RAM),
+      NES::Interface::memorySize(NES::Interface::Memory::RAM)
+    );
+  }
+
   NES::Interface::unloadCartridge();
   interface->baseName = "";
 }
@@ -35,22 +50,24 @@ void InterfaceNES::unloadCartridge() {
 //
 
 void InterfaceNES::videoRefresh(const uint16_t *data) {
-  interface->videoRefresh();
+  static uint16_t output[256 * 240];
 
-  uint32_t *output;
-  unsigned outpitch;
-  if(video.lock(output, outpitch, 256, 240)) {
-    for(unsigned y = 0; y < 240; y++) {
-      const uint16_t *sp = data + y * 256;
-      uint32_t *dp = output + y * (outpitch >> 2);
-      for(unsigned x = 0; x < 256; x++) {
-        *dp++ = palette[*sp++];
-      }
-    }
-
-    video.unlock();
-    video.refresh();
+  unsigned height = 240;
+  if(config->video.enableOverscan == false) {
+    height = 224;
+    data += 8 * 256;
   }
+
+  for(unsigned y = 0; y < height; y++) {
+    const uint16_t *sp = data + y * 256;
+    uint16_t *dp = output + y * 256;
+    for(unsigned x = 0; x < 256; x++) {
+      uint32_t color = palette[*sp++];
+      *dp++ = ((color & 0xf80000) >> 9) | ((color & 0x00f800) >> 6) | ((color & 0x0000f8) >> 3);;
+    }
+  }
+
+  interface->videoRefresh(output, 256 * 2, 256, height);
 }
 
 void InterfaceNES::audioSample(int16_t sample) {

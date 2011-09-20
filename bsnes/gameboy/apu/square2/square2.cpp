@@ -19,7 +19,7 @@ void APU::Square2::run() {
   uint4 sample = (duty_output ? volume : (uint4)0);
   if(enable == false) sample = 0;
 
-  output = (sample * 4369) - 32768;
+  output = sample;
 }
 
 void APU::Square2::clock_length() {

@@ -4,7 +4,7 @@
 namespace SNES {
   namespace Info {
     static const char Name[] = "bsnes";
-    static const char Version[] = "082.17";
+    static const char Version[] = "082.18";
     static const unsigned SerializerVersion = 22;
   }
 }
@@ -12,7 +12,7 @@ namespace SNES {
 /*
   bsnes - SNES emulator
   author: byuu
-  license: GPLv2
+  license: GPLv3
   project started: 2004-10-14
 */
 

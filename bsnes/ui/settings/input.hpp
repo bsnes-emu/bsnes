@@ -1,4 +1,4 @@
-struct InputSettings : VerticalLayout {
+struct InputSettings : SettingsLayout {
   Label title;
   HorizontalLayout selectionLayout;
     ComboBox primary;

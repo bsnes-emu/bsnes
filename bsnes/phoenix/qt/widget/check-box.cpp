@@ -21,6 +21,7 @@ void pCheckBox::constructor() {
   qtWidget = qtCheckBox = new QCheckBox;
   connect(qtCheckBox, SIGNAL(stateChanged(int)), SLOT(onTick()));
 
+  pWidget::synchronizeState();
   setChecked(checkBox.state.checked);
   setText(checkBox.state.text);
 }

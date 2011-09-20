@@ -177,10 +177,6 @@ void InputManager::scan() {
       if(mainWindow->focused()) userInterface.inputEvent(n, scancode[activeScancode][n]);
     }
   }
-
-  if(scancode[activeScancode][keyboard(0)[Keyboard::Escape]]) {
-    if(mainWindow->fullScreen() == false && input.acquired()) input.unacquire();
-  }
 }
 
 InputManager::InputManager() {

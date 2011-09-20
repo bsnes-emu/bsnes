@@ -81,6 +81,7 @@ void pHexEdit::constructor() {
 
   connect(qtScroll, SIGNAL(actionTriggered(int)), SLOT(onScroll()));
 
+  pWidget::synchronizeState();
   setColumns(hexEdit.state.columns);
   setRows(hexEdit.state.rows);
   setLength(hexEdit.state.length);

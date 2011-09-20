@@ -38,6 +38,16 @@ void Interface::unloadCartridge() {
   cartridge.unload();
 }
 
+unsigned Interface::memorySize(Memory memory) {
+  if(memory == Memory::RAM) return cartridge.ramsize;
+  return 0u;
+}
+
+uint8_t* Interface::memoryData(Memory memory) {
+  if(memory == Memory::RAM) return cartridge.ramdata;
+  return 0u;
+}
+
 void Interface::power() {
   system.power();
 }

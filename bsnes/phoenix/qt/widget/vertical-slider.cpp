@@ -22,6 +22,7 @@ void pVerticalSlider::constructor() {
   qtSlider->setPageStep(101 >> 3);
   connect(qtSlider, SIGNAL(valueChanged(int)), SLOT(onChange()));
 
+  pWidget::synchronizeState();
   setLength(verticalSlider.state.length);
   setPosition(verticalSlider.state.position);
 }

@@ -19,6 +19,8 @@ void pLineEdit::constructor() {
   qtWidget = qtLineEdit = new QLineEdit;
   connect(qtLineEdit, SIGNAL(returnPressed()), SLOT(onActivate()));
   connect(qtLineEdit, SIGNAL(textEdited(const QString&)), SLOT(onChange()));
+
+  pWidget::synchronizeState();
   setEditable(lineEdit.state.editable);
   setText(lineEdit.state.text);
 }

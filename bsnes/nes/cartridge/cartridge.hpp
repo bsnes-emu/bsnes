@@ -2,6 +2,9 @@ struct Cartridge : property<Cartridge> {
   void load(const string &xml, const uint8_t *data, unsigned size);
   void unload();
 
+  unsigned ram_size();
+  uint8 *ram_data();
+
   void power();
   void reset();
 

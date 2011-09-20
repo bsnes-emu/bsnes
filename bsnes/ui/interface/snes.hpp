@@ -8,6 +8,9 @@ struct InterfaceSNES : SNES::Interface {
   bool loadSuperGameBoyCartridge(const string &basename, const string &slotname);
   void unloadCartridge();
 
+  void loadMemory();
+  void saveMemory();
+
   bool saveState(const string &filename);
   bool loadState(const string &filename);
 

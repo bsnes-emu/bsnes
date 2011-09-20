@@ -19,23 +19,21 @@ void Utility::setMode(Interface::Mode mode) {
     mainWindow->setTitle({ notdir(interface->baseName), " - ", NES::Info::Name, " v", NES::Info::Version });
     mainWindow->nesMenu.setVisible(true);
     dspaudio.setChannels(1);
-    dspaudio.setFrequency(315.0 / 88.0 * 6000000.0 / 12.0);
   }
 
   else if(mode == Interface::Mode::SNES) {
     mainWindow->setTitle({ notdir(interface->baseName), " - ", SNES::Info::Name, " v", SNES::Info::Version });
     mainWindow->snesMenu.setVisible(true);
     dspaudio.setChannels(2);
-    dspaudio.setFrequency(32040.0);
   }
 
   else if(mode == Interface::Mode::GameBoy) {
     mainWindow->setTitle({ notdir(interface->baseName), " - ", GameBoy::Info::Name, " v", GameBoy::Info::Version });
     mainWindow->gameBoyMenu.setVisible(true);
     dspaudio.setChannels(2);
-    dspaudio.setFrequency(4194304.0);
   }
 
+  interface->updateDSP();
   mainWindow->synchronize();
   resizeMainWindow();
 }
@@ -45,9 +43,15 @@ void Utility::resizeMainWindow(bool shrink) {
   unsigned width = geometry.width, height = geometry.height;
 
   switch(interface->mode()) {
-  case Interface::Mode::NES:     width = 256, height = 240; break;
-  case Interface::Mode::SNES:    width = 256, height = 239; break;
+  case Interface::Mode::NES:     width = 256, height = config->video.enableOverscan ? 240 : 224; break;
+  case Interface::Mode::SNES:    width = 256, height = config->video.enableOverscan ? 240 : 224; break;
   case Interface::Mode::GameBoy: width = 160, height = 144; break;
+  }
+
+  if(config->video.correctAspectRatio) {
+    if(interface->mode() != Interface::Mode::GameBoy) {
+      width = (double)width * (config->video.enableOverscan ? 1.225 : 1.149);
+    }
   }
 
   unsigned maxW = geometry.width / width;
@@ -56,6 +60,18 @@ void Utility::resizeMainWindow(bool shrink) {
 
   width  = width  * maxM;
   height = height * maxM;
+
+  if(mainWindow->fullScreen() == true) {
+    if(config->video.fullScreenMode == 1) {  //scale
+      width  = (double)width * ((double)geometry.height / height);
+      height = geometry.height;
+    }
+
+    if(config->video.fullScreenMode == 2) {  //stretch
+      width  = geometry.width;
+      height = geometry.height;
+    }
+  }
 
   if(shrink == false) {
     if(geometry.width  < width ) width  = geometry.width;

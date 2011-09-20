@@ -13,6 +13,13 @@ public:
   virtual void loadCartridge(const string &xml, const uint8_t *data, unsigned size);
   virtual void unloadCartridge();
 
+  enum class Memory : unsigned {
+    RAM,
+  };
+
+  virtual unsigned memorySize(Memory);
+  virtual uint8_t* memoryData(Memory);
+
   virtual void power();
   virtual void run();
 

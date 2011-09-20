@@ -9,6 +9,8 @@ void pLabel::setText(const string &text) {
 
 void pLabel::constructor() {
   qtWidget = qtLabel = new QLabel;
+
+  pWidget::synchronizeState();
   setText(label.state.text);
 }
 

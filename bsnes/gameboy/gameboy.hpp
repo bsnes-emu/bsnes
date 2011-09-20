@@ -12,7 +12,7 @@ namespace GameBoy {
 /*
   bgameboy - Game Boy emulator
   author: byuu
-  license: GPLv2
+  license: GPLv3
   project started: 2010-12-27
 */
 
