@@ -40,15 +40,21 @@ struct MainWindow : Window {
     Item gameBoyCartridgeUnload;
 
   Menu settingsMenu;
-    Menu settingsVideoShaders;
-      RadioItem *settingsVideoShader;
+    Menu settingsVideoFilter;
+      RadioItem settingsVideoFilterNone;
+      Separator settingsVideoFilterSeparator;
+      RadioItem *settingsVideoFilterList;
+    Menu settingsVideoShader;
+      RadioItem settingsVideoShaderNone;
+      RadioItem settingsVideoShaderBlur;
+      Separator settingsVideoShaderSeparator;
+      RadioItem *settingsVideoShaderList;
     Separator settingsSeparator1;
     CheckItem settingsSynchronizeVideo;
     CheckItem settingsSynchronizeAudio;
     Separator settingsSeparator2;
     CheckItem settingsEnableOverscan;
     CheckItem settingsCorrectAspectRatio;
-    CheckItem settingsSmoothVideo;
     CheckItem settingsMuteAudio;
     Separator settingsSeparator3;
     Item settingsConfiguration;
@@ -66,22 +72,19 @@ struct MainWindow : Window {
       Item toolsStateLoad3;
       Item toolsStateLoad4;
       Item toolsStateLoad5;
-    Separator toolsSeparator1;
-    Item toolsCaptureMouse;
+    Separator toolsSeparator;
     Item toolsShrinkWindow;
-    Separator toolsSeparator2;
     Item toolsCheatEditor;
     Item toolsStateManager;
-    Separator toolsSeparator3;
-    CheckItem toolsTest;
 
   void synchronize();
   MainWindow();
 
 private:
-  unsigned videoShaderCount;
+  lstring videoFilterName;
   lstring videoShaderName;
 
+  void setupVideoFilters();
   void setupVideoShaders();
 };
 

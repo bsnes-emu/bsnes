@@ -11,7 +11,6 @@ CheatEditor::CheatEditor() {
   codeLabel.setText("Code(s):");
   descLabel.setText("Description:");
   findButton.setText("Find Codes ...");
-  findButton.setEnabled(false);
   clearAllButton.setText("Clear All");
   clearButton.setText("Clear");
 
@@ -38,6 +37,7 @@ CheatEditor::CheatEditor() {
   cheatList.onTick = [&](unsigned) { updateInterface(); };
   codeEdit.onChange = { &CheatEditor::updateCode, this };
   descEdit.onChange = { &CheatEditor::updateDesc, this };
+  findButton.onTick = { &CheatDatabase::findCodes, cheatDatabase };
   clearAllButton.onTick = { &CheatEditor::clearAll, this };
   clearButton.onTick = { &CheatEditor::clearSelected, this };
 }
@@ -195,4 +195,16 @@ bool CheatEditor::save(const string &filename) {
   fp.close();
 
   return true;
+}
+
+bool CheatEditor::addCode(const string &code, const string &description) {
+  for(unsigned n = 0; n < 128; n++) {
+    if(cheatText[n][Code] == "" && cheatText[n][Desc] == "") {
+      cheatList.setChecked(n, false);
+      cheatText[n][Code] = code;
+      cheatText[n][Desc] = description;
+      return true;
+    }
+  }
+  return false;
 }

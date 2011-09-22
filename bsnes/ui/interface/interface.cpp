@@ -5,6 +5,23 @@
 #include "gameboy.cpp"
 Interface *interface = 0;
 
+Filter filter;
+
+void Filter::render(const uint16_t *input, unsigned inputPitch, unsigned inputWidth, unsigned inputHeight) {
+  width = inputWidth, height = inputHeight;
+  dl_size(width, height);
+  dl_render(data, pitch, input, inputPitch, inputWidth, inputHeight);
+}
+
+Filter::Filter() {
+  data = new uint16_t[1024 * 1024];
+  pitch = 1024 * sizeof(uint16_t);
+}
+
+Filter::~Filter() {
+  delete[] data;
+}
+
 void Interface::bindControllers() {
   switch(mode()) {
   case Mode::NES:
@@ -64,6 +81,7 @@ bool Interface::loadCartridge(const string &filename) {
 
 void Interface::unloadCartridge() {
   if(cartridgeLoaded() == false) return;
+  cheatDatabase->setVisible(false);
   cheatEditor->save({ baseName, ".cht" });
   stateManager->save({ baseName, ".bsa" }, 0u);
   setCheatCodes();
@@ -151,6 +169,15 @@ void Interface::setCheatCodes(const lstring &list) {
   }
 }
 
+string Interface::sha256() {
+  switch(mode()) {
+  case Mode::NES:     return NES::cartridge.sha256();
+  case Mode::SNES:    return SNES::cartridge.sha256();
+  case Mode::GameBoy: return GameBoy::cartridge.sha256();
+  }
+  return "{None}";
+}
+
 Interface::Interface() {
   mode = Mode::None;
   palette.update();
@@ -165,6 +192,14 @@ Interface::Interface() {
 void Interface::videoRefresh(const uint16_t *input, unsigned inputPitch, unsigned width, unsigned height) {
   uint32_t *output;
   unsigned outputPitch;
+
+  if(filter.opened()) {
+    filter.render(input, inputPitch, width, height);
+    input = filter.data;
+    inputPitch = filter.pitch;
+    width = filter.width;
+    height = filter.height;
+  }
 
   if(video.lock(output, outputPitch, width, height)) {
     inputPitch >>= 1, outputPitch >>= 2;

@@ -41,7 +41,7 @@ Application::Application(int argc, char **argv) {
   inputManager = new InputManager;
   utility = new Utility;
 
-  title = "bsnes";
+  title = "bsnes v082.19";
 
   #if defined(PLATFORM_WIN)
   normalFont = "Tahoma, 8";
@@ -59,6 +59,7 @@ Application::Application(int argc, char **argv) {
   slotLoader = new SlotLoader;
   dipSwitches = new DipSwitches;
   settingsWindow = new SettingsWindow;
+  cheatDatabase = new CheatDatabase;
   cheatEditor = new CheatEditor;
   stateManager = new StateManager;
   windowManager->loadGeometry();
@@ -69,8 +70,8 @@ Application::Application(int argc, char **argv) {
   video.driver(config->video.driver);
   video.set(Video::Handle, mainWindow->viewport.handle());
   video.set(Video::Synchronize, config->video.synchronize);
-  video.set(Video::Filter, config->video.smooth == false ? 0u : 1u);
   video.init();
+  utility->bindVideoFilter();
   utility->bindVideoShader();
 
   audio.driver(config->audio.driver);
@@ -104,6 +105,7 @@ Application::Application(int argc, char **argv) {
 Application::~Application() {
   delete stateManager;
   delete cheatEditor;
+  delete cheatDatabase;
   delete settingsWindow;
   delete dipSwitches;
   delete slotLoader;

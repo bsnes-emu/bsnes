@@ -59,8 +59,13 @@ MainWindow::MainWindow() {
     gameBoyCartridgeUnload.setText("Unload Cartridge");
 
   settingsMenu.setText("Settings");
-    settingsVideoShaders.setText("Video Shader");
-    setupVideoShaders();
+    settingsVideoFilter.setText("Video Filter");
+      settingsVideoFilterNone.setText("None");
+      setupVideoFilters();
+    settingsVideoShader.setText("Video Shader");
+      settingsVideoShaderNone.setText("None");
+      settingsVideoShaderBlur.setText("Blur");
+      setupVideoShaders();
     settingsSynchronizeVideo.setText("Synchronize Video");
     settingsSynchronizeVideo.setChecked(config->video.synchronize);
     settingsSynchronizeAudio.setText("Synchronize Audio");
@@ -69,8 +74,6 @@ MainWindow::MainWindow() {
     settingsEnableOverscan.setChecked(config->video.enableOverscan);
     settingsCorrectAspectRatio.setText("Correct Aspect Ratio");
     settingsCorrectAspectRatio.setChecked(config->video.correctAspectRatio);
-    settingsSmoothVideo.setText("Smooth Video Output");
-    settingsSmoothVideo.setChecked(config->video.smooth);
     settingsMuteAudio.setText("Mute Audio");
     settingsMuteAudio.setChecked(config->audio.mute);
     settingsConfiguration.setText("Configuration ...");
@@ -88,11 +91,9 @@ MainWindow::MainWindow() {
       toolsStateLoad3.setText("Slot 3");
       toolsStateLoad4.setText("Slot 4");
       toolsStateLoad5.setText("Slot 5");
-    toolsCaptureMouse.setText("Capture Mouse");
     toolsShrinkWindow.setText("Shrink Window");
     toolsCheatEditor.setText("Cheat Editor ...");
     toolsStateManager.setText("State Manager ...");
-    toolsTest.setText("Test");
 
   append(cartridgeMenu);
     cartridgeMenu.append(cartridgeLoadNES);
@@ -144,16 +145,25 @@ MainWindow::MainWindow() {
     gameBoyMenu.append(gameBoyCartridgeUnload);
 
   append(settingsMenu);
-    settingsMenu.append(settingsVideoShaders);
-      for(unsigned n = 0; n < videoShaderCount; n++)
-      settingsVideoShaders.append(settingsVideoShader[n]);
+    settingsMenu.append(settingsVideoFilter);
+      settingsVideoFilter.append(settingsVideoFilterNone);
+      if(videoFilterName.size())
+      settingsVideoFilter.append(settingsVideoFilterSeparator);
+      for(unsigned n = 0; n < videoFilterName.size(); n++)
+      settingsVideoFilter.append(settingsVideoFilterList[n]);
+    settingsMenu.append(settingsVideoShader);
+      settingsVideoShader.append(settingsVideoShaderNone);
+      settingsVideoShader.append(settingsVideoShaderBlur);
+      if(videoShaderName.size())
+      settingsVideoShader.append(settingsVideoShaderSeparator);
+      for(unsigned n = 0; n < videoShaderName.size(); n++)
+      settingsVideoShader.append(settingsVideoShaderList[n]);
     settingsMenu.append(settingsSeparator1);
     settingsMenu.append(settingsSynchronizeVideo);
     settingsMenu.append(settingsSynchronizeAudio);
     settingsMenu.append(settingsSeparator2);
     settingsMenu.append(settingsEnableOverscan);
     settingsMenu.append(settingsCorrectAspectRatio);
-    settingsMenu.append(settingsSmoothVideo);
     settingsMenu.append(settingsMuteAudio);
     settingsMenu.append(settingsSeparator3);
     settingsMenu.append(settingsConfiguration);
@@ -171,14 +181,10 @@ MainWindow::MainWindow() {
       toolsStateLoad.append(toolsStateLoad3);
       toolsStateLoad.append(toolsStateLoad4);
       toolsStateLoad.append(toolsStateLoad5);
-    toolsMenu.append(toolsSeparator1);
-    toolsMenu.append(toolsCaptureMouse);
+    toolsMenu.append(toolsSeparator);
     toolsMenu.append(toolsShrinkWindow);
-    toolsMenu.append(toolsSeparator2);
     toolsMenu.append(toolsCheatEditor);
     toolsMenu.append(toolsStateManager);
-    toolsMenu.append(toolsSeparator3);
-    toolsMenu.append(toolsTest);
 
   setMenuVisible();
 
@@ -247,6 +253,21 @@ MainWindow::MainWindow() {
   gameBoyPower.onTick = { &Interface::power, interface };
   gameBoyCartridgeUnload.onTick = { &Interface::unloadCartridge, interface };
 
+  settingsVideoFilterNone.onTick = [&] {
+    config->video.filter = "None";
+    utility->bindVideoFilter();
+  };
+
+  settingsVideoShaderNone.onTick = [&] {
+    config->video.shader = "None";
+    utility->bindVideoShader();
+  };
+
+  settingsVideoShaderBlur.onTick = [&] {
+    config->video.shader = "Blur";
+    utility->bindVideoShader();
+  };
+
   settingsSynchronizeVideo.onTick = [&] {
     config->video.synchronize = settingsSynchronizeVideo.checked();
     video.set(Video::Synchronize, config->video.synchronize);
@@ -265,11 +286,6 @@ MainWindow::MainWindow() {
   settingsCorrectAspectRatio.onTick = [&] {
     config->video.correctAspectRatio = settingsCorrectAspectRatio.checked();
     utility->resizeMainWindow();
-  };
-
-  settingsSmoothVideo.onTick = [&] {
-    config->video.smooth = settingsSmoothVideo.checked();
-    video.set(Video::Filter, config->video.smooth == false ? 0u : 1u);
   };
 
   settingsMuteAudio.onTick = [&] {
@@ -291,15 +307,9 @@ MainWindow::MainWindow() {
   toolsStateLoad4.onTick = [&] { interface->loadState(4); };
   toolsStateLoad5.onTick = [&] { interface->loadState(5); };
 
-  toolsCaptureMouse.onTick = [&] { input.acquire(); };
   toolsShrinkWindow.onTick = [&] { utility->resizeMainWindow(true); };
-
   toolsCheatEditor.onTick = [&] { cheatEditor->setVisible(); };
   toolsStateManager.onTick = [&] { stateManager->setVisible(); };
-
-  toolsTest.onTick = [&] {
-    NES::cpu.trace = toolsTest.checked();
-  };
 
   synchronize();
 }
@@ -314,33 +324,56 @@ void MainWindow::synchronize() {
   }
 }
 
+void MainWindow::setupVideoFilters() {
+  lstring files = directory::files({ application->userpath, "filters/" }, "*.filter");
+  reference_array<RadioItem&> group;
+
+  settingsVideoFilterList = new RadioItem[files.size()];
+  for(unsigned n = 0; n < files.size(); n++) {
+    string name = files[n];
+    videoFilterName.append({ application->userpath, "filters/", name });
+    if(auto position = name.position(".filter")) name[position()] = 0;
+
+    settingsVideoFilterList[n].setText(name);
+    settingsVideoFilterList[n].onTick = [&, n] {
+      config->video.filter = videoFilterName[n];
+      utility->bindVideoFilter();
+    };
+  }
+
+  group.append(settingsVideoFilterNone);
+  for(unsigned n = 0; n < files.size(); n++) group.append(settingsVideoFilterList[n]);
+  RadioItem::group(group);
+
+  if(config->video.filter == "None") settingsVideoFilterNone.setChecked();
+  for(unsigned n = 0; n < files.size(); n++)
+  if(config->video.filter == videoFilterName[n]) settingsVideoFilterList[n].setChecked();
+}
+
 void MainWindow::setupVideoShaders() {
   lstring files = directory::files({ application->userpath, "shaders/" }, { "*.", config->video.driver, ".shader" });
-  videoShaderCount = 1 + files.size();
-
   reference_array<RadioItem&> group;
-  unsigned active = 0;
 
-  settingsVideoShader = new RadioItem[videoShaderCount];
-  for(unsigned n = 0; n < videoShaderCount; n++) {
-    string name;
-    if(n == 0) {
-      name = "None";
-      videoShaderName.append("");
-    } else {
-      name = files[n - 1];
-      videoShaderName.append({ application->userpath, "shaders/", name });
-      if(auto position = name.position(string{ ".", config->video.driver, ".shader" })) name[position()] = 0;
-    }
-    if(config->video.shader == videoShaderName[n]) active = n;
-    settingsVideoShader[n].setText(name);
-    settingsVideoShader[n].onTick = [&, n] {
+  settingsVideoShaderList = new RadioItem[files.size()];
+  for(unsigned n = 0; n < files.size(); n++) {
+    string name = files[n];
+    videoShaderName.append({ application->userpath, "shaders/", name });
+    if(auto position = name.position(string{ ".", config->video.driver, ".shader" })) name[position()] = 0;
+
+    settingsVideoShaderList[n].setText(name);
+    settingsVideoShaderList[n].onTick = [&, n] {
       config->video.shader = videoShaderName[n];
       utility->bindVideoShader();
     };
   }
 
-  for(unsigned n = 0; n < videoShaderCount; n++) group.append(settingsVideoShader[n]);
+  group.append(settingsVideoShaderNone);
+  group.append(settingsVideoShaderBlur);
+  for(unsigned n = 0; n < files.size(); n++) group.append(settingsVideoShaderList[n]);
   RadioItem::group(group);
-  settingsVideoShader[active].setChecked();
+
+  if(config->video.shader == "None") settingsVideoShaderNone.setChecked();
+  if(config->video.shader == "Blur") settingsVideoShaderBlur.setChecked();
+  for(unsigned n = 0; n < files.size(); n++)
+  if(config->video.shader == videoShaderName[n]) settingsVideoShaderList[n].setChecked();
 }

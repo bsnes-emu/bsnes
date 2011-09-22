@@ -28,6 +28,7 @@ class OpenGL {
 public:
   GLuint gltexture;
   GLuint glprogram;
+  unsigned shaderfilter;
   GLuint fragmentshader;
   GLuint vertexshader;
   bool shader_support;
@@ -139,6 +140,7 @@ public:
 
     if(source) {
       bool is_glsl = false;
+      shaderfilter = 0;
       string fragment_source;
       string vertex_source;
 
@@ -147,6 +149,7 @@ public:
         if(head.name == "shader") {
           foreach(attribute, head.attribute) {
             if(attribute.name == "language" && attribute.content == "GLSL") is_glsl = true;
+            if(attribute.name == "filter") shaderfilter = attribute.content == "linear" ? 1 : 0;
           }
           foreach(element, head.element) {
             if(element.name == "fragment") {
@@ -236,6 +239,7 @@ public:
   OpenGL() {
     gltexture = 0;
     glprogram = 0;
+    shaderfilter = 0;
     fragmentshader = 0;
     vertexshader = 0;
 

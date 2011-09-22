@@ -2,6 +2,7 @@ struct Utility {
   void setMode(Interface::Mode mode);
   void resizeMainWindow(bool shrink = false);
   void toggleFullScreen();
+  void bindVideoFilter();
   void bindVideoShader();
 
   void updateStatus();

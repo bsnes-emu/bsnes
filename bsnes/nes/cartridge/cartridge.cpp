@@ -37,6 +37,7 @@ void Cartridge::load(const string &xml, const uint8_t *data, unsigned size) {
   }
 
   loaded = true;
+  sha256 = nall::sha256(rom_data, rom_size);
 }
 
 void Cartridge::unload() {

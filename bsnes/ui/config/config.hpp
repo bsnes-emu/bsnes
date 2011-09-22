@@ -1,11 +1,11 @@
 struct Config : public configuration {
   struct Video {
     string driver;
+    string filter;
     string shader;
     bool synchronize;
     bool enableOverscan;
     bool correctAspectRatio;
-    bool smooth;
 
     unsigned brightness;
     unsigned contrast;

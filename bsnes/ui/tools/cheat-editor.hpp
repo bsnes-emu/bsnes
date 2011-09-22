@@ -24,6 +24,7 @@ struct CheatEditor : Window {
   void reset();
   bool load(const string &filename);
   bool save(const string &filename);
+  bool addCode(const string &code, const string &description);
 
   CheatEditor();
 

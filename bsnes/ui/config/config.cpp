@@ -3,11 +3,11 @@ Config *config = 0;
 
 Config::Config() {
   attach(video.driver = "", "Video::Driver");
-  attach(video.shader = "", "Video::Shader");
+  attach(video.filter = "None", "Video::Filter");
+  attach(video.shader = "None", "Video::Shader");
   attach(video.synchronize = true, "Video::Synchronize");
   attach(video.enableOverscan = false, "Video::EnableOverscan");
   attach(video.correctAspectRatio = true, "Video::CorrectAspectRatio");
-  attach(video.smooth = true, "Video::Smooth");
 
   attach(video.brightness = 100, "Video::Brightness");
   attach(video.contrast = 100, "Video::Contrast");

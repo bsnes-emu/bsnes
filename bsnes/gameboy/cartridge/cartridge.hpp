@@ -34,6 +34,7 @@ struct Cartridge : MMIO, property<Cartridge> {
   } info;
 
   readonly<bool> loaded;
+  readonly<string> sha256;
 
   uint8_t *romdata;
   unsigned romsize;

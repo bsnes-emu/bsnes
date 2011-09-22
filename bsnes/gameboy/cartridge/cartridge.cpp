@@ -83,7 +83,9 @@ void Cartridge::load(const string &xml, const uint8_t *data, unsigned size) {
 
   ramdata = new uint8_t[ramsize = info.ramsize]();
   system.load();
+
   loaded = true;
+  sha256 = nall::sha256(romdata, romsize);
 }
 
 void Cartridge::unload() {

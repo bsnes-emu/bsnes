@@ -16,19 +16,19 @@ void Utility::setMode(Interface::Mode mode) {
   }
 
   else if(mode == Interface::Mode::NES) {
-    mainWindow->setTitle({ notdir(interface->baseName), " - ", NES::Info::Name, " v", NES::Info::Version });
+    mainWindow->setTitle(notdir(interface->baseName));
     mainWindow->nesMenu.setVisible(true);
     dspaudio.setChannels(1);
   }
 
   else if(mode == Interface::Mode::SNES) {
-    mainWindow->setTitle({ notdir(interface->baseName), " - ", SNES::Info::Name, " v", SNES::Info::Version });
+    mainWindow->setTitle(notdir(interface->baseName));
     mainWindow->snesMenu.setVisible(true);
     dspaudio.setChannels(2);
   }
 
   else if(mode == Interface::Mode::GameBoy) {
-    mainWindow->setTitle({ notdir(interface->baseName), " - ", GameBoy::Info::Name, " v", GameBoy::Info::Version });
+    mainWindow->setTitle(notdir(interface->baseName));
     mainWindow->gameBoyMenu.setVisible(true);
     dspaudio.setChannels(2);
   }
@@ -107,10 +107,28 @@ void Utility::toggleFullScreen() {
   resizeMainWindow();
 }
 
+void Utility::bindVideoFilter() {
+  if(filter.opened()) filter.close();
+  if(config->video.filter == "None") return;
+  if(filter.open_absolute(config->video.filter)) {
+    filter.dl_size = filter.sym("filter_size");
+    filter.dl_render = filter.sym("filter_render");
+    if(!filter.dl_size || !filter.dl_render) filter.close();
+  }
+}
+
 void Utility::bindVideoShader() {
-  string data;
-  data.readfile(config->video.shader);
-  video.set(Video::Shader, (const char*)data);
+  if(config->video.shader == "None") {
+    video.set(Video::Filter, 0u);
+    video.set(Video::Shader, (const char*)"");
+  } else if(config->video.shader == "Blur") {
+    video.set(Video::Filter, 1u);
+    video.set(Video::Shader, (const char*)"");
+  } else {
+    string data;
+    data.readfile(config->video.shader);
+    video.set(Video::Shader, (const char*)data);
+  }
 }
 
 void Utility::updateStatus() {

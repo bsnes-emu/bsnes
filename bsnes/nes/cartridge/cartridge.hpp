@@ -9,6 +9,7 @@ struct Cartridge : property<Cartridge> {
   void reset();
 
   readonly<bool> loaded;
+  readonly<string> sha256;
 
   Cartridge();
 

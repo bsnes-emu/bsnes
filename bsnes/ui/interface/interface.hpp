@@ -4,6 +4,21 @@
 #include "snes.hpp"
 #include "gameboy.hpp"
 
+struct Filter : public library {
+  function<void (unsigned&, unsigned&)> dl_size;
+  function<void (uint16_t*, unsigned, const uint16_t*, unsigned, unsigned, unsigned)> dl_render;
+  void render(const uint16_t*, unsigned, unsigned, unsigned);
+  Filter();
+  ~Filter();
+
+  uint16_t *data;
+  unsigned pitch;
+  unsigned width;
+  unsigned height;
+};
+
+extern Filter filter;
+
 struct Interface : property<Interface> {
   enum class Mode : unsigned { None, SNES, NES, GameBoy };
   readonly<Mode> mode;
@@ -27,6 +42,7 @@ struct Interface : property<Interface> {
   bool saveState(unsigned slot);
   bool loadState(unsigned slot);
   void setCheatCodes(const lstring &list = lstring{});
+  string sha256();
 
   Interface();
 
