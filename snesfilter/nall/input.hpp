@@ -110,7 +110,7 @@ struct Keyboard {
         break;
       }
     }
-    return string() << "KB" << ID << "::" << KeyboardScancodeName[index];
+    return { "KB", ID, "::", KeyboardScancodeName[index] };
   }
 
   uint16_t operator[](Scancode code) const { return Base + ID * Size + code; }
@@ -207,7 +207,7 @@ struct Mouse {
         break;
       }
     }
-    return string() << "MS" << ID << "::" << MouseScancodeName[index];
+    return { "MS", ID, "::", MouseScancodeName[index] };
   }
 
   uint16_t operator[](Scancode code) const { return Base + ID * Size + code; }
@@ -330,7 +330,7 @@ struct Joypad {
         index = code - (Base + Size * i);
       }
     }
-    return string() << "JP" << ID << "::" << JoypadScancodeName[index];
+    return { "JP", ID, "::", JoypadScancodeName[index] };
   }
 
   uint16_t operator[](Scancode code) const { return Base + ID * Size + code; }

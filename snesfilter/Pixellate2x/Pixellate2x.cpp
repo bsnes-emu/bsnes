@@ -4,42 +4,33 @@ using namespace nall;
 
 extern "C" {
   void filter_size(unsigned&, unsigned&);
-  void filter_render(uint32_t*, uint32_t*, unsigned, const uint16_t*, unsigned, unsigned, unsigned);
+  void filter_render(uint16_t*, unsigned, const uint16_t*, unsigned, unsigned, unsigned);
 };
 
 dllexport void filter_size(unsigned &width, unsigned &height) {
-  width  = (width  <= 256) ? width  * 2 : width;
-  height = (height <= 240) ? height * 2 : height;
+  width  *= 2;
+  height *= 2;
 }
 
 dllexport void filter_render(
-  uint32_t *colortable, uint32_t *output, unsigned outpitch,
-  const uint16_t *input, unsigned pitch, unsigned width, unsigned height
+  uint16_t *output, unsigned outputPitch,
+  const uint16_t *input, unsigned inputPitch,
+  unsigned width, unsigned height
 ) {
-  pitch >>= 1;
-  outpitch >>= 2;
+  outputPitch >>= 1, inputPitch >>= 1;
 
-  uint32_t *out0 = output;
-  uint32_t *out1 = output + outpitch;
-
+  #pragma omp parallel for
   for(unsigned y = 0; y < height; y++) {
+    const uint16_t *in = input + y * inputPitch;
+    uint16_t *out0 = output + y * outputPitch * 2;
+    uint16_t *out1 = output + y * outputPitch * 2 + outputPitch;
+
     for(unsigned x = 0; x < width; x++) {
-      uint32_t p = colortable[*input++];
-
-      *out0++ = p;
-      if(height <= 240) *out1++ = p;
-      if(width > 256) continue;
-
-      *out0++ = p;
-      if(height <= 240) *out1++ = p;
-    }
-
-    input += pitch - width;
-    if(height <= 240) {
-      out0 += outpitch + outpitch - 512;
-      out1 += outpitch + outpitch - 512;
-    } else {
-      out0 += outpitch - 512;
+      uint16_t pixel = *in++;
+      *out0++ = pixel;
+      *out0++ = pixel;
+      *out1++ = pixel;
+      *out1++ = pixel;
     }
   }
 }

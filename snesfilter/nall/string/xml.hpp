@@ -77,7 +77,7 @@ inline string xml_element::parse() const {
       if(auto pos = strpos(source, "]]>")) {
         if(pos() - 9 > 0) {
           string cdata = substr(source, 9, pos() - 9);
-          data << cdata;
+          data.append(cdata);
           offset += strlen(cdata);
         }
         source += 9 + offset + 3;

@@ -3,55 +3,35 @@
 
 namespace nall {
 
-template<unsigned Limit> void lstring::split(const char *key, const char *src) {
-  unsigned limit = Limit;
+template<unsigned Limit, bool Insensitive, bool Quoted> lstring& lstring::usplit(const char *key, const char *base) {
   reset();
+  if(!key || !*key) return *this;
 
-  int ssl = strlen(src), ksl = strlen(key);
-  int lp = 0, split_count = 0;
+  const char *p = base;
+  unsigned counter = 0;
 
-  for(int i = 0; i <= ssl - ksl;) {
-    if(!memcmp(src + i, key, ksl)) {
-      strlcpy(operator[](split_count++), src + lp, i - lp + 1);
-      i += ksl;
-      lp = i;
-      if(!--limit) break;
-    } else i++;
-  }
-
-  operator[](split_count++) = src + lp;
-}
-
-template<unsigned Limit> void lstring::qsplit(const char *key, const char *src) {
-  unsigned limit = Limit;
-  reset();
-
-  int ssl = strlen(src), ksl = strlen(key);
-  int lp = 0, split_count = 0;
-
-  for(int i = 0; i <= ssl - ksl;) {
-    uint8_t x = src[i];
-
-    if(x == '\"' || x == '\'') {
-      int z = i++;                        //skip opening quote
-      while(i < ssl && src[i] != x) i++;
-      if(i >= ssl) i = z;                 //failed match, rewind i
-      else {
-        i++;                              //skip closing quote
-        continue;                         //restart in case next char is also a quote
+  while(*p) {
+    if(Limit) if(counter >= Limit) break;
+    if(quoteskip<Quoted>(p)) continue;
+    for(unsigned n = 0;; n++) {
+      if(key[n] == 0) {
+        strlcpy(operator[](counter++), base, (unsigned)(p - base + 1));
+        p += n;
+        base = p;
+        break;
       }
+      if(!chrequal<Insensitive>(key[n], p[n])) { p++; break; }
     }
-
-    if(!memcmp(src + i, key, ksl)) {
-      strlcpy(operator[](split_count++), src + lp, i - lp + 1);
-      i += ksl;
-      lp = i;
-      if(!--limit) break;
-    } else i++;
   }
 
-  operator[](split_count++) = src + lp;
+  operator[](counter) = base;
+  return *this;
 }
+
+template<unsigned Limit> lstring& lstring::split(const char *key, const char *src) { return usplit<Limit, false, false>(key, src); }
+template<unsigned Limit> lstring& lstring::isplit(const char *key, const char *src) { return usplit<Limit, true, false>(key, src); }
+template<unsigned Limit> lstring& lstring::qsplit(const char *key, const char *src) { return usplit<Limit, false, true>(key, src); }
+template<unsigned Limit> lstring& lstring::iqsplit(const char *key, const char *src) { return usplit<Limit, true, true>(key, src); }
 
 };
 

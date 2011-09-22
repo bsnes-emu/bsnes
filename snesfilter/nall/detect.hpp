@@ -15,7 +15,7 @@
   #define PLATFORM_WIN
 #elif defined(__APPLE__)
   #define PLATFORM_OSX
-#elif defined(linux) || defined(__sun__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
+#elif defined(linux) || defined(__sun__) || defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || defined(__NetBSD__) || defined(__OpenBSD__)
   #define PLATFORM_X
 #endif
 

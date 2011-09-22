@@ -11,7 +11,7 @@ char chrupper(char c) {
   return (c >= 'a' && c <= 'z') ? c - ('a' - 'A') : c;
 }
 
-int stricmp(const char *str1, const char *str2) {
+int istrcmp(const char *str1, const char *str2) {
   while(*str1) {
     if(chrlower(*str1) != chrlower(*str2)) break;
     str1++, str2++;
@@ -66,7 +66,7 @@ bool strbegin(const char *str, const char *key) {
   return (!memcmp(str, key, ksl));
 }
 
-bool stribegin(const char *str, const char *key) {
+bool istrbegin(const char *str, const char *key) {
   int ssl = strlen(str), ksl = strlen(key);
 
   if(ksl > ssl) return false;
@@ -89,7 +89,7 @@ bool strend(const char *str, const char *key) {
   return (!memcmp(str + ssl - ksl, key, ksl));
 }
 
-bool striend(const char *str, const char *key) {
+bool istrend(const char *str, const char *key) {
   int ssl = strlen(str), ksl = strlen(key);
 
   if(ksl > ssl) return false;

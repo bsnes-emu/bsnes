@@ -3,6 +3,8 @@
 
 namespace nall {
 
+static function<int64_t (const char *&)> eval_fallback;
+
 static int eval_integer(const char *&s) {
   if(!*s) throw "unrecognized_integer";
   int value = 0, x = *s, y = *(s + 1);
@@ -58,7 +60,7 @@ static int eval_integer(const char *&s) {
 }
 
 static int eval(const char *&s, int depth = 0) {
-  while(*s == ' ' || *s == '\t') s++; //trim whitespace
+  while(*s == ' ' || *s == '\t') s++;  //trim whitespace
   if(!*s) throw "unrecognized_token";
   int value = 0, x = *s, y = *(s + 1);
 
@@ -74,10 +76,12 @@ static int eval(const char *&s, int depth = 0) {
 
   else if((x >= '0' && x <= '9') || x == '\'') value = eval_integer(s);
 
+  else if(eval_fallback) value = eval_fallback(s);  //optional user-defined syntax parsing
+
   else throw "unrecognized_token";
 
   while(true) {
-    while(*s == ' ' || *s == '\t') s++; //trim whitespace
+    while(*s == ' ' || *s == '\t') s++;  //trim whitespace
     if(!*s) break;
     x = *s, y = *(s + 1);
 

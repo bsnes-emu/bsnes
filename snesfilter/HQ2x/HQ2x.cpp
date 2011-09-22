@@ -4,7 +4,7 @@ using namespace nall;
 
 extern "C" {
   void filter_size(unsigned&, unsigned&);
-  void filter_render(uint32_t*, uint32_t*, unsigned, const uint16_t*, unsigned, unsigned, unsigned);
+  void filter_render(uint16_t*, unsigned, const uint16_t*, unsigned, unsigned, unsigned);
 };
 
 enum {
@@ -147,21 +147,21 @@ dllexport void filter_size(unsigned &width, unsigned &height) {
 }
 
 dllexport void filter_render(
-  uint32_t *colortable, uint32_t *output, unsigned outpitch,
-  const uint16_t *input, unsigned pitch, unsigned width, unsigned height
+  uint16_t *output, unsigned outputPitch,
+  const uint16_t *input, unsigned inputPitch,
+  unsigned width, unsigned height
 ) {
   initialize();
-  pitch >>= 1;
-  outpitch >>= 2;
+  outputPitch >>= 1, inputPitch >>= 1;
 
-//#pragma omp parallel for
+  #pragma omp parallel for
   for(unsigned y = 0; y < height; y++) {
-    const uint16_t *in = input + y * pitch;
-    uint32_t *out0 = output + y * outpitch * 2;
-    uint32_t *out1 = output + y * outpitch * 2 + outpitch;
+    const uint16_t *in = input + y * inputPitch;
+    uint16_t *out0 = output + y * outputPitch * 2;
+    uint16_t *out1 = output + y * outputPitch * 2 + outputPitch;
 
-    int prevline = (y == 0 ? 0 : pitch);
-    int nextline = (y == height - 1 ? 0 : pitch);
+    int prevline = (y == 0 ? 0 : inputPitch);
+    int nextline = (y == height - 1 ? 0 : inputPitch);
 
     in++;
     *out0++ = 0; *out0++ = 0;
@@ -189,10 +189,10 @@ dllexport void filter_render(
       pattern |= diff(e, H) << 6;
       pattern |= diff(e, I) << 7;
 
-      *(out0 + 0) = colortable[blend(hqTable[pattern], E, A, B, D, F, H)]; pattern = rotate[pattern];
-      *(out0 + 1) = colortable[blend(hqTable[pattern], E, C, F, B, H, D)]; pattern = rotate[pattern];
-      *(out1 + 1) = colortable[blend(hqTable[pattern], E, I, H, F, D, B)]; pattern = rotate[pattern];
-      *(out1 + 0) = colortable[blend(hqTable[pattern], E, G, D, H, B, F)];
+      *(out0 + 0) = blend(hqTable[pattern], E, A, B, D, F, H); pattern = rotate[pattern];
+      *(out0 + 1) = blend(hqTable[pattern], E, C, F, B, H, D); pattern = rotate[pattern];
+      *(out1 + 1) = blend(hqTable[pattern], E, I, H, F, D, B); pattern = rotate[pattern];
+      *(out1 + 0) = blend(hqTable[pattern], E, G, D, H, B, F);
 
       in++;
       out0 += 2;

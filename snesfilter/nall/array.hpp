@@ -54,6 +54,10 @@ namespace nall {
       operator[](buffersize) = data;
     }
 
+    void remove() {
+      if(size > 0) resize(size - 1);  //remove last element only
+    }
+
     template<typename U> void insert(unsigned index, const U list) {
       unsigned listsize = container_size(list);
       resize(buffersize + listsize);
@@ -133,6 +137,12 @@ namespace nall {
       if(index >= buffersize) throw "array[] out of bounds";
       return pool[index];
     }
+
+    //iteration
+    T* begin() { return &pool[0]; }
+    T* end() { return &pool[buffersize]; }
+    const T* begin() const { return &pool[0]; }
+    const T* end() const { return &pool[buffersize]; }
   };
 
   template<typename T> struct has_size<array<T>> { enum { value = true }; };

@@ -2,39 +2,32 @@
 #define NALL_STRING_STRPOS_HPP
 
 //usage example:
-//if(auto pos = strpos(str, key)) print(pos(), "\n");
-//prints position of key within str, only if it is found
+//if(auto position = strpos(str, key)) print(position(), "\n");
+//prints position of key within str; but only if it is found
 
 namespace nall {
 
-optional<unsigned> strpos(const char *str, const char *key) {
-  unsigned ssl = strlen(str), ksl = strlen(key);
-  if(ksl > ssl) return { false, 0 };
+template<bool Insensitive, bool Quoted>
+optional<unsigned> ustrpos(const char *str, const char *key) {
+  const char *base = str;
 
-  for(unsigned i = 0; i <= ssl - ksl; i++) {
-    if(!memcmp(str + i, key, ksl)) return { true, i };
-  }
-
-  return { false, 0 };
-}
-
-optional<unsigned> qstrpos(const char *str, const char *key) {
-  unsigned ssl = strlen(str), ksl = strlen(key);
-  if(ksl > ssl) return { false, 0 };
-
-  for(unsigned i = 0; i <= ssl - ksl;) {
-    uint8_t x = str[i];
-    if(x == '\"' || x == '\'') {
-      uint8_t z = i++;
-      while(str[i] != x && i < ssl) i++;
-      if(i >= ssl) i = z;
+  while(*str) {
+    if(quoteskip<Quoted>(str)) continue;
+    for(unsigned n = 0;; n++) {
+      if(key[n] == 0) return { true, (unsigned)(str - base) };
+      if(str[n] == 0) return { false, 0 };
+      if(!chrequal<Insensitive>(str[n], key[n])) break;
     }
-    if(!memcmp(str + i, key, ksl)) return { true, i };
-    i++;
+    str++;
   }
 
   return { false, 0 };
 }
+
+optional<unsigned> strpos(const char *str, const char *key) { return ustrpos<false, false>(str, key); }
+optional<unsigned> istrpos(const char *str, const char *key) { return ustrpos<true, false>(str, key); }
+optional<unsigned> qstrpos(const char *str, const char *key) { return ustrpos<false, true>(str, key); }
+optional<unsigned> iqstrpos(const char *str, const char *key) { return ustrpos<true, true>(str, key); }
 
 }
 

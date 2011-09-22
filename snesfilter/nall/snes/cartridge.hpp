@@ -111,422 +111,426 @@ SNESCartridge::SNESCartridge(const uint8_t *data, unsigned size) {
   string xml = "<?xml version='1.0' encoding='UTF-8'?>\n";
 
   if(type == TypeBsx) {
-    xml << "<cartridge/>";
+    xml.append("<cartridge/>");
     xmlMemoryMap = xml.transform("'", "\"");
     return;
   }
 
   if(type == TypeSufamiTurbo) {
-    xml << "<cartridge/>";
+    xml.append("<cartridge/>");
     xmlMemoryMap = xml.transform("'", "\"");
     return;
   }
 
   if(type == TypeGameBoy) {
-    xml << "<cartridge rtc='" << gameboy_has_rtc(data, size) << "'>\n";
+    xml.append("<cartridge rtc='", gameboy_has_rtc(data, size), "'>\n");
     if(gameboy_ram_size(data, size) > 0) {
-      xml << "  <ram size='" << hex(gameboy_ram_size(data, size)) << "'/>\n";
+      xml.append("  <ram size='0x", hex(gameboy_ram_size(data, size)), "'/>\n");
     }
-    xml << "</cartridge>\n";
+    xml.append("</cartridge>\n");
     xmlMemoryMap = xml.transform("'", "\"");
     return;
   }
 
-  xml << "<cartridge";
+  xml.append("<cartridge");
   if(region == NTSC) {
-    xml << " region='NTSC'";
+    xml.append(" region='NTSC'");
   } else {
-    xml << " region='PAL'";
+    xml.append(" region='PAL'");
   }
-  xml << ">\n";
+  xml.append(">\n");
 
   if(type == TypeSuperGameBoy1Bios) {
-    xml << "  <rom>\n";
-    xml << "    <map mode='linear' address='00-7f:8000-ffff'/>\n";
-    xml << "    <map mode='linear' address='80-ff:8000-ffff'/>\n";
-    xml << "  </rom>\n";
-    xml << "  <icd2 revision='1'>\n";
-    xml << "    <map address='00-3f:6000-7fff'/>\n";
-    xml << "    <map address='80-bf:6000-7fff'/>\n";
-    xml << "  </icd2>\n";
+    xml.append("  <rom>\n");
+    xml.append("    <map mode='linear' address='00-7f:8000-ffff'/>\n");
+    xml.append("    <map mode='linear' address='80-ff:8000-ffff'/>\n");
+    xml.append("  </rom>\n");
+    xml.append("  <icd2 revision='1'>\n");
+    xml.append("    <map address='00-3f:6000-7fff'/>\n");
+    xml.append("    <map address='80-bf:6000-7fff'/>\n");
+    xml.append("  </icd2>\n");
   } else if(type == TypeSuperGameBoy2Bios) {
-    xml << "  <rom>\n";
-    xml << "    <map mode='linear' address='00-7f:8000-ffff'/>\n";
-    xml << "    <map mode='linear' address='80-ff:8000-ffff'/>\n";
-    xml << "  </rom>\n";
-    xml << "  <icd2 revision='2'>\n";
-    xml << "    <map address='00-3f:6000-7fff'/>\n";
-    xml << "    <map address='80-bf:6000-7fff'/>\n";
-    xml << "  </icd2>\n";
+    xml.append("  <rom>\n");
+    xml.append("    <map mode='linear' address='00-7f:8000-ffff'/>\n");
+    xml.append("    <map mode='linear' address='80-ff:8000-ffff'/>\n");
+    xml.append("  </rom>\n");
+    xml.append("  <icd2 revision='2'>\n");
+    xml.append("    <map address='00-3f:6000-7fff'/>\n");
+    xml.append("    <map address='80-bf:6000-7fff'/>\n");
+    xml.append("  </icd2>\n");
+  } else if(has_cx4) {
+    xml.append("  <hitachidsp model='HG51B169' frequency='20000000' firmware='cx4.bin' sha256='ae8d4d1961b93421ff00b3caa1d0f0ce7783e749772a3369c36b3dbf0d37ef18'>\n");
+    xml.append("    <rom>\n");
+    xml.append("      <map mode='linear' address='00-7f:8000-ffff'/>\n");
+    xml.append("      <map mode='linear' address='80-ff:8000-ffff'/>\n");
+    xml.append("    </rom>\n");
+    xml.append("    <mmio>\n");
+    xml.append("      <map address='00-3f:6000-7fff'/>\n");
+    xml.append("      <map address='80-bf:6000-7fff'/>\n");
+    xml.append("    </mmio>\n");
+    xml.append("  </hitachidsp>\n");
   } else if(has_spc7110) {
-    xml << "  <rom>\n";
-    xml << "    <map mode='shadow' address='00-0f:8000-ffff'/>\n";
-    xml << "    <map mode='shadow' address='80-bf:8000-ffff'/>\n";
-    xml << "    <map mode='linear' address='c0-cf:0000-ffff'/>\n";
-    xml << "  </rom>\n";
+    xml.append("  <rom>\n");
+    xml.append("    <map mode='shadow' address='00-0f:8000-ffff'/>\n");
+    xml.append("    <map mode='shadow' address='80-bf:8000-ffff'/>\n");
+    xml.append("    <map mode='linear' address='c0-cf:0000-ffff'/>\n");
+    xml.append("  </rom>\n");
 
-    xml << "  <spc7110>\n";
-    xml << "    <mcu>\n";
-    xml << "      <map address='d0-ff:0000-ffff' offset='100000' size='" << hex(size - 0x100000) << "'/>\n";
-    xml << "    </mcu>\n";
-    xml << "    <ram size='" << hex(ram_size) << "'>\n";
-    xml << "      <map mode='linear' address='00:6000-7fff'/>\n";
-    xml << "      <map mode='linear' address='30:6000-7fff'/>\n";
-    xml << "    </ram>\n";
-    xml << "    <mmio>\n";
-    xml << "      <map address='00-3f:4800-483f'/>\n";
-    xml << "      <map address='80-bf:4800-483f'/>\n";
-    xml << "    </mmio>\n";
+    xml.append("  <spc7110>\n");
+    xml.append("    <mcu>\n");
+    xml.append("      <map address='d0-ff:0000-ffff' offset='0x100000' size='0x", hex(size - 0x100000), "'/>\n");
+    xml.append("    </mcu>\n");
+    xml.append("    <ram size='0x", hex(ram_size), "'>\n");
+    xml.append("      <map mode='linear' address='00:6000-7fff'/>\n");
+    xml.append("      <map mode='linear' address='30:6000-7fff'/>\n");
+    xml.append("    </ram>\n");
+    xml.append("    <mmio>\n");
+    xml.append("      <map address='00-3f:4800-483f'/>\n");
+    xml.append("      <map address='80-bf:4800-483f'/>\n");
+    xml.append("    </mmio>\n");
     if(has_spc7110rtc) {
-      xml << "    <rtc>\n";
-      xml << "      <map address='00-3f:4840-4842'/>\n";
-      xml << "      <map address='80-bf:4840-4842'/>\n";
-      xml << "    </rtc>\n";
+      xml.append("    <rtc>\n");
+      xml.append("      <map address='00-3f:4840-4842'/>\n");
+      xml.append("      <map address='80-bf:4840-4842'/>\n");
+      xml.append("    </rtc>\n");
     }
-    xml << "    <dcu>\n";
-    xml << "      <map address='50:0000-ffff'/>\n";
-    xml << "    </dcu>\n";
-    xml << "  </spc7110>\n";
+    xml.append("    <dcu>\n");
+    xml.append("      <map address='50:0000-ffff'/>\n");
+    xml.append("    </dcu>\n");
+    xml.append("  </spc7110>\n");
   } else if(mapper == LoROM) {
-    xml << "  <rom>\n";
-    xml << "    <map mode='linear' address='00-7f:8000-ffff'/>\n";
-    xml << "    <map mode='linear' address='80-ff:8000-ffff'/>\n";
-    xml << "  </rom>\n";
+    xml.append("  <rom>\n");
+    xml.append("    <map mode='linear' address='00-7f:8000-ffff'/>\n");
+    xml.append("    <map mode='linear' address='80-ff:8000-ffff'/>\n");
+    xml.append("  </rom>\n");
 
     if(ram_size > 0) {
-      xml << "  <ram size='" << hex(ram_size) << "'>\n";
-      xml << "    <map mode='linear' address='20-3f:6000-7fff'/>\n";
-      xml << "    <map mode='linear' address='a0-bf:6000-7fff'/>\n";
+      xml.append("  <ram size='0x", hex(ram_size), "'>\n");
+      xml.append("    <map mode='linear' address='20-3f:6000-7fff'/>\n");
+      xml.append("    <map mode='linear' address='a0-bf:6000-7fff'/>\n");
       if((rom_size > 0x200000) || (ram_size > 32 * 1024)) {
-        xml << "    <map mode='linear' address='70-7f:0000-7fff'/>\n";
-        xml << "    <map mode='linear' address='f0-ff:0000-7fff'/>\n";
+        xml.append("    <map mode='linear' address='70-7f:0000-7fff'/>\n");
+        xml.append("    <map mode='linear' address='f0-ff:0000-7fff'/>\n");
       } else {
-        xml << "    <map mode='linear' address='70-7f:0000-ffff'/>\n";
-        xml << "    <map mode='linear' address='f0-ff:0000-ffff'/>\n";
+        xml.append("    <map mode='linear' address='70-7f:0000-ffff'/>\n");
+        xml.append("    <map mode='linear' address='f0-ff:0000-ffff'/>\n");
       }
-      xml << "  </ram>\n";
+      xml.append("  </ram>\n");
     }
   } else if(mapper == HiROM) {
-    xml << "  <rom>\n";
-    xml << "    <map mode='shadow' address='00-3f:8000-ffff'/>\n";
-    xml << "    <map mode='linear' address='40-7f:0000-ffff'/>\n";
-    xml << "    <map mode='shadow' address='80-bf:8000-ffff'/>\n";
-    xml << "    <map mode='linear' address='c0-ff:0000-ffff'/>\n";
-    xml << "  </rom>\n";
+    xml.append("  <rom>\n");
+    xml.append("    <map mode='shadow' address='00-3f:8000-ffff'/>\n");
+    xml.append("    <map mode='linear' address='40-7f:0000-ffff'/>\n");
+    xml.append("    <map mode='shadow' address='80-bf:8000-ffff'/>\n");
+    xml.append("    <map mode='linear' address='c0-ff:0000-ffff'/>\n");
+    xml.append("  </rom>\n");
 
     if(ram_size > 0) {
-      xml << "  <ram size='" << hex(ram_size) << "'>\n";
-      xml << "    <map mode='linear' address='20-3f:6000-7fff'/>\n";
-      xml << "    <map mode='linear' address='a0-bf:6000-7fff'/>\n";
+      xml.append("  <ram size='0x", hex(ram_size), "'>\n");
+      xml.append("    <map mode='linear' address='20-3f:6000-7fff'/>\n");
+      xml.append("    <map mode='linear' address='a0-bf:6000-7fff'/>\n");
       if((rom_size > 0x200000) || (ram_size > 32 * 1024)) {
-        xml << "    <map mode='linear' address='70-7f:0000-7fff'/>\n";
+        xml.append("    <map mode='linear' address='70-7f:0000-7fff'/>\n");
       } else {
-        xml << "    <map mode='linear' address='70-7f:0000-ffff'/>\n";
+        xml.append("    <map mode='linear' address='70-7f:0000-ffff'/>\n");
       }
-      xml << "  </ram>\n";
+      xml.append("  </ram>\n");
     }
   } else if(mapper == ExLoROM) {
-    xml << "  <rom>\n";
-    xml << "    <map mode='linear' address='00-3f:8000-ffff'/>\n";
-    xml << "    <map mode='linear' address='40-7f:0000-ffff'/>\n";
-    xml << "    <map mode='linear' address='80-bf:8000-ffff'/>\n";
-    xml << "  </rom>\n";
+    xml.append("  <rom>\n");
+    xml.append("    <map mode='linear' address='00-3f:8000-ffff'/>\n");
+    xml.append("    <map mode='linear' address='40-7f:0000-ffff'/>\n");
+    xml.append("    <map mode='linear' address='80-bf:8000-ffff'/>\n");
+    xml.append("  </rom>\n");
 
     if(ram_size > 0) {
-      xml << "  <ram size='" << hex(ram_size) << "'>\n";
-      xml << "    <map mode='linear' address='20-3f:6000-7fff'/>\n";
-      xml << "    <map mode='linear' address='a0-bf:6000-7fff'/>\n";
-      xml << "    <map mode='linear' address='70-7f:0000-7fff'/>\n";
-      xml << "  </ram>\n";
+      xml.append("  <ram size='0x", hex(ram_size), "'>\n");
+      xml.append("    <map mode='linear' address='20-3f:6000-7fff'/>\n");
+      xml.append("    <map mode='linear' address='a0-bf:6000-7fff'/>\n");
+      xml.append("    <map mode='linear' address='70-7f:0000-7fff'/>\n");
+      xml.append("  </ram>\n");
     }
   } else if(mapper == ExHiROM) {
-    xml << "  <rom>\n";
-    xml << "    <map mode='shadow' address='00-3f:8000-ffff' offset='400000'/>\n";
-    xml << "    <map mode='linear' address='40-7f:0000-ffff' offset='400000'/>\n";
-    xml << "    <map mode='shadow' address='80-bf:8000-ffff' offset='000000'/>\n";
-    xml << "    <map mode='linear' address='c0-ff:0000-ffff' offset='000000'/>\n";
-    xml << "  </rom>\n";
+    xml.append("  <rom>\n");
+    xml.append("    <map mode='shadow' address='00-3f:8000-ffff' offset='0x400000'/>\n");
+    xml.append("    <map mode='linear' address='40-7f:0000-ffff' offset='0x400000'/>\n");
+    xml.append("    <map mode='shadow' address='80-bf:8000-ffff' offset='0x000000'/>\n");
+    xml.append("    <map mode='linear' address='c0-ff:0000-ffff' offset='0x000000'/>\n");
+    xml.append("  </rom>\n");
 
     if(ram_size > 0) {
-      xml << "  <ram size='" << hex(ram_size) << "'>\n";
-      xml << "    <map mode='linear' address='20-3f:6000-7fff'/>\n";
-      xml << "    <map mode='linear' address='a0-bf:6000-7fff'/>\n";
+      xml.append("  <ram size='0x", hex(ram_size), "'>\n");
+      xml.append("    <map mode='linear' address='20-3f:6000-7fff'/>\n");
+      xml.append("    <map mode='linear' address='a0-bf:6000-7fff'/>\n");
       if((rom_size > 0x200000) || (ram_size > 32 * 1024)) {
-        xml << "    <map mode='linear' address='70-7f:0000-7fff'/>\n";
+        xml.append("    <map mode='linear' address='70-7f:0000-7fff'/>\n");
       } else {
-        xml << "    <map mode='linear' address='70-7f:0000-ffff'/>\n";
+        xml.append("    <map mode='linear' address='70-7f:0000-ffff'/>\n");
       }
-      xml << "  </ram>\n";
+      xml.append("  </ram>\n");
     }
   } else if(mapper == SuperFXROM) {
-    xml << "  <superfx revision='2'>\n";
-    xml << "    <rom>\n";
-    xml << "      <map mode='linear' address='00-3f:8000-ffff'/>\n";
-    xml << "      <map mode='linear' address='40-5f:0000-ffff'/>\n";
-    xml << "      <map mode='linear' address='80-bf:8000-ffff'/>\n";
-    xml << "      <map mode='linear' address='c0-df:0000-ffff'/>\n";
-    xml << "    </rom>\n";
-    xml << "    <ram size='" << hex(ram_size) << "'>\n";
-    xml << "      <map mode='linear' address='00-3f:6000-7fff' size='2000'/>\n";
-    xml << "      <map mode='linear' address='60-7f:0000-ffff'/>\n";
-    xml << "      <map mode='linear' address='80-bf:6000-7fff' size='2000'/>\n";
-    xml << "      <map mode='linear' address='e0-ff:0000-ffff'/>\n";
-    xml << "    </ram>\n";
-    xml << "    <mmio>\n";
-    xml << "      <map address='00-3f:3000-32ff'/>\n";
-    xml << "      <map address='80-bf:3000-32ff'/>\n";
-    xml << "    </mmio>\n";
-    xml << "  </superfx>\n";
+    xml.append("  <superfx revision='2'>\n");
+    xml.append("    <rom>\n");
+    xml.append("      <map mode='linear' address='00-3f:8000-ffff'/>\n");
+    xml.append("      <map mode='linear' address='40-5f:0000-ffff'/>\n");
+    xml.append("      <map mode='linear' address='80-bf:8000-ffff'/>\n");
+    xml.append("      <map mode='linear' address='c0-df:0000-ffff'/>\n");
+    xml.append("    </rom>\n");
+    xml.append("    <ram size='0x", hex(ram_size), "'>\n");
+    xml.append("      <map mode='linear' address='00-3f:6000-7fff' size='0x2000'/>\n");
+    xml.append("      <map mode='linear' address='60-7f:0000-ffff'/>\n");
+    xml.append("      <map mode='linear' address='80-bf:6000-7fff' size='0x2000'/>\n");
+    xml.append("      <map mode='linear' address='e0-ff:0000-ffff'/>\n");
+    xml.append("    </ram>\n");
+    xml.append("    <mmio>\n");
+    xml.append("      <map address='00-3f:3000-32ff'/>\n");
+    xml.append("      <map address='80-bf:3000-32ff'/>\n");
+    xml.append("    </mmio>\n");
+    xml.append("  </superfx>\n");
   } else if(mapper == SA1ROM) {
-    xml << "  <sa1>\n";
-    xml << "    <mcu>\n";
-    xml << "      <rom>\n";
-    xml << "        <map mode='direct' address='00-3f:8000-ffff'/>\n";
-    xml << "        <map mode='direct' address='80-bf:8000-ffff'/>\n";
-    xml << "        <map mode='direct' address='c0-ff:0000-ffff'/>\n";
-    xml << "      </rom>\n";
-    xml << "      <ram>\n";
-    xml << "        <map mode='direct' address='00-3f:6000-7fff'/>\n";
-    xml << "        <map mode='direct' address='80-bf:6000-7fff'/>\n";
-    xml << "      </ram>\n";
-    xml << "    </mcu>\n";
-    xml << "    <iram size='800'>\n";
-    xml << "      <map mode='linear' address='00-3f:3000-37ff'/>\n";
-    xml << "      <map mode='linear' address='80-bf:3000-37ff'/>\n";
-    xml << "    </iram>\n";
-    xml << "    <bwram size='" << hex(ram_size) << "'>\n";
-    xml << "      <map mode='linear' address='40-4f:0000-ffff'/>\n";
-    xml << "    </bwram>\n";
-    xml << "    <mmio>\n";
-    xml << "      <map address='00-3f:2200-23ff'/>\n";
-    xml << "      <map address='80-bf:2200-23ff'/>\n";
-    xml << "    </mmio>\n";
-    xml << "  </sa1>\n";
+    xml.append("  <sa1>\n");
+    xml.append("    <mcu>\n");
+    xml.append("      <rom>\n");
+    xml.append("        <map mode='direct' address='00-3f:8000-ffff'/>\n");
+    xml.append("        <map mode='direct' address='80-bf:8000-ffff'/>\n");
+    xml.append("        <map mode='direct' address='c0-ff:0000-ffff'/>\n");
+    xml.append("      </rom>\n");
+    xml.append("      <ram>\n");
+    xml.append("        <map mode='direct' address='00-3f:6000-7fff'/>\n");
+    xml.append("        <map mode='direct' address='80-bf:6000-7fff'/>\n");
+    xml.append("      </ram>\n");
+    xml.append("    </mcu>\n");
+    xml.append("    <iram size='0x800'>\n");
+    xml.append("      <map mode='linear' address='00-3f:3000-37ff'/>\n");
+    xml.append("      <map mode='linear' address='80-bf:3000-37ff'/>\n");
+    xml.append("    </iram>\n");
+    xml.append("    <bwram size='0x", hex(ram_size), "'>\n");
+    xml.append("      <map mode='linear' address='40-4f:0000-ffff'/>\n");
+    xml.append("    </bwram>\n");
+    xml.append("    <mmio>\n");
+    xml.append("      <map address='00-3f:2200-23ff'/>\n");
+    xml.append("      <map address='80-bf:2200-23ff'/>\n");
+    xml.append("    </mmio>\n");
+    xml.append("  </sa1>\n");
   } else if(mapper == BSCLoROM) {
-    xml << "  <rom>\n";
-    xml << "    <map mode='linear' address='00-1f:8000-ffff' offset='000000'/>\n";
-    xml << "    <map mode='linear' address='20-3f:8000-ffff' offset='100000'/>\n";
-    xml << "    <map mode='linear' address='80-9f:8000-ffff' offset='200000'/>\n";
-    xml << "    <map mode='linear' address='a0-bf:8000-ffff' offset='100000'/>\n";
-    xml << "  </rom>\n";
-    xml << "  <ram size='" << hex(ram_size) << "'>\n";
-    xml << "    <map mode='linear' address='70-7f:0000-7fff'/>\n";
-    xml << "    <map mode='linear' address='f0-ff:0000-7fff'/>\n";
-    xml << "  </ram>\n";
-    xml << "  <bsx>\n";
-    xml << "    <slot>\n";
-    xml << "      <map mode='linear' address='c0-ef:0000-ffff'/>\n";
-    xml << "    </slot>\n";
-    xml << "  </bsx>\n";
+    xml.append("  <rom>\n");
+    xml.append("    <map mode='linear' address='00-1f:8000-ffff' offset='0x000000'/>\n");
+    xml.append("    <map mode='linear' address='20-3f:8000-ffff' offset='0x100000'/>\n");
+    xml.append("    <map mode='linear' address='80-9f:8000-ffff' offset='0x200000'/>\n");
+    xml.append("    <map mode='linear' address='a0-bf:8000-ffff' offset='0x100000'/>\n");
+    xml.append("  </rom>\n");
+    xml.append("  <ram size='0x", hex(ram_size), "'>\n");
+    xml.append("    <map mode='linear' address='70-7f:0000-7fff'/>\n");
+    xml.append("    <map mode='linear' address='f0-ff:0000-7fff'/>\n");
+    xml.append("  </ram>\n");
+    xml.append("  <bsx>\n");
+    xml.append("    <slot>\n");
+    xml.append("      <map mode='linear' address='c0-ef:0000-ffff'/>\n");
+    xml.append("    </slot>\n");
+    xml.append("  </bsx>\n");
   } else if(mapper == BSCHiROM) {
-    xml << "  <rom>\n";
-    xml << "    <map mode='shadow' address='00-1f:8000-ffff'/>\n";
-    xml << "    <map mode='linear' address='40-5f:0000-ffff'/>\n";
-    xml << "    <map mode='shadow' address='80-9f:8000-ffff'/>\n";
-    xml << "    <map mode='linear' address='c0-df:0000-ffff'/>\n";
-    xml << "  </rom>\n";
-    xml << "  <ram size='" << hex(ram_size) << "'>\n";
-    xml << "    <map mode='linear' address='20-3f:6000-7fff'/>\n";
-    xml << "    <map mode='linear' address='a0-bf:6000-7fff'/>\n";
-    xml << "  </ram>\n";
-    xml << "  <bsx>\n";
-    xml << "    <slot>\n";
-    xml << "      <map mode='shadow' address='20-3f:8000-ffff'/>\n";
-    xml << "      <map mode='linear' address='60-7f:0000-ffff'/>\n";
-    xml << "      <map mode='shadow' address='a0-bf:8000-ffff'/>\n";
-    xml << "      <map mode='linear' address='e0-ff:0000-ffff'/>\n";
-    xml << "    </slot>\n";
-    xml << "  </bsx>\n";
+    xml.append("  <rom>\n");
+    xml.append("    <map mode='shadow' address='00-1f:8000-ffff'/>\n");
+    xml.append("    <map mode='linear' address='40-5f:0000-ffff'/>\n");
+    xml.append("    <map mode='shadow' address='80-9f:8000-ffff'/>\n");
+    xml.append("    <map mode='linear' address='c0-df:0000-ffff'/>\n");
+    xml.append("  </rom>\n");
+    xml.append("  <ram size='0x", hex(ram_size), "'>\n");
+    xml.append("    <map mode='linear' address='20-3f:6000-7fff'/>\n");
+    xml.append("    <map mode='linear' address='a0-bf:6000-7fff'/>\n");
+    xml.append("  </ram>\n");
+    xml.append("  <bsx>\n");
+    xml.append("    <slot>\n");
+    xml.append("      <map mode='shadow' address='20-3f:8000-ffff'/>\n");
+    xml.append("      <map mode='linear' address='60-7f:0000-ffff'/>\n");
+    xml.append("      <map mode='shadow' address='a0-bf:8000-ffff'/>\n");
+    xml.append("      <map mode='linear' address='e0-ff:0000-ffff'/>\n");
+    xml.append("    </slot>\n");
+    xml.append("  </bsx>\n");
   } else if(mapper == BSXROM) {
-    xml << "  <bsx>\n";
-    xml << "    <mcu>\n";
-    xml << "      <map address='00-3f:8000-ffff'/>\n";
-    xml << "      <map address='80-bf:8000-ffff'/>\n";
-    xml << "      <map address='40-7f:0000-ffff'/>\n";
-    xml << "      <map address='c0-ff:0000-ffff'/>\n";
-    xml << "      <map address='20-3f:6000-7fff'/>\n";
-    xml << "    </mcu>\n";
-    xml << "    <mmio>\n";
-    xml << "      <map address='00-3f:5000-5fff'/>\n";
-    xml << "      <map address='80-bf:5000-5fff'/>\n";
-    xml << "    </mmio>\n";
-    xml << "  </bsx>\n";
+    xml.append("  <bsx>\n");
+    xml.append("    <mcu>\n");
+    xml.append("      <map address='00-3f:8000-ffff'/>\n");
+    xml.append("      <map address='80-bf:8000-ffff'/>\n");
+    xml.append("      <map address='40-7f:0000-ffff'/>\n");
+    xml.append("      <map address='c0-ff:0000-ffff'/>\n");
+    xml.append("      <map address='20-3f:6000-7fff'/>\n");
+    xml.append("    </mcu>\n");
+    xml.append("    <mmio>\n");
+    xml.append("      <map address='00-3f:5000-5fff'/>\n");
+    xml.append("      <map address='80-bf:5000-5fff'/>\n");
+    xml.append("    </mmio>\n");
+    xml.append("  </bsx>\n");
   } else if(mapper == STROM) {
-    xml << "  <rom>\n";
-    xml << "    <map mode='linear' address='00-1f:8000-ffff'/>\n";
-    xml << "    <map mode='linear' address='80-9f:8000-ffff'/>\n";
-    xml << "  </rom>\n";
-    xml << "  <sufamiturbo>\n";
-    xml << "    <slot id='A'>\n";
-    xml << "      <rom>\n";
-    xml << "        <map mode='linear' address='20-3f:8000-ffff'/>\n";
-    xml << "        <map mode='linear' address='a0-bf:8000-ffff'/>\n";
-    xml << "      </rom>\n";
-    xml << "      <ram size='20000'>\n";
-    xml << "        <map mode='linear' address='60-63:8000-ffff'/>\n";
-    xml << "        <map mode='linear' address='e0-e3:8000-ffff'/>\n";
-    xml << "      </ram>\n";
-    xml << "    </slot>\n";
-    xml << "    <slot id='B'>\n";
-    xml << "      <rom>\n";
-    xml << "        <map mode='linear' address='40-5f:8000-ffff'/>\n";
-    xml << "        <map mode='linear' address='c0-df:8000-ffff'/>\n";
-    xml << "      </rom>\n";
-    xml << "      <ram size='20000'>\n";
-    xml << "        <map mode='linear' address='70-73:8000-ffff'/>\n";
-    xml << "        <map mode='linear' address='f0-f3:8000-ffff'/>\n";
-    xml << "      </ram>\n";
-    xml << "    </slot>\n";
-    xml << "  </sufamiturbo>\n";
+    xml.append("  <rom>\n");
+    xml.append("    <map mode='linear' address='00-1f:8000-ffff'/>\n");
+    xml.append("    <map mode='linear' address='80-9f:8000-ffff'/>\n");
+    xml.append("  </rom>\n");
+    xml.append("  <sufamiturbo>\n");
+    xml.append("    <slot id='A'>\n");
+    xml.append("      <rom>\n");
+    xml.append("        <map mode='linear' address='20-3f:8000-ffff'/>\n");
+    xml.append("        <map mode='linear' address='a0-bf:8000-ffff'/>\n");
+    xml.append("      </rom>\n");
+    xml.append("      <ram size='0x20000'>\n");
+    xml.append("        <map mode='linear' address='60-63:8000-ffff'/>\n");
+    xml.append("        <map mode='linear' address='e0-e3:8000-ffff'/>\n");
+    xml.append("      </ram>\n");
+    xml.append("    </slot>\n");
+    xml.append("    <slot id='B'>\n");
+    xml.append("      <rom>\n");
+    xml.append("        <map mode='linear' address='40-5f:8000-ffff'/>\n");
+    xml.append("        <map mode='linear' address='c0-df:8000-ffff'/>\n");
+    xml.append("      </rom>\n");
+    xml.append("      <ram size='0x20000'>\n");
+    xml.append("        <map mode='linear' address='70-73:8000-ffff'/>\n");
+    xml.append("        <map mode='linear' address='f0-f3:8000-ffff'/>\n");
+    xml.append("      </ram>\n");
+    xml.append("    </slot>\n");
+    xml.append("  </sufamiturbo>\n");
   }
 
   if(has_srtc) {
-    xml << "  <srtc>\n";
-    xml << "    <map address='00-3f:2800-2801'/>\n";
-    xml << "    <map address='80-bf:2800-2801'/>\n";
-    xml << "  </srtc>\n";
+    xml.append("  <srtc>\n");
+    xml.append("    <map address='00-3f:2800-2801'/>\n");
+    xml.append("    <map address='80-bf:2800-2801'/>\n");
+    xml.append("  </srtc>\n");
   }
 
   if(has_sdd1) {
-    xml << "  <sdd1>\n";
-    xml << "    <mcu>\n";
-    xml << "      <map address='c0-ff:0000-ffff'/>\n";
-    xml << "    </mcu>\n";
-    xml << "    <mmio>\n";
-    xml << "      <map address='00-3f:4800-4807'/>\n";
-    xml << "      <map address='80-bf:4800-4807'/>\n";
-    xml << "    </mmio>\n";
-    xml << "  </sdd1>\n";
-  }
-
-  if(has_cx4) {
-    xml << "  <cx4>\n";
-    xml << "    <map address='00-3f:6000-7fff'/>\n";
-    xml << "    <map address='80-bf:6000-7fff'/>\n";
-    xml << "  </cx4>\n";
+    xml.append("  <sdd1>\n");
+    xml.append("    <mcu>\n");
+    xml.append("      <map address='c0-ff:0000-ffff'/>\n");
+    xml.append("    </mcu>\n");
+    xml.append("    <mmio>\n");
+    xml.append("      <map address='00-3f:4800-4807'/>\n");
+    xml.append("      <map address='80-bf:4800-4807'/>\n");
+    xml.append("    </mmio>\n");
+    xml.append("  </sdd1>\n");
   }
 
   if(has_dsp1) {
-    xml << "  <necdsp revision='upd7725' frequency='8000000' program='dsp1b.bin' sha256='4d42db0f36faef263d6b93f508e8c1c4ae8fc2605fd35e3390ecc02905cd420c'>\n";
+    xml.append("  <necdsp model='uPD7725' frequency='8000000' firmware='dsp1b.bin' sha256='4d42db0f36faef263d6b93f508e8c1c4ae8fc2605fd35e3390ecc02905cd420c'>\n");
     if(dsp1_mapper == DSP1LoROM1MB) {
-      xml << "    <dr>\n";
-      xml << "      <map address='20-3f:8000-bfff'/>\n";
-      xml << "      <map address='a0-bf:8000-bfff'/>\n";
-      xml << "    </dr>\n";
-      xml << "    <sr>\n";
-      xml << "      <map address='20-3f:c000-ffff'/>\n";
-      xml << "      <map address='a0-bf:c000-ffff'/>\n";
-      xml << "    </sr>\n";
+      xml.append("    <dr>\n");
+      xml.append("      <map address='20-3f:8000-bfff'/>\n");
+      xml.append("      <map address='a0-bf:8000-bfff'/>\n");
+      xml.append("    </dr>\n");
+      xml.append("    <sr>\n");
+      xml.append("      <map address='20-3f:c000-ffff'/>\n");
+      xml.append("      <map address='a0-bf:c000-ffff'/>\n");
+      xml.append("    </sr>\n");
     } else if(dsp1_mapper == DSP1LoROM2MB) {
-      xml << "    <dr>\n";
-      xml << "      <map address='60-6f:0000-3fff'/>\n";
-      xml << "      <map address='e0-ef:0000-3fff'/>\n";
-      xml << "    </dr>\n";
-      xml << "    <sr>\n";
-      xml << "      <map address='60-6f:4000-7fff'/>\n";
-      xml << "      <map address='e0-ef:4000-7fff'/>\n";
-      xml << "    </sr>\n";
+      xml.append("    <dr>\n");
+      xml.append("      <map address='60-6f:0000-3fff'/>\n");
+      xml.append("      <map address='e0-ef:0000-3fff'/>\n");
+      xml.append("    </dr>\n");
+      xml.append("    <sr>\n");
+      xml.append("      <map address='60-6f:4000-7fff'/>\n");
+      xml.append("      <map address='e0-ef:4000-7fff'/>\n");
+      xml.append("    </sr>\n");
     } else if(dsp1_mapper == DSP1HiROM) {
-      xml << "    <dr>\n";
-      xml << "      <map address='00-1f:6000-6fff'/>\n";
-      xml << "      <map address='80-9f:6000-6fff'/>\n";
-      xml << "    </dr>\n";
-      xml << "    <sr>\n";
-      xml << "      <map address='00-1f:7000-7fff'/>\n";
-      xml << "      <map address='80-9f:7000-7fff'/>\n";
-      xml << "    </sr>\n";
+      xml.append("    <dr>\n");
+      xml.append("      <map address='00-1f:6000-6fff'/>\n");
+      xml.append("      <map address='80-9f:6000-6fff'/>\n");
+      xml.append("    </dr>\n");
+      xml.append("    <sr>\n");
+      xml.append("      <map address='00-1f:7000-7fff'/>\n");
+      xml.append("      <map address='80-9f:7000-7fff'/>\n");
+      xml.append("    </sr>\n");
     }
-    xml << "  </necdsp>\n";
+    xml.append("  </necdsp>\n");
   }
 
   if(has_dsp2) {
-    xml << "  <necdsp revision='upd7725' frequency='8000000' program='dsp2.bin' sha256='5efbdf96ed0652790855225964f3e90e6a4d466cfa64df25b110933c6cf94ea1'>\n";
-    xml << "    <dr>\n";
-    xml << "      <map address='20-3f:8000-bfff'/>\n";
-    xml << "      <map address='a0-bf:8000-bfff'/>\n";
-    xml << "    </dr>\n";
-    xml << "    <sr>\n";
-    xml << "      <map address='20-3f:c000-ffff'/>\n";
-    xml << "      <map address='a0-bf:c000-ffff'/>\n";
-    xml << "    </sr>\n";
-    xml << "  </necdsp>\n";
+    xml.append("  <necdsp model='uPD7725' frequency='8000000' firmware='dsp2.bin' sha256='5efbdf96ed0652790855225964f3e90e6a4d466cfa64df25b110933c6cf94ea1'>\n");
+    xml.append("    <dr>\n");
+    xml.append("      <map address='20-3f:8000-bfff'/>\n");
+    xml.append("      <map address='a0-bf:8000-bfff'/>\n");
+    xml.append("    </dr>\n");
+    xml.append("    <sr>\n");
+    xml.append("      <map address='20-3f:c000-ffff'/>\n");
+    xml.append("      <map address='a0-bf:c000-ffff'/>\n");
+    xml.append("    </sr>\n");
+    xml.append("  </necdsp>\n");
   }
 
   if(has_dsp3) {
-    xml << "  <necdsp revision='upd7725' frequency='8000000' program='dsp3.bin' sha256='2e635f72e4d4681148bc35429421c9b946e4f407590e74e31b93b8987b63ba90'>\n";
-    xml << "    <dr>\n";
-    xml << "      <map address='20-3f:8000-bfff'/>\n";
-    xml << "      <map address='a0-bf:8000-bfff'/>\n";
-    xml << "    </dr>\n";
-    xml << "    <sr>\n";
-    xml << "      <map address='20-3f:c000-ffff'/>\n";
-    xml << "      <map address='a0-bf:c000-ffff'/>\n";
-    xml << "    </sr>\n";
-    xml << "  </necdsp>\n";
+    xml.append("  <necdsp model='uPD7725' frequency='8000000' firmware='dsp3.bin' sha256='2e635f72e4d4681148bc35429421c9b946e4f407590e74e31b93b8987b63ba90'>\n");
+    xml.append("    <dr>\n");
+    xml.append("      <map address='20-3f:8000-bfff'/>\n");
+    xml.append("      <map address='a0-bf:8000-bfff'/>\n");
+    xml.append("    </dr>\n");
+    xml.append("    <sr>\n");
+    xml.append("      <map address='20-3f:c000-ffff'/>\n");
+    xml.append("      <map address='a0-bf:c000-ffff'/>\n");
+    xml.append("    </sr>\n");
+    xml.append("  </necdsp>\n");
   }
 
   if(has_dsp4) {
-    xml << "  <necdsp revision='upd7725' frequency='8000000' program='dsp4.bin' sha256='63ede17322541c191ed1fdf683872554a0a57306496afc43c59de7c01a6e764a'>\n";
-    xml << "    <dr>\n";
-    xml << "      <map address='30-3f:8000-bfff'/>\n";
-    xml << "      <map address='b0-bf:8000-bfff'/>\n";
-    xml << "    </dr>\n";
-    xml << "    <sr>\n";
-    xml << "      <map address='30-3f:c000-ffff'/>\n";
-    xml << "      <map address='b0-bf:c000-ffff'/>\n";
-    xml << "    </sr>\n";
-    xml << "  </necdsp>\n";
+    xml.append("  <necdsp model='uPD7725' frequency='8000000' firmware='dsp4.bin' sha256='63ede17322541c191ed1fdf683872554a0a57306496afc43c59de7c01a6e764a'>\n");
+    xml.append("    <dr>\n");
+    xml.append("      <map address='30-3f:8000-bfff'/>\n");
+    xml.append("      <map address='b0-bf:8000-bfff'/>\n");
+    xml.append("    </dr>\n");
+    xml.append("    <sr>\n");
+    xml.append("      <map address='30-3f:c000-ffff'/>\n");
+    xml.append("      <map address='b0-bf:c000-ffff'/>\n");
+    xml.append("    </sr>\n");
+    xml.append("  </necdsp>\n");
   }
 
   if(has_obc1) {
-    xml << "  <obc1>\n";
-    xml << "    <map address='00-3f:6000-7fff'/>\n";
-    xml << "    <map address='80-bf:6000-7fff'/>\n";
-    xml << "  </obc1>\n";
+    xml.append("  <obc1>\n");
+    xml.append("    <map address='00-3f:6000-7fff'/>\n");
+    xml.append("    <map address='80-bf:6000-7fff'/>\n");
+    xml.append("  </obc1>\n");
   }
 
   if(has_st010) {
-    xml << "  <necdsp revision='upd96050' frequency='10000000' program='st0010.bin' sha256='55c697e864562445621cdf8a7bf6e84ae91361e393d382a3704e9aa55559041e'>\n";
-    xml << "    <dr>\n";
-    xml << "      <map address='60:0000'/>\n";
-    xml << "      <map address='e0:0000'/>\n";
-    xml << "    </dr>\n";
-    xml << "    <sr>\n";
-    xml << "      <map address='60:0001'/>\n";
-    xml << "      <map address='e0:0001'/>\n";
-    xml << "    </sr>\n";
-    xml << "    <dp>\n";
-    xml << "      <map address='68-6f:0000-0fff'/>\n";
-    xml << "      <map address='e8-ef:0000-0fff'/>\n";
-    xml << "    </dp>\n";
-    xml << "  </necdsp>\n";
+    xml.append("  <necdsp model='uPD96050' frequency='10000000' firmware='st0010.bin' sha256='55c697e864562445621cdf8a7bf6e84ae91361e393d382a3704e9aa55559041e'>\n");
+    xml.append("    <dr>\n");
+    xml.append("      <map address='60:0000'/>\n");
+    xml.append("      <map address='e0:0000'/>\n");
+    xml.append("    </dr>\n");
+    xml.append("    <sr>\n");
+    xml.append("      <map address='60:0001'/>\n");
+    xml.append("      <map address='e0:0001'/>\n");
+    xml.append("    </sr>\n");
+    xml.append("    <dp>\n");
+    xml.append("      <map address='68-6f:0000-0fff'/>\n");
+    xml.append("      <map address='e8-ef:0000-0fff'/>\n");
+    xml.append("    </dp>\n");
+    xml.append("  </necdsp>\n");
   }
 
   if(has_st011) {
-    xml << "  <necdsp revision='upd96050' frequency='15000000' program='st0011.bin' sha256='651b82a1e26c4fa8dd549e91e7f923012ed2ca54c1d9fd858655ab30679c2f0e'>\n";
-    xml << "    <dr>\n";
-    xml << "      <map address='60:0000'/>\n";
-    xml << "      <map address='e0:0000'/>\n";
-    xml << "    </dr>\n";
-    xml << "    <sr>\n";
-    xml << "      <map address='60:0001'/>\n";
-    xml << "      <map address='e0:0001'/>\n";
-    xml << "    </sr>\n";
-    xml << "    <dp>\n";
-    xml << "      <map address='68-6f:0000-0fff'/>\n";
-    xml << "      <map address='e8-ef:0000-0fff'/>\n";
-    xml << "    </dp>\n";
-    xml << "  </necdsp>\n";
+    xml.append("  <necdsp model='uPD96050' frequency='15000000' firmware='st0011.bin' sha256='651b82a1e26c4fa8dd549e91e7f923012ed2ca54c1d9fd858655ab30679c2f0e'>\n");
+    xml.append("    <dr>\n");
+    xml.append("      <map address='60:0000'/>\n");
+    xml.append("      <map address='e0:0000'/>\n");
+    xml.append("    </dr>\n");
+    xml.append("    <sr>\n");
+    xml.append("      <map address='60:0001'/>\n");
+    xml.append("      <map address='e0:0001'/>\n");
+    xml.append("    </sr>\n");
+    xml.append("    <dp>\n");
+    xml.append("      <map address='68-6f:0000-0fff'/>\n");
+    xml.append("      <map address='e8-ef:0000-0fff'/>\n");
+    xml.append("    </dp>\n");
+    xml.append("  </necdsp>\n");
   }
 
   if(has_st018) {
-    xml << "  <setarisc program='ST-0018'>\n";
-    xml << "    <map address='00-3f:3800-38ff'/>\n";
-    xml << "    <map address='80-bf:3800-38ff'/>\n";
-    xml << "  </setarisc>\n";
+    xml.append("  <setarisc firmware='ST-0018'>\n");
+    xml.append("    <map address='00-3f:3800-38ff'/>\n");
+    xml.append("    <map address='80-bf:3800-38ff'/>\n");
+    xml.append("  </setarisc>\n");
   }
 
-  xml << "</cartridge>\n";
+  xml.append("</cartridge>\n");
   xmlMemoryMap = xml.transform("'", "\"");
 }
 

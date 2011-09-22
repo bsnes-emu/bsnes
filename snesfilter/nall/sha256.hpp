@@ -3,6 +3,8 @@
 
 //author: vladitx
 
+#include <nall/stdint.hpp>
+
 namespace nall {
   #define PTR(t, a) ((t*)(a))
 
@@ -49,7 +51,7 @@ namespace nall {
     uint64_t len;
   };
 
-  void sha256_init(sha256_ctx *p) {
+  inline void sha256_init(sha256_ctx *p) {
     memset(p, 0, sizeof(sha256_ctx));
     memcpy(p->h, T_H, sizeof(T_H));
   }
@@ -90,7 +92,7 @@ namespace nall {
     p->inlen = 0;
   }
 
-  void sha256_chunk(sha256_ctx *p, const uint8_t *s, unsigned len) {
+  inline void sha256_chunk(sha256_ctx *p, const uint8_t *s, unsigned len) {
     unsigned l;
     p->len += len;
 
@@ -107,7 +109,7 @@ namespace nall {
     }
   }
 
-  void sha256_final(sha256_ctx *p) {
+  inline void sha256_final(sha256_ctx *p) {
     uint64_t len;
     p->in[p->inlen++] = 0x80;
 
@@ -124,7 +126,7 @@ namespace nall {
     sha256_block(p);
   }
 
-  void sha256_hash(sha256_ctx *p, uint8_t *s) {
+  inline void sha256_hash(sha256_ctx *p, uint8_t *s) {
     uint32_t *t = (uint32_t*)s;
     for(unsigned i = 0; i < 8; i++) ST32BE(t++, p->h[i]);
   }

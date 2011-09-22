@@ -36,10 +36,26 @@ namespace nall {
       buffersize = newsize;
     }
 
-    void append(const T data) {
+    bool append(const T data) {
+      for(unsigned index = 0; index < buffersize; index++) {
+        if(pool[index] == &data) return false;
+      }
+
       unsigned index = buffersize++;
       if(index >= poolsize) resize(index + 1);
       pool[index] = &data;
+      return true;
+    }
+
+    bool remove(const T data) {
+      for(unsigned index = 0; index < buffersize; index++) {
+        if(pool[index] == &data) {
+          for(unsigned i = index; i < buffersize - 1; i++) pool[i] = pool[i + 1];
+          resize(buffersize - 1);
+          return true;
+        }
+      }
+      return false;
     }
 
     template<typename... Args> reference_array(Args&... args) : pool(0), poolsize(0), buffersize(0) {

@@ -66,11 +66,13 @@ bool string::operator> (const char *str) const { return strcmp(data, str)  > 0; 
 bool string::operator>=(const char *str) const { return strcmp(data, str) >= 0; }
 
 string& string::operator=(const string &value) {
+  if(&value == this) return *this;
   assign(value);
   return *this;
 }
 
 string& string::operator=(string &&source) {
+  if(&source == this) return *this;
   if(data) free(data);
   size = source.size;
   data = source.data;
@@ -87,11 +89,13 @@ template<typename... Args> string::string(Args&&... args) {
 }
 
 string::string(const string &value) {
+  if(&value == this) return;
   size = strlen(value);
   data = strdup(value);
 }
 
 string::string(string &&source) {
+  if(&source == this) return;
   size = source.size;
   data = source.data;
   source.data = 0;
@@ -129,6 +133,19 @@ optional<unsigned> lstring::find(const char *key) const {
     if(operator[](i) == key) return { true, i };
   }
   return { false, 0 };
+}
+
+bool lstring::operator==(const lstring &source) const {
+  if(this == &source) return true;
+  if(size() != source.size()) return false;
+  for(unsigned n = 0; n < size(); n++) {
+    if(operator[](n) != source[n]) return false;
+  }
+  return true;
+}
+
+bool lstring::operator!=(const lstring &source) const {
+  return !operator==(source);
 }
 
 inline lstring::lstring() {
