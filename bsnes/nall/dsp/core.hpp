@@ -5,9 +5,24 @@
 
 namespace nall {
 
+//precision: can be float, double or long double
+#define real float
+
+struct DSP;
+
+struct Resampler {
+  DSP &dsp;
+  real frequency;
+
+  virtual void setFrequency() = 0;
+  virtual void clear() = 0;
+  virtual void sample() = 0;
+  Resampler(DSP &dsp) : dsp(dsp) {}
+};
+
 struct DSP {
-  enum class Resampler : unsigned {
-    Point,
+  enum class ResampleEngine : unsigned {
+    Nearest,
     Linear,
     Cosine,
     Cubic,
@@ -17,12 +32,12 @@ struct DSP {
 
   inline void setChannels(unsigned channels);
   inline void setPrecision(unsigned precision);
-  inline void setFrequency(double frequency);  //inputFrequency
-  inline void setVolume(double volume);
-  inline void setBalance(double balance);
+  inline void setFrequency(real frequency);  //inputFrequency
+  inline void setVolume(real volume);
+  inline void setBalance(real balance);
 
-  inline void setResampler(Resampler resampler);
-  inline void setResamplerFrequency(double frequency);  //outputFrequency
+  inline void setResampler(ResampleEngine resamplingEngine);
+  inline void setResamplerFrequency(real frequency);  //outputFrequency
 
   inline void sample(signed channel[]);
   inline bool pending();
@@ -33,33 +48,27 @@ struct DSP {
   inline ~DSP();
 
 protected:
+  friend class ResampleNearest;
+  friend class ResampleLinear;
+  friend class ResampleCosine;
+  friend class ResampleCubic;
+  friend class ResampleAverage;
+  friend class ResampleHermite;
+
   struct Settings {
     unsigned channels;
     unsigned precision;
-    double frequency;
-    double volume;
-    double balance;
+    real frequency;
+    real volume;
+    real balance;
+
     //internal
-    double intensity;
+    real intensity;
+    real intensityInverse;
   } settings;
 
-  struct ResamplerSettings {
-    Resampler engine;
-    double frequency;
-    //internal
-    double fraction;
-    double step;
-  } resampler;
-
-  inline void resamplerRun();
-  inline void resamplerWrite(double channel[]);
-
-  inline void resamplePoint();
-  inline void resampleLinear();
-  inline void resampleCosine();
-  inline void resampleCubic();
-  inline void resampleHermite();
-  inline void resampleAverage();
+  Resampler *resampler;
+  inline void write(real channel[]);
 
   #include "buffer.hpp"
   Buffer buffer;
@@ -70,14 +79,20 @@ protected:
   inline signed clamp(const unsigned bits, const signed x);
 };
 
+#include "resample/nearest.hpp"
+#include "resample/linear.hpp"
+#include "resample/cosine.hpp"
+#include "resample/cubic.hpp"
+#include "resample/hermite.hpp"
+#include "resample/average.hpp"
 #include "settings.hpp"
 
 void DSP::sample(signed channel[]) {
   for(unsigned c = 0; c < settings.channels; c++) {
-    buffer.write(c) = (double)channel[c] / settings.intensity;
+    buffer.write(c) = (real)channel[c] * settings.intensityInverse;
   }
   buffer.wroffset++;
-  resamplerRun();
+  resampler->sample();
 }
 
 bool DSP::pending() {
@@ -94,30 +109,12 @@ void DSP::read(signed channel[]) {
   output.rdoffset++;
 }
 
-void DSP::resamplerRun() {
-  switch(resampler.engine) {
-  case Resampler::Point:   return resamplePoint();
-  case Resampler::Linear:  return resampleLinear();
-  case Resampler::Cosine:  return resampleCosine();
-  case Resampler::Cubic:   return resampleCubic();
-  case Resampler::Hermite: return resampleHermite();
-  case Resampler::Average: return resampleAverage();
-  }
-}
-
-void DSP::resamplerWrite(double channel[]) {
+void DSP::write(real channel[]) {
   for(unsigned c = 0; c < settings.channels; c++) {
     output.write(c) = channel[c];
   }
   output.wroffset++;
 }
-
-#include "resample/point.hpp"
-#include "resample/linear.hpp"
-#include "resample/cosine.hpp"
-#include "resample/cubic.hpp"
-#include "resample/hermite.hpp"
-#include "resample/average.hpp"
 
 void DSP::adjustVolume() {
   for(unsigned c = 0; c < settings.channels; c++) {
@@ -138,24 +135,29 @@ signed DSP::clamp(const unsigned bits, const signed x) {
 }
 
 void DSP::clear() {
-  resampler.fraction = 0.0;
   buffer.clear();
   output.clear();
+  resampler->clear();
 }
 
 DSP::DSP() {
+  setResampler(ResampleEngine::Hermite);
+  setResamplerFrequency(44100.0);
+
   setChannels(2);
   setPrecision(16);
   setFrequency(44100.0);
   setVolume(1.0);
   setBalance(0.0);
-  setResampler(Resampler::Hermite);
-  setResamplerFrequency(44100.0);
+
   clear();
 }
 
 DSP::~DSP() {
+  if(resampler) delete resampler;
 }
+
+#undef real
 
 }
 

@@ -58,6 +58,15 @@ void Interface::run() {
   system.run();
 }
 
+serializer Interface::serialize() {
+  system.runtosave();
+  return system.serialize();
+}
+
+bool Interface::unserialize(serializer &s) {
+  return system.unserialize(s);
+}
+
 void Interface::setCheats(const lstring &list) {
   cheat.reset();
   foreach(code, list) {

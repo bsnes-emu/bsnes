@@ -11,6 +11,7 @@ struct Cartridge : property<Cartridge> {
   readonly<bool> loaded;
   readonly<string> sha256;
 
+  void serialize(serializer&);
   Cartridge();
 
 //privileged:

@@ -1,31 +1,50 @@
 #ifdef NALL_DSP_INTERNAL_HPP
 
-void DSP::resampleCubic() {
-  while(resampler.fraction <= 1.0) {
-    double channel[settings.channels];
+struct ResampleCubic : Resampler {
+  inline void setFrequency();
+  inline void clear();
+  inline void sample();
+  ResampleCubic(DSP &dsp) : Resampler(dsp) {}
 
-    for(unsigned n = 0; n < settings.channels; n++) {
-      double a = buffer.read(n, -3);
-      double b = buffer.read(n, -2);
-      double c = buffer.read(n, -1);
-      double d = buffer.read(n, -0);
+  real fraction;
+  real step;
+};
 
-      double mu = resampler.fraction;
+void ResampleCubic::setFrequency() {
+  fraction = 0.0;
+  step = dsp.settings.frequency / frequency;
+}
 
-      double A = d - c - a + b;
-      double B = a - b - A;
-      double C = c - a;
-      double D = b;
+void ResampleCubic::clear() {
+  fraction = 0.0;
+}
+
+void ResampleCubic::sample() {
+  while(fraction <= 1.0) {
+    real channel[dsp.settings.channels];
+
+    for(unsigned n = 0; n < dsp.settings.channels; n++) {
+      real a = dsp.buffer.read(n, -3);
+      real b = dsp.buffer.read(n, -2);
+      real c = dsp.buffer.read(n, -1);
+      real d = dsp.buffer.read(n, -0);
+
+      real mu = fraction;
+
+      real A = d - c - a + b;
+      real B = a - b - A;
+      real C = c - a;
+      real D = b;
 
       channel[n] = A * (mu * 3) + B * (mu * 2) + C * mu + D;
     }
 
-    resamplerWrite(channel);
-    resampler.fraction += resampler.step;
+    dsp.write(channel);
+    fraction += step;
   }
 
-  buffer.rdoffset++;
-  resampler.fraction -= 1.0;
+  dsp.buffer.rdoffset++;
+  fraction -= 1.0;
 }
 
 #endif

@@ -1,7 +1,7 @@
 int16_t NesGamepad::poll(unsigned n) {
   switch(n) {
-  case 0: return b.poll();
-  case 1: return a.poll();
+  case 0: return a.poll();
+  case 1: return b.poll();
   case 2: return select.poll();
   case 3: return start.poll();
   case 4: return up.poll() & !down.poll();

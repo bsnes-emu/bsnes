@@ -2,10 +2,9 @@
 
 namespace NES {
 
-static unsigned opcodeCounter = 0;
-
 #include "core/core.cpp"
 #include "memory/memory.cpp"
+#include "serialization.cpp"
 CPU cpu;
 
 void CPU::Main() {
@@ -17,6 +16,10 @@ void CPU::main() {
 
   unsigned lpc = 0xffff;
   while(true) {
+    if(scheduler.sync == Scheduler::SynchronizeMode::All) {
+      scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
+    }
+
     if(status.interrupt_pending) {
       interrupt();
       continue;
@@ -28,16 +31,15 @@ void CPU::main() {
     }
 
     op_exec();
-    opcodeCounter++;
   }
 }
 
 void CPU::add_clocks(unsigned clocks) {
   apu.clock -= clocks;
-  if(apu.clock < 0) co_switch(apu.thread);
+  if(apu.clock < 0 && scheduler.sync != Scheduler::SynchronizeMode::All) co_switch(apu.thread);
 
   ppu.clock -= clocks;
-  if(ppu.clock < 0) co_switch(ppu.thread);
+  if(ppu.clock < 0 && scheduler.sync != Scheduler::SynchronizeMode::All) co_switch(ppu.thread);
 }
 
 void CPU::power() {

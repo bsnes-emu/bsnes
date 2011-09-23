@@ -190,8 +190,7 @@ void CPU::op_exec() {
 
   regs.pc--;
   print("Unimplemented opcode: ", hex<4>(regs.pc), " = ", hex<2>(bus.read(regs.pc)), "\n");
-  print("Counter = ", opcodeCounter, "\n");
-  while(true) scheduler.exit();
+  while(true) scheduler.exit(Scheduler::ExitReason::UnknownEvent);
 }
 
 #undef I

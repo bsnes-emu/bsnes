@@ -103,3 +103,14 @@ void BandaiFCG::clock() {
     }
   }
 }
+
+//
+
+void BandaiFCG::serialize(serializer &s) {
+  s.array(chr_bank);
+  s.integer(prg_bank);
+  s.integer(mirror_select);
+  s.integer(irq_counter_enable);
+  s.integer(irq_counter);
+  s.integer(irq_latch);
+}

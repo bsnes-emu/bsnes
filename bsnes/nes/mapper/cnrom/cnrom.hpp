@@ -11,6 +11,8 @@ struct CNROM : Mapper {
   void power();
   void reset();
 
+  void serialize(serializer&);
+
 private:
   uint2 chr_bank;
 };

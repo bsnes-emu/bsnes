@@ -35,6 +35,8 @@ struct PPU : Processor {
   void raster_sprite();
   void raster_scanline();
 
+  void serialize(serializer&);
+
   struct Status {
     uint8 mdr;
 

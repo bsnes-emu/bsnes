@@ -40,3 +40,7 @@ void CNROM::power() {
 void CNROM::reset() {
   chr_bank = 0;
 }
+
+void CNROM::serialize(serializer &s) {
+  s.integer(chr_bank);
+}

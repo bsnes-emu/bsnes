@@ -22,6 +22,9 @@ struct Interface {
   virtual void reset();
   virtual void run();
 
+  virtual serializer serialize();
+  virtual bool unserialize(serializer&);
+
   virtual void setCheats(const lstring &list = lstring{});
 
   virtual void message(const string &text);

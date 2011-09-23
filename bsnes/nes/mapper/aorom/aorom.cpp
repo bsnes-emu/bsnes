@@ -41,3 +41,8 @@ void AOROM::reset() {
   prg_bank = 0x0f;
   mirror_select = 0;
 }
+
+void AOROM::serialize(serializer &s) {
+  s.integer(prg_bank);
+  s.integer(mirror_select);
+}

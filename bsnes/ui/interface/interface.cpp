@@ -125,6 +125,7 @@ void Interface::run() {
 
 serializer Interface::serialize() {
   switch(mode()) {
+  case Mode::NES:     return nes.serialize();
   case Mode::SNES:    return snes.serialize();
   case Mode::GameBoy: return gameBoy.serialize();
   }
@@ -133,6 +134,7 @@ serializer Interface::serialize() {
 
 bool Interface::unserialize(serializer &s) {
   switch(mode()) {
+  case Mode::NES:     return nes.unserialize(s);
   case Mode::SNES:    return snes.unserialize(s);
   case Mode::GameBoy: return gameBoy.unserialize(s);
   }
@@ -143,6 +145,7 @@ bool Interface::saveState(unsigned slot) {
   string filename = { baseName, "-", slot, ".bst" };
   bool result = false;
   switch(mode()) {
+  case Mode::NES:     result = nes.saveState(filename); break;
   case Mode::SNES:    result = snes.saveState(filename); break;
   case Mode::GameBoy: result = gameBoy.saveState(filename); break;
   }
@@ -154,6 +157,7 @@ bool Interface::loadState(unsigned slot) {
   string filename = { baseName, "-", slot, ".bst" };
   bool result = false;
   switch(mode()) {
+  case Mode::NES:     result = nes.loadState(filename); break;
   case Mode::SNES:    result = snes.loadState(filename); break;
   case Mode::GameBoy: result = gameBoy.loadState(filename); break;
   }

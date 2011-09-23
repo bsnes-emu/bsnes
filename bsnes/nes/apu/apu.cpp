@@ -2,6 +2,7 @@
 
 namespace NES {
 
+#include "serialization.cpp"
 APU apu;
 
 const uint8 APU::length_counter_table[32] = {
@@ -31,6 +32,10 @@ void APU::Main() {
 
 void APU::main() {
   while(true) {
+    if(scheduler.sync == Scheduler::SynchronizeMode::All) {
+      scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
+    }
+
     unsigned rectangle_output, triangle_output, noise_output, dmc_output;
 
     rectangle_output  = rectangle[0].clock();
@@ -50,7 +55,7 @@ void APU::main() {
 
 void APU::tick() {
   clock += 12;
-  if(clock >= 0) co_switch(cpu.thread);
+  if(clock >= 0 && scheduler.sync != Scheduler::SynchronizeMode::All) co_switch(cpu.thread);
 }
 
 void APU::set_irq_line() {

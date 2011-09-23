@@ -36,6 +36,7 @@ void Cartridge::load(const string &xml, const uint8_t *data, unsigned size) {
   case  16: mapper = &Mapper::bandaiFCG; break;
   }
 
+  system.load();
   loaded = true;
   sha256 = nall::sha256(rom_data, rom_size);
 }
@@ -92,6 +93,12 @@ uint8 Cartridge::ciram_read(uint13 addr) {
 
 void Cartridge::ciram_write(uint13 addr, uint8 data) {
   return mapper->ciram_write(addr, data);
+}
+
+void Cartridge::serialize(serializer &s) {
+  if(chr_ram) s.array(chr_data, chr_size);
+
+  return mapper->serialize(s);
 }
 
 }

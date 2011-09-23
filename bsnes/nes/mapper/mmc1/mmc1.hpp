@@ -14,6 +14,8 @@ struct MMC1 : Mapper {
   void power();
   void reset();
 
+  void serialize(serializer&);
+
 private:
   uint8 prg_ram[8192];
   uint8 r[4];

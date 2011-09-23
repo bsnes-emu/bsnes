@@ -11,6 +11,8 @@ struct Input {
   void power();
   void reset();
 
+  void serialize(serializer &s);
+
 private:
   Device port1;
   Device port2;

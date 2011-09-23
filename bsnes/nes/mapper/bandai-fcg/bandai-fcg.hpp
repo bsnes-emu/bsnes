@@ -11,6 +11,8 @@ struct BandaiFCG : Mapper {
   void power();
   void reset();
 
+  void serialize(serializer&);
+
 private:
   unsigned ciram_addr(unsigned addr) const;
   void clock();

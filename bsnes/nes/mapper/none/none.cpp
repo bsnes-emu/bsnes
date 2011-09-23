@@ -37,3 +37,6 @@ void None::power() {
 
 void None::reset() {
 }
+
+void None::serialize(serializer &s) {
+}

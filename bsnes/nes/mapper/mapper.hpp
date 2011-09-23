@@ -16,6 +16,8 @@ namespace Mapper {
 
     virtual void power() = 0;
     virtual void reset() = 0;
+
+    virtual void serialize(serializer&) = 0;
   };
 
   #include "none/none.hpp"

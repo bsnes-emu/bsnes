@@ -40,7 +40,10 @@ struct CPU : Processor {
 
   void oam_dma();
 
-bool trace;
+  void serialize(serializer&);
+
+//internal:
+  bool trace;
 };
 
 extern CPU cpu;

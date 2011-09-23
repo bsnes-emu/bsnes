@@ -2,6 +2,7 @@
 
 namespace NES {
 
+#include "serialization.cpp"
 Input input;
 
 void Input::latch(bool data) {

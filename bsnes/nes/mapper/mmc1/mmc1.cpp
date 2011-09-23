@@ -194,3 +194,13 @@ void MMC1::reset() {
   r[2] = 0x01;
   r[3] = 0x00;
 }
+
+//
+
+void MMC1::serialize(serializer &s) {
+  s.array(prg_ram);
+  s.array(r);
+  s.integer(prg_ex_select);
+  s.integer(shiftaddr);
+  s.integer(shiftdata);
+}

@@ -10,6 +10,7 @@ struct APU : Processor {
   uint8 read(uint16 addr);
   void write(uint16 addr, uint8 data);
 
+  void serialize(serializer&);
   APU();
 
   struct Envelope {
@@ -23,6 +24,7 @@ struct APU : Processor {
 
     unsigned volume() const;
     void clock();
+    void serialize(serializer&);
   };
 
   struct Sweep {
@@ -36,6 +38,7 @@ struct APU : Processor {
 
     bool check_period();
     void clock(unsigned channel);
+    void serialize(serializer&);
   };
 
   struct Rectangle {
@@ -53,6 +56,7 @@ struct APU : Processor {
     void clock_length();
     bool check_period();
     uint8 clock();
+    void serialize(serializer&);
   } rectangle[2];
 
   struct Triangle {
@@ -71,6 +75,7 @@ struct APU : Processor {
     void clock_length();
     void clock_linear_length();
     uint8 clock();
+    void serialize(serializer&);
   } triangle;
 
   struct Noise {
@@ -86,6 +91,7 @@ struct APU : Processor {
 
     void clock_length();
     uint8 clock();
+    void serialize(serializer&);
   } noise;
 
   struct DMC {
@@ -114,6 +120,7 @@ struct APU : Processor {
 
     void start();
     uint8 clock();
+    void serialize(serializer&);
   } dmc;
 
   struct FrameCounter {
@@ -124,6 +131,8 @@ struct APU : Processor {
     uint2 mode;
     uint2 counter;
     signed divider;
+
+    void serialize(serializer&);
   } frame;
 
   void clock_frame_counter();

@@ -28,8 +28,8 @@ class OpenGL {
 public:
   GLuint gltexture;
   GLuint glprogram;
-  unsigned shaderfilter;
   GLuint fragmentshader;
+  unsigned fragmentfilter;
   GLuint vertexshader;
   bool shader_support;
 
@@ -39,17 +39,16 @@ public:
   void resize(unsigned width, unsigned height) {
     if(iwidth >= width && iheight >= height) return;
 
-    if(gltexture) glDeleteTextures(1, &gltexture);
+    if(gltexture == 0) glGenTextures(1, &gltexture);
     iwidth  = max(width,  iwidth );
     iheight = max(height, iheight);
     if(buffer) delete[] buffer;
-    buffer = new uint32_t[iwidth * iheight];
+    buffer = new uint32_t[iwidth * iheight]();
 
-    glGenTextures(1, &gltexture);
     glBindTexture(GL_TEXTURE_2D, gltexture);
     glPixelStorei(GL_UNPACK_ROW_LENGTH, iwidth);
     glTexImage2D(GL_TEXTURE_2D,
-      /* mip-map level = */ 0, /* internal format = */ GL_RGB,
+      /* mip-map level = */ 0, /* internal format = */ GL_RGBA,
       iwidth, iheight, /* border = */ 0, /* format = */ GL_BGRA,
       GL_UNSIGNED_INT_8_8_8_8_REV, buffer);
   }
@@ -140,7 +139,7 @@ public:
 
     if(source) {
       bool is_glsl = false;
-      shaderfilter = 0;
+      fragmentfilter = 0;
       string fragment_source;
       string vertex_source;
 
@@ -149,10 +148,12 @@ public:
         if(head.name == "shader") {
           foreach(attribute, head.attribute) {
             if(attribute.name == "language" && attribute.content == "GLSL") is_glsl = true;
-            if(attribute.name == "filter") shaderfilter = attribute.content == "linear" ? 1 : 0;
           }
           foreach(element, head.element) {
             if(element.name == "fragment") {
+              foreach(attribute, element.attribute) {
+                if(attribute.name == "filter") fragmentfilter = attribute.content == "linear" ? 1 : 0;
+              }
               fragment_source = element.parse();
             } else if(element.name == "vertex") {
               vertex_source = element.parse();
@@ -239,8 +240,8 @@ public:
   OpenGL() {
     gltexture = 0;
     glprogram = 0;
-    shaderfilter = 0;
     fragmentshader = 0;
+    fragmentfilter = 0;
     vertexshader = 0;
 
     buffer = 0;

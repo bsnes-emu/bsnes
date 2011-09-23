@@ -10,6 +10,8 @@ struct None : Mapper {
 
   void power();
   void reset();
+
+  void serialize(serializer&);
 };
 
 extern None none;

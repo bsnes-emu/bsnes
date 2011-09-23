@@ -2,6 +2,7 @@
 
 namespace NES {
 
+#include "serialization.cpp"
 PPU ppu;
 
 void PPU::Main() {
@@ -10,6 +11,10 @@ void PPU::Main() {
 
 void PPU::main() {
   while(true) {
+    if(scheduler.sync == Scheduler::SynchronizeMode::PPU) {
+      scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
+    }
+
     raster_scanline();
   }
 }
@@ -34,7 +39,7 @@ void PPU::scanline_edge() {
 void PPU::frame_edge() {
   status.field ^= 1;
   interface->videoRefresh(buffer);
-  scheduler.exit();
+  scheduler.exit(Scheduler::ExitReason::FrameEvent);
 }
 
 void PPU::power() {

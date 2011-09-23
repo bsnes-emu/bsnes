@@ -49,6 +49,22 @@ void InterfaceNES::unloadCartridge() {
 
 //
 
+bool InterfaceNES::saveState(const string &filename) {
+  serializer s = serialize();
+  return file::write(filename, s.data(), s.size());
+}
+
+bool InterfaceNES::loadState(const string &filename) {
+  uint8_t *data;
+  unsigned size;
+  if(file::read(filename, data, size) == false) return false;
+  serializer s(data, size);
+  delete[] data;
+  return unserialize(s);
+}
+
+//
+
 void InterfaceNES::videoRefresh(const uint16_t *data) {
   static uint16_t output[256 * 240];
 

@@ -11,6 +11,8 @@ struct AOROM : Mapper {
   void power();
   void reset();
 
+  void serialize(serializer&);
+
 private:
   uint4 prg_bank;
   bool mirror_select;

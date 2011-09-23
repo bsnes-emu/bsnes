@@ -4,6 +4,9 @@ struct InterfaceNES : NES::Interface {
   bool loadCartridge(const string &filename);
   void unloadCartridge();
 
+  bool saveState(const string &filename);
+  bool loadState(const string &filename);
+
   void videoRefresh(const uint16_t *data);
   void audioSample(int16_t sample);
   int16_t inputPoll(bool port, unsigned device, unsigned id);
