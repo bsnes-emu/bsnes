@@ -32,15 +32,12 @@ void HotkeyGeneral::inputEvent(int16_t scancode, int16_t value) {
   }
 
   if(scancode == turboMode.scancode) {
-    static bool Vsync, Async;
     if(value) {
-      Vsync = any_cast<bool>(video.get(Video::Synchronize));
-      Async = any_cast<bool>(audio.get(Audio::Synchronize));
       video.set(Video::Synchronize, false);
       audio.set(Audio::Synchronize, false);
     } else {
-      video.set(Video::Synchronize, Vsync);
-      audio.set(Audio::Synchronize, Async);
+      video.set(Video::Synchronize, config->video.synchronize);
+      audio.set(Audio::Synchronize, config->audio.synchronize);
     }
   }
 

@@ -37,8 +37,6 @@ public:
   unsigned iwidth, iheight;
 
   void resize(unsigned width, unsigned height) {
-    if(iwidth >= width && iheight >= height) return;
-
     if(gltexture == 0) glGenTextures(1, &gltexture);
     iwidth  = max(width,  iwidth );
     iheight = max(height, iheight);

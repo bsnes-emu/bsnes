@@ -28,6 +28,7 @@ struct DSP {
     Cubic,
     Hermite,
     Average,
+    Sinc,
   };
 
   inline void setChannels(unsigned channels);
@@ -54,6 +55,7 @@ protected:
   friend class ResampleCubic;
   friend class ResampleAverage;
   friend class ResampleHermite;
+  friend class ResampleSinc;
 
   struct Settings {
     unsigned channels;
@@ -85,6 +87,7 @@ protected:
 #include "resample/cubic.hpp"
 #include "resample/hermite.hpp"
 #include "resample/average.hpp"
+#include "resample/sinc.hpp"
 #include "settings.hpp"
 
 void DSP::sample(signed channel[]) {

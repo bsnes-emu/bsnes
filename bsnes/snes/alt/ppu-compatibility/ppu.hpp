@@ -12,8 +12,8 @@ public:
   #include "mmio/mmio.hpp"
   #include "render/render.hpp"
 
-  uint16 *surface;
-  uint16 *output;
+  uint32 *surface;
+  uint32 *output;
 
   uint8 ppu1_version;
   uint8 ppu2_version;
@@ -50,7 +50,6 @@ public:
   alwaysinline bool overscan()  const { return display.overscan;  }
   alwaysinline bool hires()     const { return (regs.pseudo_hires || regs.bg_mode == 5 || regs.bg_mode == 6); }
 
-  uint16 light_table[16][32768];
   uint16 mosaic_table[16][4096];
   void render_line();
 

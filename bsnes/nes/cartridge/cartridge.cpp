@@ -32,6 +32,7 @@ void Cartridge::load(const string &xml, const uint8_t *data, unsigned size) {
   default : mapper = &Mapper::none; break;
   case   1: mapper = &Mapper::mmc1; break;
   case   3: mapper = &Mapper::cnrom; break;
+  case   4: mapper = &Mapper::mmc3; break;
   case   7: mapper = &Mapper::aorom; break;
   case  16: mapper = &Mapper::bandaiFCG; break;
   }

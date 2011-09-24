@@ -13,7 +13,7 @@ void Audio::coprocessor_enable(bool state) {
 
 void Audio::coprocessor_frequency(double input_frequency) {
   dspaudio.setFrequency(input_frequency);
-  dspaudio.setResampler(nall::DSP::ResampleEngine::Average);
+  dspaudio.setResampler(nall::DSP::ResampleEngine::Sinc);
   dspaudio.setResamplerFrequency(system.apu_frequency() / 768.0);
 }
 

@@ -21,6 +21,14 @@ namespace Mapper {
     return base;
   }
 
+  uint8& Mapper::prg_data(unsigned addr) {
+    return cartridge.prg_data[mirror(addr, cartridge.prg_size)];
+  }
+
+  uint8& Mapper::chr_data(unsigned addr) {
+    return cartridge.chr_data[mirror(addr, cartridge.chr_size)];
+  }
+
   unsigned Mapper::ram_size() {
     return 0u;
   }
@@ -34,6 +42,7 @@ namespace Mapper {
   #include "bandai-fcg/bandai-fcg.cpp"
   #include "cnrom/cnrom.cpp"
   #include "mmc1/mmc1.cpp"
+  #include "mmc3/mmc3.cpp"
 }
 
 }

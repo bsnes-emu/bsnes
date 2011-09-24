@@ -351,7 +351,7 @@ void PPU::power() {
 void PPU::reset() {
   create(Enter, system.cpu_frequency());
   PPUcounter::reset();
-  memset(surface, 0, 512 * 512 * sizeof(uint16));
+  memset(surface, 0, 512 * 512 * sizeof(uint32));
 
   frame();
 
@@ -399,7 +399,7 @@ void PPU::set_frameskip(unsigned frameskip_) {
 }
 
 PPU::PPU() {
-  surface = new uint16[512 * 512];
+  surface = new uint32[512 * 512];
   output = surface + 16 * 512;
 
   alloc_tiledata_cache();
@@ -407,20 +407,6 @@ PPU::PPU() {
   for(unsigned l = 0; l < 16; l++) {
     for(unsigned i = 0; i < 4096; i++) {
       mosaic_table[l][i] = (i / (l + 1)) * (l + 1);
-    }
-  }
-
-  for(unsigned l = 0; l < 16; l++) {
-    for(unsigned r = 0; r < 32; r++) {
-      for(unsigned g = 0; g < 32; g++) {
-        for(unsigned b = 0; b < 32; b++) {
-          double luma = (double)l / 15.0;
-          unsigned ar = (luma * r + 0.5);
-          unsigned ag = (luma * g + 0.5);
-          unsigned ab = (luma * b + 0.5);
-          light_table[l][(r << 10) + (g << 5) + b] = (ab << 10) + (ag << 5) + ar;
-        }
-      }
     }
   }
 

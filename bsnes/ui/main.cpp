@@ -41,7 +41,7 @@ Application::Application(int argc, char **argv) {
   inputManager = new InputManager;
   utility = new Utility;
 
-  title = "bsnes v082.20";
+  title = "bsnes v082.21";
 
   #if defined(PLATFORM_WIN)
   normalFont = "Tahoma, 8";
@@ -84,7 +84,7 @@ Application::Application(int argc, char **argv) {
   dspaudio.setPrecision(16);
   dspaudio.setVolume(config->audio.mute == false ? 1.0 : 0.0);
   dspaudio.setBalance(0.0);
-  dspaudio.setResampler(DSP::ResampleEngine::Average);
+  dspaudio.setResampler(DSP::ResampleEngine::Sinc);
   dspaudio.setResamplerFrequency(48000.0);
 
   input.driver(config->input.driver);

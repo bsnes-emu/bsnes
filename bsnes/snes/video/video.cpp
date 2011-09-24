@@ -21,7 +21,7 @@ const uint8_t Video::cursor[15 * 15] = {
 };
 
 void Video::draw_cursor(uint16_t color, int x, int y) {
-  uint16_t *data = (uint16_t*)ppu.output;
+  uint32_t *data = (uint32_t*)ppu.output;
   if(ppu.interlace() && ppu.field()) data += 512;
 
   for(int cy = 0; cy < 15; cy++) {
@@ -34,13 +34,13 @@ void Video::draw_cursor(uint16_t color, int x, int y) {
       if(vx < 0 || vx >= 256) continue;  //do not draw offscreen
       uint8_t pixel = cursor[cy * 15 + cx];
       if(pixel == 0) continue;
-      uint16_t pixelcolor = (pixel == 1) ? 0 : color;
+      uint32_t pixelcolor = (15 << 15) | ((pixel == 1) ? 0 : color);
 
       if(hires == false) {
-        *((uint16_t*)data + vy * 1024 + vx) = pixelcolor;
+        *((uint32_t*)data + vy * 1024 + vx) = pixelcolor;
       } else {
-        *((uint16_t*)data + vy * 1024 + vx * 2 + 0) = pixelcolor;
-        *((uint16_t*)data + vy * 1024 + vx * 2 + 1) = pixelcolor;
+        *((uint32_t*)data + vy * 1024 + vx * 2 + 0) = pixelcolor;
+        *((uint32_t*)data + vy * 1024 + vx * 2 + 1) = pixelcolor;
       }
     }
   }

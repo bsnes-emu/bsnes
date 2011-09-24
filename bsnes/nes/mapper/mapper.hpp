@@ -1,6 +1,8 @@
 namespace Mapper {
   struct Mapper {
     unsigned mirror(unsigned addr, unsigned size) const;
+    uint8& prg_data(unsigned addr);
+    uint8& chr_data(unsigned addr);
 
     virtual uint8 prg_read(uint16 addr) = 0;
     virtual void prg_write(uint16 addr, uint8 data) = 0;
@@ -25,4 +27,5 @@ namespace Mapper {
   #include "bandai-fcg/bandai-fcg.hpp"
   #include "cnrom/cnrom.hpp"
   #include "mmc1/mmc1.hpp"
+  #include "mmc3/mmc3.hpp"
 }

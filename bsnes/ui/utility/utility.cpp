@@ -119,11 +119,11 @@ void Utility::bindVideoFilter() {
 
 void Utility::bindVideoShader() {
   if(config->video.shader == "None") {
+    video.set(Video::Shader, (const char*)"");
     video.set(Video::Filter, 0u);
-    video.set(Video::Shader, (const char*)"");
   } else if(config->video.shader == "Blur") {
-    video.set(Video::Filter, 1u);
     video.set(Video::Shader, (const char*)"");
+    video.set(Video::Filter, 1u);
   } else {
     string data;
     data.readfile(config->video.shader);

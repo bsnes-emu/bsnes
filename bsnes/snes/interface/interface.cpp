@@ -4,7 +4,7 @@ namespace SNES {
 
 Interface *interface = 0;
 
-void Interface::videoRefresh(const uint16_t *data, bool hires, bool interlace, bool overscan) {
+void Interface::videoRefresh(const uint32_t *data, bool hires, bool interlace, bool overscan) {
 }
 
 void Interface::audioSample(int16_t l_sample, int16_t r_sample) {

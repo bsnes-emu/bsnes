@@ -8,7 +8,7 @@ void PPU::Screen::scanline() {
 void PPU::Screen::run() {
   if(ppu.vcounter() == 0) return;
 
-  uint16 color;
+  uint32 color;
   if(self.regs.pseudo_hires == false && self.regs.bgmode != 5 && self.regs.bgmode != 6) {
     color = get_pixel(0);
     *output++ = color;
@@ -21,7 +21,7 @@ void PPU::Screen::run() {
   }
 }
 
-uint16 PPU::Screen::get_pixel(bool swap) {
+uint32 PPU::Screen::get_pixel(bool swap) {
   if(ppu.regs.overscan == false && ppu.vcounter() >= 225) return 0x0000;
 
   enum source_t { BG1, BG2, BG3, BG4, OAM, BACK };
@@ -149,9 +149,8 @@ uint16 PPU::Screen::get_pixel(bool swap) {
   //lighting
   //========
 
-  output = light_table[self.regs.display_brightness][output];
-  if(self.regs.display_disable) output = 0x0000;
-  return output;
+  if(self.regs.display_disable) return 0;
+  return (self.regs.display_brightness << 15) | output;
 }
 
 uint16 PPU::Screen::addsub(unsigned x, unsigned y, bool halve) {
@@ -206,19 +205,6 @@ void PPU::Screen::reset() {
 }
 
 PPU::Screen::Screen(PPU &self) : self(self) {
-  for(unsigned l = 0; l < 16; l++) {
-    for(unsigned r = 0; r < 32; r++) {
-      for(unsigned g = 0; g < 32; g++) {
-        for(unsigned b = 0; b < 32; b++) {
-          double luma = (double)l / 15.0;
-          unsigned ar = (luma * r + 0.5);
-          unsigned ag = (luma * g + 0.5);
-          unsigned ab = (luma * b + 0.5);
-          light_table[l][(b << 10) + (g << 5) + r] = (ab << 10) + (ag << 5) + ar;
-        }
-      }
-    }
-  }
 }
 
 #endif

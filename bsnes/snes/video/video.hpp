@@ -1,4 +1,4 @@
-class Video {
+struct Video {
 private:
   bool hires;
   unsigned line_width[240];

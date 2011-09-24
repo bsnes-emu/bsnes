@@ -1,5 +1,5 @@
 class Screen {
-  uint16 *output;
+  uint32 *output;
 
   struct Regs {
     bool addsub_mode;
@@ -23,8 +23,7 @@ class Screen {
   void run();
   void reset();
 
-  uint16 light_table[16][32768];
-  uint16 get_pixel(bool swap);
+  uint32 get_pixel(bool swap);
   uint16 addsub(unsigned x, unsigned y, bool halve);
   uint16 get_color(unsigned palette);
   uint16 get_direct_color(unsigned palette, unsigned tile);

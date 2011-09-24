@@ -28,8 +28,8 @@ public:
   ~PPU();
 
 private:
-  uint16 *surface;
-  uint16 *output;
+  uint32 *surface;
+  uint32 *output;
 
   #include "mmio/mmio.hpp"
   #include "window/window.hpp"

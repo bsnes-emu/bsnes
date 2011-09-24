@@ -36,6 +36,7 @@ void DSP::setResampler(ResampleEngine engine) {
   case ResampleEngine::Cubic:   resampler = new ResampleCubic  (*this); return;
   case ResampleEngine::Hermite: resampler = new ResampleHermite(*this); return;
   case ResampleEngine::Average: resampler = new ResampleAverage(*this); return;
+  case ResampleEngine::Sinc:    resampler = new ResampleSinc   (*this); return;
   }
 
   throw;

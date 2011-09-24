@@ -25,7 +25,6 @@ class Screen {
   } output;
 
   ColorWindow window;
-  uint16 **light_table;
 
   alwaysinline unsigned get_palette(unsigned color);
   unsigned get_direct_color(unsigned palette, unsigned tile);

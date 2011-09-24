@@ -105,7 +105,7 @@ void PPU::power() {
 void PPU::reset() {
   create(Enter, system.cpu_frequency());
   PPUcounter::reset();
-  memset(surface, 0, 512 * 512 * sizeof(uint16));
+  memset(surface, 0, 512 * 512 * sizeof(uint32));
 
   mmio_reset();
   bg1.reset();
@@ -153,7 +153,7 @@ bg4(*this, Background::ID::BG4),
 sprite(*this),
 window(*this),
 screen(*this) {
-  surface = new uint16[512 * 512];
+  surface = new uint32[512 * 512];
   output = surface + 16 * 512;
 }
 

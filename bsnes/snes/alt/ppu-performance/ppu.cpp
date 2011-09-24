@@ -104,7 +104,7 @@ void PPU::power() {
 void PPU::reset() {
   create(Enter, system.cpu_frequency());
   PPUcounter::reset();
-  memset(surface, 0, 512 * 512 * sizeof(uint16));
+  memset(surface, 0, 512 * 512 * sizeof(uint32));
   mmio_reset();
   display.interlace = false;
   display.overscan = false;
@@ -140,7 +140,7 @@ bg3(*this, Background::ID::BG3),
 bg4(*this, Background::ID::BG4),
 sprite(*this),
 screen(*this) {
-  surface = new uint16[512 * 512];
+  surface = new uint32[512 * 512];
   output = surface + 16 * 512;
   display.width = 256;
   display.height = 224;

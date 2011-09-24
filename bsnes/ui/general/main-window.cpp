@@ -2,7 +2,7 @@ MainWindow *mainWindow = 0;
 
 MainWindow::MainWindow() {
   setTitle(application->title);
-  setGeometry({ 256, 256, 640, 480 });
+  setGeometry({ 256, 256, 626, 480 });
   setBackgroundColor({ 0, 0, 0 });
   windowManager->append(this, "MainWindow");
 
