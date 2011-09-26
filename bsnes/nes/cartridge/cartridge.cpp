@@ -4,6 +4,14 @@ namespace NES {
 
 Cartridge cartridge;
 
+void Cartridge::Main() {
+  cartridge.main();
+}
+
+void Cartridge::main() {
+  mapper->main();
+}
+
 void Cartridge::load(const string &xml, const uint8_t *data, unsigned size) {
   rom_size = size - 16;
   rom_data = new uint8[rom_size];
@@ -31,10 +39,13 @@ void Cartridge::load(const string &xml, const uint8_t *data, unsigned size) {
   switch(mapperNumber) {
   default : mapper = &Mapper::none; break;
   case   1: mapper = &Mapper::mmc1; break;
+  case   2: mapper = &Mapper::uorom; break;
   case   3: mapper = &Mapper::cnrom; break;
   case   4: mapper = &Mapper::mmc3; break;
   case   7: mapper = &Mapper::aorom; break;
   case  16: mapper = &Mapper::bandaiFCG; break;
+  case  24: mapper = &Mapper::vrc6; Mapper::vrc6.abus_swap = 0; break;
+  case  26: mapper = &Mapper::vrc6; Mapper::vrc6.abus_swap = 1; break;
   }
 
   system.load();
@@ -61,10 +72,12 @@ uint8* Cartridge::ram_data() {
 }
 
 void Cartridge::power() {
+  create(Cartridge::Main, 21477272);
   mapper->power();
 }
 
 void Cartridge::reset() {
+  create(Cartridge::Main, 21477272);
   mapper->reset();
 }
 

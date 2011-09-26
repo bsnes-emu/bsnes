@@ -1,4 +1,7 @@
-struct Cartridge : property<Cartridge> {
+struct Cartridge : Processor, property<Cartridge> {
+  static void Main();
+  void main();
+
   void load(const string &xml, const uint8_t *data, unsigned size);
   void unload();
 

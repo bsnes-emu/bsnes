@@ -1,5 +1,8 @@
 namespace Mapper {
   struct Mapper {
+    virtual void main();
+    virtual void tick();
+
     unsigned mirror(unsigned addr, unsigned size) const;
     uint8& prg_data(unsigned addr);
     uint8& chr_data(unsigned addr);
@@ -28,4 +31,6 @@ namespace Mapper {
   #include "cnrom/cnrom.hpp"
   #include "mmc1/mmc1.hpp"
   #include "mmc3/mmc3.hpp"
+  #include "uorom/uorom.hpp"
+  #include "vrc6/vrc6.hpp"
 }

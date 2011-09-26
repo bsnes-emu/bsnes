@@ -3,6 +3,7 @@ struct APU : Processor {
   void main();
   void tick();
   void set_irq_line();
+  void set_sample(int16 sample);
 
   void power();
   void reset();
@@ -139,6 +140,7 @@ struct APU : Processor {
   void clock_frame_counter_divider();
 
   uint8 enabled_channels;
+  int16 cartridge_sample;
 
   int16 rectangle_dac[32];
   int16 dmc_triangle_noise_dac[128][16][16];

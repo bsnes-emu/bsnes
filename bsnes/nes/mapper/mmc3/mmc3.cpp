@@ -1,24 +1,34 @@
 MMC3 mmc3;
 
-void MMC3::clock_irq_test(uint16 addr) {
-  if(!(last_chr_addr & 0x1000) && (addr & 0x1000)) {
+void MMC3::main() {
+  while(true) {
+    if(scheduler.sync == Scheduler::SynchronizeMode::All) {
+      scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
+    }
+
+    if(irq_delay) irq_delay--;
+    cpu.set_irq_line(irq_line);
+    tick();
+  }
+}
+
+void MMC3::irq_test(uint16 addr) {
+  if(!(chr_abus & 0x1000) && (addr & 0x1000)) {
     if(irq_delay == 0) {
       if(irq_counter == 0) {
         irq_counter = irq_latch;
-        irq_line = irq_enable;
-        cpu.set_irq_line(irq_line);
+      } else if(--irq_counter == 0) {
+        if(irq_enable) irq_line = 1;
       }
-      irq_counter--;
     }
-    irq_delay = 5;
+    irq_delay = 6;
   }
-
-  last_chr_addr = addr;
+  chr_abus = addr;
 }
 
 unsigned MMC3::prg_addr(uint16 addr) {
   if((addr & 0xe000) == 0x8000) {
-    if((bank_select & 0x40) == 1) return (0x3e << 13) | (addr & 0x1fff);
+    if((bank_select & 0x40) != 0) return (0x3e << 13) | (addr & 0x1fff);
     return (prg_bank[0] << 13) | (addr & 0x1fff);
   }
 
@@ -39,8 +49,6 @@ unsigned MMC3::prg_addr(uint16 addr) {
 }
 
 uint8 MMC3::prg_read(uint16 addr) {
-  if(irq_delay) irq_delay--;
-
   if((addr & 0xe000) == 0x6000) {  //$6000-7fff
     if(prg_ram_enable) {
       return prg_ram[addr & 0x1fff];
@@ -55,8 +63,6 @@ uint8 MMC3::prg_read(uint16 addr) {
 }
 
 void MMC3::prg_write(uint16 addr, uint8 data) {
-  if(irq_delay) irq_delay--;
-
   if((addr & 0xe000) == 0x6000) {  //$6000-7fff
     if(prg_ram_enable && prg_ram_write_protect == false) {
       prg_ram[addr & 0x1fff] = data;
@@ -133,26 +139,25 @@ unsigned MMC3::chr_addr(uint16 addr) {
 }
 
 uint8 MMC3::chr_read(uint16 addr) {
-  clock_irq_test(addr);
+  irq_test(addr);
   return chr_data(chr_addr(addr));
 }
 
 void MMC3::chr_write(uint16 addr, uint8 data) {
-  clock_irq_test(addr);
-  last_chr_addr = addr;
+  irq_test(addr);
   if(cartridge.chr_ram == false) return;
   chr_data(chr_addr(addr)) = data;
 }
 
 unsigned MMC3::ciram_addr(uint13 addr) {
-  clock_irq_test(0x2000 | addr);
+  irq_test(0x2000 | addr);
   if(mirror_select == 0) return ((addr & 0x0400) >> 0) | (addr & 0x03ff);
   if(mirror_select == 1) return ((addr & 0x0800) >> 1) | (addr & 0x03ff);
   throw;
 }
 
 uint8 MMC3::ciram_read(uint13 addr) {
-  clock_irq_test(0x2000 | addr);
+  irq_test(0x2000 | addr);
   return ppu.ciram_read(ciram_addr(addr));
 }
 
@@ -194,7 +199,24 @@ void MMC3::reset() {
   irq_enable = false;
   irq_delay = 0;
   irq_line = 0;
+
+  chr_abus = 0;
 }
 
 void MMC3::serialize(serializer &s) {
+  s.array(prg_ram);
+
+  s.integer(bank_select);
+  s.array(prg_bank);
+  s.array(chr_bank);
+  s.integer(mirror_select);
+  s.integer(prg_ram_enable);
+  s.integer(prg_ram_write_protect);
+  s.integer(irq_latch);
+  s.integer(irq_counter);
+  s.integer(irq_enable);
+  s.integer(irq_delay);
+  s.integer(irq_line);
+
+  s.integer(chr_abus);
 }

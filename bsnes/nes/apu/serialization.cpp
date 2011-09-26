@@ -8,6 +8,7 @@ void APU::serialize(serializer &s) {
   frame.serialize(s);
 
   s.integer(enabled_channels);
+  s.integer(cartridge_sample);
 }
 
 void APU::Envelope::serialize(serializer &s) {

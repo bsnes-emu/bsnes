@@ -47,7 +47,7 @@ void APU::main() {
     clock_frame_counter_divider();
 
     signed output = rectangle_dac[rectangle_output] + dmc_triangle_noise_dac[dmc_output][triangle_output][noise_output];
-    interface->audioSample(output);
+    interface->audioSample(output + cartridge_sample);
 
     tick();
   }
@@ -60,6 +60,10 @@ void APU::tick() {
 
 void APU::set_irq_line() {
   cpu.set_irq_apu_line(frame.irq_pending || dmc.irq_pending);
+}
+
+void APU::set_sample(int16 sample) {
+  cartridge_sample = sample;
 }
 
 void APU::power() {
@@ -144,6 +148,8 @@ void APU::reset() {
   frame.divider = 1;
 
   enabled_channels = 0;
+  cartridge_sample = 0;
+
   set_irq_line();
 }
 

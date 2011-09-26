@@ -21,6 +21,10 @@ void System::runtosave() {
   scheduler.thread = apu.thread;
   runthreadtosave();
 
+  scheduler.sync = Scheduler::SynchronizeMode::All;
+  scheduler.thread = cartridge.thread;
+  runthreadtosave();
+
   scheduler.sync = Scheduler::SynchronizeMode::None;
 }
 

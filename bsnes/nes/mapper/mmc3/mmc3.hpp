@@ -1,4 +1,6 @@
 struct MMC3 : Mapper {
+  void main();
+
   uint8 prg_read(uint16 addr);
   void prg_write(uint16 addr, uint8 data);
 
@@ -31,12 +33,12 @@ private:
   unsigned irq_delay;
   bool irq_line;
 
-  uint16 last_chr_addr;
+  uint16 chr_abus;
 
+  void irq_test(uint16 addr);
   unsigned prg_addr(uint16 addr);
   unsigned chr_addr(uint16 addr);
   unsigned ciram_addr(uint13 addr);
-  void clock_irq_test(uint16 addr);
 };
 
 extern MMC3 mmc3;

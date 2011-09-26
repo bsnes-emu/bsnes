@@ -1,8 +1,23 @@
 BandaiFCG bandaiFCG;
 
-uint8 BandaiFCG::prg_read(uint16 addr) {
-  clock();
+void BandaiFCG::main() {
+  while(true) {
+    if(scheduler.sync == Scheduler::SynchronizeMode::All) {
+      scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
+    }
 
+    if(irq_counter_enable) {
+      if(--irq_counter == 0xffff) {
+        cpu.set_irq_line(1);
+        irq_counter_enable = false;
+      }
+    }
+
+    tick();
+  }
+}
+
+uint8 BandaiFCG::prg_read(uint16 addr) {
   if(addr >= 0x8000 && addr <= 0xbfff) {
     unsigned rom_addr = (prg_bank << 14) | (addr & 0x3fff);
     return cartridge.prg_data[mirror(rom_addr, cartridge.prg_size)];
@@ -17,8 +32,6 @@ uint8 BandaiFCG::prg_read(uint16 addr) {
 }
 
 void BandaiFCG::prg_write(uint16 addr, uint8 data) {
-  clock();
-
   if(addr >= 0x6000) {
     addr &= 0x0f;
     switch(addr) {
@@ -93,15 +106,6 @@ unsigned BandaiFCG::ciram_addr(unsigned addr) const {
   case 3: return 0x0400 | (addr & 0x03ff);                  //one-screen mirroring (second)
   }
   throw;
-}
-
-void BandaiFCG::clock() {
-  if(irq_counter_enable) {
-    if(--irq_counter == 0xffff) {
-      cpu.set_irq_line(1);
-      irq_counter_enable = false;
-    }
-  }
 }
 
 //

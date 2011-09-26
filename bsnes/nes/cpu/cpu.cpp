@@ -40,6 +40,9 @@ void CPU::add_clocks(unsigned clocks) {
 
   ppu.clock -= clocks;
   if(ppu.clock < 0 && scheduler.sync != Scheduler::SynchronizeMode::All) co_switch(ppu.thread);
+
+  cartridge.clock -= clocks;
+  if(cartridge.clock < 0 && scheduler.sync != Scheduler::SynchronizeMode::All) co_switch(cartridge.thread);
 }
 
 void CPU::power() {

@@ -9,7 +9,7 @@ struct MMC1 : Mapper {
   void ciram_write(uint13 addr, uint8 data);
 
   unsigned ram_size();
-  uint8 *ram_data();
+  uint8* ram_data();
 
   void power();
   void reset();

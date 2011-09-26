@@ -1,6 +1,4 @@
-struct BandaiFCG : Mapper {
-  void main();
-
+struct UOROM : Mapper {
   uint8 prg_read(uint16 addr);
   void prg_write(uint16 addr, uint8 data);
 
@@ -16,14 +14,7 @@ struct BandaiFCG : Mapper {
   void serialize(serializer&);
 
 private:
-  unsigned ciram_addr(unsigned addr) const;
-
-  uint8 chr_bank[8];
-  uint8 prg_bank;
-  uint8 mirror_select;
-  bool irq_counter_enable;
-  uint16 irq_counter;
-  uint16 irq_latch;
+  uint4 prg_bank;
 };
 
-extern BandaiFCG bandaiFCG;
+extern UOROM uorom;
