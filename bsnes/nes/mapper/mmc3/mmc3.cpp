@@ -48,7 +48,7 @@ unsigned MMC3::prg_addr(uint16 addr) {
   throw;
 }
 
-uint8 MMC3::prg_read(uint16 addr) {
+uint8 MMC3::prg_read(unsigned addr) {
   if((addr & 0xe000) == 0x6000) {  //$6000-7fff
     if(prg_ram_enable) {
       return prg_ram[addr & 0x1fff];
@@ -56,13 +56,13 @@ uint8 MMC3::prg_read(uint16 addr) {
   }
 
   if(addr & 0x8000) {  //$8000-ffff
-    return prg_data(prg_addr(addr));
+    return Mapper::prg_read(prg_addr(addr));
   }
 
   return cpu.mdr();
 }
 
-void MMC3::prg_write(uint16 addr, uint8 data) {
+void MMC3::prg_write(unsigned addr, uint8 data) {
   if((addr & 0xe000) == 0x6000) {  //$6000-7fff
     if(prg_ram_enable && prg_ram_write_protect == false) {
       prg_ram[addr & 0x1fff] = data;
@@ -138,31 +138,22 @@ unsigned MMC3::chr_addr(uint16 addr) {
   throw;
 }
 
-uint8 MMC3::chr_read(uint16 addr) {
+uint8 MMC3::chr_read(unsigned addr) {
   irq_test(addr);
-  return chr_data(chr_addr(addr));
+  if(addr & 0x2000) return ppu.ciram_read(ciram_addr(addr));
+  return Mapper::chr_read(chr_addr(addr));
 }
 
-void MMC3::chr_write(uint16 addr, uint8 data) {
+void MMC3::chr_write(unsigned addr, uint8 data) {
   irq_test(addr);
-  if(cartridge.chr_ram == false) return;
-  chr_data(chr_addr(addr)) = data;
+  if(addr & 0x2000) return ppu.ciram_write(ciram_addr(addr), data);
+  return Mapper::chr_write(chr_addr(addr), data);
 }
 
 unsigned MMC3::ciram_addr(uint13 addr) {
-  irq_test(0x2000 | addr);
   if(mirror_select == 0) return ((addr & 0x0400) >> 0) | (addr & 0x03ff);
   if(mirror_select == 1) return ((addr & 0x0800) >> 1) | (addr & 0x03ff);
   throw;
-}
-
-uint8 MMC3::ciram_read(uint13 addr) {
-  irq_test(0x2000 | addr);
-  return ppu.ciram_read(ciram_addr(addr));
-}
-
-void MMC3::ciram_write(uint13 addr, uint8 data) {
-  return ppu.ciram_write(ciram_addr(addr), data);
 }
 
 unsigned MMC3::ram_size() {

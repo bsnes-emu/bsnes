@@ -85,27 +85,27 @@ Cartridge::Cartridge() {
   loaded = false;
 }
 
-uint8 Cartridge::prg_read(uint16 addr) {
+uint8 Cartridge::prg_read(unsigned addr) {
   return mapper->prg_read(addr);
 }
 
-void Cartridge::prg_write(uint16 addr, uint8 data) {
+void Cartridge::prg_write(unsigned addr, uint8 data) {
   return mapper->prg_write(addr, data);
 }
 
-uint8 Cartridge::chr_read(uint16 addr) {
+uint8 Cartridge::chr_read(unsigned addr) {
   return mapper->chr_read(addr);
 }
 
-void Cartridge::chr_write(uint16 addr, uint8 data) {
+void Cartridge::chr_write(unsigned addr, uint8 data) {
   return mapper->chr_write(addr, data);
 }
 
-uint8 Cartridge::ciram_read(uint13 addr) {
+uint8 Cartridge::ciram_read(unsigned addr) {
   return mapper->ciram_read(addr);
 }
 
-void Cartridge::ciram_write(uint13 addr, uint8 data) {
+void Cartridge::ciram_write(unsigned addr, uint8 data) {
   return mapper->ciram_write(addr, data);
 }
 

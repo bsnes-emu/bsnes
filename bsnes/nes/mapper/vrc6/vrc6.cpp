@@ -1,70 +1,30 @@
 VRC6 vrc6;
 
-//
-
 void VRC6::Pulse::clock() {
   if(--divider == 0) {
-    divider = frequency;
+    divider = frequency + 1;
     cycle++;
-    output = (mode == 1 || cycle < duty) ? volume : (uint4)0;
+    output = (mode == 1 || cycle > duty) ? volume : (uint4)0;
   }
 
   if(enable == false) output = 0;
 }
 
-void VRC6::Pulse::serialize(serializer &s) {
-  s.integer(mode);
-  s.integer(duty);
-  s.integer(volume);
-  s.integer(enable);
-  s.integer(frequency);
-
-  s.integer(divider);
-  s.integer(cycle);
-  s.integer(output);
-}
-
-VRC6::Pulse::Pulse() {
-  for(unsigned n = 0; n < 16; n++) {
-    dac[n] = -15360 + (n * 2048);
-  }
-}
-
-//
-
 void VRC6::Sawtooth::clock() {
   if(--divider == 0) {
-    divider = frequency;
-    if(phase == 0) {
-      phase = 0;
-      accumulator = 0;
-    } else if((phase & 1) == 0) {
+    divider = frequency + 1;
+    if(++phase == 0) {
       accumulator += rate;
+      if(++stage == 7) {
+        stage = 0;
+        accumulator = 0;
+      }
     }
   }
 
   output = accumulator >> 3;
   if(enable == false) output = 0;
 }
-
-void VRC6::Sawtooth::serialize(serializer &s) {
-  s.integer(rate);
-  s.integer(enable);
-  s.integer(frequency);
-
-  s.integer(divider);
-  s.integer(phase);
-  s.integer(accumulator);
-  s.integer(output);
-}
-
-VRC6::Sawtooth::Sawtooth() {
-  for(unsigned n = 0; n < 32; n++) {
-    dac[n] = -15872 + (n * 1024);
-  }
-}
-
-//
 
 void VRC6::main() {
   while(true) {
@@ -95,45 +55,39 @@ void VRC6::main() {
         }
       }
     }
+    cpu.set_irq_line(irq_line);
 
     pulse1.clock();
     pulse2.clock();
     sawtooth.clock();
+    signed output = (pulse1.output + pulse2.output + sawtooth.output) << 7;
+    apu.set_sample(-output);
 
-    signed output = 0;
-    output +=   pulse1.dac[  pulse1.output];
-    output +=   pulse2.dac[  pulse2.output];
-    output += sawtooth.dac[sawtooth.output];
-    output /= 6;  //div by 3 for channel count; div that by 2 to match NES volume intensity
-    output = sclamp<16>(output);
-
-    apu.set_sample(output);
-    cpu.set_irq_line(irq_line);
     tick();
   }
 }
 
-uint8 VRC6::prg_read(uint16 addr) {
+uint8 VRC6::prg_read(unsigned addr) {
   if((addr & 0xe000) == 0x6000) {
     return prg_ram[addr & 0x1fff];
   }
 
   if((addr & 0xc000) == 0x8000) {
-    return prg_data((prg_bank[0] << 14) | (addr & 0x3fff));
+    return Mapper::prg_read((prg_bank[0] << 14) | (addr & 0x3fff));
   }
 
   if((addr & 0xe000) == 0xc000) {
-    return prg_data((prg_bank[1] << 13) | (addr & 0x1fff));
+    return Mapper::prg_read((prg_bank[1] << 13) | (addr & 0x1fff));
   }
 
   if((addr & 0xe000) == 0xe000) {
-    return prg_data((0xff << 13) | (addr & 0x1fff));
+    return Mapper::prg_read((0xff << 13) | (addr & 0x1fff));
   }
 
   return cpu.mdr();
 }
 
-void VRC6::prg_write(uint16 addr, uint8 data) {
+void VRC6::prg_write(unsigned addr, uint8 data) {
   if((addr & 0xe000) == 0x6000) {
     prg_ram[addr & 0x1fff] = data;
     return;
@@ -228,15 +182,18 @@ void VRC6::prg_write(uint16 addr, uint8 data) {
   }
 }
 
-uint8 VRC6::chr_read(uint16 addr) {
+uint8 VRC6::chr_read(unsigned addr) {
+  if(addr & 0x2000) return ppu.ciram_read(ciram_addr(addr));
+
   unsigned bank = chr_bank[(addr >> 10) & 7];
-  return chr_data((bank << 10) | (addr & 0x03ff));
+  return Mapper::chr_read((bank << 10) | (addr & 0x03ff));
 }
 
-void VRC6::chr_write(uint16 addr, uint8 data) {
-  if(cartridge.chr_ram == false) return;
+void VRC6::chr_write(unsigned addr, uint8 data) {
+  if(addr & 0x2000) return ppu.ciram_write(ciram_addr(addr), data);
+
   unsigned bank = chr_bank[(addr >> 10) & 7];
-  chr_data((bank << 10) | (addr & 0x03ff)) = data;
+  Mapper::chr_write((bank << 10) | (addr & 0x03ff), data);
 }
 
 unsigned VRC6::ciram_addr(unsigned addr) const {
@@ -246,14 +203,6 @@ unsigned VRC6::ciram_addr(unsigned addr) const {
   case 2: return 0x0000 | (addr & 0x03ff);                  //one-screen mirroring (first)
   case 3: return 0x0400 | (addr & 0x03ff);                  //one-screen mirroring (second)
   }
-}
-
-uint8 VRC6::ciram_read(uint13 addr) {
-  return ppu.ciram_read(ciram_addr(addr));
-}
-
-void VRC6::ciram_write(uint13 addr, uint8 data) {
-  return ppu.ciram_write(ciram_addr(addr), data);
 }
 
 unsigned VRC6::ram_size() {
@@ -297,7 +246,7 @@ void VRC6::reset() {
   pulse1.enable = 0;
   pulse1.frequency = 0;
 
-  pulse1.divider = 0;
+  pulse1.divider = 1;
   pulse1.cycle = 0;
   pulse1.output = 0;
 
@@ -307,7 +256,7 @@ void VRC6::reset() {
   pulse2.enable = 0;
   pulse2.frequency = 0;
 
-  pulse2.divider = 0;
+  pulse2.divider = 1;
   pulse2.cycle = 0;
   pulse2.output = 0;
 
@@ -315,8 +264,9 @@ void VRC6::reset() {
   sawtooth.enable = 0;
   sawtooth.frequency = 0;
 
-  sawtooth.divider = 0;
+  sawtooth.divider = 1;
   sawtooth.phase = 0;
+  sawtooth.stage = 0;
   sawtooth.accumulator = 0;
   sawtooth.output = 0;
 }
@@ -339,4 +289,28 @@ void VRC6::serialize(serializer &s) {
   pulse1.serialize(s);
   pulse2.serialize(s);
   sawtooth.serialize(s);
+}
+
+void VRC6::Pulse::serialize(serializer &s) {
+  s.integer(mode);
+  s.integer(duty);
+  s.integer(volume);
+  s.integer(enable);
+  s.integer(frequency);
+
+  s.integer(divider);
+  s.integer(cycle);
+  s.integer(output);
+}
+
+void VRC6::Sawtooth::serialize(serializer &s) {
+  s.integer(rate);
+  s.integer(enable);
+  s.integer(frequency);
+
+  s.integer(divider);
+  s.integer(phase);
+  s.integer(stage);
+  s.integer(accumulator);
+  s.integer(output);
 }

@@ -66,41 +66,27 @@ bool MMC1::prg_ram_disable() const {
   return r[3] & 0x10;
 }
 
-//
-
-uint8& MMC1::prg_data(unsigned addr) {
-  return cartridge.prg_data[mirror(addr, cartridge.prg_size)];
-}
-
-uint8& MMC1::chr_data(unsigned addr) {
-  return cartridge.chr_data[mirror(addr, cartridge.chr_size)];
-}
-
-//
-
-uint8 MMC1::prg_read(uint16 readaddr) {
-  unsigned addr = readaddr;
-
-  if(addr >= 0x6000 && addr <= 0x7fff) {
+uint8 MMC1::prg_read(unsigned addr) {
+  if((addr & 0xe000) == 0x6000) {
     if(prg_ram_disable() == false) return prg_ram[addr & 0x1fff];
     return 0x00;
   }
 
-  if(addr >= 0x8000 && addr <= 0xffff) {
+  if(addr & 0x8000) {
     addr = prg_addr(addr & 0x4000) | (addr & 0x3fff);
-    return prg_data(addr);
+    return Mapper::prg_read(addr);
   }
 
   return cpu.mdr();
 }
 
-void MMC1::prg_write(uint16 addr, uint8 data) {
-  if(addr >= 0x6000 && addr <= 0x7fff) {
+void MMC1::prg_write(unsigned addr, uint8 data) {
+  if((addr & 0xe000) == 0x6000) {
     if(prg_ram_disable() == false) prg_ram[addr & 0x1fff] = data;
     return;
   }
 
-  if(addr >= 0x8000 && addr <= 0xffff) {
+  if(addr & 0x8000) {
     if(data & 0x80) {
       shiftaddr = 0;
       r[0] |= 0x0c;
@@ -116,59 +102,47 @@ void MMC1::prg_write(uint16 addr, uint8 data) {
   }
 }
 
-//
+uint8 MMC1::chr_read(unsigned addr) {
+  if(addr & 0x2000) {
+    return ppu.ciram_read(ciram_addr(addr));
+  }
 
-uint8 MMC1::chr_read(uint16 readaddr) {
-  unsigned addr = readaddr;
   prg_ex_select = addr & 0x1000;
 
   if(addr <= 0x0fff) {
     addr = chr_banklo() * 0x1000 + (addr & 0x0fff);
-    return chr_data(addr);
+    return Mapper::chr_read(addr);
   }
 
   if(addr <= 0x1fff) {
     addr = chr_bankhi() * 0x1000 + (addr & 0x0fff);
-    return chr_data(addr);
+    return Mapper::chr_read(addr);
   }
 
   throw;
 }
 
-void MMC1::chr_write(uint16 readaddr, uint8 data) {
-  unsigned addr = readaddr;
+void MMC1::chr_write(unsigned addr, uint8 data) {
+  if(addr & 0x2000) {
+    return ppu.ciram_write(ciram_addr(addr), data);
+  }
+
   prg_ex_select = addr & 0x1000;
 
   if(addr <= 0x0fff) {
     if(cartridge.chr_ram == false) return;
     addr = chr_banklo() * 0x1000 + (addr & 0x0fff);
-    chr_data(addr) = data;
-    return;
+    return Mapper::chr_write(addr, data);
   }
 
   if(addr <= 0x1fff) {
     if(cartridge.chr_ram == false) return;
     addr = chr_bankhi() * 0x1000 + (addr & 0x0fff);
-    chr_data(addr) = data;
-    return;
+    return Mapper::chr_write(addr, data);
   }
 
   throw;
 }
-
-//
-
-uint8 MMC1::ciram_read(uint13 addr) {
-  addr = ciram_addr(addr);
-  return ppu.ciram_read(addr);
-}
-
-void MMC1::ciram_write(uint13 addr, uint8 data) {
-  addr = ciram_addr(addr);
-  return ppu.ciram_write(addr, data);
-}
-
-//
 
 unsigned MMC1::ram_size() {
   return 8192u;
@@ -177,8 +151,6 @@ unsigned MMC1::ram_size() {
 uint8* MMC1::ram_data() {
   return prg_ram;
 }
-
-//
 
 void MMC1::power() {
   reset();
@@ -194,8 +166,6 @@ void MMC1::reset() {
   r[2] = 0x01;
   r[3] = 0x00;
 }
-
-//
 
 void MMC1::serialize(serializer &s) {
   s.array(prg_ram);

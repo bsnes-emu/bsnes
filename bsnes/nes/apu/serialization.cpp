@@ -1,6 +1,8 @@
 void APU::serialize(serializer &s) {
   Processor::serialize(s);
 
+  filter.serialize(s);
+
   rectangle[0].serialize(s);
   rectangle[1].serialize(s);
   triangle.serialize(s);
@@ -9,6 +11,12 @@ void APU::serialize(serializer &s) {
 
   s.integer(enabled_channels);
   s.integer(cartridge_sample);
+}
+
+void APU::Filter::serialize(serializer &s) {
+  s.integer(hipass_strong);
+  s.integer(hipass_weak);
+  s.integer(lopass);
 }
 
 void APU::Envelope::serialize(serializer &s) {

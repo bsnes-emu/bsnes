@@ -14,6 +14,19 @@ struct APU : Processor {
   void serialize(serializer&);
   APU();
 
+  struct Filter {
+    enum : signed { HiPassStrong = 225574, HiPassWeak = 57593, LoPass = 86322413 };
+
+    int64 hipass_strong;
+    int64 hipass_weak;
+    int64 lopass;
+
+    signed run_hipass_strong(signed sample);
+    signed run_hipass_weak(signed sample);
+    signed run_lopass(signed sample);
+    void serialize(serializer&);
+  } filter;
+
   struct Envelope {
     uint4 speed;
     bool use_speed_as_volume;

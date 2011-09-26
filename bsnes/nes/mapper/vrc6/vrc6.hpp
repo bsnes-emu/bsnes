@@ -1,14 +1,11 @@
 struct VRC6 : Mapper {
   void main();
 
-  uint8 prg_read(uint16 addr);
-  void prg_write(uint16 addr, uint8 data);
+  uint8 prg_read(unsigned addr);
+  void prg_write(unsigned addr, uint8 data);
 
-  uint8 chr_read(uint16 addr);
-  void chr_write(uint16 addr, uint8 data);
-
-  uint8 ciram_read(uint13 addr);
-  void ciram_write(uint13 addr, uint8 data);
+  uint8 chr_read(unsigned addr);
+  void chr_write(unsigned addr, uint8 data);
 
   unsigned ram_size();
   uint8* ram_data();
@@ -46,11 +43,9 @@ private:
     uint12 divider;
     uint4 cycle;
     uint4 output;
-    int16 dac[16];
 
     void clock();
     void serialize(serializer&);
-    Pulse();
   } pulse1, pulse2;
 
   struct Sawtooth {
@@ -59,14 +54,13 @@ private:
     uint12 frequency;
 
     uint12 divider;
-    uint4 phase;
+    uint1 phase;
+    uint3 stage;
     uint8 accumulator;
     uint5 output;
-    int16 dac[32];
 
     void clock();
     void serialize(serializer&);
-    Sawtooth();
   } sawtooth;
 
   unsigned ciram_addr(unsigned addr) const;

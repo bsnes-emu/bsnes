@@ -14,8 +14,8 @@ void Filter::render(const uint16_t *input, unsigned inputPitch, unsigned inputWi
 }
 
 Filter::Filter() {
-  data = new uint16_t[1024 * 1024];
-  pitch = 1024 * sizeof(uint16_t);
+  data = new uint16_t[2048 * 2048];
+  pitch = 2048 * sizeof(uint16_t);
 }
 
 Filter::~Filter() {

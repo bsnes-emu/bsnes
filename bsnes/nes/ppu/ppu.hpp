@@ -25,7 +25,6 @@ struct PPU : Processor {
   unsigned sprite_height() const;
 
   uint8 chr_load(uint16 addr);
-  uint8 ciram_load(uint16 addr);
 
   void ly_increment();
   void scrollx_increment();

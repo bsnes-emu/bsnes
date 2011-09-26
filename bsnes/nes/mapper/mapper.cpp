@@ -37,12 +37,21 @@ unsigned Mapper::mirror(unsigned addr, unsigned size) const {
   return base;
 }
 
-uint8& Mapper::prg_data(unsigned addr) {
+uint8 Mapper::prg_read(unsigned addr) {
   return cartridge.prg_data[mirror(addr, cartridge.prg_size)];
 }
 
-uint8& Mapper::chr_data(unsigned addr) {
+void Mapper::prg_write(unsigned addr, uint8 data) {
+  cartridge.prg_data[mirror(addr, cartridge.prg_size)] = data;
+}
+
+uint8 Mapper::chr_read(unsigned addr) {
   return cartridge.chr_data[mirror(addr, cartridge.chr_size)];
+}
+
+void Mapper::chr_write(unsigned addr, uint8 data) {
+  if(cartridge.chr_ram == false) return;
+  cartridge.chr_data[mirror(addr, cartridge.chr_size)] = data;
 }
 
 unsigned Mapper::ram_size() {

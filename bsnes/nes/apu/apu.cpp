@@ -47,7 +47,14 @@ void APU::main() {
     clock_frame_counter_divider();
 
     signed output = rectangle_dac[rectangle_output] + dmc_triangle_noise_dac[dmc_output][triangle_output][noise_output];
-    interface->audioSample(output + cartridge_sample);
+
+    output  = filter.run_hipass_strong(output);
+    output += cartridge_sample;
+    output  = filter.run_hipass_weak(output);
+  //output  = filter.run_lopass(output);
+    output  = sclamp<16>(output);
+
+    interface->audioSample(output);
 
     tick();
   }
@@ -67,6 +74,10 @@ void APU::set_sample(int16 sample) {
 }
 
 void APU::power() {
+  filter.hipass_strong = 0;
+  filter.hipass_weak = 0;
+  filter.lopass = 0;
+
   for(unsigned n = 0; n < 2; n++) {
     rectangle[n].sweep.shift = 0;
     rectangle[n].sweep.decrement = 0;
@@ -300,6 +311,21 @@ void APU::write(uint16 addr, uint8 data) {
     frame.divider = FrameCounter::NtscPeriod;
     break;
   }
+}
+
+signed APU::Filter::run_hipass_strong(signed sample) {
+  hipass_strong += ((((int64)sample << 16) - (hipass_strong >> 16)) * HiPassStrong) >> 16;
+  return sample - (hipass_strong >> 32);
+}
+
+signed APU::Filter::run_hipass_weak(signed sample) {
+  hipass_weak += ((((int64)sample << 16) - (hipass_weak >> 16)) * HiPassWeak) >> 16;
+  return sample - (hipass_weak >> 32);
+}
+
+signed APU::Filter::run_lopass(signed sample) {
+  lopass += ((((int64)sample << 16) - (lopass >> 16)) * LoPass) >> 16;
+  return (lopass >> 32);
 }
 
 bool APU::Sweep::check_period() {

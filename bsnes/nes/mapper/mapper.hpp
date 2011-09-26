@@ -4,17 +4,18 @@ namespace Mapper {
     virtual void tick();
 
     unsigned mirror(unsigned addr, unsigned size) const;
-    uint8& prg_data(unsigned addr);
-    uint8& chr_data(unsigned addr);
 
-    virtual uint8 prg_read(uint16 addr) = 0;
-    virtual void prg_write(uint16 addr, uint8 data) = 0;
+    //note: Mapper::{prg,chr}_read() functions take literal ROM addresses; mirroring appropriately
+    //subclasses of Mapper take 16-bit bus addresses; decode them; and call Mapper read functions
 
-    virtual uint8 chr_read(uint16 addr) = 0;
-    virtual void chr_write(uint16 addr, uint8 data) = 0;
+    virtual uint8 prg_read(unsigned addr);
+    virtual void prg_write(unsigned addr, uint8 data);
 
-    virtual uint8 ciram_read(uint13 addr) = 0;
-    virtual void ciram_write(uint13 addr, uint8 data) = 0;
+    virtual uint8 chr_read(unsigned addr);
+    virtual void chr_write(unsigned addr, uint8 data);
+
+    virtual uint8 ciram_read(uint13 addr) {}
+    virtual void ciram_write(uint13 addr, uint8 data) {}
 
     virtual unsigned ram_size();
     virtual uint8* ram_data();

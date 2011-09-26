@@ -41,7 +41,7 @@ Application::Application(int argc, char **argv) {
   inputManager = new InputManager;
   utility = new Utility;
 
-  title = "bsnes v082.22";
+  title = "bsnes v082.23";
 
   #if defined(PLATFORM_WIN)
   normalFont = "Tahoma, 8";
