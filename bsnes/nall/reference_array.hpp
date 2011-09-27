@@ -1,9 +1,9 @@
 #ifndef NALL_REFERENCE_ARRAY_HPP
 #define NALL_REFERENCE_ARRAY_HPP
 
+#include <algorithm>
 #include <type_traits>
 #include <nall/bit.hpp>
-#include <nall/concept.hpp>
 
 namespace nall {
   template<typename T> struct reference_array {
@@ -95,6 +95,22 @@ namespace nall {
       return *pool[index];
     }
 
+    //iteration
+    struct iterator {
+      bool operator!=(const iterator &source) const { return index != source.index; }
+      T& operator*() { return array.operator[](index); }
+      iterator& operator++() { index++; return *this; }
+      iterator(const reference_array &array, unsigned index) : array(array), index(index) {}
+    private:
+      const reference_array &array;
+      unsigned index;
+    };
+
+    iterator begin() { return iterator(*this, 0); }
+    iterator end() { return iterator(*this, buffersize); }
+    const iterator begin() const { return iterator(*this, 0); }
+    const iterator end() const { return iterator(*this, buffersize); }
+
   private:
     void construct() {
     }
@@ -112,8 +128,6 @@ namespace nall {
       construct(args...);
     }
   };
-
-  template<typename T> struct has_size<reference_array<T>> { enum { value = true }; };
 }
 
 #endif

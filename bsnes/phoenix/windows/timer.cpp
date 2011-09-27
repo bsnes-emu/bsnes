@@ -1,7 +1,7 @@
 static linear_vector<pTimer*> timers;
 
 static void CALLBACK Timer_timeoutProc(HWND hwnd, UINT msg, UINT_PTR timerID, DWORD time) {
-  foreach(timer, timers) {
+  for(auto &timer : timers) {
     if(timer->htimer == timerID) {
       if(timer->timer.onTimeout) timer->timer.onTimeout();
       return;

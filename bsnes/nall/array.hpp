@@ -2,13 +2,12 @@
 #define NALL_ARRAY_HPP
 
 #include <stdlib.h>
+#include <algorithm>
 #include <initializer_list>
 #include <type_traits>
 #include <utility>
 #include <nall/algorithm.hpp>
 #include <nall/bit.hpp>
-#include <nall/concept.hpp>
-#include <nall/foreach.hpp>
 #include <nall/utility.hpp>
 
 namespace nall {
@@ -62,7 +61,7 @@ namespace nall {
       unsigned listsize = container_size(list);
       resize(buffersize + listsize);
       memmove(pool + index + listsize, pool + index, (buffersize - index) * sizeof(T));
-      foreach(item, list) pool[index++] = item;
+      for(auto &item : list) pool[index++] = item;
     }
 
     void insert(unsigned index, const T item) {
@@ -144,8 +143,6 @@ namespace nall {
     const T* begin() const { return &pool[0]; }
     const T* end() const { return &pool[buffersize]; }
   };
-
-  template<typename T> struct has_size<array<T>> { enum { value = true }; };
 }
 
 #endif

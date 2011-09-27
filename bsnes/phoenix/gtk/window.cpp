@@ -38,10 +38,10 @@ static gboolean Window_configure(GtkWidget *widget, GdkEvent *event, Window *win
 
   if(window->state.fullScreen == false) {
     //update geometry settings
-    settings.frameGeometryX = client.x - border.x;
-    settings.frameGeometryY = client.y - border.y;
-    settings.frameGeometryWidth = border.width - client.width;
-    settings.frameGeometryHeight = border.height - client.height;
+    settings->frameGeometryX = client.x - border.x;
+    settings->frameGeometryY = client.y - border.y;
+    settings->frameGeometryWidth = border.width - client.width;
+    settings->frameGeometryHeight = border.height - client.height;
   }
 
   //move
@@ -64,7 +64,7 @@ static gboolean Window_configure(GtkWidget *widget, GdkEvent *event, Window *win
       window->state.geometry.height = client.height - window->p.menuHeight() - window->p.statusHeight();
     }
 
-    foreach(layout, window->state.layout) {
+    for(auto &layout : window->state.layout) {
       Geometry geometry = window->geometry();
       geometry.x = geometry.y = 0;
       layout.setGeometry(geometry);
@@ -107,10 +107,10 @@ Color pWindow::backgroundColor() {
 Geometry pWindow::frameMargin() {
   if(window.state.fullScreen) return { 0, menuHeight(), 0, menuHeight() + statusHeight() };
   return {
-    settings.frameGeometryX,
-    settings.frameGeometryY + menuHeight(),
-    settings.frameGeometryWidth,
-    settings.frameGeometryHeight + menuHeight() + statusHeight()
+    settings->frameGeometryX,
+    settings->frameGeometryY + menuHeight(),
+    settings->frameGeometryWidth,
+    settings->frameGeometryHeight + menuHeight() + statusHeight()
   };
 }
 
@@ -183,7 +183,7 @@ void pWindow::setGeometry(const Geometry &geometry) {
   gtk_widget_set_size_request(formContainer, geometry.width, geometry.height);
   gtk_window_resize(GTK_WINDOW(widget), geometry.width + margin.width, geometry.height + margin.height);
 
-  foreach(layout, window.state.layout) {
+  for(auto &layout : window.state.layout) {
     Geometry geometry = this->geometry();
     geometry.x = geometry.y = 0;
     layout.setGeometry(geometry);
@@ -191,7 +191,7 @@ void pWindow::setGeometry(const Geometry &geometry) {
 }
 
 void pWindow::setMenuFont(const string &font) {
-  foreach(item, window.state.menu) item.p.setFont(font);
+  for(auto &item : window.state.menu) item.p.setFont(font);
 }
 
 void pWindow::setMenuVisible(bool visible) {
@@ -225,7 +225,7 @@ void pWindow::setVisible(bool visible) {
 }
 
 void pWindow::setWidgetFont(const string &font) {
-  foreach(item, window.state.widget) {
+  for(auto &item : window.state.widget) {
     if(item.state.font == "") item.setFont(font);
   }
 }
@@ -273,9 +273,9 @@ void pWindow::constructor() {
 }
 
 unsigned pWindow::menuHeight() {
-  return window.state.menuVisible ? settings.menuGeometryHeight : 0;
+  return window.state.menuVisible ? settings->menuGeometryHeight : 0;
 }
 
 unsigned pWindow::statusHeight() {
-  return window.state.statusVisible ? settings.statusGeometryHeight : 0;
+  return window.state.statusVisible ? settings->statusGeometryHeight : 0;
 }

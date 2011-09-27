@@ -17,7 +17,6 @@ namespace GameBoy {
 
 #include <libco/libco.h>
 
-#include <nall/foreach.hpp>
 #include <nall/platform.hpp>
 #include <nall/property.hpp>
 #include <nall/random.hpp>

@@ -19,7 +19,7 @@ static void ListView_tick(GtkCellRendererToggle *cell, gchar *path_string, ListV
 void pListView::append(const lstring &text) {
   GtkTreeIter iter;
   gtk_list_store_append(store, &iter);
-  foreach(item, text, n) gtk_list_store_set(store, &iter, 1 + n, (const char*)item, -1);
+  for(unsigned n = 0; n < text.size(); n++) gtk_list_store_set(store, &iter, 1 + n, (const char*)text[n], -1);
 }
 
 void pListView::autoSizeColumns() {
@@ -44,7 +44,7 @@ void pListView::modify(unsigned row, const lstring &text) {
     if(i == 0) gtk_tree_model_get_iter_first(model, &iter);
     else gtk_tree_model_iter_next(model, &iter);
   }
-  foreach(item, text, n) gtk_list_store_set(store, &iter, 1 + n, (const char*)item, -1);
+  for(unsigned n = 0; n < text.size(); n++) gtk_list_store_set(store, &iter, 1 + n, (const char*)text[n], -1);
 }
 
 void pListView::reset() {
@@ -148,11 +148,11 @@ void pListView::constructor() {
 
   lstring headerText;
   headerText.append("");  //checkbox column
-  foreach(headerItem, listView.state.headerText) headerText.append(headerItem);
+  for(auto &headerItem : listView.state.headerText) headerText.append(headerItem);
   if(headerText.size() == 1) headerText.append("");
 
   GType *v = (GType*)malloc(headerText.size() * sizeof(GType));
-  foreach(header, headerText, n) v[n] = (n == 0 ? G_TYPE_BOOLEAN : G_TYPE_STRING);
+  for(unsigned n = 0; n < headerText.size(); n++) v[n] = (n == 0 ? G_TYPE_BOOLEAN : G_TYPE_STRING);
   store = gtk_list_store_newv(headerText.size(), v);
   free(v);
 
@@ -160,7 +160,7 @@ void pListView::constructor() {
   gtk_container_add(GTK_CONTAINER(gtkWidget), subWidget);
   g_object_unref(G_OBJECT(store));
 
-  foreach(header, headerText, n) {
+  for(unsigned n = 0; n < headerText.size(); n++) {
     if(n == 0) {
       column[n].renderer = gtk_cell_renderer_toggle_new();
       column[n].column = gtk_tree_view_column_new_with_attributes("", column[n].renderer, "active", n, (void*)0);
@@ -172,7 +172,7 @@ void pListView::constructor() {
       column[n].column = gtk_tree_view_column_new_with_attributes("", column[n].renderer, "text", n, (void*)0);
       gtk_tree_view_column_set_resizable(column[n].column, true);
     }
-    column[n].label = gtk_label_new(header);
+    column[n].label = gtk_label_new(headerText[n]);
     gtk_tree_view_column_set_widget(GTK_TREE_VIEW_COLUMN(column[n].column), column[n].label);
     gtk_tree_view_append_column(GTK_TREE_VIEW(subWidget), column[n].column);
     gtk_widget_show(column[n].label);
@@ -188,8 +188,8 @@ void pListView::constructor() {
 
   setHeaderVisible(listView.state.headerVisible);
   setCheckable(listView.state.checkable);
-  foreach(text, listView.state.text) append(text);
-  foreach(checked, listView.state.checked, n) setChecked(n, checked);
+  for(auto &text : listView.state.text) append(text);
+  for(unsigned n = 0; n < listView.state.checked.size(); n++) setChecked(n, listView.state.checked[n]);
   if(listView.state.selected) setSelection(listView.state.selection);
   autoSizeColumns();
 }

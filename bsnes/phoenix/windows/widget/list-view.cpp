@@ -9,8 +9,8 @@ void pListView::append(const lstring &list) {
   locked = true;
   ListView_InsertItem(hwnd, &item);
   locked = false;
-  foreach(text, list, n) {
-    utf16_t wtext(text);
+  for(unsigned n = 0; n < list.size(); n++) {
+    utf16_t wtext(list[n]);
     ListView_SetItemText(hwnd, row, n, wtext);
   }
 }
@@ -26,8 +26,8 @@ bool pListView::checked(unsigned row) {
 }
 
 void pListView::modify(unsigned row, const lstring &list) {
-  foreach(text, list, n) {
-    utf16_t wtext(text);
+  for(unsigned n = 0; n < list.size(); n++) {
+    utf16_t wtext(list[n]);
     ListView_SetItemText(hwnd, row, n, wtext);
   }
 }
@@ -68,12 +68,12 @@ void pListView::setHeaderText(const lstring &list) {
   lstring headers = list;
   if(headers.size() == 0) headers.append("");  //must have at least one column
 
-  foreach(text, headers, n) {
+  for(unsigned n = 0; n < headers.size(); n++) {
     LVCOLUMN column;
     column.mask = LVCF_FMT | LVCF_TEXT | LVCF_SUBITEM;
     column.fmt = LVCFMT_LEFT;
     column.iSubItem = n;
-    utf16_t headerText(text);
+    utf16_t headerText(headers[n]);
     column.pszText = headerText;
     ListView_InsertColumn(hwnd, n, &column);
   }
@@ -116,8 +116,8 @@ void pListView::constructor() {
   setHeaderText(listView.state.headerText);
   setHeaderVisible(listView.state.headerVisible);
   setCheckable(listView.state.checkable);
-  foreach(text, listView.state.text) append(text);
-  foreach(checked, listView.state.checked, n) setChecked(n, checked);
+  for(auto &text : listView.state.text) append(text);
+  for(unsigned n = 0; n < listView.state.checked.size(); n++) setChecked(n, listView.state.checked[n]);
   if(listView.state.selected) setSelection(listView.state.selection);
   autoSizeColumns();
   synchronize();

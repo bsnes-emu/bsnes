@@ -34,9 +34,9 @@ void Cartridge::load(const string &xml, const uint8_t *data, unsigned size) {
   info.ramsize = 0;
 
   xml_element document = xml_parse(xml);
-  foreach(head, document.element) {
+  for(auto &head : document.element) {
     if(head.name == "cartridge") {
-      foreach(attr, head.attribute) {
+      for(auto &attr : head.attribute) {
         if(attr.name == "mapper") {
           if(attr.content == "none")  info.mapper = Mapper::MBC0;
           if(attr.content == "MBC1")  info.mapper = Mapper::MBC1;
@@ -52,16 +52,16 @@ void Cartridge::load(const string &xml, const uint8_t *data, unsigned size) {
         if(attr.name == "rumble") info.rumble = (attr.content == "true" ? true : false);
       }
 
-      foreach(elem, head.element) {
+      for(auto &elem : head.element) {
         if(elem.name == "rom") {
-          foreach(attr, elem.attribute) {
+          for(auto &attr : elem.attribute) {
             if(attr.name == "size") info.romsize = hex(attr.content);
           }
         }
 
         if(elem.name == "ram") {
           info.ram = true;
-          foreach(attr, elem.attribute) {
+          for(auto &attr : elem.attribute) {
             if(attr.name == "size") info.ramsize = hex(attr.content);
             if(attr.name == "battery") info.battery = (attr.content == "true" ? true : false);
           }

@@ -20,7 +20,7 @@ void pRadioBox::setChecked() {
 }
 
 void pRadioBox::setGroup(const reference_array<RadioBox&> &group) {
-  foreach(item, group, n) {
+  for(unsigned n = 0; n < group.size(); n++) {
     if(n == 0) continue;
     GSList *currentGroup = gtk_radio_button_get_group(GTK_RADIO_BUTTON(group[0].p.gtkWidget));
     if(currentGroup != gtk_radio_button_get_group(GTK_RADIO_BUTTON(gtkWidget))) {

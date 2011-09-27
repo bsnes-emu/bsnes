@@ -23,7 +23,6 @@ namespace NES {
 #include <nall/dl.hpp>
 #include <nall/endian.hpp>
 #include <nall/file.hpp>
-#include <nall/foreach.hpp>
 #include <nall/function.hpp>
 #include <nall/platform.hpp>
 #include <nall/property.hpp>

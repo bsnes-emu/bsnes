@@ -95,7 +95,7 @@ void Video::scanline() {
 
 void Video::init() {
   hires = false;
-  for(unsigned i = 0; i < 240; i++) line_width[i] = 256;
+  for(auto &n : line_width) n = 256;
 }
 
 #endif

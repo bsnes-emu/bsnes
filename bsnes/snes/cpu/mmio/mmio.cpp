@@ -352,7 +352,7 @@ void CPU::mmio_power() {
 
 void CPU::mmio_reset() {
   //$2140-217f
-  foreach(port, status.port) port = 0x00;
+  for(auto &port : status.port) port = 0x00;
 
   //$2181-$2183
   status.wram_addr = 0x000000;

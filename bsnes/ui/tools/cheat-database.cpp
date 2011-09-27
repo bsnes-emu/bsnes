@@ -19,11 +19,11 @@ CheatDatabase::CheatDatabase() {
     controlLayout.append(acceptButton, 80, 0);
 
   selectAllButton.onTick = [&] {
-    foreach(item, cheatCode, n) cheatList.setChecked(n, true);
+    for(unsigned n = 0; n < cheatCode.size(); n++) cheatList.setChecked(n, true);
   };
 
   unselectAllButton.onTick = [&] {
-    foreach(item, cheatCode, n) cheatList.setChecked(n, false);
+    for(unsigned n = 0; n < cheatCode.size(); n++) cheatList.setChecked(n, false);
   };
 
   acceptButton.onTick = { &CheatDatabase::addCodes, this };
@@ -46,14 +46,14 @@ void CheatDatabase::findCodes() {
     cheatCode.reset();
 
     xml_element document = xml_parse(xmlData);
-    foreach(root, document.element) {
+    for(auto &root : document.element) {
       if(root.name == "cartridge") {
-        foreach(node, root.element) {
+        for(auto &node : root.element) {
           if(node.name == "name") {
             setTitle(node.parse());
           } else if(node.name == "cheat") {
             string description, code;
-            foreach(element, node.element) {
+            for(auto &element : node.element) {
               if(element.name == "description") {
                 description = element.parse();
               } else if(element.name == "code") {
@@ -77,10 +77,10 @@ void CheatDatabase::findCodes() {
 }
 
 void CheatDatabase::addCodes() {
-  foreach(code, cheatCode, n) {
+  for(unsigned n = 0; n < cheatCode.size(); n++) {
     if(cheatList.checked(n)) {
       lstring part;
-      part.split<1>("\t", code);
+      part.split<1>("\t", cheatCode[n]);
       if(cheatEditor->addCode(part[0], part[1]) == false) {
         MessageWindow::warning(*this, "Ran out of empty slots for cheat codes.\nNot all cheat codes were added.");
         break;

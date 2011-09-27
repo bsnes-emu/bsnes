@@ -134,9 +134,9 @@ void PPU::power() {
   ppu1_version = config.ppu1.version;
   ppu2_version = config.ppu2.version;
 
-  foreach(n, vram) n = 0x00;
-  foreach(n, oam) n = 0x00;
-  foreach(n, cgram) n = 0x00;
+  for(auto &n : vram) n = 0x00;
+  for(auto &n : oam) n = 0x00;
+  for(auto &n : cgram) n = 0x00;
   flush_tiledata_cache();
 
   region = (system.region() == System::Region::NTSC ? 0 : 1);  //0 = NTSC, 1 = PAL

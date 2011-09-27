@@ -3,7 +3,7 @@ bool pRadioItem::checked() {
 }
 
 void pRadioItem::setChecked() {
-  foreach(item, radioItem.state.group) {
+  for(auto &item : radioItem.state.group) {
     //CheckMenuRadioItem takes: lo, hi, id; checking only id when lo <= id <= hi
     //phoenix does not force IDs to be linear, so to uncheck id, we use: lo == hi == id + 1 (out of range)
     //to check id, we use: lo == hi == id (only ID, but in range)

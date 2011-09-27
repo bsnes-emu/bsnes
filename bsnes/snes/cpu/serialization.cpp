@@ -10,7 +10,6 @@ void CPU::serialize(serializer &s) {
   s.integer(cpu_version);
 
   s.integer(status.interrupt_pending);
-  s.integer(status.interrupt_vector);
 
   s.integer(status.clock_count);
   s.integer(status.line_clocks);

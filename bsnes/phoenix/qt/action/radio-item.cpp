@@ -4,7 +4,7 @@ bool pRadioItem::checked() {
 
 void pRadioItem::setChecked() {
   locked = true;
-  foreach(item, radioItem.state.group) {
+  for(auto &item : radioItem.state.group) {
     bool checkState = item.p.qtAction == qtAction;
     item.state.checked = checkState;
     item.p.qtAction->setChecked(checkState);

@@ -344,12 +344,12 @@ public:
     bool is_hlsl = false;
     string shader_source;
     xml_element document = xml_parse(shader_source_xml);
-    foreach(head, document.element) {
+    for(auto &head : document.element) {
       if(head.name == "shader") {
-        foreach(attribute, head.attribute) {
+        for(auto &attribute : head.attribute) {
           if(attribute.name == "language" && attribute.content == "HLSL") is_hlsl = true;
         }
-        foreach(element, head.element) {
+        for(auto &element : head.element) {
           if(element.name == "source") {
             if(is_hlsl) shader_source = element.parse();
           }

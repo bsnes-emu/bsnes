@@ -1,5 +1,4 @@
-class SMP : public Processor, public SMPcore {
-public:
+struct SMP : public Processor, public SMPcore {
   static const uint8 iplrom[64];
   uint8 apuram[64 * 1024];
 

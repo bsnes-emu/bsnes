@@ -16,7 +16,7 @@ void pMenu::remove(Action &action) {
   if(dynamic_cast<Menu*>(&action)) {
     //QMenu::removeMenu() does not exist
     qtMenu->clear();
-    foreach(action, menu.state.action) append(action);
+    for(auto &action : menu.state.action) append(action);
   } else if(dynamic_cast<Separator*>(&action)) {
     qtMenu->removeAction(((Separator&)action).p.qtAction);
   } else if(dynamic_cast<Item*>(&action)) {
@@ -30,7 +30,7 @@ void pMenu::remove(Action &action) {
 
 void pMenu::setFont(const string &font) {
   qtMenu->setFont(pFont::create(font));
-  foreach(item, menu.state.action) item.p.setFont(font);
+  for(auto &item : menu.state.action) item.p.setFont(font);
 }
 
 void pMenu::setText(const string &text) {

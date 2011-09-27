@@ -1,4 +1,4 @@
-static Settings settings;
+static Settings *settings = nullptr;
 
 void Settings::load() {
   string path = { userpath(), ".config/phoenix/qt.cfg" };
@@ -15,8 +15,10 @@ void Settings::save() {
 }
 
 Settings::Settings() {
-  attach(frameGeometryX = 0, "frameGeometryX");
-  attach(frameGeometryY = 0, "frameGeometryY");
-  attach(frameGeometryWidth = 0, "frameGeometryWidth");
-  attach(frameGeometryHeight = 0, "frameGeometryHeight");
+  attach(frameGeometryX = 4, "frameGeometryX");
+  attach(frameGeometryY = 24, "frameGeometryY");
+  attach(frameGeometryWidth = 8, "frameGeometryWidth");
+  attach(frameGeometryHeight = 28, "frameGeometryHeight");
+  attach(menuGeometryHeight = 20, "menuGeometryHeight");
+  attach(statusGeometryHeight = 20, "statusGeometryHeight");
 }

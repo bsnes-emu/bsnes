@@ -29,13 +29,13 @@ void pMenu::destructor() {
 }
 
 void pMenu::orphan() {
-  foreach(action, menu.state.action) action.p.orphan();
+  for(auto &action : menu.state.action) action.p.orphan();
   destructor();
   constructor();
-  foreach(action, menu.state.action) append(action);
+  for(auto &action : menu.state.action) append(action);
 }
 
 void pMenu::setFont(const string &font) {
   pAction::setFont(font);
-  foreach(item, menu.state.action) item.p.setFont(font);
+  for(auto &item : menu.state.action) item.p.setFont(font);
 }

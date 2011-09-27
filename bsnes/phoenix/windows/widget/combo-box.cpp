@@ -5,7 +5,7 @@ void pComboBox::append(const string &text) {
 
 Geometry pComboBox::minimumGeometry() {
   unsigned maximumWidth = 0;
-  foreach(text, comboBox.state.text) maximumWidth = max(maximumWidth, pFont::geometry(hfont, text).width);
+  for(auto &text : comboBox.state.text) maximumWidth = max(maximumWidth, pFont::geometry(hfont, text).width);
   return { 0, 0, maximumWidth + 24, pFont::geometry(hfont, " ").height + 10 };
 }
 
@@ -30,7 +30,7 @@ void pComboBox::constructor() {
   );
   SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&comboBox);
   setDefaultFont();
-  foreach(text, comboBox.state.text) append(text);
+  for(auto &text : comboBox.state.text) append(text);
   setSelection(comboBox.state.selection);
   synchronize();
 }

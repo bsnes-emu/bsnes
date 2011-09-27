@@ -1,11 +1,23 @@
 #ifndef NALL_STRING_HPP
 #define NALL_STRING_HPP
 
+#include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include <algorithm>
 #include <initializer_list>
+
 #include <nall/array.hpp>
+#include <nall/function.hpp>
 #include <nall/platform.hpp>
 #include <nall/sha256.hpp>
+#include <nall/stdint.hpp>
 #include <nall/utility.hpp>
+#include <nall/vector.hpp>
+
+#include <nall/windows/utf8.hpp>
 
 #include <nall/string/base.hpp>
 #include <nall/string/bsv.hpp>
@@ -25,10 +37,5 @@
 #include <nall/string/variadic.hpp>
 #include <nall/string/wrapper.hpp>
 #include <nall/string/xml.hpp>
-
-namespace nall {
-  template<> struct has_length<string> { enum { value = true }; };
-  template<> struct has_size<lstring> { enum { value = true }; };
-}
 
 #endif

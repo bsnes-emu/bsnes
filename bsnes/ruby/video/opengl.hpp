@@ -142,14 +142,14 @@ public:
       string vertex_source;
 
       xml_element document = xml_parse(source);
-      foreach(head, document.element) {
+      for(auto &head : document.element) {
         if(head.name == "shader") {
-          foreach(attribute, head.attribute) {
+          for(auto &attribute : head.attribute) {
             if(attribute.name == "language" && attribute.content == "GLSL") is_glsl = true;
           }
-          foreach(element, head.element) {
+          for(auto &element : head.element) {
             if(element.name == "fragment") {
-              foreach(attribute, element.attribute) {
+              for(auto &attribute : element.attribute) {
                 if(attribute.name == "filter") fragmentfilter = attribute.content == "linear" ? 1 : 0;
               }
               fragment_source = element.parse();

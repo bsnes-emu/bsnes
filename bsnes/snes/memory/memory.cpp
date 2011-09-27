@@ -61,7 +61,7 @@ void Bus::map_reset() {
 }
 
 void Bus::map_xml() {
-  foreach(m, cartridge.mapping) {
+  for(auto &m : cartridge.mapping) {
     map(m.mode, m.banklo, m.bankhi, m.addrlo, m.addrhi, m.read, m.write, m.offset, m.size);
   }
 }

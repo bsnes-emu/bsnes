@@ -49,7 +49,7 @@ FileBrowser::FileBrowser() {
   filterModes[Mode::SufamiTurbo] = { "SufamiTurbo", "", { "*.st" } };
   mode = &filterModes[Mode::Default];
 
-  foreach(mode, filterModes) config.attach(mode.path, mode.name);
+  for(auto &mode : filterModes) config.attach(mode.path, mode.name);
   config.load(string{ application->userpath, "paths.cfg" });
   config.save(string{ application->userpath, "paths.cfg" });
 }
@@ -70,7 +70,7 @@ void FileBrowser::open(const string &title, unsigned requestedMode, function<voi
   setPath(mode->path);
 
   string filterText = "Files of type: ";
-  foreach(filter, mode->filter) filterText.append(filter, ", ");
+  for(auto &filter : mode->filter) filterText.append(filter, ", ");
   filterText.trim<1>(", ");
   filterLabel.setText(filterText);
 
@@ -86,10 +86,10 @@ void FileBrowser::setPath(const string &path) {
   fileNameList.reset();
 
   lstring contentsList = directory::contents(path);
-  foreach(fileName, contentsList) {
+  for(auto &fileName : contentsList) {
     if(fileName.endswith("/")) {
       fileNameList.append(fileName);
-    } else foreach(filter, mode->filter) {
+    } else for(auto &filter : mode->filter) {
       if(fileName.wildcard(filter)) {
         fileNameList.append(fileName);
         break;
@@ -97,7 +97,7 @@ void FileBrowser::setPath(const string &path) {
     }
   }
 
-  foreach(fileName, fileNameList) fileList.append(fileName);
+  for(auto &fileName : fileNameList) fileList.append(fileName);
   fileList.setSelection(0);
   fileList.setFocused();
 }
@@ -116,15 +116,15 @@ bool FileBrowser::loadFolder(const string &requestedPath) {
   bool accept = false;
   string path = requestedPath;
   path.rtrim<1>("/");
-  foreach(filter, mode->filter) {
+  for(auto &filter : mode->filter) {
     if(path.wildcard(filter)) accept = true;
   }
   if(accept == false) return false;
 
   lstring contentsList = directory::contents(requestedPath);
   lstring fileNameList;
-  foreach(fileName, contentsList) {
-    foreach(filter, mode->filter) {
+  for(auto &fileName : contentsList) {
+    for(auto &filter : mode->filter) {
       if(fileName.wildcard(filter)) {
         fileNameList.append(fileName);
         break;

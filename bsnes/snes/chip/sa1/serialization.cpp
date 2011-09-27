@@ -8,7 +8,6 @@ void SA1::serialize(serializer &s) {
   s.integer(status.tick_counter);
 
   s.integer(status.interrupt_pending);
-  s.integer(status.interrupt_vector);
 
   s.integer(status.scanlines);
   s.integer(status.vcounter);

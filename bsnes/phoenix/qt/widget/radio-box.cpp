@@ -9,7 +9,7 @@ Geometry pRadioBox::minimumGeometry() {
 
 void pRadioBox::setChecked() {
   locked = true;
-  foreach(item, radioBox.state.group) {
+  for(auto &item : radioBox.state.group) {
     bool checkState = item.p.qtRadioBox == qtRadioBox;
     item.state.checked = checkState;
     item.p.qtRadioBox->setChecked(checkState);
@@ -25,7 +25,7 @@ void pRadioBox::setGroup(const reference_array<RadioBox&> &group) {
   }
   if(group.size() > 0 && qtRadioBox == group[0].p.qtRadioBox) {
     qtGroup = new QButtonGroup;
-    foreach(item, group) qtGroup->addButton(item.p.qtRadioBox);
+    for(auto &item : group) qtGroup->addButton(item.p.qtRadioBox);
     setChecked();
   }
   locked = false;

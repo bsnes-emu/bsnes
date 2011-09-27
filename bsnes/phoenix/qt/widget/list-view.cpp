@@ -60,7 +60,7 @@ void pListView::setChecked(unsigned row, bool checked) {
 
 void pListView::setHeaderText(const lstring &text) {
   QStringList labels;
-  foreach(column, text) labels << QString::fromUtf8(column);
+  for(auto &column : text) labels << QString::fromUtf8(column);
 
   qtListView->setColumnCount(text.size());
   qtListView->setAlternatingRowColors(text.size() >= 2);
@@ -106,7 +106,7 @@ void pListView::constructor() {
   setCheckable(listView.state.checkable);
   setHeaderText(listView.state.headerText.size() ? listView.state.headerText : lstring{ " " });
   setHeaderVisible(listView.state.headerVisible);
-  foreach(row, listView.state.text) append(row);
+  for(auto &row : listView.state.text) append(row);
   if(listView.state.checkable) {
     for(unsigned n = 0; n < listView.state.checked.size(); n++) {
       setChecked(n, listView.state.checked[n]);

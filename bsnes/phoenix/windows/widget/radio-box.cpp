@@ -8,7 +8,7 @@ Geometry pRadioBox::minimumGeometry() {
 }
 
 void pRadioBox::setChecked() {
-  foreach(item, radioBox.state.group) {
+  for(auto &item : radioBox.state.group) {
     SendMessage(item.p.hwnd, BM_SETCHECK, (WPARAM)(&item == &radioBox), 0);
   }
 }

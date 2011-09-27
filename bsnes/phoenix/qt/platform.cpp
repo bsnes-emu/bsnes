@@ -44,7 +44,7 @@ Geometry pOS::desktopGeometry() {
 
 string pOS::fileLoad(Window &parent, const string &path, const lstring &filter) {
   string filterList;
-  foreach(item, filter) {
+  for(auto &item : filter) {
     filterList.append(item);
     filterList.append(";;");
   }
@@ -53,7 +53,7 @@ string pOS::fileLoad(Window &parent, const string &path, const lstring &filter) 
   //convert filter list from phoenix to Qt format, example:
   //"Text, XML files (*.txt,*.xml)" -> "Text, XML files (*.txt *.xml)"
   signed parenthesis = 0;
-  foreach(n, filterList) {
+  for(auto &n : filterList) {
     if(n == '(') parenthesis++;
     if(n == ')') parenthesis--;
     if(n == ',' && parenthesis) n = ' ';
@@ -68,7 +68,7 @@ string pOS::fileLoad(Window &parent, const string &path, const lstring &filter) 
 
 string pOS::fileSave(Window &parent, const string &path, const lstring &filter) {
   string filterList;
-  foreach(item, filter) {
+  for(auto &item : filter) {
     filterList.append(item);
     filterList.append(";;");
   }
@@ -77,7 +77,7 @@ string pOS::fileSave(Window &parent, const string &path, const lstring &filter) 
   //convert filter list from phoenix to Qt format, example:
   //"Text, XML files (*.txt,*.xml)" -> "Text, XML files (*.txt *.xml)"
   signed parenthesis = 0;
-  foreach(n, filterList) {
+  for(auto &n : filterList) {
     if(n == '(') parenthesis++;
     if(n == ')') parenthesis--;
     if(n == ',' && parenthesis) n = ' ';
@@ -113,14 +113,16 @@ void pOS::processEvents() {
 }
 
 void pOS::quit() {
-  settings.save();
+  settings->save();
+
   QApplication::quit();
   //note: QApplication cannot be deleted; or libQtGui will crash
   qtApplication = 0;
 }
 
 void pOS::initialize() {
-  settings.load();
+  settings = new Settings;
+  settings->load();
 
   static int argc = 1;
   static char *argv[2];

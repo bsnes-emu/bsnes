@@ -1,9 +1,9 @@
 #ifndef NALL_DIRECTORY_HPP
 #define NALL_DIRECTORY_HPP
 
-#include <nall/foreach.hpp>
 #include <nall/sort.hpp>
 #include <nall/string.hpp>
+#include <nall/vector.hpp>
 
 #if defined(_WIN32)
   #include <nall/windows/utf8.hpp>
@@ -56,7 +56,7 @@ struct directory {
       FindClose(handle);
     }
     if(list.size() > 0) sort(&list[0], list.size());
-    foreach(name, list) name.append("/");  //must append after sorting
+    for(auto &name : list) name.append("/");  //must append after sorting
     return list;
   }
 
@@ -89,7 +89,7 @@ struct directory {
   inline lstring directory::contents(const string &pathname, const string &pattern) {
     lstring folders = directory::folders(pathname);  //pattern search of contents() should only filter files
     lstring files = directory::files(pathname, pattern);
-    foreach(file, files) folders.append(file);
+    for(auto &file : files) folders.append(file);
     return folders;
   }
 #else
@@ -116,7 +116,7 @@ struct directory {
       closedir(dp);
     }
     if(list.size() > 0) sort(&list[0], list.size());
-    foreach(name, list) name.append("/");  //must append after sorting
+    for(auto &name : list) name.append("/");  //must append after sorting
     return list;
   }
 
@@ -142,7 +142,7 @@ struct directory {
   inline lstring directory::contents(const string &pathname, const string &pattern) {
     lstring folders = directory::folders(pathname);  //pattern search of contents() should only filter files
     lstring files = directory::files(pathname, pattern);
-    foreach(file, files) folders.append(file);
+    for(auto &file : files) folders.append(file);
     return folders;
   }
 #endif

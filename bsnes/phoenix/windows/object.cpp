@@ -8,6 +8,6 @@ pObject::pObject(Object &object) : object(object) {
 }
 
 pObject* pObject::find(unsigned id) {
-  foreach(item, objects) if(item->id == id) return item;
+  for(auto &item : objects) if(item->id == id) return item;
   return 0;
 }

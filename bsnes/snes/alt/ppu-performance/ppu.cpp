@@ -95,9 +95,9 @@ void PPU::enable() {
 }
 
 void PPU::power() {
-  foreach(n, vram) n = 0;
-  foreach(n, oam) n = 0;
-  foreach(n, cgram) n = 0;
+  for(auto &n : vram) n = 0;
+  for(auto &n : oam) n = 0;
+  for(auto &n : cgram) n = 0;
   reset();
 }
 

@@ -65,7 +65,7 @@ string sha256(const uint8_t *data, unsigned size) {
   sha256_final(&sha);
   sha256_hash(&sha, hash);
   string result;
-  foreach(byte, hash) result.append(hex<2>(byte));
+  for(auto &byte : hash) result.append(hex<2>(byte));
   return result;
 }
 
@@ -193,7 +193,7 @@ template<unsigned length_, char padding> string hex(uintmax_t value) {
   return (const char*)result;
 }
 
-template<unsigned length_, char padding> string binary(uintmax_t value) {
+template<unsigned length_, char padding> string bin(uintmax_t value) {
   char buffer[256];
   unsigned size = 0;
 

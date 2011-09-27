@@ -118,7 +118,7 @@ uintmax_t decimal(const char *str) {
   return result;
 }
 
-uintmax_t binary(const char *str) {
+uintmax_t bin(const char *str) {
   if(!str) return 0;
   uintmax_t result = 0;
 

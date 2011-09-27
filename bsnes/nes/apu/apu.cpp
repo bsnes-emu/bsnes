@@ -290,12 +290,11 @@ void APU::write(uint16 addr, uint8 data) {
     if((data & 0x02) == 0) rectangle[1].length_counter = 0;
     if((data & 0x04) == 0)     triangle.length_counter = 0;
     if((data & 0x08) == 0)        noise.length_counter = 0;
-    if((data & 0x10) == 0)          dmc.length_counter = 0;
 
-    if((data & 0x10) && dmc.length_counter == 0) dmc.start();
+    (data & 0x10) ? dmc.start() : dmc.stop();
     dmc.irq_pending = false;
-    set_irq_line();
 
+    set_irq_line();
     enabled_channels = data & 0x1f;
     break;
 
@@ -456,8 +455,17 @@ uint8 APU::Noise::clock() {
 }
 
 void APU::DMC::start() {
-  read_addr = 0x4000 + (addr_latch << 6);
-  length_counter = (length_latch << 4) + 1;
+  if(length_counter == 0) {
+    read_addr = 0x4000 + (addr_latch << 6);
+    length_counter = (length_latch << 4) + 1;
+  }
+}
+
+void APU::DMC::stop() {
+  length_counter = 0;
+  dma_delay_counter = 0;
+  cpu.set_rdy_line(1);
+  cpu.set_rdy_addr({ false, 0u });
 }
 
 uint8 APU::DMC::clock() {

@@ -8,7 +8,7 @@ Geometry pFont::geometry(const string &description, const string &text) {
 HFONT pFont::create(const string &description) {
   lstring part;
   part.split(",", description);
-  foreach(item, part) item.trim(" ");
+  for(auto &item : part) item.trim(" ");
 
   string family = part[0];
   unsigned size = decimal(part[1]);

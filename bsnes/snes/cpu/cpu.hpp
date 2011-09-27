@@ -1,5 +1,4 @@
-class CPU : public Processor, public CPUcore, public PPUcounter {
-public:
+struct CPU : public Processor, public CPUcore, public PPUcounter {
   uint8 wram[128 * 1024];
 
   enum : bool { Threaded = true };
@@ -36,7 +35,6 @@ private:
 
   struct Status {
     bool interrupt_pending;
-    uint16 interrupt_vector;
 
     unsigned clock_count;
     unsigned line_clocks;
@@ -133,7 +131,6 @@ private:
   } alu;
 
   static void Enter();
-  void op_irq();
   debugvirtual void op_step();
 
   friend class CPUDebugger;

@@ -67,6 +67,21 @@ alwaysinline void CPUcore::op_io_cond6(uint16 addr) {
   }
 }
 
+void CPUcore::op_irq() {
+  op_read(regs.pc.d);
+  op_io();
+  if(!regs.e) op_writestack(regs.pc.b);
+  op_writestack(regs.pc.h);
+  op_writestack(regs.pc.l);
+  op_writestack(regs.e ? (regs.p & ~0x10) : regs.p);
+  rd.l = op_read(regs.vector + 0);
+  regs.pc.b = 0x00;
+  regs.p.i  = 1;
+  regs.p.d  = 0;
+  rd.h = op_read(regs.vector + 1);
+  regs.pc.w = rd.w;
+}
+
 CPUcore::CPUcore() {
   initialize_opcode_table();
 }

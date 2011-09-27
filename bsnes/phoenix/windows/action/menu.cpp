@@ -25,7 +25,7 @@ void pMenu::update(Window &parentWindow, Menu *parentMenu) {
   if(hmenu) DestroyMenu(hmenu);
   hmenu = CreatePopupMenu();
 
-  foreach(action, menu.state.action) {
+  for(auto &action : menu.state.action) {
     action.p.parentMenu = &menu;
     action.p.parentWindow = &parentWindow;
 

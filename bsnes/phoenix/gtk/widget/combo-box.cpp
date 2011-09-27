@@ -12,7 +12,7 @@ void pComboBox::append(const string &text) {
 
 Geometry pComboBox::minimumGeometry() {
   unsigned maximumWidth = 0;
-  foreach(item, comboBox.state.text) maximumWidth = max(maximumWidth, pFont::geometry(widget.state.font, item).width);
+  for(auto &item : comboBox.state.text) maximumWidth = max(maximumWidth, pFont::geometry(widget.state.font, item).width);
 
   Geometry geometry = pFont::geometry(widget.state.font, " ");
   return { 0, 0, maximumWidth + 44, geometry.height + 12 };
@@ -41,7 +41,7 @@ void pComboBox::constructor() {
   g_signal_connect_swapped(G_OBJECT(gtkWidget), "changed", G_CALLBACK(ComboBox_change), (gpointer)&comboBox);
 
   locked = true;
-  foreach(text, comboBox.state.text) append(text);
+  for(auto &text : comboBox.state.text) append(text);
   locked = false;
   setSelection(comboBox.state.selection);
 }

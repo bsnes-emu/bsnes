@@ -110,7 +110,7 @@ void pWindow::setGeometry(const Geometry &geometry) {
     SWP_NOZORDER | SWP_FRAMECHANGED
   );
   SetWindowPos(hstatus, NULL, 0, 0, 0, 0, SWP_NOZORDER | SWP_FRAMECHANGED);
-  foreach(layout, window.state.layout) {
+  for(auto &layout : window.state.layout) {
     Geometry geom = this->geometry();
     geom.x = geom.y = 0;
     layout.setGeometry(geom);
@@ -159,7 +159,7 @@ void pWindow::setVisible(bool visible) {
 }
 
 void pWindow::setWidgetFont(const string &font) {
-  foreach(widget, window.state.widget) {
+  for(auto &widget : window.state.widget) {
     if(widget.state.font == "") widget.setFont(font);
   }
 }
@@ -191,7 +191,7 @@ void pWindow::updateMenu() {
   if(hmenu) DestroyMenu(hmenu);
   hmenu = CreateMenu();
 
-  foreach(menu, window.state.menu) {
+  for(auto &menu : window.state.menu) {
     menu.p.update(window);
     if(menu.visible()) {
       AppendMenu(hmenu, MF_STRING | MF_POPUP, (UINT_PTR)menu.p.hmenu, utf16_t(menu.state.text));

@@ -101,7 +101,7 @@ int16_t InterfaceNES::inputPoll(bool port, unsigned device, unsigned id) {
 }
 
 InterfaceNES::InterfaceNES() {
-  palette = {
+  unsigned base_palette[] = {
     0x7c7c7c, 0x0000fc, 0x0000bc, 0x4428bc,
     0x940084, 0xa80020, 0xa81000, 0x881400,
     0x503000, 0x007800, 0x006800, 0x005800,
@@ -119,6 +119,7 @@ InterfaceNES::InterfaceNES() {
     0xf8d878, 0xd8f878, 0xb8f8b8, 0xb8f8d8,
     0x00fcfc, 0xf8d8f8, 0x000000, 0x000000,
   };
+  memcpy(palette, base_palette, sizeof base_palette);
 
   for(unsigned e = 1; e < 8; e++) {
     static const double rfactor[8] = { 1.000, 1.239, 0.794, 1.019, 0.905, 1.023, 0.741, 0.750 };

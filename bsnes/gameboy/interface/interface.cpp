@@ -69,10 +69,10 @@ bool Interface::unserialize(serializer &s) {
 
 void Interface::setCheats(const lstring &list) {
   cheat.reset();
-  foreach(code, list) {
+  for(auto &code : list) {
     lstring codelist;
     codelist.split("+", code);
-    foreach(part, codelist) {
+    for(auto &part : codelist) {
       unsigned addr, data, comp;
       if(Cheat::decode(part, addr, data, comp)) {
         cheat.append({ addr, data, comp });

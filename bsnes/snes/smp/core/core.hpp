@@ -1,5 +1,4 @@
-class SMPcore {
-public:
+struct SMPcore {
   #include "registers.hpp"
   #include "memory.hpp"
   #include "disassembler/disassembler.hpp"

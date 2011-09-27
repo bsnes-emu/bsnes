@@ -130,17 +130,17 @@ bool CheatEditor::load(const string &filename) {
 
   unsigned n = 0;
   xml_element document = xml_parse(data);
-  foreach(head, document.element) {
+  for(auto &head : document.element) {
     if(head.name == "cartridge") {
-      foreach(node, head.element) {
+      for(auto &node : head.element) {
         if(node.name == "cheat") {
           bool enable = false;
           string description;
           string code;
-          foreach(attribute, node.attribute) {
+          for(auto &attribute : node.attribute) {
             if(attribute.name == "enabled") enable = (attribute.parse() == "true");
           }
-          foreach(element, node.element) {
+          for(auto &element : node.element) {
             if(element.name == "description") description = element.parse();
             else if(element.name == "code") code.append(element.parse(), "+");
           }
@@ -186,7 +186,7 @@ bool CheatEditor::save(const string &filename) {
     fp.print("    <description>", cheatText[n][Desc], "</description>\n");
     lstring list;
     list.split("+", cheatText[n][Code]);
-    foreach(code, list) {
+    for(auto &code : list) {
       fp.print("    <code>", code, "</code>\n");
     }
     fp.print("  </cheat>\n");

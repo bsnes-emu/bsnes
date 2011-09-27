@@ -1,16 +1,6 @@
 #ifndef NALL_STRING_BASE_HPP
 #define NALL_STRING_BASE_HPP
 
-#include <stdarg.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <nall/concept.hpp>
-#include <nall/function.hpp>
-#include <nall/stdint.hpp>
-#include <nall/vector.hpp>
-#include <nall/windows/utf8.hpp>
-
 namespace nall {
   class string;
   class lstring;
@@ -77,6 +67,11 @@ namespace nall {
     inline string(string&&);
     inline ~string();
 
+    inline char* begin() { return &data[0]; }
+    inline char* end() { return &data[length()]; }
+    inline const char* begin() const { return &data[0]; }
+    inline const char* end() const { return &data[length()]; }
+
     //internal functions
     inline string& assign_(const char*);
     inline string& append_(const char*);
@@ -106,8 +101,8 @@ namespace nall {
     inline bool operator==(const lstring&) const;
     inline bool operator!=(const lstring&) const;
 
-    lstring();
-    lstring(std::initializer_list<string>);
+    inline lstring();
+    inline lstring(std::initializer_list<string>);
 
   protected:
     template<unsigned Limit, bool Insensitive, bool Quoted> inline lstring& usplit(const char*, const char*);
@@ -133,7 +128,7 @@ namespace nall {
   inline uintmax_t hex(const char *str);
   inline intmax_t integer(const char *str);
   inline uintmax_t decimal(const char *str);
-  inline uintmax_t binary(const char *str);
+  inline uintmax_t bin(const char *str);
   inline double fp(const char *str);
 
   //math.hpp
@@ -175,7 +170,7 @@ namespace nall {
   template<unsigned length = 0, char padding = ' '> inline string decimal(uintmax_t value);
   template<unsigned length = 0, char padding = ' '> inline string ldecimal(uintmax_t value);
   template<unsigned length = 0, char padding = '0'> inline string hex(uintmax_t value);
-  template<unsigned length = 0, char padding = '0'> inline string binary(uintmax_t value);
+  template<unsigned length = 0, char padding = '0'> inline string bin(uintmax_t value);
   inline unsigned fp(char *str, double value);
   inline string fp(double value);
 

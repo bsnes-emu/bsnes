@@ -28,18 +28,18 @@ Geometry WindowManager::geometry(const string &geometry) {
 }
 
 void WindowManager::loadGeometry() {
-  foreach(window, windowList) {
+  for(auto &window : windowList) {
     config.attach(window.geometry, window.name);
   }
   config.load(string{ application->userpath, "geometry.cfg" });
   config.save(string{ application->userpath, "geometry.cfg" });
-  foreach(window, windowList) {
+  for(auto &window : windowList) {
     window.window->setGeometry(geometry(window.geometry));
   }
 }
 
 void WindowManager::saveGeometry() {
-  foreach(window, windowList) {
+  for(auto &window : windowList) {
     window.geometry = geometry(window.window->geometry());
   }
   config.save(string{ application->userpath, "geometry.cfg" });

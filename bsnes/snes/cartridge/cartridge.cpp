@@ -45,17 +45,7 @@ void Cartridge::load(Mode cartridge_mode, const lstring &xml_list) {
   ram.write_protect(false);
 
   crc32 = crc32_calculate(rom.data(), rom.size());
-
-  sha256_ctx sha;
-  uint8_t shahash[32];
-  sha256_init(&sha);
-  sha256_chunk(&sha, rom.data(), rom.size());
-  sha256_final(&sha);
-  sha256_hash(&sha, shahash);
-
-  string hash;
-  foreach(n, shahash) hash.append(hex<2>(n));
-  sha256 = hash;
+  sha256 = nall::sha256(rom.data(), rom.size());
 
   system.load();
   loaded = true;

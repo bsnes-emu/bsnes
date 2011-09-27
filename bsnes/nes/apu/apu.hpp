@@ -133,6 +133,7 @@ struct APU : Processor {
     uint8 sample;
 
     void start();
+    void stop();
     uint8 clock();
     void serialize(serializer&);
   } dmc;

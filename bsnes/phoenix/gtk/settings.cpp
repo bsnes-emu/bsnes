@@ -1,4 +1,4 @@
-static Settings settings;
+static Settings *settings = nullptr;
 
 void Settings::load() {
   string path = { userpath(), ".config/phoenix/gtk.cfg" };

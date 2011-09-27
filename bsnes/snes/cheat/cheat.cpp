@@ -72,7 +72,7 @@ bool Cheat::decode(const string &code, unsigned &addr, unsigned &data) {
   #define ischr(n) ((n >= '0' && n <= '9') || (n >= 'a' && n <= 'f'))
 
   if(t.wildcard("??????:??")) {
-    //Pro Action Replay
+    //Direct
     t = { substr(t, 0, 6), substr(t, 7, 2) };
     for(unsigned n = 0; n < 8; n++) if(!ischr(t[n])) return false;  //validate input
     unsigned r = hex(t);

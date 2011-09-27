@@ -1,5 +1,4 @@
-class CPUcore {
-public:
+struct CPUcore {
   #include "registers.hpp"
   #include "memory.hpp"
   #include "disassembler/disassembler.hpp"
@@ -18,6 +17,8 @@ public:
   void op_io_cond2();
   void op_io_cond4(uint16 x, uint16 y);
   void op_io_cond6(uint16 addr);
+
+  void op_irq();
 
   void op_adc_b();
   void op_adc_w();

@@ -6,7 +6,7 @@ void pComboBox::append(const string &text) {
 
 Geometry pComboBox::minimumGeometry() {
   unsigned maximumWidth = 0;
-  foreach(text, comboBox.state.text) maximumWidth = max(maximumWidth, pFont::geometry(qtWidget->font(), text).width);
+  for(auto &text : comboBox.state.text) maximumWidth = max(maximumWidth, pFont::geometry(qtWidget->font(), text).width);
   Geometry geometry = pFont::geometry(qtWidget->font(), " ");
   return { 0, 0, maximumWidth + 32, geometry.height + 12 };
 }
@@ -35,7 +35,7 @@ void pComboBox::constructor() {
   pWidget::synchronizeState();
   unsigned selection = comboBox.state.selection;
   locked = true;
-  foreach(text, comboBox.state.text) append(text);
+  for(auto &text : comboBox.state.text) append(text);
   locked = false;
   setSelection(selection);
 }

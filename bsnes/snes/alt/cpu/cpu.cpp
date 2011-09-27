@@ -67,12 +67,14 @@ void CPU::enter() {
 
     if(status.nmi_pending) {
       status.nmi_pending = false;
-      op_irq(regs.e == false ? 0xffea : 0xfffa);
+      regs.vector = (regs.e == false ? 0xffea : 0xfffa);
+      op_irq();
     }
 
     if(status.irq_pending) {
       status.irq_pending = false;
-      op_irq(regs.e == false ? 0xffee : 0xfffe);
+      regs.vector = (regs.e == false ? 0xffee : 0xfffe);
+      op_irq();
     }
 
     op_step();
@@ -81,21 +83,6 @@ void CPU::enter() {
 
 alwaysinline void CPU::op_step() {
   (this->*opcode_table[op_readpc()])();
-}
-
-void CPU::op_irq(uint16 vector) {
-  op_read(regs.pc.d);
-  op_io();
-  if(!regs.e) op_writestack(regs.pc.b);
-  op_writestack(regs.pc.h);
-  op_writestack(regs.pc.l);
-  op_writestack(regs.e ? (regs.p & ~0x10) : regs.p);
-  rd.l = op_read(vector + 0);
-  regs.pc.b = 0x00;
-  regs.p.i = 1;
-  regs.p.d = 0;
-  rd.h = op_read(vector + 1);
-  regs.pc.w = rd.w;
 }
 
 void CPU::enable() {

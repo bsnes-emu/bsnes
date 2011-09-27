@@ -71,7 +71,7 @@ void SMP::reset() {
   regs.sp = 0xef;
   regs.p = 0x02;
 
-  foreach(n, apuram) n = random(0x00);
+  for(auto &n : apuram) n = random(0x00);
   apuram[0x00f4] = 0x00;
   apuram[0x00f5] = 0x00;
   apuram[0x00f6] = 0x00;

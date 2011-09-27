@@ -1,5 +1,4 @@
-class Cartridge : property<Cartridge> {
-public:
+struct Cartridge : property<Cartridge> {
   enum class Mode : unsigned {
     Normal,
     BsxSlotted,

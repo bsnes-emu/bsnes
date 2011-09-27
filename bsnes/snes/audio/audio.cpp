@@ -17,15 +17,13 @@ void Audio::coprocessor_frequency(double input_frequency) {
   dspaudio.setResamplerFrequency(system.apu_frequency() / 768.0);
 }
 
-void Audio::sample(int16 left, int16 right) {
-  if(coprocessor == false) {
-    interface->audioSample(left, right);
-  } else {
-    dsp_buffer[dsp_wroffset] = ((uint16)left << 0) + ((uint16)right << 16);
-    dsp_wroffset = (dsp_wroffset + 1) & buffer_mask;
-    dsp_length = (dsp_length + 1) & buffer_mask;
-    flush();
-  }
+void Audio::sample(int16 lsample, int16 rsample) {
+  if(coprocessor == false) return interface->audioSample(lsample, rsample);
+
+  dsp_buffer[dsp_wroffset] = ((uint16)lsample << 0) + ((uint16)rsample << 16);
+  dsp_wroffset = (dsp_wroffset + 1) & buffer_mask;
+  dsp_length = (dsp_length + 1) & buffer_mask;
+  flush();
 }
 
 void Audio::coprocessor_sample(int16 lsample, int16 rsample) {
@@ -55,11 +53,11 @@ void Audio::flush() {
     dsp_length--;
     cop_length--;
 
-    int dsp_left  = (int16)(dsp_sample >>  0);
-    int dsp_right = (int16)(dsp_sample >> 16);
+    signed dsp_left  = (int16)(dsp_sample >>  0);
+    signed dsp_right = (int16)(dsp_sample >> 16);
 
-    int cop_left  = (int16)(cop_sample >>  0);
-    int cop_right = (int16)(cop_sample >> 16);
+    signed cop_left  = (int16)(cop_sample >>  0);
+    signed cop_right = (int16)(cop_sample >> 16);
 
     interface->audioSample(
       sclamp<16>((dsp_left  + cop_left ) / 2),

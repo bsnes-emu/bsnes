@@ -25,7 +25,6 @@ namespace SNES {
 #include <nall/dsp.hpp>
 #include <nall/endian.hpp>
 #include <nall/file.hpp>
-#include <nall/foreach.hpp>
 #include <nall/function.hpp>
 #include <nall/moduloarray.hpp>
 #include <nall/platform.hpp>
@@ -149,11 +148,6 @@ namespace SNES {
 
   #include <snes/memory/memory-inline.hpp>
   #include <snes/ppu/counter/counter-inline.hpp>
-}
-
-namespace nall {
-  template<> struct has_size<SNES::MappedRAM> { enum { value = true }; };
-  template<> struct has_size<SNES::StaticRAM> { enum { value = true }; };
 }
 
 #undef debugvirtual

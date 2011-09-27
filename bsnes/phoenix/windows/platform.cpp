@@ -50,7 +50,7 @@ static string pOS_fileDialog(bool save, Window &parent, const string &path, cons
   dir.replace("/", "\\");
 
   string filterList;
-  foreach(filterItem, filter) {
+  for(auto &filterItem : filter) {
     lstring part;
     part.split("(", filterItem);
     if(part.size() != 2) { print("--", filterItem, "\n"); continue; }
@@ -284,7 +284,7 @@ static LRESULT CALLBACK OS_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM
       window.state.geometry.width = geometry.width;
       window.state.geometry.height = geometry.height;
 
-      foreach(layout, window.state.layout) {
+      for(auto &layout : window.state.layout) {
         Geometry geom = window.geometry();
         geom.x = geom.y = 0;
         layout.setGeometry(geom);

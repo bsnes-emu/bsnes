@@ -1,14 +1,13 @@
 #ifndef NALL_VECTOR_HPP
 #define NALL_VECTOR_HPP
 
+#include <algorithm>
 #include <initializer_list>
 #include <new>
 #include <type_traits>
 #include <utility>
 #include <nall/algorithm.hpp>
 #include <nall/bit.hpp>
-#include <nall/concept.hpp>
-#include <nall/foreach.hpp>
 #include <nall/utility.hpp>
 
 namespace nall {
@@ -77,7 +76,7 @@ namespace nall {
     template<typename U> void insert(unsigned index, const U list) {
       linear_vector<T> merged;
       for(unsigned i = 0; i < index; i++) merged.append(pool[i]);
-      foreach(item, list) merged.append(item);
+      for(auto &item : list) merged.append(item);
       for(unsigned i = index; i < objectsize; i++) merged.append(pool[i]);
       operator=(merged);
     }
@@ -211,7 +210,7 @@ namespace nall {
     template<typename U> void insert(unsigned index, const U list) {
       pointer_vector<T> merged;
       for(unsigned i = 0; i < index; i++) merged.append(*pool[i]);
-      foreach(item, list) merged.append(item);
+      for(auto &item : list) merged.append(item);
       for(unsigned i = index; i < objectsize; i++) merged.append(*pool[i]);
       operator=(merged);
     }
@@ -284,18 +283,17 @@ namespace nall {
       bool operator!=(const iterator &source) const { return index != source.index; }
       T& operator*() { return vector.operator[](index); }
       iterator& operator++() { index++; return *this; }
-      iterator(pointer_vector &vector, unsigned index) : vector(vector), index(index) {}
+      iterator(const pointer_vector &vector, unsigned index) : vector(vector), index(index) {}
     private:
-      pointer_vector &vector;
+      const pointer_vector &vector;
       unsigned index;
     };
 
     iterator begin() { return iterator(*this, 0); }
     iterator end() { return iterator(*this, objectsize); }
+    const iterator begin() const { return iterator(*this, 0); }
+    const iterator end() const { return iterator(*this, objectsize); }
   };
-
-  template<typename T> struct has_size<linear_vector<T>> { enum { value = true }; };
-  template<typename T> struct has_size<pointer_vector<T>> { enum { value = true }; };
 }
 
 #endif

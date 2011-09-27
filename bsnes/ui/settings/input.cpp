@@ -42,6 +42,11 @@ InputSettings::InputSettings() : activeInput(0) {
 }
 
 void InputSettings::synchronize() {
+  PrimaryInput &pinput = inputManager->inputList[primary.selection()];
+  SecondaryInput &sinput = pinput[secondary.selection()];
+  TertiaryInput &tinput = sinput[tertiary.selection()];
+  secondary.setEnabled(pinput.size() > 1);
+  tertiary.setEnabled(sinput.size() > 1);
   clearButton.setEnabled(inputList.selected());
 }
 
@@ -52,7 +57,6 @@ void InputSettings::primaryChange() {
   for(unsigned n = 0; n < input.size(); n++) {
     secondary.append(input[n].name);
   }
-  secondary.setEnabled(input.size() > 1);
   secondaryChange();
 }
 
@@ -63,7 +67,6 @@ void InputSettings::secondaryChange() {
   for(unsigned n = 0; n < input.size(); n++) {
     tertiary.append(input[n].name);
   }
-  tertiary.setEnabled(input.size() > 1);
   tertiaryChange();
 }
 
@@ -139,10 +142,9 @@ void InputSettings::inputEvent(int16_t scancode, int16_t value, bool allowMouseI
   settingsWindow->setStatusText("");
   settingsWindow->panelList.setEnabled(true);
   primary.setEnabled(true);
-  secondary.setEnabled(true);
-  tertiary.setEnabled(true);
   inputList.setEnabled(true);
   assignPrimary.setVisible(false);
   assignSecondary.setVisible(false);
   assignTertiary.setVisible(false);
+  synchronize();
 }

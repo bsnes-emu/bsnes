@@ -145,7 +145,7 @@ bool VideoInterface::init() {
 void VideoInterface::term() {
   if(p) {
     delete p;
-    p = 0;
+    p = nullptr;
   }
 }
 
@@ -156,7 +156,7 @@ bool VideoInterface::lock(uint32_t *&data, unsigned &pitch, unsigned width, unsi
 void VideoInterface::unlock() { if(p) p->unlock(); }
 void VideoInterface::clear() { if(p) p->clear(); }
 void VideoInterface::refresh() { if(p) p->refresh(); }
-VideoInterface::VideoInterface() : p(0) {}
+VideoInterface::VideoInterface() : p(nullptr) {}
 VideoInterface::~VideoInterface() { term(); }
 
 /* AudioInterface */
@@ -282,7 +282,7 @@ bool AudioInterface::init() {
 void AudioInterface::term() {
   if(p) {
     delete p;
-    p = 0;
+    p = nullptr;
   }
 }
 
@@ -291,7 +291,7 @@ any AudioInterface::get(const string& name) { return p ? p->get(name) : false; }
 bool AudioInterface::set(const string& name, const any& value) { return p ? p->set(name, value) : false; }
 void AudioInterface::sample(uint16_t left, uint16_t right) { if(p) p->sample(left, right); }
 void AudioInterface::clear() { if(p) p->clear(); }
-AudioInterface::AudioInterface() : p(0) {}
+AudioInterface::AudioInterface() : p(nullptr) {}
 AudioInterface::~AudioInterface() { term(); }
 
 /* InputInterface */
@@ -388,7 +388,7 @@ bool InputInterface::init() {
 void InputInterface::term() {
   if(p) {
     delete p;
-    p = 0;
+    p = nullptr;
   }
 }
 
@@ -399,7 +399,7 @@ bool InputInterface::acquire() { return p ? p->acquire() : false; }
 bool InputInterface::unacquire() { return p ? p->unacquire() : false; }
 bool InputInterface::acquired() { return p ? p->acquired() : false; }
 bool InputInterface::poll(int16_t *table) { return p ? p->poll(table) : false; }
-InputInterface::InputInterface() : p(0) {}
+InputInterface::InputInterface() : p(nullptr) {}
 InputInterface::~InputInterface() { term(); }
 
 };

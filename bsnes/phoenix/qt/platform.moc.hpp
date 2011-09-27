@@ -5,6 +5,8 @@ struct Settings : public configuration {
   unsigned frameGeometryY;
   unsigned frameGeometryWidth;
   unsigned frameGeometryHeight;
+  unsigned menuGeometryHeight;
+  unsigned statusGeometryHeight;
 
   void load();
   void save();

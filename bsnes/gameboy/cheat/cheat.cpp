@@ -11,13 +11,13 @@ bool Cheat::decode(const string &code_, unsigned &addr, unsigned &data, unsigned
   if(initialize == false) {
     initialize = true;
 
-    foreach(n, mapProActionReplay) n = ~0;
+    for(auto &n : mapProActionReplay) n = ~0;
     mapProActionReplay['0'] =  0; mapProActionReplay['1'] =  1; mapProActionReplay['2'] =  2; mapProActionReplay['3'] =  3;
     mapProActionReplay['4'] =  4; mapProActionReplay['5'] =  5; mapProActionReplay['6'] =  6; mapProActionReplay['7'] =  7;
     mapProActionReplay['8'] =  8; mapProActionReplay['9'] =  9; mapProActionReplay['A'] = 10; mapProActionReplay['B'] = 11;
     mapProActionReplay['C'] = 12; mapProActionReplay['D'] = 13; mapProActionReplay['E'] = 14; mapProActionReplay['F'] = 15;
 
-    foreach(n, mapGameGenie) n = ~0;
+    for(auto &n : mapGameGenie) n = ~0;
     mapGameGenie['0'] =  0; mapGameGenie['1'] =  1; mapGameGenie['2'] =  2; mapGameGenie['3'] =  3;
     mapGameGenie['4'] =  4; mapGameGenie['5'] =  5; mapGameGenie['6'] =  6; mapGameGenie['7'] =  7;
     mapGameGenie['8'] =  8; mapGameGenie['9'] =  9; mapGameGenie['A'] = 10; mapGameGenie['B'] = 11;
@@ -81,7 +81,7 @@ bool Cheat::decode(const string &code_, unsigned &addr, unsigned &data, unsigned
 }
 
 void Cheat::synchronize() {
-  foreach(n, override) n = false;
+  for(auto &n : override) n = false;
 
   for(unsigned n = 0; n < size(); n++) {
     override[operator[](n).addr] = true;

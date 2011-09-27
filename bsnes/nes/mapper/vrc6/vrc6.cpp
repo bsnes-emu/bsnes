@@ -218,7 +218,7 @@ void VRC6::power() {
 }
 
 void VRC6::reset() {
-  foreach(n, prg_ram) n = 0xff;
+  for(auto &n : prg_ram) n = 0xff;
 
   prg_bank[0] = 0;
   prg_bank[1] = 0;

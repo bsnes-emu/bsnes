@@ -448,7 +448,7 @@ CheckItem::~CheckItem() {
 //=========
 
 void RadioItem::group(const reference_array<RadioItem&> &list) {
-  foreach(item, list) item.p.setGroup(item.state.group = list);
+  for(auto &item : list) item.p.setGroup(item.state.group = list);
   if(list.size()) list[0].setChecked();
 }
 
@@ -457,7 +457,7 @@ bool RadioItem::checked() {
 }
 
 void RadioItem::setChecked() {
-  foreach(item, state.group) item.state.checked = false;
+  for(auto &item : state.group) item.state.checked = false;
   state.checked = true;
   return p.setChecked();
 }
@@ -476,7 +476,7 @@ p(base_from_member<pRadioItem&>::value) {
 }
 
 RadioItem::~RadioItem() {
-  foreach(item, state.group) {
+  for(auto &item : state.group) {
     if(&item != this) item.state.group.remove(*this);
   }
   p.destructor();
@@ -1003,7 +1003,7 @@ ProgressBar::~ProgressBar() {
 //========
 
 void RadioBox::group(const reference_array<RadioBox&> &list) {
-  foreach(item, list) item.p.setGroup(item.state.group = list);
+  for(auto &item : list) item.p.setGroup(item.state.group = list);
   if(list.size()) list[0].setChecked();
 }
 
@@ -1012,7 +1012,7 @@ bool RadioBox::checked() {
 }
 
 void RadioBox::setChecked() {
-  foreach(item, state.group) item.state.checked = false;
+  for(auto &item : state.group) item.state.checked = false;
   state.checked = true;
   return p.setChecked();
 }
@@ -1031,7 +1031,7 @@ p(base_from_member<pRadioBox&>::value) {
 }
 
 RadioBox::~RadioBox() {
-  foreach(item, state.group) {
+  for(auto &item : state.group) {
     if(&item != this) item.state.group.remove(*this);
   }
   p.destructor();

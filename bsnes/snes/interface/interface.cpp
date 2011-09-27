@@ -101,10 +101,10 @@ void Interface::setCheats(const lstring &list) {
   }
 
   cheat.reset();
-  foreach(code, list) {
+  for(auto &code : list) {
     lstring codelist;
     codelist.split("+", code);
-    foreach(part, codelist) {
+    for(auto &part : codelist) {
       unsigned addr, data;
       if(Cheat::decode(part, addr, data)) {
         cheat.append({ addr, data });

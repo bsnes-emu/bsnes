@@ -5,7 +5,7 @@ Geometry pFont::geometry(const string &description, const string &text) {
 QFont pFont::create(const string &description) {
   lstring part;
   part.split(",", description);
-  foreach(item, part) item.trim(" ");
+  for(auto &item : part) item.trim(" ");
 
   string name = part[0] != "" ? part[0] : "Sans";
   unsigned size = part.size() >= 2 ? decimal(part[1]) : 8u;
@@ -27,7 +27,7 @@ Geometry pFont::geometry(const QFont &qtFont, const string &text) {
   lines.split("\n", text);
 
   unsigned maxWidth = 0;
-  foreach(line, lines) {
+  for(auto &line : lines) {
     maxWidth = max(maxWidth, metrics.width(line));
   }
 

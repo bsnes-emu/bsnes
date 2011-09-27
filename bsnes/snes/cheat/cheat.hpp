@@ -3,8 +3,7 @@ struct CheatCode {
   unsigned data;
 };
 
-class Cheat : public linear_vector<CheatCode> {
-public:
+struct Cheat : public linear_vector<CheatCode> {
   uint8 *override;
 
   bool enabled() const;

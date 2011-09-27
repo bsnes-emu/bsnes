@@ -6,7 +6,7 @@ void Input::connect(bool port, Input::Device id) {
   Controller *&controller = (port == Controller::Port1 ? port1 : port2);
   if(controller) {
     delete controller;
-    controller = 0;
+    controller = nullptr;
   }
 
   switch(id) { default:
@@ -26,7 +26,7 @@ void Input::connect(bool port, Input::Device id) {
   }
 }
 
-Input::Input() {
+Input::Input() : port1(nullptr), port2(nullptr) {
   connect(Controller::Port1, Input::Device::Joypad);
   connect(Controller::Port2, Input::Device::Joypad);
 }

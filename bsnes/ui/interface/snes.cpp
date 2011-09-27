@@ -156,7 +156,7 @@ void InterfaceSNES::unloadCartridge() {
 
 void InterfaceSNES::loadMemory() {
   static unsigned slot[] = { 0, 0, 0, 1, 2, 1 };
-  foreach(memory, SNES::Interface::memory()) {
+  for(auto &memory : SNES::Interface::memory()) {
     if(memory.size == 0) continue;
     string filename = { interface->slotName[slot[(unsigned)memory.slot]], memory.id };
     uint8_t *data;
@@ -170,7 +170,7 @@ void InterfaceSNES::loadMemory() {
 
 void InterfaceSNES::saveMemory() {
   static unsigned slot[] = { 0, 0, 0, 1, 2, 1 };
-  foreach(memory, SNES::Interface::memory()) {
+  for(auto &memory : SNES::Interface::memory()) {
     if(memory.size == 0) continue;
     string filename = { interface->slotName[slot[(unsigned)memory.slot]], memory.id };
     file::write(filename, memory.data, memory.size);

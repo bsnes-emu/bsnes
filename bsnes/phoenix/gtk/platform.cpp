@@ -81,7 +81,7 @@ static string pOS_fileDialog(bool save, Window &parent, const string &path, cons
 
   if(path) gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dialog), path);
 
-  foreach(filterItem, filter) {
+  for(auto &filterItem : filter) {
     GtkFileFilter *gtkFilter = gtk_file_filter_new();
     gtk_file_filter_set_name(gtkFilter, filterItem);
     lstring part;
@@ -89,7 +89,7 @@ static string pOS_fileDialog(bool save, Window &parent, const string &path, cons
     part[1].rtrim<1>(")");
     lstring list;
     list.split(",", part[1]);
-    foreach(pattern, list) gtk_file_filter_add_pattern(gtkFilter, pattern);
+    for(auto &pattern : list) gtk_file_filter_add_pattern(gtkFilter, pattern);
     gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog), gtkFilter);
   }
 
@@ -150,12 +150,14 @@ void pOS::processEvents() {
 }
 
 void pOS::quit() {
-  settings.save();
+  settings->save();
+
   gtk_main_quit();
 }
 
 void pOS::initialize() {
-  settings.load();
+  settings = new Settings;
+  settings->load();
 
   int argc = 1;
   char *argv[2];

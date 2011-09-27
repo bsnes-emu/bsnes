@@ -9,7 +9,6 @@ public:
     uint8 tick_counter;
 
     bool interrupt_pending;
-    uint16 interrupt_vector;
 
     uint16 scanlines;
     uint16 vcounter;
@@ -18,7 +17,6 @@ public:
 
   static void Enter();
   void enter();
-  void interrupt(uint16 vector);
   void tick();
 
   alwaysinline void trigger_irq();
