@@ -199,17 +199,17 @@ inline int codes(state *s, huffman *lencode, huffman *distcode) {
       symbol = decode(s, distcode);
       if(symbol < 0) return symbol;
       dist = dists[symbol] + bits(s, dext[symbol]);
-#ifndef INFLATE_ALLOW_INVALID_DISTANCE_TOO_FAR
+      #ifndef INFLATE_ALLOW_INVALID_DISTANCE_TOO_FAR
       if(dist > s->outcnt) return -11;
-#endif
+      #endif
 
       if(s->out != 0) {
         if(s->outcnt + len > s->outlen) return 1;
         while(len--) {
           s->out[s->outcnt] =
-#ifdef INFLATE_ALLOW_INVALID_DISTANCE_TOO_FAR
+          #ifdef INFLATE_ALLOW_INVALID_DISTANCE_TOO_FAR
           dist > s->outcnt ? 0 :
-#endif
+          #endif
           s->out[s->outcnt - dist];
           s->outcnt++;
         }

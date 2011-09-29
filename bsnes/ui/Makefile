@@ -21,8 +21,6 @@ ifeq ($(platform),x)
   ruby := video.glx video.xv video.sdl
   ruby += audio.alsa audio.openal audio.oss audio.pulseaudio audio.pulseaudiosimple audio.ao
   ruby += input.sdl input.x
-
-  link += $(if $(findstring audio.openal,$(ruby)),-lopenal)
 else ifeq ($(platform),osx)
   phoenix_compile = $(call compile,-DPHOENIX_QT)
   link +=
@@ -30,8 +28,6 @@ else ifeq ($(platform),osx)
   ruby :=
   ruby += audio.openal
   ruby += input.carbon
-
-  link += $(if $(findstring audio.openal,$(ruby)),-framework OpenAL)
 else ifeq ($(platform),win)
   phoenix_compile = $(call compile,-DPHOENIX_WINDOWS)
   link +=
@@ -39,29 +35,11 @@ else ifeq ($(platform),win)
   ruby := video.direct3d video.wgl video.directdraw video.gdi
   ruby += audio.directsound audio.xaudio2
   ruby += input.rawinput input.directinput
-
-  link += $(if $(findstring audio.openal,$(ruby)),-lopenal32)
 endif
 
 # ruby
-rubyflags := $(if $(finstring .sdl,$(ruby)),`sdl-config --cflags`)
-
-link += $(if $(findstring .sdl,$(ruby)),`sdl-config --libs`)
-link += $(if $(findstring video.direct3d,$(ruby)),-ld3d9)
-link += $(if $(findstring video.directdraw,$(ruby)),-lddraw)
-link += $(if $(findstring video.glx,$(ruby)),-lGL)
-link += $(if $(findstring video.wgl,$(ruby)),-lopengl32)
-link += $(if $(findstring video.xv,$(ruby)),-lXv)
-link += $(if $(findstring audio.alsa,$(ruby)),-lasound)
-link += $(if $(findstring audio.ao,$(ruby)),-lao)
-link += $(if $(findstring audio.directsound,$(ruby)),-ldsound)
-link += $(if $(findstring audio.pulseaudio,$(ruby)),-lpulse)
-link += $(if $(findstring audio.pulseaudiosimple,$(ruby)),-lpulse-simple)
-link += $(if $(findstring audio.xaudio2,$(ruby)),-lole32)
-link += $(if $(findstring input.directinput,$(ruby)),-ldinput8 -ldxguid)
-link += $(if $(findstring input.rawinput,$(ruby)),-ldinput8 -ldxguid)
-
-rubydef := $(foreach c,$(subst .,_,$(call strupper,$(ruby))),-D$c)
+include ruby/Makefile
+link += $(rubylink)
 
 # rules
 objects := $(ui_objects) $(objects)
@@ -78,7 +56,7 @@ obj/ui-settings.o: $(ui)/settings/settings.cpp $(call rwildcard,$(ui)/)
 obj/ui-tools.o: $(ui)/tools/tools.cpp $(call rwildcard,$(ui)/)
 
 obj/ruby.o: ruby/ruby.cpp $(call rwildcard,ruby/*)
-	$(call compile,$(rubydef) $(rubyflags))
+	$(call compile,$(rubyflags))
 
 obj/phoenix.o: phoenix/phoenix.cpp $(call rwildcard,phoenix/*)
 	$(phoenix_compile)
@@ -99,17 +77,15 @@ install:
 ifeq ($(platform),x)
 	install -D -m 755 out/$(name) $(DESTDIR)$(prefix)/bin/$(name)
 	mkdir -p ~/.config/$(name)
+	install -D -m 644 data/$(name).png $(DESTDIR)$(prefix)/share/pixmaps/$(name).png
+	install -D -m 644 data/$(name).desktop $(DESTDIR)$(prefix)/share/applications/$(name).desktop
+	cp data/cheats.xml ~/.config/$(name)/cheats.xml
+	chmod 777 ~/.config/$(name) ~/.config/$(name)/cheats.xml
 endif
 
 uninstall:
 ifeq ($(platform),x)
 	rm $(DESTDIR)$(prefix)/bin/$(name)
+	rm $(DESTDIR)$(prefix)/share/pixmaps/$(name).png
+	rm $(DESTDIR)$(prefix)/share/applications/$(name).desktop
 endif
-
-#	install -D -m 644 data/$(name).png $(DESTDIR)$(prefix)/share/pixmaps/$(name).png
-#	install -D -m 644 data/$(name).desktop $(DESTDIR)$(prefix)/share/applications/$(name).desktop
-#	cp data/cheats.xml ~/.config/$(name)/cheats.xml
-#	chmod 777 ~/.config/$(name) ~/.config/$(name)/cheats.xml
-
-#	rm $(DESTDIR)$(prefix)/share/pixmaps/$(name).png
-#	rm $(DESTDIR)$(prefix)/share/applications/$(name).desktop

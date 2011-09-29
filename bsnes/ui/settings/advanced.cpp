@@ -40,7 +40,7 @@ AdvancedSettings::AdvancedSettings() {
   }
 
   append(title, ~0, 0, 5);
-  append(driverLabel, ~0, 0, 5);
+  append(driverLabel, ~0, 0);
   append(driverLayout, ~0, 0, 5);
     driverLayout.append(videoLabel, 0, 0, 5);
     driverLayout.append(videoDriver, ~0, 0, 5);
@@ -48,7 +48,7 @@ AdvancedSettings::AdvancedSettings() {
     driverLayout.append(audioDriver, ~0, 0, 5);
     driverLayout.append(inputLabel, 0, 0, 5);
     driverLayout.append(inputDriver, ~0, 0);
-  append(focusPolicyLabel, ~0, 0, 5);
+  append(focusPolicyLabel, ~0, 0);
   append(focusPolicyLayout, ~0, 0, 5);
     focusPolicyLayout.append(focusPolicy[0], ~0, 0, 5);
     focusPolicyLayout.append(focusPolicy[1], ~0, 0, 5);

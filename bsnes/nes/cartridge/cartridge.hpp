@@ -1,3 +1,5 @@
+#include "board/board.hpp"
+
 struct Cartridge : Processor, property<Cartridge> {
   static void Main();
   void main();
@@ -18,6 +20,7 @@ struct Cartridge : Processor, property<Cartridge> {
   Cartridge();
 
 //privileged:
+  Board *board;
   Mapper::Mapper *mapper;
 
   uint8 prg_read(unsigned addr);
@@ -25,9 +28,6 @@ struct Cartridge : Processor, property<Cartridge> {
 
   uint8 chr_read(unsigned addr);
   void chr_write(unsigned addr, uint8 data);
-
-  uint8 ciram_read(unsigned addr);
-  void ciram_write(unsigned addr, uint8 data);
 
   uint8 *rom_data;
   unsigned rom_size;

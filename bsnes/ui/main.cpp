@@ -3,6 +3,14 @@
 Application *application = 0;
 nall::DSP dspaudio;
 
+//allow files to exist in the same folder as binary;
+//otherwise default to home folder
+string Application::path(const string &filename) {
+  string result = { basepath, filename };
+  if(file::exists(result)) return result;
+  return { userpath, filename };
+}
+
 void Application::run() {
   inputManager->scan();
 
@@ -26,14 +34,14 @@ Application::Application(int argc, char **argv) {
   {
     char path[PATH_MAX];
     auto unused = ::realpath(argv[0], path);
-    basepath = path;
+    basepath = dir(path);
     unused = ::userpath(path);
     userpath = path;
-    #if defined(PLATFORM_WIN)
-    userpath.append("batch/");
-    #else
-    userpath.append(".config/batch/");
-    #endif
+    if(Intrinsics::platform() == Intrinsics::Platform::Windows) {
+      userpath.append("bsnes/");
+    } else {
+      userpath.append(".config/bsnes/");
+    }
     mkdir(userpath, 0755);
   }
   config = new Config;
@@ -41,17 +49,12 @@ Application::Application(int argc, char **argv) {
   inputManager = new InputManager;
   utility = new Utility;
 
-  title = "bsnes v082.24";
+  title = "bsnes v082.25";
 
-  #if defined(PLATFORM_WIN)
-  normalFont = "Tahoma, 8";
-  boldFont = "Tahoma, 8, Bold";
-  titleFont = "Tahoma, 16, Bold";
-  #else
-  normalFont = "Sans, 8";
-  boldFont = "Sans, 8, Bold";
-  titleFont = "Sans, 16, Bold";
-  #endif
+  string fontFamily = Intrinsics::platform() == Intrinsics::Platform::Windows ? "Tahoma, " : "Sans, ";
+  normalFont = { fontFamily, "8" };
+  boldFont = { fontFamily, "8, Bold" };
+  titleFont = { fontFamily, "16, Bold" };
 
   windowManager = new WindowManager;
   mainWindow = new MainWindow;
@@ -91,6 +94,7 @@ Application::Application(int argc, char **argv) {
   input.set(Input::Handle, mainWindow->viewport.handle());
   input.init();
 
+  if(config->video.startFullScreen) utility->toggleFullScreen();
   if(argc == 2) interface->loadCartridge(argv[1]);
 
   while(quit == false) {

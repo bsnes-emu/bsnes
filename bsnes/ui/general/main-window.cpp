@@ -325,7 +325,8 @@ void MainWindow::synchronize() {
 }
 
 void MainWindow::setupVideoFilters() {
-  lstring files = directory::files({ application->userpath, "filters/" }, "*.filter");
+  lstring files = directory::files({ application->basepath, "filters/" }, "*.filter");
+  if(files.size() == 0) directory::files({ application->userpath, "filters/" }, "*.filter");
   reference_array<RadioItem&> group;
 
   settingsVideoFilterList = new RadioItem[files.size()];
@@ -351,7 +352,8 @@ void MainWindow::setupVideoFilters() {
 }
 
 void MainWindow::setupVideoShaders() {
-  lstring files = directory::files({ application->userpath, "shaders/" }, { "*.", config->video.driver, ".shader" });
+  lstring files = directory::files({ application->basepath, "shaders/" }, { "*.", config->video.driver, ".shader" });
+  if(files.size() == 0) files = directory::files({ application->userpath, "shaders/" }, { "*.", config->video.driver, ".shader" });
   reference_array<RadioItem&> group;
 
   settingsVideoShaderList = new RadioItem[files.size()];

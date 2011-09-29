@@ -37,7 +37,7 @@ namespace nall {
         for(unsigned i = 0; i < objectsize; i++) pool[i].~T();
         free(pool);
       }
-      pool = 0;
+      pool = nullptr;
       poolsize = 0;
       objectsize = 0;
     }
@@ -93,10 +93,10 @@ namespace nall {
       else resize(objectsize - count);
     }
 
-    linear_vector() : pool(0), poolsize(0), objectsize(0) {
+    linear_vector() : pool(nullptr), poolsize(0), objectsize(0) {
     }
 
-    linear_vector(std::initializer_list<T> list) : pool(0), poolsize(0), objectsize(0) {
+    linear_vector(std::initializer_list<T> list) : pool(nullptr), poolsize(0), objectsize(0) {
       for(const T *p = list.begin(); p != list.end(); ++p) append(*p);
     }
 
@@ -113,7 +113,7 @@ namespace nall {
       return *this;
     }
 
-    linear_vector(const linear_vector<T> &source) : pool(0), poolsize(0), objectsize(0) {
+    linear_vector(const linear_vector<T> &source) : pool(nullptr), poolsize(0), objectsize(0) {
       operator=(source);
     }
 
@@ -123,12 +123,12 @@ namespace nall {
       pool = source.pool;
       poolsize = source.poolsize;
       objectsize = source.objectsize;
-      source.pool = 0;
+      source.pool = nullptr;
       source.reset();
       return *this;
     }
 
-    linear_vector(linear_vector<T> &&source) : pool(0), poolsize(0), objectsize(0) {
+    linear_vector(linear_vector<T> &&source) : pool(nullptr), poolsize(0), objectsize(0) {
       operator=(std::move(source));
     }
 
@@ -174,7 +174,7 @@ namespace nall {
         for(unsigned i = 0; i < objectsize; i++) { if(pool[i]) delete pool[i]; }
         free(pool);
       }
-      pool = 0;
+      pool = nullptr;
       poolsize = 0;
       objectsize = 0;
     }
@@ -227,10 +227,10 @@ namespace nall {
       else resize(objectsize - count);
     }
 
-    pointer_vector() : pool(0), poolsize(0), objectsize(0) {
+    pointer_vector() : pool(nullptr), poolsize(0), objectsize(0) {
     }
 
-    pointer_vector(std::initializer_list<T> list) : pool(0), poolsize(0), objectsize(0) {
+    pointer_vector(std::initializer_list<T> list) : pool(nullptr), poolsize(0), objectsize(0) {
       for(const T *p = list.begin(); p != list.end(); ++p) append(*p);
     }
 
@@ -247,7 +247,7 @@ namespace nall {
       return *this;
     }
 
-    pointer_vector(const pointer_vector<T> &source) : pool(0), poolsize(0), objectsize(0) {
+    pointer_vector(const pointer_vector<T> &source) : pool(nullptr), poolsize(0), objectsize(0) {
       operator=(source);
     }
 
@@ -257,12 +257,12 @@ namespace nall {
       pool = source.pool;
       poolsize = source.poolsize;
       objectsize = source.objectsize;
-      source.pool = 0;
+      source.pool = nullptr;
       source.reset();
       return *this;
     }
 
-    pointer_vector(pointer_vector<T> &&source) : pool(0), poolsize(0), objectsize(0) {
+    pointer_vector(pointer_vector<T> &&source) : pool(nullptr), poolsize(0), objectsize(0) {
       operator=(std::move(source));
     }
 

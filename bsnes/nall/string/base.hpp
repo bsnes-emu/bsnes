@@ -2,12 +2,11 @@
 #define NALL_STRING_BASE_HPP
 
 namespace nall {
-  class string;
-  class lstring;
+  struct string;
+  struct lstring;
   template<typename T> inline const char* to_string(T);
 
-  class string {
-  public:
+  struct string {
     inline void reserve(unsigned);
 
     template<typename... Args> inline string& assign(Args&&... args);
@@ -88,8 +87,7 @@ namespace nall {
   #endif
   };
 
-  class lstring : public linear_vector<string> {
-  public:
+  struct lstring : public linear_vector<string> {
     template<typename T> inline lstring& operator<<(T value);
 
     inline optional<unsigned> find(const char*) const;
@@ -125,11 +123,6 @@ namespace nall {
   inline char* qstrlower(char *str);
   inline char* qstrupper(char *str);
   inline char* strtr(char *dest, const char *before, const char *after);
-  inline uintmax_t hex(const char *str);
-  inline intmax_t integer(const char *str);
-  inline uintmax_t decimal(const char *str);
-  inline uintmax_t bin(const char *str);
-  inline double fp(const char *str);
 
   //math.hpp
   inline bool strint(const char *str, int &result);
@@ -170,7 +163,7 @@ namespace nall {
   template<unsigned length = 0, char padding = ' '> inline string decimal(uintmax_t value);
   template<unsigned length = 0, char padding = ' '> inline string ldecimal(uintmax_t value);
   template<unsigned length = 0, char padding = '0'> inline string hex(uintmax_t value);
-  template<unsigned length = 0, char padding = '0'> inline string bin(uintmax_t value);
+  template<unsigned length = 0, char padding = '0'> inline string binary(uintmax_t value);
   inline unsigned fp(char *str, double value);
   inline string fp(double value);
 

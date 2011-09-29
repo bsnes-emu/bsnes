@@ -188,13 +188,13 @@ InputManager::InputManager() {
   inputList.append(userInterface);
 
   for(unsigned n = 0; n < inputList.size(); n++) inputList[n].attach();
-  config.load(string{ application->userpath, "input.cfg" });
-  config.save(string{ application->userpath, "input.cfg" });
+  config.load(application->path("input.cfg"));
+  config.save(application->path("input.cfg"));
   for(unsigned n = 0; n < inputList.size(); n++) inputList[n].bind();
 
   activeScancode = 0;
 }
 
 InputManager::~InputManager() {
-  config.save(string{ application->userpath, "input.cfg" });
+  config.save(application->path("input.cfg"));
 }

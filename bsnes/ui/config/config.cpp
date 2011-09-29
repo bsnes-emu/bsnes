@@ -15,6 +15,8 @@ Config::Config() {
   attach(video.gammaRamp = true, "Video::GammaRamp");
   attach(video.fullScreenMode = 0, "Video::FullScreenMode");
 
+  attach(video.startFullScreen = false, "Video::StartFullScreen");
+
   attach(audio.driver = "", "Audio::Driver");
   attach(audio.synchronize = true, "Audio::Synchronize");
   attach(audio.mute = false, "Audio::Mute");
@@ -37,10 +39,10 @@ Config::Config() {
   attach(snes.controllerPort1Device = 1, "SNES::Controller::Port1");
   attach(snes.controllerPort2Device = 0, "SNES::Controller::Port2");
 
-  load(string{ application->userpath, "settings.cfg" });
-  save(string{ application->userpath, "settings.cfg" });
+  load(application->path("settings.cfg"));
+  save(application->path("settings.cfg"));
 }
 
 Config::~Config() {
-  save(string{ application->userpath, "settings.cfg" });
+  save(application->path("settings.cfg"));
 }

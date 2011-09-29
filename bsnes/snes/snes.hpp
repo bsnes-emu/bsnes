@@ -20,7 +20,6 @@ namespace SNES {
 #include <nall/algorithm.hpp>
 #include <nall/any.hpp>
 #include <nall/array.hpp>
-#include <nall/detect.hpp>
 #include <nall/dl.hpp>
 #include <nall/dsp.hpp>
 #include <nall/endian.hpp>

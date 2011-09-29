@@ -7,7 +7,7 @@
 
 #if defined(VIDEO_QTOPENGL)
   #include <QGLWidget>
-  #if defined(PLATFORM_WIN)
+  #if defined(PLATFORM_WINDOWS)
     #include <GL/glext.h>
   #endif
 #endif
@@ -19,7 +19,7 @@
 #elif defined(PLATFORM_OSX)
   #define __INTEL_COMPILER
   #include <Carbon/Carbon.h>
-#elif defined(PLATFORM_WIN)
+#elif defined(PLATFORM_WINDOWS)
   #define _WIN32_WINNT 0x0501
   #include <windows.h>
 #endif

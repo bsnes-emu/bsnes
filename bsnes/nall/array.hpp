@@ -25,7 +25,7 @@ namespace nall {
 
     void reset() {
       if(pool) free(pool);
-      pool = 0;
+      pool = nullptr;
       poolsize = 0;
       buffersize = 0;
     }
@@ -85,10 +85,10 @@ namespace nall {
       memset(pool, 0, buffersize * sizeof(T));
     }
 
-    array() : pool(0), poolsize(0), buffersize(0) {
+    array() : pool(nullptr), poolsize(0), buffersize(0) {
     }
 
-    array(std::initializer_list<T> list) : pool(0), poolsize(0), buffersize(0) {
+    array(std::initializer_list<T> list) : pool(nullptr), poolsize(0), buffersize(0) {
       for(const T *p = list.begin(); p != list.end(); ++p) append(*p);
     }
 
@@ -106,7 +106,7 @@ namespace nall {
       return *this;
     }
 
-    array(const array &source) : pool(0), poolsize(0), buffersize(0) {
+    array(const array &source) : pool(nullptr), poolsize(0), buffersize(0) {
       operator=(source);
     }
 
@@ -116,12 +116,12 @@ namespace nall {
       pool = source.pool;
       poolsize = source.poolsize;
       buffersize = source.buffersize;
-      source.pool = 0;
+      source.pool = nullptr;
       source.reset();
       return *this;
     }
 
-    array(array &&source) : pool(0), poolsize(0), buffersize(0) {
+    array(array &&source) : pool(nullptr), poolsize(0), buffersize(0) {
       operator=(std::move(source));
     }
 

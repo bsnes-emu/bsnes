@@ -42,7 +42,7 @@ FileBrowser::FileBrowser() {
   fileList.onActivate = openButton.onTick = { &FileBrowser::fileListActivate, this };
 
   filterModes[Mode::Default    ] = { "Default",     "", { "*" } };
-  filterModes[Mode::NES        ] = { "NES",         "", { "*.nes" } };
+  filterModes[Mode::NES        ] = { "NES",         "", { "*.fc", "*.nes" } };
   filterModes[Mode::SNES       ] = { "SNES",        "", { "*.sfc" } };
   filterModes[Mode::GameBoy    ] = { "GameBoy",     "", { "*.gb", "*.gbc" } };
   filterModes[Mode::Satellaview] = { "Satellaview", "", { "*.bs" } };
@@ -50,12 +50,12 @@ FileBrowser::FileBrowser() {
   mode = &filterModes[Mode::Default];
 
   for(auto &mode : filterModes) config.attach(mode.path, mode.name);
-  config.load(string{ application->userpath, "paths.cfg" });
-  config.save(string{ application->userpath, "paths.cfg" });
+  config.load(application->path("paths.cfg"));
+  config.save(application->path("paths.cfg"));
 }
 
 FileBrowser::~FileBrowser() {
-  config.save(string{ application->userpath, "paths.cfg" });
+  config.save(application->path("paths.cfg"));
 }
 
 void FileBrowser::open(const string &title, unsigned requestedMode, function<void (string)> requestedCallback) {

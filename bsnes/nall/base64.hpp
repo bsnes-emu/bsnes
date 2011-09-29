@@ -5,8 +5,7 @@
 #include <nall/stdint.hpp>
 
 namespace nall {
-  class base64 {
-  public:
+  struct base64 {
     static bool encode(char *&output, const uint8_t* input, unsigned inlength) {
       output = new char[inlength * 8 / 6 + 6]();
 

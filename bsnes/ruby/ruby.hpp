@@ -11,8 +11,8 @@
 #include <nall/any.hpp>
 #include <nall/array.hpp>
 #include <nall/bit.hpp>
-#include <nall/detect.hpp>
 #include <nall/input.hpp>
+#include <nall/intrinsics.hpp>
 #include <nall/sort.hpp>
 #include <nall/stdint.hpp>
 #include <nall/string.hpp>
@@ -24,8 +24,7 @@ namespace ruby {
 #include <ruby/audio.hpp>
 #include <ruby/input.hpp>
 
-class VideoInterface {
-public:
+struct VideoInterface {
   void driver(const char *driver = "");
   const char* default_driver();
   const char* driver_list();
@@ -47,8 +46,7 @@ private:
   Video *p;
 };
 
-class AudioInterface {
-public:
+struct AudioInterface {
   void driver(const char *driver = "");
   const char* default_driver();
   const char* driver_list();
@@ -68,8 +66,7 @@ private:
   Audio *p;
 };
 
-class InputInterface {
-public:
+struct InputInterface {
   void driver(const char *driver = "");
   const char* default_driver();
   const char* driver_list();

@@ -19,7 +19,6 @@ namespace NES {
 
 #include <nall/algorithm.hpp>
 #include <nall/array.hpp>
-#include <nall/detect.hpp>
 #include <nall/dl.hpp>
 #include <nall/endian.hpp>
 #include <nall/file.hpp>

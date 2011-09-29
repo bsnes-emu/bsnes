@@ -2,6 +2,10 @@
 
 namespace NES {
 
+#include "board/board.cpp"
+
+//#define BOARD
+
 Cartridge cartridge;
 
 void Cartridge::Main() {
@@ -13,20 +17,31 @@ void Cartridge::main() {
 }
 
 void Cartridge::load(const string &xml, const uint8_t *data, unsigned size) {
+  #ifdef BOARD
+  rom_size = size;
+  rom_data = new uint8[rom_size];
+  memcpy(rom_data, data, size);
+  #else
   rom_size = size - 16;
   rom_data = new uint8[rom_size];
   memcpy(rom_data, data + 16, size - 16);
+  #endif
 
+  #ifdef BOARD
+  prg_size = 32768;
+  chr_size = 8192;
+  #else
   prg_size = data[4] * 0x4000;
   chr_size = data[5] * 0x2000;
+  #endif
 
   prg_data = new uint8[prg_size];
-  memcpy(prg_data, data + 16, prg_size);
+  memcpy(prg_data, rom_data, prg_size);
 
   if(chr_size) {
     chr_ram = false;
     chr_data = new uint8[chr_size];
-    memcpy(chr_data, data + 16 + prg_size, chr_size);
+    memcpy(chr_data, rom_data + prg_size, chr_size);
   } else {
     chr_ram = true;
     chr_size = 0x2000;
@@ -48,9 +63,14 @@ void Cartridge::load(const string &xml, const uint8_t *data, unsigned size) {
   case  26: mapper = &Mapper::vrc6; Mapper::vrc6.abus_swap = 1; break;
   }
 
+  sha256 = nall::sha256(rom_data, rom_size);
+
+  #ifdef BOARD
+  board = Board::create(xml, rom_data, rom_size);
+  #endif
+
   system.load();
   loaded = true;
-  sha256 = nall::sha256(rom_data, rom_size);
 }
 
 void Cartridge::unload() {
@@ -86,27 +106,31 @@ Cartridge::Cartridge() {
 }
 
 uint8 Cartridge::prg_read(unsigned addr) {
+#ifdef BOARD
+  return board->prg_read(addr);
+#endif
   return mapper->prg_read(addr);
 }
 
 void Cartridge::prg_write(unsigned addr, uint8 data) {
+#ifdef BOARD
+  return board->prg_write(addr, data);
+#endif
   return mapper->prg_write(addr, data);
 }
 
 uint8 Cartridge::chr_read(unsigned addr) {
+#ifdef BOARD
+  return board->chr_read(addr);
+#endif
   return mapper->chr_read(addr);
 }
 
 void Cartridge::chr_write(unsigned addr, uint8 data) {
+#ifdef BOARD
+  return board->chr_write(addr, data);
+#endif
   return mapper->chr_write(addr, data);
-}
-
-uint8 Cartridge::ciram_read(unsigned addr) {
-  return mapper->ciram_read(addr);
-}
-
-void Cartridge::ciram_write(unsigned addr, uint8 data) {
-  return mapper->ciram_write(addr, data);
 }
 
 void Cartridge::serialize(serializer &s) {

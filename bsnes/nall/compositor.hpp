@@ -1,7 +1,7 @@
 #ifndef NALL_COMPOSITOR_HPP
 #define NALL_COMPOSITOR_HPP
 
-#include <nall/detect.hpp>
+#include <nall/intrinsics.hpp>
 
 namespace nall {
 
@@ -35,7 +35,7 @@ bool compositor::enable(bool status) {
   return true;
 }
 
-#elif defined(PLATFORM_WIN)
+#elif defined(PLATFORM_WINDOWS)
 
 bool compositor::enabled() {
   HMODULE module = GetModuleHandleW(L"dwmapi");

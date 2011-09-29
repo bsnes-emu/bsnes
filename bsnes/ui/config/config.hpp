@@ -12,6 +12,8 @@ struct Config : public configuration {
     unsigned gamma;
     bool gammaRamp;
     unsigned fullScreenMode;
+
+    bool startFullScreen;
   } video;
 
   struct Audio {

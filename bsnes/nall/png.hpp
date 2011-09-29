@@ -413,7 +413,7 @@ void png::alphaTransform(uint32_t rgb) {
   }
 }
 
-png::png() : data(0), rawData(0) {
+png::png() : data(nullptr), rawData(nullptr) {
 }
 
 png::~png() {

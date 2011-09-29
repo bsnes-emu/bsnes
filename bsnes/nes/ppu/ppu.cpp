@@ -335,11 +335,11 @@ void PPU::raster_sprite() {
     return;
   }
 
-  raster.soam[raster.oam_counter].id = n;
-  raster.soam[raster.oam_counter].y = y;
+  raster.soam[raster.oam_counter].id   = n;
+  raster.soam[raster.oam_counter].y    = oam[(n * 4) + 0];
   raster.soam[raster.oam_counter].tile = oam[(n * 4) + 1];
   raster.soam[raster.oam_counter].attr = oam[(n * 4) + 2];
-  raster.soam[raster.oam_counter].x = oam[(n * 4) + 3];
+  raster.soam[raster.oam_counter].x    = oam[(n * 4) + 3];
   raster.oam_counter++;
 }
 
@@ -357,7 +357,11 @@ void PPU::raster_scanline() {
   raster.oam_counter = 0;
 
   for(unsigned n = 0; n < 8; n++) {
-    raster.soam[n].id = 64;
+    raster.soam[n].id   = 64;
+    raster.soam[n].y    = 0xff;
+    raster.soam[n].tile = 0xff;
+    raster.soam[n].attr = 0xff;
+    raster.soam[n].x    = 0xff;
     raster.soam[n].tiledatalo = 0;
     raster.soam[n].tiledatahi = 0;
   }
@@ -420,10 +424,9 @@ void PPU::raster_scanline() {
     tick();
     tick();
 
-    unsigned spritey = raster.oam[sprite].y;
+    unsigned spritey = (status.ly - raster.oam[sprite].y) & (sprite_height() - 1);
     if(raster.oam[sprite].attr & 0x80) spritey ^= (sprite_height() - 1);
     tileaddr += spritey + (spritey & 8);
-    if(raster.oam[sprite].id == 64) tileaddr = status.sprite_addr;
 
     raster.oam[sprite].tiledatalo = chr_load(tileaddr + 0);
     tick();

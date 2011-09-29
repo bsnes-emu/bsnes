@@ -35,6 +35,7 @@ struct Application {
 
   string basepath;
   string userpath;
+  string path(const string &filename);
 
   string title;
   string normalFont;

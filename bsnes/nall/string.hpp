@@ -10,6 +10,7 @@
 #include <initializer_list>
 
 #include <nall/array.hpp>
+#include <nall/atoi.hpp>
 #include <nall/function.hpp>
 #include <nall/platform.hpp>
 #include <nall/sha256.hpp>

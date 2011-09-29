@@ -2,10 +2,6 @@
 #define NALL_BIT_HPP
 
 namespace nall {
-  constexpr inline unsigned binary(const char *s, unsigned sum = 0) {
-    return s[0] == 0 ? sum : binary(s + 1, (sum << 1) | s[0] == '1');
-  }
-
   template<int bits> constexpr inline unsigned uclamp(const unsigned x) {
     enum { y = (1U << (bits - 1)) + ((1U << (bits - 1)) - 1) };
     return y + ((x - y) & -(x < y));  //min(x, y);

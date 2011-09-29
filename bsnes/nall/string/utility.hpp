@@ -193,7 +193,7 @@ template<unsigned length_, char padding> string hex(uintmax_t value) {
   return (const char*)result;
 }
 
-template<unsigned length_, char padding> string bin(uintmax_t value) {
+template<unsigned length_, char padding> string binary(uintmax_t value) {
   char buffer[256];
   unsigned size = 0;
 

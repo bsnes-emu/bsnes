@@ -1,11 +1,12 @@
 #ifndef NALL_DIRECTORY_HPP
 #define NALL_DIRECTORY_HPP
 
+#include <nall/intrinsics.hpp>
 #include <nall/sort.hpp>
 #include <nall/string.hpp>
 #include <nall/vector.hpp>
 
-#if defined(_WIN32)
+#if defined(PLATFORM_WINDOWS)
   #include <nall/windows/utf8.hpp>
 #else
   #include <dirent.h>
@@ -22,7 +23,7 @@ struct directory {
   static lstring contents(const string &pathname, const string &pattern = "*");
 };
 
-#if defined(_WIN32)
+#if defined(PLATFORM_WINDOWS)
   inline bool directory::exists(const string &pathname) {
     DWORD result = GetFileAttributes(utf16_t(pathname));
     if(result == INVALID_FILE_ATTRIBUTES) return false;

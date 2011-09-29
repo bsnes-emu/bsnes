@@ -76,7 +76,7 @@ string& string::operator=(string &&source) {
   if(data) free(data);
   size = source.size;
   data = source.data;
-  source.data = 0;
+  source.data = nullptr;
   source.size = 0;
   return *this;
 }
@@ -98,7 +98,7 @@ string::string(string &&source) {
   if(&source == this) return;
   size = source.size;
   data = source.data;
-  source.data = 0;
+  source.data = nullptr;
 }
 
 string::~string() {

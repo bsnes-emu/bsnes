@@ -18,7 +18,7 @@ namespace nall {
 
     void reset() {
       if(pool) free(pool);
-      pool = 0;
+      pool = nullptr;
       poolsize = 0;
       buffersize = 0;
     }
@@ -58,7 +58,7 @@ namespace nall {
       return false;
     }
 
-    template<typename... Args> reference_array(Args&... args) : pool(0), poolsize(0), buffersize(0) {
+    template<typename... Args> reference_array(Args&... args) : pool(nullptr), poolsize(0), buffersize(0) {
       construct(args...);
     }
 
@@ -80,7 +80,7 @@ namespace nall {
       pool = source.pool;
       poolsize = source.poolsize;
       buffersize = source.buffersize;
-      source.pool = 0;
+      source.pool = nullptr;
       source.reset();
       return *this;
     }

@@ -36,19 +36,19 @@ namespace nall {
   public:
     operator bool() const { return callback; }
     R operator()(P... p) const { return (*callback)(std::forward<P>(p)...); }
-    void reset() { if(callback) { delete callback; callback = 0; } }
+    void reset() { if(callback) { delete callback; callback = nullptr; } }
 
     function& operator=(const function &source) {
       if(this != &source) {
-        if(callback) { delete callback; callback = 0; }
+        if(callback) { delete callback; callback = nullptr; }
         if(source.callback) callback = source.callback->copy();
       }
       return *this;
     }
 
-    function(const function &source) : callback(0) { operator=(source); }
-    function() : callback(0) {}
-    function(void *function) : callback(0) { if(function) callback = new global((R (*)(P...))function); }
+    function(const function &source) : callback(nullptr) { operator=(source); }
+    function() : callback(nullptr) {}
+    function(void *function) : callback(nullptr) { if(function) callback = new global((R (*)(P...))function); }
     function(R (*function)(P...)) { callback = new global(function); }
     template<typename C> function(R (C::*function)(P...), C *object) { callback = new member<C>(function, object); }
     template<typename C> function(R (C::*function)(P...) const, C *object) { callback = new member<C>((R (C::*)(P...))function, object); }
