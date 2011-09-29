@@ -1,0 +1,29 @@
+//NES-SAROM
+//NES-SBROM
+//NES-SCROM
+//NES-SC1ROM
+//NES-SEROM
+//NES-SFROM
+//NES-SGROM
+//NES-SHROM
+//NES-SH1ROM
+//NES-SIROM
+//NES-SJROM
+//NES-SKROM
+//NES-SLROM
+//NES-SL1ROM
+//NES-SL2ROM
+//NES-SL3ROM
+//NES-SLRROM
+//NES-SMROM
+//NES-SNROM
+//NES-SOROM
+//NES-SUROM
+//NES-SXROM
+
+struct SxROM : Board {
+
+SxROM(BML::Node &board, const uint8_t *data, unsigned size) : Board(board, data, size) {
+}
+
+};

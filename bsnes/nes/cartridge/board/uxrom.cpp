@@ -1,24 +1,28 @@
-//NES-NROM-128
-//NES-NROM-256
+//NES-UNROM
+//NES-UOROM
 
-struct NROM : Board {
+struct UxROM : Board {
 
 struct Settings {
   bool mirror;  //0 = horizontal, 1 = vertical
 } settings;
 
+uint4 prg_bank;
+
 uint8 prg_read(unsigned addr) {
-  if(addr & 0x8000) return Board::prg_read(addr);
+  if((addr & 0xc000) == 0x8000) return Board::prg_read((prg_bank << 14) | (addr & 0x3fff));
+  if((addr & 0xc000) == 0xc000) return Board::prg_read((    0x0f << 14) | (addr & 0x3fff));
   return cpu.mdr();
 }
 
 void prg_write(unsigned addr, uint8 data) {
+  if(addr & 0x8000) prg_bank = data & 0x0f;
 }
 
 uint8 chr_read(unsigned addr) {
   if(addr & 0x2000) {
     if(settings.mirror == 0) addr = ((addr & 0x0800) >> 1) | (addr & 0x03ff);
-    return ppu.ciram_read(addr & 0x07ff);
+    return ppu.ciram_read(addr);
   }
   return Board::chr_read(addr);
 }
@@ -26,12 +30,24 @@ uint8 chr_read(unsigned addr) {
 void chr_write(unsigned addr, uint8 data) {
   if(addr & 0x2000) {
     if(settings.mirror == 0) addr = ((addr & 0x0800) >> 1) | (addr & 0x03ff);
-    return ppu.ciram_write(addr & 0x07ff, data);
+    return ppu.ciram_write(addr, data);
   }
   return Board::chr_write(addr, data);
 }
 
-NROM(BML::Node &board, const uint8_t *data, unsigned size) : Board(board, data, size) {
+void power() {
+  reset();
+}
+
+void reset() {
+  prg_bank = 0;
+}
+
+void serialize(serializer &s) {
+  s.integer(prg_bank);
+}
+
+UxROM(BML::Node &board, const uint8_t *data, unsigned size) : Board(board, data, size) {
   settings.mirror = board["mirror"].value() == "vertical" ? 1 : 0;
 }
 

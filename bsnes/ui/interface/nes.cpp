@@ -20,10 +20,10 @@ bool InterfaceNES::loadCartridge(const string &filename) {
   interface->unloadCartridge();
   interface->baseName = nall::basename(filename);
 
-  string xml;
-  xml.readfile({ interface->baseName, ".xml" });
+  string markup;
+  markup.readfile({ interface->baseName, ".bml" });
 
-  NES::Interface::loadCartridge(xml, fp.data(), fp.size());
+  NES::Interface::loadCartridge(markup, fp.data(), fp.size());
   fp.close();
 
   if(NES::Interface::memorySize(NES::Interface::Memory::RAM) > 0) {

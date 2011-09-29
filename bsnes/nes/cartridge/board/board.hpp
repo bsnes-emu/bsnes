@@ -1,5 +1,14 @@
 struct Board {
+  struct Memory {
+    uint8_t *data;
+    unsigned size;
+    inline Memory() : data(nullptr), size(0u) {}
+  };
+
   unsigned mirror(unsigned addr, unsigned size) const;
+
+  virtual void main();
+  virtual void tick();
 
   virtual uint8 prg_read(unsigned addr);
   virtual void prg_write(unsigned addr, uint8 data);
@@ -7,19 +16,25 @@ struct Board {
   virtual uint8 chr_read(unsigned addr);
   virtual void chr_write(unsigned addr, uint8 data);
 
-  virtual void configure(const string &xml) = 0;
+  virtual Memory memory();
 
-  static Board* create(const string &xml, const uint8_t *data, unsigned size);
+  virtual void power();
+  virtual void reset();
+
+  virtual void serialize(serializer&);
+  Board(BML::Node &board, const uint8_t *data, unsigned size);
+  ~Board();
+
+  static Board* load(const string &markup, const uint8_t *data, unsigned size);
 
   struct Information {
     string type;
+    bool battery;
   } information;
 
-  struct Memory {
-    uint8_t *data;
-    unsigned size;
-  };
-
-  Memory prg;
-  Memory chr;
+protected:
+  Memory prgrom;
+  Memory prgram;
+  Memory chrrom;
+  Memory chrram;
 };

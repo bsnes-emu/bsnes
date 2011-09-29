@@ -1,4 +1,8 @@
+#include "axrom.cpp"
+#include "cnrom.cpp"
 #include "nrom.cpp"
+#include "sxrom.cpp"
+#include "uxrom.cpp"
 
 unsigned Board::mirror(unsigned addr, unsigned size) const {
   unsigned base = 0;
@@ -18,73 +22,94 @@ unsigned Board::mirror(unsigned addr, unsigned size) const {
   return base;
 }
 
+void Board::main() {
+  while(true) {
+    if(scheduler.sync == Scheduler::SynchronizeMode::All) {
+      scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
+    }
+
+    cartridge.clock += 12 * 4095;
+    tick();
+  }
+}
+
+void Board::tick() {
+  cartridge.clock += 12;
+  if(cartridge.clock >= 0 && scheduler.sync != Scheduler::SynchronizeMode::All) co_switch(cpu.thread);
+}
+
 uint8 Board::prg_read(unsigned addr) {
-  return prg.data[mirror(addr, prg.size)];
+  return prgrom.data[mirror(addr, prgrom.size)];
 }
 
 void Board::prg_write(unsigned addr, uint8 data) {
-  prg.data[mirror(addr, prg.size)] = data;
+  prgrom.data[mirror(addr, prgrom.size)] = data;
 }
 
 uint8 Board::chr_read(unsigned addr) {
-  return chr.data[mirror(addr, chr.size)];
+  if(chrrom.size) return chrrom.data[mirror(addr, chrrom.size)];
+  if(chrram.size) return chrram.data[mirror(addr, chrram.size)];
+  return 0u;
 }
 
 void Board::chr_write(unsigned addr, uint8 data) {
-  chr.data[mirror(addr, chr.size)] = data;
+  if(chrram.size) chrram.data[mirror(addr, chrram.size)] = data;
 }
 
-Board* Board::create(const string &xml, const uint8_t *data, unsigned size) {
-  string type;
-  string configuration;
+Board::Memory Board::memory() {
+  return prgram;
+}
 
-  xml_element document = xml_parse(xml);
-  for(auto &head : document.element) {
-    if(head.name == "cartridge") {
-      for(auto &node : head.element) {
-        if(node.name == "board") {
-          configuration = node.content;
-          for(auto &attr : node.attribute) {
-            if(attr.name == "type") type = attr.parse();
-          }
-        }
-      }
-    }
-  }
+void Board::power() {
+}
 
-  Board *board = nullptr;
-  if(type == "NES-NROM-256") board = new NROM;
-  assert(board != nullptr);
+void Board::reset() {
+}
 
-  for(auto &head : document.element) {
-    if(head.name == "cartridge") {
-      for(auto &node : head.element) {
-        if(node.name == "board") {
-          for(auto &leaf : node.element) {
-            if(leaf.name == "prg") {
-              for(auto &attr : leaf.attribute) {
-                if(attr.name == "size") board->prg.size = decimal(attr.content);
-              }
-            }
+void Board::serialize(serializer &s) {
+  if(prgram.size) s.array(prgram.data, prgram.size);
+  if(chrram.size) s.array(chrram.data, chrram.size);
+}
 
-            if(leaf.name == "chr") {
-              for(auto &attr : leaf.attribute) {
-                if(attr.name == "size") board->chr.size = decimal(attr.content);
-              }
-            }
-          }
-        }
-      }
-    }
-  }
+Board::Board(BML::Node &board, const uint8_t *data, unsigned size) {
+  information.type = board["type"].value();
+  information.battery = board["prg"]["battery"].value();
 
-  board->prg.data = new uint8[board->prg.size];
-  memcpy(board->prg.data, data, board->prg.size);
+  prgrom.size = decimal(board["prg"]["rom"].value());
+  prgram.size = decimal(board["prg"]["ram"].value());
+  chrrom.size = decimal(board["chr"]["rom"].value());
+  chrram.size = decimal(board["chr"]["ram"].value());
 
-  board->chr.data = new uint8[board->chr.size];
-  memcpy(board->chr.data, data + board->prg.size, board->chr.size);
+  if(prgrom.size) prgrom.data = new uint8[prgrom.size]();
+  if(prgram.size) prgram.data = new uint8[prgram.size]();
+  if(chrrom.size) chrrom.data = new uint8[chrrom.size]();
+  if(chrram.size) chrram.data = new uint8[chrram.size]();
 
-  board->configure({ "<board>\n", configuration, "</board>\n" });
+  if(prgrom.size) memcpy(prgrom.data, data, prgrom.size);
+  if(chrrom.size) memcpy(chrrom.data, data + prgrom.size, chrrom.size);
+}
 
-  return board;
+Board::~Board() {
+  if(prgrom.size) delete[] prgrom.data;
+  if(prgram.size) delete[] prgram.data;
+  if(chrrom.size) delete[] chrrom.data;
+  if(chrram.size) delete[] chrram.data;
+}
+
+Board* Board::load(const string &markup, const uint8_t *data, unsigned size) {
+  BML::Node document(markup);
+  auto &board = document["cartridge"]["board"];
+  string type = board["type"].value();
+
+  if(type == "NES-AMROM"   ) return new AxROM(board, data, size);
+  if(type == "NES-ANROM"   ) return new AxROM(board, data, size);
+  if(type == "NES-AN1ROM"  ) return new AxROM(board, data, size);
+  if(type == "NES-AOROM"   ) return new AxROM(board, data, size);
+  if(type == "NES-CNROM"   ) return new CNROM(board, data, size);
+  if(type == "NES-NROM-256") return new NROM(board, data, size);
+  if(type == "NES-UNROM"   ) return new UxROM(board, data, size);
+  if(type == "NES-SXROM"   ) return new SxROM(board, data, size);
+  if(type == "NES-UOROM"   ) return new UxROM(board, data, size);
+
+  return nullptr;
 }

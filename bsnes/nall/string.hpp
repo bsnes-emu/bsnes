@@ -20,7 +20,9 @@
 
 #include <nall/windows/utf8.hpp>
 
+#define NALL_STRING_INTERNAL_HPP
 #include <nall/string/base.hpp>
+#include <nall/string/bml.hpp>
 #include <nall/string/bsv.hpp>
 #include <nall/string/core.hpp>
 #include <nall/string/cast.hpp>
@@ -38,5 +40,6 @@
 #include <nall/string/variadic.hpp>
 #include <nall/string/wrapper.hpp>
 #include <nall/string/xml.hpp>
+#undef NALL_STRING_INTERNAL_HPP
 
 #endif

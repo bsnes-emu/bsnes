@@ -99,9 +99,8 @@ namespace NES {
   #include <nes/system/system.hpp>
   #include <nes/scheduler/scheduler.hpp>
   #include <nes/input/input.hpp>
-  #include <nes/mapper/mapper.hpp>
-  #include <nes/cartridge/cartridge.hpp>
   #include <nes/memory/memory.hpp>
+  #include <nes/cartridge/cartridge.hpp>
   #include <nes/cpu/cpu.hpp>
   #include <nes/apu/apu.hpp>
   #include <nes/ppu/ppu.hpp>

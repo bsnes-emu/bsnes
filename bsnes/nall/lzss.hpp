@@ -34,7 +34,7 @@ protected:
   unsigned sourceSize;
 
 public:
-  inline lzss() : sourceData(nullptr), sourceSize(nullptr) {}
+  inline lzss() : sourceData(nullptr), sourceSize(0) {}
 };
 
 void lzss::source(const uint8_t *data, unsigned size) {

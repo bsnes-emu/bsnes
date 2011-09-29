@@ -8,7 +8,7 @@ struct Interface {
   virtual void initialize(Interface*);
 
   virtual bool cartridgeLoaded();
-  virtual void loadCartridge(const string &xml, const uint8_t *data, unsigned size);
+  virtual void loadCartridge(const string &markup, const uint8_t *data, unsigned size);
   virtual void unloadCartridge();
 
   enum class Memory : unsigned {
