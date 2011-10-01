@@ -1,32 +1,92 @@
-VRC6 vrc6;
+struct VRC6 : Chip {
 
-void VRC6::Pulse::clock() {
-  if(--divider == 0) {
-    divider = frequency + 1;
-    cycle++;
-    output = (mode == 1 || cycle > duty) ? volume : (uint4)0;
+uint8 prg_bank[2];
+uint8 chr_bank[8];
+uint2 mirror;
+uint8 irq_latch;
+bool irq_mode;
+bool irq_enable;
+bool irq_acknowledge;
+
+uint8 irq_counter;
+signed irq_scalar;
+bool irq_line;
+
+struct Pulse {
+  bool mode;
+  uint3 duty;
+  uint4 volume;
+  bool enable;
+  uint12 frequency;
+
+  uint12 divider;
+  uint4 cycle;
+  uint4 output;
+
+  void clock() {
+    if(--divider == 0) {
+      divider = frequency + 1;
+      cycle++;
+      output = (mode == 1 || cycle > duty) ? volume : (uint4)0;
+    }
+
+    if(enable == false) output = 0;
   }
 
-  if(enable == false) output = 0;
-}
+  void serialize(serializer &s) {
+    s.integer(mode);
+    s.integer(duty);
+    s.integer(volume);
+    s.integer(enable);
+    s.integer(frequency);
 
-void VRC6::Sawtooth::clock() {
-  if(--divider == 0) {
-    divider = frequency + 1;
-    if(++phase == 0) {
-      accumulator += rate;
-      if(++stage == 7) {
-        stage = 0;
-        accumulator = 0;
+    s.integer(divider);
+    s.integer(cycle);
+    s.integer(output);
+  }
+} pulse1, pulse2;
+
+struct Sawtooth {
+  uint6 rate;
+  bool enable;
+  uint12 frequency;
+
+  uint12 divider;
+  uint1 phase;
+  uint3 stage;
+  uint8 accumulator;
+  uint5 output;
+
+  void clock() {
+    if(--divider == 0) {
+      divider = frequency + 1;
+      if(++phase == 0) {
+        accumulator += rate;
+        if(++stage == 7) {
+          stage = 0;
+          accumulator = 0;
+        }
       }
     }
+
+    output = accumulator >> 3;
+    if(enable == false) output = 0;
   }
 
-  output = accumulator >> 3;
-  if(enable == false) output = 0;
-}
+  void serialize(serializer &s) {
+    s.integer(rate);
+    s.integer(enable);
+    s.integer(frequency);
 
-void VRC6::main() {
+    s.integer(divider);
+    s.integer(phase);
+    s.integer(stage);
+    s.integer(accumulator);
+    s.integer(output);
+  }
+} sawtooth;
+
+void main() {
   while(true) {
     if(scheduler.sync == Scheduler::SynchronizeMode::All) {
       scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
@@ -67,35 +127,35 @@ void VRC6::main() {
   }
 }
 
-uint8 VRC6::prg_read(unsigned addr) {
-  if((addr & 0xe000) == 0x6000) {
-    return prg_ram[addr & 0x1fff];
-  }
-
-  if((addr & 0xc000) == 0x8000) {
-    return Mapper::prg_read((prg_bank[0] << 14) | (addr & 0x3fff));
-  }
-
-  if((addr & 0xe000) == 0xc000) {
-    return Mapper::prg_read((prg_bank[1] << 13) | (addr & 0x1fff));
-  }
-
-  if((addr & 0xe000) == 0xe000) {
-    return Mapper::prg_read((0xff << 13) | (addr & 0x1fff));
-  }
-
-  return cpu.mdr();
+unsigned prg_addr(unsigned addr) const {
+  if((addr & 0xc000) == 0x8000) return (prg_bank[0] << 14) | (addr & 0x3fff);
+  if((addr & 0xe000) == 0xc000) return (prg_bank[1] << 13) | (addr & 0x1fff);
+  if((addr & 0xe000) == 0xe000) return (       0xff << 13) | (addr & 0x1fff);
 }
 
-void VRC6::prg_write(unsigned addr, uint8 data) {
-  if((addr & 0xe000) == 0x6000) {
-    prg_ram[addr & 0x1fff] = data;
-    return;
+unsigned chr_addr(unsigned addr) const {
+  unsigned bank = chr_bank[(addr >> 10) & 7];
+  return (bank << 10) | (addr & 0x03ff);
+}
+
+unsigned ciram_addr(unsigned addr) const {
+  switch(mirror) {
+  case 0: return ((addr & 0x0400) >> 0) | (addr & 0x03ff);  //vertical mirroring
+  case 1: return ((addr & 0x0800) >> 1) | (addr & 0x03ff);  //horizontal mirroring
+  case 2: return 0x0000 | (addr & 0x03ff);                  //one-screen mirroring (first)
+  case 3: return 0x0400 | (addr & 0x03ff);                  //one-screen mirroring (second)
   }
+}
 
-  addr = (addr & 0xf003);
-  if(abus_swap) addr = (addr & ~3) | ((addr & 2) >> 1) | ((addr & 1) << 1);
+uint8 ram_read(unsigned addr) {
+  return board.prgram.data[addr & 0x1fff];
+}
 
+void ram_write(unsigned addr, uint8 data) {
+  board.prgram.data[addr & 0x1fff] = data;
+}
+
+void reg_write(unsigned addr, uint8 data) {
   switch(addr) {
   case 0x8000: case 0x8001: case 0x8002: case 0x8003:
     prg_bank[0] = data;
@@ -145,7 +205,7 @@ void VRC6::prg_write(unsigned addr, uint8 data) {
     break;
 
   case 0xb003:
-    mirror_select = (data >> 2) & 3;
+    mirror = (data >> 2) & 3;
     break;
 
   case 0xc000: case 0xc001: case 0xc002: case 0xc003:
@@ -182,44 +242,11 @@ void VRC6::prg_write(unsigned addr, uint8 data) {
   }
 }
 
-uint8 VRC6::chr_read(unsigned addr) {
-  if(addr & 0x2000) return ppu.ciram_read(ciram_addr(addr));
-
-  unsigned bank = chr_bank[(addr >> 10) & 7];
-  return Mapper::chr_read((bank << 10) | (addr & 0x03ff));
-}
-
-void VRC6::chr_write(unsigned addr, uint8 data) {
-  if(addr & 0x2000) return ppu.ciram_write(ciram_addr(addr), data);
-
-  unsigned bank = chr_bank[(addr >> 10) & 7];
-  Mapper::chr_write((bank << 10) | (addr & 0x03ff), data);
-}
-
-unsigned VRC6::ciram_addr(unsigned addr) const {
-  switch(mirror_select) {
-  case 0: return ((addr & 0x0400) >> 0) | (addr & 0x03ff);  //vertical mirroring
-  case 1: return ((addr & 0x0800) >> 1) | (addr & 0x03ff);  //horizontal mirroring
-  case 2: return 0x0000 | (addr & 0x03ff);                  //one-screen mirroring (first)
-  case 3: return 0x0400 | (addr & 0x03ff);                  //one-screen mirroring (second)
-  }
-}
-
-unsigned VRC6::ram_size() {
-  return 8192u;
-}
-
-uint8* VRC6::ram_data() {
-  return prg_ram;
-}
-
-void VRC6::power() {
+void power() {
   reset();
 }
 
-void VRC6::reset() {
-  for(auto &n : prg_ram) n = 0xff;
-
+void reset() {
   prg_bank[0] = 0;
   prg_bank[1] = 0;
   chr_bank[0] = 0;
@@ -230,7 +257,7 @@ void VRC6::reset() {
   chr_bank[5] = 0;
   chr_bank[6] = 0;
   chr_bank[7] = 0;
-  mirror_select = 0;
+  mirror = 0;
   irq_latch = 0;
   irq_mode = 0;
   irq_enable = 0;
@@ -271,12 +298,14 @@ void VRC6::reset() {
   sawtooth.output = 0;
 }
 
-void VRC6::serialize(serializer &s) {
-  s.array(prg_ram);
+void serialize(serializer &s) {
+  pulse1.serialize(s);
+  pulse2.serialize(s);
+  sawtooth.serialize(s);
 
   s.array(prg_bank);
   s.array(chr_bank);
-  s.integer(mirror_select);
+  s.integer(mirror);
   s.integer(irq_latch);
   s.integer(irq_mode);
   s.integer(irq_enable);
@@ -285,32 +314,9 @@ void VRC6::serialize(serializer &s) {
   s.integer(irq_counter);
   s.integer(irq_scalar);
   s.integer(irq_line);
-
-  pulse1.serialize(s);
-  pulse2.serialize(s);
-  sawtooth.serialize(s);
 }
 
-void VRC6::Pulse::serialize(serializer &s) {
-  s.integer(mode);
-  s.integer(duty);
-  s.integer(volume);
-  s.integer(enable);
-  s.integer(frequency);
-
-  s.integer(divider);
-  s.integer(cycle);
-  s.integer(output);
+VRC6(Board &board) : Chip(board) {
 }
 
-void VRC6::Sawtooth::serialize(serializer &s) {
-  s.integer(rate);
-  s.integer(enable);
-  s.integer(frequency);
-
-  s.integer(divider);
-  s.integer(phase);
-  s.integer(stage);
-  s.integer(accumulator);
-  s.integer(output);
-}
+};

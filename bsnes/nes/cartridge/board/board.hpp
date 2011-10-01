@@ -2,6 +2,7 @@ struct Board {
   struct Memory {
     uint8_t *data;
     unsigned size;
+    inline Memory(uint8_t *data, unsigned size) : data(data), size(size) {}
     inline Memory() : data(nullptr), size(0u) {}
   };
 
@@ -32,7 +33,6 @@ struct Board {
     bool battery;
   } information;
 
-protected:
   Memory prgrom;
   Memory prgram;
   Memory chrrom;

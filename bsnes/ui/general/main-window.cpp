@@ -326,7 +326,7 @@ void MainWindow::synchronize() {
 
 void MainWindow::setupVideoFilters() {
   lstring files = directory::files({ application->basepath, "filters/" }, "*.filter");
-  if(files.size() == 0) directory::files({ application->userpath, "filters/" }, "*.filter");
+  if(files.size() == 0) files = directory::files({ application->userpath, "filters/" }, "*.filter");
   reference_array<RadioItem&> group;
 
   settingsVideoFilterList = new RadioItem[files.size()];

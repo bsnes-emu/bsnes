@@ -24,22 +24,46 @@ static string iNES(const uint8_t *data, unsigned size) {
     output.append("    mirror=", mirror == 0 ? "horizontal" : "vertical", "\n");
     break;
 
-  case 1:
+  case   1:
     output.append("  board type=NES-SXROM\n");
+    output.append("    chip type=MMC1B2\n");
+    prgram = 8192;
     break;
 
-  case 2:
+  case   2:
     output.append("  board type=NES-UOROM\n");
     output.append("    mirror=", mirror == 0 ? "horizontal" : "vertical", "\n");
     break;
 
-  case 3:
+  case   3:
     output.append("  board type=NES-CNROM\n");
     output.append("    mirror=", mirror == 0 ? "horizontal" : "vertical", "\n");
     break;
 
-  case 7:
+  case   4:
+    output.append("  board type=NES-TLROM\n");
+    output.append("    chip type=MMC3B\n");
+    prgram = 8192;
+    break;
+
+  case   7:
     output.append("  board type=NES-AOROM\n");
+    break;
+
+  case  16:
+    output.append("  board type=BANDAI-FCG\n");
+    output.append("    chip type=LZ93D50 manufacturer=Sharp\n");
+    break;
+
+  case 24:
+    output.append("  board type=KONAMI-VRC-6\n");
+    output.append("    chip type=VRC6\n");
+    break;
+
+  case 26:
+    output.append("  board type=KONAMI-VRC-6\n");
+    output.append("    chip type=VRC6\n");
+    prgram = 8192;
     break;
   }
 
@@ -50,17 +74,3 @@ static string iNES(const uint8_t *data, unsigned size) {
 
   return output;
 }
-
-/*
-  switch(mapperNumber) {
-//default : mapper = &Mapper::none; break;
-//case   1: mapper = &Mapper::mmc1; break;
-//case   2: mapper = &Mapper::uorom; break;
-//case   3: mapper = &Mapper::cnrom; break;
-  case   4: mapper = &Mapper::mmc3; break;
-//case   7: mapper = &Mapper::aorom; break;
-  case  16: mapper = &Mapper::bandaiFCG; break;
-  case  24: mapper = &Mapper::vrc6; Mapper::vrc6.abus_swap = 0; break;
-  case  26: mapper = &Mapper::vrc6; Mapper::vrc6.abus_swap = 1; break;
-  }
-*/

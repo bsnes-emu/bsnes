@@ -9,7 +9,7 @@ struct Cartridge : Processor, property<Cartridge> {
   void unload();
 
   unsigned ram_size();
-  uint8 *ram_data();
+  uint8* ram_data();
 
   void power();
   void reset();

@@ -44,7 +44,7 @@ void Interface::setController(unsigned port, unsigned device) {
 }
 
 void Interface::updateDSP() {
-  dspaudio.setVolume((double)config->audio.volume / 100.0);
+  dspaudio.setVolume(config->audio.mute == false ? (double)config->audio.volume / 100.0 : 0.0);
   switch(mode()) {
   case Mode::NES:     return dspaudio.setFrequency(config->audio.frequencyNES);
   case Mode::SNES:    return dspaudio.setFrequency(config->audio.frequencySNES);

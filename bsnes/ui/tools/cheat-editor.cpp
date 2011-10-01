@@ -161,11 +161,11 @@ bool CheatEditor::save(const string &filename) {
   file fp;
   if(fp.open(filename, file::mode::write) == false) return false;
 
-  fp.print("cartridge sha256=", interface->sha256(), "\n");
+  fp.print("cartridge sha256=`", interface->sha256(), "`\n");
   for(unsigned n = 0; n <= lastSave; n++) {
     fp.print("  cheat", cheatList.checked(n) ? " enable" : "", "\n");
-    fp.print("    description=|", cheatText[n][Desc], "|\n");
-    fp.print("    code=|", cheatText[n][Code], "|\n");
+    fp.print("    description=`", string{cheatText[n][Desc]}.transform("`", "'"), "`\n");
+    fp.print("    code=`", string{cheatText[n][Code]}.transform("`", "'"), "`\n");
   }
 
   fp.close();

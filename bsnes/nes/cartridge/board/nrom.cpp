@@ -31,6 +31,10 @@ void chr_write(unsigned addr, uint8 data) {
   return Board::chr_write(addr, data);
 }
 
+void serialize(serializer &s) {
+  Board::serialize(s);
+}
+
 NROM(BML::Node &board, const uint8_t *data, unsigned size) : Board(board, data, size) {
   settings.mirror = board["mirror"].value() == "vertical" ? 1 : 0;
 }

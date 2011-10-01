@@ -2,7 +2,10 @@
 #include "cnrom.cpp"
 #include "nrom.cpp"
 #include "sxrom.cpp"
+#include "txrom.cpp"
 #include "uxrom.cpp"
+#include "bandai-fcg.cpp"
+#include "konami-vrc6.cpp"
 
 unsigned Board::mirror(unsigned addr, unsigned size) const {
   unsigned base = 0;
@@ -106,10 +109,16 @@ Board* Board::load(const string &markup, const uint8_t *data, unsigned size) {
   if(type == "NES-AN1ROM"  ) return new AxROM(board, data, size);
   if(type == "NES-AOROM"   ) return new AxROM(board, data, size);
   if(type == "NES-CNROM"   ) return new CNROM(board, data, size);
-  if(type == "NES-NROM-256") return new NROM(board, data, size);
+  if(type == "NES-NROM-256") return new NROM (board, data, size);
   if(type == "NES-UNROM"   ) return new UxROM(board, data, size);
+  if(type == "NES-SNROM"   ) return new SxROM(board, data, size);
   if(type == "NES-SXROM"   ) return new SxROM(board, data, size);
+  if(type == "NES-TLROM"   ) return new TxROM(board, data, size);
   if(type == "NES-UOROM"   ) return new UxROM(board, data, size);
+
+  if(type == "BANDAI-FCG") return new BandaiFCG(board, data, size);
+
+  if(type == "KONAMI-VRC-6") return new KonamiVRC6(board, data, size);
 
   return nullptr;
 }
