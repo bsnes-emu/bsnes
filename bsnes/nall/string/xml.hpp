@@ -1,8 +1,7 @@
-#ifndef NALL_STRING_XML_HPP
-#define NALL_STRING_XML_HPP
+#ifdef NALL_STRING_INTERNAL_HPP
 
-//XML subset parser
-//version 0.05
+//XML v1.0 subset parser
+//revision 0.05
 
 namespace nall {
 

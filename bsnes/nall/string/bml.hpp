@@ -1,124 +1,175 @@
 #ifdef NALL_STRING_INTERNAL_HPP
 
-//BML parser
-//version 0.02
+//BML v1.0 parser
+//revision 0.03
 
 namespace nall {
 namespace BML {
 
-struct Node : linear_vector<Node> {
-  Node *parent;
-  const char *cname;
-  const char *cvalue;
+inline static string encode(const char *s) {
+  array<char> output;
+  while(*s) {
+    char c = *s++;
+    (c == '\n') ? output.append("{lf}", 4) :
+    (c ==  '{') ? output.append("{lb}", 4) :
+    (c ==  '}') ? output.append("{rb}", 4) :
+    output.append(c);
+  }
+  output.append(0);
+  return output.get();
+}
 
-  inline string name() { return cname; }
-  inline string value() { return cvalue; }
+struct Node {
+  cstring name;
+  cstring value;
+  signed depth;
 
 private:
+  linear_vector<Node> children;
+
   inline bool valid(char p) const {
     if(p >= 'A' && p <= 'Z') return true;
     if(p >= 'a' && p <= 'z') return true;
     if(p >= '0' && p <= '9') return true;
-    if(p == '+' || p == '-') return true;
-    if(p == '.' || p == '_') return true;
-    if(p == ':') return true;
+    if(p == '-' || p == '.') return true;
     return false;
-  }
-
-  inline bool space(char p) const {
-    return p == ' ' || p == '\t';
   }
 
   inline unsigned parseDepth(char *p) {
     unsigned depth = 0;
-    while(space(*p)) depth++, p++;
+    while(*p == '\t') depth++, p++;
     return depth;
   }
 
-  inline void parseNode(char *&p) {
+  inline void parseName(char *&p) {
     if(valid(*p)) {
-      cname = p;
+      name = p;
       while(valid(*p)) p++;
-      if(*p != '=') return;
-      *p++ = 0;
     }
-    if(*p == '\n') throw "Missing node value";
+  }
 
-    if(valid(*p)) {
-      cvalue = p;
-      while(valid(*p)) p++;
-    } else {
-      char terminal = *p++;
-      cvalue = p;
-      while(*p && *p != terminal) p++;
-      if(*p == 0) throw "Unclosed terminal";
-      *p++ = 0;
+  inline void parseValue(char *&p) {
+    *p++ = 0;  //'{'
+    value = p;
+    char *w = p;
+    while(*p) {
+      if(*p == '\n') throw "Unclosed node value";
+      if(*p ==  '}') break;
+      if(*p ==  '{') {
+             if(*(p + 1) == 'l' && *(p + 2) == 'b' && *(p + 3) == '}') *w++ =  '{', p += 4;
+        else if(*(p + 1) == 'r' && *(p + 2) == 'b' && *(p + 3) == '}') *w++ =  '}', p += 4;
+        else if(*(p + 1) == 'l' && *(p + 2) == 'f' && *(p + 3) == '}') *w++ = '\n', p += 4;
+        else throw "Unrecognized escape sequence";
+        continue;
+      }
+      *w++ = *p++;
     }
+
+    if(*p != '}') throw "Unclosed node value";
+    *w = *p++ = 0;  //'}'
   }
 
   inline void parseLine(char *&p) {
-    unsigned depth = parseDepth(p);
-    while(space(*p)) p++;
-    parseNode(p);
+    depth = parseDepth(p);
+    while(*p == '\t') p++;
 
-    while(space(*p)) {
+    parseName(p);
+    bool multiLine = false;
+    if(*p == ':') {
+      multiLine = true;
       *p++ = 0;
-      Node node(this);
-      node.parseNode(p);
-      append(node);
+    } else if(*p == '{') {
+      parseValue(p);
+      if(*p != ' ' && *p != '\n') throw "Invalid character after first node value";
     }
 
-    if(*p == '\n') *p++ = 0;
+    while(*p == ' ') {
+      *p++ = 0;
+      Node node;
+      node.parseName(p);
+      if(*p == '{') node.parseValue(p);
+      if(*p != ' ' && *p != '\n') throw "Invalid character after node";
+      children.append(node);
+    }
 
-    while(parseDepth(p) > depth) {
-      Node node(this);
-      node.parseLine(p);
-      append(node);
+    if(*p == 0) throw "Missing line feed";
+    while(*p == '\n') *p++ = 0;
+
+    if(multiLine == false) {
+      while(parseDepth(p) > depth) {
+        Node node;
+        node.parseLine(p);
+        children.append(node);
+      }
+    } else {
+      value = p;
+      char *w = p;
+      while(parseDepth(p) > depth) {
+        p += depth + 1;
+        while(*p && *p != '\n') *w++ = *p++;
+        if(*p != '\n') throw "Multi-line value missing line feed";
+        *w++ = *p++;
+      }
+      *(w - 1) = 0;
+      if(value == p) value = p - 1;  //no text data copied, point it back at null data
+      *(p - 1) = 0;
     }
   }
 
-  inline void parse(char *&p, unsigned parentDepth = 0) {
+  inline void parse(char *&p) {
     while(*p) {
       while(*p == '\n') *p++ = 0;
-      Node node(this);
+      Node node;
       node.parseLine(p);
-      append(node);
+      children.append(node);
     }
   }
 
 public:
-  inline Node& operator[](const string &name) {
-    for(auto &node : *this) {
-      if(!strcmp(node.cname, name)) return node;
+  inline Node& operator[](const char *name) {
+    for(auto &node : children) {
+      if(node.name == name) return node;
     }
     static Node node;
+    node.name = nullptr;
     return node;
   }
 
-  inline bool exists() {
-    return parent != nullptr;
+  inline bool exists() const {
+    return name;
   }
 
-  inline string content(const string &separator = "\n") const {
-    string result;
-    for(auto &node : *this) result.append(node.cvalue, separator);
-    result.rtrim<1>(separator);
-    return result;
-  }
-
-  inline Node(const string &document) : parent(nullptr), cname(nullptr), cvalue(nullptr) {
+  inline bool load(const char *document) {
+    if(document == nullptr) return false;
     char *p = strdup(document);
-    cvalue = p;
+    name = nullptr;
+    value = p;
     try {
       parse(p);
     } catch(const char *error) {
-      reset();
+      free((void*)(const char*)value);
+      children.reset();
+      return false;
     }
+    depth = -1;
+    return true;
   }
 
-  inline Node(Node *parent) : parent(parent), cname(""), cvalue("") {}
-  inline Node() : parent(nullptr), cname(""), cvalue("") {}
-  inline ~Node() { if(cname == nullptr && cvalue) free((void*)cvalue); }
+  inline void constructor() {
+    depth = 0;
+    name = "";
+    value = "";
+  }
+
+  unsigned size() const { return children.size(); }
+  Node* begin() { return children.begin(); }
+  Node* end() { return children.end(); }
+  const Node* begin() const { return children.begin(); }
+  const Node* end() const { return children.end(); }
+
+  inline Node() { constructor(); }
+  inline Node(const char *document) { constructor(); load(document); }
+  inline ~Node() { if(depth == -1) free((void*)(const char*)value); }
 };
 
 }

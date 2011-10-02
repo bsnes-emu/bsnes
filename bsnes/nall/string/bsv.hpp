@@ -1,7 +1,7 @@
 #ifdef NALL_STRING_INTERNAL_HPP
 
-//BSV parser
-//version 0.02
+//BSV v1.0 parser
+//revision 0.02
 
 namespace nall {
 

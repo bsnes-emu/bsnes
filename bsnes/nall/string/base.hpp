@@ -1,10 +1,25 @@
-#ifndef NALL_STRING_BASE_HPP
-#define NALL_STRING_BASE_HPP
+#ifdef NALL_STRING_INTERNAL_HPP
 
 namespace nall {
+  struct cstring;
   struct string;
   struct lstring;
   template<typename T> inline const char* to_string(T);
+
+  struct cstring {
+    inline operator const char*() const;
+    inline unsigned length() const;
+    inline bool operator==(const char*) const;
+    inline bool operator!=(const char*) const;
+    inline optional<unsigned> position(const char *key) const;
+    inline optional<unsigned> iposition(const char *key) const;
+    inline cstring& operator=(const char *data);
+    inline cstring(const char *data);
+    inline cstring();
+
+  protected:
+    const char *data;
+  };
 
   struct string {
     inline void reserve(unsigned);

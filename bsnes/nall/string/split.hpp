@@ -1,5 +1,4 @@
-#ifndef NALL_STRING_SPLIT_HPP
-#define NALL_STRING_SPLIT_HPP
+#ifdef NALL_STRING_INTERNAL_HPP
 
 namespace nall {
 

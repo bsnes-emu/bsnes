@@ -3,7 +3,7 @@
 //NES-AN1ROM
 //NES-AOROM
 
-struct AxROM : Board {
+struct NES_AxROM : Board {
 
 uint4 prg_bank;
 bool mirror_select;
@@ -46,7 +46,7 @@ void serialize(serializer &s) {
   s.integer(mirror_select);
 }
 
-AxROM(BML::Node &board, const uint8_t *data, unsigned size) : Board(board, data, size) {
+NES_AxROM(BML::Node &board, const uint8_t *data, unsigned size) : Board(board, data, size) {
 }
 
 };

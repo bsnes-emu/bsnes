@@ -1,5 +1,4 @@
-#ifndef NALL_STRING_STRPOS_HPP
-#define NALL_STRING_STRPOS_HPP
+#ifdef NALL_STRING_INTERNAL_HPP
 
 //usage example:
 //if(auto position = strpos(str, key)) print(position(), "\n");

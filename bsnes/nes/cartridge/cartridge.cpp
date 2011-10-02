@@ -23,6 +23,7 @@ void Cartridge::load(const string &markup, const uint8_t *data, unsigned size) {
     sha256 = nall::sha256(data + 16, size - 16);
     board = Board::load(markup != "" ? markup : iNES(data, size), data + 16, size - 16);
   }
+  if(board == nullptr) return;
 
   system.load();
   loaded = true;

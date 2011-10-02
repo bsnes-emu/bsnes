@@ -1,4 +1,4 @@
-struct TxROM : Board {
+struct NES_TxROM : Board {
 
 enum class Revision : unsigned {
   TBROM,
@@ -110,7 +110,7 @@ void serialize(serializer &s) {
   mmc3.serialize(s);
 }
 
-TxROM(BML::Node &board, const uint8_t *data, unsigned size) : Board(board, data, size), mmc3(*this) {
+NES_TxROM(BML::Node &board, const uint8_t *data, unsigned size) : Board(board, data, size), mmc3(*this) {
   revision = Revision::TLROM;
 }
 

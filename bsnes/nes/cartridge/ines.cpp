@@ -20,55 +20,65 @@ static string iNES(const uint8_t *data, unsigned size) {
 
   switch(mapper) {
   default:
-    output.append("  board type=NES-NROM-256\n");
-    output.append("    mirror=", mirror == 0 ? "horizontal" : "vertical", "\n");
+    output.append("\tboard type{NES-NROM-256}\n");
+    output.append("\t\tmirror{", mirror == 0 ? "horizontal" : "vertical", "}\n");
     break;
 
   case   1:
-    output.append("  board type=NES-SXROM\n");
-    output.append("    chip type=MMC1B2\n");
+    output.append("\tboard type{NES-SXROM}\n");
+    output.append("\t\tchip type{MMC1B2}\n");
     prgram = 8192;
     break;
 
   case   2:
-    output.append("  board type=NES-UOROM\n");
-    output.append("    mirror=", mirror == 0 ? "horizontal" : "vertical", "\n");
+    output.append("\tboard type{NES-UOROM}\n");
+    output.append("\t\tmirror{", mirror == 0 ? "horizontal" : "vertical", "}\n");
     break;
 
   case   3:
-    output.append("  board type=NES-CNROM\n");
-    output.append("    mirror=", mirror == 0 ? "horizontal" : "vertical", "\n");
+    output.append("\tboard type{NES-CNROM}\n");
+    output.append("\t\tmirror{", mirror == 0 ? "horizontal" : "vertical", "}\n");
     break;
 
   case   4:
-    output.append("  board type=NES-TLROM\n");
-    output.append("    chip type=MMC3B\n");
+    output.append("\tboard type{NES-TLROM}\n");
+    output.append("\t\tchip type{MMC3B}\n");
     prgram = 8192;
     break;
 
   case   7:
-    output.append("  board type=NES-AOROM\n");
+    output.append("\tboard type{NES-AOROM}\n");
     break;
 
   case  16:
-    output.append("  board type=BANDAI-FCG\n");
-    output.append("    chip type=LZ93D50 manufacturer=Sharp\n");
+    output.append("\tboard type{BANDAI-FCG}\n");
+    output.append("\t\tchip type{LZ93D50}\n");
     break;
 
-  case 24:
-    output.append("  board type=KONAMI-VRC-6\n");
-    output.append("    chip type=VRC6\n");
+  case  24:
+    output.append("\tboard type{KONAMI-VRC-6}\n");
+    output.append("\t\tchip type{VRC6}\n");
     break;
 
-  case 26:
-    output.append("  board type=KONAMI-VRC-6\n");
-    output.append("    chip type=VRC6\n");
+  case  26:
+    output.append("\tboard type{KONAMI-VRC-6}\n");
+    output.append("\t\tchip type{VRC6}\n");
     prgram = 8192;
+    break;
+
+  case  34:
+    output.append("\tboard type{NES-BNROM}\n");
+    output.append("\t\tmirror{", mirror == 0 ? "horizontal" : "vertical", "}\n");
+    break;
+
+  case  66:
+    output.append("\tboard type{NES-GNROM}\n");
+    output.append("\t\tmirror{", mirror == 0 ? "horizontal" : "vertical", "}\n");
     break;
   }
 
-  output.append("    prg rom=", prgrom, " ram=", prgram, "\n");
-  output.append("    chr rom=", chrrom, " ram=", chrram, "\n");
+  output.append("\t\tprg rom{", prgrom, "} ram{", prgram, "}\n");
+  output.append("\t\tchr rom{", chrrom, "} ram{", chrram, "}\n");
 
   print(output, "\n");
 

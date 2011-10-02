@@ -28,6 +28,7 @@
 #include <nall/string/cast.hpp>
 #include <nall/string/compare.hpp>
 #include <nall/string/convert.hpp>
+#include <nall/string/cstring.hpp>
 #include <nall/string/filename.hpp>
 #include <nall/string/math.hpp>
 #include <nall/string/platform.hpp>

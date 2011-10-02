@@ -29,7 +29,7 @@ endif
 
 # platform
 ifeq ($(platform),x)
-  # tree vectorization causes code generation errors with GCC 4.6.1
+  # tree vectorization causes code generation errors with Linux/GCC 4.6.1
   flags += -fno-tree-vectorize
   link += -s -ldl -lX11 -lXext
 else ifeq ($(platform),osx)

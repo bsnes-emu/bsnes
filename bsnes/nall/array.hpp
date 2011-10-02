@@ -53,19 +53,12 @@ namespace nall {
       operator[](buffersize) = data;
     }
 
+    void append(const T data[], unsigned length) {
+      for(unsigned n = 0; n < length; n++) operator[](buffersize) = data[n];
+    }
+
     void remove() {
       if(size > 0) resize(size - 1);  //remove last element only
-    }
-
-    template<typename U> void insert(unsigned index, const U list) {
-      unsigned listsize = container_size(list);
-      resize(buffersize + listsize);
-      memmove(pool + index + listsize, pool + index, (buffersize - index) * sizeof(T));
-      for(auto &item : list) pool[index++] = item;
-    }
-
-    void insert(unsigned index, const T item) {
-      insert(index, array<T>{ item });
     }
 
     void remove(unsigned index, unsigned count = 1) {

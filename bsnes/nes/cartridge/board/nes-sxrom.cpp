@@ -1,4 +1,4 @@
-struct SxROM : Board {
+struct NES_SxROM : Board {
 
 enum class Revision : unsigned {
   SAROM,
@@ -138,7 +138,7 @@ void serialize(serializer &s) {
   s.integer(shiftdata);
 }
 
-SxROM(BML::Node &board, const uint8_t *data, unsigned size) : Board(board, data, size), mmc1(*this) {
+NES_SxROM(BML::Node &board, const uint8_t *data, unsigned size) : Board(board, data, size), mmc1(*this) {
   revision = Revision::SXROM;
 
   shiftaddr = 0;
