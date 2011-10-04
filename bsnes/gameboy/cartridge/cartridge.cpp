@@ -16,7 +16,7 @@ namespace GameBoy {
 #include "serialization.cpp"
 Cartridge cartridge;
 
-void Cartridge::load(const string &xml, const uint8_t *data, unsigned size) {
+void Cartridge::load(const string &markup, const uint8_t *data, unsigned size) {
   if(size == 0) size = 32768;
   romdata = allocate<uint8>(romsize = size, 0xff);
   if(data) memcpy(romdata, data, size);
@@ -33,42 +33,24 @@ void Cartridge::load(const string &xml, const uint8_t *data, unsigned size) {
   info.romsize = 0;
   info.ramsize = 0;
 
-  xml_element document = xml_parse(xml);
-  for(auto &head : document.element) {
-    if(head.name == "cartridge") {
-      for(auto &attr : head.attribute) {
-        if(attr.name == "mapper") {
-          if(attr.content == "none")  info.mapper = Mapper::MBC0;
-          if(attr.content == "MBC1")  info.mapper = Mapper::MBC1;
-          if(attr.content == "MBC2")  info.mapper = Mapper::MBC2;
-          if(attr.content == "MBC3")  info.mapper = Mapper::MBC3;
-          if(attr.content == "MBC5")  info.mapper = Mapper::MBC5;
-          if(attr.content == "MMM01") info.mapper = Mapper::MMM01;
-          if(attr.content == "HuC1")  info.mapper = Mapper::HuC1;
-          if(attr.content == "HuC3")  info.mapper = Mapper::HuC3;
-        }
+  BML::Document document(markup);
 
-        if(attr.name == "rtc") info.rtc = (attr.content == "true" ? true : false);
-        if(attr.name == "rumble") info.rumble = (attr.content == "true" ? true : false);
-      }
+  auto &mapperid = document["cartridge"]["mapper"].value;
+  if(mapperid == "none" ) info.mapper = Mapper::MBC0;
+  if(mapperid == "MBC1" ) info.mapper = Mapper::MBC1;
+  if(mapperid == "MBC2" ) info.mapper = Mapper::MBC2;
+  if(mapperid == "MBC3" ) info.mapper = Mapper::MBC3;
+  if(mapperid == "MBC5" ) info.mapper = Mapper::MBC5;
+  if(mapperid == "MMM01") info.mapper = Mapper::MMM01;
+  if(mapperid == "HuC1" ) info.mapper = Mapper::HuC1;
+  if(mapperid == "HuC3" ) info.mapper = Mapper::HuC3;
 
-      for(auto &elem : head.element) {
-        if(elem.name == "rom") {
-          for(auto &attr : elem.attribute) {
-            if(attr.name == "size") info.romsize = hex(attr.content);
-          }
-        }
+  info.rtc = document["cartridge"]["rtc"].exists();
+  info.rumble = document["cartridge"]["rumble"].exists();
 
-        if(elem.name == "ram") {
-          info.ram = true;
-          for(auto &attr : elem.attribute) {
-            if(attr.name == "size") info.ramsize = hex(attr.content);
-            if(attr.name == "battery") info.battery = (attr.content == "true" ? true : false);
-          }
-        }
-      }
-    }
-  }
+  info.romsize = hex(document["cartridge"]["rom"]["size"].value);
+  info.ramsize = hex(document["cartridge"]["ram"]["size"].value);
+  info.battery = document["cartridge"]["ram"]["non-volatile"].exists();
 
   switch(info.mapper) { default:
     case Mapper::MBC0:  mapper = &mbc0;  break;

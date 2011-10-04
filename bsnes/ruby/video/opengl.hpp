@@ -136,29 +136,11 @@ public:
     }
 
     if(source) {
-      bool is_glsl = false;
-      fragmentfilter = 0;
-      string fragment_source;
-      string vertex_source;
-
-      xml_element document = xml_parse(source);
-      for(auto &head : document.element) {
-        if(head.name == "shader") {
-          for(auto &attribute : head.attribute) {
-            if(attribute.name == "language" && attribute.content == "GLSL") is_glsl = true;
-          }
-          for(auto &element : head.element) {
-            if(element.name == "fragment") {
-              for(auto &attribute : element.attribute) {
-                if(attribute.name == "filter") fragmentfilter = attribute.content == "linear" ? 1 : 0;
-              }
-              fragment_source = element.parse();
-            } else if(element.name == "vertex") {
-              vertex_source = element.parse();
-            }
-          }
-        }
-      }
+      BML::Document document(source);
+      bool is_glsl = document["shader"]["language"].value == "GLSL";
+      fragmentfilter = document["shader"]["fragment"]["filter"].value == "linear" ? 1 : 0;
+      string fragment_source = document["shader"]["fragment"].value;
+      string vertex_source = document["shader"]["vertex"].value;
 
       if(is_glsl) {
         if(fragment_source != "") set_fragment_shader(fragment_source);

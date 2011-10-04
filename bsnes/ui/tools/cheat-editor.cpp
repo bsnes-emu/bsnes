@@ -129,7 +129,7 @@ bool CheatEditor::load(const string &filename) {
   if(data.readfile(filename) == false) return false;
 
   unsigned n = 0;
-  BML::Node document(data);
+  BML::Document document(data);
   for(auto &cheat : document["cartridge"]) {
     if(cheat.name != "cheat") continue;
     cheatList.setChecked(n, cheat["enable"].exists());
@@ -161,11 +161,11 @@ bool CheatEditor::save(const string &filename) {
   file fp;
   if(fp.open(filename, file::mode::write) == false) return false;
 
-  fp.print("cartridge sha256{", interface->sha256(), "}\n");
+  fp.print("cartridge sha256:", interface->sha256(), "\n");
   for(unsigned n = 0; n <= lastSave; n++) {
     fp.print("\tcheat", cheatList.checked(n) ? " enable" : "", "\n");
-    fp.print("\t\tdescription{", BML::encode(cheatText[n][Desc]), "}\n");
-    fp.print("\t\tcode{", BML::encode(cheatText[n][Code]), "}\n");
+    fp.print("\t\tdescription:", cheatText[n][Desc], "\n");
+    fp.print("\t\tcode:", cheatText[n][Code], "\n");
   }
 
   fp.close();

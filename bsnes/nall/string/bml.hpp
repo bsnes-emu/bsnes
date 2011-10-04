@@ -1,124 +1,97 @@
 #ifdef NALL_STRING_INTERNAL_HPP
 
 //BML v1.0 parser
-//revision 0.03
+//revision 0.05
 
 namespace nall {
 namespace BML {
 
-inline static string encode(const char *s) {
+inline static string indent(const char *s, unsigned depth) {
   array<char> output;
-  while(*s) {
-    char c = *s++;
-    (c == '\n') ? output.append("{lf}", 4) :
-    (c ==  '{') ? output.append("{lb}", 4) :
-    (c ==  '}') ? output.append("{rb}", 4) :
-    output.append(c);
-  }
-  output.append(0);
+  do {
+    for(unsigned n = 0; n < depth; n++) output.append('\t');
+    do output.append(*s); while(*s && *s++ != '\n');
+  } while(*s);
   return output.get();
 }
 
 struct Node {
   cstring name;
   cstring value;
-  signed depth;
 
 private:
   linear_vector<Node> children;
 
-  inline bool valid(char p) const {
-    if(p >= 'A' && p <= 'Z') return true;
-    if(p >= 'a' && p <= 'z') return true;
-    if(p >= '0' && p <= '9') return true;
-    if(p == '-' || p == '.') return true;
-    return false;
+  inline bool valid(char p) const {  //A-Za-z0-9-.
+    return p - 'A' < 26u | p - 'a' < 26u | p - '0' < 10u | p - '-' < 2u;
   }
 
-  inline unsigned parseDepth(char *p) {
+  inline unsigned parseDepth(char *&p) {
+    while(*p == '\n' || *p == '#') {
+      while(*p != '\n') *p++ = 0;
+      *p++ = 0;  //'\n'
+    }
     unsigned depth = 0;
-    while(*p == '\t') depth++, p++;
+    while(p[depth] == '\t') depth++;
     return depth;
   }
 
   inline void parseName(char *&p) {
-    if(valid(*p)) {
-      name = p;
-      while(valid(*p)) p++;
-    }
+    if(valid(*p) == false) throw "Missing node name";
+    name = p;
+    while(valid(*p)) p++;
   }
 
   inline void parseValue(char *&p) {
-    *p++ = 0;  //'{'
+    char terminal = *p == ':' ? '\n' : ' ';  //':' or '='
+    *p++ = 0;
+    value = p;
+    while(*p && *p != terminal && *p != '\n') p++;
+  }
+
+  inline void parseBlock(char *&p, unsigned depth) {
     value = p;
     char *w = p;
-    while(*p) {
-      if(*p == '\n') throw "Unclosed node value";
-      if(*p ==  '}') break;
-      if(*p ==  '{') {
-             if(*(p + 1) == 'l' && *(p + 2) == 'b' && *(p + 3) == '}') *w++ =  '{', p += 4;
-        else if(*(p + 1) == 'r' && *(p + 2) == 'b' && *(p + 3) == '}') *w++ =  '}', p += 4;
-        else if(*(p + 1) == 'l' && *(p + 2) == 'f' && *(p + 3) == '}') *w++ = '\n', p += 4;
-        else throw "Unrecognized escape sequence";
-        continue;
-      }
-      *w++ = *p++;
+    while(parseDepth(p) > depth) {
+      p += depth + 1;
+      while(*p && *p != '\n') *w++ = *p++;
+      if(*p && *p != '\n') throw "Multi-line value missing line feed";
+      *w++ = *p;
     }
-
-    if(*p != '}') throw "Unclosed node value";
-    *w = *p++ = 0;  //'}'
+    *(w - 1) = 0;  //'\n'
   }
 
   inline void parseLine(char *&p) {
-    depth = parseDepth(p);
+    unsigned depth = parseDepth(p);
     while(*p == '\t') p++;
 
     parseName(p);
-    bool multiLine = false;
-    if(*p == ':') {
-      multiLine = true;
-      *p++ = 0;
-    } else if(*p == '{') {
-      parseValue(p);
-      if(*p != ' ' && *p != '\n') throw "Invalid character after first node value";
-    }
+    bool multiLine = *p == '~';
+    if(multiLine) *p++ = 0;
+    else if(*p == ':' || *p == '=') parseValue(p);
+    if(*p && *p != ' ' && *p != '\n') throw "Invalid character encountered";
 
     while(*p == ' ') {
       *p++ = 0;
       Node node;
       node.parseName(p);
-      if(*p == '{') node.parseValue(p);
-      if(*p != ' ' && *p != '\n') throw "Invalid character after node";
+      if(*p == ':' || *p == '=') node.parseValue(p);
+      if(*p && *p != ' ' && *p != '\n') throw "Invalid character after node";
+      if(*p == '\n') *p++ = 0;
       children.append(node);
     }
 
-    if(*p == 0) throw "Missing line feed";
-    while(*p == '\n') *p++ = 0;
+    if(multiLine) return parseBlock(p, depth);
 
-    if(multiLine == false) {
-      while(parseDepth(p) > depth) {
-        Node node;
-        node.parseLine(p);
-        children.append(node);
-      }
-    } else {
-      value = p;
-      char *w = p;
-      while(parseDepth(p) > depth) {
-        p += depth + 1;
-        while(*p && *p != '\n') *w++ = *p++;
-        if(*p != '\n') throw "Multi-line value missing line feed";
-        *w++ = *p++;
-      }
-      *(w - 1) = 0;
-      if(value == p) value = p - 1;  //no text data copied, point it back at null data
-      *(p - 1) = 0;
+    while(parseDepth(p) > depth) {
+      Node node;
+      node.parseLine(p);
+      children.append(node);
     }
   }
 
   inline void parse(char *&p) {
     while(*p) {
-      while(*p == '\n') *p++ = 0;
       Node node;
       node.parseLine(p);
       children.append(node);
@@ -135,41 +108,41 @@ public:
     return node;
   }
 
-  inline bool exists() const {
-    return name;
-  }
-
-  inline bool load(const char *document) {
-    if(document == nullptr) return false;
-    char *p = strdup(document);
-    name = nullptr;
-    value = p;
-    try {
-      parse(p);
-    } catch(const char *error) {
-      free((void*)(const char*)value);
-      children.reset();
-      return false;
-    }
-    depth = -1;
-    return true;
-  }
-
-  inline void constructor() {
-    depth = 0;
-    name = "";
-    value = "";
-  }
-
+  inline bool exists() const { return name; }
   unsigned size() const { return children.size(); }
   Node* begin() { return children.begin(); }
   Node* end() { return children.end(); }
   const Node* begin() const { return children.begin(); }
   const Node* end() const { return children.end(); }
+  inline Node() : name(""), value("") {}
+  friend class Document;
+};
 
-  inline Node() { constructor(); }
-  inline Node(const char *document) { constructor(); load(document); }
-  inline ~Node() { if(depth == -1) free((void*)(const char*)value); }
+struct Document : Node {
+  cstring error;
+
+  inline bool load(const char *document) {
+    if(document == nullptr) return false;
+    this->document = strdup(document);
+    char *p = this->document;
+    try {
+      this->error = nullptr;
+      parse(p);
+    } catch(const char *error) {
+      this->error = error;
+      free(this->document);
+      this->document = nullptr;
+      children.reset();
+      return false;
+    }
+    return true;
+  }
+
+  inline Document(const char *document = "") : document(nullptr), error(nullptr) { if(*document) load(document); }
+  inline ~Document() { if(document) free(document); }
+
+private:
+  char *document;
 };
 
 }

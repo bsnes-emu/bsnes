@@ -102,7 +102,7 @@ Board::~Board() {
 }
 
 Board* Board::load(const string &markup, const uint8_t *data, unsigned size) {
-  BML::Node document(markup);
+  BML::Document document(markup);
   auto &board = document["cartridge"]["board"];
   string type = board["type"].value;
 

@@ -6,12 +6,12 @@
 #define CARTRIDGE_CPP
 namespace SNES {
 
-#include "xml.cpp"
+#include "markup.cpp"
 #include "serialization.cpp"
 
 Cartridge cartridge;
 
-void Cartridge::load(Mode cartridge_mode, const lstring &xml_list) {
+void Cartridge::load(Mode cartridge_mode, const char *markup) {
   mode = cartridge_mode;
   region = Region::NTSC;
   ram_size = 0;
@@ -33,8 +33,8 @@ void Cartridge::load(Mode cartridge_mode, const lstring &xml_list) {
 
   nvram.reset();
 
-  parse_xml(xml_list);
-//print(xml_list[0], "\n\n");
+  parse_markup(markup);
+  print(markup, "\n\n");
 
   if(ram_size > 0) {
     ram.map(allocate<uint8>(ram_size, 0xff), ram_size);

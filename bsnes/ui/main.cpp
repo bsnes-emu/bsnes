@@ -49,7 +49,7 @@ Application::Application(int argc, char **argv) {
   inputManager = new InputManager;
   utility = new Utility;
 
-  title = "bsnes v082.28";
+  title = "bsnes v082.29";
 
   string fontFamily = Intrinsics::platform() == Intrinsics::Platform::Windows ? "Tahoma, " : "Sans, ";
   normalFont = { fontFamily, "8" };

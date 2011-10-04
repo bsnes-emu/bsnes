@@ -7,7 +7,7 @@ bool InterfaceGameBoy::loadCartridge(const string &filename) {
   interface->baseName = nall::basename(filename);
 
   GameBoyCartridge info(data, size);
-  GameBoy::Interface::loadCartridge(info.xml, data, size);
+  GameBoy::Interface::loadCartridge(info.markup, data, size);
   delete[] data;
 
   if(GameBoy::Interface::memorySize(GameBoy::Interface::Memory::RAM) > 0) {

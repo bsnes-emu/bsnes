@@ -29,8 +29,8 @@ bool Interface::cartridgeLoaded() {
   return cartridge.loaded();
 }
 
-void Interface::loadCartridge(const string &xml, const uint8_t *data, unsigned size) {
-  cartridge.load(xml, data, size);
+void Interface::loadCartridge(const string &markup, const uint8_t *data, unsigned size) {
+  cartridge.load(markup, data, size);
   system.power();
 }
 

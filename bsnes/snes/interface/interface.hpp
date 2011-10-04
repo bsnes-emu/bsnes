@@ -8,7 +8,7 @@ struct Interface {
   virtual void connect(bool port, Input::Device device);
 
   struct CartridgeData {
-    string xml;
+    string markup;
     const uint8_t *data;
     unsigned size;
   };

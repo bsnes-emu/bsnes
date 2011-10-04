@@ -29,21 +29,21 @@ bool Interface::cartridgeLoaded() {
 
 void Interface::loadCartridge(const CartridgeData &base) {
   cartridge.rom.copy(base.data, base.size);
-  cartridge.load(Cartridge::Mode::Normal, { base.xml });
+  cartridge.load(Cartridge::Mode::Normal, base.markup);
   system.power();
 }
 
 void Interface::loadSatellaviewSlottedCartridge(const CartridgeData &base, const CartridgeData &slot) {
   cartridge.rom.copy(base.data, base.size);
   if(slot.data) bsxflash.memory.copy(slot.data, slot.size);
-  cartridge.load(Cartridge::Mode::BsxSlotted, { base.xml, slot.xml });
+  cartridge.load(Cartridge::Mode::BsxSlotted, base.markup);
   system.power();
 }
 
 void Interface::loadSatellaviewCartridge(const CartridgeData &base, const CartridgeData &slot) {
   cartridge.rom.copy(base.data, base.size);
   if(slot.data) bsxflash.memory.copy(slot.data, slot.size);
-  cartridge.load(Cartridge::Mode::Bsx, { base.xml, slot.xml });
+  cartridge.load(Cartridge::Mode::Bsx, base.markup);
   system.power();
 }
 
@@ -51,14 +51,14 @@ void Interface::loadSufamiTurboCartridge(const CartridgeData &base, const Cartri
   cartridge.rom.copy(base.data, base.size);
   if(slotA.data) sufamiturbo.slotA.rom.copy(slotA.data, slotA.size);
   if(slotB.data) sufamiturbo.slotB.rom.copy(slotB.data, slotB.size);
-  cartridge.load(Cartridge::Mode::SufamiTurbo, { base.xml, slotA.xml, slotB.xml });
+  cartridge.load(Cartridge::Mode::SufamiTurbo, base.markup);
   system.power();
 }
 
 void Interface::loadSuperGameBoyCartridge(const CartridgeData &base, const CartridgeData &slot) {
   cartridge.rom.copy(base.data, base.size);
-  GameBoy::cartridge.load(slot.xml, slot.data, slot.size);
-  cartridge.load(Cartridge::Mode::SuperGameBoy, { base.xml, "" });
+  GameBoy::cartridge.load(slot.markup, slot.data, slot.size);
+  cartridge.load(Cartridge::Mode::SuperGameBoy, base.markup);
   system.power();
 }
 

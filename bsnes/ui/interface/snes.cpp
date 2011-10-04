@@ -30,11 +30,11 @@ bool InterfaceSNES::loadCartridge(const string &basename) {
   interface->baseName = nall::basename(basename);
   interface->slotName = { nall::basename(basename) };
 
-  string xml;
-  xml.readfile({ interface->baseName, ".xml" });
-  if(xml == "") xml = SNESCartridge(data, size).xmlMemoryMap;
+  string markup;
+  markup.readfile({ interface->baseName, ".bml" });
+  if(markup == "") markup = SnesCartridge(data, size).markup;
 
-  SNES::Interface::loadCartridge({ xml, data, size });
+  SNES::Interface::loadCartridge({ markup, data, size });
   delete[] data;
 
   loadMemory();
@@ -53,11 +53,11 @@ bool InterfaceSNES::loadSatellaviewSlottedCartridge(const string &basename, cons
   if(data[1]) interface->baseName.append("+", nall::basename(notdir(slotname)));
   interface->slotName = { nall::basename(basename), nall::basename(slotname) };
 
-  string xml;
-  xml.readfile({ interface->baseName, ".xml" });
-  if(xml == "") xml = SNESCartridge(data[0], size[0]).xmlMemoryMap;
+  string markup;
+  markup.readfile({ interface->baseName, ".bml" });
+  if(markup == "") markup = SnesCartridge(data[0], size[0]).markup;
 
-  SNES::Interface::loadSatellaviewSlottedCartridge({ xml, data[0], size[0] }, { "", data[1], size[1] });
+  SNES::Interface::loadSatellaviewSlottedCartridge({ markup, data[0], size[0] }, { "", data[1], size[1] });
   delete[] data[0];
   if(data[1]) delete[] data[1];
 
@@ -77,11 +77,11 @@ bool InterfaceSNES::loadSatellaviewCartridge(const string &basename, const strin
   if(data[1]) interface->baseName.append("+", nall::basename(notdir(slotname)));
   interface->slotName = { nall::basename(basename), nall::basename(slotname) };
 
-  string xml;
-  xml.readfile({ interface->baseName, ".xml" });
-  if(xml == "") xml = SNESCartridge(data[0], size[0]).xmlMemoryMap;
+  string markup;
+  markup.readfile({ interface->baseName, ".bml" });
+  if(markup == "") markup = SnesCartridge(data[0], size[0]).markup;
 
-  SNES::Interface::loadSatellaviewCartridge({ xml, data[0], size[0] }, { "", data[1], size[1] });
+  SNES::Interface::loadSatellaviewCartridge({ markup, data[0], size[0] }, { "", data[1], size[1] });
   delete[] data[0];
   if(data[1]) delete[] data[1];
 
@@ -104,11 +104,11 @@ bool InterfaceSNES::loadSufamiTurboCartridge(const string &basename, const strin
   else if(data[2]) interface->baseName = nall::basename(slotBname);
   interface->slotName = { nall::basename(basename), nall::basename(slotAname), nall::basename(slotBname) };
 
-  string xml;
-  xml.readfile({ interface->baseName, ".xml" });
-  if(xml == "") xml = SNESCartridge(data[0], size[0]).xmlMemoryMap;
+  string markup;
+  markup.readfile({ interface->baseName, ".bml" });
+  if(markup == "") markup = SnesCartridge(data[0], size[0]).markup;
 
-  SNES::Interface::loadSufamiTurboCartridge({ xml, data[0], size[0] }, { "", data[1], size[1] }, { "", data[2], size[2] });
+  SNES::Interface::loadSufamiTurboCartridge({ markup, data[0], size[0] }, { "", data[1], size[1] }, { "", data[2], size[2] });
   delete[] data[0];
   if(data[1]) delete[] data[1];
   if(data[2]) delete[] data[2];
@@ -129,14 +129,14 @@ bool InterfaceSNES::loadSuperGameBoyCartridge(const string &basename, const stri
   if(data[1]) interface->baseName = nall::basename(slotname);
   interface->slotName = { nall::basename(basename), nall::basename(slotname) };
 
-  string xml;
-  xml.readfile({ interface->baseName, ".xml" });
-  if(xml == "") xml = SNESCartridge(data[0], size[0]).xmlMemoryMap;
+  string markup;
+  markup.readfile({ interface->baseName, ".bml" });
+  if(markup == "") markup = SnesCartridge(data[0], size[0]).markup;
 
-  string gbXml;
-  gbXml.readfile({ nall::basename(slotname), ".xml" });
-  if(gbXml == "") gbXml = GameBoyCartridge(data[1], size[1]).xml;
-  SNES::Interface::loadSuperGameBoyCartridge({ xml, data[0], size[0] }, { gbXml, data[1], size[1] });
+  string gbMarkup;
+  gbMarkup.readfile({ nall::basename(slotname), ".bml" });
+  if(gbMarkup == "") gbMarkup = GameBoyCartridge(data[1], size[1]).markup;
+  SNES::Interface::loadSuperGameBoyCartridge({ markup, data[0], size[0] }, { gbMarkup, data[1], size[1] });
   delete[] data[0];
   if(data[1]) delete[] data[1];
 
@@ -194,27 +194,29 @@ bool InterfaceSNES::loadState(const string &filename) {
 //
 
 void InterfaceSNES::videoRefresh(const uint32_t *data, bool hires, bool interlace, bool overscan) {
-  static uint16_t output[512 * 478];
+  static uint16_t output[512 * 480];
 
   unsigned width = 256 << hires;
-  unsigned height = (config->video.enableOverscan ? 240 : 224) << interlace;
+  unsigned height = 240 << interlace;
   unsigned pitch = 1024 >> interlace;
 
-  //data[] = scanline { 8 (blank) + 240 (video) + 8 (blank) }
-  //first line of video data is not rendered (effectively blank as well)
-  if(config->video.enableOverscan) {
-    if(overscan == false) data +=  1 * 1024;  // 8 + 224 +  8
-    if(overscan == true ) data +=  9 * 1024;  // 0 + 240 +  0
-  } else {
-    if(overscan == false) data +=  9 * 1024;  // 0 + 224 +  0
-    if(overscan == true ) data += 16 * 1024;  //-8 + 224 + -8
-  }
+  if(overscan == false) data +=  1 * 1024;  // 8 + 224 +  8
+  if(overscan == true ) data +=  9 * 1024;  // 0 + 240 +  0
 
   for(unsigned y = 0; y < height; y++) {
     const uint32_t *sp = data + y * pitch;
     uint16_t *dp = output + y * 512;
     for(unsigned x = 0; x < width; x++) {
       *dp++ = palette[*sp++];
+    }
+  }
+
+  if(config->video.enableOverscan == false) {
+    unsigned mask = 8 << interlace;
+    for(unsigned y = 0; y < height; y++) {
+      if(y < mask || y >= height - mask) {
+        memset(output + y * 512, 0, width * 2);
+      }
     }
   }
 

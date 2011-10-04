@@ -5,7 +5,7 @@ namespace nall {
 
 class GameBoyCartridge {
 public:
-  string xml;
+  string markup;
   inline GameBoyCartridge(uint8_t *data, unsigned size);
 
 //private:
@@ -22,7 +22,7 @@ public:
 };
 
 GameBoyCartridge::GameBoyCartridge(uint8_t *romdata, unsigned romsize) {
-  xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+  markup = "";
   if(romsize < 0x4000) return;
 
   info.mapper = "unknown";
@@ -100,18 +100,15 @@ GameBoyCartridge::GameBoyCartridge(uint8_t *romdata, unsigned romsize) {
 
   if(info.mapper == "MBC2") info.ramsize = 512;  //512 x 4-bit
 
-  xml.append("<cartridge mapper='", info.mapper, "'");
-  if(info.rtc) xml.append(" rtc='true'");
-  if(info.rumble) xml.append(" rumble='true'");
-  xml.append(">\n");
+  markup.append("cartridge mapper=", info.mapper);
+  if(info.rtc) markup.append(" rtc");
+  if(info.rumble) markup.append(" rumble");
+  markup.append("\n");
 
-  xml.append("  <rom size='", hex(romsize), "'/>\n");  //TODO: trust/check info.romsize?
+  markup.append("\t" "rom size=", hex(romsize), "\n");  //TODO: trust/check info.romsize?
 
   if(info.ramsize > 0)
-  xml.append("  <ram size='", hex(info.ramsize), "' battery='", info.battery, "'/>\n");
-
-  xml.append("</cartridge>\n");
-  xml.transform("'", "\"");
+  markup.append("\t" "ram size=", hex(info.ramsize), info.battery ? " non-volatile\n" : "\n");
 }
 
 }

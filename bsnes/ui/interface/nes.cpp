@@ -71,13 +71,7 @@ bool InterfaceNES::loadState(const string &filename) {
 void InterfaceNES::videoRefresh(const uint16_t *data) {
   static uint16_t output[256 * 240];
 
-  unsigned height = 240;
-  if(config->video.enableOverscan == false) {
-    height = 224;
-    data += 8 * 256;
-  }
-
-  for(unsigned y = 0; y < height; y++) {
+  for(unsigned y = 0; y < 240; y++) {
     const uint16_t *sp = data + y * 256;
     uint16_t *dp = output + y * 256;
     for(unsigned x = 0; x < 256; x++) {
@@ -86,7 +80,19 @@ void InterfaceNES::videoRefresh(const uint16_t *data) {
     }
   }
 
-  interface->videoRefresh(output, 256 * 2, 256, height);
+  if(config->video.enableOverscan == false) {
+    for(unsigned y = 0; y < 240; y++) {
+      uint16_t *dp = output + y * 256;
+      if(y < 16 || y >= 224) {
+        memset(dp, 0, 256 * 2);
+      } else {
+        memset(dp +   0, 0, 8 * 2);
+        memset(dp + 248, 0, 8 * 2);
+      }
+    }
+  }
+
+  interface->videoRefresh(output, 256 * 2, 256, 240);
 }
 
 void InterfaceNES::audioSample(int16_t sample) {

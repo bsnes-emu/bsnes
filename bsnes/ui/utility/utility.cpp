@@ -43,14 +43,14 @@ void Utility::resizeMainWindow(bool shrink) {
   unsigned width = geometry.width, height = geometry.height;
 
   switch(interface->mode()) {
-  case Interface::Mode::NES:     width = 256, height = config->video.enableOverscan ? 240 : 224; break;
-  case Interface::Mode::SNES:    width = 256, height = config->video.enableOverscan ? 240 : 224; break;
+  case Interface::Mode::NES:     width = 256, height = 240; break;
+  case Interface::Mode::SNES:    width = 256, height = 240; break;
   case Interface::Mode::GameBoy: width = 160, height = 144; break;
   }
 
   if(config->video.correctAspectRatio) {
     if(interface->mode() != Interface::Mode::GameBoy) {
-      width = (double)width * (config->video.enableOverscan ? 1.225 : 1.149);
+      width = (double)width * 1.226;
     }
   }
 

@@ -82,7 +82,7 @@ struct Cartridge : property<Cartridge> {
     } nss;
   } information;
 
-  void load(Mode, const lstring&);
+  void load(Mode, const char*);
   void unload();
 
   void serialize(serializer&);
@@ -90,35 +90,27 @@ struct Cartridge : property<Cartridge> {
   ~Cartridge();
 
 private:
-  void parse_xml(const lstring&);
-  void parse_xml_cartridge(const char*);
-  void parse_xml_bsx(const char*);
-  void parse_xml_sufami_turbo(const char*, bool);
-  void parse_xml_gameboy(const char*);
+  void parse_markup(const char*);
+  unsigned parse_markup_integer(cstring&);
+  void parse_markup_map(Mapping&, BML::Node&);
 
-  void xml_parse_rom(xml_element&);
-  void xml_parse_ram(xml_element&);
-  void xml_parse_nss(xml_element&);
-  void xml_parse_icd2(xml_element&);
-  void xml_parse_superfx(xml_element&);
-  void xml_parse_sa1(xml_element&);
-  void xml_parse_necdsp(xml_element&);
-  void xml_parse_hitachidsp(xml_element&);
-  void xml_parse_bsx(xml_element&);
-  void xml_parse_sufamiturbo(xml_element&);
-  void xml_parse_supergameboy(xml_element&);
-  void xml_parse_srtc(xml_element&);
-  void xml_parse_sdd1(xml_element&);
-  void xml_parse_spc7110(xml_element&);
-  void xml_parse_obc1(xml_element&);
-  void xml_parse_setarisc(xml_element&);
-  void xml_parse_msu1(xml_element&);
-  void xml_parse_link(xml_element&);
-
-  unsigned xml_parse_hex(const string&);
-  unsigned xml_parse_unsigned(const string&);
-  void xml_parse_address(Mapping&, const string&);
-  void xml_parse_mode(Mapping&, const string&);
+  void parse_markup_rom(BML::Node&);
+  void parse_markup_ram(BML::Node&);
+  void parse_markup_nss(BML::Node&);
+  void parse_markup_icd2(BML::Node&);
+  void parse_markup_superfx(BML::Node&);
+  void parse_markup_sa1(BML::Node&);
+  void parse_markup_necdsp(BML::Node&);
+  void parse_markup_hitachidsp(BML::Node&);
+  void parse_markup_bsx(BML::Node&);
+  void parse_markup_sufamiturbo(BML::Node&);
+  void parse_markup_srtc(BML::Node&);
+  void parse_markup_sdd1(BML::Node&);
+  void parse_markup_spc7110(BML::Node&);
+  void parse_markup_obc1(BML::Node&);
+  void parse_markup_setarisc(BML::Node&);
+  void parse_markup_msu1(BML::Node&);
+  void parse_markup_link(BML::Node&);
 };
 
 extern Cartridge cartridge;
