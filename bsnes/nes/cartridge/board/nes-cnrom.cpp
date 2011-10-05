@@ -45,7 +45,6 @@ void reset() {
 
 void serialize(serializer &s) {
   Board::serialize(s);
-
   s.integer(chr_bank);
 }
 

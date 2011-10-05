@@ -30,50 +30,29 @@ CheatDatabase::CheatDatabase() {
 }
 
 void CheatDatabase::findCodes() {
+  cheatList.reset();
+  cheatCode.reset();
+
   string data;
-  data.readfile({ application->userpath, "cheats.xml" });
-  if(auto position = data.position(interface->sha256())) {
-    auto startPosition = strpos((const char*)data + position(), ">");
-    auto endPosition = strpos((const char*)data + position(), "</cartridge>");
-    string xmlData = {
-      "<cartridge>\n",
-      substr((const char*)data + position() + 1, startPosition(), endPosition() - startPosition() - 1),
-      "</cartridge>\n"
-    };
+  data.readfile(application->path("cheats.bml"));
+  BML::Document document(data);
+  for(auto &root : document) {
+    if(root.name != "cartridge") continue;
+    if(root["sha256"].value != interface->sha256()) continue;
 
-    setTitle("");
-    cheatList.reset();
-    cheatCode.reset();
-
-    xml_element document = xml_parse(xmlData);
-    for(auto &root : document.element) {
-      if(root.name == "cartridge") {
-        for(auto &node : root.element) {
-          if(node.name == "name") {
-            setTitle(node.parse());
-          } else if(node.name == "cheat") {
-            string description, code;
-            for(auto &element : node.element) {
-              if(element.name == "description") {
-                description = element.parse();
-              } else if(element.name == "code") {
-                code.append(element.parse(), "+");
-              }
-            }
-            code.rtrim<1>("+");
-            code.append("\t");
-            code.append(description);
-            cheatList.append(description);
-            cheatCode.append(code);
-          }
-        }
-      }
+    setTitle(root["title"].value);
+    for(auto &cheat : root) {
+      if(cheat.name != "cheat") continue;
+      if(cheat["description"].exists() == false || cheat["code"].exists() == false) continue;
+      cheatList.append(cheat["description"].value);
+      cheatCode.append({ cheat["code"].value, "\t", cheat["description"].value });
     }
 
     setVisible();
-  } else {
-    MessageWindow::information(*cheatEditor, "Sorry, no cheat codes were found for this cartridge.");
+    return;
   }
+
+  MessageWindow::information(*cheatEditor, "Sorry, no cheat codes were found for this cartridge.");
 }
 
 void CheatDatabase::addCodes() {

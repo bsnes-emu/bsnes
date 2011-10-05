@@ -8,6 +8,7 @@
 #include "nes-sxrom.cpp"
 #include "nes-txrom.cpp"
 #include "nes-uxrom.cpp"
+#include "sunsoft-5b.cpp"
 
 unsigned Board::mirror(unsigned addr, unsigned size) const {
   unsigned base = 0;
@@ -132,6 +133,8 @@ Board* Board::load(const string &markup, const uint8_t *data, unsigned size) {
 
   if(type == "NES-UNROM"   ) return new NES_UxROM(board, data, size);
   if(type == "NES-UOROM"   ) return new NES_UxROM(board, data, size);
+
+  if(type == "SUNSOFT-5B"  ) return new Sunsoft5B(board, data, size);
 
   return nullptr;
 }

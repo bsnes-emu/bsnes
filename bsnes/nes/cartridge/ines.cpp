@@ -75,6 +75,12 @@ static string iNES(const uint8_t *data, unsigned size) {
     output.append("\tboard type:NES-GNROM\n");
     output.append("\t\tmirror:", mirror == 0 ? "horizontal" : "vertical", "\n");
     break;
+
+  case  69:
+    output.append("\tboard type:SUNSOFT-5B\n");
+    output.append("\t\tchip type:5B\n");
+    prgram = 8192;
+    break;
   }
 
   output.append("\t\tprg rom=", prgrom, " ram=", prgram, "\n");
