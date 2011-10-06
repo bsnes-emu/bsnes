@@ -14,8 +14,9 @@ void InterfaceNES::setController(bool port, unsigned device) {
 }
 
 bool InterfaceNES::loadCartridge(const string &filename) {
-  filemap fp;
-  if(fp.open(filename, filemap::mode::read) == false) return false;
+  uint8_t *data;
+  unsigned size;
+  if(interface->loadFile(filename, data, size) == false) return false;
 
   interface->unloadCartridge();
   interface->baseName = nall::basename(filename);
@@ -23,10 +24,11 @@ bool InterfaceNES::loadCartridge(const string &filename) {
   string markup;
   markup.readfile({ interface->baseName, ".bml" });
 
-  NES::Interface::loadCartridge(markup, fp.data(), fp.size());
-  fp.close();
+  NES::Interface::loadCartridge(markup, data, size);
+  delete[] data;
 
   if(NES::Interface::memorySize(NES::Interface::Memory::RAM) > 0) {
+    filemap fp;
     if(fp.open(string{ interface->baseName, ".sav" }, filemap::mode::read)) {
       memcpy(NES::Interface::memoryData(NES::Interface::Memory::RAM), fp.data(),
         min(NES::Interface::memorySize(NES::Interface::Memory::RAM), fp.size())
@@ -80,14 +82,17 @@ void InterfaceNES::videoRefresh(const uint16_t *data) {
     }
   }
 
-  if(config->video.enableOverscan == false) {
+  if(config->video.maskOverscan) {
+    unsigned osw = config->video.maskOverscanHorizontal;
+    unsigned osh = config->video.maskOverscanVertical;
+
     for(unsigned y = 0; y < 240; y++) {
       uint16_t *dp = output + y * 256;
-      if(y < 16 || y >= 224) {
+      if(y < osh || y >= 240 - osh) {
         memset(dp, 0, 256 * 2);
       } else {
-        memset(dp +   0, 0, 8 * 2);
-        memset(dp + 248, 0, 8 * 2);
+        memset(dp + 0, 0, osw * 2);
+        memset(dp + 256 - osw, 0, osw * 2);
       }
     }
   }

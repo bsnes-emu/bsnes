@@ -2,11 +2,13 @@ struct Board {
   struct Memory {
     uint8_t *data;
     unsigned size;
+    inline uint8 read(unsigned addr) const;
+    inline void write(unsigned addr, uint8 data);
     inline Memory(uint8_t *data, unsigned size) : data(data), size(size) {}
     inline Memory() : data(nullptr), size(0u) {}
   };
 
-  unsigned mirror(unsigned addr, unsigned size) const;
+  static unsigned mirror(unsigned addr, unsigned size);
 
   virtual void main();
   virtual void tick();

@@ -53,8 +53,8 @@ struct MainWindow : Window {
     CheckItem settingsSynchronizeVideo;
     CheckItem settingsSynchronizeAudio;
     Separator settingsSeparator2;
-    CheckItem settingsEnableOverscan;
     CheckItem settingsCorrectAspectRatio;
+    CheckItem settingsMaskOverscan;
     CheckItem settingsMuteAudio;
     Separator settingsSeparator3;
     Item settingsConfiguration;

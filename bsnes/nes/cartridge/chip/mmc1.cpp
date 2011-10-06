@@ -9,17 +9,18 @@ enum class Revision : unsigned {
   MMC1C,
 } revision;
 
+unsigned shiftaddr;
+unsigned shiftdata;
+
 bool chr_mode;
 bool prg_size;  //0 = 32K, 1 = 16K
 bool prg_mode;
 uint2 mirror;  //0 = first, 1 = second, 2 = vertical, 3 = horizontal
 uint5 chr_bank[2];
+bool ram_disable;
 uint4 prg_bank;
-bool prg_page;
-uint2 ram_bank;
-bool ram_disable[2];
 
-unsigned prg_addr(unsigned addr) const {
+unsigned prg_addr(unsigned addr) {
   bool region = addr & 0x4000;
   unsigned bank = (prg_bank & ~1) + region;
 
@@ -28,17 +29,17 @@ unsigned prg_addr(unsigned addr) const {
     if(region != prg_mode) bank = prg_bank;
   }
 
-  return (prg_page << 18) | (bank << 14) | (addr & 0x3fff);
+  return (bank << 14) | (addr & 0x3fff);
 }
 
-unsigned chr_addr(unsigned addr) const {
+unsigned chr_addr(unsigned addr) {
   bool region = addr & 0x1000;
   unsigned bank = chr_bank[region];
   if(chr_mode == 0) bank = (chr_bank[0] & ~1) | region;
   return (bank << 12) | (addr & 0x0fff);
 }
 
-unsigned ciram_addr(unsigned addr) const {
+unsigned ciram_addr(unsigned addr) {
   switch(mirror) {
   case 0: return 0x0000 | (addr & 0x03ff);
   case 1: return 0x0400 | (addr & 0x03ff);
@@ -47,15 +48,38 @@ unsigned ciram_addr(unsigned addr) const {
   }
 }
 
-uint8 ram_read(unsigned addr) {
-  addr = (ram_bank * 0x2000) | (addr & 0x1fff);
-  if(ram_disable[0] == false && ram_disable[1] == false) return board.prgram.data[addr];
-  return 0x00;
-}
+void mmio_write(unsigned addr, uint8 data) {
+  if(data & 0x80) {
+    shiftaddr = 0;
+    prg_size = 1;
+    prg_mode = 1;
+  } else {
+    shiftdata = ((data & 1) << 4) | (shiftdata >> 1);
+    if(++shiftaddr == 5) {
+      shiftaddr = 0;
+      switch((addr >> 13) & 3) {
+      case 0:
+        chr_mode = (shiftdata & 0x10);
+        prg_size = (shiftdata & 0x08);
+        prg_mode = (shiftdata & 0x04);
+        mirror = (shiftdata & 0x03);
+        break;
 
-void ram_write(unsigned addr, uint8 data) {
-  addr = (ram_bank * 0x2000) | (addr & 0x1fff);
-  if(ram_disable[0] == false && ram_disable[1] == false) board.prgram.data[addr] = data;
+      case 1:
+        chr_bank[0] = (shiftdata & 0x1f);
+        break;
+
+      case 2:
+        chr_bank[1] = (shiftdata & 0x1f);
+        break;
+
+      case 3:
+        ram_disable = (shiftdata & 0x10);
+        prg_bank = (shiftdata & 0x0f);
+        break;
+      }
+    }
+  }
 }
 
 void power() {
@@ -63,29 +87,30 @@ void power() {
 }
 
 void reset() {
+  shiftaddr = 0;
+  shiftdata = 0;
+
   chr_mode = 0;
   prg_size = 1;
   prg_mode = 1;
   mirror = 0;
   chr_bank[0] = 0;
   chr_bank[1] = 1;
+  ram_disable = 0;
   prg_bank = 0;
-  prg_page = 0;
-  ram_bank = 0;
-  ram_disable[0] = 0;
-  ram_disable[1] = 0;
 }
 
 void serialize(serializer &s) {
+  s.integer(shiftaddr);
+  s.integer(shiftdata);
+
   s.integer(chr_mode);
   s.integer(prg_size);
   s.integer(prg_mode);
   s.integer(mirror);
   s.array(chr_bank);
+  s.integer(ram_disable);
   s.integer(prg_bank);
-  s.integer(prg_page);
-  s.integer(ram_bank);
-  s.array(ram_disable);
 }
 
 MMC1(Board &board) : Chip(board) {

@@ -1,7 +1,7 @@
 bool InterfaceGameBoy::loadCartridge(const string &filename) {
   uint8_t *data;
   unsigned size;
-  if(file::read(filename, data, size) == false) return false;
+  if(interface->loadFile(filename, data, size) == false) return false;
 
   interface->unloadCartridge();
   interface->baseName = nall::basename(filename);

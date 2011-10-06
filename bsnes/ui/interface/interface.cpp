@@ -192,6 +192,29 @@ Interface::Interface() {
 
 //internal
 
+bool Interface::loadFile(const string &filename, uint8_t *&data, unsigned &size) {
+  if(file::read(filename, data, size) == false) return false;
+
+  string patchname = { nall::basename(filename), ".bps" };
+  if(file::exists(patchname) == false) return true;
+
+  bpspatch bps;
+  bps.modify(patchname);
+  bps.source(data, size);
+  unsigned targetSize = bps.size();
+  uint8_t *targetData = new uint8_t[targetSize];
+  bps.target(targetData, targetSize);
+  if(bps.apply() != bpspatch::result::success) {
+    delete[] targetData;
+    return true;
+  }
+
+  delete[] data;
+  data = targetData;
+  size = targetSize;
+  return true;
+}
+
 //RGB555 input
 void Interface::videoRefresh(const uint16_t *input, unsigned inputPitch, unsigned width, unsigned height) {
   uint32_t *output;

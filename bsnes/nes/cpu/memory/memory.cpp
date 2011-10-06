@@ -16,8 +16,8 @@ uint8 CPU::op_read(uint16 addr) {
 }
 
 void CPU::op_write(uint16 addr, uint8 data) {
-  add_clocks(12);
   bus.write(addr, regs.mdr = data);
+  add_clocks(12);
 }
 
 //

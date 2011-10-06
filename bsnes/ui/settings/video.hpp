@@ -13,6 +13,9 @@ struct VideoSettings : SettingsLayout {
   VideoSlider contrast;
   VideoSlider gamma;
   CheckBox gammaRamp;
+  Label overscanAdjustment;
+  VideoSlider overscanHorizontal;
+  VideoSlider overscanVertical;
   Label fullScreenMode;
   HorizontalLayout fullScreenLayout;
   RadioBox fullScreen[3];

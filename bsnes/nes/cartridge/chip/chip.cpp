@@ -1,5 +1,6 @@
 #include "mmc1.cpp"
 #include "mmc3.cpp"
+#include "mmc5.cpp"
 #include "vrc6.cpp"
 
 void Chip::tick() {

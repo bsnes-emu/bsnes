@@ -46,6 +46,12 @@ static string iNES(const uint8_t *data, unsigned size) {
     prgram = 8192;
     break;
 
+  case   5:
+    output.append("\tboard type:NES-ELROM\n");
+    output.append("\t\tchip type:MMC5\n");
+    prgram = 65536;
+    break;
+
   case   7:
     output.append("\tboard type:NES-AOROM\n");
     break;

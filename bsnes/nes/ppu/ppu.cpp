@@ -468,11 +468,11 @@ void PPU::raster_scanline() {
   }
 
   //336-339
-  unsigned nametable = chr_load(0x2000 | (status.vaddr & 0x0fff));
+  chr_load(0x2000 | (status.vaddr & 0x0fff));
   tick();
   tick();
 
-  unsigned attribute = chr_load(0x23c0 | (status.vaddr & 0x0fc0) | ((scrolly() >> 5) << 3) | (scrollx() >> 5));
+  chr_load(0x2000 | (status.vaddr & 0x0fff));
   tick();
   tick();
 

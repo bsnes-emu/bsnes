@@ -3,6 +3,7 @@
 #include "nes-axrom.cpp"
 #include "nes-bnrom.cpp"
 #include "nes-cnrom.cpp"
+#include "nes-exrom.cpp"
 #include "nes-gxrom.cpp"
 #include "nes-nrom.cpp"
 #include "nes-sxrom.cpp"
@@ -10,7 +11,15 @@
 #include "nes-uxrom.cpp"
 #include "sunsoft-5b.cpp"
 
-unsigned Board::mirror(unsigned addr, unsigned size) const {
+uint8 Board::Memory::read(unsigned addr) const {
+  return data[mirror(addr, size)];
+}
+
+void Board::Memory::write(unsigned addr, uint8 byte) {
+  data[mirror(addr, size)] = byte;
+}
+
+unsigned Board::mirror(unsigned addr, unsigned size) {
   unsigned base = 0;
   if(size) {
     unsigned mask = 1 << 23;
@@ -119,6 +128,11 @@ Board* Board::load(const string &markup, const uint8_t *data, unsigned size) {
   if(type == "NES-BNROM"   ) return new NES_BNROM(board, data, size);
 
   if(type == "NES-CNROM"   ) return new NES_CNROM(board, data, size);
+
+  if(type == "NES-EKROM"   ) return new NES_ExROM(board, data, size);
+  if(type == "NES-ELROM"   ) return new NES_ExROM(board, data, size);
+  if(type == "NES-ETROM"   ) return new NES_ExROM(board, data, size);
+  if(type == "NES-EWROM"   ) return new NES_ExROM(board, data, size);
 
   if(type == "NES-GNROM"   ) return new NES_GxROM(board, data, size);
   if(type == "NES-MHROM"   ) return new NES_GxROM(board, data, size);

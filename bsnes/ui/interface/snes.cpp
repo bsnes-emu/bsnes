@@ -24,7 +24,7 @@ void InterfaceSNES::setController(bool port, unsigned device) {
 bool InterfaceSNES::loadCartridge(const string &basename) {
   uint8_t *data;
   unsigned size;
-  if(file::read(basename, data, size) == false) return false;
+  if(interface->loadFile(basename, data, size) == false) return false;
 
   interface->unloadCartridge();
   interface->baseName = nall::basename(basename);
@@ -45,8 +45,8 @@ bool InterfaceSNES::loadCartridge(const string &basename) {
 bool InterfaceSNES::loadSatellaviewSlottedCartridge(const string &basename, const string &slotname) {
   uint8_t *data[2];
   unsigned size[2];
-  if(file::read(basename, data[0], size[0]) == false) return false;
-  file::read(slotname, data[1], size[1]);
+  if(interface->loadFile(basename, data[0], size[0]) == false) return false;
+  interface->loadFile(slotname, data[1], size[1]);
 
   interface->unloadCartridge();
   interface->baseName = nall::basename(basename);
@@ -69,8 +69,8 @@ bool InterfaceSNES::loadSatellaviewSlottedCartridge(const string &basename, cons
 bool InterfaceSNES::loadSatellaviewCartridge(const string &basename, const string &slotname) {
   uint8_t *data[2];
   unsigned size[2];
-  if(file::read(basename, data[0], size[0]) == false) return false;
-  file::read(slotname, data[1], size[1]);
+  if(interface->loadFile(basename, data[0], size[0]) == false) return false;
+  interface->loadFile(slotname, data[1], size[1]);
 
   interface->unloadCartridge();
   interface->baseName = nall::basename(basename);
@@ -93,9 +93,9 @@ bool InterfaceSNES::loadSatellaviewCartridge(const string &basename, const strin
 bool InterfaceSNES::loadSufamiTurboCartridge(const string &basename, const string &slotAname, const string &slotBname) {
   uint8_t *data[3];
   unsigned size[3];
-  if(file::read(basename, data[0], size[0]) == false) return false;
-  file::read(slotAname, data[1], size[1]);
-  file::read(slotBname, data[2], size[2]);
+  if(interface->loadFile(basename, data[0], size[0]) == false) return false;
+  interface->loadFile(slotAname, data[1], size[1]);
+  interface->loadFile(slotBname, data[2], size[2]);
 
   interface->unloadCartridge();
   interface->baseName = nall::basename(basename);
@@ -121,8 +121,8 @@ bool InterfaceSNES::loadSufamiTurboCartridge(const string &basename, const strin
 bool InterfaceSNES::loadSuperGameBoyCartridge(const string &basename, const string &slotname) {
   uint8_t *data[2];
   unsigned size[2];
-  if(file::read(basename, data[0], size[0]) == false) return false;
-  file::read(slotname, data[1], size[1]);
+  if(interface->loadFile(basename, data[0], size[0]) == false) return false;
+  interface->loadFile(slotname, data[1], size[1]);
 
   interface->unloadCartridge();
   interface->baseName = nall::basename(basename);
@@ -211,11 +211,17 @@ void InterfaceSNES::videoRefresh(const uint32_t *data, bool hires, bool interlac
     }
   }
 
-  if(config->video.enableOverscan == false) {
-    unsigned mask = 8 << interlace;
+  if(config->video.maskOverscan) {
+    unsigned osw = config->video.maskOverscanHorizontal << hires;
+    unsigned osh = config->video.maskOverscanVertical << interlace;
+
     for(unsigned y = 0; y < height; y++) {
-      if(y < mask || y >= height - mask) {
-        memset(output + y * 512, 0, width * 2);
+      uint16_t *dp = output + y * 512;
+      if(y < osh || y >= height - osh) {
+        memset(dp, 0, width * 2);
+      } else {
+        memset(dp + 0, 0, osw * 2);
+        memset(dp + width - osw, 0, osw * 2);
       }
     }
   }

@@ -4,8 +4,11 @@ struct Config : public configuration {
     string filter;
     string shader;
     bool synchronize;
-    bool enableOverscan;
     bool correctAspectRatio;
+
+    bool maskOverscan;
+    unsigned maskOverscanHorizontal;
+    unsigned maskOverscanVertical;
 
     unsigned brightness;
     unsigned contrast;

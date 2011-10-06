@@ -6,8 +6,11 @@ Config::Config() {
   attach(video.filter = "None", "Video::Filter");
   attach(video.shader = "None", "Video::Shader");
   attach(video.synchronize = true, "Video::Synchronize");
-  attach(video.enableOverscan = false, "Video::EnableOverscan");
   attach(video.correctAspectRatio = true, "Video::CorrectAspectRatio");
+
+  attach(video.maskOverscan = false, "Video::MaskOverscan");
+  attach(video.maskOverscanHorizontal = 8, "Video::MaskOverscanHorizontal");
+  attach(video.maskOverscanVertical = 8, "Video::MaskOverscanVertical");
 
   attach(video.brightness = 100, "Video::Brightness");
   attach(video.contrast = 100, "Video::Contrast");

@@ -70,10 +70,10 @@ MainWindow::MainWindow() {
     settingsSynchronizeVideo.setChecked(config->video.synchronize);
     settingsSynchronizeAudio.setText("Synchronize Audio");
     settingsSynchronizeAudio.setChecked(config->audio.synchronize);
-    settingsEnableOverscan.setText("Enable Overscan");
-    settingsEnableOverscan.setChecked(config->video.enableOverscan);
     settingsCorrectAspectRatio.setText("Correct Aspect Ratio");
     settingsCorrectAspectRatio.setChecked(config->video.correctAspectRatio);
+    settingsMaskOverscan.setText("Mask Overscan");
+    settingsMaskOverscan.setChecked(config->video.maskOverscan);
     settingsMuteAudio.setText("Mute Audio");
     settingsMuteAudio.setChecked(config->audio.mute);
     settingsConfiguration.setText("Configuration ...");
@@ -162,8 +162,8 @@ MainWindow::MainWindow() {
     settingsMenu.append(settingsSynchronizeVideo);
     settingsMenu.append(settingsSynchronizeAudio);
     settingsMenu.append(settingsSeparator2);
-    settingsMenu.append(settingsEnableOverscan);
     settingsMenu.append(settingsCorrectAspectRatio);
+    settingsMenu.append(settingsMaskOverscan);
     settingsMenu.append(settingsMuteAudio);
     settingsMenu.append(settingsSeparator3);
     settingsMenu.append(settingsConfiguration);
@@ -278,14 +278,13 @@ MainWindow::MainWindow() {
     audio.set(Audio::Synchronize, config->audio.synchronize);
   };
 
-  settingsEnableOverscan.onTick = [&] {
-    config->video.enableOverscan = settingsEnableOverscan.checked();
-    utility->resizeMainWindow();
-  };
-
   settingsCorrectAspectRatio.onTick = [&] {
     config->video.correctAspectRatio = settingsCorrectAspectRatio.checked();
     utility->resizeMainWindow();
+  };
+
+  settingsMaskOverscan.onTick = [&] {
+    config->video.maskOverscan = settingsMaskOverscan.checked();
   };
 
   settingsMuteAudio.onTick = [&] {
