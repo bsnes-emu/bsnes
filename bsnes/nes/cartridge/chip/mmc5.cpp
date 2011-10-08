@@ -51,6 +51,9 @@ uint16 chr_access[4];
 bool chr_active;
 bool sprite_8x16;
 
+uint8 exbank;
+uint8 exattr;
+
 void main() {
   while(true) {
     if(scheduler.sync == Scheduler::SynchronizeMode::All) {
@@ -92,14 +95,17 @@ uint8 prg_access(bool write, unsigned addr, uint8 data = 0x00) {
     addr &= 0x1fff;
   }
 
+  bool rom = bank & 0x80;
+  bank &= 0x7f;
+
   if(write == false) {
-    if(bank & 0x80) {
+    if(rom) {
       return board.prgrom.read((bank << 13) | addr);
     } else {
-      board.prgram.read((bank << 13) | addr);
+      return board.prgram.read((bank << 13) | addr);
     }
   } else {
-    if(bank & 0x80) {
+    if(rom) {
       board.prgrom.write((bank << 13) | addr, data);
     } else {
       if(prgram_write_protect[0] == 2 && prgram_write_protect[1] == 1) {
@@ -112,7 +118,7 @@ uint8 prg_access(bool write, unsigned addr, uint8 data = 0x00) {
 
 uint8 prg_read(unsigned addr) {
   if((addr & 0xfc00) == 0x5c00) {
-    if(exram_mode & 2) return exram[addr & 0x03ff];
+    if(exram_mode >= 2) return exram[addr & 0x03ff];
     return cpu.mdr();
   }
 
@@ -133,6 +139,8 @@ uint8 prg_read(unsigned addr) {
 
 void prg_write(unsigned addr, uint8 data) {
   if((addr & 0xfc00) == 0x5c00) {
+    //writes 0x00 *during* Vblank (not during screen rendering ...)
+    if(exram_mode == 0 || exram_mode == 1) exram[addr & 0x03ff] = in_frame ? data : 0x00;
     if(exram_mode == 2) exram[addr & 0x03ff] = data;
     return;
   }
@@ -320,6 +328,15 @@ void scanline() {
   cpu_cycle_counter = 0;
 }
 
+uint8 ciram_read(unsigned addr) {
+  switch(nametable_mode[(addr >> 10) & 3]) {
+  case 0: return ppu.ciram_read(0x0000 | (addr & 0x03ff));
+  case 1: return ppu.ciram_read(0x0400 | (addr & 0x03ff));
+  case 2: return exram_mode < 2 ? exram[addr & 0x03ff] : 0x00;
+  case 3: return (hcounter & 2) == 0 ? fillmode_tile : (uint8)fillmode_color;
+  }
+}
+
 uint8 chr_read(unsigned addr) {
   chr_access[0] = chr_access[1];
   chr_access[1] = chr_access[2];
@@ -332,35 +349,49 @@ uint8 chr_read(unsigned addr) {
   && (chr_access[2] & 0x2000)
   && (chr_access[3] & 0x2000)) scanline();
 
-  unsigned lx = hcounter;
-  hcounter += 2;
+  if(in_frame == false) {
+    if(addr & 0x2000) return ciram_read(addr);
+    return 0x00;
+  }
 
-  if(addr & 0x2000) {
-    switch(nametable_mode[(addr >> 10) & 3]) {
-    case 0: return ppu.ciram_read(0x0000 | (addr & 0x03ff));
-    case 1: return ppu.ciram_read(0x0400 | (addr & 0x03ff));
-    case 2: return (exram_mode < 2) ? exram[addr & 0x03ff] : 0x00;
-    case 3: return fillmode_tile;
+  unsigned mode = nametable_mode[(addr >> 10) & 3];
+  uint8 result = 0x00;
+
+  if((hcounter & 7) == 0) {
+    result = ciram_read(addr);
+
+    exbank = (chr_bank_hi << 6) | (exram[addr & 0x03ff] & 0x3f);
+    exattr = exram[addr & 0x03ff] >> 6;
+    exattr |= exattr << 2;
+    exattr |= exattr << 4;
+  } else if((hcounter & 7) == 2) {
+    result = ciram_read(addr);
+
+    if((hcounter < 256 || hcounter >= 320) && exram_mode == 1) {
+      result = exattr;
+    }
+  } else {
+    if(sprite_8x16 == false) {
+      result = board.chrrom.read(chr_active ? chr_bg_addr(addr) : chr_sprite_addr(addr));
+    }
+    else if(hcounter < 256) result = board.chrrom.read(chr_bg_addr(addr));
+    else if(hcounter < 320) result = board.chrrom.read(chr_sprite_addr(addr));
+    else /* hcounter < 340*/result = board.chrrom.read(chr_bg_addr(addr));
+
+    if((hcounter < 256 || hcounter >= 320) && exram_mode == 1) {
+      result = board.chrrom.read(exbank * 0x1000 + addr);
     }
   }
 
-  if(sprite_8x16 == false) {
-    return board.chrrom.read(chr_active ? chr_bg_addr(addr) : chr_sprite_addr(addr));
-  }
-
-  if(lx < 256) return board.chrrom.read(chr_bg_addr(addr));
-  if(lx < 320) return board.chrrom.read(chr_sprite_addr(addr));
-  /* lx < 340*/return board.chrrom.read(chr_bg_addr(addr));
+  hcounter += 2;
+  return result;
 }
 
 void chr_write(unsigned addr, uint8 data) {
   if(addr & 0x2000) {
-    switch(nametable_mode[(addr >> 10) & 3]) {
-    case 0: return ppu.ciram_write(0x0000 | (addr & 0x03ff), data);
-    case 1: return ppu.ciram_write(0x0400 | (addr & 0x03ff), data);
-    case 2: if(exram_mode < 2) exram[addr & 0x03ff] = data; return;
-    case 3: fillmode_tile = data; return;
-    }
+    unsigned mode = nametable_mode[(addr >> 10) & 3];
+    if(mode == 0) ppu.ciram_write(0x0000 | (addr & 0x03ff), data);
+    if(mode == 1) ppu.ciram_write(0x0400 | (addr & 0x03ff), data);
   }
 }
 
@@ -406,6 +437,9 @@ void reset() {
   for(auto &n : chr_access) n = 0;
   chr_active = 0;
   sprite_8x16 = 0;
+
+  exbank = 0;
+  exattr = 0;
 }
 
 void serialize(serializer &s) {
@@ -444,6 +478,9 @@ void serialize(serializer &s) {
   for(auto &n : chr_access) s.integer(n);
   s.integer(chr_active);
   s.integer(sprite_8x16);
+
+  s.integer(exbank);
+  s.integer(exattr);
 }
 
 MMC5(Board &board) : Chip(board) {

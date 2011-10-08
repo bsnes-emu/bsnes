@@ -27,6 +27,10 @@ enum class Revision : unsigned {
 
 MMC1 mmc1;
 
+void main() {
+  return mmc1.main();
+}
+
 unsigned ram_addr(unsigned addr) {
   unsigned bank = 0;
   if(revision == Revision::SOROM) bank = (mmc1.chr_bank[0] & 0x08) >> 3;

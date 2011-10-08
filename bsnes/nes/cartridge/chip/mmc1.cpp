@@ -9,6 +9,7 @@ enum class Revision : unsigned {
   MMC1C,
 } revision;
 
+unsigned writedelay;
 unsigned shiftaddr;
 unsigned shiftdata;
 
@@ -19,6 +20,17 @@ uint2 mirror;  //0 = first, 1 = second, 2 = vertical, 3 = horizontal
 uint5 chr_bank[2];
 bool ram_disable;
 uint4 prg_bank;
+
+void main() {
+  while(true) {
+    if(scheduler.sync == Scheduler::SynchronizeMode::All) {
+      scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
+    }
+
+    if(writedelay) writedelay--;
+    tick();
+  }
+}
 
 unsigned prg_addr(unsigned addr) {
   bool region = addr & 0x4000;
@@ -49,6 +61,9 @@ unsigned ciram_addr(unsigned addr) {
 }
 
 void mmio_write(unsigned addr, uint8 data) {
+  if(writedelay) return;
+  writedelay = 2;
+
   if(data & 0x80) {
     shiftaddr = 0;
     prg_size = 1;
@@ -87,6 +102,7 @@ void power() {
 }
 
 void reset() {
+  writedelay = 0;
   shiftaddr = 0;
   shiftdata = 0;
 
@@ -101,6 +117,7 @@ void reset() {
 }
 
 void serialize(serializer &s) {
+  s.integer(writedelay);
   s.integer(shiftaddr);
   s.integer(shiftdata);
 
