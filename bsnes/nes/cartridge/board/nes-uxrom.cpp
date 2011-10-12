@@ -10,8 +10,8 @@ struct Settings {
 uint4 prg_bank;
 
 uint8 prg_read(unsigned addr) {
-  if((addr & 0xc000) == 0x8000) return Board::prg_read((prg_bank << 14) | (addr & 0x3fff));
-  if((addr & 0xc000) == 0xc000) return Board::prg_read((    0x0f << 14) | (addr & 0x3fff));
+  if((addr & 0xc000) == 0x8000) return prgrom.read((prg_bank << 14) | (addr & 0x3fff));
+  if((addr & 0xc000) == 0xc000) return prgrom.read((    0x0f << 14) | (addr & 0x3fff));
   return cpu.mdr();
 }
 
@@ -36,7 +36,6 @@ void chr_write(unsigned addr, uint8 data) {
 }
 
 void power() {
-  reset();
 }
 
 void reset() {

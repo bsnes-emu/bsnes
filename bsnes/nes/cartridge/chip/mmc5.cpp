@@ -30,7 +30,7 @@ bool vs_enable;      //$5200
 bool vs_side;        //$5200
 uint5 vs_tile;       //$5200
 uint8 vs_scroll;     //$5201
-uint8 vs_bank;       //5202
+uint8 vs_bank;       //$5202
 
 uint8 irq_line;      //$5203
 bool irq_enable;     //$5204
@@ -66,6 +66,11 @@ void main() {
     cpu.set_irq_line(irq_enable && irq_pending);
     tick();
   }
+}
+
+void scanline(unsigned y) {
+//used for testing only, to verify MMC5 scanline detection is accurate:
+//if(y != vcounter && y <= 240) print(y, " vs ", vcounter, "\n");
 }
 
 uint8 prg_access(bool write, unsigned addr, uint8 data = 0x00) {
@@ -396,7 +401,6 @@ void chr_write(unsigned addr, uint8 data) {
 }
 
 void power() {
-  reset();
 }
 
 void reset() {

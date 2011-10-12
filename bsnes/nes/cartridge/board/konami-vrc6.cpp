@@ -4,7 +4,7 @@ VRC6 vrc6;
 
 uint8 prg_read(unsigned addr) {
   if((addr & 0xe000) == 0x6000) return vrc6.ram_read(addr);
-  if(addr & 0x8000) return Board::prg_read(vrc6.prg_addr(addr));
+  if(addr & 0x8000) return prgrom.read(vrc6.prg_addr(addr));
   return cpu.mdr();
 }
 
@@ -35,7 +35,6 @@ void serialize(serializer &s) {
 void main() { vrc6.main(); }
 void power() { vrc6.power(); }
 void reset() { vrc6.reset(); }
-Memory memory() { return prgram; }
 
 KonamiVRC6(BML::Node &board, const uint8_t *data, unsigned size) : Board(board, data, size), vrc6(*this) {
 }

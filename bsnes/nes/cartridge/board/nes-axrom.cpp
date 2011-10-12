@@ -9,7 +9,7 @@ uint4 prg_bank;
 bool mirror_select;
 
 uint8 prg_read(unsigned addr) {
-  if(addr & 0x8000) return Board::prg_read((prg_bank << 15) | (addr & 0x7fff));
+  if(addr & 0x8000) return prgrom.read((prg_bank << 15) | (addr & 0x7fff));
   return cpu.mdr();
 }
 
@@ -31,7 +31,6 @@ void chr_write(unsigned addr, uint8 data) {
 }
 
 void power() {
-  reset();
 }
 
 void reset() {

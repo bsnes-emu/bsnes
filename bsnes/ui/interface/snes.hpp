@@ -19,9 +19,11 @@ struct InterfaceSNES : SNES::Interface {
   int16_t inputPoll(bool port, SNES::Input::Device device, unsigned index, unsigned id);
 
   string path(SNES::Cartridge::Slot slot, const string &hint);
+  void message(const string &text);
 
   InterfaceSNES();
+  ~InterfaceSNES();
 
 private:
-  unsigned palette[16 * 32768];
+  unsigned *palette;
 };

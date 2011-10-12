@@ -11,6 +11,8 @@ struct AdvancedSettings : SettingsLayout {
   Label focusPolicyLabel;
   HorizontalLayout focusPolicyLayout;
     RadioBox focusPolicy[3];
+  Widget spacer;
+  Label aboutLabel;
 
   AdvancedSettings();
 };

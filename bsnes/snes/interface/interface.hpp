@@ -33,8 +33,8 @@ struct Interface {
 
   void setCheats(const lstring &list = lstring{});
 
-  virtual void message(const string &text);
   virtual string path(Cartridge::Slot slot, const string &hint) = 0;
+  virtual void message(const string &text);
 };
 
 extern Interface *interface;

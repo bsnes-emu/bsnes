@@ -19,6 +19,7 @@ namespace NES {
 
 #include <nall/algorithm.hpp>
 #include <nall/array.hpp>
+#include <nall/crc32.hpp>
 #include <nall/dl.hpp>
 #include <nall/endian.hpp>
 #include <nall/file.hpp>
@@ -93,7 +94,7 @@ namespace NES {
       s.integer(clock);
     }
 
-    inline Processor() : thread(0) {}
+    inline Processor() : thread(nullptr) {}
   };
 
   #include <nes/system/system.hpp>

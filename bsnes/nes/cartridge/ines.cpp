@@ -56,9 +56,30 @@ static string iNES(const uint8_t *data, unsigned size) {
     output.append("\tboard type:NES-AOROM\n");
     break;
 
+  case   9:
+    output.append("\tboard type:NES-PNROM\n");
+    output.append("\t\tchip type:MMC2\n");
+    prgram = 8192;
+    break;
+
+  case  10:
+    output.append("\tboard type:NES-FKROM\n");
+    output.append("\t\tchip type:MMC4\n");
+    prgram = 8192;
+    break;
+
   case  16:
     output.append("\tboard type:BANDAI-FCG\n");
     output.append("\t\tchip type:LZ93D50\n");
+    break;
+
+  case  21:
+  case  23:
+  case  25:
+    output.append("\tboard type:KONAMI-VRC-4\n");
+    output.append("\t\tchip type:VRC4\n");
+    output.append("\t\t\tpinout a0=1 a1=0\n");
+    prgram = 8192;
     break;
 
   case  24:
@@ -85,6 +106,12 @@ static string iNES(const uint8_t *data, unsigned size) {
   case  69:
     output.append("\tboard type:SUNSOFT-5B\n");
     output.append("\t\tchip type:5B\n");
+    prgram = 8192;
+    break;
+
+  case  85:
+    output.append("\tboard type:KONAMI-VRC-7\n");
+    output.append("\t\tchip type:VRC7\n");
     prgram = 8192;
     break;
   }

@@ -20,6 +20,8 @@ void Cartridge::load(const string &markup, const uint8_t *data, unsigned size) {
     sha256 = nall::sha256(data, size);
     board = Board::load(markup, data, size);
   } else {
+  //unsigned crc32 = crc32_calculate(data + 16, size - 16);
+  //print(hex<8>(crc32), "\n");
     sha256 = nall::sha256(data + 16, size - 16);
     board = Board::load(markup != "" ? markup : iNES(data, size), data + 16, size - 16);
   }
@@ -43,7 +45,6 @@ uint8* Cartridge::ram_data() {
 }
 
 void Cartridge::power() {
-  create(Cartridge::Main, 21477272);
   board->power();
 }
 
@@ -72,7 +73,12 @@ void Cartridge::chr_write(unsigned addr, uint8 data) {
   return board->chr_write(addr, data);
 }
 
+void Cartridge::scanline(unsigned y) {
+  return board->scanline(y);
+}
+
 void Cartridge::serialize(serializer &s) {
+  Processor::serialize(s);
   return board->serialize(s);
 }
 

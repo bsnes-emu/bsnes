@@ -26,7 +26,7 @@ void main() {
 
 uint8 prg_read(unsigned addr) {
   if((addr & 0xe000) == 0x6000) return mmc3.ram_read(addr);
-  if(addr & 0x8000) return Board::prg_read(mmc3.prg_addr(addr));
+  if(addr & 0x8000) return prgrom.read(mmc3.prg_addr(addr));
   return cpu.mdr();
 }
 
@@ -91,10 +91,6 @@ void chr_write(unsigned addr, uint8 data) {
   mmc3.irq_test(addr);
   if(addr & 0x2000) return ppu.ciram_write(mmc3.ciram_addr(addr), data);
   return Board::chr_write(mmc3.chr_addr(addr), data);
-}
-
-Memory memory() {
-  return prgram;
 }
 
 void power() {

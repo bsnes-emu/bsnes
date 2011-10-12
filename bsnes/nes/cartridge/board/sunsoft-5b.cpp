@@ -94,7 +94,7 @@ uint8 prg_read(unsigned addr) {
   }
 
   addr = (bank << 13) | (addr & 0x1fff);
-  return Board::prg_read(addr);
+  return prgrom.read(addr);
 }
 
 void prg_write(unsigned addr, uint8 data) {
@@ -184,8 +184,6 @@ void power() {
     double volume = 1.0 / pow(2, 1.0 / 2 * (15 - n));
     dac[n] = volume * 8192.0;
   }
-
-  reset();
 }
 
 void reset() {

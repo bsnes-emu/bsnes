@@ -58,8 +58,6 @@ void CPU::power() {
   ram[0x0009] = 0xef;
   ram[0x000a] = 0xdf;
   ram[0x000f] = 0xbf;
-
-  reset();
 }
 
 void CPU::reset() {

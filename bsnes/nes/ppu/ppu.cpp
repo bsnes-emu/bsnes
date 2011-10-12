@@ -43,7 +43,6 @@ void PPU::frame_edge() {
 }
 
 void PPU::power() {
-  reset();
 }
 
 void PPU::reset() {
@@ -108,6 +107,8 @@ uint8 PPU::read(uint16 addr) {
     if((status.oam_addr & 3) == 3) result &= 0xe3;
     break;
   case 7:  //PPUDATA
+    if(raster_enable() && (status.ly <= 240 || status.ly == 261)) return 0x00;
+
     addr = status.vaddr & 0x3fff;
     if(addr <= 0x1fff) {
       result = status.bus_data;
@@ -175,6 +176,8 @@ void PPU::write(uint16 addr, uint8 data) {
     status.address_latch ^= 1;
     return;
   case 7:  //PPUDATA
+    if(raster_enable() && (status.ly <= 240 || status.ly == 261)) return;
+
     addr = status.vaddr & 0x3fff;
     if(addr <= 0x1fff) {
       cartridge.chr_write(addr, data);
@@ -252,6 +255,7 @@ void PPU::ly_increment() {
     frame_edge();
   }
   scanline_edge();
+  cartridge.scanline(status.ly);
 }
 
 void PPU::scrollx_increment() {

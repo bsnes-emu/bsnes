@@ -81,10 +81,6 @@ void chr_write(unsigned addr, uint8 data) {
   return Board::chr_write(mmc1.chr_addr(addr), data);
 }
 
-Memory memory() {
-  return prgram;
-}
-
 void power() {
   mmc1.power();
 }

@@ -110,9 +110,9 @@ inline void PPU::render_line_output() {
 }
 
 inline void PPU::render_line_clear() {
-  uint16 *ptr = (uint16*)output + (line * 1024) + ((interlace() && field()) ? 512 : 0);
-  uint16 width = (!regs.pseudo_hires && regs.bg_mode != 5 && regs.bg_mode != 6) ? 256 : 512;
-  memset(ptr, 0, width * 2 * sizeof(uint16));
+  uint32 *ptr = (uint32*)output + (line * 1024) + ((interlace() && field()) ? 512 : 0);
+  unsigned width = (!regs.pseudo_hires && regs.bg_mode != 5 && regs.bg_mode != 6) ? 256 : 512;
+  memset(ptr, 0, width * 2 * sizeof(uint32));
 }
 
 #endif

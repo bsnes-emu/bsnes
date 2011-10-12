@@ -29,6 +29,10 @@ void chr_write(unsigned addr, uint8 data) {
   mmc5.chr_write(addr, data);
 }
 
+void scanline(unsigned y) {
+  mmc5.scanline(y);
+}
+
 void power() {
   mmc5.power();
 }

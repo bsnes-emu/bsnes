@@ -98,7 +98,6 @@ void mmio_write(unsigned addr, uint8 data) {
 }
 
 void power() {
-  reset();
 }
 
 void reset() {

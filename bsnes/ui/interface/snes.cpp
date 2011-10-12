@@ -200,6 +200,7 @@ void InterfaceSNES::videoRefresh(const uint32_t *data, bool hires, bool interlac
   unsigned height = 240 << interlace;
   unsigned pitch = 1024 >> interlace;
 
+  //skip first line; as it is always blank (by SNES design)
   if(overscan == false) data +=  1 * 1024;  // 8 + 224 +  8
   if(overscan == true ) data +=  9 * 1024;  // 0 + 240 +  0
 
@@ -275,8 +276,13 @@ string InterfaceSNES::path(SNES::Cartridge::Slot slot, const string &hint) {
   return { interface->slotName[index[(unsigned)slot]], hint };
 }
 
+void InterfaceSNES::message(const string &text) {
+  MessageWindow::information(*mainWindow, text);
+}
+
 InterfaceSNES::InterfaceSNES() {
   //{llll bbbbb ggggg rrrrr} -> { rrrrr ggggg bbbbb }
+  palette = new uint32_t[16 * 32 * 32 * 32];
   for(unsigned l = 0; l < 16; l++) {
     for(unsigned r = 0; r < 32; r++) {
       for(unsigned g = 0; g < 32; g++) {
@@ -290,4 +296,8 @@ InterfaceSNES::InterfaceSNES() {
       }
     }
   }
+}
+
+InterfaceSNES::~InterfaceSNES() {
+  delete[] palette;
 }

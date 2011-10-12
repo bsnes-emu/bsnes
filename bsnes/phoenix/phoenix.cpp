@@ -6,6 +6,7 @@
   #define WINVER 0x0501
   #define _WIN32_WINNT 0x0501
   #define _WIN32_IE 0x0600
+  #define __MSVCRT_VERSION__ 0x0601
   #define NOMINMAX
 
   #include <windows.h>

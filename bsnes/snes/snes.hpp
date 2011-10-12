@@ -118,7 +118,7 @@ namespace SNES {
       s.integer(clock);
     }
 
-    inline Processor() : thread(0) {}
+    inline Processor() : thread(nullptr) {}
   };
 
   struct ChipDebugger {

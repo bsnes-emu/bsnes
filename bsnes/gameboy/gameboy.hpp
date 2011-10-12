@@ -87,7 +87,7 @@ namespace GameBoy {
       clock = 0;
     }
 
-    inline Processor() : thread(0) {}
+    inline Processor() : thread(nullptr) {}
   };
 
   #include <gameboy/memory/memory.hpp>

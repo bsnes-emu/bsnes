@@ -47,6 +47,7 @@ void System::power() {
   ppu.power();
   input.reset();
   scheduler.power();
+  reset();
 }
 
 void System::reset() {

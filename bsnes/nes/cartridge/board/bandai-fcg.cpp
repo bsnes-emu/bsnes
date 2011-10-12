@@ -39,7 +39,7 @@ uint8 prg_read(unsigned addr) {
   if(addr & 0x8000) {
     bool region = addr & 0x4000;
     unsigned bank = (region == 0 ? prg_bank : 0x0f);
-    return Board::prg_read((bank << 14) | (addr & 0x3fff));
+    return prgrom.read((bank << 14) | (addr & 0x3fff));
   }
   return cpu.mdr();
 }

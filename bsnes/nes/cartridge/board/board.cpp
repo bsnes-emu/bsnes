@@ -1,11 +1,15 @@
 #include "bandai-fcg.cpp"
+#include "konami-vrc4.cpp"
 #include "konami-vrc6.cpp"
+#include "konami-vrc7.cpp"
 #include "nes-axrom.cpp"
 #include "nes-bnrom.cpp"
 #include "nes-cnrom.cpp"
 #include "nes-exrom.cpp"
+#include "nes-fxrom.cpp"
 #include "nes-gxrom.cpp"
 #include "nes-nrom.cpp"
+#include "nes-pxrom.cpp"
 #include "nes-sxrom.cpp"
 #include "nes-txrom.cpp"
 #include "nes-uxrom.cpp"
@@ -16,7 +20,7 @@ uint8 Board::Memory::read(unsigned addr) const {
 }
 
 void Board::Memory::write(unsigned addr, uint8 byte) {
-  data[mirror(addr, size)] = byte;
+  if(writable) data[mirror(addr, size)] = byte;
 }
 
 unsigned Board::mirror(unsigned addr, unsigned size) {
@@ -53,17 +57,9 @@ void Board::tick() {
   if(cartridge.clock >= 0 && scheduler.sync != Scheduler::SynchronizeMode::All) co_switch(cpu.thread);
 }
 
-uint8 Board::prg_read(unsigned addr) {
-  return prgrom.data[mirror(addr, prgrom.size)];
-}
-
-void Board::prg_write(unsigned addr, uint8 data) {
-  prgrom.data[mirror(addr, prgrom.size)] = data;
-}
-
 uint8 Board::chr_read(unsigned addr) {
-  if(chrrom.size) return chrrom.data[mirror(addr, chrrom.size)];
   if(chrram.size) return chrram.data[mirror(addr, chrram.size)];
+  if(chrrom.size) return chrrom.data[mirror(addr, chrrom.size)];
   return 0u;
 }
 
@@ -71,7 +67,7 @@ void Board::chr_write(unsigned addr, uint8 data) {
   if(chrram.size) chrram.data[mirror(addr, chrram.size)] = data;
 }
 
-Board::Memory Board::memory() {
+Board::Memory& Board::memory() {
   return prgram;
 }
 
@@ -102,13 +98,12 @@ Board::Board(BML::Node &board, const uint8_t *data, unsigned size) {
 
   if(prgrom.size) memcpy(prgrom.data, data, prgrom.size);
   if(chrrom.size) memcpy(chrrom.data, data + prgrom.size, chrrom.size);
+
+  prgram.writable = true;
+  chrram.writable = true;
 }
 
 Board::~Board() {
-  if(prgrom.size) delete[] prgrom.data;
-  if(prgram.size) delete[] prgram.data;
-  if(chrrom.size) delete[] chrrom.data;
-  if(chrram.size) delete[] chrram.data;
 }
 
 Board* Board::load(const string &markup, const uint8_t *data, unsigned size) {
@@ -118,7 +113,9 @@ Board* Board::load(const string &markup, const uint8_t *data, unsigned size) {
 
   if(type == "BANDAI-FCG") return new BandaiFCG(board, data, size);
 
+  if(type == "KONAMI-VRC-4") return new KonamiVRC4(board, data, size);
   if(type == "KONAMI-VRC-6") return new KonamiVRC6(board, data, size);
+  if(type == "KONAMI-VRC-7") return new KonamiVRC7(board, data, size);
 
   if(type == "NES-AMROM"   ) return new NES_AxROM(board, data, size);
   if(type == "NES-ANROM"   ) return new NES_AxROM(board, data, size);
@@ -134,11 +131,17 @@ Board* Board::load(const string &markup, const uint8_t *data, unsigned size) {
   if(type == "NES-ETROM"   ) return new NES_ExROM(board, data, size);
   if(type == "NES-EWROM"   ) return new NES_ExROM(board, data, size);
 
+  if(type == "NES-FJROM"   ) return new NES_FxROM(board, data, size);
+  if(type == "NES-FKROM"   ) return new NES_FxROM(board, data, size);
+
   if(type == "NES-GNROM"   ) return new NES_GxROM(board, data, size);
   if(type == "NES-MHROM"   ) return new NES_GxROM(board, data, size);
 
   if(type == "NES-NROM-128") return new NES_NROM(board, data, size);
   if(type == "NES-NROM-256") return new NES_NROM(board, data, size);
+
+  if(type == "NES-PEEOROM" ) return new NES_PxROM(board, data, size);
+  if(type == "NES-PNROM"   ) return new NES_PxROM(board, data, size);
 
   if(type == "NES-SNROM"   ) return new NES_SxROM(board, data, size);
   if(type == "NES-SXROM"   ) return new NES_SxROM(board, data, size);

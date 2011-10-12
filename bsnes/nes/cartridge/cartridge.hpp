@@ -28,6 +28,10 @@ struct Cartridge : Processor, property<Cartridge> {
 
   uint8 chr_read(unsigned addr);
   void chr_write(unsigned addr, uint8 data);
+
+  //scanline() is for debugging purposes only:
+  //boards must detect scanline edges on their own
+  void scanline(unsigned y);
 };
 
 extern Cartridge cartridge;
