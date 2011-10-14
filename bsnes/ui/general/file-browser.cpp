@@ -62,6 +62,7 @@ void FileBrowser::open(const string &title, unsigned requestedMode, function<voi
   callback = requestedCallback;
   if(mode == &filterModes[requestedMode]) {
     setVisible();
+    fileList.setFocused();
     return;
   }
   mode = &filterModes[requestedMode];
@@ -75,6 +76,7 @@ void FileBrowser::open(const string &title, unsigned requestedMode, function<voi
   filterLabel.setText(filterText);
 
   setVisible();
+  fileList.setFocused();
 }
 
 void FileBrowser::setPath(const string &path) {

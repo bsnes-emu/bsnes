@@ -17,6 +17,7 @@ namespace NES {
 
 #include <libco/libco.h>
 
+#include <nall/platform.hpp>
 #include <nall/algorithm.hpp>
 #include <nall/array.hpp>
 #include <nall/crc32.hpp>
@@ -24,7 +25,6 @@ namespace NES {
 #include <nall/endian.hpp>
 #include <nall/file.hpp>
 #include <nall/function.hpp>
-#include <nall/platform.hpp>
 #include <nall/property.hpp>
 #include <nall/serializer.hpp>
 #include <nall/stdint.hpp>

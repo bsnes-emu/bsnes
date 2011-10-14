@@ -62,6 +62,7 @@ obj/phoenix.o: phoenix/phoenix.cpp $(call rwildcard,phoenix/*)
 	$(phoenix_compile)
 
 obj/resource.o: $(ui)/resource.rc
+#	windres --target=pe-i386 $(ui)/resource.rc obj/resource.o
 	windres $(ui)/resource.rc obj/resource.o
 
 # targets

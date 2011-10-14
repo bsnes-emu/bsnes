@@ -65,14 +65,14 @@ void Video::update() {
     break;
   }
 
-  uint16_t *data = (uint16_t*)ppu.output;
+  uint32_t *data = (uint32_t*)ppu.output;
   if(ppu.interlace() && ppu.field()) data += 512;
 
   if(hires) {
     //normalize line widths
     for(unsigned y = 0; y < 240; y++) {
       if(line_width[y] == 512) continue;
-      uint16_t *buffer = data + y * 1024;
+      uint32_t *buffer = data + y * 1024;
       for(signed x = 255; x >= 0; x--) {
         buffer[(x * 2) + 0] = buffer[(x * 2) + 1] = buffer[x];
       }

@@ -14,7 +14,7 @@ static string iNES(const uint8_t *data, unsigned size) {
   unsigned prgram = 0;
   unsigned chrram = chrrom == 0 ? 8192 : 0;
 
-  print("iNES mapper: ", mapper, "\n");
+//print("iNES mapper: ", mapper, "\n");
 
   output.append("cartridge\n");
 
@@ -119,7 +119,7 @@ static string iNES(const uint8_t *data, unsigned size) {
   output.append("\t\tprg rom=", prgrom, " ram=", prgram, "\n");
   output.append("\t\tchr rom=", chrrom, " ram=", chrram, "\n");
 
-  print(output, "\n");
+//print(output, "\n");
 
   return output;
 }

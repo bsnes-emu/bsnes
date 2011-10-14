@@ -4,7 +4,7 @@ Config *config = 0;
 Config::Config() {
   attach(video.driver = "", "Video::Driver");
   attach(video.filter = "None", "Video::Filter");
-  attach(video.shader = "None", "Video::Shader");
+  attach(video.shader = "Blur", "Video::Shader");
   attach(video.synchronize = true, "Video::Synchronize");
   attach(video.correctAspectRatio = true, "Video::CorrectAspectRatio");
 

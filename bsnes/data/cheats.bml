@@ -589,7 +589,7 @@ cartridge sha256:e8dc8c0441c54d09a1cfe0c112a3137bb6d709989b23e6528f8e30360e1ad91
 		description:Infinite health
 		code:SXOYOSVK
 	cheat
-		description:Infinite Vitality
+		description:Infinite vitality
 		code:SKOYOSVK
 	cheat
 		description:Infinite lives
@@ -615,6 +615,9 @@ cartridge sha256:e8dc8c0441c54d09a1cfe0c112a3137bb6d709989b23e6528f8e30360e1ad91
 	cheat
 		description:Keep items after dying - after 1st stage
 		code:GXUUGOSO
+	cheat
+		description:Start a new game to view the ending
+		code:AAEZYIGA+LAEZLSZA
 	cheat
 		description:Start with 2 lives
 		code:PESZAALA
@@ -738,6 +741,21 @@ cartridge sha256:0e862077f390348b8e109caa8189ff5ecdf3fac53eefc204369fae880e077d1
 	cheat
 		description:Infinite lives
 		code:GZOVLLVG
+	cheat
+		description:Always have pistol
+		code:EZNATKKZ+XTNEAGYE+PANAYGOG
+	cheat
+		description:Always have knife
+		code:EZNATKKZ+XTNEAGYE+ZANAYGOG
+	cheat
+		description:Always have ugly stick
+		code:EZNATKKZ+XTNEAGYE+LANAYGOG
+	cheat
+		description:Always have whip
+		code:EZNATKKZ+XTNEAGYE+IANAYGOG
+	cheat
+		description:Start a new game to view the ending (game A or B)
+		code:IEOVAYGA
 	cheat
 		description:Start with 1 life
 		code:AAETAGZA
@@ -2884,6 +2902,12 @@ cartridge sha256:56d25e05dde2048c3a9b4e36ab5325091310ce2b65171615b5596fc542db66f
 		description:Mega-jumping
 		code:EYSAUVEI
 	cheat
+		description:Double health from flies
+		code:AOUKXNAA
+	cheat
+		description:Maximum health from flies
+		code:YXUKXNAE
+	cheat
 		description:Super fast punching
 		code:AEUZITPA
 	cheat
@@ -2928,12 +2952,6 @@ cartridge sha256:56d25e05dde2048c3a9b4e36ab5325091310ce2b65171615b5596fc542db66f
 	cheat
 		description:Start on level 12 - The Revolution
 		code:GAXAALAE
-	cheat
-		description:Double health from flies
-		code:AOUKXNAA
-	cheat
-		description:Maximum health from flies
-		code:YXUKXNAE
 	cheat
 		description:Invincibility
 		code:0574:02
@@ -3370,7 +3388,7 @@ cartridge sha256:abde6fc87b2d90e0b40cd3420d4b7381e1f23285efbbdc62fd27b59c591ad2c
 		description:Players 2/CPU don't throw punches
 		code:OXKXTVPK+SXSZZSSU
 	cheat
-		description:Start a new game to view ending
+		description:Start a new game to view the ending
 		code:YASGITLA
 
 cartridge sha256:7a26c62a9b1605cbedf7cd5b2672aa0fc15b688b227a6cb57dbf74aa71a05f1c
@@ -4105,7 +4123,7 @@ cartridge sha256:d02b24e4ee8e639bf77af6746d6b3a92e996c0d2298861071851e2beec0ef81
 		description:10 lives after continue
 		code:PEXGVYZE
 	cheat
-		description:Press Start to finish level
+		description:Press Start to complete the level
 		code:AESGILPE+AESKALPA+GOSGYUPE+OXSGGUPK
 	cheat
 		description:Start a new game to see ending
@@ -5059,6 +5077,12 @@ cartridge sha256:9575ec31c1c658fd6b77ae1d69e4861ecada8570e4eebf51409941486e4b4ef
 cartridge sha256:6e8d289635ac39479ff1d36733aa3f8b9650593ab972cedb8e2cdbfc03aaa739
 	title:Castlevania III - Dracula's Curse (USA)
 	cheat
+		description:Invincibility (disable if you cannot enter a door)
+		code:EIOAZPEY
+	cheat
+		description:Invincibility (disable if you cannot enter a door) (alt)
+		code:SZKLPZSA
+	cheat
 		description:Infinite health
 		code:OXEEZZSE
 	cheat
@@ -5077,7 +5101,7 @@ cartridge sha256:6e8d289635ac39479ff1d36733aa3f8b9650593ab972cedb8e2cdbfc03aaa73
 		description:Start each stage with 99 hearts
 		code:OOKPPAIE
 	cheat
-		description:Invincibility (disable if you're unable to go through a door) (blinking)
+		description:Invincibility (blinking) (disable if you cannot enter a door)
 		code:0080:02
 	cheat
 		description:Remove invincibility blinking
@@ -5250,6 +5274,9 @@ cartridge sha256:e84d90fefb92f2b6ab70e35bfb990978c7e384e357ec6b995c3880bff4c5b46
 	cheat
 		description:Infinite health
 		code:AOEITEEN
+	cheat
+		description:Multi-jump
+		code:AAKGSGPA+SXXKEOZA
 	cheat
 		description:Freeze mechanical bulldog
 		code:ATUEENSL
@@ -6001,9 +6028,6 @@ cartridge sha256:d41e28b1a33b3b6768e7c39c9fdfb1fda4b49940542d14085911fabd399e1ca
 		description:Invincibility (blinking) (alt)
 		code:AAVITGIA
 	cheat
-		description:Keep weapons after losing a life
-		code:GXIIUX
-	cheat
 		description:Hit anywhere
 		code:ESEVALEP+GXXTPLEL+GZNVYLEL+SXKTYLAX
 	cheat
@@ -6013,14 +6037,23 @@ cartridge sha256:d41e28b1a33b3b6768e7c39c9fdfb1fda4b49940542d14085911fabd399e1ca
 		description:Jump higher
 		code:UNVSYVKN+XNVSPVUN
 	cheat
-		description:Run twice as fast
+		description:Run 2x as fast
 		code:VYVIPNNN+ZASSIYPA
+	cheat
+		description:Run 4x as fast
+		code:GASSIYPA+KYVIPNNN
+	cheat
+		description:Keep weapons after losing life
+		code:GXIIUX
+	cheat
+		description:Press Select to change weapons - P1
+		code:GGXNIVNN+IZOYLVNY+KZOYZVNY+PZONYVNN+LAOYIVNY+SAXNPVNY+LIOYYVNY+SZXNLVNY+OGXYPVNN+YAXYAVNY+SYXNGVNY+OZXYIVNN+ZAXYGVNY+SZONIVNY+PAXNAVNY+ZPKILAIZ+TAONGVNN+PTXYYVNN+TGXNTVNY+PZONPVNN+VYKIGAEI+XZONTVNN+XZXNZVNN+AZONZVNY+EIONAVNY+EIXNYVNY+EIXYLVNY+EYONLVNY+EYOYGVNY+GAXYZVNY+GGKIZAKX+GGOYTVNN
+	cheat
+		description:Press Start to complete the level
+		code:LLKSIAIX
 	cheat
 		description:Start with infinite lives
 		code:SLAIUZ
-	cheat
-		description:Press Start to finish level
-		code:LLKSIAIX
 	cheat
 		description:Start new life with Machine Gun
 		code:PEIIXZ
@@ -7693,6 +7726,27 @@ cartridge sha256:038f2241fd6e58600ce234623be752cca47875ef7295fe92c30c328c81ffe7e
 		description:Infinite Red Power Pole time (spin attack)
 		code:0036:0F
 
+cartridge sha256:901b7a9b3e8c0256bd091f845f48b0e7bd903f7456ce3dcea386cc1871fe70c1
+	title:Dragon Spirit - The New Legend (USA)
+	cheat
+		description:Invincibility and three heads after one hit (blinking)
+		code:EXAXEU
+	cheat
+		description:Infinite health
+		code:OZVZOZVG
+	cheat
+		description:Hit anywhere
+		code:OXNLEIES+OXXLOIES
+	cheat
+		description:Always gold dragon
+		code:VEOIKAKA
+	cheat
+		description:Always blue dragon
+		code:KXOIKAKA
+	cheat
+		description:Invincibility
+		code:0588:00
+
 cartridge sha256:5564e54943deddc6d290b256638c774aa379a0d33dcea3b0a4f0c4b9fc2034e3
 	title:Dragon's Lair (USA)
 	cheat
@@ -8701,6 +8755,15 @@ cartridge sha256:761df2c2e04f9ffec5eec59afd821bd74af3b155546519d649876aad37160c0
 cartridge sha256:e9f4c9d1b7c66c6af83f2db5d4f704cf5f4b3c86e26a49c05539237807d8875e
 	title:Excitebike (Japan, USA)
 	cheat
+		description:Never crash
+		code:SZOSKTSP
+	cheat
+		description:Never crash when holding forward
+		code:ATSVIASP+ATVTLASP+ATVSUGSP
+	cheat
+		description:Never lose speed (even if you crash)
+		code:SLNKSTVI
+	cheat
 		description:Never overheat
 		code:SXXTYUVV
 	cheat
@@ -8716,17 +8779,20 @@ cartridge sha256:e9f4c9d1b7c66c6af83f2db5d4f704cf5f4b3c86e26a49c05539237807d8875
 		description:Timer runs at quarter speed
 		code:GAUSEYAP
 	cheat
-		description:Turbo speed on 'A' button
+		description:Turbo speed on button A
 		code:ENUKGEAP+GESGPALA
 	cheat
-		description:Mega turbo speed on 'A' button
+		description:Mega turbo speed on button A
 		code:EVUKGEAP+TESGPALA
 	cheat
-		description:Never crash when holding forward
-		code:ATSVIASP+ATVTLASP+ATVSUGSP
+		description:Infinite obstacles in design mode
+		code:AAEYSAPA
 	cheat
-		description:Never lose speed (even if you crash)
-		code:SLNKSTVI
+		description:Start racing before gate opens
+		code:AAEVXXAL+AAXGXSIP+AAXSOXYL+APUSOTEI
+	cheat
+		description:Press Start to complete current race (uses your race position for the verdict)
+		code:AASKOZLA+ZISKEZOL
 
 cartridge sha256:9e3c5574e31cbf74146808df930a70856d7196ec581e40cae3061743504bfba2
 	title:Exodus - Journey to the Promised Land (USA) (v4.0) (Unl)
@@ -9559,7 +9625,7 @@ cartridge sha256:5f21fadd084947d11224d1f37218a504bd75f7c6f17212f638a6917ba8a96f9
 cartridge sha256:9a0cc935c7d8452eff5b90f591bb6390d04362545ecd66b4be67a875ad63dc73
 	title:Fire Dragon (Asia) (Unl)
 	cheat
-		description:One fireball needed to complete level
+		description:One fireball needed to finish the level
 		code:034F:04
 	cheat
 		description:Start on stage 50
@@ -11338,7 +11404,7 @@ cartridge sha256:a2033c3b3d9f54b37fad8083604d37e2b2cb4ff77e0e183021141f55dfa9c4c
 		description:Keep weapon after death
 		code:SXUTEUSO
 	cheat
-		description:Press Start to finish level
+		description:Press Start to complete the level
 		code:LASKYYPO
 	cheat
 		description:Start a new game to view the ending
@@ -13648,6 +13714,45 @@ cartridge sha256:49fe0c49cd0a2841ae9c8ae5aa19f710d187ee6931a1e531d3bff19772ca4af
 		description:Explosive multi-shots (from small dinosaurs instead of normal bullets)
 		code:NEXASASA+NEUAXASA
 
+cartridge sha256:f40341cf7e76480465ba8ab2d09e44644c3e3af7d647dc04c8b38357b26e014a
+	title:Just Breed (Japan)
+	cheat
+		description:No health - all enemies
+		code:69E3:00+69E4:00+69E5:00+69E6:00+69DA:00+69DB:00+69DC:00+69DD:00+69DE:00+69DF:00+69E0:00+69E1:00+69E2:00
+	cheat
+		description:Lots of EXP after battle
+		code:6F6E:FF
+	cheat
+		description:Max EXP after battle
+		code:6F6E:FF+6F6F:FF
+	cheat
+		description:Max gold after battle
+		code:6F6C:FF+6F6D:FF
+	cheat
+		description:Max Health (Swordsman/Archer, Etc. 1)
+		code:69C4:FF
+	cheat
+		description:Max Magic (Swordsman/Archer, Etc. 1)
+		code:6A04:FF
+	cheat
+		description:Max Health (Swordsman/Archer, Etc. 2)
+		code:69C6:FF
+	cheat
+		description:Max Magic (Swordsman/Archer, Etc. 2)
+		code:6A06:FF
+	cheat
+		description:Max Health (Swordsman/Archer, Etc. 3)
+		code:69C5:FF
+	cheat
+		description:Max Magic (Swordsman/Archer, Etc. 3)
+		code:6A05:FF
+	cheat
+		description:Max Health (Swordsman/Archer, Etc. 4)
+		code:69C3:FF
+	cheat
+		description:Max Magic (Swordsman/Archer, Etc. 4)
+		code:6A03:FF
+
 cartridge sha256:2ae0a99b457a6d00ff0b241aa08f98d40c5c5ed45e634a7ed934b386bbd17a12
 	title:Kabuki - Quantum Fighter (USA)
 	cheat
@@ -14059,7 +14164,7 @@ cartridge sha256:f85a689b4ff7a5e51703e5fabc73ca1af43e6519754c4a59c11a960baa323b4
 		description:Infinite lives
 		code:SZKKXIVG
 	cheat
-		description:Press Start to finish level
+		description:Press Start to complete the level
 		code:GEXGUALU+LEXGSALU+OXXGXAIK
 	cheat
 		description:One life after continue
@@ -18400,6 +18505,21 @@ cartridge sha256:6b04b87ab30e885974844ad693cc39ba8c87e7e650e1f9cf22a054e0a385df4
 		description:Infinite weapons
 		code:03F5:0A+03F6:0A+03F7:09
 
+cartridge sha256:0bd6257a4566c57c582421bfbf8e81a5491a94e13f4e7a9378c3332c70884532
+	title:Mitsume ga Tooru (Japan)
+	cheat
+		description:Hit anywhere
+		code:AEULXZLA
+	cheat
+		description:Collect money from anywhere
+		code:AIXALGEL+ALVEOIEL
+	cheat
+		description:Start a new game for hidden debug TEST MODE menu
+		code:LAKAPLGA
+	cheat
+		description:Start a new game to view the ending
+		code:YAKAPLGA
+
 cartridge sha256:f997fe34edf1d998694aa979c81fe0063480274b4284498f230fffe694fe87ac
 	title:Monopoly (USA)
 	cheat
@@ -20152,14 +20272,14 @@ cartridge sha256:4986c3862a04fcf5b22df58b1182ec2ad636e6083714ac7c069adc1639023eb
 		description:Infinite health
 		code:OTKESZSV
 	cheat
-		description:Take minimum damage
-		code:SZKAKXOU
-	cheat
 		description:Infinite lives
 		code:SZSIAAVG
 	cheat
 		description:Hit anywhere
 		code:AEOANGZZ+ENEEUGEP
+	cheat
+		description:Take minimum damage
+		code:SZKAKXOU
 	cheat
 		description:Mega-jump
 		code:AZXSAVAU
@@ -20169,6 +20289,12 @@ cartridge sha256:4986c3862a04fcf5b22df58b1182ec2ad636e6083714ac7c069adc1639023eb
 	cheat
 		description:Don't lose multi-boomerangs when you die
 		code:GZUSGAVG+GZVSZASA
+	cheat
+		description:Press Start to finish the level (don't use on Protect level)
+		code:AEEIPPPE+AOEILOIK+AVEIGOOZ
+	cheat
+		description:Start a new game to view the ending
+		code:YANNLTZA
 	cheat
 		description:Start with 1 life
 		code:AAXYZYZA
@@ -20220,6 +20346,9 @@ cartridge sha256:6c462c3fa07aab70759376fe6b59e9c91e808f79fae2960f869bafc9cf20dca
 	cheat
 		description:Maximum throwing ability on pick-up
 		code:OZVULSOK+SANLZIVT
+	cheat
+		description:Start a new game to view the ending
+		code:YAXTNTLA
 	cheat
 		description:Start with 1 life
 		code:AEKEPTZA
@@ -20521,20 +20650,32 @@ cartridge sha256:ea81de1a6d901d8d1ad229a6d8d88edcc8e1aeeae6146aa4cd01eb0310eb44d
 		description:Infinite health
 		code:SZNZKOSE+SZUZPVSE+VZKZNOVE
 	cheat
-		description:Never lose a life against normal enemy
-		code:XVOVGXXK
-	cheat
-		description:Never lose a life against end of level enemy
-		code:XVOEXOXK
-	cheat
 		description:Infinite Grenades
 		code:XTSVSNXK
 	cheat
 		description:Infinite bullets and Rockets
 		code:AESYAPPA
 	cheat
+		description:Never lose a life against normal enemy
+		code:XVOVGXXK
+	cheat
+		description:Never lose a life against end of level enemy
+		code:XVOEXOXK
+	cheat
+		description:Hit anywhere
+		code:AANZGXAZ+AAOXYXIA+AAXXAKPA+AAXXZPZL
+	cheat
 		description:Faster Punisher
 		code:GEUUYIZA
+	cheat
+		description:Stage scrolls 2x as fast
+		code:PANVGGAA
+	cheat
+		description:Stage scrolls 3x as fast
+		code:ZANVGGAA
+	cheat
+		description:Stage scrolls 4x as fast
+		code:LANVGGAA
 	cheat
 		description:150 Machine Gun bullets on pick-up
 		code:PEUYNLAA
@@ -20976,6 +21117,27 @@ cartridge sha256:67123fe28cf5fbadeafc77400a0812f0135ab36706ec7d1267f84931d044e71
 	cheat
 		description:Exit always open
 		code:0053:01
+
+cartridge sha256:d4f1650059a011455577561ea607993a5046d452ba987b1c7381cad56550be0a
+	title:R.B.I. Baseball (USA)
+	cheat
+		description:Perfectly straight pitches - both players
+		code:EESLUZTL+OXSLXZPN
+	cheat
+		description:Super slow pitches - both players
+		code:AEXUKZTL+OXXUUZOU
+	cheat
+		description:Slow pitches - both players
+		code:LEXUKZTL+OXXUUZOU
+	cheat
+		description:Fast pitches - both players
+		code:OXXUUZOU+YEXUKZTL
+	cheat
+		description:Super fast pitches - both players
+		code:OXXUUZOU+YEXUKZTU
+	cheat
+		description:All missed pitches are strikes - both players
+		code:AOVLSLEI
 
 cartridge sha256:3f9e3d3b48a897d94003df004ab4b332d749f85ea5d0e1a1b29b6d4f5634049a
 	title:R.C. Pro-Am (USA) (Rev A)
@@ -22879,6 +23041,12 @@ cartridge sha256:a98e48a26c104375ae45e5c1bc4eb7b2a446e0e9ffa7ed3923c3cf5eec9a549
 		description:Autofire without having to hold the button down
 		code:NNNOUTSN
 	cheat
+		description:Press Start to complete current mission (do not use past sector 40)
+		code:AEOIILYA+OXOIPUPK+PUOIGUSN+ZEOIZLPA
+	cheat
+		description:Start a new game to view the ending
+		code:LAEAZYPA
+	cheat
 		description:Start with 1 life
 		code:PEXSIZLA
 	cheat
@@ -23623,7 +23791,7 @@ cartridge sha256:c85ed147e6da0da5ef02c930cc52621ae38d66971a332d168bf31126a3a740c
 		description:One hit defeats Metal Gear
 		code:ESXALLEY
 	cheat
-		description:Start a new game to view ending
+		description:Start a new game to view the ending
 		code:PPUGASTA
 	cheat
 		description:Start with half bullets for Beretta M92
@@ -24811,7 +24979,7 @@ cartridge sha256:3edd803db1cc88155720625ed8f3e362a5e3c660e7faf3285bbe3a2c6571511
 		description:Press Start to complete current level
 		code:AUOVNXPU+GEOVSZPA
 	cheat
-		description:Start a new game to view ending
+		description:Start a new game to view the ending
 		code:AEKTLGAE
 	cheat
 		description:Start with Spray Gun
@@ -24916,12 +25084,6 @@ cartridge sha256:fcb6a0ef3a20c19b356005fbb21dc8009563b1cb5a9aaebc8e9386b4a8c5912
 		description:Fireballs hit anywhere
 		code:GZXIPYEP
 	cheat
-		description:Control Mario in entrances that lead to underground
-		code:SNAULA
-	cheat
-		description:Control Mario in demo and title screen
-		code:PEUEGZAA+ANUETXKY+YEUEYZTA
-	cheat
 		description:Gain a 1-up when an enemy is killed or power-up is gained
 		code:AEVAIGYA
 	cheat
@@ -24961,8 +25123,32 @@ cartridge sha256:fcb6a0ef3a20c19b356005fbb21dc8009563b1cb5a9aaebc8e9386b4a8c5912
 		description:Turn all enemies into Toad
 		code:NULTKA
 	cheat
-		description:Walk through pipes and blocks
+		description:Can control Mario in demo and title screen
+		code:PEUEGZAA+ANUETXKY+YEUEYZTA
+	cheat
+		description:Can control Mario in entrances that lead to underground
+		code:SNAULA
+	cheat
+		description:Can move left or right while crouched
+		code:APXLLPEY
+	cheat
+		description:Can walk through pipes and blocks
 		code:GIIIVY
+	cheat
+		description:Small Mario can break bricks
+		code:AAOUEIPA+AENLNGZA+EZOLNIEI
+	cheat
+		description:Fireballs can kill Bowser's Fire
+		code:AEOIGNTZ
+	cheat
+		description:Fireballs can kill Bullet Bill
+		code:AEESGYTL
+	cheat
+		description:Fireballs can kill Buzzy Beetle
+		code:AASIYNLT
+	cheat
+		description:Fireballs can kill Podoboo
+		code:AAXVZAGA+AEOIAYZL
 	cheat
 		description:Enable level select
 		code:AAYAAZ
@@ -25072,12 +25258,6 @@ cartridge sha256:5dde385041aa7364c78205f2ba49615f416c701b6025e38aa1d7b9c4f99a62d
 		description:SMB - Fireballs hit anywhere
 		code:GZXIPYEP
 	cheat
-		description:SMB - Control Mario in entrances that lead to underground
-		code:SNAULA
-	cheat
-		description:SMB - Control Mario in demo and title screen
-		code:PEUEGZAA+ANUETXKY+YEUEYZTA
-	cheat
 		description:SMB - Gain a 1-up when an enemy is killed or power-up is gained
 		code:AEVAIGYA
 	cheat
@@ -25117,8 +25297,32 @@ cartridge sha256:5dde385041aa7364c78205f2ba49615f416c701b6025e38aa1d7b9c4f99a62d
 		description:SMB - Turn all enemies into Toad
 		code:NULTKA
 	cheat
-		description:SMB - Walk through pipes and blocks
+		description:SMB - Can control Mario in demo and title screen
+		code:PEUEGZAA+ANUETXKY+YEUEYZTA
+	cheat
+		description:SMB - Can control Mario in entrances that lead to underground
+		code:SNAULA
+	cheat
+		description:SMB - Can move left or right while crouched
+		code:APXLLPEY
+	cheat
+		description:SMB - Can walk through pipes and blocks
 		code:GIIIVY
+	cheat
+		description:SMB - Small Mario can break bricks
+		code:AAOUEIPA+AENLNGZA+EZOLNIEI
+	cheat
+		description:SMB - Fireballs can kill Bowser's Fire
+		code:AEOIGNTZ
+	cheat
+		description:SMB - Fireballs can kill Bullet Bill
+		code:AEESGYTL
+	cheat
+		description:SMB - Fireballs can kill Buzzy Beetle
+		code:AASIYNLT
+	cheat
+		description:SMB - Fireballs can kill Podoboo
+		code:AAXVZAGA+AEOIAYZL
 	cheat
 		description:SMB - Enable level select
 		code:AAYAAZ
@@ -25231,12 +25435,6 @@ cartridge sha256:26977a6c51a6f1e1af895b8863e8e7d57c5321621f29cf58ebfbf85163a999d
 		description:SMB - Fireballs hit anywhere
 		code:GZXIPYEP
 	cheat
-		description:SMB - Control Mario in entrances that lead to underground
-		code:SNAULA
-	cheat
-		description:SMB - Control Mario in demo and title screen
-		code:PEUEGZAA+ANUETXKY+YEUEYZTA
-	cheat
 		description:SMB - Gain a 1-up when an enemy is killed or power-up is gained
 		code:AEVAIGYA
 	cheat
@@ -25276,8 +25474,32 @@ cartridge sha256:26977a6c51a6f1e1af895b8863e8e7d57c5321621f29cf58ebfbf85163a999d
 		description:SMB - Turn all enemies into Toad
 		code:NULTKA
 	cheat
-		description:SMB - Walk through pipes and blocks
+		description:SMB - Can control Mario in demo and title screen
+		code:PEUEGZAA+ANUETXKY+YEUEYZTA
+	cheat
+		description:SMB - Can control Mario in entrances that lead to underground
+		code:SNAULA
+	cheat
+		description:SMB - Can move left or right while crouched
+		code:APXLLPEY
+	cheat
+		description:SMB - Can walk through pipes and blocks
 		code:GIIIVY
+	cheat
+		description:SMB - Small Mario can break bricks
+		code:AAOUEIPA+AENLNGZA+EZOLNIEI
+	cheat
+		description:SMB - Fireballs can kill Bowser's Fire
+		code:AEOIGNTZ
+	cheat
+		description:SMB - Fireballs can kill Bullet Bill
+		code:AEESGYTL
+	cheat
+		description:SMB - Fireballs can kill Buzzy Beetle
+		code:AASIYNLT
+	cheat
+		description:SMB - Fireballs can kill Podoboo
+		code:AAXVZAGA+AEOIAYZL
 	cheat
 		description:SMB - Enable level select
 		code:AAYAAZ
@@ -25390,12 +25612,6 @@ cartridge sha256:968cf4ae63fddf6a0d379bb12add5563f468e57ddddb69e00e1379a839234f9
 		description:SMB - Fireballs hit anywhere
 		code:GZXIPYEP
 	cheat
-		description:SMB - Control Mario in entrances that lead to underground
-		code:SNAULA
-	cheat
-		description:SMB - Control Mario in demo and title screen
-		code:PEUEGZAA+ANUETXKY+YEUEYZTA
-	cheat
 		description:SMB - Gain a 1-up when an enemy is killed or power-up is gained
 		code:AEVAIGYA
 	cheat
@@ -25435,8 +25651,32 @@ cartridge sha256:968cf4ae63fddf6a0d379bb12add5563f468e57ddddb69e00e1379a839234f9
 		description:SMB - Turn all enemies into Toad
 		code:NULTKA
 	cheat
-		description:SMB - Walk through pipes and blocks
+		description:SMB - Can control Mario in demo and title screen
+		code:PEUEGZAA+ANUETXKY+YEUEYZTA
+	cheat
+		description:SMB - Can control Mario in entrances that lead to underground
+		code:SNAULA
+	cheat
+		description:SMB - Can move left or right while crouched
+		code:APXLLPEY
+	cheat
+		description:SMB - Can walk through pipes and blocks
 		code:GIIIVY
+	cheat
+		description:SMB - Small Mario can break bricks
+		code:AAOUEIPA+AENLNGZA+EZOLNIEI
+	cheat
+		description:SMB - Fireballs can kill Bowser's Fire
+		code:AEOIGNTZ
+	cheat
+		description:SMB - Fireballs can kill Bullet Bill
+		code:AEESGYTL
+	cheat
+		description:SMB - Fireballs can kill Buzzy Beetle
+		code:AASIYNLT
+	cheat
+		description:SMB - Fireballs can kill Podoboo
+		code:AAXVZAGA+AEOIAYZL
 	cheat
 		description:SMB - Enable level select
 		code:AAYAAZ
@@ -26617,6 +26857,15 @@ cartridge sha256:f6e88113b5f64cf7ffd915dd60b49e55d7015aaeb8b232c87e9855d4b9759cb
 cartridge sha256:d088f4b91a03dd6a618245fffb492bcda127c7faa6d880596aa5e751fdac0181
 	title:Tecmo Bowl (USA) (Rev A)
 	cheat
+		description:Instant touchdowns - P1
+		code:AAVELPLA
+	cheat
+		description:Instant touchdowns - P2
+		code:AAEEKILA
+	cheat
+		description:Always kick with max power - P1
+		code:IVXOKLZA+OXXOUUPV
+	cheat
 		description:Only 2 downs allowed
 		code:ZAXAYIGA+ZAXOTPGA
 	cheat
@@ -26634,6 +26883,15 @@ cartridge sha256:d088f4b91a03dd6a618245fffb492bcda127c7faa6d880596aa5e751fdac018
 
 cartridge sha256:d2b56b27912cfc03756c94df6667fdf923c8a3746fa37e4632eeb4134ef4c200
 	title:Tecmo Bowl (USA)
+	cheat
+		description:Instant touchdowns - P1
+		code:AAVELPLA
+	cheat
+		description:Instant touchdowns - P2
+		code:AAEEKILA
+	cheat
+		description:Always kick with max power - P1
+		code:IVXOKLZA+OXXOUUPV
 	cheat
 		description:Only 2 downs allowed
 		code:ZAXAYIGA+ZAXOTPGA
@@ -27133,6 +27391,9 @@ cartridge sha256:10e2091a1c5e3ff3f636944fb274cd61db09dc25d0c14868710675cf1f86fd0
 		description:Start with 1/3 health - both players
 		code:AUXAGAEL
 	cheat
+		description:Start a new game to view the ending
+		code:LEXYLGZE
+	cheat
 		description:Infinite health - P1
 		code:0590:B0
 	cheat
@@ -27476,7 +27737,7 @@ cartridge sha256:c47a01c9b32642ad3145316804e64b0475a20863e42e81d17c664d03dcdde3c
 		code:SZOOSVVK
 	cheat
 		description:Infinite health and one Carrot
-		code::SEOEYXKX
+		code:SEOEYXKX
 	cheat
 		description:Infinite time
 		code:SIKINXVS
@@ -27490,8 +27751,20 @@ cartridge sha256:c47a01c9b32642ad3145316804e64b0475a20863e42e81d17c664d03dcdde3c
 		description:Speed up timer
 		code:YPXIXXLU
 	cheat
-		description:Pick up more hearts
+		description:Multi-jump
+		code:AASPPVPZ
+	cheat
+		description:Pick-up more hearts
 		code:AEEPPYPA
+	cheat
+		description:Power decreases slower when using Dizzy Devil's spin attack
+		code:PEVOIPZA
+	cheat
+		description:Press Start to finish the level (don't use on 6-3)
+		code:GENIVPPE+GKNSEOIK
+	cheat
+		description:Start a new game to view the ending
+		code:AOOKSYAA
 	cheat
 		description:1 life after continue
 		code:AEXZNZZA
@@ -27580,6 +27853,9 @@ cartridge sha256:d4a94fd07859485fc2aac73d627933b70e1977c93b744ec3d71b66d4365ab7f
 		description:Fun house costs 90 normal tickets
 		code:PANOZPIE
 	cheat
+		description:Start a new game to view the ending
+		code:PAKYINAE
+	cheat
 		description:Start with 20 tickets instead of 10
 		code:ZAEYPYPA
 	cheat
@@ -27637,25 +27913,31 @@ cartridge sha256:e580f51b06217b102e56ec98fff7c4ebad5b925fa3a28042d67433cffa8c5cd
 		description:Infinite health
 		code:EESEYEVG
 	cheat
+		description:Infinite weapons
+		code:SZNOGUVV+SXEOLUVV+SXOOZUSE
+	cheat
 		description:Infinite time
 		code:AAKEVYPA
 	cheat
 		description:Infinite lives
 		code:SXNYZSVK
 	cheat
-		description:When your weapon runs out of ammo its replaced with the double weapon
+		description:Hit anywhere - normal enemies
+		code:SXSETVSO+XVEAPTAV
+	cheat
+		description:When weapon runs out of ammo it's replaced with the double weapon
 		code:PEOPTLAA
 	cheat
-		description:When your weapon runs out of ammo its replaced with the wave weapon
+		description:When weapon runs out of ammo it's replaced with the wave weapon
 		code:ZEOPTLAA
 	cheat
-		description:When your weapon runs out of ammo its replaced with the 3-way weapon
+		description:When weapon runs out of ammo it's replaced with the 3-way weapon
 		code:LEOPTLAA
 	cheat
-		description:When your weapon runs out of ammo its replaced with the flame weapon
+		description:When weapon runs out of ammo it's replaced with the flame weapon
 		code:GEOPTLAA
 	cheat
-		description:When your weapon runs out of ammo its replaced with the fireball weapon
+		description:When weapon runs out of ammo it's replaced with the fireball weapon
 		code:IEOPTLAA
 	cheat
 		description:Start with less time
@@ -27666,9 +27948,6 @@ cartridge sha256:e580f51b06217b102e56ec98fff7c4ebad5b925fa3a28042d67433cffa8c5cd
 	cheat
 		description:Start with even more time
 		code:PAEIKALE+PAKAGALE
-	cheat
-		description:Weapons don't run out
-		code:SZNOGUVV+SXEOLUVV+SXOOZUSE
 	cheat
 		description:Start with one heart - first life only
 		code:PAENPIZA
@@ -31198,7 +31477,7 @@ cartridge sha256:b8055844825653210d252d29a2229f9a3e7e512004e83940620173c57d8723f
 		description:Invincibility after one hit
 		code:1DBB-D4D7
 	cheat
-		description:Almost invincible in action sequences
+		description:Infinite health in action sequences
 		code:2264-6FD4
 	cheat
 		description:Infinite MP (Magic Points)
@@ -31240,7 +31519,7 @@ cartridge sha256:b8055844825653210d252d29a2229f9a3e7e512004e83940620173c57d8723f
 		description:Start with 1/2 health (first game only)
 		code:D081-6DD8
 	cheat
-		description:Infinite health in action sequences
+		description:Infinite health in action sequences (alt)
 		code:7E001D:08
 	cheat
 		description:Infinite health in sim mode
@@ -39746,40 +40025,40 @@ cartridge sha256:1a79d51a2ad7dd4848205a07ff8e5d873b155dc420de5e52158c9bab935e05c
 	title:Dream TV (USA)
 	cheat
 		description:Almost infinite health
-		code:8FA6 3DA8+8FAA 3FA8
+		code:8FA6-3DA8+8FAA-3FA8
 	cheat
 		description:Infinite lives
-		code:DDCE C7DC
-	cheat
-		description:Start with 5 lives
-		code:D9B8 1F04
-	cheat
-		description:Start with 1 life
-		code:DFB8 1F04
-	cheat
-		description:Start with 8 lives
-		code:D6B8 1F04
+		code:DDCE-C7DC
 	cheat
 		description:One hit kills, except skeletons
-		code:8F23 3768
+		code:8F23-3768
 	cheat
 		description:Mega-jump (disable to land again)
-		code:8F84 17D8
+		code:8F84-17D8
 	cheat
 		description:Can't get hit - some characters are white
-		code:DDC7 1DD8
+		code:DDC7-1DD8
+	cheat
+		description:Start with 5 lives
+		code:D9B8-1F04
+	cheat
+		description:Start with 1 life
+		code:DFB8-1F04
+	cheat
+		description:Start with 8 lives
+		code:D6B8-1F04
 	cheat
 		description:Start with 2/3 health - 1st life
-		code:4DBD CF04
+		code:4DBD-CF04
 	cheat
 		description:Start with 2/3 health - after 1st life
-		code:4DCE CD0C
+		code:4DCE-CD0C
 	cheat
 		description:Start with 1/3 health - 1st life
-		code:FDBD CF04
+		code:FDBD-CF04
 	cheat
 		description:Start with 1/3 health - after 1st life
-		code:FDCE CD0C
+		code:FDCE-CD0C
 
 cartridge sha256:c509e957873d6cff232bc360ae1795ea74e86bf4fa09c686f6cfc83bd8bac3d7
 	title:Dual Orb II (Japan)
@@ -40523,13 +40802,13 @@ cartridge sha256:0a8cd5101f849ccd4e40d55fdc4edce914b2825b69eb76ec31cf53b59719e79
 	title:Eye of the Beholder (USA)
 	cheat
 		description:Infinite HP
-		code:8285 6D2C+82DE 049B
+		code:8285-6D2C+82DE-049B
 	cheat
 		description:No waiting to hit again
-		code:828D A798
+		code:828D-A798
 	cheat
 		description:One hit kills (works for enemies also)
-		code:CBAA A726+3CA2 AD96
+		code:CBAA-A726+3CA2-AD96
 	cheat
 		description:Pick a lawful, human male fighter and he will be at Level 8
 		code:D68B-A474
@@ -45672,6 +45951,57 @@ cartridge sha256:183af7d642b55d52cd594786ec2f031d033cc6c8c1a2a84a834e4ada04301b2
 	cheat
 		description:Infinite health (disable then enable when bored in sub games)
 		code:7E9EB0:03
+	cheat
+		description:Infinite lives
+		code:7E9E90:0A
+	cheat
+		description:Start on Greek Village I
+		code:7E0394:05+7E0398:05
+	cheat
+		description:Start on Rocket Ride I
+		code:7E0394:06+7E0398:06
+	cheat
+		description:Start on Greek Village II
+		code:7E0394:07+7E0398:07
+	cheat
+		description:Start on Space Walk I
+		code:7E0394:08+7E0398:08
+	cheat
+		description:Start on Greek Village III
+		code:7E0394:09+7E0398:09
+	cheat
+		description:Start on Rocket Ride II
+		code:7E0394:0A+7E0398:0A
+	cheat
+		description:Start on Lava Dome I
+		code:7E0394:0B+7E0398:0B
+	cheat
+		description:Start on Space Walk II
+		code:7E0394:0C+7E0398:0C
+	cheat
+		description:Start on Lava Dome II
+		code:7E0394:0D+7E0398:0D
+	cheat
+		description:Start on Rocket Ride III
+		code:7E0394:0E+7E0398:0E
+	cheat
+		description:Start on Lava Dome III
+		code:7E0394:0F+7E0398:0F
+	cheat
+		description:Start on Space Walk III
+		code:7E0394:10+7E0398:10
+	cheat
+		description:Start on Exit to Atlanta I
+		code:7E0394:11+7E0398:11
+	cheat
+		description:Start on Exit to Atlanta II
+		code:7E0394:12+7E0398:12
+	cheat
+		description:Start on Round Ends
+		code:7E0394:13+7E0398:13
+	cheat
+		description:Start on Game Ending
+		code:7E0394:14+7E0398:14
 
 cartridge sha256:62557ee2a3fc3b5a3f59431f966eb61bb380ba983ef6c7742cb55cf075f15f6c
 	title:J.R.R. Tolkien's The Lord of the Rings - Volume 1 (USA)
@@ -45957,6 +46287,9 @@ cartridge sha256:a314583b11d594b8245b5177aa64a4d3b7497d096edabbea7c1842c57aa2ad2
 	cheat
 		description:Infinite lives (alt)
 		code:7E1F93:03
+	cheat
+		description:Infinite bombs
+		code:7E1F95:09
 
 cartridge sha256:6f0bec87ece503b0fbe108cd159ed6f5fa7711b1c4fe31e982af41ad5c638093
 	title:Jim Power - The Lost Dimension in 3D (USA)
@@ -46378,17 +46711,17 @@ cartridge sha256:771a0322d9f5f8e13a52d01e80257a1f75cc693cf4abf74793520eb5f8b5580
 		description:Hearts from big jungle fruit restore all energy
 		code:DDCF-3F6D
 	cheat
+		description:Super-jump - Mowgli
+		code:E8CA-3DA4
+	cheat
+		description:Mega-jump - Mowgli
+		code:ECCA-3DA4
+	cheat
 		description:20 seconds from hourglass
 		code:D4C0-1FAF
 	cheat
 		description:30 seconds from hourglass
 		code:D7C0-1FAF
-	cheat
-		description:Super-jumping Mowgli
-		code:E8CA-3DA4
-	cheat
-		description:Mega-jumping Mowgli
-		code:ECCA-3DA4
 	cheat
 		description:Bonus gems worth 2 (don't collect over 100)
 		code:D4CA-4DDF
@@ -49618,6 +49951,9 @@ cartridge sha256:80c22cc92d51a54de9cd9fd00db5ff58a35fff35e822169c94e445d50834fba
 		description:Start with fewer magazine clips
 		code:DF6A-AF6F
 	cheat
+		description:Invincibility (blinking)
+		code:7E025E:50
+	cheat
 		description:Infinite health (alt)
 		code:7E0226:06
 	cheat
@@ -49626,6 +49962,12 @@ cartridge sha256:80c22cc92d51a54de9cd9fd00db5ff58a35fff35e822169c94e445d50834fba
 	cheat
 		description:Infinite time (alt)
 		code:7E0D28:99+7E0D29:09
+	cheat
+		description:Play as Riggs
+		code:7E0246:00
+	cheat
+		description:Play as Murtaugh
+		code:7E0246:01
 
 cartridge sha256:457abe634e0a8be03e29513a3dca8f3e9d0ddc6bf97d8931f2316094260f3712
 	title:Lion King, The (USA)
@@ -49770,6 +50112,24 @@ cartridge sha256:ab3d97c1a3a979e1680a428ec65df54cfb72997bbfe2173292248a4fa8c51ba
 	cheat
 		description:Infinite health - 3rd viking
 		code:7E103B:06
+
+cartridge sha256:8510491f99400115ccf33570269bc4e484fb56370f7ac36f12e73eec19d342da
+	title:Lucky Luke (Europe) (En,Fr,De,Es)
+	cheat
+		description:Invincibility
+		code:7E0526:48
+	cheat
+		description:Infinite health
+		code:7E059F:04
+	cheat
+		description:Infinite lives
+		code:7E05A0:09
+	cheat
+		description:Infinite rounds
+		code:7E05A2:09
+	cheat
+		description:Infinite bombs
+		code:7E05A3:09
 
 cartridge sha256:73731a5a7932965de02a9e98055dcf88b4d17b8f710a6ecfde3e36a1f248773b
 	title:Lufia & The Fortress of Doom (USA)
@@ -59195,19 +59555,19 @@ cartridge sha256:549f2e5b17f685cad25ba71ce7bc6e004e7bfd09e6be12a827af9a9a26556ff
 	title:Redline F-1 Racer (USA)
 	cheat
 		description:Always in 1st place
-		code:C98E 6FDF
-	cheat
-		description:Instant 255 mph speed (best to get into 6th gear before activating this code, then you can go 357 mph)
-		code:CBC5 D70F+EEC5 D7AF
-	cheat
-		description:Don't lose speed when you get off accelerator button
-		code:C98C 6F0F
-	cheat
-		description:No loss of speed on grass
-		code:C9BD 0F04
+		code:C98E-6FDF
 	cheat
 		description:Infinite special fuel
-		code:3CAA AF04
+		code:3CAA-AF04
+	cheat
+		description:Instant 255 mph speed (best to get into 6th gear before activating this code, then you can go 357 mph)
+		code:CBC5-D70F+EEC5-D7AF
+	cheat
+		description:No speed loss when you get off accelerator button
+		code:C98C-6F0F
+	cheat
+		description:No speed loss on grass
+		code:C9BD-0F04
 
 cartridge sha256:71e7083cfcf32b738f60f5eeffd4f9d1fd9250afbde0c56e22a4b97abac377a1
 	title:Ren & Stimpy Show, The - Fire Dogs (USA)
@@ -65059,445 +65419,463 @@ cartridge sha256:3f8efb19eae68f24feb42c018b7dc7a819bfd8d993ab36899681caa7ee94b06
 cartridge sha256:a9e3e57d591e995e8e0dd228b619b6aed42205eaf55316fa8ff33f236b3a32b3
 	title:Super Mario All-Stars (USA)
 	cheat
-		description:(SMB) Invincibility (Starman effect)
+		description:SMB - Invincibility (Starman effect)
 		code:292B-67DE
 	cheat
-		description:(SMB) Invincibility does not last as long
+		description:SMB - Invincibility does not last as long
 		code:D62F-6DAE
 	cheat
-		description:(SMB) Invincibility lasts longer
+		description:SMB - Invincibility lasts longer
 		code:9D2F-6DAE
 	cheat
-		description:(SMB) Infinite lives (alt)
+		description:SMB - Infinite lives (alt)
 		code:C2C1-D4AA
 	cheat
-		description:(SMB) Infinite time
+		description:SMB - Infinite time
 		code:6D84-DF03
 	cheat
-		description:(SMB) Multi-jump
+		description:SMB - Multi-jump
 		code:2D8E-D7D2
 	cheat
-		description:(SMB) Run without holding the dash button
+		description:SMB - Run without holding the dash button
 		code:DD8E-D702
 	cheat
-		description:(SMB) Start File A game with 2 lives
+		description:SMB - Start File A game with 2 lives
 		code:DFDF-FAAD
 	cheat
-		description:(SMB) Start File A game with 10 lives
+		description:SMB - Start File A game with 10 lives
 		code:DBDF-FAAD
 	cheat
-		description:(SMB) Start File A game with 50 lives
+		description:SMB - Start File A game with 50 lives
 		code:7FDF-FAAD
 	cheat
-		description:(SMB) Start File A game with 100 lives
+		description:SMB - Start File A game with 100 lives
 		code:17DF-FAAD
 	cheat
-		description:(SMB) 1-up worth nothing
+		description:SMB - 1-up worth nothing
 		code:C26B-0FBF
 	cheat
-		description:(SMB) Allows you to select any world for File A
+		description:SMB - Allows you to select any world for File A
 		code:D5DF-FADD
 	cheat
-		description:(SMB) Jump lower (disable if you get stuck)
+		description:SMB - Jump lower (disable if you get stuck)
 		code:CB81-0D02+E281-0D62+3C81-0DA2
 	cheat
-		description:(SMB) Super-jump
+		description:SMB - Super-jump
 		code:CB81-0D02+EC81-0D62+3C81-0DA2
 	cheat
-		description:(SMB) Mega-jump
+		description:SMB - Mega-jump
 		code:CB81-0D02+E681-0D62+3C81-0DA2
 	cheat
-		description:(LL) Start File A game with 2 lives
+		description:LL - Start File A game with 2 lives
 		code:DFDF-FEDD
 	cheat
-		description:(LL) Start File A game with 10 lives
+		description:LL - Start File A game with 10 lives
 		code:DBDF-FEDD
 	cheat
-		description:(LL) Start File A game with 50 lives
+		description:LL - Start File A game with 50 lives
 		code:7FDF-FEDD
 	cheat
-		description:(LL) Start File A game with 100 lives
+		description:LL - Start File A game with 100 lives
 		code:17DF-FEDD
 	cheat
-		description:(LL) Infinite lives
+		description:LL - Infinite lives
 		code:C2B6-A455
 	cheat
-		description:(LL) Infinite time
+		description:LL - Infinite time
 		code:6D82-0F79
 	cheat
-		description:(LL) Allows you to select any world or level for File A
+		description:LL - Allows you to select any world or level for File A
 		code:DADF-F30D+D7DF-F36D
 	cheat
-		description:(LL) Infinite lives
+		description:LL - Infinite lives
 		code:C2B6-A455
 	cheat
-		description:(LL) Multi-jump
+		description:LL - Multi-jump
 		code:DD86-6F80
 	cheat
-		description:(SMB2) Multi-jump - all characters
+		description:SMB2 - Multi-jump - all characters
 		code:D966-6166
 	cheat
-		description:(SMB2) Float - all characters
+		description:SMB2 - Float - all characters
 		code:6267-A5A6
 	cheat
-		description:(SMB2) 1 life after continue
+		description:SMB2 - 1 life after continue
 		code:DF61-05D0
 	cheat
-		description:(SMB2) 9 lives after continue
+		description:SMB2 - 9 lives after continue
 		code:DB61-05D0
 	cheat
-		description:(SMB2) 25 lives after continue
+		description:SMB2 - 25 lives after continue
 		code:FB61-05D0
 	cheat
-		description:(SMB2) 50 lives after continue
+		description:SMB2 - 50 lives after continue
 		code:7461-05D0
 	cheat
-		description:(SMB2) 99 lives after continue
+		description:SMB2 - 99 lives after continue
 		code:1761-05D0
 	cheat
-		description:(SMB2) Infinite lives
+		description:SMB2 - Infinite lives
 		code:C26E-D5A6
 	cheat
-		description:(SMB2) Continue with 3 hearts instead of 2
+		description:SMB2 - Continue with 3 hearts instead of 2
 		code:DF6B-A9A1
 	cheat
-		description:(SMB2) Continue with 4 hearts
+		description:SMB2 - Continue with 4 hearts
 		code:D46B-A9A1
 	cheat
-		description:(SMB2) Infinite hearts
+		description:SMB2 - Infinite hearts
 		code:DD32-6966
 	cheat
-		description:(SMB2) Jumping in place charges super jump
+		description:SMB2 - Jumping in place charges super jump
 		code:7A60-A966
 	cheat
-		description:(SMB2) Allows you to select any world for File A
+		description:SMB2 - Allows you to select any world for File A
 		code:D1D4-FA0D
 	cheat
-		description:(SMB3) Infinite time
-		code:6D3D-6619
-	cheat
-		description:(SMB3) Multi-jump
-		code:40AA-6803
-	cheat
-		description:(SMB3) Fly at any time (run meter always full)
-		code:DDAF-A8A3
-	cheat
-		description:(SMB3) Infinite flying time
-		code:EEA4-AB63
-	cheat
-		description:(SMB3) Fireballs hit anywhere
-		code:4083-D8F3+408D-08F3
-	cheat
-		description:(SMB3) Tail hits anywhere
-		code:40C4-6C22
-	cheat
-		description:(SMB3) Fireballs can kill most enemies
-		code:4084-0BB3
-	cheat
-		description:(SMB3) Start and continue as Big Mario
-		code:E1A3-D60A
-	cheat
-		description:(SMB3) Change to Big Mario whenever you go to the map
-		code:CB69-AC07+DF69-AC67
-	cheat
-		description:(SMB3) Change to Fire Mario whenever you go to the map
-		code:CB69-AC07+D469-AC67
-	cheat
-		description:(SMB3) Change to Raccoon Mario whenever you go to the map
-		code:CB69-AC07+D769-AC67
-	cheat
-		description:(SMB3) Change to Frog Mario whenever you go to the map
-		code:CB69-AC07+D069-AC67
-	cheat
-		description:(SMB3) Change to Tanooki Mario whenever you go to the map
-		code:CB69-AC07+D969-AC67
-	cheat
-		description:(SMB3) Change to Sledgehammer Mario when you go to the map
-		code:CB69-AC07+D169-AC67
-	cheat
-		description:(SMB3) All power-ups turn you into Shoe Mario
-		code:D0A1-6C0A+E1A3-D60A
-	cheat
-		description:(SMB3) Collisions turn you into Big Mario
-		code:D4A8-6CAA
-	cheat
-		description:(SMB3) Collisions turn you into Fire Mario
-		code:D7A8-6CAA
-	cheat
-		description:(SMB3) Collisions turn you into Raccoon Mario
-		code:D0A8-6CAA
-	cheat
-		description:(SMB3) Collisions turn you into Frog Mario
-		code:D9A8-6CAA
-	cheat
-		description:(SMB3) Collisions turn you into Tanooki Mario
-		code:D1A8-6CAA
-	cheat
-		description:(SMB3) Collisions turn you into Sledgehammer Mario
-		code:D5A8-6CAA
-	cheat
-		description:(SMB3) After getting star, invincible until end of level (may have to disable to jump)
-		code:C23B-680D
-	cheat
-		description:(SMB3) 1 life after continue
-		code:DFBB-DBAF
-	cheat
-		description:(SMB3) 10 lives after continue
-		code:DBBB-DBAF
-	cheat
-		description:(SMB3) 26 lives after continue
-		code:FBBB-DBAF
-	cheat
-		description:(SMB3) 51 lives after continue
-		code:74BB-DBAF
-	cheat
-		description:(SMB3) 100 lives after continue
-		code:17BB-DBAF
-	cheat
-		description:(SMB3) Infinite lives
+		description:SMB3 - Infinite lives
 		code:82BB-0C6D
 	cheat
-		description:(SMB3) Gain lots of lives with each 5 coins
+		description:SMB3 - Infinite time
+		code:6D3D-6619
+	cheat
+		description:SMB3 - Infinite flying time
+		code:EEA4-AB63
+	cheat
+		description:SMB3 - Multi-jump
+		code:40AA-6803
+	cheat
+		description:SMB3 - Fly at any time (run meter always full)
+		code:DDAF-A8A3
+	cheat
+		description:SMB3 - Fireballs hit anywhere
+		code:4083-D8F3+408D-08F3
+	cheat
+		description:SMB3 - Tail hits anywhere
+		code:40C4-6C22
+	cheat
+		description:SMB3 - Fireballs can kill most enemies
+		code:4084-0BB3
+	cheat
+		description:SMB3 - Change to Big Mario whenever you go to the map
+		code:CB69-AC07+DF69-AC67
+	cheat
+		description:SMB3 - Change to Fire Mario whenever you go to the map
+		code:CB69-AC07+D469-AC67
+	cheat
+		description:SMB3 - Change to Raccoon Mario whenever you go to the map
+		code:CB69-AC07+D769-AC67
+	cheat
+		description:SMB3 - Change to Frog Mario whenever you go to the map
+		code:CB69-AC07+D069-AC67
+	cheat
+		description:SMB3 - Change to Tanooki Mario whenever you go to the map
+		code:CB69-AC07+D969-AC67
+	cheat
+		description:SMB3 - Change to Sledgehammer Mario when you go to the map
+		code:CB69-AC07+D169-AC67
+	cheat
+		description:SMB3 - All power-ups turn you into Shoe Mario
+		code:D0A1-6C0A+E1A3-D60A
+	cheat
+		description:SMB3 - Collisions turn you into Big Mario
+		code:D4A8-6CAA
+	cheat
+		description:SMB3 - Collisions turn you into Fire Mario
+		code:D7A8-6CAA
+	cheat
+		description:SMB3 - Collisions turn you into Raccoon Mario
+		code:D0A8-6CAA
+	cheat
+		description:SMB3 - Collisions turn you into Frog Mario
+		code:D9A8-6CAA
+	cheat
+		description:SMB3 - Collisions turn you into Tanooki Mario
+		code:D1A8-6CAA
+	cheat
+		description:SMB3 - Collisions turn you into Sledgehammer Mario
+		code:D5A8-6CAA
+	cheat
+		description:SMB3 - After getting star, invincible until end of level (may have to disable to jump)
+		code:C23B-680D
+	cheat
+		description:SMB3 - 1 life after continue
+		code:DFBB-DBAF
+	cheat
+		description:SMB3 - 10 lives after continue
+		code:DBBB-DBAF
+	cheat
+		description:SMB3 - 26 lives after continue
+		code:FBBB-DBAF
+	cheat
+		description:SMB3 - 51 lives after continue
+		code:74BB-DBAF
+	cheat
+		description:SMB3 - 100 lives after continue
+		code:17BB-DBAF
+	cheat
+		description:SMB3 - Gain lots of lives with each 5 coins
 		code:D93E-6C49
 	cheat
-		description:(SMB3) 5 coins needed for an extra life
+		description:SMB3 - 5 coins needed for an extra life
 		code:D93E-6819
 	cheat
-		description:(SMB3) 10 coins needed for an extra life
+		description:SMB3 - 10 coins needed for an extra life
 		code:DC3E-6819
 	cheat
-		description:(SMB3) 25 coins needed for an extra life
+		description:SMB3 - 25 coins needed for an extra life
 		code:FB3E-6819
 	cheat
-		description:(SMB3) 50 coins needed for an extra life
+		description:SMB3 - 50 coins needed for an extra life
 		code:743E-6819
 	cheat
-		description:(SMB3) Power-jump
+		description:SMB3 - Power-jump
 		code:AD3E-6801
 	cheat
-		description:(SMB3) Super-jump
+		description:SMB3 - Super-jump
 		code:863E-6801
 	cheat
-		description:(SMB3) Mega-jump
+		description:SMB3 - Mega-jump
 		code:8D3E-6801
 	cheat
-		description:(SMB3) Ultra power-jump
+		description:SMB3 - Ultra power-jump
 		code:C63E-6801
 	cheat
-		description:(SMB3) Mega power-jump
+		description:SMB3 - Mega power-jump
 		code:DDA9-A603
 	cheat
-		description:(SMB3) Select any world for File A game
+		description:SMB3 - Select any world for File A game
 		code:D5D4-F36D
 	cheat
-		description:(SMB) Invincibility (Starman)
+		description:SMB3 - Re-enter already beaten levels
+		code:DD63-D6A5
+	cheat
+		description:SMB3 - Re-enter already beaten fortresses
+		code:1D63-D665
+	cheat
+		description:SMB3 - Re-enter already beaten mushroom houses and special levels
+		code:0D63-D605
+	cheat
+		description:SMB3 - Start and continue as Big Mario
+		code:E1A3-D60A
+	cheat
+		description:SMB - Invincibility (Starman)
 		code:7E07AF:0F
 	cheat
-		description:(SMB) Infinite lives
+		description:SMB - Infinite lives
 		code:7E075A:05
 	cheat
-		description:(SMB2) Invincibility
+		description:SMB2 - Invincibility
 		code:7E0085:3B
 	cheat
-		description:(SMB2) Always big
+		description:SMB2 - Always big
 		code:7E04C3:1F
 	cheat
-		description:(SMB2) Always small
+		description:SMB2 - Always small
 		code:7E04C3:0F
 	cheat
-		description:(SMB2) Infinite float time - all characters
+		description:SMB2 - Infinite float time - all characters
 		code:7E04CA:FF
 	cheat
-		description:(SMB3) Enable debug mode (in game)
+		description:SMB3 - Enable debug mode (in game)
 		code:7E0160:80
 	cheat
-		description:(SMB3) Invincibility
+		description:SMB3 - Invincibility
 		code:7E0552:80
 	cheat
-		description:(SMB3) Invincibility (Starman)
+		description:SMB3 - Invincibility (Starman)
 		code:7E0553:FF
 	cheat
-		description:(SMB3) Always Small Mario
+		description:SMB3 - Always Small Mario
 		code:7E00BB:00
 	cheat
-		description:(SMB3) Always Big Mario
+		description:SMB3 - Always Big Mario
 		code:7E00BB:01
 	cheat
-		description:(SMB3) Always Fire Mario
+		description:SMB3 - Always Fire Mario
 		code:7E00BB:02
 	cheat
-		description:(SMB3) Always Raccoon Mario
+		description:SMB3 - Always Raccoon Mario
 		code:7E00BB:03
 	cheat
-		description:(SMB3) Always Frog Mario
+		description:SMB3 - Always Frog Mario
 		code:7E00BB:04
 	cheat
-		description:(SMB3) Always Tanooki Mario
+		description:SMB3 - Always Tanooki Mario
 		code:7E00BB:05
 	cheat
-		description:(SMB3) Always Hammer Bros. Mario
+		description:SMB3 - Always Hammer Bros. Mario
 		code:7E00BB:06
 	cheat
-		description:(SMB3) Have Magic Whistle
+		description:SMB3 - Have Magic Whistle
 		code:7E1D80:0C
 	cheat
-		description:(SMB3) Raccoon and Tanooki have P-Wing
+		description:SMB3 - Raccoon and Tanooki have P-Wing
 		code:7E056E:FF
 	cheat
-		description:(SMB3) Fly for an unlimited amount of time
+		description:SMB3 - Fly for an unlimited amount of time
 		code:23CB26:FF
 
 cartridge sha256:a8806bfe07cd3c9945d9fd3fcea932ae1cd671cab5cae12bb7a2ae726cbf9175
 	title:Super Mario All-Stars + Super Mario World (USA)
 	cheat
-		description:(SMB) Invincibility (Starman effect)
+		description:SMB - Invincibility (Starman effect)
 		code:292B-67DE
 	cheat
-		description:(SMB) Invincibility
+		description:SMB - Invincibility
 		code:62E7-A7D2+2DE7-A7A2
 	cheat
-		description:(SMB) Always Fiery Mario after first hit
+		description:SMB - Always Fiery Mario after first hit
 		code:CB29-AF0E+D429-AF6E+CB8B-676A+DD8B-67AA
 	cheat
-		description:(SMB) Fireballs hit anywhere
+		description:SMB - Fireballs hit anywhere
 		code:4028-D4DE
 	cheat
-		description:(SMB) Multi-jump
+		description:SMB - Multi-jump
 		code:2D8E-D7D2
 	cheat
-		description:(SMB) Run without holding the dash button
+		description:SMB - Run without holding the dash button
 		code:DD8E-D702
 	cheat
-		description:(LL) Infinite lives
+		description:LL - Infinite lives
 		code:C2B6-A455
 	cheat
-		description:(LL) Multi-jump
+		description:LL - Multi-jump
 		code:DD86-6F80
 	cheat
-		description:(SMB2) Infinite lives
+		description:SMB2 - Infinite lives
 		code:C26E-D5A6
 	cheat
-		description:(SMB2) Infinite hearts
+		description:SMB2 - Infinite hearts
 		code:DD32-6966
 	cheat
-		description:(SMB2) Multi-jump - all characters
+		description:SMB2 - Multi-jump - all characters
 		code:D966-6166
 	cheat
-		description:(SMB2) Float - all characters
+		description:SMB2 - Float - all characters
 		code:6267-A5A6
 	cheat
-		description:(SMB3) Fireballs hit anywhere
+		description:SMB3 - Fireballs hit anywhere
 		code:4083-D8F3+408D-08F3
 	cheat
-		description:(SMB3) Tail hits anywhere
+		description:SMB3 - Tail hits anywhere
 		code:40C4-6C22
 	cheat
-		description:(SMB3) Fireballs can kill most enemies
+		description:SMB3 - Fireballs can kill most enemies
 		code:4084-0BB3
 	cheat
-		description:(SMW) Nintendo's debug
+		description:SMB3 - Re-enter already beaten levels
+		code:DD63-D6A5
+	cheat
+		description:SMB3 - Re-enter already beaten fortresses
+		code:1D63-D665
+	cheat
+		description:SMB3 - Re-enter already beaten mushroom houses and special levels
+		code:0D63-D605
+	cheat
+		description:SMW - Nintendo's debug
 		code:DDA6-DF07
 	cheat
-		description:(SMW) Infinite flying time for Yoshi
+		description:SMW - Infinite flying time for Yoshi
 		code:C2EC-0700
 	cheat
-		description:(SMB) Invincibility (Starman)
+		description:SMB - Invincibility (Starman)
 		code:7E07AF:0F
 	cheat
-		description:(SMB) Infinite lives
+		description:SMB - Infinite lives
 		code:7E075A:05
 	cheat
-		description:(SMB2) Invincibility
+		description:SMB2 - Invincibility
 		code:7E0085:3B
 	cheat
-		description:(SMB2) Infinite float time - all characters
+		description:SMB2 - Infinite float time - all characters
 		code:7E04CA:FF
 	cheat
-		description:(SMB3) Enable debug mode (in game)
+		description:SMB3 - Enable debug mode (in game)
 		code:7E0160:80
 	cheat
-		description:(SMB3) Infinite lives
+		description:SMB3 - Infinite lives
 		code:20919A:BD
 	cheat
-		description:(SMB3) Invincibility
+		description:SMB3 - Invincibility
 		code:7E0552:80
 	cheat
-		description:(SMB3) Invincibility (Starman)
+		description:SMB3 - Invincibility (Starman)
 		code:7E0553:FF
 	cheat
-		description:(SMB3) Always Small Mario
+		description:SMB3 - Always Small Mario
 		code:7E00BB:00
 	cheat
-		description:(SMB3) Always Big Mario
+		description:SMB3 - Always Big Mario
 		code:7E00BB:01
 	cheat
-		description:(SMB3) Always Fire Mario
+		description:SMB3 - Always Fire Mario
 		code:7E00BB:02
 	cheat
-		description:(SMB3) Always Raccoon Mario
+		description:SMB3 - Always Raccoon Mario
 		code:7E00BB:03
 	cheat
-		description:(SMB3) Always Frog Mario
+		description:SMB3 - Always Frog Mario
 		code:7E00BB:04
 	cheat
-		description:(SMB3) Always Tanooki Mario
+		description:SMB3 - Always Tanooki Mario
 		code:7E00BB:05
 	cheat
-		description:(SMB3) Always Hammer Bros Mario
+		description:SMB3 - Always Hammer Bros Mario
 		code:7E00BB:06
 	cheat
-		description:(SMB3) Infinite flying time
+		description:SMB3 - Infinite flying time
 		code:23CB26:FF
 	cheat
-		description:(SMB3) Have Magic Whistle
+		description:SMB3 - Have Magic Whistle
 		code:7E1D80:0C
 	cheat
-		description:(SMB3) Raccoon and Tanooki have P-Wing
+		description:SMB3 - Raccoon and Tanooki have P-Wing
 		code:7E056E:FF
 	cheat
-		description:(SMW) Invincibility
+		description:SMW - Invincibility
 		code:7E1497:FF
 	cheat
-		description:(SMW) Invincible (Starman)
+		description:SMW - Invincible (Starman)
 		code:7E1490:FF
 	cheat
-		description:(SMW) Always Small Mario
+		description:SMW - Always Small Mario
 		code:7E0019:00
 	cheat
-		description:(SMW) Always Big Mario
+		description:SMW - Always Big Mario
 		code:7E0019:01
 	cheat
-		description:(SMW) Always Caped Mario
+		description:SMW - Always Caped Mario
 		code:7E0019:02
 	cheat
-		description:(SMW) Always Fire Mario
+		description:SMW - Always Fire Mario
 		code:7E0019:03
 	cheat
-		description:(SMW) Infinite time
+		description:SMW - Infinite time
 		code:7E0F31:09+7E0F32:09+7E0F33:09
 	cheat
-		description:(SMW) Infinite P-Balloon time
+		description:SMW - Infinite P-Balloon time
 		code:7E1891:FF
 	cheat
-		description:(SMW) Always have Yoshi
+		description:SMW - Always have Yoshi
 		code:7E0DC1:01
 	cheat
-		description:(SMW) Jump to automatically fly
+		description:SMW - Jump to automatically fly
 		code:7E13E4:70
 	cheat
-		description:(SMW) Multi-jump and float down (disable in water and to get on Yoshi)
+		description:SMW - Multi-jump and float down (disable in water and to get on Yoshi)
 		code:7E1471:01
 	cheat
-		description:(SMW) Activate yellow blocks (deactivate before entering the Yellow Switch Palace)
+		description:SMW - Activate yellow blocks (deactivate before entering the Yellow Switch Palace)
 		code:7E1F28:01
 	cheat
-		description:(SMW) Activate blue blocks (deactivate before entering the Blue Switch Palace)
+		description:SMW - Activate blue blocks (deactivate before entering the Blue Switch Palace)
 		code:7E1F29:01
 	cheat
-		description:(SMW) Activate red blocks (deactivate before entering the Red Switch Palace)
+		description:SMW - Activate red blocks (deactivate before entering the Red Switch Palace)
 		code:7E1F2A:01
 	cheat
-		description:(SMW) 8000 points for each enemy stomped
+		description:SMW - 8000 points for each enemy stomped
 		code:7E1697:06
 
 cartridge sha256:2ada8919688087be60a6a48cace8f877add60c45d2e5d09e2442faa55be62a49
@@ -68963,7 +69341,7 @@ cartridge sha256:5b82cdd6f2da56f43680d6a5021faebe2e06036d30602c1a7917aa414cf8b5f
 	title:Teenage Mutant Ninja Turtles IV - Turtles in Time (USA)
 	cheat
 		description:Invincibility
-		code:3C86-0764+CB86-07A4+D48B-0DD4+DD8B-0D04+B98B-0D64
+		code:3C86-0764+B98B-0D64+CB86-07A4+D48B-0DD4+DD8B-0D04
 	cheat
 		description:Infinite health
 		code:892F-0DD7
@@ -68971,7 +69349,7 @@ cartridge sha256:5b82cdd6f2da56f43680d6a5021faebe2e06036d30602c1a7917aa414cf8b5f
 		description:Infinite lives
 		code:DDAC-6F67
 	cheat
-		description:One hit kills (disable when you reach Shredder's first fight)
+		description:One hit kills (disable during Shredder's first fight)
 		code:6D6C-0F2F
 	cheat
 		description:Hit anywhere - P1
@@ -70828,8 +71206,20 @@ cartridge sha256:e9fae4c2e171a1fc4f2bd800abd9e42750aaf7a4db9e40c5b9142e15029500b
 		description:Infinite health
 		code:4ABA-67DF
 	cheat
+		description:Infinite health - P1
+		code:7E07EE:53
+	cheat
+		description:No health - P2
+		code:7E084E:00
+	cheat
 		description:Infinite chances
 		code:4024-6FA7
+	cheat
+		description:Infinite time (seconds)
+		code:7E00A3:63
+	cheat
+		description:Infinite time (minutes)
+		code:7E00A4:09
 	cheat
 		description:Quicker health replenishment
 		code:DD8F-DF0D
@@ -70837,14 +71227,11 @@ cartridge sha256:e9fae4c2e171a1fc4f2bd800abd9e42750aaf7a4db9e40c5b9142e15029500b
 		description:Less health replenishment for enemies
 		code:3C80-DDDD
 	cheat
-		description:Start with 1 chance
-		code:DD6C-0467
+		description:Weaker punch
+		code:DFAC-D76E
 	cheat
-		description:Start with 6 chances
-		code:D96C-0467
-	cheat
-		description:Start with 9 chances
-		code:DB6C-0467
+		description:Weaker kick
+		code:DFA8-DDDE
 	cheat
 		description:9 minutes per stage
 		code:DBB4-DD6D
@@ -70855,23 +71242,41 @@ cartridge sha256:e9fae4c2e171a1fc4f2bd800abd9e42750aaf7a4db9e40c5b9142e15029500b
 		description:2 minutes per stage
 		code:D4B4-DD6D
 	cheat
-		description:Weaker punch
-		code:DFAC-D76E
+		description:Start with 1 chance
+		code:DD6C-0467
 	cheat
-		description:Weaker kick
-		code:DFA8-DDDE
+		description:Start with 6 chances
+		code:D96C-0467
 	cheat
-		description:Infinite health - P1
-		code:7E07EE:53
+		description:Start with 9 chances
+		code:DB6C-0467
 	cheat
-		description:No health - P2
-		code:7E084E:00
+		description:Start on stage 1 - Gudis
+		code:7E00F8:00
 	cheat
-		description:Infinite time (seconds)
-		code:7E00A3:63
+		description:Start on stage 2 - Bogun
+		code:7E00F8:01
 	cheat
-		description:Infinite time (minutes)
-		code:7E00A4:09
+		description:Start on stage 3 - Degola
+		code:7E00F8:02
+	cheat
+		description:Start on stage 4 - Barrangas
+		code:7E00F8:03
+	cheat
+		description:Start on stage 5 - Gudis II
+		code:7E00F8:04
+	cheat
+		description:Start on stage 6 - Zebokon
+		code:7E00F8:05
+	cheat
+		description:Start on stage 7 - Majaba
+		code:7E00F8:06
+	cheat
+		description:Start on stage 8 - Kodalar
+		code:7E00F8:07
+	cheat
+		description:Start on final stage - Kilazee
+		code:7E00F8:08
 
 cartridge sha256:794152fc6f55cb15a0b203fa645ac9fa314a293da999d8ec8b3dda080434d175
 	title:Uncharted Waters (USA)
@@ -71846,19 +72251,19 @@ cartridge sha256:132ca0b6a4888edf7de785d48f4417fac28522646e6c7514f80c5e9ff1438d5
 	title:Wing Commander - The Secret Missions (USA)
 	cheat
 		description:Infinite blaster power
-		code:C2A6 4D0D
+		code:C2A6-4D0D
 	cheat
 		description:Infinite fuel
-		code:C2C8 14AD
+		code:C2C8-14AD
 	cheat
 		description:Infinite missiles
-		code:3C66 C7A1
+		code:3C66-C7A1
 	cheat
 		description:Start on mission 4
-		code:D068 C402
+		code:D068-C402
 	cheat
 		description:Start on mission 8
-		code:D668 C402
+		code:D668-C402
 
 cartridge sha256:c3bcd5c716f96e6359ebcfd85c3e9b07b46c5124bf4010d89ceef5b6f2f868f6
 	title:Wings 2 - Aces High (USA)
@@ -72318,6 +72723,147 @@ cartridge sha256:65fe17fd6b297f52df6ce9812ecb02c3bb1bfda3ebc05a19c4a8decbf9a446a
 	cheat
 		description:Lava stops flowing
 		code:7E1685:DB
+
+cartridge sha256:363c60f924257bf6465efc32093c7749a0e69ea7234e47ebd4f070e7b0e7035d
+	title:Yogi Bear (Japan)
+	cheat
+		description:Infinite health
+		code:7E021E:06
+	cheat
+		description:Infinite lives
+		code:7E021C:09
+	cheat
+		description:Super-jump
+		code:7E0AB0:00
+	cheat
+		description:Start on Snow Business Stage 1
+		code:7E009F:23
+	cheat
+		description:Start on Snow Business Stage 2
+		code:7E009F:28
+	cheat
+		description:Start on Snow Business Stage 3
+		code:7E009F:2D
+	cheat
+		description:Start on Snow Business Stage 4
+		code:7E009F:32
+	cheat
+		description:Start on Cave Capers Stage 1
+		code:7E009F:37
+	cheat
+		description:Start on Cave Capers Stage 2
+		code:7E009F:3C
+	cheat
+		description:Start on Cave Capers Stage 3
+		code:7E009F:41
+	cheat
+		description:Start on Cave Capers Stage 4
+		code:7E009F:46
+	cheat
+		description:Start on Redwood Rendevous Stage 1
+		code:7E009F:4B
+	cheat
+		description:Start on Redwood Rendevous Stage 2
+		code:7E009F:50
+	cheat
+		description:Start on Redwood Rendevous Stage 3
+		code:7E009F:55
+	cheat
+		description:Start on Redwood Rendevous Stage 4
+		code:7E009F:5A
+	cheat
+		description:Start on Water Palaver Stage 1
+		code:7E009F:5F
+	cheat
+		description:Start on Water Palaver Stage 2
+		code:7E009F:64
+	cheat
+		description:Start on Water Palaver Stage 3
+		code:7E009F:69
+	cheat
+		description:Start on Water Palaver Stage 4
+		code:7E009F:6E
+	cheat
+		description:Start on Construction Site Shenanigans Stage 1
+		code:7E009F:73
+	cheat
+		description:Start on Construction Site Shenanigans Stage 2
+		code:7E009F:78
+	cheat
+		description:Start on Construction Site Shenanigans Stage 3
+		code:7E009F:7D
+	cheat
+		description:Start on Construction Site Shenanigans Stage 4
+		code:7E009F:82
+
+cartridge sha256:163399c955e6d813056826e53fc1a7d21d8958e3d11c6384854cc284412caffb
+	title:Yogi Bear's Cartoon Capers (Europe)
+	cheat
+		description:Infinite health
+		code:7E021E:06
+	cheat
+		description:Infinite lives
+		code:7E021C:09
+	cheat
+		description:Start on Snow Business Stage 1
+		code:7E009F:23
+	cheat
+		description:Start on Snow Business Stage 2
+		code:7E009F:28
+	cheat
+		description:Start on Snow Business Stage 3
+		code:7E009F:2D
+	cheat
+		description:Start on Snow Business Stage 4
+		code:7E009F:32
+	cheat
+		description:Start on Cave Capers Stage 1
+		code:7E009F:37
+	cheat
+		description:Start on Cave Capers Stage 2
+		code:7E009F:3C
+	cheat
+		description:Start on Cave Capers Stage 3
+		code:7E009F:41
+	cheat
+		description:Start on Cave Capers Stage 4
+		code:7E009F:46
+	cheat
+		description:Start on Redwood Rendevous Stage 1
+		code:7E009F:4B
+	cheat
+		description:Start on Redwood Rendevous Stage 2
+		code:7E009F:50
+	cheat
+		description:Start on Redwood Rendevous Stage 3
+		code:7E009F:55
+	cheat
+		description:Start on Redwood Rendevous Stage 4
+		code:7E009F:5A
+	cheat
+		description:Start on Water Palaver Stage 1
+		code:7E009F:5F
+	cheat
+		description:Start on Water Palaver Stage 2
+		code:7E009F:64
+	cheat
+		description:Start on Water Palaver Stage 3
+		code:7E009F:69
+	cheat
+		description:Start on Water Palaver Stage 4
+		code:7E009F:6E
+	cheat
+		description:Start on Construction Site Shenanigans Stage 1
+		code:7E009F:73
+	cheat
+		description:Start on Construction Site Shenanigans Stage 2
+		code:7E009F:78
+	cheat
+		description:Start on Construction Site Shenanigans Stage 3
+		code:7E009F:7D
+	cheat
+		description:Start on Construction Site Shenanigans Stage 4
+		code:7E009F:82
 
 cartridge sha256:90ad69a489194aca7ef7b7fd1d30e0105da4934a81ac8b0333ea20f9248df92d
 	title:Yoshi's Cookie (USA)

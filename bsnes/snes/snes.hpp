@@ -17,6 +17,7 @@ namespace SNES {
 
 #include <libco/libco.h>
 
+#include <nall/platform.hpp>
 #include <nall/algorithm.hpp>
 #include <nall/any.hpp>
 #include <nall/array.hpp>
@@ -26,7 +27,6 @@ namespace SNES {
 #include <nall/file.hpp>
 #include <nall/function.hpp>
 #include <nall/moduloarray.hpp>
-#include <nall/platform.hpp>
 #include <nall/priorityqueue.hpp>
 #include <nall/property.hpp>
 #include <nall/serializer.hpp>

@@ -96,8 +96,6 @@
     _wfullpath(fn, nall::utf16_t(filename), _MAX_PATH);
     strcpy(resolvedname, nall::utf8_t(fn));
     for(unsigned n = 0; resolvedname[n]; n++) if(resolvedname[n] == '\\') resolvedname[n] = '/';
-    unsigned length = strlen(resolvedname);
-    if(resolvedname[length] != '/') strcpy(resolvedname + length, "/");
     return resolvedname;
   }
 

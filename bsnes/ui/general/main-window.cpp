@@ -324,14 +324,18 @@ void MainWindow::synchronize() {
 }
 
 void MainWindow::setupVideoFilters() {
-  lstring files = directory::files({ application->basepath, "filters/" }, "*.filter");
-  if(files.size() == 0) files = directory::files({ application->userpath, "filters/" }, "*.filter");
+  string path = { application->basepath, "filters/" };
+  lstring files = directory::files(path, "*.filter");
+  if(files.size() == 0) {
+    path = { application->userpath, "filters/" };
+    files = directory::files(path, "*.filter");
+  }
   reference_array<RadioItem&> group;
 
   settingsVideoFilterList = new RadioItem[files.size()];
   for(unsigned n = 0; n < files.size(); n++) {
     string name = files[n];
-    videoFilterName.append({ application->userpath, "filters/", name });
+    videoFilterName.append({ path, name });
     if(auto position = name.position(".filter")) name[position()] = 0;
 
     settingsVideoFilterList[n].setText(name);
@@ -351,14 +355,18 @@ void MainWindow::setupVideoFilters() {
 }
 
 void MainWindow::setupVideoShaders() {
-  lstring files = directory::files({ application->basepath, "shaders/" }, { "*.", config->video.driver, ".shader" });
-  if(files.size() == 0) files = directory::files({ application->userpath, "shaders/" }, { "*.", config->video.driver, ".shader" });
+  string path = { application->basepath, "shaders/" };
+  lstring files = directory::files(path, { "*.", config->video.driver, ".shader" });
+  if(files.size() == 0) {
+    path = { application->userpath, "shaders/" };
+    files = directory::files(path, { "*.", config->video.driver, ".shader" });
+  }
   reference_array<RadioItem&> group;
 
   settingsVideoShaderList = new RadioItem[files.size()];
   for(unsigned n = 0; n < files.size(); n++) {
     string name = files[n];
-    videoShaderName.append({ application->userpath, "shaders/", name });
+    videoShaderName.append({ path, name });
     if(auto position = name.position(string{ ".", config->video.driver, ".shader" })) name[position()] = 0;
 
     settingsVideoShaderList[n].setText(name);

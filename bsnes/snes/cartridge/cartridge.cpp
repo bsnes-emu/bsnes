@@ -34,7 +34,7 @@ void Cartridge::load(Mode cartridge_mode, const char *markup) {
   nvram.reset();
 
   parse_markup(markup);
-  print(markup, "\n\n");
+//print(markup, "\n\n");
 
   if(ram_size > 0) {
     ram.map(allocate<uint8>(ram_size, 0xff), ram_size);
@@ -45,7 +45,22 @@ void Cartridge::load(Mode cartridge_mode, const char *markup) {
   ram.write_protect(false);
 
   crc32 = crc32_calculate(rom.data(), rom.size());
-  sha256 = nall::sha256(rom.data(), rom.size());
+
+  switch((Mode)mode) {
+  case Mode::Normal:
+  case Mode::BsxSlotted:
+    sha256 = nall::sha256(rom.data(), rom.size());
+    break;
+  case Mode::Bsx:
+    sha256 = nall::sha256(bsxflash.memory.data(), bsxflash.memory.size());
+    break;
+  case Mode::SufamiTurbo:
+    sha256 = nall::sha256(sufamiturbo.slotA.rom.data(), sufamiturbo.slotA.rom.size());
+    break;
+  case Mode::SuperGameBoy:
+    sha256 = GameBoy::cartridge.sha256();
+    break;
+  }
 
   system.load();
   loaded = true;
