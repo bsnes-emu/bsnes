@@ -10,12 +10,15 @@ HFONT pFont::create(const string &description) {
   part.split(",", description);
   for(auto &item : part) item.trim(" ");
 
-  string family = part[0];
-  unsigned size = decimal(part[1]);
-  bool bold = part[2].position("Bold");
-  bool italic = part[2].position("Italic");
-  if(family == "") family = "Tahoma";
-  if(size == 0) size = 8;
+  string family = "Sans";
+  unsigned size = 8u;
+  bool bold = false;
+  bool italic = false;
+
+  if(part[0] != "") family = part[0];
+  if(part.size() >= 2) size = decimal(part[1]);
+  if(part.size() >= 3) bold = part[2].position("Bold");
+  if(part.size() >= 3) italic = part[2].position("Italic");
 
   return CreateFont(
     -(size * 96.0 / 72.0 + 0.5),

@@ -130,7 +130,7 @@ struct CheckBox::State {
 
 struct ComboBox::State {
   unsigned selection;
-  linear_vector<string> text;
+  vector<string> text;
 
   State() {
     selection = 0;
@@ -191,7 +191,7 @@ struct ListView::State {
   bool headerVisible;
   bool selected;
   unsigned selection;
-  linear_vector<lstring> text;
+  vector<lstring> text;
 
   State() {
     checkable = false;

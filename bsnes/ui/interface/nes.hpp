@@ -15,4 +15,8 @@ struct InterfaceNES : NES::Interface {
 
 private:
   unsigned palette[512];
+  unsigned paletteColor(
+    unsigned color, double saturation = 1.0, double hue = 0.0,
+    double contrast = 1.0, double brightness = 1.0, double gamma = 1.8
+  );
 };

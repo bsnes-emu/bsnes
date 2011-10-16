@@ -4,7 +4,7 @@ struct WindowManager {
     string name;
     string geometry;
   };
-  linear_vector<WindowList> windowList;
+  vector<WindowList> windowList;
 
   void append(Window *window, const string &name);
 

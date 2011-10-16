@@ -151,9 +151,7 @@ inline lstring::lstring() {
 }
 
 inline lstring::lstring(std::initializer_list<string> list) {
-  for(const string *s = list.begin(); s != list.end(); ++s) {
-    operator<<(*s);
-  }
+  for(auto &data : list) append(data);
 }
 
 }

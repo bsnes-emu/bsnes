@@ -11,6 +11,116 @@
 #include <nall/utility.hpp>
 
 namespace nall {
+  template<typename T> struct vector {
+    struct exception_out_of_bounds{};
+
+  protected:
+    T *pool;
+    unsigned poolsize;
+    unsigned objectsize;
+
+  public:
+    unsigned size() const { return objectsize; }
+    unsigned capacity() const { return poolsize; }
+
+    void reset() {
+      if(pool) {
+        for(unsigned n = 0; n < objectsize; n++) pool[n].~T();
+        free(pool);
+      }
+      pool = nullptr;
+      poolsize = 0;
+      objectsize = 0;
+    }
+
+    void reserve(unsigned size) {
+      size = bit::round(size);  //amortize growth
+      T *copy = (T*)calloc(size, sizeof(T));
+      for(unsigned n = 0; n < min(size, objectsize); n++) new(copy + n) T(pool[n]);
+      for(unsigned n = 0; n < objectsize; n++) pool[n].~T();
+      free(pool);
+      pool = copy;
+      poolsize = size;
+      objectsize = min(size, objectsize);
+    }
+
+    template<typename... Args>
+    void append(const T& data, Args&&... args) {
+      append(data);
+      append(std::forward<Args>(args)...);
+    }
+
+    void append(const T& data) {
+      if(objectsize + 1 > poolsize) reserve(objectsize + 1);
+      new(pool + objectsize++) T(data);
+    }
+
+    void remove(unsigned index, unsigned count = 1) {
+      for(unsigned n = index; count + n < objectsize; n++) {
+        pool[n] = pool[count + n];
+      }
+      objectsize = (count + index >= objectsize) ? index : objectsize - count;
+    }
+
+    //access
+    inline T& operator[](unsigned position) {
+      if(position >= objectsize) throw exception_out_of_bounds();
+      return pool[position];
+    }
+
+    inline const T& operator[](unsigned position) const {
+      if(position >= objectsize) throw exception_out_of_bounds();
+      return pool[position];
+    }
+
+    inline const T& operator()(unsigned position, const T& data) const {
+      if(position >= objectsize) return data;
+      return pool[position];
+    }
+
+    //iteration
+    T* begin() { return &pool[0]; }
+    T* end() { return &pool[objectsize]; }
+    const T* begin() const { return &pool[0]; }
+    const T* end() const { return &pool[objectsize]; }
+
+    //copy
+    inline vector& operator=(const vector &source) {
+      reset();
+      reserve(source.capacity());
+      for(auto &data : source) append(data);
+      return *this;
+    }
+
+    vector(const vector &source) : pool(nullptr), poolsize(0), objectsize(0) {
+      operator=(source);
+    }
+
+    //move
+    inline vector& operator=(vector &&source) {
+      reset();
+      pool = source.pool, poolsize = source.poolsize, objectsize = source.objectsize;
+      source.pool = nullptr, source.poolsize = 0, source.objectsize = 0;
+      return *this;
+    }
+
+    vector(vector &&source) : pool(nullptr), poolsize(0), objectsize(0) {
+      operator=(std::move(source));
+    }
+
+    //construction
+    vector() : pool(nullptr), poolsize(0), objectsize(0) {
+    }
+
+    vector(std::initializer_list<T> list) : pool(nullptr), poolsize(0), objectsize(0) {
+      for(auto &data : list) append(data);
+    }
+
+    ~vector() {
+      reset();
+    }
+  };
+
   //linear_vector
   //memory: O(capacity * 2)
   //
@@ -23,7 +133,7 @@ namespace nall {
   //if objects hold memory address references to themselves (introspection), a
   //valid copy constructor will be needed to keep pointers valid.
 
-  template<typename T> class linear_vector {
+  template<typename T> struct linear_vector {
   protected:
     T *pool;
     unsigned poolsize, objectsize;
@@ -160,7 +270,7 @@ namespace nall {
   //by guaranteeing that the base memory address of each objects never changes,
   //this avoids the need for an object to have a valid copy constructor.
 
-  template<typename T> class pointer_vector {
+  template<typename T> struct pointer_vector {
   protected:
     T **pool;
     unsigned poolsize, objectsize;

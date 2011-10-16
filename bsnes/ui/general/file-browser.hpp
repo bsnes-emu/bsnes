@@ -22,7 +22,7 @@ private:
     string path;
     lstring filter;
   } *mode;
-  linear_vector<FilterMode> filterModes;
+  vector<FilterMode> filterModes;
 
   lstring fileNameList;
   function<void (string)> callback;

@@ -36,6 +36,11 @@ namespace nall {
 
     inline unsigned length() const;
 
+    template<unsigned Limit = 0> inline lstring split(const char*) const;
+    template<unsigned Limit = 0> inline lstring isplit(const char*) const;
+    template<unsigned Limit = 0> inline lstring qsplit(const char*) const;
+    template<unsigned Limit = 0> inline lstring iqsplit(const char*) const;
+
     inline bool equals(const char*) const;
     inline bool iequals(const char*) const;
 
@@ -102,9 +107,7 @@ namespace nall {
   #endif
   };
 
-  struct lstring : public linear_vector<string> {
-    template<typename T> inline lstring& operator<<(T value);
-
+  struct lstring : vector<string> {
     inline optional<unsigned> find(const char*) const;
     template<unsigned Limit = 0> inline lstring& split(const char*, const char*);
     template<unsigned Limit = 0> inline lstring& isplit(const char*, const char*);

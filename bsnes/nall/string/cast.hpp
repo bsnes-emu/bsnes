@@ -16,11 +16,6 @@ template<> inline const char* to_string<const string&> (const string &v)  { retu
 template<> inline const char* to_string<cstring>       (cstring v)        { return v; }
 template<> inline const char* to_string<const cstring&>(const cstring &v) { return v; }
 
-template<typename T> lstring& lstring::operator<<(T value) {
-  operator[](size()).assign(to_string<T>(value));
-  return *this;
-}
-
 #if defined(QSTRING_H)
 template<> inline const char* to_string<QString>(QString v) { return v.toUtf8().constData(); }
 template<> inline const char* to_string<const QString&>(const QString &v) { return v.toUtf8().constData(); }
