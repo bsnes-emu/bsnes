@@ -3,8 +3,8 @@ struct PPU : Processor {
   void main();
   void tick();
 
-  void scanline_edge();
-  void frame_edge();
+  void scanline();
+  void frame();
 
   void power();
   void reset();
@@ -26,11 +26,10 @@ struct PPU : Processor {
 
   uint8 chr_load(uint16 addr);
 
-  void ly_increment();
   void scrollx_increment();
   void scrolly_increment();
 
-  void raster_pixel(unsigned x);
+  void raster_pixel();
   void raster_sprite();
   void raster_scanline();
 
@@ -51,6 +50,9 @@ struct PPU : Processor {
     uint15 taddr;
     uint8 xaddr;
 
+    bool nmi_hold;
+    bool nmi_flag;
+
     //$2000
     bool nmi_enable;
     bool master_select;
@@ -68,7 +70,6 @@ struct PPU : Processor {
     bool grayscale;
 
     //$2002
-    bool nmi;
     bool sprite_zero_hit;
     bool sprite_overflow;
 

@@ -80,14 +80,24 @@ namespace GameBoy {
     unsigned frequency;
     int64 clock;
 
-    inline void create(void (*entrypoint_)(), unsigned frequency_) {
+    inline void create(void (*entrypoint)(), unsigned frequency) {
       if(thread) co_delete(thread);
-      thread = co_create(65536 * sizeof(void*), entrypoint_);
-      frequency = frequency_;
+      thread = co_create(65536 * sizeof(void*), entrypoint);
+      this->frequency = frequency;
       clock = 0;
     }
 
-    inline Processor() : thread(nullptr) {}
+    inline void serialize(serializer &s) {
+      s.integer(frequency);
+      s.integer(clock);
+    }
+
+    inline Processor() : thread(nullptr) {
+    }
+
+    inline ~Processor() {
+      if(thread) co_delete(thread);
+    }
   };
 
   #include <gameboy/memory/memory.hpp>

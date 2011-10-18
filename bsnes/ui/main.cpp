@@ -27,6 +27,8 @@ void Application::run() {
 }
 
 Application::Application(int argc, char **argv) {
+  title = "bsnes v083.02";
+
   application = this;
   quit = false;
   pause = false;
@@ -48,8 +50,6 @@ Application::Application(int argc, char **argv) {
   interface = new Interface;
   inputManager = new InputManager;
   utility = new Utility;
-
-  title = "bsnes v083.01";
 
   string fontFamily = Intrinsics::platform() == Intrinsics::Platform::Windows ? "Tahoma, " : "Sans, ";
   normalFont = { fontFamily, "8" };

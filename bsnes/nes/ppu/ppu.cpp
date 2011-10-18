@@ -20,23 +20,28 @@ void PPU::main() {
 }
 
 void PPU::tick() {
+  if(status.ly == 240 && status.lx == 340) status.nmi_hold = 1;
+  if(status.ly == 241 && status.lx ==   0) status.nmi_flag = status.nmi_hold;
+  if(status.ly == 241 && status.lx ==   2) if(status.nmi_enable && status.nmi_flag) cpu.set_nmi_line(1);
+  if(status.ly == 261 && status.lx ==   0) cpu.set_nmi_line(status.nmi_flag = 0);
+  if(status.ly == 261 && status.lx ==   0) status.sprite_zero_hit = 0;
+
   clock += 4;
   if(clock >= 0) co_switch(cpu.thread);
+
+  status.lx++;
 }
 
-void PPU::scanline_edge() {
-  if(status.ly == 241) {
-    status.nmi = 1;
-    if(status.nmi_enable) cpu.set_nmi_line(1);
+void PPU::scanline() {
+  status.lx = 0;
+  if(++status.ly == 262) {
+    status.ly = 0;
+    frame();
   }
-  if(status.ly == 261) {
-    status.nmi = 0;
-    cpu.set_nmi_line(0);
-    status.sprite_zero_hit = 0;
-  }
+  cartridge.scanline(status.ly);
 }
 
-void PPU::frame_edge() {
+void PPU::frame() {
   status.field ^= 1;
   interface->videoRefresh(buffer);
   scheduler.exit(Scheduler::ExitReason::FrameEvent);
@@ -58,6 +63,9 @@ void PPU::reset() {
   status.taddr = 0x0000;
   status.xaddr = 0x00;
 
+  status.nmi_hold = 0;
+  status.nmi_flag = 0;
+
   //$2000
   status.nmi_enable = false;
   status.master_select = 0;
@@ -75,18 +83,16 @@ void PPU::reset() {
   status.grayscale = false;
 
   //$2002
-  status.nmi = false;
   status.sprite_zero_hit = false;
   status.sprite_overflow = false;
 
   //$2003
   status.oam_addr = 0x00;
 
-  memset(buffer, 0, sizeof buffer);
-
-  memset(ciram, 0, sizeof ciram);
-  memset(cgram, 0, sizeof cgram);
-  memset(oam, 0, sizeof oam);
+  for(auto &n : buffer) n = 0;
+  for(auto &n : ciram ) n = 0;
+  for(auto &n : cgram ) n = 0;
+  for(auto &n : oam   ) n = 0;
 }
 
 uint8 PPU::read(uint16 addr) {
@@ -94,13 +100,13 @@ uint8 PPU::read(uint16 addr) {
 
   switch(addr & 7) {
   case 2:  //PPUSTATUS
-    result |= status.nmi << 7;
+    result |= status.nmi_flag << 7;
     result |= status.sprite_zero_hit << 6;
     result |= status.sprite_overflow << 5;
     result |= status.mdr & 0x1f;
-    status.nmi = 0;
-    cpu.set_nmi_line(0);
     status.address_latch = 0;
+    status.nmi_hold = 0;
+    cpu.set_nmi_line(status.nmi_flag = 0);
     break;
   case 4:  //OAMDATA
     result = oam[status.oam_addr];
@@ -133,13 +139,13 @@ void PPU::write(uint16 addr, uint8 data) {
   switch(addr & 7) {
   case 0:  //PPUCTRL
     status.nmi_enable = data & 0x80;
-    cpu.set_nmi_line(status.nmi_enable && status.nmi);
     status.master_select = data & 0x40;
     status.sprite_size = data & 0x20;
     status.bg_addr = (data & 0x10) ? 0x1000 : 0x0000;
     status.sprite_addr = (data & 0x08) ? 0x1000 : 0x0000;
     status.vram_increment = (data & 0x04) ? 32 : 1;
     status.taddr = (status.taddr & 0x73ff) | ((data & 0x03) << 10);
+    cpu.set_nmi_line(status.nmi_enable && status.nmi_flag);
     return;
   case 1:  //PPUMASK
     status.emphasis = data >> 5;
@@ -249,15 +255,6 @@ uint8 PPU::chr_load(uint16 addr) {
 
 //
 
-void PPU::ly_increment() {
-  if(++status.ly == 262) {
-    status.ly = 0;
-    frame_edge();
-  }
-  scanline_edge();
-  cartridge.scanline(status.ly);
-}
-
 void PPU::scrollx_increment() {
   if(raster_enable() == false) return;
   status.vaddr = (status.vaddr & 0x7fe0) | ((status.vaddr + 0x0001) & 0x001f);
@@ -280,10 +277,10 @@ void PPU::scrolly_increment() {
 
 //
 
-void PPU::raster_pixel(unsigned x) {
+void PPU::raster_pixel() {
   uint16 *output = buffer + status.ly * 256;
 
-  unsigned mask = 0x8000 >> (status.xaddr + x);
+  unsigned mask = 0x8000 >> (status.xaddr + (status.lx & 7));
   unsigned palette = 0, object_palette = 0;
   bool object_priority = 0;
   palette |= (raster.tiledatalo & mask) ? 1 : 0;
@@ -311,7 +308,7 @@ void PPU::raster_pixel(unsigned x) {
     sprite_palette |= (raster.oam[sprite].tiledatahi & mask) ? 2 : 0;
     if(sprite_palette == 0) continue;
 
-    if(raster.oam[sprite].id == 0 && palette) status.sprite_zero_hit = 1;
+    if(raster.oam[sprite].id == 0 && palette && status.lx != 255) status.sprite_zero_hit = 1;
     sprite_palette |= (raster.oam[sprite].attr & 3) << 2;
 
     object_priority = raster.oam[sprite].attr & 0x20;
@@ -323,7 +320,7 @@ void PPU::raster_pixel(unsigned x) {
   }
 
   if(raster_enable() == false) palette = 0;
-  output[status.lx++] = (status.emphasis << 6) | cgram_read(palette);
+  output[status.lx] = (status.emphasis << 6) | cgram_read(palette);
 }
 
 void PPU::raster_sprite() {
@@ -349,13 +346,9 @@ void PPU::raster_sprite() {
 
 void PPU::raster_scanline() {
   if((status.ly >= 240 && status.ly <= 260)) {
-    for(unsigned x = 0; x < 340; x++) tick();
-    if(raster_enable() == false || status.field != 1 || status.ly != 240) tick();
-    return ly_increment();
+    for(unsigned x = 0; x < 341; x++) tick();
+    return scanline();
   }
-
-  signed lx = 0, ly = (status.ly == 261 ? -1 : status.ly);
-  status.lx = 0;
 
   raster.oam_iterator = 0;
   raster.oam_counter = 0;
@@ -373,36 +366,36 @@ void PPU::raster_scanline() {
   for(unsigned tile = 0; tile < 32; tile++) {  //  0-255
     unsigned nametable = chr_load(0x2000 | (status.vaddr & 0x0fff));
     unsigned tileaddr = status.bg_addr + (nametable << 4) + (scrolly() & 7);
-    raster_pixel(0);
+    raster_pixel();
     tick();
 
-    raster_pixel(1);
+    raster_pixel();
     tick();
 
     unsigned attribute = chr_load(0x23c0 | (status.vaddr & 0x0fc0) | ((scrolly() >> 5) << 3) | (scrollx() >> 5));
     if(scrolly() & 16) attribute >>= 4;
     if(scrollx() & 16) attribute >>= 2;
-    raster_pixel(2);
+    raster_pixel();
     tick();
 
     scrollx_increment();
     if(tile == 31) scrolly_increment();
-    raster_pixel(3);
+    raster_pixel();
     raster_sprite();
     tick();
 
     unsigned tiledatalo = chr_load(tileaddr + 0);
-    raster_pixel(4);
+    raster_pixel();
     tick();
 
-    raster_pixel(5);
+    raster_pixel();
     tick();
 
     unsigned tiledatahi = chr_load(tileaddr + 8);
-    raster_pixel(6);
+    raster_pixel();
     tick();
 
-    raster_pixel(7);
+    raster_pixel();
     raster_sprite();
     tick();
 
@@ -476,14 +469,15 @@ void PPU::raster_scanline() {
   tick();
   tick();
 
+  bool skip = (raster_enable() && status.field == 1 && status.ly == 261);
   chr_load(0x2000 | (status.vaddr & 0x0fff));
   tick();
   tick();
 
   //340
-  tick();
+  if(skip == false) tick();
 
-  return ly_increment();
+  return scanline();
 }
 
 }

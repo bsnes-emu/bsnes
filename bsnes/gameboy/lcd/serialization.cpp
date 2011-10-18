@@ -1,6 +1,8 @@
 #ifdef LCD_CPP
 
 void LCD::serialize(serializer &s) {
+  Processor::serialize(s);
+
   s.integer(status.lx);
   s.integer(status.wyc);
 

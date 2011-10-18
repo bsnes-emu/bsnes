@@ -80,7 +80,7 @@ namespace NES {
   struct Processor {
     cothread_t thread;
     unsigned frequency;
-    signed clock;
+    int64 clock;
 
     inline void create(void (*entrypoint)(), unsigned frequency) {
       if(thread) co_delete(thread);
@@ -94,7 +94,12 @@ namespace NES {
       s.integer(clock);
     }
 
-    inline Processor() : thread(nullptr) {}
+    inline Processor() : thread(nullptr) {
+    }
+
+    inline ~Processor() {
+      if(thread) co_delete(thread);
+    }
   };
 
   #include <nes/system/system.hpp>

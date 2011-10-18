@@ -15,6 +15,9 @@ void PPU::serialize(serializer &s) {
   s.integer(status.taddr);
   s.integer(status.xaddr);
 
+  s.integer(status.nmi_hold);
+  s.integer(status.nmi_flag);
+
   s.integer(status.nmi_enable);
   s.integer(status.master_select);
   s.integer(status.sprite_size);
@@ -29,7 +32,6 @@ void PPU::serialize(serializer &s) {
   s.integer(status.bg_edge_enable);
   s.integer(status.grayscale);
 
-  s.integer(status.nmi);
   s.integer(status.sprite_zero_hit);
   s.integer(status.sprite_overflow);
 
