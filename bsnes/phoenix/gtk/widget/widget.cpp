@@ -21,7 +21,7 @@ void pWidget::setFont(const string &font) {
 }
 
 void pWidget::setGeometry(const Geometry &geometry) {
-  if(sizable.state.window) gtk_fixed_move(GTK_FIXED(sizable.state.window->p.formContainer), gtkWidget, geometry.x, geometry.y);
+  if(sizable.window() && sizable.window()->visible()) gtk_fixed_move(GTK_FIXED(sizable.window()->p.formContainer), gtkWidget, geometry.x, geometry.y);
   unsigned width = (signed)geometry.width <= 0 ? 1U : geometry.width;
   unsigned height = (signed)geometry.height <= 0 ? 1U : geometry.height;
   gtk_widget_set_size_request(gtkWidget, width, height);

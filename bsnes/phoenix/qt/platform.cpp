@@ -120,6 +120,14 @@ void pOS::quit() {
   qtApplication = 0;
 }
 
+void pOS::syncX() {
+  for(unsigned n = 0; n < 8; n++) {
+    QApplication::syncX();
+    OS::processEvents();
+    usleep(2000);
+  }
+}
+
 void pOS::initialize() {
   settings = new Settings;
   settings->load();

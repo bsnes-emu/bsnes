@@ -13,6 +13,7 @@ void Utility::setMode(Interface::Mode mode) {
     mainWindow->setTitle(application->title);
     mainWindow->setStatusText("No cartridge loaded");
     cheatEditor->reset();
+    stateManager->reset();
   }
 
   else if(mode == Interface::Mode::NES) {

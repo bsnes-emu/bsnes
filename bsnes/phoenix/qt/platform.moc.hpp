@@ -45,6 +45,7 @@ struct pOS : public pObject {
   static bool pendingEvents();
   static void processEvents();
   static void quit();
+  static void syncX();
 
   static void initialize();
 };

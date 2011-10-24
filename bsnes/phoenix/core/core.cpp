@@ -13,6 +13,7 @@
   #include "../reference/platform.cpp"
 #endif
 
+static bool OS_quit = false;
 Window Window::None;
 
 //Font
@@ -80,6 +81,7 @@ void OS::processEvents() {
 }
 
 void OS::quit() {
+  OS_quit = true;
   return pOS::quit();
 }
 
@@ -159,7 +161,6 @@ void Window::append(Widget &widget) {
   if(state.widget.append(widget)) {
     ((Sizable&)widget).state.window = this;
     p.append(widget);
-    synchronizeLayout();
   }
 }
 
@@ -282,6 +283,7 @@ void Window::setTitle(const string &text) {
 
 void Window::setVisible(bool visible) {
   state.visible = visible;
+  synchronizeLayout();
   return p.setVisible(visible);
 }
 
@@ -295,7 +297,11 @@ string Window::statusText() {
 }
 
 void Window::synchronizeLayout() {
-  setGeometry(geometry());
+  if(visible() && OS_quit == false) setGeometry(geometry());
+}
+
+bool Window::visible() {
+  return state.visible;
 }
 
 Window::Window():
@@ -524,8 +530,6 @@ void Layout::append(Sizable &sizable) {
     Widget &widget = (Widget&)sizable;
     if(sizable.window()) sizable.window()->append(widget);
   }
-
-  if(window()) window()->synchronizeLayout();
 }
 
 void Layout::remove(Sizable &sizable) {
@@ -536,8 +540,6 @@ void Layout::remove(Sizable &sizable) {
 
   sizable.state.layout = 0;
   sizable.state.window = 0;
-
-  if(window()) window()->synchronizeLayout();
 }
 
 Layout::Layout():

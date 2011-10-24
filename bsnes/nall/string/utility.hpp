@@ -68,11 +68,47 @@ string sha256(const uint8_t *data, unsigned size) {
   return result;
 }
 
-/* arithmetic <> string */
+/* cast.hpp arithmetic -> string */
+
+char* integer(char *result, intmax_t value) {
+  bool negative = value < 0;
+  if(negative) value = -value;
+
+  char buffer[64];
+  unsigned size = 0;
+
+  do {
+    unsigned n = value % 10;
+    buffer[size++] = '0' + n;
+    value /= 10;
+  } while(value);
+  buffer[size++] = negative ? '-' : '+';
+
+  for(signed x = size - 1, y = 0; x >= 0 && y < size; x--, y++) result[x] = buffer[y];
+  result[size] = 0;
+  return result;
+}
+
+char* decimal(char *result, uintmax_t value) {
+  char buffer[64];
+  unsigned size = 0;
+
+  do {
+    unsigned n = value % 10;
+    buffer[size++] = '0' + n;
+    value /= 10;
+  } while(value);
+
+  for(signed x = size - 1, y = 0; x >= 0 && y < size; x--, y++) result[x] = buffer[y];
+  result[size] = 0;
+  return result;
+}
+
+/* general-purpose arithmetic -> string */
 
 template<unsigned length_, char padding> string integer(intmax_t value) {
   bool negative = value < 0;
-  if(negative) value = abs(value);
+  if(negative) value = -value;
 
   char buffer[64];
   unsigned size = 0;
@@ -99,7 +135,7 @@ template<unsigned length_, char padding> string integer(intmax_t value) {
 
 template<unsigned length_, char padding> string linteger(intmax_t value) {
   bool negative = value < 0;
-  if(negative) value = abs(value);
+  if(negative) value = -value;
 
   char buffer[64];
   unsigned size = 0;

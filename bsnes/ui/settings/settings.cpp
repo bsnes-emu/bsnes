@@ -40,9 +40,9 @@ SettingsWindow::SettingsWindow() {
   append(*inputSettings);
   append(*advancedSettings);
 
-  panelList.onChange = [&] { setPanel(panelList.selection()); };
-
-  setPanel(2);
+  panelList.onChange = { &SettingsWindow::panelChanged, this };
+  panelList.setSelection(2);
+  panelChanged();
 }
 
 SettingsWindow::~SettingsWindow() {
@@ -52,15 +52,13 @@ SettingsWindow::~SettingsWindow() {
   delete videoSettings;
 }
 
-void SettingsWindow::setPanel(unsigned n) {
-  panelList.setSelection(n);
-
+void SettingsWindow::panelChanged() {
   videoSettings->setVisible(false);
   audioSettings->setVisible(false);
   inputSettings->setVisible(false);
   advancedSettings->setVisible(false);
 
-  switch(n) {
+  if(panelList.selected()) switch(panelList.selection()) {
   case 0: return videoSettings->setVisible();
   case 1: return audioSettings->setVisible();
   case 2: return inputSettings->setVisible();

@@ -155,6 +155,7 @@ struct Window : private nall::base_from_member<pWindow&>, Object {
   void setWidgetFont(const nall::string &font);
   nall::string statusText();
   void synchronizeLayout();
+  bool visible();
 
   Window();
   ~Window();

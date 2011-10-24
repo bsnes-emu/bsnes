@@ -90,6 +90,7 @@ void pListView::setHeaderVisible(bool visible) {
 
 void pListView::setSelected(bool selected) {
   locked = true;
+  lostFocus = false;
   if(selected == false) {
     ListView_SetItemState(hwnd, -1, 0, LVIS_FOCUSED | LVIS_SELECTED);
   } else {
@@ -100,6 +101,7 @@ void pListView::setSelected(bool selected) {
 
 void pListView::setSelection(unsigned row) {
   locked = true;
+  lostFocus = false;
   ListView_SetItemState(hwnd, row, LVIS_FOCUSED | LVIS_SELECTED, LVIS_FOCUSED | LVIS_SELECTED);
   locked = false;
 }

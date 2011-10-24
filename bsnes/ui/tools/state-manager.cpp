@@ -58,6 +58,12 @@ void StateManager::refresh() {
   stateList.autoSizeColumns();
 }
 
+void StateManager::reset() {
+  for(unsigned n = 0; n < 32; n++) slot[n] = serializer();
+  synchronize();
+  refresh();
+}
+
 bool StateManager::load(const string &filename, unsigned revision) {
   for(unsigned n = 0; n < 32; n++) slot[n] = serializer();
   synchronize();

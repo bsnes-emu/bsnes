@@ -23,5 +23,5 @@ struct FixedLayout : Layout {
     Sizable *sizable;
     Geometry geometry;
   };
-  nall::linear_vector<Children> children;
+  nall::vector<Children> children;
 };

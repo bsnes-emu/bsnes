@@ -53,7 +53,7 @@ static string pOS_fileDialog(bool save, Window &parent, const string &path, cons
   for(auto &filterItem : filter) {
     lstring part;
     part.split("(", filterItem);
-    if(part.size() != 2) { print("--", filterItem, "\n"); continue; }
+    if(part.size() != 2) continue;
     part[1].rtrim<1>(")");
     part[1].replace(" ", "");
     part[1].transform(",", ";");
@@ -397,17 +397,16 @@ static LRESULT CALLBACK OS_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM
             if(listView.p.locked == false && listView.onTick) listView.onTick(nmlistview->iItem);
           } else if((nmlistview->uOldState & LVIS_FOCUSED) && !(nmlistview->uNewState & LVIS_FOCUSED)) {
             listView.p.lostFocus = true;
-          } else {
-            if(!(nmlistview->uOldState & LVIS_SELECTED) && (nmlistview->uNewState & LVIS_SELECTED)) {
-              listView.state.selected = true;
-              listView.state.selection = listView.selection();
-              if(listView.p.locked == false && listView.onChange) listView.onChange();
-            } else if(listView.p.lostFocus == false && listView.selected() == false) {
-              listView.state.selected = true;
-              listView.state.selection = listView.selection();
-              if(listView.p.locked == false && listView.onChange) listView.onChange();
-            }
+          } else if(!(nmlistview->uOldState & LVIS_SELECTED) && (nmlistview->uNewState & LVIS_SELECTED)) {
             listView.p.lostFocus = false;
+            listView.state.selected = true;
+            listView.state.selection = listView.selection();
+            if(listView.p.locked == false && listView.onChange) listView.onChange();
+          } else if(listView.p.lostFocus == false && listView.selected() == false) {
+            listView.p.lostFocus = false;
+            listView.state.selected = false;
+            listView.state.selection = 0;
+            if(listView.p.locked == false && listView.onChange) listView.onChange();
           }
         } else if(nmhdr->code == LVN_ITEMACTIVATE) {
           if(listView.onActivate) listView.onActivate();

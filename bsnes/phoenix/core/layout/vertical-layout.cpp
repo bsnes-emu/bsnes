@@ -2,6 +2,7 @@ void VerticalLayout::append(Sizable &sizable, unsigned width, unsigned height, u
   for(auto &child : children) if(child.sizable == &sizable) return;
   children.append({ &sizable, width, height, spacing });
   synchronizeLayout();
+  if(window()) window()->synchronizeLayout();
 }
 
 void VerticalLayout::append(Sizable &sizable) {
@@ -47,6 +48,7 @@ void VerticalLayout::remove(Sizable &sizable) {
       }
       children.remove(n);
       Layout::remove(sizable);
+      if(window()) window()->synchronizeLayout();
       break;
     }
   }

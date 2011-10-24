@@ -1,11 +1,13 @@
 void FixedLayout::append(Sizable &sizable, const Geometry &geometry) {
   children.append({ &sizable, geometry });
   synchronizeLayout();
+  if(window()) window()->synchronizeLayout();
 }
 
 void FixedLayout::append(Sizable &sizable) {
   for(auto &child : children) if(child.sizable == &sizable) return;
   Layout::append(sizable);
+  if(window()) window()->synchronizeLayout();
 }
 
 bool FixedLayout::enabled() {
@@ -27,6 +29,7 @@ void FixedLayout::remove(Sizable &sizable) {
     if(children[n].sizable == &sizable) {
       children.remove(n);
       Layout::remove(sizable);
+      if(window()) window()->synchronizeLayout();
       break;
     }
   }

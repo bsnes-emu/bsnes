@@ -176,6 +176,9 @@ namespace nall {
   inline string substr(const char *src, unsigned start = 0, unsigned length = ~0u);
   inline string sha256(const uint8_t *data, unsigned size);
 
+  inline char* integer(char *result, intmax_t value);
+  inline char* decimal(char *result, uintmax_t value);
+
   template<unsigned length = 0, char padding = ' '> inline string integer(intmax_t value);
   template<unsigned length = 0, char padding = ' '> inline string linteger(intmax_t value);
   template<unsigned length = 0, char padding = ' '> inline string decimal(uintmax_t value);

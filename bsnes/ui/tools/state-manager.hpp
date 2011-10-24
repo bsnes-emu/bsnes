@@ -13,6 +13,7 @@ struct StateManager : Window {
   void synchronize();
   void refresh();
 
+  void reset();
   bool load(const string &filename, unsigned revision);
   bool save(const string &filename, unsigned revision);
 

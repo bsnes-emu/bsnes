@@ -22,8 +22,12 @@ void PPU::main() {
 void PPU::tick() {
   if(status.ly == 240 && status.lx == 340) status.nmi_hold = 1;
   if(status.ly == 241 && status.lx ==   0) status.nmi_flag = status.nmi_hold;
-  if(status.ly == 241 && status.lx ==   2) if(status.nmi_enable && status.nmi_flag) cpu.set_nmi_line(1);
-  if(status.ly == 261 && status.lx ==   0) cpu.set_nmi_line(status.nmi_flag = 0);
+  if(status.ly == 241 && status.lx ==   2) cpu.set_nmi_line(status.nmi_enable && status.nmi_flag);
+
+  if(status.ly == 260 && status.lx == 340) status.nmi_hold = 0;
+  if(status.ly == 261 && status.lx ==   0) status.nmi_flag = status.nmi_hold;
+  if(status.ly == 261 && status.lx ==   2) cpu.set_nmi_line(status.nmi_enable && status.nmi_flag);
+
   if(status.ly == 261 && status.lx ==   0) status.sprite_zero_hit = 0;
 
   clock += 4;
@@ -145,7 +149,7 @@ void PPU::write(uint16 addr, uint8 data) {
     status.sprite_addr = (data & 0x08) ? 0x1000 : 0x0000;
     status.vram_increment = (data & 0x04) ? 32 : 1;
     status.taddr = (status.taddr & 0x73ff) | ((data & 0x03) << 10);
-    cpu.set_nmi_line(status.nmi_enable && status.nmi_flag);
+    cpu.set_nmi_line(status.nmi_enable && status.nmi_hold && status.nmi_flag);
     return;
   case 1:  //PPUMASK
     status.emphasis = data >> 5;
@@ -467,9 +471,9 @@ void PPU::raster_scanline() {
   //336-339
   chr_load(0x2000 | (status.vaddr & 0x0fff));
   tick();
+  bool skip = (raster_enable() && status.field == 1 && status.ly == 261);
   tick();
 
-  bool skip = (raster_enable() && status.field == 1 && status.ly == 261);
   chr_load(0x2000 | (status.vaddr & 0x0fff));
   tick();
   tick();

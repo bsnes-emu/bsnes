@@ -15,7 +15,7 @@ struct SettingsWindow : Window {
   HorizontalLayout layout;
   ListView panelList;
 
-  void setPanel(unsigned);
+  void panelChanged();
 
   SettingsWindow();
   ~SettingsWindow();

@@ -27,5 +27,5 @@ struct HorizontalLayout : public Layout {
     Sizable *sizable;
     unsigned width, height, spacing;
   };
-  nall::linear_vector<Children> children;
+  nall::vector<Children> children;
 };

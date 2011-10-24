@@ -92,10 +92,12 @@ void pWindow::setFullScreen(bool fullScreen) {
 
 void pWindow::setGeometry(const Geometry &geometry_) {
   locked = true;
+  OS::processEvents();
+  QApplication::syncX();
   Geometry geometry = geometry_, margin = frameMargin();
 
   setResizable(window.state.resizable);
-  qtWindow->move(geometry.x, geometry.y);
+  qtWindow->move(geometry.x - frameMargin().x, geometry.y - frameMargin().y);
   //qtWindow->adjustSize() fails if larger than 2/3rds screen size
   qtWindow->resize(qtWindow->sizeHint());
   qtWindow->setMinimumSize(1, 1);
@@ -200,12 +202,7 @@ void pWindow::destructor() {
 }
 
 void pWindow::updateFrameGeometry() {
-  if(window.state.fullScreen == false) for(unsigned n = 0; n < 100; n++) {
-    if(qtWindow->geometry().x() > qtWindow->frameGeometry().x()) break;
-    usleep(100);
-    QApplication::processEvents();
-  }
-
+  pOS::syncX();
   QRect border = qtWindow->frameGeometry();
   QRect client = qtWindow->geometry();
 
@@ -215,12 +212,12 @@ void pWindow::updateFrameGeometry() {
   settings->frameGeometryHeight = border.height() - client.height();
 
   if(window.state.menuVisible) {
-    for(unsigned n = 0; n < 10; n++) { usleep(100); QApplication::processEvents(); }
+    pOS::syncX();
     settings->menuGeometryHeight = qtMenu->height();
   }
 
   if(window.state.statusVisible) {
-    for(unsigned n = 0; n < 10; n++) { usleep(100); QApplication::processEvents(); }
+    pOS::syncX();
     settings->statusGeometryHeight = qtStatus->height();
   }
 }

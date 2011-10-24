@@ -91,6 +91,7 @@ void pWindow::append(Menu &menu) {
 }
 
 void pWindow::append(Widget &widget) {
+  ((Sizable&)widget).state.window = &window;
   gtk_fixed_put(GTK_FIXED(formContainer), widget.p.gtkWidget, 0, 0);
   if(widget.state.font != "") widget.p.setFont(widget.state.font);
   else if(window.state.widgetFont != "") widget.p.setFont(window.state.widgetFont);
@@ -154,18 +155,16 @@ void pWindow::setFullScreen(bool fullScreen) {
     gtk_window_unfullscreen(GTK_WINDOW(widget));
     gtk_window_set_resizable(GTK_WINDOW(widget), window.state.resizable);
     gtk_window_set_decorated(GTK_WINDOW(widget), true);
-    for(unsigned n = 0; n < 4; n++) {
-      setGeometry(window.state.geometry);
-      gtk_widget_set_size_request(widget, -1, -1);
-      OS::processEvents();
-      usleep(2000);
-    }
+    gtk_widget_set_size_request(widget, -1, -1);
+    gdk_display_sync(gtk_widget_get_display(widget));
+    setGeometry(window.state.geometry);
   } else {
     gtk_window_fullscreen(GTK_WINDOW(widget));
     gtk_window_set_decorated(GTK_WINDOW(widget), false);
     gtk_widget_set_size_request(widget, OS::desktopGeometry().width, OS::desktopGeometry().height);
     gtk_window_set_resizable(GTK_WINDOW(widget), false);
   }
+  gdk_display_sync(gtk_widget_get_display(widget));
 }
 
 void pWindow::setGeometry(const Geometry &geometry) {
@@ -181,7 +180,7 @@ void pWindow::setGeometry(const Geometry &geometry) {
 
   gtk_window_set_policy(GTK_WINDOW(widget), true, true, false);
   gtk_widget_set_size_request(formContainer, geometry.width, geometry.height);
-  gtk_window_resize(GTK_WINDOW(widget), geometry.width + margin.width, geometry.height + margin.height);
+  gtk_window_resize(GTK_WINDOW(widget), geometry.width, geometry.height + menuHeight() + statusHeight());
 
   for(auto &layout : window.state.layout) {
     Geometry geometry = this->geometry();
