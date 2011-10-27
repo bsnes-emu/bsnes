@@ -39,6 +39,7 @@ bool InterfaceSNES::loadCartridge(const string &basename) {
 
   loadMemory();
   interface->loadCartridge(::Interface::Mode::SNES);
+  SNES::video.generate(SNES::Video::Format::RGB24);
   return true;
 }
 
@@ -63,6 +64,7 @@ bool InterfaceSNES::loadSatellaviewSlottedCartridge(const string &basename, cons
 
   loadMemory();
   interface->loadCartridge(::Interface::Mode::SNES);
+  SNES::video.generate(SNES::Video::Format::RGB24);
   return true;
 }
 
@@ -87,6 +89,7 @@ bool InterfaceSNES::loadSatellaviewCartridge(const string &basename, const strin
 
   loadMemory();
   interface->loadCartridge(::Interface::Mode::SNES);
+  SNES::video.generate(SNES::Video::Format::RGB24);
   return true;
 }
 
@@ -115,6 +118,7 @@ bool InterfaceSNES::loadSufamiTurboCartridge(const string &basename, const strin
 
   loadMemory();
   interface->loadCartridge(::Interface::Mode::SNES);
+  SNES::video.generate(SNES::Video::Format::RGB24);
   return true;
 }
 
@@ -142,6 +146,7 @@ bool InterfaceSNES::loadSuperGameBoyCartridge(const string &basename, const stri
 
   loadMemory();
   interface->loadCartridge(::Interface::Mode::SNES);
+  SNES::video.generate(SNES::Video::Format::RGB24);
   return true;
 }
 
@@ -194,7 +199,7 @@ bool InterfaceSNES::loadState(const string &filename) {
 //
 
 void InterfaceSNES::videoRefresh(const uint32_t *data, bool hires, bool interlace, bool overscan) {
-  static uint16_t output[512 * 480];
+  static uint32_t output[512 * 480];
 
   unsigned width = 256 << hires;
   unsigned height = 240 << interlace;
@@ -206,9 +211,9 @@ void InterfaceSNES::videoRefresh(const uint32_t *data, bool hires, bool interlac
 
   for(unsigned y = 0; y < height; y++) {
     const uint32_t *sp = data + y * pitch;
-    uint16_t *dp = output + y * 512;
+    uint32_t *dp = output + y * 512;
     for(unsigned x = 0; x < width; x++) {
-      *dp++ = palette[*sp++];
+      *dp++ = SNES::video.palette[*sp++];
     }
   }
 
@@ -217,7 +222,7 @@ void InterfaceSNES::videoRefresh(const uint32_t *data, bool hires, bool interlac
     unsigned osh = config->video.maskOverscanVertical << interlace;
 
     for(unsigned y = 0; y < height; y++) {
-      uint16_t *dp = output + y * 512;
+      uint32_t *dp = output + y * 512;
       if(y < osh || y >= height - osh) {
         memset(dp, 0, width * 2);
       } else {
@@ -227,7 +232,7 @@ void InterfaceSNES::videoRefresh(const uint32_t *data, bool hires, bool interlac
     }
   }
 
-  interface->videoRefresh(output, 512 * 2, width, height);
+  interface->videoRefresh(output, 512 * 4, width, height);
 }
 
 void InterfaceSNES::audioSample(int16_t lsample, int16_t rsample) {
@@ -278,26 +283,4 @@ string InterfaceSNES::path(SNES::Cartridge::Slot slot, const string &hint) {
 
 void InterfaceSNES::message(const string &text) {
   MessageWindow::information(*mainWindow, text);
-}
-
-InterfaceSNES::InterfaceSNES() {
-  //{llll bbbbb ggggg rrrrr} -> { rrrrr ggggg bbbbb }
-  palette = new uint32_t[16 * 32 * 32 * 32];
-  for(unsigned l = 0; l < 16; l++) {
-    for(unsigned r = 0; r < 32; r++) {
-      for(unsigned g = 0; g < 32; g++) {
-        for(unsigned b = 0; b < 32; b++) {
-          double luma = (double)l / 15.0;
-          unsigned ar = (luma * r + 0.5);
-          unsigned ag = (luma * g + 0.5);
-          unsigned ab = (luma * b + 0.5);
-          palette[(l << 15) + (r << 10) + (g << 5) + (b << 0)] = (ab << 10) + (ag << 5) + (ar << 0);
-        }
-      }
-    }
-  }
-}
-
-InterfaceSNES::~InterfaceSNES() {
-  delete[] palette;
 }

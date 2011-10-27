@@ -47,14 +47,12 @@ void APU::main() {
     master.run();
 
     interface->audioSample(master.center, master.left, master.right);
-
-    clock += 2;
-    if(clock >= 0) co_switch(scheduler.active_thread = cpu.thread);
+    if(++clock >= 0) co_switch(scheduler.active_thread = cpu.thread);
   }
 }
 
 void APU::power() {
-  create(Main, 8 * 1024 * 1024);
+  create(Main, 4 * 1024 * 1024);
   for(unsigned n = 0xff10; n <= 0xff3f; n++) bus.mmio[n] = this;
 
   for(auto &n : mmio_data) n = 0x00;

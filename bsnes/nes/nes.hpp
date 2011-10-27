@@ -111,6 +111,7 @@ namespace NES {
   #include <nes/apu/apu.hpp>
   #include <nes/ppu/ppu.hpp>
   #include <nes/cheat/cheat.hpp>
+  #include <nes/video/video.hpp>
   #include <nes/interface/interface.hpp>
 }
 

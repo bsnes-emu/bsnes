@@ -31,11 +31,13 @@ VideoSettings::VideoSettings() {
   RadioBox::group(fullScreen[0], fullScreen[1], fullScreen[2]);
 
   append(title, ~0, 0, 5);
+  #if 0
   append(colorAdjustment, ~0, 0);
   append(brightness, ~0, 0);
   append(contrast, ~0, 0);
   append(gamma, ~0, 0);
   append(gammaRamp, ~0, 0, 5);
+  #endif
   append(overscanAdjustment, ~0, 0);
   append(overscanHorizontal, ~0, 0);
   append(overscanVertical, ~0, 0, 5);

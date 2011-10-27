@@ -3,7 +3,8 @@
 unsigned CPU::wram_addr(uint16 addr) const {
   addr &= 0x1fff;
   if(addr < 0x1000) return addr;
-  return (status.wram_bank * 0x1000) + (addr & 0x0fff);
+  auto bank = status.wram_bank + (status.wram_bank == 0);
+  return (bank * 0x1000) + (addr & 0x0fff);
 }
 
 void CPU::mmio_joyp_poll() {
@@ -82,13 +83,37 @@ uint8 CPU::mmio_read(uint16 addr) {
     return 0x02;
   }
 
-  if(addr == 0xff6c) return 0xfe | status.ff6c;
-  if(addr == 0xff72) return status.ff72;
-  if(addr == 0xff73) return status.ff73;
-  if(addr == 0xff74) return status.ff74;
-  if(addr == 0xff75) return 0x8f | status.ff75;
-  if(addr == 0xff76) return 0x00;
-  if(addr == 0xff77) return 0x00;
+  if(addr == 0xff6c) {  //???
+    return 0xfe | status.ff6c;
+  }
+
+  if(addr == 0xff70) {  //SVBK
+    return status.wram_bank;
+  }
+
+  if(addr == 0xff72) {  //???
+    return status.ff72;
+  }
+
+  if(addr == 0xff73) {  //???
+    return status.ff73;
+  }
+
+  if(addr == 0xff74) {  //???
+    return status.ff74;
+  }
+
+  if(addr == 0xff75) {  //???
+    return 0x8f | status.ff75;
+  }
+
+  if(addr == 0xff76) {  //???
+    return 0x00;
+  }
+
+  if(addr == 0xff77) {  //???
+    return 0x00;
+  }
 
   if(addr == 0xffff) {  //IE
     return (status.interrupt_enable_joypad << 4)
@@ -158,7 +183,7 @@ void CPU::mmio_write(uint16 addr, uint8 data) {
   if(addr == 0xff46) {  //DMA
     for(unsigned n = 0x00; n <= 0x9f; n++) {
       bus.write(0xfe00 + n, bus.read((data << 8) + n));
-      add_clocks(8);
+      add_clocks(4);
     }
     return;
   }
@@ -194,7 +219,7 @@ void CPU::mmio_write(uint16 addr, uint8 data) {
 
     if(status.dma_mode == 0) do {
       bus.write(status.dma_target++, bus.read(status.dma_source++));
-      add_clocks(8);
+      add_clocks(4);
     } while(--status.dma_length);
     return;
   }
@@ -230,7 +255,6 @@ void CPU::mmio_write(uint16 addr, uint8 data) {
 
   if(addr == 0xff70) {  //SVBK
     status.wram_bank = data & 0x07;
-    if(status.wram_bank == 0) status.wram_bank = 1;
     return;
   }
 

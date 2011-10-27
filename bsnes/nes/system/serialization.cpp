@@ -27,7 +27,7 @@ bool System::unserialize(serializer &s) {
   if(version != Info::SerializerVersion) return false;
 //if(crc32 != 0) return false;
 
-  reset();
+  power();
   serialize_all(s);
   return true;
 }

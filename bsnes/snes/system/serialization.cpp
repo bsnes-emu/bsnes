@@ -34,7 +34,7 @@ bool System::unserialize(serializer &s) {
 //if(crc32 != cartridge.crc32()) return false;
   if(strcmp(profile, Info::Profile)) return false;
 
-  reset();
+  power();
   serialize_all(s);
   return true;
 }

@@ -11,17 +11,17 @@ void CPU::add_clocks(unsigned clocks) {
   scheduler.exit(Scheduler::ExitReason::StepEvent);
 
   status.clock += clocks;
-  if(status.clock >= 8 * 1024 * 1024) {
-    status.clock -= 8 * 1024 * 1024;
+  if(status.clock >= 4 * 1024 * 1024) {
+    status.clock -= 4 * 1024 * 1024;
     cartridge.mbc3.second();
   }
 
-  //8MHz / N(hz) - 1 = mask
-  if((status.clock &   31) == 0) timer_262144hz();
-  if((status.clock &  127) == 0)  timer_65536hz();
-  if((status.clock &  511) == 0)  timer_16384hz();
-  if((status.clock & 1023) == 0)   timer_8192hz();
-  if((status.clock & 2047) == 0)   timer_4096hz();
+  //4MHz / N(hz) - 1 = mask
+  if((status.clock &   15) == 0) timer_262144hz();
+  if((status.clock &   63) == 0)  timer_65536hz();
+  if((status.clock &  255) == 0)  timer_16384hz();
+  if((status.clock &  511) == 0)   timer_8192hz();
+  if((status.clock & 1023) == 0)   timer_4096hz();
 
   lcd.clock -= clocks;
   if(lcd.clock <= 0) co_switch(scheduler.active_thread = lcd.thread);
@@ -81,7 +81,7 @@ void CPU::hblank() {
   if(status.dma_mode == 1 && status.dma_length) {
     for(unsigned n = 0; n < 16; n++) {
       bus.write(status.dma_target++, bus.read(status.dma_source++));
-      add_clocks(8);
+      add_clocks(4);
     }
     status.dma_length -= 16;
   }

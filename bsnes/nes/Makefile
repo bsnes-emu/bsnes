@@ -1,6 +1,6 @@
 nes_objects := nes-interface nes-system nes-scheduler nes-input
 nes_objects += nes-memory nes-cartridge nes-cpu nes-apu nes-ppu
-nes_objects += nes-cheat
+nes_objects += nes-cheat nes-video
 objects += $(nes_objects)
 
 obj/nes-interface.o: $(nes)/interface/interface.cpp $(call rwildcard,$(nes)/interface/)
@@ -13,3 +13,4 @@ obj/nes-cpu.o: $(nes)/cpu/cpu.cpp $(call rwildcard,$(nes)/cpu/)
 obj/nes-apu.o: $(nes)/apu/apu.cpp $(call rwildcard,$(nes)/apu/)
 obj/nes-ppu.o: $(nes)/ppu/ppu.cpp $(call rwildcard,$(nes)/ppu/)
 obj/nes-cheat.o: $(nes)/cheat/cheat.cpp $(call rwildcard,$(nes)/cheat/)
+obj/nes-video.o: $(nes)/video/video.cpp $(call rwildcard,$(nes)/video/)

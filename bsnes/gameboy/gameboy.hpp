@@ -108,6 +108,7 @@ namespace GameBoy {
   #include <gameboy/apu/apu.hpp>
   #include <gameboy/lcd/lcd.hpp>
   #include <gameboy/cheat/cheat.hpp>
+  #include <gameboy/video/video.hpp>
 };
 
 #endif

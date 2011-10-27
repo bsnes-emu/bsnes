@@ -7,15 +7,15 @@ Interface *interface = 0;
 
 Filter filter;
 
-void Filter::render(const uint16_t *input, unsigned inputPitch, unsigned inputWidth, unsigned inputHeight) {
+void Filter::render(const uint32_t *input, unsigned inputPitch, unsigned inputWidth, unsigned inputHeight) {
   width = inputWidth, height = inputHeight;
   dl_size(width, height);
   dl_render(data, pitch, input, inputPitch, inputWidth, inputHeight);
 }
 
 Filter::Filter() {
-  data = new uint16_t[2048 * 2048];
-  pitch = 2048 * sizeof(uint16_t);
+  data = new uint32_t[2048 * 2048];
+  pitch = 2048 * sizeof(uint32_t);
 }
 
 Filter::~Filter() {
@@ -215,8 +215,7 @@ bool Interface::loadFile(const string &filename, uint8_t *&data, unsigned &size)
   return true;
 }
 
-//RGB555 input
-void Interface::videoRefresh(const uint16_t *input, unsigned inputPitch, unsigned width, unsigned height) {
+void Interface::videoRefresh(const uint32_t *input, unsigned inputPitch, unsigned width, unsigned height) {
   uint32_t *output;
   unsigned outputPitch;
 
@@ -229,13 +228,13 @@ void Interface::videoRefresh(const uint16_t *input, unsigned inputPitch, unsigne
   }
 
   if(video.lock(output, outputPitch, width, height)) {
-    inputPitch >>= 1, outputPitch >>= 2;
+    inputPitch >>= 2, outputPitch >>= 2;
 
     for(unsigned y = 0; y < height; y++) {
-      const uint16_t *sp = input + y * inputPitch;
+      const uint32_t *sp = input + y * inputPitch;
       uint32_t *dp = output + y * outputPitch;
       for(unsigned x = 0; x < width; x++) {
-        *dp++ = palette[*sp++];
+        *dp++ = *sp++;  //palette[*sp++];
       }
     }
 

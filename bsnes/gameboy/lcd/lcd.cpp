@@ -25,7 +25,7 @@ void LCD::main() {
       scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
     }
 
-    add_clocks(8);
+    add_clocks(4);
     status.lx += 4;
     if(status.lx >= 456) scanline();
 
@@ -82,7 +82,7 @@ unsigned LCD::hflip(unsigned data) const {
 }
 
 void LCD::power() {
-  create(Main, 8 * 1024 * 1024);
+  create(Main, 4 * 1024 * 1024);
 
   for(unsigned n = 0x8000; n <= 0x9fff; n++) bus.mmio[n] = this;  //VRAM
   for(unsigned n = 0xfe00; n <= 0xfe9f; n++) bus.mmio[n] = this;  //OAM

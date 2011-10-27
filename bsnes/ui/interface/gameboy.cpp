@@ -20,6 +20,7 @@ bool InterfaceGameBoy::loadCartridge(GameBoy::System::Revision revision, const s
   }
 
   GameBoy::interface = this;
+  GameBoy::video.generate(GameBoy::Video::Format::RGB24);
   interface->loadCartridge(::Interface::Mode::GameBoy);
   return true;
 }
@@ -53,35 +54,18 @@ bool InterfaceGameBoy::loadState(const string &filename) {
 //
 
 void InterfaceGameBoy::videoRefresh(const uint16_t *data) {
-  static uint16_t output[160 * 144];
+  static uint32_t output[160 * 144];
 
-  if(GameBoy::system.cgb() == false) {  //L2
-    static uint32_t palette[] = {
-      0x9bbc0f, 0x8bac0f, 0x306230, 0x0f380f
-    };
-
-    for(unsigned y = 0; y < 144; y++) {
-      const uint16_t *sp = data + y * 160;
-      uint16_t *dp = output + y * 160;
-      for(unsigned x = 0; x < 160; x++) {
-        uint32_t color = palette[*sp++];
-        *dp++ = ((color & 0xf80000) >> 9) | ((color & 0x00f800) >> 6) | ((color & 0x0000f8) >> 3);
-      }
+  for(unsigned y = 0; y < 144; y++) {
+    const uint16_t *sp = data + y * 160;
+    uint32_t *dp = output + y * 160;
+    for(unsigned x = 0; x < 160; x++) {
+      uint16_t color = *sp++;
+      *dp++ = GameBoy::video.palette[color];
     }
   }
 
-  if(GameBoy::system.cgb() == true) {  //BGR555
-    for(unsigned y = 0; y < 144; y++) {
-      const uint16_t *sp = data + y * 160;
-      uint16_t *dp = output + y * 160;
-      for(unsigned x = 0; x < 160; x++) {
-        uint16_t color = *sp++;
-        *dp++ = ((color >> 10) & 0x001f) | (color & 0x03e0) | ((color << 10) & 0x7c00);
-      }
-    }
-  }
-
-  interface->videoRefresh(output, 160 * 2, 160, 144);
+  interface->videoRefresh(output, 160 * 4, 160, 144);
 }
 
 void InterfaceGameBoy::audioSample(int16_t csample, int16_t lsample, int16_t rsample) {

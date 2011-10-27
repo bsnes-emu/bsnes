@@ -20,10 +20,4 @@ struct InterfaceSNES : SNES::Interface {
 
   string path(SNES::Cartridge::Slot slot, const string &hint);
   void message(const string &text);
-
-  InterfaceSNES();
-  ~InterfaceSNES();
-
-private:
-  unsigned *palette;
 };
