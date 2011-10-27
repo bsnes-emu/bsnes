@@ -10,7 +10,7 @@ void Interface::lcdScanline() {
 void Interface::joypWrite(bool p15, bool p14) {
 }
 
-void Interface::videoRefresh(const uint8_t *data) {
+void Interface::videoRefresh(const uint16_t *data) {
 }
 
 void Interface::audioSample(int16_t center, int16_t left, int16_t right) {
@@ -29,8 +29,8 @@ bool Interface::cartridgeLoaded() {
   return cartridge.loaded();
 }
 
-void Interface::loadCartridge(const string &markup, const uint8_t *data, unsigned size) {
-  cartridge.load(markup, data, size);
+void Interface::loadCartridge(GameBoy::System::Revision revision, const string &markup, const uint8_t *data, unsigned size) {
+  cartridge.load(revision, markup, data, size);
   system.power();
 }
 

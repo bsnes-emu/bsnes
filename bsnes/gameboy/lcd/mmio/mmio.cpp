@@ -1,7 +1,11 @@
 #ifdef LCD_CPP
 
+unsigned LCD::vram_addr(uint16 addr) const {
+  return (status.vram_bank * 0x2000) + (addr & 0x1fff);
+}
+
 uint8 LCD::mmio_read(uint16 addr) {
-  if(addr >= 0x8000 && addr <= 0x9fff) return vram[addr & 0x1fff];
+  if(addr >= 0x8000 && addr <= 0x9fff) return vram[vram_addr(addr)];
   if(addr >= 0xfe00 && addr <= 0xfe9f) return oam[addr & 0xff];
 
   if(addr == 0xff40) {  //LCDC
@@ -47,24 +51,24 @@ uint8 LCD::mmio_read(uint16 addr) {
   }
 
   if(addr == 0xff47) {  //BGP
-    return (status.bgp[3] << 6)
-         | (status.bgp[2] << 4)
-         | (status.bgp[1] << 2)
-         | (status.bgp[0] << 0);
+    return (bgp[3] << 6)
+         | (bgp[2] << 4)
+         | (bgp[1] << 2)
+         | (bgp[0] << 0);
   }
 
   if(addr == 0xff48) {  //OBP0
-    return (status.obp[0][3] << 6)
-         | (status.obp[0][2] << 4)
-         | (status.obp[0][1] << 2)
-         | (status.obp[0][0] << 0);
+    return (obp[0][3] << 6)
+         | (obp[0][2] << 4)
+         | (obp[0][1] << 2)
+         | (obp[0][0] << 0);
   }
 
   if(addr == 0xff49) {  //OBP1
-    return (status.obp[1][3] << 6)
-         | (status.obp[1][2] << 4)
-         | (status.obp[1][1] << 2)
-         | (status.obp[1][0] << 0);
+    return (obp[1][3] << 6)
+         | (obp[1][2] << 4)
+         | (obp[1][1] << 2)
+         | (obp[1][0] << 0);
   }
 
   if(addr == 0xff4a) {  //WY
@@ -75,11 +79,19 @@ uint8 LCD::mmio_read(uint16 addr) {
     return status.wx;
   }
 
+  if(addr == 0xff69) { //BGPD
+    return bgpd[status.bgpi];
+  }
+
+  if(addr == 0xff6b) {  //OBPD
+    return obpd[status.obpi];
+  }
+
   return 0x00;
 }
 
 void LCD::mmio_write(uint16 addr, uint8 data) {
-  if(addr >= 0x8000 && addr <= 0x9fff) { vram[addr & 0x1fff] = data; return; }
+  if(addr >= 0x8000 && addr <= 0x9fff) { vram[vram_addr(addr)] = data; return; }
   if(addr >= 0xfe00 && addr <= 0xfe9f) { oam[addr & 0xff] = data; return; }
 
   if(addr == 0xff40) {  //LCDC
@@ -126,32 +138,27 @@ void LCD::mmio_write(uint16 addr, uint8 data) {
     return;
   }
 
-  if(addr == 0xff46) {  //DMA
-    for(unsigned n = 0x00; n <= 0x9f; n++) bus.write(0xfe00 + n, bus.read((data << 8) + n));
-    return;
-  }
-
   if(addr == 0xff47) {  //BGP
-    status.bgp[3] = (data >> 6) & 3;
-    status.bgp[2] = (data >> 4) & 3;
-    status.bgp[1] = (data >> 2) & 3;
-    status.bgp[0] = (data >> 0) & 3;
+    bgp[3] = (data >> 6) & 3;
+    bgp[2] = (data >> 4) & 3;
+    bgp[1] = (data >> 2) & 3;
+    bgp[0] = (data >> 0) & 3;
     return;
   }
 
   if(addr == 0xff48) {  //OBP0
-    status.obp[0][3] = (data >> 6) & 3;
-    status.obp[0][2] = (data >> 4) & 3;
-    status.obp[0][1] = (data >> 2) & 3;
-    status.obp[0][0] = (data >> 0) & 3;
+    obp[0][3] = (data >> 6) & 3;
+    obp[0][2] = (data >> 4) & 3;
+    obp[0][1] = (data >> 2) & 3;
+    obp[0][0] = (data >> 0) & 3;
     return;
   }
 
   if(addr == 0xff49) {  //OBP1
-    status.obp[1][3] = (data >> 6) & 3;
-    status.obp[1][2] = (data >> 4) & 3;
-    status.obp[1][1] = (data >> 2) & 3;
-    status.obp[1][0] = (data >> 0) & 3;
+    obp[1][3] = (data >> 6) & 3;
+    obp[1][2] = (data >> 4) & 3;
+    obp[1][1] = (data >> 2) & 3;
+    obp[1][0] = (data >> 0) & 3;
     return;
   }
 
@@ -163,6 +170,33 @@ void LCD::mmio_write(uint16 addr, uint8 data) {
   if(addr == 0xff4b) {  //WX
     status.wx = data;
     return;
+  }
+
+  if(addr == 0xff4f) {  //VBK
+    status.vram_bank = data & 1;
+    return;
+  }
+
+  if(addr == 0xff68) {  //BGPI
+    status.bgpi_increment = data & 0x80;
+    status.bgpi = data & 0x3f;
+    return;
+  }
+
+  if(addr == 0xff69) {  //BGPD
+    bgpd[status.bgpi] = data;
+    if(status.bgpi_increment) status.bgpi++;
+    return;
+  }
+
+  if(addr == 0xff6a) {  //OBPI
+    status.obpi_increment = data & 0x80;
+    status.obpi = data & 0x3f;
+  }
+
+  if(addr == 0xff6b) {  //OBPD
+    obpd[status.obpi] = data;
+    if(status.obpi_increment) status.obpi++;
   }
 }
 

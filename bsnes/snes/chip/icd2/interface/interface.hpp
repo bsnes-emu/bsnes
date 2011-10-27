@@ -1,6 +1,6 @@
 void lcdScanline();
 void joypWrite(bool p15, bool p14);
-void videoRefresh(const uint8_t *data);
+void videoRefresh(const uint16_t *data);
 void audioSample(int16_t center, int16_t left, int16_t right);
 bool inputPoll(unsigned id);
 

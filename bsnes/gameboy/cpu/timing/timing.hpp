@@ -4,6 +4,7 @@ void timer_65536hz();
 void timer_16384hz();
 void timer_8192hz();
 void timer_4096hz();
+void hblank();
 
 //opcode.cpp
 void op_io();

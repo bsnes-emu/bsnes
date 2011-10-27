@@ -59,8 +59,8 @@ void ICD2::reset() {
   r7800 = 0x0000;
   mlt_req = 0;
 
-  for(auto &byte : lcd.buffer) byte = 0;
-  for(auto &byte : lcd.output) byte = 0;
+  for(auto &n : lcd.buffer) n = 0;
+  for(auto &n : lcd.output) n = 0;
   lcd.row = 0;
 
   packetsize = 0;

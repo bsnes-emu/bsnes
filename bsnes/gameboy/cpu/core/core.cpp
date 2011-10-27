@@ -571,6 +571,11 @@ void CPU::op_halt() {
 }
 
 void CPU::op_stop() {
+  if(status.speed_switch) {
+    status.speed_switch = 0;
+    status.speed_double ^= 1;
+    return;
+  }
   status.stop = true;
   while(status.stop == true) op_io();
 }

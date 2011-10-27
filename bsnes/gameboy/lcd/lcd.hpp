@@ -33,38 +33,57 @@ struct LCD : Processor, MMIO {
     //$ff45  LYC
     uint8 lyc;
 
-    //$ff47  BGP
-    uint8 bgp[4];
-
-    //$ff48  OBP0
-    //$ff49  OBP1
-    uint8 obp[2][4];
-
     //$ff4a  WY
     uint8 wy;
 
     //$ff4b  WX
     uint8 wx;
+
+    //$ff4f  VBK
+    bool vram_bank;
+
+    //$ff68  BGPI
+    bool bgpi_increment;
+    uint6 bgpi;
+
+    //$ff6a  OBPI
+    bool obpi_increment;
+    uint8 obpi;
   } status;
 
-  uint8 screen[160 * 144];
-  uint8 vram[8192];
-  uint8 oam[160];
-  uint8 line[160];
-
-  struct Origin { enum : unsigned { None, BG, Window, OBJ }; };
+  uint16 screen[160 * 144];
+  uint16 line[160];
+  struct Origin { enum : unsigned { None, BG, BGP, OB }; };
   uint8 origin[160];
+
+  uint8 vram[16384];  //GB = 8192, GBC = 16384
+  uint8 oam[160];
+  uint8 bgp[4];
+  uint8 obp[2][4];
+  uint8 bgpd[64];
+  uint8 obpd[64];
 
   static void Main();
   void main();
   void add_clocks(unsigned clocks);
   void scanline();
   void frame();
-  void render();
-  uint16 read_tile(bool select, unsigned x, unsigned y);
-  void render_bg();
-  void render_window();
-  void render_obj();
+
+  unsigned hflip(unsigned data) const;
+
+  //dmg.cpp
+  void dmg_render();
+  uint16 dmg_read_tile(bool select, unsigned x, unsigned y);
+  void dmg_render_bg();
+  void dmg_render_window();
+  void dmg_render_ob();
+
+  //cgb.cpp
+  void cgb_render();
+  void cgb_read_tile(bool select, unsigned x, unsigned y, unsigned &tile, unsigned &attr, unsigned &data);
+  void cgb_render_bg();
+  void cgb_render_window();
+  void cgb_render_ob();
 
   void power();
 

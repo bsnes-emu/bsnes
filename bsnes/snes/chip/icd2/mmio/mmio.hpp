@@ -1,4 +1,4 @@
-void render(const uint8 *source);
+void render(const uint16 *source);
 
 uint8 r6000_ly;   //SGB BIOS' cache of LY
 uint8 r6000_row;  //SGB BIOS' cache of ROW
@@ -13,7 +13,7 @@ unsigned r7800;   //VRAM offset
 uint8 mlt_req;    //number of active joypads
 
 struct LCD {
-  uint8 buffer[4 * 160 * 8];  //four tile rows of linear video data
-  uint8 output[320];          //one tile row of 2bpp video data
-  unsigned row;               //active ICD2 rendering tile row
+  uint16 buffer[4 * 160 * 8];  //four tile rows of linear video data
+  uint16 output[320];          //one tile row of 2bpp video data
+  unsigned row;                //active ICD2 rendering tile row
 } lcd;

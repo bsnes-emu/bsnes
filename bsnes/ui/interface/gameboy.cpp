@@ -1,4 +1,4 @@
-bool InterfaceGameBoy::loadCartridge(const string &filename) {
+bool InterfaceGameBoy::loadCartridge(GameBoy::System::Revision revision, const string &filename) {
   uint8_t *data;
   unsigned size;
   if(interface->loadFile(filename, data, size) == false) return false;
@@ -7,7 +7,7 @@ bool InterfaceGameBoy::loadCartridge(const string &filename) {
   interface->baseName = nall::basename(filename);
 
   GameBoyCartridge info(data, size);
-  GameBoy::Interface::loadCartridge(info.markup, data, size);
+  GameBoy::Interface::loadCartridge(revision, info.markup, data, size);
   delete[] data;
 
   if(GameBoy::Interface::memorySize(GameBoy::Interface::Memory::RAM) > 0) {
@@ -19,6 +19,7 @@ bool InterfaceGameBoy::loadCartridge(const string &filename) {
     }
   }
 
+  GameBoy::interface = this;
   interface->loadCartridge(::Interface::Mode::GameBoy);
   return true;
 }
@@ -51,18 +52,32 @@ bool InterfaceGameBoy::loadState(const string &filename) {
 
 //
 
-void InterfaceGameBoy::videoRefresh(const uint8_t *data) {
+void InterfaceGameBoy::videoRefresh(const uint16_t *data) {
   static uint16_t output[160 * 144];
-  static uint32_t palette[] = {
-    0x9bbc0f, 0x8bac0f, 0x306230, 0x0f380f
-  };
 
-  for(unsigned y = 0; y < 144; y++) {
-    const uint8_t *sp = data + y * 160;
-    uint16_t *dp = output + y * 160;
-    for(unsigned x = 0; x < 160; x++) {
-      uint32_t color = palette[*sp++];
-      *dp++ = ((color & 0xf80000) >> 9) | ((color & 0x00f800) >> 6) | ((color & 0x0000f8) >> 3);
+  if(GameBoy::system.cgb() == false) {  //L2
+    static uint32_t palette[] = {
+      0x9bbc0f, 0x8bac0f, 0x306230, 0x0f380f
+    };
+
+    for(unsigned y = 0; y < 144; y++) {
+      const uint16_t *sp = data + y * 160;
+      uint16_t *dp = output + y * 160;
+      for(unsigned x = 0; x < 160; x++) {
+        uint32_t color = palette[*sp++];
+        *dp++ = ((color & 0xf80000) >> 9) | ((color & 0x00f800) >> 6) | ((color & 0x0000f8) >> 3);
+      }
+    }
+  }
+
+  if(GameBoy::system.cgb() == true) {  //BGR555
+    for(unsigned y = 0; y < 144; y++) {
+      const uint16_t *sp = data + y * 160;
+      uint16_t *dp = output + y * 160;
+      for(unsigned x = 0; x < 160; x++) {
+        uint16_t color = *sp++;
+        *dp++ = ((color >> 10) & 0x001f) | (color & 0x03e0) | ((color << 10) & 0x7c00);
+      }
     }
   }
 

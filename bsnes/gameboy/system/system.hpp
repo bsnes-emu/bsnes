@@ -4,10 +4,21 @@ enum class Input : unsigned {
   Up, Down, Left, Right, B, A, Select, Start,
 };
 
-struct System {
+struct System : property<System> {
+  enum class Revision : unsigned {
+    GameBoy,
+    SuperGameBoy,
+    GameBoyColor,
+  };
+  readonly<Revision> revision;
+  inline bool dmg() const { return revision == Revision::GameBoy; }
+  inline bool sgb() const { return revision == Revision::SuperGameBoy; }
+  inline bool cgb() const { return revision == Revision::GameBoyColor; }
+
   struct BootROM {
-    static const uint8 dmg[256];
-    static const uint8 sgb[256];
+    static const uint8 dmg[ 256];
+    static const uint8 sgb[ 256];
+    static const uint8 cgb[2048];
   } bootROM;
 
   void run();
@@ -15,7 +26,7 @@ struct System {
   void runthreadtosave();
 
   void init();
-  void load();
+  void load(Revision);
   void power();
 
   unsigned clocks_executed;

@@ -29,6 +29,9 @@ void Utility::setMode(Interface::Mode mode) {
   }
 
   else if(mode == Interface::Mode::GameBoy) {
+    mainWindow->gameBoyMenu.setText(
+      GameBoy::system.cgb() == false ? "Game Boy" : "Game Boy Color"
+    );
     mainWindow->setTitle(notdir(interface->baseName));
     mainWindow->gameBoyMenu.setVisible(true);
     dspaudio.setChannels(2);

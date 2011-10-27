@@ -94,15 +94,43 @@ void CPU::interrupt_exec(uint16 pc) {
 }
 
 void CPU::power() {
-  create(Main, 4194304);
+  create(Main, 8 * 1024 * 1024);
 
   for(unsigned n = 0xc000; n <= 0xdfff; n++) bus.mmio[n] = this;  //WRAM
   for(unsigned n = 0xe000; n <= 0xfdff; n++) bus.mmio[n] = this;  //WRAM (mirror)
-  for(unsigned n = 0xff00; n <= 0xff0f; n++) bus.mmio[n] = this;  //MMIO
-  for(unsigned n = 0xff80; n <= 0xffff; n++) bus.mmio[n] = this;  //HRAM+IE
+  for(unsigned n = 0xff80; n <= 0xfffe; n++) bus.mmio[n] = this;  //HRAM
 
-  for(unsigned n = 0; n < 8192; n++) wram[n] = 0x00;
-  for(unsigned n = 0; n <  128; n++) hram[n] = 0x00;
+  bus.mmio[0xff00] = this;  //JOYP
+  bus.mmio[0xff01] = this;  //SB
+  bus.mmio[0xff02] = this;  //SC
+  bus.mmio[0xff04] = this;  //DIV
+  bus.mmio[0xff05] = this;  //TIMA
+  bus.mmio[0xff06] = this;  //TMA
+  bus.mmio[0xff07] = this;  //TAC
+  bus.mmio[0xff0f] = this;  //IF
+  bus.mmio[0xff46] = this;  //DMA
+  bus.mmio[0xffff] = this;  //IE
+
+  if(system.cgb()) {
+  bus.mmio[0xff4d] = this;  //KEY1
+  bus.mmio[0xff51] = this;  //HDMA1
+  bus.mmio[0xff52] = this;  //HDMA2
+  bus.mmio[0xff53] = this;  //HDMA3
+  bus.mmio[0xff54] = this;  //HDMA4
+  bus.mmio[0xff55] = this;  //HDMA5
+  bus.mmio[0xff56] = this;  //RP
+  bus.mmio[0xff6c] = this;  //???
+  bus.mmio[0xff70] = this;  //SVBK
+  bus.mmio[0xff72] = this;  //???
+  bus.mmio[0xff73] = this;  //???
+  bus.mmio[0xff74] = this;  //???
+  bus.mmio[0xff75] = this;  //???
+  bus.mmio[0xff76] = this;  //???
+  bus.mmio[0xff77] = this;  //???
+  }
+
+  for(auto &n : wram) n = 0x00;
+  for(auto &n : hram) n = 0x00;
 
   r[PC] = 0x0000;
   r[SP] = 0x0000;
@@ -142,6 +170,23 @@ void CPU::power() {
   status.interrupt_request_timer = 0;
   status.interrupt_request_stat = 0;
   status.interrupt_request_vblank = 0;
+
+  status.speed_double = 0;
+  status.speed_switch = 0;
+
+  status.dma_source = 0;
+  status.dma_target = 0;
+
+  status.dma_mode = 0;
+  status.dma_length = 0;
+
+  status.ff6c = 0;
+  status.ff72 = 0;
+  status.ff73 = 0;
+  status.ff74 = 0;
+  status.ff75 = 0;
+
+  status.wram_bank = 1;
 
   status.interrupt_enable_joypad = 0;
   status.interrupt_enable_serial = 0;

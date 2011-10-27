@@ -4,12 +4,12 @@
 namespace GameBoy {
   namespace Info {
     static const char Name[] = "bgameboy";
-    static const unsigned SerializerVersion = 2;
+    static const unsigned SerializerVersion = 3;
   }
 }
 
 /*
-  bgameboy - Game Boy emulator
+  bgameboy - Game Boy, Super Game Boy, and Game Boy Color emulator
   author: byuu
   license: GPLv3
   project started: 2010-12-27

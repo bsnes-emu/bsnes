@@ -57,7 +57,7 @@ void Interface::loadSufamiTurboCartridge(const CartridgeData &base, const Cartri
 
 void Interface::loadSuperGameBoyCartridge(const CartridgeData &base, const CartridgeData &slot) {
   cartridge.rom.copy(base.data, base.size);
-  GameBoy::cartridge.load(slot.markup, slot.data, slot.size);
+  GameBoy::cartridge.load(GameBoy::System::Revision::SuperGameBoy, slot.markup, slot.data, slot.size);
   cartridge.load(Cartridge::Mode::SuperGameBoy, base.markup);
   system.power();
 }

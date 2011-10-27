@@ -24,11 +24,11 @@ void PPU::tick() {
   if(status.ly == 241 && status.lx ==   0) status.nmi_flag = status.nmi_hold;
   if(status.ly == 241 && status.lx ==   2) cpu.set_nmi_line(status.nmi_enable && status.nmi_flag);
 
+  if(status.ly == 260 && status.lx == 340) status.sprite_zero_hit = 0, status.sprite_overflow = 0;
+
   if(status.ly == 260 && status.lx == 340) status.nmi_hold = 0;
   if(status.ly == 261 && status.lx ==   0) status.nmi_flag = status.nmi_hold;
   if(status.ly == 261 && status.lx ==   2) cpu.set_nmi_line(status.nmi_enable && status.nmi_flag);
-
-  if(status.ly == 261 && status.lx ==   0) status.sprite_zero_hit = 0;
 
   clock += 4;
   if(clock >= 0) co_switch(cpu.thread);
@@ -298,6 +298,7 @@ void PPU::raster_pixel() {
   if(status.bg_enable == false) palette = 0;
   if(status.bg_edge_enable == false && status.lx < 8) palette = 0;
 
+  if(status.sprite_enable == true)
   for(signed sprite = 7; sprite >= 0; sprite--) {
     if(status.sprite_edge_enable == false && status.lx < 8) continue;
     if(raster.oam[sprite].id == 64) continue;
@@ -328,7 +329,7 @@ void PPU::raster_pixel() {
 }
 
 void PPU::raster_sprite() {
-  if(status.sprite_enable == false) return;
+  if(raster_enable() == false) return;
 
   unsigned n = raster.oam_iterator++;
   signed ly = (status.ly == 261 ? -1 : status.ly);

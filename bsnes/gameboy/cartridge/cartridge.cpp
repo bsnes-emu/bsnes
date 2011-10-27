@@ -16,13 +16,10 @@ namespace GameBoy {
 #include "serialization.cpp"
 Cartridge cartridge;
 
-void Cartridge::load(const string &markup, const uint8_t *data, unsigned size) {
+void Cartridge::load(System::Revision revision, const string &markup, const uint8_t *data, unsigned size) {
   if(size == 0) size = 32768;
   romdata = allocate<uint8>(romsize = size, 0xff);
   if(data) memcpy(romdata, data, size);
-
-//uint32_t crc = crc32_calculate(data, size);
-//print("CRC32 = ", hex<4>(crc), "\n");
 
   info.mapper = Mapper::Unknown;
   info.ram = false;
@@ -64,7 +61,7 @@ void Cartridge::load(const string &markup, const uint8_t *data, unsigned size) {
   }
 
   ramdata = new uint8_t[ramsize = info.ramsize]();
-  system.load();
+  system.load(revision);
 
   loaded = true;
   sha256 = nall::sha256(romdata, romsize);
@@ -101,12 +98,28 @@ void Cartridge::ram_write(unsigned addr, uint8 data) {
 }
 
 uint8 Cartridge::mmio_read(uint16 addr) {
-  if(bootrom_enable && within<0x0000, 0x00ff>(addr)) return System::BootROM::sgb[addr];
+  if(addr == 0xff50) return 0x00;
+
+  if(bootrom_enable) {
+    const uint8 *data = nullptr;
+    switch(system.revision()) { default:
+    case System::Revision::GameBoy: data = System::BootROM::dmg; break;
+    case System::Revision::SuperGameBoy: data = System::BootROM::sgb; break;
+    case System::Revision::GameBoyColor: data = System::BootROM::cgb; break;
+    }
+    if(addr >= 0x0000 && addr <= 0x00ff) return data[addr];
+    if(addr >= 0x0200 && addr <= 0x08ff && system.cgb()) return data[addr - 256];
+  }
+
   return mapper->mmio_read(addr);
 }
 
 void Cartridge::mmio_write(uint16 addr, uint8 data) {
-  if(bootrom_enable && addr == 0xff50) bootrom_enable = false;
+  if(bootrom_enable && addr == 0xff50) {
+    bootrom_enable = false;
+    return;
+  }
+
   mapper->mmio_write(addr, data);
 }
 

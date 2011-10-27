@@ -6,6 +6,7 @@ struct MainWindow : Window {
     Item cartridgeLoadSNES;
     Item cartridgeLoadNES;
     Item cartridgeLoadGameBoy;
+    Item cartridgeLoadGameBoyColor;
     Separator cartridgeSeparator;
     Item cartridgeLoadSatellaviewSlotted;
     Item cartridgeLoadSatellaview;

@@ -54,6 +54,32 @@ struct CPU : Processor, MMIO {
     bool interrupt_request_stat;
     bool interrupt_request_vblank;
 
+    //$ff4d  KEY1
+    bool speed_double;
+    bool speed_switch;
+
+    //$ff51,$ff52  HDMA1,HDMA2
+    uint16 dma_source;
+
+    //$ff53,$ff54  HDMA3,HDMA4
+    uint16 dma_target;
+
+    //$ff55  HDMA5
+    bool dma_mode;
+    uint16 dma_length;
+
+    //$ff6c  ???
+    uint8 ff6c;
+
+    //$ff70  SVBK
+    uint3 wram_bank;
+
+    //$ff72-$ff75  ???
+    uint8 ff72;
+    uint8 ff73;
+    uint8 ff74;
+    uint8 ff75;
+
     //$ffff  IE
     bool interrupt_enable_joypad;
     bool interrupt_enable_serial;
@@ -62,7 +88,7 @@ struct CPU : Processor, MMIO {
     bool interrupt_enable_vblank;
   } status;
 
-  uint8 wram[8192];
+  uint8 wram[32768];  //GB=8192, GBC=32768
   uint8 hram[128];
 
   static void Main();

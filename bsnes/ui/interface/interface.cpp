@@ -74,8 +74,8 @@ bool Interface::loadCartridge(const string &filename) {
   bool result = false;
   if(filename.endswith(".nes")) result = nes.loadCartridge(filename);
   if(filename.endswith(".sfc")) result = snes.loadCartridge(filename);
-  if(filename.endswith(".gb" )) result = gameBoy.loadCartridge(filename);
-  if(filename.endswith(".gbc")) result = gameBoy.loadCartridge(filename);
+  if(filename.endswith(".gb" )) result = gameBoy.loadCartridge(GameBoy::System::Revision::GameBoy, filename);
+  if(filename.endswith(".gbc")) result = gameBoy.loadCartridge(GameBoy::System::Revision::GameBoyColor, filename);
   return result;
 }
 

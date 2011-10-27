@@ -251,65 +251,47 @@ void prg_write(unsigned addr, uint8 data) {
 }
 
 unsigned chr_sprite_addr(unsigned addr) {
-  unsigned bank;
-
   if(chr_mode == 0) {
-    bank = chr_sprite_bank[7];
+    auto bank = chr_sprite_bank[7];
     return (bank * 0x2000) + (addr & 0x1fff);
   }
 
   if(chr_mode == 1) {
-    bank = (addr < 0x1000) ? chr_sprite_bank[3]
-         :/*addr < 0x2000 */ chr_sprite_bank[7];
+    auto bank = chr_sprite_bank[(addr / 0x1000) * 4 + 3];
     return (bank * 0x1000) + (addr & 0x0fff);
   }
 
   if(chr_mode == 2) {
-    bank = (addr < 0x0800) ? chr_sprite_bank[1]
-         : (addr < 0x1000) ? chr_sprite_bank[3]
-         : (addr < 0x1800) ? chr_sprite_bank[5]
-         :/*addr < 0x2000 */ chr_sprite_bank[7];
+    auto bank = chr_sprite_bank[(addr / 0x0800) * 2 + 1];
     return (bank * 0x0800) + (addr & 0x07ff);
   }
 
   if(chr_mode == 3) {
-    bank = (addr < 0x0400) ? chr_sprite_bank[0]
-         : (addr < 0x0800) ? chr_sprite_bank[1]
-         : (addr < 0x0c00) ? chr_sprite_bank[2]
-         : (addr < 0x1000) ? chr_sprite_bank[3]
-         : (addr < 0x1400) ? chr_sprite_bank[4]
-         : (addr < 0x1800) ? chr_sprite_bank[5]
-         : (addr < 0x1c00) ? chr_sprite_bank[6]
-         :/*addr < 0x2000 */ chr_sprite_bank[7];
+    auto bank = chr_sprite_bank[(addr / 0x0400)];
     return (bank * 0x0400) + (addr & 0x03ff);
   }
 }
 
 unsigned chr_bg_addr(unsigned addr) {
   addr &= 0x0fff;
-  unsigned bank;
 
   if(chr_mode == 0) {
-    bank = chr_bg_bank[3];
+    auto bank = chr_bg_bank[3];
     return (bank * 0x2000) + (addr & 0x0fff);
   }
 
   if(chr_mode == 1) {
-    bank = chr_bg_bank[3];
+    auto bank = chr_bg_bank[3];
     return (bank * 0x1000) + (addr & 0x0fff);
   }
 
   if(chr_mode == 2) {
-    bank = (addr < 0x0800) ? chr_bg_bank[1]
-         :/*addr < 0x1000 */ chr_bg_bank[3];
+    auto bank = chr_bg_bank[(addr / 0x0800) * 2 + 1];
     return (bank * 0x0800) + (addr & 0x07ff);
   }
 
   if(chr_mode == 3) {
-    bank = (addr < 0x0400) ? chr_bg_bank[0]
-         : (addr < 0x0800) ? chr_bg_bank[1]
-         : (addr < 0x0c00) ? chr_bg_bank[2]
-         :/*addr < 0x1000 */ chr_bg_bank[3];
+    auto bank = chr_bg_bank[(addr / 0x0400)];
     return (bank * 0x0400) + (addr & 0x03ff);
   }
 }
