@@ -41,7 +41,7 @@ void LCD::main() {
 }
 
 void LCD::add_clocks(unsigned clocks) {
-  clock += clocks;
+  clock += clocks * cpu.frequency;
   if(clock >= 0 && scheduler.sync != Scheduler::SynchronizeMode::All) {
     co_switch(scheduler.active_thread = cpu.thread);
   }
@@ -127,8 +127,8 @@ void LCD::power() {
   status.window_display_enable = 0;
   status.bg_tiledata_select = 0;
   status.bg_tilemap_select = 0;
-  status.obj_size = 0;
-  status.obj_enable = 0;
+  status.ob_size = 0;
+  status.ob_enable = 0;
   status.bg_enable = 0;
 
   status.interrupt_lyc = 0;

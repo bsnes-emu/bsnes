@@ -2,17 +2,17 @@
 
 void LCD::cgb_render() {
   for(unsigned n = 0; n < 160; n++) {
-    line[n] = 0x0000;
+    line[n] = 0x7fff;
     origin[n] = Origin::None;
   }
 
-  if(status.display_enable == true) {
+  if(status.display_enable) {
     cgb_render_bg();
-    if(status.window_display_enable == true) cgb_render_window();
-    if(status.obj_enable == true) cgb_render_ob();
+    if(status.window_display_enable) cgb_render_window();
+    if(status.ob_enable) cgb_render_ob();
   }
 
-  uint16_t *output = screen + status.ly * 160;
+  uint16 *output = screen + status.ly * 160;
   for(unsigned n = 0; n < 160; n++) output[n] = line[n];
   interface->lcdScanline();
 }
@@ -107,7 +107,7 @@ void LCD::cgb_render_window() {
 //0x08: VRAM bank#
 //0x07: palette#
 void LCD::cgb_render_ob() {
-  const unsigned Height = (status.obj_size == 0 ? 8 : 16);
+  const unsigned Height = (status.ob_size == 0 ? 8 : 16);
   unsigned sprite[10], sprites = 0;
 
   //find first ten sprites on this scanline

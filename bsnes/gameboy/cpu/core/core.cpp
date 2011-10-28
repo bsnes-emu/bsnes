@@ -574,6 +574,8 @@ void CPU::op_stop() {
   if(status.speed_switch) {
     status.speed_switch = 0;
     status.speed_double ^= 1;
+    frequency = 4 * 1024 * 1024;
+    if(status.speed_double) frequency *= 2;
     return;
   }
   status.stop = true;

@@ -299,6 +299,7 @@ static LRESULT CALLBACK OS_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM
     //mmi->ptMinTrackSize.x = 256 + window.p.frameMargin().width;
     //mmi->ptMinTrackSize.y = 256 + window.p.frameMargin().height;
     //return TRUE;
+      break;
     }
 
     case WM_ERASEBKGND: {
@@ -320,6 +321,7 @@ static LRESULT CALLBACK OS_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM
         SetBkColor((HDC)wparam, window.p.brushColor);
         return (INT_PTR)window.p.brush;
       }
+      break;
     }
 
     case WM_COMMAND: {
@@ -378,6 +380,7 @@ static LRESULT CALLBACK OS_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM
           }
         }
       }
+      break;
     }
 
     case WM_NOTIFY: {
@@ -412,6 +415,7 @@ static LRESULT CALLBACK OS_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM
           if(listView.onActivate) listView.onActivate();
         }
       }
+      break;
     }
 
     case WM_HSCROLL:
@@ -481,6 +485,8 @@ static LRESULT CALLBACK OS_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM
           if(verticalSlider.onChange) verticalSlider.onChange();
         }
       }
+
+      break;
     }
   }
 

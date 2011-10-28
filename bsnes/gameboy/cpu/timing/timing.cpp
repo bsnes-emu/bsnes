@@ -8,7 +8,7 @@
 
 void CPU::add_clocks(unsigned clocks) {
   system.clocks_executed += clocks;
-  scheduler.exit(Scheduler::ExitReason::StepEvent);
+  if(system.sgb()) scheduler.exit(Scheduler::ExitReason::StepEvent);
 
   status.clock += clocks;
   if(status.clock >= 4 * 1024 * 1024) {
@@ -23,10 +23,10 @@ void CPU::add_clocks(unsigned clocks) {
   if((status.clock &  511) == 0)   timer_8192hz();
   if((status.clock & 1023) == 0)   timer_4096hz();
 
-  lcd.clock -= clocks;
+  lcd.clock -= clocks * lcd.frequency;
   if(lcd.clock <= 0) co_switch(scheduler.active_thread = lcd.thread);
 
-  apu.clock -= clocks;
+  apu.clock -= clocks * apu.frequency;
   if(apu.clock <= 0) co_switch(scheduler.active_thread = apu.thread);
 }
 

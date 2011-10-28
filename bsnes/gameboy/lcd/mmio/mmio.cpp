@@ -14,8 +14,8 @@ uint8 LCD::mmio_read(uint16 addr) {
          | (status.window_display_enable << 5)
          | (status.bg_tiledata_select << 4)
          | (status.bg_tilemap_select << 3)
-         | (status.obj_size << 2)
-         | (status.obj_enable << 1)
+         | (status.ob_size << 2)
+         | (status.ob_enable << 1)
          | (status.bg_enable << 0);
   }
 
@@ -104,8 +104,8 @@ void LCD::mmio_write(uint16 addr, uint8 data) {
     status.window_display_enable = data & 0x20;
     status.bg_tiledata_select = data & 0x10;
     status.bg_tilemap_select = data & 0x08;
-    status.obj_size = data & 0x04;
-    status.obj_enable = data & 0x02;
+    status.ob_size = data & 0x04;
+    status.ob_enable = data & 0x02;
     status.bg_enable = data & 0x01;
     return;
   }

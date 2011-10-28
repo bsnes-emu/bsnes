@@ -24,7 +24,9 @@ Config::Config() {
   attach(audio.synchronize = true, "Audio::Synchronize");
   attach(audio.mute = false, "Audio::Mute");
   attach(audio.volume = 100, "Audio::Volume");
+  attach(audio.latency = 60, "Audio::Latency");
 
+  attach(audio.frequency = 48000, "Audio::Frequency::Native");
   attach(audio.frequencyNES = 1789772, "Audio::Frequency::NES");
   attach(audio.frequencySNES = 32000, "Audio::Frequency::SNES");
   attach(audio.frequencyGameBoy = 4194304, "Audio::Frequency::GameBoy");

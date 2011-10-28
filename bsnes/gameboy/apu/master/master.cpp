@@ -1,11 +1,6 @@
 #ifdef APU_CPP
 
 void APU::Master::run() {
-  static int16_t volume[] = {
-    -16384, -14336, -12288, -10240,  -8192,  -6144,  -4096,  -2048,
-     +2048,  +4096,  +6144,  +8192, +10240, +12288, +14336, +16384,
-  };
-
   if(enable == false) {
     center = 0;
     left   = 0;
@@ -13,22 +8,19 @@ void APU::Master::run() {
     return;
   }
 
-  signed sample = 0, channels;
+  signed sample = 0;
   sample += apu.square1.output;
   sample += apu.square2.output;
   sample +=    apu.wave.output;
   sample +=   apu.noise.output;
-  sample >>= 2;
-  center = volume[sample];
+  center = (sample * 512) - 16384;
 
   sample = 0;
-  channels = 0;
-  if(channel1_left_enable) { sample += apu.square1.output; channels++; }
-  if(channel2_left_enable) { sample += apu.square2.output; channels++; }
-  if(channel3_left_enable) { sample +=    apu.wave.output; channels++; }
-  if(channel4_left_enable) { sample +=   apu.noise.output; channels++; }
-  if(channels) sample /= channels;
-  left = volume[sample];
+  if(channel1_left_enable) sample += apu.square1.output;
+  if(channel2_left_enable) sample += apu.square2.output;
+  if(channel3_left_enable) sample +=    apu.wave.output;
+  if(channel4_left_enable) sample +=   apu.noise.output;
+  left = (sample * 512) - 16384;
 
   switch(left_volume) {
     case 0: left >>= 3;                       break;  // 12.5%
@@ -42,13 +34,11 @@ void APU::Master::run() {
   }
 
   sample = 0;
-  channels = 0;
-  if(channel1_right_enable) { sample += apu.square1.output; channels++; }
-  if(channel2_right_enable) { sample += apu.square2.output; channels++; }
-  if(channel3_right_enable) { sample +=    apu.wave.output; channels++; }
-  if(channel4_right_enable) { sample +=   apu.noise.output; channels++; }
-  if(channels) sample /= channels;
-  right = volume[sample];
+  if(channel1_right_enable) sample += apu.square1.output;
+  if(channel2_right_enable) sample += apu.square2.output;
+  if(channel3_right_enable) sample +=    apu.wave.output;
+  if(channel4_right_enable) sample +=   apu.noise.output;
+  right = (sample * 512) - 16384;
 
   switch(right_volume) {
     case 0: right >>= 3;                         break;  // 12.5%

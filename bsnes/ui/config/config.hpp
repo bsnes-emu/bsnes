@@ -24,7 +24,9 @@ struct Config : public configuration {
     bool synchronize;
     bool mute;
     unsigned volume;
+    unsigned latency;
 
+    unsigned frequency;
     unsigned frequencyNES;
     unsigned frequencySNES;
     unsigned frequencyGameBoy;

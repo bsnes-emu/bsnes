@@ -27,7 +27,7 @@ void Application::run() {
 }
 
 Application::Application(int argc, char **argv) {
-  title = "bsnes v083.06";
+  title = "bsnes v083.07";
 
   application = this;
   quit = false;
@@ -80,8 +80,8 @@ Application::Application(int argc, char **argv) {
   audio.driver(config->audio.driver);
   audio.set(Audio::Handle, mainWindow->viewport.handle());
   audio.set(Audio::Synchronize, config->audio.synchronize);
-  audio.set(Audio::Latency, 60u);
-  audio.set(Audio::Frequency, 48000u);
+  audio.set(Audio::Latency, config->audio.latency);
+  audio.set(Audio::Frequency, config->audio.frequency);
   audio.init();
 
   dspaudio.setPrecision(16);

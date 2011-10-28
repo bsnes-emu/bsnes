@@ -11,8 +11,8 @@ struct LCD : Processor, MMIO {
     bool window_display_enable;
     bool bg_tiledata_select;
     bool bg_tilemap_select;
-    bool obj_size;
-    bool obj_enable;
+    bool ob_size;
+    bool ob_enable;
     bool bg_enable;
 
     //$ff41  STAT

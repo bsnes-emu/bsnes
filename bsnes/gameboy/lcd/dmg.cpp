@@ -6,13 +6,13 @@ void LCD::dmg_render() {
     origin[n] = Origin::None;
   }
 
-  if(status.display_enable == true) {
-    if(status.bg_enable == true) dmg_render_bg();
-    if(status.window_display_enable == true) dmg_render_window();
-    if(status.obj_enable == true) dmg_render_ob();
+  if(status.display_enable) {
+    if(status.bg_enable) dmg_render_bg();
+    if(status.window_display_enable) dmg_render_window();
+    if(status.ob_enable) dmg_render_ob();
   }
 
-  uint16_t *output = screen + status.ly * 160;
+  uint16 *output = screen + status.ly * 160;
   for(unsigned n = 0; n < 160; n++) output[n] = line[n];
   interface->lcdScanline();
 }
@@ -76,7 +76,7 @@ void LCD::dmg_render_window() {
 //0x20: horizontal flip
 //0x10: palette#
 void LCD::dmg_render_ob() {
-  const unsigned Height = (status.obj_size == 0 ? 8 : 16);
+  const unsigned Height = (status.ob_size == 0 ? 8 : 16);
   unsigned sprite[10], sprites = 0;
 
   //find first ten sprites on this scanline

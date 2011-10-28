@@ -219,7 +219,7 @@ void CPU::mmio_write(uint16 addr, uint8 data) {
 
     if(status.dma_mode == 0) do {
       bus.write(status.dma_target++, bus.read(status.dma_source++));
-      add_clocks(4);
+      add_clocks(4 << status.speed_double);
     } while(--status.dma_length);
     return;
   }

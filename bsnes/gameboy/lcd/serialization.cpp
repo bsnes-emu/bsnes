@@ -23,8 +23,8 @@ void LCD::serialize(serializer &s) {
   s.integer(status.window_display_enable);
   s.integer(status.bg_tiledata_select);
   s.integer(status.bg_tilemap_select);
-  s.integer(status.obj_size);
-  s.integer(status.obj_enable);
+  s.integer(status.ob_size);
+  s.integer(status.ob_enable);
   s.integer(status.bg_enable);
 
   s.integer(status.interrupt_lyc);
