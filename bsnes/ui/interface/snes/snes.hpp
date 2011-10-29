@@ -1,6 +1,9 @@
-struct InterfaceSNES : SNES::Interface {
+struct InterfaceSNES : InterfaceCore, SNES::Interface {
+  void initialize();
+
   void setController(bool port, unsigned device);
 
+  bool cartridgeLoaded();
   bool loadCartridge(const string &filename);
   bool loadSatellaviewSlottedCartridge(const string &basename, const string &slotname);
   bool loadSatellaviewCartridge(const string &basename, const string &slotname);
@@ -8,11 +11,17 @@ struct InterfaceSNES : SNES::Interface {
   bool loadSuperGameBoyCartridge(const string &basename, const string &slotname);
   void unloadCartridge();
 
+  void power();
+  void reset();
+  void run();
+
   void loadMemory();
   void saveMemory();
 
-  bool saveState(const string &filename);
-  bool loadState(const string &filename);
+  serializer serialize();
+  bool unserialize(serializer&);
+
+  void setCheats(const lstring &list = lstring{});
 
   void videoRefresh(const uint32_t *data, bool hires, bool interlace, bool overscan);
   void audioSample(int16_t lsample, int16_t rsample);

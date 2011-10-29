@@ -1,5 +1,5 @@
 struct Palette {
-  alwaysinline uint32_t operator[](unsigned n);
+  alwaysinline uint8_t operator[](uint8_t color);
 
   uint8_t contrastAdjust(uint8_t);
   uint8_t brightnessAdjust(uint8_t);
@@ -7,8 +7,7 @@ struct Palette {
   void update();
 
 private:
-  static const uint8_t gammaRamp[32];
-  uint32_t color[32768];
+  uint32_t color[256];
 };
 
 extern Palette palette;

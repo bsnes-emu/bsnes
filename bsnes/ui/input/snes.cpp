@@ -4,10 +4,10 @@ int16_t SnesGamepad::poll(unsigned n) {
   case SNES::Input::JoypadID::Down: return down.poll() & !up.poll();
   case SNES::Input::JoypadID::Left: return left.poll() & !right.poll();
   case SNES::Input::JoypadID::Right: return right.poll() & !left.poll();
-  case SNES::Input::JoypadID::B: return b.poll();
-  case SNES::Input::JoypadID::A: return a.poll();
-  case SNES::Input::JoypadID::Y: return y.poll();
-  case SNES::Input::JoypadID::X: return x.poll();
+  case SNES::Input::JoypadID::B: return b.poll() | bTurbo.poll();
+  case SNES::Input::JoypadID::A: return a.poll() | aTurbo.poll();
+  case SNES::Input::JoypadID::Y: return y.poll() | yTurbo.poll();
+  case SNES::Input::JoypadID::X: return x.poll() | xTurbo.poll();
   case SNES::Input::JoypadID::L: return l.poll();
   case SNES::Input::JoypadID::R: return r.poll();
   case SNES::Input::JoypadID::Select: return select.poll();
@@ -22,6 +22,7 @@ SnesGamepad::SnesGamepad(const string &name, bool defaultBindings) {
   up.name = "Up", down.name = "Down", left.name = "Left", right.name = "Right";
   b.name = "B", a.name = "A", y.name = "Y", x.name = "X";
   l.name = "L", r.name = "R", select.name = "Select", start.name = "Start";
+  bTurbo.name = "Turbo B", aTurbo.name = "Turbo A", yTurbo.name = "Turbo Y", xTurbo.name = "Turbo X";
 
   if(defaultBindings) {
     up.mapping = "KB0::Up";
@@ -41,6 +42,7 @@ SnesGamepad::SnesGamepad(const string &name, bool defaultBindings) {
   append(up); append(down); append(left); append(right);
   append(b); append(a); append(y); append(x);
   append(l); append(r); append(select); append(start);
+  append(bTurbo); append(aTurbo); append(yTurbo); append(xTurbo);
 }
 
 //

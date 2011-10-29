@@ -4,8 +4,8 @@ int16_t GameBoyController::poll(unsigned n) {
   case 1: return down.poll() & !up.poll();
   case 2: return left.poll() & !right.poll();
   case 3: return right.poll() & !left.poll();
-  case 4: return b.poll();
-  case 5: return a.poll();
+  case 4: return b.poll() | bTurbo.poll();
+  case 5: return a.poll() | aTurbo.poll();
   case 6: return select.poll();
   case 7: return start.poll();
   }
@@ -23,6 +23,8 @@ GameBoyController::GameBoyController() {
   a.name = "A";
   select.name = "Select";
   start.name = "Start";
+  bTurbo.name = "Turbo B";
+  aTurbo.name = "Turbo A";
 
   up.mapping = "KB0::Up";
   down.mapping = "KB0::Down";
@@ -35,6 +37,7 @@ GameBoyController::GameBoyController() {
 
   append(up); append(down); append(left); append(right);
   append(b); append(a); append(select); append(start);
+  append(bTurbo); append(aTurbo);
 }
 
 //

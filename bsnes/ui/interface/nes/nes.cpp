@@ -1,16 +1,25 @@
+void InterfaceNES::initialize() {
+  NES::interface = this;
+  NES::system.init();
+}
+
 void InterfaceNES::setController(bool port, unsigned device) {
   if(port == 0) config->nes.controllerPort1Device = device;
   if(port == 1) config->nes.controllerPort2Device = device;
 
   if(port == 0) switch(device) {
-  case 0: return connect(0, NES::Input::Device::None);
-  case 1: return connect(0, NES::Input::Device::Joypad);
+  case 0: return NES::input.connect(0, NES::Input::Device::None);
+  case 1: return NES::input.connect(0, NES::Input::Device::Joypad);
   }
 
   if(port == 1) switch(device) {
-  case 0: return connect(1, NES::Input::Device::None);
-  case 1: return connect(1, NES::Input::Device::Joypad);
+  case 0: return NES::input.connect(1, NES::Input::Device::None);
+  case 1: return NES::input.connect(1, NES::Input::Device::Joypad);
   }
+}
+
+bool InterfaceNES::cartridgeLoaded() {
+  return NES::cartridge.loaded();
 }
 
 bool InterfaceNES::loadCartridge(const string &filename) {
@@ -24,15 +33,14 @@ bool InterfaceNES::loadCartridge(const string &filename) {
   string markup;
   markup.readfile({ interface->baseName, ".bml" });
 
-  NES::Interface::loadCartridge(markup, data, size);
+  NES::cartridge.load(markup, data, size);
+  NES::system.power();
   delete[] data;
 
-  if(NES::Interface::memorySize(NES::Interface::Memory::RAM) > 0) {
+  if(NES::cartridge.ram_size()) {
     filemap fp;
     if(fp.open(string{ interface->baseName, ".sav" }, filemap::mode::read)) {
-      memcpy(NES::Interface::memoryData(NES::Interface::Memory::RAM), fp.data(),
-        min(NES::Interface::memorySize(NES::Interface::Memory::RAM), fp.size())
-      );
+      memcpy(NES::cartridge.ram_data(), fp.data(), min(NES::cartridge.ram_size(), fp.size()));
     }
   }
 
@@ -42,31 +50,53 @@ bool InterfaceNES::loadCartridge(const string &filename) {
 }
 
 void InterfaceNES::unloadCartridge() {
-  if(NES::Interface::memorySize(NES::Interface::Memory::RAM) > 0) {
-    file::write({ interface->baseName, ".sav" },
-      NES::Interface::memoryData(NES::Interface::Memory::RAM),
-      NES::Interface::memorySize(NES::Interface::Memory::RAM)
-    );
+  if(NES::cartridge.ram_size()) {
+    file::write({ interface->baseName, ".sav" }, NES::cartridge.ram_data(), NES::cartridge.ram_size());
   }
-
-  NES::Interface::unloadCartridge();
+  NES::cartridge.unload();
   interface->baseName = "";
 }
 
 //
 
-bool InterfaceNES::saveState(const string &filename) {
-  serializer s = serialize();
-  return file::write(filename, s.data(), s.size());
+void InterfaceNES::power() {
+  NES::system.power();
 }
 
-bool InterfaceNES::loadState(const string &filename) {
-  uint8_t *data;
-  unsigned size;
-  if(file::read(filename, data, size) == false) return false;
-  serializer s(data, size);
-  delete[] data;
-  return unserialize(s);
+void InterfaceNES::reset() {
+  NES::system.reset();
+}
+
+void InterfaceNES::run() {
+  NES::system.run();
+}
+
+//
+
+serializer InterfaceNES::serialize() {
+  NES::system.runtosave();
+  return NES::system.serialize();
+}
+
+bool InterfaceNES::unserialize(serializer &s) {
+  return NES::system.unserialize(s);
+}
+
+//
+
+void InterfaceNES::setCheats(const lstring &list) {
+  NES::cheat.reset();
+  for(auto &code : list) {
+    lstring codelist;
+    codelist.split("+", code);
+    for(auto &part : codelist) {
+      unsigned addr, data, comp;
+      if(NES::Cheat::decode(part, addr, data, comp)) {
+        NES::cheat.append({ addr, data, comp });
+      }
+    }
+  }
+  NES::cheat.synchronize();
 }
 
 //

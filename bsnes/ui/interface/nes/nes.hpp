@@ -1,11 +1,19 @@
-struct InterfaceNES : NES::Interface {
+struct InterfaceNES : InterfaceCore, NES::Interface {
+  void initialize();
   void setController(bool port, unsigned device);
 
+  bool cartridgeLoaded();
   bool loadCartridge(const string &filename);
   void unloadCartridge();
 
-  bool saveState(const string &filename);
-  bool loadState(const string &filename);
+  void power();
+  void reset();
+  void run();
+
+  serializer serialize();
+  bool unserialize(serializer&);
+
+  void setCheats(const lstring &list = lstring{});
 
   void videoRefresh(const uint16_t *data);
   void audioSample(int16_t sample);

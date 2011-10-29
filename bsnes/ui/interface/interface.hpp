@@ -1,8 +1,17 @@
 #include "palette.hpp"
 
-#include "nes.hpp"
-#include "snes.hpp"
-#include "gameboy.hpp"
+struct InterfaceCore {
+  virtual void power() = 0;
+  virtual void reset() = 0;
+  virtual void run() = 0;
+
+  virtual serializer serialize() = 0;
+  virtual bool unserialize(serializer&) = 0;
+};
+
+#include "nes/nes.hpp"
+#include "snes/snes.hpp"
+#include "gameboy/gameboy.hpp"
 
 struct Filter : public library {
   function<void (unsigned&, unsigned&)> dl_size;
@@ -52,6 +61,7 @@ struct Interface : property<Interface> {
   string baseName;  // = "/path/to/cartridge" (no extension)
   lstring slotName;
 
+  InterfaceCore *core;
   InterfaceNES nes;
   InterfaceSNES snes;
   InterfaceGameBoy gameBoy;

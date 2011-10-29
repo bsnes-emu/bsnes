@@ -14,8 +14,8 @@ Config::Config() {
 
   attach(video.brightness = 100, "Video::Brightness");
   attach(video.contrast = 100, "Video::Contrast");
-  attach(video.gamma = 100, "Video::Gamma");
-  attach(video.gammaRamp = true, "Video::GammaRamp");
+  attach(video.gamma = 50, "Video::Gamma");
+
   attach(video.fullScreenMode = 0, "Video::FullScreenMode");
 
   attach(video.startFullScreen = false, "Video::StartFullScreen");

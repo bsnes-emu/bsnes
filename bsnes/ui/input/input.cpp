@@ -121,6 +121,18 @@ int16_t DigitalInput::poll() {
 
 //
 
+int16_t TurboInput::poll() {
+  int16_t result = DigitalInput::poll();
+  if(phase < 3) result = 0;
+  if(++phase >= 6) phase = 0;
+  return result;
+}
+
+TurboInput::TurboInput() : phase(0) {
+}
+
+//
+
 void TertiaryInput::attach(const string &primaryName, const string &secondaryName) {
   for(unsigned n = 0; n < size(); n++) {
     operator[](n).attach(primaryName, secondaryName, name);

@@ -12,7 +12,6 @@ struct VideoSettings : SettingsLayout {
   VideoSlider brightness;
   VideoSlider contrast;
   VideoSlider gamma;
-  CheckBox gammaRamp;
   Label overscanAdjustment;
   VideoSlider overscanHorizontal;
   VideoSlider overscanVertical;

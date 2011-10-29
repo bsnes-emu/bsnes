@@ -13,7 +13,7 @@ struct Config : public configuration {
     unsigned brightness;
     unsigned contrast;
     unsigned gamma;
-    bool gammaRamp;
+
     unsigned fullScreenMode;
 
     bool startFullScreen;

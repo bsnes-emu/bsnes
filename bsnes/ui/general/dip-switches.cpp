@@ -28,7 +28,7 @@ void DipSwitches::load() {
   if(interface->mode() != Interface::Mode::SNES || SNES::cartridge.has_nss_dip() == false) return;
   application->pause = true;
 
-  auto info = interface->snes.information().nss;
+  auto info = SNES::cartridge.information.nss;
   unsigned count = info.setting.size();
 
   for(unsigned n = 0; n < min(8, count); n++) {
@@ -55,7 +55,7 @@ void DipSwitches::load() {
 }
 
 void DipSwitches::accept() {
-  auto info = interface->snes.information().nss;
+  auto info = SNES::cartridge.information.nss;
   unsigned count = info.setting.size();
 
   unsigned result = 0x0000;

@@ -1,24 +1,33 @@
+void InterfaceSNES::initialize() {
+  SNES::interface = this;
+  SNES::system.init();
+}
+
 void InterfaceSNES::setController(bool port, unsigned device) {
   if(port == 0) config->snes.controllerPort1Device = device;
   if(port == 1) config->snes.controllerPort2Device = device;
 
   if(port == 0) switch(device) {
-  case 0: return connect(0, SNES::Input::Device::None);
-  case 1: return connect(0, SNES::Input::Device::Joypad);
-  case 2: return connect(0, SNES::Input::Device::Multitap);
-  case 3: return connect(0, SNES::Input::Device::Mouse);
+  case 0: return SNES::input.connect(0, SNES::Input::Device::None);
+  case 1: return SNES::input.connect(0, SNES::Input::Device::Joypad);
+  case 2: return SNES::input.connect(0, SNES::Input::Device::Multitap);
+  case 3: return SNES::input.connect(0, SNES::Input::Device::Mouse);
   }
 
   if(port == 1) switch(device) {
-  case 0: return connect(1, SNES::Input::Device::None);
-  case 1: return connect(1, SNES::Input::Device::Joypad);
-  case 2: return connect(1, SNES::Input::Device::Multitap);
-  case 3: return connect(1, SNES::Input::Device::Mouse);
-  case 4: return connect(1, SNES::Input::Device::SuperScope);
-  case 5: return connect(1, SNES::Input::Device::Justifier);
-  case 6: return connect(1, SNES::Input::Device::Justifiers);
-  case 7: return connect(1, SNES::Input::Device::Serial);
+  case 0: return SNES::input.connect(1, SNES::Input::Device::None);
+  case 1: return SNES::input.connect(1, SNES::Input::Device::Joypad);
+  case 2: return SNES::input.connect(1, SNES::Input::Device::Multitap);
+  case 3: return SNES::input.connect(1, SNES::Input::Device::Mouse);
+  case 4: return SNES::input.connect(1, SNES::Input::Device::SuperScope);
+  case 5: return SNES::input.connect(1, SNES::Input::Device::Justifier);
+  case 6: return SNES::input.connect(1, SNES::Input::Device::Justifiers);
+  case 7: return SNES::input.connect(1, SNES::Input::Device::Serial);
   }
+}
+
+bool InterfaceSNES::cartridgeLoaded() {
+  return SNES::cartridge.loaded();
 }
 
 bool InterfaceSNES::loadCartridge(const string &basename) {
@@ -34,7 +43,10 @@ bool InterfaceSNES::loadCartridge(const string &basename) {
   markup.readfile({ interface->baseName, ".bml" });
   if(markup == "") markup = SnesCartridge(data, size).markup;
 
-  SNES::Interface::loadCartridge({ markup, data, size });
+  SNES::cartridge.rom.copy(data, size);
+  SNES::cartridge.load(SNES::Cartridge::Mode::Normal, markup);
+  SNES::system.power();
+
   delete[] data;
 
   loadMemory();
@@ -58,7 +70,11 @@ bool InterfaceSNES::loadSatellaviewSlottedCartridge(const string &basename, cons
   markup.readfile({ interface->baseName, ".bml" });
   if(markup == "") markup = SnesCartridge(data[0], size[0]).markup;
 
-  SNES::Interface::loadSatellaviewSlottedCartridge({ markup, data[0], size[0] }, { "", data[1], size[1] });
+  SNES::cartridge.rom.copy(data[0], size[0]);
+  if(data[1]) SNES::bsxflash.memory.copy(data[1], size[1]);
+  SNES::cartridge.load(SNES::Cartridge::Mode::BsxSlotted, markup);
+  SNES::system.power();
+
   delete[] data[0];
   if(data[1]) delete[] data[1];
 
@@ -83,7 +99,11 @@ bool InterfaceSNES::loadSatellaviewCartridge(const string &basename, const strin
   markup.readfile({ interface->baseName, ".bml" });
   if(markup == "") markup = SnesCartridge(data[0], size[0]).markup;
 
-  SNES::Interface::loadSatellaviewCartridge({ markup, data[0], size[0] }, { "", data[1], size[1] });
+  SNES::cartridge.rom.copy(data[0], size[0]);
+  if(data[1]) SNES::bsxflash.memory.copy(data[1], size[1]);
+  SNES::cartridge.load(SNES::Cartridge::Mode::Bsx, markup);
+  SNES::system.power();
+
   delete[] data[0];
   if(data[1]) delete[] data[1];
 
@@ -111,7 +131,12 @@ bool InterfaceSNES::loadSufamiTurboCartridge(const string &basename, const strin
   markup.readfile({ interface->baseName, ".bml" });
   if(markup == "") markup = SnesCartridge(data[0], size[0]).markup;
 
-  SNES::Interface::loadSufamiTurboCartridge({ markup, data[0], size[0] }, { "", data[1], size[1] }, { "", data[2], size[2] });
+  SNES::cartridge.rom.copy(data[0], size[0]);
+  if(data[1]) SNES::sufamiturbo.slotA.rom.copy(data[1], size[1]);
+  if(data[2]) SNES::sufamiturbo.slotB.rom.copy(data[1], size[1]);
+  SNES::cartridge.load(SNES::Cartridge::Mode::SufamiTurbo, markup);
+  SNES::system.power();
+
   delete[] data[0];
   if(data[1]) delete[] data[1];
   if(data[2]) delete[] data[2];
@@ -140,7 +165,12 @@ bool InterfaceSNES::loadSuperGameBoyCartridge(const string &basename, const stri
   string gbMarkup;
   gbMarkup.readfile({ nall::basename(slotname), ".bml" });
   if(gbMarkup == "") gbMarkup = GameBoyCartridge(data[1], size[1]).markup;
-  SNES::Interface::loadSuperGameBoyCartridge({ markup, data[0], size[0] }, { gbMarkup, data[1], size[1] });
+
+  SNES::cartridge.rom.copy(data[0], size[0]);
+  GameBoy::cartridge.load(GameBoy::System::Revision::SuperGameBoy, gbMarkup, data[1], size[1]);
+  SNES::cartridge.load(SNES::Cartridge::Mode::SuperGameBoy, markup);
+  SNES::system.power();
+
   delete[] data[0];
   if(data[1]) delete[] data[1];
 
@@ -152,8 +182,20 @@ bool InterfaceSNES::loadSuperGameBoyCartridge(const string &basename, const stri
 
 void InterfaceSNES::unloadCartridge() {
   saveMemory();
-  SNES::Interface::unloadCartridge();
+  SNES::cartridge.unload();
   interface->baseName = "";
+}
+
+void InterfaceSNES::power() {
+  SNES::system.power();
+}
+
+void InterfaceSNES::reset() {
+  SNES::system.reset();
+}
+
+void InterfaceSNES::run() {
+  SNES::system.run();
 }
 
 //slot[] array = Cartridge::Slot to slot# conversion:
@@ -161,7 +203,7 @@ void InterfaceSNES::unloadCartridge() {
 
 void InterfaceSNES::loadMemory() {
   static unsigned slot[] = { 0, 0, 0, 1, 2, 1 };
-  for(auto &memory : SNES::Interface::memory()) {
+  for(auto &memory : SNES::cartridge.nvram) {
     if(memory.size == 0) continue;
     string filename = { interface->slotName[slot[(unsigned)memory.slot]], memory.id };
     uint8_t *data;
@@ -175,25 +217,51 @@ void InterfaceSNES::loadMemory() {
 
 void InterfaceSNES::saveMemory() {
   static unsigned slot[] = { 0, 0, 0, 1, 2, 1 };
-  for(auto &memory : SNES::Interface::memory()) {
+  for(auto &memory : SNES::cartridge.nvram) {
     if(memory.size == 0) continue;
     string filename = { interface->slotName[slot[(unsigned)memory.slot]], memory.id };
     file::write(filename, memory.data, memory.size);
   }
 }
 
-bool InterfaceSNES::saveState(const string &filename) {
-  serializer s = serialize();
-  return file::write(filename, s.data(), s.size());
+serializer InterfaceSNES::serialize() {
+  SNES::system.runtosave();
+  return SNES::system.serialize();
 }
 
-bool InterfaceSNES::loadState(const string &filename) {
-  uint8_t *data;
-  unsigned size;
-  if(file::read(filename, data, size) == false) return false;
-  serializer s(data, size);
-  delete[] data;
-  return unserialize(s);
+bool InterfaceSNES::unserialize(serializer &s) {
+  return SNES::system.unserialize(s);
+}
+
+void InterfaceSNES::setCheats(const lstring &list) {
+  if(SNES::cartridge.mode() == SNES::Cartridge::Mode::SuperGameBoy) {
+    GameBoy::cheat.reset();
+    for(auto &code : list) {
+      lstring codelist;
+      codelist.split("+", code);
+      for(auto &part : codelist) {
+        unsigned addr, data, comp;
+        if(GameBoy::Cheat::decode(part, addr, data, comp)) {
+          GameBoy::cheat.append({ addr, data, comp });
+        }
+      }
+    }
+    GameBoy::cheat.synchronize();
+    return;
+  }
+
+  SNES::cheat.reset();
+  for(auto &code : list) {
+    lstring codelist;
+    codelist.split("+", code);
+    for(auto &part : codelist) {
+      unsigned addr, data;
+      if(SNES::Cheat::decode(part, addr, data)) {
+        SNES::cheat.append({ addr, data });
+      }
+    }
+  }
+  SNES::cheat.synchronize();
 }
 
 //

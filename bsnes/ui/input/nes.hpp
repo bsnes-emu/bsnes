@@ -1,6 +1,7 @@
 struct NesGamepad : TertiaryInput {
   DigitalInput up, down, left, right;
   DigitalInput b, a, select, start;
+  TurboInput bTurbo, aTurbo;
 
   int16_t poll(unsigned n);
   NesGamepad();

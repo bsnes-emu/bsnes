@@ -12,13 +12,12 @@ struct CPUcore {
   virtual void op_write(uint32_t addr, uint8_t data) = 0;
   virtual void last_cycle() = 0;
   virtual bool interrupt_pending() = 0;
+  virtual void op_irq();
 
   void op_io_irq();
   void op_io_cond2();
   void op_io_cond4(uint16 x, uint16 y);
   void op_io_cond6(uint16 addr);
-
-  void op_irq();
 
   void op_adc_b();
   void op_adc_w();

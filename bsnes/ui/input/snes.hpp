@@ -2,6 +2,7 @@ struct SnesGamepad : TertiaryInput {
   DigitalInput up, down, left, right;
   DigitalInput b, a, y, x;
   DigitalInput l, r, select, start;
+  TurboInput bTurbo, aTurbo, yTurbo, xTurbo;
 
   int16_t poll(unsigned n);
   SnesGamepad(const string &name, bool defaultBindings);

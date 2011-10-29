@@ -20,6 +20,13 @@ struct DigitalInput : AbstractInput {
   int16_t poll();
 };
 
+struct TurboInput : DigitalInput {
+  unsigned phase;
+
+  int16_t poll();
+  TurboInput();
+};
+
 struct TertiaryInput : reference_array<AbstractInput&> {
   string name;
 

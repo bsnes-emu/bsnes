@@ -18,6 +18,7 @@ public:
   static void Enter();
   void enter();
   void tick();
+  void op_irq();
 
   alwaysinline void trigger_irq();
   alwaysinline void last_cycle();

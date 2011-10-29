@@ -36,27 +36,40 @@ void SA1::enter() {
   }
 }
 
+void SA1::op_irq() {
+  op_read(regs.pc.d);
+  op_io();
+  if(!regs.e) op_writestack(regs.pc.b);
+  op_writestack(regs.pc.h);
+  op_writestack(regs.pc.l);
+  op_writestack(regs.e ? (regs.p & ~0x10) : regs.p);
+  regs.pc.w = regs.vector;
+  regs.pc.b = 0x00;
+  regs.p.i = 1;
+  regs.p.d = 0;
+}
+
 void SA1::last_cycle() {
   if(mmio.sa1_nmi && !mmio.sa1_nmicl) {
     status.interrupt_pending = true;
-    regs.vector  = mmio.cnv;
+    regs.vector = mmio.cnv;
     mmio.sa1_nmifl = true;
     mmio.sa1_nmicl = 1;
     regs.wai = false;
   } else if(!regs.p.i) {
     if(mmio.timer_irqen && !mmio.timer_irqcl) {
       status.interrupt_pending = true;
-      regs.vector  = mmio.civ;
+      regs.vector = mmio.civ;
       mmio.timer_irqfl = true;
       regs.wai = false;
     } else if(mmio.dma_irqen && !mmio.dma_irqcl) {
       status.interrupt_pending = true;
-      regs.vector  = mmio.civ;
+      regs.vector = mmio.civ;
       mmio.dma_irqfl = true;
       regs.wai = false;
     } else if(mmio.sa1_irq && !mmio.sa1_irqcl) {
       status.interrupt_pending = true;
-      regs.vector  = mmio.civ;
+      regs.vector = mmio.civ;
       mmio.sa1_irqfl = true;
       regs.wai = false;
     }

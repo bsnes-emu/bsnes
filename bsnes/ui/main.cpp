@@ -27,7 +27,7 @@ void Application::run() {
 }
 
 Application::Application(int argc, char **argv) {
-  title = "bsnes v083.07";
+  title = "bsnes v083.08";
 
   application = this;
   quit = false;
@@ -88,7 +88,7 @@ Application::Application(int argc, char **argv) {
   dspaudio.setVolume(config->audio.mute == false ? 1.0 : 0.0);
   dspaudio.setBalance(0.0);
   dspaudio.setResampler(DSP::ResampleEngine::Sinc);
-  dspaudio.setResamplerFrequency(48000.0);
+  dspaudio.setResamplerFrequency(config->audio.frequency);
 
   input.driver(config->input.driver);
   input.set(Input::Handle, mainWindow->viewport.handle());
