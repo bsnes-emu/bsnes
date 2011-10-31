@@ -16,7 +16,7 @@ AdvancedSettings::AdvancedSettings() {
   RadioBox::group(focusPolicy[0], focusPolicy[1], focusPolicy[2]);
   focusPolicy[config->input.focusPolicy].setChecked();
   aboutLabel.setFont(application->boldFont);
-  aboutLabel.setText("bsnes    author: byuu    license: GPLv3    website: http://byuu.org/");
+  aboutLabel.setText("bsnes    author: byuu    license: GPLv3    website: byuu.org");
 
   lstring list;
 

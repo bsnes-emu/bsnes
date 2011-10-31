@@ -36,6 +36,13 @@ namespace nall {
       buffersize = newsize;
     }
 
+    template<typename... Args>
+    bool append(const T& data, Args&&... args) {
+      bool result = append(data);
+      append(std::forward<Args>(args)...);
+      return result;
+    }
+
     bool append(const T data) {
       for(unsigned index = 0; index < buffersize; index++) {
         if(pool[index] == &data) return false;

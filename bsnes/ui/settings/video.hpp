@@ -18,6 +18,9 @@ struct VideoSettings : SettingsLayout {
   Label fullScreenMode;
   HorizontalLayout fullScreenLayout;
   RadioBox fullScreen[3];
+  Label compositorLabel;
+  HorizontalLayout compositorLayout;
+  RadioBox compositor[3];
 
   void synchronize();
   VideoSettings();

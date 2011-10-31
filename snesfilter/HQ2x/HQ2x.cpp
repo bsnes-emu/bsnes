@@ -4,7 +4,7 @@ using namespace nall;
 
 extern "C" {
   void filter_size(unsigned&, unsigned&);
-  void filter_render(uint16_t*, unsigned, const uint16_t*, unsigned, unsigned, unsigned);
+  void filter_render(uint32_t*, unsigned, const uint32_t*, unsigned, unsigned, unsigned);
 };
 
 enum {
@@ -34,6 +34,15 @@ const uint8_t hqTable[256] = {
   4, 4, 6,  2, 4, 4, 6,  2, 5,  3,  1, 12, 5,  3,  1, 14,
 };
 
+static uint16_t rgb555(uint32_t C) {
+  return ((C >> 9) & 0x7c00) + ((C >> 6) & 0x03e0) + ((C >> 3) & 0x001f);
+}
+
+static uint32_t rgb888(uint16_t C) {
+  return ((C & 0x7c00) << 9) + ((C & 0x03e0) << 6) + ((C & 0x001f) << 3)
+       + ((C & 0x7000) << 4) + ((C & 0x0380) << 1) + ((C & 0x001c) >> 2);
+}
+
 static void initialize() {
   static bool initialized = false;
   if(initialized == true) return;
@@ -42,16 +51,12 @@ static void initialize() {
   yuvTable = new uint32_t[32768];
 
   for(unsigned i = 0; i < 32768; i++) {
-    uint8_t R = (i >>  0) & 31;
-    uint8_t G = (i >>  5) & 31;
-    uint8_t B = (i >> 10) & 31;
+    uint32_t C = rgb888(i);
 
-    //bgr555->bgr888
-    double r = (R << 3) | (R >> 2);
-    double g = (G << 3) | (G >> 2);
-    double b = (B << 3) | (B >> 2);
+    double r = (uint8_t)(C >> 16);
+    double g = (uint8_t)(C >>  8);
+    double b = (uint8_t)(C >>  0);
 
-    //bgr888->yuv
     double y = (r + g + b) * (0.25f * (63.5f / 48.0f));
     double u = ((r - b) * 0.25f + 128.0f) * (7.5f / 7.0f);
     double v = ((g * 2.0f - r - b) * 0.125f + 128.0f) * (7.5f / 6.0f);
@@ -147,18 +152,18 @@ dllexport void filter_size(unsigned &width, unsigned &height) {
 }
 
 dllexport void filter_render(
-  uint16_t *output, unsigned outputPitch,
-  const uint16_t *input, unsigned inputPitch,
+  uint32_t *output, unsigned outputPitch,
+  const uint32_t *input, unsigned inputPitch,
   unsigned width, unsigned height
 ) {
   initialize();
-  outputPitch >>= 1, inputPitch >>= 1;
+  outputPitch >>= 2, inputPitch >>= 2;
 
   #pragma omp parallel for
   for(unsigned y = 0; y < height; y++) {
-    const uint16_t *in = input + y * inputPitch;
-    uint16_t *out0 = output + y * outputPitch * 2;
-    uint16_t *out1 = output + y * outputPitch * 2 + outputPitch;
+    const uint32_t *in = input + y * inputPitch;
+    uint32_t *out0 = output + y * outputPitch * 2;
+    uint32_t *out1 = output + y * outputPitch * 2 + outputPitch;
 
     int prevline = (y == 0 ? 0 : inputPitch);
     int nextline = (y == height - 1 ? 0 : inputPitch);
@@ -168,15 +173,15 @@ dllexport void filter_render(
     *out1++ = 0; *out1++ = 0;
 
     for(unsigned x = 1; x < width - 1; x++) {
-      uint16_t A = *(in - prevline - 1);
-      uint16_t B = *(in - prevline + 0);
-      uint16_t C = *(in - prevline + 1);
-      uint16_t D = *(in - 1);
-      uint16_t E = *(in + 0);
-      uint16_t F = *(in + 1);
-      uint16_t G = *(in + nextline - 1);
-      uint16_t H = *(in + nextline + 0);
-      uint16_t I = *(in + nextline + 1);
+      uint16_t A = rgb555(*(in - prevline - 1));
+      uint16_t B = rgb555(*(in - prevline + 0));
+      uint16_t C = rgb555(*(in - prevline + 1));
+      uint16_t D = rgb555(*(in - 1));
+      uint16_t E = rgb555(*(in + 0));
+      uint16_t F = rgb555(*(in + 1));
+      uint16_t G = rgb555(*(in + nextline - 1));
+      uint16_t H = rgb555(*(in + nextline + 0));
+      uint16_t I = rgb555(*(in + nextline + 1));
       uint32_t e = yuvTable[E] + diff_offset;
 
       uint8_t pattern;
@@ -189,10 +194,10 @@ dllexport void filter_render(
       pattern |= diff(e, H) << 6;
       pattern |= diff(e, I) << 7;
 
-      *(out0 + 0) = blend(hqTable[pattern], E, A, B, D, F, H); pattern = rotate[pattern];
-      *(out0 + 1) = blend(hqTable[pattern], E, C, F, B, H, D); pattern = rotate[pattern];
-      *(out1 + 1) = blend(hqTable[pattern], E, I, H, F, D, B); pattern = rotate[pattern];
-      *(out1 + 0) = blend(hqTable[pattern], E, G, D, H, B, F);
+      *(out0 + 0) = rgb888(blend(hqTable[pattern], E, A, B, D, F, H)); pattern = rotate[pattern];
+      *(out0 + 1) = rgb888(blend(hqTable[pattern], E, C, F, B, H, D)); pattern = rotate[pattern];
+      *(out1 + 1) = rgb888(blend(hqTable[pattern], E, I, H, F, D, B)); pattern = rotate[pattern];
+      *(out1 + 0) = rgb888(blend(hqTable[pattern], E, G, D, H, B, F));
 
       in++;
       out0 += 2;

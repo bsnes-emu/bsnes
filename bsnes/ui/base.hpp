@@ -2,6 +2,7 @@
 #include <snes/snes.hpp>
 #include <gameboy/gameboy.hpp>
 
+#include <nall/compositor.hpp>
 #include <nall/config.hpp>
 #include <nall/directory.hpp>
 #include <nall/dsp.hpp>
@@ -32,6 +33,7 @@ struct Application {
   bool quit;
   bool pause;
   bool autopause;
+  bool compositionEnable;
 
   string basepath;
   string userpath;

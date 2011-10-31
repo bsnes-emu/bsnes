@@ -15,6 +15,7 @@ struct Config : public configuration {
     unsigned gamma;
 
     unsigned fullScreenMode;
+    unsigned compositionMode;
 
     bool startFullScreen;
   } video;
@@ -25,6 +26,7 @@ struct Config : public configuration {
     bool mute;
     unsigned volume;
     unsigned latency;
+    string resampler;
 
     unsigned frequency;
     unsigned frequencyNES;

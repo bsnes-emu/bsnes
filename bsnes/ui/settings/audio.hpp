@@ -13,12 +13,19 @@ struct AudioSlider : HorizontalLayout {
 
 struct AudioSettings : SettingsLayout {
   Label title;
+  Label outputLabel;
+  HorizontalLayout outputLayout;
+    Label frequencyLabel;
+    ComboBox frequencySelection;
+    Label latencyLabel;
+    ComboBox latencySelection;
+    Label resamplerLabel;
+    ComboBox resamplerSelection;
+  AudioSlider volume;
   Label frequencyAdjustmentLabel;
   AudioSlider nes;
   AudioSlider snes;
   AudioSlider gameBoy;
-  Label outputAdjustmentLabel;
-  AudioSlider volume;
 
   void synchronize();
   AudioSettings();

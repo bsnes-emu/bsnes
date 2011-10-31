@@ -35,9 +35,7 @@ NesGamepad::NesGamepad() {
   select.mapping = "KB0::Apostrophe";
   start.mapping = "KB0::Return";
 
-  append(up); append(down); append(left); append(right);
-  append(b); append(a); append(select); append(start);
-  append(bTurbo); append(aTurbo);
+  append(up, down, left, right, b,a, select, start, bTurbo, aTurbo);
 }
 
 //
@@ -58,6 +56,5 @@ NesPort2Input::NesPort2Input() {
 
 NesInput::NesInput() {
   name = "NES";
-  append(port1);
-  append(port2);
+  append(port1, port1);
 }

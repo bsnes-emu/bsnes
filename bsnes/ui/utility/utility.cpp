@@ -109,6 +109,11 @@ void Utility::toggleFullScreen() {
   }
 
   resizeMainWindow();
+  if(application->compositionEnable) {
+    if(config->video.compositionMode == 1) {
+      compositor::enable(mainWindow->fullScreen() == false);
+    }
+  }
 }
 
 void Utility::bindVideoFilter() {

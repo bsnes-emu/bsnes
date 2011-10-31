@@ -44,7 +44,15 @@ void Interface::setController(unsigned port, unsigned device) {
 }
 
 void Interface::updateDSP() {
+  audio.set(Audio::Frequency, config->audio.frequency);
+  audio.set(Audio::Latency, config->audio.latency);
+
+  if(config->audio.resampler == "linear" ) dspaudio.setResampler(DSP::ResampleEngine::Linear);
+  if(config->audio.resampler == "hermite") dspaudio.setResampler(DSP::ResampleEngine::Hermite);
+  if(config->audio.resampler == "sinc"   ) dspaudio.setResampler(DSP::ResampleEngine::Sinc);
+  dspaudio.setResamplerFrequency(config->audio.frequency);
   dspaudio.setVolume(config->audio.mute == false ? (double)config->audio.volume / 100.0 : 0.0);
+
   switch(mode()) {
   case Mode::NES:     return dspaudio.setFrequency(config->audio.frequencyNES);
   case Mode::SNES:    return dspaudio.setFrequency(config->audio.frequencySNES);

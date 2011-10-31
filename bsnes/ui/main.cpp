@@ -27,7 +27,7 @@ void Application::run() {
 }
 
 Application::Application(int argc, char **argv) {
-  title = "bsnes v083.08";
+  title = "bsnes v083.09";
 
   application = this;
   quit = false;
@@ -55,6 +55,9 @@ Application::Application(int argc, char **argv) {
   normalFont = { fontFamily, "8" };
   boldFont = { fontFamily, "8, Bold" };
   titleFont = { fontFamily, "16, Bold" };
+
+  compositionEnable = compositor::enabled();
+  if(config->video.compositionMode == 2) compositor::enable(false);
 
   windowManager = new WindowManager;
   mainWindow = new MainWindow;
@@ -104,6 +107,7 @@ Application::Application(int argc, char **argv) {
 
   interface->unloadCartridge();
   windowManager->saveGeometry();
+  if(compositionEnable) compositor::enable(true);
 }
 
 Application::~Application() {
