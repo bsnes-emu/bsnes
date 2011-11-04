@@ -1,5 +1,4 @@
-uint32_t* pCanvas::buffer() {
-  return 0;
+void pCanvas::setSize(const Size &size) {
 }
 
 void pCanvas::update() {

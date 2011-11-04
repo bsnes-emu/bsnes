@@ -15,18 +15,18 @@ InputSettings::InputSettings() : activeInput(0) {
   }
   primaryChange();
 
-  append(title, ~0, 0, 5);
-  append(selectionLayout, ~0, 0, 5);
-    selectionLayout.append(primary, ~0, 0, 5);
-    selectionLayout.append(secondary, ~0, 0, 5);
-    selectionLayout.append(tertiary, ~0, 0);
-  append(inputList, ~0, ~0, 5);
-  append(controlLayout, ~0, 0);
-    controlLayout.append(assignPrimary, 100, 0, 5);
-    controlLayout.append(assignSecondary, 100, 0, 5);
-    controlLayout.append(assignTertiary, 100, 0, 5);
-    controlLayout.append(spacer, ~0, 0);
-    controlLayout.append(clearButton, 80, 0);
+  append(title,                           {  ~0,  0 }, 5);
+  append(selectionLayout,                 {  ~0,  0 }, 5);
+    selectionLayout.append(primary,       {  ~0,  0 }, 5);
+    selectionLayout.append(secondary,     {  ~0,  0 }, 5);
+    selectionLayout.append(tertiary,      {  ~0,  0 }, 0);
+  append(inputList,                       {  ~0, ~0 }, 5);
+  append(controlLayout,                   {  ~0,  0 }, 0);
+    controlLayout.append(assignPrimary,   { 100,  0 }, 5);
+    controlLayout.append(assignSecondary, { 100,  0 }, 5);
+    controlLayout.append(assignTertiary,  { 100,  0 }, 5);
+    controlLayout.append(spacer,          {  ~0,  0 }, 0);
+    controlLayout.append(clearButton,     {  80,  0 }, 0);
 
   primary.onChange = { &InputSettings::primaryChange, this };
   secondary.onChange = { &InputSettings::secondaryChange, this };

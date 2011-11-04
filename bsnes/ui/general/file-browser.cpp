@@ -10,14 +10,14 @@ FileBrowser::FileBrowser() {
   openButton.setText("Open");
 
   append(layout);
-    layout.append(pathLayout, ~0, 0, 5);
-      pathLayout.append(pathEdit, ~0, 0, 5);
-      pathLayout.append(pathBrowse, 0, 0, 5);
-      pathLayout.append(pathUp, 0, 0);
-    layout.append(fileList, ~0, ~0, 5);
-    layout.append(controlLayout, ~0, 0);
-      controlLayout.append(filterLabel, ~0, 0, 5);
-      controlLayout.append(openButton, 80, 0);
+    layout.append(pathLayout, { ~0, 0 }, 5);
+      pathLayout.append(pathEdit, { ~0, 0 }, 5);
+      pathLayout.append(pathBrowse, { 0, 0 }, 5);
+      pathLayout.append(pathUp, { 0, 0 });
+    layout.append(fileList, { ~0, ~0 }, 5);
+    layout.append(controlLayout, { ~0, 0 });
+      controlLayout.append(filterLabel, { ~0, 0 }, 5);
+      controlLayout.append(openButton, { 80, 0 });
 
   pathEdit.onActivate = [&] {
     string path = pathEdit.text();

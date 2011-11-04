@@ -185,7 +185,7 @@ struct pButton : public pWidget {
 struct pCanvas : public pWidget {
   Canvas &canvas;
 
-  uint32_t* buffer();
+  void setSize(const Size &size);
   void update();
 
   pCanvas(Canvas &canvas) : pWidget(canvas), canvas(canvas) {}

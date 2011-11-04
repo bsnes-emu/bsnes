@@ -1,9 +1,9 @@
 AudioSettings *audioSettings = 0;
 
 AudioSlider::AudioSlider() {
-  append(name, 75, 0);
-  append(value, 75, 0);
-  append(slider, ~0, 0);
+  append(name,   { 75, 0 });
+  append(value,  { 75, 0 });
+  append(slider, { ~0, 0 });
 }
 
 unsigned AudioSlider::position() {
@@ -68,20 +68,20 @@ AudioSettings::AudioSettings() {
   gameBoy.base = 4194304;
   gameBoy.step = 131;
 
-  append(title, ~0, 0, 5);
-  append(outputLabel, ~0, 0);
-  append(outputLayout, ~0, 0, 5);
-  outputLayout.append(frequencyLabel, 0, 0, 5);
-  outputLayout.append(frequencySelection, ~0, 0, 5);
-  outputLayout.append(latencyLabel, 0, 0, 5);
-  outputLayout.append(latencySelection, ~0, 0, 5);
-  outputLayout.append(resamplerLabel, 0, 0, 5);
-  outputLayout.append(resamplerSelection, ~0, 0);
-  append(volume, ~0, 0, 5);
-  append(frequencyAdjustmentLabel, ~0, 0);
-  append(nes, ~0, 0);
-  append(snes, ~0, 0);
-  append(gameBoy, ~0, 0);
+  append(title,                           { ~0, 0 }, 5);
+  append(outputLabel,                     { ~0, 0 }, 0);
+  append(outputLayout,                    { ~0, 0 }, 5);
+  outputLayout.append(frequencyLabel,     {  0, 0 }, 5);
+  outputLayout.append(frequencySelection, { ~0, 0 }, 5);
+  outputLayout.append(latencyLabel,       {  0, 0 }, 5);
+  outputLayout.append(latencySelection,   { ~0, 0 }, 5);
+  outputLayout.append(resamplerLabel,     {  0, 0 }, 5);
+  outputLayout.append(resamplerSelection, { ~0, 0 }, 0);
+  append(volume,                          { ~0, 0 }, 5);
+  append(frequencyAdjustmentLabel,        { ~0, 0 }, 0);
+  append(nes,                             { ~0, 0 }, 0);
+  append(snes,                            { ~0, 0 }, 0);
+  append(gameBoy,                         { ~0, 0 }, 0);
 
   frequencySelection.setSelection(
     config->audio.frequency == 32000 ? 0 :

@@ -1,8 +1,8 @@
 DipSwitches *dipSwitches = 0;
 
 DipSwitch::DipSwitch() {
-  append(name, ~0, 0, 5);
-  append(value, ~0, 0);
+  append(name,  { ~0, 0 }, 5);
+  append(value, { ~0, 0 }, 0);
 }
 
 DipSwitches::DipSwitches() {
@@ -13,10 +13,10 @@ DipSwitches::DipSwitches() {
 
   append(layout);
   for(unsigned n = 0; n < 8; n++)
-  layout.append(dip[n], ~0, 0, 5);
-  layout.append(controlLayout, ~0, 0, 5);
-    controlLayout.append(spacer, ~0, 0);
-    controlLayout.append(acceptButton, 0, 0);
+  layout.append(dip[n],                { ~0, 0 }, 5);
+  layout.append(controlLayout,         { ~0, 0 }, 5);
+    controlLayout.append(spacer,       { ~0, 0 }, 0);
+    controlLayout.append(acceptButton, {  0, 0 }, 0);
 
   setGeometry({ 128, 128, 400, layout.minimumGeometry().height });
   windowManager->append(this, "DipSwitches");

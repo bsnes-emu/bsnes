@@ -47,6 +47,7 @@ void Utility::resizeMainWindow(bool shrink) {
   unsigned width = geometry.width, height = geometry.height;
 
   switch(interface->mode()) {
+  case Interface::Mode::None:    return;
   case Interface::Mode::NES:     width = 256, height = 240; break;
   case Interface::Mode::SNES:    width = 256, height = 240; break;
   case Interface::Mode::GameBoy: width = 160, height = 144; break;

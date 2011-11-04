@@ -2,7 +2,7 @@ struct SettingsLayout : HorizontalLayout {
   Widget spacer;
   VerticalLayout layout;
 
-  void append(Sizable &widget, unsigned width, unsigned height, unsigned spacing = 0);
+  void append(Sizable &widget, const Size &size, unsigned spacing = 0);
   SettingsLayout();
 };
 

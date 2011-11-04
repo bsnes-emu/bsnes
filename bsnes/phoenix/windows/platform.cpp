@@ -153,23 +153,10 @@ void OS_processDialogMessage(MSG &msg) {
     OS_keyboardProc(msg.hwnd, msg.message, msg.wParam, msg.lParam);
   }
 
-  wchar_t className[256];
-  GetClassName(msg.hwnd, className, 255);
-
-  //if this HWND accepts tabs to move between controls ...
-  if(!wcscmp(className, L"BUTTON")       //Button, CheckBox, RadioBox
-  || !wcscmp(className, L"COMBOBOX")     //ComboBox
-  || !wcscmp(className, L"EDIT")         //HexEdit, LineEdit, TextEdit
-  || !wcscmp(className, L"SCROLLBAR")    //HorizontalScrollBar, VerticalScrollBar
-  || !wcscmp(className, TRACKBAR_CLASS)  //HorizontalSlider, VerticalSlider
-  || !wcscmp(className, WC_LISTVIEW)     //ListView
-  ) {
-    //... return if the message is a dialog command
-    if(IsDialogMessage(msg.hwnd, &msg)) return;
+  if(!IsDialogMessage(GetForegroundWindow(), &msg)) {
+    TranslateMessage(&msg);
+    DispatchMessage(&msg);
   }
-
-  TranslateMessage(&msg);
-  DispatchMessage(&msg);
 }
 
 void pOS::quit() {
@@ -195,7 +182,7 @@ void pOS::initialize() {
 
   wc.cbClsExtra = 0;
   wc.cbWndExtra = 0;
-  wc.hbrBackground = CreateSolidBrush(RGB(0, 0, 0));
+  wc.hbrBackground = GetSysColorBrush(COLOR_3DFACE);
   wc.hCursor = LoadCursor(0, IDC_ARROW);
   wc.hIcon = LoadIcon(0, IDI_APPLICATION);
   wc.hInstance = GetModuleHandle(0);

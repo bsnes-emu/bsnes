@@ -16,18 +16,18 @@ CheatEditor::CheatEditor() {
 
   append(layout);
   layout.setMargin(5);
-  layout.append(cheatList, ~0, ~0, 5);
-  layout.append(codeLayout, ~0, 0, 5);
-    codeLayout.append(codeLabel, 80, 0);
-    codeLayout.append(codeEdit, ~0, 0);
-  layout.append(descLayout, ~0, 0, 5);
-    descLayout.append(descLabel, 80, 0);
-    descLayout.append(descEdit, ~0, 0);
-  layout.append(controlLayout, ~0, 0);
-    controlLayout.append(findButton, 100, 0);
-    controlLayout.append(spacer, ~0, 0);
-    controlLayout.append(clearAllButton, 80, 0, 5);
-    controlLayout.append(clearButton, 80, 0);
+  layout.append(cheatList,               {  ~0, ~0 }, 5);
+  layout.append(codeLayout,              {  ~0,  0 }, 5);
+    codeLayout.append(codeLabel,         {  80,  0 }, 0);
+    codeLayout.append(codeEdit,          {  ~0,  0 }, 0);
+  layout.append(descLayout,              {  ~0,  0 }, 5);
+    descLayout.append(descLabel,         {  80,  0 }, 0);
+    descLayout.append(descEdit,          {  ~0,  0 }, 0);
+  layout.append(controlLayout,           {  ~0,  0 }, 0);
+    controlLayout.append(findButton,     { 100,  0 }, 0);
+    controlLayout.append(spacer,         {  ~0,  0 }, 0);
+    controlLayout.append(clearAllButton, {  80,  0 }, 5);
+    controlLayout.append(clearButton,    {  80,  0 }, 0);
 
   for(unsigned n = 0; n < 128; n++) cheatList.append("", "", "");
   updateUI();

@@ -18,5 +18,6 @@ void pViewport::orphan() {
 }
 
 static LRESULT CALLBACK Viewport_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
+  if(msg == WM_GETDLGCODE) return DLGC_STATIC | DLGC_WANTCHARS;
   return DefWindowProc(hwnd, msg, wparam, lparam);
 }

@@ -119,6 +119,18 @@ struct Button::State {
   }
 };
 
+struct Canvas::State {
+  uint32_t *data;
+  unsigned width;
+  unsigned height;
+
+  State() {
+    data = nullptr;
+    width = 256;
+    height = 256;
+  }
+};
+
 struct CheckBox::State {
   bool checked;
   string text;

@@ -1,21 +1,17 @@
-uint32_t* pCanvas::buffer() {
-  return (uint32_t*)qtImage->bits();
-}
-
-void pCanvas::setGeometry(const Geometry &geometry) {
-  qtImage = new QImage(geometry.width, geometry.height, QImage::Format_RGB32);
-  qtImage->fill(0);
-  update();
-  pWidget::setGeometry(geometry);
+void pCanvas::setSize(const Size &size) {
+  delete qtImage;
+  qtImage = new QImage(size.width, size.height, QImage::Format_RGB32);
 }
 
 void pCanvas::update() {
+  memcpy(qtImage->bits(), canvas.state.data, canvas.state.width * canvas.state.height * sizeof(uint32_t));
   qtCanvas->update();
 }
 
 void pCanvas::constructor() {
   qtWidget = qtCanvas = new QtCanvas(*this);
-  qtImage = new QImage(256, 256, QImage::Format_RGB32);
+  qtImage = new QImage(canvas.state.width, canvas.state.height, QImage::Format_RGB32);
+  memcpy(qtImage->bits(), canvas.state.data, canvas.state.width * canvas.state.height * sizeof(uint32_t));
 
   pWidget::synchronizeState();
   update();
@@ -36,6 +32,13 @@ void pCanvas::orphan() {
 void pCanvas::QtCanvas::paintEvent(QPaintEvent *event) {
   QPainter painter(self.qtCanvas);
   painter.drawImage(0, 0, *self.qtImage);
+
+//this will scale the source image to fit the target widget size (nearest-neighbor):
+//painter.drawImage(
+//  QRect(0, 0, geometry().width(), geometry().height()),
+//  *self.qtImage,
+//  QRect(0, 0, self.canvas.state.width, self.canvas.state.height)
+//);
 }
 
 pCanvas::QtCanvas::QtCanvas(pCanvas &self) : self(self) {

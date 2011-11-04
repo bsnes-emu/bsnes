@@ -32,53 +32,7 @@ uint8 prg_read(unsigned addr) {
 
 void prg_write(unsigned addr, uint8 data) {
   if((addr & 0xe000) == 0x6000) return mmc3.ram_write(addr, data);
-
-  switch(addr & 0xe001) {
-  case 0x8000:
-    mmc3.chr_mode = data & 0x80;
-    mmc3.prg_mode = data & 0x40;
-    mmc3.bank_select = data & 0x07;
-    break;
-
-  case 0x8001:
-    switch(mmc3.bank_select) {
-    case 0: mmc3.chr_bank[0] = data & ~1; break;
-    case 1: mmc3.chr_bank[1] = data & ~1; break;
-    case 2: mmc3.chr_bank[2] = data; break;
-    case 3: mmc3.chr_bank[3] = data; break;
-    case 4: mmc3.chr_bank[4] = data; break;
-    case 5: mmc3.chr_bank[5] = data; break;
-    case 6: mmc3.prg_bank[0] = data & 0x3f; break;
-    case 7: mmc3.prg_bank[1] = data & 0x3f; break;
-    }
-    break;
-
-  case 0xa000:
-    mmc3.mirror = data & 0x01;
-    break;
-
-  case 0xa001:
-    mmc3.ram_enable = data & 0x80;
-    mmc3.ram_write_protect = data & 0x40;
-    break;
-
-  case 0xc000:
-    mmc3.irq_latch = data;
-    break;
-
-  case 0xc001:
-    mmc3.irq_counter = 0;
-    break;
-
-  case 0xe000:
-    mmc3.irq_enable = false;
-    mmc3.irq_line = 0;
-    break;
-
-  case 0xe001:
-    mmc3.irq_enable = true;
-    break;
-  }
+  if(addr & 0x8000) return mmc3.reg_write(addr, data);
 }
 
 uint8 chr_read(unsigned addr) {

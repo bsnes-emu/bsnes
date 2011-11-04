@@ -41,11 +41,29 @@ enum : unsigned {
   MinimumSize =  0u,
 };
 
+struct Color {
+  uint8_t red, green, blue, alpha;
+  inline Color() : red(0), green(0), blue(0), alpha(255) {}
+  inline Color(uint8_t red, uint8_t green, uint8_t blue, uint8_t alpha = 255) : red(red), green(green), blue(blue), alpha(alpha) {}
+};
+
 struct Geometry {
   signed x, y;
   unsigned width, height;
   inline Geometry() : x(0), y(0), width(0), height(0) {}
   inline Geometry(signed x, signed y, unsigned width, unsigned height) : x(x), y(y), width(width), height(height) {}
+};
+
+struct Position {
+  signed x, y;
+  inline Position() : x(0), y(0) {}
+  inline Position(signed x, signed y) : x(x), y(y) {}
+};
+
+struct Size {
+  unsigned width, height;
+  inline Size() : width(0), height(0) {}
+  inline Size(unsigned width, unsigned height) : width(width), height(height) {}
 };
 
 struct Font {
@@ -54,10 +72,19 @@ struct Font {
   Font(const nall::string &description = "");
 };
 
-struct Color {
-  uint8_t red, green, blue, alpha;
-  inline Color() : red(0), green(0), blue(0), alpha(255) {}
-  inline Color(uint8_t red, uint8_t green, uint8_t blue, uint8_t alpha = 255) : red(red), green(green), blue(blue), alpha(alpha) {}
+struct Image {
+  uint32_t *data;
+  unsigned width, height;
+  bool load(const nall::string &filename, const Color &alpha = Color{255, 255, 255});
+  void load(const uint32_t *data, const Size &size);
+  Image& operator=(const Image &source);
+  Image& operator=(Image &&source);
+  Image();
+  Image(const nall::string &filename, const Color &alpha = Color{255, 255, 255});
+  Image(const uint32_t *data, const Size &size);
+  Image(const Image &source);
+  Image(Image &&source);
+  ~Image();
 };
 
 struct Object {
@@ -302,11 +329,16 @@ struct Button : private nall::base_from_member<pButton&>, Widget {
 };
 
 struct Canvas : private nall::base_from_member<pCanvas&>, Widget {
-  uint32_t* buffer();
+  uint32_t* data();
+  bool setImage(const Image &image);
+  void setSize(const Size &size);
+  Size size();
   void update();
 
   Canvas();
   ~Canvas();
+  struct State;
+  State &state;
   pCanvas &p;
 };
 

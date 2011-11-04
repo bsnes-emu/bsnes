@@ -162,6 +162,7 @@ string CPU::disassemble() {
     op(0xe6, inc, zpg);
     op(0xe8, inx, imp);
     op(0xe9, sbc, imm);
+    op(0xea, nop, imp);
     op(0xec, cpx, abs);
     op(0xed, sbc, abs);
     op(0xee, inc, abs);

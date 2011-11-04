@@ -282,8 +282,7 @@ public:
     QtCanvas(pCanvas &self);
   } *qtCanvas;
 
-  uint32_t* buffer();
-  void setGeometry(const Geometry &geometry);
+  void setSize(const Size &size);
   void update();
 
   pCanvas(Canvas &canvas) : pWidget(canvas), canvas(canvas) {}

@@ -14,15 +14,15 @@ StateManager::StateManager() {
 
   append(layout);
   layout.setMargin(5);
-  layout.append(stateList, ~0, ~0, 5);
-  layout.append(descLayout, ~0, 0, 5);
-    descLayout.append(descLabel, 0, 0, 5);
-    descLayout.append(descEdit, ~0, 0);
-  layout.append(controlLayout, ~0, 0);
-    controlLayout.append(spacer, ~0, 0);
-    controlLayout.append(loadButton, 80, 0, 5);
-    controlLayout.append(saveButton, 80, 0, 5);
-    controlLayout.append(eraseButton, 80, 0);
+  layout.append(stateList,            { ~0, ~0 }, 5);
+  layout.append(descLayout,           { ~0,  0 }, 5);
+    descLayout.append(descLabel,      {  0,  0 }, 5);
+    descLayout.append(descEdit,       { ~0,  0 }, 0);
+  layout.append(controlLayout,        { ~0,  0 }, 0);
+    controlLayout.append(spacer,      { ~0,  0 }, 0);
+    controlLayout.append(loadButton,  { 80,  0 }, 5);
+    controlLayout.append(saveButton,  { 80,  0 }, 5);
+    controlLayout.append(eraseButton, { 80,  0 }, 0);
 
   for(unsigned n = 0; n < 32; n++) stateList.append(decimal<2>(n + 1), "(empty)");
   stateList.autoSizeColumns();

@@ -2,9 +2,9 @@ SlotLoader *slotLoader = 0;
 
 SlotLoaderPath::SlotLoaderPath() {
   browse.setText("Browse ...");
-  append(label, 40, 0, 5);
-  append(path, ~0, 0, 5);
-  append(browse, 80, 0);
+  append(label,  { 40, 0 }, 5);
+  append(path,   { ~0, 0 }, 5);
+  append(browse, { 80, 0 }, 0);
 }
 
 SlotLoader::SlotLoader() {
@@ -15,12 +15,12 @@ SlotLoader::SlotLoader() {
   loadButton.setText("Load");
 
   append(layout);
-  layout.append(base, ~0, 0, 5);
-  layout.append(slot[0], ~0, 0, 5);
-  layout.append(slot[1], ~0, 0, 5);
-  layout.append(controlLayout, ~0, 0);
-    controlLayout.append(spacer, ~0, 0);
-    controlLayout.append(loadButton, 80, 0);
+  layout.append(base,                { ~0, 0 }, 5);
+  layout.append(slot[0],             { ~0, 0 }, 5);
+  layout.append(slot[1],             { ~0, 0 }, 5);
+  layout.append(controlLayout,       { ~0, 0 }, 0);
+    controlLayout.append(spacer,     { ~0, 0 }, 0);
+    controlLayout.append(loadButton, { 80, 0 }, 0);
 
   setGeometry({ 128, 128, 500, layout.minimumGeometry().height });
   windowManager->append(this, "SlotLoader");

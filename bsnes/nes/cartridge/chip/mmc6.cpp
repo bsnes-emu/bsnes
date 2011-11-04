@@ -1,13 +1,14 @@
-struct MMC3 : Chip {
+struct MMC6 : Chip {
 
 bool chr_mode;
 bool prg_mode;
+bool ram_enable;
 uint3 bank_select;
 uint8 prg_bank[2];
 uint8 chr_bank[6];
 bool mirror;
-bool ram_enable;
-bool ram_write_protect;
+bool ram_readable[2];
+bool ram_writable[2];
 uint8 irq_latch;
 uint8 irq_counter;
 bool irq_enable;
@@ -81,12 +82,18 @@ unsigned ciram_addr(unsigned addr) const {
 }
 
 uint8 ram_read(unsigned addr) {
-  if(ram_enable) return board.prgram.data[addr & 0x1fff];
-  return 0x00;
+  if(ram_enable == false) return cpu.mdr();
+  if(ram_readable[0] == false && ram_readable[1] == false) return cpu.mdr();
+  bool region = addr & 0x0200;
+  if(ram_readable[region] == false) return 0x00;
+  return board.prgram.read((region * 0x0200) + (addr & 0x01ff));
 }
 
 void ram_write(unsigned addr, uint8 data) {
-  if(ram_enable && !ram_write_protect) board.prgram.data[addr & 0x1fff] = data;
+  if(ram_enable == false) return;
+  bool region = addr & 0x0200;
+  if(ram_writable[region] == false) return;
+  return board.prgram.write((region * 0x0200) + (addr & 0x01ff), data);
 }
 
 void reg_write(unsigned addr, uint8 data) {
@@ -94,7 +101,12 @@ void reg_write(unsigned addr, uint8 data) {
   case 0x8000:
     chr_mode = data & 0x80;
     prg_mode = data & 0x40;
+    ram_enable = data & 0x20;
     bank_select = data & 0x07;
+    if(ram_enable == false) {
+      for(auto &n : ram_readable) n = false;
+      for(auto &n : ram_writable) n = false;
+    }
     break;
 
   case 0x8001:
@@ -115,8 +127,11 @@ void reg_write(unsigned addr, uint8 data) {
     break;
 
   case 0xa001:
-    ram_enable = data & 0x80;
-    ram_write_protect = data & 0x40;
+    if(ram_enable == false) break;
+    ram_readable[1] = data & 0x80;
+    ram_writable[1] = data & 0x40;
+    ram_readable[0] = data & 0x20;
+    ram_writable[0] = data & 0x10;
     break;
 
   case 0xc000:
@@ -144,21 +159,16 @@ void power() {
 void reset() {
   chr_mode = 0;
   prg_mode = 0;
+  ram_enable = 0;
   bank_select = 0;
-  prg_bank[0] = 0;
-  prg_bank[1] = 0;
-  chr_bank[0] = 0;
-  chr_bank[1] = 0;
-  chr_bank[2] = 0;
-  chr_bank[3] = 0;
-  chr_bank[4] = 0;
-  chr_bank[5] = 0;
+  for(auto &n : prg_bank) n = 0;
+  for(auto &n : chr_bank) n = 0;
   mirror = 0;
-  ram_enable = 1;
-  ram_write_protect = 0;
+  for(auto &n : ram_readable) n = 0;
+  for(auto &n : ram_writable) n = 0;
   irq_latch = 0;
   irq_counter = 0;
-  irq_enable = false;
+  irq_enable = 0;
   irq_delay = 0;
   irq_line = 0;
 
@@ -168,12 +178,13 @@ void reset() {
 void serialize(serializer &s) {
   s.integer(chr_mode);
   s.integer(prg_mode);
-  s.integer(bank_select);
-  s.array(prg_bank);
-  s.array(chr_bank);
-  s.integer(mirror);
   s.integer(ram_enable);
-  s.integer(ram_write_protect);
+  s.integer(bank_select);
+  for(auto &n : prg_bank) s.integer(n);
+  for(auto &n : chr_bank) s.integer(n);
+  s.integer(mirror);
+  for(auto &n : ram_readable) s.integer(n);
+  for(auto &n : ram_writable) s.integer(n);
   s.integer(irq_latch);
   s.integer(irq_counter);
   s.integer(irq_enable);
@@ -183,7 +194,7 @@ void serialize(serializer &s) {
   s.integer(chr_abus);
 }
 
-MMC3(Board &board) : Chip(board) {
+MMC6(Board &board) : Chip(board) {
 }
 
 };

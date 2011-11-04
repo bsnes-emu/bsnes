@@ -11,12 +11,12 @@ CheatDatabase::CheatDatabase() {
   acceptButton.setText("Add Codes");
 
   append(layout);
-  layout.append(cheatList, ~0, ~0, 5);
-  layout.append(controlLayout, ~0, 0);
-    controlLayout.append(selectAllButton, 100, 0, 5);
-    controlLayout.append(unselectAllButton, 100, 0);
-    controlLayout.append(spacer, ~0, 0);
-    controlLayout.append(acceptButton, 80, 0);
+  layout.append(cheatList,                  {  ~0, ~0 }, 5);
+  layout.append(controlLayout,              {  ~0,  0 }, 0);
+    controlLayout.append(selectAllButton,   { 100,  0 }, 5);
+    controlLayout.append(unselectAllButton, { 100,  0 }, 0);
+    controlLayout.append(spacer,            {  ~0,  0 }, 0);
+    controlLayout.append(acceptButton,      {  80,  0 }, 0);
 
   selectAllButton.onTick = [&] {
     for(unsigned n = 0; n < cheatCode.size(); n++) cheatList.setChecked(n, true);

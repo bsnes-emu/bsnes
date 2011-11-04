@@ -214,10 +214,9 @@ struct pButton : public pWidget {
 
 struct pCanvas : public pWidget {
   Canvas &canvas;
-  uint32_t *bufferRGB;
+  uint32_t *data;
 
-  uint32_t* buffer();
-  void setGeometry(const Geometry &geometry);
+  void setSize(const Size &size);
   void update();
 
   pCanvas(Canvas &canvas) : pWidget(canvas), canvas(canvas) {}

@@ -140,6 +140,7 @@ unsigned ciram_addr(unsigned addr) const {
   case 2: return 0x0000 | (addr & 0x03ff);                  //one-screen mirroring (first)
   case 3: return 0x0400 | (addr & 0x03ff);                  //one-screen mirroring (second)
   }
+  throw;
 }
 
 void power() {

@@ -14,7 +14,7 @@ static string iNES(const uint8_t *data, unsigned size) {
   unsigned prgram = 0;
   unsigned chrram = chrrom == 0 ? 8192 : 0;
 
-//print("iNES mapper: ", mapper, "\n");
+  print("iNES mapper: ", mapper, "\n");
 
   output.append("cartridge\n");
 
@@ -41,9 +41,14 @@ static string iNES(const uint8_t *data, unsigned size) {
     break;
 
   case   4:
+    //MMC3
     output.append("\tboard type:NES-TLROM\n");
     output.append("\t\tchip type:MMC3B\n");
     prgram = 8192;
+    //MMC6
+    //output.append("\tboard type:NES-HKROM\n");
+    //output.append("\t\tchip type:MMC6\n");
+    //prgram = 1024;
     break;
 
   case   5:
@@ -76,6 +81,10 @@ static string iNES(const uint8_t *data, unsigned size) {
   case  21:
   case  23:
   case  25:
+    //VRC2
+    //output.append("\tboard type:KONAMI-VRC-2\n");
+    //output.append("\t\tchip type:VRC2\n");
+    //VRC4
     output.append("\tboard type:KONAMI-VRC-4\n");
     output.append("\t\tchip type:VRC4\n");
     output.append("\t\t\tpinout a0=1 a1=0\n");
@@ -109,6 +118,18 @@ static string iNES(const uint8_t *data, unsigned size) {
     prgram = 8192;
     break;
 
+  case  73:
+    output.append("\tboard type:KONAMI-VRC-3\n");
+    output.append("\t\tchip type:VRC3\n");
+    output.append("\t\tmirror:", mirror == 0 ? "horizontal" : "vertical", "\n");
+    prgram = 8192;
+    break;
+
+  case  75:
+    output.append("\tboard type:KONAMI-VRC-1\n");
+    output.append("\t\tchip type:VRC1\n");
+    break;
+
   case  85:
     output.append("\tboard type:KONAMI-VRC-7\n");
     output.append("\t\tchip type:VRC7\n");
@@ -119,7 +140,7 @@ static string iNES(const uint8_t *data, unsigned size) {
   output.append("\t\tprg rom=", prgrom, " ram=", prgram, "\n");
   output.append("\t\tchr rom=", chrrom, " ram=", chrram, "\n");
 
-//print(output, "\n");
+  print(output, "\n");
 
   return output;
 }

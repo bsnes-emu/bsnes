@@ -1,4 +1,7 @@
 #include "bandai-fcg.cpp"
+#include "konami-vrc1.cpp"
+#include "konami-vrc2.cpp"
+#include "konami-vrc3.cpp"
 #include "konami-vrc4.cpp"
 #include "konami-vrc6.cpp"
 #include "konami-vrc7.cpp"
@@ -8,6 +11,7 @@
 #include "nes-exrom.cpp"
 #include "nes-fxrom.cpp"
 #include "nes-gxrom.cpp"
+#include "nes-hkrom.cpp"
 #include "nes-nrom.cpp"
 #include "nes-pxrom.cpp"
 #include "nes-sxrom.cpp"
@@ -113,6 +117,9 @@ Board* Board::load(const string &markup, const uint8_t *data, unsigned size) {
 
   if(type == "BANDAI-FCG") return new BandaiFCG(board, data, size);
 
+  if(type == "KONAMI-VRC-1") return new KonamiVRC1(board, data, size);
+  if(type == "KONAMI-VRC-2") return new KonamiVRC2(board, data, size);
+  if(type == "KONAMI-VRC-3") return new KonamiVRC3(board, data, size);
   if(type == "KONAMI-VRC-4") return new KonamiVRC4(board, data, size);
   if(type == "KONAMI-VRC-6") return new KonamiVRC6(board, data, size);
   if(type == "KONAMI-VRC-7") return new KonamiVRC7(board, data, size);
@@ -136,6 +143,8 @@ Board* Board::load(const string &markup, const uint8_t *data, unsigned size) {
 
   if(type == "NES-GNROM"   ) return new NES_GxROM(board, data, size);
   if(type == "NES-MHROM"   ) return new NES_GxROM(board, data, size);
+
+  if(type == "NES-HKROM"   ) return new NES_HKROM(board, data, size);
 
   if(type == "NES-NROM-128") return new NES_NROM(board, data, size);
   if(type == "NES-NROM-256") return new NES_NROM(board, data, size);
