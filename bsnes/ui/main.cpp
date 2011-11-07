@@ -27,7 +27,7 @@ void Application::run() {
 }
 
 Application::Application(int argc, char **argv) {
-  title = "bsnes v083.10";
+  title = "bsnes v084";
 
   application = this;
   quit = false;
@@ -76,7 +76,11 @@ Application::Application(int argc, char **argv) {
   video.driver(config->video.driver);
   video.set(Video::Handle, mainWindow->viewport.handle());
   video.set(Video::Synchronize, config->video.synchronize);
-  video.init();
+  if(video.init() == false) {
+    MessageWindow::critical(*mainWindow, { "Failed to initialize ", config->video.driver, " video driver." });
+    video.driver("None");
+    video.init();
+  }
   utility->bindVideoFilter();
   utility->bindVideoShader();
 
@@ -85,17 +89,25 @@ Application::Application(int argc, char **argv) {
   audio.set(Audio::Synchronize, config->audio.synchronize);
   audio.set(Audio::Latency, config->audio.latency);
   audio.set(Audio::Frequency, config->audio.frequency);
-  audio.init();
+  if(audio.init() == false) {
+    MessageWindow::critical(*mainWindow, { "Failed to initialize ", config->audio.driver, " audio driver." });
+    audio.driver("None");
+    audio.init();
+  }
 
   dspaudio.setPrecision(16);
-  dspaudio.setVolume(config->audio.mute == false ? 1.0 : 0.0);
+  dspaudio.setVolume(config->audio.mute == false ? (double)config->audio.volume / 100.0 : 0.0);
   dspaudio.setBalance(0.0);
   dspaudio.setResampler(DSP::ResampleEngine::Sinc);
   dspaudio.setResamplerFrequency(config->audio.frequency);
 
   input.driver(config->input.driver);
   input.set(Input::Handle, mainWindow->viewport.handle());
-  input.init();
+  if(input.init() == false) {
+    MessageWindow::critical(*mainWindow, { "Failed to initialize ", config->input.driver, " input driver." });
+    input.driver("None");
+    input.init();
+  }
 
   if(config->video.startFullScreen) utility->toggleFullScreen();
   if(argc == 2) interface->loadCartridge(argv[1]);

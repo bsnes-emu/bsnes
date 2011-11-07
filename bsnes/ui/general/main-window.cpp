@@ -297,7 +297,7 @@ MainWindow::MainWindow() {
 
   settingsMuteAudio.onTick = [&] {
     config->audio.mute = settingsMuteAudio.checked();
-    dspaudio.setVolume(config->audio.mute == false ? 1.0 : 0.0);
+    dspaudio.setVolume(config->audio.mute == false ? (double)config->audio.volume / 100.0 : 0.0);
   };
 
   settingsConfiguration.onTick = [&] { settingsWindow->setVisible(); };

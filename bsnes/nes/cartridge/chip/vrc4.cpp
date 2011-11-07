@@ -49,6 +49,32 @@ void main() {
   }
 }
 
+unsigned prg_addr(unsigned addr) const {
+  unsigned bank = 0, banks = board.prgrom.size / 0x2000;
+  switch(addr & 0xe000) {
+  case 0x8000: bank = prg_mode == 0 ? (unsigned)prg_bank[0] : banks - 2; break;
+  case 0xa000: bank = prg_bank[1]; break;
+  case 0xc000: bank = prg_mode == 0 ? banks - 2 : (unsigned)prg_bank[0]; break;
+  case 0xe000: bank = banks - 1; break;
+  }
+  return (bank * 0x2000) + (addr & 0x1fff);
+}
+
+unsigned chr_addr(unsigned addr) const {
+  unsigned bank = chr_bank[addr / 0x0400];
+  return (bank * 0x0400) + (addr & 0x03ff);
+}
+
+unsigned ciram_addr(unsigned addr) const {
+  switch(mirror) {
+  case 0: return ((addr & 0x0400) >> 0) | (addr & 0x03ff);  //vertical mirroring
+  case 1: return ((addr & 0x0800) >> 1) | (addr & 0x03ff);  //horizontal mirroring
+  case 2: return 0x0000 | (addr & 0x03ff);                  //one-screen mirroring (first)
+  case 3: return 0x0400 | (addr & 0x03ff);                  //one-screen mirroring (second)
+  }
+  throw;
+}
+
 void reg_write(unsigned addr, uint8 data) {
   switch(addr) {
   case 0x8000: case 0x8001: case 0x8002: case 0x8003:
@@ -115,32 +141,6 @@ void reg_write(unsigned addr, uint8 data) {
     irq_line = 0;
     break;
   }
-}
-
-unsigned prg_addr(unsigned addr) const {
-  unsigned bank = 0, banks = board.prgrom.size / 0x2000;
-  switch((addr / 0x2000) & 3) {
-  case 0: bank = prg_mode == 0 ? (unsigned)prg_bank[0] : banks - 2; break;
-  case 1: bank = prg_bank[1]; break;
-  case 2: bank = prg_mode == 0 ? banks - 2 : (unsigned)prg_bank[0]; break;
-  case 3: bank = banks - 1; break;
-  }
-  return (bank * 0x2000) + (addr & 0x1fff);
-}
-
-unsigned chr_addr(unsigned addr) const {
-  unsigned bank = chr_bank[addr / 0x0400];
-  return (bank * 0x0400) + (addr & 0x03ff);
-}
-
-unsigned ciram_addr(unsigned addr) const {
-  switch(mirror) {
-  case 0: return ((addr & 0x0400) >> 0) | (addr & 0x03ff);  //vertical mirroring
-  case 1: return ((addr & 0x0800) >> 1) | (addr & 0x03ff);  //horizontal mirroring
-  case 2: return 0x0000 | (addr & 0x03ff);                  //one-screen mirroring (first)
-  case 3: return 0x0400 | (addr & 0x03ff);                  //one-screen mirroring (second)
-  }
-  throw;
 }
 
 void power() {

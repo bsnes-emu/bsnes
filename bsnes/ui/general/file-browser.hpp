@@ -27,6 +27,7 @@ private:
   lstring fileNameList;
   function<void (string)> callback;
 
+  void synchronize();
   void setPath(const string &path);
   void fileListActivate();
   bool loadFolder(const string &path);

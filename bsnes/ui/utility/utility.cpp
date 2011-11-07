@@ -8,6 +8,7 @@ void Utility::setMode(Interface::Mode mode) {
   mainWindow->nesMenu.setVisible(false);
   mainWindow->snesMenu.setVisible(false);
   mainWindow->gameBoyMenu.setVisible(false);
+  mainWindow->viewport.setVisible(mode != Interface::Mode::None);
 
   if(mode == Interface::Mode::None) {
     mainWindow->setTitle(application->title);

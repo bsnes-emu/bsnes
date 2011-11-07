@@ -39,6 +39,7 @@ FileBrowser::FileBrowser() {
     setPath(path);
   };
 
+  fileList.onChange = { &FileBrowser::synchronize, this };
   fileList.onActivate = openButton.onTick = { &FileBrowser::fileListActivate, this };
 
   filterModes.append({ "Default",      "", { "*" } });
@@ -53,6 +54,11 @@ FileBrowser::FileBrowser() {
   for(auto &mode : filterModes) config.attach(mode.path, mode.name);
   config.load(application->path("paths.cfg"));
   config.save(application->path("paths.cfg"));
+  synchronize();
+}
+
+void FileBrowser::synchronize() {
+  openButton.setEnabled(fileList.selected());
 }
 
 FileBrowser::~FileBrowser() {
@@ -103,6 +109,7 @@ void FileBrowser::setPath(const string &path) {
   for(auto &fileName : fileNameList) fileList.append(fileName);
   fileList.setSelection(0);
   fileList.setFocused();
+  synchronize();
 }
 
 void FileBrowser::fileListActivate() {

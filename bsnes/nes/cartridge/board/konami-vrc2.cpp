@@ -1,17 +1,29 @@
 struct KonamiVRC2 : Board {
 
+struct Settings {
+  struct Pinout {
+    unsigned a0;
+    unsigned a1;
+  } pinout;
+} settings;
+
 VRC2 vrc2;
-bool latch;
 
 uint8 prg_read(unsigned addr) {
-  if(addr == 0x6000) return latch;
-  if(addr & 0x8000) return prgrom.read(vrc2.prg_addr(addr));
-  return cpu.mdr();
+  if(addr < 0x6000) return cpu.mdr();
+  if(addr < 0x8000) return vrc2.ram_read(addr);
+  return prgrom.read(vrc2.prg_addr(addr));
 }
 
 void prg_write(unsigned addr, uint8 data) {
-  if(addr == 0x6000) latch = data & 0x01;
-  if(addr & 0x8000) return vrc2.reg_write(addr, data);
+  if(addr < 0x6000) return;
+  if(addr < 0x8000) return vrc2.ram_write(addr, data);
+
+  bool a0 = (addr & settings.pinout.a0);
+  bool a1 = (addr & settings.pinout.a1);
+  addr &= 0xfff0;
+  addr |= (a0 << 0) | (a1 << 1);
+  return vrc2.reg_write(addr, data);
 }
 
 uint8 chr_read(unsigned addr) {
@@ -30,16 +42,16 @@ void power() {
 
 void reset() {
   vrc2.reset();
-  latch = 0;
 }
 
 void serialize(serializer &s) {
   Board::serialize(s);
   vrc2.serialize(s);
-  s.integer(latch);
 }
 
 KonamiVRC2(BML::Node &board, const uint8_t *data, unsigned size) : Board(board, data, size), vrc2(*this) {
+  settings.pinout.a0 = 1 << decimal(board["chip"]["pinout"]["a0"].value);
+  settings.pinout.a1 = 1 << decimal(board["chip"]["pinout"]["a1"].value);
 }
 
 };
