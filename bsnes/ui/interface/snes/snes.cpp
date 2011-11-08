@@ -292,15 +292,15 @@ void InterfaceSNES::videoRefresh(const uint32_t *data, bool hires, bool interlac
     for(unsigned y = 0; y < height; y++) {
       uint32_t *dp = output + y * 512;
       if(y < osh || y >= height - osh) {
-        memset(dp, 0, width * 2);
+        memset(dp, 0, width * sizeof(uint32_t));
       } else {
-        memset(dp + 0, 0, osw * 2);
-        memset(dp + width - osw, 0, osw * 2);
+        memset(dp + 0, 0, osw * sizeof(uint32_t));
+        memset(dp + width - osw, 0, osw * sizeof(uint32_t));
       }
     }
   }
 
-  interface->videoRefresh(output, 512 * 4, width, height);
+  interface->videoRefresh(output, 512 * sizeof(uint32_t), width, height);
 }
 
 void InterfaceSNES::audioSample(int16_t lsample, int16_t rsample) {

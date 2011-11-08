@@ -94,7 +94,7 @@ void InterfaceGameBoy::videoRefresh(const uint16_t *data) {
     }
   }
 
-  interface->videoRefresh(output, 160 * 4, 160, 144);
+  interface->videoRefresh(output, 160 * sizeof(uint32_t), 160, 144);
 }
 
 void InterfaceGameBoy::audioSample(int16_t csample, int16_t lsample, int16_t rsample) {

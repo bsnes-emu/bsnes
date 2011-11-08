@@ -120,15 +120,15 @@ void InterfaceNES::videoRefresh(const uint16_t *data) {
     for(unsigned y = 0; y < 240; y++) {
       uint32_t *dp = output + y * 256;
       if(y < osh || y >= 240 - osh) {
-        memset(dp, 0, 256 * 2);
+        memset(dp, 0, 256 * sizeof(uint32_t));
       } else {
-        memset(dp + 0, 0, osw * 2);
-        memset(dp + 256 - osw, 0, osw * 2);
+        memset(dp + 0, 0, osw * sizeof(uint32_t));
+        memset(dp + 256 - osw, 0, osw * sizeof(uint32_t));
       }
     }
   }
 
-  interface->videoRefresh(output, 256 * 4, 256, 240);
+  interface->videoRefresh(output, 256 * sizeof(uint32_t), 256, 240);
 }
 
 void InterfaceNES::audioSample(int16_t sample) {
