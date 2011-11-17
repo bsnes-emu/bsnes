@@ -48,7 +48,6 @@ private:
   } status;
 
   static void Enter();
-  debugvirtual void op_step();
 
   friend class SMPcore;
   friend class SMPDebugger;

@@ -205,7 +205,7 @@ public:
 
   void term() {
     if(device.handle) {
-      snd_pcm_drain(device.handle);
+    //snd_pcm_drain(device.handle);  //prevents popping noise; but causes multi-second lag
       snd_pcm_close(device.handle);
       device.handle = 0;
     }

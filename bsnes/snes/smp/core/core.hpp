@@ -1,117 +1,96 @@
 struct SMPcore {
-  #include "registers.hpp"
-  #include "memory.hpp"
-  #include "disassembler/disassembler.hpp"
-
-  regs_t regs;
-  uint16 dp, sp, rd, wr, bit, ya;
-
   virtual void op_io() = 0;
   virtual uint8 op_read(uint16 addr) = 0;
   virtual void op_write(uint16 addr, uint8 data) = 0;
+  void op_step();
 
-  uint8  op_adc (uint8  x, uint8  y);
-  uint16 op_addw(uint16 x, uint16 y);
-  uint8  op_and (uint8  x, uint8  y);
-  uint8  op_cmp (uint8  x, uint8  y);
-  uint16 op_cmpw(uint16 x, uint16 y);
-  uint8  op_eor (uint8  x, uint8  y);
-  uint8  op_inc (uint8  x);
-  uint8  op_dec (uint8  x);
-  uint8  op_or  (uint8  x, uint8  y);
-  uint8  op_sbc (uint8  x, uint8  y);
-  uint16 op_subw(uint16 x, uint16 y);
-  uint8  op_asl (uint8  x);
-  uint8  op_lsr (uint8  x);
-  uint8  op_rol (uint8  x);
-  uint8  op_ror (uint8  x);
+  #include "registers.hpp"
+  #include "memory.hpp"
 
-  template<int, int> void op_mov_reg_reg();
-  void op_mov_sp_x();
-  template<int> void op_mov_reg_const();
-  void op_mov_a_ix();
-  void op_mov_a_ixinc();
-  template<int> void op_mov_reg_dp();
-  template<int, int> void op_mov_reg_dpr();
-  template<int> void op_mov_reg_addr();
-  template<int> void op_mov_a_addrr();
-  void op_mov_a_idpx();
-  void op_mov_a_idpy();
-  void op_mov_dp_dp();
-  void op_mov_dp_const();
-  void op_mov_ix_a();
-  void op_mov_ixinc_a();
-  template<int> void op_mov_dp_reg();
-  template<int, int> void op_mov_dpr_reg();
-  template<int> void op_mov_addr_reg();
-  template<int> void op_mov_addrr_a();
-  void op_mov_idpx_a();
-  void op_mov_idpy_a();
-  void op_movw_ya_dp();
-  void op_movw_dp_ya();
-  void op_mov1_c_bit();
-  void op_mov1_bit_c();
-
-  void op_bra();
-  template<int, int> void op_branch();
-  template<int, int> void op_bitbranch();
-  void op_cbne_dp();
-  void op_cbne_dpx();
-  void op_dbnz_dp();
-  void op_dbnz_y();
-  void op_jmp_addr();
-  void op_jmp_iaddrx();
-  void op_call();
-  void op_pcall();
-  template<int> void op_tcall();
-  void op_brk();
-  void op_ret();
-  void op_reti();
-
-  template<uint8 (SMPcore::*)(uint8, uint8), int> void op_read_reg_const();
-  template<uint8 (SMPcore::*)(uint8, uint8)> void op_read_a_ix();
-  template<uint8 (SMPcore::*)(uint8, uint8), int> void op_read_reg_dp();
-  template<uint8 (SMPcore::*)(uint8, uint8)> void op_read_a_dpx();
-  template<uint8 (SMPcore::*)(uint8, uint8), int> void op_read_reg_addr();
-  template<uint8 (SMPcore::*)(uint8, uint8), int> void op_read_a_addrr();
-  template<uint8 (SMPcore::*)(uint8, uint8)> void op_read_a_idpx();
-  template<uint8 (SMPcore::*)(uint8, uint8)> void op_read_a_idpy();
-  template<uint8 (SMPcore::*)(uint8, uint8)> void op_read_ix_iy();
-  template<uint8 (SMPcore::*)(uint8, uint8)> void op_read_dp_dp();
-  template<uint8 (SMPcore::*)(uint8, uint8)> void op_read_dp_const();
-  template<uint16 (SMPcore::*)(uint16, uint16)> void op_read_ya_dp();
-  void op_cmpw_ya_dp();
-  template<int> void op_and1_bit();
-  void op_eor1_bit();
-  void op_not1_bit();
-  template<int> void op_or1_bit();
-
-  template<uint8 (SMPcore::*)(uint8), int> void op_adjust_reg();
-  template<uint8 (SMPcore::*)(uint8)> void op_adjust_dp();
-  template<uint8 (SMPcore::*)(uint8)> void op_adjust_dpx();
-  template<uint8 (SMPcore::*)(uint8)> void op_adjust_addr();
-  template<int> void op_adjust_addr_a();
-  template<int> void op_adjustw_dp();
-
-  void op_nop();
-  void op_wait();
-  void op_xcn();
-  void op_daa();
-  void op_das();
-  template<int, int> void op_setbit();
-  void op_notc();
-  template<int> void op_seti();
-  template<int, int> void op_setbit_dp();
-  template<int> void op_push_reg();
-  void op_push_p();
-  template<int> void op_pop_reg();
-  void op_pop_p();
-  void op_mul_ya();
-  void op_div_ya_x();
-
-  void (SMPcore::*opcode_table[256])();
-  void initialize_opcode_table();
+  regs_t regs;
+  word_t dp, sp, rd, wr, bit, ya;
+  uint8 opcode;
 
   void core_serialize(serializer&);
-  SMPcore();
+  string disassemble_opcode(uint16 addr);
+
+protected:
+  uint8 op_adc(uint8, uint8);
+  uint8 op_and(uint8, uint8);
+  uint8 op_asl(uint8);
+  uint8 op_cmp(uint8, uint8);
+  uint8 op_dec(uint8);
+  uint8 op_eor(uint8, uint8);
+  uint8 op_inc(uint8);
+  uint8 op_ld (uint8, uint8);
+  uint8 op_lsr(uint8);
+  uint8 op_or (uint8, uint8);
+  uint8 op_rol(uint8);
+  uint8 op_ror(uint8);
+  uint8 op_sbc(uint8, uint8);
+  uint8 op_st (uint8, uint8);
+  uint16 op_adw(uint16, uint16);
+  uint16 op_cpw(uint16, uint16);
+  uint16 op_ldw(uint16, uint16);
+  uint16 op_sbw(uint16, uint16);
+
+  template<uint8 (SMPcore::*op)(uint8)> void op_adjust(uint8&);
+  template<uint8 (SMPcore::*op)(uint8)> void op_adjust_addr();
+  template<uint8 (SMPcore::*op)(uint8)> void op_adjust_dp();
+  void op_adjust_dpw(signed);
+  template<uint8 (SMPcore::*op)(uint8)> void op_adjust_dpx();
+  void op_branch(bool);
+  void op_branch_bit();
+  void op_pull(uint8&);
+  void op_push(uint8);
+  template<uint8 (SMPcore::*op)(uint8, uint8)> void op_read_addr(uint8&);
+  template<uint8 (SMPcore::*op)(uint8, uint8)> void op_read_addri(uint8&);
+  template<uint8 (SMPcore::*op)(uint8, uint8)> void op_read_const(uint8&);
+  template<uint8 (SMPcore::*op)(uint8, uint8)> void op_read_dp(uint8&);
+  template<uint8 (SMPcore::*op)(uint8, uint8)> void op_read_dpi(uint8&, uint8&);
+  template<uint16 (SMPcore::*op)(uint16, uint16)> void op_read_dpw();
+  template<uint8 (SMPcore::*op)(uint8, uint8)> void op_read_idpx();
+  template<uint8 (SMPcore::*op)(uint8, uint8)> void op_read_idpy();
+  template<uint8 (SMPcore::*op)(uint8, uint8)> void op_read_ix();
+  void op_set_addr_bit();
+  void op_set_bit();
+  void op_set_flag(bool&, bool);
+  void op_test_addr(bool);
+  void op_transfer(uint8&, uint8&);
+  void op_write_addr(uint8&);
+  void op_write_addri(uint8&);
+  void op_write_dp(uint8&);
+  void op_write_dpi(uint8&, uint8&);
+  template<uint8 (SMPcore::*op)(uint8, uint8)> void op_write_dp_const();
+  template<uint8 (SMPcore::*op)(uint8, uint8)> void op_write_dp_dp();
+  template<uint8 (SMPcore::*op)(uint8, uint8)> void op_write_ix_iy();
+
+  void op_bne_dp();
+  void op_bne_dpdec();
+  void op_bne_dpx();
+  void op_bne_ydec();
+  void op_brk();
+  void op_clv();
+  void op_cmc();
+  void op_daa();
+  void op_das();
+  void op_div_ya_x();
+  void op_jmp_addr();
+  void op_jmp_iaddrx();
+  void op_jsp_dp();
+  void op_jsr_addr();
+  void op_jst();
+  void op_lda_ixinc();
+  void op_mul_ya();
+  void op_nop();
+  void op_plp();
+  void op_rti();
+  void op_rts();
+  void op_sta_idpx();
+  void op_sta_idpy();
+  void op_sta_ix();
+  void op_sta_ixinc();
+  void op_stw_dp();
+  void op_wait();
+  void op_xcn();
 };

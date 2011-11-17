@@ -128,8 +128,6 @@ namespace nall {
   inline char chrlower(char c);
   inline char chrupper(char c);
   inline int istrcmp(const char *str1, const char *str2);
-  inline bool wildcard(const char *str, const char *pattern);
-  inline bool iwildcard(const char *str, const char *pattern);
   inline bool strbegin(const char *str, const char *key);
   inline bool istrbegin(const char *str, const char *key);
   inline bool strend(const char *str, const char *key);
@@ -190,6 +188,10 @@ namespace nall {
 
   //variadic.hpp
   template<typename... Args> inline void print(Args&&... args);
+
+  //wildcard.hpp
+  inline bool wildcard(const char *str, const char *pattern);
+  inline bool iwildcard(const char *str, const char *pattern);
 };
 
 #endif

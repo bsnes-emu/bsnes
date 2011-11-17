@@ -42,6 +42,7 @@ static gboolean Window_configure(GtkWidget *widget, GdkEvent *event, Window *win
     settings->frameGeometryY = client.y - border.y;
     settings->frameGeometryWidth = border.width - client.width;
     settings->frameGeometryHeight = border.height - client.height;
+    settings->save();
   }
 
   //move

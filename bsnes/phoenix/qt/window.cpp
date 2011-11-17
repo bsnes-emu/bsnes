@@ -67,9 +67,10 @@ void pWindow::remove(Widget &widget) {
 
 void pWindow::setBackgroundColor(const Color &color) {
   QPalette palette;
-  palette.setColor(QPalette::Window, QColor(color.red, color.green, color.blue));
+  palette.setColor(QPalette::Window, QColor(color.red, color.green, color.blue, color.alpha));
   qtContainer->setPalette(palette);
   qtContainer->setAutoFillBackground(true);
+  qtWindow->setAttribute(Qt::WA_TranslucentBackground, color.alpha != 255);
 }
 
 void pWindow::setFocused() {
@@ -220,6 +221,8 @@ void pWindow::updateFrameGeometry() {
     pOS::syncX();
     settings->statusGeometryHeight = qtStatus->height();
   }
+
+  settings->save();
 }
 
 void pWindow::QtWindow::closeEvent(QCloseEvent *event) {

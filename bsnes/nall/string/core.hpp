@@ -7,7 +7,7 @@ static void istring(string &output) {
 
 template<typename T, typename... Args>
 static void istring(string &output, const T &value, Args&&... args) {
-  output.append_(to_string(value));
+  output.append_(make_string(value));
   istring(output, std::forward<Args>(args)...);
 }
 

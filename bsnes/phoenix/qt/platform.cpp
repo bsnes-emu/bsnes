@@ -113,8 +113,6 @@ void pOS::processEvents() {
 }
 
 void pOS::quit() {
-  settings->save();
-
   QApplication::quit();
   //note: QApplication cannot be deleted; or libQtGui will crash
   qtApplication = 0;

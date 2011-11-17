@@ -150,8 +150,6 @@ void pOS::processEvents() {
 }
 
 void pOS::quit() {
-  settings->save();
-
   gtk_main_quit();
 }
 

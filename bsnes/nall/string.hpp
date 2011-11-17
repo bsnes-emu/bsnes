@@ -16,6 +16,7 @@
 #include <nall/sha256.hpp>
 #include <nall/stdint.hpp>
 #include <nall/utility.hpp>
+#include <nall/varint.hpp>
 #include <nall/vector.hpp>
 
 #include <nall/windows/utf8.hpp>
@@ -39,6 +40,7 @@
 #include <nall/string/split.hpp>
 #include <nall/string/utility.hpp>
 #include <nall/string/variadic.hpp>
+#include <nall/string/wildcard.hpp>
 #include <nall/string/wrapper.hpp>
 #include <nall/string/xml.hpp>
 #undef NALL_STRING_INTERNAL_HPP

@@ -26,6 +26,8 @@ else ifeq ($(profile),performance)
   snessmp := $(snes)/alt/smp
   snesdsp := $(snes)/alt/dsp
   snesppu := $(snes)/alt/ppu-performance
+else
+  $(error Unknown profile: $(profile))
 endif
 
 obj/snes-interface.o : $(snes)/interface/interface.cpp $(call rwildcard,$(snes)/interface)
