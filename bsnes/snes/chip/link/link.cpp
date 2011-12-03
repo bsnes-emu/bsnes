@@ -40,7 +40,6 @@ void Link::unload() {
 
 void Link::power() {
   if(link_power) link_power();
-  create(Link::Enter, frequency);
 }
 
 void Link::reset() {

@@ -27,12 +27,13 @@ void Application::run() {
 }
 
 Application::Application(int argc, char **argv) {
-  title = "bsnes v084.01";
+  title = "bsnes v084.03";
 
   application = this;
   quit = false;
   pause = false;
   autopause = false;
+
   {
     char path[PATH_MAX];
     auto unused = ::realpath(argv[0], path);
@@ -46,6 +47,7 @@ Application::Application(int argc, char **argv) {
     }
     mkdir(userpath, 0755);
   }
+
   config = new Config;
   interface = new Interface;
   inputManager = new InputManager;
@@ -76,6 +78,7 @@ Application::Application(int argc, char **argv) {
   video.driver(config->video.driver);
   video.set(Video::Handle, mainWindow->viewport.handle());
   video.set(Video::Synchronize, config->video.synchronize);
+  video.set(Video::Depth, config->video.depth);
   if(video.init() == false) {
     MessageWindow::critical(*mainWindow, { "Failed to initialize ", config->video.driver, " video driver." });
     video.driver("None");

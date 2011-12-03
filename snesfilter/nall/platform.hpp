@@ -104,6 +104,8 @@
     SHGetFolderPathW(0, CSIDL_APPDATA | CSIDL_FLAG_CREATE, 0, 0, fp);
     strcpy(path, nall::utf8_t(fp));
     for(unsigned n = 0; path[n]; n++) if(path[n] == '\\') path[n] = '/';
+    unsigned length = strlen(path);
+    if(path[length] != '/') strcpy(path + length, "/");
     return path;
   }
 
@@ -112,6 +114,8 @@
     _wgetcwd(fp, _MAX_PATH);
     strcpy(path, nall::utf8_t(fp));
     for(unsigned n = 0; path[n]; n++) if(path[n] == '\\') path[n] = '/';
+    unsigned length = strlen(path);
+    if(path[length] != '/') strcpy(path + length, "/");
     return path;
   }
 #else

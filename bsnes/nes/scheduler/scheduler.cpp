@@ -16,7 +16,6 @@ void Scheduler::exit(ExitReason reason) {
 }
 
 void Scheduler::power() {
-  reset();
 }
 
 void Scheduler::reset() {

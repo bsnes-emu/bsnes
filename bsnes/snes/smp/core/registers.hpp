@@ -24,18 +24,20 @@ struct word_t {
   };
 
   inline operator unsigned() const { return w; }
-  inline unsigned operator=(unsigned data) { w = data; return w; }
+  inline unsigned operator=(unsigned data) { return w = data; }
 
   inline unsigned operator++() { return ++w; }
   inline unsigned operator--() { return --w; }
+
   inline unsigned operator++(int) { unsigned data = w++; return data; }
   inline unsigned operator--(int) { unsigned data = w--; return data; }
 
-  inline unsigned operator|=(unsigned data) { w |= data; return w; }
-  inline unsigned operator^=(unsigned data) { w ^= data; return w; }
-  inline unsigned operator&=(unsigned data) { w &= data; return w; }
-  inline unsigned operator+=(unsigned data) { w += data; return w; }
-  inline unsigned operator-=(unsigned data) { w -= data; return w; }
+  inline unsigned operator+=(unsigned data) { return w += data;; }
+  inline unsigned operator-=(unsigned data) { return w -= data;; }
+
+  inline unsigned operator|=(unsigned data) { return w |= data; }
+  inline unsigned operator^=(unsigned data) { return w ^= data; }
+  inline unsigned operator&=(unsigned data) { return w &= data; }
 };
 
 struct regs_t {

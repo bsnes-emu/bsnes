@@ -1,5 +1,4 @@
-#ifndef NALL_STRING_SPLIT_HPP
-#define NALL_STRING_SPLIT_HPP
+#ifdef NALL_STRING_INTERNAL_HPP
 
 namespace nall {
 
@@ -8,14 +7,13 @@ template<unsigned Limit, bool Insensitive, bool Quoted> lstring& lstring::usplit
   if(!key || !*key) return *this;
 
   const char *p = base;
-  unsigned counter = 0;
 
   while(*p) {
-    if(Limit) if(counter >= Limit) break;
+    if(Limit) if(size() >= Limit) break;
     if(quoteskip<Quoted>(p)) continue;
     for(unsigned n = 0;; n++) {
       if(key[n] == 0) {
-        strlcpy(operator[](counter++), base, (unsigned)(p - base + 1));
+        append(substr(base, 0, p - base));
         p += n;
         base = p;
         break;
@@ -24,7 +22,7 @@ template<unsigned Limit, bool Insensitive, bool Quoted> lstring& lstring::usplit
     }
   }
 
-  operator[](counter) = base;
+  append(base);
   return *this;
 }
 

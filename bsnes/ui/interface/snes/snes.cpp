@@ -51,7 +51,7 @@ bool InterfaceSNES::loadCartridge(const string &basename) {
 
   loadMemory();
   interface->loadCartridge(::Interface::Mode::SNES);
-  SNES::video.generate(SNES::Video::Format::RGB24);
+  SNES::video.generate(SNES::Video::Format::RGB30);
   return true;
 }
 
@@ -80,7 +80,7 @@ bool InterfaceSNES::loadSatellaviewSlottedCartridge(const string &basename, cons
 
   loadMemory();
   interface->loadCartridge(::Interface::Mode::SNES);
-  SNES::video.generate(SNES::Video::Format::RGB24);
+  SNES::video.generate(SNES::Video::Format::RGB30);
   return true;
 }
 
@@ -109,7 +109,7 @@ bool InterfaceSNES::loadSatellaviewCartridge(const string &basename, const strin
 
   loadMemory();
   interface->loadCartridge(::Interface::Mode::SNES);
-  SNES::video.generate(SNES::Video::Format::RGB24);
+  SNES::video.generate(SNES::Video::Format::RGB30);
   return true;
 }
 
@@ -143,7 +143,7 @@ bool InterfaceSNES::loadSufamiTurboCartridge(const string &basename, const strin
 
   loadMemory();
   interface->loadCartridge(::Interface::Mode::SNES);
-  SNES::video.generate(SNES::Video::Format::RGB24);
+  SNES::video.generate(SNES::Video::Format::RGB30);
   return true;
 }
 
@@ -176,7 +176,7 @@ bool InterfaceSNES::loadSuperGameBoyCartridge(const string &basename, const stri
 
   loadMemory();
   interface->loadCartridge(::Interface::Mode::SNES);
-  SNES::video.generate(SNES::Video::Format::RGB24);
+  SNES::video.generate(SNES::Video::Format::RGB30);
   return true;
 }
 

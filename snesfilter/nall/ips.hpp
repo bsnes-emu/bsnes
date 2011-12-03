@@ -76,7 +76,7 @@ bool ips::apply() {
   }
 
   delete[] data;
-  data = 0;
+  data = nullptr;
   return false;
 }
 
@@ -96,7 +96,7 @@ bool ips::modify(const string &filename) {
   return file::read(filename, modifyData, modifySize);
 }
 
-ips::ips() : data(0), sourceData(0), modifyData(0) {
+ips::ips() : data(nullptr), sourceData(nullptr), modifyData(nullptr) {
 }
 
 ips::~ips() {

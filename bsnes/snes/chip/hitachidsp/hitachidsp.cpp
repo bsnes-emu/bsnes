@@ -52,7 +52,6 @@ void HitachiDSP::unload() {
 }
 
 void HitachiDSP::power() {
-  reset();
 }
 
 void HitachiDSP::reset() {

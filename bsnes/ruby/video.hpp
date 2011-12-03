@@ -1,7 +1,7 @@
-class Video {
-public:
+struct Video {
   static const char *Handle;
   static const char *Synchronize;
+  static const char *Depth;
   static const char *Filter;
   static const char *Shader;
   static const char *FragmentShader;

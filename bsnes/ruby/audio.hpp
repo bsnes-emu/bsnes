@@ -1,5 +1,4 @@
-class Audio {
-public:
+struct Audio {
   static const char *Handle;
   static const char *Synchronize;
   static const char *Frequency;

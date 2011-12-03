@@ -183,8 +183,8 @@ namespace nall {
   template<unsigned length = 0, char padding = ' '> inline string ldecimal(uintmax_t value);
   template<unsigned length = 0, char padding = '0'> inline string hex(uintmax_t value);
   template<unsigned length = 0, char padding = '0'> inline string binary(uintmax_t value);
-  inline unsigned fp(char *str, double value);
-  inline string fp(double value);
+  inline unsigned fp(char *str, long double value);
+  inline string fp(long double value);
 
   //variadic.hpp
   template<typename... Args> inline void print(Args&&... args);

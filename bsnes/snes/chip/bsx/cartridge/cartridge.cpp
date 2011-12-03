@@ -19,7 +19,6 @@ void BSXCartridge::unload() {
 }
 
 void BSXCartridge::power() {
-  reset();
 }
 
 void BSXCartridge::reset() {

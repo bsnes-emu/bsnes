@@ -32,6 +32,8 @@
 #include <nall/string/cstring.hpp>
 #include <nall/string/filename.hpp>
 #include <nall/string/math.hpp>
+#include <nall/string/math-fixed-point.hpp>
+#include <nall/string/math-floating-point.hpp>
 #include <nall/string/platform.hpp>
 #include <nall/string/strl.hpp>
 #include <nall/string/strpos.hpp>

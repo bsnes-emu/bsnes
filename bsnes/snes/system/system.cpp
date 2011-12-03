@@ -10,10 +10,9 @@ System system;
 #include <snes/scheduler/scheduler.cpp>
 #include <snes/random/random.cpp>
 
-#include <snes/video/video.cpp>
-#include <snes/audio/audio.cpp>
-#include <snes/input/input.cpp>
-
+#include "video.cpp"
+#include "audio.cpp"
+#include "input.cpp"
 #include "serialization.cpp"
 
 void System::run() {
@@ -181,17 +180,7 @@ void System::power() {
   if(cartridge.has_msu1()) msu1.power();
   if(cartridge.has_link()) link.power();
 
-  if(cartridge.mode() == Cartridge::Mode::SuperGameBoy) cpu.coprocessors.append(&icd2);
-  if(cartridge.has_superfx()) cpu.coprocessors.append(&superfx);
-  if(cartridge.has_sa1()) cpu.coprocessors.append(&sa1);
-  if(cartridge.has_necdsp()) cpu.coprocessors.append(&necdsp);
-  if(cartridge.has_hitachidsp()) cpu.coprocessors.append(&hitachidsp);
-  if(cartridge.has_msu1()) cpu.coprocessors.append(&msu1);
-  if(cartridge.has_link()) cpu.coprocessors.append(&link);
-
-  scheduler.init();
-  input.connect(0, config.controller_port1);
-  input.connect(1, config.controller_port2);
+  reset();
 }
 
 void System::reset() {

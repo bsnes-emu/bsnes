@@ -16,7 +16,6 @@ void BSXFlash::unload() {
 }
 
 void BSXFlash::power() {
-  reset();
 }
 
 void BSXFlash::reset() {

@@ -28,7 +28,7 @@ bool InterfaceGameBoy::loadCartridge(GameBoy::System::Revision revision, const s
   }
 
   GameBoy::interface = this;
-  GameBoy::video.generate(GameBoy::Video::Format::RGB24);
+  GameBoy::video.generate(GameBoy::Video::Format::RGB30);
   interface->loadCartridge(::Interface::Mode::GameBoy);
   return true;
 }

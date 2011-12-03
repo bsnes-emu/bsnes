@@ -3,6 +3,7 @@ Config *config = 0;
 
 Config::Config() {
   attach(video.driver = "", "Video::Driver");
+  attach(video.depth = 24u, "Video::Depth");
   attach(video.filter = "None", "Video::Filter");
   attach(video.shader = "Blur", "Video::Shader");
   attach(video.synchronize = true, "Video::Synchronize");

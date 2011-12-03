@@ -72,21 +72,6 @@ struct Font {
   Font(const nall::string &description = "");
 };
 
-struct Image {
-  uint32_t *data;
-  unsigned width, height;
-  bool load(const nall::string &filename, const Color &alpha = Color{255, 255, 255});
-  void load(const uint32_t *data, const Size &size);
-  Image& operator=(const Image &source);
-  Image& operator=(Image &&source);
-  Image();
-  Image(const nall::string &filename, const Color &alpha = Color{255, 255, 255});
-  Image(const uint32_t *data, const Size &size);
-  Image(const Image &source);
-  Image(Image &&source);
-  ~Image();
-};
-
 struct Object {
   Object(pObject &p);
   Object& operator=(const Object&) = delete;
@@ -330,7 +315,7 @@ struct Button : private nall::base_from_member<pButton&>, Widget {
 
 struct Canvas : private nall::base_from_member<pCanvas&>, Widget {
   uint32_t* data();
-  bool setImage(const Image &image);
+  bool setImage(const nall::image &image);
   void setSize(const Size &size);
   Size size();
   void update();

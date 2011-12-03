@@ -34,13 +34,14 @@ const uint8_t hqTable[256] = {
   4, 4, 6,  2, 4, 4, 6,  2, 5,  3,  1, 12, 5,  3,  1, 14,
 };
 
-static uint16_t rgb555(uint32_t C) {
-  return ((C >> 9) & 0x7c00) + ((C >> 6) & 0x03e0) + ((C >> 3) & 0x001f);
+static uint16_t rgb15(uint32_t C) {
+  return ((C >> 15) & 0x7c00) + ((C >> 10) & 0x03e0) + ((C >> 5) & 0x001f);
 }
 
-static uint32_t rgb888(uint16_t C) {
-  return ((C & 0x7c00) << 9) + ((C & 0x03e0) << 6) + ((C & 0x001f) << 3)
-       + ((C & 0x7000) << 4) + ((C & 0x0380) << 1) + ((C & 0x001c) >> 2);
+static uint32_t rgb30(uint16_t C) {
+  return ((C & 0x7c00) << 15) + ((C & 0x7c00) << 10)
+       + ((C & 0x03e0) << 10) + ((C & 0x03e0) <<  5)
+       + ((C & 0x001f) <<  5) + ((C & 0x001f) <<  0);
 }
 
 static void initialize() {
@@ -51,11 +52,13 @@ static void initialize() {
   yuvTable = new uint32_t[32768];
 
   for(unsigned i = 0; i < 32768; i++) {
-    uint32_t C = rgb888(i);
+    uint8_t R = (i >> 10) & 31;
+    uint8_t G = (i >>  5) & 31;
+    uint8_t B = (i >>  0) & 31;
 
-    double r = (uint8_t)(C >> 16);
-    double g = (uint8_t)(C >>  8);
-    double b = (uint8_t)(C >>  0);
+    double r = (R << 3) | (R >> 2);
+    double g = (G << 3) | (G >> 2);
+    double b = (B << 3) | (B >> 2);
 
     double y = (r + g + b) * (0.25f * (63.5f / 48.0f));
     double u = ((r - b) * 0.25f + 128.0f) * (7.5f / 7.0f);
@@ -173,15 +176,15 @@ dllexport void filter_render(
     *out1++ = 0; *out1++ = 0;
 
     for(unsigned x = 1; x < width - 1; x++) {
-      uint16_t A = rgb555(*(in - prevline - 1));
-      uint16_t B = rgb555(*(in - prevline + 0));
-      uint16_t C = rgb555(*(in - prevline + 1));
-      uint16_t D = rgb555(*(in - 1));
-      uint16_t E = rgb555(*(in + 0));
-      uint16_t F = rgb555(*(in + 1));
-      uint16_t G = rgb555(*(in + nextline - 1));
-      uint16_t H = rgb555(*(in + nextline + 0));
-      uint16_t I = rgb555(*(in + nextline + 1));
+      uint16_t A = rgb15(*(in - prevline - 1));
+      uint16_t B = rgb15(*(in - prevline + 0));
+      uint16_t C = rgb15(*(in - prevline + 1));
+      uint16_t D = rgb15(*(in - 1));
+      uint16_t E = rgb15(*(in + 0));
+      uint16_t F = rgb15(*(in + 1));
+      uint16_t G = rgb15(*(in + nextline - 1));
+      uint16_t H = rgb15(*(in + nextline + 0));
+      uint16_t I = rgb15(*(in + nextline + 1));
       uint32_t e = yuvTable[E] + diff_offset;
 
       uint8_t pattern;
@@ -194,10 +197,10 @@ dllexport void filter_render(
       pattern |= diff(e, H) << 6;
       pattern |= diff(e, I) << 7;
 
-      *(out0 + 0) = rgb888(blend(hqTable[pattern], E, A, B, D, F, H)); pattern = rotate[pattern];
-      *(out0 + 1) = rgb888(blend(hqTable[pattern], E, C, F, B, H, D)); pattern = rotate[pattern];
-      *(out1 + 1) = rgb888(blend(hqTable[pattern], E, I, H, F, D, B)); pattern = rotate[pattern];
-      *(out1 + 0) = rgb888(blend(hqTable[pattern], E, G, D, H, B, F));
+      *(out0 + 0) = rgb30(blend(hqTable[pattern], E, A, B, D, F, H)); pattern = rotate[pattern];
+      *(out0 + 1) = rgb30(blend(hqTable[pattern], E, C, F, B, H, D)); pattern = rotate[pattern];
+      *(out1 + 1) = rgb30(blend(hqTable[pattern], E, I, H, F, D, B)); pattern = rotate[pattern];
+      *(out1 + 0) = rgb30(blend(hqTable[pattern], E, G, D, H, B, F));
 
       in++;
       out0 += 2;

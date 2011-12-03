@@ -45,7 +45,7 @@ bool InterfaceNES::loadCartridge(const string &filename) {
   }
 
   interface->loadCartridge(::Interface::Mode::NES);
-  NES::video.generate(NES::Video::Format::RGB24);
+  NES::video.generate(NES::Video::Format::RGB30);
   return true;
 }
 

@@ -27,11 +27,6 @@
 
 namespace ruby {
 
-//returns true once window is mapped (created and displayed onscreen)
-static Bool glx_wait_for_map_notify(Display *d, XEvent *e, char *arg) {
-  return (e->type == MapNotify) && (e->xmap.window == (Window)arg);
-}
-
 class pVideoGLX : public OpenGL {
 public:
   int (*glSwapInterval)(int);
@@ -52,15 +47,18 @@ public:
   struct {
     Window handle;
     bool synchronize;
+    unsigned depth;
     unsigned filter;
 
     unsigned width;
     unsigned height;
+    unsigned format;
   } settings;
 
   bool cap(const string& name) {
     if(name == Video::Handle) return true;
     if(name == Video::Synchronize) return true;
+    if(name == Video::Depth) return true;
     if(name == Video::Filter) return true;
     if(name == Video::Shader) return true;
     if(name == Video::FragmentShader) return true;
@@ -71,6 +69,7 @@ public:
   any get(const string& name) {
     if(name == Video::Handle) return (uintptr_t)settings.handle;
     if(name == Video::Synchronize) return settings.synchronize;
+    if(name == Video::Depth) return settings.depth;
     if(name == Video::Filter) return settings.filter;
     return false;
   }
@@ -87,6 +86,19 @@ public:
         if(glSwapInterval) glSwapInterval(settings.synchronize);
         return true;
       }
+    }
+
+    if(name == Video::Depth) {
+      unsigned depth = any_cast<unsigned>(value);
+      switch(depth) {
+      case 15u: ibpp = 2; iformat = GL_UNSIGNED_SHORT_1_5_5_5_REV; break;
+      case 16u: ibpp = 2; iformat = GL_UNSIGNED_SHORT_5_6_5_REV; break;
+      case 24u: ibpp = 4; iformat = GL_UNSIGNED_INT_8_8_8_8_REV; break;
+      case 30u: ibpp = 4; iformat = GL_UNSIGNED_INT_2_10_10_10_REV; break;
+      default: return false;
+      }
+      settings.depth = depth;
+      return true;
     }
 
     if(name == Video::Filter) {
@@ -159,8 +171,21 @@ public:
 
     //let GLX determine the best Visual to use for GL output; provide a few hints
     //note: some video drivers will override double buffering attribute
-    int attributelist[] = { GLX_RGBA, GLX_DOUBLEBUFFER, None };
-    XVisualInfo *vi = glXChooseVisual(display, screen, attributelist);
+    int attributeList[] = {
+      GLX_DRAWABLE_TYPE, GLX_WINDOW_BIT,
+      GLX_RENDER_TYPE, GLX_RGBA_BIT,
+      GLX_DOUBLEBUFFER, True,
+      GLX_RED_SIZE, (settings.depth / 3),
+      GLX_GREEN_SIZE, (settings.depth / 3) + (settings.depth % 3),
+      GLX_BLUE_SIZE, (settings.depth / 3),
+      None,
+    };
+
+    int fbCount;
+    GLXFBConfig *fbConfig = glXChooseFBConfig(display, screen, attributeList, &fbCount);
+    if(fbCount == 0) return false;
+
+    XVisualInfo *vi = glXGetVisualFromFBConfig(display, fbConfig[0]);
 
     //Window settings.handle has already been realized, most likely with DefaultVisual.
     //GLX requires that the GL output window has the same Visual as the GLX context.
@@ -170,16 +195,19 @@ public:
     XSetWindowAttributes attributes;
     attributes.colormap = colormap;
     attributes.border_pixel = 0;
-    attributes.event_mask = StructureNotifyMask;
     xwindow = XCreateWindow(display, /* parent = */ settings.handle,
       /* x = */ 0, /* y = */ 0, window_attributes.width, window_attributes.height,
       /* border_width = */ 0, vi->depth, InputOutput, vi->visual,
-      CWColormap | CWBorderPixel | CWEventMask, &attributes);
+      CWColormap | CWBorderPixel, &attributes);
     XSetWindowBackground(display, xwindow, /* color = */ 0);
     XMapWindow(display, xwindow);
-    XEvent event;
+    XFlush(display);
+
     //window must be realized (appear onscreen) before we make the context current
-    XIfEvent(display, &event, glx_wait_for_map_notify, (char*)xwindow);
+    while(XPending(display)) {
+      XEvent event;
+      XNextEvent(display, &event);
+    }
 
     glxcontext = glXCreateContext(display, vi, /* sharelist = */ 0, /* direct = */ GL_TRUE);
     glXMakeCurrent(display, glxwindow = xwindow, glxcontext);
@@ -224,6 +252,10 @@ public:
   pVideoGLX() : glSwapInterval(0) {
     settings.handle = 0;
     settings.synchronize = false;
+    settings.depth = 24u;
+
+    iformat = GL_UNSIGNED_INT_8_8_8_8_REV;
+    ibpp = 4;
     xwindow = 0;
     colormap = 0;
     glxcontext = 0;

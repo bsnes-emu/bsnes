@@ -53,8 +53,6 @@ void SMP::power() {
   timer0.target = 0;
   timer1.target = 0;
   timer2.target = 0;
-
-  reset();
 }
 
 void SMP::reset() {

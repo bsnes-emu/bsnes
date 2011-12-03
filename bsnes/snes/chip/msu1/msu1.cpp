@@ -60,8 +60,6 @@ void MSU1::unload() {
 void MSU1::power() {
   audio.coprocessor_enable(true);
   audio.coprocessor_frequency(44100.0);
-
-  reset();
 }
 
 void MSU1::reset() {
@@ -78,60 +76,39 @@ void MSU1::reset() {
 }
 
 uint8 MSU1::mmio_read(unsigned addr) {
-  addr &= 0xffff;
-
-  if(addr == 0x2000) {
+  switch(addr & 7) {
+  case 0:
     return (mmio.data_busy    << 7)
          | (mmio.audio_busy   << 6)
          | (mmio.audio_repeat << 5)
          | (mmio.audio_play   << 4)
          | (Revision          << 0);
-  }
-
-  if(addr == 0x2001) {
+  case 1:
     if(mmio.data_busy) return 0x00;
     mmio.data_offset++;
     if(datafile.open()) return datafile.read();
     return 0x00;
+  case 2: return 'S';
+  case 3: return '-';
+  case 4: return 'M';
+  case 5: return 'S';
+  case 6: return 'U';
+  case 7: return '0' + Revision;
   }
-
-  if(addr == 0x2002) return 'S';
-  if(addr == 0x2003) return '-';
-  if(addr == 0x2004) return 'M';
-  if(addr == 0x2005) return 'S';
-  if(addr == 0x2006) return 'U';
-  if(addr == 0x2007) return '0' + Revision;
-
-  return 0x00;
+  throw;
 }
 
 void MSU1::mmio_write(unsigned addr, uint8 data) {
-  addr &= 0xffff;
-
-  if(addr == 0x2000) {
-    mmio.data_offset = (mmio.data_offset & 0xffffff00) | (data <<  0);
-  }
-
-  if(addr == 0x2001) {
-    mmio.data_offset = (mmio.data_offset & 0xffff00ff) | (data <<  8);
-  }
-
-  if(addr == 0x2002) {
-    mmio.data_offset = (mmio.data_offset & 0xff00ffff) | (data << 16);
-  }
-
-  if(addr == 0x2003) {
-    mmio.data_offset = (mmio.data_offset & 0x00ffffff) | (data << 24);
+  switch(addr & 7) {
+  case 0: mmio.data_offset = (mmio.data_offset & 0xffffff00) | (data <<  0); break;
+  case 1: mmio.data_offset = (mmio.data_offset & 0xffff00ff) | (data <<  8); break;
+  case 2: mmio.data_offset = (mmio.data_offset & 0xff00ffff) | (data << 16); break;
+  case 3: mmio.data_offset = (mmio.data_offset & 0x00ffffff) | (data << 24);
     if(datafile.open()) datafile.seek(mmio.data_offset);
     mmio.data_busy = false;
-  }
-
-  if(addr == 0x2004) {
-    mmio.audio_track = (mmio.audio_track & 0xff00) | (data << 0);
-  }
-
-  if(addr == 0x2005) {
-    mmio.audio_track = (mmio.audio_track & 0x00ff) | (data << 8);
+    break;
+  case 4: mmio.audio_track = (mmio.audio_track & 0xff00) | (data << 0);
+  case 5: mmio.audio_track = (mmio.audio_track & 0x00ff) | (data << 8);
     if(audiofile.open()) audiofile.close();
     if(audiofile.open(interface->path(Cartridge::Slot::Base, { "-", (unsigned)mmio.audio_track, ".pcm" }), file::mode::read)) {
       uint32 header = audiofile.readm(4);
@@ -145,15 +122,14 @@ void MSU1::mmio_write(unsigned addr, uint8 data) {
     mmio.audio_busy   = false;
     mmio.audio_repeat = false;
     mmio.audio_play   = false;
-  }
-
-  if(addr == 0x2006) {
+    break;
+  case 6:
     mmio.audio_volume = data;
-  }
-
-  if(addr == 0x2007) {
+    break;
+  case 7:
     mmio.audio_repeat = data & 2;
     mmio.audio_play   = data & 1;
+    break;
   }
 }
 

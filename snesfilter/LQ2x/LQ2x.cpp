@@ -17,6 +17,7 @@ dllexport void filter_render(
   const uint32_t *input, unsigned inputPitch,
   unsigned width, unsigned height
 ) {
+  enum : unsigned { Mask = (1 << 20) | (1 << 10) | (1 << 0) };
   outputPitch >>= 2, inputPitch >>= 2;
 
   #pragma omp parallel for
@@ -36,10 +37,10 @@ dllexport void filter_render(
       uint32_t E = *(in++ + nextline);
 
       if(A != E && B != D) {
-        *out0++ = (A == B ? C + A - ((C ^ A) & 0x010101) >> 1 : C);
-        *out0++ = (A == D ? C + A - ((C ^ A) & 0x010101) >> 1 : C);
-        *out1++ = (E == B ? C + E - ((C ^ E) & 0x010101) >> 1 : C);
-        *out1++ = (E == D ? C + E - ((C ^ E) & 0x010101) >> 1 : C);
+        *out0++ = (A == B ? C + A - ((C ^ A) & Mask) >> 1 : C);
+        *out0++ = (A == D ? C + A - ((C ^ A) & Mask) >> 1 : C);
+        *out1++ = (E == B ? C + E - ((C ^ E) & Mask) >> 1 : C);
+        *out1++ = (E == D ? C + E - ((C ^ E) & Mask) >> 1 : C);
       } else {
         *out0++ = C;
         *out0++ = C;

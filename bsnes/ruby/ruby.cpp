@@ -14,6 +14,7 @@ InputInterface input;
 
 const char *Video::Handle = "Handle";
 const char *Video::Synchronize = "Synchronize";
+const char *Video::Depth = "Depth";
 const char *Video::Filter = "Filter";
 const char *Video::Shader = "Shader";
 const char *Video::FragmentShader = "FragmentShader";
@@ -58,6 +59,10 @@ void VideoInterface::driver(const char *driver) {
   else if(!strcmp(driver, "OpenGL")) p = new VideoWGL();
   #endif
 
+  #ifdef VIDEO_XSHM
+  else if(!strcmp(driver, "XShm")) p = new VideoXShm();
+  #endif
+
   #ifdef VIDEO_XV
   else if(!strcmp(driver, "X-Video")) p = new VideoXv();
   #endif
@@ -75,6 +80,8 @@ const char* VideoInterface::default_driver() {
   return "DirectDraw";
   #elif defined(VIDEO_GDI)
   return "GDI";
+  #elif defined(VIDEO_XSHM)
+  return "XShm";
   #elif defined(VIDEO_QTOPENGL)
   return "Qt-OpenGL";
   #elif defined(VIDEO_QTRASTER)
@@ -124,6 +131,10 @@ const char* VideoInterface::driver_list() {
 
   #if defined(VIDEO_XV)
   "X-Video;"
+  #endif
+
+  #if defined(VIDEO_XSHM)
+  "XShm;"
   #endif
 
   #if defined(VIDEO_QTRASTER)

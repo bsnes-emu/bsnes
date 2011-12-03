@@ -128,7 +128,6 @@ void SA1::unload() {
 void SA1::power() {
   regs.a = regs.x = regs.y = 0x0000;
   regs.s = 0x01ff;
-  reset();
 }
 
 void SA1::reset() {

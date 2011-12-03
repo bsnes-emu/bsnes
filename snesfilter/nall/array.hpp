@@ -2,13 +2,12 @@
 #define NALL_ARRAY_HPP
 
 #include <stdlib.h>
+#include <algorithm>
 #include <initializer_list>
 #include <type_traits>
 #include <utility>
 #include <nall/algorithm.hpp>
 #include <nall/bit.hpp>
-#include <nall/concept.hpp>
-#include <nall/foreach.hpp>
 #include <nall/utility.hpp>
 
 namespace nall {
@@ -26,7 +25,7 @@ namespace nall {
 
     void reset() {
       if(pool) free(pool);
-      pool = 0;
+      pool = nullptr;
       poolsize = 0;
       buffersize = 0;
     }
@@ -54,19 +53,12 @@ namespace nall {
       operator[](buffersize) = data;
     }
 
+    void append(const T data[], unsigned length) {
+      for(unsigned n = 0; n < length; n++) operator[](buffersize) = data[n];
+    }
+
     void remove() {
       if(size > 0) resize(size - 1);  //remove last element only
-    }
-
-    template<typename U> void insert(unsigned index, const U list) {
-      unsigned listsize = container_size(list);
-      resize(buffersize + listsize);
-      memmove(pool + index + listsize, pool + index, (buffersize - index) * sizeof(T));
-      foreach(item, list) pool[index++] = item;
-    }
-
-    void insert(unsigned index, const T item) {
-      insert(index, array<T>{ item });
     }
 
     void remove(unsigned index, unsigned count = 1) {
@@ -86,10 +78,10 @@ namespace nall {
       memset(pool, 0, buffersize * sizeof(T));
     }
 
-    array() : pool(0), poolsize(0), buffersize(0) {
+    array() : pool(nullptr), poolsize(0), buffersize(0) {
     }
 
-    array(std::initializer_list<T> list) : pool(0), poolsize(0), buffersize(0) {
+    array(std::initializer_list<T> list) : pool(nullptr), poolsize(0), buffersize(0) {
       for(const T *p = list.begin(); p != list.end(); ++p) append(*p);
     }
 
@@ -107,7 +99,7 @@ namespace nall {
       return *this;
     }
 
-    array(const array &source) : pool(0), poolsize(0), buffersize(0) {
+    array(const array &source) : pool(nullptr), poolsize(0), buffersize(0) {
       operator=(source);
     }
 
@@ -117,12 +109,12 @@ namespace nall {
       pool = source.pool;
       poolsize = source.poolsize;
       buffersize = source.buffersize;
-      source.pool = 0;
+      source.pool = nullptr;
       source.reset();
       return *this;
     }
 
-    array(array &&source) : pool(0), poolsize(0), buffersize(0) {
+    array(array &&source) : pool(nullptr), poolsize(0), buffersize(0) {
       operator=(std::move(source));
     }
 
@@ -144,8 +136,6 @@ namespace nall {
     const T* begin() const { return &pool[0]; }
     const T* end() const { return &pool[buffersize]; }
   };
-
-  template<typename T> struct has_size<array<T>> { enum { value = true }; };
 }
 
 #endif

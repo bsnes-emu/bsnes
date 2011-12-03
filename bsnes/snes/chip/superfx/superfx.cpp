@@ -51,7 +51,6 @@ void SuperFX::unload() {
 
 void SuperFX::power() {
   clockmode = config.superfx.speed;
-  reset();
 }
 
 void SuperFX::reset() {

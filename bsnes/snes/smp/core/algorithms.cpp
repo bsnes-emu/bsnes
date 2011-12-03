@@ -94,13 +94,7 @@ uint8 SMPcore::op_ror(uint8 x) {
 }
 
 uint8 SMPcore::op_sbc(uint8 x, uint8 y) {
-  int r = x - y - !regs.p.c;
-  regs.p.n = r & 0x80;
-  regs.p.v = (x ^ y) & (x ^ r) & 0x80;
-  regs.p.h = !((x ^ y ^ r) & 0x10);
-  regs.p.z = (uint8)r == 0;
-  regs.p.c = r >= 0;
-  return r;
+  return op_adc(x, ~y);
 }
 
 uint8 SMPcore::op_st(uint8 x, uint8 y) {

@@ -1,5 +1,4 @@
-class Input {
-public:
+struct Input {
   static const char *Handle;
   static const char *KeyboardSupport;
   static const char *MouseSupport;

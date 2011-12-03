@@ -41,8 +41,6 @@ void ICD2::unload() {
 void ICD2::power() {
   audio.coprocessor_enable(true);
   audio.coprocessor_frequency(4 * 1024 * 1024);
-
-  reset();
 }
 
 void ICD2::reset() {

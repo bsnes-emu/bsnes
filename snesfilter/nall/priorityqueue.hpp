@@ -12,7 +12,7 @@ namespace nall {
   //priority queue implementation using binary min-heap array;
   //does not require normalize() function.
   //O(1)     find   (tick)
-  //O(log n) insert (enqueue)
+  //O(log n) append (enqueue)
   //O(log n) remove (dequeue)
   template<typename type_t> class priority_queue {
   public:

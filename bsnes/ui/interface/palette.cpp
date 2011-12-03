@@ -1,7 +1,7 @@
 Palette palette;
 
-uint8_t Palette::operator[](uint8_t n) {
-  return color[n];
+unsigned Palette::operator()(unsigned r, unsigned g, unsigned b) const {
+  return red[r] + green[g] + blue[b];
 }
 
 /* 5-bit -> 8-bit
@@ -13,35 +13,38 @@ const uint8_t Palette::gammaRamp[32] = {
 };
 */
 
-uint8_t Palette::contrastAdjust(uint8_t input) {
-  signed contrast = config->video.contrast - 100;
-  signed result = input - contrast + (2 * contrast * input + 127) / 255;
-  return max(0, min(255, result));
-}
-
-uint8_t Palette::brightnessAdjust(uint8_t input) {
-  signed brightness = config->video.brightness - 100;
-  signed result = input + brightness;
-  return max(0, min(255, result));
-}
-
-uint8_t Palette::gammaAdjust(uint8_t input) {
-  signed result = (signed)(pow(((double)input / 255.0), (double)config->video.gamma / 100.0) * 255.0 + 0.5);
-  return max(0, min(255, result));
-}
-
 void Palette::update() {
   double exponent = 1.0 + (double)config->video.gamma * 0.01;
-  for(unsigned n = 0; n < 256; n++) {
-    unsigned result = (n < 128 ? 127 * pow(((double)n / 127), exponent) : n);
+  for(unsigned n = 0; n < 1024; n++) {
+    unsigned result = (n < 512 ? 511 * pow(((double)n / 511), exponent) : n);
     color[n] = result;
   }
 
-  for(unsigned n = 0; n < 256; n++) {
-    color[n] = contrastAdjust(color[n]);
+  double contrast = config->video.contrast * 0.01;
+  for(unsigned n = 0; n < 1024; n++) {
+    signed result = color[n] * contrast;
+    color[n] = max(0, min(1023, result));
   }
 
-  for(unsigned n = 0; n < 256; n++) {
-    color[n] = brightnessAdjust(color[n]);
+  signed brightness = (config->video.brightness - 100) * 4;
+  for(unsigned n = 0; n < 1024; n++) {
+    signed result = color[n] + brightness;
+    color[n] = max(0, min(1023, result));
+  }
+
+  if(config->video.depth == 30) {
+    for(unsigned n = 0; n < 1024; n++) {
+      red[n] = color[n] << 20;
+      green[n] = color[n] << 10;
+      blue[n] = color[n] << 0;
+    }
+  }
+
+  if(config->video.depth == 24) {
+    for(unsigned n = 0; n < 1024; n++) {
+      red[n] = (color[n] >> 2) << 16;
+      green[n] = (color[n] >> 2) << 8;
+      blue[n] = (color[n] >> 2) << 0;
+    }
   }
 }

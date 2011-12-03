@@ -16,7 +16,6 @@ void OBC1::unload() {
 }
 
 void OBC1::power() {
-  reset();
 }
 
 void OBC1::reset() {

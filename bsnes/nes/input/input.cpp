@@ -42,7 +42,6 @@ void Input::connect(bool port, Device device) {
 }
 
 void Input::power() {
-  reset();
 }
 
 void Input::reset() {

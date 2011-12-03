@@ -141,6 +141,8 @@ public:
     settings.synchronize = false;
     settings.filter = 0;
 
+    iformat = GL_UNSIGNED_INT_8_8_8_8_REV;
+    ibpp = 4;
     window = 0;
     wglcontext = 0;
     glwindow = 0;

@@ -55,7 +55,6 @@ void ST0018::unload() {
 }
 
 void ST0018::power() {
-  reset();
 }
 
 void ST0018::reset() {

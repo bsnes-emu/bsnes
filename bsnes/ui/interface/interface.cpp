@@ -231,7 +231,7 @@ void Interface::videoRefresh(const uint32_t *input, unsigned inputPitch, unsigne
       uint32_t *dp = output + y * outputPitch;
       for(unsigned x = 0; x < width; x++) {
         uint32_t color = *sp++;
-        *dp++ = (palette[color >> 16] << 16) + (palette[color >> 8] << 8) + (palette[color >> 0] << 0);
+        *dp++ = palette((color >> 20) & 1023, (color >> 10) & 1023, (color >> 0) & 1023);
       }
     }
 

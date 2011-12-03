@@ -1,15 +1,17 @@
 #ifndef NALL_REFERENCE_ARRAY_HPP
 #define NALL_REFERENCE_ARRAY_HPP
 
+#include <algorithm>
 #include <type_traits>
 #include <nall/bit.hpp>
-#include <nall/concept.hpp>
 
 namespace nall {
   template<typename T> struct reference_array {
+    struct exception_out_of_bounds{};
+
   protected:
-    typedef typename std::remove_reference<T>::type *Tptr;
-    Tptr *pool;
+    typedef typename std::remove_reference<T>::type type_t;
+    type_t **pool;
     unsigned poolsize, buffersize;
 
   public:
@@ -18,7 +20,7 @@ namespace nall {
 
     void reset() {
       if(pool) free(pool);
-      pool = 0;
+      pool = nullptr;
       poolsize = 0;
       buffersize = 0;
     }
@@ -26,7 +28,7 @@ namespace nall {
     void reserve(unsigned newsize) {
       if(newsize == poolsize) return;
 
-      pool = (Tptr*)realloc(pool, newsize * sizeof(T));
+      pool = (type_t**)realloc(pool, sizeof(type_t*) * newsize);
       poolsize = newsize;
       buffersize = min(buffersize, newsize);
     }
@@ -36,7 +38,14 @@ namespace nall {
       buffersize = newsize;
     }
 
-    bool append(const T data) {
+    template<typename... Args>
+    bool append(type_t& data, Args&&... args) {
+      bool result = append(data);
+      append(std::forward<Args>(args)...);
+      return result;
+    }
+
+    bool append(type_t& data) {
       for(unsigned index = 0; index < buffersize; index++) {
         if(pool[index] == &data) return false;
       }
@@ -47,7 +56,7 @@ namespace nall {
       return true;
     }
 
-    bool remove(const T data) {
+    bool remove(type_t& data) {
       for(unsigned index = 0; index < buffersize; index++) {
         if(pool[index] == &data) {
           for(unsigned i = index; i < buffersize - 1; i++) pool[i] = pool[i + 1];
@@ -58,7 +67,7 @@ namespace nall {
       return false;
     }
 
-    template<typename... Args> reference_array(Args&... args) : pool(0), poolsize(0), buffersize(0) {
+    template<typename... Args> reference_array(Args&... args) : pool(nullptr), poolsize(0), buffersize(0) {
       construct(args...);
     }
 
@@ -70,8 +79,8 @@ namespace nall {
       if(pool) free(pool);
       buffersize = source.buffersize;
       poolsize = source.poolsize;
-      pool = (Tptr*)malloc(sizeof(T) * poolsize);
-      memcpy(pool, source.pool, sizeof(T) * buffersize);
+      pool = (type_t**)malloc(sizeof(type_t*) * poolsize);
+      memcpy(pool, source.pool, sizeof(type_t*) * buffersize);
       return *this;
     }
 
@@ -80,20 +89,36 @@ namespace nall {
       pool = source.pool;
       poolsize = source.poolsize;
       buffersize = source.buffersize;
-      source.pool = 0;
+      source.pool = nullptr;
       source.reset();
       return *this;
     }
 
-    inline T operator[](unsigned index) {
-      if(index >= buffersize) throw "reference_array[] out of bounds";
+    inline type_t& operator[](unsigned index) {
+      if(index >= buffersize) throw exception_out_of_bounds();
       return *pool[index];
     }
 
-    inline const T operator[](unsigned index) const {
-      if(index >= buffersize) throw "reference_array[] out of bounds";
+    inline type_t& operator[](unsigned index) const {
+      if(index >= buffersize) throw exception_out_of_bounds();
       return *pool[index];
     }
+
+    //iteration
+    struct iterator {
+      bool operator!=(const iterator &source) const { return index != source.index; }
+      type_t& operator*() { return array.operator[](index); }
+      iterator& operator++() { index++; return *this; }
+      iterator(const reference_array &array, unsigned index) : array(array), index(index) {}
+    private:
+      const reference_array &array;
+      unsigned index;
+    };
+
+    iterator begin() { return iterator(*this, 0); }
+    iterator end() { return iterator(*this, buffersize); }
+    const iterator begin() const { return iterator(*this, 0); }
+    const iterator end() const { return iterator(*this, buffersize); }
 
   private:
     void construct() {
@@ -112,8 +137,6 @@ namespace nall {
       construct(args...);
     }
   };
-
-  template<typename T> struct has_size<reference_array<T>> { enum { value = true }; };
 }
 
 #endif

@@ -21,6 +21,7 @@ namespace nall {
   };
 
   template<typename T> class optional {
+  public:
     bool valid;
     T value;
   public:

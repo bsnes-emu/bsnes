@@ -130,17 +130,17 @@ bool pHexEdit::keyPress(unsigned scancode) {
   unsigned cursorY = position / lineWidth;
   unsigned cursorX = position % lineWidth;
 
-  if(scancode == GDK_KEY_Home) {
+  if(scancode == GDK_Home) {
     setCursorPosition(cursorY * lineWidth + 10);
     return true;
   }
 
-  if(scancode == GDK_KEY_End) {
+  if(scancode == GDK_End) {
     setCursorPosition(cursorY * lineWidth + 10 + (hexEdit.state.columns * 3 - 1));
     return true;
   }
 
-  if(scancode == GDK_KEY_Up) {
+  if(scancode == GDK_Up) {
     if(cursorY != 0) return false;
 
     signed newOffset = hexEdit.state.offset - hexEdit.state.columns;
@@ -151,7 +151,7 @@ bool pHexEdit::keyPress(unsigned scancode) {
     return true;
   }
 
-  if(scancode == GDK_KEY_Down) {
+  if(scancode == GDK_Down) {
     if(cursorY != hexEdit.state.rows - 1) return false;
 
     signed newOffset = hexEdit.state.offset + hexEdit.state.columns;
@@ -162,7 +162,7 @@ bool pHexEdit::keyPress(unsigned scancode) {
     return true;
   }
 
-  if(scancode == GDK_KEY_Page_Up) {
+  if(scancode == GDK_Page_Up) {
     signed newOffset = hexEdit.state.offset - hexEdit.state.columns * hexEdit.state.rows;
     if(newOffset >= 0) {
       hexEdit.setOffset(newOffset);
@@ -173,7 +173,7 @@ bool pHexEdit::keyPress(unsigned scancode) {
     return true;
   }
 
-  if(scancode == GDK_KEY_Page_Down) {
+  if(scancode == GDK_Page_Down) {
     signed newOffset = hexEdit.state.offset + hexEdit.state.columns * hexEdit.state.rows;
     for(unsigned n = 0; n < hexEdit.state.rows; n++) {
       if(newOffset + hexEdit.state.columns * hexEdit.state.rows - (hexEdit.state.columns - 1) <= hexEdit.state.length) {

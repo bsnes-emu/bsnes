@@ -101,19 +101,19 @@ template<unsigned bits> struct stringify<uint_t<bits>> {
 template<> struct stringify<float> {
   char data[256];
   operator const char*() const { return data; }
-  stringify(float value) { snprintf(data, 255, "%f", value); }
+  stringify(float value) { fp(data, value); }
 };
 
 template<> struct stringify<double> {
   char data[256];
   operator const char*() const { return data; }
-  stringify(double value) { snprintf(data, 255, "%f", value); }
+  stringify(double value) { fp(data, value); }
 };
 
 template<> struct stringify<long double> {
   char data[256];
   operator const char*() const { return data; }
-  stringify(long double value) { snprintf(data, 255, "%Lf", value); }
+  stringify(long double value) { fp(data, value); }
 };
 
 // strings

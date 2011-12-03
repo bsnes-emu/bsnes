@@ -42,9 +42,9 @@ private:
   friend class Input;
 };
 
-#include <snes/video/video.hpp>
-#include <snes/audio/audio.hpp>
-#include <snes/input/input.hpp>
+#include "video.hpp"
+#include "audio.hpp"
+#include "input.hpp"
 
 #include <snes/config/config.hpp>
 #include <snes/debugger/debugger.hpp>

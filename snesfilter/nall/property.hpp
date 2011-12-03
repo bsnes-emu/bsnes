@@ -22,7 +22,7 @@
 //  readwrite<int> y;
 //};
 
-//return types are const T& (byref) instead fo T (byval) to avoid major speed
+//return types are const T& (byref) instead of T (byval) to avoid major speed
 //penalties for objects with expensive copy constructors
 
 //operator-> provides access to underlying object type:

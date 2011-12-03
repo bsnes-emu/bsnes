@@ -70,7 +70,7 @@ namespace nall {
       else list[n].type = unknown_t;
     }
 
-    virtual bool load(const char *filename) {
+    virtual bool load(const string &filename) {
       string data;
       if(data.readfile(filename) == true) {
         data.replace("\r", "");
@@ -100,7 +100,7 @@ namespace nall {
       }
     }
 
-    virtual bool save(const char *filename) const {
+    virtual bool save(const string &filename) const {
       file fp;
       if(fp.open(filename, file::mode::write)) {
         for(unsigned i = 0; i < list.size(); i++) {

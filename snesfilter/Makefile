@@ -2,12 +2,12 @@ include nall/Makefile
 
 c       := $(compiler) -std=gnu99
 cpp     := $(subst cc,++,$(compiler)) -std=gnu++0x
-flags   := -fPIC -O3 -I. -Iobj -fomit-frame-pointer
+flags   := -fPIC -I. -Iobj -O3 -fomit-frame-pointer
 link    := -s
 objects :=
 
 ifeq ($(platform),x)
-  flags += -fopenmp
+# flags += -fopenmp
 endif
 
 objects += out/Pixellate2x.filter

@@ -25,7 +25,7 @@ protected:
   struct Node {
     unsigned offset;
     Node *next;
-    inline Node() : offset(0), next(0) {}
+    inline Node() : offset(0), next(nullptr) {}
     inline ~Node() { if(next) delete next; }
   } *tree[65536];
 
@@ -34,7 +34,7 @@ protected:
   unsigned sourceSize;
 
 public:
-  inline lzss() : sourceData(0), sourceSize(0) {}
+  inline lzss() : sourceData(nullptr), sourceSize(0) {}
 };
 
 void lzss::source(const uint8_t *data, unsigned size) {

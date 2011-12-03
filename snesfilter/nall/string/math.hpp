@@ -1,5 +1,4 @@
-#ifndef NALL_STRING_MATH_HPP
-#define NALL_STRING_MATH_HPP
+#ifdef NALL_STRING_INTERNAL_HPP
 
 namespace nall {
 
@@ -87,8 +86,8 @@ static int eval(const char *&s, int depth = 0) {
 
     if(depth >= 13) break;
     if(x == '*') { value *= eval(++s, 13); continue; }
-    if(x == '/') { value /= eval(++s, 13); continue; }
-    if(x == '%') { value %= eval(++s, 13); continue; }
+    if(x == '/') { int result = eval(++s, 13); if(result == 0) throw "division_by_zero"; value /= result; continue; }
+    if(x == '%') { int result = eval(++s, 13); if(result == 0) throw "division_by_zero"; value %= result; continue; }
 
     if(depth >= 12) break;
     if(x == '+') { value += eval(++s, 12); continue; }

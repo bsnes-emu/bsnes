@@ -24,7 +24,7 @@ protected:
   struct Node {
     unsigned offset;
     Node *next;
-    inline Node() : offset(0), next(0) {}
+    inline Node() : offset(0), next(nullptr) {}
     inline ~Node() { if(next) delete next; }
   };
 

@@ -27,85 +27,6 @@ Font::Font(const string &description):
 description(description) {
 }
 
-//Image
-//=====
-
-bool Image::load(const string &filename, const Color &alpha) {
-  if(data) { delete[] data; data = nullptr; }
-
-  file fp;
-  if(fp.open(filename, file::mode::read) == false) return false;
-  uint8_t d0 = fp.read();
-  uint8_t d1 = fp.read();
-  uint8_t d2 = fp.read();
-  uint8_t d3 = fp.read();
-  fp.close();
-
-  if(d0 == 'B' && d1 == 'M') {
-    bmp::read(filename, data, width, height);
-  }
-
-  if(d0 == 0x89 && d1 == 'P' && d2 == 'N' && d3 == 'G') {
-    png image;
-    if(image.decode(filename)) {
-      image.alphaTransform((alpha.red << 16) + (alpha.green << 8) + (alpha.blue << 0));
-      width = image.info.width, height = image.info.height;
-      data = new uint32_t[width * height];
-      memcpy(data, image.data, width * height * sizeof(uint32_t));
-    }
-  }
-
-  return data;
-}
-
-void Image::load(const uint32_t *data, const Size &size) {
-  if(data) { delete[] data; data = nullptr; }
-  width = size.width, height = size.height;
-  this->data = new uint32_t[width * height];
-  memcpy(this->data, data, width * height * sizeof(uint32_t));
-}
-
-Image& Image::operator=(const Image &source) {
-  if(this == &source) return *this;
-  if(data) { delete[] data; data = nullptr; }
-  if(source.data == nullptr) return *this;
-  width = source.width, height = source.height;
-  data = new uint32_t[width * height];
-  memcpy(data, source.data, width * height * sizeof(uint32_t));
-  return *this;
-}
-
-Image& Image::operator=(Image &&source) {
-  if(this == &source) return *this;
-  if(data) { delete[] data; data = nullptr; }
-  data = source.data, width = source.width, height = source.height;
-  source.data = nullptr;
-  return *this;
-}
-
-Image::Image() : data(nullptr) {
-}
-
-Image::Image(const string &filename, const Color &alpha) : data(nullptr) {
-  load(filename, alpha);
-}
-
-Image::Image(const uint32_t *data, const Size &size) {
-  load(data, size);
-}
-
-Image::Image(const Image &source) : data(nullptr) {
-  operator=(source);
-}
-
-Image::Image(Image &&source) : data(nullptr) {
-  operator=(std::forward<Image>(source));
-}
-
-Image::~Image() {
-  if(data) delete[] data;
-}
-
 //Object
 //======
 
@@ -739,7 +660,7 @@ uint32_t* Canvas::data() {
   return state.data;
 }
 
-bool Canvas::setImage(const Image &image) {
+bool Canvas::setImage(const nall::image &image) {
   if(image.data == nullptr || image.width == 0 || image.height == 0) return false;
   state.width = image.width;
   state.height = image.height;

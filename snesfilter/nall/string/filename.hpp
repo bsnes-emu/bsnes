@@ -1,5 +1,4 @@
-#ifndef NALL_FILENAME_HPP
-#define NALL_FILENAME_HPP
+#ifdef NALL_STRING_INTERNAL_HPP
 
 namespace nall {
 

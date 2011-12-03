@@ -12,7 +12,7 @@ ui := ui
 # compiler
 c       := $(compiler) -std=gnu99
 cpp     := $(subst cc,++,$(compiler)) -std=gnu++0x
-flags   := -O3 -fomit-frame-pointer -I.
+flags   := -I. -O3 -fomit-frame-pointer
 link    :=
 objects := libco
 
@@ -29,8 +29,6 @@ endif
 
 # platform
 ifeq ($(platform),x)
-  # tree vectorization causes code generation errors with Linux/GCC 4.6.1
-  flags += -fno-tree-vectorize
   link += -s -ldl -lX11 -lXext
 else ifeq ($(platform),osx)
 else ifeq ($(platform),win)

@@ -10,9 +10,12 @@
 namespace nall {
 
 struct png {
-  uint32_t *data;
-  unsigned size;
-
+  //colorType:
+  //0 = L
+  //2 = R,G,B
+  //3 = P
+  //4 = L,A
+  //6 = R,G,B,A
   struct Info {
     unsigned width;
     unsigned height;
@@ -28,13 +31,14 @@ struct png {
     uint8_t palette[256][3];
   } info;
 
-  uint8_t *rawData;
-  unsigned rawSize;
+  uint8_t *data;
+  unsigned size;
 
   inline bool decode(const string &filename);
   inline bool decode(const uint8_t *sourceData, unsigned sourceSize);
-  inline void transform();
-  inline void alphaTransform(uint32_t rgb = 0xffffff);
+  inline unsigned readbits(const uint8_t *&data);
+  unsigned bitpos;
+
   inline png();
   inline ~png();
 
@@ -46,16 +50,11 @@ protected:
     IEND = 0x49454e44,
   };
 
-  unsigned bitpos;
-
   inline unsigned interlace(unsigned pass, unsigned index);
   inline unsigned inflateSize();
   inline bool deinterlace(const uint8_t *&inputData, unsigned pass);
   inline bool filter(uint8_t *outputData, const uint8_t *inputData, unsigned width, unsigned height);
   inline unsigned read(const uint8_t *data, unsigned length);
-  inline unsigned decode(const uint8_t *&data);
-  inline unsigned readbits(const uint8_t *&data);
-  inline unsigned scale(unsigned n);
 };
 
 bool png::decode(const string &filename) {
@@ -146,14 +145,14 @@ bool png::decode(const uint8_t *sourceData, unsigned sourceSize) {
     return false;
   }
 
-  rawSize = info.width * info.height * info.bytesPerPixel;
-  rawData = new uint8_t[rawSize];
+  size = info.width * info.height * info.bytesPerPixel;
+  data = new uint8_t[size];
 
   if(info.interlaceMethod == 0) {
-    if(filter(rawData, interlacedData, info.width, info.height) == false) {
+    if(filter(data, interlacedData, info.width, info.height) == false) {
       delete[] interlacedData;
-      delete[] rawData;
-      rawData = 0;
+      delete[] data;
+      data = 0;
       return false;
     }
   } else {
@@ -161,8 +160,8 @@ bool png::decode(const uint8_t *sourceData, unsigned sourceSize) {
     for(unsigned pass = 0; pass < 7; pass++) {
       if(deinterlace(passData, pass) == false) {
         delete[] interlacedData;
-        delete[] rawData;
-        rawData = 0;
+        delete[] data;
+        data = 0;
         return false;
       }
     }
@@ -216,7 +215,7 @@ bool png::deinterlace(const uint8_t *&inputData, unsigned pass) {
 
   const uint8_t *rd = outputData;
   for(unsigned y = yo; y < info.height; y += yd) {
-    uint8_t *wr = rawData + y * info.pitch;
+    uint8_t *wr = data + y * info.pitch;
     for(unsigned x = xo; x < info.width; x += xd) {
       for(unsigned b = 0; b < info.bytesPerPixel; b++) {
         wr[x * info.bytesPerPixel + b] = *rd++;
@@ -298,42 +297,6 @@ unsigned png::read(const uint8_t *data, unsigned length) {
   return result;
 }
 
-unsigned png::decode(const uint8_t *&data) {
-  unsigned p, r, g, b, a;
-
-  switch(info.colorType) {
-  case 0:  //L
-    r = g = b = scale(readbits(data));
-    a = 0xff;
-    break;
-  case 2:  //R,G,B
-    r = scale(readbits(data));
-    g = scale(readbits(data));
-    b = scale(readbits(data));
-    a = 0xff;
-    break;
-  case 3:  //P
-    p = readbits(data);
-    r = info.palette[p][0];
-    g = info.palette[p][1];
-    b = info.palette[p][2];
-    a = 0xff;
-    break;
-  case 4:  //L,A
-    r = g = b = scale(readbits(data));
-    a = scale(readbits(data));
-    break;
-  case 6:  //R,G,B,A
-    r = scale(readbits(data));
-    g = scale(readbits(data));
-    b = scale(readbits(data));
-    a = scale(readbits(data));
-    break;
-  }
-
-  return (a << 24) | (r << 16) | (g << 8) | (b << 0);
-}
-
 unsigned png::readbits(const uint8_t *&data) {
   unsigned result = 0;
   switch(info.bitDepth) {
@@ -363,62 +326,12 @@ unsigned png::readbits(const uint8_t *&data) {
   return result;
 }
 
-unsigned png::scale(unsigned n) {
-  switch(info.bitDepth) {
-  case  1: return n ? 0xff : 0x00;
-  case  2: return n * 0x55;
-  case  4: return n * 0x11;
-  case  8: return n;
-  case 16: return n >> 8;
-  }
-  return 0;
-}
-
-void png::transform() {
-  if(data) delete[] data;
-  data = new uint32_t[info.width * info.height];
-
+png::png() : data(nullptr) {
   bitpos = 0;
-  const uint8_t *rd = rawData;
-  for(unsigned y = 0; y < info.height; y++) {
-    uint32_t *wr = data + y * info.width;
-    for(unsigned x = 0; x < info.width; x++) {
-      wr[x] = decode(rd);
-    }
-  }
-}
-
-void png::alphaTransform(uint32_t rgb) {
-  transform();
-
-  uint8_t ir = rgb >> 16;
-  uint8_t ig = rgb >>  8;
-  uint8_t ib = rgb >>  0;
-
-  uint32_t *p = data;
-  for(unsigned y = 0; y < info.height; y++) {
-    for(unsigned x = 0; x < info.width; x++) {
-      uint32_t pixel = *p;
-      uint8_t a = pixel >> 24;
-      uint8_t r = pixel >> 16;
-      uint8_t g = pixel >>  8;
-      uint8_t b = pixel >>  0;
-
-      r = (r * a) + (ir * (255 - a)) >> 8;
-      g = (g * a) + (ig * (255 - a)) >> 8;
-      b = (b * a) + (ib * (255 - a)) >> 8;
-
-      *p++ = (255 << 24) | (r << 16) | (g << 8) | (b << 0);
-    }
-  }
-}
-
-png::png() : data(0), rawData(0) {
 }
 
 png::~png() {
   if(data) delete[] data;
-  if(rawData) delete[] rawData;
 }
 
 }

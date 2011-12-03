@@ -1,6 +1,6 @@
 /*
   ruby
-  version: 0.07 (2011-08-14)
+  version: 0.08 (2011-11-25)
   license: public domain
 */
 

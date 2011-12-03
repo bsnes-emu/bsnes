@@ -274,8 +274,6 @@ void DSP::power() {
     voice[i].t_envx_out = 0;
     voice[i].hidden_env = 0;
   }
-
-  reset();
 }
 
 void DSP::reset() {

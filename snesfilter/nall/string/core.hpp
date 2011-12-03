@@ -1,5 +1,4 @@
-#ifndef NALL_STRING_CORE_HPP
-#define NALL_STRING_CORE_HPP
+#ifdef NALL_STRING_INTERNAL_HPP
 
 namespace nall {
 
@@ -8,7 +7,7 @@ static void istring(string &output) {
 
 template<typename T, typename... Args>
 static void istring(string &output, const T &value, Args&&... args) {
-  output.append_(to_string(value));
+  output.append_(make_string(value));
   istring(output, std::forward<Args>(args)...);
 }
 
@@ -76,7 +75,7 @@ string& string::operator=(string &&source) {
   if(data) free(data);
   size = source.size;
   data = source.data;
-  source.data = 0;
+  source.data = nullptr;
   source.size = 0;
   return *this;
 }
@@ -98,7 +97,7 @@ string::string(string &&source) {
   if(&source == this) return;
   size = source.size;
   data = source.data;
-  source.data = 0;
+  source.data = nullptr;
 }
 
 string::~string() {
@@ -152,9 +151,7 @@ inline lstring::lstring() {
 }
 
 inline lstring::lstring(std::initializer_list<string> list) {
-  for(const string *s = list.begin(); s != list.end(); ++s) {
-    operator<<(*s);
-  }
+  for(auto &data : list) append(data);
 }
 
 }

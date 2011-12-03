@@ -253,9 +253,14 @@ template<unsigned length_, char padding> string binary(uintmax_t value) {
 //using sprintf is certainly not the most ideal method to convert
 //a double to a string ... but attempting to parse a double by
 //hand, digit-by-digit, results in subtle rounding errors.
-unsigned fp(char *str, double value) {
+unsigned fp(char *str, long double value) {
   char buffer[256];
-  sprintf(buffer, "%f", value);
+  #ifdef _WIN32
+  //Windows C-runtime does not support long double via sprintf()
+  sprintf(buffer, "%f", (double)value);
+  #else
+  sprintf(buffer, "%Lf", value);
+  #endif
 
   //remove excess 0's in fraction (2.500000 -> 2.5)
   for(char *p = buffer; *p; p++) {
@@ -274,7 +279,7 @@ unsigned fp(char *str, double value) {
   return length + 1;
 }
 
-string fp(double value) {
+string fp(long double value) {
   string temp;
   temp.reserve(fp(0, value));
   fp(temp(), value);

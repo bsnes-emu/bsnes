@@ -75,7 +75,7 @@ bool gzip::decompress(const uint8_t *data, unsigned size) {
   return inflate(this->data, this->size, data + p, size - p - 8);
 }
 
-gzip::gzip() : data(0) {
+gzip::gzip() : data(nullptr) {
 }
 
 gzip::~gzip() {
