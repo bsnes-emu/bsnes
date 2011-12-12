@@ -172,7 +172,7 @@ public:
   void destructor();
 
 public slots:
-  void onTick();
+  void onActivate();
 };
 
 struct pCheckItem : public QObject, public pAction {
@@ -191,7 +191,7 @@ public:
   void destructor();
 
 public slots:
-  void onTick();
+  void onToggle();
 };
 
 struct pRadioItem : public QObject, public pAction {
@@ -212,7 +212,7 @@ public:
   void destructor();
 
 public slots:
-  void onTick();
+  void onActivate();
 };
 
 struct pSizable : public pObject {
@@ -267,7 +267,7 @@ public:
   void orphan();
 
 public slots:
-  void onTick();
+  void onActivate();
 };
 
 struct pCanvas : public QObject, public pWidget {
@@ -311,7 +311,7 @@ public:
   void orphan();
 
 public slots:
-  void onTick();
+  void onToggle();
 };
 
 struct pComboBox : public QObject, public pWidget {
@@ -472,7 +472,7 @@ public:
 public slots:
   void onActivate();
   void onChange(QTreeWidgetItem *item);
-  void onTick(QTreeWidgetItem *item);
+  void onToggle(QTreeWidgetItem *item);
 };
 
 struct pProgressBar : public pWidget {
@@ -508,7 +508,7 @@ public:
   void orphan();
 
 public slots:
-  void onTick();
+  void onActivate();
 };
 
 struct pTextEdit : public QObject, public pWidget {

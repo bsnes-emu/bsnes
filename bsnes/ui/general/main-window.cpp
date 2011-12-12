@@ -199,124 +199,124 @@ MainWindow::MainWindow() {
   onClose = [&] { application->quit = true; };
   onSize = [&] { utility->resizeMainWindow(); };
 
-  cartridgeLoadNES.onTick = [&] {
+  cartridgeLoadNES.onActivate = [&] {
     fileBrowser->open("Load Cartridge - NES", FileBrowser::Mode::NES, [](string filename) {
       interface->nes.loadCartridge(filename);
     });
   };
 
-  cartridgeLoadSNES.onTick = [&] {
+  cartridgeLoadSNES.onActivate = [&] {
     fileBrowser->open("Load Cartridge - SNES", FileBrowser::Mode::SNES, [](string filename) {
       interface->snes.loadCartridge(filename);
     });
   };
 
-  cartridgeLoadGameBoy.onTick = [&] {
+  cartridgeLoadGameBoy.onActivate = [&] {
     fileBrowser->open("Load Cartridge - Game Boy", FileBrowser::Mode::GameBoy, [](string filename) {
       interface->gameBoy.loadCartridge(GameBoy::System::Revision::GameBoy, filename);
     });
   };
 
-  cartridgeLoadGameBoyColor.onTick = [&] {
+  cartridgeLoadGameBoyColor.onActivate = [&] {
     fileBrowser->open("Load Cartridge - Game Boy Color", FileBrowser::Mode::GameBoyColor, [](string filename) {
       interface->gameBoy.loadCartridge(GameBoy::System::Revision::GameBoyColor, filename);
     });
   };
 
-  cartridgeLoadSatellaviewSlotted.onTick = [&] { slotLoader->loadSatellaviewSlotted(); };
-  cartridgeLoadSatellaview.onTick        = [&] { slotLoader->loadSatellaview(); };
-  cartridgeLoadSufamiTurbo.onTick        = [&] { slotLoader->loadSufamiTurbo(); };
-  cartridgeLoadSuperGameBoy.onTick       = [&] { slotLoader->loadSuperGameBoy(); };
+  cartridgeLoadSatellaviewSlotted.onActivate = [&] { slotLoader->loadSatellaviewSlotted(); };
+  cartridgeLoadSatellaview.onActivate        = [&] { slotLoader->loadSatellaview(); };
+  cartridgeLoadSufamiTurbo.onActivate        = [&] { slotLoader->loadSufamiTurbo(); };
+  cartridgeLoadSuperGameBoy.onActivate       = [&] { slotLoader->loadSuperGameBoy(); };
 
-  nesPower.onTick = { &Interface::power, interface };
-  nesReset.onTick = { &Interface::reset, interface };
+  nesPower.onActivate = { &Interface::power, interface };
+  nesReset.onActivate = { &Interface::reset, interface };
 
-  nesPort1Device[0].onTick = [&] { interface->setController(0, 0); };
-  nesPort1Device[1].onTick = [&] { interface->setController(0, 1); };
+  nesPort1Device[0].onActivate = [&] { interface->setController(0, 0); };
+  nesPort1Device[1].onActivate = [&] { interface->setController(0, 1); };
 
-  nesPort2Device[0].onTick = [&] { interface->setController(1, 0); };
-  nesPort2Device[1].onTick = [&] { interface->setController(1, 1); };
+  nesPort2Device[0].onActivate = [&] { interface->setController(1, 0); };
+  nesPort2Device[1].onActivate = [&] { interface->setController(1, 1); };
 
-  nesCartridgeUnload.onTick = { &Interface::unloadCartridge, interface };
+  nesCartridgeUnload.onActivate = { &Interface::unloadCartridge, interface };
 
-  snesPower.onTick = { &Interface::power, interface };
-  snesReset.onTick = { &Interface::reset, interface };
+  snesPower.onActivate = { &Interface::power, interface };
+  snesReset.onActivate = { &Interface::reset, interface };
 
-  snesPort1Device[0].onTick = [&] { interface->setController(0, 0); };
-  snesPort1Device[1].onTick = [&] { interface->setController(0, 1); };
-  snesPort1Device[2].onTick = [&] { interface->setController(0, 2); };
-  snesPort1Device[3].onTick = [&] { interface->setController(0, 3); };
+  snesPort1Device[0].onActivate = [&] { interface->setController(0, 0); };
+  snesPort1Device[1].onActivate = [&] { interface->setController(0, 1); };
+  snesPort1Device[2].onActivate = [&] { interface->setController(0, 2); };
+  snesPort1Device[3].onActivate = [&] { interface->setController(0, 3); };
 
-  snesPort2Device[0].onTick = [&] { interface->setController(1, 0); };
-  snesPort2Device[1].onTick = [&] { interface->setController(1, 1); };
-  snesPort2Device[2].onTick = [&] { interface->setController(1, 2); };
-  snesPort2Device[3].onTick = [&] { interface->setController(1, 3); };
-  snesPort2Device[4].onTick = [&] { interface->setController(1, 4); };
-  snesPort2Device[5].onTick = [&] { interface->setController(1, 5); };
-  snesPort2Device[6].onTick = [&] { interface->setController(1, 6); };
-  snesPort2Device[7].onTick = [&] { interface->setController(1, 7); };
+  snesPort2Device[0].onActivate = [&] { interface->setController(1, 0); };
+  snesPort2Device[1].onActivate = [&] { interface->setController(1, 1); };
+  snesPort2Device[2].onActivate = [&] { interface->setController(1, 2); };
+  snesPort2Device[3].onActivate = [&] { interface->setController(1, 3); };
+  snesPort2Device[4].onActivate = [&] { interface->setController(1, 4); };
+  snesPort2Device[5].onActivate = [&] { interface->setController(1, 5); };
+  snesPort2Device[6].onActivate = [&] { interface->setController(1, 6); };
+  snesPort2Device[7].onActivate = [&] { interface->setController(1, 7); };
 
-  snesCartridgeUnload.onTick = { &Interface::unloadCartridge, interface };
+  snesCartridgeUnload.onActivate = { &Interface::unloadCartridge, interface };
 
-  gameBoyPower.onTick = { &Interface::power, interface };
-  gameBoyCartridgeUnload.onTick = { &Interface::unloadCartridge, interface };
+  gameBoyPower.onActivate = { &Interface::power, interface };
+  gameBoyCartridgeUnload.onActivate = { &Interface::unloadCartridge, interface };
 
-  settingsVideoFilterNone.onTick = [&] {
+  settingsVideoFilterNone.onActivate = [&] {
     config->video.filter = "None";
     utility->bindVideoFilter();
   };
 
-  settingsVideoShaderNone.onTick = [&] {
+  settingsVideoShaderNone.onActivate = [&] {
     config->video.shader = "None";
     utility->bindVideoShader();
   };
 
-  settingsVideoShaderBlur.onTick = [&] {
+  settingsVideoShaderBlur.onActivate = [&] {
     config->video.shader = "Blur";
     utility->bindVideoShader();
   };
 
-  settingsSynchronizeVideo.onTick = [&] {
+  settingsSynchronizeVideo.onToggle = [&] {
     config->video.synchronize = settingsSynchronizeVideo.checked();
     video.set(Video::Synchronize, config->video.synchronize);
   };
 
-  settingsSynchronizeAudio.onTick = [&] {
+  settingsSynchronizeAudio.onToggle = [&] {
     config->audio.synchronize = settingsSynchronizeAudio.checked();
     audio.set(Audio::Synchronize, config->audio.synchronize);
   };
 
-  settingsCorrectAspectRatio.onTick = [&] {
+  settingsCorrectAspectRatio.onToggle = [&] {
     config->video.correctAspectRatio = settingsCorrectAspectRatio.checked();
     utility->resizeMainWindow();
   };
 
-  settingsMaskOverscan.onTick = [&] {
+  settingsMaskOverscan.onToggle = [&] {
     config->video.maskOverscan = settingsMaskOverscan.checked();
   };
 
-  settingsMuteAudio.onTick = [&] {
+  settingsMuteAudio.onToggle = [&] {
     config->audio.mute = settingsMuteAudio.checked();
     dspaudio.setVolume(config->audio.mute == false ? (double)config->audio.volume / 100.0 : 0.0);
   };
 
-  settingsConfiguration.onTick = [&] { settingsWindow->setVisible(); };
+  settingsConfiguration.onActivate = [&] { settingsWindow->setVisible(); };
 
-  toolsStateSave1.onTick = [&] { interface->saveState(1); };
-  toolsStateSave2.onTick = [&] { interface->saveState(2); };
-  toolsStateSave3.onTick = [&] { interface->saveState(3); };
-  toolsStateSave4.onTick = [&] { interface->saveState(4); };
-  toolsStateSave5.onTick = [&] { interface->saveState(5); };
+  toolsStateSave1.onActivate = [&] { interface->saveState(1); };
+  toolsStateSave2.onActivate = [&] { interface->saveState(2); };
+  toolsStateSave3.onActivate = [&] { interface->saveState(3); };
+  toolsStateSave4.onActivate = [&] { interface->saveState(4); };
+  toolsStateSave5.onActivate = [&] { interface->saveState(5); };
 
-  toolsStateLoad1.onTick = [&] { interface->loadState(1); };
-  toolsStateLoad2.onTick = [&] { interface->loadState(2); };
-  toolsStateLoad3.onTick = [&] { interface->loadState(3); };
-  toolsStateLoad4.onTick = [&] { interface->loadState(4); };
-  toolsStateLoad5.onTick = [&] { interface->loadState(5); };
+  toolsStateLoad1.onActivate = [&] { interface->loadState(1); };
+  toolsStateLoad2.onActivate = [&] { interface->loadState(2); };
+  toolsStateLoad3.onActivate = [&] { interface->loadState(3); };
+  toolsStateLoad4.onActivate = [&] { interface->loadState(4); };
+  toolsStateLoad5.onActivate = [&] { interface->loadState(5); };
 
-  toolsShrinkWindow.onTick = [&] { utility->resizeMainWindow(true); };
-  toolsCheatEditor.onTick = [&] { cheatEditor->setVisible(); };
-  toolsStateManager.onTick = [&] { stateManager->setVisible(); };
+  toolsShrinkWindow.onActivate = [&] { utility->resizeMainWindow(true); };
+  toolsCheatEditor.onActivate = [&] { cheatEditor->setVisible(); };
+  toolsStateManager.onActivate = [&] { stateManager->setVisible(); };
 
   synchronize();
 }
@@ -347,7 +347,7 @@ void MainWindow::setupVideoFilters() {
     if(auto position = name.position(".filter")) name[position()] = 0;
 
     settingsVideoFilterList[n].setText(name);
-    settingsVideoFilterList[n].onTick = [&, n] {
+    settingsVideoFilterList[n].onActivate = [&, n] {
       config->video.filter = videoFilterName[n];
       utility->bindVideoFilter();
     };
@@ -378,7 +378,7 @@ void MainWindow::setupVideoShaders() {
     if(auto position = name.position(string{ ".", config->video.driver, ".shader" })) name[position()] = 0;
 
     settingsVideoShaderList[n].setText(name);
-    settingsVideoShaderList[n].onTick = [&, n] {
+    settingsVideoShaderList[n].onActivate = [&, n] {
       config->video.shader = videoShaderName[n];
       utility->bindVideoShader();
     };

@@ -319,16 +319,16 @@ static LRESULT CALLBACK OS_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM
         if(!object) break;
         if(dynamic_cast<pItem*>(object)) {
           Item &item = ((pItem*)object)->item;
-          if(item.onTick) item.onTick();
+          if(item.onActivate) item.onActivate();
         } else if(dynamic_cast<pCheckItem*>(object)) {
           CheckItem &checkItem = ((pCheckItem*)object)->checkItem;
           checkItem.setChecked(!checkItem.state.checked);
-          if(checkItem.onTick) checkItem.onTick();
+          if(checkItem.onToggle) checkItem.onToggle();
         } else if(dynamic_cast<pRadioItem*>(object)) {
           RadioItem &radioItem = ((pRadioItem*)object)->radioItem;
           if(radioItem.state.checked == false) {
             radioItem.setChecked();
-            if(radioItem.onTick) radioItem.onTick();
+            if(radioItem.onActivate) radioItem.onActivate();
           }
         }
       } else {
@@ -336,11 +336,11 @@ static LRESULT CALLBACK OS_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM
         if(!object) break;
         if(dynamic_cast<Button*>(object)) {
           Button &button = (Button&)*object;
-          if(button.onTick) button.onTick();
+          if(button.onActivate) button.onActivate();
         } else if(dynamic_cast<CheckBox*>(object)) {
           CheckBox &checkBox = (CheckBox&)*object;
           checkBox.setChecked(!checkBox.state.checked);
-          if(checkBox.onTick) checkBox.onTick();
+          if(checkBox.onToggle) checkBox.onToggle();
         } else if(dynamic_cast<ComboBox*>(object)) {
           ComboBox &comboBox = (ComboBox&)*object;
           if(HIWORD(wparam) == CBN_SELCHANGE) {
@@ -358,7 +358,7 @@ static LRESULT CALLBACK OS_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM
           RadioBox &radioBox = (RadioBox&)*object;
           if(radioBox.state.checked == false) {
             radioBox.setChecked();
-            if(radioBox.onTick) radioBox.onTick();
+            if(radioBox.onActivate) radioBox.onActivate();
           }
         } else if(dynamic_cast<TextEdit*>(object)) {
           TextEdit &textEdit = (TextEdit&)*object;
@@ -384,7 +384,7 @@ static LRESULT CALLBACK OS_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM
         if(nmhdr->code == LVN_ITEMCHANGED && (nmlistview->uChanged & LVIF_STATE)) {
           unsigned imagemask = ((nmlistview->uNewState & LVIS_STATEIMAGEMASK) >> 12) - 1;
           if(imagemask == 0 || imagemask == 1) {
-            if(listView.p.locked == false && listView.onTick) listView.onTick(nmlistview->iItem);
+            if(listView.p.locked == false && listView.onToggle) listView.onToggle(nmlistview->iItem);
           } else if((nmlistview->uOldState & LVIS_FOCUSED) && !(nmlistview->uNewState & LVIS_FOCUSED)) {
             listView.p.lostFocus = true;
           } else if(!(nmlistview->uOldState & LVIS_SELECTED) && (nmlistview->uNewState & LVIS_SELECTED)) {

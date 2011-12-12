@@ -1,4 +1,4 @@
-StateManager *stateManager = 0;
+StateManager *stateManager = nullptr;
 
 StateManager::StateManager() {
   setTitle("State Manager");
@@ -32,9 +32,9 @@ StateManager::StateManager() {
   stateList.onActivate = { &StateManager::slotLoad, this };
   stateList.onChange = { &StateManager::synchronize, this };
   descEdit.onChange = { &StateManager::slotSaveDescription, this };
-  loadButton.onTick = { &StateManager::slotLoad, this };
-  saveButton.onTick = { &StateManager::slotSave, this };
-  eraseButton.onTick = { &StateManager::slotErase, this };
+  loadButton.onActivate = { &StateManager::slotLoad, this };
+  saveButton.onActivate = { &StateManager::slotSave, this };
+  eraseButton.onActivate = { &StateManager::slotErase, this };
 }
 
 void StateManager::synchronize() {

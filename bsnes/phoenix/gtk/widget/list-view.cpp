@@ -10,10 +10,10 @@ static void ListView_change(ListView *self) {
   }
 }
 
-static void ListView_tick(GtkCellRendererToggle *cell, gchar *path_string, ListView *self) {
+static void ListView_toggle(GtkCellRendererToggle *cell, gchar *path_string, ListView *self) {
   unsigned row = decimal(path_string);
   self->setChecked(row, !self->checked(row));
-  if(self->onTick) self->onTick(row);
+  if(self->onToggle) self->onToggle(row);
 }
 
 void pListView::append(const lstring &text) {
@@ -134,7 +134,7 @@ void pListView::constructor() {
       column[n].column = gtk_tree_view_column_new_with_attributes("", column[n].renderer, "active", n, (void*)0);
       gtk_tree_view_column_set_resizable(column[n].column, false);
       gtk_tree_view_column_set_visible(column[n].column, false);
-      g_signal_connect(column[n].renderer, "toggled", G_CALLBACK(ListView_tick), (gpointer)&listView);
+      g_signal_connect(column[n].renderer, "toggled", G_CALLBACK(ListView_toggle), (gpointer)&listView);
     } else {
       column[n].renderer = gtk_cell_renderer_text_new();
       column[n].column = gtk_tree_view_column_new_with_attributes("", column[n].renderer, "text", n, (void*)0);

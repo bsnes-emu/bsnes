@@ -42,6 +42,7 @@ struct image {
 
   inline void free();
   inline void allocate(unsigned width, unsigned height);
+  inline void clear(uint64_t color);
   inline bool load(const string &filename);
   inline void scale(unsigned width, unsigned height, interpolation op);
   inline void transform(bool endian, unsigned depth, uint64_t alphaMask, uint64_t redMask, uint64_t greenMask, uint64_t blueMask);
@@ -169,11 +170,20 @@ void image::free() {
 }
 
 void image::allocate(unsigned width, unsigned height) {
+  if(data != nullptr && this->width == width && this->height == height) return;
   free();
   data = new uint8_t[width * height * stride]();
   pitch = width * stride;
   this->width = width;
   this->height = height;
+}
+
+void image::clear(uint64_t color) {
+  uint8_t *dp = data;
+  for(unsigned n = 0; n < width * height; n++) {
+    write(dp, color);
+    dp += stride;
+  }
 }
 
 bool image::load(const string &filename) {
@@ -209,7 +219,7 @@ void image::transform(bool outputEndian, unsigned outputDepth, uint64_t outputAl
       g = normalize(g, green.depth, output.green.depth);
       b = normalize(b, blue.depth, output.blue.depth);
 
-      output.write(dp, (a << output.alpha.shift) + (r << output.red.shift) + (g << output.green.shift) + (b << output.blue.shift));
+      output.write(dp, (a << output.alpha.shift) | (r << output.red.shift) | (g << output.green.shift) | (b << output.blue.shift));
       dp += output.stride;
     }
   }
@@ -239,7 +249,7 @@ void image::alphaBlend(uint64_t alphaColor) {
       colorG = (colorG * alphaScale) + (alphaG * (1.0 - alphaScale));
       colorB = (colorB * alphaScale) + (alphaB * (1.0 - alphaScale));
 
-      write(dp, (colorA << alpha.shift) + (colorR << red.shift) + (colorG << green.shift) + (colorB << blue.shift));
+      write(dp, (colorA << alpha.shift) | (colorR << red.shift) | (colorG << green.shift) | (colorB << blue.shift));
       dp += stride;
     }
   }
@@ -267,7 +277,7 @@ uint64_t image::interpolate(double mu, const uint64_t *s, double (*op)(double, d
   G = max(0, min(G, (1 << green.depth) - 1));
   B = max(0, min(B, (1 << blue.depth) - 1));
 
-  return (A << alpha.shift) + (R << red.shift) + (G << green.shift) + (B << blue.shift);
+  return (A << alpha.shift) | (R << red.shift) | (G << green.shift) | (B << blue.shift);
 }
 
 void image::scaleX(unsigned outputWidth, interpolation op) {
@@ -360,7 +370,7 @@ bool image::loadBMP(const string &filename) {
       uint64_t r = normalize((uint8_t)(color >> 16), 8, red.depth);
       uint64_t g = normalize((uint8_t)(color >>  8), 8, green.depth);
       uint64_t b = normalize((uint8_t)(color >>  0), 8, blue.depth);
-      write(dp, (a << alpha.shift) + (r << red.shift) + (g << green.shift) + (b << blue.shift));
+      write(dp, (a << alpha.shift) | (r << red.shift) | (g << green.shift) | (b << blue.shift));
       dp += stride;
     }
   }
@@ -415,7 +425,7 @@ bool image::loadPNG(const string &filename) {
     g = normalize(g, source.info.bitDepth, green.depth);
     b = normalize(b, source.info.bitDepth, blue.depth);
 
-    return (a << alpha.shift) + (r << red.shift) + (g << green.shift) + (b << blue.shift);
+    return (a << alpha.shift) | (r << red.shift) | (g << green.shift) | (b << blue.shift);
   };
 
   for(unsigned y = 0; y < height; y++) {

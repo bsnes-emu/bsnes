@@ -223,6 +223,7 @@ struct pCanvas : public pWidget {
   void constructor();
   void destructor();
   void orphan();
+  void paint();
 };
 
 struct pCheckBox : public pWidget {

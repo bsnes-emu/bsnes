@@ -138,9 +138,17 @@ static bool eval(const char *s, double &result) {
     result = eval(s);
     return true;
   } catch(const char*e) {
-printf("%s\n", e);
     result = 0;
     return false;
+  }
+}
+
+static double parse(const char *s) {
+  try {
+    double result = eval(s);
+    return result;
+  } catch(const char *) {
+    return 0;
   }
 }
 

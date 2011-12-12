@@ -191,6 +191,7 @@ void CPU::timing_reset() {
   status.hdma_mode    = 0;
 
   status.auto_joypad_active  = false;
+  status.auto_joypad_latch   = false;
   status.auto_joypad_counter = 0;
   status.auto_joypad_clock   = 0;
 }

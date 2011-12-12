@@ -3,6 +3,7 @@
 namespace nall {
 
 unsigned string::length() const { return strlen(data); }
+unsigned string::capacity() const { return size; }
 
 template<unsigned limit> lstring string::split(const char *key) const { lstring result; result.split<limit>(key, data); return result; }
 template<unsigned limit> lstring string::isplit(const char *key) const { lstring result; result.isplit<limit>(key, data); return result; }

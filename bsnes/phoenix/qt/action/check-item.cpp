@@ -13,7 +13,7 @@ void pCheckItem::setText(const string &text) {
 void pCheckItem::constructor() {
   qtAction = new QAction(0);
   qtAction->setCheckable(true);
-  connect(qtAction, SIGNAL(triggered()), SLOT(onTick()));
+  connect(qtAction, SIGNAL(triggered()), SLOT(onToggle()));
 }
 
 void pCheckItem::destructor() {
@@ -21,7 +21,7 @@ void pCheckItem::destructor() {
   delete qtAction;
 }
 
-void pCheckItem::onTick() {
+void pCheckItem::onToggle() {
   checkItem.state.checked = checked();
-  if(checkItem.onTick) checkItem.onTick();
+  if(checkItem.onToggle) checkItem.onToggle();
 }

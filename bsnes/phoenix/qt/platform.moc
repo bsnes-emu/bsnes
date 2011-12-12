@@ -1,7 +1,7 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'platform.moc.hpp'
 **
-** Created: Tue Nov 29 20:27:15 2011
+** Created: Sun Dec 11 12:26:40 2011
 **      by: The Qt Meta Object Compiler version 62 (Qt 4.6.3)
 **
 ** WARNING! All changes made in this file will be lost!
@@ -148,7 +148,7 @@ static const uint qt_meta_data_pItem[] = {
 };
 
 static const char qt_meta_stringdata_pItem[] = {
-    "pItem\0\0onTick()\0"
+    "pItem\0\0onActivate()\0"
 };
 
 const QMetaObject pItem::staticMetaObject = {
@@ -182,7 +182,7 @@ int pItem::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
         switch (_id) {
-        case 0: onTick(); break;
+        case 0: onActivate(); break;
         default: ;
         }
         _id -= 1;
@@ -209,7 +209,7 @@ static const uint qt_meta_data_pCheckItem[] = {
 };
 
 static const char qt_meta_stringdata_pCheckItem[] = {
-    "pCheckItem\0\0onTick()\0"
+    "pCheckItem\0\0onToggle()\0"
 };
 
 const QMetaObject pCheckItem::staticMetaObject = {
@@ -243,7 +243,7 @@ int pCheckItem::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
         switch (_id) {
-        case 0: onTick(); break;
+        case 0: onToggle(); break;
         default: ;
         }
         _id -= 1;
@@ -270,7 +270,7 @@ static const uint qt_meta_data_pRadioItem[] = {
 };
 
 static const char qt_meta_stringdata_pRadioItem[] = {
-    "pRadioItem\0\0onTick()\0"
+    "pRadioItem\0\0onActivate()\0"
 };
 
 const QMetaObject pRadioItem::staticMetaObject = {
@@ -304,7 +304,7 @@ int pRadioItem::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
         switch (_id) {
-        case 0: onTick(); break;
+        case 0: onActivate(); break;
         default: ;
         }
         _id -= 1;
@@ -331,7 +331,7 @@ static const uint qt_meta_data_pButton[] = {
 };
 
 static const char qt_meta_stringdata_pButton[] = {
-    "pButton\0\0onTick()\0"
+    "pButton\0\0onActivate()\0"
 };
 
 const QMetaObject pButton::staticMetaObject = {
@@ -365,7 +365,7 @@ int pButton::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
         switch (_id) {
-        case 0: onTick(); break;
+        case 0: onActivate(); break;
         default: ;
         }
         _id -= 1;
@@ -443,7 +443,7 @@ static const uint qt_meta_data_pCheckBox[] = {
 };
 
 static const char qt_meta_stringdata_pCheckBox[] = {
-    "pCheckBox\0\0onTick()\0"
+    "pCheckBox\0\0onToggle()\0"
 };
 
 const QMetaObject pCheckBox::staticMetaObject = {
@@ -477,7 +477,7 @@ int pCheckBox::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
         switch (_id) {
-        case 0: onTick(); break;
+        case 0: onToggle(); break;
         default: ;
         }
         _id -= 1;
@@ -815,7 +815,7 @@ static const uint qt_meta_data_pListView[] = {
 static const char qt_meta_stringdata_pListView[] = {
     "pListView\0\0onActivate()\0item\0"
     "onChange(QTreeWidgetItem*)\0"
-    "onTick(QTreeWidgetItem*)\0"
+    "onToggle(QTreeWidgetItem*)\0"
 };
 
 const QMetaObject pListView::staticMetaObject = {
@@ -851,7 +851,7 @@ int pListView::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
         switch (_id) {
         case 0: onActivate(); break;
         case 1: onChange((*reinterpret_cast< QTreeWidgetItem*(*)>(_a[1]))); break;
-        case 2: onTick((*reinterpret_cast< QTreeWidgetItem*(*)>(_a[1]))); break;
+        case 2: onToggle((*reinterpret_cast< QTreeWidgetItem*(*)>(_a[1]))); break;
         default: ;
         }
         _id -= 3;
@@ -878,7 +878,7 @@ static const uint qt_meta_data_pRadioBox[] = {
 };
 
 static const char qt_meta_stringdata_pRadioBox[] = {
-    "pRadioBox\0\0onTick()\0"
+    "pRadioBox\0\0onActivate()\0"
 };
 
 const QMetaObject pRadioBox::staticMetaObject = {
@@ -912,7 +912,7 @@ int pRadioBox::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
         switch (_id) {
-        case 0: onTick(); break;
+        case 0: onActivate(); break;
         default: ;
         }
         _id -= 1;

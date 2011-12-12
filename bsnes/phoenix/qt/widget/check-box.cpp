@@ -19,7 +19,7 @@ void pCheckBox::setText(const string &text) {
 
 void pCheckBox::constructor() {
   qtWidget = qtCheckBox = new QCheckBox;
-  connect(qtCheckBox, SIGNAL(stateChanged(int)), SLOT(onTick()));
+  connect(qtCheckBox, SIGNAL(stateChanged(int)), SLOT(onToggle()));
 
   pWidget::synchronizeState();
   setChecked(checkBox.state.checked);
@@ -36,7 +36,7 @@ void pCheckBox::orphan() {
   constructor();
 }
 
-void pCheckBox::onTick() {
+void pCheckBox::onToggle() {
   checkBox.state.checked = checked();
-  if(locked == false && checkBox.onTick) checkBox.onTick();
+  if(locked == false && checkBox.onToggle) checkBox.onToggle();
 }

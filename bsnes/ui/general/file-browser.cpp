@@ -26,12 +26,12 @@ FileBrowser::FileBrowser() {
     setPath(path);
   };
 
-  pathBrowse.onTick = [&] {
+  pathBrowse.onActivate = [&] {
     string path = OS::folderSelect(*this, mode->path);
     if(path != "") setPath(path);
   };
 
-  pathUp.onTick = [&] {
+  pathUp.onActivate = [&] {
     if(mode->path == "/") return;
     string path = mode->path;
     path.rtrim<1>("/");
@@ -40,7 +40,7 @@ FileBrowser::FileBrowser() {
   };
 
   fileList.onChange = { &FileBrowser::synchronize, this };
-  fileList.onActivate = openButton.onTick = { &FileBrowser::fileListActivate, this };
+  fileList.onActivate = openButton.onActivate = { &FileBrowser::fileListActivate, this };
 
   filterModes.append({ "Default",      "", { "*" } });
   filterModes.append({ "NES",          "", { "*.fc", "*.nes" } });

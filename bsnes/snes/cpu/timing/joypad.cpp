@@ -3,9 +3,11 @@
 //called every 256 clocks; see CPU::add_clocks()
 void CPU::step_auto_joypad_poll() {
   if(vcounter() >= (ppu.overscan() == false ? 225 : 240)) {
+    //cache enable state at first iteration
+    if(status.auto_joypad_counter == 0) status.auto_joypad_latch = status.auto_joypad_poll;
     status.auto_joypad_active = status.auto_joypad_counter <= 15;
 
-    if(status.auto_joypad_active && status.auto_joypad_poll) {
+    if(status.auto_joypad_active && status.auto_joypad_latch) {
       if(status.auto_joypad_counter == 0) {
         input.port1->latch(1);
         input.port2->latch(1);

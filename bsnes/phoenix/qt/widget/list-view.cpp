@@ -100,7 +100,7 @@ void pListView::constructor() {
 
   connect(qtListView, SIGNAL(itemActivated(QTreeWidgetItem*, int)), SLOT(onActivate()));
   connect(qtListView, SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)), SLOT(onChange(QTreeWidgetItem*)));
-  connect(qtListView, SIGNAL(itemChanged(QTreeWidgetItem*, int)), SLOT(onTick(QTreeWidgetItem*)));
+  connect(qtListView, SIGNAL(itemChanged(QTreeWidgetItem*, int)), SLOT(onToggle(QTreeWidgetItem*)));
 
   pWidget::synchronizeState();
   setCheckable(listView.state.checkable);
@@ -139,9 +139,9 @@ void pListView::onChange(QTreeWidgetItem *item) {
   if(locked == false && listView.onChange) listView.onChange();
 }
 
-void pListView::onTick(QTreeWidgetItem *item) {
+void pListView::onToggle(QTreeWidgetItem *item) {
   unsigned row = item->data(0, Qt::UserRole).toUInt();
   bool checkState = checked(row);
   listView.state.checked[row] = checkState;
-  if(locked == false && listView.onTick) listView.onTick(row);
+  if(locked == false && listView.onToggle) listView.onToggle(row);
 }

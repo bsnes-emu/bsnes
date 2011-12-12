@@ -4,7 +4,7 @@ void pItem::setText(const string &text) {
 
 void pItem::constructor() {
   qtAction = new QAction(0);
-  connect(qtAction, SIGNAL(triggered()), SLOT(onTick()));
+  connect(qtAction, SIGNAL(triggered()), SLOT(onActivate()));
 }
 
 void pItem::destructor() {
@@ -12,6 +12,6 @@ void pItem::destructor() {
   delete qtAction;
 }
 
-void pItem::onTick() {
-  if(item.onTick) item.onTick();
+void pItem::onActivate() {
+  if(item.onActivate) item.onActivate();
 }

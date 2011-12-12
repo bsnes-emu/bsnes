@@ -1,5 +1,5 @@
-static void CheckItem_tick(CheckItem *self) {
-  if(self->p.locked == false && self->onTick) self->onTick();
+static void CheckItem_toggle(CheckItem *self) {
+  if(self->p.locked == false && self->onToggle) self->onToggle();
 }
 
 bool pCheckItem::checked() {
@@ -19,7 +19,7 @@ void pCheckItem::setText(const string &text) {
 void pCheckItem::constructor() {
   widget = gtk_check_menu_item_new_with_label(checkItem.state.text);
   setChecked(checkItem.state.checked);
-  g_signal_connect_swapped(G_OBJECT(widget), "toggled", G_CALLBACK(CheckItem_tick), (gpointer)&checkItem);
+  g_signal_connect_swapped(G_OBJECT(widget), "toggled", G_CALLBACK(CheckItem_toggle), (gpointer)&checkItem);
 }
 
 void pCheckItem::destructor() {

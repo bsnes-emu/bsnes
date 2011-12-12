@@ -1,6 +1,7 @@
 #ifndef NALL_FILEMAP_HPP
 #define NALL_FILEMAP_HPP
 
+#include <nall/file.hpp>
 #include <nall/stdint.hpp>
 #include <nall/windows/utf8.hpp>
 

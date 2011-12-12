@@ -74,7 +74,23 @@ clean:
 	-@$(call delete,*.pdb)
 	-@$(call delete,*.manifest)
 
+sync:
+	if [ -d ./libco ]; then rm -r ./libco; fi
+	if [ -d ./nall ]; then rm -r ./nall; fi
+	if [ -d ./ruby ]; then rm -r ./ruby; fi
+	if [ -d ./phoenix ]; then rm -r ./phoenix; fi
+	cp -r ../libco ./libco
+	cp -r ../nall ./nall
+	cp -r ../ruby ./ruby
+	cp -r ../phoenix ./phoenix
+	rm -r libco/doc
+	rm -r libco/test
+	rm -r nall/test
+	rm -r ruby/_test
+	rm -r phoenix/nall
+	rm -r phoenix/test
+
 archive-all:
-	tar -cjf bsnes.tar.bz2 data gameboy libco nall nes obj out phoenix ruby snes ui ui-libsnes Makefile cc.bat clean.bat sync.sh
+	tar -cjf bsnes.tar.bz2 data gameboy libco nall nes obj out phoenix ruby snes ui ui-libsnes Makefile cc.bat clean.bat
 
 help:;

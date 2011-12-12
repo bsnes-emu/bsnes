@@ -43,21 +43,21 @@ void SlotLoader::loadSatellaviewSlotted() {
   slot[1].path.setEnabled(false);
   slot[1].browse.setEnabled(false);
 
-  base.browse.onTick = [&] {
+  base.browse.onActivate = [&] {
     fileBrowser->open("Load Cartridge - SNES", FileBrowser::Mode::SNES, [&](const string &filename) {
       base.path.setText(filename);
       synchronize();
     });
   };
 
-  slot[0].browse.onTick = [&] {
+  slot[0].browse.onActivate = [&] {
     fileBrowser->open("Load Cartridge - Satellaview", FileBrowser::Mode::Satellaview, [&](const string &filename) {
       slot[0].path.setText(filename);
       synchronize();
     });
   };
 
-  loadButton.onTick = [&] {
+  loadButton.onActivate = [&] {
     this->setVisible(false);
     interface->snes.loadSatellaviewSlottedCartridge(base.path.text(), slot[0].path.text());
   };
@@ -79,7 +79,7 @@ void SlotLoader::loadSatellaview() {
   slot[1].path.setEnabled(false);
   slot[1].browse.setEnabled(false);
 
-  base.browse.onTick = [&] {
+  base.browse.onActivate = [&] {
     fileBrowser->open("Load BIOS - Satellaview", FileBrowser::Mode::SNES, [&](const string &filename) {
       config->path.bios.satellaview = filename;
       base.path.setText(filename);
@@ -87,14 +87,14 @@ void SlotLoader::loadSatellaview() {
     });
   };
 
-  slot[0].browse.onTick = [&] {
+  slot[0].browse.onActivate = [&] {
     fileBrowser->open("Load Cartridge - Satellaview", FileBrowser::Mode::Satellaview, [&](const string &filename) {
       slot[0].path.setText(filename);
       synchronize();
     });
   };
 
-  loadButton.onTick = [&] {
+  loadButton.onActivate = [&] {
     this->setVisible(false);
     interface->snes.loadSatellaviewCartridge(base.path.text(), slot[0].path.text());
   };
@@ -116,7 +116,7 @@ void SlotLoader::loadSufamiTurbo() {
   slot[1].path.setEnabled(true);
   slot[1].browse.setEnabled(true);
 
-  base.browse.onTick = [&] {
+  base.browse.onActivate = [&] {
     fileBrowser->open("Load BIOS - Sufami Turbo", FileBrowser::Mode::SNES, [&](const string &filename) {
       config->path.bios.sufamiTurbo = filename;
       base.path.setText(filename);
@@ -124,21 +124,21 @@ void SlotLoader::loadSufamiTurbo() {
     });
   };
 
-  slot[0].browse.onTick = [&] {
+  slot[0].browse.onActivate = [&] {
     fileBrowser->open("Load Cartridge - Sufami Turbo", FileBrowser::Mode::SufamiTurbo, [&](const string &filename) {
       slot[0].path.setText(filename);
       synchronize();
     });
   };
 
-  slot[1].browse.onTick = [&] {
+  slot[1].browse.onActivate = [&] {
     fileBrowser->open("Load Cartridge - Sufami Turbo", FileBrowser::Mode::SufamiTurbo, [&](const string &filename) {
       slot[1].path.setText(filename);
       synchronize();
     });
   };
 
-  loadButton.onTick = [&] {
+  loadButton.onActivate = [&] {
     this->setVisible(false);
     interface->snes.loadSufamiTurboCartridge(base.path.text(), slot[0].path.text(), slot[1].path.text());
   };
@@ -160,7 +160,7 @@ void SlotLoader::loadSuperGameBoy() {
   slot[1].path.setEnabled(false);
   slot[1].browse.setEnabled(false);
 
-  base.browse.onTick = [&] {
+  base.browse.onActivate = [&] {
     fileBrowser->open("Load BIOS - Super Game Boy", FileBrowser::Mode::SNES, [&](const string &filename) {
       config->path.bios.superGameBoy = filename;
       base.path.setText(filename);
@@ -168,14 +168,14 @@ void SlotLoader::loadSuperGameBoy() {
     });
   };
 
-  slot[0].browse.onTick = [&] {
+  slot[0].browse.onActivate = [&] {
     fileBrowser->open("Load Cartridge - Game Boy", FileBrowser::Mode::GameBoy, [&](const string &filename) {
       slot[0].path.setText(filename);
       synchronize();
     });
   };
 
-  loadButton.onTick = [&] {
+  loadButton.onActivate = [&] {
     this->setVisible(false);
     interface->snes.loadSuperGameBoyCartridge(base.path.text(), slot[0].path.text());
   };

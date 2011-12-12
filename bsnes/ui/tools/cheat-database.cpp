@@ -18,15 +18,15 @@ CheatDatabase::CheatDatabase() {
     controlLayout.append(spacer,            {  ~0,  0 }, 0);
     controlLayout.append(acceptButton,      {  80,  0 }, 0);
 
-  selectAllButton.onTick = [&] {
+  selectAllButton.onActivate = [&] {
     for(unsigned n = 0; n < cheatCode.size(); n++) cheatList.setChecked(n, true);
   };
 
-  unselectAllButton.onTick = [&] {
+  unselectAllButton.onActivate = [&] {
     for(unsigned n = 0; n < cheatCode.size(); n++) cheatList.setChecked(n, false);
   };
 
-  acceptButton.onTick = { &CheatDatabase::addCodes, this };
+  acceptButton.onActivate = { &CheatDatabase::addCodes, this };
 }
 
 void CheatDatabase::findCodes() {

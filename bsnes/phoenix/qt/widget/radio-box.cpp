@@ -40,7 +40,7 @@ void pRadioBox::constructor() {
   qtGroup = new QButtonGroup;
   qtGroup->addButton(qtRadioBox);
   qtRadioBox->setChecked(true);
-  connect(qtRadioBox, SIGNAL(toggled(bool)), SLOT(onTick()));
+  connect(qtRadioBox, SIGNAL(toggled(bool)), SLOT(onActivate()));
 
   pWidget::synchronizeState();
   setGroup(radioBox.state.group);
@@ -59,6 +59,6 @@ void pRadioBox::orphan() {
   constructor();
 }
 
-void pRadioBox::onTick() {
-  if(locked == false && checked() && radioBox.onTick) radioBox.onTick();
+void pRadioBox::onActivate() {
+  if(locked == false && checked() && radioBox.onActivate) radioBox.onActivate();
 }

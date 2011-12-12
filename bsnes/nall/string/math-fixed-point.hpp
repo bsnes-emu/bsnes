@@ -152,6 +152,15 @@ static bool eval(const char *s, intmax_t &result) {
   }
 }
 
+static intmax_t parse(const char *s) {
+  try {
+    intmax_t result = eval(s);
+    return result;
+  } catch(const char *) {
+    return 0;
+  }
+}
+
 }
 
 #endif

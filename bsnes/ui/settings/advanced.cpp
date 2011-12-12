@@ -76,7 +76,7 @@ AdvancedSettings::AdvancedSettings() {
     config->input.driver = list[inputDriver.selection()];
   };
 
-  focusPolicy[0].onTick = [&] { config->input.focusPolicy = 0; };
-  focusPolicy[1].onTick = [&] { config->input.focusPolicy = 1; };
-  focusPolicy[2].onTick = [&] { config->input.focusPolicy = 2; };
+  focusPolicy[0].onActivate = [&] { config->input.focusPolicy = 0; };
+  focusPolicy[1].onActivate = [&] { config->input.focusPolicy = 1; };
+  focusPolicy[2].onActivate = [&] { config->input.focusPolicy = 2; };
 }

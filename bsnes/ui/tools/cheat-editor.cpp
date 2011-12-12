@@ -34,12 +34,12 @@ CheatEditor::CheatEditor() {
   synchronize();
 
   cheatList.onChange = { &CheatEditor::synchronize, this };
-  cheatList.onTick = [&](unsigned) { updateInterface(); };
+  cheatList.onToggle = [&](unsigned) { updateInterface(); };
   codeEdit.onChange = { &CheatEditor::updateCode, this };
   descEdit.onChange = { &CheatEditor::updateDesc, this };
-  findButton.onTick = { &CheatDatabase::findCodes, cheatDatabase };
-  clearAllButton.onTick = { &CheatEditor::clearAll, this };
-  clearButton.onTick = { &CheatEditor::clearSelected, this };
+  findButton.onActivate = { &CheatDatabase::findCodes, cheatDatabase };
+  clearAllButton.onActivate = { &CheatEditor::clearAll, this };
+  clearButton.onActivate = { &CheatEditor::clearSelected, this };
 }
 
 void CheatEditor::synchronize() {

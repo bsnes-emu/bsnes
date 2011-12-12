@@ -23,6 +23,7 @@ namespace nall {
 
   struct string {
     inline void reserve(unsigned);
+    inline bool empty() const;
 
     template<typename... Args> inline string& assign(Args&&... args);
     template<typename... Args> inline string& append(Args&&... args);
@@ -35,6 +36,7 @@ namespace nall {
     template<unsigned Limit = 0> inline string& iqreplace(const char*, const char*);
 
     inline unsigned length() const;
+    inline unsigned capacity() const;
 
     template<unsigned Limit = 0> inline lstring split(const char*) const;
     template<unsigned Limit = 0> inline lstring isplit(const char*) const;

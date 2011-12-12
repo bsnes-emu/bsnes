@@ -33,10 +33,10 @@ InputSettings::InputSettings() : activeInput(0) {
   tertiary.onChange = { &InputSettings::tertiaryChange, this };
   inputList.onChange = { &InputSettings::synchronize, this };
   inputList.onActivate = { &InputSettings::assignInput, this };
-  assignPrimary.onTick = [&] { assignMouseInput(0); };
-  assignSecondary.onTick = [&] { assignMouseInput(1); };
-  assignTertiary.onTick = [&] { assignMouseInput(2); };
-  clearButton.onTick = { &InputSettings::clearInput, this };
+  assignPrimary.onActivate = [&] { assignMouseInput(0); };
+  assignSecondary.onActivate = [&] { assignMouseInput(1); };
+  assignTertiary.onActivate = [&] { assignMouseInput(2); };
+  clearButton.onActivate = { &InputSettings::clearInput, this };
 
   synchronize();
 }

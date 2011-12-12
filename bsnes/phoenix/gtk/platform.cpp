@@ -34,11 +34,11 @@
 Font pOS::defaultFont;
 
 Geometry pOS::availableGeometry() {
-  Display *display = XOpenDisplay(0);
+  XlibDisplay *display = XOpenDisplay(0);
   int screen = DefaultScreen(display);
 
-  static Atom atom = X11None;
-  if(atom == X11None) atom = XInternAtom(display, "_NET_WORKAREA", True);
+  static Atom atom = XlibNone;
+  if(atom == XlibNone) atom = XInternAtom(display, "_NET_WORKAREA", True);
 
   int format;
   unsigned char *data = 0;

@@ -75,6 +75,7 @@ private:
 
     //auto joypad polling
     bool auto_joypad_active;
+    bool auto_joypad_latch;
     unsigned auto_joypad_counter;
     unsigned auto_joypad_clock;
 

@@ -69,21 +69,21 @@ VideoSettings::VideoSettings() {
   overscanHorizontal.slider.onChange = overscanVertical.slider.onChange =
   { &VideoSettings::synchronize, this };
 
-  fullScreen[0].onTick = [&] { config->video.fullScreenMode = 0; };
-  fullScreen[1].onTick = [&] { config->video.fullScreenMode = 1; };
-  fullScreen[2].onTick = [&] { config->video.fullScreenMode = 2; };
+  fullScreen[0].onActivate = [&] { config->video.fullScreenMode = 0; };
+  fullScreen[1].onActivate = [&] { config->video.fullScreenMode = 1; };
+  fullScreen[2].onActivate = [&] { config->video.fullScreenMode = 2; };
 
-  compositor[0].onTick = [&] {
+  compositor[0].onActivate = [&] {
     config->video.compositionMode = 0;
     compositor::enable(application->compositionEnable);
   };
 
-  compositor[1].onTick = [&] {
+  compositor[1].onActivate = [&] {
     config->video.compositionMode = 1;
     compositor::enable(application->compositionEnable && mainWindow->fullScreen() == false);
   };
 
-  compositor[2].onTick = [&] {
+  compositor[2].onActivate = [&] {
     config->video.compositionMode = 2;
     compositor::enable(false);
   };

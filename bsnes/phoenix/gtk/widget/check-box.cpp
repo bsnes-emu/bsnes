@@ -1,6 +1,6 @@
-static void CheckBox_tick(CheckBox *self) {
+static void CheckBox_toggle(CheckBox *self) {
   self->state.checked = self->checked();
-  if(self->p.locked == false && self->onTick) self->onTick();
+  if(self->p.locked == false && self->onToggle) self->onToggle();
 }
 
 bool pCheckBox::checked() {
@@ -24,7 +24,7 @@ void pCheckBox::setText(const string &text) {
 
 void pCheckBox::constructor() {
   gtkWidget = gtk_check_button_new_with_label("");
-  g_signal_connect_swapped(G_OBJECT(gtkWidget), "toggled", G_CALLBACK(CheckBox_tick), (gpointer)&checkBox);
+  g_signal_connect_swapped(G_OBJECT(gtkWidget), "toggled", G_CALLBACK(CheckBox_toggle), (gpointer)&checkBox);
 
   setChecked(checkBox.state.checked);
   setText(checkBox.state.text);

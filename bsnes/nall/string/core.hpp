@@ -19,6 +19,10 @@ void string::reserve(unsigned size_) {
   }
 }
 
+bool string::empty() const {
+  return !*data;
+}
+
 template<typename... Args> string& string::assign(Args&&... args) {
   *data = 0;
   istring(*this, std::forward<Args>(args)...);

@@ -1,7 +1,7 @@
 static void VerticalScrollBar_change(VerticalScrollBar *self) {
   if(self->state.position == self->position()) return;
   self->state.position = self->position();
-  if(self->onChange) self->onChange();
+  if(self->p.locked == false && self->onChange) self->onChange();
 }
 
 Geometry pVerticalScrollBar::minimumGeometry() {
@@ -13,9 +13,11 @@ unsigned pVerticalScrollBar::position() {
 }
 
 void pVerticalScrollBar::setLength(unsigned length) {
+  locked = true;
   length += length == 0;
   gtk_range_set_range(GTK_RANGE(gtkWidget), 0, length - 1);
   gtk_range_set_increments(GTK_RANGE(gtkWidget), 1, length >> 3);
+  locked = false;
 }
 
 void pVerticalScrollBar::setPosition(unsigned position) {

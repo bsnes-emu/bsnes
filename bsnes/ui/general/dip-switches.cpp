@@ -21,7 +21,7 @@ DipSwitches::DipSwitches() {
   setGeometry({ 128, 128, 400, layout.minimumGeometry().height });
   windowManager->append(this, "DipSwitches");
 
-  acceptButton.onTick = { &DipSwitches::accept, this };
+  acceptButton.onActivate = { &DipSwitches::accept, this };
 }
 
 void DipSwitches::load() {

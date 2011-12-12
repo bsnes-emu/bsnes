@@ -47,6 +47,7 @@ void CPU::serialize(serializer &s) {
   s.integer(status.hdma_mode);
 
   s.integer(status.auto_joypad_active);
+  s.integer(status.auto_joypad_latch);
   s.integer(status.auto_joypad_counter);
   s.integer(status.auto_joypad_clock);
 

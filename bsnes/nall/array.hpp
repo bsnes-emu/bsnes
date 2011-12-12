@@ -118,16 +118,21 @@ namespace nall {
       operator=(std::move(source));
     }
 
-    //index
-    inline T& operator[](unsigned index) {
-      if(index >= buffersize) resize(index + 1);
-      if(index >= buffersize) throw "array[] out of bounds";
-      return pool[index];
+    //access
+    inline T& operator[](unsigned position) {
+      if(position >= buffersize) resize(position + 1);
+      if(position >= buffersize) throw "array[] out of bounds";
+      return pool[position];
     }
 
-    inline const T& operator[](unsigned index) const {
-      if(index >= buffersize) throw "array[] out of bounds";
-      return pool[index];
+    inline const T& operator[](unsigned position) const {
+      if(position >= buffersize) throw "array[] out of bounds";
+      return pool[position];
+    }
+
+    inline const T& operator()(unsigned position, const T& data) {
+      if(position >= buffersize) return data;
+      return pool[position];
     }
 
     //iteration

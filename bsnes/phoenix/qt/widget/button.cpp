@@ -9,7 +9,7 @@ void pButton::setText(const string &text) {
 
 void pButton::constructor() {
   qtWidget = qtButton = new QPushButton;
-  connect(qtButton, SIGNAL(released()), SLOT(onTick()));
+  connect(qtButton, SIGNAL(released()), SLOT(onActivate()));
 
   pWidget::synchronizeState();
   setText(button.state.text);
@@ -25,6 +25,6 @@ void pButton::orphan() {
   constructor();
 }
 
-void pButton::onTick() {
-  if(button.onTick) button.onTick();
+void pButton::onActivate() {
+  if(button.onActivate) button.onActivate();
 }

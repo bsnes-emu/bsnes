@@ -25,7 +25,7 @@ void pRadioItem::constructor() {
   qtAction->setCheckable(true);
   qtAction->setActionGroup(qtGroup);
   qtAction->setChecked(true);
-  connect(qtAction, SIGNAL(triggered()), SLOT(onTick()));
+  connect(qtAction, SIGNAL(triggered()), SLOT(onActivate()));
 }
 
 void pRadioItem::destructor() {
@@ -33,9 +33,9 @@ void pRadioItem::destructor() {
   delete qtAction;
 }
 
-void pRadioItem::onTick() {
+void pRadioItem::onActivate() {
   if(radioItem.state.checked == false) {
     setChecked();
-    if(locked == false && radioItem.onTick) radioItem.onTick();
+    if(locked == false && radioItem.onActivate) radioItem.onActivate();
   }
 }

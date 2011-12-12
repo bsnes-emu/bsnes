@@ -1,5 +1,5 @@
-static void Item_tick(Item *self) {
-  if(self->onTick) self->onTick();
+static void Item_activate(Item *self) {
+  if(self->onActivate) self->onActivate();
 }
 
 void pItem::setText(const string &text) {
@@ -8,7 +8,7 @@ void pItem::setText(const string &text) {
 
 void pItem::constructor() {
   widget = gtk_menu_item_new_with_label(item.state.text);
-  g_signal_connect_swapped(G_OBJECT(widget), "activate", G_CALLBACK(Item_tick), (gpointer)&item);
+  g_signal_connect_swapped(G_OBJECT(widget), "activate", G_CALLBACK(Item_activate), (gpointer)&item);
 }
 
 void pItem::destructor() {
