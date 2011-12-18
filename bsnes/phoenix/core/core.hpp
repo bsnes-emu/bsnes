@@ -47,15 +47,6 @@ struct Color {
   inline Color(uint8_t red, uint8_t green, uint8_t blue, uint8_t alpha = 255) : red(red), green(green), blue(blue), alpha(alpha) {}
 };
 
-struct Geometry {
-  signed x, y;
-  unsigned width, height;
-  nall::string text();
-  inline Geometry() : x(0), y(0), width(0), height(0) {}
-  inline Geometry(signed x, signed y, unsigned width, unsigned height) : x(x), y(y), width(width), height(height) {}
-  Geometry(const nall::string &text);
-};
-
 struct Position {
   signed x, y;
   inline Position() : x(0), y(0) {}
@@ -66,6 +57,17 @@ struct Size {
   unsigned width, height;
   inline Size() : width(0), height(0) {}
   inline Size(unsigned width, unsigned height) : width(width), height(height) {}
+};
+
+struct Geometry {
+  signed x, y;
+  unsigned width, height;
+  Position position() const;
+  Size size() const;
+  nall::string text() const;
+  inline Geometry() : x(0), y(0), width(0), height(0) {}
+  inline Geometry(signed x, signed y, unsigned width, unsigned height) : x(x), y(y), width(width), height(height) {}
+  Geometry(const nall::string &text);
 };
 
 struct Font {

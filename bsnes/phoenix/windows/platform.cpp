@@ -31,7 +31,7 @@
 #include "widget/vertical-slider.cpp"
 #include "widget/viewport.cpp"
 
-static void OS_keyboardProc(HWND, UINT, WPARAM, LPARAM);
+static bool OS_keyboardProc(HWND, UINT, WPARAM, LPARAM);
 static void OS_processDialogMessage(MSG&);
 static LRESULT CALLBACK OS_windowProc(HWND, UINT, WPARAM, LPARAM);
 
@@ -150,7 +150,10 @@ void pOS::processEvents() {
 
 void OS_processDialogMessage(MSG &msg) {
   if(msg.message == WM_KEYDOWN || msg.message == WM_KEYUP) {
-    OS_keyboardProc(msg.hwnd, msg.message, msg.wParam, msg.lParam);
+    if(OS_keyboardProc(msg.hwnd, msg.message, msg.wParam, msg.lParam)) {
+      DispatchMessage(&msg);
+      return;
+    }
   }
 
   if(!IsDialogMessage(GetForegroundWindow(), &msg)) {
@@ -217,14 +220,14 @@ void pOS::initialize() {
   RegisterClass(&wc);
 }
 
-static void OS_keyboardProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
+static bool OS_keyboardProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
   if(msg == WM_KEYDOWN) {
     GUITHREADINFO info;
     memset(&info, 0, sizeof(GUITHREADINFO));
     info.cbSize = sizeof(GUITHREADINFO);
     GetGUIThreadInfo(GetCurrentThreadId(), &info);
     Object *object = (Object*)GetWindowLongPtr(info.hwndFocus, GWLP_USERDATA);
-    if(object == 0) return;
+    if(object == nullptr) return false;
     if(dynamic_cast<ListView*>(object)) {
       ListView &listView = (ListView&)*object;
       if(wparam == VK_RETURN) {
@@ -235,8 +238,48 @@ static void OS_keyboardProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
       if(wparam == VK_RETURN) {
         if(lineEdit.onActivate) lineEdit.onActivate();
       }
+    } else if(dynamic_cast<TextEdit*>(object)) {
+      TextEdit &textEdit = (TextEdit&)*object;
+      if(wparam == 'A' && GetKeyState(VK_CONTROL) < 0) {
+        //Ctrl+A = select all text
+        //note: this is not a standard accelerator on Windows
+        Edit_SetSel(textEdit.p.hwnd, 0, ~0);
+        return true;
+      } else if(wparam == 'V' && GetKeyState(VK_CONTROL) < 0) {
+        //Ctrl+V = paste text
+        //note: this formats Unix (LF) and OS9 (CR) line-endings to Windows (CR+LF) line-endings
+        //this is necessary as the EDIT control only supports Windows line-endings
+        OpenClipboard(hwnd);
+        HANDLE handle = GetClipboardData(CF_UNICODETEXT);
+        if(handle) {
+          wchar_t *text = (wchar_t*)GlobalLock(handle);
+          if(text) {
+            string data = (const char*)utf8_t(text);
+            data.replace("\r\n", "\n");
+            data.replace("\r", "\n");
+            data.replace("\n", "\r\n");
+            GlobalUnlock(handle);
+            utf16_t output(data);
+            HGLOBAL resource = GlobalAlloc(GMEM_MOVEABLE, (wcslen(output) + 1) * sizeof(wchar_t));
+            if(resource) {
+              wchar_t *write = (wchar_t*)GlobalLock(resource);
+              if(write) {
+                wcscpy(write, output);
+                GlobalUnlock(write);
+                if(SetClipboardData(CF_UNICODETEXT, resource) == FALSE) {
+                  GlobalFree(resource);
+                }
+              }
+            }
+          }
+        }
+        CloseClipboard();
+        return false;
+      }
     }
   }
+
+  return false;
 }
 
 static LRESULT CALLBACK OS_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {

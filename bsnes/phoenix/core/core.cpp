@@ -19,7 +19,15 @@ Window Window::None;
 //Geometry
 //========
 
-string Geometry::text() {
+Position Geometry::position() const {
+  return { x, y };
+}
+
+Size Geometry::size() const {
+  return { width, height };
+}
+
+string Geometry::text() const {
   return { x, ",", y, ",", width, ",", height };
 }
 

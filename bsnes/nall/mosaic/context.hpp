@@ -9,8 +9,9 @@ struct context {
   unsigned height;
   unsigned count;
 
-  bool endian;
-  unsigned depth;
+  bool endian;     //0 = lsb, 1 = msb
+  bool order;      //0 = linear, 1 = planar
+  unsigned depth;  //1 - 24bpp
 
   unsigned blockWidth;
   unsigned blockHeight;
@@ -51,21 +52,61 @@ struct context {
     return result;
   }
 
-  inline void eval(array<unsigned> &buffer, const string &expression) {
+  inline void eval(array<unsigned> &buffer, const string &expression_) {
+    string expression = expression_;
+    bool function = false;
+    for(auto &c : expression) {
+      if(c == '(') function = true;
+      if(c == ')') function = false;
+      if(c == ',' && function == true) c = ';';
+    }
+
     lstring list = expression.split(",");
     for(auto &item : list) {
       item.trim();
-      if(item.wildcard("f(?*) *")) {
-        lstring part = item.split<1>(" ");
-        part[0].trim("f(", ")");
-        unsigned length = decimal(part[0].trim());
+      if(item.wildcard("f(?*) ?*")) {
+        item.ltrim<1>("f(");
+        lstring part = item.split<1>(") ");
+        lstring args = part[0].split<3>(";");
+        for(auto &item : args) item.trim();
+
+        unsigned length = eval(args(0, "0"));
+        unsigned offset = eval(args(1, "0"));
+        unsigned stride = eval(args(2, "0"));
+        if(args.size() < 2) offset = buffer.size();
+        if(args.size() < 3) stride = 1;
+
         for(unsigned n = 0; n < length; n++) {
           string fn = part[1];
           fn.replace("n", decimal(n));
+          fn.replace("o", decimal(offset));
           fn.replace("p", decimal(buffer.size()));
-          buffer.append(eval(fn));
+          buffer.resize(offset + 1);
+          buffer[offset] = eval(fn);
+          offset += stride;
         }
-      } else if(item != "") {
+      } else if(item.wildcard("base64*")) {
+        unsigned offset = 0;
+        item.ltrim<1>("base64");
+        if(item.wildcard("(?*) *")) {
+          item.ltrim<1>("(");
+          lstring part = item.split<1>(") ");
+          offset = eval(part[0]);
+          item = part(1, "");
+        }
+        item.trim();
+        for(auto &c : item) {
+          if(c >= 'A' && c <= 'Z') buffer.append(offset + c - 'A' +  0);
+          if(c >= 'a' && c <= 'z') buffer.append(offset + c - 'a' + 26);
+          if(c >= '0' && c <= '9') buffer.append(offset + c - '0' + 52);
+          if(c == '-') buffer.append(offset + 62);
+          if(c == '_') buffer.append(offset + 63);
+        }
+      } else if(item.wildcard("file *")) {
+        item.ltrim<1>("file ");
+        item.trim();
+        //...
+      } else if(item.empty() == false) {
         buffer.append(eval(item));
       }
     }
@@ -87,6 +128,7 @@ struct context {
       if(part[0] == "count") count = eval(part[1]);
 
       if(part[0] == "endian") endian = eval(part[1]);
+      if(part[0] == "order") order = eval(part[1]);
       if(part[0] == "depth") depth = eval(part[1]);
 
       if(part[0] == "blockWidth") blockWidth = eval(part[1]);
@@ -144,6 +186,7 @@ struct context {
     count = 0;
 
     endian = 1;
+    order = 0;
     depth = 1;
 
     blockWidth = 1;

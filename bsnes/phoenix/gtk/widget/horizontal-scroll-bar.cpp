@@ -15,7 +15,7 @@ unsigned pHorizontalScrollBar::position() {
 void pHorizontalScrollBar::setLength(unsigned length) {
   locked = true;
   length += length == 0;
-  gtk_range_set_range(GTK_RANGE(gtkWidget), 0, length - 1);
+  gtk_range_set_range(GTK_RANGE(gtkWidget), 0, max(1u, length - 1));
   gtk_range_set_increments(GTK_RANGE(gtkWidget), 1, length >> 3);
   locked = false;
 }

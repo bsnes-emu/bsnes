@@ -35,10 +35,6 @@ void SuperScope::enter() {
       x = max(-16, min(256 + 16, nx));
       y = max(-16, min(240 + 16, ny));
       offscreen = (x < 0 || y < 0 || x >= 256 || y >= (ppu.overscan() ? 240 : 225));
-    } else {
-      //sleep until PPU counters are close to latch position
-      unsigned diff = abs((signed)y - cpu.vcounter());
-      if(diff >= 2) step((diff - 2) * 1364);
     }
 
     prev = next;

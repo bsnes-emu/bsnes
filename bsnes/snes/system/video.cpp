@@ -107,9 +107,9 @@ void Video::update() {
   case Input::Device::Justifiers:
     if(dynamic_cast<Justifier*>(input.port2)) {
       Justifier &device = (Justifier&)*input.port2;
-      draw_cursor(0x001f, device.x1, device.y1);
+      draw_cursor(0x001f, device.player1.x, device.player1.y);
       if(device.chained == false) break;
-      draw_cursor(0x02e0, device.x2, device.y2);
+      draw_cursor(0x02e0, device.player2.x, device.player2.y);
     }
     break;
   }

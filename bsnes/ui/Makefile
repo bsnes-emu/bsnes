@@ -10,32 +10,22 @@ ui_objects += $(if $(call streq,$(platform),win),resource)
 
 # platform
 ifeq ($(platform),x)
-  ifeq ($(phoenix),gtk)
-    phoenix_compile = $(call compile,-DPHOENIX_GTK `pkg-config --cflags gtk+-2.0`)
-    link += `pkg-config --libs gtk+-2.0`
-  else
-    phoenix_compile = $(call compile,-DPHOENIX_QT `pkg-config --cflags QtCore QtGui`)
-    link += `pkg-config --libs QtCore QtGui`
-  endif
-
   ruby := video.glx video.xv video.sdl
   ruby += audio.alsa audio.openal audio.oss audio.pulseaudio audio.pulseaudiosimple audio.ao
   ruby += input.sdl input.x
 else ifeq ($(platform),osx)
-  phoenix_compile = $(call compile,-DPHOENIX_QT)
-  link +=
-
   ruby :=
   ruby += audio.openal
   ruby += input.carbon
 else ifeq ($(platform),win)
-  phoenix_compile = $(call compile,-DPHOENIX_WINDOWS)
-  link +=
-
   ruby := video.direct3d video.wgl video.directdraw video.gdi
   ruby += audio.directsound audio.xaudio2
   ruby += input.rawinput input.directinput
 endif
+
+# phoenix
+include phoenix/Makefile
+link += $(phoenixlink)
 
 # ruby
 include ruby/Makefile
@@ -59,7 +49,7 @@ obj/ruby.o: ruby/ruby.cpp $(call rwildcard,ruby/*)
 	$(call compile,$(rubyflags))
 
 obj/phoenix.o: phoenix/phoenix.cpp $(call rwildcard,phoenix/*)
-	$(phoenix_compile)
+	$(call compile,$(phoenixflags))
 
 obj/resource.o: $(ui)/resource.rc
 #	windres --target=pe-i386 $(ui)/resource.rc obj/resource.o

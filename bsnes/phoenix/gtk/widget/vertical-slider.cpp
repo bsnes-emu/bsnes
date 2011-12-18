@@ -14,7 +14,7 @@ unsigned pVerticalSlider::position() {
 
 void pVerticalSlider::setLength(unsigned length) {
   length += length == 0;
-  gtk_range_set_range(GTK_RANGE(gtkWidget), 0, length - 1);
+  gtk_range_set_range(GTK_RANGE(gtkWidget), 0, max(1u, length - 1));
   gtk_range_set_increments(GTK_RANGE(gtkWidget), 1, length >> 3);
 }
 

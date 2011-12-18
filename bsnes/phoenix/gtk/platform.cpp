@@ -165,13 +165,16 @@ void pOS::initialize() {
   char **argvp = argv;
   gtk_init(&argc, &argvp);
 
-  gtk_rc_parse_string(
-    "style \"phoenix-gtk\"\n"
-    "{\n"
-    "  GtkComboBox::appears-as-list = 1\n"
-    "  GtkTreeView::vertical-separator = 0\n"
-    "}\n"
-  //"class \"GtkComboBox\" style \"phoenix-gtk\"\n"
-    "class \"GtkTreeView\" style \"phoenix-gtk\"\n"
-  );
+  gtk_rc_parse_string(R"(
+    style "phoenix-gtk"
+    {
+      GtkWindow::resize-grip-width = 0
+      GtkWindow::resize-grip-height = 0
+      GtkTreeView::vertical-separator = 0
+      GtkComboBox::appears-as-list = 1
+    }
+    class "GtkWindow" style "phoenix-gtk"
+    class "GtkTreeView" style "phoenix-gtk"
+  # class "GtkComboBox" style "phoenix-gtk"
+  )");
 }

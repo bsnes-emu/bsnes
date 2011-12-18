@@ -4,7 +4,8 @@ void pCanvas::setSize(const Size &size) {
 }
 
 void pCanvas::update() {
-  memcpy(qtImage->bits(), canvas.state.data, canvas.state.width * canvas.state.height * sizeof(uint32_t));
+  uint32_t *dp = (uint32_t*)qtImage->bits(), *sp = (uint32_t*)canvas.state.data;
+  for(unsigned n = 0; n < canvas.state.width * canvas.state.height; n++) *dp++ = 0xff000000 | *sp++;
   qtCanvas->update();
 }
 

@@ -10,8 +10,8 @@ struct Justifier : Controller {
   unsigned counter;
 
   bool active;
-  signed x1, x2;
-  signed y1, y2;
-  bool trigger1, trigger2;
-  bool start1, start2;
+  struct Player {
+    signed x, y;
+    bool trigger, start;
+  } player1, player2;
 };

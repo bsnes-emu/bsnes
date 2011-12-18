@@ -1,6 +1,7 @@
 #ifndef PHOENIX_HPP
 #define PHOENIX_HPP
 
+#include <nall/platform.hpp>
 #include <nall/array.hpp>
 #include <nall/config.hpp>
 #include <nall/function.hpp>

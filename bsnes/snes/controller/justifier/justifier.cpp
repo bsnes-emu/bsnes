@@ -5,7 +5,7 @@ void Justifier::enter() {
   while(true) {
     unsigned next = cpu.vcounter() * 1364 + cpu.hcounter();
 
-    signed x = (active == 0 ? x1 : x2), y = (active == 0 ? y1 : y2);
+    signed x = (active == 0 ? player1.x : player2.x), y = (active == 0 ? player1.y : player2.y);
     bool offscreen = (x < 0 || y < 0 || x >= 256 || y >= (ppu.overscan() ? 240 : 225));
 
     if(offscreen == false) {
@@ -20,23 +20,19 @@ void Justifier::enter() {
     if(next < prev) {
       int nx1 = interface->inputPoll(port, Input::Device::Justifier, 0, (unsigned)Input::JustifierID::X);
       int ny1 = interface->inputPoll(port, Input::Device::Justifier, 0, (unsigned)Input::JustifierID::Y);
-      nx1 += x1;
-      ny1 += y1;
-      x1 = max(-16, min(256 + 16, nx1));
-      y1 = max(-16, min(240 + 16, ny1));
+      nx1 += player1.x;
+      ny1 += player1.y;
+      player1.x = max(-16, min(256 + 16, nx1));
+      player1.y = max(-16, min(240 + 16, ny1));
+    }
 
-      if(chained == true) {
-        int nx2 = interface->inputPoll(port, Input::Device::Justifiers, 1, (unsigned)Input::JustifierID::X);
-        int ny2 = interface->inputPoll(port, Input::Device::Justifiers, 1, (unsigned)Input::JustifierID::Y);
-        nx2 += x2;
-        ny2 += y2;
-        x2 = max(-16, min(256 + 16, nx2));
-        y2 = max(-16, min(240 + 16, ny2));
-      }
-    } else {
-      //sleep until PPU counters are close to latch position
-      unsigned diff = abs((signed)y - cpu.vcounter());
-      if(diff >= 2) step((diff - 2) * 1364);
+    if(next < prev && chained) {
+      int nx2 = interface->inputPoll(port, Input::Device::Justifiers, 1, (unsigned)Input::JustifierID::X);
+      int ny2 = interface->inputPoll(port, Input::Device::Justifiers, 1, (unsigned)Input::JustifierID::Y);
+      nx2 += player2.x;
+      ny2 += player2.y;
+      player2.x = max(-16, min(256 + 16, nx2));
+      player2.y = max(-16, min(240 + 16, ny2));
     }
 
     prev = next;
@@ -48,12 +44,13 @@ uint2 Justifier::data() {
   if(counter >= 32) return 1;
 
   if(counter == 0) {
-    trigger1 = interface->inputPoll(port, Input::Device::Justifier, 0, (unsigned)Input::JustifierID::Trigger);
-    start1   = interface->inputPoll(port, Input::Device::Justifier, 0, (unsigned)Input::JustifierID::Start);
-    if(chained) {
-      trigger2 = interface->inputPoll(port, Input::Device::Justifiers, 1, (unsigned)Input::JustifierID::Trigger);
-      start2   = interface->inputPoll(port, Input::Device::Justifiers, 1, (unsigned)Input::JustifierID::Start);
-    }
+    player1.trigger = interface->inputPoll(port, Input::Device::Justifier, 0, (unsigned)Input::JustifierID::Trigger);
+    player1.start   = interface->inputPoll(port, Input::Device::Justifier, 0, (unsigned)Input::JustifierID::Start);
+  }
+
+  if(counter == 0 && chained) {
+    player2.trigger = interface->inputPoll(port, Input::Device::Justifiers, 1, (unsigned)Input::JustifierID::Trigger);
+    player2.start   = interface->inputPoll(port, Input::Device::Justifiers, 1, (unsigned)Input::JustifierID::Start);
   }
 
   switch(counter++) {
@@ -84,10 +81,10 @@ uint2 Justifier::data() {
   case 22: return 0;
   case 23: return 1;
 
-  case 24: return trigger1;
-  case 25: return trigger2;
-  case 26: return start1;
-  case 27: return start2;
+  case 24: return player1.trigger;
+  case 25: return player2.trigger;
+  case 26: return player1.start;
+  case 27: return player2.start;
   case 28: return active;
 
   case 29: return 0;
@@ -109,23 +106,23 @@ Justifier::Justifier(bool port, bool chained) : Controller(port), chained(chaine
   counter = 0;
   active = 0;
 
+  player1.x = 256 / 2;
+  player1.y = 240 / 2;
+  player1.trigger = false;
+  player2.start = false;
+
+  player2.x = 256 / 2;
+  player2.y = 240 / 2;
+  player2.trigger = false;
+  player2.start = false;
+
   if(chained == false) {
-    x1 = 256 / 2;
-    y1 = 240 / 2;
-    x2 = -1;
-    y2 = -1;
+    player2.x = -1;
+    player2.y = -1;
   } else {
-    x1 = 256 / 2 - 16;
-    y1 = 240 / 2;
-    x2 = 256 / 2 + 16;
-    y2 = 240 / 2;
+    player1.x -= 16;
+    player2.x += 16;
   }
-
-  trigger1 = false;
-  trigger2 = false;
-
-  start1 = false;
-  start2 = false;
 }
 
 #endif

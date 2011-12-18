@@ -6,13 +6,15 @@ namespace mosaic {
 struct parser {
   image canvas;
 
-  inline void importData(bitstream &stream, uint64_t offset, context &ctx, unsigned width, unsigned height) {
+  //export from bitstream to canvas
+  inline void load(bitstream &stream, uint64_t offset, context &ctx, unsigned width, unsigned height) {
     canvas.allocate(width, height);
     canvas.clear(ctx.paddingColor);
     parse(1, stream, offset, ctx, width, height);
   }
 
-  inline bool exportData(bitstream &stream, uint64_t offset, context &ctx) {
+  //import from canvas to bitstream
+  inline bool save(bitstream &stream, uint64_t offset, context &ctx) {
     if(stream.readonly) return false;
     parse(0, stream, offset, ctx, canvas.width, canvas.height);
     return true;
@@ -36,39 +38,45 @@ private:
     buffer[addr] = data;
   }
 
-  inline void parse(bool import, bitstream &stream, uint64_t offset, context &ctx, unsigned width, unsigned height) {
+  inline void parse(bool load, bitstream &stream, uint64_t offset, context &ctx, unsigned width, unsigned height) {
     stream.endian = ctx.endian;
     unsigned canvasWidth = width / (ctx.mosaicWidth * ctx.tileWidth * ctx.blockWidth + ctx.paddingWidth);
     unsigned canvasHeight = height / (ctx.mosaicHeight * ctx.tileHeight * ctx.blockHeight + ctx.paddingHeight);
+    unsigned bitsPerBlock = ctx.depth * ctx.blockWidth * ctx.blockHeight;
 
     unsigned objectOffset = 0;
     for(unsigned objectY = 0; objectY < canvasHeight; objectY++) {
       for(unsigned objectX = 0; objectX < canvasWidth; objectX++) {
-        if(objectOffset++ >= ctx.count && ctx.count > 0) break;
+        if(objectOffset >= ctx.count && ctx.count > 0) break;
         unsigned objectIX = objectX * ctx.objectWidth();
         unsigned objectIY = objectY * ctx.objectHeight();
+        objectOffset++;
 
         unsigned mosaicOffset = 0;
         for(unsigned mosaicY = 0; mosaicY < ctx.mosaicHeight; mosaicY++) {
           for(unsigned mosaicX = 0; mosaicX < ctx.mosaicWidth; mosaicX++) {
-            unsigned mosaicData = ctx.mosaic(mosaicOffset++, 0);
+            unsigned mosaicData = ctx.mosaic(mosaicOffset, mosaicOffset);
             unsigned mosaicIX = (mosaicData % ctx.mosaicWidth) * (ctx.tileWidth * ctx.blockWidth);
             unsigned mosaicIY = (mosaicData / ctx.mosaicWidth) * (ctx.tileHeight * ctx.blockHeight);
+            mosaicOffset++;
 
             unsigned tileOffset = 0;
             for(unsigned tileY = 0; tileY < ctx.tileHeight; tileY++) {
               for(unsigned tileX = 0; tileX < ctx.tileWidth; tileX++) {
-                unsigned tileData = ctx.tile(tileOffset++, 0);
+                unsigned tileData = ctx.tile(tileOffset, tileOffset);
                 unsigned tileIX = (tileData % ctx.tileWidth) * ctx.blockWidth;
                 unsigned tileIY = (tileData / ctx.tileWidth) * ctx.blockHeight;
+                tileOffset++;
 
                 unsigned blockOffset = 0;
                 for(unsigned blockY = 0; blockY < ctx.blockHeight; blockY++) {
                   for(unsigned blockX = 0; blockX < ctx.blockWidth; blockX++) {
-                    if(import) {
+                    if(load) {
                       unsigned palette = 0;
                       for(unsigned n = 0; n < ctx.depth; n++) {
-                        palette |= stream.read(offset + ctx.block(blockOffset++, 0)) << n;
+                        unsigned index = blockOffset++;
+                        if(ctx.order == 1) index = (index % ctx.depth) * ctx.blockWidth * ctx.blockHeight + (index / ctx.depth);
+                        palette |= stream.read(offset + ctx.block(index, index)) << n;
                       }
 
                       write(
@@ -76,14 +84,16 @@ private:
                         objectIY + mosaicIY + tileIY + blockY,
                         ctx.palette(palette, palette)
                       );
-                    } else {
+                    } else /* save */ {
                       uint32_t palette = read(
                         objectIX + mosaicIX + tileIX + blockX,
                         objectIY + mosaicIY + tileIY + blockY
                       );
 
                       for(unsigned n = 0; n < ctx.depth; n++) {
-                        stream.write(offset + ctx.block(blockOffset++, 0), palette & 1);
+                        unsigned index = blockOffset++;
+                        if(ctx.order == 1) index = (index % ctx.depth) * ctx.blockWidth * ctx.blockHeight + (index / ctx.depth);
+                        stream.write(offset + ctx.block(index, index), palette & 1);
                         palette >>= 1;
                       }
                     }

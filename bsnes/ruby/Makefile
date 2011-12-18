@@ -18,9 +18,9 @@ rubylink += $(if $(findstring input.directinput,$(ruby)),-ldinput8 -ldxguid)
 rubylink += $(if $(findstring input.rawinput,$(ruby)),-ldinput8 -ldxguid)
 
 ifeq ($(platform),x)
-rubylink += $(if $(findstring audio.openal,$(ruby)),-lopenal)
+  rubylink += $(if $(findstring audio.openal,$(ruby)),-lopenal)
 else ifeq ($(platform),osx)
-rubylink += $(if $(findstring audio.openal,$(ruby)),-framework OpenAL)
+  rubylink += $(if $(findstring audio.openal,$(ruby)),-framework OpenAL)
 else ifeq ($(platform),win)
-rubylink += $(if $(findstring audio.openal,$(ruby)),-lopenal32)
+  rubylink += $(if $(findstring audio.openal,$(ruby)),-lopenal32)
 endif
