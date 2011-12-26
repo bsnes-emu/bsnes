@@ -19,15 +19,15 @@ void Cartridge::MBC3::second() {
 }
 
 uint8 Cartridge::MBC3::mmio_read(uint16 addr) {
-  if(within<0x0000, 0x3fff>(addr)) {
+  if((addr & 0xc000) == 0x0000) {  //$0000-3fff
     return cartridge.rom_read(addr);
   }
 
-  if(within<0x4000, 0x7fff>(addr)) {
+  if((addr & 0xc000) == 0x4000) {  //$4000-7fff
     return cartridge.rom_read((rom_select << 14) | (addr & 0x3fff));
   }
 
-  if(within<0xa000, 0xbfff>(addr)) {
+  if((addr & 0xe000) == 0xa000) {  //$a000-bfff
     if(ram_enable) {
       if(ram_select >= 0x00 && ram_select <= 0x03) {
         return cartridge.ram_read((ram_select << 13) | (addr & 0x1fff));
@@ -45,22 +45,22 @@ uint8 Cartridge::MBC3::mmio_read(uint16 addr) {
 }
 
 void Cartridge::MBC3::mmio_write(uint16 addr, uint8 data) {
-  if(within<0x0000, 0x1fff>(addr)) {
+  if((addr & 0xe000) == 0x0000) {  //$0000-1fff
     ram_enable = (data & 0x0f) == 0x0a;
     return;
   }
 
-  if(within<0x2000, 0x3fff>(addr)) {
+  if((addr & 0xe000) == 0x2000) {  //$2000-3fff
     rom_select = (data & 0x7f) + ((data & 0x7f) == 0);
     return;
   }
 
-  if(within<0x4000, 0x5fff>(addr)) {
+  if((addr & 0xe000) == 0x4000) {  //$4000-5fff
     ram_select = data;
     return;
   }
 
-  if(within<0x6000, 0x7fff>(addr)) {
+  if((addr & 0xe000) == 0x6000) {  //$6000-7fff
     if(rtc_latch == 0 && data == 1) {
       rtc_latch_second = rtc_second;
       rtc_latch_minute = rtc_minute;
@@ -72,7 +72,7 @@ void Cartridge::MBC3::mmio_write(uint16 addr, uint8 data) {
     return;
   }
 
-  if(within<0xa000, 0xbfff>(addr)) {
+  if((addr & 0xe000) == 0xa000) {  //$a000-bfff
     if(ram_enable) {
       if(ram_select >= 0x00 && ram_select <= 0x03) {
         cartridge.ram_write((ram_select << 13) | (addr & 0x1fff), data);

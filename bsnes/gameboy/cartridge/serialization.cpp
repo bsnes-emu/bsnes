@@ -41,9 +41,10 @@ void Cartridge::serialize(serializer &s) {
   s.integer(mmm01.rom_select);
   s.integer(mmm01.ram_select);
 
-  s.integer(huc1.ram_enable);
+  s.integer(huc1.ram_writable);
   s.integer(huc1.rom_select);
   s.integer(huc1.ram_select);
+  s.integer(huc1.model);
 
   s.integer(huc3.ram_enable);
   s.integer(huc3.rom_select);

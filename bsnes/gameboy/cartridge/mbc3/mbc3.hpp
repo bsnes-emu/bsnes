@@ -1,8 +1,8 @@
 struct MBC3 : MMIO {
-  bool  ram_enable;  //0000-1fff
-  uint8 rom_select;  //2000-3fff
-  uint8 ram_select;  //4000-5fff
-  bool rtc_latch;    //6000-7fff
+  bool  ram_enable;  //$0000-1fff
+  uint8 rom_select;  //$2000-3fff
+  uint8 ram_select;  //$4000-5fff
+  bool rtc_latch;    //$6000-7fff
 
   bool rtc_halt;
   unsigned rtc_second;

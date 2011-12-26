@@ -109,7 +109,7 @@ void LCD::dmg_render_ob() {
     unsigned n = sprite[s] << 2;
     unsigned sy = oam[n + 0] - 16;
     unsigned sx = oam[n + 1] -  8;
-    unsigned tile = oam[n + 2];
+    unsigned tile = oam[n + 2] & ~status.ob_size;
     unsigned attr = oam[n + 3];
 
     sy = status.ly - sy;
