@@ -34,18 +34,18 @@ void CheatDatabase::findCodes() {
   cheatCode.reset();
 
   string data;
-  data.readfile(application->path("cheats.bml"));
-  BML::Document document(data);
-  for(auto &root : document) {
+  data.readfile(application->path("cheats.xml"));
+  XML::Document document(data);
+  for(auto &root : document["database"]) {
     if(root.name != "cartridge") continue;
-    if(root["sha256"].value != interface->sha256()) continue;
+    if(root["sha256"].data != interface->sha256()) continue;
 
-    setTitle(root["title"].value);
+    setTitle(root["title"].data);
     for(auto &cheat : root) {
       if(cheat.name != "cheat") continue;
-      if(cheat["description"].exists() == false || cheat["code"].exists() == false) continue;
-      cheatList.append(cheat["description"].value);
-      cheatCode.append({ cheat["code"].value, "\t", cheat["description"].value });
+      if(cheat["description"].name.empty() || cheat["code"].name.empty()) continue;
+      cheatList.append(cheat["description"].data);
+      cheatCode.append({ cheat["code"].data, "\t", cheat["description"].data });
     }
 
     setVisible();

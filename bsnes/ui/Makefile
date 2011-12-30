@@ -70,8 +70,8 @@ ifeq ($(platform),x)
 	mkdir -p ~/.config/$(name)
 	install -D -m 644 data/$(name).png $(DESTDIR)$(prefix)/share/pixmaps/$(name).png
 	install -D -m 644 data/$(name).desktop $(DESTDIR)$(prefix)/share/applications/$(name).desktop
-	cp data/cheats.bml ~/.config/$(name)/cheats.bml
-	chmod 777 ~/.config/$(name) ~/.config/$(name)/cheats.bml
+	cp data/cheats.xml ~/.config/$(name)/cheats.xml
+	chmod 777 ~/.config/$(name) ~/.config/$(name)/cheats.xml
 endif
 
 uninstall:

@@ -45,6 +45,7 @@
 #include <nall/string/wildcard.hpp>
 #include <nall/string/wrapper.hpp>
 #include <nall/string/xml.hpp>
+#include <nall/string/xml-legacy.hpp>
 #undef NALL_STRING_INTERNAL_HPP
 
 #endif

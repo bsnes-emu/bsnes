@@ -27,7 +27,7 @@ void Application::run() {
 }
 
 Application::Application(int argc, char **argv) {
-  title = "bsnes v084.06";
+  title = "bsnes v084.07";
 
   application = this;
   quit = false;

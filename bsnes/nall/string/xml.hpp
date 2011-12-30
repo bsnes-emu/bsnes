@@ -1,265 +1,246 @@
 #ifdef NALL_STRING_INTERNAL_HPP
 
 //XML v1.0 subset parser
-//revision 0.05
+//revision 0.01
 
 namespace nall {
+namespace XML {
 
-struct xml_attribute {
+struct Node {
   string name;
-  string content;
-  virtual string parse() const;
-};
-
-struct xml_element : xml_attribute {
-  string parse() const;
-  linear_vector<xml_attribute> attribute;
-  linear_vector<xml_element> element;
-
-protected:
-  void parse_doctype(const char *&data);
-  bool parse_head(string data);
-  bool parse_body(const char *&data);
-  friend xml_element xml_parse(const char *data);
-};
-
-inline string xml_attribute::parse() const {
   string data;
-  unsigned offset = 0;
+  bool attribute;
+  array<Node*> children;
 
-  const char *source = content;
-  while(*source) {
-    if(*source == '&') {
-      if(strbegin(source, "&lt;"))   { data[offset++] = '<';  source += 4; continue; }
-      if(strbegin(source, "&gt;"))   { data[offset++] = '>';  source += 4; continue; }
-      if(strbegin(source, "&amp;"))  { data[offset++] = '&';  source += 5; continue; }
-      if(strbegin(source, "&apos;")) { data[offset++] = '\''; source += 6; continue; }
-      if(strbegin(source, "&quot;")) { data[offset++] = '"';  source += 6; continue; }
-    }
-
-    //reject illegal characters
-    if(*source == '&') return "";
-    if(*source == '<') return "";
-    if(*source == '>') return "";
-
-    data[offset++] = *source++;
+  inline bool isName(char c) const {
+    if(c >= 'A' && c <= 'Z') return true;
+    if(c >= 'a' && c <= 'z') return true;
+    if(c >= '0' && c <= '9') return true;
+    if(c == '.' || c == '_') return true;
+    if(c == '?') return true;
+    return false;
   }
 
-  data[offset] = 0;
-  return data;
-}
+  inline bool isWhitespace(char c) const {
+    if(c ==  ' ' || c == '\t') return true;
+    if(c == '\r' || c == '\n') return true;
+    return false;
+  }
 
-inline string xml_element::parse() const {
-  string data;
-  unsigned offset = 0;
+  //copy part of string from source document into target string; decode markup while copying
+  inline void copy(string &target, const char *source, unsigned length) {
+    target.reserve(length + 1);
 
-  const char *source = content;
-  while(*source) {
-    if(*source == '&') {
-      if(strbegin(source, "&lt;"))   { data[offset++] = '<';  source += 4; continue; }
-      if(strbegin(source, "&gt;"))   { data[offset++] = '>';  source += 4; continue; }
-      if(strbegin(source, "&amp;"))  { data[offset++] = '&';  source += 5; continue; }
-      if(strbegin(source, "&apos;")) { data[offset++] = '\''; source += 6; continue; }
-      if(strbegin(source, "&quot;")) { data[offset++] = '"';  source += 6; continue; }
-    }
+    #if defined(NALL_XML_LITERAL)
+    memcpy(target(), source, length);
+    target[length] = 0;
+    return;
+    #endif
 
-    if(strbegin(source, "<!--")) {
-      if(auto pos = strpos(source, "-->")) {
-        source += pos() + 3;
-        continue;
-      } else {
-        return "";
+    char *output = target();
+    while(length) {
+      if(*source == '&') {
+        if(!memcmp(source, "&lt;",   4)) { *output++ = '<';  source += 4; length -= 4; continue; }
+        if(!memcmp(source, "&gt;",   4)) { *output++ = '>';  source += 4; length -= 4; continue; }
+        if(!memcmp(source, "&amp;",  5)) { *output++ = '&';  source += 5; length -= 5; continue; }
+        if(!memcmp(source, "&apos;", 6)) { *output++ = '\''; source += 6; length -= 6; continue; }
+        if(!memcmp(source, "&quot;", 6)) { *output++ = '\"'; source += 6; length -= 6; continue; }
       }
-    }
 
-    if(strbegin(source, "<![CDATA[")) {
-      if(auto pos = strpos(source, "]]>")) {
-        if(pos() - 9 > 0) {
-          string cdata = substr(source, 9, pos() - 9);
-          data.append(cdata);
-          offset += strlen(cdata);
+      if(attribute == false && source[0] == '<' && source[1] == '!') {
+        //comment
+        if(!memcmp(source, "<!--", 4)) {
+          source += 4, length -= 4;
+          while(memcmp(source, "-->", 3)) source++, length--;
+          source += 3, length -= 3;
+          continue;
         }
-        source += 9 + offset + 3;
-        continue;
-      } else {
-        return "";
+
+        //CDATA
+        if(!memcmp(source, "<![CDATA[", 9)) {
+          source += 9, length -= 9;
+          while(memcmp(source, "]]>", 3)) *output++ = *source++, length--;
+          source += 3, length -= 3;
+          continue;
+        }
       }
+
+      *output++ = *source++, length--;
     }
-
-    //reject illegal characters
-    if(*source == '&') return "";
-    if(*source == '<') return "";
-    if(*source == '>') return "";
-
-    data[offset++] = *source++;
+    *output = 0;
   }
 
-  data[offset] = 0;
-  return data;
-}
+  inline bool parseExpression(const char *&p) {
+    if(*(p + 1) != '!') return false;
 
-inline void xml_element::parse_doctype(const char *&data) {
-  name = "!DOCTYPE";
-  const char *content_begin = data;
-
-  signed counter = 0;
-  while(*data) {
-    char value = *data++;
-    if(value == '<') counter++;
-    if(value == '>') counter--;
-    if(counter < 0) {
-      content = substr(content_begin, 0, data - content_begin - 1);
-      return;
-    }
-  }
-  throw "...";
-}
-
-inline bool xml_element::parse_head(string data) {
-  data.qreplace("\t", " ");
-  data.qreplace("\r", " ");
-  data.qreplace("\n", " ");
-  while(qstrpos(data, "  ")) data.qreplace("  ", " ");
-  data.qreplace(" =", "=");
-  data.qreplace("= ", "=");
-  data.rtrim();
-
-  lstring part;
-  part.qsplit(" ", data);
-
-  name = part[0];
-  if(name == "") throw "...";
-
-  for(unsigned i = 1; i < part.size(); i++) {
-    lstring side;
-    side.qsplit("=", part[i]);
-    if(side.size() != 2) throw "...";
-
-    xml_attribute attr;
-    attr.name = side[0];
-    attr.content = side[1];
-    if(strbegin(attr.content, "\"") && strend(attr.content, "\"")) attr.content.trim<1>("\"");
-    else if(strbegin(attr.content, "'") && strend(attr.content, "'")) attr.content.trim<1>("'");
-    else throw "...";
-    attribute.append(attr);
-  }
-}
-
-inline bool xml_element::parse_body(const char *&data) {
-  while(true) {
-    if(!*data) return false;
-    if(*data++ != '<') continue;
-    if(*data == '/') return false;
-
-    if(strbegin(data, "!DOCTYPE") == true) {
-      parse_doctype(data);
+    //comment
+    if(!memcmp(p, "<!--", 4)) {
+      while(*p && memcmp(p, "-->", 3)) p++;
+      if(!*p) throw "unclosed comment";
+      p += 3;
       return true;
     }
 
-    if(strbegin(data, "!--")) {
-      if(auto offset = strpos(data, "-->")) {
-        data += offset() + 3;
-        continue;
-      } else {
-        throw "...";
-      }
+    //CDATA
+    if(!memcmp(p, "<![CDATA[", 9)) {
+      while(*p && memcmp(p, "]]>", 3)) p++;
+      if(!*p) throw "unclosed CDATA";
+      p += 3;
+      return true;
     }
 
-    if(strbegin(data, "![CDATA[")) {
-      if(auto offset = strpos(data, "]]>")) {
-        data += offset() + 3;
-        continue;
-      } else {
-        throw "...";
-      }
+    //DOCTYPE
+    if(!memcmp(p, "<!DOCTYPE", 9)) {
+      unsigned counter = 0;
+      do {
+        char n = *p++;
+        if(!n) throw "unclosed DOCTYPE";
+        if(n == '<') counter++;
+        if(n == '>') counter--;
+      } while(counter);
+      return true;
     }
 
-    auto offset = strpos(data, ">");
-    if(!offset) throw "...";
-
-    string tag = substr(data, 0, offset());
-    data += offset() + 1;
-    const char *content_begin = data;
-
-    bool self_terminating = false;
-
-    if(strend(tag, "?") == true) {
-      self_terminating = true;
-      tag.rtrim<1>("?");
-    } else if(strend(tag, "/") == true) {
-      self_terminating = true;
-      tag.rtrim<1>("/");
-    }
-
-    parse_head(tag);
-    if(self_terminating) return true;
-
-    while(*data) {
-      unsigned index = element.size();
-      xml_element node;
-      if(node.parse_body(data) == false) {
-        if(*data == '/') {
-          signed length = data - content_begin - 1;
-          if(length > 0) content = substr(content_begin, 0, length);
-
-          data++;
-          auto offset = strpos(data, ">");
-          if(!offset) throw "...";
-
-          tag = substr(data, 0, offset());
-          data += offset() + 1;
-
-          tag.replace("\t", " ");
-          tag.replace("\r", " ");
-          tag.replace("\n", " ");
-          while(strpos(tag, "  ")) tag.replace("  ", " ");
-          tag.rtrim();
-
-          if(name != tag) throw "...";
-          return true;
-        }
-      } else {
-        element.append(node);
-      }
-    }
-  }
-}
-
-//ensure there is only one root element
-inline bool xml_validate(xml_element &document) {
-  unsigned root_counter = 0;
-
-  for(unsigned i = 0; i < document.element.size(); i++) {
-    string &name = document.element[i].name;
-    if(strbegin(name, "?")) continue;
-    if(strbegin(name, "!")) continue;
-    if(++root_counter > 1) return false;
+    return false;
   }
 
-  return true;
-}
+  //returns true if tag closes itself (<tag/>); false if not (<tag>)
+  inline bool parseHead(const char *&p) {
+    //parse name
+    const char *nameStart = ++p;  //skip '<'
+    while(isName(*p)) p++;
+    const char *nameEnd = p;
+    copy(name, nameStart, nameEnd - nameStart);
+    if(name.empty()) throw "missing element name";
 
-inline xml_element xml_parse(const char *data) {
-  xml_element self;
+    //parse attributes
+    while(*p) {
+      while(isWhitespace(*p)) p++;
+      if(!*p) throw "unclosed attribute";
+      if(*p == '?' || *p == '/' || *p == '>') break;
 
-  try {
-    while(*data) {
-      xml_element node;
-      if(node.parse_body(data) == false) {
-        break;
-      } else {
-        self.element.append(node);
-      }
+      //parse attribute name
+      Node *attribute = new Node;
+      children.append(attribute);
+      attribute->attribute = true;
+
+      const char *nameStart = p;
+      while(isName(*p)) p++;
+      const char *nameEnd = p;
+      copy(attribute->name, nameStart, nameEnd - nameStart);
+      if(attribute->name.empty()) throw "missing attribute name";
+
+      //parse attribute data
+      if(*p++ != '=') throw "missing attribute value";
+      char terminal = *p++;
+      if(terminal != '\'' && terminal != '\"') throw "attribute value not quoted";
+      const char *dataStart = p;
+      while(*p && *p != terminal) p++;
+      if(!*p) throw "missing attribute data terminal";
+      const char *dataEnd = p++;  //skip closing terminal
+
+      copy(attribute->data, dataStart, dataEnd - dataStart);
     }
 
-    if(xml_validate(self) == false) throw "...";
-    return self;
-  } catch(const char*) {
-    xml_element empty;
-    return empty;
+    //parse closure
+    if(*p == '?' && *(p + 1) == '>') { p += 2; return true; }
+    if(*p == '/' && *(p + 1) == '>') { p += 2; return true; }
+    if(*p == '>') { p += 1; return false; }
+    throw "invalid element tag";
   }
-}
 
+  //parse element and all of its child elements
+  inline void parseElement(const char *&p) {
+    Node *node = new Node;
+    children.append(node);
+    if(node->parseHead(p) == true) return;
+    node->parse(p);
+  }
+
+  //return true if </tag> matches this node's name
+  inline bool parseClosureElement(const char *&p) {
+    if(p[0] != '<' || p[1] != '/') return false;
+    p += 2;
+    const char *nameStart = p;
+    while(*p && *p != '>') p++;
+    if(*p != '>') throw "unclosed closure element";
+    const char *nameEnd = p++;
+    if(memcmp(name, nameStart, nameEnd - nameStart)) throw "closure element name mismatch";
+    return true;
+  }
+
+  //parse contents of an element
+  inline void parse(const char *&p) {
+    const char *dataStart = p, *dataEnd = p;
+
+    while(*p) {
+      while(*p && *p != '<') p++;
+      if(!*p) break;
+      dataEnd = p;
+      if(parseClosureElement(p) == true) break;
+      if(parseExpression(p) == true) continue;
+      parseElement(p);
+    }
+
+    copy(data, dataStart, dataEnd - dataStart);
+  }
+
+  inline void reset() {
+    for(auto &child : children) delete child;
+    children.reset();
+  }
+
+  struct iterator {
+    inline bool operator!=(const iterator &source) const { return index != source.index; }
+    inline Node& operator*() { return *node.children[index]; }
+    inline iterator& operator++() { index++; return *this; }
+    inline iterator(const Node &node, unsigned index) : node(node), index(index) {}
+  private:
+    const Node &node;
+    unsigned index;
+  };
+
+  inline iterator begin() { return iterator(*this, 0); }
+  inline iterator end() { return iterator(*this, children.size()); }
+  inline const iterator begin() const { return iterator(*this, 0); }
+  inline const iterator end() const { return iterator(*this, children.size()); }
+
+  inline Node& operator[](const char *name) {
+    for(auto &node : *this) {
+      if(node.name == name) return node;
+    }
+    static Node node;
+    return node;
+  }
+
+  inline Node() : attribute(false) {}
+  inline ~Node() { reset(); }
+
+  Node(const Node&) = delete;
+  Node& operator=(const Node&) = delete;
+};
+
+struct Document : Node {
+  string error;
+
+  inline bool load(const char *document) {
+    if(document == nullptr) return false;
+    reset();
+    try {
+      parse(document);
+    } catch(const char *error) {
+      reset();
+      this->error = error;
+      return false;
+    }
+    return true;
+  }
+
+  inline Document() {}
+  inline Document(const char *document) { load(document); }
+};
+
+}
 }
 
 #endif

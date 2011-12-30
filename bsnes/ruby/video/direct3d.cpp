@@ -341,9 +341,9 @@ public:
     }
     shader_source_markup = source;
 
-    BML::Document document(shader_source_markup);
-    bool is_hlsl = document["shader"]["language"].value == "HLSL";
-    string shader_source = document["shader"].value;
+    XML::Document document(shader_source_markup);
+    bool is_hlsl = document["shader"]["language"].data == "HLSL";
+    string shader_source = document["shader"]["source"].data;
     if(shader_source == "") return;
 
     HMODULE d3dx;
