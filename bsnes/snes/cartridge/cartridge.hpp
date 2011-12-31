@@ -91,26 +91,26 @@ struct Cartridge : property<Cartridge> {
 
 private:
   void parse_markup(const char*);
-  unsigned parse_markup_integer(cstring&);
-  void parse_markup_map(Mapping&, BML::Node&);
+  unsigned parse_markup_integer(string&);
+  void parse_markup_map(Mapping&, XML::Node&);
 
-  void parse_markup_rom(BML::Node&);
-  void parse_markup_ram(BML::Node&);
-  void parse_markup_nss(BML::Node&);
-  void parse_markup_icd2(BML::Node&);
-  void parse_markup_superfx(BML::Node&);
-  void parse_markup_sa1(BML::Node&);
-  void parse_markup_necdsp(BML::Node&);
-  void parse_markup_hitachidsp(BML::Node&);
-  void parse_markup_bsx(BML::Node&);
-  void parse_markup_sufamiturbo(BML::Node&);
-  void parse_markup_srtc(BML::Node&);
-  void parse_markup_sdd1(BML::Node&);
-  void parse_markup_spc7110(BML::Node&);
-  void parse_markup_obc1(BML::Node&);
-  void parse_markup_setarisc(BML::Node&);
-  void parse_markup_msu1(BML::Node&);
-  void parse_markup_link(BML::Node&);
+  void parse_markup_rom(XML::Node&);
+  void parse_markup_ram(XML::Node&);
+  void parse_markup_nss(XML::Node&);
+  void parse_markup_icd2(XML::Node&);
+  void parse_markup_superfx(XML::Node&);
+  void parse_markup_sa1(XML::Node&);
+  void parse_markup_necdsp(XML::Node&);
+  void parse_markup_hitachidsp(XML::Node&);
+  void parse_markup_bsx(XML::Node&);
+  void parse_markup_sufamiturbo(XML::Node&);
+  void parse_markup_srtc(XML::Node&);
+  void parse_markup_sdd1(XML::Node&);
+  void parse_markup_spc7110(XML::Node&);
+  void parse_markup_obc1(XML::Node&);
+  void parse_markup_setarisc(XML::Node&);
+  void parse_markup_msu1(XML::Node&);
+  void parse_markup_link(XML::Node&);
 };
 
 extern Cartridge cartridge;

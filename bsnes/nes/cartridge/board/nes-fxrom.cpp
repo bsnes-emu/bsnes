@@ -84,7 +84,7 @@ void serialize(serializer &s) {
   s.array(latch);
 }
 
-NES_FxROM(BML::Node &board, const uint8_t *data, unsigned size) : Board(board, data, size) {
+NES_FxROM(XML::Node &board, const uint8_t *data, unsigned size) : Board(board, data, size) {
   revision = Revision::FKROM;
 }
 

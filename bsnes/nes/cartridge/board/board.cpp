@@ -86,14 +86,14 @@ void Board::serialize(serializer &s) {
   if(chrram.size) s.array(chrram.data, chrram.size);
 }
 
-Board::Board(BML::Node &board, const uint8_t *data, unsigned size) {
-  information.type = board["type"].value;
-  information.battery = board["prg"]["battery"].value;
+Board::Board(XML::Node &board, const uint8_t *data, unsigned size) {
+  information.type = board["type"].data;
+  information.battery = board["prg"]["battery"].data == "true";
 
-  prgrom.size = decimal(board["prg"]["rom"].value);
-  prgram.size = decimal(board["prg"]["ram"].value);
-  chrrom.size = decimal(board["chr"]["rom"].value);
-  chrram.size = decimal(board["chr"]["ram"].value);
+  prgrom.size = hex(board["prg"]["rom"].data);
+  prgram.size = hex(board["prg"]["ram"].data);
+  chrrom.size = hex(board["chr"]["rom"].data);
+  chrram.size = hex(board["chr"]["ram"].data);
 
   if(prgrom.size) prgrom.data = new uint8[prgrom.size]();
   if(prgram.size) prgram.data = new uint8[prgram.size]();
@@ -111,9 +111,9 @@ Board::~Board() {
 }
 
 Board* Board::load(const string &markup, const uint8_t *data, unsigned size) {
-  BML::Document document(markup);
+  XML::Document document(markup);
   auto &board = document["cartridge"]["board"];
-  string type = board["type"].value;
+  string type = board["type"].data;
 
   if(type == "BANDAI-FCG") return new BandaiFCG(board, data, size);
 

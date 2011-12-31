@@ -31,7 +31,7 @@ bool InterfaceNES::loadCartridge(const string &filename) {
   interface->baseName = nall::basename(filename);
 
   string markup;
-  markup.readfile({ interface->baseName, ".bml" });
+  markup.readfile({ interface->baseName, ".xml" });
 
   NES::cartridge.load(markup, data, size);
   NES::system.power();

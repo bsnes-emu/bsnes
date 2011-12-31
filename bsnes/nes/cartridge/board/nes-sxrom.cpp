@@ -94,7 +94,7 @@ void serialize(serializer &s) {
   mmc1.serialize(s);
 }
 
-NES_SxROM(BML::Node &board, const uint8_t *data, unsigned size) : Board(board, data, size), mmc1(*this) {
+NES_SxROM(XML::Node &board, const uint8_t *data, unsigned size) : Board(board, data, size), mmc1(*this) {
   revision = Revision::SXROM;
 }
 

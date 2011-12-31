@@ -46,7 +46,7 @@ void serialize(serializer &s) {
   mmc5.serialize(s);
 }
 
-NES_ExROM(BML::Node &board, const uint8_t *data, unsigned size) : Board(board, data, size), mmc5(*this) {
+NES_ExROM(XML::Node &board, const uint8_t *data, unsigned size) : Board(board, data, size), mmc5(*this) {
   revision = Revision::ELROM;
 }
 

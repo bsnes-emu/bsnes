@@ -15,8 +15,13 @@ bool InterfaceGameBoy::loadCartridge(GameBoy::System::Revision revision, const s
   interface->unloadCartridge();
   interface->baseName = nall::basename(filename);
 
+  string markup;
+  markup.readfile({ interface->baseName, ".xml" });
+
   GameBoyCartridge info(data, size);
-  GameBoy::cartridge.load(revision, info.markup, data, size);
+  if(markup.empty()) markup = info.markup;
+
+  GameBoy::cartridge.load(revision, markup, data, size);
   GameBoy::system.power();
   delete[] data;
 

@@ -50,8 +50,8 @@ void serialize(serializer &s) {
   vrc3.serialize(s);
 }
 
-KonamiVRC3(BML::Node &board, const uint8_t *data, unsigned size) : Board(board, data, size), vrc3(*this) {
-  settings.mirror = board["mirror"].value == "vertical" ? 1 : 0;
+KonamiVRC3(XML::Node &board, const uint8_t *data, unsigned size) : Board(board, data, size), vrc3(*this) {
+  settings.mirror = board["mirror"]["mode"].data == "vertical" ? 1 : 0;
 }
 
 };

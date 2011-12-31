@@ -45,7 +45,7 @@ void serialize(serializer &s) {
   s.integer(mirror_select);
 }
 
-NES_AxROM(BML::Node &board, const uint8_t *data, unsigned size) : Board(board, data, size) {
+NES_AxROM(XML::Node &board, const uint8_t *data, unsigned size) : Board(board, data, size) {
 }
 
 };

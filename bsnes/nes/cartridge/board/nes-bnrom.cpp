@@ -45,8 +45,8 @@ void serialize(serializer &s) {
   s.integer(prg_bank);
 }
 
-NES_BNROM(BML::Node &board, const uint8_t *data, unsigned size) : Board(board, data, size) {
-  settings.mirror = board["mirror"].value == "vertical" ? 1 : 0;
+NES_BNROM(XML::Node &board, const uint8_t *data, unsigned size) : Board(board, data, size) {
+  settings.mirror = board["mirror"]["mode"].data == "vertical" ? 1 : 0;
 }
 
 };

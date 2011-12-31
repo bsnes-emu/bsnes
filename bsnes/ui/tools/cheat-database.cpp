@@ -36,16 +36,23 @@ void CheatDatabase::findCodes() {
   string data;
   data.readfile(application->path("cheats.xml"));
   XML::Document document(data);
-  for(auto &root : document["database"]) {
-    if(root.name != "cartridge") continue;
-    if(root["sha256"].data != interface->sha256()) continue;
+  for(auto &node : document["database"]) {
+    if(node.name != "cartridge") continue;
+    if(node["sha256"].data != interface->sha256()) continue;
 
-    setTitle(root["title"].data);
-    for(auto &cheat : root) {
+    setTitle(node["title"].data);
+    for(auto &cheat : node) {
       if(cheat.name != "cheat") continue;
-      if(cheat["description"].name.empty() || cheat["code"].name.empty()) continue;
       cheatList.append(cheat["description"].data);
-      cheatCode.append({ cheat["code"].data, "\t", cheat["description"].data });
+
+      string codeList;
+      for(auto &code : cheat) {
+        if(code.name != "code") continue;
+        codeList.append(code.data, "+");
+      }
+      codeList.rtrim<1>("+");
+
+      cheatCode.append({ codeList, "\t", cheat["description"].data });
     }
 
     setVisible();

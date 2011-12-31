@@ -54,8 +54,8 @@ void serialize(serializer &s) {
   s.integer(chr_bank);
 }
 
-NES_GxROM(BML::Node &board, const uint8_t *data, unsigned size) : Board(board, data, size) {
-  settings.mirror = board["mirror"].value == "vertical" ? 1 : 0;
+NES_GxROM(XML::Node &board, const uint8_t *data, unsigned size) : Board(board, data, size) {
+  settings.mirror = board["mirror"]["mode"].data == "vertical" ? 1 : 0;
 }
 
 };

@@ -49,9 +49,9 @@ void serialize(serializer &s) {
   vrc2.serialize(s);
 }
 
-KonamiVRC2(BML::Node &board, const uint8_t *data, unsigned size) : Board(board, data, size), vrc2(*this) {
-  settings.pinout.a0 = 1 << decimal(board["chip"]["pinout"]["a0"].value);
-  settings.pinout.a1 = 1 << decimal(board["chip"]["pinout"]["a1"].value);
+KonamiVRC2(XML::Node &board, const uint8_t *data, unsigned size) : Board(board, data, size), vrc2(*this) {
+  settings.pinout.a0 = 1 << decimal(board["chip"]["pinout"]["a0"].data);
+  settings.pinout.a1 = 1 << decimal(board["chip"]["pinout"]["a1"].data);
 }
 
 };

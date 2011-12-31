@@ -12,6 +12,10 @@ struct Node {
   bool attribute;
   array<Node*> children;
 
+  inline bool exists() const {
+    return !name.empty();
+  }
+
   inline bool isName(char c) const {
     if(c >= 'A' && c <= 'Z') return true;
     if(c >= 'a' && c <= 'z') return true;
