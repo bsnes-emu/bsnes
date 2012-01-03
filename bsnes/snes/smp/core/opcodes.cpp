@@ -166,7 +166,7 @@ void SMPcore::op_set_addr_bit() {
     break;
   case 4:  //eor  addr:bit
     op_io();
-    regs.p.c ^= (rd & (1 << bit));
+    regs.p.c ^= (bool)(rd & (1 << bit));
     break;
   case 5:  //ldc  addr:bit
     regs.p.c  = (rd & (1 << bit));

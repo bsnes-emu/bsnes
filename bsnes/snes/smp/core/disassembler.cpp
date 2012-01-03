@@ -18,7 +18,7 @@ string SMPcore::disassemble_opcode(uint16 addr) {
   auto dp = [&](unsigned n) { return hex<3>((regs.p.p << 8) + read(addr + 1 + n)); };
   auto ab = [&] {
     unsigned n = (read(addr + 1) << 0) + (read(addr + 2) << 8);
-    return string{ hex<4>(addr & 0x1fff), ":", hex<1>(addr >> 13) };
+    return string{ hex<4>(n & 0x1fff), ":", hex<1>(n >> 13) };
   };
 
   auto mnemonic = [&]() -> string {
