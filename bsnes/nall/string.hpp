@@ -35,7 +35,7 @@
 #include <nall/string/math-fixed-point.hpp>
 #include <nall/string/math-floating-point.hpp>
 #include <nall/string/platform.hpp>
-#include <nall/string/strl.hpp>
+#include <nall/string/strm.hpp>
 #include <nall/string/strpos.hpp>
 #include <nall/string/trim.hpp>
 #include <nall/string/replace.hpp>

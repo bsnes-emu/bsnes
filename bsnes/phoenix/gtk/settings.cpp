@@ -15,10 +15,10 @@ void Settings::save() {
 }
 
 Settings::Settings() {
-  attach(frameGeometryX = 4, "frameGeometryX");
-  attach(frameGeometryY = 24, "frameGeometryY");
-  attach(frameGeometryWidth = 8, "frameGeometryWidth");
-  attach(frameGeometryHeight = 28, "frameGeometryHeight");
-  attach(menuGeometryHeight = 20, "menuGeometryHeight");
-  attach(statusGeometryHeight = 20, "statusGeometryHeight");
+  append(frameGeometryX = 4, "frameGeometryX");
+  append(frameGeometryY = 24, "frameGeometryY");
+  append(frameGeometryWidth = 8, "frameGeometryWidth");
+  append(frameGeometryHeight = 28, "frameGeometryHeight");
+  append(menuGeometryHeight = 20, "menuGeometryHeight");
+  append(statusGeometryHeight = 20, "statusGeometryHeight");
 }

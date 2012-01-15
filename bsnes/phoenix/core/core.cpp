@@ -50,6 +50,85 @@ Font::Font(const string &description):
 description(description) {
 }
 
+//Desktop
+//=======
+
+Size Desktop::size() {
+  return pDesktop::size();
+}
+
+Geometry Desktop::workspace() {
+  return pDesktop::workspace();
+}
+
+//Keyboard
+//========
+
+bool Keyboard::pressed(Keyboard::Scancode scancode) {
+  return pKeyboard::pressed(scancode);
+}
+
+bool Keyboard::released(Keyboard::Scancode scancode) {
+  return !pressed(scancode);
+}
+
+array<bool> Keyboard::state() {
+  return pKeyboard::state();
+}
+
+//Mouse
+//=====
+
+Position Mouse::position() {
+  return pMouse::position();
+}
+
+bool Mouse::pressed(Mouse::Button button) {
+  return pMouse::pressed(button);
+}
+
+bool Mouse::released(Mouse::Button button) {
+  return !pressed(button);
+}
+
+//DialogWindow
+//============
+
+string DialogWindow::fileOpen_(Window &parent, const string &path, const lstring &filter_) {
+  auto filter = filter_;
+  if(filter.size() == 0) filter.append("All files (*)");
+  return pDialogWindow::fileOpen(parent, path, filter);
+}
+
+string DialogWindow::fileSave_(Window &parent, const string &path, const lstring &filter_) {
+  auto filter = filter_;
+  if(filter.size() == 0) filter.append("All files (*)");
+  return pDialogWindow::fileSave(parent, path, filter);
+}
+
+string DialogWindow::folderSelect(Window &parent, const string &path) {
+  return pDialogWindow::folderSelect(parent, path);
+}
+
+//MessageWindow
+//=============
+
+MessageWindow::Response MessageWindow::information(Window &parent, const string &text, MessageWindow::Buttons buttons) {
+  return pMessageWindow::information(parent, text, buttons);
+}
+
+MessageWindow::Response MessageWindow::question(Window &parent, const string &text, MessageWindow::Buttons buttons) {
+  return pMessageWindow::question(parent, text, buttons);
+}
+
+MessageWindow::Response MessageWindow::warning(Window &parent, const string &text, MessageWindow::Buttons buttons) {
+  return pMessageWindow::warning(parent, text, buttons);
+}
+
+MessageWindow::Response MessageWindow::critical(Window &parent, const string &text, MessageWindow::Buttons buttons) {
+  return pMessageWindow::critical(parent, text, buttons);
+}
+
 //Object
 //======
 
@@ -66,30 +145,6 @@ Object::~Object() {
 
 //OS
 //==
-
-Geometry OS::availableGeometry() {
-  return pOS::availableGeometry();
-}
-
-Geometry OS::desktopGeometry() {
-  return pOS::desktopGeometry();
-}
-
-string OS::fileLoad_(Window &parent, const string &path, const lstring &filter_) {
-  auto filter = filter_;
-  if(filter.size() == 0) filter.append("All files (*)");
-  return pOS::fileLoad(parent, path, filter);
-}
-
-string OS::fileSave_(Window &parent, const string &path, const lstring &filter_) {
-  auto filter = filter_;
-  if(filter.size() == 0) filter.append("All files (*)");
-  return pOS::fileSave(parent, path, filter);
-}
-
-string OS::folderSelect(Window &parent, const string &path) {
-  return pOS::folderSelect(parent, path);
-}
 
 void OS::main() {
   return pOS::main();
@@ -142,29 +197,10 @@ Timer::~Timer() {
   delete &state;
 }
 
-//MessageWindow
-//=============
-
-MessageWindow::Response MessageWindow::information(Window &parent, const string &text, MessageWindow::Buttons buttons) {
-  return pMessageWindow::information(parent, text, buttons);
-}
-
-MessageWindow::Response MessageWindow::question(Window &parent, const string &text, MessageWindow::Buttons buttons) {
-  return pMessageWindow::question(parent, text, buttons);
-}
-
-MessageWindow::Response MessageWindow::warning(Window &parent, const string &text, MessageWindow::Buttons buttons) {
-  return pMessageWindow::warning(parent, text, buttons);
-}
-
-MessageWindow::Response MessageWindow::critical(Window &parent, const string &text, MessageWindow::Buttons buttons) {
-  return pMessageWindow::critical(parent, text, buttons);
-}
-
 //Window
 //======
 
-void Window::append(Layout &layout) {
+void Window::append_(Layout &layout) {
   if(state.layout.append(layout)) {
     ((Sizable&)layout).state.window = this;
     ((Sizable&)layout).state.layout = 0;
@@ -173,14 +209,14 @@ void Window::append(Layout &layout) {
   }
 }
 
-void Window::append(Menu &menu) {
+void Window::append_(Menu &menu) {
   if(state.menu.append(menu)) {
     ((Action&)menu).state.window = this;
     p.append(menu);
   }
 }
 
-void Window::append(Widget &widget) {
+void Window::append_(Widget &widget) {
   if(state.widget.append(widget)) {
     ((Sizable&)widget).state.window = this;
     p.append(widget);
@@ -220,21 +256,21 @@ void Window::ignore() {
   state.ignore = true;
 }
 
-void Window::remove(Layout &layout) {
+void Window::remove_(Layout &layout) {
   if(state.layout.remove(layout)) {
     p.remove(layout);
     ((Sizable&)layout).state.window = 0;
   }
 }
 
-void Window::remove(Menu &menu) {
+void Window::remove_(Menu &menu) {
   if(state.menu.remove(menu)) {
     p.remove(menu);
     ((Action&)menu).state.window = 0;
   }
 }
 
-void Window::remove(Widget &widget) {
+void Window::remove_(Widget &widget) {
   if(state.widget.remove(widget)) {
     p.remove(widget);
     ((Sizable&)widget).state.window = 0;
@@ -376,17 +412,21 @@ Action::~Action() {
 //Menu
 //====
 
-void Menu::append(Action &action) {
-  if(state.action.append(action)) {
-    action.state.menu = this;
-    return p.append(action);
+void Menu::append(const reference_array<Action&> &list) {
+  for(auto &action : list) {
+    if(state.action.append(action)) {
+      action.state.menu = this;
+      p.append(action);
+    }
   }
 }
 
-void Menu::remove(Action &action) {
-  if(state.action.remove(action)) {
-    action.state.menu = 0;
-    return p.remove(action);
+void Menu::remove(const reference_array<Action&> &list) {
+  for(auto &action : list) {
+    if(state.action.remove(action)) {
+      action.state.menu = 0;
+      return p.remove(action);
+    }
   }
 }
 
@@ -424,6 +464,11 @@ Separator::~Separator() {
 
 //Item
 //====
+
+void Item::setImage(const image &image) {
+  state.image = image;
+  return p.setImage(image);
+}
 
 void Item::setText(const string &text) {
   state.text = text;
@@ -658,6 +703,12 @@ Widget::~Widget() {
 //Button
 //======
 
+void Button::setImage(const image &image, Orientation orientation) {
+  state.image = image;
+  state.orientation = orientation;
+  return p.setImage(image, orientation);
+}
+
 void Button::setText(const string &text) {
   state.text = text;
   return p.setText(text);
@@ -756,9 +807,11 @@ CheckBox::~CheckBox() {
 //ComboBox
 //========
 
-void ComboBox::append(const string &text) {
-  state.text.append(text);
-  return p.append(text);
+void ComboBox::append_(const lstring &list) {
+  for(auto &text : list) {
+    state.text.append(text);
+    p.append(text);
+  }
 }
 
 void ComboBox::reset() {

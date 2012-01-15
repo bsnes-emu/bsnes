@@ -7,7 +7,7 @@ serializer System::serialize() {
   char description[512], profile[16];
   memset(&description, 0, sizeof description);
   memset(&profile, 0, sizeof profile);
-  strlcpy(profile, Info::Profile, sizeof profile);
+  strmcpy(profile, Info::Profile, sizeof profile);
 
   s.integer(signature);
   s.integer(version);

@@ -1,6 +1,7 @@
 #ifndef NALL_SORT_HPP
 #define NALL_SORT_HPP
 
+#include <algorithm>
 #include <nall/utility.hpp>
 
 //class:   merge sort
@@ -29,7 +30,7 @@ namespace nall {
         for(unsigned j = i + 1; j < length; j++) {
           if(list[j] < list[min]) min = j;
         }
-        if(min != i) swap(list[i], list[min]);
+        if(min != i) std::swap(list[i], list[min]);
       }
       return;
     }

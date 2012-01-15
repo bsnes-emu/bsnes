@@ -1,9 +1,15 @@
 #include "platform.hpp"
+#include "utility.cpp"
+
+#include "desktop.cpp"
+#include "keyboard.cpp"
+#include "mouse.cpp"
+#include "dialog-window.cpp"
+#include "message-window.cpp"
 
 #include "object.cpp"
 #include "font.cpp"
 #include "timer.cpp"
-#include "message-window.cpp"
 #include "window.cpp"
 
 #include "action/action.cpp"
@@ -35,98 +41,6 @@ static bool OS_keyboardProc(HWND, UINT, WPARAM, LPARAM);
 static void OS_processDialogMessage(MSG&);
 static LRESULT CALLBACK OS_windowProc(HWND, UINT, WPARAM, LPARAM);
 
-Geometry pOS::availableGeometry() {
-  RECT rc;
-  SystemParametersInfo(SPI_GETWORKAREA, 0, &rc, 0);
-  return { rc.left, rc.top, rc.right - rc.left, rc.bottom - rc.top };
-}
-
-Geometry pOS::desktopGeometry() {
-  return { 0, 0, GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN) };
-}
-
-static string pOS_fileDialog(bool save, Window &parent, const string &path, const lstring &filter) {
-  string dir = path;
-  dir.replace("/", "\\");
-
-  string filterList;
-  for(auto &filterItem : filter) {
-    lstring part;
-    part.split("(", filterItem);
-    if(part.size() != 2) continue;
-    part[1].rtrim<1>(")");
-    part[1].replace(" ", "");
-    part[1].transform(",", ";");
-    filterList.append(string(filterItem, "\t", part[1], "\t"));
-  }
-
-  utf16_t wfilter(filterList);
-  utf16_t wdir(dir);
-  wchar_t wfilename[PATH_MAX + 1] = L"";
-
-  wchar_t *p = wfilter;
-  while(*p != L'\0') {
-    if(*p == L'\t') *p = L'\0';
-    p++;
-  }
-
-  OPENFILENAME ofn;
-  memset(&ofn, 0, sizeof(OPENFILENAME));
-  ofn.lStructSize = sizeof(OPENFILENAME);
-  ofn.hwndOwner = &parent != &Window::None ? parent.p.hwnd : 0;
-  ofn.lpstrFilter = wfilter;
-  ofn.lpstrInitialDir = wdir;
-  ofn.lpstrFile = wfilename;
-  ofn.nMaxFile = PATH_MAX;
-  ofn.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_HIDEREADONLY;
-  ofn.lpstrDefExt = L"";
-
-  bool result = (save == false ? GetOpenFileName(&ofn) : GetSaveFileName(&ofn));
-  if(result == false) return "";
-  string name = (const char*)utf8_t(wfilename);
-  name.transform("\\", "/");
-  return name;
-}
-
-string pOS::fileLoad(Window &parent, const string &path, const lstring &filter) {
-  return pOS_fileDialog(false, parent, path, filter);
-}
-
-string pOS::fileSave(Window &parent, const string &path, const lstring &filter) {
-  return pOS_fileDialog(true, parent, path, filter);
-}
-
-string pOS::folderSelect(Window &parent, const string &path) {
-  wchar_t wfilename[PATH_MAX + 1] = L"";
-  BROWSEINFO bi;
-  bi.hwndOwner = &parent != &Window::None ? parent.p.hwnd : 0;
-  bi.pidlRoot = NULL;
-  bi.pszDisplayName = wfilename;
-  bi.lpszTitle = L"";
-  bi.ulFlags = BIF_NEWDIALOGSTYLE | BIF_RETURNONLYFSDIRS;
-  bi.lpfn = NULL;
-  bi.lParam = 0;
-  bi.iImage = 0;
-  bool result = false;
-  LPITEMIDLIST pidl = SHBrowseForFolder(&bi);
-  if(pidl) {
-    if(SHGetPathFromIDList(pidl, wfilename)) {
-      result = true;
-      IMalloc *imalloc = 0;
-      if(SUCCEEDED(SHGetMalloc(&imalloc))) {
-        imalloc->Free(pidl);
-        imalloc->Release();
-      }
-    }
-  }
-  if(result == false) return "";
-  string name = (const char*)utf8_t(wfilename);
-  if(name == "") return "";
-  name.transform("\\", "/");
-  if(name.endswith("/") == false) name.append("/");
-  return name;
-}
-
 void pOS::main() {
   MSG msg;
   while(GetMessage(&msg, 0, 0, 0)) {
@@ -149,7 +63,8 @@ void pOS::processEvents() {
 }
 
 void OS_processDialogMessage(MSG &msg) {
-  if(msg.message == WM_KEYDOWN || msg.message == WM_KEYUP) {
+  if(msg.message == WM_KEYDOWN || msg.message == WM_KEYUP
+  || msg.message == WM_SYSKEYDOWN || msg.message == WM_SYSKEYUP) {
     if(OS_keyboardProc(msg.hwnd, msg.message, msg.wParam, msg.lParam)) {
       DispatchMessage(&msg);
       return;
@@ -163,6 +78,7 @@ void OS_processDialogMessage(MSG &msg) {
 }
 
 void pOS::quit() {
+  osQuit = true;
   PostQuitMessage(0);
 }
 
@@ -218,16 +134,31 @@ void pOS::initialize() {
   wc.lpszMenuName = 0;
   wc.style = CS_HREDRAW | CS_VREDRAW;
   RegisterClass(&wc);
+
+  pKeyboard::initialize();
 }
 
 static bool OS_keyboardProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
+  if(msg != WM_KEYDOWN && msg != WM_SYSKEYDOWN && msg != WM_KEYUP && msg != WM_SYSKEYUP) return false;
+
+  GUITHREADINFO info;
+  memset(&info, 0, sizeof(GUITHREADINFO));
+  info.cbSize = sizeof(GUITHREADINFO);
+  GetGUIThreadInfo(GetCurrentThreadId(), &info);
+  Object *object = (Object*)GetWindowLongPtr(info.hwndFocus, GWLP_USERDATA);
+  if(object == nullptr) return false;
+
+  if(dynamic_cast<Window*>(object)) {
+    Window &window = (Window&)*object;
+    Keyboard::Keycode keysym = Keysym(wparam, lparam);
+    if(keysym != Keyboard::Keycode::None) {
+      if((msg == WM_KEYDOWN || msg == WM_SYSKEYDOWN) && window.onKeyPress) window.onKeyPress(keysym);
+      if((msg == WM_KEYUP || msg == WM_SYSKEYUP) && window.onKeyRelease) window.onKeyRelease(keysym);
+    }
+    return false;
+  }
+
   if(msg == WM_KEYDOWN) {
-    GUITHREADINFO info;
-    memset(&info, 0, sizeof(GUITHREADINFO));
-    info.cbSize = sizeof(GUITHREADINFO);
-    GetGUIThreadInfo(GetCurrentThreadId(), &info);
-    Object *object = (Object*)GetWindowLongPtr(info.hwndFocus, GWLP_USERDATA);
-    if(object == nullptr) return false;
     if(dynamic_cast<ListView*>(object)) {
       ListView &listView = (ListView&)*object;
       if(wparam == VK_RETURN) {
@@ -287,7 +218,7 @@ static LRESULT CALLBACK OS_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM
   if(!object || !dynamic_cast<Window*>(object)) return DefWindowProc(hwnd, msg, wparam, lparam);
   Window &window = (Window&)*object;
 
-  switch(msg) {
+  if(!osQuit) switch(msg) {
     case WM_CLOSE: {
       window.state.ignore = false;
       if(window.onClose) window.onClose();

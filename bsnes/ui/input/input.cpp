@@ -38,6 +38,7 @@ int16_t AbstractInput::poll() {
 //
 
 bool AnalogInput::bind(int16_t scancode, int16_t value) {
+  using nall::Mouse;
   string encode = Scancode::encode(scancode);
   Type type = Type::Button;
 
@@ -66,6 +67,8 @@ int16_t AnalogInput::poll() {
 //
 
 bool DigitalInput::bind(int16_t scancode, int16_t value) {
+  using nall::Keyboard;
+  using nall::Mouse;
   string encode = Scancode::encode(scancode);
   Type type = Type::Button;
 

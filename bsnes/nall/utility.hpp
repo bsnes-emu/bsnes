@@ -9,12 +9,6 @@ namespace nall {
   template<typename T> struct enable_if<false, T> {};
   template<typename C, typename T = bool> struct mp_enable_if : enable_if<C::value, T> {};
 
-  template<typename T> inline void swap(T &x, T &y) {
-    T temp(std::move(x));
-    x = std::move(y);
-    y = std::move(temp);
-  }
-
   template<typename T> struct base_from_member {
     T value;
     base_from_member(T value_) : value(value_) {}

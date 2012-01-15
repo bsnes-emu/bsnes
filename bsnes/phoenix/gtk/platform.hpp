@@ -26,6 +26,38 @@ struct pFont {
   static void setFont(GtkWidget *widget, gpointer font);
 };
 
+struct pDesktop {
+  static Size size();
+  static Geometry workspace();
+};
+
+struct pKeyboard {
+  static bidirectional_map<Keyboard::Scancode, unsigned> keymap;
+
+  static bool pressed(Keyboard::Scancode scancode);
+  static array<bool> state();
+
+  static void initialize();
+};
+
+struct pMouse {
+  static Position position();
+  static bool pressed(Mouse::Button button);
+};
+
+struct pDialogWindow {
+  static string fileOpen(Window &parent, const string &path, const lstring &filter);
+  static string fileSave(Window &parent, const string &path, const lstring &filter);
+  static string folderSelect(Window &parent, const string &path);
+};
+
+struct pMessageWindow {
+  static MessageWindow::Response information(Window &parent, const string &text, MessageWindow::Buttons buttons);
+  static MessageWindow::Response question(Window &parent, const string &text, MessageWindow::Buttons buttons);
+  static MessageWindow::Response warning(Window &parent, const string &text, MessageWindow::Buttons buttons);
+  static MessageWindow::Response critical(Window &parent, const string &text, MessageWindow::Buttons buttons);
+};
+
 struct pObject {
   Object &object;
   bool locked;
@@ -38,13 +70,9 @@ struct pObject {
 };
 
 struct pOS : public pObject {
+  static XlibDisplay *display;
   static Font defaultFont;
 
-  static Geometry availableGeometry();
-  static Geometry desktopGeometry();
-  static string fileLoad(Window &parent, const string &path, const lstring &filter);
-  static string fileSave(Window &parent, const string &path, const lstring &filter);
-  static string folderSelect(Window &parent, const string &path);
   static void main();
   static bool pendingEvents();
   static void processEvents();
@@ -61,13 +89,6 @@ struct pTimer : public pObject {
 
   pTimer(Timer &timer) : pObject(timer), timer(timer) {}
   void constructor();
-};
-
-struct pMessageWindow : public pObject {
-  static MessageWindow::Response information(Window &parent, const string &text, MessageWindow::Buttons buttons);
-  static MessageWindow::Response question(Window &parent, const string &text, MessageWindow::Buttons buttons);
-  static MessageWindow::Response warning(Window &parent, const string &text, MessageWindow::Buttons buttons);
-  static MessageWindow::Response critical(Window &parent, const string &text, MessageWindow::Buttons buttons);
 };
 
 struct pWindow : public pObject {
@@ -150,6 +171,7 @@ struct pSeparator : public pAction {
 struct pItem : public pAction {
   Item &item;
 
+  void setImage(const image &image);
   void setText(const string &text);
 
   pItem(Item &item) : pAction(item), item(item) {}
@@ -219,6 +241,7 @@ struct pButton : public pWidget {
   Button &button;
 
   Geometry minimumGeometry();
+  void setImage(const image &image, Orientation orientation);
   void setText(const string &text);
 
   pButton(Button &button) : pWidget(button), button(button) {}

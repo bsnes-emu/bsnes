@@ -117,7 +117,7 @@ struct http {
         }
       }
     } else if(auto position = header.iposition("\r\nContent-Length: ")) {
-      unsigned length = decimal((const char*)header + position() + 16);
+      unsigned length = decimal((const char*)header + position() + 18);
       while(length) {
         char buffer[256];
         int packetlength = recv(serversocket, buffer, min(256, length), 0);

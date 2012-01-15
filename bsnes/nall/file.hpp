@@ -134,12 +134,12 @@ namespace nall {
       file_offset = req_offset;
     }
 
-    int offset() {
+    int offset() const {
       if(!fp) return -1;  //file not open
       return file_offset;
     }
 
-    int size() {
+    int size() const {
       if(!fp) return -1;  //file not open
       return file_size;
     }
@@ -194,7 +194,7 @@ namespace nall {
       }
     }
 
-    bool open() {
+    bool open() const {
       return fp;
     }
 

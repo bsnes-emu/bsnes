@@ -4,12 +4,46 @@ struct pMenu;
 struct pLayout;
 struct pWidget;
 
+static bool osQuit = false;
+
 struct pFont {
   static Geometry geometry(const string &description, const string &text);
 
   static HFONT create(const string &description);
   static void free(HFONT hfont);
   static Geometry geometry(HFONT hfont, const string &text);
+};
+
+struct pDesktop {
+  static Size size();
+  static Geometry workspace();
+};
+
+struct pKeyboard {
+  static bidirectional_map<Keyboard::Scancode, unsigned> keymap;
+
+  static bool pressed(Keyboard::Scancode scancode);
+  static array<bool> state();
+
+  static void initialize();
+};
+
+struct pMouse {
+  static Position position();
+  static bool pressed(Mouse::Button button);
+};
+
+struct pDialogWindow {
+  static string fileOpen(Window &parent, const string &path, const lstring &filter);
+  static string fileSave(Window &parent, const string &path, const lstring &filter);
+  static string folderSelect(Window &parent, const string &path);
+};
+
+struct pMessageWindow {
+  static MessageWindow::Response information(Window &parent, const string &text, MessageWindow::Buttons buttons);
+  static MessageWindow::Response question(Window &parent, const string &text, MessageWindow::Buttons buttons);
+  static MessageWindow::Response warning(Window &parent, const string &text, MessageWindow::Buttons buttons);
+  static MessageWindow::Response critical(Window &parent, const string &text, MessageWindow::Buttons buttons);
 };
 
 struct pObject {
@@ -27,11 +61,6 @@ struct pObject {
 };
 
 struct pOS : public pObject {
-  static Geometry availableGeometry();
-  static Geometry desktopGeometry();
-  static string fileLoad(Window &parent, const string &path, const lstring &filter);
-  static string fileSave(Window &parent, const string &path, const lstring &filter);
-  static string folderSelect(Window &parent, const string &path);
   static void main();
   static bool pendingEvents();
   static void processEvents();
@@ -49,13 +78,6 @@ struct pTimer : public pObject {
 
   pTimer(Timer &timer) : pObject(timer), timer(timer) {}
   void constructor();
-};
-
-struct pMessageWindow : public pObject {
-  static MessageWindow::Response information(Window &parent, const string &text, MessageWindow::Buttons buttons);
-  static MessageWindow::Response question(Window &parent, const string &text, MessageWindow::Buttons buttons);
-  static MessageWindow::Response warning(Window &parent, const string &text, MessageWindow::Buttons buttons);
-  static MessageWindow::Response critical(Window &parent, const string &text, MessageWindow::Buttons buttons);
 };
 
 struct pWindow : public pObject {
@@ -133,12 +155,15 @@ struct pSeparator : public pAction {
 
 struct pItem : public pAction {
   Item &item;
+  HBITMAP hbitmap;
 
+  void setImage(const image &image);
   void setText(const string &text);
 
-  pItem(Item &item) : pAction(item), item(item) {}
+  pItem(Item &item) : pAction(item), item(item), hbitmap(0) {}
   void constructor();
   void destructor();
+  void createBitmap();
 };
 
 struct pCheckItem : public pAction {
@@ -202,11 +227,14 @@ struct pWidget : public pSizable {
 
 struct pButton : public pWidget {
   Button &button;
+  HBITMAP hbitmap;
+  HIMAGELIST himagelist;
 
   Geometry minimumGeometry();
+  void setImage(const image &image, Orientation orientation);
   void setText(const string &text);
 
-  pButton(Button &button) : pWidget(button), button(button) {}
+  pButton(Button &button) : pWidget(button), button(button), hbitmap(0), himagelist(0) {}
   void constructor();
   void destructor();
   void orphan();

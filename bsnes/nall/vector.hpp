@@ -55,15 +55,18 @@ namespace nall {
       new(pool + objectsize++) T(data);
     }
 
-    void prepend(const T& data) {
+    void insert(unsigned position, const T& data) {
       append(data);
-      for(unsigned n = objectsize - 1; n; n--) swap(pool[n], pool[n - 1]);
+      for(signed n = size() - 1; n > position; n--) pool[n] = pool[n - 1];
+      pool[position] = data;
+    }
+
+    void prepend(const T& data) {
+      insert(0, data);
     }
 
     void remove(unsigned index, unsigned count = 1) {
-      for(unsigned n = index; count + n < objectsize; n++) {
-        pool[n] = pool[count + n];
-      }
+      for(unsigned n = index; count + n < objectsize; n++) pool[n] = pool[count + n];
       objectsize = (count + index >= objectsize) ? index : objectsize - count;
     }
 

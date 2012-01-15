@@ -151,7 +151,7 @@ static string iNES(const uint8_t *data, unsigned size) {
     "</cartridge>\n"
   );
 
-  print(output, "\n");
+//print(output, "\n");
 
   return output;
 }

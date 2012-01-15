@@ -27,7 +27,7 @@ FileBrowser::FileBrowser() {
   };
 
   pathBrowse.onActivate = [&] {
-    string path = OS::folderSelect(*this, mode->path);
+    string path = DialogWindow::folderSelect(*this, mode->path);
     if(path != "") setPath(path);
   };
 

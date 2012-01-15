@@ -60,7 +60,11 @@ struct Menu::State {
 };
 
 struct Item::State {
+  nall::image image;
   string text;
+
+  State() : image(0, 32, 255u << 24, 255u << 16, 255u << 8, 255u << 0) {
+  }
 };
 
 struct CheckItem::State {
@@ -113,9 +117,11 @@ struct Widget::State {
 };
 
 struct Button::State {
+  nall::image image;
+  Orientation orientation;
   string text;
 
-  State() {
+  State() : image(0, 32, 255u << 24, 255u << 16, 255u << 8, 255u << 0) {
   }
 };
 

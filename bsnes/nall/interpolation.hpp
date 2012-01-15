@@ -5,23 +5,23 @@ namespace nall {
 
 struct Interpolation {
   static inline double Nearest(double mu, double a, double b, double c, double d) {
-    return (mu < 0.5 ? c : d);
+    return (mu <= 0.5 ? b : c);
   }
 
   static inline double Sublinear(double mu, double a, double b, double c, double d) {
     mu = ((mu - 0.5) * 2.0) + 0.5;
     if(mu < 0) mu = 0;
     if(mu > 1) mu = 1;
-    return c * (1.0 - mu) + d * mu;
+    return b * (1.0 - mu) + c * mu;
   }
 
   static inline double Linear(double mu, double a, double b, double c, double d) {
-    return c * (1.0 - mu) + d * mu;
+    return b * (1.0 - mu) + c * mu;
   }
 
   static inline double Cosine(double mu, double a, double b, double c, double d) {
     mu = (1.0 - cos(mu * 3.14159265)) / 2.0;
-    return c * (1.0 - mu) + d * mu;
+    return b * (1.0 - mu) + c * mu;
   }
 
   static inline double Cubic(double mu, double a, double b, double c, double d) {

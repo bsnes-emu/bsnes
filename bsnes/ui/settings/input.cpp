@@ -133,6 +133,7 @@ void InputSettings::clearInput() {
 }
 
 void InputSettings::inputEvent(int16_t scancode, int16_t value, bool allowMouseInput) {
+  using nall::Mouse;
   if(activeInput == 0) return;
   if(allowMouseInput == false && (Mouse::isAnyButton(scancode) || Mouse::isAnyAxis(scancode))) return;
   if(activeInput->bind(scancode, value) == false) return;

@@ -79,7 +79,7 @@ struct Interface : public SNES::Interface {
 static Interface interface;
 
 const char* snes_library_id(void) {
-  return "bsnes v083";
+  return "bsnes v085";
 }
 
 unsigned snes_library_revision_major(void) {
@@ -115,7 +115,8 @@ void snes_set_cartridge_basename(const char *basename) {
 }
 
 void snes_init(void) {
-  interface.initialize(&interface);
+  SNES::interface = &interface;
+  SNES::system.init();
   SNES::input.connect(SNES::Controller::Port1, SNES::Input::Device::Joypad);
   SNES::input.connect(SNES::Controller::Port2, SNES::Input::Device::Joypad);
 }
@@ -163,7 +164,10 @@ static linear_vector<CheatList> cheatList;
 
 void snes_cheat_reset(void) {
   cheatList.reset();
-  interface.setCheats();
+  GameBoy::cheat.reset();
+  GameBoy::cheat.synchronize();
+  SNES::cheat.reset();
+  SNES::cheat.synchronize();
 }
 
 void snes_cheat_set(unsigned index, bool enable, const char *code) {
@@ -173,7 +177,35 @@ void snes_cheat_set(unsigned index, bool enable, const char *code) {
   for(unsigned n = 0; n < cheatList.size(); n++) {
     if(cheatList[n].enable) list.append(cheatList[n].code);
   }
-  interface.setCheats(list);
+
+  if(SNES::cartridge.mode() == SNES::Cartridge::Mode::SuperGameBoy) {
+    GameBoy::cheat.reset();
+    for(auto &code : list) {
+      lstring codelist;
+      codelist.split("+", code);
+      for(auto &part : codelist) {
+        unsigned addr, data, comp;
+        if(GameBoy::Cheat::decode(part, addr, data, comp)) {
+          GameBoy::cheat.append({ addr, data, comp });
+        }
+      }
+    }
+    GameBoy::cheat.synchronize();
+    return;
+  }
+
+  SNES::cheat.reset();
+  for(auto &code : list) {
+    lstring codelist;
+    codelist.split("+", code);
+    for(auto &part : codelist) {
+      unsigned addr, data;
+      if(SNES::Cheat::decode(part, addr, data)) {
+        SNES::cheat.append({ addr, data });
+      }
+    }
+  }
+  SNES::cheat.synchronize();
 }
 
 bool snes_load_cartridge_normal(
@@ -244,7 +276,7 @@ bool snes_load_cartridge_super_game_boy(
     uint8_t *data = new uint8_t[dmg_size];
     memcpy(data, dmg_data, dmg_size);
     string xmldmg = (dmg_xml && *dmg_xml) ? string(dmg_xml) : GameBoyCartridge(data, dmg_size).markup;
-    GameBoy::cartridge.load(xmldmg, data, dmg_size);
+    GameBoy::cartridge.load(GameBoy::System::Revision::SuperGameBoy, xmldmg, data, dmg_size);
     delete[] data;
   }
   SNES::cartridge.load(SNES::Cartridge::Mode::SuperGameBoy, xmlrom);

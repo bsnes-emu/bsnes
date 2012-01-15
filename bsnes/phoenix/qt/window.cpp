@@ -45,7 +45,7 @@ Geometry pWindow::geometry() {
   if(window.state.fullScreen) {
     unsigned menuHeight = window.state.menuVisible ? qtMenu->height() : 0;
     unsigned statusHeight = window.state.statusVisible ? qtStatus->height() : 0;
-    return { 0, menuHeight, OS::desktopGeometry().width, OS::desktopGeometry().height - menuHeight - statusHeight };
+    return { 0, menuHeight, Desktop::size().width, Desktop::size().height - menuHeight - statusHeight };
   }
   return window.state.geometry;
 }
@@ -84,9 +84,8 @@ void pWindow::setFullScreen(bool fullScreen) {
     qtWindow->showNormal();
     qtWindow->adjustSize();
   } else {
-    Geometry geometry = OS::desktopGeometry(), margin = frameMargin();
     qtLayout->setSizeConstraint(QLayout::SetDefaultConstraint);
-    qtContainer->setFixedSize(geometry.width - margin.width, geometry.height - margin.height);
+    qtContainer->setFixedSize(Desktop::size().width - frameMargin().width, Desktop::size().height - frameMargin().height);
     qtWindow->showFullScreen();
   }
 }
@@ -241,6 +240,16 @@ void pWindow::QtWindow::moveEvent(QMoveEvent *event) {
   if(self.locked == false) {
     if(self.window.onMove) self.window.onMove();
   }
+}
+
+void pWindow::QtWindow::keyPressEvent(QKeyEvent *event) {
+  Keyboard::Keycode sym = Keysym(event->nativeVirtualKey());
+  if(sym != Keyboard::Keycode::None && self.window.onKeyPress) self.window.onKeyPress(sym);
+}
+
+void pWindow::QtWindow::keyReleaseEvent(QKeyEvent *event) {
+  Keyboard::Keycode sym = Keysym(event->nativeVirtualKey());
+  if(sym != Keyboard::Keycode::None && self.window.onKeyRelease) self.window.onKeyRelease(sym);
 }
 
 void pWindow::QtWindow::resizeEvent(QResizeEvent*) {

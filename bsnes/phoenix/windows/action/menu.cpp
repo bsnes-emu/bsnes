@@ -39,7 +39,18 @@ void pMenu::update(Window &parentWindow, Menu *parentMenu) {
       if(action.state.visible) AppendMenu(hmenu, MF_SEPARATOR | enabled, item.p.id, L"");
     } else if(dynamic_cast<Item*>(&action)) {
       Item &item = (Item&)action;
-      if(action.state.visible) AppendMenu(hmenu, MF_STRING | enabled, item.p.id, utf16_t(item.state.text));
+      if(action.state.visible) {
+        AppendMenu(hmenu, MF_STRING | enabled, item.p.id, utf16_t(item.state.text));
+
+        if(item.state.image.width && item.state.image.height) {
+          MENUITEMINFO mii = { sizeof(MENUITEMINFO) };
+          //Windows XP and below displays MIIM_BITMAP + hbmpItem in its own column (separate from check/radio marks)
+          //this causes too much spacing, so use a custom checkmark image instead
+          mii.fMask = MIIM_CHECKMARKS;
+          mii.hbmpUnchecked = item.p.hbitmap;
+          SetMenuItemInfo(hmenu, item.p.id, FALSE, &mii);
+        }
+      }
     } else if(dynamic_cast<CheckItem*>(&action)) {
       CheckItem &item = (CheckItem&)action;
       if(action.state.visible) AppendMenu(hmenu, MF_STRING | enabled, item.p.id, utf16_t(item.state.text));

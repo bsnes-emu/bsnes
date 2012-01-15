@@ -151,9 +151,12 @@ namespace nall {
   inline string userpath();
   inline string currentpath();
 
-  //strl.hpp
-  inline unsigned strlcpy(char *dest, const char *src, unsigned length);
-  inline unsigned strlcat(char *dest, const char *src, unsigned length);
+  //strm.hpp
+  inline unsigned strmcpy(char *target, const char *source, unsigned length);
+  inline unsigned strmcat(char *target, const char *source, unsigned length);
+  inline bool strccpy(char *target, const char *source, unsigned length);
+  inline bool strccat(char *target, const char *source, unsigned length);
+  inline void strpcpy(char *&target, const char *source, unsigned &length);
 
   //strpos.hpp
   inline optional<unsigned> strpos(const char *str, const char *key);
@@ -171,8 +174,6 @@ namespace nall {
   template<bool Insensitive> alwaysinline bool chrequal(char x, char y);
   template<bool Quoted, typename T> alwaysinline bool quoteskip(T *&p);
   template<bool Quoted, typename T> alwaysinline bool quotecopy(char *&t, T *&p);
-  inline unsigned strlcpy(string &dest, const char *src, unsigned length);
-  inline unsigned strlcat(string &dest, const char *src, unsigned length);
   inline string substr(const char *src, unsigned start = 0, unsigned length = ~0u);
   inline string sha256(const uint8_t *data, unsigned size);
 

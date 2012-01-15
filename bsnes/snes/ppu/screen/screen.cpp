@@ -116,9 +116,9 @@ uint32 PPU::Screen::get_pixel(bool swap) {
   }
 
   if(swap == true) {
-    nall::swap(priority_main, priority_sub);
-    nall::swap(color_main, color_sub);
-    nall::swap(source_main, source_sub);
+    std::swap(priority_main, priority_sub);
+    std::swap(color_main, color_sub);
+    std::swap(source_main, source_sub);
   }
 
   uint16 output;

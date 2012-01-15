@@ -193,8 +193,8 @@ bool image::load(const string &filename) {
 }
 
 void image::scale(unsigned outputWidth, unsigned outputHeight, interpolation op) {
-  scaleX(outputWidth, op);
-  scaleY(outputHeight, op);
+  if(width != outputWidth) scaleX(outputWidth, op);
+  if(height != outputHeight) scaleY(outputHeight, op);
 }
 
 void image::transform(bool outputEndian, unsigned outputDepth, uint64_t outputAlphaMask, uint64_t outputRedMask, uint64_t outputGreenMask, uint64_t outputBlueMask) {
@@ -284,6 +284,7 @@ void image::scaleX(unsigned outputWidth, interpolation op) {
   uint8_t *outputData = new uint8_t[outputWidth * height * stride];
   unsigned outputPitch = outputWidth * stride;
   double step = (double)width / (double)outputWidth;
+  const uint8_t *terminal = data + pitch * height;
 
   #pragma omp parallel for
   for(unsigned y = 0; y < height; y++) {
@@ -291,15 +292,12 @@ void image::scaleX(unsigned outputWidth, interpolation op) {
     uint8_t *sp = data + pitch * y;
 
     double fraction = 0.0;
-    uint64_t s[4] = { read(sp), read(sp), read(sp), read(sp) };
+    uint64_t s[4] = { sp < terminal ? read(sp) : 0 };  //B,C (0,1) = center of kernel { 0, 0, 1, 2 }
+    s[1] = s[0];
+    s[2] = sp + stride < terminal ? read(sp += stride) : s[1];
+    s[3] = sp + stride < terminal ? read(sp += stride) : s[2];
 
     for(unsigned x = 0; x < width; x++) {
-      if(sp >= data + pitch * height) break;
-      s[0] = s[1];
-      s[1] = s[2];
-      s[2] = s[3];
-      s[3] = read(sp);
-
       while(fraction <= 1.0) {
         if(dp >= outputData + outputPitch * height) break;
         write(dp, interpolate(fraction, (const uint64_t*)&s, op));
@@ -307,7 +305,8 @@ void image::scaleX(unsigned outputWidth, interpolation op) {
         fraction += step;
       }
 
-      sp += stride;
+      s[0] = s[1]; s[1] = s[2]; s[2] = s[3];
+      if(sp + stride < terminal) s[3] = read(sp += stride);
       fraction -= 1.0;
     }
   }
@@ -321,6 +320,7 @@ void image::scaleX(unsigned outputWidth, interpolation op) {
 void image::scaleY(unsigned outputHeight, interpolation op) {
   uint8_t *outputData = new uint8_t[width * outputHeight * stride];
   double step = (double)height / (double)outputHeight;
+  const uint8_t *terminal = data + pitch * height;
 
   #pragma omp parallel for
   for(unsigned x = 0; x < width; x++) {
@@ -328,15 +328,12 @@ void image::scaleY(unsigned outputHeight, interpolation op) {
     uint8_t *sp = data + stride * x;
 
     double fraction = 0.0;
-    uint64_t s[4] = { read(sp), read(sp), read(sp), read(sp) };
+    uint64_t s[4] = { sp < terminal ? read(sp) : 0 };
+    s[1] = s[0];
+    s[2] = sp + pitch < terminal ? read(sp += pitch) : s[1];
+    s[3] = sp + pitch < terminal ? read(sp += pitch) : s[2];
 
     for(unsigned y = 0; y < height; y++) {
-      if(sp >= data + pitch * height) break;
-      s[0] = s[1];
-      s[1] = s[2];
-      s[2] = s[3];
-      s[3] = read(sp);
-
       while(fraction <= 1.0) {
         if(dp >= outputData + pitch * outputHeight) break;
         write(dp, interpolate(fraction, (const uint64_t*)&s, op));
@@ -344,7 +341,8 @@ void image::scaleY(unsigned outputHeight, interpolation op) {
         fraction += step;
       }
 
-      sp += pitch;
+      s[0] = s[1]; s[1] = s[2]; s[2] = s[3];
+      if(sp + pitch < terminal) s[3] = read(sp += pitch);
       fraction -= 1.0;
     }
   }

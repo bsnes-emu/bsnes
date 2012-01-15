@@ -32,7 +32,7 @@ namespace nall {
       string desc;
       type_t type;
 
-      string get() const {
+      inline string get() const {
         switch(type) {
           case boolean_t:  return { *(bool*)data };
           case signed_t:   return { *(signed*)data };
@@ -43,7 +43,7 @@ namespace nall {
         return "???";
       }
 
-      void set(string s) {
+      inline void set(string s) {
         switch(type) {
           case boolean_t:  *(bool*)data = (s == "true");     break;
           case signed_t:   *(signed*)data = integer(s);      break;
@@ -56,7 +56,7 @@ namespace nall {
     linear_vector<item_t> list;
 
     template<typename T>
-    void attach(T &data, const char *name, const char *desc = "") {
+    inline void append(T &data, const char *name, const char *desc = "") {
       unsigned n = list.size();
       list[n].data = (uintptr_t)&data;
       list[n].name = name;
@@ -70,7 +70,13 @@ namespace nall {
       else list[n].type = unknown_t;
     }
 
-    virtual bool load(const string &filename) {
+    //deprecated
+    template<typename T>
+    inline void attach(T &data, const char *name, const char *desc = "") {
+      append(data, name, desc);
+    }
+
+    inline virtual bool load(const string &filename) {
       string data;
       if(data.readfile(filename) == true) {
         data.replace("\r", "");
@@ -100,7 +106,7 @@ namespace nall {
       }
     }
 
-    virtual bool save(const string &filename) const {
+    inline virtual bool save(const string &filename) const {
       file fp;
       if(fp.open(filename, file::mode::write)) {
         for(unsigned i = 0; i < list.size(); i++) {

@@ -141,7 +141,7 @@ void StateManager::slotErase() {
 string StateManager::slotLoadDescription(unsigned n) {
   if(slot[n].capacity() == 0) return "(empty)";
   char text[DescriptionLength];
-  strlcpy(text, (const char*)slot[n].data() + HeaderLength, DescriptionLength);
+  strmcpy(text, (const char*)slot[n].data() + HeaderLength, DescriptionLength);
   return text;
 }
 
@@ -149,7 +149,7 @@ void StateManager::slotSaveDescription() {
   if(stateList.selected() == false) return;
   string text = descEdit.text();
   if(slot[stateList.selection()].capacity() > 0) {
-    strlcpy((char*)slot[stateList.selection()].data() + HeaderLength, (const char*)text, DescriptionLength);
+    strmcpy((char*)slot[stateList.selection()].data() + HeaderLength, (const char*)text, DescriptionLength);
   }
   refresh();
 }

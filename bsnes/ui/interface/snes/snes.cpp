@@ -317,9 +317,9 @@ int16_t InterfaceSNES::inputPoll(bool port, SNES::Input::Device device, unsigned
     if(device == SNES::Input::Device::Joypad) return inputManager->snes.port1.gamepad.poll(id);
     if(device == SNES::Input::Device::Multitap) {
       if(index == 0) return inputManager->snes.port1.multitap1.poll(id);
-      if(index == 1) return inputManager->snes.port1.multitap1.poll(id);
-      if(index == 2) return inputManager->snes.port1.multitap1.poll(id);
-      if(index == 3) return inputManager->snes.port1.multitap1.poll(id);
+      if(index == 1) return inputManager->snes.port1.multitap2.poll(id);
+      if(index == 2) return inputManager->snes.port1.multitap3.poll(id);
+      if(index == 3) return inputManager->snes.port1.multitap4.poll(id);
     }
     if(device == SNES::Input::Device::Mouse) return inputManager->snes.port1.mouse.poll(id);
   }
@@ -328,9 +328,9 @@ int16_t InterfaceSNES::inputPoll(bool port, SNES::Input::Device device, unsigned
     if(device == SNES::Input::Device::Joypad) return inputManager->snes.port2.gamepad.poll(id);
     if(device == SNES::Input::Device::Multitap) {
       if(index == 0) return inputManager->snes.port2.multitap1.poll(id);
-      if(index == 1) return inputManager->snes.port2.multitap1.poll(id);
-      if(index == 2) return inputManager->snes.port2.multitap1.poll(id);
-      if(index == 3) return inputManager->snes.port2.multitap1.poll(id);
+      if(index == 1) return inputManager->snes.port2.multitap2.poll(id);
+      if(index == 2) return inputManager->snes.port2.multitap3.poll(id);
+      if(index == 3) return inputManager->snes.port2.multitap4.poll(id);
     }
     if(device == SNES::Input::Device::Mouse) return inputManager->snes.port2.mouse.poll(id);
     if(device == SNES::Input::Device::SuperScope) return inputManager->snes.port2.superScope.poll(id);

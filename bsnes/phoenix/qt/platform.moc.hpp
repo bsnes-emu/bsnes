@@ -25,6 +25,38 @@ struct pFont {
   static Geometry geometry(const QFont &qtFont, const string &text);
 };
 
+struct pDesktop {
+  static Size size();
+  static Geometry workspace();
+};
+
+struct pKeyboard {
+  static bidirectional_map<Keyboard::Scancode, unsigned> keymap;
+
+  static bool pressed(Keyboard::Scancode scancode);
+  static array<bool> state();
+
+  static void initialize();
+};
+
+struct pMouse {
+  static Position position();
+  static bool pressed(Mouse::Button button);
+};
+
+struct pDialogWindow {
+  static string fileOpen(Window &parent, const string &path, const lstring &filter);
+  static string fileSave(Window &parent, const string &path, const lstring &filter);
+  static string folderSelect(Window &parent, const string &path);
+};
+
+struct pMessageWindow {
+  static MessageWindow::Response information(Window &parent, const string &text, MessageWindow::Buttons buttons);
+  static MessageWindow::Response question(Window &parent, const string &text, MessageWindow::Buttons buttons);
+  static MessageWindow::Response warning(Window &parent, const string &text, MessageWindow::Buttons buttons);
+  static MessageWindow::Response critical(Window &parent, const string &text, MessageWindow::Buttons buttons);
+};
+
 struct pObject {
   Object &object;
   bool locked;
@@ -36,18 +68,15 @@ struct pObject {
 };
 
 struct pOS : public pObject {
-  static Geometry availableGeometry();
-  static Geometry desktopGeometry();
-  static string fileLoad(Window &parent, const string &path, const lstring &filter);
-  static string fileSave(Window &parent, const string &path, const lstring &filter);
-  static string folderSelect(Window &parent, const string &path);
+  static XlibDisplay *display;
+
   static void main();
   static bool pendingEvents();
   static void processEvents();
   static void quit();
-  static void syncX();
 
   static void initialize();
+  static void syncX();
 };
 
 struct pTimer : public QObject, public pObject {
@@ -68,13 +97,6 @@ public slots:
   void onTimeout();
 };
 
-struct pMessageWindow : public pObject {
-  static MessageWindow::Response information(Window &parent, const string &text, MessageWindow::Buttons buttons);
-  static MessageWindow::Response question(Window &parent, const string &text, MessageWindow::Buttons buttons);
-  static MessageWindow::Response warning(Window &parent, const string &text, MessageWindow::Buttons buttons);
-  static MessageWindow::Response critical(Window &parent, const string &text, MessageWindow::Buttons buttons);
-};
-
 struct pWindow : public QObject, public pObject {
   Q_OBJECT
 
@@ -83,6 +105,8 @@ public:
   struct QtWindow : public QWidget {
     pWindow &self;
     void closeEvent(QCloseEvent*);
+    void keyPressEvent(QKeyEvent*);
+    void keyReleaseEvent(QKeyEvent*);
     void moveEvent(QMoveEvent*);
     void resizeEvent(QResizeEvent*);
     QSize sizeHint() const;
@@ -165,6 +189,7 @@ public:
   Item &item;
   QAction *qtAction;
 
+  void setImage(const image &image);
   void setText(const string &text);
 
   pItem(Item &item) : pAction(item), item(item) {}
@@ -256,9 +281,10 @@ struct pButton : public QObject, public pWidget {
 
 public:
   Button &button;
-  QPushButton *qtButton;
+  QToolButton *qtButton;
 
   Geometry minimumGeometry();
+  void setImage(const image &image, Orientation orientation);
   void setText(const string &text);
 
   pButton(Button &button) : pWidget(button), button(button) {}

@@ -79,6 +79,18 @@ static gboolean Window_configure(GtkWidget *widget, GdkEvent *event, Window *win
   return false;
 }
 
+static gboolean Window_keyPressEvent(GtkWidget *widget, GdkEventKey *event, Window *window) {
+  Keyboard::Keycode key = Keysym(event->keyval);
+  if(key != Keyboard::Keycode::None && window->onKeyPress) window->onKeyPress(key);
+  return false;
+}
+
+static gboolean Window_keyReleaseEvent(GtkWidget *widget, GdkEventKey *event, Window *window) {
+  Keyboard::Keycode key = Keysym(event->keyval);
+  if(key != Keyboard::Keycode::None && window->onKeyRelease) window->onKeyRelease(key);
+  return false;
+}
+
 void pWindow::append(Layout &layout) {
   Geometry geometry = this->geometry();
   geometry.x = geometry.y = 0;
@@ -123,7 +135,7 @@ bool pWindow::focused() {
 
 Geometry pWindow::geometry() {
   if(window.state.fullScreen == true) {
-    return { 0, menuHeight(), OS::desktopGeometry().width, OS::desktopGeometry().height - menuHeight() - statusHeight() };
+    return { 0, menuHeight(), Desktop::size().width, Desktop::size().height - menuHeight() - statusHeight() };
   };
   return window.state.geometry;
 }
@@ -163,7 +175,7 @@ void pWindow::setFullScreen(bool fullScreen) {
   } else {
     gtk_window_fullscreen(GTK_WINDOW(widget));
     gtk_window_set_decorated(GTK_WINDOW(widget), false);
-    gtk_widget_set_size_request(widget, OS::desktopGeometry().width, OS::desktopGeometry().height);
+    gtk_widget_set_size_request(widget, Desktop::size().width, Desktop::size().height);
     gtk_window_set_resizable(GTK_WINDOW(widget), false);
   }
   gdk_display_sync(gtk_widget_get_display(widget));
@@ -275,6 +287,8 @@ void pWindow::constructor() {
   g_signal_connect(G_OBJECT(widget), "delete-event", G_CALLBACK(Window_close), (gpointer)&window);
   g_signal_connect(G_OBJECT(widget), "expose-event", G_CALLBACK(Window_expose), (gpointer)&window);
   g_signal_connect(G_OBJECT(widget), "configure-event", G_CALLBACK(Window_configure), (gpointer)&window);
+  g_signal_connect(G_OBJECT(widget), "key-press-event", G_CALLBACK(Window_keyPressEvent), (gpointer)&window);
+  g_signal_connect(G_OBJECT(widget), "key-release-event", G_CALLBACK(Window_keyPressEvent), (gpointer)&window);
 }
 
 unsigned pWindow::menuHeight() {

@@ -1,8 +1,13 @@
 #include "platform.hpp"
 
+#include "desktop.cpp"
+#include "keyboard.cpp"
+#include "mouse.cpp"
+#include "dialog-window.cpp"
+#include "message-window.cpp"
+
 #include "font.cpp"
 #include "timer.cpp"
-#include "message-window.cpp"
 #include "window.cpp"
 
 #include "action/action.cpp"
@@ -29,26 +34,6 @@
 #include "widget/vertical-scroll-bar.cpp"
 #include "widget/vertical-slider.cpp"
 #include "widget/viewport.cpp"
-
-Geometry pOS::availableGeometry() {
-  return { 0, 0, 0, 0 };
-}
-
-Geometry pOS::desktopGeometry() {
-  return { 0, 0, 0, 0 };
-}
-
-string pOS::fileLoad(Window &parent, const string &path, const lstring &filter) {
-  return "";
-}
-
-string pOS::fileSave(Window &parent, const string &path, const lstring &filter) {
-  return "";
-}
-
-string pOS::folderSelect(Window &parent, const string &path) {
-  return "";
-}
 
 void pOS::main() {
 }

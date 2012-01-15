@@ -1,10 +1,16 @@
 #include "platform.moc.hpp"
 #include "platform.moc"
+#include "utility.cpp"
+
+#include "desktop.cpp"
+#include "keyboard.cpp"
+#include "mouse.cpp"
+#include "dialog-window.cpp"
+#include "message-window.cpp"
 
 #include "settings.cpp"
 #include "font.cpp"
 #include "timer.cpp"
-#include "message-window.cpp"
 #include "window.cpp"
 
 #include "action/action.cpp"
@@ -32,73 +38,7 @@
 #include "widget/vertical-slider.cpp"
 #include "widget/viewport.cpp"
 
-Geometry pOS::availableGeometry() {
-  QRect rect = QApplication::desktop()->availableGeometry();
-  return { rect.x(), rect.y(), rect.width(), rect.height() };
-}
-
-Geometry pOS::desktopGeometry() {
-  QRect rect = QApplication::desktop()->screenGeometry();
-  return { 0, 0, rect.width(), rect.height() };
-}
-
-string pOS::fileLoad(Window &parent, const string &path, const lstring &filter) {
-  string filterList;
-  for(auto &item : filter) {
-    filterList.append(item);
-    filterList.append(";;");
-  }
-  filterList.rtrim<1>(";;");
-
-  //convert filter list from phoenix to Qt format, example:
-  //"Text, XML files (*.txt,*.xml)" -> "Text, XML files (*.txt *.xml)"
-  signed parenthesis = 0;
-  for(auto &n : filterList) {
-    if(n == '(') parenthesis++;
-    if(n == ')') parenthesis--;
-    if(n == ',' && parenthesis) n = ' ';
-  }
-
-  QString filename = QFileDialog::getOpenFileName(
-    &parent != &Window::None ? parent.p.qtWindow : 0, "Load File",
-    QString::fromUtf8(path), QString::fromUtf8(filterList)
-  );
-  return filename.toUtf8().constData();
-}
-
-string pOS::fileSave(Window &parent, const string &path, const lstring &filter) {
-  string filterList;
-  for(auto &item : filter) {
-    filterList.append(item);
-    filterList.append(";;");
-  }
-  filterList.rtrim<1>(";;");
-
-  //convert filter list from phoenix to Qt format, example:
-  //"Text, XML files (*.txt,*.xml)" -> "Text, XML files (*.txt *.xml)"
-  signed parenthesis = 0;
-  for(auto &n : filterList) {
-    if(n == '(') parenthesis++;
-    if(n == ')') parenthesis--;
-    if(n == ',' && parenthesis) n = ' ';
-  }
-
-  QString filename = QFileDialog::getSaveFileName(
-    &parent != &Window::None ? parent.p.qtWindow : 0, "Save File",
-    QString::fromUtf8(path), QString::fromUtf8(filterList)
-  );
-  return filename.toUtf8().constData();
-}
-
-string pOS::folderSelect(Window &parent, const string &path) {
-  QString directory = QFileDialog::getExistingDirectory(
-    &parent != &Window::None ? parent.p.qtWindow : 0, "Select Directory",
-    QString::fromUtf8(path), QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks
-  );
-  string name = directory.toUtf8().constData();
-  if(name != "" && name.endswith("/") == false) name.append("/");
-  return name;
-}
+XlibDisplay* pOS::display = 0;
 
 void pOS::main() {
   QApplication::exec();
@@ -127,6 +67,8 @@ void pOS::syncX() {
 }
 
 void pOS::initialize() {
+  display = XOpenDisplay(0);
+
   settings = new Settings;
   settings->load();
 
@@ -138,4 +80,6 @@ void pOS::initialize() {
   char **argvp = argv;
 
   qtApplication = new QApplication(argc, argvp);
+
+  pKeyboard::initialize();
 }

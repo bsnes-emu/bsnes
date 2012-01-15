@@ -11,11 +11,11 @@ struct gzip {
   uint8_t *data;
   unsigned size;
 
-  bool decompress(const string &filename);
-  bool decompress(const uint8_t *data, unsigned size);
+  inline bool decompress(const string &filename);
+  inline bool decompress(const uint8_t *data, unsigned size);
 
-  gzip();
-  ~gzip();
+  inline gzip();
+  inline ~gzip();
 };
 
 bool gzip::decompress(const string &filename) {
