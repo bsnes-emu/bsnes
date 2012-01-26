@@ -1,9 +1,7 @@
 #ifndef NALL_VARINT_HPP
 #define NALL_VARINT_HPP
 
-#include <type_traits>
 #include <nall/bit.hpp>
-#include <nall/static.hpp>
 
 namespace nall {
   template<unsigned bits> class uint_t {

@@ -20,7 +20,7 @@ struct Node {
   cstring value;
 
 private:
-  linear_vector<Node> children;
+  vector<Node> children;
 
   inline bool valid(char p) const {  //A-Za-z0-9-.
     return p - 'A' < 26u | p - 'a' < 26u | p - '0' < 10u | p - '-' < 2u;

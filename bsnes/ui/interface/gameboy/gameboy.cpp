@@ -10,10 +10,20 @@ bool InterfaceGameBoy::cartridgeLoaded() {
 bool InterfaceGameBoy::loadCartridge(GameBoy::System::Revision revision, const string &filename) {
   uint8_t *data;
   unsigned size;
-  if(interface->loadFile(filename, data, size) == false) return false;
+
+  if(filename.endswith("/")) {
+    string basename = filename;
+    basename.rtrim<1>("/");
+    basename.append("/", notdir(basename));
+    if(file::read(basename, data, size) == false) return false;
+    interface->baseName = nall::basename(basename);
+  } else {
+    if(file::read(filename, data, size) == false) return false;
+    interface->baseName = nall::basename(filename);
+  }
 
   interface->unloadCartridge();
-  interface->baseName = nall::basename(filename);
+  interface->applyPatch(interface->baseName, data, size);
 
   string markup;
   markup.readfile({ interface->baseName, ".xml" });

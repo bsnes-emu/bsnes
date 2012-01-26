@@ -12,51 +12,74 @@ struct map {
     RHS data;
   };
 
-  void reset() {
+  inline void reset() {
     list.reset();
   }
 
-  unsigned size() const {
+  inline unsigned size() const {
     return list.size();
   }
 
-  //O(n)
-  void append(const LHS &name, const RHS &data) {
+  //O(log n) find
+  inline optional<unsigned> find(const LHS &name) const {
+    signed first = 0, last = size() - 1;
+    while(first <= last) {
+      signed middle = (first + last) / 2;
+           if(name < list[middle].name) last  = middle - 1;  //search lower half
+      else if(list[middle].name < name) first = middle + 1;  //search upper half
+      else return { true, middle };                          //match found
+    }
+    return { false, 0u };
+  }
+
+  //O(n) insert + O(log n) find
+  inline RHS& insert(const LHS &name, const RHS &data) {
+    if(auto position = find(name)) {
+      list[position()].data = data;
+      return list[position()].data;
+    }
     signed offset = size();
     for(unsigned n = 0; n < size(); n++) {
       if(name < list[n].name) { offset = n; break; }
     }
     list.insert(offset, { name, data });
+    return list[offset].data;
   }
 
-  //O(log n)
-  RHS& operator[](const LHS &name) {
-    signed first = 0, last = size() - 1;
-    while(first <= last) {
-      signed middle = (first + last) / 2;
-           if(name < list[middle].name) last  = middle - 1;  //search lower half
-      else if(name > list[middle].name) first = middle + 1;  //search upper half
-      else return list[middle].data;                         //match found
-    }
+  //O(log n) find
+  inline void modify(const LHS &name, const RHS &data) {
+    if(auto position = find(name)) list[position()].data = data;
+  }
+
+  //O(n) remove + O(log n) find
+  inline void remove(const LHS &name) {
+    if(auto position = find(name)) list.remove(position());
+  }
+
+  //O(log n) find
+  inline RHS& operator[](const LHS &name) {
+    if(auto position = find(name)) return list[position()].data;
     throw;
   }
 
-  //O(log n) nothrow
-  const RHS& operator()(const LHS &name, const RHS &data) {
-    signed first = 0, last = size() - 1;
-    while(first <= last) {
-      signed middle = (first + last) / 2;
-           if(name < list[middle].name) last  = middle - 1;  //search lower half
-      else if(name > list[middle].name) first = middle + 1;  //search upper half
-      else return list[middle].data;                         //match found
-    }
+  inline const RHS& operator[](const LHS &name) const {
+    if(auto position = find(name)) return list[position()].data;
+    throw;
+  }
+
+  inline RHS& operator()(const LHS &name) {
+    return insert(name, RHS());
+  }
+
+  inline const RHS& operator()(const LHS &name, const RHS &data) const {
+    if(auto position = find(name)) return list[position()].data;
     return data;
   }
 
-  pair* begin() { return list.begin(); }
-  pair* end() { return list.end(); }
-  const pair* begin() const { return list.begin(); }
-  const pair* end() const { return list.end(); }
+  inline pair* begin() { return list.begin(); }
+  inline pair* end() { return list.end(); }
+  inline const pair* begin() const { return list.begin(); }
+  inline const pair* end() const { return list.end(); }
 
 protected:
   vector<pair> list;
@@ -64,22 +87,28 @@ protected:
 
 template<typename LHS, typename RHS>
 struct bidirectional_map {
-  map<LHS, RHS> lhs;
-  map<RHS, LHS> rhs;
+  const map<LHS, RHS> &lhs;
+  const map<RHS, LHS> &rhs;
 
-  void reset() {
-    lhs.reset();
-    rhs.reset();
+  inline void reset() {
+    llist.reset();
+    rlist.reset();
   }
 
-  unsigned size() const {
-    return lhs.size();
+  inline unsigned size() const {
+    return llist.size();
   }
 
-  void append(const LHS &ldata, const RHS &rdata) {
-    lhs.append(ldata, rdata);
-    rhs.append(rdata, ldata);
+  inline void insert(const LHS &ldata, const RHS &rdata) {
+    llist.insert(ldata, rdata);
+    rlist.insert(rdata, ldata);
   }
+
+  inline bidirectional_map() : lhs(llist), rhs(rlist) {}
+
+protected:
+  map<LHS, RHS> llist;
+  map<RHS, LHS> rlist;
 };
 
 }

@@ -2,17 +2,15 @@
 #define NALL_ANY_HPP
 
 #include <typeinfo>
-#include <type_traits>
-#include <nall/static.hpp>
+#include <nall/type_traits.hpp>
 
 namespace nall {
-  class any {
-  public:
+  struct any {
     bool empty() const { return container; }
     const std::type_info& type() const { return container ? container->type() : typeid(void); }
 
     template<typename T> any& operator=(const T& value_) {
-      typedef typename static_if<
+      typedef typename type_if<
         std::is_array<T>::value,
         typename std::remove_extent<typename std::add_const<T>::type>::type*,
         T

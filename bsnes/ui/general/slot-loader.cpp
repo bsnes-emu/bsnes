@@ -1,4 +1,4 @@
-SlotLoader *slotLoader = 0;
+SlotLoader *slotLoader = nullptr;
 
 SlotLoaderPath::SlotLoaderPath() {
   browse.setText("Browse ...");

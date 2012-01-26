@@ -79,6 +79,19 @@ constexpr inline uintmax_t hex(const char *s) {
   );
 }
 
+constexpr inline intmax_t numeral(const char *s) {
+  return (
+    *s == '0' && *(s + 1) == 'X' ? hex_(s + 2) :
+    *s == '0' && *(s + 1) == 'x' ? hex_(s + 2) :
+    *s == '0' && *(s + 1) == 'B' ? binary_(s + 2) :
+    *s == '0' && *(s + 1) == 'b' ? binary_(s + 2) :
+    *s == '0' ? octal_(s + 1) :
+    *s == '+' ? +decimal_(s + 1) :
+    *s == '-' ? -decimal_(s + 1) :
+    decimal_(s)
+  );
+}
+
 inline double fp(const char *s) {
   return atof(s);
 }

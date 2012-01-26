@@ -11,6 +11,7 @@ void pCanvas::update() {
 
 void pCanvas::constructor() {
   qtWidget = qtCanvas = new QtCanvas(*this);
+  qtCanvas->setMouseTracking(true);
   qtImage = new QImage(canvas.state.width, canvas.state.height, QImage::Format_ARGB32);
   memcpy(qtImage->bits(), canvas.state.data, canvas.state.width * canvas.state.height * sizeof(uint32_t));
 
@@ -28,6 +29,32 @@ void pCanvas::destructor() {
 void pCanvas::orphan() {
   destructor();
   constructor();
+}
+
+void pCanvas::QtCanvas::leaveEvent(QEvent *event) {
+  if(self.canvas.onMouseLeave) self.canvas.onMouseLeave();
+}
+
+void pCanvas::QtCanvas::mouseMoveEvent(QMouseEvent *event) {
+  if(self.canvas.onMouseMove) self.canvas.onMouseMove({ event->pos().x(), event->pos().y() });
+}
+
+void pCanvas::QtCanvas::mousePressEvent(QMouseEvent *event) {
+  if(self.canvas.onMousePress == false) return;
+  switch(event->button()) {
+  case Qt::LeftButton: self.canvas.onMousePress(Mouse::Button::Left); break;
+  case Qt::MidButton: self.canvas.onMousePress(Mouse::Button::Middle); break;
+  case Qt::RightButton: self.canvas.onMousePress(Mouse::Button::Right); break;
+  }
+}
+
+void pCanvas::QtCanvas::mouseReleaseEvent(QMouseEvent *event) {
+  if(self.canvas.onMouseRelease == false) return;
+  switch(event->button()) {
+  case Qt::LeftButton: self.canvas.onMouseRelease(Mouse::Button::Left); break;
+  case Qt::MidButton: self.canvas.onMouseRelease(Mouse::Button::Middle); break;
+  case Qt::RightButton: self.canvas.onMouseRelease(Mouse::Button::Right); break;
+  }
 }
 
 void pCanvas::QtCanvas::paintEvent(QPaintEvent *event) {

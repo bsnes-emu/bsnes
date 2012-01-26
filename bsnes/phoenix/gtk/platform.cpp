@@ -1,5 +1,6 @@
 #include "platform.hpp"
 #include "utility.cpp"
+#include "settings.cpp"
 
 #include "desktop.cpp"
 #include "keyboard.cpp"
@@ -7,7 +8,6 @@
 #include "dialog-window.cpp"
 #include "message-window.cpp"
 
-#include "settings.cpp"
 #include "font.cpp"
 #include "timer.cpp"
 #include "window.cpp"

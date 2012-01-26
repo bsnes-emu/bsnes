@@ -56,7 +56,7 @@ struct directory {
       }
       FindClose(handle);
     }
-    if(list.size() > 0) sort(&list[0], list.size());
+    if(list.size() > 0) list.sort();
     for(auto &name : list) name.append("/");  //must append after sorting
     return list;
   }
@@ -83,7 +83,7 @@ struct directory {
       }
       FindClose(handle);
     }
-    if(list.size() > 0) sort(&list[0], list.size());
+    if(list.size() > 0) list.sort();
     return list;
   }
 
@@ -116,7 +116,7 @@ struct directory {
       }
       closedir(dp);
     }
-    if(list.size() > 0) sort(&list[0], list.size());
+    if(list.size() > 0) list.sort();
     for(auto &name : list) name.append("/");  //must append after sorting
     return list;
   }
@@ -136,7 +136,7 @@ struct directory {
       }
       closedir(dp);
     }
-    if(list.size() > 0) sort(&list[0], list.size());
+    if(list.size() > 0) list.sort();
     return list;
   }
 

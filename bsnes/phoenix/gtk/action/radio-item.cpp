@@ -14,7 +14,7 @@ void pRadioItem::setChecked() {
   locked = false;
 }
 
-void pRadioItem::setGroup(const reference_array<RadioItem&> &group) {
+void pRadioItem::setGroup(const array<RadioItem&> &group) {
   for(unsigned n = 0; n < group.size(); n++) {
     if(n == 0) continue;
     GSList *currentGroup = gtk_radio_menu_item_get_group(GTK_RADIO_MENU_ITEM(group[0].p.widget));

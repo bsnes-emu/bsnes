@@ -17,7 +17,7 @@ void pRadioBox::setChecked() {
   locked = false;
 }
 
-void pRadioBox::setGroup(const reference_array<RadioBox&> &group) {
+void pRadioBox::setGroup(const array<RadioBox&> &group) {
   locked = true;
   if(qtGroup) {
     delete qtGroup;

@@ -29,14 +29,9 @@ void Cartridge::parse_markup(const char *markup) {
 
 //
 
-unsigned Cartridge::parse_markup_integer(string &data) {
-  if(strbegin(data, "0x")) return hex(data);
-  return decimal(data);
-}
-
 void Cartridge::parse_markup_map(Mapping &m, XML::Node &map) {
-  m.offset = parse_markup_integer(map["offset"].data);
-  m.size = parse_markup_integer(map["size"].data);
+  m.offset = numeral(map["offset"].data);
+  m.size = numeral(map["size"].data);
 
   string data = map["mode"].data;
   if(data == "direct") m.mode = Bus::MapMode::Direct;
@@ -82,7 +77,7 @@ void Cartridge::parse_markup_rom(XML::Node &root) {
 
 void Cartridge::parse_markup_ram(XML::Node &root) {
   if(root.exists() == false) return;
-  ram_size = parse_markup_integer(root["size"].data);
+  ram_size = numeral(root["size"].data);
   for(auto &node : root) {
     Mapping m(ram);
     parse_markup_map(m, node);
@@ -100,11 +95,11 @@ void Cartridge::parse_markup_nss(XML::Node &root) {
     if(number >= 16) break;  //more than 16 DIP switches is not physically possible
 
     information.nss.option[number].reset();
-    information.nss.setting[number] = node["name"].data;
+    information.nss.setting.append(node["name"].data);
     for(auto &leaf : node) {
       if(leaf.name != "option") continue;
       string name = leaf["name"].data;
-      unsigned value = parse_markup_integer(leaf["value"].data);
+      unsigned value = numeral(leaf["value"].data);
       information.nss.option[number].append({ hex<4>(value), ":", name });
     }
   }
@@ -114,7 +109,7 @@ void Cartridge::parse_markup_icd2(XML::Node &root) {
   if(root.exists() == false) return;
   if(mode != Mode::SuperGameBoy) return;
 
-  icd2.revision = max(1, parse_markup_integer(root["revision"].data));
+  icd2.revision = max(1, numeral(root["revision"].data));
 
   for(auto &node : root) {
     if(node.name != "map") continue;
@@ -140,7 +135,7 @@ void Cartridge::parse_markup_superfx(XML::Node &root) {
     if(node.name == "ram") {
       for(auto &leaf : node) {
         if(leaf.name == "size") {
-          ram_size = parse_markup_integer(leaf.data);
+          ram_size = numeral(leaf.data);
           continue;
         }
         if(leaf.name != "map") continue;
@@ -193,7 +188,7 @@ void Cartridge::parse_markup_sa1(XML::Node &root) {
     mapping.append(m);
   }
 
-  ram_size = parse_markup_integer(bwram["size"].data);
+  ram_size = numeral(bwram["size"].data);
   for(auto &node : bwram) {
     if(node.name != "map") continue;
     Mapping m(sa1.cpubwram);
@@ -217,7 +212,7 @@ void Cartridge::parse_markup_necdsp(XML::Node &root) {
   for(unsigned n = 0; n < 16384; n++) necdsp.programROM[n] = 0x000000;
   for(unsigned n = 0; n <  2048; n++) necdsp.dataROM[n] = 0x0000;
 
-  necdsp.frequency = parse_markup_integer(root["frequency"].data);
+  necdsp.frequency = numeral(root["frequency"].data);
   if(necdsp.frequency == 0) necdsp.frequency = 8000000;
   necdsp.revision
   = root["model"].data == "uPD7725"  ? NECDSP::Revision::uPD7725
@@ -286,7 +281,7 @@ void Cartridge::parse_markup_hitachidsp(XML::Node &root) {
 
   for(unsigned n = 0; n < 1024; n++) hitachidsp.dataROM[n] = 0x000000;
 
-  hitachidsp.frequency = parse_markup_integer(root["frequency"].data);
+  hitachidsp.frequency = numeral(root["frequency"].data);
   if(hitachidsp.frequency == 0) hitachidsp.frequency = 20000000;
   string firmware = root["firmware"].data;
   string sha256 = root["sha256"].data;
@@ -379,7 +374,7 @@ void Cartridge::parse_markup_sufamiturbo(XML::Node &root) {
         }
       }
       if(node.name == "ram") {
-        unsigned ram_size = parse_markup_integer(node["size"].data);
+        unsigned ram_size = numeral(node["size"].data);
         for(auto &leaf : node) {
           if(leaf.name != "map") continue;
           Memory &memory = slotid == 0 ? sufamiturbo.slotA.ram : sufamiturbo.slotB.ram;
@@ -434,7 +429,7 @@ void Cartridge::parse_markup_spc7110(XML::Node &root) {
   auto &dcu = root["dcu"];
   auto &rtc = root["rtc"];
 
-  ram_size = parse_markup_integer(ram["size"].data);
+  ram_size = numeral(ram["size"].data);
   for(auto &node : ram) {
     if(node.name != "map") continue;
     Mapping m({ &SPC7110::ram_read, &spc7110 }, { &SPC7110::ram_write, &spc7110 });
@@ -449,7 +444,7 @@ void Cartridge::parse_markup_spc7110(XML::Node &root) {
     mapping.append(m);
   }
 
-  spc7110.data_rom_offset = parse_markup_integer(mcu["offset"].data);
+  spc7110.data_rom_offset = numeral(mcu["offset"].data);
   if(spc7110.data_rom_offset == 0) spc7110.data_rom_offset = 0x100000;
   for(auto &node : mcu) {
     if(node.name != "map") continue;
@@ -524,7 +519,7 @@ void Cartridge::parse_markup_link(XML::Node &root) {
   if(root.exists() == false) return;
   has_link = true;
 
-  link.frequency = max(1, parse_markup_integer(root["frequency"].data));
+  link.frequency = max(1, numeral(root["frequency"].data));
   link.program = root["program"].data;
 
   for(auto &node : root) {

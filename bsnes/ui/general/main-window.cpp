@@ -1,4 +1,4 @@
-MainWindow *mainWindow = 0;
+MainWindow *mainWindow = nullptr;
 
 MainWindow::MainWindow() {
   setTitle(application->title);
@@ -338,7 +338,7 @@ void MainWindow::setupVideoFilters() {
     path = { application->userpath, "filters/" };
     files = directory::files(path, "*.filter");
   }
-  reference_array<RadioItem&> group;
+  array<RadioItem&> group;
 
   settingsVideoFilterList = new RadioItem[files.size()];
   for(unsigned n = 0; n < files.size(); n++) {
@@ -369,7 +369,7 @@ void MainWindow::setupVideoShaders() {
     path = { application->userpath, "shaders/" };
     files = directory::files(path, { "*.", config->video.driver, ".shader" });
   }
-  reference_array<RadioItem&> group;
+  array<RadioItem&> group;
 
   settingsVideoShaderList = new RadioItem[files.size()];
   for(unsigned n = 0; n < files.size(); n++) {

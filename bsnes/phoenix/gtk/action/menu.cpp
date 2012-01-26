@@ -13,13 +13,18 @@ void pMenu::remove(Action &action) {
   action.state.window = 0;
 }
 
+void pMenu::setImage(const image &image) {
+  GtkImage *gtkImage = CreateImage(image, /* menuIcon = */ true);
+  gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(widget), (GtkWidget*)gtkImage);
+}
+
 void pMenu::setText(const string &text) {
   gtk_menu_item_set_label(GTK_MENU_ITEM(widget), text);
 }
 
 void pMenu::constructor() {
   gtkMenu = gtk_menu_new();
-  widget = gtk_menu_item_new_with_label(menu.state.text);
+  widget = gtk_image_menu_item_new_with_label(menu.state.text);
   gtk_menu_item_set_submenu(GTK_MENU_ITEM(widget), gtkMenu);
 }
 

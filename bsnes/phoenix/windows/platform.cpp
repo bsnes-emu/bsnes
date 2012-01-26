@@ -1,5 +1,6 @@
 #include "platform.hpp"
 #include "utility.cpp"
+#include "settings.cpp"
 
 #include "desktop.cpp"
 #include "keyboard.cpp"
@@ -135,6 +136,7 @@ void pOS::initialize() {
   wc.style = CS_HREDRAW | CS_VREDRAW;
   RegisterClass(&wc);
 
+  settings = new Settings;
   pKeyboard::initialize();
 }
 

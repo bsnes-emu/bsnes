@@ -1,4 +1,4 @@
-DipSwitches *dipSwitches = 0;
+DipSwitches *dipSwitches = nullptr;
 
 DipSwitch::DipSwitch() {
   append(name,  { ~0, 0 }, 5);

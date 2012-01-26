@@ -22,6 +22,7 @@ void pButton::setImage(const image &image, Orientation orientation) {
   QIcon qtIcon(QPixmap::fromImage(qtImage));
   qtButton->setIconSize(QSize(qtBuffer.width, qtBuffer.height));
   qtButton->setIcon(qtIcon);
+  qtButton->setStyleSheet("text-align: top;");
   switch(orientation) {
   case Orientation::Horizontal: qtButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon); break;
   case Orientation::Vertical:   qtButton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);  break;

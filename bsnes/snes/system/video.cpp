@@ -9,6 +9,7 @@ unsigned Video::palette30(unsigned color) {
   unsigned r = (color >>  0) & 31;
 
   double L = (1.0 + l) / 16.0;
+  if(l == 0) L *= 0.5;
   unsigned R = L * ((r << 5) + (r << 0));
   unsigned G = L * ((g << 5) + (g << 0));
   unsigned B = L * ((b << 5) + (b << 0));

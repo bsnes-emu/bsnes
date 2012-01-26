@@ -1,6 +1,8 @@
 static QApplication *qtApplication = 0;
 
 struct Settings : public configuration {
+  bidirectional_map<Keyboard::Scancode, unsigned> keymap;
+
   unsigned frameGeometryX;
   unsigned frameGeometryY;
   unsigned frameGeometryWidth;
@@ -31,8 +33,6 @@ struct pDesktop {
 };
 
 struct pKeyboard {
-  static bidirectional_map<Keyboard::Scancode, unsigned> keymap;
-
   static bool pressed(Keyboard::Scancode scancode);
   static array<bool> state();
 
@@ -166,6 +166,7 @@ struct pMenu : public pAction {
   void append(Action &action);
   void remove(Action &action);
   void setFont(const string &font);
+  void setImage(const image &image);
   void setText(const string &text);
 
   pMenu(Menu &menu) : pAction(menu), menu(menu) {}
@@ -229,7 +230,7 @@ public:
 
   bool checked();
   void setChecked();
-  void setGroup(const reference_array<RadioItem&> &group);
+  void setGroup(const array<RadioItem&> &group);
   void setText(const string &text);
 
   pRadioItem(RadioItem &radioItem) : pAction(radioItem), radioItem(radioItem) {}
@@ -304,6 +305,10 @@ public:
   QImage *qtImage;
   struct QtCanvas : public QWidget {
     pCanvas &self;
+    void leaveEvent(QEvent*);
+    void mouseMoveEvent(QMouseEvent*);
+    void mousePressEvent(QMouseEvent*);
+    void mouseReleaseEvent(QMouseEvent*);
     void paintEvent(QPaintEvent*);
     QtCanvas(pCanvas &self);
   } *qtCanvas;
@@ -525,7 +530,7 @@ public:
   bool checked();
   Geometry minimumGeometry();
   void setChecked();
-  void setGroup(const reference_array<RadioBox&> &group);
+  void setGroup(const array<RadioBox&> &group);
   void setText(const string &text);
 
   pRadioBox(RadioBox &radioBox) : pWidget(radioBox), radioBox(radioBox) {}
@@ -603,6 +608,14 @@ public slots:
 
 struct pViewport : public pWidget {
   Viewport &viewport;
+  struct QtViewport : public QWidget {
+    pViewport &self;
+    void leaveEvent(QEvent*);
+    void mouseMoveEvent(QMouseEvent*);
+    void mousePressEvent(QMouseEvent*);
+    void mouseReleaseEvent(QMouseEvent*);
+    QtViewport(pViewport &self);
+  } *qtViewport;
 
   uintptr_t handle();
 

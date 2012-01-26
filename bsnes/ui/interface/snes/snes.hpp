@@ -4,11 +4,12 @@ struct InterfaceSNES : InterfaceCore, SNES::Interface {
   void setController(bool port, unsigned device);
 
   bool cartridgeLoaded();
-  bool loadCartridge(const string &filename);
-  bool loadSatellaviewSlottedCartridge(const string &basename, const string &slotname);
-  bool loadSatellaviewCartridge(const string &basename, const string &slotname);
-  bool loadSufamiTurboCartridge(const string &basename, const string &slotAname, const string &slotBname);
-  bool loadSuperGameBoyCartridge(const string &basename, const string &slotname);
+  bool loadFile(string &filename, uint8_t *&data, unsigned &size);
+  bool loadCartridge(string basename);
+  bool loadSatellaviewSlottedCartridge(string basename, string slotname);
+  bool loadSatellaviewCartridge(string basename, string slotname);
+  bool loadSufamiTurboCartridge(string basename, string slotAname, string slotBname);
+  bool loadSuperGameBoyCartridge(string basename, string slotname);
   void unloadCartridge();
 
   void power();

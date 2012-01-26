@@ -1,8 +1,6 @@
-bidirectional_map<Keyboard::Scancode, unsigned> pKeyboard::keymap;
-
 void pKeyboard::initialize() {
   auto append = [](Keyboard::Scancode scancode, unsigned keysym) {
-    keymap.append(scancode, keysym);
+    settings->keymap.insert(scancode, keysym);
   };
 
   append(Keyboard::Scancode::Escape, VK_ESCAPE);
@@ -121,7 +119,7 @@ void pKeyboard::initialize() {
 }
 
 bool pKeyboard::pressed(Keyboard::Scancode scancode) {
-  return GetAsyncKeyState(keymap.lhs[scancode]) & 0x8000;
+  return GetAsyncKeyState(settings->keymap.lhs[scancode]) & 0x8000;
 }
 
 array<bool> pKeyboard::state() {
@@ -129,7 +127,7 @@ array<bool> pKeyboard::state() {
   output.resize((unsigned)Keyboard::Scancode::Limit);
   for(auto &n : output) n = false;
 
-  for(auto &n : keymap.rhs) {
+  for(auto &n : settings->keymap.rhs) {
     if(GetAsyncKeyState(n.name) & 0x8000) {
       output[(unsigned)n.data] = true;
     }

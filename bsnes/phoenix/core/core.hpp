@@ -231,8 +231,9 @@ struct Menu : private nall::base_from_member<pMenu&>, Action {
   template<typename... Args> void append(Args&... args) { append({ args... }); }
   template<typename... Args> void remove(Args&... args) { remove({ args... }); }
 
-  void append(const nall::reference_array<Action&> &list);
-  void remove(const nall::reference_array<Action&> &list);
+  void append(const nall::array<Action&> &list);
+  void remove(const nall::array<Action&> &list);
+  void setImage(const nall::image &image);
   void setText(const nall::string &text);
 
   Menu();
@@ -277,7 +278,7 @@ struct CheckItem : private nall::base_from_member<pCheckItem&>, Action {
 
 struct RadioItem : private nall::base_from_member<pRadioItem&>, Action {
   template<typename... Args> static void group(Args&... args) { group({ args... }); }
-  static void group(const nall::reference_array<RadioItem&> &list);
+  static void group(const nall::array<RadioItem&> &list);
 
   nall::function<void ()> onActivate;
 
@@ -357,6 +358,11 @@ struct Button : private nall::base_from_member<pButton&>, Widget {
 };
 
 struct Canvas : private nall::base_from_member<pCanvas&>, Widget {
+  nall::function<void ()> onMouseLeave;
+  nall::function<void (Position)> onMouseMove;
+  nall::function<void (Mouse::Button)> onMousePress;
+  nall::function<void (Mouse::Button)> onMouseRelease;
+
   uint32_t* data();
   bool setImage(const nall::image &image);
   void setSize(const Size &size);
@@ -515,7 +521,7 @@ struct ProgressBar : private nall::base_from_member<pProgressBar&>, Widget {
 
 struct RadioBox : private nall::base_from_member<pRadioBox&>, Widget {
   template<typename... Args> static void group(Args&... args) { group({ args... }); }
-  static void group(const nall::reference_array<RadioBox&> &list);
+  static void group(const nall::array<RadioBox&> &list);
 
   nall::function<void ()> onActivate;
 
@@ -577,6 +583,11 @@ struct VerticalSlider : private nall::base_from_member<pVerticalSlider&>, Widget
 };
 
 struct Viewport : private nall::base_from_member<pViewport&>, Widget {
+  nall::function<void ()> onMouseLeave;
+  nall::function<void (Position)> onMouseMove;
+  nall::function<void (Mouse::Button)> onMousePress;
+  nall::function<void (Mouse::Button)> onMouseRelease;
+
   uintptr_t handle();
 
   Viewport();

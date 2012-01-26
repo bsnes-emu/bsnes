@@ -91,7 +91,6 @@ struct Cartridge : property<Cartridge> {
 
 private:
   void parse_markup(const char*);
-  unsigned parse_markup_integer(string&);
   void parse_markup_map(Mapping&, XML::Node&);
 
   void parse_markup_rom(XML::Node&);

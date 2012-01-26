@@ -8,6 +8,7 @@
 #include <utility>
 #include <nall/algorithm.hpp>
 #include <nall/bit.hpp>
+#include <nall/sort.hpp>
 #include <nall/utility.hpp>
 
 namespace nall {
@@ -70,6 +71,19 @@ namespace nall {
       objectsize = (count + index >= objectsize) ? index : objectsize - count;
     }
 
+    void sort() {
+      nall::sort(pool, objectsize);
+    }
+
+    template<typename Comparator> void sort(const Comparator &lessthan) {
+      nall::sort(pool, objectsize, lessthan);
+    }
+
+    optional<unsigned> find(const T& data) {
+      for(unsigned n = 0; n < size(); n++) if(pool[n] == data) return { true, n };
+      return { false, 0u };
+    }
+
     //access
     inline T& operator[](unsigned position) {
       if(position >= objectsize) throw exception_out_of_bounds();
@@ -78,6 +92,12 @@ namespace nall {
 
     inline const T& operator[](unsigned position) const {
       if(position >= objectsize) throw exception_out_of_bounds();
+      return pool[position];
+    }
+
+    inline T& operator()(unsigned position) {
+      if(position >= poolsize) reserve(position + 1);
+      while(position >= objectsize) append(T());
       return pool[position];
     }
 
@@ -141,6 +161,8 @@ namespace nall {
   //if objects hold memory address references to themselves (introspection), a
   //valid copy constructor will be needed to keep pointers valid.
 
+  #define NALL_DEPRECATED
+  #if defined(NALL_DEPRECATED)
   template<typename T> struct linear_vector {
   protected:
     T *pool;
@@ -412,6 +434,7 @@ namespace nall {
     const iterator begin() const { return iterator(*this, 0); }
     const iterator end() const { return iterator(*this, objectsize); }
   };
+  #endif
 }
 
 #endif

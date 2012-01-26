@@ -35,6 +35,7 @@ struct image {
   inline image(const image &source);
   inline image(image &&source);
   inline image(bool endian, unsigned depth, uint64_t alphaMask, uint64_t redMask, uint64_t greenMask, uint64_t blueMask);
+  inline image();
   inline ~image();
 
   inline uint64_t read(const uint8_t *data) const;
@@ -136,6 +137,20 @@ image::image(bool endian, unsigned depth, uint64_t alphaMask, uint64_t redMask, 
   this->stride = (depth / 8) + ((depth & 7) > 0);
 
   alpha.mask = alphaMask, red.mask = redMask, green.mask = greenMask, blue.mask = blueMask;
+  alpha.depth = bitDepth(alpha.mask), alpha.shift = bitShift(alpha.mask);
+  red.depth = bitDepth(red.mask), red.shift = bitShift(red.mask);
+  green.depth = bitDepth(green.mask), green.shift = bitShift(green.mask);
+  blue.depth = bitDepth(blue.mask), blue.shift = bitShift(blue.mask);
+}
+
+image::image() : data(nullptr) {
+  width = 0, height = 0, pitch = 0;
+
+  this->endian = 0;
+  this->depth = 32;
+  this->stride = 4;
+
+  alpha.mask = 255u << 24, red.mask = 255u << 16, green.mask = 255u << 8, blue.mask = 255u << 0;
   alpha.depth = bitDepth(alpha.mask), alpha.shift = bitShift(alpha.mask);
   red.depth = bitDepth(red.mask), red.shift = bitShift(red.mask);
   green.depth = bitDepth(green.mask), green.shift = bitShift(green.mask);

@@ -188,11 +188,9 @@ Interface::Interface() : core(nullptr) {
 
 //internal
 
-bool Interface::loadFile(const string &filename, uint8_t *&data, unsigned &size) {
-  if(file::read(filename, data, size) == false) return false;
-
+bool Interface::applyPatch(const string &filename, uint8_t *&data, unsigned &size) {
   string patchname = { nall::basename(filename), ".bps" };
-  if(file::exists(patchname) == false) return true;
+  if(file::exists(patchname) == false) return false;
 
   bpspatch bps;
   bps.modify(patchname);
@@ -202,7 +200,7 @@ bool Interface::loadFile(const string &filename, uint8_t *&data, unsigned &size)
   bps.target(targetData, targetSize);
   if(bps.apply() != bpspatch::result::success) {
     delete[] targetData;
-    return true;
+    return false;
   }
 
   delete[] data;

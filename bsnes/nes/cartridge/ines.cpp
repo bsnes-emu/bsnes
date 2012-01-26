@@ -14,7 +14,7 @@ static string iNES(const uint8_t *data, unsigned size) {
   unsigned prgram = 0;
   unsigned chrram = chrrom == 0 ? 8192 : 0;
 
-//print("iNES mapper: ", mapper, "\n");
+  print("iNES mapper: ", mapper, "\n");
 
   output.append("<?xml version='1.0' encoding='UTF-8'?>\n");
   output.append("<cartridge>\n");
@@ -151,7 +151,7 @@ static string iNES(const uint8_t *data, unsigned size) {
     "</cartridge>\n"
   );
 
-//print(output, "\n");
+  print(output, "\n");
 
   return output;
 }

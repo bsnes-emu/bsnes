@@ -45,8 +45,8 @@ void Cartridge::load(System::Revision revision, const string &markup, const uint
   info.rtc = document["cartridge"]["rtc"].data == "true";
   info.rumble = document["cartridge"]["rumble"].data == "true";
 
-  info.romsize = hex(document["cartridge"]["rom"]["size"].data);
-  info.ramsize = hex(document["cartridge"]["ram"]["size"].data);
+  info.romsize = numeral(document["cartridge"]["rom"]["size"].data);
+  info.ramsize = numeral(document["cartridge"]["ram"]["size"].data);
   info.battery = document["cartridge"]["ram"]["battery"].data == "true";
 
   switch(info.mapper) { default:

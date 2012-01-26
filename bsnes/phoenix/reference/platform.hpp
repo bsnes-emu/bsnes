@@ -112,6 +112,7 @@ struct pMenu : public pAction {
 
   void append(Action &action);
   void remove(Action &action);
+  void setImage(const image &image);
   void setText(const string &text);
 
   pMenu(Menu &menu) : pAction(menu), menu(menu) {}
@@ -155,7 +156,7 @@ struct pRadioItem : public pAction {
 
   bool checked();
   void setChecked();
-  void setGroup(const reference_array<RadioItem&> &group);
+  void setGroup(const array<RadioItem&> &group);
   void setText(const string &text);
 
   pRadioItem(RadioItem &radioItem) : pAction(radioItem), radioItem(radioItem) {}
@@ -323,7 +324,7 @@ struct pRadioBox : public pWidget {
 
   bool checked();
   void setChecked();
-  void setGroup(const reference_array<RadioBox&> &group);
+  void setGroup(const array<RadioBox&> &group);
   void setText(const string &text);
 
   pRadioBox(RadioBox &radioBox) : pWidget(radioBox), radioBox(radioBox) {}

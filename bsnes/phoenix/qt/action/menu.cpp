@@ -33,6 +33,15 @@ void pMenu::setFont(const string &font) {
   for(auto &item : menu.state.action) item.p.setFont(font);
 }
 
+void pMenu::setImage(const image &image) {
+  nall::image qtBuffer = image;
+  qtBuffer.transform(0, 32u, 255u << 24, 255u << 16, 255u << 8, 255u << 0);
+
+  QImage qtImage(qtBuffer.data, qtBuffer.width, qtBuffer.height, QImage::Format_ARGB32);
+  QIcon qtIcon(QPixmap::fromImage(qtImage));
+  qtMenu->setIcon(qtIcon);
+}
+
 void pMenu::setText(const string &text) {
   qtMenu->setTitle(QString::fromUtf8(text));
 }

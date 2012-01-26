@@ -1,4 +1,4 @@
-FileBrowser *fileBrowser = 0;
+FileBrowser *fileBrowser = nullptr;
 
 FileBrowser::FileBrowser() {
   setGeometry({ 128, 128, 640, 400 });
@@ -130,21 +130,23 @@ bool FileBrowser::loadFolder(const string &requestedPath) {
     if(path.wildcard(filter)) accept = true;
   }
   if(accept == false) return false;
-
-  lstring contentsList = directory::contents(requestedPath);
-  lstring fileNameList;
-  for(auto &fileName : contentsList) {
-    for(auto &filter : mode->filter) {
-      if(fileName.wildcard(filter)) {
-        fileNameList.append(fileName);
-        break;
-      }
-    }
-  }
-
-  if(fileNameList.size() != 1) return false;
-  loadFile({ requestedPath, fileNameList[0] });
+  loadFile(requestedPath);
   return true;
+
+//  lstring contentsList = directory::contents(requestedPath);
+//  lstring fileNameList;
+//  for(auto &fileName : contentsList) {
+//    for(auto &filter : mode->filter) {
+//      if(fileName.wildcard(filter)) {
+//        fileNameList.append(fileName);
+//        break;
+//      }
+//    }
+//  }
+
+//  if(fileNameList.size() != 1) return false;
+//  loadFile({ requestedPath, fileNameList[0] });
+//  return true;
 }
 
 void FileBrowser::loadFile(const string &filename) {

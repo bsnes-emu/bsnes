@@ -25,10 +25,37 @@ bool InterfaceNES::cartridgeLoaded() {
 bool InterfaceNES::loadCartridge(const string &filename) {
   uint8_t *data;
   unsigned size;
-  if(interface->loadFile(filename, data, size) == false) return false;
+
+  if(filename.endswith("/")) {
+    string basename = filename;
+    basename.rtrim<1>("/");
+    basename.append("/", notdir(nall::basename(basename)));
+
+    if(file::exists({ basename, ".prg" }) && file::exists({ basename, ".chr" })) {
+      unsigned prgsize = file::size({ basename, ".prg" });
+      unsigned chrsize = file::size({ basename, ".chr" });
+      data = new uint8_t[size = prgsize + chrsize];
+      nall::file fp;
+      fp.open({ basename, ".prg" }, file::mode::read);
+      fp.read(data, fp.size());
+      fp.close();
+      fp.open({ basename, ".chr" }, file::mode::read);
+      fp.read(data + prgsize, fp.size());
+      fp.close();
+    } else if(file::exists({ basename, ".fc" })) {
+      file::read({ basename, ".fc" }, data, size);
+    } else {
+      return false;
+    }
+
+    interface->baseName = basename;
+  } else {
+    file::read(filename, data, size);
+    interface->baseName = nall::basename(filename);
+  }
 
   interface->unloadCartridge();
-  interface->baseName = nall::basename(filename);
+  interface->applyPatch(interface->baseName, data, size);
 
   string markup;
   markup.readfile({ interface->baseName, ".xml" });

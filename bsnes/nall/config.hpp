@@ -53,21 +53,18 @@ namespace nall {
         }
       }
     };
-    linear_vector<item_t> list;
+    vector<item_t> list;
 
     template<typename T>
     inline void append(T &data, const char *name, const char *desc = "") {
-      unsigned n = list.size();
-      list[n].data = (uintptr_t)&data;
-      list[n].name = name;
-      list[n].desc = desc;
-
-      if(configuration_traits::is_boolean<T>::value) list[n].type = boolean_t;
-      else if(configuration_traits::is_signed<T>::value) list[n].type = signed_t;
-      else if(configuration_traits::is_unsigned<T>::value) list[n].type = unsigned_t;
-      else if(configuration_traits::is_double<T>::value) list[n].type = double_t;
-      else if(configuration_traits::is_string<T>::value) list[n].type = string_t;
-      else list[n].type = unknown_t;
+      item_t item = { (uintptr_t)&data, name, desc };
+      if(configuration_traits::is_boolean<T>::value) item.type = boolean_t;
+      else if(configuration_traits::is_signed<T>::value) item.type = signed_t;
+      else if(configuration_traits::is_unsigned<T>::value) item.type = unsigned_t;
+      else if(configuration_traits::is_double<T>::value) item.type = double_t;
+      else if(configuration_traits::is_string<T>::value) item.type = string_t;
+      else item.type = unknown_t;
+      list.append(item);
     }
 
     //deprecated

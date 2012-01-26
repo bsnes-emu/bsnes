@@ -412,7 +412,7 @@ Action::~Action() {
 //Menu
 //====
 
-void Menu::append(const reference_array<Action&> &list) {
+void Menu::append(const array<Action&> &list) {
   for(auto &action : list) {
     if(state.action.append(action)) {
       action.state.menu = this;
@@ -421,13 +421,18 @@ void Menu::append(const reference_array<Action&> &list) {
   }
 }
 
-void Menu::remove(const reference_array<Action&> &list) {
+void Menu::remove(const array<Action&> &list) {
   for(auto &action : list) {
     if(state.action.remove(action)) {
       action.state.menu = 0;
       return p.remove(action);
     }
   }
+}
+
+void Menu::setImage(const image &image) {
+  state.image = image;
+  return p.setImage(image);
 }
 
 void Menu::setText(const string &text) {
@@ -521,7 +526,7 @@ CheckItem::~CheckItem() {
 //RadioItem
 //=========
 
-void RadioItem::group(const reference_array<RadioItem&> &list) {
+void RadioItem::group(const array<RadioItem&> &list) {
   for(auto &item : list) item.p.setGroup(item.state.group = list);
   if(list.size()) list[0].setChecked();
 }
@@ -1105,7 +1110,7 @@ ProgressBar::~ProgressBar() {
 //RadioBox
 //========
 
-void RadioBox::group(const reference_array<RadioBox&> &list) {
+void RadioBox::group(const array<RadioBox&> &list) {
   for(auto &item : list) item.p.setGroup(item.state.group = list);
   if(list.size()) list[0].setChecked();
 }

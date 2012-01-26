@@ -55,7 +55,7 @@ struct Interface : property<Interface> {
 
   Interface();
 
-  bool loadFile(const string &filename, uint8_t *&data, unsigned &size);
+  bool applyPatch(const string &filename, uint8_t *&data, unsigned &size);
   void videoRefresh(const uint32_t *input, unsigned inputPitch, unsigned width, unsigned height);
 
   string baseName;  // = "/path/to/cartridge" (no extension)

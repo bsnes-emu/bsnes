@@ -116,7 +116,7 @@ protected:
   }
 
 public:
-  linear_vector<File> file;
+  vector<File> file;
 };
 
 }

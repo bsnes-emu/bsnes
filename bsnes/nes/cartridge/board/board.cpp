@@ -90,10 +90,10 @@ Board::Board(XML::Node &board, const uint8_t *data, unsigned size) {
   information.type = board["type"].data;
   information.battery = board["prg"]["battery"].data == "true";
 
-  prgrom.size = hex(board["prg"]["rom"].data);
-  prgram.size = hex(board["prg"]["ram"].data);
-  chrrom.size = hex(board["chr"]["rom"].data);
-  chrram.size = hex(board["chr"]["ram"].data);
+  prgrom.size = numeral(board["prg"]["rom"].data);
+  prgram.size = numeral(board["prg"]["ram"].data);
+  chrrom.size = numeral(board["chr"]["rom"].data);
+  chrram.size = numeral(board["chr"]["ram"].data);
 
   if(prgrom.size) prgrom.data = new uint8[prgrom.size]();
   if(prgram.size) prgram.data = new uint8[prgram.size]();
