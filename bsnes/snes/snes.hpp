@@ -40,12 +40,6 @@ using namespace nall;
 
 #include <gameboy/gameboy.hpp>
 
-#ifdef DEBUGGER
-  #define debugvirtual virtual
-#else
-  #define debugvirtual
-#endif
-
 namespace SNES {
   typedef int8_t  int8;
   typedef int16_t int16;
@@ -126,10 +120,6 @@ namespace SNES {
     }
   };
 
-  struct ChipDebugger {
-    virtual bool property(unsigned id, string &name, string &value) = 0;
-  };
-
   #include <snes/memory/memory.hpp>
   #include <snes/cpu/core/core.hpp>
   #include <snes/smp/core/core.hpp>
@@ -153,7 +143,5 @@ namespace SNES {
   #include <snes/memory/memory-inline.hpp>
   #include <snes/ppu/counter/counter-inline.hpp>
 }
-
-#undef debugvirtual
 
 #endif

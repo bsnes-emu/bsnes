@@ -19,8 +19,8 @@ public:
   void mmio_write(unsigned addr, uint8 data);
 
   void op_io();
-  debugvirtual uint8 op_read(unsigned addr);
-  debugvirtual void op_write(unsigned addr, uint8 data);
+  uint8 op_read(unsigned addr);
+  void op_write(unsigned addr, uint8 data);
 
   void enter();
   void enable();
@@ -34,7 +34,7 @@ public:
 private:
   //cpu
   static void Enter();
-  debugvirtual void op_step();
+  void op_step();
 
   //timing
   struct QueueEvent {
@@ -145,13 +145,6 @@ private:
     uint8 joy3l, joy3h;
     uint8 joy4l, joy4h;
   } status;
-
-  friend class CPUDebugger;
 };
 
-#if defined(DEBUGGER)
-  #include "debugger/debugger.hpp"
-  extern CPUDebugger cpu;
-#else
-  extern CPU cpu;
-#endif
+extern CPU cpu;

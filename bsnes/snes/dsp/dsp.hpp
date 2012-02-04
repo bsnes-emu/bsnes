@@ -167,13 +167,6 @@ private:
   //dsp
   static void Enter();
   void tick();
-
-  friend class DSPDebugger;
 };
 
-#if defined(DEBUGGER)
-  #include "debugger/debugger.hpp"
-  extern DSPDebugger dsp;
-#else
-  extern DSP dsp;
-#endif
+extern DSP dsp;

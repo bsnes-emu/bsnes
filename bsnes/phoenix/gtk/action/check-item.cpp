@@ -13,12 +13,13 @@ void pCheckItem::setChecked(bool checked) {
 }
 
 void pCheckItem::setText(const string &text) {
-  gtk_menu_item_set_label(GTK_MENU_ITEM(widget), text);
+  gtk_menu_item_set_label(GTK_MENU_ITEM(widget), mnemonic(text));
 }
 
 void pCheckItem::constructor() {
-  widget = gtk_check_menu_item_new_with_label(checkItem.state.text);
+  widget = gtk_check_menu_item_new_with_mnemonic("");
   setChecked(checkItem.state.checked);
+  setText(checkItem.state.text);
   g_signal_connect_swapped(G_OBJECT(widget), "toggled", G_CALLBACK(CheckItem_toggle), (gpointer)&checkItem);
 }
 

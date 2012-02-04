@@ -3,12 +3,7 @@
 #define CPU_CPP
 namespace SNES {
 
-#if defined(DEBUGGER)
-  #include "debugger/debugger.cpp"
-  CPUDebugger cpu;
-#else
-  CPU cpu;
-#endif
+CPU cpu;
 
 #include "serialization.cpp"
 #include "dma.cpp"

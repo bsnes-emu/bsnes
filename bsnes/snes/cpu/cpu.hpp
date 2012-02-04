@@ -132,14 +132,7 @@ private:
   } alu;
 
   static void Enter();
-  debugvirtual void op_step();
-
-  friend class CPUDebugger;
+  void op_step();
 };
 
-#if defined(DEBUGGER)
-  #include "debugger/debugger.hpp"
-  extern CPUDebugger cpu;
-#else
-  extern CPU cpu;
-#endif
+extern CPU cpu;

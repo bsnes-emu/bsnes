@@ -72,13 +72,6 @@ public:
   void serialize(serializer&);
   PPU();
   ~PPU();
-
-  friend class PPUDebugger;
 };
 
-#if defined(DEBUGGER)
-  #include "debugger/debugger.hpp"
-  extern PPUDebugger ppu;
-#else
-  extern PPU ppu;
-#endif
+extern PPU ppu;

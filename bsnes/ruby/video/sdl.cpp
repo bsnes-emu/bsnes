@@ -115,6 +115,7 @@ public:
 
     SDL_InitSubSystem(SDL_INIT_VIDEO);
     screen = SDL_SetVideoMode(2560, 1600, 32, SDL_HWSURFACE);
+    XUndefineCursor(display, settings.handle);
 
     buffer  = 0;
     iwidth  = 0;

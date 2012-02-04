@@ -1,6 +1,6 @@
 #include "SPC_DSP.h"
 
-class DSP : public Processor, public ChipDebugger {
+class DSP : public Processor {
 public:
   enum : bool { Threaded = false };
   alwaysinline void step(unsigned clocks);
@@ -16,7 +16,6 @@ public:
   void channel_enable(unsigned channel, bool enable);
 
   void serialize(serializer&);
-  bool property(unsigned id, string &name, string &value) { return false; }
   DSP();
 
 private:

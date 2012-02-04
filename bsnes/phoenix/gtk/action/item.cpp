@@ -8,12 +8,13 @@ void pItem::setImage(const image &image) {
 }
 
 void pItem::setText(const string &text) {
-  gtk_menu_item_set_label(GTK_MENU_ITEM(widget), text);
+  gtk_menu_item_set_label(GTK_MENU_ITEM(widget), mnemonic(text));
 }
 
 void pItem::constructor() {
-  widget = gtk_image_menu_item_new_with_label(item.state.text);
+  widget = gtk_image_menu_item_new_with_mnemonic("");
   g_signal_connect_swapped(G_OBJECT(widget), "activate", G_CALLBACK(Item_activate), (gpointer)&item);
+  setText(item.state.text);
 }
 
 void pItem::destructor() {

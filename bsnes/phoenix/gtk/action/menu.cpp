@@ -19,13 +19,14 @@ void pMenu::setImage(const image &image) {
 }
 
 void pMenu::setText(const string &text) {
-  gtk_menu_item_set_label(GTK_MENU_ITEM(widget), text);
+  gtk_menu_item_set_label(GTK_MENU_ITEM(widget), mnemonic(text));
 }
 
 void pMenu::constructor() {
   gtkMenu = gtk_menu_new();
-  widget = gtk_image_menu_item_new_with_label(menu.state.text);
+  widget = gtk_image_menu_item_new_with_mnemonic("");
   gtk_menu_item_set_submenu(GTK_MENU_ITEM(widget), gtkMenu);
+  setText(menu.state.text);
 }
 
 void pMenu::destructor() {

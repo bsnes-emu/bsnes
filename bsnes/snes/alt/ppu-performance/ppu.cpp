@@ -3,12 +3,7 @@
 #define PPU_CPP
 namespace SNES {
 
-#if defined(DEBUGGER)
-  #include "debugger/debugger.cpp"
-  PPUDebugger ppu;
-#else
-  PPU ppu;
-#endif
+PPU ppu;
 
 #include "mmio/mmio.cpp"
 #include "window/window.cpp"

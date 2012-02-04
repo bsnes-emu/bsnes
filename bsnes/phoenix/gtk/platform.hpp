@@ -141,6 +141,7 @@ struct pAction : public pObject {
   pAction(Action &action) : pObject(action), action(action) {}
   void constructor();
   virtual void orphan();
+  string mnemonic(string text);
   virtual void setFont(const string &font);
 };
 

@@ -168,13 +168,11 @@ void pWindow::setFullScreen(bool fullScreen) {
   if(fullScreen == false) {
     gtk_window_unfullscreen(GTK_WINDOW(widget));
     gtk_window_set_resizable(GTK_WINDOW(widget), window.state.resizable);
-    gtk_window_set_decorated(GTK_WINDOW(widget), true);
     gtk_widget_set_size_request(widget, -1, -1);
     gdk_display_sync(gtk_widget_get_display(widget));
     setGeometry(window.state.geometry);
   } else {
     gtk_window_fullscreen(GTK_WINDOW(widget));
-    gtk_window_set_decorated(GTK_WINDOW(widget), false);
     gtk_widget_set_size_request(widget, Desktop::size().width, Desktop::size().height);
     gtk_window_set_resizable(GTK_WINDOW(widget), false);
   }

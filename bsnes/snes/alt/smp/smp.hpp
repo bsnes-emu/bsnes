@@ -21,6 +21,8 @@ public:
   SMP();
   ~SMP();
 
+  void disassemble_opcode(char *output, uint16 addr);
+
 //private:
   struct Flags {
     bool n, v, p, b, h, i, z, c;
@@ -55,7 +57,7 @@ public:
     Flags p;
   } regs;
 
-  unsigned rd, wr, dp, sp, ya, bit;
+  uint16 rd, wr, dp, sp, ya, bit;
 
   struct Status {
     //$00f1
@@ -87,9 +89,9 @@ public:
 
   void tick();
   alwaysinline void op_io();
-  debugvirtual alwaysinline uint8 op_read(uint16 addr);
-  debugvirtual alwaysinline void op_write(uint16 addr, uint8 data);
-  debugvirtual alwaysinline void op_step();
+  alwaysinline uint8 op_read(uint16 addr);
+  alwaysinline void op_write(uint16 addr, uint8 data);
+  alwaysinline void op_step();
   static const unsigned cycle_count_table[256];
   uint64 cycle_table_cpu[256];
   unsigned cycle_table_dsp[256];
@@ -112,9 +114,4 @@ public:
   uint8  op_ror (uint8  x);
 };
 
-#if defined(DEBUGGER)
-  #include "debugger/debugger.hpp"
-  extern SMPDebugger smp;
-#else
-  extern SMP smp;
-#endif
+extern SMP smp;

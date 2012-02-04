@@ -50,12 +50,6 @@ private:
   static void Enter();
 
   friend class SMPcore;
-  friend class SMPDebugger;
 };
 
-#if defined(DEBUGGER)
-  #include "debugger/debugger.hpp"
-  extern SMPDebugger smp;
-#else
-  extern SMP smp;
-#endif
+extern SMP smp;

@@ -3,18 +3,12 @@
 #define DSP_CPP
 namespace SNES {
 
-#if defined(DEBUGGER)
-  #include "debugger/debugger.cpp"
-  DSPDebugger dsp;
-#else
-  DSP dsp;
-#endif
-
-#include "serialization.cpp"
+DSP dsp;
 
 #define REG(n) state.regs[r_##n]
 #define VREG(n) state.regs[v.vidx + v_##n]
 
+#include "serialization.cpp"
 #include "gaussian.cpp"
 #include "counter.cpp"
 #include "envelope.cpp"
@@ -302,5 +296,8 @@ DSP::DSP() {
 
 DSP::~DSP() {
 }
+
+#undef REG
+#undef VREG
 
 }
