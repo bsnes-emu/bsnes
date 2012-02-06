@@ -1,26 +1,17 @@
-include $(nes)/Makefile
-include $(gameboy)/Makefile
 include $(snes)/Makefile
-name := bsnes
+name := bsnes-debugger
 
-ui_objects := ui-main ui-config ui-interface ui-input ui-utility
-ui_objects += ui-window ui-general ui-settings ui-tools
+ui_objects := ui-main ui-interface ui-console ui-video
 ui_objects += phoenix ruby
 ui_objects += $(if $(call streq,$(platform),win),resource)
 
 # platform
 ifeq ($(platform),x)
-  ruby := video.glx video.xv video.sdl
-  ruby += audio.alsa audio.openal audio.oss audio.pulseaudio audio.pulseaudiosimple audio.ao
-  ruby += input.sdl input.x
+  ruby := audio.alsa
 else ifeq ($(platform),osx)
-  ruby :=
-  ruby += audio.openal
-  ruby += input.carbon
+  ruby := audio.openal
 else ifeq ($(platform),win)
-  ruby := video.direct3d video.wgl video.directdraw video.gdi
-  ruby += audio.directsound audio.xaudio2
-  ruby += input.rawinput input.directinput
+  ruby := audio.xaudio2
 endif
 
 # phoenix
@@ -36,14 +27,9 @@ objects := $(ui_objects) $(objects)
 objects := $(patsubst %,obj/%.o,$(objects))
 
 obj/ui-main.o: $(ui)/main.cpp $(call rwildcard,$(ui)/)
-obj/ui-config.o: $(ui)/config/config.cpp $(call rwildcard,$(ui)/)
-obj/ui-interface.o: $(ui)/interface/interface.cpp $(call rwildcard,$(ui)/)
-obj/ui-input.o: $(ui)/input/input.cpp $(call rwildcard,$(ui)/)
-obj/ui-utility.o: $(ui)/utility/utility.cpp $(call rwildcard,$(ui)/)
-obj/ui-window.o: $(ui)/window/window.cpp $(call rwildcard,$(ui)/)
-obj/ui-general.o: $(ui)/general/general.cpp $(call rwildcard,$(ui)/)
-obj/ui-settings.o: $(ui)/settings/settings.cpp $(call rwildcard,$(ui)/)
-obj/ui-tools.o: $(ui)/tools/tools.cpp $(call rwildcard,$(ui)/)
+obj/ui-interface.o: $(ui)/interface/interface.cpp $(call rwildcard,$(ui)/*)
+obj/ui-console.o: $(ui)/console/console.cpp $(call rwildcard,$(ui)/*)
+obj/ui-video.o: $(ui)/video/video.cpp $(call rwildcard,$(ui)/*)
 
 obj/ruby.o: ruby/ruby.cpp $(call rwildcard,ruby/*)
 	$(call compile,$(rubyflags))

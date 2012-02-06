@@ -1,6 +1,6 @@
 #include "base.hpp"
 
-Application *application = 0;
+Application *application = nullptr;
 nall::DSP dspaudio;
 
 //allow files to exist in the same folder as binary;
@@ -27,7 +27,7 @@ void Application::run() {
 }
 
 Application::Application(int argc, char **argv) {
-  title = "bsnes v085.03";
+  title = {"bsnes v", Version};
 
   application = this;
   quit = false;

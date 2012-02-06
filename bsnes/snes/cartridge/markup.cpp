@@ -106,6 +106,7 @@ void Cartridge::parse_markup_nss(XML::Node &root) {
 }
 
 void Cartridge::parse_markup_icd2(XML::Node &root) {
+  #if defined(GAMEBOY)
   if(root.exists() == false) return;
   if(mode != Mode::SuperGameBoy) return;
 
@@ -117,6 +118,7 @@ void Cartridge::parse_markup_icd2(XML::Node &root) {
     parse_markup_map(m, node);
     mapping.append(m);
   }
+  #endif
 }
 
 void Cartridge::parse_markup_superfx(XML::Node &root) {

@@ -133,6 +133,13 @@ private:
 
   static void Enter();
   void op_step();
+
+public:
+  struct Debugger {
+    hook<void (uint32)> op_exec;
+    hook<void (uint32)> op_read;
+    hook<void (uint32, uint8)> op_write;
+  } debugger;
 };
 
 extern CPU cpu;

@@ -11,6 +11,8 @@ void CPU::op_io() {
 }
 
 uint8 CPU::op_read(uint32 addr) {
+  debugger.op_read(addr);
+
   status.clock_count = speed(addr);
   dma_edge();
   add_clocks(status.clock_count - 4);
@@ -21,6 +23,8 @@ uint8 CPU::op_read(uint32 addr) {
 }
 
 void CPU::op_write(uint32 addr, uint8 data) {
+  debugger.op_write(addr, data);
+
   alu_edge();
   status.clock_count = speed(addr);
   dma_edge();

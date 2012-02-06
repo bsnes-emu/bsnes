@@ -45,44 +45,42 @@ void BSXCartridge::memory_write(Memory &memory, unsigned addr, uint8 data) {
 
 //mcu_access() allows mcu_read() and mcu_write() to share decoding logic
 uint8 BSXCartridge::mcu_access(bool write, unsigned addr, uint8 data) {
-  if(within<0x00, 0x1f, 0x8000, 0xffff>(addr)) {
+  if((addr & 0xe08000) == 0x008000) {  //$00-1f:8000-ffff
     if(r07 == 1) {
       addr = ((addr & 0x1f0000) >> 1) | (addr & 0x7fff);
       return memory_access(write, cartridge.rom, addr, data);
     }
   }
 
-  if(within<0x80, 0x9f, 0x8000, 0xffff>(addr)) {
+  if((addr & 0xe08000) == 0x808000) {  //$80-9f:8000-ffff
     if(r08 == 1) {
       addr = ((addr & 0x1f0000) >> 1) | (addr & 0x7fff);
       return memory_access(write, cartridge.rom, addr, data);
     }
   }
 
-  if(within<0x20, 0x3f, 0x6000, 0x7fff>(addr)) {
+  if((addr & 0xe0e000) == 0x206000) {  //$20-3f:6000-7fff
     return memory_access(write, psram, addr, data);
   }
 
-  if(within<0x40, 0x4f, 0x0000, 0xffff>(addr)) {
+  if((addr & 0xf00000) == 0x400000) {  //$40-4f:0000-ffff
     if(r05 == 0) return memory_access(write, psram, addr & 0x0fffff, data);
   }
 
-  if(within<0x50, 0x5f, 0x0000, 0xffff>(addr)) {
+  if((addr & 0xf00000) == 0x500000) {  //$50-5f:0000-ffff
     if(r06 == 0) return memory_access(write, psram, addr & 0x0fffff, data);
   }
 
-  if(within<0x60, 0x6f, 0x0000, 0xffff>(addr)) {
+  if((addr & 0xf00000) == 0x600000) {  //$60-6f:0000-ffff
     if(r03 == 1) return memory_access(write, psram, addr & 0x0fffff, data);
   }
 
-  if(within<0x70, 0x77, 0x0000, 0xffff>(addr)) {
+  if((addr & 0xf80000) == 0x700000) {  //$70-77:0000-ffff
     return memory_access(write, psram, addr & 0x07ffff, data);
   }
 
-  if(within<0x00, 0x3f, 0x8000, 0xffff>(addr)
-  || within<0x40, 0x7f, 0x0000, 0xffff>(addr)
-  || within<0x80, 0xbf, 0x8000, 0xffff>(addr)
-  || within<0xc0, 0xff, 0x0000, 0xffff>(addr)
+  if(((addr & 0x408000) == 0x008000)  //$00-3f|80-bf:8000-ffff
+  || ((addr & 0x400000) == 0x400000)  //$40-7f|c0-ff:0000-ffff
   ) {
     if(r02 == 0) addr = ((addr & 0x7f0000) >> 1) | (addr & 0x7fff);
     Memory &memory = (r01 == 0 ? (Memory&)bsxflash : (Memory&)psram);
@@ -101,12 +99,12 @@ void BSXCartridge::mcu_write(unsigned addr, uint8 data) {
 }
 
 uint8 BSXCartridge::mmio_read(unsigned addr) {
-  if(within<0x00, 0x0f, 0x5000, 0x5000>(addr)) {
+  if((addr & 0xf0ffff) == 0x005000) {  //$00-0f:5000
     uint8 n = (addr >> 16) & 15;
     return r[n];
   }
 
-  if(within<0x10, 0x17, 0x5000, 0x5fff>(addr)) {
+  if((addr & 0xf8f000) == 0x105000) { //$10-17:5000-5fff
     return memory_read(sram, ((addr >> 16) & 7) * 0x1000 + (addr & 0xfff));
   }
 
@@ -114,14 +112,14 @@ uint8 BSXCartridge::mmio_read(unsigned addr) {
 }
 
 void BSXCartridge::mmio_write(unsigned addr, uint8 data) {
-  if(within<0x00, 0x0f, 0x5000, 0x5000>(addr)) {
+  if((addr & 0xf0ffff) == 0x005000) {  //$00-0f:5000
     uint8 n = (addr >> 16) & 15;
     r[n] = data;
     if(n == 0x0e && data & 0x80) mmio_commit();
     return;
   }
 
-  if(within<0x10, 0x17, 0x5000, 0x5fff>(addr)) {
+  if((addr & 0xf8f000) == 0x105000) {  //$10-17:5000-5fff
     return memory_write(sram, ((addr >> 16) & 7) * 0x1000 + (addr & 0xfff), data);
   }
 }

@@ -65,7 +65,9 @@ void System::runthreadtosave() {
 void System::init() {
   assert(interface != 0);
 
+  #if defined(GAMEBOY)
   icd2.init();
+  #endif
   nss.init();
   superfx.init();
   sa1.init();
@@ -104,7 +106,9 @@ void System::load() {
   if(expansion() == ExpansionPortDevice::BSX) bsxsatellaview.load();
   if(cartridge.mode() == Cartridge::Mode::Bsx) bsxcartridge.load();
   if(cartridge.mode() == Cartridge::Mode::SufamiTurbo) sufamiturbo.load();
+  #if defined(GAMEBOY)
   if(cartridge.mode() == Cartridge::Mode::SuperGameBoy) icd2.load();
+  #endif
 
   if(cartridge.has_bsx_slot()) bsxflash.load();
   if(cartridge.has_nss_dip()) nss.load();
@@ -128,7 +132,9 @@ void System::unload() {
   if(expansion() == ExpansionPortDevice::BSX) bsxsatellaview.unload();
   if(cartridge.mode() == Cartridge::Mode::Bsx) bsxcartridge.unload();
   if(cartridge.mode() == Cartridge::Mode::SufamiTurbo) sufamiturbo.unload();
+  #if defined(GAMEBOY)
   if(cartridge.mode() == Cartridge::Mode::SuperGameBoy) icd2.unload();
+  #endif
 
   if(cartridge.has_bsx_slot()) bsxflash.unload();
   if(cartridge.has_nss_dip()) nss.unload();
@@ -164,7 +170,9 @@ void System::power() {
 
   if(expansion() == ExpansionPortDevice::BSX) bsxsatellaview.power();
   if(cartridge.mode() == Cartridge::Mode::Bsx) bsxcartridge.power();
+  #if defined(GAMEBOY)
   if(cartridge.mode() == Cartridge::Mode::SuperGameBoy) icd2.power();
+  #endif
 
   if(cartridge.has_bsx_slot()) bsxflash.power();
   if(cartridge.has_nss_dip()) nss.power();
@@ -192,7 +200,9 @@ void System::reset() {
   if(expansion() == ExpansionPortDevice::BSX) bsxsatellaview.reset();
 
   if(cartridge.mode() == Cartridge::Mode::Bsx) bsxcartridge.reset();
+  #if defined(GAMEBOY)
   if(cartridge.mode() == Cartridge::Mode::SuperGameBoy) icd2.reset();
+  #endif
 
   if(cartridge.has_bsx_slot()) bsxflash.reset();
   if(cartridge.has_nss_dip()) nss.reset();
@@ -208,7 +218,9 @@ void System::reset() {
   if(cartridge.has_msu1()) msu1.reset();
   if(cartridge.has_link()) link.reset();
 
+  #if defined(GAMEBOY)
   if(cartridge.mode() == Cartridge::Mode::SuperGameBoy) cpu.coprocessors.append(&icd2);
+  #endif
   if(cartridge.has_superfx()) cpu.coprocessors.append(&superfx);
   if(cartridge.has_sa1()) cpu.coprocessors.append(&sa1);
   if(cartridge.has_necdsp()) cpu.coprocessors.append(&necdsp);

@@ -58,7 +58,11 @@ void Cartridge::load(Mode cartridge_mode, const char *markup) {
     sha256 = nall::sha256(sufamiturbo.slotA.rom.data(), sufamiturbo.slotA.rom.size());
     break;
   case Mode::SuperGameBoy:
+    #if defined(GAMEBOY)
     sha256 = GameBoy::cartridge.sha256();
+    #else
+    throw "Game Boy support not present";
+    #endif
     break;
   }
 

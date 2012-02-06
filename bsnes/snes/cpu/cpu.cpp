@@ -83,6 +83,8 @@ void CPU::enter() {
 }
 
 void CPU::op_step() {
+  debugger.op_exec(regs.pc.d);
+
   (this->*opcode_table[op_readpc()])();
 }
 

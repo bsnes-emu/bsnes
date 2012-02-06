@@ -1,3 +1,5 @@
+options += gameboy
+
 gameboy_objects := gameboy-interface gameboy-system gameboy-scheduler
 gameboy_objects += gameboy-memory gameboy-cartridge
 gameboy_objects += gameboy-cpu gameboy-apu gameboy-lcd

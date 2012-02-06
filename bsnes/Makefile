@@ -4,10 +4,10 @@ nes := nes
 snes := snes
 gameboy := gameboy
 profile := accuracy
-ui := ui
+ui := ui-debugger
 
 # options += console
-# options += debugger
+options += debugger
 
 # compiler
 c       := $(compiler) -std=gnu99
@@ -39,8 +39,6 @@ else
   unknown_platform: help;
 endif
 
-flags := $(flags) $(foreach o,$(call strupper,$(options)),-D$o)
-
 # implicit rules
 compile = \
   $(strip \
@@ -59,6 +57,7 @@ all: build;
 obj/libco.o: libco/libco.c libco/*
 
 include $(ui)/Makefile
+flags := $(flags) $(foreach o,$(call strupper,$(options)),-D$o)
 
 # targets
 clean:
@@ -91,6 +90,6 @@ sync:
 	rm -r phoenix/test
 
 archive-all:
-	tar -cjf bsnes.tar.bz2 data gameboy libco nall nes obj out phoenix ruby snes ui ui-libsnes Makefile cc.bat clean.bat
+	tar -cjf bsnes.tar.bz2 base data gameboy libco nall nes obj out phoenix ruby snes ui ui-debugger ui-libsnes Makefile cc.bat clean.bat
 
 help:;

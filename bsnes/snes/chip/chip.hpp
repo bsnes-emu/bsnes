@@ -3,8 +3,11 @@ struct Coprocessor : Processor {
   alwaysinline void synchronize_cpu();
 };
 
+#if defined(GAMEBOY)
+  #include <snes/chip/icd2/icd2.hpp>
+#endif
+
 #include <snes/chip/nss/nss.hpp>
-#include <snes/chip/icd2/icd2.hpp>
 #include <snes/chip/superfx/superfx.hpp>
 #include <snes/chip/sa1/sa1.hpp>
 #include <snes/chip/necdsp/necdsp.hpp>

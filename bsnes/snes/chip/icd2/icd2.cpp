@@ -1,3 +1,5 @@
+#if defined(GAMEBOY)
+
 #include <snes/snes.hpp>
 
 #define ICD2_CPP
@@ -73,3 +75,5 @@ void ICD2::reset() {
 }
 
 }
+
+#endif
