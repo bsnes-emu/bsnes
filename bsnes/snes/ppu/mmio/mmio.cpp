@@ -31,6 +31,8 @@ uint16 PPU::get_vram_address() {
 }
 
 uint8 PPU::vram_read(unsigned addr) {
+  debugger.vram_read(addr);
+
   if(regs.display_disable || vcounter() >= (!regs.overscan ? 225 : 240)) {
     return vram[addr];
   }
@@ -38,6 +40,8 @@ uint8 PPU::vram_read(unsigned addr) {
 }
 
 void PPU::vram_write(unsigned addr, uint8 data) {
+  debugger.vram_write(addr, data);
+
   if(regs.display_disable || vcounter() >= (!regs.overscan ? 225 : 240)) {
     vram[addr] = data;
   }

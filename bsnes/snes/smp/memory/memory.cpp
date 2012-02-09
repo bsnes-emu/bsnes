@@ -181,6 +181,8 @@ void SMP::op_io() {
 }
 
 uint8 SMP::op_read(uint16 addr) {
+  debugger.op_read(addr);
+
   add_clocks(12);
   uint8 r = op_busread(addr);
   add_clocks(12);
@@ -189,6 +191,8 @@ uint8 SMP::op_read(uint16 addr) {
 }
 
 void SMP::op_write(uint16 addr, uint8 data) {
+  debugger.op_write(addr, data);
+
   add_clocks(24);
   op_buswrite(addr, data);
   cycle_edge();

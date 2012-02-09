@@ -21,7 +21,7 @@ struct PPU : public Processor, public PPUcounter {
   PPU();
   ~PPU();
 
-private:
+privileged:
   uint32 *surface;
   uint32 *output;
 
@@ -58,6 +58,15 @@ private:
   friend class PPU::Window;
   friend class PPU::Screen;
   friend class Video;
+
+  struct Debugger {
+    hook<void (uint16)> vram_read;
+    hook<void (uint16)> oam_read;
+    hook<void (uint16)> cgram_read;
+    hook<void (uint16, uint8)> vram_write;
+    hook<void (uint16, uint8)> oam_write;
+    hook<void (uint16, uint8)> cgram_write;
+  } debugger;
 };
 
 extern PPU ppu;

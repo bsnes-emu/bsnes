@@ -25,7 +25,7 @@ struct CPU : public Processor, public CPUcore, public PPUcounter {
   CPU();
   ~CPU();
 
-private:
+privileged:
   #include "dma/dma.hpp"
   #include "memory/memory.hpp"
   #include "mmio/mmio.hpp"
@@ -134,11 +134,10 @@ private:
   static void Enter();
   void op_step();
 
-public:
   struct Debugger {
-    hook<void (uint32)> op_exec;
-    hook<void (uint32)> op_read;
-    hook<void (uint32, uint8)> op_write;
+    hook<void (uint24)> op_exec;
+    hook<void (uint24)> op_read;
+    hook<void (uint24, uint8)> op_write;
   } debugger;
 };
 

@@ -12,6 +12,21 @@ VideoWindow::VideoWindow() {
   layout.append(canvas, {~0, ~0});
   append(layout);
 
+  image logo(0, 32, 255u << 24, 255u << 16, 255u << 8, 255u << 0);
+  logo.loadPNG(laevateinnLogo, sizeof laevateinnLogo);
+  logo.alphaBlend(0x000000);
+
+  unsigned cx = (512 - logo.width) / 2, cy = (480 - logo.height) / 2;
+  for(unsigned y = 0; y < logo.height; y++) {
+    uint32_t *dp = canvas.data() + (y + cy) * 512 + cx;
+    const uint32_t *sp = (const uint32_t*)logo.data + y * logo.width;
+    for(unsigned x = 0; x < logo.width; x++) {
+      *dp++ = *sp++;
+    }
+  }
+
+  canvas.update();
+
   canvas.onMouseLeave = [&] {
     setStatusText("");
   };

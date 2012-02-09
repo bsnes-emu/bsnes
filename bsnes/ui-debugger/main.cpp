@@ -32,13 +32,17 @@ Application::Application(int argc, char **argv) {
 
   string filename;
   if(argc >= 2) filename = argv[1];
-  if(!file::exists(filename)) filename = "/media/sdb1/root/cartridges/SNES - Archived/zelda_us.sfc";
+  if(!file::exists(filename)) filename = "/media/sdb1/root/cartridges/Laevateinn/The Legend of Zelda - A Link to the Past (US).sfc";
   if(!file::exists(filename)) filename = DialogWindow::fileOpen(Window::None, "", "SNES images (*.sfc)");
   if(!file::exists(filename)) return;
 
   interface = new Interface;
+  debugger = new Debugger;
   consoleWindow = new ConsoleWindow;
+  aboutWindow = new AboutWindow;
   videoWindow = new VideoWindow;
+  memoryEditor = new MemoryEditor;
+  breakpointEditor = new BreakpointEditor;
 
   videoWindow->setVisible();
   consoleWindow->setVisible();
@@ -54,15 +58,19 @@ Application::Application(int argc, char **argv) {
 
   while(quit == false) {
     OS::processEvents();
-    SNES::system.run();
+    debugger->run();
   }
 
   interface->saveMemory();
 }
 
 Application::~Application() {
+  delete breakpointEditor;
+  delete memoryEditor;
   delete videoWindow;
+  delete aboutWindow;
   delete consoleWindow;
+  delete debugger;
   delete interface;
 }
 

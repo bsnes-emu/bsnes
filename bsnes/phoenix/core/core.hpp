@@ -43,6 +43,8 @@ enum : unsigned {
 
 struct Color {
   uint8_t red, green, blue, alpha;
+  uint32_t rgb() const;
+  uint32_t rgba() const;
   inline Color() : red(0), green(0), blue(0), alpha(255) {}
   inline Color(uint8_t red, uint8_t green, uint8_t blue, uint8_t alpha = 255) : red(red), green(green), blue(blue), alpha(alpha) {}
 };

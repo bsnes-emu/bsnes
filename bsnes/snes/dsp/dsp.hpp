@@ -14,7 +14,7 @@ struct DSP : public Processor {
   DSP();
   ~DSP();
 
-private:
+privileged:
   //global registers
   enum global_reg_t {
     r_mvoll = 0x0c, r_mvolr = 0x1c,

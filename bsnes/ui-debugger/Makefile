@@ -1,7 +1,10 @@
-include $(snes)/Makefile
-name := bsnes-debugger
+options += debugger
 
-ui_objects := ui-main ui-interface ui-console ui-video
+include $(snes)/Makefile
+name := laevateinn
+
+ui_objects := ui-main ui-interface ui-debugger ui-console
+ui_objects += ui-video ui-memory ui-breakpoint
 ui_objects += phoenix ruby
 ui_objects += $(if $(call streq,$(platform),win),resource)
 
@@ -28,8 +31,11 @@ objects := $(patsubst %,obj/%.o,$(objects))
 
 obj/ui-main.o: $(ui)/main.cpp $(call rwildcard,$(ui)/)
 obj/ui-interface.o: $(ui)/interface/interface.cpp $(call rwildcard,$(ui)/*)
+obj/ui-debugger.o: $(ui)/debugger/debugger.cpp $(call rwildcard,$(ui)/*)
 obj/ui-console.o: $(ui)/console/console.cpp $(call rwildcard,$(ui)/*)
 obj/ui-video.o: $(ui)/video/video.cpp $(call rwildcard,$(ui)/*)
+obj/ui-memory.o: $(ui)/memory/memory.cpp $(call rwildcard,$(ui)/*)
+obj/ui-breakpoint.o: $(ui)/breakpoint/breakpoint.cpp $(call rwildcard,$(ui)/*)
 
 obj/ruby.o: ruby/ruby.cpp $(call rwildcard,ruby/*)
 	$(call compile,$(rubyflags))
@@ -54,8 +60,8 @@ install:
 ifeq ($(platform),x)
 	install -D -m 755 out/$(name) $(DESTDIR)$(prefix)/bin/$(name)
 	mkdir -p ~/.config/$(name)
-	install -D -m 644 data/$(name).png $(DESTDIR)$(prefix)/share/pixmaps/$(name).png
-	install -D -m 644 data/$(name).desktop $(DESTDIR)$(prefix)/share/applications/$(name).desktop
+#	install -D -m 644 data/$(name).png $(DESTDIR)$(prefix)/share/pixmaps/$(name).png
+#	install -D -m 644 data/$(name).desktop $(DESTDIR)$(prefix)/share/applications/$(name).desktop
 	cp data/cheats.xml ~/.config/$(name)/cheats.xml
 	chmod 777 ~/.config/$(name) ~/.config/$(name)/cheats.xml
 endif
@@ -63,6 +69,6 @@ endif
 uninstall:
 ifeq ($(platform),x)
 	rm $(DESTDIR)$(prefix)/bin/$(name)
-	rm $(DESTDIR)$(prefix)/share/pixmaps/$(name).png
-	rm $(DESTDIR)$(prefix)/share/applications/$(name).desktop
+#	rm $(DESTDIR)$(prefix)/share/pixmaps/$(name).png
+#	rm $(DESTDIR)$(prefix)/share/applications/$(name).desktop
 endif

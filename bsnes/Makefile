@@ -7,7 +7,6 @@ profile := accuracy
 ui := ui-debugger
 
 # options += console
-options += debugger
 
 # compiler
 c       := $(compiler) -std=gnu99

@@ -39,6 +39,7 @@ void SMP::enter() {
       scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
     }
 
+    debugger.op_exec(regs.pc);
     op_step();
   }
 }

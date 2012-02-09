@@ -19,8 +19,12 @@ using namespace phoenix;
 using namespace ruby;
 
 #include "interface/interface.hpp"
+#include "debugger/debugger.hpp"
 #include "console/console.hpp"
 #include "video/video.hpp"
+#include "memory/memory.hpp"
+#include "breakpoint/breakpoint.hpp"
+extern uint8_t laevateinnLogo[121905];
 
 struct Application {
   bool quit;

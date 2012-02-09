@@ -1,9 +1,11 @@
 #include "../base.hpp"
 ConsoleWindow *consoleWindow = nullptr;
 
+#include "about.cpp"
+
 ConsoleWindow::ConsoleWindow() {
-  setTitle({"Console - bsnes v", Version});
-  setGeometry({64, 650, 800, 400});
+  setTitle({"Console - Laevateinn v", Version});
+  setGeometry({64, 650, 640, 400});
   setMenuVisible();
 
   menuEmulation.setText("&Emulation");
@@ -17,19 +19,47 @@ ConsoleWindow::ConsoleWindow() {
       menuEmulationSeparator, menuEmulationSynchronizeAudio, menuEmulationMuteAudio);
   append(menuEmulation);
 
+  menuDebug.setText("&Debug");
+    menuDebugCPU.setText("CPU");
+    menuDebugCPU.setChecked(debugger->flags.debugCPU);
+    menuDebugSMP.setText("SMP");
+    menuDebugSMP.setChecked(debugger->flags.debugSMP);
+    menuDebugSMP.setEnabled(false);
+    menuDebug.append(menuDebugCPU, menuDebugSMP);
+  append(menuDebug);
+
+  menuTracer.setText("&Tracer");
+    menuTracerEnable.setText("Enable");
+    menuTracerMask.setText("Mask");
+    menuTracerMask.setEnabled(false);
+    menuTracerMaskReset.setText("Reset Mask");
+    menuTracerMaskReset.setEnabled(false);
+    menuTracer.append(menuTracerEnable, menuTracerMask, menuTracerMaskReset);
+  append(menuTracer);
+
   menuWindows.setText("&Windows");
-    menuWindowsVideo.setText("Video");
-    menuWindows.append(menuWindowsVideo);
+    menuWindowsVideoWindow.setText("Video");
+    menuWindowsMemoryEditor.setText("Memory Editor");
+    menuWindowsBreakpointEditor.setText("Breakpoint Editor");
+    menuWindows.append(menuWindowsVideoWindow, menuWindowsMemoryEditor, menuWindowsBreakpointEditor);
   append(menuWindows);
+
+  menuHelp.setText("&Help");
+    menuHelpAbout.setText("About ...");
+    menuHelp.append(menuHelpAbout);
+  append(menuHelp);
 
   layout.setMargin(5);
   runButton.setText("Run");
   stepButton.setText("Step");
+  clearButton.setText("Clear");
   console.setFont(application->monospaceFont);
 
   layout.append(commandLayout, {~0, 0}, 5);
     commandLayout.append(runButton, {80, ~0}, 5);
-    commandLayout.append(stepButton, {80, ~0});
+    commandLayout.append(stepButton, {80, ~0}, 5);
+    commandLayout.append(spacer, {~0, 0});
+    commandLayout.append(clearButton, {80, ~0});
   layout.append(console, {~0, ~0});
   append(layout);
 
@@ -53,9 +83,41 @@ ConsoleWindow::ConsoleWindow() {
     audio.set(Audio::Synchronize, menuEmulationSynchronizeAudio.checked());
   };
 
-  menuWindowsVideo.onActivate = [&] {
+  menuDebugCPU.onToggle = [&] { debugger->flags.debugCPU = menuDebugCPU.checked(); };
+  menuDebugSMP.onToggle = [&] { debugger->flags.debugSMP = menuDebugSMP.checked(); };
+
+  menuTracerEnable.onToggle = [&] { debugger->tracerEnable(menuTracerEnable.checked()); };
+
+  menuWindowsVideoWindow.onActivate = [&] {
     videoWindow->setVisible();
     videoWindow->setFocused();
+  };
+
+  menuWindowsMemoryEditor.onActivate = [&] {
+    memoryEditor->update();
+    memoryEditor->setVisible();
+    memoryEditor->setFocused();
+  };
+
+  menuWindowsBreakpointEditor.onActivate = [&] {
+    breakpointEditor->setVisible();
+    breakpointEditor->setFocused();
+  };
+
+  menuHelpAbout.onActivate = [&] { aboutWindow->show(); };
+
+  runButton.onActivate = [&] {
+    if(debugger->flags.paused == true) debugger->resume();
+    else debugger->suspend();
+  };
+
+  stepButton.onActivate = [&] {
+    debugger->flags.step = true;
+    debugger->resume();
+  };
+
+  clearButton.onActivate = [&] {
+    console.setText("");
   };
 }
 

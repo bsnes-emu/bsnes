@@ -9,7 +9,7 @@ bool Interface::loadCartridge(const string &filename) {
   if(SNES::cartridge.loaded()) {
     saveMemory();
     SNES::cartridge.unload();
-    consoleWindow->print("Cartridge unloaded\n");
+    debugger->print("Cartridge unloaded\n");
   }
 
   fileName = filename;
@@ -26,8 +26,9 @@ bool Interface::loadCartridge(const string &filename) {
   delete[] data;
   videoWindow->setTitle(notdir(baseName));
   SNES::video.generate(SNES::Video::Format::RGB24);
-  consoleWindow->print({"Loaded ", fileName, "\n", markup, "\n"});
+  debugger->print("Loaded ", fileName, "\n");
   loadMemory();
+  debugger->print(markup, "\n");
   return true;
 }
 
@@ -38,7 +39,7 @@ void Interface::loadMemory() {
     uint8_t *data;
     unsigned size;
     if(file::read(filename, data, size)) {
-      consoleWindow->print({"Loaded ", filename, "\n"});
+      debugger->print("Loaded ", filename, "\n");
       memcpy(memory.data, data, min(memory.size, size));
       delete[] data;
     }
@@ -50,7 +51,7 @@ void Interface::saveMemory() {
     if(memory.size == 0) continue;
     string filename = { baseName, memory.id };
     if(file::write(filename, memory.data, memory.size)) {
-      consoleWindow->print({"Saved ", filename, "\n"});
+      debugger->print("Saved ", filename, "\n");
     }
   }
 }
@@ -58,6 +59,7 @@ void Interface::saveMemory() {
 //hires is always true for accuracy core
 //overscan is ignored for the debugger port
 void Interface::videoRefresh(const uint32_t *data, bool hires, bool interlace, bool overscan) {
+  data += 8 * 1024;  //skip NTSC overscan compensation
   uint32_t *output = videoWindow->canvas.data();
 
   if(interlace == false) {
@@ -98,12 +100,12 @@ int16_t Interface::inputPoll(bool port, SNES::Input::Device device, unsigned ind
       case SNES::Input::JoypadID::Down:   return keyboardState[(unsigned)phoenix::Keyboard::Scancode::Down];
       case SNES::Input::JoypadID::Left:   return keyboardState[(unsigned)phoenix::Keyboard::Scancode::Left];
       case SNES::Input::JoypadID::Right:  return keyboardState[(unsigned)phoenix::Keyboard::Scancode::Right];
-      case SNES::Input::JoypadID::B:      return keyboardState[(unsigned)phoenix::Keyboard::Scancode::B];
-      case SNES::Input::JoypadID::A:      return keyboardState[(unsigned)phoenix::Keyboard::Scancode::A];
-      case SNES::Input::JoypadID::Y:      return keyboardState[(unsigned)phoenix::Keyboard::Scancode::Y];
-      case SNES::Input::JoypadID::X:      return keyboardState[(unsigned)phoenix::Keyboard::Scancode::X];
-      case SNES::Input::JoypadID::L:      return keyboardState[(unsigned)phoenix::Keyboard::Scancode::L];
-      case SNES::Input::JoypadID::R:      return keyboardState[(unsigned)phoenix::Keyboard::Scancode::R];
+      case SNES::Input::JoypadID::B:      return keyboardState[(unsigned)phoenix::Keyboard::Scancode::Z];
+      case SNES::Input::JoypadID::A:      return keyboardState[(unsigned)phoenix::Keyboard::Scancode::X];
+      case SNES::Input::JoypadID::Y:      return keyboardState[(unsigned)phoenix::Keyboard::Scancode::A];
+      case SNES::Input::JoypadID::X:      return keyboardState[(unsigned)phoenix::Keyboard::Scancode::S];
+      case SNES::Input::JoypadID::L:      return keyboardState[(unsigned)phoenix::Keyboard::Scancode::D];
+      case SNES::Input::JoypadID::R:      return keyboardState[(unsigned)phoenix::Keyboard::Scancode::C];
       case SNES::Input::JoypadID::Select: return keyboardState[(unsigned)phoenix::Keyboard::Scancode::Apostrophe];
       case SNES::Input::JoypadID::Start:  return keyboardState[(unsigned)phoenix::Keyboard::Scancode::Return];
       }
@@ -118,7 +120,7 @@ string Interface::path(SNES::Cartridge::Slot slot, const string &hint) {
 }
 
 void Interface::message(const string &text) {
-  consoleWindow->print({text, "\n"});
+  debugger->print(text, "\n");
 }
 
 Interface::Interface() {

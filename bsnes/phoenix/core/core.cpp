@@ -16,6 +16,17 @@
 static bool OS_quit = false;
 Window Window::None;
 
+//Color
+//=====
+
+uint32_t Color::rgb() const {
+  return (255 << 24) + (red << 16) + (green << 8) + (blue << 0);
+}
+
+uint32_t Color::rgba() const {
+  return (alpha << 24) + (red << 16) + (green << 8) + (blue << 0);
+}
+
 //Geometry
 //========
 

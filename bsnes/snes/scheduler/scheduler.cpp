@@ -13,6 +13,10 @@ void Scheduler::exit(ExitReason reason) {
   co_switch(host_thread);
 }
 
+void Scheduler::debug() {
+  exit(ExitReason::DebuggerEvent);
+}
+
 void Scheduler::init() {
   host_thread = co_active();
   thread = cpu.thread;

@@ -1,7 +1,7 @@
 #ifndef BASE_HPP
 #define BASE_HPP
 
-const char Version[] = "085.04";
+const char Version[] = "085.06";
 
 #include <nall/platform.hpp>
 #include <nall/algorithm.hpp>
@@ -39,13 +39,21 @@ template<typename R, typename... P> struct hook<R (P...)> {
   }
 
   hook() {}
+  hook(const hook &hook) { callback = hook.callback; }
   hook(void *function) { callback = function; }
   hook(R (*function)(P...)) { callback = function; }
   template<typename C> hook(R (C::*function)(P...), C *object) { callback = { function, object }; }
   template<typename C> hook(R (C::*function)(P...) const, C *object) { callback = { function, object }; }
   template<typename L> hook(const L& function) { callback = function; }
-  hook& operator=(const function<R (P...)> &function) { callback = function; return *this; }
+
+  hook& operator=(const hook& hook) { callback = hook.callback; return *this; }
 };
+
+#if defined(DEBUGGER)
+  #define privileged public
+#else
+  #define privileged private
+#endif
 
 typedef int_t< 1>  int1;
 typedef int_t< 2>  int2;

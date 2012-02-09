@@ -8,6 +8,7 @@ struct Scheduler : property<Scheduler> {
 
   void enter();
   void exit(ExitReason);
+  void debug();
 
   void init();
   Scheduler();

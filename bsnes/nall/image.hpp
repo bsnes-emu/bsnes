@@ -2,6 +2,7 @@
 #define NALL_IMAGE_HPP
 
 #include <nall/bmp.hpp>
+#include <nall/filemap.hpp>
 #include <nall/interpolation.hpp>
 #include <nall/png.hpp>
 #include <nall/stdint.hpp>
@@ -45,6 +46,8 @@ struct image {
   inline void allocate(unsigned width, unsigned height);
   inline void clear(uint64_t color);
   inline bool load(const string &filename);
+//inline bool loadBMP(const uint8_t *data, unsigned size);
+  inline bool loadPNG(const uint8_t *data, unsigned size);
   inline void scale(unsigned width, unsigned height, interpolation op);
   inline void transform(bool endian, unsigned depth, uint64_t alphaMask, uint64_t redMask, uint64_t greenMask, uint64_t blueMask);
   inline void alphaBlend(uint64_t alphaColor);
@@ -392,9 +395,9 @@ bool image::loadBMP(const string &filename) {
   return true;
 }
 
-bool image::loadPNG(const string &filename) {
+bool image::loadPNG(const uint8_t *pngData, unsigned pngSize) {
   png source;
-  if(source.decode(filename) == false) return false;
+  if(source.decode(pngData, pngSize) == false) return false;
 
   allocate(source.info.width, source.info.height);
   const uint8_t *sp = source.data;
@@ -449,6 +452,12 @@ bool image::loadPNG(const string &filename) {
   }
 
   return true;
+}
+
+bool image::loadPNG(const string &filename) {
+  filemap map;
+  if(map.open(filename, filemap::mode::read) == false) return false;
+  return loadPNG(map.data(), map.size());
 }
 
 }
