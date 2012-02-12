@@ -3,7 +3,7 @@ MemoryEditor *memoryEditor = nullptr;
 
 MemoryEditor::MemoryEditor() {
   setTitle("Memory Editor");
-  setGeometry({640, 64, 485, 255});
+  setGeometry({128, 128, 485, 255});
 
   gotoLabel.setText("Goto:");
   gotoAddress.setFont(application->monospaceFont);
@@ -38,6 +38,8 @@ MemoryEditor::MemoryEditor() {
   exportMemory.onActivate = { &MemoryEditor::exportMemoryToDisk, this };
   editor.onRead = { &MemoryEditor::read, this };
   editor.onWrite = { &MemoryEditor::write, this };
+
+  windowManager->append(this, "MemoryEditor");
 }
 
 uint8_t MemoryEditor::read(unsigned addr) {

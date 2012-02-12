@@ -4,9 +4,13 @@ void SMP::add_clocks(unsigned clocks) {
   step(clocks);
   synchronize_dsp();
 
+  #if defined(DEBUGGER)
+  synchronize_cpu();
+  #else
   //forcefully sync S-SMP to S-CPU in case chips are not communicating
   //sync if S-SMP is more than 24 samples ahead of S-CPU
   if(clock > +(768 * 24 * (int64)24000000)) synchronize_cpu();
+  #endif
 }
 
 void SMP::cycle_edge() {

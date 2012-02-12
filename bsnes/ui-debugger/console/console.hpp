@@ -24,6 +24,7 @@ struct ConsoleWindow : Window {
     Separator menuWindowsSeparator2;
     Item menuWindowsMemoryEditor;
     Item menuWindowsBreakpointEditor;
+    Item menuWindowsVRAMViewer;
 
   Menu menuState;
     Item menuStateSave1;

@@ -5,7 +5,7 @@ ConsoleWindow *consoleWindow = nullptr;
 
 ConsoleWindow::ConsoleWindow() {
   setTitle({"Console - Laevateinn v", Version});
-  setGeometry({64, 650, 640, 400});
+  setGeometry({64, 640, 640, 400});
   setMenuVisible();
 
   menuEmulation.setText("&Emulation");
@@ -13,8 +13,9 @@ ConsoleWindow::ConsoleWindow() {
     menuEmulationPowerCycle.setText("Power Cycle");
     menuEmulationReset.setText("Reset");
     menuEmulationSynchronizeAudio.setText("Synchronize Audio");
-    menuEmulationSynchronizeAudio.setChecked();
+    menuEmulationSynchronizeAudio.setChecked(settings->synchronizeAudio);
     menuEmulationMuteAudio.setText("Mute Audio");
+    menuEmulationMuteAudio.setChecked(settings->muteAudio);
     menuEmulation.append(menuEmulationReloadCartridge, menuEmulationPowerCycle, menuEmulationReset,
       menuEmulationSeparator, menuEmulationSynchronizeAudio, menuEmulationMuteAudio);
   append(menuEmulation);
@@ -41,8 +42,10 @@ ConsoleWindow::ConsoleWindow() {
     menuWindowsSMPDebugger.setText("SMP Debugger");
     menuWindowsMemoryEditor.setText("Memory Editor");
     menuWindowsBreakpointEditor.setText("Breakpoint Editor");
+    menuWindowsVRAMViewer.setText("VRAM Viewer");
     menuWindows.append(menuWindowsVideoWindow, menuWindowsSeparator1, menuWindowsCPUDebugger,
-      menuWindowsSMPDebugger, menuWindowsSeparator2, menuWindowsMemoryEditor, menuWindowsBreakpointEditor);
+      menuWindowsSMPDebugger, menuWindowsSeparator2, menuWindowsMemoryEditor, menuWindowsBreakpointEditor,
+      menuWindowsVRAMViewer);
   append(menuWindows);
 
   menuState.setText("&State");
@@ -96,7 +99,11 @@ ConsoleWindow::ConsoleWindow() {
   };
 
   menuEmulationSynchronizeAudio.onToggle = [&] {
-    audio.set(Audio::Synchronize, menuEmulationSynchronizeAudio.checked());
+    audio.set(Audio::Synchronize, settings->synchronizeAudio = menuEmulationSynchronizeAudio.checked());
+  };
+
+  menuEmulationMuteAudio.onToggle = [&] {
+    settings->muteAudio = menuEmulationMuteAudio.checked();
   };
 
   menuDebugCPU.onToggle = [&] { debugger->debug.cpu = menuDebugCPU.checked(); };
@@ -135,6 +142,11 @@ ConsoleWindow::ConsoleWindow() {
     breakpointEditor->setFocused();
   };
 
+  menuWindowsVRAMViewer.onActivate = [&] {
+    vramViewer->setVisible();
+    vramViewer->setFocused();
+  };
+
   menuStateSave1.onActivate = [&] { interface->saveState(1); };
   menuStateSave2.onActivate = [&] { interface->saveState(2); };
   menuStateSave3.onActivate = [&] { interface->saveState(3); };
@@ -150,8 +162,12 @@ ConsoleWindow::ConsoleWindow() {
   menuHelpAbout.onActivate = [&] { aboutWindow->setVisible(); };
 
   runButton.onActivate = [&] {
-    if(debugger->paused) debugger->resume();
-    else debugger->suspend();
+    if(debugger->paused) {
+      print("\n");
+      debugger->resume();
+    } else {
+      debugger->suspend();
+    }
   };
 
   stepButton.onActivate = [&] {
@@ -162,6 +178,8 @@ ConsoleWindow::ConsoleWindow() {
   clearButton.onActivate = [&] {
     console.setText("");
   };
+
+  windowManager->append(this, "ConsoleWindow");
 }
 
 void ConsoleWindow::print(const string &text) {

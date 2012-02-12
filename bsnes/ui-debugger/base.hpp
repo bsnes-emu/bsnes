@@ -18,15 +18,18 @@ using namespace phoenix;
 #include <ruby/ruby.hpp>
 using namespace ruby;
 
+#include "settings/settings.hpp"
 #include "interface/interface.hpp"
 #include "debugger/debugger.hpp"
 #include "tracer/tracer.hpp"
+#include "window/window.hpp"
 #include "console/console.hpp"
 #include "video/video.hpp"
 #include "cpu/cpu.hpp"
 #include "smp/smp.hpp"
 #include "memory/memory.hpp"
 #include "breakpoint/breakpoint.hpp"
+#include "vram/vram.hpp"
 extern uint8_t laevateinnLogo[121905];
 
 struct Application {

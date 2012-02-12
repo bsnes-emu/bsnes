@@ -27,5 +27,6 @@ AboutWindow::AboutWindow() {
   canvas.setImage(logo);
   canvas.update();
 
-  setGeometry({800, 64, layout.minimumGeometry().width, layout.minimumGeometry().height});
+  setGeometry({128, 128, layout.minimumGeometry().width, layout.minimumGeometry().height});
+  windowManager->append(this, "AboutWindow");
 }

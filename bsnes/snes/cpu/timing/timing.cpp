@@ -27,6 +27,12 @@ void CPU::add_clocks(unsigned clocks) {
     status.dram_refreshed = true;
     add_clocks(40);
   }
+
+  #if defined(DEBUGGER)
+  synchronize_smp();
+  synchronize_ppu();
+  synchronize_coprocessors();
+  #endif
 }
 
 //called by ppu.tick() when Hcounter=0
@@ -35,8 +41,8 @@ void CPU::scanline() {
   status.line_clocks = lineclocks();
 
   //forcefully sync S-CPU to other processors, in case chips are not communicating
-  synchronize_ppu();
   synchronize_smp();
+  synchronize_ppu();
   synchronize_coprocessors();
   system.scanline();
 

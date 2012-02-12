@@ -1,6 +1,8 @@
 #include "../base.hpp"
 CPUDebugger *cpuDebugger = nullptr;
 
+#include "registers.cpp"
+
 uint24 CPUDebugger::mirror(uint24 addr) {
   if((addr & 0x40e000) == 0x0000) addr = 0x7e0000 | (addr & 0x1fff);  //$00-3f:80-bf:0000-1fff WRAM
   return addr;
@@ -109,7 +111,7 @@ CPUDebugger::CPUDebugger() {
   opcodePC = 0x008000;
 
   setTitle("CPU Debugger");
-  setGeometry({800, 64, 350, 255});
+  setGeometry({128, 128, 350, 255});
 
   layout.setMargin(5);
   stepInto.setText("Step Into");
@@ -148,4 +150,11 @@ CPUDebugger::CPUDebugger() {
   };
 
   update.onActivate = { &CPUDebugger::updateDisassembly, this };
+
+  registers.onActivate = [&] {
+    cpuRegisterEditor->loadRegisters();
+    cpuRegisterEditor->setVisible();
+  };
+
+  windowManager->append(this, "CPUDebugger");
 }

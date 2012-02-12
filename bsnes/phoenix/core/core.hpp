@@ -68,6 +68,7 @@ struct Geometry {
   Size size() const;
   nall::string text() const;
   inline Geometry() : x(0), y(0), width(0), height(0) {}
+  inline Geometry(const Position& position, const Size& size) : x(position.x), y(position.y), width(size.width), height(size.height) {}
   inline Geometry(signed x, signed y, unsigned width, unsigned height) : x(x), y(y), width(width), height(height) {}
   Geometry(const nall::string &text);
 };

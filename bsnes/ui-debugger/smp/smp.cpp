@@ -1,6 +1,8 @@
 #include "../base.hpp"
 SMPDebugger *smpDebugger = nullptr;
 
+#include "registers.cpp"
+
 uint8 SMPDebugger::read(uint16 addr) {
   if((addr & 0xfff0) == 0x00f0) return ~0;  //$00f0-00ff  MMIO
   return SNES::smp.op_busread(addr);
@@ -71,7 +73,7 @@ SMPDebugger::SMPDebugger() {
   opcodePC = 0xffc0;
 
   setTitle("SMP Debugger");
-  setGeometry({800, 800, 350, 255});
+  setGeometry({128, 128, 350, 255});
 
   layout.setMargin(5);
   stepInto.setText("Step Into");
@@ -96,4 +98,11 @@ SMPDebugger::SMPDebugger() {
   };
 
   update.onActivate = { &SMPDebugger::updateDisassembly, this };
+
+  registers.onActivate = [&] {
+    smpRegisterEditor->loadRegisters();
+    smpRegisterEditor->setVisible();
+  };
+
+  windowManager->append(this, "SMPDebugger");
 }

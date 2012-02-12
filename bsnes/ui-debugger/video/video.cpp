@@ -41,4 +41,6 @@ VideoWindow::VideoWindow() {
       "0x", hex<4>((b << 10) + (g << 5) + (r << 0))
     });
   };
+
+  windowManager->append(this, "VideoWindow");
 }

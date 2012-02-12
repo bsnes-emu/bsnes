@@ -60,25 +60,15 @@ void Debugger::cpu_op_write(uint24 addr, uint8 data) {
 
 void Debugger::cpu_op_nmi() {
   if(flags.cpu.nmi) {
-    char text[512];
-    SNES::cpu.disassemble_opcode(text, cpuDebugger->opcodePC = SNES::cpu.regs.pc);
-    print("CPU NMI\n", text, "\n");
-
-    cpuDebugger->updateDisassembly();
-    suspend();
-    SNES::scheduler.debug();
+    print("CPU NMI\n");  //, text, "\n");
+    flags.cpu.stepInto = true;
   }
 }
 
 void Debugger::cpu_op_irq() {
   if(flags.cpu.irq) {
-    char text[512];
-    SNES::cpu.disassemble_opcode(text, cpuDebugger->opcodePC = SNES::cpu.regs.pc);
-    print("CPU IRQ\n", text, "\n");
-
-    cpuDebugger->updateDisassembly();
-    suspend();
-    SNES::scheduler.debug();
+    print("CPU IRQ\n");
+    flags.cpu.stepInto = true;
   }
 }
 

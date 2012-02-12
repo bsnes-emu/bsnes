@@ -32,8 +32,10 @@ BreakpointEditor::BreakpointEditor() {
   for(auto &bp : breakpointEntry) layout.append(bp, {0, 0}, 5);
   append(layout);
 
-  setGeometry({800, 600, layout.minimumGeometry().width, layout.minimumGeometry().height - 5});
+  setGeometry({128, 128, layout.minimumGeometry().width, layout.minimumGeometry().height - 5});
   synchronize();
+
+  windowManager->append(this, "BreakpointEditor");
 }
 
 //enable checkbox toggled on one of the five BreakpointEntry items:
