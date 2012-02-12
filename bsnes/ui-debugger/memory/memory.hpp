@@ -4,15 +4,17 @@ struct MemoryEditor : Window {
       Label gotoLabel;
       LineEdit gotoAddress;
       ComboBox source;
+      Button exportMemory;
       Widget spacer;
-      CheckBox autoRefresh;
-      Button updateButton;
+      CheckBox autoUpdate;
+      Button update;
     HexEdit editor;
 
   uint8_t read(unsigned addr);
   void write(unsigned addr, uint8_t data);
   void selectSource();
-  void update();
+  void exportMemoryToDisk();
+  void updateView();
   MemoryEditor();
 };
 

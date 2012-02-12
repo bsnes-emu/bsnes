@@ -6,6 +6,8 @@ struct Interface : SNES::Interface {
   bool loadCartridge(const string &filename);
   void loadMemory();
   void saveMemory();
+  bool loadState(unsigned slot);
+  bool saveState(unsigned slot);
 
   void videoRefresh(const uint32_t *data, bool hires, bool interlace, bool overscan);
   void audioSample(int16_t lsample, int16_t rsample);

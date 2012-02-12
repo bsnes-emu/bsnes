@@ -7,6 +7,7 @@ struct Settings : public configuration {
   unsigned frameGeometryHeight;
   unsigned menuGeometryHeight;
   unsigned statusGeometryHeight;
+  unsigned windowBackgroundColor;
 
   void load();
   void save();

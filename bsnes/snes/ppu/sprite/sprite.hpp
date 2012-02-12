@@ -1,4 +1,4 @@
-class Sprite {
+struct Sprite {
   struct SpriteItem {
     uint16 x;
     uint16 y;

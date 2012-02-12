@@ -1,4 +1,4 @@
-class Window {
+struct Window {
   struct {
     bool bg1_one_enable;
     bool bg1_one_invert;

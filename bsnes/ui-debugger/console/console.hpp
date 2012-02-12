@@ -18,9 +18,25 @@ struct ConsoleWindow : Window {
 
   Menu menuWindows;
     Item menuWindowsVideoWindow;
+    Separator menuWindowsSeparator1;
     Item menuWindowsCPUDebugger;
+    Item menuWindowsSMPDebugger;
+    Separator menuWindowsSeparator2;
     Item menuWindowsMemoryEditor;
     Item menuWindowsBreakpointEditor;
+
+  Menu menuState;
+    Item menuStateSave1;
+    Item menuStateSave2;
+    Item menuStateSave3;
+    Item menuStateSave4;
+    Item menuStateSave5;
+    Separator menuStateSeparator;
+    Item menuStateLoad1;
+    Item menuStateLoad2;
+    Item menuStateLoad3;
+    Item menuStateLoad4;
+    Item menuStateLoad5;
 
   Menu menuHelp;
     Item menuHelpAbout;
@@ -43,8 +59,8 @@ struct AboutWindow : Window {
     Canvas canvas;
     Label title;
     Label version;
+    Label website;
 
-  void show();
   AboutWindow();
 };
 

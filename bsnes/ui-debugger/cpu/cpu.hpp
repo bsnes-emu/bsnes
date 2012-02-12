@@ -4,16 +4,19 @@ struct CPUDebugger : Window {
   VerticalLayout layout;
     HorizontalLayout controlLayout;
       Button stepInto;
-      Button stepOver;
-      Button stepOut;
-      Button skipOver;
+      Button stepNMI;
+      Button stepIRQ;
       Widget spacer;
-      CheckBox autoRefresh;
+      CheckBox autoUpdate;
       Button update;
     TextEdit disassembly;
     Label registers;
 
-  unsigned opcodeLength(uint24 addr) const;
+  uint24 mirror(uint24 addr);
+  uint8_t read(uint24 addr);
+  void write(uint24 addr, uint8 data);
+
+  unsigned opcodeLength(uint24 addr);
   void updateDisassembly();
   CPUDebugger();
 };

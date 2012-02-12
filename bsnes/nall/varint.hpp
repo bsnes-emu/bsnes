@@ -116,4 +116,71 @@ namespace nall {
   };
 }
 
+//typedefs
+  typedef nall::uint_t< 1> uint1_t;
+  typedef nall::uint_t< 2> uint2_t;
+  typedef nall::uint_t< 3> uint3_t;
+  typedef nall::uint_t< 4> uint4_t;
+  typedef nall::uint_t< 5> uint5_t;
+  typedef nall::uint_t< 6> uint6_t;
+  typedef nall::uint_t< 7> uint7_t;
+//typedef nall::uint_t< 8> uint8_t;
+  typedef nall::uint_t< 9> uint9_t;
+  typedef nall::uint_t<10> uint10_t;
+  typedef nall::uint_t<11> uint11_t;
+  typedef nall::uint_t<12> uint12_t;
+  typedef nall::uint_t<13> uint13_t;
+  typedef nall::uint_t<14> uint14_t;
+  typedef nall::uint_t<15> uint15_t;
+//typedef nall::uint_t<16> uint16_t;
+  typedef nall::uint_t<17> uint17_t;
+  typedef nall::uint_t<18> uint18_t;
+  typedef nall::uint_t<19> uint19_t;
+  typedef nall::uint_t<20> uint20_t;
+  typedef nall::uint_t<21> uint21_t;
+  typedef nall::uint_t<22> uint22_t;
+  typedef nall::uint_t<23> uint23_t;
+  typedef nall::uint_t<24> uint24_t;
+  typedef nall::uint_t<25> uint25_t;
+  typedef nall::uint_t<26> uint26_t;
+  typedef nall::uint_t<27> uint27_t;
+  typedef nall::uint_t<28> uint28_t;
+  typedef nall::uint_t<29> uint29_t;
+  typedef nall::uint_t<30> uint30_t;
+  typedef nall::uint_t<31> uint31_t;
+//typedef nall::uint_t<32> uint32_t;
+
+  typedef nall::int_t< 1> int1_t;
+  typedef nall::int_t< 2> int2_t;
+  typedef nall::int_t< 3> int3_t;
+  typedef nall::int_t< 4> int4_t;
+  typedef nall::int_t< 5> int5_t;
+  typedef nall::int_t< 6> int6_t;
+  typedef nall::int_t< 7> int7_t;
+//typedef nall::int_t< 8> int8_t;
+  typedef nall::int_t< 9> int9_t;
+  typedef nall::int_t<10> int10_t;
+  typedef nall::int_t<11> int11_t;
+  typedef nall::int_t<12> int12_t;
+  typedef nall::int_t<13> int13_t;
+  typedef nall::int_t<14> int14_t;
+  typedef nall::int_t<15> int15_t;
+//typedef nall::int_t<16> int16_t;
+  typedef nall::int_t<17> int17_t;
+  typedef nall::int_t<18> int18_t;
+  typedef nall::int_t<19> int19_t;
+  typedef nall::int_t<20> int20_t;
+  typedef nall::int_t<21> int21_t;
+  typedef nall::int_t<22> int22_t;
+  typedef nall::int_t<23> int23_t;
+  typedef nall::int_t<24> int24_t;
+  typedef nall::int_t<25> int25_t;
+  typedef nall::int_t<26> int26_t;
+  typedef nall::int_t<27> int27_t;
+  typedef nall::int_t<28> int28_t;
+  typedef nall::int_t<29> int29_t;
+  typedef nall::int_t<30> int30_t;
+  typedef nall::int_t<31> int31_t;
+//typedef nall::int_t<32> int32_t;
+
 #endif

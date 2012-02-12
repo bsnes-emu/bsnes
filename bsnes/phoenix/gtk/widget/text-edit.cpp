@@ -24,6 +24,9 @@ void pTextEdit::setText(const string &text) {
 
 void pTextEdit::setWordWrap(bool wordWrap) {
   gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(subWidget), wordWrap ? GTK_WRAP_WORD_CHAR : GTK_WRAP_NONE);
+  gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(gtkWidget),
+    wordWrap ? GTK_POLICY_NEVER : GTK_POLICY_ALWAYS,
+    GTK_POLICY_ALWAYS);
 }
 
 string pTextEdit::text() {

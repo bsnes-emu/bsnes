@@ -15,7 +15,7 @@ bool Interface::loadCartridge(const string &filename) {
   fileName = filename;
   baseName = nall::basename(fileName);
   pathName = dir(baseName);
-  mkdir(string{pathName, "debug/"}, 0755);
+  mkdir(string(pathName, "debug/"), 0755);
 
   string markup;
   markup.readfile({ baseName, ".xml" });
@@ -31,6 +31,7 @@ bool Interface::loadCartridge(const string &filename) {
   debugger->print("Loaded ", fileName, "\n");
   loadMemory();
   debugger->print(markup, "\n");
+  debugger->suspend();
   return true;
 }
 
@@ -60,6 +61,27 @@ void Interface::saveMemory() {
   }
 
   debugger->saveUsage();
+}
+
+bool Interface::loadState(unsigned slot) {
+  string filename = { baseName, "-", slot, ".bst" };
+  uint8_t *data;
+  unsigned size;
+  if(file::read(filename, data, size) == false) return false;
+  serializer s(data, size);
+  bool result = SNES::system.unserialize(s);
+  delete[] data;
+  if(result) debugger->print("Loaded state from ", filename, "\n");
+  return result;
+}
+
+bool Interface::saveState(unsigned slot) {
+  SNES::system.runtosave();
+  serializer s = SNES::system.serialize();
+  string filename = { baseName, "-", slot, ".bst" };
+  bool result = file::write(filename, s.data(), s.size());
+  if(result) debugger->print("Saved state to ", filename, "\n");
+  return result;
 }
 
 //hires is always true for accuracy core

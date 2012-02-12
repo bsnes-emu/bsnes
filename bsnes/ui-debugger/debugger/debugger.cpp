@@ -11,8 +11,9 @@ void Debugger::run() {
   }
 
   SNES::system.run();
-  if(cpuDebugger->autoRefresh.checked()) cpuDebugger->updateDisassembly();
-  if(memoryEditor->autoRefresh.checked()) memoryEditor->update();
+  if(cpuDebugger->autoUpdate.checked()) cpuDebugger->updateDisassembly();
+  if(smpDebugger->autoUpdate.checked()) smpDebugger->updateDisassembly();
+  if(memoryEditor->autoUpdate.checked()) memoryEditor->updateView();
 }
 
 void Debugger::echo(const string &text) {
@@ -30,26 +31,10 @@ void Debugger::suspend() {
   paused = true;
   flags.step = false;
   flags.cpu.stepInto = false;
+  flags.cpu.nmi = false;
+  flags.cpu.irq = false;
+  flags.smp.stepInto = false;
   consoleWindow->runButton.setText("Run");
-}
-
-void Debugger::tracerEnable(bool state) {
-  if(state == false) {
-    print("Tracer disabled\n");
-    fpTracer.close();
-    return;
-  }
-
-  //try not to overwrite existing traces: scan from 001-999.
-  //if all files exist, use 000, even if it overwrites another log.
-  unsigned n = 1;
-  do {
-    if(file::exists({ interface->pathName, "debug/trace-", decimal<3, '0'>(n), ".log" }) == false) break;
-  } while(++n <= 999);
-
-  string filename = { interface->pathName, "debug/trace-", decimal<3, '0'>(n), ".log" };
-  if(fpTracer.open(filename, file::mode::write) == false) return;
-  print("Tracing to ", filename, "\n");
 }
 
 Debugger::Debugger() {
@@ -57,6 +42,9 @@ Debugger::Debugger() {
 
   flags.step = false;
   flags.cpu.stepInto = false;
+  flags.cpu.nmi = false;
+  flags.cpu.irq = false;
+  flags.smp.stepInto = false;
 
   debug.cpu = true;
   debug.smp = false;
@@ -68,7 +56,19 @@ Debugger::Debugger() {
   SNES::cpu.debugger.op_read = { &Debugger::cpu_op_read, this };
   SNES::cpu.debugger.op_write = { &Debugger::cpu_op_write, this };
 
+  SNES::cpu.debugger.op_nmi = { &Debugger::cpu_op_nmi, this };
+  SNES::cpu.debugger.op_irq = { &Debugger::cpu_op_irq, this };
+
   SNES::smp.debugger.op_exec = { &Debugger::smp_op_exec, this };
   SNES::smp.debugger.op_read = { &Debugger::smp_op_read, this };
   SNES::smp.debugger.op_write = { &Debugger::smp_op_write, this };
+
+  SNES::ppu.debugger.vram_read = { &Debugger::ppu_vram_read, this };
+  SNES::ppu.debugger.vram_write = { &Debugger::ppu_vram_write, this };
+
+  SNES::ppu.debugger.oam_read = { &Debugger::ppu_oam_read, this };
+  SNES::ppu.debugger.oam_write = { &Debugger::ppu_oam_write, this };
+
+  SNES::ppu.debugger.cgram_read = { &Debugger::ppu_cgram_read, this };
+  SNES::ppu.debugger.cgram_write = { &Debugger::ppu_cgram_write, this };
 }

@@ -3,8 +3,8 @@ VideoWindow *videoWindow = nullptr;
 
 VideoWindow::VideoWindow() {
   setTitle("Video");
+//setResizable(false);
   setGeometry({64, 64, 512, 480});
-  setResizable(false);
   setStatusFont(application->proportionalFontBold);
   setStatusVisible();
 

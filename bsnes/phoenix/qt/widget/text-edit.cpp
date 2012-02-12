@@ -15,6 +15,8 @@ void pTextEdit::setText(const string &text) {
 
 void pTextEdit::setWordWrap(bool wordWrap) {
   qtTextEdit->setWordWrapMode(wordWrap ? QTextOption::WordWrap : QTextOption::NoWrap);
+  qtTextEdit->setHorizontalScrollBarPolicy(wordWrap ? Qt::ScrollBarAlwaysOff : Qt::ScrollBarAlwaysOn);
+  qtTextEdit->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
 }
 
 string pTextEdit::text() {

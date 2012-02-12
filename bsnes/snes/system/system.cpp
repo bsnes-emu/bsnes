@@ -6,7 +6,6 @@ namespace SNES {
 System system;
 
 #include <snes/config/config.cpp>
-#include <snes/debugger/debugger.cpp>
 #include <snes/scheduler/scheduler.cpp>
 #include <snes/random/random.cpp>
 

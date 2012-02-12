@@ -250,7 +250,7 @@ struct TextEdit::State {
   State() {
     cursorPosition = 0;
     editable = true;
-    wordWrap = false;
+    wordWrap = true;
   }
 };
 

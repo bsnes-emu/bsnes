@@ -43,6 +43,13 @@ static gboolean Window_configure(GtkWidget *widget, GdkEvent *event, Window *win
     settings->frameGeometryY = client.y - border.y;
     settings->frameGeometryWidth = border.width - client.width;
     settings->frameGeometryHeight = border.height - client.height;
+    if(window->state.backgroundColorOverride == false) {
+      GdkColor color = widget->style->bg[GTK_STATE_NORMAL];
+      settings->windowBackgroundColor
+      = ((uint8_t)(color.red   >> 8) << 16)
+      + ((uint8_t)(color.green >> 8) <<  8)
+      + ((uint8_t)(color.blue  >> 8) <<  0);
+    }
     settings->save();
   }
 
@@ -115,8 +122,12 @@ void pWindow::append(Widget &widget) {
 
 Color pWindow::backgroundColor() {
   if(window.state.backgroundColorOverride) return window.state.backgroundColor;
-  GdkColor color = widget->style->bg[GTK_STATE_NORMAL];
-  return { (uint8_t)(color.red >> 8), (uint8_t)(color.green >> 8), (uint8_t)(color.blue >> 8), 255 };
+  return {
+    (uint8_t)(settings->windowBackgroundColor >> 16),
+    (uint8_t)(settings->windowBackgroundColor >>  8),
+    (uint8_t)(settings->windowBackgroundColor >>  0),
+    255
+  };
 }
 
 Geometry pWindow::frameMargin() {

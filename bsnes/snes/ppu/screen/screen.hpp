@@ -1,4 +1,4 @@
-class Screen {
+struct Screen {
   uint32 *output;
 
   struct Regs {

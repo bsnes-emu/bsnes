@@ -30,18 +30,24 @@ Application::Application(int argc, char **argv) {
     monospaceFont = "Liberation Mono, 8";
   }
 
-  string filename;
-  if(argc >= 2) filename = argv[1];
-  if(!file::exists(filename)) filename = "/media/sdb1/root/cartridges/Laevateinn/The Legend of Zelda - A Link to the Past (US).sfc";
-  if(!file::exists(filename)) filename = DialogWindow::fileOpen(Window::None, "", "SNES images (*.sfc)");
+  string foldername;
+  if(argc >= 2) foldername = argv[1];
+  if(!directory::exists(foldername)) foldername = "/media/sdb1/root/cartridges/The Legend of Zelda - A Link to the Past (US).sfc/";
+  if(!directory::exists(foldername)) foldername = DialogWindow::folderSelect(Window::None, "");
+  if(!foldername.endswith(".sfc/")) return;
+  lstring contents = directory::files(foldername, "*.sfc");
+  if(contents.size() != 1) return;
+  string filename = { foldername, contents[0] };
   if(!file::exists(filename)) return;
 
   interface = new Interface;
   debugger = new Debugger;
+  tracer = new Tracer;
   consoleWindow = new ConsoleWindow;
   aboutWindow = new AboutWindow;
   videoWindow = new VideoWindow;
   cpuDebugger = new CPUDebugger;
+  smpDebugger = new SMPDebugger;
   memoryEditor = new MemoryEditor;
   breakpointEditor = new BreakpointEditor;
 
@@ -58,6 +64,7 @@ Application::Application(int argc, char **argv) {
 
   if(interface->loadCartridge(filename) == false) return;
   cpuDebugger->updateDisassembly();
+  smpDebugger->updateDisassembly();
   memoryEditor->selectSource();
 
   while(quit == false) {
@@ -72,10 +79,12 @@ Application::~Application() {
   exit(0);
   delete breakpointEditor;
   delete memoryEditor;
+  delete smpDebugger;
   delete cpuDebugger;
   delete videoWindow;
   delete aboutWindow;
   delete consoleWindow;
+  delete tracer;
   delete debugger;
   delete interface;
 }

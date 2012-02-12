@@ -1,8 +1,7 @@
 public:
   uint8 mmio_read(unsigned addr);
   void mmio_write(unsigned addr, uint8 data);
-
-private:
+privileged:
 
 struct {
   uint8 ppu1_mdr;
@@ -91,6 +90,10 @@ struct {
 uint16 get_vram_address();
 uint8 vram_read(unsigned addr);
 void vram_write(unsigned addr, uint8 data);
+uint8 oam_read(unsigned addr);
+void oam_write(unsigned addr, uint8 data);
+uint8 cgram_read(unsigned addr);
+void cgram_write(unsigned addr, uint8 data);
 
 void mmio_update_video_mode();
 

@@ -24,27 +24,41 @@ ConsoleWindow::ConsoleWindow() {
     menuDebugCPU.setChecked(debugger->debug.cpu);
     menuDebugSMP.setText("SMP");
     menuDebugSMP.setChecked(debugger->debug.smp);
-    menuDebugSMP.setEnabled(false);
     menuDebug.append(menuDebugCPU, menuDebugSMP);
   append(menuDebug);
 
   menuTracer.setText("&Tracer");
     menuTracerEnable.setText("Enable");
+    menuTracerMask.setChecked(tracer->mask);
     menuTracerMask.setText("Mask");
-    menuTracerMask.setEnabled(false);
     menuTracerMaskReset.setText("Reset Mask");
-    menuTracerMaskReset.setEnabled(false);
     menuTracer.append(menuTracerEnable, menuTracerMask, menuTracerMaskReset);
   append(menuTracer);
 
   menuWindows.setText("&Windows");
     menuWindowsVideoWindow.setText("Video");
     menuWindowsCPUDebugger.setText("CPU Debugger");
+    menuWindowsSMPDebugger.setText("SMP Debugger");
     menuWindowsMemoryEditor.setText("Memory Editor");
     menuWindowsBreakpointEditor.setText("Breakpoint Editor");
-    menuWindows.append(menuWindowsVideoWindow, menuWindowsCPUDebugger, menuWindowsMemoryEditor,
-      menuWindowsBreakpointEditor);
+    menuWindows.append(menuWindowsVideoWindow, menuWindowsSeparator1, menuWindowsCPUDebugger,
+      menuWindowsSMPDebugger, menuWindowsSeparator2, menuWindowsMemoryEditor, menuWindowsBreakpointEditor);
   append(menuWindows);
+
+  menuState.setText("&State");
+    menuStateSave1.setText("Save - Slot 1");
+    menuStateSave2.setText("Save - Slot 2");
+    menuStateSave3.setText("Save - Slot 3");
+    menuStateSave4.setText("Save - Slot 4");
+    menuStateSave5.setText("Save - Slot 5");
+    menuStateLoad1.setText("Load - Slot 1");
+    menuStateLoad2.setText("Load - Slot 2");
+    menuStateLoad3.setText("Load - Slot 3");
+    menuStateLoad4.setText("Load - Slot 4");
+    menuStateLoad5.setText("Load - Slot 5");
+  menuState.append(menuStateSave1, menuStateSave2, menuStateSave3, menuStateSave4, menuStateSave5,
+    menuStateSeparator, menuStateLoad1, menuStateLoad2, menuStateLoad3, menuStateLoad4, menuStateLoad5);
+  append(menuState);
 
   menuHelp.setText("&Help");
     menuHelpAbout.setText("About ...");
@@ -88,7 +102,12 @@ ConsoleWindow::ConsoleWindow() {
   menuDebugCPU.onToggle = [&] { debugger->debug.cpu = menuDebugCPU.checked(); };
   menuDebugSMP.onToggle = [&] { debugger->debug.smp = menuDebugSMP.checked(); };
 
-  menuTracerEnable.onToggle = [&] { debugger->tracerEnable(menuTracerEnable.checked()); };
+  menuTracerEnable.onToggle = [&] { tracer->enable(menuTracerEnable.checked()); };
+  menuTracerMask.onToggle = [&] { tracer->mask = menuTracerMask.checked(); };
+  menuTracerMaskReset.onActivate = [&] {
+    tracer->resetMask();
+    debugger->print("Tracer mask reset\n");
+  };
 
   menuWindowsVideoWindow.onActivate = [&] {
     videoWindow->setVisible();
@@ -100,8 +119,13 @@ ConsoleWindow::ConsoleWindow() {
     cpuDebugger->setFocused();
   };
 
+  menuWindowsSMPDebugger.onActivate = [&] {
+    smpDebugger->setVisible();
+    smpDebugger->setFocused();
+  };
+
   menuWindowsMemoryEditor.onActivate = [&] {
-    memoryEditor->update();
+    memoryEditor->updateView();
     memoryEditor->setVisible();
     memoryEditor->setFocused();
   };
@@ -111,7 +135,19 @@ ConsoleWindow::ConsoleWindow() {
     breakpointEditor->setFocused();
   };
 
-  menuHelpAbout.onActivate = [&] { aboutWindow->show(); };
+  menuStateSave1.onActivate = [&] { interface->saveState(1); };
+  menuStateSave2.onActivate = [&] { interface->saveState(2); };
+  menuStateSave3.onActivate = [&] { interface->saveState(3); };
+  menuStateSave4.onActivate = [&] { interface->saveState(4); };
+  menuStateSave5.onActivate = [&] { interface->saveState(5); };
+
+  menuStateLoad1.onActivate = [&] { interface->loadState(1); };
+  menuStateLoad2.onActivate = [&] { interface->loadState(2); };
+  menuStateLoad3.onActivate = [&] { interface->loadState(3); };
+  menuStateLoad4.onActivate = [&] { interface->loadState(4); };
+  menuStateLoad5.onActivate = [&] { interface->loadState(5); };
+
+  menuHelpAbout.onActivate = [&] { aboutWindow->setVisible(); };
 
   runButton.onActivate = [&] {
     if(debugger->paused) debugger->resume();

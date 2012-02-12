@@ -21,4 +21,5 @@ Settings::Settings() {
   append(frameGeometryHeight = 28, "frameGeometryHeight");
   append(menuGeometryHeight = 20, "menuGeometryHeight");
   append(statusGeometryHeight = 20, "statusGeometryHeight");
+  append(windowBackgroundColor = 0xedeceb, "windowBackgroundColor");
 }

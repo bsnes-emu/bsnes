@@ -3,7 +3,7 @@ BreakpointEditor *breakpointEditor = nullptr;
 
 BreakpointEntry::BreakpointEntry() {
   static unsigned id = 1;
-  enable.setText({ id++, ". Enable" });
+  enable.setText({ "#", id++ });
   addr.setFont(application->monospaceFont);
   data.setFont(application->monospaceFont);
   type.append("Read", "Write", "Exec");
@@ -61,12 +61,46 @@ void BreakpointEditor::synchronize() {
   for(auto &bp : breakpoint) if(bp.type == Breakpoint::Read && bp.source == Breakpoint::CPU) breakpointReadCPU.append(bp);
   for(auto &bp : breakpoint) if(bp.type == Breakpoint::Write && bp.source == Breakpoint::CPU) breakpointWriteCPU.append(bp);
   for(auto &bp : breakpoint) if(bp.type == Breakpoint::Exec && bp.source == Breakpoint::CPU) breakpointExecCPU.append(bp);
+
+  for(auto &bp : breakpointReadCPU) bp.addr = cpuDebugger->mirror(bp.addr);
+  for(auto &bp : breakpointWriteCPU) bp.addr = cpuDebugger->mirror(bp.addr);
+  for(auto &bp : breakpointExecCPU) bp.addr = cpuDebugger->mirror(bp.addr);
+
+  breakpointReadAPU.reset();
+  breakpointWriteAPU.reset();
+  breakpointExecAPU.reset();
+
+  for(auto &bp : breakpoint) if(bp.type == Breakpoint::Read && bp.source == Breakpoint::APU) breakpointReadAPU.append(bp);
+  for(auto &bp : breakpoint) if(bp.type == Breakpoint::Write && bp.source == Breakpoint::APU) breakpointWriteAPU.append(bp);
+  for(auto &bp : breakpoint) if(bp.type == Breakpoint::Exec && bp.source == Breakpoint::APU) breakpointExecAPU.append(bp);
+
+  breakpointReadVRAM.reset();
+  breakpointWriteVRAM.reset();
+
+  for(auto &bp : breakpoint) if(bp.type == Breakpoint::Read && bp.source == Breakpoint::VRAM) breakpointReadVRAM.append(bp);
+  for(auto &bp : breakpoint) if(bp.type == Breakpoint::Write && bp.source == Breakpoint::VRAM) breakpointWriteVRAM.append(bp);
+
+  breakpointReadOAM.reset();
+  breakpointWriteOAM.reset();
+
+  for(auto &bp : breakpoint) if(bp.type == Breakpoint::Read && bp.source == Breakpoint::OAM) breakpointReadOAM.append(bp);
+  for(auto &bp : breakpoint) if(bp.type == Breakpoint::Write && bp.source == Breakpoint::OAM) breakpointWriteOAM.append(bp);
+
+  breakpointReadCGRAM.reset();
+  breakpointWriteCGRAM.reset();
+
+  for(auto &bp : breakpoint) if(bp.type == Breakpoint::Read && bp.source == Breakpoint::CGRAM) breakpointReadCGRAM.append(bp);
+  for(auto &bp : breakpoint) if(bp.type == Breakpoint::Write && bp.source == Breakpoint::CGRAM) breakpointWriteCGRAM.append(bp);
 }
 
+//S-CPU
+//=====
+
 bool BreakpointEditor::testReadCPU(uint24 addr) {
+  addr = cpuDebugger->mirror(addr);
   for(auto &bp : breakpointReadCPU) {
     if(bp.addr == addr) {
-      if(bp.compare && bp.data != SNES::bus.read(addr)) continue;
+      if(bp.compare && bp.data != cpuDebugger->read(addr)) continue;
       debugger->print("Breakpoint #", bp.id, " hit\n");
       return true;
     }
@@ -75,6 +109,7 @@ bool BreakpointEditor::testReadCPU(uint24 addr) {
 }
 
 bool BreakpointEditor::testWriteCPU(uint24 addr, uint8 data) {
+  addr = cpuDebugger->mirror(addr);
   for(auto &bp : breakpointWriteCPU) {
     if(bp.addr == addr) {
       if(bp.compare && bp.data != data) continue;
@@ -86,9 +121,114 @@ bool BreakpointEditor::testWriteCPU(uint24 addr, uint8 data) {
 }
 
 bool BreakpointEditor::testExecCPU(uint24 addr) {
+  addr = cpuDebugger->mirror(addr);
   for(auto &bp : breakpointExecCPU) {
     if(bp.addr == addr) {
       debugger->print("Breapoint #", bp.id, " hit\n");
+      return true;
+    }
+  }
+  return false;
+}
+
+//S-SMP
+//=====
+
+bool BreakpointEditor::testReadAPU(uint16 addr) {
+  for(auto &bp : breakpointReadAPU) {
+    if(bp.addr == addr) {
+      if(bp.compare && bp.data != smpDebugger->read(addr)) continue;
+      debugger->print("Breakpoint #", bp.id, " hit\n");
+      return true;
+    }
+  }
+  return false;
+}
+
+bool BreakpointEditor::testWriteAPU(uint16 addr, uint8 data) {
+  for(auto &bp : breakpointWriteAPU) {
+    if(bp.addr == addr) {
+      if(bp.compare && bp.data != data) continue;
+      debugger->print("Breakpoint #", bp.id, " hit\n");
+      return true;
+    }
+  }
+  return false;
+}
+
+bool BreakpointEditor::testExecAPU(uint16 addr) {
+  for(auto &bp : breakpointExecAPU) {
+    if(bp.addr == addr) {
+      debugger->print("Breapoint #", bp.id, " hit\n");
+      return true;
+    }
+  }
+  return false;
+}
+
+//S-PPU
+//=====
+
+bool BreakpointEditor::testReadVRAM(uint16 addr) {
+  for(auto &bp : breakpointReadVRAM) {
+    if(bp.addr == addr) {
+      if(bp.compare && bp.data != SNES::ppu.vram[addr]) continue;
+      debugger->print("Breakpoint #", bp.id, " hit\n");
+      return true;
+    }
+  }
+  return false;
+}
+
+bool BreakpointEditor::testWriteVRAM(uint16 addr, uint8 data) {
+  for(auto &bp : breakpointWriteVRAM) {
+    if(bp.addr == addr) {
+      if(bp.compare && bp.data != data) continue;
+      debugger->print("Breakpoint #", bp.id, " hit\n");
+      return true;
+    }
+  }
+  return false;
+}
+
+bool BreakpointEditor::testReadOAM(uint16 addr) {
+  for(auto &bp : breakpointReadOAM) {
+    if(bp.addr == addr) {
+      if(bp.compare && bp.data != SNES::ppu.oam[addr]) continue;
+      debugger->print("Breakpoint #", bp.id, " hit\n");
+      return true;
+    }
+  }
+  return false;
+}
+
+bool BreakpointEditor::testWriteOAM(uint16 addr, uint8 data) {
+  for(auto &bp : breakpointWriteOAM) {
+    if(bp.addr == addr) {
+      if(bp.compare && bp.data != data) continue;
+      debugger->print("Breakpoint #", bp.id, " hit\n");
+      return true;
+    }
+  }
+  return false;
+}
+
+bool BreakpointEditor::testReadCGRAM(uint16 addr) {
+  for(auto &bp : breakpointReadCGRAM) {
+    if(bp.addr == addr) {
+      if(bp.compare && bp.data != SNES::ppu.cgram[addr]) continue;
+      debugger->print("Breakpoint #", bp.id, " hit\n");
+      return true;
+    }
+  }
+  return false;
+}
+
+bool BreakpointEditor::testWriteCGRAM(uint16 addr, uint8 data) {
+  for(auto &bp : breakpointWriteCGRAM) {
+    if(bp.addr == addr) {
+      if(bp.compare && bp.data != data) continue;
+      debugger->print("Breakpoint #", bp.id, " hit\n");
       return true;
     }
   }

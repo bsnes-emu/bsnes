@@ -47,7 +47,6 @@ private:
 #include "input.hpp"
 
 #include <snes/config/config.hpp>
-#include <snes/debugger/debugger.hpp>
 #include <snes/scheduler/scheduler.hpp>
 #include <snes/random/random.hpp>
 

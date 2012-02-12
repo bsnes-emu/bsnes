@@ -47,6 +47,31 @@ void PPU::vram_write(unsigned addr, uint8 data) {
   }
 }
 
+uint8 PPU::oam_read(unsigned addr) {
+  debugger.oam_read(addr);
+
+  return oam[addr];
+}
+
+void PPU::oam_write(unsigned addr, uint8 data) {
+  debugger.oam_write(addr, data);
+
+  oam[addr] = data;
+  sprite.update(addr, data);
+}
+
+uint8 PPU::cgram_read(unsigned addr) {
+  debugger.cgram_read(addr);
+
+  return cgram[addr];
+}
+
+void PPU::cgram_write(unsigned addr, uint8 data) {
+  debugger.cgram_write(addr, data);
+
+  cgram[addr] = data;
+}
+
 void PPU::mmio_update_video_mode() {
   switch(regs.bgmode) {
     case 0: {
@@ -181,10 +206,10 @@ void PPU::mmio_w2104(uint8 data) {
 
   if(latch == 0) regs.oam_latchdata = data;
   if(addr & 0x0200) {
-    sprite.update(addr, data);
+    oam_write(addr, data);
   } else if(latch == 1) {
-    sprite.update((addr & ~1) + 0, regs.oam_latchdata);
-    sprite.update((addr & ~1) + 1, data);
+    oam_write((addr & ~1) + 0, regs.oam_latchdata);
+    oam_write((addr & ~1) + 1, data);
   }
   sprite.set_first_sprite();
 }
@@ -403,8 +428,8 @@ void PPU::mmio_w2122(uint8 data) {
   if(latch == 0) {
     regs.cgram_latchdata = data;
   } else {
-    cgram[(addr & ~1) + 0] = regs.cgram_latchdata;
-    cgram[(addr & ~1) + 1] = data & 0x7f;
+    cgram_write((addr & ~1) + 0, regs.cgram_latchdata);
+    cgram_write((addr & ~1) + 1, data & 0x7f);
   }
 }
 
@@ -584,7 +609,7 @@ uint8 PPU::mmio_r2138() {
   if(regs.display_disable == false && vcounter() < (!regs.overscan ? 225 : 240)) addr = regs.oam_iaddr;
   if(addr & 0x0200) addr &= 0x021f;
 
-  regs.ppu1_mdr = oam[addr];
+  regs.ppu1_mdr = oam_read(addr);
   sprite.set_first_sprite();
   return regs.ppu1_mdr;
 }
@@ -625,10 +650,10 @@ uint8 PPU::mmio_r213b() {
   ) addr = regs.cgram_iaddr;
 
   if(latch == 0) {
-    regs.ppu2_mdr  = cgram[addr];
+    regs.ppu2_mdr  = cgram_read(addr);
   } else {
     regs.ppu2_mdr &= 0x80;
-    regs.ppu2_mdr |= cgram[addr];
+    regs.ppu2_mdr |= cgram_read(addr);
   }
   return regs.ppu2_mdr;
 }

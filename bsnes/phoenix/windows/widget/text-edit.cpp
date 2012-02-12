@@ -1,5 +1,7 @@
 void pTextEdit::setCursorPosition(unsigned position) {
+  if(position == ~0) position >>= 1;  //Edit_SetSel takes signed type
   Edit_SetSel(hwnd, position, position);
+  Edit_ScrollCaret(hwnd);
 }
 
 void pTextEdit::setEditable(bool editable) {
@@ -34,7 +36,7 @@ string pTextEdit::text() {
 void pTextEdit::constructor() {
   hwnd = CreateWindowEx(
     WS_EX_CLIENTEDGE, L"EDIT", L"",
-    WS_CHILD | WS_TABSTOP | ES_AUTOVSCROLL | ES_MULTILINE | ES_WANTRETURN | (textEdit.state.wordWrap == false ? ES_AUTOHSCROLL : 0),
+    WS_CHILD | WS_TABSTOP | WS_VSCROLL | ES_AUTOVSCROLL | ES_MULTILINE | ES_WANTRETURN | (textEdit.state.wordWrap == false ? WS_HSCROLL | ES_AUTOHSCROLL : 0),
     0, 0, 0, 0, parentWindow->p.hwnd, (HMENU)id, GetModuleHandle(0), 0
   );
   SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&textEdit);

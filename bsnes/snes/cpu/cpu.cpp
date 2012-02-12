@@ -66,10 +66,12 @@ void CPU::enter() {
         status.nmi_pending = false;
         regs.vector = (regs.e == false ? 0xffea : 0xfffa);
         op_irq();
+        debugger.op_nmi();
       } else if(status.irq_pending) {
         status.irq_pending = false;
         regs.vector = (regs.e == false ? 0xffee : 0xfffe);
         op_irq();
+        debugger.op_irq();
       } else if(status.reset_pending) {
         status.reset_pending = false;
         add_clocks(186);

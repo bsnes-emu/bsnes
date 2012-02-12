@@ -1,8 +1,6 @@
 #ifdef PPU_CPP
 
 void PPU::Sprite::update(unsigned addr, uint8 data) {
-  ppu.oam[addr] = data;
-
   if(addr < 0x0200) {
     unsigned n = addr >> 2;
     addr &= 3;
