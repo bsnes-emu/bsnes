@@ -1,6 +1,7 @@
 struct Interface : SNES::Interface {
   string fileName;
   string baseName;
+  string pathName;
 
   bool loadCartridge(const string &filename);
   void loadMemory();

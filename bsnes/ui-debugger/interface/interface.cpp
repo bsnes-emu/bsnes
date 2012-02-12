@@ -14,6 +14,8 @@ bool Interface::loadCartridge(const string &filename) {
 
   fileName = filename;
   baseName = nall::basename(fileName);
+  pathName = dir(baseName);
+  mkdir(string{pathName, "debug/"}, 0755);
 
   string markup;
   markup.readfile({ baseName, ".xml" });
@@ -44,6 +46,8 @@ void Interface::loadMemory() {
       delete[] data;
     }
   }
+
+  debugger->loadUsage();
 }
 
 void Interface::saveMemory() {
@@ -54,6 +58,8 @@ void Interface::saveMemory() {
       debugger->print("Saved ", filename, "\n");
     }
   }
+
+  debugger->saveUsage();
 }
 
 //hires is always true for accuracy core

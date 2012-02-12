@@ -35,8 +35,6 @@ MemoryEditor::MemoryEditor() {
   source.onChange = { &MemoryEditor::selectSource, this };
   editor.onRead = { &MemoryEditor::read, this };
   editor.onWrite = { &MemoryEditor::write, this };
-
-  selectSource();
 }
 
 uint8_t MemoryEditor::read(unsigned addr) {

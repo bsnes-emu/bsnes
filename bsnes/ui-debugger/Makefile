@@ -4,7 +4,7 @@ include $(snes)/Makefile
 name := laevateinn
 
 ui_objects := ui-main ui-interface ui-debugger ui-console
-ui_objects += ui-video ui-memory ui-breakpoint
+ui_objects += ui-video ui-cpu ui-memory ui-breakpoint
 ui_objects += phoenix ruby
 ui_objects += $(if $(call streq,$(platform),win),resource)
 
@@ -33,6 +33,7 @@ obj/ui-main.o: $(ui)/main.cpp $(call rwildcard,$(ui)/)
 obj/ui-interface.o: $(ui)/interface/interface.cpp $(call rwildcard,$(ui)/*)
 obj/ui-debugger.o: $(ui)/debugger/debugger.cpp $(call rwildcard,$(ui)/*)
 obj/ui-console.o: $(ui)/console/console.cpp $(call rwildcard,$(ui)/*)
+obj/ui-cpu.o: $(ui)/cpu/cpu.cpp $(call rwildcard,$(ui)/*)
 obj/ui-video.o: $(ui)/video/video.cpp $(call rwildcard,$(ui)/*)
 obj/ui-memory.o: $(ui)/memory/memory.cpp $(call rwildcard,$(ui)/*)
 obj/ui-breakpoint.o: $(ui)/breakpoint/breakpoint.cpp $(call rwildcard,$(ui)/*)

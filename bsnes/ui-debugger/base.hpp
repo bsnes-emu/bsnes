@@ -22,6 +22,7 @@ using namespace ruby;
 #include "debugger/debugger.hpp"
 #include "console/console.hpp"
 #include "video/video.hpp"
+#include "cpu/cpu.hpp"
 #include "memory/memory.hpp"
 #include "breakpoint/breakpoint.hpp"
 extern uint8_t laevateinnLogo[121905];

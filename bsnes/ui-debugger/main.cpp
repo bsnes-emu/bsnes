@@ -41,11 +41,13 @@ Application::Application(int argc, char **argv) {
   consoleWindow = new ConsoleWindow;
   aboutWindow = new AboutWindow;
   videoWindow = new VideoWindow;
+  cpuDebugger = new CPUDebugger;
   memoryEditor = new MemoryEditor;
   breakpointEditor = new BreakpointEditor;
 
-  videoWindow->setVisible();
   consoleWindow->setVisible();
+  videoWindow->setVisible();
+  consoleWindow->setFocused();
 
   if(audio.init() == false) {
     audio.driver("None");
@@ -55,6 +57,8 @@ Application::Application(int argc, char **argv) {
   audio.set(Audio::Frequency, 32000u);
 
   if(interface->loadCartridge(filename) == false) return;
+  cpuDebugger->updateDisassembly();
+  memoryEditor->selectSource();
 
   while(quit == false) {
     OS::processEvents();
@@ -65,8 +69,10 @@ Application::Application(int argc, char **argv) {
 }
 
 Application::~Application() {
+  exit(0);
   delete breakpointEditor;
   delete memoryEditor;
+  delete cpuDebugger;
   delete videoWindow;
   delete aboutWindow;
   delete consoleWindow;

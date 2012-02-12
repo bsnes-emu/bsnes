@@ -6,6 +6,7 @@ AboutWindow::AboutWindow() {
   setResizable(false);
 
   layout.setMargin(10);
+  layout.setAlignment(0.5);
   canvas.setSize({288, 360});
   title.setFont("Sans, 16, Bold");
   title.setText("Laevateinn");
@@ -13,14 +14,8 @@ AboutWindow::AboutWindow() {
   version.setText({"bsnes/debugger v", Version});
 
   layout.append(canvas, {288, 360});
-  layout.append(titleLayout, {~0, 0});
-    titleLayout.append(titleL, {~0, 0});
-    titleLayout.append(title, {0, 0});
-    titleLayout.append(titleR, {~0, 0});
-  layout.append(versionLayout, {~0, 0});
-    versionLayout.append(versionL, {~0, 0});
-    versionLayout.append(version, {0, 0});
-    versionLayout.append(versionR, {~0, 0});
+  layout.append(title, {0, 0});
+  layout.append(version, {0, 0});
   append(layout);
 }
 

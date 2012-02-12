@@ -2,15 +2,17 @@
 Debugger *debugger = nullptr;
 
 #include "hook.cpp"
+#include "usage.cpp"
 
 void Debugger::run() {
-  if(flags.paused == true) {
+  if(paused == true) {
     usleep(2000);
     return;
   }
 
-  if(memoryEditor->autoRefresh.checked()) memoryEditor->update();
   SNES::system.run();
+  if(cpuDebugger->autoRefresh.checked()) cpuDebugger->updateDisassembly();
+  if(memoryEditor->autoRefresh.checked()) memoryEditor->update();
 }
 
 void Debugger::echo(const string &text) {
@@ -18,15 +20,17 @@ void Debugger::echo(const string &text) {
 }
 
 void Debugger::resume() {
-  flags.paused = false;
+  if(paused == false) return;
+  paused = false;
   consoleWindow->runButton.setText("Stop");
-  consoleWindow->stepButton.setEnabled(false);
 }
 
 void Debugger::suspend() {
-  flags.paused = true;
+  if(paused == true) return;
+  paused = true;
+  flags.step = false;
+  flags.cpu.stepInto = false;
   consoleWindow->runButton.setText("Run");
-  consoleWindow->stepButton.setEnabled(true);
 }
 
 void Debugger::tracerEnable(bool state) {
@@ -40,22 +44,31 @@ void Debugger::tracerEnable(bool state) {
   //if all files exist, use 000, even if it overwrites another log.
   unsigned n = 1;
   do {
-    if(file::exists({ interface->baseName, "-", decimal<3, '0'>(n), ".log" }) == false) break;
+    if(file::exists({ interface->pathName, "debug/trace-", decimal<3, '0'>(n), ".log" }) == false) break;
   } while(++n <= 999);
 
-  string filename = { interface->baseName, "-", decimal<3, '0'>(n), ".log" };
+  string filename = { interface->pathName, "debug/trace-", decimal<3, '0'>(n), ".log" };
   if(fpTracer.open(filename, file::mode::write) == false) return;
   print("Tracing to ", filename, "\n");
 }
 
 Debugger::Debugger() {
-  flags.paused = true;
-  flags.step = false;
+  paused = true;
 
-  flags.debugCPU = true;
-  flags.debugSMP = false;
+  flags.step = false;
+  flags.cpu.stepInto = false;
+
+  debug.cpu = true;
+  debug.smp = false;
+
+  cpuUsage.allocate(16 * 1024 * 1024);
+  apuUsage.allocate(64 * 1024);
 
   SNES::cpu.debugger.op_exec = { &Debugger::cpu_op_exec, this };
   SNES::cpu.debugger.op_read = { &Debugger::cpu_op_read, this };
   SNES::cpu.debugger.op_write = { &Debugger::cpu_op_write, this };
+
+  SNES::smp.debugger.op_exec = { &Debugger::smp_op_exec, this };
+  SNES::smp.debugger.op_read = { &Debugger::smp_op_read, this };
+  SNES::smp.debugger.op_write = { &Debugger::smp_op_write, this };
 }

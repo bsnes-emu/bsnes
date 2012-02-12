@@ -21,9 +21,9 @@ ConsoleWindow::ConsoleWindow() {
 
   menuDebug.setText("&Debug");
     menuDebugCPU.setText("CPU");
-    menuDebugCPU.setChecked(debugger->flags.debugCPU);
+    menuDebugCPU.setChecked(debugger->debug.cpu);
     menuDebugSMP.setText("SMP");
-    menuDebugSMP.setChecked(debugger->flags.debugSMP);
+    menuDebugSMP.setChecked(debugger->debug.smp);
     menuDebugSMP.setEnabled(false);
     menuDebug.append(menuDebugCPU, menuDebugSMP);
   append(menuDebug);
@@ -39,9 +39,11 @@ ConsoleWindow::ConsoleWindow() {
 
   menuWindows.setText("&Windows");
     menuWindowsVideoWindow.setText("Video");
+    menuWindowsCPUDebugger.setText("CPU Debugger");
     menuWindowsMemoryEditor.setText("Memory Editor");
     menuWindowsBreakpointEditor.setText("Breakpoint Editor");
-    menuWindows.append(menuWindowsVideoWindow, menuWindowsMemoryEditor, menuWindowsBreakpointEditor);
+    menuWindows.append(menuWindowsVideoWindow, menuWindowsCPUDebugger, menuWindowsMemoryEditor,
+      menuWindowsBreakpointEditor);
   append(menuWindows);
 
   menuHelp.setText("&Help");
@@ -83,14 +85,19 @@ ConsoleWindow::ConsoleWindow() {
     audio.set(Audio::Synchronize, menuEmulationSynchronizeAudio.checked());
   };
 
-  menuDebugCPU.onToggle = [&] { debugger->flags.debugCPU = menuDebugCPU.checked(); };
-  menuDebugSMP.onToggle = [&] { debugger->flags.debugSMP = menuDebugSMP.checked(); };
+  menuDebugCPU.onToggle = [&] { debugger->debug.cpu = menuDebugCPU.checked(); };
+  menuDebugSMP.onToggle = [&] { debugger->debug.smp = menuDebugSMP.checked(); };
 
   menuTracerEnable.onToggle = [&] { debugger->tracerEnable(menuTracerEnable.checked()); };
 
   menuWindowsVideoWindow.onActivate = [&] {
     videoWindow->setVisible();
     videoWindow->setFocused();
+  };
+
+  menuWindowsCPUDebugger.onActivate = [&] {
+    cpuDebugger->setVisible();
+    cpuDebugger->setFocused();
   };
 
   menuWindowsMemoryEditor.onActivate = [&] {
@@ -107,7 +114,7 @@ ConsoleWindow::ConsoleWindow() {
   menuHelpAbout.onActivate = [&] { aboutWindow->show(); };
 
   runButton.onActivate = [&] {
-    if(debugger->flags.paused == true) debugger->resume();
+    if(debugger->paused) debugger->resume();
     else debugger->suspend();
   };
 

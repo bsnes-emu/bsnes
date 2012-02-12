@@ -18,6 +18,7 @@ struct ConsoleWindow : Window {
 
   Menu menuWindows;
     Item menuWindowsVideoWindow;
+    Item menuWindowsCPUDebugger;
     Item menuWindowsMemoryEditor;
     Item menuWindowsBreakpointEditor;
 
@@ -40,14 +41,8 @@ struct ConsoleWindow : Window {
 struct AboutWindow : Window {
   VerticalLayout layout;
     Canvas canvas;
-    HorizontalLayout titleLayout;
-      Widget titleL;
-      Label title;
-      Widget titleR;
-    HorizontalLayout versionLayout;
-      Widget versionL;
-      Label version;
-      Widget versionR;
+    Label title;
+    Label version;
 
   void show();
   AboutWindow();
