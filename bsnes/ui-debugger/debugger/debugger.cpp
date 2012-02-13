@@ -14,6 +14,7 @@ void Debugger::run() {
   if(cpuDebugger->autoUpdate.checked()) cpuDebugger->updateDisassembly();
   if(smpDebugger->autoUpdate.checked()) smpDebugger->updateDisassembly();
   if(memoryEditor->autoUpdate.checked()) memoryEditor->updateView();
+  if(propertiesViewer->autoUpdate.checked()) propertiesViewer->updateProperties();
   if(vramViewer->autoUpdate.checked()) vramViewer->updateTiles();
 }
 

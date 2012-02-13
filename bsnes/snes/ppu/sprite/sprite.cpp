@@ -200,7 +200,7 @@ void PPU::Sprite::reset() {
 
   regs.base_size = random(0);
   regs.nameselect = random(0);
-  regs.tiledata_addr = random(0x0000);
+  regs.tiledata_addr = (random(0x0000) & 3) << 14;
   regs.first_sprite = 0;
 
   regs.priority0 = 0;

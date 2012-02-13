@@ -1,5 +1,5 @@
 #include "../base.hpp"
-Utility *utility = 0;
+Utility *utility = nullptr;
 
 void Utility::setMode(Interface::Mode mode) {
   video.clear();
@@ -56,7 +56,7 @@ void Utility::resizeMainWindow(bool shrink) {
   if(config->video.correctAspectRatio) {
     if(interface->mode() == Interface::Mode::NES
     || interface->mode() == Interface::Mode::SNES
-    ) width = (double)width * 1.226;
+    ) width = (double)width * 8.0 / 7.0;
   }
 
   unsigned maxW = geometry.width / width;

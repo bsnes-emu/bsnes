@@ -204,8 +204,8 @@ unsigned PPU::Background::get_tile_color() {
 }
 
 void PPU::Background::reset() {
-  regs.tiledata_addr = random(0x0000);
-  regs.screen_addr = random(0x0000);
+  regs.tiledata_addr = (random(0x0000) & 0x07) << 13;
+  regs.screen_addr = (random(0x0000) & 0x7c) << 9;
   regs.screen_size = random(0);
   regs.mosaic = random(0);
   regs.tile_size = random(0);

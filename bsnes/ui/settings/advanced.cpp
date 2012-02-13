@@ -1,4 +1,4 @@
-AdvancedSettings *advancedSettings = 0;
+AdvancedSettings *advancedSettings = nullptr;
 
 AdvancedSettings::AdvancedSettings() {
   title.setFont(application->titleFont);

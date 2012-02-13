@@ -4,7 +4,7 @@ nes := nes
 snes := snes
 gameboy := gameboy
 profile := accuracy
-ui := ui-debugger
+ui := ui
 
 # options += console
 

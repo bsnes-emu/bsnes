@@ -1,4 +1,4 @@
-InputSettings *inputSettings = 0;
+InputSettings *inputSettings = nullptr;
 
 InputSettings::InputSettings() : activeInput(0) {
   title.setFont(application->titleFont);

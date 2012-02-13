@@ -78,7 +78,7 @@ void Debugger::cpu_op_irq() {
 void Debugger::smp_op_exec(uint16 addr) {
   apuUsage.data[addr] |= Usage::Exec;
   smpDebugger->opcodePC = addr;
-  bool breakpointHit = breakpointEditor->testExecAPU(addr);
+  bool breakpointHit = breakpointEditor->testExecSMP(addr);
 
   if((debug.cpu && tracer->enabled() && !tracer->maskSMP(addr))
   || (debug.smp && flags.step)
@@ -105,7 +105,7 @@ void Debugger::smp_op_exec(uint16 addr) {
 
 void Debugger::smp_op_read(uint16 addr) {
   apuUsage.data[addr] |= Usage::Read;
-  bool breakpointHit = breakpointEditor->testReadAPU(addr);
+  bool breakpointHit = breakpointEditor->testReadSMP(addr);
 
   if(breakpointHit) {
     print(SNES::smp.disassemble_opcode(smpDebugger->opcodePC), "\n");
@@ -116,7 +116,7 @@ void Debugger::smp_op_read(uint16 addr) {
 
 void Debugger::smp_op_write(uint16 addr, uint8 data) {
   apuUsage.data[addr] |= Usage::Write;
-  bool breakpointHit = breakpointEditor->testWriteAPU(addr, data);
+  bool breakpointHit = breakpointEditor->testWriteSMP(addr, data);
 
   if(breakpointHit) {
     print(SNES::smp.disassemble_opcode(smpDebugger->opcodePC), "\n");

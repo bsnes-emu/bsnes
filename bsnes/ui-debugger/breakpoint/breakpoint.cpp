@@ -7,7 +7,7 @@ BreakpointEntry::BreakpointEntry() {
   addr.setFont(application->monospaceFont);
   data.setFont(application->monospaceFont);
   type.append("Read", "Write", "Exec");
-  source.append("CPU-Bus", "APU-Bus", "VRAM", "OAM", "CGRAM");
+  source.append("CPU", "SMP", "VRAM", "OAM", "CGRAM");
 
   append(enable, {0, 0}, 5);
   append(addr, {50, 0}, 5);
@@ -68,13 +68,13 @@ void BreakpointEditor::synchronize() {
   for(auto &bp : breakpointWriteCPU) bp.addr = cpuDebugger->mirror(bp.addr);
   for(auto &bp : breakpointExecCPU) bp.addr = cpuDebugger->mirror(bp.addr);
 
-  breakpointReadAPU.reset();
-  breakpointWriteAPU.reset();
-  breakpointExecAPU.reset();
+  breakpointReadSMP.reset();
+  breakpointWriteSMP.reset();
+  breakpointExecSMP.reset();
 
-  for(auto &bp : breakpoint) if(bp.type == Breakpoint::Read && bp.source == Breakpoint::APU) breakpointReadAPU.append(bp);
-  for(auto &bp : breakpoint) if(bp.type == Breakpoint::Write && bp.source == Breakpoint::APU) breakpointWriteAPU.append(bp);
-  for(auto &bp : breakpoint) if(bp.type == Breakpoint::Exec && bp.source == Breakpoint::APU) breakpointExecAPU.append(bp);
+  for(auto &bp : breakpoint) if(bp.type == Breakpoint::Read && bp.source == Breakpoint::SMP) breakpointReadSMP.append(bp);
+  for(auto &bp : breakpoint) if(bp.type == Breakpoint::Write && bp.source == Breakpoint::SMP) breakpointWriteSMP.append(bp);
+  for(auto &bp : breakpoint) if(bp.type == Breakpoint::Exec && bp.source == Breakpoint::SMP) breakpointExecSMP.append(bp);
 
   breakpointReadVRAM.reset();
   breakpointWriteVRAM.reset();
@@ -136,8 +136,8 @@ bool BreakpointEditor::testExecCPU(uint24 addr) {
 //S-SMP
 //=====
 
-bool BreakpointEditor::testReadAPU(uint16 addr) {
-  for(auto &bp : breakpointReadAPU) {
+bool BreakpointEditor::testReadSMP(uint16 addr) {
+  for(auto &bp : breakpointReadSMP) {
     if(bp.addr == addr) {
       if(bp.compare && bp.data != smpDebugger->read(addr)) continue;
       debugger->print("Breakpoint #", bp.id, " hit\n");
@@ -147,8 +147,8 @@ bool BreakpointEditor::testReadAPU(uint16 addr) {
   return false;
 }
 
-bool BreakpointEditor::testWriteAPU(uint16 addr, uint8 data) {
-  for(auto &bp : breakpointWriteAPU) {
+bool BreakpointEditor::testWriteSMP(uint16 addr, uint8 data) {
+  for(auto &bp : breakpointWriteSMP) {
     if(bp.addr == addr) {
       if(bp.compare && bp.data != data) continue;
       debugger->print("Breakpoint #", bp.id, " hit\n");
@@ -158,8 +158,8 @@ bool BreakpointEditor::testWriteAPU(uint16 addr, uint8 data) {
   return false;
 }
 
-bool BreakpointEditor::testExecAPU(uint16 addr) {
-  for(auto &bp : breakpointExecAPU) {
+bool BreakpointEditor::testExecSMP(uint16 addr) {
+  for(auto &bp : breakpointExecSMP) {
     if(bp.addr == addr) {
       debugger->print("Breapoint #", bp.id, " hit\n");
       return true;

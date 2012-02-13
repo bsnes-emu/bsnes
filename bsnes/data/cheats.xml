@@ -13304,7 +13304,7 @@
     <code>SZSGUGSA</code>
   </cheat>
   <cheat enable="false">
-    <description>Infintie time</description>
+    <description>Infinite time</description>
     <code>SZSVGTVG</code>
   </cheat>
   <cheat enable="false">
@@ -30510,6 +30510,10 @@
     <code>SZKTYPVG</code>
   </cheat>
   <cheat enable="false">
+    <description>Walk through walls</description>
+    <code>EONGELAP</code>
+  </cheat>
+  <cheat enable="false">
     <description>5 Super Bombs on pick-up</description>
     <code>IAVTPSZA</code>
   </cheat>
@@ -44061,10 +44065,9 @@
     <description>Infinite lives</description>
     <code>DD67-4468</code>
   </cheat>
-  <cheat enable="false">
-    <description>One hit kills</description>
-    <code>DDB3-C764</code>
-  </cheat>
+</cartridge>
+<cartridge sha256="One hit kills">
+  <name>DDB3-C764</name>
   <cheat enable="false">
     <description>Small magic power-up adds 3 instead of 1</description>
     <code>D7C0-37A7</code>
@@ -44639,6 +44642,37 @@
     <code>7EEA00:FF</code>
   </cheat>
 </cartridge>
+<cartridge sha256="0a8cd5101f849ccd4e40d55fdc4edce914b2825b69eb76ec31cf53b59719e79e">
+  <name>Advanced Dungeons &amp; Dragons - Eye of the Beholder (USA)</name>
+  <cheat enable="false">
+    <description>Infinite HP</description>
+    <code>8285-6D2C</code>
+    <code>82DE-049B</code>
+  </cheat>
+  <cheat enable="false">
+    <description>No waiting to hit again</description>
+    <code>828D-A798</code>
+  </cheat>
+  <cheat enable="false">
+    <description>One hit kills (works for enemies also)</description>
+    <code>CBAA-A726</code>
+    <code>3CA2-AD96</code>
+  </cheat>
+  <cheat enable="false">
+    <description>Pick a lawful, human male fighter and he will be at Level 8</description>
+    <code>D68B-A474</code>
+  </cheat>
+  <cheat enable="false">
+    <description>Pick a lawful, human male fighter and he will be at level 6</description>
+    <code>D18B-A474</code>
+  </cheat>
+  <cheat enable="false">
+    <description>999,999 EXP 1st class</description>
+    <code>7E0533:3F</code>
+    <code>7E0534:42</code>
+    <code>7E0535:0F</code>
+  </cheat>
+</cartridge>
 <cartridge sha256="8083307f3f4b7df9e5bf53d5f25877c2e548f0f677540d4ee62d60ccca3098f8">
   <name>Adventures of Batman &amp; Robin, The (USA)</name>
   <cheat enable="false">
@@ -44923,10 +44957,6 @@
     <code>8229-37A0</code>
   </cheat>
   <cheat enable="false">
-    <description>Don't lose power-ups when you die - both players</description>
-    <code>8229-37D0</code>
-  </cheat>
-  <cheat enable="false">
     <description>Infinite Bombs for American F-18 - P1</description>
     <code>8237-47A1</code>
   </cheat>
@@ -44957,6 +44987,24 @@
   <cheat enable="false">
     <description>Infinite Bombs for British IDS - P2</description>
     <code>823D-C769</code>
+  </cheat>
+  <cheat enable="false">
+    <description>Don't lose power-ups when you die - both players</description>
+    <code>8229-37D0</code>
+  </cheat>
+  <cheat enable="false">
+    <description>Hit anywhere + one hit kills</description>
+    <code>40CA-14DD</code>
+    <code>40CA-17AD</code>
+    <code>40C2-1FDD</code>
+    <code>40C2-14DD</code>
+    <code>40C2-17DD</code>
+    <code>6DC5-1F0D</code>
+    <code>6DCB-1DAD</code>
+  </cheat>
+  <cheat enable="false">
+    <description>One hit kills</description>
+    <code>6DCB-1DAD</code>
   </cheat>
   <cheat enable="false">
     <description>Infinite lives (alt)</description>
@@ -45946,7 +45994,7 @@
   </cheat>
 </cartridge>
 <cartridge sha256="05eb897d7696555790591c431c9d55a43ff9a1c12162443c17c5fcddfa5eb3c5">
-  <name>Alien vs. Predator (USA)</name>
+  <name>Alien vs Predator (USA)</name>
   <cheat enable="false">
     <description>Invincibility</description>
     <code>1D3B-0FAD</code>
@@ -51189,7 +51237,7 @@
   </cheat>
 </cartridge>
 <cartridge sha256="9a064b67f522b75b82d0857519c0e33b4dbbe494c2ef79a44fdc913d605d0b26">
-  <name>Choplifter III - Rescue &amp; Survive (USA)</name>
+  <name>Choplifter III - Rescue-Survive (USA)</name>
   <cheat enable="false">
     <description>Have all weapons and infinte ammo</description>
     <code>DD67-CDA7</code>
@@ -52078,7 +52126,7 @@
   </cheat>
 </cartridge>
 <cartridge sha256="5536cea2da39f2572abe3b0fcf71f8fcd981376b470b174969772aae4a7a1845">
-  <name>College Football USA '97 - The Road to New Orleans (USA)</name>
+  <name>College Football USA 97 (USA)</name>
   <cheat enable="false">
     <description>Always 1st down</description>
     <code>7E1836:05</code>
@@ -55934,7 +55982,7 @@
   </cheat>
 </cartridge>
 <cartridge sha256="1a79d51a2ad7dd4848205a07ff8e5d873b155dc420de5e52158c9bab935e05c3">
-  <name>Dream TV (USA)</name>
+  <name>Dream T.V. (USA)</name>
   <cheat enable="false">
     <description>Almost infinite health</description>
     <code>8FA6-3DA8</code>
@@ -57014,37 +57062,6 @@
     <description>2 outs per inning</description>
     <code>D467-AD67</code>
     <code>D461-D4A7</code>
-  </cheat>
-</cartridge>
-<cartridge sha256="0a8cd5101f849ccd4e40d55fdc4edce914b2825b69eb76ec31cf53b59719e79e">
-  <name>Eye of the Beholder (USA)</name>
-  <cheat enable="false">
-    <description>Infinite HP</description>
-    <code>8285-6D2C</code>
-    <code>82DE-049B</code>
-  </cheat>
-  <cheat enable="false">
-    <description>No waiting to hit again</description>
-    <code>828D-A798</code>
-  </cheat>
-  <cheat enable="false">
-    <description>One hit kills (works for enemies also)</description>
-    <code>CBAA-A726</code>
-    <code>3CA2-AD96</code>
-  </cheat>
-  <cheat enable="false">
-    <description>Pick a lawful, human male fighter and he will be at Level 8</description>
-    <code>D68B-A474</code>
-  </cheat>
-  <cheat enable="false">
-    <description>Pick a lawful, human male fighter and he will be at level 6</description>
-    <code>D18B-A474</code>
-  </cheat>
-  <cheat enable="false">
-    <description>999,999 EXP 1st class</description>
-    <code>7E0533:3F</code>
-    <code>7E0534:42</code>
-    <code>7E0535:0F</code>
   </cheat>
 </cartridge>
 <cartridge sha256="1d38e3af9e3a6409e93f4705b68c42558f558c68f3e83ef2a40e46cf560b26cc">
@@ -62253,7 +62270,18 @@
   </cheat>
 </cartridge>
 <cartridge sha256="8796ca4de3aeffd3a494fe28e7d7e2aeb220ca652b43684f29e2cc94f02c20c4">
-  <name>Gods (USA)</name>
+  <name>Gods - The Bitmap Brothers (USA)</name>
+  <cheat enable="false">
+    <description>Invincibility</description>
+    <code>C268-3576</code>
+  </cheat>
+  <cheat enable="false">
+    <description>Continually hit anywhere</description>
+    <code>40A2-49E8</code>
+    <code>40A3-4988</code>
+    <code>40AF-1188</code>
+    <code>6DAD-1988</code>
+  </cheat>
   <cheat enable="false">
     <description>Shields last until at least end of the world (disable if you get stuck)</description>
     <code>1DE7-31E8</code>
@@ -62605,7 +62633,7 @@
   </cheat>
 </cartridge>
 <cartridge sha256="f921297c361f16ad3f1257e91829638fc795f9323172015d7237ed648c8f7515">
-  <name>GunForce - Battle Fire Engulfed Terror Island (USA)</name>
+  <name>GunForce (USA)</name>
   <cheat enable="false">
     <description>Invincibility</description>
     <code>69BD-A4A1</code>
@@ -63215,7 +63243,7 @@
   </cheat>
 </cartridge>
 <cartridge sha256="48a3ac52e2c9128abc2dc60e07817a51898e8a93be0d51d6f541a8635263a089">
-  <name>Home Improvement (USA)</name>
+  <name>Home Improvement - Power Tool Pursuit! (USA)</name>
   <cheat enable="false">
     <description>Invincibility</description>
     <code>6D62-4B82</code>
@@ -66016,18 +66044,18 @@
   </cheat>
 </cartridge>
 <cartridge sha256="5eff7c27f69b3ebc1ec1294ffcd1debf3512bc3e6c1c75fbdc5e778dcaaba1c9">
-  <name>Jurassic Park II - The Chaos Continues (USA) (En,Fr,De,It)</name>
+  <name>Jurassic Park Part 2 - The Chaos Continues (USA) (En,Fr,De,It)</name>
   <cheat enable="false">
     <description>Almost invincible</description>
     <code>8BEB-C22D</code>
     <code>8B65-1C67</code>
   </cheat>
   <cheat enable="false">
-    <description>Invincibiltiy after one hit until you enter a new screen</description>
+    <description>Invincibility after one hit until you enter a new screen</description>
     <code>82B6-C704</code>
   </cheat>
   <cheat enable="false">
-    <description>Infintie health against some larger dinosaurs</description>
+    <description>Infinite health against some larger dinosaurs</description>
     <code>6DED-3A9D</code>
   </cheat>
   <cheat enable="false">
@@ -66144,7 +66172,7 @@
   </cheat>
 </cartridge>
 <cartridge sha256="05152bcf9bf086e7bcdbfa7dd8edfe2085f1339c4d7e193e0071c49a10471ef4">
-  <name>Kablooey (USA)</name>
+  <name>Ka-blooey (USA)</name>
   <cheat enable="false">
     <description>Infinite lives</description>
     <code>C261-0F0D</code>
@@ -67515,7 +67543,7 @@
   </cheat>
 </cartridge>
 <cartridge sha256="6638b5541059814d4c34574e5e277ef613aebf81c91d3def557a7642fb5840e1">
-  <name>King of Dragons, The (USA)</name>
+  <name>King of Dragons (USA)</name>
   <cheat enable="false">
     <description>Invincibility - both players</description>
     <code>ED76-E4AF</code>
@@ -68863,6 +68891,15 @@
     <description>One hit kills</description>
     <code>40C6-C469</code>
     <code>4081-1F69</code>
+  </cheat>
+  <cheat enable="false">
+    <description>Hit anywhere</description>
+    <code>40E4-37A0</code>
+    <code>40ED-37D0</code>
+    <code>40E0-3DD0</code>
+    <code>40E0-3FA0</code>
+    <code>6DED-3FD0</code>
+    <code>6DEF-3DA0</code>
   </cheat>
   <cheat enable="false">
     <description>Infinite health - P1</description>
@@ -75159,7 +75196,7 @@
   </cheat>
 </cartridge>
 <cartridge sha256="49dd77b310b476c875633335243553be59ecfb0bffae62e46f2e53ff05c20fcd">
-  <name>Marvel Super Heroes - War of the Gems (USA)</name>
+  <name>Marvel Super Heroes in War of the Gems (USA)</name>
   <cheat enable="false">
     <description>Infinite health</description>
     <code>B9D9-74D4</code>
@@ -78156,7 +78193,7 @@
   </cheat>
 </cartridge>
 <cartridge sha256="f292598ac462fdfcd32ad9b6b35ac01d4bab020391dff92bfe94780ec604289a">
-  <name>Musya (USA)</name>
+  <name>Musya - The Classic Japanese Tale of Horror (USA)</name>
   <cheat enable="false">
     <description>Invincibility (blinking)</description>
     <code>7E103C:0A</code>
@@ -79477,7 +79514,7 @@
   </cheat>
 </cartridge>
 <cartridge sha256="55f3432a130085c112d65aa6443c41eb7a8aeec59aad2c2b4b2ac536b604b449">
-  <name>NHLPA Hockey '93 (USA)</name>
+  <name>NHLPA Hockey 93 (USA)</name>
   <cheat enable="false">
     <description>Period clock runs faster</description>
     <code>F160-4776</code>
@@ -79942,7 +79979,7 @@
   </cheat>
 </cartridge>
 <cartridge sha256="3c109e50b91ec6df3bb8509778ae544c99433fb40dda9b801178dfe513053618">
-  <name>Ninjawarriors, The (USA)</name>
+  <name>Ninjawarriors (USA)</name>
   <cheat enable="false">
     <description>Invincibility</description>
     <code>EDB0-D768</code>
@@ -80450,7 +80487,7 @@
   </cheat>
 </cartridge>
 <cartridge sha256="190742792a950a112f893cba0e083eb787cf24293f698967defff929635ba0e7">
-  <name>Operation Logic Bomb (USA)</name>
+  <name>Operation Logic Bomb - The Ultimate Search &amp; Destroy (USA)</name>
   <cheat enable="false">
     <description>Infinite health</description>
     <code>C2B5-4DD0</code>
@@ -81407,7 +81444,7 @@
   </cheat>
 </cartridge>
 <cartridge sha256="14ad9d2fb8e6bb0f49bc9e53f3c472177653d1c24102169ade308a2fab8a8888">
-  <name>Parodius da! - Shinwa kara Owarai e (Japan)</name>
+  <name>Parodius Da! - Shinwa kara Owarai e (Japan)</name>
   <cheat enable="false">
     <description>Infinite lives</description>
     <code>7E0098:03</code>
@@ -81540,7 +81577,7 @@
   </cheat>
 </cartridge>
 <cartridge sha256="0663330bc061f4b768fa1806610878ef6e6cf546f36041ae087c8e55703693b8">
-  <name>Phalanx - The Enforce Fighter A-144 (USA)</name>
+  <name>Phalanx (USA)</name>
   <cheat enable="false">
     <description>Infinite health</description>
     <code>3C21-AD0F</code>
@@ -82657,7 +82694,7 @@
   </cheat>
 </cartridge>
 <cartridge sha256="04ca1a481093c4a7e12f18b33697d6e05e50e30e0f5b1655aa265abd14719bba">
-  <name>Prince of Persia 2 - The Shadow &amp; The Flame (USA)</name>
+  <name>Prince of Persia 2 (USA)</name>
   <cheat enable="false">
     <description>Infinite health</description>
     <code>7E0957:03</code>
@@ -83724,7 +83761,7 @@
   </cheat>
 </cartridge>
 <cartridge sha256="4d6c7d6d2693d8d43bafaff7582f9a94885362dadd9ee4012bbbdce1ba10c30e">
-  <name>R-Type III - The Third Lightning (USA)</name>
+  <name>R-Type III (USA)</name>
   <cheat enable="false">
     <description>Invincibility</description>
     <code>DD62-33DD</code>
@@ -83747,7 +83784,7 @@
   </cheat>
 </cartridge>
 <cartridge sha256="edf990e502c646a2fe83fcd1d359ca0ed5003ace06cb4c3de5a51a0c56d6ec54">
-  <name>R.P.M. Racing (USA)</name>
+  <name>Radical Psycho Machine Racing (USA)</name>
   <cheat enable="false">
     <description>Sturdy tires are free</description>
     <code>DDB8-0465</code>
@@ -86788,7 +86825,22 @@
   </cheat>
 </cartridge>
 <cartridge sha256="c73757eea258e169e506eaef989227a59918060f94117917f338183db14c50b6">
-  <name>Shaq Fu (USA)</name>
+  <name>Shaq-Fu (USA)</name>
+  <cheat enable="false">
+    <description>Invincibility - P1</description>
+    <code>0D8B-8DDD</code>
+    <code>2D8B-8D6D</code>
+    <code>3D86-87AD</code>
+    <code>4D8B-8D0D</code>
+  </cheat>
+  <cheat enable="false">
+    <description>Hit anywhere - P1</description>
+    <code>0D85-87DD</code>
+    <code>3D85-84AD</code>
+    <code>4D85-870D</code>
+    <code>DD86-8D6D</code>
+    <code>FA86-8D0D</code>
+  </cheat>
   <cheat enable="false">
     <description>Infinite continues - Duel Mode</description>
     <code>C269-EF0D</code>
@@ -86994,7 +87046,7 @@
   </cheat>
 </cartridge>
 <cartridge sha256="c0bd1b378337c32047a6b7122a3813beb646e496fbdb1fa5c87ab9856271e4c5">
-  <name>SimAnt (USA)</name>
+  <name>SimAnt - The Electronic Ant Colony (USA)</name>
   <cheat enable="false">
     <description>Always have maximum energy</description>
     <code>DD88-0D0A</code>
@@ -87041,7 +87093,7 @@
   </cheat>
 </cartridge>
 <cartridge sha256="bf74c58e4190faca2f3a967dc190fe529d13887d1262b72e057b5353e43cf67f">
-  <name>SimCity 2000 (USA)</name>
+  <name>SimCity 2000 - The Ultimate City Simulator (USA)</name>
   <cheat enable="false">
     <description>Start with $99,999,999 on all the maps except the Land Of Freedom</description>
     <code>EEF3-8700</code>
@@ -88207,7 +88259,7 @@
   </cheat>
 </cartridge>
 <cartridge sha256="dc5353ddc350816619230f25f8c51bddabf7438e6dfba21662eb1c4794856735">
-  <name>Space Invaders - The Original Game (USA)</name>
+  <name>Space Invaders (USA)</name>
   <cheat enable="false">
     <description>Infinite lives</description>
     <code>CB6F-37A9</code>
@@ -88482,7 +88534,7 @@
   </cheat>
 </cartridge>
 <cartridge sha256="32d0f1ca5b91fd9b2caf81422fb9e8fb30bc091f0b2a429b9269dd307fcba4fd">
-  <name>Spawn (USA)</name>
+  <name>Spawn - The Video Game (USA)</name>
   <cheat enable="false">
     <description>Invincibility after one hit (invisible)</description>
     <code>C203-84D1</code>
@@ -88495,10 +88547,9 @@
     <description>Infinite health</description>
     <code>C208-87D1</code>
   </cheat>
-  <cheat enable="false">
-    <description>Don't blink after getting hit</description>
-    <code>FDDB-5FB9</code>
-  </cheat>
+</cartridge>
+<cartridge sha256="Don't blink after getting hit">
+  <name>FDDB-5FB9</name>
   <cheat enable="false">
     <description>Falling doesn't use life points</description>
     <code>C2F4-7FD1</code>
@@ -88856,7 +88907,7 @@
   </cheat>
 </cartridge>
 <cartridge sha256="2701e94631ae1c43ca0ccef2b50bc0341a4111b31b885fa372ab5b4a49b06942">
-  <name>SpellCraft (USA) (Proto)</name>
+  <name>SpellCraft - Aspects of Valor (USA) (Proto)</name>
   <cheat enable="false">
     <description>Infinite health</description>
     <code>7E018D:99</code>
@@ -89240,6 +89291,33 @@
     <code>7E14D9:03</code>
   </cheat>
 </cartridge>
+<cartridge sha256="2c0bac12a7866fad1cb306da768a201c12f2520332df1ef51cba1576db21ff06">
+  <name>Star Fox - Super Weekend (USA)</name>
+  <cheat enable="false">
+    <description>Infinite Shield</description>
+    <code>7E0396:28</code>
+  </cheat>
+  <cheat enable="false">
+    <description>Infinite Bombs</description>
+    <code>7E15AF:04</code>
+  </cheat>
+  <cheat enable="false">
+    <description>Infinite time (minutes)</description>
+    <code>7EF0DA:09</code>
+  </cheat>
+  <cheat enable="false">
+    <description>Infinite time (seconds tens)</description>
+    <code>7EF0DC:09</code>
+  </cheat>
+  <cheat enable="false">
+    <description>Infinite time (seconds ones)</description>
+    <code>7EF0DB:09</code>
+  </cheat>
+  <cheat enable="false">
+    <description>Have Double Blaster</description>
+    <code>7E14D9:01</code>
+  </cheat>
+</cartridge>
 <cartridge sha256="82e39dfbb3e4fe5c28044e80878392070c618b298dd5a267e5ea53c8f72cc548">
   <name>Star Fox (USA) (Rev 2)</name>
   <cheat enable="false">
@@ -89265,33 +89343,6 @@
   <cheat enable="false">
     <description>Infinite Shield (alt 2)</description>
     <code>7E0396:35</code>
-  </cheat>
-</cartridge>
-<cartridge sha256="2c0bac12a7866fad1cb306da768a201c12f2520332df1ef51cba1576db21ff06">
-  <name>Star Fox (USA) (Super Weekend Competition)</name>
-  <cheat enable="false">
-    <description>Infinite Shield</description>
-    <code>7E0396:28</code>
-  </cheat>
-  <cheat enable="false">
-    <description>Infinite Bombs</description>
-    <code>7E15AF:04</code>
-  </cheat>
-  <cheat enable="false">
-    <description>Infinite time (minutes)</description>
-    <code>7EF0DA:09</code>
-  </cheat>
-  <cheat enable="false">
-    <description>Infinite time (seconds tens)</description>
-    <code>7EF0DC:09</code>
-  </cheat>
-  <cheat enable="false">
-    <description>Infinite time (seconds ones)</description>
-    <code>7EF0DB:09</code>
-  </cheat>
-  <cheat enable="false">
-    <description>Have Double Blaster</description>
-    <code>7E14D9:01</code>
   </cheat>
 </cartridge>
 <cartridge sha256="efae37be832d0ea1490784d57bef00761a8bf0b5bcef9c23f558e063441c3876">
@@ -99206,7 +99257,7 @@
   </cheat>
 </cartridge>
 <cartridge sha256="4f500da19dbb1557a7bc0ce14437098c1402478d573fb569303b81c011f86fbf">
-  <name>Tom &amp; Jerry (USA)</name>
+  <name>Tom and Jerry (USA)</name>
   <cheat enable="false">
     <description>Invincibility</description>
     <code>7E14C8:33</code>
@@ -99870,7 +99921,7 @@
   </cheat>
 </cartridge>
 <cartridge sha256="7a6e5da46b026900fba4584a32ad40d940b9ecf9fccfb11f96a205a914014784">
-  <name>Toys (USA)</name>
+  <name>Toys - Let the Toy Wars begin! (USA)</name>
   <cheat enable="false">
     <description>Infinite lives</description>
     <code>C261-3D7B</code>
@@ -100419,7 +100470,7 @@
   </cheat>
 </cartridge>
 <cartridge sha256="11659bd8dd620d50400d16042aeb2d0ddb00c7183fc1ecb95b1a34f07db0431b">
-  <name>Ultima VI - The False Prophet (USA)</name>
+  <name>Ultima - The False Prophet (USA)</name>
   <cheat enable="false">
     <description>Infinite time</description>
     <code>89C8-D76D</code>
@@ -100630,7 +100681,7 @@
   </cheat>
 </cartridge>
 <cartridge sha256="a31af0e39afb55bbc92a5543b504327fbe7e8cd0a5e08626976bed7b65376737">
-  <name>Ultima VII - The Black Gate (USA)</name>
+  <name>Ultima - The Black Gate (USA)</name>
   <cheat enable="false">
     <description>Infinite health</description>
     <code>7E1CFA:E4</code>
@@ -100730,7 +100781,7 @@
   </cheat>
 </cartridge>
 <cartridge sha256="e9fae4c2e171a1fc4f2bd800abd9e42750aaf7a4db9e40c5b9142e15029500bd">
-  <name>Ultraman - Towards the Future (USA)</name>
+  <name>Ultraman (USA)</name>
   <cheat enable="false">
     <description>Infinite health</description>
     <code>4ABA-67DF</code>
@@ -100840,7 +100891,7 @@
   </cheat>
 </cartridge>
 <cartridge sha256="64bc4707f422661a66618088887e2363a5f896ea683c58984fffd96dd21ab5f0">
-  <name>Uncharted Waters - New Horizons (USA)</name>
+  <name>New Horizons (USA)</name>
   <cheat enable="false">
     <description>Joao starts with 156 Leadership instead of 78</description>
     <code>BA6D-873D</code>
@@ -102088,6 +102139,19 @@
 <cartridge sha256="c8f159e2625ac8078535c06857ea28475706da45df494de8e46f50888272cf71">
   <name>Wild Guns (USA)</name>
   <cheat enable="false">
+    <description>Invincibility</description>
+    <code>4061-DFAA</code>
+  </cheat>
+  <cheat enable="false">
+    <description>Hit anywhere</description>
+    <code>40B4-0DDF</code>
+    <code>40B4-070F</code>
+    <code>40B7-0FAF</code>
+    <code>40BD-AD0A</code>
+    <code>40BF-0F6F</code>
+    <code>6DBE-DDDF</code>
+  </cheat>
+  <cheat enable="false">
     <description>Infinite specials</description>
     <code>7E1FA0:05</code>
   </cheat>
@@ -102284,7 +102348,7 @@
   </cheat>
 </cartridge>
 <cartridge sha256="9c2b458e8fda5cb437a4c6d28fb430e45c4cfef98420c40546b8e08563a4fc7d">
-  <name>Wolfenstein 3D (USA)</name>
+  <name>Wolfenstein 3-D (USA)</name>
   <cheat enable="false">
     <description>Infinite health</description>
     <code>C2CC-5D64</code>
@@ -102354,6 +102418,22 @@
   <cheat enable="false">
     <description>No enemies</description>
     <code>69E9-3A1F</code>
+  </cheat>
+  <cheat enable="false">
+    <description>Hit anywhere + one hit kills</description>
+    <code>4060-340D</code>
+    <code>4060-3D6D</code>
+    <code>4061-37DD</code>
+    <code>4061-3DDD</code>
+    <code>4064-3D6D</code>
+    <code>4064-376D</code>
+    <code>4065-37AD</code>
+    <code>4069-340D</code>
+    <code>4069-3D6D</code>
+  </cheat>
+  <cheat enable="false">
+    <description>One hit kills</description>
+    <code>4065-37AD</code>
   </cheat>
   <cheat enable="false">
     <description>Invincibility</description>
@@ -102763,6 +102843,11 @@
   <cheat enable="false">
     <description>Infinite lives - mission mode</description>
     <code>C2D7-5F64</code>
+  </cheat>
+  <cheat enable="false">
+    <description>Hit anywhere</description>
+    <code>40E3-5766</code>
+    <code>6DEF-84D6</code>
   </cheat>
   <cheat enable="false">
     <description>Easy specials (press X)</description>
@@ -103210,7 +103295,7 @@
     <code>EE8E-00BE</code>
   </cheat>
   <cheat enable="false">
-    <description>Invincibiltiy (alt)</description>
+    <description>Invincibility (alt)</description>
     <code>7E1AFC:08</code>
   </cheat>
   <cheat enable="false">
@@ -104424,6 +104509,14 @@
   <cheat enable="false">
     <description>Infinite time</description>
     <code>BE6-C4E-3BE</code>
+  </cheat>
+</cartridge>
+<cartridge sha256="a52b036d637b59950749de679208785480b8ad2d5e95c0ea2a6f638750cc645e">
+  <name>Amazing Spider-Man, The (USA, Europe)</name>
+  <cheat enable="false">
+    <description>Hit anywhere</description>
+    <code>008-EAD-809</code>
+    <code>008-8CD-7FF</code>
   </cheat>
 </cartridge>
 <cartridge sha256="3f0688ed9219c44ce133647f0668cde50fdcba7ed8f04c34c3a0fc5ce596bfe5">
@@ -108178,7 +108271,7 @@
   </cheat>
 </cartridge>
 <cartridge sha256="fedb0c8100987cb466c116a3ac3a6572675b6aa721a7a8930cec1ae39f677bc6">
-  <name>Mickey's Chase (USA)</name>
+  <name>Mickey's Dangerous Chase (USA)</name>
   <cheat enable="false">
     <description>Invincibility after first hit</description>
     <code>001-A8E-E6E</code>
@@ -109521,6 +109614,13 @@
     <code>FA8-C1B-E61</code>
   </cheat>
 </cartridge>
+<cartridge sha256="2b059983d79efc5a4f77b41a4efbad68c65ae259715dc008f20a3c11226a943b">
+  <name>R-Type II (Europe)</name>
+  <cheat enable="false">
+    <description>Invincibility</description>
+    <code>C9F-3FE-081</code>
+  </cheat>
+</cartridge>
 <cartridge sha256="e0a07f84198e062c9ba8d617ef15679ba044f96510e5c62309ea1f743499a2c9">
   <name>Samurai Shodown (USA, Europe) (SGB Enhanced)</name>
   <cheat enable="false">
@@ -110643,6 +110743,44 @@
 <cartridge sha256="8730c69cb2aa82260ac07257e0e29d61f598de2f8fa3e65da1d694790fa5db16">
   <name>Street Fighter II (USA, Europe) (Rev A) (SGB Enhanced)</name>
   <cheat enable="false">
+    <description>Invincibility</description>
+    <code>18A-8ED-4CA</code>
+    <code>18A-9FD-4CA</code>
+    <code>18A-D2D-4CA</code>
+  </cheat>
+  <cheat enable="false">
+    <description>Hit anywhere - P1</description>
+    <code>00A-B1D-F7E</code>
+  </cheat>
+  <cheat enable="false">
+    <description>Hit anywhere - P2</description>
+    <code>00A-8FD-F7E</code>
+  </cheat>
+  <cheat enable="false">
+    <description>Fireball kills</description>
+    <code>885-838-B3E</code>
+  </cheat>
+  <cheat enable="false">
+    <description>Nobody takes damage from anything but throws/grabs</description>
+    <code>009-249-3B7</code>
+  </cheat>
+  <cheat enable="false">
+    <description>Opponent can't win any normal rounds</description>
+    <code>00B-938-E6D</code>
+  </cheat>
+  <cheat enable="false">
+    <description>Allows you to select a higher skill level</description>
+    <code>093-85A-F72</code>
+  </cheat>
+  <cheat enable="false">
+    <description>Fireball doesn't do any damage</description>
+    <code>005-838-B3E</code>
+  </cheat>
+  <cheat enable="false">
+    <description>Fireball does more damage</description>
+    <code>405-838-B3E</code>
+  </cheat>
+  <cheat enable="false">
     <description>Player one starts with very little energy</description>
     <code>013-F89-2AB</code>
   </cheat>
@@ -110685,30 +110823,6 @@
   <cheat enable="false">
     <description>Start with seconds on the timer</description>
     <code>884-619-6E7</code>
-  </cheat>
-  <cheat enable="false">
-    <description>Allows you to select a higher skill level</description>
-    <code>093-85A-F72</code>
-  </cheat>
-  <cheat enable="false">
-    <description>Opponent can't win any normal rounds</description>
-    <code>00B-938-E6D</code>
-  </cheat>
-  <cheat enable="false">
-    <description>Fireball doesn't do any damage</description>
-    <code>005-838-B3E</code>
-  </cheat>
-  <cheat enable="false">
-    <description>Fireball does more damage</description>
-    <code>405-838-B3E</code>
-  </cheat>
-  <cheat enable="false">
-    <description>Fireball kills</description>
-    <code>885-838-B3E</code>
-  </cheat>
-  <cheat enable="false">
-    <description>Nobody takes damage from anything but throws/grabs</description>
-    <code>009-249-3B7</code>
   </cheat>
   <cheat enable="false">
     <description>Ryu - Foot sweep doesn't do any damage</description>

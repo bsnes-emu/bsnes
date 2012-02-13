@@ -29,6 +29,7 @@ using namespace ruby;
 #include "smp/smp.hpp"
 #include "memory/memory.hpp"
 #include "breakpoint/breakpoint.hpp"
+#include "properties/properties.hpp"
 #include "vram/vram.hpp"
 extern uint8_t laevateinnLogo[121905];
 

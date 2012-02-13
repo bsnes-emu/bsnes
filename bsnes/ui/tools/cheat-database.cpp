@@ -1,4 +1,4 @@
-CheatDatabase *cheatDatabase = 0;
+CheatDatabase *cheatDatabase = nullptr;
 
 CheatDatabase::CheatDatabase() {
   setGeometry({ 128, 128, 640, 400 });

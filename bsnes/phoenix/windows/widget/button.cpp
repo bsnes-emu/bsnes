@@ -1,3 +1,22 @@
+#ifndef Button_SetImageList
+  //MinGW/32-bit has painfully outdated platform headers ...
+  typedef struct {
+    HIMAGELIST himl;
+    RECT margin;
+    UINT uAlign;
+  } BUTTON_IMAGELIST, *PBUTTON_IMAGELIST;
+
+  #define BUTTON_IMAGELIST_ALIGN_LEFT 0
+  #define BUTTON_IMAGELIST_ALIGN_RIGHT 1
+  #define BUTTON_IMAGELIST_ALIGN_TOP 2
+  #define BUTTON_IMAGELIST_ALIGN_BOTTOM 3
+  #define BUTTON_IMAGELIST_ALIGN_CENTER 4
+
+  #define BCM_FIRST 0x1600
+  #define BCM_SETIMAGELIST (BCM_FIRST+2)
+  #define Button_SetImageList(hwnd, pbuttonImagelist) (WINBOOL)SNDMSG((hwnd),BCM_SETIMAGELIST,0,(LPARAM)(pbuttonImagelist))
+#endif
+
 Geometry pButton::minimumGeometry() {
   Geometry geometry = pFont::geometry(hfont, button.state.text);
 

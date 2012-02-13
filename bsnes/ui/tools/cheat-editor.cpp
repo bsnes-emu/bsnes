@@ -1,4 +1,4 @@
-CheatEditor *cheatEditor = 0;
+CheatEditor *cheatEditor = nullptr;
 
 CheatEditor::CheatEditor() {
   setTitle("Cheat Editor");

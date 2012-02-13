@@ -3,7 +3,7 @@
 #include "snes.cpp"
 #include "gameboy.cpp"
 #include "user-interface.cpp"
-InputManager *inputManager = 0;
+InputManager *inputManager = nullptr;
 
 void AbstractInput::attach(const string &primaryName, const string &secondaryName, const string &tertiaryName) {
   string name = { primaryName, "::", secondaryName, "::", tertiaryName, "::", this->name };

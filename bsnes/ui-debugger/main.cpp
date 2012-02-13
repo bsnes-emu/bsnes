@@ -61,6 +61,7 @@ Application::Application(int argc, char **argv) {
   smpRegisterEditor = new SMPRegisterEditor;
   memoryEditor = new MemoryEditor;
   breakpointEditor = new BreakpointEditor;
+  propertiesViewer = new PropertiesViewer;
   vramViewer = new VRAMViewer;
 
   windowManager->loadGeometry();
@@ -79,6 +80,7 @@ Application::Application(int argc, char **argv) {
   cpuDebugger->updateDisassembly();
   smpDebugger->updateDisassembly();
   memoryEditor->selectSource();
+  propertiesViewer->updateProperties();
   vramViewer->updateTiles();
 
   while(quit == false) {
@@ -93,6 +95,7 @@ Application::Application(int argc, char **argv) {
 
 Application::~Application() {
   delete vramViewer;
+  delete propertiesViewer;
   delete breakpointEditor;
   delete memoryEditor;
   delete smpRegisterEditor;

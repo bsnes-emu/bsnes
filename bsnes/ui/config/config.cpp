@@ -1,5 +1,5 @@
 #include "../base.hpp"
-Config *config = 0;
+Config *config = nullptr;
 
 Config::Config() {
   attach(video.driver = "", "Video::Driver");

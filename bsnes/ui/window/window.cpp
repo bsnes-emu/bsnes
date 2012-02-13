@@ -1,5 +1,5 @@
 #include "../base.hpp"
-WindowManager *windowManager = 0;
+WindowManager *windowManager = nullptr;
 
 void WindowManager::append(Window *window, const string &name) {
   windowList.append({ window, name, geometry(window->geometry()) });

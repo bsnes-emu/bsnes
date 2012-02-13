@@ -14,7 +14,7 @@ struct BreakpointEditor : Window {
 
   struct Breakpoint {
     enum : unsigned { Read, Write, Exec };
-    enum : unsigned { CPU, APU, VRAM, OAM, CGRAM };
+    enum : unsigned { CPU, SMP, VRAM, OAM, CGRAM };
     unsigned id;
     bool compare;
     unsigned addr;
@@ -26,9 +26,9 @@ struct BreakpointEditor : Window {
   vector<Breakpoint> breakpointReadCPU;
   vector<Breakpoint> breakpointWriteCPU;
   vector<Breakpoint> breakpointExecCPU;
-  vector<Breakpoint> breakpointReadAPU;
-  vector<Breakpoint> breakpointWriteAPU;
-  vector<Breakpoint> breakpointExecAPU;
+  vector<Breakpoint> breakpointReadSMP;
+  vector<Breakpoint> breakpointWriteSMP;
+  vector<Breakpoint> breakpointExecSMP;
   vector<Breakpoint> breakpointReadVRAM;
   vector<Breakpoint> breakpointWriteVRAM;
   vector<Breakpoint> breakpointReadOAM;
@@ -41,9 +41,9 @@ struct BreakpointEditor : Window {
   bool testWriteCPU(uint24 addr, uint8 data);
   bool testExecCPU(uint24 addr);
 
-  bool testReadAPU(uint16 addr);
-  bool testWriteAPU(uint16 addr, uint8 data);
-  bool testExecAPU(uint16 addr);
+  bool testReadSMP(uint16 addr);
+  bool testWriteSMP(uint16 addr, uint8 data);
+  bool testExecSMP(uint16 addr);
 
   bool testReadVRAM(uint16 addr);
   bool testWriteVRAM(uint16 addr, uint8 data);

@@ -3,7 +3,7 @@
 #include "audio.cpp"
 #include "input.cpp"
 #include "advanced.cpp"
-SettingsWindow *settingsWindow = 0;
+SettingsWindow *settingsWindow = nullptr;
 
 void SettingsLayout::append(Sizable &sizable, const Size &size, unsigned spacing) {
   layout.append(sizable, size, spacing);

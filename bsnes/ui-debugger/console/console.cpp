@@ -42,10 +42,11 @@ ConsoleWindow::ConsoleWindow() {
     menuWindowsSMPDebugger.setText("SMP Debugger");
     menuWindowsMemoryEditor.setText("Memory Editor");
     menuWindowsBreakpointEditor.setText("Breakpoint Editor");
+    menuWindowsPropertiesViewer.setText("Properties Viewer");
     menuWindowsVRAMViewer.setText("VRAM Viewer");
     menuWindows.append(menuWindowsVideoWindow, menuWindowsSeparator1, menuWindowsCPUDebugger,
       menuWindowsSMPDebugger, menuWindowsSeparator2, menuWindowsMemoryEditor, menuWindowsBreakpointEditor,
-      menuWindowsVRAMViewer);
+      menuWindowsPropertiesViewer, menuWindowsVRAMViewer);
   append(menuWindows);
 
   menuState.setText("&State");
@@ -140,6 +141,11 @@ ConsoleWindow::ConsoleWindow() {
   menuWindowsBreakpointEditor.onActivate = [&] {
     breakpointEditor->setVisible();
     breakpointEditor->setFocused();
+  };
+
+  menuWindowsPropertiesViewer.onActivate = [&] {
+    propertiesViewer->setVisible();
+    propertiesViewer->setFocused();
   };
 
   menuWindowsVRAMViewer.onActivate = [&] {
