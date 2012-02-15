@@ -4,7 +4,7 @@ struct InterfaceSNES : InterfaceCore, SNES::Interface {
   void setController(bool port, unsigned device);
 
   bool cartridgeLoaded();
-  bool loadFile(string &filename, uint8_t *&data, unsigned &size);
+  bool loadCartridge(const string &filename, CartridgePath &cartridge, uint8_t *&data, unsigned &size);
   bool loadCartridge(string basename);
   bool loadSatellaviewSlottedCartridge(string basename, string slotname);
   bool loadSatellaviewCartridge(string basename, string slotname);
@@ -16,6 +16,7 @@ struct InterfaceSNES : InterfaceCore, SNES::Interface {
   void reset();
   void run();
 
+  string memoryName(SNES::Cartridge::NonVolatileRAM &memory);
   void loadMemory();
   void saveMemory();
 

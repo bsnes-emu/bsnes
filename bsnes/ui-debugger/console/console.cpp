@@ -86,7 +86,7 @@ ConsoleWindow::ConsoleWindow() {
   onClose = [] { application->quit = true; };
 
   menuEmulationReloadCartridge.onActivate = [&] {
-    interface->loadCartridge(interface->fileName);
+    interface->loadCartridge(interface->pathName);
   };
 
   menuEmulationPowerCycle.onActivate = [&] {

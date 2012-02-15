@@ -1,10 +1,10 @@
 #include "../base.hpp"
 Interface *interface = nullptr;
 
-bool Interface::loadCartridge(const string &filename) {
+bool Interface::loadCartridge(const string &foldername) {
   uint8_t *data;
   unsigned size;
-  if(file::read(filename, data, size) == false) return false;
+  if(file::read({ foldername, "program.rom" }, data, size) == false) return false;
 
   if(SNES::cartridge.loaded()) {
     saveMemory();
@@ -12,23 +12,25 @@ bool Interface::loadCartridge(const string &filename) {
     debugger->print("Cartridge unloaded\n");
   }
 
-  fileName = filename;
-  baseName = nall::basename(fileName);
-  pathName = dir(baseName);
+  pathName = foldername;
   mkdir(string(pathName, "debug/"), 0755);
 
   string markup;
-  markup.readfile({ baseName, ".xml" });
+  markup.readfile({ pathName, "manifest.xml" });
   if(markup.empty()) markup = SnesCartridge(data, size).markup;
 
   SNES::cartridge.rom.copy(data, size);
   SNES::cartridge.load(SNES::Cartridge::Mode::Normal, markup);
   SNES::system.power();
 
+  string name = pathName;
+  name.rtrim<1>("/");
+  name = notdir(name);
+
   delete[] data;
-  videoWindow->setTitle(notdir(baseName));
+  videoWindow->setTitle(name);
   SNES::video.generate(SNES::Video::Format::RGB24);
-  debugger->print("Loaded ", fileName, "\n");
+  debugger->print("Loaded ", pathName, "program.rom\n");
   loadMemory();
   debugger->print(markup, "\n");
   debugger->suspend();
@@ -38,7 +40,7 @@ bool Interface::loadCartridge(const string &filename) {
 void Interface::loadMemory() {
   for(auto &memory : SNES::cartridge.nvram) {
     if(memory.size == 0) continue;
-    string filename = { baseName, memory.id };
+    string filename = { pathName, memory.id };
     uint8_t *data;
     unsigned size;
     if(file::read(filename, data, size)) {
@@ -54,7 +56,7 @@ void Interface::loadMemory() {
 void Interface::saveMemory() {
   for(auto &memory : SNES::cartridge.nvram) {
     if(memory.size == 0) continue;
-    string filename = { baseName, memory.id };
+    string filename = { pathName, memory.id };
     if(file::write(filename, memory.data, memory.size)) {
       debugger->print("Saved ", filename, "\n");
     }
@@ -64,7 +66,7 @@ void Interface::saveMemory() {
 }
 
 bool Interface::loadState(unsigned slot) {
-  string filename = { baseName, "-", slot, ".bst" };
+  string filename = { pathName, "state-", slot, ".bst" };
   uint8_t *data;
   unsigned size;
   if(file::read(filename, data, size) == false) return false;
@@ -78,7 +80,7 @@ bool Interface::loadState(unsigned slot) {
 bool Interface::saveState(unsigned slot) {
   SNES::system.runtosave();
   serializer s = SNES::system.serialize();
-  string filename = { baseName, "-", slot, ".bst" };
+  string filename = { pathName, "state-", slot, ".bst" };
   bool result = file::write(filename, s.data(), s.size());
   if(result) debugger->print("Saved state to ", filename, "\n");
   return result;
@@ -144,7 +146,7 @@ int16_t Interface::inputPoll(bool port, SNES::Input::Device device, unsigned ind
 }
 
 string Interface::path(SNES::Cartridge::Slot slot, const string &hint) {
-  return { baseName, hint };
+  return { pathName, hint };
 }
 
 void Interface::message(const string &text) {

@@ -27,38 +27,31 @@ bool InterfaceNES::loadCartridge(const string &filename) {
   unsigned size;
 
   if(filename.endswith("/")) {
-    string basename = filename;
-    basename.rtrim<1>("/");
-    basename.append("/", notdir(nall::basename(basename)));
-
-    if(file::exists({ basename, ".prg" }) && file::exists({ basename, ".chr" })) {
-      unsigned prgsize = file::size({ basename, ".prg" });
-      unsigned chrsize = file::size({ basename, ".chr" });
+    if(file::exists({ filename, "program.rom" }) && file::exists({ filename, "character.rom" })) {
+      unsigned prgsize = file::size({ filename, "program.rom" });
+      unsigned chrsize = file::size({ filename, "character.rom" });
       data = new uint8_t[size = prgsize + chrsize];
       nall::file fp;
-      fp.open({ basename, ".prg" }, file::mode::read);
+      fp.open({ filename, "program.rom" }, file::mode::read);
       fp.read(data, fp.size());
       fp.close();
-      fp.open({ basename, ".chr" }, file::mode::read);
+      fp.open({ filename, "character.rom" }, file::mode::read);
       fp.read(data + prgsize, fp.size());
       fp.close();
-    } else if(file::exists({ basename, ".fc" })) {
-      file::read({ basename, ".fc" }, data, size);
     } else {
       return false;
     }
-
-    interface->baseName = basename;
+    interface->base = { true, filename };
   } else {
     file::read(filename, data, size);
-    interface->baseName = nall::basename(filename);
+    interface->base = { false, nall::basename(filename) };
   }
 
   interface->unloadCartridge();
-  interface->applyPatch(interface->baseName, data, size);
+//interface->applyPatch(interface->base.filename("patch.bps", ".bps"), data, size);
 
   string markup;
-  markup.readfile({ interface->baseName, ".xml" });
+  markup.readfile(interface->base.filename("manifest.xml", ".xml"));
 
   NES::cartridge.load(markup, data, size);
   NES::system.power();
@@ -66,7 +59,7 @@ bool InterfaceNES::loadCartridge(const string &filename) {
 
   if(NES::cartridge.ram_size()) {
     filemap fp;
-    if(fp.open(string{ interface->baseName, ".sav" }, filemap::mode::read)) {
+    if(fp.open(interface->base.filename("program.ram", ".sav"), filemap::mode::read)) {
       memcpy(NES::cartridge.ram_data(), fp.data(), min(NES::cartridge.ram_size(), fp.size()));
     }
   }
@@ -78,10 +71,10 @@ bool InterfaceNES::loadCartridge(const string &filename) {
 
 void InterfaceNES::unloadCartridge() {
   if(NES::cartridge.ram_size()) {
-    file::write({ interface->baseName, ".sav" }, NES::cartridge.ram_data(), NES::cartridge.ram_size());
+    file::write(interface->base.filename("program.ram", ".sav"), NES::cartridge.ram_data(), NES::cartridge.ram_size());
   }
   NES::cartridge.unload();
-  interface->baseName = "";
+  interface->base.name = "";
 }
 
 //

@@ -30,29 +30,32 @@ bool InterfaceSNES::cartridgeLoaded() {
   return SNES::cartridge.loaded();
 }
 
-bool InterfaceSNES::loadFile(string &filename, uint8_t *&data, unsigned &size) {
+bool InterfaceSNES::loadCartridge(const string &filename, CartridgePath &cartridge, uint8_t *&data, unsigned &size) {
+  auto backup = cartridge;
+  string suffix;
   if(filename.endswith("/")) {
-    filename.rtrim<1>("/");
-    filename.append("/", notdir(filename));
+    cartridge = { true, filename };
+  } else {
+    suffix = { ".", extension(filename) };
+    cartridge = { false, nall::basename(filename) };
   }
-  if(file::read(filename, data, size) == false) return false;
-  filename = nall::basename(filename);
-  interface->applyPatch(filename, data, size);
+  if(file::read(cartridge.filename("program.rom", suffix), data, size) == false) {
+    cartridge = backup;
+    return false;
+  }
+//interface->applyPatch(filename, data, size);
   return true;
 }
 
 bool InterfaceSNES::loadCartridge(string basename) {
   uint8_t *data;
   unsigned size;
-  if(loadFile(basename, data, size) == false) return false;
-
+  if(loadCartridge(basename, interface->base, data, size) == false) return false;
   interface->unloadCartridge();
-  interface->baseName = basename;
-  interface->slotName = { basename };
 
   string markup;
-  markup.readfile({ interface->baseName, ".xml" });
-  if(markup == "") markup = SnesCartridge(data, size).markup;
+  markup.readfile(interface->base.filename("manifest.xml", ".xml"));
+  if(markup.empty()) markup = SnesCartridge(data, size).markup;
 
   SNES::cartridge.rom.copy(data, size);
   SNES::cartridge.load(SNES::Cartridge::Mode::Normal, markup);
@@ -69,17 +72,13 @@ bool InterfaceSNES::loadCartridge(string basename) {
 bool InterfaceSNES::loadSatellaviewSlottedCartridge(string basename, string slotname) {
   uint8_t *data[2];
   unsigned size[2];
-  if(loadFile(basename, data[0], size[0]) == false) return false;
-  loadFile(slotname, data[1], size[1]);
-
+  if(loadCartridge(basename, interface->base, data[0], size[0]) == false) return false;
+  loadCartridge(slotname, interface->slot(0), data[1], size[1]);
   interface->unloadCartridge();
-  interface->baseName = basename;
-  if(data[1]) interface->baseName.append("+", notdir(slotname));
-  interface->slotName = { basename, slotname };
 
   string markup;
-  markup.readfile({ interface->baseName, ".xml" });
-  if(markup == "") markup = SnesCartridge(data[0], size[0]).markup;
+  markup.readfile(interface->base.filename("manifest.xml", ".xml"));
+  if(markup.empty()) markup = SnesCartridge(data[0], size[0]).markup;
 
   SNES::cartridge.rom.copy(data[0], size[0]);
   if(data[1]) SNES::bsxflash.memory.copy(data[1], size[1]);
@@ -98,17 +97,13 @@ bool InterfaceSNES::loadSatellaviewSlottedCartridge(string basename, string slot
 bool InterfaceSNES::loadSatellaviewCartridge(string basename, string slotname) {
   uint8_t *data[2];
   unsigned size[2];
-  if(loadFile(basename, data[0], size[0]) == false) return false;
-  loadFile(slotname, data[1], size[1]);
-
+  if(loadCartridge(basename, interface->base, data[0], size[0]) == false) return false;
+  loadCartridge(slotname, interface->slot(0), data[1], size[1]);
   interface->unloadCartridge();
-  interface->baseName = basename;
-  if(data[1]) interface->baseName.append("+", notdir(slotname));
-  interface->slotName = { basename, slotname };
 
   string markup;
-  markup.readfile({ interface->baseName, ".xml" });
-  if(markup == "") markup = SnesCartridge(data[0], size[0]).markup;
+  markup.readfile(interface->base.filename("manifest.xml", ".xml"));
+  if(markup.empty()) markup = SnesCartridge(data[0], size[0]).markup;
 
   SNES::cartridge.rom.copy(data[0], size[0]);
   if(data[1]) SNES::bsxflash.memory.copy(data[1], size[1]);
@@ -127,20 +122,14 @@ bool InterfaceSNES::loadSatellaviewCartridge(string basename, string slotname) {
 bool InterfaceSNES::loadSufamiTurboCartridge(string basename, string slotAname, string slotBname) {
   uint8_t *data[3];
   unsigned size[3];
-  if(loadFile(basename, data[0], size[0]) == false) return false;
-  loadFile(slotAname, data[1], size[1]);
-  loadFile(slotBname, data[2], size[2]);
-
+  if(loadCartridge(basename, interface->base, data[0], size[0]) == false) return false;
+  loadCartridge(slotAname, interface->slot(0), data[1], size[1]);
+  loadCartridge(slotBname, interface->slot(1), data[2], size[2]);
   interface->unloadCartridge();
-  interface->baseName = basename;
-  if(data[1] && data[2]) interface->baseName = { slotAname, "+", notdir(slotBname) };
-  else if(data[1]) interface->baseName = slotAname;
-  else if(data[2]) interface->baseName = slotBname;
-  interface->slotName = { basename, slotAname, slotBname };
 
   string markup;
-  markup.readfile({ interface->baseName, ".xml" });
-  if(markup == "") markup = SnesCartridge(data[0], size[0]).markup;
+  markup.readfile(interface->base.filename("manifest.xml", ".xml"));
+  if(markup.empty()) markup = SnesCartridge(data[0], size[0]).markup;
 
   SNES::cartridge.rom.copy(data[0], size[0]);
   if(data[1]) SNES::sufamiturbo.slotA.rom.copy(data[1], size[1]);
@@ -161,21 +150,17 @@ bool InterfaceSNES::loadSufamiTurboCartridge(string basename, string slotAname, 
 bool InterfaceSNES::loadSuperGameBoyCartridge(string basename, string slotname) {
   uint8_t *data[2];
   unsigned size[2];
-  if(loadFile(basename, data[0], size[0]) == false) return false;
-  loadFile(slotname, data[1], size[1]);
-
+  if(loadCartridge(basename, interface->base, data[0], size[0]) == false) return false;
+  loadCartridge(slotname, interface->slot(0), data[1], size[1]);
   interface->unloadCartridge();
-  interface->baseName = basename;
-  if(data[1]) interface->baseName = slotname;
-  interface->slotName = { basename, slotname };
 
   string markup;
-  markup.readfile({ interface->baseName, ".xml" });
-  if(markup == "") markup = SnesCartridge(data[0], size[0]).markup;
+  markup.readfile(interface->base.filename("manifest.xml", ".xml"));
+  if(markup.empty()) markup = SnesCartridge(data[0], size[0]).markup;
 
   string gbMarkup;
-  gbMarkup.readfile({ nall::basename(slotname), ".xml" });
-  if(gbMarkup == "") gbMarkup = GameBoyCartridge(data[1], size[1]).markup;
+  gbMarkup.readfile(interface->slot[0].filename("manifest.xml", ".xml"));
+  if(gbMarkup.empty()) gbMarkup = GameBoyCartridge(data[1], size[1]).markup;
 
   SNES::cartridge.rom.copy(data[0], size[0]);
   GameBoy::cartridge.load(GameBoy::System::Revision::SuperGameBoy, gbMarkup, data[1], size[1]);
@@ -194,7 +179,8 @@ bool InterfaceSNES::loadSuperGameBoyCartridge(string basename, string slotname) 
 void InterfaceSNES::unloadCartridge() {
   saveMemory();
   SNES::cartridge.unload();
-  interface->baseName = "";
+  interface->base.name = "";
+  interface->slot.reset();
 }
 
 void InterfaceSNES::power() {
@@ -209,14 +195,29 @@ void InterfaceSNES::run() {
   SNES::system.run();
 }
 
-//slot[] array = Cartridge::Slot to slot# conversion:
-//{ Base, Bsx, SufamiTurbo, SufamiTurboA, SufamiTurboB, GameBoy }
+string InterfaceSNES::memoryName(SNES::Cartridge::NonVolatileRAM &memory) {
+  if(memory.slot == SNES::Cartridge::Slot::Base) {
+    if(memory.id == "program.ram") return interface->base.filename("program.ram", ".srm");
+    if(memory.id == "upd96050.ram") return interface->base.filename("upd96050.ram", ".nec");
+    if(memory.id == "bsx.ram") return interface->base.filename("bsx.ram", ".bss");
+    if(memory.id == "bsx.psram") return interface->base.filename("bsx.psram", ".bsp");
+  }
+  if(memory.slot == SNES::Cartridge::Slot::SufamiTurboA) {
+    if(memory.id == "program.ram") return interface->slot[0].filename("program.ram", ".sts");
+  }
+  if(memory.slot == SNES::Cartridge::Slot::SufamiTurboB) {
+    if(memory.id == "program.ram") return interface->slot[1].filename("program.ram", ".sts");
+  }
+  return "";
+}
 
 void InterfaceSNES::loadMemory() {
-  static unsigned slot[] = { 0, 0, 0, 1, 2, 1 };
   for(auto &memory : SNES::cartridge.nvram) {
     if(memory.size == 0) continue;
-    string filename = { interface->slotName[slot[(unsigned)memory.slot]], memory.id };
+
+    string filename = memoryName(memory);
+    if(filename.empty()) continue;
+
     uint8_t *data;
     unsigned size;
     if(file::read(filename, data, size)) {
@@ -227,10 +228,12 @@ void InterfaceSNES::loadMemory() {
 }
 
 void InterfaceSNES::saveMemory() {
-  static unsigned slot[] = { 0, 0, 0, 1, 2, 1 };
   for(auto &memory : SNES::cartridge.nvram) {
     if(memory.size == 0) continue;
-    string filename = { interface->slotName[slot[(unsigned)memory.slot]], memory.id };
+
+    string filename = memoryName(memory);
+    if(filename.empty()) continue;
+
     file::write(filename, memory.data, memory.size);
   }
 }
@@ -356,8 +359,17 @@ int16_t InterfaceSNES::inputPoll(bool port, SNES::Input::Device device, unsigned
 }
 
 string InterfaceSNES::path(SNES::Cartridge::Slot slot, const string &hint) {
-  static unsigned index[] = { 0, 0, 0, 1, 2, 1 };
-  return { interface->slotName[index[(unsigned)slot]], hint };
+  if(slot == SNES::Cartridge::Slot::Base) {
+    if(hint == "msu1.rom") return interface->base.filename("msu1.rom", ".msu");
+    if(hint.wildcard("track-*.pcm")) {
+      string track = hint;
+      track.trim<1>("track-", ".pcm");
+      return interface->base.filename(hint, { "-", decimal(track), ".pcm" });
+    }
+    if(hint == "serial.so") return { dir(interface->base.name), "libserial.so" };
+    if(hint.endswith(".rom")) return { dir(interface->base.name), hint };
+  }
+  return { dir(interface->base.name), hint };
 }
 
 void InterfaceSNES::message(const string &text) {

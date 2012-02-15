@@ -223,7 +223,7 @@ void Cartridge::parse_markup_necdsp(XML::Node &root) {
   string firmware = root["firmware"].data;
   string sha256 = root["sha256"].data;
 
-  string path = { dir(interface->path(Slot::Base, ".dsp")), firmware };
+  string path = interface->path(Slot::Base, firmware);
   unsigned promsize = (necdsp.revision == NECDSP::Revision::uPD7725 ? 2048 : 16384);
   unsigned dromsize = (necdsp.revision == NECDSP::Revision::uPD7725 ? 1024 :  2048);
   unsigned filesize = promsize * 3 + dromsize * 2;
@@ -288,7 +288,7 @@ void Cartridge::parse_markup_hitachidsp(XML::Node &root) {
   string firmware = root["firmware"].data;
   string sha256 = root["sha256"].data;
 
-  string path = { dir(interface->path(Slot::Base, ".dsp")), firmware };
+  string path = interface->path(Slot::Base, firmware);
   file fp;
   if(fp.open(path, file::mode::read) == false) {
     interface->message({ "Warning: Hitachi DSP firmware ", firmware, " is missing." });
@@ -496,7 +496,7 @@ void Cartridge::parse_markup_setarisc(XML::Node &root) {
 
 void Cartridge::parse_markup_msu1(XML::Node &root) {
   if(root.exists() == false) {
-    has_msu1 = file::exists(interface->path(Cartridge::Slot::Base, ".msu"));
+    has_msu1 = file::exists(interface->path(Cartridge::Slot::Base, "msu1.rom"));
     if(has_msu1) {
       Mapping m({ &MSU1::mmio_read, &msu1 }, { &MSU1::mmio_write, &msu1 });
       m.banklo = 0x00, m.bankhi = 0x3f, m.addrlo = 0x2000, m.addrhi = 0x2007;

@@ -9,6 +9,12 @@ struct InterfaceCore {
   virtual bool unserialize(serializer&) = 0;
 };
 
+struct CartridgePath {
+  bool folder;
+  string name;
+  string filename(const string &folderName, const string &fileName) const;
+};
+
 #include "nes/nes.hpp"
 #include "snes/snes.hpp"
 #include "gameboy/gameboy.hpp"
@@ -58,8 +64,11 @@ struct Interface : property<Interface> {
   bool applyPatch(const string &filename, uint8_t *&data, unsigned &size);
   void videoRefresh(const uint32_t *input, unsigned inputPitch, unsigned width, unsigned height);
 
+  CartridgePath base;
+  vector<CartridgePath> slot;
+
+  //deprecated
   string baseName;  // = "/path/to/cartridge" (no extension)
-  lstring slotName;
 
   InterfaceCore *core;
   InterfaceNES nes;

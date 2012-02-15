@@ -145,7 +145,7 @@ SnesCartridge::SnesCartridge(const uint8_t *data, unsigned size) {
   );
 
   else if(has_cx4) markup.append(
-    "  <hitachidsp model='HG51B169' frequency='20000000' firmware='cx4.bin' sha256='ae8d4d1961b93421ff00b3caa1d0f0ce7783e749772a3369c36b3dbf0d37ef18'>\n"
+    "  <hitachidsp model='HG51B169' frequency='20000000' firmware='cx4.rom' sha256='ae8d4d1961b93421ff00b3caa1d0f0ce7783e749772a3369c36b3dbf0d37ef18'>\n"
     "    <rom>\n"
     "      <map mode='linear' address='00-7f:8000-ffff'/>\n"
     "      <map mode='linear' address='80-ff:8000-ffff'/>\n"
@@ -420,7 +420,7 @@ SnesCartridge::SnesCartridge(const uint8_t *data, unsigned size) {
   );
 
   if(has_dsp1) {
-    markup.append("  <necdsp model='uPD7725' frequency='8000000' firmware='dsp1b.bin' sha256='4d42db0f36faef263d6b93f508e8c1c4ae8fc2605fd35e3390ecc02905cd420c'>\n");
+    markup.append("  <necdsp model='uPD7725' frequency='8000000' firmware='dsp1b.rom' sha256='4d42db0f36faef263d6b93f508e8c1c4ae8fc2605fd35e3390ecc02905cd420c'>\n");
     if(dsp1_mapper == DSP1LoROM1MB) markup.append(
       "    <dr>\n"
       "      <map address='20-3f:8000-bfff'/>\n"
@@ -455,7 +455,7 @@ SnesCartridge::SnesCartridge(const uint8_t *data, unsigned size) {
   }
 
   if(has_dsp2) markup.append(
-    "  <necdsp model='uPD7725' frequency='8000000' firmware='dsp2.bin' sha256='5efbdf96ed0652790855225964f3e90e6a4d466cfa64df25b110933c6cf94ea1'>\n"
+    "  <necdsp model='uPD7725' frequency='8000000' firmware='dsp2.rom' sha256='5efbdf96ed0652790855225964f3e90e6a4d466cfa64df25b110933c6cf94ea1'>\n"
     "    <dr>\n"
     "      <map address='20-3f:8000-bfff'/>\n"
     "      <map address='a0-bf:8000-bfff'/>\n"
@@ -468,7 +468,7 @@ SnesCartridge::SnesCartridge(const uint8_t *data, unsigned size) {
   );
 
   if(has_dsp3) markup.append(
-    "  <necdsp model='uPD7725' frequency='8000000' firmware='dsp3.bin' sha256='2e635f72e4d4681148bc35429421c9b946e4f407590e74e31b93b8987b63ba90'>\n"
+    "  <necdsp model='uPD7725' frequency='8000000' firmware='dsp3.rom' sha256='2e635f72e4d4681148bc35429421c9b946e4f407590e74e31b93b8987b63ba90'>\n"
     "    <dr>\n"
     "      <map address='20-3f:8000-bfff'/>\n"
     "      <map address='a0-bf:8000-bfff'/>\n"
@@ -481,7 +481,7 @@ SnesCartridge::SnesCartridge(const uint8_t *data, unsigned size) {
   );
 
   if(has_dsp4) markup.append(
-    "  <necdsp model='uPD7725' frequency='8000000' firmware='dsp4.bin' sha256='63ede17322541c191ed1fdf683872554a0a57306496afc43c59de7c01a6e764a'>\n"
+    "  <necdsp model='uPD7725' frequency='8000000' firmware='dsp4.rom' sha256='63ede17322541c191ed1fdf683872554a0a57306496afc43c59de7c01a6e764a'>\n"
     "    <dr>\n"
     "      <map address='30-3f:8000-bfff'/>\n"
     "      <map address='b0-bf:8000-bfff'/>\n"
@@ -494,7 +494,7 @@ SnesCartridge::SnesCartridge(const uint8_t *data, unsigned size) {
   );
 
   if(has_st010) markup.append(
-    "  <necdsp model='uPD96050' frequency='10000000' firmware='st0010.bin' sha256='55c697e864562445621cdf8a7bf6e84ae91361e393d382a3704e9aa55559041e'>\n"
+    "  <necdsp model='uPD96050' frequency='10000000' firmware='st0010.rom' sha256='55c697e864562445621cdf8a7bf6e84ae91361e393d382a3704e9aa55559041e'>\n"
     "    <dr>\n"
     "      <map address='60:0000'/>\n"
     "      <map address='e0:0000'/>\n"
@@ -511,7 +511,7 @@ SnesCartridge::SnesCartridge(const uint8_t *data, unsigned size) {
   );
 
   if(has_st011) markup.append(
-    "  <necdsp model='uPD96050' frequency='15000000' firmware='st0011.bin' sha256='651b82a1e26c4fa8dd549e91e7f923012ed2ca54c1d9fd858655ab30679c2f0e'>\n"
+    "  <necdsp model='uPD96050' frequency='15000000' firmware='st0011.rom' sha256='651b82a1e26c4fa8dd549e91e7f923012ed2ca54c1d9fd858655ab30679c2f0e'>\n"
     "    <dr>\n"
     "      <map address='60:0000'/>\n"
     "      <map address='e0:0000'/>\n"

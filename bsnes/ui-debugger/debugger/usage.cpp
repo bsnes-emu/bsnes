@@ -20,7 +20,7 @@ void Debugger::loadUsage() {
   //then it is possible that the memory map has changed.
   //will print invalidation message when files do not exist as well.
 
-  if(file::timestamp(interface->fileName, file::time::modify) >=
+  if(file::timestamp({ interface->pathName, "program.rom"     }, file::time::modify) >=
      file::timestamp({ interface->pathName, "debug/usage.cpu" }, file::time::modify)
   ) {
     print("CPU usage invalidated\n");
@@ -31,7 +31,7 @@ void Debugger::loadUsage() {
     }
   }
 
-  if(file::timestamp(interface->fileName, file::time::modify) >=
+  if(file::timestamp({ interface->pathName, "program.rom"     }, file::time::modify) >=
      file::timestamp({ interface->pathName, "debug/usage.apu" }, file::time::modify)
   ) {
     print("APU usage invalidated\n");

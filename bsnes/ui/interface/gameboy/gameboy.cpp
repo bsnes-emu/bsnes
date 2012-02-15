@@ -12,21 +12,18 @@ bool InterfaceGameBoy::loadCartridge(GameBoy::System::Revision revision, const s
   unsigned size;
 
   if(filename.endswith("/")) {
-    string basename = filename;
-    basename.rtrim<1>("/");
-    basename.append("/", notdir(basename));
-    if(file::read(basename, data, size) == false) return false;
-    interface->baseName = nall::basename(basename);
+    if(file::read({ filename, "program.rom" }, data, size) == false) return false;
+    interface->base = { true, filename };
   } else {
     if(file::read(filename, data, size) == false) return false;
-    interface->baseName = nall::basename(filename);
+    interface->base.name = { false, nall::basename(filename) };
   }
 
   interface->unloadCartridge();
-  interface->applyPatch(interface->baseName, data, size);
+//interface->applyPatch(interface->baseName, data, size);
 
   string markup;
-  markup.readfile({ interface->baseName, ".xml" });
+  markup.readfile(interface->base.filename("manifest.xml", ".xml"));
 
   GameBoyCartridge info(data, size);
   if(markup.empty()) markup = info.markup;
@@ -37,7 +34,7 @@ bool InterfaceGameBoy::loadCartridge(GameBoy::System::Revision revision, const s
 
   if(GameBoy::cartridge.ramsize) {
     filemap fp;
-    if(fp.open(string{ interface->baseName, ".sav" }, filemap::mode::read)) {
+    if(fp.open(interface->base.filename("program.ram", ".sav"), filemap::mode::read)) {
       memcpy(GameBoy::cartridge.ramdata, fp.data(), min(GameBoy::cartridge.ramsize, fp.size()));
     }
   }
@@ -50,11 +47,11 @@ bool InterfaceGameBoy::loadCartridge(GameBoy::System::Revision revision, const s
 
 void InterfaceGameBoy::unloadCartridge() {
   if(GameBoy::cartridge.ramsize) {
-    file::write({ interface->baseName, ".sav" }, GameBoy::cartridge.ramdata, GameBoy::cartridge.ramsize);
+    file::write(interface->base.filename("program.ram", ".sav"), GameBoy::cartridge.ramdata, GameBoy::cartridge.ramsize);
   }
 
   GameBoy::cartridge.unload();
-  interface->baseName = "";
+  interface->base.name = "";
 }
 
 void InterfaceGameBoy::power() {

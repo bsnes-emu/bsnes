@@ -38,10 +38,7 @@ Application::Application(int argc, char **argv) {
 //if(!directory::exists(foldername)) foldername = "/media/sdb1/root/cartridges/The Legend of Zelda - A Link to the Past (US).sfc/";
   if(!directory::exists(foldername)) foldername = DialogWindow::folderSelect(Window::None, settings->folderpath);
   if(!foldername.endswith(".sfc/")) return;
-  lstring contents = directory::files(foldername, "*.sfc");
-  if(contents.size() != 1) return;
-  string filename = { foldername, contents[0] };
-  if(!file::exists(filename)) return;
+  if(!directory::exists(foldername)) return;
 
   //save path for later; remove cartridge name from path
   settings->folderpath = foldername;
@@ -76,7 +73,7 @@ Application::Application(int argc, char **argv) {
   audio.set(Audio::Synchronize, settings->synchronizeAudio);
   audio.set(Audio::Frequency, 32000u);
 
-  if(interface->loadCartridge(filename) == false) return;
+  if(interface->loadCartridge(foldername) == false) return;
   cpuDebugger->updateDisassembly();
   smpDebugger->updateDisassembly();
   memoryEditor->selectSource();

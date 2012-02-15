@@ -5,7 +5,6 @@
 #define SMP_CPP
 namespace SNES {
 
-#include "disassembler.cpp"
 SMP smp;
 
 #include "algorithms.cpp"

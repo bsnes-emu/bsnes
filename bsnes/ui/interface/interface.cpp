@@ -22,6 +22,12 @@ Filter::~Filter() {
   delete[] data;
 }
 
+string CartridgePath::filename(const string &folderName, const string &fileName) const {
+  if(name.empty()) return "";
+  if(folder) return { name, folderName };
+  return { name, fileName };
+}
+
 void Interface::bindControllers() {
   switch(mode()) {
   case Mode::NES:
@@ -79,8 +85,8 @@ void Interface::loadCartridge(Mode mode) {
   }
 
   bindControllers();
-  cheatEditor->load({ baseName, ".cht" });
-  stateManager->load({ baseName, ".bsa" }, 0u);
+  cheatEditor->load(base.filename("cheats.xml", ".cht"));
+  stateManager->load(base.filename("states.bsa", ".bsa"), 0u);
   dipSwitches->load();
   utility->showMessage({ "Loaded ", notdir(baseName) });
 }
@@ -97,8 +103,8 @@ bool Interface::loadCartridge(const string &filename) {
 void Interface::unloadCartridge() {
   if(cartridgeLoaded() == false) return;
   cheatDatabase->setVisible(false);
-  cheatEditor->save({ baseName, ".cht" });
-  stateManager->save({ baseName, ".bsa" }, 0u);
+  cheatEditor->save(base.filename("cheats.xml", ".cht"));
+  stateManager->save(base.filename("states.bsa", ".bsa"), 0u);
   setCheatCodes();
 
   switch(mode()) {
@@ -108,7 +114,6 @@ void Interface::unloadCartridge() {
   }
 
   interface->baseName = "";
-  interface->slotName.reset();
   utility->setMode(mode = Mode::None);
 }
 
@@ -140,7 +145,7 @@ bool Interface::unserialize(serializer &s) {
 }
 
 bool Interface::saveState(unsigned slot) {
-  string filename = { baseName, "-", slot, ".bst" };
+  string filename = base.filename({ "state-", slot, ".bst" }, { "-", slot, ".bst" });
   serializer s = serialize();
   bool result = file::write(filename, s.data(), s.size());
   utility->showMessage(result == true ? string{ "Saved state ", slot } : "Failed to save state");
@@ -148,7 +153,7 @@ bool Interface::saveState(unsigned slot) {
 }
 
 bool Interface::loadState(unsigned slot) {
-  string filename = { baseName, "-", slot, ".bst" };
+  string filename = base.filename({ "state-", slot, ".bst" }, { "-", slot, ".bst" });
   uint8_t *data;
   unsigned size;
   if(file::read(filename, data, size) == false) {
