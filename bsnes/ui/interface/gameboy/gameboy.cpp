@@ -16,11 +16,13 @@ bool InterfaceGameBoy::loadCartridge(GameBoy::System::Revision revision, const s
     interface->base = { true, filename };
   } else {
     if(file::read(filename, data, size) == false) return false;
-    interface->base.name = { false, nall::basename(filename) };
+    interface->base = { false, nall::basename(filename) };
   }
 
   interface->unloadCartridge();
-//interface->applyPatch(interface->baseName, data, size);
+  interface->game = interface->base;
+  interface->cartridgeTitle = interface->base.title();
+  interface->applyPatch(interface->base, data, size);
 
   string markup;
   markup.readfile(interface->base.filename("manifest.xml", ".xml"));

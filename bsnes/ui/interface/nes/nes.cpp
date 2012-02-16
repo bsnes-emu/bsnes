@@ -48,7 +48,9 @@ bool InterfaceNES::loadCartridge(const string &filename) {
   }
 
   interface->unloadCartridge();
-//interface->applyPatch(interface->base.filename("patch.bps", ".bps"), data, size);
+  interface->game = interface->base;
+  interface->cartridgeTitle = interface->base.title();
+  interface->applyPatch(interface->base, data, size);
 
   string markup;
   markup.readfile(interface->base.filename("manifest.xml", ".xml"));

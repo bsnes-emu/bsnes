@@ -13,6 +13,7 @@ struct CartridgePath {
   bool folder;
   string name;
   string filename(const string &folderName, const string &fileName) const;
+  string title() const;
 };
 
 #include "nes/nes.hpp"
@@ -61,14 +62,13 @@ struct Interface : property<Interface> {
 
   Interface();
 
-  bool applyPatch(const string &filename, uint8_t *&data, unsigned &size);
+  bool applyPatch(CartridgePath &filepath, uint8_t *&data, unsigned &size);
   void videoRefresh(const uint32_t *input, unsigned inputPitch, unsigned width, unsigned height);
 
-  CartridgePath base;
-  vector<CartridgePath> slot;
-
-  //deprecated
-  string baseName;  // = "/path/to/cartridge" (no extension)
+  CartridgePath base;     //base cartridge connected to emulated system
+  CartridgePath slot[2];  //slot cartridges connected to base cartridge
+  CartridgePath game;     //where to store resources (cheats.xml, states.bsa, ...)
+  string cartridgeTitle;  //combined name of game ([base] + [slot ...])
 
   InterfaceCore *core;
   InterfaceNES nes;

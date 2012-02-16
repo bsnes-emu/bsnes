@@ -34,7 +34,7 @@ void Cartridge::load(Mode cartridge_mode, const char *markup) {
   nvram.reset();
 
   parse_markup(markup);
-//print(markup, "\n\n");
+  print(markup, "\n\n");
 
   if(ram_size > 0) {
     ram.map(allocate<uint8>(ram_size, 0xff), ram_size);

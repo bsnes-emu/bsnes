@@ -334,6 +334,7 @@ void Cartridge::parse_markup_hitachidsp(XML::Node &root) {
 void Cartridge::parse_markup_bsx(XML::Node &root) {
   if(root.exists() == false) return;
   if(mode != Mode::BsxSlotted && mode != Mode::Bsx) return;
+  has_bsx_slot = true;
 
   for(auto &node : root["slot"]) {
     if(node.name != "map") continue;

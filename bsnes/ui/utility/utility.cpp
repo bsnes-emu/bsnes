@@ -17,13 +17,13 @@ void Utility::setMode(Interface::Mode mode) {
   }
 
   else if(mode == Interface::Mode::NES) {
-    mainWindow->setTitle(notdir(interface->baseName));
+    mainWindow->setTitle(interface->cartridgeTitle);
     mainWindow->nesMenu.setVisible(true);
     dspaudio.setChannels(1);
   }
 
   else if(mode == Interface::Mode::SNES) {
-    mainWindow->setTitle(notdir(interface->baseName));
+    mainWindow->setTitle(interface->cartridgeTitle);
     mainWindow->snesMenu.setVisible(true);
     dspaudio.setChannels(2);
   }
@@ -32,7 +32,7 @@ void Utility::setMode(Interface::Mode mode) {
     mainWindow->gameBoyMenu.setText(
       GameBoy::system.cgb() == false ? "Game Boy" : "Game Boy Color"
     );
-    mainWindow->setTitle(notdir(interface->baseName));
+    mainWindow->setTitle(interface->cartridgeTitle);
     mainWindow->gameBoyMenu.setVisible(true);
     dspaudio.setChannels(2);
   }

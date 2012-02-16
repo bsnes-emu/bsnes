@@ -28,6 +28,17 @@ string CartridgePath::filename(const string &folderName, const string &fileName)
   return { name, fileName };
 }
 
+string CartridgePath::title() const {
+  if(name.empty()) return "";
+  if(folder) {
+    string title = name;
+    title.rtrim<1>("/");
+    title = notdir(nall::basename(title));
+    return title;
+  }
+  return notdir(nall::basename(name));
+}
+
 void Interface::bindControllers() {
   switch(mode()) {
   case Mode::NES:
@@ -85,10 +96,10 @@ void Interface::loadCartridge(Mode mode) {
   }
 
   bindControllers();
-  cheatEditor->load(base.filename("cheats.xml", ".cht"));
-  stateManager->load(base.filename("states.bsa", ".bsa"), 0u);
+  cheatEditor->load(game.filename("cheats.xml", ".cht"));
+  stateManager->load(game.filename("states.bsa", ".bsa"), 0u);
   dipSwitches->load();
-  utility->showMessage({ "Loaded ", notdir(baseName) });
+  utility->showMessage({ "Loaded ", cartridgeTitle });
 }
 
 bool Interface::loadCartridge(const string &filename) {
@@ -103,8 +114,8 @@ bool Interface::loadCartridge(const string &filename) {
 void Interface::unloadCartridge() {
   if(cartridgeLoaded() == false) return;
   cheatDatabase->setVisible(false);
-  cheatEditor->save(base.filename("cheats.xml", ".cht"));
-  stateManager->save(base.filename("states.bsa", ".bsa"), 0u);
+  cheatEditor->save(game.filename("cheats.xml", ".cht"));
+  stateManager->save(game.filename("states.bsa", ".bsa"), 0u);
   setCheatCodes();
 
   switch(mode()) {
@@ -113,7 +124,7 @@ void Interface::unloadCartridge() {
   case Mode::GameBoy: gameBoy.unloadCartridge(); break;
   }
 
-  interface->baseName = "";
+  cartridgeTitle = "";
   utility->setMode(mode = Mode::None);
 }
 
@@ -145,7 +156,7 @@ bool Interface::unserialize(serializer &s) {
 }
 
 bool Interface::saveState(unsigned slot) {
-  string filename = base.filename({ "state-", slot, ".bst" }, { "-", slot, ".bst" });
+  string filename = game.filename({ "state-", slot, ".bst" }, { "-", slot, ".bst" });
   serializer s = serialize();
   bool result = file::write(filename, s.data(), s.size());
   utility->showMessage(result == true ? string{ "Saved state ", slot } : "Failed to save state");
@@ -153,7 +164,7 @@ bool Interface::saveState(unsigned slot) {
 }
 
 bool Interface::loadState(unsigned slot) {
-  string filename = base.filename({ "state-", slot, ".bst" }, { "-", slot, ".bst" });
+  string filename = game.filename({ "state-", slot, ".bst" }, { "-", slot, ".bst" });
   uint8_t *data;
   unsigned size;
   if(file::read(filename, data, size) == false) {
@@ -193,8 +204,8 @@ Interface::Interface() : core(nullptr) {
 
 //internal
 
-bool Interface::applyPatch(const string &filename, uint8_t *&data, unsigned &size) {
-  string patchname = { nall::basename(filename), ".bps" };
+bool Interface::applyPatch(CartridgePath &filepath, uint8_t *&data, unsigned &size) {
+  string patchname = filepath.filename("patch.bps", ".bps");
   if(file::exists(patchname) == false) return false;
 
   bpspatch bps;
