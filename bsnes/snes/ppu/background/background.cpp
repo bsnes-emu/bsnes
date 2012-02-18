@@ -127,19 +127,18 @@ void PPU::Background::get_tile() {
   if(mirror_y) voffset ^= 7;
   offset = (character << (4 + color_depth)) + ((voffset & 7) << 1);
 
-  if(regs.mode >= Mode::BPP2) {
-    data[0] = ppu.vram[offset +  0];
-    data[1] = ppu.vram[offset +  1];
-  }
-  if(regs.mode >= Mode::BPP4) {
-    data[2] = ppu.vram[offset + 16];
-    data[3] = ppu.vram[offset + 17];
-  }
-  if(regs.mode >= Mode::BPP8) {
-    data[4] = ppu.vram[offset + 32];
-    data[5] = ppu.vram[offset + 33];
-    data[6] = ppu.vram[offset + 48];
+  switch(regs.mode) {
+  case Mode::BPP8:
     data[7] = ppu.vram[offset + 49];
+    data[6] = ppu.vram[offset + 48];
+    data[5] = ppu.vram[offset + 33];
+    data[4] = ppu.vram[offset + 32];
+  case Mode::BPP4:
+    data[3] = ppu.vram[offset + 17];
+    data[2] = ppu.vram[offset + 16];
+  case Mode::BPP2:
+    data[1] = ppu.vram[offset +  1];
+    data[0] = ppu.vram[offset +  0];
   }
 
   if(mirror_x) for(unsigned n = 0; n < 8; n++) {
@@ -160,7 +159,6 @@ void PPU::Background::run(bool screen) {
     if(hires == false) return;
   }
 
-  if(regs.main_enable == false && regs.sub_enable == false) return;
   if(regs.mode == Mode::Inactive) return;
   if(regs.mode == Mode::Mode7) return run_mode7();
 
@@ -186,20 +184,21 @@ void PPU::Background::run(bool screen) {
 
 unsigned PPU::Background::get_tile_color() {
   unsigned color = 0;
-  if(regs.mode >= Mode::BPP2) {
-    color += (data[0] & 0x80) ? 0x01 : 0; data[0] <<= 1;
-    color += (data[1] & 0x80) ? 0x02 : 0; data[1] <<= 1;
+
+  switch(regs.mode) {
+  case Mode::BPP8:
+    color += (data[7] >> 0) & 0x80; data[7] <<= 1;
+    color += (data[6] >> 1) & 0x40; data[6] <<= 1;
+    color += (data[5] >> 2) & 0x20; data[5] <<= 1;
+    color += (data[4] >> 3) & 0x10; data[4] <<= 1;
+  case Mode::BPP4:
+    color += (data[3] >> 4) & 0x08; data[3] <<= 1;
+    color += (data[2] >> 5) & 0x04; data[2] <<= 1;
+  case Mode::BPP2:
+    color += (data[1] >> 6) & 0x02; data[1] <<= 1;
+    color += (data[0] >> 7) & 0x01; data[0] <<= 1;
   }
-  if(regs.mode >= Mode::BPP4) {
-    color += (data[2] & 0x80) ? 0x04 : 0; data[2] <<= 1;
-    color += (data[3] & 0x80) ? 0x08 : 0; data[3] <<= 1;
-  }
-  if(regs.mode >= Mode::BPP8) {
-    color += (data[4] & 0x80) ? 0x10 : 0; data[4] <<= 1;
-    color += (data[5] & 0x80) ? 0x20 : 0; data[5] <<= 1;
-    color += (data[6] & 0x80) ? 0x40 : 0; data[6] <<= 1;
-    color += (data[7] & 0x80) ? 0x80 : 0; data[7] <<= 1;
-  }
+
   return color;
 }
 

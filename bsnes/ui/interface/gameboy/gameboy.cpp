@@ -8,6 +8,8 @@ bool InterfaceGameBoy::cartridgeLoaded() {
 }
 
 bool InterfaceGameBoy::loadCartridge(GameBoy::System::Revision revision, const string &filename) {
+  interface->unloadCartridge();
+
   uint8_t *data;
   unsigned size;
 
@@ -19,7 +21,6 @@ bool InterfaceGameBoy::loadCartridge(GameBoy::System::Revision revision, const s
     interface->base = { false, nall::basename(filename) };
   }
 
-  interface->unloadCartridge();
   interface->game = interface->base;
   interface->cartridgeTitle = interface->base.title();
   interface->applyPatch(interface->base, data, size);

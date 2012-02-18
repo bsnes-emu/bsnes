@@ -23,6 +23,8 @@ bool InterfaceNES::cartridgeLoaded() {
 }
 
 bool InterfaceNES::loadCartridge(const string &filename) {
+  interface->unloadCartridge();
+
   uint8_t *data;
   unsigned size;
 
@@ -47,7 +49,6 @@ bool InterfaceNES::loadCartridge(const string &filename) {
     interface->base = { false, nall::basename(filename) };
   }
 
-  interface->unloadCartridge();
   interface->game = interface->base;
   interface->cartridgeTitle = interface->base.title();
   interface->applyPatch(interface->base, data, size);

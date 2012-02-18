@@ -33,7 +33,7 @@ void PPU::enter() {
     }
 
     scanline();
-    add_clocks(60);
+    add_clocks(68);
     bg1.begin();
     bg2.begin();
     bg3.begin();
@@ -59,13 +59,13 @@ void PPU::enter() {
         add_clocks(2);
       }
 
-      add_clocks(22);
+      add_clocks(14);
       sprite.tilefetch();
     } else {
-      add_clocks(1052 + 22 + 136);
+      add_clocks(1052 + 14 + 136);
     }
 
-    add_clocks(lineclocks() - 60 - 1052 - 22 - 136);
+    add_clocks(lineclocks() - 68 - 1052 - 14 - 136);
   }
 }
 
