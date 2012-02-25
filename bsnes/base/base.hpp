@@ -1,7 +1,7 @@
 #ifndef BASE_HPP
 #define BASE_HPP
 
-const char Version[] = "086.04";
+const char Version[] = "086.05";
 
 #include <nall/platform.hpp>
 #include <nall/algorithm.hpp>

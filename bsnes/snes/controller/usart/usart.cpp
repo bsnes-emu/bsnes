@@ -16,14 +16,35 @@
 // IOBit   ---
 // GND     GND
 
-static uint8 usart_read();
-static void usart_write(uint8 data);
+void USART::enter() {
+  main({ &USART::usleep, this }, { &USART::read, this }, { &USART::write, this });
+  while(true) step(1000000);  //fallback; main should never return
+}
+
+void USART::usleep(unsigned milliseconds) {
+  step(milliseconds);
+}
+
+//SNES -> USART
+uint8 USART::read() {
+  while(txbuffer.size() == 0) step(1);
+  uint8 data = txbuffer[0];
+  txbuffer.remove(0);
+  return data;
+}
+
+//USART -> SNES
+void USART::write(uint8 data) {
+  rxbuffer.append(data);
+}
 
 //USART -> SNES
 uint2 USART::data() {
-  if(rxlength == 0) {
+  if(rxlength == 0 && rxbuffer.size()) {
     data1 = 0;
-    rxdata = usart_read();
+    rxdata = rxbuffer[0];
+    rxbuffer.remove(0);
+    rxlength++;
   } else if(rxlength <= 8) {
     data1 = rxdata & 1;
     rxdata >>= 1;
@@ -43,7 +64,7 @@ void USART::latch(bool data) {
     txdata = (data << 7) | (txdata >> 1);
     txlength++;
   } else {
-    if(data == 1) usart_write(txdata);
+    if(data == 1) txbuffer.append(txdata);
     txlength = 0;
   }
 
@@ -60,16 +81,16 @@ USART::USART(bool port) : Controller(port) {
 
   txlength = 0;
   txdata = 0;
+
+  string filename = interface->path(Cartridge::Slot::Base, "usart.so");
+  if(open_absolute(filename)) {
+    main = sym("usart_main");
+    if(main) create(Controller::Enter, 1000000);
+  }
 }
 
 USART::~USART() {
-}
-
-static uint8 usart_read() {
-  return 0xff;
-}
-
-static void usart_write(uint8 data) {
+  if(opened()) close();
 }
 
 #endif
