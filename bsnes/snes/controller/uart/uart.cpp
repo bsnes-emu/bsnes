@@ -1,6 +1,6 @@
 #ifdef CONTROLLER_CPP
 
-//Serial communications cable emulation:
+//Asynchronous serial communications cable emulation:
 //The SNES controller ports can be used for bi-directional serial communication
 //when wired to a specialized controller. This class implements said controller,
 //for the primary purpose of testing code outside of real hardware.
@@ -30,15 +30,19 @@ static void snesserial_tick(unsigned clocks);
 static uint8 snesserial_read();
 static void snesserial_write(uint8 data);
 
-void Serial::enter() {
-  if(enable == false) while(true) step(1);  //fallback, in case library was not found
+void UART::enter() {
+  if(enable == false) {
+    //fallback, in case library was not found
+    interface->message("UART library not found");
+    while(true) step(1);
+  }
   step(256 * 8);  //simulate warm-up delay
   if(flowcontrol()) data2 = 1;
   main(snesserial_tick, snesserial_read, snesserial_write);  //stubs for Serial::step, Serial::read, Serial::write
   while(true) step(1);  //fallback, in case snesserial_main() returns (it should never do so)
 }
 
-uint8 Serial::read() {
+uint8 UART::read() {
   while(latched == 0) step(1);
   while(latched == 1) step(1);
   step(4);
@@ -52,7 +56,7 @@ uint8 Serial::read() {
   return data;
 }
 
-void Serial::write(uint8 data) {
+void UART::write(uint8 data) {
   if(flowcontrol()) while(iobit()) step(1);
   step(8);
 
@@ -69,20 +73,18 @@ void Serial::write(uint8 data) {
   step(8);
 }
 
-uint2 Serial::data() {
+uint2 UART::data() {
   return (data2 << 1) | (data1 << 0);
 }
 
-void Serial::latch(bool data) {
+void UART::latch(bool data) {
   latched = data;
 }
 
-Serial::Serial(bool port) : Controller(port) {
+UART::UART(bool port) : Controller(port) {
   enable = false;
-  string basename = interface->path(Cartridge::Slot::Base, "serial.so");
-  string name = notdir(basename);
-  string path = dir(basename);
-  if(open(name, path)) {
+  string filename = interface->path(Cartridge::Slot::Base, "uart.so");
+  if(open_absolute(filename)) {
     baudrate = sym("snesserial_baudrate");
     flowcontrol = sym("snesserial_flowcontrol");
     main = sym("snesserial_main");
@@ -95,7 +97,7 @@ Serial::Serial(bool port) : Controller(port) {
   data2 = 0;
 }
 
-Serial::~Serial() {
+UART::~UART() {
   if(opened()) close();
 }
 
@@ -103,42 +105,42 @@ Serial::~Serial() {
 
 static void snesserial_tick(unsigned clocks) {
   if(co_active() == input.port1->thread) {
-    if(dynamic_cast<Serial*>(input.port1)) {
-      return ((Serial*)input.port1)->step(clocks);
+    if(dynamic_cast<UART*>(input.port1)) {
+      return ((UART*)input.port1)->step(clocks);
     }
   }
 
   if(co_active() == input.port2->thread) {
-    if(dynamic_cast<Serial*>(input.port2)) {
-      return ((Serial*)input.port2)->step(clocks);
+    if(dynamic_cast<UART*>(input.port2)) {
+      return ((UART*)input.port2)->step(clocks);
     }
   }
 }
 
 static uint8 snesserial_read() {
   if(co_active() == input.port1->thread) {
-    if(dynamic_cast<Serial*>(input.port1)) {
-      return ((Serial*)input.port1)->read();
+    if(dynamic_cast<UART*>(input.port1)) {
+      return ((UART*)input.port1)->read();
     }
   }
 
   if(co_active() == input.port2->thread) {
-    if(dynamic_cast<Serial*>(input.port2)) {
-      return ((Serial*)input.port2)->read();
+    if(dynamic_cast<UART*>(input.port2)) {
+      return ((UART*)input.port2)->read();
     }
   }
 }
 
 static void snesserial_write(uint8 data) {
   if(co_active() == input.port1->thread) {
-    if(dynamic_cast<Serial*>(input.port1)) {
-      return ((Serial*)input.port1)->write(data);
+    if(dynamic_cast<UART*>(input.port1)) {
+      return ((UART*)input.port1)->write(data);
     }
   }
 
   if(co_active() == input.port2->thread) {
-    if(dynamic_cast<Serial*>(input.port2)) {
-      return ((Serial*)input.port2)->write(data);
+    if(dynamic_cast<UART*>(input.port2)) {
+      return ((UART*)input.port2)->write(data);
     }
   }
 }

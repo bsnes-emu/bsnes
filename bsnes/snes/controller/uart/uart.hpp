@@ -1,11 +1,11 @@
-struct Serial : Controller, public library {
+struct UART : Controller, public library {
   void enter();
   uint8 read();
   void write(uint8 data);
   uint2 data();
   void latch(bool data);
-  Serial(bool port);
-  ~Serial();
+  UART(bool port);
+  ~UART();
 
 private:
   bool enable;

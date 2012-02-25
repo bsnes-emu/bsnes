@@ -7,7 +7,8 @@ struct Input {
     SuperScope,
     Justifier,
     Justifiers,
-    Serial,
+    UART,
+    USART,
   };
 
   enum class JoypadID : unsigned {

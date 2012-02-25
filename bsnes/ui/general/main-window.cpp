@@ -49,9 +49,10 @@ MainWindow::MainWindow() {
       snesPort2Device[4].setText("Super Scope");
       snesPort2Device[5].setText("Justifier");
       snesPort2Device[6].setText("Dual Justifiers");
-      snesPort2Device[7].setText("Serial Cable");
+      snesPort2Device[7].setText("Serial UART");
+      snesPort2Device[8].setText("Serial USART");
       RadioItem::group(snesPort2Device[0], snesPort2Device[1], snesPort2Device[2], snesPort2Device[3],
-                       snesPort2Device[4], snesPort2Device[5], snesPort2Device[6], snesPort2Device[7]);
+        snesPort2Device[4], snesPort2Device[5], snesPort2Device[6], snesPort2Device[7], snesPort2Device[8]);
       snesPort2Device[config->snes.controllerPort2Device].setChecked();
     snesCartridgeUnload.setText("&Unload Cartridge");
 
@@ -138,6 +139,7 @@ MainWindow::MainWindow() {
       snesPort2.append(snesPort2Device[5]);
       snesPort2.append(snesPort2Device[6]);
       snesPort2.append(snesPort2Device[7]);
+      snesPort2.append(snesPort2Device[8]);
     snesMenu.append(snesSeparator2);
     snesMenu.append(snesCartridgeUnload);
 
@@ -255,6 +257,7 @@ MainWindow::MainWindow() {
   snesPort2Device[5].onActivate = [&] { interface->setController(1, 5); };
   snesPort2Device[6].onActivate = [&] { interface->setController(1, 6); };
   snesPort2Device[7].onActivate = [&] { interface->setController(1, 7); };
+  snesPort2Device[8].onActivate = [&] { interface->setController(1, 8); };
 
   snesCartridgeUnload.onActivate = { &Interface::unloadCartridge, interface };
 

@@ -22,7 +22,8 @@ void InterfaceSNES::setController(bool port, unsigned device) {
   case 4: return SNES::input.connect(1, SNES::Input::Device::SuperScope);
   case 5: return SNES::input.connect(1, SNES::Input::Device::Justifier);
   case 6: return SNES::input.connect(1, SNES::Input::Device::Justifiers);
-  case 7: return SNES::input.connect(1, SNES::Input::Device::Serial);
+  case 7: return SNES::input.connect(1, SNES::Input::Device::UART);
+  case 8: return SNES::input.connect(1, SNES::Input::Device::USART);
   }
 }
 
@@ -412,7 +413,8 @@ string InterfaceSNES::path(SNES::Cartridge::Slot slot, const string &hint) {
       track.trim<1>("track-", ".pcm");
       return interface->base.filename(hint, { "-", decimal(track), ".pcm" });
     }
-    if(hint == "serial.so") return { dir(interface->base.name), "libserial.so" };
+    if(hint == "uart.so") return { dir(interface->base.name), "uart.so" };
+    if(hint == "usart.so") return { dir(interface->base.name), "usart.so" };
     if(hint.endswith(".rom")) return { dir(interface->base.name), hint };
   }
   return { dir(interface->base.name), hint };
