@@ -23,5 +23,6 @@ private:
   uint8 txdata;
   vector<uint8> txbuffer;
 
-  function<void (function<void (unsigned)>, function<uint8 ()>, function<void (uint8)>)> main;
+  function<void (function<void (unsigned)>, function<uint8 ()>, function<void (uint8)>)> init;
+  function<void ()> main;
 };

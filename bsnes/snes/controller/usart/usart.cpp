@@ -17,7 +17,8 @@
 // GND     GND
 
 void USART::enter() {
-  main({ &USART::usleep, this }, { &USART::read, this }, { &USART::write, this });
+  init({ &USART::usleep, this }, { &USART::read, this }, { &USART::write, this });
+  main();
   while(true) step(1000000);  //fallback; main should never return
 }
 
@@ -38,8 +39,20 @@ void USART::write(uint8 data) {
   rxbuffer.append(data ^ 0xff);
 }
 
-//USART -> SNES
+//clock
 uint2 USART::data() {
+  //SNES -> USART
+  if(txlength == 0 && latched == 0) {
+    txlength++;
+  } else if(txlength <= 8) {
+    txdata = (latched << 7) | (txdata >> 1);
+    txlength++;
+  } else {
+    if(latched == 1) txbuffer.append(txdata);
+    txlength = 0;
+  }
+
+  //USART -> SNES
   if(rxlength == 0 && rxbuffer.size()) {
     data1 = 1;
     rxdata = rxbuffer[0];
@@ -57,18 +70,8 @@ uint2 USART::data() {
   return (data2 << 1) | (data1 << 0);
 }
 
-//SNES -> USART
+//latch
 void USART::latch(bool data) {
-  if(txlength == 0 && latched == 1 && data == 0) {
-    txlength++;
-  } else if(txlength <= 8) {
-    txdata = (data << 7) | (txdata >> 1);
-    txlength++;
-  } else {
-    if(data == 1) txbuffer.append(txdata);
-    txlength = 0;
-  }
-
   latched = data;
 }
 
@@ -85,8 +88,9 @@ USART::USART(bool port) : Controller(port) {
 
   string filename = interface->path(Cartridge::Slot::Base, "usart.so");
   if(open_absolute(filename)) {
+    init = sym("usart_init");
     main = sym("usart_main");
-    if(main) create(Controller::Enter, 1000000);
+    if(init && main) create(Controller::Enter, 1000000);
   }
 }
 
