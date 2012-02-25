@@ -35,21 +35,22 @@ uint8 USART::read() {
 
 //USART -> SNES
 void USART::write(uint8 data) {
-  rxbuffer.append(data);
+  rxbuffer.append(data ^ 0xff);
 }
 
 //USART -> SNES
 uint2 USART::data() {
   if(rxlength == 0 && rxbuffer.size()) {
-    data1 = 0;
+    data1 = 1;
     rxdata = rxbuffer[0];
     rxbuffer.remove(0);
     rxlength++;
   } else if(rxlength <= 8) {
     data1 = rxdata & 1;
     rxdata >>= 1;
+    rxlength++;
   } else {
-    data1 = 1;
+    data1 = 0;
     rxlength = 0;
   }
 

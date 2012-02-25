@@ -17,7 +17,6 @@ void Input::connect(bool port, Input::Device id) {
   case Device::SuperScope: controller = new SuperScope(port); break;
   case Device::Justifier: controller = new Justifier(port, false); break;
   case Device::Justifiers: controller = new Justifier(port, true); break;
-  case Device::UART: controller = new UART(port); break;
   case Device::USART: controller = new USART(port); break;
   }
 

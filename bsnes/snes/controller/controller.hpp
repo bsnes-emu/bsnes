@@ -32,5 +32,4 @@ struct Controller : Processor {
 #include "mouse/mouse.hpp"
 #include "superscope/superscope.hpp"
 #include "justifier/justifier.hpp"
-#include "uart/uart.hpp"
 #include "usart/usart.hpp"

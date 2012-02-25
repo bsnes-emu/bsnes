@@ -8,7 +8,6 @@ namespace SNES {
 #include "mouse/mouse.cpp"
 #include "superscope/superscope.cpp"
 #include "justifier/justifier.cpp"
-#include "uart/uart.cpp"
 #include "usart/usart.cpp"
 
 void Controller::Enter() {

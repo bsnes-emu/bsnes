@@ -39,7 +39,9 @@ MainWindow::MainWindow() {
       snesPort1Device[1].setText("Gamepad");
       snesPort1Device[2].setText("Multitap");
       snesPort1Device[3].setText("Mouse");
-      RadioItem::group(snesPort1Device[0], snesPort1Device[1], snesPort1Device[2], snesPort1Device[3]);
+      snesPort1Device[4].setText("Serial USART");
+      RadioItem::group(snesPort1Device[0], snesPort1Device[1], snesPort1Device[2], snesPort1Device[3],
+        snesPort1Device[4]);
       snesPort1Device[config->snes.controllerPort1Device].setChecked();
     snesPort2.setText("Controller Port &2");
       snesPort2Device[0].setText("None");
@@ -49,10 +51,9 @@ MainWindow::MainWindow() {
       snesPort2Device[4].setText("Super Scope");
       snesPort2Device[5].setText("Justifier");
       snesPort2Device[6].setText("Dual Justifiers");
-      snesPort2Device[7].setText("Serial UART");
-      snesPort2Device[8].setText("Serial USART");
+      snesPort2Device[7].setText("Serial USART");
       RadioItem::group(snesPort2Device[0], snesPort2Device[1], snesPort2Device[2], snesPort2Device[3],
-        snesPort2Device[4], snesPort2Device[5], snesPort2Device[6], snesPort2Device[7], snesPort2Device[8]);
+        snesPort2Device[4], snesPort2Device[5], snesPort2Device[6], snesPort2Device[7]);
       snesPort2Device[config->snes.controllerPort2Device].setChecked();
     snesCartridgeUnload.setText("&Unload Cartridge");
 
@@ -126,20 +127,9 @@ MainWindow::MainWindow() {
     snesMenu.append(snesReset);
     snesMenu.append(snesSeparator1);
     snesMenu.append(snesPort1);
-      snesPort1.append(snesPort1Device[0]);
-      snesPort1.append(snesPort1Device[1]);
-      snesPort1.append(snesPort1Device[2]);
-      snesPort1.append(snesPort1Device[3]);
+      for(auto &item : snesPort1Device) snesPort1.append(item);
     snesMenu.append(snesPort2);
-      snesPort2.append(snesPort2Device[0]);
-      snesPort2.append(snesPort2Device[1]);
-      snesPort2.append(snesPort2Device[2]);
-      snesPort2.append(snesPort2Device[3]);
-      snesPort2.append(snesPort2Device[4]);
-      snesPort2.append(snesPort2Device[5]);
-      snesPort2.append(snesPort2Device[6]);
-      snesPort2.append(snesPort2Device[7]);
-      snesPort2.append(snesPort2Device[8]);
+      for(auto &item : snesPort2Device) snesPort2.append(item);
     snesMenu.append(snesSeparator2);
     snesMenu.append(snesCartridgeUnload);
 
@@ -248,6 +238,7 @@ MainWindow::MainWindow() {
   snesPort1Device[1].onActivate = [&] { interface->setController(0, 1); };
   snesPort1Device[2].onActivate = [&] { interface->setController(0, 2); };
   snesPort1Device[3].onActivate = [&] { interface->setController(0, 3); };
+  snesPort1Device[4].onActivate = [&] { interface->setController(0, 4); };
 
   snesPort2Device[0].onActivate = [&] { interface->setController(1, 0); };
   snesPort2Device[1].onActivate = [&] { interface->setController(1, 1); };
@@ -257,7 +248,6 @@ MainWindow::MainWindow() {
   snesPort2Device[5].onActivate = [&] { interface->setController(1, 5); };
   snesPort2Device[6].onActivate = [&] { interface->setController(1, 6); };
   snesPort2Device[7].onActivate = [&] { interface->setController(1, 7); };
-  snesPort2Device[8].onActivate = [&] { interface->setController(1, 8); };
 
   snesCartridgeUnload.onActivate = { &Interface::unloadCartridge, interface };
 

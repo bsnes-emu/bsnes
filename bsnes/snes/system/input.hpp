@@ -7,7 +7,6 @@ struct Input {
     SuperScope,
     Justifier,
     Justifiers,
-    UART,
     USART,
   };
 

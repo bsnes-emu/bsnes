@@ -29,9 +29,9 @@ struct MainWindow : Window {
     Item snesReset;
     Separator snesSeparator1;
     Menu snesPort1;
-      RadioItem snesPort1Device[4];
+      RadioItem snesPort1Device[5];
     Menu snesPort2;
-      RadioItem snesPort2Device[9];
+      RadioItem snesPort2Device[8];
     Separator snesSeparator2;
     Item snesCartridgeUnload;
 

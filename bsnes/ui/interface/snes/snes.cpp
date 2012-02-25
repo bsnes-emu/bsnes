@@ -7,14 +7,15 @@ void InterfaceSNES::setController(bool port, unsigned device) {
   if(port == 0) config->snes.controllerPort1Device = device;
   if(port == 1) config->snes.controllerPort2Device = device;
 
-  if(port == 0) switch(device) {
+  if(port == 0) switch(device) { default:
   case 0: return SNES::input.connect(0, SNES::Input::Device::None);
   case 1: return SNES::input.connect(0, SNES::Input::Device::Joypad);
   case 2: return SNES::input.connect(0, SNES::Input::Device::Multitap);
   case 3: return SNES::input.connect(0, SNES::Input::Device::Mouse);
+  case 4: return SNES::input.connect(0, SNES::Input::Device::USART);
   }
 
-  if(port == 1) switch(device) {
+  if(port == 1) switch(device) { default:
   case 0: return SNES::input.connect(1, SNES::Input::Device::None);
   case 1: return SNES::input.connect(1, SNES::Input::Device::Joypad);
   case 2: return SNES::input.connect(1, SNES::Input::Device::Multitap);
@@ -22,8 +23,7 @@ void InterfaceSNES::setController(bool port, unsigned device) {
   case 4: return SNES::input.connect(1, SNES::Input::Device::SuperScope);
   case 5: return SNES::input.connect(1, SNES::Input::Device::Justifier);
   case 6: return SNES::input.connect(1, SNES::Input::Device::Justifiers);
-  case 7: return SNES::input.connect(1, SNES::Input::Device::UART);
-  case 8: return SNES::input.connect(1, SNES::Input::Device::USART);
+  case 7: return SNES::input.connect(1, SNES::Input::Device::USART);
   }
 }
 
