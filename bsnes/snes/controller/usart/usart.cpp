@@ -17,8 +17,10 @@
 // GND     GND
 
 void USART::enter() {
-  init({ &USART::usleep, this }, { &USART::read, this }, { &USART::write, this });
-  main();
+  if(init && main) {
+    init({ &USART::usleep, this }, { &USART::read, this }, { &USART::write, this });
+    main();
+  }
   while(true) step(1000000);  //fallback; main should never return
 }
 

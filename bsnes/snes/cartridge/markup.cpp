@@ -16,6 +16,7 @@ void Cartridge::parse_markup(const char *markup) {
   parse_markup_superfx(cartridge["superfx"]);
   parse_markup_necdsp(cartridge["necdsp"]);
   parse_markup_hitachidsp(cartridge["hitachidsp"]);
+  parse_markup_armdsp(cartridge["armdsp"]);
   parse_markup_bsx(cartridge["bsx"]);
   parse_markup_sufamiturbo(cartridge["sufamiturbo"]);
   parse_markup_srtc(cartridge["srtc"]);
@@ -238,7 +239,7 @@ void Cartridge::parse_markup_necdsp(XML::Node &root) {
     for(unsigned n = 0; n < promsize; n++) necdsp.programROM[n] = fp.readm(3);
     for(unsigned n = 0; n < dromsize; n++) necdsp.dataROM[n] = fp.readm(2);
 
-    if(sha256 != "") {
+    if(!sha256.empty()) {
       //XML file specified SHA256 sum for program. Verify file matches the hash.
       fp.seek(0);
       uint8_t data[filesize];
@@ -298,7 +299,7 @@ void Cartridge::parse_markup_hitachidsp(XML::Node &root) {
   } else {
     for(unsigned n = 0; n < 1024; n++) hitachidsp.dataROM[n] = fp.readl(3);
 
-    if(sha256 != "") {
+    if(!sha256.empty()) {
       //XML file specified SHA256 sum for program. Verify file matches the hash.
       fp.seek(0);
       uint8 data[3072];
@@ -328,6 +329,41 @@ void Cartridge::parse_markup_hitachidsp(XML::Node &root) {
         mapping.append(m);
       }
     }
+  }
+}
+
+void Cartridge::parse_markup_armdsp(XML::Node &root) {
+  if(root.exists() == false) return;
+  has_armdsp = true;
+
+  for(auto &byte : armdsp.programROM) byte = 0x00;
+  string firmware = root["firmware"].data;
+  string sha256 = root["sha256"].data;
+
+  string path = interface->path(Slot::Base, firmware);
+  file fp;
+  if(fp.open(path, file::mode::read) == false) {
+    interface->message({ "Warning: ARM DSP firmware ", firmware, " is missing." });
+  } else if(fp.size() != 128 * 1024) {
+    interface->message({ "Warning: ARM DSP firmware ", firmware, " is of the wrong file size." });
+    fp.close();
+  } else {
+    for(auto &byte : armdsp.programROM) byte = fp.read();
+
+    if(!sha256.empty()) {
+      if(sha256 != nall::sha256(armdsp.programROM, 128 * 1024)) {
+        interface->message({ "Warning: ARM DSP firmware ", firmware, " SHA256 sum is incorrect." });
+      }
+    }
+
+    fp.close();
+  }
+
+  for(auto &node : root) {
+    if(node.name != "map") continue;
+    Mapping m({ &ArmDSP::mmio_read, &armdsp }, { &ArmDSP::mmio_write, &armdsp });
+    parse_markup_map(m, node);
+    mapping.append(m);
   }
 }
 

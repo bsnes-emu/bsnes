@@ -528,11 +528,20 @@ SnesCartridge::SnesCartridge(const uint8_t *data, unsigned size) {
   );
 
   if(has_st018) markup.append(
+    "  <armdsp firmware='st0018.rom' sha256='6cceff3c6945bb2672040066d218efcd2f31492f3f5c28916c8e53435c2c887e'>\n"
+    "    <map address='00-3f:3800-3805'/>\n"
+    "    <map address='80-bf:3800-3805'/>\n"
+    "  </armdsp>\n"
+  );
+
+  #if 0
+  if(has_st018) markup.append(
     "  <setarisc firmware='ST-0018'>\n"
     "    <map address='00-3f:3800-38ff'/>\n"
     "    <map address='80-bf:3800-38ff'/>\n"
     "  </setarisc>\n"
   );
+  #endif
 
   markup.append("</cartridge>\n");
 }

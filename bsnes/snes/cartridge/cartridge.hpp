@@ -38,6 +38,7 @@ struct Cartridge : property<Cartridge> {
   readonly<bool> has_sa1;
   readonly<bool> has_necdsp;
   readonly<bool> has_hitachidsp;
+  readonly<bool> has_armdsp;
   readonly<bool> has_srtc;
   readonly<bool> has_sdd1;
   readonly<bool> has_spc7110;
@@ -101,6 +102,7 @@ private:
   void parse_markup_sa1(XML::Node&);
   void parse_markup_necdsp(XML::Node&);
   void parse_markup_hitachidsp(XML::Node&);
+  void parse_markup_armdsp(XML::Node&);
   void parse_markup_bsx(XML::Node&);
   void parse_markup_sufamiturbo(XML::Node&);
   void parse_markup_srtc(XML::Node&);

@@ -65,6 +65,7 @@ void System::serialize_all(serializer &s) {
   if(cartridge.has_sa1()) sa1.serialize(s);
   if(cartridge.has_necdsp()) necdsp.serialize(s);
   if(cartridge.has_hitachidsp()) hitachidsp.serialize(s);
+  if(cartridge.has_armdsp()) armdsp.serialize(s);
   if(cartridge.has_srtc()) srtc.serialize(s);
   if(cartridge.has_sdd1()) sdd1.serialize(s);
   if(cartridge.has_spc7110()) spc7110.serialize(s);

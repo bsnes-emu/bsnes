@@ -12,6 +12,7 @@ struct Coprocessor : Processor {
 #include <snes/chip/sa1/sa1.hpp>
 #include <snes/chip/necdsp/necdsp.hpp>
 #include <snes/chip/hitachidsp/hitachidsp.hpp>
+#include <snes/chip/armdsp/armdsp.hpp>
 #include <snes/chip/bsx/bsx.hpp>
 #include <snes/chip/srtc/srtc.hpp>
 #include <snes/chip/sdd1/sdd1.hpp>
