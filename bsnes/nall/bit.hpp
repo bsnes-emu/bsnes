@@ -38,6 +38,13 @@ namespace nall {
       return x | (x + 1);
     }
 
+    //count number of bits set in a byte
+    inline unsigned count(unsigned x) {
+      unsigned count = 0;
+      do count += x & 1; while(x >>= 1);
+      return count;
+    }
+
     //round up to next highest single bit:
     //round(15) == 16, round(16) == 16, round(17) == 32
     inline unsigned round(unsigned x) {
