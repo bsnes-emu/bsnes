@@ -6,8 +6,17 @@ struct ArmDSP : public Coprocessor {
 
   #include "registers.hpp"
 
-  uint8 cpuport[4];
-  uint8 armport[4];
+  //CPU
+  uint8 r3800, r3802, r3804;
+  uint8 w3800, w3802, w3804;
+
+  //ARM
+  uint32 r40000000, r40000010, r40000020, r40000024, r40000028, r4000002c;
+  uint32 w40000000, w40000010, w40000020, w40000024, w40000028, w4000002c;
+
+  //Status
+  bool cputoarm;
+  bool armtocpu;
 
   static void Enter();
   void enter();
@@ -24,11 +33,11 @@ struct ArmDSP : public Coprocessor {
   //opcodes.cpp
   bool condition();
   void opcode(uint32 data);
-  void flags(uint32 rd);
 
   void op_branch();
   void op_data_immediate();
   void op_data_immediate_shift();
+  void op_data_register_shift();
   void op_move_immediate_offset();
   void op_move_status_register_to_register();
   void op_move_multiple();

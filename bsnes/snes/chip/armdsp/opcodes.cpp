@@ -1,7 +1,7 @@
 #ifdef ARMDSP_CPP
 
 bool ArmDSP::condition() {
-  switch((uint4)(instruction >> 28)) { default:
+  switch((uint4)(instruction >> 28)) {
   case  0: return cpsr.z == 1;                      //EQ (equal)
   case  1: return cpsr.z == 0;                      //NE (not equal)
   case  2: return cpsr.c == 1;                      //CS (carry set)
@@ -53,26 +53,21 @@ void ArmDSP::opcode(uint32 rm) {
   switch(opcode) {
   case  0: rd = rn & rm;            nz(rd); break;  //AND (logical and)
   case  1: rd = rn ^ rm;            nz(rd); break;  //EOR (logical exclusive or)
-  case  2: rd = rn +~rm;          nzcv(rd); break;  //SUB (subtract)
-  case  3: rd = rm +~rn;          nzcv(rd); break;  //RSB (reverse subtract)
+  case  2: rd = rn +~rm + 1;      nzcv(rd); break;  //SUB (subtract)
+  case  3: rd = rm +~rn + 1;      nzcv(rd); break;  //RSB (reverse subtract)
   case  4: rd = rn + rm;          nzcv(rd); break;  //ADD (add)
   case  5: rd = rn + rm + cpsr.c; nzcv(rd); break;  //ADC (add with carry)
   case  6: rd = rn +~rm + cpsr.c; nzcv(rd); break;  //SBC (subtract with carry)
   case  7: rd = rm +~rn + cpsr.c; nzcv(rd); break;  //RSC (reverse subtract with carry)
   case  8: ro = rn & rm;            nz(ro); break;  //TST (test)
   case  9: ro = rn ^ rm;            nz(ro); break;  //TEQ (test equivalence)
-  case 10: ro = rn +~rm;          nzcv(ro); break;  //CMP (compare)
+  case 10: ro = rn +~rm + 1;      nzcv(ro); break;  //CMP (compare)
   case 11: ro = rn + rm;          nzcv(ro); break;  //CMN (compare negated)
   case 12: rd = rn | rm;            nz(rd); break;  //ORR (logical inclusive or)
   case 13: rd = rm;                 nz(rd); break;  //MOV (move)
   case 14: rd = rn &~rm;            nz(rd); break;  //BIC (bit clear)
   case 15: rd =~rm;                 nz(rd); break;  //MVN (move not)
   }
-}
-
-void ArmDSP::flags(uint32 rd) {
-  cpsr.n = rd & 0x80000000;
-  cpsr.z = rd == 0;
 }
 
 //CCCC 101L DDDD DDDD DDDD DDDD DDDD DDDD
@@ -89,6 +84,9 @@ void ArmDSP::op_branch() {
   r[15] += displacement * 4;
 }
 
+//{opcode}{condition}{s} rd,#immediate
+//{opcode}{condition} rn,#immediate
+//{opcode}{condition}{s} rd,rn,#immediate
 //CCCC 001O OOOS NNNN DDDD RRRR IIII IIII
 //C = condition
 //O = opcode
@@ -100,16 +98,18 @@ void ArmDSP::op_branch() {
 void ArmDSP::op_data_immediate() {
   if(!condition()) return;
 
-  uint4 rotate = instruction >> 8;
-  uint8 immediate = instruction >> 0;
+  uint4 shift = instruction >> 8;
+  uint8 immediate = instruction;
 
-  opcode(
-    (immediate >> (rotate << 1)) | (immediate << (32 - (rotate << 1)))
-  );
+  uint32 rs = shift << 1;
+  uint32 rm = (immediate >> rs) | (immediate << (32 - rs));
 
-  //todo: set carry for non-add/sub opcodes here
+  opcode(rm);
 }
 
+//{opcode}{condition}{s} rd,rm {shift} #immediate
+//{opcode}{condition} rn,rm {shift} #immediate
+//{opcode}{condition}{s} rd,rn,rm {shift} #immediate
 //CCCC 000O OOOS NNNN DDDD LLLL LSS0 MMMM
 //C = condition
 //O = opcode
@@ -123,34 +123,66 @@ void ArmDSP::op_data_immediate_shift() {
   if(!condition()) return;
 
   uint5 shift = instruction >> 7;
-  uint2 op = instruction >> 5;
-  uint32 rm = r[(uint4)instruction];
+  uint2 mode = instruction >> 5;
+  uint4 m = instruction;
 
-  if(op == 0) {  //LSL (logical shift left)
-    rm = rm << shift;
-  }
+  uint32 rs = shift;
+  uint32 rm = r[m];
 
-  if(op == 1) {  //LSR (logical shift right)
-    rm = rm >> (1 + shift);
-  }
+  switch(mode) {
+  case 0:  //LSL
+    rm = rm << rs;
+    break;
 
-  if(op == 2) {  //ASR (arithmetic shift right)
-    rm = (int32)rm >> (1 + shift);
-  }
+  case 1:  //LSR
+    if(rs == 0) rs = 32;
+    rm = rm >> rs;
+    break;
 
-  if(op == 3) {  //ROR (rotate right)
-    if(shift == 0) {  //RRX (rorate right with extend)
-      rm = (cpsr.c << 31) | (rm >> 1);
-    } else {
-      rm = (rm >> shift) + (rm << (32 - shift));
-    }
+  case 2:  //ASR
+    if(rs == 0) rs = 32;
+    rm = (int32)rm >> rs;
+    break;
+
+  case 3:  //ROR + RRX
+    if(rs == 0) rm = (cpsr.c << 31) | (rm >> 1);      //RRX
+    if(rs != 0) rm = (rm >> rs) + (rm << (32 - rs));  //ROR
+    break;
   }
 
   opcode(rm);
-
-  //todo: set carry
 }
 
+//cccc 000o ooos nnnn dddd ssss 0ss1 mmmm
+//c = condition
+//o = opcode
+//s = save flags
+//n = rn
+//d = rd
+//s = rs
+//s = shift
+//m = rm
+void ArmDSP::op_data_register_shift() {
+  if(!condition()) return;
+
+  uint4 s = instruction >> 8;
+  uint2 mode = instruction >> 5;
+  uint4 m = instruction >> 0;
+
+  uint32 rs = r[s];
+  uint32 rm = r[m];
+
+  switch(mode) {
+  case 0: rm = rm << rs;                       break;  //LSL
+  case 1: rm = rm >> rs;                       break;  //LSR
+  case 2: rm = (int32)rm >> rs;                break;  //ASR
+  case 3: rm = (rm >> rs) + (rm << (32 - rs)); break;  //ROR
+  }
+
+  opcode(rm);
+}
+
+//(ldr,str){condition}{b} rd,[rn{+offset}]
 //CCCC 010P UBWL NNNN DDDD IIII IIII IIII
 //C = condition
 //P = pre (0 = post-indexed addressing)
@@ -256,6 +288,8 @@ void ArmDSP::op_move_multiple() {
     if(u == 1) r[n] = r[n] + bit::count(list) * 4;  //IA, IB
     if(u == 0) r[n] = r[n] - bit::count(list) * 4;  //DA, DB
   }
+
+//if(l)exception=true;
 }
 
 #endif
