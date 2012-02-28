@@ -15,13 +15,15 @@ string ArmDSP::disassemble_opcode(uint32 pc) {
   uint32 instruction = bus_read<4>(pc);
   output.append(hex<8>(instruction), "  ");
 
-  uint4 condition = instruction >> 28;
-  uint4 opcode = instruction >> 21;
-  uint4 rn = instruction >> 16;
-  uint4 rd = instruction >> 12;
-  uint4 rs = instruction >> 8;
+  //move to register from status register
+  if((instruction & 0x0fb000f0) == 0x01000000) {
+    uint1 psr = instruction >> 22;
+    uint4 rd = instruction >> 12;
+    output.append("mrs ", registers[rd], ",", psr ? "spsr" : "cpsr");
+    return output;
+  }
 
-  //move status register to register
+  //move to status register from register
   if((instruction & 0x0fb000f0) == 0x01200000) {
     uint1 psr = instruction >> 22;
     uint4 field = instruction >> 16;
@@ -89,34 +91,46 @@ string ArmDSP::disassemble_opcode(uint32 pc) {
   //(ldr,str){condition}{b} rd,[rn{+offset}]
   //todo: support W flag
   if((instruction & 0x0e000000) == 0x04000000) {
+    uint4 condition = instruction >> 28;
     uint1 u = instruction >> 23;
     uint1 load = instruction >> 20;
+    uint4 rn = instruction >> 16;
+    uint4 rd = instruction >> 12;
     uint12 immediate = instruction;
+
     output.append(load ? "ldr" : "str", conditions[condition]);
     if(instruction & 0x00400000) output.append("b");
     output.append(" ", registers[rd], ",[", registers[rn]);
     if(immediate) output.append(u ? "+" : "-", "0x", hex<3>((uint12)instruction));
     output.append("]");
+
     return output;
   }
 
   //move multiple
   //(ldm,stm){condition}{mode} rn{!},{r...}
   if((instruction & 0x0e000000) == 0x08000000) {
+    uint4 condition = instruction >> 28;
+    uint4 rn = instruction >> 16;
+
     output.append(instruction & 0x00100000 ? "ldm" : "stm", conditions[condition], indices[(uint2)(instruction >> 23)]);
     output.append(" ", registers[rn], instruction & 0x00200000 ? "!" : "", ",{");
     for(unsigned n = 0; n < 16; n++) if(instruction & (1 << n)) output.append(registers[n], ",");
     output.rtrim<1>(",");
     output.append("}");
+
     return output;
   }
 
   //branch
   //b{l}{condition} address
   if((instruction & 0x0e000000) == 0x0a000000) {
+    uint4 condition = instruction >> 28;
     uint1 l = instruction >> 24;
+
     output.append("b", l ? "l" : "", conditions[condition]);
     output.append(" 0x", hex<8>(pc + 8 + (int24)instruction * 4));
+
     return output;
   }
 
