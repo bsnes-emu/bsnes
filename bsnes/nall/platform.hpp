@@ -64,8 +64,8 @@
   #define mkdir(n, m) _wmkdir(nall::utf16_t(n))
   #define putenv      _putenv
   #define rmdir       _rmdir
-  #define usleep(n)   Sleep(n / 1000)
   #define vsnprintf   _vsnprintf
+  inline void usleep(unsigned milliseconds) { Sleep(milliseconds / 1000); }
 #endif
 
 //================

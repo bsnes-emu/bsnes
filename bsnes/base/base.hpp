@@ -1,7 +1,7 @@
 #ifndef BASE_HPP
 #define BASE_HPP
 
-const char Version[] = "086.12";
+const char Version[] = "086.13";
 
 #include <nall/platform.hpp>
 #include <nall/algorithm.hpp>
@@ -121,6 +121,7 @@ typedef uint29_t uint29;
 typedef uint30_t uint30;
 typedef uint31_t uint31;
 typedef uint32_t uint32;
+typedef uint_t<33> uint33;
 typedef uint64_t uint64;
 
 typedef varuint_t varuint;

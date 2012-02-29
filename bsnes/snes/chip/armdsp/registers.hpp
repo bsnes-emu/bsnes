@@ -16,7 +16,7 @@ struct Bridge {
   Buffer armtocpu;
 
   uint8 status() const {
-    return 0x80 | (cputoarm.ready << 3) | (armtocpu.ready << 0);
+    return 0x84 | (cputoarm.ready << 3) | (armtocpu.ready << 0);
   }
 } bridge;
 

@@ -1,4 +1,4 @@
-//ARM v3 (ARM6?)
+//ARMv3 (ARM6)
 
 struct ArmDSP : public Coprocessor {
   uint8 programROM[128 * 1024];
@@ -22,6 +22,11 @@ struct ArmDSP : public Coprocessor {
   //opcodes.cpp
   bool condition();
   void opcode(uint32 data);
+  void lsl(bool &c, uint32 &rm, uint32 rs);
+  void lsr(bool &c, uint32 &rm, uint32 rs);
+  void asr(bool &c, uint32 &rm, uint32 rs);
+  void ror(bool &c, uint32 &rm, uint32 rs);
+  void rrx(bool &c, uint32 &rm);
 
   void op_multiply();
   void op_move_to_status_register_from_register();

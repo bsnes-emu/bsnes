@@ -44,7 +44,7 @@ void ArmDSP::enter() {
     pipeline.prefetch.opcode = bus_read<4>(r[15]);
     r[15].step();
 
-  //if(pipeline.instruction.address == 0x00000208) trace = 1;
+  //if(pipeline.instruction.address == 0x0000ef5c) trace = 1;
     if(trace) {
       print("\n", disassemble_registers(), "\n");
       print(disassemble_opcode(pipeline.instruction.address), "\n");
@@ -52,6 +52,7 @@ void ArmDSP::enter() {
     }
 
     instruction = pipeline.instruction.opcode;
+    if(!condition()) continue;
     if((instruction & 0x0fc000f0) == 0x00000090) { op_multiply(); continue; }
     if((instruction & 0x0fb000f0) == 0x01000000) { op_move_to_register_from_status_register(); continue; }
     if((instruction & 0x0fb000f0) == 0x01200000) { op_move_to_status_register_from_register(); continue; }

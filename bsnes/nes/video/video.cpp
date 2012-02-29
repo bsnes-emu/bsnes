@@ -46,9 +46,10 @@ unsigned Video::palette30(
   q *= saturation;
 
   auto gammaAdjust = [=](double f) { return f < 0.0 ? 0.0 : std::pow(f, 2.2 / gamma); };
-  return (uclamp<10>(1023.0 * gammaAdjust(y +  0.946882 * i +  0.623557 * q)) << 20)
-       + (uclamp<10>(1023.0 * gammaAdjust(y + -0.274788 * i + -0.635691 * q)) << 10)
-       + (uclamp<10>(1023.0 * gammaAdjust(y + -1.108545 * i +  1.709007 * q)) <<  0);
+  unsigned r = 1023.0 * gammaAdjust(y +  0.946882 * i +  0.623557 * q);
+  unsigned g = 1023.0 * gammaAdjust(y + -0.274788 * i + -0.635691 * q);
+  unsigned b = 1023.0 * gammaAdjust(y + -1.108545 * i +  1.709007 * q);
+  return (uclamp<10>(r) << 20) + (uclamp<10>(g) << 10) + (uclamp<10>(b) << 0);
 }
 
 void Video::generate(Format format) {

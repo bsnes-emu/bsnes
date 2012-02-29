@@ -15,24 +15,49 @@ string ArmDSP::disassemble_opcode(uint32 pc) {
   uint32 instruction = bus_read<4>(pc);
   output.append(hex<8>(instruction), "  ");
 
+  //multiply
+  if((instruction & 0x0fc000f0) == 0x00000090) {
+    uint4 condition = instruction >> 28;
+    uint1 accumulate = instruction >> 21;
+    uint1 save = instruction >> 20;
+    uint4 rd = instruction >> 16;
+    uint4 rn = instruction >> 12;
+    uint4 rs = instruction >> 8;
+    uint4 rm = instruction >> 0;
+
+    output.append(accumulate ? "mla" : "mul", condition[conditions], save ? "s " : " ");
+    output.append(registers[rd], ",", registers[rm], ",", registers[rs]);
+    if(accumulate) output.append(",", registers[rn]);
+
+    return output;
+  }
+
   //move to register from status register
   if((instruction & 0x0fb000f0) == 0x01000000) {
+    uint4 condition = instruction >> 28;
     uint1 psr = instruction >> 22;
     uint4 rd = instruction >> 12;
-    output.append("mrs ", registers[rd], ",", psr ? "spsr" : "cpsr");
+
+    output.append("mrs", condition[conditions], " ");
+    output.append(registers[rd], ",", psr ? "spsr" : "cpsr");
+
     return output;
   }
 
   //move to status register from register
   if((instruction & 0x0fb000f0) == 0x01200000) {
+    uint4 condition = instruction >> 28;
     uint1 psr = instruction >> 22;
     uint4 field = instruction >> 16;
-    output.append("msr ", psr ? "spsr:" : "cpsr:",
+
+    output.append("msr", conditions[condition], " ");
+    output.append(psr ? "spsr:" : "cpsr:",
       field & 1 ? "c" : "",
       field & 2 ? "x" : "",
       field & 4 ? "s" : "",
       field & 8 ? "f" : "",
       ",", registers[(uint4)instruction]);
+
     return output;
   }
 

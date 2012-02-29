@@ -1,7 +1,8 @@
 #ifdef ARMDSP_CPP
 
 bool ArmDSP::condition() {
-  switch((uint4)(instruction >> 28)) {
+  uint4 condition = instruction >> 28;
+  switch(condition) {
   case  0: return cpsr.z == 1;                      //EQ (equal)
   case  1: return cpsr.z == 0;                      //NE (not equal)
   case  2: return cpsr.c == 1;                      //CS (carry set)
@@ -29,33 +30,36 @@ bool ArmDSP::condition() {
 void ArmDSP::opcode(uint32 rm) {
   uint4 opcode = instruction >> 21;
   uint1 s = instruction >> 20;
-  auto &rn = r[(uint4)(instruction >> 16)];
-  auto &rd = r[(uint4)(instruction >> 12)];
+  uint4 n = instruction >> 16;
+  uint4 d = instruction >> 12;
+
+  uint32 rn = r[n];
+  auto &rd = r[d];
   uint32 ri = rd, ro;
 
   //comparison opcodes always update flags
   if(opcode >= 8 && opcode <= 11) assert(s == 1);
 
-  static auto bit = [&](uint32 ro) {
+  auto bit = [&](uint32 ro) {
     if(!s) return;
-    cpsr.n = ro & 0x80000000;
+    cpsr.n = ro >> 31;
     cpsr.z = ro == 0;
   };
 
-  static auto add = [&](uint32 ro) {
+  auto add = [&](uint32 ro) {
     if(!s) return;
-    cpsr.n = ro & 0x80000000;
+    cpsr.n = ro >> 31;
     cpsr.z = ro == 0;
     cpsr.c = ro < ri;
-    cpsr.v = ~(ri ^ rm) & (ri ^ ro) & 0x80000000;
+    cpsr.v = ~(ri ^ rm) & (ri ^ ro) & (1u << 31);
   };
 
-  static auto sub = [&](uint32 ro) {
+  auto sub = [&](uint32 ro) {
     if(!s) return;
-    cpsr.n = ro & 0x80000000;
+    cpsr.n = ro >> 31;
     cpsr.z = ro == 0;
     cpsr.c = ro > ri;
-    cpsr.v =  (ri ^ rm) & (ri ^ ro) & 0x80000000;
+    cpsr.v =  (ri ^ rm) & (ri ^ ro) & (1u << 31);
   };
 
   switch(opcode) {
@@ -78,7 +82,46 @@ void ArmDSP::opcode(uint32 rm) {
   }
 }
 
-//(mul,mla){condition}{s}
+//logical shift left
+void ArmDSP::lsl(bool &c, uint32 &rm, uint32 rs) {
+  while(rs--) {
+    c = rm >> 31;
+    rm <<= 1;
+  }
+}
+
+//logical shift right
+void ArmDSP::lsr(bool &c, uint32 &rm, uint32 rs) {
+  while(rs--) {
+    c = rm & 1;
+    rm >>= 1;
+  }
+}
+
+//arithmetic shift right
+void ArmDSP::asr(bool &c, uint32 &rm, uint32 rs) {
+  while(rs--) {
+    c = rm & 1;
+    rm = (int32)rm >> 1;
+  }
+}
+
+//rotate right
+void ArmDSP::ror(bool &c, uint32 &rm, uint32 rs) {
+  while(rs--) {
+    c = rm & 1;
+    rm = (rm << 31) | (rm >> 1);
+  }
+}
+
+//rotate right with extend
+void ArmDSP::rrx(bool &c, uint32 &rm) {
+  bool carry = c;
+  c = rm & 1;
+  rm = (carry << 31) | (rm >> 1);
+}
+
+//(mul,mla){condition}{s} rd,rm,rs,rn
 //cccc 0000 00as dddd nnnn ssss 1001 mmmm
 //c = condition
 //a = accumulate
@@ -88,8 +131,6 @@ void ArmDSP::opcode(uint32 rm) {
 //s = rs
 //n = rm
 void ArmDSP::op_multiply() {
-  if(!condition()) return;
-
   uint1 accumulate = instruction >> 21;
   uint1 save = instruction >> 20;
   uint4 d = instruction >> 16;
@@ -100,7 +141,7 @@ void ArmDSP::op_multiply() {
   r[d] = r[m] * r[s];
   if(accumulate) r[d] += r[n];
   if(save) {
-    cpsr.n = r[d] & 0x80000000;
+    cpsr.n = r[d] >> 31;
     cpsr.z = r[d] == 0;
   }
 }
@@ -111,8 +152,6 @@ void ArmDSP::op_multiply() {
 //r = SPSR (0 = CPSR)
 //d = rd
 void ArmDSP::op_move_to_register_from_status_register() {
-  if(!condition()) return;
-
   uint1 source = instruction >> 22;
   uint4 d = instruction >> 12;
 
@@ -126,8 +165,6 @@ void ArmDSP::op_move_to_register_from_status_register() {
 //f = field mask
 //m = rm
 void ArmDSP::op_move_to_status_register_from_register() {
-  if(!condition()) return;
-
   uint1 source = instruction >> 22;
   uint4 field = instruction >> 16;
   uint4 m = instruction;
@@ -152,44 +189,27 @@ void ArmDSP::op_move_to_status_register_from_register() {
 //s = shift
 //m = rm
 void ArmDSP::op_data_immediate_shift() {
-  if(!condition()) return;
-
   uint1 save = instruction >> 20;
   uint5 shift = instruction >> 7;
   uint2 mode = instruction >> 5;
   uint4 m = instruction;
 
-  bool carry = cpsr.c;
   uint32 rs = shift;
   uint32 rm = r[m];
+  bool c = cpsr.c;
 
-  switch(mode) {
-  case 0:  //LSL
-    rm = rm << rs;
-    if(rs) carry = rm & (1 << (32 - rs));
-    break;
+  if(mode == 0) lsl(c, rm, rs);
+  if(mode == 1) lsr(c, rm, rs ? rs : 32);
+  if(mode == 2) asr(c, rm, rs ? rs : 32);
+  if(mode == 3) rs ? ror(c, rm, rs) : rrx(c, rm);
 
-  case 1:  //LSR
-    if(rs == 0) rs = 32;
-    rm = rm >> rs;
-    carry = rm & (1 << (rs - 1));
-    break;
-
-  case 2:  //ASR
-    if(rs == 0) rs = 32;
-    rm = (int32)rm >> rs;
-    break;
-
-  case 3:  //ROR + RRX
-    if(rs == 0) rm = (cpsr.c << 31) | (rm >> 1);      //RRX
-    if(rs != 0) rm = (rm >> rs) + (rm << (32 - rs));  //ROR
-    break;
-  }
-
-  if(save) cpsr.c = carry;
+  if(save) cpsr.c = c;
   opcode(rm);
 }
 
+//{opcode}{condition}{s} rd,rm {shift} rs
+//{opcode}{condition} rn,rm {shift} rs
+//{opcode}{condition}{s} rd,rn,rm {shift} rs
 //cccc 000o ooos nnnn dddd ssss 0ss1 mmmm
 //c = condition
 //o = opcode
@@ -200,39 +220,21 @@ void ArmDSP::op_data_immediate_shift() {
 //s = shift
 //m = rm
 void ArmDSP::op_data_register_shift() {
-  if(!condition()) return;
-
   uint1 save = instruction >> 20;
   uint4 s = instruction >> 8;
   uint2 mode = instruction >> 5;
   uint4 m = instruction >> 0;
 
-  bool carry = cpsr.c;
-  uint32 rs = (uint8)r[s];
+  uint8 rs = r[s];
   uint32 rm = r[m];
+  bool c = cpsr.c;
 
-  switch(mode) {
-  case 0:  //LSL
-    rm = rm << rs;
-    if(rs) carry = rm & (1 << (32 - rs));
-    break;
+  if(mode == 0) lsl(c, rm, rs < 33 ? rs : 33);
+  if(mode == 1) lsr(c, rm, rs < 33 ? rs : 33);
+  if(mode == 2) asr(c, rm, rs < 32 ? rs : 32);
+  if(mode == 3) ror(c, rm, rs < 32 ? rs : 32);
 
-  case 1:  //LSR
-    if(rs == 0) break;
-    rm = rm >> rs;
-    carry = rm & (1 << (rs - 1));
-    break;
-
-  case 2:  //ASR
-    rm = (int32)rm >> rs;
-    break;
-
-  case 3:  //ROR
-    rm = (rm >> rs) + (rm << (32 - rs));
-    break;
-  }
-
-  if(save) cpsr.c = carry;
+  if(save) cpsr.c = c;
   opcode(rm);
 }
 
@@ -248,18 +250,17 @@ void ArmDSP::op_data_register_shift() {
 //l = shift immediate
 //i = immediate
 void ArmDSP::op_data_immediate() {
-  if(!condition()) return;
-
   uint1 save = instruction >> 20;
   uint4 shift = instruction >> 8;
   uint8 immediate = instruction;
 
-  bool carry = cpsr.c;
+  bool c = cpsr.c;
+
   uint32 rs = shift << 1;
   uint32 rm = (immediate >> rs) | (immediate << (32 - rs));
-  if(rs) carry = immediate & 0x80000000;
+  if(rs) c = immediate >> 31;
 
-  if(save) cpsr.c = carry;
+  if(save) cpsr.c = c;
   opcode(rm);
 }
 
@@ -275,8 +276,6 @@ void ArmDSP::op_data_immediate() {
 //d = rd
 //i = immediate
 void ArmDSP::op_move_immediate_offset() {
-  if(!condition()) return;
-
   uint1 p = instruction >> 24;
   uint1 u = instruction >> 23;
   uint1 b = instruction >> 22;
@@ -318,8 +317,6 @@ void ArmDSP::op_move_immediate_offset() {
 //s = shift mode
 //m = rm
 void ArmDSP::op_move_register_offset() {
-  if(!condition()) return;
-
   uint1 p = instruction >> 24;
   uint1 u = instruction >> 23;
   uint1 b = instruction >> 22;
@@ -335,27 +332,12 @@ void ArmDSP::op_move_register_offset() {
   auto &rd = r[d];
   uint32 rs = immediate;
   uint32 rm = r[m];
+  bool c = cpsr.c;
 
-  switch(mode) {
-  case 0:  //LSL
-    rm = rm << rs;
-    break;
-
-  case 1:  //LSR
-    if(rs == 0) rs = 32;
-    rm = rm >> rs;
-    break;
-
-  case 2:  //ASR
-    if(rs == 0) rs = 32;
-    rm = (int32)rm >> rs;
-    break;
-
-  case 3:  //ROR + RRX
-    if(rs == 0) rm = (cpsr.c << 31) | (rm >> 1);      //RRX
-    if(rs != 0) rm = (rm >> rs) + (rm << (32 - rs));  //ROR
-    break;
-  }
+  if(mode == 0) lsl(c, rm, rs);
+  if(mode == 1) lsr(c, rm, rs ? rs : 32);
+  if(mode == 2) asr(c, rm, rs ? rs : 32);
+  if(mode == 3) rs ? ror(c, rm, rs) : rrx(c, rm);
 
   if(l) {
     if(p == 1) rn = u ? rn + rm : rn - rm;
@@ -372,6 +354,7 @@ void ArmDSP::op_move_register_offset() {
   if(p == 0 || w == 1) r[n] = rn;
 }
 
+//(ldm,stm){condition}{mode} rn{!},{r...}
 //cccc 100p uswl nnnn llll llll llll llll
 //c = condition
 //p = pre (0 = post-indexed addressing)
@@ -382,8 +365,6 @@ void ArmDSP::op_move_register_offset() {
 //n = rn
 //l = register list
 void ArmDSP::op_move_multiple() {
-  if(!condition()) return;
-
   uint1 p = instruction >> 24;
   uint1 u = instruction >> 23;
   uint1 s = instruction >> 22;
@@ -426,8 +407,6 @@ void ArmDSP::op_move_multiple() {
 //l = link
 //d = displacement (24-bit signed)
 void ArmDSP::op_branch() {
-  if(!condition()) return;
-
   uint1 l = instruction >> 24;
   int24 displacement = instruction;
 

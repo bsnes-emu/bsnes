@@ -36,8 +36,10 @@ void MSU1::enter() {
       }
     }
 
-    left  = sclamp<16>((double)left  * (double)mmio.audio_volume / 255.0);
-    right = sclamp<16>((double)right * (double)mmio.audio_volume / 255.0);
+    signed lchannel = (double)left  * (double)mmio.audio_volume / 255.0;
+    signed rchannel = (double)right * (double)mmio.audio_volume / 255.0;
+    left  = sclamp<16>(lchannel);
+    right = sclamp<16>(rchannel);
 
     audio.coprocessor_sample(left, right);
     step(1);
