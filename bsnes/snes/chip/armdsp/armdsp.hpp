@@ -3,7 +3,7 @@
 struct ArmDSP : public Coprocessor {
   uint8 programROM[128 * 1024];
   uint8 programRAM[16 * 1024];
-  uint8 aoRAM[32 * 1024];
+  uint8 dataROM[32 * 1024];
 
   #include "registers.hpp"
 
@@ -23,6 +23,7 @@ struct ArmDSP : public Coprocessor {
   bool condition();
   void opcode(uint32 data);
 
+  void op_multiply();
   void op_move_to_status_register_from_register();
   void op_move_to_register_from_status_register();
   void op_data_immediate_shift();

@@ -52,6 +52,7 @@ void ArmDSP::enter() {
     }
 
     instruction = pipeline.instruction.opcode;
+    if((instruction & 0x0fc000f0) == 0x00000090) { op_multiply(); continue; }
     if((instruction & 0x0fb000f0) == 0x01000000) { op_move_to_register_from_status_register(); continue; }
     if((instruction & 0x0fb000f0) == 0x01200000) { op_move_to_status_register_from_register(); continue; }
     if((instruction & 0x0e000010) == 0x00000000) { op_data_immediate_shift(); continue; }
@@ -126,7 +127,7 @@ void ArmDSP::power() {
   string filename = interface->path(Cartridge::Slot::Base, "st0018d.rom");
   file fp;
   if(fp.open(filename, file::mode::read)) {
-    fp.read(aoRAM, 32 * 1024);
+    fp.read(dataROM, 32 * 1024);
     fp.close();
   }
 }

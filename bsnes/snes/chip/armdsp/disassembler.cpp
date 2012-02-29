@@ -40,7 +40,7 @@ string ArmDSP::disassemble_opcode(uint32 pc) {
   //{opcode}{condition}{s} rd,rm {shift} #immediate
   //{opcode}{condition} rn,rm {shift} #immediate
   //{opcode}{condition}{s} rd,rn,rm {shift} #immediate
-  if((instruction & 0x0e000000) == 0x00000000) {
+  if((instruction & 0x0e000010) == 0x00000000) {
     uint4 condition = instruction >> 28;
     uint4 opcode = instruction >> 21;
     uint1 save = instruction >> 20;

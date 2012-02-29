@@ -25,7 +25,7 @@ uint8 ArmDSP::bus_iread(uint32 addr) {
   }
 
   if(addr >= 0xa0000000 && addr <= 0xa0007fff) {
-    return aoRAM[addr & 0x00007fff];
+    return dataROM[addr & 0x00007fff];
   }
 
   if(addr >= 0xe0000000 && addr <= 0xe0003fff) {
@@ -50,9 +50,6 @@ void ArmDSP::bus_iwrite(uint32 addr, uint8 data) {
     if(addr == 0x4000002c) return print("* w4000002c = ", hex<2>(data), "\n");
   }
 
-  if(addr >= 0xa0000000 && addr <= 0xa0007fff) {
-  }
-
   if(addr >= 0xe0000000 && addr <= 0xe0003fff) {
     programRAM[addr & 0x00003fff] = data;
     return;
@@ -64,10 +61,19 @@ void ArmDSP::bus_iwrite(uint32 addr, uint8 data) {
 template<unsigned size>
 uint32 ArmDSP::bus_read(uint32 addr) {
   uint32 data = 0;
-  data |= bus_iread(addr + 0) <<  0;
-  data |= bus_iread(addr + 1) <<  8;
-  data |= bus_iread(addr + 2) << 16;
-  data |= bus_iread(addr + 3) << 24;
+
+  if(size == 1) {
+    uint32 mask = 255u << ((addr & ~3) << 3);
+    data |= bus_iread(addr) & mask;
+  }
+
+  if(size == 4) {
+    addr &= ~3;
+    data |= bus_iread(addr + 0) <<  0;
+    data |= bus_iread(addr + 1) <<  8;
+    data |= bus_iread(addr + 2) << 16;
+    data |= bus_iread(addr + 3) << 24;
+  }
 
   if(0&&addr >= 0x40000000 && addr <= 0x400000ff) {
     if(addr != 0x40000020 || data != 0x80)
@@ -95,12 +101,18 @@ void ArmDSP::bus_write(uint32 addr, uint32 data) {
     }
   }
 
-  if(size == 1) data = (bus_read<1>(addr) & 0xffffff00) | (data & 0x000000ff);
-  if(size == 2) data = (bus_read<2>(addr) & 0xffff0000) | (data & 0x0000ffff);
-  bus_iwrite(addr + 0, data >>  0);
-  bus_iwrite(addr + 1, data >>  8);
-  bus_iwrite(addr + 2, data >> 16);
-  bus_iwrite(addr + 3, data >> 24);
+  if(size == 1) {
+    uint32 mask = 255u << ((addr & ~3) << 3);
+    bus_iwrite(addr, data);
+  }
+
+  if(size == 4) {
+    addr &= ~3;
+    bus_iwrite(addr + 0, data >>  0);
+    bus_iwrite(addr + 1, data >>  8);
+    bus_iwrite(addr + 2, data >> 16);
+    bus_iwrite(addr + 3, data >> 24);
+  }
 }
 
 #endif

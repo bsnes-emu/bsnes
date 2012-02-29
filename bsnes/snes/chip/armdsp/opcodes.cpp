@@ -36,13 +36,13 @@ void ArmDSP::opcode(uint32 rm) {
   //comparison opcodes always update flags
   if(opcode >= 8 && opcode <= 11) assert(s == 1);
 
-  static auto nz = [&](uint32 ro) {
+  static auto bit = [&](uint32 ro) {
     if(!s) return;
     cpsr.n = ro & 0x80000000;
     cpsr.z = ro == 0;
   };
 
-  static auto nzcv = [&](uint32 ro) {
+  static auto add = [&](uint32 ro) {
     if(!s) return;
     cpsr.n = ro & 0x80000000;
     cpsr.z = ro == 0;
@@ -50,23 +50,58 @@ void ArmDSP::opcode(uint32 rm) {
     cpsr.v = ~(ri ^ rm) & (ri ^ ro) & 0x80000000;
   };
 
+  static auto sub = [&](uint32 ro) {
+    if(!s) return;
+    cpsr.n = ro & 0x80000000;
+    cpsr.z = ro == 0;
+    cpsr.c = ro > ri;
+    cpsr.v =  (ri ^ rm) & (ri ^ ro) & 0x80000000;
+  };
+
   switch(opcode) {
-  case  0: rd = rn & rm;            nz(rd); break;  //AND (logical and)
-  case  1: rd = rn ^ rm;            nz(rd); break;  //EOR (logical exclusive or)
-  case  2: rd = rn +~rm + 1;      nzcv(rd); break;  //SUB (subtract)
-  case  3: rd = rm +~rn + 1;      nzcv(rd); break;  //RSB (reverse subtract)
-  case  4: rd = rn + rm;          nzcv(rd); break;  //ADD (add)
-  case  5: rd = rn + rm + cpsr.c; nzcv(rd); break;  //ADC (add with carry)
-  case  6: rd = rn +~rm + cpsr.c; nzcv(rd); break;  //SBC (subtract with carry)
-  case  7: rd = rm +~rn + cpsr.c; nzcv(rd); break;  //RSC (reverse subtract with carry)
-  case  8: ro = rn & rm;            nz(ro); break;  //TST (test)
-  case  9: ro = rn ^ rm;            nz(ro); break;  //TEQ (test equivalence)
-  case 10: ro = rn +~rm + 1;      nzcv(ro); break;  //CMP (compare)
-  case 11: ro = rn + rm;          nzcv(ro); break;  //CMN (compare negated)
-  case 12: rd = rn | rm;            nz(rd); break;  //ORR (logical inclusive or)
-  case 13: rd = rm;                 nz(rd); break;  //MOV (move)
-  case 14: rd = rn &~rm;            nz(rd); break;  //BIC (bit clear)
-  case 15: rd =~rm;                 nz(rd); break;  //MVN (move not)
+  case  0: rd = rn & rm;          bit(rd); break;  //AND (logical and)
+  case  1: rd = rn ^ rm;          bit(rd); break;  //EOR (logical exclusive or)
+  case  2: rd = rn - rm;          sub(rd); break;  //SUB (subtract)
+  case  3: rd = rm - rn;          sub(rd); break;  //RSB (reverse subtract)
+  case  4: rd = rn + rm;          add(rd); break;  //ADD (add)
+  case  5: rd = rn + rm + cpsr.c; add(rd); break;  //ADC (add with carry)
+  case  6: rd = rn - rm -!cpsr.c; sub(rd); break;  //SBC (subtract with carry)
+  case  7: rd = rm - rn -!cpsr.c; sub(rd); break;  //RSC (reverse subtract with carry)
+  case  8: ro = rn & rm;          bit(ro); break;  //TST (test)
+  case  9: ro = rn ^ rm;          bit(ro); break;  //TEQ (test equivalence)
+  case 10: ro = rn - rm;          sub(ro); break;  //CMP (compare)
+  case 11: ro = rn + rm;          add(ro); break;  //CMN (compare negated)
+  case 12: rd = rn | rm;          bit(rd); break;  //ORR (logical inclusive or)
+  case 13: rd = rm;               bit(rd); break;  //MOV (move)
+  case 14: rd = rn &~rm;          bit(rd); break;  //BIC (bit clear)
+  case 15: rd =~rm;               bit(rd); break;  //MVN (move not)
+  }
+}
+
+//(mul,mla){condition}{s}
+//cccc 0000 00as dddd nnnn ssss 1001 mmmm
+//c = condition
+//a = accumulate
+//s = save flags
+//d = rd
+//n = rn
+//s = rs
+//n = rm
+void ArmDSP::op_multiply() {
+  if(!condition()) return;
+
+  uint1 accumulate = instruction >> 21;
+  uint1 save = instruction >> 20;
+  uint4 d = instruction >> 16;
+  uint4 n = instruction >> 12;
+  uint4 s = instruction >> 8;
+  uint4 m = instruction >> 0;
+
+  r[d] = r[m] * r[s];
+  if(accumulate) r[d] += r[n];
+  if(save) {
+    cpsr.n = r[d] & 0x80000000;
+    cpsr.z = r[d] == 0;
   }
 }
 
