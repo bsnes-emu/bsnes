@@ -29,56 +29,53 @@ bool ArmDSP::condition() {
 //ro = modified target
 void ArmDSP::opcode(uint32 rm) {
   uint4 opcode = instruction >> 21;
-  uint1 s = instruction >> 20;
+  uint1 save = instruction >> 20;
   uint4 n = instruction >> 16;
   uint4 d = instruction >> 12;
 
   uint32 rn = r[n];
-  auto &rd = r[d];
-  uint32 ri = rd, ro;
 
-  //comparison opcodes always update flags
-  if(opcode >= 8 && opcode <= 11) assert(s == 1);
+  //comparison opcodes always update flags (debug test)
+  //this can be removed later: s=0 opcode=8-11 is invalid
+  if(opcode >= 8 && opcode <= 11) assert(save == 1);
 
-  auto bit = [&](uint32 ro) {
-    if(!s) return;
-    cpsr.n = ro >> 31;
-    cpsr.z = ro == 0;
+  auto test = [&](uint32 result) {
+    if(save) {
+      cpsr.n = result >> 31;
+      cpsr.z = result == 0;
+      cpsr.c = shiftercarry;
+    }
+    return result;
   };
 
-  auto add = [&](uint32 ro) {
-    if(!s) return;
-    cpsr.n = ro >> 31;
-    cpsr.z = ro == 0;
-    cpsr.c = ro < ri;
-    cpsr.v = ~(ri ^ rm) & (ri ^ ro) & (1u << 31);
-  };
-
-  auto sub = [&](uint32 ro) {
-    if(!s) return;
-    cpsr.n = ro >> 31;
-    cpsr.z = ro == 0;
-    cpsr.c = ro > ri;
-    cpsr.v =  (ri ^ rm) & (ri ^ ro) & (1u << 31);
+  auto math = [&](uint32 source, uint32 modify, bool carry) {
+    uint32 result = source + modify + carry;
+    if(save) {
+      cpsr.n = result >> 31;
+      cpsr.z = result == 0;
+      cpsr.c = result < source;
+      cpsr.v = ~(source ^ modify) & (source ^ result) & (1u << 31);
+    }
+    return result;
   };
 
   switch(opcode) {
-  case  0: rd = rn & rm;          bit(rd); break;  //AND (logical and)
-  case  1: rd = rn ^ rm;          bit(rd); break;  //EOR (logical exclusive or)
-  case  2: rd = rn - rm;          sub(rd); break;  //SUB (subtract)
-  case  3: rd = rm - rn;          sub(rd); break;  //RSB (reverse subtract)
-  case  4: rd = rn + rm;          add(rd); break;  //ADD (add)
-  case  5: rd = rn + rm + cpsr.c; add(rd); break;  //ADC (add with carry)
-  case  6: rd = rn - rm -!cpsr.c; sub(rd); break;  //SBC (subtract with carry)
-  case  7: rd = rm - rn -!cpsr.c; sub(rd); break;  //RSC (reverse subtract with carry)
-  case  8: ro = rn & rm;          bit(ro); break;  //TST (test)
-  case  9: ro = rn ^ rm;          bit(ro); break;  //TEQ (test equivalence)
-  case 10: ro = rn - rm;          sub(ro); break;  //CMP (compare)
-  case 11: ro = rn + rm;          add(ro); break;  //CMN (compare negated)
-  case 12: rd = rn | rm;          bit(rd); break;  //ORR (logical inclusive or)
-  case 13: rd = rm;               bit(rd); break;  //MOV (move)
-  case 14: rd = rn &~rm;          bit(rd); break;  //BIC (bit clear)
-  case 15: rd =~rm;               bit(rd); break;  //MVN (move not)
+  case  0: r[d] = test(rn & rm);         break;  //AND
+  case  1: r[d] = test(rn ^ rm);         break;  //EOR
+  case  2: r[d] = math(rn, ~rm, 1);      break;  //SUB
+  case  3: r[d] = math(rm, ~rn, 1);      break;  //RSB
+  case  4: r[d] = math(rn,  rm, 0);      break;  //ADD
+  case  5: r[d] = math(rn,  rm, cpsr.c); break;  //ADC
+  case  6: r[d] = math(rn, ~rm, cpsr.c); break;  //SBC
+  case  7: r[d] = math(rm, ~rn, cpsr.c); break;  //RSC
+  case  8:        test(rn & rm);         break;  //TST
+  case  9:        test(rn ^ rm);         break;  //TEQ
+  case 10:        math(rn, ~rm, 1);      break;  //CMP
+  case 11:        math(rn,  rm, 0);      break;  //CMN
+  case 12: r[d] = test(rn | rm);         break;  //ORR
+  case 13: r[d] = test(rm);              break;  //MOV
+  case 14: r[d] = test(rn &~rm);         break;  //BIC
+  case 15: r[d] = test(~rm);             break;  //MVN
   }
 }
 
@@ -203,7 +200,7 @@ void ArmDSP::op_data_immediate_shift() {
   if(mode == 2) asr(c, rm, rs ? rs : 32);
   if(mode == 3) rs ? ror(c, rm, rs) : rrx(c, rm);
 
-  if(save) cpsr.c = c;
+  shiftercarry = c;
   opcode(rm);
 }
 
@@ -232,9 +229,9 @@ void ArmDSP::op_data_register_shift() {
   if(mode == 0) lsl(c, rm, rs < 33 ? rs : 33);
   if(mode == 1) lsr(c, rm, rs < 33 ? rs : 33);
   if(mode == 2) asr(c, rm, rs < 32 ? rs : 32);
-  if(mode == 3) ror(c, rm, rs < 32 ? rs : 32);
+  if(mode == 3 && rs) ror(c, rm, rs & 31 == 0 ? 32 : rs & 31);
 
-  if(save) cpsr.c = c;
+  shiftercarry = c;
   opcode(rm);
 }
 
@@ -254,17 +251,15 @@ void ArmDSP::op_data_immediate() {
   uint4 shift = instruction >> 8;
   uint8 immediate = instruction;
 
-  bool c = cpsr.c;
-
   uint32 rs = shift << 1;
   uint32 rm = (immediate >> rs) | (immediate << (32 - rs));
-  if(rs) c = immediate >> 31;
+  if(rs) shiftercarry = immediate >> 31;
 
-  if(save) cpsr.c = c;
   opcode(rm);
 }
 
-//(ldr,str){condition}{b} rd,[rn{+offset}]
+//(ldr,str){condition}{b} rd,[rn{,+/-offset}]{!}
+//(ldr,str){condition}{b} rd,[rn]{,+/-offset}
 //cccc 010p ubwl nnnn dddd iiii iiii iiii
 //c = condition
 //p = pre (0 = post-indexed addressing)
@@ -288,22 +283,16 @@ void ArmDSP::op_move_immediate_offset() {
   uint32 rn = r[n];
   auto &rd = r[d];
 
-  if(l) {
-    if(p == 1) rn = u ? rn + rm : rn - rm;
-    if(b) rd = bus_read<1>(rn);
-    else  rd = bus_read<4>(rn);
-    if(p == 0) rn = u ? rn + rm : rn - rm;
-  } else {
-    if(p == 1) rn = u ? rn + rm : rn - rm;
-    if(b) bus_write<1>(rn, rd);
-    else  bus_write<4>(rn, rd);
-    if(p == 0) rn = u ? rn + rm : rn - rm;
-  }
+  if(p == 1) rn = u ? rn + rm : rn - rm;
+  if(l) rd = b ? bus_readbyte(rn) : bus_readword(rn);
+  else b ? bus_writebyte(rn, rd) : bus_writeword(rn, rd);
+  if(p == 0) rn = u ? rn + rm : rn - rm;
 
   if(p == 0 || w == 1) r[n] = rn;
 }
 
-//(ldr)(str){condition}{b} rd,rn,rm {mode} #immediate
+//(ldr)(str){condition}{b} rd,[rn,rm {mode} #immediate]{!}
+//(ldr)(str){condition}{b} rd,[rn],rm {mode} #immediate
 //cccc 011p ubwl nnnn dddd llll lss0 mmmm
 //c = condition
 //p = pre (0 = post-indexed addressing)
@@ -339,17 +328,10 @@ void ArmDSP::op_move_register_offset() {
   if(mode == 2) asr(c, rm, rs ? rs : 32);
   if(mode == 3) rs ? ror(c, rm, rs) : rrx(c, rm);
 
-  if(l) {
-    if(p == 1) rn = u ? rn + rm : rn - rm;
-    if(b) rd = bus_read<1>(rn);
-    else  rd = bus_read<4>(rn);
-    if(p == 0) rn = u ? rn + rm : rn - rm;
-  } else {
-    if(p == 1) rn = u ? rn + rm : rn - rm;
-    if(b) bus_write<1>(rn, rd);
-    else  bus_write<4>(rn, rd);
-    if(p == 0) rn = u ? rn + rm : rn - rm;
-  }
+  if(p == 1) rn = u ? rn + rm : rn - rm;
+  if(l) rd = b ? bus_readbyte(rn) : bus_readword(rn);
+  else b ? bus_writebyte(rn, rd) : bus_writeword(rn, rd);
+  if(p == 0) rn = u ? rn + rm : rn - rm;
 
   if(p == 0 || w == 1) r[n] = rn;
 }
@@ -379,19 +361,11 @@ void ArmDSP::op_move_multiple() {
   if(p == 1 && u == 0) rn = rn - bit::count(list) * 4 + 0;  //DB
   if(p == 0 && u == 0) rn = rn - bit::count(list) * 4 + 4;  //DA
 
-  if(l) {
-    for(unsigned n = 0; n < 16; n++) {
-      if(list & (1 << n)) {
-        r[n] = bus_read<4>(rn);
-        rn += 4;
-      }
-    }
-  } else {
-    for(unsigned n = 0; n < 16; n++) {
-      if(list & (1 << n)) {
-        bus_write<4>(rn, r[n]);
-        rn += 4;
-      }
+  for(unsigned n = 0; n < 16; n++) {
+    if(list & (1 << n)) {
+      if(l) r[n] = bus_readword(rn);
+      else bus_writeword(rn, r[n]);
+      rn += 4;
     }
   }
 

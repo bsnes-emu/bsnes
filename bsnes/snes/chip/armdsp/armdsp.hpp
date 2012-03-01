@@ -42,8 +42,12 @@ struct ArmDSP : public Coprocessor {
   //memory.cpp
   uint8 bus_iread(uint32 addr);
   void bus_iwrite(uint32 addr, uint8 data);
-  template<unsigned size> uint32 bus_read(uint32 addr);
-  template<unsigned size> void bus_write(uint32 addr, uint32 data);
+
+  uint32 bus_readbyte(uint32 addr);
+  uint32 bus_readword(uint32 addr);
+
+  void bus_writebyte(uint32 addr, uint32 data);
+  void bus_writeword(uint32 addr, uint32 data);
 
   //disassembler.cpp
   string disassemble_opcode(uint32 pc);

@@ -101,6 +101,8 @@ struct Register {
   }
 } r[16];
 
+bool shiftercarry;
+
 struct Pipeline {
   bool reload;
   struct Instruction {

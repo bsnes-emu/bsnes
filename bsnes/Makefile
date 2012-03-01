@@ -89,6 +89,6 @@ sync:
 	rm -r phoenix/test
 
 archive-all:
-	tar -cjf bsnes.tar.bz2 base data gameboy libco nall nes obj out phoenix ruby snes ui ui-debugger ui-libsnes Makefile cc.bat clean.bat
+	tar -cjf bsnes.tar.bz2 base data gameboy libco nall nes obj out phoenix ruby snes ui ui-debugger ui-libsnes Makefile cc.bat purge.bat
 
 help:;

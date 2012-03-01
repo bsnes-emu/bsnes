@@ -58,61 +58,30 @@ void ArmDSP::bus_iwrite(uint32 addr, uint8 data) {
   if((addr & 3) == 0) print("* ARM w", hex<8>(addr), " = ", hex<2>(data), "\n");
 }
 
-template<unsigned size>
-uint32 ArmDSP::bus_read(uint32 addr) {
-  uint32 data = 0;
-
-  if(size == 1) {
-    uint32 mask = 255u << ((addr & ~3) << 3);
-    data |= bus_iread(addr) & mask;
-  }
-
-  if(size == 4) {
-    addr &= ~3;
-    data |= bus_iread(addr + 0) <<  0;
-    data |= bus_iread(addr + 1) <<  8;
-    data |= bus_iread(addr + 2) << 16;
-    data |= bus_iread(addr + 3) << 24;
-  }
-
-  if(0&&addr >= 0x40000000 && addr <= 0x400000ff) {
-    if(addr != 0x40000020 || data != 0x80)
-    if(data) {
-      if(size == 1) print("* ARM r", hex<8>(addr), " = ", hex<2>(data), "\n");
-      if(size == 2) print("* ARM r", hex<8>(addr), " = ", hex<4>(data), "\n");
-      if(size == 4) print("* ARM r", hex<8>(addr), " = ", hex<8>(data), "\n");
-      usleep(20000);
-    }
-  }
-
-  if(size == 1) return data & 0xff;
-  if(size == 2) return data & 0xffff;
-  return data;
+uint32 ArmDSP::bus_readbyte(uint32 addr) {
+  return bus_iread(addr);
 }
 
-template<unsigned size>
-void ArmDSP::bus_write(uint32 addr, uint32 data) {
-  if(0&&addr >= 0x40000000 && addr <= 0x400000ff) {
-    if(data) {
-      if(size == 1) print("* ARM w", hex<8>(addr), " = ", hex<2>(data), "\n");
-      if(size == 2) print("* ARM w", hex<8>(addr), " = ", hex<4>(data), "\n");
-      if(size == 4) print("* ARM w", hex<8>(addr), " = ", hex<8>(data), "\n");
-      usleep(20000);
-    }
-  }
+uint32 ArmDSP::bus_readword(uint32 addr) {
+  addr &= ~3;
+  return (
+    (bus_iread(addr + 0) <<  0)
+  | (bus_iread(addr + 1) <<  8)
+  | (bus_iread(addr + 2) << 16)
+  | (bus_iread(addr + 3) << 24)
+  );
+}
 
-  if(size == 1) {
-    uint32 mask = 255u << ((addr & ~3) << 3);
-    bus_iwrite(addr, data);
-  }
+void ArmDSP::bus_writebyte(uint32 addr, uint32 data) {
+  return bus_iwrite(addr, data);
+}
 
-  if(size == 4) {
-    addr &= ~3;
-    bus_iwrite(addr + 0, data >>  0);
-    bus_iwrite(addr + 1, data >>  8);
-    bus_iwrite(addr + 2, data >> 16);
-    bus_iwrite(addr + 3, data >> 24);
-  }
+void ArmDSP::bus_writeword(uint32 addr, uint32 data) {
+  addr &= ~3;
+  bus_iwrite(addr + 0, data >>  0);
+  bus_iwrite(addr + 1, data >>  8);
+  bus_iwrite(addr + 2, data >> 16);
+  bus_iwrite(addr + 3, data >> 24);
 }
 
 #endif

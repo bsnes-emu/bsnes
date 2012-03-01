@@ -12,10 +12,11 @@ string ArmDSP::disassemble_opcode(uint32 pc) {
 
   string output{hex<8>(pc), "  "};
 
-  uint32 instruction = bus_read<4>(pc);
+  uint32 instruction = bus_readword(pc);
   output.append(hex<8>(instruction), "  ");
 
   //multiply
+  //(mul,mla){condition}{s} rd,rm,rs,rn
   if((instruction & 0x0fc000f0) == 0x00000090) {
     uint4 condition = instruction >> 28;
     uint1 accumulate = instruction >> 21;
@@ -33,6 +34,7 @@ string ArmDSP::disassemble_opcode(uint32 pc) {
   }
 
   //move to register from status register
+  //mrs{condition} rd,(c,s)psr
   if((instruction & 0x0fb000f0) == 0x01000000) {
     uint4 condition = instruction >> 28;
     uint1 psr = instruction >> 22;
@@ -45,6 +47,7 @@ string ArmDSP::disassemble_opcode(uint32 pc) {
   }
 
   //move to status register from register
+  //msr{condition} (c,s)psr:{fields},rm
   if((instruction & 0x0fb000f0) == 0x01200000) {
     uint4 condition = instruction >> 28;
     uint1 psr = instruction >> 22;
@@ -89,6 +92,34 @@ string ArmDSP::disassemble_opcode(uint32 pc) {
     return output;
   }
 
+  //data register shift
+  //{opcode}{condition}{s} rd,rm {shift} rs
+  //{opcode}{condition} rn,rm {shift} rs
+  //{opcode}{condition}{s} rd,rn,rm {shift} rs
+  if((instruction & 0x0e000090) == 0x00000010)  {
+    uint4 condition = instruction >> 28;
+    uint4 opcode = instruction >> 21;
+    uint1 save = instruction >> 20;
+    uint4 rn = instruction >> 16;
+    uint4 rd = instruction >> 12;
+    uint4 rs = instruction >> 8;
+    uint2 mode = instruction >> 5;
+    uint4 rm = instruction;
+
+    output.append(opcodes[opcode], conditions[condition]);
+    if(is_move(opcode)) output.append(save ? "s " : " ", registers[rd], ",");
+    if(is_comp(opcode)) output.append(registers[rn], ",");
+    if(is_math(opcode)) output.append(save ? "s " : " ", registers[rd], ",", registers[rn], ",");
+    output.append(registers[rm]);
+    if(mode == 0) output.append(" lsl ");
+    if(mode == 1) output.append(" lsr ");
+    if(mode == 2) output.append(" asr ");
+    if(mode == 3) output.append(" ror ");
+    output.append(registers[rs]);
+
+    return output;
+  }
+
   //data immediate
   //{opcode}{condition}{s} rd,#immediate
   //{opcode}{condition} rn,#immediate
@@ -113,21 +144,58 @@ string ArmDSP::disassemble_opcode(uint32 pc) {
   }
 
   //move immediate offset
-  //(ldr,str){condition}{b} rd,[rn{+offset}]
-  //todo: support W flag
+  //(ldr,str){condition}{b} rd,[rn{,+/-offset}]{!}
+  //(ldr,str){condition}{b} rd,[rn]{,+/-offset}
   if((instruction & 0x0e000000) == 0x04000000) {
     uint4 condition = instruction >> 28;
+    uint1 p = instruction >> 24;
     uint1 u = instruction >> 23;
+    uint1 b = instruction >> 22;
+    uint1 w = instruction >> 21;
     uint1 load = instruction >> 20;
     uint4 rn = instruction >> 16;
     uint4 rd = instruction >> 12;
     uint12 immediate = instruction;
 
-    output.append(load ? "ldr" : "str", conditions[condition]);
-    if(instruction & 0x00400000) output.append("b");
-    output.append(" ", registers[rd], ",[", registers[rn]);
-    if(immediate) output.append(u ? "+" : "-", "0x", hex<3>((uint12)instruction));
-    output.append("]");
+    output.append(load ? "ldr" : "str", conditions[condition], b ? "b " : " ");
+    output.append(registers[rd], ",[", registers[rn]);
+    if(p == 0) output.append("]");
+    if(immediate) output.append(",", u ? "+" : "-", "0x", hex<3>(immediate));
+    if(p == 1) output.append("]");
+    if(p == 1 && w == 1) output.append("!");
+
+    if(rn == 15) output.append(" (0x", hex<8>(pc + 8 + (u ? +immediate : -immediate)), ")");
+
+    return output;
+  }
+
+  //move register offset
+  //(ldr)(str){condition}{b} rd,[rn,rm {mode} #immediate]{!}
+  //(ldr)(str){condition}{b} rd,[rn],rm {mode} #immediate
+  if((instruction & 0x0e000010) == 0x06000000) {
+    uint4 condition = instruction >> 28;
+    uint1 p = instruction >> 24;
+    uint1 u = instruction >> 23;
+    uint1 b = instruction >> 22;
+    uint1 w = instruction >> 21;
+    uint1 load = instruction >> 20;
+    uint4 rn = instruction >> 16;
+    uint4 rd = instruction >> 12;
+    uint5 shift = instruction >> 7;
+    uint2 mode = instruction >> 5;
+    uint4 rm = instruction;
+
+    output.append(load ? "ldr" : "str", conditions[condition], b ? "b " : " ");
+    output.append(registers[rd], ",[", registers[rn]);
+    if(p == 0) output.append("]");
+    output.append(",", u ? "+" : "-", registers[rm]);
+    if(mode == 0 && shift != 0) output.append(" lsl #", shift);
+    if(mode == 1) output.append(" lsr #", shift == 0 ? 32u : (unsigned)shift);
+    if(mode == 2) output.append(" asr #", shift == 0 ? 32u : (unsigned)shift);
+    if(mode == 3 && shift != 0) output.append(" ror #", shift);
+    if(mode == 3 && shift == 0) output.append(" rrx");
+    if(p == 1) output.append("]");
+    if(p == 1 && w == 1) output.append("!");
 
     return output;
   }
@@ -166,10 +234,12 @@ string ArmDSP::disassemble_opcode(uint32 pc) {
 string ArmDSP::disassemble_registers() {
   return {
       "r0:", hex<8>(r[ 0]), "  r1:", hex<8>(r[ 1]), "  r2:", hex<8>(r[ 2]), "  r3:", hex<8>(r[ 3]),
-    "  r4:", hex<8>(r[ 4]), "  r5:", hex<8>(r[ 5]), "  r6:", hex<8>(r[ 6]), "  r7:", hex<8>(r[ 7]), "\n",
+    "  r4:", hex<8>(r[ 4]), "  r5:", hex<8>(r[ 5]), "  r6:", hex<8>(r[ 6]), "  r7:", hex<8>(r[ 7]), " ",
+    "cpsr:", cpsr.n ? "N" : "n", cpsr.z ? "Z" : "z", cpsr.c ? "C" : "c", cpsr.v ? "V" : "v", "\n",
       "r8:", hex<8>(r[ 8]), "  r9:", hex<8>(r[ 9]), " r10:", hex<8>(r[10]), " r11:", hex<8>(r[11]),
-    " r12:", hex<8>(r[12]), " r13:", hex<8>(r[13]), " r14:", hex<8>(r[14]), " r15:", hex<8>(r[15]), "\n",
-    "cpsr:", cpsr.n ? "N" : "n", cpsr.z ? "Z" : "z", cpsr.c ? "C" : "c", cpsr.v ? "V" : "v"
+    " r12:", hex<8>(r[12]), " r13:", hex<8>(r[13]), " r14:", hex<8>(r[14]), " r15:", hex<8>(r[15]), " ",
+    "spsr:", spsr.n ? "N" : "n", spsr.z ? "Z" : "z", spsr.c ? "C" : "c", spsr.v ? "V" : "v"
+
   };
 }
 

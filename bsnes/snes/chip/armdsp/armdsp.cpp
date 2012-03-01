@@ -35,13 +35,13 @@ void ArmDSP::enter() {
     if(pipeline.reload) {
       pipeline.reload = false;
       pipeline.prefetch.address = r[15];
-      pipeline.prefetch.opcode = bus_read<4>(r[15]);
+      pipeline.prefetch.opcode = bus_readword(r[15]);
       r[15].step();
     }
 
     pipeline.instruction = pipeline.prefetch;
     pipeline.prefetch.address = r[15];
-    pipeline.prefetch.opcode = bus_read<4>(r[15]);
+    pipeline.prefetch.opcode = bus_readword(r[15]);
     r[15].step();
 
   //if(pipeline.instruction.address == 0x0000ef5c) trace = 1;
@@ -68,11 +68,15 @@ void ArmDSP::enter() {
   }
 }
 
+//MMIO: $00-3f|80-bf:3800-38ff
+//3800-3807 mirrored throughout
+//a0 ignored
+
 uint8 ArmDSP::mmio_read(unsigned addr) {
   cpu.synchronize_coprocessors();
 
   uint8 data = 0x00;
-  addr &= 0xffff;
+  addr &= 0xff06;
 
   if(addr == 0x3800) {
     if(bridge.armtocpu.ready) {
@@ -104,7 +108,7 @@ void ArmDSP::mmio_write(unsigned addr, uint8 data) {
     usleep(200000);
   }
 
-  addr &= 0xffff;
+  addr &= 0xff06;
 
   if(addr == 0x3802) {
     bridge.cputoarm.ready = true;
@@ -131,12 +135,21 @@ void ArmDSP::power() {
     fp.read(dataROM, 32 * 1024);
     fp.close();
   }
+
+  filename = { dir(filename), "disassembly.txt" };
+  fp.open(filename, file::mode::write);
+  for(unsigned n = 0; n < 128 * 1024; n += 4) {
+    fp.print(disassemble_opcode(n), "\n");
+  }
+  fp.close();
 }
 
 void ArmDSP::reset() {
   create(ArmDSP::Enter, 21477272);
 
   for(auto &rd : r) rd = 0;
+  shiftercarry = 0;
+
   exception = false;
 
   pipeline.reload = true;
