@@ -336,7 +336,6 @@ void Cartridge::parse_markup_armdsp(XML::Node &root) {
   if(root.exists() == false) return;
   has_armdsp = true;
 
-  for(auto &byte : armdsp.programROM) byte = 0x00;
   string firmware = root["firmware"].data;
   string sha256 = root["sha256"].data;
 
@@ -344,14 +343,14 @@ void Cartridge::parse_markup_armdsp(XML::Node &root) {
   file fp;
   if(fp.open(path, file::mode::read) == false) {
     interface->message({ "Warning: ARM DSP firmware ", firmware, " is missing." });
-  } else if(fp.size() != 128 * 1024) {
+  } else if(fp.size() != 160 * 1024) {
     interface->message({ "Warning: ARM DSP firmware ", firmware, " is of the wrong file size." });
     fp.close();
   } else {
-    for(auto &byte : armdsp.programROM) byte = fp.read();
+    fp.read(armdsp.firmware, fp.size());
 
     if(!sha256.empty()) {
-      if(sha256 != nall::sha256(armdsp.programROM, 128 * 1024)) {
+      if(sha256 != nall::sha256(armdsp.firmware, fp.size())) {
         interface->message({ "Warning: ARM DSP firmware ", firmware, " SHA256 sum is incorrect." });
       }
     }

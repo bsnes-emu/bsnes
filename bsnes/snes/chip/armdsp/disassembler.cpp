@@ -164,7 +164,7 @@ string ArmDSP::disassemble_opcode(uint32 pc) {
     if(p == 1) output.append("]");
     if(p == 1 && w == 1) output.append("!");
 
-    if(rn == 15) output.append(" (0x", hex<8>(pc + 8 + (u ? +immediate : -immediate)), ")");
+    if(rn == 15) output.append(" =0x", hex<8>(bus_readword(pc + 8 + (u ? +immediate : -immediate))));
 
     return output;
   }

@@ -14,9 +14,11 @@ struct Bridge {
   };
   Buffer cputoarm;
   Buffer armtocpu;
+  bool reset;
+  bool ready;
 
   uint8 status() const {
-    return 0x84 | (cputoarm.ready << 3) | (armtocpu.ready << 0);
+    return (ready << 7) | (cputoarm.ready << 3) | (armtocpu.ready << 0) | 4;
   }
 } bridge;
 
@@ -111,6 +113,7 @@ struct Pipeline {
   };
   Instruction instruction;
   Instruction prefetch;
+  Instruction mdr;
 } pipeline;
 
 uint32 instruction;

@@ -14,6 +14,20 @@ ArmDSP armdsp;
 void ArmDSP::Enter() { armdsp.enter(); }
 
 void ArmDSP::enter() {
+  //reset hold delay
+  while(bridge.reset) {
+    step(4);
+    synchronize_cpu();
+    continue;
+  }
+
+  //reset sequence delay
+  if(bridge.ready == false) {
+    step(4096);  //todo: verify cycle count
+    synchronize_cpu();
+    bridge.ready = true;
+  }
+
   while(true) {
     if(scheduler.sync == Scheduler::SynchronizeMode::All) {
       scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
@@ -44,12 +58,16 @@ void ArmDSP::enter() {
     pipeline.prefetch.opcode = bus_readword(r[15]);
     r[15].step();
 
-  //if(pipeline.instruction.address == 0x0000ef5c) trace = 1;
+    pipeline.mdr.address = r[15];
+    pipeline.mdr.opcode = bus_readword(r[15]);
+
+    if(pipeline.instruction.address == 0x00000208) trace = 1;
     if(trace) {
       print("\n", disassemble_registers(), "\n");
       print(disassemble_opcode(pipeline.instruction.address), "\n");
       usleep(200000);
     }
+    trace = 0;
 
     instruction = pipeline.instruction.opcode;
     if(!condition()) continue;
@@ -86,7 +104,8 @@ uint8 ArmDSP::mmio_read(unsigned addr) {
     }
   }
 
-  if(addr == 0x3802);
+  if(addr == 0x3802) {
+  }
 
   if(addr == 0x3804) {
     data = bridge.status();
@@ -116,7 +135,10 @@ void ArmDSP::mmio_write(unsigned addr, uint8 data) {
     print("* w3802 = ", hex<2>(data), "\n");
   }
 
-  if(addr == 0x3804);
+  if(addr == 0x3804) {
+    if(!bridge.reset && data) arm_reset();
+    bridge.reset = data;
+  }
 }
 
 void ArmDSP::init() {
@@ -129,32 +151,44 @@ void ArmDSP::unload() {
 }
 
 void ArmDSP::power() {
-  string filename = interface->path(Cartridge::Slot::Base, "st0018d.rom");
+  string filename = { dir(interface->path(Cartridge::Slot::Base, "st018.rom")), "disassembly.txt" };
   file fp;
-  if(fp.open(filename, file::mode::read)) {
-    fp.read(dataROM, 32 * 1024);
-    fp.close();
-  }
-
-  filename = { dir(filename), "disassembly.txt" };
   fp.open(filename, file::mode::write);
   for(unsigned n = 0; n < 128 * 1024; n += 4) {
     fp.print(disassemble_opcode(n), "\n");
   }
   fp.close();
+
+  for(unsigned n = 0; n < 16 * 1024; n++) programRAM[n] = random(0x00);
 }
 
 void ArmDSP::reset() {
+  bridge.reset = false;
+  arm_reset();
+}
+
+void ArmDSP::arm_reset() {
+  bridge.ready = false;
   create(ArmDSP::Enter, 21477272);
 
   for(auto &rd : r) rd = 0;
   shiftercarry = 0;
-
-  exception = false;
-
+  exception = 0;
   pipeline.reload = true;
-
   r[15].write = [&] { pipeline.reload = true; };
+}
+
+ArmDSP::ArmDSP() {
+  firmware = new uint8[160 * 1024];
+  programRAM = new uint8[16 * 1024];
+
+  programROM = &firmware[0];
+  dataROM = &firmware[128 * 1024];
+}
+
+ArmDSP::~ArmDSP() {
+  delete[] firmware;
+  delete[] programRAM;
 }
 
 }

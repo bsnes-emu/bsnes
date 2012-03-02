@@ -1,9 +1,10 @@
 //ARMv3 (ARM6)
 
 struct ArmDSP : public Coprocessor {
-  uint8 programROM[128 * 1024];
-  uint8 programRAM[16 * 1024];
-  uint8 dataROM[32 * 1024];
+  uint8 *firmware;
+  uint8 *programROM;
+  uint8 *dataROM;
+  uint8 *programRAM;
 
   #include "registers.hpp"
 
@@ -15,6 +16,10 @@ struct ArmDSP : public Coprocessor {
   void unload();
   void power();
   void reset();
+  void arm_reset();
+
+  ArmDSP();
+  ~ArmDSP();
 
   uint8 mmio_read(unsigned addr);
   void mmio_write(unsigned addr, uint8 data);
@@ -40,13 +45,13 @@ struct ArmDSP : public Coprocessor {
   void op_branch();
 
   //memory.cpp
-  uint8 bus_iread(uint32 addr);
-  void bus_iwrite(uint32 addr, uint8 data);
+  uint8 bus_read(uint32 addr);
+  void bus_write(uint32 addr, uint8 data);
 
   uint32 bus_readbyte(uint32 addr);
-  uint32 bus_readword(uint32 addr);
-
   void bus_writebyte(uint32 addr, uint32 data);
+
+  uint32 bus_readword(uint32 addr);
   void bus_writeword(uint32 addr, uint32 data);
 
   //disassembler.cpp
