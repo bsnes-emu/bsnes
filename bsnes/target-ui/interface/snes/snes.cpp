@@ -226,6 +226,7 @@ void InterfaceSNES::run() {
 string InterfaceSNES::memoryName(SNES::Cartridge::NonVolatileRAM &memory) {
   if(memory.slot == SNES::Cartridge::Slot::Base) {
     if(memory.id == "program.ram") return interface->base.filename("program.ram", ".srm");
+    if(memory.id == "program.rtc") return interface->base.filename("program.rtc", ".rtc");
     if(memory.id == "upd96050.ram") return interface->base.filename("upd96050.ram", ".nec");
     if(memory.id == "bsx.ram") return interface->base.filename("bsx.ram", ".bss");
     if(memory.id == "bsx.psram") return interface->base.filename("bsx.psram", ".bsp");

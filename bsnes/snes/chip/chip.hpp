@@ -18,7 +18,6 @@ struct Coprocessor : Processor {
 #include <snes/chip/sdd1/sdd1.hpp>
 #include <snes/chip/spc7110/spc7110.hpp>
 #include <snes/chip/obc1/obc1.hpp>
-#include <snes/chip/st0018/st0018.hpp>
 #include <snes/chip/sufamiturbo/sufamiturbo.hpp>
 #include <snes/chip/msu1/msu1.hpp>
 #include <snes/chip/link/link.hpp>

@@ -44,8 +44,8 @@ void USART::write(uint8 data) {
 //clock
 uint2 USART::data() {
   //SNES -> USART
-  if(txlength == 0 && latched == 0) {
-    txlength++;
+  if(txlength == 0) {
+    if(latched == 0) txlength++;
   } else if(txlength <= 8) {
     txdata = (latched << 7) | (txdata >> 1);
     txlength++;

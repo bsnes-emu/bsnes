@@ -23,7 +23,6 @@ void Cartridge::parse_markup(const char *markup) {
   parse_markup_sdd1(cartridge["sdd1"]);
   parse_markup_spc7110(cartridge["spc7110"]);
   parse_markup_obc1(cartridge["obc1"]);
-  parse_markup_setarisc(cartridge["setarisc"]);
   parse_markup_msu1(cartridge["msu1"]);
   parse_markup_link(cartridge["link"]);
 }
@@ -236,8 +235,8 @@ void Cartridge::parse_markup_necdsp(XML::Node &root) {
     interface->message({ "Warning: NEC DSP firmware ", firmware, " is of the wrong file size." });
     fp.close();
   } else {
-    for(unsigned n = 0; n < promsize; n++) necdsp.programROM[n] = fp.readm(3);
-    for(unsigned n = 0; n < dromsize; n++) necdsp.dataROM[n] = fp.readm(2);
+    for(unsigned n = 0; n < promsize; n++) necdsp.programROM[n] = fp.readl(3);
+    for(unsigned n = 0; n < dromsize; n++) necdsp.dataROM[n] = fp.readl(2);
 
     if(!sha256.empty()) {
       //XML file specified SHA256 sum for program. Verify file matches the hash.
@@ -460,6 +459,7 @@ void Cartridge::parse_markup_sdd1(XML::Node &root) {
 void Cartridge::parse_markup_spc7110(XML::Node &root) {
   if(root.exists() == false) return;
   has_spc7110 = true;
+  has_spc7110rtc = root["rtc"].exists();
 
   auto &ram = root["ram"];
   auto &mmio = root["mmio"];
@@ -513,18 +513,6 @@ void Cartridge::parse_markup_obc1(XML::Node &root) {
   for(auto &node : root) {
     if(node.name != "map") continue;
     Mapping m({ &OBC1::read, &obc1 }, { &OBC1::write, &obc1 });
-    parse_markup_map(m, node);
-    mapping.append(m);
-  }
-}
-
-void Cartridge::parse_markup_setarisc(XML::Node &root) {
-  if(root.exists() == false) return;
-  has_st0018 = true;
-
-  for(auto &node : root) {
-    if(node.name != "map") continue;
-    Mapping m({ &ST0018::mmio_read, &st0018 }, { &ST0018::mmio_write, &st0018 });
     parse_markup_map(m, node);
     mapping.append(m);
   }

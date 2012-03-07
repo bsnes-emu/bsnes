@@ -28,7 +28,6 @@ void Cartridge::load(Mode cartridge_mode, const char *markup) {
   has_spc7110    = false;
   has_spc7110rtc = false;
   has_obc1       = false;
-  has_st0018     = false;
   has_msu1       = false;
   has_link       = false;
 

@@ -107,6 +107,8 @@ struct Register {
 } r[16];
 
 bool shiftercarry;
+uint32 instruction;
+bool exception;
 
 struct Pipeline {
   bool reload;
@@ -118,6 +120,3 @@ struct Pipeline {
   Instruction prefetch;
   Instruction mdr;
 } pipeline;
-
-uint32 instruction;
-bool exception;

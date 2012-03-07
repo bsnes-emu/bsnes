@@ -44,7 +44,6 @@ struct Cartridge : property<Cartridge> {
   readonly<bool> has_spc7110;
   readonly<bool> has_spc7110rtc;
   readonly<bool> has_obc1;
-  readonly<bool> has_st0018;
   readonly<bool> has_msu1;
   readonly<bool> has_link;
 
@@ -109,7 +108,6 @@ private:
   void parse_markup_sdd1(XML::Node&);
   void parse_markup_spc7110(XML::Node&);
   void parse_markup_obc1(XML::Node&);
-  void parse_markup_setarisc(XML::Node&);
   void parse_markup_msu1(XML::Node&);
   void parse_markup_link(XML::Node&);
 };

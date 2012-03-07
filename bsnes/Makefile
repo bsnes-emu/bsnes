@@ -4,14 +4,14 @@ nes := nes
 snes := snes
 gameboy := gameboy
 profile := accuracy
-ui := ui
+target := ui
 
 # options += console
 
 # compiler
 c       := $(compiler) -std=gnu99
 cpp     := $(subst cc,++,$(compiler)) -std=gnu++0x
-flags   := -I. -march=native -O3 -fomit-frame-pointer
+flags   := -I. -O3 -fomit-frame-pointer
 link    :=
 objects := libco
 
@@ -37,6 +37,8 @@ else ifeq ($(platform),win)
 else
   unknown_platform: help;
 endif
+
+ui := target-$(target)
 
 # implicit rules
 compile = \
@@ -89,6 +91,6 @@ sync:
 	rm -r phoenix/test
 
 archive-all:
-	tar -cjf bsnes.tar.bz2 base data gameboy libco nall nes obj out phoenix ruby snes ui ui-debugger ui-libsnes Makefile cc.bat purge.bat
+	tar -cjf bsnes.tar.bz2 base data gameboy libco nall nes obj out phoenix ruby snes target-debugger target-libsnes target-ui Makefile cc.bat purge.bat
 
 help:;

@@ -5,7 +5,7 @@ snes_objects += snes-cpu snes-smp snes-dsp snes-ppu
 snes_objects += snes-icd2 snes-nss snes-superfx snes-sa1
 snes_objects += snes-necdsp snes-hitachidsp snes-armdsp
 snes_objects += snes-bsx snes-srtc snes-sdd1 snes-spc7110
-snes_objects += snes-obc1 snes-st0018 snes-sufamiturbo
+snes_objects += snes-obc1 snes-sufamiturbo
 snes_objects += snes-msu1 snes-link
 objects += $(snes_objects)
 
@@ -54,7 +54,6 @@ obj/snes-srtc.o       : $(snes)/chip/srtc/srtc.cpp $(snes)/chip/srtc/*
 obj/snes-sdd1.o       : $(snes)/chip/sdd1/sdd1.cpp $(snes)/chip/sdd1/*
 obj/snes-spc7110.o    : $(snes)/chip/spc7110/spc7110.cpp $(snes)/chip/spc7110/*
 obj/snes-obc1.o       : $(snes)/chip/obc1/obc1.cpp $(snes)/chip/obc1/*
-obj/snes-st0018.o     : $(snes)/chip/st0018/st0018.cpp $(snes)/chip/st0018/*
 obj/snes-sufamiturbo.o: $(snes)/chip/sufamiturbo/sufamiturbo.cpp $(snes)/chip/sufamiturbo/*
 obj/snes-msu1.o       : $(snes)/chip/msu1/msu1.cpp $(snes)/chip/msu1/*
 obj/snes-link.o       : $(snes)/chip/link/link.cpp $(snes)/chip/link/*
