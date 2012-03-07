@@ -5,26 +5,34 @@
 
 namespace nall {
   template<unsigned bits, typename type_t = unsigned>
-  constexpr inline type_t uclamp(const type_t x) {
+  constexpr inline
+  typename type_if<sizeof(type_t) <= sizeof(unsigned), unsigned, uintmax_t>::type
+  uclamp(const type_t x) {
     enum : type_t { b = 1ull << (bits - 1), y = b * 2 - 1 };
     return y + ((x - y) & -(x < y));  //min(x, y);
   }
 
   template<unsigned bits, typename type_t = unsigned>
-  constexpr inline type_t uclip(const type_t x) {
+  constexpr inline
+  typename type_if<sizeof(type_t) <= sizeof(unsigned), unsigned, uintmax_t>::type
+  uclip(const type_t x) {
     enum : type_t { b = 1ull << (bits - 1), m = b * 2 - 1 };
     return (x & m);
   }
 
   template<unsigned bits, typename type_t = signed>
-  constexpr inline type_t sclamp(const type_t x) {
+  constexpr inline
+  typename type_if<sizeof(type_t) <= sizeof(signed), signed, intmax_t>::type
+  sclamp(const type_t x) {
     enum : type_t { b = 1ull << (bits - 1), m = b - 1 };
     return (x > m) ? m : (x < -b) ? -b : x;
   }
 
   template<unsigned bits, typename type_t = signed>
-  constexpr inline type_t sclip(const type_t x) {
-    typedef typename type_if<std::is_same<type_t, signed>::value, unsigned, uintmax_t>::type cast_t;
+  constexpr inline
+  typename type_if<sizeof(type_t) <= sizeof(signed), signed, intmax_t>::type
+  sclip(const type_t x) {
+    typedef typename type_if<sizeof(type_t) <= sizeof(signed), unsigned, uintmax_t>::type cast_t;
     enum : cast_t { b = 1ull << (bits - 1), m = b * 2 - 1 };
     return ((x & m) ^ b) - b;
   }

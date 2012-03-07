@@ -36,12 +36,13 @@ bool quotecopy(char *&t, T *&p) {
 
 string substr(const char *src, unsigned start, unsigned length) {
   string dest;
-  dest.reserve(length + 1);
   if(length == ~0u) {
     //copy entire string
+    dest.reserve(strlen(src + start) + 1);
     strcpy(dest(), src + start);
   } else {
     //copy partial string
+    dest.reserve(length + 1);
     strmcpy(dest(), src + start, length + 1);
   }
   return dest;

@@ -66,9 +66,18 @@ namespace nall {
       insert(0, data);
     }
 
-    void remove(unsigned index, unsigned count = 1) {
+    void remove(unsigned index = ~0u, unsigned count = 1) {
+      if(index == ~0) index = objectsize ? objectsize - 1 : 0;
       for(unsigned n = index; count + n < objectsize; n++) pool[n] = pool[count + n];
       objectsize = (count + index >= objectsize) ? index : objectsize - count;
+    }
+
+    T take(unsigned index = ~0u) {
+      if(index == ~0) index = objectsize ? objectsize - 1 : 0;
+      if(index >= objectsize) throw exception_out_of_bounds();
+      T item = pool[index];
+      remove(index);
+      return item;
     }
 
     void sort() {
@@ -82,6 +91,16 @@ namespace nall {
     optional<unsigned> find(const T& data) {
       for(unsigned n = 0; n < size(); n++) if(pool[n] == data) return { true, n };
       return { false, 0u };
+    }
+
+    T& first() {
+      if(objectsize == 0) throw exception_out_of_bounds();
+      return pool[0];
+    }
+
+    T& last() {
+      if(objectsize == 0) throw exception_out_of_bounds();
+      return pool[objectsize - 1];
     }
 
     //access

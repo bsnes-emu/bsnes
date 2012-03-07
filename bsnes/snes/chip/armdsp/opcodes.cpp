@@ -51,10 +51,11 @@ void ArmDSP::opcode(uint32 rm) {
   auto math = [&](uint32 source, uint32 modify, bool carry) {
     uint32 result = source + modify + carry;
     if(save) {
+      uint32 overflow = ~(source ^ modify) & (source ^ result);
       cpsr.n = result >> 31;
       cpsr.z = result == 0;
-      cpsr.c = result < source;
-      cpsr.v = ~(source ^ modify) & (source ^ result) & (1u << 31);
+      cpsr.c = (1u << 31) & (overflow ^ source ^ modify ^ result);
+      cpsr.v = (1u << 31) & (overflow);
     }
     return result;
   };
@@ -135,11 +136,23 @@ void ArmDSP::op_multiply() {
   uint4 s = instruction >> 8;
   uint4 m = instruction >> 0;
 
+  //Booth's algorithm: two bit steps
+  uint32 temp = r[s];
+  while(temp) {
+    temp >>= 2;
+    tick();
+  }
   r[d] = r[m] * r[s];
-  if(accumulate) r[d] += r[n];
+
+  if(accumulate) {
+    tick();
+    r[d] += r[n];
+  }
+
   if(save) {
     cpsr.n = r[d] >> 31;
     cpsr.z = r[d] == 0;
+    cpsr.c = 0;  //undefined
   }
 }
 

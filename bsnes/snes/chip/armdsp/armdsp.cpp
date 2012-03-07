@@ -16,15 +16,13 @@ void ArmDSP::Enter() { armdsp.enter(); }
 void ArmDSP::enter() {
   //reset hold delay
   while(bridge.reset) {
-    step(4);
-    synchronize_cpu();
+    tick();
     continue;
   }
 
   //reset sequence delay
   if(bridge.ready == false) {
-    step(4096);  //todo: verify cycle count
-    synchronize_cpu();
+    tick(65536);
     bridge.ready = true;
   }
 
@@ -33,17 +31,11 @@ void ArmDSP::enter() {
       scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
     }
 
-    step(4);  //todo: how many cycles per instruction?
-    synchronize_cpu();
-
     if(exception) {
       print("* ARM unknown instruction\n");
       print("\n", disassemble_registers());
       print("\n", disassemble_opcode(pipeline.instruction.address), "\n");
-      while(true) {
-        step(21477272);
-        synchronize_cpu();
-      }
+      while(true) tick(frequency);
     }
 
     if(pipeline.reload) {
@@ -58,16 +50,17 @@ void ArmDSP::enter() {
     pipeline.prefetch.opcode = bus_readword(r[15]);
     r[15].step();
 
-    pipeline.mdr.address = r[15];
-    pipeline.mdr.opcode = bus_readword(r[15]);
+  //todo: bus_readword() calls tick(); so we need to prefetch this as well
+  //pipeline.mdr.address = r[15];
+  //pipeline.mdr.opcode = bus_readword(r[15]);
 
-    if(pipeline.instruction.address == 0x00000208) trace = 1;
+  //if(pipeline.instruction.address == 0x00000208) trace = 1;
     if(trace) {
       print("\n", disassemble_registers(), "\n");
       print(disassemble_opcode(pipeline.instruction.address), "\n");
       usleep(200000);
     }
-    trace = 0;
+  //trace = 0;
 
     instruction = pipeline.instruction.opcode;
     if(!condition()) continue;
@@ -86,6 +79,13 @@ void ArmDSP::enter() {
   }
 }
 
+void ArmDSP::tick(unsigned clocks) {
+  if(bridge.timer && --bridge.timer == 0) bridge.busy = false;
+
+  step(clocks);
+  synchronize_cpu();
+}
+
 //MMIO: $00-3f|80-bf:3800-38ff
 //3800-3807 mirrored throughout
 //a0 ignored
@@ -100,20 +100,16 @@ uint8 ArmDSP::mmio_read(unsigned addr) {
     if(bridge.armtocpu.ready) {
       bridge.armtocpu.ready = false;
       data = bridge.armtocpu.data;
-      print("* r3800 = ", hex<2>(data), "\n");
     }
   }
 
   if(addr == 0x3802) {
+    bridge.timer = 0;
+    bridge.busy = false;
   }
 
   if(addr == 0x3804) {
     data = bridge.status();
-  }
-
-  if(0) {
-    print("* r", hex<6>(addr), " = ", hex<2>(data), "\n");
-    usleep(200000);
   }
 
   return data;
@@ -122,20 +118,15 @@ uint8 ArmDSP::mmio_read(unsigned addr) {
 void ArmDSP::mmio_write(unsigned addr, uint8 data) {
   cpu.synchronize_coprocessors();
 
-  if(0) {
-    print("* w", hex<6>(addr), " = ", hex<2>(data), "\n");
-    usleep(200000);
-  }
-
   addr &= 0xff06;
 
   if(addr == 0x3802) {
     bridge.cputoarm.ready = true;
     bridge.cputoarm.data = data;
-    print("* w3802 = ", hex<2>(data), "\n");
   }
 
   if(addr == 0x3804) {
+    data &= 1;
     if(!bridge.reset && data) arm_reset();
     bridge.reset = data;
   }
@@ -151,14 +142,6 @@ void ArmDSP::unload() {
 }
 
 void ArmDSP::power() {
-  string filename = { dir(interface->path(Cartridge::Slot::Base, "st018.rom")), "disassembly.txt" };
-  file fp;
-  fp.open(filename, file::mode::write);
-  for(unsigned n = 0; n < 128 * 1024; n += 4) {
-    fp.print(disassemble_opcode(n), "\n");
-  }
-  fp.close();
-
   for(unsigned n = 0; n < 16 * 1024; n++) programRAM[n] = random(0x00);
 }
 
@@ -168,8 +151,14 @@ void ArmDSP::reset() {
 }
 
 void ArmDSP::arm_reset() {
-  bridge.ready = false;
   create(ArmDSP::Enter, 21477272);
+
+  bridge.ready = false;
+  bridge.timer = 0;
+  bridge.timerlatch = 0;
+  bridge.busy = false;
+  bridge.cputoarm.ready = false;
+  bridge.armtocpu.ready = false;
 
   for(auto &rd : r) rd = 0;
   shiftercarry = 0;
@@ -179,8 +168,8 @@ void ArmDSP::arm_reset() {
 }
 
 ArmDSP::ArmDSP() {
-  firmware = new uint8[160 * 1024];
-  programRAM = new uint8[16 * 1024];
+  firmware = new uint8[160 * 1024]();
+  programRAM = new uint8[16 * 1024]();
 
   programROM = &firmware[0];
   dataROM = &firmware[128 * 1024];

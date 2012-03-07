@@ -14,11 +14,14 @@ struct Bridge {
   };
   Buffer cputoarm;
   Buffer armtocpu;
+  uint32 timer;
+  uint32 timerlatch;
   bool reset;
   bool ready;
+  bool busy;
 
   uint8 status() const {
-    return (ready << 7) | (cputoarm.ready << 3) | (armtocpu.ready << 0) | 4;
+    return (ready << 7) | (cputoarm.ready << 3) | (busy << 2) | (armtocpu.ready << 0);
   }
 } bridge;
 

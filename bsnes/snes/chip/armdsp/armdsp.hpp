@@ -10,6 +10,7 @@ struct ArmDSP : public Coprocessor {
 
   static void Enter();
   void enter();
+  void tick(unsigned clocks = 1);
 
   void init();
   void load();
