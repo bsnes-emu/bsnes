@@ -9,12 +9,37 @@
 #include <nall/stdint.hpp>
 
 namespace nall {
-  class serial {
-  public:
+  struct serial {
+    bool readable() {
+      if(port_open == false) return false;
+      fd_set fdset;
+      FD_ZERO(&fdset);
+      FD_SET(port, &fdset);
+      timeval timeout;
+      timeout.tv_sec = 0;
+      timeout.tv_usec = 0;
+      int result = select(FD_SETSIZE, &fdset, nullptr, nullptr, &timeout);
+      if(result < 1) return false;
+      return FD_ISSET(port, &fdset);
+    }
+
     //-1 on error, otherwise return bytes read
     int read(uint8_t *data, unsigned length) {
       if(port_open == false) return -1;
       return ::read(port, (void*)data, length);
+    }
+
+    bool writable() {
+      if(port_open == false) return false;
+      fd_set fdset;
+      FD_ZERO(&fdset);
+      FD_SET(port, &fdset);
+      timeval timeout;
+      timeout.tv_sec = 0;
+      timeout.tv_usec = 0;
+      int result = select(FD_SETSIZE, nullptr, &fdset, nullptr, &timeout);
+      if(result < 1) return false;
+      return FD_ISSET(port, &fdset);
     }
 
     //-1 on error, otherwise return bytes written

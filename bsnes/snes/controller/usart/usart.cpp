@@ -7,37 +7,59 @@
 //AT90USB1286
 
 //Connection Diagram:
-//[SNES]  [Teensy]
-// +5v     ---
-// Clock   D5
-// Latch   D2
-// Data1   D3
-// Data2   ---
-// IOBit   ---
-// GND     GND
+//SNES GND <> Teensy GND
+//SNES IOBit <> Teensy B0
+//SNES Latch <> Teensy D2
+//SNES Data1 <> Teensy D3
+//SNES Clock <> 1Kohm Resistor <> Teensy D5
+//Teensy D5 <> Teensy D7
 
 void USART::enter() {
   if(init && main) {
-    init({ &USART::usleep, this }, { &USART::read, this }, { &USART::write, this });
+    init(
+      {&USART::quit, this},
+      {&USART::usleep, this},
+      {&USART::readable, this},
+      {&USART::read, this},
+      {&USART::writable, this},
+      {&USART::write, this}
+    );
     main();
   }
-  while(true) step(1000000);  //fallback; main should never return
+  while(true) step(10000000);
+}
+
+bool USART::quit() {
+  step(1);
+  return false;
 }
 
 void USART::usleep(unsigned milliseconds) {
-  step(milliseconds);
+  step(10 * milliseconds);
+}
+
+bool USART::readable() {
+  step(1);
+  return txbuffer.size();
 }
 
 //SNES -> USART
 uint8 USART::read() {
+  step(1);
   while(txbuffer.size() == 0) step(1);
   uint8 data = txbuffer[0];
   txbuffer.remove(0);
   return data;
 }
 
+bool USART::writable() {
+  step(1);
+  return true;
+}
+
 //USART -> SNES
 void USART::write(uint8 data) {
+  step(1);
   rxbuffer.append(data ^ 0xff);
 }
 
@@ -103,7 +125,7 @@ USART::USART(bool port) : Controller(port) {
   if(open_absolute(filename)) {
     init = sym("usart_init");
     main = sym("usart_main");
-    if(init && main) create(Controller::Enter, 1000000);
+    if(init && main) create(Controller::Enter, 10000000);
   }
 }
 
