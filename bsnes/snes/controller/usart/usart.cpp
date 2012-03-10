@@ -43,6 +43,14 @@ void USART::write(uint8 data) {
 
 //clock
 uint2 USART::data() {
+  //Joypad
+  if(iobit()) {
+    if(counter >= 16) return 1;
+    uint2 result = interface->inputPoll(port, Input::Device::Joypad, 0, counter);
+    if(latched == 0) counter++;
+    return result;
+  }
+
   //SNES -> USART
   if(txlength == 0) {
     if(latched == 0) txlength++;
@@ -74,13 +82,16 @@ uint2 USART::data() {
 
 //latch
 void USART::latch(bool data) {
+  if(latched == data) return;
   latched = data;
+  counter = 0;
 }
 
 USART::USART(bool port) : Controller(port) {
   latched = 0;
   data1 = 0;
   data2 = 0;
+  counter = 0;
 
   rxlength = 0;
   rxdata = 0;

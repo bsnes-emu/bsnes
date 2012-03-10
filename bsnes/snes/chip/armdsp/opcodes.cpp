@@ -297,8 +297,13 @@ void ArmDSP::op_move_immediate_offset() {
   auto &rd = r[d];
 
   if(p == 1) rn = u ? rn + rm : rn - rm;
-  if(l) rd = b ? bus_readbyte(rn) : bus_readword(rn);
-  else b ? bus_writebyte(rn, rd) : bus_writeword(rn, rd);
+  if(l) {
+    rd = bus_readword(rn);
+    ror(shiftercarry, rd.data, 8 * (rn & 3));
+    if(b) rd &= 0xff;
+  } else {
+    b ? bus_writebyte(rn, rd) : bus_writeword(rn, rd);
+  }
   if(p == 0) rn = u ? rn + rm : rn - rm;
 
   if(p == 0 || w == 1) r[n] = rn;
@@ -342,8 +347,13 @@ void ArmDSP::op_move_register_offset() {
   if(mode == 3) rs ? ror(c, rm, rs) : rrx(c, rm);
 
   if(p == 1) rn = u ? rn + rm : rn - rm;
-  if(l) rd = b ? bus_readbyte(rn) : bus_readword(rn);
-  else b ? bus_writebyte(rn, rd) : bus_writeword(rn, rd);
+  if(l) {
+    rd = bus_readword(rn);
+    ror(shiftercarry, rd.data, 8 * (rn & 3));
+    if(b) rd &= 0xff;
+  } else {
+    b ? bus_writebyte(rn, rd) : bus_writeword(rn, rd);
+  }
   if(p == 0) rn = u ? rn + rm : rn - rm;
 
   if(p == 0 || w == 1) r[n] = rn;

@@ -80,8 +80,7 @@ void ArmDSP::enter() {
 }
 
 void ArmDSP::tick(unsigned clocks) {
-  if(bridge.timer && --bridge.timer == 0) bridge.busy = false;
-
+  if(bridge.timer && --bridge.timer == 0);
   step(clocks);
   synchronize_cpu();
 }
@@ -104,8 +103,7 @@ uint8 ArmDSP::mmio_read(unsigned addr) {
   }
 
   if(addr == 0x3802) {
-    bridge.timer = 0;
-    bridge.busy = false;
+    bridge.signal = false;
   }
 
   if(addr == 0x3804) {
@@ -154,9 +152,9 @@ void ArmDSP::arm_reset() {
   create(ArmDSP::Enter, 21477272);
 
   bridge.ready = false;
+  bridge.signal = false;
   bridge.timer = 0;
   bridge.timerlatch = 0;
-  bridge.busy = false;
   bridge.cputoarm.ready = false;
   bridge.armtocpu.ready = false;
 

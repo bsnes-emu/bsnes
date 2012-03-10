@@ -102,12 +102,14 @@ void Interface::loadCartridge(Mode mode) {
   utility->showMessage({ "Loaded ", cartridgeTitle });
 }
 
-bool Interface::loadCartridge(const string &filename) {
+bool Interface::loadCartridge(string filename) {
+  filename.trim<1>("\"");
+  filename.transform("\\", "/");
   bool result = false;
-  if(filename.endswith(".nes")) result = nes.loadCartridge(filename);
-  if(filename.endswith(".sfc")) result = snes.loadCartridge(filename);
-  if(filename.endswith(".gb" )) result = gameBoy.loadCartridge(GameBoy::System::Revision::GameBoy, filename);
-  if(filename.endswith(".gbc")) result = gameBoy.loadCartridge(GameBoy::System::Revision::GameBoyColor, filename);
+  if(filename.endswith(".nes") || filename.endswith(".nes/")) result = nes.loadCartridge(filename);
+  if(filename.endswith(".sfc") || filename.endswith(".sfc/")) result = snes.loadCartridge(filename);
+  if(filename.endswith(".gb" ) || filename.endswith(".gb/" )) result = gameBoy.loadCartridge(GameBoy::System::Revision::GameBoy, filename);
+  if(filename.endswith(".gbc") || filename.endswith(".gbc/")) result = gameBoy.loadCartridge(GameBoy::System::Revision::GameBoyColor, filename);
   return result;
 }
 
@@ -196,7 +198,6 @@ string Interface::sha256() {
 
 Interface::Interface() : core(nullptr) {
   mode = Mode::None;
-  palette.update();
   nes.initialize();
   snes.initialize();
   gameBoy.initialize();

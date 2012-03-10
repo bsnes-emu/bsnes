@@ -43,24 +43,18 @@ void ArmDSP::bus_write(uint32 addr, uint8 data) {
     return;
   }
 
+  if(addr == 0x40000010) {
+    bridge.signal = true;
+    return;
+  }
+
   if(addr == 0x40000020) bridge.timerlatch = (bridge.timerlatch & 0xffff00) | (data <<  0);
   if(addr == 0x40000024) bridge.timerlatch = (bridge.timerlatch & 0xff00ff) | (data <<  8);
   if(addr == 0x40000028) bridge.timerlatch = (bridge.timerlatch & 0x00ffff) | (data << 16);
 
   if(addr == 0x40000028) {
     bridge.timer = bridge.timerlatch;
-    bridge.busy = !bridge.timer;
   }
-}
-
-uint32 ArmDSP::bus_readbyte(uint32 addr) {
-  tick();
-  return bus_read(addr);
-}
-
-void ArmDSP::bus_writebyte(uint32 addr, uint32 data) {
-  tick();
-  return bus_write(addr, data);
 }
 
 uint32 ArmDSP::bus_readword(uint32 addr) {
@@ -81,6 +75,11 @@ void ArmDSP::bus_writeword(uint32 addr, uint32 data) {
   bus_write(addr + 1, data >>  8);
   bus_write(addr + 2, data >> 16);
   bus_write(addr + 3, data >> 24);
+}
+
+void ArmDSP::bus_writebyte(uint32 addr, uint32 data) {
+  tick();
+  return bus_write(addr, data);
 }
 
 #endif

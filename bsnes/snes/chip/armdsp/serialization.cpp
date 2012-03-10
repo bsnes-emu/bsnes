@@ -13,7 +13,7 @@ void ArmDSP::serialize(serializer &s) {
   s.integer(bridge.timerlatch);
   s.integer(bridge.reset);
   s.integer(bridge.ready);
-  s.integer(bridge.busy);
+  s.integer(bridge.signal);
 
   s.integer(cpsr.n);
   s.integer(cpsr.z);

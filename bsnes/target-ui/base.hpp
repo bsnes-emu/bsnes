@@ -34,6 +34,7 @@ struct Application {
   bool pause;
   bool autopause;
   bool compositionEnable;
+  unsigned depth;
 
   string basepath;
   string userpath;

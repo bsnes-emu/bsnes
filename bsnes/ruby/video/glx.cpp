@@ -2,7 +2,7 @@
   video.glx
   author: byuu
   license: public domain
-  last updated: 2010-09-28
+  last updated: 2012-03-09
 
   Design notes:
   SGI's GLX is the X11/Xlib interface to OpenGL.
@@ -89,7 +89,10 @@ public:
     }
 
     if(name == Video::Depth) {
+      //using a depth higher than the current display depth will perform very poorly, if at all
       unsigned depth = any_cast<unsigned>(value);
+      if(depth > DefaultDepth(display, screen)) return false;
+
       switch(depth) {
       case 15u: ibpp = 2; iformat = GL_UNSIGNED_SHORT_1_5_5_5_REV; break;
       case 16u: ibpp = 2; iformat = GL_UNSIGNED_SHORT_5_6_5_REV; break;
@@ -97,6 +100,7 @@ public:
       case 30u: ibpp = 4; iformat = GL_UNSIGNED_INT_2_10_10_10_REV; break;
       default: return false;
       }
+
       settings.depth = depth;
       return true;
     }
@@ -160,8 +164,8 @@ public:
   bool init() {
     term();
 
-    display = XOpenDisplay(0);
-    screen = DefaultScreen(display);
+//    display = XOpenDisplay(0);
+//    screen = DefaultScreen(display);
     glXQueryVersion(display, &glx.version_major, &glx.version_minor);
     //require GLX 1.2+ API
     if(glx.version_major < 1 || (glx.version_major == 1 && glx.version_minor < 2)) return false;
@@ -250,6 +254,9 @@ public:
   }
 
   pVideoGLX() : glSwapInterval(0) {
+    display = XOpenDisplay(0);
+    screen = DefaultScreen(display);
+
     settings.handle = 0;
     settings.synchronize = false;
     settings.depth = 24u;
@@ -262,7 +269,10 @@ public:
     glxwindow = 0;
   }
 
-  ~pVideoGLX() { term(); }
+  ~pVideoGLX() {
+    term();
+    XCloseDisplay(display);
+  }
 };
 
 DeclareVideo(GLX)

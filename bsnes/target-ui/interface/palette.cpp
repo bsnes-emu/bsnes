@@ -32,7 +32,7 @@ void Palette::update() {
     color[n] = max(0, min(1023, result));
   }
 
-  if(config->video.depth == 30) {
+  if(application->depth == 30) {
     for(unsigned n = 0; n < 1024; n++) {
       red[n] = color[n] << 20;
       green[n] = color[n] << 10;
@@ -40,7 +40,7 @@ void Palette::update() {
     }
   }
 
-  if(config->video.depth == 24) {
+  if(application->depth == 24) {
     for(unsigned n = 0; n < 1024; n++) {
       red[n] = (color[n] >> 2) << 16;
       green[n] = (color[n] >> 2) << 8;

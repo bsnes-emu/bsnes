@@ -45,7 +45,7 @@ struct Interface : property<Interface> {
 
   bool cartridgeLoaded();
   void loadCartridge(Mode mode);
-  bool loadCartridge(const string &filename);  //auto-detect system-type based on file extension
+  bool loadCartridge(string filename);  //auto-detect system-type based on file extension
   void unloadCartridge();
 
   void power();

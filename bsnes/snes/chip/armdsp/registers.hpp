@@ -18,10 +18,10 @@ struct Bridge {
   uint32 timerlatch;
   bool reset;
   bool ready;
-  bool busy;
+  bool signal;
 
   uint8 status() const {
-    return (ready << 7) | (cputoarm.ready << 3) | (busy << 2) | (armtocpu.ready << 0);
+    return (ready << 7) | (cputoarm.ready << 3) | (signal << 2) | (armtocpu.ready << 0);
   }
 } bridge;
 

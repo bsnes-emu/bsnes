@@ -14,6 +14,7 @@ private:
   bool latched;
   bool data1;
   bool data2;
+  unsigned counter;
 
   uint8 rxlength;
   uint8 rxdata;
