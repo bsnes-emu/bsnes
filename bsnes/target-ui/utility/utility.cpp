@@ -37,6 +37,11 @@ void Utility::setMode(Interface::Mode mode) {
     dspaudio.setChannels(2);
   }
 
+  else if(mode == Interface::Mode::GBA) {
+    mainWindow->setTitle(interface->cartridgeTitle);
+    dspaudio.setChannels(2);
+  }
+
   interface->updateDSP();
   mainWindow->synchronize();
   resizeMainWindow();
@@ -51,6 +56,7 @@ void Utility::resizeMainWindow(bool shrink) {
   case Interface::Mode::NES:     width = 256, height = 240; break;
   case Interface::Mode::SNES:    width = 256, height = 240; break;
   case Interface::Mode::GameBoy: width = 160, height = 144; break;
+  case Interface::Mode::GBA:     width = 240, height = 160; break;
   }
 
   if(config->video.correctAspectRatio) {

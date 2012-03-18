@@ -68,6 +68,11 @@ AudioSettings::AudioSettings() {
   gameBoy.base = 4194304;
   gameBoy.step = 131;
 
+  gba.name.setText("GBA:");
+  gba.slider.setLength(2001);
+  gba.base = 32768;
+  gba.step = 1;
+
   append(title,                           { ~0, 0 }, 5);
   append(outputLabel,                     { ~0, 0 }, 0);
   append(outputLayout,                    { ~0, 0 }, 5);
@@ -82,6 +87,7 @@ AudioSettings::AudioSettings() {
   append(nes,                             { ~0, 0 }, 0);
   append(snes,                            { ~0, 0 }, 0);
   append(gameBoy,                         { ~0, 0 }, 0);
+  append(gba,                             { ~0, 0 }, 0);
 
   frequencySelection.setSelection(
     config->audio.frequency == 32000 ? 0 :
@@ -109,9 +115,10 @@ AudioSettings::AudioSettings() {
   nes.setPosition(config->audio.frequencyNES);
   snes.setPosition(config->audio.frequencySNES);
   gameBoy.setPosition(config->audio.frequencyGameBoy);
+  gba.setPosition(config->audio.frequencyGBA);
 
-  frequencySelection.onChange = latencySelection.onChange = resamplerSelection.onChange =
-  volume.slider.onChange = nes.slider.onChange = snes.slider.onChange = gameBoy.slider.onChange =
+  frequencySelection.onChange = latencySelection.onChange = resamplerSelection.onChange = volume.slider.onChange =
+  nes.slider.onChange = snes.slider.onChange = gameBoy.slider.onChange = gba.slider.onChange =
   { &AudioSettings::synchronize, this };
 
   synchronize();
@@ -141,10 +148,12 @@ void AudioSettings::synchronize() {
   config->audio.frequencyNES = nes.position();
   config->audio.frequencySNES = snes.position();
   config->audio.frequencyGameBoy = gameBoy.position();
+  config->audio.frequencyGBA = gba.position();
 
   nes.value.setText({ nes.position(), "hz" });
   snes.value.setText({ snes.position(), "hz" });
   gameBoy.value.setText({ gameBoy.position(), "hz" });
+  gba.value.setText({ gba.position(), "hz" });
   volume.value.setText({ volume.position(), "%" });
 
   interface->updateDSP();

@@ -2,49 +2,50 @@
 Config *config = nullptr;
 
 Config::Config() {
-  attach(video.driver = "", "Video::Driver");
-  attach(video.filter = "None", "Video::Filter");
-  attach(video.shader = "Blur", "Video::Shader");
-  attach(video.synchronize = true, "Video::Synchronize");
-  attach(video.correctAspectRatio = true, "Video::CorrectAspectRatio");
+  append(video.driver = "", "Video::Driver");
+  append(video.filter = "None", "Video::Filter");
+  append(video.shader = "Blur", "Video::Shader");
+  append(video.synchronize = true, "Video::Synchronize");
+  append(video.correctAspectRatio = true, "Video::CorrectAspectRatio");
 
-  attach(video.maskOverscan = false, "Video::MaskOverscan");
-  attach(video.maskOverscanHorizontal = 8, "Video::MaskOverscanHorizontal");
-  attach(video.maskOverscanVertical = 8, "Video::MaskOverscanVertical");
+  append(video.maskOverscan = false, "Video::MaskOverscan");
+  append(video.maskOverscanHorizontal = 8, "Video::MaskOverscanHorizontal");
+  append(video.maskOverscanVertical = 8, "Video::MaskOverscanVertical");
 
-  attach(video.brightness = 100, "Video::Brightness");
-  attach(video.contrast = 100, "Video::Contrast");
-  attach(video.gamma = 50, "Video::Gamma");
+  append(video.brightness = 100, "Video::Brightness");
+  append(video.contrast = 100, "Video::Contrast");
+  append(video.gamma = 50, "Video::Gamma");
 
-  attach(video.fullScreenMode = 0, "Video::FullScreenMode");
+  append(video.fullScreenMode = 0, "Video::FullScreenMode");
 
-  attach(video.startFullScreen = false, "Video::StartFullScreen");
-  attach(video.compositionMode = 0, "Video::CompositionMode");
+  append(video.startFullScreen = false, "Video::StartFullScreen");
+  append(video.compositionMode = 0, "Video::CompositionMode");
 
-  attach(audio.driver = "", "Audio::Driver");
-  attach(audio.synchronize = true, "Audio::Synchronize");
-  attach(audio.mute = false, "Audio::Mute");
-  attach(audio.volume = 100, "Audio::Volume");
-  attach(audio.latency = 60, "Audio::Latency");
-  attach(audio.resampler = "sinc", "Audio::Resampler");
+  append(audio.driver = "", "Audio::Driver");
+  append(audio.synchronize = true, "Audio::Synchronize");
+  append(audio.mute = false, "Audio::Mute");
+  append(audio.volume = 100, "Audio::Volume");
+  append(audio.latency = 60, "Audio::Latency");
+  append(audio.resampler = "sinc", "Audio::Resampler");
 
-  attach(audio.frequency = 48000, "Audio::Frequency::Native");
-  attach(audio.frequencyNES = 1789772, "Audio::Frequency::NES");
-  attach(audio.frequencySNES = 32000, "Audio::Frequency::SNES");
-  attach(audio.frequencyGameBoy = 4194304, "Audio::Frequency::GameBoy");
+  append(audio.frequency = 48000, "Audio::Frequency::Native");
+  append(audio.frequencyNES = 1789772, "Audio::Frequency::NES");
+  append(audio.frequencySNES = 32000, "Audio::Frequency::SNES");
+  append(audio.frequencyGameBoy = 4194304, "Audio::Frequency::GameBoy");
+  append(audio.frequencyGBA = 32768, "Audio::Frequency::GBA");
 
-  attach(input.driver = "", "Input::Driver");
-  attach(input.focusPolicy = 1, "Input::FocusPolicy");
+  append(input.driver = "", "Input::Driver");
+  append(input.focusPolicy = 1, "Input::FocusPolicy");
 
-  attach(path.bios.satellaview = "", "Path::BIOS::Satellaview");
-  attach(path.bios.sufamiTurbo = "", "Path::BIOS::SufamiTurbo");
-  attach(path.bios.superGameBoy = "", "Path::BIOS::SuperGameBoy");
+  append(path.bios.satellaview = "", "Path::BIOS::Satellaview");
+  append(path.bios.sufamiTurbo = "", "Path::BIOS::SufamiTurbo");
+  append(path.bios.superGameBoy = "", "Path::BIOS::SuperGameBoy");
 
-  attach(nes.controllerPort1Device = 1, "NES::Controller::Port1");
-  attach(nes.controllerPort2Device = 0, "NES::Controller::Port2");
+  append(nes.controllerPort1Device = 1, "NES::Controller::Port1");
+  append(nes.controllerPort2Device = 0, "NES::Controller::Port2");
 
-  attach(snes.controllerPort1Device = 1, "SNES::Controller::Port1");
-  attach(snes.controllerPort2Device = 0, "SNES::Controller::Port2");
+  append(snes.controllerPort1Device = 1, "SNES::Controller::Port1");
+  append(snes.controllerPort2Device = 0, "SNES::Controller::Port2");
 
   load(application->path("settings.cfg"));
   save(application->path("settings.cfg"));

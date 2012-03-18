@@ -2,6 +2,7 @@
 #include "nes.cpp"
 #include "snes.cpp"
 #include "gameboy.cpp"
+#include "gba.cpp"
 #include "user-interface.cpp"
 InputManager *inputManager = nullptr;
 
@@ -200,6 +201,7 @@ InputManager::InputManager() {
   inputList.append(nes);
   inputList.append(snes);
   inputList.append(gameBoy);
+  inputList.append(gba);
   inputList.append(userInterface);
 
   for(unsigned n = 0; n < inputList.size(); n++) inputList[n].attach();

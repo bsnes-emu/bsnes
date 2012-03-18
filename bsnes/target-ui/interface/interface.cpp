@@ -3,6 +3,7 @@
 #include "nes/nes.cpp"
 #include "snes/snes.cpp"
 #include "gameboy/gameboy.cpp"
+#include "gba/gba.cpp"
 Interface *interface = nullptr;
 
 Filter filter;
@@ -74,6 +75,7 @@ void Interface::updateDSP() {
   case Mode::NES:     return dspaudio.setFrequency(config->audio.frequencyNES);
   case Mode::SNES:    return dspaudio.setFrequency(config->audio.frequencySNES);
   case Mode::GameBoy: return dspaudio.setFrequency(config->audio.frequencyGameBoy);
+  case Mode::GBA:     return dspaudio.setFrequency(config->audio.frequencyGBA);
   }
 }
 
@@ -82,6 +84,7 @@ bool Interface::cartridgeLoaded() {
   case Mode::NES:     return nes.cartridgeLoaded();
   case Mode::SNES:    return snes.cartridgeLoaded();
   case Mode::GameBoy: return gameBoy.cartridgeLoaded();
+  case Mode::GBA:     return gba.cartridgeLoaded();
   }
   return false;
 }
@@ -92,6 +95,7 @@ void Interface::loadCartridge(Mode mode) {
   case Mode::NES: core = &nes; break;
   case Mode::SNES: core = &snes; break;
   case Mode::GameBoy: core = &gameBoy; break;
+  case Mode::GBA: core = &gba; break;
   default: core = nullptr; break;
   }
 
@@ -124,6 +128,7 @@ void Interface::unloadCartridge() {
   case Mode::NES:     nes.unloadCartridge(); break;
   case Mode::SNES:    snes.unloadCartridge(); break;
   case Mode::GameBoy: gameBoy.unloadCartridge(); break;
+  case Mode::GBA:     gba.unloadCartridge(); break;
   }
 
   cartridgeTitle = "";
@@ -184,6 +189,7 @@ void Interface::setCheatCodes(const lstring &list) {
   case Mode::NES:     return nes.setCheats(list);
   case Mode::SNES:    return snes.setCheats(list);
   case Mode::GameBoy: return gameBoy.setCheats(list);
+  case Mode::GBA:     return gba.setCheats(list);
   }
 }
 
@@ -192,6 +198,7 @@ string Interface::sha256() {
   case Mode::NES:     return NES::cartridge.sha256();
   case Mode::SNES:    return SNES::cartridge.sha256();
   case Mode::GameBoy: return GameBoy::cartridge.sha256();
+  case Mode::GBA:     return GBA::cartridge.sha256();
   }
   return "{None}";
 }
@@ -201,6 +208,7 @@ Interface::Interface() : core(nullptr) {
   nes.initialize();
   snes.initialize();
   gameBoy.initialize();
+  gba.initialize();
 }
 
 //internal

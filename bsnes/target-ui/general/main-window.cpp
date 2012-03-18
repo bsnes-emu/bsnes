@@ -11,6 +11,7 @@ MainWindow::MainWindow() {
     cartridgeLoadNES.setText("Load &NES Cartridge ...");
     cartridgeLoadGameBoy.setText("Load &Game Boy Cartridge ...");
     cartridgeLoadGameBoyColor.setText("Load Game Boy &Color Cartridge ...");
+    cartridgeLoadGameBoyAdvance.setText("Load Game Boy &Advance Cartridge ...");
     cartridgeLoadSatellaviewSlotted.setText("Load Satellaview-Slotted Cartridge ...");
     cartridgeLoadSatellaview.setText("Load Satellaview Cartridge ...");
     cartridgeLoadSufamiTurbo.setText("Load Sufami Turbo Cartridge ...");
@@ -103,6 +104,7 @@ MainWindow::MainWindow() {
     cartridgeMenu.append(cartridgeLoadSNES);
     cartridgeMenu.append(cartridgeLoadGameBoy);
     cartridgeMenu.append(cartridgeLoadGameBoyColor);
+    cartridgeMenu.append(cartridgeLoadGameBoyAdvance);
     cartridgeMenu.append(cartridgeSeparator);
     cartridgeMenu.append(cartridgeLoadSatellaviewSlotted);
     cartridgeMenu.append(cartridgeLoadSatellaview);
@@ -212,6 +214,12 @@ MainWindow::MainWindow() {
   cartridgeLoadGameBoyColor.onActivate = [&] {
     fileBrowser->open("Load Cartridge - Game Boy Color", FileBrowser::Mode::GameBoyColor, [](string filename) {
       interface->gameBoy.loadCartridge(GameBoy::System::Revision::GameBoyColor, filename);
+    });
+  };
+
+  cartridgeLoadGameBoyAdvance.onActivate = [&] {
+    fileBrowser->open("Load Cartridge - Game Boy Advance", FileBrowser::Mode::GameBoyAdvance, [](string filename) {
+      interface->gba.loadCartridge(filename);
     });
   };
 

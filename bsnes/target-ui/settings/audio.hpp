@@ -26,6 +26,7 @@ struct AudioSettings : SettingsLayout {
   AudioSlider nes;
   AudioSlider snes;
   AudioSlider gameBoy;
+  AudioSlider gba;
 
   void synchronize();
   AudioSettings();
