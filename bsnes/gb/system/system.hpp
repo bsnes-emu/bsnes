@@ -42,6 +42,6 @@ struct System : property<System> {
   void serialize_init();
 };
 
-#include <gameboy/interface/interface.hpp>
+#include <gb/interface/interface.hpp>
 
 extern System system;

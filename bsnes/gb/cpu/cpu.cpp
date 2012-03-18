@@ -1,7 +1,7 @@
-#include <gameboy/gameboy.hpp>
+#include <gb/gb.hpp>
 
 #define CPU_CPP
-namespace GameBoy {
+namespace GB {
 
 #include "core/core.cpp"
 #include "mmio/mmio.cpp"

@@ -3,15 +3,15 @@
 
 #include <base/base.hpp>
 
-namespace GameBoy {
+namespace GB {
   namespace Info {
-    static const char Name[] = "bgameboy";
+    static const char Name[] = "bsgbc";
     static const unsigned SerializerVersion = 3;
   }
 }
 
 /*
-  bgameboy - Game Boy, Super Game Boy, and Game Boy Color emulator
+  bsgbc - Game Boy, Super Game Boy, and Game Boy Color emulator
   author: byuu
   license: GPLv3
   project started: 2010-12-27
@@ -20,7 +20,7 @@ namespace GameBoy {
 #include <libco/libco.h>
 #include <nall/gameboy/cartridge.hpp>
 
-namespace GameBoy {
+namespace GB {
   struct Processor {
     cothread_t thread;
     unsigned frequency;
@@ -46,15 +46,15 @@ namespace GameBoy {
     }
   };
 
-  #include <gameboy/memory/memory.hpp>
-  #include <gameboy/system/system.hpp>
-  #include <gameboy/scheduler/scheduler.hpp>
-  #include <gameboy/cartridge/cartridge.hpp>
-  #include <gameboy/cpu/cpu.hpp>
-  #include <gameboy/apu/apu.hpp>
-  #include <gameboy/lcd/lcd.hpp>
-  #include <gameboy/cheat/cheat.hpp>
-  #include <gameboy/video/video.hpp>
+  #include <gb/memory/memory.hpp>
+  #include <gb/system/system.hpp>
+  #include <gb/scheduler/scheduler.hpp>
+  #include <gb/cartridge/cartridge.hpp>
+  #include <gb/cpu/cpu.hpp>
+  #include <gb/apu/apu.hpp>
+  #include <gb/lcd/lcd.hpp>
+  #include <gb/cheat/cheat.hpp>
+  #include <gb/video/video.hpp>
 };
 
 #endif

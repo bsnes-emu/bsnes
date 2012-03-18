@@ -1,9 +1,9 @@
-#include <gameboy/gameboy.hpp>
+#include <gb/gb.hpp>
 
 #include <nall/crc32.hpp>
 
 #define CARTRIDGE_CPP
-namespace GameBoy {
+namespace GB {
 
 #include "mbc0/mbc0.cpp"
 #include "mbc1/mbc1.cpp"

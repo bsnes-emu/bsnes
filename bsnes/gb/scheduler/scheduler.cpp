@@ -1,7 +1,7 @@
-#include <gameboy/gameboy.hpp>
+#include <gb/gb.hpp>
 
 #define SCHEDULER_CPP
-namespace GameBoy {
+namespace GB {
 
 Scheduler scheduler;
 

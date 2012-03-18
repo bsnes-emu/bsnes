@@ -1,7 +1,7 @@
-#include <gameboy/gameboy.hpp>
+#include <gb/gb.hpp>
 
 #define SYSTEM_CPP
-namespace GameBoy {
+namespace GB {
 
 #include "bootrom-dmg.cpp"
 #include "bootrom-sgb.cpp"

@@ -1,7 +1,7 @@
-#include <gameboy/gameboy.hpp>
+#include <gb/gb.hpp>
 
 #define APU_CPP
-namespace GameBoy {
+namespace GB {
 
 #include "square1/square1.cpp"
 #include "square2/square2.cpp"

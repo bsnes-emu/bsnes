@@ -1,4 +1,4 @@
-#include <gameboy/gameboy.hpp>
+#include <gb/gb.hpp>
 
 //LY     =   0-153
 //Raster =   0-143
@@ -7,7 +7,7 @@
 //LX     =   0-455
 
 #define LCD_CPP
-namespace GameBoy {
+namespace GB {
 
 #include "dmg.cpp"
 #include "cgb.cpp"

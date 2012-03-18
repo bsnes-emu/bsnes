@@ -1,7 +1,7 @@
-#include <gameboy/gameboy.hpp>
+#include <gb/gb.hpp>
 
 #define MEMORY_CPP
-namespace GameBoy {
+namespace GB {
 
 Unmapped unmapped;
 Bus bus;

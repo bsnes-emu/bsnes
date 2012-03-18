@@ -1,6 +1,6 @@
-#include <gameboy/gameboy.hpp>
+#include <gb/gb.hpp>
 
-namespace GameBoy {
+namespace GB {
 
 Cheat cheat;
 
