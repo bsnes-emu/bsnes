@@ -1,5 +1,5 @@
 include $(snes)/Makefile
-include $(gameboy)/Makefile
+include $(gb)/Makefile
 output := libsnes
 
 ifeq ($(platform),x)

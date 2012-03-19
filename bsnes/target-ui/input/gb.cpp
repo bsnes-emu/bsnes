@@ -1,4 +1,4 @@
-int16_t GameBoyController::poll(unsigned n) {
+int16_t GbController::poll(unsigned n) {
   switch(n) {
   case 0: return up.poll() & !down.poll();
   case 1: return down.poll() & !up.poll();
@@ -12,7 +12,7 @@ int16_t GameBoyController::poll(unsigned n) {
   return 0;
 }
 
-GameBoyController::GameBoyController() {
+GbController::GbController() {
   name = "Controller";
 
   up.name = "Up";
@@ -40,14 +40,14 @@ GameBoyController::GameBoyController() {
 
 //
 
-GameBoyDevice::GameBoyDevice() {
+GbDevice::GbDevice() {
   name = "Device";
   append(controller);
 }
 
 //
 
-GameBoyInput::GameBoyInput() {
+GbInput::GbInput() {
   name = "Game Boy";
   append(device);
 }

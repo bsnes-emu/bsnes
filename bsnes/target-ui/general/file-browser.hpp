@@ -9,16 +9,7 @@ struct FileBrowser : Window {
   Label filterLabel;
   Button openButton;
 
-  struct Mode { enum : unsigned {
-    Default,
-    NES,
-    SNES,
-    GameBoy,
-    GameBoyColor,
-    GameBoyAdvance,
-    Satellaview,
-    SufamiTurbo
-  }; };
+  struct Mode { enum : unsigned { Default, NES, SNES, GameBoy, GameBoyColor, Satellaview, SufamiTurbo }; };
   void open(const string &title, unsigned mode, function<void (string)> callback);
 
   FileBrowser();

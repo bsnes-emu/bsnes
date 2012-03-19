@@ -1,8 +1,8 @@
-struct InterfaceGameBoy : InterfaceCore, GameBoy::Interface {
+struct InterfaceGB : InterfaceCore, GB::Interface {
   void initialize();
 
   bool cartridgeLoaded();
-  bool loadCartridge(GameBoy::System::Revision revision, const string &filename);
+  bool loadCartridge(GB::System::Revision revision, const string &filename);
   void unloadCartridge();
 
   void power();

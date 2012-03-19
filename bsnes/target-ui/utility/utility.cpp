@@ -28,17 +28,12 @@ void Utility::setMode(Interface::Mode mode) {
     dspaudio.setChannels(2);
   }
 
-  else if(mode == Interface::Mode::GameBoy) {
+  else if(mode == Interface::Mode::GB) {
     mainWindow->gameBoyMenu.setText(
-      GameBoy::system.cgb() == false ? "Game Boy" : "Game Boy Color"
+      GB::system.cgb() == false ? "Game Boy" : "Game Boy Color"
     );
     mainWindow->setTitle(interface->cartridgeTitle);
     mainWindow->gameBoyMenu.setVisible(true);
-    dspaudio.setChannels(2);
-  }
-
-  else if(mode == Interface::Mode::GBA) {
-    mainWindow->setTitle(interface->cartridgeTitle);
     dspaudio.setChannels(2);
   }
 
@@ -52,11 +47,10 @@ void Utility::resizeMainWindow(bool shrink) {
   unsigned width = geometry.width, height = geometry.height;
 
   switch(interface->mode()) {
-  case Interface::Mode::None:    return mainWindow->viewport.setGeometry({ 0, 0, 1, 1 });
-  case Interface::Mode::NES:     width = 256, height = 240; break;
-  case Interface::Mode::SNES:    width = 256, height = 240; break;
-  case Interface::Mode::GameBoy: width = 160, height = 144; break;
-  case Interface::Mode::GBA:     width = 240, height = 160; break;
+  case Interface::Mode::None: return mainWindow->viewport.setGeometry({ 0, 0, 1, 1 });
+  case Interface::Mode::NES:  width = 256, height = 240; break;
+  case Interface::Mode::SNES: width = 256, height = 240; break;
+  case Interface::Mode::GB:   width = 160, height = 144; break;
   }
 
   if(config->video.correctAspectRatio) {

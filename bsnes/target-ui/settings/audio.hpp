@@ -25,8 +25,7 @@ struct AudioSettings : SettingsLayout {
   Label frequencyAdjustmentLabel;
   AudioSlider nes;
   AudioSlider snes;
-  AudioSlider gameBoy;
-  AudioSlider gba;
+  AudioSlider gb;
 
   void synchronize();
   AudioSettings();

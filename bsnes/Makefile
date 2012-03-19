@@ -1,46 +1,39 @@
 include nall/Makefile
 
-nes := nes
+nes  := nes
 snes := snes
-gameboy := gameboy
-gba := gba
+gb   := gb
 
 profile := accuracy
-target := ui
+target  := ui
 
 # options += console
 
 # compiler
 c       := $(compiler) -std=gnu99
 cpp     := $(subst cc,++,$(compiler)) -std=gnu++0x
-flags   := -I. -O3 -fomit-frame-pointer
+flags   := -I. -march=native -O3 -fomit-frame-pointer
 link    :=
 objects := libco
 
 # profile-guided optimization mode
 # pgo := instrument
 # pgo := optimize
-# pgo := analyze
 
 ifeq ($(pgo),instrument)
   flags += -fprofile-generate
   link += -lgcov
 else ifeq ($(pgo),optimize)
   flags += -fprofile-use
-else ifeq ($(pgo),analyze)
-  flags := $(subst -fomit-frame-pointer,,$(flags))
-  flags += -pg
-  link += -pg -lgcov
 endif
 
 # platform
 ifeq ($(platform),x)
-  flags += -march=native
-  link += -ldl -lX11 -lXext
+  link += -s -ldl -lX11 -lXext
 else ifeq ($(platform),osx)
 else ifeq ($(platform),win)
   link += $(if $(findstring console,$(options)),-mconsole,-mwindows)
-  link += -mthreads -luuid -lkernel32 -luser32 -lgdi32 -lcomctl32 -lcomdlg32 -lshell32 -lole32
+  link += -mthreads -s -luuid -lkernel32 -luser32 -lgdi32 -lcomctl32 -lcomdlg32 -lshell32 -lole32
   link += -Wl,-enable-auto-import -Wl,-enable-runtime-pseudo-reloc
 else
   unknown_platform: help;
@@ -99,6 +92,6 @@ sync:
 	rm -r phoenix/test
 
 archive-all:
-	tar -cjf bsnes.tar.bz2 base data gameboy gba libco nall nes obj out phoenix ruby snes target-debugger target-libsnes target-ui Makefile cc.bat purge.bat
+	tar -cjf bsnes.tar.bz2 base data gb libco nall nes obj out phoenix ruby snes target-debugger target-libsnes target-ui Makefile cc.bat purge.bat
 
 help:;

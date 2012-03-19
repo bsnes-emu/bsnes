@@ -193,7 +193,7 @@ bool InterfaceSNES::loadSuperGameBoyCartridge(string basename, string slotname) 
   if(gbMarkup.empty()) gbMarkup = GameBoyCartridge(data[1], size[1]).markup;
 
   SNES::cartridge.rom.copy(data[0], size[0]);
-  GameBoy::cartridge.load(GameBoy::System::Revision::SuperGameBoy, gbMarkup, data[1], size[1]);
+  GB::cartridge.load(GB::System::Revision::SuperGameBoy, gbMarkup, data[1], size[1]);
   SNES::cartridge.load(SNES::Cartridge::Mode::SuperGameBoy, markup);
   SNES::system.power();
 
@@ -256,11 +256,11 @@ void InterfaceSNES::loadMemory() {
   }
 
   if(SNES::cartridge.mode() == SNES::Cartridge::Mode::SuperGameBoy) {
-    if(GameBoy::cartridge.ramsize) {
+    if(GB::cartridge.ramsize) {
       uint8_t *data;
       unsigned size;
       if(file::read(interface->slot[0].filename("program.ram", ".sav"), data, size)) {
-        memcpy(GameBoy::cartridge.ramdata, data, min(GameBoy::cartridge.ramsize, size));
+        memcpy(GB::cartridge.ramdata, data, min(GB::cartridge.ramsize, size));
         delete[] data;
       }
     }
@@ -278,9 +278,9 @@ void InterfaceSNES::saveMemory() {
   }
 
   if(SNES::cartridge.mode() == SNES::Cartridge::Mode::SuperGameBoy) {
-    if(GameBoy::cartridge.ramsize) {
+    if(GB::cartridge.ramsize) {
       file::write(interface->slot[0].filename("program.ram", ".sav"),
-        GameBoy::cartridge.ramdata, GameBoy::cartridge.ramsize
+        GB::cartridge.ramdata, GB::cartridge.ramsize
       );
     }
   }
@@ -297,18 +297,18 @@ bool InterfaceSNES::unserialize(serializer &s) {
 
 void InterfaceSNES::setCheats(const lstring &list) {
   if(SNES::cartridge.mode() == SNES::Cartridge::Mode::SuperGameBoy) {
-    GameBoy::cheat.reset();
+    GB::cheat.reset();
     for(auto &code : list) {
       lstring codelist;
       codelist.split("+", code);
       for(auto &part : codelist) {
         unsigned addr, data, comp;
-        if(GameBoy::Cheat::decode(part, addr, data, comp)) {
-          GameBoy::cheat.append({ addr, data, comp });
+        if(GB::Cheat::decode(part, addr, data, comp)) {
+          GB::cheat.append({ addr, data, comp });
         }
       }
     }
-    GameBoy::cheat.synchronize();
+    GB::cheat.synchronize();
     return;
   }
 

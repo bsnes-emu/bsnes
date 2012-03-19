@@ -1,5 +1,5 @@
-#ifndef GAMEBOY_HPP
-#define GAMEBOY_HPP
+#ifndef GB_HPP
+#define GB_HPP
 
 #include <base/base.hpp>
 

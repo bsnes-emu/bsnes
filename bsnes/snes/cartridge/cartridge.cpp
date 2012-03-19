@@ -59,7 +59,7 @@ void Cartridge::load(Mode cartridge_mode, const char *markup) {
     break;
   case Mode::SuperGameBoy:
     #if defined(GAMEBOY)
-    sha256 = GameBoy::cartridge.sha256();
+    sha256 = GB::cartridge.sha256();
     #else
     throw "Game Boy support not present";
     #endif

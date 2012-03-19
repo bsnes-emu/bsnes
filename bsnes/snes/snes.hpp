@@ -20,7 +20,7 @@ namespace SNES {
 #include <libco/libco.h>
 
 #if defined(GAMEBOY)
-  #include <gameboy/gameboy.hpp>
+  #include <gb/gb.hpp>
 #endif
 
 namespace SNES {
