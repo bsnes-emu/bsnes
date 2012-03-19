@@ -65,7 +65,7 @@ void Video::generate(Format format) {
 }
 
 Video::Video() {
-  palette = new unsigned[1 << 15];
+  palette = new unsigned[1 << 15]();
 }
 
 Video::~Video() {

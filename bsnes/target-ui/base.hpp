@@ -1,6 +1,7 @@
 #include <nes/nes.hpp>
 #include <snes/snes.hpp>
 #include <gb/gb.hpp>
+#include <gba/gba.hpp>
 
 #include <nall/compositor.hpp>
 #include <nall/config.hpp>

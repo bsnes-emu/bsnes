@@ -42,13 +42,14 @@ FileBrowser::FileBrowser() {
   fileList.onChange = { &FileBrowser::synchronize, this };
   fileList.onActivate = openButton.onActivate = { &FileBrowser::fileListActivate, this };
 
-  filterModes.append({ "Default",      "", { "*" } });
-  filterModes.append({ "NES",          "", { "*.fc", "*.nes" } });
-  filterModes.append({ "SNES",         "", { "*.sfc" } });
-  filterModes.append({ "GameBoy",      "", { "*.gb", "*.gbc" } });
-  filterModes.append({ "GameBoyColor", "", { "*.gbc" } });
-  filterModes.append({ "Satellaview",  "", { "*.bs" } });
-  filterModes.append({ "SufamiTurbo",  "", { "*.st" } });
+  filterModes.append({ "Default",        "", { "*" } });
+  filterModes.append({ "NES",            "", { "*.fc", "*.nes" } });
+  filterModes.append({ "SNES",           "", { "*.sfc" } });
+  filterModes.append({ "GameBoy",        "", { "*.gb", "*.gbc" } });
+  filterModes.append({ "GameBoyColor",   "", { "*.gbc" } });
+  filterModes.append({ "GameBoyAdvance", "", { "*.gba" } });
+  filterModes.append({ "Satellaview",    "", { "*.bs" } });
+  filterModes.append({ "SufamiTurbo",    "", { "*.st" } });
   mode = &filterModes[Mode::Default];
 
   for(auto &mode : filterModes) config.attach(mode.path, mode.name);

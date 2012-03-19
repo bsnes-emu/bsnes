@@ -3,6 +3,7 @@
 #include "nes/nes.cpp"
 #include "snes/snes.cpp"
 #include "gb/gb.cpp"
+#include "gba/gba.cpp"
 Interface *interface = nullptr;
 
 Filter filter;
@@ -74,6 +75,7 @@ void Interface::updateDSP() {
   case Mode::NES:  return dspaudio.setFrequency(config->audio.frequencyNES);
   case Mode::SNES: return dspaudio.setFrequency(config->audio.frequencySNES);
   case Mode::GB:   return dspaudio.setFrequency(config->audio.frequencyGB);
+  case Mode::GBA:  return dspaudio.setFrequency(config->audio.frequencyGBA);
   }
 }
 
@@ -82,6 +84,7 @@ bool Interface::cartridgeLoaded() {
   case Mode::NES:  return nes.cartridgeLoaded();
   case Mode::SNES: return snes.cartridgeLoaded();
   case Mode::GB:   return gb.cartridgeLoaded();
+  case Mode::GBA:  return gba.cartridgeLoaded();
   }
   return false;
 }
@@ -92,6 +95,7 @@ void Interface::loadCartridge(Mode mode) {
   case Mode::NES:  core = &nes; break;
   case Mode::SNES: core = &snes; break;
   case Mode::GB:   core = &gb; break;
+  case Mode::GBA:  core = &gba; break;
   default:         core = nullptr; break;
   }
 
@@ -110,6 +114,7 @@ bool Interface::loadCartridge(string filename) {
   if(filename.endswith(".sfc") || filename.endswith(".sfc/")) result = snes.loadCartridge(filename);
   if(filename.endswith(".gb" ) || filename.endswith(".gb/" )) result = gb.loadCartridge(GB::System::Revision::GameBoy, filename);
   if(filename.endswith(".gbc") || filename.endswith(".gbc/")) result = gb.loadCartridge(GB::System::Revision::GameBoyColor, filename);
+  if(filename.endswith(".gba") || filename.endswith(".gba/")) result = gba.loadCartridge(filename);
   return result;
 }
 
@@ -124,6 +129,7 @@ void Interface::unloadCartridge() {
   case Mode::NES:  nes.unloadCartridge(); break;
   case Mode::SNES: snes.unloadCartridge(); break;
   case Mode::GB:   gb.unloadCartridge(); break;
+  case Mode::GBA:  gba.unloadCartridge(); break;
   }
 
   cartridgeTitle = "";
@@ -184,6 +190,7 @@ void Interface::setCheatCodes(const lstring &list) {
   case Mode::NES:  return nes.setCheats(list);
   case Mode::SNES: return snes.setCheats(list);
   case Mode::GB:   return gb.setCheats(list);
+  case Mode::GBA:  return gba.setCheats(list);
   }
 }
 
@@ -192,6 +199,7 @@ string Interface::sha256() {
   case Mode::NES:  return NES::cartridge.sha256();
   case Mode::SNES: return SNES::cartridge.sha256();
   case Mode::GB:   return GB::cartridge.sha256();
+  case Mode::GBA:  return GBA::cartridge.sha256();
   }
   return "{None}";
 }
@@ -201,6 +209,7 @@ Interface::Interface() : core(nullptr) {
   nes.initialize();
   snes.initialize();
   gb.initialize();
+  gba.initialize();
 }
 
 //internal

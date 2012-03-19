@@ -125,6 +125,7 @@ Application::Application(int argc, char **argv) {
 
   interface->unloadCartridge();
   windowManager->saveGeometry();
+  windowManager->hideAll();
   if(compositionEnable) compositor::enable(true);
 }
 

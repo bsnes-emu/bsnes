@@ -111,12 +111,12 @@ static string iNES(const uint8_t *data, unsigned size) {
 
   case  34:
     output.append("  <board type='NES-BNROM'>\n");
-    output.append("    <mirror type='", mirror == 0 ? "horizontal" : "vertical", "'/>\n");
+    output.append("    <mirror mode='", mirror == 0 ? "horizontal" : "vertical", "'/>\n");
     break;
 
   case  66:
     output.append("  <board type='NES-GNROM'>\n");
-    output.append("    <mirror type='", mirror == 0 ? "horizontal" : "vertical", "'/>\n");
+    output.append("    <mirror mode='", mirror == 0 ? "horizontal" : "vertical", "'/>\n");
     break;
 
   case  69:
@@ -128,7 +128,7 @@ static string iNES(const uint8_t *data, unsigned size) {
   case  73:
     output.append("  <board type='KONAMI-VRC-3'>\n");
     output.append("    <chip type='VRC3'/>\n");
-    output.append("    <mirror type='", mirror == 0 ? "horizontal" : "vertical", "'/>\n");
+    output.append("    <mirror mode='", mirror == 0 ? "horizontal" : "vertical", "'/>\n");
     prgram = 8192;
     break;
 

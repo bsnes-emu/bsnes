@@ -52,6 +52,7 @@ struct PrimaryInput : array<SecondaryInput&> {
 #include "nes.hpp"
 #include "snes.hpp"
 #include "gb.hpp"
+#include "gba.hpp"
 #include "user-interface.hpp"
 
 struct InputManager {
@@ -63,6 +64,7 @@ struct InputManager {
   NesInput nes;
   SnesInput snes;
   GbInput gb;
+  GbaInput gba;
   UserInterfaceInput userInterface;
 
   void scan();

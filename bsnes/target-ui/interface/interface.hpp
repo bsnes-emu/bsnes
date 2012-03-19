@@ -19,6 +19,7 @@ struct CartridgePath {
 #include "nes/nes.hpp"
 #include "snes/snes.hpp"
 #include "gb/gb.hpp"
+#include "gba/gba.hpp"
 
 struct Filter : public library {
   function<void (unsigned&, unsigned&)> dl_size;
@@ -36,7 +37,7 @@ struct Filter : public library {
 extern Filter filter;
 
 struct Interface : property<Interface> {
-  enum class Mode : unsigned { None, SNES, NES, GB };
+  enum class Mode : unsigned { None, SNES, NES, GB, GBA };
   readonly<Mode> mode;
 
   void bindControllers();
@@ -74,6 +75,7 @@ struct Interface : property<Interface> {
   InterfaceNES nes;
   InterfaceSNES snes;
   InterfaceGB gb;
+  InterfaceGBA gba;
 };
 
 extern Interface *interface;

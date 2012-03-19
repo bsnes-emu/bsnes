@@ -11,6 +11,7 @@ MainWindow::MainWindow() {
     cartridgeLoadNES.setText("Load &NES Cartridge ...");
     cartridgeLoadGameBoy.setText("Load &Game Boy Cartridge ...");
     cartridgeLoadGameBoyColor.setText("Load Game Boy &Color Cartridge ...");
+    cartridgeLoadGameBoyAdvance.setText("Load Game Boy &Advance Cartridge ...");
     cartridgeLoadSatellaviewSlotted.setText("Load Satellaview-Slotted Cartridge ...");
     cartridgeLoadSatellaview.setText("Load Satellaview Cartridge ...");
     cartridgeLoadSufamiTurbo.setText("Load Sufami Turbo Cartridge ...");
@@ -61,6 +62,10 @@ MainWindow::MainWindow() {
     gameBoyPower.setText("&Power Cycle");
     gameBoyCartridgeUnload.setText("&Unload Cartridge");
 
+  gameBoyAdvanceMenu.setText("&Game Boy Advance");
+    gameBoyAdvancePower.setText("&Power Cycle");
+    gameBoyAdvanceCartridgeUnload.setText("&Unload Cartridge");
+
   settingsMenu.setText("S&ettings");
     settingsVideoFilter.setText("Video &Filter");
       settingsVideoFilterNone.setText("None");
@@ -103,6 +108,7 @@ MainWindow::MainWindow() {
     cartridgeMenu.append(cartridgeLoadSNES);
     cartridgeMenu.append(cartridgeLoadGameBoy);
     cartridgeMenu.append(cartridgeLoadGameBoyColor);
+    cartridgeMenu.append(cartridgeLoadGameBoyAdvance);
     cartridgeMenu.append(cartridgeSeparator);
     cartridgeMenu.append(cartridgeLoadSatellaviewSlotted);
     cartridgeMenu.append(cartridgeLoadSatellaview);
@@ -137,6 +143,11 @@ MainWindow::MainWindow() {
     gameBoyMenu.append(gameBoyPower);
     gameBoyMenu.append(gameBoySeparator);
     gameBoyMenu.append(gameBoyCartridgeUnload);
+
+  append(gameBoyAdvanceMenu);
+    gameBoyAdvanceMenu.append(gameBoyAdvancePower);
+    gameBoyAdvanceMenu.append(gameBoyAdvanceSeparator);
+    gameBoyAdvanceMenu.append(gameBoyAdvanceCartridgeUnload);
 
   append(settingsMenu);
     settingsMenu.append(settingsVideoFilter);
@@ -215,6 +226,12 @@ MainWindow::MainWindow() {
     });
   };
 
+  cartridgeLoadGameBoyAdvance.onActivate = [&] {
+    fileBrowser->open("Load Cartridge - Game Boy Advance", FileBrowser::Mode::GameBoyAdvance, [](string filename) {
+      interface->gba.loadCartridge(filename);
+    });
+  };
+
   cartridgeLoadSatellaviewSlotted.onActivate = [&] { slotLoader->loadSatellaviewSlotted(); };
   cartridgeLoadSatellaview.onActivate        = [&] { slotLoader->loadSatellaview(); };
   cartridgeLoadSufamiTurbo.onActivate        = [&] { slotLoader->loadSufamiTurbo(); };
@@ -253,6 +270,9 @@ MainWindow::MainWindow() {
 
   gameBoyPower.onActivate = { &Interface::power, interface };
   gameBoyCartridgeUnload.onActivate = { &Interface::unloadCartridge, interface };
+
+  gameBoyAdvancePower.onActivate = { &Interface::power, interface };
+  gameBoyAdvanceCartridgeUnload.onActivate = { &Interface::unloadCartridge, interface };
 
   settingsVideoFilterNone.onActivate = [&] {
     config->video.filter = "None";

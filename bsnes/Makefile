@@ -3,6 +3,7 @@ include nall/Makefile
 nes  := nes
 snes := snes
 gb   := gb
+gba  := gba
 
 profile := accuracy
 target  := ui
@@ -92,6 +93,6 @@ sync:
 	rm -r phoenix/test
 
 archive-all:
-	tar -cjf bsnes.tar.bz2 base data gb libco nall nes obj out phoenix ruby snes target-debugger target-libsnes target-ui Makefile cc.bat purge.bat
+	tar -cjf bsnes.tar.bz2 base data gb gba libco nall nes obj out phoenix ruby snes target-debugger target-libsnes target-ui Makefile cc.bat purge.bat
 
 help:;

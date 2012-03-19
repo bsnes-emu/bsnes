@@ -1,12 +1,3 @@
-//Exceptions:
-//00000000 = reset
-//00000004 = undefined instruction
-//00000008 = software interrupt
-//0000000c = prefetch abort
-//00000010 = data abort
-//00000018 = IRQ (interrupt)
-//0000001c = FIQ (fast interrupt)
-
 struct Bridge {
   struct Buffer {
     bool ready;

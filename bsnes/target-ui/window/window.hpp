@@ -13,6 +13,7 @@ struct WindowManager {
 
   void loadGeometry();
   void saveGeometry();
+  void hideAll();
 
 private:
   configuration config;
