@@ -86,6 +86,8 @@ struct Register {
     if(write) write();
   }
 
+  Register& operator=(const Register &source) { return operator=(source.data); }
+
   Register& operator+=(uint32 n) { return operator=(data + n); }
   Register& operator-=(uint32 n) { return operator=(data - n); }
   Register& operator&=(uint32 n) { return operator=(data & n); }

@@ -9,7 +9,11 @@ void CPU::Enter() { cpu.enter(); }
 
 void CPU::enter() {
   while(true) {
-    step(2);
+    if(exception) {
+      print(disassemble_registers(), "\n");
+      while(true) step(frequency);
+    }
+    cpsr().t ? thumb_step() : arm_step();
   }
 }
 

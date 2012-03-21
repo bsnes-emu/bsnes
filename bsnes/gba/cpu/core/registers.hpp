@@ -4,6 +4,7 @@ struct GPR {
 
   inline operator uint32() const { return data; }
   inline GPR& operator=(uint32 n) { data = n; if(modify) modify(); return *this; }
+  inline GPR& operator=(const GPR& source) { return operator=(source.data); }
 
   inline GPR& operator &=(uint32 n) { return operator=(data  & n); }
   inline GPR& operator |=(uint32 n) { return operator=(data  | n); }
@@ -47,10 +48,12 @@ struct PSR {
 
 struct Pipeline {
   bool reload;
+
   struct Instruction {
-    uint32 opcode;
     uint32 address;
+    uint32 instruction;
   };
+
   Instruction execute;
   Instruction decode;
   Instruction fetch;
@@ -100,6 +103,7 @@ struct Processor {
 
   GPR pc;
   PSR cpsr;
+  bool carryout;
 
   GPR *r[16];
   PSR *spsr;
@@ -115,3 +119,6 @@ bool exception;
 alwaysinline GPR& r(unsigned n) { return *processor.r[n]; }
 alwaysinline PSR& cpsr() { return processor.cpsr; }
 alwaysinline PSR& spsr() { return *processor.spsr; }
+alwaysinline bool& carryout() { return processor.carryout; }
+alwaysinline uint32 instruction() { return pipeline.execute.instruction; }
+alwaysinline Processor::Mode mode() { return (Processor::Mode)processor.cpsr.m; }

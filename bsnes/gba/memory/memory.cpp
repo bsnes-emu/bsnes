@@ -5,42 +5,42 @@ namespace GBA {
 Bus bus;
 
 uint32 StaticMemory::read(uint32 addr, uint32 size) {
-  unsigned bits = addr & 3;
-  addr &= ~3;
-
   uint32 word = 0;
-  switch(size) {
-  case Word: word |= data[addr + 3] << 24;
-             word |= data[addr + 2] << 16;
-  case Half: word |= data[addr + 1] <<  8;
-  case Byte: word |= data[addr + 0] <<  0;
-  }
-
-  if(bits) {
-    unsigned rotate = bits << 3;
-    word = (word >> rotate) | (word << (32 - rotate));
-  }
 
   switch(size) {
-  case Word: return word;
-  case Half: return word & 0xffff;
-  case Byte: return word & 0xff;
+  case Word:
+    addr &= ~3;
+    word |= data[addr + 0] <<  0;
+    word |= data[addr + 1] <<  8;
+    word |= data[addr + 2] << 16;
+    word |= data[addr + 3] << 24;
+    break;
+  case Half:
+    addr &= ~1;
+    word |= data[addr + 0] <<  0;
+    word |= data[addr + 1] <<  8;
+    break;
+  case Byte:
+    word |= data[addr + 0] <<  0;
+    break;
   }
+
+  return word;
 }
 
 void StaticMemory::write(uint32 addr, uint32 size, uint32 word) {
   switch(size) {
   case Word:
     addr &= ~3;
-    data[addr + 3] = word >> 24;
-    data[addr + 2] = word >> 16;
-    data[addr + 1] = word >>  8;
     data[addr + 0] = word >>  0;
+    data[addr + 1] = word >>  8;
+    data[addr + 2] = word >> 16;
+    data[addr + 3] = word >> 24;
     break;
   case Half:
     addr &= ~1;
-    data[addr + 1] = word >>  8;
     data[addr + 0] = word >>  0;
+    data[addr + 1] = word >>  8;
     break;
   case Byte:
     data[addr + 0] = word >>  0;

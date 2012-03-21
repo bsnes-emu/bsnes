@@ -93,6 +93,7 @@ sync:
 	rm -r phoenix/test
 
 archive-all:
-	tar -cjf bsnes.tar.bz2 base data gb gba libco nall nes obj out phoenix ruby snes target-debugger target-libsnes target-ui Makefile cc.bat purge.bat
+	if [ -f bsnes.tar.bz2 ]; then rm bsnes.tar.bz2; fi
+	tar -cjf bsnes.tar.bz2 `ls`
 
 help:;

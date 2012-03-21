@@ -1,5 +1,15 @@
 #include <gba/gba.hpp>
 
+//pixel:      4 cycles
+
+//hdraw:    240 pixels ( 960 cycles)
+//hblank:    68 pixels ( 272 cycles)
+//scanline: 308 pixels (1232 cycles)
+
+//vdraw:    160 scanlines (197120 cycles)
+//vblank:    68 scanlines ( 83776 cycles)
+//frame:    208 scanlines (280896 cycles)
+
 namespace GBA {
 
 PPU ppu;
@@ -9,7 +19,7 @@ void PPU::Enter() { ppu.enter(); }
 void PPU::enter() {
   while(true) {
     frame();
-    step(279620);
+    step(280896);
   }
 }
 

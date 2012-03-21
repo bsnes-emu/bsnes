@@ -233,7 +233,7 @@ void ArmDSP::op_data_register_shift() {
   uint1 save = instruction >> 20;
   uint4 s = instruction >> 8;
   uint2 mode = instruction >> 5;
-  uint4 m = instruction >> 0;
+  uint4 m = instruction;
 
   uint8 rs = r[s];
   uint32 rm = r[m];
@@ -309,8 +309,8 @@ void ArmDSP::op_move_immediate_offset() {
   if(p == 0 || w == 1) r[n] = rn;
 }
 
-//(ldr)(str){condition}{b} rd,[rn,rm {mode} #immediate]{!}
-//(ldr)(str){condition}{b} rd,[rn],rm {mode} #immediate
+//(ldr,str){condition}{b} rd,[rn,rm {mode} #immediate]{!}
+//(ldr,str){condition}{b} rd,[rn],rm {mode} #immediate
 //cccc 011p ubwl nnnn dddd llll lss0 mmmm
 //c = condition
 //p = pre (0 = post-indexed addressing)
