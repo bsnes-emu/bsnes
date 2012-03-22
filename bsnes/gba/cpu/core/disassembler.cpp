@@ -270,7 +270,12 @@ string ARM::disassemble_arm_opcode(uint32 pc) {
 }
 
 string ARM::disassemble_thumb_opcode(uint32 pc) {
-  static string opcodes[] = { "mov", "cmp", "add", "sub" };
+  static string conditions[] = {
+    "eq", "ne", "cs", "cc",
+    "mi", "pl", "vs", "vc",
+    "hi", "ls", "ge", "lt",
+    "gt", "le", "", "",
+  };
 
   static string registers[] = {
     "r0",  "r1", "r2",  "r3",
@@ -284,14 +289,292 @@ string ARM::disassemble_thumb_opcode(uint32 pc) {
   uint16 instruction = bus.read(pc, Half);
   output.append(hex<4>(instruction), "  ");
 
+  //adjust_register()
+  //(add,sub) rd,rn,rm
+  if((instruction & 0xfc00) == 0x1800) {
+    uint1 opcode = instruction >> 9;
+    uint3 rm = instruction >> 6;
+    uint3 rn = instruction >> 3;
+    uint3 rd = instruction >> 0;
+
+    output.append(opcode == 0 ? "add" : "sub", " ", registers[rd], ",", registers[rn], ",", registers[rm]);
+
+    return output;
+  }
+
+  //adjust_immediate()
+  //(add,sub) rd,rn,#immediate
+  if((instruction & 0xfc00) == 0x1c00) {
+    uint1 opcode = instruction >> 9;
+    uint3 immediate = instruction >> 6;
+    uint3 rn = instruction >> 3;
+    uint3 rd = instruction >> 0;
+
+    output.append(opcode == 0 ? "add" : "sub", " ", registers[rd], ",", registers[rn], ",#", hex<1>(immediate));
+
+    return output;
+  }
+
+  //shift_immediate()
+  //(lsl,lsr,asar) rd,rm,#immmediate
+  if((instruction & 0xe000) == 0x0000) {
+    static string opcodes[] = { "lsl", "lsr", "asr", "" };
+
+    uint2 opcode = instruction >> 11;
+    uint5 immediate = instruction >> 6;
+    uint3 rm = instruction >> 3;
+    uint3 rd = instruction >> 0;
+
+    output.append(opcodes[opcode], " ", registers[rd], ",", registers[rm], ",#", immediate);
+
+    return output;
+  }
+
   //immediate()
   //(mov,cmp,add,sub) (rd,rn),#immediate
   if((instruction & 0xe000) == 0x2000) {
+    static string opcodes[] = { "mov", "cmp", "add", "sub" };
+
     uint2 opcode = instruction >> 11;
     uint3 rd = instruction >> 8;
     uint8 immediate = instruction;
 
     output.append(opcodes[opcode], " ", registers[rd], ",#0x", hex<2>(immediate));
+
+    return output;
+  }
+
+  //alu()
+  //{opcode} rd,rm
+  if((instruction & 0xfc00) == 0x4000) {
+    static string opcodes[] = {
+      "and", "eor", "lsl", "lsr",
+      "asr", "adc", "sbc", "ror",
+      "tst", "neg", "cmp", "cmn",
+      "orr", "mul", "bic", "mvn",
+    };
+
+    uint4 opcode = instruction >> 6;
+    uint3 rm = instruction >> 3;
+    uint3 rd = instruction >> 0;
+
+    output.append(opcodes[opcode], " ", registers[rd], ",", registers[rm]);
+
+    return output;
+  }
+
+  //branch_exchange()
+  //bx rm
+  if((instruction & 0xff80) == 0x4700) {
+    uint4 rm = instruction >> 3;
+
+    output.append("bx ", registers[rm]);
+
+    return output;
+  }
+
+  //alu_hi()
+  //{opcode} rd,rm
+  if((instruction & 0xfc00) == 0x4400) {
+    static string opcodes[] = { "add", "sub", "mov", "" };
+
+    uint2 opcode = instruction >> 8;
+    uint4 rm = instruction >> 3;
+    uint4 rd = ((uint1)(instruction >> 7) << 3) + (uint3)instruction;
+
+    if(opcode == 2 && rm == 8 && rd == 8) {
+      output.append("nop");
+      return output;
+    }
+
+    output.append(opcodes[opcode], " ", registers[rd], ",", registers[rm]);
+
+    return output;
+  }
+
+  //load_literal()
+  //ldr rd,[pc,#+/-offset]
+  if((instruction & 0xf800) == 0x4800) {
+    uint3 rd = instruction >> 8;
+    uint8 displacement = instruction;
+
+    unsigned rm = ((pc + 4) & ~3) + displacement * 4;
+    output.append("ldr ", registers[rd], ",[pc,#0x", hex<3>(rm), "]");
+    output.append(" =0x", hex<8>(bus.read(rm, Word)));
+
+    return output;
+  }
+
+  //move_register_offset()
+  //(ld(r,s),str){b,h} rd,[rn,rm]
+  if((instruction & 0xf000) == 0x5000) {
+    static string opcodes[] = {
+      "str", "strh", "strb", "ldsb",
+      "ldr", "ldrh", "ldrb", "ldsh",
+    };
+
+    uint3 opcode = instruction >> 9;
+    uint3 rm = instruction >> 6;
+    uint3 rn = instruction >> 3;
+    uint3 rd = instruction >> 0;
+
+    output.append(opcodes[opcode], " ", registers[rd], ",[", registers[rn], ",", registers[rm], "]");
+
+    return output;
+  }
+
+  //move_word_immediate()
+  //(ldr,str) rd,[rn,#offset]
+  if((instruction & 0xf000) == 0x6000) {
+    uint1 load = instruction >> 11;
+    uint5 offset = instruction >> 6;
+    uint3 rn = instruction >> 3;
+    uint3 rd = instruction >> 0;
+
+    output.append(load ? "ldr " : "str ", registers[rd], ",[", registers[rn], ",#0x", hex<2>(offset * 4), "]");
+
+    return output;
+  }
+
+  //move_byte_immediate()
+  //(ldr,str)b rd,[rn,#offset]
+  if((instruction & 0xf000) == 0x7000) {
+    uint1 load = instruction >> 11;
+    uint5 offset = instruction >> 6;
+    uint3 rn = instruction >> 3;
+    uint3 rd = instruction >> 0;
+
+    output.append(load ? "ldrb " : "strb ", registers[rd], ",[", registers[rn], ",#0x", hex<2>(offset), "]");
+
+    return output;
+  }
+
+  //move_half_immediate()
+  //(ldr,str)h rd,[rn,#offset]
+  if((instruction & 0xf000) == 0x8000) {
+    uint1 load = instruction >> 11;
+    uint5 offset = instruction >> 6;
+    uint3 rn = instruction >> 3;
+    uint3 rd = instruction >> 0;
+
+    output.append(load ? "ldrh " : "strh ", registers[rd], ",[", registers[rn], ",#0x", hex<2>(offset * 2), "]");
+
+    return output;
+  }
+
+  //move_stack()
+  //(ldr,str) rd,[sp,#relative]
+  if((instruction & 0xf000) == 0x9000) {
+    uint1 opcode = instruction >> 11;
+    uint3 rd = instruction >> 8;
+    int8 relative = instruction;
+
+    output.append(opcode ? "ldr" : "str", " ", registers[rd], ",[sp,#0x", hex<3>(relative * 4), "]");
+
+    return output;
+  }
+
+  //add_register_hi()
+  //add rd,{pc,sp},#immediate
+  if((instruction & 0xf000) == 0xa000) {
+    uint1 sp = instruction >> 11;
+    uint3 rd = instruction >> 8;
+    uint8 immediate = instruction;
+
+    output.append("add ", registers[rd], ",", sp ? "sp" : "pc", ",#0x", hex<2>(immediate));
+
+    return output;
+  }
+
+  //adjust_stack()
+  //(add,sub) sp,#immediate
+  if((instruction & 0xff00) == 0xb000) {
+    uint1 opcode = instruction >> 7;
+    uint7 immediate = instruction;
+
+    output.append(opcode == 0 ? "add" : "sub", " sp,#0x", hex<3>(immediate * 4));
+
+    return output;
+  }
+
+  //stack_multiple()
+  //push {r...{,lr}}
+  //pop {r...{,pc}}
+  if((instruction & 0xf600) == 0xb400) {
+    uint1 load = instruction >> 11;
+    uint1 branch = instruction >> 8;
+    uint8 list = instruction;
+
+    output.append(load == 0 ? "push" : "pop", " {");
+    for(unsigned l = 0; l < 8; l++) {
+      if(list & (1 << l)) output.append(registers[l], ",");
+    }
+    if(branch) output.append(load == 0 ? "lr," : "pc,");
+    output.rtrim<1>(",");
+    output.append("}");
+
+    return output;
+  }
+
+  //move_multiple()
+  //(ldmia,stmdb) rn,{r...}
+  if((instruction & 0xf000) == 0xc000) {
+    uint1 load = instruction >> 11;
+    uint3 rn = instruction >> 8;
+    uint8 list = instruction;
+
+    output.append(load ? "ldmia " : "stmdb ", registers[rn], "!,{");
+    for(unsigned l = 0; l < 8; l++) {
+      if(list & (1 << l)) output.append(registers[l], ",");
+    }
+    output.rtrim<1>(",");
+    output.append("}");
+
+    return output;
+  }
+
+  //software_interrupt()
+  //swi #immediate
+  if((instruction & 0xff00) == 0xdf00) {
+    uint8 immediate = instruction;
+
+    output.append("swi #0x", hex<2>(immediate));
+
+    return output;
+  }
+
+  //branch_conditional()
+  //b{condition} address
+  if((instruction & 0xf000) == 0xd000) {
+    uint4 condition = instruction >> 8;
+    int8 displacement = instruction;
+
+    uint32 offset = pc + 4 + displacement * 2;
+    output.append("b", conditions[condition], " 0x", hex<8>(offset));
+
+    return output;
+  }
+
+  //branch_short()
+  //b address
+  if((instruction & 0xf800) == 0xe000) {
+    int11 displacement = instruction;
+
+    output.append("b 0x", hex<8>(pc + 4 + displacement * 2));
+
+    return output;
+  }
+
+  //branch_long()
+  //bl address
+  if((instruction & 0xf800) == 0xf000) {
+    uint11 offsethi = instruction;
+    instruction = bus.read(pc + 2, Half);
+    uint11 offsetlo = instruction;
+
+    int22 displacement = (offsethi << 11) | (offsetlo << 0);
+    output.append("bl 0x", hex<8>(pc + 4 + displacement * 2));
+    output.append("\n", hex<8>(pc + 2), "  ", hex<4>(instruction), "  ...");
 
     return output;
   }

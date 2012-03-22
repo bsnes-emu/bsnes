@@ -19,6 +19,7 @@ void ARM::arm_step() {
   pipeline.fetch.instruction = bus.read(r(15), Word);
   step(2);
 
+//print(disassemble_registers(), "\n");
   print(disassemble_arm_opcode(pipeline.execute.address), "\n");
 
   if(arm_condition() == false) return;
