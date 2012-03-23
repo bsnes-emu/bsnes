@@ -3,12 +3,12 @@ void ARM::thumb_step() {
     pipeline.reload = false;
 
     pipeline.fetch.address = r(15);
-    pipeline.fetch.instruction = bus.read(r(15), Half);
+    pipeline.fetch.instruction = bus_read(r(15), Half);
 
     r(15).data += 2;
     pipeline.decode = pipeline.fetch;
     pipeline.fetch.address = r(15);
-    pipeline.fetch.instruction = bus.read(r(15), Half);
+    pipeline.fetch.instruction = bus_read(r(15), Half);
     step(1);
   }
 
@@ -16,11 +16,11 @@ void ARM::thumb_step() {
   pipeline.execute = pipeline.decode;
   pipeline.decode = pipeline.fetch;
   pipeline.fetch.address = r(15);
-  pipeline.fetch.instruction = bus.read(r(15), Half);
+  pipeline.fetch.instruction = bus_read(r(15), Half);
   step(1);
 
 //print(disassemble_registers(), "\n");
-  print(disassemble_thumb_opcode(pipeline.execute.address), "\n");
+//print(disassemble_thumb_opcode(pipeline.execute.address), "\n");
 
   if((instruction() & 0xfc00) == 0x1800) { thumb_op_adjust_register(); return; }
   if((instruction() & 0xfc00) == 0x1c00) { thumb_op_adjust_immediate(); return; }
@@ -42,7 +42,8 @@ void ARM::thumb_step() {
   if((instruction() & 0xff00) == 0xdf00) { thumb_op_software_interrupt(); return; }
   if((instruction() & 0xf000) == 0xd000) { thumb_op_branch_conditional(); return; }
   if((instruction() & 0xf800) == 0xe000) { thumb_op_branch_short(); return; }
-  if((instruction() & 0xf800) == 0xf000) { thumb_op_branch_long(); return; }
+  if((instruction() & 0xf800) == 0xf000) { thumb_op_branch_long_prefix(); return; }
+  if((instruction() & 0xf800) == 0xf800) { thumb_op_branch_long_suffix(); return; }
 
   exception = true;
 }
@@ -294,7 +295,7 @@ void ARM::thumb_op_load_literal() {
   uint8 displacement = instruction();
 
   unsigned rm = (r(15) & ~3) + displacement * 4;
-  r(d) = bus.read(rm, Word);
+  r(d) = bus_read(rm, Word);
 }
 
 //(ld(r,s),str){b,h} rd,[rn,rm]
@@ -310,14 +311,14 @@ void ARM::thumb_op_move_register_offset() {
   uint3 d = instruction() >> 0;
 
   switch(opcode) {
-  case 0: bus.write(r(n) + r(m), Word, r(d));        break;  //STR
-  case 1: bus.write(r(n) + r(m), Half, r(d));        break;  //STRH
-  case 2: bus.write(r(n) + r(m), Byte, r(d));        break;  //STRB
-  case 3: r(d) = (int8)bus.read(r(n) + r(m), Byte);  break;  //LDSB
-  case 4: r(d) = bus.read(r(n) + r(m), Word);        break;  //LDR
-  case 5: r(d) = bus.read(r(n) + r(m), Half);        break;  //LDRH
-  case 6: r(d) = bus.read(r(n) + r(m), Byte);        break;  //LDRB
-  case 7: r(d) = (int16)bus.read(r(n) + r(m), Half); break;  //LDSH
+  case 0: bus_write(r(n) + r(m), Word, r(d));        break;  //STR
+  case 1: bus_write(r(n) + r(m), Half, r(d));        break;  //STRH
+  case 2: bus_write(r(n) + r(m), Byte, r(d));        break;  //STRB
+  case 3: r(d) = (int8)bus_read(r(n) + r(m), Byte);  break;  //LDSB
+  case 4: r(d) = bus_read(r(n) + r(m), Word);        break;  //LDR
+  case 5: r(d) = bus_read(r(n) + r(m), Half);        break;  //LDRH
+  case 6: r(d) = bus_read(r(n) + r(m), Byte);        break;  //LDRB
+  case 7: r(d) = (int16)bus_read(r(n) + r(m), Half); break;  //LDSH
   }
 }
 
@@ -333,8 +334,8 @@ void ARM::thumb_op_move_word_immediate() {
   uint3 n = instruction() >> 3;
   uint3 d = instruction() >> 0;
 
-  if(load == 1) r(d) = bus.read(r(n) + offset * 4, Word);
-  if(load == 0) bus.write(r(d) + offset * 4, Word, r(n));
+  if(load == 1) r(d) = bus_read(r(n) + offset * 4, Word);
+  if(load == 0) bus_write(r(d) + offset * 4, Word, r(n));
 }
 
 //(ldr,str)b rd,[rn,#offset]
@@ -349,8 +350,8 @@ void ARM::thumb_op_move_byte_immediate() {
   uint3 n = instruction() >> 3;
   uint4 d = instruction() >> 0;
 
-  if(load == 1) r(d) = bus.read(r(n) + offset, Byte);
-  if(load == 0) bus.write(r(d) + offset, Byte, r(n));
+  if(load == 1) r(d) = bus_read(r(n) + offset, Byte);
+  if(load == 0) bus_write(r(d) + offset, Byte, r(n));
 }
 
 //(ldr,str)h rd,[rn,#offset]
@@ -365,8 +366,8 @@ void ARM::thumb_op_move_half_immediate() {
   uint3 n = instruction() >> 3;
   uint3 d = instruction() >> 0;
 
-  if(load == 1) r(d) = bus.read(r(n) + offset * 2, Half);
-  if(load == 0) bus.write(r(d) + offset * 2, Half, r(n));
+  if(load == 1) r(d) = bus_read(r(n) + offset * 2, Half);
+  if(load == 0) bus_write(r(d) + offset * 2, Half, r(n));
 }
 
 //(ldr,str) rd,[sp,#relative]
@@ -379,8 +380,8 @@ void ARM::thumb_op_move_stack() {
   uint3 d = instruction() >> 8;
   int8 relative = instruction();
 
-  if(opcode == 0) bus.write(r(13) + relative * 4, Word, r(d));
-  if(opcode == 1) r(d) = bus.read(r(13) + relative * 4, Word);
+  if(opcode == 0) bus_write(r(13) + relative * 4, Word, r(d));
+  if(opcode == 1) r(d) = bus_read(r(13) + relative * 4, Word);
 }
 
 //add rd,{pc,sp},#immediate
@@ -423,12 +424,12 @@ void ARM::thumb_op_stack_multiple() {
   if(load == 1) {
     for(unsigned l = 0; l < 8; l++) {
       if(list & (1 << l)) {
-        r(l) = bus.read(r(13), Word);
+        r(l) = bus_read(r(13), Word);
         r(13) += 4;
       }
     }
     if(branch) {
-      r(15) = bus.read(r(13), Word);
+      r(15) = bus_read(r(13), Word);
       r(13) += 4;
     }
   }
@@ -437,12 +438,12 @@ void ARM::thumb_op_stack_multiple() {
     for(unsigned l = 0; l < 8; l++) {
       if(list & (1 << l)) {
         r(13) -= 4;
-        bus.write(r(13), Word, r(l));
+        bus_write(r(13), Word, r(l));
       }
     }
     if(branch) {
       r(13) -= 4;
-      bus.write(r(13), Word, r(14));
+      bus_write(r(13), Word, r(14));
     }
   }
 }
@@ -460,7 +461,7 @@ void ARM::thumb_op_move_multiple() {
   if(load == 1) {
     for(unsigned l = 0; l < 8; l++) {
       if(list & (1 << l)) {
-        r(l) = bus.read(r(n), Word);
+        r(l) = bus_read(r(n), Word);
         r(n) += 4;
       }
     }
@@ -470,7 +471,7 @@ void ARM::thumb_op_move_multiple() {
     for(unsigned l = 0; l < 8; l++) {
       if(list & (1 << l)) {
         r(n) -= 4;
-        bus.write(r(n), Word, r(l));
+        bus_write(r(n), Word, r(l));
       }
     }
   }
@@ -514,13 +515,20 @@ void ARM::thumb_op_branch_short() {
 
 //bl address
 //1111 0ooo oooo oooo
+//o = offset
+void ARM::thumb_op_branch_long_prefix() {
+  uint11 offsethi = instruction();
+
+  r(14) = offsethi;
+}
+
+//bl address
 //1111 1ooo oooo oooo
 //o = offset
-void ARM::thumb_op_branch_long() {
-  uint11 offsethi = instruction();
-  uint11 offsetlo = pipeline.decode.instruction;
+void ARM::thumb_op_branch_long_suffix() {
+  uint11 offsetlo = instruction();
 
-  int22 displacement = (offsethi << 11) | (offsetlo << 0);
-  r(14) = (r(15) - 2) | 1;
+  int22 displacement = ((uint11)r(14) << 11) | offsetlo;
+  r(14) = r(15) | 1;
   r(15) += displacement * 2;
 }

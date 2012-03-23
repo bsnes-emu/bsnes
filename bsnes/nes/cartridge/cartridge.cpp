@@ -78,7 +78,7 @@ void Cartridge::scanline(unsigned y) {
 }
 
 void Cartridge::serialize(serializer &s) {
-  Processor::serialize(s);
+  Thread::serialize(s);
   return board->serialize(s);
 }
 

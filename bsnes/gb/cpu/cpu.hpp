@@ -1,4 +1,4 @@
-struct CPU : Processor, MMIO {
+struct CPU : Thread, MMIO {
   #include "core/core.hpp"
   #include "mmio/mmio.hpp"
   #include "timing/timing.hpp"

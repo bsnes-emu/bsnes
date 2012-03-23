@@ -1,5 +1,8 @@
 options += debugger
 
+processor := arm
+include processor/Makefile
+
 include $(snes)/Makefile
 name := laevateinn
 

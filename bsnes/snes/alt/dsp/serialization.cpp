@@ -11,7 +11,7 @@ static void dsp_state_load(unsigned char **in, void *out, size_t size) {
 }
 
 void DSP::serialize(serializer &s) {
-  Processor::serialize(s);
+  Thread::serialize(s);
   s.array(samplebuffer);
 
   unsigned char state[SPC_DSP::state_size];

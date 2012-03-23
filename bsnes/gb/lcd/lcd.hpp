@@ -1,4 +1,4 @@
-struct LCD : Processor, MMIO {
+struct LCD : Thread, MMIO {
   #include "mmio/mmio.hpp"
 
   struct Status {

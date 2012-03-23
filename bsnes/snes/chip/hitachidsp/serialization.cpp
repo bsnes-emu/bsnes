@@ -1,7 +1,7 @@
 #ifdef HITACHIDSP_CPP
 
 void HitachiDSP::serialize(serializer &s) {
-  Processor::serialize(s);
+  Thread::serialize(s);
 
   s.array(dataRAM);
   for(auto &n : stack) s.integer(n);

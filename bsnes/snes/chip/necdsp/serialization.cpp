@@ -1,7 +1,7 @@
 #ifdef NECDSP_CPP
 
 void NECDSP::serialize(serializer &s) {
-  Processor::serialize(s);
+  Thread::serialize(s);
 
   s.array(dataRAM);
 

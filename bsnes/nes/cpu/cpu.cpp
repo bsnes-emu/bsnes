@@ -61,7 +61,7 @@ void CPU::power() {
 }
 
 void CPU::reset() {
-  Processor::create(CPU::Main, 21477272);
+  create(CPU::Main, 21477272);
 
   regs.mdr = 0x00;
   regs.s -= 3;

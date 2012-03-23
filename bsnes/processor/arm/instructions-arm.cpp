@@ -3,12 +3,12 @@ void ARM::arm_step() {
     pipeline.reload = false;
 
     pipeline.fetch.address = r(15);
-    pipeline.fetch.instruction = bus.read(r(15), Word);
+    pipeline.fetch.instruction = bus_read(r(15), Word);
 
     r(15).data += 4;
     pipeline.decode = pipeline.fetch;
     pipeline.fetch.address = r(15);
-    pipeline.fetch.instruction = bus.read(r(15), Word);
+    pipeline.fetch.instruction = bus_read(r(15), Word);
     step(2);
   }
 
@@ -16,11 +16,11 @@ void ARM::arm_step() {
   pipeline.execute = pipeline.decode;
   pipeline.decode = pipeline.fetch;
   pipeline.fetch.address = r(15);
-  pipeline.fetch.instruction = bus.read(r(15), Word);
+  pipeline.fetch.instruction = bus_read(r(15), Word);
   step(2);
 
 //print(disassemble_registers(), "\n");
-  print(disassemble_arm_opcode(pipeline.execute.address), "\n");
+//print(disassemble_arm_opcode(pipeline.execute.address), "\n");
 
   if(arm_condition() == false) return;
   if((instruction() & 0x0fc000f0) == 0x00000090) { arm_op_multiply(); return; }
@@ -365,9 +365,9 @@ void ARM::arm_op_move_immediate_offset() {
 
   if(pre == 1) rn = up ? rn + rm : rn - rm;
   if(load) {
-    rd = bus.read(rn, byte ? Byte : Word);
+    rd = bus_read(rn, byte ? Byte : Word);
   } else {
-    bus.write(rn, byte ? Byte : Word, rd);
+    bus_write(rn, byte ? Byte : Word, rd);
   }
   if(pre == 0) rn = up ? rn + rm : rn - rm;
 
@@ -413,9 +413,9 @@ void ARM::arm_op_move_register_offset() {
 
   if(pre == 1) rn = up ? rn + rm : rn - rm;
   if(load) {
-    rd = bus.read(rn, byte ? Byte : Word);
+    rd = bus_read(rn, byte ? Byte : Word);
   } else {
-    bus.write(rn, byte ? Byte : Word, rd);
+    bus_write(rn, byte ? Byte : Word, rd);
   }
   if(pre == 0) rn = up ? rn + rm : rn - rm;
 
@@ -456,8 +456,8 @@ void ARM::arm_op_move_multiple() {
 
   for(unsigned n = 0; n < 16; n++) {
     if(list & (1 << n)) {
-      if(load) r(n) = bus.read(rn, Word);
-      else bus.write(rn, Word, r(n));
+      if(load) r(n) = bus_read(rn, Word);
+      else bus_write(rn, Word, r(n));
       rn += 4;
     }
   }

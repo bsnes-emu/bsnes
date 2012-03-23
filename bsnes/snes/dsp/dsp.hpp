@@ -1,4 +1,4 @@
-struct DSP : public Processor {
+struct DSP : Thread {
   enum : bool { Threaded = true };
   alwaysinline void step(unsigned clocks);
   alwaysinline void synchronize_smp();

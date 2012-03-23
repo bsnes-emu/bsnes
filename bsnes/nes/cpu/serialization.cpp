@@ -1,5 +1,5 @@
 void CPU::serialize(serializer &s) {
-  Processor::serialize(s);
+  Thread::serialize(s);
 
   s.array(ram);
 

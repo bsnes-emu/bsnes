@@ -1,7 +1,7 @@
 #ifdef LCD_CPP
 
 void LCD::serialize(serializer &s) {
-  Processor::serialize(s);
+  Thread::serialize(s);
 
   s.array(screen);
   s.array(line);

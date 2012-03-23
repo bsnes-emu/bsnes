@@ -1,7 +1,7 @@
 #ifdef SMP_CPP
 
 void SMP::serialize(serializer &s) {
-  Processor::serialize(s);
+  Thread::serialize(s);
   SMPcore::core_serialize(s);
 
   s.array(apuram);

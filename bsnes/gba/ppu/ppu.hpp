@@ -1,4 +1,4 @@
-struct PPU : Processor {
+struct PPU : Thread {
   StaticMemory vram;
   StaticMemory oam;
   StaticMemory pram;

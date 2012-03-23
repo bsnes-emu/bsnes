@@ -2,7 +2,6 @@
 
 namespace GBA {
 
-#include "core/core.cpp"
 CPU cpu;
 
 void CPU::Enter() { cpu.enter(); }
@@ -23,6 +22,16 @@ void CPU::step(unsigned clocks) {
 
   apu.clock -= clocks;
   if(apu.clock < 0) co_switch(apu.thread);
+}
+
+uint32 CPU::bus_read(uint32 addr, uint32 size) {
+  step(1);
+  return bus.read(addr, size);
+}
+
+void CPU::bus_write(uint32 addr, uint32 size, uint32 word) {
+  step(1);
+  return bus.write(addr, size, word);
 }
 
 void CPU::power() {

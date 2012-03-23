@@ -21,7 +21,7 @@ namespace GB {
 #include <nall/gameboy/cartridge.hpp>
 
 namespace GB {
-  struct Processor {
+  struct Thread {
     cothread_t thread;
     unsigned frequency;
     int64 clock;
@@ -38,10 +38,10 @@ namespace GB {
       s.integer(clock);
     }
 
-    inline Processor() : thread(nullptr) {
+    inline Thread() : thread(nullptr) {
     }
 
-    inline ~Processor() {
+    inline ~Thread() {
       if(thread) co_delete(thread);
     }
   };

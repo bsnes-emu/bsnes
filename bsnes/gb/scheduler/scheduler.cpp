@@ -16,11 +16,6 @@ void Scheduler::exit(ExitReason reason) {
   co_switch(host_thread);
 }
 
-void Scheduler::swapto(Processor &p) {
-  active_thread = p.thread;
-  co_switch(active_thread);
-}
-
 void Scheduler::init() {
   host_thread = co_active();
   active_thread = cpu.thread;

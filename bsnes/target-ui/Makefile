@@ -1,3 +1,6 @@
+processors := arm
+include processor/Makefile
+
 include $(nes)/Makefile
 include $(snes)/Makefile
 include $(gb)/Makefile

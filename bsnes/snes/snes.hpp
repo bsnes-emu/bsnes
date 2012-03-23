@@ -2,6 +2,7 @@
 #define SNES_HPP
 
 #include <base/base.hpp>
+#include <processor/arm/arm.hpp>
 
 namespace SNES {
   namespace Info {
@@ -24,7 +25,7 @@ namespace SNES {
 #endif
 
 namespace SNES {
-  struct Processor {
+  struct Thread {
     cothread_t thread;
     unsigned frequency;
     int64 clock;
@@ -41,10 +42,10 @@ namespace SNES {
       s.integer(clock);
     }
 
-    inline Processor() : thread(nullptr) {
+    inline Thread() : thread(nullptr) {
     }
 
-    inline ~Processor() {
+    inline ~Thread() {
       if(thread) co_delete(thread);
     }
   };

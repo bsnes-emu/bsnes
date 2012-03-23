@@ -1,5 +1,4 @@
-class PPU : public Processor, public PPUcounter {
-public:
+struct PPU : Thread, public PPUcounter {
   uint8 vram[128 * 1024];
   uint8 oam[544];
   uint8 cgram[512];

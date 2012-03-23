@@ -1,6 +1,11 @@
+#include <processor/processor.hpp>
+#include "arm.hpp"
+
+namespace Processor {
+
 #include "registers.cpp"
-#include "arm.cpp"
-#include "thumb.cpp"
+#include "instructions-arm.cpp"
+#include "instructions-thumb.cpp"
 #include "disassembler.cpp"
 
 void ARM::power() {
@@ -11,4 +16,9 @@ void ARM::power() {
     pipeline.reload = true;
     r(15).data &= cpsr().t ? ~1 : ~3;
   };
+}
+
+void ARM::serialize(serializer &s) {
+}
+
 }

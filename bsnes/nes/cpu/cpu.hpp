@@ -1,4 +1,4 @@
-struct CPU : Processor {
+struct CPU : Thread {
   #include "core/core.hpp"
   #include "memory/memory.hpp"
   uint8 ram[0x0800];

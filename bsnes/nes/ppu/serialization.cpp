@@ -1,5 +1,5 @@
 void PPU::serialize(serializer &s) {
-  Processor::serialize(s);
+  Thread::serialize(s);
 
   s.integer(status.mdr);
 

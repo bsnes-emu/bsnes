@@ -1,4 +1,4 @@
-class ICD2 : public GB::Interface, public Coprocessor {
+class ICD2 : GB::Interface, public Coprocessor {
 public:
   unsigned revision;
 

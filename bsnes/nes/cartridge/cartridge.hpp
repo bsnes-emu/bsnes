@@ -1,7 +1,7 @@
 #include "chip/chip.hpp"
 #include "board/board.hpp"
 
-struct Cartridge : Processor, property<Cartridge> {
+struct Cartridge : Thread, property<Cartridge> {
   static void Main();
   void main();
 

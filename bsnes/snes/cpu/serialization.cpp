@@ -1,7 +1,7 @@
 #ifdef CPU_CPP
 
 void CPU::serialize(serializer &s) {
-  Processor::serialize(s);
+  Thread::serialize(s);
   CPUcore::core_serialize(s);
   PPUcounter::serialize(s);
 

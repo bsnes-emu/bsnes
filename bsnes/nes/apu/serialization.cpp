@@ -1,5 +1,5 @@
 void APU::serialize(serializer &s) {
-  Processor::serialize(s);
+  Thread::serialize(s);
 
   filter.serialize(s);
 

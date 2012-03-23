@@ -2,6 +2,7 @@
 #define GBA_HPP
 
 #include <base/base.hpp>
+#include <processor/arm/arm.hpp>
 
 namespace GBA {
   namespace Info {
@@ -22,7 +23,7 @@ namespace GBA {
 namespace GBA {
   enum : unsigned { Byte = 8, Half = 16, Word = 32 };
 
-  struct Processor {
+  struct Thread {
     cothread_t thread;
     unsigned frequency;
     signed clock;
@@ -39,10 +40,10 @@ namespace GBA {
       s.integer(clock);
     }
 
-    inline Processor() : thread(nullptr) {
+    inline Thread() : thread(nullptr) {
     }
 
-    inline ~Processor() {
+    inline ~Thread() {
       if(thread) co_delete(thread);
     }
   };

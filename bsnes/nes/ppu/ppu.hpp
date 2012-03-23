@@ -1,4 +1,4 @@
-struct PPU : Processor {
+struct PPU : Thread {
   static void Main();
   void main();
   void tick();

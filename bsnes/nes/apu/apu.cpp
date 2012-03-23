@@ -92,7 +92,7 @@ void APU::power() {
 }
 
 void APU::reset() {
-  Processor::create(APU::Main, 21477272);
+  create(APU::Main, 21477272);
 
   pulse[0].reset();
   pulse[1].reset();

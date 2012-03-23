@@ -1,7 +1,7 @@
 #ifdef DSP_CPP
 
 void DSP::serialize(serializer &s) {
-  Processor::serialize(s);
+  Thread::serialize(s);
 
   s.array(state.regs, 128);
   state.echo_hist[0].serialize(s);

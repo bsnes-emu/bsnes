@@ -20,7 +20,7 @@ namespace NES {
 #include <libco/libco.h>
 
 namespace NES {
-  struct Processor {
+  struct Thread {
     cothread_t thread;
     unsigned frequency;
     int64 clock;
@@ -37,10 +37,10 @@ namespace NES {
       s.integer(clock);
     }
 
-    inline Processor() : thread(nullptr) {
+    inline Thread() : thread(nullptr) {
     }
 
-    inline ~Processor() {
+    inline ~Thread() {
       if(thread) co_delete(thread);
     }
   };

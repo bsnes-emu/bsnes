@@ -30,7 +30,7 @@ string ARM::disassemble_arm_opcode(uint32 pc) {
 
   string output{hex<8>(pc), "  "};
 
-  uint32 instruction = bus.read(pc, Word);
+  uint32 instruction = bus_read(pc, Word);
   output.append(hex<8>(instruction), "  ");
 
   //multiply()
@@ -198,7 +198,7 @@ string ARM::disassemble_arm_opcode(uint32 pc) {
     if(pre == 1) output.append("]");
     if(pre == 0 || writeback == 1) output.append("!");
 
-    if(rn == 15) output.append(" =0x", hex<8>(bus.read(pc + 8 + (up ? +immediate : -immediate), byte ? Byte : Word)));
+    if(rn == 15) output.append(" =0x", hex<8>(bus_read(pc + 8 + (up ? +immediate : -immediate), byte ? Byte : Word)));
     return output;
   }
 
@@ -286,7 +286,7 @@ string ARM::disassemble_thumb_opcode(uint32 pc) {
 
   string output{hex<8>(pc), "  "};
 
-  uint16 instruction = bus.read(pc, Half);
+  uint16 instruction = bus_read(pc, Half);
   output.append(hex<4>(instruction), "  ");
 
   //adjust_register()
@@ -400,7 +400,7 @@ string ARM::disassemble_thumb_opcode(uint32 pc) {
 
     unsigned rm = ((pc + 4) & ~3) + displacement * 4;
     output.append("ldr ", registers[rd], ",[pc,#0x", hex<3>(rm), "]");
-    output.append(" =0x", hex<8>(bus.read(rm, Word)));
+    output.append(" =0x", hex<8>(bus_read(rm, Word)));
 
     return output;
   }
@@ -565,16 +565,23 @@ string ARM::disassemble_thumb_opcode(uint32 pc) {
     return output;
   }
 
-  //branch_long()
+  //branch_long_prefix()
   //bl address
   if((instruction & 0xf800) == 0xf000) {
     uint11 offsethi = instruction;
-    instruction = bus.read(pc + 2, Half);
+    instruction = bus_read(pc + 2, Half);
     uint11 offsetlo = instruction;
 
     int22 displacement = (offsethi << 11) | (offsetlo << 0);
     output.append("bl 0x", hex<8>(pc + 4 + displacement * 2));
-    output.append("\n", hex<8>(pc + 2), "  ", hex<4>(instruction), "  ...");
+
+    return output;
+  }
+
+  //branch_long_suffix()
+  //bl address
+  if((instruction & 0xf800) == 0xf800) {
+    output.append("...");
 
     return output;
   }

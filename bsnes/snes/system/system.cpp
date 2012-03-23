@@ -45,7 +45,7 @@ void System::runtosave() {
   }
 
   for(unsigned i = 0; i < cpu.coprocessors.size(); i++) {
-    Processor &chip = *cpu.coprocessors[i];
+    auto &chip = *cpu.coprocessors[i];
     scheduler.thread = chip.thread;
     runthreadtosave();
   }

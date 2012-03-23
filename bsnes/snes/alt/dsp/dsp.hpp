@@ -1,7 +1,6 @@
 #include "SPC_DSP.h"
 
-class DSP : public Processor {
-public:
+struct DSP : Thread {
   enum : bool { Threaded = false };
   alwaysinline void step(unsigned clocks);
   alwaysinline void synchronize_smp();

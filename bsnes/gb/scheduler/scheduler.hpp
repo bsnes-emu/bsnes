@@ -8,7 +8,6 @@ struct Scheduler : property<Scheduler> {
 
   void enter();
   void exit(ExitReason);
-  void swapto(Processor&);
 
   void init();
   Scheduler();

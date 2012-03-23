@@ -1,4 +1,4 @@
-struct APU : Processor, MMIO {
+struct APU : Thread, MMIO {
   #include "square1/square1.hpp"
   #include "square2/square2.hpp"
   #include "wave/wave.hpp"

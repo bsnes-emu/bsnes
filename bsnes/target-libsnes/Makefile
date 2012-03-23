@@ -1,3 +1,6 @@
+processor := arm
+include processor/Makefile
+
 include $(snes)/Makefile
 include $(gb)/Makefile
 output := libsnes

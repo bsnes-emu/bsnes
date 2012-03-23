@@ -1,7 +1,7 @@
 #ifdef SUPERFX_CPP
 
 void SuperFX::serialize(serializer &s) {
-  Processor::serialize(s);
+  Thread::serialize(s);
 
   //superfx.hpp
   s.integer(clockmode);

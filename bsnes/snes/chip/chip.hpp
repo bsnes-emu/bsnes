@@ -1,4 +1,4 @@
-struct Coprocessor : Processor {
+struct Coprocessor : Thread {
   alwaysinline void step(unsigned clocks);
   alwaysinline void synchronize_cpu();
 };

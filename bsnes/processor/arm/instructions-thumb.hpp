@@ -33,4 +33,5 @@ void thumb_op_move_multiple();
 void thumb_op_software_interrupt();
 void thumb_op_branch_conditional();
 void thumb_op_branch_short();
-void thumb_op_branch_long();
+void thumb_op_branch_long_prefix();
+void thumb_op_branch_long_suffix();

@@ -1,4 +1,4 @@
-struct APU : Processor {
+struct APU : Thread {
   static void Enter();
   void enter();
   void step(unsigned clocks);

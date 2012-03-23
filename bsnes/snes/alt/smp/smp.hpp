@@ -1,5 +1,4 @@
-class SMP : public Processor {
-public:
+struct SMP : Thread {
   static const uint8 iplrom[64];
   uint8 *apuram;
 

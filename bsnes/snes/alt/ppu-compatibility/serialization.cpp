@@ -13,7 +13,7 @@ void PPUcounter::serialize(serializer &s) {
 }
 
 void PPU::serialize(serializer &s) {
-  Processor::serialize(s);
+  Thread::serialize(s);
   PPUcounter::serialize(s);
 
   s.array(vram);

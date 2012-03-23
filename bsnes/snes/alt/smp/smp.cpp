@@ -34,8 +34,8 @@ void SMP::enter() {
 }
 
 void SMP::power() {
-  Processor::frequency = system.apu_frequency();
-  Processor::clock = 0;
+  Thread::frequency = system.apu_frequency();
+  Thread::clock = 0;
 
   timer0.target = 0;
   timer1.target = 0;
@@ -82,7 +82,7 @@ void SMP::reset() {
 }
 
 void SMP::serialize(serializer &s) {
-  Processor::serialize(s);
+  Thread::serialize(s);
 
   s.array(apuram, 64 * 1024);
 

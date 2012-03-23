@@ -1,7 +1,7 @@
 #ifdef APU_CPP
 
 void APU::serialize(serializer &s) {
-  Processor::serialize(s);
+  Thread::serialize(s);
 
   s.array(mmio_data);
   s.integer(sequencer_base);
