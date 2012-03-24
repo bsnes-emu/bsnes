@@ -1,41 +1,22 @@
 #ifdef HITACHIDSP_CPP
 
 void HitachiDSP::serialize(serializer &s) {
+  HG51B::serialize(s);
   Thread::serialize(s);
 
-  s.array(dataRAM);
-  for(auto &n : stack) s.integer(n);
-  s.integer(opcode);
-  s.integer((unsigned&)state);
-
-  s.integer(regs.pc);
-  s.integer(regs.p);
-  s.integer(regs.n);
-  s.integer(regs.z);
-  s.integer(regs.c);
-
-  s.integer(regs.a);
-  s.integer(regs.acch);
-  s.integer(regs.accl);
-  s.integer(regs.busdata);
-  s.integer(regs.romdata);
-  s.integer(regs.ramdata);
-  s.integer(regs.busaddr);
-  s.integer(regs.ramaddr);
-  for(auto &n : regs.gpr) s.integer(n);
-
-  s.integer(regs.dma_source);
-  s.integer(regs.dma_length);
-  s.integer(regs.dma_target);
-  s.integer(regs.r1f48);
-  s.integer(regs.program_offset);
-  s.integer(regs.r1f4c);
-  s.integer(regs.page_number);
-  s.integer(regs.program_counter);
-  s.integer(regs.r1f50);
-  s.integer(regs.r1f51);
-  s.integer(regs.r1f52);
-  s.array(regs.vector);
+  s.integer(mmio.dma);
+  s.integer(mmio.dma_source);
+  s.integer(mmio.dma_length);
+  s.integer(mmio.dma_target);
+  s.integer(mmio.r1f48);
+  s.integer(mmio.program_offset);
+  s.integer(mmio.r1f4c);
+  s.integer(mmio.page_number);
+  s.integer(mmio.program_counter);
+  s.integer(mmio.r1f50);
+  s.integer(mmio.r1f51);
+  s.integer(mmio.r1f52);
+  s.array(mmio.vector);
 }
 
 #endif

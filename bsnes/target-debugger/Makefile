@@ -1,6 +1,6 @@
 options += debugger
 
-processor := arm
+processor := arm hg51b
 include processor/Makefile
 
 include $(snes)/Makefile

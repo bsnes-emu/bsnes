@@ -14,7 +14,7 @@ target  := ui
 c       := $(compiler) -std=gnu99
 cpp     := $(subst cc,++,$(compiler)) -std=gnu++0x
 flags   := -I. -march=native -O3 -fomit-frame-pointer
-link    :=
+link    := -s
 objects := libco
 
 # profile-guided optimization mode
@@ -30,11 +30,11 @@ endif
 
 # platform
 ifeq ($(platform),x)
-  link += -s -ldl -lX11 -lXext
+  link += -ldl -lX11 -lXext
 else ifeq ($(platform),osx)
 else ifeq ($(platform),win)
   link += $(if $(findstring console,$(options)),-mconsole,-mwindows)
-  link += -mthreads -s -luuid -lkernel32 -luser32 -lgdi32 -lcomctl32 -lcomdlg32 -lshell32 -lole32
+  link += -mthreads -luuid -lkernel32 -luser32 -lgdi32 -lcomctl32 -lcomdlg32 -lshell32 -lole32
   link += -Wl,-enable-auto-import -Wl,-enable-runtime-pseudo-reloc
 else
   unknown_platform: help;

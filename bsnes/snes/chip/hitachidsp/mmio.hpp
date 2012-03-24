@@ -1,21 +1,6 @@
-struct Registers {
-  uint24 pc;
-  uint16 p;
-  bool n;
-  bool z;
-  bool c;
+struct MMIO {
+  bool dma;  //true during DMA transfers
 
-  uint24 a;
-  uint24 acch;
-  uint24 accl;
-  uint24 busdata;
-  uint24 romdata;
-  uint24 ramdata;
-  uint24 busaddr;
-  uint24 ramaddr;
-  uint24 gpr[16];
-
-  //MMIO
   uint24 dma_source;       //$1f40-$1f42
   uint24 dma_length;       //$1f43-$1f44
   uint24 dma_target;       //$1f45-$1f47
@@ -28,4 +13,4 @@ struct Registers {
   uint8  r1f51;            //$1f51
   uint8  r1f52;            //$1f52
   uint8  vector[32];       //$1f60-$1f7f
-} regs;
+} mmio;

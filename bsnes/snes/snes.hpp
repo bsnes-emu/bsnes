@@ -3,6 +3,7 @@
 
 #include <base/base.hpp>
 #include <processor/arm/arm.hpp>
+#include <processor/hg51b/hg51b.hpp>
 
 namespace SNES {
   namespace Info {

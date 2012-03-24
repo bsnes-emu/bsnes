@@ -1,3 +1,5 @@
+#ifdef PROCESSOR_ARM_HPP
+
 void ARM::thumb_step() {
   if(pipeline.reload) {
     pipeline.reload = false;
@@ -20,7 +22,7 @@ void ARM::thumb_step() {
   step(1);
 
 //print(disassemble_registers(), "\n");
-//print(disassemble_thumb_opcode(pipeline.execute.address), "\n");
+//print(disassemble_thumb_instruction(pipeline.execute.address), "\n");
 
   if((instruction() & 0xfc00) == 0x1800) { thumb_op_adjust_register(); return; }
   if((instruction() & 0xfc00) == 0x1c00) { thumb_op_adjust_immediate(); return; }
@@ -483,13 +485,7 @@ void ARM::thumb_op_move_multiple() {
 void ARM::thumb_op_software_interrupt() {
   uint8 immediate = instruction();
 
-  auto psr = cpsr();
-  processor.setMode(Processor::Mode::SVC);
-  r(14) = r(15) - 2;
-  spsr() = psr;
-  cpsr().t = 0;
-  cpsr().i = 1;
-  r(15) = 0x00000008;
+  vector(0x00000008, Processor::Mode::SVC);
 }
 
 //b{condition}
@@ -532,3 +528,5 @@ void ARM::thumb_op_branch_long_suffix() {
   r(14) = r(15) | 1;
   r(15) += displacement * 2;
 }
+
+#endif

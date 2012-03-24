@@ -4,6 +4,13 @@ namespace GBA {
 
 Bus bus;
 
+struct UnmappedMemory : Memory {
+  uint32 read(uint32 addr, uint32 size) { return 0u; }
+  void write(uint32 addr, uint32 size, uint32 word) {}
+};
+
+static UnmappedMemory unmappedMemory;
+
 uint32 StaticMemory::read(uint32 addr, uint32 size) {
   uint32 word = 0;
 
@@ -63,9 +70,9 @@ uint32 Bus::read(uint32 addr, uint32 size) {
   switch(addr & 0x0f000000) {
   case 0x00000000: return system.bios.read(addr & 0x3fff, size);
   case 0x01000000: return system.bios.read(addr & 0x3fff, size);
-  case 0x02000000: return cpu.eram.read(addr & 0x3ffff, size);
-  case 0x03000000: return cpu.iram.read(addr & 0x7fff, size);
-  case 0x04000000: return 0u;  //MMIO [0x400]
+  case 0x02000000: return cpu.ewram.read(addr & 0x3ffff, size);
+  case 0x03000000: return cpu.iwram.read(addr & 0x7fff, size);
+  case 0x04000000: return mmio[addr & 0x3ff]->read(addr, size);
   case 0x05000000: return ppu.pram.read(addr & 0x3ff, size);
   case 0x06000000: return ppu.vram.read(addr & 0x10000 ? (0x10000 + (addr & 0x7fff)) : (addr & 0xffff), size);
   case 0x07000000: return ppu.oam.read(addr & 0x3ff, size);
@@ -84,9 +91,9 @@ void Bus::write(uint32 addr, uint32 size, uint32 word) {
   switch(addr & 0x0f000000) {
   case 0x00000000: return;
   case 0x01000000: return;
-  case 0x02000000: return cpu.eram.write(addr & 0x3ffff, size, word);
-  case 0x03000000: return cpu.iram.write(addr & 0x7fff, size, word);
-  case 0x04000000: return;  //MMIO [0x400]
+  case 0x02000000: return cpu.ewram.write(addr & 0x3ffff, size, word);
+  case 0x03000000: return cpu.iwram.write(addr & 0x7fff, size, word);
+  case 0x04000000: return mmio[addr & 0x3ff]->write(addr, size, word);
   case 0x05000000: return ppu.pram.write(addr & 0x3ff, size, word);
   case 0x06000000: return ppu.vram.write(addr & 0x10000 ? (0x10000 + (addr & 0x7fff)) : (addr & 0xffff), size, word);
   case 0x07000000: return ppu.oam.write(addr & 0x3ff, size, word);
@@ -99,6 +106,10 @@ void Bus::write(uint32 addr, uint32 size, uint32 word) {
   case 0x0e000000: return cartridge.ram.write(addr & 0xffff, size, word);
   case 0x0f000000: return cartridge.ram.write(addr & 0xffff, size, word);
   }
+}
+
+void Bus::power() {
+  for(unsigned n = 0; n < 0x400; n++) mmio[n] = &unmappedMemory;
 }
 
 }

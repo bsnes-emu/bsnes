@@ -18,6 +18,13 @@ void APU::step(unsigned clocks) {
   if(clock >= 0) co_switch(cpu.thread);
 }
 
+uint32 APU::read(uint32 addr, uint32 size) {
+  return 0u;
+}
+
+void APU::write(uint32 addr, uint32 size, uint32 word) {
+}
+
 void APU::power() {
   create(APU::Enter, 16777216);
 }

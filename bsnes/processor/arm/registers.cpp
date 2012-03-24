@@ -1,3 +1,5 @@
+#ifdef PROCESSOR_ARM_HPP
+
 void ARM::Processor::power() {
   r0 = r1 = r2 = r3 = r4 = r5 = r6 = r7 = 0;
   usr.r8 = usr.r9 = usr.r10 = usr.r11 = usr.r12 = usr.sp = usr.lr = 0;
@@ -26,8 +28,6 @@ void ARM::Processor::power() {
   r[7] = &r7;
 
   r[15] = &pc;
-
-  setMode(Mode::SYS);
 }
 
 void ARM::Processor::setMode(Mode mode) {
@@ -56,3 +56,5 @@ void ARM::Processor::setMode(Mode mode) {
   default:        r[13] = &usr.sp; r[14] = &usr.lr; spsr = nullptr;   break;
   }
 }
+
+#endif

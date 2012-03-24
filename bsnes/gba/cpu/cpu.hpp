@@ -1,6 +1,6 @@
-struct CPU : Processor::ARM, Thread {
-  StaticMemory iram;
-  StaticMemory eram;
+struct CPU : Processor::ARM, Thread, Memory {
+  StaticMemory iwram;
+  StaticMemory ewram;
 
   static void Enter();
   void enter();
@@ -9,6 +9,9 @@ struct CPU : Processor::ARM, Thread {
   void bus_write(uint32 addr, uint32 size, uint32 word);
 
   void power();
+
+  uint32 read(uint32 addr, uint32 size);
+  void write(uint32 addr, uint32 size, uint32 word);
 
   CPU();
 };

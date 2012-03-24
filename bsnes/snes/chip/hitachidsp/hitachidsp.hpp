@@ -1,15 +1,6 @@
-//Hitachi HG51B169
-
-class HitachiDSP : public Coprocessor {
-public:
+struct HitachiDSP : Processor::HG51B, Coprocessor {
   unsigned frequency;
-//uint16 programROM[2][256];
-  uint24 dataROM[1024];
-  uint8  dataRAM[3072];
-  uint24 stack[8];
-  uint16 opcode;
-  enum class State : unsigned { Idle, DMA, Execute } state;
-  #include "registers.hpp"
+  #include "mmio.hpp"
 
   static void Enter();
   void enter();
@@ -20,27 +11,17 @@ public:
   void power();
   void reset();
 
-  //memory.cpp
-  uint8 bus_read(unsigned addr);
-  void bus_write(unsigned addr, uint8 data);
+  //HG51B read/write
+  uint8 bus_read(uint24 addr);
+  void bus_write(uint24 addr, uint8 data);
 
+  //CPU ROM read/write
   uint8 rom_read(unsigned addr);
   void rom_write(unsigned addr, uint8 data);
 
+  //CPU MMIO read/write
   uint8 dsp_read(unsigned addr);
   void dsp_write(unsigned addr, uint8 data);
-
-  //opcodes.cpp
-  void push();
-  void pull();
-  unsigned sa();
-  unsigned ri();
-  unsigned np();
-  void exec();
-
-  //registers.cpp
-  unsigned reg_read(unsigned n) const;
-  void reg_write(unsigned n, unsigned data);
 
   void serialize(serializer&);
 };

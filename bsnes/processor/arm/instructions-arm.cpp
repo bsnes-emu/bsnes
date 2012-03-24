@@ -1,3 +1,5 @@
+#ifdef PROCESSOR_ARM_HPP
+
 void ARM::arm_step() {
   if(pipeline.reload) {
     pipeline.reload = false;
@@ -20,13 +22,17 @@ void ARM::arm_step() {
   step(2);
 
 //print(disassemble_registers(), "\n");
-//print(disassemble_arm_opcode(pipeline.execute.address), "\n");
+//print(disassemble_arm_instruction(pipeline.execute.address), "\n");
 
   if(arm_condition() == false) return;
+
   if((instruction() & 0x0fc000f0) == 0x00000090) { arm_op_multiply(); return; }
   if((instruction() & 0x0fb000f0) == 0x01000000) { arm_op_move_to_register_from_status(); return; }
+  if((instruction() & 0x0fb000f0) == 0x01000090) { arm_op_memory_swap(); return; }
   if((instruction() & 0x0fb000f0) == 0x01200000) { arm_op_move_to_status_from_register(); return; }
-  if((instruction() & 0x0ff000f0) == 0x01200010) { arm_op_branch_exchange_register(); return; }
+  if((instruction() & 0x0ff000f0) == 0x01200010) { arm_op_branch_exchange_register(); return; }  //ARMv4
+  if((instruction() & 0x0fb00000) == 0x03200000) { arm_op_move_to_status_from_immediate(); return; }
+
   if((instruction() & 0x0e000010) == 0x00000000) { arm_op_data_immediate_shift(); return; }
   if((instruction() & 0x0e000090) == 0x00000010) { arm_op_data_register_shift(); return; }
   if((instruction() & 0x0e000000) == 0x02000000) { arm_op_data_immediate(); return; }
@@ -34,6 +40,7 @@ void ARM::arm_step() {
   if((instruction() & 0x0e000010) == 0x06000000) { arm_op_move_register_offset(); return; }
   if((instruction() & 0x0e000000) == 0x08000000) { arm_op_move_multiple(); return; }
   if((instruction() & 0x0e000000) == 0x0a000000) { arm_op_branch(); return; }
+  if((instruction() & 0x0f000000) == 0x0f000000) { arm_op_software_interrupt(); return; }
 
   exception = true;
 }
@@ -110,6 +117,35 @@ void ARM::arm_opcode(uint32 rm) {
   }
 }
 
+void ARM::arm_move_to_status(uint32 rm) {
+  uint1 source = instruction() >> 22;
+  uint4 field = instruction() >> 16;
+
+  if(source == 1) {
+    if(mode() == Processor::Mode::USR) return;
+    if(mode() == Processor::Mode::SYS) return;
+  }
+
+  PSR &psr = source ? spsr() : cpsr();
+
+  if(field & 1) {
+    if(source == 1 || (Processor::Mode)cpsr().m != Processor::Mode::USR) {
+      psr.i = rm & 0x00000080;
+      psr.f = rm & 0x00000040;
+      psr.t = rm & 0x00000020;
+      psr.m = rm & 0x0000001f;
+      if(source == 0) processor.setMode((Processor::Mode)psr.m);
+    }
+  }
+
+  if(field & 8) {
+    psr.n = rm & 0x80000000;
+    psr.z = rm & 0x40000000;
+    psr.c = rm & 0x20000000;
+    psr.v = rm & 0x10000000;
+  }
+}
+
 //logical shift left
 void ARM::lsl(bool &c, uint32 &rm, uint32 rs) {
   while(rs--) {
@@ -167,23 +203,35 @@ void ARM::arm_op_multiply() {
   uint4 s = instruction() >> 8;
   uint4 m = instruction() >> 0;
 
-  //Booth's algorithm: two bit steps
-  uint32 temp = r(s);
-  while(temp) {
-    temp >>= 2;
-    step(1);
-  }
-  r(d) = r(m) * r(s);
+  auto &rd = r(d);
+  uint32 rs = r(s);
+  auto &rm = r(m);
 
-  if(accumulate) {
+  rd = accumulate ? r(n) : 0u;
+  step(1);
+
+  //Modified Booth Encoding
+  bool carry = 0;
+  unsigned place = 0;
+
+  do {
     step(1);
-    r(d) += r(n);
-  }
+    signed factor = (int2)rs + carry;
+
+    if(factor == -2) rd -= rm << (place + 1);
+    if(factor == -1) rd -= rm << (place + 0);
+    if(factor == +1) rd += rm << (place + 0);
+    if(factor == +2) rd += rm << (place + 1);
+
+    carry = rs & 2;
+    place += 2;
+    rs >>= 2;
+  } while(rs + carry && place < 32);
 
   if(save) {
     cpsr().n = r(d) >> 31;
     cpsr().z = r(d) == 0;
-    cpsr().c = 0;  //undefined
+    cpsr().c = carry;
   }
 }
 
@@ -204,6 +252,24 @@ void ARM::arm_op_move_to_register_from_status() {
   r(d) = source ? spsr() : cpsr();
 }
 
+//swp{condition}{b} rd,rm,[rn]
+//cccc 0001 0b00 nnnn dddd ---- 1001 mmmm
+//c = condition
+//b = byte (0 = word)
+//n = rn
+//d = rd
+//m = rm
+void ARM::arm_op_memory_swap() {
+  uint1 byte = instruction() >> 22;
+  uint4 n = instruction() >> 16;
+  uint4 d = instruction() >> 12;
+  uint4 m = instruction();
+
+  uint32 word = bus_read(r(n), byte ? Byte : Word);
+  bus_write(r(n), byte ? Byte : Word, r(m));
+  r(d) = word;
+}
+
 //msr{condition} (c,s)psr:{fields},rm
 //cccc 0001 0r10 ffff ++++ ---- 0000 mmmm
 //c = condition
@@ -211,35 +277,9 @@ void ARM::arm_op_move_to_register_from_status() {
 //f = field mask
 //m = rm
 void ARM::arm_op_move_to_status_from_register() {
-  uint1 source = instruction() >> 22;
-  uint4 field = instruction() >> 16;
   uint4 m = instruction();
 
-  if(source) {
-    if(mode() == Processor::Mode::USR) return;
-    if(mode() == Processor::Mode::SYS) return;
-  }
-
-  PSR &psr = source ? spsr() : cpsr();
-  uint32 rm = r(m);
-
-  if(field & 1) {
-    psr.i = rm & 0x00000080;
-    psr.f = rm & 0x00000040;
-    psr.t = rm & 0x00000020;
-    psr.m = rm & 0x0000001f;
-
-    if(source == 0) {
-      processor.setMode((Processor::Mode)psr.m);
-    }
-  }
-
-  if(field & 8) {
-    psr.n = rm & 0x80000000;
-    psr.z = rm & 0x40000000;
-    psr.c = rm & 0x20000000;
-    psr.v = rm & 0x10000000;
-  }
+  arm_move_to_status(r(m));
 }
 
 //bx{condition} rm
@@ -251,6 +291,24 @@ void ARM::arm_op_branch_exchange_register() {
 
   r(15) = r(m);
   cpsr().t = r(m) & 1;
+}
+
+//msr{condition} (c,s)psr:{fields},#immediate
+//cccc 0011 0r10 ffff ++++ rrrr iiii iiii
+//c = condition
+//r = SPSR (0 = CPSR)
+//f = field mask
+//r = rotate
+//i = immediate
+void ARM::arm_op_move_to_status_from_immediate() {
+  uint4 rotate = instruction() >> 8;
+  uint8 immediate = instruction();
+
+  uint32 rm = immediate;
+  bool c = cpsr().c;
+  if(rotate) ror(c, rm, 2 * rotate);
+
+  arm_move_to_status(rm);
 }
 
 //{opcode}{condition}{s} rd,rm {shift} #immediate
@@ -489,3 +547,15 @@ void ARM::arm_op_branch() {
   if(link) r(14) = r(15) - 4;
   r(15) += displacement * 4;
 }
+
+//swi #immediate
+//cccc 1111 iiii iiii iiii iiii iiii iiii
+//c = condition
+//i = immediate
+void ARM::arm_op_software_interrupt() {
+  uint24 immediate = instruction();
+
+  vector(0x00000008, Processor::Mode::SVC);
+}
+
+#endif

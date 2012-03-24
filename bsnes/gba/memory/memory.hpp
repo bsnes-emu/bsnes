@@ -3,7 +3,7 @@ struct Memory {
   virtual void write(uint32 addr, uint32 size, uint32 word) = 0;
 };
 
-struct StaticMemory {
+struct StaticMemory : Memory {
   uint8_t *data;
   unsigned size;
 
@@ -14,8 +14,11 @@ struct StaticMemory {
 };
 
 struct Bus : Memory {
+  Memory *mmio[0x400];
+
   uint32 read(uint32 addr, uint32 size);
   void write(uint32 addr, uint32 size, uint32 word);
+  void power();
 };
 
 extern Bus bus;

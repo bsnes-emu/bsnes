@@ -3,6 +3,8 @@
 
 namespace Processor {
 
+//ARMv3, ARMv4TM
+
 struct ARM {
   enum : unsigned { Byte = 8, Half = 16, Word = 32 };
   #include "registers.hpp"
@@ -14,6 +16,8 @@ struct ARM {
   virtual void bus_write(uint32 addr, uint32 size, uint32 word) = 0;
 
   void power();
+  void vector(uint32 addr, Processor::Mode mode);
+
   void serialize(serializer&);
 };
 

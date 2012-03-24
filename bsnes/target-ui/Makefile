@@ -1,4 +1,4 @@
-processors := arm
+processors := arm hg51b
 include processor/Makefile
 
 include $(nes)/Makefile

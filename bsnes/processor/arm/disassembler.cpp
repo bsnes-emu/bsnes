@@ -1,4 +1,6 @@
-string ARM::disassemble_arm_opcode(uint32 pc) {
+#ifdef PROCESSOR_ARM_HPP
+
+string ARM::disassemble_arm_instruction(uint32 pc) {
   static string conditions[] = {
     "eq", "ne", "cs", "cc",
     "mi", "pl", "vs", "vc",
@@ -65,6 +67,21 @@ string ARM::disassemble_arm_opcode(uint32 pc) {
     return output;
   }
 
+  //memory_swap()
+  //swp{condition}{b} rd,rm,[rn]
+  if((instruction & 0x0fb000f0) == 0x01000090) {
+    uint4 condition = instruction >> 28;
+    uint1 byte = instruction >> 22;
+    uint4 rn = instruction >> 16;
+    uint4 rd = instruction >> 12;
+    uint4 rm = instruction;
+
+    output.append("swp", conditions[condition], byte ? "b " : " ");
+    output.append(registers[rd], ",", registers[rm], "[", registers[rn], "]");
+
+    return output;
+  }
+
   //move_to_status_from_register()
   //msr{condition} (c,s)psr:{fields},rm
   if((instruction & 0x0fb000f0) == 0x01200000) {
@@ -94,6 +111,30 @@ string ARM::disassemble_arm_opcode(uint32 pc) {
 
     output.append("bx", conditions[condition], " ");
     output.append(registers[rm]);
+
+    return output;
+  }
+
+  //move_to_status_from_immediate()
+  //msr{condition} (c,s)psr:{fields},#immediate
+  if((instruction & 0x0fb00000) == 0x03200000) {
+    uint4 condition = instruction >> 28;
+    uint1 psr = instruction >> 22;
+    uint4 field = instruction >> 16;
+    uint4 rotate = instruction >> 8;
+    uint8 immediate = instruction;
+
+    uint32 rm = (immediate >> (rotate * 2)) | (immediate << (32 - (rotate * 2)));
+
+    output.append("msr", conditions[condition], " ");
+    output.append(psr ? "spsr:" : "cpsr:");
+    output.append(
+      field & 1 ? "c" : "",
+      field & 2 ? "x" : "",
+      field & 4 ? "s" : "",
+      field & 8 ? "f" : ""
+    );
+    output.append(",#0x", hex<8>(immediate));
 
     return output;
   }
@@ -265,11 +306,21 @@ string ARM::disassemble_arm_opcode(uint32 pc) {
     return output;
   }
 
+  //software_interrupt()
+  //swi #immediate
+  if((instruction & 0x0f000000) == 0x0f000000) {
+    uint24 immediate = instruction;
+
+    output.append("swi #0x", hex<6>(immediate));
+
+    return output;
+  }
+
   output.append("???");
   return output;
 }
 
-string ARM::disassemble_thumb_opcode(uint32 pc) {
+string ARM::disassemble_thumb_instruction(uint32 pc) {
   static string conditions[] = {
     "eq", "ne", "cs", "cc",
     "mi", "pl", "vs", "vc",
@@ -602,3 +653,5 @@ string ARM::disassemble_registers() {
   output.append(         spsr().n ? "N" : "n", spsr().z ? "Z" : "z", spsr().c ? "C" : "c", spsr().v ? "V" : "v");
   return output;
 }
+
+#endif

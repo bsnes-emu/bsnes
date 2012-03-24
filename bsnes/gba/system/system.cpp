@@ -24,6 +24,7 @@ void System::term() {
 }
 
 void System::power() {
+  bus.power();
   cpu.power();
   ppu.power();
   apu.power();

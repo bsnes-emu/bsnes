@@ -1,6 +1,6 @@
-#ifdef HITACHIDSP_CPP
+#ifdef PROCESSOR_HG51B_HPP
 
-void HitachiDSP::push() {
+void HG51B::push() {
   stack[7] = stack[6];
   stack[6] = stack[5];
   stack[5] = stack[4];
@@ -11,7 +11,7 @@ void HitachiDSP::push() {
   stack[0] = regs.pc;
 }
 
-void HitachiDSP::pull() {
+void HG51B::pull() {
   regs.pc  = stack[0];
   stack[0] = stack[1];
   stack[1] = stack[2];
@@ -24,7 +24,7 @@ void HitachiDSP::pull() {
 }
 
 //Shift-A: math opcodes can shift A register prior to ALU operation
-unsigned HitachiDSP::sa() {
+unsigned HG51B::sa() {
   switch(opcode & 0x0300) { default:
   case 0x0000: return regs.a <<  0;
   case 0x0100: return regs.a <<  1;
@@ -34,18 +34,18 @@ unsigned HitachiDSP::sa() {
 }
 
 //Register-or-Immediate: most opcodes can load from a register or immediate
-unsigned HitachiDSP::ri() {
+unsigned HG51B::ri() {
   if(opcode & 0x0400) return opcode & 0xff;
   return reg_read(opcode & 0xff);
 }
 
 //New-PC: determine jump target address; opcode.d9 = long jump flag (1 = yes)
-unsigned HitachiDSP::np() {
+unsigned HG51B::np() {
   if(opcode & 0x0200) return (regs.p << 8) | (opcode & 0xff);
   return (regs.pc & 0xffff00) | (opcode & 0xff);
 }
 
-void HitachiDSP::exec() {
+void HG51B::instruction() {
   if((opcode & 0xffff) == 0x0000) {
     //0000 0000 0000 0000
     //nop
@@ -344,12 +344,12 @@ void HitachiDSP::exec() {
   else if((opcode & 0xffff) == 0xfc00) {
     //1111 1100 0000 0000
     //halt
-    state = State::Idle;
+    regs.halt = true;
   }
 
   else {
-    print("Hitachi DSP: invalid opcode @ ", hex<4>(regs.pc - 1), " = ", hex<4>(opcode), "\n");
-    state = State::Idle;
+    print("Hitachi DSP: unknown opcode @ ", hex<4>(regs.pc - 1), " = ", hex<4>(opcode), "\n");
+    regs.halt = true;
   }
 }
 

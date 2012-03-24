@@ -9,6 +9,9 @@ bool Cartridge::load(const string &markup, const uint8_t *data, unsigned size) {
   cartridge.rom.data = new uint8[cartridge.rom.size = size];
   memcpy(cartridge.rom.data, data, size);
 
+  if(cartridge.ram.data) delete[] cartridge.ram.data;
+  cartridge.ram.data = new uint8[cartridge.ram.size = 64 * 1024]();
+
   sha256 = nall::sha256(cartridge.rom.data, cartridge.rom.size);
 
   return loaded = true;

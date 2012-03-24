@@ -56,6 +56,13 @@ void PPU::frame() {
   scheduler.exit(Scheduler::ExitReason::FrameEvent);
 }
 
+uint32 PPU::read(uint32 addr, uint32 size) {
+  return 0u;
+}
+
+void PPU::write(uint32 addr, uint32 size, uint32 word) {
+}
+
 PPU::PPU() {
   vram.data = new uint8[vram.size = 96 * 1024];
   oam.data = new uint8[oam.size = 1024];
