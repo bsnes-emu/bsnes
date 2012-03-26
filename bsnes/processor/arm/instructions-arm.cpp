@@ -30,7 +30,7 @@ void ARM::arm_step() {
   if((instruction() & 0x0fb000f0) == 0x01000000) { arm_op_move_to_register_from_status(); return; }
   if((instruction() & 0x0fb000f0) == 0x01000090) { arm_op_memory_swap(); return; }
   if((instruction() & 0x0fb000f0) == 0x01200000) { arm_op_move_to_status_from_register(); return; }
-  if((instruction() & 0x0ff000f0) == 0x01200010) { arm_op_branch_exchange_register(); return; }  //ARMv4
+  if((instruction() & 0x0ff000f0) == 0x01200010) { arm_op_branch_exchange_register(); return; }  //ARMv4+
   if((instruction() & 0x0fb00000) == 0x03200000) { arm_op_move_to_status_from_immediate(); return; }
 
   if((instruction() & 0x0e000010) == 0x00000000) { arm_op_data_immediate_shift(); return; }
@@ -289,8 +289,8 @@ void ARM::arm_op_move_to_status_from_register() {
 void ARM::arm_op_branch_exchange_register() {
   uint4 m = instruction();
 
-  r(15) = r(m);
   cpsr().t = r(m) & 1;
+  r(15) = r(m);
 }
 
 //msr{condition} (c,s)psr:{fields},#immediate

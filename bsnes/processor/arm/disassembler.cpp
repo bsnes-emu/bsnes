@@ -568,13 +568,13 @@ string ARM::disassemble_thumb_instruction(uint32 pc) {
   }
 
   //move_multiple()
-  //(ldmia,stmdb) rn,{r...}
+  //(ldmia,stmia) rn,{r...}
   if((instruction & 0xf000) == 0xc000) {
     uint1 load = instruction >> 11;
     uint3 rn = instruction >> 8;
     uint8 list = instruction;
 
-    output.append(load ? "ldmia " : "stmdb ", registers[rn], "!,{");
+    output.append(load ? "ldmia " : "stmia ", registers[rn], "!,{");
     for(unsigned l = 0; l < 8; l++) {
       if(list & (1 << l)) output.append(registers[l], ",");
     }

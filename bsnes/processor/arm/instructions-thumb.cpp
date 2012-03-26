@@ -96,15 +96,6 @@ uint32 ARM::thumb_tst(uint32 modify) {
   return modify;
 }
 
-void ARM::thumb_cmp(uint32 source, uint32 modify) {
-  uint32 result = source - modify;
-  uint32 overflow = ~(source ^ modify) & (source ^ result);
-  cpsr().n = result >> 31;
-  cpsr().z = result == 0;
-  cpsr().c = (1u << 31) & (overflow ^ source ^ modify ^ result);
-  cpsr().v = (1u << 31) & (overflow);
-}
-
 uint32 ARM::thumb_add(uint32 source, uint32 modify, bool carry) {
   uint32 result = source + modify + carry;
   uint32 overflow = ~(source ^ modify) & (source ^ result);
@@ -116,13 +107,7 @@ uint32 ARM::thumb_add(uint32 source, uint32 modify, bool carry) {
 }
 
 uint32 ARM::thumb_sub(uint32 source, uint32 modify, bool carry) {
-  uint32 result = source - modify + carry;
-  uint32 overflow = ~(source ^ modify) & (source ^ result);
-  cpsr().n = result >> 31;
-  cpsr().z = result == 0;
-  cpsr().c = (1u << 31) & (overflow ^ source ^ modify ^ result);
-  cpsr().v = (1u << 31) & (overflow);
-  return result;
+  thumb_add(source, ~modify, carry);
 }
 
 uint32 ARM::thumb_lsl(uint32 source, uint32 modify) {
@@ -240,7 +225,7 @@ void ARM::thumb_op_immediate() {
 
   switch(opcode) {
   case 0: r(d) = thumb_tst(      immediate); break;
-  case 1:        thumb_cmp(r(d), immediate); break;
+  case 1:        thumb_sub(r(d), immediate); break;
   case 2: r(d) = thumb_add(r(d), immediate); break;
   case 3: r(d) = thumb_sub(r(d), immediate); break;
   }
@@ -265,8 +250,8 @@ void ARM::thumb_op_alu() {
 void ARM::thumb_op_branch_exchange() {
   uint4 m = instruction() >> 3;
 
-  r(15) = r(m);
   cpsr().t = r(m) & 1;
+  r(15) = r(m);
 }
 
 //{opcode} rd,rm
@@ -423,34 +408,30 @@ void ARM::thumb_op_stack_multiple() {
   uint1 branch = instruction() >> 8;
   uint8 list = instruction();
 
-  if(load == 1) {
-    for(unsigned l = 0; l < 8; l++) {
-      if(list & (1 << l)) {
-        r(l) = bus_read(r(13), Word);
-        r(13) += 4;
-      }
-    }
-    if(branch) {
-      r(15) = bus_read(r(13), Word);
-      r(13) += 4;
+  uint32 sp = 0;
+  if(load == 1) sp = r(13);
+  if(load == 0) sp = r(13) - (bit::count(list) + branch) * 4;
+
+  for(unsigned l = 0; l < 8; l++) {
+    if(list & (1 << l)) {
+      if(load == 1) r(l) = bus_read(sp, Word);  //POP
+      if(load == 0) bus_write(sp, Word, r(l));  //PUSH
+      sp += 4;
     }
   }
 
-  if(load == 0) {
-    for(unsigned l = 0; l < 8; l++) {
-      if(list & (1 << l)) {
-        r(13) -= 4;
-        bus_write(r(13), Word, r(l));
-      }
-    }
-    if(branch) {
-      r(13) -= 4;
-      bus_write(r(13), Word, r(14));
-    }
+  if(branch) {
+    //note: ARMv5+ POP sets cpsr().t
+    if(load == 1) r(15) = bus_read(sp, Word);  //POP
+    if(load == 0) bus_write(sp, Word, r(14));  //PUSH
+    sp += 4;
   }
+
+  if(load == 1) r(13) += (bit::count(list) + branch) * 4;
+  if(load == 0) r(13) -= (bit::count(list) + branch) * 4;
 }
 
-//(ldmia,stmdb) rn!,{r...}
+//(ldmia,stmia) rn!,{r...}
 //1100 lnnn llll llll
 //l = load (0 = save)
 //n = rn
@@ -460,21 +441,11 @@ void ARM::thumb_op_move_multiple() {
   uint3 n = instruction() >> 8;
   uint8 list = instruction();
 
-  if(load == 1) {
-    for(unsigned l = 0; l < 8; l++) {
-      if(list & (1 << l)) {
-        r(l) = bus_read(r(n), Word);
-        r(n) += 4;
-      }
-    }
-  }
-
-  if(load == 0) {
-    for(unsigned l = 0; l < 8; l++) {
-      if(list & (1 << l)) {
-        r(n) -= 4;
-        bus_write(r(n), Word, r(l));
-      }
+  for(unsigned l = 0; l < 8; l++) {
+    if(list & (1 << l)) {
+      if(load == 1) r(l) = bus_read(r(n), Word);  //LDMIA
+      if(load == 0) bus_write(r(n), Word, r(l));  //STMIA
+      r(n) += 4;
     }
   }
 }
@@ -513,9 +484,9 @@ void ARM::thumb_op_branch_short() {
 //1111 0ooo oooo oooo
 //o = offset
 void ARM::thumb_op_branch_long_prefix() {
-  uint11 offsethi = instruction();
+  int11 offsethi = instruction();
 
-  r(14) = offsethi;
+  r(14) = r(15) + ((offsethi * 2) << 11);
 }
 
 //bl address
@@ -524,9 +495,8 @@ void ARM::thumb_op_branch_long_prefix() {
 void ARM::thumb_op_branch_long_suffix() {
   uint11 offsetlo = instruction();
 
-  int22 displacement = ((uint11)r(14) << 11) | offsetlo;
-  r(14) = r(15) | 1;
-  r(15) += displacement * 2;
+  r(15) = r(14) + (offsetlo * 2);
+  r(14) = pipeline.decode.address | 1;
 }
 
 #endif

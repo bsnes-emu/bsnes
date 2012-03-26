@@ -52,13 +52,13 @@ struct Color {
 struct Position {
   signed x, y;
   inline Position() : x(0), y(0) {}
-  inline Position(signed x, signed y) : x(x), y(y) {}
+  template<typename X, typename Y> inline Position(X x, Y y) : x(x), y(y) {}
 };
 
 struct Size {
   unsigned width, height;
   inline Size() : width(0), height(0) {}
-  inline Size(unsigned width, unsigned height) : width(width), height(height) {}
+  template<typename W, typename H> inline Size(W width, H height) : width(width), height(height) {}
 };
 
 struct Geometry {
@@ -69,7 +69,7 @@ struct Geometry {
   nall::string text() const;
   inline Geometry() : x(0), y(0), width(0), height(0) {}
   inline Geometry(const Position& position, const Size& size) : x(position.x), y(position.y), width(size.width), height(size.height) {}
-  inline Geometry(signed x, signed y, unsigned width, unsigned height) : x(x), y(y), width(width), height(height) {}
+  template<typename X, typename Y, typename W, typename H> inline Geometry(X x, Y y, W width, H height) : x(x), y(y), width(width), height(height) {}
   Geometry(const nall::string &text);
 };
 

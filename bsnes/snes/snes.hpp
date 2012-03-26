@@ -4,11 +4,12 @@
 #include <base/base.hpp>
 #include <processor/arm/arm.hpp>
 #include <processor/hg51b/hg51b.hpp>
+#include <processor/upd96050/upd96050.hpp>
 
 namespace SNES {
   namespace Info {
     static const char Name[] = "bsnes";
-    static const unsigned SerializerVersion = 23;
+    static const unsigned SerializerVersion = 24;
   }
 }
 

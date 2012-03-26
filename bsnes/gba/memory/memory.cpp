@@ -5,8 +5,8 @@ namespace GBA {
 Bus bus;
 
 struct UnmappedMemory : Memory {
-  uint32 read(uint32 addr, uint32 size) { return 0u; }
-  void write(uint32 addr, uint32 size, uint32 word) {}
+  uint32 read(uint32 addr, uint32 size) { print(hex<8>(addr), ":", decimal<2>(size), "\n"); return 0u; }
+  void write(uint32 addr, uint32 size, uint32 word) { print(hex<8>(addr), ":", decimal<2>(size), "=", hex<8>(word), "\n"); }
 };
 
 static UnmappedMemory unmappedMemory;

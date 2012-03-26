@@ -27,7 +27,7 @@ struct map {
       signed middle = (first + last) / 2;
            if(name < list[middle].name) last  = middle - 1;  //search lower half
       else if(list[middle].name < name) first = middle + 1;  //search upper half
-      else return { true, middle };                          //match found
+      else return { true, (unsigned)middle };                //match found
     }
     return { false, 0u };
   }

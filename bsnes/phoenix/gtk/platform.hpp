@@ -100,7 +100,8 @@ struct pWindow : public pObject {
   GtkWidget *statusContainer;
   GtkWidget *menu;
   GtkWidget *status;
-  GdkEventConfigure lastConfigure;
+  GtkAllocation lastAllocation;
+  bool onSizePending;
 
   void append(Layout &layout);
   void append(Menu &menu);

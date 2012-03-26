@@ -50,7 +50,6 @@ void CPU::power() {
 }
 
 uint32 CPU::read(uint32 addr, uint32 size) {
-  if(addr == 0x04000300) return prng() & 1;
   return 0u;
 }
 

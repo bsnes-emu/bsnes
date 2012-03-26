@@ -53,36 +53,27 @@ static gboolean Window_configure(GtkWidget *widget, GdkEvent *event, Window *win
     settings->save();
   }
 
+  Geometry geometry = {
+    client.x,
+    client.y + window->p.menuHeight(),
+    client.width,
+    client.height - window->p.menuHeight() - window->p.statusHeight()
+  };
+
   //move
-  if(event->configure.x != window->p.lastConfigure.x
-  || event->configure.y != window->p.lastConfigure.y
-  ) {
+  if(geometry.x != window->state.geometry.x || geometry.y != window->state.geometry.y) {
     if(window->state.fullScreen == false) {
-      window->state.geometry.x = client.x;
-      window->state.geometry.y = client.y + window->p.menuHeight();
+      window->state.geometry.x = geometry.x;
+      window->state.geometry.y = geometry.y;
     }
     if(window->p.locked == false && window->onMove) window->onMove();
   }
 
   //size
-  if(event->configure.width  != window->p.lastConfigure.width
-  || event->configure.height != window->p.lastConfigure.height
-  ) {
-    if(window->state.fullScreen == false) {
-      window->state.geometry.width  = client.width;
-      window->state.geometry.height = client.height - window->p.menuHeight() - window->p.statusHeight();
-    }
-
-    for(auto &layout : window->state.layout) {
-      Geometry geometry = window->geometry();
-      geometry.x = geometry.y = 0;
-      layout.setGeometry(geometry);
-    }
-
-    if(window->p.locked == false && window->onSize) window->onSize();
+  if(geometry.width != window->state.geometry.width || geometry.height != window->state.geometry.height) {
+    window->p.onSizePending = true;
   }
 
-  window->p.lastConfigure = event->configure;
   return false;
 }
 
@@ -96,6 +87,33 @@ static gboolean Window_keyReleaseEvent(GtkWidget *widget, GdkEventKey *event, Wi
   Keyboard::Keycode key = Keysym(event->keyval);
   if(key != Keyboard::Keycode::None && window->onKeyRelease) window->onKeyRelease(key);
   return false;
+}
+
+static void Window_sizeAllocate(GtkWidget *widget, GtkAllocation *allocation, Window *window) {
+  //size-allocate sent from gtk_fixed_move(); detect if layout unchanged and return
+  if(allocation->width  == window->p.lastAllocation.width
+  && allocation->height == window->p.lastAllocation.height) return;
+
+  window->state.geometry.width  = allocation->width;
+  window->state.geometry.height = allocation->height;
+
+  for(auto &layout : window->state.layout) {
+    Geometry geometry = window->geometry();
+    geometry.x = geometry.y = 0;
+    layout.setGeometry(geometry);
+  }
+
+  if(window->p.onSizePending && window->p.locked == false && window->onSize) {
+    window->p.onSizePending = false;
+    window->onSize();
+  }
+
+  window->p.lastAllocation = *allocation;
+}
+
+static void Window_sizeRequest(GtkWidget *widget, GtkRequisition *requisition, Window *window) {
+  requisition->width  = window->state.geometry.width;
+  requisition->height = window->state.geometry.height;
 }
 
 void pWindow::append(Layout &layout) {
@@ -131,7 +149,13 @@ Color pWindow::backgroundColor() {
 }
 
 Geometry pWindow::frameMargin() {
-  if(window.state.fullScreen) return { 0, menuHeight(), 0, menuHeight() + statusHeight() };
+  if(window.state.fullScreen) return {
+    0,
+    menuHeight(),
+    0,
+    menuHeight() + statusHeight()
+  };
+
   return {
     settings->frameGeometryX,
     settings->frameGeometryY + menuHeight(),
@@ -145,9 +169,13 @@ bool pWindow::focused() {
 }
 
 Geometry pWindow::geometry() {
-  if(window.state.fullScreen == true) {
-    return { 0, menuHeight(), Desktop::size().width, Desktop::size().height - menuHeight() - statusHeight() };
+  if(window.state.fullScreen == true) return {
+    0,
+    menuHeight(),
+    Desktop::size().width,
+    Desktop::size().height - menuHeight() - statusHeight()
   };
+
   return window.state.geometry;
 }
 
@@ -178,38 +206,23 @@ void pWindow::setFocused() {
 void pWindow::setFullScreen(bool fullScreen) {
   if(fullScreen == false) {
     gtk_window_unfullscreen(GTK_WINDOW(widget));
-    gtk_window_set_resizable(GTK_WINDOW(widget), window.state.resizable);
-    gtk_widget_set_size_request(widget, -1, -1);
-    gdk_display_sync(gtk_widget_get_display(widget));
-    setGeometry(window.state.geometry);
   } else {
     gtk_window_fullscreen(GTK_WINDOW(widget));
-    gtk_widget_set_size_request(widget, Desktop::size().width, Desktop::size().height);
-    gtk_window_set_resizable(GTK_WINDOW(widget), false);
   }
-  gdk_display_sync(gtk_widget_get_display(widget));
 }
 
 void pWindow::setGeometry(const Geometry &geometry) {
-  OS::processEvents();
-
   Geometry margin = frameMargin();
   gtk_window_move(GTK_WINDOW(widget), geometry.x - margin.x, geometry.y - margin.y);
 
-//GdkGeometry geom;
-//geom.min_width = 1;
-//geom.min_height = 1;
-//gtk_window_set_geometry_hints(GTK_WINDOW(widget), GTK_WIDGET(widget), &geom, GDK_HINT_MIN_SIZE);
+  GdkGeometry geom;
+  geom.min_width  = window.state.resizable ? 1 : window.state.geometry.width;
+  geom.min_height = window.state.resizable ? 1 : window.state.geometry.height;
+  gtk_window_set_geometry_hints(GTK_WINDOW(widget), GTK_WIDGET(widget), &geom, GDK_HINT_MIN_SIZE);
 
-  gtk_window_set_policy(GTK_WINDOW(widget), true, true, false);
+//gtk_window_set_policy(GTK_WINDOW(widget), true, true, false);
   gtk_widget_set_size_request(formContainer, geometry.width, geometry.height);
   gtk_window_resize(GTK_WINDOW(widget), geometry.width, geometry.height + menuHeight() + statusHeight());
-
-  for(auto &layout : window.state.layout) {
-    Geometry geometry = this->geometry();
-    geometry.x = geometry.y = 0;
-    layout.setGeometry(geometry);
-  }
 }
 
 void pWindow::setMenuFont(const string &font) {
@@ -244,6 +257,19 @@ void pWindow::setTitle(const string &text) {
 
 void pWindow::setVisible(bool visible) {
   gtk_widget_set_visible(widget, visible);
+  if(visible) {
+    if(gtk_widget_get_visible(menu)) {
+      GtkAllocation allocation;
+      gtk_widget_get_allocation(menu, &allocation);
+      settings->menuGeometryHeight = allocation.height;
+    }
+
+    if(gtk_widget_get_visible(status)) {
+      GtkAllocation allocation;
+      gtk_widget_get_allocation(status, &allocation);
+      settings->statusGeometryHeight = allocation.height;
+    }
+  }
 }
 
 void pWindow::setWidgetFont(const string &font) {
@@ -253,7 +279,10 @@ void pWindow::setWidgetFont(const string &font) {
 }
 
 void pWindow::constructor() {
-  memset(&lastConfigure, 0, sizeof(GdkEventConfigure));
+  lastAllocation.width  = 0;
+  lastAllocation.height = 0;
+  onSizePending = false;
+
   widget = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 
   if(gdk_screen_is_composited(gdk_screen_get_default())) {
@@ -289,6 +318,7 @@ void pWindow::constructor() {
   gtk_widget_show(statusContainer);
 
   setTitle("");
+  setResizable(window.state.resizable);
   setGeometry(window.state.geometry);
   setMenuFont("Sans, 8");
   setStatusFont("Sans, 8");
@@ -298,6 +328,9 @@ void pWindow::constructor() {
   g_signal_connect(G_OBJECT(widget), "configure-event", G_CALLBACK(Window_configure), (gpointer)&window);
   g_signal_connect(G_OBJECT(widget), "key-press-event", G_CALLBACK(Window_keyPressEvent), (gpointer)&window);
   g_signal_connect(G_OBJECT(widget), "key-release-event", G_CALLBACK(Window_keyPressEvent), (gpointer)&window);
+
+  g_signal_connect(G_OBJECT(formContainer), "size-allocate", G_CALLBACK(Window_sizeAllocate), (gpointer)&window);
+  g_signal_connect(G_OBJECT(formContainer), "size-request", G_CALLBACK(Window_sizeRequest), (gpointer)&window);
 }
 
 unsigned pWindow::menuHeight() {

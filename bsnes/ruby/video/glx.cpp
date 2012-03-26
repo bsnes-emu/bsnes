@@ -164,8 +164,6 @@ public:
   bool init() {
     term();
 
-//    display = XOpenDisplay(0);
-//    screen = DefaultScreen(display);
     glXQueryVersion(display, &glx.version_major, &glx.version_minor);
     //require GLX 1.2+ API
     if(glx.version_major < 1 || (glx.version_major == 1 && glx.version_minor < 2)) return false;
@@ -179,9 +177,9 @@ public:
       GLX_DRAWABLE_TYPE, GLX_WINDOW_BIT,
       GLX_RENDER_TYPE, GLX_RGBA_BIT,
       GLX_DOUBLEBUFFER, True,
-      GLX_RED_SIZE, (settings.depth / 3),
-      GLX_GREEN_SIZE, (settings.depth / 3) + (settings.depth % 3),
-      GLX_BLUE_SIZE, (settings.depth / 3),
+      GLX_RED_SIZE, (signed)(settings.depth / 3),
+      GLX_GREEN_SIZE, (signed)(settings.depth / 3) + (signed)(settings.depth % 3),
+      GLX_BLUE_SIZE, (signed)(settings.depth / 3),
       None,
     };
 

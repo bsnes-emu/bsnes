@@ -92,7 +92,7 @@ sync:
 	rm -r phoenix/nall
 	rm -r phoenix/test
 
-archive-all:
+archive:
 	if [ -f bsnes.tar.bz2 ]; then rm bsnes.tar.bz2; fi
 	tar -cjf bsnes.tar.bz2 `ls`
 

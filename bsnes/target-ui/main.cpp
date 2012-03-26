@@ -123,6 +123,8 @@ Application::Application(int argc, char **argv) {
     Application::run();
   }
 
+  if(GBA::cartridge.loaded()) print(GBA::cpu.disassemble_registers(), "\n");
+
   interface->unloadCartridge();
   windowManager->saveGeometry();
   windowManager->hideAll();
