@@ -54,19 +54,6 @@ string ARM::disassemble_arm_instruction(uint32 pc) {
     return output;
   }
 
-  //move_to_register_from_status()
-  //mrs{condition} rd,(c,s)psr
-  if((instruction & 0x0fb000f0) == 0x01000000) {
-    uint4 condition = instruction >> 28;
-    uint1 psr = instruction >> 22;
-    uint4 rd = instruction >> 12;
-
-    output.append("mrs", conditions[condition], " ");
-    output.append(registers[rd], ",", psr ? "spsr" : "cpsr");
-
-    return output;
-  }
-
   //memory_swap()
   //swp{condition}{b} rd,rm,[rn]
   if((instruction & 0x0fb000f0) == 0x01000090) {
@@ -78,6 +65,120 @@ string ARM::disassemble_arm_instruction(uint32 pc) {
 
     output.append("swp", conditions[condition], byte ? "b " : " ");
     output.append(registers[rd], ",", registers[rm], "[", registers[rn], "]");
+
+    return output;
+  }
+
+  //move_half_register()
+  //(ldr,str){condition}h rd,[rn,rm]{!}
+  //(ldr,str){condition}h rd,[rn],rm
+  if((instruction & 0x0e4000f0) == 0x000000b0) {
+    uint4 condition = instruction >> 28;
+    uint1 pre = instruction >> 24;
+    uint1 up = instruction >> 23;
+    uint1 writeback = instruction >> 21;
+    uint1 load = instruction >> 20;
+    uint4 rn = instruction >> 16;
+    uint4 rd = instruction >> 12;
+    uint4 rm = instruction;
+
+    output.append(load ? "ldr" : "str", conditions[condition], "h ");
+    output.append(registers[rd], ",[", registers[rn]);
+    if(pre == 0) output.append("]");
+    output.append(",", up ? "+" : "-", registers[rm]);
+    if(pre == 1) output.append("]");
+    if(pre == 0 || writeback == 1) output.append("!");
+
+    return output;
+  }
+
+  //move_half_immediate()
+  //(ldr,str){condition}h rd,[rd{,+/-offset}]{!}
+  //(ldr,str){condition}h rd,[rn]{,+/-offset}
+  if((instruction & 0x0e4000f0) == 0x004000b0) {
+    uint4 condition = instruction >> 28;
+    uint1 pre = instruction >> 24;
+    uint1 up = instruction >> 23;
+    uint1 writeback = instruction >> 21;
+    uint1 load = instruction >> 20;
+    uint4 rn = instruction >> 16;
+    uint4 rd = instruction >> 12;
+    uint4 ih = instruction >> 8;
+    uint4 il = instruction >> 0;
+
+    uint8 immediate = (ih << 4) + (il << 0);
+
+    output.append(load ? "ldr" : "str", conditions[condition], "h ");
+    output.append(registers[rd], ",[", registers[rn]);
+    if(pre == 0) output.append("]");
+    if(immediate) output.append(",", up ? "+" : "-", "0x", hex<2>(immediate));
+    if(pre == 1) output.append("]");
+    if(pre == 0 || writeback == 1) output.append("!");
+
+    if(rn == 15) output.append(" =0x", hex<4>(bus_read(pc + 8 + (up ? +immediate : -immediate), Half)));
+    return output;
+  }
+
+  //load_register()
+  //ldr{condition}s(h,b) rd,[rn,rm]{!}
+  //ldr{condition}s(h,b) rd,[rn],rm
+  if((instruction & 0x0e5000d0) == 0x001000b0) {
+    uint4 condition = instruction >> 28;
+    uint1 pre = instruction >> 24;
+    uint1 up = instruction >> 23;
+    uint1 writeback = instruction >> 21;
+    uint4 rn = instruction >> 16;
+    uint4 rd = instruction >> 12;
+    uint1 half = instruction >> 5;
+    uint4 rm = instruction;
+
+    output.append("ldr", conditions[condition], half ? "sh " : "sb ");
+    output.append(registers[rd], ",[", registers[rn]);
+    if(pre == 0) output.append("]");
+    output.append(",", up ? "+" : "-", registers[rm]);
+    if(pre == 1) output.append("]");
+    if(pre == 0 || writeback == 1) output.append("!");
+
+    return output;
+  }
+
+  //load_immediate()
+  //ldr{condition}s(h,b) rd,[rn{,+/-offset}]{!}
+  //ldr{condition}s(h,b) rd,[rn]{,+/-offset}
+  if((instruction & 0x0e5000b0) == 0x005000b0) {
+    uint4 condition = instruction >> 28;
+    uint1 pre = instruction >> 24;
+    uint1 up = instruction >> 23;
+    uint1 writeback = instruction >> 21;
+    uint4 rn = instruction >> 16;
+    uint4 rd = instruction >> 12;
+    uint4 ih = instruction >> 8;
+    uint1 half = instruction >> 5;
+    uint4 il = instruction;
+
+    uint8 immediate = (ih << 4) + (il << 0);
+
+    output.append("ldr", conditions[condition], half ? "sh " : "sb ");
+    output.append(registers[rd], ",[", registers[rn]);
+    if(pre == 0) output.append("]");
+    if(immediate) output.append(",", up ? "+" : "-", "0x", hex<2>(immediate));
+    if(pre == 1) output.append("]");
+    if(pre == 0 || writeback == 1) output.append("!");
+
+    if(rn == 15 && half == 1) output.append(" =0x", hex<4>(bus_read(pc + 8 + (up ? +immediate : -immediate), Half)));
+    if(rn == 15 && half == 0) output.append(" =0x", hex<2>(bus_read(pc + 8 + (up ? +immediate : -immediate), Byte)));
+    return output;
+  }
+
+  //move_to_register_from_status()
+  //mrs{condition} rd,(c,s)psr
+  if((instruction & 0x0fb000f0) == 0x01000000) {
+    uint4 condition = instruction >> 28;
+    uint1 psr = instruction >> 22;
+    uint4 rd = instruction >> 12;
+
+    output.append("mrs", conditions[condition], " ");
+    output.append(registers[rd], ",", psr ? "spsr" : "cpsr");
 
     return output;
   }

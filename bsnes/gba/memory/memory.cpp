@@ -5,8 +5,8 @@ namespace GBA {
 Bus bus;
 
 struct UnmappedMemory : Memory {
-  uint32 read(uint32 addr, uint32 size) { print(hex<8>(addr), ":", decimal<2>(size), "\n"); return 0u; }
-  void write(uint32 addr, uint32 size, uint32 word) { print(hex<8>(addr), ":", decimal<2>(size), "=", hex<8>(word), "\n"); }
+  uint32 read(uint32 addr, uint32 size) { return 0u; }
+  void write(uint32 addr, uint32 size, uint32 word) {}
 };
 
 static UnmappedMemory unmappedMemory;
@@ -65,6 +65,24 @@ StaticMemory::~StaticMemory() {
 }
 
 //
+
+uint32 Bus::mirror(uint32 addr, uint32 size) {
+  uint32 base = 0;
+  if(size) {
+    uint32 mask = 1 << 27;  //28-bit bus
+    while(addr >= size) {
+      while(!(addr & mask)) mask >>= 1;
+      addr -= mask;
+      if(size > mask) {
+        size -= mask;
+        base += mask;
+      }
+      mask >>= 1;
+    }
+    base += addr;
+  }
+  return base;
+}
 
 uint32 Bus::read(uint32 addr, uint32 size) {
   switch(addr & 0x0f000000) {

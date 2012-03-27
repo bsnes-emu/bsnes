@@ -28,7 +28,9 @@ void ArmDSP::enter() {
     }
 
     if(exception) {
-      print("* ARM unknown instruction\n");
+      print(disassemble_arm_instruction(pipeline.execute.address), "\n");
+      print(disassemble_registers(), "\n");
+      print("Executed: ", instructions, "\n");
       while(true) step(frequency);
     }
 

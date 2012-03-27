@@ -15,6 +15,7 @@ struct StaticMemory : Memory {
 
 struct Bus : Memory {
   Memory *mmio[0x400];
+  static uint32 mirror(uint32 addr, uint32 size);
 
   uint32 read(uint32 addr, uint32 size);
   void write(uint32 addr, uint32 size, uint32 word);

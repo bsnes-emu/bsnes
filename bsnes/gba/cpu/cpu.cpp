@@ -12,6 +12,7 @@ void CPU::enter() {
       print(cpsr().t ? disassemble_thumb_instruction(pipeline.execute.address)
                        : disassemble_arm_instruction(pipeline.execute.address), "\n");
       print(disassemble_registers(), "\n");
+      print("Executed: ", instructions, "\n");
       while(true) step(frequency);
     }
     cpsr().t ? thumb_step() : arm_step();

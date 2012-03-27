@@ -4,6 +4,7 @@
 namespace Processor {
 
 #include "registers.cpp"
+#include "algorithms.cpp"
 #include "instructions-arm.cpp"
 #include "instructions-thumb.cpp"
 #include "disassembler.cpp"
@@ -17,6 +18,9 @@ void ARM::power() {
     pipeline.reload = true;
     r(15).data &= cpsr().t ? ~1 : ~3;
   };
+
+  trace = false;
+  instructions = 0;
 }
 
 void ARM::vector(uint32 addr, Processor::Mode mode) {

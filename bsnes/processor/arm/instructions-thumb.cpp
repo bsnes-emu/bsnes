@@ -21,52 +21,43 @@ void ARM::thumb_step() {
   pipeline.fetch.instruction = bus_read(r(15), Half);
   step(1);
 
-//print(disassemble_registers(), "\n");
-//print(disassemble_thumb_instruction(pipeline.execute.address), "\n");
+  instructions++;
+  if(trace) {
+    print(disassemble_registers(), "\n");
+    print(disassemble_thumb_instruction(pipeline.execute.address), "\n");
+  }
 
-  if((instruction() & 0xfc00) == 0x1800) { thumb_op_adjust_register(); return; }
-  if((instruction() & 0xfc00) == 0x1c00) { thumb_op_adjust_immediate(); return; }
-  if((instruction() & 0xe000) == 0x0000) { thumb_op_shift_immediate(); return; }
-  if((instruction() & 0xe000) == 0x2000) { thumb_op_immediate(); return; }
-  if((instruction() & 0xfc00) == 0x4000) { thumb_op_alu(); return; }
-  if((instruction() & 0xff80) == 0x4700) { thumb_op_branch_exchange(); return; }
-  if((instruction() & 0xfc00) == 0x4400) { thumb_op_alu_hi(); return; }
-  if((instruction() & 0xf800) == 0x4800) { thumb_op_load_literal(); return; }
-  if((instruction() & 0xf000) == 0x5000) { thumb_op_move_register_offset(); return; }
-  if((instruction() & 0xf000) == 0x6000) { thumb_op_move_word_immediate(); return; }
-  if((instruction() & 0xf000) == 0x7000) { thumb_op_move_byte_immediate(); return; }
-  if((instruction() & 0xf000) == 0x8000) { thumb_op_move_half_immediate(); return; }
-  if((instruction() & 0xf000) == 0x9000) { thumb_op_move_stack(); return; }
-  if((instruction() & 0xf000) == 0xa000) { thumb_op_add_register_hi(); return; }
-  if((instruction() & 0xff00) == 0xb000) { thumb_op_adjust_stack(); return; }
-  if((instruction() & 0xf600) == 0xb400) { thumb_op_stack_multiple(); return; }
-  if((instruction() & 0xf000) == 0xc000) { thumb_op_move_multiple(); return; }
-  if((instruction() & 0xff00) == 0xdf00) { thumb_op_software_interrupt(); return; }
-  if((instruction() & 0xf000) == 0xd000) { thumb_op_branch_conditional(); return; }
-  if((instruction() & 0xf800) == 0xe000) { thumb_op_branch_short(); return; }
-  if((instruction() & 0xf800) == 0xf000) { thumb_op_branch_long_prefix(); return; }
-  if((instruction() & 0xf800) == 0xf800) { thumb_op_branch_long_suffix(); return; }
+  #define decode(pattern, execute) if( \
+    (instruction() & std::integral_constant<uint32, bit::mask(pattern)>::value) \
+    == std::integral_constant<uint32, bit::test(pattern)>::value \
+  ) return thumb_op_ ## execute()
+
+  decode("0001 10?? ???? ????", adjust_register);
+  decode("0001 11?? ???? ????", adjust_immediate);
+  decode("000? ???? ???? ????", shift_immediate);
+  decode("001? ???? ???? ????", immediate);
+  decode("0100 00?? ???? ????", alu);
+  decode("0100 0111 0??? ?---", branch_exchange);
+  decode("0100 01?? ???? ????", alu_hi);
+  decode("0100 1??? ???? ????", load_literal);
+  decode("0101 ???? ???? ????", move_register_offset);
+  decode("0110 ???? ???? ????", move_word_immediate);
+  decode("0111 ???? ???? ????", move_byte_immediate);
+  decode("1000 ???? ???? ????", move_half_immediate);
+  decode("1001 ???? ???? ????", move_stack);
+  decode("1010 ???? ???? ????", add_register_hi);
+  decode("1011 0000 ???? ????", adjust_stack);
+  decode("1011 ?10? ???? ????", stack_multiple);
+  decode("1100 ???? ???? ????", move_multiple);
+  decode("1101 1111 ???? ????", software_interrupt);
+  decode("1101 ???? ???? ????", branch_conditional);
+  decode("1110 0??? ???? ????", branch_short);
+  decode("1111 0??? ???? ????", branch_long_prefix);
+  decode("1111 1??? ???? ????", branch_long_suffix);
+
+  #undef decode
 
   exception = true;
-}
-
-bool ARM::thumb_condition(uint4 condition) {
-  switch(condition) {
-  case  0: return cpsr().z == 1;                          //EQ (equal)
-  case  1: return cpsr().z == 0;                          //NE (not equal)
-  case  2: return cpsr().c == 1;                          //CS (carry set)
-  case  3: return cpsr().c == 0;                          //CC (carry clear)
-  case  4: return cpsr().n == 1;                          //MI (negative)
-  case  5: return cpsr().n == 0;                          //PL (positive)
-  case  6: return cpsr().v == 1;                          //VS (overflow)
-  case  7: return cpsr().v == 0;                          //VC (no overflow)
-  case  8: return cpsr().c == 1 && cpsr().z == 0;         //HI (unsigned higher)
-  case  9: return cpsr().c == 0 || cpsr().z == 1;         //LS (unsigned lower or same)
-  case 10: return cpsr().n == cpsr().v;                   //GE (signed greater than or equal)
-  case 11: return cpsr().n != cpsr().v;                   //LT (signed less than)
-  case 12: return cpsr().z == 0 && cpsr().n == cpsr().v;  //GT (signed greater than)
-  case 13: return cpsr().z == 1 || cpsr().n != cpsr().v;  //LE (signed less than or equal)
-  }
 }
 
 void ARM::thumb_opcode(uint4 opcode, uint4 d, uint4 m) {
@@ -381,8 +372,8 @@ void ARM::thumb_op_add_register_hi() {
   uint3 d = instruction() >> 8;
   uint8 immediate = instruction();
 
-  if(sp == 0) r(d) = (r(15) & ~2) + immediate;
-  if(sp == 1) r(d) = r(13) + immediate;
+  if(sp == 0) r(d) = (r(15) & ~2) + immediate * 4;
+  if(sp == 1) r(d) = r(13) + immediate * 4;
 }
 
 //(add,sub) sp,#immediate
@@ -464,10 +455,10 @@ void ARM::thumb_op_software_interrupt() {
 //c = condition
 //d = displacement
 void ARM::thumb_op_branch_conditional() {
-  uint4 condition = instruction() >> 8;
+  uint4 flagcondition = instruction() >> 8;
   int8 displacement = instruction();
 
-  if(thumb_condition(condition) == false) return;
+  if(condition(flagcondition) == false) return;
   r(15) = r(15) + displacement * 2;
 }
 

@@ -27,6 +27,24 @@ namespace nall {
   }
 
   namespace bit {
+    constexpr inline uintmax_t mask(const char *s, uintmax_t sum = 0) {
+      return (
+        *s == '0' || *s == '1' ? mask(s + 1, (sum << 1) | 1) :
+        *s == ' ' || *s == '_' ? mask(s + 1, sum) :
+        *s ? mask(s + 1, sum << 1) :
+        sum
+      );
+    }
+
+    constexpr inline uintmax_t test(const char *s, uintmax_t sum = 0) {
+      return (
+        *s == '0' || *s == '1' ? test(s + 1, (sum << 1) | (*s - '0')) :
+        *s == ' ' || *s == '_' ? test(s + 1, sum) :
+        *s ? test(s + 1, sum << 1) :
+        sum
+      );
+    }
+
     //lowest(0b1110) == 0b0010
     constexpr inline uintmax_t lowest(const uintmax_t x) {
       return x & -x;

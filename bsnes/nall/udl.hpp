@@ -4,6 +4,7 @@
 //user-defined literals
 
 #include <nall/atoi.hpp>
+#include <type_traits>
 
 namespace nall {
   constexpr inline uintmax_t operator"" _b(const char *n) { return binary(n); }

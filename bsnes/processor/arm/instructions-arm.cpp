@@ -21,51 +21,43 @@ void ARM::arm_step() {
   pipeline.fetch.instruction = bus_read(r(15), Word);
   step(2);
 
-//print(disassemble_registers(), "\n");
-//print(disassemble_arm_instruction(pipeline.execute.address), "\n");
+  instructions++;
+  if(trace) {
+    print(disassemble_registers(), "\n");
+    print(disassemble_arm_instruction(pipeline.execute.address), "\n");
+  }
 
-  if(arm_condition() == false) return;
+  if(condition(instruction() >> 28) == false) return;
 
-  if((instruction() & 0x0fc000f0) == 0x00000090) { arm_op_multiply(); return; }
-  if((instruction() & 0x0fb000f0) == 0x01000000) { arm_op_move_to_register_from_status(); return; }
-  if((instruction() & 0x0fb000f0) == 0x01000090) { arm_op_memory_swap(); return; }
-  if((instruction() & 0x0fb000f0) == 0x01200000) { arm_op_move_to_status_from_register(); return; }
-  if((instruction() & 0x0ff000f0) == 0x01200010) { arm_op_branch_exchange_register(); return; }  //ARMv4+
-  if((instruction() & 0x0fb00000) == 0x03200000) { arm_op_move_to_status_from_immediate(); return; }
+  #define decode(pattern, execute) if( \
+    (instruction() & std::integral_constant<uint32, bit::mask(pattern)>::value) \
+    == std::integral_constant<uint32, bit::test(pattern)>::value \
+  ) return arm_op_ ## execute()
 
-  if((instruction() & 0x0e000010) == 0x00000000) { arm_op_data_immediate_shift(); return; }
-  if((instruction() & 0x0e000090) == 0x00000010) { arm_op_data_register_shift(); return; }
-  if((instruction() & 0x0e000000) == 0x02000000) { arm_op_data_immediate(); return; }
-  if((instruction() & 0x0e000000) == 0x04000000) { arm_op_move_immediate_offset(); return; }
-  if((instruction() & 0x0e000010) == 0x06000000) { arm_op_move_register_offset(); return; }
-  if((instruction() & 0x0e000000) == 0x08000000) { arm_op_move_multiple(); return; }
-  if((instruction() & 0x0e000000) == 0x0a000000) { arm_op_branch(); return; }
-  if((instruction() & 0x0f000000) == 0x0f000000) { arm_op_software_interrupt(); return; }
+  decode("???? 0000 00?? ???? ???? ???? 1001 ????", multiply);
+  decode("???? 0001 0?00 ???? ???? ---- 1001 ????", memory_swap);
+  decode("???? 000? ?0?? ???? ???? ---- 1011 ????", move_half_register);
+  decode("???? 000? ?1?? ???? ???? ???? 1011 ????", move_half_immediate);
+  decode("???? 000? ?0?1 ???? ???? ---- 11?1 ????", load_register);
+  decode("???? 000? ?1?1 ???? ???? ???? 11?1 ????", load_immediate);
+
+  decode("???? 0001 0?00 ++++ ???? ---- 0000 ----", move_to_register_from_status);
+  decode("???? 0001 0?10 ???? ++++ ---- 0000 ????", move_to_status_from_register);
+  decode("???? 0001 0010 ++++ ++++ ++++ 0001 ????", branch_exchange_register);
+
+  decode("???? 000? ???? ???? ???? ???? ???0 ????", data_immediate_shift);
+  decode("???? 000? ???? ???? ???? ???? 0??1 ????", data_register_shift);
+  decode("???? 001? ???? ???? ???? ???? ???? ????", data_immediate);
+  decode("???? 0011 0?10 ???? ++++ ???? ???? ????", move_to_status_from_immediate);
+  decode("???? 010? ???? ???? ???? ???? ???? ????", move_immediate_offset);
+  decode("???? 011? ???? ???? ???? ???? ???0 ????", move_register_offset);
+  decode("???? 100? ???? ???? ???? ???? ???? ????", move_multiple);
+  decode("???? 101? ???? ???? ???? ???? ???? ????", branch);
+  decode("???? 1111 ???? ???? ???? ???? ???? ????", software_interrupt);
+
+  #undef decode
 
   exception = true;
-}
-
-bool ARM::arm_condition() {
-  uint4 condition = instruction() >> 28;
-
-  switch(condition) {
-  case  0: return cpsr().z == 1;                          //EQ (equal)
-  case  1: return cpsr().z == 0;                          //NE (not equal)
-  case  2: return cpsr().c == 1;                          //CS (carry set)
-  case  3: return cpsr().c == 0;                          //CC (carry clear)
-  case  4: return cpsr().n == 1;                          //MI (negative)
-  case  5: return cpsr().n == 0;                          //PL (positive)
-  case  6: return cpsr().v == 1;                          //VS (overflow)
-  case  7: return cpsr().v == 0;                          //VC (no overflow)
-  case  8: return cpsr().c == 1 && cpsr().z == 0;         //HI (unsigned higher)
-  case  9: return cpsr().c == 0 || cpsr().z == 1;         //LS (unsigned lower or same)
-  case 10: return cpsr().n == cpsr().v;                   //GE (signed greater than or equal)
-  case 11: return cpsr().n != cpsr().v;                   //LT (signed less than)
-  case 12: return cpsr().z == 0 && cpsr().n == cpsr().v;  //GT (signed greater than)
-  case 13: return cpsr().z == 1 || cpsr().n != cpsr().v;  //LE (signed less than or equal)
-  case 14: return true;                                   //AL (always)
-  case 15: return false;                                  //NV (never)
-  }
 }
 
 void ARM::arm_opcode(uint32 rm) {
@@ -235,23 +227,6 @@ void ARM::arm_op_multiply() {
   }
 }
 
-//mrs{condition} rd,(c,s)psr
-//cccc 0001 0r00 ++++ dddd ---- 0000 ----
-//c = condition
-//r = SPSR (0 = CPSR)
-//d = rd
-void ARM::arm_op_move_to_register_from_status() {
-  uint1 source = instruction() >> 22;
-  uint4 d = instruction() >> 12;
-
-  if(source) {
-    if(mode() == Processor::Mode::USR) return;
-    if(mode() == Processor::Mode::SYS) return;
-  }
-
-  r(d) = source ? spsr() : cpsr();
-}
-
 //swp{condition}{b} rd,rm,[rn]
 //cccc 0001 0b00 nnnn dddd ---- 1001 mmmm
 //c = condition
@@ -268,6 +243,151 @@ void ARM::arm_op_memory_swap() {
   uint32 word = bus_read(r(n), byte ? Byte : Word);
   bus_write(r(n), byte ? Byte : Word, r(m));
   r(d) = word;
+}
+
+//(ldr,str){condition}h rd,[rn,rm]{!}
+//(ldr,str){condition}h rd,[rn],rm
+//cccc 000p u0wl nnnn dddd ---- 1011 mmmm
+//c = condition
+//p = pre (0 = post)
+//u = up
+//w = writeback
+//l = load (0 = save)
+//n = rn
+//d = rd
+//m = rm
+void ARM::arm_op_move_half_register() {
+  uint1 pre = instruction() >> 24;
+  uint1 up = instruction() >> 23;
+  uint1 writeback = instruction() >> 21;
+  uint1 load = instruction() >> 20;
+  uint4 n = instruction() >> 16;
+  uint4 d = instruction() >> 12;
+  uint4 m = instruction();
+
+  uint32 rn = r(n);
+  uint32 rm = r(m);
+
+  if(pre == 1) rn = up ? rn + rm : rn - rm;
+  if(load == 1) r(d) = bus_read(rn, Word);
+  if(load == 0) bus_write(rn, Word, r(d));
+  if(pre == 0) rn = up ? rn + rm : rn - rm;
+
+  if(pre == 0 || writeback == 1) r(n) = rn;
+}
+
+//(ldr,str){condition}h rd,[rn{,+/-offset}]{!}
+//(ldr,str){condition}h rd,[rn]{,+/-offset}
+//cccc 000p u1wl nnnn dddd iiii 1011 iiii
+//c = condition
+//p = pre (0 = post)
+//u = up
+//w = writeback
+//l = load (0 = save)
+//n = rn
+//d = rd
+//i = immediate hi
+//i = immediate lo
+void ARM::arm_op_move_half_immediate() {
+  uint1 pre = instruction() >> 24;
+  uint1 up = instruction() >> 23;
+  uint1 writeback = instruction() >> 21;
+  uint1 load = instruction() >> 20;
+  uint4 n = instruction() >> 16;
+  uint4 d = instruction() >> 12;
+  uint4 ih = instruction() >> 8;
+  uint4 il = instruction();
+
+  uint32 rn = r(n);
+  uint8 immediate = (ih << 4) + (il << 0);
+
+  if(pre == 1) rn = up ? rn + immediate : rn - immediate;
+  if(load == 1) r(d) = bus_read(rn, Word);
+  if(load == 0) bus_write(rn, Word, r(d));
+  if(pre == 0) rn = up ? rn + immediate : rn - immediate;
+
+  if(pre == 0 || writeback == 1) r(n) = rn;
+}
+
+//ldr{condition}s(h,b) rd,[rn,rm]{!}
+//ldr{condition}s(h,b) rd,[rn],rm
+//cccc 000p u0w1 nnnn dddd ---- 11h1 mmmm
+//c = condition
+//p = pre (0 = post)
+//u = up
+//w = writeback
+//n = rn
+//d = rd
+//h = half (0 = byte)
+//m = rm
+void ARM::arm_op_load_register() {
+  uint1 pre = instruction() >> 24;
+  uint1 up = instruction() >> 23;
+  uint1 writeback = instruction() >> 21;
+  uint4 n = instruction() >> 16;
+  uint4 d = instruction() >> 12;
+  uint1 half = instruction() >> 5;
+  uint4 m = instruction();
+
+  uint32 rn = r(n);
+  uint32 rm = r(m);
+
+  if(pre == 1) rn = up ? rn + rm : rn - rm;
+  uint32 word = bus_read(rn, half ? Half : Byte);
+  r(d) = half ? (int16)word : (int8)word;
+  if(pre == 0) rm = up ? rn + rm : rn - rm;
+
+  if(pre == 0 || writeback == 1) r(n) = rn;
+}
+
+//ldr{condition}s(h,b) rd,[rn{,+/-offset}]{!}
+//ldr{condition}s(h,b) rd,[rn]{,+/-offset}
+//cccc 000p u1w1 nnnn dddd iiii 11h1 iiii
+//c = condition
+//p = pre (0 = post)
+//u = up
+//w = writeback
+//n = rn
+//d = rd
+//i = immediate hi
+//h = half (0 = byte)
+//i = immediate lo
+void ARM::arm_op_load_immediate() {
+  uint1 pre = instruction() >> 24;
+  uint1 up = instruction() >> 23;
+  uint1 writeback = instruction() >> 21;
+  uint4 n = instruction() >> 16;
+  uint4 d = instruction() >> 12;
+  uint4 ih = instruction() >> 8;
+  uint1 half = instruction() >> 5;
+  uint4 il = instruction();
+
+  uint32 rn = r(n);
+  uint8 immediate = (ih << 4) + (il << 0);
+
+  if(pre == 1) rn = up ? rn + immediate : rn - immediate;
+  uint32 word = bus_read(rn, half ? Half : Byte);
+  r(d) = half ? (int16)word : (int8)word;
+  if(pre == 0) rn = up ? rn + immediate : rn - immediate;
+
+  if(pre == 0 || writeback == 1) r(n) = rn;
+}
+
+//mrs{condition} rd,(c,s)psr
+//cccc 0001 0r00 ++++ dddd ---- 0000 ----
+//c = condition
+//r = SPSR (0 = CPSR)
+//d = rd
+void ARM::arm_op_move_to_register_from_status() {
+  uint1 source = instruction() >> 22;
+  uint4 d = instruction() >> 12;
+
+  if(source) {
+    if(mode() == Processor::Mode::USR) return;
+    if(mode() == Processor::Mode::SYS) return;
+  }
+
+  r(d) = source ? spsr() : cpsr();
 }
 
 //msr{condition} (c,s)psr:{fields},rm
@@ -432,7 +552,7 @@ void ARM::arm_op_move_immediate_offset() {
   if(pre == 0 || writeback == 1) r(n) = rn;
 }
 
-//(ldr,str){condition}{b} rd,[rn,rm {mode} #immediate]{1}
+//(ldr,str){condition}{b} rd,[rn,rm {mode} #immediate]{!}
 //(ldr,str){condition}{b} rd,[rn],rm {mode} #immediate
 //cccc 011p ubwl nnnn dddd llll lss0 mmmm
 //c = condition

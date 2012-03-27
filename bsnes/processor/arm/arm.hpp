@@ -17,8 +17,12 @@ struct ARM {
 
   void power();
   void vector(uint32 addr, Processor::Mode mode);
+  bool condition(uint4 condition);
 
   void serialize(serializer&);
+
+  bool trace;
+  uintmax_t instructions;
 };
 
 }
