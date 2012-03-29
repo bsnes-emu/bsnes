@@ -746,12 +746,14 @@ string ARM::disassemble_registers() {
   string output;
   output.append( "r0:", hex<8>(r( 0)), " r1:", hex<8>(r( 1)), "  r2:", hex<8>(r( 2)), "  r3:", hex<8>(r( 3)), "  ");
   output.append( "r4:", hex<8>(r( 4)), " r5:", hex<8>(r( 5)),  " r6:", hex<8>(r( 6)),  " r7:", hex<8>(r( 7)), " ");
-  output.append("cpsr:", cpsr().n ? "N" : "n", cpsr().z ? "Z" : "z", cpsr().c ? "C" : "c", cpsr().v ? "V" : "v", "\n");
+  output.append("cpsr:", cpsr().n ? "N" : "n", cpsr().z ? "Z" : "z", cpsr().c ? "C" : "c", cpsr().v ? "V" : "v");
+  output.append("/", hex<2>(cpsr().m), "\n");
   output.append( "r8:", hex<8>(r( 8)), " r9:", hex<8>(r( 9)), " r10:", hex<8>(r(10)), " r11:", hex<8>(r(11)), " ");
   output.append("r12:", hex<8>(r(12)), " sp:", hex<8>(r(13)),  " lr:", hex<8>(r(14)),  " pc:", hex<8>(r(15)), " ");
   output.append("spsr:");
-  if(mode() == Processor::Mode::USR || mode() == Processor::Mode::SYS) { output.append("----"); return output; }
+  if(mode() == Processor::Mode::USR || mode() == Processor::Mode::SYS) { output.append("----/--"); return output; }
   output.append(         spsr().n ? "N" : "n", spsr().z ? "Z" : "z", spsr().c ? "C" : "c", spsr().v ? "V" : "v");
+  output.append("/", hex<2>(spsr().m));
   return output;
 }
 

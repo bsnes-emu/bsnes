@@ -7,18 +7,11 @@ void ARM::arm_step() {
     pipeline.fetch.address = r(15);
     pipeline.fetch.instruction = bus_read(r(15), Word);
 
-    r(15).data += 4;
-    pipeline.decode = pipeline.fetch;
-    pipeline.fetch.address = r(15);
-    pipeline.fetch.instruction = bus_read(r(15), Word);
+    pipeline_step();
     step(2);
   }
 
-  r(15).data += 4;
-  pipeline.execute = pipeline.decode;
-  pipeline.decode = pipeline.fetch;
-  pipeline.fetch.address = r(15);
-  pipeline.fetch.instruction = bus_read(r(15), Word);
+  pipeline_step();
   step(2);
 
   instructions++;
@@ -34,21 +27,19 @@ void ARM::arm_step() {
     == std::integral_constant<uint32, bit::test(pattern)>::value \
   ) return arm_op_ ## execute()
 
+  decode("???? 0001 0010 ++++ ++++ ++++ 0001 ????", branch_exchange_register);
   decode("???? 0000 00?? ???? ???? ???? 1001 ????", multiply);
+  decode("???? 0001 0?00 ++++ ???? ---- 0000 ----", move_to_register_from_status);
   decode("???? 0001 0?00 ???? ???? ---- 1001 ????", memory_swap);
-  decode("???? 000? ?0?? ???? ???? ---- 1011 ????", move_half_register);
-  decode("???? 000? ?1?? ???? ???? ???? 1011 ????", move_half_immediate);
+  decode("???? 0001 0?10 ???? ++++ ---- 0000 ????", move_to_status_from_register);
+  decode("???? 0011 0?10 ???? ++++ ???? ???? ????", move_to_status_from_immediate);
   decode("???? 000? ?0?1 ???? ???? ---- 11?1 ????", load_register);
   decode("???? 000? ?1?1 ???? ???? ???? 11?1 ????", load_immediate);
-
-  decode("???? 0001 0?00 ++++ ???? ---- 0000 ----", move_to_register_from_status);
-  decode("???? 0001 0?10 ???? ++++ ---- 0000 ????", move_to_status_from_register);
-  decode("???? 0001 0010 ++++ ++++ ++++ 0001 ????", branch_exchange_register);
-
+  decode("???? 000? ?0?? ???? ???? ---- 1011 ????", move_half_register);
+  decode("???? 000? ?1?? ???? ???? ???? 1011 ????", move_half_immediate);
   decode("???? 000? ???? ???? ???? ???? ???0 ????", data_immediate_shift);
   decode("???? 000? ???? ???? ???? ???? 0??1 ????", data_register_shift);
   decode("???? 001? ???? ???? ???? ???? ???? ????", data_immediate);
-  decode("???? 0011 0?10 ???? ++++ ???? ???? ????", move_to_status_from_immediate);
   decode("???? 010? ???? ???? ???? ???? ???? ????", move_immediate_offset);
   decode("???? 011? ???? ???? ???? ???? ???0 ????", move_register_offset);
   decode("???? 100? ???? ???? ???? ???? ???? ????", move_multiple);
@@ -57,7 +48,7 @@ void ARM::arm_step() {
 
   #undef decode
 
-  exception = true;
+  crash = true;
 }
 
 void ARM::arm_opcode(uint32 rm) {
@@ -68,44 +59,28 @@ void ARM::arm_opcode(uint32 rm) {
 
   uint32 rn = r(n);
 
-  auto test = [&](uint32 result) {
-    if(save) {
-      cpsr().n = result >> 31;
-      cpsr().z = result == 0;
-      cpsr().c = carryout();
-    }
-    return result;
-  };
-
-  auto math = [&](uint32 source, uint32 modify, bool carry) {
-    uint32 result = source + modify + carry;
-    if(save) {
-      uint32 overflow = ~(source ^ modify) & (source ^ result);
-      cpsr().n = result >> 31;
-      cpsr().z = result == 0;
-      cpsr().c = (1u << 31) & (overflow ^ source ^ modify ^ result);
-      cpsr().v = (1u << 31) & (overflow);
-    }
-    return result;
-  };
-
   switch(opcode) {
-  case  0: r(d) = test(rn & rm);            break;  //AND
-  case  1: r(d) = test(rn ^ rm);            break;  //EOR
-  case  2: r(d) = math(rn, ~rm, 1);         break;  //SUB
-  case  3: r(d) = math(rm, ~rn, 1);         break;  //RSB
-  case  4: r(d) = math(rn,  rm, 0);         break;  //ADD
-  case  5: r(d) = math(rn,  rm, cpsr().c);  break;  //ADC
-  case  6: r(d) = math(rn, ~rm, cpsr().c);  break;  //SBC
-  case  7: r(d) = math(rm, ~rn, cpsr().c);  break;  //RSC
-  case  8:        test(rn & rm);            break;  //TST
-  case  9:        test(rn ^ rm);            break;  //TEQ
-  case 10:        math(rn, ~rm, 1);         break;  //CMP
-  case 11:        math(rn,  rm, 0);         break;  //CMN
-  case 12: r(d) = test(rn | rm);            break;  //ORR
-  case 13: r(d) = test(rm);                 break;  //MOV
-  case 14: r(d) = test(rn &~rm);            break;  //BIC
-  case 15: r(d) = test(~rm);                break;  //MVN
+  case  0: r(d) = bit(rn & rm);           break;  //AND
+  case  1: r(d) = bit(rn ^ rm);           break;  //EOR
+  case  2: r(d) = sub(rn, rm, 1);         break;  //SUB
+  case  3: r(d) = sub(rm, rn, 1);         break;  //RSB
+  case  4: r(d) = add(rn, rm, 0);         break;  //ADD
+  case  5: r(d) = add(rn, rm, cpsr().c);  break;  //ADC
+  case  6: r(d) = sub(rn, rm, cpsr().c);  break;  //SBC
+  case  7: r(d) = sub(rm, rn, cpsr().c);  break;  //RSC
+  case  8:        bit(rn & rm);           break;  //TST
+  case  9:        bit(rn ^ rm);           break;  //TEQ
+  case 10:        sub(rn, rm, 1);         break;  //CMP
+  case 11:        add(rn, rm, 0);         break;  //CMN
+  case 12: r(d) = bit(rn | rm);           break;  //ORR
+  case 13: r(d) = bit(rm);                break;  //MOV
+  case 14: r(d) = bit(rn & ~rm);          break;  //BIC
+  case 15: r(d) = bit(~rm);               break;  //MVN
+  }
+
+  if(exceptionmode() && d == 15 && save) {
+    cpsr() = spsr();
+    processor.setMode((Processor::Mode)cpsr().m);
   }
 }
 
@@ -121,7 +96,7 @@ void ARM::arm_move_to_status(uint32 rm) {
   PSR &psr = source ? spsr() : cpsr();
 
   if(field & 1) {
-    if(source == 1 || (Processor::Mode)cpsr().m != Processor::Mode::USR) {
+    if(source == 1 || privilegedmode()) {
       psr.i = rm & 0x00000080;
       psr.f = rm & 0x00000040;
       psr.t = rm & 0x00000020;
@@ -138,45 +113,6 @@ void ARM::arm_move_to_status(uint32 rm) {
   }
 }
 
-//logical shift left
-void ARM::lsl(bool &c, uint32 &rm, uint32 rs) {
-  while(rs--) {
-    c = rm >> 31;
-    rm <<= 1;
-  }
-}
-
-//logical shift right
-void ARM::lsr(bool &c, uint32 &rm, uint32 rs) {
-  while(rs--) {
-    c = rm & 1;
-    rm >>= 1;
-  }
-}
-
-//arithmetic shift right
-void ARM::asr(bool &c, uint32 &rm, uint32 rs) {
-  while(rs--) {
-    c = rm & 1;
-    rm = (int32)rm >> 1;
-  }
-}
-
-//rotate right
-void ARM::ror(bool &c, uint32 &rm, uint32 rs) {
-  while(rs--) {
-    c = rm & 1;
-    rm = (rm << 31) | (rm >> 1);
-  }
-}
-
-//rotate right with extend
-void ARM::rrx(bool &c, uint32 &rm) {
-  bool carry = c;
-  c = rm & 1;
-  rm = (carry << 31) | (rm >> 1);
-}
-
 //mul{condition}{s} rd,rm,rs
 //mla{condition}{s} rd,rm,rs,rn
 //cccc 0000 00as dddd nnnn ssss 1001 mmmm
@@ -189,42 +125,14 @@ void ARM::rrx(bool &c, uint32 &rm) {
 //n = rm
 void ARM::arm_op_multiply() {
   uint1 accumulate = instruction() >> 21;
-  uint1 save = instruction() >> 20;
   uint4 d = instruction() >> 16;
   uint4 n = instruction() >> 12;
   uint4 s = instruction() >> 8;
   uint4 m = instruction() >> 0;
 
-  auto &rd = r(d);
-  uint32 rs = r(s);
-  auto &rm = r(m);
-
-  rd = accumulate ? r(n) : 0u;
+  r(d) = accumulate ? r(n) : 0u;
   step(1);
-
-  //Modified Booth Encoding
-  bool carry = 0;
-  unsigned place = 0;
-
-  do {
-    step(1);
-    signed factor = (int2)rs + carry;
-
-    if(factor == -2) rd -= rm << (place + 1);
-    if(factor == -1) rd -= rm << (place + 0);
-    if(factor == +1) rd += rm << (place + 0);
-    if(factor == +2) rd += rm << (place + 1);
-
-    carry = rs & 2;
-    place += 2;
-    rs >>= 2;
-  } while(rs + carry && place < 32);
-
-  if(save) {
-    cpsr().n = r(d) >> 31;
-    cpsr().z = r(d) == 0;
-    cpsr().c = carry;
-  }
+  r(d) = mul(r(d), r(m), r(s));
 }
 
 //swp{condition}{b} rd,rm,[rn]
@@ -269,8 +177,8 @@ void ARM::arm_op_move_half_register() {
   uint32 rm = r(m);
 
   if(pre == 1) rn = up ? rn + rm : rn - rm;
-  if(load == 1) r(d) = bus_read(rn, Word);
-  if(load == 0) bus_write(rn, Word, r(d));
+  if(load == 1) r(d) = bus_read(rn, Half);
+  if(load == 0) bus_write(rn, Half, r(d));
   if(pre == 0) rn = up ? rn + rm : rn - rm;
 
   if(pre == 0 || writeback == 1) r(n) = rn;
@@ -302,8 +210,8 @@ void ARM::arm_op_move_half_immediate() {
   uint8 immediate = (ih << 4) + (il << 0);
 
   if(pre == 1) rn = up ? rn + immediate : rn - immediate;
-  if(load == 1) r(d) = bus_read(rn, Word);
-  if(load == 0) bus_write(rn, Word, r(d));
+  if(load == 1) r(d) = bus_read(rn, Half);
+  if(load == 0) bus_write(rn, Half, r(d));
   if(pre == 0) rn = up ? rn + immediate : rn - immediate;
 
   if(pre == 0 || writeback == 1) r(n) = rn;
@@ -335,7 +243,7 @@ void ARM::arm_op_load_register() {
   if(pre == 1) rn = up ? rn + rm : rn - rm;
   uint32 word = bus_read(rn, half ? Half : Byte);
   r(d) = half ? (int16)word : (int8)word;
-  if(pre == 0) rm = up ? rn + rm : rn - rm;
+  if(pre == 0) rn = up ? rn + rm : rn - rm;
 
   if(pre == 0 || writeback == 1) r(n) = rn;
 }
@@ -425,8 +333,7 @@ void ARM::arm_op_move_to_status_from_immediate() {
   uint8 immediate = instruction();
 
   uint32 rm = immediate;
-  bool c = cpsr().c;
-  if(rotate) ror(c, rm, 2 * rotate);
+  if(rotate) rm = ror(rm, 2 * rotate);
 
   arm_move_to_status(rm);
 }
@@ -451,14 +358,12 @@ void ARM::arm_op_data_immediate_shift() {
 
   uint32 rs = shift;
   uint32 rm = r(m);
-  bool c = cpsr().c;
 
-  if(mode == 0) lsl(c, rm, rs);
-  if(mode == 1) lsr(c, rm, rs ? rs : 32);
-  if(mode == 2) asr(c, rm, rs ? rs : 32);
-  if(mode == 3) rs ? ror(c, rm, rs) : rrx(c, rm);
+  if(mode == 0) rm = lsl(rm, rs);
+  if(mode == 1) rm = lsr(rm, rs ? rs : 32);
+  if(mode == 2) rm = asr(rm, rs ? rs : 32);
+  if(mode == 3) rm = rs ? ror(rm, rs) : rrx(rm);
 
-  carryout() = c;
   arm_opcode(rm);
 }
 
@@ -482,14 +387,12 @@ void ARM::arm_op_data_register_shift() {
 
   uint8 rs = r(s);
   uint32 rm = r(m);
-  bool c = cpsr().c;
 
-  if(mode == 0) lsl(c, rm, rs < 33 ? rs : 33);
-  if(mode == 1) lsr(c, rm, rs < 33 ? rs : 33);
-  if(mode == 2) asr(c, rm, rs < 32 ? rs : 32);
-  if(mode == 3 && rs) ror(c, rm, rs & 31 == 0 ? 32 : rs & 31);
+  if(mode == 0      ) rm = lsl(rm, rs < 33 ? rs : 33);
+  if(mode == 1      ) rm = lsr(rm, rs < 33 ? rs : 33);
+  if(mode == 2      ) rm = asr(rm, rs < 32 ? rs : 32);
+  if(mode == 3 && rs) rm = ror(rm, rs & 31 == 0 ? 32 : rs & 31);
 
-  carryout() = c;
   arm_opcode(rm);
 }
 
@@ -584,10 +487,10 @@ void ARM::arm_op_move_register_offset() {
   uint32 rm = r(m);
   bool c = cpsr().c;
 
-  if(mode == 0) lsl(c, rm, rs);
-  if(mode == 1) lsr(c, rm, rs ? rs : 32);
-  if(mode == 2) asr(c, rm, rs ? rs : 32);
-  if(mode == 3) rs ? ror(c, rm, rs) : rrx(c, rm);
+  if(mode == 0) rm = lsl(rm, rs);
+  if(mode == 1) rm = lsr(rm, rs ? rs : 32);
+  if(mode == 2) rm = asr(rm, rs ? rs : 32);
+  if(mode == 3) rm = rs ? ror(rm, rs) : rrx(rm);
 
   if(pre == 1) rn = up ? rn + rm : rn - rm;
   if(load) {

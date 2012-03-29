@@ -27,7 +27,7 @@ void ArmDSP::enter() {
       scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
     }
 
-    if(exception) {
+    if(crash) {
       print(disassemble_arm_instruction(pipeline.execute.address), "\n");
       print(disassemble_registers(), "\n");
       print("Executed: ", instructions, "\n");

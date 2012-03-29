@@ -7,18 +7,11 @@ void ARM::thumb_step() {
     pipeline.fetch.address = r(15);
     pipeline.fetch.instruction = bus_read(r(15), Half);
 
-    r(15).data += 2;
-    pipeline.decode = pipeline.fetch;
-    pipeline.fetch.address = r(15);
-    pipeline.fetch.instruction = bus_read(r(15), Half);
+    pipeline_step();
     step(1);
   }
 
-  r(15).data += 2;
-  pipeline.execute = pipeline.decode;
-  pipeline.decode = pipeline.fetch;
-  pipeline.fetch.address = r(15);
-  pipeline.fetch.instruction = bus_read(r(15), Half);
+  pipeline_step();
   step(1);
 
   instructions++;
@@ -57,96 +50,28 @@ void ARM::thumb_step() {
 
   #undef decode
 
-  exception = true;
+  crash = true;
 }
 
 void ARM::thumb_opcode(uint4 opcode, uint4 d, uint4 m) {
   switch(opcode) {
-  case  0: r(d) = thumb_tst(r(d) & r(m));          break;  //AND
-  case  1: r(d) = thumb_tst(r(d) ^ r(m));          break;  //EOR
-  case  2: r(d) = thumb_lsl(r(d), r(m) & 0xff);    break;  //LSL
-  case  3: r(d) = thumb_lsr(r(d), r(m) & 0xff);    break;  //LSR
-  case  4: r(d) = thumb_asr(r(d), r(m) & 0xff);    break;  //ASR
-  case  5: r(d) = thumb_add(r(d), r(m), cpsr().c); break;  //ADC
-  case  6: r(d) = thumb_sub(r(d), r(m), cpsr().c); break;  //SBC
-  case  7: r(d) = thumb_ror(r(d), r(m) & 0xff);    break;  //ROR
-  case  8:        thumb_tst(r(d) & r(m));          break;  //TST
-  case  9: r(d) = thumb_sub(0, r(m));              break;  //NEG
-  case 10:        thumb_sub(r(d), r(m));           break;  //CMP
-  case 11:        thumb_add(r(d), r(m));           break;  //CMN
-  case 12: r(d) = thumb_tst(r(d) | r(m));          break;  //ORR
-  case 13: r(d) = thumb_mul(r(d), r(m));           break;  //MUL
-  case 14: r(d) = thumb_tst(r(d) & ~r(m));         break;  //BIC
-  case 15: r(d) = thumb_tst(~r(m));                break;  //MVN
+  case  0: r(d) = bit(r(d) & r(m));          break;  //AND
+  case  1: r(d) = bit(r(d) ^ r(m));          break;  //EOR
+  case  2: r(d) = lsl(r(d), r(m) & 0xff);    break;  //LSL
+  case  3: r(d) = lsr(r(d), r(m) & 0xff);    break;  //LSR
+  case  4: r(d) = asr(r(d), r(m) & 0xff);    break;  //ASR
+  case  5: r(d) = add(r(d), r(m), cpsr().c); break;  //ADC
+  case  6: r(d) = sub(r(d), r(m), cpsr().c); break;  //SBC
+  case  7: r(d) = ror(r(d), r(m) & 0xff);    break;  //ROR
+  case  8:        bit(r(d) & r(m));          break;  //TST
+  case  9: r(d) = sub(0, r(m), 1);           break;  //NEG
+  case 10:        sub(r(d), r(m), 1);        break;  //CMP
+  case 11:        add(r(d), r(m), 0);        break;  //CMN
+  case 12: r(d) = bit(r(d) | r(m));          break;  //ORR
+  case 13: r(d) = mul(0, r(d), r(m));        break;  //MUL
+  case 14: r(d) = bit(r(d) & ~r(m));         break;  //BIC
+  case 15: r(d) = bit(~r(m));                break;  //MVN
   }
-}
-
-uint32 ARM::thumb_tst(uint32 modify) {
-  cpsr().n = modify >> 31;
-  cpsr().z = modify == 0;
-  return modify;
-}
-
-uint32 ARM::thumb_add(uint32 source, uint32 modify, bool carry) {
-  uint32 result = source + modify + carry;
-  uint32 overflow = ~(source ^ modify) & (source ^ result);
-  cpsr().n = result >> 31;
-  cpsr().z = result == 0;
-  cpsr().c = (1u << 31) & (overflow ^ source ^ modify ^ result);
-  cpsr().v = (1u << 31) & (overflow);
-  return result;
-}
-
-uint32 ARM::thumb_sub(uint32 source, uint32 modify, bool carry) {
-  thumb_add(source, ~modify, carry);
-}
-
-uint32 ARM::thumb_lsl(uint32 source, uint32 modify) {
-  while(modify--) {
-    cpsr().c = source >> 31;
-    source <<= 1;
-  }
-  cpsr().n = source >> 31;
-  cpsr().z = source == 0;
-  return source;
-}
-
-uint32 ARM::thumb_lsr(uint32 source, uint32 modify) {
-  while(modify--) {
-    cpsr().c = source & 1;
-    source >>= 1;
-  }
-  cpsr().n = source >> 31;
-  cpsr().z = source == 0;
-  return source;
-}
-
-uint32 ARM::thumb_asr(uint32 source, uint32 modify) {
-  while(modify--) {
-    cpsr().c = source & 1;
-    source = (int32)source >> 1;
-  }
-  cpsr().n = source >> 31;
-  cpsr().z = source == 0;
-  return source;
-}
-
-uint32 ARM::thumb_ror(uint32 source, uint32 modify) {
-  while(modify--) {
-    cpsr().c = source & 1;
-    source = (source << 31) | (source >> 1);
-  }
-  cpsr().n = source >> 31;
-  cpsr().z = source == 0;
-  return source;
-}
-
-uint32 ARM::thumb_mul(uint32 source, uint32 modify) {
-  source = source * modify;
-  cpsr().n = source >> 31;
-  cpsr().z = source == 0;
-  cpsr().c = 0;
-  return source;
 }
 
 //(add,sub) rd,rn,rm
@@ -162,8 +87,8 @@ void ARM::thumb_op_adjust_register() {
   uint3 d = instruction() >> 0;
 
   switch(opcode) {
-  case 0: r(d) = thumb_add(r(n), r(m)); break;
-  case 1: r(d) = thumb_sub(r(n), r(m)); break;
+  case 0: r(d) = add(r(n), r(m), 0); break;
+  case 1: r(d) = sub(r(n), r(m), 1); break;
   }
 }
 
@@ -180,8 +105,8 @@ void ARM::thumb_op_adjust_immediate() {
   uint3 d = instruction() >> 0;
 
   switch(opcode) {
-  case 0: r(d) = thumb_add(r(n), immediate); break;
-  case 1: r(d) = thumb_sub(r(n), immediate); break;
+  case 0: r(d) = add(r(n), immediate, 0); break;
+  case 1: r(d) = sub(r(n), immediate, 1); break;
   }
 }
 
@@ -198,9 +123,9 @@ void ARM::thumb_op_shift_immediate() {
   uint3 d = instruction() >> 0;
 
   switch(opcode) {
-  case 0: r(d) = thumb_lsl(r(m), immediate); break;
-  case 1: r(d) = thumb_lsr(r(m), immediate); break;
-  case 2: r(d) = thumb_asr(r(m), immediate); break;
+  case 0: r(d) = lsl(r(m), immediate); break;
+  case 1: r(d) = lsr(r(m), immediate); break;
+  case 2: r(d) = asr(r(m), immediate); break;
   }
 }
 
@@ -215,10 +140,10 @@ void ARM::thumb_op_immediate() {
   uint8 immediate = instruction();
 
   switch(opcode) {
-  case 0: r(d) = thumb_tst(      immediate); break;
-  case 1:        thumb_sub(r(d), immediate); break;
-  case 2: r(d) = thumb_add(r(d), immediate); break;
-  case 3: r(d) = thumb_sub(r(d), immediate); break;
+  case 0: r(d) = bit(      immediate   ); break;
+  case 1:        sub(r(d), immediate, 1); break;
+  case 2: r(d) = add(r(d), immediate, 0); break;
+  case 3: r(d) = sub(r(d), immediate, 1); break;
   }
 }
 
@@ -258,9 +183,9 @@ void ARM::thumb_op_alu_hi() {
 
   uint4 d = (dh << 3) + (dl << 0);
   switch(opcode) {
-  case 0: r(d) = thumb_add(r(d), r(m)); break;  //ADD
-  case 1:        thumb_sub(r(d), r(m)); break;  //SUB
-  case 2: r(d) = thumb_tst(      r(m)); break;  //MOV
+  case 0: r(d) = r(d) + r(m); break;  //ADD (does not modify flags)
+  case 1: sub(r(d), r(m), 1); break;  //SUB
+  case 2: r(d) = r(m);        break;  //MOV (does not modify flags)
   }
 }
 
@@ -313,7 +238,7 @@ void ARM::thumb_op_move_word_immediate() {
   uint3 d = instruction() >> 0;
 
   if(load == 1) r(d) = bus_read(r(n) + offset * 4, Word);
-  if(load == 0) bus_write(r(d) + offset * 4, Word, r(n));
+  if(load == 0) bus_write(r(n) + offset * 4, Word, r(d));
 }
 
 //(ldr,str)b rd,[rn,#offset]
@@ -326,10 +251,10 @@ void ARM::thumb_op_move_byte_immediate() {
   uint1 load = instruction() >> 11;
   uint5 offset = instruction() >> 6;
   uint3 n = instruction() >> 3;
-  uint4 d = instruction() >> 0;
+  uint3 d = instruction() >> 0;
 
   if(load == 1) r(d) = bus_read(r(n) + offset, Byte);
-  if(load == 0) bus_write(r(d) + offset, Byte, r(n));
+  if(load == 0) bus_write(r(n) + offset, Byte, r(d));
 }
 
 //(ldr,str)h rd,[rn,#offset]
@@ -345,21 +270,21 @@ void ARM::thumb_op_move_half_immediate() {
   uint3 d = instruction() >> 0;
 
   if(load == 1) r(d) = bus_read(r(n) + offset * 2, Half);
-  if(load == 0) bus_write(r(d) + offset * 2, Half, r(n));
+  if(load == 0) bus_write(r(n) + offset * 2, Half, r(d));
 }
 
-//(ldr,str) rd,[sp,#relative]
-//1001 oddd rrrr rrrr
+//(ldr,str) rd,[sp,#immediate]
+//1001 oddd iiii iiii
 //o = opcode
 //d = rd
-//r = relative
+//i = immediate
 void ARM::thumb_op_move_stack() {
   uint1 opcode = instruction() >> 11;
   uint3 d = instruction() >> 8;
-  int8 relative = instruction();
+  uint8 immediate = instruction();
 
-  if(opcode == 0) bus_write(r(13) + relative * 4, Word, r(d));
-  if(opcode == 1) r(d) = bus_read(r(13) + relative * 4, Word);
+  if(opcode == 0) bus_write(r(13) + immediate * 4, Word, r(d));
+  if(opcode == 1) r(d) = bus_read(r(13) + immediate * 4, Word);
 }
 
 //add rd,{pc,sp},#immediate

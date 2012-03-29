@@ -10,6 +10,9 @@ void ARM::Processor::power() {
   und.sp = und.lr = 0;
   pc = 0;
 
+  carryout = false;
+  irqline = false;
+
   cpsr = 0;
   spsr = nullptr;
   fiq.spsr = 0;
@@ -31,7 +34,7 @@ void ARM::Processor::power() {
 }
 
 void ARM::Processor::setMode(Mode mode) {
-  cpsr.m = (unsigned)mode;
+  cpsr.m = 0x10 | (unsigned)mode;
 
   if(mode == Mode::FIQ) {
     r[ 8] = &fiq.r8;
@@ -54,6 +57,21 @@ void ARM::Processor::setMode(Mode mode) {
   case Mode::ABT: r[13] = &abt.sp; r[14] = &abt.lr; spsr = &abt.spsr; break;
   case Mode::UND: r[13] = &und.sp; r[14] = &und.lr; spsr = &und.spsr; break;
   default:        r[13] = &usr.sp; r[14] = &usr.lr; spsr = nullptr;   break;
+  }
+}
+
+void ARM::pipeline_step() {
+  pipeline.execute = pipeline.decode;
+  pipeline.decode = pipeline.fetch;
+
+  if(cpsr().t == 0) {
+    r(15).data += 4;
+    pipeline.fetch.address = r(15);
+    pipeline.fetch.instruction = bus_read(r(15), Word);
+  } else {
+    r(15).data += 2;
+    pipeline.fetch.address = r(15);
+    pipeline.fetch.instruction = bus_read(r(15), Half);
   }
 }
 

@@ -104,6 +104,7 @@ struct Processor {
   GPR pc;
   PSR cpsr;
   bool carryout;
+  bool irqline;
 
   GPR *r[16];
   PSR *spsr;
@@ -114,7 +115,9 @@ struct Processor {
 
 Processor processor;
 Pipeline pipeline;
-bool exception;
+bool crash;
+
+void pipeline_step();
 
 alwaysinline GPR& r(unsigned n) { return *processor.r[n]; }
 alwaysinline PSR& cpsr() { return processor.cpsr; }
@@ -122,3 +125,5 @@ alwaysinline PSR& spsr() { return *processor.spsr; }
 alwaysinline bool& carryout() { return processor.carryout; }
 alwaysinline uint32 instruction() { return pipeline.execute.instruction; }
 alwaysinline Processor::Mode mode() { return (Processor::Mode)processor.cpsr.m; }
+alwaysinline bool privilegedmode() const { return (Processor::Mode)processor.cpsr.m != Processor::Mode::USR; }
+alwaysinline bool exceptionmode() const { return privilegedmode() && (Processor::Mode)processor.cpsr.m != Processor::Mode::SYS; }

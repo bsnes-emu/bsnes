@@ -1,6 +1,7 @@
 struct CPU : Processor::ARM, Thread, Memory {
   StaticMemory iwram;
   StaticMemory ewram;
+  #include "registers.hpp"
 
   static void Enter();
   void enter();

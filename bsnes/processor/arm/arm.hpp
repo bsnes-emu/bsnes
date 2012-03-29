@@ -16,8 +16,19 @@ struct ARM {
   virtual void bus_write(uint32 addr, uint32 size, uint32 word) = 0;
 
   void power();
+  void exec();
   void vector(uint32 addr, Processor::Mode mode);
+
   bool condition(uint4 condition);
+  uint32 bit(uint32 result);
+  uint32 add(uint32 source, uint32 modify, bool carry);
+  uint32 sub(uint32 source, uint32 modify, bool carry);
+  uint32 mul(uint32 product, uint32 multiplicand, uint32 multiplier);
+  uint32 lsl(uint32 source, uint32 shift);
+  uint32 lsr(uint32 source, uint32 shift);
+  uint32 asr(uint32 source, uint32 shift);
+  uint32 ror(uint32 source, uint32 shift);
+  uint32 rrx(uint32 source);
 
   void serialize(serializer&);
 

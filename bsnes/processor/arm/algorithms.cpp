@@ -18,3 +18,121 @@ bool ARM::condition(uint4 condition) {
   case 15: return false;                                  //NV (never)
   }
 }
+
+uint32 ARM::bit(uint32 result) {
+  if(cpsr().t || instruction() & (1 << 20)) {
+    cpsr().n = result >> 31;
+    cpsr().z = result == 0;
+    cpsr().c = carryout();
+  }
+  return result;
+}
+
+uint32 ARM::add(uint32 source, uint32 modify, bool carry) {
+  uint32 result = source + modify + carry;
+  if(cpsr().t || instruction() & (1 << 20)) {
+    uint32 overflow = ~(source ^ modify) & (source ^ result);
+    cpsr().n = result >> 31;
+    cpsr().z = result == 0;
+    cpsr().c = (1u << 31) & (overflow ^ source ^ modify ^ result);
+    cpsr().v = (1u << 31) & (overflow);
+  }
+  return result;
+}
+
+uint32 ARM::sub(uint32 source, uint32 modify, bool carry) {
+  return add(source, ~modify, carry);
+}
+
+uint32 ARM::mul(uint32 product, uint32 multiplicand, uint32 multiplier) {
+  //Modified Booth Encoding
+  bool carry = 0;
+  unsigned place = 0;
+
+  do {
+    step(1);
+    signed factor = (int2)multiplier + carry;
+
+    if(factor == -2) product -= multiplicand << (place + 1);
+    if(factor == -1) product -= multiplicand << (place + 0);
+    if(factor == +1) product += multiplicand << (place + 0);
+    if(factor == +2) product += multiplicand << (place + 1);
+
+    carry = multiplier & 2;
+    place += 2;
+    multiplier >>= 2;
+  } while(multiplier + carry && place < 32);
+
+  if(cpsr().t || instruction() & (1 << 20)) {
+    cpsr().n = product >> 31;
+    cpsr().z = product == 0;
+    cpsr().c = carry;
+  }
+
+  return product;
+}
+
+uint32 ARM::lsl(uint32 source, uint32 shift) {
+  while(shift--) {
+    carryout() = source >> 31;
+    source <<= 1;
+  }
+
+  if(cpsr().t) {
+    cpsr().n = source >> 31;
+    cpsr().z = source == 0;
+    cpsr().c = carryout();
+  }
+
+  return source;
+}
+
+uint32 ARM::lsr(uint32 source, uint32 shift) {
+  while(shift--) {
+    carryout() = source & 1;
+    source >>= 1;
+  }
+
+  if(cpsr().t) {
+    cpsr().n = source >> 31;
+    cpsr().z = source == 0;
+    cpsr().c = carryout();
+  }
+
+  return source;
+}
+
+uint32 ARM::asr(uint32 source, uint32 shift) {
+  while(shift--) {
+    carryout() = source & 1;
+    source = (int32)source >> 1;
+  }
+
+  if(cpsr().t) {
+    cpsr().n = source >> 31;
+    cpsr().z = source == 0;
+    cpsr().c = carryout();
+  }
+
+  return source;
+}
+
+uint32 ARM::ror(uint32 source, uint32 shift) {
+  while(shift--) {
+    carryout() = source & 1;
+    source = (source << 31) | (source >> 1);
+  }
+
+  if(cpsr().t) {
+    cpsr().n = source >> 31;
+    cpsr().z = source == 0;
+    cpsr().c = carryout();
+  }
+
+  return source;
+}
+
+uint32 ARM::rrx(uint32 source) {
+  carryout() = source & 1;
+  source = (cpsr().c << 31) | (source >> 1);
+}

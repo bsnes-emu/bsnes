@@ -3,11 +3,16 @@ struct PPU : Thread, Memory {
   StaticMemory oam;
   StaticMemory pram;
 
+  struct Registers {
+    unsigned scanline;
+  } regs;
+
   static void Enter();
   void enter();
   void step(unsigned clocks);
 
   void power();
+  void scanline();
   void frame();
 
   uint32 read(uint32 addr, uint32 size);

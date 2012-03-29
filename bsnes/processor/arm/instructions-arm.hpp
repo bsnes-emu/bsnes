@@ -1,14 +1,7 @@
 void arm_step();
 
-bool arm_condition();
 void arm_opcode(uint32 rm);
 void arm_move_to_status(uint32 rm);
-
-void lsl(bool &c, uint32 &rm, uint32 rs);
-void lsr(bool &c, uint32 &rm, uint32 rs);
-void asr(bool &c, uint32 &rm, uint32 rs);
-void ror(bool &c, uint32 &rm, uint32 rs);
-void rrx(bool &c, uint32 &rm);
 
 void arm_op_multiply();
 void arm_op_memory_swap();

@@ -1,16 +1,6 @@
 void thumb_step();
 
-bool thumb_condition(uint4 condition);
 void thumb_opcode(uint4 opcode, uint4 d, uint4 s);
-
-uint32 thumb_tst(uint32 modify);
-uint32 thumb_add(uint32 source, uint32 modify, bool carry = 0);
-uint32 thumb_sub(uint32 source, uint32 modify, bool carry = 1);
-uint32 thumb_lsl(uint32 source, uint32 modify);
-uint32 thumb_lsr(uint32 source, uint32 modify);
-uint32 thumb_asr(uint32 source, uint32 modify);
-uint32 thumb_ror(uint32 source, uint32 modify);
-uint32 thumb_mul(uint32 source, uint32 modify);
 
 void thumb_op_adjust_register();
 void thumb_op_adjust_immediate();

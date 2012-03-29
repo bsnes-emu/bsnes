@@ -8,7 +8,7 @@
 
 //vdraw:    160 scanlines (197120 cycles)
 //vblank:    68 scanlines ( 83776 cycles)
-//frame:    208 scanlines (280896 cycles)
+//frame:    228 scanlines (280896 cycles)
 
 namespace GBA {
 
@@ -18,8 +18,8 @@ void PPU::Enter() { ppu.enter(); }
 
 void PPU::enter() {
   while(true) {
-    frame();
-    step(280896);
+    step(1232);
+    scanline();
   }
 }
 
@@ -34,6 +34,27 @@ void PPU::power() {
   for(unsigned n = 0; n < vram.size; n++) vram.data[n] = 0;
   for(unsigned n = 0; n <  oam.size; n++)  oam.data[n] = 0;
   for(unsigned n = 0; n < pram.size; n++) pram.data[n] = 0;
+
+  regs.scanline = 0;
+
+  bus.mmio[0x006] = this;
+}
+
+void PPU::scanline() {
+  regs.scanline++;
+
+  if(regs.scanline == 160) {
+    if(cpu.regs.ime && cpu.regs.irq_enable.vblank) {
+      cpu.regs.irq_flag.vblank = 1;
+    }
+  }
+
+  if(regs.scanline == 228) {
+    regs.scanline = 0;
+    frame();
+  }
+
+  if(regs.scanline >= 160) return;
 }
 
 void PPU::frame() {
@@ -57,6 +78,11 @@ void PPU::frame() {
 }
 
 uint32 PPU::read(uint32 addr, uint32 size) {
+  if(addr == 0x04000006) {
+    //VCOUNT
+    return regs.scanline;
+  }
+
   return 0u;
 }
 
