@@ -134,9 +134,8 @@ void ARM::arm_op_multiply() {
   uint4 s = instruction() >> 8;
   uint4 m = instruction();
 
-  r(d) = accumulate ? r(n) : 0u;
   step(1);
-  r(d) = mul(r(d), r(m), r(s));
+  r(d) = mul(accumulate ? r(d) : 0u, r(m), r(s));
 }
 
 //(u,s)mull{condition}{s} rdlo,rdhi,rm,rs
@@ -159,8 +158,12 @@ void ARM::arm_op_multiply_long() {
   uint4 s = instruction() >> 8;
   uint4 m = instruction();
 
-  uint64 rm = signextend ? r(m) : (int32)r(m);
-  uint64 rs = signextend ? r(s) : (int32)r(s);
+  uint64 rm = r(m);
+  uint64 rs = r(s);
+  if(signextend) {
+    rm = (int32)rm;
+    rs = (int32)rs;
+  }
 
   uint64 rd = rm * rs;
   if(accumulate) rd += ((uint64)r(dhi) << 32) + ((uint64)r(dlo) << 0);
@@ -399,6 +402,7 @@ void ARM::arm_op_data_immediate_shift() {
 
   uint32 rs = shift;
   uint32 rm = r(m);
+  carryout() = cpsr().c;
 
   if(mode == 0) rm = lsl(rm, rs);
   if(mode == 1) rm = lsr(rm, rs ? rs : 32);
@@ -428,6 +432,7 @@ void ARM::arm_op_data_register_shift() {
 
   uint8 rs = r(s);
   uint32 rm = r(m);
+  carryout() = cpsr().c;
 
   if(mode == 0      ) rm = lsl(rm, rs < 33 ? rs : 33);
   if(mode == 1      ) rm = lsr(rm, rs < 33 ? rs : 33);
@@ -453,9 +458,10 @@ void ARM::arm_op_data_immediate() {
   uint4 shift = instruction() >> 8;
   uint8 immediate = instruction();
 
-  uint32 rs = shift << 1;
-  uint32 rm = (immediate >> rs) | (immediate << (32 - rs));
-  if(rs) carryout() = immediate >> 31;
+  uint32 rm = immediate;
+
+  carryout() = cpsr().c;
+  if(shift) rm = ror(immediate, 2 * shift);
 
   arm_opcode(rm);
 }

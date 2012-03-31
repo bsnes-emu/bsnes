@@ -45,28 +45,11 @@ uint32 ARM::sub(uint32 source, uint32 modify, bool carry) {
 }
 
 uint32 ARM::mul(uint32 product, uint32 multiplicand, uint32 multiplier) {
-  //Modified Booth Encoding
-  bool carry = 0;
-  unsigned place = 0;
-
-  do {
-    step(1);
-    signed factor = (int2)multiplier + carry;
-
-    if(factor == -2) product -= multiplicand << (place + 1);
-    if(factor == -1) product -= multiplicand << (place + 0);
-    if(factor == +1) product += multiplicand << (place + 0);
-    if(factor == +2) product += multiplicand << (place + 1);
-
-    carry = multiplier & 2;
-    place += 2;
-    multiplier >>= 2;
-  } while(multiplier + carry && place < 32);
+  product += multiplicand * multiplier;
 
   if(cpsr().t || instruction() & (1 << 20)) {
     cpsr().n = product >> 31;
     cpsr().z = product == 0;
-    cpsr().c = carry;
   }
 
   return product;
@@ -134,5 +117,5 @@ uint32 ARM::ror(uint32 source, uint32 shift) {
 
 uint32 ARM::rrx(uint32 source) {
   carryout() = source & 1;
-  source = (cpsr().c << 31) | (source >> 1);
+  return (cpsr().c << 31) | (source >> 1);
 }

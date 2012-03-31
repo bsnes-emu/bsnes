@@ -17,7 +17,7 @@ void CPU::enter() {
       while(true) step(frequency);
     }
 
-    processor.irqline = regs.ime && regs.irq_flag;
+    processor.irqline = regs.ime && (regs.irq_enable & regs.irq_flag);
 
     if(regs.mode == Registers::Mode::Halt) {
       if((regs.irq_enable & regs.irq_flag) == 0) {
@@ -88,7 +88,7 @@ uint32 CPU::read(uint32 addr, uint32 size) {
   }
 
   if(size == Half) {
-    addr &= ~3;
+    addr &= ~1;
     uint32 half = 0;
     half |= read(addr + 0, Byte) <<  0;
     half |= read(addr + 0, Byte) <<  8;
@@ -101,14 +101,14 @@ uint32 CPU::read(uint32 addr, uint32 size) {
 
   //KEYINPUT
   case 0x04000130:
-    for(unsigned n = 0; n < 8; n++) result |= (interface->inputPoll(n) == false) << n;
+    for(unsigned n = 0; n < 8; n++) result |= interface->inputPoll(n) << n;
     if((result & 0xc0) == 0xc0) result &= ~0xc0;  //up+down cannot be pressed simultaneously
     if((result & 0x30) == 0x30) result &= ~0x30;  //left+right cannot be pressed simultaneously
-    return result;
+    return result ^ 0xff;
   case 0x40000131:
-    result |= (interface->inputPoll(8) == false) << 0;
-    result |= (interface->inputPoll(9) == false) << 1;
-    return result;
+    result |= interface->inputPoll(8) << 0;
+    result |= interface->inputPoll(9) << 1;
+    return result ^ 0x03;
 
   //IE
   case 0x04000200: return regs.irq_enable >> 0;

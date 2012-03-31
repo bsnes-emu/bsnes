@@ -228,6 +228,7 @@ public:
     if(surface) {
       device->ColorFill(surface, 0, D3DCOLOR_XRGB(0x00, 0x00, 0x00));
       surface->Release();
+      surface = nullptr;
     }
 
     //clear primary display and all backbuffers
@@ -255,6 +256,7 @@ public:
   void unlock() {
     surface->UnlockRect();
     surface->Release();
+    surface = nullptr;
   }
 
   void refresh() {

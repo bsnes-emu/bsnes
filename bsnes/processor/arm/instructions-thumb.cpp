@@ -125,8 +125,8 @@ void ARM::thumb_op_shift_immediate() {
 
   switch(opcode) {
   case 0: r(d) = lsl(r(m), immediate); break;
-  case 1: r(d) = lsr(r(m), immediate); break;
-  case 2: r(d) = asr(r(m), immediate); break;
+  case 1: r(d) = lsr(r(m), immediate == 0 ? 32u : (unsigned)immediate); break;
+  case 2: r(d) = asr(r(m), immediate == 0 ? 32u : (unsigned)immediate); break;
   }
 }
 

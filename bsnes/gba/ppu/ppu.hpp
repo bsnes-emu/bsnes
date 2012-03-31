@@ -3,6 +3,7 @@ struct PPU : Thread, Memory {
   StaticMemory oam;
   StaticMemory pram;
   #include "registers.hpp"
+  uint16 *output;
 
   static void Enter();
   void enter();
@@ -15,11 +16,8 @@ struct PPU : Thread, Memory {
   uint32 read(uint32 addr, uint32 size);
   void write(uint32 addr, uint32 size, uint32 word);
 
-  void render_bg();
-  void render_obj();
-  void render_window();
-
   PPU();
+  ~PPU();
 };
 
 extern PPU ppu;
