@@ -12,6 +12,11 @@
 
 namespace GBA {
 
+#include "registers.cpp"
+#include "mmio.cpp"
+#include "bg.cpp"
+#include "obj.cpp"
+#include "window.cpp"
 PPU ppu;
 
 void PPU::Enter() { ppu.enter(); }
@@ -35,9 +40,10 @@ void PPU::power() {
   for(unsigned n = 0; n <  oam.size; n++)  oam.data[n] = 0;
   for(unsigned n = 0; n < pram.size; n++) pram.data[n] = 0;
 
+  regs.control = 0;
   regs.scanline = 0;
 
-  bus.mmio[0x006] = this;
+  for(unsigned n = 0x000; n <= 0x055; n++) bus.mmio[n] = this;
 }
 
 void PPU::scanline() {
@@ -55,6 +61,8 @@ void PPU::scanline() {
   }
 
   if(regs.scanline >= 160) return;
+  render_bg();
+  render_obj();
 }
 
 void PPU::frame() {
@@ -75,18 +83,6 @@ void PPU::frame() {
 
   interface->videoRefresh(output);
   scheduler.exit(Scheduler::ExitReason::FrameEvent);
-}
-
-uint32 PPU::read(uint32 addr, uint32 size) {
-  if(addr == 0x04000006) {
-    //VCOUNT
-    return regs.scanline;
-  }
-
-  return 0u;
-}
-
-void PPU::write(uint32 addr, uint32 size, uint32 word) {
 }
 
 PPU::PPU() {

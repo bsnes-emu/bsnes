@@ -1,3 +1,28 @@
+CPU::Registers::DMA::Control::operator uint16() const {
+  return (
+     (targetmode <<  5)
+  || (sourcemode <<  7)
+  || (repeat     <<  9)
+  || (size       << 10)
+  || (drq        << 11)
+  || (timing     << 12)
+  || (irq        << 14)
+  || (enable     << 15)
+  );
+}
+
+uint16 CPU::Registers::DMA::Control::operator=(uint16 source) {
+  targetmode = source >>  5;
+  sourcemode = source >>  7;
+  repeat     = source >>  9;
+  size       = source >> 10;
+  drq        = source >> 11;
+  timing     = source >> 12;
+  irq        = source >> 14;
+  enable     = source >> 15;
+  return operator uint16();
+}
+
 CPU::Registers::Interrupt::operator uint16() const {
   return (
      (vblank       <<  0)
@@ -17,7 +42,7 @@ CPU::Registers::Interrupt::operator uint16() const {
   );
 }
 
-CPU::Registers::Interrupt& CPU::Registers::Interrupt::operator=(uint16 source) {
+uint16 CPU::Registers::Interrupt::operator=(uint16 source) {
   vblank       = source & (1 <<  0);
   hblank       = source & (1 <<  1);
   vcoincidence = source & (1 <<  2);
@@ -32,4 +57,5 @@ CPU::Registers::Interrupt& CPU::Registers::Interrupt::operator=(uint16 source) {
   dma3         = source & (1 << 11);
   keypad       = source & (1 << 12);
   cartridge    = source & (1 << 13);
+  return operator uint16();
 }

@@ -4,6 +4,7 @@ void arm_opcode(uint32 rm);
 void arm_move_to_status(uint32 rm);
 
 void arm_op_multiply();
+void arm_op_multiply_long();
 void arm_op_memory_swap();
 void arm_op_move_half_register();
 void arm_op_move_half_immediate();

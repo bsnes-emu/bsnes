@@ -32,7 +32,7 @@ string ARM::disassemble_arm_instruction(uint32 pc) {
 
   string output{hex<8>(pc), "  "};
 
-  uint32 instruction = bus_read(pc, Word);
+  uint32 instruction = read(pc & ~3, Word);
   output.append(hex<8>(instruction), "  ");
 
   //multiply()
@@ -45,11 +45,30 @@ string ARM::disassemble_arm_instruction(uint32 pc) {
     uint4 rd = instruction >> 16;
     uint4 rn = instruction >> 12;
     uint4 rs = instruction >> 8;
-    uint4 rm = instruction >> 0;
+    uint4 rm = instruction;
 
     output.append(accumulate ? "mla" : "mul", conditions[condition], save ? "s " : " ");
     output.append(registers[rd], ",", registers[rm], ",", registers[rs]);
     if(accumulate) output.append(",", registers[rn]);
+
+    return output;
+  }
+
+  //multiply_long()
+  //(u,s)mull{condition}{s} rdlo,rdhi,rm,rs
+  //(u,s)mlal{condition}{s} rdlo,rdhi,rm,rs
+  if((instruction & 0x0f8000f0) == 0x00800090) {
+    uint4 condition = instruction >> 28;
+    uint1 signextend = instruction >> 22;
+    uint1 accumulate = instruction >> 21;
+    uint1 save = instruction >> 20;
+    uint4 rdhi = instruction >> 16;
+    uint4 rdlo = instruction >> 12;
+    uint4 rs = instruction >> 8;
+    uint4 rm = instruction;
+
+    output.append(signextend ? "s" : "u", accumulate ? "mlal" : "mull", conditions[condition], save ? "s " : " ");
+    output.append(registers[rdlo], ",", registers[rdhi], ",", registers[rm], ",", registers[rs]);
 
     return output;
   }
@@ -115,7 +134,7 @@ string ARM::disassemble_arm_instruction(uint32 pc) {
     if(pre == 1) output.append("]");
     if(pre == 0 || writeback == 1) output.append("!");
 
-    if(rn == 15) output.append(" =0x", hex<4>(bus_read(pc + 8 + (up ? +immediate : -immediate), Half)));
+    if(rn == 15) output.append(" =0x", hex<4>(read(pc + 8 + (up ? +immediate : -immediate), Half)));
     return output;
   }
 
@@ -165,8 +184,8 @@ string ARM::disassemble_arm_instruction(uint32 pc) {
     if(pre == 1) output.append("]");
     if(pre == 0 || writeback == 1) output.append("!");
 
-    if(rn == 15 && half == 1) output.append(" =0x", hex<4>(bus_read(pc + 8 + (up ? +immediate : -immediate), Half)));
-    if(rn == 15 && half == 0) output.append(" =0x", hex<2>(bus_read(pc + 8 + (up ? +immediate : -immediate), Byte)));
+    if(rn == 15 && half == 1) output.append(" =0x", hex<4>(read(pc + 8 + (up ? +immediate : -immediate), Half)));
+    if(rn == 15 && half == 0) output.append(" =0x", hex<2>(read(pc + 8 + (up ? +immediate : -immediate), Byte)));
     return output;
   }
 
@@ -340,7 +359,7 @@ string ARM::disassemble_arm_instruction(uint32 pc) {
     if(pre == 1) output.append("]");
     if(pre == 0 || writeback == 1) output.append("!");
 
-    if(rn == 15) output.append(" =0x", hex<8>(bus_read(pc + 8 + (up ? +immediate : -immediate), byte ? Byte : Word)));
+    if(rn == 15) output.append(" =0x", hex<8>(read(pc + 8 + (up ? +immediate : -immediate), byte ? Byte : Word)));
     return output;
   }
 
@@ -438,7 +457,7 @@ string ARM::disassemble_thumb_instruction(uint32 pc) {
 
   string output{hex<8>(pc), "  "};
 
-  uint16 instruction = bus_read(pc, Half);
+  uint16 instruction = read(pc & ~1, Half);
   output.append(hex<4>(instruction), "  ");
 
   //adjust_register()
@@ -552,7 +571,7 @@ string ARM::disassemble_thumb_instruction(uint32 pc) {
 
     unsigned rm = ((pc + 4) & ~3) + displacement * 4;
     output.append("ldr ", registers[rd], ",[pc,#0x", hex<3>(rm), "]");
-    output.append(" =0x", hex<8>(bus_read(rm, Word)));
+    output.append(" =0x", hex<8>(read(rm, Word)));
 
     return output;
   }
@@ -721,7 +740,7 @@ string ARM::disassemble_thumb_instruction(uint32 pc) {
   //bl address
   if((instruction & 0xf800) == 0xf000) {
     uint11 offsethi = instruction;
-    instruction = bus_read(pc + 2, Half);
+    instruction = read((pc & ~1) + 2, Half);
     uint11 offsetlo = instruction;
 
     int22 displacement = (offsethi << 11) | (offsetlo << 0);
@@ -747,12 +766,14 @@ string ARM::disassemble_registers() {
   output.append( "r0:", hex<8>(r( 0)), " r1:", hex<8>(r( 1)), "  r2:", hex<8>(r( 2)), "  r3:", hex<8>(r( 3)), "  ");
   output.append( "r4:", hex<8>(r( 4)), " r5:", hex<8>(r( 5)),  " r6:", hex<8>(r( 6)),  " r7:", hex<8>(r( 7)), " ");
   output.append("cpsr:", cpsr().n ? "N" : "n", cpsr().z ? "Z" : "z", cpsr().c ? "C" : "c", cpsr().v ? "V" : "v");
+  output.append("/", cpsr().i ? "I" : "i", cpsr().f ? "F" : "f", cpsr().t ? "T" : "t");
   output.append("/", hex<2>(cpsr().m), "\n");
   output.append( "r8:", hex<8>(r( 8)), " r9:", hex<8>(r( 9)), " r10:", hex<8>(r(10)), " r11:", hex<8>(r(11)), " ");
   output.append("r12:", hex<8>(r(12)), " sp:", hex<8>(r(13)),  " lr:", hex<8>(r(14)),  " pc:", hex<8>(r(15)), " ");
   output.append("spsr:");
-  if(mode() == Processor::Mode::USR || mode() == Processor::Mode::SYS) { output.append("----/--"); return output; }
+  if(mode() == Processor::Mode::USR || mode() == Processor::Mode::SYS) { output.append("----/---/--"); return output; }
   output.append(         spsr().n ? "N" : "n", spsr().z ? "Z" : "z", spsr().c ? "C" : "c", spsr().v ? "V" : "v");
+  output.append("/", spsr().i ? "I" : "i", spsr().f ? "F" : "f", spsr().t ? "T" : "t");
   output.append("/", hex<2>(spsr().m));
   return output;
 }

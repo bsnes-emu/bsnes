@@ -17,6 +17,8 @@ struct ARM {
 
   void power();
   void exec();
+  uint32 read(uint32 addr, uint32 size);
+  void write(uint32 addr, uint32 size, uint32 word);
   void vector(uint32 addr, Processor::Mode mode);
 
   bool condition(uint4 condition);

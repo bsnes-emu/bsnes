@@ -1,30 +1,19 @@
 #ifdef ARMDSP_CPP
 
 uint32 ArmDSP::bus_read(uint32 addr, uint32 size) {
-  static auto adjust = [&](uint32 word, uint32 addr, uint32 size) {
-    unsigned rotate = (addr & 3) << 3;
-    word = (word >> rotate) | (word << (32 - rotate));
-    return word & (~0u >> (32 - size));
-  };
-
   static auto memory = [&](const uint8 *memory, uint32 addr, uint32 size) {
     memory += addr & ~3;
-    uint32 word = 0;
-    word |= *memory++ <<  0;
-    word |= *memory++ <<  8;
-    word |= *memory++ << 16;
-    word |= *memory++ << 24;
-    return adjust(word, addr, size);
+    return (memory[0] << 0) | (memory[1] << 8) | (memory[2] << 16) | (memory[3] << 24);
   };
 
   switch(addr & 0xe0000000) {
   case 0x00000000: return memory(programROM, addr & 0x1ffff, size);
-  case 0x20000000: return adjust(pipeline.fetch.instruction, addr, size);
+  case 0x20000000: return pipeline.fetch.instruction;
   case 0x40000000: break;
-  case 0x60000000: return adjust(0x40404001, addr, size);
-  case 0x80000000: return adjust(pipeline.fetch.instruction, addr, size);
+  case 0x60000000: return 0x40404001;
+  case 0x80000000: return pipeline.fetch.instruction;
   case 0xa0000000: return memory(dataROM, addr & 0x7fff, size);
-  case 0xc0000000: return adjust(pipeline.fetch.instruction, addr, size);
+  case 0xc0000000: return pipeline.fetch.instruction;
   case 0xe0000000: return memory(programRAM, addr & 0x3fff, size);
   }
 
@@ -33,12 +22,12 @@ uint32 ArmDSP::bus_read(uint32 addr, uint32 size) {
   if(addr == 0x40000010) {
     if(bridge.cputoarm.ready) {
       bridge.cputoarm.ready = false;
-      return adjust(bridge.cputoarm.data, addr, size);
+      return bridge.cputoarm.data;
     }
   }
 
   if(addr == 0x40000020) {
-    return adjust(bridge.status(), addr, size);
+    return bridge.status();
   }
 
   return 0u;

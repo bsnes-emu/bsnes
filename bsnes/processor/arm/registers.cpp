@@ -67,11 +67,11 @@ void ARM::pipeline_step() {
   if(cpsr().t == 0) {
     r(15).data += 4;
     pipeline.fetch.address = r(15);
-    pipeline.fetch.instruction = bus_read(r(15), Word);
+    pipeline.fetch.instruction = read(r(15), Word);
   } else {
     r(15).data += 2;
     pipeline.fetch.address = r(15);
-    pipeline.fetch.instruction = bus_read(r(15), Half);
+    pipeline.fetch.instruction = read(r(15), Half);
   }
 }
 

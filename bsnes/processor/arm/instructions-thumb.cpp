@@ -3,9 +3,10 @@
 void ARM::thumb_step() {
   if(pipeline.reload) {
     pipeline.reload = false;
+    r(15).data &= ~1;
 
     pipeline.fetch.address = r(15);
-    pipeline.fetch.instruction = bus_read(r(15), Half);
+    pipeline.fetch.instruction = read(r(15), Half);
 
     pipeline_step();
     step(1);
@@ -198,7 +199,7 @@ void ARM::thumb_op_load_literal() {
   uint8 displacement = instruction();
 
   unsigned rm = (r(15) & ~3) + displacement * 4;
-  r(d) = bus_read(rm, Word);
+  r(d) = read(rm, Word);
 }
 
 //(ld(r,s),str){b,h} rd,[rn,rm]
@@ -214,14 +215,14 @@ void ARM::thumb_op_move_register_offset() {
   uint3 d = instruction() >> 0;
 
   switch(opcode) {
-  case 0: bus_write(r(n) + r(m), Word, r(d));        break;  //STR
-  case 1: bus_write(r(n) + r(m), Half, r(d));        break;  //STRH
-  case 2: bus_write(r(n) + r(m), Byte, r(d));        break;  //STRB
-  case 3: r(d) = (int8)bus_read(r(n) + r(m), Byte);  break;  //LDSB
-  case 4: r(d) = bus_read(r(n) + r(m), Word);        break;  //LDR
-  case 5: r(d) = bus_read(r(n) + r(m), Half);        break;  //LDRH
-  case 6: r(d) = bus_read(r(n) + r(m), Byte);        break;  //LDRB
-  case 7: r(d) = (int16)bus_read(r(n) + r(m), Half); break;  //LDSH
+  case 0: write(r(n) + r(m), Word, r(d));        break;  //STR
+  case 1: write(r(n) + r(m), Half, r(d));        break;  //STRH
+  case 2: write(r(n) + r(m), Byte, r(d));        break;  //STRB
+  case 3: r(d) = (int8)read(r(n) + r(m), Byte);  break;  //LDSB
+  case 4: r(d) = read(r(n) + r(m), Word);        break;  //LDR
+  case 5: r(d) = read(r(n) + r(m), Half);        break;  //LDRH
+  case 6: r(d) = read(r(n) + r(m), Byte);        break;  //LDRB
+  case 7: r(d) = (int16)read(r(n) + r(m), Half); break;  //LDSH
   }
 }
 
@@ -237,8 +238,8 @@ void ARM::thumb_op_move_word_immediate() {
   uint3 n = instruction() >> 3;
   uint3 d = instruction() >> 0;
 
-  if(load == 1) r(d) = bus_read(r(n) + offset * 4, Word);
-  if(load == 0) bus_write(r(n) + offset * 4, Word, r(d));
+  if(load == 1) r(d) = read(r(n) + offset * 4, Word);
+  if(load == 0) write(r(n) + offset * 4, Word, r(d));
 }
 
 //(ldr,str)b rd,[rn,#offset]
@@ -253,8 +254,8 @@ void ARM::thumb_op_move_byte_immediate() {
   uint3 n = instruction() >> 3;
   uint3 d = instruction() >> 0;
 
-  if(load == 1) r(d) = bus_read(r(n) + offset, Byte);
-  if(load == 0) bus_write(r(n) + offset, Byte, r(d));
+  if(load == 1) r(d) = read(r(n) + offset, Byte);
+  if(load == 0) write(r(n) + offset, Byte, r(d));
 }
 
 //(ldr,str)h rd,[rn,#offset]
@@ -269,8 +270,8 @@ void ARM::thumb_op_move_half_immediate() {
   uint3 n = instruction() >> 3;
   uint3 d = instruction() >> 0;
 
-  if(load == 1) r(d) = bus_read(r(n) + offset * 2, Half);
-  if(load == 0) bus_write(r(n) + offset * 2, Half, r(d));
+  if(load == 1) r(d) = read(r(n) + offset * 2, Half);
+  if(load == 0) write(r(n) + offset * 2, Half, r(d));
 }
 
 //(ldr,str) rd,[sp,#immediate]
@@ -283,8 +284,8 @@ void ARM::thumb_op_move_stack() {
   uint3 d = instruction() >> 8;
   uint8 immediate = instruction();
 
-  if(opcode == 0) bus_write(r(13) + immediate * 4, Word, r(d));
-  if(opcode == 1) r(d) = bus_read(r(13) + immediate * 4, Word);
+  if(opcode == 0) write(r(13) + immediate * 4, Word, r(d));
+  if(opcode == 1) r(d) = read(r(13) + immediate * 4, Word);
 }
 
 //add rd,{pc,sp},#immediate
@@ -330,16 +331,16 @@ void ARM::thumb_op_stack_multiple() {
 
   for(unsigned l = 0; l < 8; l++) {
     if(list & (1 << l)) {
-      if(load == 1) r(l) = bus_read(sp, Word);  //POP
-      if(load == 0) bus_write(sp, Word, r(l));  //PUSH
+      if(load == 1) r(l) = read(sp, Word);  //POP
+      if(load == 0) write(sp, Word, r(l));  //PUSH
       sp += 4;
     }
   }
 
   if(branch) {
     //note: ARMv5+ POP sets cpsr().t
-    if(load == 1) r(15) = bus_read(sp, Word);  //POP
-    if(load == 0) bus_write(sp, Word, r(14));  //PUSH
+    if(load == 1) r(15) = read(sp, Word);  //POP
+    if(load == 0) write(sp, Word, r(14));  //PUSH
     sp += 4;
   }
 
@@ -359,8 +360,8 @@ void ARM::thumb_op_move_multiple() {
 
   for(unsigned l = 0; l < 8; l++) {
     if(list & (1 << l)) {
-      if(load == 1) r(l) = bus_read(r(n), Word);  //LDMIA
-      if(load == 0) bus_write(r(n), Word, r(l));  //STMIA
+      if(load == 1) r(l) = read(r(n), Word);  //LDMIA
+      if(load == 0) write(r(n), Word, r(l));  //STMIA
       r(n) += 4;
     }
   }
