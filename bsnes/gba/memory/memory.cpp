@@ -2,6 +2,7 @@
 
 namespace GBA {
 
+#include "mmio.cpp"
 Bus bus;
 
 struct UnmappedMemory : Memory {
@@ -74,7 +75,10 @@ uint32 Bus::read(uint32 addr, uint32 size) {
   case 0x01000000: return system.bios.read(addr & 0x3fff, size);
   case 0x02000000: return cpu.ewram.read(addr & 0x3ffff, size);
   case 0x03000000: return cpu.iwram.read(addr & 0x7fff, size);
-  case 0x04000000: return mmio[addr & 0x3ff]->read(addr, size);
+  case 0x04000000:
+    if((addr & 0xfffffc00) == 0x04000000) return mmio[addr & 0x3ff]->read(addr, size);
+    if((addr & 0xff00ffff) == 0x04000800) return ((MMIO&)cpu).read(0x04000800 | (addr & 3), size);
+    return 0u;
   case 0x05000000: return ppu.pram.read(addr & 0x3ff, size);
   case 0x06000000: return ppu.vram.read(addr & 0x10000 ? (0x10000 + (addr & 0x7fff)) : (addr & 0xffff), size);
   case 0x07000000: return ppu.oam.read(addr & 0x3ff, size);
@@ -95,7 +99,10 @@ void Bus::write(uint32 addr, uint32 size, uint32 word) {
   case 0x01000000: return;
   case 0x02000000: return cpu.ewram.write(addr & 0x3ffff, size, word);
   case 0x03000000: return cpu.iwram.write(addr & 0x7fff, size, word);
-  case 0x04000000: return mmio[addr & 0x3ff]->write(addr, size, word);
+  case 0x04000000:
+    if((addr & 0xfffffc00) == 0x04000000) return mmio[addr & 0x3ff]->write(addr, size, word);
+    if((addr & 0xff00ffff) == 0x04000800) return ((MMIO&)cpu).write(0x04000800 | (addr & 3), size, word);
+    return;
   case 0x05000000: return ppu.pram.write(addr & 0x3ff, size, word);
   case 0x06000000: return ppu.vram.write(addr & 0x10000 ? (0x10000 + (addr & 0x7fff)) : (addr & 0xffff), size, word);
   case 0x07000000: return ppu.oam.write(addr & 0x3ff, size, word);

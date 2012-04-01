@@ -82,16 +82,16 @@ void PPU::scanline() {
   }
 
   if(regs.vcounter == 160) {
-    if(regs.status.irqvblank) cpu.regs.irq_flag.vblank = 1;
+    if(regs.status.irqvblank) cpu.regs.irq.flag.vblank = 1;
   }
 
   if(regs.status.irqvcoincidence) {
-    if(regs.status.vcoincidence) cpu.regs.irq_flag.vcoincidence = 1;
+    if(regs.status.vcoincidence) cpu.regs.irq.flag.vcoincidence = 1;
   }
 
   step(256 * 4);
   regs.status.hblank = 1;
-  if(regs.status.irqhblank) cpu.regs.irq_flag.hblank = 1;
+  if(regs.status.irqhblank) cpu.regs.irq.flag.hblank = 1;
 
   step( 52 * 4);
   regs.status.hblank = 0;

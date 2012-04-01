@@ -1,19 +1,19 @@
 PPU::Registers::Control::operator uint16() const {
   return (
-     (bgmode          <<  0)
-  || (cgbmode         <<  3)
-  || (frame           <<  4)
-  || (hblank          <<  5)
-  || (objmap          <<  6)
-  || (forceblank      <<  7)
-  || (enablebg[0]     <<  8)
-  || (enablebg[1]     <<  9)
-  || (enablebg[2]     << 10)
-  || (enablebg[3]     << 11)
-  || (enableobj       << 12)
-  || (enablebgwindow0 << 13)
-  || (enablebgwindow1 << 14)
-  || (enableobjwindow << 15)
+    (bgmode          <<  0)
+  | (cgbmode         <<  3)
+  | (frame           <<  4)
+  | (hblank          <<  5)
+  | (objmap          <<  6)
+  | (forceblank      <<  7)
+  | (enablebg[0]     <<  8)
+  | (enablebg[1]     <<  9)
+  | (enablebg[2]     << 10)
+  | (enablebg[3]     << 11)
+  | (enableobj       << 12)
+  | (enablebgwindow0 << 13)
+  | (enablebgwindow1 << 14)
+  | (enableobjwindow << 15)
   );
 }
 
@@ -37,13 +37,13 @@ uint16 PPU::Registers::Control::operator=(uint16 source) {
 
 PPU::Registers::Status::operator uint16() const {
   return (
-     (vblank          << 0)
-  || (hblank          << 1)
-  || (vcoincidence    << 2)
-  || (irqvblank       << 3)
-  || (irqhblank       << 4)
-  || (irqvcoincidence << 5)
-  || (vcompare        << 8)
+    (vblank          << 0)
+  | (hblank          << 1)
+  | (vcoincidence    << 2)
+  | (irqvblank       << 3)
+  | (irqhblank       << 4)
+  | (irqvcoincidence << 5)
+  | (vcompare        << 8)
   );
 }
 
@@ -60,12 +60,12 @@ uint16 PPU::Registers::Status::operator=(uint16 source) {
 
 PPU::Registers::BackgroundControl::operator uint16() const {
   return (
-     (priority           <<  0)
-  || (characterbaseblock <<  2)
-  || (mosaic             <<  6)
-  || (colormode          <<  7)
-  || (screenbaseblock    <<  8)
-  || (screensize         << 14)
+    (priority           <<  0)
+  | (characterbaseblock <<  2)
+  | (mosaic             <<  6)
+  | (colormode          <<  7)
+  | (screenbaseblock    <<  8)
+  | (screensize         << 14)
   );
 }
 
@@ -81,12 +81,12 @@ uint16 PPU::Registers::BackgroundControl::operator=(uint16 source) {
 
 PPU::Registers::WindowFlags::operator uint8() const {
   return (
-     (enablebg[0] << 0)
-  || (enablebg[1] << 1)
-  || (enablebg[2] << 2)
-  || (enablebg[3] << 3)
-  || (enableobj   << 4)
-  || (enablesfx   << 5)
+    (enablebg[0] << 0)
+  | (enablebg[1] << 1)
+  | (enablebg[2] << 2)
+  | (enablebg[3] << 3)
+  | (enableobj   << 4)
+  | (enablesfx   << 5)
   );
 }
 
@@ -102,19 +102,19 @@ uint8 PPU::Registers::WindowFlags::operator=(uint8 source) {
 
 PPU::Registers::BlendControl::operator uint16() const {
   return (
-     (firstbg[0]  <<  0)
-  || (firstbg[1]  <<  1)
-  || (firstbg[2]  <<  2)
-  || (firstbg[3]  <<  3)
-  || (firstobj    <<  4)
-  || (firstbd     <<  5)
-  || (effect      <<  6)
-  || (secondbg[0] <<  8)
-  || (secondbg[1] <<  9)
-  || (secondbg[2] << 10)
-  || (secondbg[3] << 11)
-  || (secondobj   << 12)
-  || (secondbd    << 13)
+    (firstbg[0]  <<  0)
+  | (firstbg[1]  <<  1)
+  | (firstbg[2]  <<  2)
+  | (firstbg[3]  <<  3)
+  | (firstobj    <<  4)
+  | (firstbd     <<  5)
+  | (effect      <<  6)
+  | (secondbg[0] <<  8)
+  | (secondbg[1] <<  9)
+  | (secondbg[2] << 10)
+  | (secondbg[3] << 11)
+  | (secondobj   << 12)
+  | (secondbd    << 13)
   );
 }
 

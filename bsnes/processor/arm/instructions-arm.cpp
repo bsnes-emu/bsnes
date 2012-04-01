@@ -16,6 +16,7 @@ void ARM::arm_step() {
   step(2);
 
   instructions++;
+  if(pipeline.execute.address == 0x08000000) print("Entry Point\n");
   if(trace) {
     print(disassemble_registers(), "\n");
     print(disassemble_arm_instruction(pipeline.execute.address), "\n");
@@ -135,7 +136,7 @@ void ARM::arm_op_multiply() {
   uint4 m = instruction();
 
   step(1);
-  r(d) = mul(accumulate ? r(d) : 0u, r(m), r(s));
+  r(d) = mul(accumulate ? r(n) : 0u, r(m), r(s));
 }
 
 //(u,s)mull{condition}{s} rdlo,rdhi,rm,rs
@@ -174,8 +175,8 @@ void ARM::arm_op_multiply_long() {
   if(save) {
     cpsr().n = r(dhi) >> 31;
     cpsr().z = r(dhi) == 0 && r(dlo) == 0;
-    cpsr().c = 0;
-    cpsr().v = 0;
+  //cpsr().c = 0;  //(undefined)
+  //cpsr().v = 0;  //(undefined)
   }
 }
 

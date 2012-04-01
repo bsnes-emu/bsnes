@@ -1,4 +1,4 @@
-struct CPU : Processor::ARM, Thread, Memory {
+struct CPU : Processor::ARM, Thread, MMIO {
   StaticMemory iwram;
   StaticMemory ewram;
   #include "registers.hpp"
@@ -11,8 +11,8 @@ struct CPU : Processor::ARM, Thread, Memory {
 
   void power();
 
-  uint32 read(uint32 addr, uint32 size);
-  void write(uint32 addr, uint32 size, uint32 word);
+  uint8 read(uint32 addr);
+  void write(uint32 addr, uint8 byte);
 
   CPU();
 };
