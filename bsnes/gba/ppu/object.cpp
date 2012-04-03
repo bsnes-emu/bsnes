@@ -1,5 +1,6 @@
 void PPU::render_objects() {
-  for(unsigned n = 0; n < 240; n++) pixel[n].exists = false;
+  for(unsigned n = 0; n < 240; n++) pixel[4][n].exists = false;
+  if(regs.control.enableobj == false) return;
 
   for(unsigned n = 0; n < 128; n++) {
     auto &obj = object[n];
@@ -72,8 +73,8 @@ void PPU::render_object_linear(Object &obj) {
     if(obj.colors == 0) color = (px & 1) ? color >> 4 : color & 15;
     if(color == 0) continue;  //transparent
 
-    if(obj.colors == 0) pixel[sx] = { true, palette(256 + obj.palette * 16 + color), obj.priority };
-    if(obj.colors == 1) pixel[sx] = { true, palette(256 + color), obj.priority };
+    if(obj.colors == 0) pixel[4][sx] = { true, palette(256 + obj.palette * 16 + color), obj.priority };
+    if(obj.colors == 1) pixel[4][sx] = { true, palette(256 + color), obj.priority };
   }
 }
 

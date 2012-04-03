@@ -13,6 +13,7 @@
 namespace GBA {
 
 #include "registers.cpp"
+#include "background.cpp"
 #include "object.cpp"
 #include "screen.cpp"
 #include "mmio.cpp"
@@ -85,6 +86,7 @@ void PPU::scanline() {
 
   if(regs.vcounter == 160) {
     if(regs.status.irqvblank) cpu.regs.irq.flag.vblank = 1;
+    cpu.pending.dma.vblank = true;
   }
 
   if(regs.status.irqvcoincidence) {
@@ -92,17 +94,21 @@ void PPU::scanline() {
   }
 
   if(regs.vcounter < 160) {
+    render_backgrounds();
     render_objects();
     render_screen();
   }
 
-  step(256 * 4);
+  step(1024);
   regs.status.hblank = 1;
   if(regs.status.irqhblank) cpu.regs.irq.flag.hblank = 1;
+  cpu.pending.dma.hblank = true;
 
-  step( 52 * 4);
+  step(200);
   regs.status.hblank = 0;
+  cpu.pending.dma.hdma = true;
 
+  step(8);
   if(++regs.vcounter == 228) regs.vcounter = 0;
 }
 

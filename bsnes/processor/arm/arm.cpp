@@ -16,7 +16,6 @@ void ARM::power() {
   crash = false;
   r(15).modify = [&] {
     pipeline.reload = true;
-    r(15).data &= cpsr().t ? ~1 : ~3;
   };
 
   trace = false;

@@ -4,6 +4,7 @@ namespace GBA {
 
 #include "registers.cpp"
 #include "mmio.cpp"
+#include "dma.cpp"
 CPU cpu;
 
 void CPU::Enter() { cpu.enter(); }
@@ -28,6 +29,7 @@ void CPU::enter() {
       regs.mode = Registers::Mode::Normal;
     }
 
+    dma_run();
     exec();
   }
 }
@@ -71,6 +73,10 @@ void CPU::power() {
   regs.postboot = 0;
   regs.mode = Registers::Mode::Normal;
   regs.memory.control = 0x0d000020;
+
+  pending.dma.vblank = 0;
+  pending.dma.hblank = 0;
+  pending.dma.hdma = 0;
 
   for(unsigned n = 0x0b0; n <= 0x0df; n++) bus.mmio[n] = this;  //DMA
   for(unsigned n = 0x100; n <= 0x10f; n++) bus.mmio[n] = this;  //Timers

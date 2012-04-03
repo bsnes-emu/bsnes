@@ -9,7 +9,7 @@ struct Registers {
       uint1 repeat;
       uint1 size;
       uint1 drq;
-      uint2 timing;
+      uint2 timingmode;
       uint1 irq;
       uint1 enable;
 
@@ -17,6 +17,9 @@ struct Registers {
       uint16 operator=(uint16 source);
       DMA& operator=(const DMA&) = delete;
     } control;
+
+    //internal
+    uint32 basetarget;
   } dma[4];
 
   struct TimerControl {
@@ -64,15 +67,9 @@ struct Registers {
     bool vblank;
     bool hblank;
     bool vcoincidence;
-    bool timer0;
-    bool timer1;
-    bool timer2;
-    bool timer3;
+    bool timer[4];
     bool serial;
-    bool dma0;
-    bool dma1;
-    bool dma2;
-    bool dma3;
+    bool dma[4];
     bool keypad;
     bool cartridge;
 

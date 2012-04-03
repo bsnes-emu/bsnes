@@ -13,7 +13,7 @@ namespace GBA {
 
 /*
   bgba - Game Boy Advance emulator
-  author: byuu
+  authors: byuu, Cydrak
   license: GPLv3
   project started: 2012-03-19
 */

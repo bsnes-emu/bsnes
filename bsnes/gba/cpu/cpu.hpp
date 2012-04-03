@@ -2,6 +2,7 @@ struct CPU : Processor::ARM, Thread, MMIO {
   StaticMemory iwram;
   StaticMemory ewram;
   #include "registers.hpp"
+  #include "state.hpp"
 
   static void Enter();
   void enter();
@@ -13,6 +14,9 @@ struct CPU : Processor::ARM, Thread, MMIO {
 
   uint8 read(uint32 addr);
   void write(uint32 addr, uint8 byte);
+
+  void dma_run();
+  void dma_transfer(uint2 channel);
 
   CPU();
 };

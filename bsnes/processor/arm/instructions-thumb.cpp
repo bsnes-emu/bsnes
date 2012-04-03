@@ -5,8 +5,8 @@ void ARM::thumb_step() {
     pipeline.reload = false;
     r(15).data &= ~1;
 
-    pipeline.fetch.address = r(15);
-    pipeline.fetch.instruction = read(r(15), Half);
+    pipeline.fetch.address = r(15) & ~1;
+    pipeline.fetch.instruction = read(pipeline.fetch.address, Half);
 
     pipeline_step();
     step(1);

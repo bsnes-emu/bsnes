@@ -5,8 +5,8 @@ void ARM::arm_step() {
     pipeline.reload = false;
     r(15).data &= ~3;
 
-    pipeline.fetch.address = r(15);
-    pipeline.fetch.instruction = read(r(15), Word);
+    pipeline.fetch.address = r(15) & ~3;
+    pipeline.fetch.instruction = read(pipeline.fetch.address, Word);
 
     pipeline_step();
     step(2);

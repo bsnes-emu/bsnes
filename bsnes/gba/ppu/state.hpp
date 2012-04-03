@@ -2,7 +2,7 @@ struct Pixel {
   bool exists;
   uint15 color;
   uint2 priority;
-} pixel[256];
+} pixel[5][256];
 
 struct Object {
   uint8  y;
@@ -27,3 +27,10 @@ struct Object {
   unsigned width;
   unsigned height;
 } object[128];
+
+struct Tile {
+  uint10 character;
+  uint1  hflip;
+  uint1  vflip;
+  uint4  palette;
+};
